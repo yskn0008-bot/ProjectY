@@ -1,7 +1,7 @@
 # ADR-001：YOS Mission ControlをGitHub中心で運用する
 
 日付：2026-07-17  
-状態：提案中
+状態：採用
 
 ## 背景
 
@@ -53,3 +53,7 @@ YOS、Taxi、Taxi Lab、Codex、Project75、Google Drive、Google Calendarなど
 ### Googleスプレッドシートだけを正本にする
 
 日常データには適するが、Codex、コード、Pull Request、設計変更履歴との統合が弱いため、Mission Controlの正本には採用しない。
+
+## 承認
+
+2026-07-17、ようすけからYOSへ最終判断を委任。YOSが内容を確認し、正式採用した。
