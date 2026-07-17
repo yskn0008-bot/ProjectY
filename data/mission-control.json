@@ -1,0 +1,229 @@
+{
+  "schema_version": "1.0.0",
+  "updated_at": "2026-07-17T17:30:00+09:00",
+  "updated_by": "YOS",
+  "source_of_truth": {
+    "repository": "yskn0008-bot/ProjectY",
+    "branch": "main",
+    "state_file": "data/mission-control.json",
+    "specification": "docs/YOS_Mission_Control_v1.0.md",
+    "architecture_decisions": [
+      "docs/ADR-001_YOS-Mission-Control.md"
+    ]
+  },
+  "inbox": [
+    {
+      "id": "inbox-001",
+      "type": "approval",
+      "title": "YOS Mission Control v1.0の設計承認",
+      "status": "review",
+      "priority": 1,
+      "source": "yos/mission-control-v1",
+      "next_action": "Pull Requestの内容を確認し、承認または修正する"
+    }
+  ],
+  "projects": [
+    {
+      "id": "yos-mission-control",
+      "name": "YOS Mission Control",
+      "domain": "YOS",
+      "type": "infrastructure",
+      "purpose": "YOSが全プロジェクトの現在地、次の作業、承認待ち、問題を一か所で把握する",
+      "status": "active",
+      "health": "ok",
+      "priority": 1,
+      "progress_percent": 30,
+      "owner": "YOS",
+      "next_action": "v1.0設計Pull Requestをレビューしてmainへ反映する",
+      "blocker": null,
+      "dependencies": [],
+      "source_links": [
+        "docs/YOS_Mission_Control_v1.0.md",
+        "docs/ADR-001_YOS-Mission-Control.md"
+      ],
+      "last_update": "2026-07-17T17:30:00+09:00",
+      "updated_by": "YOS"
+    },
+    {
+      "id": "yos-master",
+      "name": "YOS Master",
+      "domain": "YOS",
+      "type": "governance",
+      "purpose": "YOS全体の唯一の上位仕様を管理する",
+      "status": "active",
+      "health": "attention",
+      "priority": 1,
+      "progress_percent": null,
+      "owner": "YOS",
+      "next_action": "今回決定したYOS、Taxi、Lab、Codex、GitHub、Mission Controlの役割をv2.0へ反映する",
+      "blocker": "現行YOS Masterの正式な保存場所と最新版の確認が必要",
+      "dependencies": [
+        "yos-mission-control"
+      ],
+      "source_links": [],
+      "last_update": "2026-07-17T17:30:00+09:00",
+      "updated_by": "YOS"
+    },
+    {
+      "id": "taxi-operation",
+      "name": "Taxi",
+      "domain": "Taxi",
+      "type": "operation",
+      "purpose": "営業前、営業中、営業終了の実運用を支援する",
+      "status": "active",
+      "health": "ok",
+      "priority": 1,
+      "progress_percent": null,
+      "owner": "YOS / Taxi",
+      "next_action": "現行運用を継続し、重要な改善案をMission Control Inboxへ返す",
+      "blocker": null,
+      "dependencies": [],
+      "source_links": [],
+      "last_update": "2026-07-17T17:30:00+09:00",
+      "updated_by": "YOS"
+    },
+    {
+      "id": "taxi-lab",
+      "name": "Taxi Lab",
+      "domain": "Taxi",
+      "type": "research",
+      "purpose": "Taxiの研究、設計、検証、改善を行う",
+      "status": "active",
+      "health": "attention",
+      "priority": 2,
+      "progress_percent": null,
+      "owner": "Taxi Lab",
+      "next_action": "YOS-Taxi-LabとProjectYの既存資産を棚卸しし、重複と正式な役割を整理する",
+      "blocker": "進捗が複数リポジトリとチャットに分散している",
+      "dependencies": [
+        "yos-mission-control"
+      ],
+      "source_links": [
+        "https://github.com/yskn0008-bot/YOS-Taxi-Lab",
+        "https://github.com/yskn0008-bot/ProjectY"
+      ],
+      "last_update": "2026-07-17T17:30:00+09:00",
+      "updated_by": "YOS"
+    },
+    {
+      "id": "github",
+      "name": "GitHub",
+      "domain": "Infrastructure",
+      "type": "infrastructure",
+      "purpose": "YOSのコード、仕様、タスク、変更履歴を保存する",
+      "status": "active",
+      "health": "ok",
+      "priority": 1,
+      "progress_percent": 45,
+      "owner": "YOS / Codex",
+      "next_action": "ProjectYを主リポジトリとしてMission Control運用を開始する",
+      "blocker": null,
+      "dependencies": [],
+      "source_links": [
+        "https://github.com/yskn0008-bot/ProjectY"
+      ],
+      "last_update": "2026-07-17T17:30:00+09:00",
+      "updated_by": "YOS"
+    },
+    {
+      "id": "codex",
+      "name": "Codex",
+      "domain": "Infrastructure",
+      "type": "development",
+      "purpose": "YOSと各Labの設計に基づいて実装、修正、テストを行う",
+      "status": "active",
+      "health": "ok",
+      "priority": 2,
+      "progress_percent": 50,
+      "owner": "Codex",
+      "next_action": "以後の実装をProjectYのブランチとPull Requestで提出する",
+      "blocker": null,
+      "dependencies": [
+        "github"
+      ],
+      "source_links": [
+        "https://github.com/yskn0008-bot/ProjectY/pulls"
+      ],
+      "last_update": "2026-07-17T17:30:00+09:00",
+      "updated_by": "YOS"
+    },
+    {
+      "id": "project75",
+      "name": "Project75",
+      "domain": "Taxi",
+      "type": "operation",
+      "purpose": "タクシー営業データを蓄積し、売上とKPIの改善へ使う",
+      "status": "active",
+      "health": "attention",
+      "priority": 2,
+      "progress_percent": null,
+      "owner": "Taxi / Taxi Lab",
+      "next_action": "最新データ構造とMission Controlへ渡す進捗項目を確認する",
+      "blocker": "Mission Controlとの同期仕様が未定",
+      "dependencies": [
+        "yos-mission-control"
+      ],
+      "source_links": [],
+      "last_update": "2026-07-17T17:30:00+09:00",
+      "updated_by": "YOS"
+    },
+    {
+      "id": "life",
+      "name": "Life",
+      "domain": "Life",
+      "type": "operation",
+      "purpose": "生活、健康、人間関係、自由、安心を支援する",
+      "status": "paused",
+      "health": "ok",
+      "priority": 4,
+      "progress_percent": null,
+      "owner": "YOS",
+      "next_action": "必要が生じた時に再開する",
+      "blocker": null,
+      "dependencies": [],
+      "source_links": [],
+      "last_update": "2026-07-17T17:30:00+09:00",
+      "updated_by": "YOS"
+    },
+    {
+      "id": "money",
+      "name": "Money",
+      "domain": "Money",
+      "type": "operation",
+      "purpose": "家計、口座、返済、資産形成を管理する",
+      "status": "paused",
+      "health": "attention",
+      "priority": 3,
+      "progress_percent": null,
+      "owner": "YOS",
+      "next_action": "YOS Mission Controlの基盤完成後に現在地を整理する",
+      "blocker": null,
+      "dependencies": [
+        "yos-mission-control"
+      ],
+      "source_links": [],
+      "last_update": "2026-07-17T17:30:00+09:00",
+      "updated_by": "YOS"
+    },
+    {
+      "id": "idea",
+      "name": "Idea",
+      "domain": "Idea",
+      "type": "operation",
+      "purpose": "思いつきを保存、整理し、必要なものだけプロジェクト化する",
+      "status": "backlog",
+      "health": "ok",
+      "priority": 5,
+      "progress_percent": 0,
+      "owner": "YOS",
+      "next_action": "Inbox設計後にアイデア受け付けルールを追加する",
+      "blocker": null,
+      "dependencies": [
+        "yos-mission-control"
+      ],
+      "source_links": [],
+      "last_update": "2026-07-17T17:30:00+09:00",
+      "updated_by": "YOS"
+    }
+  ]
+}
