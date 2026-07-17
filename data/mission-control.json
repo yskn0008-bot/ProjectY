@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-17T17:30:00+09:00",
+  "updated_at": "2026-07-17T17:50:00+09:00",
   "updated_by": "YOS",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -11,15 +11,13 @@
       "docs/ADR-001_YOS-Mission-Control.md"
     ]
   },
-  "inbox": [
+  "inbox": [],
+  "recently_completed": [
     {
-      "id": "inbox-001",
-      "type": "approval",
+      "id": "complete-001",
       "title": "YOS Mission Control v1.0の設計承認",
-      "status": "review",
-      "priority": 1,
-      "source": "yos/mission-control-v1",
-      "next_action": "Pull Requestの内容を確認し、承認または修正する"
+      "completed_at": "2026-07-17T17:50:00+09:00",
+      "result": "ProjectYを主リポジトリとし、GitHub中心の運用設計を正式採用"
     }
   ],
   "projects": [
@@ -32,16 +30,18 @@
       "status": "active",
       "health": "ok",
       "priority": 1,
-      "progress_percent": 30,
+      "progress_percent": 40,
       "owner": "YOS",
-      "next_action": "v1.0設計Pull Requestをレビューしてmainへ反映する",
+      "next_action": "data/mission-control.jsonを読み込むiPhone向けDashboardを実装する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "docs/YOS_Mission_Control_v1.0.md",
-        "docs/ADR-001_YOS-Mission-Control.md"
+        "docs/ADR-001_YOS-Mission-Control.md",
+        "https://github.com/yskn0008-bot/ProjectY/issues/4",
+        "https://github.com/yskn0008-bot/ProjectY/pull/5"
       ],
-      "last_update": "2026-07-17T17:30:00+09:00",
+      "last_update": "2026-07-17T17:50:00+09:00",
       "updated_by": "YOS"
     },
     {
@@ -61,7 +61,7 @@
         "yos-mission-control"
       ],
       "source_links": [],
-      "last_update": "2026-07-17T17:30:00+09:00",
+      "last_update": "2026-07-17T17:50:00+09:00",
       "updated_by": "YOS"
     },
     {
@@ -79,7 +79,7 @@
       "blocker": null,
       "dependencies": [],
       "source_links": [],
-      "last_update": "2026-07-17T17:30:00+09:00",
+      "last_update": "2026-07-17T17:50:00+09:00",
       "updated_by": "YOS"
     },
     {
@@ -102,7 +102,7 @@
         "https://github.com/yskn0008-bot/YOS-Taxi-Lab",
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-17T17:30:00+09:00",
+      "last_update": "2026-07-17T17:50:00+09:00",
       "updated_by": "YOS"
     },
     {
@@ -114,15 +114,15 @@
       "status": "active",
       "health": "ok",
       "priority": 1,
-      "progress_percent": 45,
+      "progress_percent": 55,
       "owner": "YOS / Codex",
-      "next_action": "ProjectYを主リポジトリとしてMission Control運用を開始する",
+      "next_action": "ProjectY上でIssue・Pull Request・CommitをMission Controlへ集約する運用を続ける",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-17T17:30:00+09:00",
+      "last_update": "2026-07-17T17:50:00+09:00",
       "updated_by": "YOS"
     },
     {
@@ -134,17 +134,18 @@
       "status": "active",
       "health": "ok",
       "priority": 2,
-      "progress_percent": 50,
+      "progress_percent": 55,
       "owner": "Codex",
-      "next_action": "以後の実装をProjectYのブランチとPull Requestで提出する",
+      "next_action": "Mission Control DashboardをブランチとPull Requestで実装する",
       "blocker": null,
       "dependencies": [
-        "github"
+        "github",
+        "yos-mission-control"
       ],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-17T17:30:00+09:00",
+      "last_update": "2026-07-17T17:50:00+09:00",
       "updated_by": "YOS"
     },
     {
@@ -159,12 +160,12 @@
       "progress_percent": null,
       "owner": "Taxi / Taxi Lab",
       "next_action": "最新データ構造とMission Controlへ渡す進捗項目を確認する",
-      "blocker": "Mission Controlとの同期仕様が未定",
+      "blocker": "Mission Controlとの同期仕様が未実装",
       "dependencies": [
         "yos-mission-control"
       ],
       "source_links": [],
-      "last_update": "2026-07-17T17:30:00+09:00",
+      "last_update": "2026-07-17T17:50:00+09:00",
       "updated_by": "YOS"
     },
     {
@@ -182,7 +183,7 @@
       "blocker": null,
       "dependencies": [],
       "source_links": [],
-      "last_update": "2026-07-17T17:30:00+09:00",
+      "last_update": "2026-07-17T17:50:00+09:00",
       "updated_by": "YOS"
     },
     {
@@ -202,7 +203,7 @@
         "yos-mission-control"
       ],
       "source_links": [],
-      "last_update": "2026-07-17T17:30:00+09:00",
+      "last_update": "2026-07-17T17:50:00+09:00",
       "updated_by": "YOS"
     },
     {
@@ -222,7 +223,7 @@
         "yos-mission-control"
       ],
       "source_links": [],
-      "last_update": "2026-07-17T17:30:00+09:00",
+      "last_update": "2026-07-17T17:50:00+09:00",
       "updated_by": "YOS"
     }
   ]
