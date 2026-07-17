@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-18T00:38:50+09:00",
+  "updated_at": "2026-07-18T00:43:35+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -45,6 +45,27 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-04185c3e6d4e",
+      "title": "fix: require daily vehicle and YOS target",
+      "completed_at": "2026-07-17T15:43:22Z",
+      "result": "GitHub mainへ反映（04185c3）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/04185c3e6d4e52278ffa8ed28fa7895a69befb55"
+    },
+    {
+      "id": "github-commit-4080d8e0a442",
+      "title": "Remove accidental empty file",
+      "completed_at": "2026-07-17T15:43:21Z",
+      "result": "GitHub mainへ反映（4080d8e）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/4080d8e0a44239f758e8beaf38144968937b7014"
+    },
+    {
+      "id": "github-commit-201e7f0b1d77",
+      "title": "noop",
+      "completed_at": "2026-07-17T15:43:10Z",
+      "result": "GitHub mainへ反映（201e7f0）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/201e7f0b1d77d0c96b75d39d9a2971394da8d0af"
+    },
+    {
       "id": "github-commit-79b4e2fb2247",
       "title": "chore: remove accidental temporary file",
       "completed_at": "2026-07-17T15:38:32Z",
@@ -57,27 +78,6 @@
       "completed_at": "2026-07-17T15:38:13Z",
       "result": "GitHub mainへ反映（37a6043）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/37a6043cb8d54d0c8b52d9f4c59d8a0c79cca494"
-    },
-    {
-      "id": "github-commit-3a7b87437b10",
-      "title": "chore: prepare taxi settings correction",
-      "completed_at": "2026-07-17T13:08:23Z",
-      "result": "GitHub mainへ反映（3a7b874）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/3a7b87437b101edbe0cbf2980ef644d90c288bc4"
-    },
-    {
-      "id": "github-commit-8f8231c6f870",
-      "title": "fix: prevent Pages deployment cancellation loop (#13)",
-      "completed_at": "2026-07-17T12:39:58Z",
-      "result": "GitHub mainへ反映（8f8231c）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/8f8231c6f870c07d34fa7619cbb9adf722fd2631"
-    },
-    {
-      "id": "github-commit-6c32be5063ba",
-      "title": "feat: publish Taxi Operations under ProjectY Pages",
-      "completed_at": "2026-07-17T12:04:35Z",
-      "result": "GitHub mainへ反映（6c32be5）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/6c32be5063bacd2fd5cc81d6c100761d28b6d546"
     },
     {
       "id": "complete-002",
@@ -114,7 +114,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-18T00:38:50+09:00",
+      "last_update": "2026-07-18T00:43:35+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -195,7 +195,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-18T00:38:50+09:00",
+      "last_update": "2026-07-18T00:43:35+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -218,7 +218,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-18T00:38:50+09:00",
+      "last_update": "2026-07-18T00:43:35+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -300,5 +300,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "6e6683a10768d2c77c0640f3aa7c52ce728343827923349c8f447976b52b8f5a"
+  "github_snapshot_hash": "79a8a873039e41a53f271aba8af97d9d88a712ec27d5733254a5bab83b28217d"
 }
