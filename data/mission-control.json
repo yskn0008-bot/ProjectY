@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-18T02:58:02+09:00",
+  "updated_at": "2026-07-18T03:18:15+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -40,7 +40,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/15",
-      "updated_at": "2026-07-17T17:17:04Z"
+      "updated_at": "2026-07-17T17:59:12Z"
     },
     {
       "id": "github-issue-4",
@@ -54,6 +54,13 @@
     }
   ],
   "recently_completed": [
+    {
+      "id": "github-commit-f30e238f2865",
+      "title": "営業カレンダーの天候・イベント更新手順を明文化",
+      "completed_at": "2026-07-17T18:18:02Z",
+      "result": "GitHub mainへ反映（f30e238）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/f30e238f28656cd85edff6c653af86a3cdda31cd"
+    },
     {
       "id": "github-commit-078dcf48b667",
       "title": "公休選択時に予定勤務時間を0へ自動設定",
@@ -81,13 +88,6 @@
       "completed_at": "2026-07-17T16:48:46Z",
       "result": "GitHub mainへ反映（30c4f17）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/30c4f176dcbdfb3ccd7dc60cdc6d9147da0d8f24"
-    },
-    {
-      "id": "github-commit-1e3517b5a8e1",
-      "title": "右上の日付・時刻から営業カレンダーを開けるようにする (#20)",
-      "completed_at": "2026-07-17T16:44:32Z",
-      "result": "GitHub mainへ反映（1e3517b）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/1e3517b5a8e119c0be9d8594356f90b4954b1cd1"
     },
     {
       "id": "complete-002",
@@ -124,7 +124,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-18T02:58:02+09:00",
+      "last_update": "2026-07-18T03:18:15+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -205,7 +205,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-18T02:58:02+09:00",
+      "last_update": "2026-07-18T03:18:15+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -228,7 +228,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-18T02:58:02+09:00",
+      "last_update": "2026-07-18T03:18:15+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -310,5 +310,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "a7d5bf59f6d4600bfd98ddc5fe116a681fe2ea8dec31b6cb118b46969d6e1152"
+  "github_snapshot_hash": "bdfd6be0203c3970f1d2b96e7229a655e1ea5a561f3e12aea5d47056aabf3c20"
 }
