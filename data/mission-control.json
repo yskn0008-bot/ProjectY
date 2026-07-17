@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-17T17:50:00+09:00",
+  "updated_at": "2026-07-17T17:55:00+09:00",
   "updated_by": "YOS",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -13,6 +13,12 @@
   },
   "inbox": [],
   "recently_completed": [
+    {
+      "id": "complete-002",
+      "title": "iPhone向けMission Control Dashboardを実装",
+      "completed_at": "2026-07-17T17:55:00+09:00",
+      "result": "PR #6をmainへマージし、PWA・オフライン対応・検索・Inbox表示を追加"
+    },
     {
       "id": "complete-001",
       "title": "YOS Mission Control v1.0の設計承認",
@@ -30,18 +36,19 @@
       "status": "active",
       "health": "ok",
       "priority": 1,
-      "progress_percent": 40,
+      "progress_percent": 70,
       "owner": "YOS",
-      "next_action": "data/mission-control.jsonを読み込むiPhone向けDashboardを実装する",
+      "next_action": "GitHub Pagesの公開状態を確認し、iPhone実機でDashboardをテストする",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "docs/YOS_Mission_Control_v1.0.md",
         "docs/ADR-001_YOS-Mission-Control.md",
         "https://github.com/yskn0008-bot/ProjectY/issues/4",
-        "https://github.com/yskn0008-bot/ProjectY/pull/5"
+        "https://github.com/yskn0008-bot/ProjectY/pull/5",
+        "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-17T17:50:00+09:00",
+      "last_update": "2026-07-17T17:55:00+09:00",
       "updated_by": "YOS"
     },
     {
@@ -61,7 +68,7 @@
         "yos-mission-control"
       ],
       "source_links": [],
-      "last_update": "2026-07-17T17:50:00+09:00",
+      "last_update": "2026-07-17T17:55:00+09:00",
       "updated_by": "YOS"
     },
     {
@@ -79,7 +86,7 @@
       "blocker": null,
       "dependencies": [],
       "source_links": [],
-      "last_update": "2026-07-17T17:50:00+09:00",
+      "last_update": "2026-07-17T17:55:00+09:00",
       "updated_by": "YOS"
     },
     {
@@ -102,7 +109,7 @@
         "https://github.com/yskn0008-bot/YOS-Taxi-Lab",
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-17T17:50:00+09:00",
+      "last_update": "2026-07-17T17:55:00+09:00",
       "updated_by": "YOS"
     },
     {
@@ -114,15 +121,15 @@
       "status": "active",
       "health": "ok",
       "priority": 1,
-      "progress_percent": 55,
+      "progress_percent": 65,
       "owner": "YOS / Codex",
-      "next_action": "ProjectY上でIssue・Pull Request・CommitをMission Controlへ集約する運用を続ける",
+      "next_action": "ProjectYのGitHub Pages公開状態を確認する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-17T17:50:00+09:00",
+      "last_update": "2026-07-17T17:55:00+09:00",
       "updated_by": "YOS"
     },
     {
@@ -134,9 +141,9 @@
       "status": "active",
       "health": "ok",
       "priority": 2,
-      "progress_percent": 55,
+      "progress_percent": 75,
       "owner": "Codex",
-      "next_action": "Mission Control DashboardをブランチとPull Requestで実装する",
+      "next_action": "GitHubのIssue・Pull Request・Commitを自動集約する仕組みを実装する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -145,7 +152,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-17T17:50:00+09:00",
+      "last_update": "2026-07-17T17:55:00+09:00",
       "updated_by": "YOS"
     },
     {
@@ -165,7 +172,7 @@
         "yos-mission-control"
       ],
       "source_links": [],
-      "last_update": "2026-07-17T17:50:00+09:00",
+      "last_update": "2026-07-17T17:55:00+09:00",
       "updated_by": "YOS"
     },
     {
@@ -183,7 +190,7 @@
       "blocker": null,
       "dependencies": [],
       "source_links": [],
-      "last_update": "2026-07-17T17:50:00+09:00",
+      "last_update": "2026-07-17T17:55:00+09:00",
       "updated_by": "YOS"
     },
     {
@@ -203,7 +210,7 @@
         "yos-mission-control"
       ],
       "source_links": [],
-      "last_update": "2026-07-17T17:50:00+09:00",
+      "last_update": "2026-07-17T17:55:00+09:00",
       "updated_by": "YOS"
     },
     {
@@ -223,7 +230,7 @@
         "yos-mission-control"
       ],
       "source_links": [],
-      "last_update": "2026-07-17T17:50:00+09:00",
+      "last_update": "2026-07-17T17:55:00+09:00",
       "updated_by": "YOS"
     }
   ]
