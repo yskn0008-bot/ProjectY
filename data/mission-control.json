@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-18T01:04:53+09:00",
+  "updated_at": "2026-07-18T01:05:12+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -65,6 +65,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-afb29d6d5015",
+      "title": "chore(taxi): refresh calendar cache",
+      "completed_at": "2026-07-17T16:04:58Z",
+      "result": "GitHub mainへ反映（afb29d6）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/afb29d6d50153246b9ea72b71e5d0ca7b3771c52"
+    },
+    {
       "id": "github-commit-735f7181cbce",
       "title": "feat(taxi): add calendar link to operations screen",
       "completed_at": "2026-07-17T16:04:39Z",
@@ -91,13 +98,6 @@
       "completed_at": "2026-07-17T15:43:21Z",
       "result": "GitHub mainへ反映（4080d8e）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/4080d8e0a44239f758e8beaf38144968937b7014"
-    },
-    {
-      "id": "github-commit-201e7f0b1d77",
-      "title": "noop",
-      "completed_at": "2026-07-17T15:43:10Z",
-      "result": "GitHub mainへ反映（201e7f0）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/201e7f0b1d77d0c96b75d39d9a2971394da8d0af"
     },
     {
       "id": "complete-002",
@@ -134,7 +134,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-18T01:04:53+09:00",
+      "last_update": "2026-07-18T01:05:12+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -215,7 +215,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-18T01:04:53+09:00",
+      "last_update": "2026-07-18T01:05:12+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -238,7 +238,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-18T01:04:53+09:00",
+      "last_update": "2026-07-18T01:05:12+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -320,5 +320,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "8a568f0c99a26351fd5acb95801f344cae5c54e709208ac97e7192116074058a"
+  "github_snapshot_hash": "01d525ef2523c73ca7023d421b3a0ce89acace0bfbe51746a6344a2e352a16ce"
 }
