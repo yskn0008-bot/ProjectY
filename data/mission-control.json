@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-18T04:52:25+09:00",
+  "updated_at": "2026-07-18T06:48:27+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -30,7 +30,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/15",
-      "updated_at": "2026-07-17T19:45:41Z"
+      "updated_at": "2026-07-17T20:00:55Z"
     },
     {
       "id": "github-issue-4",
@@ -44,6 +44,20 @@
     }
   ],
   "recently_completed": [
+    {
+      "id": "github-commit-dcf96f99805f",
+      "title": "Remove accidental temporary file",
+      "completed_at": "2026-07-17T21:48:14Z",
+      "result": "GitHub mainへ反映（dcf96f9）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/dcf96f99805f0eddc7e35653827cbeb075ab3cd5"
+    },
+    {
+      "id": "github-commit-c9918a8c8f2d",
+      "title": "noop",
+      "completed_at": "2026-07-17T21:47:58Z",
+      "result": "GitHub mainへ反映（c9918a8）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/c9918a8c8f2db4712f4e67893a2042e6978aebcd"
+    },
     {
       "id": "github-commit-982549ca49ba",
       "title": "営業終了時のYOS引き渡しを自動化",
@@ -64,20 +78,6 @@
       "completed_at": "2026-07-17T17:57:47Z",
       "result": "GitHub mainへ反映（078dcf4）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/078dcf48b667edba4a7b77a67496ee29dfa991e7"
-    },
-    {
-      "id": "github-commit-a5d6c963673d",
-      "title": "feat(taxi): 今日・1週間・月間ビューを追加",
-      "completed_at": "2026-07-17T17:14:27Z",
-      "result": "GitHub mainへ反映（a5d6c96）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/a5d6c963673d128a77df3effd71147d66c3b26ed"
-    },
-    {
-      "id": "github-commit-bdc9ff26294d",
-      "title": "docs: CodexへYOSの最重要識別ルールを固定 (#22)",
-      "completed_at": "2026-07-17T16:51:05Z",
-      "result": "GitHub mainへ反映（bdc9ff2）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/bdc9ff26294db66bc2db0e91edc195cc1b0f824d"
     },
     {
       "id": "complete-002",
@@ -114,7 +114,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-18T04:52:25+09:00",
+      "last_update": "2026-07-18T06:48:27+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -195,7 +195,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-18T04:52:25+09:00",
+      "last_update": "2026-07-18T06:48:27+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -218,7 +218,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-18T04:52:25+09:00",
+      "last_update": "2026-07-18T06:48:27+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -300,5 +300,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "279466002d92f8b7cc8371f7f0be1e4229b0b6d4e7de12453fcb8fc05bd7175a"
+  "github_snapshot_hash": "8a52d73f1250e12e496d1bcf29bec5ee2221aefc0b65277bf81cd48dc066b0db"
 }
