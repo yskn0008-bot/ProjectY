@@ -17,6 +17,11 @@ GitHubの`ProjectY`を開き、次を設定する。
 
 `https://yskn0008-bot.github.io/ProjectY/`
 
+## 初回公開時の注意
+
+`Source`を`GitHub Actions`へ変更しただけでは、すでに終わった過去のコミットは自動で再実行されない場合がある。
+その場合は、設定後に`main`へ新しい変更を反映し、Pages用Workflowをもう一度起動する。
+
 ## 自動処理
 
 `.github/workflows/deploy-pages.yml`が次を実行する。
