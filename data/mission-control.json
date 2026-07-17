@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-17T22:12:48+09:00",
+  "updated_at": "2026-07-18T00:38:50+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -30,7 +30,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/11",
-      "updated_at": "2026-07-17T13:12:43Z"
+      "updated_at": "2026-07-17T14:58:51Z"
     },
     {
       "id": "github-issue-4",
@@ -44,6 +44,20 @@
     }
   ],
   "recently_completed": [
+    {
+      "id": "github-commit-79b4e2fb2247",
+      "title": "chore: remove accidental temporary file",
+      "completed_at": "2026-07-17T15:38:32Z",
+      "result": "GitHub mainへ反映（79b4e2f）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/79b4e2fb224742f5bba2fcccb6c5d5c3b5acc04a"
+    },
+    {
+      "id": "github-commit-37a6043cb8d5",
+      "title": "noop",
+      "completed_at": "2026-07-17T15:38:13Z",
+      "result": "GitHub mainへ反映（37a6043）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/37a6043cb8d54d0c8b52d9f4c59d8a0c79cca494"
+    },
     {
       "id": "github-commit-3a7b87437b10",
       "title": "chore: prepare taxi settings correction",
@@ -64,20 +78,6 @@
       "completed_at": "2026-07-17T12:04:35Z",
       "result": "GitHub mainへ反映（6c32be5）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/6c32be5063bacd2fd5cc81d6c100761d28b6d546"
-    },
-    {
-      "id": "github-commit-3523762ee78d",
-      "title": "docs: define Taxi Operations v1 release",
-      "completed_at": "2026-07-17T11:16:39Z",
-      "result": "GitHub mainへ反映（3523762）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/3523762ee78d830974bad87e4efd96e79d0e35b5"
-    },
-    {
-      "id": "github-commit-a05e69a4a2b7",
-      "title": "ci: automate Mission Control sync and deployment",
-      "completed_at": "2026-07-17T10:44:35Z",
-      "result": "GitHub mainへ反映（a05e69a）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/a05e69a4a2b74f2ac0d34357a32a715602e0d1cd"
     },
     {
       "id": "complete-002",
@@ -114,7 +114,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-17T22:12:48+09:00",
+      "last_update": "2026-07-18T00:38:50+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -195,7 +195,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-17T22:12:48+09:00",
+      "last_update": "2026-07-18T00:38:50+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -218,7 +218,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-17T22:12:48+09:00",
+      "last_update": "2026-07-18T00:38:50+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -300,5 +300,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "4c28d185e6999104a97ea20146c834a03a664dfe819a7cc33236632ab349315c"
+  "github_snapshot_hash": "6e6683a10768d2c77c0640f3aa7c52ce728343827923349c8f447976b52b8f5a"
 }
