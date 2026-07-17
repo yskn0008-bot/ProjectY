@@ -39,12 +39,13 @@
 'use strict';
 const KEY='yos-taxi-calendar-v1',OPS='yos-taxi-ops-v1';
 const $=id=>document.getElementById(id),yen=n=>new Intl.NumberFormat('ja-JP',{style:'currency',currency:'JPY',maximumFractionDigits:0}).format(Number(n||0));
-const todayKey=()=>{const d=new Date();if(d.getHours()<8)d.setDate(d.getDate()-1);return d.toISOString().slice(0,10)};
+const localDateKey=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const todayKey=()=>{const d=new Date();if(d.getHours()<8)d.setDate(d.getDate()-1);return localDateKey(d)};
 const load=()=>{try{return JSON.parse(localStorage.getItem(KEY))||{monthlyGoals:{},days:{}}}catch{return{monthlyGoals:{},days:{}}}};
 let data=load(),view=new Date(),selected='';view.setDate(1);
 const save=()=>localStorage.setItem(KEY,JSON.stringify(data));
 const monthKey=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
-const keyOf=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const keyOf=localDateKey;
 const dayData=k=>data.days[k]||{status:'unknown',hours:10,target:0,sales:0,weather:'未確認',factor:1,event:''};
 function summary(){const mk=monthKey(view),goal=Number(data.monthlyGoals[mk]||770000),entries=Object.entries(data.days).filter(([k])=>k.startsWith(mk));const achieved=entries.reduce((s,[,v])=>s+Number(v.sales||0),0),remain=Math.max(0,goal-achieved),today=todayKey();const future=entries.filter(([k,v])=>k>=today&&v.status==='work');const days=future.length,hours=future.reduce((s,[,v])=>s+Number(v.hours||0),0);$('monthTarget').textContent=yen(goal);$('achieved').textContent=yen(achieved);$('remaining').textContent=yen(remain);$('workDays').textContent=`${days}日`;$('workHours').textContent=`${hours}時間`;$('progress').textContent=goal?`${Math.min(999,Math.round(achieved/goal*100))}%`:'0%'}
 function targetClass(k,v){if(!v.target)return'white';if(Number(v.sales||0)>=Number(v.target))return'blue';if(k<todayKey()||Number(v.sales||0)>0)return'red';return'white'}
