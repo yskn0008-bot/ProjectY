@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b0b0d">
+<title>YOS Taxi 営業カレンダー</title>
+<style>
+:root{color-scheme:dark;--bg:#09090b;--panel:#151517;--panel2:#1d1d21;--line:#2a2a30;--text:#fafafa;--muted:#a6a6b0;--amber:#ffb323;--blue:#73a7ff;--red:#ff6b73;--green:#4bd283}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(circle at 100% 0,rgba(255,179,35,.13),transparent 34%),var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif}.app{width:min(100%,980px);margin:auto;padding:calc(env(safe-area-inset-top) + 12px) 12px calc(env(safe-area-inset-bottom) + 28px)}button,input,select,textarea{font:inherit}.top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:12px}.eyebrow{margin:0 0 4px;color:var(--amber);font-size:11px;font-weight:900;letter-spacing:.12em}h1{margin:0;font-size:25px}.back{color:var(--text);text-decoration:none;border:1px solid var(--line);border-radius:13px;padding:10px 12px;background:var(--panel)}.summary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:10px}.card{background:rgba(21,21,23,.96);border:1px solid var(--line);border-radius:18px;padding:13px}.card strong{display:block;font-size:21px;line-height:1.1}.card span{color:var(--muted);font-size:11px}.toolbar{display:grid;grid-template-columns:48px 1fr 48px;gap:8px;align-items:center;margin:10px 0}.toolbar button,.settings{min-height:44px;border:1px solid var(--line);border-radius:14px;background:var(--panel2);color:var(--text);font-weight:900}.month{text-align:center;font-size:18px;font-weight:900}.settings{width:100%;margin-bottom:10px}.legend{display:flex;gap:11px;flex-wrap:wrap;color:var(--muted);font-size:11px;margin:0 2px 10px}.legend b{font-size:13px}.white{color:#fff}.blue{color:var(--blue)}.red{color:var(--red)}.week,.grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}.week div{text-align:center;color:var(--muted);font-size:11px;padding:6px 0}.day{min-height:108px;border:1px solid var(--line);border-radius:13px;background:rgba(21,21,23,.96);color:var(--text);padding:8px 6px;text-align:left;overflow:hidden}.day.other{opacity:.28}.day.today{outline:2px solid var(--amber)}.day.off{background:rgba(255,107,115,.07)}.date{font-size:13px;font-weight:900}.tag{display:inline-block;margin:2px 0 4px;padding:2px 5px;border-radius:999px;background:#25252b;color:var(--muted);font-size:9px}.tag.work{color:var(--green)}.tag.off{color:var(--red)}.line{display:block;font-size:10px;line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.target{font-weight:900}.actual{color:var(--muted)}.notice{margin-top:10px;border-left:3px solid var(--amber);background:rgba(255,179,35,.08);border-radius:8px;padding:9px 10px;color:#ffe0a5;font-size:11px;line-height:1.5}dialog{width:min(calc(100% - 20px),620px);max-height:90vh;border:1px solid var(--line);border-radius:23px;padding:0;background:#111114;color:var(--text)}dialog::backdrop{background:rgba(0,0,0,.72)}form{padding:17px}form h2{margin:0 0 12px;font-size:20px}.fields{display:grid;gap:10px}.row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}.field{display:grid;gap:5px}.field label{font-size:11px;color:var(--muted);font-weight:800}.field input,.field select,.field textarea{width:100%;min-height:45px;border:1px solid var(--line);border-radius:13px;padding:9px 11px;background:#1c1c20;color:var(--text)}.field textarea{min-height:75px}.actions{display:grid;grid-template-columns:1fr 1.4fr;gap:8px;margin-top:13px}.actions button{min-height:47px;border:1px solid var(--line);border-radius:13px;background:var(--panel2);color:var(--text);font-weight:900}.actions .save{background:linear-gradient(145deg,#ffbd34,#ff7a00);border:0;color:#17100a}.subactions{display:grid;gap:8px;margin-top:10px}.subactions button{min-height:45px;border:1px solid var(--line);border-radius:13px;background:var(--panel2);color:var(--text);font-weight:800}@media(min-width:700px){.summary{grid-template-columns:repeat(6,1fr)}.day{min-height:125px}}
+</style>
+</head>
+<body>
+<main class="app">
+<header class="top"><div><p class="eyebrow">YOS TAXI OPERATIONS</p><h1>📅 営業カレンダー</h1></div><a class="back" href="./">営業画面</a></header>
+<section class="summary">
+<div class="card"><strong id="monthTarget">¥0</strong><span>月目標</span></div>
+<div class="card"><strong id="achieved">¥0</strong><span>現在達成</span></div>
+<div class="card"><strong id="remaining">¥0</strong><span>残り金額</span></div>
+<div class="card"><strong id="workDays">0日</strong><span>残り勤務日</span></div>
+<div class="card"><strong id="workHours">0時間</strong><span>残り勤務時間</span></div>
+<div class="card"><strong id="progress">0%</strong><span>達成率</span></div>
+</section>
+<div class="toolbar"><button id="prev">‹</button><div id="monthLabel" class="month"></div><button id="next">›</button></div>
+<button id="openMonth" class="settings">月目標・勤務予定を設定</button>
+<div class="legend"><span><b class="white">白</b> 営業前目標</span><span><b class="blue">青</b> 達成</span><span><b class="red">赤</b> 未達</span><span>公休は確認済みのみ反映</span></div>
+<div class="week"><div>日</div><div>月</div><div>火</div><div>水</div><div>木</div><div>金</div><div>土</div></div>
+<section id="calendar" class="grid"></section>
+<p class="notice">公休・天候・イベントは推測しません。確認できた情報だけ保存します。目標配分は、確認済みの勤務日・勤務時間・曜日・天候・イベント補正を使います。</p>
+</main>
+<dialog id="dayDialog"><form method="dialog"><h2 id="dayTitle"></h2><div class="fields">
+<div class="row2"><div class="field"><label>勤務区分</label><select id="status"><option value="unknown">未確認</option><option value="work">勤務</option><option value="off">公休</option></select></div><div class="field"><label>予定勤務時間</label><input id="hours" type="number" min="0" max="24" step="0.5" inputmode="decimal"></div></div>
+<div class="row2"><div class="field"><label>YOS推奨目標（税込）</label><input id="target" type="number" min="0" step="500" inputmode="numeric"></div><div class="field"><label>実売上（税込）</label><input id="sales" type="number" min="0" step="100" inputmode="numeric"></div></div>
+<div class="row2"><div class="field"><label>天候</label><select id="weather"><option>未確認</option><option>晴れ</option><option>曇り</option><option>雨</option><option>強雨</option><option>強風</option><option>台風</option></select></div><div class="field"><label>期待値補正</label><select id="factor"><option value="1">通常</option><option value="0.8">低い ×0.8</option><option value="0.9">やや低い ×0.9</option><option value="1.1">やや高い ×1.1</option><option value="1.2">高い ×1.2</option><option value="1.3">非常に高い ×1.3</option></select></div></div>
+<div class="field"><label>イベント・需要要因</label><textarea id="event" placeholder="例：ライブ、祭り、祝前日、クルーズ船、空港遅延"></textarea></div>
+</div><div class="actions"><button value="cancel">取消</button><button id="saveDay" class="save" value="default">保存</button></div></form></dialog>
+<dialog id="monthDialog"><form method="dialog"><h2>月間設定</h2><div class="fields"><div class="field"><label>月目標（税込）</label><input id="monthlyGoal" type="number" min="0" step="10000" inputmode="numeric"></div></div><div class="subactions"><button id="importToday" type="button">今日のPWA売上を取り込む</button><button id="allocate" type="button">確認済み勤務日へ目標を再配分</button></div><div class="actions"><button value="cancel">閉じる</button><button id="saveMonth" class="save" value="default">保存</button></div></form></dialog>
+<script>
+'use strict';
+const KEY='yos-taxi-calendar-v1',OPS='yos-taxi-ops-v1';
+const $=id=>document.getElementById(id),yen=n=>new Intl.NumberFormat('ja-JP',{style:'currency',currency:'JPY',maximumFractionDigits:0}).format(Number(n||0));
+const todayKey=()=>{const d=new Date();if(d.getHours()<8)d.setDate(d.getDate()-1);return d.toISOString().slice(0,10)};
+const load=()=>{try{return JSON.parse(localStorage.getItem(KEY))||{monthlyGoals:{},days:{}}}catch{return{monthlyGoals:{},days:{}}}};
+let data=load(),view=new Date(),selected='';view.setDate(1);
+const save=()=>localStorage.setItem(KEY,JSON.stringify(data));
+const monthKey=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+const keyOf=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const dayData=k=>data.days[k]||{status:'unknown',hours:10,target:0,sales:0,weather:'未確認',factor:1,event:''};
+function summary(){const mk=monthKey(view),goal=Number(data.monthlyGoals[mk]||770000),entries=Object.entries(data.days).filter(([k])=>k.startsWith(mk));const achieved=entries.reduce((s,[,v])=>s+Number(v.sales||0),0),remain=Math.max(0,goal-achieved),today=todayKey();const future=entries.filter(([k,v])=>k>=today&&v.status==='work');const days=future.length,hours=future.reduce((s,[,v])=>s+Number(v.hours||0),0);$('monthTarget').textContent=yen(goal);$('achieved').textContent=yen(achieved);$('remaining').textContent=yen(remain);$('workDays').textContent=`${days}日`;$('workHours').textContent=`${hours}時間`;$('progress').textContent=goal?`${Math.min(999,Math.round(achieved/goal*100))}%`:'0%'}
+function targetClass(k,v){if(!v.target)return'white';if(Number(v.sales||0)>=Number(v.target))return'blue';if(k<todayKey()||Number(v.sales||0)>0)return'red';return'white'}
+function render(){const y=view.getFullYear(),m=view.getMonth(),first=new Date(y,m,1),start=new Date(y,m,1-first.getDay()),today=todayKey();$('monthLabel').textContent=`${y}年 ${m+1}月`;const out=[];for(let i=0;i<42;i++){const d=new Date(start);d.setDate(start.getDate()+i);const k=keyOf(d),v=dayData(k),same=d.getMonth()===m,tag=v.status==='work'?'勤務':v.status==='off'?'公休':'未確認',extra=[v.weather!=='未確認'?v.weather:'',v.event].filter(Boolean).join('・');out.push(`<button class="day ${same?'':'other'} ${k===today?'today':''} ${v.status==='off'?'off':''}" data-key="${k}"><span class="date">${d.getDate()}</span><span class="tag ${v.status}">${tag}</span>${v.target?`<span class="line target ${targetClass(k,v)}">目標 ${yen(v.target)}</span>`:''}${v.sales?`<span class="line actual">実績 ${yen(v.sales)}</span>`:''}${extra?`<span class="line">${escapeHtml(extra)}</span>`:''}</button>`)}$('calendar').innerHTML=out.join('');document.querySelectorAll('.day').forEach(b=>b.onclick=()=>openDay(b.dataset.key));summary()}
+function escapeHtml(s){return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;')}
+function openDay(k){selected=k;const v=dayData(k);$('dayTitle').textContent=k;$('status').value=v.status;$('hours').value=v.hours??10;$('target').value=v.target||'';$('sales').value=v.sales||'';$('weather').value=v.weather||'未確認';$('factor').value=String(v.factor||1);$('event').value=v.event||'';$('dayDialog').showModal()}
+$('saveDay').onclick=()=>{data.days[selected]={status:$('status').value,hours:Number($('hours').value||0),target:Number($('target').value||0),sales:Number($('sales').value||0),weather:$('weather').value,factor:Number($('factor').value||1),event:$('event').value.trim()};save();render()};
+$('prev').onclick=()=>{view.setMonth(view.getMonth()-1);render()};$('next').onclick=()=>{view.setMonth(view.getMonth()+1);render()};
+$('openMonth').onclick=()=>{$('monthlyGoal').value=data.monthlyGoals[monthKey(view)]||770000;$('monthDialog').showModal()};
+$('saveMonth').onclick=()=>{data.monthlyGoals[monthKey(view)]=Number($('monthlyGoal').value||0);save();render()};
+$('importToday').onclick=()=>{try{const ops=JSON.parse(localStorage.getItem(OPS)||'{}'),k=ops.businessDate||todayKey(),rides=(ops.events||[]).filter(e=>e.type==='降車'),sales=rides.reduce((s,e)=>s+Number(e.fare||0)+Number(e.tip||0),0),v=dayData(k);data.days[k]={...v,sales};save();render();alert(`PWA売上 ${yen(sales)} を取り込みました`)}catch{alert('PWA売上を読み込めませんでした')}};
+function weekdayWeight(k){const d=new Date(`${k}T12:00:00`),w=d.getDay();return w===6?1.28:w===5?1.18:w===0?1.02:w===4?0.98:0.9}
+$('allocate').onclick=()=>{const mk=monthKey(view),goal=Number($('monthlyGoal').value||data.monthlyGoals[mk]||0),today=todayKey(),entries=Object.entries(data.days).filter(([k,v])=>k.startsWith(mk)&&k>=today&&v.status==='work'),achieved=Object.entries(data.days).filter(([k])=>k.startsWith(mk)).reduce((s,[,v])=>s+Number(v.sales||0),0),remain=Math.max(0,goal-achieved);if(!entries.length){alert('確認済みの勤務日がありません');return}const weighted=entries.map(([k,v])=>[k,weekdayWeight(k)*Math.max(.25,Number(v.hours||10)/10)*Number(v.factor||1)]),total=weighted.reduce((s,[,w])=>s+w,0);weighted.forEach(([k,w])=>{const raw=remain*w/total;data.days[k]={...dayData(k),target:Math.ceil(raw/500)*500}});data.monthlyGoals[mk]=goal;save();render();alert('確認済み勤務日へ目標を配分しました')};
+render();
+</script>
+</body>
+</html>
