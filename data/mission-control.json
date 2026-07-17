@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-18T04:35:31+09:00",
+  "updated_at": "2026-07-18T04:45:37+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -45,6 +45,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-982549ca49ba",
+      "title": "営業終了時のYOS引き渡しを自動化",
+      "completed_at": "2026-07-17T19:45:23Z",
+      "result": "GitHub mainへ反映（982549c）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/982549ca49ba0d0a9c8b72d692eda1fefaf61222"
+    },
+    {
       "id": "github-commit-f30e238f2865",
       "title": "営業カレンダーの天候・イベント更新手順を明文化",
       "completed_at": "2026-07-17T18:18:02Z",
@@ -71,13 +78,6 @@
       "completed_at": "2026-07-17T16:51:05Z",
       "result": "GitHub mainへ反映（bdc9ff2）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/bdc9ff26294db66bc2db0e91edc195cc1b0f824d"
-    },
-    {
-      "id": "github-commit-30c4f176dcbd",
-      "title": "fix(taxi): 目標金額のSafari入力エラーを修正",
-      "completed_at": "2026-07-17T16:48:46Z",
-      "result": "GitHub mainへ反映（30c4f17）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/30c4f176dcbdfb3ccd7dc60cdc6d9147da0d8f24"
     },
     {
       "id": "complete-002",
@@ -114,7 +114,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-18T04:35:31+09:00",
+      "last_update": "2026-07-18T04:45:37+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -195,7 +195,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-18T04:35:31+09:00",
+      "last_update": "2026-07-18T04:45:37+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -218,7 +218,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-18T04:35:31+09:00",
+      "last_update": "2026-07-18T04:45:37+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -300,5 +300,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "b35d63166deece1a0c98e344af15f7aec5e83dbe6674b58754e0c8955dce03a3"
+  "github_snapshot_hash": "8321fb81a24fb8561ea275b24c3534056047214169c075f4af4c61e27909de81"
 }
