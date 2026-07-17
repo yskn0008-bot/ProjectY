@@ -1,0 +1,13 @@
+{
+  "name": "YOS Mission Control",
+  "short_name": "YOS",
+  "description": "YOSが全プロジェクトの現在地と次の作業を把握する司令室",
+  "lang": "ja",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#080808",
+  "theme_color": "#0a0a0a",
+  "categories": ["productivity", "utilities"]
+}
