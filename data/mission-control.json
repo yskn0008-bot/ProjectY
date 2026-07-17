@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-18T01:03:16+09:00",
+  "updated_at": "2026-07-18T01:04:53+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -12,6 +12,16 @@
     ]
   },
   "inbox": [
+    {
+      "id": "github-pr-18",
+      "title": "PR #18 Taxi営業カレンダーv1を追加",
+      "type": "GitHub PR",
+      "status": "review",
+      "priority": 1,
+      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/18",
+      "updated_at": "2026-07-17T16:04:31Z"
+    },
     {
       "id": "github-issue-10",
       "title": "Issue #10 Mission Control v2：GitHubのIssue・PR・Commitを自動集約する",
@@ -55,6 +65,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-735f7181cbce",
+      "title": "feat(taxi): add calendar link to operations screen",
+      "completed_at": "2026-07-17T16:04:39Z",
+      "result": "GitHub mainへ反映（735f718）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/735f7181cbcea38348736dbe3050078fe4ccd0bf"
+    },
+    {
       "id": "github-commit-5db1f2fe3b1f",
       "title": "feat(taxi): 営業カレンダーv1を追加",
       "completed_at": "2026-07-17T16:03:00Z",
@@ -83,13 +100,6 @@
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/201e7f0b1d77d0c96b75d39d9a2971394da8d0af"
     },
     {
-      "id": "github-commit-79b4e2fb2247",
-      "title": "chore: remove accidental temporary file",
-      "completed_at": "2026-07-17T15:38:32Z",
-      "result": "GitHub mainへ反映（79b4e2f）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/79b4e2fb224742f5bba2fcccb6c5d5c3b5acc04a"
-    },
-    {
       "id": "complete-002",
       "title": "iPhone向けMission Control Dashboardを実装",
       "completed_at": "2026-07-17T17:55:00+09:00",
@@ -114,7 +124,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "Issue #4を実装する：YOS Mission Control v1.0を構築する",
+      "next_action": "PR #18をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -124,7 +134,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-18T01:03:16+09:00",
+      "last_update": "2026-07-18T01:04:53+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -195,17 +205,17 @@
       "type": "infrastructure",
       "purpose": "YOSのコード、仕様、タスク、変更履歴を保存する",
       "status": "active",
-      "health": "ok",
+      "health": "attention",
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 4件・Open PR 0件を自動同期中",
+      "next_action": "Open Issue 4件・Open PR 1件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-18T01:03:16+09:00",
+      "last_update": "2026-07-18T01:04:53+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -214,12 +224,12 @@
       "domain": "Infrastructure",
       "type": "development",
       "purpose": "YOSと各Labの設計に基づいて実装、修正、テストを行う",
-      "status": "active",
-      "health": "ok",
+      "status": "review",
+      "health": "attention",
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "Issue #4を実装する：YOS Mission Control v1.0を構築する",
+      "next_action": "PR #18をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -228,7 +238,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-18T01:03:16+09:00",
+      "last_update": "2026-07-18T01:04:53+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -310,5 +320,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "34d769cfe379dce1c6e09e80e3a092da364087bb1c9d414fe9b656591ed6f510"
+  "github_snapshot_hash": "8a568f0c99a26351fd5acb95801f344cae5c54e709208ac97e7192116074058a"
 }
