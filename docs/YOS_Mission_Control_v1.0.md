@@ -1,7 +1,7 @@
 # YOS Mission Control v1.0
 
 更新日：2026-07-17  
-状態：設計確定候補
+状態：正式採用
 
 ## 1. 目的
 
@@ -9,9 +9,9 @@ YOSが、複数のチャット・GitHub・Codex・Taxi Lab・Project75・Google 
 
 解決する問題：
 
-- 進捗確認のために、あちこちのチャットを見に行く必要がある
-- どこまで進んだか、次に何をするかが分散する
-- 設計、実装、運用、承認の責任範囲が混ざる
+- 進捗確認のために、あちこちを見に行く必要がある
+- 現在地、次の作業、問題、承認待ちが分散する
+- 設計・実装・運用・承認の責任範囲が混ざる
 - 完了した作業がYOS全体へ反映されない
 
 ## 2. 基本構造
@@ -19,12 +19,8 @@ YOSが、複数のチャット・GitHub・Codex・Taxi Lab・Project75・Google 
 ```text
 ようすけ
   ↓
-YOS
-  ├ 判断
-  ├ 優先順位
-  ├ 承認
-  └ 全体統合
-       ↓
+YOS（判断・優先順位・承認・統合）
+  ↓
 YOS Mission Control
   ├ Projects
   ├ Tasks
@@ -32,14 +28,14 @@ YOS Mission Control
   ├ Approvals
   ├ Metrics
   └ History
-       ↓
+  ↓
 Taxi / Life / Money / Idea
-       ↓
-Lab
-       ↓
-Codex
-       ↓
-GitHub
+  ↓
+Lab（研究・設計・検証）
+  ↓
+Codex（実装）
+  ↓
+GitHub（保存・履歴管理）
 ```
 
 ## 3. 役割
@@ -62,45 +58,43 @@ GitHub
 ### Taxi / Life / Money / Idea
 
 - 日常運用を行う
-- 進捗・問題・完了結果をMission Controlへ返す
-- 全体仕様は変更しない
+- 重要な進捗・問題・完了結果をMission Controlへ返す
+- 全体仕様は独自に変更しない
 
 ### Lab
 
-- 調査、設計、実験、改善案の作成
-- 実装前の仕様整理
-- 実装結果の検証
+- 調査、設計、実験、改善案を作る
+- 実装前の仕様を整理する
+- 実装結果を検証する
 - 最終決定は行わない
 
 ### Codex
 
-- コード作成、修正、テスト、リファクタリング
+- コード作成、修正、テスト、リファクタリングを行う
 - ブランチとPull Requestで変更を提出する
-- 仕様は独自に変更しない
+- 仕様を独自に変更しない
 
 ### GitHub
 
-- コード、設計書、タスク、履歴の保存場所
-- 変更の根拠をCommit・Issue・Pull Requestとして残す
+- コード、設計書、タスク、変更履歴を保存する
+- Issue・Pull Request・Commitで根拠を残す
 
 ## 4. 正本
 
 YOS全体の開発基盤は `yskn0008-bot/ProjectY` を主リポジトリとする。
 
-Mission Controlの正本は次の通り。
-
-- プロジェクト一覧・現在状態：`data/mission-control.json`
+- 現在状態：`data/mission-control.json`
 - Mission Control仕様：`docs/YOS_Mission_Control_v1.0.md`
 - 重要な設計判断：`docs/ADR-*.md`
 - 個別タスク：GitHub Issues
 - 実装変更：GitHub Pull Requests
 - 実行履歴：GitHub Commits
 
-チャット内の会話だけを正本にしない。
+会話だけを正本にしない。
 
 ## 5. 状態
 
-各プロジェクトとタスクは、次の6状態だけを使う。
+プロジェクトとタスクは次の6状態だけを使う。
 
 | 状態 | 意味 |
 |---|---|
@@ -111,7 +105,7 @@ Mission Controlの正本は次の通り。
 | `paused` | 意図的に保留 |
 | `done` | 完了 |
 
-健康状態は次の3段階とする。
+健康状態：
 
 - `ok`：正常
 - `attention`：確認が必要
@@ -119,39 +113,30 @@ Mission Controlの正本は次の通り。
 
 ## 6. プロジェクト必須項目
 
-- `id`：変更しない識別子
-- `name`：表示名
-- `domain`：YOS / Taxi / Life / Money / Idea / Infrastructure
-- `type`：operation / research / development / governance / infrastructure
-- `purpose`：存在目的
-- `status`：現在状態
-- `health`：健康状態
-- `priority`：1〜5。1が最優先
-- `progress_percent`：0〜100
-- `owner`：担当
-- `next_action`：次にする一つの行動
-- `blocker`：進行を止めている要因
-- `dependencies`：先に必要な対象
-- `source_links`：根拠となる資料・リポジトリ・Issue
-- `last_update`：最終更新日時
-- `updated_by`：更新者
+- `id`
+- `name`
+- `domain`
+- `type`
+- `purpose`
+- `status`
+- `health`
+- `priority`
+- `progress_percent`
+- `owner`
+- `next_action`
+- `blocker`
+- `dependencies`
+- `source_links`
+- `last_update`
+- `updated_by`
 
 ## 7. YOSコマンド
 
 ### `進捗`
 
-全プロジェクトを、重要度順に表示する。
+全プロジェクトを重要度順に表示する。
 
-表示順：
-
-1. `critical`
-2. `blocked`
-3. `review`
-4. 優先度1の`active`
-5. その他の`active`
-6. `paused`
-7. `backlog`
-8. `done`
+表示順：`critical` → `blocked` → `review` → 優先度1の`active` → その他の`active` → `paused` → `backlog` → `done`。
 
 ### `次`
 
@@ -175,11 +160,11 @@ Mission Controlの正本は次の通り。
 
 ### `追加`
 
-新しいプロジェクトまたはタスクを登録する。既存資産で代用できないかを先に確認する。
+新しいプロジェクトまたはタスクを登録する。先に既存資産で対応できないか確認する。
 
 ## 8. Inboxと承認
 
-次の情報はYOS Inboxへ集める。
+次をInboxへ集約する。
 
 - 仕様変更案
 - Codexの実装完了
@@ -189,31 +174,25 @@ Mission Controlの正本は次の通り。
 - 重要資料の更新
 - 営業終了レビューから生まれた改善案
 
-YOSの判断は次の3つ。
+YOSの判断は「承認・保留・却下」の3つ。
 
-- 承認
-- 保留
-- 却下
-
-重要な仕様変更は、理由・影響範囲・更新資料・Change Log記録を確認してから承認する。
+重要な仕様変更では、変更理由・影響範囲・更新資料・Change Logへの記録を確認する。
 
 ## 9. 更新ルール
 
-1. 作業開始時にIssueまたはプロジェクト状態を更新する
+1. 開始時にIssueまたは状態を更新する
 2. 作業中はCommit・コメント・資料で根拠を残す
 3. 完了時に結果、残課題、次の作業を記録する
-4. Codexの変更はPull Requestで提出する
+4. CodexはPull Requestで提出する
 5. Labが検証する
 6. YOSが承認する
 7. 承認後に正本を更新する
 
 会話だけで完了扱いにしない。
 
-## 10. 自動化方針
+## 10. 自動取得対象
 
 ### GitHub
-
-自動取得対象：
 
 - Open Issues
 - Review待ちPull Requests
@@ -223,7 +202,7 @@ YOSの判断は次の3つ。
 
 ### Codex
 
-- 作業ブランチ名
+- 作業ブランチ
 - Pull Request状態
 - 実装内容
 - テスト結果
@@ -251,22 +230,20 @@ YOSの判断は次の3つ。
 - 未入力・確認待ち
 - 次回営業への改善点
 
-### 専門チャット
-
-専門チャットを常時自動巡回することは前提にしない。各チャットは、重要な進捗をGitHub Issue、Pull Request、正本ファイルのいずれかへ返す。YOSはそこを確認する。
+専門チャットの常時巡回は前提にしない。重要な進捗はIssue、Pull Request、正本ファイルのいずれかへ返す。
 
 ## 11. 安全と運用
 
-- 認証情報、個人情報、営業上の機密は公開リポジトリへ保存しない
-- 重要データは必要に応じて非公開リポジトリへ移す
-- mainへ直接大規模変更を入れない
+- 認証情報、個人情報、営業上の機密を公開リポジトリへ保存しない
+- 必要な情報は非公開リポジトリへ移す
+- mainへ大規模変更を直接入れない
 - ブランチ → Pull Request → レビュー → Mergeを基本とする
 - 既存資産を削除・置換する前に影響を確認する
-- iPhoneから見やすく、操作回数を少なくする
+- iPhoneで見やすく、操作回数を減らす
 
 ## 12. 完成条件
 
-YOSが `進捗` と言われた時に、次を一度で返せること。
+YOSが`進捗`と言われた時に、一度で次を返せること。
 
 - 全プロジェクトの状態
 - 今やること一つ
@@ -276,11 +253,15 @@ YOSが `進捗` と言われた時に、次を一度で返せること。
 - 情報が古い対象
 - 根拠へのリンク
 
-## 13. 最初の実装範囲
+## 13. 実装順
 
-1. `data/mission-control.json` を作る
-2. 既存プロジェクトを登録する
-3. Mission Control用Issueを作る
-4. GitHubのIssue・PR・CommitをYOSが確認できる運用を始める
-5. iPhone向けDashboard画面を実装する
-6. Google Drive、Calendar、Project75との連携を順次追加する
+1. Mission Controlの正本と初期プロジェクトを登録する
+2. GitHub IssuesをTasks・Inboxとして運用する
+3. `進捗`と`次`をYOSから使える状態にする
+4. iPhone向けDashboardを実装する
+5. GitHubのIssue・PR・Commitを自動集約する
+6. Google Drive、Calendar、Project75を連携する
+
+## 14. 承認
+
+2026-07-17、ようすけからYOSへ最終判断を委任。YOSが設計を確認し、v1.0として正式採用した。
