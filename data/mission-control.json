@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-18T01:48:59+09:00",
+  "updated_at": "2026-07-18T01:50:32+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -21,6 +21,16 @@
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/10",
       "updated_at": "2026-07-17T11:08:22Z"
+    },
+    {
+      "id": "github-issue-11",
+      "title": "Issue #11 Taxi Operations v1を2026-07-18 17:00までに実用化する",
+      "type": "GitHub Issue",
+      "status": "open",
+      "priority": 3,
+      "next_action": "完成条件を確認し、次の安全な実装を1件進める",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/11",
+      "updated_at": "2026-07-17T16:50:15Z"
     },
     {
       "id": "github-issue-15",
@@ -114,7 +124,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-18T01:48:59+09:00",
+      "last_update": "2026-07-18T01:50:32+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -189,13 +199,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 3件・Open PR 0件を自動同期中",
+      "next_action": "Open Issue 4件・Open PR 0件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-18T01:48:59+09:00",
+      "last_update": "2026-07-18T01:50:32+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -218,7 +228,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-18T01:48:59+09:00",
+      "last_update": "2026-07-18T01:50:32+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -300,5 +310,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "375a05cd3530a2c1b6458d7f27a75f870f4b1473b99b5fa97e55476c363a5f83"
+  "github_snapshot_hash": "03459322d527195d41dda0cb4b030ee5e13270a48fb7027ec58c493e69cda5d5"
 }
