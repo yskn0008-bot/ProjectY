@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-17T20:08:35+09:00",
+  "updated_at": "2026-07-17T20:16:52+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -35,6 +35,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-3523762ee78d",
+      "title": "docs: define Taxi Operations v1 release",
+      "completed_at": "2026-07-17T11:16:39Z",
+      "result": "GitHub mainへ反映（3523762）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/3523762ee78d830974bad87e4efd96e79d0e35b5"
+    },
+    {
       "id": "github-commit-a05e69a4a2b7",
       "title": "ci: automate Mission Control sync and deployment",
       "completed_at": "2026-07-17T10:44:35Z",
@@ -61,13 +68,6 @@
       "completed_at": "2026-07-17T08:57:13Z",
       "result": "GitHub mainへ反映（1caeab3）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/1caeab3a6dc76cdedf4593d0cec5689fac10b714"
-    },
-    {
-      "id": "github-commit-16cf464efe5a",
-      "title": "data: record Dashboard merge and next deployment step",
-      "completed_at": "2026-07-17T08:51:38Z",
-      "result": "GitHub mainへ反映（16cf464）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/16cf464efe5a9f76de97e2f222793c48de95547e"
     },
     {
       "id": "complete-002",
@@ -104,7 +104,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-17T20:08:35+09:00",
+      "last_update": "2026-07-17T20:16:52+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -185,7 +185,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-17T20:08:35+09:00",
+      "last_update": "2026-07-17T20:16:52+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -208,7 +208,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-17T20:08:35+09:00",
+      "last_update": "2026-07-17T20:16:52+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -290,5 +290,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "62ba410cc1c264a4b0a6295589a0241188a940b93c885b26e85802fedee62c40"
+  "github_snapshot_hash": "383f9aa6e283f3cd8793a7efccba5ddef0fc7fca2669e5a6fd601d31148dc0d0"
 }
