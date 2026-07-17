@@ -3,6 +3,8 @@ name: Sync and deploy YOS Mission Control
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - 'data/mission-control.json'
   issues:
     types: [opened, edited, closed, reopened, labeled, unlabeled, assigned, unassigned]
   schedule:
