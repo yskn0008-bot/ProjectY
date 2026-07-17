@@ -2,14 +2,671 @@
 <html lang="ja">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#0a0a0a" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <title>YOS</title>
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="YOS" />
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <title>YOS Mission Control</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #080808;
+        --panel: #141414;
+        --panel-2: #1b1b1b;
+        --line: #2a2a2a;
+        --text: #f7f7f7;
+        --muted: #9a9a9a;
+        --good: #43d17a;
+        --attention: #f3bb45;
+        --critical: #ff5c5c;
+        --accent: #7aa7ff;
+        --paused: #8c8c8c;
+        --radius: 22px;
+      }
+
+      * { box-sizing: border-box; }
+
+      html { background: var(--bg); }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background:
+          radial-gradient(circle at 100% 0%, rgba(82, 119, 255, 0.15), transparent 33%),
+          var(--bg);
+        color: var(--text);
+        font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic", sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      button, input { font: inherit; }
+      button { -webkit-tap-highlight-color: transparent; }
+
+      .app {
+        width: min(100%, 760px);
+        margin: 0 auto;
+        padding:
+          calc(env(safe-area-inset-top) + 18px)
+          16px
+          calc(env(safe-area-inset-bottom) + 28px);
+      }
+
+      .topbar {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 18px;
+      }
+
+      .eyebrow {
+        margin: 0 0 5px;
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: clamp(26px, 7vw, 38px);
+        line-height: 1.05;
+        letter-spacing: -0.04em;
+      }
+
+      .icon-button {
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        min-width: 48px;
+        min-height: 48px;
+        background: rgba(20, 20, 20, 0.92);
+        color: var(--text);
+        font-size: 22px;
+        cursor: pointer;
+      }
+
+      .icon-button:active { transform: scale(0.96); }
+      .icon-button[disabled] { opacity: 0.5; cursor: wait; }
+
+      .sync-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        margin-bottom: 14px;
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .sync-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+      }
+
+      .sync-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--attention);
+      }
+
+      .sync-dot.online { background: var(--good); }
+      .sync-dot.offline { background: var(--critical); }
+
+      .hero {
+        border: 1px solid rgba(122, 167, 255, 0.3);
+        border-radius: 26px;
+        padding: 20px;
+        margin-bottom: 14px;
+        background:
+          linear-gradient(145deg, rgba(69, 103, 216, 0.24), rgba(18, 18, 18, 0.92) 62%),
+          var(--panel);
+        box-shadow: 0 18px 50px rgba(0, 0, 0, 0.25);
+      }
+
+      .hero-label {
+        margin: 0 0 8px;
+        color: #b8ccff;
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+      }
+
+      .hero h2 {
+        margin: 0 0 10px;
+        font-size: 23px;
+        line-height: 1.35;
+        letter-spacing: -0.025em;
+      }
+
+      .hero-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .chip {
+        display: inline-flex;
+        align-items: center;
+        min-height: 28px;
+        padding: 5px 9px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        background: rgba(0, 0, 0, 0.2);
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+        margin-bottom: 14px;
+      }
+
+      .summary-card {
+        border: 1px solid var(--line);
+        border-radius: 20px;
+        padding: 15px;
+        background: rgba(20, 20, 20, 0.92);
+      }
+
+      .summary-value {
+        display: block;
+        margin-bottom: 4px;
+        font-size: 26px;
+        font-weight: 800;
+        line-height: 1;
+      }
+
+      .summary-label {
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .tabs {
+        position: sticky;
+        top: calc(env(safe-area-inset-top) + 8px);
+        z-index: 5;
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 4px;
+        padding: 4px;
+        margin-bottom: 14px;
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        background: rgba(12, 12, 12, 0.9);
+        backdrop-filter: blur(18px);
+        -webkit-backdrop-filter: blur(18px);
+      }
+
+      .tab {
+        min-height: 42px;
+        border: 0;
+        border-radius: 14px;
+        background: transparent;
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+
+      .tab.active {
+        background: var(--panel-2);
+        color: var(--text);
+      }
+
+      .panel { display: none; }
+      .panel.active { display: block; }
+
+      .section-title {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        margin: 22px 2px 10px;
+      }
+
+      .section-title h3 {
+        margin: 0;
+        font-size: 17px;
+      }
+
+      .section-title span {
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .search {
+        width: 100%;
+        min-height: 48px;
+        margin-bottom: 12px;
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        padding: 0 15px;
+        background: var(--panel);
+        color: var(--text);
+        outline: none;
+      }
+
+      .search:focus { border-color: rgba(122, 167, 255, 0.7); }
+
+      .list {
+        display: grid;
+        gap: 10px;
+      }
+
+      .card {
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        padding: 16px;
+        background: rgba(20, 20, 20, 0.95);
+      }
+
+      .card-head {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 12px;
+      }
+
+      .card h4 {
+        margin: 0 0 4px;
+        font-size: 17px;
+      }
+
+      .card-domain {
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .health {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        flex: 0 0 auto;
+        border-radius: 999px;
+        padding: 6px 9px;
+        font-size: 11px;
+        font-weight: 800;
+      }
+
+      .health::before {
+        content: "";
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: currentColor;
+      }
+
+      .health-ok { color: var(--good); background: rgba(67, 209, 122, 0.09); }
+      .health-attention { color: var(--attention); background: rgba(243, 187, 69, 0.09); }
+      .health-critical { color: var(--critical); background: rgba(255, 92, 92, 0.09); }
+
+      .next-action {
+        margin: 0;
+        font-size: 14px;
+        line-height: 1.65;
+      }
+
+      .muted {
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.55;
+      }
+
+      .blocker {
+        margin-top: 12px;
+        padding: 10px 12px;
+        border-left: 3px solid var(--critical);
+        border-radius: 10px;
+        background: rgba(255, 92, 92, 0.07);
+        color: #ffb2b2;
+        font-size: 12px;
+        line-height: 1.55;
+      }
+
+      .progress {
+        height: 7px;
+        margin: 14px 0 7px;
+        border-radius: 999px;
+        overflow: hidden;
+        background: #252525;
+      }
+
+      .progress > span {
+        display: block;
+        height: 100%;
+        border-radius: inherit;
+        background: linear-gradient(90deg, #6e91ff, #8bc8ff);
+      }
+
+      .card-footer {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        margin-top: 12px;
+        color: var(--muted);
+        font-size: 11px;
+      }
+
+      .empty {
+        padding: 28px 16px;
+        border: 1px dashed var(--line);
+        border-radius: var(--radius);
+        color: var(--muted);
+        text-align: center;
+        line-height: 1.7;
+      }
+
+      .error {
+        display: none;
+        margin-bottom: 14px;
+        padding: 12px 14px;
+        border: 1px solid rgba(255, 92, 92, 0.4);
+        border-radius: 16px;
+        background: rgba(255, 92, 92, 0.08);
+        color: #ffc0c0;
+        font-size: 13px;
+        line-height: 1.55;
+      }
+
+      .error.show { display: block; }
+
+      .skeleton {
+        min-height: 130px;
+        background: linear-gradient(90deg, #151515 25%, #202020 50%, #151515 75%);
+        background-size: 200% 100%;
+        animation: pulse 1.4s infinite;
+      }
+
+      @keyframes pulse {
+        from { background-position: 200% 0; }
+        to { background-position: -200% 0; }
+      }
+
+      @media (min-width: 640px) {
+        .summary-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+        .project-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after { scroll-behavior: auto !important; animation: none !important; transition: none !important; }
+      }
+    </style>
   </head>
   <body>
-    <main>
-      <h1>YOS</h1>
-      <p>プロジェクトを初期化しています。</p>
+    <main class="app">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">YOUR ONLY SYSTEM</p>
+          <h1>Mission Control</h1>
+        </div>
+        <button id="refreshButton" class="icon-button" type="button" aria-label="最新情報に更新">↻</button>
+      </header>
+
+      <div class="sync-row">
+        <span class="sync-status"><span id="syncDot" class="sync-dot"></span><span id="syncText">読込中</span></span>
+        <span id="updatedAt">—</span>
+      </div>
+
+      <div id="errorBox" class="error" role="alert"></div>
+
+      <section id="hero" class="hero skeleton" aria-live="polite"></section>
+
+      <section id="summary" class="summary-grid" aria-label="全体概要"></section>
+
+      <nav class="tabs" aria-label="表示切替">
+        <button class="tab active" type="button" data-tab="overview">概要</button>
+        <button class="tab" type="button" data-tab="projects">全体</button>
+        <button class="tab" type="button" data-tab="inbox">Inbox</button>
+        <button class="tab" type="button" data-tab="history">完了</button>
+      </nav>
+
+      <section id="overview" class="panel active">
+        <div class="section-title"><h3>注意が必要</h3><span id="attentionCount">0件</span></div>
+        <div id="attentionList" class="list"></div>
+
+        <div class="section-title"><h3>進行中</h3><span id="activeCount">0件</span></div>
+        <div id="activeList" class="list project-grid"></div>
+      </section>
+
+      <section id="projects" class="panel">
+        <input id="projectSearch" class="search" type="search" inputmode="search" placeholder="プロジェクトを検索" aria-label="プロジェクトを検索" />
+        <div id="projectList" class="list project-grid"></div>
+      </section>
+
+      <section id="inbox" class="panel">
+        <div id="inboxList" class="list"></div>
+      </section>
+
+      <section id="history" class="panel">
+        <div id="historyList" class="list"></div>
+      </section>
     </main>
+
+    <script>
+      const DATA_URL = './data/mission-control.json';
+      const CACHE_KEY = 'yos-mission-control-cache-v1';
+      const state = { data: null, source: 'network' };
+
+      const $ = (id) => document.getElementById(id);
+
+      function escapeHtml(value = '') {
+        return String(value)
+          .replaceAll('&', '&amp;')
+          .replaceAll('<', '&lt;')
+          .replaceAll('>', '&gt;')
+          .replaceAll('"', '&quot;')
+          .replaceAll("'", '&#039;');
+      }
+
+      function formatDate(value) {
+        if (!value) return '更新不明';
+        const date = new Date(value);
+        if (Number.isNaN(date.getTime())) return escapeHtml(value);
+        return new Intl.DateTimeFormat('ja-JP', {
+          month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit'
+        }).format(date);
+      }
+
+      function statusLabel(status) {
+        return ({
+          backlog: '未着手', active: '進行中', review: '確認待ち',
+          blocked: '停止中', paused: '保留', done: '完了'
+        })[status] || status || '不明';
+      }
+
+      function healthLabel(health) {
+        return ({ ok: '正常', attention: '要確認', critical: '重大' })[health] || '不明';
+      }
+
+      function projectScore(project) {
+        const health = { critical: 0, attention: 15, ok: 30 }[project.health] ?? 40;
+        const status = { blocked: 0, review: 5, active: 10, paused: 50, backlog: 60, done: 90 }[project.status] ?? 70;
+        return health + status + ((project.priority ?? 5) * 2);
+      }
+
+      function chooseNextProject(projects) {
+        return [...projects]
+          .filter((project) => project.next_action && project.status !== 'done' && project.status !== 'paused')
+          .sort((a, b) => projectScore(a) - projectScore(b))[0] || null;
+      }
+
+      function renderProjectCard(project) {
+        const progress = Number.isFinite(project.progress_percent)
+          ? `<div class="progress" aria-label="進捗 ${project.progress_percent}%"><span style="width:${Math.max(0, Math.min(100, project.progress_percent))}%"></span></div>`
+          : '';
+
+        const blocker = project.blocker
+          ? `<div class="blocker"><strong>問題：</strong>${escapeHtml(project.blocker)}</div>`
+          : '';
+
+        return `
+          <article class="card">
+            <div class="card-head">
+              <div>
+                <h4>${escapeHtml(project.name)}</h4>
+                <div class="card-domain">${escapeHtml(project.domain)} ・ ${escapeHtml(statusLabel(project.status))}</div>
+              </div>
+              <span class="health health-${escapeHtml(project.health)}">${escapeHtml(healthLabel(project.health))}</span>
+            </div>
+            <p class="next-action"><strong>次：</strong>${escapeHtml(project.next_action || '未設定')}</p>
+            ${blocker}
+            ${progress}
+            <div class="card-footer">
+              <span>優先度 ${escapeHtml(project.priority ?? '—')}</span>
+              <span>${formatDate(project.last_update)}</span>
+            </div>
+          </article>`;
+      }
+
+      function renderEmpty(message) {
+        return `<div class="empty">${escapeHtml(message)}</div>`;
+      }
+
+      function render(data) {
+        state.data = data;
+        const projects = Array.isArray(data.projects) ? data.projects : [];
+        const inbox = Array.isArray(data.inbox) ? data.inbox : [];
+        const completed = Array.isArray(data.recently_completed) ? data.recently_completed : [];
+        const next = chooseNextProject(projects);
+
+        $('hero').classList.remove('skeleton');
+        $('hero').innerHTML = next
+          ? `<p class="hero-label">今やること</p>
+             <h2>${escapeHtml(next.next_action)}</h2>
+             <div class="hero-meta">
+               <span class="chip">${escapeHtml(next.name)}</span>
+               <span class="chip">優先度 ${escapeHtml(next.priority)}</span>
+               <span class="chip">${escapeHtml(healthLabel(next.health))}</span>
+             </div>`
+          : `<p class="hero-label">今やること</p><h2>次の作業はありません</h2>`;
+
+        const counts = {
+          active: projects.filter((p) => p.status === 'active').length,
+          attention: projects.filter((p) => p.health === 'attention' || p.health === 'critical' || p.status === 'blocked').length,
+          inbox: inbox.length,
+          done: completed.length
+        };
+
+        $('summary').innerHTML = `
+          <div class="summary-card"><span class="summary-value">${counts.active}</span><span class="summary-label">進行中</span></div>
+          <div class="summary-card"><span class="summary-value">${counts.attention}</span><span class="summary-label">要確認</span></div>
+          <div class="summary-card"><span class="summary-value">${counts.inbox}</span><span class="summary-label">Inbox</span></div>
+          <div class="summary-card"><span class="summary-value">${counts.done}</span><span class="summary-label">直近完了</span></div>`;
+
+        const attention = projects
+          .filter((p) => p.health !== 'ok' || p.status === 'blocked' || p.status === 'review')
+          .sort((a, b) => projectScore(a) - projectScore(b));
+        const active = projects
+          .filter((p) => p.status === 'active')
+          .sort((a, b) => projectScore(a) - projectScore(b));
+
+        $('attentionCount').textContent = `${attention.length}件`;
+        $('activeCount').textContent = `${active.length}件`;
+        $('attentionList').innerHTML = attention.length ? attention.map(renderProjectCard).join('') : renderEmpty('注意が必要な項目はありません');
+        $('activeList').innerHTML = active.length ? active.map(renderProjectCard).join('') : renderEmpty('進行中の項目はありません');
+        renderProjectSearch('');
+
+        $('inboxList').innerHTML = inbox.length
+          ? inbox.sort((a, b) => (a.priority ?? 5) - (b.priority ?? 5)).map((item) => `
+              <article class="card">
+                <div class="card-head">
+                  <div><h4>${escapeHtml(item.title)}</h4><div class="card-domain">${escapeHtml(item.type || 'item')} ・ ${escapeHtml(item.status || '未確認')}</div></div>
+                  <span class="chip">優先度 ${escapeHtml(item.priority ?? '—')}</span>
+                </div>
+                <p class="next-action"><strong>次：</strong>${escapeHtml(item.next_action || '未設定')}</p>
+              </article>`).join('')
+          : renderEmpty('承認待ち・確認待ちはありません');
+
+        $('historyList').innerHTML = completed.length
+          ? completed.map((item) => `
+              <article class="card">
+                <div class="card-head"><div><h4>${escapeHtml(item.title)}</h4><div class="card-domain">${formatDate(item.completed_at)}</div></div><span class="health health-ok">完了</span></div>
+                <p class="next-action">${escapeHtml(item.result || '')}</p>
+              </article>`).join('')
+          : renderEmpty('直近の完了記録はありません');
+
+        $('updatedAt').textContent = `更新 ${formatDate(data.updated_at)}`;
+      }
+
+      function renderProjectSearch(query) {
+        if (!state.data) return;
+        const normalized = query.trim().toLowerCase();
+        const projects = [...(state.data.projects || [])]
+          .filter((project) => !normalized || [project.name, project.domain, project.purpose, project.next_action]
+            .some((value) => String(value || '').toLowerCase().includes(normalized)))
+          .sort((a, b) => projectScore(a) - projectScore(b));
+        $('projectList').innerHTML = projects.length ? projects.map(renderProjectCard).join('') : renderEmpty('一致するプロジェクトがありません');
+      }
+
+      function setSyncStatus(mode, text) {
+        $('syncDot').className = `sync-dot ${mode}`;
+        $('syncText').textContent = text;
+      }
+
+      async function loadData({ manual = false } = {}) {
+        const button = $('refreshButton');
+        button.disabled = true;
+        if (manual) setSyncStatus('', '更新中');
+        $('errorBox').classList.remove('show');
+
+        try {
+          const response = await fetch(`${DATA_URL}?t=${Date.now()}`, { cache: 'no-store' });
+          if (!response.ok) throw new Error(`HTTP ${response.status}`);
+          const data = await response.json();
+          localStorage.setItem(CACHE_KEY, JSON.stringify(data));
+          state.source = 'network';
+          setSyncStatus('online', 'GitHubと同期済み');
+          render(data);
+        } catch (error) {
+          const cached = localStorage.getItem(CACHE_KEY);
+          if (cached) {
+            try {
+              state.source = 'cache';
+              setSyncStatus('offline', '保存データを表示中');
+              render(JSON.parse(cached));
+              $('errorBox').textContent = '最新データを取得できなかったため、前回保存した状態を表示しています。';
+              $('errorBox').classList.add('show');
+            } catch {
+              showFatal(error);
+            }
+          } else {
+            showFatal(error);
+          }
+        } finally {
+          button.disabled = false;
+        }
+      }
+
+      function showFatal(error) {
+        setSyncStatus('offline', '読込失敗');
+        $('hero').classList.remove('skeleton');
+        $('hero').innerHTML = '<p class="hero-label">Mission Control</p><h2>データを読み込めませんでした</h2>';
+        $('errorBox').textContent = `Mission Controlの正本を取得できません。通信状態またはGitHub Pagesの設定を確認してください。(${error.message})`;
+        $('errorBox').classList.add('show');
+      }
+
+      document.querySelectorAll('.tab').forEach((button) => {
+        button.addEventListener('click', () => {
+          document.querySelectorAll('.tab').forEach((tab) => tab.classList.toggle('active', tab === button));
+          document.querySelectorAll('.panel').forEach((panel) => panel.classList.toggle('active', panel.id === button.dataset.tab));
+        });
+      });
+
+      $('refreshButton').addEventListener('click', () => loadData({ manual: true }));
+      $('projectSearch').addEventListener('input', (event) => renderProjectSearch(event.target.value));
+
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js').catch(() => {}));
+      }
+
+      loadData();
+    </script>
   </body>
 </html>
