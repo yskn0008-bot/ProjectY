@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-17T17:55:00+09:00",
-  "updated_by": "YOS",
+  "updated_at": "2026-07-17T19:44:48+09:00",
+  "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
     "branch": "main",
@@ -11,8 +11,64 @@
       "docs/ADR-001_YOS-Mission-Control.md"
     ]
   },
-  "inbox": [],
+  "inbox": [
+    {
+      "id": "github-issue-10",
+      "title": "Issue #10 Mission Control v2：GitHubのIssue・PR・Commitを自動集約する",
+      "type": "GitHub Issue",
+      "status": "open",
+      "priority": 3,
+      "next_action": "完成条件を確認し、次の安全な実装を1件進める",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/10",
+      "updated_at": "2026-07-17T10:35:28Z"
+    },
+    {
+      "id": "github-issue-4",
+      "title": "Issue #4 YOS Mission Control v1.0を構築する",
+      "type": "GitHub Issue",
+      "status": "open",
+      "priority": 3,
+      "next_action": "完成条件を確認し、次の安全な実装を1件進める",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/4",
+      "updated_at": "2026-07-17T10:35:18Z"
+    }
+  ],
   "recently_completed": [
+    {
+      "id": "github-commit-a05e69a4a2b7",
+      "title": "ci: automate Mission Control sync and deployment",
+      "completed_at": "2026-07-17T10:44:35Z",
+      "result": "GitHub mainへ反映（a05e69a）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/a05e69a4a2b74f2ac0d34357a32a715602e0d1cd"
+    },
+    {
+      "id": "github-commit-723e560f6405",
+      "title": "feat: add GitHub state synchronizer",
+      "completed_at": "2026-07-17T10:44:14Z",
+      "result": "GitHub mainへ反映（723e560）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/723e560f6405eeabeefdb963d95ece786079aea1"
+    },
+    {
+      "id": "github-commit-03e07299067d",
+      "title": "docs: trigger initial GitHub Pages deployment",
+      "completed_at": "2026-07-17T09:20:30Z",
+      "result": "GitHub mainへ反映（03e0729）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/03e07299067d9d876cbd64a611ebc7e28580e845"
+    },
+    {
+      "id": "github-commit-1caeab3a6dc7",
+      "title": "ci: publish YOS Mission Control with GitHub Pages",
+      "completed_at": "2026-07-17T08:57:13Z",
+      "result": "GitHub mainへ反映（1caeab3）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/1caeab3a6dc76cdedf4593d0cec5689fac10b714"
+    },
+    {
+      "id": "github-commit-16cf464efe5a",
+      "title": "data: record Dashboard merge and next deployment step",
+      "completed_at": "2026-07-17T08:51:38Z",
+      "result": "GitHub mainへ反映（16cf464）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/16cf464efe5a9f76de97e2f222793c48de95547e"
+    },
     {
       "id": "complete-002",
       "title": "iPhone向けMission Control Dashboardを実装",
@@ -34,11 +90,11 @@
       "type": "infrastructure",
       "purpose": "YOSが全プロジェクトの現在地、次の作業、承認待ち、問題を一か所で把握する",
       "status": "active",
-      "health": "ok",
+      "health": "attention",
       "priority": 1,
-      "progress_percent": 70,
+      "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "GitHub Pagesの公開状態を確認し、iPhone実機でDashboardをテストする",
+      "next_action": "Issue #4を実装する：YOS Mission Control v1.0を構築する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -48,8 +104,8 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-17T17:55:00+09:00",
-      "updated_by": "YOS"
+      "last_update": "2026-07-17T19:44:48+09:00",
+      "updated_by": "GitHub Actions"
     },
     {
       "id": "yos-master",
@@ -121,16 +177,16 @@
       "status": "active",
       "health": "ok",
       "priority": 1,
-      "progress_percent": 65,
+      "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "ProjectYのGitHub Pages公開状態を確認する",
+      "next_action": "Open Issue 2件・Open PR 0件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-17T17:55:00+09:00",
-      "updated_by": "YOS"
+      "last_update": "2026-07-17T19:44:48+09:00",
+      "updated_by": "GitHub Actions"
     },
     {
       "id": "codex",
@@ -141,9 +197,9 @@
       "status": "active",
       "health": "ok",
       "priority": 2,
-      "progress_percent": 75,
+      "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "GitHubのIssue・Pull Request・Commitを自動集約する仕組みを実装する",
+      "next_action": "Issue #4を実装する：YOS Mission Control v1.0を構築する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -152,8 +208,8 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-17T17:55:00+09:00",
-      "updated_by": "YOS"
+      "last_update": "2026-07-17T19:44:48+09:00",
+      "updated_by": "GitHub Actions"
     },
     {
       "id": "project75",
@@ -233,5 +289,6 @@
       "last_update": "2026-07-17T17:55:00+09:00",
       "updated_by": "YOS"
     }
-  ]
+  ],
+  "github_snapshot_hash": "86a6680fcf6c133598f900ee94da13d7f30962cfc8a38fdd05bccc5cc1a413f9"
 }
