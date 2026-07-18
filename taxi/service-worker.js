@@ -1,5 +1,5 @@
 'use strict';
-const CACHE='yos-taxi-projecty-v9';
+const CACHE='yos-taxi-projecty-v10';
 const STATIC=['./calendar.html','./manifest.webmanifest','./v9.css','./v9.js'];
 const isIndex=url=>url.pathname.endsWith('/taxi/')||url.pathname.endsWith('/taxi/index.html');
 async function inject(response){const html=await response.text();const body=html.includes('v9.css')?html:html.replace('</head>','<link rel="stylesheet" href="./v9.css"></head>').replace('</body>','<script src="./v9.js"></script></body>');const headers=new Headers(response.headers);headers.delete('content-length');headers.delete('content-encoding');return new Response(body,{status:response.status,statusText:response.statusText,headers})}
