@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-18T13:14:00+09:00",
+  "updated_at": "2026-07-18T13:24:37+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -41,6 +41,16 @@
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/40",
       "updated_at": "2026-07-18T04:03:30Z"
+    },
+    {
+      "id": "github-issue-41",
+      "title": "Issue #41 営業カレンダーの勤務時間管理とスワイプ操作を改善する",
+      "type": "GitHub Issue",
+      "status": "open",
+      "priority": 3,
+      "next_action": "完成条件を確認し、次の安全な実装を1件進める",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/41",
+      "updated_at": "2026-07-18T04:24:23Z"
     }
   ],
   "recently_completed": [
@@ -114,7 +124,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-18T13:14:00+09:00",
+      "last_update": "2026-07-18T13:24:37+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -189,13 +199,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 3件・Open PR 0件を自動同期中",
+      "next_action": "Open Issue 4件・Open PR 0件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-18T13:14:00+09:00",
+      "last_update": "2026-07-18T13:24:37+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -218,7 +228,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-18T13:14:00+09:00",
+      "last_update": "2026-07-18T13:24:37+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -300,5 +310,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "bd6f91ab73ca4752478a355d2b68f6d50c9c6acf829de7b9ba8f08d0706bbee8"
+  "github_snapshot_hash": "cf0d373c41e2c2aad90b89f0764c4c5045b20ec5c2007fdf13c1b27016496079"
 }
