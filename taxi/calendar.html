@@ -6,25 +6,46 @@
 <meta name="theme-color" content="#0b0b0d">
 <title>YOS Taxi 営業カレンダー</title>
 <style>
-:root{color-scheme:dark;--bg:#09090b;--panel:#151517;--panel2:#1d1d21;--line:#2a2a30;--text:#fafafa;--muted:#a6a6b0;--amber:#ffb323;--blue:#73a7ff;--red:#ff6b73;--green:#4bd283}
-*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(circle at 100% 0,rgba(255,179,35,.13),transparent 34%),var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif}.app{width:min(100%,980px);margin:auto;padding:calc(env(safe-area-inset-top) + 12px) 12px calc(env(safe-area-inset-bottom) + 28px)}button,input,select,textarea{font:inherit}button{touch-action:manipulation}.top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:12px}.eyebrow{margin:0 0 4px;color:var(--amber);font-size:11px;font-weight:900;letter-spacing:.12em}h1{margin:0;font-size:25px}.back{color:var(--text);text-decoration:none;border:1px solid var(--line);border-radius:13px;padding:10px 12px;background:var(--panel)}.summary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:10px}.card{background:rgba(21,21,23,.96);border:1px solid var(--line);border-radius:18px;padding:13px}.card strong{display:block;font-size:21px;line-height:1.1}.card span{color:var(--muted);font-size:11px}.view-tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:12px 0 8px}.view-tab{min-height:46px;border:1px solid var(--line);border-radius:14px;background:var(--panel2);color:var(--muted);font-weight:900}.view-tab.active{background:linear-gradient(145deg,var(--amber),#ff7a00);border:0;color:#17100a}.toolbar{display:grid;grid-template-columns:48px 1fr 48px;gap:8px;align-items:center;margin:8px 0}.toolbar button,.settings,.edit-button{min-height:44px;border:1px solid var(--line);border-radius:14px;background:var(--panel2);color:var(--text);font-weight:900}.period{text-align:center;font-size:17px;font-weight:900}.jump-today{width:100%;min-height:40px;border:0;background:transparent;color:var(--amber);font-weight:900}.settings{width:100%;margin-bottom:10px}.view{display:none}.view.active{display:block}.detail{display:grid;gap:10px}.detail-hero{border:1px solid rgba(255,179,35,.35);border-radius:22px;padding:17px;background:linear-gradient(145deg,rgba(255,150,0,.15),rgba(21,21,23,.98) 62%)}.detail-date{color:var(--amber);font-size:12px;font-weight:900}.detail-hero h2{margin:5px 0 4px;font-size:27px}.detail-hero p{margin:0;color:var(--muted);font-size:12px}.detail-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.detail-card{border:1px solid var(--line);border-radius:17px;background:var(--panel);padding:13px}.detail-card strong{display:block;font-size:19px}.detail-card span{font-size:11px;color:var(--muted)}.detail-wide{border:1px solid var(--line);border-radius:17px;background:var(--panel);padding:14px}.detail-wide h3{font-size:12px;color:var(--muted);margin:0 0 6px}.detail-wide p{margin:0;font-size:14px;line-height:1.55}.edit-button{width:100%;background:linear-gradient(145deg,var(--amber),#ff7a00);color:#17100a;border:0}.week-summary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:9px}.week-list{display:grid;gap:8px}.week-item{width:100%;border:1px solid var(--line);border-radius:17px;background:var(--panel);color:var(--text);padding:13px;text-align:left}.week-item.today{outline:2px solid var(--amber)}.week-item.off{background:rgba(255,107,115,.07)}.week-top{display:flex;justify-content:space-between;align-items:center;gap:8px}.week-date{font-size:15px;font-weight:900}.tag{display:inline-block;padding:3px 7px;border-radius:999px;background:#25252b;color:var(--muted);font-size:10px}.tag.work{color:var(--green)}.tag.off{color:var(--red)}.week-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-top:9px}.week-metrics div{font-size:10px;color:var(--muted)}.week-metrics strong{display:block;color:var(--text);font-size:13px}.week-extra{margin-top:7px;color:var(--muted);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.legend{display:flex;gap:11px;flex-wrap:wrap;color:var(--muted);font-size:11px;margin:0 2px 10px}.legend b{font-size:13px}.white{color:#fff}.blue{color:var(--blue)}.red{color:var(--red)}.week-head,.month-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}.week-head div{text-align:center;color:var(--muted);font-size:11px;padding:6px 0}.day{min-height:108px;border:1px solid var(--line);border-radius:13px;background:rgba(21,21,23,.96);color:var(--text);padding:8px 6px;text-align:left;overflow:hidden}.day.other{opacity:.28}.day.today{outline:2px solid var(--amber)}.day.off{background:rgba(255,107,115,.07)}.date{font-size:13px;font-weight:900}.day .tag{margin:2px 0 4px;font-size:9px}.line{display:block;font-size:10px;line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.target{font-weight:900}.actual{color:var(--muted)}.notice{margin-top:10px;border-left:3px solid var(--amber);background:rgba(255,179,35,.08);border-radius:8px;padding:9px 10px;color:#ffe0a5;font-size:11px;line-height:1.5}dialog{width:min(calc(100% - 20px),620px);max-height:90vh;border:1px solid var(--line);border-radius:23px;padding:0;background:#111114;color:var(--text)}dialog::backdrop{background:rgba(0,0,0,.72)}form{padding:17px}form h2{margin:0 0 12px;font-size:20px}.fields{display:grid;gap:10px}.row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}.field{display:grid;gap:5px}.field label{font-size:11px;color:var(--muted);font-weight:800}.field input,.field select,.field textarea{width:100%;min-height:45px;border:1px solid var(--line);border-radius:13px;padding:9px 11px;background:#1c1c20;color:var(--text)}.field textarea{min-height:75px}.actions{display:grid;grid-template-columns:1fr 1.4fr;gap:8px;margin-top:13px}.actions button{min-height:47px;border:1px solid var(--line);border-radius:13px;background:var(--panel2);color:var(--text);font-weight:900}.actions .save{background:linear-gradient(145deg,var(--amber),#ff7a00);border:0;color:#17100a}.subactions{display:grid;gap:8px;margin-top:10px}.subactions button{min-height:45px;border:1px solid var(--line);border-radius:13px;background:var(--panel2);color:var(--text);font-weight:800}@media(min-width:700px){.summary{grid-template-columns:repeat(6,1fr)}.detail-grid{grid-template-columns:repeat(4,1fr)}.week-summary{grid-template-columns:repeat(4,1fr)}.week-list{grid-template-columns:repeat(2,1fr)}.day{min-height:125px}}
+:root{color-scheme:dark;--bg:#09090b;--panel:#151517;--panel2:#1d1d21;--line:#2a2a30;--text:#fafafa;--muted:#a6a6b0;--amber:#ffb323;--blue:#73a7ff;--red:#ff6b73;--green:#4bd283;--violet:#ad8cff}
+*{box-sizing:border-box}
+html{background:var(--bg)}
+body{margin:0;min-height:100vh;background:radial-gradient(circle at 100% 0,rgba(255,179,35,.13),transparent 34%),var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit}button{touch-action:manipulation}
+.app{width:min(100%,980px);margin:auto;padding:calc(env(safe-area-inset-top) + 12px) 12px calc(env(safe-area-inset-bottom) + 86px)}
+.top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:12px}.eyebrow{margin:0 0 4px;color:var(--amber);font-size:11px;font-weight:900;letter-spacing:.12em}h1{margin:0;font-size:25px}.back{color:var(--text);text-decoration:none;border:1px solid var(--line);border-radius:13px;padding:10px 12px;background:var(--panel)}
+.summary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:10px}.card{background:rgba(21,21,23,.96);border:1px solid var(--line);border-radius:18px;padding:13px}.card strong{display:block;font-size:21px;line-height:1.1}.card span{color:var(--muted);font-size:11px}
+.view-tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:12px 0 8px}.view-tab{min-height:46px;border:1px solid var(--line);border-radius:14px;background:var(--panel2);color:var(--muted);font-weight:900}.view-tab.active{background:linear-gradient(145deg,var(--amber),#ff7a00);border:0;color:#17100a}
+.toolbar{display:grid;grid-template-columns:48px 1fr 48px;gap:8px;align-items:center;margin:8px 0}.toolbar button,.settings,.edit-button{min-height:44px;border:1px solid var(--line);border-radius:14px;background:var(--panel2);color:var(--text);font-weight:900}.period{text-align:center;font-size:17px;font-weight:900}.jump-today{width:100%;min-height:40px;border:0;background:transparent;color:var(--amber);font-weight:900}.settings{display:flex;align-items:center;justify-content:center;width:100%;margin-bottom:10px;text-decoration:none}
+.view{display:none}.view.active{display:block}.detail{display:grid;gap:10px}.detail-hero{border:1px solid rgba(255,179,35,.35);border-radius:22px;padding:17px;background:linear-gradient(145deg,rgba(255,150,0,.15),rgba(21,21,23,.98) 62%)}.detail-date{color:var(--amber);font-size:12px;font-weight:900}.detail-hero h2{margin:5px 0 4px;font-size:27px}.detail-hero p{margin:0;color:var(--muted);font-size:12px}.detail-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.detail-card{border:1px solid var(--line);border-radius:17px;background:var(--panel);padding:13px}.detail-card strong{display:block;font-size:18px}.detail-card span{font-size:11px;color:var(--muted)}.detail-wide{border:1px solid var(--line);border-radius:17px;background:var(--panel);padding:14px}.detail-wide h3{font-size:12px;color:var(--muted);margin:0 0 6px}.detail-wide p{margin:0;font-size:14px;line-height:1.55}.edit-button{width:100%;background:linear-gradient(145deg,var(--amber),#ff7a00);color:#17100a;border:0}
+.week-summary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:9px}.week-list{display:grid;gap:8px}.week-item{width:100%;border:1px solid var(--line);border-radius:17px;background:var(--panel);color:var(--text);padding:13px;text-align:left}.week-item.today{outline:2px solid var(--amber)}.week-item.off{background:rgba(255,107,115,.07)}.week-item.transfer{border-color:rgba(173,140,255,.55)}.week-top{display:flex;justify-content:space-between;align-items:center;gap:8px}.week-date{font-size:15px;font-weight:900}.tag{display:inline-block;padding:3px 7px;border-radius:999px;background:#25252b;color:var(--muted);font-size:10px}.tag.work{color:var(--green)}.tag.off{color:var(--red)}.tag.transferWork,.tag.transferOff{color:var(--violet)}.week-metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-top:9px}.week-metrics div{font-size:9px;color:var(--muted)}.week-metrics strong{display:block;color:var(--text);font-size:12px}.week-extra{margin-top:7px;color:var(--muted);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.legend{display:flex;gap:11px;flex-wrap:wrap;color:var(--muted);font-size:11px;margin:0 2px 10px}.legend b{font-size:13px}.white{color:#fff}.blue{color:var(--blue)}.red{color:var(--red)}.violet{color:var(--violet)}
+.week-head,.month-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}.week-head div{text-align:center;color:var(--muted);font-size:11px;padding:6px 0}.day{min-height:118px;border:1px solid var(--line);border-radius:13px;background:rgba(21,21,23,.96);color:var(--text);padding:8px 6px;text-align:left;overflow:hidden}.day.other{opacity:.28}.day.today{outline:2px solid var(--amber)}.day.off{background:rgba(255,107,115,.07)}.day.transfer{border-color:rgba(173,140,255,.55)}.date{font-size:13px;font-weight:900}.day .tag{margin:2px 0 4px;font-size:9px}.line{display:block;font-size:9px;line-height:1.42;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.target{font-weight:900}.actual{color:var(--muted)}
+.notice{margin-top:10px;border-left:3px solid var(--amber);background:rgba(255,179,35,.08);border-radius:8px;padding:9px 10px;color:#ffe0a5;font-size:11px;line-height:1.5}
+dialog{width:min(calc(100% - 20px),660px);max-height:92vh;border:1px solid var(--line);border-radius:23px;padding:0;background:#111114;color:var(--text)}dialog::backdrop{background:rgba(0,0,0,.72);backdrop-filter:blur(5px)}form{padding:17px}form h2{margin:0 0 12px;font-size:20px}.fields{display:grid;gap:10px}.row2,.row3{display:grid;grid-template-columns:1fr 1fr;gap:8px}.field{display:grid;gap:5px}.field label{font-size:11px;color:var(--muted);font-weight:800}.field input,.field select,.field textarea{width:100%;min-height:45px;border:1px solid var(--line);border-radius:13px;padding:9px 11px;background:#1c1c20;color:var(--text)}.field textarea{min-height:75px}.field small{font-size:10px;color:var(--muted);line-height:1.4}.actions{display:grid;grid-template-columns:1fr 1.4fr;gap:8px;margin-top:13px}.actions button{min-height:47px;border:1px solid var(--line);border-radius:13px;background:var(--panel2);color:var(--text);font-weight:900}.actions .save{background:linear-gradient(145deg,var(--amber),#ff7a00);border:0;color:#17100a}
+@media(min-width:700px){.summary{grid-template-columns:repeat(4,1fr)}.detail-grid{grid-template-columns:repeat(4,1fr)}.week-summary{grid-template-columns:repeat(4,1fr)}.week-list{grid-template-columns:repeat(2,1fr)}.day{min-height:132px}.row3{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:390px){.row2,.row3{grid-template-columns:1fr}.week-metrics{grid-template-columns:repeat(2,1fr)}}
 </style>
 </head>
 <body>
 <main class="app">
 <header class="top"><div><p class="eyebrow">YOS TAXI OPERATIONS</p><h1>📅 営業カレンダー</h1></div><a class="back" href="./">営業画面</a></header>
+
 <section class="summary">
 <div class="card"><strong id="monthTarget">¥0</strong><span>月目標</span></div>
 <div class="card"><strong id="achieved">¥0</strong><span>現在達成</span></div>
 <div class="card"><strong id="remaining">¥0</strong><span>残り金額</span></div>
 <div class="card"><strong id="workDays">0日</strong><span>残り勤務日</span></div>
-<div class="card"><strong id="workHours">0時間</strong><span>残り勤務時間</span></div>
-<div class="card"><strong id="progress">0%</strong><span>達成率</span></div>
+<div class="card"><strong id="hourLimit">0時間</strong><span>月間勤務上限</span></div>
+<div class="card"><strong id="workedHours">0時間</strong><span>実勤務時間</span></div>
+<div class="card"><strong id="remainingHours">0時間</strong><span>残り勤務時間</span></div>
+<div class="card"><strong id="progress">0%</strong><span>売上達成率</span></div>
 </section>
+
 <nav class="view-tabs" aria-label="表示切り替え"><button class="view-tab active" data-mode="today">今日</button><button class="view-tab" data-mode="week">1週間</button><button class="view-tab" data-mode="month">月間</button></nav>
 <div class="toolbar"><button id="prev" aria-label="前へ">‹</button><div id="periodLabel" class="period"></div><button id="next" aria-label="次へ">›</button></div>
 <button id="jumpToday" class="jump-today">今日へ戻る</button>
-<button id="openMonth" class="settings">月目標・勤務予定を設定</button>
+<a class="settings" href="./settings.html">⚙️ 月目標・勤務時間・勤務周期を設定</a>
+
 <section id="todayView" class="view active">
 <div class="detail">
 <div class="detail-hero"><div id="todayDate" class="detail-date"></div><h2 id="todayStatus">未確認</h2><p id="todayMessage">その日の情報を確認できます。</p></div>
@@ -32,77 +53,221 @@
 <div class="detail-card"><strong id="todayTarget">¥0</strong><span>YOS推奨目標</span></div>
 <div class="detail-card"><strong id="todaySales">¥0</strong><span>実売上</span></div>
 <div class="detail-card"><strong id="todayDiff">¥0</strong><span>目標差</span></div>
-<div class="detail-card"><strong id="todayHours">0時間</strong><span>予定勤務時間</span></div>
+<div class="detail-card"><strong id="todayPlannedHours">0時間</strong><span>予定勤務時間</span></div>
+<div class="detail-card"><strong id="todayActualHours">0時間</strong><span>実勤務時間</span></div>
+<div class="detail-card"><strong id="todayServiceEnd">--:--</strong><span>乗務終了</span></div>
 <div class="detail-card"><strong id="todayWeather">未確認</strong><span>天候</span></div>
-<div class="detail-card"><strong id="todayFactor">×1.0</strong><span>期待値補正</span></div>
-<div class="detail-card"><strong id="todayRate">0%</strong><span>目標達成率</span></div>
 <div class="detail-card"><strong id="todayWorkType">未確認</strong><span>勤務区分</span></div>
 </div>
+<div class="detail-wide"><h3>勤務時刻</h3><p id="todayTimes">未確認</p></div>
 <div class="detail-wide"><h3>イベント・需要要因</h3><p id="todayEvent">未確認</p></div>
-<button id="editToday" class="edit-button">この日の情報を編集</button>
+<button id="editToday" class="edit-button">この日の情報を編集・振替</button>
 </div>
 </section>
+
 <section id="weekView" class="view">
 <div class="week-summary">
 <div class="card"><strong id="weekTarget">¥0</strong><span>週間目標</span></div>
 <div class="card"><strong id="weekSales">¥0</strong><span>週間実績</span></div>
-<div class="card"><strong id="weekDiff">¥0</strong><span>週間差額</span></div>
-<div class="card"><strong id="weekHours">0時間</strong><span>週間勤務時間</span></div>
+<div class="card"><strong id="weekPlanned">0時間</strong><span>予定勤務時間</span></div>
+<div class="card"><strong id="weekActual">0時間</strong><span>実勤務時間</span></div>
 </div>
 <div id="weekList" class="week-list"></div>
 </section>
+
 <section id="monthView" class="view">
-<div class="legend"><span><b class="white">白</b> 営業前目標</span><span><b class="blue">青</b> 達成</span><span><b class="red">赤</b> 未達</span><span>公休は確認済みのみ反映</span></div>
+<div class="legend"><span><b class="white">白</b> 目標</span><span><b class="blue">青</b> 達成</span><span><b class="red">赤</b> 未達</span><span><b class="violet">紫</b> 振替</span></div>
 <div class="week-head"><div>日</div><div>月</div><div>火</div><div>水</div><div>木</div><div>金</div><div>土</div></div>
 <div id="calendar" class="month-grid"></div>
 </section>
-<p class="notice">今日・1週間・月間を切り替えられます。公休・天候・イベントは、確認できた情報だけ保存します。</p>
+
+<p class="notice">3勤1休は基準です。振替勤務・振替公休は日別編集で設定でき、勤務周期を再作成しても保持されます。月間勤務上限から毎日の実勤務時間を差し引きます。</p>
 </main>
-<dialog id="dayDialog"><form method="dialog"><h2 id="dayTitle"></h2><div class="fields">
-<div class="row2"><div class="field"><label>勤務区分</label><select id="status"><option value="unknown">未確認</option><option value="work">勤務</option><option value="off">公休</option></select></div><div class="field"><label>予定勤務時間</label><input id="hours" type="number" min="0" max="24" step="0.5" inputmode="decimal"></div></div>
-<div class="row2"><div class="field"><label>YOS推奨目標（税込）</label><input id="target" type="number" min="0" step="500" inputmode="numeric"></div><div class="field"><label>実売上（税込）</label><input id="sales" type="number" min="0" step="100" inputmode="numeric"></div></div>
-<div class="row2"><div class="field"><label>天候</label><select id="weather"><option>未確認</option><option>晴れ</option><option>曇り</option><option>雨</option><option>強雨</option><option>強風</option><option>台風</option></select></div><div class="field"><label>期待値補正</label><select id="factor"><option value="1">通常</option><option value="0.8">低い ×0.8</option><option value="0.9">やや低い ×0.9</option><option value="1.1">やや高い ×1.1</option><option value="1.2">高い ×1.2</option><option value="1.3">非常に高い ×1.3</option></select></div></div>
+
+<dialog id="dayDialog">
+<form method="dialog">
+<h2 id="dayTitle"></h2>
+<div class="fields">
+<div class="row2">
+<div class="field"><label>勤務区分</label><select id="status"><option value="unknown">未確認</option><option value="work">勤務</option><option value="off">公休</option><option value="transferWork">振替勤務</option><option value="transferOff">振替公休</option></select></div>
+<div class="field"><label>実勤務時間</label><input id="actualHours" type="number" min="0" max="24" step="0.1" inputmode="decimal"><small>月間勤務上限から差し引く時間です。</small></div>
+</div>
+<div class="row3">
+<div class="field"><label>勤務開始</label><input id="shiftStart" type="time"></div>
+<div class="field"><label>乗務終了</label><input id="serviceEnd" type="time"></div>
+<div class="field"><label>勤務終了</label><input id="workEnd" type="time"></div>
+</div>
+<div class="row2">
+<div class="field"><label>YOS推奨目標（税込）</label><input id="target" type="number" min="0" step="100" inputmode="numeric"></div>
+<div class="field"><label>実売上（税込）</label><input id="sales" type="number" min="0" step="100" inputmode="numeric"></div>
+</div>
+<div class="row2">
+<div class="field"><label>天候</label><select id="weather"><option>未確認</option><option>晴れ</option><option>曇り</option><option>雨</option><option>強雨</option><option>強風</option><option>台風</option></select></div>
+<div class="field"><label>期待値補正</label><select id="factor"><option value="0.8">低い ×0.8</option><option value="0.9">やや低い ×0.9</option><option value="1">通常 ×1.0</option><option value="1.1">やや高い ×1.1</option><option value="1.2">高い ×1.2</option><option value="1.3">非常に高い ×1.3</option></select></div>
+</div>
 <div class="field"><label>イベント・需要要因</label><textarea id="event" placeholder="例：ライブ、祭り、祝前日、クルーズ船、空港遅延"></textarea></div>
-</div><div class="actions"><button value="cancel">取消</button><button id="saveDay" class="save" value="default">保存</button></div></form></dialog>
-<dialog id="monthDialog"><form method="dialog"><h2>月間設定</h2><div class="fields"><div class="field"><label>月目標（税込）</label><input id="monthlyGoal" type="number" min="0" step="10000" inputmode="numeric"></div></div><div class="subactions"><button id="importToday" type="button">今日のPWA売上を取り込む</button><button id="allocate" type="button">確認済み勤務日へ目標を再配分</button></div><div class="actions"><button value="cancel">閉じる</button><button id="saveMonth" class="save" value="default">保存</button></div></form></dialog>
+</div>
+<div class="actions"><button value="cancel">取消</button><button id="saveDay" class="save" value="default">保存</button></div>
+</form>
+</dialog>
+
 <script>
 'use strict';
-const KEY='yos-taxi-calendar-v1',OPS='yos-taxi-ops-v1';
-const $=id=>document.getElementById(id),yen=n=>new Intl.NumberFormat('ja-JP',{style:'currency',currency:'JPY',maximumFractionDigits:0}).format(Number(n||0));
-const localDateKey=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const CAL='yos-taxi-calendar-v1',SET='yos-taxi-calendar-settings-v3',OLD_SET='yos-taxi-calendar-settings-v2',OPS='yos-taxi-ops-v1',TAXI='yos-taxi-settings-v2';
+const $=id=>document.getElementById(id);
+const read=(key,fallback)=>{try{return JSON.parse(localStorage.getItem(key)||'null')||fallback}catch{return fallback}};
+const write=(key,value)=>localStorage.setItem(key,JSON.stringify(value));
+const yen=n=>new Intl.NumberFormat('ja-JP',{style:'currency',currency:'JPY',maximumFractionDigits:0}).format(Number(n||0));
+const num=n=>Number.isFinite(Number(n))?Number(n):0;
+const pad=n=>String(n).padStart(2,'0');
+const localDateKey=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
 const todayKey=()=>{const d=new Date();if(d.getHours()<8)d.setDate(d.getDate()-1);return localDateKey(d)};
 const fromKey=k=>new Date(`${k}T12:00:00`);
-const load=()=>{try{return JSON.parse(localStorage.getItem(KEY))||{monthlyGoals:{},days:{}}}catch{return{monthlyGoals:{},days:{}}}};
-let data=load(),focus=fromKey(todayKey()),selected='',mode='today';
-const save=()=>localStorage.setItem(KEY,JSON.stringify(data));
-const monthKey=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
-const keyOf=localDateKey;
-const dayData=k=>data.days[k]||{status:'unknown',hours:10,target:0,sales:0,weather:'未確認',factor:1,event:''};
-const statusText=s=>s==='work'?'勤務':s==='off'?'公休':'未確認';
-const fmtDate=d=>new Intl.DateTimeFormat('ja-JP',{month:'long',day:'numeric',weekday:'short'}).format(d);
-const escapeHtml=s=>String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;');
-function targetClass(k,v){if(!v.target)return'white';if(Number(v.sales||0)>=Number(v.target))return'blue';if(k<todayKey()||Number(v.sales||0)>0)return'red';return'white'}
-function summary(){const mk=monthKey(focus),goal=Number(data.monthlyGoals[mk]||770000),entries=Object.entries(data.days).filter(([k])=>k.startsWith(mk));const achieved=entries.reduce((s,[,v])=>s+Number(v.sales||0),0),remain=Math.max(0,goal-achieved),today=todayKey();const future=entries.filter(([k,v])=>k>=today&&v.status==='work');$('monthTarget').textContent=yen(goal);$('achieved').textContent=yen(achieved);$('remaining').textContent=yen(remain);$('workDays').textContent=`${future.length}日`;$('workHours').textContent=`${future.reduce((s,[,v])=>s+Number(v.hours||0),0)}時間`;$('progress').textContent=goal?`${Math.min(999,Math.round(achieved/goal*100))}%`:'0%'}
+const monthKey=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}`;
+const timeHours=(start,end)=>{if(!start||!end)return 0;const [a,b]=[start,end].map(v=>v.split(':').map(Number)).map(v=>v[0]*60+v[1]);return Math.max(0,((b<=a?b+1440:b)-a)/60)};
+const hoursLabel=n=>`${Math.round(num(n)*10)/10}時間`;
+const isWork=s=>s==='work'||s==='transferWork';
+const isOff=s=>s==='off'||s==='transferOff';
+const isTransfer=s=>s==='transferWork'||s==='transferOff';
+const statusText=s=>({work:'勤務',off:'公休',transferWork:'振替勤務',transferOff:'振替公休',unknown:'未確認'})[s]||'未確認';
+const escapeHtml=s=>String(s??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;');
+
+let data=read(CAL,{monthlyGoals:{},days:{}});
+const old=read(OLD_SET,{});
+let settings=read(SET,{
+  shiftStart:old.shiftStart||'17:30',
+  serviceEnd:old.shiftEnd||'03:30',
+  workEnd:old.workEnd||old.shiftEnd||'03:30',
+  workDays:num(old.workDays)||3,
+  offDays:num(old.offDays)||1,
+  anchor:old.anchor||todayKey(),
+  factor:num(old.factor)||1,
+  round:num(old.round)||500,
+  months:{}
+});
+settings.months=settings.months||{};
+let focus=fromKey(todayKey()),selected='',mode='today';
+
+function monthCfg(mk){
+  const legacyCarry=monthKey(new Date())===mk?num(old.carrySales):0;
+  return {hourLimit:288,carryHours:0,carrySales:legacyCarry,...(settings.months[mk]||{})};
+}
+function defaultDay(){
+  return {status:'unknown',shiftStart:settings.shiftStart,serviceEnd:settings.serviceEnd,workEnd:settings.workEnd,plannedHours:timeHours(settings.shiftStart,settings.workEnd),actualHours:0,target:0,sales:0,weather:'未確認',factor:settings.factor||1,event:''};
+}
+const dayData=k=>({...defaultDay(),...(data.days[k]||{})});
+function save(){write(CAL,data);write(SET,settings)}
+function targetClass(k,v){if(!num(v.target))return'white';if(num(v.sales)>=num(v.target))return'blue';if(k<todayKey()||num(v.sales)>0)return'red';return'white'}
+function fmtDate(d){return new Intl.DateTimeFormat('ja-JP',{month:'long',day:'numeric',weekday:'short'}).format(d)}
+function monthEntries(mk){return Object.entries(data.days).filter(([k])=>k.startsWith(mk))}
+
+function syncTodayFromOperations(){
+  const ops=read(OPS,null);if(!ops?.businessDate)return false;
+  const rides=(ops.events||[]).filter(e=>e.type==='降車');
+  const sales=rides.reduce((sum,e)=>sum+num(e.fare)+num(e.tip),0);
+  const taxi=read(TAXI,{}),current=dayData(ops.businessDate);
+  const next={...current};
+  if(!isOff(current.status)&&ops.status!=='before')next.status=isTransfer(current.status)?current.status:'work';
+  next.target=num(taxi.targetSales||current.target);
+  next.sales=sales;
+  next.shiftStart=current.shiftStart||settings.shiftStart;
+  next.serviceEnd=current.serviceEnd||taxi.plannedEnd||settings.serviceEnd;
+  next.workEnd=current.workEnd||taxi.plannedWorkEnd||settings.workEnd;
+  next.plannedHours=timeHours(next.shiftStart,next.workEnd);
+  const before=JSON.stringify(data.days[ops.businessDate]||null),after=JSON.stringify(next);
+  if(before!==after){data.days[ops.businessDate]=next;save();return true}
+  return false;
+}
+
+function summary(){
+  const mk=monthKey(focus),cfg=monthCfg(mk),entries=monthEntries(mk),goal=num(data.monthlyGoals[mk]||770000);
+  const achieved=num(cfg.carrySales)+entries.reduce((s,[,v])=>s+num(v.sales),0);
+  const remaining=Math.max(0,goal-achieved),today=todayKey();
+  const future=entries.filter(([k,v])=>k>=today&&isWork(v.status));
+  const worked=num(cfg.carryHours)+entries.reduce((s,[,v])=>s+num(v.actualHours),0);
+  const left=Math.max(0,num(cfg.hourLimit)-worked);
+  $('monthTarget').textContent=yen(goal);
+  $('achieved').textContent=yen(achieved);
+  $('remaining').textContent=yen(remaining);
+  $('workDays').textContent=`${future.length}日`;
+  $('hourLimit').textContent=hoursLabel(cfg.hourLimit);
+  $('workedHours').textContent=hoursLabel(worked);
+  $('remainingHours').textContent=hoursLabel(left);
+  $('progress').textContent=goal?`${Math.min(999,Math.round(achieved/goal*100))}%`:'0%';
+}
+
+function renderToday(){
+  const k=localDateKey(focus),v=dayData(k),diff=num(v.sales)-num(v.target);
+  $('todayDate').textContent=new Intl.DateTimeFormat('ja-JP',{year:'numeric',month:'long',day:'numeric',weekday:'long'}).format(focus);
+  $('todayStatus').textContent=statusText(v.status);
+  $('todayStatus').className=targetClass(k,v);
+  $('todayMessage').textContent=isOff(v.status)?'公休日です。振替の場合も日別編集から変更できます。':isWork(v.status)?'乗務終了と勤務終了を分けて管理します。':'勤務予定はまだ確認されていません。';
+  $('todayTarget').textContent=yen(v.target);$('todayTarget').className=targetClass(k,v);
+  $('todaySales').textContent=yen(v.sales);
+  $('todayDiff').textContent=`${diff>=0?'+':''}${yen(diff)}`;$('todayDiff').className=diff>=0?'blue':'red';
+  $('todayPlannedHours').textContent=hoursLabel(isWork(v.status)?(v.plannedHours||timeHours(v.shiftStart,v.workEnd)):0);
+  $('todayActualHours').textContent=hoursLabel(v.actualHours);
+  $('todayServiceEnd').textContent=isWork(v.status)?(v.serviceEnd||'--:--'):'—';
+  $('todayWeather').textContent=v.weather||'未確認';
+  $('todayWorkType').textContent=statusText(v.status);
+  $('todayTimes').textContent=isWork(v.status)?`勤務開始 ${v.shiftStart||'未設定'} ／ 乗務終了 ${v.serviceEnd||'未設定'} ／ 勤務終了 ${v.workEnd||'未設定'}`:'勤務なし';
+  $('todayEvent').textContent=v.event||'未確認';
+}
 function weekStart(d){const s=new Date(d);s.setDate(s.getDate()-s.getDay());return s}
-function renderToday(){const k=keyOf(focus),v=dayData(k),diff=Number(v.sales||0)-Number(v.target||0),rate=v.target?Math.round(Number(v.sales||0)/Number(v.target)*100):0;$('todayDate').textContent=new Intl.DateTimeFormat('ja-JP',{year:'numeric',month:'long',day:'numeric',weekday:'long'}).format(focus);$('todayStatus').textContent=statusText(v.status);$('todayStatus').className=targetClass(k,v);$('todayMessage').textContent=v.status==='off'?'公休日です。休養と次の営業準備を優先します。':v.status==='work'?'その日の営業情報をまとめて確認できます。':'勤務予定はまだ確認されていません。';$('todayTarget').textContent=yen(v.target);$('todayTarget').className=targetClass(k,v);$('todaySales').textContent=yen(v.sales);$('todayDiff').textContent=`${diff>=0?'+':''}${yen(diff)}`;$('todayDiff').className=diff>=0?'blue':'red';$('todayHours').textContent=`${Number(v.hours||0)}時間`;$('todayWeather').textContent=v.weather||'未確認';$('todayFactor').textContent=`×${Number(v.factor||1).toFixed(1)}`;$('todayRate').textContent=`${rate}%`;$('todayWorkType').textContent=statusText(v.status);$('todayEvent').textContent=v.event||'未確認'}
-function renderWeek(){const start=weekStart(focus),items=[];let target=0,sales=0,hours=0;for(let i=0;i<7;i++){const d=new Date(start);d.setDate(start.getDate()+i);const k=keyOf(d),v=dayData(k),extra=[v.weather&&v.weather!=='未確認'?v.weather:'',v.event].filter(Boolean).join('・')||'詳細未確認';target+=Number(v.target||0);sales+=Number(v.sales||0);if(v.status==='work')hours+=Number(v.hours||0);items.push(`<button class="week-item ${k===todayKey()?'today':''} ${v.status==='off'?'off':''}" data-key="${k}"><div class="week-top"><span class="week-date">${escapeHtml(fmtDate(d))}</span><span class="tag ${v.status}">${statusText(v.status)}</span></div><div class="week-metrics"><div>目標<strong class="${targetClass(k,v)}">${yen(v.target)}</strong></div><div>実績<strong>${yen(v.sales)}</strong></div><div>予定<strong>${Number(v.hours||0)}時間</strong></div></div><div class="week-extra">${escapeHtml(extra)}</div></button>`)}$('weekList').innerHTML=items.join('');$('weekTarget').textContent=yen(target);$('weekSales').textContent=yen(sales);$('weekDiff').textContent=`${sales-target>=0?'+':''}${yen(sales-target)}`;$('weekDiff').className=sales-target>=0?'blue':'red';$('weekHours').textContent=`${hours}時間`;document.querySelectorAll('.week-item').forEach(b=>b.onclick=()=>{focus=fromKey(b.dataset.key);mode='today';render()})}
-function renderMonth(){const y=focus.getFullYear(),m=focus.getMonth(),start=new Date(y,m,1-new Date(y,m,1).getDay()),out=[];for(let i=0;i<42;i++){const d=new Date(start);d.setDate(start.getDate()+i);const k=keyOf(d),v=dayData(k),same=d.getMonth()===m,extra=[v.weather!=='未確認'?v.weather:'',v.event].filter(Boolean).join('・');out.push(`<button class="day ${same?'':'other'} ${k===todayKey()?'today':''} ${v.status==='off'?'off':''}" data-key="${k}"><span class="date">${d.getDate()}</span><span class="tag ${v.status}">${statusText(v.status)}</span>${v.target?`<span class="line target ${targetClass(k,v)}">目標 ${yen(v.target)}</span>`:''}${v.sales?`<span class="line actual">実績 ${yen(v.sales)}</span>`:''}${extra?`<span class="line">${escapeHtml(extra)}</span>`:''}</button>`)}$('calendar').innerHTML=out.join('');document.querySelectorAll('.day').forEach(b=>b.onclick=()=>{focus=fromKey(b.dataset.key);mode='today';render()})}
-function renderPeriod(){if(mode==='today')$('periodLabel').textContent=fmtDate(focus);else if(mode==='week'){const s=weekStart(focus),e=new Date(s);e.setDate(s.getDate()+6);$('periodLabel').textContent=`${s.getMonth()+1}/${s.getDate()}〜${e.getMonth()+1}/${e.getDate()}`}else $('periodLabel').textContent=`${focus.getFullYear()}年 ${focus.getMonth()+1}月`}
-function render(){document.querySelectorAll('.view-tab').forEach(b=>b.classList.toggle('active',b.dataset.mode===mode));['today','week','month'].forEach(v=>$(`${v}View`).classList.toggle('active',v===mode));renderPeriod();summary();if(mode==='today')renderToday();if(mode==='week')renderWeek();if(mode==='month')renderMonth()}
-function openDay(k){selected=k;const v=dayData(k);$('dayTitle').textContent=k;$('status').value=v.status;$('hours').value=v.status==='off'?0:(v.hours??10);$('target').value=v.target||'';$('sales').value=v.sales||'';$('weather').value=v.weather||'未確認';$('factor').value=String(v.factor||1);$('event').value=v.event||'';$('dayDialog').showModal()}
+function renderWeek(){
+  const start=weekStart(focus),items=[];let target=0,sales=0,planned=0,actual=0;
+  for(let i=0;i<7;i++){
+    const d=new Date(start);d.setDate(start.getDate()+i);const k=localDateKey(d),v=dayData(k);
+    target+=num(v.target);sales+=num(v.sales);if(isWork(v.status))planned+=num(v.plannedHours||timeHours(v.shiftStart,v.workEnd));actual+=num(v.actualHours);
+    const extra=[v.weather&&v.weather!=='未確認'?v.weather:'',v.event].filter(Boolean).join('・')||'詳細未確認';
+    items.push(`<button class="week-item ${k===todayKey()?'today':''} ${isOff(v.status)?'off':''} ${isTransfer(v.status)?'transfer':''}" data-key="${k}"><div class="week-top"><span class="week-date">${escapeHtml(fmtDate(d))}</span><span class="tag ${v.status}">${statusText(v.status)}</span></div><div class="week-metrics"><div>目標<strong class="${targetClass(k,v)}">${yen(v.target)}</strong></div><div>実績<strong>${yen(v.sales)}</strong></div><div>予定<strong>${hoursLabel(isWork(v.status)?v.plannedHours:0)}</strong></div><div>実勤務<strong>${hoursLabel(v.actualHours)}</strong></div></div><div class="week-extra">${escapeHtml(extra)}</div></button>`);
+  }
+  $('weekList').innerHTML=items.join('');
+  $('weekTarget').textContent=yen(target);$('weekSales').textContent=yen(sales);$('weekPlanned').textContent=hoursLabel(planned);$('weekActual').textContent=hoursLabel(actual);
+  document.querySelectorAll('.week-item').forEach(b=>b.onclick=()=>{focus=fromKey(b.dataset.key);mode='today';render()});
+}
+function renderMonth(){
+  const y=focus.getFullYear(),m=focus.getMonth(),start=new Date(y,m,1-new Date(y,m,1).getDay()),out=[];
+  for(let i=0;i<42;i++){
+    const d=new Date(start);d.setDate(start.getDate()+i);const k=localDateKey(d),v=dayData(k),same=d.getMonth()===m;
+    const extra=[v.weather!=='未確認'?v.weather:'',v.event].filter(Boolean).join('・');
+    out.push(`<button class="day ${same?'':'other'} ${k===todayKey()?'today':''} ${isOff(v.status)?'off':''} ${isTransfer(v.status)?'transfer':''}" data-key="${k}"><span class="date">${d.getDate()}</span><span class="tag ${v.status}">${statusText(v.status)}</span>${v.target?`<span class="line target ${targetClass(k,v)}">目標 ${yen(v.target)}</span>`:''}${v.sales?`<span class="line actual">実績 ${yen(v.sales)}</span>`:''}${v.actualHours?`<span class="line">実勤務 ${hoursLabel(v.actualHours)}</span>`:''}${isWork(v.status)?`<span class="line">乗務終了 ${escapeHtml(v.serviceEnd||'未設定')}</span>`:''}${extra?`<span class="line">${escapeHtml(extra)}</span>`:''}</button>`);
+  }
+  $('calendar').innerHTML=out.join('');
+  document.querySelectorAll('.day').forEach(b=>b.onclick=()=>{focus=fromKey(b.dataset.key);mode='today';render()});
+}
+function renderPeriod(){
+  if(mode==='today')$('periodLabel').textContent=fmtDate(focus);
+  else if(mode==='week'){const s=weekStart(focus),e=new Date(s);e.setDate(s.getDate()+6);$('periodLabel').textContent=`${s.getMonth()+1}/${s.getDate()}〜${e.getMonth()+1}/${e.getDate()}`}
+  else $('periodLabel').textContent=`${focus.getFullYear()}年 ${focus.getMonth()+1}月`;
+}
+function render(){
+  document.querySelectorAll('.view-tab').forEach(b=>b.classList.toggle('active',b.dataset.mode===mode));
+  ['today','week','month'].forEach(v=>$(`${v}View`).classList.toggle('active',v===mode));
+  renderPeriod();summary();
+  if(mode==='today')renderToday();if(mode==='week')renderWeek();if(mode==='month')renderMonth();
+}
+function openDay(k){
+  selected=k;const v=dayData(k);
+  $('dayTitle').textContent=k;$('status').value=v.status;$('actualHours').value=v.actualHours||'';
+  $('shiftStart').value=v.shiftStart||settings.shiftStart;$('serviceEnd').value=v.serviceEnd||settings.serviceEnd;$('workEnd').value=v.workEnd||settings.workEnd;
+  $('target').value=v.target||'';$('sales').value=v.sales||'';$('weather').value=v.weather||'未確認';$('factor').value=String(v.factor||1);$('event').value=v.event||'';
+  $('dayDialog').showModal();
+}
 document.querySelectorAll('.view-tab').forEach(b=>b.onclick=()=>{mode=b.dataset.mode;render()});
-$('editToday').onclick=()=>openDay(keyOf(focus));
-$('status').onchange=()=>{if($('status').value==='off')$('hours').value=0};
-$('saveDay').onclick=()=>{const status=$('status').value;data.days[selected]={status,hours:status==='off'?0:Number($('hours').value||0),target:Number($('target').value||0),sales:Number($('sales').value||0),weather:$('weather').value,factor:Number($('factor').value||1),event:$('event').value.trim()};save();focus=fromKey(selected);render()};
+$('editToday').onclick=()=>openDay(localDateKey(focus));
+$('status').onchange=()=>{if(isOff($('status').value))$('actualHours').value=0};
+$('saveDay').onclick=()=>{
+  const status=$('status').value,shiftStart=$('shiftStart').value||settings.shiftStart,serviceEnd=$('serviceEnd').value||settings.serviceEnd,workEnd=$('workEnd').value||settings.workEnd;
+  data.days[selected]={...dayData(selected),status,shiftStart,serviceEnd,workEnd,plannedHours:isWork(status)?timeHours(shiftStart,workEnd):0,actualHours:isOff(status)?0:num($('actualHours').value),target:num($('target').value),sales:num($('sales').value),weather:$('weather').value,factor:num($('factor').value)||1,event:$('event').value.trim()};
+  save();focus=fromKey(selected);render();
+};
 $('prev').onclick=()=>{if(mode==='today')focus.setDate(focus.getDate()-1);else if(mode==='week')focus.setDate(focus.getDate()-7);else focus.setMonth(focus.getMonth()-1);render()};
 $('next').onclick=()=>{if(mode==='today')focus.setDate(focus.getDate()+1);else if(mode==='week')focus.setDate(focus.getDate()+7);else focus.setMonth(focus.getMonth()+1);render()};
 $('jumpToday').onclick=()=>{focus=fromKey(todayKey());render()};
-$('openMonth').onclick=()=>{$('monthlyGoal').value=data.monthlyGoals[monthKey(focus)]||770000;$('monthDialog').showModal()};
-$('saveMonth').onclick=()=>{data.monthlyGoals[monthKey(focus)]=Number($('monthlyGoal').value||0);save();render()};
-$('importToday').onclick=()=>{try{const ops=JSON.parse(localStorage.getItem(OPS)||'{}'),k=ops.businessDate||todayKey(),rides=(ops.events||[]).filter(e=>e.type==='降車'),sales=rides.reduce((s,e)=>s+Number(e.fare||0)+Number(e.tip||0),0),v=dayData(k);data.days[k]={...v,sales};save();focus=fromKey(k);render();alert(`PWA売上 ${yen(sales)} を取り込みました`)}catch{alert('PWA売上を読み込めませんでした')}};
-function weekdayWeight(k){const w=fromKey(k).getDay();return w===6?1.28:w===5?1.18:w===0?1.02:w===4?0.98:0.9}
-$('allocate').onclick=()=>{const mk=monthKey(focus),goal=Number($('monthlyGoal').value||data.monthlyGoals[mk]||0),today=todayKey(),entries=Object.entries(data.days).filter(([k,v])=>k.startsWith(mk)&&k>=today&&v.status==='work'),achieved=Object.entries(data.days).filter(([k])=>k.startsWith(mk)).reduce((s,[,v])=>s+Number(v.sales||0),0),remain=Math.max(0,goal-achieved);if(!entries.length){alert('確認済みの勤務日がありません');return}const weighted=entries.map(([k,v])=>[k,weekdayWeight(k)*Math.max(.25,Number(v.hours||10)/10)*Number(v.factor||1)]),total=weighted.reduce((s,[,w])=>s+w,0);weighted.forEach(([k,w])=>{data.days[k]={...dayData(k),target:Math.ceil((remain*w/total)/500)*500}});data.monthlyGoals[mk]=goal;save();render();alert('確認済み勤務日へ目標を配分しました')};
-render();
+syncTodayFromOperations();render();
+setInterval(()=>{if(syncTodayFromOperations())render();else summary()},15000);
 </script>
+<script src="./swipe-nav.js"></script>
 </body>
 </html>
