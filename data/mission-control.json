@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-18T12:07:32+09:00",
+  "updated_at": "2026-07-18T12:22:40+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -35,6 +35,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-d2a7a71fd35c",
+      "title": "Life OSのiPhoneカレンダー同期仕様を追加",
+      "completed_at": "2026-07-18T03:22:30Z",
+      "result": "GitHub mainへ反映（d2a7a71）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/d2a7a71fd35c494759b068c39208d8fff789fe0d"
+    },
+    {
       "id": "github-commit-e53f81722dab",
       "title": "YOS Life OS v1のホーム画面を実装",
       "completed_at": "2026-07-18T03:07:19Z",
@@ -61,13 +68,6 @@
       "completed_at": "2026-07-18T03:03:21Z",
       "result": "GitHub mainへ反映（9a1c1cd）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/9a1c1cd356fa1cc38d1c8f2557f9a0473df1b5f5"
-    },
-    {
-      "id": "github-commit-2d91e3340010",
-      "title": "YOS Life OS v1ホーム画面を実装",
-      "completed_at": "2026-07-18T03:03:05Z",
-      "result": "GitHub mainへ反映（2d91e33）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/2d91e3340010b7c9f12bdad0d0018e4805637a67"
     },
     {
       "id": "complete-002",
@@ -104,7 +104,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-18T12:07:32+09:00",
+      "last_update": "2026-07-18T12:22:40+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -185,7 +185,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-18T12:07:32+09:00",
+      "last_update": "2026-07-18T12:22:40+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -208,7 +208,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-18T12:07:32+09:00",
+      "last_update": "2026-07-18T12:22:40+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -290,5 +290,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "90e98f58ed58ab4d2337c21f1ac3267fa3b34d70fd35fa011fbf6964ededfeb0"
+  "github_snapshot_hash": "3a6459a48c2e480182794450cc3d528b179feefb94ddca358ef14b2854483776"
 }
