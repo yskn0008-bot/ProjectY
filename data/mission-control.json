@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-18T12:01:06+09:00",
+  "updated_at": "2026-07-18T12:07:32+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -23,16 +23,6 @@
       "updated_at": "2026-07-17T11:08:22Z"
     },
     {
-      "id": "github-issue-34",
-      "title": "Issue #34 YOS Life OS v1を設計・実装する",
-      "type": "GitHub Issue",
-      "status": "open",
-      "priority": 3,
-      "next_action": "完成条件を確認し、次の安全な実装を1件進める",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/34",
-      "updated_at": "2026-07-18T02:31:33Z"
-    },
-    {
       "id": "github-issue-4",
       "title": "Issue #4 YOS Mission Control v1.0を構築する",
       "type": "GitHub Issue",
@@ -45,39 +35,39 @@
   ],
   "recently_completed": [
     {
-      "id": "github-commit-90c2163b6893",
-      "title": "docs: add verification details to taxi calendar audit",
-      "completed_at": "2026-07-18T03:00:52Z",
-      "result": "GitHub mainへ反映（90c2163）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/90c2163b6893f740aca1ef89f901407bd99e6af7"
+      "id": "github-commit-e53f81722dab",
+      "title": "YOS Life OS v1のホーム画面を実装",
+      "completed_at": "2026-07-18T03:07:19Z",
+      "result": "GitHub mainへ反映（e53f817）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/e53f81722dab896895562a386655ab5ab697a2dd"
     },
     {
-      "id": "github-commit-712bc8bb6f2e",
-      "title": "chore: ensure docs directory exists",
-      "completed_at": "2026-07-18T03:00:33Z",
-      "result": "GitHub mainへ反映（712bc8b）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/712bc8bb6f2ed69fdb550c0773f57606a5f9609a"
+      "id": "github-commit-fd1e310b3cf5",
+      "title": "Life OSブランチから無関係な監査ファイル差分を除外",
+      "completed_at": "2026-07-18T03:06:47Z",
+      "result": "GitHub mainへ反映（fd1e310）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/fd1e310b3cf558bdd218a80fc60b6f389cafdd04"
     },
     {
-      "id": "github-commit-461396a1fef4",
-      "title": "docs: record taxi calendar safety audit",
-      "completed_at": "2026-07-18T03:00:21Z",
-      "result": "GitHub mainへ反映（461396a）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/461396a1fef4799044afb37695ad173f1a723530"
+      "id": "github-commit-dd95aa7a50a9",
+      "title": "YOS Life OSをオフライン対応",
+      "completed_at": "2026-07-18T03:03:38Z",
+      "result": "GitHub mainへ反映（dd95aa7）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/dd95aa7a50a954b1afb316146d5920ac080b0b96"
     },
     {
-      "id": "github-commit-588692607807",
-      "title": "数字フォントと全体文字サイズを可読性優先へ改善",
-      "completed_at": "2026-07-18T01:45:10Z",
-      "result": "GitHub mainへ反映（5886926）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/588692607807f3ec53f5b1b653e849fca9fecf0b"
+      "id": "github-commit-9a1c1cd356fa",
+      "title": "YOS Life OSのPWAマニフェストを追加",
+      "completed_at": "2026-07-18T03:03:21Z",
+      "result": "GitHub mainへ反映（9a1c1cd）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/9a1c1cd356fa1cc38d1c8f2557f9a0473df1b5f5"
     },
     {
-      "id": "github-commit-655f295073a7",
-      "title": "可読性改善内容の要約を追加",
-      "completed_at": "2026-07-18T01:44:32Z",
-      "result": "GitHub mainへ反映（655f295）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/655f295073a7c18b3570021c9339e38c0e1bd8df"
+      "id": "github-commit-2d91e3340010",
+      "title": "YOS Life OS v1ホーム画面を実装",
+      "completed_at": "2026-07-18T03:03:05Z",
+      "result": "GitHub mainへ反映（2d91e33）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/2d91e3340010b7c9f12bdad0d0018e4805637a67"
     },
     {
       "id": "complete-002",
@@ -114,7 +104,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-18T12:01:06+09:00",
+      "last_update": "2026-07-18T12:07:32+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -189,13 +179,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 3件・Open PR 0件を自動同期中",
+      "next_action": "Open Issue 2件・Open PR 0件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-18T12:01:06+09:00",
+      "last_update": "2026-07-18T12:07:32+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -218,7 +208,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-18T12:01:06+09:00",
+      "last_update": "2026-07-18T12:07:32+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -300,5 +290,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "51194c0df116be299a49190bec5a7417e2897eac0614eadbbfa169298a4c0728"
+  "github_snapshot_hash": "90e98f58ed58ab4d2337c21f1ac3267fa3b34d70fd35fa011fbf6964ededfeb0"
 }
