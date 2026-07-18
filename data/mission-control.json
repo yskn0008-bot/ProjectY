@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-18T13:44:25+09:00",
+  "updated_at": "2026-07-18T13:45:12+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -45,6 +45,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-60e8543c09dd",
+      "title": "Remove temporary file",
+      "completed_at": "2026-07-18T04:44:59Z",
+      "result": "GitHub mainへ反映（60e8543）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/60e8543c09dd476d7c023ba3454b109c4277bb8b"
+    },
+    {
       "id": "github-commit-4492ef9e86a5",
       "title": "tmp",
       "completed_at": "2026-07-18T04:44:13Z",
@@ -71,13 +78,6 @@
       "completed_at": "2026-07-18T04:13:24Z",
       "result": "GitHub mainへ反映（c1bfc36）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/c1bfc3600d75b3261a5e278b5059c6310a25e1dd"
-    },
-    {
-      "id": "github-commit-efccce508ba1",
-      "title": "Add standalone Taxi calendar settings screen",
-      "completed_at": "2026-07-18T04:12:55Z",
-      "result": "GitHub mainへ反映（efccce5）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/efccce508ba1de27cf4a5ce133d41754ba77f4d2"
     },
     {
       "id": "complete-002",
@@ -114,7 +114,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-18T13:44:25+09:00",
+      "last_update": "2026-07-18T13:45:12+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -195,7 +195,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-18T13:44:25+09:00",
+      "last_update": "2026-07-18T13:45:12+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -218,7 +218,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-18T13:44:25+09:00",
+      "last_update": "2026-07-18T13:45:12+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -300,5 +300,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "9f07f4a27fd05e8d2d03b3f3e81a07a525c1f3ab8c7e6abff900da2e10d870f4"
+  "github_snapshot_hash": "9234d177a26af9aec8a5b300d270e6046013ecd1d626bc3f44e19dee3646dc0c"
 }
