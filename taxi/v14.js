@@ -29,7 +29,11 @@
   function persistWeekdayFactors(){
     const cfg=read(SET,{});
     const factors=[...document.querySelectorAll('[data-weekday-factor]')].map(select=>Number(select.value||1));
-    if(factors.length===7){cfg.weekdayFactors=factors;cfg.factor=1;write(SET,cfg)}
+    if(factors.length===7){
+      cfg.weekdayFactors=factors;cfg.factor=1;
+      try{if(typeof settings==='object'&&settings){settings.weekdayFactors=factors;settings.factor=1}}catch{}
+      write(SET,cfg);
+    }
   }
 
   function addWeekdayFactors(){
