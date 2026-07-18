@@ -6,11 +6,7 @@ const config: CapacitorConfig = {
   webDir: 'www',
   ios: {
     contentInset: 'automatic',
-    preferredContentMode: 'mobile',
-    scheme: 'YOS'
-  },
-  server: {
-    iosScheme: 'https'
+    preferredContentMode: 'mobile'
   }
 };
 
