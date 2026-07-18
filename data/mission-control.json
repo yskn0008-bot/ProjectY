@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-18T09:00:34+09:00",
+  "updated_at": "2026-07-18T09:02:04+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -33,16 +33,6 @@
       "updated_at": "2026-07-17T23:03:33Z"
     },
     {
-      "id": "github-issue-28",
-      "title": "Issue #28 IMadaベース営業判断を2026-07-18の営業前に実用化する",
-      "type": "GitHub Issue",
-      "status": "open",
-      "priority": 3,
-      "next_action": "完成条件を確認し、次の安全な実装を1件進める",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/28",
-      "updated_at": "2026-07-18T00:00:23Z"
-    },
-    {
       "id": "github-issue-4",
       "title": "Issue #4 YOS Mission Control v1.0を構築する",
       "type": "GitHub Issue",
@@ -54,6 +44,13 @@
     }
   ],
   "recently_completed": [
+    {
+      "id": "github-commit-fbbbca5d9818",
+      "title": "Add IMada-based live decision MVP",
+      "completed_at": "2026-07-18T00:01:48Z",
+      "result": "GitHub mainへ反映（fbbbca5）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/fbbbca5d981844760138997df83fa9dd5728f9af"
+    },
     {
       "id": "github-commit-8786bf363295",
       "title": "Add IMada decision MVP plan",
@@ -81,13 +78,6 @@
       "completed_at": "2026-07-17T21:47:58Z",
       "result": "GitHub mainへ反映（c9918a8）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/c9918a8c8f2db4712f4e67893a2042e6978aebcd"
-    },
-    {
-      "id": "github-commit-982549ca49ba",
-      "title": "営業終了時のYOS引き渡しを自動化",
-      "completed_at": "2026-07-17T19:45:23Z",
-      "result": "GitHub mainへ反映（982549c）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/982549ca49ba0d0a9c8b72d692eda1fefaf61222"
     },
     {
       "id": "complete-002",
@@ -124,7 +114,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-18T09:00:34+09:00",
+      "last_update": "2026-07-18T09:02:04+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -199,13 +189,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 4件・Open PR 0件を自動同期中",
+      "next_action": "Open Issue 3件・Open PR 0件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-18T09:00:34+09:00",
+      "last_update": "2026-07-18T09:02:04+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -228,7 +218,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-18T09:00:34+09:00",
+      "last_update": "2026-07-18T09:02:04+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -310,5 +300,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "f6f784ff206dbd816af0ddefd7388049885f80abcc756d555e844cebeb3489ed"
+  "github_snapshot_hash": "b9874f88693014f78a7164183b738f6c250f41d02bea36913e598ca298850701"
 }
