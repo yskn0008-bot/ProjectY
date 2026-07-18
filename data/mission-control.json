@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-18T11:31:45+09:00",
+  "updated_at": "2026-07-18T12:00:31+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -45,6 +45,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-461396a1fef4",
+      "title": "docs: record taxi calendar safety audit",
+      "completed_at": "2026-07-18T03:00:21Z",
+      "result": "GitHub mainへ反映（461396a）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/461396a1fef4799044afb37695ad173f1a723530"
+    },
+    {
       "id": "github-commit-588692607807",
       "title": "数字フォントと全体文字サイズを可読性優先へ改善",
       "completed_at": "2026-07-18T01:45:10Z",
@@ -71,13 +78,6 @@
       "completed_at": "2026-07-18T01:44:09Z",
       "result": "GitHub mainへ反映（453449d）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/453449ddfbb42a89178a714c5e8ef99113eb911a"
-    },
-    {
-      "id": "github-commit-4988bcb44b0d",
-      "title": "可読性改善版のPWAキャッシュをv11へ更新",
-      "completed_at": "2026-07-18T01:43:55Z",
-      "result": "GitHub mainへ反映（4988bcb）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/4988bcb44b0d10d98b18a3e48f7a05ebe7cb461d"
     },
     {
       "id": "complete-002",
@@ -114,7 +114,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-18T11:31:45+09:00",
+      "last_update": "2026-07-18T12:00:31+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -195,7 +195,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-18T11:31:45+09:00",
+      "last_update": "2026-07-18T12:00:31+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -218,7 +218,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-18T11:31:45+09:00",
+      "last_update": "2026-07-18T12:00:31+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -300,5 +300,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "6052f0dfb3c7219da639f933b5ad7b56ba6991e7fc21116604af2709fd1927df"
+  "github_snapshot_hash": "c0ffc941b55e3728fcb15d391a24ac603292cf5d3e897e6622edf18172a43c3f"
 }
