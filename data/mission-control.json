@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-18T13:46:58+09:00",
+  "updated_at": "2026-07-18T13:54:19+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -41,19 +41,16 @@
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/40",
       "updated_at": "2026-07-18T04:03:30Z"
-    },
-    {
-      "id": "github-issue-43",
-      "title": "Issue #43 営業設定の見栄えと曜日別目標補正を改善する",
-      "type": "GitHub Issue",
-      "status": "open",
-      "priority": 3,
-      "next_action": "完成条件を確認し、次の安全な実装を1件進める",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/43",
-      "updated_at": "2026-07-18T04:46:47Z"
     }
   ],
   "recently_completed": [
+    {
+      "id": "github-commit-ccfd920d7c45",
+      "title": "営業設定を1行表示と曜日別目標補正へ改善 (#44)",
+      "completed_at": "2026-07-18T04:53:48Z",
+      "result": "GitHub mainへ反映（ccfd920）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/ccfd920d7c45aaf071c83c9b4acb0e1e1acf0254"
+    },
     {
       "id": "github-commit-60e8543c09dd",
       "title": "Remove temporary file",
@@ -81,13 +78,6 @@
       "completed_at": "2026-07-18T04:13:51Z",
       "result": "GitHub mainへ反映（9345e87）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/9345e8767f8431091d6a3d9ad59128b2e108b76e"
-    },
-    {
-      "id": "github-commit-c1bfc3600d75",
-      "title": "Connect calendar to app settings and live Taxi data",
-      "completed_at": "2026-07-18T04:13:24Z",
-      "result": "GitHub mainへ反映（c1bfc36）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/c1bfc3600d75b3261a5e278b5059c6310a25e1dd"
     },
     {
       "id": "complete-002",
@@ -124,7 +114,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-18T13:46:58+09:00",
+      "last_update": "2026-07-18T13:54:19+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -199,13 +189,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 4件・Open PR 0件を自動同期中",
+      "next_action": "Open Issue 3件・Open PR 0件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-18T13:46:58+09:00",
+      "last_update": "2026-07-18T13:54:19+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -228,7 +218,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-18T13:46:58+09:00",
+      "last_update": "2026-07-18T13:54:19+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -310,5 +300,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "9c8385300ffed28253f27caa3e2820bfd90933a2c69c40b38044c6b6f0e8a1d3"
+  "github_snapshot_hash": "4822fd09c4a4e30421818b4f17fb624318fa8d4cb18726e087649e82106da86e"
 }
