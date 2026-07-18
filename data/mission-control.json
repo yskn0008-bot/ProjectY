@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-18T10:10:56+09:00",
+  "updated_at": "2026-07-18T10:18:00+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -43,16 +43,6 @@
       "updated_at": "2026-07-18T01:04:36Z"
     },
     {
-      "id": "github-issue-31",
-      "title": "Issue #31 候補2をYOS Taxi正式デザインとして実装する",
-      "type": "GitHub Issue",
-      "status": "open",
-      "priority": 3,
-      "next_action": "完成条件を確認し、次の安全な実装を1件進める",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/31",
-      "updated_at": "2026-07-18T01:10:45Z"
-    },
-    {
       "id": "github-issue-4",
       "title": "Issue #4 YOS Mission Control v1.0を構築する",
       "type": "GitHub Issue",
@@ -65,39 +55,39 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-8b8aa75736ac",
+      "title": "候補2の大時刻・営業状態・達成率リングを実装",
+      "completed_at": "2026-07-18T01:17:49Z",
+      "result": "GitHub mainへ反映（8b8aa75）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/8b8aa75736acd778d87b56aea35c58e8113d9f92"
+    },
+    {
+      "id": "github-commit-7119ff2437b2",
+      "title": "候補2デザイン用にPWAキャッシュをv10へ更新",
+      "completed_at": "2026-07-18T01:17:02Z",
+      "result": "GitHub mainへ反映（7119ff2）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/7119ff2437b2e85210400118e4e78aabdfcb720e"
+    },
+    {
+      "id": "github-commit-c6256846ad52",
+      "title": "候補2の黒金高視認レイアウトへ更新",
+      "completed_at": "2026-07-18T01:16:41Z",
+      "result": "GitHub mainへ反映（c625684）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/c6256846ad521db0154d7325969bc2a435cba59c"
+    },
+    {
+      "id": "github-commit-63f5e9fbdb8b",
+      "title": "候補2の大時刻・営業状態・達成率リングを実装",
+      "completed_at": "2026-07-18T01:16:00Z",
+      "result": "GitHub mainへ反映（63f5e9f）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/63f5e9fbdb8b3cc416119b2927fdd99f08ebb707"
+    },
+    {
       "id": "github-commit-ba42b5259fcb",
       "title": "Merge pull request #30 from yskn0008-bot/yos/strategy-design-v9",
       "completed_at": "2026-07-18T00:23:42Z",
       "result": "GitHub mainへ反映（ba42b52）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/ba42b5259fcbb55a91ad9db5f7a6b43c4e8346f9"
-    },
-    {
-      "id": "github-commit-ba0c4a292020",
-      "title": "v9デザインと戦略表示をPWAへ読み込む",
-      "completed_at": "2026-07-18T00:23:01Z",
-      "result": "GitHub mainへ反映（ba0c4a2）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/ba0c4a2920209e5cf9a8c7aab870c9fee3eaaed8"
-    },
-    {
-      "id": "github-commit-511d1eecf0c1",
-      "title": "今日の営業戦略表示とYOS最新化導線を追加",
-      "completed_at": "2026-07-18T00:22:23Z",
-      "result": "GitHub mainへ反映（511d1ee）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/511d1eecf0c1ad6024afbd2840f68afbb51e0178"
-    },
-    {
-      "id": "github-commit-b8745b227046",
-      "title": "黒金デザインテーマを追加",
-      "completed_at": "2026-07-18T00:21:55Z",
-      "result": "GitHub mainへ反映（b8745b2）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/b8745b227046c05759a16190a870a77be88e222c"
-    },
-    {
-      "id": "github-commit-fbbbca5d9818",
-      "title": "Add IMada-based live decision MVP",
-      "completed_at": "2026-07-18T00:01:48Z",
-      "result": "GitHub mainへ反映（fbbbca5）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/fbbbca5d981844760138997df83fa9dd5728f9af"
     },
     {
       "id": "complete-002",
@@ -134,7 +124,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-18T10:10:56+09:00",
+      "last_update": "2026-07-18T10:18:00+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -209,13 +199,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 5件・Open PR 0件を自動同期中",
+      "next_action": "Open Issue 4件・Open PR 0件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-18T10:10:56+09:00",
+      "last_update": "2026-07-18T10:18:00+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -238,7 +228,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-18T10:10:56+09:00",
+      "last_update": "2026-07-18T10:18:00+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -320,5 +310,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "eca6b9a34278e64748ce6af019998ec7987d09cf036987b99ea356071ae8f83b"
+  "github_snapshot_hash": "ce3dd16f82a051b27c4b2b3f15608d87003d62686b94540f02151dbd93518341"
 }
