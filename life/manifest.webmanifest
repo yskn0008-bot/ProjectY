@@ -1,0 +1,11 @@
+{
+  "name": "YOS Life OS",
+  "short_name": "YOS Life",
+  "description": "予定・体調・ルーティン・相談を一画面で整える生活OS",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#050607",
+  "theme_color": "#050607",
+  "orientation": "portrait-primary"
+}
