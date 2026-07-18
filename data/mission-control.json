@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-18T13:13:10+09:00",
+  "updated_at": "2026-07-18T13:13:35+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -45,6 +45,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-c1bfc3600d75",
+      "title": "Connect calendar to app settings and live Taxi data",
+      "completed_at": "2026-07-18T04:13:24Z",
+      "result": "GitHub mainへ反映（c1bfc36）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/c1bfc3600d75b3261a5e278b5059c6310a25e1dd"
+    },
+    {
       "id": "github-commit-efccce508ba1",
       "title": "Add standalone Taxi calendar settings screen",
       "completed_at": "2026-07-18T04:12:55Z",
@@ -71,13 +78,6 @@
       "completed_at": "2026-07-18T03:56:59Z",
       "result": "GitHub mainへ反映（4eba129）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/4eba129f5cbf2546256cde97a0a4c83e49099324"
-    },
-    {
-      "id": "github-commit-fe641230cc88",
-      "title": "正式アプリのYOSホーム画面を追加",
-      "completed_at": "2026-07-18T03:56:29Z",
-      "result": "GitHub mainへ反映（fe64123）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/fe641230cc887b20456af2f9d76de4fc4989f4e8"
     },
     {
       "id": "complete-002",
@@ -114,7 +114,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-18T13:13:10+09:00",
+      "last_update": "2026-07-18T13:13:35+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -195,7 +195,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-18T13:13:10+09:00",
+      "last_update": "2026-07-18T13:13:35+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -218,7 +218,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-18T13:13:10+09:00",
+      "last_update": "2026-07-18T13:13:35+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -300,5 +300,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "447835421fbb297e5b2b29b8610f3fdfc96887c8430a1f958a27edc46729797d"
+  "github_snapshot_hash": "b07ee7a968c54320f55b8bc473f9705e57c8a67776f31ec8d64b292d4a213263"
 }
