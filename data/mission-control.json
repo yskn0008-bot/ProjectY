@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-18T10:18:00+09:00",
+  "updated_at": "2026-07-18T10:45:20+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -55,39 +55,39 @@
   ],
   "recently_completed": [
     {
-      "id": "github-commit-8b8aa75736ac",
-      "title": "候補2の大時刻・営業状態・達成率リングを実装",
-      "completed_at": "2026-07-18T01:17:49Z",
-      "result": "GitHub mainへ反映（8b8aa75）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/8b8aa75736acd778d87b56aea35c58e8113d9f92"
+      "id": "github-commit-588692607807",
+      "title": "数字フォントと全体文字サイズを可読性優先へ改善",
+      "completed_at": "2026-07-18T01:45:10Z",
+      "result": "GitHub mainへ反映（5886926）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/588692607807f3ec53f5b1b653e849fca9fecf0b"
     },
     {
-      "id": "github-commit-7119ff2437b2",
-      "title": "候補2デザイン用にPWAキャッシュをv10へ更新",
-      "completed_at": "2026-07-18T01:17:02Z",
-      "result": "GitHub mainへ反映（7119ff2）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/7119ff2437b2e85210400118e4e78aabdfcb720e"
+      "id": "github-commit-655f295073a7",
+      "title": "可読性改善内容の要約を追加",
+      "completed_at": "2026-07-18T01:44:32Z",
+      "result": "GitHub mainへ反映（655f295）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/655f295073a7c18b3570021c9339e38c0e1bd8df"
     },
     {
-      "id": "github-commit-c6256846ad52",
-      "title": "候補2の黒金高視認レイアウトへ更新",
-      "completed_at": "2026-07-18T01:16:41Z",
-      "result": "GitHub mainへ反映（c625684）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/c6256846ad521db0154d7325969bc2a435cba59c"
+      "id": "github-commit-232d31b19cc5",
+      "title": "可読性改善の実機確認項目を追加",
+      "completed_at": "2026-07-18T01:44:19Z",
+      "result": "GitHub mainへ反映（232d31b）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/232d31b19cc5928f98525dab526adc0332c08d9b"
     },
     {
-      "id": "github-commit-63f5e9fbdb8b",
-      "title": "候補2の大時刻・営業状態・達成率リングを実装",
-      "completed_at": "2026-07-18T01:16:00Z",
-      "result": "GitHub mainへ反映（63f5e9f）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/63f5e9fbdb8b3cc416119b2927fdd99f08ebb707"
+      "id": "github-commit-453449ddfbb4",
+      "title": "YOS Taxi可読性デザイン基準v11を記録",
+      "completed_at": "2026-07-18T01:44:09Z",
+      "result": "GitHub mainへ反映（453449d）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/453449ddfbb42a89178a714c5e8ef99113eb911a"
     },
     {
-      "id": "github-commit-ba42b5259fcb",
-      "title": "Merge pull request #30 from yskn0008-bot/yos/strategy-design-v9",
-      "completed_at": "2026-07-18T00:23:42Z",
-      "result": "GitHub mainへ反映（ba42b52）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/ba42b5259fcbb55a91ad9db5f7a6b43c4e8346f9"
+      "id": "github-commit-4988bcb44b0d",
+      "title": "可読性改善版のPWAキャッシュをv11へ更新",
+      "completed_at": "2026-07-18T01:43:55Z",
+      "result": "GitHub mainへ反映（4988bcb）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/4988bcb44b0d10d98b18a3e48f7a05ebe7cb461d"
     },
     {
       "id": "complete-002",
@@ -124,7 +124,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-18T10:18:00+09:00",
+      "last_update": "2026-07-18T10:45:20+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -205,7 +205,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-18T10:18:00+09:00",
+      "last_update": "2026-07-18T10:45:20+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -228,7 +228,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-18T10:18:00+09:00",
+      "last_update": "2026-07-18T10:45:20+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -310,5 +310,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "ce3dd16f82a051b27c4b2b3f15608d87003d62686b94540f02151dbd93518341"
+  "github_snapshot_hash": "0b487eb04ef99f2ae301a8b189f71bb0fdbe0abd3bc0175b41b5e84da956a844"
 }
