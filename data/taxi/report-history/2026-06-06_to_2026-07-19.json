@@ -1,0 +1,93 @@
+{
+  "schema_version": "1.0",
+  "record_type": "taxi_report_history_summary",
+  "period": {
+    "start": "2026-06-06",
+    "end": "2026-07-19",
+    "business_days": 17
+  },
+  "source": {
+    "folder": "Google Drive/03_Reports",
+    "type": "paper_daily_reports",
+    "raw_images_committed": false,
+    "reason": "原本には個人情報が含まれるため、公開リポジトリには数値化した記録のみ保存"
+  },
+  "aggregate": {
+    "sales_yen": 530600,
+    "average_sales_yen": 31212,
+    "median_sales_yen": 29700,
+    "trips": 392,
+    "weighted_average_fare_yen": 1354,
+    "payment": {
+      "go_yen": 213000,
+      "didi_yen": 78100,
+      "uber_yen": 10600,
+      "non_app_yen": 228900,
+      "app_total_yen": 301700,
+      "app_share_percent": 56.9
+    },
+    "known_distance_occupied_rate_percent": 43.0,
+    "known_work_hours": 182.25,
+    "sales_per_known_work_hour_yen": 2614
+  },
+  "high_sales_group": {
+    "definition": "sales_yen >= 35000",
+    "days": 6,
+    "average_sales_yen": 44617,
+    "average_trips": 30.2,
+    "average_fare_yen": 1515,
+    "average_occupied_rate_percent": 49.5,
+    "average_app_share_percent": 62.4,
+    "average_sales_per_hour_yen": 3472
+  },
+  "low_sales_group": {
+    "definition": "sales_yen < 25000",
+    "days": 5,
+    "average_sales_yen": 18220,
+    "average_trips": 14.6,
+    "average_occupied_rate_percent": 31.6,
+    "average_app_share_percent": 37.1,
+    "average_sales_per_hour_yen": 1755
+  },
+  "weekday_average_sales_yen": {
+    "monday": 22100,
+    "tuesday": 27150,
+    "wednesday": 30550,
+    "thursday": 24200,
+    "friday": 37350,
+    "saturday": 36600,
+    "sunday": 33833
+  },
+  "strategy_findings": [
+    "初動は宜野湾・北谷外周でGOとDiDiを稼働し、空車で那覇へ直行せず南向き実車で寄せる。",
+    "中距離以上の降車後は即帰還せず、降車地周辺を10分検証する。",
+    "高売上日は乗車回数、実車率、アプリ併用、降車地からの連鎖が共通している。",
+    "23:00〜1:00は低単価に固定されやすいため、1000円以下が2件連続、30分売上2000円未満、15分無反応のいずれかで隣接エリアへ移動する。",
+    "長距離1本だけを待たず、短中距離を回しながら長距離が混ざる状態を狙う。",
+    "基地入構と空港待機は行わない。若狭バース、天気、イベント、空港便は営業前に最新確認する。"
+  ],
+  "open_checks": [
+    "2026-06-13は表面がなく、日付と一部項目は裏写りからの推定。",
+    "2026-07-18は明細40行とメーター41回、走行距離215kmと帳票216kmの差異が未解消。",
+    "2026-07-19はGO600円1件が裏面から抜けており、時刻と区間は不明。休憩記録はユーザー指示により分析対象外。"
+  ],
+  "daily": [
+    {"date":"2026-06-06","sales_yen":29000,"trips":27,"go_yen":14300,"didi_yen":0,"uber_yen":0,"non_app_yen":14700,"occupied_km":68,"total_km":151,"data_quality":"confirmed_front_back"},
+    {"date":"2026-06-13","sales_yen":54200,"trips":37,"go_yen":21700,"didi_yen":0,"uber_yen":10600,"non_app_yen":21900,"occupied_km":null,"total_km":null,"data_quality":"back_only_inferred_date"},
+    {"date":"2026-06-24","sales_yen":30100,"trips":27,"go_yen":12900,"didi_yen":4700,"uber_yen":0,"non_app_yen":12500,"occupied_km":74,"total_km":169,"data_quality":"confirmed_front_back"},
+    {"date":"2026-06-28","sales_yen":20400,"trips":16,"go_yen":7000,"didi_yen":2400,"uber_yen":0,"non_app_yen":11000,"occupied_km":53,"total_km":169,"data_quality":"confirmed_front_back"},
+    {"date":"2026-06-29","sales_yen":8300,"trips":8,"go_yen":700,"didi_yen":0,"uber_yen":0,"non_app_yen":7600,"occupied_km":17,"total_km":114,"data_quality":"confirmed_front_back"},
+    {"date":"2026-07-01","sales_yen":31000,"trips":24,"go_yen":10900,"didi_yen":3800,"uber_yen":0,"non_app_yen":16300,"occupied_km":79,"total_km":161,"data_quality":"confirmed_front_back"},
+    {"date":"2026-07-02","sales_yen":23100,"trips":15,"go_yen":1700,"didi_yen":6300,"uber_yen":0,"non_app_yen":15100,"occupied_km":59,"total_km":183,"data_quality":"confirmed_front_back"},
+    {"date":"2026-07-03","sales_yen":38100,"trips":22,"go_yen":24500,"didi_yen":4900,"uber_yen":0,"non_app_yen":8700,"occupied_km":111,"total_km":284,"data_quality":"confirmed_front_back"},
+    {"date":"2026-07-05","sales_yen":26700,"trips":26,"go_yen":11000,"didi_yen":3100,"uber_yen":0,"non_app_yen":12600,"occupied_km":63,"total_km":151,"data_quality":"confirmed_front_back"},
+    {"date":"2026-07-06","sales_yen":35900,"trips":22,"go_yen":13700,"didi_yen":13700,"uber_yen":0,"non_app_yen":8500,"occupied_km":97,"total_km":222,"data_quality":"corrected_from_image"},
+    {"date":"2026-07-07","sales_yen":24600,"trips":22,"go_yen":14300,"didi_yen":2700,"uber_yen":0,"non_app_yen":7600,"occupied_km":56,"total_km":121,"data_quality":"confirmed_front_back"},
+    {"date":"2026-07-09","sales_yen":25300,"trips":19,"go_yen":10300,"didi_yen":5400,"uber_yen":0,"non_app_yen":9600,"occupied_km":70,"total_km":180,"data_quality":"confirmed_front_back"},
+    {"date":"2026-07-10","sales_yen":36600,"trips":24,"go_yen":6000,"didi_yen":3900,"uber_yen":0,"non_app_yen":26700,"occupied_km":97,"total_km":201,"data_quality":"corrected_from_image"},
+    {"date":"2026-07-11","sales_yen":14700,"trips":12,"go_yen":2500,"didi_yen":1500,"uber_yen":0,"non_app_yen":10700,"occupied_km":38,"total_km":115,"data_quality":"confirmed_front_back"},
+    {"date":"2026-07-14","sales_yen":29700,"trips":15,"go_yen":14000,"didi_yen":3600,"uber_yen":0,"non_app_yen":12100,"occupied_km":85,"total_km":193,"data_quality":"confirmed_front_back"},
+    {"date":"2026-07-18","sales_yen":48500,"trips":41,"go_yen":19000,"didi_yen":9400,"uber_yen":0,"non_app_yen":20100,"occupied_km":121,"total_km":216,"data_quality":"user_confirmed_with_open_checks"},
+    {"date":"2026-07-19","sales_yen":54400,"trips":35,"go_yen":28500,"didi_yen":12700,"uber_yen":0,"non_app_yen":13200,"occupied_km":150,"total_km":249,"data_quality":"user_confirmed_missing_go"}
+  ]
+}
