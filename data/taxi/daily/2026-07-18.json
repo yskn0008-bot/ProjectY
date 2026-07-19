@@ -1,0 +1,64 @@
+{
+  "schema_version": "1.0",
+  "record_type": "taxi_daily_operation",
+  "business_date": "2026-07-18",
+  "status": "confirmed_with_open_checks",
+  "goal": {
+    "sales_yen": 36500,
+    "actual_yen": 48500,
+    "difference_yen": 12000,
+    "achievement_rate_percent": 132.9
+  },
+  "shift": {
+    "start_roll_call": "15:09",
+    "dispatch": "15:20",
+    "return": "04:22+1",
+    "end_roll_call": "04:27+1"
+  },
+  "sales": {
+    "total_yen": 48500,
+    "cash_or_deposit_yen": 20100,
+    "go_yen": 19000,
+    "didi_yen": 9400,
+    "uber_yen": 0,
+    "ticket_coupon_yen": 0,
+    "electronic_net_yen": 0,
+    "other_receivable_yen": 0,
+    "disability_discount_yen": 0,
+    "reconciliation_yen": 48500
+  },
+  "operation": {
+    "vehicle_number": "511",
+    "trip_detail_rows": 40,
+    "meter_trip_count": 41,
+    "passengers": 41,
+    "occupied_distance_km": 121,
+    "reported_total_distance_km": 216,
+    "odometer_start": 4500,
+    "odometer_end": 4715,
+    "lpg_liters": 15.32
+  },
+  "breaks": {
+    "status": "unconfirmed",
+    "entries": []
+  },
+  "data_quality": {
+    "confirmed_by_user": [
+      "sales.total_yen=48500"
+    ],
+    "open_checks": [
+      "明細は40行だが、メーター乗車回数の差引は41回。1件分の差異を要確認。",
+      "帳票の走行キロ差引は216km。画像上の開始4500・終了4715との差は215kmとなるため、終了値または差引値を要確認。",
+      "休憩時間と休憩場所は未確定。"
+    ],
+    "notes": [
+      "帳票写真では総運賃収入・メーター料金が48,600円と読めるが、ユーザー確認により48,500円を確定値として保存。",
+      "売上内訳は20,100+19,000+9,400=48,500円で一致。",
+      "原本写真には個人情報が含まれるため、公開リポジトリには保存していない。"
+    ]
+  },
+  "source": {
+    "type": "paper_daily_report_front_and_back",
+    "raw_images_committed": false
+  }
+}
