@@ -1,6 +1,6 @@
 'use strict';
-const CACHE='yos-taxi-projecty-v14';
-const STATIC=['./','./index.html','./calendar.html','./settings.html','./manifest.webmanifest','./v9.css','./v9.js','./swipe-nav.js','./v14.css','./v14.js'];
+const CACHE='yos-taxi-projecty-v15';
+const STATIC=['./','./index.html','./calendar.html','./settings.html','./manifest.webmanifest','./v9.css','./v9.js','./swipe-nav.js','./v14.css','./v14.js','./v15.js'];
 const isIndex=url=>url.pathname.endsWith('/taxi/')||url.pathname.endsWith('/taxi/index.html');
 const isAppPage=url=>isIndex(url)||url.pathname.endsWith('/taxi/calendar.html')||url.pathname.endsWith('/taxi/settings.html');
 async function inject(response,url){
@@ -10,6 +10,7 @@ async function inject(response,url){
   if(!body.includes('swipe-nav.js'))body=body.replace('</body>','<script src="./swipe-nav.js"></script></body>');
   if(!body.includes('v14.css'))body=body.replace('</head>','<link rel="stylesheet" href="./v14.css"></head>');
   if(!body.includes('v14.js'))body=body.replace('</body>','<script src="./v14.js"></script></body>');
+  if(!body.includes('v15.js'))body=body.replace('</body>','<script src="./v15.js"></script></body>');
   const headers=new Headers(response.headers);
   headers.delete('content-length');headers.delete('content-encoding');
   return new Response(body,{status:response.status,statusText:response.statusText,headers});
