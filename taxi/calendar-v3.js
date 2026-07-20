@@ -21,9 +21,6 @@
   };
 
   function inferAnchor(){
-    const futurePlanned=Object.entries(data.days||{}).filter(([k,v])=>k>=todayKey()&&(isWork(v.status)||isOff(v.status))).length;
-    if(futurePlanned>=4&&settings.anchor)return settings.anchor;
-
     const keys=Object.keys(data.days||{}).filter(confirmedWork).sort();
     let latest='';
     for(let i=0;i<=keys.length-WORK_DAYS;i++){
