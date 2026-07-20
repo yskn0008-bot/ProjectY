@@ -14,8 +14,7 @@
     button.style.cssText='display:flex;align-items:center;justify-content:center;text-decoration:none;margin-bottom:10px';
     button.textContent='⚙️ 詳細設定・勤務周期・目標配分';
     const basic=document.getElementById('openMonth');
-    basic.textContent='月目標の簡易設定';
-    basic.insertAdjacentElement('afterend',button);
+    if(basic){basic.textContent='月目標の簡易設定';basic.insertAdjacentElement('afterend',button)}
   }
 
   function syncTodayFromOperations(){
@@ -42,17 +41,29 @@
     document.getElementById('progress').textContent=goal?`${Math.min(999,Math.round(achieved/goal*100))}%`:'0%';
   };
 
-  function loadReportHistory(){
-    if(document.querySelector('script[data-yos-report-history-v15]'))return;
+  function loadCalendarV17(){
+    if(window.__yosCalendarV17Requested||document.querySelector('script[src*="calendar-v3.js"]'))return;
+    window.__yosCalendarV17Requested=true;
     const script=document.createElement('script');
+    script.src='./calendar-v3.js?v=17';
+    script.dataset.yosCalendarV17='1';
+    document.head.appendChild(script);
+  }
+
+  function loadEnhancements(){
+    if(window.__yosReportHistoryRequested){loadCalendarV17();return}
+    window.__yosReportHistoryRequested=true;
+    const script=document.createElement('script');
+    script.src='./v15.js?v=17';
     script.dataset.yosReportHistoryV15='1';
-    script.src='./v15.js?v=15.1';
+    script.onload=loadCalendarV17;
+    script.onerror=loadCalendarV17;
     document.head.appendChild(script);
   }
 
   addSettingsLink();
   syncTodayFromOperations();
   render();
-  loadReportHistory();
+  loadEnhancements();
   setInterval(()=>{if(syncTodayFromOperations())render();else summary()},15000);
 })();
