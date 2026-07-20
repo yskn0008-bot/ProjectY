@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-20T08:37:26+09:00",
+  "updated_at": "2026-07-20T15:52:44+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -45,6 +45,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-d363609e598a",
+      "title": "YOS Taxiカレンダーのv15読込修正",
+      "completed_at": "2026-07-20T06:52:33Z",
+      "result": "GitHub mainへ反映（d363609）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/d363609e598ac532305a8708ba18e73f44ccbe2f"
+    },
+    {
       "id": "github-commit-5b3d9bb30fa9",
       "title": "紙日報17営業日の分析とYOS Taxi反映",
       "completed_at": "2026-07-19T23:37:15Z",
@@ -71,13 +78,6 @@
       "completed_at": "2026-07-18T04:53:48Z",
       "result": "GitHub mainへ反映（ccfd920）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/ccfd920d7c45aaf071c83c9b4acb0e1e1acf0254"
-    },
-    {
-      "id": "github-commit-60e8543c09dd",
-      "title": "Remove temporary file",
-      "completed_at": "2026-07-18T04:44:59Z",
-      "result": "GitHub mainへ反映（60e8543）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/60e8543c09dd476d7c023ba3454b109c4277bb8b"
     },
     {
       "id": "complete-002",
@@ -114,7 +114,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-20T08:37:26+09:00",
+      "last_update": "2026-07-20T15:52:44+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -195,7 +195,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-20T08:37:26+09:00",
+      "last_update": "2026-07-20T15:52:44+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -218,7 +218,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-20T08:37:26+09:00",
+      "last_update": "2026-07-20T15:52:44+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -300,5 +300,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "a859ef699a34193f3f4b8743afde7abd62728410b73735c4e0e6de80a4eb11ff"
+  "github_snapshot_hash": "8f6c6760a6c558fd0cbcb3b17d3fea84a00c1dc15a767475cc7db9ba89039dda"
 }
