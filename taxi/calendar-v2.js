@@ -42,8 +42,17 @@
     document.getElementById('progress').textContent=goal?`${Math.min(999,Math.round(achieved/goal*100))}%`:'0%';
   };
 
+  function loadReportHistory(){
+    if(document.querySelector('script[data-yos-report-history-v15]'))return;
+    const script=document.createElement('script');
+    script.dataset.yosReportHistoryV15='1';
+    script.src='./v15.js?v=15.1';
+    document.head.appendChild(script);
+  }
+
   addSettingsLink();
   syncTodayFromOperations();
   render();
+  loadReportHistory();
   setInterval(()=>{if(syncTodayFromOperations())render();else summary()},15000);
 })();
