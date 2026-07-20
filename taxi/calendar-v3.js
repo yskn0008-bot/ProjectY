@@ -10,12 +10,12 @@
     for(let d=1;d<=last;d++)out.push(`${y}-${pad2(m)}-${pad2(d)}`);
     return out;
   };
-  const explicitWork=k=>{
+  const confirmedWork=k=>{
     const v=data.days?.[k];
-    return !!v&&(isWork(v.status)||num(v.sales)>0||num(v.reportTrips)>0||v.reportSource);
+    return !!v&&(num(v.sales)>0||num(v.reportTrips)>0||v.reportSource||v.status==='transferWork');
   };
   function inferAnchor(){
-    const keys=Object.keys(data.days||{}).filter(explicitWork).sort();
+    const keys=Object.keys(data.days||{}).filter(confirmedWork).sort();
     let candidate='';
     for(let i=0;i<=keys.length-CYCLE_WORK;i++){
       let consecutive=true;
@@ -34,17 +34,18 @@
     const anchor=inferAnchor();
     settings.anchor=anchor;
     const planned=timeHours(settings.shiftStart,settings.workEnd);
+    let changed=false;
     for(const k of monthDays(mk)){
       const current=data.days[k]||defaultDay();
       if(isTransfer(current.status))continue;
-      const derived=cycleStatus(k,anchor);
-      if(current.status==='unknown'||!data.days[k]){
-        data.days[k]={...current,status:derived,shiftStart:settings.shiftStart,serviceEnd:settings.serviceEnd,workEnd:settings.workEnd,plannedHours:derived==='work'?planned:0,actualHours:derived==='off'?0:num(current.actualHours)};
-      }else if(num(current.sales)>0&&current.status!=='work'){
-        data.days[k]={...current,status:'work',plannedHours:current.plannedHours||planned};
+      const derived=num(current.sales)>0?'work':cycleStatus(k,anchor);
+      const next={...current,status:derived,shiftStart:current.shiftStart||settings.shiftStart,serviceEnd:current.serviceEnd||settings.serviceEnd,workEnd:current.workEnd||settings.workEnd,plannedHours:derived==='work'?(num(current.plannedHours)||planned):0,actualHours:derived==='off'?0:num(current.actualHours)};
+      if(JSON.stringify(data.days[k]||null)!==JSON.stringify(next)){
+        data.days[k]=next;
+        changed=true;
       }
     }
-    save();
+    if(changed)save();else write(SET,settings);
   }
   function autoAllocate(mk){
     const today=todayKey(),cfg=monthCfg(mk),goal=num(data.monthlyGoals[mk]||770000);
@@ -59,11 +60,12 @@
       return [k,Math.max(.1,num(factors[w])||1)*Math.max(.1,num(v.factor)||1)];
     });
     const total=weighted.reduce((s,[,w])=>s+w,0)||1,round=num(settings.round)||500;
+    let changed=false;
     weighted.forEach(([k,w])=>{
       const target=Math.ceil((remaining*w/total)/round)*round;
-      data.days[k]={...dayData(k),target};
+      if(num(data.days[k]?.target)!==target){data.days[k]={...dayData(k),target};changed=true}
     });
-    save();
+    if(changed)save();
   }
   function compactYen(n){
     const value=num(n);
