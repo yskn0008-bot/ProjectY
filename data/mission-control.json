@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-21T20:57:27+09:00",
+  "updated_at": "2026-07-21T20:59:35+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -45,6 +45,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-0044fa5d4a78",
+      "title": "Show restored historical sales even when target is unavailable",
+      "completed_at": "2026-07-21T11:59:23Z",
+      "result": "GitHub mainへ反映（0044fa5）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/0044fa5d4a7822a822de716693bbf178126fbbe4"
+    },
+    {
       "id": "github-commit-c3ca626b9af3",
       "title": "Release calendar history restoration fix v22",
       "completed_at": "2026-07-21T11:57:17Z",
@@ -71,13 +78,6 @@
       "completed_at": "2026-07-21T11:40:45Z",
       "result": "GitHub mainへ反映（34a8de2）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/34a8de27a6edb5e9c7a643e5b2b30488bb3e404f"
-    },
-    {
-      "id": "github-commit-89b50630813d",
-      "title": "Make taxi calendar fully one-screen with four pages",
-      "completed_at": "2026-07-21T11:40:25Z",
-      "result": "GitHub mainへ反映（89b5063）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/89b50630813da2d14d03b2dd658214ec9d79c882"
     },
     {
       "id": "complete-002",
@@ -114,7 +114,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-21T20:57:27+09:00",
+      "last_update": "2026-07-21T20:59:35+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -195,7 +195,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-21T20:57:27+09:00",
+      "last_update": "2026-07-21T20:59:35+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -218,7 +218,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-21T20:57:27+09:00",
+      "last_update": "2026-07-21T20:59:35+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -300,5 +300,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "8f1f9ec9db6855c02d68cd3583ed80d155213b6874400f3b1a7610a22c1666f2"
+  "github_snapshot_hash": "a732fd546a3a2b3747aa76ed9d20295a135ad73ed8a7b5f6551e723b736e6f0f"
 }
