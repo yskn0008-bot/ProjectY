@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-21T18:01:53+09:00",
+  "updated_at": "2026-07-21T18:04:24+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -45,6 +45,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-43945bd2d492",
+      "title": "Add one-screen tabbed settings",
+      "completed_at": "2026-07-21T09:04:14Z",
+      "result": "GitHub mainへ反映（43945bd）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/43945bd2d4920cbaa3e5d15348babe5c43924b20"
+    },
+    {
       "id": "github-commit-cec779513e31",
       "title": "Refresh PWA cache for calendar v19",
       "completed_at": "2026-07-21T09:01:37Z",
@@ -71,13 +78,6 @@
       "completed_at": "2026-07-20T07:52:05Z",
       "result": "GitHub mainへ反映（782ccd2）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/782ccd2368f395f434c51d6a4e1a6284a648d02d"
-    },
-    {
-      "id": "github-commit-d363609e598a",
-      "title": "YOS Taxiカレンダーのv15読込修正",
-      "completed_at": "2026-07-20T06:52:33Z",
-      "result": "GitHub mainへ反映（d363609）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/d363609e598ac532305a8708ba18e73f44ccbe2f"
     },
     {
       "id": "complete-002",
@@ -114,7 +114,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-21T18:01:53+09:00",
+      "last_update": "2026-07-21T18:04:24+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -195,7 +195,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-21T18:01:53+09:00",
+      "last_update": "2026-07-21T18:04:24+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -218,7 +218,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-21T18:01:53+09:00",
+      "last_update": "2026-07-21T18:04:24+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -300,5 +300,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "868b907fbb4ce3a5d20332fe6022ed80565f17886146dd8ce91262a3b15a8fd8"
+  "github_snapshot_hash": "c75cb3604be021bd308858ee0f05bb208c7e686d31898601a641c8bef5f4f644"
 }
