@@ -1,7 +1,7 @@
 'use strict';
 (()=>{
-  if(window.__yosCalendarV17Loaded)return;
-  window.__yosCalendarV17Loaded=true;
+  if(window.__yosCalendarV19Loaded)return;
+  window.__yosCalendarV19Loaded=true;
 
   const WORK_DAYS=3,OFF_DAYS=1,CYCLE=WORK_DAYS+OFF_DAYS;
   const WEEKDAYS=['日','月','火','水','木','金','土'];
@@ -18,6 +18,11 @@
   const confirmedWork=k=>{
     const v=data.days?.[k];
     return !!v&&(num(v.sales)>0||num(v.reportTrips)>0||v.reportSource||v.status==='transferWork');
+  };
+  const operations=()=>read(OPS,null);
+  const isLiveDay=k=>{
+    const ops=operations();
+    return !!ops&&ops.businessDate===k&&!['before','ended'].includes(ops.status);
   };
 
   function inferAnchor(){
@@ -66,12 +71,19 @@
     if(changed)save();else write(SET,settings);
   }
 
+  function futureWorkEntries(mk){
+    const today=todayKey();
+    return monthDays(mk)
+      .map(k=>[k,dayData(k)])
+      .filter(([k,v])=>k>=today&&isWork(v.status)&&num(v.sales)===0);
+  }
+
   function autoAllocate(mk){
-    const today=todayKey(),cfg=monthCfg(mk),goal=num(data.monthlyGoals[mk]||770000);
+    const cfg=monthCfg(mk),goal=num(data.monthlyGoals[mk]||770000);
     const entries=monthDays(mk).map(k=>[k,dayData(k)]);
     const achieved=num(cfg.carrySales)+entries.reduce((sum,[,v])=>sum+num(v.sales),0);
     const remaining=Math.max(0,goal-achieved);
-    const future=entries.filter(([k,v])=>k>=today&&isWork(v.status));
+    const future=futureWorkEntries(mk);
     if(!future.length)return;
 
     const factors=Array.isArray(settings.weekdayFactors)&&settings.weekdayFactors.length===7
@@ -83,7 +95,9 @@
     });
     const totalWeight=weighted.reduce((sum,item)=>sum+item.weight,0)||1;
     const round=Math.max(100,num(settings.round)||500);
-    const totalUnits=Math.ceil(remaining/round);
+    const roundedPool=Math.floor(remaining/round)*round;
+    const tail=remaining-roundedPool;
+    const totalUnits=Math.floor(roundedPool/round);
     let used=0;
     const allocated=weighted.map(item=>{
       const exact=totalUnits*item.weight/totalWeight;
@@ -91,46 +105,66 @@
       used+=units;
       return {...item,units,fraction:exact-units};
     });
-    allocated.sort((a,b)=>b.fraction-a.fraction);
+    allocated.sort((a,b)=>b.fraction-a.fraction||a.k.localeCompare(b.k));
     for(let i=0;i<totalUnits-used;i++)allocated[i%allocated.length].units++;
+    if(tail>0)allocated[0].tail=tail;
 
     let changed=false;
     for(const item of allocated){
-      const target=item.units*round;
+      const target=item.units*round+num(item.tail);
       if(num(data.days[item.k]?.target)!==target){
-        data.days[item.k]={...dayData(item.k),target};
+        data.days[item.k]={...dayData(item.k),target,autoTarget:true};
         changed=true;
       }
     }
     if(changed)save();
   }
 
-  function compactYen(value){
-    return `¥${Math.round(num(value)).toLocaleString('ja-JP')}`;
+  function compactYen(value){return `¥${Math.round(num(value)).toLocaleString('ja-JP')}`}
+  function signedYen(value){const n=Math.round(num(value));return `${n>=0?'+':'−'}¥${Math.abs(n).toLocaleString('ja-JP')}`}
+  function resultState(k,v){
+    const target=num(v.target),sales=num(v.sales);
+    if(!target)return'none';
+    if(isLiveDay(k))return'live';
+    if(sales>0||k<todayKey())return sales>=target?'hit':'miss';
+    return'target';
   }
 
+  targetClass=(k,v)=>({hit:'green',miss:'red',live:'blue',target:'white',none:'white'})[resultState(k,v)]||'white';
+
   function installUI(){
-    if(!document.getElementById('calendarV17Styles')){
+    if(!document.getElementById('calendarV19Styles')){
       const style=document.createElement('style');
-      style.id='calendarV17Styles';
+      style.id='calendarV19Styles';
       style.textContent=`
-        .week-start-control{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 10px;padding:9px 11px;border:1px solid var(--line);border-radius:14px;background:var(--panel)}
-        .week-start-control label{font-size:11px;color:var(--muted);font-weight:900}
-        .week-start-control select{min-height:38px;border:1px solid var(--line);border-radius:11px;padding:6px 10px;background:var(--panel2);color:var(--text);font-weight:900}
-        .legend-v17{display:flex;gap:12px;flex-wrap:wrap;margin:0 2px 10px;color:var(--muted);font-size:11px}
-        .legend-v17 i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:4px;vertical-align:-1px}
-        .legend-v17 .work{background:var(--green)}.legend-v17 .off{background:var(--red)}.legend-v17 .transfer{background:var(--violet)}
-        .day{position:relative;min-height:118px;padding:8px 6px}
-        .day::before{content:'';position:absolute;left:5px;right:5px;top:4px;height:3px;border-radius:999px;background:#4a4a52}
-        .day.status-work::before{background:var(--green)}
-        .day.status-off{background:rgba(255,107,115,.09)}.day.status-off::before{background:var(--red)}
-        .day.status-transferWork,.day.status-transferOff{background:rgba(173,140,255,.08);border-color:rgba(173,140,255,.55)}
+        .week-start-control{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 8px;padding:8px 10px;border:1px solid var(--line);border-radius:13px;background:var(--panel)}
+        .week-start-control label{font-size:10px;color:var(--muted);font-weight:900}
+        .week-start-control select{min-height:34px;border:1px solid var(--line);border-radius:10px;padding:5px 9px;background:var(--panel2);color:var(--text);font-weight:900}
+        .legend-v17{display:flex;gap:9px;flex-wrap:wrap;margin:0 2px 7px;color:var(--muted);font-size:9px}
+        .legend-v17 i{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:3px;vertical-align:0}
+        .legend-v17 .work{background:#5c5c64}.legend-v17 .off{background:#8a8a92}.legend-v17 .transfer{background:var(--violet)}
+        .day{position:relative;min-height:64px;padding:5px 4px;background:rgba(21,21,23,.96)}
+        .day::before{content:'';position:absolute;left:4px;right:4px;top:3px;height:2px;border-radius:999px;background:#4a4a52}
+        .day.status-off{background:rgba(255,255,255,.025)}.day.status-off::before{background:#77777f}
+        .day.status-transferWork,.day.status-transferOff{background:rgba(173,140,255,.055);border-color:rgba(173,140,255,.35)}
         .day.status-transferWork::before,.day.status-transferOff::before{background:var(--violet)}
-        .month-money{display:block;margin-top:12px;font-size:12px;font-weight:950;line-height:1.15;letter-spacing:-.03em}
-        .month-money.actual{color:var(--blue)}.month-money.target{color:#fff}
-        .month-label{display:block;margin-top:2px;color:var(--muted);font-size:8px;font-weight:800}
-        .month-sub{display:block;margin-top:5px;color:var(--muted);font-size:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-        @media(max-width:390px){.day{min-height:108px}.month-money{font-size:10px}.month-label,.month-sub{font-size:7px}}
+        .day.today{outline:2px solid var(--amber);outline-offset:0}
+        .month-money{display:block;margin-top:8px;font-size:10px;font-weight:950;line-height:1.05;letter-spacing:-.04em;color:#fff}
+        .month-money.hit{color:var(--green)}.month-money.miss{color:var(--red)}.month-money.live{color:var(--blue)}.month-money.target{color:#fff}
+        .month-label{display:block;margin-top:2px;color:var(--muted);font-size:7px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .month-label.hit{color:var(--green)}.month-label.miss{color:var(--red)}.month-label.live{color:var(--blue)}
+        .month-sub{display:block;margin-top:2px;color:var(--muted);font-size:7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .green{color:var(--green)!important}.red{color:var(--red)!important}.blue{color:var(--blue)!important}.white{color:#fff!important}
+        body.calendar-month-mode .app{padding:calc(env(safe-area-inset-top) + 5px) 6px calc(env(safe-area-inset-bottom) + 8px)}
+        body.calendar-month-mode .top{margin-bottom:5px;align-items:center}body.calendar-month-mode .top .eyebrow{display:none}body.calendar-month-mode .top h1{font-size:19px}body.calendar-month-mode .back{min-height:34px;padding:0 9px;font-size:11px}
+        body.calendar-month-mode .summary{grid-template-columns:repeat(4,1fr);gap:4px;margin-bottom:5px}body.calendar-month-mode .summary .card{padding:6px 3px;border-radius:10px;text-align:center}body.calendar-month-mode .summary .card strong{font-size:12px}body.calendar-month-mode .summary .card span{font-size:7px}body.calendar-month-mode .summary .card:nth-child(n+5){display:none}
+        body.calendar-month-mode .view-tabs{margin:4px 0;gap:4px}body.calendar-month-mode .view-tab{min-height:34px;border-radius:10px;font-size:11px}
+        body.calendar-month-mode .toolbar{grid-template-columns:38px 1fr 38px;margin:3px 0;gap:5px}body.calendar-month-mode .toolbar button{min-height:34px;border-radius:10px}body.calendar-month-mode .period{font-size:14px}
+        body.calendar-month-mode #jumpToday,body.calendar-month-mode .settings,body.calendar-month-mode .notice,body.calendar-month-mode .week-start-control{display:none!important}
+        body.calendar-month-mode .week-head div{font-size:9px;padding:3px 0}body.calendar-month-mode .week-head,body.calendar-month-mode .month-grid{gap:3px}
+        body.calendar-week-mode .summary .card:nth-child(n+5),body.calendar-today-mode .summary .card:nth-child(n+5){display:none}
+        body.calendar-week-mode .week-item{padding:8px 10px;border-radius:13px}body.calendar-week-mode .week-list{gap:5px}body.calendar-week-mode .week-extra{display:none}body.calendar-week-mode .week-metrics{margin-top:5px}
+        @media(max-width:390px){.day{min-height:58px}.month-money{font-size:9px}.month-label,.month-sub{font-size:6px}}
       `;
       document.head.appendChild(style);
     }
@@ -139,18 +173,19 @@
     if(monthView&&!$('weekStartV17')){
       monthView.insertAdjacentHTML('afterbegin',`<div class="week-start-control"><label for="weekStartV17">週の始まり</label><select id="weekStartV17">${WEEKDAYS.map((name,index)=>`<option value="${index}">${name}曜日</option>`).join('')}</select></div>`);
       $('weekStartV17').value=String(currentWeekStart());
-      $('weekStartV17').onchange=()=>{
-        settings.weekStart=num($('weekStartV17').value);
-        write(SET,settings);
-        render();
-      };
+      $('weekStartV17').onchange=()=>{settings.weekStart=num($('weekStartV17').value);write(SET,settings);render()};
     }
 
     const legend=monthView?.querySelector('.legend');
     if(legend){
       legend.className='legend-v17';
-      legend.innerHTML='<span><i class="work"></i>勤務</span><span><i class="off"></i>公休</span><span><i class="transfer"></i>振替</span><span class="blue">青＝実績</span><span>白＝目標</span>';
+      legend.innerHTML='<span><i class="work"></i>勤務</span><span><i class="off"></i>公休</span><span><i class="transfer"></i>振替</span><span class="green">緑＝達成</span><span class="red">赤＝未達</span><span class="blue">青＝営業中</span>';
     }
+  }
+
+  function updateModeClass(){
+    document.body.classList.remove('calendar-today-mode','calendar-week-mode','calendar-month-mode');
+    document.body.classList.add(`calendar-${mode}-mode`);
   }
 
   function updateWeekHeader(){
@@ -171,7 +206,12 @@
     ensureSchedule(mk);
     autoAllocate(mk);
     originalSummary();
+    const future=futureWorkEntries(mk);
+    if($('workDays'))$('workDays').textContent=`${future.length}日`;
   };
+
+  const originalRender=render;
+  render=()=>{updateModeClass();originalRender();updateModeClass()};
 
   renderMonth=()=>{
     const mk=monthKey(focus);
@@ -185,16 +225,25 @@
     const start=new Date(y,m,1-offset),out=[];
     for(let i=0;i<42;i++){
       const d=new Date(start);d.setDate(start.getDate()+i);
-      const k=keyOf(d),v=dayData(k),same=d.getMonth()===m;
-      const hasSales=num(v.sales)>0,hasTarget=num(v.target)>0;
-      const amount=hasSales
-        ? `<span class="month-money actual">${compactYen(v.sales)}</span><span class="month-label">実績</span>`
-        : isWork(v.status)&&hasTarget
-          ? `<span class="month-money target">${compactYen(v.target)}</span><span class="month-label">目標</span>`
-          : '';
-      const sub=hasSales&&hasTarget?`<span class="month-sub">目標 ${compactYen(v.target)}</span>`:'';
-      const aria=`${k} ${statusText(v.status)} ${hasSales?`実績${compactYen(v.sales)}`:hasTarget?`目標${compactYen(v.target)}`:''}`;
-      out.push(`<button class="day ${same?'':'other'} ${k===todayKey()?'today':''} status-${v.status}" data-key="${k}" aria-label="${escapeHtml(aria)}"><span class="date">${d.getDate()}</span>${amount}${sub}</button>`);
+      const k=keyOf(d),v=dayData(k),same=d.getMonth()===m,state=resultState(k,v);
+      const target=num(v.target),sales=num(v.sales),diff=sales-target;
+      let amount='',label='',sub='';
+      if(state==='live'){
+        amount=`<span class="month-money live">${compactYen(sales)}</span>`;
+        label='<span class="month-label live">営業中</span>';
+        sub=target?`<span class="month-sub">目標 ${compactYen(target)}</span>`:'';
+      }else if(state==='hit'){
+        amount=`<span class="month-money hit">${compactYen(sales)}</span>`;
+        label=`<span class="month-label hit">✓ 達成 ${signedYen(diff)}</span>`;
+      }else if(state==='miss'){
+        amount=`<span class="month-money miss">${compactYen(sales)}</span>`;
+        label=`<span class="month-label miss">未達 ${signedYen(diff)}</span>`;
+      }else if(isWork(v.status)&&target){
+        amount=`<span class="month-money target">${compactYen(target)}</span>`;
+        label='<span class="month-label">目標</span>';
+      }
+      const aria=`${k} ${statusText(v.status)} ${state==='hit'?'目標達成':state==='miss'?'目標未達':state==='live'?'営業中':target?`目標${compactYen(target)}`:''}`;
+      out.push(`<button class="day ${same?'':'other'} ${k===todayKey()?'today':''} status-${v.status} result-${state}" data-key="${k}" aria-label="${escapeHtml(aria)}"><span class="date">${d.getDate()}</span>${amount}${label}${sub}</button>`);
     }
     $('calendar').innerHTML=out.join('');
     document.querySelectorAll('.day').forEach(button=>button.onclick=()=>{focus=fromKey(button.dataset.key);mode='today';render()});
