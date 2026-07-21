@@ -1,0 +1,113 @@
+/* Taxi Calendar v32 — aligned weekly rows */
+body[data-calendar-page="week"] #weekView{
+  display:grid!important;
+  grid-template-rows:auto minmax(0,1fr)!important;
+  gap:9px!important;
+  min-height:0!important
+}
+body[data-calendar-page="week"] .week-summary{
+  display:grid!important;
+  grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  gap:7px!important;
+  margin:0!important
+}
+body[data-calendar-page="week"] .week-summary .card{
+  min-height:76px!important;
+  padding:9px 4px!important;
+  border-radius:17px!important;
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:center!important;
+  justify-content:center!important;
+  text-align:center!important
+}
+body[data-calendar-page="week"] .week-summary .card strong{
+  font-size:clamp(17px,4.8vw,22px)!important;
+  line-height:1!important;
+  white-space:nowrap!important
+}
+body[data-calendar-page="week"] .week-summary .card span{
+  margin-top:6px!important;
+  font-size:9px!important;
+  line-height:1.1!important
+}
+body[data-calendar-page="week"] .week-list{
+  min-height:0!important;
+  height:100%!important;
+  display:grid!important;
+  grid-template-rows:repeat(7,minmax(0,1fr))!important;
+  gap:6px!important;
+  overflow:hidden!important
+}
+body[data-calendar-page="week"] .week-item{
+  min-width:0!important;
+  min-height:0!important;
+  height:100%!important;
+  padding:7px 11px!important;
+  border-radius:15px!important;
+  display:grid!important;
+  grid-template-columns:minmax(0,1.22fr) minmax(0,1fr)!important;
+  align-items:center!important;
+  gap:10px!important;
+  overflow:hidden!important;
+  touch-action:none!important
+}
+body[data-calendar-page="week"] .week-top{
+  min-width:0!important;
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) auto!important;
+  align-items:center!important;
+  gap:7px!important
+}
+body[data-calendar-page="week"] .week-date{
+  min-width:0!important;
+  font-size:clamp(18px,5vw,23px)!important;
+  line-height:1!important;
+  letter-spacing:-.035em!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important
+}
+body[data-calendar-page="week"] .week-item .tag{
+  flex:0 0 auto!important;
+  padding:4px 8px!important;
+  font-size:9px!important;
+  line-height:1!important
+}
+body[data-calendar-page="week"] .week-metrics{
+  min-width:0!important;
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  align-items:center!important;
+  gap:7px!important;
+  margin:0!important
+}
+body[data-calendar-page="week"] .week-metrics div{
+  min-width:0!important;
+  font-size:9px!important;
+  line-height:1.05!important;
+  color:var(--muted)!important
+}
+body[data-calendar-page="week"] .week-metrics div:nth-child(n+3){display:none!important}
+body[data-calendar-page="week"] .week-metrics strong{
+  display:block!important;
+  margin-top:4px!important;
+  font-size:clamp(15px,4.2vw,20px)!important;
+  line-height:1!important;
+  letter-spacing:-.035em!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important
+}
+body[data-calendar-page="week"] .week-extra{display:none!important}
+body[data-calendar-page="week"] .week-item.today{
+  outline:3px solid var(--amber)!important;
+  outline-offset:-1px!important
+}
+@media(max-height:760px){
+  body[data-calendar-page="week"] .week-summary .card{min-height:64px!important}
+  body[data-calendar-page="week"] .week-summary .card strong{font-size:18px!important}
+  body[data-calendar-page="week"] .week-item{padding:5px 9px!important;gap:8px!important}
+  body[data-calendar-page="week"] .week-date{font-size:18px!important}
+  body[data-calendar-page="week"] .week-metrics strong{font-size:15px!important}
+}
