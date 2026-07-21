@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-21T20:41:46+09:00",
+  "updated_at": "2026-07-21T20:57:00+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -45,6 +45,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-a451b9dde5d2",
+      "title": "Fix calendar history hydration before rendering",
+      "completed_at": "2026-07-21T11:56:46Z",
+      "result": "GitHub mainへ反映（a451b9d）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/a451b9dde5d27dfffc893b1299e9e8f71b6ee0f2"
+    },
+    {
       "id": "github-commit-14c8ad2d859d",
       "title": "Fix calendar management page placement",
       "completed_at": "2026-07-21T11:41:34Z",
@@ -71,13 +78,6 @@
       "completed_at": "2026-07-21T09:04:39Z",
       "result": "GitHub mainへ反映（9400f09）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/9400f094799aa53855242e4fd9b3601c17b0a6e5"
-    },
-    {
-      "id": "github-commit-43945bd2d492",
-      "title": "Add one-screen tabbed settings",
-      "completed_at": "2026-07-21T09:04:14Z",
-      "result": "GitHub mainへ反映（43945bd）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/43945bd2d4920cbaa3e5d15348babe5c43924b20"
     },
     {
       "id": "complete-002",
@@ -114,7 +114,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-21T20:41:46+09:00",
+      "last_update": "2026-07-21T20:57:00+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -195,7 +195,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-21T20:41:46+09:00",
+      "last_update": "2026-07-21T20:57:00+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -218,7 +218,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-21T20:41:46+09:00",
+      "last_update": "2026-07-21T20:57:00+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -300,5 +300,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "4cb97e8bc4e99db69d9395549e74f303c9aed139baa5510777e4ee21a7647770"
+  "github_snapshot_hash": "bd9d0238340b72fb1220330463ad375e3b028d2cbb58ec332848936c616bc5b4"
 }
