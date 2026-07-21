@@ -32,7 +32,7 @@
     manage.className='manage-view-v21';
     manage.innerHTML='<div class="manage-head-v21"><div><span>月次管理</span><b>残額は自動再配分</b></div><small>実績確定後、未営業の勤務日だけ目標が変動</small></div><div class="manage-actions-v21"><a href="./settings.html">営業設定</a><a href="./">営業画面</a></div>';
     manage.insertBefore(summary,manage.querySelector('.manage-actions-v21'));
-    app.insertBefore(manage,document.getElementById('dayDialog'));
+    app.appendChild(manage);
 
     if(settingsLink)settingsLink.remove();
     if(notice)notice.remove();
