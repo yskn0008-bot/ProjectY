@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-21T21:25:42+09:00",
+  "updated_at": "2026-07-21T21:26:01+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -45,6 +45,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-edf9591b91f0",
+      "title": "Publish Life OS v3 navigation and theme controls",
+      "completed_at": "2026-07-21T12:25:50Z",
+      "result": "GitHub mainへ反映（edf9591）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/edf9591b91f001a95cab5ae8c35b7229e451e1ce"
+    },
+    {
       "id": "github-commit-ee79204471be",
       "title": "Add Life OS page navigation, monthly view, page ordering, and themes",
       "completed_at": "2026-07-21T12:25:29Z",
@@ -71,13 +78,6 @@
       "completed_at": "2026-07-21T11:59:23Z",
       "result": "GitHub mainへ反映（0044fa5）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/0044fa5d4a7822a822de716693bbf178126fbbe4"
-    },
-    {
-      "id": "github-commit-c3ca626b9af3",
-      "title": "Release calendar history restoration fix v22",
-      "completed_at": "2026-07-21T11:57:17Z",
-      "result": "GitHub mainへ反映（c3ca626）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/c3ca626b9af36e31fa5f8550d414617254ee7481"
     },
     {
       "id": "complete-002",
@@ -114,7 +114,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-21T21:25:42+09:00",
+      "last_update": "2026-07-21T21:26:01+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -195,7 +195,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-21T21:25:42+09:00",
+      "last_update": "2026-07-21T21:26:01+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -218,7 +218,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-21T21:25:42+09:00",
+      "last_update": "2026-07-21T21:26:01+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -300,5 +300,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "9e0b5a94e0690952047ad7907343a7482f26826a65d3fcda8696ed42fd2d5d4f"
+  "github_snapshot_hash": "c060b986ef98fbc41ee5a71039eec803ff50620d380436eed76e1fcc0ca681b6"
 }
