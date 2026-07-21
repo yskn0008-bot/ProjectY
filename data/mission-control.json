@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-21T23:18:53+09:00",
+  "updated_at": "2026-07-21T23:19:48+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -45,6 +45,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-fcfa42968d6d",
+      "title": "Add large one-screen Taxi calendar layout",
+      "completed_at": "2026-07-21T14:19:38Z",
+      "result": "GitHub mainへ反映（fcfa429）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/fcfa42968d6d65183a873bc47fa08db70a55e0f6"
+    },
+    {
       "id": "github-commit-c9dada0d773b",
       "title": "Improve Taxi themes, page ordering, and swipe navigation",
       "completed_at": "2026-07-21T14:18:40Z",
@@ -71,13 +78,6 @@
       "completed_at": "2026-07-21T14:03:55Z",
       "result": "GitHub mainへ反映（34ddd34）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/34ddd34d5d698e64985ec57b2326a631885d75bf"
-    },
-    {
-      "id": "github-commit-615b24787530",
-      "title": "Add Taxi themes, full-screen layout, and global navigation styles",
-      "completed_at": "2026-07-21T14:03:31Z",
-      "result": "GitHub mainへ反映（615b247）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/615b2478753071939b26fe282ad1cb9e0f88ab60"
     },
     {
       "id": "complete-002",
@@ -114,7 +114,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-21T23:18:53+09:00",
+      "last_update": "2026-07-21T23:19:48+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -195,7 +195,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-21T23:18:53+09:00",
+      "last_update": "2026-07-21T23:19:48+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -218,7 +218,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-21T23:18:53+09:00",
+      "last_update": "2026-07-21T23:19:48+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -300,5 +300,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "fa5d6fa7d09fe2344656243d6517e474ebfdae91ac5cd2ed8ae56ad6f661bf7c"
+  "github_snapshot_hash": "e7cae2f1c2cd24aa1457adac7b53c92967508866bd3cdbe3e89f467e1f47e297"
 }
