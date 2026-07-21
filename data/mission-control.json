@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-21T17:21:37+09:00",
+  "updated_at": "2026-07-21T18:01:30+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -45,6 +45,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-59f176f19212",
+      "title": "Add dynamic monthly targets and minimal result colors",
+      "completed_at": "2026-07-21T09:01:15Z",
+      "result": "GitHub mainへ反映（59f176f）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/59f176f19212ca1968fe29c7860447dc8efde5a0"
+    },
+    {
       "id": "github-commit-afa20e31ec1f",
       "title": "Fix mobile dashboard and add one-tap shift restore",
       "completed_at": "2026-07-21T08:21:25Z",
@@ -71,13 +78,6 @@
       "completed_at": "2026-07-19T23:37:15Z",
       "result": "GitHub mainへ反映（5b3d9bb）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/5b3d9bb30fa9e03b35d122c61fb6750ee3f8a457"
-    },
-    {
-      "id": "github-commit-a204f2cdacb5",
-      "title": "保存: 2026-07-18 タクシー営業記録",
-      "completed_at": "2026-07-19T06:36:39Z",
-      "result": "GitHub mainへ反映（a204f2c）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/a204f2cdacb52bce223529c4c2fb7371cfa31e7f"
     },
     {
       "id": "complete-002",
@@ -114,7 +114,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-21T17:21:37+09:00",
+      "last_update": "2026-07-21T18:01:30+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -195,7 +195,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-21T17:21:37+09:00",
+      "last_update": "2026-07-21T18:01:30+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -218,7 +218,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-21T17:21:37+09:00",
+      "last_update": "2026-07-21T18:01:30+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -300,5 +300,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "8bf85ed9597203c81254aac4d20221698f0a9d48f625ee90b6f36dbb3a56acea"
+  "github_snapshot_hash": "b0e997a4bd425fbdb3c48c1d85318a078f79eaf13ea61120cc705e3412f07893"
 }
