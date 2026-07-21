@@ -42,7 +42,12 @@
     const next=direction==='left'?index+1:index-1;
     return next>=0&&next<list.length?list[next]:null;
   };
-  const blocked=target=>target.closest('button,a,input,textarea,select,dialog,[contenteditable="true"],#taxiGlobalNavV24');
+  const blocked=target=>target.closest([
+    'input','textarea','select','dialog','[contenteditable="true"]',
+    '#taxiGlobalNavV24','.toolbar button','.top a','.top button','.edit-button',
+    '.quick-actions-v18 button','.quick-tools-v18 button','.settings-tabs-v20 button',
+    '.taxi-setting-block-v24 button','.dialog-actions button'
+  ].join(','));
 
   document.documentElement.classList.add('taxi-swipe-v30');
   const app=document.querySelector('main.app');
@@ -139,7 +144,7 @@
     });
   }
 
-  let tracking=false,horizontal=false,startX=0,startY=0,x=0,target=null,direction='',frame=0,samples=[];
+  let tracking=false,horizontal=false,startX=0,startY=0,x=0,target=null,direction='',frame=0,samples=[],lastSwipeAt=0;
   const render=()=>{frame=0;const progress=Math.min(1,Math.abs(x)/(Math.max(320,innerWidth)*.52));setTransform(x,progress);setPreview(target,progress,direction)};
   const scheduleRender=()=>{if(!frame)frame=requestAnimationFrame(render)};
 
@@ -177,6 +182,7 @@
     tracking=false;
     if(!horizontal)return;
     event.preventDefault();event.stopImmediatePropagation();
+    lastSwipeAt=Date.now();
     if(frame){cancelAnimationFrame(frame);render()}
     const last=samples[samples.length-1],first=samples[0];
     const velocity=last&&first&&last.t>first.t?(last.x-first.x)/(last.t-first.t):0;
@@ -184,6 +190,10 @@
     const shouldCommit=target&&(Math.abs(x)>width*.27||(Math.abs(velocity)>.52&&Math.abs(x)>24));
     if(shouldCommit)commit(target,direction,x,velocity);else cancel(x);
   },{capture:true,passive:false});
+
+  document.addEventListener('click',event=>{
+    if(Date.now()-lastSwipeAt<520){event.preventDefault();event.stopImmediatePropagation()}
+  },true);
 
   document.addEventListener('touchcancel',()=>{if(!tracking)return;tracking=false;horizontal=false;cancel(x)},{capture:true,passive:true});
 
