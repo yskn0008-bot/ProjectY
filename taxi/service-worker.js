@@ -1,16 +1,16 @@
 'use strict';
-const CACHE='yos-taxi-projecty-v17';
+const CACHE='yos-taxi-projecty-v19';
 const STATIC=['./calendar.html','./settings.html','./manifest.webmanifest','./v9.css','./v9.js','./calendar-v2.js','./calendar-v3.js','./swipe-nav.js','./v15.js'];
 const pageType=url=>url.pathname.endsWith('/taxi/')||url.pathname.endsWith('/taxi/index.html')?'index':url.pathname.endsWith('/taxi/calendar.html')?'calendar':'';
 async function inject(response,type){
   let html=await response.text();
   if(type==='index'){
     if(!html.includes('v9.css'))html=html.replace('</head>','<link rel="stylesheet" href="./v9.css"></head>');
-    if(!html.includes('v9.js'))html=html.replace('</body>','<script src="./v9.js"></script></body>');
+    if(!html.includes('v9.js'))html=html.replace('</body>','<script src="./v9.js?v=19"></script></body>');
     if(!html.includes('swipe-nav.js'))html=html.replace('</body>','<script src="./swipe-nav.js"></script></body>');
   }
   if(type==='calendar'){
-    if(!html.includes('calendar-v2.js'))html=html.replace('</body>','<script src="./calendar-v2.js?v=17"></script></body>');
+    if(!html.includes('calendar-v2.js'))html=html.replace('</body>','<script src="./calendar-v2.js?v=19"></script></body>');
     if(!html.includes('swipe-nav.js'))html=html.replace('</body>','<script src="./swipe-nav.js"></script></body>');
   }
   const headers=new Headers(response.headers);headers.delete('content-length');headers.delete('content-encoding');
