@@ -1,27 +1,29 @@
 'use strict';
-const CACHE='yos-taxi-projecty-v27';
-const STATIC=['./calendar.html','./settings.html','./manifest.webmanifest','./v9.css','./v9.js','./calendar-v2.js','./calendar-v3.js','./calendar-v21.js','./calendar-v23-fix.js','./calendar-v26.css','./settings-v20.js','./ui-v24.css','./ui-v24.js','./ui-v24-fix.js','./swipe-nav.js','./v15.js'];
+const CACHE='yos-taxi-projecty-v28';
+const STATIC=['./calendar.html','./settings.html','./manifest.webmanifest','./v9.css','./v9.js','./calendar-v2.js','./calendar-v3.js','./calendar-v21.js','./calendar-v23-fix.js','./calendar-v26.css','./calendar-v28.css','./viewport-v28.js','./settings-v20.js','./ui-v24.css','./ui-v24.js','./ui-v24-fix.js','./swipe-nav.js','./v15.js'];
 const pageType=url=>url.pathname.endsWith('/taxi/')||url.pathname.endsWith('/taxi/index.html')?'index':url.pathname.endsWith('/taxi/calendar.html')?'calendar':url.pathname.endsWith('/taxi/settings.html')?'settings':'';
 async function inject(response,type){
   let html=await response.text();
-  if(!html.includes('ui-v24.css'))html=html.replace('</head>','<link rel="stylesheet" href="./ui-v24.css?v=27"></head>');
-  if(type==='calendar'&&!html.includes('calendar-v26.css'))html=html.replace('</head>','<link rel="stylesheet" href="./calendar-v26.css?v=27"></head>');
+  if(!html.includes('ui-v24.css'))html=html.replace('</head>','<link rel="stylesheet" href="./ui-v24.css?v=28"></head>');
+  if(type==='calendar'&&!html.includes('calendar-v26.css'))html=html.replace('</head>','<link rel="stylesheet" href="./calendar-v26.css?v=28"></head>');
+  if(type==='calendar'&&!html.includes('calendar-v28.css'))html=html.replace('</head>','<link rel="stylesheet" href="./calendar-v28.css?v=28"></head>');
   if(type==='index'){
-    if(!html.includes('v9.css'))html=html.replace('</head>','<link rel="stylesheet" href="./v9.css?v=27"></head>');
-    if(!html.includes('v9.js'))html=html.replace('</body>','<script src="./v9.js?v=27"></script></body>');
-    if(!html.includes('swipe-nav.js'))html=html.replace('</body>','<script src="./swipe-nav.js?v=27"></script></body>');
+    if(!html.includes('v9.css'))html=html.replace('</head>','<link rel="stylesheet" href="./v9.css?v=28"></head>');
+    if(!html.includes('v9.js'))html=html.replace('</body>','<script src="./v9.js?v=28"></script></body>');
+    if(!html.includes('swipe-nav.js'))html=html.replace('</body>','<script src="./swipe-nav.js?v=28"></script></body>');
   }
   if(type==='calendar'){
-    if(!html.includes('calendar-v2.js'))html=html.replace('</body>','<script src="./calendar-v2.js?v=27"></script></body>');
-    if(!html.includes('calendar-v21.js'))html=html.replace('</body>','<script src="./calendar-v21.js?v=27"></script></body>');
-    if(!html.includes('calendar-v23-fix.js'))html=html.replace('</body>','<script src="./calendar-v23-fix.js?v=27"></script></body>');
-    if(!html.includes('swipe-nav.js'))html=html.replace('</body>','<script src="./swipe-nav.js?v=27"></script></body>');
+    if(!html.includes('calendar-v2.js'))html=html.replace('</body>','<script src="./calendar-v2.js?v=28"></script></body>');
+    if(!html.includes('calendar-v21.js'))html=html.replace('</body>','<script src="./calendar-v21.js?v=28"></script></body>');
+    if(!html.includes('calendar-v23-fix.js'))html=html.replace('</body>','<script src="./calendar-v23-fix.js?v=28"></script></body>');
+    if(!html.includes('swipe-nav.js'))html=html.replace('</body>','<script src="./swipe-nav.js?v=28"></script></body>');
+    if(!html.includes('viewport-v28.js'))html=html.replace('</body>','<script src="./viewport-v28.js?v=28"></script></body>');
   }
   if(type==='settings'){
-    if(!html.includes('settings-v20.js'))html=html.replace('</body>','<script src="./settings-v20.js?v=27"></script></body>');
+    if(!html.includes('settings-v20.js'))html=html.replace('</body>','<script src="./settings-v20.js?v=28"></script></body>');
   }
-  if(!html.includes('ui-v24.js'))html=html.replace('</body>','<script src="./ui-v24.js?v=27"></script></body>');
-  if(type==='settings'&&!html.includes('ui-v24-fix.js'))html=html.replace('</body>','<script src="./ui-v24-fix.js?v=27"></script></body>');
+  if(!html.includes('ui-v24.js'))html=html.replace('</body>','<script src="./ui-v24.js?v=28"></script></body>');
+  if(type==='settings'&&!html.includes('ui-v24-fix.js'))html=html.replace('</body>','<script src="./ui-v24-fix.js?v=28"></script></body>');
   const headers=new Headers(response.headers);
   headers.delete('content-length');
   headers.delete('content-encoding');
