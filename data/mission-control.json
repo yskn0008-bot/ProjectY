@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-21T23:19:48+09:00",
+  "updated_at": "2026-07-21T23:20:54+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -45,6 +45,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-737791b7dfcd",
+      "title": "Publish Taxi calendar v26 large swipe layout",
+      "completed_at": "2026-07-21T14:20:38Z",
+      "result": "GitHub mainへ反映（737791b）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/737791b7dfcdf7b87e3e2141974224c545934e26"
+    },
+    {
       "id": "github-commit-fcfa42968d6d",
       "title": "Add large one-screen Taxi calendar layout",
       "completed_at": "2026-07-21T14:19:38Z",
@@ -71,13 +78,6 @@
       "completed_at": "2026-07-21T14:04:53Z",
       "result": "GitHub mainへ反映（908d756）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/908d75614fe3cfbca7f5c48414cbccde22e28544"
-    },
-    {
-      "id": "github-commit-34ddd34d5d69",
-      "title": "Publish Taxi UI v24 navigation and themes",
-      "completed_at": "2026-07-21T14:03:55Z",
-      "result": "GitHub mainへ反映（34ddd34）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/34ddd34d5d698e64985ec57b2326a631885d75bf"
     },
     {
       "id": "complete-002",
@@ -114,7 +114,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-21T23:19:48+09:00",
+      "last_update": "2026-07-21T23:20:54+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -195,7 +195,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-21T23:19:48+09:00",
+      "last_update": "2026-07-21T23:20:54+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -218,7 +218,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-21T23:19:48+09:00",
+      "last_update": "2026-07-21T23:20:54+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -300,5 +300,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "e7cae2f1c2cd24aa1457adac7b53c92967508866bd3cdbe3e89f467e1f47e297"
+  "github_snapshot_hash": "741fce9ed6712fa3d0f4eb32a290c2ece5b1ff75ed0ae34d1b0324c461e1f88b"
 }
