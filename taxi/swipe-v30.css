@@ -1,0 +1,66 @@
+/* Taxi swipe v30 — GPU-only interactive motion */
+html.taxi-swipe-v30{overflow-x:hidden!important}
+html.taxi-swipe-v30 body{overflow-x:hidden!important}
+html.taxi-swipe-v30 main.app{
+  position:relative;
+  z-index:20;
+  transform:translate3d(0,0,0);
+  transform-origin:50% 50%;
+  backface-visibility:hidden;
+  -webkit-backface-visibility:hidden;
+  will-change:transform,opacity;
+  touch-action:pan-y
+}
+#taxiSwipeSceneV30{
+  position:fixed;
+  inset:0;
+  z-index:8;
+  pointer-events:none;
+  overflow:hidden;
+  opacity:0;
+  background:radial-gradient(circle at 50% 42%,var(--taxi-glow),transparent 38%),var(--bg);
+  will-change:opacity
+}
+#taxiSwipeSceneV30::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(90deg,rgba(255,255,255,.025),transparent 22%,transparent 78%,rgba(255,255,255,.025))
+}
+.taxi-swipe-preview-v30{
+  position:absolute;
+  left:50%;
+  top:48%;
+  min-width:154px;
+  transform:translate3d(-50%,-50%,0) scale(.94);
+  text-align:center;
+  opacity:.64;
+  will-change:transform,opacity
+}
+.taxi-swipe-preview-v30 span{
+  display:block;
+  font-size:34px;
+  line-height:1
+}
+.taxi-swipe-preview-v30 b{
+  display:block;
+  margin-top:10px;
+  color:var(--text);
+  font-size:24px;
+  letter-spacing:-.03em
+}
+.taxi-swipe-preview-v30 small{
+  display:block;
+  margin-top:5px;
+  color:var(--muted);
+  font-size:11px
+}
+html.taxi-swipe-v30 .taxi-global-nav-v24{
+  transform:translate3d(-50%,0,0);
+  backface-visibility:hidden;
+  -webkit-backface-visibility:hidden
+}
+@media(prefers-reduced-motion:reduce){
+  #taxiSwipeSceneV30{display:none!important}
+  html.taxi-swipe-v30 main.app{will-change:auto}
+}
