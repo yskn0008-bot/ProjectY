@@ -1,6 +1,6 @@
 'use strict';
 (()=>{
-  const EXT='yos-taxi-calendar-settings-v2',OPS='yos-taxi-ops-v1',TAXI='yos-taxi-settings-v2';
+  const CAL='yos-taxi-calendar-v1',EXT='yos-taxi-calendar-settings-v2',OPS='yos-taxi-ops-v1',TAXI='yos-taxi-settings-v2';
   const read=(key,fallback)=>{try{return JSON.parse(localStorage.getItem(key)||'null')||fallback}catch{return fallback}};
   const ext=()=>({carrySales:0,shiftStart:'17:30',shiftEnd:'03:30',workDays:3,offDays:1,...read(EXT,{})});
   const calcHours=(start,end)=>{const [a,b]=[start,end].map(v=>String(v||'').split(':').map(Number)).map(v=>v[0]*60+v[1]);return Math.max(0,((b<=a?b+1440:b)-a)/60)};
@@ -41,23 +41,37 @@
     document.getElementById('progress').textContent=goal?`${Math.min(999,Math.round(achieved/goal*100))}%`:'0%';
   };
 
-  function loadCalendarV17(){
+  function hydrateCalendarFromStorage(){
+    const restored=read(CAL,{monthlyGoals:{},days:{}});
+    data.monthlyGoals={...(restored.monthlyGoals||{})};
+    data.days={...(restored.days||{})};
+  }
+
+  function loadCalendarV22(){
     if(window.__yosCalendarV17Requested||document.querySelector('script[src*="calendar-v3.js"]'))return;
     window.__yosCalendarV17Requested=true;
     const script=document.createElement('script');
-    script.src='./calendar-v3.js?v=17';
+    script.src='./calendar-v3.js?v=22';
     script.dataset.yosCalendarV17='1';
     document.head.appendChild(script);
   }
 
   function loadEnhancements(){
-    if(window.__yosReportHistoryRequested){loadCalendarV17();return}
+    if(window.__yosReportHistoryRequested){hydrateCalendarFromStorage();loadCalendarV22();return}
     window.__yosReportHistoryRequested=true;
     const script=document.createElement('script');
-    script.src='./v15.js?v=17';
+    script.src='./v15.js?v=22';
     script.dataset.yosReportHistoryV15='1';
-    script.onload=loadCalendarV17;
-    script.onerror=loadCalendarV17;
+    script.onload=()=>{
+      hydrateCalendarFromStorage();
+      loadCalendarV22();
+      render();
+    };
+    script.onerror=()=>{
+      hydrateCalendarFromStorage();
+      loadCalendarV22();
+      render();
+    };
     document.head.appendChild(script);
   }
 
