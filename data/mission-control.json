@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-21T23:05:13+09:00",
+  "updated_at": "2026-07-21T23:05:34+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -45,6 +45,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-a5df7b45b85b",
+      "title": "Finalize Taxi UI navigation and settings tabs",
+      "completed_at": "2026-07-21T14:05:18Z",
+      "result": "GitHub mainへ反映（a5df7b4）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/a5df7b45b85ba3fa636dbbd7de1136e1ded476f0"
+    },
+    {
       "id": "github-commit-908d75614fe3",
       "title": "Fix Taxi display settings tab isolation",
       "completed_at": "2026-07-21T14:04:53Z",
@@ -71,13 +78,6 @@
       "completed_at": "2026-07-21T14:02:26Z",
       "result": "GitHub mainへ反映（efa5dfd）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/efa5dfd0e7ddfe16227b44c872e88c647f3b0ceb"
-    },
-    {
-      "id": "github-commit-e8ef3fb111f3",
-      "title": "Restore Life OS service worker",
-      "completed_at": "2026-07-21T13:59:37Z",
-      "result": "GitHub mainへ反映（e8ef3fb）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/e8ef3fb111f3e641634f8d26252cb349350df2a6"
     },
     {
       "id": "complete-002",
@@ -114,7 +114,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-21T23:05:13+09:00",
+      "last_update": "2026-07-21T23:05:34+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -195,7 +195,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-21T23:05:13+09:00",
+      "last_update": "2026-07-21T23:05:34+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -218,7 +218,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-21T23:05:13+09:00",
+      "last_update": "2026-07-21T23:05:34+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -300,5 +300,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "d1fa63f204dcbc430aa198bf6f43979b6e22c82821d83f949d0fd4709718b029"
+  "github_snapshot_hash": "a8c7a8c94e79eae35d8ed5337c8bdf9e05724ed93520408d3e7956ba529cb1fd"
 }
