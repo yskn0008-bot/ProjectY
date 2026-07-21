@@ -1,48 +1,62 @@
-/* Taxi Calendar v28 — lock to the iPhone visual viewport and remove dead space */
+/* Taxi Calendar v29 — fixed one-screen viewport; horizontal swipe only */
 html.taxi-calendar-v28,
 html.taxi-calendar-v28 body{
   width:100%!important;
   height:var(--taxi-visual-height,100dvh)!important;
   min-height:0!important;
+  max-height:var(--taxi-visual-height,100dvh)!important;
   overflow:hidden!important;
-  overscroll-behavior:none!important
+  overscroll-behavior:none!important;
+  -webkit-overflow-scrolling:auto!important
 }
 html.taxi-calendar-v28 body{
   position:fixed!important;
   inset:0!important;
-  margin:0!important
+  margin:0!important;
+  touch-action:pan-x!important
 }
 html.taxi-calendar-v28 body[data-calendar-page] .app{
-  position:absolute!important;
+  position:fixed!important;
   inset:0!important;
   width:min(100%,760px)!important;
-  height:100%!important;
-  max-height:100%!important;
+  height:var(--taxi-visual-height,100dvh)!important;
+  min-height:0!important;
+  max-height:var(--taxi-visual-height,100dvh)!important;
   margin:0 auto!important;
   overflow:hidden!important;
+  overscroll-behavior:none!important;
+  touch-action:pan-x!important;
   padding:calc(env(safe-area-inset-top) + 8px) 14px calc(env(safe-area-inset-bottom) + 88px)!important
+}
+html.taxi-calendar-v28 body[data-calendar-page] .app > *{
+  min-height:0!important
 }
 html.taxi-calendar-v28 body[data-calendar-page] .view,
 html.taxi-calendar-v28 body[data-calendar-page] .manage-view-v21{
   min-height:0!important;
-  height:100%!important
+  height:100%!important;
+  overflow:hidden!important;
+  overscroll-behavior:none!important
 }
 html.taxi-calendar-v28 body[data-calendar-page="today"] #todayView{
   flex:1 1 auto!important;
   min-height:0!important;
-  height:100%!important
+  height:100%!important;
+  overflow:hidden!important
 }
 html.taxi-calendar-v28 body[data-calendar-page="today"] #todayView .detail{
   flex:1 1 auto!important;
   min-height:0!important;
   height:100%!important;
+  overflow:hidden!important;
   align-content:stretch!important;
   grid-template-rows:minmax(0,1.05fr) minmax(0,1.45fr) 64px!important
 }
 html.taxi-calendar-v28 body[data-calendar-page="today"] #todayView .detail-hero,
 html.taxi-calendar-v28 body[data-calendar-page="today"] #todayView .detail-grid{
   height:100%!important;
-  min-height:0!important
+  min-height:0!important;
+  overflow:hidden!important
 }
 html.taxi-calendar-v28 body[data-calendar-page="today"] #todayView .edit-button{
   display:flex!important;
@@ -53,7 +67,12 @@ html.taxi-calendar-v28 body[data-calendar-page="today"] #todayView .edit-button{
   margin:0!important
 }
 html.taxi-calendar-v28 .taxi-global-nav-v24{
-  bottom:calc(env(safe-area-inset-bottom) + 8px)!important
+  bottom:calc(env(safe-area-inset-bottom) + 8px)!important;
+  touch-action:manipulation!important
+}
+html.taxi-calendar-v28 dialog,
+html.taxi-calendar-v28 dialog *{
+  touch-action:auto!important
 }
 @media(max-height:760px){
   html.taxi-calendar-v28 body[data-calendar-page="today"] #todayView .detail{
