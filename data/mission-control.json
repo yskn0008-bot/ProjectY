@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-22T02:38:47+09:00",
+  "updated_at": "2026-07-22T02:39:57+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -45,6 +45,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-cc61eed87c21",
+      "title": "Add isolated UX v33 test mode and preserve production swipe",
+      "completed_at": "2026-07-21T17:39:43Z",
+      "result": "GitHub mainへ反映（cc61eed）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/cc61eed87c212f145131a7dbb2f71ec375bffd5a"
+    },
+    {
       "id": "github-commit-979ade49ae6c",
       "title": "Add configurable cross-swipe UX test v33",
       "completed_at": "2026-07-21T17:38:31Z",
@@ -71,13 +78,6 @@
       "completed_at": "2026-07-21T16:37:36Z",
       "result": "GitHub mainへ反映（9eec4a0）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/9eec4a0949dcaefdd17c56b9a0a5fe8e177fdb5d"
-    },
-    {
-      "id": "github-commit-53ed3c47ed75",
-      "title": "Fix swipe gesture on calendar day rows",
-      "completed_at": "2026-07-21T16:37:09Z",
-      "result": "GitHub mainへ反映（53ed3c4）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/53ed3c47ed75a28c42ce9e933cb8c7494b796a2a"
     },
     {
       "id": "complete-002",
@@ -114,7 +114,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-22T02:38:47+09:00",
+      "last_update": "2026-07-22T02:39:57+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -195,7 +195,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-22T02:38:47+09:00",
+      "last_update": "2026-07-22T02:39:57+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -218,7 +218,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-22T02:38:47+09:00",
+      "last_update": "2026-07-22T02:39:57+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -300,5 +300,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "ba56d840c3771ca7e95c700859693f9fbb5ed3782e5f48b3ab5ceac1f2124541"
+  "github_snapshot_hash": "cd34e6f7c2c400add3135ca2c9f9b5b96f454e4c0345fa7d2a2faaa917cb2a25"
 }
