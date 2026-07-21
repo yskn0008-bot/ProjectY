@@ -1,0 +1,285 @@
+/* Taxi Calendar v26 — large, swipe-first, one-screen layout */
+body[data-calendar-page]{overflow:hidden!important}
+body[data-calendar-page] .app{
+  width:min(100%,760px)!important;
+  height:100svh!important;
+  min-height:0!important;
+  overflow:hidden!important;
+  padding:calc(env(safe-area-inset-top) + 8px) 14px calc(env(safe-area-inset-bottom) + 78px)!important;
+  display:grid!important;
+  grid-template-rows:auto auto minmax(0,1fr)!important;
+  gap:10px!important
+}
+body[data-calendar-page] .top{
+  margin:0!important;
+  min-height:58px;
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) auto auto!important;
+  align-items:center!important;
+  gap:9px!important
+}
+body[data-calendar-page] .top>div{min-width:0}
+body[data-calendar-page] .top .eyebrow{display:none!important}
+body[data-calendar-page] .top h1{
+  font-size:clamp(24px,7vw,31px)!important;
+  line-height:1.05!important;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis
+}
+body[data-calendar-page] .top .back{
+  min-height:46px!important;
+  padding:0 13px!important;
+  border-radius:14px!important;
+  font-size:13px!important
+}
+body[data-calendar-page] #calendarPagesV21,
+body[data-calendar-page] #jumpToday,
+body[data-calendar-page] .week-start-control{display:none!important}
+body[data-calendar-page] .toolbar{
+  grid-row:2;
+  margin:0!important;
+  grid-template-columns:52px 1fr 52px!important;
+  gap:9px!important
+}
+body[data-calendar-page] .toolbar button{
+  min-height:48px!important;
+  border-radius:15px!important;
+  font-size:26px!important
+}
+body[data-calendar-page] .period{
+  font-size:clamp(21px,6vw,27px)!important;
+  font-weight:950!important;
+  letter-spacing:-.03em
+}
+body[data-calendar-page] .view,
+body[data-calendar-page] .manage-view-v21{
+  grid-row:3;
+  height:100%!important;
+  min-height:0!important;
+  overflow:hidden!important
+}
+body[data-calendar-page] .view.v21-active,
+body[data-calendar-page] .manage-view-v21.v21-active{display:flex!important;flex-direction:column!important}
+body[data-calendar-page="today"] #todayView .detail{
+  flex:1!important;
+  height:100%!important;
+  min-height:0!important;
+  display:grid!important;
+  grid-template-rows:minmax(150px,1.05fr) minmax(245px,1.6fr) 62px!important;
+  gap:11px!important
+}
+body[data-calendar-page="today"] #todayView .detail-hero{
+  min-height:0!important;
+  display:flex!important;
+  flex-direction:column!important;
+  justify-content:center!important;
+  padding:18px 20px!important;
+  border-radius:24px!important
+}
+body[data-calendar-page="today"] #todayView .detail-date{
+  font-size:15px!important;
+  letter-spacing:.02em
+}
+body[data-calendar-page="today"] #todayView .detail-hero h2{
+  margin:7px 0 6px!important;
+  font-size:clamp(37px,11vw,50px)!important;
+  line-height:1!important
+}
+body[data-calendar-page="today"] #todayView .detail-hero p{
+  font-size:14px!important;
+  line-height:1.45!important;
+  white-space:normal!important;
+  overflow:visible!important
+}
+body[data-calendar-page="today"] #todayView .detail-grid{
+  min-height:0!important;
+  display:grid!important;
+  grid-template-columns:repeat(12,minmax(0,1fr))!important;
+  grid-template-rows:minmax(138px,1.25fr) minmax(96px,.75fr)!important;
+  gap:9px!important
+}
+body[data-calendar-page="today"] #todayView .detail-card{
+  min-width:0!important;
+  min-height:0!important;
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:center!important;
+  justify-content:center!important;
+  text-align:center!important;
+  padding:10px 5px!important;
+  border-radius:20px!important
+}
+body[data-calendar-page="today"] #todayView .detail-card:nth-child(1){order:2;grid-column:span 4}
+body[data-calendar-page="today"] #todayView .detail-card:nth-child(2){order:1;grid-column:span 4}
+body[data-calendar-page="today"] #todayView .detail-card:nth-child(3){order:3;grid-column:span 4}
+body[data-calendar-page="today"] #todayView .detail-card:nth-child(4){display:none!important}
+body[data-calendar-page="today"] #todayView .detail-card:nth-child(5),
+body[data-calendar-page="today"] #todayView .detail-card:nth-child(6),
+body[data-calendar-page="today"] #todayView .detail-card:nth-child(7),
+body[data-calendar-page="today"] #todayView .detail-card:nth-child(8){order:4;grid-column:span 3}
+body[data-calendar-page="today"] #todayView .detail-card:nth-child(-n+3) strong{
+  font-size:clamp(24px,7.4vw,34px)!important;
+  letter-spacing:-.04em
+}
+body[data-calendar-page="today"] #todayView .detail-card:nth-child(-n+3) span{font-size:12px!important;margin-top:7px}
+body[data-calendar-page="today"] #todayView .detail-card:nth-child(n+5) strong{
+  font-size:clamp(18px,5vw,23px)!important;
+  letter-spacing:-.025em
+}
+body[data-calendar-page="today"] #todayView .detail-card:nth-child(n+5) span{font-size:10px!important;margin-top:6px}
+body[data-calendar-page="today"] #todayView .detail-wide{display:none!important}
+body[data-calendar-page="today"] #todayView .edit-button{
+  min-height:62px!important;
+  border-radius:19px!important;
+  font-size:18px!important;
+  font-weight:950!important
+}
+body[data-calendar-page="week"] #weekView{gap:9px!important}
+body[data-calendar-page="week"] .week-summary{
+  flex:0 0 auto!important;
+  display:grid!important;
+  grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  gap:7px!important;
+  margin:0!important
+}
+body[data-calendar-page="week"] .week-summary .card{
+  min-height:74px!important;
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:center!important;
+  justify-content:center!important;
+  padding:8px 4px!important;
+  text-align:center!important;
+  border-radius:17px!important
+}
+body[data-calendar-page="week"] .week-summary .card strong{font-size:clamp(17px,4.8vw,22px)!important}
+body[data-calendar-page="week"] .week-summary .card span{font-size:9px!important;margin-top:5px}
+body[data-calendar-page="week"] .week-list{
+  flex:1!important;
+  min-height:0!important;
+  display:grid!important;
+  grid-template-rows:repeat(7,minmax(0,1fr))!important;
+  gap:6px!important
+}
+body[data-calendar-page="week"] .week-item{
+  min-height:0!important;
+  padding:9px 12px!important;
+  border-radius:15px!important;
+  display:grid!important;
+  grid-template-columns:1.15fr 1fr!important;
+  align-items:center!important;
+  gap:9px!important
+}
+body[data-calendar-page="week"] .week-date{font-size:16px!important}
+body[data-calendar-page="week"] .week-item .tag{font-size:9px!important;padding:3px 7px!important}
+body[data-calendar-page="week"] .week-metrics{grid-template-columns:1fr 1fr!important;gap:5px!important;margin:0!important}
+body[data-calendar-page="week"] .week-metrics div:nth-child(n+3){display:none!important}
+body[data-calendar-page="week"] .week-metrics div{font-size:9px!important}
+body[data-calendar-page="week"] .week-metrics strong{font-size:14px!important}
+body[data-calendar-page="week"] .week-extra{display:none!important}
+body[data-calendar-page="month"] #monthView{
+  display:grid!important;
+  grid-template-rows:auto auto minmax(0,1fr)!important;
+  gap:5px!important
+}
+body[data-calendar-page="month"] .legend-v17{
+  margin:0!important;
+  min-height:20px;
+  align-items:center;
+  gap:9px!important;
+  font-size:9px!important
+}
+body[data-calendar-page="month"] .week-head{gap:5px!important}
+body[data-calendar-page="month"] .week-head div{font-size:10px!important;padding:4px 0!important}
+body[data-calendar-page="month"] .month-grid{
+  height:100%!important;
+  min-height:0!important;
+  grid-template-rows:repeat(6,minmax(0,1fr))!important;
+  gap:5px!important
+}
+body[data-calendar-page="month"] .day{
+  min-height:0!important;
+  padding:6px 4px!important;
+  border-radius:12px!important
+}
+body[data-calendar-page="month"] .day::before{left:4px!important;right:4px!important;top:3px!important;height:2px!important}
+body[data-calendar-page="month"] .date{font-size:12px!important}
+body[data-calendar-page="month"] .month-money{
+  margin-top:10px!important;
+  font-size:clamp(9px,2.8vw,12px)!important;
+  line-height:1!important
+}
+body[data-calendar-page="month"] .month-label{font-size:7px!important;margin-top:3px!important}
+body[data-calendar-page="month"] .month-sub{display:none!important}
+body[data-calendar-page="manage"] .manage-view-v21{gap:10px!important}
+body[data-calendar-page="manage"] .manage-head-v21{
+  min-height:118px!important;
+  padding:18px!important;
+  border-radius:23px!important;
+  align-items:center!important
+}
+body[data-calendar-page="manage"] .manage-head-v21 span{font-size:13px!important}
+body[data-calendar-page="manage"] .manage-head-v21 b{font-size:clamp(25px,7vw,33px)!important}
+body[data-calendar-page="manage"] .manage-head-v21 small{font-size:11px!important;line-height:1.5!important}
+body[data-calendar-page="manage"] .summary{
+  flex:1!important;
+  min-height:0!important;
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  grid-template-rows:repeat(4,minmax(0,1fr))!important;
+  gap:8px!important
+}
+body[data-calendar-page="manage"] .summary .card{
+  min-height:0!important;
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:center!important;
+  justify-content:center!important;
+  text-align:center!important;
+  padding:9px 5px!important;
+  border-radius:18px!important
+}
+body[data-calendar-page="manage"] .summary .card strong{font-size:clamp(19px,5.6vw,27px)!important}
+body[data-calendar-page="manage"] .summary .card span{font-size:10px!important;margin-top:6px}
+body[data-calendar-page="manage"] .manage-actions-v21{gap:8px!important}
+body[data-calendar-page="manage"] .manage-actions-v21 a{
+  min-height:58px!important;
+  border-radius:17px!important;
+  font-size:15px!important
+}
+.taxi-global-nav-v24 button{min-height:54px!important}
+.taxi-global-nav-v24 button span{font-size:18px!important}
+.taxi-global-nav-v24 button b{font-size:10px!important}
+html[data-taxi-theme="taxi511"] body[data-calendar-page] .top{
+  border-bottom:4px solid var(--amber);
+  box-shadow:inset 0 -1px 0 #173f91;
+  padding-bottom:8px
+}
+html[data-taxi-theme="taxi511"][data-taxi-appearance="light"] body[data-calendar-page] .top h1{color:#173f91!important}
+html[data-taxi-theme="taxi511"] body[data-calendar-page] .detail-hero,
+html[data-taxi-theme="taxi511"] body[data-calendar-page] .manage-head-v21{
+  box-shadow:inset 0 -4px 0 #173f91
+}
+@media(max-height:760px){
+  body[data-calendar-page] .app{gap:7px!important}
+  body[data-calendar-page] .top{min-height:48px}
+  body[data-calendar-page] .top h1{font-size:23px!important}
+  body[data-calendar-page] .top .back{min-height:40px!important}
+  body[data-calendar-page] .toolbar button{min-height:41px!important}
+  body[data-calendar-page] .period{font-size:20px!important}
+  body[data-calendar-page="today"] #todayView .detail{grid-template-rows:minmax(115px,.9fr) minmax(205px,1.45fr) 52px!important;gap:7px!important}
+  body[data-calendar-page="today"] #todayView .detail-hero h2{font-size:34px!important}
+  body[data-calendar-page="today"] #todayView .detail-grid{grid-template-rows:minmax(110px,1.15fr) minmax(82px,.85fr)!important;gap:6px!important}
+  body[data-calendar-page="today"] #todayView .edit-button{min-height:52px!important;font-size:16px!important}
+  body[data-calendar-page="week"] .week-summary .card{min-height:58px!important}
+  body[data-calendar-page="week"] .week-item{padding:6px 9px!important}
+  body[data-calendar-page="manage"] .manage-head-v21{min-height:88px!important;padding:12px!important}
+}
+@media(max-width:370px){
+  body[data-calendar-page] .app{padding-left:9px!important;padding-right:9px!important}
+  body[data-calendar-page="today"] #todayView .detail-card:nth-child(-n+3) strong{font-size:22px!important}
+  body[data-calendar-page="today"] #todayView .detail-card:nth-child(n+5) strong{font-size:16px!important}
+  body[data-calendar-page="month"] .month-money{font-size:9px!important}
+  .taxi-global-nav-v24 button b{font-size:9px!important}
+}
