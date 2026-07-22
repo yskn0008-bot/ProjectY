@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-22T22:21:43+09:00",
+  "updated_at": "2026-07-22T22:39:32+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -45,6 +45,20 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-1e5907313f4c",
+      "title": "Add YOS Nav web app manifest",
+      "completed_at": "2026-07-22T13:39:13Z",
+      "result": "GitHub mainへ反映（1e59073）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/1e5907313f4c21602bae6427c75076fbc23abc45"
+    },
+    {
+      "id": "github-commit-05d93dd2749d",
+      "title": "Add YOS Nav one-tap Google Maps launcher",
+      "completed_at": "2026-07-22T13:39:00Z",
+      "result": "GitHub mainへ反映（05d93dd）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/05d93dd2749d0889d3e128862793f21120c71d51"
+    },
+    {
       "id": "github-commit-9254c1c61325",
       "title": "Rebuild SE3 calendar layouts v38",
       "completed_at": "2026-07-22T13:21:28Z",
@@ -64,20 +78,6 @@
       "completed_at": "2026-07-22T13:15:05Z",
       "result": "GitHub mainへ反映（98610a6）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/98610a6ded9940f7b1a6f1e1fe6a571838209c30"
-    },
-    {
-      "id": "github-commit-c0606e4d8134",
-      "title": "Refresh Taxi cache for SE3 layout fix v36",
-      "completed_at": "2026-07-22T10:57:48Z",
-      "result": "GitHub mainへ反映（c0606e4）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/c0606e4d8134670b8c329f2fffa219dc220ac5d9"
-    },
-    {
-      "id": "github-commit-8a7d5ee2c8d0",
-      "title": "Fix SE3 calendar and manage layout overlap v36",
-      "completed_at": "2026-07-22T10:57:18Z",
-      "result": "GitHub mainへ反映（8a7d5ee）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/8a7d5ee2c8d083a21c2c8500633c7af1d332fb41"
     },
     {
       "id": "complete-002",
@@ -114,7 +114,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-22T22:21:43+09:00",
+      "last_update": "2026-07-22T22:39:32+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -195,7 +195,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-22T22:21:43+09:00",
+      "last_update": "2026-07-22T22:39:32+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -218,7 +218,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-22T22:21:43+09:00",
+      "last_update": "2026-07-22T22:39:32+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -300,5 +300,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "e47c6ac95be001ba95f701d3375d2c9f1695d6e8e8f4bedc6d4f031fb3478ff3"
+  "github_snapshot_hash": "6199942c330f3cc5ff8fe85a1e2ffff75e827eb68aada3d6930b66f3a9d150a6"
 }
