@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-22T19:52:13+09:00",
+  "updated_at": "2026-07-22T19:57:30+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -45,6 +45,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-8a7d5ee2c8d0",
+      "title": "Fix SE3 calendar and manage layout overlap v36",
+      "completed_at": "2026-07-22T10:57:18Z",
+      "result": "GitHub mainへ反映（8a7d5ee）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/8a7d5ee2c8d083a21c2c8500633c7af1d332fb41"
+    },
+    {
       "id": "github-commit-9cc0fd7f2b58",
       "title": "Enable production cross swipe navigation v35",
       "completed_at": "2026-07-22T10:52:04Z",
@@ -71,13 +78,6 @@
       "completed_at": "2026-07-22T10:49:54Z",
       "result": "GitHub mainへ反映（bb7f7dd）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/bb7f7dd7045b4dc3b54d8368457784c73147e1f3"
-    },
-    {
-      "id": "github-commit-2d2bc4429a0d",
-      "title": "Add YOS Interpreter offline shell",
-      "completed_at": "2026-07-22T05:43:25Z",
-      "result": "GitHub mainへ反映（2d2bc44）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/2d2bc4429a0d55dd3e747cfe3b9d8f690021d5bb"
     },
     {
       "id": "complete-002",
@@ -114,7 +114,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-22T19:52:13+09:00",
+      "last_update": "2026-07-22T19:57:30+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -195,7 +195,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-22T19:52:13+09:00",
+      "last_update": "2026-07-22T19:57:30+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -218,7 +218,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-22T19:52:13+09:00",
+      "last_update": "2026-07-22T19:57:30+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -300,5 +300,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "465803962afcd7f68999553aca8d266c77caa17a18134ef89bf1f35d37939e5a"
+  "github_snapshot_hash": "b932c21886e6e166a85dc7a0bef825cbe04b73ee2585631b7b69640395de5299"
 }
