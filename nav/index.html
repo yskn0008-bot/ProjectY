@@ -5,55 +5,81 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0b0b0d">
 <link rel="manifest" href="./manifest.webmanifest">
-<title>YOSナビ</title>
+<title>YOS戦略ナビ</title>
 <style>
-:root{color-scheme:dark;--bg:#09090b;--panel:#171719;--line:#2b2b30;--text:#fff;--muted:#aaaab3;--accent:#ff9a1f}
-*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 100% 0,rgba(255,154,31,.16),transparent 34%),var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif}.app{max-width:520px;margin:auto;padding:calc(env(safe-area-inset-top) + 18px) 14px calc(env(safe-area-inset-bottom) + 24px)}h1{margin:0;font-size:28px}.sub{margin:6px 0 18px;color:var(--muted);font-size:13px}.panel{padding:14px;border:1px solid var(--line);border-radius:20px;background:var(--panel)}label{display:block;margin-bottom:7px;color:var(--muted);font-size:12px;font-weight:800}input{width:100%;min-height:54px;border:1px solid var(--line);border-radius:15px;padding:0 14px;background:#222226;color:var(--text);font-size:18px}button{border:0;font:inherit}.start{width:100%;min-height:58px;margin-top:10px;border-radius:16px;background:linear-gradient(145deg,#ffb323,#ff7a00);color:#17100a;font-size:18px;font-weight:950}.quick-title{margin:18px 2px 9px;color:var(--muted);font-size:12px;font-weight:900}.quick{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.quick button{min-height:58px;border:1px solid var(--line);border-radius:16px;background:var(--panel);color:var(--text);font-size:16px;font-weight:900}.note{margin:14px 2px 0;color:var(--muted);font-size:11px;line-height:1.5}.error{min-height:20px;margin:8px 2px 0;color:#ff727b;font-size:12px}
+:root{color-scheme:dark;--bg:#09090b;--panel:#171719;--line:#2b2b30;--text:#fff;--muted:#aaaab3;--accent:#ff9a1f;--green:#42d17f;--blue:#6fa8ff;--yellow:#f4c84d;--red:#ff6d78}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif}body{background:radial-gradient(circle at 100% 0,rgba(255,154,31,.16),transparent 34%),var(--bg)}button,input{font:inherit}.app{max-width:560px;margin:auto;padding:calc(env(safe-area-inset-top) + 14px) 12px calc(env(safe-area-inset-bottom) + 22px)}h1{margin:0;font-size:26px}.sub{margin:5px 0 14px;color:var(--muted);font-size:12px}.hero{border:1px solid rgba(66,209,127,.45);border-radius:22px;padding:15px;background:linear-gradient(145deg,rgba(66,209,127,.16),var(--panel) 64%)}.eyebrow{color:var(--green);font-size:11px;font-weight:950}.hero h2{margin:5px 0 2px;font-size:30px;line-height:1.05}.hero p{margin:0;color:var(--muted);font-size:12px}.go{width:100%;min-height:58px;margin-top:12px;border:0;border-radius:16px;background:linear-gradient(145deg,#ffb323,#ff7a00);color:#17100a;font-size:18px;font-weight:950}.grid{display:grid;gap:8px;margin-top:10px}.card{display:grid;grid-template-columns:12px minmax(0,1fr) auto;align-items:center;gap:10px;min-height:74px;padding:11px 12px;border:1px solid var(--line);border-radius:18px;background:var(--panel)}.bar{width:8px;height:42px;border-radius:999px}.card b{display:block;font-size:17px}.card small{display:block;margin-top:3px;color:var(--muted);font-size:10px}.card button{min-height:38px;padding:0 10px;border:1px solid var(--line);border-radius:11px;background:#222226;color:var(--text);font-size:11px;font-weight:900}.green .bar{background:var(--green)}.blue .bar{background:var(--blue)}.yellow .bar{background:var(--yellow)}.red .bar{background:var(--red)}.timer{margin-top:10px;padding:13px;border:1px solid var(--line);border-radius:18px;background:var(--panel)}.timer-head{display:flex;justify-content:space-between;align-items:center;gap:8px}.timer strong{font-size:28px}.timer span{color:var(--muted);font-size:11px}.timer-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:9px}.timer-actions button{min-height:42px;border:1px solid var(--line);border-radius:12px;background:#222226;color:var(--text);font-weight:900}.manual{margin-top:12px;padding:13px;border:1px solid var(--line);border-radius:18px;background:var(--panel)}label{display:block;margin-bottom:6px;color:var(--muted);font-size:11px;font-weight:900}input{width:100%;min-height:48px;border:1px solid var(--line);border-radius:13px;padding:0 12px;background:#222226;color:var(--text)}.manual button{width:100%;min-height:48px;margin-top:8px;border:0;border-radius:13px;background:#2b2b30;color:var(--text);font-weight:900}.note{margin:12px 2px 0;color:var(--muted);font-size:10px;line-height:1.5}.hidden{display:none!important}
 </style>
 </head>
 <body>
 <main class="app">
-<h1>🧭 YOSナビ</h1>
-<p class="sub">目的地を選ぶか入力して、Googleマップの車ルートを開く。</p>
-<section class="panel">
-<label for="destination">目的地</label>
-<input id="destination" type="search" inputmode="search" autocomplete="off" enterkeyhint="go" placeholder="例：那覇空港、ホテル名、住所">
-<button id="start" class="start">Googleマップで案内</button>
-<p id="error" class="error" role="alert"></p>
+<h1>🧭 YOS戦略ナビ</h1>
+<p class="sub">見る → 動く。営業判断を色とナビに変える。</p>
+<section class="hero">
+<div class="eyebrow">今の指示</div>
+<h2 id="primaryName">久茂地</h2>
+<p id="primaryAction">今すぐ向かう</p>
+<button id="primaryGo" class="go">ここへ行く</button>
 </section>
-<p class="quick-title">よく使う目的地</p>
-<section class="quick" aria-label="よく使う目的地">
-<button data-destination="那覇空港">空港</button>
-<button data-destination="那覇市久茂地">久茂地</button>
-<button data-destination="那覇市松山">松山</button>
-<button data-destination="美浜アメリカンビレッジ">アメビレ</button>
-<button data-destination="沖縄コンベンションセンター">コンベンション</button>
-<button data-destination="那覇市若狭">若狭</button>
+<section class="grid">
+<article class="card blue"><i class="bar"></i><div><b id="nextName">松山</b><small id="nextAction">次の候補・到着後10分待機</small></div><button data-target="next">ナビ</button></article>
+<article class="card yellow"><i class="bar"></i><div><b id="passName">若狭</b><small id="passAction">流しながら確認</small></div><button data-target="pass">ナビ</button></article>
+<article class="card red"><i class="bar"></i><div><b id="avoidName">空港</b><small id="avoidAction">今は行かない</small></div><button data-target="avoid">確認</button></article>
 </section>
-<p class="note">運転中は操作しない。停車後に確認。Googleマップが開いたら、必要に応じて「開始」を押す。</p>
+<section class="timer">
+<div class="timer-head"><div><span>待機タイマー</span><strong id="timerText">10:00</strong></div><span id="timerStatus">未開始</span></div>
+<div class="timer-actions"><button id="timerStart">開始</button><button id="timerReset">リセット</button></div>
+</section>
+<section class="manual">
+<label for="destination">自由入力</label>
+<input id="destination" type="search" autocomplete="off" enterkeyhint="go" placeholder="ホテル名・施設名・住所">
+<button id="manualGo">Googleマップで案内</button>
+</section>
+<p class="note">運転中は操作しない。停車後に確認。Googleマップでは必要に応じて「開始」を押す。</p>
 </main>
 <script>
 'use strict';
 (()=>{
-  const input=document.getElementById('destination');
-  const error=document.getElementById('error');
+  const params=new URLSearchParams(location.search);
+  const state={
+    primary:params.get('primary')||'那覇市久茂地',
+    primaryLabel:params.get('primaryLabel')||'久茂地',
+    primaryAction:params.get('primaryAction')||'今すぐ向かう',
+    next:params.get('next')||'那覇市松山',
+    nextLabel:params.get('nextLabel')||'松山',
+    nextAction:params.get('nextAction')||'次の候補・到着後10分待機',
+    pass:params.get('pass')||'那覇市若狭',
+    passLabel:params.get('passLabel')||'若狭',
+    passAction:params.get('passAction')||'流しながら確認',
+    avoid:params.get('avoid')||'那覇空港',
+    avoidLabel:params.get('avoidLabel')||'空港',
+    avoidAction:params.get('avoidAction')||'今は行かない',
+    wait:Math.max(1,Math.min(60,Number(params.get('wait')||10)))
+  };
+  const $=id=>document.getElementById(id);
+  $('primaryName').textContent=state.primaryLabel;$('primaryAction').textContent=state.primaryAction;
+  $('nextName').textContent=state.nextLabel;$('nextAction').textContent=state.nextAction;
+  $('passName').textContent=state.passLabel;$('passAction').textContent=state.passAction;
+  $('avoidName').textContent=state.avoidLabel;$('avoidAction').textContent=state.avoidAction;
   function openMaps(destination){
-    const value=String(destination||'').trim();
-    if(!value){error.textContent='目的地を入力してください。';input.focus();return}
-    error.textContent='';
+    const value=String(destination||'').trim();if(!value)return;
     const url=new URL('https://www.google.com/maps/dir/');
-    url.searchParams.set('api','1');
-    url.searchParams.set('destination',value);
-    url.searchParams.set('travelmode','driving');
-    url.searchParams.set('dir_action','navigate');
+    url.searchParams.set('api','1');url.searchParams.set('destination',value);url.searchParams.set('travelmode','driving');url.searchParams.set('dir_action','navigate');
     location.href=url.toString();
   }
-  document.getElementById('start').addEventListener('click',()=>openMaps(input.value));
-  input.addEventListener('keydown',event=>{if(event.key==='Enter'){event.preventDefault();openMaps(input.value)}});
-  document.querySelectorAll('[data-destination]').forEach(button=>button.addEventListener('click',()=>openMaps(button.dataset.destination)));
-  const params=new URLSearchParams(location.search);
-  const preset=params.get('destination');
-  if(preset){input.value=preset;openMaps(preset)}
+  $('primaryGo').onclick=()=>openMaps(state.primary);
+  document.querySelector('[data-target="next"]').onclick=()=>openMaps(state.next);
+  document.querySelector('[data-target="pass"]').onclick=()=>openMaps(state.pass);
+  document.querySelector('[data-target="avoid"]').onclick=()=>openMaps(state.avoid);
+  $('manualGo').onclick=()=>openMaps($('destination').value);
+  $('destination').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();openMaps(e.currentTarget.value)}});
+  let remaining=state.wait*60,timer=null;
+  const paint=()=>{$('timerText').textContent=`${String(Math.floor(remaining/60)).padStart(2,'0')}:${String(remaining%60).padStart(2,'0')}`};paint();
+  $('timerStart').onclick=()=>{
+    if(timer)return;$('timerStatus').textContent='待機中';
+    timer=setInterval(()=>{remaining=Math.max(0,remaining-1);paint();if(remaining===0){clearInterval(timer);timer=null;$('timerStatus').textContent='次候補へ';navigator.vibrate?.([200,100,200]);}},1000);
+  };
+  $('timerReset').onclick=()=>{if(timer)clearInterval(timer);timer=null;remaining=state.wait*60;paint();$('timerStatus').textContent='未開始'};
   if('serviceWorker' in navigator)navigator.serviceWorker.register('./service-worker.js').catch(()=>{});
 })();
 </script>
