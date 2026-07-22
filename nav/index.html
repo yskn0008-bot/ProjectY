@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b0b0d">
+<link rel="manifest" href="./manifest.webmanifest">
+<title>YOSナビ</title>
+<style>
+:root{color-scheme:dark;--bg:#09090b;--panel:#171719;--line:#2b2b30;--text:#fff;--muted:#aaaab3;--accent:#ff9a1f}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 100% 0,rgba(255,154,31,.16),transparent 34%),var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif}.app{max-width:520px;margin:auto;padding:calc(env(safe-area-inset-top) + 18px) 14px calc(env(safe-area-inset-bottom) + 24px)}h1{margin:0;font-size:28px}.sub{margin:6px 0 18px;color:var(--muted);font-size:13px}.panel{padding:14px;border:1px solid var(--line);border-radius:20px;background:var(--panel)}label{display:block;margin-bottom:7px;color:var(--muted);font-size:12px;font-weight:800}input{width:100%;min-height:54px;border:1px solid var(--line);border-radius:15px;padding:0 14px;background:#222226;color:var(--text);font-size:18px}button{border:0;font:inherit}.start{width:100%;min-height:58px;margin-top:10px;border-radius:16px;background:linear-gradient(145deg,#ffb323,#ff7a00);color:#17100a;font-size:18px;font-weight:950}.quick-title{margin:18px 2px 9px;color:var(--muted);font-size:12px;font-weight:900}.quick{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.quick button{min-height:58px;border:1px solid var(--line);border-radius:16px;background:var(--panel);color:var(--text);font-size:16px;font-weight:900}.note{margin:14px 2px 0;color:var(--muted);font-size:11px;line-height:1.5}.error{min-height:20px;margin:8px 2px 0;color:#ff727b;font-size:12px}
+</style>
+</head>
+<body>
+<main class="app">
+<h1>🧭 YOSナビ</h1>
+<p class="sub">目的地を選ぶか入力して、Googleマップの車ルートを開く。</p>
+<section class="panel">
+<label for="destination">目的地</label>
+<input id="destination" type="search" inputmode="search" autocomplete="off" enterkeyhint="go" placeholder="例：那覇空港、ホテル名、住所">
+<button id="start" class="start">Googleマップで案内</button>
+<p id="error" class="error" role="alert"></p>
+</section>
+<p class="quick-title">よく使う目的地</p>
+<section class="quick" aria-label="よく使う目的地">
+<button data-destination="那覇空港">空港</button>
+<button data-destination="那覇市久茂地">久茂地</button>
+<button data-destination="那覇市松山">松山</button>
+<button data-destination="美浜アメリカンビレッジ">アメビレ</button>
+<button data-destination="沖縄コンベンションセンター">コンベンション</button>
+<button data-destination="那覇市若狭">若狭</button>
+</section>
+<p class="note">運転中は操作しない。停車後に確認。Googleマップが開いたら、必要に応じて「開始」を押す。</p>
+</main>
+<script>
+'use strict';
+(()=>{
+  const input=document.getElementById('destination');
+  const error=document.getElementById('error');
+  function openMaps(destination){
+    const value=String(destination||'').trim();
+    if(!value){error.textContent='目的地を入力してください。';input.focus();return}
+    error.textContent='';
+    const url=new URL('https://www.google.com/maps/dir/');
+    url.searchParams.set('api','1');
+    url.searchParams.set('destination',value);
+    url.searchParams.set('travelmode','driving');
+    url.searchParams.set('dir_action','navigate');
+    location.href=url.toString();
+  }
+  document.getElementById('start').addEventListener('click',()=>openMaps(input.value));
+  input.addEventListener('keydown',event=>{if(event.key==='Enter'){event.preventDefault();openMaps(input.value)}});
+  document.querySelectorAll('[data-destination]').forEach(button=>button.addEventListener('click',()=>openMaps(button.dataset.destination)));
+  const params=new URLSearchParams(location.search);
+  const preset=params.get('destination');
+  if(preset){input.value=preset;openMaps(preset)}
+  if('serviceWorker' in navigator)navigator.serviceWorker.register('./service-worker.js').catch(()=>{});
+})();
+</script>
+</body>
+</html>
