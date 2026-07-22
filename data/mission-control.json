@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-22T14:18:52+09:00",
+  "updated_at": "2026-07-22T14:43:09+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -45,6 +45,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-71b1be9445cd",
+      "title": "Add YOS Interpreter PWA prototype",
+      "completed_at": "2026-07-22T05:42:59Z",
+      "result": "GitHub mainへ反映（71b1be9）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/71b1be9445cd64e235e7368246eab6d52717ac14"
+    },
+    {
       "id": "github-commit-78549adbad77",
       "title": "Add reliable launcher for UX v33 test build",
       "completed_at": "2026-07-22T05:18:41Z",
@@ -71,13 +78,6 @@
       "completed_at": "2026-07-21T17:37:27Z",
       "result": "GitHub mainへ反映（a996c45）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/a996c45e3eee8cd7cfd6b4df57c3d14d9a8b6420"
-    },
-    {
-      "id": "github-commit-a4720877b634",
-      "title": "Publish weekly layout and swipe fixes",
-      "completed_at": "2026-07-21T16:38:08Z",
-      "result": "GitHub mainへ反映（a472087）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/a4720877b634629660c0e679e5bf0a33beeb58c6"
     },
     {
       "id": "complete-002",
@@ -114,7 +114,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-22T14:18:52+09:00",
+      "last_update": "2026-07-22T14:43:09+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -195,7 +195,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-22T14:18:52+09:00",
+      "last_update": "2026-07-22T14:43:09+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -218,7 +218,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-22T14:18:52+09:00",
+      "last_update": "2026-07-22T14:43:09+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -300,5 +300,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "e97b52ae1918bbb962d9e8dd4efa4b44fa49b5e8a7cff204387dc09562cf08bf"
+  "github_snapshot_hash": "d3d189e90eaf5d2eb0818a15655ca29f20669ae91329b4d9477e7f01abd7f167"
 }
