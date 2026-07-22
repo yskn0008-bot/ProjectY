@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-22T14:43:38+09:00",
+  "updated_at": "2026-07-22T19:50:06+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -45,6 +45,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-bb7f7dd7045b",
+      "title": "Stabilize Taxi UI by disabling all swipe navigation",
+      "completed_at": "2026-07-22T10:49:54Z",
+      "result": "GitHub mainへ反映（bb7f7dd）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/bb7f7dd7045b4dc3b54d8368457784c73147e1f3"
+    },
+    {
       "id": "github-commit-2d2bc4429a0d",
       "title": "Add YOS Interpreter offline shell",
       "completed_at": "2026-07-22T05:43:25Z",
@@ -71,13 +78,6 @@
       "completed_at": "2026-07-22T05:18:41Z",
       "result": "GitHub mainへ反映（78549ad）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/78549adbad771eff39e35d5eeb37c7e993579df3"
-    },
-    {
-      "id": "github-commit-cc61eed87c21",
-      "title": "Add isolated UX v33 test mode and preserve production swipe",
-      "completed_at": "2026-07-21T17:39:43Z",
-      "result": "GitHub mainへ反映（cc61eed）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/cc61eed87c212f145131a7dbb2f71ec375bffd5a"
     },
     {
       "id": "complete-002",
@@ -114,7 +114,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-22T14:43:38+09:00",
+      "last_update": "2026-07-22T19:50:06+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -195,7 +195,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-22T14:43:38+09:00",
+      "last_update": "2026-07-22T19:50:06+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -218,7 +218,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-22T14:43:38+09:00",
+      "last_update": "2026-07-22T19:50:06+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -300,5 +300,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "1f9cebb9f99805784e3dbb3558f9be883c8d60ea2887d7372c85bbf4b0700356"
+  "github_snapshot_hash": "a23a0d8889c73aa45721068b6629846c769b00897891cc2bb5cd45d64dcae122"
 }
