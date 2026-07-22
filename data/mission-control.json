@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-22T22:42:43+09:00",
+  "updated_at": "2026-07-22T22:43:12+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -45,6 +45,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-1ad4a52ce35e",
+      "title": "Document YOS Navi strategy integration for Codex",
+      "completed_at": "2026-07-22T13:42:53Z",
+      "result": "GitHub mainへ反映（1ad4a52）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/1ad4a52ce35e43f3032b4ed4d368e63543541536"
+    },
+    {
       "id": "github-commit-0dd60ada0238",
       "title": "Add YOS Navi strategy app service worker",
       "completed_at": "2026-07-22T13:42:28Z",
@@ -71,13 +78,6 @@
       "completed_at": "2026-07-22T13:39:00Z",
       "result": "GitHub mainへ反映（05d93dd）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/05d93dd2749d0889d3e128862793f21120c71d51"
-    },
-    {
-      "id": "github-commit-9254c1c61325",
-      "title": "Rebuild SE3 calendar layouts v38",
-      "completed_at": "2026-07-22T13:21:28Z",
-      "result": "GitHub mainへ反映（9254c1c）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/9254c1c61325752f13a2114c3c69172716a03532"
     },
     {
       "id": "complete-002",
@@ -114,7 +114,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-22T22:42:43+09:00",
+      "last_update": "2026-07-22T22:43:12+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -195,7 +195,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-22T22:42:43+09:00",
+      "last_update": "2026-07-22T22:43:12+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -218,7 +218,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-22T22:42:43+09:00",
+      "last_update": "2026-07-22T22:43:12+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -300,5 +300,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "9f8ac0c621262d3f1e3803b544d5a229b52944ec69debf1fd3aeb1503344b3dd"
+  "github_snapshot_hash": "143f142f9d4d18c088119c4c32b52cb44154bb9bb1516063643e78e27d88ef8c"
 }
