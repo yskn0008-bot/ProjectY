@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-22T02:39:57+09:00",
+  "updated_at": "2026-07-22T14:18:52+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -45,6 +45,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-78549adbad77",
+      "title": "Add reliable launcher for UX v33 test build",
+      "completed_at": "2026-07-22T05:18:41Z",
+      "result": "GitHub mainへ反映（78549ad）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/78549adbad771eff39e35d5eeb37c7e993579df3"
+    },
+    {
       "id": "github-commit-cc61eed87c21",
       "title": "Add isolated UX v33 test mode and preserve production swipe",
       "completed_at": "2026-07-21T17:39:43Z",
@@ -71,13 +78,6 @@
       "completed_at": "2026-07-21T16:38:08Z",
       "result": "GitHub mainへ反映（a472087）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/a4720877b634629660c0e679e5bf0a33beeb58c6"
-    },
-    {
-      "id": "github-commit-9eec4a0949dc",
-      "title": "Fix weekly calendar alignment",
-      "completed_at": "2026-07-21T16:37:36Z",
-      "result": "GitHub mainへ反映（9eec4a0）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/9eec4a0949dcaefdd17c56b9a0a5fe8e177fdb5d"
     },
     {
       "id": "complete-002",
@@ -114,7 +114,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-22T02:39:57+09:00",
+      "last_update": "2026-07-22T14:18:52+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -195,7 +195,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-22T02:39:57+09:00",
+      "last_update": "2026-07-22T14:18:52+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -218,7 +218,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-22T02:39:57+09:00",
+      "last_update": "2026-07-22T14:18:52+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -300,5 +300,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "cd34e6f7c2c400add3135ca2c9f9b5b96f454e4c0345fa7d2a2faaa917cb2a25"
+  "github_snapshot_hash": "e97b52ae1918bbb962d9e8dd4efa4b44fa49b5e8a7cff204387dc09562cf08bf"
 }
