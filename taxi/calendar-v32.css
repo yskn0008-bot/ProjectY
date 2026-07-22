@@ -111,3 +111,29 @@ body[data-calendar-page="week"] .week-item.today{
   body[data-calendar-page="week"] .week-date{font-size:18px!important}
   body[data-calendar-page="week"] .week-metrics strong{font-size:15px!important}
 }
+
+/* v36 SE3 / narrow-width emergency layout fix */
+@media(max-width:430px){
+  html,body{width:100%!important;max-width:100%!important;overflow-x:hidden!important}
+  body .app{width:100%!important;max-width:100%!important;padding-left:10px!important;padding-right:10px!important}
+  body .top{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;align-items:center!important;gap:8px!important}
+  body .top h1{font-size:22px!important;line-height:1.05!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+  body .summary{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:7px!important;width:100%!important}
+  body .summary .card{min-width:0!important;padding:10px!important;overflow:hidden!important}
+  body .summary .card strong{font-size:17px!important;line-height:1.05!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+  body .view-tabs{grid-template-columns:repeat(3,minmax(0,1fr))!important;width:100%!important}
+  body .toolbar{grid-template-columns:48px minmax(0,1fr) 48px!important;width:100%!important}
+  body .period{min-width:0!important;font-size:17px!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+  body #todayView,body #weekView,body #monthView,body .view,body .detail,body .detail-grid,body .week-list,body .month-grid{width:100%!important;max-width:100%!important;min-width:0!important}
+  body .detail-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  body .month-grid,body .week-head{grid-template-columns:repeat(7,minmax(0,1fr))!important;gap:3px!important}
+  body .day{min-width:0!important;min-height:92px!important;padding:6px 4px!important;overflow:hidden!important}
+  body .day .date{font-size:12px!important}
+  body .month-money{font-size:9px!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+  body .month-label,body .month-sub{font-size:7px!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+  body a.settings,body button.settings,body .settings{width:100%!important;max-width:100%!important;min-height:44px!important;white-space:normal!important;text-align:center!important;line-height:1.2!important}
+  body [class*="balance"],body [class*="remaining"],body [class*="manage"],body [class*="allocation"],body [class*="target-panel"]{max-width:100%!important;min-width:0!important;width:100%!important;position:static!important;float:none!important;transform:none!important;writing-mode:horizontal-tb!important;overflow:hidden!important;word-break:break-word!important}
+  body [class*="balance"] *,body [class*="remaining"] *,body [class*="manage"] *,body [class*="allocation"] *,body [class*="target-panel"] *{max-width:100%!important;writing-mode:horizontal-tb!important;word-break:break-word!important}
+  body [style*="position: fixed"],body [style*="position:fixed"]{max-width:calc(100vw - 20px)!important}
+  body #taxiGlobalNavV24{left:10px!important;right:10px!important;width:auto!important;max-width:calc(100vw - 20px)!important}
+}
