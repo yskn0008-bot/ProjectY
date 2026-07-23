@@ -60,3 +60,10 @@
   .day{min-height:76px!important}
   .taxi-global-nav-v24{left:5px!important;right:5px!important;padding:5px!important;gap:2px!important}
 }
+
+/* Safari／アプリ内ブラウザの下部操作バーと固定ナビを重ねない */
+@media (max-width:430px) and (display-mode:browser){
+  main.app,.app{padding-bottom:calc(env(safe-area-inset-bottom) + 190px)!important}
+  .taxi-global-nav-v24{bottom:calc(env(safe-area-inset-bottom) + 96px)!important}
+  #yosSuiteHomeV38{bottom:calc(env(safe-area-inset-bottom) + 168px)!important}
+}
