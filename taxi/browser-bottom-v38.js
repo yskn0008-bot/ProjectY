@@ -7,12 +7,15 @@
   const apply=()=>{
     if(isStandalone()){
       root.style.setProperty('--yos-browser-bottom','0px');
+      root.classList.add('yos-standalone-mode');
+      root.classList.remove('yos-browser-mode');
       return;
     }
+    root.classList.add('yos-browser-mode');
+    root.classList.remove('yos-standalone-mode');
     const vv=window.visualViewport;
     const measured=vv?Math.max(0,Math.round(window.innerHeight-vv.height-vv.offsetTop)):0;
-    const fallback=44;
-    const extra=Math.min(140,Math.max(fallback,measured));
+    const extra=Math.min(150,Math.max(96,measured));
     root.style.setProperty('--yos-browser-bottom',`${extra}px`);
   };
   apply();
