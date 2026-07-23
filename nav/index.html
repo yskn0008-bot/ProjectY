@@ -42,6 +42,8 @@
 'use strict';
 (()=>{
   const params=new URLSearchParams(location.search);
+  const waitParam=Number(params.get('wait'));
+  const waitMinutes=Number.isFinite(waitParam)?Math.max(1,Math.min(60,Math.round(waitParam))):10;
   const state={
     primary:params.get('primary')||'那覇市久茂地',
     primaryLabel:params.get('primaryLabel')||'久茂地',
@@ -55,7 +57,7 @@
     avoid:params.get('avoid')||'那覇空港',
     avoidLabel:params.get('avoidLabel')||'空港',
     avoidAction:params.get('avoidAction')||'今は行かない',
-    wait:Math.max(1,Math.min(60,Number(params.get('wait')||10)))
+    wait:waitMinutes
   };
   const $=id=>document.getElementById(id);
   $('primaryName').textContent=state.primaryLabel;$('primaryAction').textContent=state.primaryAction;
@@ -81,13 +83,19 @@
   document.querySelector('[data-target="avoid"]').onclick=()=>alert(`${state.avoidLabel}は現在の回避先です。ナビは開始しません。`);
   $('manualGo').onclick=()=>openMaps($('destination').value);
   $('destination').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();openMaps(e.currentTarget.value)}});
-  let remaining=state.wait*60,timer=null;
-  const paint=()=>{$('timerText').textContent=`${String(Math.floor(remaining/60)).padStart(2,'0')}:${String(remaining%60).padStart(2,'0')}`};paint();
+  let remaining=state.wait*60,timer=null,deadline=0,finished=false;
+  const paint=()=>{$('timerText').textContent=`${String(Math.floor(remaining/60)).padStart(2,'0')}:${String(remaining%60).padStart(2,'0')}`};
+  const stopTimer=()=>{if(timer)clearInterval(timer);timer=null};
+  const finishTimer=()=>{if(finished)return;finished=true;stopTimer();remaining=0;paint();$('timerStatus').textContent='次候補へ';navigator.vibrate?.([200,100,200])};
+  const syncTimer=()=>{if(!deadline)return;remaining=Math.max(0,Math.ceil((deadline-Date.now())/1000));paint();if(remaining===0)finishTimer()};
+  paint();
   $('timerStart').onclick=()=>{
-    if(timer)return;$('timerStatus').textContent='待機中';
-    timer=setInterval(()=>{remaining=Math.max(0,remaining-1);paint();if(remaining===0){clearInterval(timer);timer=null;$('timerStatus').textContent='次候補へ';navigator.vibrate?.([200,100,200]);}},1000);
+    if(timer||remaining===0)return;
+    finished=false;deadline=Date.now()+remaining*1000;$('timerStatus').textContent='待機中';
+    timer=setInterval(syncTimer,250);syncTimer();
   };
-  $('timerReset').onclick=()=>{if(timer)clearInterval(timer);timer=null;remaining=state.wait*60;paint();$('timerStatus').textContent='未開始'};
+  $('timerReset').onclick=()=>{stopTimer();deadline=0;finished=false;remaining=state.wait*60;paint();$('timerStatus').textContent='未開始'};
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden&&deadline)syncTimer()});
   if('serviceWorker' in navigator)navigator.serviceWorker.register('./service-worker.js').catch(()=>{});
 })();
 </script>
