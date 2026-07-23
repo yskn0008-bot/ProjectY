@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-24T02:27:48+09:00",
+  "updated_at": "2026-07-24T02:28:40+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -75,6 +75,20 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-72c6ccb72746",
+      "title": "Refresh YOS navigation cache for location freshness",
+      "completed_at": "2026-07-23T17:28:25Z",
+      "result": "GitHub mainへ反映（72c6ccb）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/72c6ccb72746e9dfebd3accc4b0b088f265621b9"
+    },
+    {
+      "id": "github-commit-f6f20242df7c",
+      "title": "Ignore stale YOS navigation route origins",
+      "completed_at": "2026-07-23T17:28:14Z",
+      "result": "GitHub mainへ反映（f6f2024）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/f6f20242df7c34e21fe7c576c7e5116939ddbb19"
+    },
+    {
       "id": "github-commit-7611d73ebcbc",
       "title": "Expire stale YOS navigation location data",
       "completed_at": "2026-07-23T17:27:34Z",
@@ -94,20 +108,6 @@
       "completed_at": "2026-07-23T16:10:17Z",
       "result": "GitHub mainへ反映（2a9930c）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/2a9930c58286209b302f7fe79acc0d42addb3732"
-    },
-    {
-      "id": "github-commit-813856ff99b6",
-      "title": "Build Life home screen v1",
-      "completed_at": "2026-07-23T15:47:21Z",
-      "result": "GitHub mainへ反映（813856f）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/813856ff99b6cf81f96b309c31a5b384a5705159"
-    },
-    {
-      "id": "github-commit-2bf3d5e0a52e",
-      "title": "chore(taxi): publish bottom-overlap fix as v39",
-      "completed_at": "2026-07-23T15:14:04Z",
-      "result": "GitHub mainへ反映（2bf3d5e）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/2bf3d5e0a52e8603865360b0f8261154e981770d"
     },
     {
       "id": "complete-002",
@@ -144,7 +144,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-24T02:27:48+09:00",
+      "last_update": "2026-07-24T02:28:40+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -225,7 +225,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-24T02:27:48+09:00",
+      "last_update": "2026-07-24T02:28:40+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -248,7 +248,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-24T02:27:48+09:00",
+      "last_update": "2026-07-24T02:28:40+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -330,5 +330,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "9b61358c829052990810cb7d1aa503b5a70977db30364c5b50096c638a0312c5"
+  "github_snapshot_hash": "2d7f4fa10d2f1bdc9dea37503fe52c9f39047b8d99ee43c451df23305412e25d"
 }
