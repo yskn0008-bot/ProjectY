@@ -1,16 +1,31 @@
-/* YOS Taxi v38.6 — browser chrome safe bottom navigation */
-:root{--yos-browser-bottom:0px}
-.taxi-global-nav-v24{
-  bottom:calc(env(safe-area-inset-bottom) + var(--yos-browser-bottom) + 8px)!important;
+/* YOS Taxi v39 — measured bottom navigation clearance */
+:root{
+  --yos-browser-bottom:0px;
+  --yos-nav-height:68px;
+  --yos-nav-gap:8px;
+  --yos-nav-reserve:calc(env(safe-area-inset-bottom) + var(--yos-browser-bottom) + var(--yos-nav-height) + var(--yos-nav-gap) + 16px)
 }
+.taxi-global-nav-v24,
 body[data-calendar-page] #taxiGlobalNavV24{
-  bottom:calc(env(safe-area-inset-bottom) + var(--yos-browser-bottom) + 12px)!important;
+  bottom:calc(env(safe-area-inset-bottom) + var(--yos-browser-bottom) + var(--yos-nav-gap))!important;
 }
 main.app,.app{
-  padding-bottom:calc(env(safe-area-inset-bottom) + var(--yos-browser-bottom) + 92px)!important;
+  padding-bottom:var(--yos-nav-reserve)!important;
+  scroll-padding-bottom:var(--yos-nav-reserve)!important;
+}
+html.taxi-calendar-v28 body[data-calendar-page] .app{
+  padding-bottom:var(--yos-nav-reserve)!important;
+}
+html.taxi-calendar-v28 body[data-calendar-page] .view.v21-active,
+html.taxi-calendar-v28 body[data-calendar-page] .manage-view-v21.v21-active,
+body[data-calendar-page="week"] #weekView.v21-active,
+body[data-calendar-page="manage"] #manageViewV21.v21-active{
+  height:100%!important;
+  max-height:100%!important;
+  min-height:0!important;
 }
 #yosSuiteHomeV38{
-  bottom:calc(env(safe-area-inset-bottom) + var(--yos-browser-bottom) + 86px)!important;
+  bottom:calc(env(safe-area-inset-bottom) + var(--yos-browser-bottom) + var(--yos-nav-height) + var(--yos-nav-gap) + 10px)!important;
 }
 @media(max-width:430px){
   .taxi-global-nav-v24,
