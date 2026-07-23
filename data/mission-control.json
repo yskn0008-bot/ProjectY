@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-23T22:17:44+09:00",
+  "updated_at": "2026-07-23T22:18:08+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -45,6 +45,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-067765b17b7e",
+      "title": "Record YOS navigation shift phase implementation",
+      "completed_at": "2026-07-23T13:17:50Z",
+      "result": "GitHub mainへ反映（067765b）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/067765b17b7eb28c7740f69afe9b7830d2b69b65"
+    },
+    {
       "id": "github-commit-e446857c3f83",
       "title": "Load shift phase indicator in YOS strategy nav",
       "completed_at": "2026-07-23T13:17:30Z",
@@ -71,13 +78,6 @@
       "completed_at": "2026-07-23T04:25:56Z",
       "result": "GitHub mainへ反映（f31e2f2）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/f31e2f22ca7ceebe653c7b95b2ca311698e8391d"
-    },
-    {
-      "id": "github-commit-3e577d8ef7ed",
-      "title": "fix: raise browser bottom navigation reliably",
-      "completed_at": "2026-07-23T04:25:36Z",
-      "result": "GitHub mainへ反映（3e577d8）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/3e577d8ef7edcc29ab80ea5b55f885e95ccba028"
     },
     {
       "id": "complete-002",
@@ -114,7 +114,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-23T22:17:44+09:00",
+      "last_update": "2026-07-23T22:18:08+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -195,7 +195,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-23T22:17:44+09:00",
+      "last_update": "2026-07-23T22:18:08+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -218,7 +218,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-23T22:17:44+09:00",
+      "last_update": "2026-07-23T22:18:08+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -300,5 +300,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "c253aee9a86b7605fadbef10f33665dc7da7ec3f93d34731b199104621777ae1"
+  "github_snapshot_hash": "a1818f0cab60c345c2096daa638b85f4d909a1e5afc96b0ea51d5292f4a210a2"
 }
