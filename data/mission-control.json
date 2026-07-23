@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-23T23:12:02+09:00",
+  "updated_at": "2026-07-23T23:12:45+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -45,6 +45,20 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-5c18ea41ac4c",
+      "title": "Cache YOS navigation location status module",
+      "completed_at": "2026-07-23T14:12:40Z",
+      "result": "GitHub mainへ反映（5c18ea4）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/5c18ea41ac4c1272e53069580191491f89ec5ec0"
+    },
+    {
+      "id": "github-commit-a9db44c3e619",
+      "title": "Load current location status in YOS navigation",
+      "completed_at": "2026-07-23T14:12:19Z",
+      "result": "GitHub mainへ反映（a9db44c）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/a9db44c3e6199539fa30fd648922421b43bbf44f"
+    },
+    {
       "id": "github-commit-9323b197696a",
       "title": "Add optional current location status to YOS navigation",
       "completed_at": "2026-07-23T14:11:29Z",
@@ -64,20 +78,6 @@
       "completed_at": "2026-07-23T13:17:50Z",
       "result": "GitHub mainへ反映（067765b）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/067765b17b7eb28c7740f69afe9b7830d2b69b65"
-    },
-    {
-      "id": "github-commit-e446857c3f83",
-      "title": "Load shift phase indicator in YOS strategy nav",
-      "completed_at": "2026-07-23T13:17:30Z",
-      "result": "GitHub mainへ反映（e446857）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/e446857c3f83592f6c58822a9cc23e44fe593d12"
-    },
-    {
-      "id": "github-commit-7fd9b21e20b5",
-      "title": "Add shift phase indicator for YOS strategy nav",
-      "completed_at": "2026-07-23T13:16:57Z",
-      "result": "GitHub mainへ反映（7fd9b21）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/7fd9b21e20b57d671f3aa0d99a58d564fda6252f"
     },
     {
       "id": "complete-002",
@@ -114,7 +114,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-23T23:12:02+09:00",
+      "last_update": "2026-07-23T23:12:45+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -195,7 +195,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-23T23:12:02+09:00",
+      "last_update": "2026-07-23T23:12:45+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -218,7 +218,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-23T23:12:02+09:00",
+      "last_update": "2026-07-23T23:12:45+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -300,5 +300,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "e2d70fca0d7699f49d5480f8516f08c0b07bc4827e8b32e5d52b675d0aa8f210"
+  "github_snapshot_hash": "676fce8accceb879cbc42e48897c538d8f0bef3d0da831cb50d99ae067a8368b"
 }
