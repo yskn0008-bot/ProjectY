@@ -1,0 +1,11 @@
+{
+  "name": "YOS｜Your Only System",
+  "short_name": "YOS",
+  "description": "仕事・生活・人生判断をつなぐ、ようすけ唯一の司令塔",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#080a10",
+  "theme_color": "#090b12",
+  "orientation": "portrait-primary"
+}
