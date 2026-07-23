@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-23T13:16:21+09:00",
+  "updated_at": "2026-07-23T13:16:52+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -45,6 +45,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-53902c7ee002",
+      "title": "ブラウザ下部バーの高さを自動検出して固定メニューを持ち上げる",
+      "completed_at": "2026-07-23T04:16:37Z",
+      "result": "GitHub mainへ反映（53902c7）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/53902c7ee0023c6cbe4665729f699bc8b0e6987f"
+    },
+    {
       "id": "github-commit-1a543e4e1a6a",
       "title": "Safari下部バーでメニューが切れる問題を修正",
       "completed_at": "2026-07-23T04:16:08Z",
@@ -71,13 +78,6 @@
       "completed_at": "2026-07-23T04:03:15Z",
       "result": "GitHub mainへ反映（01c96a4）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/01c96a45b7883d354d7f045b127dddf8ccbcfeca"
-    },
-    {
-      "id": "github-commit-9b7c60f5f4f3",
-      "title": "fix: deploy urgent calendar v38 layout corrections",
-      "completed_at": "2026-07-23T03:54:42Z",
-      "result": "GitHub mainへ反映（9b7c60f）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/9b7c60f5f4f32472f8a0b37b0da90f303eb52fab"
     },
     {
       "id": "complete-002",
@@ -114,7 +114,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-23T13:16:21+09:00",
+      "last_update": "2026-07-23T13:16:52+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -195,7 +195,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-23T13:16:21+09:00",
+      "last_update": "2026-07-23T13:16:52+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -218,7 +218,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-23T13:16:21+09:00",
+      "last_update": "2026-07-23T13:16:52+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -300,5 +300,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "6fbdc51fd4352aa96668d51c0b875629a2652c499cd236cefe7acfd805929057"
+  "github_snapshot_hash": "976847f62fec8981365dea8099968445ef9c88b85f22be61d0803df932708fdf"
 }
