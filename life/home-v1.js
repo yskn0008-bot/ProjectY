@@ -4,7 +4,7 @@
   window.__yosLifeHomeV1=true;
 
   const DATA_KEY='yos-life-v1';
-  const SETTINGS_KEY='yos-life-settings-v1';
+  const PAGE_KEY='yos-life-home-page-v1';
   const ROUTINE_TOTAL={wake:6,before:4,home:4};
   const PAGE_META={
     home:{label:'ホーム',icon:'⌂'},
@@ -127,11 +127,7 @@
       const copy={home:'今日の全体像',schedule:'予定とやること',record:'体調と気分',improve:'習慣と相談'};
       subtitle.textContent=copy[key];
     }
-    if(remember){
-      const settings=readJson(SETTINGS_KEY,{});
-      settings.lifeHomePage=key;
-      localStorage.setItem(SETTINGS_KEY,JSON.stringify(settings));
-    }
+    if(remember)localStorage.setItem(PAGE_KEY,key);
     window.scrollTo({top:0,behavior:'smooth'});
     queueRefresh();
   }
@@ -206,7 +202,7 @@
     layout.remove();
 
     renderNav(nav);
-    const saved=readJson(SETTINGS_KEY,{}).lifeHomePage;
+    const saved=localStorage.getItem(PAGE_KEY);
     activatePage(PAGE_META[saved]?saved:'home',false);
 
     const observer=new MutationObserver(queueRefresh);
