@@ -1,0 +1,33 @@
+/* YOS Taxi v38.4 — browser chrome safe bottom navigation */
+:root{--yos-browser-bottom:0px}
+.taxi-global-nav-v24{
+  bottom:calc(env(safe-area-inset-bottom) + var(--yos-browser-bottom) + 8px)!important;
+}
+main.app,.app{
+  padding-bottom:calc(env(safe-area-inset-bottom) + var(--yos-browser-bottom) + 86px)!important;
+}
+#yosSuiteHomeV38{
+  bottom:calc(env(safe-area-inset-bottom) + var(--yos-browser-bottom) + 82px)!important;
+}
+@media(max-width:430px){
+  .taxi-global-nav-v24{
+    left:8px!important;
+    right:8px!important;
+    width:auto!important;
+    max-width:none!important;
+    transform:none!important;
+  }
+  .taxi-global-nav-v24 button{
+    min-height:54px!important;
+    padding:5px 2px 7px!important;
+    overflow:visible!important;
+  }
+  .taxi-global-nav-v24 button span{line-height:1!important}
+  .taxi-global-nav-v24 button b{
+    display:block!important;
+    line-height:1.15!important;
+    padding-bottom:1px!important;
+    overflow:visible!important;
+    text-overflow:clip!important;
+  }
+}
