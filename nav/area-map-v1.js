@@ -5,7 +5,9 @@
 
   const params=new URLSearchParams(location.search);
   const numberParam=(name,fallback)=>{
-    const value=Number(params.get(name));
+    const raw=params.get(name);
+    if(raw===null||raw==='')return fallback;
+    const value=Number(raw);
     return Number.isFinite(value)?Math.max(0,Math.min(100,Math.round(value))):fallback;
   };
   const areas=[
