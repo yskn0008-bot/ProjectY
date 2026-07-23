@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-23T12:26:54+09:00",
+  "updated_at": "2026-07-23T12:27:29+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -45,6 +45,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-dd84300dcf66",
+      "title": "Connect YOS Taxi to YOS command center",
+      "completed_at": "2026-07-23T03:27:20Z",
+      "result": "GitHub mainへ反映（dd84300）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/dd84300dcf668e0b1c2a32ff8df80b4be4720ad7"
+    },
+    {
       "id": "github-commit-40548eabb93c",
       "title": "Add YOS suite return control to Taxi",
       "completed_at": "2026-07-23T03:26:40Z",
@@ -71,13 +78,6 @@
       "completed_at": "2026-07-23T03:24:10Z",
       "result": "GitHub mainへ反映（ff0d5e7）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/ff0d5e7d7e8aa3382f54e722ace873f220796619"
-    },
-    {
-      "id": "github-commit-1ad4a52ce35e",
-      "title": "Document YOS Navi strategy integration for Codex",
-      "completed_at": "2026-07-22T13:42:53Z",
-      "result": "GitHub mainへ反映（1ad4a52）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/1ad4a52ce35e43f3032b4ed4d368e63543541536"
     },
     {
       "id": "complete-002",
@@ -114,7 +114,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-23T12:26:54+09:00",
+      "last_update": "2026-07-23T12:27:29+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -195,7 +195,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-23T12:26:54+09:00",
+      "last_update": "2026-07-23T12:27:29+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -218,7 +218,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-23T12:26:54+09:00",
+      "last_update": "2026-07-23T12:27:29+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -300,5 +300,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "b381200e59176f6da51df1f56438cf64da976b12b9bc5c8c9bed4bd098dcab08"
+  "github_snapshot_hash": "0fd1c46be54ebd07f0f3413059e5b5db513c097fc26bf1992d12a51f2cc9f6e6"
 }
