@@ -67,8 +67,10 @@
     const locationStatus=document.querySelector('.yos-location-status');
     const latitude=locationStatus?.dataset.latitude;
     const longitude=locationStatus?.dataset.longitude;
+    const acquiredAt=Number(locationStatus?.dataset.acquiredAt||0);
+    const locationIsFresh=acquiredAt>0&&Date.now()-acquiredAt<=5*60*1000;
     url.searchParams.set('api','1');
-    if(latitude&&longitude)url.searchParams.set('origin',`${latitude},${longitude}`);
+    if(latitude&&longitude&&locationIsFresh)url.searchParams.set('origin',`${latitude},${longitude}`);
     url.searchParams.set('destination',value);url.searchParams.set('travelmode','driving');url.searchParams.set('dir_action','navigate');
     location.href=url.toString();
   }
