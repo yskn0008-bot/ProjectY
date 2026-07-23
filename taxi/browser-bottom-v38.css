@@ -1,16 +1,20 @@
-/* YOS Taxi v38.4 — browser chrome safe bottom navigation */
+/* YOS Taxi v38.6 — browser chrome safe bottom navigation */
 :root{--yos-browser-bottom:0px}
 .taxi-global-nav-v24{
   bottom:calc(env(safe-area-inset-bottom) + var(--yos-browser-bottom) + 8px)!important;
 }
+body[data-calendar-page] #taxiGlobalNavV24{
+  bottom:calc(env(safe-area-inset-bottom) + var(--yos-browser-bottom) + 12px)!important;
+}
 main.app,.app{
-  padding-bottom:calc(env(safe-area-inset-bottom) + var(--yos-browser-bottom) + 86px)!important;
+  padding-bottom:calc(env(safe-area-inset-bottom) + var(--yos-browser-bottom) + 92px)!important;
 }
 #yosSuiteHomeV38{
-  bottom:calc(env(safe-area-inset-bottom) + var(--yos-browser-bottom) + 82px)!important;
+  bottom:calc(env(safe-area-inset-bottom) + var(--yos-browser-bottom) + 86px)!important;
 }
 @media(max-width:430px){
-  .taxi-global-nav-v24{
+  .taxi-global-nav-v24,
+  body[data-calendar-page] #taxiGlobalNavV24{
     left:8px!important;
     right:8px!important;
     width:auto!important;
