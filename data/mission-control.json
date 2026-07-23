@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-23T12:28:30+09:00",
+  "updated_at": "2026-07-23T12:52:28+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -45,6 +45,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-ae54931d67b1",
+      "title": "fix: allow cross swipe from every taxi screen",
+      "completed_at": "2026-07-23T03:52:17Z",
+      "result": "GitHub mainへ反映（ae54931）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/ae54931d67b133937ced10efde24a2beeccf08cc"
+    },
+    {
       "id": "github-commit-de3af88248a3",
       "title": "Connect YOS Life to YOS command center",
       "completed_at": "2026-07-23T03:28:17Z",
@@ -71,13 +78,6 @@
       "completed_at": "2026-07-23T03:26:40Z",
       "result": "GitHub mainへ反映（40548ea）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/40548eabb93c7f7ee836da9384a2635557f2725c"
-    },
-    {
-      "id": "github-commit-34d191d73bd2",
-      "title": "Add YOS PWA offline support",
-      "completed_at": "2026-07-23T03:24:49Z",
-      "result": "GitHub mainへ反映（34d191d）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/34d191d73bd28f682b7a9512252ca118478f20d2"
     },
     {
       "id": "complete-002",
@@ -114,7 +114,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-23T12:28:30+09:00",
+      "last_update": "2026-07-23T12:52:28+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -195,7 +195,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-23T12:28:30+09:00",
+      "last_update": "2026-07-23T12:52:28+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -218,7 +218,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-23T12:28:30+09:00",
+      "last_update": "2026-07-23T12:52:28+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -300,5 +300,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "024d2c03815c66a6d7aa518adb28d04e168fb15dda54de5951336aa2f061143d"
+  "github_snapshot_hash": "39516ba96c14db147139eb4810ea4f0d516384adf846d11fdfc0d0656b4fd36d"
 }
