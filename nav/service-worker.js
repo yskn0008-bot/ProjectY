@@ -1,6 +1,6 @@
 'use strict';
-const CACHE='yos-navi-strategy-v2';
-const STATIC=['./','./index.html','./manifest.webmanifest','./shift-phase-v1.js'];
+const CACHE='yos-navi-strategy-v3';
+const STATIC=['./','./index.html','./manifest.webmanifest','./shift-phase-v1.js','./location-status-v1.js'];
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(STATIC)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim())));
 self.addEventListener('fetch',event=>{
@@ -10,8 +10,7 @@ self.addEventListener('fetch',event=>{
   if(isNavPage){
     event.respondWith(fetch(event.request,{cache:'no-cache'}).then(async response=>{
       const html=await response.text();
-      const injected=html.includes('shift-phase-v1.js')?html:html.replace('</body>','<script src="./shift-phase-v1.js"></script></body>');
-      return new Response(injected,{status:response.status,statusText:response.statusText,headers:{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-cache'}});
+      return new Response(html,{status:response.status,statusText:response.statusText,headers:{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-cache'}});
     }).catch(()=>caches.match('./index.html')));
     return;
   }
