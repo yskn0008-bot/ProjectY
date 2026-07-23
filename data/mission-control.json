@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-24T07:10:52+09:00",
+  "updated_at": "2026-07-24T07:11:05+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -75,6 +75,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-0cd5e26df724",
+      "title": "Refresh YOS navigation cache for persistent wait timer",
+      "completed_at": "2026-07-23T22:10:53Z",
+      "result": "GitHub mainへ反映（0cd5e26）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/0cd5e26df72491171295df7580cc4c0f90fdc726"
+    },
+    {
       "id": "github-commit-536edb774ff2",
       "title": "Persist YOS navigation wait timer across map transitions",
       "completed_at": "2026-07-23T22:10:40Z",
@@ -101,13 +108,6 @@
       "completed_at": "2026-07-23T21:09:16Z",
       "result": "GitHub mainへ反映（4483ddf）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/4483ddf50b870aa0ee702c4e1234ee0a8cb1b8dd"
-    },
-    {
-      "id": "github-commit-dbbabab2e2d5",
-      "title": "YOSナビ: 待機タイマーを実時間基準へ修正",
-      "completed_at": "2026-07-23T21:09:01Z",
-      "result": "GitHub mainへ反映（dbbabab）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/dbbabab2e2d59d28d6565ebc5325afbaa65d5f92"
     },
     {
       "id": "complete-002",
@@ -144,7 +144,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-24T07:10:52+09:00",
+      "last_update": "2026-07-24T07:11:05+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -225,7 +225,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-24T07:10:52+09:00",
+      "last_update": "2026-07-24T07:11:05+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -248,7 +248,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-24T07:10:52+09:00",
+      "last_update": "2026-07-24T07:11:05+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -330,5 +330,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "130c5b51a12674c7d3a4e3c4661eb14b0f0de27790160e4a69ac36a306c671ea"
+  "github_snapshot_hash": "5c5bc5e608542ed90b8df01a43fb629316b71d31f5ae26e0f6445c1d9125f79a"
 }
