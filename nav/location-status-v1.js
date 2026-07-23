@@ -30,6 +30,9 @@
     detail.textContent=message;
     button.disabled=false;
     button.textContent='再試行';
+    delete section.dataset.latitude;
+    delete section.dataset.longitude;
+    delete section.dataset.acquiredAt;
   };
 
   button.addEventListener('click',()=>{
@@ -44,12 +47,15 @@
 
     navigator.geolocation.getCurrentPosition(position=>{
       const {latitude,longitude,accuracy}=position.coords;
+      const acquiredAt=Date.now();
+      const acquiredTime=new Date(acquiredAt).toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'});
       title.textContent='現在地 取得済み';
-      detail.textContent=`緯度 ${latitude.toFixed(5)} / 経度 ${longitude.toFixed(5)} / 精度 約${Math.round(accuracy)}m`;
+      detail.textContent=`${acquiredTime}取得 / 精度 約${Math.round(accuracy)}m`;
       button.disabled=false;
       button.textContent='更新';
       section.dataset.latitude=String(latitude);
       section.dataset.longitude=String(longitude);
+      section.dataset.acquiredAt=String(acquiredAt);
     },error=>{
       const messages={
         1:'位置情報の利用が許可されていません',
