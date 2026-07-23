@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-23T22:42:18+09:00",
+  "updated_at": "2026-07-23T23:12:02+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -45,6 +45,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-9323b197696a",
+      "title": "Add optional current location status to YOS navigation",
+      "completed_at": "2026-07-23T14:11:29Z",
+      "result": "GitHub mainへ反映（9323b19）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/9323b197696ab5de10d62282713602ba08f1b9fb"
+    },
+    {
       "id": "github-commit-6f101b3d2f03",
       "title": "Show YOS navigation shift phase on first load",
       "completed_at": "2026-07-23T13:42:04Z",
@@ -71,13 +78,6 @@
       "completed_at": "2026-07-23T13:16:57Z",
       "result": "GitHub mainへ反映（7fd9b21）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/7fd9b21e20b57d671f3aa0d99a58d564fda6252f"
-    },
-    {
-      "id": "github-commit-52d0065d2a27",
-      "title": "chore: publish browser-safe navigation v38.6",
-      "completed_at": "2026-07-23T04:26:48Z",
-      "result": "GitHub mainへ反映（52d0065）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/52d0065d2a27e7e4914879646471ee1be6e0c9a1"
     },
     {
       "id": "complete-002",
@@ -114,7 +114,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-23T22:42:18+09:00",
+      "last_update": "2026-07-23T23:12:02+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -195,7 +195,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-23T22:42:18+09:00",
+      "last_update": "2026-07-23T23:12:02+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -218,7 +218,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-23T22:42:18+09:00",
+      "last_update": "2026-07-23T23:12:02+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -300,5 +300,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "7a85af4633bef5ad5081174c1a61689ca55913d465ee5a396f878d8cabebd184"
+  "github_snapshot_hash": "e2d70fca0d7699f49d5480f8516f08c0b07bc4827e8b32e5d52b675d0aa8f210"
 }
