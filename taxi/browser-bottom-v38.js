@@ -1,26 +1,50 @@
 'use strict';
 (()=>{
-  if(window.__yosBrowserBottomV38)return;
-  window.__yosBrowserBottomV38=true;
+  if(window.__yosBrowserBottomV39)return;
+  window.__yosBrowserBottomV39=true;
+
   const root=document.documentElement;
+  const navId='taxiGlobalNavV24';
   const isStandalone=()=>window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true;
-  const apply=()=>{
-    if(isStandalone()){
-      root.style.setProperty('--yos-browser-bottom','0px');
-      root.classList.add('yos-standalone-mode');
-      root.classList.remove('yos-browser-mode');
-      return;
-    }
-    root.classList.add('yos-browser-mode');
-    root.classList.remove('yos-standalone-mode');
+
+  function browserBottomInset(){
+    if(isStandalone())return 0;
     const vv=window.visualViewport;
-    const measured=vv?Math.max(0,Math.round(window.innerHeight-vv.height-vv.offsetTop)):0;
-    const extra=Math.min(150,Math.max(96,measured));
-    root.style.setProperty('--yos-browser-bottom',`${extra}px`);
+    if(!vv)return 96;
+    const measured=Math.max(0,Math.round(window.innerHeight-vv.height-vv.offsetTop));
+    return Math.min(160,Math.max(96,measured));
+  }
+
+  function apply(){
+    const standalone=isStandalone();
+    const nav=document.getElementById(navId);
+    const navHeight=Math.max(58,Math.ceil(nav?.getBoundingClientRect().height||68));
+    root.style.setProperty('--yos-browser-bottom',`${standalone?0:browserBottomInset()}px`);
+    root.style.setProperty('--yos-nav-height',`${navHeight}px`);
+    root.classList.toggle('yos-standalone-mode',standalone);
+    root.classList.toggle('yos-browser-mode',!standalone);
+  }
+
+  let frame=0;
+  const schedule=()=>{
+    cancelAnimationFrame(frame);
+    frame=requestAnimationFrame(()=>requestAnimationFrame(apply));
   };
+
   apply();
-  window.addEventListener('resize',apply,{passive:true});
-  window.addEventListener('orientationchange',()=>setTimeout(apply,250),{passive:true});
-  window.visualViewport?.addEventListener('resize',apply,{passive:true});
-  window.visualViewport?.addEventListener('scroll',apply,{passive:true});
+  addEventListener('DOMContentLoaded',schedule,{once:true});
+  addEventListener('load',schedule,{once:true});
+  addEventListener('resize',schedule,{passive:true});
+  addEventListener('orientationchange',()=>setTimeout(schedule,250),{passive:true});
+  window.visualViewport?.addEventListener('resize',schedule,{passive:true});
+  window.visualViewport?.addEventListener('scroll',schedule,{passive:true});
+
+  const observer=new MutationObserver(()=>{
+    const nav=document.getElementById(navId);
+    if(!nav)return;
+    observer.disconnect();
+    new ResizeObserver(schedule).observe(nav);
+    schedule();
+  });
+  observer.observe(document.documentElement,{childList:true,subtree:true});
 })();
