@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-23T12:52:28+09:00",
+  "updated_at": "2026-07-23T12:53:23+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -45,6 +45,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-f087a2a6b057",
+      "title": "fix: urgent SE3 calendar layout corrections",
+      "completed_at": "2026-07-23T03:53:08Z",
+      "result": "GitHub mainへ反映（f087a2a）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/f087a2a6b057ba5f0310caa41afa037da1830a2d"
+    },
+    {
       "id": "github-commit-ae54931d67b1",
       "title": "fix: allow cross swipe from every taxi screen",
       "completed_at": "2026-07-23T03:52:17Z",
@@ -71,13 +78,6 @@
       "completed_at": "2026-07-23T03:27:20Z",
       "result": "GitHub mainへ反映（dd84300）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/dd84300dcf668e0b1c2a32ff8df80b4be4720ad7"
-    },
-    {
-      "id": "github-commit-40548eabb93c",
-      "title": "Add YOS suite return control to Taxi",
-      "completed_at": "2026-07-23T03:26:40Z",
-      "result": "GitHub mainへ反映（40548ea）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/40548eabb93c7f7ee836da9384a2635557f2725c"
     },
     {
       "id": "complete-002",
@@ -114,7 +114,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-23T12:52:28+09:00",
+      "last_update": "2026-07-23T12:53:23+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -195,7 +195,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-23T12:52:28+09:00",
+      "last_update": "2026-07-23T12:53:23+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -218,7 +218,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-23T12:52:28+09:00",
+      "last_update": "2026-07-23T12:53:23+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -300,5 +300,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "39516ba96c14db147139eb4810ea4f0d516384adf846d11fdfc0d0656b4fd36d"
+  "github_snapshot_hash": "4d703a25800fc90d84e64c39debf72330d81a44587bec320fa0307c1ee47e7c2"
 }
