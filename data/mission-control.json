@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-24T05:08:55+09:00",
+  "updated_at": "2026-07-24T06:09:32+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -70,10 +70,24 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/51",
-      "updated_at": "2026-07-23T19:16:21Z"
+      "updated_at": "2026-07-23T20:15:39Z"
     }
   ],
   "recently_completed": [
+    {
+      "id": "github-commit-4483ddf50b87",
+      "title": "YOSナビ: 実時間タイマーをキャッシュv8へ反映",
+      "completed_at": "2026-07-23T21:09:16Z",
+      "result": "GitHub mainへ反映（4483ddf）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/4483ddf50b870aa0ee702c4e1234ee0a8cb1b8dd"
+    },
+    {
+      "id": "github-commit-dbbabab2e2d5",
+      "title": "YOSナビ: 待機タイマーを実時間基準へ修正",
+      "completed_at": "2026-07-23T21:09:01Z",
+      "result": "GitHub mainへ反映（dbbabab）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/dbbabab2e2d59d28d6565ebc5325afbaa65d5f92"
+    },
     {
       "id": "github-commit-683e295918db",
       "title": "Taxi: YOSナビ入口をキャッシュv40へ反映",
@@ -94,20 +108,6 @@
       "completed_at": "2026-07-23T19:05:50Z",
       "result": "GitHub mainへ反映（25a3a82）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/25a3a82c8976895a981865e96eb56206727bd9c5"
-    },
-    {
-      "id": "github-commit-a0f22c30191a",
-      "title": "YOSナビ: 回避先の誤案内を防止",
-      "completed_at": "2026-07-23T19:05:41Z",
-      "result": "GitHub mainへ反映（a0f22c3）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/a0f22c30191a7bfdedc155696c01a8434deb83df"
-    },
-    {
-      "id": "github-commit-20c4f53c7546",
-      "title": "Refresh YOS navigation cache after Taxi links",
-      "completed_at": "2026-07-23T18:13:34Z",
-      "result": "GitHub mainへ反映（20c4f53）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/20c4f53c7546f0f91515cb803c1e22912c73b6dc"
     },
     {
       "id": "complete-002",
@@ -144,7 +144,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-24T05:08:55+09:00",
+      "last_update": "2026-07-24T06:09:32+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -225,7 +225,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-24T05:08:55+09:00",
+      "last_update": "2026-07-24T06:09:32+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -248,7 +248,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-24T05:08:55+09:00",
+      "last_update": "2026-07-24T06:09:32+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -330,5 +330,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "eb6adab701b51174dce8b39b6b098307798ba5636cceafcfa83bb780d236de87"
+  "github_snapshot_hash": "b10a035039f4feae5ffc196af7f07ba091f0c6850b75d84e52a7dc1de7d9b31b"
 }
