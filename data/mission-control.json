@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-23T12:53:23+09:00",
+  "updated_at": "2026-07-23T12:54:52+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -45,6 +45,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-9b7c60f5f4f3",
+      "title": "fix: deploy urgent calendar v38 layout corrections",
+      "completed_at": "2026-07-23T03:54:42Z",
+      "result": "GitHub mainへ反映（9b7c60f）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/9b7c60f5f4f32472f8a0b37b0da90f303eb52fab"
+    },
+    {
       "id": "github-commit-f087a2a6b057",
       "title": "fix: urgent SE3 calendar layout corrections",
       "completed_at": "2026-07-23T03:53:08Z",
@@ -71,13 +78,6 @@
       "completed_at": "2026-07-23T03:27:53Z",
       "result": "GitHub mainへ反映（94054d0）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/94054d0bc7a8e7dfe3a3950c91cb5aa1b5035c43"
-    },
-    {
-      "id": "github-commit-dd84300dcf66",
-      "title": "Connect YOS Taxi to YOS command center",
-      "completed_at": "2026-07-23T03:27:20Z",
-      "result": "GitHub mainへ反映（dd84300）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/dd84300dcf668e0b1c2a32ff8df80b4be4720ad7"
     },
     {
       "id": "complete-002",
@@ -114,7 +114,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-23T12:53:23+09:00",
+      "last_update": "2026-07-23T12:54:52+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -195,7 +195,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-23T12:53:23+09:00",
+      "last_update": "2026-07-23T12:54:52+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -218,7 +218,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-23T12:53:23+09:00",
+      "last_update": "2026-07-23T12:54:52+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -300,5 +300,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "4d703a25800fc90d84e64c39debf72330d81a44587bec320fa0307c1ee47e7c2"
+  "github_snapshot_hash": "eb3384725e880e77c8ea9a9c41498cb0bbf200de92a1e9357204948e1b8b010f"
 }
