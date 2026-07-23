@@ -64,7 +64,12 @@
   function openMaps(destination){
     const value=String(destination||'').trim();if(!value)return;
     const url=new URL('https://www.google.com/maps/dir/');
-    url.searchParams.set('api','1');url.searchParams.set('destination',value);url.searchParams.set('travelmode','driving');url.searchParams.set('dir_action','navigate');
+    const locationStatus=document.querySelector('.yos-location-status');
+    const latitude=locationStatus?.dataset.latitude;
+    const longitude=locationStatus?.dataset.longitude;
+    url.searchParams.set('api','1');
+    if(latitude&&longitude)url.searchParams.set('origin',`${latitude},${longitude}`);
+    url.searchParams.set('destination',value);url.searchParams.set('travelmode','driving');url.searchParams.set('dir_action','navigate');
     location.href=url.toString();
   }
   $('primaryGo').onclick=()=>openMaps(state.primary);
