@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-24T00:09:42+09:00",
+  "updated_at": "2026-07-24T00:13:26+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -20,7 +20,7 @@
       "priority": 2,
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/50",
-      "updated_at": "2026-07-23T15:04:15Z"
+      "updated_at": "2026-07-23T15:13:23Z"
     },
     {
       "id": "github-issue-10",
@@ -65,6 +65,20 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-50ea612cea05",
+      "title": "fix(taxi): measure bottom navigation clearance dynamically",
+      "completed_at": "2026-07-23T15:13:04Z",
+      "result": "GitHub mainへ反映（50ea612）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/50ea612cea0574f6038b56f7f47965dc6de954c6"
+    },
+    {
+      "id": "github-commit-143b386c270a",
+      "title": "fix(taxi): fully separate bottom menu from page content",
+      "completed_at": "2026-07-23T15:12:52Z",
+      "result": "GitHub mainへ反映（143b386）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/143b386c270a01f4040fb7e6b36bcedc179aaf58"
+    },
+    {
       "id": "github-commit-9adb3951e085",
       "title": "Record YOS navigation location status implementation",
       "completed_at": "2026-07-23T14:13:01Z",
@@ -84,20 +98,6 @@
       "completed_at": "2026-07-23T14:12:19Z",
       "result": "GitHub mainへ反映（a9db44c）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/a9db44c3e6199539fa30fd648922421b43bbf44f"
-    },
-    {
-      "id": "github-commit-9323b197696a",
-      "title": "Add optional current location status to YOS navigation",
-      "completed_at": "2026-07-23T14:11:29Z",
-      "result": "GitHub mainへ反映（9323b19）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/9323b197696ab5de10d62282713602ba08f1b9fb"
-    },
-    {
-      "id": "github-commit-6f101b3d2f03",
-      "title": "Show YOS navigation shift phase on first load",
-      "completed_at": "2026-07-23T13:42:04Z",
-      "result": "GitHub mainへ反映（6f101b3）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/6f101b3d2f0329bed8dbeb90e807a2a6a9ac5f70"
     },
     {
       "id": "complete-002",
@@ -134,7 +134,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-24T00:09:42+09:00",
+      "last_update": "2026-07-24T00:13:26+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -215,7 +215,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-24T00:09:42+09:00",
+      "last_update": "2026-07-24T00:13:26+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -238,7 +238,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-24T00:09:42+09:00",
+      "last_update": "2026-07-24T00:13:26+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -320,5 +320,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "9cf1a1df77ff674b0bc4f5fa67df64b063fe406d5b1d2119f455e4571ebf81c5"
+  "github_snapshot_hash": "325c4bd4997667f593a0438381dd0a758dddc30c002131b24ed37321a8128fd0"
 }
