@@ -1,9 +1,9 @@
 'use strict';
-const CACHE='yos-life-os-v3-suite';
-const STATIC=['./','./index.html','./manifest.webmanifest','./yos-suite-v3.js'];
+const CACHE='yos-life-home-v1';
+const STATIC=['./','./index.html','./manifest.webmanifest','./yos-suite-v3.js','./home-v1.js','./home-v1.css'];
 async function inject(response){
   let html=await response.text();
-  if(!html.includes('yos-suite-v3.js'))html=html.replace('</body>','<script src="./yos-suite-v3.js?v=3"></script></body>');
+  if(!html.includes('yos-suite-v3.js'))html=html.replace('</body>','<script src="./yos-suite-v3.js?v=4"></script></body>');
   const headers=new Headers(response.headers);
   headers.delete('content-length');
   headers.delete('content-encoding');
