@@ -3,6 +3,7 @@
   if(window.__yosLocationStatusV1)return;
   window.__yosLocationStatusV1=true;
 
+  const MAX_ORIGIN_ACCURACY_METERS=200;
   const style=document.createElement('style');
   style.textContent=`
     .yos-location-status{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;margin:0 0 12px;padding:11px 12px;border:1px solid var(--line);border-radius:15px;background:rgba(23,23,25,.9)}
@@ -25,14 +26,19 @@
   const detail=section.querySelector('small');
   const button=section.querySelector('button');
 
+  const clearLocation=()=>{
+    delete section.dataset.latitude;
+    delete section.dataset.longitude;
+    delete section.dataset.accuracy;
+    delete section.dataset.acquiredAt;
+  };
+
   const showError=(message)=>{
     title.textContent='現在地を取得できません';
     detail.textContent=message;
     button.disabled=false;
     button.textContent='再試行';
-    delete section.dataset.latitude;
-    delete section.dataset.longitude;
-    delete section.dataset.acquiredAt;
+    clearLocation();
   };
 
   button.addEventListener('click',()=>{
@@ -49,12 +55,17 @@
       const {latitude,longitude,accuracy}=position.coords;
       const acquiredAt=Date.now();
       const acquiredTime=new Date(acquiredAt).toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'});
-      title.textContent='現在地 取得済み';
-      detail.textContent=`${acquiredTime}取得 / 精度 約${Math.round(accuracy)}m`;
+      const roundedAccuracy=Math.round(accuracy);
+      const originUsable=Number.isFinite(accuracy)&&accuracy<=MAX_ORIGIN_ACCURACY_METERS;
+      title.textContent=originUsable?'現在地 取得済み':'現在地 精度不足';
+      detail.textContent=originUsable
+        ?`${acquiredTime}取得 / 精度 約${roundedAccuracy}m`
+        :`${acquiredTime}取得 / 精度 約${roundedAccuracy}m。出発地点には使いません`;
       button.disabled=false;
       button.textContent='更新';
       section.dataset.latitude=String(latitude);
       section.dataset.longitude=String(longitude);
+      section.dataset.accuracy=String(accuracy);
       section.dataset.acquiredAt=String(acquiredAt);
     },error=>{
       const messages={
