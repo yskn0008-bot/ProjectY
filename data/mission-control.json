@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-23T12:27:29+09:00",
+  "updated_at": "2026-07-23T12:28:03+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -45,6 +45,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-94054d0bc7a8",
+      "title": "Add YOS suite return control to Life",
+      "completed_at": "2026-07-23T03:27:53Z",
+      "result": "GitHub mainへ反映（94054d0）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/94054d0bc7a8e7dfe3a3950c91cb5aa1b5035c43"
+    },
+    {
       "id": "github-commit-dd84300dcf66",
       "title": "Connect YOS Taxi to YOS command center",
       "completed_at": "2026-07-23T03:27:20Z",
@@ -71,13 +78,6 @@
       "completed_at": "2026-07-23T03:24:30Z",
       "result": "GitHub mainへ反映（ff4fd78）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/ff4fd78be923b45608411fdf2f049b04720aaa2f"
-    },
-    {
-      "id": "github-commit-ff0d5e7d7e8a",
-      "title": "Add standalone YOS command center PWA",
-      "completed_at": "2026-07-23T03:24:10Z",
-      "result": "GitHub mainへ反映（ff0d5e7）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/ff0d5e7d7e8aa3382f54e722ace873f220796619"
     },
     {
       "id": "complete-002",
@@ -114,7 +114,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-23T12:27:29+09:00",
+      "last_update": "2026-07-23T12:28:03+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -195,7 +195,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-23T12:27:29+09:00",
+      "last_update": "2026-07-23T12:28:03+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -218,7 +218,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-23T12:27:29+09:00",
+      "last_update": "2026-07-23T12:28:03+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -300,5 +300,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "0fd1c46be54ebd07f0f3413059e5b5db513c097fc26bf1992d12a51f2cc9f6e6"
+  "github_snapshot_hash": "d8be6d1ab0f704f58e25be2f233c6d629972d9ea0aed48df21b3219d7d51a0b3"
 }
