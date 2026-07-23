@@ -42,7 +42,8 @@
 'use strict';
 (()=>{
   const params=new URLSearchParams(location.search);
-  const waitParam=Number(params.get('wait'));
+  const waitRaw=params.get('wait');
+  const waitParam=waitRaw===null?NaN:Number(waitRaw);
   const waitMinutes=Number.isFinite(waitParam)?Math.max(1,Math.min(60,Math.round(waitParam))):10;
   const state={
     primary:params.get('primary')||'那覇市久茂地',
