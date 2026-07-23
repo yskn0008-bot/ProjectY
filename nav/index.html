@@ -84,19 +84,32 @@
   document.querySelector('[data-target="avoid"]').onclick=()=>alert(`${state.avoidLabel}は現在の回避先です。ナビは開始しません。`);
   $('manualGo').onclick=()=>openMaps($('destination').value);
   $('destination').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();openMaps(e.currentTarget.value)}});
+  const TIMER_KEY='yos-nav-wait-timer-v1';
+  const readTimer=()=>{try{return JSON.parse(localStorage.getItem(TIMER_KEY)||'null')}catch{return null}};
+  const writeTimer=value=>{try{localStorage.setItem(TIMER_KEY,JSON.stringify(value))}catch{}};
+  const clearTimer=()=>{try{localStorage.removeItem(TIMER_KEY)}catch{}};
   let remaining=state.wait*60,timer=null,deadline=0,finished=false;
   const paint=()=>{$('timerText').textContent=`${String(Math.floor(remaining/60)).padStart(2,'0')}:${String(remaining%60).padStart(2,'0')}`};
   const stopTimer=()=>{if(timer)clearInterval(timer);timer=null};
-  const finishTimer=()=>{if(finished)return;finished=true;stopTimer();remaining=0;paint();$('timerStatus').textContent='次候補へ';navigator.vibrate?.([200,100,200])};
+  const persistTimer=()=>writeTimer({deadline,wait:state.wait,updatedAt:Date.now()});
+  const finishTimer=()=>{if(finished)return;finished=true;stopTimer();remaining=0;paint();$('timerStatus').textContent='次候補へ';writeTimer({deadline:0,wait:state.wait,finished:true,updatedAt:Date.now()});navigator.vibrate?.([200,100,200])};
   const syncTimer=()=>{if(!deadline)return;remaining=Math.max(0,Math.ceil((deadline-Date.now())/1000));paint();if(remaining===0)finishTimer()};
+  const saved=readTimer();
+  if(saved&&Number(saved.wait)===state.wait){
+    if(saved.finished){remaining=0;finished=true;$('timerStatus').textContent='次候補へ'}
+    else if(Number(saved.deadline)>Date.now()){
+      deadline=Number(saved.deadline);$('timerStatus').textContent='待機中';syncTimer();timer=setInterval(syncTimer,250)
+    }else if(Number(saved.deadline)>0){remaining=0;finishTimer()}
+  }
   paint();
   $('timerStart').onclick=()=>{
     if(timer||remaining===0)return;
-    finished=false;deadline=Date.now()+remaining*1000;$('timerStatus').textContent='待機中';
+    finished=false;deadline=Date.now()+remaining*1000;$('timerStatus').textContent='待機中';persistTimer();
     timer=setInterval(syncTimer,250);syncTimer();
   };
-  $('timerReset').onclick=()=>{stopTimer();deadline=0;finished=false;remaining=state.wait*60;paint();$('timerStatus').textContent='未開始'};
+  $('timerReset').onclick=()=>{stopTimer();deadline=0;finished=false;remaining=state.wait*60;clearTimer();paint();$('timerStatus').textContent='未開始'};
   document.addEventListener('visibilitychange',()=>{if(!document.hidden&&deadline)syncTimer()});
+  window.addEventListener('pageshow',()=>{if(deadline)syncTimer()});
   if('serviceWorker' in navigator)navigator.serviceWorker.register('./service-worker.js').catch(()=>{});
 })();
 </script>
