@@ -25,7 +25,7 @@
 <section class="grid">
 <article class="card blue"><i class="bar"></i><div><b id="nextName">松山</b><small id="nextAction">次の候補・到着後10分待機</small></div><button data-target="next">ナビ</button></article>
 <article class="card yellow"><i class="bar"></i><div><b id="passName">若狭</b><small id="passAction">流しながら確認</small></div><button data-target="pass">ナビ</button></article>
-<article class="card red"><i class="bar"></i><div><b id="avoidName">空港</b><small id="avoidAction">今は行かない</small></div><button data-target="avoid">確認</button></article>
+<article class="card red"><i class="bar"></i><div><b id="avoidName">空港</b><small id="avoidAction">今は行かない</small></div><button data-target="avoid">避ける</button></article>
 </section>
 <section class="timer">
 <div class="timer-head"><div><span>待機タイマー</span><strong id="timerText">10:00</strong></div><span id="timerStatus">未開始</span></div>
@@ -78,7 +78,7 @@
   $('primaryGo').onclick=()=>openMaps(state.primary);
   document.querySelector('[data-target="next"]').onclick=()=>openMaps(state.next);
   document.querySelector('[data-target="pass"]').onclick=()=>openMaps(state.pass);
-  document.querySelector('[data-target="avoid"]').onclick=()=>openMaps(state.avoid);
+  document.querySelector('[data-target="avoid"]').onclick=()=>alert(`${state.avoidLabel}は現在の回避先です。ナビは開始しません。`);
   $('manualGo').onclick=()=>openMaps($('destination').value);
   $('destination').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();openMaps(e.currentTarget.value)}});
   let remaining=state.wait*60,timer=null;
