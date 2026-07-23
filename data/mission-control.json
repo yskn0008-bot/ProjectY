@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-24T05:08:34+09:00",
+  "updated_at": "2026-07-24T05:08:55+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -75,6 +75,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-683e295918db",
+      "title": "Taxi: YOSナビ入口をキャッシュv40へ反映",
+      "completed_at": "2026-07-23T20:08:44Z",
+      "result": "GitHub mainへ反映（683e295）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/683e295918dbbc3dbad2bda2ad683f27687c99c4"
+    },
+    {
       "id": "github-commit-63ae507880a1",
       "title": "Taxi: YOSナビへの安全な入口を追加",
       "completed_at": "2026-07-23T20:08:19Z",
@@ -101,13 +108,6 @@
       "completed_at": "2026-07-23T18:13:34Z",
       "result": "GitHub mainへ反映（20c4f53）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/20c4f53c7546f0f91515cb803c1e22912c73b6dc"
-    },
-    {
-      "id": "github-commit-49b7b35f139d",
-      "title": "Integrate YOS navigation entry points with Taxi",
-      "completed_at": "2026-07-23T18:13:22Z",
-      "result": "GitHub mainへ反映（49b7b35）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/49b7b35f139deba1428ed7c5af3a7cfb13c0cb83"
     },
     {
       "id": "complete-002",
@@ -144,7 +144,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-24T05:08:34+09:00",
+      "last_update": "2026-07-24T05:08:55+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -225,7 +225,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-24T05:08:34+09:00",
+      "last_update": "2026-07-24T05:08:55+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -248,7 +248,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-24T05:08:34+09:00",
+      "last_update": "2026-07-24T05:08:55+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -330,5 +330,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "8175d263a49677886d66f1636cd6db59ec829ce6a2c709d6383c8923ce23824f"
+  "github_snapshot_hash": "eb6adab701b51174dce8b39b6b098307798ba5636cceafcfa83bb780d236de87"
 }
