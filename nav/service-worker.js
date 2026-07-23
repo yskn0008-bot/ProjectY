@@ -1,5 +1,5 @@
 'use strict';
-const CACHE='yos-navi-strategy-v7';
+const CACHE='yos-navi-strategy-v8';
 const STATIC=['./','./index.html','./manifest.webmanifest','./shift-phase-v1.js','./location-status-v1.js'];
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(STATIC)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim())));
