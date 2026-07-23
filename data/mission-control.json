@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-23T13:16:52+09:00",
+  "updated_at": "2026-07-23T13:17:28+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -45,6 +45,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-4b562089bdee",
+      "title": "v38.4 下部メニューをSafari操作バーから自動退避",
+      "completed_at": "2026-07-23T04:17:15Z",
+      "result": "GitHub mainへ反映（4b56208）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/4b562089bdeed34f21be85c208a68bfbb5dbc389"
+    },
+    {
       "id": "github-commit-53902c7ee002",
       "title": "ブラウザ下部バーの高さを自動検出して固定メニューを持ち上げる",
       "completed_at": "2026-07-23T04:16:37Z",
@@ -71,13 +78,6 @@
       "completed_at": "2026-07-23T04:03:56Z",
       "result": "GitHub mainへ反映（64d76c4）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/64d76c4075ff3f323bdbfe9bdcdfe9cccf5cde92"
-    },
-    {
-      "id": "github-commit-01c96a45b788",
-      "title": "fix SE3 today heading and weekly amount clipping",
-      "completed_at": "2026-07-23T04:03:15Z",
-      "result": "GitHub mainへ反映（01c96a4）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/01c96a45b7883d354d7f045b127dddf8ccbcfeca"
     },
     {
       "id": "complete-002",
@@ -114,7 +114,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-23T13:16:52+09:00",
+      "last_update": "2026-07-23T13:17:28+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -195,7 +195,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-23T13:16:52+09:00",
+      "last_update": "2026-07-23T13:17:28+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -218,7 +218,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-23T13:16:52+09:00",
+      "last_update": "2026-07-23T13:17:28+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -300,5 +300,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "976847f62fec8981365dea8099968445ef9c88b85f22be61d0803df932708fdf"
+  "github_snapshot_hash": "06ee5963e924466f483f6872cf0337a86f5a0ecfbbd5bd30a3bf44c5bab52bf6"
 }
