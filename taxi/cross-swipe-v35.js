@@ -9,6 +9,7 @@
   const OPP={up:'down',down:'up',left:'right',right:'left'};
   const dirs=['up','right','down','left'];
   const labels={today:'今日',week:'週間',month:'月間',manage:'管理',drive:'営業'};
+  const arrows={up:'↑',right:'→',down:'↓',left:'←'};
   const page=()=>{
     const p=location.pathname;
     if(p.endsWith('/taxi/')||p.endsWith('/taxi/index.html'))return'drive';
@@ -18,16 +19,25 @@
     return document.body.dataset.calendarPage||localStorage.getItem('yos-taxi-calendar-page-v21')||'today';
   };
   const placed=k=>dirs.find(d=>MAP[d]===k);
-  const target=d=>page()==='drive'?MAP[d]:(OPP[placed(page())]===d?'drive':null);
+  const target=d=>{
+    const cur=page();
+    if(cur==='drive')return MAP[d];
+    const back=OPP[placed(cur)];
+    if(d===back)return'drive';
+    const next=MAP[d];
+    return next===cur?null:next;
+  };
   const url=k=>k==='drive'?'./index.html':`./calendar.html?page=${k}`;
-  const go=k=>{if(!k)return;location.href=url(k)};
+  const go=k=>{if(k)location.href=url(k)};
   const guide=document.createElement('div');
   guide.id='crossSwipeGuideV35';
   document.body.appendChild(guide);
   const renderGuide=()=>{
     const cur=page();
-    if(cur==='drive')guide.innerHTML=dirs.map(d=>`<span data-dir="${d}">${{up:'↑',right:'→',down:'↓',left:'←'}[d]} ${labels[MAP[d]]}</span>`).join('');
-    else{const back=OPP[placed(cur)];guide.innerHTML=`<span data-dir="${back}">${{up:'↑',right:'→',down:'↓',left:'←'}[back]} 営業</span>`}
+    guide.innerHTML=dirs.map(d=>{
+      const dest=target(d);
+      return dest?`<span data-dir="${d}">${arrows[d]} ${labels[dest]}</span>`:'';
+    }).join('');
   };
   renderGuide();
   let active=false,sx=0,sy=0,dx=0,dy=0,axis='',dir='',dest=null;
