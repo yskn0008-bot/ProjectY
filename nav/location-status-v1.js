@@ -5,7 +5,6 @@
 
   const MAX_ORIGIN_ACCURACY_METERS=200;
   const MAX_ORIGIN_AGE_MS=300000;
-  const MAX_FUTURE_TIMESTAMP_DRIFT_MS=10000;
   const style=document.createElement('style');
   style.textContent=`
     .yos-location-status{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;margin:0 0 12px;padding:11px 12px;border:1px solid var(--line);border-radius:15px;background:rgba(23,23,25,.9)}
@@ -78,8 +77,8 @@
       const {latitude,longitude,accuracy}=position.coords;
       const receivedAt=Date.now();
       const rawMeasuredAt=Number(position.timestamp);
-      const timestampIsValid=Number.isFinite(rawMeasuredAt)&&rawMeasuredAt>0&&rawMeasuredAt<=receivedAt+MAX_FUTURE_TIMESTAMP_DRIFT_MS;
-      const measuredAt=timestampIsValid?rawMeasuredAt:receivedAt;
+      const timestampIsValid=Number.isFinite(rawMeasuredAt)&&rawMeasuredAt>0;
+      const measuredAt=timestampIsValid?Math.min(rawMeasuredAt,receivedAt):receivedAt;
       const coordinatesAreValid=Number.isFinite(latitude)&&latitude>=-90&&latitude<=90&&Number.isFinite(longitude)&&longitude>=-180&&longitude<=180;
       if(!coordinatesAreValid){
         showError('取得した現在地の値が正しくありません。再試行してください');
