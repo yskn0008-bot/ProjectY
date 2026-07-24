@@ -29,6 +29,7 @@
     mapButtons().forEach(button=>{
       button.classList.toggle('yos-map-disabled',offline);
       button.setAttribute('aria-disabled',offline?'true':'false');
+      if('disabled' in button)button.disabled=offline;
     });
   };
 
