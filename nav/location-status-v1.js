@@ -5,6 +5,7 @@
 
   const MAX_ORIGIN_ACCURACY_METERS=200;
   const MAX_ORIGIN_AGE_MS=300000;
+  const MAX_FUTURE_TIMESTAMP_DRIFT_MS=10000;
   const style=document.createElement('style');
   style.textContent=`
     .yos-location-status{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;margin:0 0 12px;padding:11px 12px;border:1px solid var(--line);border-radius:15px;background:rgba(23,23,25,.9)}
@@ -76,22 +77,31 @@
     navigator.geolocation.getCurrentPosition(position=>{
       const {latitude,longitude,accuracy}=position.coords;
       const receivedAt=Date.now();
-      const measuredAt=Number.isFinite(position.timestamp)&&position.timestamp>0?position.timestamp:receivedAt;
-      const acquiredTime=new Date(measuredAt).toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'});
-      const roundedAccuracy=Math.round(accuracy);
+      const rawMeasuredAt=Number(position.timestamp);
+      const timestampIsValid=Number.isFinite(rawMeasuredAt)&&rawMeasuredAt>0&&rawMeasuredAt<=receivedAt+MAX_FUTURE_TIMESTAMP_DRIFT_MS;
+      const measuredAt=timestampIsValid?rawMeasuredAt:receivedAt;
+      const coordinatesAreValid=Number.isFinite(latitude)&&latitude>=-90&&latitude<=90&&Number.isFinite(longitude)&&longitude>=-180&&longitude<=180;
+      if(!coordinatesAreValid){
+        showError('取得した現在地の値が正しくありません。再試行してください');
+        return;
+      }
+      const accuracyIsValid=Number.isFinite(accuracy)&&accuracy>=0;
+      const measuredTime=new Date(measuredAt).toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'});
       const locationIsFresh=receivedAt-measuredAt<=MAX_ORIGIN_AGE_MS;
-      const originUsable=locationIsFresh&&Number.isFinite(accuracy)&&accuracy<=MAX_ORIGIN_ACCURACY_METERS;
+      const originUsable=locationIsFresh&&accuracyIsValid&&accuracy<=MAX_ORIGIN_ACCURACY_METERS;
       title.textContent=originUsable?'現在地 取得済み':locationIsFresh?'現在地 精度不足':'現在地 期限切れ';
       detail.textContent=originUsable
-        ?`${acquiredTime}測位 / 精度 約${roundedAccuracy}m`
+        ?`${measuredTime}測位 / 精度 約${Math.round(accuracy)}m`
         :locationIsFresh
-          ?`${acquiredTime}測位 / 精度 約${roundedAccuracy}m。出発地点には使いません`
-          :`${acquiredTime}測位 / 5分以上前の位置情報です。出発地点には使いません`;
+          ?accuracyIsValid
+            ?`${measuredTime}測位 / 精度 約${Math.round(accuracy)}m。出発地点には使いません`
+            :`${measuredTime}測位 / 精度を確認できません。出発地点には使いません`
+          :`${measuredTime}測位 / 5分以上前の位置情報です。出発地点には使いません`;
       button.disabled=false;
       button.textContent='更新';
       section.dataset.latitude=String(latitude);
       section.dataset.longitude=String(longitude);
-      section.dataset.accuracy=String(accuracy);
+      section.dataset.accuracy=accuracyIsValid?String(accuracy):'';
       section.dataset.acquiredAt=String(measuredAt);
       if(locationIsFresh)scheduleExpiry(measuredAt);
       else clearLocation();
