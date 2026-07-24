@@ -1,5 +1,5 @@
 'use strict';
-const CACHE='yos-navi-strategy-v15';
+const CACHE='yos-navi-strategy-v16';
 const STATIC=['./','./index.html','./shift-phase-v1.js','./location-status-v1.js','./connectivity-status-v1.js'];
 const CONNECTIVITY_SCRIPT='<script src="./connectivity-status-v1.js"></script>';
 const injectConnectivity=async response=>{
