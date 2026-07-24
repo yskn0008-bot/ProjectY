@@ -1,5 +1,5 @@
 'use strict';
-const CACHE='yos-life-home-v1';
+const CACHE='yos-life-home-v2';
 const STATIC=['./','./index.html','./manifest.webmanifest','./yos-suite-v3.js','./home-v1.js','./home-v1.css'];
 async function inject(response){
   let html=await response.text();

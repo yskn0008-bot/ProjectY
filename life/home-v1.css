@@ -46,12 +46,53 @@
 .life-page-v1[data-page="schedule"]>.card:first-child,.life-page-v1[data-page="record"]>.card:first-child,.life-page-v1[data-page="improve"]>.card:first-child{margin-top:2px}
 .life-page-v1[data-page="record"] .metrics{margin-bottom:4px}
 .life-page-v1[data-page="improve"] .routine-grid{margin-bottom:4px}
+
+/* Readability pass: keep all Life screens comfortably readable on iPhone. */
+.brand p{font-size:12px}
+.clock span{font-size:12px}
+.sunrise small{font-size:13px}
+.sunrise p{font-size:15px;line-height:1.65;max-width:82%}
+.day b{font-size:12px}
+.card-head span,.sync-state{font-size:12px}
+.sync-button,.minor-button{font-size:13px}
+.event-time{font-size:14px}
+.event-main b{font-size:16px}
+.event-main small{font-size:12px}
+.empty{font-size:14px}
+.routine-card b{font-size:15px}
+.routine-card small{font-size:12px}
+.routine-item b{font-size:15px}
+.routine-item small{font-size:12px}
+.task select{font-size:13px}
+.donut-center span{font-size:12px}
+.legend-row{font-size:12px}
+.legend-row b{font-size:13px}
+.metric span{font-size:12px}
+.metric small{font-size:12px}
+.checkin label{font-size:12px}
+#lifeBottomNavV1 .nav b{font-size:11px}
+.dialog p{font-size:14px}
+.field label{font-size:12px}
+.status-ring-v1 span{font-size:11px}
+.status-copy-v1 small,.home-next-v1 small,.home-tip-v1 small{font-size:11px}
+.status-copy-v1 h2{font-size:22px}
+.status-copy-v1 p{font-size:14px;line-height:1.65}
+.home-next-v1 h3{font-size:19px}
+.home-next-v1 p{font-size:13px}
+.home-next-v1 button{font-size:13px}
+.glance-card-v1 span{font-size:12px}
+.glance-card-v1 strong{font-size:22px}
+.glance-card-v1 small{font-size:11px}
+.home-actions-v1 b{font-size:15px}
+.home-actions-v1 small{font-size:11px}
+.home-tip-v1 b{font-size:14px}
+
 @media(max-width:430px){
   .home-status-v1{grid-template-columns:88px 1fr;gap:12px;padding:14px}
   .status-ring-v1{width:86px;height:86px}.status-ring-v1:before{width:66px;height:66px}.status-ring-v1 strong{font-size:18px}
-  .status-copy-v1 h2{font-size:18px}
+  .status-copy-v1 h2{font-size:20px}
   .home-next-v1{grid-template-columns:1fr}.home-next-v1 button{width:100%}
   .home-glance-v1,.home-actions-v1{gap:6px}
-  .glance-card-v1{padding:11px 8px;min-height:98px}
-  .home-actions-v1 button{min-height:90px;padding:10px 8px}
+  .glance-card-v1{padding:11px 8px;min-height:102px}
+  .home-actions-v1 button{min-height:94px;padding:10px 8px}
 }
