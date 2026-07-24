@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-24T10:10:35+09:00",
+  "updated_at": "2026-07-24T10:10:59+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -75,6 +75,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-7f1cd166a9aa",
+      "title": "YOSナビの通信状態制御をキャッシュv13へ反映",
+      "completed_at": "2026-07-24T01:10:45Z",
+      "result": "GitHub mainへ反映（7f1cd16）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/7f1cd166a9aaa24b3f2473e49e0845e6f778c580"
+    },
+    {
       "id": "github-commit-5e5a54a65a66",
       "title": "YOSナビにオフライン時の案内防止を追加",
       "completed_at": "2026-07-24T01:10:21Z",
@@ -101,13 +108,6 @@
       "completed_at": "2026-07-23T23:11:20Z",
       "result": "GitHub mainへ反映（86ce8a5）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/86ce8a502ec5334b6fe7685e49803cbf34853f25"
-    },
-    {
-      "id": "github-commit-2f5d38828dd6",
-      "title": "Reject low-accuracy YOS nav origins",
-      "completed_at": "2026-07-23T23:11:09Z",
-      "result": "GitHub mainへ反映（2f5d388）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/2f5d38828dd63f84b428ca6be09c31360aa7b301"
     },
     {
       "id": "complete-002",
@@ -144,7 +144,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-24T10:10:35+09:00",
+      "last_update": "2026-07-24T10:10:59+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -225,7 +225,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-24T10:10:35+09:00",
+      "last_update": "2026-07-24T10:10:59+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -248,7 +248,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-24T10:10:35+09:00",
+      "last_update": "2026-07-24T10:10:59+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -330,5 +330,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "c5678fa20f06e0a2e847ff58f853228e4b0b07fd6717b32ce04b6b009f7bcfb7"
+  "github_snapshot_hash": "85bf5478a8e64e5ebead331a777be3e63072ec3750cd8941c7a2f26061f4be6b"
 }
