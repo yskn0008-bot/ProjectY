@@ -27,17 +27,24 @@
   const detail=section.querySelector('small');
   const button=section.querySelector('button');
   let expiryTimer=null;
+  let expiryStartedAt=0;
+  let expiryDurationMs=0;
 
   const clearLocation=()=>{
     delete section.dataset.latitude;
     delete section.dataset.longitude;
     delete section.dataset.accuracy;
     delete section.dataset.acquiredAt;
+    expiryStartedAt=0;
+    expiryDurationMs=0;
   };
 
   const expireLocation=()=>{
     const acquiredAt=Number(section.dataset.acquiredAt||0);
-    if(!acquiredAt||Date.now()-acquiredAt<MAX_ORIGIN_AGE_MS)return;
+    if(!acquiredAt)return;
+    const wallClockExpired=Date.now()-acquiredAt>=MAX_ORIGIN_AGE_MS;
+    const monotonicExpired=expiryStartedAt>0&&performance.now()-expiryStartedAt>=expiryDurationMs;
+    if(!wallClockExpired&&!monotonicExpired)return;
     if(expiryTimer)clearTimeout(expiryTimer);
     expiryTimer=null;
     clearLocation();
@@ -50,6 +57,8 @@
   const scheduleExpiry=acquiredAt=>{
     if(expiryTimer)clearTimeout(expiryTimer);
     const remaining=Math.max(0,MAX_ORIGIN_AGE_MS-(Date.now()-acquiredAt));
+    expiryStartedAt=performance.now();
+    expiryDurationMs=remaining;
     expiryTimer=setTimeout(expireLocation,remaining+250);
   };
 
