@@ -4,6 +4,7 @@
   window.__yosLocationStatusV1=true;
 
   const MAX_ORIGIN_ACCURACY_METERS=200;
+  const MAX_ORIGIN_AGE_MS=300000;
   const style=document.createElement('style');
   style.textContent=`
     .yos-location-status{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;margin:0 0 12px;padding:11px 12px;border:1px solid var(--line);border-radius:15px;background:rgba(23,23,25,.9)}
@@ -25,6 +26,7 @@
   const title=section.querySelector('b');
   const detail=section.querySelector('small');
   const button=section.querySelector('button');
+  let expiryTimer=null;
 
   const clearLocation=()=>{
     delete section.dataset.latitude;
@@ -33,7 +35,26 @@
     delete section.dataset.acquiredAt;
   };
 
+  const expireLocation=()=>{
+    const acquiredAt=Number(section.dataset.acquiredAt||0);
+    if(!acquiredAt||Date.now()-acquiredAt<MAX_ORIGIN_AGE_MS)return;
+    if(expiryTimer)clearTimeout(expiryTimer);
+    expiryTimer=null;
+    clearLocation();
+    title.textContent='現在地 期限切れ';
+    detail.textContent='取得から5分以上経過しました。出発前に更新してください';
+    button.disabled=false;
+    button.textContent='更新';
+  };
+
+  const scheduleExpiry=acquiredAt=>{
+    if(expiryTimer)clearTimeout(expiryTimer);
+    expiryTimer=setTimeout(expireLocation,MAX_ORIGIN_AGE_MS+250);
+  };
+
   const showError=(message)=>{
+    if(expiryTimer)clearTimeout(expiryTimer);
+    expiryTimer=null;
     title.textContent='現在地を取得できません';
     detail.textContent=message;
     button.disabled=false;
@@ -67,6 +88,7 @@
       section.dataset.longitude=String(longitude);
       section.dataset.accuracy=String(accuracy);
       section.dataset.acquiredAt=String(acquiredAt);
+      scheduleExpiry(acquiredAt);
     },error=>{
       const messages={
         1:'位置情報の利用が許可されていません',
@@ -76,4 +98,7 @@
       showError(messages[error.code]||'位置情報の取得に失敗しました');
     },{enableHighAccuracy:true,timeout:12000,maximumAge:60000});
   });
+
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)expireLocation()});
+  window.addEventListener('pageshow',expireLocation);
 })();
