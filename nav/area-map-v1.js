@@ -39,7 +39,7 @@
     @keyframes yos-map-pulse{50%{opacity:.13}}
     .yos-area-map__current{display:none;pointer-events:none}.yos-area-map__current.is-visible{display:block}.yos-area-map__current circle:first-child{fill:rgba(255,255,255,.22)}.yos-area-map__current circle:last-child{fill:#fff;stroke:#0e1117;stroke-width:2}.yos-area-map__current text{fill:#fff;font-size:9px;font-weight:950;text-anchor:middle}
     .yos-area-map__detail{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;margin-top:10px;padding:12px;border:1px solid var(--line);border-radius:15px;background:rgba(14,14,16,.86)}
-    .yos-area-map__detail strong{display:flex;align-items:baseline;gap:6px;font-size:18px}.yos-area-map__detail strong em{font-style:normal;color:var(--accent);font-size:29px;line-height:1}.yos-area-map__detail p{margin:5px 0 0;color:var(--muted);font-size:12px;line-height:1.5}.yos-area-map__detail button{min-height:46px;padding:0 14px;border:0;border-radius:13px;background:linear-gradient(145deg,#ffb323,#ff7a00);color:#17100a;font-size:13px;font-weight:950}
+    .yos-area-map__detail strong{display:flex;align-items:baseline;gap:6px;font-size:18px}.yos-area-map__detail strong em{font-style:normal;color:var(--accent);font-size:29px;line-height:1}.yos-area-map__detail p{margin:5px 0 0;color:var(--muted);font-size:12px;line-height:1.5}.yos-area-map__detail button{min-height:46px;padding:0 14px;border:0;border-radius:13px;background:linear-gradient(145deg,#ffb323,#ff7a00);color:#17100a;font-size:13px;font-weight:950}.yos-area-map__detail button:disabled{background:#2b2b30;color:var(--muted);cursor:not-allowed}
     .yos-area-map__legend{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px;color:var(--muted);font-size:11px}.yos-area-map__legend span{display:flex;align-items:center;gap:5px}.yos-area-map__legend i{width:8px;height:8px;border-radius:50%}.yos-area-map__legend .green{background:var(--green)}.yos-area-map__legend .blue{background:var(--blue)}.yos-area-map__legend .yellow{background:var(--yellow)}.yos-area-map__legend .red{background:var(--red)}
     .yos-area-map.is-collapsed .yos-area-map__canvas,.yos-area-map.is-collapsed .yos-area-map__detail,.yos-area-map.is-collapsed .yos-area-map__legend{display:none}.yos-area-map.is-collapsed .yos-area-map__head{margin-bottom:0}
     @media(max-width:390px){.yos-area-map__head{display:grid}.yos-area-map__tools{justify-content:flex-start}.yos-area-map__detail{grid-template-columns:1fr}.yos-area-map__detail button{width:100%}}
@@ -86,6 +86,7 @@
   let selected=areas[0];
 
   const openMaps=destination=>{
+    if(!navigator.onLine){alert('通信できません。通信復旧後、停車した状態で案内を開始してください');return;}
     const value=String(destination||'').trim();
     if(!value)return;
     const url=new URL('https://www.google.com/maps/dir/');
@@ -104,14 +105,16 @@
     selected=area;
     zones.forEach(zone=>zone.setAttribute('aria-pressed',String(zone.dataset.key===key)));
     selectedName.textContent=area.label;selectedScore.textContent=String(area.score);
-    selectedAction.textContent=`${area.rank}・${area.action}。数値は現時点では参考表示です。`;
-    goButton.textContent=area.key==='avoid'?'場所を確認':'ここへ行く';
+    const isAvoid=area.key==='avoid';
+    selectedAction.textContent=isAvoid?`${area.rank}・${area.action}。この場所へのナビは開始しません。`:`${area.rank}・${area.action}。数値は現時点では参考表示です。`;
+    goButton.textContent=isAvoid?'回避地点':'ここへ行く';
+    goButton.disabled=isAvoid;
   };
   zones.forEach(zone=>{
     zone.addEventListener('click',()=>selectArea(zone.dataset.key));
     zone.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();selectArea(zone.dataset.key);}});
   });
-  goButton.addEventListener('click',()=>openMaps(selected.destination));
+  goButton.addEventListener('click',()=>{if(selected.key!=='avoid')openMaps(selected.destination);});
   toggle.addEventListener('click',()=>{
     const collapsed=section.classList.toggle('is-collapsed');
     toggle.setAttribute('aria-expanded',String(!collapsed));
