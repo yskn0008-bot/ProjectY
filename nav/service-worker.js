@@ -1,5 +1,5 @@
 'use strict';
-const CACHE='yos-navi-strategy-v26';
+const CACHE='yos-navi-strategy-v27';
 const STATIC=['./','./index.html','./shift-phase-v1.js','./location-status-v1.js','./connectivity-status-v1.js','./area-map-v1.js','./niche-demand-v1.js'];
 const REQUIRED_SCRIPTS=['./connectivity-status-v1.js','./niche-demand-v1.js'];
 const injectRequiredScripts=async response=>{
@@ -16,7 +16,7 @@ self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(keys=
 self.addEventListener('fetch',event=>{
   if(event.request.method!=='GET')return;
   const requestUrl=new URL(event.request.url);
-  const isNavPage=event.request.mode==='navigate'&&requestUrl.pathname.endsWith('/nav/');
+  const isNavPage=event.request.mode==='navigate'&&(requestUrl.pathname.endsWith('/nav/')||requestUrl.pathname.endsWith('/nav/index.html'));
   if(isNavPage){
     event.respondWith(fetch(event.request,{cache:'no-cache'}).then(injectRequiredScripts).catch(()=>caches.match('./index.html').then(injectRequiredScripts)));
     return;
