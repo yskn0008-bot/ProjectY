@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-25T15:36:52+09:00",
+  "updated_at": "2026-07-25T17:05:45+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -21,16 +21,6 @@
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/53",
       "updated_at": "2026-07-23T15:15:38Z"
-    },
-    {
-      "id": "github-pr-60",
-      "title": "PR #60 YOSナビの回避エリア誤案内を防止 v24",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/60",
-      "updated_at": "2026-07-25T06:13:51Z"
     },
     {
       "id": "github-issue-10",
@@ -70,10 +60,17 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/51",
-      "updated_at": "2026-07-25T06:25:35Z"
+      "updated_at": "2026-07-25T07:17:23Z"
     }
   ],
   "recently_completed": [
+    {
+      "id": "github-commit-f17ab8c3b153",
+      "title": "YOSナビの回避エリア誤案内を防止 v25",
+      "completed_at": "2026-07-25T08:05:34Z",
+      "result": "GitHub mainへ反映（f17ab8c）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/f17ab8c3b1530024bf772e1bb4727b59fa17c6a7"
+    },
     {
       "id": "github-commit-cbbe5355b54c",
       "title": "YOSナビの位置情報安全判定を統合 v23",
@@ -103,13 +100,6 @@
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/aee84d4f08162518afbceaa6623076631be0dc6a"
     },
     {
-      "id": "github-commit-0d88a893545e",
-      "title": "Bump YOSナビ cache to v17",
-      "completed_at": "2026-07-24T05:11:20Z",
-      "result": "GitHub mainへ反映（0d88a89）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/0d88a893545e23ba453265dbb4201b83d1a66d86"
-    },
-    {
       "id": "complete-002",
       "title": "iPhone向けMission Control Dashboardを実装",
       "completed_at": "2026-07-17T17:55:00+09:00",
@@ -134,7 +124,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #60をレビューして公開判断する",
+      "next_action": "PR #53をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -144,7 +134,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-25T15:36:52+09:00",
+      "last_update": "2026-07-25T17:05:45+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -219,13 +209,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 4件・Open PR 2件を自動同期中",
+      "next_action": "Open Issue 4件・Open PR 1件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-25T15:36:52+09:00",
+      "last_update": "2026-07-25T17:05:45+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -239,7 +229,7 @@
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #60をレビューして公開判断する",
+      "next_action": "PR #53をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -248,7 +238,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-25T15:36:52+09:00",
+      "last_update": "2026-07-25T17:05:45+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -330,5 +320,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "028f8ff45ad0fd5bce636a6b4828f69a3675427cd8f91fdc5e0e64987fdb8a6e"
+  "github_snapshot_hash": "7a619b717e56b221e7dddec3105137dd5a3f20ebabdfe9474984a46c6a83331d"
 }
