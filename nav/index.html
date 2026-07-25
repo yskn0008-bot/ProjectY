@@ -65,6 +65,7 @@
   $('passName').textContent=state.passLabel;$('passAction').textContent=state.passAction;
   $('avoidName').textContent=state.avoidLabel;$('avoidAction').textContent=state.avoidAction;
   function openMaps(destination){
+    if(!navigator.onLine){alert('通信できません。通信復旧後、停車した状態で案内を開始してください');return;}
     const value=String(destination||'').trim();if(!value)return;
     const url=new URL('https://www.google.com/maps/dir/');
     const locationStatus=document.querySelector('.yos-location-status');
