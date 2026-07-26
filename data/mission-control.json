@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-27T00:47:41+09:00",
+  "updated_at": "2026-07-27T02:51:16+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -13,24 +13,14 @@
   },
   "inbox": [
     {
-      "id": "github-pr-53",
-      "title": "PR #53 YOSホーム画面初版を実装",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/53",
-      "updated_at": "2026-07-23T15:15:38Z"
-    },
-    {
       "id": "github-pr-67",
       "title": "PR #67 YOSナビ：営業エリアマップのビジュアル初版",
       "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
+      "status": "review",
+      "priority": 1,
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/67",
-      "updated_at": "2026-07-26T15:09:56Z"
+      "updated_at": "2026-07-26T17:51:05Z"
     },
     {
       "id": "github-issue-10",
@@ -70,10 +60,17 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/51",
-      "updated_at": "2026-07-26T15:15:27Z"
+      "updated_at": "2026-07-26T17:19:57Z"
     }
   ],
   "recently_completed": [
+    {
+      "id": "github-commit-783a79e4cec0",
+      "title": "YOSホーム画面初版を公開",
+      "completed_at": "2026-07-26T17:50:43Z",
+      "result": "GitHub mainへ反映（783a79e）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/783a79e4cec0992bd371d55d3706de3e687a5ec3"
+    },
     {
       "id": "github-commit-6ac27c546750",
       "title": "YOSナビのニッチ需要を初回表示でも有効化 v27",
@@ -101,13 +98,6 @@
       "completed_at": "2026-07-25T05:09:39Z",
       "result": "GitHub mainへ反映（cbbe535）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/cbbe5355b54c00cfd588b96aa9636e9af2bb1600"
-    },
-    {
-      "id": "github-commit-8723208c111e",
-      "title": "YOSナビに営業エリアマップを表示 (#57)",
-      "completed_at": "2026-07-24T14:34:01Z",
-      "result": "GitHub mainへ反映（8723208）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/8723208c111e809c638c8cc5fe9a5835bb9a270a"
     },
     {
       "id": "complete-002",
@@ -144,7 +134,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-27T00:47:41+09:00",
+      "last_update": "2026-07-27T02:51:16+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -219,13 +209,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 4件・Open PR 2件を自動同期中",
+      "next_action": "Open Issue 4件・Open PR 1件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-27T00:47:41+09:00",
+      "last_update": "2026-07-27T02:51:16+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -248,7 +238,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-27T00:47:41+09:00",
+      "last_update": "2026-07-27T02:51:16+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -330,5 +320,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "029250b775c5de299adf0b1636c0d625359c7796ab9e96b5dd838bf1b83a7bc4"
+  "github_snapshot_hash": "3b0f4c20f5508467038ec60a46cceda312dc28452dac155ceb6f696a754db2ab"
 }
