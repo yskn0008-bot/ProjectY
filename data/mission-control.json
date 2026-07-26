@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-27T02:51:16+09:00",
+  "updated_at": "2026-07-27T02:55:28+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -12,16 +12,6 @@
     ]
   },
   "inbox": [
-    {
-      "id": "github-pr-67",
-      "title": "PR #67 YOSナビ：営業エリアマップのビジュアル初版",
-      "type": "GitHub PR",
-      "status": "review",
-      "priority": 1,
-      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/67",
-      "updated_at": "2026-07-26T17:51:05Z"
-    },
     {
       "id": "github-issue-10",
       "title": "Issue #10 Mission Control v2：GitHubのIssue・PR・Commitを自動集約する",
@@ -65,6 +55,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-ff886fa233c4",
+      "title": "YOSナビ営業エリアマップを公開",
+      "completed_at": "2026-07-26T17:55:16Z",
+      "result": "GitHub mainへ反映（ff886fa）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/ff886fa233c40db8b38adbcd8f921c17c6874ff0"
+    },
+    {
       "id": "github-commit-783a79e4cec0",
       "title": "YOSホーム画面初版を公開",
       "completed_at": "2026-07-26T17:50:43Z",
@@ -93,13 +90,6 @@
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/f17ab8c3b1530024bf772e1bb4727b59fa17c6a7"
     },
     {
-      "id": "github-commit-cbbe5355b54c",
-      "title": "YOSナビの位置情報安全判定を統合 v23",
-      "completed_at": "2026-07-25T05:09:39Z",
-      "result": "GitHub mainへ反映（cbbe535）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/cbbe5355b54c00cfd588b96aa9636e9af2bb1600"
-    },
-    {
       "id": "complete-002",
       "title": "iPhone向けMission Control Dashboardを実装",
       "completed_at": "2026-07-17T17:55:00+09:00",
@@ -124,7 +114,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #67をレビューして公開判断する",
+      "next_action": "Issue #4を実装する：YOS Mission Control v1.0を構築する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -134,7 +124,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-27T02:51:16+09:00",
+      "last_update": "2026-07-27T02:55:28+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -205,17 +195,17 @@
       "type": "infrastructure",
       "purpose": "YOSのコード、仕様、タスク、変更履歴を保存する",
       "status": "active",
-      "health": "attention",
+      "health": "ok",
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 4件・Open PR 1件を自動同期中",
+      "next_action": "Open Issue 4件・Open PR 0件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-27T02:51:16+09:00",
+      "last_update": "2026-07-27T02:55:28+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -224,12 +214,12 @@
       "domain": "Infrastructure",
       "type": "development",
       "purpose": "YOSと各Labの設計に基づいて実装、修正、テストを行う",
-      "status": "review",
-      "health": "attention",
+      "status": "active",
+      "health": "ok",
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #67をレビューして公開判断する",
+      "next_action": "Issue #4を実装する：YOS Mission Control v1.0を構築する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -238,7 +228,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-27T02:51:16+09:00",
+      "last_update": "2026-07-27T02:55:28+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -320,5 +310,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "3b0f4c20f5508467038ec60a46cceda312dc28452dac155ceb6f696a754db2ab"
+  "github_snapshot_hash": "a4f37fec538bd5105a1d87c645494623bd45df3d34bd496e9be3f35350e0d174"
 }
