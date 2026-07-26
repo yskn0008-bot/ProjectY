@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-26T16:56:22+09:00",
+  "updated_at": "2026-07-26T20:48:52+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -23,14 +23,14 @@
       "updated_at": "2026-07-23T15:15:38Z"
     },
     {
-      "id": "github-pr-65",
-      "title": "PR #65 YOSナビ：オフライン時のGoogleマップ起動を統一して停止",
+      "id": "github-pr-67",
+      "title": "PR #67 YOSナビ：営業エリアマップのビジュアル初版",
       "type": "GitHub PR",
       "status": "draft",
       "priority": 2,
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/65",
-      "updated_at": "2026-07-26T07:10:57Z"
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/67",
+      "updated_at": "2026-07-26T11:09:40Z"
     },
     {
       "id": "github-issue-10",
@@ -70,7 +70,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/51",
-      "updated_at": "2026-07-26T00:23:03Z"
+      "updated_at": "2026-07-26T11:18:14Z"
     }
   ],
   "recently_completed": [
@@ -134,7 +134,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #65をレビューして公開判断する",
+      "next_action": "PR #67をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -144,7 +144,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-26T16:56:22+09:00",
+      "last_update": "2026-07-26T20:48:52+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -225,7 +225,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-26T16:56:22+09:00",
+      "last_update": "2026-07-26T20:48:52+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -239,7 +239,7 @@
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #65をレビューして公開判断する",
+      "next_action": "PR #67をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -248,7 +248,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-26T16:56:22+09:00",
+      "last_update": "2026-07-26T20:48:52+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -330,5 +330,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "ff0e61aebd613ca75fb1e84920a98a2e02f468aebae62d4294d56ed626e502ba"
+  "github_snapshot_hash": "f54b30d420ba7f7480cf100895ec6ceaaa6faa288471d3d00f2efdf0c1bbc37a"
 }
