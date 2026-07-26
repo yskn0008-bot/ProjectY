@@ -1,11 +1,14 @@
 'use strict';
 
-const CACHE = 'yos-command-center-v2';
+const CACHE = 'yos-command-center-v3';
 const STATIC = [
   './',
   './index.html',
   './styles.css',
   './app.js',
+  './journey.html',
+  './journey.css',
+  './journey.js',
   './manifest.webmanifest'
 ];
 
