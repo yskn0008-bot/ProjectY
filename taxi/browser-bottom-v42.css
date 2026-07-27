@@ -1,0 +1,134 @@
+/* YOS Taxi v42 — iPhone browser viewport and bottom-nav fit */
+:root{
+  --yos-nav-height:72px;
+  --yos-nav-gap:8px;
+  --yos-nav-reserve:calc(env(safe-area-inset-bottom) + var(--yos-nav-height) + var(--yos-nav-gap) + 18px);
+}
+
+main.app,.app{
+  padding-bottom:var(--yos-nav-reserve)!important;
+  scroll-padding-bottom:var(--yos-nav-reserve)!important;
+}
+
+.taxi-global-nav-v24,
+body[data-calendar-page] #taxiGlobalNavV24{
+  left:8px!important;
+  right:8px!important;
+  bottom:calc(env(safe-area-inset-bottom) + var(--yos-nav-gap))!important;
+  width:auto!important;
+  max-width:none!important;
+  transform:none!important;
+}
+
+@media(max-width:430px){
+  html,body{
+    width:100%!important;
+    max-width:100%!important;
+    min-height:100%!important;
+    height:auto!important;
+    overflow-x:hidden!important;
+    overflow-y:auto!important;
+  }
+
+  main.app,.app{
+    width:100%!important;
+    max-width:100%!important;
+    min-height:100%!important;
+    height:auto!important;
+    overflow:visible!important;
+    padding-left:10px!important;
+    padding-right:10px!important;
+    padding-bottom:var(--yos-nav-reserve)!important;
+  }
+
+  /* 操作導線は下メニューに一本化 */
+  #crossSwipeGuideV35,
+  #yosCrossSwipeHintV35,
+  .yos-cross-swipe-hint-v35,
+  #yosSuiteHomeV38{
+    display:none!important;
+  }
+
+  .taxi-global-nav-v24,
+  body[data-calendar-page] #taxiGlobalNavV24{
+    min-height:68px!important;
+    padding:6px!important;
+    gap:3px!important;
+    border-radius:20px!important;
+  }
+  .taxi-global-nav-v24 button{
+    min-height:54px!important;
+    min-width:0!important;
+    padding:5px 2px 7px!important;
+    overflow:visible!important;
+  }
+  .taxi-global-nav-v24 button span{font-size:15px!important;line-height:1!important}
+  .taxi-global-nav-v24 button b{
+    display:block!important;
+    max-width:100%!important;
+    font-size:9px!important;
+    line-height:1.15!important;
+    white-space:nowrap!important;
+    overflow:visible!important;
+    text-overflow:clip!important;
+  }
+
+  /* 本文は画面高へ押し込まず、必要な時だけ自然にスクロール */
+  html.taxi-calendar-v28 body[data-calendar-page] .view.v21-active,
+  html.taxi-calendar-v28 body[data-calendar-page] .manage-view-v21.v21-active,
+  body[data-calendar-page="today"] #todayView.v21-active,
+  body[data-calendar-page="week"] #weekView.v21-active,
+  body[data-calendar-page="month"] #monthView.v21-active,
+  body[data-calendar-page="manage"] #manageViewV21.v21-active{
+    height:auto!important;
+    max-height:none!important;
+    min-height:0!important;
+    overflow:visible!important;
+  }
+
+  body[data-calendar-page="today"] #todayView .detail{
+    height:auto!important;
+    min-height:0!important;
+    grid-template-rows:none!important;
+    overflow:visible!important;
+  }
+
+  body[data-calendar-page="week"] #weekView.v21-active{display:block!important}
+  body[data-calendar-page="week"] .week-list{
+    height:auto!important;
+    min-height:0!important;
+    grid-template-rows:none!important;
+    overflow:visible!important;
+  }
+  body[data-calendar-page="week"] .week-item{
+    height:auto!important;
+    min-height:64px!important;
+    overflow:visible!important;
+  }
+
+  body[data-calendar-page="month"] #monthView,
+  body[data-calendar-page="month"] .month-grid{
+    height:auto!important;
+    max-height:none!important;
+    overflow:visible!important;
+  }
+
+  body[data-calendar-page="manage"] #manageViewV21.v21-active,
+  body[data-calendar-page="manage"] .manage-view-v21 .summary{
+    height:auto!important;
+    max-height:none!important;
+    overflow:visible!important;
+    flex:none!important;
+  }
+
+  .panel:last-of-type,
+  .view.v21-active,
+  .manage-view-v21.v21-active{
+    scroll-margin-bottom:var(--yos-nav-reserve)!important;
+  }
+}
+
+@media(max-width:375px){
+  main.app,.app{padding-left:8px!important;padding-right:8px!important}
+  .taxi-global-nav-v24,body[data-calendar-page] #taxiGlobalNavV24{left:6px!important;right:6px!important}
+}
