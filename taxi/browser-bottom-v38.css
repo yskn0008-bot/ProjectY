@@ -50,3 +50,85 @@ body[data-calendar-page="manage"] #manageViewV21.v21-active{
     text-overflow:clip!important;
   }
 }
+
+/* YOS Taxi v41 — in-app browser overlap emergency fix */
+@media(max-width:430px){
+  html,body{
+    height:auto!important;
+    min-height:100%!important;
+    overflow-x:hidden!important;
+    overflow-y:auto!important;
+  }
+  main.app,.app{
+    height:auto!important;
+    min-height:100%!important;
+    overflow:visible!important;
+    padding-bottom:calc(var(--yos-nav-reserve) + 44px)!important;
+    scroll-padding-bottom:calc(var(--yos-nav-reserve) + 44px)!important;
+  }
+
+  /* 画面中央を塞いでいた補助UIを撤去。移動は下メニューへ統一 */
+  #crossSwipeGuideV35,
+  #yosCrossSwipeHintV35,
+  .yos-cross-swipe-hint-v35,
+  #yosSuiteHomeV38{
+    display:none!important;
+  }
+
+  /* 画面高へ押し込まず、本文を自然に縦スクロールさせる */
+  html.taxi-calendar-v28 body[data-calendar-page] .view.v21-active,
+  html.taxi-calendar-v28 body[data-calendar-page] .manage-view-v21.v21-active,
+  body[data-calendar-page="today"] #todayView.v21-active,
+  body[data-calendar-page="week"] #weekView.v21-active,
+  body[data-calendar-page="month"] #monthView.v21-active,
+  body[data-calendar-page="manage"] #manageViewV21.v21-active{
+    height:auto!important;
+    max-height:none!important;
+    min-height:0!important;
+    overflow:visible!important;
+  }
+
+  body[data-calendar-page="today"] #todayView .detail{
+    height:auto!important;
+    min-height:0!important;
+    grid-template-rows:none!important;
+    overflow:visible!important;
+  }
+
+  body[data-calendar-page="week"] #weekView.v21-active{
+    display:block!important;
+  }
+  body[data-calendar-page="week"] .week-list{
+    height:auto!important;
+    min-height:0!important;
+    grid-template-rows:none!important;
+    overflow:visible!important;
+  }
+  body[data-calendar-page="week"] .week-item{
+    height:auto!important;
+    min-height:64px!important;
+    overflow:visible!important;
+  }
+
+  body[data-calendar-page="month"] #monthView,
+  body[data-calendar-page="month"] .month-grid{
+    height:auto!important;
+    max-height:none!important;
+    overflow:visible!important;
+  }
+
+  body[data-calendar-page="manage"] #manageViewV21.v21-active,
+  body[data-calendar-page="manage"] .manage-view-v21 .summary{
+    height:auto!important;
+    max-height:none!important;
+    overflow:visible!important;
+    flex:none!important;
+  }
+
+  /* 固定メニュー直前の要素も必ず上までスクロール可能にする */
+  .panel:last-of-type,
+  .view.v21-active,
+  .manage-view-v21.v21-active{
+    scroll-margin-bottom:calc(var(--yos-nav-reserve) + 28px)!important;
+  }
+}
