@@ -1,0 +1,38 @@
+/* YOS Taxi v57 — monthly calendar sales performance */
+@media (max-width:430px){
+  body[data-calendar-page="month"] .day.has-performance-v57,
+  body.calendar-month-mode .day.has-performance-v57{
+    border-color:rgba(255,179,35,.38)!important;
+  }
+
+  body[data-calendar-page="month"] .day.has-performance-v57 .month-money,
+  body.calendar-month-mode .day.has-performance-v57 .month-money{
+    display:block!important;
+    margin-top:7px!important;
+    font-size:clamp(9px,2.75vw,11px)!important;
+    font-weight:950!important;
+    line-height:1!important;
+    letter-spacing:-.055em!important;
+    white-space:nowrap!important;
+    overflow:visible!important;
+    text-overflow:clip!important;
+  }
+
+  body[data-calendar-page="month"] .day.has-performance-v57 .month-money.actual-v57,
+  body.calendar-month-mode .day.has-performance-v57 .month-money.actual-v57{
+    color:var(--amber)!important;
+  }
+
+  body[data-calendar-page="month"] .day.has-performance-v57 .month-label.actual-v57,
+  body.calendar-month-mode .day.has-performance-v57 .month-label.actual-v57{
+    display:block!important;
+    margin-top:2px!important;
+    color:#ffd98c!important;
+    font-size:7px!important;
+    font-weight:900!important;
+    line-height:1!important;
+    white-space:nowrap!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis!important;
+  }
+}
