@@ -1,0 +1,29 @@
+/* YOS Taxi v44 — one-action driving UI */
+.drive-v44{padding:14px!important}
+.drive-v44 .quick-head-v18{align-items:center}
+.drive-v44 .quick-sales-v18 strong{font-size:32px}
+.quick-actions-v44{display:grid;gap:8px;margin-top:10px}
+.quick-primary-v44{display:grid}
+.quick-primary-v44 .action.v44-main{display:block!important;width:100%!important;min-height:76px!important;border-radius:18px!important;font-size:23px!important;font-weight:900!important;letter-spacing:.02em!important}
+.drive-v44[data-state="available"] .quick-primary-v44 .v44-main{background:linear-gradient(145deg,#4bd283,#1c9c58)!important;color:#06120b!important;border:0!important}
+.drive-v44[data-state="occupied"] .quick-primary-v44 .v44-main,.drive-v44[data-state="before"] .quick-primary-v44 .v44-main{background:linear-gradient(145deg,#f6be3f,#e89a10)!important;color:#171006!important;border:0!important}
+.drive-v44[data-state="break"] .quick-primary-v44 .v44-main{background:linear-gradient(145deg,#76a8ff,#4e78cf)!important;color:#07101f!important;border:0!important}
+.drive-v44[data-state="ended"] .quick-primary-v44 .v44-main{background:linear-gradient(145deg,#b8bac0,#7f838c)!important;color:#0b0c0e!important;border:0!important}
+.quick-secondary-v44{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+.quick-secondary-v44[hidden]{display:none!important}
+.quick-secondary-v44 .action{display:block!important;min-height:44px!important;border-radius:12px!important;padding:7px 5px!important;font-size:12px!important}
+.drive-v44 .quick-tools-v18{grid-template-columns:repeat(5,minmax(0,1fr));gap:5px}
+.drive-v44 .quick-tool-v18{min-height:38px;font-size:10px;padding:4px 2px}
+.drive-v44 .undo-v44{color:#ffd39a}
+.optional-v44{margin-top:2px;border:1px solid var(--line);border-radius:14px;background:rgba(0,0,0,.16);overflow:hidden}
+.optional-v44 summary{min-height:45px;display:flex;align-items:center;padding:10px 12px;color:var(--muted);font-size:12px;font-weight:800;cursor:pointer;list-style:none}
+.optional-v44 summary::-webkit-details-marker{display:none}
+.optional-v44 summary:after{content:'＋';margin-left:auto;color:var(--amber);font-size:18px}
+.optional-v44[open] summary:after{content:'−'}
+.optional-body-v44{display:grid;gap:11px;padding:0 10px 10px}
+@media(max-width:390px){
+  .drive-v44{padding:11px!important}
+  .quick-primary-v44 .action.v44-main{min-height:70px!important;font-size:21px!important}
+  .drive-v44 .quick-tools-v18{grid-template-columns:repeat(5,minmax(0,1fr))}
+  .drive-v44 .quick-tool-v18{font-size:9px}
+}
