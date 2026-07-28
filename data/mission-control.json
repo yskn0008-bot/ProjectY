@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-29T05:41:58+09:00",
+  "updated_at": "2026-07-29T05:42:53+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -55,6 +55,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-80aefa7aef4f",
+      "title": "Taxi v62: expand month calendar and install clear icon navigation",
+      "completed_at": "2026-07-28T20:42:40Z",
+      "result": "GitHub mainへ反映（80aefa7）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/80aefa7aef4f4a0ee96d81fda205d4be7e40cc99"
+    },
+    {
       "id": "github-commit-1ba747190da5",
       "title": "Taxi v62: replace ambiguous bottom navigation symbols",
       "completed_at": "2026-07-28T20:41:48Z",
@@ -81,13 +88,6 @@
       "completed_at": "2026-07-28T20:35:15Z",
       "result": "GitHub mainへ反映（1d4fb88）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/1d4fb880238025ed30114f2ebc8216a743478afb"
-    },
-    {
-      "id": "github-commit-110986471479",
-      "title": "Release v60 precise full-height monthly calendar",
-      "completed_at": "2026-07-28T18:26:27Z",
-      "result": "GitHub mainへ反映（1109864）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/110986471479b9e90356ef0f4950b1b77ea27842"
     },
     {
       "id": "complete-002",
@@ -124,7 +124,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-29T05:41:58+09:00",
+      "last_update": "2026-07-29T05:42:53+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -205,7 +205,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-29T05:41:58+09:00",
+      "last_update": "2026-07-29T05:42:53+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -228,7 +228,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-29T05:41:58+09:00",
+      "last_update": "2026-07-29T05:42:53+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -310,5 +310,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "7b2f2b550bec951be7a0c4a880778ce14a9603424dd962e2024c0af61372d2bd"
+  "github_snapshot_hash": "29b78048024faf02deeb8c3662b04d6bef1581616be07923b1b844f14d1215b3"
 }
