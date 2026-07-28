@@ -1,0 +1,51 @@
+/* YOS Taxi v65 — use the empty strip above navigation without overlap */
+@media (max-width:430px){
+  /* v64 already separates content and navigation into different body rows. */
+  html.taxi-page-month-v49 main.app,
+  html.taxi-page-month-v49 .app{
+    position:relative!important;
+    overflow:hidden!important;
+  }
+
+  /* Fill the whole content row, ending exactly at the navigation row. */
+  body[data-calendar-page="month"] #monthView.v21-active,
+  body.calendar-month-mode #monthView{
+    position:absolute!important;
+    top:60px!important;
+    left:0!important;
+    right:0!important;
+    bottom:0!important;
+    inset-block:auto 0!important;
+    width:auto!important;
+    height:auto!important;
+    min-height:0!important;
+    margin:0!important;
+    padding:0!important;
+    display:flex!important;
+    flex-direction:column!important;
+    gap:0!important;
+    overflow:hidden!important;
+  }
+
+  body[data-calendar-page="month"] #monthView .month-grid,
+  body.calendar-month-mode #monthView .month-grid{
+    flex:1 1 0!important;
+    display:grid!important;
+    grid-template-columns:repeat(7,minmax(0,1fr))!important;
+    grid-template-rows:repeat(6,minmax(0,1fr))!important;
+    width:100%!important;
+    height:auto!important;
+    min-height:0!important;
+    margin:0!important;
+    padding:0!important;
+    gap:0!important;
+    overflow:hidden!important;
+  }
+}
+
+@media (max-width:375px) and (max-height:700px){
+  body[data-calendar-page="month"] #monthView.v21-active,
+  body.calendar-month-mode #monthView{
+    top:57px!important;
+  }
+}
