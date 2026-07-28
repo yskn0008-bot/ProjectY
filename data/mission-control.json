@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-29T02:27:48+09:00",
+  "updated_at": "2026-07-29T02:28:21+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -55,6 +55,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-8e2f9e05c10d",
+      "title": "Taxi v56: publish reclaimed weekly bottom space",
+      "completed_at": "2026-07-28T17:28:05Z",
+      "result": "GitHub mainへ反映（8e2f9e0）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/8e2f9e05c10d5de42c64ff94dcef092929af8ec6"
+    },
+    {
       "id": "github-commit-8c9ea753daad",
       "title": "Taxi v56: use weekly bottom gap for larger seven-day rows",
       "completed_at": "2026-07-28T17:27:28Z",
@@ -81,13 +88,6 @@
       "completed_at": "2026-07-28T17:19:37Z",
       "result": "GitHub mainへ反映（648a38e）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/648a38ec8f6a65120daed221cb01f2c3fcc2669f"
-    },
-    {
-      "id": "github-commit-7836f839bf6a",
-      "title": "Taxi v54: enlarge weekly text further while keeping dates unchanged",
-      "completed_at": "2026-07-28T17:19:01Z",
-      "result": "GitHub mainへ反映（7836f83）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/7836f839bf6aa806b73183099dc83d3111da4c6e"
     },
     {
       "id": "complete-002",
@@ -124,7 +124,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-29T02:27:48+09:00",
+      "last_update": "2026-07-29T02:28:21+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -205,7 +205,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-29T02:27:48+09:00",
+      "last_update": "2026-07-29T02:28:21+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -228,7 +228,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-29T02:27:48+09:00",
+      "last_update": "2026-07-29T02:28:21+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -310,5 +310,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "197061e00f2c7f5b7bd509273a14c03ce5c2f346165c2f98feb00002355ed6cf"
+  "github_snapshot_hash": "cec0290940e7e104cc2b1771242492e8057ddc64c93e5b50548127ba59d3ce34"
 }
