@@ -1,0 +1,96 @@
+/* YOS Taxi v52 — weekly text readability without changing frame sizes */
+@media (max-width:430px){
+  /* Header text */
+  html.taxi-page-week-v49 .top h1{
+    font-size:17px!important;
+    font-weight:900!important;
+    letter-spacing:-.02em!important;
+  }
+  html.taxi-page-week-v49 .period{
+    font-size:15px!important;
+    font-weight:900!important;
+    color:var(--text)!important;
+  }
+
+  /* Weekly summary: keep boxes, improve text */
+  body[data-calendar-page="week"] .week-summary .card strong{
+    font-size:clamp(13px,3.8vw,16px)!important;
+    font-weight:900!important;
+    line-height:1!important;
+    letter-spacing:-.035em!important;
+    color:var(--text)!important;
+    opacity:1!important;
+  }
+  body[data-calendar-page="week"] .week-summary .card span{
+    font-size:8px!important;
+    font-weight:800!important;
+    line-height:1!important;
+    color:var(--text)!important;
+    opacity:.68!important;
+  }
+
+  /* Seven daily rows */
+  body[data-calendar-page="week"] .week-date{
+    font-size:clamp(17px,4.8vw,20px)!important;
+    font-weight:900!important;
+    line-height:1!important;
+    letter-spacing:-.035em!important;
+    color:var(--text)!important;
+    opacity:1!important;
+  }
+  body[data-calendar-page="week"] .week-item .tag{
+    font-size:9px!important;
+    font-weight:900!important;
+    line-height:1!important;
+    opacity:1!important;
+  }
+  body[data-calendar-page="week"] .week-metrics div{
+    font-size:8px!important;
+    font-weight:800!important;
+    line-height:1!important;
+    color:var(--text)!important;
+    opacity:.72!important;
+  }
+  body[data-calendar-page="week"] .week-metrics strong{
+    font-size:clamp(12px,3.55vw,15px)!important;
+    font-weight:900!important;
+    line-height:1!important;
+    letter-spacing:-.045em!important;
+    opacity:1!important;
+  }
+
+  /* Keep status colors vivid */
+  body[data-calendar-page="week"] .week-item .red,
+  body[data-calendar-page="week"] .week-item strong.red{
+    color:#ff6673!important;
+  }
+  body[data-calendar-page="week"] .week-item .green,
+  body[data-calendar-page="week"] .week-item strong.green{
+    color:#59dc8d!important;
+  }
+
+  /* Bottom menu: same frame, clearer labels */
+  html.taxi-shell-v49 #taxiGlobalNavV24 button b{
+    font-size:9px!important;
+    font-weight:900!important;
+    line-height:1!important;
+    color:var(--text)!important;
+    opacity:.76!important;
+  }
+  html.taxi-shell-v49 #taxiGlobalNavV24 button span{
+    font-size:15px!important;
+    opacity:.9!important;
+  }
+  html.taxi-shell-v49 #taxiGlobalNavV24 button.active b,
+  html.taxi-shell-v49 #taxiGlobalNavV24 button.active span{
+    opacity:1!important;
+  }
+}
+
+@media (max-width:375px) and (max-height:700px){
+  body[data-calendar-page="week"] .week-date{font-size:15px!important}
+  body[data-calendar-page="week"] .week-metrics div{font-size:7px!important}
+  body[data-calendar-page="week"] .week-metrics strong{font-size:11px!important}
+  body[data-calendar-page="week"] .week-summary .card strong{font-size:12px!important}
+  body[data-calendar-page="week"] .week-summary .card span{font-size:7px!important}
+}
