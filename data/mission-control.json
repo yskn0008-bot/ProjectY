@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-28T21:06:17+09:00",
+  "updated_at": "2026-07-28T22:33:21+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -50,10 +50,17 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/51",
-      "updated_at": "2026-07-28T05:07:29Z"
+      "updated_at": "2026-07-28T12:13:53Z"
     }
   ],
   "recently_completed": [
+    {
+      "id": "github-commit-ab094d04c25d",
+      "title": "Fix Taxi primary action and fare guard",
+      "completed_at": "2026-07-28T13:33:03Z",
+      "result": "GitHub mainへ反映（ab094d0）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/ab094d04c25d6a828cf7e864cb6b31aeed45c6cb"
+    },
     {
       "id": "github-commit-ebf940a8faa8",
       "title": "Load Taxi v44 driving UI and refresh cache",
@@ -81,13 +88,6 @@
       "completed_at": "2026-07-27T14:17:08Z",
       "result": "GitHub mainへ反映（063dd6e）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/063dd6e44b80eca533e05b36edce1cd41a711d97"
-    },
-    {
-      "id": "github-commit-1e0f5d30174b",
-      "title": "確認済み乗務日報13日分をTaxiカレンダーへ同期 v43",
-      "completed_at": "2026-07-27T14:16:06Z",
-      "result": "GitHub mainへ反映（1e0f5d3）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/1e0f5d30174b233f0642640909bd0cb551b590b1"
     },
     {
       "id": "complete-002",
@@ -124,7 +124,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-28T21:06:17+09:00",
+      "last_update": "2026-07-28T22:33:21+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -205,7 +205,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-28T21:06:17+09:00",
+      "last_update": "2026-07-28T22:33:21+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -228,7 +228,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-28T21:06:17+09:00",
+      "last_update": "2026-07-28T22:33:21+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -310,5 +310,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "6cc8ff83f8d20c8fea7ffe37dac71bb1aa487aeafdfe969403b3d6d21c39cef3"
+  "github_snapshot_hash": "8ced53415ea039d6981f6648c9eebdc726e7ae618f33bd16ce44591c203c2632"
 }
