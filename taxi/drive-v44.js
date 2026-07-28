@@ -130,6 +130,7 @@
     const oldBox=byId('quickActionsV18');
     if(!dash||!oldBox)return false;
     dash.classList.add('drive-v44');
+    document.body.classList.add('taxi-drive-v44-active');
 
     const refs={};
     ['shiftButton','rideButton','dropoffButton','breakButton','memoButton','shareButton','settingsButton','endButton'].forEach(id=>refs[id]=byId(id));
@@ -142,6 +143,8 @@
     secondary.id='quickSecondaryV44';
     secondary.className='quick-secondary-v44';
     oldBox.replaceChildren(primary,secondary);
+    const metrics=dash.querySelector('.quick-metrics-v18');
+    if(metrics)dash.insertBefore(oldBox,metrics);
     Object.values(refs).forEach(button=>{
       if(!button)return;
       button.classList.remove('v44-main');
