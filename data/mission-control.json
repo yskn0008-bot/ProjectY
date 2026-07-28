@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-29T01:57:10+09:00",
+  "updated_at": "2026-07-29T01:57:41+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -55,6 +55,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-76d90a21089d",
+      "title": "Load v52 weekly readability styles",
+      "completed_at": "2026-07-28T16:57:27Z",
+      "result": "GitHub mainへ反映（76d90a2）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/76d90a21089d87e369eb0f761d3b971c691b057f"
+    },
+    {
       "id": "github-commit-d69ce005a44b",
       "title": "Improve weekly page text readability without changing layout",
       "completed_at": "2026-07-28T16:56:51Z",
@@ -81,13 +88,6 @@
       "completed_at": "2026-07-28T16:35:28Z",
       "result": "GitHub mainへ反映（b87e4fb）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/b87e4fb22ff787b631604bfa734525768e34b86a"
-    },
-    {
-      "id": "github-commit-717c9880fea3",
-      "title": "Fit all seven days in weekly Taxi view",
-      "completed_at": "2026-07-28T16:34:54Z",
-      "result": "GitHub mainへ反映（717c988）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/717c9880fea3946459af015a403e4ff4535fb43f"
     },
     {
       "id": "complete-002",
@@ -124,7 +124,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-29T01:57:10+09:00",
+      "last_update": "2026-07-29T01:57:41+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -205,7 +205,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-29T01:57:10+09:00",
+      "last_update": "2026-07-29T01:57:41+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -228,7 +228,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-29T01:57:10+09:00",
+      "last_update": "2026-07-29T01:57:41+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -310,5 +310,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "b16b24639e423b795cf8642272c92821fc38ead1e5846c44de0617a5e15a5a2b"
+  "github_snapshot_hash": "0aa917cc99e224dd656ca3b1bb2a5622321f4e12b76e49a269142508b3d77f4b"
 }
