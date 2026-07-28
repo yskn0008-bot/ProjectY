@@ -1,0 +1,92 @@
+/* YOS Taxi v58 — fixed monthly performance overlay */
+@media (max-width:430px){
+  body[data-calendar-page="month"] #monthView .day,
+  body.calendar-month-mode #monthView .day{
+    position:relative!important;
+    padding-bottom:25px!important;
+    overflow:hidden!important;
+  }
+
+  body[data-calendar-page="month"] #monthView .day.has-performance-v58 > .month-money,
+  body[data-calendar-page="month"] #monthView .day.has-performance-v58 > .month-label,
+  body[data-calendar-page="month"] #monthView .day.has-performance-v58 > .month-sub,
+  body.calendar-month-mode #monthView .day.has-performance-v58 > .month-money,
+  body.calendar-month-mode #monthView .day.has-performance-v58 > .month-label,
+  body.calendar-month-mode #monthView .day.has-performance-v58 > .month-sub{
+    display:none!important;
+  }
+
+  body[data-calendar-page="month"] #monthView .month-performance-v58,
+  body.calendar-month-mode #monthView .month-performance-v58{
+    position:absolute!important;
+    left:2px!important;
+    right:2px!important;
+    bottom:4px!important;
+    z-index:4!important;
+    display:grid!important;
+    grid-template-rows:auto auto!important;
+    justify-items:center!important;
+    align-content:end!important;
+    gap:1px!important;
+    min-width:0!important;
+    pointer-events:none!important;
+    color:var(--amber)!important;
+  }
+
+  body[data-calendar-page="month"] #monthView .month-performance-v58 strong,
+  body.calendar-month-mode #monthView .month-performance-v58 strong{
+    display:block!important;
+    width:100%!important;
+    margin:0!important;
+    font-size:clamp(10px,3vw,12px)!important;
+    font-weight:950!important;
+    line-height:.92!important;
+    letter-spacing:-.075em!important;
+    text-align:center!important;
+    white-space:nowrap!important;
+    overflow:visible!important;
+    text-overflow:clip!important;
+    font-variant-numeric:tabular-nums!important;
+  }
+
+  body[data-calendar-page="month"] #monthView .month-performance-v58 small,
+  body.calendar-month-mode #monthView .month-performance-v58 small{
+    display:block!important;
+    width:100%!important;
+    margin:0!important;
+    font-size:7px!important;
+    font-weight:900!important;
+    line-height:1!important;
+    letter-spacing:-.03em!important;
+    text-align:center!important;
+    white-space:nowrap!important;
+    overflow:hidden!important;
+    text-overflow:clip!important;
+    color:currentColor!important;
+    opacity:.92!important;
+  }
+
+  body[data-calendar-page="month"] #monthView .month-performance-v58.hit,
+  body.calendar-month-mode #monthView .month-performance-v58.hit{color:var(--green)!important}
+  body[data-calendar-page="month"] #monthView .month-performance-v58.miss,
+  body.calendar-month-mode #monthView .month-performance-v58.miss{color:var(--red)!important}
+  body[data-calendar-page="month"] #monthView .month-performance-v58.live,
+  body.calendar-month-mode #monthView .month-performance-v58.live{color:var(--blue)!important}
+
+  body[data-calendar-page="month"] #monthView .day.has-performance-v58,
+  body.calendar-month-mode #monthView .day.has-performance-v58{
+    box-shadow:inset 0 -2px 0 currentColor!important;
+  }
+
+  body[data-calendar-page="month"] #monthView .actual-legend-v58 i,
+  body.calendar-month-mode #monthView .actual-legend-v58 i{
+    background:var(--amber)!important;
+  }
+}
+
+@media (max-width:375px){
+  body[data-calendar-page="month"] #monthView .month-performance-v58 strong,
+  body.calendar-month-mode #monthView .month-performance-v58 strong{font-size:10px!important}
+  body[data-calendar-page="month"] #monthView .month-performance-v58 small,
+  body.calendar-month-mode #monthView .month-performance-v58 small{font-size:6.5px!important}
+}
