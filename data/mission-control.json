@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-29T05:53:36+09:00",
+  "updated_at": "2026-07-29T05:54:24+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -55,6 +55,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-b12b902bd285",
+      "title": "Publish non-overlapping monthly calendar v64",
+      "completed_at": "2026-07-28T20:54:05Z",
+      "result": "GitHub mainへ反映（b12b902）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/b12b902bd2858940c1f15416a56c7c362ea4394b"
+    },
+    {
       "id": "github-commit-234053fa00eb",
       "title": "Fix monthly calendar overlap with bottom navigation v64",
       "completed_at": "2026-07-28T20:53:20Z",
@@ -81,13 +88,6 @@
       "completed_at": "2026-07-28T20:42:40Z",
       "result": "GitHub mainへ反映（80aefa7）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/80aefa7aef4f4a0ee96d81fda205d4be7e40cc99"
-    },
-    {
-      "id": "github-commit-1ba747190da5",
-      "title": "Taxi v62: replace ambiguous bottom navigation symbols",
-      "completed_at": "2026-07-28T20:41:48Z",
-      "result": "GitHub mainへ反映（1ba7471）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/1ba747190da5a2871e9bed950362da7505da1172"
     },
     {
       "id": "complete-002",
@@ -124,7 +124,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-29T05:53:36+09:00",
+      "last_update": "2026-07-29T05:54:24+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -205,7 +205,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-29T05:53:36+09:00",
+      "last_update": "2026-07-29T05:54:24+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -228,7 +228,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-29T05:53:36+09:00",
+      "last_update": "2026-07-29T05:54:24+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -310,5 +310,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "12f0a79b33e470f1a6d80c42be592babdf6916a33dfa2b75b95f2b9dfd0fe2ad"
+  "github_snapshot_hash": "5495054c271d745b7c9b94d35d2a1bbc2d25e40797820b094e3b3de46c561e8c"
 }
