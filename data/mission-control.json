@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-28T23:39:04+09:00",
+  "updated_at": "2026-07-28T23:39:23+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -55,6 +55,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-f29ab190448d",
+      "title": "Prioritize Taxi main action and move nav into flow",
+      "completed_at": "2026-07-28T14:39:11Z",
+      "result": "GitHub mainへ反映（f29ab19）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/f29ab190448d7ee8caf5764fd9c582319c24b8cc"
+    },
+    {
       "id": "github-commit-f97d36976737",
       "title": "Fix Taxi action order and navigation overlap",
       "completed_at": "2026-07-28T14:38:45Z",
@@ -81,13 +88,6 @@
       "completed_at": "2026-07-28T13:33:03Z",
       "result": "GitHub mainへ反映（ab094d0）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/ab094d04c25d6a828cf7e864cb6b31aeed45c6cb"
-    },
-    {
-      "id": "github-commit-ebf940a8faa8",
-      "title": "Load Taxi v44 driving UI and refresh cache",
-      "completed_at": "2026-07-28T12:05:57Z",
-      "result": "GitHub mainへ反映（ebf940a）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/ebf940a8faa8c540debda92273d5bc826e1e0eb6"
     },
     {
       "id": "complete-002",
@@ -124,7 +124,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-28T23:39:04+09:00",
+      "last_update": "2026-07-28T23:39:23+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -205,7 +205,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-28T23:39:04+09:00",
+      "last_update": "2026-07-28T23:39:23+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -228,7 +228,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-28T23:39:04+09:00",
+      "last_update": "2026-07-28T23:39:23+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -310,5 +310,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "5e9cedac5575d5ebf2b035e26eacd8e301171de19079d52553d04167befe10d1"
+  "github_snapshot_hash": "02c7c29c9c0dafeac6053817e0983e05b873e18b96ec4b6a1c74c8ca12eddf55"
 }
