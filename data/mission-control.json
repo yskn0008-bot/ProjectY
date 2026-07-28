@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-29T01:01:11+09:00",
+  "updated_at": "2026-07-29T01:14:07+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -50,10 +50,17 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/51",
-      "updated_at": "2026-07-28T15:17:45Z"
+      "updated_at": "2026-07-28T16:07:58Z"
     }
   ],
   "recently_completed": [
+    {
+      "id": "github-commit-6b80494dd990",
+      "title": "Add smooth horizontal page motion and fixed app shell",
+      "completed_at": "2026-07-28T16:13:45Z",
+      "result": "GitHub mainへ反映（6b80494）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/6b80494dd99013af137bbb48369ffca8ebb25254"
+    },
     {
       "id": "github-commit-d5ae877f7c23",
       "title": "Replace cross swipe with horizontal customizable pages",
@@ -81,13 +88,6 @@
       "completed_at": "2026-07-28T14:39:51Z",
       "result": "GitHub mainへ反映（280699f）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/280699f45dd2aa547f0cf27587e1aad2b99a13f9"
-    },
-    {
-      "id": "github-commit-f29ab190448d",
-      "title": "Prioritize Taxi main action and move nav into flow",
-      "completed_at": "2026-07-28T14:39:11Z",
-      "result": "GitHub mainへ反映（f29ab19）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/f29ab190448d7ee8caf5764fd9c582319c24b8cc"
     },
     {
       "id": "complete-002",
@@ -124,7 +124,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-29T01:01:11+09:00",
+      "last_update": "2026-07-29T01:14:07+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -205,7 +205,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-29T01:01:11+09:00",
+      "last_update": "2026-07-29T01:14:07+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -228,7 +228,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-29T01:01:11+09:00",
+      "last_update": "2026-07-29T01:14:07+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -310,5 +310,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "078e7e2a43917e40475461f86eab835b798e5d7ad889ef85517d1a7172a64495"
+  "github_snapshot_hash": "5dff11aff3e2381ad2b63d08074f70ddd264fb16b75e2105569bf15332073f89"
 }
