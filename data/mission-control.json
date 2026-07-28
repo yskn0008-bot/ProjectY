@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-29T05:36:15+09:00",
+  "updated_at": "2026-07-29T05:41:58+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -55,6 +55,20 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-1ba747190da5",
+      "title": "Taxi v62: replace ambiguous bottom navigation symbols",
+      "completed_at": "2026-07-28T20:41:48Z",
+      "result": "GitHub mainへ反映（1ba7471）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/1ba747190da5a2871e9bed950362da7505da1172"
+    },
+    {
+      "id": "github-commit-43c44640b071",
+      "title": "Taxi v62: use remaining month space and refine icon navigation",
+      "completed_at": "2026-07-28T20:41:31Z",
+      "result": "GitHub mainへ反映（43c4464）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/43c44640b0714dd2492e3cf888c1c5370d8870ec"
+    },
+    {
       "id": "github-commit-81be82b4f783",
       "title": "Taxi v61: publish full-height month grid and icon-only navigation",
       "completed_at": "2026-07-28T20:36:02Z",
@@ -74,20 +88,6 @@
       "completed_at": "2026-07-28T18:26:27Z",
       "result": "GitHub mainへ反映（1109864）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/110986471479b9e90356ef0f4950b1b77ea27842"
-    },
-    {
-      "id": "github-commit-0b794dfd309e",
-      "title": "Add v60 full-height readable monthly calendar",
-      "completed_at": "2026-07-28T18:25:46Z",
-      "result": "GitHub mainへ反映（0b794df）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/0b794dfd309ec58cf0a4271d7eb99371beb86a47"
-    },
-    {
-      "id": "github-commit-c42ea868852f",
-      "title": "Add v60 precise monthly sales display",
-      "completed_at": "2026-07-28T18:25:09Z",
-      "result": "GitHub mainへ反映（c42ea86）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/c42ea868852f0989a3168380c3333d5d6e5c5639"
     },
     {
       "id": "complete-002",
@@ -124,7 +124,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-29T05:36:15+09:00",
+      "last_update": "2026-07-29T05:41:58+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -205,7 +205,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-29T05:36:15+09:00",
+      "last_update": "2026-07-29T05:41:58+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -228,7 +228,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-29T05:36:15+09:00",
+      "last_update": "2026-07-29T05:41:58+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -310,5 +310,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "1ffda7b1d8c12d8a0db10196cc8365240bc5317c095f9253d34a76cde9cfc614"
+  "github_snapshot_hash": "7b2f2b550bec951be7a0c4a880778ce14a9603424dd962e2024c0af61372d2bd"
 }
