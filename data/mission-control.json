@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-29T00:55:23+09:00",
+  "updated_at": "2026-07-29T01:00:37+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -55,6 +55,20 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-904254f97fce",
+      "title": "Style horizontal page navigation controls",
+      "completed_at": "2026-07-28T16:00:12Z",
+      "result": "GitHub mainへ反映（904254f）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/904254f97fceaa9c3a1a8339562b35e2b06e4c1f"
+    },
+    {
+      "id": "github-commit-f756574b4c53",
+      "title": "Add horizontal page swipe and page visibility controls",
+      "completed_at": "2026-07-28T15:59:59Z",
+      "result": "GitHub mainへ反映（f756574）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/f756574b4c53d48c80461481f8ec3003bd1d3125"
+    },
+    {
       "id": "github-commit-280699f45dd2",
       "title": "Refresh Taxi cache for action-first layout",
       "completed_at": "2026-07-28T14:39:51Z",
@@ -74,20 +88,6 @@
       "completed_at": "2026-07-28T14:38:45Z",
       "result": "GitHub mainへ反映（f97d369）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/f97d3697673781c3d00054bc9f11656e58ce8387"
-    },
-    {
-      "id": "github-commit-86ed7ff76887",
-      "title": "Refresh Taxi v45 cache after UI fixes",
-      "completed_at": "2026-07-28T13:34:10Z",
-      "result": "GitHub mainへ反映（86ed7ff）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/86ed7ff768878c532c7ad457814e71bd1ed87346"
-    },
-    {
-      "id": "github-commit-f8a6baab9cad",
-      "title": "Fix Taxi browser bottom-nav overlap",
-      "completed_at": "2026-07-28T13:33:28Z",
-      "result": "GitHub mainへ反映（f8a6baa）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/f8a6baab9cad8186a385100124f99c605f4e381a"
     },
     {
       "id": "complete-002",
@@ -124,7 +124,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-29T00:55:23+09:00",
+      "last_update": "2026-07-29T01:00:37+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -205,7 +205,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-29T00:55:23+09:00",
+      "last_update": "2026-07-29T01:00:37+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -228,7 +228,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-29T00:55:23+09:00",
+      "last_update": "2026-07-29T01:00:37+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -310,5 +310,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "4448528ac285e5ab56a8effc7c1ffe94876bfb1217f9f0816b1453b85a0d4350"
+  "github_snapshot_hash": "95928ef9c280473be1002404ab9041d6abe36160ed8cc984271b6a33f1c7fdaa"
 }
