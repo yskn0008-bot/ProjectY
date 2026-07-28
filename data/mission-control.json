@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-29T03:25:33+09:00",
+  "updated_at": "2026-07-29T03:26:00+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -55,6 +55,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-0b794dfd309e",
+      "title": "Add v60 full-height readable monthly calendar",
+      "completed_at": "2026-07-28T18:25:46Z",
+      "result": "GitHub mainへ反映（0b794df）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/0b794dfd309ec58cf0a4271d7eb99371beb86a47"
+    },
+    {
       "id": "github-commit-c42ea868852f",
       "title": "Add v60 precise monthly sales display",
       "completed_at": "2026-07-28T18:25:09Z",
@@ -81,13 +88,6 @@
       "completed_at": "2026-07-28T18:12:39Z",
       "result": "GitHub mainへ反映（2922660）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/292266004d14b9b0c6cb71421d4d75296a1bc775"
-    },
-    {
-      "id": "github-commit-0ae862792849",
-      "title": "Taxi v58: make monthly sales results visible in each day cell",
-      "completed_at": "2026-07-28T18:11:58Z",
-      "result": "GitHub mainへ反映（0ae8627）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/0ae862792849d6ac55bc2673c844a0c6938731e0"
     },
     {
       "id": "complete-002",
@@ -124,7 +124,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-29T03:25:33+09:00",
+      "last_update": "2026-07-29T03:26:00+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -205,7 +205,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-29T03:25:33+09:00",
+      "last_update": "2026-07-29T03:26:00+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -228,7 +228,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-29T03:25:33+09:00",
+      "last_update": "2026-07-29T03:26:00+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -310,5 +310,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "2554af64f65c7812cf59efbde669abcc1440dcd51c371642e8538da0f7dc0114"
+  "github_snapshot_hash": "a7d78dcb8ed223bf1b0b3a2edccd877993137c5bce62b203585c267ed73cbdda"
 }
