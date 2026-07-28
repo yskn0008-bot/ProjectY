@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-29T03:12:18+09:00",
+  "updated_at": "2026-07-29T03:13:01+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -55,6 +55,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-292266004d14",
+      "title": "Taxi v58: publish visible monthly performance overlays",
+      "completed_at": "2026-07-28T18:12:39Z",
+      "result": "GitHub mainへ反映（2922660）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/292266004d14b9b0c6cb71421d4d75296a1bc775"
+    },
+    {
       "id": "github-commit-0ae862792849",
       "title": "Taxi v58: make monthly sales results visible in each day cell",
       "completed_at": "2026-07-28T18:11:58Z",
@@ -81,13 +88,6 @@
       "completed_at": "2026-07-28T17:34:57Z",
       "result": "GitHub mainへ反映（91bf024）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/91bf024e7c0d2721e30988912d3c19075d2fa407"
-    },
-    {
-      "id": "github-commit-1474a10b9a4a",
-      "title": "Reflect confirmed sales performance in monthly calendar",
-      "completed_at": "2026-07-28T17:34:19Z",
-      "result": "GitHub mainへ反映（1474a10）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/1474a10b9a4a5f3eb3c2eaec713b7d83f519c8ee"
     },
     {
       "id": "complete-002",
@@ -124,7 +124,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-29T03:12:18+09:00",
+      "last_update": "2026-07-29T03:13:01+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -205,7 +205,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-29T03:12:18+09:00",
+      "last_update": "2026-07-29T03:13:01+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -228,7 +228,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-29T03:12:18+09:00",
+      "last_update": "2026-07-29T03:13:01+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -310,5 +310,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "80314bdc38160e7d1aa8427ede6c6a043a93e28e4e58900dc8ec3f0b148b0832"
+  "github_snapshot_hash": "2b59b302de35a6ec67bdbd5bddcc2deef6c80a97aa923d863573ad6d10a3da33"
 }
