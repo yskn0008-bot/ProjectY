@@ -1,8 +1,8 @@
-/* YOS Taxi v45 — one-action driving UI fixes */
+/* YOS Taxi v46 — action-first driving UI */
 .drive-v44{padding:14px!important}
 .drive-v44 .quick-head-v18{align-items:center}
 .drive-v44 .quick-sales-v18 strong{font-size:32px}
-.quick-actions-v44{display:grid;gap:8px;margin-top:10px}
+.quick-actions-v44{display:grid;gap:8px;margin:10px 0}
 .quick-primary-v44{display:grid}
 .quick-primary-v44 .action.v44-main{display:block!important;width:100%!important;min-height:76px!important;border-radius:18px!important;font-size:23px!important;font-weight:900!important;letter-spacing:.02em!important}
 .drive-v44[data-state="available"] .quick-primary-v44 .v44-main{background:linear-gradient(145deg,#4bd283,#1c9c58)!important;color:#06120b!important;border:0!important}
@@ -21,13 +21,13 @@
 .optional-v44 summary:after{content:'＋';margin-left:auto;color:var(--amber);font-size:18px}
 .optional-v44[open] summary:after{content:'−'}
 .optional-body-v44{display:grid;gap:11px;padding:0 10px 10px}
+body.taxi-drive-v44-active main.app,body.taxi-drive-v44-active .app{padding-bottom:16px!important}
+body.taxi-drive-v44-active .taxi-global-nav-v24{position:static!important;left:auto!important;right:auto!important;bottom:auto!important;transform:none!important;width:calc(100% - 20px)!important;max-width:740px!important;min-height:60px!important;margin:12px auto calc(env(safe-area-inset-bottom) + 108px)!important;padding:5px!important;border-radius:18px!important}
+body.taxi-drive-v44-active .taxi-global-nav-v24 button{min-height:48px!important;padding:4px 2px!important}
 @media(max-width:390px){
   .drive-v44{padding:11px!important}
   .quick-primary-v44 .action.v44-main{min-height:70px!important;font-size:21px!important}
   .drive-v44 .quick-tools-v18{grid-template-columns:repeat(5,minmax(0,1fr))}
   .drive-v44 .quick-tool-v18{font-size:9px}
-}
-@media(max-width:430px) and (display-mode:browser){
-  main.app,.app{padding-bottom:calc(env(safe-area-inset-bottom) + 190px)!important}
-  .taxi-global-nav-v24{bottom:calc(env(safe-area-inset-bottom) + 96px)!important}
+  body.taxi-drive-v44-active .taxi-global-nav-v24{width:calc(100% - 16px)!important;margin-left:8px!important;margin-right:8px!important}
 }
