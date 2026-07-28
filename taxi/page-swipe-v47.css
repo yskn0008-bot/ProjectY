@@ -1,0 +1,12 @@
+/* YOS Taxi v47 — horizontal-only swipe and page customization */
+#crossSwipeGuideV35{display:none!important}
+#taxiGlobalNavV24{grid-template-columns:repeat(var(--taxi-page-count,5),minmax(0,1fr))!important}
+.page-swipe-help-v47{margin:0 0 7px;color:var(--muted);font-size:10px;line-height:1.45}
+.taxi-order-list-v24>div{grid-template-columns:28px minmax(0,1fr) 54px 38px 38px!important}
+.taxi-order-list-v24>div.page-hidden-v47{opacity:.55}
+.taxi-order-list-v24 .page-visible-v47{font-size:9px;padding:0 4px}
+.taxi-order-list-v24>div.page-hidden-v47 .page-visible-v47{border-color:rgba(255,179,35,.55);color:var(--amber)}
+@media(max-width:390px){
+  .taxi-order-list-v24>div{grid-template-columns:24px minmax(0,1fr) 48px 34px 34px!important;gap:4px!important}
+  .taxi-order-list-v24 .page-visible-v47{font-size:8px}
+}
