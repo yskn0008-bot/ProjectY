@@ -6,6 +6,23 @@
   const LAST_DISPATCH='yos-taxi-last-dispatch-v44';
   const byId=id=>document.getElementById(id);
 
+  function installFareGuard(){
+    const confirmButton=byId('confirmDropoff');
+    const fare=byId('fare');
+    if(!confirmButton||!fare||confirmButton.dataset.fareGuardV44)return;
+    confirmButton.addEventListener('click',event=>{
+      const raw=String(fare.value||'').trim();
+      const amount=Number(raw);
+      if(raw===''||!Number.isFinite(amount)||amount<=0){
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        alert('運賃を入力してください。');
+        fare.focus();
+      }
+    },true);
+    confirmButton.dataset.fareGuardV44='1';
+  }
+
   function simplifyForms(){
     const payment=byId('payment');
     if(payment&&!payment.dataset.v44){
@@ -58,6 +75,7 @@
       dropoffButton.addEventListener('click',()=>setTimeout(()=>byId('fare')?.focus(),450));
       dropoffButton.dataset.focusV44='1';
     }
+    installFareGuard();
   }
 
   function undoLast(){
@@ -117,13 +135,23 @@
     ['shiftButton','rideButton','dropoffButton','breakButton','memoButton','shareButton','settingsButton','endButton'].forEach(id=>refs[id]=byId(id));
 
     oldBox.className='quick-actions-v44';
-    oldBox.innerHTML='<div id="quickPrimaryV44" class="quick-primary-v44"></div><div id="quickSecondaryV44" class="quick-secondary-v44"></div>';
-    Object.values(refs).forEach(button=>button&&button.classList.remove('v44-main'));
+    const primary=document.createElement('div');
+    primary.id='quickPrimaryV44';
+    primary.className='quick-primary-v44';
+    const secondary=document.createElement('div');
+    secondary.id='quickSecondaryV44';
+    secondary.className='quick-secondary-v44';
+    oldBox.replaceChildren(primary,secondary);
+    Object.values(refs).forEach(button=>{
+      if(!button)return;
+      button.classList.remove('v44-main');
+      secondary.appendChild(button);
+    });
 
     const urlButton=byId('quickUrlV18');
     if(urlButton){
       urlButton.textContent='設定';
-      urlButton.onclick=()=>refs.settingsButton?.click();
+      urlButton.onclick=()=>byId('settingsButton')?.click();
     }
     const yosButton=byId('quickYosV18');
     if(yosButton)yosButton.textContent='YOSへ送る';
@@ -146,6 +174,8 @@
   function move(button,parent,main=false){
     if(!button||!parent)return;
     if(button.parentNode!==parent)parent.appendChild(button);
+    button.hidden=false;
+    if(main)button.disabled=false;
     button.classList.toggle('v44-main',main);
   }
 
@@ -167,11 +197,11 @@
     move(main,primary,true);
 
     const secondaryMap={
-      before:[buttons.memo,buttons.settings],
+      before:[buttons.memo],
       available:[buttons.break,buttons.memo,buttons.end],
       occupied:[buttons.memo],
       break:[buttons.memo],
-      ended:[buttons.settings]
+      ended:[]
     };
     const allowed=new Set(secondaryMap[state.status]||[]);
     (secondaryMap[state.status]||[]).forEach(button=>move(button,secondary,false));
