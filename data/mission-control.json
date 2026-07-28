@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-29T01:14:07+09:00",
+  "updated_at": "2026-07-29T01:14:32+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -55,6 +55,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-c19a31dc7f38",
+      "title": "Style one-screen Taxi shell and smooth page motion",
+      "completed_at": "2026-07-28T16:14:18Z",
+      "result": "GitHub mainへ反映（c19a31d）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/c19a31dc7f389c9daaf9820b061a98a17552e35d"
+    },
+    {
       "id": "github-commit-6b80494dd990",
       "title": "Add smooth horizontal page motion and fixed app shell",
       "completed_at": "2026-07-28T16:13:45Z",
@@ -81,13 +88,6 @@
       "completed_at": "2026-07-28T15:59:59Z",
       "result": "GitHub mainへ反映（f756574）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/f756574b4c53d48c80461481f8ec3003bd1d3125"
-    },
-    {
-      "id": "github-commit-280699f45dd2",
-      "title": "Refresh Taxi cache for action-first layout",
-      "completed_at": "2026-07-28T14:39:51Z",
-      "result": "GitHub mainへ反映（280699f）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/280699f45dd2aa547f0cf27587e1aad2b99a13f9"
     },
     {
       "id": "complete-002",
@@ -124,7 +124,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-29T01:14:07+09:00",
+      "last_update": "2026-07-29T01:14:32+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -205,7 +205,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-29T01:14:07+09:00",
+      "last_update": "2026-07-29T01:14:32+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -228,7 +228,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-29T01:14:07+09:00",
+      "last_update": "2026-07-29T01:14:32+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -310,5 +310,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "5dff11aff3e2381ad2b63d08074f70ddd264fb16b75e2105569bf15332073f89"
+  "github_snapshot_hash": "56a90bcca217258fe66a2493af1945f131da64b9614665d9f833998423018774"
 }
