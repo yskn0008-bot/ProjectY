@@ -1,0 +1,185 @@
+/* YOS Taxi v60 — precise values, full-height month grid, no clipped cell text */
+@media (max-width:430px){
+  html.taxi-page-month-v49 main.app,
+  html.taxi-page-month-v49 .app{
+    gap:2px!important;
+    padding-bottom:0!important;
+    overflow:hidden!important;
+  }
+
+  /* Use every pixel between the month controls and the fixed navigation. */
+  body[data-calendar-page="month"] #monthView.v21-active,
+  body.calendar-month-mode #monthView{
+    display:flex!important;
+    flex:1 1 auto!important;
+    flex-direction:column!important;
+    align-self:stretch!important;
+    width:100%!important;
+    height:auto!important;
+    min-height:0!important;
+    margin:0!important;
+    padding:0!important;
+    gap:0!important;
+    overflow:hidden!important;
+  }
+
+  body[data-calendar-page="month"] #monthView .legend-v17,
+  body.calendar-month-mode #monthView .legend-v17{
+    flex:0 0 17px!important;
+    min-height:17px!important;
+    margin:0!important;
+    padding:0!important;
+    line-height:17px!important;
+  }
+
+  body[data-calendar-page="month"] #monthView .week-head,
+  body.calendar-month-mode #monthView .week-head{
+    flex:0 0 22px!important;
+    min-height:22px!important;
+    gap:0!important;
+    margin:0!important;
+  }
+
+  body[data-calendar-page="month"] #monthView .week-head div,
+  body.calendar-month-mode #monthView .week-head div{
+    display:flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    padding:0!important;
+    font-size:11px!important;
+    font-weight:950!important;
+    line-height:1!important;
+  }
+
+  body[data-calendar-page="month"] #monthView .month-grid,
+  body.calendar-month-mode #monthView .month-grid{
+    flex:1 1 0!important;
+    align-self:stretch!important;
+    width:100%!important;
+    height:auto!important;
+    min-height:0!important;
+    margin:0!important;
+    gap:0!important;
+    overflow:hidden!important;
+  }
+
+  body[data-calendar-page="month"] #monthView .day,
+  body.calendar-month-mode #monthView .day{
+    position:relative!important;
+    min-width:0!important;
+    min-height:0!important;
+    width:100%!important;
+    height:100%!important;
+    margin:0!important;
+    padding:4px 1px 27px!important;
+    overflow:hidden!important;
+  }
+
+  body[data-calendar-page="month"] #monthView .date,
+  body.calendar-month-mode #monthView .date{
+    display:block!important;
+    width:100%!important;
+    padding:0 0 0 3px!important;
+    font-size:clamp(14px,4vw,16px)!important;
+    font-weight:950!important;
+    line-height:1!important;
+    text-align:left!important;
+    white-space:nowrap!important;
+    overflow:visible!important;
+  }
+
+  /* Replace the older target/result strings whenever the compact v60 value exists. */
+  body[data-calendar-page="month"] #monthView .day.has-month-value-v60 > .month-money,
+  body[data-calendar-page="month"] #monthView .day.has-month-value-v60 > .month-label,
+  body[data-calendar-page="month"] #monthView .day.has-month-value-v60 > .month-sub,
+  body.calendar-month-mode #monthView .day.has-month-value-v60 > .month-money,
+  body.calendar-month-mode #monthView .day.has-month-value-v60 > .month-label,
+  body.calendar-month-mode #monthView .day.has-month-value-v60 > .month-sub{
+    display:none!important;
+  }
+
+  body[data-calendar-page="month"] #monthView .month-performance-v60,
+  body.calendar-month-mode #monthView .month-performance-v60{
+    position:absolute!important;
+    left:0!important;
+    right:0!important;
+    bottom:4px!important;
+    z-index:6!important;
+    display:grid!important;
+    grid-template-rows:auto auto!important;
+    justify-items:center!important;
+    align-content:end!important;
+    gap:2px!important;
+    min-width:0!important;
+    max-width:100%!important;
+    pointer-events:none!important;
+    color:var(--amber)!important;
+  }
+
+  body[data-calendar-page="month"] #monthView .month-performance-v60 strong,
+  body.calendar-month-mode #monthView .month-performance-v60 strong{
+    display:block!important;
+    width:100%!important;
+    max-width:100%!important;
+    margin:0!important;
+    padding:0!important;
+    font-size:clamp(10px,3vw,12.5px)!important;
+    font-weight:950!important;
+    line-height:.92!important;
+    letter-spacing:-.085em!important;
+    text-align:center!important;
+    white-space:nowrap!important;
+    overflow:visible!important;
+    text-overflow:clip!important;
+    font-variant-numeric:tabular-nums!important;
+    transform:scaleX(.94)!important;
+    transform-origin:center!important;
+  }
+
+  body[data-calendar-page="month"] #monthView .month-performance-v60 small,
+  body.calendar-month-mode #monthView .month-performance-v60 small{
+    display:block!important;
+    width:100%!important;
+    max-width:100%!important;
+    margin:0!important;
+    padding:0!important;
+    font-size:8px!important;
+    font-weight:950!important;
+    line-height:1!important;
+    letter-spacing:-.035em!important;
+    text-align:center!important;
+    white-space:nowrap!important;
+    overflow:hidden!important;
+    text-overflow:clip!important;
+    color:currentColor!important;
+  }
+
+  body[data-calendar-page="month"] #monthView .month-performance-v60.hit,
+  body.calendar-month-mode #monthView .month-performance-v60.hit{color:var(--green)!important}
+  body[data-calendar-page="month"] #monthView .month-performance-v60.miss,
+  body.calendar-month-mode #monthView .month-performance-v60.miss{color:var(--red)!important}
+  body[data-calendar-page="month"] #monthView .month-performance-v60.live,
+  body.calendar-month-mode #monthView .month-performance-v60.live{color:var(--blue)!important}
+  body[data-calendar-page="month"] #monthView .month-performance-v60.target,
+  body.calendar-month-mode #monthView .month-performance-v60.target{color:#fff!important}
+
+  body[data-calendar-page="month"] #monthView .actual-legend-v60 i,
+  body.calendar-month-mode #monthView .actual-legend-v60 i{
+    background:var(--amber)!important;
+  }
+
+  html.taxi-page-month-v49 #taxiGlobalNavV24,
+  html.taxi-page-month-v49 .taxi-global-nav-v24{
+    margin-top:0!important;
+  }
+}
+
+@media (max-width:375px){
+  body[data-calendar-page="month"] #monthView .month-performance-v60 strong,
+  body.calendar-month-mode #monthView .month-performance-v60 strong{
+    font-size:10.5px!important;
+    transform:scaleX(.91)!important;
+  }
+  body[data-calendar-page="month"] #monthView .month-performance-v60 small,
+  body.calendar-month-mode #monthView .month-performance-v60 small{font-size:7.5px!important}
+}
