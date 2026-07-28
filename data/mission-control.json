@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-28T21:05:14+09:00",
+  "updated_at": "2026-07-28T21:05:35+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -55,6 +55,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-f8a14782aab8",
+      "title": "Style one-action Taxi driving UI",
+      "completed_at": "2026-07-28T12:05:17Z",
+      "result": "GitHub mainへ反映（f8a1478）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/f8a14782aab82facf5aa7c9f1b6027f7a7590140"
+    },
+    {
       "id": "github-commit-fbdf81399fb5",
       "title": "Improve Taxi driving controls and simplify inputs",
       "completed_at": "2026-07-28T12:04:57Z",
@@ -81,13 +88,6 @@
       "completed_at": "2026-07-27T11:06:59Z",
       "result": "GitHub mainへ反映（34a5b3a）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/34a5b3a2bff2d5d74c7c9c0d60bd19e8e3d23350"
-    },
-    {
-      "id": "github-commit-d852ce00d62b",
-      "title": "Taxi下メニュー位置と余白を最適化 v42",
-      "completed_at": "2026-07-27T11:06:13Z",
-      "result": "GitHub mainへ反映（d852ce0）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/d852ce00d62b4d3cb22cc9fadc81506e358ecf20"
     },
     {
       "id": "complete-002",
@@ -124,7 +124,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-28T21:05:14+09:00",
+      "last_update": "2026-07-28T21:05:35+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -205,7 +205,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-28T21:05:14+09:00",
+      "last_update": "2026-07-28T21:05:35+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -228,7 +228,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-28T21:05:14+09:00",
+      "last_update": "2026-07-28T21:05:35+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -310,5 +310,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "90e374da666da384e6c8225719ea6ba3b51fd54f3fdd8d32ef32035a17951271"
+  "github_snapshot_hash": "952c551ab4d192b423332e6925eedf4836a80dc74200e928a8f594f0bc2df583"
 }
