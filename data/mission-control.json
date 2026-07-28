@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-29T05:50:32+09:00",
+  "updated_at": "2026-07-29T05:51:18+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -55,6 +55,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-e4f77338ed9c",
+      "title": "Publish exact monthly bottom-gap fix in v63",
+      "completed_at": "2026-07-28T20:50:54Z",
+      "result": "GitHub mainへ反映（e4f7733）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/e4f77338ed9c735c153aa82ca75440efc4ef7f4c"
+    },
+    {
       "id": "github-commit-fbfae2af0047",
       "title": "Fix monthly calendar bottom gap in v63",
       "completed_at": "2026-07-28T20:50:11Z",
@@ -81,13 +88,6 @@
       "completed_at": "2026-07-28T20:41:31Z",
       "result": "GitHub mainへ反映（43c4464）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/43c44640b0714dd2492e3cf888c1c5370d8870ec"
-    },
-    {
-      "id": "github-commit-81be82b4f783",
-      "title": "Taxi v61: publish full-height month grid and icon-only navigation",
-      "completed_at": "2026-07-28T20:36:02Z",
-      "result": "GitHub mainへ反映（81be82b）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/81be82b4f7831303c918f54602c0b819bb9ac008"
     },
     {
       "id": "complete-002",
@@ -124,7 +124,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-29T05:50:32+09:00",
+      "last_update": "2026-07-29T05:51:18+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -205,7 +205,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-29T05:50:32+09:00",
+      "last_update": "2026-07-29T05:51:18+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -228,7 +228,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-29T05:50:32+09:00",
+      "last_update": "2026-07-29T05:51:18+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -310,5 +310,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "7c14673440ae45d960d0837980830b436a1000a9de807227e5f149d8d1c6e8f1"
+  "github_snapshot_hash": "0b8d25f191046ab58e8766133eb5f91f80177532d2c2789f21d9b61232f580fa"
 }
