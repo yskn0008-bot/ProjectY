@@ -1,0 +1,77 @@
+/* YOS Taxi v63 — make the monthly calendar reach the navigation with zero wasted strip */
+@media (max-width:430px){
+  html.taxi-shell-v49 body{
+    row-gap:0!important;
+  }
+
+  html.taxi-page-month-v49 main.app,
+  html.taxi-page-month-v49 .app{
+    position:relative!important;
+    display:grid!important;
+    grid-template-rows:32px 28px minmax(0,1fr)!important;
+    row-gap:0!important;
+    min-height:0!important;
+    height:100%!important;
+    padding-top:calc(env(safe-area-inset-top) + 2px)!important;
+    padding-bottom:0!important;
+    margin:0 auto!important;
+    overflow:hidden!important;
+  }
+
+  html.taxi-page-month-v49 .top{
+    grid-row:1!important;
+    margin:0!important;
+  }
+
+  html.taxi-page-month-v49 .toolbar{
+    grid-row:2!important;
+    margin:0!important;
+  }
+
+  /* Pin the calendar body to the exact bottom edge of the main content row. */
+  body[data-calendar-page="month"] #monthView.v21-active,
+  body.calendar-month-mode #monthView{
+    position:absolute!important;
+    top:calc(env(safe-area-inset-top) + 62px)!important;
+    left:0!important;
+    right:0!important;
+    bottom:0!important;
+    width:auto!important;
+    height:auto!important;
+    min-height:0!important;
+    margin:0!important;
+    padding:0!important;
+    display:flex!important;
+    flex-direction:column!important;
+    gap:0!important;
+    overflow:hidden!important;
+  }
+
+  body[data-calendar-page="month"] #monthView .month-grid,
+  body.calendar-month-mode #monthView .month-grid{
+    flex:1 1 0!important;
+    display:grid!important;
+    grid-template-columns:repeat(7,minmax(0,1fr))!important;
+    grid-template-rows:repeat(6,minmax(0,1fr))!important;
+    width:100%!important;
+    height:auto!important;
+    min-height:0!important;
+    margin:0!important;
+    padding:0!important;
+    gap:0!important;
+    overflow:hidden!important;
+  }
+
+  /* Remove any inherited outside spacing above the navigation itself. */
+  html.taxi-shell-v49 #taxiGlobalNavV24,
+  html.taxi-shell-v49 .taxi-global-nav-v24{
+    margin-top:0!important;
+  }
+}
+
+@media (max-width:375px) and (max-height:700px){
+  body[data-calendar-page="month"] #monthView.v21-active,
+  body.calendar-month-mode #monthView{
+    top:calc(env(safe-area-inset-top) + 60px)!important;
+  }
+}
