@@ -1,0 +1,32 @@
+/* YOS Taxi v49 — smooth motion without intermediate preview */
+:root{--taxi-vh:100dvh;--taxi-nav-height:68px;--taxi-shell-gap:6px}
+html.taxi-shell-v49,html.taxi-shell-v49 body{width:100%!important;height:var(--taxi-vh)!important;min-height:0!important;max-height:var(--taxi-vh)!important;overflow:hidden!important;overscroll-behavior:none!important}
+html.taxi-shell-v49 body{display:grid!important;grid-template-rows:minmax(0,1fr) auto!important;background:var(--bg)!important}
+html.taxi-shell-v49 main.app,html.taxi-shell-v49 .app{grid-row:1!important;width:min(100%,760px)!important;height:100%!important;min-height:0!important;max-height:none!important;margin:0 auto!important;padding:calc(env(safe-area-inset-top) + 6px) 8px 6px!important;overflow-y:auto!important;overflow-x:hidden!important;-webkit-overflow-scrolling:touch;overscroll-behavior-y:contain;transform:translate3d(0,0,0);backface-visibility:hidden;transform-origin:center center;touch-action:pan-y;position:relative;z-index:2;background:var(--bg)!important}
+html.taxi-shell-v49 #taxiGlobalNavV24,html.taxi-shell-v49 .taxi-global-nav-v24,html.taxi-shell-v49 body.taxi-drive-v44-active #taxiGlobalNavV24,html.taxi-shell-v49 body.taxi-drive-v44-active .taxi-global-nav-v24{grid-row:2!important;position:relative!important;left:auto!important;right:auto!important;bottom:auto!important;transform:none!important;width:min(calc(100% - 16px),760px)!important;max-width:760px!important;min-height:62px!important;margin:0 auto calc(env(safe-area-inset-bottom) + var(--taxi-shell-gap))!important;padding:5px!important;border-radius:18px!important;grid-template-columns:repeat(var(--taxi-page-count,5),minmax(0,1fr))!important;z-index:70!important}
+html.taxi-shell-v49 #taxiGlobalNavV24 button{min-height:50px!important;padding:4px 2px!important}
+#crossSwipeGuideV35,#pageMotionBackdropV48{display:none!important}
+.page-swipe-help-v49{margin:0 0 7px;color:var(--muted);font-size:10px;line-height:1.45}
+.taxi-order-list-v24>div{grid-template-columns:28px minmax(0,1fr) 54px 38px 38px!important}
+.taxi-order-list-v24>div.page-hidden-v49{opacity:.55}
+.taxi-order-list-v24 .page-visible-v49{font-size:9px;padding:0 4px}
+.taxi-order-list-v24>div.page-hidden-v49 .page-visible-v49{border-color:rgba(255,179,35,.55);color:var(--amber)}
+html.taxi-page-drive-v49 main.app{display:flex!important;flex-direction:column!important;overflow:hidden!important}
+html.taxi-page-drive-v49 .top{flex:0 0 auto!important;margin-bottom:5px!important}
+html.taxi-page-drive-v49 .top h1{font-size:clamp(20px,3.1vh,29px)!important}
+html.taxi-page-drive-v49 .drive-hero-v10{flex:0 0 auto!important;margin-bottom:6px!important;padding:clamp(7px,1.3vh,12px)!important}
+html.taxi-page-drive-v49 .drive-clock-v10 strong{font-size:clamp(48px,8.2vh,82px)!important;line-height:.94!important}
+html.taxi-page-drive-v49 #quickDashV18{flex:1 1 auto!important;min-height:0!important;max-height:none!important;overflow:hidden!important;display:flex!important;flex-direction:column!important;padding:clamp(8px,1.2vh,12px)!important}
+html.taxi-page-drive-v49 #quickDashV18 .quick-actions-v44{order:2!important;flex:0 0 auto!important;margin:7px 0!important}
+html.taxi-page-drive-v49 #quickDashV18 .quick-metrics-v18{order:3!important;flex:0 0 auto!important;margin:6px 0!important}
+html.taxi-page-drive-v49 #quickDashV18 .quick-decision-v18{order:4!important;flex:0 0 auto!important;margin-bottom:6px!important}
+html.taxi-page-drive-v49 #quickDashV18 .quick-tools-v18{order:5!important;flex:0 0 auto!important;margin-top:5px!important}
+html.taxi-page-drive-v49 #quickDashV18 .quick-last-v18{order:6!important;flex:0 0 auto!important;margin-top:5px!important}
+html.taxi-page-drive-v49 .quick-primary-v44 .action.v44-main{min-height:clamp(62px,9vh,76px)!important}
+html.taxi-page-drive-v49 .quick-secondary-v44 .action{min-height:40px!important}
+html.taxi-page-drive-v49 .quick-tool-v18{min-height:34px!important}
+html.taxi-page-today-v49 main.app,html.taxi-page-week-v49 main.app,html.taxi-page-month-v49 main.app,html.taxi-page-manage-v49 main.app{overflow-y:auto!important;overflow-x:hidden!important;padding-bottom:8px!important}
+html.taxi-page-manage-v49 main.app>.actions{position:sticky!important;left:auto!important;right:auto!important;bottom:0!important;margin-top:8px!important;z-index:8!important}
+@media(max-height:760px){html.taxi-page-drive-v49 .top{margin-bottom:2px!important}html.taxi-page-drive-v49 .top .eyebrow{display:none!important}html.taxi-page-drive-v49 .drive-hero-v10{padding:6px!important;margin-bottom:4px!important}html.taxi-page-drive-v49 .drive-clock-v10 strong{font-size:46px!important}html.taxi-page-drive-v49 #quickDashV18{padding:7px!important}html.taxi-page-drive-v49 #quickDashV18 .quick-head-v18 b{font-size:17px!important}html.taxi-page-drive-v49 #quickDashV18 .quick-sales-v18 strong{font-size:25px!important}html.taxi-page-drive-v49 #quickDashV18 .quick-metric-v18{padding:5px 3px!important}html.taxi-page-drive-v49 #quickDashV18 .quick-decision-v18{padding:6px 8px!important}html.taxi-page-drive-v49 #quickDashV18 .quick-decision-v18 small{display:none!important}html.taxi-page-drive-v49 #quickDashV18 .quick-last-v18{display:none!important}html.taxi-page-drive-v49 .quick-primary-v44 .action.v44-main{min-height:58px!important;font-size:20px!important}html.taxi-shell-v49 #taxiGlobalNavV24 button{min-height:44px!important}}
+@media(max-width:390px){.taxi-order-list-v24>div{grid-template-columns:24px minmax(0,1fr) 48px 34px 34px!important;gap:4px!important}.taxi-order-list-v24 .page-visible-v49{font-size:8px}html.taxi-shell-v49 main.app,html.taxi-shell-v49 .app{padding-left:7px!important;padding-right:7px!important}html.taxi-shell-v49 #taxiGlobalNavV24{width:calc(100% - 12px)!important}}
+@media(prefers-reduced-motion:reduce){html.taxi-shell-v49 main.app{transition:none!important}}
