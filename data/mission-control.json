@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-29T01:19:58+09:00",
+  "updated_at": "2026-07-29T01:20:33+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -55,6 +55,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-1fdcd504c846",
+      "title": "Refine Taxi one-screen shell without swipe preview",
+      "completed_at": "2026-07-28T16:20:19Z",
+      "result": "GitHub mainへ反映（1fdcd50）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/1fdcd504c846fd228ab64898378941309968a8c3"
+    },
+    {
       "id": "github-commit-c46a7df718b4",
       "title": "Hide intermediate swipe preview and refine Taxi motion",
       "completed_at": "2026-07-28T16:19:42Z",
@@ -81,13 +88,6 @@
       "completed_at": "2026-07-28T16:13:45Z",
       "result": "GitHub mainへ反映（6b80494）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/6b80494dd99013af137bbb48369ffca8ebb25254"
-    },
-    {
-      "id": "github-commit-d5ae877f7c23",
-      "title": "Replace cross swipe with horizontal customizable pages",
-      "completed_at": "2026-07-28T16:00:58Z",
-      "result": "GitHub mainへ反映（d5ae877）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/d5ae877f7c23e27e8fb71d94840edb4e19fc95ea"
     },
     {
       "id": "complete-002",
@@ -124,7 +124,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-29T01:19:58+09:00",
+      "last_update": "2026-07-29T01:20:33+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -205,7 +205,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-29T01:19:58+09:00",
+      "last_update": "2026-07-29T01:20:33+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -228,7 +228,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-29T01:19:58+09:00",
+      "last_update": "2026-07-29T01:20:33+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -310,5 +310,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "cd8686c1ef4d6c8d58612301101b118f1f2b20b97f729e1fa5f867cacbd02d35"
+  "github_snapshot_hash": "ec190273a851d0f7a3a82be8ee5a071e353328828b498750018b7fd635f09e70"
 }
