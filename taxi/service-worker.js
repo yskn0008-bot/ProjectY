@@ -1,9 +1,9 @@
 'use strict';
-const CACHE='yos-taxi-projecty-v94-manage-card-balance';
-const VERSION='94';
+const CACHE='yos-taxi-projecty-v95-settings-dialog-fit';
+const VERSION='95';
 const STATIC=[
   './index.html','./calendar.html','./settings.html','./manifest.webmanifest',
-  './v9.css','./v9.js','./drive-v44.css','./drive-v44.js','./drive-no-overlap-v69.css','./drive-no-overlap-v69.js',
+  './v9.css','./v9.js','./drive-v44.css','./drive-v44.js','./drive-no-overlap-v69.css','./drive-no-overlap-v69.js','./settings-dialog-v95.css',
   './calendar-v2.js','./calendar-v3.js','./calendar-v21.js','./calendar-v23-fix.js','./calendar-v26.css','./calendar-v28.css','./calendar-v32.css','./calendar-v38-urgent.css',
   './browser-bottom-v38.css','./browser-bottom-v38.js','./browser-bottom-v42.css','./report-sync-v43.js',
   './month-performance-v57.css','./month-performance-v57.js','./month-performance-v60.js','./month-layout-v59.css','./month-layout-v60.css','./month-nav-v61.css','./month-nav-v62.css',
@@ -34,6 +34,7 @@ async function inject(response,type){
   if(type==='index'){
     addCss('v9.css');
     addCss('drive-v44.css');
+    addCss('settings-dialog-v95.css');
     addJs('v9.js');
     addJs('yos-nav-entry-v40.js');
   }
