@@ -1,3 +1,4 @@
+import {createAnswerAuditRecord, type AuditSink} from '../audit.js';
 import type {IdentityGate} from '../auth/identity-gate.js';
 import type {IdentityVerifier} from '../auth/types.js';
 import {readVercelOidcToken} from '../auth/vercel-oidc.js';
@@ -11,8 +12,10 @@ export interface ChatHandlerOptions extends CorsOptions {
   identityGate: IdentityGate;
   runtimeFactory: RequestRuntimeFactory;
   rateLimiter: RateLimiter;
+  auditSink: AuditSink;
   requestIdFactory?: () => string;
   clock?: () => string;
+  monotonicClock?: () => number;
   maxBodyBytes?: number;
   maxUserTextCharacters?: number;
   maxConversationSummaryCharacters?: number;
@@ -28,6 +31,7 @@ interface ChatBody {
 export function createChatHandler(options: ChatHandlerOptions): (request: Request) => Promise<Response> {
   const requestIdFactory = options.requestIdFactory ?? (() => crypto.randomUUID());
   const clock = options.clock ?? (() => new Date().toISOString());
+  const monotonicClock = options.monotonicClock ?? (() => Date.now());
   const maxBodyBytes = options.maxBodyBytes ?? 32_768;
   const maxUserTextCharacters = options.maxUserTextCharacters ?? 10_000;
   const maxConversationSummaryCharacters = options.maxConversationSummaryCharacters ?? 12_000;
@@ -92,6 +96,7 @@ export function createChatHandler(options: ChatHandlerOptions): (request: Reques
       ...(body.conversationSummary ? {conversationSummary: body.conversationSummary} : {})
     };
 
+    const startedAt = monotonicClock();
     try {
       const vercelOidcToken = readVercelOidcToken(request);
       const runtime = await options.runtimeFactory.create({
@@ -100,6 +105,13 @@ export function createChatHandler(options: ChatHandlerOptions): (request: Reques
         ...(vercelOidcToken ? {vercelOidcToken} : {})
       });
       const answer = await runtime.answer(yosRequest);
+      const durationMilliseconds = Math.max(0, Math.round(monotonicClock() - startedAt));
+      await options.auditSink.append(createAnswerAuditRecord({
+        answer,
+        subjectHash,
+        createdAt: yosRequest.currentTime,
+        durationMilliseconds
+      }));
       return secureJson(answer, 200, origin);
     } catch {
       return secureJson({error: 'YOS is temporarily unavailable', requestId}, 503, origin);
