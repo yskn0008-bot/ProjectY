@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-30T05:35:59+09:00",
+  "updated_at": "2026-07-30T05:37:58+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -85,6 +85,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-2dc11c45a56b",
+      "title": "Taxi v99: add opt-in iPhone release QA diagnostics",
+      "completed_at": "2026-07-29T20:37:45Z",
+      "result": "GitHub mainへ反映（2dc11c4）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/2dc11c45a56b037c5b245404cde37bc4a401d24b"
+    },
+    {
       "id": "github-commit-30d112ba5588",
       "title": "Taxi v98: harden offline asset handling and avoid caching external requests",
       "completed_at": "2026-07-29T20:35:40Z",
@@ -111,13 +118,6 @@
       "completed_at": "2026-07-29T20:32:48Z",
       "result": "GitHub mainへ反映（a18197a）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/a18197a13fec05b13c31ca98ca3c1daeb3ddb9fa"
-    },
-    {
-      "id": "github-commit-993d70974d17",
-      "title": "Taxi v96: publish corrected sales settings layout",
-      "completed_at": "2026-07-29T17:31:04Z",
-      "result": "GitHub mainへ反映（993d709）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/993d70974d175f349f68f1bd276aadd778bcf92a"
     },
     {
       "id": "complete-002",
@@ -154,7 +154,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-30T05:35:59+09:00",
+      "last_update": "2026-07-30T05:37:58+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -235,7 +235,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-30T05:35:59+09:00",
+      "last_update": "2026-07-30T05:37:58+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -258,7 +258,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-30T05:35:59+09:00",
+      "last_update": "2026-07-30T05:37:58+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -340,5 +340,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "46ad518066f9f9546746c95535348700645f9802da62a8e72047e440657bc027"
+  "github_snapshot_hash": "d91ba1ea805b0bec8330cda22eb8d4893782faafa0fda0d79a5ffa6110015ff6"
 }
