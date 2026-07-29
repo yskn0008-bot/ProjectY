@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-29T23:55:09+09:00",
+  "updated_at": "2026-07-29T23:55:32+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -61,6 +61,16 @@
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/51",
       "updated_at": "2026-07-29T14:12:12Z"
+    },
+    {
+      "id": "github-issue-71",
+      "title": "Issue #71 YOS専用生成AI：最小実用版の設計と実装",
+      "type": "GitHub Issue",
+      "status": "open",
+      "priority": 3,
+      "next_action": "完成条件を確認し、次の安全な実装を1件進める",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/71",
+      "updated_at": "2026-07-29T14:55:13Z"
     }
   ],
   "recently_completed": [
@@ -134,7 +144,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-29T23:55:09+09:00",
+      "last_update": "2026-07-29T23:55:32+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -209,13 +219,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 4件・Open PR 1件を自動同期中",
+      "next_action": "Open Issue 5件・Open PR 1件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-29T23:55:09+09:00",
+      "last_update": "2026-07-29T23:55:32+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -238,7 +248,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-29T23:55:09+09:00",
+      "last_update": "2026-07-29T23:55:32+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -320,5 +330,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "9370570487b469805e6380b88e79e2028510c90c0f9ba91afd9d693b4593821f"
+  "github_snapshot_hash": "4e4815402e6d7215708ae0d2ce0751d5f287dd2c6e030a35de76267435303dda"
 }
