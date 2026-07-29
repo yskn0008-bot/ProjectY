@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-29T21:02:41+09:00",
+  "updated_at": "2026-07-29T21:03:25+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -55,6 +55,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-58ae4ffb8066",
+      "title": "Publish weekly weekday and sales sync v82",
+      "completed_at": "2026-07-29T12:03:07Z",
+      "result": "GitHub mainへ反映（58ae4ff）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/58ae4ffb8066d603deca1c28e735ed62d6faea51"
+    },
+    {
       "id": "github-commit-e776bd455f3e",
       "title": "Sync weekly sales from calendar storage and show weekdays v82",
       "completed_at": "2026-07-29T12:02:21Z",
@@ -81,13 +88,6 @@
       "completed_at": "2026-07-29T11:44:35Z",
       "result": "GitHub mainへ反映（d174537）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/d1745375114e64d9b3fcc20ed8c20fb68aafb03e"
-    },
-    {
-      "id": "github-commit-b8f976415cbe",
-      "title": "Taxi v80: prevent repeated month row mutations",
-      "completed_at": "2026-07-29T11:30:25Z",
-      "result": "GitHub mainへ反映（b8f9764）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/b8f976415cbec815ccd2991be913c686defc8a69"
     },
     {
       "id": "complete-002",
@@ -124,7 +124,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-29T21:02:41+09:00",
+      "last_update": "2026-07-29T21:03:25+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -205,7 +205,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-29T21:02:41+09:00",
+      "last_update": "2026-07-29T21:03:25+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -228,7 +228,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-29T21:02:41+09:00",
+      "last_update": "2026-07-29T21:03:25+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -310,5 +310,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "d553b2eaa4f8dd9743abd7d2b54fb815e067f26dca00767fda6ccea70cb2cf1d"
+  "github_snapshot_hash": "f7c600d1ac98d482def39c6f8ef1d436958daad696c11485a4ef9c6400d60cc0"
 }
