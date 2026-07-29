@@ -15,6 +15,7 @@ function dependencies(overrides = {}) {
     allowedOrigins: [origin],
     identityVerifier: { async verify(token) { if (token === 'bad') throw new Error('bad'); return identity; } },
     identityGate: { async authorize() { return { subjectHash: 'hash' }; } },
+    rateLimiter: { async check() { return { allowed: true, remaining: 29 }; } },
     orchestrator: {
       async answer(request) {
         return {
@@ -79,6 +80,18 @@ test('rejects invalid content type, JSON, unknown fields and oversized input', a
 
   const tooLong = await handler(jsonRequest({ userText: '123456' }));
   assert.equal(tooLong.status, 400);
+});
+
+test('enforces the injected rate limiter before model execution', async () => {
+  let called = false;
+  const handler = createChatHandler(dependencies({
+    rateLimiter: { async check() { return { allowed: false, remaining: 0, retryAfterSeconds: 42 }; } },
+    orchestrator: { async answer() { called = true; throw new Error('must not run'); } }
+  }));
+  const response = await handler(jsonRequest({ userText: 'hello' }));
+  assert.equal(response.status, 429);
+  assert.equal(response.headers.get('retry-after'), '42');
+  assert.equal(called, false);
 });
 
 test('returns a grounded YOS answer and security headers', async () => {
