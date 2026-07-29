@@ -45,6 +45,8 @@ export interface SourceDocument {
   content: string;
   privacyLevel: PrivacyLevel;
   evidence?: EvidenceItem[];
+  retrievalStatus?: 'ok' | 'missing' | 'error';
+  retrievalNote?: string;
 }
 
 export interface DomainRoute {
