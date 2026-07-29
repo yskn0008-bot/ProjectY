@@ -1,0 +1,19 @@
+{
+  "name": "@projecty/yos-ai-core",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "check:api": "node --check api/yos/chat.mjs && node --check api/yos/health.mjs",
+    "test": "npm run build && node --test tests/*.test.mjs && npm run check:api",
+    "check": "npm run test",
+    "vercel-build": "npm run build"
+  },
+  "dependencies": {
+    "google-auth-library": "10.9.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.3"
+  }
+}

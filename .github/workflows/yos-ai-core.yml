@@ -1,0 +1,40 @@
+name: YOS AI Core
+
+on:
+  pull_request:
+    paths:
+      - 'server/yos-ai/**'
+      - '.github/workflows/yos-ai-core.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - 'server/yos-ai/**'
+      - '.github/workflows/yos-ai-core.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: server/yos-ai
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          package-manager-cache: false
+
+      - name: Install dependencies
+        run: npm install --ignore-scripts --no-audit --no-fund
+
+      - name: Typecheck and test
+        run: npm test
