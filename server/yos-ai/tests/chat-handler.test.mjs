@@ -10,12 +10,20 @@ const identity = {
   expiresAt: 1_900_000_000
 };
 
-function answerFor(request) {
+function answerFor(request, overrides = {}) {
   return {
     requestId: request.requestId,
     route: {primary: 'yos', related: [], liveMode: false, reasons: []},
-    answer: 'ok', facts: [], assumptions: [], unknowns: [], memoryCandidates: [], nextAction: null,
-    conflicts: [], sources: [], safety: {level: 'normal', notes: []}
+    answer: 'private answer text',
+    facts: [],
+    assumptions: [],
+    unknowns: [],
+    memoryCandidates: [],
+    nextAction: null,
+    conflicts: [],
+    sources: [],
+    safety: {level: 'normal', notes: []},
+    ...overrides
   };
 }
 
@@ -25,6 +33,7 @@ function dependencies(overrides = {}) {
     identityVerifier: {async verify(token) { if (token === 'bad') throw new Error('bad'); return identity; }},
     identityGate: {async authorize() { return {subjectHash: 'hash'}; }},
     rateLimiter: {async check() { return {allowed: true, remaining: 29}; }},
+    auditSink: {async append() {}},
     runtimeFactory: {
       async create() {
         return {async answer(request) { return answerFor(request); }};
@@ -32,6 +41,10 @@ function dependencies(overrides = {}) {
     },
     requestIdFactory: () => 'req-test',
     clock: () => '2026-07-29T14:00:00.000Z',
+    monotonicClock: (() => {
+      const values = [1000, 1123];
+      return () => values.shift() ?? 1123;
+    })(),
     ...overrides
   };
 }
@@ -127,6 +140,60 @@ test('passes a valid Vercel token only to the request runtime', async () => {
   assert.equal(JSON.stringify(await response.json()).includes('aaa.bbb.ccc'), false);
 });
 
+test('appends a privacy-minimized audit before returning the answer', async () => {
+  let audit;
+  const handler = createChatHandler(dependencies({
+    auditSink: {async append(record) { audit = record; }},
+    runtimeFactory: {
+      async create() {
+        return {
+          async answer(request) {
+            return answerFor(request, {
+              sources: [{
+                id: 'law', title: '00_律法', kind: 'law', priority: 1,
+                modifiedAt: '2026-07-29T00:00:00Z', locator: 'drive:private-file-id'
+              }],
+              conflicts: [{
+                key: 'closing_time',
+                selected: {key: 'closing_time', value: '03:30', status: 'confirmed', source: {id: 'law', title: 'law', kind: 'law', priority: 1}},
+                alternatives: [{key: 'closing_time', value: '04:30', status: 'candidate', source: {id: 'old', title: 'old', kind: 'memory', priority: 9}}],
+                reason: 'conflict'
+              }],
+              modelUsage: {
+                model: 'gpt-5.6-terra', responseId: 'resp_private', inputTokens: 100,
+                cachedInputTokens: 20, outputTokens: 40, reasoningTokens: 10, totalTokens: 140
+              }
+            });
+          }
+        };
+      }
+    }
+  }));
+  const response = await handler(jsonRequest(
+    {userText: 'private question text', currentLocation: 'private location'},
+    {vercelOidcToken: 'aaa.bbb.ccc'}
+  ));
+  assert.equal(response.status, 200);
+  assert.equal(audit.requestId, 'req-test');
+  assert.equal(audit.subjectHash, 'hash');
+  assert.equal(audit.durationMilliseconds, 123);
+  assert.deepEqual(audit.sourceSnapshots, [{sourceId: 'law', modifiedAt: '2026-07-29T00:00:00Z'}]);
+  assert.deepEqual(audit.conflictKeys, ['closing_time']);
+  assert.equal(audit.modelUsage.totalTokens, 140);
+  const serialized = JSON.stringify(audit);
+  assert.doesNotMatch(serialized, /private question text|private answer text|private location/);
+  assert.doesNotMatch(serialized, /private-file-id|aaa\.bbb\.ccc|03:30|04:30/);
+});
+
+test('does not return an untracked answer when audit persistence fails', async () => {
+  const handler = createChatHandler(dependencies({
+    auditSink: {async append() { throw new Error('audit unavailable'); }}
+  }));
+  const response = await handler(jsonRequest({userText: 'hello'}));
+  assert.equal(response.status, 503);
+  assert.doesNotMatch(await response.text(), /private answer text|audit unavailable/);
+});
+
 test('returns a grounded YOS answer and security headers', async () => {
   let received;
   const handler = createChatHandler(dependencies({
@@ -148,7 +215,7 @@ test('returns a grounded YOS answer and security headers', async () => {
   assert.equal(received.userText, 'hello');
   assert.equal(received.requestId, 'req-test');
   assert.equal(received.currentTime, '2026-07-29T14:00:00.000Z');
-  assert.equal((await response.json()).answer, 'ok');
+  assert.equal((await response.json()).answer, 'private answer text');
 });
 
 test('rejects malformed Vercel tokens without leaking them', async () => {
