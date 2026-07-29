@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-30T02:18:48+09:00",
+  "updated_at": "2026-07-30T02:30:49+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -85,6 +85,20 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-d6a027659989",
+      "title": "Taxi v96: reset sales settings dialog scroll position",
+      "completed_at": "2026-07-29T17:30:28Z",
+      "result": "GitHub mainへ反映（d6a0276）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/d6a027659989a98aaa4572404f2e6111369abe12"
+    },
+    {
+      "id": "github-commit-fb508ba0d562",
+      "title": "Taxi v96: stack iPhone time fields in sales settings",
+      "completed_at": "2026-07-29T17:30:17Z",
+      "result": "GitHub mainへ反映（fb508ba）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/fb508ba0d56211e391bde5d7061d34ec0b14dc0a"
+    },
+    {
       "id": "github-commit-22c1ee9bbb39",
       "title": "Taxi v95: publish sales settings dialog fix",
       "completed_at": "2026-07-29T17:18:33Z",
@@ -104,20 +118,6 @@
       "completed_at": "2026-07-29T16:32:29Z",
       "result": "GitHub mainへ反映（f8a7f4a）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/f8a7f4a436bf60a2d68ac132882a608f58d280f3"
-    },
-    {
-      "id": "github-commit-632dcbd6a0f4",
-      "title": "Taxi v94: balance monthly management card insets",
-      "completed_at": "2026-07-29T16:31:45Z",
-      "result": "GitHub mainへ反映（632dcbd）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/632dcbd6a0f47dc7464d6d676c2aaaa8c92127c1"
-    },
-    {
-      "id": "github-commit-86fb4eab02f6",
-      "title": "Taxi v93: publish management card width optimization",
-      "completed_at": "2026-07-29T15:56:19Z",
-      "result": "GitHub mainへ反映（86fb4ea）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/86fb4eab02f6d8855fa2448758d9a6ee0e837934"
     },
     {
       "id": "complete-002",
@@ -154,7 +154,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-30T02:18:48+09:00",
+      "last_update": "2026-07-30T02:30:49+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -235,7 +235,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-30T02:18:48+09:00",
+      "last_update": "2026-07-30T02:30:49+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -258,7 +258,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-30T02:18:48+09:00",
+      "last_update": "2026-07-30T02:30:49+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -340,5 +340,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "14e0c87715c05204325e18c6a9d8f476fd664436a5e38b0cdb645fa44fa6758c"
+  "github_snapshot_hash": "3ab798b9f6d0395db28cce1aefe03dd76d5f7c23def0e5a71d91730753f7ee0c"
 }
