@@ -4,7 +4,7 @@ import {OpenAIResponsesClient} from '../dist/openai/responses-client.js';
 
 const modelOutput = {
   answer: '結論',
-  facts: ['事実'],
+  facts: [{text: '事実', sourceIds: ['source-1']}],
   assumptions: [],
   unknowns: [],
   memoryCandidates: [],
@@ -18,7 +18,7 @@ function modelInput(liveMode = false) {
     instruction: 'instruction',
     userText: liveMode ? '営業中' : '相談',
     context: 'context',
-    sourceRefs: [],
+    sourceRefs: [{id: 'source-1', title: 'Source', kind: 'master', priority: 1}],
     conflicts: []
   };
 }
@@ -58,6 +58,7 @@ test('Responses client forces safe options and captures usage', async () => {
   assert.equal(requestBody.max_output_tokens, 1200);
   assert.equal(requestBody.text.format.type, 'json_schema');
   assert.equal(result.answer, '結論');
+  assert.deepEqual(result.facts, modelOutput.facts);
   assert.deepEqual(result.modelUsage, {
     model: 'gpt-5.6-terra-2026-07-01',
     responseId: 'resp_123',
@@ -93,6 +94,25 @@ test('Responses client rejects malformed model output', async () => {
   });
 
   await assert.rejects(() => client.generate(modelInput()), /answer must be a string/);
+});
+
+test('Responses client rejects facts without source IDs', async () => {
+  const client = new OpenAIResponsesClient({
+    apiKey: 'test-key',
+    safetyIdentifier: 'hashed-user',
+    responseSchema: {type: 'object'},
+    fetchImpl: async () => new Response(JSON.stringify({
+      output: [{
+        type: 'message',
+        content: [{
+          type: 'output_text',
+          text: JSON.stringify({...modelOutput, facts: [{text: '根拠なし', sourceIds: []}]})
+        }]
+      }]
+    }), {status: 200, headers: {'content-type': 'application/json'}})
+  });
+
+  await assert.rejects(() => client.generate(modelInput()), /non-empty sourceIds/);
 });
 
 test('Responses client rejects corrupt usage counters', async () => {
