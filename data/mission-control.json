@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-29T23:55:32+09:00",
+  "updated_at": "2026-07-30T00:00:54+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -75,6 +75,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-d5d02c810482",
+      "title": "Taxi v91: publish horizontal monthly management cards",
+      "completed_at": "2026-07-29T14:55:39Z",
+      "result": "GitHub mainへ反映（d5d02c8）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/d5d02c810482ca2c835742937b754a6e25fda359"
+    },
+    {
       "id": "github-commit-0c5d35f7396d",
       "title": "Taxi v91: arrange monthly management card labels and values horizontally",
       "completed_at": "2026-07-29T14:54:45Z",
@@ -101,13 +108,6 @@
       "completed_at": "2026-07-29T14:27:17Z",
       "result": "GitHub mainへ反映（943cf52）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/943cf5281586db03c84395c1697b48955d0396f6"
-    },
-    {
-      "id": "github-commit-fc0ff2396fc6",
-      "title": "Taxi v89: align weekly summary labels left and values right",
-      "completed_at": "2026-07-29T14:26:37Z",
-      "result": "GitHub mainへ反映（fc0ff23）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/fc0ff2396fc6addd05d6a0bca406e9026729b26d"
     },
     {
       "id": "complete-002",
@@ -144,7 +144,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-29T23:55:32+09:00",
+      "last_update": "2026-07-30T00:00:54+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -225,7 +225,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-29T23:55:32+09:00",
+      "last_update": "2026-07-30T00:00:54+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -248,7 +248,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-29T23:55:32+09:00",
+      "last_update": "2026-07-30T00:00:54+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -330,5 +330,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "4e4815402e6d7215708ae0d2ce0751d5f287dd2c6e030a35de76267435303dda"
+  "github_snapshot_hash": "f27799fcfcdf31399fdc72acbf44fafb22deaba6e80d699370541c0f4ea6b6be"
 }
