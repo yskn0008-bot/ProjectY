@@ -50,6 +50,6 @@ node --test tests/*.test.mjs
 
 ## 秘密情報
 
-`.env.example` には変数名と公開可能な文書IDだけを置いています。
+`.env.example` には変数名だけを置きます。
 
-秘密鍵、APIキー、本人のメールアドレスはGitHubへ保存しません。
+秘密鍵、APIキー、本人のメールアドレス、非公開ファイルID、スプレッドシートIDはGitHubへ保存しません。
