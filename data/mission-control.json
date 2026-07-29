@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-29T17:35:34+09:00",
+  "updated_at": "2026-07-29T17:42:35+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -55,6 +55,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-b5a7fc033f6c",
+      "title": "taxi v73: expand management cards into unused vertical space",
+      "completed_at": "2026-07-29T08:42:23Z",
+      "result": "GitHub mainへ反映（b5a7fc0）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/b5a7fc033f6ce82a4f6a6f54ca2ad6aa963f8e49"
+    },
+    {
       "id": "github-commit-f016a56b1180",
       "title": "Publish management no-cut layout v72",
       "completed_at": "2026-07-29T08:35:14Z",
@@ -81,13 +88,6 @@
       "completed_at": "2026-07-29T07:45:16Z",
       "result": "GitHub mainへ反映（dab21f4）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/dab21f4a8122550224c9500a59d0d4525f57e4f6"
-    },
-    {
-      "id": "github-commit-9e52d18243c0",
-      "title": "Fix management card value-label overlap v71",
-      "completed_at": "2026-07-29T07:44:52Z",
-      "result": "GitHub mainへ反映（9e52d18）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/9e52d18243c0824534a58c4a749aed4779d6faa9"
     },
     {
       "id": "complete-002",
@@ -124,7 +124,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-29T17:35:34+09:00",
+      "last_update": "2026-07-29T17:42:35+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -205,7 +205,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-29T17:35:34+09:00",
+      "last_update": "2026-07-29T17:42:35+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -228,7 +228,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-29T17:35:34+09:00",
+      "last_update": "2026-07-29T17:42:35+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -310,5 +310,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "e0f1db76671b65cee1c61b8b76935a77b1a618ff292b7219070ec2ea4b6fb25c"
+  "github_snapshot_hash": "34d20c02368645f39d06634c49253814172380517bedee9ba91ae08e3229b2bd"
 }
