@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-29T21:03:25+09:00",
+  "updated_at": "2026-07-29T21:05:24+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -55,6 +55,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-e7301ac7a337",
+      "title": "Prevent weekly sales sync redraw loop",
+      "completed_at": "2026-07-29T12:04:59Z",
+      "result": "GitHub mainへ反映（e7301ac）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/e7301ac7a337403952ab0a7a66e430eff580a165"
+    },
+    {
       "id": "github-commit-58ae4ffb8066",
       "title": "Publish weekly weekday and sales sync v82",
       "completed_at": "2026-07-29T12:03:07Z",
@@ -81,13 +88,6 @@
       "completed_at": "2026-07-29T11:45:13Z",
       "result": "GitHub mainへ反映（dfe9179）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/dfe91795c2de91ded03c6d2ad5da7436f6ea7b91"
-    },
-    {
-      "id": "github-commit-d1745375114e",
-      "title": "taxi: compact manage header and enlarge cards v81",
-      "completed_at": "2026-07-29T11:44:35Z",
-      "result": "GitHub mainへ反映（d174537）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/d1745375114e64d9b3fcc20ed8c20fb68aafb03e"
     },
     {
       "id": "complete-002",
@@ -124,7 +124,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-29T21:03:25+09:00",
+      "last_update": "2026-07-29T21:05:24+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -205,7 +205,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-29T21:03:25+09:00",
+      "last_update": "2026-07-29T21:05:24+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -228,7 +228,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-29T21:03:25+09:00",
+      "last_update": "2026-07-29T21:05:24+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -310,5 +310,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "f7c600d1ac98d482def39c6f8ef1d436958daad696c11485a4ef9c6400d60cc0"
+  "github_snapshot_hash": "de13c882cbf4d0d141fd094ec886f9256f9e79d5cc54e7c368b47d472cd1a28c"
 }
