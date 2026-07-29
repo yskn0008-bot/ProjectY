@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-30T01:31:59+09:00",
+  "updated_at": "2026-07-30T01:32:45+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -20,7 +20,7 @@
       "priority": 2,
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/76",
-      "updated_at": "2026-07-29T16:31:33Z"
+      "updated_at": "2026-07-29T16:32:28Z"
     },
     {
       "id": "github-pr-78",
@@ -85,6 +85,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-f8a7f4a436bf",
+      "title": "Taxi v94: publish balanced monthly card spacing",
+      "completed_at": "2026-07-29T16:32:29Z",
+      "result": "GitHub mainへ反映（f8a7f4a）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/f8a7f4a436bf60a2d68ac132882a608f58d280f3"
+    },
+    {
       "id": "github-commit-632dcbd6a0f4",
       "title": "Taxi v94: balance monthly management card insets",
       "completed_at": "2026-07-29T16:31:45Z",
@@ -111,13 +118,6 @@
       "completed_at": "2026-07-29T15:51:22Z",
       "result": "GitHub mainへ反映（c33b3ec）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/c33b3ec67bcaa214fdf0cd5a06ddd8fc7461c2d1"
-    },
-    {
-      "id": "github-commit-f289e8f284f5",
-      "title": "Taxi v92: enlarge management action button labels",
-      "completed_at": "2026-07-29T15:50:36Z",
-      "result": "GitHub mainへ反映（f289e8f）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/f289e8f284f54c5fd62c2e0a44e79d457f0519d8"
     },
     {
       "id": "complete-002",
@@ -154,7 +154,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-30T01:31:59+09:00",
+      "last_update": "2026-07-30T01:32:45+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -235,7 +235,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-30T01:31:59+09:00",
+      "last_update": "2026-07-30T01:32:45+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -258,7 +258,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-30T01:31:59+09:00",
+      "last_update": "2026-07-30T01:32:45+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -340,5 +340,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "a5d2ddd49789d445ddab84d9a598a582e8f4e58531e45a281404e61c97909ae1"
+  "github_snapshot_hash": "cfe3f7a2b5120a191f86f91620344bd89b1088b8ca326fb244068b0f763e1879"
 }
