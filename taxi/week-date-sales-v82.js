@@ -71,9 +71,14 @@
 
       if(targetNode){
         targetNode.classList.remove('white','blue','red');
-        if(target>0&&sales>=target)targetNode.classList.add('blue');
-        else if(sales>0)targetNode.classList.add('red');
-        else targetNode.classList.add('white');
+        targetNode.classList.add('white');
+      }
+
+      if(salesNode){
+        salesNode.classList.remove('white','blue','red');
+        if(target>0&&sales>=target)salesNode.classList.add('blue');
+        else if(sales>0)salesNode.classList.add('red');
+        else salesNode.classList.add('white');
       }
     });
 
