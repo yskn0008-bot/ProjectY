@@ -1,4 +1,5 @@
 import { assertOk, type FetchLike } from '../http.js';
+import { validateBoundedRanges } from './a1-range.js';
 
 export interface GoogleValueRange {
   range: string;
@@ -19,7 +20,7 @@ export class GoogleSheetsClient {
     ranges: string[],
     accessToken: string
   ): Promise<BatchGetResult> {
-    if (ranges.length === 0) throw new Error('At least one Sheets range is required');
+    validateBoundedRanges(ranges);
 
     const url = new URL(`https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(spreadsheetId)}/values:batchGet`);
     for (const range of ranges) url.searchParams.append('ranges', range);
