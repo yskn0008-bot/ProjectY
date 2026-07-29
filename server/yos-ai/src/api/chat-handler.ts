@@ -9,6 +9,7 @@ export interface ChatHandlerOptions extends CorsOptions {
   identityGate: IdentityGate;
   orchestrator: Pick<YosOrchestrator, 'answer'>;
   requestIdFactory?: () => string;
+  clock?: () => string;
   maxBodyBytes?: number;
   maxUserTextCharacters?: number;
   maxConversationSummaryCharacters?: number;
@@ -17,13 +18,13 @@ export interface ChatHandlerOptions extends CorsOptions {
 
 interface ChatBody {
   userText: string;
-  currentTime?: string;
   currentLocation?: string;
   conversationSummary?: string;
 }
 
 export function createChatHandler(options: ChatHandlerOptions): (request: Request) => Promise<Response> {
   const requestIdFactory = options.requestIdFactory ?? (() => crypto.randomUUID());
+  const clock = options.clock ?? (() => new Date().toISOString());
   const maxBodyBytes = options.maxBodyBytes ?? 32_768;
   const maxUserTextCharacters = options.maxUserTextCharacters ?? 10_000;
   const maxConversationSummaryCharacters = options.maxConversationSummaryCharacters ?? 12_000;
@@ -68,7 +69,7 @@ export function createChatHandler(options: ChatHandlerOptions): (request: Reques
     const yosRequest: YosRequest = {
       requestId,
       userText: body.userText,
-      currentTime: body.currentTime ?? new Date().toISOString(),
+      currentTime: clock(),
       ...(body.currentLocation ? { currentLocation: body.currentLocation } : {}),
       ...(body.conversationSummary ? { conversationSummary: body.conversationSummary } : {})
     };
@@ -98,9 +99,11 @@ function parseChatBody(
   }
   if (!isRecord(value)) throw new Error('Request body must be an object');
 
+  const allowedKeys = new Set(['userText', 'currentLocation', 'conversationSummary']);
+  const unknownKey = Object.keys(value).find((key) => !allowedKeys.has(key));
+  if (unknownKey) throw new Error(`Unknown request field: ${unknownKey}`);
+
   const userText = boundedString(value.userText, 'userText', 1, limits.maxUserTextCharacters);
-  const currentTime = optionalString(value.currentTime, 'currentTime', 64);
-  if (currentTime && Number.isNaN(Date.parse(currentTime))) throw new Error('currentTime must be ISO-8601 compatible');
   const currentLocation = optionalString(value.currentLocation, 'currentLocation', limits.maxLocationCharacters);
   const conversationSummary = optionalString(
     value.conversationSummary,
@@ -110,7 +113,6 @@ function parseChatBody(
 
   return {
     userText,
-    ...(currentTime ? { currentTime } : {}),
     ...(currentLocation ? { currentLocation } : {}),
     ...(conversationSummary ? { conversationSummary } : {})
   };
