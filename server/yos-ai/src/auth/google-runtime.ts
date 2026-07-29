@@ -28,11 +28,20 @@ export async function createGoogleAccessTokenProvider(
     return new GoogleAuthAccessTokenProvider(client);
   }
 
-  const subjectToken = validateVercelOidcToken(vercelOidcToken ?? '');
+  return new GoogleAuthAccessTokenProvider(
+    createVercelIdentityPoolClient(config, vercelOidcToken ?? '')
+  );
+}
+
+export function createVercelIdentityPoolClient(
+  config: Extract<GoogleWorkloadAuthConfig, {mode: 'vercel_oidc'}>,
+  vercelOidcToken: string
+): IdentityPoolClient {
+  const subjectToken = validateVercelOidcToken(vercelOidcToken);
   const audience = workloadIdentityAudience(config);
   const impersonationUrl = serviceAccountImpersonationUrl(config.serviceAccountEmail);
 
-  const client = new IdentityPoolClient({
+  return new IdentityPoolClient({
     type: 'external_account',
     audience,
     subject_token_type: SUBJECT_TOKEN_TYPE,
@@ -49,8 +58,6 @@ export async function createGoogleAccessTokenProvider(
       }
     }
   });
-
-  return new GoogleAuthAccessTokenProvider(client);
 }
 
 export function workloadIdentityAudience(
