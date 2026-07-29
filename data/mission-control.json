@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-29T19:59:22+09:00",
+  "updated_at": "2026-07-29T20:27:51+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -50,10 +50,17 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/51",
-      "updated_at": "2026-07-29T10:19:38Z"
+      "updated_at": "2026-07-29T11:18:18Z"
     }
   ],
   "recently_completed": [
+    {
+      "id": "github-commit-724abc52d00c",
+      "title": "Taxi v80: enlarge month cells by removing unused final row",
+      "completed_at": "2026-07-29T11:27:29Z",
+      "result": "GitHub mainへ反映（724abc5）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/724abc52d00cfda35e3bee7b8b30d0ffc18ae6d4"
+    },
     {
       "id": "github-commit-7a88fe5f7d78",
       "title": "Taxi v79: align weekly calendar with bottom navigation",
@@ -81,13 +88,6 @@
       "completed_at": "2026-07-29T09:30:42Z",
       "result": "GitHub mainへ反映（268a8ff）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/268a8ff474c64824997f4ea902c967aae3a738db"
-    },
-    {
-      "id": "github-commit-ffe812e2578c",
-      "title": "Measure manage screen height to bottom navigation v78",
-      "completed_at": "2026-07-29T09:29:33Z",
-      "result": "GitHub mainへ反映（ffe812e）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/ffe812e2578ce840fa666c88ebce3cb554dd9dea"
     },
     {
       "id": "complete-002",
@@ -124,7 +124,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-29T19:59:22+09:00",
+      "last_update": "2026-07-29T20:27:51+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -205,7 +205,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-29T19:59:22+09:00",
+      "last_update": "2026-07-29T20:27:51+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -228,7 +228,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-29T19:59:22+09:00",
+      "last_update": "2026-07-29T20:27:51+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -310,5 +310,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "57ff0c4caf992e7ae2b535660429f31da45ebbdab6de866f9549cac04b5c42da"
+  "github_snapshot_hash": "e6be7fb35403fa19f3d4bcc0f76437b2778f97bbb6ed8c0ce3c6c86a57d75eb6"
 }
