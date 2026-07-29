@@ -72,6 +72,16 @@ export interface MemoryCandidate {
   privacyLevel: PrivacyLevel;
 }
 
+export interface ModelUsage {
+  model: string;
+  responseId?: string;
+  inputTokens: number;
+  cachedInputTokens: number;
+  outputTokens: number;
+  reasoningTokens: number;
+  totalTokens: number;
+}
+
 export interface YosRequest {
   requestId: string;
   userText: string;
@@ -97,6 +107,7 @@ export interface ModelOutput {
   unknowns: string[];
   memoryCandidates: MemoryCandidate[];
   nextAction: string | null;
+  modelUsage?: ModelUsage;
 }
 
 export interface YosAnswer extends ModelOutput {
