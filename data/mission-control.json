@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-29T15:45:34+09:00",
+  "updated_at": "2026-07-29T16:21:52+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -50,10 +50,17 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/51",
-      "updated_at": "2026-07-29T05:08:02Z"
+      "updated_at": "2026-07-29T07:15:48Z"
     }
   ],
   "recently_completed": [
+    {
+      "id": "github-commit-d365df4895a6",
+      "title": "Taxi v68 widen weekly money columns",
+      "completed_at": "2026-07-29T07:21:39Z",
+      "result": "GitHub mainへ反映（d365df4）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/d365df4895a67964319388ae99945fe8d51adf18"
+    },
     {
       "id": "github-commit-bf79125c9d2e",
       "title": "Publish v67 monthly grid edge fix",
@@ -81,13 +88,6 @@
       "completed_at": "2026-07-28T21:06:12Z",
       "result": "GitHub mainへ反映（acf836e）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/acf836e58b0d781c4c920800a134a6fe0243c11f"
-    },
-    {
-      "id": "github-commit-4b994a44ceff",
-      "title": "Fix monthly calendar height using live navigation position",
-      "completed_at": "2026-07-28T21:04:30Z",
-      "result": "GitHub mainへ反映（4b994a4）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/4b994a44ceff7c1b60dfa75c00d99516add9d44f"
     },
     {
       "id": "complete-002",
@@ -124,7 +124,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-29T15:45:34+09:00",
+      "last_update": "2026-07-29T16:21:52+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -205,7 +205,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-29T15:45:34+09:00",
+      "last_update": "2026-07-29T16:21:52+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -228,7 +228,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-29T15:45:34+09:00",
+      "last_update": "2026-07-29T16:21:52+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -310,5 +310,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "f25272d1407e86df3479bf8a79427ce6a96c01bba3114dcb1d41674229cf9d89"
+  "github_snapshot_hash": "c7b8f7f586ebf1555126de4c074ca20f0d782107682e5275dc7ee8b96ea69ad3"
 }
