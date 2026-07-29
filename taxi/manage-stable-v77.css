@@ -1,0 +1,291 @@
+/* YOS Taxi v77 — stable management screen: visible, even, no overlap */
+@media (max-width:430px){
+  html.taxi-shell-v49 body[data-calendar-page="manage"]{
+    display:grid!important;
+    grid-template-rows:minmax(0,1fr) auto!important;
+    row-gap:0!important;
+    height:var(--taxi-vh,100dvh)!important;
+    min-height:0!important;
+    overflow:hidden!important;
+    background:var(--bg,#08090b)!important;
+  }
+
+  html.taxi-page-manage-v49 main.app,
+  html.taxi-page-manage-v49 .app,
+  body[data-calendar-page="manage"] main.app,
+  body[data-calendar-page="manage"] .app{
+    grid-row:1!important;
+    position:relative!important;
+    inset:auto!important;
+    display:flex!important;
+    flex-direction:column!important;
+    width:min(100%,760px)!important;
+    height:100%!important;
+    min-height:0!important;
+    max-height:100%!important;
+    margin:0 auto!important;
+    padding:calc(env(safe-area-inset-top) + 4px) 14px 0!important;
+    overflow:hidden!important;
+    background:var(--bg,#08090b)!important;
+  }
+
+  body[data-calendar-page="manage"] .top{
+    flex:0 0 52px!important;
+    height:52px!important;
+    min-height:52px!important;
+    margin:0!important;
+    align-items:center!important;
+    overflow:hidden!important;
+  }
+
+  body[data-calendar-page="manage"] .top h1{
+    color:var(--text,#fff)!important;
+    font-size:clamp(21px,6vw,26px)!important;
+    line-height:1!important;
+    white-space:nowrap!important;
+  }
+
+  body[data-calendar-page="manage"] .toolbar{
+    flex:0 0 48px!important;
+    height:48px!important;
+    min-height:48px!important;
+    margin:0 0 6px!important;
+    grid-template-columns:52px minmax(0,1fr) 52px!important;
+    gap:8px!important;
+  }
+
+  body[data-calendar-page="manage"] .toolbar button{
+    height:48px!important;
+    min-height:48px!important;
+    border-radius:14px!important;
+    font-size:25px!important;
+  }
+
+  body[data-calendar-page="manage"] .period{
+    color:var(--text,#fff)!important;
+    font-size:clamp(22px,6.5vw,28px)!important;
+    line-height:1!important;
+    white-space:nowrap!important;
+  }
+
+  body[data-calendar-page="manage"] #calendarPagesV21,
+  body[data-calendar-page="manage"] #todayView,
+  body[data-calendar-page="manage"] #weekView,
+  body[data-calendar-page="manage"] #monthView{
+    display:none!important;
+  }
+
+  body[data-calendar-page="manage"] #manageViewV21.v21-active,
+  body[data-calendar-page="manage"] .manage-view-v21.v21-active{
+    position:static!important;
+    inset:auto!important;
+    flex:1 1 auto!important;
+    display:flex!important;
+    flex-direction:column!important;
+    gap:6px!important;
+    width:100%!important;
+    height:auto!important;
+    min-height:0!important;
+    max-height:none!important;
+    margin:0!important;
+    padding:0!important;
+    overflow:hidden!important;
+    transform:none!important;
+  }
+
+  body[data-calendar-page="manage"] .manage-head-v21{
+    flex:0 0 72px!important;
+    display:flex!important;
+    flex-direction:column!important;
+    align-items:flex-start!important;
+    justify-content:center!important;
+    width:100%!important;
+    height:72px!important;
+    min-height:72px!important;
+    max-height:72px!important;
+    margin:0!important;
+    padding:9px 14px!important;
+    border:1px solid rgba(255,179,35,.48)!important;
+    border-radius:18px!important;
+    background:linear-gradient(145deg,rgba(255,179,35,.14),rgba(18,19,22,.98))!important;
+    color:var(--text,#fff)!important;
+    opacity:1!important;
+    overflow:hidden!important;
+  }
+
+  body[data-calendar-page="manage"] .manage-head-v21>div{
+    width:100%!important;
+    min-width:0!important;
+  }
+
+  body[data-calendar-page="manage"] .manage-head-v21 span{
+    display:block!important;
+    color:var(--amber,#ffb323)!important;
+    font-size:11px!important;
+    font-weight:950!important;
+    line-height:1!important;
+    opacity:1!important;
+  }
+
+  body[data-calendar-page="manage"] .manage-head-v21 b{
+    display:block!important;
+    margin-top:4px!important;
+    color:var(--text,#fff)!important;
+    font-size:clamp(22px,6.8vw,29px)!important;
+    font-weight:950!important;
+    line-height:1!important;
+    white-space:nowrap!important;
+    opacity:1!important;
+    -webkit-text-fill-color:currentColor!important;
+  }
+
+  body[data-calendar-page="manage"] .manage-head-v21 small{
+    display:block!important;
+    max-width:none!important;
+    margin-top:5px!important;
+    color:var(--muted,#a8a8b0)!important;
+    font-size:9px!important;
+    font-weight:800!important;
+    line-height:1!important;
+    text-align:left!important;
+    white-space:nowrap!important;
+    opacity:1!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis!important;
+  }
+
+  body[data-calendar-page="manage"] .manage-view-v21 .summary{
+    flex:1 1 auto!important;
+    display:grid!important;
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    grid-template-rows:repeat(4,minmax(0,1fr))!important;
+    gap:6px!important;
+    width:100%!important;
+    height:auto!important;
+    min-height:0!important;
+    max-height:none!important;
+    margin:0!important;
+    padding:0!important;
+    overflow:hidden!important;
+  }
+
+  body[data-calendar-page="manage"] .manage-view-v21 .summary .card{
+    display:grid!important;
+    grid-template-rows:minmax(0,1fr) 13px!important;
+    row-gap:3px!important;
+    align-items:stretch!important;
+    justify-items:center!important;
+    width:100%!important;
+    height:100%!important;
+    min-width:0!important;
+    min-height:0!important;
+    margin:0!important;
+    padding:7px 7px 6px!important;
+    border:1px solid var(--line,#303138)!important;
+    border-radius:17px!important;
+    background:var(--panel,#141518)!important;
+    color:var(--text,#fff)!important;
+    opacity:1!important;
+    overflow:hidden!important;
+  }
+
+  body[data-calendar-page="manage"] .manage-view-v21 .summary .card strong{
+    align-self:end!important;
+    display:block!important;
+    width:100%!important;
+    margin:0!important;
+    padding:0!important;
+    color:var(--text,#fff)!important;
+    font-size:clamp(22px,6.8vw,31px)!important;
+    font-weight:950!important;
+    line-height:.95!important;
+    letter-spacing:-.05em!important;
+    font-variant-numeric:tabular-nums!important;
+    text-align:center!important;
+    white-space:nowrap!important;
+    opacity:1!important;
+    filter:none!important;
+    mix-blend-mode:normal!important;
+    -webkit-text-fill-color:currentColor!important;
+    overflow:hidden!important;
+    text-overflow:clip!important;
+  }
+
+  body[data-calendar-page="manage"] #monthTarget{color:var(--amber,#ffb323)!important}
+  body[data-calendar-page="manage"] #achieved{color:var(--green,#6dde91)!important}
+  body[data-calendar-page="manage"] #remaining{color:#ff858d!important}
+  body[data-calendar-page="manage"] #progress{color:var(--amber,#ffb323)!important}
+
+  body[data-calendar-page="manage"] .manage-view-v21 .summary .card span{
+    align-self:start!important;
+    display:block!important;
+    width:100%!important;
+    min-height:12px!important;
+    margin:0!important;
+    color:var(--muted,#b1b1ba)!important;
+    font-size:10px!important;
+    font-weight:900!important;
+    line-height:1!important;
+    text-align:center!important;
+    white-space:nowrap!important;
+    opacity:1!important;
+    -webkit-text-fill-color:currentColor!important;
+    overflow:hidden!important;
+  }
+
+  body[data-calendar-page="manage"] .manage-actions-v21{
+    flex:0 0 54px!important;
+    display:grid!important;
+    grid-template-columns:1fr 1fr!important;
+    gap:10px!important;
+    width:100%!important;
+    height:54px!important;
+    min-height:54px!important;
+    max-height:54px!important;
+    margin:0!important;
+    padding:0!important;
+  }
+
+  body[data-calendar-page="manage"] .manage-actions-v21 a{
+    height:54px!important;
+    min-height:54px!important;
+    max-height:54px!important;
+    border-radius:16px!important;
+    color:var(--text,#fff)!important;
+    font-size:16px!important;
+    font-weight:950!important;
+    opacity:1!important;
+    -webkit-text-fill-color:currentColor!important;
+  }
+
+  body[data-calendar-page="manage"] .manage-actions-v21 a:first-child{
+    color:#17100a!important;
+    -webkit-text-fill-color:#17100a!important;
+  }
+
+  body[data-calendar-page="manage"] #taxiGlobalNavV24,
+  body[data-calendar-page="manage"] .taxi-global-nav-v24{
+    grid-row:2!important;
+    position:relative!important;
+    inset:auto!important;
+    transform:none!important;
+    margin-top:0!important;
+    z-index:80!important;
+  }
+}
+
+@media (max-width:375px) and (max-height:700px){
+  body[data-calendar-page="manage"] .top{flex-basis:46px!important;height:46px!important;min-height:46px!important}
+  body[data-calendar-page="manage"] .toolbar{flex-basis:42px!important;height:42px!important;min-height:42px!important;margin-bottom:4px!important}
+  body[data-calendar-page="manage"] .toolbar button{height:42px!important;min-height:42px!important}
+  body[data-calendar-page="manage"] .manage-head-v21{flex-basis:62px!important;height:62px!important;min-height:62px!important;max-height:62px!important;padding:7px 11px!important}
+  body[data-calendar-page="manage"] .manage-head-v21 b{font-size:21px!important}
+  body[data-calendar-page="manage"] .manage-head-v21 small{font-size:8px!important;margin-top:3px!important}
+  body[data-calendar-page="manage"] .manage-view-v21{gap:4px!important}
+  body[data-calendar-page="manage"] .manage-view-v21 .summary{gap:4px!important}
+  body[data-calendar-page="manage"] .manage-view-v21 .summary .card{padding:5px 5px 4px!important;grid-template-rows:minmax(0,1fr) 11px!important}
+  body[data-calendar-page="manage"] .manage-view-v21 .summary .card strong{font-size:20px!important}
+  body[data-calendar-page="manage"] .manage-view-v21 .summary .card span{font-size:9px!important}
+  body[data-calendar-page="manage"] .manage-actions-v21{flex-basis:48px!important;height:48px!important;min-height:48px!important;max-height:48px!important}
+  body[data-calendar-page="manage"] .manage-actions-v21 a{height:48px!important;min-height:48px!important;max-height:48px!important;font-size:14px!important}
+}
