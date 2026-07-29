@@ -5,6 +5,7 @@ export * from './privacy-filter.js';
 export * from './conflict-detector.js';
 export * from './context-builder.js';
 export * from './context-budget.js';
+export * from './grounding.js';
 export * from './memory-candidates.js';
 export * from './audit.js';
 export * from './orchestrator.js';
