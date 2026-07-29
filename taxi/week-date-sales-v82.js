@@ -87,8 +87,6 @@
       const node=document.getElementById(id);
       if(node&&node.textContent!==text)node.textContent=text;
     });
-
-    window.dispatchEvent(new Event('resize'));
   }
 
   function schedule(){
