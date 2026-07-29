@@ -1,5 +1,12 @@
 import {assertOk, type FetchLike} from '../http.js';
-import type {MemoryCandidate, ModelClient, ModelInput, ModelOutput, ModelUsage} from '../types.js';
+import type {
+  GroundedFact,
+  MemoryCandidate,
+  ModelClient,
+  ModelInput,
+  ModelOutput,
+  ModelUsage
+} from '../types.js';
 
 export interface OpenAIResponsesClientOptions {
   apiKey: string;
@@ -133,7 +140,9 @@ export function parseModelUsage(payload: ResponsesApiResult, fallbackModel: stri
 function validateModelOutput(value: unknown): ModelOutput {
   if (!isRecord(value)) throw new Error('Model output must be an object');
   if (typeof value.answer !== 'string') throw new Error('Model output answer must be a string');
-  if (!isStringArray(value.facts)) throw new Error('Model output facts must be a string array');
+  if (!isGroundedFactArray(value.facts)) {
+    throw new Error('Model output facts must contain text and non-empty sourceIds');
+  }
   if (!isStringArray(value.assumptions)) throw new Error('Model output assumptions must be a string array');
   if (!isStringArray(value.unknowns)) throw new Error('Model output unknowns must be a string array');
   if (!Array.isArray(value.memoryCandidates)) throw new Error('Model output memoryCandidates must be an array');
@@ -157,6 +166,15 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 function isStringArray(value: unknown): value is string[] {
   return Array.isArray(value) && value.every((item) => typeof item === 'string');
+}
+
+function isGroundedFactArray(value: unknown): value is GroundedFact[] {
+  return Array.isArray(value) && value.every((item) => {
+    if (!isRecord(item) || typeof item.text !== 'string' || !item.text.trim()) return false;
+    return Array.isArray(item.sourceIds)
+      && item.sourceIds.length > 0
+      && item.sourceIds.every((sourceId) => typeof sourceId === 'string' && sourceId.trim().length > 0);
+  });
 }
 
 function positiveTokenLimit(value: number, name: string): number {
