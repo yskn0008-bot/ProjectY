@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-29T18:29:48+09:00",
+  "updated_at": "2026-07-29T18:31:02+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -55,6 +55,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-268a8ff474c6",
+      "title": "Publish manage navigation gap fix v78",
+      "completed_at": "2026-07-29T09:30:42Z",
+      "result": "GitHub mainへ反映（268a8ff）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/268a8ff474c64824997f4ea902c967aae3a738db"
+    },
+    {
       "id": "github-commit-ffe812e2578c",
       "title": "Measure manage screen height to bottom navigation v78",
       "completed_at": "2026-07-29T09:29:33Z",
@@ -81,13 +88,6 @@
       "completed_at": "2026-07-29T09:22:18Z",
       "result": "GitHub mainへ反映（53d3e19）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/53d3e19e0965eb8450f7b5bd94c03d03adcd4dcb"
-    },
-    {
-      "id": "github-commit-4785369cc0b7",
-      "title": "Fix manage screen with stable flex layout v77",
-      "completed_at": "2026-07-29T09:21:54Z",
-      "result": "GitHub mainへ反映（4785369）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/4785369cc0b790c52416f0333bdffb80ace9cf5f"
     },
     {
       "id": "complete-002",
@@ -124,7 +124,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-29T18:29:48+09:00",
+      "last_update": "2026-07-29T18:31:02+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -205,7 +205,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-29T18:29:48+09:00",
+      "last_update": "2026-07-29T18:31:02+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -228,7 +228,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-29T18:29:48+09:00",
+      "last_update": "2026-07-29T18:31:02+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -310,5 +310,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "98cb38a4fa540370f20095197367bdf48d9a91cb31a300b57be149352aa2443d"
+  "github_snapshot_hash": "fea92fe7491480c5f410c4fb4cbf6d7bf5a46189b1dc255fa4f3810511fc65c5"
 }
