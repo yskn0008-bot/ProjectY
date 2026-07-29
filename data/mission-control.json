@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-29T21:12:36+09:00",
+  "updated_at": "2026-07-29T21:53:16+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -50,10 +50,17 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/51",
-      "updated_at": "2026-07-29T11:18:18Z"
+      "updated_at": "2026-07-29T12:19:17Z"
     }
   ],
   "recently_completed": [
+    {
+      "id": "github-commit-a3c7e584b689",
+      "title": "Taxi v85: color weekly actual sales instead of targets",
+      "completed_at": "2026-07-29T12:53:05Z",
+      "result": "GitHub mainへ反映（a3c7e58）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/a3c7e584b689376c9b93a49ac352cdc1dffdbdd7"
+    },
     {
       "id": "github-commit-8e357c48b55b",
       "title": "Taxi v84: publish compact weekly date format",
@@ -81,13 +88,6 @@
       "completed_at": "2026-07-29T12:06:43Z",
       "result": "GitHub mainへ反映（a32ee2c）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/a32ee2cdc72de3d49bb3affc65cdbb95f865c1d9"
-    },
-    {
-      "id": "github-commit-65c1b115df0f",
-      "title": "Sync latest confirmed daily reports through July 28",
-      "completed_at": "2026-07-29T12:05:49Z",
-      "result": "GitHub mainへ反映（65c1b11）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/65c1b115df0f9ccdf63144cbe2f15b5447960189"
     },
     {
       "id": "complete-002",
@@ -124,7 +124,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-29T21:12:36+09:00",
+      "last_update": "2026-07-29T21:53:16+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -205,7 +205,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-29T21:12:36+09:00",
+      "last_update": "2026-07-29T21:53:16+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -228,7 +228,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-29T21:12:36+09:00",
+      "last_update": "2026-07-29T21:53:16+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -310,5 +310,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "bc7f5d9c5a5098ffa191d6dbe8162cbfb1be05e8ac45e6de201f9c088ac883ce"
+  "github_snapshot_hash": "46ab4d27947676dd95eef1b4fb557ae16d2088f2ac562eee98a6b34055d161b1"
 }
