@@ -19,8 +19,10 @@ const registry = [
   { id: 'project75_trip_history', type: 'sheet', spreadsheetId: 'p75', ranges: ["'乗車履歴'!A1:J100"], title: 'Project75乗車履歴', kind: 'sheet', priority: 7, privacyLevel: 'L2' }
 ];
 
+const accessTokenProvider = { async getAccessToken() { return 'token'; } };
+
 test('provider loads core and route-specific sources', async () => {
-  const provider = new GoogleSourceProvider(drive, sheets, { accessToken: 'token', registry });
+  const provider = new GoogleSourceProvider(drive, sheets, { accessTokenProvider, registry });
   const core = await provider.loadCoreSources();
   const domain = await provider.loadDomainSources({ primary: 'taxi-live', related: [], liveMode: true, reasons: [] }, { requestId: 'r', userText: '営業中', currentTime: '2026-07-29T00:00:00Z' });
   assert.deepEqual(core.map((item) => item.source.id), ['00_law', '02_yos_master', '00_change_log']);
@@ -29,7 +31,7 @@ test('provider loads core and route-specific sources', async () => {
 });
 
 test('provider marks unconfigured required source as unknown', async () => {
-  const provider = new GoogleSourceProvider(drive, sheets, { accessToken: 'token', registry: registry.slice(0, 3) });
+  const provider = new GoogleSourceProvider(drive, sheets, { accessTokenProvider, registry: registry.slice(0, 3) });
   const domain = await provider.loadDomainSources({ primary: 'life', related: [], liveMode: false, reasons: [] }, { requestId: 'r', userText: '健康', currentTime: '2026-07-29T00:00:00Z' });
   assert.equal(domain[0].retrievalStatus, 'missing');
   assert.match(domain[0].content, /未確認/);
