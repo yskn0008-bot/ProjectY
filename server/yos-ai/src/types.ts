@@ -63,6 +63,11 @@ export interface Conflict {
   reason: string;
 }
 
+export interface GroundedFact {
+  text: string;
+  sourceIds: string[];
+}
+
 export interface MemoryCandidate {
   content: string;
   category: 'personal-data' | 'hypothesis' | 'operation-rule' | 'spec-change' | 'implementation-change';
@@ -102,7 +107,7 @@ export interface ModelInput {
 
 export interface ModelOutput {
   answer: string;
-  facts: string[];
+  facts: GroundedFact[];
   assumptions: string[];
   unknowns: string[];
   memoryCandidates: MemoryCandidate[];
