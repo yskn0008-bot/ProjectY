@@ -5,8 +5,10 @@
   "type": "module",
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "test": "npm run build && node --test tests/*.test.mjs",
-    "check": "npm run test"
+    "check:api": "node --check api/yos/chat.mjs && node --check api/yos/health.mjs",
+    "test": "npm run build && node --test tests/*.test.mjs && npm run check:api",
+    "check": "npm run test",
+    "vercel-build": "npm run build"
   },
   "dependencies": {
     "google-auth-library": "10.9.1"
