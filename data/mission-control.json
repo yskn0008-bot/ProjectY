@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-29T17:44:35+09:00",
+  "updated_at": "2026-07-29T17:56:40+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -55,6 +55,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-346ee73cfa1d",
+      "title": "Taxi v74: expand management cards into lower free space",
+      "completed_at": "2026-07-29T08:56:21Z",
+      "result": "GitHub mainへ反映（346ee73）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/346ee73cfa1d96564c613dbe0f4ed4cad24e7f22"
+    },
+    {
       "id": "github-commit-959e9dad4255",
       "title": "taxi v73: expand management cards to navigation edge",
       "completed_at": "2026-07-29T08:44:15Z",
@@ -81,13 +88,6 @@
       "completed_at": "2026-07-29T08:35:14Z",
       "result": "GitHub mainへ反映（f016a56）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/f016a56b1180f2e8eec935d779285aeb53c3f51b"
-    },
-    {
-      "id": "github-commit-5b1f7b7e6288",
-      "title": "Fix clipped management cards above actions v72",
-      "completed_at": "2026-07-29T08:34:16Z",
-      "result": "GitHub mainへ反映（5b1f7b7）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/5b1f7b7e62884431d032c2363afdf14dc6472c85"
     },
     {
       "id": "complete-002",
@@ -124,7 +124,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-29T17:44:35+09:00",
+      "last_update": "2026-07-29T17:56:40+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -205,7 +205,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-29T17:44:35+09:00",
+      "last_update": "2026-07-29T17:56:40+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -228,7 +228,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-29T17:44:35+09:00",
+      "last_update": "2026-07-29T17:56:40+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -310,5 +310,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "625722f1b547e10db2db67ab3c75081a405646bce2cad01bc15b19d92042bbff"
+  "github_snapshot_hash": "573fd06d85f74c2fe81e7a6156aa6c43c9c4a80b336cd5f3f7d8b3c29ae35e3d"
 }
