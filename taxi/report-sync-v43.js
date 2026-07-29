@@ -22,7 +22,11 @@
     '2026-07-14':{shiftStart:'17:15',serviceEnd:'04:38',workEnd:'04:38',actualHours:11.3833333333,sales:29700,taxExclusiveSales:27000,rides:15},
     '2026-07-18':{shiftStart:'15:20',serviceEnd:'04:22',workEnd:'04:22',actualHours:13.0333333333,sales:48500,taxExclusiveSales:44091,rides:41},
     '2026-07-19':{shiftStart:'16:35',serviceEnd:'04:30',workEnd:'04:30',actualHours:11.9166666667,sales:54400,taxExclusiveSales:49455,rides:35},
-    '2026-07-21':{shiftStart:'14:00',serviceEnd:'02:35',workEnd:'02:35',actualHours:12.5833333333,sales:41500,taxExclusiveSales:37727,rides:24}
+    '2026-07-21':{shiftStart:'14:00',serviceEnd:'02:35',workEnd:'02:35',actualHours:12.5833333333,sales:41500,taxExclusiveSales:37727,rides:24},
+    '2026-07-22':{shiftStart:'',serviceEnd:'',workEnd:'',actualHours:0,sales:19100,taxExclusiveSales:17364,rides:12},
+    '2026-07-23':{shiftStart:'15:35',serviceEnd:'03:30',workEnd:'03:30',actualHours:11.9166666667,sales:27780,taxExclusiveSales:25255,rides:21},
+    '2026-07-27':{shiftStart:'16:20',serviceEnd:'02:55',workEnd:'02:55',actualHours:10.5833333333,sales:29500,taxExclusiveSales:26818,rides:22},
+    '2026-07-28':{shiftStart:'16:20',serviceEnd:'04:20',workEnd:'04:20',actualHours:12,sales:30200,taxExclusiveSales:27455,rides:25}
   };
 
   const read=(key,fallback)=>{
@@ -36,18 +40,20 @@
 
   Object.entries(confirmed).forEach(([date,report])=>{
     const current=calendar.days[date]||{};
-    calendar.days[date]={
+    const next={
       ...current,
       status:'work',
-      shiftStart:report.shiftStart,
-      serviceEnd:report.serviceEnd,
-      workEnd:report.workEnd,
       actualHours:report.actualHours,
       sales:report.sales,
       taxExclusiveSales:report.taxExclusiveSales,
       rides:report.rides,
+      reportTrips:report.rides,
       source:'ProjectY 運行データ／乗務日報（確認済み）'
     };
+    if(report.shiftStart)next.shiftStart=report.shiftStart;
+    if(report.serviceEnd)next.serviceEnd=report.serviceEnd;
+    if(report.workEnd)next.workEnd=report.workEnd;
+    calendar.days[date]=next;
   });
   write(CAL,calendar);
 
@@ -61,7 +67,7 @@
   settings.months=settings.months||{};
   settings.months['2026-07']={...(settings.months['2026-07']||{}),hourLimit:288,carrySales:0,carryHours:0};
   write(SET,settings);
-  localStorage.setItem(MIGRATION,'2026-07-21-confirmed');
+  localStorage.setItem(MIGRATION,'2026-07-28-confirmed');
 
   try{
     if(typeof data!=='undefined'){
