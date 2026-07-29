@@ -26,6 +26,7 @@ function dependencies(overrides = {}) {
       }
     },
     requestIdFactory: () => 'req-test',
+    clock: () => '2026-07-29T14:00:00.000Z',
     ...overrides
   };
 }
@@ -63,7 +64,7 @@ test('rejects missing or invalid authentication', async () => {
   assert.equal(bad.status, 401);
 });
 
-test('rejects invalid content type, JSON, time and oversized input', async () => {
+test('rejects invalid content type, JSON, unknown fields and oversized input', async () => {
   const handler = createChatHandler(dependencies({ maxUserTextCharacters: 5 }));
   const contentType = await handler(jsonRequest({ userText: 'hello' }, { contentType: 'text/plain' }));
   assert.equal(contentType.status, 415);
@@ -73,8 +74,8 @@ test('rejects invalid content type, JSON, time and oversized input', async () =>
   }));
   assert.equal(invalidJson.status, 400);
 
-  const invalidTime = await handler(jsonRequest({ userText: 'hello', currentTime: 'not-a-date' }));
-  assert.equal(invalidTime.status, 400);
+  const unknownField = await handler(jsonRequest({ userText: 'hello', currentTime: '2026-07-29T23:00:00+09:00' }));
+  assert.equal(unknownField.status, 400);
 
   const tooLong = await handler(jsonRequest({ userText: '123456' }));
   assert.equal(tooLong.status, 400);
@@ -95,12 +96,13 @@ test('returns a grounded YOS answer and security headers', async () => {
       }
     }
   }));
-  const response = await handler(jsonRequest({ userText: '  hello  ', currentTime: '2026-07-29T23:00:00+09:00' }));
+  const response = await handler(jsonRequest({ userText: '  hello  ' }));
   assert.equal(response.status, 200);
   assert.equal(response.headers.get('cache-control'), 'no-store');
   assert.equal(response.headers.get('x-content-type-options'), 'nosniff');
   assert.equal(received.userText, 'hello');
   assert.equal(received.requestId, 'req-test');
+  assert.equal(received.currentTime, '2026-07-29T14:00:00.000Z');
   assert.equal((await response.json()).answer, 'ok');
 });
 
