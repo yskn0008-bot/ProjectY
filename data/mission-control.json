@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-29T21:53:56+09:00",
+  "updated_at": "2026-07-29T22:01:19+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -55,6 +55,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-b90824da5362",
+      "title": "Taxi v86: remove repeated target and actual labels from weekly rows",
+      "completed_at": "2026-07-29T13:01:07Z",
+      "result": "GitHub mainへ反映（b90824d）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/b90824da53625715cf071e9651e2795988772aee"
+    },
+    {
       "id": "github-commit-1700d195559a",
       "title": "Taxi v85: publish actual-sales color rule",
       "completed_at": "2026-07-29T12:53:45Z",
@@ -81,13 +88,6 @@
       "completed_at": "2026-07-29T12:11:42Z",
       "result": "GitHub mainへ反映（fac5698）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/fac5698d62a1581fdba8573ad592f0a91db4e797"
-    },
-    {
-      "id": "github-commit-5db5933ea7d3",
-      "title": "Taxi v84: show day and weekday only in weekly rows",
-      "completed_at": "2026-07-29T12:11:24Z",
-      "result": "GitHub mainへ反映（5db5933）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/5db5933ea7d325cbeadc41ed9fa30ab51f243602"
     },
     {
       "id": "complete-002",
@@ -124,7 +124,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-29T21:53:56+09:00",
+      "last_update": "2026-07-29T22:01:19+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -205,7 +205,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-29T21:53:56+09:00",
+      "last_update": "2026-07-29T22:01:19+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -228,7 +228,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-29T21:53:56+09:00",
+      "last_update": "2026-07-29T22:01:19+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -310,5 +310,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "cf0df8aa3aa230863643a0d89e4bfa9ced5e9effa210343f5c3fa77a1b008088"
+  "github_snapshot_hash": "830169297bd1a9114967de873867129f07de1c279f512c728c85c8e4be4e8f44"
 }
