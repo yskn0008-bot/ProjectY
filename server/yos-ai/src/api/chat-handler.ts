@@ -1,14 +1,15 @@
-import type { IdentityGate } from '../auth/identity-gate.js';
-import type { IdentityVerifier } from '../auth/types.js';
-import type { YosOrchestrator } from '../orchestrator.js';
-import type { RateLimiter } from '../rate-limit.js';
-import type { YosRequest } from '../types.js';
-import { allowedOrigin, bearerToken, corsPreflight, secureJson, type CorsOptions } from './shared.js';
+import type {IdentityGate} from '../auth/identity-gate.js';
+import type {IdentityVerifier} from '../auth/types.js';
+import {readVercelOidcToken} from '../auth/vercel-oidc.js';
+import type {RateLimiter} from '../rate-limit.js';
+import type {RequestRuntimeFactory} from '../runtime/types.js';
+import type {YosRequest} from '../types.js';
+import {allowedOrigin, bearerToken, corsPreflight, secureJson, type CorsOptions} from './shared.js';
 
 export interface ChatHandlerOptions extends CorsOptions {
   identityVerifier: IdentityVerifier;
   identityGate: IdentityGate;
-  orchestrator: Pick<YosOrchestrator, 'answer'>;
+  runtimeFactory: RequestRuntimeFactory;
   rateLimiter: RateLimiter;
   requestIdFactory?: () => string;
   clock?: () => string;
@@ -35,13 +36,13 @@ export function createChatHandler(options: ChatHandlerOptions): (request: Reques
   return async (request: Request): Promise<Response> => {
     const requestId = requestIdFactory();
     const origin = allowedOrigin(request, options);
-    if (origin === null) return secureJson({ error: 'Origin not allowed', requestId }, 403, null);
+    if (origin === null) return secureJson({error: 'Origin not allowed', requestId}, 403, null);
     if (request.method === 'OPTIONS') return corsPreflight(origin);
     if (request.method !== 'POST') {
-      return secureJson({ error: 'Method not allowed', requestId }, 405, origin, { Allow: 'POST, OPTIONS' });
+      return secureJson({error: 'Method not allowed', requestId}, 405, origin, {Allow: 'POST, OPTIONS'});
     }
     if (!(request.headers.get('content-type') ?? '').toLowerCase().startsWith('application/json')) {
-      return secureJson({ error: 'Content-Type must be application/json', requestId }, 415, origin);
+      return secureJson({error: 'Content-Type must be application/json', requestId}, 415, origin);
     }
 
     let subjectHash: string;
@@ -50,28 +51,28 @@ export function createChatHandler(options: ChatHandlerOptions): (request: Reques
       const identity = await options.identityVerifier.verify(idToken);
       subjectHash = (await options.identityGate.authorize(identity)).subjectHash;
     } catch {
-      return secureJson({ error: 'Authentication failed', requestId }, 401, origin);
+      return secureJson({error: 'Authentication failed', requestId}, 401, origin);
     }
 
     try {
       const decision = await options.rateLimiter.check(subjectHash);
       if (!decision.allowed) {
         return secureJson(
-          { error: 'Rate limit exceeded', requestId },
+          {error: 'Rate limit exceeded', requestId},
           429,
           origin,
-          { 'Retry-After': String(decision.retryAfterSeconds ?? 60) }
+          {'Retry-After': String(decision.retryAfterSeconds ?? 60)}
         );
       }
     } catch {
-      return secureJson({ error: 'YOS is temporarily unavailable', requestId }, 503, origin);
+      return secureJson({error: 'YOS is temporarily unavailable', requestId}, 503, origin);
     }
 
     let body: ChatBody;
     try {
       const raw = await request.text();
       if (new TextEncoder().encode(raw).byteLength > maxBodyBytes) {
-        return secureJson({ error: 'Request body is too large', requestId }, 413, origin);
+        return secureJson({error: 'Request body is too large', requestId}, 413, origin);
       }
       body = parseChatBody(raw, {
         maxUserTextCharacters,
@@ -80,22 +81,28 @@ export function createChatHandler(options: ChatHandlerOptions): (request: Reques
       });
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Invalid request body';
-      return secureJson({ error: message, requestId }, 400, origin);
+      return secureJson({error: message, requestId}, 400, origin);
     }
 
     const yosRequest: YosRequest = {
       requestId,
       userText: body.userText,
       currentTime: clock(),
-      ...(body.currentLocation ? { currentLocation: body.currentLocation } : {}),
-      ...(body.conversationSummary ? { conversationSummary: body.conversationSummary } : {})
+      ...(body.currentLocation ? {currentLocation: body.currentLocation} : {}),
+      ...(body.conversationSummary ? {conversationSummary: body.conversationSummary} : {})
     };
 
     try {
-      const answer = await options.orchestrator.answer(yosRequest);
+      const vercelOidcToken = readVercelOidcToken(request);
+      const runtime = await options.runtimeFactory.create({
+        requestId,
+        subjectHash,
+        ...(vercelOidcToken ? {vercelOidcToken} : {})
+      });
+      const answer = await runtime.answer(yosRequest);
       return secureJson(answer, 200, origin);
     } catch {
-      return secureJson({ error: 'YOS is temporarily unavailable', requestId }, 503, origin);
+      return secureJson({error: 'YOS is temporarily unavailable', requestId}, 503, origin);
     }
   };
 }
@@ -130,8 +137,8 @@ function parseChatBody(
 
   return {
     userText,
-    ...(currentLocation ? { currentLocation } : {}),
-    ...(conversationSummary ? { conversationSummary } : {})
+    ...(currentLocation ? {currentLocation} : {}),
+    ...(conversationSummary ? {conversationSummary} : {})
   };
 }
 
