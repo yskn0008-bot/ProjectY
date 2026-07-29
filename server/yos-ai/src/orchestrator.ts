@@ -2,6 +2,7 @@ import {buildContext} from './context-builder.js';
 import {detectConflicts} from './conflict-detector.js';
 import {applyContextBudget, type ContextBudgetOptions} from './context-budget.js';
 import {routeDomain} from './domain-router.js';
+import {validateGroundedFacts} from './grounding.js';
 import {validateMemoryCandidates} from './memory-candidates.js';
 import {sanitizeDocuments} from './privacy-filter.js';
 import type {
@@ -19,7 +20,8 @@ const BASE_INSTRUCTION = [
   '安全、法令、信頼できる事実、長期的期待値、再現性、効率、本人の意思の順で判断する。',
   '資料が支持しない内容を補わない。',
   '確定、仮説、未確認、矛盾を分ける。',
-  '重要な断定にはsource_idを対応付ける。',
+  'factsは各項目を{text, sourceIds}で返し、使用したsource_idを必ず1件以上付ける。',
+  'answer内の事実主張はfactsに含めた内容だけを使う。根拠がない内容はassumptionsかunknownsへ移す。',
   '正本やデータを変更せず、必要なら保存候補だけを返す。',
   '営業中モードでは結論を短くする。'
 ].join('\n');
@@ -67,27 +69,36 @@ export class YosOrchestrator {
     };
 
     const modelOutput = await this.modelClient.generate(modelInput);
+    const groundedFacts = validateGroundedFacts(modelOutput.facts, modelInput.sourceRefs);
     const candidates = validateMemoryCandidates(
       modelOutput.memoryCandidates,
       modelInput.sourceRefs,
       [route.primary, ...route.related]
     );
-    const unavailable = budget.documents.filter((document) => document.retrievalStatus && document.retrievalStatus !== 'ok');
+    const unavailable = budget.documents.filter(
+      (document) => document.retrievalStatus && document.retrievalStatus !== 'ok'
+    );
     const safetyNotes = [
       ...privacy.notes,
       ...budget.notes,
       ...unavailable.map((document) => `${document.source.id}:${document.retrievalNote ?? '情報源未確認'}`),
+      ...groundedFacts.rejected.map((item) => `事実${item.index + 1}を除外:${item.reason}`),
       ...candidates.rejected.map((item) => `保存候補${item.index + 1}を除外:${item.reason}`)
     ];
     if (privacy.blockedSourceIds.length > 0) {
       safetyNotes.push(`L4情報源を除外:${privacy.blockedSourceIds.join(',')}`);
     }
 
-    const attention = privacy.blockedSourceIds.length > 0 || unavailable.length > 0 || candidates.rejected.length > 0;
+    const attention = privacy.blockedSourceIds.length > 0
+      || unavailable.length > 0
+      || groundedFacts.rejected.length > 0
+      || candidates.rejected.length > 0;
+
     return {
       requestId: request.requestId,
       route,
       ...modelOutput,
+      facts: groundedFacts.accepted,
       memoryCandidates: candidates.accepted,
       conflicts,
       sources: modelInput.sourceRefs,
