@@ -1,9 +1,10 @@
 'use strict';
-const CACHE='yos-taxi-projecty-v96-settings-time-stack';
-const VERSION='96';
+const CACHE_PREFIX='yos-taxi-projecty-';
+const CACHE='yos-taxi-projecty-v97-production-polish';
+const VERSION='97';
 const STATIC=[
   './index.html','./calendar.html','./settings.html','./manifest.webmanifest',
-  './v9.css','./v9.js','./drive-v44.css','./drive-v44.js','./drive-no-overlap-v69.css','./drive-no-overlap-v69.js','./settings-dialog-v95.css','./settings-dialog-v96.css','./settings-dialog-v96.js',
+  './v9.css','./v9.js','./drive-v44.css','./drive-v44.js','./drive-no-overlap-v69.css','./drive-no-overlap-v69.js','./settings-dialog-v95.css','./settings-dialog-v96.css','./settings-dialog-v96.js','./release-polish-v97.css',
   './calendar-v2.js','./calendar-v3.js','./calendar-v21.js','./calendar-v23-fix.js','./calendar-v26.css','./calendar-v28.css','./calendar-v32.css','./calendar-v38-urgent.css',
   './browser-bottom-v38.css','./browser-bottom-v38.js','./browser-bottom-v42.css','./report-sync-v43.js',
   './month-performance-v57.css','./month-performance-v57.js','./month-performance-v60.js','./month-layout-v59.css','./month-layout-v60.css','./month-nav-v61.css','./month-nav-v62.css',
@@ -64,7 +65,10 @@ async function inject(response,type){
   if(type==='calendar'){
     ['month-grid-fit-v67.css','month-row-fit-v80.css','week-money-fit-v68.css','week-nav-fit-v79.css','week-date-sales-v82.css','week-value-only-v86.css','week-summary-grid-v87.css','week-summary-width-v88.css','week-summary-readable-v90.css','manage-stable-v77.css','manage-nav-fit-v78.css','manage-card-grow-v81.css','manage-card-inline-v91.css','manage-action-text-v92.css','manage-card-width-v93.css','manage-card-balance-v94.css'].forEach(addCss);
   }
-  if(type==='index')addCss('drive-no-overlap-v69.css');
+  if(type==='index'){
+    addCss('drive-no-overlap-v69.css');
+    addCss('release-polish-v97.css');
+  }
 
   addJs('page-motion-v49.js');
   addJs('nav-icons-v62.js');
@@ -91,7 +95,7 @@ self.addEventListener('install',event=>event.waitUntil((async()=>{
 })()));
 
 self.addEventListener('activate',event=>event.waitUntil(
-  caches.keys().then(keys=>Promise.all(keys.filter(key=>key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim())
+  caches.keys().then(keys=>Promise.all(keys.filter(key=>key.startsWith(CACHE_PREFIX)&&key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim())
 ));
 
 self.addEventListener('fetch',event=>{
