@@ -1,8 +1,9 @@
-import { buildContext } from './context-builder.js';
-import { detectConflicts } from './conflict-detector.js';
-import { applyContextBudget, type ContextBudgetOptions } from './context-budget.js';
-import { routeDomain } from './domain-router.js';
-import { sanitizeDocuments } from './privacy-filter.js';
+import {buildContext} from './context-builder.js';
+import {detectConflicts} from './conflict-detector.js';
+import {applyContextBudget, type ContextBudgetOptions} from './context-budget.js';
+import {routeDomain} from './domain-router.js';
+import {validateMemoryCandidates} from './memory-candidates.js';
+import {sanitizeDocuments} from './privacy-filter.js';
 import type {
   EvidenceItem,
   ModelClient,
@@ -66,24 +67,32 @@ export class YosOrchestrator {
     };
 
     const modelOutput = await this.modelClient.generate(modelInput);
+    const candidates = validateMemoryCandidates(
+      modelOutput.memoryCandidates,
+      modelInput.sourceRefs,
+      [route.primary, ...route.related]
+    );
     const unavailable = budget.documents.filter((document) => document.retrievalStatus && document.retrievalStatus !== 'ok');
     const safetyNotes = [
       ...privacy.notes,
       ...budget.notes,
-      ...unavailable.map((document) => `${document.source.id}:${document.retrievalNote ?? '情報源未確認'}`)
+      ...unavailable.map((document) => `${document.source.id}:${document.retrievalNote ?? '情報源未確認'}`),
+      ...candidates.rejected.map((item) => `保存候補${item.index + 1}を除外:${item.reason}`)
     ];
     if (privacy.blockedSourceIds.length > 0) {
       safetyNotes.push(`L4情報源を除外:${privacy.blockedSourceIds.join(',')}`);
     }
 
+    const attention = privacy.blockedSourceIds.length > 0 || unavailable.length > 0 || candidates.rejected.length > 0;
     return {
       requestId: request.requestId,
       route,
       ...modelOutput,
+      memoryCandidates: candidates.accepted,
       conflicts,
       sources: modelInput.sourceRefs,
       safety: {
-        level: privacy.blockedSourceIds.length > 0 || unavailable.length > 0 ? 'attention' : 'normal',
+        level: attention ? 'attention' : 'normal',
         notes: safetyNotes
       }
     };
