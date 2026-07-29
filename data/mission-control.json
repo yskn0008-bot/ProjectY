@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-29T16:30:12+09:00",
+  "updated_at": "2026-07-29T16:30:41+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -55,6 +55,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-665f470c22b5",
+      "title": "Add measured driving layout guard v69",
+      "completed_at": "2026-07-29T07:30:20Z",
+      "result": "GitHub mainへ反映（665f470）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/665f470c22b5ebe4d085b9023ff711e0d65bdeaf"
+    },
+    {
       "id": "github-commit-cf0059b1095c",
       "title": "Fix Taxi driving screen bottom navigation overlap v69",
       "completed_at": "2026-07-29T07:29:57Z",
@@ -81,13 +88,6 @@
       "completed_at": "2026-07-29T07:21:39Z",
       "result": "GitHub mainへ反映（d365df4）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/d365df4895a67964319388ae99945fe8d51adf18"
-    },
-    {
-      "id": "github-commit-bf79125c9d2e",
-      "title": "Publish v67 monthly grid edge fix",
-      "completed_at": "2026-07-29T06:45:16Z",
-      "result": "GitHub mainへ反映（bf79125）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/bf79125c9d2e7c07f9083724493d4cda4fdd7b6c"
     },
     {
       "id": "complete-002",
@@ -124,7 +124,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-29T16:30:12+09:00",
+      "last_update": "2026-07-29T16:30:41+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -205,7 +205,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-29T16:30:12+09:00",
+      "last_update": "2026-07-29T16:30:41+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -228,7 +228,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-29T16:30:12+09:00",
+      "last_update": "2026-07-29T16:30:41+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -310,5 +310,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "6139c8c7abf20ecb3fa7f4a0590675ea01d9e2193ef46ada2bf6b94c3f1b27aa"
+  "github_snapshot_hash": "d916b1f7836b110278a6691f716b5bcff9c20cf912aa1af787122abd64ef5f09"
 }
