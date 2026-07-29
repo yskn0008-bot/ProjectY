@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-29T17:58:32+09:00",
+  "updated_at": "2026-07-29T18:06:44+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -55,6 +55,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-37f3063921a1",
+      "title": "Taxi v75: fill manage gap above navigation",
+      "completed_at": "2026-07-29T09:06:33Z",
+      "result": "GitHub mainへ反映（37f3063）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/37f3063921a17e494f0be893b98c3825d0b297a8"
+    },
+    {
       "id": "github-commit-c6296f41cfa2",
       "title": "Taxi v74: enlarge management cards and activate measured layout",
       "completed_at": "2026-07-29T08:58:16Z",
@@ -81,13 +88,6 @@
       "completed_at": "2026-07-29T08:44:15Z",
       "result": "GitHub mainへ反映（959e9da）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/959e9dad4255c6e1640477633b7ddc4ee74328b4"
-    },
-    {
-      "id": "github-commit-c5015e05f379",
-      "title": "taxi v73: measure safe management height above nav",
-      "completed_at": "2026-07-29T08:42:47Z",
-      "result": "GitHub mainへ反映（c5015e0）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/c5015e05f379d1a2b8198ffce9a33564ddfb07ac"
     },
     {
       "id": "complete-002",
@@ -124,7 +124,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-29T17:58:32+09:00",
+      "last_update": "2026-07-29T18:06:44+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -205,7 +205,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-29T17:58:32+09:00",
+      "last_update": "2026-07-29T18:06:44+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -228,7 +228,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-29T17:58:32+09:00",
+      "last_update": "2026-07-29T18:06:44+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -310,5 +310,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "a57f24384c390a4cf44a3ea1d246f8e49206e90990979dca6dbf706dd09c2a72"
+  "github_snapshot_hash": "29dcf3756efc0d6d04044950dd38741483949b0cfb5251fbcbf81e25340a3787"
 }
