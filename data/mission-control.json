@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-30T02:30:49+09:00",
+  "updated_at": "2026-07-30T02:31:25+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -85,6 +85,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-993d70974d17",
+      "title": "Taxi v96: publish corrected sales settings layout",
+      "completed_at": "2026-07-29T17:31:04Z",
+      "result": "GitHub mainへ反映（993d709）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/993d70974d175f349f68f1bd276aadd778bcf92a"
+    },
+    {
       "id": "github-commit-d6a027659989",
       "title": "Taxi v96: reset sales settings dialog scroll position",
       "completed_at": "2026-07-29T17:30:28Z",
@@ -111,13 +118,6 @@
       "completed_at": "2026-07-29T17:18:02Z",
       "result": "GitHub mainへ反映（e9d2ec4）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/e9d2ec4ab54f95436ce6a36509974a95f2607f7a"
-    },
-    {
-      "id": "github-commit-f8a7f4a436bf",
-      "title": "Taxi v94: publish balanced monthly card spacing",
-      "completed_at": "2026-07-29T16:32:29Z",
-      "result": "GitHub mainへ反映（f8a7f4a）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/f8a7f4a436bf60a2d68ac132882a608f58d280f3"
     },
     {
       "id": "complete-002",
@@ -154,7 +154,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-30T02:30:49+09:00",
+      "last_update": "2026-07-30T02:31:25+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -235,7 +235,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-30T02:30:49+09:00",
+      "last_update": "2026-07-30T02:31:25+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -258,7 +258,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-30T02:30:49+09:00",
+      "last_update": "2026-07-30T02:31:25+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -340,5 +340,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "3ab798b9f6d0395db28cce1aefe03dd76d5f7c23def0e5a71d91730753f7ee0c"
+  "github_snapshot_hash": "6178b690881f36575b00d8c19fd600ed6d284ed70b7192afab8e83fda33d567f"
 }
