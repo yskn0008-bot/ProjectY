@@ -1,5 +1,6 @@
 import { buildContext } from './context-builder.js';
 import { detectConflicts } from './conflict-detector.js';
+import { applyContextBudget, type ContextBudgetOptions } from './context-budget.js';
 import { routeDomain } from './domain-router.js';
 import { sanitizeDocuments } from './privacy-filter.js';
 import type {
@@ -35,7 +36,8 @@ function assertRequest(request: YosRequest): void {
 export class YosOrchestrator {
   constructor(
     private readonly sourceProvider: SourceProvider,
-    private readonly modelClient: ModelClient
+    private readonly modelClient: ModelClient,
+    private readonly contextBudget: ContextBudgetOptions = {}
   ) {}
 
   async answer(request: YosRequest): Promise<YosAnswer> {
@@ -49,8 +51,9 @@ export class YosOrchestrator {
 
     const allDocuments = deduplicateDocuments([...core, ...domain]);
     const privacy = sanitizeDocuments(allDocuments);
-    const conflicts = detectConflicts(collectEvidence(privacy.documents));
-    const context = buildContext(route, privacy.documents, conflicts);
+    const budget = applyContextBudget(privacy.documents, this.contextBudget);
+    const conflicts = detectConflicts(collectEvidence(budget.documents));
+    const context = buildContext(route, budget.documents, conflicts);
 
     const modelInput: ModelInput = {
       requestId: request.requestId,
@@ -58,14 +61,15 @@ export class YosOrchestrator {
       instruction: BASE_INSTRUCTION,
       userText: request.userText,
       context,
-      sourceRefs: privacy.documents.map((document) => document.source),
+      sourceRefs: budget.documents.map((document) => document.source),
       conflicts
     };
 
     const modelOutput = await this.modelClient.generate(modelInput);
-    const unavailable = privacy.documents.filter((document) => document.retrievalStatus && document.retrievalStatus !== 'ok');
+    const unavailable = budget.documents.filter((document) => document.retrievalStatus && document.retrievalStatus !== 'ok');
     const safetyNotes = [
       ...privacy.notes,
+      ...budget.notes,
       ...unavailable.map((document) => `${document.source.id}:${document.retrievalNote ?? '情報源未確認'}`)
     ];
     if (privacy.blockedSourceIds.length > 0) {
