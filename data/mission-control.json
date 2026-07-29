@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-29T16:21:52+09:00",
+  "updated_at": "2026-07-29T16:22:13+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -55,6 +55,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-324eb0ed8449",
+      "title": "Taxi v68 auto-fit full weekly yen amounts",
+      "completed_at": "2026-07-29T07:21:58Z",
+      "result": "GitHub mainへ反映（324eb0e）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/324eb0ed8449bf7c06f0b6bf0fce29219b8c4c32"
+    },
+    {
       "id": "github-commit-d365df4895a6",
       "title": "Taxi v68 widen weekly money columns",
       "completed_at": "2026-07-29T07:21:39Z",
@@ -81,13 +88,6 @@
       "completed_at": "2026-07-29T06:44:02Z",
       "result": "GitHub mainへ反映（013dc07）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/013dc0796f62c4bd0a7eaf1ab821ff6030c89e2d"
-    },
-    {
-      "id": "github-commit-acf836e58b0d",
-      "title": "Publish v66 measured monthly calendar fit",
-      "completed_at": "2026-07-28T21:06:12Z",
-      "result": "GitHub mainへ反映（acf836e）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/acf836e58b0d781c4c920800a134a6fe0243c11f"
     },
     {
       "id": "complete-002",
@@ -124,7 +124,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-29T16:21:52+09:00",
+      "last_update": "2026-07-29T16:22:13+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -205,7 +205,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-29T16:21:52+09:00",
+      "last_update": "2026-07-29T16:22:13+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -228,7 +228,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-29T16:21:52+09:00",
+      "last_update": "2026-07-29T16:22:13+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -310,5 +310,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "c7b8f7f586ebf1555126de4c074ca20f0d782107682e5275dc7ee8b96ea69ad3"
+  "github_snapshot_hash": "f5ade7c7d3c807865e4ef51108dbd67cb1ce6c6cb15e7ac6c3e9a62baf49d225"
 }
