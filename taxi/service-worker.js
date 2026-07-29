@@ -1,6 +1,6 @@
 'use strict';
-const CACHE='yos-taxi-projecty-v87-week-summary-grid';
-const VERSION='87';
+const CACHE='yos-taxi-projecty-v88-week-summary-width';
+const VERSION='88';
 const STATIC=[
   './index.html','./calendar.html','./settings.html','./manifest.webmanifest',
   './v9.css','./v9.js','./drive-v44.css','./drive-v44.js','./drive-no-overlap-v69.css','./drive-no-overlap-v69.js',
@@ -8,7 +8,7 @@ const STATIC=[
   './browser-bottom-v38.css','./browser-bottom-v38.js','./browser-bottom-v42.css','./report-sync-v43.js',
   './month-performance-v57.css','./month-performance-v57.js','./month-performance-v60.js','./month-layout-v59.css','./month-layout-v60.css','./month-nav-v61.css','./month-nav-v62.css',
   './month-grid-fit-v67.css','./month-grid-fit-v67.js','./month-row-fit-v80.css','./month-row-fit-v80.js',
-  './week-money-fit-v68.css','./week-money-fit-v68.js','./week-nav-fit-v79.css','./week-nav-fit-v79.js','./week-date-sales-v82.css','./week-date-sales-v82.js','./week-value-only-v86.css','./week-summary-grid-v87.css',
+  './week-money-fit-v68.css','./week-money-fit-v68.js','./week-nav-fit-v79.css','./week-nav-fit-v79.js','./week-date-sales-v82.css','./week-date-sales-v82.js','./week-value-only-v86.css','./week-summary-grid-v87.css','./week-summary-width-v88.css',
   './manage-stable-v77.css','./manage-stable-v77.js','./manage-nav-fit-v78.css','./manage-nav-fit-v78.js','./manage-card-grow-v81.css',
   './nav-icons-v62.js','./viewport-v28.js','./settings-v20.js','./ui-v24.css','./ui-v24.js','./ui-v24-fix.js',
   './page-motion-v49.css','./page-motion-v49.js','./week-fit-v50.css','./week-balance-v51.css','./week-readability-v52.css','./week-readability-v53.css','./week-readability-v54.css','./week-readability-v55.css','./week-space-v56.css',
@@ -57,7 +57,7 @@ async function inject(response,type){
   addCss('month-nav-v61.css');
   addCss('month-nav-v62.css');
   if(type==='calendar'){
-    ['month-grid-fit-v67.css','month-row-fit-v80.css','week-money-fit-v68.css','week-nav-fit-v79.css','week-date-sales-v82.css','week-value-only-v86.css','week-summary-grid-v87.css','manage-stable-v77.css','manage-nav-fit-v78.css','manage-card-grow-v81.css'].forEach(addCss);
+    ['month-grid-fit-v67.css','month-row-fit-v80.css','week-money-fit-v68.css','week-nav-fit-v79.css','week-date-sales-v82.css','week-value-only-v86.css','week-summary-grid-v87.css','week-summary-width-v88.css','manage-stable-v77.css','manage-nav-fit-v78.css','manage-card-grow-v81.css'].forEach(addCss);
   }
   if(type==='index')addCss('drive-no-overlap-v69.css');
 
