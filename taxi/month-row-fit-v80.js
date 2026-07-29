@@ -20,15 +20,20 @@
     const cells=Array.from(grid.children).filter(node=>node.classList?.contains('day'));
     if(cells.length<35)return;
 
-    cells.forEach(cell=>cell.classList.remove('month-row-hidden-v80'));
-
     const finalRow=cells.slice(35,42);
     const hideFinalRow=finalRow.length===7&&finalRow.every(cell=>cell.classList.contains('other'));
     const rowCount=hideFinalRow?5:6;
 
-    if(hideFinalRow)finalRow.forEach(cell=>cell.classList.add('month-row-hidden-v80'));
+    cells.forEach((cell,index)=>{
+      const shouldHide=hideFinalRow&&index>=35&&index<42;
+      if(cell.classList.contains('month-row-hidden-v80')!==shouldHide){
+        cell.classList.toggle('month-row-hidden-v80',shouldHide);
+      }
+    });
 
-    document.body.dataset.monthRowCountV80=String(rowCount);
+    if(document.body.dataset.monthRowCountV80!==String(rowCount)){
+      document.body.dataset.monthRowCountV80=String(rowCount);
+    }
     document.body.style.setProperty('--month-row-count-v80',String(rowCount));
     grid.style.setProperty('--month-row-count-v80',String(rowCount));
   }
