@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-30T05:32:58+09:00",
+  "updated_at": "2026-07-30T05:33:27+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -20,7 +20,7 @@
       "priority": 2,
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/76",
-      "updated_at": "2026-07-29T20:32:26Z"
+      "updated_at": "2026-07-29T20:33:04Z"
     },
     {
       "id": "github-pr-79",
@@ -85,6 +85,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-995313fc2d8d",
+      "title": "Taxi v97: integrate one-tap YOS Navi entry into driving screen",
+      "completed_at": "2026-07-29T20:33:04Z",
+      "result": "GitHub mainへ反映（995313f）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/995313fc2d8d82490d8c027ecd58bd22e443344a"
+    },
+    {
       "id": "github-commit-a18197a13fec",
       "title": "Taxi v97: add prominent YOS Navi entry without increasing screen height",
       "completed_at": "2026-07-29T20:32:48Z",
@@ -111,13 +118,6 @@
       "completed_at": "2026-07-29T17:30:17Z",
       "result": "GitHub mainへ反映（fb508ba）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/fb508ba0d56211e391bde5d7061d34ec0b14dc0a"
-    },
-    {
-      "id": "github-commit-22c1ee9bbb39",
-      "title": "Taxi v95: publish sales settings dialog fix",
-      "completed_at": "2026-07-29T17:18:33Z",
-      "result": "GitHub mainへ反映（22c1ee9）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/22c1ee9bbb39e02913822ba854e721e856cc607d"
     },
     {
       "id": "complete-002",
@@ -154,7 +154,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-30T05:32:58+09:00",
+      "last_update": "2026-07-30T05:33:27+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -235,7 +235,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-30T05:32:58+09:00",
+      "last_update": "2026-07-30T05:33:27+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -258,7 +258,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-30T05:32:58+09:00",
+      "last_update": "2026-07-30T05:33:27+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -340,5 +340,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "e72ca01b01925ff40b708319b49b88138056eba10f6d56546ab41fd9471902fe"
+  "github_snapshot_hash": "4e768384da20149f9cddf32d20e02a3b8bcd533925b4e198cbd998fd1f7bc131"
 }
