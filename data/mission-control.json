@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-29T21:06:04+09:00",
+  "updated_at": "2026-07-29T21:06:54+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -55,6 +55,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-a32ee2cdc72d",
+      "title": "Refresh weekly sales data cache v83",
+      "completed_at": "2026-07-29T12:06:43Z",
+      "result": "GitHub mainへ反映（a32ee2c）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/a32ee2cdc72de3d49bb3affc65cdbb95f865c1d9"
+    },
+    {
       "id": "github-commit-65c1b115df0f",
       "title": "Sync latest confirmed daily reports through July 28",
       "completed_at": "2026-07-29T12:05:49Z",
@@ -81,13 +88,6 @@
       "completed_at": "2026-07-29T12:02:21Z",
       "result": "GitHub mainへ反映（e776bd4）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/e776bd455f3e63ba57a7a4b178666c742d5044f1"
-    },
-    {
-      "id": "github-commit-454d47077271",
-      "title": "Fix weekly weekday visibility and preserve money width v82",
-      "completed_at": "2026-07-29T12:01:50Z",
-      "result": "GitHub mainへ反映（454d470）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/454d470772715513d953fa07e465a7443c73b081"
     },
     {
       "id": "complete-002",
@@ -124,7 +124,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-29T21:06:04+09:00",
+      "last_update": "2026-07-29T21:06:54+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -205,7 +205,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-29T21:06:04+09:00",
+      "last_update": "2026-07-29T21:06:54+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -228,7 +228,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-29T21:06:04+09:00",
+      "last_update": "2026-07-29T21:06:54+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -310,5 +310,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "dbc66520ee1998748cc5a5eca43ed665439359dc107e2ab584579b5d6867aba7"
+  "github_snapshot_hash": "98a2c9fb9a45ab873a63b2f0676fc7d8150e0f49e9361a85ba968e71c61c47c7"
 }
