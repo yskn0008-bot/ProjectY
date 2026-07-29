@@ -26,7 +26,7 @@
     const [y,m,d]=String(key||'').split('-').map(Number);
     if(!y||!m||!d)return key||'';
     const date=new Date(y,m-1,d);
-    return `${m}/${d}(${weekdays[date.getDay()]})`;
+    return `${d}(${weekdays[date.getDay()]})`;
   };
 
   function sync(){
