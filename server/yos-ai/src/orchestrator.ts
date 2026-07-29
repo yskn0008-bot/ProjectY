@@ -63,7 +63,11 @@ export class YosOrchestrator {
     };
 
     const modelOutput = await this.modelClient.generate(modelInput);
-    const safetyNotes = [...privacy.notes];
+    const unavailable = privacy.documents.filter((document) => document.retrievalStatus && document.retrievalStatus !== 'ok');
+    const safetyNotes = [
+      ...privacy.notes,
+      ...unavailable.map((document) => `${document.source.id}:${document.retrievalNote ?? '情報源未確認'}`)
+    ];
     if (privacy.blockedSourceIds.length > 0) {
       safetyNotes.push(`L4情報源を除外:${privacy.blockedSourceIds.join(',')}`);
     }
@@ -75,7 +79,7 @@ export class YosOrchestrator {
       conflicts,
       sources: modelInput.sourceRefs,
       safety: {
-        level: privacy.blockedSourceIds.length > 0 ? 'attention' : 'normal',
+        level: privacy.blockedSourceIds.length > 0 || unavailable.length > 0 ? 'attention' : 'normal',
         notes: safetyNotes
       }
     };
