@@ -8,6 +8,8 @@ export interface OpenAIResponsesClientOptions {
   responseSchema: Record<string, unknown>;
   endpoint?: string;
   fetchImpl?: FetchLike;
+  maxOutputTokens?: number;
+  liveMaxOutputTokens?: number;
 }
 
 interface ResponsesApiResult {
@@ -21,6 +23,8 @@ export class OpenAIResponsesClient implements ModelClient {
   private readonly fetchImpl: FetchLike;
   private readonly endpoint: string;
   private readonly model: string;
+  private readonly maxOutputTokens: number;
+  private readonly liveMaxOutputTokens: number;
 
   constructor(private readonly options: OpenAIResponsesClientOptions) {
     if (!options.apiKey.trim()) throw new Error('OpenAI API key is required');
@@ -28,6 +32,8 @@ export class OpenAIResponsesClient implements ModelClient {
     this.fetchImpl = options.fetchImpl ?? fetch;
     this.endpoint = options.endpoint ?? 'https://api.openai.com/v1/responses';
     this.model = options.model ?? 'gpt-5.6-terra';
+    this.maxOutputTokens = positiveTokenLimit(options.maxOutputTokens ?? 5_000, 'maxOutputTokens');
+    this.liveMaxOutputTokens = positiveTokenLimit(options.liveMaxOutputTokens ?? 1_500, 'liveMaxOutputTokens');
   }
 
   async generate(input: ModelInput): Promise<ModelOutput> {
@@ -56,7 +62,8 @@ export class OpenAIResponsesClient implements ModelClient {
             ]
           }
         ],
-        reasoning: { effort: 'medium' },
+        reasoning: { effort: input.route.liveMode ? 'low' : 'medium' },
+        max_output_tokens: input.route.liveMode ? this.liveMaxOutputTokens : this.maxOutputTokens,
         store: false,
         safety_identifier: this.options.safetyIdentifier,
         text: {
@@ -115,4 +122,11 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 function isStringArray(value: unknown): value is string[] {
   return Array.isArray(value) && value.every((item) => typeof item === 'string');
+}
+
+function positiveTokenLimit(value: number, name: string): number {
+  if (!Number.isSafeInteger(value) || value < 1 || value > 128_000) {
+    throw new Error(`${name} must be between 1 and 128000`);
+  }
+  return value;
 }
