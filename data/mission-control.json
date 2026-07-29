@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-29T20:44:50+09:00",
+  "updated_at": "2026-07-29T20:45:25+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -55,6 +55,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-dfe91795c2de",
+      "title": "taxi: publish manage card grow v81",
+      "completed_at": "2026-07-29T11:45:13Z",
+      "result": "GitHub mainへ反映（dfe9179）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/dfe91795c2de91ded03c6d2ad5da7436f6ea7b91"
+    },
+    {
       "id": "github-commit-d1745375114e",
       "title": "taxi: compact manage header and enlarge cards v81",
       "completed_at": "2026-07-29T11:44:35Z",
@@ -81,13 +88,6 @@
       "completed_at": "2026-07-29T11:27:53Z",
       "result": "GitHub mainへ反映（862685d）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/862685daf9d9ccb561456fb2d7978fd32e762f9c"
-    },
-    {
-      "id": "github-commit-724abc52d00c",
-      "title": "Taxi v80: enlarge month cells by removing unused final row",
-      "completed_at": "2026-07-29T11:27:29Z",
-      "result": "GitHub mainへ反映（724abc5）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/724abc52d00cfda35e3bee7b8b30d0ffc18ae6d4"
     },
     {
       "id": "complete-002",
@@ -124,7 +124,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-29T20:44:50+09:00",
+      "last_update": "2026-07-29T20:45:25+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -205,7 +205,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-29T20:44:50+09:00",
+      "last_update": "2026-07-29T20:45:25+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -228,7 +228,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-29T20:44:50+09:00",
+      "last_update": "2026-07-29T20:45:25+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -310,5 +310,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "5d4544cc636db0a3fab0a088e9128827acf5051794804594f4c1a34f43caeeda"
+  "github_snapshot_hash": "7bb68ef510a579f900e1895a4e3de160a217ce2ae52458b702a708b63a250119"
 }
