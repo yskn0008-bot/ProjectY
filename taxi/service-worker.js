@@ -1,6 +1,6 @@
 'use strict';
-const CACHE='yos-taxi-projecty-v83-week-sales-data';
-const VERSION='83';
+const CACHE='yos-taxi-projecty-v84-week-day-only';
+const VERSION='84';
 const STATIC=[
   './index.html','./calendar.html','./settings.html','./manifest.webmanifest',
   './v9.css','./v9.js','./drive-v44.css','./drive-v44.js','./drive-no-overlap-v69.css','./drive-no-overlap-v69.js',
