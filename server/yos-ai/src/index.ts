@@ -23,6 +23,7 @@ export * from './auth/vercel-oidc.js';
 export * from './runtime/types.js';
 export * from './runtime/source-registry.js';
 export * from './runtime/request-runtime.js';
+export * from './runtime/app.js';
 export * from './api/shared.js';
 export * from './api/chat-handler.js';
 export * from './api/health-handler.js';
