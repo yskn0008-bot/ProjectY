@@ -1,4 +1,4 @@
-/* YOS Taxi v88 — use wasted horizontal space in weekly summary */
+/* YOS Taxi v89 — use each weekly summary card horizontally */
 @media (max-width:430px){
   body[data-calendar-page="week"] #weekView.v21-active,
   body.calendar-week-mode #weekView.v21-active{
@@ -15,19 +15,43 @@
 
   body[data-calendar-page="week"] .week-summary .card,
   body.calendar-week-mode .week-summary .card{
-    padding:7px 4px!important;
+    display:grid!important;
+    grid-template-columns:minmax(44px,.60fr) minmax(0,1.40fr)!important;
+    grid-template-areas:"label value"!important;
+    align-items:center!important;
+    column-gap:5px!important;
+    padding:6px 8px!important;
     border-radius:12px!important;
   }
 
   body[data-calendar-page="week"] .week-summary .card strong,
   body.calendar-week-mode .week-summary .card strong{
-    font-size:clamp(24px,6.9vw,30px)!important;
+    grid-area:value!important;
+    justify-self:end!important;
+    width:auto!important;
+    min-width:0!important;
+    max-width:100%!important;
+    margin:0!important;
+    font-size:clamp(23px,6.4vw,28px)!important;
+    line-height:.95!important;
     letter-spacing:-.055em!important;
+    text-align:right!important;
+    white-space:nowrap!important;
+    overflow:visible!important;
   }
 
   body[data-calendar-page="week"] .week-summary .card span,
   body.calendar-week-mode .week-summary .card span{
+    grid-area:label!important;
+    justify-self:start!important;
+    width:auto!important;
+    max-width:58px!important;
+    margin:0!important;
     font-size:11px!important;
+    font-weight:900!important;
+    line-height:1.05!important;
+    text-align:left!important;
+    white-space:normal!important;
   }
 }
 
@@ -43,7 +67,9 @@
 
   body[data-calendar-page="week"] .week-summary .card,
   body.calendar-week-mode .week-summary .card{
-    padding:5px 2px!important;
+    grid-template-columns:minmax(42px,.58fr) minmax(0,1.42fr)!important;
+    column-gap:4px!important;
+    padding:5px 6px!important;
     border-radius:11px!important;
   }
 
@@ -54,6 +80,7 @@
 
   body[data-calendar-page="week"] .week-summary .card span,
   body.calendar-week-mode .week-summary .card span{
+    max-width:52px!important;
     font-size:10px!important;
   }
 }
