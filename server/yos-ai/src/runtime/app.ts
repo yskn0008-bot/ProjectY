@@ -1,5 +1,6 @@
 import {createChatHandler} from '../api/chat-handler.js';
 import {createHealthHandler} from '../api/health-handler.js';
+import type {AuditSink} from '../audit.js';
 import {createGoogleIdentityVerifier} from '../auth/google-runtime.js';
 import {IdentityGate} from '../auth/identity-gate.js';
 import type {YosRuntimeConfig} from '../config.js';
@@ -11,9 +12,11 @@ export interface CreateYosAppOptions {
   config: YosRuntimeConfig;
   responseSchema: Record<string, unknown>;
   rateLimiter: RateLimiter;
+  auditSink: AuditSink;
   fetchImpl?: FetchLike;
   requestIdFactory?: () => string;
   clock?: () => string;
+  monotonicClock?: () => number;
   healthVersion?: string;
 }
 
@@ -46,8 +49,10 @@ export function createYosApp(options: CreateYosAppOptions): YosAppHandlers {
       identityGate,
       runtimeFactory,
       rateLimiter: options.rateLimiter,
+      auditSink: options.auditSink,
       ...(options.requestIdFactory ? {requestIdFactory: options.requestIdFactory} : {}),
-      ...(options.clock ? {clock: options.clock} : {})
+      ...(options.clock ? {clock: options.clock} : {}),
+      ...(options.monotonicClock ? {monotonicClock: options.monotonicClock} : {})
     }),
     health: createHealthHandler({
       ...cors,
