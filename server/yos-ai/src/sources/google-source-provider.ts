@@ -7,6 +7,7 @@ import type {
   SourceRef,
   YosRequest
 } from '../types.js';
+import type { AccessTokenProvider } from './access-token-provider.js';
 import type { GoogleDriveClient } from './google-drive-client.js';
 import type { GoogleSheetsClient } from './google-sheets-client.js';
 
@@ -32,7 +33,7 @@ export interface SheetRegistryEntry extends BaseRegistryEntry {
 export type SourceRegistryEntry = DocumentRegistryEntry | SheetRegistryEntry;
 
 export interface GoogleSourceProviderOptions {
-  accessToken: string;
+  accessTokenProvider: AccessTokenProvider;
   registry: SourceRegistryEntry[];
 }
 
@@ -48,24 +49,36 @@ export class GoogleSourceProvider implements SourceProvider {
   }
 
   async loadCoreSources(): Promise<SourceDocument[]> {
-    return await Promise.all(CORE_SOURCE_IDS.map((id) => this.loadOne(id)));
+    return await this.loadMany([...CORE_SOURCE_IDS]);
   }
 
   async loadDomainSources(route: DomainRoute, _request: YosRequest): Promise<SourceDocument[]> {
     const core = new Set<string>(CORE_SOURCE_IDS);
     const ids = requiredSourceIds(route).filter((id) => !core.has(id));
-    return await Promise.all(ids.map((id) => this.loadOne(id)));
+    return await this.loadMany(ids);
   }
 
-  private async loadOne(sourceId: string): Promise<SourceDocument> {
+  private async loadMany(sourceIds: string[]): Promise<SourceDocument[]> {
+    if (sourceIds.length === 0) return [];
+    let accessToken: string;
+    try {
+      accessToken = await this.options.accessTokenProvider.getAccessToken();
+    } catch (error) {
+      const note = error instanceof Error ? error.message : 'Google認証に失敗';
+      return sourceIds.map((sourceId) => unavailableDocument(sourceId, 'error', note, this.registry.get(sourceId)));
+    }
+    return await Promise.all(sourceIds.map((id) => this.loadOne(id, accessToken)));
+  }
+
+  private async loadOne(sourceId: string, accessToken: string): Promise<SourceDocument> {
     const entry = this.registry.get(sourceId);
     if (!entry) return unavailableDocument(sourceId, 'missing', '情報源の接続設定がない');
 
     try {
       if (entry.type === 'document') {
         const [metadata, content] = await Promise.all([
-          this.drive.getMetadata(entry.fileId, this.options.accessToken),
-          this.drive.exportText(entry.fileId, this.options.accessToken)
+          this.drive.getMetadata(entry.fileId, accessToken),
+          this.drive.exportText(entry.fileId, accessToken)
         ]);
         return {
           source: {
@@ -82,11 +95,7 @@ export class GoogleSourceProvider implements SourceProvider {
         };
       }
 
-      const result = await this.sheets.batchGet(
-        entry.spreadsheetId,
-        entry.ranges,
-        this.options.accessToken
-      );
+      const result = await this.sheets.batchGet(entry.spreadsheetId, entry.ranges, accessToken);
       return {
         source: {
           id: entry.id,
