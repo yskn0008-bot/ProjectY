@@ -1,7 +1,4 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://projecty.local/schemas/yos-answer.schema.json",
-  "title": "YOS Answer",
   "type": "object",
   "required": [
     "answer",
@@ -12,29 +9,83 @@
     "nextAction"
   ],
   "properties": {
-    "answer": { "type": "string" },
-    "facts": { "type": "array", "items": { "type": "string" } },
-    "assumptions": { "type": "array", "items": { "type": "string" } },
-    "unknowns": { "type": "array", "items": { "type": "string" } },
+    "answer": {
+      "type": "string"
+    },
+    "facts": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "assumptions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "unknowns": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
     "memoryCandidates": {
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["content", "category", "domain", "status", "evidenceSourceIds", "privacyLevel"],
+        "required": [
+          "content",
+          "category",
+          "domain",
+          "status",
+          "evidenceSourceIds",
+          "privacyLevel"
+        ],
         "properties": {
-          "content": { "type": "string" },
-          "category": {
-            "enum": ["personal-data", "hypothesis", "operation-rule", "spec-change", "implementation-change"]
+          "content": {
+            "type": "string"
           },
-          "domain": { "type": "string" },
-          "status": { "const": "candidate" },
-          "evidenceSourceIds": { "type": "array", "items": { "type": "string" } },
-          "privacyLevel": { "enum": ["L0", "L1", "L2", "L3", "L4"] }
+          "category": {
+            "enum": [
+              "personal-data",
+              "hypothesis",
+              "operation-rule",
+              "spec-change",
+              "implementation-change"
+            ]
+          },
+          "domain": {
+            "type": "string"
+          },
+          "status": {
+            "const": "candidate"
+          },
+          "evidenceSourceIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "privacyLevel": {
+            "enum": [
+              "L0",
+              "L1",
+              "L2",
+              "L3",
+              "L4"
+            ]
+          }
         },
         "additionalProperties": false
       }
     },
-    "nextAction": { "type": ["string", "null"] }
+    "nextAction": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
   },
   "additionalProperties": false
 }
