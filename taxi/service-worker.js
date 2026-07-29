@@ -1,7 +1,7 @@
 'use strict';
 const CACHE_PREFIX='yos-taxi-projecty-';
-const CACHE='yos-taxi-projecty-v97-production-polish';
-const VERSION='97';
+const CACHE='yos-taxi-projecty-v98-production-reliability';
+const VERSION='98';
 const STATIC=[
   './index.html','./calendar.html','./settings.html','./manifest.webmanifest',
   './v9.css','./v9.js','./drive-v44.css','./drive-v44.js','./drive-no-overlap-v69.css','./drive-no-overlap-v69.js','./settings-dialog-v95.css','./settings-dialog-v96.css','./settings-dialog-v96.js','./release-polish-v97.css',
@@ -83,6 +83,11 @@ async function inject(response,type){
   return new Response(html,{status:response.status,statusText:response.statusText,headers});
 }
 
+async function cachedAsset(request){
+  const cache=await caches.open(CACHE);
+  return cache.match(request,{ignoreSearch:true});
+}
+
 self.addEventListener('install',event=>event.waitUntil((async()=>{
   const cache=await caches.open(CACHE);
   await cache.addAll(STATIC);
@@ -101,7 +106,9 @@ self.addEventListener('activate',event=>event.waitUntil(
 self.addEventListener('fetch',event=>{
   if(event.request.method!=='GET')return;
   const url=new URL(event.request.url);
-  const type=url.origin===self.location.origin?pageType(url):'';
+  const sameOrigin=url.origin===self.location.origin;
+  const type=sameOrigin?pageType(url):'';
+
   if(type){
     event.respondWith(fetch(event.request,{cache:'no-store'}).then(async response=>{
       const transformed=await inject(response,type);
@@ -111,9 +118,20 @@ self.addEventListener('fetch',event=>{
     }).catch(()=>caches.match(event.request).then(hit=>hit||caches.match(type==='calendar'?'./calendar.html':type==='settings'?'./settings.html':'./index.html'))));
     return;
   }
+
+  if(!sameOrigin){
+    event.respondWith(fetch(event.request));
+    return;
+  }
+
   event.respondWith(fetch(event.request,{cache:'no-cache'}).then(response=>{
-    const copy=response.clone();
-    caches.open(CACHE).then(cache=>cache.put(event.request,copy));
+    if(response&&response.ok){
+      const copy=response.clone();
+      caches.open(CACHE).then(cache=>cache.put(event.request,copy));
+    }
     return response;
-  }).catch(()=>caches.match(event.request).then(hit=>hit||caches.match('./index.html'))));
+  }).catch(async()=>{
+    const hit=await cachedAsset(event.request);
+    return hit||Response.error();
+  }));
 });
