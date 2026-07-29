@@ -5,3 +5,8 @@ export * from './privacy-filter.js';
 export * from './conflict-detector.js';
 export * from './context-builder.js';
 export * from './orchestrator.js';
+export * from './http.js';
+export * from './sources/google-drive-client.js';
+export * from './sources/google-sheets-client.js';
+export * from './sources/google-source-provider.js';
+export * from './openai/responses-client.js';
