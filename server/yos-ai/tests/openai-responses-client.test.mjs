@@ -18,6 +18,8 @@ test('Responses client forces store false and structured output', async () => {
     model: 'gpt-5.6-terra',
     safetyIdentifier: 'hashed-user',
     responseSchema: { type: 'object' },
+    maxOutputTokens: 4000,
+    liveMaxOutputTokens: 1200,
     fetchImpl: async (_input, init) => {
       requestBody = JSON.parse(init.body);
       return new Response(JSON.stringify({
@@ -39,6 +41,8 @@ test('Responses client forces store false and structured output', async () => {
   assert.equal(requestBody.store, false);
   assert.equal(requestBody.safety_identifier, 'hashed-user');
   assert.equal(requestBody.text.verbosity, 'low');
+  assert.equal(requestBody.reasoning.effort, 'low');
+  assert.equal(requestBody.max_output_tokens, 1200);
   assert.equal(requestBody.text.format.type, 'json_schema');
   assert.equal(result.answer, '結論');
 });
