@@ -1,6 +1,7 @@
 import type { IdentityGate } from '../auth/identity-gate.js';
 import type { IdentityVerifier } from '../auth/types.js';
 import type { YosOrchestrator } from '../orchestrator.js';
+import type { RateLimiter } from '../rate-limit.js';
 import type { YosRequest } from '../types.js';
 import { allowedOrigin, bearerToken, corsPreflight, secureJson, type CorsOptions } from './shared.js';
 
@@ -8,6 +9,7 @@ export interface ChatHandlerOptions extends CorsOptions {
   identityVerifier: IdentityVerifier;
   identityGate: IdentityGate;
   orchestrator: Pick<YosOrchestrator, 'answer'>;
+  rateLimiter: RateLimiter;
   requestIdFactory?: () => string;
   clock?: () => string;
   maxBodyBytes?: number;
@@ -42,12 +44,27 @@ export function createChatHandler(options: ChatHandlerOptions): (request: Reques
       return secureJson({ error: 'Content-Type must be application/json', requestId }, 415, origin);
     }
 
+    let subjectHash: string;
     try {
       const idToken = bearerToken(request);
       const identity = await options.identityVerifier.verify(idToken);
-      await options.identityGate.authorize(identity);
+      subjectHash = (await options.identityGate.authorize(identity)).subjectHash;
     } catch {
       return secureJson({ error: 'Authentication failed', requestId }, 401, origin);
+    }
+
+    try {
+      const decision = await options.rateLimiter.check(subjectHash);
+      if (!decision.allowed) {
+        return secureJson(
+          { error: 'Rate limit exceeded', requestId },
+          429,
+          origin,
+          { 'Retry-After': String(decision.retryAfterSeconds ?? 60) }
+        );
+      }
+    } catch {
+      return secureJson({ error: 'YOS is temporarily unavailable', requestId }, 503, origin);
     }
 
     let body: ChatBody;
