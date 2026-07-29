@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-29T18:07:10+09:00",
+  "updated_at": "2026-07-29T18:08:07+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -50,10 +50,17 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/51",
-      "updated_at": "2026-07-29T08:17:28Z"
+      "updated_at": "2026-07-29T09:07:54Z"
     }
   ],
   "recently_completed": [
+    {
+      "id": "github-commit-875c5ea52a9e",
+      "title": "Taxi v75: remove manage gap above bottom nav",
+      "completed_at": "2026-07-29T09:07:53Z",
+      "result": "GitHub mainへ反映（875c5ea）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/875c5ea52a9eb942f48694bdf40e45daa6292912"
+    },
     {
       "id": "github-commit-551df112250e",
       "title": "Taxi v75: pin manage actions to content bottom",
@@ -81,13 +88,6 @@
       "completed_at": "2026-07-29T08:57:04Z",
       "result": "GitHub mainへ反映（bbb5467）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/bbb546796c7722effd3c0a52418f82280edce495"
-    },
-    {
-      "id": "github-commit-346ee73cfa1d",
-      "title": "Taxi v74: expand management cards into lower free space",
-      "completed_at": "2026-07-29T08:56:21Z",
-      "result": "GitHub mainへ反映（346ee73）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/346ee73cfa1d96564c613dbe0f4ed4cad24e7f22"
     },
     {
       "id": "complete-002",
@@ -124,7 +124,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-29T18:07:10+09:00",
+      "last_update": "2026-07-29T18:08:07+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -205,7 +205,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-29T18:07:10+09:00",
+      "last_update": "2026-07-29T18:08:07+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -228,7 +228,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-29T18:07:10+09:00",
+      "last_update": "2026-07-29T18:08:07+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -310,5 +310,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "1bb0dc937f387b4d6715c303bd143f7e9959a7d504b43480103483a55f8ae270"
+  "github_snapshot_hash": "bcba8da3f2c9cfa81a12af9575f968818d09c692a087ba046a44d4e4cca12f8e"
 }
