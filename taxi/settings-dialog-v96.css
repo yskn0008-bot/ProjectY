@@ -1,0 +1,29 @@
+/* YOS Taxi v96 — settings dialog: remove time-field collision and restore top visibility */
+#settingsDialog .dialog-body{
+  scroll-padding-top:24px!important;
+  padding-top:22px!important;
+}
+
+#settingsDialog .dialog-body h3{
+  overflow:visible!important;
+}
+
+@media (max-width:430px){
+  /* iOS time controls keep a large intrinsic width. Stack only the time row. */
+  #settingsDialog .row2:has(input[type="time"]){
+    grid-template-columns:minmax(0,1fr)!important;
+    gap:10px!important;
+  }
+
+  #settingsDialog .row2:has(input[type="time"]) .field,
+  #settingsDialog .row2:has(input[type="time"]) input[type="time"]{
+    width:100%!important;
+    min-width:0!important;
+    max-width:100%!important;
+  }
+
+  #settingsDialog input[type="time"]{
+    min-height:54px!important;
+    padding-inline:14px!important;
+  }
+}
