@@ -1,53 +1,69 @@
 # YOS AI Core v0.1
 
-YOS専用生成AIの、安全な中核ロジックと接続境界です。
+YOS専用生成AIの読み取り専用MVPです。
+
+状態：**コード完成・自動試験合格・本番資格情報未設定**
 
 ## 実装済み
 
 - 情報領域の判定
-- 必須情報源の選択
+- 00_律法・02_YOS Master・00_Change Logの必須参照
+- 専門MasterとProject75の必要範囲選択
 - L4秘密情報の送信禁止
-- 秘密文字列の除外
+- APIキー・秘密鍵・Bearer Token等の除外
 - 根拠の競合検知
-- Google Drive文書の読み取り専用クライアント
+- 各事実への既知`source_id`必須化
+- 根拠なし・未知根拠・過大な事実の除外
+- Google Drive文書の読み取り専用取得
 - Google Sheetsの有限範囲読み取り
 - 開放範囲・1万セル超の読み取り拒否
 - 正本の総文字数・1文書の文字数上限
-- OpenAI Responses APIクライアント
-- `store: false`、`safety_identifier`、JSON Schema出力
+- Project75の個人情報列・原本URL列を避けた範囲設定
+- OpenAI Responses API接続
+- `store: false`、`safety_identifier`、厳格なJSON Schema出力
 - 通常回答・営業中回答の出力トークン上限
 - OpenAI使用トークン・モデル・Response IDの取得
-- Google Auth Libraryによる本人IDトークン検証の接続
-- Google `sub` のハッシュによる本人許可
-- 許可Origin限定のYOS chat API境界
-- 本人ごとの回数制限を必須化
-- 入力サイズ・項目・Content-Type・HTTPメソッドの検査
+- Google Auth Libraryによる本人IDトークン検証
+- Google `sub`のハッシュによる本人許可
+- 許可Origin限定のYOS chat API
 - APIサーバー側での現在時刻確定
-- 内部エラーと秘密情報を返さない処理
-- 秘密を含まないhealth API
-- Vercel OIDC＋Google Workload Identity Federationの実接続コード
+- Vercel OIDC＋Google Workload Identity Federation接続
 - Google STSとサービスアカウント偽装による短期資格情報
 - Drive・Sheets読み取り専用スコープ固定
-- リクエスト単位のYOS実行組立て
-- 個人情報列を避けたProject75範囲設定
-- 保存候補の根拠・領域・秘密情報・件数・文字数検査
-- 質問・回答本文・位置を保存しない回答監査レコード
+- Upstash RESTによる分散回数制限
+- Upstashへのメタデータ限定回答監査
 - 監査保存失敗時に回答を返さない処理
-- GitHub Actionsによる型検査と自動試験
+- 保存候補の根拠・領域・秘密情報・件数・文字数検査
+- 保存候補を承認前に確定保存しない処理
+- Vercel用`/api/yos/chat`、`/api/yos/health`
+- GitHub Actionsによる型検査・API構文検査・自動試験
+- 20件以上の独立した再発防止評価ゲート
 
-## Google認証方針
+## 本番構成
 
-本番の第一候補は、Vercel OIDCとGoogle Workload Identity Federationです。
+```text
+YOS PWA
+  ↓ Google ID token
+Vercel /api/yos/chat
+  ├─ 本人確認
+  ├─ Upstash分散回数制限
+  ├─ Vercel OIDC
+  ├─ Google Workload Identity Federation
+  ├─ Drive / Sheets読み取り
+  ├─ 秘密情報除外・根拠検査
+  ├─ OpenAI Responses API
+  └─ Upstashメタデータ監査
+```
 
-長期のサービスアカウント秘密鍵をVercel環境変数へ保存せず、短期資格情報を取得します。
+## Google認証
 
-OIDCトークンはGoogle資格情報交換だけに使用し、質問本文、OpenAI入力、回答、監査ログへ渡しません。
+本番では長期のサービスアカウント秘密鍵を使いません。
 
-ローカル開発ではApplication Default Credentialsを利用できますが、本番では標準で拒否します。
+Vercel OIDCをGoogle Workload Identity Federationで短期資格情報へ交換します。OIDCトークンはGoogle資格情報交換だけに使い、質問本文・OpenAI入力・回答・監査ログへ渡しません。
 
-## 回答監査方針
+## 回答監査
 
-監査へ保存するもの：
+保存するもの：
 
 - Request ID
 - 本人を直接特定しないsubject hash
@@ -59,7 +75,7 @@ OIDCトークンはGoogle資格情報交換だけに使用し、質問本文、O
 - 処理時間
 - モデル・トークン使用量
 
-監査へ保存しないもの：
+保存しないもの：
 
 - 質問本文
 - 回答本文
@@ -69,32 +85,17 @@ OIDCトークンはGoogle資格情報交換だけに使用し、質問本文、O
 - Drive・Sheetsの非公開Locator
 - APIキー・Google資格情報・Vercel OIDCトークン
 
-## 未実装
+## Vercel配置
 
-- Google CloudのWorkload Identity Pool・Provider設定
-- VercelのOIDC Team Issuerと環境設定
-- 非公開環境変数の設定
-- Vercel等へのAPIルート配置
-- 本番用の分散レートリミッター
-- 監査ログの永続DB
-- 保存候補の永続DBと承認画面
-- `/yos/` PWAとの接続
-- 本番デプロイとiPhone実機確認
+VercelプロジェクトのRoot Directoryを`server/yos-ai`に設定します。
 
-## 原則
+公開されるAPI：
 
-- 正本を無承認で変更しない
-- `store: false` を標準とする
-- APIキーをブラウザーやGitHubへ保存しない
-- 長期のGoogle秘密鍵を本番で使用しない
-- 本人メールではなくGoogleの不変ID `sub` をハッシュ照合する
-- 重要な現在時刻はAPIサーバー側で確定する
-- Project75は必要な有限範囲だけ取得する
-- モデル入力と出力の上限を強制する
-- 本人ごとの回数制限を必須にする
-- 確定、仮説、未確認、矛盾を分離する
-- 保存候補は承認前に確定保存しない
-- 追跡不能な回答を返さない
+- `POST /api/yos/chat`
+- `OPTIONS /api/yos/chat`
+- `GET /api/yos/health`
+
+必要な環境変数名は`.env.example`にあります。実値はGitHubへ保存しません。
 
 ## テスト
 
@@ -103,24 +104,49 @@ npm install
 npm test
 ```
 
-GitHub Actions結果：65件合格、0件失敗。
+GitHub Actions結果：**96件合格、0件失敗**。
 
-確認済み：公式Google Auth Library 10.9.1のインストール、TypeScript型検査、単体試験。
+確認済み：
 
-未確認：実Google Cloud・Vercel・OpenAI資格情報を使う本番通信。
+- TypeScript型検査
+- 公式Google Auth Library 10.9.1
+- JSON SchemaとOpenAI出力検査
+- Vercel APIファイルの構文
+- 分散回数制限・監査保存の模擬通信
+- 24件のYOS再発防止評価
 
-## 次の実装
+## 本番利用前に外部画面で必要な設定
 
-1. 誤回答の再発防止用評価ゲート
-2. 本番用の分散レートリミッター
-3. 監査ログ永続DB
-4. 保存候補DBと承認フロー
-5. `POST /api/yos/chat` と `GET /api/yos/health` のサーバーレス配置
-6. 非公開の正本ID・Sheet ID設定
-7. `/yos/` PWA接続
+コード外で次を一度だけ設定します。
+
+1. Vercelプロジェクト作成とRoot Directory設定
+2. Vercel環境変数設定
+3. Upstash Redis作成と資格情報設定
+4. Google Cloud Workload Identity Pool・Provider設定
+5. 読み取り専用サービスアカウント共有
+6. OpenAI APIキー設定
+7. 実Google Drive・Sheets・OpenAI疎通確認
+8. `/yos/` PWAからAPIへ接続
+9. iPhone実機確認
+
+これらは秘密情報と外部アカウント操作を伴うため、リポジトリ内だけでは完了しません。
+
+## 原則
+
+- 正本を無承認で変更しない
+- 保存候補を承認前に確定保存しない
+- `store: false`を標準とする
+- APIキーをブラウザーやGitHubへ保存しない
+- 長期のGoogle秘密鍵を本番で使用しない
+- 本人メールではなくGoogleの不変ID`sub`をハッシュ照合する
+- 重要な現在時刻はAPIサーバー側で確定する
+- Project75は必要な有限範囲だけ取得する
+- モデル入力・出力・回数を制限する
+- 確定・仮説・未確認・矛盾を分離する
+- 追跡不能な回答を返さない
 
 ## 秘密情報
 
-`.env.example` には変数名だけを置きます。
+`.env.example`には変数名だけを置きます。
 
 秘密鍵、APIキー、本人のメールアドレス、Google `sub`、Vercel OIDCトークン、非公開ファイルID、スプレッドシートIDはGitHubへ保存しません。
