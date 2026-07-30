@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-31T06:09:32+09:00",
+  "updated_at": "2026-07-31T06:10:14+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -65,6 +65,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-482868e2aa6f",
+      "title": "Add v113 single-screen responsive layout for Taxi main pages",
+      "completed_at": "2026-07-30T21:09:58Z",
+      "result": "GitHub mainへ反映（482868e）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/482868e2aa6f31ed9740423e15fde7b9a93b6417"
+    },
+    {
       "id": "github-commit-1efd8c555a53",
       "title": "fix(nav): keep YOS map current after app resume v52",
       "completed_at": "2026-07-30T21:09:16Z",
@@ -91,13 +98,6 @@
       "completed_at": "2026-07-30T20:07:49Z",
       "result": "GitHub mainへ反映（932483a）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/932483a1731ca6410aac501f35d863c17642a955"
-    },
-    {
-      "id": "github-commit-0fb82c76a537",
-      "title": "fix(nav): sync YOS map after location changes v50",
-      "completed_at": "2026-07-30T19:08:35Z",
-      "result": "GitHub mainへ反映（0fb82c7）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/0fb82c76a53708c86c9e4ef331cd2cc980f78678"
     },
     {
       "id": "complete-002",
@@ -134,7 +134,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-31T06:09:32+09:00",
+      "last_update": "2026-07-31T06:10:14+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -215,7 +215,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-31T06:09:32+09:00",
+      "last_update": "2026-07-31T06:10:14+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -238,7 +238,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-31T06:09:32+09:00",
+      "last_update": "2026-07-31T06:10:14+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -320,5 +320,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "90da941f3d213201e37554252e49d88445604ed6864a2fc44dbacba1acfde575"
+  "github_snapshot_hash": "b33ab0c9bf0fc9467bf2f64caf05f2e7f410e84f250a0c99fdef95eaa5c9a9ba"
 }
