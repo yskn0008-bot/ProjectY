@@ -1,0 +1,45 @@
+/* YOS Taxi v105 — layout safeguards for the approved reference design. */
+
+/* The legacy drive layer moves the nav into document flow. Restore the approved fixed bar. */
+body.taxi-drive-v44-active main.app,
+body.taxi-drive-v44-active .app{
+  padding-bottom:calc(env(safe-area-inset-bottom) + 90px)!important;
+}
+
+body.taxi-drive-v44-active #taxiGlobalNavV24,
+#taxiGlobalNavV24{
+  position:fixed!important;
+  left:50%!important;
+  right:auto!important;
+  bottom:calc(env(safe-area-inset-bottom) + 6px)!important;
+  transform:translateX(-50%)!important;
+  width:min(calc(100% - 14px),760px)!important;
+  min-height:0!important;
+  margin:0!important;
+  z-index:90!important;
+}
+
+/* Keep the centre Navi button visually primary without covering page content. */
+#taxiGlobalNavV24 button[data-page="nav"]{
+  transform:none!important;
+}
+#taxiGlobalNavV24 button[data-page="nav"]:active{
+  transform:translateY(1px) scale(.97)!important;
+}
+
+/* Prevent browser/PWA bottom controls from covering the final content row. */
+@media(max-height:740px){
+  body.taxi-drive-v44-active main.app,
+  body.taxi-drive-v44-active .app,
+  .app{
+    padding-bottom:calc(env(safe-area-inset-bottom) + 80px)!important;
+  }
+}
+
+@media(max-width:375px) and (max-height:700px){
+  body.taxi-drive-v44-active #taxiGlobalNavV24,
+  #taxiGlobalNavV24{
+    width:calc(100% - 10px)!important;
+    bottom:calc(env(safe-area-inset-bottom) + 4px)!important;
+  }
+}
