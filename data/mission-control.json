@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-31T02:27:55+09:00",
+  "updated_at": "2026-07-31T02:28:39+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -20,7 +20,7 @@
       "priority": 1,
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/99",
-      "updated_at": "2026-07-30T17:27:22Z"
+      "updated_at": "2026-07-30T17:27:55Z"
     },
     {
       "id": "github-issue-10",
@@ -75,6 +75,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-02fcd62b7538",
+      "title": "Publish clean v111 reference UI and retire legacy visual overlays",
+      "completed_at": "2026-07-30T17:28:21Z",
+      "result": "GitHub mainへ反映（02fcd62）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/02fcd62b75385b5f068ca62801685e097d584dc7"
+    },
+    {
       "id": "github-commit-517a73dd64b8",
       "title": "Add exact black-gold reference design for Taxi v111",
       "completed_at": "2026-07-30T17:27:42Z",
@@ -101,13 +108,6 @@
       "completed_at": "2026-07-30T17:07:58Z",
       "result": "GitHub mainへ反映（9fbb10c）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/9fbb10cb75cd9589c9ea3f74b85d0653c9505e35"
-    },
-    {
-      "id": "github-commit-b69e1aa11271",
-      "title": "fix(yos-navi): 承認済みマップ表示の再描画を安定化",
-      "completed_at": "2026-07-30T16:07:59Z",
-      "result": "GitHub mainへ反映（b69e1aa）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/b69e1aa11271758e3e160394a9088281c3a614ba"
     },
     {
       "id": "complete-002",
@@ -144,7 +144,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-31T02:27:55+09:00",
+      "last_update": "2026-07-31T02:28:39+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -225,7 +225,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-31T02:27:55+09:00",
+      "last_update": "2026-07-31T02:28:39+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -248,7 +248,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-31T02:27:55+09:00",
+      "last_update": "2026-07-31T02:28:39+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -330,5 +330,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "417cc80990e2f767ae0b34da045c812169518b8430c45a07d5fbef5020bf0600"
+  "github_snapshot_hash": "a9803de9aa4d47cf8320a76b883f21ce67f0b0db7bb20e5a4e6dc8a3ad74bd36"
 }
