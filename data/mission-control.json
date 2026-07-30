@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-31T06:03:59+09:00",
+  "updated_at": "2026-07-31T06:04:23+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -65,6 +65,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-698f2cf3d4a8",
+      "title": "chore(taxi): bump cache for July 30 report sync",
+      "completed_at": "2026-07-30T21:04:08Z",
+      "result": "GitHub mainへ反映（698f2cf）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/698f2cf3d4a819fd9cd830ca442acbb38da2bb42"
+    },
+    {
       "id": "github-commit-8ba252fa7cb3",
       "title": "data(taxi): reflect July 30 report in calendar",
       "completed_at": "2026-07-30T21:03:47Z",
@@ -91,13 +98,6 @@
       "completed_at": "2026-07-30T19:08:07Z",
       "result": "GitHub mainへ反映（680e6ba）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/680e6ba87581f463ef96121e13102ff3287c461d"
-    },
-    {
-      "id": "github-commit-62060bc9331d",
-      "title": "fix(nav): sync map after location changes",
-      "completed_at": "2026-07-30T19:07:47Z",
-      "result": "GitHub mainへ反映（62060bc）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/62060bc9331d531e6d5801331468cee485308cae"
     },
     {
       "id": "complete-002",
@@ -134,7 +134,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-31T06:03:59+09:00",
+      "last_update": "2026-07-31T06:04:23+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -215,7 +215,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-31T06:03:59+09:00",
+      "last_update": "2026-07-31T06:04:23+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -238,7 +238,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-31T06:03:59+09:00",
+      "last_update": "2026-07-31T06:04:23+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -320,5 +320,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "a607ab664b46a7db918dab2fb6d8ac87f062835f7d1b8e87821c3194fe0d7ddd"
+  "github_snapshot_hash": "df4e692895838569a272da4884c94e2a4017108c558d6aa98925530b989026cf"
 }
