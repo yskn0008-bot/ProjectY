@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-30T16:04:19+09:00",
+  "updated_at": "2026-07-30T16:05:31+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -65,6 +65,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-74ef6d811b54",
+      "title": "Taxi v100: publish full premium redesign and public holiday styling",
+      "completed_at": "2026-07-30T07:05:16Z",
+      "result": "GitHub mainへ反映（74ef6d8）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/74ef6d811b5472b6c1cc106e76fddabd1b0932a4"
+    },
+    {
       "id": "github-commit-35a3ae44a75b",
       "title": "Taxi v100: add cohesive premium black-gold app redesign",
       "completed_at": "2026-07-30T07:04:04Z",
@@ -91,13 +98,6 @@
       "completed_at": "2026-07-29T20:58:09Z",
       "result": "GitHub mainへ反映（a5d84e0）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/a5d84e05ad7c2496e305d537dd3b9196bf3d853d"
-    },
-    {
-      "id": "github-commit-63daaca03601",
-      "title": "Taxi v99: add opt-in iPhone release QA mode",
-      "completed_at": "2026-07-29T20:38:29Z",
-      "result": "GitHub mainへ反映（63daaca）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/63daaca03601136a4478a3deb551af3226f4301f"
     },
     {
       "id": "complete-002",
@@ -134,7 +134,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-30T16:04:19+09:00",
+      "last_update": "2026-07-30T16:05:31+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -215,7 +215,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-30T16:04:19+09:00",
+      "last_update": "2026-07-30T16:05:31+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -238,7 +238,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-30T16:04:19+09:00",
+      "last_update": "2026-07-30T16:05:31+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -320,5 +320,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "d66d794e84a54ea75eb9da75558ea9a07f690d11159eddc740102e0562dcdf90"
+  "github_snapshot_hash": "83081b19dadb89c58ea3cf3456834e5aa4d9a47bb65c1e8d9e91ff1e784b736b"
 }
