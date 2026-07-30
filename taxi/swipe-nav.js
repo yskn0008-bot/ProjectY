@@ -18,7 +18,8 @@
     '2026-07-26':{status:'work',sales:11100,note:'日報確定：9件・11,100円（表面未確認）'},
     '2026-07-27':{status:'work',sales:29500,actualHours:10+35/60},
     '2026-07-28':{status:'work',sales:30200,actualHours:12},
-    '2026-07-29':{status:'work',sales:38000,actualHours:11+55/60}
+    '2026-07-29':{status:'work',sales:38000,actualHours:11+55/60},
+    '2026-07-30':{status:'work',sales:22400,actualHours:11+15/60,note:'日報確定：11件・22,400円（明細2件の時刻・乗降地不明）'}
   };
 
   function applyOfficialDays(){
