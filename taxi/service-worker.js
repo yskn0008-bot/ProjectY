@@ -1,7 +1,7 @@
 'use strict';
 const CACHE_PREFIX='yos-taxi-projecty-';
-const CACHE='yos-taxi-projecty-v112-large-readable-type';
-const VERSION='112';
+const CACHE='yos-taxi-projecty-v113-jul30-report';
+const VERSION='113';
 const STATIC=[
   './','./index.html','./calendar.html','./settings.html','./manifest.webmanifest','./swipe-nav.js',
   './reference-perfect-v111.css','./reference-perfect-v111.js','./large-type-v112.css','./report-sync-v43.js','./settings-v20.js'
@@ -11,8 +11,8 @@ const pageType=url=>url.pathname.endsWith('/taxi/')||url.pathname.endsWith('/tax
 
 async function inject(response,type){
   let html=await response.text();
-  const addCss=file=>{if(!html.includes(file))html=html.replace('</head>',`<link rel="stylesheet" href="./${file}?v=${VERSION}"></head>`)};
-  const addJs=file=>{if(!html.includes(file))html=html.replace('</body>',`<script src="./${file}?v=${VERSION}"></script></body>`)};
+  const addCss=file=>{if(!html.includes(file))html=html.replace('</head>',`<link rel="stylesheet" href="./${file}?v=${VERSION}"></head>`) };
+  const addJs=file=>{if(!html.includes(file))html=html.replace('</body>',`<script src="./${file}?v=${VERSION}"></script></body>`) };
 
   /* v111 clean rebuild, followed by the v112 readability layer. */
   addCss('reference-perfect-v111.css');
