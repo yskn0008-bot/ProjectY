@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-30T10:45:46+09:00",
+  "updated_at": "2026-07-30T16:04:19+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -13,14 +13,14 @@
   },
   "inbox": [
     {
-      "id": "github-pr-79",
-      "title": "PR #79 YOSナビ：Service Workerのキャッシュ削除範囲を限定（v32）",
+      "id": "github-pr-81",
+      "title": "PR #81 fix(yos-navi): limit cache cleanup to YOSナビ",
       "type": "GitHub PR",
       "status": "draft",
       "priority": 2,
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/79",
-      "updated_at": "2026-07-29T22:05:02Z"
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/81",
+      "updated_at": "2026-07-30T03:05:21Z"
     },
     {
       "id": "github-issue-10",
@@ -60,10 +60,17 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/51",
-      "updated_at": "2026-07-29T23:15:55Z"
+      "updated_at": "2026-07-30T03:05:35Z"
     }
   ],
   "recently_completed": [
+    {
+      "id": "github-commit-35a3ae44a75b",
+      "title": "Taxi v100: add cohesive premium black-gold app redesign",
+      "completed_at": "2026-07-30T07:04:04Z",
+      "result": "GitHub mainへ反映（35a3ae4）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/35a3ae44a75b1916fa63abdf6f4ad38de686caca"
+    },
     {
       "id": "github-commit-c7011302c132",
       "title": "Refresh Taxi cache for confirmed report imports",
@@ -93,13 +100,6 @@
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/63daaca03601136a4478a3deb551af3226f4301f"
     },
     {
-      "id": "github-commit-2dc11c45a56b",
-      "title": "Taxi v99: add opt-in iPhone release QA diagnostics",
-      "completed_at": "2026-07-29T20:37:45Z",
-      "result": "GitHub mainへ反映（2dc11c4）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/2dc11c45a56b037c5b245404cde37bc4a401d24b"
-    },
-    {
       "id": "complete-002",
       "title": "iPhone向けMission Control Dashboardを実装",
       "completed_at": "2026-07-17T17:55:00+09:00",
@@ -124,7 +124,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #79をレビューして公開判断する",
+      "next_action": "PR #81をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -134,7 +134,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-30T10:45:46+09:00",
+      "last_update": "2026-07-30T16:04:19+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -215,7 +215,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-30T10:45:46+09:00",
+      "last_update": "2026-07-30T16:04:19+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -229,7 +229,7 @@
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #79をレビューして公開判断する",
+      "next_action": "PR #81をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -238,7 +238,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-30T10:45:46+09:00",
+      "last_update": "2026-07-30T16:04:19+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -320,5 +320,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "119d83e93466b6ec65b85ee69d61135b650403ac88c2be4bc5721377a87511f1"
+  "github_snapshot_hash": "d66d794e84a54ea75eb9da75558ea9a07f690d11159eddc740102e0562dcdf90"
 }
