@@ -1,7 +1,7 @@
 'use strict';
 const CACHE_PREFIX='yos-taxi-projecty-';
-const CACHE='yos-taxi-projecty-v108-browser-calendar-fit';
-const VERSION='108';
+const CACHE='yos-taxi-projecty-v109-stable-browser-calendar-fit';
+const VERSION='109';
 const STATIC=[
   './index.html','./calendar.html','./settings.html','./manifest.webmanifest',
   './v9.css','./v9.js','./drive-v44.css','./drive-v44.js','./drive-no-overlap-v69.css','./drive-no-overlap-v69.js','./settings-dialog-v95.css','./settings-dialog-v96.css','./settings-dialog-v96.js','./release-polish-v97.css','./qa-v99.js','./premium-redesign-v100.css','./bottom-nav-v101.css','./bottom-nav-v101.js','./bottom-nav-state-v102.css','./reference-design-v104.css','./reference-design-v104.js','./reference-layout-fix-v105.css','./unified-nav-v106.css','./unified-nav-v106.js','./browser-safe-nav-v107.css','./browser-safe-nav-v107.js','./browser-calendar-fit-v108.css','./browser-calendar-fit-v108.js',
