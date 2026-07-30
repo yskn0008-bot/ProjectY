@@ -26,6 +26,7 @@
   body.yos-approved-map .yos-approved-score:nth-child(2){border-color:rgba(77,169,255,.35);color:#63b8ff}
   body.yos-approved-map .yos-approved-score:nth-child(3){border-color:rgba(91,228,137,.35);color:#65e896}
   body.yos-approved-map .yos-approved-score:nth-child(4){color:#b7bec5}
+  body.yos-approved-map .yos-approved-score.is-empty{opacity:.52}
   body.yos-approved-map .yos-okinawa-map__detail{border-color:rgba(255,91,102,.24);background:linear-gradient(135deg,rgba(39,12,18,.84),rgba(8,13,20,.9))}
   body.yos-approved-map .yos-okinawa-map__detail strong:before{content:'♛';display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:linear-gradient(145deg,#ff6b70,#ba2431);box-shadow:0 0 18px rgba(255,77,86,.3);font-size:18px}
   body.yos-approved-map .yos-okinawa-map__detail button{background:linear-gradient(145deg,#ff6f75,#e1323e);color:#fff;box-shadow:0 9px 26px rgba(221,48,60,.3),inset 0 1px rgba(255,255,255,.34)}
@@ -34,24 +35,27 @@
   @media(max-width:390px){body.yos-approved-map .yos-approved-score-rail{gap:4px}body.yos-approved-map .yos-approved-score{padding:8px 3px}body.yos-approved-map .yos-approved-score b{font-size:18px}}
   `;
   document.head.appendChild(style);
+  let scheduled=false;
   const render=()=>{
+    scheduled=false;
     const section=document.getElementById('yos-okinawa-area-map');
     const rec=Array.isArray(window.__yosNavRecommendations)?window.__yosNavRecommendations:[];
     if(!section||!rec.length)return false;
     document.body.classList.add('yos-approved-map');
     const headTitle=section.querySelector('.yos-okinawa-map__head b');
-    if(headTitle)headTitle.textContent='エリアマップ';
+    if(headTitle&&headTitle.textContent!=='エリアマップ')headTitle.textContent='エリアマップ';
     let rail=section.querySelector('.yos-approved-score-rail');
     if(!rail){rail=document.createElement('div');rail.className='yos-approved-score-rail';section.querySelector('.yos-okinawa-map__canvas')?.insertAdjacentElement('afterend',rail)}
     const labels=['最優先','次候補','条件付き','回避'];
-    const fallback=[86,69,48,18];
-    rail.innerHTML=labels.map((label,index)=>{const item=rec[index];const score=Number.isFinite(Number(item?.score))?Math.round(Number(item.score)):fallback[index];return `<div class="yos-approved-score"><small>${label}${item?.label?`・${esc(item.label)}`:''}</small><b>${score}</b></div>`}).join('');
+    const html=labels.map((label,index)=>{const item=rec[index];const valid=Number.isFinite(Number(item?.score));const score=valid?Math.round(Number(item.score)):'—';return `<div class="yos-approved-score${valid?'':' is-empty'}"><small>${label}${item?.label?`・${esc(item.label)}`:''}</small><b>${score}</b></div>`}).join('');
+    if(rail.dataset.signature!==html){rail.innerHTML=html;rail.dataset.signature=html}
     const links=document.querySelector('.app-links');
     if(links&&section.previousElementSibling!==links)links.insertAdjacentElement('afterend',section);
     return true;
   };
+  const scheduleRender=()=>{if(scheduled)return;scheduled=true;requestAnimationFrame(render)};
   render();
-  window.addEventListener('yos-nav-recommendation',render);
-  window.addEventListener('pageshow',render);
-  new MutationObserver(render).observe(document.body,{childList:true,subtree:true});
+  window.addEventListener('yos-nav-recommendation',scheduleRender);
+  window.addEventListener('pageshow',scheduleRender);
+  new MutationObserver(scheduleRender).observe(document.body,{childList:true,subtree:true});
 })();
