@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-30T20:08:20+09:00",
+  "updated_at": "2026-07-30T20:36:19+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -50,7 +50,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/51",
-      "updated_at": "2026-07-30T10:18:04Z"
+      "updated_at": "2026-07-30T11:15:12Z"
     },
     {
       "id": "github-issue-86",
@@ -64,6 +64,13 @@
     }
   ],
   "recently_completed": [
+    {
+      "id": "github-commit-e772eea11d5c",
+      "title": "feat(yos-navi): 沖縄エリアマップのビジュアルを強化",
+      "completed_at": "2026-07-30T11:35:57Z",
+      "result": "GitHub mainへ反映（e772eea）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/e772eea11d5c6355b682818235db33ecd9e8f00e"
+    },
     {
       "id": "github-commit-5fe8a489e713",
       "title": "feat(yos-navi): エリアマップのネオン演出を強化",
@@ -91,13 +98,6 @@
       "completed_at": "2026-07-30T10:05:53Z",
       "result": "GitHub mainへ反映（3dd6305）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/3dd6305957a4a54cb066a7dcddb6e9d597f674c8"
-    },
-    {
-      "id": "github-commit-dfa29f623261",
-      "title": "feat(yos-navi): 沖縄本島エリアマップを実装",
-      "completed_at": "2026-07-30T09:26:00Z",
-      "result": "GitHub mainへ反映（dfa29f6）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/dfa29f6232611275ee9cd42073e99225b8be421e"
     },
     {
       "id": "complete-002",
@@ -134,7 +134,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-30T20:08:20+09:00",
+      "last_update": "2026-07-30T20:36:19+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -215,7 +215,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-30T20:08:20+09:00",
+      "last_update": "2026-07-30T20:36:19+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -238,7 +238,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-30T20:08:20+09:00",
+      "last_update": "2026-07-30T20:36:19+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -320,5 +320,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "e37b888e6f8013d1b7f7c2e65f1c2df6fca4592ed5c6476aa6adfa6cd4fe620a"
+  "github_snapshot_hash": "cee5172fa65fa0ad1f087e9a6aa088193e518d8566e43d40871c839ffb532d95"
 }
