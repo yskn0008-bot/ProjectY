@@ -1,10 +1,10 @@
 'use strict';
 const CACHE_PREFIX='yos-taxi-projecty-';
-const CACHE='yos-taxi-projecty-v113-jul30-report';
-const VERSION='113';
+const CACHE='yos-taxi-projecty-v114-one-screen-main-pages';
+const VERSION='114';
 const STATIC=[
   './','./index.html','./calendar.html','./settings.html','./manifest.webmanifest','./swipe-nav.js',
-  './reference-perfect-v111.css','./reference-perfect-v111.js','./large-type-v112.css','./report-sync-v43.js','./settings-v20.js'
+  './reference-perfect-v111.css','./reference-perfect-v111.js','./large-type-v112.css','./one-screen-fit-v113.css','./one-screen-fit-v113.js','./report-sync-v43.js','./settings-v20.js'
 ];
 
 const pageType=url=>url.pathname.endsWith('/taxi/')||url.pathname.endsWith('/taxi/index.html')?'index':url.pathname.endsWith('/taxi/calendar.html')?'calendar':url.pathname.endsWith('/taxi/settings.html')?'settings':'';
@@ -14,12 +14,14 @@ async function inject(response,type){
   const addCss=file=>{if(!html.includes(file))html=html.replace('</head>',`<link rel="stylesheet" href="./${file}?v=${VERSION}"></head>`) };
   const addJs=file=>{if(!html.includes(file))html=html.replace('</body>',`<script src="./${file}?v=${VERSION}"></script></body>`) };
 
-  /* v111 clean rebuild, followed by the v112 readability layer. */
+  /* Approved black/gold rebuild, large type, then final one-screen fitting. */
   addCss('reference-perfect-v111.css');
   addCss('large-type-v112.css');
+  addCss('one-screen-fit-v113.css');
   if(type==='calendar')addJs('report-sync-v43.js');
   if(type==='settings')addJs('settings-v20.js');
   addJs('reference-perfect-v111.js');
+  addJs('one-screen-fit-v113.js');
 
   const headers=new Headers(response.headers);
   headers.delete('content-length');
