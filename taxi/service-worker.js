@@ -1,10 +1,10 @@
 'use strict';
 const CACHE_PREFIX='yos-taxi-projecty-';
-const CACHE='yos-taxi-projecty-v109-stable-browser-calendar-fit';
-const VERSION='109';
+const CACHE='yos-taxi-projecty-v110-manage-title-dedupe';
+const VERSION='110';
 const STATIC=[
   './index.html','./calendar.html','./settings.html','./manifest.webmanifest',
-  './v9.css','./v9.js','./drive-v44.css','./drive-v44.js','./drive-no-overlap-v69.css','./drive-no-overlap-v69.js','./settings-dialog-v95.css','./settings-dialog-v96.css','./settings-dialog-v96.js','./release-polish-v97.css','./qa-v99.js','./premium-redesign-v100.css','./bottom-nav-v101.css','./bottom-nav-v101.js','./bottom-nav-state-v102.css','./reference-design-v104.css','./reference-design-v104.js','./reference-layout-fix-v105.css','./unified-nav-v106.css','./unified-nav-v106.js','./browser-safe-nav-v107.css','./browser-safe-nav-v107.js','./browser-calendar-fit-v108.css','./browser-calendar-fit-v108.js',
+  './v9.css','./v9.js','./drive-v44.css','./drive-v44.js','./drive-no-overlap-v69.css','./drive-no-overlap-v69.js','./settings-dialog-v95.css','./settings-dialog-v96.css','./settings-dialog-v96.js','./release-polish-v97.css','./qa-v99.js','./premium-redesign-v100.css','./bottom-nav-v101.css','./bottom-nav-v101.js','./bottom-nav-state-v102.css','./reference-design-v104.css','./reference-design-v104.js','./reference-layout-fix-v105.css','./unified-nav-v106.css','./unified-nav-v106.js','./browser-safe-nav-v107.css','./browser-safe-nav-v107.js','./browser-calendar-fit-v108.css','./browser-calendar-fit-v108.js','./manage-title-dedupe-v110.css',
   './calendar-v2.js','./calendar-v3.js','./calendar-v21.js','./calendar-v23-fix.js','./calendar-v26.css','./calendar-v28.css','./calendar-v32.css','./calendar-v38-urgent.css',
   './browser-bottom-v38.css','./browser-bottom-v38.js','./browser-bottom-v42.css','./report-sync-v43.js',
   './month-performance-v57.css','./month-performance-v57.js','./month-performance-v60.js','./month-layout-v59.css','./month-layout-v60.css','./month-nav-v61.css','./month-nav-v62.css',
@@ -79,6 +79,8 @@ async function inject(response,type){
   addCss('browser-safe-nav-v107.css');
   /* v108 is the final size, position and month-grid clearance layer. */
   addCss('browser-calendar-fit-v108.css');
+  /* v110 removes the duplicate management label after all other visual layers. */
+  addCss('manage-title-dedupe-v110.css');
 
   addJs('bottom-nav-v101.js');
   addJs('page-motion-v49.js');
