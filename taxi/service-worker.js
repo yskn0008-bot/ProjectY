@@ -1,100 +1,24 @@
 'use strict';
 const CACHE_PREFIX='yos-taxi-projecty-';
-const CACHE='yos-taxi-projecty-v110-manage-title-dedupe';
-const VERSION='110';
+const CACHE='yos-taxi-projecty-v111-reference-rebuild';
+const VERSION='111';
 const STATIC=[
-  './index.html','./calendar.html','./settings.html','./manifest.webmanifest',
-  './v9.css','./v9.js','./drive-v44.css','./drive-v44.js','./drive-no-overlap-v69.css','./drive-no-overlap-v69.js','./settings-dialog-v95.css','./settings-dialog-v96.css','./settings-dialog-v96.js','./release-polish-v97.css','./qa-v99.js','./premium-redesign-v100.css','./bottom-nav-v101.css','./bottom-nav-v101.js','./bottom-nav-state-v102.css','./reference-design-v104.css','./reference-design-v104.js','./reference-layout-fix-v105.css','./unified-nav-v106.css','./unified-nav-v106.js','./browser-safe-nav-v107.css','./browser-safe-nav-v107.js','./browser-calendar-fit-v108.css','./browser-calendar-fit-v108.js','./manage-title-dedupe-v110.css',
-  './calendar-v2.js','./calendar-v3.js','./calendar-v21.js','./calendar-v23-fix.js','./calendar-v26.css','./calendar-v28.css','./calendar-v32.css','./calendar-v38-urgent.css',
-  './browser-bottom-v38.css','./browser-bottom-v38.js','./browser-bottom-v42.css','./report-sync-v43.js',
-  './month-performance-v57.css','./month-performance-v57.js','./month-performance-v60.js','./month-layout-v59.css','./month-layout-v60.css','./month-nav-v61.css','./month-nav-v62.css',
-  './month-grid-fit-v67.css','./month-grid-fit-v67.js','./month-row-fit-v80.css','./month-row-fit-v80.js',
-  './week-money-fit-v68.css','./week-money-fit-v68.js','./week-nav-fit-v79.css','./week-nav-fit-v79.js','./week-date-sales-v82.css','./week-date-sales-v82.js','./week-value-only-v86.css','./week-summary-grid-v87.css','./week-summary-width-v88.css','./week-summary-readable-v90.css',
-  './manage-stable-v77.css','./manage-stable-v77.js','./manage-nav-fit-v78.css','./manage-nav-fit-v78.js','./manage-card-grow-v81.css','./manage-card-inline-v91.css','./manage-action-text-v92.css','./manage-card-width-v93.css','./manage-card-balance-v94.css',
-  './nav-icons-v62.js','./viewport-v28.js','./settings-v20.js','./ui-v24.css','./ui-v24.js','./ui-v24-fix.js',
-  './page-motion-v49.css','./page-motion-v49.js','./week-fit-v50.css','./week-balance-v51.css','./week-readability-v52.css','./week-readability-v53.css','./week-readability-v54.css','./week-readability-v55.css','./week-space-v56.css',
-  './se3-final-v37.css','./yos-suite-v38.js','./yos-nav-entry-v40.js','./v15.js'
+  './','./index.html','./calendar.html','./settings.html','./manifest.webmanifest','./swipe-nav.js',
+  './reference-perfect-v111.css','./reference-perfect-v111.js','./report-sync-v43.js','./settings-v20.js'
 ];
 
 const pageType=url=>url.pathname.endsWith('/taxi/')||url.pathname.endsWith('/taxi/index.html')?'index':url.pathname.endsWith('/taxi/calendar.html')?'calendar':url.pathname.endsWith('/taxi/settings.html')?'settings':'';
 
 async function inject(response,type){
   let html=await response.text();
-  const addCss=file=>{if(!html.includes(file))html=html.replace('</head>',`<link rel="stylesheet" href="./${file}?v=${VERSION}"></head>`) };
-  const addJs=file=>{if(!html.includes(file))html=html.replace('</body>',`<script src="./${file}?v=${VERSION}"></script></body>`) };
+  const addCss=file=>{if(!html.includes(file))html=html.replace('</head>',`<link rel="stylesheet" href="./${file}?v=${VERSION}"></head>`)};
+  const addJs=file=>{if(!html.includes(file))html=html.replace('</body>',`<script src="./${file}?v=${VERSION}"></script></body>`)};
 
-  addCss('ui-v24.css');
-  if(type==='calendar'){
-    ['calendar-v26.css','calendar-v28.css','calendar-v32.css'].forEach(addCss);
-  }
-  addCss('se3-final-v37.css');
-  if(type==='calendar')addCss('calendar-v38-urgent.css');
-  addCss('browser-bottom-v38.css');
-  addCss('browser-bottom-v42.css');
-
-  if(type==='index'){
-    addCss('v9.css');
-    addCss('drive-v44.css');
-    addCss('settings-dialog-v95.css');
-    addCss('settings-dialog-v96.css');
-    addJs('v9.js');
-    addJs('yos-nav-entry-v40.js');
-  }
-
-  if(type==='calendar'){
-    ['calendar-v2.js','calendar-v21.js','calendar-v23-fix.js','viewport-v28.js','report-sync-v43.js','month-performance-v57.js','month-performance-v60.js'].forEach(addJs);
-  }
+  /* v111 is a clean visual rebuild. Legacy visual overlays are intentionally not injected. */
+  addCss('reference-perfect-v111.css');
+  if(type==='calendar')addJs('report-sync-v43.js');
   if(type==='settings')addJs('settings-v20.js');
-
-  if(!html.includes('page-motion-v49-marker'))html=html.replace('</body>','<script id="page-motion-v49-marker">document.querySelector("main.app")?.setAttribute("data-taxi-swipe-installed","1");</script></body>');
-  addJs('ui-v24.js');
-  if(type==='settings')addJs('ui-v24-fix.js');
-  addJs('yos-suite-v38.js');
-  addJs('browser-bottom-v38.js');
-  if(type==='index'){
-    addJs('drive-v44.js');
-    addJs('settings-dialog-v96.js');
-  }
-
-  addCss('page-motion-v49.css');
-  if(type==='calendar'){
-    ['week-fit-v50.css','week-balance-v51.css','week-readability-v52.css','week-readability-v53.css','week-readability-v54.css','week-readability-v55.css','week-space-v56.css','month-performance-v57.css','month-layout-v59.css','month-layout-v60.css'].forEach(addCss);
-  }
-  addCss('month-nav-v61.css');
-  addCss('month-nav-v62.css');
-  if(type==='calendar'){
-    ['month-grid-fit-v67.css','month-row-fit-v80.css','week-money-fit-v68.css','week-nav-fit-v79.css','week-date-sales-v82.css','week-value-only-v86.css','week-summary-grid-v87.css','week-summary-width-v88.css','week-summary-readable-v90.css','manage-stable-v77.css','manage-nav-fit-v78.css','manage-card-grow-v81.css','manage-card-inline-v91.css','manage-action-text-v92.css','manage-card-width-v93.css','manage-card-balance-v94.css'].forEach(addCss);
-  }
-  if(type==='index'){
-    addCss('drive-no-overlap-v69.css');
-    addCss('release-polish-v97.css');
-  }
-
-  addCss('premium-redesign-v100.css');
-  addCss('bottom-nav-v101.css');
-  addCss('bottom-nav-state-v102.css');
-  addCss('reference-design-v104.css');
-  addCss('reference-layout-fix-v105.css');
-  addCss('unified-nav-v106.css');
-  addCss('browser-safe-nav-v107.css');
-  /* v108 is the final size, position and month-grid clearance layer. */
-  addCss('browser-calendar-fit-v108.css');
-  /* v110 removes the duplicate management label after all other visual layers. */
-  addCss('manage-title-dedupe-v110.css');
-
-  addJs('bottom-nav-v101.js');
-  addJs('page-motion-v49.js');
-  addJs('nav-icons-v62.js');
-  if(type==='calendar'){
-    ['month-grid-fit-v67.js','month-row-fit-v80.js','week-money-fit-v68.js','week-nav-fit-v79.js','week-date-sales-v82.js','manage-stable-v77.js','manage-nav-fit-v78.js'].forEach(addJs);
-  }
-  if(type==='index')addJs('drive-no-overlap-v69.js');
-  addJs('reference-design-v104.js');
-  addJs('qa-v99.js');
-  addJs('unified-nav-v106.js');
-  addJs('browser-safe-nav-v107.js');
-  /* Run last: settle the nav, then measure the month grid against its final top edge. */
-  addJs('browser-calendar-fit-v108.js');
+  addJs('reference-perfect-v111.js');
 
   const headers=new Headers(response.headers);
   headers.delete('content-length');
@@ -138,19 +62,10 @@ self.addEventListener('fetch',event=>{
     return;
   }
 
-  if(!sameOrigin){
-    event.respondWith(fetch(event.request));
-    return;
-  }
+  if(!sameOrigin){event.respondWith(fetch(event.request));return}
 
   event.respondWith(fetch(event.request,{cache:'no-cache'}).then(response=>{
-    if(response&&response.ok){
-      const copy=response.clone();
-      caches.open(CACHE).then(cache=>cache.put(event.request,copy));
-    }
+    if(response&&response.ok){const copy=response.clone();caches.open(CACHE).then(cache=>cache.put(event.request,copy))}
     return response;
-  }).catch(async()=>{
-    const hit=await cachedAsset(event.request);
-    return hit||Response.error();
-  }));
+  }).catch(async()=>await cachedAsset(event.request)||Response.error()));
 });
