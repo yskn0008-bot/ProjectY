@@ -1,5 +1,5 @@
 'use strict';
-const CACHE='yos-navi-strategy-v29';
+const CACHE='yos-navi-strategy-v35';
 const STATIC=['./','./index.html','./shift-phase-v1.js','./location-status-v1.js','./connectivity-status-v1.js','./area-map-v1.js','./niche-demand-v1.js'];
 const REQUIRED_SCRIPTS=['./connectivity-status-v1.js','./niche-demand-v1.js'];
 const injectRequiredScripts=async response=>{
@@ -12,7 +12,7 @@ const injectRequiredScripts=async response=>{
   return new Response(html,{status:response.status,statusText:response.statusText,headers:{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-cache'}});
 };
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(STATIC)).then(()=>self.skipWaiting())));
-self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim())));
+self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key.startsWith('yos-navi-strategy-')&&key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim())));
 self.addEventListener('fetch',event=>{
   if(event.request.method!=='GET')return;
   const requestUrl=new URL(event.request.url);
