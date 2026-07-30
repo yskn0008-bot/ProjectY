@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-30T09:15:47+09:00",
+  "updated_at": "2026-07-30T10:45:16+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -65,6 +65,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-57cbb34f4673",
+      "title": "Reflect confirmed July taxi reports in calendar",
+      "completed_at": "2026-07-30T01:45:04Z",
+      "result": "GitHub mainへ反映（57cbb34）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/57cbb34f4673db43ed2375b9bdd1e2c143380cd9"
+    },
+    {
       "id": "github-commit-a5d84e05ad7c",
       "title": "YOS AI v0.1: complete read-only generative AI MVP",
       "completed_at": "2026-07-29T20:58:09Z",
@@ -91,13 +98,6 @@
       "completed_at": "2026-07-29T20:35:40Z",
       "result": "GitHub mainへ反映（30d112b）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/30d112ba55884cd14450db1775556ef7c08baa59"
-    },
-    {
-      "id": "github-commit-a3513ebefb12",
-      "title": "Taxi v97: integrate YOS Navi and isolate Taxi cache cleanup",
-      "completed_at": "2026-07-29T20:33:48Z",
-      "result": "GitHub mainへ反映（a3513eb）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/a3513ebefb12acbf48e378bf7f5f2025f68bba9a"
     },
     {
       "id": "complete-002",
@@ -134,7 +134,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-30T09:15:47+09:00",
+      "last_update": "2026-07-30T10:45:16+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -215,7 +215,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-30T09:15:47+09:00",
+      "last_update": "2026-07-30T10:45:16+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -238,7 +238,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-30T09:15:47+09:00",
+      "last_update": "2026-07-30T10:45:16+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -320,5 +320,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "f947fb526b54244ae73d368a17eda4f3888b44ae4bb86789ce199813721008dd"
+  "github_snapshot_hash": "8593a3a2ea52edef07f29c01147d8d1da6d0b7518679cd2fd9b504258bb57b60"
 }
