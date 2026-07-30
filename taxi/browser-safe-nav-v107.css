@@ -1,0 +1,49 @@
+/* YOS Taxi v107 — keep the shared bottom nav fully visible above browser chrome. */
+
+:root{
+  --yos-browser-bottom:0px;
+  --yos-unified-nav-browser-gap:6px;
+  --yos-unified-nav-reserve:calc(
+    var(--yos-unified-nav-height,72px)
+    + var(--yos-browser-bottom,0px)
+    + env(safe-area-inset-bottom)
+    + var(--yos-unified-nav-browser-gap)
+    + 18px
+  );
+}
+
+html[data-taxi-nav-fixed="107"] body #taxiGlobalNavV24,
+html[data-taxi-nav-fixed="107"] body .taxi-global-nav-v24,
+html[data-taxi-nav-fixed="107"].taxi-shell-v49 body #taxiGlobalNavV24,
+html[data-taxi-nav-fixed="107"].taxi-shell-v49 body.taxi-drive-v44-active #taxiGlobalNavV24{
+  bottom:calc(var(--yos-browser-bottom,0px) + env(safe-area-inset-bottom) + var(--yos-unified-nav-browser-gap))!important;
+}
+
+html[data-taxi-nav-fixed="107"] main.app,
+html[data-taxi-nav-fixed="107"] .app,
+html[data-taxi-nav-fixed="107"].taxi-shell-v49 main.app,
+html[data-taxi-nav-fixed="107"].taxi-shell-v49 .app,
+html[data-taxi-nav-fixed="107"].taxi-page-drive-v49 main.app,
+html[data-taxi-nav-fixed="107"].taxi-page-today-v49 main.app,
+html[data-taxi-nav-fixed="107"].taxi-page-week-v49 main.app,
+html[data-taxi-nav-fixed="107"].taxi-page-month-v49 main.app,
+html[data-taxi-nav-fixed="107"].taxi-page-manage-v49 main.app{
+  padding-bottom:var(--yos-unified-nav-reserve)!important;
+  scroll-padding-bottom:var(--yos-unified-nav-reserve)!important;
+}
+
+html[data-taxi-nav-fixed="107"] .panel:last-of-type,
+html[data-taxi-nav-fixed="107"] .view.v21-active,
+html[data-taxi-nav-fixed="107"] .manage-view-v21.v21-active,
+html[data-taxi-nav-fixed="107"] dialog form{
+  scroll-margin-bottom:var(--yos-unified-nav-reserve)!important;
+}
+
+/* Standalone/PWA has no browser toolbar, so the bar stays at the true bottom. */
+html.yos-standalone-mode{
+  --yos-browser-bottom:0px!important;
+}
+
+@media(max-width:375px) and (max-height:700px){
+  :root{--yos-unified-nav-browser-gap:4px}
+}
