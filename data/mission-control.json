@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-30T20:36:19+09:00",
+  "updated_at": "2026-07-30T21:08:43+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -65,6 +65,27 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-fcb1d12fa261",
+      "title": "Merge pull request #92 from yskn0008-bot/fix/yos-navi-location-consistency-v41",
+      "completed_at": "2026-07-30T12:08:28Z",
+      "result": "GitHub mainへ反映（fcb1d12）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/fcb1d12fa261288691e7f665502a7525d606435f"
+    },
+    {
+      "id": "github-commit-5f8f2a727649",
+      "title": "chore(yos-navi): bump service worker cache to v41",
+      "completed_at": "2026-07-30T12:08:08Z",
+      "result": "GitHub mainへ反映（5f8f2a7）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/5f8f2a7276491d09eb7789af1078b5b501782480"
+    },
+    {
+      "id": "github-commit-842ce2d0d326",
+      "title": "fix(yos-navi): align map location validity with ranking",
+      "completed_at": "2026-07-30T12:07:55Z",
+      "result": "GitHub mainへ反映（842ce2d）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/842ce2d0d326287ea0085db382a6ced8c18de773"
+    },
+    {
       "id": "github-commit-e772eea11d5c",
       "title": "feat(yos-navi): 沖縄エリアマップのビジュアルを強化",
       "completed_at": "2026-07-30T11:35:57Z",
@@ -77,27 +98,6 @@
       "completed_at": "2026-07-30T11:08:09Z",
       "result": "GitHub mainへ反映（5fe8a48）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/5fe8a489e71352d21de0d08508a51eaca8c5732d"
-    },
-    {
-      "id": "github-commit-86a5e05cc87c",
-      "title": "fix(yos-navi): エリアマップのテーマ切替を即時同期",
-      "completed_at": "2026-07-30T10:07:46Z",
-      "result": "GitHub mainへ反映（86a5e05）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/86a5e05cc87c09702dae4415a4ce650c36450292"
-    },
-    {
-      "id": "github-commit-94799061c52e",
-      "title": "revert: remove temporary file",
-      "completed_at": "2026-07-30T10:06:16Z",
-      "result": "GitHub mainへ反映（9479906）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/94799061c52eaf233128231e16b32452e0f6781f"
-    },
-    {
-      "id": "github-commit-3dd6305957a4",
-      "title": "chore: reserve theme sync branch",
-      "completed_at": "2026-07-30T10:05:53Z",
-      "result": "GitHub mainへ反映（3dd6305）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/3dd6305957a4a54cb066a7dcddb6e9d597f674c8"
     },
     {
       "id": "complete-002",
@@ -134,7 +134,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-30T20:36:19+09:00",
+      "last_update": "2026-07-30T21:08:43+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -215,7 +215,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-30T20:36:19+09:00",
+      "last_update": "2026-07-30T21:08:43+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -238,7 +238,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-30T20:36:19+09:00",
+      "last_update": "2026-07-30T21:08:43+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -320,5 +320,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "cee5172fa65fa0ad1f087e9a6aa088193e518d8566e43d40871c839ffb532d95"
+  "github_snapshot_hash": "d91db2b31b3c3be2e74302f7149af5296d3ac303c5ba76814af16a1d06cfcfe5"
 }
