@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-31T00:17:56+09:00",
+  "updated_at": "2026-07-31T01:08:16+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -65,6 +65,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-b69e1aa11271",
+      "title": "fix(yos-navi): 承認済みマップ表示の再描画を安定化",
+      "completed_at": "2026-07-30T16:07:59Z",
+      "result": "GitHub mainへ反映（b69e1aa）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/b69e1aa11271758e3e160394a9088281c3a614ba"
+    },
+    {
       "id": "github-commit-fd4c22b4a9fb",
       "title": "Release v110 without duplicate management title",
       "completed_at": "2026-07-30T15:17:45Z",
@@ -91,13 +98,6 @@
       "completed_at": "2026-07-30T14:55:37Z",
       "result": "GitHub mainへ反映（2ec09e4）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/2ec09e44bded7236c9379ffa476510e3a0029890"
-    },
-    {
-      "id": "github-commit-835eb9be32f7",
-      "title": "Stabilize v108 nav selectors against legacy timers",
-      "completed_at": "2026-07-30T14:55:05Z",
-      "result": "GitHub mainへ反映（835eb9b）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/835eb9be32f7a87e0859d7874343e8558755a55d"
     },
     {
       "id": "complete-002",
@@ -134,7 +134,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-31T00:17:56+09:00",
+      "last_update": "2026-07-31T01:08:16+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -215,7 +215,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-31T00:17:56+09:00",
+      "last_update": "2026-07-31T01:08:16+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -238,7 +238,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-31T00:17:56+09:00",
+      "last_update": "2026-07-31T01:08:16+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -320,5 +320,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "b330c39cb5d628a3acd3a885d989b8db137613f09c555a80fb569f2c4b2e3052"
+  "github_snapshot_hash": "5356461e490146617fd0c0f2e2e5a81dab45b41a13dbe172d9c6e71c2b4b38d4"
 }
