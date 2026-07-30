@@ -1,0 +1,437 @@
+/* YOS Taxi v104 — implementation of the approved black/gold reference design.
+   Presentation-only layer: existing Taxi state, calendar data and forms are preserved. */
+
+:root,
+html[data-taxi-theme]{
+  color-scheme:dark!important;
+  --bg:#030304!important;
+  --panel:#0b0b0d!important;
+  --panel2:#121216!important;
+  --line:rgba(231,174,51,.28)!important;
+  --text:#fffdf8!important;
+  --muted:#aaa8a3!important;
+  --amber:#efb63b!important;
+  --orange:#d98b16!important;
+  --green:#4fde7d!important;
+  --red:#ff4f5e!important;
+  --blue:#6ea8ff!important;
+  --violet:#a56cff!important;
+  --taxi-nav-bg:rgba(5,5,7,.97)!important;
+  --taxi-accent-text:#100b03!important;
+  --yos-ref-gold:#efb63b;
+  --yos-ref-gold-bright:#ffd66f;
+  --yos-ref-gold-line:rgba(239,182,59,.48);
+  --yos-ref-card:linear-gradient(160deg,#111114 0%,#08080a 100%);
+  --yos-ref-card-soft:linear-gradient(160deg,rgba(239,182,59,.065),#0b0b0e 58%);
+  --yos-ref-shadow:0 18px 48px rgba(0,0,0,.48);
+}
+
+html,body{
+  background:#020203!important;
+  color:var(--text)!important;
+}
+
+body{
+  background:
+    radial-gradient(circle at 50% -8%,rgba(239,182,59,.105),transparent 27%),
+    linear-gradient(180deg,#050506 0%,#020203 58%,#000 100%)!important;
+  min-height:100svh;
+}
+
+body::before{
+  content:""!important;
+  position:fixed!important;
+  inset:0!important;
+  pointer-events:none!important;
+  z-index:-1!important;
+  opacity:.38!important;
+  background:
+    linear-gradient(90deg,transparent 5%,rgba(239,182,59,.08) 5.15%,transparent 5.3%,transparent 94.7%,rgba(239,182,59,.08) 94.85%,transparent 95%)!important;
+}
+
+.app{
+  width:min(100%,760px)!important;
+  margin-inline:auto!important;
+  padding-inline:12px!important;
+  padding-bottom:calc(env(safe-area-inset-bottom) + 88px)!important;
+}
+
+/* Header — simple centered title like the approved reference. */
+.top{
+  position:relative!important;
+  display:flex!important;
+  justify-content:center!important;
+  align-items:center!important;
+  min-height:44px!important;
+  margin:0 0 8px!important;
+  padding:0 74px!important;
+  border-bottom:1px solid rgba(239,182,59,.16)!important;
+}
+
+.top>div:not(.brand-mark-v9){text-align:center!important}
+.top .brand-mark-v9,.top .eyebrow{display:none!important}
+.top h1{
+  margin:0!important;
+  color:#fff!important;
+  font-size:19px!important;
+  font-weight:900!important;
+  line-height:1!important;
+  letter-spacing:-.025em!important;
+  text-shadow:none!important;
+}
+
+.top .clock,.top .back{
+  position:absolute!important;
+  right:0!important;
+  top:50%!important;
+  transform:translateY(-50%)!important;
+  min-height:38px!important;
+  border:1px solid var(--yos-ref-gold-line)!important;
+  border-radius:12px!important;
+  background:#0c0c0f!important;
+  color:#f8f1df!important;
+}
+
+#taxiModeQuickV24{
+  position:absolute!important;
+  left:0!important;
+  top:50%!important;
+  transform:translateY(-50%)!important;
+  border-color:rgba(239,182,59,.25)!important;
+  background:#0c0c0f!important;
+}
+
+/* Driving screen */
+body.taxi-drive-v44-active .drive-hero-v10{display:none!important}
+body.taxi-drive-v44-active .app{padding-top:calc(env(safe-area-inset-top) + 7px)!important}
+body.taxi-drive-v44-active #quickDashV18{
+  margin:0!important;
+  padding:10px!important;
+  border:1px solid var(--yos-ref-gold-line)!important;
+  border-radius:14px!important;
+  background:var(--yos-ref-card)!important;
+  box-shadow:var(--yos-ref-shadow),inset 0 1px 0 rgba(255,255,255,.035)!important;
+}
+
+body.taxi-drive-v44-active .quick-head-v18{
+  padding:4px 5px 10px!important;
+  border-bottom:1px solid rgba(239,182,59,.18)!important;
+}
+
+body.taxi-drive-v44-active .quick-head-v18 span,
+body.taxi-drive-v44-active .quick-sales-v18 small{
+  color:#d3c9b2!important;
+  font-size:10px!important;
+  font-weight:800!important;
+}
+
+body.taxi-drive-v44-active .quick-head-v18 b{
+  margin-top:4px!important;
+  color:#fff!important;
+  font-size:17px!important;
+  font-weight:900!important;
+}
+
+body.taxi-drive-v44-active .quick-sales-v18 strong{
+  color:var(--yos-ref-gold-bright)!important;
+  font-size:32px!important;
+  font-weight:900!important;
+  letter-spacing:-.045em!important;
+}
+
+body.taxi-drive-v44-active .quick-metrics-v18{
+  grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  gap:5px!important;
+  margin:8px 0!important;
+}
+
+body.taxi-drive-v44-active .quick-metric-v18{
+  min-width:0!important;
+  padding:8px 3px!important;
+  border:1px solid rgba(239,182,59,.24)!important;
+  border-radius:9px!important;
+  background:#09090b!important;
+}
+
+body.taxi-drive-v44-active .quick-metric-v18 strong{
+  color:#fff!important;
+  font-size:14px!important;
+  font-weight:900!important;
+}
+body.taxi-drive-v44-active .quick-metric-v18 span{font-size:8px!important}
+
+body.taxi-drive-v44-active .quick-decision-v18{
+  margin:0 0 8px!important;
+  padding:9px 10px!important;
+  border:1px solid rgba(239,182,59,.24)!important;
+  border-left:3px solid var(--yos-ref-gold)!important;
+  border-radius:10px!important;
+  background:linear-gradient(145deg,rgba(239,182,59,.09),#09090b)!important;
+}
+body.taxi-drive-v44-active .quick-decision-v18 b{font-size:14px!important}
+body.taxi-drive-v44-active .quick-decision-v18 small{color:#bcb8af!important;font-size:9px!important}
+
+body.taxi-drive-v44-active .quick-primary-v44 .action.v44-main{
+  min-height:62px!important;
+  border:1px solid rgba(255,221,132,.72)!important;
+  border-radius:12px!important;
+  background:linear-gradient(145deg,#ffd66f,#efb63b 55%,#d98918)!important;
+  color:#130d04!important;
+  font-size:19px!important;
+  box-shadow:0 9px 24px rgba(217,137,24,.2),inset 0 1px rgba(255,255,255,.42)!important;
+}
+
+body.taxi-drive-v44-active .quick-secondary-v44{gap:5px!important}
+body.taxi-drive-v44-active .quick-secondary-v44 .action,
+body.taxi-drive-v44-active .quick-tool-v18,
+body.taxi-drive-v44-active .quick-nav-v97{
+  border:1px solid rgba(239,182,59,.3)!important;
+  border-radius:9px!important;
+  background:#0a0a0c!important;
+  color:#f5e5bc!important;
+  box-shadow:inset 0 1px rgba(255,255,255,.025)!important;
+}
+
+body.taxi-drive-v44-active .quick-tools-v18{
+  grid-template-columns:repeat(5,minmax(0,1fr))!important;
+  gap:5px!important;
+  margin-top:6px!important;
+}
+body.taxi-drive-v44-active .quick-tool-v18{min-height:38px!important;font-size:9px!important}
+body.taxi-drive-v44-active .quick-last-v18{color:#898780!important;font-size:9px!important}
+
+/* Dialog/detail screen */
+#detailDialogV18,
+dialog{
+  border:1px solid rgba(239,182,59,.32)!important;
+  background:#08080a!important;
+  box-shadow:0 28px 90px rgba(0,0,0,.76)!important;
+}
+#detailDialogV18 .detail-close-v18{
+  background:#0b0b0e!important;
+  border-bottom-color:rgba(239,182,59,.22)!important;
+  color:#f7e7be!important;
+}
+
+/* Calendar shell */
+body[data-calendar-page] .app{
+  padding-top:calc(env(safe-area-inset-top) + 6px)!important;
+}
+
+body[data-calendar-page] .calendar-pages-v21{
+  padding:3px!important;
+  border:1px solid rgba(239,182,59,.19)!important;
+  border-radius:12px!important;
+  background:#08080a!important;
+}
+body[data-calendar-page] .calendar-pages-v21 .view-tab{
+  border:0!important;
+  border-radius:9px!important;
+  background:transparent!important;
+  color:#8d8b87!important;
+}
+body[data-calendar-page] .calendar-pages-v21 .view-tab.active{
+  background:linear-gradient(145deg,rgba(239,182,59,.2),rgba(239,182,59,.07))!important;
+  color:var(--yos-ref-gold-bright)!important;
+  box-shadow:inset 0 0 0 1px rgba(239,182,59,.33)!important;
+}
+
+body[data-calendar-page] .toolbar{
+  margin:0!important;
+  padding:2px 0!important;
+}
+body[data-calendar-page] .toolbar button{
+  border-color:rgba(239,182,59,.3)!important;
+  background:#0b0b0e!important;
+  color:#fff!important;
+}
+body[data-calendar-page] .period{
+  color:#fff!important;
+  font-size:20px!important;
+  font-weight:950!important;
+  letter-spacing:-.04em!important;
+}
+
+/* Today */
+body[data-calendar-page="today"] .detail-hero,
+body[data-calendar-page="today"] .detail-card,
+body[data-calendar-page="today"] .detail-wide{
+  border-color:rgba(239,182,59,.26)!important;
+  background:var(--yos-ref-card)!important;
+  border-radius:11px!important;
+}
+body[data-calendar-page="today"] .detail-card strong{color:#fff!important}
+body[data-calendar-page="today"] .edit-button{
+  border:1px solid rgba(255,220,132,.75)!important;
+  border-radius:11px!important;
+  background:linear-gradient(145deg,#ffd66f,#e99d24)!important;
+  color:#120c03!important;
+}
+
+/* Weekly cards */
+body[data-calendar-page="week"] .week-summary{
+  gap:5px!important;
+}
+body[data-calendar-page="week"] .week-summary .card,
+body[data-calendar-page="week"] .week-item{
+  border-color:rgba(239,182,59,.26)!important;
+  border-radius:10px!important;
+  background:var(--yos-ref-card)!important;
+}
+body[data-calendar-page="week"] .week-summary .card strong{color:var(--yos-ref-gold-bright)!important}
+body[data-calendar-page="week"] .week-item.today{
+  border:2px solid var(--yos-ref-gold)!important;
+  box-shadow:0 0 0 1px rgba(239,182,59,.15)!important;
+}
+body[data-calendar-page="week"] .week-item.off{
+  border-color:rgba(165,108,255,.8)!important;
+  background:linear-gradient(150deg,#2d1550,#160d28)!important;
+}
+
+/* Monthly grid */
+body[data-calendar-page="month"] .week-head,
+body[data-calendar-page="month"] .month-grid{gap:1px!important}
+body[data-calendar-page="month"] .week-head div{
+  padding:3px 0!important;
+  color:#ddd8cf!important;
+  font-weight:900!important;
+}
+body[data-calendar-page="month"] .week-head div:first-child{color:#ff696f!important}
+body[data-calendar-page="month"] .day{
+  border:1px solid rgba(255,255,255,.115)!important;
+  border-radius:0!important;
+  background:#0b0b0e!important;
+  box-shadow:none!important;
+}
+body[data-calendar-page="month"] .day.today{
+  border:3px solid var(--yos-ref-gold)!important;
+  background:#111013!important;
+  box-shadow:inset 0 0 0 1px rgba(0,0,0,.7)!important;
+}
+body[data-calendar-page="month"] .day .date{color:#fff!important;font-weight:950!important}
+body[data-calendar-page="month"] .day .month-money{color:var(--yos-ref-gold-bright)!important;font-weight:950!important}
+
+/* Full purple public-holiday cell, visually separate from performance colours. */
+body[data-calendar-page="month"] .day.off:not(.other),
+body[data-calendar-page="month"] .day.transfer.off:not(.other){
+  position:relative!important;
+  opacity:1!important;
+  border:1px solid rgba(193,139,255,.92)!important;
+  background:
+    radial-gradient(circle at 78% 18%,rgba(229,207,255,.18),transparent 26%),
+    linear-gradient(150deg,#4c146a 0%,#2c104a 54%,#160c2d 100%)!important;
+  box-shadow:inset 0 1px rgba(255,255,255,.13)!important;
+}
+body[data-calendar-page="month"] .day.off:not(.other)::after,
+body[data-calendar-page="month"] .day.transfer.off:not(.other)::after{
+  content:"☾ 公休"!important;
+  position:absolute!important;
+  inset:auto 3px 4px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  min-height:20px!important;
+  border:1px solid rgba(235,218,255,.28)!important;
+  border-radius:6px!important;
+  background:rgba(17,6,35,.52)!important;
+  color:#fff!important;
+  font-size:8px!important;
+  font-weight:950!important;
+}
+body[data-calendar-page="month"] .day.off:not(.other) .tag,
+body[data-calendar-page="month"] .day.transfer.off:not(.other) .tag{display:none!important}
+body[data-calendar-page="month"] .day.off:not(.other) .line,
+body[data-calendar-page="month"] .day.off:not(.other) .month-money,
+body[data-calendar-page="month"] .day.off:not(.other) .month-label,
+body[data-calendar-page="month"] .day.off:not(.other) .month-result{opacity:.12!important}
+
+/* Monthly management */
+body[data-calendar-page="manage"] .manage-head-v21{
+  border-color:rgba(239,182,59,.42)!important;
+  background:var(--yos-ref-card-soft)!important;
+}
+body[data-calendar-page="manage"] .manage-view-v21 .summary{
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:7px!important;
+}
+body[data-calendar-page="manage"] .manage-view-v21 .summary .card{
+  min-height:64px!important;
+  padding:9px 10px!important;
+  border:1px solid rgba(239,182,59,.34)!important;
+  border-radius:11px!important;
+  background:var(--yos-ref-card)!important;
+}
+body[data-calendar-page="manage"] .manage-view-v21 .summary .card strong{
+  color:var(--yos-ref-gold-bright)!important;
+  font-size:17px!important;
+}
+body[data-calendar-page="manage"] .manage-actions-v21 a{
+  border-color:rgba(239,182,59,.42)!important;
+  border-radius:11px!important;
+  background:#0b0b0e!important;
+  color:#fff!important;
+}
+body[data-calendar-page="manage"] .manage-actions-v21 a:first-child{
+  background:linear-gradient(145deg,#ffd66f,#e99d24)!important;
+  color:#120c03!important;
+}
+
+/* Settings/forms */
+.panel,.notice,.status,.metric{
+  border-color:rgba(239,182,59,.25)!important;
+  background:var(--yos-ref-card)!important;
+}
+.field input,.field select,.field textarea{
+  border-color:rgba(239,182,59,.24)!important;
+  background:#111115!important;
+  color:#fff!important;
+}
+.field input:focus,.field select:focus,.field textarea:focus{
+  border-color:var(--yos-ref-gold)!important;
+  box-shadow:0 0 0 3px rgba(239,182,59,.12)!important;
+}
+
+/* Approved 5-item bottom menu; centre YOS Navi is the primary visual action. */
+#taxiGlobalNavV24{
+  border-color:rgba(239,182,59,.33)!important;
+  background:linear-gradient(180deg,rgba(11,11,13,.985),rgba(2,2,3,.985))!important;
+  box-shadow:0 20px 50px rgba(0,0,0,.62),inset 0 1px rgba(255,255,255,.04)!important;
+}
+#taxiGlobalNavV24 button:not([data-page="nav"]){color:#a4a29d!important}
+#taxiGlobalNavV24 button.active:not([data-page="nav"]),
+#taxiGlobalNavV24 button[aria-current="page"]:not([data-page="nav"]){
+  color:var(--yos-ref-gold-bright)!important;
+  background:rgba(239,182,59,.095)!important;
+  box-shadow:inset 0 0 0 1px rgba(239,182,59,.22)!important;
+}
+#taxiGlobalNavV24 button[data-page="nav"]{
+  border-color:rgba(255,216,105,.88)!important;
+  background:linear-gradient(145deg,#ffd66f,#eaa125 62%,#cb7710)!important;
+  color:#120b02!important;
+  box-shadow:0 10px 28px rgba(220,134,18,.32),inset 0 1px rgba(255,255,255,.48)!important;
+}
+
+@media(max-width:390px){
+  .app{padding-inline:8px!important}
+  .top{padding-inline:60px!important}
+  body.taxi-drive-v44-active #quickDashV18{padding:8px!important}
+  body.taxi-drive-v44-active .quick-sales-v18 strong{font-size:28px!important}
+  body.taxi-drive-v44-active .quick-metric-v18 strong{font-size:12px!important}
+  body[data-calendar-page="month"] .period{font-size:18px!important}
+}
+
+@media(max-width:375px) and (max-height:700px){
+  .app{padding-bottom:calc(env(safe-area-inset-bottom) + 76px)!important}
+  .top{min-height:38px!important;margin-bottom:5px!important}
+  .top h1{font-size:17px!important}
+  body.taxi-drive-v44-active #quickDashV18{padding:7px!important}
+  body.taxi-drive-v44-active .quick-head-v18{padding-bottom:6px!important}
+  body.taxi-drive-v44-active .quick-metrics-v18{margin:5px 0!important}
+  body.taxi-drive-v44-active .quick-primary-v44 .action.v44-main{min-height:53px!important;font-size:17px!important}
+  body[data-calendar-page="month"] .day.off:not(.other)::after,
+  body[data-calendar-page="month"] .day.transfer.off:not(.other)::after{min-height:15px!important;font-size:7px!important;bottom:2px!important}
+}
+
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+}
