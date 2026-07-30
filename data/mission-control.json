@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-31T02:28:39+09:00",
+  "updated_at": "2026-07-31T02:29:33+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -12,16 +12,6 @@
     ]
   },
   "inbox": [
-    {
-      "id": "github-pr-99",
-      "title": "PR #99 YOSナビ v47：IMada基準へ期待値モデルを改修",
-      "type": "GitHub PR",
-      "status": "review",
-      "priority": 1,
-      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/99",
-      "updated_at": "2026-07-30T17:27:55Z"
-    },
     {
       "id": "github-issue-10",
       "title": "Issue #10 Mission Control v2：GitHubのIssue・PR・Commitを自動集約する",
@@ -75,11 +65,25 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-ef0c16495b44",
+      "title": "Merge pull request #99 from yskn0008-bot/feature/yos-nav-imada-v36",
+      "completed_at": "2026-07-30T17:29:14Z",
+      "result": "GitHub mainへ反映（ef0c164）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/ef0c16495b4410fa156fa4f868721837c0fb3c67"
+    },
+    {
       "id": "github-commit-02fcd62b7538",
       "title": "Publish clean v111 reference UI and retire legacy visual overlays",
       "completed_at": "2026-07-30T17:28:21Z",
       "result": "GitHub mainへ反映（02fcd62）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/02fcd62b75385b5f068ca62801685e097d584dc7"
+    },
+    {
+      "id": "github-commit-024b0ae0c2b1",
+      "title": "feat(yos-navi): combine premium map v6 with IMada v47",
+      "completed_at": "2026-07-30T17:27:51Z",
+      "result": "GitHub mainへ反映（024b0ae）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/024b0ae0c2b1bbdf385ae42b055a30d56526e5ae"
     },
     {
       "id": "github-commit-517a73dd64b8",
@@ -89,25 +93,11 @@
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/517a73dd64b874fc2a44885b45988e370607b884"
     },
     {
-      "id": "github-commit-a8d34acb4dac",
-      "title": "Rebuild Taxi UI from approved five-screen reference",
-      "completed_at": "2026-07-30T17:26:19Z",
-      "result": "GitHub mainへ反映（a8d34ac）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/a8d34acb4dac8722574d380849c360ceae8f26fa"
-    },
-    {
-      "id": "github-commit-127ebee0ec04",
-      "title": "feat(nav): premium YOS area map visual v6",
-      "completed_at": "2026-07-30T17:16:46Z",
-      "result": "GitHub mainへ反映（127ebee）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/127ebee0ec04d57ed956fb385c8ec82c3cab65fa"
-    },
-    {
-      "id": "github-commit-9fbb10cb75cd",
-      "title": "fix(yos-navi): 初期描画後のDOM監視を停止",
-      "completed_at": "2026-07-30T17:07:58Z",
-      "result": "GitHub mainへ反映（9fbb10c）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/9fbb10cb75cd9589c9ea3f74b85d0653c9505e35"
+      "id": "github-commit-b6bd76909402",
+      "title": "Merge pull request #100 from yskn0008-bot/main",
+      "completed_at": "2026-07-30T17:27:18Z",
+      "result": "GitHub mainへ反映（b6bd769）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/b6bd769094021066ba3bd1073c5799a5fd01da57"
     },
     {
       "id": "complete-002",
@@ -134,7 +124,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #99をレビューして公開判断する",
+      "next_action": "Issue #4を実装する：YOS Mission Control v1.0を構築する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -144,7 +134,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-31T02:28:39+09:00",
+      "last_update": "2026-07-31T02:29:33+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -215,17 +205,17 @@
       "type": "infrastructure",
       "purpose": "YOSのコード、仕様、タスク、変更履歴を保存する",
       "status": "active",
-      "health": "attention",
+      "health": "ok",
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 5件・Open PR 1件を自動同期中",
+      "next_action": "Open Issue 5件・Open PR 0件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-31T02:28:39+09:00",
+      "last_update": "2026-07-31T02:29:33+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -234,12 +224,12 @@
       "domain": "Infrastructure",
       "type": "development",
       "purpose": "YOSと各Labの設計に基づいて実装、修正、テストを行う",
-      "status": "review",
-      "health": "attention",
+      "status": "active",
+      "health": "ok",
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #99をレビューして公開判断する",
+      "next_action": "Issue #4を実装する：YOS Mission Control v1.0を構築する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -248,7 +238,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-31T02:28:39+09:00",
+      "last_update": "2026-07-31T02:29:33+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -330,5 +320,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "a9803de9aa4d47cf8320a76b883f21ce67f0b0db7bb20e5a4e6dc8a3ad74bd36"
+  "github_snapshot_hash": "93eda7390e3c7450b345b147e4e24c9738b4140770ebcb9c497e582526386a8e"
 }
