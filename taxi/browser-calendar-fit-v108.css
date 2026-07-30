@@ -1,0 +1,83 @@
+/* YOS Taxi v108 — compact unified nav and guaranteed month-grid clearance. */
+
+:root{
+  --yos-browser-bottom:32px;
+  --yos-unified-nav-browser-gap:6px;
+  --yos-month-nav-clearance:8px;
+}
+
+/* Keep every item inside one shared bar. The centre item is highlighted, not raised. */
+html[data-taxi-nav-fixed="108"] body #taxiGlobalNavV24,
+html[data-taxi-nav-fixed="108"] body .taxi-global-nav-v24,
+html[data-taxi-nav-fixed="108"].taxi-shell-v49 body #taxiGlobalNavV24{
+  min-height:56px!important;
+  padding:4px!important;
+  gap:2px!important;
+  border-radius:18px!important;
+  overflow:hidden!important;
+}
+
+html[data-taxi-nav-fixed="108"] #taxiGlobalNavV24 button{
+  min-height:46px!important;
+  height:46px!important;
+  margin:0!important;
+  padding:3px 2px!important;
+  border-radius:12px!important;
+}
+
+html[data-taxi-nav-fixed="108"] #taxiGlobalNavV24 button[data-page="nav"]{
+  min-height:46px!important;
+  height:46px!important;
+  margin:0!important;
+  transform:none!important;
+  border-radius:12px!important;
+}
+
+html[data-taxi-nav-fixed="108"] #taxiGlobalNavV24 button .taxi-nav-icon-v101{
+  width:21px!important;
+  height:21px!important;
+}
+html[data-taxi-nav-fixed="108"] #taxiGlobalNavV24 button .taxi-nav-icon-v101 svg{
+  width:20px!important;
+  height:20px!important;
+}
+html[data-taxi-nav-fixed="108"] #taxiGlobalNavV24 button b{
+  font-size:8px!important;
+  line-height:1.05!important;
+}
+html[data-taxi-nav-fixed="108"] #taxiGlobalNavV24 button[data-page="nav"] b{
+  font-size:9px!important;
+}
+
+/* The final calendar row must finish before the fixed bar starts. */
+html[data-taxi-nav-fixed="108"] body[data-calendar-page="month"] #monthView .month-grid,
+html[data-taxi-nav-fixed="108"] body.calendar-month-mode #monthView .month-grid{
+  margin-bottom:var(--yos-month-nav-clearance)!important;
+}
+
+html[data-taxi-nav-fixed="108"] main.app,
+html[data-taxi-nav-fixed="108"] .app{
+  padding-bottom:calc(
+    var(--yos-unified-nav-height,56px)
+    + var(--yos-browser-bottom,0px)
+    + env(safe-area-inset-bottom)
+    + var(--yos-unified-nav-browser-gap,6px)
+    + 18px
+  )!important;
+}
+
+html.yos-standalone-mode{
+  --yos-browser-bottom:0px!important;
+}
+
+@media(max-width:375px) and (max-height:700px){
+  html[data-taxi-nav-fixed="108"] body #taxiGlobalNavV24{
+    min-height:52px!important;
+    padding:3px!important;
+  }
+  html[data-taxi-nav-fixed="108"] #taxiGlobalNavV24 button,
+  html[data-taxi-nav-fixed="108"] #taxiGlobalNavV24 button[data-page="nav"]{
+    min-height:44px!important;
+    height:44px!important;
+  }
+}
