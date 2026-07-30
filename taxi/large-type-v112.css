@@ -1,0 +1,101 @@
+/* YOS Taxi v112 — maximum readable typography for iPhone, without changing data or actions. */
+
+/* Shared hierarchy */
+.rp-header h1{font-size:21px!important;line-height:1.15!important;font-weight:900!important}
+.rp-card h2{font-size:14px!important;line-height:1.25!important;margin-bottom:9px!important}
+
+/* Drive */
+.rp-sales-copy>span{font-size:13px!important}
+.rp-sales-copy>strong{font-size:36px!important;font-weight:650!important;letter-spacing:-.02em!important}
+.rp-sales-copy>small{font-size:13px!important}
+.rp-ring-large strong{font-size:21px!important;font-weight:650!important}
+.rp-primary-action{min-height:44px!important;font-size:16px!important}
+.rp-three-metrics span{font-size:11px!important}
+.rp-three-metrics strong{font-size:18px!important;font-weight:750!important}
+.rp-status-card dl{gap:6px!important}
+.rp-status-card dl div{grid-template-columns:96px minmax(0,1fr)!important;font-size:13px!important;line-height:1.35!important}
+.rp-status-card dd{font-size:13px!important}
+.rp-action-row button,.rp-command-card button{min-height:43px!important;font-size:12px!important;line-height:1.2!important}
+.rp-command-card button{min-height:40px!important}
+.rp-operations summary{min-height:42px!important;font-size:12px!important}
+.rp-operations button{min-height:40px!important;font-size:11px!important}
+
+/* Date and period controls */
+.rp-date-switch strong,.rp-month-period strong,.rp-manage-period strong{font-size:17px!important;font-weight:750!important}
+.rp-date-switch button,.rp-month-period button,.rp-manage-period button,.rp-period-arrows button{font-size:26px!important}
+
+/* Today */
+.rp-schedule-card,.rp-memo-card{padding:13px!important}
+.rp-schedule-card h2,.rp-memo-card h2{font-size:15px!important}
+.rp-schedule-row{min-height:43px!important;grid-template-columns:58px minmax(0,1fr) 25px!important;padding:0 6px!important}
+.rp-schedule-row time{font-size:14px!important;font-weight:700!important}
+.rp-schedule-row span{font-size:14px!important;line-height:1.25!important}
+.rp-schedule-row i{width:21px!important;height:21px!important;font-size:13px!important}
+.rp-memo-card button{min-height:92px!important;font-size:13px!important;line-height:1.45!important}
+
+/* Week */
+.rp-week-strip{grid-auto-columns:132px!important;gap:8px!important}
+.rp-week-day{min-height:300px!important;padding:10px 8px!important}
+.rp-week-date strong{font-size:15px!important}
+.rp-week-date small{font-size:11px!important}
+.rp-week-money strong{font-size:18px!important}
+.rp-week-money small{font-size:12px!important}
+.rp-ring-small strong{font-size:15px!important}
+.rp-week-foot{font-size:10px!important;line-height:1.25!important}
+.rp-off-panel strong{font-size:21px!important}
+
+/* Month: retain seven columns, enlarge the two most important lines. */
+.rp-week-head b{font-size:11px!important;font-weight:850!important}
+.rp-month-cell{min-height:64px!important;padding:5px 2px!important}
+.rp-month-cell>span{top:4px!important;left:5px!important;font-size:12px!important;font-weight:850!important}
+.rp-month-cell>strong{margin-top:20px!important;font-size:11.5px!important;line-height:1.1!important;font-weight:850!important;white-space:nowrap!important}
+.rp-month-cell>i{font-size:10px!important;font-weight:900!important}
+.rp-month-cell.off .rp-moon{margin-top:18px!important;font-size:19px!important}
+.rp-month-cell.off small{font-size:10px!important;font-weight:850!important}
+.rp-month-legend{font-size:10.5px!important;line-height:1.3!important}
+
+/* Manage */
+.rp-manage-grid button{min-height:122px!important;gap:12px!important}
+.rp-manage-grid svg{width:44px!important;height:44px!important}
+.rp-manage-grid b{font-size:15px!important;line-height:1.25!important}
+.rp-dialog-head h2{font-size:20px!important}
+.rp-dialog-metrics span{font-size:12px!important}
+.rp-dialog-metrics strong{font-size:18px!important}
+
+/* Bottom navigation */
+.rp-bottom-nav button b{font-size:10.5px!important;font-weight:900!important;line-height:1.05!important}
+.rp-bottom-nav button span{width:25px!important;height:25px!important}
+.rp-bottom-nav svg{width:24px!important;height:24px!important}
+
+/* Existing settings screen */
+html.rp-settings-page-v111 .top h1{font-size:25px!important;line-height:1.15!important}
+html.rp-settings-page-v111 .panel h2,
+html.rp-settings-page-v111 .panel h3{font-size:18px!important}
+html.rp-settings-page-v111 .field label{font-size:15px!important;line-height:1.3!important}
+html.rp-settings-page-v111 input,
+html.rp-settings-page-v111 select,
+html.rp-settings-page-v111 textarea{font-size:17px!important;line-height:1.35!important;min-height:52px!important}
+html.rp-settings-page-v111 .notice,
+html.rp-settings-page-v111 .small,
+html.rp-settings-page-v111 .help{font-size:13px!important;line-height:1.5!important}
+html.rp-settings-page-v111 button,
+html.rp-settings-page-v111 .actions a{font-size:16px!important}
+
+@media(max-width:375px){
+  .rp-header h1{font-size:20px!important}
+  .rp-sales-copy>strong{font-size:33px!important}
+  .rp-week-strip{grid-auto-columns:126px!important}
+  .rp-month-cell{min-height:60px!important}
+  .rp-month-cell>strong{font-size:10.5px!important}
+  .rp-month-legend{font-size:10px!important}
+  .rp-manage-grid b{font-size:14px!important}
+}
+
+@media(max-height:700px){
+  /* Keep type large; reduce spacing instead of shrinking text. */
+  .rp-page{gap:5px!important}
+  .rp-sales-card{padding:9px 10px!important}
+  .rp-status-card,.rp-action-card,.rp-command-card{padding:8px 9px!important}
+  .rp-month-cell{min-height:56px!important}
+  .rp-manage-grid button{min-height:100px!important}
+}
