@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-30T22:34:21+09:00",
+  "updated_at": "2026-07-30T22:35:27+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -65,6 +65,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-7639ca9fd9e0",
+      "title": "Taxi v105: stabilize reference design observer",
+      "completed_at": "2026-07-30T13:35:15Z",
+      "result": "GitHub mainへ反映（7639ca9）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/7639ca9fd9e0bc89da8c52baec3b35b3d5202f76"
+    },
+    {
       "id": "github-commit-e28e6ec99301",
       "title": "Taxi v104: publish approved reference design",
       "completed_at": "2026-07-30T13:33:57Z",
@@ -91,13 +98,6 @@
       "completed_at": "2026-07-30T13:10:03Z",
       "result": "GitHub mainへ反映（5dafdce）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/5dafdcee55c68d22e0f2060758f2724a601993e7"
-    },
-    {
-      "id": "github-commit-e77536ed7f49",
-      "title": "feat(yos-navi): エリアマップをシネマティックUIへ強化 (#93)",
-      "completed_at": "2026-07-30T13:04:03Z",
-      "result": "GitHub mainへ反映（e77536e）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/e77536ed7f49820f5117648f405f62bd2ba83751"
     },
     {
       "id": "complete-002",
@@ -134,7 +134,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-30T22:34:21+09:00",
+      "last_update": "2026-07-30T22:35:27+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -215,7 +215,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-30T22:34:21+09:00",
+      "last_update": "2026-07-30T22:35:27+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -238,7 +238,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-30T22:34:21+09:00",
+      "last_update": "2026-07-30T22:35:27+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -320,5 +320,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "e0796f829939274ff45e7e1447bb2897090ab1a5593159beb2639ea75fa914ab"
+  "github_snapshot_hash": "57309fcd341232a9a90cae00c9a9c24befa055be3865fbd52c8f19b9eb6da945"
 }
