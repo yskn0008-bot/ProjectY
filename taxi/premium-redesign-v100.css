@@ -1,0 +1,467 @@
+/* YOS Taxi v100 — cohesive premium black/gold redesign
+   Visual-only layer. Existing data, state, navigation and gestures remain unchanged. */
+
+:root{
+  --bg:#050506!important;
+  --panel:#111114!important;
+  --panel2:#18181c!important;
+  --line:#323238!important;
+  --text:#ffffff!important;
+  --muted:#b6b6c0!important;
+  --amber:#f6b92f!important;
+  --orange:#ef8f20!important;
+  --green:#57d886!important;
+  --red:#ff747e!important;
+  --blue:#74a8ff!important;
+  --violet:#a88cff!important;
+  --yos-gold-soft:rgba(246,185,47,.18);
+  --yos-gold-line:rgba(246,185,47,.42);
+  --yos-panel-glass:linear-gradient(155deg,rgba(30,30,34,.98),rgba(12,12,14,.98));
+  --yos-shadow:0 16px 36px rgba(0,0,0,.34);
+}
+
+html{
+  background:#050506!important;
+}
+
+body{
+  background:
+    radial-gradient(circle at 105% -4%,rgba(246,185,47,.16),transparent 31%),
+    radial-gradient(circle at -10% 108%,rgba(246,185,47,.07),transparent 34%),
+    #050506!important;
+  color:var(--text)!important;
+  letter-spacing:-.012em;
+}
+
+body::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:-1;
+  background:linear-gradient(120deg,transparent 0 68%,rgba(246,185,47,.035) 68.2% 68.5%,transparent 68.7%);
+}
+
+button,a,input,select,textarea{
+  -webkit-tap-highlight-color:transparent;
+}
+
+button,a{
+  transition:transform .12s ease,background-color .18s ease,border-color .18s ease,box-shadow .18s ease;
+}
+
+button:active,a:active{
+  transform:scale(.98);
+}
+
+/* Shared headers */
+.top{
+  align-items:center!important;
+}
+
+.top h1,
+body[data-calendar-page] .top h1{
+  color:#fff!important;
+  font-weight:950!important;
+  letter-spacing:-.035em!important;
+  text-shadow:0 2px 14px rgba(0,0,0,.45);
+}
+
+.eyebrow{
+  color:var(--amber)!important;
+  font-weight:950!important;
+}
+
+.back,
+.clock,
+.settings{
+  border-color:rgba(255,255,255,.11)!important;
+  background:linear-gradient(155deg,rgba(31,31,36,.98),rgba(18,18,21,.98))!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.045)!important;
+}
+
+/* Shared premium cards */
+.status,
+.kpi,
+.imada,
+.panel,
+.card,
+.detail-card,
+.detail-wide,
+.week-item,
+.day,
+.metric,
+.notice,
+.status,
+.manage-head-v21{
+  background:var(--yos-panel-glass)!important;
+  border-color:rgba(255,255,255,.115)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.035),0 8px 22px rgba(0,0,0,.17)!important;
+}
+
+.status,
+.imada,
+.manage-head-v21,
+.detail-hero{
+  border-color:var(--yos-gold-line)!important;
+  background:
+    linear-gradient(155deg,rgba(246,185,47,.105),rgba(18,18,21,.985) 58%)!important;
+}
+
+.status-label,
+.imada-tag,
+.manage-head-v21 span,
+.detail-date{
+  color:var(--amber)!important;
+}
+
+.small,
+.kpi span,
+.card span,
+.metric span,
+.detail-card span,
+.detail-wide h3,
+.field label,
+.field small,
+.panel h2 small{
+  color:var(--muted)!important;
+}
+
+/* Main operation screen */
+.status{
+  border-radius:24px!important;
+}
+
+.status h2{
+  color:#fff!important;
+  font-weight:950!important;
+}
+
+.badge{
+  border-color:rgba(246,185,47,.38)!important;
+  background:rgba(246,185,47,.08)!important;
+  color:#ffe19a!important;
+}
+
+.kpis{
+  gap:7px!important;
+}
+
+.kpi{
+  border-radius:17px!important;
+  text-align:center!important;
+}
+
+.kpi strong{
+  color:#fff!important;
+  font-weight:950!important;
+  font-variant-numeric:tabular-nums;
+}
+
+.imada{
+  border-radius:21px!important;
+}
+
+.imada-main{
+  color:#fff!important;
+  font-weight:950!important;
+}
+
+.imada-metric{
+  border-color:rgba(246,185,47,.25)!important;
+  background:rgba(0,0,0,.25)!important;
+}
+
+.action,
+.link,
+.minor,
+.dialog-actions button,
+.actions button,
+.manage-actions-v21 a{
+  border-color:rgba(255,255,255,.12)!important;
+  background:linear-gradient(155deg,#202024,#151518)!important;
+  color:#fff!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.045)!important;
+}
+
+.action.primary,
+.dialog-actions .confirm,
+.actions .primary,
+.manage-actions-v21 a:first-child,
+.edit-button{
+  border:1px solid rgba(255,220,133,.72)!important;
+  background:linear-gradient(145deg,#ffd66f 0%,#f5b934 52%,#ee8a20 100%)!important;
+  color:#161006!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 8px 20px rgba(238,143,32,.2)!important;
+  font-weight:950!important;
+}
+
+.action.green,
+.actions .green{
+  border-color:rgba(87,216,134,.43)!important;
+  background:linear-gradient(155deg,rgba(87,216,134,.16),rgba(19,26,22,.96))!important;
+}
+
+.action.red{
+  border-color:rgba(255,116,126,.4)!important;
+  background:linear-gradient(155deg,rgba(255,116,126,.13),rgba(27,19,21,.96))!important;
+}
+
+/* Calendar shell */
+body[data-calendar-page] .toolbar button{
+  border-color:rgba(255,255,255,.13)!important;
+  background:linear-gradient(155deg,#222226,#161619)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.05)!important;
+}
+
+body[data-calendar-page] .period{
+  color:#fff!important;
+  font-weight:950!important;
+  letter-spacing:-.045em!important;
+}
+
+.calendar-pages-v21 .view-tab{
+  color:#bdbdc6!important;
+  background:linear-gradient(155deg,#1c1c20,#121214)!important;
+  border-color:rgba(255,255,255,.1)!important;
+}
+
+.calendar-pages-v21 .view-tab.active{
+  color:#140e05!important;
+  border-color:rgba(255,220,133,.82)!important;
+  background:linear-gradient(145deg,#ffd66f,#f2a72a)!important;
+  box-shadow:0 6px 16px rgba(242,167,42,.2)!important;
+}
+
+/* Today calendar page */
+.detail-hero{
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.045),0 10px 24px rgba(0,0,0,.2)!important;
+}
+
+.detail-card strong,
+.detail-wide p{
+  color:#fff!important;
+  font-weight:900!important;
+}
+
+/* Weekly page */
+body[data-calendar-page="week"] .week-summary .card,
+body.calendar-week-mode .week-summary .card{
+  border-color:rgba(246,185,47,.32)!important;
+  background:linear-gradient(155deg,rgba(246,185,47,.075),rgba(16,16,19,.98))!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.035)!important;
+}
+
+body[data-calendar-page="week"] .week-summary .card strong,
+body.calendar-week-mode .week-summary .card strong{
+  color:#fff!important;
+  font-weight:950!important;
+  font-variant-numeric:tabular-nums;
+}
+
+body[data-calendar-page="week"] .week-item,
+body.calendar-week-mode .week-item{
+  border-color:rgba(255,255,255,.12)!important;
+  background:linear-gradient(155deg,#18181c,#111113)!important;
+}
+
+body[data-calendar-page="week"] .week-item.today,
+body.calendar-week-mode .week-item.today{
+  outline:0!important;
+  border:2px solid var(--amber)!important;
+  background:linear-gradient(155deg,rgba(246,185,47,.11),rgba(17,17,19,.98))!important;
+  box-shadow:0 0 0 1px rgba(246,185,47,.12),0 8px 18px rgba(0,0,0,.2)!important;
+}
+
+.week-item .tag.work{
+  background:rgba(87,216,134,.13)!important;
+  color:#65e596!important;
+}
+
+.week-item .tag.off{
+  background:rgba(124,108,243,.18)!important;
+  color:#c8bdff!important;
+}
+
+.week-item .tag.off::before{
+  content:"☾";
+  margin-right:3px;
+}
+
+/* Monthly calendar */
+body[data-calendar-page="month"] .legend,
+body[data-calendar-page="month"] .legend-v17{
+  color:#c1c1c8!important;
+}
+
+body[data-calendar-page="month"] .week-head div{
+  color:#d0d0d6!important;
+  font-weight:900!important;
+}
+
+body[data-calendar-page="month"] .day{
+  border-color:rgba(255,255,255,.095)!important;
+  background:linear-gradient(155deg,#17171a,#101012)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.025)!important;
+}
+
+body[data-calendar-page="month"] .day.today{
+  outline:0!important;
+  border:2px solid var(--amber)!important;
+  background:linear-gradient(155deg,rgba(246,185,47,.11),#111113)!important;
+  box-shadow:0 0 0 1px rgba(246,185,47,.12)!important;
+}
+
+body[data-calendar-page="month"] .day.other{
+  opacity:.38!important;
+}
+
+/* Public holiday — unmistakable at a glance, distinct from achieved/shortfall colours */
+body[data-calendar-page="month"] .day.off:not(.other),
+body[data-calendar-page="month"] .day.transfer.off:not(.other){
+  position:relative!important;
+  opacity:1!important;
+  color:#fff!important;
+  border:1px solid rgba(157,142,255,.9)!important;
+  background:
+    radial-gradient(circle at 78% 17%,rgba(194,184,255,.24),transparent 24%),
+    linear-gradient(150deg,#28234c 0%,#181735 58%,#111326 100%)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.11),0 0 0 1px rgba(124,108,243,.12),0 8px 18px rgba(0,0,0,.24)!important;
+}
+
+body[data-calendar-page="month"] .day.off:not(.other)::after,
+body[data-calendar-page="month"] .day.transfer.off:not(.other)::after{
+  content:"☾ 公休";
+  position:absolute;
+  left:4px;
+  right:4px;
+  bottom:4px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  min-height:18px;
+  border:1px solid rgba(205,198,255,.28);
+  border-radius:7px;
+  background:rgba(9,10,28,.5);
+  color:#eeeaff;
+  font-size:8px;
+  font-weight:950;
+  line-height:1;
+  letter-spacing:.02em;
+}
+
+body[data-calendar-page="month"] .day.off:not(.other) .tag,
+body[data-calendar-page="month"] .day.transfer.off:not(.other) .tag{
+  display:none!important;
+}
+
+body[data-calendar-page="month"] .day.off:not(.other) .date,
+body[data-calendar-page="month"] .day.transfer.off:not(.other) .date{
+  color:#fff!important;
+  text-shadow:0 1px 8px rgba(0,0,0,.5);
+}
+
+body[data-calendar-page="month"] .day.off:not(.other) .month-money,
+body[data-calendar-page="month"] .day.off:not(.other) .month-label,
+body[data-calendar-page="month"] .day.off:not(.other) .month-result,
+body[data-calendar-page="month"] .day.off:not(.other) .line{
+  opacity:.25!important;
+}
+
+/* Monthly management */
+body[data-calendar-page="manage"] .manage-head-v21{
+  border-color:var(--yos-gold-line)!important;
+}
+
+body[data-calendar-page="manage"] .manage-view-v21 .summary .card{
+  border-color:rgba(246,185,47,.24)!important;
+  background:linear-gradient(155deg,rgba(246,185,47,.055),rgba(15,15,18,.985))!important;
+}
+
+body[data-calendar-page="manage"] .manage-view-v21 .summary .card span{
+  color:#c3c3cb!important;
+  font-weight:900!important;
+}
+
+body[data-calendar-page="manage"] .manage-view-v21 .summary .card strong{
+  font-weight:950!important;
+  font-variant-numeric:tabular-nums;
+}
+
+body[data-calendar-page="manage"] .manage-actions-v21 a{
+  border-radius:16px!important;
+}
+
+/* Settings */
+.field input,
+.field select,
+.field textarea{
+  border-color:rgba(255,255,255,.13)!important;
+  background:linear-gradient(155deg,#202024,#161619)!important;
+  color:#fff!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.035)!important;
+}
+
+.field input:focus,
+.field select:focus,
+.field textarea:focus{
+  border-color:rgba(246,185,47,.75)!important;
+  box-shadow:0 0 0 3px rgba(246,185,47,.12)!important;
+  outline:0!important;
+}
+
+/* Shared bottom navigation */
+#taxiGlobalNavV24{
+  border-color:rgba(255,255,255,.14)!important;
+  background:rgba(8,8,10,.94)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.055),0 14px 34px rgba(0,0,0,.42)!important;
+  backdrop-filter:blur(18px) saturate(130%)!important;
+  -webkit-backdrop-filter:blur(18px) saturate(130%)!important;
+}
+
+#taxiGlobalNavV24 button{
+  color:#b8b8c0!important;
+  border:0!important;
+  background:transparent!important;
+}
+
+#taxiGlobalNavV24 button.active,
+#taxiGlobalNavV24 button[aria-current="page"],
+#taxiGlobalNavV24 button[data-active="true"]{
+  color:var(--amber)!important;
+  background:linear-gradient(155deg,rgba(246,185,47,.18),rgba(246,185,47,.055))!important;
+  box-shadow:inset 0 0 0 1px rgba(246,185,47,.16)!important;
+}
+
+#taxiGlobalNavV24 button span{
+  filter:saturate(.82);
+}
+
+/* Dialogs */
+dialog{
+  border-color:rgba(246,185,47,.25)!important;
+  background:#0e0e11!important;
+  box-shadow:0 22px 70px rgba(0,0,0,.62)!important;
+}
+
+/* SE3: keep the visual upgrade without increasing layout height */
+@media(max-width:375px) and (max-height:700px){
+  body[data-calendar-page="month"] .day.off:not(.other)::after,
+  body[data-calendar-page="month"] .day.transfer.off:not(.other)::after{
+    left:3px;
+    right:3px;
+    bottom:3px;
+    min-height:15px;
+    font-size:7px;
+    border-radius:6px;
+  }
+
+  #taxiGlobalNavV24{
+    backdrop-filter:blur(12px)!important;
+    -webkit-backdrop-filter:blur(12px)!important;
+  }
+}
+
+@media(prefers-reduced-motion:reduce){
+  button,a{transition:none!important}
+}
