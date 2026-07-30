@@ -1,0 +1,203 @@
+/* YOS Taxi v101 — fixed five-item navigation and calendar consolidation */
+
+.app{
+  padding-bottom:calc(env(safe-area-inset-bottom) + 84px)!important;
+}
+
+.taxi-global-nav-v24{
+  position:fixed!important;
+  left:50%!important;
+  bottom:calc(env(safe-area-inset-bottom) + 6px)!important;
+  transform:translateX(-50%)!important;
+  width:min(calc(100% - 14px),760px)!important;
+  display:grid!important;
+  grid-template-columns:repeat(5,minmax(0,1fr))!important;
+  gap:3px!important;
+  padding:6px!important;
+  border:1px solid rgba(255,255,255,.13)!important;
+  border-radius:21px!important;
+  background:linear-gradient(180deg,rgba(22,22,25,.97),rgba(9,9,11,.97))!important;
+  -webkit-backdrop-filter:blur(22px) saturate(145%)!important;
+  backdrop-filter:blur(22px) saturate(145%)!important;
+  box-shadow:0 18px 44px rgba(0,0,0,.42),inset 0 1px 0 rgba(255,255,255,.055)!important;
+  overflow:visible!important;
+  z-index:80!important;
+}
+
+.taxi-global-nav-v24 button{
+  position:relative!important;
+  min-width:0!important;
+  min-height:50px!important;
+  border:0!important;
+  border-radius:14px!important;
+  padding:4px 2px 3px!important;
+  background:transparent!important;
+  color:#8e8e98!important;
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:2px!important;
+  font-weight:900!important;
+  line-height:1!important;
+  box-shadow:none!important;
+}
+
+.taxi-global-nav-v24 button .taxi-nav-icon-v101{
+  display:grid!important;
+  place-items:center!important;
+  width:24px!important;
+  height:24px!important;
+  color:currentColor!important;
+}
+
+.taxi-global-nav-v24 button .taxi-nav-icon-v101 svg{
+  width:22px!important;
+  height:22px!important;
+  fill:none!important;
+  stroke:currentColor!important;
+  stroke-width:1.8!important;
+  stroke-linecap:round!important;
+  stroke-linejoin:round!important;
+}
+
+.taxi-global-nav-v24 button b{
+  max-width:100%!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  white-space:nowrap!important;
+  font-size:9px!important;
+  font-weight:900!important;
+  letter-spacing:-.03em!important;
+}
+
+.taxi-global-nav-v24 button.active:not([data-page="nav"]){
+  background:linear-gradient(155deg,rgba(246,185,47,.17),rgba(246,185,47,.055))!important;
+  color:var(--amber)!important;
+  box-shadow:inset 0 0 0 1px rgba(246,185,47,.2)!important;
+}
+
+.taxi-global-nav-v24 button[data-page="nav"]{
+  min-height:58px!important;
+  margin-top:-10px!important;
+  margin-bottom:1px!important;
+  border:1px solid rgba(246,185,47,.72)!important;
+  border-radius:17px!important;
+  background:linear-gradient(155deg,#f8c84d,#e98d1f)!important;
+  color:#15100a!important;
+  box-shadow:0 10px 24px rgba(239,143,32,.28),inset 0 1px 0 rgba(255,255,255,.42)!important;
+}
+
+.taxi-global-nav-v24 button[data-page="nav"] .taxi-nav-icon-v101{
+  width:27px!important;
+  height:27px!important;
+}
+
+.taxi-global-nav-v24 button[data-page="nav"] .taxi-nav-icon-v101 svg{
+  width:25px!important;
+  height:25px!important;
+  stroke-width:2!important;
+}
+
+.taxi-global-nav-v24 button[data-page="nav"] b{
+  font-size:10px!important;
+}
+
+.taxi-global-nav-v24 button[data-page="nav"]:active{
+  transform:translateY(1px) scale(.97)!important;
+}
+
+/* Calendar now owns only the week/month choice. Today and management live in the bottom bar. */
+#calendarPagesV21[data-nav-version="101"]{
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:5px!important;
+  margin:0!important;
+}
+
+#calendarPagesV21[data-nav-version="101"] button[data-page="today"],
+#calendarPagesV21[data-nav-version="101"] button[data-page="manage"]{
+  display:none!important;
+}
+
+body[data-calendar-page="today"] #calendarPagesV21[data-nav-version="101"],
+body[data-calendar-page="manage"] #calendarPagesV21[data-nav-version="101"]{
+  display:none!important;
+}
+
+#calendarPagesV21[data-nav-version="101"] button[data-page="week"],
+#calendarPagesV21[data-nav-version="101"] button[data-page="month"]{
+  min-height:38px!important;
+  border:1px solid rgba(255,255,255,.11)!important;
+  border-radius:12px!important;
+  background:linear-gradient(155deg,#1b1b1f,#111114)!important;
+  color:#a9a9b3!important;
+  font-size:12px!important;
+  font-weight:950!important;
+}
+
+#calendarPagesV21[data-nav-version="101"] button.active{
+  border-color:rgba(246,185,47,.45)!important;
+  background:linear-gradient(155deg,rgba(246,185,47,.22),rgba(246,185,47,.07))!important;
+  color:var(--amber)!important;
+  box-shadow:inset 0 0 0 1px rgba(246,185,47,.14)!important;
+}
+
+.taxi-nav-fixed-note-v101{
+  border:1px solid rgba(246,185,47,.24);
+  border-radius:14px;
+  padding:12px;
+  background:linear-gradient(155deg,rgba(246,185,47,.075),rgba(17,17,20,.98));
+  color:#d1d1d8;
+  font-size:11px;
+  font-weight:700;
+  line-height:1.55;
+}
+
+@media(max-height:740px){
+  .app{
+    padding-bottom:calc(env(safe-area-inset-bottom) + 76px)!important;
+  }
+  .taxi-global-nav-v24{
+    padding:5px!important;
+  }
+  .taxi-global-nav-v24 button{
+    min-height:45px!important;
+  }
+  .taxi-global-nav-v24 button[data-page="nav"]{
+    min-height:53px!important;
+    margin-top:-8px!important;
+  }
+}
+
+/* iPhone SE 3 baseline */
+@media(max-width:375px) and (max-height:700px){
+  .taxi-global-nav-v24{
+    width:calc(100% - 12px)!important;
+    gap:2px!important;
+    padding:4px!important;
+    border-radius:18px!important;
+  }
+  .taxi-global-nav-v24 button{
+    min-height:43px!important;
+    border-radius:12px!important;
+  }
+  .taxi-global-nav-v24 button .taxi-nav-icon-v101{
+    width:21px!important;
+    height:21px!important;
+  }
+  .taxi-global-nav-v24 button .taxi-nav-icon-v101 svg{
+    width:20px!important;
+    height:20px!important;
+  }
+  .taxi-global-nav-v24 button b{
+    font-size:8px!important;
+  }
+  .taxi-global-nav-v24 button[data-page="nav"]{
+    min-height:51px!important;
+    margin-top:-8px!important;
+    border-radius:15px!important;
+  }
+  .taxi-global-nav-v24 button[data-page="nav"] b{
+    font-size:9px!important;
+  }
+}
