@@ -1,0 +1,12 @@
+/* YOS Taxi v110 — remove the duplicated monthly-management label. */
+body[data-calendar-page="manage"] .manage-head-v21 span{
+  display:none!important;
+}
+body[data-calendar-page="manage"] .manage-head-v21>div{
+  display:flex!important;
+  align-items:center!important;
+  min-width:0!important;
+}
+body[data-calendar-page="manage"] .manage-head-v21 b{
+  margin:0!important;
+}
