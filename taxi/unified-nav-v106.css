@@ -1,0 +1,104 @@
+/* YOS Taxi v106 — one bottom-navigation position across every Taxi page. */
+
+:root{
+  --yos-unified-nav-height:72px;
+  --yos-unified-nav-gap:6px;
+  --yos-unified-nav-reserve:calc(var(--yos-unified-nav-height) + env(safe-area-inset-bottom) + var(--yos-unified-nav-gap) + 18px);
+}
+
+/* Remove the legacy page-dependent two-row shell. The page scrolls; the nav does not. */
+html[data-taxi-nav-fixed="106"],
+html[data-taxi-nav-fixed="106"] body,
+html[data-taxi-nav-fixed="106"].taxi-shell-v49,
+html[data-taxi-nav-fixed="106"].taxi-shell-v49 body{
+  width:100%!important;
+  min-height:100%!important;
+  height:auto!important;
+  max-height:none!important;
+  overflow-x:hidden!important;
+  overflow-y:auto!important;
+}
+
+html[data-taxi-nav-fixed="106"] body,
+html[data-taxi-nav-fixed="106"].taxi-shell-v49 body{
+  display:block!important;
+  grid-template-rows:none!important;
+}
+
+html[data-taxi-nav-fixed="106"] main.app,
+html[data-taxi-nav-fixed="106"] .app,
+html[data-taxi-nav-fixed="106"].taxi-shell-v49 main.app,
+html[data-taxi-nav-fixed="106"].taxi-shell-v49 .app,
+html[data-taxi-nav-fixed="106"].taxi-page-drive-v49 main.app,
+html[data-taxi-nav-fixed="106"].taxi-page-today-v49 main.app,
+html[data-taxi-nav-fixed="106"].taxi-page-week-v49 main.app,
+html[data-taxi-nav-fixed="106"].taxi-page-month-v49 main.app,
+html[data-taxi-nav-fixed="106"].taxi-page-manage-v49 main.app{
+  grid-row:auto!important;
+  width:min(100%,760px)!important;
+  min-height:100dvh!important;
+  height:auto!important;
+  max-height:none!important;
+  margin:0 auto!important;
+  padding-bottom:var(--yos-unified-nav-reserve)!important;
+  scroll-padding-bottom:var(--yos-unified-nav-reserve)!important;
+  overflow-x:hidden!important;
+  overflow-y:visible!important;
+}
+
+/* High-specificity fallback. JavaScript also applies the same values inline. */
+html[data-taxi-nav-fixed="106"] body #taxiGlobalNavV24,
+html[data-taxi-nav-fixed="106"] body .taxi-global-nav-v24,
+html[data-taxi-nav-fixed="106"].taxi-shell-v49 body #taxiGlobalNavV24,
+html[data-taxi-nav-fixed="106"].taxi-shell-v49 body.taxi-drive-v44-active #taxiGlobalNavV24{
+  position:fixed!important;
+  grid-row:auto!important;
+  left:50%!important;
+  right:auto!important;
+  top:auto!important;
+  bottom:max(6px,env(safe-area-inset-bottom))!important;
+  transform:translateX(-50%)!important;
+  width:min(calc(100% - 14px),760px)!important;
+  max-width:760px!important;
+  min-height:0!important;
+  margin:0!important;
+  z-index:2147483000!important;
+  isolation:isolate!important;
+}
+
+html[data-taxi-nav-fixed="106"] #taxiGlobalNavV24 button{
+  min-width:0!important;
+}
+
+/* The centre Navi remains prominent, but the container itself never moves. */
+html[data-taxi-nav-fixed="106"] #taxiGlobalNavV24 button[data-page="nav"]{
+  transform:none!important;
+}
+html[data-taxi-nav-fixed="106"] #taxiGlobalNavV24 button[data-page="nav"]:active{
+  transform:translateY(1px) scale(.97)!important;
+}
+
+/* Keep the final row reachable above the shared bar. */
+html[data-taxi-nav-fixed="106"] .panel:last-of-type,
+html[data-taxi-nav-fixed="106"] .view.v21-active,
+html[data-taxi-nav-fixed="106"] .manage-view-v21.v21-active,
+html[data-taxi-nav-fixed="106"] dialog form{
+  scroll-margin-bottom:var(--yos-unified-nav-reserve)!important;
+}
+
+@media(max-width:430px){
+  html[data-taxi-nav-fixed="106"] body #taxiGlobalNavV24,
+  html[data-taxi-nav-fixed="106"].taxi-shell-v49 body #taxiGlobalNavV24{
+    width:calc(100% - 12px)!important;
+  }
+}
+
+@media(max-width:375px) and (max-height:700px){
+  :root{
+    --yos-unified-nav-gap:4px;
+  }
+  html[data-taxi-nav-fixed="106"] body #taxiGlobalNavV24,
+  html[data-taxi-nav-fixed="106"].taxi-shell-v49 body #taxiGlobalNavV24{
+    width:calc(100% - 10px)!important;
+  }
+}
