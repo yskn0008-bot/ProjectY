@@ -36,6 +36,7 @@
   `;
   document.head.appendChild(style);
   let scheduled=false;
+  let mountObserver=null;
   const render=()=>{
     scheduled=false;
     const section=document.getElementById('yos-okinawa-area-map');
@@ -51,11 +52,14 @@
     if(rail.dataset.signature!==html){rail.innerHTML=html;rail.dataset.signature=html}
     const links=document.querySelector('.app-links');
     if(links&&section.previousElementSibling!==links)links.insertAdjacentElement('afterend',section);
+    if(mountObserver){mountObserver.disconnect();mountObserver=null}
     return true;
   };
   const scheduleRender=()=>{if(scheduled)return;scheduled=true;requestAnimationFrame(render)};
-  render();
+  if(!render()){
+    mountObserver=new MutationObserver(scheduleRender);
+    mountObserver.observe(document.body,{childList:true,subtree:true});
+  }
   window.addEventListener('yos-nav-recommendation',scheduleRender);
   window.addEventListener('pageshow',scheduleRender);
-  new MutationObserver(scheduleRender).observe(document.body,{childList:true,subtree:true});
 })();
