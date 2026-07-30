@@ -1,0 +1,205 @@
+/* YOS Taxi v113 — fit the five main screens into one visible iPhone viewport. */
+:root{
+  --rp-visible-height:100dvh;
+  --rp-page-fit-height:auto;
+  --rp-fit-gap:6px;
+}
+
+html.rp-one-screen-v113,
+html.rp-one-screen-v113 body{
+  height:var(--rp-visible-height)!important;
+  min-height:var(--rp-visible-height)!important;
+  overflow:hidden!important;
+}
+
+html.rp-one-screen-v113 .rp-shell{
+  height:var(--rp-visible-height)!important;
+  min-height:0!important;
+  overflow:hidden!important;
+  padding-top:calc(env(safe-area-inset-top) + 4px)!important;
+  padding-bottom:calc(var(--rp-nav-height) + var(--rp-browser-bottom) + env(safe-area-inset-bottom) + 12px)!important;
+}
+
+html.rp-one-screen-v113 .rp-page{
+  height:var(--rp-page-fit-height,auto)!important;
+  min-height:0!important;
+  max-height:var(--rp-page-fit-height,none)!important;
+  overflow:hidden!important;
+  gap:var(--rp-fit-gap)!important;
+  align-content:stretch!important;
+}
+
+html.rp-one-screen-v113 .rp-header{
+  height:40px!important;
+  min-height:40px!important;
+}
+html.rp-one-screen-v113 .rp-header h1{
+  font-size:20px!important;
+}
+
+/* 1. Drive — same information as the reference, without extra vertical scroll. */
+html.rp-one-screen-v113 .rp-page-drive{
+  grid-template-rows:40px minmax(108px,1.25fr) 56px minmax(88px,1fr) 56px minmax(76px,.9fr)!important;
+}
+html.rp-one-screen-v113 .rp-page-drive .rp-operations{display:none!important}
+html.rp-one-screen-v113 .rp-sales-card{min-height:0!important;padding:9px 10px!important}
+html.rp-one-screen-v113 .rp-sales-copy>strong{font-size:34px!important;margin:2px 0 4px!important}
+html.rp-one-screen-v113 .rp-sales-copy>i{margin-top:6px!important}
+html.rp-one-screen-v113 .rp-primary-action{min-height:38px!important;font-size:15px!important}
+html.rp-one-screen-v113 .rp-three-metrics>div{min-height:0!important;padding:6px 4px!important;display:grid;align-content:center}
+html.rp-one-screen-v113 .rp-status-card,
+html.rp-one-screen-v113 .rp-action-card,
+html.rp-one-screen-v113 .rp-command-card{min-height:0!important;padding:7px 9px!important;overflow:hidden!important}
+html.rp-one-screen-v113 .rp-status-card dl{gap:3px!important}
+html.rp-one-screen-v113 .rp-status-card dl div{font-size:12px!important;line-height:1.2!important}
+html.rp-one-screen-v113 .rp-action-row button,
+html.rp-one-screen-v113 .rp-command-card button{min-height:34px!important;font-size:11.5px!important}
+html.rp-one-screen-v113 .rp-command-card>div{gap:4px!important}
+
+/* 2. Today */
+html.rp-one-screen-v113 .rp-page-today{
+  grid-template-rows:40px 36px minmax(0,1fr) 86px!important;
+}
+html.rp-one-screen-v113 .rp-date-switch{min-height:36px!important}
+html.rp-one-screen-v113 .rp-schedule-card,
+html.rp-one-screen-v113 .rp-memo-card{min-height:0!important;padding:8px 10px!important;overflow:hidden!important}
+html.rp-one-screen-v113 .rp-schedule-card{display:flex!important;flex-direction:column!important}
+html.rp-one-screen-v113 .rp-schedule-card h2{margin-bottom:3px!important}
+html.rp-one-screen-v113 .rp-schedule-row{flex:1 1 0!important;min-height:0!important;height:auto!important}
+html.rp-one-screen-v113 .rp-memo-card button{min-height:50px!important;height:50px!important}
+
+/* 3. Week — four columns by two rows like the approved reference. */
+html.rp-one-screen-v113 .rp-page-week{
+  grid-template-rows:40px 30px minmax(0,1fr)!important;
+}
+html.rp-one-screen-v113 .rp-period-arrows{margin:0!important;align-items:center!important}
+html.rp-one-screen-v113 .rp-period-arrows button{min-height:30px!important;height:30px!important}
+html.rp-one-screen-v113 .rp-week-strip{
+  display:grid!important;
+  grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  grid-template-rows:repeat(2,minmax(0,1fr))!important;
+  grid-auto-flow:row!important;
+  grid-auto-columns:auto!important;
+  gap:5px!important;
+  height:100%!important;
+  min-height:0!important;
+  overflow:hidden!important;
+  padding:0!important;
+}
+html.rp-one-screen-v113 .rp-week-day,
+html.rp-one-screen-v113 .rp-week-add-v113{
+  min-width:0!important;
+  min-height:0!important;
+  height:auto!important;
+  padding:6px 4px!important;
+  overflow:hidden!important;
+}
+html.rp-one-screen-v113 .rp-week-date{padding-bottom:4px!important}
+html.rp-one-screen-v113 .rp-week-date strong{font-size:12px!important}
+html.rp-one-screen-v113 .rp-week-date small{font-size:9px!important}
+html.rp-one-screen-v113 .rp-week-money{padding:6px 0 4px!important}
+html.rp-one-screen-v113 .rp-week-money strong{font-size:13px!important;white-space:nowrap!important}
+html.rp-one-screen-v113 .rp-week-money small{font-size:9px!important;margin-top:3px!important;white-space:nowrap!important}
+html.rp-one-screen-v113 .rp-ring-small{width:45px!important;height:45px!important}
+html.rp-one-screen-v113 .rp-ring-small::before{width:35px!important;height:35px!important}
+html.rp-one-screen-v113 .rp-ring-small strong{font-size:11px!important}
+html.rp-one-screen-v113 .rp-week-foot{font-size:8px!important}
+html.rp-one-screen-v113 .rp-off-panel{gap:5px!important}
+html.rp-one-screen-v113 .rp-off-panel b{font-size:34px!important}
+html.rp-one-screen-v113 .rp-off-panel strong{font-size:14px!important}
+html.rp-one-screen-v113 .rp-week-add-v113{
+  border:1px solid var(--rp-line-soft);
+  border-radius:7px;
+  background:#09090b;
+  color:var(--rp-gold-2);
+  display:grid;
+  place-items:center;
+  align-content:center;
+  gap:7px;
+  font-weight:850;
+}
+html.rp-one-screen-v113 .rp-week-add-v113 b{font-size:28px;line-height:1}
+html.rp-one-screen-v113 .rp-week-add-v113 span{font-size:11px;color:#fff}
+
+/* 4. Month */
+html.rp-one-screen-v113 .rp-page-month{
+  grid-template-rows:40px 34px 20px minmax(0,1fr) 40px!important;
+  gap:4px!important;
+}
+html.rp-one-screen-v113 .rp-month-period{min-height:34px!important}
+html.rp-one-screen-v113 .rp-week-head{height:20px!important;align-items:center!important}
+html.rp-one-screen-v113 .rp-month-grid{
+  height:100%!important;
+  min-height:0!important;
+  grid-template-rows:repeat(6,minmax(0,1fr))!important;
+}
+html.rp-one-screen-v113 .rp-month-cell{
+  min-height:0!important;
+  height:auto!important;
+  padding:3px 2px!important;
+  overflow:hidden!important;
+}
+html.rp-one-screen-v113 .rp-month-cell>span{top:3px!important;font-size:11px!important}
+html.rp-one-screen-v113 .rp-month-cell>strong{margin-top:17px!important;font-size:10px!important}
+html.rp-one-screen-v113 .rp-month-cell>i{font-size:8px!important;margin-top:0!important}
+html.rp-one-screen-v113 .rp-month-cell.off .rp-moon{margin-top:15px!important;font-size:16px!important}
+html.rp-one-screen-v113 .rp-month-cell.off small{font-size:9px!important}
+html.rp-one-screen-v113 .rp-month-legend{
+  height:40px!important;
+  padding:3px 2px!important;
+  gap:2px 8px!important;
+  font-size:9px!important;
+  align-content:center!important;
+}
+
+/* 5. Manage */
+html.rp-one-screen-v113 .rp-page-manage{
+  grid-template-rows:40px 34px minmax(0,1fr)!important;
+}
+html.rp-one-screen-v113 .rp-manage-grid{
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  grid-template-rows:repeat(4,minmax(0,1fr))!important;
+  height:100%!important;
+  min-height:0!important;
+  gap:6px!important;
+}
+html.rp-one-screen-v113 .rp-manage-grid button{
+  min-height:0!important;
+  height:auto!important;
+  gap:6px!important;
+}
+html.rp-one-screen-v113 .rp-manage-grid svg{width:34px!important;height:34px!important}
+html.rp-one-screen-v113 .rp-manage-grid b{font-size:14px!important}
+
+/* Bottom menu stays inside the visible Safari area. */
+html.rp-one-screen-v113 .rp-bottom-nav,
+html.rp-one-screen-v113 #taxiGlobalNavV24.rp-bottom-nav{
+  height:62px!important;
+  --rp-nav-height:62px;
+}
+html.rp-one-screen-v113 .rp-bottom-nav button{height:52px!important;min-height:52px!important}
+html.rp-one-screen-v113 .rp-bottom-nav button b{font-size:10px!important}
+
+/* Settings and dialogs intentionally remain scrollable for safe data entry. */
+html.rp-settings-page-v111,
+html.rp-settings-page-v111 body{height:auto!important;min-height:100%!important;overflow-y:auto!important}
+
+@media(max-width:375px){
+  :root{--rp-fit-gap:5px}
+  html.rp-one-screen-v113 .rp-shell{padding-left:11px!important;padding-right:11px!important}
+  html.rp-one-screen-v113 .rp-header h1{font-size:19px!important}
+  html.rp-one-screen-v113 .rp-sales-copy>strong{font-size:31px!important}
+  html.rp-one-screen-v113 .rp-status-card dl div{grid-template-columns:84px minmax(0,1fr)!important;font-size:11.5px!important}
+  html.rp-one-screen-v113 .rp-manage-grid b{font-size:13px!important}
+}
+
+@media(max-height:560px){
+  :root{--rp-fit-gap:4px}
+  html.rp-one-screen-v113 .rp-header{height:36px!important;min-height:36px!important}
+  html.rp-one-screen-v113 .rp-page-drive{grid-template-rows:36px minmax(96px,1.15fr) 50px minmax(76px,.9fr) 50px minmax(66px,.8fr)!important}
+  html.rp-one-screen-v113 .rp-page-today{grid-template-rows:36px 32px minmax(0,1fr) 72px!important}
+  html.rp-one-screen-v113 .rp-page-week{grid-template-rows:36px 28px minmax(0,1fr)!important}
+  html.rp-one-screen-v113 .rp-page-month{grid-template-rows:36px 30px 18px minmax(0,1fr) 34px!important}
+  html.rp-one-screen-v113 .rp-page-manage{grid-template-rows:36px 30px minmax(0,1fr)!important}
+  html.rp-one-screen-v113 .rp-card h2{font-size:12.5px!important;margin-bottom:4px!important}
+}
