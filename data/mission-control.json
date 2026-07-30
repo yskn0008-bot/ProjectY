@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-31T06:10:14+09:00",
+  "updated_at": "2026-07-31T06:10:33+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -65,6 +65,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-65a7b04a105b",
+      "title": "Add v113 viewport fitting and week add tile",
+      "completed_at": "2026-07-30T21:10:18Z",
+      "result": "GitHub mainへ反映（65a7b04）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/65a7b04a105b2e6476764a576c7c1e5fc3bab38b"
+    },
+    {
       "id": "github-commit-482868e2aa6f",
       "title": "Add v113 single-screen responsive layout for Taxi main pages",
       "completed_at": "2026-07-30T21:09:58Z",
@@ -91,13 +98,6 @@
       "completed_at": "2026-07-30T21:03:47Z",
       "result": "GitHub mainへ反映（8ba252f）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/8ba252fa7cb33ac4a0c23b524d5a217090189d18"
-    },
-    {
-      "id": "github-commit-932483a1731c",
-      "title": "fix(nav): restore YOS location sync after page return v51",
-      "completed_at": "2026-07-30T20:07:49Z",
-      "result": "GitHub mainへ反映（932483a）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/932483a1731ca6410aac501f35d863c17642a955"
     },
     {
       "id": "complete-002",
@@ -134,7 +134,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-31T06:10:14+09:00",
+      "last_update": "2026-07-31T06:10:33+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -215,7 +215,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-31T06:10:14+09:00",
+      "last_update": "2026-07-31T06:10:33+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -238,7 +238,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-31T06:10:14+09:00",
+      "last_update": "2026-07-31T06:10:33+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -320,5 +320,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "b33ab0c9bf0fc9467bf2f64caf05f2e7f410e84f250a0c99fdef95eaa5c9a9ba"
+  "github_snapshot_hash": "066fc200cc618f42c1c5cc36f7c356d7fbf9d62ddc7ee31a910fb9ffb0a6bc28"
 }
