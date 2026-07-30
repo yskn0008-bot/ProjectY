@@ -1,7 +1,7 @@
 'use strict';
 const CACHE_PREFIX='yos-taxi-projecty-';
-const CACHE='yos-taxi-projecty-v115-stable-one-screen';
-const VERSION='115';
+const CACHE='yos-taxi-projecty-v116-adaptive-readable-layout';
+const VERSION='116';
 const STATIC=[
   './','./index.html','./calendar.html','./settings.html','./manifest.webmanifest','./swipe-nav.js',
   './reference-perfect-v111.css','./reference-perfect-v111.js','./large-type-v112.css','./one-screen-fit-v113.css','./one-screen-fit-v113.js','./report-sync-v43.js','./settings-v20.js'
@@ -14,7 +14,7 @@ async function inject(response,type){
   const addCss=file=>{if(!html.includes(file))html=html.replace('</head>',`<link rel="stylesheet" href="./${file}?v=${VERSION}"></head>`) };
   const addJs=file=>{if(!html.includes(file))html=html.replace('</body>',`<script src="./${file}?v=${VERSION}"></script></body>`) };
 
-  /* Approved black/gold rebuild, large type, then final one-screen fitting. */
+  /* Approved black/gold rebuild, large type, then adaptive one-screen fitting. */
   addCss('reference-perfect-v111.css');
   addCss('large-type-v112.css');
   addCss('one-screen-fit-v113.css');
