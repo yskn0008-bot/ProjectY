@@ -3,14 +3,17 @@
   if(window.__yosTaxiBottomNavV101)return;
   window.__yosTaxiBottomNavV101=true;
 
-  /* Stop the legacy page-motion layer before it installs its old five-page model. */
+  /* v101 owns navigation, icons and swipe order. */
   window.__yosPageMotionV49=true;
   window.__yosPageMotionV48=true;
   window.__yosPageSwipeV47=true;
+  window.__yosTaxiNavIconsV62=true;
 
   const ENTRY='yos-taxi-page-entry-v101';
   const SWIPE_ORDER=['drive','today','calendar','manage'];
   const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let entryApplied=false;
+  let syncQueued=false;
 
   const ICONS={
     drive:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 17h14l-1.2-6.2A2.3 2.3 0 0 0 15.5 9h-7a2.3 2.3 0 0 0-2.3 1.8L5 17Z"/><path d="M7 9l1.2-3h7.6L17 9M4 13h16M7 17v2M17 17v2"/><circle cx="8" cy="14" r="1"/><circle cx="16" cy="14" r="1"/></svg>',
@@ -21,12 +24,14 @@
   };
 
   const ITEMS=[
-    {key:'drive',label:'営業'},
-    {key:'today',label:'今日'},
-    {key:'nav',label:'ナビ'},
-    {key:'calendar',label:'カレンダー'},
-    {key:'manage',label:'管理'}
+    ['drive','営業'],
+    ['today','今日'],
+    ['nav','ナビ'],
+    ['calendar','カレンダー'],
+    ['manage','管理']
   ];
+
+  const isCalendarPath=()=>location.pathname.endsWith('/taxi/calendar.html');
 
   function calendarPage(){
     const bodyPage=document.body?.dataset?.calendarPage;
@@ -41,7 +46,7 @@
     const path=location.pathname;
     if(path.endsWith('/taxi/')||path.endsWith('/taxi/index.html'))return'drive';
     if(path.endsWith('/taxi/settings.html'))return'manage';
-    if(path.endsWith('/taxi/calendar.html')){
+    if(isCalendarPath()){
       const page=document.body?.dataset?.calendarPage||new URLSearchParams(location.search).get('page')||localStorage.getItem('yos-taxi-calendar-page-v21')||'today';
       if(page==='today')return'today';
       if(page==='manage')return'manage';
@@ -50,7 +55,7 @@
     return'drive';
   }
 
-  function localUrl(key){
+  function pageUrl(key){
     if(key==='drive')return'./index.html';
     if(key==='today')return'./calendar.html?page=today';
     if(key==='calendar')return`./calendar.html?page=${calendarPage()}`;
@@ -59,18 +64,18 @@
   }
 
   function activateCalendar(page){
-    if(!location.pathname.endsWith('/taxi/calendar.html'))return false;
+    if(!isCalendarPath())return false;
     const button=document.querySelector(`#calendarPagesV21 button[data-page="${page}"]`);
     if(!button)return false;
     button.click();
     const url=new URL(location.href);
     url.searchParams.set('page',page);
     history.replaceState({},'',url);
-    sync();
+    queueSync();
     return true;
   }
 
-  function animateAndGo(key,direction='next'){
+  function go(key,direction='next'){
     if(key==='nav'){
       location.href='../nav/';
       return;
@@ -81,19 +86,22 @@
 
     const host=document.querySelector('main.app');
     sessionStorage.setItem(ENTRY,direction==='next'?'fromRight':'fromLeft');
-    if(reduced||!host){location.href=localUrl(key);return}
+    if(reduced||!host){location.href=pageUrl(key);return}
     const offset=direction==='next'?-42:42;
     host.style.transition='transform 170ms cubic-bezier(.22,1,.36,1),opacity 150ms ease';
     host.style.transform=`translate3d(${offset}px,0,0) scale(.994)`;
     host.style.opacity='.9';
-    setTimeout(()=>{location.href=localUrl(key)},120);
+    setTimeout(()=>{location.href=pageUrl(key)},120);
   }
 
   function applyEntry(){
+    if(entryApplied)return;
     const host=document.querySelector('main.app');
     const entry=sessionStorage.getItem(ENTRY);
-    if(!host||!entry||reduced)return;
+    if(!host||!entry)return;
+    entryApplied=true;
     sessionStorage.removeItem(ENTRY);
+    if(reduced)return;
     const start=entry==='fromRight'?28:-28;
     host.style.transition='none';
     host.style.transform=`translate3d(${start}px,0,0) scale(.995)`;
@@ -106,8 +114,8 @@
     }));
   }
 
-  function navMarkup(){
-    return ITEMS.map(item=>`<button type="button" data-page="${item.key}" aria-label="${item.label}"><span class="taxi-nav-icon-v101">${ICONS[item.key]}</span><b>${item.label}</b></button>`).join('');
+  function markup(){
+    return ITEMS.map(([key,label])=>`<button type="button" data-page="${key}" aria-label="${label}"><span class="taxi-nav-icon-v101">${ICONS[key]}</span><b>${label}</b></button>`).join('');
   }
 
   function installNav(){
@@ -121,12 +129,12 @@
     if(nav.dataset.navVersion!=='101'){
       nav.dataset.navVersion='101';
       nav.setAttribute('aria-label','YOS Taxi メニュー');
-      nav.innerHTML=navMarkup();
+      nav.innerHTML=markup();
       nav.querySelectorAll('button[data-page]').forEach(button=>{
         button.onclick=()=>{
           const from=SWIPE_ORDER.indexOf(currentKey());
           const to=SWIPE_ORDER.indexOf(button.dataset.page);
-          animateAndGo(button.dataset.page,to>=from?'next':'prev');
+          go(button.dataset.page,to>=from?'next':'prev');
         };
       });
     }
@@ -136,11 +144,13 @@
   function simplifyCalendarTabs(){
     const tabs=document.getElementById('calendarPagesV21');
     if(!tabs)return;
-    tabs.dataset.navVersion='101';
+    if(tabs.dataset.navVersion!=='101')tabs.dataset.navVersion='101';
     const week=tabs.querySelector('[data-page="week"]');
     const month=tabs.querySelector('[data-page="month"]');
-    if(week){week.textContent='週間';week.setAttribute('aria-label','週間カレンダー')}
-    if(month){month.textContent='月間';month.setAttribute('aria-label','月間カレンダー')}
+    if(week&&week.textContent!=='週間')week.textContent='週間';
+    if(month&&month.textContent!=='月間')month.textContent='月間';
+    week?.setAttribute('aria-label','週間カレンダー');
+    month?.setAttribute('aria-label','月間カレンダー');
   }
 
   function simplifyDisplaySettings(){
@@ -152,6 +162,7 @@
   }
 
   function sync(){
+    syncQueued=false;
     const nav=installNav();
     const current=currentKey();
     nav.querySelectorAll('button[data-page]').forEach(button=>{
@@ -163,6 +174,14 @@
     document.documentElement.dataset.taxiNavPage=current;
     simplifyCalendarTabs();
     simplifyDisplaySettings();
+    installSwipe();
+    applyEntry();
+  }
+
+  function queueSync(){
+    if(syncQueued)return;
+    syncQueued=true;
+    requestAnimationFrame(sync);
   }
 
   function installSwipe(){
@@ -174,10 +193,9 @@
 
     const paint=()=>{
       raf=0;
-      const order=SWIPE_ORDER;
-      const index=order.indexOf(currentKey());
+      const index=SWIPE_ORDER.indexOf(currentKey());
       const next=dx<0?index+1:index-1;
-      target=next>=0&&next<order.length?order[next]:null;
+      target=next>=0&&next<SWIPE_ORDER.length?SWIPE_ORDER[next]:null;
       const limit=target?26:12;
       const travel=Math.sign(dx||1)*Math.min(limit,Math.abs(dx)*.15);
       host.style.transition='none';
@@ -219,9 +237,9 @@
       if(!tracking)return;
       tracking=false;
       if(raf){cancelAnimationFrame(raf);raf=0;paint()}
-      if(!horizontal){return}
+      if(!horizontal)return;
       const commit=target&&(Math.abs(dx)>Math.max(innerWidth,320)*.22||(Math.abs(velocity)>.5&&Math.abs(dx)>38));
-      if(commit){animateAndGo(target,dx<0?'next':'prev');return}
+      if(commit){go(target,dx<0?'next':'prev');return}
       reset();
     };
 
@@ -229,18 +247,12 @@
     host.addEventListener('touchcancel',()=>{tracking=false;horizontal=false;reset()},{passive:true});
   }
 
-  function install(){
-    sync();
-    installSwipe();
-    applyEntry();
-  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',queueSync,{once:true});
+  else queueSync();
 
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install,{once:true});
-  else install();
-
-  const observer=new MutationObserver(()=>{sync();installSwipe()});
+  const observer=new MutationObserver(queueSync);
   observer.observe(document.documentElement,{childList:true,subtree:true});
-  addEventListener('pageshow',sync);
-  document.addEventListener('visibilitychange',()=>{if(!document.hidden)sync()});
-  setInterval(sync,1200);
+  addEventListener('pageshow',queueSync);
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)queueSync()});
+  setInterval(queueSync,1500);
 })();
