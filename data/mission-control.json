@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-30T05:58:26+09:00",
+  "updated_at": "2026-07-30T09:15:47+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -13,16 +13,6 @@
   },
   "inbox": [
     {
-      "id": "github-pr-76",
-      "title": "PR #76 YOS専用生成AI：設計・安全基盤・鍵なしGoogle接続",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/76",
-      "updated_at": "2026-07-29T20:33:04Z"
-    },
-    {
       "id": "github-pr-79",
       "title": "PR #79 YOSナビ：Service Workerのキャッシュ削除範囲を限定（v32）",
       "type": "GitHub PR",
@@ -30,7 +20,7 @@
       "priority": 2,
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/79",
-      "updated_at": "2026-07-29T18:08:04Z"
+      "updated_at": "2026-07-29T22:05:02Z"
     },
     {
       "id": "github-issue-10",
@@ -70,7 +60,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/51",
-      "updated_at": "2026-07-29T20:08:21Z"
+      "updated_at": "2026-07-29T23:15:55Z"
     }
   ],
   "recently_completed": [
@@ -134,7 +124,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #76をレビューして公開判断する",
+      "next_action": "PR #79をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -144,7 +134,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-30T05:58:26+09:00",
+      "last_update": "2026-07-30T09:15:47+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -219,13 +209,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 4件・Open PR 2件を自動同期中",
+      "next_action": "Open Issue 4件・Open PR 1件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-30T05:58:26+09:00",
+      "last_update": "2026-07-30T09:15:47+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -239,7 +229,7 @@
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #76をレビューして公開判断する",
+      "next_action": "PR #79をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -248,7 +238,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-30T05:58:26+09:00",
+      "last_update": "2026-07-30T09:15:47+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -330,5 +320,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "d4f108e77825d8dcc159fca477cdbbdb4e6e08c1d649a38317d793b67ee055ee"
+  "github_snapshot_hash": "f947fb526b54244ae73d368a17eda4f3888b44ae4bb86789ce199813721008dd"
 }
