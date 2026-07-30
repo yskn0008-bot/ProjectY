@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-30T23:47:10+09:00",
+  "updated_at": "2026-07-30T23:52:18+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -65,6 +65,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-35852192d583",
+      "title": "Fix browser nav size and month calendar clearance v108",
+      "completed_at": "2026-07-30T14:52:01Z",
+      "result": "GitHub mainへ反映（3585219）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/35852192d58329384eea694cf81ec2e5493451d7"
+    },
+    {
       "id": "github-commit-c93e1070e155",
       "title": "Release Taxi v107 with Safari-safe fixed navigation",
       "completed_at": "2026-07-30T14:46:59Z",
@@ -91,13 +98,6 @@
       "completed_at": "2026-07-30T14:37:24Z",
       "result": "GitHub mainへ反映（5cbd069）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/5cbd069367af93c11ab7c3d5a63af0812953c5f5"
-    },
-    {
-      "id": "github-commit-28988599f929",
-      "title": "Stabilize Taxi bottom navigation as a body-level fixed control",
-      "completed_at": "2026-07-30T14:36:11Z",
-      "result": "GitHub mainへ反映（2898859）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/28988599f929d52db789b6144c230521130cba36"
     },
     {
       "id": "complete-002",
@@ -134,7 +134,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-30T23:47:10+09:00",
+      "last_update": "2026-07-30T23:52:18+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -215,7 +215,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-30T23:47:10+09:00",
+      "last_update": "2026-07-30T23:52:18+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -238,7 +238,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-30T23:47:10+09:00",
+      "last_update": "2026-07-30T23:52:18+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -320,5 +320,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "49f2cf1c4ee0d13c3def7e137bc9486c8a282d83dc99378983f8cde9625a5c4c"
+  "github_snapshot_hash": "44e99fc8c5afab8af1bbccbc504d63a5caaf32a05e36d87800059ae020dadb76"
 }
