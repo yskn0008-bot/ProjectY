@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-31T02:08:10+09:00",
+  "updated_at": "2026-07-31T02:17:02+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -65,6 +65,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-127ebee0ec04",
+      "title": "feat(nav): premium YOS area map visual v6",
+      "completed_at": "2026-07-30T17:16:46Z",
+      "result": "GitHub mainへ反映（127ebee）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/127ebee0ec04d57ed956fb385c8ec82c3cab65fa"
+    },
+    {
       "id": "github-commit-9fbb10cb75cd",
       "title": "fix(yos-navi): 初期描画後のDOM監視を停止",
       "completed_at": "2026-07-30T17:07:58Z",
@@ -91,13 +98,6 @@
       "completed_at": "2026-07-30T15:13:43Z",
       "result": "GitHub mainへ反映（9ea81bf）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/9ea81bf8a4b745130c0b032f4894ff142bdbc664"
-    },
-    {
-      "id": "github-commit-6f4607daf29e",
-      "title": "Release v109 stable browser calendar fit",
-      "completed_at": "2026-07-30T14:57:10Z",
-      "result": "GitHub mainへ反映（6f4607d）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/6f4607daf29e5fade4f8071a7d485685ab923c4b"
     },
     {
       "id": "complete-002",
@@ -134,7 +134,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-31T02:08:10+09:00",
+      "last_update": "2026-07-31T02:17:02+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -215,7 +215,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-31T02:08:10+09:00",
+      "last_update": "2026-07-31T02:17:02+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -238,7 +238,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-31T02:08:10+09:00",
+      "last_update": "2026-07-31T02:17:02+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -320,5 +320,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "695ad5f4123c2d2d727281fd24c7b55e8060ac5673aa502591512e1d47ce570f"
+  "github_snapshot_hash": "8f4c99ae0ad5d0b4bcd37072dbd2b4e5c26213becda53ac1106c863f2639c56b"
 }
