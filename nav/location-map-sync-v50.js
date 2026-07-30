@@ -7,6 +7,7 @@
   let section=null;
   let signature='';
   let scheduled=false;
+  let lastResumeRefresh=0;
   const readSignature=node=>[
     node?.dataset.latitude||'',
     node?.dataset.longitude||'',
@@ -15,12 +16,20 @@
   ].join('|');
   const refresh=()=>{
     scheduled=false;
-    window.dispatchEvent(new CustomEvent('yos-nav-recommendation',{detail:{source:'location-map-sync-v51'}}));
+    window.dispatchEvent(new CustomEvent('yos-nav-recommendation',{detail:{source:'location-map-sync-v52'}}));
   };
   const scheduleRefresh=()=>{
     if(scheduled)return;
     scheduled=true;
     requestAnimationFrame(refresh);
+  };
+  const refreshAfterResume=()=>{
+    if(document.visibilityState==='hidden')return;
+    const now=Date.now();
+    if(now-lastResumeRefresh<1000)return;
+    lastResumeRefresh=now;
+    ensureMounted();
+    scheduleRefresh();
   };
   const disconnect=()=>{
     observer?.disconnect();
@@ -57,8 +66,7 @@
   };
   ensureMounted();
   window.addEventListener('pagehide',disconnect);
-  window.addEventListener('pageshow',()=>{
-    ensureMounted();
-    scheduleRefresh();
-  });
+  window.addEventListener('pageshow',refreshAfterResume);
+  window.addEventListener('focus',refreshAfterResume);
+  document.addEventListener('visibilitychange',refreshAfterResume);
 })();
