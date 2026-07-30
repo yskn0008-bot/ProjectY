@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-30T22:10:17+09:00",
+  "updated_at": "2026-07-30T22:32:35+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -65,6 +65,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-baf77133ac6a",
+      "title": "Taxi v104: add approved black-gold reference design",
+      "completed_at": "2026-07-30T13:32:22Z",
+      "result": "GitHub mainへ反映（baf7713）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/baf77133ac6ae7a8088db0d8c881bdc155bf3a51"
+    },
+    {
       "id": "github-commit-5dafdcee55c6",
       "title": "refactor(yos-navi): マップ視覚レイヤーを統合 (#94)",
       "completed_at": "2026-07-30T13:10:03Z",
@@ -91,13 +98,6 @@
       "completed_at": "2026-07-30T12:08:08Z",
       "result": "GitHub mainへ反映（5f8f2a7）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/5f8f2a7276491d09eb7789af1078b5b501782480"
-    },
-    {
-      "id": "github-commit-842ce2d0d326",
-      "title": "fix(yos-navi): align map location validity with ranking",
-      "completed_at": "2026-07-30T12:07:55Z",
-      "result": "GitHub mainへ反映（842ce2d）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/842ce2d0d326287ea0085db382a6ced8c18de773"
     },
     {
       "id": "complete-002",
@@ -134,7 +134,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-30T22:10:17+09:00",
+      "last_update": "2026-07-30T22:32:35+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -215,7 +215,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-30T22:10:17+09:00",
+      "last_update": "2026-07-30T22:32:35+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -238,7 +238,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-30T22:10:17+09:00",
+      "last_update": "2026-07-30T22:32:35+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -320,5 +320,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "6eeb48bf8367789ca9a5c761551ead4b533280add1cfc1b925acd9fa6e727928"
+  "github_snapshot_hash": "5bf710909de578de48c0b54279d6d47d6bacc1ea61acca9dbd52e164bb5571d3"
 }
