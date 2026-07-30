@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-31T03:05:48+09:00",
+  "updated_at": "2026-07-31T04:08:54+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -65,6 +65,27 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-0fb82c76a537",
+      "title": "fix(nav): sync YOS map after location changes v50",
+      "completed_at": "2026-07-30T19:08:35Z",
+      "result": "GitHub mainへ反映（0fb82c7）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/0fb82c76a53708c86c9e4ef331cd2cc980f78678"
+    },
+    {
+      "id": "github-commit-680e6ba87581",
+      "title": "chore(nav): publish location map sync v50",
+      "completed_at": "2026-07-30T19:08:07Z",
+      "result": "GitHub mainへ反映（680e6ba）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/680e6ba87581f463ef96121e13102ff3287c461d"
+    },
+    {
+      "id": "github-commit-62060bc9331d",
+      "title": "fix(nav): sync map after location changes",
+      "completed_at": "2026-07-30T19:07:47Z",
+      "result": "GitHub mainへ反映（62060bc）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/62060bc9331d531e6d5801331468cee485308cae"
+    },
+    {
       "id": "github-commit-a61d0fff251c",
       "title": "fix(nav): YOS map label safety v49",
       "completed_at": "2026-07-30T18:05:29Z",
@@ -77,27 +98,6 @@
       "completed_at": "2026-07-30T17:53:19Z",
       "result": "GitHub mainへ反映（338c3d5）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/338c3d58679183f848c05bf772f5f44e8c13ad90"
-    },
-    {
-      "id": "github-commit-2d03c7b0b96b",
-      "title": "Taxi v112: enlarge typography across all screens",
-      "completed_at": "2026-07-30T17:52:50Z",
-      "result": "GitHub mainへ反映（2d03c7b）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/2d03c7b0b96ba353d115b095adadaafdd9172583"
-    },
-    {
-      "id": "github-commit-ef0c16495b44",
-      "title": "Merge pull request #99 from yskn0008-bot/feature/yos-nav-imada-v36",
-      "completed_at": "2026-07-30T17:29:14Z",
-      "result": "GitHub mainへ反映（ef0c164）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/ef0c16495b4410fa156fa4f868721837c0fb3c67"
-    },
-    {
-      "id": "github-commit-02fcd62b7538",
-      "title": "Publish clean v111 reference UI and retire legacy visual overlays",
-      "completed_at": "2026-07-30T17:28:21Z",
-      "result": "GitHub mainへ反映（02fcd62）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/02fcd62b75385b5f068ca62801685e097d584dc7"
     },
     {
       "id": "complete-002",
@@ -134,7 +134,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-31T03:05:48+09:00",
+      "last_update": "2026-07-31T04:08:54+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -215,7 +215,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-31T03:05:48+09:00",
+      "last_update": "2026-07-31T04:08:54+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -238,7 +238,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-31T03:05:48+09:00",
+      "last_update": "2026-07-31T04:08:54+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -320,5 +320,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "95d9cea69fa529d6ee83695839687a18152afcdc6dee407bf8e9bf5346387a35"
+  "github_snapshot_hash": "2326f089a1e9a5fd648ce8f01b3b91a81dc824e7dfffb1f1eedf96cebe455851"
 }
