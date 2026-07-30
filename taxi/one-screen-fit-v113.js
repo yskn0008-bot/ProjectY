@@ -6,6 +6,8 @@
   const root=document.documentElement;
   let raf=0;
   let observer=null;
+  let lastVisible=0;
+  let lastAvailable=0;
 
   function visibleHeight(){
     const vv=window.visualViewport;
@@ -25,7 +27,6 @@
   }
 
   function fit(){
-    cancelAnimationFrame(raf);
     raf=0;
     const shell=document.getElementById('yosReferencePerfectV111');
     const page=shell?.querySelector('.rp-page');
@@ -33,7 +34,11 @@
     if(!shell||!page||!nav)return;
 
     root.classList.add('rp-one-screen-v113');
-    root.style.setProperty('--rp-visible-height',`${visibleHeight()}px`);
+    const visible=visibleHeight();
+    if(visible!==lastVisible){
+      lastVisible=visible;
+      root.style.setProperty('--rp-visible-height',`${visible}px`);
+    }
 
     const pageType=(page.className.match(/rp-page-(drive|today|week|month|manage)/)||[])[1]||'';
     ensureWeekAdd(pageType);
@@ -42,20 +47,24 @@
       const pageTop=Math.round(page.getBoundingClientRect().top);
       const navTop=Math.round(nav.getBoundingClientRect().top);
       const available=Math.max(300,navTop-pageTop-6);
-      root.style.setProperty('--rp-page-fit-height',`${available}px`);
+      if(available!==lastAvailable){
+        lastAvailable=available;
+        root.style.setProperty('--rp-page-fit-height',`${available}px`);
+      }
     });
   }
 
   function schedule(){
-    cancelAnimationFrame(raf);
+    if(raf)return;
     raf=requestAnimationFrame(()=>requestAnimationFrame(fit));
   }
 
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',schedule,{once:true});
   else schedule();
 
+  /* Observe only DOM replacement. Do not observe our own style writes. */
   observer=new MutationObserver(schedule);
-  observer.observe(document.documentElement,{childList:true,subtree:true,attributes:true,attributeFilter:['class','style']});
+  observer.observe(document.body||document.documentElement,{childList:true,subtree:true});
   addEventListener('pageshow',schedule);
   addEventListener('resize',schedule,{passive:true});
   addEventListener('orientationchange',()=>setTimeout(schedule,220),{passive:true});
