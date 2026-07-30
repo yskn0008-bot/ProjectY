@@ -1,5 +1,5 @@
 'use strict';
-const CACHE='yos-taxi-projecty-v15';
+const CACHE='yos-taxi-projecty-v16';
 const STATIC=['./','./index.html','./calendar.html','./settings.html','./manifest.webmanifest','./v9.css','./v9.js','./swipe-nav.js','./v14.css','./v14.js','./v15.js'];
 const isIndex=url=>url.pathname.endsWith('/taxi/')||url.pathname.endsWith('/taxi/index.html');
 const isAppPage=url=>isIndex(url)||url.pathname.endsWith('/taxi/calendar.html')||url.pathname.endsWith('/taxi/settings.html');
