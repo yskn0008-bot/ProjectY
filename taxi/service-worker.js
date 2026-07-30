@@ -1,7 +1,7 @@
 'use strict';
 const CACHE_PREFIX='yos-taxi-projecty-';
-const CACHE='yos-taxi-projecty-v114-one-screen-main-pages';
-const VERSION='114';
+const CACHE='yos-taxi-projecty-v115-stable-one-screen';
+const VERSION='115';
 const STATIC=[
   './','./index.html','./calendar.html','./settings.html','./manifest.webmanifest','./swipe-nav.js',
   './reference-perfect-v111.css','./reference-perfect-v111.js','./large-type-v112.css','./one-screen-fit-v113.css','./one-screen-fit-v113.js','./report-sync-v43.js','./settings-v20.js'
