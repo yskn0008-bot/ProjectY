@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-30T23:46:18+09:00",
+  "updated_at": "2026-07-30T23:47:10+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -65,6 +65,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-c93e1070e155",
+      "title": "Release Taxi v107 with Safari-safe fixed navigation",
+      "completed_at": "2026-07-30T14:46:59Z",
+      "result": "GitHub mainへ反映（c93e107）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/c93e1070e155107f7d9bee4ce664ac16d119d8ce"
+    },
+    {
       "id": "github-commit-f2966f5708d2",
       "title": "Add Safari-aware Taxi nav positioning",
       "completed_at": "2026-07-30T14:45:51Z",
@@ -91,13 +98,6 @@
       "completed_at": "2026-07-30T14:36:11Z",
       "result": "GitHub mainへ反映（2898859）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/28988599f929d52db789b6144c230521130cba36"
-    },
-    {
-      "id": "github-commit-01ccca8d6d24",
-      "title": "Fix Taxi bottom navigation position across every page",
-      "completed_at": "2026-07-30T14:35:43Z",
-      "result": "GitHub mainへ反映（01ccca8）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/01ccca8d6d24670836e7cebda2fa0cf9c4c646c6"
     },
     {
       "id": "complete-002",
@@ -134,7 +134,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-30T23:46:18+09:00",
+      "last_update": "2026-07-30T23:47:10+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -215,7 +215,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-30T23:46:18+09:00",
+      "last_update": "2026-07-30T23:47:10+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -238,7 +238,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-30T23:46:18+09:00",
+      "last_update": "2026-07-30T23:47:10+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -320,5 +320,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "4a50d2484a12cb7a9f6c1bb32bb60e4aa322eca8ad72bec46a6fb177ba24321a"
+  "github_snapshot_hash": "49f2cf1c4ee0d13c3def7e137bc9486c8a282d83dc99378983f8cde9625a5c4c"
 }
