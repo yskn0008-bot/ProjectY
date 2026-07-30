@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-31T04:08:54+09:00",
+  "updated_at": "2026-07-31T05:08:08+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -50,7 +50,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/51",
-      "updated_at": "2026-07-30T17:19:09Z"
+      "updated_at": "2026-07-30T19:12:17Z"
     },
     {
       "id": "github-issue-86",
@@ -64,6 +64,13 @@
     }
   ],
   "recently_completed": [
+    {
+      "id": "github-commit-932483a1731c",
+      "title": "fix(nav): restore YOS location sync after page return v51",
+      "completed_at": "2026-07-30T20:07:49Z",
+      "result": "GitHub mainへ反映（932483a）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/932483a1731ca6410aac501f35d863c17642a955"
+    },
     {
       "id": "github-commit-0fb82c76a537",
       "title": "fix(nav): sync YOS map after location changes v50",
@@ -91,13 +98,6 @@
       "completed_at": "2026-07-30T18:05:29Z",
       "result": "GitHub mainへ反映（a61d0ff）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/a61d0fff251caf48faca64a222e5a49ead330b64"
-    },
-    {
-      "id": "github-commit-338c3d586791",
-      "title": "Taxi v112: publish large readable typography",
-      "completed_at": "2026-07-30T17:53:19Z",
-      "result": "GitHub mainへ反映（338c3d5）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/338c3d58679183f848c05bf772f5f44e8c13ad90"
     },
     {
       "id": "complete-002",
@@ -134,7 +134,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-31T04:08:54+09:00",
+      "last_update": "2026-07-31T05:08:08+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -215,7 +215,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-31T04:08:54+09:00",
+      "last_update": "2026-07-31T05:08:08+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -238,7 +238,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-31T04:08:54+09:00",
+      "last_update": "2026-07-31T05:08:08+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -320,5 +320,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "2326f089a1e9a5fd648ce8f01b3b91a81dc824e7dfffb1f1eedf96cebe455851"
+  "github_snapshot_hash": "67df05ef8500b89dccdab02c5c80dff9880016c7decf5d4205987603f6850f67"
 }
