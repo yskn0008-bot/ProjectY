@@ -33,7 +33,6 @@
     const nav=document.getElementById('taxiGlobalNavV24');
     if(!shell||!page||!nav)return;
 
-    root.classList.add('rp-one-screen-v113');
     const visible=visibleHeight();
     if(visible!==lastVisible){
       lastVisible=visible;
@@ -42,6 +41,21 @@
 
     const pageType=(page.className.match(/rp-page-(drive|today|week|month|manage)/)||[])[1]||'';
     ensureWeekAdd(pageType);
+
+    /*
+      Large readable type plus the approved information density needs about
+      620 CSS px of visible height. Short Safari viewports must scroll instead
+      of crushing or overlapping cards.
+    */
+    const oneScreen=visible>=620;
+    root.classList.toggle('rp-one-screen-v113',oneScreen);
+    root.classList.toggle('rp-adaptive-scroll-v116',!oneScreen);
+
+    if(!oneScreen){
+      lastAvailable=0;
+      root.style.removeProperty('--rp-page-fit-height');
+      return;
+    }
 
     requestAnimationFrame(()=>{
       const pageTop=Math.round(page.getBoundingClientRect().top);
@@ -62,7 +76,6 @@
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',schedule,{once:true});
   else schedule();
 
-  /* Observe only DOM replacement. Do not observe our own style writes. */
   observer=new MutationObserver(schedule);
   observer.observe(document.body||document.documentElement,{childList:true,subtree:true});
   addEventListener('pageshow',schedule);
