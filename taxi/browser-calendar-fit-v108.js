@@ -39,7 +39,7 @@
 
   function apply(){
     queued=false;
-    root.dataset.taxiNavFixed='108';
+    if(root.dataset.taxiNavFixed!=='108')root.dataset.taxiNavFixed='108';
     const element=nav();
     if(!element)return;
 
@@ -89,7 +89,7 @@
   else queue();
 
   const observer=new MutationObserver(queue);
-  observer.observe(document.documentElement,{childList:true,subtree:true,attributes:true,attributeFilter:['class','data-calendar-page','style']});
+  observer.observe(document.documentElement,{childList:true,subtree:true,attributes:true,attributeFilter:['class','data-calendar-page','data-taxi-nav-fixed']});
   addEventListener('pageshow',queue);
   addEventListener('resize',queue,{passive:true});
   addEventListener('orientationchange',()=>setTimeout(queue,220),{passive:true});
