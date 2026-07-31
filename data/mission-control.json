@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-31T21:14:22+09:00",
+  "updated_at": "2026-07-31T21:15:11+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -85,6 +85,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-cad233253313",
+      "title": "chore: remove temporary Vercel note",
+      "completed_at": "2026-07-31T12:15:01Z",
+      "result": "GitHub mainへ反映（cad2332）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/cad23325331337c7a9b49bf2cc545a98230c1594"
+    },
+    {
       "id": "github-commit-729cbf957180",
       "title": "temp",
       "completed_at": "2026-07-31T12:14:10Z",
@@ -111,13 +118,6 @@
       "completed_at": "2026-07-31T10:09:19Z",
       "result": "GitHub mainへ反映（1ff800c）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/1ff800cf85c1bd5fadaac3552639d73ffe9149de"
-    },
-    {
-      "id": "github-commit-707b87448697",
-      "title": "fix(nav): add explicit YOS refresh action v69",
-      "completed_at": "2026-07-31T09:10:27Z",
-      "result": "GitHub mainへ反映（707b874）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/707b87448697f4dab5544b8726d0c2aaf4d292cc"
     },
     {
       "id": "complete-002",
@@ -154,7 +154,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-31T21:14:22+09:00",
+      "last_update": "2026-07-31T21:15:11+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -235,7 +235,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-31T21:14:22+09:00",
+      "last_update": "2026-07-31T21:15:11+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -258,7 +258,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-31T21:14:22+09:00",
+      "last_update": "2026-07-31T21:15:11+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -340,5 +340,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "e09cfe77a5b35bfdfd26d62a0cbca948f613c9134da1d1e06e672c1357dff840"
+  "github_snapshot_hash": "b3f5b4f3c8b5b71aff10aa3b72c29765c72c667ee80d6241f97a538c520bb186"
 }
