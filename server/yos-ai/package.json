@@ -3,6 +3,9 @@
   "version": "0.4.0",
   "private": true,
   "type": "module",
+  "engines": {
+    "node": "22.x"
+  },
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "check:api": "node --check api/yos/chat.mjs && node --check api/yos/health.mjs && node --check api/yos/nav-model.mjs && node --check api/yos/taxi-event.mjs",
