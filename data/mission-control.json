@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-31T15:41:46+09:00",
+  "updated_at": "2026-07-31T16:14:05+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -85,6 +85,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-98bf561c93c2",
+      "title": "fix(nav): reduce YOS diagnostics polling v67",
+      "completed_at": "2026-07-31T07:13:54Z",
+      "result": "GitHub mainへ反映（98bf561）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/98bf561c93c24f169732bedbf80e957c917ea694"
+    },
+    {
       "id": "github-commit-4d83a9252f25",
       "title": "Guard legacy navigation in final YOS Taxi v130",
       "completed_at": "2026-07-31T06:41:35Z",
@@ -111,13 +118,6 @@
       "completed_at": "2026-07-31T06:35:00Z",
       "result": "GitHub mainへ反映（2611d63）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/2611d63b4d6df82b46d8545bc67634adcb086e33"
-    },
-    {
-      "id": "github-commit-89087d28bb9e",
-      "title": "Add final operational drive behavior v124",
-      "completed_at": "2026-07-31T06:13:55Z",
-      "result": "GitHub mainへ反映（89087d2）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/89087d28bb9eeef960fe54bc0315d326e750d4d1"
     },
     {
       "id": "complete-002",
@@ -154,7 +154,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-31T15:41:46+09:00",
+      "last_update": "2026-07-31T16:14:05+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -235,7 +235,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-31T15:41:46+09:00",
+      "last_update": "2026-07-31T16:14:05+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -258,7 +258,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-31T15:41:46+09:00",
+      "last_update": "2026-07-31T16:14:05+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -340,5 +340,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "7151404c4ee092c2455e28ae00bb9ab8c4d4074ff74fe378559aeaff9c3e74c4"
+  "github_snapshot_hash": "a465cf281894cd9a7f61e4ec072bc2e5647c58ed0b928da5c0e8a0cb749e2957"
 }
