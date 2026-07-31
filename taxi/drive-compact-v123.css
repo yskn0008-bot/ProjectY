@@ -1,0 +1,131 @@
+/* YOS Taxi v123 — 文字サイズを維持し、営業画面の縦余白だけを圧縮する。 */
+html.yos-final-drive-v118 .rp-page-drive{
+  gap:5px!important;
+  padding-bottom:4px!important;
+  scroll-padding-bottom:4px!important;
+}
+
+html.yos-final-drive-v118 .rp-page-drive::after{
+  height:0!important;
+  flex-basis:0!important;
+}
+
+html.yos-final-drive-v118 .rp-shell::after{
+  display:none!important;
+}
+
+html.yos-final-drive-v118 .rp-header{
+  height:36px!important;
+  min-height:36px!important;
+}
+html.yos-final-drive-v118 .rp-header h1{
+  font-size:20px!important;
+}
+html.yos-final-drive-v118 .rp-header-icon{
+  width:34px!important;
+  height:34px!important;
+}
+
+html.yos-final-drive-v118 .rp-sales-card{
+  grid-template-columns:minmax(0,1fr) 70px!important;
+  gap:7px!important;
+  padding:8px 10px 7px!important;
+}
+html.yos-final-drive-v118 .rp-sales-copy>span{
+  font-size:14px!important;
+}
+html.yos-final-drive-v118 .rp-sales-copy>strong{
+  font-size:37px!important;
+  line-height:.98!important;
+  margin:1px 0 3px!important;
+}
+html.yos-final-drive-v118 .rp-sales-copy>small{
+  font-size:14px!important;
+}
+html.yos-final-drive-v118 .rp-sales-copy>i{
+  margin-top:5px!important;
+  height:6px!important;
+}
+html.yos-final-drive-v118 .rp-ring-large{
+  width:64px!important;
+  height:64px!important;
+}
+html.yos-final-drive-v118 .rp-ring-large::before{
+  width:50px!important;
+  height:50px!important;
+}
+html.yos-final-drive-v118 .rp-primary-action{
+  min-height:46px!important;
+  height:46px!important;
+  margin-top:2px!important;
+  font-size:19px!important;
+}
+
+html.yos-final-drive-v118 .yf-advice-v118{
+  min-height:62px!important;
+  padding:7px 10px!important;
+}
+html.yos-final-drive-v118 .yf-advice-v118 span{
+  font-size:12px!important;
+}
+html.yos-final-drive-v118 .yf-advice-v118 strong{
+  font-size:19px!important;
+  line-height:1.15!important;
+}
+html.yos-final-drive-v118 .yf-advice-v118 button{
+  font-size:28px!important;
+}
+
+html.yos-final-drive-v118 .rp-three-metrics>div{
+  min-height:58px!important;
+  padding:5px 3px!important;
+}
+html.yos-final-drive-v118 .rp-three-metrics span{
+  font-size:12px!important;
+}
+html.yos-final-drive-v118 .rp-three-metrics strong{
+  font-size:18px!important;
+}
+
+html.yos-final-drive-v118 .rp-action-card{
+  padding:6px 7px!important;
+}
+html.yos-final-drive-v118 .rp-action-card h2{
+  margin:0 0 4px!important;
+  font-size:14px!important;
+}
+html.yos-final-drive-v118 .rp-action-row{
+  gap:5px!important;
+}
+html.yos-final-drive-v118 .rp-action-row button{
+  min-height:43px!important;
+  height:43px!important;
+  font-size:14px!important;
+}
+
+html.yos-final-drive-v118 .rp-status-card{
+  padding:7px!important;
+}
+html.yos-final-drive-v118 .rp-status-card h2{
+  margin:0 0 4px!important;
+  font-size:14px!important;
+}
+html.yos-final-drive-v118 .rp-status-card dl{
+  gap:5px!important;
+}
+html.yos-final-drive-v118 .rp-status-card dl>div{
+  min-height:52px!important;
+  padding:5px 6px!important;
+}
+html.yos-final-drive-v118 .rp-status-card dt{
+  font-size:11px!important;
+}
+html.yos-final-drive-v118 .rp-status-card dd{
+  font-size:15px!important;
+}
+
+@media(max-width:375px){
+  html.yos-final-drive-v118 .rp-shell{padding-left:10px!important;padding-right:10px!important}
+  html.yos-final-drive-v118 .rp-sales-copy>strong{font-size:35px!important}
+  html.yos-final-drive-v118 .yf-advice-v118 strong{font-size:18px!important}
+}
