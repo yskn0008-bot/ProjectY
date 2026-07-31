@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-31T13:52:18+09:00",
+  "updated_at": "2026-07-31T13:55:28+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -75,6 +75,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-55626b951958",
+      "title": "fix(nav): keep YOS map covered until tiles render v63",
+      "completed_at": "2026-07-31T04:55:09Z",
+      "result": "GitHub mainへ反映（55626b9）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/55626b951958dd6e9d6dfa8286d27723a43315cf"
+    },
+    {
       "id": "github-commit-db5f9e5bc56b",
       "title": "fix(nav): stabilize YOS tab lifecycle v62",
       "completed_at": "2026-07-31T04:52:01Z",
@@ -101,13 +108,6 @@
       "completed_at": "2026-07-31T04:39:43Z",
       "result": "GitHub mainへ反映（a3f0ce8）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/a3f0ce821955734c7af96e4f44f628efd92b12f0"
-    },
-    {
-      "id": "github-commit-5851b3652df2",
-      "title": "Add YOS Taxi final integrated operational UI behavior",
-      "completed_at": "2026-07-31T04:38:04Z",
-      "result": "GitHub mainへ反映（5851b36）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/5851b3652df2f3cbeca4c421d54dabaa2bdebfb7"
     },
     {
       "id": "complete-002",
@@ -144,7 +144,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-31T13:52:18+09:00",
+      "last_update": "2026-07-31T13:55:28+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -225,7 +225,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-31T13:52:18+09:00",
+      "last_update": "2026-07-31T13:55:28+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -248,7 +248,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-31T13:52:18+09:00",
+      "last_update": "2026-07-31T13:55:28+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -330,5 +330,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "6166e87c5ba7d2f6123a987c80d1b5e1501603aff5062fc23221df2a4ca5574f"
+  "github_snapshot_hash": "3710d1ff6bf650e9bb7bb1e05a88468c969859ed98f3442150c113e9d725a097"
 }
