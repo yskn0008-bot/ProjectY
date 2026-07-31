@@ -1,13 +1,14 @@
 'use strict';
 const CACHE_PREFIX='yos-taxi-projecty-';
-const CACHE='yos-taxi-projecty-v120-drive-scroll-safe';
-const VERSION='120';
+const CACHE='yos-taxi-projecty-v121-drive-priority';
+const VERSION='121';
 const STATIC=[
   './','./index.html','./calendar.html','./settings.html','./manifest.webmanifest','./swipe-nav.js',
   './reference-perfect-v111.css','./reference-perfect-v111.js','./large-type-v112.css',
   './final-integrated-v118.css','./final-integrated-v118.js',
   './drive-refine-v119.css','./drive-refine-v119.js',
   './drive-scroll-v120.css','./drive-scroll-v120.js',
+  './drive-priority-v121.css','./drive-priority-v121.js',
   './report-sync-v43.js','./settings-v20.js','./projecty-live-sync-v1.js'
 ];
 
@@ -25,6 +26,7 @@ async function inject(response,type){
   if(type==='index'){
     addCss('drive-refine-v119.css');
     addCss('drive-scroll-v120.css');
+    addCss('drive-priority-v121.css');
   }
   if(type==='calendar')addJs('report-sync-v43.js');
   if(type==='settings')addJs('settings-v20.js');
@@ -33,6 +35,7 @@ async function inject(response,type){
   if(type==='index'){
     addJs('drive-refine-v119.js');
     addJs('drive-scroll-v120.js');
+    addJs('drive-priority-v121.js');
     addJs('projecty-live-sync-v1.js');
   }
 
