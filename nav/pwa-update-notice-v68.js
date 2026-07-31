@@ -1,13 +1,13 @@
 'use strict';
 (()=>{
-  if(window.__yosNavPwaUpdateNoticeV71)return;
-  window.__yosNavPwaUpdateNoticeV71=true;
+  if(window.__yosNavPwaUpdateNoticeV72)return;
+  window.__yosNavPwaUpdateNoticeV72=true;
 
   let notice=null;
   let refreshButton=null;
   let text=null;
   let reloading=false;
-  let hadController=Boolean(navigator.serviceWorker?.controller);
+  let knownController=navigator.serviceWorker?.controller||null;
 
   const removeNotice=()=>{
     notice?.remove();
@@ -38,7 +38,7 @@
   const showNotice=()=>{
     if(notice){syncConnectivity();return;}
     notice=document.createElement('aside');
-    notice.id='yos-nav-pwa-update-v71';
+    notice.id='yos-nav-pwa-update-v72';
     notice.setAttribute('role','status');
     notice.setAttribute('aria-live','polite');
     notice.style.cssText='position:fixed;z-index:99998;left:10px;right:10px;bottom:calc(env(safe-area-inset-bottom) + 10px);padding:12px;border:1px solid #31516b;border-radius:14px;background:#030a10;color:#eaf7ff;font:12px/1.45 -apple-system,BlinkMacSystemFont,sans-serif;box-shadow:0 12px 30px rgba(0,0,0,.45)';
@@ -68,12 +68,14 @@
   };
 
   const handleControllerChange=()=>{
-    const hasController=Boolean(navigator.serviceWorker?.controller);
-    if(!hasController)return;
-    if(!hadController){
-      hadController=true;
+    const nextController=navigator.serviceWorker?.controller||null;
+    if(!nextController)return;
+    if(!knownController){
+      knownController=nextController;
       return;
     }
+    if(nextController===knownController)return;
+    knownController=nextController;
     showNotice();
   };
 
