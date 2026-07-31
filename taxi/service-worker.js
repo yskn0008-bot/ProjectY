@@ -1,16 +1,11 @@
 'use strict';
 const CACHE_PREFIX='yos-taxi-projecty-';
-const CACHE='yos-taxi-projecty-v123-drive-compact';
-const VERSION='123';
+const CACHE='yos-taxi-projecty-v130-final-app';
+const VERSION='130';
 const STATIC=[
   './','./index.html','./calendar.html','./settings.html','./manifest.webmanifest','./swipe-nav.js',
-  './reference-perfect-v111.css','./reference-perfect-v111.js','./large-type-v112.css',
-  './final-integrated-v118.css','./final-integrated-v118.js',
-  './drive-refine-v119.css','./drive-refine-v119.js',
-  './drive-scroll-v120.css','./drive-scroll-v120.js',
-  './drive-priority-v121.css','./drive-priority-v121.js',
-  './drive-stable-v122.css','./drive-stable-v122.js',
-  './drive-compact-v123.css',
+  './reference-perfect-v111.css','./reference-perfect-v111.js',
+  './final-app-v130.css','./final-app-v130.js',
   './report-sync-v43.js','./settings-v20.js','./projecty-live-sync-v1.js'
 ];
 
@@ -18,31 +13,16 @@ const pageType=url=>url.pathname.endsWith('/taxi/')||url.pathname.endsWith('/tax
 
 async function inject(response,type){
   let html=await response.text();
-  const addCss=file=>{if(!html.includes(file))html=html.replace('</head>',`<link rel="stylesheet" href="./${file}?v=${VERSION}"></head>`) };
-  const addJs=file=>{if(!html.includes(file))html=html.replace('</body>',`<script src="./${file}?v=${VERSION}"></script></body>`) };
+  const addCss=file=>{if(!html.includes(file))html=html.replace('</head>',`<link rel="stylesheet" href="./${file}?v=${VERSION}"></head>`)};
+  const addJs=file=>{if(!html.includes(file))html=html.replace('</body>',`<script src="./${file}?v=${VERSION}"></script></body>`)};
 
-  /* Clean black/gold base, readable type, approved UI, then real-device page refinements. */
   addCss('reference-perfect-v111.css');
-  addCss('large-type-v112.css');
-  addCss('final-integrated-v118.css');
-  if(type==='index'){
-    addCss('drive-refine-v119.css');
-    addCss('drive-scroll-v120.css');
-    addCss('drive-priority-v121.css');
-    addCss('drive-stable-v122.css');
-    addCss('drive-compact-v123.css');
-  }
+  if(type!=='settings')addCss('final-app-v130.css');
   if(type==='calendar')addJs('report-sync-v43.js');
   if(type==='settings')addJs('settings-v20.js');
   addJs('reference-perfect-v111.js');
-  addJs('final-integrated-v118.js');
-  if(type==='index'){
-    addJs('drive-refine-v119.js');
-    addJs('drive-scroll-v120.js');
-    addJs('drive-priority-v121.js');
-    addJs('drive-stable-v122.js');
-    addJs('projecty-live-sync-v1.js');
-  }
+  if(type!=='settings')addJs('final-app-v130.js');
+  if(type==='index')addJs('projecty-live-sync-v1.js');
 
   const headers=new Headers(response.headers);
   headers.delete('content-length');
