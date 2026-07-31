@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-31T13:59:00+09:00",
+  "updated_at": "2026-07-31T14:02:58+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -75,6 +75,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-6670221238d4",
+      "title": "fix(taxi): isolate drive content above fixed nav on iPhone Safari",
+      "completed_at": "2026-07-31T05:02:48Z",
+      "result": "GitHub mainへ反映（6670221）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/6670221238d4a0594a092ddd3d0bbdde7ab514bd"
+    },
+    {
       "id": "github-commit-51c4fe813ac6",
       "title": "YOS AI：本番起動診断とVercel配置準備",
       "completed_at": "2026-07-31T04:58:45Z",
@@ -101,13 +108,6 @@
       "completed_at": "2026-07-31T04:55:58Z",
       "result": "GitHub mainへ反映（7d4cca2）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/7d4cca2d5c74e5ba5acf6693d6b7d6d142d792f7"
-    },
-    {
-      "id": "github-commit-55626b951958",
-      "title": "fix(nav): keep YOS map covered until tiles render v63",
-      "completed_at": "2026-07-31T04:55:09Z",
-      "result": "GitHub mainへ反映（55626b9）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/55626b951958dd6e9d6dfa8286d27723a43315cf"
     },
     {
       "id": "complete-002",
@@ -144,7 +144,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-31T13:59:00+09:00",
+      "last_update": "2026-07-31T14:02:58+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -225,7 +225,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-31T13:59:00+09:00",
+      "last_update": "2026-07-31T14:02:58+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -248,7 +248,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-31T13:59:00+09:00",
+      "last_update": "2026-07-31T14:02:58+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -330,5 +330,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "e70b6df943c24c05937d0f76d2e5dcec8b7891d0208d9ba048de752fadb82f03"
+  "github_snapshot_hash": "bca0992d15884dc51fe9f7568ec23ab32e5291f2745e902f452c21c3c9e4d478"
 }
