@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-31T14:10:48+09:00",
+  "updated_at": "2026-07-31T14:14:46+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -70,7 +70,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/51",
-      "updated_at": "2026-07-31T04:14:59Z"
+      "updated_at": "2026-07-31T05:11:54Z"
     },
     {
       "id": "github-issue-86",
@@ -84,6 +84,13 @@
     }
   ],
   "recently_completed": [
+    {
+      "id": "github-commit-1041e54cdae0",
+      "title": "YOS AI：OpenAPI契約とPWA接続仕様を追加",
+      "completed_at": "2026-07-31T05:14:29Z",
+      "result": "GitHub mainへ反映（1041e54）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/1041e54cdae04734484959253ac14132280146b9"
+    },
     {
       "id": "github-commit-9c833f167363",
       "title": "Publish drive priority refinement v121",
@@ -111,13 +118,6 @@
       "completed_at": "2026-07-31T05:08:52Z",
       "result": "GitHub mainへ反映（69b5b3d）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/69b5b3d674b8cdaa35b94a8527605533c2aea0a2"
-    },
-    {
-      "id": "github-commit-a2974d1ca35c",
-      "title": "YOS AI：READMEをv0.4・106試験へ同期",
-      "completed_at": "2026-07-31T05:05:42Z",
-      "result": "GitHub mainへ反映（a2974d1）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/a2974d1ca35c8f663b7d833c6da94e62ca57924a"
     },
     {
       "id": "complete-002",
@@ -154,7 +154,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-31T14:10:48+09:00",
+      "last_update": "2026-07-31T14:14:46+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -235,7 +235,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-31T14:10:48+09:00",
+      "last_update": "2026-07-31T14:14:46+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -258,7 +258,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-31T14:10:48+09:00",
+      "last_update": "2026-07-31T14:14:46+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -340,5 +340,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "a3c7af4d4f7850edbabca0af699bc05d17738b0964341935d1e1ebd714174820"
+  "github_snapshot_hash": "fbf042a7b8d3270ed4b31a964fc29faaadfec28a6ea0553df13b9c421d66f6af"
 }
