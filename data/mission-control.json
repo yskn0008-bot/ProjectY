@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-31T17:09:17+09:00",
+  "updated_at": "2026-07-31T18:10:43+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -70,7 +70,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/51",
-      "updated_at": "2026-07-31T07:16:45Z"
+      "updated_at": "2026-07-31T08:16:38Z"
     },
     {
       "id": "github-issue-86",
@@ -84,6 +84,13 @@
     }
   ],
   "recently_completed": [
+    {
+      "id": "github-commit-707b87448697",
+      "title": "fix(nav): add explicit YOS refresh action v69",
+      "completed_at": "2026-07-31T09:10:27Z",
+      "result": "GitHub mainへ反映（707b874）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/707b87448697f4dab5544b8726d0c2aaf4d292cc"
+    },
     {
       "id": "github-commit-ca7edc90d5ef",
       "title": "feat(nav): add YOS PWA update notice v68",
@@ -111,13 +118,6 @@
       "completed_at": "2026-07-31T06:38:51Z",
       "result": "GitHub mainへ反映（bb956b6）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/bb956b690872047e392a407505d9c7295d698053"
-    },
-    {
-      "id": "github-commit-f90473150601",
-      "title": "Add final unified YOS Taxi behavior v130",
-      "completed_at": "2026-07-31T06:37:53Z",
-      "result": "GitHub mainへ反映（f904731）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/f90473150601a7aff944b01575e4bde8900f21bf"
     },
     {
       "id": "complete-002",
@@ -154,7 +154,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-31T17:09:17+09:00",
+      "last_update": "2026-07-31T18:10:43+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -235,7 +235,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-31T17:09:17+09:00",
+      "last_update": "2026-07-31T18:10:43+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -258,7 +258,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-31T17:09:17+09:00",
+      "last_update": "2026-07-31T18:10:43+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -340,5 +340,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "ef093bf901424e6c7e2dd03d742fb99a470d76392dc8d5fcec3e7435e34b77fa"
+  "github_snapshot_hash": "cad04756e8bd7d7d0fef6c0a3c91f7dc7b578de0df26961f94ab51ef8fb94172"
 }
