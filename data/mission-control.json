@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-31T13:55:28+09:00",
+  "updated_at": "2026-07-31T13:56:11+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -75,6 +75,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-7d4cca2d5c74",
+      "title": "Refine SE3 drive screen layout and prevent nav overlap",
+      "completed_at": "2026-07-31T04:55:58Z",
+      "result": "GitHub mainへ反映（7d4cca2）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/7d4cca2d5c74e5ba5acf6693d6b7d6d142d792f7"
+    },
+    {
       "id": "github-commit-55626b951958",
       "title": "fix(nav): keep YOS map covered until tiles render v63",
       "completed_at": "2026-07-31T04:55:09Z",
@@ -101,13 +108,6 @@
       "completed_at": "2026-07-31T04:40:36Z",
       "result": "GitHub mainへ反映（216797b）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/216797bacf0382324531bb437167e8032107cadc"
-    },
-    {
-      "id": "github-commit-a3f0ce821955",
-      "title": "Add YOS Taxi final integrated operational UI styles",
-      "completed_at": "2026-07-31T04:39:43Z",
-      "result": "GitHub mainへ反映（a3f0ce8）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/a3f0ce821955734c7af96e4f44f628efd92b12f0"
     },
     {
       "id": "complete-002",
@@ -144,7 +144,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-31T13:55:28+09:00",
+      "last_update": "2026-07-31T13:56:11+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -225,7 +225,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-31T13:55:28+09:00",
+      "last_update": "2026-07-31T13:56:11+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -248,7 +248,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-31T13:55:28+09:00",
+      "last_update": "2026-07-31T13:56:11+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -330,5 +330,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "3710d1ff6bf650e9bb7bb1e05a88468c969859ed98f3442150c113e9d725a097"
+  "github_snapshot_hash": "ceb862b982d1e97c818fcaccdf866b84bd78a25c219a582bb2ec7fe1426770e6"
 }
