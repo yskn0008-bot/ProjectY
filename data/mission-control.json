@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-31T14:04:53+09:00",
+  "updated_at": "2026-07-31T14:05:55+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -12,16 +12,6 @@
     ]
   },
   "inbox": [
-    {
-      "id": "github-pr-119",
-      "title": "PR #119 YOS AI：READMEをv0.4・106試験へ同期",
-      "type": "GitHub PR",
-      "status": "review",
-      "priority": 1,
-      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/119",
-      "updated_at": "2026-07-31T05:04:44Z"
-    },
     {
       "id": "github-issue-10",
       "title": "Issue #10 Mission Control v2：GitHubのIssue・PR・Commitを自動集約する",
@@ -85,6 +75,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-a2974d1ca35c",
+      "title": "YOS AI：READMEをv0.4・106試験へ同期",
+      "completed_at": "2026-07-31T05:05:42Z",
+      "result": "GitHub mainへ反映（a2974d1）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/a2974d1ca35c8f663b7d833c6da94e62ca57924a"
+    },
+    {
       "id": "github-commit-630ae3ff96fb",
       "title": "feat(nav): add YOS runtime diagnostics v64",
       "completed_at": "2026-07-31T05:04:41Z",
@@ -113,13 +110,6 @@
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/6670221238d4a0594a092ddd3d0bbdde7ab514bd"
     },
     {
-      "id": "github-commit-51c4fe813ac6",
-      "title": "YOS AI：本番起動診断とVercel配置準備",
-      "completed_at": "2026-07-31T04:58:45Z",
-      "result": "GitHub mainへ反映（51c4fe8）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/51c4fe813ac62524b7581c37676deb297d51daaf"
-    },
-    {
       "id": "complete-002",
       "title": "iPhone向けMission Control Dashboardを実装",
       "completed_at": "2026-07-17T17:55:00+09:00",
@@ -144,7 +134,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #119をレビューして公開判断する",
+      "next_action": "Issue #4を実装する：YOS Mission Control v1.0を構築する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -154,7 +144,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-31T14:04:53+09:00",
+      "last_update": "2026-07-31T14:05:55+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -225,17 +215,17 @@
       "type": "infrastructure",
       "purpose": "YOSのコード、仕様、タスク、変更履歴を保存する",
       "status": "active",
-      "health": "attention",
+      "health": "ok",
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 6件・Open PR 1件を自動同期中",
+      "next_action": "Open Issue 6件・Open PR 0件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-31T14:04:53+09:00",
+      "last_update": "2026-07-31T14:05:55+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -244,12 +234,12 @@
       "domain": "Infrastructure",
       "type": "development",
       "purpose": "YOSと各Labの設計に基づいて実装、修正、テストを行う",
-      "status": "review",
-      "health": "attention",
+      "status": "active",
+      "health": "ok",
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #119をレビューして公開判断する",
+      "next_action": "Issue #4を実装する：YOS Mission Control v1.0を構築する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -258,7 +248,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-31T14:04:53+09:00",
+      "last_update": "2026-07-31T14:05:55+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -340,5 +330,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "e7ad3d90736a6773a27202230fde479e707836ddc0fc82301ac207d386cda412"
+  "github_snapshot_hash": "884d685c73b7384a292924830c7bbd1155d9dfa42dd89f4b96975606366a82df"
 }
