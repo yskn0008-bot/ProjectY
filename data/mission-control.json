@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-08-01T08:00:33+09:00",
+  "updated_at": "2026-08-01T08:09:11+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -95,6 +95,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-660eac248a0e",
+      "title": "feat(nav): validate YOSナビ response URLs v83",
+      "completed_at": "2026-07-31T23:08:59Z",
+      "result": "GitHub mainへ反映（660eac2）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/660eac248a0e53edd466ac56cd1bcc6e790acd97"
+    },
+    {
       "id": "github-commit-13b8ca034ff6",
       "title": "feat(nav): validate YOSナビ runtime responses v82",
       "completed_at": "2026-07-31T22:10:05Z",
@@ -121,13 +128,6 @@
       "completed_at": "2026-07-31T19:10:30Z",
       "result": "GitHub mainへ反映（977a12b）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/977a12b971ec1757b2626750e2babf6dd17e3275"
-    },
-    {
-      "id": "github-commit-8238f45ffb12",
-      "title": "feat(nav): validate YOS cached script body signatures v78",
-      "completed_at": "2026-07-31T18:08:14Z",
-      "result": "GitHub mainへ反映（8238f45）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/8238f45ffb1279d70ad1c997c75ccf0b74097c95"
     },
     {
       "id": "complete-002",
@@ -164,7 +164,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-08-01T08:00:33+09:00",
+      "last_update": "2026-08-01T08:09:11+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -245,7 +245,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-08-01T08:00:33+09:00",
+      "last_update": "2026-08-01T08:09:11+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -268,7 +268,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-08-01T08:00:33+09:00",
+      "last_update": "2026-08-01T08:09:11+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -350,5 +350,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "55a06a8eb08632d5e100ce383a0cd53dd093f50ea8dd6b838962c7765549ce3f"
+  "github_snapshot_hash": "fd0277b44b1c3d9f9b35a17aad21c12685cd0a69248a36ef85b5dedc0fa01bf8"
 }
