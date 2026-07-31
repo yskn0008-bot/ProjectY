@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-31T15:35:11+09:00",
+  "updated_at": "2026-07-31T15:38:04+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -85,6 +85,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-f90473150601",
+      "title": "Add final unified YOS Taxi behavior v130",
+      "completed_at": "2026-07-31T06:37:53Z",
+      "result": "GitHub mainへ反映（f904731）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/f90473150601a7aff944b01575e4bde8900f21bf"
+    },
+    {
       "id": "github-commit-2611d63b4d6d",
       "title": "Add final unified YOS Taxi UI v130",
       "completed_at": "2026-07-31T06:35:00Z",
@@ -111,13 +118,6 @@
       "completed_at": "2026-07-31T06:10:41Z",
       "result": "GitHub mainへ反映（a039369）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/a0393691dba3894910c15645b019b0602709ec79"
-    },
-    {
-      "id": "github-commit-cdcb09138d0f",
-      "title": "Release v123 compact drive layout",
-      "completed_at": "2026-07-31T05:23:24Z",
-      "result": "GitHub mainへ反映（cdcb091）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/cdcb09138d0f00b6a1a0d33eccfc40bf259d75e0"
     },
     {
       "id": "complete-002",
@@ -154,7 +154,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-31T15:35:11+09:00",
+      "last_update": "2026-07-31T15:38:04+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -235,7 +235,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-31T15:35:11+09:00",
+      "last_update": "2026-07-31T15:38:04+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -258,7 +258,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-31T15:35:11+09:00",
+      "last_update": "2026-07-31T15:38:04+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -340,5 +340,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "c743a0ee0ccf01b36e9c05f59dff4ffe1b750ceb70b994bac2c1a0453500d69f"
+  "github_snapshot_hash": "2b6ad09789c22481db1c4c384fb8ab814d67a6478e4114aebe19128bf25f3d0d"
 }
