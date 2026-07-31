@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-31T14:23:02+09:00",
+  "updated_at": "2026-07-31T14:23:37+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -40,7 +40,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/120",
-      "updated_at": "2026-07-31T05:15:57Z"
+      "updated_at": "2026-07-31T05:23:05Z"
     },
     {
       "id": "github-issue-4",
@@ -85,6 +85,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-cdcb09138d0f",
+      "title": "Release v123 compact drive layout",
+      "completed_at": "2026-07-31T05:23:24Z",
+      "result": "GitHub mainへ反映（cdcb091）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/cdcb09138d0f00b6a1a0d33eccfc40bf259d75e0"
+    },
+    {
       "id": "github-commit-5cfbce3190a0",
       "title": "Add v123 compact drive layout for iPhone SE3",
       "completed_at": "2026-07-31T05:22:42Z",
@@ -111,13 +118,6 @@
       "completed_at": "2026-07-31T05:16:55Z",
       "result": "GitHub mainへ反映（feea93f）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/feea93f27f3496e35d16c9cfc17fbaac49aec407"
-    },
-    {
-      "id": "github-commit-f5b089c2e3ef",
-      "title": "Add v122 stable drive layout and Safari nav positioning",
-      "completed_at": "2026-07-31T05:16:24Z",
-      "result": "GitHub mainへ反映（f5b089c）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/f5b089c2e3ef19dd5ca7c33518f8a1d28ce4b03e"
     },
     {
       "id": "complete-002",
@@ -154,7 +154,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-31T14:23:02+09:00",
+      "last_update": "2026-07-31T14:23:37+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -235,7 +235,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-31T14:23:02+09:00",
+      "last_update": "2026-07-31T14:23:37+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -258,7 +258,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-31T14:23:02+09:00",
+      "last_update": "2026-07-31T14:23:37+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -340,5 +340,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "333457d8f8bbd68d310b88c15bb981df65a546358baa2c9ff43425adbcc3b39c"
+  "github_snapshot_hash": "049392dce44225536f1806405abb11c94fbdc2505f19a7f162973b567999b8a6"
 }
