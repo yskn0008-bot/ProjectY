@@ -1,7 +1,7 @@
 # YOS Taxi Activation Status
 
 - Code: ready
-- Repository CI: verification in progress for activation assistant and deploy guards
+- Repository CI: passed for activation assistant and deploy guards
 - Vercel project creation: blocked by Hobby deployment limit until reset
 - Required external credentials: not registered
 - Google Cloud WIF: not configured
