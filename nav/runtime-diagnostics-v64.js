@@ -1,15 +1,18 @@
 'use strict';
 (()=>{
-  if(window.__yosNavRuntimeDiagnosticsV66)return;
-  window.__yosNavRuntimeDiagnosticsV66=true;
+  if(window.__yosNavRuntimeDiagnosticsV67)return;
+  window.__yosNavRuntimeDiagnosticsV67=true;
 
-  const BUILD='v66';
-  const EXPECTED_CACHE='yos-navi-strategy-v66-diagnostics-loop-guard';
+  const BUILD='v67';
+  const EXPECTED_CACHE='yos-navi-strategy-v67-diagnostics-polling';
+  const SW_STATUS_TTL_MS=30000;
   const isDiagnosticMode=new URL(location.href).searchParams.get('diagnostics')==='1';
   let swStatus={controlled:Boolean(navigator.serviceWorker?.controller),cache:null,buildMatch:false};
+  let swCheckedAt=0;
   let scheduled=false;
   let running=false;
   let pending=false;
+  let forcePending=false;
   let lastPanelSignature='';
 
   const requestServiceWorkerStatus=()=>new Promise(resolve=>{
@@ -24,8 +27,19 @@
       const cache=String(event.data?.cache||'')||null;
       finish({controlled:true,cache,buildMatch:cache===EXPECTED_CACHE});
     };
-    controller.postMessage({type:'YOS_NAV_STATUS_REQUEST'},[channel.port2]);
+    try{
+      controller.postMessage({type:'YOS_NAV_STATUS_REQUEST'},[channel.port2]);
+    }catch(error){
+      clearTimeout(timer);
+      finish({controlled:true,cache:null,buildMatch:false});
+    }
   });
+
+  const refreshServiceWorkerStatus=async force=>{
+    if(!force&&swCheckedAt&&Date.now()-swCheckedAt<SW_STATUS_TTL_MS)return;
+    swStatus=await requestServiceWorkerStatus();
+    swCheckedAt=Date.now();
+  };
 
   const snapshot=()=>{
     const locationEl=document.querySelector('.yos-location-status');
@@ -74,33 +88,46 @@
     panel.innerHTML=`<div style="display:flex;justify-content:space-between;gap:8px"><strong>YOSナビ 診断 ${report.build}</strong><span>${report.ready?'READY':'CHECK'}</span></div>${rows}`;
   };
 
-  const run=async()=>{
-    if(running){pending=true;return;}
+  const run=async force=>{
+    if(running){
+      pending=true;
+      forcePending=forcePending||force;
+      return;
+    }
     running=true;
+    let shouldForce=force;
     do{
       pending=false;
-      swStatus=await requestServiceWorkerStatus();
+      forcePending=false;
+      await refreshServiceWorkerStatus(shouldForce);
       renderPanel(publish());
-    }while(pending);
+      shouldForce=forcePending;
+    }while(pending||forcePending);
     running=false;
   };
 
-  const schedule=()=>{
+  const schedule=(force=false)=>{
+    forcePending=forcePending||force;
     if(scheduled){pending=true;return;}
     scheduled=true;
-    requestAnimationFrame(()=>{scheduled=false;run();});
+    requestAnimationFrame(()=>{
+      scheduled=false;
+      const shouldForce=forcePending;
+      forcePending=false;
+      run(shouldForce);
+    });
   };
 
   const observer=new MutationObserver(mutations=>{
     if(mutations.every(mutation=>mutation.target.closest?.('#yos-nav-diagnostics-v64')))return;
-    schedule();
+    schedule(false);
   });
   observer.observe(document.documentElement,{childList:true,subtree:true,attributes:true,attributeFilter:['class','data-latitude','data-longitude','data-accuracy','data-acquired-at']});
-  navigator.serviceWorker?.addEventListener('controllerchange',schedule);
-  window.addEventListener('online',schedule);
-  window.addEventListener('offline',schedule);
-  window.addEventListener('pageshow',schedule);
-  window.addEventListener('yos-nav-recommendation',schedule);
-  document.addEventListener('visibilitychange',()=>{if(!document.hidden)schedule();});
-  schedule();
+  navigator.serviceWorker?.addEventListener('controllerchange',()=>schedule(true));
+  window.addEventListener('online',()=>schedule(true));
+  window.addEventListener('offline',()=>schedule(false));
+  window.addEventListener('pageshow',()=>schedule(true));
+  window.addEventListener('yos-nav-recommendation',()=>schedule(false));
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)schedule(true);});
+  schedule(true);
 })();
