@@ -1,10 +1,10 @@
 'use strict';
 (()=>{
-  if(window.__yosMapTabControlsV61)return;
-  window.__yosMapTabControlsV61=true;
+  if(window.__yosMapTabControlsV62)return;
+  window.__yosMapTabControlsV62=true;
 
   const style=document.createElement('style');
-  style.id='yos-map-tab-controls-v61-style';
+  style.id='yos-map-tab-controls-v62-style';
   style.textContent=`
     .yos-real-map-v7__tab{cursor:pointer;touch-action:manipulation}
     .yos-real-map-v7__tab:focus-visible{outline:2px solid #7bd4ff;outline-offset:-3px}
@@ -20,34 +20,23 @@
   `;
   document.head.appendChild(style);
 
-  let mountedSection=null;
+  let mountedFirstTab=null;
   const mount=()=>{
     const section=document.getElementById('yos-okinawa-area-map');
-    if(!section||section===mountedSection&&!section.querySelector('.yos-real-map-v7__tabs'))return false;
+    if(!section)return false;
     const tabs=[...section.querySelectorAll('.yos-real-map-v7__tab')];
     const mapWrap=section.querySelector('.yos-real-map-v7__map-wrap');
     const summary=section.querySelector('.yos-real-map-v7__summary');
     const ranking=section.querySelector('.yos-real-map-v7__ranking');
     if(tabs.length<3||!mapWrap||!summary||!ranking)return false;
-    mountedSection=section;
-
-    tabs.forEach((tab,index)=>{
-      tab.setAttribute('role','tab');
-      tab.setAttribute('aria-selected',index===0?'true':'false');
-      tab.classList.toggle('is-active',index===0);
-    });
-    tabs[0].id='yos-map-tab-map';
-    tabs[1].id='yos-map-tab-ranking';
-    tabs[2].id='yos-map-tab-history';
-    mapWrap.setAttribute('role','tabpanel');
-    mapWrap.setAttribute('aria-labelledby',tabs[0].id);
-    ranking.setAttribute('role','tabpanel');
-    ranking.setAttribute('aria-labelledby',tabs[1].id);
+    if(mountedFirstTab===tabs[0])return true;
+    mountedFirstTab=tabs[0];
 
     const activate=index=>{
       tabs.forEach((tab,tabIndex)=>{
         const active=tabIndex===index;
         tab.setAttribute('aria-selected',active?'true':'false');
+        tab.setAttribute('tabindex',active?'0':'-1');
         tab.classList.toggle('is-active',active);
       });
       if(index===0){
@@ -60,11 +49,34 @@
         ranking.classList.remove('yos-map-v61-hidden');
         summary.classList.remove('yos-map-v61-hidden');
       }else{
-        location.href='../taxi/calendar.html';
+        location.href=new URL('../taxi/calendar.html',location.href).href;
       }
     };
 
-    tabs.forEach((tab,index)=>tab.addEventListener('click',()=>activate(index)));
+    tabs.forEach((tab,index)=>{
+      tab.setAttribute('role','tab');
+      tab.id=['yos-map-tab-map','yos-map-tab-ranking','yos-map-tab-history'][index];
+      tab.setAttribute('aria-selected',index===0?'true':'false');
+      tab.setAttribute('tabindex',index===0?'0':'-1');
+      tab.classList.toggle('is-active',index===0);
+      tab.addEventListener('click',()=>activate(index));
+      tab.addEventListener('keydown',event=>{
+        let nextIndex=null;
+        if(event.key==='ArrowRight')nextIndex=(index+1)%tabs.length;
+        if(event.key==='ArrowLeft')nextIndex=(index-1+tabs.length)%tabs.length;
+        if(event.key==='Home')nextIndex=0;
+        if(event.key==='End')nextIndex=tabs.length-1;
+        if(nextIndex===null)return;
+        event.preventDefault();
+        tabs[nextIndex].focus();
+        activate(nextIndex);
+      });
+    });
+
+    mapWrap.setAttribute('role','tabpanel');
+    mapWrap.setAttribute('aria-labelledby',tabs[0].id);
+    ranking.setAttribute('role','tabpanel');
+    ranking.setAttribute('aria-labelledby',tabs[1].id);
     ranking.classList.add('yos-map-v61-hidden');
 
     const syncRankState=button=>{
@@ -73,7 +85,7 @@
     const rankButtons=[...section.querySelectorAll('.yos-real-map-v7__rank')];
     rankButtons.forEach(button=>{
       button.setAttribute('aria-pressed','false');
-      button.addEventListener('click',()=>syncRankState(button));
+      button.addEventListener('click',()=>syncRankState(button),{once:false});
     });
     if(rankButtons[0])syncRankState(rankButtons[0]);
     return true;
