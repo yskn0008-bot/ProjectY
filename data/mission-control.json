@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-31T21:20:35+09:00",
+  "updated_at": "2026-07-31T21:39:00+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -40,7 +40,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/120",
-      "updated_at": "2026-07-31T05:23:05Z"
+      "updated_at": "2026-07-31T12:32:40Z"
     },
     {
       "id": "github-issue-4",
@@ -85,6 +85,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-75a133b5a8cc",
+      "title": "Fix Taxi drive card clipping at short viewport heights",
+      "completed_at": "2026-07-31T12:38:44Z",
+      "result": "GitHub mainへ反映（75a133b）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/75a133b5a8cc710eb953df31f0b76b2aa722d3f0"
+    },
+    {
       "id": "github-commit-9b1c00a23dc7",
       "title": "Publish Taxi v131 with one UI root and no legacy overlays",
       "completed_at": "2026-07-31T12:20:23Z",
@@ -111,13 +118,6 @@
       "completed_at": "2026-07-31T12:16:00Z",
       "result": "GitHub mainへ反映（1b461e1）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/1b461e1459f65ecefaf3ddbcc384bb5d5633ee89"
-    },
-    {
-      "id": "github-commit-b4125d79f703",
-      "title": "fix(vercel): add public output directory",
-      "completed_at": "2026-07-31T12:15:30Z",
-      "result": "GitHub mainへ反映（b4125d7）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/b4125d79f70350e674e0b75b1de4e6571bf5e49a"
     },
     {
       "id": "complete-002",
@@ -154,7 +154,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-31T21:20:35+09:00",
+      "last_update": "2026-07-31T21:39:00+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -235,7 +235,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-31T21:20:35+09:00",
+      "last_update": "2026-07-31T21:39:00+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -258,7 +258,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-31T21:20:35+09:00",
+      "last_update": "2026-07-31T21:39:00+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -340,5 +340,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "a9348b8bf4841ed5f36e80bd4830e2518b03c29507ead36ac5b5ad64686b910e"
+  "github_snapshot_hash": "474082fcd4389cce1b704f002dc47574b1767dd8e4ad70d3500efd84d463d435"
 }
