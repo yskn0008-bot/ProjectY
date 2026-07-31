@@ -13,6 +13,7 @@ export * from './rate-limit.js';
 export * from './config.js';
 export * from './preflight.js';
 export * from './http.js';
+export * from './client/yos-ai-client.js';
 export * from './storage/config.js';
 export * from './storage/upstash-rest.js';
 export * from './storage/upstash-rate-limit.js';
