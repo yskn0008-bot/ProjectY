@@ -1,7 +1,7 @@
 'use strict';
 const CACHE_PREFIX='yos-taxi-projecty-';
-const CACHE='yos-taxi-projecty-v122-drive-stable';
-const VERSION='122';
+const CACHE='yos-taxi-projecty-v123-drive-compact';
+const VERSION='123';
 const STATIC=[
   './','./index.html','./calendar.html','./settings.html','./manifest.webmanifest','./swipe-nav.js',
   './reference-perfect-v111.css','./reference-perfect-v111.js','./large-type-v112.css',
@@ -10,6 +10,7 @@ const STATIC=[
   './drive-scroll-v120.css','./drive-scroll-v120.js',
   './drive-priority-v121.css','./drive-priority-v121.js',
   './drive-stable-v122.css','./drive-stable-v122.js',
+  './drive-compact-v123.css',
   './report-sync-v43.js','./settings-v20.js','./projecty-live-sync-v1.js'
 ];
 
@@ -29,6 +30,7 @@ async function inject(response,type){
     addCss('drive-scroll-v120.css');
     addCss('drive-priority-v121.css');
     addCss('drive-stable-v122.css');
+    addCss('drive-compact-v123.css');
   }
   if(type==='calendar')addJs('report-sync-v43.js');
   if(type==='settings')addJs('settings-v20.js');
