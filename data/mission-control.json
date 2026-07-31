@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-31T22:35:17+09:00",
+  "updated_at": "2026-07-31T22:36:24+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -85,6 +85,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-d7667ecca294",
+      "title": "docs(server): add iPhone activation runbook",
+      "completed_at": "2026-07-31T13:36:06Z",
+      "result": "GitHub mainへ反映（d7667ec）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/d7667ecca294cf600186d115cd21bac5960a3245"
+    },
+    {
       "id": "github-commit-194a6d59c750",
       "title": "test(server): verify activation assistant stays local",
       "completed_at": "2026-07-31T13:35:02Z",
@@ -111,13 +118,6 @@
       "completed_at": "2026-07-31T13:08:32Z",
       "result": "GitHub mainへ反映（cb05615）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/cb056150c3f79e4b1ca0fdb342e1e4110324a6a5"
-    },
-    {
-      "id": "github-commit-0abb0fb2d46d",
-      "title": "chore(nav): advance service worker cache to v73",
-      "completed_at": "2026-07-31T13:08:09Z",
-      "result": "GitHub mainへ反映（0abb0fb）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/0abb0fb2d46d6a00ff993b6cd8b0e66a35f33b7f"
     },
     {
       "id": "complete-002",
@@ -154,7 +154,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-31T22:35:17+09:00",
+      "last_update": "2026-07-31T22:36:24+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -235,7 +235,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-31T22:35:17+09:00",
+      "last_update": "2026-07-31T22:36:24+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -258,7 +258,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-31T22:35:17+09:00",
+      "last_update": "2026-07-31T22:36:24+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -340,5 +340,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "dabb7245db4f959fac4ae92e50a8478350c6f6fb39e44751dd0679283934726a"
+  "github_snapshot_hash": "f44767ba7fef1bcbc614f34609b0a93f68c178bc018858017e5e8446e60aa3e3"
 }
