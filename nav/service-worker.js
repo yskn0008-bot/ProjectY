@@ -1,9 +1,16 @@
 'use strict';
 const CACHE_PREFIX='yos-navi-strategy-';
-const CACHE='yos-navi-strategy-v76-cache-read-failure';
+const CACHE='yos-navi-strategy-v77-content-type-validation';
 const STATIC=['./','./index.html','./shift-phase-v1.js','./location-status-v1.js','./connectivity-status-v1.js','./area-map-v1.js','./niche-demand-v1.js','./expected-value-model-v1.js','./expected-value-v1.js','./map-theme-v1.js','./okinawa-area-map-v1.js','./map-theme-sync-v1.js','./map-visual-v5.js','./map-approved-layout-v1.js','./map-premium-v6.js','./imada-efficiency-v47.js','./map-label-safety-v49.js','./location-map-sync-v50.js','./map-real-v7.js','./taxi-live-context-v1.js','./map-load-safety-v58.js','./map-tab-controls-v61.js','./map-loading-visibility-v63.js','./runtime-diagnostics-v64.js','./pwa-update-notice-v68.js'];
 const REQUIRED_SCRIPTS=['./connectivity-status-v1.js','./niche-demand-v1.js','./expected-value-model-v1.js','./expected-value-v1.js','./map-theme-v1.js','./okinawa-area-map-v1.js','./map-theme-sync-v1.js','./map-visual-v5.js','./map-approved-layout-v1.js','./map-premium-v6.js','./imada-efficiency-v47.js','./map-label-safety-v49.js','./location-map-sync-v50.js','./map-real-v7.js','./taxi-live-context-v1.js','./map-load-safety-v58.js','./map-tab-controls-v61.js','./map-loading-visibility-v63.js','./runtime-diagnostics-v64.js','./pwa-update-notice-v68.js'];
 const CRITICAL_ASSETS=['./index.html',...REQUIRED_SCRIPTS];
+const expectedContentType=src=>src.endsWith('.html')?'text/html':src.endsWith('.js')?'javascript':null;
+const hasExpectedContentType=(response,src)=>{
+  const expected=expectedContentType(src);
+  if(!expected)return true;
+  const contentType=String(response.headers.get('Content-Type')||'').toLowerCase();
+  return expected==='javascript'?contentType.includes('javascript'):contentType.includes(expected);
+};
 const injectRequiredScripts=async response=>{
   if(!response)return response;
   let html=await response.text();
@@ -17,7 +24,7 @@ const cacheOptionalAssets=async cache=>{
   const optional=STATIC.filter(src=>src!=='./index.html');
   await Promise.allSettled(optional.map(async src=>{
     const response=await fetch(src,{cache:'no-cache'});
-    if(response.ok)await cache.put(src,response);
+    if(response.ok&&hasExpectedContentType(response,src))await cache.put(src,response);
   }));
 };
 const inspectCachedAsset=async(cache,src)=>{
@@ -25,6 +32,10 @@ const inspectCachedAsset=async(cache,src)=>{
     const response=await cache.match(src);
     if(!response)return 'missing';
     if(!response.ok)return `http-${response.status}`;
+    if(!hasExpectedContentType(response,src)){
+      const contentType=String(response.headers.get('Content-Type')||'missing').split(';')[0].trim().toLowerCase()||'missing';
+      return `content-type-${contentType}`;
+    }
     const bytes=await response.clone().arrayBuffer();
     if(bytes.byteLength===0)return 'empty';
     return null;
@@ -49,7 +60,9 @@ const getOfflineCacheStatus=async()=>{
 };
 self.addEventListener('install',event=>event.waitUntil(
   caches.open(CACHE).then(async cache=>{
-    await cache.add('./index.html');
+    const indexResponse=await fetch('./index.html',{cache:'no-cache'});
+    if(!indexResponse.ok||!hasExpectedContentType(indexResponse,'./index.html'))throw new Error('invalid-index-response');
+    await cache.put('./index.html',indexResponse);
     await cacheOptionalAssets(cache);
   }).then(()=>self.skipWaiting())
 ));
@@ -79,6 +92,8 @@ self.addEventListener('fetch',event=>{
   const networkRequest=fetch(event.request,{cache:'no-cache'});
   event.waitUntil(networkRequest.then(response=>{
     if(!response.ok||requestUrl.origin!==self.location.origin)return;
+    const relativePath=`.${requestUrl.pathname.slice(requestUrl.pathname.lastIndexOf('/nav/')+4)}`;
+    if(CRITICAL_ASSETS.includes(relativePath)&&!hasExpectedContentType(response,relativePath))return;
     return caches.open(CACHE).then(cache=>cache.put(event.request,response.clone()));
   }).catch(()=>undefined));
   event.respondWith(networkRequest.catch(()=>caches.match(event.request).then(hit=>hit||Response.error())));
