@@ -1,0 +1,22 @@
+/* YOS Taxi v133 — 実測済み最終レイアウト。 */
+.yos131-drive{grid-template-rows:36px 185px 52px 56px 58px}
+
+@media(max-height:520px){
+  .yos131-drive{grid-template-rows:32px 185px 48px 52px 52px}
+}
+
+@media(max-height:470px){
+  .yos131-drive{grid-template-rows:188px 44px 48px 48px}
+  .yos131-drive>.yos131-header{display:none}
+  .yos131-sales{padding:6px;grid-template-rows:auto 28px 44px;gap:4px 6px}
+  .yos131-ring{width:56px;height:56px}
+  .yos131-ring strong{font-size:17px}
+  .yos131-sales-copy strong{font-size:31px}
+  .yos131-sales-copy small{font-size:12px}
+  .yos131-state b{font-size:11px}
+  .yos131-primary{font-size:17px}
+  .yos131-advice{padding:5px 8px}
+  .yos131-advice strong{font-size:15px}
+  .yos131-kpis strong{font-size:17px}
+  .yos131-actions button{font-size:13px}
+}
