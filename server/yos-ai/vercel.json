@@ -15,6 +15,9 @@
       "maxDuration": 30,
       "supportsCancellation": true
     },
+    "api/yos/taxi-health.mjs": {
+      "maxDuration": 10
+    },
     "api/yos/health.mjs": {
       "maxDuration": 10
     }
