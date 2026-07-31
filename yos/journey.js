@@ -3,18 +3,36 @@
 (() => {
   const STORAGE_KEY = 'yos-hero-journey-v1';
   const HOME_KEY = 'yos-home-settings-v2';
+  const STATE_KEY = 'yos-home-current-state-v1';
   const JST = 'Asia/Tokyo';
   const $ = (id) => document.getElementById(id);
 
   const defaultState = {
     chapter: '第1章｜始まり',
     chapterMessage: '大きく変えるのではなく、今日の一歩を経験に変える。',
+    stage: '日常世界',
+    calling: '',
     mainQuest: '',
     selectedXp: 10,
     totalXp: 0,
     quests: [],
     completed: [],
     reflections: []
+  };
+
+  const stageGuides = {
+    '日常世界': '今いる場所を否定せず、変えたいことを一つだけ言葉にしよう。',
+    '冒険への誘い': '気になって離れないものは、旅からの呼びかけかもしれない。',
+    'ためらい': '怖さは止まる理由ではなく、準備する場所を教えるデータ。',
+    'メンターとの出会い': '答えを渡すのではなく、自分で選べる地図を一緒に作ろう。',
+    '最初の境界線': '戻れる小さな一歩で、新しい世界へ足を入れよう。',
+    '試練・仲間・敵': '出来事から、味方・弱点・再現条件を見つけよう。',
+    '最も深い場所へ': '避けてきた核心を、安全に小さく観察する時。',
+    '最大の試練': '安全と自己一致を守りながら、いちばん大切な挑戦へ。',
+    '報酬': '得たものを、経験・自信・選択肢として受け取ろう。',
+    '帰路': '新しい学びを、日常で続く仕組みに変えよう。',
+    '復活': '経験を持った自分として、もう一度選び直そう。',
+    '宝を持って帰還': '得た宝を、次の人生と周りへどう生かすか決めよう。'
   };
 
   const readJson = (key, fallback) => {
@@ -41,10 +59,7 @@
   };
 
   const todayKey = (date = new Date()) => new Intl.DateTimeFormat('sv-SE', {
-    timeZone: JST,
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit'
+    timeZone: JST, year: 'numeric', month: '2-digit', day: '2-digit'
   }).format(date);
 
   const formatDate = (value) => {
@@ -62,9 +77,7 @@
     const days = new Set(state.reflections.map((item) => item.day).filter(Boolean));
     let streak = 0;
     const cursor = new Date();
-    while (true) {
-      const key = todayKey(cursor);
-      if (!days.has(key)) break;
+    while (days.has(todayKey(cursor))) {
       streak += 1;
       cursor.setDate(cursor.getDate() - 1);
     }
@@ -83,10 +96,14 @@
   }
 
   function renderChapter() {
+    $('stageLabel').textContent = state.stage;
+    $('stageGuide').textContent = stageGuides[state.stage] || stageGuides['日常世界'];
     $('chapterTitle').textContent = state.chapter;
     $('chapterMessage').textContent = state.chapterMessage;
     $('chapterInput').value = state.chapter;
+    $('stageInput').value = state.stage;
     $('chapterMessageInput').value = state.chapterMessage;
+    $('callingInput').value = state.calling;
     $('mainQuestInput').value = state.mainQuest;
   }
 
@@ -150,7 +167,7 @@
   function addQuest() {
     const title = $('questInput').value.trim();
     if (!title) {
-      setStatus('クエストの内容を入力してください。');
+      setStatus('次の一歩を入力してください。');
       $('questInput').focus();
       return;
     }
@@ -163,7 +180,7 @@
     $('questInput').value = '';
     save();
     renderQuests();
-    setStatus('今日のクエストを追加しました。');
+    setStatus('次の一歩を追加しました。');
   }
 
   function completeQuest(id) {
@@ -180,13 +197,9 @@
     setStatus(`達成。${quest.xp} XPを経験として追加しました。`);
   }
 
-  function saveReflection() {
+  function storeReflection(showMessage = true) {
     const text = $('reflectionInput').value.trim();
-    if (!text) {
-      setStatus('今日わかったことを一言だけ残してください。');
-      $('reflectionInput').focus();
-      return;
-    }
+    if (!text) return false;
     const day = todayKey();
     const existing = state.reflections.find((item) => item.day === day);
     if (existing) {
@@ -198,7 +211,15 @@
     save();
     renderReflection();
     renderStats();
-    setStatus('今日の経験を保存しました。');
+    if (showMessage) setStatus('今日の経験を保存しました。');
+    return true;
+  }
+
+  function saveReflection() {
+    if (!storeReflection(true)) {
+      setStatus('今日わかったことを一言だけ残してください。');
+      $('reflectionInput').focus();
+    }
   }
 
   async function copyText(text) {
@@ -219,18 +240,19 @@
   }
 
   async function consultYos() {
-    saveReflection();
+    storeReflection(false);
     const active = state.quests.map((quest) => `・${quest.title}`).join('\n') || '・なし';
     const reflection = $('reflectionInput').value.trim() || '未記録';
-    const prompt = `【ヒーローズジャーニー｜振り返り】\n現在の章：${state.chapter}\nメインクエスト：${state.mainQuest || '未設定'}\n進行中：\n${active}\n今日の経験：${reflection}\n\nこの経験を次の一手に変えて。`;
+    const heroState = readJson(STATE_KEY, {});
+    const prompt = `【YOS｜ヒーローズジャーニー・メンターモード】\n現在の章：${state.chapter}\n旅の段階：${state.stage}\n冒険からの呼びかけ：${state.calling || '未設定'}\nメインクエスト：${state.mainQuest || '未設定'}\n進行中の一歩：\n${active}\n今日の経験・違和感：${reflection}\n体力：${heroState.energy || '未選択'}\n気持ち：${heroState.mood || '未選択'}\n\nようすけが主人公。YOSは安全・自己一致・長期的な期待値を守るメンターとして、この経験の意味を整理し、次の一歩を一つに絞って。答えを押しつけず、失敗も経験資産として扱って。`;
     const copied = await copyText(prompt);
     const home = readJson(HOME_KEY, {});
     if (typeof home.yosUrl === 'string' && home.yosUrl.startsWith('https://chatgpt.com/')) {
-      setStatus(copied ? '振り返り文をコピーしてYOSを開きます。' : 'YOSを開きます。');
+      setStatus(copied ? '旅の記録をコピーしてYOSを開きます。' : 'YOSを開きます。');
       window.location.href = home.yosUrl;
       return;
     }
-    setStatus(copied ? '振り返り文をコピーしました。YOSホームでチャットURLを設定してください。' : 'YOSホームでチャットURLを設定してください。');
+    setStatus(copied ? '旅の記録をコピーしました。YOSホームでチャットURLを設定してください。' : 'YOSホームでチャットURLを設定してください。');
   }
 
   document.querySelectorAll('[data-xp]').forEach((button) => {
@@ -244,6 +266,11 @@
   $('questInput').addEventListener('keydown', (event) => {
     if (event.key === 'Enter') addQuest();
   });
+  $('saveCalling').addEventListener('click', () => {
+    state.calling = $('callingInput').value.trim();
+    save();
+    setStatus('冒険からの呼びかけを保存しました。');
+  });
   $('saveMainQuest').addEventListener('click', () => {
     state.mainQuest = $('mainQuestInput').value.trim();
     save();
@@ -255,11 +282,12 @@
   $('saveJourneySettings').addEventListener('click', (event) => {
     event.preventDefault();
     state.chapter = $('chapterInput').value.trim() || defaultState.chapter;
+    state.stage = $('stageInput').value || defaultState.stage;
     state.chapterMessage = $('chapterMessageInput').value.trim() || defaultState.chapterMessage;
     save();
     renderChapter();
     $('journeySettingsDialog').close();
-    setStatus('物語の章を更新しました。');
+    setStatus('物語の現在地を更新しました。');
   });
 
   render();
