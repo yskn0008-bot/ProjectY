@@ -1,6 +1,6 @@
 {
   "name": "@projecty/yos-ai-core",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -8,6 +8,7 @@
     "check:api": "node --check api/yos/chat.mjs && node --check api/yos/health.mjs && node --check api/yos/nav-model.mjs && node --check api/yos/taxi-event.mjs",
     "test": "npm run build && node --test tests/*.test.mjs && npm run check:api",
     "check": "npm run test",
+    "preflight": "npm run build && node scripts/preflight.mjs",
     "vercel-build": "npm run build"
   },
   "dependencies": {
