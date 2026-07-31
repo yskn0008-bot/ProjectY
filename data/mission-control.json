@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-31T14:09:51+09:00",
+  "updated_at": "2026-07-31T14:10:48+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -85,6 +85,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-9c833f167363",
+      "title": "Publish drive priority refinement v121",
+      "completed_at": "2026-07-31T05:10:35Z",
+      "result": "GitHub mainへ反映（9c833f1）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/9c833f1673636a49a24992587c2e407b3be38a89"
+    },
+    {
       "id": "github-commit-56064a651fcf",
       "title": "Prioritize drive actions and fix nav offset v121",
       "completed_at": "2026-07-31T05:09:41Z",
@@ -111,13 +118,6 @@
       "completed_at": "2026-07-31T05:05:42Z",
       "result": "GitHub mainへ反映（a2974d1）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/a2974d1ca35c8f663b7d833c6da94e62ca57924a"
-    },
-    {
-      "id": "github-commit-630ae3ff96fb",
-      "title": "feat(nav): add YOS runtime diagnostics v64",
-      "completed_at": "2026-07-31T05:04:41Z",
-      "result": "GitHub mainへ反映（630ae3f）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/630ae3ff96fbea9760fee1d3c9b3addc2f8d6a3a"
     },
     {
       "id": "complete-002",
@@ -154,7 +154,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-31T14:09:51+09:00",
+      "last_update": "2026-07-31T14:10:48+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -235,7 +235,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-31T14:09:51+09:00",
+      "last_update": "2026-07-31T14:10:48+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -258,7 +258,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-31T14:09:51+09:00",
+      "last_update": "2026-07-31T14:10:48+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -340,5 +340,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "475864633d9a25d067c13ea6d053aeed2484fe16d6872c9641525dfc1980d755"
+  "github_snapshot_hash": "a3c7af4d4f7850edbabca0af699bc05d17738b0964341935d1e1ebd714174820"
 }
