@@ -1,6 +1,6 @@
 'use strict';
 const CACHE_PREFIX='yos-navi-strategy-';
-const CACHE='yos-navi-strategy-v74-offline-cache-diagnostics';
+const CACHE='yos-navi-strategy-v75-cache-integrity';
 const STATIC=['./','./index.html','./shift-phase-v1.js','./location-status-v1.js','./connectivity-status-v1.js','./area-map-v1.js','./niche-demand-v1.js','./expected-value-model-v1.js','./expected-value-v1.js','./map-theme-v1.js','./okinawa-area-map-v1.js','./map-theme-sync-v1.js','./map-visual-v5.js','./map-approved-layout-v1.js','./map-premium-v6.js','./imada-efficiency-v47.js','./map-label-safety-v49.js','./location-map-sync-v50.js','./map-real-v7.js','./taxi-live-context-v1.js','./map-load-safety-v58.js','./map-tab-controls-v61.js','./map-loading-visibility-v63.js','./runtime-diagnostics-v64.js','./pwa-update-notice-v68.js'];
 const REQUIRED_SCRIPTS=['./connectivity-status-v1.js','./niche-demand-v1.js','./expected-value-model-v1.js','./expected-value-v1.js','./map-theme-v1.js','./okinawa-area-map-v1.js','./map-theme-sync-v1.js','./map-visual-v5.js','./map-approved-layout-v1.js','./map-premium-v6.js','./imada-efficiency-v47.js','./map-label-safety-v49.js','./location-map-sync-v50.js','./map-real-v7.js','./taxi-live-context-v1.js','./map-load-safety-v58.js','./map-tab-controls-v61.js','./map-loading-visibility-v63.js','./runtime-diagnostics-v64.js','./pwa-update-notice-v68.js'];
 const CRITICAL_ASSETS=['./index.html',...REQUIRED_SCRIPTS];
@@ -20,13 +20,28 @@ const cacheOptionalAssets=async cache=>{
     if(response.ok)await cache.put(src,response);
   }));
 };
+const inspectCachedAsset=async(cache,src)=>{
+  const response=await cache.match(src);
+  if(!response)return 'missing';
+  if(!response.ok)return `http-${response.status}`;
+  const bytes=await response.clone().arrayBuffer();
+  if(bytes.byteLength===0)return 'empty';
+  return null;
+};
 const getOfflineCacheStatus=async()=>{
   const cache=await caches.open(CACHE);
   const missing=[];
+  const invalid=[];
   for(const src of CRITICAL_ASSETS){
-    if(!(await cache.match(src)))missing.push(src);
+    const issue=await inspectCachedAsset(cache,src);
+    if(issue==='missing')missing.push(src);
+    else if(issue)invalid.push(`${src}:${issue}`);
   }
-  return {offlineReady:missing.length===0,missingCriticalAssets:missing};
+  return {
+    offlineReady:missing.length===0&&invalid.length===0,
+    missingCriticalAssets:missing,
+    invalidCriticalAssets:invalid
+  };
 };
 self.addEventListener('install',event=>event.waitUntil(
   caches.open(CACHE).then(async cache=>{
@@ -46,7 +61,7 @@ self.addEventListener('message',event=>{
   event.waitUntil(
     getOfflineCacheStatus()
       .then(status=>replyPort.postMessage({cache:CACHE,...status}))
-      .catch(()=>replyPort.postMessage({cache:CACHE,offlineReady:false,missingCriticalAssets:['status-unavailable']}))
+      .catch(()=>replyPort.postMessage({cache:CACHE,offlineReady:false,missingCriticalAssets:[],invalidCriticalAssets:['status-unavailable']}))
   );
 });
 self.addEventListener('fetch',event=>{
