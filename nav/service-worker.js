@@ -1,6 +1,6 @@
 'use strict';
 const CACHE_PREFIX='yos-navi-strategy-';
-const CACHE='yos-navi-strategy-v78-content-signature-validation';
+const CACHE='yos-navi-strategy-v79-html-identity-validation';
 const STATIC=['./','./index.html','./shift-phase-v1.js','./location-status-v1.js','./connectivity-status-v1.js','./area-map-v1.js','./niche-demand-v1.js','./expected-value-model-v1.js','./expected-value-v1.js','./map-theme-v1.js','./okinawa-area-map-v1.js','./map-theme-sync-v1.js','./map-visual-v5.js','./map-approved-layout-v1.js','./map-premium-v6.js','./imada-efficiency-v47.js','./map-label-safety-v49.js','./location-map-sync-v50.js','./map-real-v7.js','./taxi-live-context-v1.js','./map-load-safety-v58.js','./map-tab-controls-v61.js','./map-loading-visibility-v63.js','./runtime-diagnostics-v64.js','./pwa-update-notice-v68.js'];
 const REQUIRED_SCRIPTS=['./connectivity-status-v1.js','./niche-demand-v1.js','./expected-value-model-v1.js','./expected-value-v1.js','./map-theme-v1.js','./okinawa-area-map-v1.js','./map-theme-sync-v1.js','./map-visual-v5.js','./map-approved-layout-v1.js','./map-premium-v6.js','./imada-efficiency-v47.js','./map-label-safety-v49.js','./location-map-sync-v50.js','./map-real-v7.js','./taxi-live-context-v1.js','./map-load-safety-v58.js','./map-tab-controls-v61.js','./map-loading-visibility-v63.js','./runtime-diagnostics-v64.js','./pwa-update-notice-v68.js'];
 const CRITICAL_ASSETS=['./index.html',...REQUIRED_SCRIPTS];
@@ -15,6 +15,11 @@ const inspectResponseBody=async(response,src)=>{
   const text=await response.clone().text();
   if(!text.trim())return 'empty';
   if(src.endsWith('.js')&&/^\s*(?:<!doctype\s+html|<html|<head|<body)\b/i.test(text))return 'html-content';
+  if(src.endsWith('.html')){
+    const hasYosTitle=/<title>\s*YOSナビ\s*<\/title>/i.test(text);
+    const hasAppRoot=/<main\s+class=["']app["']/i.test(text);
+    if(!hasYosTitle||!hasAppRoot)return 'html-identity';
+  }
   return null;
 };
 const isCacheableResponse=async(response,src)=>response.ok&&hasExpectedContentType(response,src)&&!(await inspectResponseBody(response,src));
