@@ -1,13 +1,13 @@
 'use strict';
 (()=>{
-  if(window.__yosNavRuntimeDiagnosticsV74)return;
-  window.__yosNavRuntimeDiagnosticsV74=true;
+  if(window.__yosNavRuntimeDiagnosticsV75)return;
+  window.__yosNavRuntimeDiagnosticsV75=true;
 
-  const BUILD='v74';
-  const EXPECTED_CACHE='yos-navi-strategy-v74-offline-cache-diagnostics';
+  const BUILD='v75';
+  const EXPECTED_CACHE='yos-navi-strategy-v75-cache-integrity';
   const SW_STATUS_TTL_MS=30000;
   const isDiagnosticMode=new URL(location.href).searchParams.get('diagnostics')==='1';
-  let swStatus={controlled:Boolean(navigator.serviceWorker?.controller),cache:null,buildMatch:false,offlineReady:false,missingCriticalAssets:[]};
+  let swStatus={controlled:Boolean(navigator.serviceWorker?.controller),cache:null,buildMatch:false,offlineReady:false,missingCriticalAssets:[],invalidCriticalAssets:[]};
   let swCheckedAt=0;
   let scheduled=false;
   let running=false;
@@ -15,30 +15,41 @@
   let forcePending=false;
   let lastPanelSignature='';
 
+  const emptyStatus=(controlled,issue)=>({
+    controlled,
+    cache:null,
+    buildMatch:false,
+    offlineReady:false,
+    missingCriticalAssets:issue?[issue]:[],
+    invalidCriticalAssets:[]
+  });
+
   const requestServiceWorkerStatus=()=>new Promise(resolve=>{
     const controller=navigator.serviceWorker?.controller;
-    if(!controller){resolve({controlled:false,cache:null,buildMatch:false,offlineReady:false,missingCriticalAssets:[]});return;}
+    if(!controller){resolve(emptyStatus(false));return;}
     const channel=new MessageChannel();
     let settled=false;
     const finish=status=>{if(settled)return;settled=true;resolve(status);};
-    const timer=setTimeout(()=>finish({controlled:true,cache:null,buildMatch:false,offlineReady:false,missingCriticalAssets:['status-timeout']}),1000);
+    const timer=setTimeout(()=>finish(emptyStatus(true,'status-timeout')),1000);
     channel.port1.onmessage=event=>{
       clearTimeout(timer);
       const cache=String(event.data?.cache||'')||null;
       const missingCriticalAssets=Array.isArray(event.data?.missingCriticalAssets)?event.data.missingCriticalAssets.map(String):[];
+      const invalidCriticalAssets=Array.isArray(event.data?.invalidCriticalAssets)?event.data.invalidCriticalAssets.map(String):[];
       finish({
         controlled:true,
         cache,
         buildMatch:cache===EXPECTED_CACHE,
         offlineReady:event.data?.offlineReady===true,
-        missingCriticalAssets
+        missingCriticalAssets,
+        invalidCriticalAssets
       });
     };
     try{
       controller.postMessage({type:'YOS_NAV_STATUS_REQUEST'},[channel.port2]);
     }catch(error){
       clearTimeout(timer);
-      finish({controlled:true,cache:null,buildMatch:false,offlineReady:false,missingCriticalAssets:['status-request-failed']});
+      finish(emptyStatus(true,'status-request-failed'));
     }
   });
 
@@ -58,6 +69,7 @@
       swBuildMatch:swStatus.buildMatch,
       swOfflineReady:swStatus.offlineReady,
       swMissingCriticalAssets:swStatus.missingCriticalAssets.length?swStatus.missingCriticalAssets.join(', '):'なし',
+      swInvalidCriticalAssets:swStatus.invalidCriticalAssets.length?swStatus.invalidCriticalAssets.join(', '):'なし',
       mapSection:Boolean(document.getElementById('yos-okinawa-area-map')),
       mapContainer:Boolean(document.getElementById('yos-real-map-v7')),
       leaflet:Boolean(window.L),
