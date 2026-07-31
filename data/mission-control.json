@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-31T20:07:25+09:00",
+  "updated_at": "2026-07-31T21:10:11+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -70,7 +70,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/51",
-      "updated_at": "2026-07-31T10:18:21Z"
+      "updated_at": "2026-07-31T11:10:47Z"
     },
     {
       "id": "github-issue-86",
@@ -84,6 +84,13 @@
     }
   ],
   "recently_completed": [
+    {
+      "id": "github-commit-320b6c264edf",
+      "title": "fix(nav): guard duplicate YOS update notices v72",
+      "completed_at": "2026-07-31T12:09:48Z",
+      "result": "GitHub mainへ反映（320b6c2）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/320b6c264edfbab12e4bdaa1f44ca8bbf6ef6226"
+    },
     {
       "id": "github-commit-358dda45e411",
       "title": "fix(nav): avoid false YOS update notice v71",
@@ -111,13 +118,6 @@
       "completed_at": "2026-07-31T08:08:55Z",
       "result": "GitHub mainへ反映（ca7edc9）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/ca7edc90d5ef68a94776faf5a8d35dc92728da35"
-    },
-    {
-      "id": "github-commit-98bf561c93c2",
-      "title": "fix(nav): reduce YOS diagnostics polling v67",
-      "completed_at": "2026-07-31T07:13:54Z",
-      "result": "GitHub mainへ反映（98bf561）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/98bf561c93c24f169732bedbf80e957c917ea694"
     },
     {
       "id": "complete-002",
@@ -154,7 +154,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-31T20:07:25+09:00",
+      "last_update": "2026-07-31T21:10:11+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -235,7 +235,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-31T20:07:25+09:00",
+      "last_update": "2026-07-31T21:10:11+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -258,7 +258,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-31T20:07:25+09:00",
+      "last_update": "2026-07-31T21:10:11+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -340,5 +340,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "075117b2074a48e3ad2c7000485eace05b09e0813fa59fa36ff9d9ac1c42d106"
+  "github_snapshot_hash": "b564a07e0e922ff38b63a67a0b035b57cb5ed7bb6bbbf970f125d7a88d7c5557"
 }
