@@ -1,6 +1,7 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "buildCommand": "npm run vercel-build",
+  "outputDirectory": "public",
   "functions": {
     "api/yos/chat.mjs": {
       "maxDuration": 60,
@@ -13,6 +14,9 @@
     "api/yos/taxi-event.mjs": {
       "maxDuration": 30,
       "supportsCancellation": true
+    },
+    "api/yos/taxi-health.mjs": {
+      "maxDuration": 10
     },
     "api/yos/health.mjs": {
       "maxDuration": 10
