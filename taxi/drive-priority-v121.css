@@ -1,0 +1,68 @@
+/* YOS Taxi v121 — 営業中の判断と主操作を最優先にする実機調整。 */
+html.yos-final-drive-v118.yos-drive-priority-v121 .rp-action-card{
+  padding:8px 9px!important;
+}
+html.yos-final-drive-v118.yos-drive-priority-v121 .rp-action-card h2{
+  margin:0 0 6px!important;
+  font-size:15px!important;
+}
+html.yos-final-drive-v118.yos-drive-priority-v121 .rp-action-row{
+  grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  gap:6px!important;
+}
+html.yos-final-drive-v118.yos-drive-priority-v121 .rp-action-row button{
+  min-height:48px!important;
+  height:48px!important;
+  padding:4px 2px!important;
+  font-size:15px!important;
+  border-radius:9px!important;
+}
+
+/* KPIと重複しない3項目だけを、1段で大きく表示する。 */
+html.yos-final-drive-v118.yos-drive-priority-v121 .rp-status-card{
+  padding:9px!important;
+}
+html.yos-final-drive-v118.yos-drive-priority-v121 .rp-status-card h2{
+  margin:0 0 6px!important;
+  font-size:15px!important;
+}
+html.yos-final-drive-v118.yos-drive-priority-v121 .rp-status-card dl{
+  display:grid!important;
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  gap:6px!important;
+}
+html.yos-final-drive-v118.yos-drive-priority-v121 .rp-status-card dl>div{
+  display:grid!important;
+  grid-template-columns:1fr!important;
+  align-content:center!important;
+  gap:2px!important;
+  min-height:62px!important;
+  padding:7px 8px!important;
+  border:1px solid rgba(228,170,50,.28)!important;
+  border-radius:9px!important;
+  background:#09090b!important;
+}
+html.yos-final-drive-v118.yos-drive-priority-v121 .rp-status-card dt{
+  font-size:12px!important;
+  color:#aaaab0!important;
+}
+html.yos-final-drive-v118.yos-drive-priority-v121 .rp-status-card dd{
+  margin:0!important;
+  font-size:16px!important;
+  font-weight:900!important;
+  color:#fff!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  white-space:nowrap!important;
+}
+
+/* v120のフェード位置を、実際のメニュー位置に合わせる。 */
+html.yos-final-drive-v118.yos-drive-priority-v121 .rp-shell::after{
+  bottom:74px!important;
+}
+
+@media(max-width:375px){
+  html.yos-final-drive-v118.yos-drive-priority-v121 .rp-status-card dl>div{padding:6px!important}
+  html.yos-final-drive-v118.yos-drive-priority-v121 .rp-status-card dd{font-size:15px!important}
+  html.yos-final-drive-v118.yos-drive-priority-v121 .rp-action-row button{font-size:14px!important}
+}
