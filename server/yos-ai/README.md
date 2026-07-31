@@ -36,6 +36,7 @@ YOS専用生成AIの読み取り専用バックエンドです。
 - 配置後health smoke test
 - Vercel関数ごとの実行時間・キャンセル設定
 - OpenAPI 3.1によるPWA向け公開契約
+- Tokenを保存しないPWA向け`YosAiClient`
 
 ## API
 
@@ -48,6 +49,23 @@ YOS専用生成AIの読み取り専用バックエンドです。
 機械可読契約：`openapi.json`
 
 PWA接続仕様：`docs/PWA_INTEGRATION.md`
+
+共通PWAクライアント：`src/client/yos-ai-client.ts`
+
+## PWAクライアント
+
+`YosAiClient`は、次を共通処理する。
+
+- Chatごとに新しいGoogle ID tokenを取得
+- Cookie・ブラウザー資格情報を送らない
+- HTTPS強制
+- 429の`Retry-After`と`requestId`保持
+- 通信・タイムアウト時の秘密情報非表示
+- nav-model再集計
+- taxi-eventの重複409を冪等成功として処理
+- JSON以外・過大レスポンスの拒否
+
+TokenはコンストラクタやlocalStorageへ保存せず、必要な呼び出し時だけ渡す。
 
 ## 本番構成
 
@@ -78,7 +96,7 @@ npm install
 npm test
 ```
 
-GitHub Actions結果：**110件合格、0件失敗**。
+GitHub Actions結果：**117件合格、0件失敗**。
 
 確認済み：
 
@@ -90,6 +108,7 @@ GitHub Actions結果：**110件合格、0件失敗**。
 - 24件のYOS再発防止評価
 - 本番preflightの秘密値非出力
 - OpenAPIの公開Path・認証・入力上限・秘密値非混入
+- PWAクライアントのToken更新・Cookie無効・429・409・503処理
 
 ## 配置前診断
 
