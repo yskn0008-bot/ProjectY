@@ -1,6 +1,6 @@
 'use strict';
 const CACHE_PREFIX='yos-navi-strategy-';
-const CACHE='yos-navi-strategy-v82-runtime-response-validation';
+const CACHE='yos-navi-strategy-v83-response-url-validation';
 const STATIC=['./','./index.html','./shift-phase-v1.js','./location-status-v1.js','./connectivity-status-v1.js','./area-map-v1.js','./niche-demand-v1.js','./expected-value-model-v1.js','./expected-value-v1.js','./map-theme-v1.js','./okinawa-area-map-v1.js','./map-theme-sync-v1.js','./map-visual-v5.js','./map-approved-layout-v1.js','./map-premium-v6.js','./imada-efficiency-v47.js','./map-label-safety-v49.js','./location-map-sync-v50.js','./map-real-v7.js','./taxi-live-context-v1.js','./map-load-safety-v58.js','./map-tab-controls-v61.js','./map-loading-visibility-v63.js','./runtime-diagnostics-v64.js','./pwa-update-notice-v68.js'];
 const REQUIRED_SCRIPTS=['./connectivity-status-v1.js','./niche-demand-v1.js','./expected-value-model-v1.js','./expected-value-v1.js','./map-theme-v1.js','./okinawa-area-map-v1.js','./map-theme-sync-v1.js','./map-visual-v5.js','./map-approved-layout-v1.js','./map-premium-v6.js','./imada-efficiency-v47.js','./map-label-safety-v49.js','./location-map-sync-v50.js','./map-real-v7.js','./taxi-live-context-v1.js','./map-load-safety-v58.js','./map-tab-controls-v61.js','./map-loading-visibility-v63.js','./runtime-diagnostics-v64.js','./pwa-update-notice-v68.js'];
 const CRITICAL_ASSETS=['./index.html',...REQUIRED_SCRIPTS];
@@ -11,6 +11,16 @@ const toNavRelativePath=requestUrl=>{
   return path?`./${path}`:'./';
 };
 const isApprovedRuntimeAsset=relativePath=>Boolean(relativePath&&STATIC.includes(relativePath));
+const expectedAssetUrl=src=>new URL(src,self.location.href);
+const hasExpectedFinalUrl=(response,src)=>{
+  try{
+    const actual=new URL(response.url);
+    const expected=expectedAssetUrl(src);
+    return actual.origin===expected.origin&&actual.pathname===expected.pathname;
+  }catch(error){
+    return false;
+  }
+};
 const expectedContentType=src=>src.endsWith('.html')?'text/html':src.endsWith('.js')?'javascript':null;
 const hasExpectedContentType=(response,src)=>{
   const expected=expectedContentType(src);
@@ -29,7 +39,7 @@ const inspectResponseBody=async(response,src)=>{
   }
   return null;
 };
-const isCacheableResponse=async(response,src)=>response.ok&&hasExpectedContentType(response,src)&&!(await inspectResponseBody(response,src));
+const isCacheableResponse=async(response,src)=>response.ok&&hasExpectedFinalUrl(response,src)&&hasExpectedContentType(response,src)&&!(await inspectResponseBody(response,src));
 const injectRequiredScripts=async response=>{
   if(!response)return response;
   let html=await response.text();
@@ -56,6 +66,7 @@ const inspectCachedAsset=async(cache,src)=>{
     const response=await cache.match(src);
     if(!response)return 'missing';
     if(!response.ok)return `http-${response.status}`;
+    if(!hasExpectedFinalUrl(response,src))return 'response-url';
     if(!hasExpectedContentType(response,src)){
       const contentType=String(response.headers.get('Content-Type')||'missing').split(';')[0].trim().toLowerCase()||'missing';
       return `content-type-${contentType}`;
