@@ -1,10 +1,10 @@
 'use strict';
 const CACHE_PREFIX='yos-taxi-projecty-';
-const CACHE='yos-taxi-projecty-v131-single-root';
-const VERSION='131';
+const CACHE='yos-taxi-projecty-v132-verified-layout';
+const VERSION='132';
 const STATIC=[
   './','./index.html','./calendar.html','./settings.html','./manifest.webmanifest','./swipe-nav.js',
-  './final-app-v131.css','./final-app-v131.js',
+  './final-app-v131.css','./final-fix-v132.css','./final-app-v131.js',
   './report-sync-v43.js','./settings-v20.js','./projecty-live-sync-v1.js'
 ];
 
@@ -20,6 +20,7 @@ async function inject(response,type){
     addJs('settings-v20.js');
   }else{
     addCss('final-app-v131.css');
+    addCss('final-fix-v132.css');
     addJs('final-app-v131.js');
   }
   if(type==='index')addJs('projecty-live-sync-v1.js');
