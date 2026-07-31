@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-31T21:10:11+09:00",
+  "updated_at": "2026-07-31T21:14:22+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -85,6 +85,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-729cbf957180",
+      "title": "temp",
+      "completed_at": "2026-07-31T12:14:10Z",
+      "result": "GitHub mainへ反映（729cbf9）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/729cbf957180d7e00705ab97775aba9dc8db9ab4"
+    },
+    {
       "id": "github-commit-320b6c264edf",
       "title": "fix(nav): guard duplicate YOS update notices v72",
       "completed_at": "2026-07-31T12:09:48Z",
@@ -111,13 +118,6 @@
       "completed_at": "2026-07-31T09:10:27Z",
       "result": "GitHub mainへ反映（707b874）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/707b87448697f4dab5544b8726d0c2aaf4d292cc"
-    },
-    {
-      "id": "github-commit-ca7edc90d5ef",
-      "title": "feat(nav): add YOS PWA update notice v68",
-      "completed_at": "2026-07-31T08:08:55Z",
-      "result": "GitHub mainへ反映（ca7edc9）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/ca7edc90d5ef68a94776faf5a8d35dc92728da35"
     },
     {
       "id": "complete-002",
@@ -154,7 +154,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-31T21:10:11+09:00",
+      "last_update": "2026-07-31T21:14:22+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -235,7 +235,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-31T21:10:11+09:00",
+      "last_update": "2026-07-31T21:14:22+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -258,7 +258,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-31T21:10:11+09:00",
+      "last_update": "2026-07-31T21:14:22+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -340,5 +340,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "b564a07e0e922ff38b63a67a0b035b57cb5ed7bb6bbbf970f125d7a88d7c5557"
+  "github_snapshot_hash": "e09cfe77a5b35bfdfd26d62a0cbca948f613c9134da1d1e06e672c1357dff840"
 }
