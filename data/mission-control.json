@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-31T22:38:19+09:00",
+  "updated_at": "2026-07-31T22:38:45+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -85,6 +85,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-31e0c9f0e277",
+      "title": "test(server): ensure resource ID template stays empty",
+      "completed_at": "2026-07-31T13:38:29Z",
+      "result": "GitHub mainへ反映（31e0c9f）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/31e0c9f0e277a3e077e07aa7e0ffde451f48fbfc"
+    },
+    {
       "id": "github-commit-d0074466da79",
       "title": "docs(server): add private resource ID template",
       "completed_at": "2026-07-31T13:38:06Z",
@@ -111,13 +118,6 @@
       "completed_at": "2026-07-31T13:36:30Z",
       "result": "GitHub mainへ反映（2f8a74b）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/2f8a74bb9303369c8b03aeb1d5e3cb9f9a594305"
-    },
-    {
-      "id": "github-commit-d7667ecca294",
-      "title": "docs(server): add iPhone activation runbook",
-      "completed_at": "2026-07-31T13:36:06Z",
-      "result": "GitHub mainへ反映（d7667ec）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/d7667ecca294cf600186d115cd21bac5960a3245"
     },
     {
       "id": "complete-002",
@@ -154,7 +154,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-31T22:38:19+09:00",
+      "last_update": "2026-07-31T22:38:45+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -235,7 +235,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-31T22:38:19+09:00",
+      "last_update": "2026-07-31T22:38:45+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -258,7 +258,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-31T22:38:19+09:00",
+      "last_update": "2026-07-31T22:38:45+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -340,5 +340,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "00491af466b655d88f278cd4c97086f92ec888cd6f69759e374bc1f40f6a991f"
+  "github_snapshot_hash": "ca82e433f8fc8a5217bd53183b4c37be49a6645fe22064ebcbfb7d2c647b57e0"
 }
