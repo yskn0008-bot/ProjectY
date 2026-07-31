@@ -1,10 +1,21 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "npm run build",
+  "buildCommand": "npm run vercel-build",
   "functions": {
-    "api/**/*.mjs": {
+    "api/yos/chat.mjs": {
       "maxDuration": 60,
       "supportsCancellation": true
+    },
+    "api/yos/nav-model.mjs": {
+      "maxDuration": 60,
+      "supportsCancellation": true
+    },
+    "api/yos/taxi-event.mjs": {
+      "maxDuration": 30,
+      "supportsCancellation": true
+    },
+    "api/yos/health.mjs": {
+      "maxDuration": 10
     }
   }
 }
