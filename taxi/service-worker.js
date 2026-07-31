@@ -1,11 +1,10 @@
 'use strict';
 const CACHE_PREFIX='yos-taxi-projecty-';
-const CACHE='yos-taxi-projecty-v130-final-app';
-const VERSION='130';
+const CACHE='yos-taxi-projecty-v131-single-root';
+const VERSION='131';
 const STATIC=[
   './','./index.html','./calendar.html','./settings.html','./manifest.webmanifest','./swipe-nav.js',
-  './reference-perfect-v111.css','./reference-perfect-v111.js',
-  './final-app-v130.css','./final-app-v130.js',
+  './final-app-v131.css','./final-app-v131.js',
   './report-sync-v43.js','./settings-v20.js','./projecty-live-sync-v1.js'
 ];
 
@@ -16,13 +15,13 @@ async function inject(response,type){
   const addCss=file=>{if(!html.includes(file))html=html.replace('</head>',`<link rel="stylesheet" href="./${file}?v=${VERSION}"></head>`)};
   const addJs=file=>{if(!html.includes(file))html=html.replace('</body>',`<script src="./${file}?v=${VERSION}"></script></body>`)};
 
-  addCss('reference-perfect-v111.css');
-  if(type!=='settings')addCss('final-app-v130.css');
-  if(type!=='settings'&&!html.includes('yos-v130-old-nav-guard'))html=html.replace('</head>','<style id="yos-v130-old-nav-guard">#taxiGlobalNavV24{display:none!important}</style></head>');
   if(type==='calendar')addJs('report-sync-v43.js');
-  if(type==='settings')addJs('settings-v20.js');
-  addJs('reference-perfect-v111.js');
-  if(type!=='settings')addJs('final-app-v130.js');
+  if(type==='settings'){
+    addJs('settings-v20.js');
+  }else{
+    addCss('final-app-v131.css');
+    addJs('final-app-v131.js');
+  }
   if(type==='index')addJs('projecty-live-sync-v1.js');
 
   const headers=new Headers(response.headers);
