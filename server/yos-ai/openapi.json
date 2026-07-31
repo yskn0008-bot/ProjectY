@@ -1,0 +1,410 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "YOS AI API",
+    "version": "0.4.0",
+    "description": "YOS PWAとYOS AIバックエンドの公開契約。秘密値と非公開情報源IDは含まない。"
+  },
+  "paths": {
+    "/api/yos/health": {
+      "get": {
+        "operationId": "getYosHealth",
+        "summary": "YOS AIの稼働確認",
+        "parameters": [
+          {"$ref": "#/components/parameters/OriginHeader"}
+        ],
+        "responses": {
+          "200": {
+            "description": "稼働中",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/HealthResponse"}
+              }
+            }
+          },
+          "403": {"$ref": "#/components/responses/OriginDenied"},
+          "405": {"$ref": "#/components/responses/MethodNotAllowed"},
+          "503": {"$ref": "#/components/responses/Unavailable"}
+        }
+      }
+    },
+    "/api/yos/chat": {
+      "post": {
+        "operationId": "createYosAnswer",
+        "summary": "根拠付きYOS回答を生成",
+        "security": [{"googleIdToken": []}],
+        "parameters": [
+          {"$ref": "#/components/parameters/OriginHeader"}
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {"$ref": "#/components/schemas/ChatRequest"}
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "YOS回答",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/YosAnswer"}
+              }
+            }
+          },
+          "400": {"$ref": "#/components/responses/BadRequest"},
+          "401": {"$ref": "#/components/responses/AuthenticationFailed"},
+          "403": {"$ref": "#/components/responses/OriginDenied"},
+          "405": {"$ref": "#/components/responses/MethodNotAllowed"},
+          "413": {"$ref": "#/components/responses/PayloadTooLarge"},
+          "415": {"$ref": "#/components/responses/UnsupportedMediaType"},
+          "429": {"$ref": "#/components/responses/RateLimited"},
+          "503": {"$ref": "#/components/responses/Unavailable"}
+        }
+      }
+    },
+    "/api/yos/nav-model": {
+      "get": {
+        "operationId": "getYosNavigationModel",
+        "summary": "Project75から生成したIMada効率モデルを取得",
+        "parameters": [
+          {"$ref": "#/components/parameters/OriginHeader"},
+          {
+            "name": "refresh",
+            "in": "query",
+            "required": false,
+            "description": "1の場合はメモリキャッシュを使わず再集計する",
+            "schema": {"type": "string", "enum": ["1"]}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "集計済みナビモデル。個別乗車明細と支払方法は含まない。",
+            "headers": {
+              "X-YOS-Model-Source": {"schema": {"type": "string"}},
+              "X-YOS-Model-Rides": {"schema": {"type": "string"}},
+              "X-YOS-Model-Version": {"schema": {"type": "string"}}
+            },
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/NavModel"}
+              }
+            }
+          },
+          "403": {"$ref": "#/components/responses/OriginDenied"},
+          "405": {"$ref": "#/components/responses/MethodNotAllowed"},
+          "503": {"$ref": "#/components/responses/Unavailable"}
+        }
+      }
+    },
+    "/api/yos/taxi-event": {
+      "post": {
+        "operationId": "recordTaxiEvent",
+        "summary": "YOS Taxiの未確認ライブ記録をProject75へ同期",
+        "security": [{"taxiSyncToken": []}],
+        "parameters": [
+          {"$ref": "#/components/parameters/OriginHeader"}
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {"$ref": "#/components/schemas/TaxiEventRequest"}
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "新規記録",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/TaxiEventResponse"}
+              }
+            }
+          },
+          "400": {"$ref": "#/components/responses/BadRequest"},
+          "401": {"$ref": "#/components/responses/AuthenticationFailed"},
+          "403": {"$ref": "#/components/responses/OriginDenied"},
+          "405": {"$ref": "#/components/responses/MethodNotAllowed"},
+          "409": {
+            "description": "同じeventIdを受信済み",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/TaxiEventResponse"}
+              }
+            }
+          },
+          "503": {"$ref": "#/components/responses/Unavailable"}
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "googleIdToken": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "Google ID token",
+        "description": "YOS本人のGoogle ID token。OpenAI APIキーではない。"
+      },
+      "taxiSyncToken": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "Opaque sync token",
+        "description": "YOS Taxi同期専用Token。サーバーではSHA-256 hashだけを保存する。"
+      }
+    },
+    "parameters": {
+      "OriginHeader": {
+        "name": "Origin",
+        "in": "header",
+        "required": true,
+        "schema": {"type": "string", "format": "uri", "maxLength": 300},
+        "description": "YOS_ALLOWED_ORIGINSに完全一致するHTTPS Origin"
+      }
+    },
+    "responses": {
+      "BadRequest": {
+        "description": "入力不正",
+        "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ErrorResponse"}}}
+      },
+      "AuthenticationFailed": {
+        "description": "本人認証または同期Tokenの認証失敗",
+        "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ErrorResponse"}}}
+      },
+      "OriginDenied": {
+        "description": "許可されていないOrigin",
+        "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ErrorResponse"}}}
+      },
+      "MethodNotAllowed": {
+        "description": "未対応HTTPメソッド",
+        "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ErrorResponse"}}}
+      },
+      "PayloadTooLarge": {
+        "description": "本文が32768 bytesを超過",
+        "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ErrorResponse"}}}
+      },
+      "UnsupportedMediaType": {
+        "description": "chatはapplication/json必須",
+        "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ErrorResponse"}}}
+      },
+      "RateLimited": {
+        "description": "本人単位の回数上限超過",
+        "headers": {"Retry-After": {"schema": {"type": "string"}}},
+        "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ErrorResponse"}}}
+      },
+      "Unavailable": {
+        "description": "認証基盤、Google、OpenAI、監査保存等の失敗。内部情報は返さない。",
+        "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ErrorResponse"}}}
+      }
+    },
+    "schemas": {
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "error": {"type": "string"},
+          "status": {"type": "string"},
+          "requestId": {"type": "string"}
+        },
+        "additionalProperties": false
+      },
+      "HealthResponse": {
+        "type": "object",
+        "required": ["status", "service", "version", "time"],
+        "properties": {
+          "status": {"const": "ok"},
+          "service": {"const": "yos-ai"},
+          "version": {"type": "string"},
+          "time": {"type": "string", "format": "date-time"}
+        },
+        "additionalProperties": false
+      },
+      "ChatRequest": {
+        "type": "object",
+        "required": ["userText"],
+        "properties": {
+          "userText": {"type": "string", "minLength": 1, "maxLength": 10000},
+          "currentLocation": {"type": "string", "minLength": 1, "maxLength": 300},
+          "conversationSummary": {"type": "string", "minLength": 1, "maxLength": 12000}
+        },
+        "additionalProperties": false
+      },
+      "DomainRoute": {
+        "type": "object",
+        "required": ["primary", "related", "liveMode", "reasons"],
+        "properties": {
+          "primary": {"$ref": "#/components/schemas/YosDomain"},
+          "related": {"type": "array", "items": {"$ref": "#/components/schemas/YosDomain"}},
+          "liveMode": {"type": "boolean"},
+          "reasons": {"type": "array", "items": {"type": "string"}}
+        },
+        "additionalProperties": false
+      },
+      "YosDomain": {
+        "type": "string",
+        "enum": ["yos", "taxi-pre", "taxi-live", "taxi-post", "taxi-research", "life", "money", "idea", "system", "translation", "navigation", "external"]
+      },
+      "SourceRef": {
+        "type": "object",
+        "required": ["id", "title", "kind", "priority"],
+        "properties": {
+          "id": {"type": "string"},
+          "title": {"type": "string"},
+          "kind": {"type": "string", "enum": ["law", "master", "change-log", "code", "sheet", "original", "web", "memory"]},
+          "priority": {"type": "integer"},
+          "modifiedAt": {"type": "string"},
+          "locator": {"type": "string", "description": "ブラウザーへ返す場合も秘密情報を含めない"}
+        },
+        "additionalProperties": false
+      },
+      "GroundedFact": {
+        "type": "object",
+        "required": ["text", "sourceIds"],
+        "properties": {
+          "text": {"type": "string", "minLength": 1, "maxLength": 500},
+          "sourceIds": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 8,
+            "uniqueItems": true,
+            "items": {"type": "string", "minLength": 1}
+          }
+        },
+        "additionalProperties": false
+      },
+      "MemoryCandidate": {
+        "type": "object",
+        "required": ["content", "category", "domain", "status", "evidenceSourceIds", "privacyLevel"],
+        "properties": {
+          "content": {"type": "string"},
+          "category": {"type": "string", "enum": ["personal-data", "hypothesis", "operation-rule", "spec-change", "implementation-change"]},
+          "domain": {"$ref": "#/components/schemas/YosDomain"},
+          "status": {"const": "candidate"},
+          "evidenceSourceIds": {"type": "array", "items": {"type": "string"}},
+          "privacyLevel": {"type": "string", "enum": ["L0", "L1", "L2", "L3"]}
+        },
+        "additionalProperties": false
+      },
+      "Safety": {
+        "type": "object",
+        "required": ["level", "notes"],
+        "properties": {
+          "level": {"type": "string", "enum": ["normal", "attention", "blocked"]},
+          "notes": {"type": "array", "items": {"type": "string"}}
+        },
+        "additionalProperties": false
+      },
+      "YosAnswer": {
+        "type": "object",
+        "required": ["requestId", "route", "answer", "facts", "assumptions", "unknowns", "memoryCandidates", "nextAction", "conflicts", "sources", "safety"],
+        "properties": {
+          "requestId": {"type": "string"},
+          "route": {"$ref": "#/components/schemas/DomainRoute"},
+          "answer": {"type": "string"},
+          "facts": {"type": "array", "maxItems": 30, "items": {"$ref": "#/components/schemas/GroundedFact"}},
+          "assumptions": {"type": "array", "items": {"type": "string"}},
+          "unknowns": {"type": "array", "items": {"type": "string"}},
+          "memoryCandidates": {"type": "array", "items": {"$ref": "#/components/schemas/MemoryCandidate"}},
+          "nextAction": {"type": ["string", "null"]},
+          "conflicts": {"type": "array", "items": {"type": "object"}},
+          "sources": {"type": "array", "items": {"$ref": "#/components/schemas/SourceRef"}},
+          "safety": {"$ref": "#/components/schemas/Safety"},
+          "modelUsage": {"type": "object"}
+        },
+        "additionalProperties": false
+      },
+      "EfficiencyMetric": {
+        "type": "object",
+        "required": ["predictedIdleMinutes", "predictedCycleMinutes", "tripsPerHour", "expectedHourlyRevenue", "noResponseRisk", "idleBasis", "efficiencySource", "actualIdleSamples", "sameZoneSamples", "opportunitySamples", "efficiencyConfidence"],
+        "properties": {
+          "predictedIdleMinutes": {"type": ["number", "null"]},
+          "predictedCycleMinutes": {"type": ["number", "null"]},
+          "tripsPerHour": {"type": ["number", "null"]},
+          "expectedHourlyRevenue": {"type": ["number", "null"]},
+          "noResponseRisk": {"type": ["number", "null"]},
+          "idleBasis": {"type": "string", "enum": ["actual", "pickup-interval", "none"]},
+          "efficiencySource": {"type": "string", "enum": ["segment", "zone-overall", "none"]},
+          "actualIdleSamples": {"type": "integer", "minimum": 0},
+          "sameZoneSamples": {"type": "integer", "minimum": 0},
+          "opportunitySamples": {"type": "integer", "minimum": 0},
+          "efficiencyConfidence": {"type": "number", "minimum": 0, "maximum": 1}
+        },
+        "additionalProperties": true
+      },
+      "NavModel": {
+        "type": "object",
+        "required": ["version", "generatedAt", "sourcePeriod", "confirmedClassifiedRides", "sourceRows", "formula", "decisionPriority", "operationalRules", "zoneProfiles", "segments"],
+        "properties": {
+          "version": {"type": "string"},
+          "generatedAt": {"type": "string", "format": "date-time"},
+          "sourcePeriod": {
+            "type": "object",
+            "required": ["from", "to"],
+            "properties": {"from": {"type": "string"}, "to": {"type": "string"}},
+            "additionalProperties": false
+          },
+          "confirmedClassifiedRides": {"type": "integer", "minimum": 0},
+          "sourceRows": {"type": "integer", "minimum": 0},
+          "formula": {
+            "type": "object",
+            "required": ["idle", "turns", "hourlyRevenue"],
+            "properties": {"idle": {"type": "number"}, "turns": {"type": "number"}, "hourlyRevenue": {"type": "number"}},
+            "additionalProperties": false
+          },
+          "decisionPriority": {
+            "type": "array",
+            "prefixItems": [
+              {"const": "predictedIdleMinutes"},
+              {"const": "tripsPerHour"},
+              {"const": "expectedHourlyRevenue"}
+            ],
+            "minItems": 3,
+            "maxItems": 3
+          },
+          "operationalRules": {"type": "object"},
+          "zoneProfiles": {"type": "object", "additionalProperties": {"type": "object"}},
+          "segments": {"type": "object", "additionalProperties": {"type": "object"}}
+        },
+        "additionalProperties": false
+      },
+      "TaxiEventRequest": {
+        "type": "object",
+        "required": ["version", "eventId", "businessDate", "fare", "tip", "distance", "durationMs", "waitMs"],
+        "properties": {
+          "version": {"const": 1},
+          "eventId": {"type": "string", "minLength": 1, "maxLength": 160, "pattern": "^[A-Za-z0-9._:-]+$"},
+          "businessDate": {"type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$"},
+          "vehicle": {"type": "string", "maxLength": 40},
+          "rideStartedAt": {"type": ["string", "null"], "format": "date-time"},
+          "rideEndedAt": {"type": ["string", "null"], "format": "date-time"},
+          "pickup": {"type": "string", "maxLength": 160},
+          "pickupCoords": {"type": "string", "maxLength": 80},
+          "dropoff": {"type": "string", "maxLength": 160},
+          "dropoffCoords": {"type": "string", "maxLength": 80},
+          "fare": {"type": "number", "minimum": 0, "maximum": 1000000},
+          "tip": {"type": "number", "minimum": 0, "maximum": 1000000},
+          "payment": {"type": "string", "maxLength": 80},
+          "dispatch": {"type": "string", "maxLength": 80},
+          "distance": {"type": "number", "minimum": 0, "maximum": 2000},
+          "durationMs": {"type": "number", "minimum": 0, "maximum": 172800000},
+          "waitMs": {"type": "number", "minimum": 0, "maximum": 172800000},
+          "memo": {"type": "string", "maxLength": 500},
+          "clientUpdatedAt": {"type": "string", "format": "date-time"}
+        },
+        "additionalProperties": true
+      },
+      "TaxiEventResponse": {
+        "type": "object",
+        "required": ["ok", "duplicate", "eventId"],
+        "properties": {
+          "ok": {"const": true},
+          "duplicate": {"type": "boolean"},
+          "eventId": {"type": "string"},
+          "updatedRange": {"type": "string"}
+        },
+        "additionalProperties": false
+      }
+    }
+  }
+}
