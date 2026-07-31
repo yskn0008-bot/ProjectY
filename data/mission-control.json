@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-31T22:39:16+09:00",
+  "updated_at": "2026-07-31T22:40:00+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -85,6 +85,20 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-c0a4d09da1cc",
+      "title": "docs(server): add one-deploy guard",
+      "completed_at": "2026-07-31T13:39:41Z",
+      "result": "GitHub mainへ反映（c0a4d09）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/c0a4d09da1ccd917b9f516b575ec6493c1befa04"
+    },
+    {
+      "id": "github-commit-f1780e1b0702",
+      "title": "test(server): lock next deploy settings",
+      "completed_at": "2026-07-31T13:39:17Z",
+      "result": "GitHub mainへ反映（f1780e1）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/f1780e1b070228da39e1a8429b1ba0a3bb2e14c6"
+    },
+    {
       "id": "github-commit-1a66af7ee812",
       "title": "docs(server): freeze next deploy settings",
       "completed_at": "2026-07-31T13:38:54Z",
@@ -104,20 +118,6 @@
       "completed_at": "2026-07-31T13:38:06Z",
       "result": "GitHub mainへ反映（d007446）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/d0074466da7925976a93caca24f4fbbe32297355"
-    },
-    {
-      "id": "github-commit-57599968f8b3",
-      "title": "test(server): verify activation copy safety",
-      "completed_at": "2026-07-31T13:37:16Z",
-      "result": "GitHub mainへ反映（5759996）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/57599968f8b37b1c44470c52cc9690a6bcbc6e28"
-    },
-    {
-      "id": "github-commit-99b87255dc29",
-      "title": "test(server): prevent false production-complete status",
-      "completed_at": "2026-07-31T13:36:54Z",
-      "result": "GitHub mainへ反映（99b8725）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/99b87255dc291e5571e363da56912e24f6abe9eb"
     },
     {
       "id": "complete-002",
@@ -154,7 +154,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-31T22:39:16+09:00",
+      "last_update": "2026-07-31T22:40:00+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -235,7 +235,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-31T22:39:16+09:00",
+      "last_update": "2026-07-31T22:40:00+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -258,7 +258,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-31T22:39:16+09:00",
+      "last_update": "2026-07-31T22:40:00+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -340,5 +340,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "48ca356a4a38df230247a9992443613a7c4889235db62e78e8561bb36afffa45"
+  "github_snapshot_hash": "42be37429aac9ffa5140f8d01007f982a7aaf6d99e182e5cc45721e2b331c757"
 }
