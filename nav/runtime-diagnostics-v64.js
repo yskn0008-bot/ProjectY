@@ -1,16 +1,44 @@
 'use strict';
 (()=>{
-  if(window.__yosNavRuntimeDiagnosticsV64)return;
-  window.__yosNavRuntimeDiagnosticsV64=true;
+  if(window.__yosNavRuntimeDiagnosticsV65)return;
+  window.__yosNavRuntimeDiagnosticsV65=true;
 
-  const BUILD='v64';
+  const BUILD='v65';
+  const EXPECTED_CACHE='yos-navi-strategy-v65-sw-diagnostics';
   const isDiagnosticMode=new URL(location.href).searchParams.get('diagnostics')==='1';
+  let swStatus={controlled:Boolean(navigator.serviceWorker?.controller),cache:null,buildMatch:false};
+
+  const requestServiceWorkerStatus=()=>new Promise(resolve=>{
+    const controller=navigator.serviceWorker?.controller;
+    if(!controller){
+      resolve({controlled:false,cache:null,buildMatch:false});
+      return;
+    }
+    const channel=new MessageChannel();
+    let settled=false;
+    const finish=status=>{
+      if(settled)return;
+      settled=true;
+      resolve(status);
+    };
+    const timer=setTimeout(()=>finish({controlled:true,cache:null,buildMatch:false}),1000);
+    channel.port1.onmessage=event=>{
+      clearTimeout(timer);
+      const cache=String(event.data?.cache||'')||null;
+      finish({controlled:true,cache,buildMatch:cache===EXPECTED_CACHE});
+    };
+    controller.postMessage({type:'YOS_NAV_STATUS_REQUEST'},[channel.port2]);
+  });
+
   const snapshot=()=>{
     const locationEl=document.querySelector('.yos-location-status');
     const acquiredAt=Number(locationEl?.dataset.acquiredAt||0);
     const locationFresh=Boolean(acquiredAt&&Date.now()-acquiredAt<=5*60*1000);
     const checks={
       online:navigator.onLine,
+      swControlled:swStatus.controlled,
+      swCache:swStatus.cache||'未取得',
+      swBuildMatch:swStatus.buildMatch,
       mapSection:Boolean(document.getElementById('yos-okinawa-area-map')),
       mapContainer:Boolean(document.getElementById('yos-real-map-v7')),
       leaflet:Boolean(window.L),
@@ -21,7 +49,7 @@
       expectedValueModel:Boolean(window.__YOS_NAV_EXPECTED_VALUE_MODEL),
       locationFresh
     };
-    const requiredReady=checks.mapSection&&checks.mapContainer&&checks.tabCount===3&&checks.expectedValueModel&&checks.recommendationCount>0;
+    const requiredReady=checks.swControlled&&checks.swBuildMatch&&checks.mapSection&&checks.mapContainer&&checks.tabCount===3&&checks.expectedValueModel&&checks.recommendationCount>0;
     const mapReady=!checks.online||checks.tileReady;
     return Object.freeze({build:BUILD,checkedAt:new Date().toISOString(),ready:requiredReady&&mapReady,checks});
   };
@@ -51,14 +79,16 @@
   const schedule=()=>{
     if(scheduled)return;
     scheduled=true;
-    requestAnimationFrame(()=>{
+    requestAnimationFrame(async()=>{
       scheduled=false;
+      swStatus=await requestServiceWorkerStatus();
       renderPanel(publish());
     });
   };
 
   const observer=new MutationObserver(schedule);
   observer.observe(document.documentElement,{childList:true,subtree:true,attributes:true,attributeFilter:['class','data-latitude','data-longitude','data-accuracy','data-acquired-at']});
+  navigator.serviceWorker?.addEventListener('controllerchange',schedule);
   window.addEventListener('online',schedule);
   window.addEventListener('offline',schedule);
   window.addEventListener('pageshow',schedule);
