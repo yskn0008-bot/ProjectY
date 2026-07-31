@@ -1,0 +1,48 @@
+/* YOS Taxi v122 — 営業画面の順番・重複・Safari下部位置を確実に固定する。 */
+html.yos-final-drive-v118.yos-drive-scroll-v120 .rp-page-drive{
+  display:grid!important;
+  align-content:start!important;
+  gap:6px!important;
+}
+
+/* 最初の表示は、判断と操作を優先する。 */
+html.yos-final-drive-v118 .rp-page-drive>.rp-header{order:1!important}
+html.yos-final-drive-v118 .rp-page-drive>.rp-sales-card{order:2!important}
+html.yos-final-drive-v118 .rp-page-drive>.yf-advice-v118{order:3!important}
+html.yos-final-drive-v118 .rp-page-drive>.rp-three-metrics{order:4!important}
+html.yos-final-drive-v118 .rp-page-drive>.rp-action-card{order:5!important}
+html.yos-final-drive-v118 .rp-page-drive>.rp-status-card{order:6!important}
+
+/* 平均単価はKPIにあるため、現在状況側の重複を非表示。 */
+html.yos-final-drive-v118 .rp-status-card dl>div:nth-child(3){display:none!important}
+html.yos-final-drive-v118 .rp-status-card dl{
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+}
+
+/* 主操作を一画面目に入れやすくする。 */
+html.yos-final-drive-v118 .rp-action-card{
+  padding:7px 8px!important;
+}
+html.yos-final-drive-v118 .rp-action-card h2{
+  margin:0 0 5px!important;
+  font-size:15px!important;
+}
+html.yos-final-drive-v118 .rp-action-row button{
+  height:46px!important;
+  min-height:46px!important;
+  font-size:15px!important;
+}
+
+/* Safariではfixedの基準が表示領域なので、ブラウザ高さを二重加算しない。 */
+html.yos-final-drive-v118 .rp-bottom-nav,
+html.yos-final-drive-v118 #taxiGlobalNavV24.rp-bottom-nav{
+  bottom:4px!important;
+}
+html.yos-final-drive-v118 .rp-shell::after{bottom:72px!important}
+
+@media(display-mode:standalone){
+  html.yos-final-drive-v118 .rp-bottom-nav,
+  html.yos-final-drive-v118 #taxiGlobalNavV24.rp-bottom-nav{
+    bottom:calc(env(safe-area-inset-bottom) + 4px)!important;
+  }
+}
