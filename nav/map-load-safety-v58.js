@@ -1,14 +1,14 @@
 'use strict';
 (()=>{
-  if(window.__yosMapLoadSafetyV59)return;
-  window.__yosMapLoadSafetyV59=true;
+  if(window.__yosMapLoadSafetyV60)return;
+  window.__yosMapLoadSafetyV60=true;
 
   const TIMEOUT_MS=12000;
   const RETRY_DELAY_MS=800;
   let timer=0;
 
   const style=document.createElement('style');
-  style.id='yos-map-load-safety-v59-style';
+  style.id='yos-map-load-safety-v60-style';
   style.textContent=`
     .yos-map-load-safety-v58{display:grid;place-items:center;gap:10px;padding:24px;text-align:center}
     .yos-map-load-safety-v58 strong{font-size:16px;color:#f5fbff}
@@ -20,8 +20,13 @@
 
   const loadingElement=()=>document.querySelector('.yos-real-map-v7__loading');
   const tileReady=()=>Boolean(document.getElementById('yos-real-map-v7')?.querySelector('.leaflet-tile-loaded'));
+  const stopTimer=()=>{
+    if(timer)clearTimeout(timer);
+    timer=0;
+  };
 
   const showRecovery=reason=>{
+    stopTimer();
     const loading=loadingElement();
     if(!loading||tileReady())return;
     const offline=!navigator.onLine;
@@ -35,16 +40,22 @@
     },{once:true});
   };
 
-  const arm=()=>{
-    clearTimeout(timer);
+  const arm=(restart=false)=>{
     const loading=loadingElement();
-    if(!loading||tileReady())return;
+    if(tileReady()){
+      stopTimer();
+      loading?.classList.add('is-hidden');
+      return;
+    }
+    if(!loading)return;
+    if(restart)stopTimer();
+    if(timer)return;
     timer=setTimeout(()=>showRecovery('12秒以内に地図タイルの読み込みが完了しませんでした'),TIMEOUT_MS);
   };
 
   const observer=new MutationObserver(()=>{
     if(tileReady()){
-      clearTimeout(timer);
+      stopTimer();
       loadingElement()?.classList.add('is-hidden');
       return;
     }
@@ -53,8 +64,8 @@
   observer.observe(document.documentElement,{childList:true,subtree:true,attributes:true,attributeFilter:['class','src']});
 
   window.addEventListener('offline',()=>showRecovery('通信状態：オフライン'));
-  window.addEventListener('online',arm);
-  window.addEventListener('pageshow',arm);
-  document.addEventListener('visibilitychange',()=>{if(!document.hidden)arm()});
+  window.addEventListener('online',()=>arm(true));
+  window.addEventListener('pageshow',()=>arm(false));
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)arm(false)});
   arm();
 })();
