@@ -18,6 +18,7 @@ async function inject(response,type){
 
   addCss('reference-perfect-v111.css');
   if(type!=='settings')addCss('final-app-v130.css');
+  if(type!=='settings'&&!html.includes('yos-v130-old-nav-guard'))html=html.replace('</head>','<style id="yos-v130-old-nav-guard">#taxiGlobalNavV24{display:none!important}</style></head>');
   if(type==='calendar')addJs('report-sync-v43.js');
   if(type==='settings')addJs('settings-v20.js');
   addJs('reference-perfect-v111.js');
