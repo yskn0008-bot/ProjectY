@@ -1,10 +1,10 @@
 'use strict';
 const CACHE_PREFIX='yos-taxi-projecty-';
-const CACHE='yos-taxi-projecty-v116-adaptive-readable-layout';
-const VERSION='116';
+const CACHE='yos-taxi-projecty-v117-live-link';
+const VERSION='117';
 const STATIC=[
   './','./index.html','./calendar.html','./settings.html','./manifest.webmanifest','./swipe-nav.js',
-  './reference-perfect-v111.css','./reference-perfect-v111.js','./large-type-v112.css','./one-screen-fit-v113.css','./one-screen-fit-v113.js','./report-sync-v43.js','./settings-v20.js'
+  './reference-perfect-v111.css','./reference-perfect-v111.js','./large-type-v112.css','./one-screen-fit-v113.css','./one-screen-fit-v113.js','./report-sync-v43.js','./settings-v20.js','./projecty-live-sync-v1.js'
 ];
 
 const pageType=url=>url.pathname.endsWith('/taxi/')||url.pathname.endsWith('/taxi/index.html')?'index':url.pathname.endsWith('/taxi/calendar.html')?'calendar':url.pathname.endsWith('/taxi/settings.html')?'settings':'';
@@ -14,7 +14,7 @@ async function inject(response,type){
   const addCss=file=>{if(!html.includes(file))html=html.replace('</head>',`<link rel="stylesheet" href="./${file}?v=${VERSION}"></head>`) };
   const addJs=file=>{if(!html.includes(file))html=html.replace('</body>',`<script src="./${file}?v=${VERSION}"></script></body>`) };
 
-  /* Approved black/gold rebuild, large type, then adaptive one-screen fitting. */
+  /* Approved black/gold rebuild, large type, adaptive fitting, then live data bridge. */
   addCss('reference-perfect-v111.css');
   addCss('large-type-v112.css');
   addCss('one-screen-fit-v113.css');
@@ -22,6 +22,7 @@ async function inject(response,type){
   if(type==='settings')addJs('settings-v20.js');
   addJs('reference-perfect-v111.js');
   addJs('one-screen-fit-v113.js');
+  if(type==='index')addJs('projecty-live-sync-v1.js');
 
   const headers=new Headers(response.headers);
   headers.delete('content-length');
