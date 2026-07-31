@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-31T15:38:04+09:00",
+  "updated_at": "2026-07-31T15:39:02+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -85,6 +85,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-bb956b690872",
+      "title": "Publish final unified YOS Taxi v130",
+      "completed_at": "2026-07-31T06:38:51Z",
+      "result": "GitHub mainへ反映（bb956b6）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/bb956b690872047e392a407505d9c7295d698053"
+    },
+    {
       "id": "github-commit-f90473150601",
       "title": "Add final unified YOS Taxi behavior v130",
       "completed_at": "2026-07-31T06:37:53Z",
@@ -111,13 +118,6 @@
       "completed_at": "2026-07-31T06:13:22Z",
       "result": "GitHub mainへ反映（d9df792）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/d9df792c82ae12f2a0a41ce7c893f9d72a67d400"
-    },
-    {
-      "id": "github-commit-a0393691dba3",
-      "title": "fix(nav): stop YOS diagnostics refresh loop v66",
-      "completed_at": "2026-07-31T06:10:41Z",
-      "result": "GitHub mainへ反映（a039369）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/a0393691dba3894910c15645b019b0602709ec79"
     },
     {
       "id": "complete-002",
@@ -154,7 +154,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-31T15:38:04+09:00",
+      "last_update": "2026-07-31T15:39:02+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -235,7 +235,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-31T15:38:04+09:00",
+      "last_update": "2026-07-31T15:39:02+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -258,7 +258,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-31T15:38:04+09:00",
+      "last_update": "2026-07-31T15:39:02+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -340,5 +340,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "2b6ad09789c22481db1c4c384fb8ab814d67a6478e4114aebe19128bf25f3d0d"
+  "github_snapshot_hash": "63c861f0e05077996366e3f9b45c3f6efbe25607e54d30d4c0260d08e3f31721"
 }
