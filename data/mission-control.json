@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-31T10:49:30+09:00",
+  "updated_at": "2026-07-31T10:49:52+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -21,6 +21,16 @@
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/10",
       "updated_at": "2026-07-17T11:08:22Z"
+    },
+    {
+      "id": "github-issue-110",
+      "title": "Issue #110 ProjectYライブ連携を本番有効化",
+      "type": "GitHub Issue",
+      "status": "open",
+      "priority": 3,
+      "next_action": "完成条件を確認し、次の安全な実装を1件進める",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/110",
+      "updated_at": "2026-07-31T01:49:39Z"
     },
     {
       "id": "github-issue-4",
@@ -134,7 +144,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-31T10:49:30+09:00",
+      "last_update": "2026-07-31T10:49:52+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -209,13 +219,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 5件・Open PR 0件を自動同期中",
+      "next_action": "Open Issue 6件・Open PR 0件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-31T10:49:30+09:00",
+      "last_update": "2026-07-31T10:49:52+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -238,7 +248,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-31T10:49:30+09:00",
+      "last_update": "2026-07-31T10:49:52+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -320,5 +330,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "60ebdb9dc9255f7c73150ecabda37e963be2f0ce9531c95c4c3c49335ab10601"
+  "github_snapshot_hash": "f36bd858bb07bbbf24a23f7744b5464a636389341cd233a05585ea18994e6ac1"
 }
