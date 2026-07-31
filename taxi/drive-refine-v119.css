@@ -1,0 +1,203 @@
+/* YOS Taxi v119 — iPhone SE3営業画面の実機調整。 */
+html.yos-final-drive-v118,
+html.yos-final-drive-v118 body{
+  min-height:100%!important;
+  height:auto!important;
+  overflow-x:hidden!important;
+  overflow-y:auto!important;
+  scroll-padding-bottom:calc(66px + var(--rp-browser-bottom,32px) + env(safe-area-inset-bottom) + 34px)!important;
+}
+
+html.yos-final-drive-v118 .rp-shell{
+  min-height:100dvh!important;
+  height:auto!important;
+  overflow:visible!important;
+  padding-top:calc(env(safe-area-inset-top) + 2px)!important;
+  padding-bottom:calc(66px + var(--rp-browser-bottom,32px) + env(safe-area-inset-bottom) + 58px)!important;
+}
+
+html.yos-final-drive-v118 .rp-page-drive{
+  display:grid!important;
+  grid-template-rows:none!important;
+  height:auto!important;
+  max-height:none!important;
+  min-height:0!important;
+  overflow:visible!important;
+  align-content:start!important;
+  gap:6px!important;
+  padding-bottom:18px!important;
+}
+
+html.yos-final-drive-v118 .rp-header{
+  height:40px!important;
+  min-height:40px!important;
+}
+html.yos-final-drive-v118 .rp-header h1{
+  font-size:21px!important;
+}
+html.yos-final-drive-v118 .rp-header-icon{
+  top:1px!important;
+  width:38px!important;
+  height:38px!important;
+}
+
+/* 売上カードは大きく見せつつ、縦方向を圧縮する。 */
+html.yos-final-drive-v118 .rp-sales-card{
+  grid-template-columns:minmax(0,1fr) 78px!important;
+  gap:8px!important;
+  padding:10px 11px 9px!important;
+  border-radius:12px!important;
+}
+html.yos-final-drive-v118 .rp-sales-copy>span{
+  font-size:14px!important;
+}
+html.yos-final-drive-v118 .rp-sales-copy>strong{
+  margin:2px 0 4px!important;
+  font-size:38px!important;
+  line-height:1!important;
+}
+html.yos-final-drive-v118 .rp-sales-copy>small{
+  font-size:14px!important;
+}
+html.yos-final-drive-v118 .rp-sales-copy>i{
+  margin-top:7px!important;
+}
+html.yos-final-drive-v118 .rp-ring-large{
+  width:70px!important;
+  height:70px!important;
+}
+html.yos-final-drive-v118 .rp-ring-large::before{
+  width:55px!important;
+  height:55px!important;
+}
+html.yos-final-drive-v118 .rp-primary-action{
+  min-height:50px!important;
+  height:50px!important;
+  margin-top:3px!important;
+  font-size:19px!important;
+  border-radius:10px!important;
+}
+
+/* YOS判断を売上直下に置き、営業中に必ず見えるようにする。 */
+html.yos-final-drive-v118 .yf-advice-v118{
+  order:0!important;
+  min-height:66px!important;
+  padding:8px 11px!important;
+  grid-template-columns:minmax(0,1fr) 32px!important;
+}
+html.yos-final-drive-v118 .yf-advice-v118 span{
+  font-size:13px!important;
+}
+html.yos-final-drive-v118 .yf-advice-v118 strong{
+  font-size:19px!important;
+  line-height:1.18!important;
+}
+html.yos-final-drive-v118 .yf-advice-v118 button{
+  font-size:28px!important;
+}
+
+/* KPIは大きい数字を残し、高さだけ抑える。 */
+html.yos-final-drive-v118 .rp-three-metrics{
+  gap:6px!important;
+}
+html.yos-final-drive-v118 .rp-three-metrics>div{
+  min-height:60px!important;
+  padding:6px 3px!important;
+  display:grid!important;
+  align-content:center!important;
+}
+html.yos-final-drive-v118 .rp-three-metrics span{
+  font-size:12px!important;
+}
+html.yos-final-drive-v118 .rp-three-metrics strong{
+  margin-top:3px!important;
+  font-size:18px!important;
+}
+
+/* 現在状況は4行ではなく2×2で表示する。 */
+html.yos-final-drive-v118 .rp-status-card{
+  padding:9px!important;
+}
+html.yos-final-drive-v118 .rp-status-card h2{
+  margin:0 0 6px!important;
+  font-size:15px!important;
+}
+html.yos-final-drive-v118 .rp-status-card dl{
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:5px!important;
+}
+html.yos-final-drive-v118 .rp-status-card dl div{
+  min-width:0!important;
+  min-height:50px!important;
+  display:grid!important;
+  grid-template-columns:1fr!important;
+  align-content:center!important;
+  gap:2px!important;
+  padding:6px 8px!important;
+  border:1px solid rgba(228,170,50,.22)!important;
+  border-radius:8px!important;
+  background:#09090b!important;
+  font-size:13px!important;
+  line-height:1.15!important;
+}
+html.yos-final-drive-v118 .rp-status-card dt{
+  color:#9f9fa4!important;
+  font-size:11px!important;
+}
+html.yos-final-drive-v118 .rp-status-card dd{
+  margin:0!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  white-space:nowrap!important;
+  font-size:15px!important;
+  font-weight:850!important;
+}
+
+/* 主操作は押しやすさを維持しつつ、1段に収める。 */
+html.yos-final-drive-v118 .rp-action-card{
+  padding:8px!important;
+}
+html.yos-final-drive-v118 .rp-action-card h2{
+  margin:0 0 6px!important;
+  font-size:15px!important;
+}
+html.yos-final-drive-v118 .rp-action-row{
+  grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  gap:5px!important;
+}
+html.yos-final-drive-v118 .rp-action-row button{
+  min-height:48px!important;
+  height:48px!important;
+  padding:3px 1px!important;
+  font-size:14px!important;
+}
+
+/* 固定メニューの背後まで確実にスクロールできる。 */
+html.yos-final-drive-v118 .rp-bottom-nav,
+html.yos-final-drive-v118 #taxiGlobalNavV24.rp-bottom-nav{
+  height:64px!important;
+}
+html.yos-final-drive-v118 .rp-bottom-nav button{
+  height:54px!important;
+  min-height:54px!important;
+}
+
+@media(max-width:375px){
+  html.yos-final-drive-v118 .rp-shell{padding-left:10px!important;padding-right:10px!important}
+  html.yos-final-drive-v118 .rp-sales-copy>strong{font-size:36px!important}
+  html.yos-final-drive-v118 .rp-primary-action{font-size:18px!important}
+  html.yos-final-drive-v118 .yf-advice-v118 strong{font-size:18px!important}
+  html.yos-final-drive-v118 .rp-three-metrics strong{font-size:17px!important}
+  html.yos-final-drive-v118 .rp-action-row button{font-size:13px!important}
+}
+
+@media(max-height:560px){
+  html.yos-final-drive-v118 .rp-sales-card{padding:8px 10px!important}
+  html.yos-final-drive-v118 .rp-sales-copy>strong{font-size:34px!important}
+  html.yos-final-drive-v118 .rp-primary-action{height:46px!important;min-height:46px!important}
+  html.yos-final-drive-v118 .yf-advice-v118{min-height:60px!important}
+  html.yos-final-drive-v118 .rp-three-metrics>div{min-height:56px!important}
+  html.yos-final-drive-v118 .rp-status-card dl div{min-height:46px!important}
+  html.yos-final-drive-v118 .rp-action-row button{height:44px!important;min-height:44px!important}
+}
