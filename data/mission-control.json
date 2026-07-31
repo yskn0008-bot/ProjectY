@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-31T22:34:42+09:00",
+  "updated_at": "2026-07-31T22:35:17+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -85,6 +85,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-194a6d59c750",
+      "title": "test(server): verify activation assistant stays local",
+      "completed_at": "2026-07-31T13:35:02Z",
+      "result": "GitHub mainへ反映（194a6d5）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/194a6d59c75024c30e7c33a1e1cb6832d9a79483"
+    },
+    {
       "id": "github-commit-3f40a3570c16",
       "title": "feat(server): add iPhone Taxi activation assistant",
       "completed_at": "2026-07-31T13:34:26Z",
@@ -111,13 +118,6 @@
       "completed_at": "2026-07-31T13:08:09Z",
       "result": "GitHub mainへ反映（0abb0fb）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/0abb0fb2d46d6a00ff993b6cd8b0e66a35f33b7f"
-    },
-    {
-      "id": "github-commit-a0679967f8f4",
-      "title": "fix(nav): align diagnostics with service worker v73",
-      "completed_at": "2026-07-31T13:07:46Z",
-      "result": "GitHub mainへ反映（a067996）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/a0679967f8f4e4efee8a5a7bf312aba1d1228982"
     },
     {
       "id": "complete-002",
@@ -154,7 +154,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-31T22:34:42+09:00",
+      "last_update": "2026-07-31T22:35:17+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -235,7 +235,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-31T22:34:42+09:00",
+      "last_update": "2026-07-31T22:35:17+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -258,7 +258,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-31T22:34:42+09:00",
+      "last_update": "2026-07-31T22:35:17+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -340,5 +340,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "6c578378c9cdb781629954b032daffb2eb703d8af68131643090f6952ad29f09"
+  "github_snapshot_hash": "dabb7245db4f959fac4ae92e50a8478350c6f6fb39e44751dd0679283934726a"
 }
