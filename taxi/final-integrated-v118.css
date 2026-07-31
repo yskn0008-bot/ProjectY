@@ -1,0 +1,174 @@
+/* YOS Taxi v118 — approved black/gold operational UI. */
+:root{
+  --yf-gold:#e4aa32;
+  --yf-gold-2:#ffd56a;
+  --yf-green:#55d982;
+  --yf-red:#ff5965;
+  --yf-violet:#7a2fa5;
+  --yf-muted:#a9a9ae;
+  --yf-panel:#0b0b0d;
+  --yf-line:rgba(228,170,50,.52);
+}
+
+/* Shared reset after legacy fitting layers. */
+html[class*="yos-final-"] body{background:#000!important}
+html[class*="yos-final-"] .rp-shell{width:min(100%,430px)!important;padding-left:12px!important;padding-right:12px!important}
+html[class*="yos-final-"] .rp-page{gap:7px!important}
+html[class*="yos-final-"] .rp-header{height:44px!important;min-height:44px!important;border-bottom:1px solid var(--yf-line)!important}
+html[class*="yos-final-"] .rp-header h1{font-size:22px!important;font-weight:900!important}
+html[class*="yos-final-"] .rp-card{border-color:var(--yf-line)!important;background:linear-gradient(155deg,#101013,#050506 72%)!important;border-radius:12px!important}
+html[class*="yos-final-"] .rp-card h2{font-size:16px!important}
+
+/* Unified bottom navigation. */
+html[class*="yos-final-"] .rp-bottom-nav,
+html[class*="yos-final-"] #taxiGlobalNavV24.rp-bottom-nav{
+  width:min(calc(100% - 18px),412px)!important;
+  height:66px!important;
+  padding:4px!important;
+  border-radius:13px!important;
+  border-color:var(--yf-line)!important;
+  background:rgba(3,3,4,.98)!important;
+  overflow:hidden!important;
+}
+html[class*="yos-final-"] .rp-bottom-nav button{
+  height:56px!important;
+  min-height:56px!important;
+  border-radius:9px!important;
+  padding:3px 1px!important;
+  gap:3px!important;
+  background:transparent!important;
+  border:1px solid transparent!important;
+  color:#929296!important;
+}
+html[class*="yos-final-"] .rp-bottom-nav button[data-page="nav"]{
+  background:transparent!important;
+  border-color:transparent!important;
+  color:#a7a7aa!important;
+}
+html[class*="yos-final-"] .rp-bottom-nav button.active{
+  color:var(--yf-gold-2)!important;
+  border-color:var(--yf-line)!important;
+  background:linear-gradient(155deg,rgba(228,170,50,.18),rgba(228,170,50,.04))!important;
+}
+html[class*="yos-final-"] .rp-bottom-nav button b{font-size:11px!important;font-weight:900!important}
+html[class*="yos-final-"] .rp-bottom-nav svg{width:25px!important;height:25px!important}
+
+/* Drive: large figures, one decision, four direct operations. */
+html.yos-final-drive-v118,
+html.yos-final-drive-v118 body{height:auto!important;min-height:100%!important;overflow-y:auto!important}
+html.yos-final-drive-v118 .rp-shell{height:auto!important;min-height:100dvh!important;overflow:visible!important;padding-bottom:calc(66px + var(--rp-browser-bottom,32px) + env(safe-area-inset-bottom) + 24px)!important}
+html.yos-final-drive-v118 .rp-page-drive{height:auto!important;max-height:none!important;grid-template-rows:none!important;overflow:visible!important;align-content:start!important}
+html.yos-final-drive-v118 .rp-sales-card{grid-template-columns:minmax(0,1fr) 90px!important;padding:13px!important}
+html.yos-final-drive-v118 .rp-sales-copy>span{font-size:15px!important}
+html.yos-final-drive-v118 .rp-sales-copy>strong{font-size:42px!important;font-weight:700!important}
+html.yos-final-drive-v118 .rp-sales-copy>small{font-size:15px!important;color:#fff!important}
+html.yos-final-drive-v118 .rp-primary-action{min-height:56px!important;font-size:21px!important;border-radius:10px!important}
+html.yos-final-drive-v118 .rp-three-metrics>div{min-height:72px!important;padding:9px 4px!important}
+html.yos-final-drive-v118 .rp-three-metrics span{font-size:13px!important}
+html.yos-final-drive-v118 .rp-three-metrics strong{font-size:20px!important}
+html.yos-final-drive-v118 .rp-status-card{padding:12px!important}
+html.yos-final-drive-v118 .rp-status-card dl div{grid-template-columns:92px minmax(0,1fr)!important;font-size:15px!important;line-height:1.35!important}
+html.yos-final-drive-v118 .rp-status-card dd{font-size:16px!important}
+.yf-advice-v118{min-height:78px;display:grid;grid-template-columns:1fr 36px;grid-template-rows:auto 1fr;align-items:center;padding:11px 12px!important;cursor:pointer}
+.yf-advice-v118 span{font-size:14px;color:var(--yf-gold-2);font-weight:900}
+.yf-advice-v118 strong{grid-column:1;font-size:22px;line-height:1.2;color:#fff}
+.yf-advice-v118 button{grid-column:2;grid-row:1/3;border:0;background:transparent;color:var(--yf-gold-2);font-size:32px}
+html.yos-final-drive-v118 .rp-action-card{padding:10px!important}
+html.yos-final-drive-v118 .rp-action-row{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:6px!important}
+html.yos-final-drive-v118 .rp-action-row button{min-height:52px!important;font-size:15px!important;border-radius:9px!important}
+#yos-projecty-live-sync-v1{display:none!important}
+
+/* Today. */
+html.yos-final-today-v118,
+html.yos-final-today-v118 body{height:auto!important;min-height:100%!important;overflow-y:auto!important}
+html.yos-final-today-v118 .rp-shell{height:auto!important;min-height:100dvh!important;overflow:visible!important;padding-bottom:calc(66px + var(--rp-browser-bottom,32px) + env(safe-area-inset-bottom) + 24px)!important}
+html.yos-final-today-v118 .rp-page-today{height:auto!important;max-height:none!important;grid-template-rows:none!important;overflow:visible!important;align-content:start!important}
+.yf-today-summary-v118{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));padding:10px!important;gap:7px}
+.yf-today-summary-v118>div{min-height:65px;display:grid;align-content:center;text-align:center;border:1px solid rgba(228,170,50,.25);border-radius:9px;background:#09090b}
+.yf-today-summary-v118 span{font-size:12px;color:var(--yf-muted)}
+.yf-today-summary-v118 strong{font-size:18px;color:#fff;white-space:nowrap}
+html.yos-final-today-v118 .rp-schedule-row{min-height:50px!important;grid-template-columns:64px minmax(0,1fr) 27px!important}
+html.yos-final-today-v118 .rp-schedule-row time{font-size:17px!important}
+html.yos-final-today-v118 .rp-schedule-row span{font-size:16px!important}
+html.yos-final-today-v118 .rp-memo-card button{font-size:15px!important}
+
+/* Shared actual-state colors. Targets never receive these classes. */
+.achieved{color:var(--yf-green)!important}
+.near,.normal{color:var(--yf-gold-2)!important}
+.danger{color:var(--yf-red)!important}
+.muted{color:#8b8b90!important}
+
+/* Week: seven large horizontal rows in one screen. */
+html.yos-final-week-v118,
+html.yos-final-week-v118 body{height:var(--rp-visible-height,100dvh)!important;overflow:hidden!important}
+html.yos-final-week-v118 .rp-shell{height:var(--rp-visible-height,100dvh)!important;min-height:0!important;overflow:hidden!important;padding-bottom:calc(66px + var(--rp-browser-bottom,32px) + env(safe-area-inset-bottom) + 10px)!important}
+html.yos-final-week-v118 .rp-page-week{height:var(--yf-page-height,520px)!important;max-height:var(--yf-page-height,520px)!important;overflow:hidden!important;display:grid!important;grid-template-rows:44px 34px 55px minmax(0,1fr)!important;gap:5px!important}
+html.yos-final-week-v118 .rp-period-arrows{margin:0!important}
+html.yos-final-week-v118 .rp-period-arrows button{height:34px!important;min-height:34px!important}
+.yf-week-summary-v118{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:7px 10px!important}
+.yf-week-summary-v118 div{display:flex;align-items:center;justify-content:space-between;gap:7px}
+.yf-week-summary-v118 span{font-size:12px;color:var(--yf-muted)}
+.yf-week-summary-v118 strong{font-size:17px;white-space:nowrap;color:#fff}
+html.yos-final-week-v118 .rp-week-strip{height:100%!important;min-height:0!important;display:grid!important;grid-template-columns:1fr!important;grid-template-rows:repeat(7,minmax(0,1fr))!important;grid-auto-flow:row!important;gap:4px!important;overflow:hidden!important;padding:0!important}
+.yf-week-row-v118{min-height:0!important;height:auto!important;width:100%!important;display:grid!important;grid-template-columns:68px minmax(0,1.25fr) minmax(0,1fr) 52px!important;align-items:center!important;gap:6px!important;padding:5px 8px!important;border:1px solid rgba(228,170,50,.34)!important;border-radius:9px!important;background:linear-gradient(155deg,#101013,#060607)!important;color:#fff!important;text-align:left!important}
+.yf-week-row-v118 .date{display:flex;align-items:baseline;gap:5px}
+.yf-week-row-v118 .date b{font-size:18px}
+.yf-week-row-v118 .date small{font-size:13px;color:var(--yf-muted)}
+.yf-week-row-v118 .actual,.yf-week-row-v118 .target{display:grid;gap:1px}
+.yf-week-row-v118 small{font-size:10px;color:var(--yf-muted)}
+.yf-week-row-v118 .actual strong{font-size:17px;white-space:nowrap}
+.yf-week-row-v118 .target strong{font-size:14px;color:#f2f2f3!important;white-space:nowrap}
+.yf-week-row-v118 .meta{text-align:right;display:grid;gap:1px}
+.yf-week-row-v118 .meta b{font-size:15px;color:var(--yf-gold-2)}
+.yf-week-row-v118 .meta small{font-size:10px}
+.yf-week-row-v118.off{grid-template-columns:84px 1fr!important;background:linear-gradient(145deg,#43125f,#1d082b)!important;border-color:rgba(166,87,218,.8)!important}
+.yf-week-row-v118 .off-label{font-size:20px;color:#fff}
+
+/* Month: summary + six-row grid + compact legend, all above nav. */
+html.yos-final-month-v118,
+html.yos-final-month-v118 body{height:var(--rp-visible-height,100dvh)!important;overflow:hidden!important}
+html.yos-final-month-v118 .rp-shell{height:var(--rp-visible-height,100dvh)!important;min-height:0!important;overflow:hidden!important;padding-bottom:calc(66px + var(--rp-browser-bottom,32px) + env(safe-area-inset-bottom) + 10px)!important}
+html.yos-final-month-v118 .rp-page-month{height:var(--yf-page-height,520px)!important;max-height:var(--yf-page-height,520px)!important;overflow:hidden!important;display:grid!important;grid-template-rows:44px 38px 61px 22px minmax(0,1fr) 38px!important;gap:4px!important}
+.yf-month-summary-v118{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 5px;gap:4px 8px;padding:7px 10px!important}
+.yf-month-summary-v118>div{display:flex;align-items:center;justify-content:space-between;gap:5px}
+.yf-month-summary-v118 span{font-size:11px;color:var(--yf-muted)}
+.yf-month-summary-v118 strong{font-size:16px;color:#fff;white-space:nowrap}
+.yf-month-summary-v118>i{grid-column:1/-1;height:5px;border-radius:999px;background:#262629;overflow:hidden}
+.yf-month-summary-v118>i>b{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,var(--yf-gold),var(--yf-gold-2))}
+html.yos-final-month-v118 .rp-week-head{height:22px!important}
+html.yos-final-month-v118 .rp-week-head b{font-size:12px!important}
+html.yos-final-month-v118 .rp-month-grid{height:100%!important;min-height:0!important;display:grid!important;grid-template-columns:repeat(7,minmax(0,1fr))!important;grid-template-rows:repeat(6,minmax(0,1fr))!important}
+.yf-month-cell-v118{position:relative!important;min-height:0!important;height:auto!important;border:0!important;border-right:1px solid rgba(255,255,255,.14)!important;border-bottom:1px solid rgba(255,255,255,.14)!important;background:#09090b!important;color:#fff!important;padding:3px 2px!important;overflow:hidden!important;text-align:center!important}
+.yf-month-cell-v118 .day{position:absolute;left:4px;top:3px;font-size:14px;font-weight:900}
+.yf-month-cell-v118 .actual{display:block;margin-top:18px;font-size:13px;font-weight:900;white-space:nowrap}
+.yf-month-cell-v118 .target{display:block;margin-top:1px;font-size:10px;color:#f0f0f1!important;white-space:nowrap}
+.yf-month-cell-v118.other{opacity:.26}
+.yf-month-cell-v118.today{box-shadow:inset 0 0 0 3px var(--yf-gold-2)!important}
+.yf-month-cell-v118.off{background:linear-gradient(145deg,#43125f,#1d082b)!important;border-color:rgba(166,87,218,.7)!important}
+.yf-month-cell-v118 .moon{display:block;margin-top:17px;font-size:20px;color:#e1b5ff}
+.yf-month-cell-v118.off small{display:block;font-size:11px;color:#fff!important;font-weight:900}
+html.yos-final-month-v118 .rp-month-legend{height:38px!important;display:flex!important;align-items:center!important;justify-content:space-between!important;gap:4px!important;padding:2px 3px!important;font-size:9px!important;overflow:hidden!important}
+html.yos-final-month-v118 .rp-month-legend span{white-space:nowrap}
+html.yos-final-month-v118 .rp-month-legend .goal{color:#fff}
+
+/* Manage: approved six-tile layout. */
+html.yos-final-manage-v118,
+html.yos-final-manage-v118 body{height:var(--rp-visible-height,100dvh)!important;overflow:hidden!important}
+html.yos-final-manage-v118 .rp-shell{height:var(--rp-visible-height,100dvh)!important;overflow:hidden!important;padding-bottom:calc(66px + var(--rp-browser-bottom,32px) + env(safe-area-inset-bottom) + 10px)!important}
+html.yos-final-manage-v118 .rp-page-manage{height:var(--yf-page-height,520px)!important;max-height:var(--yf-page-height,520px)!important;display:grid!important;grid-template-rows:44px 38px minmax(0,1fr)!important;overflow:hidden!important}
+html.yos-final-manage-v118 .rp-manage-grid{height:100%!important;display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;grid-template-rows:repeat(3,minmax(0,1fr))!important;gap:8px!important}
+html.yos-final-manage-v118 .rp-manage-grid button:not([hidden]){min-height:0!important;height:auto!important;display:grid!important;align-content:center!important;gap:8px!important}
+html.yos-final-manage-v118 .rp-manage-grid button[hidden]{display:none!important}
+html.yos-final-manage-v118 .rp-manage-grid svg{width:46px!important;height:46px!important}
+html.yos-final-manage-v118 .rp-manage-grid b{font-size:17px!important}
+
+@media(max-width:375px){
+  html.yos-final-drive-v118 .rp-sales-copy>strong{font-size:38px!important}
+  html.yos-final-drive-v118 .rp-action-row button{font-size:14px!important}
+  .yf-week-row-v118{grid-template-columns:61px minmax(0,1.2fr) minmax(0,.92fr) 46px!important;padding-left:6px!important;padding-right:6px!important}
+  .yf-week-row-v118 .date b{font-size:16px}
+  .yf-week-row-v118 .actual strong{font-size:15px}
+  .yf-week-row-v118 .target strong{font-size:12px}
+  .yf-month-cell-v118 .actual{font-size:12px}
+  .yf-month-cell-v118 .target{font-size:9px}
+}
