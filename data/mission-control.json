@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-31T22:40:00+09:00",
+  "updated_at": "2026-07-31T22:40:18+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -85,6 +85,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-6f82b9cc9ce5",
+      "title": "test(server): prevent repeated blind deploys",
+      "completed_at": "2026-07-31T13:40:04Z",
+      "result": "GitHub mainへ反映（6f82b9c）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/6f82b9cc9ce568d14b9e1a26e708e6446f07b349"
+    },
+    {
       "id": "github-commit-c0a4d09da1cc",
       "title": "docs(server): add one-deploy guard",
       "completed_at": "2026-07-31T13:39:41Z",
@@ -111,13 +118,6 @@
       "completed_at": "2026-07-31T13:38:29Z",
       "result": "GitHub mainへ反映（31e0c9f）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/31e0c9f0e277a3e077e07aa7e0ffde451f48fbfc"
-    },
-    {
-      "id": "github-commit-d0074466da79",
-      "title": "docs(server): add private resource ID template",
-      "completed_at": "2026-07-31T13:38:06Z",
-      "result": "GitHub mainへ反映（d007446）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/d0074466da7925976a93caca24f4fbbe32297355"
     },
     {
       "id": "complete-002",
@@ -154,7 +154,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-31T22:40:00+09:00",
+      "last_update": "2026-07-31T22:40:18+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -235,7 +235,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-31T22:40:00+09:00",
+      "last_update": "2026-07-31T22:40:18+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -258,7 +258,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-31T22:40:00+09:00",
+      "last_update": "2026-07-31T22:40:18+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -340,5 +340,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "42be37429aac9ffa5140f8d01007f982a7aaf6d99e182e5cc45721e2b331c757"
+  "github_snapshot_hash": "0d3a829dd63d471f3c4236bb0e65410d0b66510fa2a677b386f011920cb9a067"
 }
