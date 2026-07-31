@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-31T21:39:00+09:00",
+  "updated_at": "2026-07-31T21:39:37+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -85,6 +85,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-010b3efc55f8",
+      "title": "Publish verified Taxi layout v132",
+      "completed_at": "2026-07-31T12:39:23Z",
+      "result": "GitHub mainへ反映（010b3ef）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/010b3efc55f82cc5292689b635bc35630e83c37b"
+    },
+    {
       "id": "github-commit-75a133b5a8cc",
       "title": "Fix Taxi drive card clipping at short viewport heights",
       "completed_at": "2026-07-31T12:38:44Z",
@@ -111,13 +118,6 @@
       "completed_at": "2026-07-31T12:18:16Z",
       "result": "GitHub mainへ反映（89edbc0）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/89edbc05ad5e91f64b9e976d780d09700dd861d4"
-    },
-    {
-      "id": "github-commit-1b461e1459f6",
-      "title": "fix(vercel): add public output entry",
-      "completed_at": "2026-07-31T12:16:00Z",
-      "result": "GitHub mainへ反映（1b461e1）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/1b461e1459f65ecefaf3ddbcc384bb5d5633ee89"
     },
     {
       "id": "complete-002",
@@ -154,7 +154,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-31T21:39:00+09:00",
+      "last_update": "2026-07-31T21:39:37+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -235,7 +235,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-31T21:39:00+09:00",
+      "last_update": "2026-07-31T21:39:37+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -258,7 +258,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-31T21:39:00+09:00",
+      "last_update": "2026-07-31T21:39:37+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -340,5 +340,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "474082fcd4389cce1b704f002dc47574b1767dd8e4ad70d3500efd84d463d435"
+  "github_snapshot_hash": "7af442db68c81205e033122d98a19e8a25e81e34f5e6405987f1f885274b56a8"
 }
