@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-07-31T22:37:12+09:00",
+  "updated_at": "2026-07-31T22:37:30+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -85,6 +85,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-57599968f8b3",
+      "title": "test(server): verify activation copy safety",
+      "completed_at": "2026-07-31T13:37:16Z",
+      "result": "GitHub mainへ反映（5759996）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/57599968f8b37b1c44470c52cc9690a6bcbc6e28"
+    },
+    {
       "id": "github-commit-99b87255dc29",
       "title": "test(server): prevent false production-complete status",
       "completed_at": "2026-07-31T13:36:54Z",
@@ -111,13 +118,6 @@
       "completed_at": "2026-07-31T13:35:02Z",
       "result": "GitHub mainへ反映（194a6d5）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/194a6d59c75024c30e7c33a1e1cb6832d9a79483"
-    },
-    {
-      "id": "github-commit-3f40a3570c16",
-      "title": "feat(server): add iPhone Taxi activation assistant",
-      "completed_at": "2026-07-31T13:34:26Z",
-      "result": "GitHub mainへ反映（3f40a35）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/3f40a3570c16779432d12779cd2fa01cefa955a7"
     },
     {
       "id": "complete-002",
@@ -154,7 +154,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-07-31T22:37:12+09:00",
+      "last_update": "2026-07-31T22:37:30+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -235,7 +235,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-07-31T22:37:12+09:00",
+      "last_update": "2026-07-31T22:37:30+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -258,7 +258,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-07-31T22:37:12+09:00",
+      "last_update": "2026-07-31T22:37:30+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -340,5 +340,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "1d7a6a7fb1a9e6f86d5ce05f3a4d800f5dec9a6c24268a07f6549ef7efcb5421"
+  "github_snapshot_hash": "7bfdf2f6cc57965bb109b7b4503c7ebafaa52f6e81392666d44f2f7e3f5ac4c9"
 }
