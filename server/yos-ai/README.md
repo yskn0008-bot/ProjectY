@@ -35,6 +35,7 @@ YOS専用生成AIの読み取り専用バックエンドです。
 - 秘密値を表示しない本番preflight
 - 配置後health smoke test
 - Vercel関数ごとの実行時間・キャンセル設定
+- OpenAPI 3.1によるPWA向け公開契約
 
 ## API
 
@@ -43,6 +44,10 @@ YOS専用生成AIの読み取り専用バックエンドです。
 - `GET /api/yos/health`
 - `GET /api/yos/nav-model`
 - `POST /api/yos/taxi-event`
+
+機械可読契約：`openapi.json`
+
+PWA接続仕様：`docs/PWA_INTEGRATION.md`
 
 ## 本番構成
 
@@ -73,7 +78,7 @@ npm install
 npm test
 ```
 
-GitHub Actions結果：**106件合格、0件失敗**。
+GitHub Actions結果：**110件合格、0件失敗**。
 
 確認済み：
 
@@ -84,6 +89,7 @@ GitHub Actions結果：**106件合格、0件失敗**。
 - Google WIF・Upstashの模擬通信
 - 24件のYOS再発防止評価
 - 本番preflightの秘密値非出力
+- OpenAPIの公開Path・認証・入力上限・秘密値非混入
 
 ## 配置前診断
 
