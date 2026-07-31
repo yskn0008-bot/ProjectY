@@ -1,26 +1,23 @@
 'use strict';
 (()=>{
-  if(window.__yosNavRuntimeDiagnosticsV65)return;
-  window.__yosNavRuntimeDiagnosticsV65=true;
+  if(window.__yosNavRuntimeDiagnosticsV66)return;
+  window.__yosNavRuntimeDiagnosticsV66=true;
 
-  const BUILD='v65';
-  const EXPECTED_CACHE='yos-navi-strategy-v65-sw-diagnostics';
+  const BUILD='v66';
+  const EXPECTED_CACHE='yos-navi-strategy-v66-diagnostics-loop-guard';
   const isDiagnosticMode=new URL(location.href).searchParams.get('diagnostics')==='1';
   let swStatus={controlled:Boolean(navigator.serviceWorker?.controller),cache:null,buildMatch:false};
+  let scheduled=false;
+  let running=false;
+  let pending=false;
+  let lastPanelSignature='';
 
   const requestServiceWorkerStatus=()=>new Promise(resolve=>{
     const controller=navigator.serviceWorker?.controller;
-    if(!controller){
-      resolve({controlled:false,cache:null,buildMatch:false});
-      return;
-    }
+    if(!controller){resolve({controlled:false,cache:null,buildMatch:false});return;}
     const channel=new MessageChannel();
     let settled=false;
-    const finish=status=>{
-      if(settled)return;
-      settled=true;
-      resolve(status);
-    };
+    const finish=status=>{if(settled)return;settled=true;resolve(status);};
     const timer=setTimeout(()=>finish({controlled:true,cache:null,buildMatch:false}),1000);
     channel.port1.onmessage=event=>{
       clearTimeout(timer);
@@ -33,7 +30,6 @@
   const snapshot=()=>{
     const locationEl=document.querySelector('.yos-location-status');
     const acquiredAt=Number(locationEl?.dataset.acquiredAt||0);
-    const locationFresh=Boolean(acquiredAt&&Date.now()-acquiredAt<=5*60*1000);
     const checks={
       online:navigator.onLine,
       swControlled:swStatus.controlled,
@@ -47,7 +43,7 @@
       rankingButtons:document.querySelectorAll('.yos-real-map-v7__rank').length,
       recommendationCount:Array.isArray(window.__yosNavRecommendations)?window.__yosNavRecommendations.length:0,
       expectedValueModel:Boolean(window.__YOS_NAV_EXPECTED_VALUE_MODEL),
-      locationFresh
+      locationFresh:Boolean(acquiredAt&&Date.now()-acquiredAt<=5*60*1000)
     };
     const requiredReady=checks.swControlled&&checks.swBuildMatch&&checks.mapSection&&checks.mapContainer&&checks.tabCount===3&&checks.expectedValueModel&&checks.recommendationCount>0;
     const mapReady=!checks.online||checks.tileReady;
@@ -63,6 +59,9 @@
 
   const renderPanel=report=>{
     if(!isDiagnosticMode)return;
+    const signature=JSON.stringify({ready:report.ready,checks:report.checks});
+    if(signature===lastPanelSignature)return;
+    lastPanelSignature=signature;
     let panel=document.getElementById('yos-nav-diagnostics-v64');
     if(!panel){
       panel=document.createElement('section');
@@ -75,18 +74,27 @@
     panel.innerHTML=`<div style="display:flex;justify-content:space-between;gap:8px"><strong>YOSナビ 診断 ${report.build}</strong><span>${report.ready?'READY':'CHECK'}</span></div>${rows}`;
   };
 
-  let scheduled=false;
-  const schedule=()=>{
-    if(scheduled)return;
-    scheduled=true;
-    requestAnimationFrame(async()=>{
-      scheduled=false;
+  const run=async()=>{
+    if(running){pending=true;return;}
+    running=true;
+    do{
+      pending=false;
       swStatus=await requestServiceWorkerStatus();
       renderPanel(publish());
-    });
+    }while(pending);
+    running=false;
   };
 
-  const observer=new MutationObserver(schedule);
+  const schedule=()=>{
+    if(scheduled){pending=true;return;}
+    scheduled=true;
+    requestAnimationFrame(()=>{scheduled=false;run();});
+  };
+
+  const observer=new MutationObserver(mutations=>{
+    if(mutations.every(mutation=>mutation.target.closest?.('#yos-nav-diagnostics-v64')))return;
+    schedule();
+  });
   observer.observe(document.documentElement,{childList:true,subtree:true,attributes:true,attributeFilter:['class','data-latitude','data-longitude','data-accuracy','data-acquired-at']});
   navigator.serviceWorker?.addEventListener('controllerchange',schedule);
   window.addEventListener('online',schedule);
