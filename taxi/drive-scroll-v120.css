@@ -1,0 +1,69 @@
+/* YOS Taxi v120 — 営業画面を下部メニュー上の専用スクロール領域へ分離する。 */
+html.yos-final-drive-v118.yos-drive-scroll-v120,
+html.yos-final-drive-v118.yos-drive-scroll-v120 body{
+  width:100%!important;
+  height:100%!important;
+  min-height:0!important;
+  overflow:hidden!important;
+  overscroll-behavior:none!important;
+}
+
+html.yos-final-drive-v118.yos-drive-scroll-v120 .rp-shell{
+  width:min(100%,430px)!important;
+  height:100%!important;
+  min-height:0!important;
+  margin:0 auto!important;
+  padding-top:calc(env(safe-area-inset-top) + 2px)!important;
+  padding-bottom:0!important;
+  overflow:hidden!important;
+}
+
+html.yos-final-drive-v118.yos-drive-scroll-v120 .rp-page-drive{
+  width:100%!important;
+  height:var(--yd-scroll-height,520px)!important;
+  min-height:0!important;
+  max-height:var(--yd-scroll-height,520px)!important;
+  overflow-x:hidden!important;
+  overflow-y:auto!important;
+  -webkit-overflow-scrolling:touch!important;
+  overscroll-behavior-y:contain!important;
+  scrollbar-width:none!important;
+  padding:0 0 22px!important;
+  scroll-padding-bottom:22px!important;
+}
+html.yos-final-drive-v118.yos-drive-scroll-v120 .rp-page-drive::-webkit-scrollbar{display:none!important}
+
+/* 最後のカードまで完全にメニュー上へ出せる余白。 */
+html.yos-final-drive-v118.yos-drive-scroll-v120 .rp-page-drive::after{
+  content:"";
+  display:block;
+  height:18px;
+  flex:0 0 18px;
+}
+
+/* 下部メニューは従来どおり全画面固定。 */
+html.yos-final-drive-v118.yos-drive-scroll-v120 .rp-bottom-nav,
+html.yos-final-drive-v118.yos-drive-scroll-v120 #taxiGlobalNavV24.rp-bottom-nav{
+  position:fixed!important;
+  z-index:2147483000!important;
+}
+
+/* スクロール可能であることを邪魔せず示す薄い下端フェード。 */
+html.yos-final-drive-v118.yos-drive-scroll-v120 .rp-shell::after{
+  content:"";
+  position:fixed;
+  left:50%;
+  transform:translateX(-50%);
+  bottom:calc(var(--rp-browser-bottom,32px) + env(safe-area-inset-bottom) + 72px);
+  width:min(calc(100% - 24px),406px);
+  height:18px;
+  pointer-events:none;
+  background:linear-gradient(180deg,transparent,rgba(0,0,0,.88));
+  z-index:2147482000;
+}
+
+@media(display-mode:standalone){
+  html.yos-final-drive-v118.yos-drive-scroll-v120 .rp-shell::after{
+    bottom:calc(env(safe-area-inset-bottom) + 72px);
+  }
+}
