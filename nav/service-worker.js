@@ -1,6 +1,6 @@
 'use strict';
 const CACHE_PREFIX='yos-navi-strategy-';
-const CACHE='yos-navi-strategy-v64-runtime-diagnostics';
+const CACHE='yos-navi-strategy-v65-sw-diagnostics';
 const STATIC=['./','./index.html','./shift-phase-v1.js','./location-status-v1.js','./connectivity-status-v1.js','./area-map-v1.js','./niche-demand-v1.js','./expected-value-model-v1.js','./expected-value-v1.js','./map-theme-v1.js','./okinawa-area-map-v1.js','./map-theme-sync-v1.js','./map-visual-v5.js','./map-approved-layout-v1.js','./map-premium-v6.js','./imada-efficiency-v47.js','./map-label-safety-v49.js','./location-map-sync-v50.js','./map-real-v7.js','./taxi-live-context-v1.js','./map-load-safety-v58.js','./map-tab-controls-v61.js','./map-loading-visibility-v63.js','./runtime-diagnostics-v64.js'];
 const REQUIRED_SCRIPTS=['./connectivity-status-v1.js','./niche-demand-v1.js','./expected-value-model-v1.js','./expected-value-v1.js','./map-theme-v1.js','./okinawa-area-map-v1.js','./map-theme-sync-v1.js','./map-visual-v5.js','./map-approved-layout-v1.js','./map-premium-v6.js','./imada-efficiency-v47.js','./map-label-safety-v49.js','./location-map-sync-v50.js','./map-real-v7.js','./taxi-live-context-v1.js','./map-load-safety-v58.js','./map-tab-controls-v61.js','./map-loading-visibility-v63.js','./runtime-diagnostics-v64.js'];
 const injectRequiredScripts=async response=>{
@@ -30,6 +30,10 @@ self.addEventListener('activate',event=>event.waitUntil(
     keys.filter(key=>key.startsWith(CACHE_PREFIX)&&key!==CACHE).map(key=>caches.delete(key))
   )).then(()=>self.clients.claim())
 ));
+self.addEventListener('message',event=>{
+  if(event.data?.type!=='YOS_NAV_STATUS_REQUEST')return;
+  event.ports?.[0]?.postMessage({cache:CACHE});
+});
 self.addEventListener('fetch',event=>{
   if(event.request.method!=='GET')return;
   const requestUrl=new URL(event.request.url);
