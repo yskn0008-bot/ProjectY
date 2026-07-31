@@ -1,12 +1,13 @@
 'use strict';
 const CACHE_PREFIX='yos-taxi-projecty-';
-const CACHE='yos-taxi-projecty-v119-drive-se3-refine';
-const VERSION='119';
+const CACHE='yos-taxi-projecty-v120-drive-scroll-safe';
+const VERSION='120';
 const STATIC=[
   './','./index.html','./calendar.html','./settings.html','./manifest.webmanifest','./swipe-nav.js',
   './reference-perfect-v111.css','./reference-perfect-v111.js','./large-type-v112.css',
   './final-integrated-v118.css','./final-integrated-v118.js',
   './drive-refine-v119.css','./drive-refine-v119.js',
+  './drive-scroll-v120.css','./drive-scroll-v120.js',
   './report-sync-v43.js','./settings-v20.js','./projecty-live-sync-v1.js'
 ];
 
@@ -17,17 +18,21 @@ async function inject(response,type){
   const addCss=file=>{if(!html.includes(file))html=html.replace('</head>',`<link rel="stylesheet" href="./${file}?v=${VERSION}"></head>`) };
   const addJs=file=>{if(!html.includes(file))html=html.replace('</body>',`<script src="./${file}?v=${VERSION}"></script></body>`) };
 
-  /* Clean black/gold base, readable type, approved integrated UI, then page-specific real-device refinements. */
+  /* Clean black/gold base, readable type, approved UI, then real-device page refinements. */
   addCss('reference-perfect-v111.css');
   addCss('large-type-v112.css');
   addCss('final-integrated-v118.css');
-  if(type==='index')addCss('drive-refine-v119.css');
+  if(type==='index'){
+    addCss('drive-refine-v119.css');
+    addCss('drive-scroll-v120.css');
+  }
   if(type==='calendar')addJs('report-sync-v43.js');
   if(type==='settings')addJs('settings-v20.js');
   addJs('reference-perfect-v111.js');
   addJs('final-integrated-v118.js');
   if(type==='index'){
     addJs('drive-refine-v119.js');
+    addJs('drive-scroll-v120.js');
     addJs('projecty-live-sync-v1.js');
   }
 
