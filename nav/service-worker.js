@@ -1,180 +1,29 @@
 'use strict';
 const CACHE_PREFIX='yos-navi-strategy-';
-const CACHE='yos-navi-strategy-v91-preserved-navigation-headers';
+const CACHE='yos-navi-strategy-v92-atomic-runtime-cache';
 const STATIC=['./index.html','./shift-phase-v1.js','./location-status-v1.js','./connectivity-status-v1.js','./area-map-v1.js','./niche-demand-v1.js','./expected-value-model-v1.js','./expected-value-v1.js','./map-theme-v1.js','./okinawa-area-map-v1.js','./map-theme-sync-v1.js','./map-visual-v5.js','./map-approved-layout-v1.js','./map-premium-v6.js','./imada-efficiency-v47.js','./map-label-safety-v49.js','./location-map-sync-v50.js','./map-real-v7.js','./taxi-live-context-v1.js','./map-load-safety-v58.js','./map-tab-controls-v61.js','./map-loading-visibility-v63.js','./runtime-diagnostics-v64.js','./pwa-update-notice-v68.js'];
 const REQUIRED_SCRIPTS=STATIC.filter(src=>src.endsWith('.js'));
 const CRITICAL_ASSETS=['./index.html',...REQUIRED_SCRIPTS];
 const NAV_SCOPE_PATH=new URL('./',self.location.href).pathname;
-const toNavRelativePath=requestUrl=>{
-  if(requestUrl.origin!==self.location.origin||!requestUrl.pathname.startsWith(NAV_SCOPE_PATH))return null;
-  const path=requestUrl.pathname.slice(NAV_SCOPE_PATH.length);
-  return path?`./${path}`:'./';
-};
+const toNavRelativePath=requestUrl=>{if(requestUrl.origin!==self.location.origin||!requestUrl.pathname.startsWith(NAV_SCOPE_PATH))return null;const path=requestUrl.pathname.slice(NAV_SCOPE_PATH.length);return path?`./${path}`:'./';};
 const isApprovedRuntimeAsset=relativePath=>Boolean(relativePath&&STATIC.includes(relativePath));
 const expectedAssetUrl=src=>new URL(src,self.location.href);
-const hasExpectedFinalUrl=(response,src)=>{
-  try{
-    const actual=new URL(response.url);
-    const expected=expectedAssetUrl(src);
-    return actual.origin===expected.origin&&actual.pathname===expected.pathname;
-  }catch(error){
-    return false;
-  }
-};
+const hasExpectedFinalUrl=(response,src)=>{try{const actual=new URL(response.url);const expected=expectedAssetUrl(src);return actual.origin===expected.origin&&actual.pathname===expected.pathname;}catch(error){return false;}};
 const expectedContentType=src=>src.endsWith('.html')?'text/html':src.endsWith('.js')?'javascript':null;
-const hasExpectedContentType=(response,src)=>{
-  const expected=expectedContentType(src);
-  if(!expected)return true;
-  const contentType=String(response.headers.get('Content-Type')||'').toLowerCase();
-  return expected==='javascript'?contentType.includes('javascript'):contentType.includes(expected);
-};
-const inspectResponseBody=async(response,src)=>{
-  const text=await response.clone().text();
-  if(!text.trim())return 'empty';
-  if(src.endsWith('.js')&&/^\s*(?:<!doctype\s+html|<html|<head|<body)\b/i.test(text))return 'html-content';
-  if(src.endsWith('.html')){
-    const hasYosTitle=/<title>\s*YOSナビ\s*<\/title>/i.test(text);
-    const hasAppRoot=/<main\s+class=["']app["']/i.test(text);
-    if(!hasYosTitle||!hasAppRoot)return 'html-identity';
-  }
-  return null;
-};
+const hasExpectedContentType=(response,src)=>{const expected=expectedContentType(src);if(!expected)return true;const contentType=String(response.headers.get('Content-Type')||'').toLowerCase();return expected==='javascript'?contentType.includes('javascript'):contentType.includes(expected);};
+const inspectResponseBody=async(response,src)=>{const text=await response.clone().text();if(!text.trim())return 'empty';if(src.endsWith('.js')&&/^\s*(?:<!doctype\s+html|<html|<head|<body)\b/i.test(text))return 'html-content';if(src.endsWith('.html')){const hasYosTitle=/<title>\s*YOSナビ\s*<\/title>/i.test(text);const hasAppRoot=/<main\s+class=["']app["']/i.test(text);if(!hasYosTitle||!hasAppRoot)return 'html-identity';}return null;};
 const isCacheableResponse=async(response,src)=>response.ok&&hasExpectedFinalUrl(response,src)&&hasExpectedContentType(response,src)&&!(await inspectResponseBody(response,src));
 const escapeRegExp=value=>String(value).replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
 const hasScriptReference=(html,src)=>new RegExp(`<script\\b[^>]*\\bsrc=["']${escapeRegExp(src)}(?:[?#][^"']*)?["'][^>]*>`,`i`).test(html);
-const createNavigationHeaders=response=>{
-  const headers=new Headers(response.headers);
-  headers.set('Content-Type','text/html; charset=utf-8');
-  headers.set('Cache-Control','no-cache');
-  headers.delete('Content-Length');
-  headers.delete('Content-Encoding');
-  headers.delete('ETag');
-  return headers;
-};
-const injectRequiredScripts=async response=>{
-  if(!response)return response;
-  let html=await response.text();
-  const missing=REQUIRED_SCRIPTS.filter(src=>!hasScriptReference(html,src));
-  if(missing.length&&!/<\/body\s*>/i.test(html))throw new Error('navigation-body-close-missing');
-  missing.forEach(src=>{
-    html=html.replace(/<\/body\s*>/i,`<script src="${src}"></script>\n</body>`);
-  });
-  const unresolved=REQUIRED_SCRIPTS.filter(src=>!hasScriptReference(html,src));
-  if(unresolved.length)throw new Error(`navigation-script-injection-incomplete:${unresolved.join(',')}`);
-  return new Response(html,{status:response.status,statusText:response.statusText,headers:createNavigationHeaders(response)});
-};
-const getValidatedNavigationResponse=async()=>{
-  const response=await fetch('./index.html',{cache:'no-cache'});
-  if(!(await isCacheableResponse(response,'./index.html')))throw new Error('invalid-navigation-response');
-  return injectRequiredScripts(response);
-};
-const cacheCriticalAssets=async cache=>{
-  for(const src of CRITICAL_ASSETS){
-    const response=await fetch(src,{cache:'no-cache'});
-    if(!(await isCacheableResponse(response,src)))throw new Error(`invalid-critical-asset:${src}`);
-    if(src==='./index.html')await injectRequiredScripts(response.clone());
-    await cache.put(src,response);
-    const issue=await inspectCachedAsset(cache,src);
-    if(issue)throw new Error(`invalid-cached-critical-asset:${src}:${issue}`);
-  }
-};
-const inspectCachedAsset=async(cache,src)=>{
-  try{
-    const response=await cache.match(src);
-    if(!response)return 'missing';
-    if(!response.ok)return `http-${response.status}`;
-    if(!hasExpectedFinalUrl(response,src))return 'response-url';
-    if(!hasExpectedContentType(response,src)){
-      const contentType=String(response.headers.get('Content-Type')||'missing').split(';')[0].trim().toLowerCase()||'missing';
-      return `content-type-${contentType}`;
-    }
-    return await inspectResponseBody(response,src);
-  }catch(error){
-    return 'unreadable';
-  }
-};
-const getValidatedCachedResponse=async relativePath=>{
-  const cache=await caches.open(CACHE);
-  const issue=await inspectCachedAsset(cache,relativePath);
-  if(issue)return null;
-  return cache.match(relativePath);
-};
-const getValidatedRuntimeResponse=async(request,relativePath)=>{
-  const response=await fetch(request,{cache:'no-cache'});
-  if(!(await isCacheableResponse(response,relativePath)))throw new Error('invalid-runtime-response');
-  const cache=await caches.open(CACHE);
-  await cache.put(relativePath,response.clone());
-  return response;
-};
-const getOfflineCacheStatus=async()=>{
-  const cache=await caches.open(CACHE);
-  const missing=[];
-  const invalid=[];
-  for(const src of CRITICAL_ASSETS){
-    const issue=await inspectCachedAsset(cache,src);
-    if(issue==='missing')missing.push(src);
-    else if(issue)invalid.push(`${src}:${issue}`);
-  }
-  return {
-    offlineReady:missing.length===0&&invalid.length===0,
-    missingCriticalAssets:missing,
-    invalidCriticalAssets:invalid
-  };
-};
-self.addEventListener('install',event=>event.waitUntil(
-  caches.open(CACHE)
-    .then(cache=>cacheCriticalAssets(cache))
-    .then(()=>getOfflineCacheStatus())
-    .then(status=>{
-      if(!status.offlineReady)throw new Error('offline-cache-incomplete');
-      return self.skipWaiting();
-    })
-    .catch(async error=>{
-      await caches.delete(CACHE);
-      throw error;
-    })
-));
-self.addEventListener('activate',event=>event.waitUntil(
-  getOfflineCacheStatus()
-    .then(status=>{
-      if(!status.offlineReady)throw new Error('offline-cache-invalid-before-activate');
-      return caches.keys();
-    })
-    .then(keys=>Promise.all(
-      keys.filter(key=>key.startsWith(CACHE_PREFIX)&&key!==CACHE).map(key=>caches.delete(key))
-    ))
-    .then(()=>self.clients.claim())
-));
-self.addEventListener('message',event=>{
-  if(event.data?.type!=='YOS_NAV_STATUS_REQUEST')return;
-  const replyPort=event.ports?.[0];
-  if(!replyPort)return;
-  event.waitUntil(
-    getOfflineCacheStatus()
-      .then(status=>replyPort.postMessage({cache:CACHE,...status}))
-      .catch(()=>replyPort.postMessage({cache:CACHE,offlineReady:false,missingCriticalAssets:[],invalidCriticalAssets:['status-unavailable']}))
-  );
-});
-self.addEventListener('fetch',event=>{
-  if(event.request.method!=='GET')return;
-  const requestUrl=new URL(event.request.url);
-  const relativePath=toNavRelativePath(requestUrl);
-  const isNavPage=event.request.mode==='navigate'&&(relativePath==='./'||relativePath==='./index.html');
-  if(isNavPage){
-    event.respondWith(
-      getValidatedNavigationResponse().catch(()=>
-        getValidatedCachedResponse('./index.html').then(response=>response?injectRequiredScripts(response):Response.error())
-      )
-    );
-    return;
-  }
-  if(isApprovedRuntimeAsset(relativePath)){
-    event.respondWith(
-      getValidatedRuntimeResponse(event.request,relativePath).catch(()=>
-        getValidatedCachedResponse(relativePath).then(hit=>hit||Response.error())
-      )
-    );
-    return;
-  }
-  event.respondWith(fetch(event.request,{cache:'no-cache'}));
-});
+const createNavigationHeaders=response=>{const headers=new Headers(response.headers);headers.set('Content-Type','text/html; charset=utf-8');headers.set('Cache-Control','no-cache');headers.delete('Content-Length');headers.delete('Content-Encoding');headers.delete('ETag');return headers;};
+const injectRequiredScripts=async response=>{if(!response)return response;let html=await response.text();const missing=REQUIRED_SCRIPTS.filter(src=>!hasScriptReference(html,src));if(missing.length&&!/<\/body\s*>/i.test(html))throw new Error('navigation-body-close-missing');missing.forEach(src=>{html=html.replace(/<\/body\s*>/i,`<script src="${src}"></script>\n</body>`);});const unresolved=REQUIRED_SCRIPTS.filter(src=>!hasScriptReference(html,src));if(unresolved.length)throw new Error(`navigation-script-injection-incomplete:${unresolved.join(',')}`);return new Response(html,{status:response.status,statusText:response.statusText,headers:createNavigationHeaders(response)});};
+const getValidatedNavigationResponse=async()=>{const response=await fetch('./index.html',{cache:'no-cache'});if(!(await isCacheableResponse(response,'./index.html')))throw new Error('invalid-navigation-response');return injectRequiredScripts(response);};
+const inspectCachedAsset=async(cache,src)=>{try{const response=await cache.match(src);if(!response)return 'missing';if(!response.ok)return `http-${response.status}`;if(!hasExpectedFinalUrl(response,src))return 'response-url';if(!hasExpectedContentType(response,src)){const contentType=String(response.headers.get('Content-Type')||'missing').split(';')[0].trim().toLowerCase()||'missing';return `content-type-${contentType}`;}return await inspectResponseBody(response,src);}catch(error){return 'unreadable';}};
+const cacheCriticalAssets=async cache=>{for(const src of CRITICAL_ASSETS){const response=await fetch(src,{cache:'no-cache'});if(!(await isCacheableResponse(response,src)))throw new Error(`invalid-critical-asset:${src}`);if(src==='./index.html')await injectRequiredScripts(response.clone());await cache.put(src,response);const issue=await inspectCachedAsset(cache,src);if(issue)throw new Error(`invalid-cached-critical-asset:${src}:${issue}`);}};
+const getValidatedCachedResponse=async relativePath=>{const cache=await caches.open(CACHE);const issue=await inspectCachedAsset(cache,relativePath);if(issue)return null;return cache.match(relativePath);};
+const getValidatedRuntimeResponse=async(request,relativePath)=>{const response=await fetch(request,{cache:'no-cache'});if(!(await isCacheableResponse(response,relativePath)))throw new Error('invalid-runtime-response');return response;};
+const getOfflineCacheStatus=async()=>{const cache=await caches.open(CACHE);const missing=[];const invalid=[];for(const src of CRITICAL_ASSETS){const issue=await inspectCachedAsset(cache,src);if(issue==='missing')missing.push(src);else if(issue)invalid.push(`${src}:${issue}`);}return {offlineReady:missing.length===0&&invalid.length===0,missingCriticalAssets:missing,invalidCriticalAssets:invalid};};
+self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cacheCriticalAssets(cache)).then(()=>getOfflineCacheStatus()).then(status=>{if(!status.offlineReady)throw new Error('offline-cache-incomplete');return self.skipWaiting();}).catch(async error=>{await caches.delete(CACHE);throw error;})));
+self.addEventListener('activate',event=>event.waitUntil(getOfflineCacheStatus().then(status=>{if(!status.offlineReady)throw new Error('offline-cache-invalid-before-activate');return caches.keys();}).then(keys=>Promise.all(keys.filter(key=>key.startsWith(CACHE_PREFIX)&&key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim())));
+self.addEventListener('message',event=>{if(event.data?.type!=='YOS_NAV_STATUS_REQUEST')return;const replyPort=event.ports?.[0];if(!replyPort)return;event.waitUntil(getOfflineCacheStatus().then(status=>replyPort.postMessage({cache:CACHE,...status})).catch(()=>replyPort.postMessage({cache:CACHE,offlineReady:false,missingCriticalAssets:[],invalidCriticalAssets:['status-unavailable']})));});
+self.addEventListener('fetch',event=>{if(event.request.method!=='GET')return;const requestUrl=new URL(event.request.url);const relativePath=toNavRelativePath(requestUrl);const isNavPage=event.request.mode==='navigate'&&(relativePath==='./'||relativePath==='./index.html');if(isNavPage){event.respondWith(getValidatedNavigationResponse().catch(()=>getValidatedCachedResponse('./index.html').then(response=>response?injectRequiredScripts(response):Response.error())));return;}if(isApprovedRuntimeAsset(relativePath)){event.respondWith(getValidatedRuntimeResponse(event.request,relativePath).catch(()=>getValidatedCachedResponse(relativePath).then(hit=>hit||Response.error())));return;}event.respondWith(fetch(event.request,{cache:'no-cache'}));});
