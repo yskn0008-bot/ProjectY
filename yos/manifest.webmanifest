@@ -1,11 +1,23 @@
 {
-  "name": "YOS｜Hero's Journey",
-  "short_name": "YOS",
-  "description": "人生を物語として進める、ヒーローズジャーニーのAIメンター",
+  "name": "Hero's Journey｜人生の物語",
+  "short_name": "Journey",
+  "description": "人生を物語として進め、今日の一歩と経験を残すAIメンターアプリ",
+  "id": "./",
   "start_url": "./",
   "scope": "./",
+  "lang": "ja",
   "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
   "background_color": "#070910",
   "theme_color": "#090b12",
-  "orientation": "portrait-primary"
+  "orientation": "portrait-primary",
+  "categories": ["lifestyle", "productivity"],
+  "shortcuts": [
+    {
+      "name": "旅の記録",
+      "short_name": "旅の記録",
+      "description": "章・クエスト・経験を確認する",
+      "url": "./journey.html"
+    }
+  ]
 }
