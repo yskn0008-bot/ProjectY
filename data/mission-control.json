@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-08-01T08:09:11+09:00",
+  "updated_at": "2026-08-01T09:10:04+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -12,6 +12,16 @@
     ]
   },
   "inbox": [
+    {
+      "id": "github-pr-144",
+      "title": "PR #144 YOSをヒーローズジャーニーのメンターへ統合",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/144",
+      "updated_at": "2026-07-31T23:09:46Z"
+    },
     {
       "id": "github-issue-10",
       "title": "Issue #10 Mission Control v2：GitHubのIssue・PR・Commitを自動集約する",
@@ -50,7 +60,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/142",
-      "updated_at": "2026-07-31T23:00:16Z"
+      "updated_at": "2026-07-31T23:10:09Z"
     },
     {
       "id": "github-issue-4",
@@ -80,7 +90,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/51",
-      "updated_at": "2026-07-31T22:13:40Z"
+      "updated_at": "2026-07-31T23:12:36Z"
     },
     {
       "id": "github-issue-86",
@@ -94,6 +104,13 @@
     }
   ],
   "recently_completed": [
+    {
+      "id": "github-commit-0bdad5dde69f",
+      "title": "fix(nav): tighten YOSナビ root cache scope v84",
+      "completed_at": "2026-08-01T00:09:52Z",
+      "result": "GitHub mainへ反映（0bdad5d）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/0bdad5dde69fc29940b3cb9a8d6f439466ca7eb4"
+    },
     {
       "id": "github-commit-660eac248a0e",
       "title": "feat(nav): validate YOSナビ response URLs v83",
@@ -123,13 +140,6 @@
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/a7c18d69067331ee798146e7f7d7eef4c892893c"
     },
     {
-      "id": "github-commit-977a12b971ec",
-      "title": "feat(nav): validate cached YOS HTML identity v79",
-      "completed_at": "2026-07-31T19:10:30Z",
-      "result": "GitHub mainへ反映（977a12b）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/977a12b971ec1757b2626750e2babf6dd17e3275"
-    },
-    {
       "id": "complete-002",
       "title": "iPhone向けMission Control Dashboardを実装",
       "completed_at": "2026-07-17T17:55:00+09:00",
@@ -154,7 +164,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "Issue #4を実装する：YOS Mission Control v1.0を構築する",
+      "next_action": "PR #144をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -164,7 +174,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-08-01T08:09:11+09:00",
+      "last_update": "2026-08-01T09:10:04+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -235,17 +245,17 @@
       "type": "infrastructure",
       "purpose": "YOSのコード、仕様、タスク、変更履歴を保存する",
       "status": "active",
-      "health": "ok",
+      "health": "attention",
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 8件・Open PR 0件を自動同期中",
+      "next_action": "Open Issue 8件・Open PR 1件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-08-01T08:09:11+09:00",
+      "last_update": "2026-08-01T09:10:04+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -254,12 +264,12 @@
       "domain": "Infrastructure",
       "type": "development",
       "purpose": "YOSと各Labの設計に基づいて実装、修正、テストを行う",
-      "status": "active",
-      "health": "ok",
+      "status": "review",
+      "health": "attention",
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "Issue #4を実装する：YOS Mission Control v1.0を構築する",
+      "next_action": "PR #144をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -268,7 +278,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-08-01T08:09:11+09:00",
+      "last_update": "2026-08-01T09:10:04+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -350,5 +360,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "fd0277b44b1c3d9f9b35a17aad21c12685cd0a69248a36ef85b5dedc0fa01bf8"
+  "github_snapshot_hash": "5a1dc1ef8a7fd14e014f0ca1092e99dfa8e2c582b8d34fc847e880a27286a5ef"
 }
