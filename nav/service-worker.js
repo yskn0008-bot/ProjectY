@@ -1,6 +1,6 @@
 'use strict';
 const CACHE_PREFIX='yos-navi-strategy-';
-const CACHE='yos-navi-strategy-v87-activation-recheck';
+const CACHE='yos-navi-strategy-v88-sequential-precache';
 const STATIC=['./index.html','./shift-phase-v1.js','./location-status-v1.js','./connectivity-status-v1.js','./area-map-v1.js','./niche-demand-v1.js','./expected-value-model-v1.js','./expected-value-v1.js','./map-theme-v1.js','./okinawa-area-map-v1.js','./map-theme-sync-v1.js','./map-visual-v5.js','./map-approved-layout-v1.js','./map-premium-v6.js','./imada-efficiency-v47.js','./map-label-safety-v49.js','./location-map-sync-v50.js','./map-real-v7.js','./taxi-live-context-v1.js','./map-load-safety-v58.js','./map-tab-controls-v61.js','./map-loading-visibility-v63.js','./runtime-diagnostics-v64.js','./pwa-update-notice-v68.js'];
 const REQUIRED_SCRIPTS=STATIC.filter(src=>src.endsWith('.js'));
 const CRITICAL_ASSETS=['./index.html',...REQUIRED_SCRIPTS];
@@ -55,11 +55,13 @@ const getValidatedNavigationResponse=async request=>{
   return injectRequiredScripts(response);
 };
 const cacheCriticalAssets=async cache=>{
-  await Promise.all(CRITICAL_ASSETS.map(async src=>{
+  for(const src of CRITICAL_ASSETS){
     const response=await fetch(src,{cache:'no-cache'});
     if(!(await isCacheableResponse(response,src)))throw new Error(`invalid-critical-asset:${src}`);
     await cache.put(src,response);
-  }));
+    const issue=await inspectCachedAsset(cache,src);
+    if(issue)throw new Error(`invalid-cached-critical-asset:${src}:${issue}`);
+  }
 };
 const inspectCachedAsset=async(cache,src)=>{
   try{
