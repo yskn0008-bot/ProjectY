@@ -1,6 +1,6 @@
 'use strict';
 const CACHE_PREFIX='yos-navi-strategy-';
-const CACHE='yos-navi-strategy-v90-verified-script-injection';
+const CACHE='yos-navi-strategy-v91-preserved-navigation-headers';
 const STATIC=['./index.html','./shift-phase-v1.js','./location-status-v1.js','./connectivity-status-v1.js','./area-map-v1.js','./niche-demand-v1.js','./expected-value-model-v1.js','./expected-value-v1.js','./map-theme-v1.js','./okinawa-area-map-v1.js','./map-theme-sync-v1.js','./map-visual-v5.js','./map-approved-layout-v1.js','./map-premium-v6.js','./imada-efficiency-v47.js','./map-label-safety-v49.js','./location-map-sync-v50.js','./map-real-v7.js','./taxi-live-context-v1.js','./map-load-safety-v58.js','./map-tab-controls-v61.js','./map-loading-visibility-v63.js','./runtime-diagnostics-v64.js','./pwa-update-notice-v68.js'];
 const REQUIRED_SCRIPTS=STATIC.filter(src=>src.endsWith('.js'));
 const CRITICAL_ASSETS=['./index.html',...REQUIRED_SCRIPTS];
@@ -42,6 +42,15 @@ const inspectResponseBody=async(response,src)=>{
 const isCacheableResponse=async(response,src)=>response.ok&&hasExpectedFinalUrl(response,src)&&hasExpectedContentType(response,src)&&!(await inspectResponseBody(response,src));
 const escapeRegExp=value=>String(value).replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
 const hasScriptReference=(html,src)=>new RegExp(`<script\\b[^>]*\\bsrc=["']${escapeRegExp(src)}(?:[?#][^"']*)?["'][^>]*>`,`i`).test(html);
+const createNavigationHeaders=response=>{
+  const headers=new Headers(response.headers);
+  headers.set('Content-Type','text/html; charset=utf-8');
+  headers.set('Cache-Control','no-cache');
+  headers.delete('Content-Length');
+  headers.delete('Content-Encoding');
+  headers.delete('ETag');
+  return headers;
+};
 const injectRequiredScripts=async response=>{
   if(!response)return response;
   let html=await response.text();
@@ -52,7 +61,7 @@ const injectRequiredScripts=async response=>{
   });
   const unresolved=REQUIRED_SCRIPTS.filter(src=>!hasScriptReference(html,src));
   if(unresolved.length)throw new Error(`navigation-script-injection-incomplete:${unresolved.join(',')}`);
-  return new Response(html,{status:response.status,statusText:response.statusText,headers:{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-cache'}});
+  return new Response(html,{status:response.status,statusText:response.statusText,headers:createNavigationHeaders(response)});
 };
 const getValidatedNavigationResponse=async()=>{
   const response=await fetch('./index.html',{cache:'no-cache'});
