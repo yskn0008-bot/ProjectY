@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-08-01T12:08:48+09:00",
+  "updated_at": "2026-08-01T13:07:41+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -90,7 +90,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/51",
-      "updated_at": "2026-08-01T03:08:02Z"
+      "updated_at": "2026-08-01T03:13:44Z"
     },
     {
       "id": "github-issue-86",
@@ -104,6 +104,13 @@
     }
   ],
   "recently_completed": [
+    {
+      "id": "github-commit-0a83b0b731c1",
+      "title": "fix(nav): serialize YOSナビ precache writes v88",
+      "completed_at": "2026-08-01T04:07:27Z",
+      "result": "GitHub mainへ反映（0a83b0b）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/0a83b0b731c18217fc183c9217813406f9f09341"
+    },
     {
       "id": "github-commit-4ac896ac20bf",
       "title": "fix(nav): revalidate YOSナビ cache before activation v87",
@@ -131,13 +138,6 @@
       "completed_at": "2026-08-01T00:09:52Z",
       "result": "GitHub mainへ反映（0bdad5d）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/0bdad5dde69fc29940b3cb9a8d6f439466ca7eb4"
-    },
-    {
-      "id": "github-commit-660eac248a0e",
-      "title": "feat(nav): validate YOSナビ response URLs v83",
-      "completed_at": "2026-07-31T23:08:59Z",
-      "result": "GitHub mainへ反映（660eac2）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/660eac248a0e53edd466ac56cd1bcc6e790acd97"
     },
     {
       "id": "complete-002",
@@ -174,7 +174,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-08-01T12:08:48+09:00",
+      "last_update": "2026-08-01T13:07:41+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -255,7 +255,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-08-01T12:08:48+09:00",
+      "last_update": "2026-08-01T13:07:41+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -278,7 +278,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-08-01T12:08:48+09:00",
+      "last_update": "2026-08-01T13:07:41+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -360,5 +360,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "6c7c8fa1c093bb3dd7fa66139717d820d1f70763bee68fc86c90948329b67e06"
+  "github_snapshot_hash": "cf81db702b4d512e42c74082ee905694bb6c5a3b5e6da345bcf7d648a98e9232"
 }
