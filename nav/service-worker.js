@@ -1,6 +1,6 @@
 'use strict';
 const CACHE_PREFIX='yos-navi-strategy-';
-const CACHE='yos-navi-strategy-v89-canonical-navigation';
+const CACHE='yos-navi-strategy-v90-verified-script-injection';
 const STATIC=['./index.html','./shift-phase-v1.js','./location-status-v1.js','./connectivity-status-v1.js','./area-map-v1.js','./niche-demand-v1.js','./expected-value-model-v1.js','./expected-value-v1.js','./map-theme-v1.js','./okinawa-area-map-v1.js','./map-theme-sync-v1.js','./map-visual-v5.js','./map-approved-layout-v1.js','./map-premium-v6.js','./imada-efficiency-v47.js','./map-label-safety-v49.js','./location-map-sync-v50.js','./map-real-v7.js','./taxi-live-context-v1.js','./map-load-safety-v58.js','./map-tab-controls-v61.js','./map-loading-visibility-v63.js','./runtime-diagnostics-v64.js','./pwa-update-notice-v68.js'];
 const REQUIRED_SCRIPTS=STATIC.filter(src=>src.endsWith('.js'));
 const CRITICAL_ASSETS=['./index.html',...REQUIRED_SCRIPTS];
@@ -40,13 +40,18 @@ const inspectResponseBody=async(response,src)=>{
   return null;
 };
 const isCacheableResponse=async(response,src)=>response.ok&&hasExpectedFinalUrl(response,src)&&hasExpectedContentType(response,src)&&!(await inspectResponseBody(response,src));
+const escapeRegExp=value=>String(value).replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+const hasScriptReference=(html,src)=>new RegExp(`<script\\b[^>]*\\bsrc=["']${escapeRegExp(src)}(?:[?#][^"']*)?["'][^>]*>`,`i`).test(html);
 const injectRequiredScripts=async response=>{
   if(!response)return response;
   let html=await response.text();
-  REQUIRED_SCRIPTS.forEach(src=>{
-    const filename=src.split('/').pop();
-    if(!html.includes(filename))html=html.replace('</body>',`<script src="${src}"></script>\n</body>`);
+  const missing=REQUIRED_SCRIPTS.filter(src=>!hasScriptReference(html,src));
+  if(missing.length&&!/<\/body\s*>/i.test(html))throw new Error('navigation-body-close-missing');
+  missing.forEach(src=>{
+    html=html.replace(/<\/body\s*>/i,`<script src="${src}"></script>\n</body>`);
   });
+  const unresolved=REQUIRED_SCRIPTS.filter(src=>!hasScriptReference(html,src));
+  if(unresolved.length)throw new Error(`navigation-script-injection-incomplete:${unresolved.join(',')}`);
   return new Response(html,{status:response.status,statusText:response.statusText,headers:{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-cache'}});
 };
 const getValidatedNavigationResponse=async()=>{
@@ -58,6 +63,7 @@ const cacheCriticalAssets=async cache=>{
   for(const src of CRITICAL_ASSETS){
     const response=await fetch(src,{cache:'no-cache'});
     if(!(await isCacheableResponse(response,src)))throw new Error(`invalid-critical-asset:${src}`);
+    if(src==='./index.html')await injectRequiredScripts(response.clone());
     await cache.put(src,response);
     const issue=await inspectCachedAsset(cache,src);
     if(issue)throw new Error(`invalid-cached-critical-asset:${src}:${issue}`);
