@@ -1,54 +1,357 @@
 'use strict';
-const BUILD='v104';
-const CACHE_PREFIX='yos-navi-strategy-';
-const CACHE='yos-navi-strategy-v104-network-request-marker';
-const RUNTIME_DIAGNOSTICS='./runtime-diagnostics-v64.js';
-const STATIC=['./index.html','./shift-phase-v1.js','./location-status-v1.js','./connectivity-status-v1.js','./area-map-v1.js','./niche-demand-v1.js','./expected-value-model-v1.js','./expected-value-v1.js','./map-theme-v1.js','./okinawa-area-map-v1.js','./map-theme-sync-v1.js','./map-visual-v5.js','./map-approved-layout-v1.js','./map-premium-v6.js','./imada-efficiency-v47.js','./map-label-safety-v49.js','./location-map-sync-v50.js','./map-real-v7.js','./taxi-live-context-v1.js','./map-load-safety-v58.js','./map-tab-controls-v61.js','./map-loading-visibility-v63.js',RUNTIME_DIAGNOSTICS,'./pwa-update-notice-v68.js'];
-const REQUIRED_SCRIPTS=STATIC.filter(src=>src.endsWith('.js'));
-const CRITICAL_ASSETS=['./index.html',...REQUIRED_SCRIPTS];
-const CLIENT_SERVING_CACHES=new Map();
-const NETWORK_SERVING_PIN='__YOS_NAV_NETWORK__';
-const NETWORK_SOURCE_PARAM='yos-nav-source';
-const NETWORK_SOURCE_VALUE=`network-${BUILD}`;
-const NAV_SCOPE_PATH=new URL('./',self.location.href).pathname;
-const toNavRelativePath=requestUrl=>{if(requestUrl.origin!==self.location.origin||!requestUrl.pathname.startsWith(NAV_SCOPE_PATH))return null;const path=requestUrl.pathname.slice(NAV_SCOPE_PATH.length);return path?`./${path}`:'./';};
-const isApprovedRuntimeAsset=relativePath=>Boolean(relativePath&&STATIC.includes(relativePath));
-const isNetworkMarkedRequest=requestUrl=>/^network-v\d+$/.test(String(requestUrl.searchParams.get(NETWORK_SOURCE_PARAM)||''));
-const expectedAssetUrl=src=>new URL(src,self.location.href);
-const hasExpectedFinalUrl=(response,src)=>{try{const actual=new URL(response.url);const expected=expectedAssetUrl(src);return actual.origin===expected.origin&&actual.pathname===expected.pathname;}catch(error){return false;}};
-const expectedContentType=src=>src.endsWith('.html')?'text/html':src.endsWith('.js')?'javascript':null;
-const hasExpectedContentType=(response,src)=>{const expected=expectedContentType(src);if(!expected)return true;const contentType=String(response.headers.get('Content-Type')||'').toLowerCase();return expected==='javascript'?contentType.includes('javascript'):contentType.includes(expected);};
-const hasExpectedRuntimeBuildMarker=(text,src,build=BUILD)=>src!==RUNTIME_DIAGNOSTICS||new RegExp(`const\\s+BUILD\\s*=\\s*['"]${build}['"]\\s*;`).test(text)&&new RegExp(`window\\.__yosNavRuntimeDiagnosticsV${build.slice(1)}\\b`).test(text);
-const inspectResponseBody=async(response,src,build=BUILD)=>{const text=await response.clone().text();if(!text.trim())return 'empty';if(src.endsWith('.js')&&/^\s*(?:<!doctype\s+html|<html|<head|<body)\b/i.test(text))return 'html-content';if(src.endsWith('.html')){const hasYosTitle=/<title>\s*YOSナビ\s*<\/title>/i.test(text);const hasAppRoot=/<main\s+class=["']app["']/i.test(text);if(!hasYosTitle||!hasAppRoot)return 'html-identity';}if(!hasExpectedRuntimeBuildMarker(text,src,build))return 'runtime-build-marker';return null;};
-const isCacheableResponse=async(response,src)=>response.ok&&hasExpectedFinalUrl(response,src)&&hasExpectedContentType(response,src)&&!(await inspectResponseBody(response,src));
-const escapeRegExp=value=>String(value).replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
-const scriptReferencePattern=src=>new RegExp(`<script\\b[^>]*\\bsrc=["']${escapeRegExp(src)}(?:[?#][^"']*)?["'][^>]*>`,`ig`);
-const scriptReferenceCapturePattern=src=>new RegExp(`(<script\\b[^>]*\\bsrc=["'])${escapeRegExp(src)}(?:[?#][^"']*)?(["'][^>]*>)`,`ig`);
-const countScriptReferences=(html,src)=>(String(html).match(scriptReferencePattern(src))||[]).length;
-const hasScriptReference=(html,src)=>countScriptReferences(html,src)>0;
-const inspectNavigationStructure=html=>{const missing=REQUIRED_SCRIPTS.filter(src=>!hasScriptReference(html,src));if(missing.length&&!/<\/body\s*>/i.test(html))return 'navigation-body-close-missing';const duplicated=REQUIRED_SCRIPTS.filter(src=>countScriptReferences(html,src)>1);if(duplicated.length)return `navigation-script-reference-duplicated:${duplicated.join(',')}`;return null;};
-const createNavigationHeaders=response=>{const headers=new Headers(response.headers);headers.set('Content-Type','text/html; charset=utf-8');headers.set('Cache-Control','no-cache');headers.delete('Content-Length');headers.delete('Content-Encoding');headers.delete('ETag');return headers;};
-const injectRequiredScripts=async response=>{if(!response)return response;let html=await response.text();const structureIssue=inspectNavigationStructure(html);if(structureIssue)throw new Error(structureIssue);const missing=REQUIRED_SCRIPTS.filter(src=>!hasScriptReference(html,src));missing.forEach(src=>{html=html.replace(/<\/body\s*>/i,`<script src="${src}"></script>\n</body>`);});const unresolved=REQUIRED_SCRIPTS.filter(src=>!hasScriptReference(html,src));if(unresolved.length)throw new Error(`navigation-script-injection-incomplete:${unresolved.join(',')}`);const postInjectionIssue=inspectNavigationStructure(html);if(postInjectionIssue)throw new Error(postInjectionIssue);return new Response(html,{status:response.status,statusText:response.statusText,headers:createNavigationHeaders(response)});};
-const markNetworkScriptRequests=async response=>{if(!response)return response;let html=await response.text();for(const src of REQUIRED_SCRIPTS){html=html.replace(scriptReferenceCapturePattern(src),`$1${src}?${NETWORK_SOURCE_PARAM}=${NETWORK_SOURCE_VALUE}$2`);}const unresolved=REQUIRED_SCRIPTS.filter(src=>!new RegExp(`${escapeRegExp(src)}\\?${NETWORK_SOURCE_PARAM}=${NETWORK_SOURCE_VALUE}["']`,'i').test(html));if(unresolved.length)throw new Error(`navigation-network-marker-incomplete:${unresolved.join(',')}`);return new Response(html,{status:response.status,statusText:response.statusText,headers:createNavigationHeaders(response)});};
-const getValidatedNavigationResponse=async()=>{const response=await fetch('./index.html',{cache:'no-cache'});if(!(await isCacheableResponse(response,'./index.html')))throw new Error('invalid-navigation-response');return markNetworkScriptRequests(await injectRequiredScripts(response));};
-const inspectCachedAsset=async(cache,src,build=BUILD)=>{try{const response=await cache.match(src);if(!response)return 'missing';if(!response.ok)return `http-${response.status}`;if(!hasExpectedFinalUrl(response,src))return 'response-url';if(!hasExpectedContentType(response,src)){const contentType=String(response.headers.get('Content-Type')||'missing').split(';')[0].trim().toLowerCase()||'missing';return `content-type-${contentType}`;}const bodyIssue=await inspectResponseBody(response,src,build);if(bodyIssue)return bodyIssue;if(src.endsWith('.html'))return inspectNavigationStructure(await response.clone().text());return null;}catch(error){return 'unreadable';}};
-const cacheCriticalAssets=async cache=>{for(const src of CRITICAL_ASSETS){const response=await fetch(src,{cache:'no-cache'});if(!(await isCacheableResponse(response,src)))throw new Error(`invalid-critical-asset:${src}`);if(src==='./index.html')await injectRequiredScripts(response.clone());await cache.put(src,response);const issue=await inspectCachedAsset(cache,src);if(issue)throw new Error(`invalid-cached-critical-asset:${src}:${issue}`);}};
-const getValidatedRuntimeResponse=async(request,relativePath)=>{const response=await fetch(request,{cache:'no-cache'});if(!(await isCacheableResponse(response,relativePath)))throw new Error('invalid-runtime-response');return response;};
-const getOfflineCacheStatus=async()=>{const cache=await caches.open(CACHE);const missing=[];const invalid=[];for(const src of CRITICAL_ASSETS){const issue=await inspectCachedAsset(cache,src);if(issue==='missing')missing.push(src);else if(issue)invalid.push(`${src}:${issue}`);}return {offlineReady:missing.length===0&&invalid.length===0,missingCriticalAssets:missing,invalidCriticalAssets:invalid};};
-const cacheBuildNumber=key=>{const match=String(key).match(/^yos-navi-strategy-v(\d+)-/);return match?Number(match[1]):-1;};
-const CURRENT_BUILD_NUMBER=cacheBuildNumber(CACHE);
-const cacheBuild=key=>{const buildNumber=cacheBuildNumber(key);return buildNumber>=0?`v${buildNumber}`:null;};
-const isValidRetainedCache=async key=>{const build=cacheBuild(key);if(!build)return false;try{const cache=await caches.open(key);for(const src of CRITICAL_ASSETS){if(await inspectCachedAsset(cache,src,build))return false;}return true;}catch(error){return false;}};
-const selectPreviousCache=async keys=>{const candidates=keys.filter(key=>key.startsWith(CACHE_PREFIX)&&key!==CACHE&&cacheBuildNumber(key)>=0&&cacheBuildNumber(key)<CURRENT_BUILD_NUMBER).sort((a,b)=>cacheBuildNumber(b)-cacheBuildNumber(a));for(const key of candidates){if(await isValidRetainedCache(key))return key;}return null;};
-const isAllowedServingCache=key=>Boolean(key&&(key===CACHE||key.startsWith(CACHE_PREFIX)&&cacheBuildNumber(key)>=0&&cacheBuildNumber(key)<CURRENT_BUILD_NUMBER));
-const isNetworkServingPin=key=>key===NETWORK_SERVING_PIN;
-const selectServingCache=async preferredCache=>{if(isAllowedServingCache(preferredCache)&&await isValidRetainedCache(preferredCache))return preferredCache;const currentStatus=await getOfflineCacheStatus();if(currentStatus.offlineReady)return CACHE;return selectPreviousCache(await caches.keys());};
-const getValidatedServingCacheResponse=async(relativePath,preferredCache)=>{const servingCache=await selectServingCache(preferredCache);if(!servingCache)return {response:null,servingCache:null};const build=cacheBuild(servingCache)||BUILD;const cache=await caches.open(servingCache);if(await inspectCachedAsset(cache,relativePath,build))return {response:null,servingCache:null};return {response:await cache.match(relativePath),servingCache};};
-const pruneClientServingCaches=async()=>{const activeClients=await self.clients.matchAll({type:'window',includeUncontrolled:true});const activeIds=new Set(activeClients.map(client=>client.id));for(const clientId of CLIENT_SERVING_CACHES.keys()){if(!activeIds.has(clientId))CLIENT_SERVING_CACHES.delete(clientId);}return CLIENT_SERVING_CACHES.size;};
-const cleanupStaleCaches=async()=>{const keys=await caches.keys();const previousCache=await selectPreviousCache(keys);await Promise.all(keys.filter(key=>key.startsWith(CACHE_PREFIX)&&key!==CACHE&&key!==previousCache).map(key=>caches.delete(key)));for(const [clientId,key] of CLIENT_SERVING_CACHES){if(!isNetworkServingPin(key)&&key!==CACHE&&key!==previousCache)CLIENT_SERVING_CACHES.delete(clientId);}return previousCache;};
-const serveNavigation=async event=>{const clientId=event.resultingClientId||event.clientId||null;const preferredCache=clientId?CLIENT_SERVING_CACHES.get(clientId):null;if(isNetworkServingPin(preferredCache))return getValidatedNavigationResponse();const result=await getValidatedServingCacheResponse('./index.html',preferredCache);if(result.response){if(clientId&&result.servingCache)CLIENT_SERVING_CACHES.set(clientId,result.servingCache);return injectRequiredScripts(result.response);}if(clientId)CLIENT_SERVING_CACHES.set(clientId,NETWORK_SERVING_PIN);return getValidatedNavigationResponse();};
-const serveApprovedAsset=async(event,relativePath,forceNetwork=false)=>{const clientId=event.clientId||null;if(forceNetwork){if(clientId)CLIENT_SERVING_CACHES.set(clientId,NETWORK_SERVING_PIN);return getValidatedRuntimeResponse(event.request,relativePath);}const preferredCache=clientId?CLIENT_SERVING_CACHES.get(clientId):null;if(isNetworkServingPin(preferredCache))return getValidatedRuntimeResponse(event.request,relativePath);const result=await getValidatedServingCacheResponse(relativePath,preferredCache);if(result.response){if(clientId&&result.servingCache)CLIENT_SERVING_CACHES.set(clientId,result.servingCache);return result.response;}if(clientId)CLIENT_SERVING_CACHES.set(clientId,NETWORK_SERVING_PIN);return getValidatedRuntimeResponse(event.request,relativePath);};
-self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cacheCriticalAssets(cache)).then(()=>getOfflineCacheStatus()).then(status=>{if(!status.offlineReady)throw new Error('offline-cache-incomplete');return self.skipWaiting();}).catch(async error=>{await caches.delete(CACHE);throw error;})));
-self.addEventListener('activate',event=>event.waitUntil(getOfflineCacheStatus().then(status=>{if(!status.offlineReady)throw new Error('offline-cache-invalid-before-activate');return self.clients.claim();}).then(()=>cleanupStaleCaches()).then(()=>pruneClientServingCaches())));
-self.addEventListener('message',event=>{if(event.data?.type!=='YOS_NAV_STATUS_REQUEST')return;const replyPort=event.ports?.[0];if(!replyPort)return;event.waitUntil(Promise.all([getOfflineCacheStatus(),caches.keys(),pruneClientServingCaches()]).then(async([status,keys,pinnedClientCount])=>{const retainedPreviousCache=await selectPreviousCache(keys);const servingCache=status.offlineReady?CACHE:retainedPreviousCache;const pinnedServingTarget=event.source?.id?CLIENT_SERVING_CACHES.get(event.source.id)||null:null;const pinnedServingNetwork=isNetworkServingPin(pinnedServingTarget);const pinnedServingCache=pinnedServingNetwork?null:pinnedServingTarget;replyPort.postMessage({build:BUILD,cache:CACHE,servingCache,servingFallback:Boolean(servingCache&&servingCache!==CACHE),retainedPreviousCache,pinnedClientCount,pinnedServingCache,pinnedServingNetwork,networkSourceValue:NETWORK_SOURCE_VALUE,...status});}).catch(()=>replyPort.postMessage({build:BUILD,cache:CACHE,servingCache:null,servingFallback:false,retainedPreviousCache:null,pinnedClientCount:0,pinnedServingCache:null,pinnedServingNetwork:false,networkSourceValue:NETWORK_SOURCE_VALUE,offlineReady:false,missingCriticalAssets:[],invalidCriticalAssets:['status-unavailable']})));});
-self.addEventListener('fetch',event=>{if(event.request.method!=='GET')return;const requestUrl=new URL(event.request.url);const relativePath=toNavRelativePath(requestUrl);const isNavPage=event.request.mode==='navigate'&&(relativePath==='./'||relativePath==='./index.html');if(isNavPage){event.respondWith(serveNavigation(event).catch(()=>getValidatedNavigationResponse().catch(()=>Response.error())));return;}if(isApprovedRuntimeAsset(relativePath)){const forceNetwork=isNetworkMarkedRequest(requestUrl);event.respondWith(serveApprovedAsset(event,relativePath,forceNetwork).catch(()=>getValidatedRuntimeResponse(event.request,relativePath).catch(()=>Response.error())));return;}event.respondWith(fetch(event.request,{cache:'no-cache'}));});
+
+const BUILD = 'v105';
+const CACHE_PREFIX = 'yos-navi-strategy-';
+const CACHE = 'yos-navi-strategy-v105-network-marker-version-lock';
+const RUNTIME_DIAGNOSTICS = './runtime-diagnostics-v64.js';
+const STATIC = [
+  './index.html',
+  './shift-phase-v1.js',
+  './location-status-v1.js',
+  './connectivity-status-v1.js',
+  './area-map-v1.js',
+  './niche-demand-v1.js',
+  './expected-value-model-v1.js',
+  './expected-value-v1.js',
+  './map-theme-v1.js',
+  './okinawa-area-map-v1.js',
+  './map-theme-sync-v1.js',
+  './map-visual-v5.js',
+  './map-approved-layout-v1.js',
+  './map-premium-v6.js',
+  './imada-efficiency-v47.js',
+  './map-label-safety-v49.js',
+  './location-map-sync-v50.js',
+  './map-real-v7.js',
+  './taxi-live-context-v1.js',
+  './map-load-safety-v58.js',
+  './map-tab-controls-v61.js',
+  './map-loading-visibility-v63.js',
+  RUNTIME_DIAGNOSTICS,
+  './pwa-update-notice-v68.js'
+];
+const REQUIRED_SCRIPTS = STATIC.filter(src => src.endsWith('.js'));
+const CRITICAL_ASSETS = ['./index.html', ...REQUIRED_SCRIPTS];
+const CLIENT_SERVING_CACHES = new Map();
+const NETWORK_SERVING_PIN = '__YOS_NAV_NETWORK__';
+const NETWORK_SOURCE_PARAM = 'yos-nav-source';
+const NETWORK_SOURCE_VALUE = `network-${BUILD}`;
+const NAV_SCOPE_PATH = new URL('./', self.location.href).pathname;
+
+const toNavRelativePath = requestUrl => {
+  if (requestUrl.origin !== self.location.origin || !requestUrl.pathname.startsWith(NAV_SCOPE_PATH)) return null;
+  const path = requestUrl.pathname.slice(NAV_SCOPE_PATH.length);
+  return path ? `./${path}` : './';
+};
+const isApprovedRuntimeAsset = relativePath => Boolean(relativePath && STATIC.includes(relativePath));
+const networkSourceMarker = requestUrl => String(requestUrl.searchParams.get(NETWORK_SOURCE_PARAM) || '');
+const isNetworkMarker = marker => /^network-v\d+$/.test(marker);
+const isCurrentNetworkMarker = marker => marker === NETWORK_SOURCE_VALUE;
+const isStaleNetworkMarker = marker => isNetworkMarker(marker) && !isCurrentNetworkMarker(marker);
+const expectedAssetUrl = src => new URL(src, self.location.href);
+const hasExpectedFinalUrl = (response, src) => {
+  try {
+    const actual = new URL(response.url);
+    const expected = expectedAssetUrl(src);
+    return actual.origin === expected.origin && actual.pathname === expected.pathname;
+  } catch (error) {
+    return false;
+  }
+};
+const expectedContentType = src => src.endsWith('.html') ? 'text/html' : src.endsWith('.js') ? 'javascript' : null;
+const hasExpectedContentType = (response, src) => {
+  const expected = expectedContentType(src);
+  if (!expected) return true;
+  const contentType = String(response.headers.get('Content-Type') || '').toLowerCase();
+  return expected === 'javascript' ? contentType.includes('javascript') : contentType.includes(expected);
+};
+const hasExpectedRuntimeBuildMarker = (text, src, build = BUILD) => src !== RUNTIME_DIAGNOSTICS ||
+  new RegExp(`const\\s+BUILD\\s*=\\s*['"]${build}['"]\\s*;`).test(text) &&
+  new RegExp(`window\\.__yosNavRuntimeDiagnosticsV${build.slice(1)}\\b`).test(text);
+const inspectResponseBody = async (response, src, build = BUILD) => {
+  const text = await response.clone().text();
+  if (!text.trim()) return 'empty';
+  if (src.endsWith('.js') && /^\s*(?:<!doctype\s+html|<html|<head|<body)\b/i.test(text)) return 'html-content';
+  if (src.endsWith('.html')) {
+    const hasYosTitle = /<title>\s*YOSナビ\s*<\/title>/i.test(text);
+    const hasAppRoot = /<main\s+class=["']app["']/i.test(text);
+    if (!hasYosTitle || !hasAppRoot) return 'html-identity';
+  }
+  if (!hasExpectedRuntimeBuildMarker(text, src, build)) return 'runtime-build-marker';
+  return null;
+};
+const isCacheableResponse = async (response, src) => response.ok &&
+  hasExpectedFinalUrl(response, src) &&
+  hasExpectedContentType(response, src) &&
+  !(await inspectResponseBody(response, src));
+const escapeRegExp = value => String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const scriptReferencePattern = src => new RegExp(`<script\\b[^>]*\\bsrc=["']${escapeRegExp(src)}(?:[?#][^"']*)?["'][^>]*>`, 'ig');
+const scriptReferenceCapturePattern = src => new RegExp(`(<script\\b[^>]*\\bsrc=["'])${escapeRegExp(src)}(?:[?#][^"']*)?(["'][^>]*>)`, 'ig');
+const countScriptReferences = (html, src) => (String(html).match(scriptReferencePattern(src)) || []).length;
+const hasScriptReference = (html, src) => countScriptReferences(html, src) > 0;
+const inspectNavigationStructure = html => {
+  const missing = REQUIRED_SCRIPTS.filter(src => !hasScriptReference(html, src));
+  if (missing.length && !/<\/body\s*>/i.test(html)) return 'navigation-body-close-missing';
+  const duplicated = REQUIRED_SCRIPTS.filter(src => countScriptReferences(html, src) > 1);
+  if (duplicated.length) return `navigation-script-reference-duplicated:${duplicated.join(',')}`;
+  return null;
+};
+const createNavigationHeaders = response => {
+  const headers = new Headers(response.headers);
+  headers.set('Content-Type', 'text/html; charset=utf-8');
+  headers.set('Cache-Control', 'no-cache');
+  headers.delete('Content-Length');
+  headers.delete('Content-Encoding');
+  headers.delete('ETag');
+  return headers;
+};
+const injectRequiredScripts = async response => {
+  if (!response) return response;
+  let html = await response.text();
+  const structureIssue = inspectNavigationStructure(html);
+  if (structureIssue) throw new Error(structureIssue);
+  const missing = REQUIRED_SCRIPTS.filter(src => !hasScriptReference(html, src));
+  missing.forEach(src => {
+    html = html.replace(/<\/body\s*>/i, `<script src="${src}"></script>\n</body>`);
+  });
+  const unresolved = REQUIRED_SCRIPTS.filter(src => !hasScriptReference(html, src));
+  if (unresolved.length) throw new Error(`navigation-script-injection-incomplete:${unresolved.join(',')}`);
+  const postInjectionIssue = inspectNavigationStructure(html);
+  if (postInjectionIssue) throw new Error(postInjectionIssue);
+  return new Response(html, {status: response.status, statusText: response.statusText, headers: createNavigationHeaders(response)});
+};
+const markNetworkScriptRequests = async response => {
+  if (!response) return response;
+  let html = await response.text();
+  for (const src of REQUIRED_SCRIPTS) {
+    html = html.replace(scriptReferenceCapturePattern(src), `$1${src}?${NETWORK_SOURCE_PARAM}=${NETWORK_SOURCE_VALUE}$2`);
+  }
+  const unresolved = REQUIRED_SCRIPTS.filter(src => !new RegExp(`${escapeRegExp(src)}\\?${NETWORK_SOURCE_PARAM}=${NETWORK_SOURCE_VALUE}["']`, 'i').test(html));
+  if (unresolved.length) throw new Error(`navigation-network-marker-incomplete:${unresolved.join(',')}`);
+  return new Response(html, {status: response.status, statusText: response.statusText, headers: createNavigationHeaders(response)});
+};
+const getValidatedNavigationResponse = async () => {
+  const response = await fetch('./index.html', {cache: 'no-cache'});
+  if (!(await isCacheableResponse(response, './index.html'))) throw new Error('invalid-navigation-response');
+  return markNetworkScriptRequests(await injectRequiredScripts(response));
+};
+const inspectCachedAsset = async (cache, src, build = BUILD) => {
+  try {
+    const response = await cache.match(src);
+    if (!response) return 'missing';
+    if (!response.ok) return `http-${response.status}`;
+    if (!hasExpectedFinalUrl(response, src)) return 'response-url';
+    if (!hasExpectedContentType(response, src)) {
+      const contentType = String(response.headers.get('Content-Type') || 'missing').split(';')[0].trim().toLowerCase() || 'missing';
+      return `content-type-${contentType}`;
+    }
+    const bodyIssue = await inspectResponseBody(response, src, build);
+    if (bodyIssue) return bodyIssue;
+    if (src.endsWith('.html')) return inspectNavigationStructure(await response.clone().text());
+    return null;
+  } catch (error) {
+    return 'unreadable';
+  }
+};
+const cacheCriticalAssets = async cache => {
+  for (const src of CRITICAL_ASSETS) {
+    const response = await fetch(src, {cache: 'no-cache'});
+    if (!(await isCacheableResponse(response, src))) throw new Error(`invalid-critical-asset:${src}`);
+    if (src === './index.html') await injectRequiredScripts(response.clone());
+    await cache.put(src, response);
+    const issue = await inspectCachedAsset(cache, src);
+    if (issue) throw new Error(`invalid-cached-critical-asset:${src}:${issue}`);
+  }
+};
+const getValidatedRuntimeResponse = async (request, relativePath) => {
+  const response = await fetch(request, {cache: 'no-cache'});
+  if (!(await isCacheableResponse(response, relativePath))) throw new Error('invalid-runtime-response');
+  return response;
+};
+const getOfflineCacheStatus = async () => {
+  const cache = await caches.open(CACHE);
+  const missing = [];
+  const invalid = [];
+  for (const src of CRITICAL_ASSETS) {
+    const issue = await inspectCachedAsset(cache, src);
+    if (issue === 'missing') missing.push(src);
+    else if (issue) invalid.push(`${src}:${issue}`);
+  }
+  return {offlineReady: missing.length === 0 && invalid.length === 0, missingCriticalAssets: missing, invalidCriticalAssets: invalid};
+};
+const cacheBuildNumber = key => {
+  const match = String(key).match(/^yos-navi-strategy-v(\d+)-/);
+  return match ? Number(match[1]) : -1;
+};
+const CURRENT_BUILD_NUMBER = cacheBuildNumber(CACHE);
+const cacheBuild = key => {
+  const buildNumber = cacheBuildNumber(key);
+  return buildNumber >= 0 ? `v${buildNumber}` : null;
+};
+const isValidRetainedCache = async key => {
+  const build = cacheBuild(key);
+  if (!build) return false;
+  try {
+    const cache = await caches.open(key);
+    for (const src of CRITICAL_ASSETS) {
+      if (await inspectCachedAsset(cache, src, build)) return false;
+    }
+    return true;
+  } catch (error) {
+    return false;
+  }
+};
+const selectPreviousCache = async keys => {
+  const candidates = keys
+    .filter(key => key.startsWith(CACHE_PREFIX) && key !== CACHE && cacheBuildNumber(key) >= 0 && cacheBuildNumber(key) < CURRENT_BUILD_NUMBER)
+    .sort((a, b) => cacheBuildNumber(b) - cacheBuildNumber(a));
+  for (const key of candidates) {
+    if (await isValidRetainedCache(key)) return key;
+  }
+  return null;
+};
+const isAllowedServingCache = key => Boolean(key && (key === CACHE || key.startsWith(CACHE_PREFIX) && cacheBuildNumber(key) >= 0 && cacheBuildNumber(key) < CURRENT_BUILD_NUMBER));
+const isNetworkServingPin = key => key === NETWORK_SERVING_PIN;
+const selectServingCache = async preferredCache => {
+  if (isAllowedServingCache(preferredCache) && await isValidRetainedCache(preferredCache)) return preferredCache;
+  const currentStatus = await getOfflineCacheStatus();
+  if (currentStatus.offlineReady) return CACHE;
+  return selectPreviousCache(await caches.keys());
+};
+const getValidatedServingCacheResponse = async (relativePath, preferredCache) => {
+  const servingCache = await selectServingCache(preferredCache);
+  if (!servingCache) return {response: null, servingCache: null};
+  const build = cacheBuild(servingCache) || BUILD;
+  const cache = await caches.open(servingCache);
+  if (await inspectCachedAsset(cache, relativePath, build)) return {response: null, servingCache: null};
+  return {response: await cache.match(relativePath), servingCache};
+};
+const pruneClientServingCaches = async () => {
+  const activeClients = await self.clients.matchAll({type: 'window', includeUncontrolled: true});
+  const activeIds = new Set(activeClients.map(client => client.id));
+  for (const clientId of CLIENT_SERVING_CACHES.keys()) {
+    if (!activeIds.has(clientId)) CLIENT_SERVING_CACHES.delete(clientId);
+  }
+  return CLIENT_SERVING_CACHES.size;
+};
+const cleanupStaleCaches = async () => {
+  const keys = await caches.keys();
+  const previousCache = await selectPreviousCache(keys);
+  await Promise.all(keys.filter(key => key.startsWith(CACHE_PREFIX) && key !== CACHE && key !== previousCache).map(key => caches.delete(key)));
+  for (const [clientId, key] of CLIENT_SERVING_CACHES) {
+    if (!isNetworkServingPin(key) && key !== CACHE && key !== previousCache) CLIENT_SERVING_CACHES.delete(clientId);
+  }
+  return previousCache;
+};
+const serveNavigation = async event => {
+  const clientId = event.resultingClientId || event.clientId || null;
+  const preferredCache = clientId ? CLIENT_SERVING_CACHES.get(clientId) : null;
+  if (isNetworkServingPin(preferredCache)) return getValidatedNavigationResponse();
+  const result = await getValidatedServingCacheResponse('./index.html', preferredCache);
+  if (result.response) {
+    if (clientId && result.servingCache) CLIENT_SERVING_CACHES.set(clientId, result.servingCache);
+    return injectRequiredScripts(result.response);
+  }
+  if (clientId) CLIENT_SERVING_CACHES.set(clientId, NETWORK_SERVING_PIN);
+  return getValidatedNavigationResponse();
+};
+const serveApprovedAsset = async (event, relativePath, forceNetwork = false) => {
+  const clientId = event.clientId || null;
+  if (forceNetwork) {
+    if (clientId) CLIENT_SERVING_CACHES.set(clientId, NETWORK_SERVING_PIN);
+    return getValidatedRuntimeResponse(event.request, relativePath);
+  }
+  const preferredCache = clientId ? CLIENT_SERVING_CACHES.get(clientId) : null;
+  if (isNetworkServingPin(preferredCache)) return getValidatedRuntimeResponse(event.request, relativePath);
+  const result = await getValidatedServingCacheResponse(relativePath, preferredCache);
+  if (result.response) {
+    if (clientId && result.servingCache) CLIENT_SERVING_CACHES.set(clientId, result.servingCache);
+    return result.response;
+  }
+  if (clientId) CLIENT_SERVING_CACHES.set(clientId, NETWORK_SERVING_PIN);
+  return getValidatedRuntimeResponse(event.request, relativePath);
+};
+
+self.addEventListener('install', event => event.waitUntil(
+  caches.open(CACHE)
+    .then(cache => cacheCriticalAssets(cache))
+    .then(() => getOfflineCacheStatus())
+    .then(status => {
+      if (!status.offlineReady) throw new Error('offline-cache-incomplete');
+      return self.skipWaiting();
+    })
+    .catch(async error => {
+      await caches.delete(CACHE);
+      throw error;
+    })
+));
+self.addEventListener('activate', event => event.waitUntil(
+  getOfflineCacheStatus()
+    .then(status => {
+      if (!status.offlineReady) throw new Error('offline-cache-invalid-before-activate');
+      return self.clients.claim();
+    })
+    .then(() => cleanupStaleCaches())
+    .then(() => pruneClientServingCaches())
+));
+self.addEventListener('message', event => {
+  if (event.data?.type !== 'YOS_NAV_STATUS_REQUEST') return;
+  const replyPort = event.ports?.[0];
+  if (!replyPort) return;
+  event.waitUntil(Promise.all([getOfflineCacheStatus(), caches.keys(), pruneClientServingCaches()])
+    .then(async ([status, keys, pinnedClientCount]) => {
+      const retainedPreviousCache = await selectPreviousCache(keys);
+      const servingCache = status.offlineReady ? CACHE : retainedPreviousCache;
+      const pinnedServingTarget = event.source?.id ? CLIENT_SERVING_CACHES.get(event.source.id) || null : null;
+      const pinnedServingNetwork = isNetworkServingPin(pinnedServingTarget);
+      const pinnedServingCache = pinnedServingNetwork ? null : pinnedServingTarget;
+      replyPort.postMessage({
+        build: BUILD,
+        cache: CACHE,
+        servingCache,
+        servingFallback: Boolean(servingCache && servingCache !== CACHE),
+        retainedPreviousCache,
+        pinnedClientCount,
+        pinnedServingCache,
+        pinnedServingNetwork,
+        networkSourceValue: NETWORK_SOURCE_VALUE,
+        ...status
+      });
+    })
+    .catch(() => replyPort.postMessage({
+      build: BUILD,
+      cache: CACHE,
+      servingCache: null,
+      servingFallback: false,
+      retainedPreviousCache: null,
+      pinnedClientCount: 0,
+      pinnedServingCache: null,
+      pinnedServingNetwork: false,
+      networkSourceValue: NETWORK_SOURCE_VALUE,
+      offlineReady: false,
+      missingCriticalAssets: [],
+      invalidCriticalAssets: ['status-unavailable']
+    })));
+});
+self.addEventListener('fetch', event => {
+  if (event.request.method !== 'GET') return;
+  const requestUrl = new URL(event.request.url);
+  const relativePath = toNavRelativePath(requestUrl);
+  const isNavPage = event.request.mode === 'navigate' && (relativePath === './' || relativePath === './index.html');
+  if (isNavPage) {
+    event.respondWith(serveNavigation(event).catch(() => getValidatedNavigationResponse().catch(() => Response.error())));
+    return;
+  }
+  if (isApprovedRuntimeAsset(relativePath)) {
+    const marker = networkSourceMarker(requestUrl);
+    if (isStaleNetworkMarker(marker)) {
+      event.respondWith(Promise.resolve(Response.error()));
+      return;
+    }
+    const forceNetwork = isCurrentNetworkMarker(marker);
+    event.respondWith(serveApprovedAsset(event, relativePath, forceNetwork)
+      .catch(() => forceNetwork ? Response.error() : getValidatedRuntimeResponse(event.request, relativePath).catch(() => Response.error())));
+    return;
+  }
+  event.respondWith(fetch(event.request, {cache: 'no-cache'}));
+});
