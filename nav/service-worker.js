@@ -1,6 +1,6 @@
 'use strict';
 const CACHE_PREFIX='yos-navi-strategy-';
-const CACHE='yos-navi-strategy-v88-sequential-precache';
+const CACHE='yos-navi-strategy-v89-canonical-navigation';
 const STATIC=['./index.html','./shift-phase-v1.js','./location-status-v1.js','./connectivity-status-v1.js','./area-map-v1.js','./niche-demand-v1.js','./expected-value-model-v1.js','./expected-value-v1.js','./map-theme-v1.js','./okinawa-area-map-v1.js','./map-theme-sync-v1.js','./map-visual-v5.js','./map-approved-layout-v1.js','./map-premium-v6.js','./imada-efficiency-v47.js','./map-label-safety-v49.js','./location-map-sync-v50.js','./map-real-v7.js','./taxi-live-context-v1.js','./map-load-safety-v58.js','./map-tab-controls-v61.js','./map-loading-visibility-v63.js','./runtime-diagnostics-v64.js','./pwa-update-notice-v68.js'];
 const REQUIRED_SCRIPTS=STATIC.filter(src=>src.endsWith('.js'));
 const CRITICAL_ASSETS=['./index.html',...REQUIRED_SCRIPTS];
@@ -49,8 +49,8 @@ const injectRequiredScripts=async response=>{
   });
   return new Response(html,{status:response.status,statusText:response.statusText,headers:{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-cache'}});
 };
-const getValidatedNavigationResponse=async request=>{
-  const response=await fetch(request,{cache:'no-cache'});
+const getValidatedNavigationResponse=async()=>{
+  const response=await fetch('./index.html',{cache:'no-cache'});
   if(!(await isCacheableResponse(response,'./index.html')))throw new Error('invalid-navigation-response');
   return injectRequiredScripts(response);
 };
@@ -147,7 +147,7 @@ self.addEventListener('fetch',event=>{
   const isNavPage=event.request.mode==='navigate'&&(relativePath==='./'||relativePath==='./index.html');
   if(isNavPage){
     event.respondWith(
-      getValidatedNavigationResponse(event.request).catch(()=>
+      getValidatedNavigationResponse().catch(()=>
         getValidatedCachedResponse('./index.html').then(response=>response?injectRequiredScripts(response):Response.error())
       )
     );
