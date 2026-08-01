@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-08-01T21:10:42+09:00",
+  "updated_at": "2026-08-01T21:24:37+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -63,6 +63,16 @@
       "updated_at": "2026-08-01T03:08:18Z"
     },
     {
+      "id": "github-issue-158",
+      "title": "Issue #158 HJ / YOS思想・体験設計の正式引き継ぎ",
+      "type": "GitHub Issue",
+      "status": "open",
+      "priority": 3,
+      "next_action": "完成条件を確認し、次の安全な実装を1件進める",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/158",
+      "updated_at": "2026-08-01T12:24:21Z"
+    },
+    {
       "id": "github-issue-4",
       "title": "Issue #4 YOS Mission Control v1.0を構築する",
       "type": "GitHub Issue",
@@ -90,7 +100,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/51",
-      "updated_at": "2026-08-01T11:17:48Z"
+      "updated_at": "2026-08-01T12:18:07Z"
     },
     {
       "id": "github-issue-86",
@@ -174,7 +184,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-08-01T21:10:42+09:00",
+      "last_update": "2026-08-01T21:24:37+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -249,13 +259,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 8件・Open PR 1件を自動同期中",
+      "next_action": "Open Issue 9件・Open PR 1件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-08-01T21:10:42+09:00",
+      "last_update": "2026-08-01T21:24:37+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -278,7 +288,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-08-01T21:10:42+09:00",
+      "last_update": "2026-08-01T21:24:37+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -360,5 +370,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "f0b328b61a439f7a9e3610a55d9522ee28498b434f1e054f95b542703dbedc4c"
+  "github_snapshot_hash": "6d28c559658ea1bb81819b91d3ae89e2b440121dac40774fa015b4f7c933a56e"
 }
