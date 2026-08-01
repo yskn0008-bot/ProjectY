@@ -1,10 +1,10 @@
 'use strict';
 (()=>{
-  if(window.__yosNavRuntimeDiagnosticsV86)return;
-  window.__yosNavRuntimeDiagnosticsV86=true;
+  if(window.__yosNavRuntimeDiagnosticsV87)return;
+  window.__yosNavRuntimeDiagnosticsV87=true;
 
-  const BUILD='v86';
-  const EXPECTED_CACHE='yos-navi-strategy-v86-atomic-offline-install';
+  const BUILD='v87';
+  const EXPECTED_CACHE='yos-navi-strategy-v87-activation-recheck';
   const SW_STATUS_TTL_MS=30000;
   const isDiagnosticMode=new URL(location.href).searchParams.get('diagnostics')==='1';
   let swStatus={controlled:Boolean(navigator.serviceWorker?.controller),cache:null,buildMatch:false,offlineReady:false,missingCriticalAssets:[],invalidCriticalAssets:[]};
