@@ -1,7 +1,7 @@
 'use strict';
-const BUILD='v99';
+const BUILD='v100';
 const CACHE_PREFIX='yos-navi-strategy-';
-const CACHE='yos-navi-strategy-v99-validated-serving-cache-fallback';
+const CACHE='yos-navi-strategy-v100-older-cache-only-fallback';
 const RUNTIME_DIAGNOSTICS='./runtime-diagnostics-v64.js';
 const STATIC=['./index.html','./shift-phase-v1.js','./location-status-v1.js','./connectivity-status-v1.js','./area-map-v1.js','./niche-demand-v1.js','./expected-value-model-v1.js','./expected-value-v1.js','./map-theme-v1.js','./okinawa-area-map-v1.js','./map-theme-sync-v1.js','./map-visual-v5.js','./map-approved-layout-v1.js','./map-premium-v6.js','./imada-efficiency-v47.js','./map-label-safety-v49.js','./location-map-sync-v50.js','./map-real-v7.js','./taxi-live-context-v1.js','./map-load-safety-v58.js','./map-tab-controls-v61.js','./map-loading-visibility-v63.js',RUNTIME_DIAGNOSTICS,'./pwa-update-notice-v68.js'];
 const REQUIRED_SCRIPTS=STATIC.filter(src=>src.endsWith('.js'));
@@ -30,9 +30,10 @@ const getValidatedCachedResponse=async relativePath=>{const cache=await caches.o
 const getValidatedRuntimeResponse=async(request,relativePath)=>{const response=await fetch(request,{cache:'no-cache'});if(!(await isCacheableResponse(response,relativePath)))throw new Error('invalid-runtime-response');return response;};
 const getOfflineCacheStatus=async()=>{const cache=await caches.open(CACHE);const missing=[];const invalid=[];for(const src of CRITICAL_ASSETS){const issue=await inspectCachedAsset(cache,src);if(issue==='missing')missing.push(src);else if(issue)invalid.push(`${src}:${issue}`);}return {offlineReady:missing.length===0&&invalid.length===0,missingCriticalAssets:missing,invalidCriticalAssets:invalid};};
 const cacheBuildNumber=key=>{const match=String(key).match(/^yos-navi-strategy-v(\d+)-/);return match?Number(match[1]):-1;};
+const CURRENT_BUILD_NUMBER=cacheBuildNumber(CACHE);
 const cacheBuild=key=>{const buildNumber=cacheBuildNumber(key);return buildNumber>=0?`v${buildNumber}`:null;};
 const isValidRetainedCache=async key=>{const build=cacheBuild(key);if(!build)return false;try{const cache=await caches.open(key);for(const src of CRITICAL_ASSETS){if(await inspectCachedAsset(cache,src,build))return false;}return true;}catch(error){return false;}};
-const selectPreviousCache=async keys=>{const candidates=keys.filter(key=>key.startsWith(CACHE_PREFIX)&&key!==CACHE).sort((a,b)=>cacheBuildNumber(b)-cacheBuildNumber(a));for(const key of candidates){if(await isValidRetainedCache(key))return key;}return null;};
+const selectPreviousCache=async keys=>{const candidates=keys.filter(key=>key.startsWith(CACHE_PREFIX)&&key!==CACHE&&cacheBuildNumber(key)>=0&&cacheBuildNumber(key)<CURRENT_BUILD_NUMBER).sort((a,b)=>cacheBuildNumber(b)-cacheBuildNumber(a));for(const key of candidates){if(await isValidRetainedCache(key))return key;}return null;};
 const selectServingCache=async()=>{const currentStatus=await getOfflineCacheStatus();if(currentStatus.offlineReady)return CACHE;return selectPreviousCache(await caches.keys());};
 const getValidatedServingCacheResponse=async relativePath=>{const servingCache=await selectServingCache();if(!servingCache)return null;const build=cacheBuild(servingCache)||BUILD;const cache=await caches.open(servingCache);if(await inspectCachedAsset(cache,relativePath,build))return null;return cache.match(relativePath);};
 const cleanupStaleCaches=async()=>{const keys=await caches.keys();const previousCache=await selectPreviousCache(keys);await Promise.all(keys.filter(key=>key.startsWith(CACHE_PREFIX)&&key!==CACHE&&key!==previousCache).map(key=>caches.delete(key)));return previousCache;};
