@@ -1,13 +1,15 @@
 'use strict';
 (()=>{
-  if(window.__yosNavRuntimeDiagnosticsV103)return;
-  window.__yosNavRuntimeDiagnosticsV103=true;
+  if(window.__yosNavRuntimeDiagnosticsV104)return;
+  window.__yosNavRuntimeDiagnosticsV104=true;
 
-  const BUILD='v103';
-  const EXPECTED_CACHE='yos-navi-strategy-v103-network-client-pin';
+  const BUILD='v104';
+  const EXPECTED_CACHE='yos-navi-strategy-v104-network-request-marker';
+  const NETWORK_SOURCE_PARAM='yos-nav-source';
+  const PAGE_NETWORK_MARKER=String(new URL(document.currentScript?.src||location.href,location.href).searchParams.get(NETWORK_SOURCE_PARAM)||'');
   const SW_STATUS_TTL_MS=30000;
   const isDiagnosticMode=new URL(location.href).searchParams.get('diagnostics')==='1';
-  let swStatus={controlled:Boolean(navigator.serviceWorker?.controller),build:null,cache:null,servingCache:null,servingFallback:false,retainedPreviousCache:null,pinnedClientCount:0,pinnedServingCache:null,pinnedServingNetwork:false,buildMatch:false,offlineReady:false,missingCriticalAssets:[],invalidCriticalAssets:[]};
+  let swStatus={controlled:Boolean(navigator.serviceWorker?.controller),build:null,cache:null,servingCache:null,servingFallback:false,retainedPreviousCache:null,pinnedClientCount:0,pinnedServingCache:null,pinnedServingNetwork:false,networkSourceValue:null,buildMatch:false,offlineReady:false,missingCriticalAssets:[],invalidCriticalAssets:[]};
   let swCheckedAt=0;
   let scheduled=false;
   let running=false;
@@ -15,7 +17,7 @@
   let forcePending=false;
   let lastPanelSignature='';
 
-  const emptyStatus=(controlled,issue)=>({controlled,build:null,cache:null,servingCache:null,servingFallback:false,retainedPreviousCache:null,pinnedClientCount:0,pinnedServingCache:null,pinnedServingNetwork:false,buildMatch:false,offlineReady:false,missingCriticalAssets:issue?[issue]:[],invalidCriticalAssets:[]});
+  const emptyStatus=(controlled,issue)=>({controlled,build:null,cache:null,servingCache:null,servingFallback:false,retainedPreviousCache:null,pinnedClientCount:0,pinnedServingCache:null,pinnedServingNetwork:false,networkSourceValue:null,buildMatch:false,offlineReady:false,missingCriticalAssets:issue?[issue]:[],invalidCriticalAssets:[]});
   const requestServiceWorkerStatus=()=>new Promise(resolve=>{
     const controller=navigator.serviceWorker?.controller;
     if(!controller){resolve(emptyStatus(false));return;}
@@ -33,9 +35,10 @@
       const pinnedClientCount=Number.isFinite(Number(event.data?.pinnedClientCount))?Number(event.data.pinnedClientCount):0;
       const pinnedServingCache=String(event.data?.pinnedServingCache||'')||null;
       const pinnedServingNetwork=event.data?.pinnedServingNetwork===true;
+      const networkSourceValue=String(event.data?.networkSourceValue||'')||null;
       const missingCriticalAssets=Array.isArray(event.data?.missingCriticalAssets)?event.data.missingCriticalAssets.map(String):[];
       const invalidCriticalAssets=Array.isArray(event.data?.invalidCriticalAssets)?event.data.invalidCriticalAssets.map(String):[];
-      finish({controlled:true,build,cache,servingCache,servingFallback,retainedPreviousCache,pinnedClientCount,pinnedServingCache,pinnedServingNetwork,buildMatch:build===BUILD&&cache===EXPECTED_CACHE,offlineReady:event.data?.offlineReady===true,missingCriticalAssets,invalidCriticalAssets});
+      finish({controlled:true,build,cache,servingCache,servingFallback,retainedPreviousCache,pinnedClientCount,pinnedServingCache,pinnedServingNetwork,networkSourceValue,buildMatch:build===BUILD&&cache===EXPECTED_CACHE,offlineReady:event.data?.offlineReady===true,missingCriticalAssets,invalidCriticalAssets});
     };
     try{controller.postMessage({type:'YOS_NAV_STATUS_REQUEST'},[channel.port2]);}
     catch(error){clearTimeout(timer);finish(emptyStatus(true,'status-request-failed'));}
@@ -48,7 +51,7 @@
   const snapshot=()=>{
     const locationEl=document.querySelector('.yos-location-status');
     const acquiredAt=Number(locationEl?.dataset.acquiredAt||0);
-    const checks={online:navigator.onLine,swControlled:swStatus.controlled,swBuild:swStatus.build||'未取得',swCache:swStatus.cache||'未取得',swServingCache:swStatus.servingCache||'なし',swServingFallback:swStatus.servingFallback,swRetainedPreviousCache:swStatus.retainedPreviousCache||'なし',swPinnedClientCount:swStatus.pinnedClientCount,swPinnedServingCache:swStatus.pinnedServingCache||'未固定',swPinnedServingNetwork:swStatus.pinnedServingNetwork,swBuildMatch:swStatus.buildMatch,swOfflineReady:swStatus.offlineReady,swMissingCriticalAssets:swStatus.missingCriticalAssets.length?swStatus.missingCriticalAssets.join(', '):'なし',swInvalidCriticalAssets:swStatus.invalidCriticalAssets.length?swStatus.invalidCriticalAssets.join(', '):'なし',mapSection:Boolean(document.getElementById('yos-okinawa-area-map')),mapContainer:Boolean(document.getElementById('yos-real-map-v7')),leaflet:Boolean(window.L),tileReady:Boolean(document.querySelector('#yos-real-map-v7 .leaflet-tile-loaded')),tabCount:document.querySelectorAll('.yos-real-map-v7__tab').length,rankingButtons:document.querySelectorAll('.yos-real-map-v7__rank').length,recommendationCount:Array.isArray(window.__yosNavRecommendations)?window.__yosNavRecommendations.length:0,expectedValueModel:Boolean(window.__YOS_NAV_EXPECTED_VALUE_MODEL),locationFresh:Boolean(acquiredAt&&Date.now()-acquiredAt<=5*60*1000)};
+    const checks={online:navigator.onLine,swControlled:swStatus.controlled,swBuild:swStatus.build||'未取得',swCache:swStatus.cache||'未取得',swServingCache:swStatus.servingCache||'なし',swServingFallback:swStatus.servingFallback,swRetainedPreviousCache:swStatus.retainedPreviousCache||'なし',swPinnedClientCount:swStatus.pinnedClientCount,swPinnedServingCache:swStatus.pinnedServingCache||'未固定',swPinnedServingNetwork:swStatus.pinnedServingNetwork,swNetworkSourceValue:swStatus.networkSourceValue||'未取得',pageNetworkMarker:PAGE_NETWORK_MARKER||'なし',pageNetworkMarkerActive:/^network-v\d+$/.test(PAGE_NETWORK_MARKER),swBuildMatch:swStatus.buildMatch,swOfflineReady:swStatus.offlineReady,swMissingCriticalAssets:swStatus.missingCriticalAssets.length?swStatus.missingCriticalAssets.join(', '):'なし',swInvalidCriticalAssets:swStatus.invalidCriticalAssets.length?swStatus.invalidCriticalAssets.join(', '):'なし',mapSection:Boolean(document.getElementById('yos-okinawa-area-map')),mapContainer:Boolean(document.getElementById('yos-real-map-v7')),leaflet:Boolean(window.L),tileReady:Boolean(document.querySelector('#yos-real-map-v7 .leaflet-tile-loaded')),tabCount:document.querySelectorAll('.yos-real-map-v7__tab').length,rankingButtons:document.querySelectorAll('.yos-real-map-v7__rank').length,recommendationCount:Array.isArray(window.__yosNavRecommendations)?window.__yosNavRecommendations.length:0,expectedValueModel:Boolean(window.__YOS_NAV_EXPECTED_VALUE_MODEL),locationFresh:Boolean(acquiredAt&&Date.now()-acquiredAt<=5*60*1000)};
     const cacheServingReady=Boolean(checks.swServingCache)&&(checks.swOfflineReady||checks.swServingFallback);
     const requiredReady=checks.swControlled&&checks.swBuildMatch&&cacheServingReady&&checks.mapSection&&checks.mapContainer&&checks.tabCount===3&&checks.expectedValueModel&&checks.recommendationCount>0;
     const mapReady=!checks.online||checks.tileReady;
