@@ -1,15 +1,15 @@
 'use strict';
 (() => {
-  if (window.__yosNavRuntimeDiagnosticsV105) return;
-  window.__yosNavRuntimeDiagnosticsV105 = true;
+  if (window.__yosNavRuntimeDiagnosticsV106) return;
+  window.__yosNavRuntimeDiagnosticsV106 = true;
 
-  const BUILD = 'v105';
-  const EXPECTED_CACHE = 'yos-navi-strategy-v105-network-marker-version-lock';
+  const BUILD = 'v106';
+  const EXPECTED_CACHE = 'yos-navi-strategy-v106-stale-marker-recovery';
   const NETWORK_SOURCE_PARAM = 'yos-nav-source';
   const PAGE_NETWORK_MARKER = String(new URL(document.currentScript?.src || location.href, location.href).searchParams.get(NETWORK_SOURCE_PARAM) || '');
   const SW_STATUS_TTL_MS = 30000;
   const isDiagnosticMode = new URL(location.href).searchParams.get('diagnostics') === '1';
-  let swStatus = {controlled: Boolean(navigator.serviceWorker?.controller), build: null, cache: null, servingCache: null, servingFallback: false, retainedPreviousCache: null, pinnedClientCount: 0, pinnedServingCache: null, pinnedServingNetwork: false, networkSourceValue: null, buildMatch: false, offlineReady: false, missingCriticalAssets: [], invalidCriticalAssets: []};
+  let swStatus = {controlled: Boolean(navigator.serviceWorker?.controller), build: null, cache: null, servingCache: null, servingFallback: false, retainedPreviousCache: null, pinnedClientCount: 0, pinnedServingCache: null, pinnedServingNetwork: false, networkSourceValue: null, staleMarkerRecovery: false, buildMatch: false, offlineReady: false, missingCriticalAssets: [], invalidCriticalAssets: []};
   let swCheckedAt = 0;
   let scheduled = false;
   let running = false;
@@ -17,7 +17,7 @@
   let forcePending = false;
   let lastPanelSignature = '';
 
-  const emptyStatus = (controlled, issue) => ({controlled, build: null, cache: null, servingCache: null, servingFallback: false, retainedPreviousCache: null, pinnedClientCount: 0, pinnedServingCache: null, pinnedServingNetwork: false, networkSourceValue: null, buildMatch: false, offlineReady: false, missingCriticalAssets: issue ? [issue] : [], invalidCriticalAssets: []});
+  const emptyStatus = (controlled, issue) => ({controlled, build: null, cache: null, servingCache: null, servingFallback: false, retainedPreviousCache: null, pinnedClientCount: 0, pinnedServingCache: null, pinnedServingNetwork: false, networkSourceValue: null, staleMarkerRecovery: false, buildMatch: false, offlineReady: false, missingCriticalAssets: issue ? [issue] : [], invalidCriticalAssets: []});
   const requestServiceWorkerStatus = () => new Promise(resolve => {
     const controller = navigator.serviceWorker?.controller;
     if (!controller) {
@@ -43,9 +43,10 @@
       const pinnedServingCache = String(event.data?.pinnedServingCache || '') || null;
       const pinnedServingNetwork = event.data?.pinnedServingNetwork === true;
       const networkSourceValue = String(event.data?.networkSourceValue || '') || null;
+      const staleMarkerRecovery = event.data?.staleMarkerRecovery === true;
       const missingCriticalAssets = Array.isArray(event.data?.missingCriticalAssets) ? event.data.missingCriticalAssets.map(String) : [];
       const invalidCriticalAssets = Array.isArray(event.data?.invalidCriticalAssets) ? event.data.invalidCriticalAssets.map(String) : [];
-      finish({controlled: true, build, cache, servingCache, servingFallback, retainedPreviousCache, pinnedClientCount, pinnedServingCache, pinnedServingNetwork, networkSourceValue, buildMatch: build === BUILD && cache === EXPECTED_CACHE, offlineReady: event.data?.offlineReady === true, missingCriticalAssets, invalidCriticalAssets});
+      finish({controlled: true, build, cache, servingCache, servingFallback, retainedPreviousCache, pinnedClientCount, pinnedServingCache, pinnedServingNetwork, networkSourceValue, staleMarkerRecovery, buildMatch: build === BUILD && cache === EXPECTED_CACHE, offlineReady: event.data?.offlineReady === true, missingCriticalAssets, invalidCriticalAssets});
     };
     try {
       controller.postMessage({type: 'YOS_NAV_STATUS_REQUEST'}, [channel.port2]);
@@ -77,6 +78,7 @@
       swPinnedServingCache: swStatus.pinnedServingCache || '未固定',
       swPinnedServingNetwork: swStatus.pinnedServingNetwork,
       swNetworkSourceValue: swStatus.networkSourceValue || '未取得',
+      swStaleMarkerRecovery: swStatus.staleMarkerRecovery,
       pageNetworkMarker: PAGE_NETWORK_MARKER || 'なし',
       pageNetworkMarkerValid,
       pageNetworkMarkerCurrent,
@@ -97,7 +99,7 @@
     };
     const cacheServingReady = Boolean(checks.swServingCache) && (checks.swOfflineReady || checks.swServingFallback);
     const markerReady = !checks.pageNetworkMarkerValid || checks.pageNetworkMarkerCurrent;
-    const requiredReady = checks.swControlled && checks.swBuildMatch && cacheServingReady && markerReady && checks.mapSection && checks.mapContainer && checks.tabCount === 3 && checks.expectedValueModel && checks.recommendationCount > 0;
+    const requiredReady = checks.swControlled && checks.swBuildMatch && checks.swStaleMarkerRecovery && cacheServingReady && markerReady && checks.mapSection && checks.mapContainer && checks.tabCount === 3 && checks.expectedValueModel && checks.recommendationCount > 0;
     const mapReady = !checks.online || checks.tileReady;
     return Object.freeze({build: BUILD, checkedAt: new Date().toISOString(), ready: requiredReady && mapReady, checks});
   };
