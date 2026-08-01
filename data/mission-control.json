@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-08-02T03:07:16+09:00",
+  "updated_at": "2026-08-02T04:07:16+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -21,6 +21,16 @@
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/144",
       "updated_at": "2026-08-01T13:46:38Z"
+    },
+    {
+      "id": "github-pr-164",
+      "title": "PR #164 feat(taxi): add v134 minimal theme foundation",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/164",
+      "updated_at": "2026-08-01T18:55:21Z"
     },
     {
       "id": "github-issue-10",
@@ -100,7 +110,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/51",
-      "updated_at": "2026-08-01T17:13:17Z"
+      "updated_at": "2026-08-01T18:14:21Z"
     },
     {
       "id": "github-issue-86",
@@ -114,6 +124,13 @@
     }
   ],
   "recently_completed": [
+    {
+      "id": "github-commit-3a59da48372b",
+      "title": "YOSナビ v102 承認済み資産の固定先を同期",
+      "completed_at": "2026-08-01T19:07:01Z",
+      "result": "GitHub mainへ反映（3a59da4）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/3a59da48372b4153334fdda221a542210b5a90be"
+    },
     {
       "id": "github-commit-b007d6f4c833",
       "title": "YOSナビ v101 クライアント単位で表示元キャッシュを固定",
@@ -143,13 +160,6 @@
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/b7c00aa73afdf9e75ae2f63650780f0f1b7f5d40"
     },
     {
-      "id": "github-commit-58b150798862",
-      "title": "fix(nav): retain previous YOSナビ cache safely v97",
-      "completed_at": "2026-08-01T14:08:48Z",
-      "result": "GitHub mainへ反映（58b1507）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/58b150798862a657ec2be2c873e96d664a504c9d"
-    },
-    {
       "id": "complete-002",
       "title": "iPhone向けMission Control Dashboardを実装",
       "completed_at": "2026-07-17T17:55:00+09:00",
@@ -174,7 +184,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #144をレビューして公開判断する",
+      "next_action": "PR #164をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -184,7 +194,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-08-02T03:07:16+09:00",
+      "last_update": "2026-08-02T04:07:16+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -259,13 +269,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 9件・Open PR 1件を自動同期中",
+      "next_action": "Open Issue 9件・Open PR 2件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-08-02T03:07:16+09:00",
+      "last_update": "2026-08-02T04:07:16+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -279,7 +289,7 @@
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #144をレビューして公開判断する",
+      "next_action": "PR #164をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -288,7 +298,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-08-02T03:07:16+09:00",
+      "last_update": "2026-08-02T04:07:16+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -370,5 +380,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "2175b5ee3fa964843a877e80be28ba1c37197b4887c93ae3d5b9fc483dc3f8ad"
+  "github_snapshot_hash": "ef40347d808c86ee85b032b24bc9d7737a606e7eb054e4c1f74b78eef4991ef3"
 }
