@@ -1,8 +1,8 @@
 'use strict';
 
-const BUILD = 'v105';
+const BUILD = 'v106';
 const CACHE_PREFIX = 'yos-navi-strategy-';
-const CACHE = 'yos-navi-strategy-v105-network-marker-version-lock';
+const CACHE = 'yos-navi-strategy-v106-stale-marker-recovery';
 const RUNTIME_DIAGNOSTICS = './runtime-diagnostics-v64.js';
 const STATIC = [
   './index.html',
@@ -36,6 +36,7 @@ const CLIENT_SERVING_CACHES = new Map();
 const NETWORK_SERVING_PIN = '__YOS_NAV_NETWORK__';
 const NETWORK_SOURCE_PARAM = 'yos-nav-source';
 const NETWORK_SOURCE_VALUE = `network-${BUILD}`;
+const STALE_MARKER_RECOVERY_KEY = 'yos-nav-stale-marker-recovery-v106';
 const NAV_SCOPE_PATH = new URL('./', self.location.href).pathname;
 
 const toNavRelativePath = requestUrl => {
@@ -48,6 +49,17 @@ const networkSourceMarker = requestUrl => String(requestUrl.searchParams.get(NET
 const isNetworkMarker = marker => /^network-v\d+$/.test(marker);
 const isCurrentNetworkMarker = marker => marker === NETWORK_SOURCE_VALUE;
 const isStaleNetworkMarker = marker => isNetworkMarker(marker) && !isCurrentNetworkMarker(marker);
+const createStaleMarkerRecoveryResponse = marker => {
+  const body = `'use strict';\n(() => {\n  const key = ${JSON.stringify(STALE_MARKER_RECOVERY_KEY)};\n  const current = ${JSON.stringify(NETWORK_SOURCE_VALUE)};\n  const stale = ${JSON.stringify(marker)};\n  try {\n    if (sessionStorage.getItem(key) === current) return;\n    sessionStorage.setItem(key, current);\n  } catch (error) {}\n  window.dispatchEvent(new CustomEvent('yos-nav-stale-marker-recovery', {detail: {stale, current}}));\n  location.reload();\n})();\n`;
+  return new Response(body, {
+    status: 200,
+    headers: {
+      'Content-Type': 'application/javascript; charset=utf-8',
+      'Cache-Control': 'no-store, max-age=0',
+      'X-YOS-Nav-Recovery': 'stale-network-marker'
+    }
+  });
+};
 const expectedAssetUrl = src => new URL(src, self.location.href);
 const hasExpectedFinalUrl = (response, src) => {
   try {
@@ -315,6 +327,7 @@ self.addEventListener('message', event => {
         pinnedServingCache,
         pinnedServingNetwork,
         networkSourceValue: NETWORK_SOURCE_VALUE,
+        staleMarkerRecovery: true,
         ...status
       });
     })
@@ -328,6 +341,7 @@ self.addEventListener('message', event => {
       pinnedServingCache: null,
       pinnedServingNetwork: false,
       networkSourceValue: NETWORK_SOURCE_VALUE,
+      staleMarkerRecovery: true,
       offlineReady: false,
       missingCriticalAssets: [],
       invalidCriticalAssets: ['status-unavailable']
@@ -345,7 +359,7 @@ self.addEventListener('fetch', event => {
   if (isApprovedRuntimeAsset(relativePath)) {
     const marker = networkSourceMarker(requestUrl);
     if (isStaleNetworkMarker(marker)) {
-      event.respondWith(Promise.resolve(Response.error()));
+      event.respondWith(Promise.resolve(createStaleMarkerRecoveryResponse(marker)));
       return;
     }
     const forceNetwork = isCurrentNetworkMarker(marker);
