@@ -6,17 +6,17 @@
   <meta name="theme-color" content="#090b12">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="YOS Journey">
-  <meta name="description" content="人生を物語として進める、ヒーローズジャーニーのAIメンター">
+  <meta name="apple-mobile-web-app-title" content="Hero's Journey">
+  <meta name="description" content="人生を物語として進める、ヒーローズジャーニーのAIメンターアプリ">
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="stylesheet" href="./styles.css">
-  <title>YOS｜人生の物語を進める</title>
+  <title>Hero's Journey｜人生の物語を進める</title>
 </head>
 <body>
   <main class="app">
     <header class="topbar">
-      <div class="brand-mark" aria-hidden="true">Y</div>
-      <div class="brand-copy"><h1>YOS</h1><p>HERO'S JOURNEY MENTOR</p></div>
+      <div class="brand-mark" aria-hidden="true">✦</div>
+      <div class="brand-copy"><h1>HERO'S JOURNEY</h1><p>AI MENTOR · YOS</p></div>
       <div class="clock" aria-label="現在時刻"><strong id="clock">--:--</strong><span id="date">----</span></div>
     </header>
 
@@ -27,8 +27,12 @@
       <p class="eyebrow">CURRENT CHAPTER</p>
       <h2 id="chapterTitle">第1章｜旅の始まり</h2>
       <p id="chapterMessage" class="chapter-message">人生を一気に変えなくていい。今日の一歩から物語は動き出す。</p>
+      <div class="stage-progress" aria-label="旅の進行度">
+        <div><span id="stageProgressLabel">1 / 12</span><small>旅の現在地</small></div>
+        <div class="stage-progress-track"><i id="stageProgressBar"></i></div>
+      </div>
       <div class="mentor-message"><span aria-hidden="true">✦</span><div><small>YOS MENTOR</small><p id="mentorMessage">今いる場所を否定せず、次の一歩を一つだけ決めよう。</p></div></div>
-      <div class="hero-actions"><button id="consultMentor" class="primary-action" type="button">YOSに話す</button><button id="editJourney" class="icon-action" type="button" aria-label="物語の設定">⚙︎</button></div>
+      <div class="hero-actions"><button id="consultMentor" class="primary-action" type="button">メンターに話す</button><button id="editJourney" class="icon-action" type="button" aria-label="物語の設定">⚙︎</button></div>
     </section>
 
     <section class="journey-overview" aria-labelledby="questTitle">
@@ -36,6 +40,8 @@
       <div class="quest-focus"><span>メインクエスト</span><strong id="mainQuest">まだ決まっていません</strong></div>
       <div class="next-step"><span>次にやること</span><p id="nextStep">小さなクエストを一つ作ろう。</p></div>
       <form id="quickQuestForm" class="quick-quest"><label for="quickQuestInput">今日できる小さな一歩</label><div><input id="quickQuestInput" type="text" maxlength="100" placeholder="例：気になることを3行書く"><button type="submit">追加</button></div></form>
+      <div id="homeQuestList" class="home-quest-list"></div>
+      <p id="emptyHomeQuest" class="empty-home-quest">まだ一歩はありません。5分で終わるくらい小さく作ろう。</p>
       <div class="journey-metrics"><div><strong id="totalXp">0</strong><span>経験XP</span></div><div><strong id="completedCount">0</strong><span>達成</span></div><div><strong id="streakCount">0</strong><span>連続記録</span></div></div>
     </section>
 
@@ -50,8 +56,8 @@
     <section class="experience-card" aria-labelledby="experienceTitle">
       <div class="section-head compact"><div><p class="section-kicker">RETURN WITH THE ELIXIR</p><h2 id="experienceTitle">経験を宝にする</h2></div><span id="reflectionSavedAt" class="subtle">未記録</span></div>
       <p class="card-copy">成功も失敗も、次の自分を助ける経験として残す。</p>
-      <label class="reflection-field" for="reflectionInput"><span>今日わかったこと</span><textarea id="reflectionInput" maxlength="300" rows="3" placeholder="例：疲れている時は大きな決断をしない"></textarea></label>
-      <div class="experience-actions"><button id="saveReflection" class="secondary-action" type="button">経験を保存</button><button id="reflectWithYos" class="primary-action" type="button">YOSと振り返る</button></div>
+      <label class="reflection-field" for="reflectionInput"><span>今日わかったこと</span><textarea id="reflectionInput" maxlength="400" rows="3" placeholder="例：疲れている時は大きな決断をしない"></textarea></label>
+      <div class="experience-actions"><button id="saveReflection" class="secondary-action" type="button">経験を保存</button><button id="reflectWithYos" class="primary-action" type="button">メンターと振り返る</button></div>
     </section>
 
     <section aria-labelledby="domainsTitle">
@@ -83,7 +89,7 @@
   <dialog id="onboardingDialog" class="onboarding-dialog">
     <form id="onboardingForm" class="dialog-body onboarding-body">
       <div class="onboarding-symbol" aria-hidden="true">✦</div><p class="section-kicker">YOUR STORY BEGINS</p><h2>人生を、あなたの物語として始めよう。</h2><p class="onboarding-copy">3つ答えるだけ。ヒーローズジャーニーを知らなくても使えます。</p>
-      <label for="heroName">呼ばれたい名前</label><input id="heroName" type="text" maxlength="30" placeholder="例：ようすけ">
+      <label for="heroName">呼ばれたい名前</label><input id="heroName" type="text" maxlength="30" placeholder="例：ようすけ" autocomplete="nickname">
       <fieldset class="scene-fieldset"><legend>今は、どんな場面？</legend><div class="scene-grid">
         <button type="button" data-stage="冒険への誘い"><span>✨</span><b>変わりたい</b></button><button type="button" data-stage="ためらい"><span>🌫️</span><b>迷っている</b></button><button type="button" data-stage="最初の境界線"><span>🚪</span><b>挑戦中</b></button><button type="button" data-stage="最大の試練"><span>⛰️</span><b>壁にいる</b></button><button type="button" data-stage="報酬"><span>💎</span><b>何かを得た</b></button><button type="button" data-stage="宝を持って帰還"><span>🌅</span><b>次の章へ</b></button>
       </div></fieldset>
@@ -95,14 +101,26 @@
   <dialog id="settingsDialog">
     <form method="dialog" class="dialog-body">
       <div class="dialog-head"><div><p class="section-kicker">STORY SETTINGS</p><h2>物語の設定</h2></div><button class="dialog-close" value="cancel" aria-label="閉じる">×</button></div>
-      <label for="settingsHeroName">呼ばれたい名前</label><input id="settingsHeroName" type="text" maxlength="30">
+      <label for="settingsHeroName">呼ばれたい名前</label><input id="settingsHeroName" type="text" maxlength="30" autocomplete="nickname">
+      <label for="settingsChapter">現在の章</label><input id="settingsChapter" type="text" maxlength="60">
+      <label for="settingsStage">旅の段階</label>
+      <select id="settingsStage">
+        <option>日常世界</option><option>冒険への誘い</option><option>ためらい</option><option>メンターとの出会い</option><option>最初の境界線</option><option>試練・仲間・敵</option><option>最も深い場所へ</option><option>最大の試練</option><option>報酬</option><option>帰路</option><option>復活</option><option>宝を持って帰還</option>
+      </select>
       <label for="settingsCalling">冒険からの呼びかけ</label><textarea id="settingsCalling" maxlength="180" rows="3"></textarea>
       <label for="yosUrl">YOSチャットURL</label><input id="yosUrl" type="url" inputmode="url" placeholder="https://chatgpt.com/...">
-      <button id="saveSettings" class="primary-action full" value="default">保存する</button><button id="restartStory" class="text-button" type="button">最初の設定をやり直す</button>
+      <button id="saveSettings" class="primary-action full" value="default">保存する</button>
+      <div class="data-actions" aria-label="データ管理">
+        <button id="exportStory" class="secondary-action" type="button">バックアップ</button>
+        <button id="importStory" class="secondary-action" type="button">復元</button>
+      </div>
+      <input id="importStoryFile" class="visually-hidden" type="file" accept="application/json,.json">
+      <button id="restartStory" class="text-button" type="button">初回設定をやり直す</button>
+      <button id="resetStory" class="danger-text-button" type="button">物語データを削除する</button>
     </form>
   </dialog>
 
   <script src="./app.js" defer></script>
-  <script src="./taxi-live-v1.js?v=6" defer></script>
+  <script src="./taxi-live-v1.js?v=7" defer></script>
 </body>
 </html>
