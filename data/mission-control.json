@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-08-01T10:13:05+09:00",
+  "updated_at": "2026-08-01T11:08:39+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -90,7 +90,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/51",
-      "updated_at": "2026-08-01T00:17:41Z"
+      "updated_at": "2026-08-01T01:16:28Z"
     },
     {
       "id": "github-issue-86",
@@ -104,6 +104,13 @@
     }
   ],
   "recently_completed": [
+    {
+      "id": "github-commit-6ca843f843c3",
+      "title": "fix(nav): activate YOSナビ only with complete offline cache v86",
+      "completed_at": "2026-08-01T02:08:21Z",
+      "result": "GitHub mainへ反映（6ca843f）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/6ca843f843c34e504524bd38310c37e062dd81f5"
+    },
     {
       "id": "github-commit-35e84be6a941",
       "title": "fix(nav): require direct YOSナビ scripts for offline readiness v85",
@@ -131,13 +138,6 @@
       "completed_at": "2026-07-31T22:10:05Z",
       "result": "GitHub mainへ反映（13b8ca0）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/13b8ca034ff601260cc7c63f8bebdf145af14c37"
-    },
-    {
-      "id": "github-commit-d30d36550dad",
-      "title": "feat(nav): restrict YOSナビ runtime cache scope v81",
-      "completed_at": "2026-07-31T21:10:10Z",
-      "result": "GitHub mainへ反映（d30d365）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/d30d36550dad587f2afce733047ae617bfebdfd4"
     },
     {
       "id": "complete-002",
@@ -174,7 +174,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-08-01T10:13:05+09:00",
+      "last_update": "2026-08-01T11:08:39+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -255,7 +255,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-08-01T10:13:05+09:00",
+      "last_update": "2026-08-01T11:08:39+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -278,7 +278,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-08-01T10:13:05+09:00",
+      "last_update": "2026-08-01T11:08:39+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -360,5 +360,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "7a47325e7088459960d95f69280f5891d730efd5702e3d1ab9787af8564e8c17"
+  "github_snapshot_hash": "b2345e41b81618982cd2be0b496fc0f87b21f20007fd3c68d70526580f0b03e3"
 }
