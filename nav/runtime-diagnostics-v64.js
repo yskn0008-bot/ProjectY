@@ -1,10 +1,10 @@
 'use strict';
 (()=>{
-  if(window.__yosNavRuntimeDiagnosticsV94)return;
-  window.__yosNavRuntimeDiagnosticsV94=true;
+  if(window.__yosNavRuntimeDiagnosticsV95)return;
+  window.__yosNavRuntimeDiagnosticsV95=true;
 
-  const BUILD='v94';
-  const EXPECTED_CACHE='yos-navi-strategy-v94-navigation-structure-cache';
+  const BUILD='v95';
+  const EXPECTED_CACHE='yos-navi-strategy-v95-script-reference-integrity-cache';
   const SW_STATUS_TTL_MS=30000;
   const isDiagnosticMode=new URL(location.href).searchParams.get('diagnostics')==='1';
   let swStatus={controlled:Boolean(navigator.serviceWorker?.controller),cache:null,buildMatch:false,offlineReady:false,missingCriticalAssets:[],invalidCriticalAssets:[]};
