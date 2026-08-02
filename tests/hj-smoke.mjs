@@ -1,11 +1,14 @@
 import assert from 'node:assert/strict';
 import { mkdir } from 'node:fs/promises';
-import { chromium } from 'playwright';
+import { chromium, webkit } from 'playwright';
 
 const baseURL = process.env.HJ_BASE_URL || 'http://127.0.0.1:4173/yos/hj/';
+const browserName = process.env.HJ_BROWSER || 'chromium';
+const engine = { chromium, webkit }[browserName];
+if (!engine) throw new Error(`Unsupported browser: ${browserName}`);
 await mkdir('test-results', { recursive: true });
 
-const browser = await chromium.launch();
+const browser = await engine.launch();
 const context = await browser.newContext({
   viewport: { width: 375, height: 667 },
   deviceScaleFactor: 2,
@@ -20,15 +23,13 @@ const page = await context.newPage();
 const pageErrors = [];
 page.on('pageerror', (error) => pageErrors.push(error.message));
 page.on('console', (message) => {
-  if (message.type() === 'error') console.error(`[browser] ${message.text()}`);
+  if (message.type() === 'error') console.error(`[${browserName}] ${message.text()}`);
 });
 
 const visible = async (selector) => page.locator(selector).isVisible();
 const waitReload = async (action) => {
-  await Promise.all([
-    page.waitForLoadState('domcontentloaded').catch(() => {}),
-    action()
-  ]);
+  await action();
+  await page.waitForLoadState('domcontentloaded');
   await page.waitForTimeout(350);
 };
 
@@ -96,14 +97,13 @@ try {
   await page.locator('#shareStoryImage').click();
   const image = await imageDownload;
   assert.match(image.suggestedFilename(), /\.png$/i, '画像共有がPNGではない');
-  await image.saveAs('test-results/hj-weekly-story.png');
+  await image.saveAs(`test-results/hj-weekly-story-${browserName}.png`);
 
   const backupDownload = page.waitForEvent('download');
   await page.locator('#exportData').click();
   const backup = await backupDownload;
   assert.match(backup.suggestedFilename(), /\.json$/i, 'バックアップがJSONではない');
-  const backupPath = 'test-results/hj-backup.json';
-  await backup.saveAs(backupPath);
+  await backup.saveAs(`test-results/hj-backup-${browserName}.json`);
 
   await page.locator('#consultYos').click();
   await page.waitForTimeout(150);
@@ -122,9 +122,9 @@ try {
   assert.match(await page.locator('#heroTitle').textContent(), /テスト主人公/, 'オフライン再起動できない');
   await context.setOffline(false);
 
-  await page.screenshot({ path: 'test-results/hj-se3-full.png', fullPage: true });
+  await page.screenshot({ path: `test-results/hj-se3-full-${browserName}.png`, fullPage: true });
   assert.deepEqual(pageErrors, [], `ページ例外: ${pageErrors.join(' | ')}`);
-  console.log('HJ smoke test passed');
+  console.log(`HJ smoke test passed: ${browserName}`);
 } finally {
   await browser.close();
 }
