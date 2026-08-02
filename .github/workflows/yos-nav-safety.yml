@@ -40,6 +40,7 @@ jobs:
           node --check nav/service-worker.js
           node --check nav/runtime-diagnostics-v64.js
           node --check nav/tests/service-worker-v106-safety.test.mjs
+          node --check nav/tests/static-manifest-safety.test.mjs
 
       - name: Run YOSナビ safety regression tests
-        run: node --test nav/tests/service-worker-v106-safety.test.mjs
+        run: node --test nav/tests/*.test.mjs
