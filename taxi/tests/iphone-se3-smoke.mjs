@@ -21,6 +21,7 @@ const page = await context.newPage();
 const pageErrors = [];
 page.on('pageerror', (error) => pageErrors.push(error.message));
 
+const THEME_KEY = 'yos-taxi-ui-theme-v1';
 const pages = [
   ['drive', ''],
   ['today', 'calendar.html?page=today'],
@@ -30,7 +31,7 @@ const pages = [
 ];
 const themes = ['minimal', 'night-gold', 'light', 'map', 'hud'];
 
-async function inspectPage(name, relative) {
+async function inspectPage(name, relative, expectedTheme) {
   const url = new URL(relative || './', baseURL).href;
   await page.goto(url, { waitUntil: 'networkidle' });
   await page.waitForTimeout(500);
@@ -65,10 +66,12 @@ async function inspectPage(name, relative) {
       viewportHeight,
       fixedBottom,
       tooSmall,
-      title: document.title
+      title: document.title,
+      appliedTheme: root.dataset.yosTheme || ''
     };
   });
 
+  assert.equal(metrics.appliedTheme, expectedTheme, `${name}: theme not applied (${metrics.appliedTheme})`);
   assert.ok(metrics.scrollWidth <= metrics.clientWidth + 1, `${name}: horizontal overflow ${metrics.scrollWidth}/${metrics.clientWidth}`);
   assert.ok(metrics.title.trim().length > 0, `${name}: document title missing`);
   assert.ok(metrics.tooSmall <= 3, `${name}: too many small touch targets (${metrics.tooSmall})`);
@@ -83,15 +86,18 @@ async function inspectPage(name, relative) {
 try {
   for (const theme of themes) {
     await page.goto(baseURL, { waitUntil: 'domcontentloaded' });
-    await page.evaluate((value) => localStorage.setItem('yos-taxi-theme-v1', value), theme);
-    for (const [name, relative] of pages) await inspectPage(`${name}-${theme}`, relative);
+    await page.evaluate(({ key, value }) => localStorage.setItem(key, value), { key: THEME_KEY, value: theme });
+    for (const [name, relative] of pages) await inspectPage(`${name}-${theme}`, relative, theme);
   }
 
   await page.goto(baseURL, { waitUntil: 'networkidle' });
   await page.waitForTimeout(800);
   const sw = await page.evaluate(async () => {
     if (!('serviceWorker' in navigator)) return { supported: false };
-    const registration = await navigator.serviceWorker.ready;
+    const registration = await Promise.race([
+      navigator.serviceWorker.ready,
+      new Promise((_, reject) => setTimeout(() => reject(new Error('Service Worker ready timeout')), 10000))
+    ]);
     return { supported: true, active: Boolean(registration.active) };
   });
   assert.equal(sw.supported, true, 'Service Worker unsupported');
