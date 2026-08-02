@@ -1,5 +1,6 @@
 'use strict';
-const CACHE='yos-life-home-v3';
+const CACHE='yos-life-home-v4';
+const LIFE_CACHE_PREFIX='yos-life-';
 const STATIC=['./','./index.html','./manifest.webmanifest','./yos-suite-v3.js','./home-v1.js','./home-v1.css'];
 async function inject(response){
   let html=await response.text();
@@ -18,7 +19,13 @@ self.addEventListener('install',event=>event.waitUntil((async()=>{
   }
   await self.skipWaiting();
 })()));
-self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim())));
+self.addEventListener('activate',event=>event.waitUntil(
+  caches.keys()
+    .then(keys=>Promise.all(keys
+      .filter(key=>key.startsWith(LIFE_CACHE_PREFIX)&&key!==CACHE)
+      .map(key=>caches.delete(key))))
+    .then(()=>self.clients.claim())
+));
 self.addEventListener('fetch',event=>{
   if(event.request.method!=='GET')return;
   const url=new URL(event.request.url);
