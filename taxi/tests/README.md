@@ -5,6 +5,7 @@ Run from the repository root:
 ```bash
 node --check taxi/service-worker.js
 node --test taxi/tests/service-worker-safety.test.mjs
+node --test taxi/tests/iphone-se3-smoke-static.test.mjs
 ```
 
 The Service Worker safety test checks:
@@ -16,6 +17,14 @@ The Service Worker safety test checks:
 - required page precaching and `/taxi/` route mapping
 - deletion of old Taxi caches only
 - network-first navigation with cached fallback
+
+The SE3 smoke static test checks:
+
+- the production theme storage key is used
+- all five production themes are covered
+- Drive, Today, Week, Month and Manage routes are covered
+- the viewport is fixed to 375 × 667 with touch enabled
+- overflow, touch targets, page errors and Service Worker checks remain present
 
 ## iPhone SE3 smoke test
 
