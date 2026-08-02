@@ -15,9 +15,10 @@ function write(key,value){try{localStorage.setItem(key,JSON.stringify(value));re
 function journeys(){const value=read(JOURNEYS_KEY,[]);return Array.isArray(value)?value:[]}
 function profile(){const value=read(PROFILE_KEY,null);return value&&typeof value==='object'?value:null}
 function setStatus(message){const node=$('appStatus');if(node)node.textContent=message}
-function stageOptions(selected){return STAGES.map((stage)=>`<option${stage===selected?' selected':''}>${stage}</option>`).join('')}
+function escapeHtml(value){return String(value??'').replace(/[&<>"']/g,(char)=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]))}
+function stageOptions(selected){return STAGES.map((stage)=>`<option${stage===selected?' selected':''}>${escapeHtml(stage)}</option>`).join('')}
 function domainOptions(selected){
-  return journeys().map((journey)=>`<option value="${String(journey.id).replace(/"/g,'&quot;')}"${journey.id===selected?' selected':''}>${journey.icon||'🧭'} ${journey.name}</option>`).join('');
+  return journeys().map((journey)=>`<option value="${escapeHtml(journey.id)}"${journey.id===selected?' selected':''}>${escapeHtml(journey.icon||'🧭')} ${escapeHtml(journey.name)}</option>`).join('');
 }
 function focusedJourney(){
   const items=journeys(),data=profile();
