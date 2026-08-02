@@ -1,0 +1,33 @@
+/* v138:営業中の1秒把握バーとライトテーマ可読性 */
+.yos131-drive.yos-drive-v138{grid-template-rows:36px 44px 154px 48px 54px 54px!important}
+.yos-drive-now-v138{display:grid;grid-template-columns:1.05fr 1fr 1fr;gap:5px;min-height:0}
+.yos-drive-now-v138>div{min-width:0;border:1px solid var(--yos131-line);border-radius:10px;background:#0a0a0c;display:grid;align-content:center;padding:4px 7px}
+.yos-drive-now-v138 small{font-size:9px;color:var(--yos131-muted);line-height:1}
+.yos-drive-now-v138 strong{font-size:14px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.yos-drive-now-v138 .clock strong{font-size:20px;color:var(--yos131-gold2)}
+
+html[data-yos-theme="light"] #yosFinalAppV131{background:#f5f6f8!important;color:#121417!important}
+html[data-yos-theme="light"] .yos131-header h1,
+html[data-yos-theme="light"] .yos131-manage-summary strong,
+html[data-yos-theme="light"] .yos131-tile b,
+html[data-yos-theme="light"] .yos131-kpis strong,
+html[data-yos-theme="light"] .yos131-state b,
+html[data-yos-theme="light"] .yos131-advice strong,
+html[data-yos-theme="light"] .yos131-sales-copy small,
+html[data-yos-theme="light"] .yos-drive-now-v138 strong{color:#121417!important}
+html[data-yos-theme="light"] .yos131-manage-summary span,
+html[data-yos-theme="light"] .yos131-kpis span,
+html[data-yos-theme="light"] .yos131-state small,
+html[data-yos-theme="light"] .yos-drive-now-v138 small{color:#68707d!important}
+html[data-yos-theme="light"] .yos131-tile svg{color:#121417!important;stroke:#121417!important}
+html[data-yos-theme="light"] .yos131-manage-summary div,
+html[data-yos-theme="light"] .yos131-state div,
+html[data-yos-theme="light"] .yos131-kpis>div,
+html[data-yos-theme="light"] .yos-drive-now-v138>div{background:#fff!important;border-color:#d7dbe1!important}
+html[data-yos-theme="light"] .yos131-sales-copy strong,
+html[data-yos-theme="light"] .yos-drive-now-v138 .clock strong{color:#246bfe!important}
+
+@media(max-height:650px){
+  .yos131-drive.yos-drive-v138{grid-template-rows:32px 40px 146px 46px 50px 50px!important}
+  .yos-drive-now-v138 strong{font-size:12px}.yos-drive-now-v138 .clock strong{font-size:18px}
+}
