@@ -14,67 +14,29 @@ const capture = (pattern, message) => {
   return match[1];
 };
 
-const relativePathSource = capture(
-  /const toNavRelativePath = requestUrl => \{([\s\S]*?)\n\};/,
-  'toNavRelativePath関数を取得できません'
-);
-
-const fetchHandlerSource = capture(
-  /self\.addEventListener\('fetch', event => \{([\s\S]*?)\n\}\);/,
-  'fetchイベント処理を取得できません'
-);
+const relativePathSource = capture(/const toNavRelativePath = requestUrl => \{([\s\S]*?)\n\};/, 'toNavRelativePath関数を取得できません');
+const fetchHandlerSource = capture(/self\.addEventListener\('fetch', event => \{([\s\S]*?)\n\}\);/, 'fetchイベント処理を取得できません');
 
 test('YOSナビのService Workerスコープは自身の配置先から算出する', () => {
-  assert.match(
-    serviceWorker,
-    /const NAV_SCOPE_PATH = new URL\('\.\/', self\.location\.href\)\.pathname;/,
-    'YOSナビ自身の配置先からNAV_SCOPE_PATHを算出していません'
-  );
+  assert.match(serviceWorker, /const NAV_SCOPE_PATH = new URL\('\.\/', self\.location\.href\)\.pathname;/);
 });
 
 test('別originとYOSナビ配下外のリクエストを対象外にする', () => {
-  assert.match(
-    relativePathSource,
-    /requestUrl\.origin !== self\.location\.origin/,
-    '別originを除外する条件がありません'
-  );
-  assert.match(
-    relativePathSource,
-    /!requestUrl\.pathname\.startsWith\(NAV_SCOPE_PATH\)/,
-    'YOSナビ配下外のパスを除外する条件がありません'
-  );
-  assert.match(
-    relativePathSource,
-    /return null;/,
-    '対象外リクエストをnullで返していません'
-  );
+  assert.match(relativePathSource, /requestUrl\.origin !== self\.location\.origin/);
+  assert.match(relativePathSource, /!requestUrl\.pathname\.startsWith\(NAV_SCOPE_PATH\)/);
+  assert.match(relativePathSource, /return null;/);
 });
 
-test('fetch処理はYOSナビ配下へ変換できないリクエストを傍受しない', () => {
-  assert.match(
-    fetchHandlerSource,
-    /const relativePath = toNavRelativePath\(requestUrl\);/,
-    'fetch処理がYOSナビ配下判定を使用していません'
-  );
-  assert.match(
-    fetchHandlerSource,
-    /if \(!relativePath\) return;/,
-    'YOSナビ配下外のリクエストを早期終了していません'
-  );
+test('承認済みYOSナビ資産だけをキャッシュ応答対象にする', () => {
+  assert.match(fetchHandlerSource, /const relativePath = toNavRelativePath\(requestUrl\);/);
+  assert.match(fetchHandlerSource, /if \(isApprovedRuntimeAsset\(relativePath\)\)/);
+  assert.match(fetchHandlerSource, /event\.respondWith\(fetch\(event\.request, \{cache: 'no-cache'\}\)\);/);
 });
 
 test('Taxi・Life・YOSのパスを直接処理対象へ追加しない', () => {
-  assert.doesNotMatch(
-    fetchHandlerSource,
-    /(?:\/taxi\/|\/life\/|\/yos\/)/i,
-    '担当外機能のパスをfetch処理へ直接追加しています'
-  );
+  assert.doesNotMatch(fetchHandlerSource, /(?:\/taxi\/|\/life\/|\/yos\/)/i);
 });
 
 test('GET以外の通信をYOSナビのService Workerが処理しない', () => {
-  assert.match(
-    fetchHandlerSource,
-    /event\.request\.method !== 'GET'/,
-    'GET以外を除外する条件がありません'
-  );
+  assert.match(fetchHandlerSource, /event\.request\.method !== 'GET'/);
 });
