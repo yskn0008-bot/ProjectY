@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-08-02T12:57:11+09:00",
+  "updated_at": "2026-08-02T12:59:10+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -34,13 +34,13 @@
     },
     {
       "id": "github-pr-177",
-      "title": "PR #177 fix(life): isolate cache cleanup and define HJ boundary",
+      "title": "PR #177 feat(life): complete daily home and isolate cache cleanup",
       "type": "GitHub PR",
       "status": "draft",
       "priority": 2,
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/177",
-      "updated_at": "2026-08-02T03:57:08Z"
+      "updated_at": "2026-08-02T03:59:05Z"
     },
     {
       "id": "github-pr-179",
@@ -145,6 +145,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-1aeb3f2d44ab",
+      "title": "feat(taxi): v141営業クイック設定 (#181)",
+      "completed_at": "2026-08-02T03:59:00Z",
+      "result": "GitHub mainへ反映（1aeb3f2）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/1aeb3f2d44abee5dcf3041d3518c61671f1e6958"
+    },
+    {
       "id": "github-commit-05a7280d623f",
       "title": "test(taxi): Service Worker安全検査を追加 (#180)",
       "completed_at": "2026-08-02T03:56:54Z",
@@ -171,13 +178,6 @@
       "completed_at": "2026-08-02T02:07:51Z",
       "result": "GitHub mainへ反映（d1096e5）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/d1096e59f7f0ebe99f38f9e0c08d327cf4025d67"
-    },
-    {
-      "id": "github-commit-4c4559b97a47",
-      "title": "chore(taxi): bump service worker to v137",
-      "completed_at": "2026-08-02T02:07:06Z",
-      "result": "GitHub mainへ反映（4c4559b）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/4c4559b97a47a9ccec0ebbf98dc3c70e80ee4a95"
     },
     {
       "id": "complete-002",
@@ -214,7 +214,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-08-02T12:57:11+09:00",
+      "last_update": "2026-08-02T12:59:10+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -295,7 +295,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-08-02T12:57:11+09:00",
+      "last_update": "2026-08-02T12:59:10+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -318,7 +318,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-08-02T12:57:11+09:00",
+      "last_update": "2026-08-02T12:59:10+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -400,5 +400,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "7146d297e228588e4bf9d107f6daf186e0b93d78017914538989c3d2ab5e2231"
+  "github_snapshot_hash": "5159acc10f514d2aaad5f3c1e7288b0b34f28ae5e2bbbe7025611963c7e725f3"
 }
