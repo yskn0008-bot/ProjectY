@@ -4,6 +4,7 @@
 .spiral-event{position:relative;display:grid;grid-template-columns:42px 1fr;gap:10px;align-items:start;padding:11px;border:1px solid var(--line);border-radius:17px;background:rgba(9,13,24,.28)}
 .spiral-node{position:relative;z-index:1;display:grid;place-items:center;width:36px;height:36px;border:1px solid rgba(240,199,106,.48);border-radius:50%;background:#11192a;color:var(--gold2);font-size:11px;font-weight:1000}
 .spiral-event strong{font-size:13px}.spiral-event p{margin:4px 0;color:var(--text);font-size:11px;line-height:1.55}.spiral-event small{color:var(--muted);font-size:9px}
+.scene-item{padding-right:90px}
 .scene-edit{position:absolute;right:42px;top:9px;min-height:29px;padding:0 9px;border:1px solid var(--line);border-radius:10px;background:rgba(141,182,255,.11);color:var(--blue);font-size:9px;font-weight:900}
 .history article{position:relative;padding-right:64px}.story-delete{position:absolute;right:9px;top:50%;transform:translateY(-50%);min-height:30px;padding:0 8px;border:1px solid rgba(255,154,130,.3);border-radius:10px;background:rgba(255,154,130,.08);color:#ffc2b4;font-size:9px;font-weight:900}
 .three-preview-actions{grid-template-columns:1fr 1fr 1.15fr}
