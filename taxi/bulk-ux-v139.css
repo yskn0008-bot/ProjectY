@@ -1,0 +1,49 @@
+/* v139 bulk UX: drive/today/calendar/manage polish */
+:root{--v139-gap:6px}
+.yos131-page{gap:var(--v139-gap)}
+
+/* Drive: keep everything above the bottom nav on SE3 */
+.yos131-drive{grid-template-rows:34px 54px 148px 48px 52px 54px!important}
+#yos-v138-live{order:0}
+.yos131-drive .yos131-sales-copy strong{font-size:32px!important}
+.yos131-drive .yos131-sales{padding:7px!important}
+.yos131-drive .yos131-advice strong{font-size:16px!important}
+.yos131-drive .yos131-kpis strong{font-size:17px!important}
+.yos131-drive .yos131-actions button{font-size:13px!important}
+
+/* Today: split practical work and reflection without changing stored data */
+.yos139-today-focus{display:grid;grid-template-columns:1fr 1fr;gap:6px;min-height:52px}
+.yos139-today-focus>button{border:1px solid var(--yos131-line);border-radius:10px;background:#09090b;color:#fff;padding:7px;text-align:left;display:grid;gap:3px}
+.yos139-today-focus span{font-size:10px;color:var(--yos131-muted)}
+.yos139-today-focus b{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+html[data-yos-theme="light"] .yos139-today-focus>button{background:#fff;color:#121417;border-color:#d7dbe1}
+html[data-yos-theme="light"] .yos139-today-focus span{color:#68707d}
+
+/* Week/month: improve scan speed */
+.yos131-week-row,.yos131-month-cell{transition:transform .12s ease,background .12s ease}
+.yos131-week-row:active,.yos131-month-cell:active{transform:scale(.985)}
+.yos139-calendar-hint{height:22px;display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--yos131-muted);white-space:nowrap}
+.yos131-month-cell .actual{font-variant-numeric:tabular-nums}
+
+/* Manage + themes */
+html[data-yos-theme="light"] .yos131-manage-summary,
+html[data-yos-theme="light"] .yos131-manage-summary strong,
+html[data-yos-theme="light"] .yos131-manage-summary span,
+html[data-yos-theme="light"] .yos131-tile b{color:#121417!important}
+html[data-yos-theme="light"] .yos131-tile svg{color:#246bfe!important}
+html[data-yos-theme="light"] .yos-theme-sheet{color:#121417!important}
+html[data-yos-theme="light"] .yos-theme-sheet button{color:#121417!important}
+html[data-yos-theme="light"] .yos-theme-sheet button small{color:#68707d!important}
+
+/* Shared SE3 safety */
+@media(max-width:390px){
+  .yos131-shell{padding-left:8px!important;padding-right:8px!important}
+  .yos131-header h1{font-size:18px!important}
+  .yos131-nav{width:calc(100% - 12px)!important}
+  .yos131-nav button b{font-size:10px!important}
+}
+@media(max-height:680px){
+  .yos131-drive{grid-template-rows:32px 48px 138px 44px 48px 50px!important}
+  #yos-v138-live{min-height:48px!important}
+  .yos131-drive .yos131-sales-copy strong{font-size:29px!important}
+}
