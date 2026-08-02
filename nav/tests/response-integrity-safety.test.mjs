@@ -45,7 +45,10 @@ test('YOSナビHTMLの正式名称とアプリルートを検証する', () => {
 
 test('実行時診断資産は現在ビルドの識別子がなければ拒否する', () => {
   assert.match(serviceWorker, /const hasExpectedRuntimeBuildMarker/);
-  assert.match(serviceWorker, /window\\\.\__yosNavRuntimeDiagnosticsV/);
+  assert.ok(
+    serviceWorker.includes('window\\\\.__yosNavRuntimeDiagnosticsV'),
+    '実行時診断資産のビルド識別子検査を確認できません'
+  );
   assert.match(bodyInspectionSource, /return 'runtime-build-marker';/);
 });
 
