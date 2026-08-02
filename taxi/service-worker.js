@@ -1,12 +1,16 @@
 'use strict';
 const CACHE_PREFIX='yos-taxi-projecty-';
-const CACHE='yos-taxi-projecty-v135-manage-theme-selector';
-const VERSION='135';
+const CACHE='yos-taxi-projecty-v142-sync-diagnostics';
+const VERSION='142';
 const STATIC=[
   './','./index.html','./calendar.html','./settings.html','./manifest.webmanifest','./swipe-nav.js',
   './final-app-v131.css','./final-fix-v133.css','./final-app-v131.js',
   './report-sync-v43.js','./settings-v20.js','./projecty-live-sync-v1.js',
-  './theme-v134.css','./theme-v134.js'
+  './theme-v134.css','./theme-v134.js','./manage-layout-v136.css',
+  './drive-minimal-v138.css','./drive-minimal-v138.js',
+  './bulk-ux-v139.css','./bulk-ux-v139.js',
+  './quick-controls-v141.css','./quick-controls-v141.js',
+  './sync-diagnostics-v142.css','./sync-diagnostics-v142.js'
 ];
 
 const pageType=url=>url.pathname.endsWith('/taxi/')||url.pathname.endsWith('/taxi/index.html')?'index':url.pathname.endsWith('/taxi/calendar.html')?'calendar':url.pathname.endsWith('/taxi/settings.html')?'settings':'';
@@ -16,11 +20,22 @@ async function inject(response,type){
   const addCss=file=>{if(!html.includes(file))html=html.replace('</head>',`<link rel="stylesheet" href="./${file}?v=${VERSION}"></head>`)};
   const addJs=file=>{if(!html.includes(file))html=html.replace('</body>',`<script src="./${file}?v=${VERSION}"></script></body>`)};
   addCss('theme-v134.css');
+  addCss('manage-layout-v136.css');
+  addCss('bulk-ux-v139.css');
   if(type==='calendar')addJs('report-sync-v43.js');
   if(type==='settings')addJs('settings-v20.js');
   else{addCss('final-app-v131.css');addCss('final-fix-v133.css');addJs('final-app-v131.js')}
-  if(type==='index')addJs('projecty-live-sync-v1.js');
+  if(type==='index'){
+    addJs('projecty-live-sync-v1.js');
+    addCss('drive-minimal-v138.css');
+    addJs('drive-minimal-v138.js');
+    addCss('quick-controls-v141.css');
+    addJs('quick-controls-v141.js');
+    addCss('sync-diagnostics-v142.css');
+    addJs('sync-diagnostics-v142.js');
+  }
   addJs('theme-v134.js');
+  addJs('bulk-ux-v139.js');
   const headers=new Headers(response.headers);
   headers.delete('content-length');headers.delete('content-encoding');
   return new Response(html,{status:response.status,statusText:response.statusText,headers});

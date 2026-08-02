@@ -1,0 +1,46 @@
+name: YOSナビ Safety
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'nav/**'
+      - '.github/workflows/yos-nav-safety.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'nav/**'
+      - '.github/workflows/yos-nav-safety.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: yos-nav-safety-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  safety-regression:
+    name: YOSナビ v106 safety regression
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: ''
+
+      - name: Check JavaScript syntax
+        run: |
+          node --check nav/service-worker.js
+          node --check nav/runtime-diagnostics-v64.js
+          node --check nav/tests/service-worker-v106-safety.test.mjs
+          node --check nav/tests/static-manifest-safety.test.mjs
+
+      - name: Run YOSナビ safety regression tests
+        run: node --test nav/tests/*.test.mjs
