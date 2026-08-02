@@ -1,7 +1,17 @@
 'use strict';
 
-const CACHE = 'hj-multi-journey-v2-onboarding';
-const STATIC = ['./', './index.html', './styles.css', './onboarding.css', './app.js', './profile.js', './manifest.webmanifest'];
+const CACHE = 'hj-multi-journey-v3-scenes';
+const STATIC = [
+  './',
+  './index.html',
+  './styles.css',
+  './onboarding.css',
+  './scenes.css',
+  './app.js',
+  './profile.js',
+  './scenes.js',
+  './manifest.webmanifest'
+];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(STATIC)).then(() => self.skipWaiting()));
