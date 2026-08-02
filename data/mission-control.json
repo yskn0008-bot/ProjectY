@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-08-02T10:53:50+09:00",
+  "updated_at": "2026-08-02T11:07:32+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -13,14 +13,14 @@
   },
   "inbox": [
     {
-      "id": "github-pr-171",
-      "title": "PR #171 ci(nav): YOSナビ安全回帰テストを自動実行",
+      "id": "github-pr-174",
+      "title": "PR #174 fix(taxi): move theme chooser to modal sheet v137",
       "type": "GitHub PR",
       "status": "review",
       "priority": 1,
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/171",
-      "updated_at": "2026-08-02T01:08:36Z"
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/174",
+      "updated_at": "2026-08-02T02:07:23Z"
     },
     {
       "id": "github-pr-144",
@@ -125,39 +125,39 @@
   ],
   "recently_completed": [
     {
-      "id": "github-commit-7980dc408af0",
-      "title": "fix(taxi): show theme selector in manage tab v135",
-      "completed_at": "2026-08-02T01:53:38Z",
-      "result": "GitHub mainへ反映（7980dc4）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/7980dc408af00a83cfdd3d43578c2fc07f409aaf"
+      "id": "github-commit-d43fe10deb05",
+      "title": "chore: remove temporary branch seed",
+      "completed_at": "2026-08-02T02:05:56Z",
+      "result": "GitHub mainへ反映（d43fe10）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/d43fe10deb05b226a90b22276fdf10bd4bd9b482"
     },
     {
-      "id": "github-commit-236153484bd5",
-      "title": "revert accidental placeholder",
-      "completed_at": "2026-08-02T01:51:51Z",
-      "result": "GitHub mainへ反映（2361534）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/236153484bd5291cacc1a592d9be8bde83a94157"
+      "id": "github-commit-aba7b51d68c8",
+      "title": "chore: seed v137 branch",
+      "completed_at": "2026-08-02T02:05:40Z",
+      "result": "GitHub mainへ反映（aba7b51）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/aba7b51d68c8594b6b34950a572d184fea68622a"
     },
     {
-      "id": "github-commit-5b39be54dc3f",
-      "title": "noop",
-      "completed_at": "2026-08-02T01:51:40Z",
-      "result": "GitHub mainへ反映（5b39be5）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/5b39be54dc3f9f2886ab509a8640e642df51594e"
+      "id": "github-commit-c95bafc3d485",
+      "title": "ci(nav): YOSナビ安全回帰テストを自動実行 (#171)",
+      "completed_at": "2026-08-02T02:05:00Z",
+      "result": "GitHub mainへ反映（c95bafc）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/c95bafc3d4852b00b29774755263c0a0b37943d7"
     },
     {
-      "id": "github-commit-a85e87c11ebb",
-      "title": "test(nav): YOSナビ v106の安全回帰テストを追加",
-      "completed_at": "2026-08-02T00:06:55Z",
-      "result": "GitHub mainへ反映（a85e87c）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/a85e87c11ebb1db8bb7a566e376fdc91a71fc4d7"
+      "id": "github-commit-4a95d2ae76ac",
+      "title": "fix(taxi): repair manage screen overlap v136 (#173)",
+      "completed_at": "2026-08-02T02:03:41Z",
+      "result": "GitHub mainへ反映（4a95d2a）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/4a95d2ae76acefb788b0023990994444ae07a4e0"
     },
     {
-      "id": "github-commit-f838515570df",
-      "title": "feat(nav): recover stale network marker safely in v106",
-      "completed_at": "2026-08-01T23:09:16Z",
-      "result": "GitHub mainへ反映（f838515）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/f838515570df5b538403b87e49d7c0efb428dc9d"
+      "id": "github-commit-b7bd952aabf8",
+      "title": "chore(taxi): remove temporary branch seed",
+      "completed_at": "2026-08-02T02:02:27Z",
+      "result": "GitHub mainへ反映（b7bd952）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/b7bd952aabf85674b8040b8ca8b541cebbaadcc7"
     },
     {
       "id": "complete-002",
@@ -184,7 +184,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #171をレビューして公開判断する",
+      "next_action": "PR #174をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -194,7 +194,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-08-02T10:53:50+09:00",
+      "last_update": "2026-08-02T11:07:32+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -275,7 +275,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-08-02T10:53:50+09:00",
+      "last_update": "2026-08-02T11:07:32+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -289,7 +289,7 @@
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #171をレビューして公開判断する",
+      "next_action": "PR #174をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -298,7 +298,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-08-02T10:53:50+09:00",
+      "last_update": "2026-08-02T11:07:32+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -380,5 +380,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "1ef99da1cc1a116ecb091fdf8ee7e28c6c309ff02f3f7becc6aa5cf43bee9f78"
+  "github_snapshot_hash": "973f6f50d7797a405a63f5feef4bfe45756c5c75484d1afa9c2110e2b74bdb14"
 }
