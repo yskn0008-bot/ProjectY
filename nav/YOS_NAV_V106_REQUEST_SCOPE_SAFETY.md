@@ -2,14 +2,15 @@
 
 ## 目的
 
-YOSナビのService Workerが、YOSナビ配下以外のページや通信を意図せず傍受しない既存条件を自動回帰テストで固定する。
+YOSナビのService Workerが、担当外のページや通信をYOSナビのキャッシュ応答対象へ混入させない既存条件を自動回帰テストで固定する。
 
 ## 変更内容
 
 - `nav/tests/request-scope-safety.test.mjs`を追加
 - Service Workerのスコープを自身の配置先から算出することを検査
 - 別originとYOSナビ配下外のパスを除外することを検査
-- 対象外リクエストを`fetch`処理の早期段階で終了することを検査
+- 承認済みYOSナビ資産だけをキャッシュ応答対象にすることを検査
+- 承認対象外のGETリクエストはキャッシュせずネットワークへ渡す既存動作を検査
 - GET以外の通信を処理しないことを検査
 - Taxi、Life、YOSのパスを直接処理対象へ追加しないことを検査
 
@@ -23,10 +24,17 @@ YOSナビのService Workerが、YOSナビ配下以外のページや通信を意
 
 既存のGitHub Actions「YOSナビ Safety」が`nav/tests/*.test.mjs`を自動検出し、構文検査と全安全回帰テストを実行する。
 
+## 確認結果
+
+- 初回のYOSナビ Safetyは失敗
+- 原因は、テストが実装されていない早期終了条件を要求していたこと
+- 既存実装の実際の安全境界である「承認済み資産のみキャッシュ応答」「対象外GETはネットワークへ渡す」へ検査内容を修正
+- Codex governanceは成功
+
 ## 未確認事項
 
-- Pull Request上の「YOSナビ Safety」最終結果
-- Codex governance最終結果
+- 修正コミット後の「YOSナビ Safety」最終結果
+- PRの最終マージ可能状態
 - main反映後の再実行結果
 - iPhone SE3でYOSナビを開いた状態でもTaxi、Life、YOSの各PWA通信へ干渉しないこと
 
