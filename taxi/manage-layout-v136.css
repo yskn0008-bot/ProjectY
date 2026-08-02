@@ -1,0 +1,56 @@
+/* v136: iPhone SE3 manage screen layout fix */
+.yos131-manage{
+  display:block!important;
+  height:100%!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  padding-bottom:18px!important;
+  -webkit-overflow-scrolling:touch;
+}
+.yos131-manage .yos131-header{
+  position:sticky;
+  top:0;
+  z-index:4;
+  background:#000;
+  margin-bottom:6px;
+}
+.yos131-manage .yos131-manage-summary{
+  height:60px;
+  margin-bottom:8px;
+}
+.yos131-manage .yos131-tiles{
+  height:430px;
+  min-height:430px;
+  margin-bottom:10px;
+}
+.yos131-manage #yos-theme-v134{
+  position:relative!important;
+  inset:auto!important;
+  width:auto!important;
+  max-height:none!important;
+  overflow:visible!important;
+  margin:0 0 76px!important;
+  padding:12px!important;
+}
+.yos131-manage #yos-theme-v134 .yos-theme-title{
+  margin-bottom:9px;
+}
+.yos131-manage #yos-theme-v134 .yos-theme-title b{
+  font-size:17px;
+}
+.yos131-manage #yos-theme-v134 .yos-theme-grid{
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:7px!important;
+}
+.yos131-manage #yos-theme-v134 button{
+  min-height:52px!important;
+  padding:8px 9px!important;
+  border-radius:12px!important;
+}
+.yos131-manage #yos-theme-v134 button small{
+  font-size:9px!important;
+}
+@media(max-width:390px){
+  .yos131-manage .yos131-tiles{height:400px;min-height:400px}
+  .yos131-manage #yos-theme-v134 .yos-theme-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+}
