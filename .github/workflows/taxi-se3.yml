@@ -36,13 +36,16 @@ jobs:
           cache-dependency-path: taxi/tests/package.json
 
       - name: Install test dependencies
-        run: npm --prefix taxi/tests install --no-audit --no-fund
+        working-directory: taxi/tests
+        run: npm install --no-audit --no-fund
 
       - name: Install Playwright browser
-        run: npx --prefix taxi/tests playwright install --with-deps ${{ matrix.browser }}
+        working-directory: taxi/tests
+        run: npx playwright install --with-deps ${{ matrix.browser }}
 
       - name: Run Taxi SE3 smoke test
-        run: npx --prefix taxi/tests playwright test --project=${{ matrix.browser }}-se3
+        working-directory: taxi/tests
+        run: npx playwright test --project=${{ matrix.browser }}-se3
 
       - name: Upload Taxi SE3 artifacts
         if: always()
