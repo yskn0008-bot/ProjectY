@@ -7,6 +7,7 @@
   const QUEUE_KEY='yos-taxi-sync-queue-v1';
   const SHARED_KEY='yos-shared-taxi-state-v1';
   const read=(key,fallback)=>{try{return JSON.parse(localStorage.getItem(key)||'null')||fallback}catch{return fallback}};
+  const write=(key,value)=>{try{localStorage.setItem(key,JSON.stringify(value));return true}catch{return false}};
   const safeHost=value=>{try{return new URL(value).host}catch{return''}};
   function snapshot(){
     const api=String(localStorage.getItem(API_KEY)||'').trim();
@@ -34,6 +35,14 @@
     if(data.pending)return['送信待ち',`${data.pending}件を自動再送中`];
     return['接続準備OK','次の降車記録から自動送信'];
   }
+  function forceRetry(){
+    const queue=read(QUEUE_KEY,[]);
+    if(!Array.isArray(queue)||!queue.length)return false;
+    const retryQueue=queue.map(item=>({...item,nextAttemptAt:0,lastError:''}));
+    if(!write(QUEUE_KEY,retryQueue))return false;
+    window.dispatchEvent(new Event('online'));
+    return true;
+  }
   function mount(){
     const card=document.getElementById('yos-projecty-live-sync-v1');
     if(!card)return;
@@ -46,12 +55,13 @@
     }
     const data=snapshot();
     const [title,detail]=label(data);
-    panel.innerHTML=`<button type="button" data-sync-diagnose><span><b>${title}</b><small>${detail}</small></span><strong>診断</strong></button><div class="yos-sync-diagnostics-v142__details" hidden><dl><div><dt>通信</dt><dd>${data.online?'オンライン':'オフライン'}</dd></div><div><dt>API</dt><dd>${data.apiConfigured?data.apiHost:'未設定'}</dd></div><div><dt>トークン</dt><dd>${data.tokenConfigured?'設定済み':'未設定'}</dd></div><div><dt>未送信</dt><dd>${data.pending}件</dd></div></dl><button type="button" data-sync-retry>今すぐ再送</button></div>`;
+    panel.innerHTML=`<button type="button" data-sync-diagnose><span><b>${title}</b><small>${detail}</small></span><strong>診断</strong></button><div class="yos-sync-diagnostics-v142__details" hidden><dl><div><dt>通信</dt><dd>${data.online?'オンライン':'オフライン'}</dd></div><div><dt>API</dt><dd>${data.apiConfigured?data.apiHost:'未設定'}</dd></div><div><dt>トークン</dt><dd>${data.tokenConfigured?'設定済み':'未設定'}</dd></div><div><dt>未送信</dt><dd>${data.pending}件</dd></div></dl><button type="button" data-sync-retry ${data.pending?'':'disabled'}>${data.pending?'今すぐ再送':'未送信なし'}</button></div>`;
     const details=panel.querySelector('.yos-sync-diagnostics-v142__details');
     panel.querySelector('[data-sync-diagnose]').onclick=()=>{details.hidden=!details.hidden};
-    panel.querySelector('[data-sync-retry]').onclick=()=>{
-      window.dispatchEvent(new Event('online'));
-      panel.querySelector('[data-sync-retry]').textContent='再送を開始しました';
+    panel.querySelector('[data-sync-retry]').onclick=event=>{
+      if(!forceRetry())return;
+      event.currentTarget.textContent='再送を開始しました';
+      event.currentTarget.disabled=true;
       setTimeout(mount,800);
     };
   }
