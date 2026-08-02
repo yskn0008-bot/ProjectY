@@ -1,15 +1,6 @@
 name: HJ iPhone Smoke
 
 on:
-  push:
-    branches:
-      - agent/hj-multi-journey-v1
-    paths:
-      - 'yos/hj/**'
-      - 'yos/hj-entry.js'
-      - 'yos/service-worker.js'
-      - 'tests/hj-smoke.mjs'
-      - '.github/workflows/hj-smoke.yml'
   pull_request:
     paths:
       - 'yos/hj/**'
@@ -18,6 +9,10 @@ on:
       - 'tests/hj-smoke.mjs'
       - '.github/workflows/hj-smoke.yml'
   workflow_dispatch:
+
+concurrency:
+  group: hj-smoke-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
