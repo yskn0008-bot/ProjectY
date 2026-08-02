@@ -7,6 +7,7 @@ on:
       - 'yos/hj-entry.js'
       - 'yos/service-worker.js'
       - 'tests/hj-smoke.mjs'
+      - 'tests/hj-home-smoke.mjs'
       - '.github/workflows/hj-smoke.yml'
   workflow_dispatch:
 
@@ -20,7 +21,7 @@ permissions:
 jobs:
   smoke:
     runs-on: ubuntu-latest
-    timeout-minutes: 18
+    timeout-minutes: 20
     strategy:
       fail-fast: false
       matrix:
@@ -50,7 +51,12 @@ jobs:
           cat /tmp/hj-server.log
           exit 1
 
-      - name: Run HJ smoke test
+      - name: Test YOS home to HJ entry
+        env:
+          HJ_BROWSER: ${{ matrix.browser }}
+        run: node tests/hj-home-smoke.mjs
+
+      - name: Run HJ full smoke test
         env:
           HJ_BROWSER: ${{ matrix.browser }}
         run: node tests/hj-smoke.mjs
