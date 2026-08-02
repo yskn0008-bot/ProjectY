@@ -32,8 +32,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: npm
-          cache-dependency-path: taxi/tests/package.json
 
       - name: Install test dependencies
         working-directory: taxi/tests
