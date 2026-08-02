@@ -1,7 +1,7 @@
 'use strict';
 (()=>{
-  if(window.__yosTaxiThemeV134)return;
-  window.__yosTaxiThemeV134=true;
+  if(window.__yosTaxiThemeV137)return;
+  window.__yosTaxiThemeV137=true;
 
   const KEY='yos-taxi-ui-theme-v1';
   const THEMES=[
@@ -12,67 +12,80 @@
     {id:'hud',name:'HUD',note:'近未来・高コントラスト'}
   ];
 
-  function stored(){
-    try{return localStorage.getItem(KEY)||'minimal'}catch{return'minimal'}
-  }
+  const stored=()=>{try{return localStorage.getItem(KEY)||'minimal'}catch{return'minimal'}};
 
   function apply(id){
     const selected=THEMES.some(theme=>theme.id===id)?id:'minimal';
     document.documentElement.dataset.yosTheme=selected;
     try{localStorage.setItem(KEY,selected)}catch{}
-    document.querySelectorAll('#yos-theme-v134 [data-theme]').forEach(button=>{
+    document.querySelectorAll('#yos-theme-v137 [data-theme]').forEach(button=>{
       button.setAttribute('aria-pressed',String(button.dataset.theme===selected));
     });
     window.dispatchEvent(new CustomEvent('yos-taxi-theme-change',{detail:{theme:selected}}));
   }
 
-  function panelMarkup(){
-    return `<div class="yos-theme-title"><b>画面デザイン</b><small>営業中は「ミニマル」を推奨。いつでも元に戻せます。</small></div><div class="yos-theme-grid">${THEMES.map(theme=>`<button type="button" data-theme="${theme.id}" aria-pressed="false">${theme.name}<small>${theme.note}</small></button>`).join('')}</div>`;
+  function markup(){
+    return `<div class="yos-theme-sheet-head"><div><b>画面デザイン</b><small>営業中は「ミニマル」を推奨</small></div><button type="button" data-theme-close aria-label="閉じる">×</button></div><div class="yos-theme-grid">${THEMES.map(theme=>`<button type="button" data-theme="${theme.id}" aria-pressed="false"><b>${theme.name}</b><small>${theme.note}</small></button>`).join('')}</div>`;
   }
 
-  function bind(section){
-    section.addEventListener('click',event=>{
-      const button=event.target.closest('[data-theme]');
-      if(!button)return;
-      apply(button.dataset.theme);
-    });
-    apply(stored());
+  function mountManage(){
+    if(!location.pathname.endsWith('/calendar.html')||new URLSearchParams(location.search).get('page')!=='manage')return;
+    const manage=document.querySelector('.yos131-manage');
+    const header=manage?.querySelector('.yos131-header');
+    if(!manage||!header)return;
+
+    let trigger=header.querySelector('[data-theme-open]');
+    if(!trigger){
+      const right=header.lastElementChild;
+      if(!right)return;
+      trigger=document.createElement('button');
+      trigger.type='button';
+      trigger.className='yos131-icon-btn yos-theme-trigger';
+      trigger.dataset.themeOpen='';
+      trigger.setAttribute('aria-label','画面デザインを選ぶ');
+      trigger.textContent='🎨';
+      right.appendChild(trigger);
+    }
+
+    let dialog=document.getElementById('yos-theme-v137');
+    if(!dialog){
+      dialog=document.createElement('dialog');
+      dialog.id='yos-theme-v137';
+      dialog.innerHTML=`<div class="yos-theme-backdrop" data-theme-close></div><section class="yos-theme-sheet">${markup()}</section>`;
+      document.body.appendChild(dialog);
+      dialog.addEventListener('click',event=>{
+        const themeButton=event.target.closest('[data-theme]');
+        if(themeButton){apply(themeButton.dataset.theme);return}
+        if(event.target.closest('[data-theme-close]'))dialog.close();
+      });
+      dialog.addEventListener('close',()=>document.documentElement.classList.remove('yos-theme-open'));
+    }
+
+    trigger.onclick=()=>{
+      apply(stored());
+      document.documentElement.classList.add('yos-theme-open');
+      if(!dialog.open)dialog.showModal();
+    };
   }
 
-  function settingsPanel(){
+  function mountSettings(){
     if(!location.pathname.endsWith('/settings.html'))return;
-    if(document.getElementById('yos-theme-v134'))return;
+    if(document.getElementById('yos-theme-v137-settings'))return;
     const panels=[...document.querySelectorAll('.panel')];
     const anchor=panels.find(panel=>panel.textContent.includes('月と売上'))||panels[0];
     if(!anchor)return;
     const section=document.createElement('section');
     section.className='panel';
-    section.id='yos-theme-v134';
-    section.innerHTML=`<h2>画面デザイン <small>営業中は「ミニマル」を推奨。いつでも元に戻せます。</small></h2><div class="yos-theme-grid">${THEMES.map(theme=>`<button type="button" data-theme="${theme.id}" aria-pressed="false">${theme.name}<small>${theme.note}</small></button>`).join('')}</div>`;
+    section.id='yos-theme-v137-settings';
+    section.innerHTML=`<h2>画面デザイン</h2><div class="yos-theme-grid">${THEMES.map(theme=>`<button type="button" data-theme="${theme.id}" aria-pressed="false"><b>${theme.name}</b><small>${theme.note}</small></button>`).join('')}</div>`;
     anchor.insertAdjacentElement('beforebegin',section);
-    bind(section);
+    section.addEventListener('click',event=>{const button=event.target.closest('[data-theme]');if(button)apply(button.dataset.theme)});
+    apply(stored());
   }
 
-  function managePanel(){
-    if(!location.pathname.endsWith('/calendar.html')||new URLSearchParams(location.search).get('page')!=='manage')return;
-    if(document.getElementById('yos-theme-v134'))return;
-    const manage=document.querySelector('.yos131-manage');
-    const tiles=manage?.querySelector('.yos131-tiles');
-    if(!manage||!tiles)return;
-    const section=document.createElement('section');
-    section.className='yos131-card yos-theme-manage';
-    section.id='yos-theme-v134';
-    section.innerHTML=panelMarkup();
-    tiles.insertAdjacentElement('afterend',section);
-    bind(section);
-  }
-
-  function mount(){settingsPanel();managePanel()}
-
+  function mount(){mountManage();mountSettings()}
   apply(stored());
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount,{once:true});
-  else mount();
-  const observer=new MutationObserver(()=>mount());
-  observer.observe(document.documentElement,{childList:true,subtree:true});
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount,{once:true});else mount();
+  new MutationObserver(mount).observe(document.documentElement,{childList:true,subtree:true});
   window.addEventListener('storage',event=>{if(event.key===KEY)apply(event.newValue||'minimal')});
 })();
