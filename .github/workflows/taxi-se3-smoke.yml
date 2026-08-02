@@ -1,0 +1,71 @@
+name: Taxi iPhone SE3 Smoke
+
+on:
+  pull_request:
+    paths:
+      - 'taxi/**'
+      - '.github/workflows/taxi-se3-smoke.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: taxi-se3-smoke-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  static:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run Taxi static safety tests
+        run: |
+          node --check taxi/service-worker.js
+          node --test taxi/tests/service-worker-safety.test.mjs taxi/tests/iphone-se3-smoke-static.test.mjs
+
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, webkit]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Playwright
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps ${{ matrix.browser }}
+      - name: Start static server
+        run: |
+          python3 -m http.server 4173 --directory . > /tmp/taxi-server.log 2>&1 &
+          echo $! > /tmp/taxi-server.pid
+          for i in {1..30}; do
+            curl -fsS http://127.0.0.1:4173/taxi/ >/dev/null && exit 0
+            sleep 1
+          done
+          cat /tmp/taxi-server.log
+          exit 1
+      - name: Run Taxi iPhone SE3 smoke
+        env:
+          TAXI_BROWSER: ${{ matrix.browser }}
+        run: node taxi/tests/iphone-se3-smoke.mjs
+      - name: Upload screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: taxi-se3-${{ matrix.browser }}
+          path: test-results/taxi/
+          if-no-files-found: warn
