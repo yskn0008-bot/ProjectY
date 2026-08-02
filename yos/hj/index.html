@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b1020">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="HJ">
+<meta name="description" content="複数の旅を螺旋状に進み、事実だけで今週の物語を残すHero's Journeyアプリ">
+<link rel="manifest" href="./manifest.webmanifest">
+<title>Hero's Journey｜人生を物語として進める</title>
+<link rel="stylesheet" href="./styles.css">
+
+</head>
+<body>
+<main class="app">
+<header class="topbar"><div class="mark" aria-hidden="true">HJ</div><div class="brand"><h1>Hero's Journey</h1><p>YOUR LIFE, YOUR STORY</p></div><div class="status"><span id="today">----</span><br><span>端末内保存</span></div></header>
+<section class="hero"><p class="eyebrow">MULTIPLE JOURNEYS · SPIRAL GROWTH</p><h2>人生は、一つの旅ではない。</h2><p class="copy">仕事、生活、お金、人間関係、夢。それぞれが別の12段階を進み、何周も巡りながら螺旋状に変化していく。</p><div class="spiral"><div><strong id="journeyCount">5</strong><span>進行中の旅</span></div><div><strong id="activeStage">—</strong><span>最も動く現在地</span></div><div><strong id="storyCount">0</strong><span>保存した物語</span></div></div></section>
+<nav class="tabs" aria-label="HJ機能"><button class="active" type="button" data-tab="journeys">旅の現在地</button><button type="button" data-tab="story">今週の物語</button></nav>
+<section id="journeysPanel" class="panel active">
+<section class="section"><div class="section-head"><div><p class="kicker">YOUR JOURNEYS</p><h2>領域ごとの現在地</h2></div><span class="subtle">12段階 × 周回</span></div><div id="journeyList" class="journey-list"></div><div class="add-row"><input id="customDomain" maxlength="24" placeholder="新しい旅を追加　例：転職、学び"><button id="addDomain" class="secondary" type="button">追加</button></div></section>
+<section class="section"><div class="section-head"><div><p class="kicker">SPIRAL VIEW</p><h2>今の全体像</h2></div><span class="subtle">高いほど偉い、ではない</span></div><div id="journeySummary" class="summary"></div></section>
+</section>
+<section id="storyPanel" class="panel">
+<section class="section"><div class="section-head"><div><p class="kicker">NONFICTION ONLY</p><h2>今週の事実を集める</h2></div><span class="subtle">脚色しない</span></div>
+<div class="story-form">
+<div class="two"><label>期間<input id="storyPeriod" maxlength="40" placeholder="例：2026年8月3日〜9日"></label><label>中心となった旅<select id="storyDomain"></select></label></div>
+<label>起きたこと<textarea id="storyFacts" rows="4" maxlength="1200" placeholder="確認できる事実だけ。複数ある場合は改行してください。"></textarea></label>
+<label>自分が実際に選んだこと・行動したこと<textarea id="storyChoice" rows="3" maxlength="800" placeholder="言っていない言葉や、していない行動は書かない。"></textarea></label>
+<label>実際の結果<textarea id="storyResult" rows="3" maxlength="800" placeholder="成功・失敗を盛らずに、そのまま。"></textarea></label>
+<label>本人が確認した学び・違和感<textarea id="storyLearning" rows="3" maxlength="800" placeholder="まだ分からない場合は空欄でOK。"></textarea></label>
+<label>次の一歩<input id="storyNext" maxlength="180" placeholder="実際に決めたことだけ"></label>
+<div><p class="kicker">READ AS</p><div class="format-row" role="group" aria-label="表現形式"><button class="selected" type="button" data-format="manga">漫画</button><button type="button" data-format="newspaper">新聞</button><button type="button" data-format="novel">短編小説</button><button type="button" data-format="picturebook">絵本</button></div></div>
+<div class="story-actions"><button id="clearStory" class="secondary" type="button">入力をクリア</button><button id="buildStory" class="primary" type="button">事実から作品を作る</button></div>
+</div></section>
+<section id="previewSection" class="section preview"><div class="section-head"><div><p class="kicker">WEEKLY HIGHLIGHT</p><h2>今週の物語</h2></div><span id="previewFormat" class="subtle">漫画</span></div><article id="storyWork" class="work manga"></article><div class="story-actions" style="margin-top:10px"><button id="copyStory" class="secondary" type="button">文章をコピー</button><button id="saveStory" class="primary" type="button">作品として保存</button></div></section>
+<section class="section"><div class="section-head"><div><p class="kicker">STORY SHELF</p><h2>物語の本棚</h2></div><span class="subtle">最新10件</span></div><div id="storyHistory" class="history"></div><p id="emptyHistory" class="empty">保存した物語がここに並びます。</p></section>
+</section>
+<section class="section"><div class="section-head"><div><p class="kicker">DATA SAFETY</p><h2>人生の記録を守る</h2></div><span class="subtle">JSON</span></div><div class="footer-actions"><button id="exportData" class="secondary" type="button">バックアップ</button><button id="resetData" class="danger" type="button">試作データを削除</button></div></section>
+<p id="appStatus" class="status-line" role="status" aria-live="polite"></p>
+</main>
+<nav class="bottom"><a href="../">YOSホーム</a><a class="active" href="./">Hero's Journey</a></nav>
+<script src="./app.js" defer></script>
+
+</body>
+</html>
