@@ -13,14 +13,24 @@ const themes = ['minimal', 'night-gold', 'light', 'map', 'hud'];
 const artifactRoot = resolve(import.meta.dirname, '../test-results/artifacts');
 
 async function openControlled(page, path, readySelector) {
-  await page.goto(path);
-  await page.waitForLoadState('networkidle');
-  await page.evaluate(async () => {
-    await navigator.serviceWorker?.ready;
-    if (!navigator.serviceWorker?.controller) await new Promise(resolve => navigator.serviceWorker?.addEventListener('controllerchange', resolve, { once: true }));
-  });
-  await page.reload();
+  await page.goto(path, { waitUntil: 'domcontentloaded' });
   await expect(page.locator(readySelector)).toBeVisible();
+
+  await page.evaluate(async () => {
+    if (!('serviceWorker' in navigator)) return;
+    await navigator.serviceWorker.register('./service-worker.js');
+    await Promise.race([
+      navigator.serviceWorker.ready,
+      new Promise((_, reject) => setTimeout(() => reject(new Error('Service Worker ready timeout')), 10000)),
+    ]);
+  });
+
+  await page.reload({ waitUntil: 'domcontentloaded' });
+  await expect(page.locator(readySelector)).toBeVisible();
+  await expect.poll(
+    () => page.evaluate(() => Boolean(navigator.serviceWorker?.controller)),
+    { message: 'Service Worker did not control the page', timeout: 10000 },
+  ).toBe(true);
 }
 
 async function expectSe3Layout(page) {
