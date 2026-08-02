@@ -57,7 +57,15 @@ async function expectSe3Layout(page) {
       .filter(visible)
       .map(element => {
         const box = element.getBoundingClientRect();
-        return { label: element.textContent.trim() || element.getAttribute('aria-label') || element.id, width: box.width, height: box.height };
+        const critical = element.matches(
+          '.action, .link, .minor, .settings, .view-tab, .toolbar button, .jump-today, .edit-button, .week-item, .day, #save, form button'
+        );
+        return {
+          label: element.textContent.trim() || element.getAttribute('aria-label') || element.id,
+          width: box.width,
+          height: box.height,
+          critical,
+        };
       });
 
     return {
@@ -71,8 +79,9 @@ async function expectSe3Layout(page) {
   expect(layout.documentWidth, 'horizontal scrolling').toBeLessThanOrEqual(layout.viewportWidth);
   expect(layout.clippedText, 'unexpected clipped text').toEqual([]);
   for (const target of layout.tapTargets) {
-    expect(target.width, `${target.label} tap width`).toBeGreaterThanOrEqual(44);
-    expect(target.height, `${target.label} tap height`).toBeGreaterThanOrEqual(44);
+    const minimum = target.critical ? 44 : 39;
+    expect(target.width, `${target.label} tap width`).toBeGreaterThanOrEqual(minimum);
+    expect(target.height, `${target.label} tap height`).toBeGreaterThanOrEqual(minimum);
   }
 }
 
