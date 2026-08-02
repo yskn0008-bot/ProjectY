@@ -60,13 +60,14 @@ Lifeを単独で使える状態のまま、将来Hero's Journey（HJ）がLife�
 | `habits.wake.completed` | `days[date].routines.wake` |
 | `habits.before.completed` | `days[date].routines.before` |
 | `habits.home.completed` | `days[date].routines.home` |
-| `doneToday` | 将来追加する `days[date].doneToday`。未実装中は空文字 |
+| `doneToday` | `days[date].doneToday`。今回追加した任意フィールド |
 
 ## 互換ルール
 - 数値が未入力の場合は `null` とする。
 - 予定がない場合は空配列とする。
 - 習慣の完了番号は既存配列をコピーし、元配列を変更しない。
 - `doneToday` が存在しない旧データも正常として扱う。
+- `doneToday` は既存の `yos-life-v1` 日別データ内へ保存し、別入力を要求しない。
 - HJ固有のステージ、XP、物語、解釈はLifeへ保存しない。
 - Lifeから渡すのは事実データだけとし、脚色や評価を含めない。
 
