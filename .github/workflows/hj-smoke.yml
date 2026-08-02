@@ -1,0 +1,63 @@
+name: HJ iPhone Smoke
+
+on:
+  push:
+    branches:
+      - agent/hj-multi-journey-v1
+    paths:
+      - 'yos/hj/**'
+      - 'yos/hj-entry.js'
+      - 'yos/service-worker.js'
+      - 'tests/hj-smoke.mjs'
+      - '.github/workflows/hj-smoke.yml'
+  pull_request:
+    paths:
+      - 'yos/hj/**'
+      - 'yos/hj-entry.js'
+      - 'yos/service-worker.js'
+      - 'tests/hj-smoke.mjs'
+      - '.github/workflows/hj-smoke.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install Playwright
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+
+      - name: Start static server
+        run: |
+          python3 -m http.server 4173 --directory . > /tmp/hj-server.log 2>&1 &
+          echo $! > /tmp/hj-server.pid
+          for i in {1..30}; do
+            curl -fsS http://127.0.0.1:4173/yos/hj/ >/dev/null && exit 0
+            sleep 1
+          done
+          cat /tmp/hj-server.log
+          exit 1
+
+      - name: Run HJ smoke test
+        run: node tests/hj-smoke.mjs
+
+      - name: Upload screenshots and exports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hj-smoke-results
+          path: test-results/
+          if-no-files-found: warn
