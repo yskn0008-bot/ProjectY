@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-08-03T04:06:34+09:00",
+  "updated_at": "2026-08-03T05:15:42+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -50,7 +50,17 @@
       "priority": 2,
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/194",
-      "updated_at": "2026-08-02T18:17:48Z"
+      "updated_at": "2026-08-02T19:16:09Z"
+    },
+    {
+      "id": "github-pr-197",
+      "title": "PR #197 test(nav): YOSナビの古いネットワークマーカー復旧条件を固定",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/197",
+      "updated_at": "2026-08-02T20:06:04Z"
     },
     {
       "id": "github-issue-10",
@@ -130,7 +140,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/51",
-      "updated_at": "2026-08-02T18:11:01Z"
+      "updated_at": "2026-08-02T20:12:09Z"
     },
     {
       "id": "github-issue-86",
@@ -204,7 +214,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #194をレビューして公開判断する",
+      "next_action": "PR #197をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -214,7 +224,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-08-03T04:06:34+09:00",
+      "last_update": "2026-08-03T05:15:42+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -289,13 +299,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 9件・Open PR 4件を自動同期中",
+      "next_action": "Open Issue 9件・Open PR 5件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-08-03T04:06:34+09:00",
+      "last_update": "2026-08-03T05:15:42+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -309,7 +319,7 @@
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #194をレビューして公開判断する",
+      "next_action": "PR #197をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -318,7 +328,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-08-03T04:06:34+09:00",
+      "last_update": "2026-08-03T05:15:42+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -400,5 +410,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "191e094a30e8230b9690759123e6ad123401560522e87afdc5bed8358fda3865"
+  "github_snapshot_hash": "a83ae3ab101b0f823f40e679241ef7643d1c57fee7b980363c560501d2561096"
 }
