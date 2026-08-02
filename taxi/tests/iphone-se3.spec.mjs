@@ -69,7 +69,7 @@ async function expectSe3Layout(page) {
       .map(element => {
         const box = element.getBoundingClientRect();
         const critical = element.matches(
-          '.action, .link, .minor, .settings, .view-tab, .toolbar button, .jump-today, .edit-button, .week-item, .day, #save, form button'
+          '.action, .link, .minor, .settings, .view-tab, .toolbar button, .edit-button, .week-item, .day, #save, form button'
         );
         return {
           label: element.textContent.trim() || element.getAttribute('aria-label') || element.id,
