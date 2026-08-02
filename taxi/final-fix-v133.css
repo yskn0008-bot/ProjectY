@@ -1,6 +1,9 @@
 /* YOS Taxi v133 — 実測済み最終レイアウト。 */
 .yos131-drive{grid-template-rows:36px 185px 52px 56px 58px}
 
+/* iPhoneの操作基準を満たし、1px未満の描画丸めでも44pxを下回らせない。 */
+main button,main a{min-height:44px}
+
 @media(max-height:520px){
   .yos131-drive{grid-template-rows:32px 185px 48px 52px 52px}
 }
