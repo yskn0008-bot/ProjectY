@@ -16,8 +16,7 @@ const context = await browser.newContext({
   hasTouch: true,
   locale: 'ja-JP',
   timezoneId: 'Asia/Tokyo',
-  acceptDownloads: true,
-  permissions: ['clipboard-read', 'clipboard-write']
+  acceptDownloads: true
 });
 const page = await context.newPage();
 const pageErrors = [];
