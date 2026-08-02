@@ -12,6 +12,7 @@
 <title>Hero's Journey｜人生を物語として進める</title>
 <link rel="stylesheet" href="./styles.css">
 <link rel="stylesheet" href="./onboarding.css">
+<link rel="stylesheet" href="./scenes.css">
 </head>
 <body>
 <main class="app">
@@ -27,7 +28,7 @@
   <p id="heroCopy" class="copy">仕事、生活、お金、人間関係、夢。それぞれが別の12段階を進み、何周も巡りながら螺旋状に変化していく。</p>
   <div class="hero-actions">
     <button id="consultYos" class="primary" type="button">現在地をYOSに相談</button>
-    <button id="openStory" class="secondary" type="button">今週の物語を作る</button>
+    <button id="openScene" class="secondary" type="button">今日のシーンを残す</button>
   </div>
   <div class="spiral">
     <div><strong id="journeyCount">5</strong><span>進行中の旅</span></div>
@@ -36,8 +37,9 @@
   </div>
 </section>
 
-<nav class="tabs" aria-label="HJ機能">
+<nav class="tabs three-tabs" aria-label="HJ機能">
   <button class="active" type="button" data-tab="journeys">旅の現在地</button>
+  <button type="button" data-tab="scenes">今日のシーン</button>
   <button type="button" data-tab="story">今週の物語</button>
 </nav>
 
@@ -50,6 +52,32 @@
   <section class="section">
     <div class="section-head"><div><p class="kicker">SPIRAL VIEW</p><h2>今の全体像</h2></div><span class="subtle">高いほど偉い、ではない</span></div>
     <div id="journeySummary" class="summary"></div>
+  </section>
+</section>
+
+<section id="scenePanel" class="panel">
+  <section class="section">
+    <div class="section-head"><div><p class="kicker">ONE MINUTE LOG</p><h2>今日のシーンを残す</h2></div><span class="subtle">事実だけ必須</span></div>
+    <p class="scene-guide">その場で残すのは一文でも十分。YOSは、書かれていない感情や出来事を勝手に足しません。</p>
+    <div class="scene-form">
+      <div class="two">
+        <label>日時<input id="sceneAt" type="datetime-local"></label>
+        <label>どの旅の出来事？<select id="sceneDomain"></select></label>
+      </div>
+      <label>この場面のHJステージ<select id="sceneStage"></select></label>
+      <label>実際に起きたこと<textarea id="sceneFact" rows="3" maxlength="600" placeholder="例：営業中、予定していた場所を離れて別のエリアへ移動した。"></textarea></label>
+      <label>自分が実際に選んだこと・行動したこと<textarea id="sceneChoice" rows="2" maxlength="400" placeholder="まだ結果が出ていなければ空欄でOK。"></textarea></label>
+      <label>確認できた結果<textarea id="sceneResult" rows="2" maxlength="400" placeholder="分からない場合は空欄のまま。"></textarea></label>
+      <label>本人が感じたこと・気づいたこと<textarea id="sceneReflection" rows="2" maxlength="400" placeholder="自分で確認できた言葉だけ。YOSの推測は入れない。"></textarea></label>
+      <div class="story-actions"><button id="clearScene" class="secondary" type="button">入力をクリア</button><button id="saveScene" class="primary" type="button">このシーンを保存</button></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-head"><div><p class="kicker">THIS WEEK</p><h2>今週のシーン</h2></div><span id="sceneWeekCount" class="subtle">0件</span></div>
+    <div id="sceneHistory" class="scene-history"></div>
+    <p id="emptyScenes" class="empty">今週の出来事がここに並びます。</p>
+    <button id="collectWeek" class="primary full-action" type="button">今週の事実を物語へまとめる</button>
   </section>
 </section>
 
@@ -80,7 +108,12 @@
 
 <section class="section">
   <div class="section-head"><div><p class="kicker">DATA SAFETY</p><h2>人生の記録を守る</h2></div><span class="subtle">JSON</span></div>
-  <div class="footer-actions"><button id="exportData" class="secondary" type="button">バックアップ</button><button id="resetData" class="danger" type="button">試作データを削除</button></div>
+  <div class="footer-actions three-actions">
+    <button id="exportData" class="secondary" type="button">バックアップ</button>
+    <button id="importData" class="secondary" type="button">復元</button>
+    <button id="resetData" class="danger" type="button">全データ削除</button>
+  </div>
+  <input id="importFile" type="file" accept="application/json,.json" hidden>
 </section>
 <p id="appStatus" class="status-line" role="status" aria-live="polite"></p>
 </main>
@@ -102,5 +135,6 @@
 
 <script src="./app.js" defer></script>
 <script src="./profile.js" defer></script>
+<script src="./scenes.js" defer></script>
 </body>
 </html>
