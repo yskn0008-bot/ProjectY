@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-08-02T12:59:10+09:00",
+  "updated_at": "2026-08-02T13:07:03+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -30,7 +30,7 @@
       "priority": 2,
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/175",
-      "updated_at": "2026-08-02T02:30:32Z"
+      "updated_at": "2026-08-02T04:06:22Z"
     },
     {
       "id": "github-pr-177",
@@ -40,17 +40,7 @@
       "priority": 2,
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/177",
-      "updated_at": "2026-08-02T03:59:05Z"
-    },
-    {
-      "id": "github-pr-179",
-      "title": "PR #179 test(nav): YOSナビ静的資産マニフェストを自動検査",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/179",
-      "updated_at": "2026-08-02T03:08:26Z"
+      "updated_at": "2026-08-02T03:59:59Z"
     },
     {
       "id": "github-issue-10",
@@ -130,7 +120,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/51",
-      "updated_at": "2026-08-02T03:18:39Z"
+      "updated_at": "2026-08-02T03:59:22Z"
     },
     {
       "id": "github-issue-86",
@@ -144,6 +134,13 @@
     }
   ],
   "recently_completed": [
+    {
+      "id": "github-commit-d2cc2e0b0fc1",
+      "title": "test(nav): YOSナビ静的資産マニフェストを自動検査 (#179)",
+      "completed_at": "2026-08-02T04:04:24Z",
+      "result": "GitHub mainへ反映（d2cc2e0）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/d2cc2e0b0fc1c57b4a4333450e2082578a74cec3"
+    },
     {
       "id": "github-commit-1aeb3f2d44ab",
       "title": "feat(taxi): v141営業クイック設定 (#181)",
@@ -173,13 +170,6 @@
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/0941fb34b33913d3735d2cd5c80b8abdbf39854e"
     },
     {
-      "id": "github-commit-d1096e59f7f0",
-      "title": "Merge pull request #174 from yskn0008-bot/agent/taxi-v137-theme-sheet",
-      "completed_at": "2026-08-02T02:07:51Z",
-      "result": "GitHub mainへ反映（d1096e5）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/d1096e59f7f0ebe99f38f9e0c08d327cf4025d67"
-    },
-    {
       "id": "complete-002",
       "title": "iPhone向けMission Control Dashboardを実装",
       "completed_at": "2026-07-17T17:55:00+09:00",
@@ -204,7 +194,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #177をレビューして公開判断する",
+      "next_action": "PR #175をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -214,7 +204,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-08-02T12:59:10+09:00",
+      "last_update": "2026-08-02T13:07:03+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -289,13 +279,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 9件・Open PR 4件を自動同期中",
+      "next_action": "Open Issue 9件・Open PR 3件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-08-02T12:59:10+09:00",
+      "last_update": "2026-08-02T13:07:03+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -309,7 +299,7 @@
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #177をレビューして公開判断する",
+      "next_action": "PR #175をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -318,7 +308,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-08-02T12:59:10+09:00",
+      "last_update": "2026-08-02T13:07:03+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -400,5 +390,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "5159acc10f514d2aaad5f3c1e7288b0b34f28ae5e2bbbe7025611963c7e725f3"
+  "github_snapshot_hash": "fb980ca94461a90e8ea0d78f6fd2aae3b56fc702da8fdfce8fc7c3c3f1021f2b"
 }
