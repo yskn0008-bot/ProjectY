@@ -19,15 +19,49 @@
   const qsa=(selector,root=document)=>[...root.querySelectorAll(selector)];
   const today=()=>new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Tokyo'}).format(new Date());
   const readJson=(key,fallback)=>{try{return JSON.parse(localStorage.getItem(key)||'null')||fallback}catch{return fallback}};
-  const escapeHtml=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+
+  function installDataExtensionGuard(){
+    if(window.__yosLifeDataExtensionGuardV1)return;
+    window.__yosLifeDataExtensionGuardV1=true;
+    const originalSetItem=Storage.prototype.setItem;
+    const originalGetItem=Storage.prototype.getItem;
+    Storage.prototype.setItem=function(key,value){
+      let nextValue=value;
+      if(this===localStorage&&key===DATA_KEY){
+        try{
+          const incoming=JSON.parse(value);
+          const current=JSON.parse(originalGetItem.call(this,key)||'null');
+          if(incoming?.days&&current?.days){
+            Object.entries(current.days).forEach(([date,currentDay])=>{
+              const incomingDay=incoming.days[date];
+              if(!incomingDay||!currentDay)return;
+              if(Object.prototype.hasOwnProperty.call(currentDay,'doneToday')&&!Object.prototype.hasOwnProperty.call(incomingDay,'doneToday')){
+                incomingDay.doneToday=currentDay.doneToday;
+              }
+            });
+          }
+          nextValue=JSON.stringify(incoming);
+        }catch{}
+      }
+      return originalSetItem.call(this,key,nextValue);
+    };
+  }
 
   function loadStyles(){
-    if(document.getElementById('lifeHomeV1Styles'))return;
-    const link=document.createElement('link');
-    link.id='lifeHomeV1Styles';
-    link.rel='stylesheet';
-    link.href='./home-v1.css?v=1';
-    document.head.appendChild(link);
+    if(!document.getElementById('lifeHomeV1Styles')){
+      const base=document.createElement('link');
+      base.id='lifeHomeV1Styles';
+      base.rel='stylesheet';
+      base.href='./home-v1.css?v=2';
+      document.head.appendChild(base);
+    }
+    if(!document.getElementById('lifeHomePriorityV1Styles')){
+      const priority=document.createElement('link');
+      priority.id='lifeHomePriorityV1Styles';
+      priority.rel='stylesheet';
+      priority.href='./home-priority-v1.css?v=1';
+      document.head.appendChild(priority);
+    }
   }
 
   function dayData(){
@@ -38,8 +72,19 @@
       tasks:Array.isArray(day.tasks)?day.tasks:[],
       routines:day.routines||{wake:[],before:[],home:[]},
       checkin:day.checkin||{sleep:'',health:'',mood:''},
-      note:day.note||''
+      note:day.note||'',
+      doneToday:String(day.doneToday||'')
     };
+  }
+
+  function updateToday(mutator){
+    const data=readJson(DATA_KEY,{days:{},activeGroup:'wake'});
+    if(!data.days||typeof data.days!=='object')data.days={};
+    const key=today();
+    if(!data.days[key]||typeof data.days[key]!=='object')data.days[key]={};
+    mutator(data.days[key]);
+    localStorage.setItem(DATA_KEY,JSON.stringify(data));
+    queueRefresh();
   }
 
   function completion(day){
@@ -49,6 +94,20 @@
     const taskDone=tasks.filter(task=>task.done).length;
     const total=routineTotal+tasks.length;
     return total?Math.round((routineDone+taskDone)/total*100):0;
+  }
+
+  function habitProgress(day){
+    const done=Object.values(day.routines).reduce((sum,list)=>sum+(Array.isArray(list)?list.length:0),0);
+    const total=Object.values(ROUTINE_TOTAL).reduce((sum,value)=>sum+value,0);
+    return {done,total,pct:total?Math.round(done/total*100):0};
+  }
+
+  function focusTask(day){
+    let index=day.tasks.findIndex(task=>String(task.text||'').trim()&&!task.done);
+    if(index<0)index=day.tasks.findIndex(task=>String(task.text||'').trim());
+    if(index<0)index=0;
+    const task=day.tasks[index]||{text:'',done:false};
+    return {index,text:String(task.text||''),done:Boolean(task.done)};
   }
 
   function fmtTime(value){
@@ -65,6 +124,13 @@
       .sort((a,b)=>new Date(a.start)-new Date(b.start))[0]||null;
   }
 
+  function focusDetail(day){
+    const event=upcomingEvent(day);
+    const open=day.tasks.filter(task=>String(task.text||'').trim()&&!task.done).length;
+    if(event)return`次の予定 ${fmtTime(event.start)}「${event.title||'予定'}」・残り${open}件`;
+    return open?`未完了は${open}件。今はこの1件だけに集中。`:'今日の予定に余白があります。';
+  }
+
   function statusMessage(day){
     const sleep=Number(day.checkin.sleep),health=Number(day.checkin.health),mood=Number(day.checkin.mood);
     if(!sleep&&!health&&!mood)return{tone:'neutral',title:'まず、今の状態を記録',detail:'30秒の記録から今日の流れを整えます。'};
@@ -74,12 +140,53 @@
     return{tone:'good',title:'今日の流れは整えられる',detail:'次の一つだけに集中して進めます。'};
   }
 
-  function nextAction(day){
-    const task=day.tasks.find(item=>String(item.text||'').trim()&&!item.done);
-    const event=upcomingEvent(day);
-    if(task)return{eyebrow:'次にやること',title:task.text,detail:event?`${fmtTime(event.start)}から「${event.title||'予定'}」`:'完了したら次を考える'};
-    if(event)return{eyebrow:'次の予定',title:event.title||'予定',detail:`${fmtTime(event.start)}〜${fmtTime(event.end)}${event.location?`・${event.location}`:''}`};
-    return{eyebrow:'次にやること',title:'空き時間を自分のために使う',detail:'休む・整える・楽しむから一つ選ぶ'};
+  function saveFocusTask(){
+    const input=document.getElementById('homeFocusInputV1');
+    if(!input)return;
+    const index=Number(input.dataset.taskIndex||0);
+    const value=input.value.trim();
+    const row=qsa('.task')[index]||qsa('.task')[0];
+    const sourceInput=row&&qs('input',row);
+    if(sourceInput){
+      if(sourceInput.value!==value){
+        sourceInput.value=value;
+        sourceInput.dispatchEvent(new Event('change',{bubbles:true}));
+      }
+      return;
+    }
+    updateToday(day=>{
+      day.tasks=Array.isArray(day.tasks)?day.tasks:[];
+      while(day.tasks.length<=index)day.tasks.push({text:'',done:false,category:'personal'});
+      day.tasks[index]={...day.tasks[index],text:value,category:day.tasks[index].category||'personal'};
+    });
+  }
+
+  function toggleFocusTask(){
+    const input=document.getElementById('homeFocusInputV1');
+    if(!input)return;
+    const before=focusTask(dayData());
+    saveFocusTask();
+    const index=Number(input.dataset.taskIndex||before.index||0);
+    const row=qsa('.task')[index]||qsa('.task')[0];
+    const button=row&&qs('button',row);
+    if(button)button.click();
+    else updateToday(day=>{
+      day.tasks=Array.isArray(day.tasks)?day.tasks:[];
+      while(day.tasks.length<=index)day.tasks.push({text:'',done:false,category:'personal'});
+      day.tasks[index].done=!day.tasks[index].done;
+    });
+    if(!before.done&&input.value.trim()&&!dayData().doneToday){
+      saveDoneToday(input.value.trim());
+    }
+  }
+
+  function saveDoneToday(value){
+    updateToday(day=>{day.doneToday=String(value||'').trim()});
+    const button=document.getElementById('homeDoneSaveV1');
+    if(button){
+      button.textContent='保存済み';
+      setTimeout(()=>{button.textContent='保存'},1000);
+    }
   }
 
   function buildDashboard(){
@@ -91,27 +198,40 @@
         <div class="status-ring-v1" id="homeRingV1"><div><strong id="homeCompletionV1">0%</strong><span>今日の進み</span></div></div>
         <div class="status-copy-v1"><small>YOS LIFE</small><h2 id="homeStatusTitleV1">今日を整える</h2><p id="homeStatusDetailV1">今の状態から、無理のない順番をつくります。</p></div>
       </section>
-      <section class="home-next-v1 card">
-        <div><small id="homeNextEyebrowV1">次にやること</small><h3 id="homeNextTitleV1">読み込み中</h3><p id="homeNextDetailV1"></p></div>
-        <button type="button" data-open-page="schedule">予定を見る</button>
+      <section class="home-focus-v1 card">
+        <button type="button" id="homeFocusDoneV1" class="home-focus-check-v1" aria-label="今日やることを完了">✓</button>
+        <div><small>今日やること1つ</small><input id="homeFocusInputV1" maxlength="70" placeholder="今日いちばん大事な1件"><p id="homeFocusDetailV1"></p></div>
       </section>
       <section class="home-glance-v1" aria-label="今日の状態">
         <button type="button" class="glance-card-v1 sleep" data-open-page="record"><span>🌙 睡眠</span><strong id="homeSleepV1">—</strong><small>時間</small></button>
         <button type="button" class="glance-card-v1 health" data-open-page="record"><span>💚 体調</span><strong id="homeHealthV1">—</strong><small>5段階</small></button>
         <button type="button" class="glance-card-v1 mood" data-open-page="record"><span>🙂 気分</span><strong id="homeMoodV1">—</strong><small>5段階</small></button>
       </section>
-      <section class="home-actions-v1" aria-label="すぐ使う">
-        <button type="button" data-open-page="schedule"><span>📅</span><b>予定</b><small>今日の流れ</small></button>
-        <button type="button" data-open-page="record"><span>✍️</span><b>記録</b><small>体調を残す</small></button>
-        <button type="button" data-open-page="improve"><span>🌱</span><b>改善</b><small>習慣を整える</small></button>
-      </section>
-      <section class="home-tip-v1 card">
-        <span>💡</span><div><small>今日の生活改善</small><b id="homeTipV1">今の状態を記録すると、次の判断が簡単になります。</b></div>
+      <section class="home-overview-v1 card">
+        <button type="button" class="home-habit-v1" data-open-page="improve"><span>🌱 習慣</span><b id="homeHabitV1">0/14</b><i><em id="homeHabitBarV1"></em></i></button>
+        <label class="home-done-v1"><span>✨ 今日できたこと</span><input id="homeDoneInputV1" maxlength="100" placeholder="完了すると自動で入ります"></label>
+        <button type="button" id="homeDoneSaveV1" class="home-done-save-v1">保存</button>
       </section>`;
+
     section.addEventListener('click',event=>{
-      const button=event.target.closest('[data-open-page]');
-      if(button)activatePage(button.dataset.openPage,true);
+      const pageButton=event.target.closest('[data-open-page]');
+      if(pageButton){activatePage(pageButton.dataset.openPage,true);return}
+      if(event.target.closest('#homeFocusDoneV1')){toggleFocusTask();return}
+      if(event.target.closest('#homeDoneSaveV1')){
+        saveDoneToday(document.getElementById('homeDoneInputV1')?.value||'');
+      }
     });
+
+    const focusInput=qs('#homeFocusInputV1',section);
+    focusInput.addEventListener('change',saveFocusTask);
+    focusInput.addEventListener('keydown',event=>{
+      if(event.key!=='Enter')return;
+      event.preventDefault();
+      saveFocusTask();
+      focusInput.blur();
+    });
+    const doneInput=qs('#homeDoneInputV1',section);
+    doneInput.addEventListener('change',()=>saveDoneToday(doneInput.value));
     return section;
   }
 
@@ -144,7 +264,7 @@
   function refreshDashboard(){
     const root=document.getElementById('lifeHomeDashboardV1');
     if(!root)return;
-    const day=dayData(),percent=completion(day),status=statusMessage(day),next=nextAction(day);
+    const day=dayData(),percent=completion(day),status=statusMessage(day),focus=focusTask(day),habit=habitProgress(day);
     const ring=document.getElementById('homeRingV1');
     ring?.style.setProperty('--progress',`${percent*3.6}deg`);
     const set=(id,value)=>{const node=document.getElementById(id);if(node)node.textContent=value};
@@ -152,14 +272,25 @@
     set('homeStatusTitleV1',status.title);
     set('homeStatusDetailV1',status.detail);
     root.dataset.tone=status.tone;
-    set('homeNextEyebrowV1',next.eyebrow);
-    set('homeNextTitleV1',next.title);
-    set('homeNextDetailV1',next.detail);
+    const focusInput=document.getElementById('homeFocusInputV1');
+    if(focusInput){
+      focusInput.dataset.taskIndex=String(focus.index);
+      if(document.activeElement!==focusInput)focusInput.value=focus.text;
+    }
+    const focusButton=document.getElementById('homeFocusDoneV1');
+    if(focusButton){
+      focusButton.classList.toggle('done',focus.done);
+      focusButton.setAttribute('aria-pressed',String(focus.done));
+    }
+    set('homeFocusDetailV1',focusDetail(day));
     set('homeSleepV1',day.checkin.sleep?`${day.checkin.sleep}h`:'—');
     set('homeHealthV1',day.checkin.health?`${day.checkin.health}/5`:'—');
     set('homeMoodV1',day.checkin.mood?`${day.checkin.mood}/5`:'—');
-    const tip=status.tone==='rest'?'予定を一つ減らし、休む時間を先に確保します。':status.tone==='care'?'5分で終わる行動を一つだけ選びます。':percent>=80?'新しいことを増やさず、気持ちよく終えます。':'次の一つを終えるまで、他のことを増やしません。';
-    set('homeTipV1',tip);
+    set('homeHabitV1',`${habit.done}/${habit.total}`);
+    const habitBar=document.getElementById('homeHabitBarV1');
+    if(habitBar)habitBar.style.width=`${habit.pct}%`;
+    const doneInput=document.getElementById('homeDoneInputV1');
+    if(doneInput&&document.activeElement!==doneInput)doneInput.value=day.doneToday;
   }
 
   function queueRefresh(){
@@ -195,8 +326,8 @@
     });
     top.insertAdjacentElement('afterend',host);
 
-    pages.home.append(sunrise,week,buildDashboard());
-    [scheduleCard,taskCard,planCard].filter(Boolean).forEach(card=>pages.schedule.appendChild(card));
+    pages.home.append(week,buildDashboard());
+    [sunrise,scheduleCard,taskCard,planCard].filter(Boolean).forEach(card=>pages.schedule.appendChild(card));
     if(stateCard)pages.record.appendChild(stateCard);
     [routineCard,yosCard].filter(Boolean).forEach(card=>pages.improve.appendChild(card));
     layout.remove();
@@ -214,6 +345,7 @@
     return true;
   }
 
+  installDataExtensionGuard();
   const timer=setInterval(()=>{if(install())clearInterval(timer)},40);
   setTimeout(()=>clearInterval(timer),10000);
 })();
