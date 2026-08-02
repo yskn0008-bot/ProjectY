@@ -13,6 +13,7 @@
 <link rel="stylesheet" href="./styles.css">
 <link rel="stylesheet" href="./onboarding.css">
 <link rel="stylesheet" href="./scenes.css">
+<link rel="stylesheet" href="./completion.css">
 </head>
 <body>
 <main class="app">
@@ -32,7 +33,7 @@
   </div>
   <div class="spiral">
     <div><strong id="journeyCount">5</strong><span>進行中の旅</span></div>
-    <div><strong id="activeStage">—</strong><span>最も動く現在地</span></div>
+    <div><strong id="activeStage">—</strong><span>注目している現在地</span></div>
     <div><strong id="storyCount">0</strong><span>保存した物語</span></div>
   </div>
 </section>
@@ -52,6 +53,12 @@
   <section class="section">
     <div class="section-head"><div><p class="kicker">SPIRAL VIEW</p><h2>今の全体像</h2></div><span class="subtle">高いほど偉い、ではない</span></div>
     <div id="journeySummary" class="summary"></div>
+  </section>
+  <section class="section">
+    <div class="section-head"><div><p class="kicker">TURNING POINTS</p><h2>螺旋の歩み</h2></div><span id="historySummary" class="subtle">0件</span></div>
+    <p class="spiral-guide">同じステージへ戻っても、前回と同じ自分ではありません。本人が変更した現在地だけを転換点として残します。</p>
+    <div id="spiralHistory" class="spiral-history"></div>
+    <p id="emptySpiralHistory" class="empty">現在地を更新すると、変化の履歴がここに並びます。</p>
   </section>
 </section>
 
@@ -98,7 +105,11 @@
   <section id="previewSection" class="section preview">
     <div class="section-head"><div><p class="kicker">WEEKLY HIGHLIGHT</p><h2>今週の物語</h2></div><span id="previewFormat" class="subtle">漫画</span></div>
     <article id="storyWork" class="work manga"></article>
-    <div class="story-actions preview-actions"><button id="copyStory" class="secondary" type="button">文章をコピー</button><button id="saveStory" class="primary" type="button">作品として保存</button></div>
+    <div class="story-actions three-preview-actions">
+      <button id="copyStory" class="secondary" type="button">文章をコピー</button>
+      <button id="shareStoryImage" class="secondary" type="button">画像で共有</button>
+      <button id="saveStory" class="primary" type="button">作品として保存</button>
+    </div>
   </section>
   <section class="section">
     <div class="section-head"><div><p class="kicker">STORY SHELF</p><h2>物語の本棚</h2></div><span class="subtle">最新10件</span></div>
@@ -124,17 +135,54 @@
   <form id="onboardingForm" class="dialog-body">
     <p class="kicker">FIRST CHAPTER</p>
     <h2>あなたの旅を始める</h2>
-    <p>最初は3つだけ。あとからいつでも変えられます。</p>
+    <p>最初は現在地と好みだけ。あとからいつでも変えられます。</p>
     <label>呼ばれたい名前<input id="profileName" maxlength="30" autocomplete="name" placeholder="例：ようすけ"></label>
     <label>今いちばん動いている旅<select id="profileDomain"></select></label>
     <label>その旅の現在地<select id="profileStage"></select></label>
     <label>今のテーマ<input id="profileTheme" maxlength="160" placeholder="例：自分に合う働き方を作る"></label>
+    <label>物語の基本形式
+      <select id="profileFormat">
+        <option value="manga">漫画</option>
+        <option value="newspaper">新聞</option>
+        <option value="novel">短編小説</option>
+        <option value="picturebook">絵本</option>
+      </select>
+    </label>
+    <label>YOSの話し方
+      <select id="profileTone">
+        <option value="balanced">率直さと優しさのバランス</option>
+        <option value="gentle">優しく寄り添う</option>
+        <option value="direct">結論をはっきり伝える</option>
+      </select>
+    </label>
     <div class="dialog-actions"><button id="cancelProfile" class="secondary" type="button">あとで</button><button class="primary" type="submit">この現在地から始める</button></div>
   </form>
 </dialog>
 
+<dialog id="sceneEditDialog">
+  <form id="sceneEditForm" class="dialog-body">
+    <p class="kicker">EDIT FACTS</p>
+    <h2>シーンを修正する</h2>
+    <p>事実や本人の言葉を訂正できます。保存済みの内容を勝手に補いません。</p>
+    <input id="editSceneId" type="hidden">
+    <label>日時<input id="editSceneAt" type="datetime-local"></label>
+    <label>旅<select id="editSceneDomain"></select></label>
+    <label>その場面のステージ<select id="editSceneStage"></select></label>
+    <label>実際に起きたこと<textarea id="editSceneFact" rows="3" maxlength="600"></textarea></label>
+    <label>選んだこと・行動<textarea id="editSceneChoice" rows="2" maxlength="400"></textarea></label>
+    <label>確認できた結果<textarea id="editSceneResult" rows="2" maxlength="400"></textarea></label>
+    <label>本人の気づき<textarea id="editSceneReflection" rows="2" maxlength="400"></textarea></label>
+    <div class="dialog-actions"><button id="cancelSceneEdit" class="secondary" type="button">戻る</button><button class="primary" type="submit">修正を保存</button></div>
+  </form>
+</dialog>
+
+<script src="./bootstrap.js" defer></script>
 <script src="./app.js" defer></script>
 <script src="./profile.js" defer></script>
 <script src="./scenes.js" defer></script>
+<script src="./history.js" defer></script>
+<script src="./editor.js" defer></script>
+<script src="./story-image.js" defer></script>
+<script src="./data-complete.js" defer></script>
 </body>
 </html>
