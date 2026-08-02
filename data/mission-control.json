@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-08-02T15:18:31+09:00",
+  "updated_at": "2026-08-02T15:33:43+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -43,16 +43,6 @@
       "updated_at": "2026-08-02T03:59:59Z"
     },
     {
-      "id": "github-pr-184",
-      "title": "PR #184 fix(taxi): 手動再送を即時実行する v143",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/184",
-      "updated_at": "2026-08-02T06:16:39Z"
-    },
-    {
       "id": "github-issue-10",
       "title": "Issue #10 Mission Control v2：GitHubのIssue・PR・Commitを自動集約する",
       "type": "GitHub Issue",
@@ -70,7 +60,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/110",
-      "updated_at": "2026-08-02T05:18:21Z"
+      "updated_at": "2026-08-02T06:31:48Z"
     },
     {
       "id": "github-issue-120",
@@ -145,6 +135,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-67a6d45fea56",
+      "title": "fix(taxi): 手動再送を即時実行する v143 (#184)",
+      "completed_at": "2026-08-02T06:31:40Z",
+      "result": "GitHub mainへ反映（67a6d45）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/67a6d45fea56dc6bd54b512e8546b53d66a176a8"
+    },
+    {
       "id": "github-commit-af60d1ac21c0",
       "title": "test(nav): YOSナビHTML資産参照を自動検査 (#183)",
       "completed_at": "2026-08-02T06:06:30Z",
@@ -173,13 +170,6 @@
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/1aeb3f2d44abee5dcf3041d3518c61671f1e6958"
     },
     {
-      "id": "github-commit-05a7280d623f",
-      "title": "test(taxi): Service Worker安全検査を追加 (#180)",
-      "completed_at": "2026-08-02T03:56:54Z",
-      "result": "GitHub mainへ反映（05a7280）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/05a7280d623f78dd23d2a067231e10f67e75ef3a"
-    },
-    {
       "id": "complete-002",
       "title": "iPhone向けMission Control Dashboardを実装",
       "completed_at": "2026-07-17T17:55:00+09:00",
@@ -204,7 +194,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #184をレビューして公開判断する",
+      "next_action": "PR #175をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -214,7 +204,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-08-02T15:18:31+09:00",
+      "last_update": "2026-08-02T15:33:43+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -289,13 +279,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 9件・Open PR 4件を自動同期中",
+      "next_action": "Open Issue 9件・Open PR 3件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-08-02T15:18:31+09:00",
+      "last_update": "2026-08-02T15:33:43+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -309,7 +299,7 @@
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #184をレビューして公開判断する",
+      "next_action": "PR #175をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -318,7 +308,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-08-02T15:18:31+09:00",
+      "last_update": "2026-08-02T15:33:43+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -400,5 +390,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "3e4bf59f32e70c8515c44828ea637b148063c4386e9b9f0133a54a2c4d9c826c"
+  "github_snapshot_hash": "b7ed3230a0c9a79ea41ea2d6a0e014490de733fc596fac4a52e3bb4cd361a783"
 }
