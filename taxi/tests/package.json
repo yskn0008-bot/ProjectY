@@ -1,0 +1,10 @@
+{
+  "name": "projecty-taxi-se3-tests",
+  "private": true,
+  "scripts": {
+    "test:se3": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.54.2"
+  }
+}
