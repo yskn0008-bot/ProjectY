@@ -36,11 +36,20 @@ jobs:
           cache: ''
 
       - name: Check JavaScript syntax
+        shell: bash
         run: |
+          set -euo pipefail
           node --check nav/service-worker.js
           node --check nav/runtime-diagnostics-v64.js
-          node --check nav/tests/service-worker-v106-safety.test.mjs
-          node --check nav/tests/static-manifest-safety.test.mjs
+          shopt -s nullglob
+          tests=(nav/tests/*.test.mjs)
+          if (( ${#tests[@]} == 0 )); then
+            echo 'YOSナビの安全テストが見つかりません' >&2
+            exit 1
+          fi
+          for test_file in "${tests[@]}"; do
+            node --check "$test_file"
+          done
 
       - name: Run YOSナビ safety regression tests
         run: node --test nav/tests/*.test.mjs
