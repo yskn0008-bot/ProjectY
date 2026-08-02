@@ -1,0 +1,56 @@
+name: Codex governance
+
+on:
+  pull_request:
+    types: [opened, edited, reopened, ready_for_review]
+
+permissions:
+  contents: read
+
+jobs:
+  validate-pr-evidence:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check required development evidence
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: |
+          set -eu
+
+          required_sections=(
+            "## Codex execution"
+            "## Scope"
+            "## Verification"
+            "## Readiness"
+            "## Remaining work"
+          )
+
+          failed=0
+          for section in "${required_sections[@]}"; do
+            if ! printf '%s' "$PR_BODY" | grep -Fq "$section"; then
+              echo "Missing required PR section: $section"
+              failed=1
+            fi
+          done
+
+          if ! printf '%s' "$PR_BODY" | grep -Eq 'Used Codex|Codex unavailable|Approved exception'; then
+            echo "Codex execution status is not recorded."
+            failed=1
+          fi
+
+          if ! printf '%s' "$PR_BODY" | grep -Fq 'Assigned directory:'; then
+            echo "Assigned directory is not recorded."
+            failed=1
+          fi
+
+          if ! printf '%s' "$PR_BODY" | grep -Fq 'iPhone Safari/PWA:'; then
+            echo "iPhone verification status is not recorded."
+            failed=1
+          fi
+
+          if [ "$failed" -ne 0 ]; then
+            echo "Update the pull request body using .github/pull_request_template.md."
+            exit 1
+          fi
+
+          echo "Required Codex and verification evidence is present."
