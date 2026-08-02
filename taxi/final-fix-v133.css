@@ -5,6 +5,8 @@
 main button,main a{min-height:44px;box-sizing:border-box}
 /* inlineリンクにはmin-heightが効かないため、実測で不足した操作対象だけflex化する。 */
 main .danger-link,main .back{display:inline-flex;align-items:center;justify-content:center;min-height:44px}
+/* カレンダーの主要ナビゲーションは既存スタイルより優先して44pxを保証する。 */
+main .jump-today{min-height:44px!important;box-sizing:border-box}
 
 @media(max-height:520px){
   .yos131-drive{grid-template-rows:32px 185px 48px 52px 52px}
