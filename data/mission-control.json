@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-08-02T10:52:11+09:00",
+  "updated_at": "2026-08-02T10:53:50+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -125,6 +125,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-7980dc408af0",
+      "title": "fix(taxi): show theme selector in manage tab v135",
+      "completed_at": "2026-08-02T01:53:38Z",
+      "result": "GitHub mainへ反映（7980dc4）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/7980dc408af00a83cfdd3d43578c2fc07f409aaf"
+    },
+    {
       "id": "github-commit-236153484bd5",
       "title": "revert accidental placeholder",
       "completed_at": "2026-08-02T01:51:51Z",
@@ -151,13 +158,6 @@
       "completed_at": "2026-08-01T23:09:16Z",
       "result": "GitHub mainへ反映（f838515）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/f838515570df5b538403b87e49d7c0efb428dc9d"
-    },
-    {
-      "id": "github-commit-d995b23a5af3",
-      "title": "feat(taxi): add v134 minimal theme foundation",
-      "completed_at": "2026-08-01T22:11:27Z",
-      "result": "GitHub mainへ反映（d995b23）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/d995b23a5af3bcbc0ec6261ccf914b27810fb264"
     },
     {
       "id": "complete-002",
@@ -194,7 +194,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-08-02T10:52:11+09:00",
+      "last_update": "2026-08-02T10:53:50+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -275,7 +275,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-08-02T10:52:11+09:00",
+      "last_update": "2026-08-02T10:53:50+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -298,7 +298,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-08-02T10:52:11+09:00",
+      "last_update": "2026-08-02T10:53:50+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -380,5 +380,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "d9f7cbc26d08d4fd66d34fe831408ce8851eea02ba2400c4afb2ee6ebc5d422b"
+  "github_snapshot_hash": "1ef99da1cc1a116ecb091fdf8ee7e28c6c309ff02f3f7becc6aa5cf43bee9f78"
 }
