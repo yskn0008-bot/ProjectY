@@ -14,15 +14,20 @@ test('diagnostics never exposes the stored token value',()=>{
 
 test('diagnostics exposes actionable states and manual retry',()=>{
   for(const text of ['オフライン','API未設定','トークン未設定','送信エラー','送信待ち','接続準備OK','今すぐ再送'])assert.ok(js.includes(text),text);
+  assert.match(js,/function forceRetry\(\)/);
+  assert.match(js,/queue\.map\(item=>\(\{\.\.\.item,nextAttemptAt:0,lastError:''\}\)\)/);
+  assert.match(js,/write\(QUEUE_KEY,retryQueue\)/);
   assert.match(js,/dispatchEvent\(new Event\('online'\)\)/);
+  assert.match(js,/data\.pending\?'':'disabled'/);
 });
 
-test('v142 assets are cached and injected only on index',()=>{
+test('v143 refreshes cached diagnostics assets only on index',()=>{
   for(const file of ['sync-diagnostics-v142.css','sync-diagnostics-v142.js']){
     assert.ok(sw.includes(`'./${file}'`));
     assert.ok(sw.includes(`add${file.endsWith('.css')?'Css':'Js'}('${file}')`));
   }
-  assert.match(sw,/const VERSION='142'/);
+  assert.match(sw,/const VERSION='143'/);
+  assert.match(sw,/const CACHE='yos-taxi-projecty-v143-force-retry'/);
   assert.match(sw,/if\(type==='index'\)/);
 });
 
