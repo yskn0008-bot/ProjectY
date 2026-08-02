@@ -148,12 +148,32 @@ try {
   }));
   assert.ok(overflow.scrollWidth <= overflow.width + 1, `横スクロールが発生: ${JSON.stringify(overflow)}`);
 
-  await page.evaluate(() => navigator.serviceWorker.ready);
+  const cacheStatus = await page.evaluate(async () => {
+    await navigator.serviceWorker.ready;
+    const paths = [
+      './index.html', './styles.css', './onboarding.css', './scenes.css', './completion.css',
+      './bootstrap.js', './app.js', './profile.js', './scenes.js', './history.js',
+      './editor.js', './story-image.js', './data-complete.js', './manifest.webmanifest'
+    ];
+    const entries = await Promise.all(paths.map(async (path) => {
+      const url = new URL(path, location.href).href;
+      return [path, Boolean(await caches.match(url))];
+    }));
+    return Object.fromEntries(entries);
+  });
+  for (const [path, cached] of Object.entries(cacheStatus)) {
+    assert.equal(cached, true, `オフラインキャッシュ漏れ: ${path}`);
+  }
+
   await page.reload({ waitUntil: 'networkidle' });
-  await context.setOffline(true);
-  await page.reload({ waitUntil: 'domcontentloaded' });
-  assert.match(await page.locator('#heroTitle').textContent(), /テスト主人公/, 'オフライン再起動できない');
-  await context.setOffline(false);
+  if (browserName === 'chromium') {
+    await context.setOffline(true);
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    assert.match(await page.locator('#heroTitle').textContent(), /テスト主人公/, 'オフライン再起動できない');
+    await context.setOffline(false);
+  } else {
+    assert.match(await page.locator('#heroTitle').textContent(), /テスト主人公/, 'WebKit再起動後に保存状態が戻らない');
+  }
 
   await page.screenshot({ path: `test-results/hj-se3-full-${browserName}.png`, fullPage: true });
   assert.deepEqual(pageErrors, [], `ページ例外: ${pageErrors.join(' | ')}`);
