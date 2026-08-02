@@ -1,41 +1,57 @@
-'use strict';
+"use strict";
 
-const CACHE = 'hj-multi-journey-v3-scenes';
+const CACHE = "hj-multi-journey-v4-complete";
 const STATIC = [
-  './',
-  './index.html',
-  './styles.css',
-  './onboarding.css',
-  './scenes.css',
-  './app.js',
-  './profile.js',
-  './scenes.js',
-  './manifest.webmanifest'
+  "./",
+  "./index.html",
+  "./styles.css",
+  "./onboarding.css",
+  "./scenes.css",
+  "./completion.css",
+  "./bootstrap.js",
+  "./app.js",
+  "./profile.js",
+  "./scenes.js",
+  "./history.js",
+  "./editor.js",
+  "./story-image.js",
+  "./data-complete.js",
+  "./manifest.webmanifest"
 ];
 
-self.addEventListener('install', (event) => {
-  event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(STATIC)).then(() => self.skipWaiting()));
+self.addEventListener("install", (event) => {
+  event.waitUntil(
+    caches.open(CACHE)
+      .then((cache) => cache.addAll(STATIC))
+      .then(() => self.skipWaiting())
+  );
 });
 
-self.addEventListener('activate', (event) => {
+self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches.keys()
-      .then((keys) => Promise.all(keys.filter((key) => key.startsWith('hj-multi-journey-') && key !== CACHE).map((key) => caches.delete(key))))
+      .then((keys) => Promise.all(
+        keys.filter((key) => key.startsWith("hj-multi-journey-") && key !== CACHE)
+          .map((key) => caches.delete(key))
+      ))
       .then(() => self.clients.claim())
   );
 });
 
-self.addEventListener('fetch', (event) => {
-  if (event.request.method !== 'GET') return;
+self.addEventListener("fetch", (event) => {
+  if (event.request.method !== "GET") return;
   const url = new URL(event.request.url);
   const scope = new URL(self.registration.scope);
   if (url.origin !== scope.origin || !url.pathname.startsWith(scope.pathname)) return;
+
   event.respondWith(
-    fetch(event.request, { cache: 'no-cache' })
+    fetch(event.request, { cache: "no-cache" })
       .then((response) => {
-        if (response.ok) caches.open(CACHE).then((cache) => cache.put(event.request, response.clone()));
+        if (response.ok) {
+          caches.open(CACHE).then((cache) => cache.put(event.request, response.clone()));
+        }
         return response;
       })
-      .catch(() => caches.match(event.request).then((hit) => hit || caches.match('./index.html')))
+      .catch(() => caches.match(event.request).then((hit) => hit || caches.match("./index.html")))
   );
 });
