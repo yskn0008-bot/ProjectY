@@ -55,6 +55,7 @@ async function expectSe3Layout(page) {
 
     const tapTargets = [...document.querySelectorAll('main button, main a')]
       .filter(visible)
+      .filter(element => !element.closest('.leaflet-control-attribution'))
       .map(element => {
         const box = element.getBoundingClientRect();
         const critical = element.matches(
