@@ -26,10 +26,13 @@ page.on('console', (message) => {
 });
 
 const visible = async (selector) => page.locator(selector).isVisible();
+const settleReload = async () => {
+  await page.waitForTimeout(700);
+  await page.waitForLoadState('domcontentloaded');
+};
 const waitReload = async (action) => {
   await action();
-  await page.waitForLoadState('domcontentloaded');
-  await page.waitForTimeout(350);
+  await settleReload();
 };
 
 try {
@@ -102,7 +105,38 @@ try {
   await page.locator('#exportData').click();
   const backup = await backupDownload;
   assert.match(backup.suggestedFilename(), /\.json$/i, 'バックアップがJSONではない');
-  await backup.saveAs(`test-results/hj-backup-${browserName}.json`);
+  const backupPath = `test-results/hj-backup-${browserName}.json`;
+  await backup.saveAs(backupPath);
+
+  page.once('dialog', (dialog) => dialog.accept());
+  await waitReload(() => page.locator('#resetData').click());
+  const cleared = await page.evaluate(() => ({
+    profile: localStorage.getItem('hj-user-profile-v1'),
+    scenes: localStorage.getItem('hj-daily-scenes-v1'),
+    stories: localStorage.getItem('hj-weekly-stories-v1')
+  }));
+  assert.equal(cleared.profile, null, '全削除後もプロフィールが残っている');
+  assert.equal(cleared.scenes, null, '全削除後もシーンが残っている');
+  assert.equal(cleared.stories, null, '全削除後も作品が残っている');
+
+  await page.locator('#importFile').setInputFiles(backupPath);
+  await settleReload();
+  await page.waitForSelector('#heroTitle');
+  assert.match(await page.locator('#heroTitle').textContent(), /テスト主人公/, '復元後に名前が戻らない');
+  const restored = await page.evaluate(() => ({
+    journeys: JSON.parse(localStorage.getItem('hj-domain-journeys-v1') || '[]'),
+    scenes: JSON.parse(localStorage.getItem('hj-daily-scenes-v1') || '[]'),
+    stories: JSON.parse(localStorage.getItem('hj-weekly-stories-v1') || '[]'),
+    history: JSON.parse(localStorage.getItem('hj-stage-history-v1') || '[]'),
+    preferences: JSON.parse(localStorage.getItem('hj-user-preferences-v1') || '{}')
+  }));
+  assert.equal(restored.journeys[0]?.cycle, 2, '復元後に周回数が戻らない');
+  assert.equal(restored.scenes.length, 1, '復元後にシーンが戻らない');
+  assert.equal(restored.scenes[0]?.result, '編集後の結果が保存された。', '編集済み結果が復元されない');
+  assert.equal(restored.stories.length, 1, '復元後に作品が戻らない');
+  assert.ok(restored.history.length > 0, '復元後に螺旋履歴が戻らない');
+  assert.equal(restored.preferences.storyFormat, 'picturebook', '物語形式が復元されない');
+  assert.equal(restored.preferences.mentorTone, 'direct', 'YOSの話し方が復元されない');
 
   await page.locator('#consultYos').click();
   await page.waitForTimeout(150);
