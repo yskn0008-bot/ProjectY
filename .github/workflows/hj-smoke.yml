@@ -25,7 +25,11 @@ permissions:
 jobs:
   smoke:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 18
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, webkit]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -38,7 +42,7 @@ jobs:
       - name: Install Playwright
         run: |
           npm install --no-save playwright@1.55.0
-          npx playwright install --with-deps chromium
+          npx playwright install --with-deps ${{ matrix.browser }}
 
       - name: Start static server
         run: |
@@ -52,12 +56,14 @@ jobs:
           exit 1
 
       - name: Run HJ smoke test
+        env:
+          HJ_BROWSER: ${{ matrix.browser }}
         run: node tests/hj-smoke.mjs
 
       - name: Upload screenshots and exports
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: hj-smoke-results
+          name: hj-smoke-results-${{ matrix.browser }}
           path: test-results/
           if-no-files-found: warn
