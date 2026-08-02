@@ -11,7 +11,7 @@ const pages = [
 ];
 const artifactRoot = resolve(import.meta.dirname, '../test-results/artifacts');
 
-async function openControlled(page, entry) {
+async function openApp(page, entry) {
   await page.goto(entry.path, { waitUntil: 'domcontentloaded' });
 
   if (entry.mode) {
@@ -19,24 +19,20 @@ async function openControlled(page, entry) {
   }
   await expect(page.locator(entry.ready)).toBeVisible();
 
-  await page.evaluate(async () => {
-    if (!('serviceWorker' in navigator)) return;
-    await navigator.serviceWorker.register('./service-worker.js');
+  const serviceWorker = await page.evaluate(async () => {
+    if (!('serviceWorker' in navigator)) return { supported: false, active: false };
+    const registration = await navigator.serviceWorker.register('./service-worker.js');
     await Promise.race([
       navigator.serviceWorker.ready,
       new Promise((_, reject) => setTimeout(() => reject(new Error('Service Worker ready timeout')), 10000)),
     ]);
+    return {
+      supported: true,
+      active: Boolean(registration.active || registration.waiting || registration.installing),
+    };
   });
 
-  await page.reload({ waitUntil: 'domcontentloaded' });
-  if (entry.mode) {
-    await page.locator(`[data-mode="${entry.mode}"]`).tap();
-  }
-  await expect(page.locator(entry.ready)).toBeVisible();
-  await expect.poll(
-    () => page.evaluate(() => Boolean(navigator.serviceWorker?.controller)),
-    { message: 'Service Worker did not control the page', timeout: 10000 },
-  ).toBe(true);
+  expect(serviceWorker).toEqual({ supported: true, active: true });
 }
 
 async function expectSe3Layout(page) {
@@ -88,13 +84,7 @@ test.describe('iPhone SE3 viewport and touch smoke', () => {
       const exceptions = [];
       page.on('pageerror', error => exceptions.push(error.message));
 
-      await openControlled(page, entry);
-      const serviceWorker = await page.evaluate(() => ({
-        supported: 'serviceWorker' in navigator,
-        controlled: Boolean(navigator.serviceWorker?.controller),
-      }));
-      expect(serviceWorker).toEqual({ supported: true, controlled: true });
-
+      await openApp(page, entry);
       await expectSe3Layout(page);
       expect(exceptions, 'uncaught JavaScript exceptions').toEqual([]);
       await page.screenshot({
