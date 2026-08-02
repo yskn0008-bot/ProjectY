@@ -20,7 +20,8 @@ const pageRoutes = [
 ];
 
 test('smoke test uses the production theme storage key', () => {
-  assert.ok(smoke.includes(`const THEME_KEY='${themeKey}'`), `expected ${themeKey}`);
+  const escaped = themeKey.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  assert.match(smoke, new RegExp(`const\\s+THEME_KEY\\s*=\\s*['\"]${escaped}['\"]`));
 });
 
 test('smoke test covers every production theme', () => {
