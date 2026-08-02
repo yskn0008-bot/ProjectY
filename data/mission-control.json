@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-08-02T11:08:05+09:00",
+  "updated_at": "2026-08-02T11:13:29+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -21,6 +21,16 @@
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/144",
       "updated_at": "2026-08-01T13:46:38Z"
+    },
+    {
+      "id": "github-pr-175",
+      "title": "PR #175 HJ複数旅・螺旋成長・今週の物語の初版",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/175",
+      "updated_at": "2026-08-02T02:10:12Z"
     },
     {
       "id": "github-issue-10",
@@ -115,6 +125,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-0941fb34b339",
+      "title": "feat(taxi): add v138 minimal live status bar",
+      "completed_at": "2026-08-02T02:13:12Z",
+      "result": "GitHub mainへ反映（0941fb3）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/0941fb34b33913d3735d2cd5c80b8abdbf39854e"
+    },
+    {
       "id": "github-commit-d1096e59f7f0",
       "title": "Merge pull request #174 from yskn0008-bot/agent/taxi-v137-theme-sheet",
       "completed_at": "2026-08-02T02:07:51Z",
@@ -143,13 +160,6 @@
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/ba50d109e39bec2c4db04ce528ad3aee0fdac0bb"
     },
     {
-      "id": "github-commit-d43fe10deb05",
-      "title": "chore: remove temporary branch seed",
-      "completed_at": "2026-08-02T02:05:56Z",
-      "result": "GitHub mainへ反映（d43fe10）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/d43fe10deb05b226a90b22276fdf10bd4bd9b482"
-    },
-    {
       "id": "complete-002",
       "title": "iPhone向けMission Control Dashboardを実装",
       "completed_at": "2026-07-17T17:55:00+09:00",
@@ -174,7 +184,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #144をレビューして公開判断する",
+      "next_action": "PR #175をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -184,7 +194,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-08-02T11:08:05+09:00",
+      "last_update": "2026-08-02T11:13:29+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -259,13 +269,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 9件・Open PR 1件を自動同期中",
+      "next_action": "Open Issue 9件・Open PR 2件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-08-02T11:08:05+09:00",
+      "last_update": "2026-08-02T11:13:29+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -279,7 +289,7 @@
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #144をレビューして公開判断する",
+      "next_action": "PR #175をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -288,7 +298,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-08-02T11:08:05+09:00",
+      "last_update": "2026-08-02T11:13:29+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -370,5 +380,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "d7fdcb30e2266d85774c6b11b858077aef009efdc7df64ae5c1ead13cf59f206"
+  "github_snapshot_hash": "e3b02f359800a32f56942c1e0dff60da4c6192d1e45d88e5f1fd9d5d6b1e0561"
 }
