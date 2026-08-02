@@ -31,6 +31,20 @@ const pages = [
 ];
 const themes = ['minimal', 'night-gold', 'light', 'map', 'hud'];
 
+async function waitForServiceWorkerControl() {
+  await page.goto(baseURL, { waitUntil: 'networkidle' });
+  await page.evaluate(async () => {
+    if (!('serviceWorker' in navigator)) throw new Error('Service Worker unsupported');
+    await Promise.race([
+      navigator.serviceWorker.ready,
+      new Promise((_, reject) => setTimeout(() => reject(new Error('Service Worker ready timeout')), 10000))
+    ]);
+  });
+  await page.reload({ waitUntil: 'networkidle' });
+  const controlled = await page.evaluate(() => Boolean(navigator.serviceWorker.controller));
+  assert.equal(controlled, true, 'Service Worker does not control Taxi page');
+}
+
 async function inspectPage(name, relative, expectedTheme) {
   const url = new URL(relative || './', baseURL).href;
   await page.goto(url, { waitUntil: 'networkidle' });
@@ -84,8 +98,9 @@ async function inspectPage(name, relative, expectedTheme) {
 }
 
 try {
+  await waitForServiceWorkerControl();
+
   for (const theme of themes) {
-    await page.goto(baseURL, { waitUntil: 'domcontentloaded' });
     await page.evaluate(({ key, value }) => localStorage.setItem(key, value), { key: THEME_KEY, value: theme });
     for (const [name, relative] of pages) await inspectPage(`${name}-${theme}`, relative, theme);
   }
@@ -98,10 +113,11 @@ try {
       navigator.serviceWorker.ready,
       new Promise((_, reject) => setTimeout(() => reject(new Error('Service Worker ready timeout')), 10000))
     ]);
-    return { supported: true, active: Boolean(registration.active) };
+    return { supported: true, active: Boolean(registration.active), controlled: Boolean(navigator.serviceWorker.controller) };
   });
   assert.equal(sw.supported, true, 'Service Worker unsupported');
   assert.equal(sw.active, true, 'Service Worker not active');
+  assert.equal(sw.controlled, true, 'Service Worker not controlling Taxi page');
 
   assert.deepEqual(pageErrors, [], `page errors: ${pageErrors.join(' | ')}`);
   console.log(`Taxi iPhone SE3 smoke passed: ${browserName}`);
