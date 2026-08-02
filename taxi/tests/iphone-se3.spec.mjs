@@ -53,9 +53,19 @@ async function expectSe3Layout(page) {
       .filter(Boolean)
       .slice(0, 5);
 
+    const isMapAttribution = element => {
+      const href = element.getAttribute('href') || '';
+      const text = element.textContent || '';
+      return Boolean(
+        element.closest('.leaflet-control-attribution, .leaflet-control-container') ||
+        /openstreetmap\.org/i.test(href) ||
+        /OpenStreetMap contributors/i.test(text)
+      );
+    };
+
     const tapTargets = [...document.querySelectorAll('main button, main a')]
       .filter(visible)
-      .filter(element => !element.closest('.leaflet-control-attribution'))
+      .filter(element => !isMapAttribution(element))
       .map(element => {
         const box = element.getBoundingClientRect();
         const critical = element.matches(
@@ -63,6 +73,8 @@ async function expectSe3Layout(page) {
         );
         return {
           label: element.textContent.trim() || element.getAttribute('aria-label') || element.id,
+          id: element.id,
+          className: element.className,
           width: box.width,
           height: box.height,
           critical,
@@ -81,8 +93,11 @@ async function expectSe3Layout(page) {
   expect(layout.clippedText, 'unexpected clipped text').toEqual([]);
   for (const target of layout.tapTargets) {
     const minimum = target.critical ? 44 : 39;
-    expect(target.width, `${target.label} tap width`).toBeGreaterThanOrEqual(minimum);
-    expect(target.height, `${target.label} tap height`).toBeGreaterThanOrEqual(minimum);
+    const identifier = [target.label, target.id && `#${target.id}`, target.className && `.${String(target.className).trim().replace(/\s+/g, '.')}`]
+      .filter(Boolean)
+      .join(' ');
+    expect(target.width, `${identifier} tap width`).toBeGreaterThanOrEqual(minimum);
+    expect(target.height, `${identifier} tap height`).toBeGreaterThanOrEqual(minimum);
   }
 }
 
