@@ -1,56 +1,68 @@
-/* v136: iPhone SE3 manage screen layout fix */
+/* v137: restore manage layout and show theme chooser as modal sheet */
 .yos131-manage{
-  display:block!important;
+  display:grid!important;
+  grid-template-rows:36px 60px minmax(0,1fr)!important;
+  gap:5px!important;
   height:100%!important;
-  overflow-y:auto!important;
-  overflow-x:hidden!important;
-  padding-bottom:18px!important;
-  -webkit-overflow-scrolling:touch;
+  overflow:hidden!important;
+  padding-bottom:0!important;
 }
 .yos131-manage .yos131-header{
-  position:sticky;
-  top:0;
-  z-index:4;
-  background:#000;
-  margin-bottom:6px;
+  position:relative!important;
+  top:auto!important;
+  z-index:auto!important;
+  margin-bottom:0!important;
+  background:transparent!important;
 }
 .yos131-manage .yos131-manage-summary{
-  height:60px;
-  margin-bottom:8px;
+  height:auto!important;
+  margin-bottom:0!important;
 }
 .yos131-manage .yos131-tiles{
-  height:430px;
-  min-height:430px;
-  margin-bottom:10px;
+  height:auto!important;
+  min-height:0!important;
+  margin-bottom:0!important;
 }
-.yos131-manage #yos-theme-v134{
-  position:relative!important;
-  inset:auto!important;
-  width:auto!important;
-  max-height:none!important;
-  overflow:visible!important;
-  margin:0 0 76px!important;
-  padding:12px!important;
+.yos-theme-trigger{font-size:20px!important;line-height:1}
+#yos-theme-v137{
+  position:fixed;
+  inset:0;
+  width:100%;
+  max-width:none;
+  height:100%;
+  max-height:none;
+  margin:0;
+  padding:0;
+  border:0;
+  background:transparent;
+  color:var(--yos-text,#fff);
+  overflow:hidden;
 }
-.yos131-manage #yos-theme-v134 .yos-theme-title{
-  margin-bottom:9px;
+#yos-theme-v137::backdrop{background:rgba(0,0,0,.56);backdrop-filter:blur(2px)}
+#yos-theme-v137 .yos-theme-backdrop{position:absolute;inset:0}
+#yos-theme-v137 .yos-theme-sheet{
+  position:absolute;
+  left:50%;
+  bottom:max(10px,env(safe-area-inset-bottom));
+  transform:translateX(-50%);
+  width:min(calc(100% - 20px),410px);
+  max-height:min(72dvh,560px);
+  overflow:auto;
+  padding:14px;
+  border:1px solid var(--yos-line,#2a2d32);
+  border-radius:22px;
+  background:var(--yos-panel,#111214);
+  box-shadow:0 22px 60px rgba(0,0,0,.5);
+  -webkit-overflow-scrolling:touch;
 }
-.yos131-manage #yos-theme-v134 .yos-theme-title b{
-  font-size:17px;
-}
-.yos131-manage #yos-theme-v134 .yos-theme-grid{
-  grid-template-columns:repeat(2,minmax(0,1fr))!important;
-  gap:7px!important;
-}
-.yos131-manage #yos-theme-v134 button{
-  min-height:52px!important;
-  padding:8px 9px!important;
-  border-radius:12px!important;
-}
-.yos131-manage #yos-theme-v134 button small{
-  font-size:9px!important;
-}
-@media(max-width:390px){
-  .yos131-manage .yos131-tiles{height:400px;min-height:400px}
-  .yos131-manage #yos-theme-v134 .yos-theme-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
-}
+.yos-theme-sheet-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px}
+.yos-theme-sheet-head>div{display:grid;gap:3px}
+.yos-theme-sheet-head b{font-size:20px}
+.yos-theme-sheet-head small{font-size:11px;color:var(--yos-muted,#aaa)}
+.yos-theme-sheet-head [data-theme-close]{width:38px;height:38px;border:1px solid var(--yos-line,#2a2d32);border-radius:50%;background:var(--yos-panel2,#17191c);color:var(--yos-text,#fff);font-size:24px;line-height:1}
+#yos-theme-v137 .yos-theme-grid,#yos-theme-v137-settings .yos-theme-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+#yos-theme-v137 [data-theme],#yos-theme-v137-settings [data-theme]{min-height:64px;border:1px solid var(--yos-line,#2a2d32);border-radius:14px;background:var(--yos-panel2,#17191c);color:var(--yos-text,#fff);padding:10px;text-align:left}
+#yos-theme-v137 [data-theme] b,#yos-theme-v137-settings [data-theme] b{display:block;font-size:16px}
+#yos-theme-v137 [data-theme] small,#yos-theme-v137-settings [data-theme] small{display:block;margin-top:3px;font-size:10px;color:var(--yos-muted,#aaa)}
+#yos-theme-v137 [data-theme][aria-pressed="true"],#yos-theme-v137-settings [data-theme][aria-pressed="true"]{outline:2px solid var(--yos-accent,#f7c948);outline-offset:1px}
+@media(max-width:390px){#yos-theme-v137 .yos-theme-grid,#yos-theme-v137-settings .yos-theme-grid{grid-template-columns:1fr 1fr}}
