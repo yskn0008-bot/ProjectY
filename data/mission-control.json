@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-08-02T13:07:03+09:00",
+  "updated_at": "2026-08-02T13:52:12+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -24,13 +24,13 @@
     },
     {
       "id": "github-pr-175",
-      "title": "PR #175 HJ複数旅・今日のシーン・今週の物語の初版",
+      "title": "PR #175 HJ MVPコード完成｜複数旅・螺旋成長・ノンフィクション物語",
       "type": "GitHub PR",
       "status": "draft",
       "priority": 2,
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/175",
-      "updated_at": "2026-08-02T04:06:22Z"
+      "updated_at": "2026-08-02T04:49:00Z"
     },
     {
       "id": "github-pr-177",
@@ -60,7 +60,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/110",
-      "updated_at": "2026-07-31T13:46:54Z"
+      "updated_at": "2026-08-02T04:18:28Z"
     },
     {
       "id": "github-issue-120",
@@ -80,7 +80,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/142",
-      "updated_at": "2026-08-01T16:59:03Z"
+      "updated_at": "2026-08-02T04:08:54Z"
     },
     {
       "id": "github-issue-158",
@@ -120,7 +120,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/51",
-      "updated_at": "2026-08-02T03:59:22Z"
+      "updated_at": "2026-08-02T04:13:53Z"
     },
     {
       "id": "github-issue-86",
@@ -134,6 +134,13 @@
     }
   ],
   "recently_completed": [
+    {
+      "id": "github-commit-100bf532d611",
+      "title": "feat(taxi): ProjectY接続診断を追加 v142 (#182)",
+      "completed_at": "2026-08-02T04:45:28Z",
+      "result": "GitHub mainへ反映（100bf53）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/100bf532d611579d44dc51c1756c3f1e3cef459c"
+    },
     {
       "id": "github-commit-d2cc2e0b0fc1",
       "title": "test(nav): YOSナビ静的資産マニフェストを自動検査 (#179)",
@@ -161,13 +168,6 @@
       "completed_at": "2026-08-02T02:25:34Z",
       "result": "GitHub mainへ反映（1933867）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/1933867d442cd8381e314020a75aa1db6cf23926"
-    },
-    {
-      "id": "github-commit-0941fb34b339",
-      "title": "feat(taxi): add v138 minimal live status bar",
-      "completed_at": "2026-08-02T02:13:12Z",
-      "result": "GitHub mainへ反映（0941fb3）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/0941fb34b33913d3735d2cd5c80b8abdbf39854e"
     },
     {
       "id": "complete-002",
@@ -204,7 +204,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-08-02T13:07:03+09:00",
+      "last_update": "2026-08-02T13:52:12+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -285,7 +285,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-08-02T13:07:03+09:00",
+      "last_update": "2026-08-02T13:52:12+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -308,7 +308,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-08-02T13:07:03+09:00",
+      "last_update": "2026-08-02T13:52:12+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -390,5 +390,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "fb980ca94461a90e8ea0d78f6fd2aae3b56fc702da8fdfce8fc7c3c3f1021f2b"
+  "github_snapshot_hash": "a3c3ad03138b60b34a4f006a9b15d578a49d4f5dcdfcea3fcf5bfb599d24a791"
 }
