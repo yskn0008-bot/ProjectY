@@ -9,7 +9,7 @@ const navRoot = resolve(here, '..');
 const serviceWorker = await readFile(resolve(navRoot, 'service-worker.js'), 'utf8');
 
 const installMatch = serviceWorker.match(
-  /self\.addEventListener\('install', event => event\.waitUntil\(([\s\S]*?)\n\)\);\n\nself\.addEventListener\('activate'/
+  /self\.addEventListener\('install', event => event\.waitUntil\(([\s\S]*?)\n\)\);\s*self\.addEventListener\('activate'/
 );
 assert.ok(installMatch, 'installイベント処理を取得できません');
 const installBlock = installMatch[1];
