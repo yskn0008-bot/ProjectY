@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-08-04T06:52:21+09:00",
+  "updated_at": "2026-08-04T07:08:44+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -12,6 +12,16 @@
     ]
   },
   "inbox": [
+    {
+      "id": "github-pr-144",
+      "title": "PR #144 Hero's Journey MVPを完成",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/144",
+      "updated_at": "2026-08-01T13:46:38Z"
+    },
     {
       "id": "github-pr-175",
       "title": "PR #175 HJ MVP最終自動検収合格｜実機Safari確認待ち",
@@ -51,16 +61,6 @@
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/198",
       "updated_at": "2026-08-02T21:28:46Z"
-    },
-    {
-      "id": "github-pr-208",
-      "title": "PR #208 test(nav): YOSナビの状態応答境界を安全回帰化",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/208",
-      "updated_at": "2026-08-03T21:07:36Z"
     },
     {
       "id": "github-issue-10",
@@ -155,6 +155,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-eb2ce5528818",
+      "title": "test(nav): YOSナビの状態応答境界を安全回帰化 (#208)",
+      "completed_at": "2026-08-03T22:08:20Z",
+      "result": "GitHub mainへ反映（eb2ce55）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/eb2ce5528818443a4ad927124915d52b5a6b316d"
+    },
+    {
       "id": "github-commit-b130b06416fd",
       "title": "test(nav): YOSナビのネットワーク配信先固定を画面単位で安全回帰化 (#207)",
       "completed_at": "2026-08-03T20:05:45Z",
@@ -183,13 +190,6 @@
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/db786ea5e6257670c39dc089f07d1fe65053e632"
     },
     {
-      "id": "github-commit-d6a90c8a37e9",
-      "title": "test(nav): YOSナビのfetch担当範囲を安全回帰化 (#203)",
-      "completed_at": "2026-08-03T10:05:30Z",
-      "result": "GitHub mainへ反映（d6a90c8）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/d6a90c8a37e9b783f288001735f19a3f73c7baea"
-    },
-    {
       "id": "complete-002",
       "title": "iPhone向けMission Control Dashboardを実装",
       "completed_at": "2026-07-17T17:55:00+09:00",
@@ -214,7 +214,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #208をレビューして公開判断する",
+      "next_action": "PR #194をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -224,7 +224,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-08-04T06:52:21+09:00",
+      "last_update": "2026-08-04T07:08:44+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -299,13 +299,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 9件・Open PR 6件を自動同期中",
+      "next_action": "Open Issue 9件・Open PR 5件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-08-04T06:52:21+09:00",
+      "last_update": "2026-08-04T07:08:44+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -319,7 +319,7 @@
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #208をレビューして公開判断する",
+      "next_action": "PR #194をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -328,7 +328,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-08-04T06:52:21+09:00",
+      "last_update": "2026-08-04T07:08:44+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -410,5 +410,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "ac1a4c2bb00231191fdc59eebfd794682a9d97052248dba359e6fd9871cd24c6"
+  "github_snapshot_hash": "a0df7d05d88cf74cd2d2fd7266a94fd53f723c088ad2f629071b4d34ae7db500"
 }
