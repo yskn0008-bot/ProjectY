@@ -34,7 +34,8 @@ test('終了した画面の固定だけを解除し稼働中画面の固定を�
   assert.match(pruneBlock, /for \(const clientId of CLIENT_SERVING_CACHES\.keys\(\)\)/);
   assert.match(pruneBlock, /if \(!activeIds\.has\(clientId\)\) CLIENT_SERVING_CACHES\.delete\(clientId\)/);
   assert.doesNotMatch(pruneBlock, /CLIENT_SERVING_CACHES\.clear\(\)/);
-  assert.doesNotMatch(pruneBlock, /CLIENT_SERVING_CACHES\.delete\(clientId\)(?![^\n]*!activeIds\.has)/);
+  const deletions = pruneBlock.match(/CLIENT_SERVING_CACHES\.delete\(clientId\)/g) || [];
+  assert.equal(deletions.length, 1, '終了画面以外を解除できる追加の削除処理があります');
 });
 
 test('固定解除処理はキャッシュ本体やService Worker状態を変更しない', () => {
