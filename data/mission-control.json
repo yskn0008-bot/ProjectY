@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-08-03T16:08:48+09:00",
+  "updated_at": "2026-08-03T17:51:30+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -12,16 +12,6 @@
     ]
   },
   "inbox": [
-    {
-      "id": "github-pr-144",
-      "title": "PR #144 Hero's Journey MVPを完成",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/144",
-      "updated_at": "2026-08-01T13:46:38Z"
-    },
     {
       "id": "github-pr-175",
       "title": "PR #175 HJ MVP最終自動検収合格｜実機Safari確認待ち",
@@ -61,6 +51,16 @@
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/198",
       "updated_at": "2026-08-02T21:28:46Z"
+    },
+    {
+      "id": "github-pr-203",
+      "title": "PR #203 test(nav): YOSナビのfetch担当範囲を安全回帰化",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/203",
+      "updated_at": "2026-08-03T08:09:15Z"
     },
     {
       "id": "github-issue-10",
@@ -140,7 +140,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/51",
-      "updated_at": "2026-08-03T06:15:48Z"
+      "updated_at": "2026-08-03T08:14:08Z"
     },
     {
       "id": "github-issue-86",
@@ -214,7 +214,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #194をレビューして公開判断する",
+      "next_action": "PR #203をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -224,7 +224,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-08-03T16:08:48+09:00",
+      "last_update": "2026-08-03T17:51:30+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -299,13 +299,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 9件・Open PR 5件を自動同期中",
+      "next_action": "Open Issue 9件・Open PR 6件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-08-03T16:08:48+09:00",
+      "last_update": "2026-08-03T17:51:30+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -319,7 +319,7 @@
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #194をレビューして公開判断する",
+      "next_action": "PR #203をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -328,7 +328,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-08-03T16:08:48+09:00",
+      "last_update": "2026-08-03T17:51:30+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -410,5 +410,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "fd33f61f9015f04952c7aee73d491b2119030493eed08c7fe96077f07adab63a"
+  "github_snapshot_hash": "a400113e688e924d16bd64721a092b6855c37f1b27ad66e4522ed3635dc4aaa6"
 }
