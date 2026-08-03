@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-08-03T13:06:10+09:00",
+  "updated_at": "2026-08-03T16:08:48+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -50,7 +50,7 @@
       "priority": 2,
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/194",
-      "updated_at": "2026-08-03T02:18:01Z"
+      "updated_at": "2026-08-03T05:16:06Z"
     },
     {
       "id": "github-pr-198",
@@ -140,7 +140,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/51",
-      "updated_at": "2026-08-03T03:17:25Z"
+      "updated_at": "2026-08-03T06:15:48Z"
     },
     {
       "id": "github-issue-86",
@@ -154,6 +154,13 @@
     }
   ],
   "recently_completed": [
+    {
+      "id": "github-commit-41cd66fa52dc",
+      "title": "test(nav): YOSナビのインストール失敗時ロールバックを固定 (#202)",
+      "completed_at": "2026-08-03T07:08:34Z",
+      "result": "GitHub mainへ反映（41cd66f）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/41cd66fa52dc886d41e267cd9260807e2ca72e12"
+    },
     {
       "id": "github-commit-4a76dfc64f18",
       "title": "test(nav): YOSナビの必須スクリプト注入条件を固定 (#201)",
@@ -181,13 +188,6 @@
       "completed_at": "2026-08-02T21:06:48Z",
       "result": "GitHub mainへ反映（c19dafc）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/c19dafc4c5faf0e32eee3418c9e8c4a7aefbf476"
-    },
-    {
-      "id": "github-commit-a7e696f2c114",
-      "title": "test(nav): YOSナビ応答完全性の安全条件を固定 (#196)",
-      "completed_at": "2026-08-02T19:06:22Z",
-      "result": "GitHub mainへ反映（a7e696f）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/a7e696f2c114c4ffb366b08abc2e85b11bcc64c4"
     },
     {
       "id": "complete-002",
@@ -224,7 +224,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-08-03T13:06:10+09:00",
+      "last_update": "2026-08-03T16:08:48+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -305,7 +305,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-08-03T13:06:10+09:00",
+      "last_update": "2026-08-03T16:08:48+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -328,7 +328,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-08-03T13:06:10+09:00",
+      "last_update": "2026-08-03T16:08:48+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -410,5 +410,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "8cb9860652165fe323d1424ad8ae6e4dfa932ffe348ee0c26eebaae604bb76f7"
+  "github_snapshot_hash": "fd33f61f9015f04952c7aee73d491b2119030493eed08c7fe96077f07adab63a"
 }
