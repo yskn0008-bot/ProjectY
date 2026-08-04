@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-08-04T10:31:48+09:00",
+  "updated_at": "2026-08-04T13:05:33+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -33,6 +33,16 @@
       "updated_at": "2026-08-02T05:43:14Z"
     },
     {
+      "id": "github-pr-177",
+      "title": "PR #177 feat(life): complete daily home and isolate cache cleanup",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/177",
+      "updated_at": "2026-08-02T03:59:59Z"
+    },
+    {
       "id": "github-pr-194",
       "title": "PR #194 ci(taxi): iPhone SE3ブラウザ試験を自動実行",
       "type": "GitHub PR",
@@ -51,16 +61,6 @@
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/198",
       "updated_at": "2026-08-02T21:28:46Z"
-    },
-    {
-      "id": "github-pr-210",
-      "title": "PR #210 test(nav): YOSナビのネットワークマーカー境界を安全回帰化",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/210",
-      "updated_at": "2026-08-04T01:10:06Z"
     },
     {
       "id": "github-issue-10",
@@ -120,7 +120,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/214",
-      "updated_at": "2026-08-04T01:31:27Z"
+      "updated_at": "2026-08-04T01:39:56Z"
     },
     {
       "id": "github-issue-4",
@@ -150,7 +150,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/51",
-      "updated_at": "2026-08-04T01:27:48Z"
+      "updated_at": "2026-08-04T03:14:03Z"
     },
     {
       "id": "github-issue-86",
@@ -164,6 +164,13 @@
     }
   ],
   "recently_completed": [
+    {
+      "id": "github-commit-b97a484066c3",
+      "title": "test(nav): YOSナビのネットワークマーカー境界を安全回帰化 (#210)",
+      "completed_at": "2026-08-04T04:05:20Z",
+      "result": "GitHub mainへ反映（b97a484）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/b97a484066c396475b3f3d385a02b8ae002bd6cd"
+    },
     {
       "id": "github-commit-a8178ebb9cec",
       "title": "test(nav): YOSナビの旧ネットワークマーカー復旧を安全回帰化 (#209)",
@@ -191,13 +198,6 @@
       "completed_at": "2026-08-03T18:07:04Z",
       "result": "GitHub mainへ反映（9764164）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/9764164fb057abe1787ab212e3749cd068409c31"
-    },
-    {
-      "id": "github-commit-adbcbc3f279d",
-      "title": "test(nav): YOSナビのキャッシュ整理範囲を安全回帰化 (#205)",
-      "completed_at": "2026-08-03T14:08:14Z",
-      "result": "GitHub mainへ反映（adbcbc3）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/adbcbc3f279d1bb23e48ff055afae26795f6c9db"
     },
     {
       "id": "complete-002",
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-08-04T10:31:48+09:00",
+      "last_update": "2026-08-04T13:05:33+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -309,13 +309,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 10件・Open PR 7件を自動同期中",
+      "next_action": "Open Issue 10件・Open PR 6件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-08-04T10:31:48+09:00",
+      "last_update": "2026-08-04T13:05:33+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-08-04T10:31:48+09:00",
+      "last_update": "2026-08-04T13:05:33+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "319639a28b9c359b319e77beb98ad3c6785e1579bc75aa9a4b12a68d74b7d1a8"
+  "github_snapshot_hash": "730dbe4a7b87b8403ef7b9e1cf7fa2c171aad664ffe86960bb1a55babf832661"
 }
