@@ -1,0 +1,53 @@
+name: Taxi iPhone SE3 Playwright
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'taxi/**'
+      - '.github/workflows/taxi-iphone-se3.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: taxi-iphone-se3-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  browser-smoke:
+    name: Chromium and WebKit at 375x667
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: ''
+
+      - name: Install Taxi test dependencies
+        run: npm --prefix taxi/tests ci --no-audit --no-fund
+
+      - name: Install Chromium, WebKit, and OS dependencies
+        run: npx --prefix taxi/tests playwright install --with-deps chromium webkit
+
+      - name: Run Taxi iPhone SE3 browser tests
+        run: npm --prefix taxi/tests run test:se3
+
+      - name: Upload Taxi Playwright artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: taxi-iphone-se3-playwright-${{ github.run_attempt }}
+          path: |
+            taxi/test-results/report/
+            taxi/test-results/raw/
+            taxi/test-results/artifacts/
+          if-no-files-found: warn
+          retention-days: 14
