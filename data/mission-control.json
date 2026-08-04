@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-08-04T23:48:00+09:00",
+  "updated_at": "2026-08-05T00:19:22+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -13,16 +13,6 @@
   },
   "inbox": [
     {
-      "id": "github-pr-213",
-      "title": "PR #213 Add iPhone SE3 Playwright smoke tests and CI workflow for Taxi",
-      "type": "GitHub PR",
-      "status": "review",
-      "priority": 1,
-      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/213",
-      "updated_at": "2026-08-04T01:23:31Z"
-    },
-    {
       "id": "github-pr-175",
       "title": "PR #175 HJ MVP最終自動検収合格｜実機Safari確認待ち",
       "type": "GitHub PR",
@@ -31,16 +21,6 @@
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/175",
       "updated_at": "2026-08-02T05:43:14Z"
-    },
-    {
-      "id": "github-pr-177",
-      "title": "PR #177 feat(life): complete daily home and isolate cache cleanup",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/177",
-      "updated_at": "2026-08-02T03:59:59Z"
     },
     {
       "id": "github-pr-194",
@@ -61,6 +41,26 @@
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/198",
       "updated_at": "2026-08-02T21:28:46Z"
+    },
+    {
+      "id": "github-pr-213",
+      "title": "PR #213 Add iPhone SE3 Playwright smoke tests and CI workflow for Taxi",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/213",
+      "updated_at": "2026-08-04T14:50:36Z"
+    },
+    {
+      "id": "github-pr-227",
+      "title": "PR #227 test(nav): YOSナビ要求スコープ境界を安全回帰化",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/227",
+      "updated_at": "2026-08-04T15:07:14Z"
     },
     {
       "id": "github-issue-10",
@@ -150,7 +150,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/51",
-      "updated_at": "2026-08-04T14:47:56Z"
+      "updated_at": "2026-08-04T14:50:49Z"
     },
     {
       "id": "github-issue-86",
@@ -224,7 +224,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #213をレビューして公開判断する",
+      "next_action": "PR #227をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-08-04T23:48:00+09:00",
+      "last_update": "2026-08-05T00:19:22+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -309,13 +309,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 12件・Open PR 6件を自動同期中",
+      "next_action": "Open Issue 13件・Open PR 7件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-08-04T23:48:00+09:00",
+      "last_update": "2026-08-05T00:19:22+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -329,7 +329,7 @@
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #213をレビューして公開判断する",
+      "next_action": "PR #227をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-08-04T23:48:00+09:00",
+      "last_update": "2026-08-05T00:19:22+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "b907a57444d82bfa3b6f5e4b0d0c37448f2aad7748d5e848c8899c782f4030da"
+  "github_snapshot_hash": "6feed490e5366e24424d07f0ab8be93006a4ddc0c6710cfa4b47839ed414dbfe"
 }
