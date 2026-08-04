@@ -59,12 +59,12 @@ test('ネットワークマーカーは専用query parameterの厳格な世代�
 });
 
 test('fetch処理はスコープ判定後にナビゲーションと承認資産だけを専用配信する', () => {
-  assert.match(fetchBlock, /const relativePath = toNavRelativePath\(url\)/);
-  assert.match(fetchBlock, /const isNavPage = relativePath === '\.\/' \|\| relativePath === '\.\/index\.html'/);
+  assert.match(fetchBlock, /const relativePath = toNavRelativePath\(requestUrl\)/);
+  assert.match(fetchBlock, /const isNavPage = event\.request\.mode === 'navigate' && \(relativePath === '\.\/' \|\| relativePath === '\.\/index\.html'\)/);
   assert.match(fetchBlock, /isApprovedRuntimeAsset\(relativePath\)/);
 
-  const scopeIndex = fetchBlock.indexOf('toNavRelativePath(url)');
-  const navIndex = fetchBlock.indexOf("relativePath === './'");
+  const scopeIndex = fetchBlock.indexOf('toNavRelativePath(requestUrl)');
+  const navIndex = fetchBlock.indexOf("event.request.mode === 'navigate'");
   const approvedIndex = fetchBlock.indexOf('isApprovedRuntimeAsset(relativePath)');
   assert.ok(scopeIndex >= 0 && navIndex > scopeIndex && approvedIndex > scopeIndex,
     '要求スコープ判定より先に専用配信判定を行っています');
