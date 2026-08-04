@@ -14,11 +14,13 @@ const fetchMatch = serviceWorker.match(
 assert.ok(fetchMatch, 'fetchイベント処理を取得できません');
 const fetchBlock = fetchMatch[1];
 
-const approvedAssetMatch = fetchBlock.match(
-  /if \(isApprovedRuntimeAsset\(relativePath\)\) \{([\s\S]*?)\n\s*\}/
-);
-assert.ok(approvedAssetMatch, '承認済み資産処理を取得できません');
-const approvedAssetBlock = approvedAssetMatch[1];
+const approvedAssetStartToken = 'if (isApprovedRuntimeAsset(relativePath)) {';
+const approvedAssetEndToken = "event.respondWith(fetch(event.request, {cache: 'no-cache'}));";
+const approvedAssetStart = fetchBlock.indexOf(approvedAssetStartToken);
+const approvedAssetEnd = fetchBlock.indexOf(approvedAssetEndToken, approvedAssetStart);
+assert.ok(approvedAssetStart >= 0, '承認済み資産処理の開始位置を取得できません');
+assert.ok(approvedAssetEnd > approvedAssetStart, '承認済み資産処理の終了位置を取得できません');
+const approvedAssetBlock = fetchBlock.slice(approvedAssetStart, approvedAssetEnd);
 
 const indexOfOrFail = (source, token, message) => {
   const index = source.indexOf(token);
