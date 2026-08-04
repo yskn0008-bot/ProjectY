@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-08-02T13:52:12+09:00",
+  "updated_at": "2026-08-04T09:08:06+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -24,13 +24,13 @@
     },
     {
       "id": "github-pr-175",
-      "title": "PR #175 HJ MVPコード完成｜複数旅・螺旋成長・ノンフィクション物語",
+      "title": "PR #175 HJ MVP最終自動検収合格｜実機Safari確認待ち",
       "type": "GitHub PR",
       "status": "draft",
       "priority": 2,
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/175",
-      "updated_at": "2026-08-02T04:49:00Z"
+      "updated_at": "2026-08-02T05:43:14Z"
     },
     {
       "id": "github-pr-177",
@@ -41,6 +41,26 @@
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/177",
       "updated_at": "2026-08-02T03:59:59Z"
+    },
+    {
+      "id": "github-pr-194",
+      "title": "PR #194 ci(taxi): iPhone SE3ブラウザ試験を自動実行",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/194",
+      "updated_at": "2026-08-03T05:16:06Z"
+    },
+    {
+      "id": "github-pr-198",
+      "title": "PR #198 Draft: HJ integration audit and legacy data safety contract",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/198",
+      "updated_at": "2026-08-02T21:28:46Z"
     },
     {
       "id": "github-issue-10",
@@ -60,7 +80,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/110",
-      "updated_at": "2026-08-02T04:18:28Z"
+      "updated_at": "2026-08-02T06:31:48Z"
     },
     {
       "id": "github-issue-120",
@@ -80,7 +100,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/142",
-      "updated_at": "2026-08-02T04:08:54Z"
+      "updated_at": "2026-08-02T05:43:26Z"
     },
     {
       "id": "github-issue-158",
@@ -120,7 +140,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/51",
-      "updated_at": "2026-08-02T04:13:53Z"
+      "updated_at": "2026-08-03T23:10:48Z"
     },
     {
       "id": "github-issue-86",
@@ -135,39 +155,39 @@
   ],
   "recently_completed": [
     {
-      "id": "github-commit-100bf532d611",
-      "title": "feat(taxi): ProjectY接続診断を追加 v142 (#182)",
-      "completed_at": "2026-08-02T04:45:28Z",
-      "result": "GitHub mainへ反映（100bf53）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/100bf532d611579d44dc51c1756c3f1e3cef459c"
+      "id": "github-commit-a8178ebb9cec",
+      "title": "test(nav): YOSナビの旧ネットワークマーカー復旧を安全回帰化 (#209)",
+      "completed_at": "2026-08-04T00:07:55Z",
+      "result": "GitHub mainへ反映（a8178eb）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/a8178ebb9cec6e11e0ba84cee366c0dc0ef2dae0"
     },
     {
-      "id": "github-commit-d2cc2e0b0fc1",
-      "title": "test(nav): YOSナビ静的資産マニフェストを自動検査 (#179)",
-      "completed_at": "2026-08-02T04:04:24Z",
-      "result": "GitHub mainへ反映（d2cc2e0）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/d2cc2e0b0fc1c57b4a4333450e2082578a74cec3"
+      "id": "github-commit-eb2ce5528818",
+      "title": "test(nav): YOSナビの状態応答境界を安全回帰化 (#208)",
+      "completed_at": "2026-08-03T22:08:20Z",
+      "result": "GitHub mainへ反映（eb2ce55）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/eb2ce5528818443a4ad927124915d52b5a6b316d"
     },
     {
-      "id": "github-commit-1aeb3f2d44ab",
-      "title": "feat(taxi): v141営業クイック設定 (#181)",
-      "completed_at": "2026-08-02T03:59:00Z",
-      "result": "GitHub mainへ反映（1aeb3f2）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/1aeb3f2d44abee5dcf3041d3518c61671f1e6958"
+      "id": "github-commit-b130b06416fd",
+      "title": "test(nav): YOSナビのネットワーク配信先固定を画面単位で安全回帰化 (#207)",
+      "completed_at": "2026-08-03T20:05:45Z",
+      "result": "GitHub mainへ反映（b130b06）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/b130b06416fd910353b81a55ea93f6a8e66a0944"
     },
     {
-      "id": "github-commit-05a7280d623f",
-      "title": "test(taxi): Service Worker安全検査を追加 (#180)",
-      "completed_at": "2026-08-02T03:56:54Z",
-      "result": "GitHub mainへ反映（05a7280）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/05a7280d623f78dd23d2a067231e10f67e75ef3a"
+      "id": "github-commit-9764164fb057",
+      "title": "test(nav): YOSナビの終了画面固定解除を安全回帰化 (#206)",
+      "completed_at": "2026-08-03T18:07:04Z",
+      "result": "GitHub mainへ反映（9764164）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/9764164fb057abe1787ab212e3749cd068409c31"
     },
     {
-      "id": "github-commit-1933867d442c",
-      "title": "feat(taxi): v139 bulk UX update",
-      "completed_at": "2026-08-02T02:25:34Z",
-      "result": "GitHub mainへ反映（1933867）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/1933867d442cd8381e314020a75aa1db6cf23926"
+      "id": "github-commit-adbcbc3f279d",
+      "title": "test(nav): YOSナビのキャッシュ整理範囲を安全回帰化 (#205)",
+      "completed_at": "2026-08-03T14:08:14Z",
+      "result": "GitHub mainへ反映（adbcbc3）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/adbcbc3f279d1bb23e48ff055afae26795f6c9db"
     },
     {
       "id": "complete-002",
@@ -194,7 +214,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #175をレビューして公開判断する",
+      "next_action": "PR #194をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -204,7 +224,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-08-02T13:52:12+09:00",
+      "last_update": "2026-08-04T09:08:06+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -279,13 +299,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 9件・Open PR 3件を自動同期中",
+      "next_action": "Open Issue 9件・Open PR 5件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-08-02T13:52:12+09:00",
+      "last_update": "2026-08-04T09:08:06+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -299,7 +319,7 @@
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #175をレビューして公開判断する",
+      "next_action": "PR #194をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -308,7 +328,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-08-02T13:52:12+09:00",
+      "last_update": "2026-08-04T09:08:06+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -390,5 +410,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "a3c3ad03138b60b34a4f006a9b15d578a49d4f5dcdfcea3fcf5bfb599d24a791"
+  "github_snapshot_hash": "73a48f470efdb3e987739c09f8da16b2ad8858cf325419091927103a74a158f8"
 }
