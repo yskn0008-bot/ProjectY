@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-08-06T04:05:05+09:00",
+  "updated_at": "2026-08-06T07:42:21+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -193,13 +193,6 @@
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/50b682c94bc57d8c057cd6409758f744366702e8"
     },
     {
-      "id": "github-commit-0b933101b259",
-      "title": "test(nav): YOSナビの保持キャッシュ完全性検証を安全回帰化 (#221)",
-      "completed_at": "2026-08-04T12:08:31Z",
-      "result": "GitHub mainへ反映（0b93310）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/0b933101b25987d73b44e7006cb32660aec88dc7"
-    },
-    {
       "id": "complete-002",
       "title": "iPhone向けMission Control Dashboardを実装",
       "completed_at": "2026-07-17T17:55:00+09:00",
@@ -234,7 +227,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-08-06T04:05:05+09:00",
+      "last_update": "2026-08-06T07:42:21+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -315,7 +308,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-08-06T04:05:05+09:00",
+      "last_update": "2026-08-06T07:42:21+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -338,7 +331,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-08-06T04:05:05+09:00",
+      "last_update": "2026-08-06T07:42:21+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +413,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "384eb628b94efd48229224113b6180f27c2ba4c74a77ce9811b7bd897fd26962"
+  "github_snapshot_hash": "603443c3b7f7f3104729d0f042735ce6fa3c818acbfaf8e925f48876c5bbf4d2"
 }
