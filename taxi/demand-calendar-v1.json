@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "updatedAt": "2026-08-06T22:35:00+09:00",
+  "sourcePolicy": {
+    "officialSourcesRequired": true,
+    "confidenceLevels": ["confirmed", "provisional", "unverified"],
+    "notes": "Taxi需要判断に使うため、公式情報・取得日・更新日・根拠を必須とする。"
+  },
+  "events": []
+}
