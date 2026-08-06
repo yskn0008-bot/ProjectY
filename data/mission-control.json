@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-08-06T23:30:59+09:00",
+  "updated_at": "2026-08-06T23:39:26+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -165,6 +165,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-309b35b8968b",
+      "title": "feat(taxi): add demand calendar",
+      "completed_at": "2026-08-06T14:38:26Z",
+      "result": "GitHub mainへ反映（309b35b）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/309b35b8968b236c3076abde7a1222dde744961f"
+    },
+    {
       "id": "github-commit-7f3b02f155b8",
       "title": "revert: remove unreviewed demand calendar file from main",
       "completed_at": "2026-08-06T14:30:12Z",
@@ -184,13 +191,6 @@
       "completed_at": "2026-08-04T16:13:35Z",
       "result": "GitHub mainへ反映（b055988）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/b055988a641cfa9974a912b85883124642dd6b04"
-    },
-    {
-      "id": "github-commit-f53e51cc8349",
-      "title": "test(nav): YOSナビの旧世代マーカー復旧境界を安全回帰化 (#224)",
-      "completed_at": "2026-08-04T14:11:47Z",
-      "result": "GitHub mainへ反映（f53e51c）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/f53e51cc8349f6a3119dff8fd863dbacd632253e"
     },
     {
       "id": "complete-002",
@@ -227,7 +227,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-08-06T23:30:59+09:00",
+      "last_update": "2026-08-06T23:39:26+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -308,7 +308,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-08-06T23:30:59+09:00",
+      "last_update": "2026-08-06T23:39:26+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -331,7 +331,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-08-06T23:30:59+09:00",
+      "last_update": "2026-08-06T23:39:26+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -413,5 +413,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "bb3f4040cedab68c19bfcf42589a3f4bdc6cac4fa1e8d1496850a94b05be25d9"
+  "github_snapshot_hash": "1310a3b9ad5f406f7cf389075940e8672b12bd0d762e1b60121080e0829c3d68"
 }
