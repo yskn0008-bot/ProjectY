@@ -1,0 +1,93 @@
+{
+  "version": 1,
+  "updatedAt": "2026-08-06T23:45:00+09:00",
+  "sourcePolicy": {
+    "officialSourcesRequired": true,
+    "confidenceLevels": ["confirmed", "provisional", "unverified"],
+    "notes": "Taxi需要判断に使うため、公式情報・取得日・更新日・根拠を必須とする。天候・主催者都合で変更されるため営業前に再確認する。"
+  },
+  "events": [
+    {
+      "id": "2026-08-09-eisa-night",
+      "title": "エイサーナイト",
+      "date": "2026-08-09",
+      "startTime": "19:00",
+      "endTime": null,
+      "area": "沖縄市・比屋根",
+      "venue": "沖縄県総合運動公園",
+      "category": "festival",
+      "demandLevel": "high",
+      "demandWindows": ["17:30-19:00", "20:30-22:30"],
+      "taxiNotes": "開演前は周辺流入、終了後は沖縄市中心部・北谷方面への移動需要を想定。渋滞・交通規制は未確認。",
+      "confidence": "confirmed",
+      "sourceName": "VISIT OKINAWA JAPAN（沖縄観光公式）",
+      "sourceUrl": "https://visitokinawajapan.com/discover/events/eisa-night/",
+      "sourceCheckedAt": "2026-08-06"
+    },
+    {
+      "id": "2026-08-15-16-yonabaru-tug",
+      "title": "与那原大綱曳まつり",
+      "date": "2026-08-15",
+      "endDate": "2026-08-16",
+      "startTime": null,
+      "endTime": null,
+      "area": "与那原町",
+      "venue": "与那原町内",
+      "category": "festival",
+      "demandLevel": "high",
+      "demandWindows": ["夕方前", "終了後"],
+      "taxiNotes": "大規模祭事。那覇・南部との往復需要が見込まれるが、詳細時刻・交通規制は営業前に公式確認が必要。",
+      "confidence": "confirmed",
+      "sourceName": "VISIT OKINAWA JAPAN（沖縄観光公式）",
+      "sourceUrl": "https://visitokinawajapan.com/discover/events/",
+      "sourceCheckedAt": "2026-08-06"
+    },
+    {
+      "id": "2026-08-16-children-rights",
+      "title": "沖縄県こどもの権利シンポジウム・夏休み親子イベント",
+      "date": "2026-08-16",
+      "startTime": "09:00",
+      "endTime": "17:00",
+      "area": "読谷村",
+      "venue": "読谷村文化センター",
+      "category": "conference",
+      "demandLevel": "medium",
+      "demandWindows": ["08:00-09:30", "15:30-17:30"],
+      "taxiNotes": "親子イベントとシンポジウム。読谷村内・北谷方面との移動を想定。来場規模は未確認。",
+      "confidence": "confirmed",
+      "sourceName": "沖縄県公式ホームページ",
+      "sourceUrl": "https://www.pref.okinawa.jp/kyoiku/jido/1007994/1040845.html",
+      "sourceCheckedAt": "2026-08-06"
+    },
+    {
+      "id": "2026-08-15-peace-reading",
+      "title": "昭和100年 平和朗読会",
+      "date": "2026-08-15",
+      "startTime": "14:00",
+      "endTime": "16:00",
+      "area": "那覇市・首里",
+      "venue": "首里支所 大会議室",
+      "category": "lecture",
+      "demandLevel": "low",
+      "demandWindows": ["13:00-14:00", "16:00-17:00"],
+      "taxiNotes": "駐車不可のため一部タクシー需要の可能性。規模は限定的と判断。",
+      "confidence": "confirmed",
+      "sourceName": "那覇市公式ホームページ",
+      "sourceUrl": "https://www.city.naha.okinawa.jp/kurasitetuduki/sankaku-kyoudou/1002706/1004745/1004833/1007488/1012182.html",
+      "sourceCheckedAt": "2026-08-06"
+    }
+  ],
+  "liveSources": [
+    {
+      "id": "naha-cruise-live",
+      "title": "那覇港 クルーズ船寄港予定",
+      "type": "cruise",
+      "status": "manual-check-required",
+      "confidence": "confirmed",
+      "notes": "寄港予定は申請情報に基づくライブシステムで公開され、天候等で急変する。営業前に当日分を確認する。",
+      "sourceName": "那覇港管理組合",
+      "sourceUrl": "https://nahaport.jp/sp/users/kyakusen/",
+      "sourceCheckedAt": "2026-08-06"
+    }
+  ]
+}
