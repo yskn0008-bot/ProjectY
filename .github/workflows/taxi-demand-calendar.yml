@@ -1,0 +1,29 @@
+name: Taxi Demand Calendar
+
+on:
+  pull_request:
+    paths:
+      - 'taxi/demand-calendar.html'
+      - 'taxi/demand-calendar-v1.json'
+      - 'taxi/tests/demand-calendar.test.mjs'
+      - '.github/workflows/taxi-demand-calendar.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'taxi/demand-calendar.html'
+      - 'taxi/demand-calendar-v1.json'
+      - 'taxi/tests/demand-calendar.test.mjs'
+      - '.github/workflows/taxi-demand-calendar.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test taxi/tests/demand-calendar.test.mjs
