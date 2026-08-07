@@ -39,9 +39,10 @@
         candidates.push({event,window:label,phase,start:parsed?.start??Infinity});
       }
     }
-    candidates.sort((a,b)=>a.phase-b.phase||a.start-b.start||
+    candidates.sort((a,b)=>a.phase-b.phase||
       (demandWeight[b.event.demandLevel]||0)-(demandWeight[a.event.demandLevel]||0)||
-      (confidenceWeight[b.event.confidence]||0)-(confidenceWeight[a.event.confidence]||0));
+      (confidenceWeight[b.event.confidence]||0)-(confidenceWeight[a.event.confidence]||0)||
+      a.start-b.start);
     return candidates[0]||null;
   };
 
