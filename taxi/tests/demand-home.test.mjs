@@ -55,7 +55,7 @@ test('挿入先の生成前はfetchせずmicrotask自己再試行を作らない
 
 test('挿入先の生成後は1回mountしてカードへ置換する',async()=>{
   let fetches=0,inserted;
-  const advice={after:node=>{inserted=node}};
+  const advice={after:node=>{inserted=node;node.isConnected=true}};
   const drive={querySelector:selector=>selector==='.yos131-advice'?advice:null};
   const sandbox={
     globalThis:{},
@@ -71,6 +71,72 @@ test('挿入先の生成後は1回mountしてカードへ置換する',async()=>
   assert.equal(inserted.className,'demand-home-slot');
   assert.match(inserted.outerHTML,/data-demand-state="empty"/);
   assert.match(inserted.outerHTML,/需要カレンダー/);
+});
+
+test('fetch中にplaceholderが切断されても再fetchせず最新ホームへカードを1回だけ挿入する',async()=>{
+  let fetches=0,microtasks=0,resolveJson,oldPlaceholder,insertions=0,insertedHtml='';
+  const oldAdvice={after:node=>{oldPlaceholder=node;node.isConnected=true}};
+  const oldDrive={querySelector:selector=>selector==='.yos131-advice'?oldAdvice:null};
+  const currentAdvice={insertAdjacentHTML:(position,html)=>{
+    assert.equal(position,'afterend');
+    insertions++;
+    insertedHtml=html;
+  }};
+  const currentDrive={querySelector:selector=>selector==='.yos131-advice'?currentAdvice:null};
+  let activeDrive=oldDrive;
+  const sandbox={
+    globalThis:{},
+    queueMicrotask:()=>{microtasks++},
+    fetch:async()=>{
+      fetches++;
+      return{ok:true,json:()=>new Promise(resolve=>{resolveJson=resolve})};
+    },
+  };
+  vm.runInNewContext(source,sandbox);
+  sandbox.document={
+    querySelector:selector=>selector==='.yos131-drive'?activeDrive:null,
+    createElement:()=>({isConnected:false}),
+  };
+
+  const mounting=sandbox.globalThis.YosTaxiDemandHome.mount();
+  await new Promise(resolve=>setImmediate(resolve));
+  oldPlaceholder.isConnected=false;
+  activeDrive=currentDrive;
+  resolveJson({updatedAt:'2026-08-07',events:[]});
+  await mounting;
+
+  assert.equal(fetches,1);
+  assert.equal(microtasks,0);
+  assert.equal(insertions,1);
+  assert.match(insertedHtml,/data-demand-state="empty"/);
+});
+
+test('fetch失敗中にplaceholderが切断されても最新ホームへerrorを1回だけ挿入する',async()=>{
+  let rejectFetch,oldPlaceholder,insertions=0,insertedHtml='';
+  const oldAdvice={after:node=>{oldPlaceholder=node;node.isConnected=true}};
+  const oldDrive={querySelector:selector=>selector==='.yos131-advice'?oldAdvice:null};
+  const currentAdvice={insertAdjacentHTML:(_position,html)=>{insertions++;insertedHtml=html}};
+  const currentDrive={querySelector:selector=>selector==='.yos131-advice'?currentAdvice:null};
+  let activeDrive=oldDrive;
+  const sandbox={
+    globalThis:{},
+    fetch:()=>new Promise((_,reject)=>{rejectFetch=reject}),
+  };
+  vm.runInNewContext(source,sandbox);
+  sandbox.document={
+    querySelector:selector=>selector==='.yos131-drive'?activeDrive:null,
+    createElement:()=>({isConnected:false}),
+  };
+
+  const mounting=sandbox.globalThis.YosTaxiDemandHome.mount();
+  oldPlaceholder.isConnected=false;
+  activeDrive=currentDrive;
+  rejectFetch(new Error('offline'));
+  await mounting;
+
+  assert.equal(insertions,1);
+  assert.match(insertedHtml,/data-demand-state="error"/);
+  assert.match(insertedHtml,/需要情報を確認できません/);
 });
 
 test('ホーム導線、失敗時の未確認表示、保存キー非干渉を維持する',async()=>{
