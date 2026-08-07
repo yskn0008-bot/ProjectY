@@ -5,14 +5,22 @@ on:
     paths:
       - 'taxi/demand-calendar.html'
       - 'taxi/demand-calendar-v1.json'
-      - 'taxi/tests/demand-calendar.test.mjs'
+      - 'taxi/demand-home-v144.css'
+      - 'taxi/demand-home-v144.js'
+      - 'taxi/index.html'
+      - 'taxi/service-worker.js'
+      - 'taxi/tests/*.test.mjs'
       - '.github/workflows/taxi-demand-calendar.yml'
   push:
     branches: [main]
     paths:
       - 'taxi/demand-calendar.html'
       - 'taxi/demand-calendar-v1.json'
-      - 'taxi/tests/demand-calendar.test.mjs'
+      - 'taxi/demand-home-v144.css'
+      - 'taxi/demand-home-v144.js'
+      - 'taxi/index.html'
+      - 'taxi/service-worker.js'
+      - 'taxi/tests/*.test.mjs'
       - '.github/workflows/taxi-demand-calendar.yml'
 
 permissions:
@@ -26,4 +34,4 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - run: node --test taxi/tests/demand-calendar.test.mjs
+      - run: node --test taxi/tests/*.test.mjs
