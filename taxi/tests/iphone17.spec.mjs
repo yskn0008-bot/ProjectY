@@ -123,8 +123,28 @@ test.describe('iPhone17 viewport and touch smoke', () => {
 
         const calendarLink = demand.locator('a[href="./demand-calendar.html"]');
         await expect(calendarLink).toBeVisible();
-        const calendarBox = await calendarLink.boundingBox();
-        expect(calendarBox?.height, 'demand calendar tap height').toBeGreaterThanOrEqual(44);
+        await expect(calendarLink).toHaveText('需要カレンダー');
+        const calendarLayout = await calendarLink.evaluate(element => {
+          const box = element.getBoundingClientRect();
+          const style = getComputedStyle(element);
+          return {
+            text: element.textContent.trim(),
+            width: box.width,
+            height: box.height,
+            display: style.display,
+            visibility: style.visibility,
+            opacity: Number(style.opacity),
+            color: style.color,
+          };
+        });
+        expect(calendarLayout.text).toBe('需要カレンダー');
+        expect(calendarLayout.width, 'demand calendar tap width').toBeGreaterThanOrEqual(44);
+        expect(calendarLayout.height, 'demand calendar tap height').toBeGreaterThanOrEqual(44);
+        expect(calendarLayout.display, 'demand calendar display').not.toBe('none');
+        expect(calendarLayout.visibility, 'demand calendar visibility').not.toBe('hidden');
+        expect(calendarLayout.opacity, 'demand calendar opacity').toBeGreaterThan(0);
+        expect(calendarLayout.color, 'demand calendar color').not.toMatch(/rgba?\([^)]*,\s*0\s*\)$/);
+        expect(calendarLayout.color, 'demand calendar color').not.toBe('transparent');
 
         const source = demand.locator('.demand-source');
         await expect(source).toBeVisible();
@@ -141,9 +161,36 @@ test.describe('iPhone17 viewport and touch smoke', () => {
           clientWidth: element.clientWidth,
           scrollHeight: element.scrollHeight,
           clientHeight: element.clientHeight,
+          bottom: element.getBoundingClientRect().bottom,
+          demandBottom: element.closest('.demand-home').getBoundingClientRect().bottom,
         }));
         expect(detailLayout.scrollWidth, 'demand details horizontal clipping').toBeLessThanOrEqual(detailLayout.clientWidth + 1);
         expect(detailLayout.scrollHeight, 'demand confidence vertical clipping').toBeLessThanOrEqual(detailLayout.clientHeight + 1);
+        expect(detailLayout.bottom, 'demand details clipped by card').toBeLessThanOrEqual(detailLayout.demandBottom + 1);
+
+        const driveLayout = await page.locator('.yos131-drive').evaluate(element => {
+          const box = element.getBoundingClientRect();
+          const navTop = document.querySelector('.yos131-nav')?.getBoundingClientRect().top ?? innerHeight;
+          const children = [...element.children].map(child => ({
+            className: child.className,
+            bottom: child.getBoundingClientRect().bottom,
+          }));
+          const actions = element.querySelector('.yos131-actions')?.getBoundingClientRect();
+          return {
+            bottom: box.bottom,
+            navTop,
+            children,
+            actionsHeight: actions?.height ?? 0,
+            tracks: getComputedStyle(element).gridTemplateRows.split(/\s+/).filter(Boolean),
+          };
+        });
+        expect(driveLayout.tracks, 'drive must define all seven demand rows').toHaveLength(7);
+        expect(driveLayout.bottom, 'drive must stay above navigation').toBeLessThanOrEqual(driveLayout.navTop + 1);
+        for (const child of driveLayout.children) {
+          expect(child.bottom, `${child.className} exceeds drive boundary`).toBeLessThanOrEqual(driveLayout.bottom + 1);
+          expect(child.bottom, `${child.className} overlaps navigation`).toBeLessThanOrEqual(driveLayout.navTop + 1);
+        }
+        expect(driveLayout.actionsHeight, 'actions track expanded abnormally').toBeLessThanOrEqual(80);
       }
 
       await expectIPhone17Layout(page);
