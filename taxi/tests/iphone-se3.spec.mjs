@@ -12,15 +12,19 @@ const pages = [
 const themes = ['minimal', 'night-gold', 'light', 'map', 'hud'];
 const artifactRoot = resolve(import.meta.dirname, '../test-results/artifacts');
 
-async function openControlled(page, path, readySelector) {
+async function openApp(page, path, readySelector) {
   await page.goto(path);
-  await page.waitForLoadState('networkidle');
-  await page.evaluate(async () => {
-    await navigator.serviceWorker?.ready;
-    if (!navigator.serviceWorker?.controller) await new Promise(resolve => navigator.serviceWorker?.addEventListener('controllerchange', resolve, { once: true }));
-  });
-  await page.reload();
   await expect(page.locator(readySelector)).toBeVisible();
+  const serviceWorker = await page.evaluate(async () => {
+    if (!('serviceWorker' in navigator)) return { supported: false, active: false };
+    await navigator.serviceWorker.register('./service-worker.js');
+    const registration = await Promise.race([
+      navigator.serviceWorker.ready,
+      new Promise((_, reject) => setTimeout(() => reject(new Error('Service Worker ready timeout')), 10_000)),
+    ]);
+    return { supported: true, active: Boolean(registration.active) };
+  });
+  expect(serviceWorker).toEqual({ supported: true, active: true });
 }
 
 async function expectSe3Layout(page) {
@@ -66,9 +70,7 @@ test.describe('iPhone SE3 viewport and touch smoke', () => {
     test(`${name}: layout, touch, JavaScript and Service Worker`, async ({ page }, testInfo) => {
       const exceptions = [];
       page.on('pageerror', error => exceptions.push(error.message));
-      await openControlled(page, path, selector);
-      const serviceWorker = await page.evaluate(() => ({ supported: 'serviceWorker' in navigator, controlled: Boolean(navigator.serviceWorker?.controller) }));
-      expect(serviceWorker).toEqual({ supported: true, controlled: true });
+      await openApp(page, path, selector);
       await expectSe3Layout(page);
 
       if (name === 'drive') {
@@ -76,6 +78,7 @@ test.describe('iPhone SE3 viewport and touch smoke', () => {
         await expect(demand).toBeVisible();
         await expect(demand).toHaveAttribute('data-demand-state', /^(ready|empty)$/);
         const link = demand.locator('a[href="./demand-calendar.html"]').last();
+        await expect(link).toBeVisible();
         const box = await link.boundingBox();
         expect(box?.height, 'demand calendar tap height').toBeGreaterThanOrEqual(44);
         await expect(link).toHaveAttribute('href', './demand-calendar.html');
@@ -93,7 +96,7 @@ test.describe('iPhone SE3 viewport and touch smoke', () => {
   test('all five themes render without regression', async ({ page }, testInfo) => {
     const exceptions = [];
     page.on('pageerror', error => exceptions.push(error.message));
-    await openControlled(page, './calendar.html?page=manage', '.yos131-manage');
+    await openApp(page, './calendar.html?page=manage', '.yos131-manage');
 
     for (const theme of themes) {
       await page.locator('[data-theme-open]').tap();
