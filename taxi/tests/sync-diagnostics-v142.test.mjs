@@ -21,13 +21,13 @@ test('diagnostics exposes actionable states and manual retry',()=>{
   assert.match(js,/data\.pending\?'':'disabled'/);
 });
 
-test('v143 refreshes cached diagnostics assets only on index',()=>{
+test('v144 refreshes cached diagnostics assets only on index',()=>{
   for(const file of ['sync-diagnostics-v142.css','sync-diagnostics-v142.js']){
     assert.ok(sw.includes(`'./${file}'`));
     assert.ok(sw.includes(`add${file.endsWith('.css')?'Css':'Js'}('${file}')`));
   }
-  assert.match(sw,/const VERSION='143'/);
-  assert.match(sw,/const CACHE='yos-taxi-projecty-v143-force-retry'/);
+  assert.match(sw,/const VERSION='144'/);
+  assert.match(sw,/const CACHE='yos-taxi-projecty-v144-demand-home'/);
   assert.match(sw,/if\(type==='index'\)/);
 });
 
