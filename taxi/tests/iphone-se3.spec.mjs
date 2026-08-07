@@ -71,6 +71,16 @@ test.describe('iPhone SE3 viewport and touch smoke', () => {
       expect(serviceWorker).toEqual({ supported: true, controlled: true });
       await expectSe3Layout(page);
 
+      if (name === 'drive') {
+        const demand = page.locator('.demand-home');
+        await expect(demand).toBeVisible();
+        await expect(demand).toHaveAttribute('data-demand-state', /^(ready|empty)$/);
+        const link = demand.locator('a[href="./demand-calendar.html"]').last();
+        const box = await link.boundingBox();
+        expect(box?.height, 'demand calendar tap height').toBeGreaterThanOrEqual(44);
+        await expect(link).toHaveAttribute('href', './demand-calendar.html');
+      }
+
       const active = page.locator('.yos131-nav button.active');
       await expect(active).toHaveCount(1);
       await active.tap();
