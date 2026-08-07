@@ -29,6 +29,41 @@ test('終了済み需要は今後の需要より優先されない',()=>{
   assert.equal(selectDemand(data,new Date(2026,7,7,18,0)).event.title,'今後');
 });
 
+test('挿入先の生成前はfetchせずmicrotask自己再試行を作らない',async()=>{
+  let fetches=0,microtasks=0;
+  const drive={querySelector:selector=>selector==='.demand-home'?null:null};
+  const sandbox={
+    globalThis:{},
+    fetch:async()=>{fetches++;throw new Error('unexpected fetch')},
+    queueMicrotask:()=>{microtasks++},
+  };
+  vm.runInNewContext(source,sandbox);
+  sandbox.document={querySelector:selector=>selector==='.yos131-drive'?drive:null,createElement:()=>({})};
+  await sandbox.globalThis.YosTaxiDemandHome.mount();
+  assert.equal(fetches,0);
+  assert.equal(microtasks,0);
+});
+
+test('挿入先の生成後は1回mountしてカードへ置換する',async()=>{
+  let fetches=0,inserted;
+  const advice={after:node=>{inserted=node}};
+  const drive={querySelector:selector=>selector==='.yos131-advice'?advice:null};
+  const sandbox={
+    globalThis:{},
+    fetch:async()=>{
+      fetches++;
+      return{ok:true,json:async()=>({updatedAt:'2026-08-07',events:[]})};
+    },
+  };
+  vm.runInNewContext(source,sandbox);
+  sandbox.document={querySelector:selector=>selector==='.yos131-drive'?drive:null,createElement:()=>({})};
+  await sandbox.globalThis.YosTaxiDemandHome.mount();
+  assert.equal(fetches,1);
+  assert.equal(inserted.className,'demand-home-slot');
+  assert.match(inserted.outerHTML,/data-demand-state="empty"/);
+  assert.match(inserted.outerHTML,/需要カレンダー/);
+});
+
 test('ホーム導線、失敗時の未確認表示、保存キー非干渉を維持する',async()=>{
   const [html,sw]=await Promise.all([
     readFile(new URL('../index.html',import.meta.url),'utf8'),
