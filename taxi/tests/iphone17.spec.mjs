@@ -106,42 +106,44 @@ test.describe('iPhone17 viewport and touch smoke', () => {
       const exceptions = [];
       page.on('pageerror', error => exceptions.push(error.message));
 
+      if (entry.name === 'drive') {
+        await page.clock.setFixedTime(new Date('2026-08-09T18:00:00+09:00'));
+      }
       await openIPhone17App(page, entry);
 
       if (entry.name === 'drive') {
         await page.goto('./index.html', { waitUntil: 'domcontentloaded' });
-        await expect(page.locator('#shiftButton')).toBeVisible();
+        await expect(page.locator('.yos131-drive')).toBeVisible();
+        await expect(page.locator('.yos131-primary[data-proxy="shiftButton"]')).toBeVisible();
         expect(await page.evaluate(() => Boolean(navigator.serviceWorker.controller)), 'controlled second index navigation').toBeTruthy();
 
         const demand = page.locator('.demand-home');
         await expect(demand).toBeVisible();
-        await expect(demand).toHaveAttribute('data-demand-state', /^(ready|empty)$/);
+        await expect(demand).toHaveAttribute('data-demand-state', 'ready');
 
         const calendarLink = demand.locator('a[href="./demand-calendar.html"]');
         await expect(calendarLink).toBeVisible();
         const calendarBox = await calendarLink.boundingBox();
         expect(calendarBox?.height, 'demand calendar tap height').toBeGreaterThanOrEqual(44);
 
-        if (await demand.getAttribute('data-demand-state') === 'ready') {
-          const source = demand.locator('.demand-source');
-          await expect(source).toBeVisible();
-          const sourceBox = await source.boundingBox();
-          expect(sourceBox?.height, 'official source tap height').toBeGreaterThanOrEqual(44);
+        const source = demand.locator('.demand-source');
+        await expect(source).toBeVisible();
+        const sourceBox = await source.boundingBox();
+        expect(sourceBox?.height, 'official source tap height').toBeGreaterThanOrEqual(44);
 
-          const details = demand.locator('small');
-          await details.evaluate(element => {
-            element.textContent = '18:00〜21:00｜沖縄市・比屋根・泡瀬周辺の長いエリア名｜需要 高｜信頼度 高';
-          });
-          await expect(details).toContainText('信頼度 高');
-          const detailLayout = await details.evaluate(element => ({
-            scrollWidth: element.scrollWidth,
-            clientWidth: element.clientWidth,
-            scrollHeight: element.scrollHeight,
-            clientHeight: element.clientHeight,
-          }));
-          expect(detailLayout.scrollWidth, 'demand details horizontal clipping').toBeLessThanOrEqual(detailLayout.clientWidth + 1);
-          expect(detailLayout.scrollHeight, 'demand confidence vertical clipping').toBeLessThanOrEqual(detailLayout.clientHeight + 1);
-        }
+        const details = demand.locator('small');
+        await details.evaluate(element => {
+          element.textContent = '18:00〜21:00｜沖縄市・比屋根・泡瀬周辺の長いエリア名｜需要 高｜信頼度 高';
+        });
+        await expect(details).toContainText('信頼度 高');
+        const detailLayout = await details.evaluate(element => ({
+          scrollWidth: element.scrollWidth,
+          clientWidth: element.clientWidth,
+          scrollHeight: element.scrollHeight,
+          clientHeight: element.clientHeight,
+        }));
+        expect(detailLayout.scrollWidth, 'demand details horizontal clipping').toBeLessThanOrEqual(detailLayout.clientWidth + 1);
+        expect(detailLayout.scrollHeight, 'demand confidence vertical clipping').toBeLessThanOrEqual(detailLayout.clientHeight + 1);
       }
 
       await expectIPhone17Layout(page);
