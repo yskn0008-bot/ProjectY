@@ -58,10 +58,12 @@
   async function mount(){
     const drive=document.querySelector('.yos131-drive');
     if(!drive||drive.querySelector('.demand-home')||loading)return;
-    loading=true;
+    const advice=drive.querySelector('.yos131-advice');
+    if(!advice)return;
     const placeholder=document.createElement('div');
     placeholder.className='demand-home-slot';
-    drive.querySelector('.yos131-advice')?.after(placeholder);
+    advice.after(placeholder);
+    loading=true;
     try{
       const response=await fetch('./demand-calendar-v1.json',{cache:'no-cache'});
       if(!response.ok)throw new Error(`HTTP ${response.status}`);
@@ -69,7 +71,7 @@
       placeholder.outerHTML=card(API.selectDemand(data,new Date()),data.updatedAt);
     }catch{
       placeholder.outerHTML=failure();
-    }finally{loading=false;queueMicrotask(mount)}
+    }finally{loading=false}
   }
   API.mount=mount;
   globalThis.YosTaxiDemandHome=API;
