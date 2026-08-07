@@ -1,5 +1,6 @@
 /* v138:営業中の1秒把握バーとライトテーマ可読性 */
 .yos131-drive.yos-drive-v138{grid-template-rows:36px 44px 154px 48px 54px 54px!important}
+.yos131-drive.yos-drive-v138:has(.demand-home){grid-template-rows:36px 44px 154px 48px 136px 54px 54px!important}
 .yos-drive-now-v138{display:grid;grid-template-columns:1.05fr 1fr 1fr;gap:5px;min-height:0}
 .yos-drive-now-v138>div{min-width:0;border:1px solid var(--yos131-line);border-radius:10px;background:#0a0a0c;display:grid;align-content:center;padding:4px 7px}
 .yos-drive-now-v138 small{font-size:9px;color:var(--yos131-muted);line-height:1}
@@ -29,5 +30,6 @@ html[data-yos-theme="light"] .yos-drive-now-v138 .clock strong{color:#246bfe!imp
 
 @media(max-height:650px){
   .yos131-drive.yos-drive-v138{grid-template-rows:32px 40px 146px 46px 50px 50px!important}
+  .yos131-drive.yos-drive-v138:has(.demand-home){grid-template-rows:32px 40px 126px 42px 84px 46px 46px!important}
   .yos-drive-now-v138 strong{font-size:12px}.yos-drive-now-v138 .clock strong{font-size:18px}
 }
