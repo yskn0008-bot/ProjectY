@@ -125,9 +125,20 @@
         const confirmed = confirmedAreaFromPlace(clone.pickup, clone.pickupCoords, env.settings);
         if (confirmed) { runtime.currentArea = confirmed; runtime.areaConfirmed = true; }
         const area = confirmed || (runtime.areaConfirmed ? runtime.currentArea : null);
+        const demandData = runtime.demandSelection?.data;
+        const selectDemand = env.YosTaxiDemandHome?.selectDemand;
+        let selection = null;
+        if (demandData && typeof selectDemand === "function") {
+          try {
+            selection = selectDemand(demandData, new Date()) || null;
+          } catch (_error) {
+            selection = null;
+          }
+          if (selection) runtime.demandSelection = { ...selection, data: demandData };
+        }
         if (module?.buildRideContext) Object.assign(clone, module.buildRideContext({
           area, areaConfirmed: Boolean(area), now: new Date(),
-          demandSelection: selectedDemandAdapter(runtime.demandSelection, area, runtime.demandSelection?.data),
+          demandSelection: selection ? selectedDemandAdapter(selection, area, demandData) : null,
           decision: runtime.currentDecision
         }));
       } else if (type === "降車") {
