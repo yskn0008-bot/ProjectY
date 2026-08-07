@@ -55,6 +55,17 @@
   };
   const failure=()=>`<section class="yos131-card demand-home" data-demand-state="error"><div><span>今日の需要</span><strong>需要情報を確認できません</strong><small>推測せず、停車後に公式情報を確認</small></div><a href="./demand-calendar.html">需要カレンダー</a></section>`;
 
+  const showResult=(placeholder,html)=>{
+    if(placeholder.isConnected){
+      placeholder.outerHTML=html;
+      return;
+    }
+    const drive=document.querySelector('.yos131-drive');
+    if(!drive||drive.querySelector('.demand-home'))return;
+    const advice=drive.querySelector('.yos131-advice');
+    if(advice)advice.insertAdjacentHTML('afterend',html);
+  };
+
   let loading=false;
   async function mount(){
     const drive=document.querySelector('.yos131-drive');
@@ -69,9 +80,9 @@
       const response=await fetch('./demand-calendar-v1.json',{cache:'no-cache'});
       if(!response.ok)throw new Error(`HTTP ${response.status}`);
       const data=await response.json();
-      placeholder.outerHTML=card(API.selectDemand(data,new Date()),data.updatedAt);
+      showResult(placeholder,card(API.selectDemand(data,new Date()),data.updatedAt));
     }catch{
-      placeholder.outerHTML=failure();
+      showResult(placeholder,failure());
     }finally{loading=false}
   }
   API.mount=mount;
