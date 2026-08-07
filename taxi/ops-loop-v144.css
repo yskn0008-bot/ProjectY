@@ -1,0 +1,159 @@
+.yos-ops-loop {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  margin: 12px 0 0;
+  border: 1px solid var(--yos131-line, rgba(228, 170, 50, 0.48));
+  border-radius: 14px;
+  background: var(--yos-card, #0b0b0d);
+  color: var(--yos-text, #fff);
+}
+
+.yos-ops-loop,
+.yos-ops-loop * {
+  box-sizing: border-box;
+}
+
+.yos-ops-loop .yos-ops-summary {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  max-width: 100%;
+  min-width: 0;
+  padding: 10px 14px;
+  font-weight: 800;
+  cursor: pointer;
+  overflow-wrap: anywhere;
+}
+
+.yos-ops-loop .yos-ops-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 8px;
+  max-width: 100%;
+  min-width: 0;
+  padding: 0 12px 12px;
+}
+
+.yos-ops-loop .yos-ops-row {
+  display: grid;
+  grid-template-columns: minmax(6.5em, auto) minmax(0, 1fr);
+  align-items: start;
+  gap: 6px 10px;
+  max-width: 100%;
+  min-width: 0;
+  padding: 8px;
+  border-radius: 10px;
+  background: var(--panel2, #111114);
+  overflow-wrap: anywhere;
+}
+
+.yos-ops-loop .yos-ops-row > :first-child {
+  color: var(--yos131-muted, #aaaab0);
+  font-weight: 700;
+}
+
+.yos-ops-loop .yos-ops-row > :last-child {
+  min-width: 0;
+  text-align: end;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.yos-ops-loop .yos-ops-area-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.yos-ops-loop .yos-ops-area {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  max-width: 100%;
+  padding: 8px 12px;
+  border: 1px solid var(--line, #34343a);
+  border-radius: 10px;
+  background: var(--panel2, #111114);
+  color: inherit;
+  font: inherit;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.yos-ops-loop .yos-ops-area[data-current="true"] {
+  border-style: double;
+  border-color: var(--yos131-gold, #e4aa32);
+  outline: 1px solid var(--yos131-gold, #e4aa32);
+  outline-offset: 2px;
+}
+
+.yos-ops-loop .yos-ops-area[data-current="true"]::after {
+  content: "現在";
+  margin-inline-start: 0.45em;
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+.yos-ops-loop .yos-ops-area[data-recommended="true"] {
+  border-width: 2px;
+  border-color: currentColor;
+}
+
+.yos-ops-loop .yos-ops-area[data-recommended="true"]::after {
+  content: "推奨";
+  margin-inline-start: 0.45em;
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+.yos-ops-loop .yos-ops-area:disabled {
+  opacity: 0.5;
+}
+
+.yos-ops-loop .yos-ops-map-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 1px solid var(--yos131-line, rgba(228, 170, 50, 0.48));
+  border-radius: 10px;
+  color: inherit;
+  text-align: center;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.yos-ops-loop .yos-ops-analysis {
+  max-width: 100%;
+  min-width: 0;
+  font-size: max(11px, 0.75rem);
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.yos-ops-loop .yos-ops-muted {
+  color: var(--yos131-muted, #aaaab0);
+}
+
+@media (max-width: 402px) {
+  .yos-ops-loop .yos-ops-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .yos-ops-loop .yos-ops-row > :last-child {
+    text-align: start;
+  }
+}
