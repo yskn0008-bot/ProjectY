@@ -43,7 +43,8 @@
     }
     const data=values();
     const now=new Date();
-    bar.innerHTML=`<div class="clock"><small>現在時刻</small><strong>${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}</strong></div><div><small>目標まで</small><strong>${money(data.remain)}</strong></div><div><small>残り勤務</small><strong>${duration(data.mins)}</strong></div>`;
+    const nextHtml=`<div class="clock"><small>現在時刻</small><strong>${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}</strong></div><div><small>目標まで</small><strong>${money(data.remain)}</strong></div><div><small>残り勤務</small><strong>${duration(data.mins)}</strong></div>`;
+    if(bar.innerHTML!==nextHtml)bar.innerHTML=nextHtml;
   }
 
   render();
