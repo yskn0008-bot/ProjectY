@@ -18,10 +18,19 @@ test('営業日の日付、現在時間帯、需要レベル、信頼度を使�
   const data={events:[
     event({title:'別日',date:'2026-08-08'}),
     event({title:'今後',demandWindows:['20:00-21:00']}),
-    event({title:'開催中・低',demandLevel:'low',demandWindows:['17:00-19:00']}),
+    event({title:'開催中・低',demandLevel:'low',demandWindows:['16:00-19:00']}),
     event({title:'開催中・確認済み',demandLevel:'high',confidence:'confirmed',demandWindows:['17:00-19:00']}),
   ]};
   assert.equal(selectDemand(data,new Date(2026,7,7,18,0)).event.title,'開催中・確認済み');
+});
+
+test('同じphaseと需要レベルでは信頼度を優先し開始時刻を最後のtie-breakにする',()=>{
+  const data={events:[
+    event({title:'早い暫定',confidence:'provisional',demandWindows:['16:00-19:00']}),
+    event({title:'遅い確認済み',confidence:'confirmed',demandWindows:['17:00-19:00']}),
+    event({title:'同条件で早い',confidence:'confirmed',demandWindows:['16:30-19:00']}),
+  ]};
+  assert.equal(selectDemand(data,new Date(2026,7,7,18,0)).event.title,'同条件で早い');
 });
 
 test('終了済み需要は今後の需要より優先されない',()=>{
