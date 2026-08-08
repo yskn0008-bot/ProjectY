@@ -1,12 +1,13 @@
 'use strict';
 
-const CACHE = 'yos-command-center-v4-live-link';
+const CACHE = 'yos-command-center-v5-hj-entry';
 const STATIC = [
   './',
   './index.html',
   './styles.css',
   './app.js',
   './taxi-live-v1.js',
+  './hj-entry.js',
   './journey.html',
   './journey.css',
   './journey.js',
@@ -15,8 +16,15 @@ const STATIC = [
 
 async function inject(response) {
   let html = await response.text();
+  const scripts = [];
   if (!html.includes('taxi-live-v1.js')) {
-    html = html.replace('</body>', '<script src="./taxi-live-v1.js?v=4"></script></body>');
+    scripts.push('<script src="./taxi-live-v1.js?v=4"></script>');
+  }
+  if (!html.includes('hj-entry.js')) {
+    scripts.push('<script src="./hj-entry.js?v=1"></script>');
+  }
+  if (scripts.length) {
+    html = html.replace('</body>', `${scripts.join('')}</body>`);
   }
   const headers = new Headers(response.headers);
   headers.delete('content-length');
@@ -35,7 +43,11 @@ self.addEventListener('install', (event) => {
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys()
-      .then((keys) => Promise.all(keys.filter((key) => key !== CACHE).map((key) => caches.delete(key))))
+      .then((keys) => Promise.all(
+        keys
+          .filter((key) => key.startsWith('yos-command-center-') && key !== CACHE)
+          .map((key) => caches.delete(key))
+      ))
       .then(() => self.clients.claim())
   );
 });
@@ -43,7 +55,8 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
   const url = new URL(event.request.url);
-  const isHome = event.request.mode === 'navigate' && (url.pathname.endsWith('/yos/') || url.pathname.endsWith('/yos/index.html'));
+  const isHome = event.request.mode === 'navigate'
+    && (url.pathname.endsWith('/yos/') || url.pathname.endsWith('/yos/index.html'));
 
   if (isHome) {
     event.respondWith(

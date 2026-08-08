@@ -1,0 +1,70 @@
+name: HJ iPhone Smoke
+
+on:
+  pull_request:
+    paths:
+      - 'yos/hj/**'
+      - 'yos/hj-entry.js'
+      - 'yos/service-worker.js'
+      - 'tests/hj-smoke.mjs'
+      - 'tests/hj-home-smoke.mjs'
+      - '.github/workflows/hj-smoke.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: hj-smoke-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, webkit]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install Playwright
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps ${{ matrix.browser }}
+
+      - name: Start static server
+        run: |
+          python3 -m http.server 4173 --directory . > /tmp/hj-server.log 2>&1 &
+          echo $! > /tmp/hj-server.pid
+          for i in {1..30}; do
+            curl -fsS http://127.0.0.1:4173/yos/hj/ >/dev/null && exit 0
+            sleep 1
+          done
+          cat /tmp/hj-server.log
+          exit 1
+
+      - name: Test YOS home to HJ entry
+        env:
+          HJ_BROWSER: ${{ matrix.browser }}
+        run: node tests/hj-home-smoke.mjs
+
+      - name: Run HJ full smoke test
+        env:
+          HJ_BROWSER: ${{ matrix.browser }}
+        run: node tests/hj-smoke.mjs
+
+      - name: Upload screenshots and exports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hj-smoke-results-${{ matrix.browser }}
+          path: test-results/
+          if-no-files-found: warn

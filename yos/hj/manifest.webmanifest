@@ -1,0 +1,11 @@
+{
+  "name": "Hero's Journey｜人生を物語として進める",
+  "short_name": "HJ",
+  "description": "複数の旅を螺旋状に進み、事実だけで今週の物語を残す",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#090d18",
+  "theme_color": "#0b1020",
+  "orientation": "portrait-primary"
+}
