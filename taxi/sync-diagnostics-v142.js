@@ -53,9 +53,13 @@
       panel.className='yos-sync-diagnostics-v142';
       card.appendChild(panel);
     }
+    const wasOpen=panel.querySelector('.yos-sync-diagnostics-v142__details')?.hidden===false;
     const data=snapshot();
     const [title,detail]=label(data);
-    panel.innerHTML=`<button type="button" data-sync-diagnose><span><b>${title}</b><small>${detail}</small></span><strong>診断</strong></button><div class="yos-sync-diagnostics-v142__details" hidden><dl><div><dt>通信</dt><dd>${data.online?'オンライン':'オフライン'}</dd></div><div><dt>API</dt><dd>${data.apiConfigured?data.apiHost:'未設定'}</dd></div><div><dt>トークン</dt><dd>${data.tokenConfigured?'設定済み':'未設定'}</dd></div><div><dt>未送信</dt><dd>${data.pending}件</dd></div></dl><button type="button" data-sync-retry ${data.pending?'':'disabled'}>${data.pending?'今すぐ再送':'未送信なし'}</button></div>`;
+    const nextHtml=`<button type="button" data-sync-diagnose><span><b>${title}</b><small>${detail}</small></span><strong>診断</strong></button><div class="yos-sync-diagnostics-v142__details"${wasOpen?'':' hidden'}><dl><div><dt>通信</dt><dd>${data.online?'オンライン':'オフライン'}</dd></div><div><dt>API</dt><dd>${data.apiConfigured?data.apiHost:'未設定'}</dd></div><div><dt>トークン</dt><dd>${data.tokenConfigured?'設定済み':'未設定'}</dd></div><div><dt>未送信</dt><dd>${data.pending}件</dd></div></dl><button type="button" data-sync-retry ${data.pending?'':'disabled'}>${data.pending?'今すぐ再送':'未送信なし'}</button></div>`;
+    const normalize=html=>html.replace(/\s(hidden|disabled)=""/g,' $1');
+    if(normalize(panel.innerHTML)===normalize(nextHtml))return;
+    panel.innerHTML=nextHtml;
     const details=panel.querySelector('.yos-sync-diagnostics-v142__details');
     panel.querySelector('[data-sync-diagnose]').onclick=()=>{details.hidden=!details.hidden};
     panel.querySelector('[data-sync-retry]').onclick=event=>{
