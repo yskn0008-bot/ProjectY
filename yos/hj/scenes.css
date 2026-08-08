@@ -1,0 +1,14 @@
+.three-tabs{grid-template-columns:repeat(3,1fr)}
+.three-tabs button{font-size:10px;padding:0 4px}
+.scene-guide{margin:-3px 0 13px;color:var(--muted);font-size:11px;line-height:1.65}
+.scene-form{display:grid;gap:11px}
+.scene-history{display:grid;gap:8px}
+.scene-item{position:relative;padding:12px 42px 12px 12px;border:1px solid var(--line);border-radius:16px;background:var(--panel2)}
+.scene-item .scene-meta{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:7px;color:var(--muted);font-size:9px}
+.scene-item .scene-meta span{padding:3px 7px;border:1px solid var(--line);border-radius:999px;background:rgba(9,13,24,.28)}
+.scene-item h3{margin:0;font-size:13px;line-height:1.55;white-space:pre-wrap}
+.scene-detail{margin:8px 0 0;padding-top:8px;border-top:1px solid var(--line);color:var(--muted);font-size:10px;line-height:1.6;white-space:pre-wrap}
+.scene-delete{position:absolute;top:9px;right:9px;width:29px;height:29px;border:1px solid var(--line);border-radius:10px;background:rgba(9,13,24,.35);color:var(--muted);font-size:15px}
+.full-action{width:100%;margin-top:10px}
+.three-actions{grid-template-columns:repeat(3,1fr)}
+@media(max-width:390px){.three-tabs button{font-size:9px}.three-actions{grid-template-columns:1fr 1fr}.three-actions .danger{grid-column:1/-1}}

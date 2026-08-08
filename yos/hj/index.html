@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b1020">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="HJ">
+<meta name="description" content="複数の旅を螺旋状に進み、事実だけで今週の物語を残すHero's Journeyアプリ">
+<link rel="manifest" href="./manifest.webmanifest">
+<title>Hero's Journey｜人生を物語として進める</title>
+<link rel="stylesheet" href="./styles.css">
+<link rel="stylesheet" href="./onboarding.css">
+<link rel="stylesheet" href="./scenes.css">
+<link rel="stylesheet" href="./completion.css">
+</head>
+<body>
+<main class="app">
+<header class="topbar">
+  <div class="mark" aria-hidden="true">HJ</div>
+  <div class="brand"><h1>Hero's Journey</h1><p>YOUR LIFE, YOUR STORY</p></div>
+  <div class="status"><span id="today">----</span><button id="editProfile" type="button">設定</button></div>
+</header>
+
+<section class="hero">
+  <p class="eyebrow">MULTIPLE JOURNEYS · SPIRAL GROWTH</p>
+  <h2 id="heroTitle">人生は、一つの旅ではない。</h2>
+  <p id="heroCopy" class="copy">仕事、生活、お金、人間関係、夢。それぞれが別の12段階を進み、何周も巡りながら螺旋状に変化していく。</p>
+  <div class="hero-actions">
+    <button id="consultYos" class="primary" type="button">現在地をYOSに相談</button>
+    <button id="openScene" class="secondary" type="button">今日のシーンを残す</button>
+  </div>
+  <div class="spiral">
+    <div><strong id="journeyCount">5</strong><span>進行中の旅</span></div>
+    <div><strong id="activeStage">—</strong><span>注目している現在地</span></div>
+    <div><strong id="storyCount">0</strong><span>保存した物語</span></div>
+  </div>
+</section>
+
+<nav class="tabs three-tabs" aria-label="HJ機能">
+  <button class="active" type="button" data-tab="journeys">旅の現在地</button>
+  <button type="button" data-tab="scenes">今日のシーン</button>
+  <button type="button" data-tab="story">今週の物語</button>
+</nav>
+
+<section id="journeysPanel" class="panel active">
+  <section class="section">
+    <div class="section-head"><div><p class="kicker">YOUR JOURNEYS</p><h2>領域ごとの現在地</h2></div><span class="subtle">12段階 × 周回</span></div>
+    <div id="journeyList" class="journey-list"></div>
+    <div class="add-row"><input id="customDomain" maxlength="24" placeholder="新しい旅を追加　例：転職、学び"><button id="addDomain" class="secondary" type="button">追加</button></div>
+  </section>
+  <section class="section">
+    <div class="section-head"><div><p class="kicker">SPIRAL VIEW</p><h2>今の全体像</h2></div><span class="subtle">高いほど偉い、ではない</span></div>
+    <div id="journeySummary" class="summary"></div>
+  </section>
+  <section class="section">
+    <div class="section-head"><div><p class="kicker">TURNING POINTS</p><h2>螺旋の歩み</h2></div><span id="historySummary" class="subtle">0件</span></div>
+    <p class="spiral-guide">同じステージへ戻っても、前回と同じ自分ではありません。本人が変更した現在地だけを転換点として残します。</p>
+    <div id="spiralHistory" class="spiral-history"></div>
+    <p id="emptySpiralHistory" class="empty">現在地を更新すると、変化の履歴がここに並びます。</p>
+  </section>
+</section>
+
+<section id="scenePanel" class="panel">
+  <section class="section">
+    <div class="section-head"><div><p class="kicker">ONE MINUTE LOG</p><h2>今日のシーンを残す</h2></div><span class="subtle">事実だけ必須</span></div>
+    <p class="scene-guide">その場で残すのは一文でも十分。YOSは、書かれていない感情や出来事を勝手に足しません。</p>
+    <div class="scene-form">
+      <div class="two">
+        <label>日時<input id="sceneAt" type="datetime-local"></label>
+        <label>どの旅の出来事？<select id="sceneDomain"></select></label>
+      </div>
+      <label>この場面のHJステージ<select id="sceneStage"></select></label>
+      <label>実際に起きたこと<textarea id="sceneFact" rows="3" maxlength="600" placeholder="例：営業中、予定していた場所を離れて別のエリアへ移動した。"></textarea></label>
+      <label>自分が実際に選んだこと・行動したこと<textarea id="sceneChoice" rows="2" maxlength="400" placeholder="まだ結果が出ていなければ空欄でOK。"></textarea></label>
+      <label>確認できた結果<textarea id="sceneResult" rows="2" maxlength="400" placeholder="分からない場合は空欄のまま。"></textarea></label>
+      <label>本人が感じたこと・気づいたこと<textarea id="sceneReflection" rows="2" maxlength="400" placeholder="自分で確認できた言葉だけ。YOSの推測は入れない。"></textarea></label>
+      <div class="story-actions"><button id="clearScene" class="secondary" type="button">入力をクリア</button><button id="saveScene" class="primary" type="button">このシーンを保存</button></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-head"><div><p class="kicker">THIS WEEK</p><h2>今週のシーン</h2></div><span id="sceneWeekCount" class="subtle">0件</span></div>
+    <div id="sceneHistory" class="scene-history"></div>
+    <p id="emptyScenes" class="empty">今週の出来事がここに並びます。</p>
+    <button id="collectWeek" class="primary full-action" type="button">今週の事実を物語へまとめる</button>
+  </section>
+</section>
+
+<section id="storyPanel" class="panel">
+  <section class="section">
+    <div class="section-head"><div><p class="kicker">NONFICTION ONLY</p><h2>今週の事実を集める</h2></div><span class="subtle">脚色しない</span></div>
+    <div class="story-form">
+      <div class="two"><label>期間<input id="storyPeriod" maxlength="40" placeholder="例：2026年8月3日〜9日"></label><label>中心となった旅<select id="storyDomain"></select></label></div>
+      <label>起きたこと<textarea id="storyFacts" rows="4" maxlength="1200" placeholder="確認できる事実だけ。複数ある場合は改行してください。"></textarea></label>
+      <label>自分が実際に選んだこと・行動したこと<textarea id="storyChoice" rows="3" maxlength="800" placeholder="言っていない言葉や、していない行動は書かない。"></textarea></label>
+      <label>実際の結果<textarea id="storyResult" rows="3" maxlength="800" placeholder="成功・失敗を盛らずに、そのまま。"></textarea></label>
+      <label>本人が確認した学び・違和感<textarea id="storyLearning" rows="3" maxlength="800" placeholder="まだ分からない場合は空欄でOK。"></textarea></label>
+      <label>次の一歩<input id="storyNext" maxlength="180" placeholder="実際に決めたことだけ"></label>
+      <div><p class="kicker">READ AS</p><div class="format-row" role="group" aria-label="表現形式"><button class="selected" type="button" data-format="manga">漫画</button><button type="button" data-format="newspaper">新聞</button><button type="button" data-format="novel">短編小説</button><button type="button" data-format="picturebook">絵本</button></div></div>
+      <div class="story-actions"><button id="clearStory" class="secondary" type="button">入力をクリア</button><button id="buildStory" class="primary" type="button">事実から作品を作る</button></div>
+    </div>
+  </section>
+  <section id="previewSection" class="section preview">
+    <div class="section-head"><div><p class="kicker">WEEKLY HIGHLIGHT</p><h2>今週の物語</h2></div><span id="previewFormat" class="subtle">漫画</span></div>
+    <article id="storyWork" class="work manga"></article>
+    <div class="story-actions three-preview-actions">
+      <button id="copyStory" class="secondary" type="button">文章をコピー</button>
+      <button id="shareStoryImage" class="secondary" type="button">画像で共有</button>
+      <button id="saveStory" class="primary" type="button">作品として保存</button>
+    </div>
+  </section>
+  <section class="section">
+    <div class="section-head"><div><p class="kicker">STORY SHELF</p><h2>物語の本棚</h2></div><span class="subtle">最新10件</span></div>
+    <div id="storyHistory" class="history"></div><p id="emptyHistory" class="empty">保存した物語がここに並びます。</p>
+  </section>
+</section>
+
+<section class="section">
+  <div class="section-head"><div><p class="kicker">DATA SAFETY</p><h2>人生の記録を守る</h2></div><span class="subtle">JSON</span></div>
+  <div class="footer-actions three-actions">
+    <button id="exportData" class="secondary" type="button">バックアップ</button>
+    <button id="importData" class="secondary" type="button">復元</button>
+    <button id="resetData" class="danger" type="button">全データ削除</button>
+  </div>
+  <input id="importFile" type="file" accept="application/json,.json" hidden>
+</section>
+<p id="appStatus" class="status-line" role="status" aria-live="polite"></p>
+</main>
+
+<nav class="bottom"><a href="../">YOSホーム</a><a class="active" href="./">Hero's Journey</a></nav>
+
+<dialog id="onboardingDialog">
+  <form id="onboardingForm" class="dialog-body">
+    <p class="kicker">FIRST CHAPTER</p>
+    <h2>あなたの旅を始める</h2>
+    <p>最初は現在地と好みだけ。あとからいつでも変えられます。</p>
+    <label>呼ばれたい名前<input id="profileName" maxlength="30" autocomplete="name" placeholder="例：ようすけ"></label>
+    <label>今いちばん動いている旅<select id="profileDomain"></select></label>
+    <label>その旅の現在地<select id="profileStage"></select></label>
+    <label>今のテーマ<input id="profileTheme" maxlength="160" placeholder="例：自分に合う働き方を作る"></label>
+    <label>物語の基本形式
+      <select id="profileFormat">
+        <option value="manga">漫画</option>
+        <option value="newspaper">新聞</option>
+        <option value="novel">短編小説</option>
+        <option value="picturebook">絵本</option>
+      </select>
+    </label>
+    <label>YOSの話し方
+      <select id="profileTone">
+        <option value="balanced">率直さと優しさのバランス</option>
+        <option value="gentle">優しく寄り添う</option>
+        <option value="direct">結論をはっきり伝える</option>
+      </select>
+    </label>
+    <div class="dialog-actions"><button id="cancelProfile" class="secondary" type="button">あとで</button><button class="primary" type="submit">この現在地から始める</button></div>
+  </form>
+</dialog>
+
+<dialog id="sceneEditDialog">
+  <form id="sceneEditForm" class="dialog-body">
+    <p class="kicker">EDIT FACTS</p>
+    <h2>シーンを修正する</h2>
+    <p>事実や本人の言葉を訂正できます。保存済みの内容を勝手に補いません。</p>
+    <input id="editSceneId" type="hidden">
+    <label>日時<input id="editSceneAt" type="datetime-local"></label>
+    <label>旅<select id="editSceneDomain"></select></label>
+    <label>その場面のステージ<select id="editSceneStage"></select></label>
+    <label>実際に起きたこと<textarea id="editSceneFact" rows="3" maxlength="600"></textarea></label>
+    <label>選んだこと・行動<textarea id="editSceneChoice" rows="2" maxlength="400"></textarea></label>
+    <label>確認できた結果<textarea id="editSceneResult" rows="2" maxlength="400"></textarea></label>
+    <label>本人の気づき<textarea id="editSceneReflection" rows="2" maxlength="400"></textarea></label>
+    <div class="dialog-actions"><button id="cancelSceneEdit" class="secondary" type="button">戻る</button><button class="primary" type="submit">修正を保存</button></div>
+  </form>
+</dialog>
+
+<script src="./bootstrap.js" defer></script>
+<script src="./app.js" defer></script>
+<script src="./profile.js" defer></script>
+<script src="./scenes.js" defer></script>
+<script src="./history.js" defer></script>
+<script src="./editor.js" defer></script>
+<script src="./story-image.js" defer></script>
+<script src="./data-complete.js" defer></script>
+</body>
+</html>
