@@ -1,0 +1,32 @@
+name: YOS Service Worker
+
+on:
+  pull_request:
+    paths:
+      - yos/service-worker.js
+      - yos/tests/service-worker-cache-scope.test.mjs
+      - .github/workflows/yos-service-worker.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  cache-scope:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Check Service Worker syntax
+        run: node --check yos/service-worker.js
+
+      - name: Test Service Worker cache scope
+        run: node --test yos/tests/service-worker-cache-scope.test.mjs
