@@ -1,0 +1,58 @@
+name: Taxi iPhone17 Smoke
+
+on:
+  pull_request:
+    paths:
+      - 'taxi/**'
+      - '.github/workflows/taxi-iphone17.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: taxi-iphone17-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    name: Playwright (${{ matrix.browser }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, webkit]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install test dependencies
+        working-directory: taxi/tests
+        run: npm install --no-audit --no-fund
+
+      - name: Install Playwright browser
+        working-directory: taxi/tests
+        run: npx playwright install --with-deps ${{ matrix.browser }}
+
+      - name: Run Taxi iPhone17 smoke test
+        working-directory: taxi/tests
+        run: npx playwright test --config=playwright.iphone17.config.mjs --project=${{ matrix.browser }}-iphone17
+
+      - name: Upload Taxi iPhone17 artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: taxi-iphone17-${{ matrix.browser }}
+          path: |
+            taxi/test-results/iphone17-artifacts/
+            taxi/test-results/iphone17-report/
+            taxi/test-results/iphone17-raw/
+          if-no-files-found: warn
+          retention-days: 14

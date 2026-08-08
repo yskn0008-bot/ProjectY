@@ -43,7 +43,25 @@
     }
     const data=values();
     const now=new Date();
-    bar.innerHTML=`<div class="clock"><small>現在時刻</small><strong>${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}</strong></div><div><small>目標まで</small><strong>${money(data.remain)}</strong></div><div><small>残り勤務</small><strong>${duration(data.mins)}</strong></div>`;
+    const fields=[
+      ['clock','現在時刻',`${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`],
+      ['target','目標まで',money(data.remain)],
+      ['remaining','残り勤務',duration(data.mins)],
+    ];
+    for(const [name,label,value] of fields){
+      let field=bar.querySelector(`[data-drive-field="${name}"]`);
+      if(!field){
+        field=document.createElement('div');
+        field.dataset.driveField=name;
+        if(name==='clock')field.className='clock';
+        field.innerHTML='<small></small><strong></strong>';
+        bar.appendChild(field);
+      }
+      const small=field.querySelector('small');
+      const strong=field.querySelector('strong');
+      if(small.textContent!==label)small.textContent=label;
+      if(strong.textContent!==value)strong.textContent=value;
+    }
   }
 
   render();

@@ -58,7 +58,8 @@
     let dest=bar.querySelector('.destination-v141');
     if(!dest){dest=document.createElement('div');dest.className='destination-v141';bar.appendChild(dest)}
     const value=localStorage.getItem(DEST_KEY)||'';
-    dest.innerHTML=`<small>次の行き先</small><strong>${value||'タップして設定'}</strong>`;
+    const nextHtml=`<small>次の行き先</small><strong>${value||'タップして設定'}</strong>`;
+    if(dest.innerHTML!==nextHtml)dest.innerHTML=nextHtml;
   }
 
   const observer=new MutationObserver(mount);
