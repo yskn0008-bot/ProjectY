@@ -1,6 +1,7 @@
 'use strict';
 
-const CACHE = 'yos-command-center-v4-live-link';
+const CACHE_PREFIXES = ['heros-journey-', 'yos-mentor-journey-', 'yos-command-center-'];
+const CACHE = 'heros-journey-v7-mvp';
 const STATIC = [
   './',
   './index.html',
@@ -13,17 +14,6 @@ const STATIC = [
   './manifest.webmanifest'
 ];
 
-async function inject(response) {
-  let html = await response.text();
-  if (!html.includes('taxi-live-v1.js')) {
-    html = html.replace('</body>', '<script src="./taxi-live-v1.js?v=4"></script></body>');
-  }
-  const headers = new Headers(response.headers);
-  headers.delete('content-length');
-  headers.delete('content-encoding');
-  return new Response(html, { status: response.status, statusText: response.statusText, headers });
-}
-
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE)
@@ -35,7 +25,9 @@ self.addEventListener('install', (event) => {
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys()
-      .then((keys) => Promise.all(keys.filter((key) => key !== CACHE).map((key) => caches.delete(key))))
+      .then((keys) => Promise.all(keys
+        .filter((key) => key !== CACHE && CACHE_PREFIXES.some((prefix) => key.startsWith(prefix)))
+        .map((key) => caches.delete(key))))
       .then(() => self.clients.claim())
   );
 });
@@ -43,24 +35,36 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
   const url = new URL(event.request.url);
-  const isHome = event.request.mode === 'navigate' && (url.pathname.endsWith('/yos/') || url.pathname.endsWith('/yos/index.html'));
+  const scope = new URL(self.registration.scope);
+  if (url.origin !== scope.origin || !url.pathname.startsWith(scope.pathname) || url.pathname.includes('/api/')) return;
 
-  if (isHome) {
+  if (event.request.mode === 'navigate') {
     event.respondWith(
       fetch(event.request, { cache: 'no-cache' })
-        .then(inject)
-        .catch(() => caches.match('./index.html').then(inject))
+        .then((response) => {
+          if (response.ok) {
+            const copy = response.clone();
+            caches.open(CACHE).then((cache) => cache.put(event.request, copy));
+          }
+          return response;
+        })
+        .catch(async () => (await caches.match(event.request)) || (await caches.match('./index.html')))
     );
     return;
   }
 
   event.respondWith(
-    fetch(event.request, { cache: 'no-cache' })
-      .then((response) => {
-        const copy = response.clone();
-        caches.open(CACHE).then((cache) => cache.put(event.request, copy));
-        return response;
-      })
-      .catch(() => caches.match(event.request).then((hit) => hit || caches.match('./index.html')))
+    caches.match(event.request).then((cached) => {
+      const network = fetch(event.request, { cache: 'no-cache' })
+        .then((response) => {
+          if (response.ok) {
+            const copy = response.clone();
+            caches.open(CACHE).then((cache) => cache.put(event.request, copy));
+          }
+          return response;
+        })
+        .catch(() => cached || Response.error());
+      return cached || network;
+    })
   );
 });

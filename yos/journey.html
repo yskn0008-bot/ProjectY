@@ -6,120 +6,96 @@
   <meta name="theme-color" content="#090b12">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="YOS Journey">
-  <meta name="description" content="人生を物語として進めるYOSヒーローズジャーニー">
+  <meta name="apple-mobile-web-app-title" content="Hero's Journey">
+  <meta name="description" content="人生の章・試練・経験を残し、YOSメンターと次の一歩を決める">
+  <link rel="manifest" href="./manifest.webmanifest">
   <link rel="stylesheet" href="./styles.css">
   <link rel="stylesheet" href="./journey.css">
-  <title>YOS｜ヒーローズジャーニー</title>
+  <title>Hero's Journey｜旅の地図</title>
 </head>
 <body>
   <main class="app journey-app">
     <header class="journey-topbar">
-      <a class="back-button" href="./" aria-label="YOSホームへ戻る">‹</a>
-      <div>
-        <p class="section-kicker">HERO'S JOURNEY</p>
-        <h1>人生を物語にする</h1>
-      </div>
-      <button id="openJourneySettings" class="icon-action" type="button" aria-label="設定">⚙︎</button>
+      <a class="back-button" href="./" aria-label="ホームへ戻る">‹</a>
+      <div><p class="section-kicker">HERO'S JOURNEY</p><h1>旅の地図</h1></div>
+      <button id="openJourneySettings" class="icon-action" type="button" aria-label="物語の設定">⚙︎</button>
     </header>
 
     <section class="journey-hero" aria-labelledby="chapterTitle">
+      <div class="journey-stage-line"><span id="stageLabel">日常世界</span><strong id="levelLabel">LEVEL 1</strong></div>
       <p class="eyebrow">CURRENT CHAPTER</p>
-      <h2 id="chapterTitle">第1章｜始まり</h2>
-      <p id="chapterMessage">大きく変えるのではなく、今日の一歩を経験に変える。</p>
-      <div class="journey-progress" aria-label="レベル進捗">
-        <div class="journey-progress-head"><span id="levelLabel">LEVEL 1</span><strong id="xpLabel">0 / 100 XP</strong></div>
+      <h2 id="chapterTitle">第1章｜旅の始まり</h2>
+      <p id="chapterMessage">人生を一気に変えなくていい。今日の一歩から物語は動き出す。</p>
+      <div class="stage-guide"><span>YOSメンター</span><p id="stageGuide">今いる場所を否定せず、変えたいことを一つだけ言葉にしよう。</p></div>
+      <div class="journey-progress" aria-label="経験進捗">
+        <div class="journey-progress-head"><span>EXPERIENCE</span><strong id="xpLabel">0 / 100 XP</strong></div>
         <div class="journey-progress-track"><i id="xpBar"></i></div>
       </div>
-      <div class="journey-stats">
-        <div><strong id="totalXp">0</strong><span>総XP</span></div>
-        <div><strong id="completedCount">0</strong><span>完了クエスト</span></div>
-        <div><strong id="streakCount">0</strong><span>連続記録</span></div>
-      </div>
+      <div class="journey-stats"><div><strong id="totalXp">0</strong><span>総XP</span></div><div><strong id="completedCount">0</strong><span>達成</span></div><div><strong id="streakCount">0</strong><span>連続記録</span></div></div>
+    </section>
+
+    <section class="journey-card" aria-labelledby="mapTitle">
+      <div class="section-head compact"><div><p class="section-kicker">THE 12 STAGES</p><h2 id="mapTitle">物語の現在地</h2></div><span id="stagePosition" class="subtle">1 / 12</span></div>
+      <div id="stageMap" class="stage-map" role="list" aria-label="ヒーローズジャーニー12段階"></div>
+      <div class="stage-navigation"><button id="previousStage" class="secondary-action" type="button">前の段階</button><button id="nextStage" class="primary-action" type="button">次の段階</button></div>
+      <p class="stage-note">段階は優劣ではありません。今の自分に一番近い場所を選びます。</p>
+    </section>
+
+    <section class="journey-card" aria-labelledby="callingTitle">
+      <div class="section-head compact"><div><p class="section-kicker">CALL TO ADVENTURE</p><h2 id="callingTitle">冒険からの呼びかけ</h2></div><span class="subtle">気になること</span></div>
+      <label class="journey-field" for="callingInput"><span>なぜか気になって離れないこと</span><input id="callingInput" type="text" maxlength="180" placeholder="例：もっと自分らしい働き方を作りたい"></label>
+      <button id="saveCalling" class="secondary-action full" type="button">呼びかけを保存</button>
     </section>
 
     <section class="journey-card" aria-labelledby="mainQuestTitle">
-      <div class="section-head compact">
-        <div><p class="section-kicker">MAIN QUEST</p><h2 id="mainQuestTitle">今いちばん進めること</h2></div>
-        <span class="subtle">1つだけ</span>
-      </div>
-      <label class="journey-field" for="mainQuestInput">
-        <span>メインクエスト</span>
-        <input id="mainQuestInput" type="text" maxlength="100" placeholder="例：明日の営業準備を終える">
-      </label>
+      <div class="section-head compact"><div><p class="section-kicker">MAIN QUEST</p><h2 id="mainQuestTitle">今いちばん進めること</h2></div><span class="subtle">1つだけ</span></div>
+      <label class="journey-field" for="mainQuestInput"><span>メインクエスト</span><input id="mainQuestInput" type="text" maxlength="100" placeholder="例：今月の営業の型を作る"></label>
       <button id="saveMainQuest" class="secondary-action full" type="button">メインクエストを保存</button>
     </section>
 
     <section class="journey-card" aria-labelledby="questCreateTitle">
-      <div class="section-head compact">
-        <div><p class="section-kicker">NEW QUEST</p><h2 id="questCreateTitle">今日のクエストを作る</h2></div>
-        <span class="subtle">音声入力OK</span>
-      </div>
-      <label class="journey-field" for="questInput">
-        <span>やること</span>
-        <input id="questInput" type="text" maxlength="100" placeholder="キーボードのマイクから話せます">
-      </label>
-      <div class="xp-choice" role="group" aria-label="クエスト難易度">
-        <button type="button" data-xp="10" class="selected">小さな一歩<br><b>10 XP</b></button>
-        <button type="button" data-xp="20">挑戦<br><b>20 XP</b></button>
-        <button type="button" data-xp="30">大きな挑戦<br><b>30 XP</b></button>
-      </div>
-      <button id="addQuest" class="primary-action full" type="button">クエストに追加</button>
+      <div class="section-head compact"><div><p class="section-kicker">NEXT STEP</p><h2 id="questCreateTitle">小さな一歩を作る</h2></div><span class="subtle">音声入力OK</span></div>
+      <label class="journey-field" for="questInput"><span>次にやること</span><input id="questInput" type="text" maxlength="100" placeholder="戻れるくらい小さな一歩にする"></label>
+      <div class="xp-choice" role="group" aria-label="一歩の大きさ"><button type="button" data-xp="10" class="selected">小さな一歩<br><b>10 XP</b></button><button type="button" data-xp="20">挑戦<br><b>20 XP</b></button><button type="button" data-xp="30">大きな挑戦<br><b>30 XP</b></button></div>
+      <button id="addQuest" class="primary-action full" type="button">次の一歩に追加</button>
     </section>
 
     <section class="journey-card" aria-labelledby="activeQuestTitle">
-      <div class="section-head compact">
-        <div><p class="section-kicker">ACTIVE QUESTS</p><h2 id="activeQuestTitle">進行中</h2></div>
-        <span id="activeQuestCount" class="subtle">0件</span>
-      </div>
+      <div class="section-head compact"><div><p class="section-kicker">ACTIVE STEPS</p><h2 id="activeQuestTitle">進行中</h2></div><span id="activeQuestCount" class="subtle">0件</span></div>
       <div id="questList" class="quest-list"></div>
-      <p id="emptyQuest" class="empty-state">まだクエストはありません。最初の一歩を追加しよう。</p>
+      <p id="emptyQuest" class="empty-state">まだ一歩はありません。小さく作ってみよう。</p>
     </section>
 
     <section class="journey-card" aria-labelledby="returnTitle">
-      <div class="section-head compact">
-        <div><p class="section-kicker">RETURN WITH THE ELIXIR</p><h2 id="returnTitle">今日の経験を残す</h2></div>
-        <span id="reflectionSavedAt" class="subtle">未記録</span>
-      </div>
-      <label class="journey-field" for="reflectionInput">
-        <span>今日わかったこと</span>
-        <textarea id="reflectionInput" maxlength="300" rows="4" placeholder="成功も失敗も、次に使えるデータとして残す"></textarea>
-      </label>
-      <div class="journey-actions">
-        <button id="saveReflection" class="secondary-action" type="button">経験を保存</button>
-        <button id="consultYos" class="primary-action" type="button">YOSと振り返る</button>
-      </div>
+      <div class="section-head compact"><div><p class="section-kicker">RETURN WITH THE ELIXIR</p><h2 id="returnTitle">経験から宝を持ち帰る</h2></div><span id="reflectionSavedAt" class="subtle">未記録</span></div>
+      <label class="journey-field" for="reflectionInput"><span>今日わかったこと・感じた違和感</span><textarea id="reflectionInput" maxlength="400" rows="4" placeholder="成功も失敗も、次に使えるデータとして残す"></textarea></label>
+      <div class="journey-actions"><button id="saveReflection" class="secondary-action" type="button">経験を保存</button><button id="consultYos" class="primary-action" type="button">メンターと話す</button></div>
+    </section>
+
+    <section class="journey-card" aria-labelledby="reflectionHistoryTitle">
+      <div class="section-head compact"><div><p class="section-kicker">EXPERIENCE LOG</p><h2 id="reflectionHistoryTitle">最近の学び</h2></div><span class="subtle">最新7件</span></div>
+      <div id="reflectionList" class="reflection-list"></div>
+      <p id="emptyReflections" class="empty-state">経験を保存すると、ここに学びが積み上がります。</p>
     </section>
 
     <section class="journey-card" aria-labelledby="historyTitle">
-      <div class="section-head compact">
-        <div><p class="section-kicker">RECENT WINS</p><h2 id="historyTitle">最近の達成</h2></div>
-        <span class="subtle">最新5件</span>
-      </div>
+      <div class="section-head compact"><div><p class="section-kicker">RECENT WINS</p><h2 id="historyTitle">最近の達成</h2></div><span class="subtle">最新7件</span></div>
       <div id="completedList" class="completed-list"></div>
-      <p id="emptyCompleted" class="empty-state">達成したクエストがここに残ります。</p>
+      <p id="emptyCompleted" class="empty-state">達成した一歩がここに残ります。</p>
     </section>
 
     <p id="journeyStatus" class="app-status" role="status" aria-live="polite"></p>
     <footer>経験は資産。失敗も物語の一部。</footer>
   </main>
 
-  <nav class="bottom-nav" aria-label="メインナビゲーション">
-    <a href="./"><span>✦</span>YOS</a>
-    <a href="../taxi/"><span>🚖</span>Taxi</a>
-    <a href="../life/"><span>🏠</span>Life</a>
-  </nav>
+  <nav class="bottom-nav" aria-label="メインナビゲーション"><a class="active" href="./"><span>✦</span>Journey</a><a href="../taxi/"><span>🚖</span>Work</a><a href="../life/"><span>🏠</span>Life</a></nav>
 
   <dialog id="journeySettingsDialog">
     <form method="dialog" class="dialog-body">
-      <div class="dialog-head">
-        <div><p class="section-kicker">STORY SETTINGS</p><h2>物語の設定</h2></div>
-        <button class="dialog-close" value="cancel" aria-label="閉じる">×</button>
-      </div>
-      <label for="chapterInput">現在の章</label>
-      <input id="chapterInput" type="text" maxlength="60" placeholder="第1章｜始まり">
-      <label for="chapterMessageInput">章のテーマ</label>
-      <input id="chapterMessageInput" type="text" maxlength="120" placeholder="今の自分に必要なテーマ">
+      <div class="dialog-head"><div><p class="section-kicker">STORY SETTINGS</p><h2>物語の現在地</h2></div><button class="dialog-close" value="cancel" aria-label="閉じる">×</button></div>
+      <label for="chapterInput">現在の章</label><input id="chapterInput" type="text" maxlength="60" placeholder="第1章｜旅の始まり">
+      <label for="stageInput">旅の段階</label><select id="stageInput"><option>日常世界</option><option>冒険への誘い</option><option>ためらい</option><option>メンターとの出会い</option><option>最初の境界線</option><option>試練・仲間・敵</option><option>最も深い場所へ</option><option>最大の試練</option><option>報酬</option><option>帰路</option><option>復活</option><option>宝を持って帰還</option></select>
+      <label for="chapterMessageInput">章のテーマ</label><input id="chapterMessageInput" type="text" maxlength="120" placeholder="今の自分に必要なテーマ">
       <button id="saveJourneySettings" class="primary-action full" value="default">保存する</button>
     </form>
   </dialog>

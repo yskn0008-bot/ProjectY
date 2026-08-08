@@ -6,170 +6,121 @@
   <meta name="theme-color" content="#090b12">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="YOS">
-  <meta name="description" content="仕事・生活・お金・人間関係をつなぎ、人生全体の次の一手を決めるYOSホーム">
+  <meta name="apple-mobile-web-app-title" content="Hero's Journey">
+  <meta name="description" content="人生を物語として進める、ヒーローズジャーニーのAIメンターアプリ">
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="stylesheet" href="./styles.css">
-  <link rel="stylesheet" href="./journey.css">
-  <title>YOS｜人生の司令塔</title>
+  <title>Hero's Journey｜人生の物語を進める</title>
 </head>
 <body>
   <main class="app">
     <header class="topbar">
-      <div class="brand-mark" aria-hidden="true">Y</div>
-      <div class="brand-copy">
-        <h1>YOS</h1>
-        <p>YOUR ONLY SYSTEM</p>
-      </div>
-      <div class="clock" aria-label="現在時刻">
-        <strong id="clock">--:--</strong>
-        <span id="date">----</span>
-      </div>
+      <div class="brand-mark" aria-hidden="true">✦</div>
+      <div class="brand-copy"><h1>HERO'S JOURNEY</h1><p>AI MENTOR · YOS</p></div>
+      <div class="clock" aria-label="現在時刻"><strong id="clock">--:--</strong><span id="date">----</span></div>
     </header>
 
-    <section class="hero" aria-labelledby="heroTitle">
+    <section class="hero mentor-hero" aria-labelledby="chapterTitle">
       <div class="hero-orbit" aria-hidden="true"></div>
-      <p class="eyebrow">人生全体の司令塔</p>
-      <h2 id="heroTitle">今の自分から、<br>次の一手を決める。</h2>
-      <p id="greeting" class="hero-copy">仕事・生活・お金・感情を切り離さず、人生全体で判断する。</p>
-      <div class="hero-actions">
-        <button class="primary-action" type="button" data-prompt="【YOS】今の状況を話すので、人生全体から次の一手を一つに絞って。">YOSに相談する</button>
-        <button id="openSettings" class="icon-action" type="button" aria-label="YOSチャット設定">⚙︎</button>
+      <div class="story-owner" id="storyOwner">あなたの物語</div>
+      <div class="stage-row"><span id="journeyStage" class="stage-chip">日常世界</span><span id="journeyLevel">LEVEL 1</span></div>
+      <p class="eyebrow">CURRENT CHAPTER</p>
+      <h2 id="chapterTitle">第1章｜旅の始まり</h2>
+      <p id="chapterMessage" class="chapter-message">人生を一気に変えなくていい。今日の一歩から物語は動き出す。</p>
+      <div class="stage-progress" aria-label="旅の進行度">
+        <div><span id="stageProgressLabel">1 / 12</span><small>旅の現在地</small></div>
+        <div class="stage-progress-track"><i id="stageProgressBar"></i></div>
       </div>
+      <div class="mentor-message"><span aria-hidden="true">✦</span><div><small>YOS MENTOR</small><p id="mentorMessage">今いる場所を否定せず、次の一歩を一つだけ決めよう。</p></div></div>
+      <div class="hero-actions"><button id="consultMentor" class="primary-action" type="button">メンターに話す</button><button id="editJourney" class="icon-action" type="button" aria-label="物語の設定">⚙︎</button></div>
     </section>
 
-    <section class="command-card" aria-labelledby="nextTitle">
-      <div class="section-head">
-        <div>
-          <p class="section-kicker">MISSION CONTROL</p>
-          <h2 id="nextTitle">今やること</h2>
-        </div>
-        <button id="refreshMission" class="refresh-button" type="button" aria-label="Mission Controlを更新">↻</button>
-      </div>
-      <p id="nextAction" class="next-action">現在地を読み込んでいます。</p>
-      <div class="mission-meta">
-        <span id="missionState" class="status-chip"><i></i>確認中</span>
-        <span id="missionUpdated">更新日時を確認中</span>
-      </div>
-      <div class="mission-grid" aria-label="Mission Control概要">
-        <div><strong id="activeCount">—</strong><span>進行中</span></div>
-        <div><strong id="attentionCount">—</strong><span>要確認</span></div>
-        <div><strong id="inboxCount">—</strong><span>Inbox</span></div>
-      </div>
+    <section class="journey-overview" aria-labelledby="questTitle">
+      <div class="section-head"><div><p class="section-kicker">TODAY'S QUEST</p><h2 id="questTitle">今日の一歩</h2></div><a class="text-link" href="./journey.html">旅の全体を見る ›</a></div>
+      <div class="quest-focus"><span>メインクエスト</span><strong id="mainQuest">まだ決まっていません</strong></div>
+      <div class="next-step"><span>次にやること</span><p id="nextStep">小さなクエストを一つ作ろう。</p></div>
+      <form id="quickQuestForm" class="quick-quest"><label for="quickQuestInput">今日できる小さな一歩</label><div><input id="quickQuestInput" type="text" maxlength="100" placeholder="例：気になることを3行書く"><button type="submit">追加</button></div></form>
+      <div id="homeQuestList" class="home-quest-list"></div>
+      <p id="emptyHomeQuest" class="empty-home-quest">まだ一歩はありません。5分で終わるくらい小さく作ろう。</p>
+      <div class="journey-metrics"><div><strong id="totalXp">0</strong><span>経験XP</span></div><div><strong id="completedCount">0</strong><span>達成</span></div><div><strong id="streakCount">0</strong><span>連続記録</span></div></div>
     </section>
 
     <section class="state-card" aria-labelledby="stateTitle">
-      <div class="section-head compact">
-        <div>
-          <p class="section-kicker">CURRENT STATE</p>
-          <h2 id="stateTitle">今の自分</h2>
-        </div>
-        <span id="stateSavedAt" class="subtle">未記録</span>
-      </div>
+      <div class="section-head compact"><div><p class="section-kicker">HERO STATUS</p><h2 id="stateTitle">今の自分</h2></div><span id="stateSavedAt" class="subtle">未記録</span></div>
+      <div class="state-block"><span class="state-label">体力</span><div class="choice-row" role="group" aria-label="体力"><button type="button" data-state-group="energy" data-value="low">低い</button><button type="button" data-state-group="energy" data-value="mid">普通</button><button type="button" data-state-group="energy" data-value="high">高い</button></div></div>
+      <div class="state-block"><span class="state-label">気持ち</span><div class="choice-row" role="group" aria-label="気持ち"><button type="button" data-state-group="mood" data-value="heavy">重い</button><button type="button" data-state-group="mood" data-value="calm">穏やか</button><button type="button" data-state-group="mood" data-value="good">良い</button></div></div>
+      <label class="focus-field" for="focusInput"><span>いま気になっていること</span><input id="focusInput" type="text" maxlength="120" placeholder="違和感も旅のデータ"></label>
+      <div class="state-actions"><button id="saveState" class="secondary-action" type="button">状態を保存</button><button id="consultState" class="primary-action" type="button">この状態で相談</button></div>
+    </section>
 
-      <div class="state-block">
-        <span class="state-label">体力</span>
-        <div class="choice-row" role="group" aria-label="体力">
-          <button type="button" data-state-group="energy" data-value="low">低い</button>
-          <button type="button" data-state-group="energy" data-value="mid">普通</button>
-          <button type="button" data-state-group="energy" data-value="high">高い</button>
-        </div>
-      </div>
-
-      <div class="state-block">
-        <span class="state-label">気持ち</span>
-        <div class="choice-row" role="group" aria-label="気持ち">
-          <button type="button" data-state-group="mood" data-value="heavy">重い</button>
-          <button type="button" data-state-group="mood" data-value="calm">穏やか</button>
-          <button type="button" data-state-group="mood" data-value="good">良い</button>
-        </div>
-      </div>
-
-      <label class="focus-field" for="focusInput">
-        <span>いま気になっていること</span>
-        <input id="focusInput" type="text" maxlength="120" placeholder="一言だけでOK">
-      </label>
-      <div class="state-actions">
-        <button id="saveState" class="secondary-action" type="button">状態を保存</button>
-        <button id="consultState" class="primary-action" type="button">この状態で相談</button>
-      </div>
+    <section class="experience-card" aria-labelledby="experienceTitle">
+      <div class="section-head compact"><div><p class="section-kicker">RETURN WITH THE ELIXIR</p><h2 id="experienceTitle">経験を宝にする</h2></div><span id="reflectionSavedAt" class="subtle">未記録</span></div>
+      <p class="card-copy">成功も失敗も、次の自分を助ける経験として残す。</p>
+      <label class="reflection-field" for="reflectionInput"><span>今日わかったこと</span><textarea id="reflectionInput" maxlength="400" rows="3" placeholder="例：疲れている時は大きな決断をしない"></textarea></label>
+      <div class="experience-actions"><button id="saveReflection" class="secondary-action" type="button">経験を保存</button><button id="reflectWithYos" class="primary-action" type="button">メンターと振り返る</button></div>
     </section>
 
     <section aria-labelledby="domainsTitle">
-      <div class="section-head plain">
-        <div>
-          <p class="section-kicker">LIFE DOMAINS</p>
-          <h2 id="domainsTitle">人生を動かす</h2>
-        </div>
-      </div>
+      <div class="section-head plain"><div><p class="section-kicker">JOURNEY DOMAINS</p><h2 id="domainsTitle">人生の舞台</h2></div></div>
       <div class="domain-grid">
-        <a class="domain-card taxi" href="../taxi/">
-          <span class="domain-icon" aria-hidden="true">🚖</span>
-          <span><b>Taxi</b><small>働く・稼ぐ・研究する</small></span>
-          <i aria-hidden="true">›</i>
-        </a>
-        <a class="domain-card life" href="../life/">
-          <span class="domain-icon" aria-hidden="true">🏠</span>
-          <span><b>Life</b><small>暮らす・整える・守る</small></span>
-          <i aria-hidden="true">›</i>
-        </a>
-        <a class="domain-card journey" href="./journey.html">
-          <span class="domain-icon" aria-hidden="true">📖</span>
-          <span><b>Journey</b><small>挑戦・経験・物語を積み上げる</small></span>
-          <i aria-hidden="true">›</i>
-        </a>
-        <button class="domain-card money" type="button" data-prompt="【人生相談｜お金】今の収入・支出・資産・自由のバランスを整理して、次の一手を一つに絞って。">
-          <span class="domain-icon" aria-hidden="true">¥</span>
-          <span><b>Money</b><small>守る・増やす・自由を作る</small></span>
-          <i aria-hidden="true">›</i>
-        </button>
-        <button class="domain-card idea" type="button" data-prompt="【アイデア】今から話す思いつきを整理して、既存資産を活かす小さな実験にして。">
-          <span class="domain-icon" aria-hidden="true">💡</span>
-          <span><b>Idea</b><small>思いつきを資産に変える</small></span>
-          <i aria-hidden="true">›</i>
-        </button>
+        <a class="domain-card taxi" href="../taxi/"><span class="domain-icon" aria-hidden="true">🚖</span><span><b>Work</b><small>仕事・挑戦・実験</small></span><i aria-hidden="true">›</i></a>
+        <a class="domain-card life" href="../life/"><span class="domain-icon" aria-hidden="true">🏠</span><span><b>Life</b><small>回復・暮らし・つながり</small></span><i aria-hidden="true">›</i></a>
+        <button class="domain-card money" type="button" data-topic="【お金】自由と安心を守りながら、今の旅に必要なお金の一歩を決めて。"><span class="domain-icon" aria-hidden="true">¥</span><span><b>Money</b><small>安心・選択肢・自由</small></span><i aria-hidden="true">›</i></button>
+        <button class="domain-card idea" type="button" data-topic="【アイデア】この思いつきを、今の旅を前へ進める小さな実験に変えて。"><span class="domain-icon" aria-hidden="true">💡</span><span><b>Dream</b><small>好奇心・創造・可能性</small></span><i aria-hidden="true">›</i></button>
       </div>
     </section>
 
     <section class="quick-card" aria-labelledby="quickTitle">
-      <div class="section-head compact">
-        <div>
-          <p class="section-kicker">QUICK START</p>
-          <h2 id="quickTitle">すぐ始める</h2>
-        </div>
-        <span class="subtle">1タップ</span>
-      </div>
+      <div class="section-head compact"><div><p class="section-kicker">MENTOR ACTIONS</p><h2 id="quickTitle">迷った時に開く</h2></div><span class="subtle">1タップ</span></div>
       <div class="quick-grid">
-        <button type="button" data-prompt="【今日の予定】今日の予定と優先順位を整理して、無理のない流れを作って。"><span>📅</span><b>今日の予定</b><small>一日の流れ</small></button>
-        <button type="button" data-prompt="【人生相談】今の悩みを、仕事・健康・お金・人間関係・自分らしさを含めて一緒に考えて。"><span>❤️</span><b>人生相談</b><small>全体から判断</small></button>
-        <button type="button" data-prompt="【アイデア】今から話すアイデアを整理して、既存資産を活かす形に設計して。"><span>💡</span><b>アイデア</b><small>思いつきを形に</small></button>
-        <button type="button" data-prompt="【YOS改善】今のYOS運用を確認して、操作を減らし長く使える改善案を考えて。"><span>⚙️</span><b>YOS改善</b><small>仕組みを育てる</small></button>
+        <button type="button" data-topic="【今日の旅】今日の予定と体力を見て、物語を前へ進める一歩を一つ決めて。"><span>🧭</span><b>次の一歩</b><small>進む方向を決める</small></button>
+        <button type="button" data-topic="【ためらい】動けない理由を責めずに整理し、安全な最小の一歩に変えて。"><span>🌫️</span><b>動けない</b><small>怖さを地図にする</small></button>
+        <button type="button" data-topic="【壁】いま越えられずにいる壁を整理して、無理のない突破口を一つ作って。"><span>⛰️</span><b>壁にいる</b><small>試練を小さくする</small></button>
+        <button type="button" data-topic="【物語の確認】今の生き方が自分らしいか、旅の方向と次の章を一緒に確認して。"><span>📖</span><b>方向を確認</b><small>自分らしさを守る</small></button>
       </div>
     </section>
 
     <p id="appStatus" class="app-status" role="status" aria-live="polite"></p>
-    <footer>俺が俺で在り続けながら、人生全体を良くする。</footer>
+    <footer id="storyFooter">主人公はあなた。YOSは、その旅を支えるメンター。</footer>
   </main>
 
-  <nav class="bottom-nav" aria-label="メインナビゲーション">
-    <a class="active" href="./"><span>✦</span>YOS</a>
-    <a href="../taxi/"><span>🚖</span>Taxi</a>
-    <a href="../life/"><span>🏠</span>Life</a>
-  </nav>
+  <nav class="bottom-nav" aria-label="メインナビゲーション"><a class="active" href="./"><span>✦</span>Journey</a><a href="../taxi/"><span>🚖</span>Work</a><a href="../life/"><span>🏠</span>Life</a></nav>
+
+  <dialog id="onboardingDialog" class="onboarding-dialog">
+    <form id="onboardingForm" class="dialog-body onboarding-body">
+      <div class="onboarding-symbol" aria-hidden="true">✦</div><p class="section-kicker">YOUR STORY BEGINS</p><h2>人生を、あなたの物語として始めよう。</h2><p class="onboarding-copy">3つ答えるだけ。ヒーローズジャーニーを知らなくても使えます。</p>
+      <label for="heroName">呼ばれたい名前</label><input id="heroName" type="text" maxlength="30" placeholder="例：ようすけ" autocomplete="nickname">
+      <fieldset class="scene-fieldset"><legend>今は、どんな場面？</legend><div class="scene-grid">
+        <button type="button" data-stage="冒険への誘い"><span>✨</span><b>変わりたい</b></button><button type="button" data-stage="ためらい"><span>🌫️</span><b>迷っている</b></button><button type="button" data-stage="最初の境界線"><span>🚪</span><b>挑戦中</b></button><button type="button" data-stage="最大の試練"><span>⛰️</span><b>壁にいる</b></button><button type="button" data-stage="報酬"><span>💎</span><b>何かを得た</b></button><button type="button" data-stage="宝を持って帰還"><span>🌅</span><b>次の章へ</b></button>
+      </div></fieldset>
+      <label for="callingInput">最近、なぜか気になっていること</label><textarea id="callingInput" maxlength="180" rows="3" placeholder="仕事を変えたい、新しいことを始めたい、休みたい…"></textarea>
+      <button id="startJourney" class="primary-action full" type="submit">この物語を始める</button><p class="privacy-note">入力内容は、この端末内に保存します。</p>
+    </form>
+  </dialog>
 
   <dialog id="settingsDialog">
     <form method="dialog" class="dialog-body">
-      <div class="dialog-head">
-        <div><p class="section-kicker">SETTINGS</p><h2>YOSチャット設定</h2></div>
-        <button class="dialog-close" value="cancel" aria-label="閉じる">×</button>
+      <div class="dialog-head"><div><p class="section-kicker">STORY SETTINGS</p><h2>物語の設定</h2></div><button class="dialog-close" value="cancel" aria-label="閉じる">×</button></div>
+      <label for="settingsHeroName">呼ばれたい名前</label><input id="settingsHeroName" type="text" maxlength="30" autocomplete="nickname">
+      <label for="settingsChapter">現在の章</label><input id="settingsChapter" type="text" maxlength="60">
+      <label for="settingsStage">旅の段階</label>
+      <select id="settingsStage">
+        <option>日常世界</option><option>冒険への誘い</option><option>ためらい</option><option>メンターとの出会い</option><option>最初の境界線</option><option>試練・仲間・敵</option><option>最も深い場所へ</option><option>最大の試練</option><option>報酬</option><option>帰路</option><option>復活</option><option>宝を持って帰還</option>
+      </select>
+      <label for="settingsCalling">冒険からの呼びかけ</label><textarea id="settingsCalling" maxlength="180" rows="3"></textarea>
+      <label for="yosUrl">YOSチャットURL</label><input id="yosUrl" type="url" inputmode="url" placeholder="https://chatgpt.com/...">
+      <button id="saveSettings" class="primary-action full" value="default">保存する</button>
+      <div class="data-actions" aria-label="データ管理">
+        <button id="exportStory" class="secondary-action" type="button">バックアップ</button>
+        <button id="importStory" class="secondary-action" type="button">復元</button>
       </div>
-      <p>YOSの会話URLを一度保存すると、相談ボタンから直接開けます。URLはこの端末内だけに保存します。</p>
-      <label for="yosUrl">YOSチャットURL</label>
-      <input id="yosUrl" type="url" inputmode="url" placeholder="https://chatgpt.com/...">
-      <button id="saveUrl" class="primary-action full" value="default">保存する</button>
+      <input id="importStoryFile" class="visually-hidden" type="file" accept="application/json,.json">
+      <button id="restartStory" class="text-button" type="button">初回設定をやり直す</button>
+      <button id="resetStory" class="danger-text-button" type="button">物語データを削除する</button>
     </form>
   </dialog>
 
   <script src="./app.js" defer></script>
+  <script src="./taxi-live-v1.js?v=7" defer></script>
 </body>
 </html>
