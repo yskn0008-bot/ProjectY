@@ -46,7 +46,8 @@
 
   function renderDetails(env) {
     const document = env?.document;
-    const host = document?.querySelector(".yos131-drive");
+    const drive = document?.querySelector(".yos131-drive");
+    const host = drive?.querySelector(".yos131-header > div:first-child");
     if (!host) return null;
 
     const core = env.YosTaxiOpsLoopV144;
