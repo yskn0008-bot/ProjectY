@@ -1,0 +1,44 @@
+name: YOS Life Safety
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'life/**'
+      - '.github/workflows/yos-life-safety.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'life/**'
+      - '.github/workflows/yos-life-safety.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: yos-life-safety-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  life-node-regression:
+    name: Life Node regression
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: ''
+
+      - name: Check Life JavaScript syntax
+        run: |
+          node --check life/home-v1.js
+          node --check life/service-worker.js
+
+      - name: Run Life data and cache boundary tests
+        run: node --test life/tests/home-priority-data.test.mjs life/tests/service-worker-cache-scope.test.mjs
