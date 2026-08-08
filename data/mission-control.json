@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-08-09T02:17:21+09:00",
+  "updated_at": "2026-08-09T04:44:07+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -150,7 +150,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/51",
-      "updated_at": "2026-08-08T16:26:51Z"
+      "updated_at": "2026-08-08T18:24:25Z"
     },
     {
       "id": "github-issue-86",
@@ -170,13 +170,6 @@
       "completed_at": "2026-08-06T14:38:26Z",
       "result": "GitHub mainへ反映（309b35b）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/309b35b8968b236c3076abde7a1222dde744961f"
-    },
-    {
-      "id": "github-commit-7f3b02f155b8",
-      "title": "revert: remove unreviewed demand calendar file from main",
-      "completed_at": "2026-08-06T14:30:12Z",
-      "result": "GitHub mainへ反映（7f3b02f）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/7f3b02f155b8510853ba256186957cab1eb4d1fa"
     },
     {
       "id": "complete-002",
@@ -213,7 +206,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-08-09T02:17:21+09:00",
+      "last_update": "2026-08-09T04:44:07+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -294,7 +287,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-08-09T02:17:21+09:00",
+      "last_update": "2026-08-09T04:44:07+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -317,7 +310,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-08-09T02:17:21+09:00",
+      "last_update": "2026-08-09T04:44:07+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -399,5 +392,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "a610713b9b96548e0a2f28da29ee4ec4106a59ec8ad341e0cc6ca1418c14534b"
+  "github_snapshot_hash": "4dc97993a682ba3725425572c81e2472d948e0d99e0f05b18ff5c0b4499422d0"
 }
