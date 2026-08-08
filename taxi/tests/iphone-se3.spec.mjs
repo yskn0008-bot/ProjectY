@@ -113,7 +113,7 @@ test.describe('iPhone SE3 viewport and touch smoke', () => {
 
       if (entry.name === 'drive') {
         await page.goto('./index.html', { waitUntil: 'domcontentloaded' });
-        await expect(page.locator('#shiftButton')).toBeVisible();
+        await expect(page.locator('.yos131-primary[data-proxy="shiftButton"]')).toBeVisible();
 
         const demand = page.locator('.demand-home');
         await expect(demand).toBeVisible();
