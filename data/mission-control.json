@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-08-09T08:16:15+09:00",
+  "updated_at": "2026-08-09T08:18:00+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -33,6 +33,16 @@
       "updated_at": "2026-08-06T16:28:52Z"
     },
     {
+      "id": "github-pr-231",
+      "title": "PR #231 Draft: Hero’s Journey最終統合",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/231",
+      "updated_at": "2026-08-05T16:59:34Z"
+    },
+    {
       "id": "github-pr-233",
       "title": "PR #233 Draft: Mission Controlに進捗率・残り時間を常時表示する",
       "type": "GitHub PR",
@@ -51,16 +61,6 @@
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/237",
       "updated_at": "2026-08-07T14:27:11Z"
-    },
-    {
-      "id": "github-pr-241",
-      "title": "PR #241 Draft: Taxi営業意思決定ループ最終統合",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/241",
-      "updated_at": "2026-08-08T23:16:12Z"
     },
     {
       "id": "github-issue-10",
@@ -165,6 +165,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-6c4b6997a72d",
+      "title": "Merge PR #241: Taxi営業意思決定ループ最終統合",
+      "completed_at": "2026-08-08T23:17:46Z",
+      "result": "GitHub mainへ反映（6c4b699）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/6c4b6997a72d971daa2f11e43f74cc30bf219935"
+    },
+    {
       "id": "github-commit-2c9b768ab2a9",
       "title": "Merge PR #239: Taxiホームに今日の需要を統合",
       "completed_at": "2026-08-08T23:16:00Z",
@@ -172,32 +179,25 @@
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/2c9b768ab2a9a02062aa4340af7eff409295ccae"
     },
     {
-      "id": "github-commit-9dbdcd54ed13",
-      "title": "test(taxi): verify seven-track iPhone17 demand layout",
-      "completed_at": "2026-08-07T14:52:58Z",
-      "result": "GitHub mainへ反映（9dbdcd5）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/9dbdcd54ed1390d84ffa1a9af43a01ca818e0ccc"
+      "id": "github-commit-f3e7ff6b3c83",
+      "title": "test(taxi): follow current visible shift control on SE3",
+      "completed_at": "2026-08-08T23:12:56Z",
+      "result": "GitHub mainへ反映（f3e7ff6）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/f3e7ff6b3c8393da9307dcea339b14de3b4a9d7b"
     },
     {
-      "id": "github-commit-380f5e3fa904",
-      "title": "fix(taxi): define seven demand home tracks",
-      "completed_at": "2026-08-07T14:52:19Z",
-      "result": "GitHub mainへ反映（380f5e3）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/380f5e3fa9046a3c4408e5d01773a591efd125be"
+      "id": "github-commit-28b2d3db89cb",
+      "title": "test(taxi): follow current service worker cache version",
+      "completed_at": "2026-08-08T23:12:38Z",
+      "result": "GitHub mainへ反映（28b2d3d）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/28b2d3db89cbf5ff5c2ebec98dd5174b36330749"
     },
     {
-      "id": "github-commit-b5465da36215",
-      "title": "test(taxi): cover demand result after rerender",
-      "completed_at": "2026-08-07T14:07:40Z",
-      "result": "GitHub mainへ反映（b5465da）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/b5465da36215e480ca9ccad8716e7561f63ccce5"
-    },
-    {
-      "id": "github-commit-d53de93b4ec0",
-      "title": "fix(taxi): retain demand result across home rerender",
-      "completed_at": "2026-08-07T14:06:18Z",
-      "result": "GitHub mainへ反映（d53de93）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/d53de93b4ec08969b7da1e6dcf753ad70a7d6f7a"
+      "id": "github-commit-ebbdc8dc5bbe",
+      "title": "fix(taxi): keep ops details inside 7-row layout",
+      "completed_at": "2026-08-08T22:35:45Z",
+      "result": "GitHub mainへ反映（ebbdc8d）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/ebbdc8dc5bbe7b34164e511f420def46e5418317"
     },
     {
       "id": "complete-002",
@@ -224,7 +224,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #241をレビューして公開判断する",
+      "next_action": "PR #233をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-08-09T08:16:15+09:00",
+      "last_update": "2026-08-09T08:18:00+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -309,13 +309,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 19件・Open PR 10件を自動同期中",
+      "next_action": "Open Issue 19件・Open PR 9件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-08-09T08:16:15+09:00",
+      "last_update": "2026-08-09T08:18:00+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -329,7 +329,7 @@
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #241をレビューして公開判断する",
+      "next_action": "PR #233をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-08-09T08:16:15+09:00",
+      "last_update": "2026-08-09T08:18:00+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "d06e5295194aa35558fcd9365bf9b5929d70dae52af680f0aeb3959b5b3de302"
+  "github_snapshot_hash": "5289af8483dbd515666000d36a2ba97d8d67ad556f24f8e78689897c9402e63d"
 }
