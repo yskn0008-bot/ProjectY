@@ -1,0 +1,44 @@
+name: Taxi P0 patch transport
+
+on:
+  push:
+    branches:
+      - codex/issue-238-shift-button-clip
+
+permissions:
+  contents: write
+  issues: read
+
+jobs:
+  apply-codex-patch:
+    if: ${{ github.actor != 'github-actions[bot]' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: codex/issue-238-shift-button-clip
+          fetch-depth: 0
+
+      - name: Apply exact Codex patch
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh api repos/${GITHUB_REPOSITORY}/issues/comments/5231329005 --jq .body > /tmp/codex-comment.txt
+          grep -E '^PATCH_[0-9]{3}=' /tmp/codex-comment.txt | sort | cut -d= -f2- | tr -d '\n' | base64 -d | gzip -d > /tmp/p0.patch
+          echo 'fe7279509c9c3f36f7c17bc7c9f9a89cd684d22dbaf331645d4998788742abc7  /tmp/p0.patch' | sha256sum -c -
+          test "$(wc -c < /tmp/p0.patch)" -eq 31197
+          expected="$(printf '%s\n' taxi/final-app-v131.css taxi/final-app-v131.js taxi/index.html taxi/service-worker.js taxi/tests/iphone17.spec.mjs taxi/tests/shift-start-gate.test.mjs)"
+          actual="$(git apply --numstat /tmp/p0.patch | awk '{print $3}')"
+          test "$actual" = "$expected"
+          git apply --check /tmp/p0.patch
+          git apply /tmp/p0.patch
+          node --test taxi/tests/*.test.mjs
+          rm -f .github/workflows/taxi-p0-patch-transport.yml
+          git add -A
+          git diff --cached --check
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'fix(taxi): gate shift start by planned time'
+          git push origin HEAD:codex/issue-238-shift-button-clip
