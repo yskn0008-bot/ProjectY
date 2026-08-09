@@ -7,7 +7,7 @@ on:
 
 permissions:
   contents: write
-  issues: read
+  issues: write
 
 jobs:
   transport:
@@ -25,11 +25,15 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          fail() {
+            code=$?
+            gh issue comment 238 --repo "$GITHUB_REPOSITORY" --body "[transport diagnostic] Taxi P0 fix transport failed. exit=${code} line=${BASH_LINENO[0]} head=$(git rev-parse HEAD)" || true
+            exit "$code"
+          }
+          trap fail ERR
           target_sha='d7bd807f858533d8f58bc5c6af1672048604373232e705d4ac1c849c6502094e'
-          ids="$(gh api --paginate repos/${GITHUB_REPOSITORY}/issues/238/comments --jq ".[] | select(.body | contains(\"PATCH_SHA256=${target_sha}\")) | .id")"
-          test "$(printf '%s\n' "$ids" | sed '/^$/d' | wc -l)" -eq 1
-          comment_id="$(printf '%s\n' "$ids" | sed '/^$/d')"
-          gh api repos/${GITHUB_REPOSITORY}/issues/comments/${comment_id} --jq .body > /tmp/codex-fix-comment.txt
+          gh api repos/${GITHUB_REPOSITORY}/issues/comments/5231436940 --jq .body > /tmp/codex-fix-comment.txt
+          grep -q "PATCH_SHA256=${target_sha}" /tmp/codex-fix-comment.txt
           grep -q 'MATCH=true' /tmp/codex-fix-comment.txt
           grep -q 'PATCH_TRANSPORT_COMPLETE=true' /tmp/codex-fix-comment.txt
           grep -E '^PATCH_[0-9]{3}=' /tmp/codex-fix-comment.txt | sort | cut -d= -f2- | tr -d '\n' | base64 -d | gzip -d > /tmp/p0-fix.patch
