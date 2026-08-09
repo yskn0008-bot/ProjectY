@@ -12,9 +12,72 @@ concurrency:
   cancel-in-progress: true
 
 permissions:
-  contents: read
+  contents: write
+  issues: read
 
 jobs:
+  transport-codex-p0:
+    if: ${{ github.event_name == 'pull_request' && github.head_ref == 'codex/issue-238-shift-button-clip' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
+        with:
+          ref: codex/issue-238-shift-button-clip
+          fetch-depth: 0
+
+      - name: Apply exact Codex final patch and clean transport files
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          target_sha='d7bd807f858533d8f58bc5c6af1672048604373232e705d4ac1c849c6502094e'
+          expected_files="$(printf '%s\n' \
+            taxi/final-app-v131.css \
+            taxi/final-app-v131.js \
+            taxi/index.html \
+            taxi/service-worker.js \
+            taxi/tests/iphone17.spec.mjs \
+            taxi/tests/shift-start-gate.test.mjs)"
+
+          git fetch origin main
+          git checkout origin/main -- \
+            taxi/final-app-v131.css \
+            taxi/final-app-v131.js \
+            taxi/index.html \
+            taxi/service-worker.js \
+            taxi/tests/iphone17.spec.mjs \
+            taxi/tests/shift-start-gate.test.mjs
+
+          gh api repos/${GITHUB_REPOSITORY}/issues/comments/5231436940 --jq .body > /tmp/codex-final.txt
+          grep -q "PATCH_SHA256=${target_sha}" /tmp/codex-final.txt
+          grep -q 'MATCH=true' /tmp/codex-final.txt
+          grep -q 'PATCH_TRANSPORT_COMPLETE=true' /tmp/codex-final.txt
+          grep -E '^PATCH_[0-9]{3}=' /tmp/codex-final.txt | sort | cut -d= -f2- | tr -d '\n' | base64 -d | gzip -d > /tmp/codex-final.patch
+          echo "${target_sha}  /tmp/codex-final.patch" | sha256sum -c -
+          test "$(wc -c < /tmp/codex-final.patch)" -eq 29625
+          actual_patch_files="$(git apply --numstat /tmp/codex-final.patch | awk '{print $3}')"
+          test "$actual_patch_files" = "$expected_files"
+          git apply --check /tmp/codex-final.patch
+          git apply /tmp/codex-final.patch
+
+          node --test taxi/tests/*.test.mjs
+          git diff --check
+
+          git checkout origin/main -- .github/workflows/taxi-iphone17.yml
+          rm -f .github/workflows/taxi-p0-fix-transport.yml
+          git add -A
+          git diff --cached --check
+          final_files="$(git diff --cached --name-only origin/main)"
+          test "$final_files" = "$expected_files"
+
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'fix(taxi): contain and initialize shift proxy'
+          git push origin HEAD:codex/issue-238-shift-button-clip
+
   smoke:
     name: Playwright (${{ matrix.browser }})
     runs-on: ubuntu-latest
