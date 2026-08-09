@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-08-09T16:58:15+09:00",
+  "updated_at": "2026-08-09T18:34:42+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -20,7 +20,7 @@
       "priority": 2,
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/177",
-      "updated_at": "2026-08-09T06:22:33Z"
+      "updated_at": "2026-08-09T08:22:31Z"
     },
     {
       "id": "github-pr-213",
@@ -31,6 +31,16 @@
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/213",
       "updated_at": "2026-08-06T16:28:52Z"
+    },
+    {
+      "id": "github-pr-231",
+      "title": "PR #231 Draft: Hero’s Journey最終統合",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/231",
+      "updated_at": "2026-08-05T16:59:34Z"
     },
     {
       "id": "github-pr-233",
@@ -51,16 +61,6 @@
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/237",
       "updated_at": "2026-08-09T02:26:41Z"
-    },
-    {
-      "id": "github-pr-242",
-      "title": "PR #242 Taxi iPhone17実機表示崩れ修正",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/242",
-      "updated_at": "2026-08-09T07:54:30Z"
     },
     {
       "id": "github-issue-10",
@@ -150,7 +150,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/51",
-      "updated_at": "2026-08-09T06:20:54Z"
+      "updated_at": "2026-08-09T08:20:59Z"
     },
     {
       "id": "github-issue-86",
@@ -165,39 +165,39 @@
   ],
   "recently_completed": [
     {
-      "id": "github-commit-6c4b6997a72d",
-      "title": "Merge PR #241: Taxi営業意思決定ループ最終統合",
-      "completed_at": "2026-08-08T23:17:46Z",
-      "result": "GitHub mainへ反映（6c4b699）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/6c4b6997a72d971daa2f11e43f74cc30bf219935"
+      "id": "github-commit-f9e97e27ff27",
+      "title": "Merge pull request #243 from yskn0008-bot/codex/issue-238-taxi-cache-refresh",
+      "completed_at": "2026-08-09T09:34:27Z",
+      "result": "GitHub mainへ反映（f9e97e2）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/f9e97e27ff277d611870e695f985666fb85c4aee"
     },
     {
-      "id": "github-commit-2c9b768ab2a9",
-      "title": "Merge PR #239: Taxiホームに今日の需要を統合",
-      "completed_at": "2026-08-08T23:16:00Z",
-      "result": "GitHub mainへ反映（2c9b768）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/2c9b768ab2a9a02062aa4340af7eff409295ccae"
+      "id": "github-commit-d8fb15cdfc55",
+      "title": "fix(taxi): refresh service worker cache for iPhone17 layout",
+      "completed_at": "2026-08-09T09:30:31Z",
+      "result": "GitHub mainへ反映（d8fb15c）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/d8fb15cdfc550c6d1e21bcdbb0792572ede43a13"
     },
     {
-      "id": "github-commit-f3e7ff6b3c83",
-      "title": "test(taxi): follow current visible shift control on SE3",
-      "completed_at": "2026-08-08T23:12:56Z",
-      "result": "GitHub mainへ反映（f3e7ff6）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/f3e7ff6b3c8393da9307dcea339b14de3b4a9d7b"
+      "id": "github-commit-472eb3407a35",
+      "title": "Merge pull request #242 from yskn0008-bot/codex/issue-238-iphone17-layout-fix",
+      "completed_at": "2026-08-09T08:01:45Z",
+      "result": "GitHub mainへ反映（472eb34）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/472eb3407a352d7c1a42a8be8438d8be74fd20f2"
     },
     {
-      "id": "github-commit-28b2d3db89cb",
-      "title": "test(taxi): follow current service worker cache version",
-      "completed_at": "2026-08-08T23:12:38Z",
-      "result": "GitHub mainへ反映（28b2d3d）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/28b2d3db89cbf5ff5c2ebec98dd5174b36330749"
+      "id": "github-commit-c416c5384f19",
+      "title": "test(taxi): require four drive tiles on one row",
+      "completed_at": "2026-08-09T07:58:40Z",
+      "result": "GitHub mainへ反映（c416c53）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/c416c5384f19914142f52d6b8946dec51764f352"
     },
     {
-      "id": "github-commit-ebbdc8dc5bbe",
-      "title": "fix(taxi): keep ops details inside 7-row layout",
-      "completed_at": "2026-08-08T22:35:45Z",
-      "result": "GitHub mainへ反映（ebbdc8d）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/ebbdc8dc5bbe7b34164e511f420def46e5418317"
+      "id": "github-commit-05efa1bcb69e",
+      "title": "fix(taxi): keep next destination in four-column drive row",
+      "completed_at": "2026-08-09T07:54:15Z",
+      "result": "GitHub mainへ反映（05efa1b）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/05efa1bcb69e893cd317d4d1a178628f785d736c"
     },
     {
       "id": "complete-002",
@@ -224,7 +224,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #242をレビューして公開判断する",
+      "next_action": "PR #177をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-08-09T16:58:15+09:00",
+      "last_update": "2026-08-09T18:34:42+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -309,13 +309,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 19件・Open PR 10件を自動同期中",
+      "next_action": "Open Issue 19件・Open PR 9件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-08-09T16:58:15+09:00",
+      "last_update": "2026-08-09T18:34:42+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -329,7 +329,7 @@
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #242をレビューして公開判断する",
+      "next_action": "PR #177をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-08-09T16:58:15+09:00",
+      "last_update": "2026-08-09T18:34:42+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "8c638e890553cdfcd0c29a7d66b206ec461dc8e204179a7cae98d877e15b78b0"
+  "github_snapshot_hash": "5384d9634c1981d168b2734f13fff2e803b2f1f6f79dbf2b005e66e6ecc7ec6b"
 }
