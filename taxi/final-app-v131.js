@@ -202,7 +202,19 @@
     bind(root,c);
   }
 
-  function syncShiftProxy(){const source=document.getElementById('shiftButton'),button=document.querySelector('.yos131-primary[data-proxy="shiftButton"]');if(!source||!button)return;button.disabled=source.disabled;button.setAttribute('aria-disabled',String(source.disabled));button.querySelector('.yos131-primary-label')?.replaceChildren(source.textContent||'営業開始');button.querySelector('.yos131-primary-hint')?.replaceChildren(source.dataset.shiftHint||'開始可能時刻を確認してください')}
+  function syncShiftProxy(){
+    const source=document.getElementById('shiftButton');
+    let button=document.querySelector('.yos131-primary[data-proxy="shiftButton"]');
+    if(source&&!button&&pageType()==='drive'){
+      render();
+      button=document.querySelector('.yos131-primary[data-proxy="shiftButton"]');
+    }
+    if(!source||!button)return;
+    button.disabled=source.disabled;
+    button.setAttribute('aria-disabled',String(source.disabled));
+    button.querySelector('.yos131-primary-label')?.replaceChildren(source.textContent||'営業開始');
+    button.querySelector('.yos131-primary-hint')?.replaceChildren(source.dataset.shiftHint||'開始可能時刻を確認してください');
+  }
   function proxy(id){const source=document.getElementById(id);if(!source||source.disabled)return;source.click()}
   function editDay(key){if(typeof window.openDay==='function')window.openDay(key);else document.getElementById('editToday')?.click()}
 

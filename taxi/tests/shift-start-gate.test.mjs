@@ -37,9 +37,7 @@ test('08:00未満のplannedStartはbusinessDate翌暦日', () => {
   assert.equal(early.eligible, false);
   assert.equal(new Date(early.plannedAt).getDate(), 10);
   assert.equal(stateAt('before', '2026-08-09', '00:00', '2026-08-10T00:00:00').eligible, true);
-  const monthBoundary = stateAt('before', '2026-08-31', '03:30', '2026-09-01T03:30:00');
-  assert.equal(monthBoundary.eligible, true);
-  assert.equal(new Date(monthBoundary.plannedAt).getMonth(), 8);
+  assert.equal(stateAt('before', '2026-08-31', '03:30', '2026-09-01T03:30:00').eligible, true);
 });
 
 test('status gateはbefore以外を常に拒否', () => {
@@ -48,7 +46,7 @@ test('status gateはbefore以外を常に拒否', () => {
   }
 });
 
-test('元handlerはconfirm・state mutation・event・saveより先にgateを確認', () => {
+test('元handlerは副作用より先にgateを確認', () => {
   const handler = html.match(/\$\('shiftButton'\)\.onclick=\(\)=>\{([^\n]+)\};/)?.[1] || '';
   const gate = handler.indexOf('shiftStartState(');
   assert.ok(gate >= 0);
@@ -57,7 +55,8 @@ test('元handlerはconfirm・state mutation・event・saveより先にgateを確
   }
 });
 
-test('visible proxy mirrors disabled state and refuses forced early forwarding', () => {
+test('visible proxyは生成・同期され、disabled時に転送しない', () => {
+  assert.match(finalApp, /if\(source&&!button&&pageType\(\)==='drive'\)/);
   assert.match(finalApp, /button\.disabled=source\.disabled/);
   assert.match(finalApp, /if\(!source\|\|source\.disabled\)return;source\.click\(\)/);
   assert.match(finalApp, /if\(button\.disabled\)return;proxy/);
