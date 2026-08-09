@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-08-09T13:47:03+09:00",
+  "updated_at": "2026-08-09T16:58:15+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -20,7 +20,7 @@
       "priority": 2,
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/177",
-      "updated_at": "2026-08-09T04:22:32Z"
+      "updated_at": "2026-08-09T06:22:33Z"
     },
     {
       "id": "github-pr-213",
@@ -31,16 +31,6 @@
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/213",
       "updated_at": "2026-08-06T16:28:52Z"
-    },
-    {
-      "id": "github-pr-231",
-      "title": "PR #231 Draft: Hero’s Journey最終統合",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/231",
-      "updated_at": "2026-08-05T16:59:34Z"
     },
     {
       "id": "github-pr-233",
@@ -61,6 +51,16 @@
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/237",
       "updated_at": "2026-08-09T02:26:41Z"
+    },
+    {
+      "id": "github-pr-242",
+      "title": "PR #242 Taxi iPhone17実機表示崩れ修正",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/242",
+      "updated_at": "2026-08-09T07:54:30Z"
     },
     {
       "id": "github-issue-10",
@@ -150,7 +150,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/51",
-      "updated_at": "2026-08-09T04:20:14Z"
+      "updated_at": "2026-08-09T06:20:54Z"
     },
     {
       "id": "github-issue-86",
@@ -224,7 +224,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #177をレビューして公開判断する",
+      "next_action": "PR #242をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-08-09T13:47:03+09:00",
+      "last_update": "2026-08-09T16:58:15+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -309,13 +309,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 19件・Open PR 9件を自動同期中",
+      "next_action": "Open Issue 19件・Open PR 10件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-08-09T13:47:03+09:00",
+      "last_update": "2026-08-09T16:58:15+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -329,7 +329,7 @@
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #177をレビューして公開判断する",
+      "next_action": "PR #242をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-08-09T13:47:03+09:00",
+      "last_update": "2026-08-09T16:58:15+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "d613c75ce1fc9cfa3a38e90eaa574f9ae239b1698e9d84012dbb7eda7b81398f"
+  "github_snapshot_hash": "8c638e890553cdfcd0c29a7d66b206ec461dc8e204179a7cae98d877e15b78b0"
 }
