@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-08-10T04:50:43+09:00",
+  "updated_at": "2026-08-10T05:10:40+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -33,6 +33,16 @@
       "updated_at": "2026-08-06T16:28:52Z"
     },
     {
+      "id": "github-pr-231",
+      "title": "PR #231 Draft: Hero’s Journey最終統合",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/231",
+      "updated_at": "2026-08-05T16:59:34Z"
+    },
+    {
       "id": "github-pr-233",
       "title": "PR #233 Draft: Mission Controlに進捗率・残り時間を常時表示する",
       "type": "GitHub PR",
@@ -51,16 +61,6 @@
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/237",
       "updated_at": "2026-08-09T02:26:41Z"
-    },
-    {
-      "id": "github-pr-246",
-      "title": "PR #246 [YOS HQ] ProjectY自動司令部 v1｜毎時監視・安全な自動継続",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/246",
-      "updated_at": "2026-08-09T19:29:00Z"
     },
     {
       "id": "github-issue-10",
@@ -165,39 +165,39 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-0b600138c2a5",
+      "title": "Merge pull request #246 from yskn0008-bot/codex/issue-232-projecty-hq",
+      "completed_at": "2026-08-09T20:10:24Z",
+      "result": "GitHub mainへ反映（0b60013）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/0b600138c2a54463d6c29d5febe3f3a5396b8980"
+    },
+    {
+      "id": "github-commit-0e4685db538e",
+      "title": "test: cover Issue 232 event state handler",
+      "completed_at": "2026-08-09T18:18:41Z",
+      "result": "GitHub mainへ反映（0e4685d）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/0e4685db538eb3e6a8acda48ce15a10e1f55e0c4"
+    },
+    {
+      "id": "github-commit-7de836d1dd16",
+      "title": "ci: add Issue 232 event state handler",
+      "completed_at": "2026-08-09T18:18:25Z",
+      "result": "GitHub mainへ反映（7de836d）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/7de836d1dd16123ddd7a7dba217c89e24ba272ad"
+    },
+    {
+      "id": "github-commit-878731bc4dd2",
+      "title": "ci: add Issue 232 event-driven workflow",
+      "completed_at": "2026-08-09T18:18:00Z",
+      "result": "GitHub mainへ反映（878731b）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/878731bc4dd29a23f7a04f496d4879b82bf34688"
+    },
+    {
       "id": "github-commit-381799ff3168",
       "title": "Taxi｜営業開始時刻ゲート",
       "completed_at": "2026-08-09T16:39:58Z",
       "result": "GitHub mainへ反映（381799f）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/381799ff31684e6bf67439d380daba9cb62d261a"
-    },
-    {
-      "id": "github-commit-f9e97e27ff27",
-      "title": "Merge pull request #243 from yskn0008-bot/codex/issue-238-taxi-cache-refresh",
-      "completed_at": "2026-08-09T09:34:27Z",
-      "result": "GitHub mainへ反映（f9e97e2）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/f9e97e27ff277d611870e695f985666fb85c4aee"
-    },
-    {
-      "id": "github-commit-d8fb15cdfc55",
-      "title": "fix(taxi): refresh service worker cache for iPhone17 layout",
-      "completed_at": "2026-08-09T09:30:31Z",
-      "result": "GitHub mainへ反映（d8fb15c）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/d8fb15cdfc550c6d1e21bcdbb0792572ede43a13"
-    },
-    {
-      "id": "github-commit-472eb3407a35",
-      "title": "Merge pull request #242 from yskn0008-bot/codex/issue-238-iphone17-layout-fix",
-      "completed_at": "2026-08-09T08:01:45Z",
-      "result": "GitHub mainへ反映（472eb34）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/472eb3407a352d7c1a42a8be8438d8be74fd20f2"
-    },
-    {
-      "id": "github-commit-c416c5384f19",
-      "title": "test(taxi): require four drive tiles on one row",
-      "completed_at": "2026-08-09T07:58:40Z",
-      "result": "GitHub mainへ反映（c416c53）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/c416c5384f19914142f52d6b8946dec51764f352"
     },
     {
       "id": "complete-002",
@@ -224,7 +224,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #246をレビューして公開判断する",
+      "next_action": "PR #177をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-08-10T04:50:43+09:00",
+      "last_update": "2026-08-10T05:10:40+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -309,13 +309,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 20件・Open PR 10件を自動同期中",
+      "next_action": "Open Issue 20件・Open PR 9件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-08-10T04:50:43+09:00",
+      "last_update": "2026-08-10T05:10:40+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -329,7 +329,7 @@
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #246をレビューして公開判断する",
+      "next_action": "PR #177をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-08-10T04:50:43+09:00",
+      "last_update": "2026-08-10T05:10:40+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "232b631e742f9c53134f327568b9d8a3f394abf6cfc7481c1395a5296cbbf6d1"
+  "github_snapshot_hash": "c6028c1d79bdadc51216d80fc41f4ad13a132f7dda6c30d29f2fac96c7fe97c8"
 }
