@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-08-10T05:23:49+09:00",
+  "updated_at": "2026-08-10T05:25:14+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -60,7 +60,7 @@
       "priority": 2,
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/247",
-      "updated_at": "2026-08-09T20:22:50Z"
+      "updated_at": "2026-08-09T20:24:37Z"
     },
     {
       "id": "github-issue-10",
@@ -165,6 +165,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-b365b95eb5c7",
+      "title": "chore: remove temporary Issue 245 patch transport",
+      "completed_at": "2026-08-09T20:24:54Z",
+      "result": "GitHub mainへ反映（b365b95）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/b365b95eb5c7c46aafd00c1a1a3b8b2cff7bfbf3"
+    },
+    {
       "id": "github-commit-c4b4752ca0da",
       "title": "chore: use PR target for verified Issue 245 transport",
       "completed_at": "2026-08-09T20:23:35Z",
@@ -191,13 +198,6 @@
       "completed_at": "2026-08-09T18:18:41Z",
       "result": "GitHub mainへ反映（0e4685d）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/0e4685db538eb3e6a8acda48ce15a10e1f55e0c4"
-    },
-    {
-      "id": "github-commit-7de836d1dd16",
-      "title": "ci: add Issue 232 event state handler",
-      "completed_at": "2026-08-09T18:18:25Z",
-      "result": "GitHub mainへ反映（7de836d）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/7de836d1dd16123ddd7a7dba217c89e24ba272ad"
     },
     {
       "id": "complete-002",
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-08-10T05:23:49+09:00",
+      "last_update": "2026-08-10T05:25:14+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -315,7 +315,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-08-10T05:23:49+09:00",
+      "last_update": "2026-08-10T05:25:14+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-08-10T05:23:49+09:00",
+      "last_update": "2026-08-10T05:25:14+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "23281ff714134d608e8ca55dbea563785386797b46810c2fdc612d14c75c8082"
+  "github_snapshot_hash": "d94651ee80dbeaa7b7678317e04c4c96ae78d16c63b66d40d5fa9bea73ba3219"
 }
