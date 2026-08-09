@@ -173,16 +173,31 @@ test.describe('iPhone17 viewport and touch smoke', () => {
             const box = element.getBoundingClientRect();
             return { top: box.top, right: box.right, bottom: box.bottom, left: box.left };
           };
+          const style = getComputedStyle(bar);
+          const tiles = [...bar.children];
           return {
             bar: bounds(bar),
-            tiles: [...bar.children].map(bounds),
+            tiles: tiles.map(bounds),
+            destinationPosition: getComputedStyle(bar.querySelector('.destination-v141')).position,
+            gridTracks: style.gridTemplateColumns.split(/\s+/).filter(Boolean),
             sales: bounds(document.querySelector('.yos131-sales')),
           };
         });
         expect(driveNowLayout.tiles, 'drive-now direct tile count').toHaveLength(4);
+        expect(driveNowLayout.gridTracks, 'drive-now grid column count').toHaveLength(4);
+        expect(driveNowLayout.destinationPosition, 'destination must participate in the grid').toBe('static');
+        const tileTops = driveNowLayout.tiles.map(tile => tile.top);
+        const tileBottoms = driveNowLayout.tiles.map(tile => tile.bottom);
+        expect(Math.max(...tileTops) - Math.min(...tileTops), 'drive-now tiles must share one row top').toBeLessThanOrEqual(1);
+        expect(Math.max(...tileBottoms) - Math.min(...tileBottoms), 'drive-now tiles must share one row bottom').toBeLessThanOrEqual(1);
         for (const [index, tile] of driveNowLayout.tiles.entries()) {
           expect(tile.top, `drive-now tile ${index + 1} top`).toBeGreaterThanOrEqual(driveNowLayout.bar.top - 1);
           expect(tile.bottom, `drive-now tile ${index + 1} bottom`).toBeLessThanOrEqual(driveNowLayout.bar.bottom + 1);
+          if (index > 0) {
+            const previous = driveNowLayout.tiles[index - 1];
+            expect(tile.left, `drive-now tile ${index + 1} left order`).toBeGreaterThan(previous.left);
+            expect(previous.right, `drive-now tiles ${index} and ${index + 1} overlap`).toBeLessThanOrEqual(tile.left + 1);
+          }
         }
         for (let left = 0; left < driveNowLayout.tiles.length; left += 1) {
           for (let right = left + 1; right < driveNowLayout.tiles.length; right += 1) {
