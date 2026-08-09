@@ -1,11 +1,15 @@
 /* v138:営業中の1秒把握バーとライトテーマ可読性 */
 .yos131-drive.yos-drive-v138{grid-template-rows:36px 44px 154px 48px 54px 54px!important}
 .yos131-drive.yos-drive-v138:has(.demand-home){grid-template-rows:36px 44px 154px 48px 136px 54px 54px!important}
-.yos-drive-now-v138{display:grid;grid-template-columns:1.05fr 1fr 1fr;gap:5px;min-height:0}
-.yos-drive-now-v138>div{min-width:0;border:1px solid var(--yos131-line);border-radius:10px;background:#0a0a0c;display:grid;align-content:center;padding:4px 7px}
+.yos-drive-now-v138{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));grid-template-rows:minmax(0,1fr);gap:4px;min-height:0}
+.yos-drive-now-v138>div{min-width:0;min-height:0;border:1px solid var(--yos131-line);border-radius:10px;background:#0a0a0c;display:grid;align-content:center;padding:3px 4px;overflow:hidden}
 .yos-drive-now-v138 small{font-size:9px;color:var(--yos131-muted);line-height:1}
 .yos-drive-now-v138 strong{font-size:14px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .yos-drive-now-v138 .clock strong{font-size:20px;color:var(--yos131-gold2)}
+#yos-drive-now-v138{grid-template-columns:repeat(4,minmax(0,1fr))!important;grid-template-rows:minmax(0,1fr)!important;padding-bottom:0!important}
+#yos-drive-now-v138 .destination-v141{position:static;inset:auto;height:auto;min-width:0;min-height:0;display:grid;align-content:center;justify-content:stretch;gap:0;border-top:1px solid var(--yos131-line);white-space:normal;overflow:hidden}
+#yos-drive-now-v138 .destination-v141 small{font-size:8px;line-height:1;white-space:nowrap}
+#yos-drive-now-v138 .destination-v141 strong{font-size:10px;line-height:1.05;white-space:normal;overflow-wrap:anywhere;text-overflow:clip}
 
 html[data-yos-theme="light"] #yosFinalAppV131{background:#f5f6f8!important;color:#121417!important}
 html[data-yos-theme="light"] .yos131-header h1,
