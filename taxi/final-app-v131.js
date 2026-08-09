@@ -107,7 +107,7 @@
         <div class="yos131-sales-copy"><span>本日の売上</span><strong>${money(sales)}</strong><small>目標 ${money(target)}</small><div class="yos131-progress"><b style="width:${pct}%"></b></div></div>
         <div class="yos131-ring" style="--pct:${pct*3.6}deg"><strong>${pct}%</strong></div>
         <div class="yos131-state"><div><small>状態</small><b>${esc(meta[0])}</b></div><div><small>エリア</small><b>${esc(area)}</b></div><div><small>空車</small><b>${idle}分</b></div></div>
-        <button class="yos131-primary" data-proxy="${meta[2]}">${meta[1]}</button>
+        <button class="yos131-primary" data-proxy="${meta[2]}"><span class="yos131-primary-label">${meta[1]}</span>${meta[2]==='shiftButton'?'<small class="yos131-primary-hint">開始可能時刻を確認中</small>':''}</button>
       </section>
       <section class="yos131-card yos131-advice" data-go-nav><span>YOS判断</span><strong>${esc(advice)}</strong><span class="arrow">›</span></section>
       <section class="yos131-kpis"><div><span>実車</span><strong>${rides.length}回</strong></div><div><span>実車率</span><strong>${util}%</strong></div><div><span>平均単価</span><strong>${money(avg)}</strong></div></section>
@@ -202,12 +202,26 @@
     bind(root,c);
   }
 
-  function proxy(id){document.getElementById(id)?.click()}
+  function syncShiftProxy(){
+    const source=document.getElementById('shiftButton');
+    let button=document.querySelector('.yos131-primary[data-proxy="shiftButton"]');
+    if(source&&!button&&pageType()==='drive'){
+      render();
+      button=document.querySelector('.yos131-primary[data-proxy="shiftButton"]');
+    }
+    if(!source||!button)return;
+    button.disabled=source.disabled;
+    button.setAttribute('aria-disabled',String(source.disabled));
+    button.querySelector('.yos131-primary-label')?.replaceChildren(source.textContent||'営業開始');
+    button.querySelector('.yos131-primary-hint')?.replaceChildren(source.dataset.shiftHint||'開始可能時刻を確認してください');
+  }
+  function proxy(id){const source=document.getElementById(id);if(!source||source.disabled)return;source.click()}
   function editDay(key){if(typeof window.openDay==='function')window.openDay(key);else document.getElementById('editToday')?.click()}
 
   function bind(root,c){
     root.querySelectorAll('[data-nav]').forEach(button=>button.onclick=()=>route(button.dataset.nav));
-    root.querySelectorAll('[data-proxy]').forEach(button=>button.onclick=()=>proxy(button.dataset.proxy));
+    root.querySelectorAll('[data-proxy]').forEach(button=>button.onclick=()=>{if(button.disabled)return;proxy(button.dataset.proxy)});
+    syncShiftProxy();
     root.querySelectorAll('[data-go-nav]').forEach(button=>button.onclick=()=>route('nav'));
     root.querySelector('[data-notice]')?.addEventListener('click',()=>alert('重要通知はここへ表示します。'));
     root.querySelectorAll('[data-edit-day]').forEach(button=>button.onclick=()=>editDay(button.dataset.editDay));
@@ -238,6 +252,7 @@
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
   addEventListener('pageshow',render);
   addEventListener('storage',render);
+  document.addEventListener('yos:shift-gate-updated',syncShiftProxy);
   addEventListener('resize',scheduleViewport,{passive:true});
   window.visualViewport?.addEventListener('resize',scheduleViewport,{passive:true});
   window.visualViewport?.addEventListener('scroll',scheduleViewport,{passive:true});

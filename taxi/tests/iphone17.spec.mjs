@@ -3,7 +3,7 @@ import { mkdir } from 'node:fs/promises';
 import { resolve } from 'node:path';
 
 const pages = [
-  { name: 'drive', path: './index.html', ready: '#shiftButton' },
+  { name: 'drive', path: './index.html', ready: '.yos131-primary[data-proxy="shiftButton"]' },
   { name: 'today', path: './calendar.html', ready: '#todayView' },
   { name: 'week', path: './calendar.html', ready: '#weekView', mode: 'week' },
   { name: 'month', path: './calendar.html', ready: '#monthView', mode: 'month' },
@@ -209,6 +209,28 @@ test.describe('iPhone17 viewport and touch smoke', () => {
         }
         expect(driveNowLayout.bar.bottom, 'drive-now overlaps sales card').toBeLessThanOrEqual(driveNowLayout.sales.top + 1);
 
+        const primary = page.locator('.yos131-primary[data-proxy="shiftButton"]');
+        await expect(primary).toContainText('営業開始');
+        await expect(primary.locator('.yos131-primary-hint')).toBeVisible();
+        const primaryLayout = await primary.evaluate(button => {
+          const sales = button.closest('.yos131-sales');
+          const label = button.querySelector('.yos131-primary-label');
+          const hint = button.querySelector('.yos131-primary-hint');
+          const bounds = element => {
+            const box = element.getBoundingClientRect();
+            return { top: box.top, right: box.right, bottom: box.bottom, left: box.left, scrollHeight: element.scrollHeight, clientHeight: element.clientHeight };
+          };
+          return { button: bounds(button), sales: bounds(sales), label: bounds(label), hint: bounds(hint) };
+        });
+        expect(primaryLayout.button.top, 'primary escapes sales card top').toBeGreaterThanOrEqual(primaryLayout.sales.top - 1);
+        expect(primaryLayout.button.bottom, 'primary escapes sales card bottom').toBeLessThanOrEqual(primaryLayout.sales.bottom + 1);
+        expect(primaryLayout.button.scrollHeight, 'primary vertical clipping').toBeLessThanOrEqual(primaryLayout.button.clientHeight + 1);
+        for (const [name, bounds] of Object.entries({ label: primaryLayout.label, hint: primaryLayout.hint })) {
+          expect(bounds.top, `${name} escapes primary top`).toBeGreaterThanOrEqual(primaryLayout.button.top - 1);
+          expect(bounds.bottom, `${name} escapes primary bottom`).toBeLessThanOrEqual(primaryLayout.button.bottom + 1);
+          expect(bounds.scrollHeight, `${name} vertical clipping`).toBeLessThanOrEqual(bounds.clientHeight + 1);
+        }
+
         const opsLoop = page.locator('.yos-ops-loop');
         const opsSummary = opsLoop.locator('summary');
         await expect(opsLoop).toBeVisible();
@@ -287,4 +309,38 @@ test.describe('iPhone17 viewport and touch smoke', () => {
       });
     });
   }
+
+  test('drive: planned start proxy exists before the boundary and opens at the exact second', async ({ page }) => {
+    const exceptions = [];
+    page.on('pageerror', error => exceptions.push(error.message));
+    await page.clock.setFixedTime(new Date('2026-08-09T18:45:59+09:00'));
+    await page.addInitScript(() => {
+      localStorage.setItem('yos-taxi-ops-v1', JSON.stringify({
+        businessDate: '2026-08-09', status: 'before', shiftStart: null, shiftEnd: null,
+        activeRide: null, breakStart: null, availableSince: null, events: [], updatedAt: 'seed',
+      }));
+      localStorage.setItem('yos-taxi-settings-v2', JSON.stringify({
+        targetSales: 30000, vehicle: '521', plannedStart: '18:46', plannedEnd: '03:30', areas: '那覇', yosUrl: '',
+      }));
+    });
+    await page.goto('./index.html', { waitUntil: 'domcontentloaded' });
+
+    const hidden = page.locator('#shiftButton');
+    const proxy = page.locator('.yos131-primary[data-proxy="shiftButton"]');
+    await expect(hidden).toBeDisabled();
+    await expect(proxy).toBeVisible();
+    await expect(proxy).toBeDisabled();
+    await expect(proxy).toContainText('18:46になったらタップ可能');
+    const beforeStorage = await page.evaluate(() => localStorage.getItem('yos-taxi-ops-v1'));
+    await proxy.dispatchEvent('click');
+    await hidden.dispatchEvent('click');
+    expect(await page.evaluate(() => localStorage.getItem('yos-taxi-ops-v1'))).toBe(beforeStorage);
+
+    await page.clock.setFixedTime(new Date('2026-08-09T18:46:00+09:00'));
+    await page.clock.runFor(1000);
+    await expect(hidden).toBeEnabled();
+    await expect(proxy).toBeEnabled();
+    await expect(proxy).toContainText('営業開始できます');
+    expect(exceptions, 'uncaught JavaScript exceptions').toEqual([]);
+  });
 });
