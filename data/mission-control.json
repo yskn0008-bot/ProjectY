@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-08-10T05:29:38+09:00",
+  "updated_at": "2026-08-10T05:34:15+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -33,6 +33,16 @@
       "updated_at": "2026-08-06T16:28:52Z"
     },
     {
+      "id": "github-pr-231",
+      "title": "PR #231 Draft: Hero’s Journey最終統合",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/231",
+      "updated_at": "2026-08-05T16:59:34Z"
+    },
+    {
       "id": "github-pr-233",
       "title": "PR #233 Draft: Mission Controlに進捗率・残り時間を常時表示する",
       "type": "GitHub PR",
@@ -51,16 +61,6 @@
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/237",
       "updated_at": "2026-08-09T20:20:06Z"
-    },
-    {
-      "id": "github-pr-247",
-      "title": "PR #247 Taxi｜営業・カレンダーUI改善",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/247",
-      "updated_at": "2026-08-09T20:29:01Z"
     },
     {
       "id": "github-issue-10",
@@ -165,11 +165,25 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-60ce09aee383",
+      "title": "Taxi｜営業・カレンダーUI改善",
+      "completed_at": "2026-08-09T20:33:36Z",
+      "result": "GitHub mainへ反映（60ce09a）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/60ce09aee383845a80345093d537ffbfdd500d23"
+    },
+    {
       "id": "github-commit-b365b95eb5c7",
       "title": "chore: remove temporary Issue 245 patch transport",
       "completed_at": "2026-08-09T20:24:54Z",
       "result": "GitHub mainへ反映（b365b95）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/b365b95eb5c7c46aafd00c1a1a3b8b2cff7bfbf3"
+    },
+    {
+      "id": "github-commit-4fba4e274159",
+      "title": "Taxi｜カレンダーUIをLevel 1差分で圧縮",
+      "completed_at": "2026-08-09T20:24:00Z",
+      "result": "GitHub mainへ反映（4fba4e2）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/4fba4e274159b2438bcafd7ce0c7fdf24600e2f0"
     },
     {
       "id": "github-commit-c4b4752ca0da",
@@ -184,20 +198,6 @@
       "completed_at": "2026-08-09T20:21:34Z",
       "result": "GitHub mainへ反映（c99a695）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/c99a6950ab55074e7a658dbd775dac88088cdda3"
-    },
-    {
-      "id": "github-commit-0b600138c2a5",
-      "title": "Merge pull request #246 from yskn0008-bot/codex/issue-232-projecty-hq",
-      "completed_at": "2026-08-09T20:10:24Z",
-      "result": "GitHub mainへ反映（0b60013）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/0b600138c2a54463d6c29d5febe3f3a5396b8980"
-    },
-    {
-      "id": "github-commit-0e4685db538e",
-      "title": "test: cover Issue 232 event state handler",
-      "completed_at": "2026-08-09T18:18:41Z",
-      "result": "GitHub mainへ反映（0e4685d）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/0e4685db538eb3e6a8acda48ce15a10e1f55e0c4"
     },
     {
       "id": "complete-002",
@@ -224,7 +224,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #247をレビューして公開判断する",
+      "next_action": "PR #237をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-08-10T05:29:38+09:00",
+      "last_update": "2026-08-10T05:34:15+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -309,13 +309,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 20件・Open PR 10件を自動同期中",
+      "next_action": "Open Issue 20件・Open PR 9件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-08-10T05:29:38+09:00",
+      "last_update": "2026-08-10T05:34:15+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -329,7 +329,7 @@
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #247をレビューして公開判断する",
+      "next_action": "PR #237をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-08-10T05:29:38+09:00",
+      "last_update": "2026-08-10T05:34:15+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "7d716a4ddbf2e7f3153d42b8c3a6af3ed8aaa0efb560be0c5104fd458d2b082f"
+  "github_snapshot_hash": "fa244ee171d5c77922d3124f5b031147a3478e0984b0f96237815975f683744e"
 }
