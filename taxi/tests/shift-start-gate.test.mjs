@@ -56,6 +56,9 @@ test('元handlerは副作用より先にgateを確認', () => {
 });
 
 test('visible proxyは生成・同期され、disabled時に転送しない', () => {
+  assert.match(html, /<link rel="stylesheet" href="\.\/final-app-v131\.css">/);
+  assert.match(html, /<link rel="stylesheet" href="\.\/final-fix-v133\.css">/);
+  assert.match(html, /<script defer src="\.\/final-app-v131\.js"><\/script>/);
   assert.match(finalApp, /if\(source&&!button&&pageType\(\)==='drive'\)/);
   assert.match(finalApp, /button\.disabled=source\.disabled/);
   assert.match(finalApp, /if\(!source\|\|source\.disabled\)return;source\.click\(\)/);
@@ -73,5 +76,5 @@ test('保存キーとTaxi Service Worker境界を変更しない', () => {
   assert.doesNotMatch(html + finalApp, /migration|removeItem\(|localStorage\.clear\(/i);
   assert.match(sw, /const CACHE_PREFIX='yos-taxi-projecty-'/);
   assert.match(sw, /key\.startsWith\(CACHE_PREFIX\)&&key!==CACHE/);
-  assert.match(sw, /const VERSION='147'/);
+  assert.match(sw, /const VERSION='148'/);
 });
