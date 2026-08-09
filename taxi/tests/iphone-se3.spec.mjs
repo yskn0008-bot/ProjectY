@@ -3,7 +3,7 @@ import { mkdir } from 'node:fs/promises';
 import { resolve } from 'node:path';
 
 const pages = [
-  { name: 'drive', path: './index.html', ready: '#shiftButton' },
+  { name: 'drive', path: './index.html', ready: '.yos131-primary[data-proxy="shiftButton"]' },
   { name: 'today', path: './calendar.html', ready: '#todayView' },
   { name: 'week', path: './calendar.html', ready: '#weekView', mode: 'week' },
   { name: 'month', path: './calendar.html', ready: '#monthView', mode: 'month' },
