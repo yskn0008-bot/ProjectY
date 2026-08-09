@@ -73,8 +73,8 @@ jobs:
           git add -A
           git diff --cached --check
 
-          final_files="$(git diff --name-only origin/main...HEAD; git diff --cached --name-only)"
-          printf '%s\n' "$final_files" | sed '/^$/d' | sort -u > /tmp/final-files.txt
+          git fetch origin main
+          git diff --cached --name-only origin/main | sed '/^$/d' | sort -u > /tmp/final-files.txt
           while IFS= read -r f; do
             [[ "$f" =~ $allowed ]] || { echo "FINAL_OUT_OF_SCOPE $f"; exit 1; }
           done < /tmp/final-files.txt
