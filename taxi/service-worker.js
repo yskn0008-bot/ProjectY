@@ -1,7 +1,7 @@
 'use strict';
 const CACHE_PREFIX='yos-taxi-projecty-';
-const CACHE='yos-taxi-projecty-v146-layout-refresh';
-const VERSION='146';
+const CACHE='yos-taxi-projecty-v147-shift-start-gate';
+const VERSION='147';
 const STATIC=[
   './','./index.html','./calendar.html','./settings.html','./manifest.webmanifest','./swipe-nav.js',
   './final-app-v131.css','./final-fix-v133.css','./final-app-v131.js',
