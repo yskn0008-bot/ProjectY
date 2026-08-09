@@ -19,7 +19,7 @@ jobs:
           ref: codex/issue-238-shift-button-clip
           fetch-depth: 0
 
-      - name: Recover and transport exact Codex fix patch
+      - name: Apply exact Codex iPhone17 fix patch
         env:
           GH_TOKEN: ${{ github.token }}
         shell: bash
@@ -35,51 +35,19 @@ jobs:
           grep -E '^PATCH_[0-9]{3}=' /tmp/codex-fix-comment.txt | sort | cut -d= -f2- | tr -d '\n' | base64 -d | gzip -d > /tmp/p0-fix.patch
           echo "${target_sha}  /tmp/p0-fix.patch" | sha256sum -c -
           test "$(wc -c < /tmp/p0-fix.patch)" -eq 29625
-
+          allowed='^(taxi/final-app-v131\.css|taxi/final-app-v131\.js|taxi/index\.html|taxi/service-worker\.js|taxi/tests/iphone17\.spec\.mjs|taxi/tests/shift-start-gate\.test\.mjs)$'
           mapfile -t patch_files < <(git apply --numstat /tmp/p0-fix.patch | awk '{print $3}')
           test "${#patch_files[@]}" -ge 1
-          allowed='^(taxi/final-app-v131\.css|taxi/final-app-v131\.js|taxi/index\.html|taxi/service-worker\.js|taxi/tests/iphone17\.spec\.mjs|taxi/tests/shift-start-gate\.test\.mjs)$'
           for f in "${patch_files[@]}"; do
             [[ "$f" =~ $allowed ]] || { echo "OUT_OF_SCOPE $f"; exit 1; }
           done
-
-          if git apply --check /tmp/p0-fix.patch; then
-            echo 'PATCH_BASE=current-head'
-            git apply /tmp/p0-fix.patch
-          else
-            echo 'Patch is not a delta from current head; validating as a main-based complete Codex patch.'
-            git fetch origin main
-            rm -rf /tmp/codex-main-result
-            git worktree add --detach /tmp/codex-main-result origin/main
-            if ! git -C /tmp/codex-main-result apply --check /tmp/p0-fix.patch; then
-              echo 'Patch applies to neither current head nor current main.'
-              exit 1
-            fi
-            echo 'PATCH_BASE=main'
-            git -C /tmp/codex-main-result apply /tmp/p0-fix.patch
-            (
-              cd /tmp/codex-main-result
-              node --test taxi/tests/*.test.mjs
-              git diff --check
-            )
-            for f in "${patch_files[@]}"; do
-              cp "/tmp/codex-main-result/$f" "$f"
-            done
-          fi
-
+          git apply --check /tmp/p0-fix.patch
+          git apply /tmp/p0-fix.patch
           node --test taxi/tests/*.test.mjs
           git diff --check
           rm -f .github/workflows/taxi-p0-fix-transport.yml
           git add -A
           git diff --cached --check
-
-          git fetch origin main
-          git diff --cached --name-only origin/main | sed '/^$/d' | sort -u > /tmp/final-files.txt
-          while IFS= read -r f; do
-            [[ "$f" =~ $allowed ]] || { echo "FINAL_OUT_OF_SCOPE $f"; exit 1; }
-          done < /tmp/final-files.txt
-          test ! -e .github/workflows/taxi-p0-fix-transport.yml
-
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git commit -m 'fix(taxi): contain and initialize shift proxy'
