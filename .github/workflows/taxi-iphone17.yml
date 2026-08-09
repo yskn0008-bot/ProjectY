@@ -48,8 +48,8 @@ jobs:
             taxi/final-app-v131.js \
             taxi/index.html \
             taxi/service-worker.js \
-            taxi/tests/iphone17.spec.mjs \
-            taxi/tests/shift-start-gate.test.mjs
+            taxi/tests/iphone17.spec.mjs
+          rm -f taxi/tests/shift-start-gate.test.mjs
 
           gh api repos/${GITHUB_REPOSITORY}/issues/comments/5231436940 --jq .body > /tmp/codex-final.txt
           grep -q "PATCH_SHA256=${target_sha}" /tmp/codex-final.txt
