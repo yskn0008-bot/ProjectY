@@ -152,17 +152,17 @@
     Object.entries(c.cal.days).forEach(([key,value])=>{if(key.startsWith(`${year}-${pad(month+1)}`))actualSum+=num(value.sales)});
     const targetSum=num(c.cal.monthlyGoals[`${year}-${pad(month+1)}`]),pct=targetSum?Math.min(100,Math.round(actualSum/targetSum*100)):0;
     for(let i=0;i<42;i++){
-      const d=new Date(start);d.setDate(start.getDate()+i);const key=keyOf(d),v=dayData(c,key),actual=num(v.sales),target=num(v.target),same=d.getMonth()===month,todayKey=key===keyOf(businessToday());
+      const d=new Date(start);d.setDate(start.getDate()+i);const key=keyOf(d),v=dayData(c,key),actual=num(v.sales),target=num(v.target),same=d.getMonth()===month,todayKey=key===keyOf(businessToday()),status=performance(actual,target),statusLabel={'yos131-green':'達成','yos131-gold':'未達','yos131-red':'大幅未達'}[status]||'—';
       cells+=isOff(v.status)
-        ?`<button class="yos131-month-cell off ${same?'':'other'} ${todayKey?'today':''}" data-edit-day="${key}"><span class="day">${d.getDate()}</span><b class="moon">☾</b><small>公休</small></button>`
-        :`<button class="yos131-month-cell ${same?'':'other'} ${todayKey?'today':''}" data-edit-day="${key}"><span class="day">${d.getDate()}</span><strong class="actual ${performance(actual,target)}">${actual?compact(actual):'—'}</strong><small class="target">${target?compact(target):''}</small></button>`;
+        ?`<button class="yos131-month-cell off ${same?'':'other'} ${todayKey?'today':''}" data-edit-day="${key}" ${same?'':'disabled'}><span class="day">${d.getDate()}</span><small class="status">▲ 公休</small></button>`
+        :`<button class="yos131-month-cell ${same?'':'other'} ${todayKey?'today':''}" data-edit-day="${key}" ${same?'':'disabled'}><span class="day">${d.getDate()}</span><small class="status ${status}">${statusLabel==='—'?'—':`● ${statusLabel}`}</small></button>`;
     }
     return`<main class="yos131-page yos131-month">
       ${header(`${year}年${month+1}月`,`<button data-month-shift="-1">‹</button>`,`<button data-switch="week">▦</button>`)}
-      <section class="yos131-card yos131-month-summary"><div><span>月目標</span><strong>${money(targetSum)}</strong></div><div><span>月実績</span><strong class="${performance(actualSum,targetSum)}">${money(actualSum)}</strong></div><i><b style="width:${pct}%"></b></i></section>
+      <section class="yos131-month-summary"><div><span>月目標</span><strong>${money(targetSum)}</strong></div><div><span>月実績</span><strong>${money(actualSum)}</strong></div><div><span>達成率</span><strong>${pct}%</strong></div></section>
       <div class="yos131-week-head">${'日月火水木金土'.split('').map(label=>`<b>${label}</b>`).join('')}</div>
       <section class="yos131-month-grid">${cells}</section>
-      <div class="yos131-legend"><span class="yos131-green">●達成</span><span class="yos131-gold">●未達</span><span class="yos131-red">●大幅未達</span><span class="off">☾公休</span><span>目標=白</span></div>
+      <div class="yos131-legend"><span class="yos131-green">●達成</span><span class="yos131-gold">●未達</span><span class="yos131-red">●大幅未達</span><span class="off">▲公休</span><span>—予定なし</span></div><p class="yos131-month-help">日付をタップすると詳細を確認・編集できます</p>
     </main>`;
   }
 
