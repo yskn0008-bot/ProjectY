@@ -1,8 +1,8 @@
-#yos-drive-now-v138{cursor:pointer;position:relative;grid-template-columns:repeat(3,minmax(0,1fr))!important;padding-bottom:27px!important}
+#yos-drive-now-v138{cursor:pointer;position:relative;grid-template-columns:repeat(4,minmax(0,1fr))!important;padding-bottom:0!important}
 #yos-drive-now-v138:active{transform:scale(.995)}
-#yos-drive-now-v138 .destination-v141{position:absolute;left:8px;right:8px;bottom:4px;height:21px;display:flex;align-items:center;justify-content:center;gap:7px;border-top:1px solid rgba(255,255,255,.1);white-space:nowrap;overflow:hidden}
-#yos-drive-now-v138 .destination-v141 small{font-size:9px;color:var(--yos-muted,#aaa)}
-#yos-drive-now-v138 .destination-v141 strong{font-size:12px;overflow:hidden;text-overflow:ellipsis}
+#yos-drive-now-v138 .destination-v141{position:static;inset:auto;height:auto;min-width:0;min-height:0;display:grid;align-content:center;justify-content:stretch;gap:1px;padding:3px 4px;border-top:1px solid rgba(255,255,255,.1);white-space:normal;overflow:hidden}
+#yos-drive-now-v138 .destination-v141 small{font-size:8px;line-height:1;color:var(--yos-muted,#aaa);white-space:nowrap}
+#yos-drive-now-v138 .destination-v141 strong{font-size:10px;line-height:1.05;white-space:normal;overflow-wrap:anywhere;overflow:hidden;text-overflow:clip}
 #yos-quick-v141[hidden]{display:none!important}
 #yos-quick-v141{position:fixed;inset:0;z-index:2147483646;display:grid;align-items:end;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic UI",sans-serif}
 #yos-quick-v141 .backdrop{position:absolute;inset:0;border:0;background:rgba(0,0,0,.68)}
