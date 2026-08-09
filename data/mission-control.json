@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-08-10T01:08:07+09:00",
+  "updated_at": "2026-08-10T01:40:12+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -33,6 +33,16 @@
       "updated_at": "2026-08-06T16:28:52Z"
     },
     {
+      "id": "github-pr-231",
+      "title": "PR #231 Draft: Hero’s Journey最終統合",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/231",
+      "updated_at": "2026-08-05T16:59:34Z"
+    },
+    {
       "id": "github-pr-233",
       "title": "PR #233 Draft: Mission Controlに進捗率・残り時間を常時表示する",
       "type": "GitHub PR",
@@ -51,16 +61,6 @@
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/237",
       "updated_at": "2026-08-09T02:26:41Z"
-    },
-    {
-      "id": "github-pr-244",
-      "title": "PR #244 Taxi｜営業開始時刻ゲート",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/244",
-      "updated_at": "2026-08-09T15:59:03Z"
     },
     {
       "id": "github-issue-10",
@@ -150,7 +150,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/51",
-      "updated_at": "2026-08-09T14:20:50Z"
+      "updated_at": "2026-08-09T16:22:24Z"
     },
     {
       "id": "github-issue-86",
@@ -164,6 +164,13 @@
     }
   ],
   "recently_completed": [
+    {
+      "id": "github-commit-381799ff3168",
+      "title": "Taxi｜営業開始時刻ゲート",
+      "completed_at": "2026-08-09T16:39:58Z",
+      "result": "GitHub mainへ反映（381799f）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/381799ff31684e6bf67439d380daba9cb62d261a"
+    },
     {
       "id": "github-commit-f9e97e27ff27",
       "title": "Merge pull request #243 from yskn0008-bot/codex/issue-238-taxi-cache-refresh",
@@ -193,13 +200,6 @@
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/c416c5384f19914142f52d6b8946dec51764f352"
     },
     {
-      "id": "github-commit-05efa1bcb69e",
-      "title": "fix(taxi): keep next destination in four-column drive row",
-      "completed_at": "2026-08-09T07:54:15Z",
-      "result": "GitHub mainへ反映（05efa1b）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/05efa1bcb69e893cd317d4d1a178628f785d736c"
-    },
-    {
       "id": "complete-002",
       "title": "iPhone向けMission Control Dashboardを実装",
       "completed_at": "2026-07-17T17:55:00+09:00",
@@ -224,7 +224,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #244をレビューして公開判断する",
+      "next_action": "PR #177をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-08-10T01:08:07+09:00",
+      "last_update": "2026-08-10T01:40:12+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -309,13 +309,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 20件・Open PR 10件を自動同期中",
+      "next_action": "Open Issue 20件・Open PR 9件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-08-10T01:08:07+09:00",
+      "last_update": "2026-08-10T01:40:12+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -329,7 +329,7 @@
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #244をレビューして公開判断する",
+      "next_action": "PR #177をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-08-10T01:08:07+09:00",
+      "last_update": "2026-08-10T01:40:12+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "efd9eb52b2ec93504d8369c096d9b2fd81c8f45251cf8beeda360355115badae"
+  "github_snapshot_hash": "5d229def31bb75117dbd7684ec419c240d1ca1f1ade3a962cefc5ace1d8763e7"
 }
