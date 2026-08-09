@@ -63,6 +63,11 @@ test('visible proxyは生成・同期され、disabled時に転送しない', ()
   assert.match(finalApp, /yos:shift-gate-updated/);
 });
 
+test('初回navigationでもfinal UI assetsをindex.htmlから直接読み込む', () => {
+  assert.match(html, /final-app-v131\.css/);
+  assert.match(html, /final-app-v131\.js/);
+});
+
 test('保存キーとTaxi Service Worker境界を変更しない', () => {
   assert.match(html, /STORE='yos-taxi-ops-v1',SETTINGS='yos-taxi-settings-v2'/);
   assert.doesNotMatch(html + finalApp, /migration|removeItem\(|localStorage\.clear\(/i);
