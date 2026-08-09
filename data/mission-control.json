@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-08-10T05:10:40+09:00",
+  "updated_at": "2026-08-10T05:19:42+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -33,16 +33,6 @@
       "updated_at": "2026-08-06T16:28:52Z"
     },
     {
-      "id": "github-pr-231",
-      "title": "PR #231 Draft: Hero’s Journey最終統合",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/231",
-      "updated_at": "2026-08-05T16:59:34Z"
-    },
-    {
       "id": "github-pr-233",
       "title": "PR #233 Draft: Mission Controlに進捗率・残り時間を常時表示する",
       "type": "GitHub PR",
@@ -60,7 +50,17 @@
       "priority": 2,
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/237",
-      "updated_at": "2026-08-09T02:26:41Z"
+      "updated_at": "2026-08-09T20:18:32Z"
+    },
+    {
+      "id": "github-pr-247",
+      "title": "PR #247 Taxi｜営業・カレンダーUI改善",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/247",
+      "updated_at": "2026-08-09T20:19:29Z"
     },
     {
       "id": "github-issue-10",
@@ -150,7 +150,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/51",
-      "updated_at": "2026-08-09T19:27:26Z"
+      "updated_at": "2026-08-09T20:18:38Z"
     },
     {
       "id": "github-issue-86",
@@ -224,7 +224,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #177をレビューして公開判断する",
+      "next_action": "PR #247をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-08-10T05:10:40+09:00",
+      "last_update": "2026-08-10T05:19:42+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -309,13 +309,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 20件・Open PR 9件を自動同期中",
+      "next_action": "Open Issue 20件・Open PR 10件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-08-10T05:10:40+09:00",
+      "last_update": "2026-08-10T05:19:42+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -329,7 +329,7 @@
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #177をレビューして公開判断する",
+      "next_action": "PR #247をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-08-10T05:10:40+09:00",
+      "last_update": "2026-08-10T05:19:42+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "c6028c1d79bdadc51216d80fc41f4ad13a132f7dda6c30d29f2fac96c7fe97c8"
+  "github_snapshot_hash": "f65ce4ad02c1ae3a81b147f8ac811426a344774fa2ec108cf5f759fd54b70614"
 }
