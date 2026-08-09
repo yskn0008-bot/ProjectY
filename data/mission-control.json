@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-08-10T05:20:01+09:00",
+  "updated_at": "2026-08-10T05:21:48+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -50,7 +50,7 @@
       "priority": 2,
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/237",
-      "updated_at": "2026-08-09T20:18:32Z"
+      "updated_at": "2026-08-09T20:20:06Z"
     },
     {
       "id": "github-pr-247",
@@ -165,6 +165,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-c99a6950ab55",
+      "title": "chore: enable verified Issue 245 patch transport",
+      "completed_at": "2026-08-09T20:21:34Z",
+      "result": "GitHub mainへ反映（c99a695）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/c99a6950ab55074e7a658dbd775dac88088cdda3"
+    },
+    {
       "id": "github-commit-0b600138c2a5",
       "title": "Merge pull request #246 from yskn0008-bot/codex/issue-232-projecty-hq",
       "completed_at": "2026-08-09T20:10:24Z",
@@ -193,13 +200,6 @@
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/878731bc4dd29a23f7a04f496d4879b82bf34688"
     },
     {
-      "id": "github-commit-381799ff3168",
-      "title": "Taxi｜営業開始時刻ゲート",
-      "completed_at": "2026-08-09T16:39:58Z",
-      "result": "GitHub mainへ反映（381799f）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/381799ff31684e6bf67439d380daba9cb62d261a"
-    },
-    {
       "id": "complete-002",
       "title": "iPhone向けMission Control Dashboardを実装",
       "completed_at": "2026-07-17T17:55:00+09:00",
@@ -224,7 +224,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #247をレビューして公開判断する",
+      "next_action": "PR #237をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-08-10T05:20:01+09:00",
+      "last_update": "2026-08-10T05:21:48+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -315,7 +315,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-08-10T05:20:01+09:00",
+      "last_update": "2026-08-10T05:21:48+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -329,7 +329,7 @@
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #247をレビューして公開判断する",
+      "next_action": "PR #237をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-08-10T05:20:01+09:00",
+      "last_update": "2026-08-10T05:21:48+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "a2c8484cbc4c25fc58fdc70a077dcacdb58bbf620c49490a5fb57931839c9168"
+  "github_snapshot_hash": "6ccb21cf21da872b7e2bed989f0926bbffd39f03a6982a9a91d31bcdee4be227"
 }
