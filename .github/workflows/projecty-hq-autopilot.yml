@@ -1,0 +1,52 @@
+name: '[YOS HQ] ProjectY自動司令部 v1｜毎時監視・安全な自動継続'
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review, edited]
+  workflow_run:
+    workflows: [Taxi iPhone17 Smoke, Taxi Demand Calendar, Codex governance]
+    types: [completed]
+  schedule:
+    - cron: '17 * * * *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: Do not write comments or dispatch Mission Control
+        required: false
+        type: boolean
+        default: true
+      event_json:
+        description: Optional pull_request or workflow_run payload for dry-run validation
+        required: false
+        type: string
+
+permissions:
+  contents: read
+  pull-requests: read
+  checks: read
+  actions: write
+  issues: write
+
+concurrency:
+  group: projecty-hq-issue-232
+  cancel-in-progress: false
+
+jobs:
+  record-state:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the immutable workflow revision
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.workflow_sha }}
+          sparse-checkout: .github/scripts
+
+      - name: Record evidence in Issue 232
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          EVENT_NAME: ${{ github.event_name }}
+          EVENT_PATH: ${{ github.event_path }}
+          REPOSITORY: ${{ github.repository }}
+          DRY_RUN: ${{ inputs.dry_run || 'false' }}
+          DISPATCH_EVENT_JSON: ${{ inputs.event_json }}
+        run: node .github/scripts/projecty-hq-autopilot.cjs
