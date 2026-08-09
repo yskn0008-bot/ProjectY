@@ -11,6 +11,71 @@
   color: var(--yos-text, #fff);
 }
 
+.yos131-header > div:first-child > .yos-ops-loop {
+  position: relative;
+  width: 40px;
+  height: 36px;
+  margin: 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+}
+
+.yos131-header > div:first-child > .yos-ops-loop:not([open]) {
+  overflow: hidden;
+}
+
+.yos131-header > div:first-child > .yos-ops-loop > .yos-ops-summary {
+  width: 40px;
+  height: 36px;
+  min-height: 36px;
+  padding: 0;
+  justify-content: center;
+  font-size: 0;
+  line-height: 1;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.yos131-header > div:first-child > .yos-ops-loop > .yos-ops-summary::after {
+  content: "根拠";
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.yos131-header > div:first-child > .yos-ops-loop[open] {
+  position: fixed;
+  inset: max(10px, env(safe-area-inset-top)) 10px max(10px, env(safe-area-inset-bottom));
+  z-index: 2147483550;
+  width: auto;
+  height: auto;
+  max-width: none;
+  margin: 0;
+  padding: 0 12px 14px;
+  border: 1px solid var(--yos131-line, rgba(228, 170, 50, 0.48));
+  border-radius: 14px;
+  background: var(--yos-card, #0b0b0d);
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.yos131-header > div:first-child > .yos-ops-loop[open] > .yos-ops-summary {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  width: 100%;
+  height: auto;
+  min-height: 44px;
+  justify-content: flex-start;
+  background: var(--yos-card, #0b0b0d);
+}
+
+.yos131-header > div:first-child > .yos-ops-loop[open] > .yos-ops-summary::after {
+  content: "営業判断の根拠";
+  font-size: 14px;
+}
+
 .yos-ops-loop,
 .yos-ops-loop * {
   box-sizing: border-box;
