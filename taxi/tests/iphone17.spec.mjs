@@ -168,6 +168,92 @@ test.describe('iPhone17 viewport and touch smoke', () => {
         expect(detailLayout.scrollHeight, 'demand confidence vertical clipping').toBeLessThanOrEqual(detailLayout.clientHeight + 1);
         expect(detailLayout.bottom, 'demand details clipped by card').toBeLessThanOrEqual(detailLayout.demandBottom + 1);
 
+        const driveNowLayout = await page.locator('#yos-drive-now-v138').evaluate(bar => {
+          const bounds = element => {
+            const box = element.getBoundingClientRect();
+            return { top: box.top, right: box.right, bottom: box.bottom, left: box.left };
+          };
+          const style = getComputedStyle(bar);
+          const tiles = [...bar.children];
+          return {
+            bar: bounds(bar),
+            tiles: tiles.map(bounds),
+            destinationPosition: getComputedStyle(bar.querySelector('.destination-v141')).position,
+            gridTracks: style.gridTemplateColumns.split(/\s+/).filter(Boolean),
+            sales: bounds(document.querySelector('.yos131-sales')),
+          };
+        });
+        expect(driveNowLayout.tiles, 'drive-now direct tile count').toHaveLength(4);
+        expect(driveNowLayout.gridTracks, 'drive-now grid column count').toHaveLength(4);
+        expect(driveNowLayout.destinationPosition, 'destination must participate in the grid').toBe('static');
+        const tileTops = driveNowLayout.tiles.map(tile => tile.top);
+        const tileBottoms = driveNowLayout.tiles.map(tile => tile.bottom);
+        expect(Math.max(...tileTops) - Math.min(...tileTops), 'drive-now tiles must share one row top').toBeLessThanOrEqual(1);
+        expect(Math.max(...tileBottoms) - Math.min(...tileBottoms), 'drive-now tiles must share one row bottom').toBeLessThanOrEqual(1);
+        for (const [index, tile] of driveNowLayout.tiles.entries()) {
+          expect(tile.top, `drive-now tile ${index + 1} top`).toBeGreaterThanOrEqual(driveNowLayout.bar.top - 1);
+          expect(tile.bottom, `drive-now tile ${index + 1} bottom`).toBeLessThanOrEqual(driveNowLayout.bar.bottom + 1);
+          if (index > 0) {
+            const previous = driveNowLayout.tiles[index - 1];
+            expect(tile.left, `drive-now tile ${index + 1} left order`).toBeGreaterThan(previous.left);
+            expect(previous.right, `drive-now tiles ${index} and ${index + 1} overlap`).toBeLessThanOrEqual(tile.left + 1);
+          }
+        }
+        for (let left = 0; left < driveNowLayout.tiles.length; left += 1) {
+          for (let right = left + 1; right < driveNowLayout.tiles.length; right += 1) {
+            const a = driveNowLayout.tiles[left];
+            const b = driveNowLayout.tiles[right];
+            const overlaps = a.left < b.right - 1 && a.right > b.left + 1 && a.top < b.bottom - 1 && a.bottom > b.top + 1;
+            expect(overlaps, `drive-now tiles ${left + 1} and ${right + 1} overlap`).toBe(false);
+          }
+        }
+        expect(driveNowLayout.bar.bottom, 'drive-now overlaps sales card').toBeLessThanOrEqual(driveNowLayout.sales.top + 1);
+
+        const opsLoop = page.locator('.yos-ops-loop');
+        const opsSummary = opsLoop.locator('summary');
+        await expect(opsLoop).toBeVisible();
+        await expect(opsSummary).toBeVisible();
+        const closedOpsLayout = await opsLoop.evaluate(details => {
+          const box = element => {
+            const bounds = element.getBoundingClientRect();
+            return { top: bounds.top, right: bounds.right, bottom: bounds.bottom, left: bounds.left };
+          };
+          return {
+            details: box(details),
+            summary: box(details.querySelector('summary')),
+            cell: box(details.closest('.yos131-header > div:first-child')),
+            header: box(details.closest('.yos131-header')),
+            driveNow: box(document.querySelector('#yos-drive-now-v138')),
+          };
+        });
+        for (const [name, bounds] of Object.entries({ details: closedOpsLayout.details, summary: closedOpsLayout.summary })) {
+          expect(bounds.top, `${name} escapes header cell top`).toBeGreaterThanOrEqual(closedOpsLayout.cell.top - 1);
+          expect(bounds.bottom, `${name} escapes header cell bottom`).toBeLessThanOrEqual(closedOpsLayout.cell.bottom + 1);
+          expect(bounds.left, `${name} escapes header cell left`).toBeGreaterThanOrEqual(closedOpsLayout.cell.left - 1);
+          expect(bounds.right, `${name} escapes header cell right`).toBeLessThanOrEqual(closedOpsLayout.cell.right + 1);
+        }
+        expect(closedOpsLayout.header.bottom, 'header overlaps drive-now').toBeLessThanOrEqual(closedOpsLayout.driveNow.top + 1);
+
+        await opsSummary.tap();
+        await expect(opsLoop).toHaveAttribute('open', '');
+        await expect(opsLoop.getByText('確信度', { exact: true })).toBeVisible();
+        const openOpsLayout = await opsLoop.evaluate(details => {
+          const box = details.getBoundingClientRect();
+          const confidence = [...details.querySelectorAll('.yos-ops-row')].find(row => row.textContent.includes('確信度'))?.getBoundingClientRect();
+          return {
+            left: box.left,
+            right: box.right,
+            scrollWidth: details.scrollWidth,
+            clientWidth: details.clientWidth,
+            confidenceVisible: Boolean(confidence && confidence.width > 0 && confidence.height > 0),
+          };
+        });
+        expect(openOpsLayout.left, 'open ops loop escapes viewport left').toBeGreaterThanOrEqual(0);
+        expect(openOpsLayout.right, 'open ops loop escapes viewport right').toBeLessThanOrEqual(await page.evaluate(() => innerWidth));
+        expect(openOpsLayout.scrollWidth, 'open ops loop horizontal overflow').toBeLessThanOrEqual(openOpsLayout.clientWidth + 1);
+        expect(openOpsLayout.confidenceVisible, 'open ops loop primary content').toBe(true);
+        await opsSummary.tap();
+
         const driveLayout = await page.locator('.yos131-drive').evaluate(element => {
           const box = element.getBoundingClientRect();
           const navTop = document.querySelector('.yos131-nav')?.getBoundingClientRect().top ?? innerHeight;
