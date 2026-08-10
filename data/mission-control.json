@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-08-11T08:07:40+09:00",
+  "updated_at": "2026-08-11T08:09:29+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -193,13 +193,6 @@
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/c4b4752ca0dac6fe88619cac1826d35aa532a9ed"
     },
     {
-      "id": "github-commit-c99a6950ab55",
-      "title": "chore: enable verified Issue 245 patch transport",
-      "completed_at": "2026-08-09T20:21:34Z",
-      "result": "GitHub mainへ反映（c99a695）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/c99a6950ab55074e7a658dbd775dac88088cdda3"
-    },
-    {
       "id": "complete-002",
       "title": "iPhone向けMission Control Dashboardを実装",
       "completed_at": "2026-07-17T17:55:00+09:00",
@@ -234,7 +227,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-08-11T08:07:40+09:00",
+      "last_update": "2026-08-11T08:09:29+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -315,7 +308,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-08-11T08:07:40+09:00",
+      "last_update": "2026-08-11T08:09:29+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -338,7 +331,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-08-11T08:07:40+09:00",
+      "last_update": "2026-08-11T08:09:29+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +413,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "cefd1308363358546647d27b7bb6cee4c63a720a2d3b5c222d8ee76f35cb32e8"
+  "github_snapshot_hash": "b3581c33fa873884c98e061043760bbf701330c0e09c181216bb84a26de6b453"
 }
