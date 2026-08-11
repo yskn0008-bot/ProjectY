@@ -12,8 +12,13 @@ const {
 
 test('Level 1 requires an explicit declaration and UI-only files', () => {
   assert.equal(classifyQaLevel('QA Level 1', ['taxi/styles/main.css', 'taxi/index.html']), 1);
+  assert.equal(classifyQaLevel('QA Level 1｜軽微UI変更', [
+    'taxi/final-app-v131.css',
+    'taxi/final-app-v131.js',
+  ]), 1);
   assert.equal(classifyQaLevel('', ['taxi/styles/main.css']), 2);
   assert.equal(classifyQaLevel('Level 1', ['taxi/app.js']), 2);
+  assert.equal(classifyQaLevel('QA Level 1', ['taxi/final-app.js']), 2);
 });
 
 test('sensitive paths are always Level 3', () => {

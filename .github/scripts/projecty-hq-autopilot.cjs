@@ -4,7 +4,7 @@ const fs = require('node:fs');
 
 const ISSUE_NUMBER = 232;
 const MARKER = '<!-- projecty-hq-event-state -->';
-const UI_FILE = /^(taxi|life|yos|nav)\/(?:[^/]+\/)*(?:[^/]+\.(?:css|html)|[^/]*(?:style|theme|view|screen|component)[^/]*\.(?:js|cjs|mjs|ts|tsx|jsx))$/i;
+const UI_FILE = /^(taxi|life|yos|nav)\/(?:[^/]+\/)*(?:[^/]+\.(?:css|html)|final-app-v\d+\.js|[^/]*(?:style|theme|view|screen|component)[^/]*\.(?:js|cjs|mjs|ts|tsx|jsx))$/i;
 const SENSITIVE_FILE = /(^|\/)(?:service-worker|sw)\.(?:js|cjs|mjs|ts)$|(^|\/)(?:auth|api|deploy|deployment|infrastructure|manifest)(?:\/|\.|-)|(^|\/)\.github\/|(?:^|\/)vercel\.json$/i;
 const LOGIC_FILE = /\.(?:js|cjs|mjs|ts|tsx|jsx|py|rb|go|rs|java|swift)$/i;
 
