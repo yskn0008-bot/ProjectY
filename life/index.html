@@ -233,10 +233,17 @@ const routines={
   home:[['洗顔','帰宅後すぐ'],['歯磨き','寝る準備へつなぐ'],['水分補給','少量でよい'],['就寝準備','画面を閉じて横になる']]
 };
 const el=id=>document.getElementById(id);
-const today=()=>new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Tokyo'}).format(new Date());
+const calendarDate=()=>new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Tokyo'}).format(new Date());
+const today=()=>{
+  const key=typeof data==='object'&&data?String(data.activeLifeDate||''):'';
+  return key&&data.days?.[key]&&!data.days[key].lifeFlow?.endedAt?key:calendarDate();
+};
 const fresh=()=>({days:{},activeGroup:'wake'});
 let data=(()=>{try{return JSON.parse(localStorage.getItem(KEY)||'null')||fresh()}catch{return fresh()}})();
-let settings=(()=>{try{return JSON.parse(localStorage.getItem(SETTINGS)||'{}')}catch{return{}})();
+let settings=(()=>{
+  try{return JSON.parse(localStorage.getItem(SETTINGS)||'{}')}
+  catch{return{}}
+})();
 function normalizeDay(d){
   d.checkin=d.checkin||{sleep:'',health:'',mood:''};
   d.routines=d.routines||{wake:[],before:[],home:[]};
