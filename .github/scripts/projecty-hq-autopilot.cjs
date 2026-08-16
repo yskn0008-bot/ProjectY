@@ -7,6 +7,14 @@ const MARKER = '<!-- projecty-hq-event-state -->';
 const UI_FILE = /^(taxi|life|yos|nav)\/(?:[^/]+\/)*(?:[^/]+\.(?:css|html)|final-app-v\d+\.js|[^/]*(?:style|theme|view|screen|component)[^/]*\.(?:js|cjs|mjs|ts|tsx|jsx))$/i;
 const SENSITIVE_FILE = /(^|\/)(?:service-worker|sw)\.(?:js|cjs|mjs|ts)$|(^|\/)(?:auth|api|deploy|deployment|infrastructure|manifest)(?:\/|\.|-)|(^|\/)\.github\/|(?:^|\/)vercel\.json$/i;
 const LOGIC_FILE = /\.(?:js|cjs|mjs|ts|tsx|jsx|py|rb|go|rs|java|swift)$/i;
+const RELEVANT_QA_WORKFLOWS = new Set([
+  'Codex governance',
+  'Taxi iPhone17 Smoke',
+  'Taxi Demand Calendar',
+  'YOS AI Core',
+  'YOSナビ Safety',
+  'YOS Service Worker',
+]);
 
 function classifyQaLevel(body, files) {
   if (files.some((file) => SENSITIVE_FILE.test(file))) return 3;
@@ -47,15 +55,38 @@ function chooseCommentMutation(comments, desiredBody) {
   return { kind: 'create', body: desiredBody };
 }
 
-function workflowRunState(run, pr) {
-  if (!pr || !run || run.head_sha !== pr.head.sha) return null;
+function newestQaRuns(runs, headSha) {
+  const newest = new Map();
+  for (const run of runs) {
+    if (run.head_sha !== headSha || !RELEVANT_QA_WORKFLOWS.has(run.name)) continue;
+    const previous = newest.get(run.name);
+    const runOrder = [Date.parse(run.created_at || 0), run.run_attempt || 0, run.id || 0];
+    const previousOrder = previous
+      ? [Date.parse(previous.created_at || 0), previous.run_attempt || 0, previous.id || 0]
+      : null;
+    if (!previousOrder || runOrder.some((value, index) => value > previousOrder[index] &&
+        runOrder.slice(0, index).every((earlier, earlierIndex) => earlier === previousOrder[earlierIndex]))) {
+      newest.set(run.name, run);
+    }
+  }
+  return [...newest.values()].sort((a, b) => a.name.localeCompare(b.name));
+}
+
+function qaState(runs) {
+  if (!runs.length) return {
+    status: 'PR更新を検知。既存path trigger QAの結果待ち。',
+    nextStep: null,
+  };
+  const pending = runs.find((run) => !run.conclusion);
+  const failed = runs.find((run) => run.conclusion === 'failure');
+  const other = runs.find((run) => !['success', 'failure'].includes(run.conclusion));
+  const decisive = pending || failed || other || runs[0];
+  const summary = runs.map((run) => `${run.name}=${run.conclusion || run.status || 'unknown'}`).join(', ');
   return {
-    prNumber: pr.number,
-    headSha: pr.head.sha,
-    level: null,
-    trigger: `workflow_run:${run.name}`,
-    status: `QA ${run.conclusion || 'unknown'}`,
-    nextStep: nextStepForConclusion(run.conclusion),
+    status: `current-head QA: ${summary}`,
+    nextStep: pending
+      ? 'QA実行中。既存QAの完了を待機。'
+      : nextStepForConclusion(failed ? 'failure' : other ? decisive.conclusion : 'success'),
   };
 }
 
@@ -82,18 +113,24 @@ async function getFiles(api, number) {
   return files.map((file) => file.filename);
 }
 
+async function getCurrentHeadQa(api, headSha) {
+  const response = await api.request(`/actions/runs?head_sha=${encodeURIComponent(headSha)}&per_page=100`);
+  return newestQaRuns(response.workflow_runs || [], headSha);
+}
+
 async function stateForPullRequest(api, pr, trigger) {
   const files = await getFiles(api, pr.number);
   const level = classifyQaLevel(pr.body || '', files);
+  const currentQa = qaState(await getCurrentHeadQa(api, pr.head.sha));
   return {
     prNumber: pr.number,
     headSha: pr.head.sha,
     level,
     trigger,
-    status: 'PR更新を検知。既存path trigger QAの結果待ち。',
-    nextStep: level === 1
+    status: currentQa.status,
+    nextStep: currentQa.nextStep || (level === 1
       ? '既存の対象path QAのみを確認（SE3・全回帰・Vercel・Service Worker監査の追加起動なし）。'
-      : `Level ${level}として既存QAとレビュー結果を確認。`,
+      : `Level ${level}として既存QAとレビュー結果を確認。`),
   };
 }
 
@@ -127,18 +164,13 @@ async function processEvent({ api, eventName, payload, dryRun }) {
     const linked = run.pull_requests && run.pull_requests[0];
     if (!linked) return { kind: 'ignored', reason: 'workflow run has no linked PR' };
     const pr = await api.request(`/pulls/${linked.number}`);
-    state = workflowRunState(run, pr);
-    if (!state) return { kind: 'ignored', reason: 'workflow run is not for the current PR head' };
-    state.level = classifyQaLevel(pr.body || '', await getFiles(api, pr.number));
+    if (run.head_sha !== pr.head.sha) {
+      return { kind: 'ignored', reason: 'workflow run is not for the current PR head' };
+    }
+    state = await stateForPullRequest(api, pr, 'current-head QA evidence');
   } else {
     const prs = await api.request('/pulls?state=open&sort=updated&direction=desc&per_page=1');
     if (!prs.length) return { kind: 'ignored', reason: 'no open PR to audit' };
-    if (eventName === 'schedule') {
-      const managed = (await readManagedComments(api)).find((comment) => comment.body && comment.body.includes(MARKER));
-      if (managed && managed.body.includes(`- current head: \`${prs[0].head.sha}\``)) {
-        return { kind: 'none', reason: 'latest open PR head is already recorded' };
-      }
-    }
     state = await stateForPullRequest(api, prs[0], eventName === 'schedule' ? 'schedule:audit' : 'workflow_dispatch:audit');
   }
   return persistState(api, state, dryRun);
@@ -164,6 +196,6 @@ async function main() {
   console.log(JSON.stringify(result));
 }
 
-module.exports = { MARKER, chooseCommentMutation, classifyQaLevel, processEvent, renderState, workflowRunState };
+module.exports = { MARKER, chooseCommentMutation, classifyQaLevel, newestQaRuns, processEvent, qaState, renderState };
 
 if (require.main === module) main().catch((error) => { console.error(error); process.exitCode = 1; });
