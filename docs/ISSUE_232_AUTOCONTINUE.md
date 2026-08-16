@@ -26,7 +26,9 @@
 - Issue #232 managed stateをcurrent headの最新QA結果から再構築できるようにする。
 - workflow_runの対象漏れを減らす。
 - schedule時もhead一致だけで終了せず、current-head QA状態の変化を監査する。
-- 安全なCodex Cloud起動経路が利用可能な場合、PRコメントの `@codex` を用いた継続へ接続する。ただし自動マージ、本番公開、実機確認代替、無制限な自己再帰起動は禁止する。
+- current headに紐づく既存QAをworkflow単位の最新runへ集約し、遅れて届いた古い結果で状態を巻き戻さない。
+- Lifeを含むrepository-wide変更は既存の `Codex governance` で受動的に観測し、追加QAをfan-outしない。
+- リポジトリ自動化からCodexを自己起動する安全で有界な経路はないため、自動起動は行わず、状態・QA継続までを自動化境界とする。
 - Mission Control同期と既存のQA Level 1〜3、名称保護、担当範囲、完成定義を維持する。
 
 ## 禁止範囲
@@ -42,8 +44,8 @@
 
 - current headの最新QA状態がIssue #232へ正しく反映される。
 - 同じheadでQA結果だけ変化した場合も更新される。
-- Codex継続が安全に起動できる条件と停止条件がテストされる。
-- 自動化が起動できない場合は理由をIssue #232へ残し、完了扱いにしない。
+- stale failureから同じheadのsuccessへの置換と、scheduleによる同一headのQA変化回収がテストされる。
+- Codex自動起動、自動マージ、本番公開、SE3 fan-out、physical iPhone17確認の代替は行わない。
 - GitHub Actionsで関連テストが合格する。
 - 自動マージ・本番公開は行わない。
 
