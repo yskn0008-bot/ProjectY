@@ -4,7 +4,7 @@ on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review, edited]
   workflow_run:
-    workflows: [Taxi iPhone17 Smoke, Taxi Demand Calendar, Codex governance]
+    workflows: [Codex governance, Taxi iPhone17 Smoke, Taxi Demand Calendar, YOS AI Core, YOSナビ Safety, YOS Service Worker]
     types: [completed]
   schedule:
     - cron: '17 * * * *'
