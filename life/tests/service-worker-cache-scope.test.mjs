@@ -48,11 +48,11 @@ let activation;
 listeners.activate({ waitUntil: promise => { activation = Promise.resolve(promise); } });
 await activation;
 
-assert.deepEqual(deleted, ['yos-life-home-v2','yos-life-home-v4','yos-life-home-v5'], 'only stale Life caches may be deleted');
+assert.deepEqual(deleted, ['yos-life-home-v2','yos-life-home-v4','yos-life-home-v5','yos-life-home-v6-daily-flow'], 'only stale Life caches may be deleted');
 assert.equal(claimed, true, 'Life service worker must claim its clients after cleanup');
 assert.match(source, /key\.startsWith\(LIFE_CACHE_PREFIX\)/, 'cleanup must be restricted by Life cache prefix');
-assert.match(source, /home-priority-v1\.css\?v=2/, 'priority home styles must be available offline');
-assert.match(source, /home-v1\.js\?v=3/, 'current home script must be cached with its requested URL');
+assert.match(source, /home-priority-v1\.css\?v=3/, 'priority home styles must be available offline');
+assert.match(source, /home-v1\.js\?v=4/, 'current home script must be cached with its requested URL');
 assert.doesNotMatch(source, /keys\.filter\(key=>key!==CACHE\)/, 'global cache deletion pattern must not return');
 
 console.log('Life service worker cache scope: PASS');

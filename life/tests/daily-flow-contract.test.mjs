@@ -24,6 +24,18 @@ test('Money remains a compact safety view without automatic advice', async () =>
   assert.match(home, /投資・税務・支払い判断を自動で断定しません/);
 });
 
+test('Life calendar uses progressive disclosure and the existing store', async () => {
+  const home = await read('home-v1.js');
+  assert.match(home, /lifeCalendar/);
+  assert.match(home, /<h3 id="lifeCalendarTodayLabelV1">今日<\/h3>/);
+  assert.match(home, /<h3 id="lifeCalendarTomorrowLabelV1">明日<\/h3>/);
+  assert.match(home, /<h3 id="lifeCalendarSoonLabelV1">もうすぐ<\/h3>/);
+  assert.match(home, /<details class="life-calendar-details-v1">/);
+  assert.match(home, /<summary>予定を見る<\/summary>/);
+  assert.match(home, /金額と支払い済み／未払いは、確認できる情報がある時だけ表示します/);
+  assert.doesNotMatch(home, /yos-life-calendar-v1/);
+});
+
 test('HJ snapshot is facts-only and user-controlled', async () => {
   const home = await read('home-v1.js');
   assert.match(home, /life-hj-export-v1/);

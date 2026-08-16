@@ -1,18 +1,18 @@
 'use strict';
-const CACHE='yos-life-home-v6-daily-flow';
+const CACHE='yos-life-home-v7-life-calendar';
 const LIFE_CACHE_PREFIX='yos-life-';
 const STATIC=[
   './',
   './index.html',
   './manifest.webmanifest',
-  './yos-suite-v3.js?v=5',
-  './home-v1.js?v=3',
+  './yos-suite-v3.js?v=6',
+  './home-v1.js?v=4',
   './home-v1.css?v=2',
-  './home-priority-v1.css?v=2'
+  './home-priority-v1.css?v=3'
 ];
 async function inject(response){
   let html=await response.text();
-  if(!html.includes('yos-suite-v3.js'))html=html.replace('</body>','<script src="./yos-suite-v3.js?v=5"></script></body>');
+  if(!html.includes('yos-suite-v3.js'))html=html.replace('</body>','<script src="./yos-suite-v3.js?v=6"></script></body>');
   const headers=new Headers(response.headers);
   headers.delete('content-length');
   headers.delete('content-encoding');

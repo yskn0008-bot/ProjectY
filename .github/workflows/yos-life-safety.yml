@@ -43,7 +43,7 @@ jobs:
           sed -n '/^<script>$/,/^<\/script>$/p' life/index.html | sed '1d;$d' | node --check
 
       - name: Run Life data and cache boundary tests
-        run: node --test life/tests/home-priority-data.test.mjs life/tests/daily-flow-contract.test.mjs life/tests/service-worker-cache-scope.test.mjs
+        run: node --test life/tests/home-priority-data.test.mjs life/tests/life-calendar-contract.test.mjs life/tests/daily-flow-contract.test.mjs life/tests/service-worker-cache-scope.test.mjs
 
   life-browser-smoke:
     name: Life iPhone smoke (${{ matrix.browser }})
@@ -82,3 +82,11 @@ jobs:
         env:
           LIFE_BROWSER: ${{ matrix.browser }}
         run: node life/tests/life-smoke.mjs
+
+      - name: Upload Life screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: life-calendar-${{ matrix.browser }}
+          path: test-results/*.png
+          if-no-files-found: warn

@@ -7,6 +7,21 @@
   const PAGE_KEY='yos-life-home-page-v1';
   const HJ_SCHEMA='life-hj-export-v1';
   const ROUTINE_TOTAL={wake:6,before:4,home:4};
+  const LIFE_CALENDAR_SOURCE='life-calendar-default-v1';
+  const DEFAULT_LIFE_CALENDAR=[
+    {id:'garbage-resources-mon',title:'缶・ビン・紙・有害ゴミ',category:'garbage',rule:{type:'weekly',weekdays:[1]},time:'08:00',timeLabel:'朝8時まで',source:LIFE_CALENDAR_SOURCE},
+    {id:'garbage-burn-tue-fri',title:'燃やすゴミ',category:'garbage',rule:{type:'weekly',weekdays:[2,5]},time:'08:00',timeLabel:'朝8時まで',source:LIFE_CALENDAR_SOURCE},
+    {id:'garbage-nonburn-2-4-wed',title:'燃やさないゴミ',category:'garbage',rule:{type:'nth-weekday',weekday:3,nth:[2,4]},time:'08:00',timeLabel:'朝8時まで',source:LIFE_CALENDAR_SOURCE},
+    {id:'garbage-pet-2-4-sat',title:'ペットボトル',category:'garbage',rule:{type:'nth-weekday',weekday:6,nth:[2,4]},time:'08:00',timeLabel:'朝8時まで',source:LIFE_CALENDAR_SOURCE},
+    {id:'payment-management-maintenance',title:'管理費・修繕費',category:'payment',rule:{type:'monthly',day:5},timeLabel:'支払日',source:LIFE_CALENDAR_SOURCE},
+    {id:'income-rent',title:'家賃収入',category:'income',rule:{type:'monthly-next-weekday',day:10},timeLabel:'入金日',source:LIFE_CALENDAR_SOURCE},
+    {id:'payment-gas',title:'ガス',category:'payment',rule:{type:'monthly',day:15},timeLabel:'支払日',source:LIFE_CALENDAR_SOURCE},
+    {id:'payment-electricity',title:'電気',category:'payment',rule:{type:'monthly',day:26},timeLabel:'支払日',source:LIFE_CALENDAR_SOURCE},
+    {id:'payment-car-insurance',title:'車保険',category:'payment',rule:{type:'monthly',day:26},timeLabel:'支払日',source:LIFE_CALENDAR_SOURCE},
+    {id:'payment-rent',title:'家賃',category:'payment',rule:{type:'monthly',day:27},timeLabel:'支払日',source:LIFE_CALENDAR_SOURCE},
+    {id:'payment-water',title:'水道',category:'payment',rule:{type:'interval-months',day:27,intervalMonths:2,anchorMonth:'2026-07'},timeLabel:'支払日',source:LIFE_CALENDAR_SOURCE},
+    {id:'income-taxi-salary',title:'タクシー給与',category:'income',rule:{type:'monthly',day:10},timeLabel:'入金日',source:LIFE_CALENDAR_SOURCE}
+  ];
   const PAGE_META={
     home:{label:'ホーム',icon:'⌂'},
     schedule:{label:'予定',icon:'◷'},
@@ -27,6 +42,64 @@
     value.setDate(value.getDate()+amount);
     return new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Tokyo'}).format(value);
   };
+  const dateParts=date=>{
+    const match=/^(\d{4})-(\d{2})-(\d{2})$/.exec(String(date||''));
+    if(!match)return null;
+    const year=Number(match[1]),month=Number(match[2]),day=Number(match[3]);
+    const value=new Date(Date.UTC(year,month-1,day));
+    if(value.getUTCFullYear()!==year||value.getUTCMonth()+1!==month||value.getUTCDate()!==day)return null;
+    return{year,month,day,weekday:value.getUTCDay(),nth:Math.floor((day-1)/7)+1};
+  };
+  const dateString=(year,month,day)=>`${year}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+  const nextWeekday=date=>{
+    const parts=dateParts(date);
+    if(!parts)return'';
+    const shift=parts.weekday===6?2:parts.weekday===0?1:0;
+    return addDays(date,shift);
+  };
+  const calendarRules=['weekly','nth-weekday','monthly','monthly-next-weekday','interval-months'];
+  const normalizedLifeCalendar=data=>(Array.isArray(data?.lifeCalendar)?data.lifeCalendar:[])
+    .filter(item=>item&&typeof item==='object'&&item.enabled!==false&&calendarRules.includes(item.rule?.type))
+    .map(item=>({
+      ...item,
+      id:clean(item.id,80),
+      title:clean(item.title,100),
+      category:['garbage','payment','income','health','maintenance','other'].includes(item.category)?item.category:'other',
+      time:clean(item.time,5),
+      timeLabel:clean(item.timeLabel,40)
+    }))
+    .filter(item=>item.id&&item.title);
+  function ensureLifeCalendar(){
+    const data=readJson(DATA_KEY,{days:{}});
+    if(Array.isArray(data.lifeCalendar))return data.lifeCalendar;
+    data.lifeCalendar=DEFAULT_LIFE_CALENDAR.map(item=>({...item,rule:{...item.rule}}));
+    localStorage.setItem(DATA_KEY,JSON.stringify(data));
+    return data.lifeCalendar;
+  }
+  function matchesCalendarRule(item,date){
+    const parts=dateParts(date),rule=item.rule||{};
+    if(!parts)return false;
+    if(rule.type==='weekly')return Array.isArray(rule.weekdays)&&rule.weekdays.includes(parts.weekday);
+    if(rule.type==='nth-weekday')return Number(rule.weekday)===parts.weekday&&Array.isArray(rule.nth)&&rule.nth.includes(parts.nth);
+    if(rule.type==='monthly')return Number(rule.day)===parts.day;
+    if(rule.type==='monthly-next-weekday'){
+      const base=dateString(parts.year,parts.month,Number(rule.day));
+      return dateParts(base)&&nextWeekday(base)===date;
+    }
+    if(rule.type==='interval-months'){
+      const anchor=/^(\d{4})-(\d{2})$/.exec(String(rule.anchorMonth||''));
+      if(!anchor||Number(rule.day)!==parts.day)return false;
+      const interval=Math.max(1,Number(rule.intervalMonths)||1);
+      const months=(parts.year-Number(anchor[1]))*12+parts.month-Number(anchor[2]);
+      return months>=0&&months%interval===0;
+    }
+    return false;
+  }
+  function lifeCalendarItemsForDate(data,date){
+    return normalizedLifeCalendar(data)
+      .filter(item=>matchesCalendarRule(item,date))
+      .map(item=>({id:item.id,date,title:item.title,category:item.category,time:item.time,timeLabel:item.timeLabel}));
+  }
   const activeLifeDate=(data=readJson(DATA_KEY,{days:{}}))=>{
     const key=clean(data.activeLifeDate,10);
     return key&&data.days?.[key]&&!data.days[key].lifeFlow?.endedAt?key:calendarDate();
@@ -44,15 +117,17 @@
         try{
           const incoming=JSON.parse(value);
           const current=JSON.parse(originalGetItem.call(this,key)||'null');
-          if(incoming?.days&&current?.days){
-            Object.entries(current.days).forEach(([date,currentDay])=>{
-              const incomingDay=incoming.days[date];
-              if(!incomingDay||!currentDay)return;
-              ['doneToday','lifeFlow','money','hjSnapshot'].forEach(field=>{
-                if(Object.prototype.hasOwnProperty.call(currentDay,field)&&!Object.prototype.hasOwnProperty.call(incomingDay,field))incomingDay[field]=currentDay[field];
+          if(incoming&&current){
+            if(incoming.days&&current.days){
+              Object.entries(current.days).forEach(([date,currentDay])=>{
+                const incomingDay=incoming.days[date];
+                if(!incomingDay||!currentDay)return;
+                ['doneToday','lifeFlow','money','hjSnapshot'].forEach(field=>{
+                  if(Object.prototype.hasOwnProperty.call(currentDay,field)&&!Object.prototype.hasOwnProperty.call(incomingDay,field))incomingDay[field]=currentDay[field];
+                });
               });
-            });
-            ['activeLifeDate','lastClosedLifeDate','moneySafety'].forEach(field=>{
+            }
+            ['activeLifeDate','lastClosedLifeDate','moneySafety','lifeCalendar'].forEach(field=>{
               if(Object.prototype.hasOwnProperty.call(current,field)&&!Object.prototype.hasOwnProperty.call(incoming,field))incoming[field]=current[field];
             });
           }
@@ -75,7 +150,7 @@
       const priority=document.createElement('link');
       priority.id='lifeHomePriorityV1Styles';
       priority.rel='stylesheet';
-      priority.href='./home-priority-v1.css?v=2';
+      priority.href='./home-priority-v1.css?v=3';
       document.head.appendChild(priority);
     }
   }
@@ -339,6 +414,93 @@
     if(button){button.textContent='コピー済み';setTimeout(()=>{button.textContent='事実スナップショットをコピー'},1200)}
   }
 
+  function buildLifeCalendar(){
+    const section=document.createElement('section');
+    section.id='lifeCalendarV1';
+    section.className='life-calendar-v1 card';
+    section.innerHTML=`
+      <header class="life-calendar-head-v1">
+        <div><small>LIFE CALENDAR</small><h2>生活カレンダー</h2><p>覚えるのはLife。今日は必要なことだけ。</p></div>
+        <span id="lifeCalendarDateV1"></span>
+      </header>
+      <div class="life-calendar-glance-v1">
+        <section aria-labelledby="lifeCalendarTodayLabelV1"><h3 id="lifeCalendarTodayLabelV1">今日</h3><div id="lifeCalendarTodayV1"></div></section>
+        <section aria-labelledby="lifeCalendarTomorrowLabelV1"><h3 id="lifeCalendarTomorrowLabelV1">明日</h3><div id="lifeCalendarTomorrowV1"></div></section>
+        <section aria-labelledby="lifeCalendarSoonLabelV1"><h3 id="lifeCalendarSoonLabelV1">もうすぐ</h3><div id="lifeCalendarSoonV1"></div></section>
+      </div>
+      <details class="life-calendar-details-v1">
+        <summary>予定を見る</summary>
+        <div id="lifeCalendarUpcomingV1"></div>
+      </details>
+      <p class="life-calendar-note-v1">金額と支払い済み／未払いは、確認できる情報がある時だけ表示します。通知はYOSの役割です。</p>`;
+    return section;
+  }
+
+  function dateLabel(date){
+    const value=new Date(`${date}T12:00:00+09:00`);
+    return new Intl.DateTimeFormat('ja-JP',{month:'numeric',day:'numeric',weekday:'short',timeZone:'Asia/Tokyo'}).format(value);
+  }
+
+  function calendarRow(item,showDate=false){
+    const row=document.createElement('div');
+    row.className=`life-calendar-row-v1 ${item.category}`;
+    const marker=document.createElement('span');
+    marker.className='life-calendar-marker-v1';
+    marker.setAttribute('aria-hidden','true');
+    const copy=document.createElement('div');
+    if(showDate){
+      const date=document.createElement('small');
+      date.textContent=dateLabel(item.date);
+      copy.appendChild(date);
+    }
+    const title=document.createElement('strong');
+    title.textContent=item.title;
+    copy.appendChild(title);
+    const meta=document.createElement('span');
+    meta.textContent=item.timeLabel||'';
+    row.append(marker,copy,meta);
+    return row;
+  }
+
+  function renderCalendarList(target,items,{showDate=false,empty='必要な予定はありません'}={}){
+    if(!target)return;
+    target.replaceChildren();
+    target.className='life-calendar-list-v1';
+    if(!items.length){
+      const message=document.createElement('p');
+      message.className='life-calendar-empty-v1';
+      message.textContent=empty;
+      target.appendChild(message);
+      return;
+    }
+    items.forEach(item=>target.appendChild(calendarRow(item,showDate)));
+  }
+
+  function upcomingCalendarItems(data,start,fromDay,toDay){
+    const items=[];
+    for(let offset=fromDay;offset<=toDay;offset+=1){
+      const date=addDays(start,offset);
+      items.push(...lifeCalendarItemsForDate(data,date));
+    }
+    return items;
+  }
+
+  function refreshLifeCalendar(){
+    const root=document.getElementById('lifeCalendarV1');
+    if(!root)return;
+    const data=readJson(DATA_KEY,{days:{}}),date=calendarDate(),tomorrow=addDays(date,1);
+    const todayItems=lifeCalendarItemsForDate(data,date);
+    const tomorrowItems=lifeCalendarItemsForDate(data,tomorrow);
+    const soonItems=upcomingCalendarItems(data,date,2,14).slice(0,4);
+    const allItems=upcomingCalendarItems(data,date,0,31);
+    const label=document.getElementById('lifeCalendarDateV1');
+    if(label)label.textContent=dateLabel(date);
+    renderCalendarList(document.getElementById('lifeCalendarTodayV1'),todayItems);
+    renderCalendarList(document.getElementById('lifeCalendarTomorrowV1'),tomorrowItems);
+    renderCalendarList(document.getElementById('lifeCalendarSoonV1'),soonItems,{showDate:true,empty:'近い期限はありません'});
+    renderCalendarList(document.getElementById('lifeCalendarUpcomingV1'),allItems,{showDate:true,empty:'31日以内の予定はありません'});
+  }
+
   function buildDailyFlow(){
     const section=document.createElement('section');
     section.id='lifeDailyFlowV1';
@@ -560,7 +722,7 @@
   function queueRefresh(){
     if(refreshQueued)return;
     refreshQueued=true;
-    requestAnimationFrame(()=>{refreshQueued=false;refreshDailyFlow();refreshDashboard()});
+    requestAnimationFrame(()=>{refreshQueued=false;refreshLifeCalendar();refreshDailyFlow();refreshDashboard()});
   }
 
   function install(){
@@ -590,7 +752,7 @@
     });
     top.insertAdjacentElement('afterend',host);
 
-    pages.home.append(buildDailyFlow(),week,buildDashboard());
+    pages.home.append(buildLifeCalendar(),buildDailyFlow(),week,buildDashboard());
     [sunrise,scheduleCard,taskCard,planCard].filter(Boolean).forEach(card=>pages.schedule.appendChild(card));
     if(stateCard)pages.record.appendChild(stateCard);
     [routineCard,yosCard].filter(Boolean).forEach(card=>pages.improve.appendChild(card));
@@ -610,6 +772,12 @@
   }
 
   installDataExtensionGuard();
+  ensureLifeCalendar();
+  window.__yosLifeCalendarV1={
+    defaults:()=>DEFAULT_LIFE_CALENDAR.map(item=>({...item,rule:{...item.rule}})),
+    itemsForDate:(data,date)=>lifeCalendarItemsForDate(data,date),
+    upcoming:(data,date,fromDay,toDay)=>upcomingCalendarItems(data,date,fromDay,toDay)
+  };
   const timer=setInterval(()=>{if(install())clearInterval(timer)},40);
   setTimeout(()=>clearInterval(timer),10000);
 })();

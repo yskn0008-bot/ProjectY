@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { mkdir } from 'node:fs/promises';
 import { chromium, webkit } from 'playwright';
 
 const browserName = process.env.LIFE_BROWSER || 'chromium';
@@ -12,8 +13,8 @@ const followingHour = new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString();
 
 const browser = await engine.launch();
 const context = await browser.newContext({
-  viewport: { width: 375, height: 667 },
-  deviceScaleFactor: 2,
+  viewport: { width: 402, height: 874 },
+  deviceScaleFactor: 3,
   isMobile: true,
   hasTouch: true,
   locale: 'ja-JP',
@@ -40,6 +41,7 @@ const pageErrors = [];
 page.on('pageerror', error => pageErrors.push(error.message));
 
 const waitForDailyFlow = async () => {
+  await page.waitForSelector('#lifeCalendarV1');
   await page.waitForSelector('#lifeDailyFlowV1');
   await page.waitForFunction(() => Boolean(document.getElementById('lifeFlowDateV1')?.textContent.trim()));
 };
@@ -65,6 +67,31 @@ try {
   assert.ok(layout.scrollWidth <= layout.clientWidth + 1, `horizontal overflow: ${layout.scrollWidth}/${layout.clientWidth}`);
   assert.ok(layout.mainPaddingBottom >= 90, 'fixed navigation does not have enough safe bottom space');
   assert.match(await page.locator('#lifeMorningNextEventV1').textContent(), /既存の予定/, 'existing schedule is not restored');
+  assert.equal(await page.locator('.life-page-v1[data-page="home"] > :first-child').getAttribute('id'), 'lifeCalendarV1', 'Life calendar is not the first home card');
+  assert.equal(await page.locator('#lifeCalendarV1').isVisible(), true, 'Life calendar is not visible on home');
+  assert.equal(await page.locator('#lifeCalendarTodayLabelV1').textContent(), '今日');
+  assert.equal(await page.locator('#lifeCalendarTomorrowLabelV1').textContent(), '明日');
+  assert.equal(await page.locator('#lifeCalendarSoonLabelV1').textContent(), 'もうすぐ');
+  await page.locator('.life-calendar-details-v1 summary').click();
+  assert.equal(await page.locator('#lifeCalendarUpcomingV1').isVisible(), true, 'calendar details do not progressively disclose');
+  const calendarContract = await page.evaluate(() => {
+    const data = JSON.parse(localStorage.getItem('yos-life-v1'));
+    const titles = date => window.__yosLifeCalendarV1.itemsForDate(data,date).map(item => item.title);
+    return {
+      count: data.lifeCalendar.length,
+      monday: titles('2026-08-17'),
+      rentWeekend: titles('2026-10-10'),
+      rentWeekday: titles('2026-10-12'),
+      waterSeptember: titles('2026-09-27'),
+      waterOctober: titles('2026-10-27')
+    };
+  });
+  assert.equal(calendarContract.count, 12, 'known schedules were not seeded in the existing Life store');
+  assert.ok(calendarContract.monday.includes('缶・ビン・紙・有害ゴミ'));
+  assert.equal(calendarContract.rentWeekend.includes('家賃収入'), false, 'weekend rent income was not rolled forward');
+  assert.ok(calendarContract.rentWeekday.includes('家賃収入'));
+  assert.ok(calendarContract.waterSeptember.includes('水道'));
+  assert.equal(calendarContract.waterOctober.includes('水道'), false);
 
   await page.locator('#lifeWorkModeV1').selectOption('work');
   await page.locator('#lifeMorningSleepV1').fill('7');
@@ -91,6 +118,7 @@ try {
   assert.equal(saved.days[lifeDate].schedule[0].title, '既存の予定');
   assert.equal(saved.moneySafety.todayBudget, '3000');
   assert.equal(saved.days[lifeDate].doneToday, '既存のできたこと');
+  assert.equal(saved.lifeCalendar.length, 12, 'daily save removed the Life calendar source of truth');
 
   const carriedDate = await page.evaluate(() => {
     const data = JSON.parse(localStorage.getItem('yos-life-v1'));
@@ -134,8 +162,8 @@ try {
   await page.evaluate(() => navigator.serviceWorker.ready);
   const cacheStatus = await page.evaluate(async () => {
     const paths = [
-      './', './index.html', './manifest.webmanifest', './yos-suite-v3.js?v=5',
-      './home-v1.js?v=3', './home-v1.css?v=2', './home-priority-v1.css?v=2'
+      './', './index.html', './manifest.webmanifest', './yos-suite-v3.js?v=6',
+      './home-v1.js?v=4', './home-v1.css?v=2', './home-priority-v1.css?v=3'
     ];
     const entries = await Promise.all(paths.map(async path => [
       path,
@@ -158,8 +186,19 @@ try {
     const restoredDone = await page.evaluate(date => JSON.parse(localStorage.getItem('yos-life-v1')).days[date].doneToday, carriedDate);
     assert.equal(restoredDone, '連絡を一件返した', 'WebKit reload did not restore the closed day');
   }
+  await mkdir('test-results', { recursive: true });
+  await page.screenshot({ path: `test-results/life-calendar-iphone17-${browserName}.png`, fullPage: true });
+  await page.setViewportSize({ width: 375, height: 667 });
+  await page.reload({ waitUntil: 'domcontentloaded' });
+  await waitForDailyFlow();
+  const narrowLayout = await page.evaluate(() => ({
+    scrollWidth: document.documentElement.scrollWidth,
+    clientWidth: document.documentElement.clientWidth
+  }));
+  assert.ok(narrowLayout.scrollWidth <= narrowLayout.clientWidth + 1, `narrow horizontal overflow: ${narrowLayout.scrollWidth}/${narrowLayout.clientWidth}`);
+  await page.screenshot({ path: `test-results/life-calendar-narrow-${browserName}.png`, fullPage: true });
   assert.deepEqual(pageErrors, [], `page errors: ${pageErrors.join(' | ')}`);
-  console.log(`Life daily flow smoke passed: ${browserName}`);
+  console.log(`Life calendar and daily flow smoke passed: ${browserName}`);
 } finally {
   await browser.close();
 }

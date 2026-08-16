@@ -16,6 +16,36 @@
 .home-done-save-v1{min-height:40px;border:0;border-radius:12px;padding:0 11px;background:#fff0e9;color:#d85f51;font-size:13px;font-weight:1000;white-space:nowrap}
 .life-page-v1[data-page="schedule"]>.sunrise{margin-top:0!important}
 
+.life-calendar-v1{display:grid;gap:11px;padding:14px;overflow:hidden;background:linear-gradient(145deg,#fff 0,#fffaf1 100%)}
+.life-calendar-head-v1{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.life-calendar-head-v1 small{color:var(--life-home-accent);font-size:10px;font-weight:1000;letter-spacing:.12em}
+.life-calendar-head-v1 h2{margin:3px 0 2px;font-size:23px;line-height:1.25}
+.life-calendar-head-v1 p{margin:0;color:var(--life-home-muted);font-size:12px;line-height:1.45}
+.life-calendar-head-v1>span{flex:0 0 auto;padding:5px 8px;border-radius:999px;background:#fff;color:#66717d;font-size:11px;font-weight:900;box-shadow:0 4px 12px rgba(66,76,91,.06)}
+.life-calendar-glance-v1{display:grid;gap:6px}
+.life-calendar-glance-v1>section{display:grid;grid-template-columns:58px minmax(0,1fr);gap:8px;align-items:start;padding:8px;border-radius:13px;background:rgba(255,255,255,.82);border:1px solid rgba(227,222,213,.7)}
+.life-calendar-glance-v1 h3{margin:2px 0 0;color:#505a66;font-size:13px;line-height:1.4}
+.life-calendar-list-v1{display:grid;min-width:0}
+.life-calendar-row-v1{display:grid;grid-template-columns:8px minmax(0,1fr) auto;gap:8px;align-items:center;min-width:0;padding:3px 0;color:var(--life-home-ink)}
+.life-calendar-row-v1+.life-calendar-row-v1{margin-top:4px;padding-top:7px;border-top:1px solid #edf0f2}
+.life-calendar-marker-v1{width:8px;height:8px;border-radius:50%;background:#aab2bd}
+.life-calendar-row-v1.garbage .life-calendar-marker-v1{background:#58a57a}
+.life-calendar-row-v1.payment .life-calendar-marker-v1{background:#ef786a}
+.life-calendar-row-v1.income .life-calendar-marker-v1{background:#5f82c9}
+.life-calendar-row-v1 div{display:grid;min-width:0}
+.life-calendar-row-v1 div small{color:#8a929c;font-size:10px;font-weight:800}
+.life-calendar-row-v1 strong{overflow:hidden;color:#34404d;font-size:14px;line-height:1.35;text-overflow:ellipsis;white-space:nowrap}
+.life-calendar-row-v1>span:last-child{color:#707985;font-size:11px;font-weight:900;white-space:nowrap}
+.life-calendar-empty-v1{margin:3px 0;color:#939aa3;font-size:12px;line-height:1.45}
+.life-calendar-details-v1{border-top:1px solid #eee7dd}
+.life-calendar-details-v1 summary{min-height:42px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#d35e50;font-size:13px;font-weight:1000;list-style:none}
+.life-calendar-details-v1 summary::-webkit-details-marker{display:none}
+.life-calendar-details-v1 summary:after{content:'⌄';margin-left:6px;font-size:14px;transition:transform .2s ease}
+.life-calendar-details-v1[open] summary:after{transform:rotate(180deg)}
+.life-calendar-details-v1>div{display:grid;gap:2px;max-height:420px;padding:2px 7px 8px;overflow:auto}
+.life-calendar-details-v1 .life-calendar-row-v1{padding:7px 2px}
+.life-calendar-note-v1{margin:0;color:#8b929b;font-size:10px;line-height:1.5}
+
 .life-daily-flow-v1{display:grid;gap:11px;padding:14px;overflow:hidden}
 .life-flow-head-v1{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
 .life-flow-head-v1 small{color:var(--life-home-accent);font-size:11px;font-weight:1000;letter-spacing:.04em}
@@ -46,6 +76,11 @@
 .life-snapshot-v1 button{min-height:38px;margin:0 10px 10px;border:0;border-radius:10px;padding:0 10px;background:#edf0ff;color:#596eac;font-size:11px;font-weight:1000}
 
 @media(max-width:430px){
+  .life-calendar-v1{padding:11px}
+  .life-calendar-head-v1 h2{font-size:21px}
+  .life-calendar-glance-v1>section{grid-template-columns:52px minmax(0,1fr);padding:7px}
+  .life-calendar-row-v1{gap:7px}
+  .life-calendar-row-v1 strong{font-size:13px}
   .life-daily-flow-v1{padding:11px}
   .life-flow-head-v1 h2{font-size:21px}
   .life-flow-three-v1{grid-template-columns:1.15fr .85fr .8fr;gap:6px}
@@ -62,6 +97,11 @@
 
 @media(max-width:430px) and (max-height:700px){
   .life-page-v1[data-page="home"]{gap:8px}
+  .life-calendar-v1{gap:8px}
+  .life-calendar-head-v1 p{font-size:11px}
+  .life-calendar-glance-v1{gap:4px}
+  .life-calendar-glance-v1>section{padding:6px 7px}
+  .life-calendar-details-v1 summary{min-height:36px}
   .life-page-v1[data-page="home"] .week{gap:4px;margin-bottom:0}
   .life-page-v1[data-page="home"] .day{min-height:57px;padding:6px 2px}
   .life-page-v1[data-page="home"] .day b{font-size:11px}
