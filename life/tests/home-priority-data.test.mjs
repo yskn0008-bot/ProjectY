@@ -68,10 +68,14 @@ assert.equal(saved.days['2026-08-02'].lifeFlow.protect, '睡眠', 'core saves mu
 assert.equal(saved.days['2026-08-02'].money.spentToday, '1200', 'core saves must preserve the daily amount');
 assert.equal(saved.days['2026-08-02'].hjSnapshot.schema, 'life-hj-export-v1', 'core saves must preserve the facts-only snapshot');
 assert.equal(saved.lifeCalendar[0].title, '既存の病院予定', 'core saves must preserve the Life calendar source of truth');
-assert.match(source, /homeFocusInputV1/, 'home must expose one priority task');
-assert.match(source, /homeDoneInputV1/, 'home must expose done-today input');
+assert.match(source, /homeFocusValueV1/, 'home must expose the saved priority task as a reading summary');
+assert.match(source, /homeDoneValueV1/, 'home must expose done-today as a reading summary');
+assert.match(source, /homeMoneyBudgetV1/, 'home must reuse confirmed Money safety information');
+assert.doesNotMatch(source, /homeFocusInputV1|homeDoneInputV1/, 'home must not duplicate record inputs');
 assert.match(source, /day\.doneToday/, 'doneToday must remain in the existing Life day record');
-assert.match(source, /pages\.home\.append\(buildLifeCalendar\(\),buildDailyFlow\(\),week,buildDashboard\(\)\)/, 'Life calendar must lead the compact home');
+assert.match(source, /pages\.home\.append\(buildLifeCalendar\(\),buildDashboard\(\),week\)/, 'Life calendar must lead the reading home');
+assert.match(source, /pages\.record\.appendChild\(buildDailyFlow\(\)\)/, 'existing Record navigation must own the input flow');
+assert.match(source, /activatePage\('home',false\)/, 'relaunch must start on the reading home');
 assert.doesNotMatch(source, /localStorage\.clear\(/, 'daily flow must never clear existing Life data');
 
 console.log('Life home priority data: PASS');

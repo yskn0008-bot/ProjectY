@@ -42,7 +42,7 @@ page.on('pageerror', error => pageErrors.push(error.message));
 
 const waitForDailyFlow = async () => {
   await page.waitForSelector('#lifeCalendarV1');
-  await page.waitForSelector('#lifeDailyFlowV1');
+  await page.waitForSelector('#lifeDailyFlowV1', { state: 'attached' });
   await page.waitForFunction(() => Boolean(document.getElementById('lifeFlowDateV1')?.textContent.trim()));
 };
 const clickAndWaitForReload = async locator => {
@@ -67,6 +67,13 @@ try {
   assert.ok(layout.scrollWidth <= layout.clientWidth + 1, `horizontal overflow: ${layout.scrollWidth}/${layout.clientWidth}`);
   assert.ok(layout.mainPaddingBottom >= 90, 'fixed navigation does not have enough safe bottom space');
   assert.match(await page.locator('#lifeMorningNextEventV1').textContent(), /既存の予定/, 'existing schedule is not restored');
+  assert.equal(await page.locator('.life-page-v1[data-page="home"] input').count(), 0, 'home must not ask for form input');
+  assert.equal(await page.locator('#lifeDailyFlowV1').isVisible(), false, 'record form must stay behind the Record navigation');
+  assert.equal(await page.locator('#homeSleepV1').textContent(), '6.5h', 'saved sleep is not summarized on home');
+  assert.equal(await page.locator('#homeHealthV1').textContent(), '3/5', 'saved health is not summarized on home');
+  assert.equal(await page.locator('#homeMoodV1').textContent(), '2/5', 'saved mood is not summarized on home');
+  assert.equal(await page.locator('#homeFocusValueV1').textContent(), '既存タスク', 'saved task is not summarized on home');
+  assert.equal(await page.locator('#homeDoneValueV1').textContent(), '既存のできたこと', 'saved done-today value is not summarized on home');
   assert.equal(await page.locator('.life-page-v1[data-page="home"] > :first-child').getAttribute('id'), 'lifeCalendarV1', 'Life calendar is not the first home card');
   assert.equal(await page.locator('#lifeCalendarV1').isVisible(), true, 'Life calendar is not visible on home');
   assert.equal(await page.locator('#lifeCalendarTodayLabelV1').textContent(), '今日');
@@ -103,10 +110,12 @@ try {
   assert.deepEqual(calendarContract.beforeDeadline, {past:false,label:'朝8時まで'});
   assert.deepEqual(calendarContract.afterDeadline, {past:true,label:'朝8時を過ぎました'});
 
+  await page.locator('#lifeBottomNavV1 [data-page="record"]').click();
+  assert.equal(await page.locator('#lifeDailyFlowV1').isVisible(), true, 'Record must open the input flow in one action');
   await page.locator('#lifeWorkModeV1').selectOption('work');
   await page.locator('#lifeMorningSleepV1').fill('7');
-  await page.locator('#lifeMorningHealthV1').fill('4');
-  await page.locator('#lifeMorningMoodV1').fill('3');
+  await page.locator('[data-life-rating-target="lifeMorningHealthV1"][data-life-rating-value="4"]').click();
+  await page.locator('[data-life-rating-target="lifeMorningMoodV1"][data-life-rating-value="3"]').click();
   await page.locator('#lifeProtectV1').fill('睡眠を守る');
   await page.locator('#lifeMorningTaskV1').fill('連絡を一件返す');
   await page.locator('#lifeDesiredSceneV1').fill('歯を磨いて横になる');
@@ -120,6 +129,7 @@ try {
   await page.locator('#lifeMoneyNextPaymentV1').fill('家賃 30000');
   await page.locator('#lifeMoneyDangerV1').selectOption('watch');
   await clickAndWaitForReload(page.locator('#lifeStartDayV1'));
+  assert.equal(await page.locator('.life-page-v1[data-page="home"]').isVisible(), true, 'morning save must return to the reading home');
 
   let saved = await page.evaluate(() => JSON.parse(localStorage.getItem('yos-life-v1')));
   assert.equal(saved.activeLifeDate, lifeDate);
@@ -144,8 +154,12 @@ try {
   });
   await page.reload({ waitUntil: 'networkidle' });
   await waitForDailyFlow();
+  assert.equal(await page.locator('.life-page-v1[data-page="home"]').isVisible(), true, 'relaunch must start on the reading home');
+  await page.locator('#lifeBottomNavV1 [data-page="record"]').click();
   assert.equal(await page.locator('#lifeFlowDateV1').textContent(), carriedDate, 'open Life day was split at midnight');
   assert.equal(await page.locator('#lifeMorningTaskV1').inputValue(), '連絡を一件返す');
+  assert.equal(await page.locator('#lifeMorningHealthV1').inputValue(), '4', 'one-tap health did not preserve the existing value format');
+  assert.equal(await page.locator('#lifeMorningMoodV1').inputValue(), '3', 'one-tap mood did not preserve the existing value format');
 
   await page.locator('[data-life-flow-tab="night"]').click();
   await page.locator('#lifeNightDoneV1').fill('連絡を一件返した');
@@ -156,6 +170,7 @@ try {
   await page.locator('#lifeNightDiscomfortV1').fill('まだ落ち着かない。');
   await page.locator('#lifeTomorrowImportantV1').fill('起きたら予定を確認する。');
   await clickAndWaitForReload(page.locator('#lifeEndDayV1'));
+  assert.equal(await page.locator('.life-page-v1[data-page="home"]').isVisible(), true, 'night save must return to the reading home');
 
   saved = await page.evaluate(() => JSON.parse(localStorage.getItem('yos-life-v1')));
   const closed = saved.days[carriedDate];
@@ -172,8 +187,8 @@ try {
   await page.evaluate(() => navigator.serviceWorker.ready);
   const cacheStatus = await page.evaluate(async () => {
     const paths = [
-      './', './index.html', './manifest.webmanifest', './yos-suite-v3.js?v=7',
-      './home-v1.js?v=5', './home-v1.css?v=2', './home-priority-v1.css?v=3'
+      './', './index.html', './manifest.webmanifest', './yos-suite-v3.js?v=8',
+      './home-v1.js?v=6', './home-v1.css?v=2', './home-priority-v1.css?v=4'
     ];
     const entries = await Promise.all(paths.map(async path => [
       path,
@@ -188,7 +203,9 @@ try {
     await context.setOffline(true);
     await page.reload({ waitUntil: 'domcontentloaded' });
     await waitForDailyFlow();
-    assert.equal(await page.locator('#lifeDailyFlowV1').isVisible(), true, 'daily flow is not available offline');
+    assert.equal(await page.locator('#lifeCalendarV1').isVisible(), true, 'reading home is not available offline');
+    await page.locator('#lifeBottomNavV1 [data-page="record"]').click();
+    assert.equal(await page.locator('#lifeDailyFlowV1').isVisible(), true, 'record flow is not available offline');
     await context.setOffline(false);
   } else {
     await page.reload({ waitUntil: 'domcontentloaded' });
@@ -196,6 +213,7 @@ try {
     const restoredDone = await page.evaluate(date => JSON.parse(localStorage.getItem('yos-life-v1')).days[date].doneToday, carriedDate);
     assert.equal(restoredDone, '連絡を一件返した', 'WebKit reload did not restore the closed day');
   }
+  await page.locator('#lifeBottomNavV1 [data-page="home"]').click();
   await mkdir('test-results', { recursive: true });
   await page.screenshot({ path: `test-results/life-calendar-iphone17-${browserName}.png`, fullPage: true });
   await page.setViewportSize({ width: 375, height: 667 });

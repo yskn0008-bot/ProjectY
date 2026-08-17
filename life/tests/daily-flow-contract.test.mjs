@@ -34,7 +34,10 @@ test('Life calendar uses progressive disclosure and the existing store', async (
   assert.match(home, /<summary>予定を見る<\/summary>/);
   assert.match(home, /金額と支払い済み／未払いは、確認できる情報がある時だけ表示します/);
   assert.doesNotMatch(home, /yos-life-calendar-v1/);
-  assert.match(page, /<script src="\.\/yos-suite-v3\.js\?v=7"><\/script>\s*<\/body>/, 'first open must load the Life home without a service-worker reload');
+  assert.match(page, /<script src="\.\/yos-suite-v3\.js\?v=8"><\/script>\s*<\/body>/, 'first open must load the Life home without a service-worker reload');
+  assert.match(home, /data-life-rating-target="lifeMorningHealthV1"/, 'health must be selectable with one tap');
+  assert.match(home, /data-life-rating-target="lifeMorningMoodV1"/, 'mood must be selectable with one tap');
+  assert.match(page, /data-checkin-rating="health"/, 'the preserved status form must use one-tap health choices');
 });
 
 test('HJ snapshot is facts-only and user-controlled', async () => {

@@ -151,7 +151,7 @@
       const priority=document.createElement('link');
       priority.id='lifeHomePriorityV1Styles';
       priority.rel='stylesheet';
-      priority.href='./home-priority-v1.css?v=3';
+      priority.href='./home-priority-v1.css?v=4';
       document.head.appendChild(priority);
     }
   }
@@ -228,40 +228,17 @@
 
   function statusMessage(day){
     const sleep=Number(day.checkin.sleep),health=Number(day.checkin.health),mood=Number(day.checkin.mood);
-    if(!sleep&&!health&&!mood)return{tone:'neutral',title:'まず、今の状態を記録',detail:'30秒の記録から今日の流れを整えます。'};
+    if(!sleep&&!health&&!mood)return{tone:'neutral',title:'今日はここだけ見れば大丈夫',detail:'記録したい時だけ、下の「記録」から追加できます。'};
     if(health&&health<=2)return{tone:'rest',title:'今日は回復を優先',detail:'予定を減らし、安全と休養を最優先にします。'};
     if(sleep&&sleep<6)return{tone:'rest',title:'睡眠不足を前提に動く',detail:'重要なことを一つに絞り、無理を増やしません。'};
     if(mood&&mood<=2)return{tone:'care',title:'小さく始めれば十分',detail:'気分を変えようとせず、できる一歩だけ選びます。'};
     return{tone:'good',title:'今日の流れは整えられる',detail:'次の一つだけに集中して進めます。'};
   }
 
-  function saveFocusTask(){
-    const input=document.getElementById('homeFocusInputV1');
-    if(!input)return;
-    const index=Number(input.dataset.taskIndex||0);
-    const value=input.value.trim();
-    const row=qsa('.task')[index]||qsa('.task')[0];
-    const sourceInput=row&&qs('input',row);
-    if(sourceInput){
-      if(sourceInput.value!==value){
-        sourceInput.value=value;
-        sourceInput.dispatchEvent(new Event('change',{bubbles:true}));
-      }
-      return;
-    }
-    updateToday(day=>{
-      day.tasks=Array.isArray(day.tasks)?day.tasks:[];
-      while(day.tasks.length<=index)day.tasks.push({text:'',done:false,category:'personal'});
-      day.tasks[index]={...day.tasks[index],text:value,category:day.tasks[index].category||'personal'};
-    });
-  }
-
   function toggleFocusTask(){
-    const input=document.getElementById('homeFocusInputV1');
-    if(!input)return;
     const before=focusTask(dayData());
-    saveFocusTask();
-    const index=Number(input.dataset.taskIndex||before.index||0);
+    if(!before.text.trim())return;
+    const index=before.index;
     const row=qsa('.task')[index]||qsa('.task')[0];
     const button=row&&qs('button',row);
     if(button)button.click();
@@ -270,18 +247,13 @@
       while(day.tasks.length<=index)day.tasks.push({text:'',done:false,category:'personal'});
       day.tasks[index].done=!day.tasks[index].done;
     });
-    if(!before.done&&input.value.trim()&&!dayData().doneToday){
-      saveDoneToday(input.value.trim());
+    if(!before.done&&!dayData().doneToday){
+      saveDoneToday(before.text.trim());
     }
   }
 
   function saveDoneToday(value){
     updateToday(day=>{day.doneToday=String(value||'').trim()});
-    const button=document.getElementById('homeDoneSaveV1');
-    if(button){
-      button.textContent='保存済み';
-      setTimeout(()=>{button.textContent='保存'},1000);
-    }
   }
 
   function firstEvent(day){
@@ -378,6 +350,7 @@
     };
     data.activeLifeDate=key;
     localStorage.setItem(DATA_KEY,JSON.stringify(data));
+    localStorage.setItem(PAGE_KEY,'home');
     location.reload();
   }
 
@@ -401,6 +374,7 @@
     data.activeLifeDate=key;
     data.lastClosedLifeDate=key;
     localStorage.setItem(DATA_KEY,JSON.stringify(data));
+    localStorage.setItem(PAGE_KEY,'home');
     location.reload();
   }
 
@@ -544,10 +518,10 @@
         <p id="lifeMorningNextEventV1" class="life-flow-next-v1"></p>
         <div class="life-flow-three-v1">
           <label>勤務／休み<select id="lifeWorkModeV1"><option value="unknown">まだ決めない</option><option value="work">勤務</option><option value="rest">休み</option></select></label>
-          <label>睡眠<input id="lifeMorningSleepV1" type="number" min="0" max="24" step="0.5" inputmode="decimal" placeholder="時間"></label>
-          <label>体調<input id="lifeMorningHealthV1" type="number" min="1" max="5" step="1" inputmode="numeric" placeholder="1〜5"></label>
+          <label>睡眠（任意）<input id="lifeMorningSleepV1" type="number" min="0" max="24" step="0.5" inputmode="decimal" placeholder="時間"></label>
         </div>
-        <label>気分 1〜5<input id="lifeMorningMoodV1" type="number" min="1" max="5" step="1" inputmode="numeric" placeholder="今の値"></label>
+        <div class="life-rating-field-v1"><span>体調</span><input id="lifeMorningHealthV1" type="hidden"><div class="life-rating-v1" role="group" aria-label="体調 1〜5">${[1,2,3,4,5].map(value=>`<button type="button" data-life-rating-target="lifeMorningHealthV1" data-life-rating-value="${value}" aria-pressed="false">${value}</button>`).join('')}</div></div>
+        <div class="life-rating-field-v1"><span>気分</span><input id="lifeMorningMoodV1" type="hidden"><div class="life-rating-v1" role="group" aria-label="気分 1〜5">${[1,2,3,4,5].map(value=>`<button type="button" data-life-rating-target="lifeMorningMoodV1" data-life-rating-value="${value}" aria-pressed="false">${value}</button>`).join('')}</div></div>
         <details class="life-money-v1">
           <summary><span>Money｜今日の生活安全</span><b id="lifeMoneySummaryV1">未入力</b></summary>
           <div class="life-money-grid-v1">
@@ -581,6 +555,13 @@
         <details class="life-snapshot-v1"><summary>HJへ渡せる事実を確認</summary><pre id="lifeSnapshotPreviewV1"></pre><button id="lifeCopySnapshotV1" type="button">事実スナップショットをコピー</button></details>
       </section>`;
     section.addEventListener('click',event=>{
+      const rating=event.target.closest('[data-life-rating-target]');
+      if(rating){
+        const target=document.getElementById(rating.dataset.lifeRatingTarget);
+        if(target)target.value=rating.dataset.lifeRatingValue;
+        refreshLifeRating(rating.dataset.lifeRatingTarget,rating.dataset.lifeRatingValue);
+        return;
+      }
       const tab=event.target.closest('[data-life-flow-tab]');
       if(tab){activateFlowPane(tab.dataset.lifeFlowTab);return}
       if(event.target.closest('#lifeStartDayV1')){saveMorning();return}
@@ -588,6 +569,14 @@
       if(event.target.closest('#lifeCopySnapshotV1'))copySnapshot();
     });
     return section;
+  }
+
+  function refreshLifeRating(targetId,value){
+    qsa(`[data-life-rating-target="${targetId}"]`).forEach(button=>{
+      const active=button.dataset.lifeRatingValue===String(value||'');
+      button.classList.toggle('active',active);
+      button.setAttribute('aria-pressed',String(active));
+    });
   }
 
   function activateFlowPane(name){
@@ -612,6 +601,8 @@
     writeField('lifeMorningSleepV1',day.checkin?.sleep||'');
     writeField('lifeMorningHealthV1',day.checkin?.health||'');
     writeField('lifeMorningMoodV1',day.checkin?.mood||'');
+    refreshLifeRating('lifeMorningHealthV1',day.checkin?.health||'');
+    refreshLifeRating('lifeMorningMoodV1',day.checkin?.mood||'');
     writeField('lifeProtectV1',flow.protect||'');
     writeField('lifeMorningTaskV1',focusTask({...day,tasks:Array.isArray(day.tasks)?day.tasks:[]}).text);
     writeField('lifeDesiredSceneV1',flow.desiredScene||'');
@@ -652,38 +643,28 @@
       </section>
       <section class="home-focus-v1 card">
         <button type="button" id="homeFocusDoneV1" class="home-focus-check-v1" aria-label="今日やることを完了">✓</button>
-        <div><small>今日やること1つ</small><input id="homeFocusInputV1" maxlength="70" placeholder="今日いちばん大事な1件"><p id="homeFocusDetailV1"></p></div>
+        <div><small>今日やること1つ</small><strong id="homeFocusValueV1">まだありません</strong><p id="homeFocusDetailV1"></p></div>
+        <button type="button" class="home-edit-v1" data-open-page="schedule">編集</button>
       </section>
       <section class="home-glance-v1" aria-label="今日の状態">
         <button type="button" class="glance-card-v1 sleep" data-open-page="record"><span>🌙 睡眠</span><strong id="homeSleepV1">—</strong><small>時間</small></button>
         <button type="button" class="glance-card-v1 health" data-open-page="record"><span>💚 体調</span><strong id="homeHealthV1">—</strong><small>5段階</small></button>
         <button type="button" class="glance-card-v1 mood" data-open-page="record"><span>🙂 気分</span><strong id="homeMoodV1">—</strong><small>5段階</small></button>
       </section>
+      <button type="button" class="home-money-summary-v1 card" data-open-page="record">
+        <span>Money｜今日の生活安全</span><strong id="homeMoneyBudgetV1">確認済み情報はまだありません</strong><small id="homeMoneyDetailV1">必要な時だけ記録できます。</small>
+      </button>
       <section class="home-overview-v1 card">
         <button type="button" class="home-habit-v1" data-open-page="improve"><span>🌱 習慣</span><b id="homeHabitV1">0/14</b><i><em id="homeHabitBarV1"></em></i></button>
-        <label class="home-done-v1"><span>✨ 今日できたこと</span><input id="homeDoneInputV1" maxlength="100" placeholder="完了すると自動で入ります"></label>
-        <button type="button" id="homeDoneSaveV1" class="home-done-save-v1">保存</button>
+        <div class="home-done-v1"><span>✨ 今日できたこと</span><strong id="homeDoneValueV1">まだありません</strong></div>
+        <button type="button" class="home-done-save-v1" data-open-page="record">記録</button>
       </section>`;
 
     section.addEventListener('click',event=>{
       const pageButton=event.target.closest('[data-open-page]');
       if(pageButton){activatePage(pageButton.dataset.openPage,true);return}
       if(event.target.closest('#homeFocusDoneV1')){toggleFocusTask();return}
-      if(event.target.closest('#homeDoneSaveV1')){
-        saveDoneToday(document.getElementById('homeDoneInputV1')?.value||'');
-      }
     });
-
-    const focusInput=qs('#homeFocusInputV1',section);
-    focusInput.addEventListener('change',saveFocusTask);
-    focusInput.addEventListener('keydown',event=>{
-      if(event.key!=='Enter')return;
-      event.preventDefault();
-      saveFocusTask();
-      focusInput.blur();
-    });
-    const doneInput=qs('#homeDoneInputV1',section);
-    doneInput.addEventListener('change',()=>saveDoneToday(doneInput.value));
     return section;
   }
 
@@ -724,15 +705,12 @@
     set('homeStatusTitleV1',status.title);
     set('homeStatusDetailV1',status.detail);
     root.dataset.tone=status.tone;
-    const focusInput=document.getElementById('homeFocusInputV1');
-    if(focusInput){
-      focusInput.dataset.taskIndex=String(focus.index);
-      if(document.activeElement!==focusInput)focusInput.value=focus.text;
-    }
+    set('homeFocusValueV1',focus.text||'まだありません');
     const focusButton=document.getElementById('homeFocusDoneV1');
     if(focusButton){
       focusButton.classList.toggle('done',focus.done);
       focusButton.setAttribute('aria-pressed',String(focus.done));
+      focusButton.disabled=!focus.text;
     }
     set('homeFocusDetailV1',focusDetail(day));
     set('homeSleepV1',day.checkin.sleep?`${day.checkin.sleep}h`:'—');
@@ -741,8 +719,11 @@
     set('homeHabitV1',`${habit.done}/${habit.total}`);
     const habitBar=document.getElementById('homeHabitBarV1');
     if(habitBar)habitBar.style.width=`${habit.pct}%`;
-    const doneInput=document.getElementById('homeDoneInputV1');
-    if(doneInput&&document.activeElement!==doneInput)doneInput.value=day.doneToday;
+    set('homeDoneValueV1',day.doneToday||'まだありません');
+    const money=readMoneySafety(readJson(DATA_KEY,{days:{}}));
+    const danger={none:'危険なし',watch:'要確認',urgent:'急ぎで確認'}[money.danger];
+    set('homeMoneyBudgetV1',money.todayBudget?`今日使える目安 ${money.todayBudget}｜${danger}`:money.nextPayment?`次の支払い ${money.nextPayment}`:'確認済み情報はまだありません');
+    set('homeMoneyDetailV1',money.nextPayment&&money.todayBudget?`次の支払い ${money.nextPayment}`:'必要な時だけ記録できます。');
   }
 
   function queueRefresh(){
@@ -778,19 +759,26 @@
     });
     top.insertAdjacentElement('afterend',host);
 
-    pages.home.append(buildLifeCalendar(),buildDailyFlow(),week,buildDashboard());
+    pages.home.append(buildLifeCalendar(),buildDashboard(),week);
     [sunrise,scheduleCard,taskCard,planCard].filter(Boolean).forEach(card=>pages.schedule.appendChild(card));
-    if(stateCard)pages.record.appendChild(stateCard);
+    pages.record.appendChild(buildDailyFlow());
+    if(stateCard){
+      const details=document.createElement('details');
+      details.className='life-legacy-record-v1 card';
+      details.innerHTML='<summary>以前の状態入力を開く</summary>';
+      details.appendChild(stateCard);
+      pages.record.appendChild(details);
+    }
     [routineCard,yosCard].filter(Boolean).forEach(card=>pages.improve.appendChild(card));
     layout.remove();
 
     renderNav(nav);
-    const saved=localStorage.getItem(PAGE_KEY);
-    activatePage(PAGE_META[saved]?saved:'home',false);
+    activatePage('home',false);
 
     const observer=new MutationObserver(queueRefresh);
     [scheduleCard,taskCard,stateCard,routineCard].filter(Boolean).forEach(node=>observer.observe(node,{subtree:true,childList:true,characterData:true,attributes:true}));
     window.addEventListener('storage',queueRefresh);
+    window.addEventListener('yos-life-record-saved',()=>activatePage('home',true));
     document.addEventListener('visibilitychange',()=>{if(!document.hidden)queueRefresh()});
     setInterval(queueRefresh,30000);
     queueRefresh();
