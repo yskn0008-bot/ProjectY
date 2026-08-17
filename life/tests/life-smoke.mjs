@@ -83,7 +83,15 @@ try {
       rentWeekend: titles('2026-10-10'),
       rentWeekday: titles('2026-10-12'),
       waterSeptember: titles('2026-09-27'),
-      waterOctober: titles('2026-10-27')
+      waterOctober: titles('2026-10-27'),
+      beforeDeadline: window.__yosLifeCalendarV1.displayFor(
+        window.__yosLifeCalendarV1.itemsForDate(data,'2026-08-17')[0],
+        new Date('2026-08-16T22:59:00Z')
+      ),
+      afterDeadline: window.__yosLifeCalendarV1.displayFor(
+        window.__yosLifeCalendarV1.itemsForDate(data,'2026-08-17')[0],
+        new Date('2026-08-16T23:01:00Z')
+      )
     };
   });
   assert.equal(calendarContract.count, 12, 'known schedules were not seeded in the existing Life store');
@@ -92,6 +100,8 @@ try {
   assert.ok(calendarContract.rentWeekday.includes('家賃収入'));
   assert.ok(calendarContract.waterSeptember.includes('水道'));
   assert.equal(calendarContract.waterOctober.includes('水道'), false);
+  assert.deepEqual(calendarContract.beforeDeadline, {past:false,label:'朝8時まで'});
+  assert.deepEqual(calendarContract.afterDeadline, {past:true,label:'朝8時を過ぎました'});
 
   await page.locator('#lifeWorkModeV1').selectOption('work');
   await page.locator('#lifeMorningSleepV1').fill('7');
@@ -162,8 +172,8 @@ try {
   await page.evaluate(() => navigator.serviceWorker.ready);
   const cacheStatus = await page.evaluate(async () => {
     const paths = [
-      './', './index.html', './manifest.webmanifest', './yos-suite-v3.js?v=6',
-      './home-v1.js?v=4', './home-v1.css?v=2', './home-priority-v1.css?v=3'
+      './', './index.html', './manifest.webmanifest', './yos-suite-v3.js?v=7',
+      './home-v1.js?v=5', './home-v1.css?v=2', './home-priority-v1.css?v=3'
     ];
     const entries = await Promise.all(paths.map(async path => [
       path,

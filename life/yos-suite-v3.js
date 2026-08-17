@@ -19,7 +19,7 @@
   if(!document.getElementById('lifeHomeV1Script')){
     const script=document.createElement('script');
     script.id='lifeHomeV1Script';
-    script.src='./home-v1.js?v=4';
+    script.src='./home-v1.js?v=5';
     document.body.appendChild(script);
   }
 })();

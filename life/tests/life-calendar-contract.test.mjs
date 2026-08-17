@@ -61,4 +61,22 @@ assert.equal(items('2026-08-26').some(item => Object.hasOwn(item,'amount')), fal
 assert.equal(source.includes('支払い済み:true'), false, 'payment completion must not be inferred');
 assert.doesNotMatch(source, /localStorage\.setItem\(['"]yos-life-calendar/, 'a second calendar storage key must not be created');
 
+const mondayGarbage = items('2026-08-17')[0];
+assert.deepEqual(
+  {...api.displayFor(mondayGarbage,new Date('2026-08-16T22:59:00Z'))},
+  {past:false,label:'朝8時まで'},
+  'a deadline must remain upcoming at 07:59 JST'
+);
+assert.deepEqual(
+  {...api.displayFor(mondayGarbage,new Date('2026-08-16T23:01:00Z'))},
+  {past:true,label:'朝8時を過ぎました'},
+  'an elapsed garbage deadline must not look actionable'
+);
+const electricity = items('2026-08-26').find(item => item.title === '電気');
+assert.deepEqual(
+  {...api.displayFor(electricity,new Date('2026-08-26T14:59:00Z'))},
+  {past:false,label:'支払日'},
+  'a payment without a confirmed time must not be marked elapsed'
+);
+
 console.log('Life calendar contract: PASS');

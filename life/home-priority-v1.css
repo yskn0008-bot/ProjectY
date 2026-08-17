@@ -36,6 +36,9 @@
 .life-calendar-row-v1 div small{color:#8a929c;font-size:10px;font-weight:800}
 .life-calendar-row-v1 strong{overflow:hidden;color:#34404d;font-size:14px;line-height:1.35;text-overflow:ellipsis;white-space:nowrap}
 .life-calendar-row-v1>span:last-child{color:#707985;font-size:11px;font-weight:900;white-space:nowrap}
+.life-calendar-row-v1.past .life-calendar-marker-v1{background:#b6bbc1}
+.life-calendar-row-v1.past strong{color:#838b95}
+.life-calendar-row-v1.past>span:last-child{color:#b06b61}
 .life-calendar-empty-v1{margin:3px 0;color:#939aa3;font-size:12px;line-height:1.45}
 .life-calendar-details-v1{border-top:1px solid #eee7dd}
 .life-calendar-details-v1 summary{min-height:42px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#d35e50;font-size:13px;font-weight:1000;list-style:none}

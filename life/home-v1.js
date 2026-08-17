@@ -33,7 +33,8 @@
 
   const qs=(selector,root=document)=>root.querySelector(selector);
   const qsa=(selector,root=document)=>[...root.querySelectorAll(selector)];
-  const calendarDate=()=>new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Tokyo'}).format(new Date());
+  const calendarDateFor=value=>new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Tokyo'}).format(value);
+  const calendarDate=()=>calendarDateFor(new Date());
   const readJson=(key,fallback)=>{try{return JSON.parse(localStorage.getItem(key)||'null')||fallback}catch{return fallback}};
   const clean=(value,max=400)=>String(value||'').trim().slice(0,max);
   const numberOrNull=(value)=>value===''||value==null?null:Number.isFinite(Number(value))?Number(value):null;
@@ -441,9 +442,34 @@
     return new Intl.DateTimeFormat('ja-JP',{month:'numeric',day:'numeric',weekday:'short',timeZone:'Asia/Tokyo'}).format(value);
   }
 
+  function calendarItemDisplay(item,now=new Date()){
+    const label=item.timeLabel||'';
+    const time=/^(\d{2}):(\d{2})$/.exec(item.time||'');
+    if(!time)return{past:false,label};
+    const currentDate=calendarDateFor(now);
+    let past=item.date<currentDate;
+    if(item.date===currentDate){
+      const parts=Object.fromEntries(new Intl.DateTimeFormat('ja-JP',{
+        hour:'2-digit',minute:'2-digit',hourCycle:'h23',timeZone:'Asia/Tokyo'
+      }).formatToParts(now).filter(part=>part.type!=='literal').map(part=>[part.type,part.value]));
+      const currentMinutes=Number(parts.hour)*60+Number(parts.minute);
+      const deadlineMinutes=Number(time[1])*60+Number(time[2]);
+      past=currentMinutes>deadlineMinutes;
+    }
+    return{
+      past,
+      label:past&&label.endsWith('まで')?`${label.slice(0,-2)}を過ぎました`:label
+    };
+  }
+
   function calendarRow(item,showDate=false){
     const row=document.createElement('div');
     row.className=`life-calendar-row-v1 ${item.category}`;
+    const display=calendarItemDisplay(item);
+    if(display.past){
+      row.classList.add('past');
+      row.dataset.status='past';
+    }
     const marker=document.createElement('span');
     marker.className='life-calendar-marker-v1';
     marker.setAttribute('aria-hidden','true');
@@ -457,7 +483,7 @@
     title.textContent=item.title;
     copy.appendChild(title);
     const meta=document.createElement('span');
-    meta.textContent=item.timeLabel||'';
+    meta.textContent=display.label;
     row.append(marker,copy,meta);
     return row;
   }
@@ -776,7 +802,8 @@
   window.__yosLifeCalendarV1={
     defaults:()=>DEFAULT_LIFE_CALENDAR.map(item=>({...item,rule:{...item.rule}})),
     itemsForDate:(data,date)=>lifeCalendarItemsForDate(data,date),
-    upcoming:(data,date,fromDay,toDay)=>upcomingCalendarItems(data,date,fromDay,toDay)
+    upcoming:(data,date,fromDay,toDay)=>upcomingCalendarItems(data,date,fromDay,toDay),
+    displayFor:(item,now)=>calendarItemDisplay(item,now)
   };
   const timer=setInterval(()=>{if(install())clearInterval(timer)},40);
   setTimeout(()=>clearInterval(timer),10000);
