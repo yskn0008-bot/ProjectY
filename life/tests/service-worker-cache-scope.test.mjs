@@ -20,6 +20,7 @@ const context = {
       'yos-life-home-v4',
       'yos-life-home-v5',
       'yos-life-home-v6-daily-flow',
+      'yos-life-home-v7-life-calendar',
       'yos-taxi-v138',
       'yos-nav-v106',
       'yos-home-v1',
@@ -48,7 +49,7 @@ let activation;
 listeners.activate({ waitUntil: promise => { activation = Promise.resolve(promise); } });
 await activation;
 
-assert.deepEqual(deleted, ['yos-life-home-v2','yos-life-home-v4','yos-life-home-v5','yos-life-home-v6-daily-flow'], 'only stale Life caches may be deleted');
+assert.deepEqual(deleted, ['yos-life-home-v2','yos-life-home-v4','yos-life-home-v5','yos-life-home-v6-daily-flow','yos-life-home-v7-life-calendar'], 'only stale Life caches may be deleted');
 assert.equal(claimed, true, 'Life service worker must claim its clients after cleanup');
 assert.match(source, /key\.startsWith\(LIFE_CACHE_PREFIX\)/, 'cleanup must be restricted by Life cache prefix');
 assert.match(source, /home-priority-v1\.css\?v=3/, 'priority home styles must be available offline');

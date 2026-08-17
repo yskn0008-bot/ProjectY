@@ -1,5 +1,5 @@
 'use strict';
-const CACHE='yos-life-home-v7-life-calendar';
+const CACHE='yos-life-home-v8-first-open';
 const LIFE_CACHE_PREFIX='yos-life-';
 const STATIC=[
   './',

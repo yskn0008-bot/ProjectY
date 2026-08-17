@@ -55,9 +55,9 @@ const clickAndWaitForReload = async locator => {
 
 try {
   await page.goto(baseURL, { waitUntil: 'networkidle' });
-  await page.evaluate(() => navigator.serviceWorker.ready);
-  await page.reload({ waitUntil: 'networkidle' });
   await waitForDailyFlow();
+  assert.equal(await page.locator('#lifeCalendarV1').isVisible(), true, 'Life calendar is missing on the first open');
+  await page.evaluate(() => navigator.serviceWorker.ready);
 
   const layout = await page.evaluate(() => ({
     scrollWidth: document.documentElement.scrollWidth,

@@ -25,7 +25,7 @@ test('Money remains a compact safety view without automatic advice', async () =>
 });
 
 test('Life calendar uses progressive disclosure and the existing store', async () => {
-  const home = await read('home-v1.js');
+  const [home,page] = await Promise.all([read('home-v1.js'),read('index.html')]);
   assert.match(home, /lifeCalendar/);
   assert.match(home, /<h3 id="lifeCalendarTodayLabelV1">今日<\/h3>/);
   assert.match(home, /<h3 id="lifeCalendarTomorrowLabelV1">明日<\/h3>/);
@@ -34,6 +34,7 @@ test('Life calendar uses progressive disclosure and the existing store', async (
   assert.match(home, /<summary>予定を見る<\/summary>/);
   assert.match(home, /金額と支払い済み／未払いは、確認できる情報がある時だけ表示します/);
   assert.doesNotMatch(home, /yos-life-calendar-v1/);
+  assert.match(page, /<script src="\.\/yos-suite-v3\.js\?v=6"><\/script>\s*<\/body>/, 'first open must load the Life home without a service-worker reload');
 });
 
 test('HJ snapshot is facts-only and user-controlled', async () => {
