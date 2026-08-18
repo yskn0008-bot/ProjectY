@@ -1,0 +1,12 @@
+.hero-actions{position:relative;z-index:1;display:grid;grid-template-columns:1.2fr 1fr;gap:8px;margin-top:15px}
+.topbar .status{display:grid;justify-items:end;gap:4px}
+.topbar .status button{min-height:28px;padding:0 9px;border:1px solid var(--line);border-radius:10px;background:rgba(255,255,255,.04);color:var(--muted);font-size:9px;font-weight:900}
+.preview-actions{margin-top:10px}
+dialog{width:min(calc(100% - 24px),560px);border:1px solid var(--line);border-radius:25px;padding:0;background:#121a2b;color:var(--text);box-shadow:0 28px 90px rgba(0,0,0,.58)}
+dialog::backdrop{background:rgba(3,6,13,.72);backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px)}
+.dialog-body{display:grid;gap:12px;padding:19px}
+.dialog-body h2{margin:0;font-size:23px}
+.dialog-body>p:not(.kicker){margin:0;color:var(--muted);font-size:11px;line-height:1.65}
+.dialog-actions{display:grid;grid-template-columns:.8fr 1.5fr;gap:8px;margin-top:2px}
+@media(max-width:390px){.hero-actions,.dialog-actions{grid-template-columns:1fr}}
+
