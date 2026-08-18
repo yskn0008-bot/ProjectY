@@ -83,6 +83,7 @@ try {
   assert.equal(await visible('#storyHistorySection'), true, 'これまでの物語を閲覧できない');
   assert.equal(await page.locator('#storyEditor').evaluate((node) => node.open), false, 'これまでを見る操作で物語作成フォームを開いた');
   assert.equal(await page.locator('#storyPanel input:visible, #storyPanel textarea:visible, #storyPanel select:visible').count(), 0, 'これまでを見る画面に入力欄が露出している');
+  await page.screenshot({ path: `test-results/hj-past-read-first-${browserName}.png`, fullPage: true });
 
   await page.locator('#editProfile').click();
   assert.equal(await page.locator('#onboardingDialog').evaluate((node) => node.open), true, '設定を任意で開けない');
@@ -119,6 +120,7 @@ try {
   assert.equal(await page.locator('#currentLocationEditor').evaluate((node) => node.open), false, '現在地を見る操作で詳細編集を開いた');
   assert.equal(await page.locator('#journeysPanel input:visible, #journeysPanel textarea:visible, #journeysPanel select:visible').count(), 0, '現在地を見る画面に入力欄が露出している');
   assert.match(await page.locator('#currentStageSummary').textContent(), /冒険への誘い/, '現在地を読む表示が保存済みデータを反映しない');
+  await page.screenshot({ path: `test-results/hj-current-read-first-${browserName}.png`, fullPage: true });
   await page.locator('#currentLocationEditor > summary').click();
   assert.equal(await visible('#mapCompass'), true, '明示操作で現在地の詳細編集を開けない');
   await page.locator('#mapCompass').fill('生活を安全に立て直す');
