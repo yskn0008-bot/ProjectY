@@ -9,10 +9,6 @@ public struct SaveYOSCaptureIntent: AppIntent {
     @Parameter(title: "残す内容")
     public var rawText: String
 
-    public static var parameterSummary: some ParameterSummary {
-        Summary("\(.$rawText)をYOSに残す")
-    }
-
     public init() {}
 
     public init(rawText: String) {
