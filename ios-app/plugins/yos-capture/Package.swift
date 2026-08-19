@@ -2,10 +2,10 @@
 import PackageDescription
 
 let package = Package(
-    name: "YOSCapture",
+    name: "YosCapture",
     platforms: [.iOS(.v16)],
     products: [
-        .library(name: "YOSCapture", targets: ["YOSCapturePlugin"])
+        .library(name: "YosCapture", targets: ["YOSCapturePlugin"])
     ],
     dependencies: [
         .package(url: "https://github.com/ionic-team/capacitor-swift-pm.git", from: "8.0.0")
