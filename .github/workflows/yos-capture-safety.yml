@@ -1,0 +1,60 @@
+name: YOS Capture Safety
+
+on:
+  pull_request:
+    paths:
+      - 'ios-app/**'
+      - '.github/workflows/yos-capture-safety.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ios-app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: JavaScript syntax
+        run: |
+          node --check shell/capture-core.js
+          node --check shell/capture.js
+      - name: Capture and BRAVIA regression
+        run: npm test
+      - name: Prepare bundled web assets
+        run: npm run prepare:web
+      - name: Generated asset contract
+        run: |
+          test -f www/capture.html
+          test -f www/capture-core.js
+          test -f www/bravia.html
+
+  ios-build:
+    runs-on: macos-latest
+    defaults:
+      run:
+        working-directory: ios-app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install dependencies
+        run: npm install --ignore-scripts
+      - name: Generate Capacitor iOS project with SPM
+        run: npm run native:init
+      - name: Build iOS simulator candidate
+        run: >-
+          xcodebuild
+          -project ios/App/App.xcodeproj
+          -scheme App
+          -configuration Debug
+          -destination 'generic/platform=iOS Simulator'
+          CODE_SIGNING_ALLOWED=NO
+          build

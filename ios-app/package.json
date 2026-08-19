@@ -6,12 +6,13 @@
   "scripts": {
     "prepare:web": "node ./scripts/prepare-web.mjs",
     "test": "node --test tests/*.test.mjs",
-    "native:init": "npm run prepare:web && npx cap add ios",
+    "native:init": "npm run prepare:web && npx cap add ios --packagemanager SPM",
     "native:sync": "npm run prepare:web && npx cap sync ios",
     "native:open": "npx cap open ios"
   },
   "dependencies": {
-    "@capacitor/core": "^8.0.0"
+    "@capacitor/core": "^8.0.0",
+    "@yos/capture": "file:plugins/yos-capture"
   },
   "devDependencies": {
     "@capacitor/cli": "^8.0.0",
