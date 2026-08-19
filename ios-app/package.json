@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "prepare:web": "node ./scripts/prepare-web.mjs",
+    "test": "node --test tests/*.test.mjs",
     "native:init": "npm run prepare:web && npx cap add ios",
     "native:sync": "npm run prepare:web && npx cap sync ios",
     "native:open": "npx cap open ios"
