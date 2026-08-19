@@ -6,7 +6,7 @@ Pod::Spec.new do |s|
   s.author = { 'ProjectY' => 'projecty@invalid.local' }
   s.source = { :path => '.' }
   s.source_files = 'ios/Sources/YOSCapturePlugin/**/*.{swift,h,m,mm,cpp}'
-  s.ios.deployment_target = '16.0'
+  s.ios.deployment_target = '15.0'
   s.swift_version = '5.9'
   s.dependency 'Capacitor'
 end
