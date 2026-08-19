@@ -5,11 +5,11 @@ import Foundation
 public final class YOSCapturePlugin: CAPPlugin, CAPBridgedPlugin {
     public let identifier = "YOSCapturePlugin"
     public let jsName = "YOSCapture"
-    public let pluginMethods = [
-        CAPPluginMethod(name: "capture", returnType: CAPPluginReturnPromise),
-        CAPPluginMethod(name: "list", returnType: CAPPluginReturnPromise),
-        CAPPluginMethod(name: "applyCalendar", returnType: CAPPluginReturnPromise),
-        CAPPluginMethod(name: "applyReminder", returnType: CAPPluginReturnPromise)
+    public let pluginMethods: [CAPPluginMethod] = [
+        CAPPluginMethod(name: "capture", returnType: CAPPluginReturnPromise)!,
+        CAPPluginMethod(name: "list", returnType: CAPPluginReturnPromise)!,
+        CAPPluginMethod(name: "applyCalendar", returnType: CAPPluginReturnPromise)!,
+        CAPPluginMethod(name: "applyReminder", returnType: CAPPluginReturnPromise)!
     ]
 
     private lazy var repositoryResult = Result { try YOSCaptureRepository() }
