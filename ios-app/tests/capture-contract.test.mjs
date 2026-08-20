@@ -46,6 +46,14 @@ test('EventKit application requires permission and idempotent marker', async () 
   assert.match(source, /needsReview/);
 });
 
+test('App Group activation keeps the previous Application Support raw store', async () => {
+  const source = await read('../plugins/yos-capture/ios/Sources/YOSCapturePlugin/YOSCaptureRepository.swift');
+  assert.match(source, /migrationSourceURL/);
+  assert.match(source, /migrateRecords/);
+  assert.match(source, /knownIDs\.insert\(record\.captureID\)\.inserted/);
+  assert.doesNotMatch(source, /removeItem\(at: source/);
+});
+
 test('Action Button path is a silent App Intent and package is linked locally', async () => {
   const [intent, packageJson] = await Promise.all([
     read('../plugins/yos-capture/ios/Sources/YOSCapturePlugin/YOSCaptureAppIntents.swift'),

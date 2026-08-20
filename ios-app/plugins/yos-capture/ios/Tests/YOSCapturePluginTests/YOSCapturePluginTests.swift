@@ -15,6 +15,30 @@ final class YOSCapturePluginTests: XCTestCase {
         XCTAssertEqual(restored.status, .captured)
     }
 
+    func testAppGroupActivationMigratesLegacyRawWithoutDeletingSource() async throws {
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        let legacyDirectory = root.appendingPathComponent("legacy")
+        let groupDirectory = root.appendingPathComponent("group")
+        defer { try? FileManager.default.removeItem(at: root) }
+
+        let legacy = try YOSCaptureRepository(baseURL: legacyDirectory)
+        let raw = YOSRawCapture(rawText: "消さない原文", inputMode: .text)
+        try await legacy.append(raw)
+
+        let migrated = try YOSCaptureRepository(
+            baseURL: groupDirectory,
+            migrationSourceURL: legacyDirectory
+        )
+        XCTAssertEqual(try await migrated.record(captureID: raw.captureID).rawText, raw.rawText)
+
+        let reopened = try YOSCaptureRepository(
+            baseURL: groupDirectory,
+            migrationSourceURL: legacyDirectory
+        )
+        XCTAssertEqual(try await reopened.recent().count, 1)
+        XCTAssertEqual(try await legacy.record(captureID: raw.captureID).rawText, raw.rawText)
+    }
+
     func testClassifierKeepsRawSeparate() {
         let raw = YOSRawCapture(rawText: "手洗い石鹸", inputMode: .voice)
         let result = YOSCaptureClassifier().classify(raw)

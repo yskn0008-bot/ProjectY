@@ -20,7 +20,7 @@ Apple’s public App Intents and App Shortcuts APIs are the only voice shortcut 
 4. Classification failure returns the already-durable raw record.
 5. AI and network access are not part of the save transaction.
 
-The repository prefers App Group `group.jp.yos.onlysystem`. Until the entitlement is enabled in the generated Xcode target, the app and its bundled App Intent use Application Support. A Widget/Control extension must not be shipped until the App Group entitlement is confirmed on every target.
+The repository prefers App Group `group.jp.yos.onlysystem`. `native:init` / `native:sync` configure the generated app target entitlement without embedding signing credentials. If an older build used Application Support, its raw records are merged into the App Group store by `captureID` and the source file is retained. A Widget/Control extension must not be shipped until the App Group entitlement is confirmed on every target.
 
 ## Classification and external writes
 
@@ -32,11 +32,13 @@ The repository prefers App Group `group.jp.yos.onlysystem`. Until the entitlemen
 - `captureID`, `applyAttemptID`, `appliedRecordID`, and `YOS-CAPTURE-ID:` prevent blind duplicate creation and support recovery.
 - External-write failure leaves the raw record and returns it to `needs_review`.
 
-Before EventKit application is enabled in a signed target, add these usage descriptions:
+`native:init` / `native:sync` add these usage descriptions to the generated app target:
 
 - `NSCalendarsFullAccessUsageDescription`
 - `NSRemindersFullAccessUsageDescription`
 - `NSCalendarsUsageDescription` and `NSRemindersUsageDescription` while iOS 16 remains supported
+
+The code does not create Apple Developer capabilities or provisioning profiles. Before a signed device build, enable `group.jp.yos.onlysystem` for the App ID and ensure the selected provisioning profile contains the same App Group. Those external signing steps remain required and are never inferred from local credentials.
 
 ## BRAVIA conflict resolution
 
