@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-08-22T00:51:39+09:00",
+  "updated_at": "2026-08-22T01:40:51+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -199,7 +199,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-08-22T00:51:39+09:00",
+      "last_update": "2026-08-22T01:40:51+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -280,7 +280,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-08-22T00:51:39+09:00",
+      "last_update": "2026-08-22T01:40:51+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -303,7 +303,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-08-22T00:51:39+09:00",
+      "last_update": "2026-08-22T01:40:51+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -385,5 +385,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "48e8e8cf10fa3dde51d7dad20a8aa55b4dd0cdd03bb9e9dada3aa6837ff19761"
+  "github_snapshot_hash": "5f805827767c1606ea4471b64253a3a3812b40e6abaefc76f2bb03d76dc3ca1f"
 }
