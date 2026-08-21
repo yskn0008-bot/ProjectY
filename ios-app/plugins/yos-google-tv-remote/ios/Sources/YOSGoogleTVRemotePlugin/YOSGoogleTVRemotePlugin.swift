@@ -376,7 +376,9 @@ private final class GoogleTVIdentityStore {
     }
 
     private func createIdentity() throws {
-        if (try loadPrivateKey()) != nil || (try loadCertificate()) != nil {
+        let existingPrivateKey = try loadPrivateKey()
+        let existingCertificate = try loadCertificate()
+        if existingPrivateKey != nil || existingCertificate != nil {
             try removeIdentityUnlocked()
         }
         let attributes: [String: Any] = [
