@@ -16,23 +16,10 @@ import {
 
 const $ = selector => document.querySelector(selector);
 const labels = {
-  power: '⏻ Power',
-  input: 'Input',
-  quick: 'Quick Settings',
-  home: 'Home',
-  back: 'Back',
-  up: '▲',
-  left: '◀',
-  confirm: 'OK',
-  right: '▶',
-  down: '▼',
-  volumeDown: 'Vol −',
-  mute: 'Mute',
-  volumeUp: 'Vol ＋',
-  channelDown: 'Ch −',
-  channelUp: 'Ch ＋',
-  play: 'Play',
-  pause: 'Pause'
+  power: '⏻ Power', input: 'Input', quick: 'Quick Settings', home: 'Home', back: 'Back',
+  up: '▲', left: '◀', confirm: 'OK', right: '▶', down: '▼',
+  volumeDown: 'Vol −', mute: 'Mute', volumeUp: 'Vol ＋',
+  channelDown: 'Ch −', channelUp: 'Ch ＋', play: 'Play', pause: 'Pause'
 };
 
 const status = $('#status');
@@ -95,7 +82,6 @@ function moveBefore(action, targetButton) {
 function render() {
   controls.classList.toggle('editing', editing);
   controls.replaceChildren();
-
   for (const action of layout.order) {
     if (layout.hidden.includes(action)) continue;
     const button = document.createElement('button');
@@ -103,7 +89,6 @@ function render() {
     button.dataset.action = action;
     button.textContent = labels[action];
     button.disabled = !editing && !commandFor(action);
-
     button.addEventListener('click', () => {
       if (!editing) return send(action);
       if (movedDuringDrag) return;
@@ -134,7 +119,6 @@ function render() {
     });
     controls.append(button);
   }
-
   $('#restore').hidden = !editing || layout.hidden.length === 0;
   $('#reset').hidden = !editing;
   $('#edit-help').hidden = !editing;
@@ -145,13 +129,11 @@ $('#edit').addEventListener('click', () => {
   $('#edit').textContent = editing ? '編集完了' : '配置を編集';
   render();
 });
-
 $('#restore').addEventListener('click', () => {
   layout.hidden = [];
   layout = saveLayout(localStorage, layout);
   render();
 });
-
 $('#reset').addEventListener('click', () => {
   layout = resetLayout(localStorage);
   render();
@@ -196,15 +178,10 @@ pad.addEventListener('pointerup', async event => {
   if (mode.value === 'tap') {
     return send(tapAction(event.offsetX, event.offsetY, pad.clientWidth, pad.clientHeight));
   }
-  const plan = cursorPlan(
-    event.offsetX - started.x,
-    event.offsetY - started.y,
-    performance.now() - started.time
-  );
+  const plan = cursorPlan(event.offsetX - started.x, event.offsetY - started.y, performance.now() - started.time);
   if (!plan) return send('confirm');
   for (let index = 0; index < plan.repeats; index += 1) await send(plan.action);
 });
-
 pad.addEventListener('keydown', event => {
   const action = { ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right', Enter: 'confirm' }[event.key];
   if (!action) return;
@@ -212,13 +189,48 @@ pad.addEventListener('keydown', event => {
   send(action);
 });
 
-$('#keyboard').addEventListener('click', async () => {
-  report(
-    googleTV.available
-      ? 'Google TV文字入力adapterは接続済みです。'
-      : 'Google TV文字入力は現在利用できません。',
-    !googleTV.available
-  );
+$('#keyboard').addEventListener('click', () => {
+  if (!googleTV.available) {
+    report('Google TV文字入力はiOS native版でのみ利用できます。', true);
+    return;
+  }
+  $('#google-text').focus();
+  report('iPhoneキーボードから入力できます。');
+});
+
+$('#pair-start').addEventListener('click', async () => {
+  try {
+    await googleTV.startPairing($('#host').value);
+    $('#pair-code-row').hidden = false;
+    $('#pair-code').focus();
+    report('テレビに表示された6桁コードを入力してください。');
+  } catch (error) {
+    report(error.message, true);
+  }
+});
+
+$('#pair-finish').addEventListener('click', async () => {
+  const code = $('#pair-code').value;
+  $('#pair-code').value = '';
+  try {
+    await googleTV.finishPairing(code);
+    $('#pair-code-row').hidden = true;
+    report('Google TVペアリング完了。');
+  } catch (error) {
+    report(error.message, true);
+  }
+});
+
+$('#google-send').addEventListener('click', async () => {
+  const text = $('#google-text').value;
+  try {
+    report('Google TVへ接続中…');
+    await googleTV.sendText($('#host').value, text);
+    $('#google-text').value = '';
+    report('文字を送信しました。');
+  } catch (error) {
+    report(error.message, true);
+  }
 });
 
 render();

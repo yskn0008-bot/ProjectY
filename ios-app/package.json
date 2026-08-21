@@ -14,7 +14,8 @@
   },
   "dependencies": {
     "@capacitor/core": "^8.0.0",
-    "@yos/secure-credentials": "file:plugins/yos-secure-credentials"
+    "@yos/secure-credentials": "file:plugins/yos-secure-credentials",
+    "@yos/google-tv-remote": "file:plugins/yos-google-tv-remote"
   },
   "devDependencies": {
     "@capacitor/cli": "^8.0.0",

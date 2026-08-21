@@ -2,24 +2,11 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import {
-  normalizeHost,
-  parseRemoteControllerInfo,
-  resolveCommands,
-  quickSettingsCandidates,
-  irccEnvelope,
-  cursorPlan,
-  tapAction,
-  SonyRemote,
-  GoogleTvTextAdapter,
-  defaultButtonOrder
+  normalizeHost, parseRemoteControllerInfo, resolveCommands, quickSettingsCandidates,
+  irccEnvelope, cursorPlan, tapAction, SonyRemote, GoogleTvTextAdapter, defaultButtonOrder
 } from '../shell/bravia-core.js';
 import {
-  layoutKey,
-  loadLayout,
-  saveLayout,
-  resetLayout,
-  loadCursorMode,
-  saveCursorMode
+  layoutKey, loadLayout, saveLayout, resetLayout, loadCursorMode, saveCursorMode
 } from '../shell/bravia-preferences.js';
 
 function storage() {
@@ -37,9 +24,7 @@ test('host validation accepts dynamic hosts and rejects paths', () => {
 });
 
 test('Sony response maps only runtime commands', () => {
-  const map = parseRemoteControllerInfo({
-    result: [{}, [{ name: 'Home', value: 'runtime-code' }, { name: 'ActionMenu', value: 'candidate' }]]
-  });
+  const map = parseRemoteControllerInfo({ result: [{}, [{ name: 'Home', value: 'runtime-code' }, { name: 'ActionMenu', value: 'candidate' }]] });
   assert.equal(resolveCommands(map).home.code, 'runtime-code');
   assert.equal(resolveCommands(map).mute, null);
   assert.deepEqual(quickSettingsCandidates(map), [{ name: 'ActionMenu', code: 'candidate' }]);
@@ -61,11 +46,7 @@ test('tap maps center and four directions', () => {
 });
 
 test('authentication failure does not expose credentials', async () => {
-  const client = new SonyRemote(
-    'tv.local',
-    { get: async () => 'runtime-value' },
-    async () => ({ ok: false, status: 403 })
-  );
+  const client = new SonyRemote('tv.local', { get: async () => 'runtime-value' }, async () => ({ ok: false, status: 403 }));
   await assert.rejects(client.discover(), /PSK認証/);
 });
 
@@ -94,34 +75,57 @@ test('cursor mode persists and invalid modes fail closed', () => {
   assert.throws(() => saveCursorMode(local, 'mouse'));
 });
 
-test('Google TV text delegates only to a registered native adapter', async () => {
+test('Google TV text adapter requires pairing and text native methods', async () => {
   const missing = new GoogleTvTextAdapter(null);
   assert.equal(missing.available, false);
-  await assert.rejects(missing.sendText('hello'), /利用できません/);
+  await assert.rejects(missing.sendText('tv.local', 'hello'), /native版/);
+
   const calls = [];
-  const available = new GoogleTvTextAdapter({ sendText: value => calls.push(value) });
-  await available.sendText('hello');
-  assert.deepEqual(calls, [{ text: 'hello' }]);
+  const available = new GoogleTvTextAdapter({
+    startPairing: value => { calls.push(['start', value]); return { state: 'waitingCode' }; },
+    finishPairing: value => { calls.push(['finish', value]); return { state: 'paired' }; },
+    sendText: value => { calls.push(['text', value]); return { sent: true }; }
+  });
+  assert.equal(available.available, true);
+  await available.startPairing('tv.local');
+  await available.finishPairing('a1b2c3');
+  await available.sendText('tv.local', 'hello');
+  assert.deepEqual(calls, [
+    ['start', { host: 'tv.local' }],
+    ['finish', { code: 'A1B2C3' }],
+    ['text', { host: 'tv.local', text: 'hello' }]
+  ]);
 });
 
-test('web layer never persists BRAVIA credentials', async () => {
+test('web layer never persists BRAVIA or Google TV credentials', async () => {
   const sources = await Promise.all([
     readFile(new URL('../shell/bravia.js', import.meta.url), 'utf8'),
     readFile(new URL('../shell/bravia-preferences.js', import.meta.url), 'utf8')
   ]);
-  assert.doesNotMatch(sources.join('\n'), /localStorage\.(setItem|getItem)\([^\n]*(psk|secret|credential)/i);
-  assert.doesNotMatch(sources.join('\n'), /console\.(log|debug)/);
+  const source = sources.join('\n');
+  assert.doesNotMatch(source, /localStorage\.(setItem|getItem)\([^\n]*(psk|secret|credential|pairing|code)/i);
+  assert.doesNotMatch(source, /console\.(log|debug)/);
 });
 
-test('local Capacitor plugin is the only Keychain credential boundary', async () => {
-  const [appPackage, pluginPackage, swift] = await Promise.all([
+test('native credential and Google TV plugins stay inside secure boundaries', async () => {
+  const [appPackage, securePackage, secureSwift, googlePackage, googleManifest, googleSwift] = await Promise.all([
     readFile(new URL('../package.json', import.meta.url), 'utf8'),
     readFile(new URL('../plugins/yos-secure-credentials/package.json', import.meta.url), 'utf8'),
-    readFile(new URL('../plugins/yos-secure-credentials/ios/Sources/YOSSecureCredentialsPlugin/YOSSecureCredentialsPlugin.swift', import.meta.url), 'utf8')
+    readFile(new URL('../plugins/yos-secure-credentials/ios/Sources/YOSSecureCredentialsPlugin/YOSSecureCredentialsPlugin.swift', import.meta.url), 'utf8'),
+    readFile(new URL('../plugins/yos-google-tv-remote/package.json', import.meta.url), 'utf8'),
+    readFile(new URL('../plugins/yos-google-tv-remote/Package.swift', import.meta.url), 'utf8'),
+    readFile(new URL('../plugins/yos-google-tv-remote/ios/Sources/YOSGoogleTVRemotePlugin/YOSGoogleTVRemotePlugin.swift', import.meta.url), 'utf8')
   ]);
   assert.match(appPackage, /"@yos\/secure-credentials": "file:plugins\/yos-secure-credentials"/);
-  assert.match(pluginPackage, /"capacitor"/);
-  assert.match(swift, /allowedKey = "braviaPSK"/);
-  assert.match(swift, /kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly/);
-  assert.doesNotMatch(swift, /UserDefaults|localStorage/);
+  assert.match(appPackage, /"@yos\/google-tv-remote": "file:plugins\/yos-google-tv-remote"/);
+  assert.match(securePackage, /"capacitor"/);
+  assert.match(secureSwift, /allowedKey = "braviaPSK"/);
+  assert.match(secureSwift, /kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly/);
+  assert.match(googlePackage, /"capacitor"/);
+  assert.match(googleManifest, /32393c3d672c285c4acbd1d42d6873e9b9a523e2/);
+  assert.match(googleManifest, /YosGoogleTvRemote/);
+  assert.match(googleSwift, /kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly/);
+  assert.match(googleSwift, /RemoteImeBatchEditRequest/);
+  assert.match(googleSwift, /Proto\.bytesField\(21, batch\)/);
+  assert.doesNotMatch(googleSwift, /UserDefaults|localStorage|console\./);
 });
