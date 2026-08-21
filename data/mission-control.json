@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-08-21T20:43:06+09:00",
+  "updated_at": "2026-08-21T20:43:34+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -60,7 +60,7 @@
       "priority": 2,
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/257",
-      "updated_at": "2026-08-20T17:40:54Z"
+      "updated_at": "2026-08-21T11:43:07Z"
     },
     {
       "id": "github-issue-10",
@@ -189,7 +189,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #255をレビューして公開判断する",
+      "next_action": "PR #257をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -199,7 +199,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-08-21T20:43:06+09:00",
+      "last_update": "2026-08-21T20:43:34+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -280,7 +280,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-08-21T20:43:06+09:00",
+      "last_update": "2026-08-21T20:43:34+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -294,7 +294,7 @@
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #255をレビューして公開判断する",
+      "next_action": "PR #257をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -303,7 +303,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-08-21T20:43:06+09:00",
+      "last_update": "2026-08-21T20:43:34+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -385,5 +385,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "89e85f4d786a5e70bd08b9eb20400ec332571af78ec37fc8bed01770f0441c07"
+  "github_snapshot_hash": "51b42f5ccad39c1bca85dc9d77f9638690023f571e3baaea47407b1929a5ca45"
 }
