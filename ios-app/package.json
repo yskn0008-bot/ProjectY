@@ -6,14 +6,17 @@
   "scripts": {
     "prepare:web": "node ./scripts/prepare-web.mjs",
     "test": "node --test tests/*.test.mjs",
-    "native:configure": "node ./scripts/configure-native.mjs",
+    "native:configure:bravia": "node ./scripts/configure-native-ios.mjs",
+    "native:configure:capture": "node ./scripts/configure-native.mjs",
+    "native:configure": "npm run native:configure:bravia && npm run native:configure:capture",
     "native:init": "npm run prepare:web && npx cap add ios --packagemanager SPM && npm run native:configure",
     "native:sync": "npm run prepare:web && npx cap sync ios && npm run native:configure",
     "native:open": "npx cap open ios"
   },
   "dependencies": {
     "@capacitor/core": "^8.0.0",
-    "@yos/capture": "file:plugins/yos-capture"
+    "@yos/capture": "file:plugins/yos-capture",
+    "@yos/secure-credentials": "file:plugins/yos-secure-credentials"
   },
   "devDependencies": {
     "@capacitor/cli": "^8.0.0",

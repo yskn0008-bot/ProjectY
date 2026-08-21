@@ -1,16 +1,20 @@
 # Issue #254 BRAVIA remote technical spike
 
-## 採用範囲
+## 採用方式
 
 - Sony System REST APIの `getRemoteControllerInfo` を接続時に呼び、テレビが返したcommand名とIRCC codeだけをメモリ上でmappingする。
-- IRCC-IPは取得済みcodeを `/sony/ircc` へ送る。PSKはiOS Keychainのthis-device-only itemに保存し、Web storageやログへ渡さない。
-- Quick Settingsは `Options`、`ActionMenu`、`Quick`、`Setting` に一致する実機commandを候補として扱うだけで、XRJ-75X90Lで表示確認されるまで未確認とする。
-- Touchpadはpointer/mouseではなく、dead zoneと最大8回の加速を持つ高速D-pad cursorとして実装する。
+- IRCC-IPは取得済みcodeを `/sony/ircc` へ送る。固定IRCC code、固定IP、PSKはsource、fixture、logへ入れない。
+- PSKはCapacitor local plugin `@yos/secure-credentials` を通じてiOS Keychainのthis-device-only itemへ保存する。許可keyは `braviaPSK` のみ。
+- pluginはCapacitor標準のlocal package / Swift Packageとして登録する。生成Xcode projectへsourceを手作業で追加する運用は採らない。
+- Quick Settingsはテレビから取得した `Options`、`ActionMenu`、`Quick`、`Setting` 系commandだけを候補にする。
+- XRJ-75X90Lを基準にした初期順序を用意し、端末内で並べ替え、非表示、復元、初期化できる。保存対象はUI設定だけ。
+- cursorはTap/Swipeを選択・保存できる高速D-pad操作とし、mouse/pointer対応とは表現しない。
+- Local Network permissionはiOS project生成後の冪等scriptで追加する。
 
-## Google TV文字入力の制約
+## Google TV文字入力
 
-Google公式がiOS向けRemote v2 pairing / keyboard injectionプロトコルを公開しておらず、この環境ではlicense、保守性、securityを監査できる依存実装も採用できなかった。非公開wire protocol、certificate、pairingを推測実装しない。UIとadapterは安全にunavailableを返し、将来監査済み実装を差し替えられる境界だけを置く。このためYouTube、browser、配信appの文字入力は未実装・実機未確認である。
+公開・監査可能なGoogle TV Remote v2実装を確認できていないため、非公開wire protocol、certificate、pairingを推測実装しない。登録済みnative adapterがある時だけ委譲し、それ以外はfail-closedで利用不可を返す。
 
-## 変更範囲と検証状態
+## 完成境界
 
-変更は `ios-app/**` のshell、Sony通信層、Keychain plugin source、tests、本文書に限定する。Local Network permissionとnative plugin registrationはCapacitor iOS project生成後に確認が必要。physical iPhone 17、XRJ-75X90L、Quick Settings、TestFlight、本番はすべて未確認であり、完成扱いにしない。
+自動試験はruntime mapping、layout/cursor設定、Keychain境界、Local Network plist、Google TV fail-closedを検証する。physical iPhone17、XRJ-75X90L、Quick Settings、Google TV文字入力、Apple signing、TestFlight、本番は未確認であり、完成扱いにしない。
