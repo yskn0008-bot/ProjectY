@@ -174,7 +174,7 @@ public final class YOSGoogleTVRemotePlugin: CAPPlugin, CAPBridgedPlugin {
 
     private func handleRemoteState(_ state: RemoteManager.RemoteState) {
         switch state {
-        case .paired:
+        case .paired(runningApp: _):
             remoteReady = true
             flushPendingTextIfReady()
         case .error(let error):
@@ -287,7 +287,7 @@ private enum GoogleTVIdentityError: Error {
 
 private final class GoogleTVIdentityStore {
     private let keyTag = Data("jp.yos.onlysystem.google-tv.client-key".utf8)
-    private let certificateLabel = "jp.yos.onlysystem.google-tv.client-certificate"
+    private let certificateLabel = "jp.yos.onlysystem.google-tv.client-identity"
     private let lock = NSLock()
 
     func identity() throws -> SecIdentity {
@@ -302,6 +302,14 @@ private final class GoogleTVIdentityStore {
     func removeIdentity() throws {
         lock.lock()
         defer { lock.unlock() }
+        try removeIdentityUnlocked()
+    }
+
+    private func removeIdentityUnlocked() throws {
+        let identityStatus = SecItemDelete([
+            kSecClass as String: kSecClassIdentity,
+            kSecAttrLabel as String: certificateLabel
+        ] as CFDictionary)
         let keyStatus = SecItemDelete([
             kSecClass as String: kSecClassKey,
             kSecAttrApplicationTag as String: keyTag,
@@ -312,13 +320,25 @@ private final class GoogleTVIdentityStore {
             kSecClass as String: kSecClassCertificate,
             kSecAttrLabel as String: certificateLabel
         ] as CFDictionary)
-        if keyStatus != errSecSuccess && keyStatus != errSecItemNotFound { throw GoogleTVIdentityError.keychain(keyStatus) }
-        if certStatus != errSecSuccess && certStatus != errSecItemNotFound { throw GoogleTVIdentityError.keychain(certStatus) }
+        for status in [identityStatus, keyStatus, certStatus] where status != errSecSuccess && status != errSecItemNotFound {
+            throw GoogleTVIdentityError.keychain(status)
+        }
     }
 
     private func loadIdentity() throws -> SecIdentity? {
-        guard let privateKey = try loadPrivateKey(), let certificate = try loadCertificate() else { return nil }
-        return SecIdentityCreate(nil, certificate, privateKey)
+        let query: [String: Any] = [
+            kSecClass as String: kSecClassIdentity,
+            kSecAttrLabel as String: certificateLabel,
+            kSecReturnRef as String: true,
+            kSecMatchLimit as String: kSecMatchLimitOne
+        ]
+        var item: CFTypeRef?
+        let status = SecItemCopyMatching(query as CFDictionary, &item)
+        if status == errSecItemNotFound { return nil }
+        guard status == errSecSuccess, let item, CFGetTypeID(item) == SecIdentityGetTypeID() else {
+            throw GoogleTVIdentityError.keychain(status)
+        }
+        return (item as! SecIdentity)
     }
 
     private func loadPrivateKey() throws -> SecKey? {
@@ -357,7 +377,7 @@ private final class GoogleTVIdentityStore {
 
     private func createIdentity() throws {
         if (try loadPrivateKey()) != nil || (try loadCertificate()) != nil {
-            try removeIdentity()
+            try removeIdentityUnlocked()
         }
         let attributes: [String: Any] = [
             kSecAttrKeyType as String: kSecAttrKeyTypeRSA,
@@ -365,6 +385,7 @@ private final class GoogleTVIdentityStore {
             kSecPrivateKeyAttrs as String: [
                 kSecAttrIsPermanent as String: true,
                 kSecAttrApplicationTag as String: keyTag,
+                kSecAttrLabel as String: certificateLabel,
                 kSecAttrAccessible as String: kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly
             ]
         ]
