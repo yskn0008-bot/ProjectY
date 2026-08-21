@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-08-20T04:24:29+09:00",
+  "updated_at": "2026-08-21T20:32:04+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -50,7 +50,7 @@
       "priority": 2,
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/255",
-      "updated_at": "2026-08-19T19:23:07Z"
+      "updated_at": "2026-08-20T21:38:30Z"
     },
     {
       "id": "github-pr-257",
@@ -60,7 +60,7 @@
       "priority": 2,
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/257",
-      "updated_at": "2026-08-19T19:23:43Z"
+      "updated_at": "2026-08-20T17:40:54Z"
     },
     {
       "id": "github-issue-10",
@@ -189,7 +189,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #257をレビューして公開判断する",
+      "next_action": "PR #255をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -199,7 +199,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-08-20T04:24:29+09:00",
+      "last_update": "2026-08-21T20:32:04+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -280,7 +280,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-08-20T04:24:29+09:00",
+      "last_update": "2026-08-21T20:32:04+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -294,7 +294,7 @@
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #257をレビューして公開判断する",
+      "next_action": "PR #255をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -303,7 +303,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-08-20T04:24:29+09:00",
+      "last_update": "2026-08-21T20:32:04+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -385,5 +385,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "a2b6e32d0640883b6c92a516b762c67a8947cee79aba2a7090f631cf2ef8a44e"
+  "github_snapshot_hash": "2f6fe877c0f0e885ca7751e591365b3b5144656d1c15446fb506c0a716b9d280"
 }
