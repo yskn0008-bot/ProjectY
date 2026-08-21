@@ -4,7 +4,7 @@ import PackageDescription
 let package = Package(
     name: "YOSSecureCredentials",
     platforms: [.iOS(.v15)],
-    products: [.library(name: "YOSSecureCredentials", targets: ["YOSSecureCredentialsPlugin"])],
+    products: [.library(name: "YosSecureCredentials", targets: ["YOSSecureCredentialsPlugin"])],
     dependencies: [
         .package(url: "https://github.com/ionic-team/capacitor-swift-pm.git", from: "8.0.0")
     ],
