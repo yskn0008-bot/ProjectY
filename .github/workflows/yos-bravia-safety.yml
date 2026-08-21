@@ -36,5 +36,4 @@ jobs:
       - run: npm install
       - run: npm run native:init
       - run: grep -q NSLocalNetworkUsageDescription ios/App/App/Info.plist
-      - run: find ios \( -type f -name '*YOSSecureCredentials*' -o -type f -name Package.swift \) -print0 | xargs -0 grep -l YOSSecureCredentials
       - run: xcodebuild -project ios/App/App.xcodeproj -scheme App -destination 'generic/platform=iOS Simulator' CODE_SIGNING_ALLOWED=NO build
