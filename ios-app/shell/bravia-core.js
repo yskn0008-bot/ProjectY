@@ -134,11 +134,26 @@ export class GoogleTvTextAdapter {
     this.plugin = plugin;
   }
   get available() {
-    return typeof this.plugin?.sendText === 'function';
+    return typeof this.plugin?.startPairing === 'function' &&
+      typeof this.plugin?.finishPairing === 'function' &&
+      typeof this.plugin?.sendText === 'function';
   }
-  async sendText(text) {
+  requireAvailable() {
+    if (!this.available) throw new Error('Google TV文字入力はiOS native版でのみ利用できます。');
+  }
+  async startPairing(host) {
+    this.requireAvailable();
+    return this.plugin.startPairing({ host: normalizeHost(host) });
+  }
+  async finishPairing(code) {
+    this.requireAvailable();
+    const value = code.trim().toUpperCase();
+    if (!/^[0-9A-F]{6}$/.test(value)) throw new Error('6桁のペアリングコードを入力してください。');
+    return this.plugin.finishPairing({ code: value });
+  }
+  async sendText(host, text) {
+    this.requireAvailable();
     if (!text) throw new Error('文字を入力してください。');
-    if (!this.available) throw new Error('Google TV文字入力は現在利用できません。');
-    return this.plugin.sendText({ text });
+    return this.plugin.sendText({ host: normalizeHost(host), text });
   }
 }

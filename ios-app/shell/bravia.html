@@ -65,8 +65,27 @@
     </div>
   </section>
 
-  <button id="keyboard" class="keyboard" type="button">Google TVへ文字入力</button>
-  <p class="note">Quick Settingsと文字入力はXRJ-75X90L実機確認まで未確認です。</p>
+  <section class="keyboard-panel" aria-labelledby="keyboard-title">
+    <div class="section-head">
+      <div>
+        <h2 id="keyboard-title">Google TV文字入力</h2>
+        <p>YouTubeやブラウザの入力欄をテレビ側で開いてから送信します。</p>
+      </div>
+      <button id="pair-start" type="button">ペアリング</button>
+    </div>
+    <div id="pair-code-row" class="pair-code" hidden>
+      <input id="pair-code" inputmode="text" autocapitalize="characters" autocomplete="off" maxlength="6" aria-label="Google TVペアリングコード" placeholder="6桁コード">
+      <button id="pair-finish" type="button">コード送信</button>
+    </div>
+    <label class="google-text-label" for="google-text">iPhoneから送る文字</label>
+    <textarea id="google-text" rows="2" autocomplete="off" autocapitalize="sentences" placeholder="ここに入力"></textarea>
+    <div class="keyboard-actions">
+      <button id="keyboard" type="button">キーボードを開く</button>
+      <button id="google-send" class="primary" type="button">テレビへ送る</button>
+    </div>
+  </section>
+
+  <p class="note">Quick SettingsとGoogle TV文字入力はXRJ-75X90L実機確認まで未確認です。</p>
 </main>
 <script type="module" src="./bravia.js"></script>
 </body>
