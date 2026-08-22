@@ -663,17 +663,42 @@
       $('projectSearch').addEventListener('input', (event) => renderProjectSearch(event.target.value));
 
       if ('serviceWorker' in navigator) {
+        const WORKER_VERSION = '3-network-first';
+        const WORKER_MIGRATION_KEY = 'yos-mission-control-worker-version';
         let workerRefreshPending = false;
+
         navigator.serviceWorker.addEventListener('controllerchange', () => {
+          sessionStorage.removeItem(WORKER_MIGRATION_KEY);
           if (workerRefreshPending) return;
           workerRefreshPending = true;
           loadData({ manual: true }).finally(() => { workerRefreshPending = false; });
         });
-        window.addEventListener('load', () => {
-          navigator.serviceWorker
-            .register('./service-worker.js?v=2-network-first', { updateViaCache: 'none' })
-            .then((registration) => registration.update())
-            .catch(() => {});
+
+        window.addEventListener('load', async () => {
+          try {
+            const controllerUrl = navigator.serviceWorker.controller?.scriptURL || '';
+            const alreadyRetried = sessionStorage.getItem(WORKER_MIGRATION_KEY) === WORKER_VERSION;
+
+            if (controllerUrl && !controllerUrl.includes(`v=${WORKER_VERSION}`) && !alreadyRetried) {
+              const registration = await navigator.serviceWorker.getRegistration('./');
+              if (registration) await registration.unregister();
+              sessionStorage.setItem(WORKER_MIGRATION_KEY, WORKER_VERSION);
+              window.location.reload();
+              return;
+            }
+
+            const registration = await navigator.serviceWorker.register(
+              `./service-worker.js?v=${WORKER_VERSION}`,
+              { updateViaCache: 'none' }
+            );
+            await registration.update();
+
+            if (navigator.serviceWorker.controller?.scriptURL.includes(`v=${WORKER_VERSION}`)) {
+              sessionStorage.removeItem(WORKER_MIGRATION_KEY);
+            }
+          } catch {
+            // Mission Control remains usable online and from its last saved data.
+          }
         });
       }
 
