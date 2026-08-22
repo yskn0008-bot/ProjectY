@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-08-22T09:20:49+09:00",
+  "updated_at": "2026-08-22T11:46:35+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -33,16 +33,6 @@
       "updated_at": "2026-08-22T00:18:37Z"
     },
     {
-      "id": "github-pr-253",
-      "title": "PR #253 fix: ProjectY自動司令部 v1の状態同期・自動継続",
-      "type": "GitHub PR",
-      "status": "review",
-      "priority": 1,
-      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/253",
-      "updated_at": "2026-08-22T00:09:07Z"
-    },
-    {
       "id": "github-pr-255",
       "title": "PR #255 Issue #254: persist BRAVIA remote foundation",
       "type": "GitHub PR",
@@ -61,6 +51,16 @@
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/257",
       "updated_at": "2026-08-22T00:18:35Z"
+    },
+    {
+      "id": "github-pr-233",
+      "title": "PR #233 Draft: Mission Controlに進捗率・残り時間を常時表示する",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/233",
+      "updated_at": "2026-08-17T00:11:00Z"
     },
     {
       "id": "github-issue-10",
@@ -165,6 +165,27 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-d34d58561531",
+      "title": "Merge pull request #253 from yskn0008-bot/codex/issue-232-autocontinue-v1",
+      "completed_at": "2026-08-22T02:46:22Z",
+      "result": "GitHub mainへ反映（d34d585）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/d34d58561531a784e90b343c81dc5096aaacbdef"
+    },
+    {
+      "id": "github-commit-d21299443303",
+      "title": "merge: sync latest main into Issue 232 autopilot",
+      "completed_at": "2026-08-22T00:02:40Z",
+      "result": "GitHub mainへ反映（d212994）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/d21299443303a6dcfe4fc3afbc19fe88a2378b5c"
+    },
+    {
+      "id": "github-commit-254d558e9bcc",
+      "title": "fix: complete bounded ProjectY autopilot recovery",
+      "completed_at": "2026-08-22T00:00:12Z",
+      "result": "GitHub mainへ反映（254d558）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/254d558e9bcc5455708f8734da9d6aa2aa5ddc6d"
+    },
+    {
       "id": "complete-002",
       "title": "iPhone向けMission Control Dashboardを実装",
       "completed_at": "2026-07-17T17:55:00+09:00",
@@ -199,7 +220,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-08-22T09:20:49+09:00",
+      "last_update": "2026-08-22T11:46:35+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -274,13 +295,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 24件・Open PR 6件を自動同期中",
+      "next_action": "Open Issue 24件・Open PR 5件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-08-22T09:20:49+09:00",
+      "last_update": "2026-08-22T11:46:35+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -303,7 +324,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-08-22T09:20:49+09:00",
+      "last_update": "2026-08-22T11:46:35+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -385,5 +406,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "2eae7826341826b44b27c6dd5aaa506af907900728af0a26f89d3d200b1c99b1"
+  "github_snapshot_hash": "ff3c1d730ad6c45bdd655243e56f75513303df8c41d3966d1b0592693e7e50a5"
 }
