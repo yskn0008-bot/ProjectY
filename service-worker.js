@@ -1,4 +1,4 @@
-const CACHE_NAME = 'yos-mission-control-v2-network-first';
+const CACHE_NAME = 'yos-mission-control-v3-network-first';
 const APP_SHELL = [
   './',
   './index.html',
@@ -26,8 +26,10 @@ async function networkWithFallback(request, fallbackKey) {
   try {
     const response = await fetch(request, { cache: 'no-store' });
     if (response.ok) {
-      const cache = await caches.open(CACHE_NAME);
-      await cache.put(fallbackKey, response.clone());
+      const cacheCopy = response.clone();
+      caches.open(CACHE_NAME)
+        .then((cache) => cache.put(fallbackKey, cacheCopy))
+        .catch(() => {});
     }
     return response;
   } catch {
