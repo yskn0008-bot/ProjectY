@@ -1,0 +1,92 @@
+name: YOS Life Safety
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'life/**'
+      - '.github/workflows/yos-life-safety.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'life/**'
+      - '.github/workflows/yos-life-safety.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: yos-life-safety-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  life-node-regression:
+    name: Life Node regression
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: ''
+
+      - name: Check Life JavaScript syntax
+        run: |
+          node --check life/home-v1.js
+          node --check life/service-worker.js
+          node --check life/yos-suite-v3.js
+          sed -n '/^<script>$/,/^<\/script>$/p' life/index.html | sed '1d;$d' | node --check
+
+      - name: Run Life data and cache boundary tests
+        run: node --test life/tests/home-priority-data.test.mjs life/tests/life-calendar-contract.test.mjs life/tests/daily-flow-contract.test.mjs life/tests/service-worker-cache-scope.test.mjs
+
+  life-browser-smoke:
+    name: Life iPhone smoke (${{ matrix.browser }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, webkit]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: ''
+
+      - name: Install Playwright
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps ${{ matrix.browser }}
+
+      - name: Start static server
+        run: |
+          python3 -m http.server 4173 --directory . > /tmp/life-server.log 2>&1 &
+          for i in {1..30}; do
+            curl -fsS http://127.0.0.1:4173/life/ >/dev/null && exit 0
+            sleep 1
+          done
+          cat /tmp/life-server.log
+          exit 1
+
+      - name: Run morning-to-night smoke
+        env:
+          LIFE_BROWSER: ${{ matrix.browser }}
+        run: node life/tests/life-smoke.mjs
+
+      - name: Upload Life screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: life-calendar-${{ matrix.browser }}
+          path: test-results/*.png
+          if-no-files-found: warn
