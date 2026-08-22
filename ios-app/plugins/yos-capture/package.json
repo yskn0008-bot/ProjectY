@@ -1,0 +1,24 @@
+{
+  "name": "@yos/capture",
+  "version": "0.1.0",
+  "description": "Raw-first native capture for the YOS iOS app",
+  "main": "dist/plugin.cjs.js",
+  "module": "dist/esm/index.js",
+  "types": "dist/esm/index.d.ts",
+  "files": [
+    "dist/",
+    "ios/Sources",
+    "ios/Tests",
+    "Package.swift",
+    "YOSCapture.podspec"
+  ],
+  "license": "UNLICENSED",
+  "peerDependencies": {
+    "@capacitor/core": ">=8.0.0"
+  },
+  "capacitor": {
+    "ios": {
+      "src": "ios"
+    }
+  }
+}

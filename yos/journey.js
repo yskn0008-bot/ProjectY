@@ -14,7 +14,13 @@
     totalXp: 0,
     quests: [],
     completed: [],
-    reflections: []
+    reflections: [],
+    rawInputs: [],
+    candidates: [],
+    confirmedFacts: [],
+    evidence: [],
+    unknown: [],
+    conversationStatus: null
   };
 
   const readJson = (key, fallback) => {
@@ -30,6 +36,16 @@
   state.quests = Array.isArray(state.quests) ? state.quests : [];
   state.completed = Array.isArray(state.completed) ? state.completed : [];
   state.reflections = Array.isArray(state.reflections) ? state.reflections : [];
+  state.rawInputs = Array.isArray(state.rawInputs) ? state.rawInputs : [];
+  state.candidates = Array.isArray(state.candidates) ? state.candidates : [];
+  state.confirmedFacts = Array.isArray(state.confirmedFacts) ? state.confirmedFacts : [];
+  state.evidence = Array.isArray(state.evidence) ? state.evidence : [];
+  state.unknown = Array.isArray(state.unknown) ? state.unknown : [];
+
+  const candidateLabels = {
+    fact: 'AIが見つけた事実候補', assumption: 'AIの推測', unknown: '未確認のこと',
+    conflict: '矛盾の可能性', nextAction: '次の一歩の候補', memory: '記憶候補（未保存）'
+  };
 
   const save = () => {
     try {
@@ -139,12 +155,148 @@
     $('reflectionSavedAt').textContent = latest ? `保存 ${formatDate(latest.savedAt)}` : '未記録';
   }
 
+  function renderCandidate() {
+    const pending = state.candidates.filter((item) => item.status === 'pending');
+    const candidate = pending[0];
+    $('candidatePanel').hidden = !candidate;
+    if (!candidate) return;
+    $('candidateKind').textContent = candidateLabels[candidate.kind] || '未確認の候補';
+    $('candidateText').textContent = candidate.text;
+    $('candidateProgress').textContent = `未確認 ${pending.length}件`;
+  }
+
   function render() {
     renderChapter();
     renderStats();
     renderQuests();
     renderCompleted();
     renderReflection();
+    renderCandidate();
+  }
+
+  const candidateId = () => globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random()}`;
+
+  const asText = (value) => {
+    if (typeof value === 'string') return value.trim();
+    if (value && typeof value === 'object') {
+      for (const key of ['text', 'statement', 'content', 'value', 'title', 'action']) {
+        if (typeof value[key] === 'string' && value[key].trim()) return value[key].trim();
+      }
+    }
+    return '';
+  };
+
+  function mapCandidates(result, rawInputId) {
+    const mapped = [];
+    const add = (values, kind) => (Array.isArray(values) ? values : []).forEach((value) => {
+      const text = asText(value);
+      if (!text) return;
+      mapped.push({
+        id: candidateId(), rawInputId, kind, text, status: 'pending',
+        sourceIds: Array.isArray(value?.sourceIds) ? value.sourceIds.filter((id) => typeof id === 'string') : [],
+        createdAt: new Date().toISOString()
+      });
+    });
+    add(result?.facts, 'fact');
+    add(result?.assumptions, 'assumption');
+    add(result?.unknowns, 'unknown');
+    add(result?.conflicts, 'conflict');
+    if (result?.nextAction) add([result.nextAction], 'nextAction');
+    add(result?.memoryCandidates, 'memory');
+    return mapped;
+  }
+
+  const apiErrorMessage = (status) => ({
+    400: '入力内容を確認してください。話した内容は端末に保存済みです。',
+    401: 'Googleログインまたは同期認証を確認してください。話した内容は端末に保存済みです。',
+    403: 'この画面からは接続できません。話した内容は端末に保存済みです。',
+    405: 'アプリ更新が必要です。話した内容は端末に保存済みです。',
+    413: '入力が長すぎます。短くして再試行してください。話した内容は端末に保存済みです。',
+    415: 'アプリ更新が必要です。話した内容は端末に保存済みです。',
+    429: '少し時間を空けてください。話した内容は端末に保存済みです。',
+    503: 'YOSへ接続できません。話した内容は端末に保存済みです。'
+  }[status] || 'YOSへ接続できません。話した内容は端末に保存済みです。');
+
+  async function sendConversation() {
+    const text = $('rawInput').value.trim();
+    if (!text) {
+      $('conversationStatus').textContent = '今のことを一言だけ話してください。';
+      $('rawInput').focus();
+      return;
+    }
+    const rawInput = { id: candidateId(), text, createdAt: new Date().toISOString() };
+    state.rawInputs.unshift(rawInput);
+    state.conversationStatus = { state: 'saved', rawInputId: rawInput.id, updatedAt: new Date().toISOString() };
+    if (!save()) {
+      state.rawInputs = state.rawInputs.filter((item) => item.id !== rawInput.id);
+      $('conversationStatus').textContent = '端末へ保存できませんでした。入力はこの画面に残しています。';
+      return;
+    }
+    $('conversationStatus').textContent = '端末に保存しました。YOSへ接続しています。';
+    $('candidatePanel').hidden = true;
+
+    const baseUrl = typeof globalThis.YOS_AI_BASE_URL === 'string' ? globalThis.YOS_AI_BASE_URL.trim() : '';
+    const getToken = globalThis.YOS_AUTH?.getGoogleIdToken;
+    if (!baseUrl || typeof getToken !== 'function') {
+      state.conversationStatus = { state: 'local-only', rawInputId: rawInput.id, updatedAt: new Date().toISOString() };
+      save();
+      $('conversationStatus').textContent = '話した内容を端末に保存しました。YOS AIはまだ設定されていません。';
+      return;
+    }
+
+    try {
+      const token = await getToken();
+      if (typeof token !== 'string' || !token.trim()) throw Object.assign(new Error('Missing token'), { status: 401 });
+      const response = await fetch(new URL('/api/yos/chat', baseUrl), {
+        method: 'POST', credentials: 'omit', cache: 'no-store', redirect: 'error', referrerPolicy: 'no-referrer',
+        headers: { Authorization: `Bearer ${token.trim()}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userText: text, currentLocation: state.chapter.slice(0, 300) })
+      });
+      if (!response.ok) throw Object.assign(new Error('YOS request failed'), { status: response.status });
+      const result = await response.json();
+      const mapped = mapCandidates(result, rawInput.id);
+      state.candidates.push(...mapped);
+      state.evidence.push(...mapped.filter((item) => item.sourceIds.length).map((item) => ({
+        candidateId: item.id, sourceIds: item.sourceIds, requestId: result.requestId || null
+      })));
+      state.conversationStatus = {
+        state: mapped.length ? 'confirming' : 'reviewed', rawInputId: rawInput.id,
+        requestId: result.requestId || null, updatedAt: new Date().toISOString()
+      };
+      save();
+      $('rawInput').value = '';
+      $('conversationStatus').textContent = mapped.length
+        ? 'AIの整理を受け取りました。候補を1件ずつ確認してください。'
+        : 'AIの整理を受け取りました。確認する候補はありません。';
+      renderCandidate();
+    } catch (error) {
+      state.conversationStatus = { state: 'failed', rawInputId: rawInput.id, updatedAt: new Date().toISOString() };
+      save();
+      $('candidatePanel').hidden = true;
+      $('conversationStatus').textContent = apiErrorMessage(Number(error?.status) || 0);
+    }
+  }
+
+  function decideCandidate(decision) {
+    const candidate = state.candidates.find((item) => item.status === 'pending');
+    if (!candidate) return;
+    candidate.status = decision === 'yes' ? 'confirmed' : decision === 'unknown' ? 'unknown' : 'rejected';
+    candidate.decidedAt = new Date().toISOString();
+    if (decision === 'yes') {
+      state.confirmedFacts.push({
+        id: candidate.id, text: candidate.text, kind: candidate.kind,
+        sourceIds: candidate.sourceIds, confirmedAt: candidate.decidedAt
+      });
+      if (candidate.kind === 'nextAction') state.mainQuest = candidate.text;
+    } else if (decision === 'unknown') {
+      state.unknown.push({ id: candidate.id, text: candidate.text, kind: candidate.kind, savedAt: candidate.decidedAt });
+    }
+    const pending = state.candidates.some((item) => item.status === 'pending');
+    state.conversationStatus = { state: pending ? 'confirming' : 'confirmed', updatedAt: new Date().toISOString() };
+    save();
+    renderChapter();
+    renderCandidate();
+    $('conversationStatus').textContent = pending ? '次の候補を確認してください。' : '候補の確認が終わりました。';
   }
 
   function addQuest() {
@@ -251,6 +403,10 @@
   });
   $('saveReflection').addEventListener('click', saveReflection);
   $('consultYos').addEventListener('click', consultYos);
+  $('sendConversation').addEventListener('click', sendConversation);
+  document.querySelectorAll('[data-candidate-decision]').forEach((button) => {
+    button.addEventListener('click', () => decideCandidate(button.dataset.candidateDecision));
+  });
   $('openJourneySettings').addEventListener('click', () => $('journeySettingsDialog').showModal());
   $('saveJourneySettings').addEventListener('click', (event) => {
     event.preventDefault();

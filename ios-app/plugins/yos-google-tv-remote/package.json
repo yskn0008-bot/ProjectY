@@ -1,0 +1,12 @@
+{
+  "name": "@yos/google-tv-remote",
+  "version": "0.1.0",
+  "description": "Local Google TV Remote v2 pairing and text bridge for YOS",
+  "main": "dist/plugin.cjs.js",
+  "module": "dist/esm/index.js",
+  "types": "dist/esm/index.d.ts",
+  "files": ["dist/", "ios/Sources", "Package.swift", "YOSGoogleTVRemote.podspec", "THIRD_PARTY_NOTICES.md"],
+  "license": "UNLICENSED",
+  "peerDependencies": { "@capacitor/core": ">=8.0.0" },
+  "capacitor": { "ios": { "src": "ios" } }
+}
