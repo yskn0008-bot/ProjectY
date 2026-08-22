@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-08-22T12:04:46+09:00",
+  "updated_at": "2026-08-22T12:15:42+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -125,6 +125,20 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-87aa2f135791",
+      "title": "Merge pull request #258 from codex/issue-232-mission-control-cache-hotfix",
+      "completed_at": "2026-08-22T03:15:31Z",
+      "result": "GitHub mainへ反映（87aa2f1）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/87aa2f1357912fc49f2caf94b131e91d0ee40185"
+    },
+    {
+      "id": "github-commit-c0213eb9e9a1",
+      "title": "fix: refresh Mission Control PWA from network",
+      "completed_at": "2026-08-22T03:13:05Z",
+      "result": "GitHub mainへ反映（c0213eb）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/c0213eb9e9a19779988a0f7baa495d85b776fde4"
+    },
+    {
       "id": "github-commit-7c82d0018a7c",
       "title": "Merge pull request #177 from yskn0008-bot/agent/life-cache-boundary-v1",
       "completed_at": "2026-08-22T03:04:31Z",
@@ -144,20 +158,6 @@
       "completed_at": "2026-08-22T03:01:07Z",
       "result": "GitHub mainへ反映（37078c8）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/37078c8b70cd16eaa1aeb5f6abca8d608c2bacbf"
-    },
-    {
-      "id": "github-commit-729edf939b7a",
-      "title": "merge: sync HJ UX completion onto latest main",
-      "completed_at": "2026-08-22T02:58:12Z",
-      "result": "GitHub mainへ反映（729edf9）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/729edf939b7a3455b5c5c5d4a4253acea9259458"
-    },
-    {
-      "id": "github-commit-86f1a939297b",
-      "title": "Merge pull request #257 from yskn0008-bot/codex/issue-256-yos-capture-phase1",
-      "completed_at": "2026-08-22T02:57:14Z",
-      "result": "GitHub mainへ反映（86f1a93）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/86f1a939297bf3d64e05cb7e998d83aeabb394ee"
     },
     {
       "id": "complete-002",
@@ -194,7 +194,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-08-22T12:04:46+09:00",
+      "last_update": "2026-08-22T12:15:42+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -275,7 +275,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-08-22T12:04:46+09:00",
+      "last_update": "2026-08-22T12:15:42+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -298,7 +298,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-08-22T12:04:46+09:00",
+      "last_update": "2026-08-22T12:15:42+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -380,5 +380,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "3d71285e5fc9b006b17cb158b72c9685581bbd0d0f00a74c2f0b3e4fc966be0a"
+  "github_snapshot_hash": "f3d365009f2d42e9287795a40caa41045009c0b2b6f0be8e1dbe36dc5a69c410"
 }
