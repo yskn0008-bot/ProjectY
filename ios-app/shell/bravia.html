@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#080a0e">
+  <title>YOS BRAVIA</title>
+  <link rel="stylesheet" href="./bravia.css">
+</head>
+<body>
+<main>
+  <header class="topbar">
+    <a href="./" aria-label="YOSへ戻る">‹ YOS</a>
+    <div>
+      <strong>BRAVIA Remote</strong>
+      <p id="status" role="status" aria-live="polite">未接続</p>
+    </div>
+  </header>
+
+  <form id="connect" class="connect">
+    <label>
+      <span>テレビ</span>
+      <input id="host" autocomplete="off" autocapitalize="none" aria-label="テレビのホスト" placeholder="ホスト名 / IP" required>
+    </label>
+    <label>
+      <span>PSK</span>
+      <input id="psk" autocomplete="off" aria-label="PSK" type="password" placeholder="Keychainへ保存" required>
+    </label>
+    <button type="submit" class="primary">接続</button>
+  </form>
+
+  <section class="remote-panel" aria-labelledby="remote-title">
+    <div class="section-head">
+      <div>
+        <h1 id="remote-title">リモコン</h1>
+        <p>テレビが返した対応ボタンだけ使えます。</p>
+      </div>
+      <button id="edit" type="button">配置を編集</button>
+    </div>
+    <p id="edit-help" class="edit-help" hidden>ドラッグで移動、タップで非表示。いつでも戻せます。</p>
+    <div id="controls" aria-label="XRJ-75X90L基準リモコン"></div>
+    <div class="edit-actions">
+      <button id="restore" type="button" hidden>非表示を戻す</button>
+      <button id="reset" type="button" hidden>初期配置へ戻す</button>
+    </div>
+  </section>
+
+  <section class="cursor-panel" aria-labelledby="cursor-title">
+    <div class="section-head">
+      <div>
+        <h2 id="cursor-title">高速D-pad cursor</h2>
+        <p>マウスではなく、方向キー操作です。</p>
+      </div>
+      <label class="mode">
+        <span>操作</span>
+        <select id="cursor-mode">
+          <option value="swipe">Swipe</option>
+          <option value="tap">Tap</option>
+        </select>
+      </label>
+    </div>
+    <div id="touchpad" role="application" tabindex="0">
+      <strong id="touchpad-label">Swipe to move</strong>
+      <small>中央タップ = OK</small>
+    </div>
+  </section>
+
+  <section class="keyboard-panel" aria-labelledby="keyboard-title">
+    <div class="section-head">
+      <div>
+        <h2 id="keyboard-title">Google TV文字入力</h2>
+        <p>YouTubeやブラウザの入力欄をテレビ側で開いてから送信します。</p>
+      </div>
+      <button id="pair-start" type="button">ペアリング</button>
+    </div>
+    <div id="pair-code-row" class="pair-code" hidden>
+      <input id="pair-code" inputmode="text" autocapitalize="characters" autocomplete="off" maxlength="6" aria-label="Google TVペアリングコード" placeholder="6桁コード">
+      <button id="pair-finish" type="button">コード送信</button>
+    </div>
+    <label class="google-text-label" for="google-text">iPhoneから送る文字</label>
+    <textarea id="google-text" rows="2" autocomplete="off" autocapitalize="sentences" placeholder="ここに入力"></textarea>
+    <div class="keyboard-actions">
+      <button id="keyboard" type="button">キーボードを開く</button>
+      <button id="google-send" class="primary" type="button">テレビへ送る</button>
+    </div>
+  </section>
+
+  <p class="note">Quick SettingsとGoogle TV文字入力はXRJ-75X90L実機確認まで未確認です。</p>
+</main>
+<script type="module" src="./bravia.js"></script>
+</body>
+</html>
