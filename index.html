@@ -663,7 +663,18 @@
       $('projectSearch').addEventListener('input', (event) => renderProjectSearch(event.target.value));
 
       if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js').catch(() => {}));
+        let workerRefreshPending = false;
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+          if (workerRefreshPending) return;
+          workerRefreshPending = true;
+          loadData({ manual: true }).finally(() => { workerRefreshPending = false; });
+        });
+        window.addEventListener('load', () => {
+          navigator.serviceWorker
+            .register('./service-worker.js?v=2-network-first', { updateViaCache: 'none' })
+            .then((registration) => registration.update())
+            .catch(() => {});
+        });
       }
 
       loadData();

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'yos-mission-control-v1';
+const CACHE_NAME = 'yos-mission-control-v2-network-first';
 const APP_SHELL = [
   './',
   './index.html',
@@ -22,6 +22,19 @@ self.addEventListener('activate', (event) => {
   );
 });
 
+async function networkWithFallback(request, fallbackKey) {
+  try {
+    const response = await fetch(request, { cache: 'no-store' });
+    if (response.ok) {
+      const cache = await caches.open(CACHE_NAME);
+      await cache.put(fallbackKey, response.clone());
+    }
+    return response;
+  } catch {
+    return caches.match(fallbackKey);
+  }
+}
+
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
 
@@ -29,15 +42,12 @@ self.addEventListener('fetch', (event) => {
   const isMissionData = url.pathname.endsWith('/data/mission-control.json');
 
   if (isMissionData) {
-    event.respondWith(
-      fetch(event.request)
-        .then((response) => {
-          const copy = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put('./data/mission-control.json', copy));
-          return response;
-        })
-        .catch(() => caches.match('./data/mission-control.json'))
-    );
+    event.respondWith(networkWithFallback(event.request, './data/mission-control.json'));
+    return;
+  }
+
+  if (event.request.mode === 'navigate') {
+    event.respondWith(networkWithFallback(event.request, './index.html'));
     return;
   }
 
