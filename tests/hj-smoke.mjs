@@ -66,11 +66,12 @@ try {
   await page.screenshot({ path: `test-results/hj-resume-${browserName}.png`, fullPage: true });
   await page.locator('#startConversation').click();
   assert.match(await page.locator('#rawInput').inputValue(), /仕事のことが気になった/, '保存した原文から再開できない');
-  await page.route('**/api/yos/chat', async (route) => {
-    await route.fulfill({
-      status: 200,
-      contentType: 'application/json',
-      body: JSON.stringify({
+  await page.evaluate(() => {
+    const nativeFetch = globalThis.fetch.bind(globalThis);
+    globalThis.fetch = async (input, init) => {
+      const url = new URL(typeof input === 'string' ? input : input.url, location.href);
+      if (url.pathname !== '/api/yos/chat') return nativeFetch(input, init);
+      return new Response(JSON.stringify({
         requestId: 'hj-smoke-request',
         answer: '話してくれてありがとう。まず確認したいことが1つあります。',
         facts: [{ text: '仕事のことが気になった', sourceIds: ['00_law'] }],
@@ -80,10 +81,11 @@ try {
         nextAction: '今日は休む',
         memoryCandidates: [],
         safety: { level: 'normal', notes: [] }
-      })
-    });
-  });
-  await page.evaluate(() => {
+      }), {
+        status: 200,
+        headers: { 'content-type': 'application/json' }
+      });
+    };
     globalThis.YOS_AI_BASE_URL = location.origin;
     globalThis.YOS_AUTH = { getGoogleIdToken: async () => 'header.payload.signature' };
   });
@@ -309,7 +311,7 @@ try {
     await navigator.serviceWorker.ready;
     const paths = [
       './index.html', './styles.css', './onboarding.css', './scenes.css', './completion.css',
-      './archetypes.js', './bootstrap.js', './app.js', './profile.js', './scenes.js', './history.js',
+      './archetypes.js', './bootstrap.js', './app.js', './profile.js', './yos-ai-client.js', './yos-auth.js', './scenes.js', './history.js',
       './editor.js', './story-image.js', './data-complete.js', './current-location.js', './manifest.webmanifest'
     ];
     const entries = await Promise.all(paths.map(async (path) => {
