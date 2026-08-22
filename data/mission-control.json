@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-08-22T12:15:42+09:00",
+  "updated_at": "2026-08-22T12:22:30+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -125,6 +125,27 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-eca0935c80c9",
+      "title": "Merge pull request #259 from codex/issue-232-mission-control-worker-migration",
+      "completed_at": "2026-08-22T03:22:17Z",
+      "result": "GitHub mainへ反映（eca0935）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/eca0935c80c9642223bf8262113dbeebb4ba4d5f"
+    },
+    {
+      "id": "github-commit-1adb918b9677",
+      "title": "fix: migrate stale Mission Control workers once",
+      "completed_at": "2026-08-22T03:21:18Z",
+      "result": "GitHub mainへ反映（1adb918）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/1adb918b9677ce13672898d40bc4519a50a0ffd3"
+    },
+    {
+      "id": "github-commit-eb3760d6bbe6",
+      "title": "fix: keep live Mission Control data ahead of cache writes",
+      "completed_at": "2026-08-22T03:21:15Z",
+      "result": "GitHub mainへ反映（eb3760d）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/eb3760d6bbe6263587dfa96a108c493f4b6c0beb"
+    },
+    {
       "id": "github-commit-87aa2f135791",
       "title": "Merge pull request #258 from codex/issue-232-mission-control-cache-hotfix",
       "completed_at": "2026-08-22T03:15:31Z",
@@ -137,27 +158,6 @@
       "completed_at": "2026-08-22T03:13:05Z",
       "result": "GitHub mainへ反映（c0213eb）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/c0213eb9e9a19779988a0f7baa495d85b776fde4"
-    },
-    {
-      "id": "github-commit-7c82d0018a7c",
-      "title": "Merge pull request #177 from yskn0008-bot/agent/life-cache-boundary-v1",
-      "completed_at": "2026-08-22T03:04:31Z",
-      "result": "GitHub mainへ反映（7c82d00）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/7c82d0018a7c92f63d077c1bd3733632d70ccbf6"
-    },
-    {
-      "id": "github-commit-bce3a2aef4b3",
-      "title": "merge: sync Life completion onto latest main",
-      "completed_at": "2026-08-22T03:01:43Z",
-      "result": "GitHub mainへ反映（bce3a2a）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/bce3a2aef4b3da29288288482cd2708a77345961"
-    },
-    {
-      "id": "github-commit-37078c8b70cd",
-      "title": "Merge pull request #175 from yskn0008-bot/agent/hj-multi-journey-v1",
-      "completed_at": "2026-08-22T03:01:07Z",
-      "result": "GitHub mainへ反映（37078c8）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/37078c8b70cd16eaa1aeb5f6abca8d608c2bacbf"
     },
     {
       "id": "complete-002",
@@ -194,7 +194,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-08-22T12:15:42+09:00",
+      "last_update": "2026-08-22T12:22:30+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -275,7 +275,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-08-22T12:15:42+09:00",
+      "last_update": "2026-08-22T12:22:30+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -298,7 +298,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-08-22T12:15:42+09:00",
+      "last_update": "2026-08-22T12:22:30+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -380,5 +380,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "f3d365009f2d42e9287795a40caa41045009c0b2b6f0be8e1dbe36dc5a69c410"
+  "github_snapshot_hash": "6b53fb1e98479cda9aaa110f63dea16c2e337156baef1c9a47ddb92136f3cdd0"
 }
