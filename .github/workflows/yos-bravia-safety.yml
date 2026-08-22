@@ -36,6 +36,7 @@ jobs:
       - run: npm install
       - run: npm run native:init
       - run: grep -q NSLocalNetworkUsageDescription ios/App/App/Info.plist
+      - run: grep -q NSAllowsLocalNetworking ios/App/App/Info.plist
       - name: Build iOS Simulator
         shell: bash
         run: |
