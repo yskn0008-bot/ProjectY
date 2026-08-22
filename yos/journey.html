@@ -38,6 +38,32 @@
       </div>
     </section>
 
+    <section class="journey-card conversation-card" aria-labelledby="conversationTitle">
+      <div class="section-head compact">
+        <div><p class="section-kicker">TALK TO YOS</p><h2 id="conversationTitle">HJの今のことを話す</h2></div>
+        <span class="subtle">先に端末保存</span>
+      </div>
+      <p class="conversation-note">話した内容はAI接続より先に端末へ残ります。AIの整理は未確認の候補です。</p>
+      <label class="journey-field" for="rawInput">
+        <span>今のこと</span>
+        <textarea id="rawInput" maxlength="10000" rows="4" placeholder="今起きていることを、そのまま話してください"></textarea>
+      </label>
+      <button id="sendConversation" class="primary-action full" type="button">保存してYOSに整理してもらう</button>
+      <p id="conversationStatus" class="conversation-status" role="status" aria-live="polite"></p>
+      <section id="candidatePanel" class="candidate-panel" aria-labelledby="candidateTitle" hidden>
+        <p class="section-kicker">UNCONFIRMED CANDIDATE</p>
+        <h3 id="candidateTitle">これはまだ候補です</h3>
+        <p id="candidateKind" class="candidate-kind"></p>
+        <p id="candidateText" class="candidate-text"></p>
+        <div class="candidate-actions" role="group" aria-label="候補を確認する">
+          <button type="button" data-candidate-decision="yes">そう</button>
+          <button type="button" data-candidate-decision="no">違う</button>
+          <button type="button" data-candidate-decision="unknown">分からない</button>
+        </div>
+        <p id="candidateProgress" class="subtle"></p>
+      </section>
+    </section>
+
     <section class="journey-card" aria-labelledby="mainQuestTitle">
       <div class="section-head compact">
         <div><p class="section-kicker">MAIN QUEST</p><h2 id="mainQuestTitle">今いちばん進めること</h2></div>

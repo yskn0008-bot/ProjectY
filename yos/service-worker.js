@@ -1,13 +1,14 @@
 'use strict';
 
 const CACHE_PREFIX = 'yos-command-center-';
-const CACHE = `${CACHE_PREFIX}v4-live-link`;
+const CACHE = `${CACHE_PREFIX}v5-hj-entry`;
 const STATIC = [
   './',
   './index.html',
   './styles.css',
   './app.js',
   './taxi-live-v1.js',
+  './hj-entry.js',
   './journey.html',
   './journey.css',
   './journey.js',
@@ -67,3 +68,4 @@ self.addEventListener('fetch', (event) => {
       .catch(() => caches.match(event.request).then((hit) => hit || caches.match('./index.html')))
   );
 });
+
