@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-08-22T11:46:35+09:00",
+  "updated_at": "2026-08-22T11:48:17+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -33,16 +33,6 @@
       "updated_at": "2026-08-22T00:18:37Z"
     },
     {
-      "id": "github-pr-255",
-      "title": "PR #255 Issue #254: persist BRAVIA remote foundation",
-      "type": "GitHub PR",
-      "status": "review",
-      "priority": 1,
-      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/255",
-      "updated_at": "2026-08-22T00:11:15Z"
-    },
-    {
       "id": "github-pr-257",
       "title": "PR #257 feat(ios): add raw-first YOS Capture phase 1",
       "type": "GitHub PR",
@@ -50,7 +40,7 @@
       "priority": 1,
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/257",
-      "updated_at": "2026-08-22T00:18:35Z"
+      "updated_at": "2026-08-22T02:48:11Z"
     },
     {
       "id": "github-pr-233",
@@ -165,6 +155,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-ced0d04eed65",
+      "title": "Merge pull request #255 from yskn0008-bot/codex/issue-254-bravia-remote",
+      "completed_at": "2026-08-22T02:48:04Z",
+      "result": "GitHub mainへ反映（ced0d04）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/ced0d04eed6581a4fac9cffb9ab0bf2f5c8c18e6"
+    },
+    {
       "id": "github-commit-d34d58561531",
       "title": "Merge pull request #253 from yskn0008-bot/codex/issue-232-autocontinue-v1",
       "completed_at": "2026-08-22T02:46:22Z",
@@ -172,18 +169,18 @@
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/d34d58561531a784e90b343c81dc5096aaacbdef"
     },
     {
-      "id": "github-commit-d21299443303",
-      "title": "merge: sync latest main into Issue 232 autopilot",
-      "completed_at": "2026-08-22T00:02:40Z",
-      "result": "GitHub mainへ反映（d212994）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/d21299443303a6dcfe4fc3afbc19fe88a2378b5c"
+      "id": "github-commit-e15575fb6fc4",
+      "title": "merge: sync latest main into BRAVIA remote",
+      "completed_at": "2026-08-22T00:08:01Z",
+      "result": "GitHub mainへ反映（e15575f）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/e15575fb6fc4a1782a041ce14ddfbd486693414f"
     },
     {
-      "id": "github-commit-254d558e9bcc",
-      "title": "fix: complete bounded ProjectY autopilot recovery",
-      "completed_at": "2026-08-22T00:00:12Z",
-      "result": "GitHub mainへ反映（254d558）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/254d558e9bcc5455708f8734da9d6aa2aa5ddc6d"
+      "id": "github-commit-ff6f0366970d",
+      "title": "fix: route BRAVIA HTTP through Capacitor native transport",
+      "completed_at": "2026-08-22T00:07:37Z",
+      "result": "GitHub mainへ反映（ff6f036）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/ff6f0366970d34686c8c95bb1e12deef58c13f26"
     },
     {
       "id": "complete-002",
@@ -210,7 +207,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #177をレビューして公開判断する",
+      "next_action": "PR #257をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -220,7 +217,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-08-22T11:46:35+09:00",
+      "last_update": "2026-08-22T11:48:17+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -295,13 +292,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 24件・Open PR 5件を自動同期中",
+      "next_action": "Open Issue 24件・Open PR 4件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-08-22T11:46:35+09:00",
+      "last_update": "2026-08-22T11:48:17+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -315,7 +312,7 @@
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #177をレビューして公開判断する",
+      "next_action": "PR #257をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -324,7 +321,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-08-22T11:46:35+09:00",
+      "last_update": "2026-08-22T11:48:17+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -406,5 +403,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "ff3c1d730ad6c45bdd655243e56f75513303df8c41d3966d1b0592693e7e50a5"
+  "github_snapshot_hash": "daa148f86f9cf29d9cf91c31ae6cb99c79729cc46c67692b87ad1efbb4999288"
 }
