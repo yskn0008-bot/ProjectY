@@ -1,0 +1,68 @@
+name: YOS Capture Safety
+
+on:
+  pull_request:
+    paths:
+      - 'ios-app/**'
+      - '.github/workflows/yos-capture-safety.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ios-app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: JavaScript syntax
+        run: |
+          node --check shell/capture-core.js
+          node --check shell/capture.js
+          node --check scripts/configure-native.mjs
+      - name: Capture and BRAVIA regression
+        run: npm test
+      - name: Prepare bundled web assets
+        run: npm run prepare:web
+      - name: Generated asset contract
+        run: |
+          test -f www/capture.html
+          test -f www/capture-core.js
+          test -f www/bravia.html
+
+  ios-build:
+    runs-on: macos-latest
+    defaults:
+      run:
+        working-directory: ios-app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install dependencies
+        run: npm install --ignore-scripts
+      - name: Generate Capacitor iOS project with SPM
+        run: npm run native:init
+      - name: Signed target configuration contract
+        run: |
+          test -f ios/App/App/App.entitlements
+          /usr/libexec/PlistBuddy -c 'Print :NSCalendarsFullAccessUsageDescription' ios/App/App/Info.plist
+          /usr/libexec/PlistBuddy -c 'Print :NSRemindersFullAccessUsageDescription' ios/App/App/Info.plist
+          test "$(/usr/libexec/PlistBuddy -c 'Print :com.apple.security.application-groups:0' ios/App/App/App.entitlements)" = 'group.jp.yos.onlysystem'
+          grep -q 'CODE_SIGN_ENTITLEMENTS = App/App.entitlements;' ios/App/App.xcodeproj/project.pbxproj
+      - name: Build iOS simulator candidate
+        run: >-
+          xcodebuild
+          -project ios/App/App.xcodeproj
+          -scheme App
+          -configuration Debug
+          -destination 'generic/platform=iOS Simulator'
+          CODE_SIGNING_ALLOWED=NO
+          build
