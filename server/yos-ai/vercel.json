@@ -20,6 +20,9 @@
     },
     "api/yos/health.mjs": {
       "maxDuration": 10
+    },
+    "api/yos/public-config.mjs": {
+      "maxDuration": 10
     }
   }
 }

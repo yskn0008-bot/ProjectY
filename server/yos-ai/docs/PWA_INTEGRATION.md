@@ -12,6 +12,14 @@
 - エラー本文にない内部原因をPWA側で推測して表示しない。
 - 通信失敗時に過去回答を最新事実として再表示しない。
 
+## 本人認証の公開設定
+
+`GET /api/yos/public-config`
+
+許可Originからだけ、Google Identity Servicesに必要な公開OAuth client IDを返す。OpenAI APIキー、Upstash Token、Googleサービスアカウント情報、非公開情報源IDは返さない。
+
+HJはGoogleの公式Webクライアントから受け取ったID tokenをメモリ内だけで使用し、localStorage・IndexedDB・Cache Storageへ保存しない。ページ再読み込み後は必要時に再認証する。
+
 ## Chat
 
 `POST /api/yos/chat`

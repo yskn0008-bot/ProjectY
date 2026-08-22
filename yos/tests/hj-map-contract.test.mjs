@@ -63,6 +63,45 @@ test('conversation-first home preserves raw input without inventing facts', asyn
   assert.doesNotMatch(scenes, /localStorage\.setItem\(['"]hj-raw/i, 'Raw Input専用の保存キーを増やしてはいけない');
 });
 
+test('active HJ saves Raw Input before YOS AI and confirms one candidate at a time', async () => {
+  const [page, scenes, client, auth, worker] = await Promise.all([
+    read('index.html'),
+    read('scenes.js'),
+    read('yos-ai-client.js'),
+    read('yos-auth.js'),
+    read('service-worker.js')
+  ]);
+  assert.match(page, /src="\.\/yos-ai-client\.js"[\s\S]*src="\.\/yos-auth\.js"[\s\S]*src="\.\/scenes\.js"/);
+  assert.equal((page.match(/data-ai-decision=/g) || []).length, 3);
+  assert.match(page, />そう</);
+  assert.match(page, />違う</);
+  assert.match(page, />分からない</);
+
+  const finish = scenes.indexOf('async function finishRawInput');
+  const rawPersist = scenes.indexOf('if (!write(KEYS.scenes, scenes))', finish);
+  const aiRequest = scenes.indexOf('await requestAiForScene(savedId)', finish);
+  assert.ok(finish > -1 && rawPersist > finish && rawPersist < aiRequest, 'Raw Input must persist before AI work');
+  for (const field of ['facts', 'assumptions', 'unknowns', 'conflicts', 'nextAction', 'memoryCandidates']) {
+    assert.match(scenes, new RegExp(`result\\?\\.${field}`));
+  }
+  assert.match(scenes, /candidate\.type === 'fact'/, 'only confirmed fact candidates become confirmed facts');
+  assert.match(scenes, /candidate\.type === 'nextAction'/, 'next action changes only after the explicit yes decision');
+  assert.match(scenes, /candidateText'\)\.textContent = candidate\.value/);
+  assert.doesNotMatch(scenes, /candidateText'\)\.innerHTML/);
+  for (const status of [401, 403, 429, 503]) assert.match(scenes, new RegExp(`${status}:`));
+
+  assert.match(client, /new URL\(path, this\.baseUrl\)/);
+  assert.match(client, /'\/api\/yos\/chat'/);
+  assert.match(client, /credentials: 'omit'/);
+  assert.match(client, /cache: 'no-store'/);
+  assert.match(auth, /accounts\.google\.com\/gsi\/client/);
+  assert.match(auth, /\/api\/yos\/public-config/);
+  assert.doesNotMatch(client + auth, /localStorage\.(?:getItem|setItem)/);
+  assert.doesNotMatch(client + auth, /OPENAI_API_KEY|UPSTASH_REDIS_REST_TOKEN|YOS_.*DOCUMENT_ID/);
+  assert.ok(worker.includes('"./yos-ai-client.js"'));
+  assert.ok(worker.includes('"./yos-auth.js"'));
+});
+
 test('detailed HJ forms stay behind explicit progressive disclosure', async () => {
   const [page, scenes, map] = await Promise.all([
     read('index.html'),

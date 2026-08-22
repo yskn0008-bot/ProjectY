@@ -66,18 +66,47 @@ try {
   await page.screenshot({ path: `test-results/hj-resume-${browserName}.png`, fullPage: true });
   await page.locator('#startConversation').click();
   assert.match(await page.locator('#rawInput').inputValue(), /仕事のことが気になった/, '保存した原文から再開できない');
+  await page.route('**/api/yos/chat', async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        requestId: 'hj-smoke-request',
+        answer: '話してくれてありがとう。まず確認したいことが1つあります。',
+        facts: [{ text: '仕事のことが気になった', sourceIds: ['00_law'] }],
+        assumptions: ['疲れが影響している可能性がある'],
+        unknowns: ['何が一番気になっているか'],
+        conflicts: [],
+        nextAction: '今日は休む',
+        memoryCandidates: [],
+        safety: { level: 'normal', notes: [] }
+      })
+    });
+  });
+  await page.evaluate(() => {
+    globalThis.YOS_AI_BASE_URL = location.origin;
+    globalThis.YOS_AUTH = { getGoogleIdToken: async () => 'header.payload.signature' };
+  });
   await page.locator('#finishRawInput').click();
   assert.equal(await visible('#rawSaved'), true, '原文保存完了が分からない');
+  await page.locator('#aiReview').waitFor({ state: 'visible' });
   assert.equal(await visible('#conversationResume'), false, '完了済みの原文を未完了の続きとして表示した');
   assert.equal(await visible('#startNewConversation'), false, '完了後も別会話導線を重複表示している');
   assert.equal(await page.locator('#startConversation').textContent(), '今のことを話す', '完了後に次回の自然な入口へ戻らない');
   const rawRecord = await page.evaluate(() => JSON.parse(localStorage.getItem('hj-daily-scenes-v1') || '[]')[0]);
-  assert.equal(rawRecord?.conversationStatus, 'raw', '本人の原文として保存完了できない');
-  assert.equal(rawRecord?.fact, '', '保存完了時に本人の原文を事実へ変換した');
+  assert.equal(rawRecord?.conversationStatus, 'confirming', 'AI候補を本人確認待ちとして保存できない');
+  assert.equal(rawRecord?.fact, '', '本人確認前に原文やAI候補を事実へ変換した');
+  assert.equal(rawRecord?.candidates?.[0]?.status, 'candidate', 'AI候補を未確認として分離できない');
 
   await page.reload({ waitUntil: 'networkidle' });
   assert.equal(await visible('#conversationResume'), false, '再起動後に完了済み原文を再開候補として表示した');
   assert.equal(await page.locator('#startConversation').textContent(), '今のことを話す', '再起動後に新しい会話入口へ戻らない');
+  assert.equal(await visible('#aiReview'), true, '再起動後に未確認のAI候補が分からない');
+  await page.locator('[data-ai-decision="yes"]').click();
+  const confirmedRecord = await page.evaluate(() => JSON.parse(localStorage.getItem('hj-daily-scenes-v1') || '[]')[0]);
+  assert.equal(confirmedRecord?.fact, '仕事のことが気になった', '本人が「そう」を選んだ事実だけを確定できない');
+  assert.deepEqual(confirmedRecord?.confirmedFacts, ['仕事のことが気になった']);
+  assert.equal(confirmedRecord?.candidates?.[1]?.status, 'candidate', '次のAI候補を一度に確定した');
 
   await page.locator('#openPastStories').click();
   assert.equal(await visible('#storyHistorySection'), true, 'これまでの物語を閲覧できない');

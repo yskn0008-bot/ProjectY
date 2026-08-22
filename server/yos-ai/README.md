@@ -51,6 +51,7 @@ YOS専用生成AI、YOSナビ自動学習、Taxiライブ保存を扱うバッ�
 - `POST /api/yos/chat`
 - `OPTIONS /api/yos/chat`
 - `GET /api/yos/health`
+- `GET /api/yos/public-config`
 - `GET /api/yos/nav-model`
 - `POST /api/yos/taxi-event`
 - `GET /api/yos/taxi-health`
@@ -98,6 +99,8 @@ GET /api/yos/taxi-health
 - nav-model再集計
 - taxi-eventの重複409を冪等成功として処理
 - JSON以外・過大レスポンスの拒否
+
+active HJ `/yos/hj/` は公開設定を取得してGoogle Identity Servicesを初期化し、ID tokenを端末保存せずに共通`YosAiClient`のブラウザー配布版からChatへ渡す。Raw Inputは認証・通信より先に既存HJストアへ保存する。
 
 TokenはコンストラクタやlocalStorageへ保存せず、必要な呼び出し時だけ渡す。
 

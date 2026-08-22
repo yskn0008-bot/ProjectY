@@ -1,6 +1,6 @@
 "use strict";
 
-const CACHE = "hj-multi-journey-v9-read-first";
+const CACHE = "hj-multi-journey-v10-yos-ai";
 const STATIC = [
   "./",
   "./index.html",
@@ -12,6 +12,8 @@ const STATIC = [
   "./bootstrap.js",
   "./app.js",
   "./profile.js",
+  "./yos-ai-client.js",
+  "./yos-auth.js",
   "./scenes.js",
   "./history.js",
   "./editor.js",
