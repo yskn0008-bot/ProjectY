@@ -1,0 +1,12 @@
+{
+  "name": "@yos/secure-credentials",
+  "version": "0.1.0",
+  "description": "BRAVIA-only Keychain boundary for YOS",
+  "main": "dist/plugin.cjs.js",
+  "module": "dist/esm/index.js",
+  "types": "dist/esm/index.d.ts",
+  "files": ["dist/", "ios/Sources", "Package.swift", "YOSSecureCredentials.podspec"],
+  "license": "UNLICENSED",
+  "peerDependencies": { "@capacitor/core": ">=8.0.0" },
+  "capacitor": { "ios": { "src": "ios" } }
+}

@@ -12,7 +12,7 @@ await mkdir(webDir, { recursive: true });
 
 await cp(resolve(repoDir, 'taxi'), resolve(webDir, 'taxi'), { recursive: true });
 await cp(resolve(repoDir, 'life'), resolve(webDir, 'life'), { recursive: true });
-await cp(resolve(appDir, 'shell', 'index.html'), resolve(webDir, 'index.html'));
+await cp(resolve(appDir, 'shell'), webDir, { recursive: true });
 
 await writeFile(
   resolve(webDir, 'build-info.json'),

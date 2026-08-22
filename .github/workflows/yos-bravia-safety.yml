@@ -1,0 +1,51 @@
+name: YOS BRAVIA safety
+
+on:
+  pull_request:
+    paths:
+      - 'ios-app/**'
+      - '.github/workflows/yos-bravia-safety.yml'
+  workflow_dispatch:
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ios-app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install
+      - run: npm test
+      - run: npm run prepare:web
+      - run: test -f www/bravia.html && test -f www/bravia.js && test -f www/bravia-preferences.js
+
+  native:
+    runs-on: macos-15
+    defaults:
+      run:
+        working-directory: ios-app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install
+      - run: npm run native:init
+      - run: grep -q NSLocalNetworkUsageDescription ios/App/App/Info.plist
+      - run: grep -q NSAllowsLocalNetworking ios/App/App/Info.plist
+      - name: Build iOS Simulator
+        shell: bash
+        run: |
+          set -o pipefail
+          xcodebuild -project ios/App/App.xcodeproj -scheme App -destination 'generic/platform=iOS Simulator' CODE_SIGNING_ALLOWED=NO build 2>&1 | tee xcodebuild.log
+      - name: Preserve native build log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bravia-native-build-log
+          path: ios-app/xcodebuild.log
+          if-no-files-found: ignore
