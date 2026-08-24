@@ -7,7 +7,6 @@ export interface YosAnswerService {
 export interface RequestRuntimeContext {
   requestId: string;
   subjectHash: string;
-  vercelOidcToken?: string;
 }
 
 export interface RequestRuntimeFactory {
