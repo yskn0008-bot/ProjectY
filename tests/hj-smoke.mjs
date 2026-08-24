@@ -1,21 +1,24 @@
 import assert from 'node:assert/strict';
 import { mkdir } from 'node:fs/promises';
-import { createServer } from 'node:https';
+import { createServer } from 'node:http';
 import { networkInterfaces } from 'node:os';
 import { chromium, webkit } from 'playwright';
 
-const baseURL = process.env.HJ_BASE_URL || 'http://127.0.0.1:4173/yos/hj/';
+const testHost = Object.values(networkInterfaces())
+  .flat()
+  .find((address) => address?.family === 'IPv4' && !address.internal)?.address;
+if (!testHost) throw new Error('HJ smoke test requires a non-loopback IPv4 address');
+process.env.NO_PROXY = [process.env.NO_PROXY, testHost].filter(Boolean).join(',');
+process.env.no_proxy = [process.env.no_proxy, testHost].filter(Boolean).join(',');
+const baseURL = process.env.HJ_BASE_URL || `http://${testHost}:4173/yos/hj/`;
 const browserName = process.env.HJ_BROWSER || 'chromium';
 const engine = { chromium, webkit }[browserName];
 if (!engine) throw new Error(`Unsupported browser: ${browserName}`);
 await mkdir('test-results', { recursive: true });
 
-const TEST_TLS_KEY = Buffer.from("LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCk1JSUV2UUlCQURBTkJna3Foa2lHOXcwQkFRRUZBQVNDQktjd2dnU2pBZ0VBQW9JQkFRREhrbG9hOFdxcFRXdTEKMnZCYUt5RzRtbXErY3BQQXdtMWk2MFhUdTZ3NTFaN2MxUkk3ZE9YYnNvMkFUbFdUNXhuZmt3Zng1QVM4ZUorZwo5S1pwQ1d0TmdLaFdRT1ROeWp5SERDL2I4cnFWMVhvZTIzaG5ldDJSdGRpSW9MTWR0SGJEOG1xZGhMSmhpaDk1CnlwbU9GUGlhTWZjWUhzQTFBUTRLRi9FU1lQbjJEWlc3OThaVWxNTFFrcmtJQ0tvRkpGbk8rdStRQWxtRm81L1IKb2JSRldkZGE3Q2VUd3BIaW9pMzRaVG92L2hKcy84SXIwYmZ3NWdHSlgweDVVbHB5MzlRazNROUZLYWRWS1FKVQoxTWx3Qy9FZmdHZ0t0ZmFuckxjQTg0NDYvSk4rSTFFRmxHRHRvYmRwMnpzT0dkQnZ0aXY2Sm5obHBXcWlLalVJCkx4MG52RzJOQWdNQkFBRUNnZ0VBRDF6bnpNMHF6YytrN0FIbm9MbFRSamUwNGVaR0UzK2tGZ3BRZk1Va3Mrc0sKNktzS1ZVTmhjbkVqVFc0NlRrRnJEM2Z0RTZUZTdIZElxb1pLelNrcGRuVGlBSW5NVXo4dk82SW5pUUg5ZFExUwo4azhvektaN3FmemFwMkhmaC9qZGI2WVlxUG1QRmMwaE1TbjBlaWlKSHEyYi9PSlpIM3R1VGo2Ymt6T2Q2bC9zCmRMVVU5L01BSGNJNEQ3ekRzdTFEbm9vcjRxUDM4MFdyV1FNaVNTZ0ZUdkEzdkhGWFNoK2ZSbHQyVzN3cEdPaHUKSlkydVozMmhkNHk5UHhsQzJsTjFuc2hKbks1S2Zid09qeFFwaXBpWTBSZE81UlorbVhDTzg5c3dDREtKRGZGVgpGV0ZVNkJNV09uY3FwUjZwYkdwODN1ZEFPb3prb2duZ01sRFBuVEhqZ1FLQmdRRHluMUVxTGtJaVJVVVAxVksvCkQyd0pjZTdUSCtDckVzZy83Z3czNUFjUjk4ejRGOUJPQ2hPWFpuTXllSUxaR3dDNEpCRVNiSkQxeWo2S2J2eXoKZ041TGFSbUlhTEVJQ2pyMUxOR01XZEtSeGJBRnhYMjVuT3NoZzE2Tjc3ZSt2QTNDb1VOT2krbVhrTU0yRWpuWQo5S3BnZjFaV1VEUkRPbDhxaXRQbjcwWFI3UUtCZ1FEU2sxemxlT0k2TlFYUlNack1lcEZkdUFwcVBLOXRveUlVClRERXpzM1lRbDBKZCszWGJJNDloUFd1Z0p2MGw0ZE9tbi8yK1gxYXIvQnhuaGNSdFgyU0plM29IelRQT09wME0KMkU4ZWdEaEpNUnlNMytxUStZdlRya25iSVdCNU1XVTR6VytOMGMvQll2NTlieGpzaENJMWRuRmpnSUVUK1dhTwpxcEYwd0RvV0lRS0JnUUNkaUxhUnRkRjVJUk1Ua2NhVmlmVHpPUWdDQzZ1OFNJaS9nZGhySGVNOVZuRy9FTzlQCkRKbmw3ejZUSWM2TUcwMWZRd1BXdTZsdi9tNlhRak5RZGpkZ0xaREhrbnFJSnVSYk4wdWtYdG9yam5tWmRiOEoKbXdyTkN0aUZQb1pIRVNHNkl5MXB2Y3poZmJ4U3lvakhCeTN0VkNFQ0VEZXZBeUt4bzh5dHh4M0ZqUUtCZ0dqVwo3NWhjUUI0RXlobXlFTDBmaFFKcEg5NVd5bXpHbkxBSVl6Sy9kZGU2eDFNdFlEY3psQzR3dTBYb1EzODUyUHVMCmluVGUyTE1WK1RwZGNqZVdGK01QTStsd2RBdUlTU3JkQXo5SFRUNjdrZUJkbDFhSXQrSXpVeGdqblBtWjZ6Q0YKcjdXbk1VMnlNTXhZcE1zVTJrZE42aFJGSlg3QlhCdEp0dE91NVB5aEFvR0FSdkM4eVp2c00wOHh2dEJLTTRIdQpBUTQ2ZVFFNldjeFp5VXNsZmROdm90ZzJTQmxOcWhMOVZMNjJLUWd3YzVTL1V2WEZxTGFSWUM4WGJwRnFvVVo0CmN5UGZrQXBnQndqV29ScFNQN1pHdE9wSkxmYVQ5c3M5VHpiYk9YcVFpTVN2bGs4Q3c2MWVzajNKaVRSZkZMWUkKRmxsSzQrTG1HTnZjSnZienVGRHUzbDA9Ci0tLS0tRU5EIFBSSVZBVEUgS0VZLS0tLS0K", 'base64');
-const TEST_TLS_CERT = Buffer.from("LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURKVENDQWcyZ0F3SUJBZ0lVTkg1ZVFhakxGQkFITWxVNTFQcFJFYVdFdHdJd0RRWUpLb1pJaHZjTkFRRUwKQlFBd0ZERVNNQkFHQTFVRUF3d0piRzlqWVd4b2IzTjBNQjRYRFRJMk1EZ3lOREl4TVRRME5Gb1hEVE0yTURneQpNVEl4TVRRME5Gb3dGREVTTUJBR0ExVUVBd3dKYkc5allXeG9iM04wTUlJQklqQU5CZ2txaGtpRzl3MEJBUUVGCkFBT0NBUThBTUlJQkNnS0NBUUVBeDVKYUd2RnFxVTFydGRyd1dpc2h1SnBxdm5LVHdNSnRZdXRGMDd1c09kV2UKM05VU08zVGwyN0tOZ0U1VmsrY1ozNU1IOGVRRXZIaWZvUFNtYVFsclRZQ29Wa0RremNvOGh3d3YyL0s2bGRWNgpIdHQ0WjNyZGtiWFlpS0N6SGJSMncvSnFuWVN5WVlvZmVjcVpqaFQ0bWpIM0dCN0FOUUVPQ2hmeEVtRDU5ZzJWCnUvZkdWSlRDMEpLNUNBaXFCU1JaenZydmtBSlpoYU9mMGFHMFJWblhXdXduazhLUjRxSXQrR1U2TC80U2JQL0MKSzlHMzhPWUJpVjlNZVZKYWN0L1VKTjBQUlNtblZTa0NWTlRKY0F2eEg0Qm9DclgycDZ5M0FQT09PdnlUZmlOUgpCWlJnN2FHM2FkczdEaG5RYjdZcitpWjRaYVZxb2lvMUNDOGRKN3h0alFJREFRQUJvMjh3YlRBZEJnTlZIUTRFCkZnUVU5OEJmQzBhdUcrdmlIeS9hR1ZiUUZXWnhjbmd3SHdZRFZSMGpCQmd3Rm9BVTk4QmZDMGF1Ryt2aUh5L2EKR1ZiUUZXWnhjbmd3RHdZRFZSMFRBUUgvQkFVd0F3RUIvekFhQmdOVkhSRUVFekFSZ2dsc2IyTmhiR2h2YzNTSApCSDhBQUFFd0RRWUpLb1pJaHZjTkFRRUxCUUFEZ2dFQkFHUHBnWUNjR0tYRERDamRPc0I1VC84ak1pVzBKWThUClJadjV3dElpTldCY3RkaDhUeE13MTJ4YlJHNUF6bVpQZUpnUXJpUUpQWFhzcUhiMzdBRXB4bXNOaTErWkRISWwKL0RsaDZCOUxENU1GZjRFZkVaK2V5M2xVeWY4SFRES2ZaeXNGcHN1ZmtiMUY5SWFGWFlBek8rSTdYZHhqRmNPNgpYSTVadGFkak1pRVBnSUljS1hpeklGSEVPaE9xT3JFZDlaSFpYU0hSS0VTRk5weUJVUVJEVHJTc2dMb09lRGJTCkFTeWdjTGl6eEQ0dE9BbmxUZ2tOTzg3SlZvajR1cEcxdkFXekRQZmJiV0czUGZGaDFCMWw2a05xcmtlT2JONkYKRmc0bDNDODl5Yi94TU0zeTIwSCsyNk5VK2RoV3FmV25OTmowVW44endQVnd1bzAvOUlaWnVFMD0KLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQo=", 'base64');
-
 const requestSequence = [];
 let chatRequest;
-const apiServer = createServer({ key: TEST_TLS_KEY, cert: TEST_TLS_CERT }, (request, response) => {
+const apiServer = createServer((request, response) => {
   if (request.url !== '/api/yos/chat') {
     response.writeHead(404).end();
     return;
@@ -25,7 +28,7 @@ const apiServer = createServer({ key: TEST_TLS_KEY, cert: TEST_TLS_CERT }, (requ
   const corsHeaders = {
     'Access-Control-Allow-Origin': origin,
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'Authorization, Content-Type, X-HJ-Smoke',
+    'Access-Control-Allow-Headers': 'Authorization, Content-Type',
     'Cache-Control': 'no-store',
     'Content-Type': 'application/json; charset=utf-8',
     Vary: 'Origin'
@@ -54,19 +57,14 @@ const apiServer = createServer({ key: TEST_TLS_KEY, cert: TEST_TLS_CERT }, (requ
 });
 await new Promise((resolve, reject) => {
   apiServer.once('error', reject);
-  apiServer.listen(0, '0.0.0.0', resolve);
+  apiServer.listen(0, testHost, resolve);
 });
 const apiAddress = apiServer.address();
 if (!apiAddress || typeof apiAddress === 'string') throw new Error('HJ CORS test server did not start');
-const apiHost = Object.values(networkInterfaces())
-  .flat()
-  .find((address) => address?.family === 'IPv4' && !address.internal)?.address;
-if (!apiHost) throw new Error('HJ CORS test server has no non-loopback IPv4 address');
-const apiBaseUrl = `https://${apiHost}:${apiAddress.port}`;
+const apiBaseUrl = `http://${testHost}:${apiAddress.port}`;
 
 const browser = await engine.launch();
 const context = await browser.newContext({
-  ignoreHTTPSErrors: true,
   viewport: { width: 375, height: 667 },
   deviceScaleFactor: 2,
   isMobile: true,
@@ -123,27 +121,10 @@ try {
   await page.screenshot({ path: `test-results/hj-resume-${browserName}.png`, fullPage: true });
   await page.locator('#startConversation').click();
   assert.match(await page.locator('#rawInput').inputValue(), /仕事のことが気になった/, '保存した原文から再開できない');
-  await page.evaluate(({ localApiBaseUrl, forceExplicitPreflight }) => {
-    const nativeFetch = globalThis.fetch.bind(globalThis);
-    let explicitPreflightSent = false;
-    globalThis.fetch = async (input, init = {}) => {
-      if (forceExplicitPreflight && !explicitPreflightSent && init.method === 'POST') {
-        explicitPreflightSent = true;
-        await nativeFetch(input, {
-          method: 'OPTIONS',
-          credentials: 'omit',
-          cache: 'no-store',
-          redirect: 'error',
-          referrerPolicy: 'no-referrer'
-        });
-      }
-      const headers = new Headers(init.headers || {});
-      headers.set('X-HJ-Smoke', 'preflight');
-      return nativeFetch(input, { ...init, headers });
-    };
+  await page.evaluate((localApiBaseUrl) => {
     globalThis.YOS_AI_BASE_URL = localApiBaseUrl;
     globalThis.YOS_AUTH = { getGoogleIdToken: async () => 'header.payload.signature' };
-  }, { localApiBaseUrl: apiBaseUrl, forceExplicitPreflight: browserName === 'webkit' });
+  }, apiBaseUrl);
   await page.locator('#finishRawInput').click();
   assert.equal(await visible('#rawSaved'), true, '原文保存完了が分からない');
   await page.waitForFunction(() => {
