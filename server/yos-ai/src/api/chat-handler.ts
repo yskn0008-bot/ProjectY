@@ -1,7 +1,6 @@
 import {createAnswerAuditRecord, type AuditSink} from '../audit.js';
 import type {IdentityGate} from '../auth/identity-gate.js';
 import type {IdentityVerifier} from '../auth/types.js';
-import {readVercelOidcToken} from '../auth/vercel-oidc.js';
 import type {RateLimiter} from '../rate-limit.js';
 import type {RequestRuntimeFactory} from '../runtime/types.js';
 import type {YosRequest} from '../types.js';
@@ -98,11 +97,9 @@ export function createChatHandler(options: ChatHandlerOptions): (request: Reques
 
     const startedAt = monotonicClock();
     try {
-      const vercelOidcToken = readVercelOidcToken(request);
       const runtime = await options.runtimeFactory.create({
         requestId,
-        subjectHash,
-        ...(vercelOidcToken ? {vercelOidcToken} : {})
+        subjectHash
       });
       const answer = await runtime.answer(yosRequest);
       const durationMilliseconds = Math.max(0, Math.round(monotonicClock() - startedAt));
