@@ -6,6 +6,15 @@ import type {RequestRuntimeFactory} from '../runtime/types.js';
 import type {YosRequest} from '../types.js';
 import {allowedOrigin, bearerToken, corsPreflight, secureJson, type CorsOptions} from './shared.js';
 
+export type ChatFailureStage = 'rate-limit' | 'runtime-create' | 'answer' | 'audit';
+
+export interface ChatFailureEvent {
+  stage: ChatFailureStage;
+  requestId: string;
+}
+
+export type ChatFailureReporter = (event: ChatFailureEvent) => void;
+
 export interface ChatHandlerOptions extends CorsOptions {
   identityVerifier: IdentityVerifier;
   identityGate: IdentityGate;
@@ -15,6 +24,7 @@ export interface ChatHandlerOptions extends CorsOptions {
   requestIdFactory?: () => string;
   clock?: () => string;
   monotonicClock?: () => number;
+  failureReporter?: ChatFailureReporter;
   maxBodyBytes?: number;
   maxUserTextCharacters?: number;
   maxConversationSummaryCharacters?: number;
@@ -68,6 +78,7 @@ export function createChatHandler(options: ChatHandlerOptions): (request: Reques
         );
       }
     } catch {
+      reportFailure(options.failureReporter, {stage: 'rate-limit', requestId});
       return secureJson({error: 'YOS is temporarily unavailable', requestId}, 503, origin);
     }
 
@@ -96,13 +107,16 @@ export function createChatHandler(options: ChatHandlerOptions): (request: Reques
     };
 
     const startedAt = monotonicClock();
+    let failureStage: ChatFailureStage = 'runtime-create';
     try {
       const runtime = await options.runtimeFactory.create({
         requestId,
         subjectHash
       });
+      failureStage = 'answer';
       const answer = await runtime.answer(yosRequest);
       const durationMilliseconds = Math.max(0, Math.round(monotonicClock() - startedAt));
+      failureStage = 'audit';
       await options.auditSink.append(createAnswerAuditRecord({
         answer,
         subjectHash,
@@ -111,6 +125,7 @@ export function createChatHandler(options: ChatHandlerOptions): (request: Reques
       }));
       return secureJson(answer, 200, origin);
     } catch {
+      reportFailure(options.failureReporter, {stage: failureStage, requestId});
       return secureJson({error: 'YOS is temporarily unavailable', requestId}, 503, origin);
     }
   };
@@ -166,4 +181,12 @@ function optionalString(value: unknown, name: string, max: number): string | und
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function reportFailure(reporter: ChatFailureReporter | undefined, event: ChatFailureEvent): void {
+  try {
+    reporter?.(event);
+  } catch {
+    // Observability must never change the fail-closed response.
+  }
 }

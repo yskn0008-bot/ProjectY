@@ -17,6 +17,12 @@ export default {
     try {
       return await getHandlers().chat(request);
     } catch {
+      console.error(JSON.stringify({
+        level: 'error',
+        event: 'yos_chat_unavailable',
+        route: '/api/yos/chat',
+        stage: 'app-init'
+      }));
       return Response.json(
         {error: 'YOS is temporarily unavailable'},
         {
