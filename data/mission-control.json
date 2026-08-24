@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-08-24T13:00:19+09:00",
+  "updated_at": "2026-08-24T13:52:38+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -30,7 +30,7 @@
       "priority": 2,
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/261",
-      "updated_at": "2026-08-24T02:37:48Z"
+      "updated_at": "2026-08-24T04:37:29Z"
     },
     {
       "id": "github-issue-10",
@@ -149,13 +149,6 @@
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/ff55425cddd325caa586e050f9f2037405951518"
     },
     {
-      "id": "github-commit-eca0935c80c9",
-      "title": "Merge pull request #259 from codex/issue-232-mission-control-worker-migration",
-      "completed_at": "2026-08-22T03:22:17Z",
-      "result": "GitHub mainへ反映（eca0935）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/eca0935c80c9642223bf8262113dbeebb4ba4d5f"
-    },
-    {
       "id": "complete-002",
       "title": "iPhone向けMission Control Dashboardを実装",
       "completed_at": "2026-07-17T17:55:00+09:00",
@@ -190,7 +183,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-08-24T13:00:19+09:00",
+      "last_update": "2026-08-24T13:52:38+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -271,7 +264,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-08-24T13:00:19+09:00",
+      "last_update": "2026-08-24T13:52:38+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -294,7 +287,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-08-24T13:00:19+09:00",
+      "last_update": "2026-08-24T13:52:38+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -376,5 +369,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "50420a4fda1161b945e9c0c265a105abc3ec5d9e9ce294fd8fd04ddba89952b2"
+  "github_snapshot_hash": "07e40e3bf864f325cde20cb10a0e21048cd929dc940c14c529c9ad1fd03056f9"
 }
