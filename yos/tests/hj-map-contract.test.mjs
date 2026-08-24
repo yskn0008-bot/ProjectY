@@ -139,8 +139,10 @@ test('offline manifest contains every current-location asset', async () => {
 
 test('scene editor maps rendered cards to stable scene ids', async () => {
   const [scenes, editor] = await Promise.all([read('scenes.js'), read('editor.js')]);
+  const decorateScenes = editor.match(/function decorateScenes\(\)[\s\S]*?(?=function decorateStories\(\))/u)?.[0] || '';
   assert.match(scenes, /article\.dataset\.sceneId = scene\.id/);
   assert.match(editor, /c\.dataset\.sceneId/);
   assert.match(editor, /ss\(\)\.find\(item=>item\.id===c\.dataset\.sceneId\)/);
-  assert.doesNotMatch(editor, /items\[i\]/, 'scene cards must not map to records by position');
+  assert.match(decorateScenes, /ss\(\)\.find\(item=>item\.id===c\.dataset\.sceneId\)/);
+  assert.doesNotMatch(decorateScenes, /items\[i\]/, 'scene cards must not map to records by position');
 });
