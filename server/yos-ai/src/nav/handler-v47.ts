@@ -1,5 +1,4 @@
 import {createGoogleAccessTokenProvider} from '../auth/google-runtime.js';
-import {readVercelOidcToken} from '../auth/vercel-oidc.js';
 import type {GoogleWorkloadAuthConfig} from '../config.js';
 import type {FetchLike} from '../http.js';
 import {GoogleSheetsClient} from '../sources/google-sheets-client.js';
@@ -46,7 +45,7 @@ export function createNavModelHandlerV47(options: CreateNavModelHandlerOptions):
     }
 
     try {
-      inFlight ??= loadModel(request).finally(() => {
+      inFlight ??= loadModel().finally(() => {
         inFlight = null;
       });
       const model = await inFlight;
@@ -58,9 +57,8 @@ export function createNavModelHandlerV47(options: CreateNavModelHandlerOptions):
     }
   };
 
-  async function loadModel(request: Request): Promise<ImadaNavModel> {
-    const oidcToken = readVercelOidcToken(request);
-    const accessTokenProvider = await createGoogleAccessTokenProvider(options.googleWorkloadAuth, oidcToken);
+  async function loadModel(): Promise<ImadaNavModel> {
+    const accessTokenProvider = await createGoogleAccessTokenProvider(options.googleWorkloadAuth);
     const accessToken = await accessTokenProvider.getAccessToken();
     const result = await sheets.batchGet(options.spreadsheetId, TRIP_RANGES, accessToken);
     const rows = result.valueRanges.flatMap((range) => range.values ?? []);
