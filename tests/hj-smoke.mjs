@@ -123,16 +123,27 @@ try {
   await page.screenshot({ path: `test-results/hj-resume-${browserName}.png`, fullPage: true });
   await page.locator('#startConversation').click();
   assert.match(await page.locator('#rawInput').inputValue(), /仕事のことが気になった/, '保存した原文から再開できない');
-  await page.evaluate((localApiBaseUrl) => {
+  await page.evaluate(({ localApiBaseUrl, forceExplicitPreflight }) => {
     const nativeFetch = globalThis.fetch.bind(globalThis);
-    globalThis.fetch = (input, init = {}) => {
+    let explicitPreflightSent = false;
+    globalThis.fetch = async (input, init = {}) => {
+      if (forceExplicitPreflight && !explicitPreflightSent && init.method === 'POST') {
+        explicitPreflightSent = true;
+        await nativeFetch(input, {
+          method: 'OPTIONS',
+          credentials: 'omit',
+          cache: 'no-store',
+          redirect: 'error',
+          referrerPolicy: 'no-referrer'
+        });
+      }
       const headers = new Headers(init.headers || {});
       headers.set('X-HJ-Smoke', 'preflight');
       return nativeFetch(input, { ...init, headers });
     };
     globalThis.YOS_AI_BASE_URL = localApiBaseUrl;
     globalThis.YOS_AUTH = { getGoogleIdToken: async () => 'header.payload.signature' };
-  }, apiBaseUrl);
+  }, { localApiBaseUrl: apiBaseUrl, forceExplicitPreflight: browserName === 'webkit' });
   await page.locator('#finishRawInput').click();
   assert.equal(await visible('#rawSaved'), true, '原文保存完了が分からない');
   await page.waitForFunction(() => {
