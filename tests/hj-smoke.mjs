@@ -1,15 +1,74 @@
 import assert from 'node:assert/strict';
 import { mkdir } from 'node:fs/promises';
+import { createServer } from 'node:https';
+import { networkInterfaces } from 'node:os';
 import { chromium, webkit } from 'playwright';
 
-const baseURL = process.env.HJ_BASE_URL || 'http://127.0.0.1:4173/yos/hj/';
+const testHost = Object.values(networkInterfaces())
+  .flat()
+  .find((address) => address?.family === 'IPv4' && !address.internal)?.address;
+if (!testHost) throw new Error('HJ smoke test requires a non-loopback IPv4 address');
+process.env.NO_PROXY = [process.env.NO_PROXY, testHost].filter(Boolean).join(',');
+process.env.no_proxy = [process.env.no_proxy, testHost].filter(Boolean).join(',');
+const baseURL = process.env.HJ_BASE_URL || `http://${testHost}:4173/yos/hj/`;
 const browserName = process.env.HJ_BROWSER || 'chromium';
 const engine = { chromium, webkit }[browserName];
 if (!engine) throw new Error(`Unsupported browser: ${browserName}`);
 await mkdir('test-results', { recursive: true });
 
+const TEST_TLS_KEY = Buffer.from("LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCk1JSUV2UUlCQURBTkJna3Foa2lHOXcwQkFRRUZBQVNDQktjd2dnU2pBZ0VBQW9JQkFRREhrbG9hOFdxcFRXdTEKMnZCYUt5RzRtbXErY3BQQXdtMWk2MFhUdTZ3NTFaN2MxUkk3ZE9YYnNvMkFUbFdUNXhuZmt3Zng1QVM4ZUorZwo5S1pwQ1d0TmdLaFdRT1ROeWp5SERDL2I4cnFWMVhvZTIzaG5ldDJSdGRpSW9MTWR0SGJEOG1xZGhMSmhpaDk1CnlwbU9GUGlhTWZjWUhzQTFBUTRLRi9FU1lQbjJEWlc3OThaVWxNTFFrcmtJQ0tvRkpGbk8rdStRQWxtRm81L1IKb2JSRldkZGE3Q2VUd3BIaW9pMzRaVG92L2hKcy84SXIwYmZ3NWdHSlgweDVVbHB5MzlRazNROUZLYWRWS1FKVQoxTWx3Qy9FZmdHZ0t0ZmFuckxjQTg0NDYvSk4rSTFFRmxHRHRvYmRwMnpzT0dkQnZ0aXY2Sm5obHBXcWlLalVJCkx4MG52RzJOQWdNQkFBRUNnZ0VBRDF6bnpNMHF6YytrN0FIbm9MbFRSamUwNGVaR0UzK2tGZ3BRZk1Va3Mrc0sKNktzS1ZVTmhjbkVqVFc0NlRrRnJEM2Z0RTZUZTdIZElxb1pLelNrcGRuVGlBSW5NVXo4dk82SW5pUUg5ZFExUwo4azhvektaN3FmemFwMkhmaC9qZGI2WVlxUG1QRmMwaE1TbjBlaWlKSHEyYi9PSlpIM3R1VGo2Ymt6T2Q2bC9zCmRMVVU5L01BSGNJNEQ3ekRzdTFEbm9vcjRxUDM4MFdyV1FNaVNTZ0ZUdkEzdkhGWFNoK2ZSbHQyVzN3cEdPaHUKSlkydVozMmhkNHk5UHhsQzJsTjFuc2hKbks1S2Zid09qeFFwaXBpWTBSZE81UlorbVhDTzg5c3dDREtKRGZGVgpGV0ZVNkJNV09uY3FwUjZwYkdwODN1ZEFPb3prb2duZ01sRFBuVEhqZ1FLQmdRRHluMUVxTGtJaVJVVVAxVksvCkQyd0pjZTdUSCtDckVzZy83Z3czNUFjUjk4ejRGOUJPQ2hPWFpuTXllSUxaR3dDNEpCRVNiSkQxeWo2S2J2eXoKZ041TGFSbUlhTEVJQ2pyMUxOR01XZEtSeGJBRnhYMjVuT3NoZzE2Tjc3ZSt2QTNDb1VOT2krbVhrTU0yRWpuWQo5S3BnZjFaV1VEUkRPbDhxaXRQbjcwWFI3UUtCZ1FEU2sxemxlT0k2TlFYUlNack1lcEZkdUFwcVBLOXRveUlVClRERXpzM1lRbDBKZCszWGJJNDloUFd1Z0p2MGw0ZE9tbi8yK1gxYXIvQnhuaGNSdFgyU0plM29IelRQT09wME0KMkU4ZWdEaEpNUnlNMytxUStZdlRya25iSVdCNU1XVTR6VytOMGMvQll2NTlieGpzaENJMWRuRmpnSUVUK1dhTwpxcEYwd0RvV0lRS0JnUUNkaUxhUnRkRjVJUk1Ua2NhVmlmVHpPUWdDQzZ1OFNJaS9nZGhySGVNOVZuRy9FTzlQCkRKbmw3ejZUSWM2TUcwMWZRd1BXdTZsdi9tNlhRak5RZGpkZ0xaREhrbnFJSnVSYk4wdWtYdG9yam5tWmRiOEoKbXdyTkN0aUZQb1pIRVNHNkl5MXB2Y3poZmJ4U3lvakhCeTN0VkNFQ0VEZXZBeUt4bzh5dHh4M0ZqUUtCZ0dqVwo3NWhjUUI0RXlobXlFTDBmaFFKcEg5NVd5bXpHbkxBSVl6Sy9kZGU2eDFNdFlEY3psQzR3dTBYb1EzODUyUHVMCmluVGUyTE1WK1RwZGNqZVdGK01QTStsd2RBdUlTU3JkQXo5SFRUNjdrZUJkbDFhSXQrSXpVeGdqblBtWjZ6Q0YKcjdXbk1VMnlNTXhZcE1zVTJrZE42aFJGSlg3QlhCdEp0dE91NVB5aEFvR0FSdkM4eVp2c00wOHh2dEJLTTRIdQpBUTQ2ZVFFNldjeFp5VXNsZmROdm90ZzJTQmxOcWhMOVZMNjJLUWd3YzVTL1V2WEZxTGFSWUM4WGJwRnFvVVo0CmN5UGZrQXBnQndqV29ScFNQN1pHdE9wSkxmYVQ5c3M5VHpiYk9YcVFpTVN2bGs4Q3c2MWVzajNKaVRSZkZMWUkKRmxsSzQrTG1HTnZjSnZienVGRHUzbDA9Ci0tLS0tRU5EIFBSSVZBVEUgS0VZLS0tLS0K", 'base64');
+const TEST_TLS_CERT = Buffer.from("LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURKVENDQWcyZ0F3SUJBZ0lVTkg1ZVFhakxGQkFITWxVNTFQcFJFYVdFdHdJd0RRWUpLb1pJaHZjTkFRRUwKQlFBd0ZERVNNQkFHQTFVRUF3d0piRzlqWVd4b2IzTjBNQjRYRFRJMk1EZ3lOREl4TVRRME5Gb1hEVE0yTURneQpNVEl4TVRRME5Gb3dGREVTTUJBR0ExVUVBd3dKYkc5allXeG9iM04wTUlJQklqQU5CZ2txaGtpRzl3MEJBUUVGCkFBT0NBUThBTUlJQkNnS0NBUUVBeDVKYUd2RnFxVTFydGRyd1dpc2h1SnBxdm5LVHdNSnRZdXRGMDd1c09kV2UKM05VU08zVGwyN0tOZ0U1VmsrY1ozNU1IOGVRRXZIaWZvUFNtYVFsclRZQ29Wa0RremNvOGh3d3YyL0s2bGRWNgpIdHQ0WjNyZGtiWFlpS0N6SGJSMncvSnFuWVN5WVlvZmVjcVpqaFQ0bWpIM0dCN0FOUUVPQ2hmeEVtRDU5ZzJWCnUvZkdWSlRDMEpLNUNBaXFCU1JaenZydmtBSlpoYU9mMGFHMFJWblhXdXduazhLUjRxSXQrR1U2TC80U2JQL0MKSzlHMzhPWUJpVjlNZVZKYWN0L1VKTjBQUlNtblZTa0NWTlRKY0F2eEg0Qm9DclgycDZ5M0FQT09PdnlUZmlOUgpCWlJnN2FHM2FkczdEaG5RYjdZcitpWjRaYVZxb2lvMUNDOGRKN3h0alFJREFRQUJvMjh3YlRBZEJnTlZIUTRFCkZnUVU5OEJmQzBhdUcrdmlIeS9hR1ZiUUZXWnhjbmd3SHdZRFZSMGpCQmd3Rm9BVTk4QmZDMGF1Ryt2aUh5L2EKR1ZiUUZXWnhjbmd3RHdZRFZSMFRBUUgvQkFVd0F3RUIvekFhQmdOVkhSRUVFekFSZ2dsc2IyTmhiR2h2YzNTSApCSDhBQUFFd0RRWUpLb1pJaHZjTkFRRUxCUUFEZ2dFQkFHUHBnWUNjR0tYRERDamRPc0I1VC84ak1pVzBKWThUClJadjV3dElpTldCY3RkaDhUeE13MTJ4YlJHNUF6bVpQZUpnUXJpUUpQWFhzcUhiMzdBRXB4bXNOaTErWkRISWwKL0RsaDZCOUxENU1GZjRFZkVaK2V5M2xVeWY4SFRES2ZaeXNGcHN1ZmtiMUY5SWFGWFlBek8rSTdYZHhqRmNPNgpYSTVadGFkak1pRVBnSUljS1hpeklGSEVPaE9xT3JFZDlaSFpYU0hSS0VTRk5weUJVUVJEVHJTc2dMb09lRGJTCkFTeWdjTGl6eEQ0dE9BbmxUZ2tOTzg3SlZvajR1cEcxdkFXekRQZmJiV0czUGZGaDFCMWw2a05xcmtlT2JONkYKRmc0bDNDODl5Yi94TU0zeTIwSCsyNk5VK2RoV3FmV25OTmowVW44endQVnd1bzAvOUlaWnVFMD0KLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQo=", 'base64');
+
+const requestSequence = [];
+let chatRequest;
+const apiServer = createServer({ key: TEST_TLS_KEY, cert: TEST_TLS_CERT }, (request, response) => {
+  if (request.url !== '/api/yos/chat') {
+    response.writeHead(404).end();
+    return;
+  }
+  const origin = request.headers.origin || '';
+  requestSequence.push(request.method);
+  const corsHeaders = {
+    'Access-Control-Allow-Origin': origin,
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Authorization, Content-Type',
+    'Cache-Control': 'no-store',
+    'Content-Type': 'application/json; charset=utf-8',
+    Vary: 'Origin'
+  };
+  if (request.method === 'OPTIONS') {
+    response.writeHead(204, corsHeaders).end();
+    return;
+  }
+  let body = '';
+  request.setEncoding('utf8');
+  request.on('data', (chunk) => { body += chunk; });
+  request.on('end', () => {
+    chatRequest = { method: request.method, headers: request.headers, body: JSON.parse(body) };
+    response.writeHead(200, corsHeaders).end(JSON.stringify({
+      requestId: 'hj-smoke-request',
+      answer: '話してくれてありがとう。まず確認したいことが1つあります。',
+      facts: [{ text: '仕事のことが気になった', sourceIds: ['00_law'] }],
+      assumptions: ['疲れが影響している可能性がある'],
+      unknowns: ['何が一番気になっているか'],
+      conflicts: [],
+      nextAction: '今日は休む',
+      memoryCandidates: [],
+      safety: { level: 'normal', notes: [] }
+    }));
+  });
+});
+await new Promise((resolve, reject) => {
+  apiServer.once('error', reject);
+  apiServer.listen(0, testHost, resolve);
+});
+const apiAddress = apiServer.address();
+if (!apiAddress || typeof apiAddress === 'string') throw new Error('HJ CORS test server did not start');
+const apiBaseUrl = `https://${testHost}:${apiAddress.port}`;
+
 const browser = await engine.launch();
 const context = await browser.newContext({
+  ignoreHTTPSErrors: true,
   viewport: { width: 375, height: 667 },
   deviceScaleFactor: 2,
   isMobile: true,
@@ -66,31 +125,32 @@ try {
   await page.screenshot({ path: `test-results/hj-resume-${browserName}.png`, fullPage: true });
   await page.locator('#startConversation').click();
   assert.match(await page.locator('#rawInput').inputValue(), /仕事のことが気になった/, '保存した原文から再開できない');
-  await page.evaluate(() => {
-    const fakeYosResult = {
-      requestId: 'hj-smoke-request',
-      answer: '話してくれてありがとう。まず確認したいことが1つあります。',
-      facts: [{ text: '仕事のことが気になった', sourceIds: ['00_law'] }],
-      assumptions: ['疲れが影響している可能性がある'],
-      unknowns: ['何が一番気になっているか'],
-      conflicts: [],
-      nextAction: '今日は休む',
-      memoryCandidates: [],
-      safety: { level: 'normal', notes: [] }
-    };
-    globalThis.YosAiClient = class {
-      constructor() {}
-
-      async chat() {
-        return fakeYosResult;
-      }
-    };
-    globalThis.YOS_AI_BASE_URL = location.origin;
+  await page.evaluate((localApiBaseUrl) => {
+    globalThis.YOS_AI_BASE_URL = localApiBaseUrl;
     globalThis.YOS_AUTH = { getGoogleIdToken: async () => 'header.payload.signature' };
-  });
+  }, apiBaseUrl);
   await page.locator('#finishRawInput').click();
   assert.equal(await visible('#rawSaved'), true, '原文保存完了が分からない');
-  await page.locator('#aiReview').waitFor({ state: 'visible' });
+  await page.waitForFunction(() => {
+    const review = document.getElementById('aiReview');
+    const records = JSON.parse(localStorage.getItem('hj-daily-scenes-v1') || '[]');
+    return !review?.hidden || records[0]?.conversationStatus === 'failed';
+  });
+  if (!(await visible('#aiReview'))) {
+    const failure = await page.evaluate(() => {
+      const records = JSON.parse(localStorage.getItem('hj-daily-scenes-v1') || '[]');
+      return {
+        conversationStatus: records[0]?.conversationStatus || '',
+        message: document.getElementById('rawSavedMessage')?.textContent || ''
+      };
+    });
+    assert.fail(`YOS browser client failed before AI review: ${JSON.stringify({ requestSequence, failure, pageErrors })}`);
+  }
+  assert.equal(chatRequest?.method, 'POST');
+  assert.equal(chatRequest?.headers.authorization, 'Bearer header.payload.signature');
+  assert.match(chatRequest?.headers['content-type'] || '', /^application\/json\b/u);
+  assert.match(chatRequest?.body?.userText || '', /何が事実かはまだ整理できていない/);
+  assert.deepEqual(requestSequence, ['OPTIONS', 'POST'], 'real browser client did not complete CORS preflight before POST');
   assert.equal(await visible('#conversationResume'), false, '完了済みの原文を未完了の続きとして表示した');
   assert.equal(await visible('#startNewConversation'), false, '完了後も別会話導線を重複表示している');
   assert.equal(await page.locator('#startConversation').textContent(), '今のことを話す', '完了後に次回の自然な入口へ戻らない');
@@ -319,8 +379,31 @@ try {
   }));
   assert.ok(overflow.scrollWidth <= overflow.width + 1, `横スクロールが発生: ${JSON.stringify(overflow)}`);
 
+  const localState = await page.evaluate(() => Array.from(
+    { length: localStorage.length },
+    (_, index) => {
+      const key = localStorage.key(index);
+      return [key, key === null ? null : localStorage.getItem(key)];
+    }
+  ));
+  await page.goto('http://127.0.0.1:4173/yos/hj/', { waitUntil: 'domcontentloaded' });
+  await page.evaluate((entries) => {
+    localStorage.clear();
+    for (const [key, value] of entries) {
+      if (key !== null && value !== null) localStorage.setItem(key, value);
+    }
+  }, localState);
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.evaluate(async () => {
+    if (!navigator.serviceWorker) throw new Error('Service Worker is unavailable on loopback');
+    await navigator.serviceWorker.register('./service-worker.js');
+  });
+
   const cacheStatus = await page.evaluate(async () => {
-    await navigator.serviceWorker.ready;
+    await Promise.race([
+      navigator.serviceWorker.ready,
+      new Promise((_, reject) => setTimeout(() => reject(new Error('Service Worker readiness timed out')), 15000))
+    ]);
     const paths = [
       './index.html', './styles.css', './onboarding.css', './scenes.css', './completion.css',
       './archetypes.js', './bootstrap.js', './app.js', './profile.js', './yos-ai-client.js', './yos-auth.js', './scenes.js', './history.js',
@@ -351,4 +434,5 @@ try {
   console.log(`HJ smoke test passed: ${browserName}`);
 } finally {
   await browser.close();
+  await new Promise((resolve, reject) => apiServer.close((error) => error ? reject(error) : resolve()));
 }

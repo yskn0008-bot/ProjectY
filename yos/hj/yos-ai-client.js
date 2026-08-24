@@ -4,12 +4,13 @@
 // Credentials are requested for each chat and are never written to browser storage.
 (() => {
   class YosAiHttpError extends Error {
-    constructor({ message, status, requestId, retryAfterSeconds }) {
+    constructor({ message, status, requestId, retryAfterSeconds, diagnosticCode }) {
       super(message);
       this.name = 'YosAiHttpError';
       this.status = status;
       this.requestId = requestId;
       this.retryAfterSeconds = retryAfterSeconds;
+      this.diagnosticCode = diagnosticCode;
     }
   }
 
@@ -18,14 +19,23 @@
       this.baseUrl = normalizeBaseUrl(options?.baseUrl);
       if (typeof options?.getGoogleIdToken !== 'function') throw new Error('getGoogleIdToken is required');
       this.getGoogleIdToken = options.getGoogleIdToken;
-      this.fetchImpl = options.fetchImpl || fetch;
+      this.fetchImpl = options.fetchImpl || globalThis.fetch.bind(globalThis);
       this.timeoutMilliseconds = boundedInteger(options.timeoutMilliseconds ?? 65000, 1000, 120000, 'timeoutMilliseconds');
       this.maxResponseBytes = boundedInteger(options.maxResponseBytes ?? 2000000, 1024, 10000000, 'maxResponseBytes');
     }
 
     async chat(input) {
       validateChatInput(input);
-      const token = validateEphemeralToken(await this.getGoogleIdToken(), 'Google ID token');
+      let token;
+      try {
+        token = validateEphemeralToken(await this.getGoogleIdToken(), 'Google ID token');
+      } catch (error) {
+        throw new YosAiHttpError({
+          message: 'Google sign-in is unavailable',
+          status: Number(error?.status) || 0,
+          diagnosticCode: 'google-token'
+        });
+      }
       return this.requestJson('/api/yos/chat', {
         method: 'POST',
         headers: {
@@ -52,11 +62,18 @@
         if (!response.ok) throw toHttpError(response, body);
         return body;
       } catch (error) {
-        if (error instanceof YosAiHttpError) throw error;
-        if (error instanceof Error && error.name === 'AbortError') {
-          throw new YosAiHttpError({ message: 'YOS request timed out', status: 0 });
+        if (error instanceof YosAiHttpError) {
+          if (!error.diagnosticCode) error.diagnosticCode = 'http-response';
+          throw error;
         }
-        throw new YosAiHttpError({ message: 'YOS is temporarily unavailable', status: Number(error?.status) || 0 });
+        if (error instanceof Error && error.name === 'AbortError') {
+          throw new YosAiHttpError({ message: 'YOS request timed out', status: 0, diagnosticCode: 'request-timeout' });
+        }
+        throw new YosAiHttpError({
+          message: 'YOS is temporarily unavailable',
+          status: 0,
+          diagnosticCode: 'browser-fetch'
+        });
       } finally {
         clearTimeout(timeout);
       }
