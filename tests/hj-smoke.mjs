@@ -120,7 +120,21 @@ try {
   }, apiBaseUrl);
   await page.locator('#finishRawInput').click();
   assert.equal(await visible('#rawSaved'), true, '原文保存完了が分からない');
-  await page.locator('#aiReview').waitFor({ state: 'visible' });
+  await page.waitForFunction(() => {
+    const review = document.getElementById('aiReview');
+    const records = JSON.parse(localStorage.getItem('hj-daily-scenes-v1') || '[]');
+    return !review?.hidden || records[0]?.conversationStatus === 'failed';
+  });
+  if (!(await visible('#aiReview'))) {
+    const failure = await page.evaluate(() => {
+      const records = JSON.parse(localStorage.getItem('hj-daily-scenes-v1') || '[]');
+      return {
+        conversationStatus: records[0]?.conversationStatus || '',
+        message: document.getElementById('rawSavedMessage')?.textContent || ''
+      };
+    });
+    assert.fail(`YOS browser client failed before AI review: ${JSON.stringify({ requestSequence, failure, pageErrors })}`);
+  }
   assert.deepEqual(requestSequence, ['OPTIONS', 'POST'], 'real browser client did not complete CORS preflight before POST');
   assert.equal(chatRequest?.method, 'POST');
   assert.equal(chatRequest?.headers.authorization, 'Bearer header.payload.signature');
