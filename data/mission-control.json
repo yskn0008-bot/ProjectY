@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-08-24T10:44:30+09:00",
+  "updated_at": "2026-08-24T12:09:52+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -30,7 +30,7 @@
       "priority": 2,
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/261",
-      "updated_at": "2026-08-24T01:43:06Z"
+      "updated_at": "2026-08-24T02:37:48Z"
     },
     {
       "id": "github-issue-10",
@@ -163,13 +163,6 @@
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/1adb918b9677ce13672898d40bc4519a50a0ffd3"
     },
     {
-      "id": "github-commit-eb3760d6bbe6",
-      "title": "fix: keep live Mission Control data ahead of cache writes",
-      "completed_at": "2026-08-22T03:21:15Z",
-      "result": "GitHub mainへ反映（eb3760d）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/eb3760d6bbe6263587dfa96a108c493f4b6c0beb"
-    },
-    {
       "id": "complete-002",
       "title": "iPhone向けMission Control Dashboardを実装",
       "completed_at": "2026-07-17T17:55:00+09:00",
@@ -204,7 +197,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-08-24T10:44:30+09:00",
+      "last_update": "2026-08-24T12:09:52+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -285,7 +278,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-08-24T10:44:30+09:00",
+      "last_update": "2026-08-24T12:09:52+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -308,7 +301,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-08-24T10:44:30+09:00",
+      "last_update": "2026-08-24T12:09:52+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -390,5 +383,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "a084bfa18ae5e2d0c2a295e1ab4e5a4732a207a0d77ff68a2324d051307e5872"
+  "github_snapshot_hash": "9f0118fe0145a4d7f7b0444f3b19af99a8ceb9d865c1a0519516bbeafbd60004"
 }
