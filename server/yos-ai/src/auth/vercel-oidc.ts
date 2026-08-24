@@ -1,4 +1,5 @@
-const VERCEL_OIDC_HEADER = 'x-vercel-oidc-token';
+import {getVercelOidcToken} from '@vercel/oidc';
+
 const JWT_SEGMENT = '[A-Za-z0-9_-]+';
 const JWT_PATTERN = new RegExp(`^${JWT_SEGMENT}\\.${JWT_SEGMENT}\\.${JWT_SEGMENT}$`, 'u');
 
@@ -10,14 +11,14 @@ export function validateVercelOidcToken(value: string): string {
   return token;
 }
 
-export function readVercelOidcToken(request: Request): string | undefined {
-  const raw = request.headers.get(VERCEL_OIDC_HEADER);
+export async function readVercelOidcToken(audience: string): Promise<string | undefined> {
+  const raw = await getVercelOidcToken({audience});
   if (!raw?.trim()) return undefined;
   return validateVercelOidcToken(raw);
 }
 
-export function requireVercelOidcToken(request: Request): string {
-  const token = readVercelOidcToken(request);
+export async function requireVercelOidcToken(audience: string): Promise<string> {
+  const token = await readVercelOidcToken(audience);
   if (!token) throw new Error('Vercel OIDC token is required');
   return token;
 }
