@@ -50,11 +50,11 @@ const apiServer = createServer((request, response) => {
 });
 await new Promise((resolve, reject) => {
   apiServer.once('error', reject);
-  apiServer.listen(0, '127.0.0.1', resolve);
+  apiServer.listen(0, 'localhost', resolve);
 });
 const apiAddress = apiServer.address();
 if (!apiAddress || typeof apiAddress === 'string') throw new Error('HJ CORS test server did not start');
-const apiBaseUrl = `http://127.0.0.1:${apiAddress.port}`;
+const apiBaseUrl = `http://localhost:${apiAddress.port}`;
 
 const browser = await engine.launch();
 const context = await browser.newContext({
