@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { mkdir } from 'node:fs/promises';
+import { createServer } from 'node:http';
 import { chromium, webkit } from 'playwright';
 
 const baseURL = process.env.HJ_BASE_URL || 'http://127.0.0.1:4173/yos/hj/';
@@ -7,6 +8,53 @@ const browserName = process.env.HJ_BROWSER || 'chromium';
 const engine = { chromium, webkit }[browserName];
 if (!engine) throw new Error(`Unsupported browser: ${browserName}`);
 await mkdir('test-results', { recursive: true });
+
+const requestSequence = [];
+let chatRequest;
+const apiServer = createServer((request, response) => {
+  if (request.url !== '/api/yos/chat') {
+    response.writeHead(404).end();
+    return;
+  }
+  const origin = request.headers.origin || '';
+  requestSequence.push(request.method);
+  const corsHeaders = {
+    'Access-Control-Allow-Origin': origin,
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Authorization, Content-Type',
+    'Cache-Control': 'no-store',
+    'Content-Type': 'application/json; charset=utf-8',
+    Vary: 'Origin'
+  };
+  if (request.method === 'OPTIONS') {
+    response.writeHead(204, corsHeaders).end();
+    return;
+  }
+  let body = '';
+  request.setEncoding('utf8');
+  request.on('data', (chunk) => { body += chunk; });
+  request.on('end', () => {
+    chatRequest = { method: request.method, headers: request.headers, body: JSON.parse(body) };
+    response.writeHead(200, corsHeaders).end(JSON.stringify({
+      requestId: 'hj-smoke-request',
+      answer: '話してくれてありがとう。まず確認したいことが1つあります。',
+      facts: [{ text: '仕事のことが気になった', sourceIds: ['00_law'] }],
+      assumptions: ['疲れが影響している可能性がある'],
+      unknowns: ['何が一番気になっているか'],
+      conflicts: [],
+      nextAction: '今日は休む',
+      memoryCandidates: [],
+      safety: { level: 'normal', notes: [] }
+    }));
+  });
+});
+await new Promise((resolve, reject) => {
+  apiServer.once('error', reject);
+  apiServer.listen(0, '127.0.0.1', resolve);
+});
+const apiAddress = apiServer.address();
+if (!apiAddress || typeof apiAddress === 'string') throw new Error('HJ CORS test server did not start');
+const apiBaseUrl = `http://127.0.0.1:${apiAddress.port}`;
 
 const browser = await engine.launch();
 const context = await browser.newContext({
@@ -66,31 +114,18 @@ try {
   await page.screenshot({ path: `test-results/hj-resume-${browserName}.png`, fullPage: true });
   await page.locator('#startConversation').click();
   assert.match(await page.locator('#rawInput').inputValue(), /仕事のことが気になった/, '保存した原文から再開できない');
-  await page.evaluate(() => {
-    const fakeYosResult = {
-      requestId: 'hj-smoke-request',
-      answer: '話してくれてありがとう。まず確認したいことが1つあります。',
-      facts: [{ text: '仕事のことが気になった', sourceIds: ['00_law'] }],
-      assumptions: ['疲れが影響している可能性がある'],
-      unknowns: ['何が一番気になっているか'],
-      conflicts: [],
-      nextAction: '今日は休む',
-      memoryCandidates: [],
-      safety: { level: 'normal', notes: [] }
-    };
-    globalThis.YosAiClient = class {
-      constructor() {}
-
-      async chat() {
-        return fakeYosResult;
-      }
-    };
-    globalThis.YOS_AI_BASE_URL = location.origin;
+  await page.evaluate((localApiBaseUrl) => {
+    globalThis.YOS_AI_BASE_URL = localApiBaseUrl;
     globalThis.YOS_AUTH = { getGoogleIdToken: async () => 'header.payload.signature' };
-  });
+  }, apiBaseUrl);
   await page.locator('#finishRawInput').click();
   assert.equal(await visible('#rawSaved'), true, '原文保存完了が分からない');
   await page.locator('#aiReview').waitFor({ state: 'visible' });
+  assert.deepEqual(requestSequence, ['OPTIONS', 'POST'], 'real browser client did not complete CORS preflight before POST');
+  assert.equal(chatRequest?.method, 'POST');
+  assert.equal(chatRequest?.headers.authorization, 'Bearer header.payload.signature');
+  assert.match(chatRequest?.headers['content-type'] || '', /^application\/json\b/u);
+  assert.match(chatRequest?.body?.userText || '', /何が事実かはまだ整理できていない/);
   assert.equal(await visible('#conversationResume'), false, '完了済みの原文を未完了の続きとして表示した');
   assert.equal(await visible('#startNewConversation'), false, '完了後も別会話導線を重複表示している');
   assert.equal(await page.locator('#startConversation').textContent(), '今のことを話す', '完了後に次回の自然な入口へ戻らない');
@@ -351,4 +386,5 @@ try {
   console.log(`HJ smoke test passed: ${browserName}`);
 } finally {
   await browser.close();
+  await new Promise((resolve, reject) => apiServer.close((error) => error ? reject(error) : resolve()));
 }

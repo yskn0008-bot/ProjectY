@@ -361,6 +361,11 @@
     503: 'YOSへ接続できません。話した内容は端末に保存済みです。'
   }[status] || 'YOSへ接続できません。話した内容は端末に保存済みです。');
 
+  const diagnosticMessage = (error) => {
+    const allowed = new Set(['google-token', 'browser-fetch', 'request-timeout', 'http-response']);
+    return allowed.has(error?.diagnosticCode) ? `（診断: ${error.diagnosticCode}）` : '';
+  };
+
   function hideAiReview() {
     activeAiSceneId = '';
     if ($('aiReview')) $('aiReview').hidden = true;
@@ -476,7 +481,7 @@
         write(KEYS.scenes, scenes);
       }
       hideAiReview();
-      $('rawSavedMessage').textContent = apiErrorMessage(Number(error?.status) || 0);
+      $('rawSavedMessage').textContent = `${apiErrorMessage(Number(error?.status) || 0)}${diagnosticMessage(error)}`;
       renderScenes();
     }
   }

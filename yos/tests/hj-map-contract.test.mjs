@@ -94,12 +94,26 @@ test('active HJ saves Raw Input before YOS AI and confirms one candidate at a ti
   assert.match(client, /'\/api\/yos\/chat'/);
   assert.match(client, /credentials: 'omit'/);
   assert.match(client, /cache: 'no-store'/);
+  for (const diagnostic of ['google-token', 'browser-fetch', 'request-timeout', 'http-response']) {
+    assert.match(client + scenes, new RegExp(diagnostic));
+  }
+  assert.match(scenes, /allowed\.has\(error\?\.diagnosticCode\)/);
+  assert.doesNotMatch(scenes, /error\?\.(?:message|stack|cause)/);
   assert.match(auth, /accounts\.google\.com\/gsi\/client/);
   assert.match(auth, /\/api\/yos\/public-config/);
   assert.doesNotMatch(client + auth, /localStorage\.(?:getItem|setItem)/);
   assert.doesNotMatch(client + auth, /OPENAI_API_KEY|UPSTASH_REDIS_REST_TOKEN|YOS_.*DOCUMENT_ID/);
   assert.ok(worker.includes('"./yos-ai-client.js"'));
   assert.ok(worker.includes('"./yos-auth.js"'));
+});
+
+test('HJ browser smoke uses the real client and requires cross-origin preflight then POST', async () => {
+  const smoke = await readFile(new URL('../../tests/hj-smoke.mjs', import.meta.url), 'utf8');
+  assert.doesNotMatch(smoke, /globalThis\.YosAiClient\s*=\s*class/);
+  assert.match(smoke, /requestSequence/);
+  assert.match(smoke, /\['OPTIONS', 'POST'\]/);
+  assert.match(smoke, /authorization/);
+  assert.match(smoke, /access-control-allow-origin/i);
 });
 
 test('detailed HJ forms stay behind explicit progressive disclosure', async () => {
