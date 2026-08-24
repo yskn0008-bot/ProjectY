@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-08-25T05:37:20+09:00",
+  "updated_at": "2026-08-25T06:33:53+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -50,7 +50,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/120",
-      "updated_at": "2026-08-24T20:31:32Z"
+      "updated_at": "2026-08-24T20:58:24Z"
     },
     {
       "id": "github-issue-142",
@@ -125,39 +125,39 @@
   ],
   "recently_completed": [
     {
-      "id": "github-commit-78f99d59abcb",
-      "title": "Merge pull request #263 from yskn0008-bot/codex/issue-120-vercel-oidc-hotfix",
-      "completed_at": "2026-08-24T11:23:22Z",
-      "result": "GitHub mainへ反映（78f99d5）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/78f99d59abcbeabc0eaad4e29a688999e60ff5c0"
+      "id": "github-commit-53c0515bf18d",
+      "title": "Merge PR #264: diagnose real WebKit chat dispatch",
+      "completed_at": "2026-08-24T21:33:40Z",
+      "result": "GitHub mainへ反映（53c0515）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/53c0515bf18d5eac8b89e377b76aeca1ce3833f4"
     },
     {
-      "id": "github-commit-bd8891f920c2",
-      "title": "fix(yos-ai): transport server-side OIDC migration",
-      "completed_at": "2026-08-24T11:22:30Z",
-      "result": "GitHub mainへ反映（bd8891f）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/bd8891f920c244d38985986c4c7769e9dbd16820"
+      "id": "github-commit-ebbdd3f114ae",
+      "title": "test(yos): bound loopback service worker readiness",
+      "completed_at": "2026-08-24T21:30:42Z",
+      "result": "GitHub mainへ反映（ebbdd3f）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/ebbdd3f114aeafdaaa02d1af5c3c65b2b3b3953f"
     },
     {
-      "id": "github-commit-bad83bd5b72c",
-      "title": "fix(yos-ai): transport server-side OIDC migration",
-      "completed_at": "2026-08-24T11:22:23Z",
-      "result": "GitHub mainへ反映（bad83bd）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/bad83bd5b72cec1aea4977fe18ba17fc9d4ac031"
+      "id": "github-commit-9f6c90def7a8",
+      "title": "test(yos): preserve offline checks on loopback",
+      "completed_at": "2026-08-24T21:27:15Z",
+      "result": "GitHub mainへ反映（9f6c90d）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/9f6c90def7a8e120418d30be383021f2034d7154"
     },
     {
-      "id": "github-commit-0a7ad63bb7fc",
-      "title": "fix(yos-ai): transport server-side OIDC migration",
-      "completed_at": "2026-08-24T11:21:55Z",
-      "result": "GitHub mainへ反映（0a7ad63）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/0a7ad63bb7fc838b92b5502087e6499405e6086a"
+      "id": "github-commit-a2042f91f83f",
+      "title": "test(yos): keep non-loopback preflight over HTTPS",
+      "completed_at": "2026-08-24T21:25:00Z",
+      "result": "GitHub mainへ反映（a2042f9）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/a2042f91f83f874cd299179685d9df8c799587bb"
     },
     {
-      "id": "github-commit-364f3553aa25",
-      "title": "fix(yos-ai): transport server-side OIDC migration",
-      "completed_at": "2026-08-24T11:21:28Z",
-      "result": "GitHub mainへ反映（364f355）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/364f3553aa250e0cae23567fc76c9d19cf2425f4"
+      "id": "github-commit-9cc877349a33",
+      "title": "test(yos): require WebKit non-loopback preflight",
+      "completed_at": "2026-08-24T21:23:48Z",
+      "result": "GitHub mainへ反映（9cc8773）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/9cc877349a330fcbeb468e1f213fa6a01f7afd25"
     },
     {
       "id": "complete-002",
@@ -194,7 +194,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-08-25T05:37:20+09:00",
+      "last_update": "2026-08-25T06:33:53+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -275,7 +275,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-08-25T05:37:20+09:00",
+      "last_update": "2026-08-25T06:33:53+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -298,7 +298,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-08-25T05:37:20+09:00",
+      "last_update": "2026-08-25T06:33:53+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -380,5 +380,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "c5f7d66a6967597de5fd866942aee3a55932ebf3c1abcf5bfbdf2127d9cffa57"
+  "github_snapshot_hash": "da40a3ea7ba5fb40fae04df1bd21b048dec65701f91186fe65cd8b0746b96303"
 }
