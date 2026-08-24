@@ -394,9 +394,16 @@ try {
     }
   }, localState);
   await page.reload({ waitUntil: 'networkidle' });
+  await page.evaluate(async () => {
+    if (!navigator.serviceWorker) throw new Error('Service Worker is unavailable on loopback');
+    await navigator.serviceWorker.register('./service-worker.js');
+  });
 
   const cacheStatus = await page.evaluate(async () => {
-    await navigator.serviceWorker.ready;
+    await Promise.race([
+      navigator.serviceWorker.ready,
+      new Promise((_, reject) => setTimeout(() => reject(new Error('Service Worker readiness timed out')), 15000))
+    ]);
     const paths = [
       './index.html', './styles.css', './onboarding.css', './scenes.css', './completion.css',
       './archetypes.js', './bootstrap.js', './app.js', './profile.js', './yos-ai-client.js', './yos-auth.js', './scenes.js', './history.js',
