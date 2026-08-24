@@ -236,3 +236,53 @@ test('does not leak internal backend errors', async () => {
   assert.doesNotMatch(body, /secret|OPENAI_API_KEY/);
   assert.match(body, /temporarily unavailable/);
 });
+
+test('reports only a fixed safe stage for each fail-closed dependency boundary', async (t) => {
+  const cases = [
+    {
+      stage: 'rate-limit',
+      overrides: {
+        rateLimiter: {async check() { throw new Error('UPSTASH_REDIS_REST_TOKEN=secret'); }}
+      }
+    },
+    {
+      stage: 'runtime-create',
+      overrides: {
+        runtimeFactory: {async create() { throw new Error('private runtime credential'); }}
+      }
+    },
+    {
+      stage: 'answer',
+      overrides: {
+        runtimeFactory: {
+          async create() {
+            return {async answer() { throw new Error('OPENAI_API_KEY=secret'); }};
+          }
+        }
+      }
+    },
+    {
+      stage: 'audit',
+      overrides: {
+        auditSink: {async append() { throw new Error('private audit payload'); }}
+      }
+    }
+  ];
+
+  for (const item of cases) {
+    await t.test(item.stage, async () => {
+      const events = [];
+      const handler = createChatHandler(dependencies({
+        ...item.overrides,
+        failureReporter(event) { events.push(event); }
+      }));
+      const response = await handler(jsonRequest({userText: 'private-user-text'}));
+      const responseBody = await response.text();
+      const serializedEvents = JSON.stringify(events);
+      assert.equal(response.status, 503);
+      assert.deepEqual(events, [{stage: item.stage, requestId: 'req-test'}]);
+      assert.doesNotMatch(serializedEvents, /private-user-text|secret|credential|payload|OPENAI|UPSTASH/);
+      assert.doesNotMatch(responseBody, /private-user-text|secret|credential|payload|OPENAI|UPSTASH/);
+    });
+  }
+});

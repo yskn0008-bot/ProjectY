@@ -1,4 +1,4 @@
-import {createChatHandler} from '../api/chat-handler.js';
+import {createChatHandler, type ChatFailureReporter} from '../api/chat-handler.js';
 import {createHealthHandler} from '../api/health-handler.js';
 import type {AuditSink} from '../audit.js';
 import {createGoogleIdentityVerifier} from '../auth/google-runtime.js';
@@ -17,6 +17,7 @@ export interface CreateYosAppOptions {
   requestIdFactory?: () => string;
   clock?: () => string;
   monotonicClock?: () => number;
+  failureReporter?: ChatFailureReporter;
   healthVersion?: string;
 }
 
@@ -52,7 +53,8 @@ export function createYosApp(options: CreateYosAppOptions): YosAppHandlers {
       auditSink: options.auditSink,
       ...(options.requestIdFactory ? {requestIdFactory: options.requestIdFactory} : {}),
       ...(options.clock ? {clock: options.clock} : {}),
-      ...(options.monotonicClock ? {monotonicClock: options.monotonicClock} : {})
+      ...(options.monotonicClock ? {monotonicClock: options.monotonicClock} : {}),
+      ...(options.failureReporter ? {failureReporter: options.failureReporter} : {})
     }),
     health: createHealthHandler({
       ...cors,
