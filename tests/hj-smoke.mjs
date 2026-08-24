@@ -67,24 +67,23 @@ try {
   await page.locator('#startConversation').click();
   assert.match(await page.locator('#rawInput').inputValue(), /仕事のことが気になった/, '保存した原文から再開できない');
   await page.evaluate(() => {
-    const nativeFetch = globalThis.fetch.bind(globalThis);
-    globalThis.fetch = async (input, init) => {
-      const url = new URL(typeof input === 'string' ? input : input.url, location.href);
-      if (url.pathname !== '/api/yos/chat') return nativeFetch(input, init);
-      return new Response(JSON.stringify({
-        requestId: 'hj-smoke-request',
-        answer: '話してくれてありがとう。まず確認したいことが1つあります。',
-        facts: [{ text: '仕事のことが気になった', sourceIds: ['00_law'] }],
-        assumptions: ['疲れが影響している可能性がある'],
-        unknowns: ['何が一番気になっているか'],
-        conflicts: [],
-        nextAction: '今日は休む',
-        memoryCandidates: [],
-        safety: { level: 'normal', notes: [] }
-      }), {
-        status: 200,
-        headers: { 'content-type': 'application/json' }
-      });
+    const fakeYosResult = {
+      requestId: 'hj-smoke-request',
+      answer: '話してくれてありがとう。まず確認したいことが1つあります。',
+      facts: [{ text: '仕事のことが気になった', sourceIds: ['00_law'] }],
+      assumptions: ['疲れが影響している可能性がある'],
+      unknowns: ['何が一番気になっているか'],
+      conflicts: [],
+      nextAction: '今日は休む',
+      memoryCandidates: [],
+      safety: { level: 'normal', notes: [] }
+    };
+    globalThis.YosAiClient = class {
+      constructor() {}
+
+      async chat() {
+        return fakeYosResult;
+      }
     };
     globalThis.YOS_AI_BASE_URL = location.origin;
     globalThis.YOS_AUTH = { getGoogleIdToken: async () => 'header.payload.signature' };
