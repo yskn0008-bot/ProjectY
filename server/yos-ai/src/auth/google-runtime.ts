@@ -2,7 +2,7 @@ import {GoogleAuth, IdentityPoolClient, OAuth2Client} from 'google-auth-library'
 import type {GoogleWorkloadAuthConfig} from '../config.js';
 import {GoogleAuthAccessTokenProvider, type AccessTokenProvider} from '../sources/access-token-provider.js';
 import {GoogleAuthLibraryVerifier} from './google-auth-library-verifier.js';
-import {validateVercelOidcToken} from './vercel-oidc.js';
+import {requireVercelOidcToken, validateVercelOidcToken} from './vercel-oidc.js';
 
 export const GOOGLE_READ_ONLY_SCOPES = [
   'https://www.googleapis.com/auth/drive.readonly',
@@ -26,7 +26,6 @@ export function createGoogleIdentityVerifier(clientId: string): GoogleAuthLibrar
 
 export async function createGoogleAccessTokenProvider(
   config: GoogleWorkloadAuthConfig,
-  vercelOidcToken?: string,
   scopes: GoogleScopes = GOOGLE_READ_ONLY_SCOPES
 ): Promise<AccessTokenProvider> {
   if (config.mode === 'application_default') {
@@ -35,8 +34,10 @@ export async function createGoogleAccessTokenProvider(
     return new GoogleAuthAccessTokenProvider(client);
   }
 
+  const audience = workloadIdentityAudience(config);
+  const vercelOidcToken = await requireVercelOidcToken(audience);
   return new GoogleAuthAccessTokenProvider(
-    createVercelIdentityPoolClient(config, vercelOidcToken ?? '', scopes)
+    createVercelIdentityPoolClient(config, vercelOidcToken, scopes)
   );
 }
 

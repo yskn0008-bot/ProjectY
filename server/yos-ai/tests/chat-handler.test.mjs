@@ -113,7 +113,7 @@ test('enforces the injected rate limiter before runtime creation', async () => {
   assert.equal(called, false);
 });
 
-test('passes a valid Vercel token only to the request runtime', async () => {
+test('ignores a valid inbound Vercel token header', async () => {
   let runtimeContext;
   let receivedRequest;
   const handler = createChatHandler(dependencies({
@@ -134,7 +134,7 @@ test('passes a valid Vercel token only to the request runtime', async () => {
     {vercelOidcToken: 'aaa.bbb.ccc'}
   ));
   assert.equal(response.status, 200);
-  assert.equal(runtimeContext.vercelOidcToken, 'aaa.bbb.ccc');
+  assert.equal(runtimeContext.vercelOidcToken, undefined);
   assert.equal(runtimeContext.subjectHash, 'hash');
   assert.equal(receivedRequest.vercelOidcToken, undefined);
   assert.equal(JSON.stringify(await response.json()).includes('aaa.bbb.ccc'), false);
@@ -218,11 +218,11 @@ test('returns a grounded YOS answer and security headers', async () => {
   assert.equal((await response.json()).answer, 'private answer text');
 });
 
-test('rejects malformed Vercel tokens without leaking them', async () => {
+test('ignores malformed inbound Vercel tokens without leaking them', async () => {
   const handler = createChatHandler(dependencies());
   const response = await handler(jsonRequest({userText: 'hello'}, {vercelOidcToken: 'not-jwt'}));
   const body = await response.text();
-  assert.equal(response.status, 503);
+  assert.equal(response.status, 200);
   assert.doesNotMatch(body, /not-jwt/);
 });
 
