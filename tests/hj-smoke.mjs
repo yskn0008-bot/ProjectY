@@ -24,7 +24,7 @@ const apiServer = createServer({ key: TEST_TLS_KEY, cert: TEST_TLS_CERT }, (requ
   const corsHeaders = {
     'Access-Control-Allow-Origin': origin,
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'Authorization, Content-Type',
+    'Access-Control-Allow-Headers': 'Authorization, Content-Type, X-HJ-Smoke',
     'Cache-Control': 'no-store',
     'Content-Type': 'application/json; charset=utf-8',
     Vary: 'Origin'
@@ -119,6 +119,12 @@ try {
   await page.locator('#startConversation').click();
   assert.match(await page.locator('#rawInput').inputValue(), /仕事のことが気になった/, '保存した原文から再開できない');
   await page.evaluate((localApiBaseUrl) => {
+    const nativeFetch = globalThis.fetch.bind(globalThis);
+    globalThis.fetch = (input, init = {}) => {
+      const headers = new Headers(init.headers || {});
+      headers.set('X-HJ-Smoke', 'preflight');
+      return nativeFetch(input, { ...init, headers });
+    };
     globalThis.YOS_AI_BASE_URL = localApiBaseUrl;
     globalThis.YOS_AUTH = { getGoogleIdToken: async () => 'header.payload.signature' };
   }, apiBaseUrl);
