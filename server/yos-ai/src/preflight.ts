@@ -57,11 +57,11 @@ export function runProductionPreflight(environment: Environment): ProductionPref
   validateLoader('storage_config', () => loadYosStorageConfig(environment), checks);
 
   const subjectHash = environment.GOOGLE_ALLOWED_SUBJECT_HASH?.trim();
-  if (subjectHash && !/^[a-f0-9]{64}$/u.test(subjectHash)) {
+  if (subjectHash && !/^[A-Za-z0-9_-]{43}$/u.test(subjectHash)) {
     checks.push({
       id: 'subject_hash_format',
       status: 'warning',
-      message: 'GOOGLE_ALLOWED_SUBJECT_HASH should be a lowercase SHA-256 hex digest'
+      message: 'GOOGLE_ALLOWED_SUBJECT_HASH should be an unpadded SHA-256 Base64URL digest'
     });
   } else if (subjectHash) {
     checks.push({id: 'subject_hash_format', status: 'pass', message: 'Subject hash format is valid'});

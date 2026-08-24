@@ -28,6 +28,28 @@
         }
       }
     },
+    "/api/yos/public-config": {
+      "get": {
+        "operationId": "getYosPublicConfig",
+        "summary": "PWA本人認証に必要な公開設定だけを取得",
+        "parameters": [
+          {"$ref": "#/components/parameters/OriginHeader"}
+        ],
+        "responses": {
+          "200": {
+            "description": "公開設定。秘密値と非公開情報源IDは含まない。",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/PublicConfigResponse"}
+              }
+            }
+          },
+          "403": {"$ref": "#/components/responses/OriginDenied"},
+          "405": {"$ref": "#/components/responses/MethodNotAllowed"},
+          "503": {"$ref": "#/components/responses/Unavailable"}
+        }
+      }
+    },
     "/api/yos/chat": {
       "post": {
         "operationId": "createYosAnswer",
@@ -217,6 +239,18 @@
           "service": {"const": "yos-ai"},
           "version": {"type": "string"},
           "time": {"type": "string", "format": "date-time"}
+        },
+        "additionalProperties": false
+      },
+      "PublicConfigResponse": {
+        "type": "object",
+        "required": ["googleClientId"],
+        "properties": {
+          "googleClientId": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9._-]+\\.apps\\.googleusercontent\\.com$",
+            "description": "Google Identity Services用の公開OAuth client ID。秘密情報ではない。"
+          }
         },
         "additionalProperties": false
       },

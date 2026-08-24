@@ -48,9 +48,32 @@
   </div>
 
   <div id="rawSaved" class="raw-saved" hidden>
-    <strong>話した内容を、そのまま残しました。</strong>
-    <p>YOSによる整理は、まだ行っていません。</p>
+    <strong id="rawSavedTitle">話した内容を、そのまま残しました。</strong>
+    <p id="rawSavedMessage">YOSによる整理は、まだ行っていません。</p>
   </div>
+
+  <div id="googleSignIn" class="google-sign-in" hidden>
+    <p>本人だけが使えるYOS AIへ接続します。認証情報は端末へ保存しません。</p>
+    <div id="googleSignInButton"></div>
+  </div>
+
+  <section id="aiReview" class="ai-review" aria-labelledby="aiReviewTitle" hidden>
+    <p class="kicker">YOS AI</p>
+    <h3 id="aiReviewTitle">YOSの返事</h3>
+    <p id="yosAnswer" class="yos-answer"></p>
+    <p id="yosSafety" class="yos-safety" role="alert" hidden></p>
+    <div class="candidate-card">
+      <p id="candidateQuestion" class="candidate-question"></p>
+      <p id="candidateText" class="candidate-text"></p>
+      <div id="candidateActions" class="candidate-actions" aria-label="YOSの候補を確認">
+        <button type="button" data-ai-decision="yes">そう</button>
+        <button type="button" data-ai-decision="no">違う</button>
+        <button type="button" data-ai-decision="unknown">分からない</button>
+      </div>
+      <small id="candidateProgress" class="candidate-progress"></small>
+    </div>
+    <p class="candidate-note">候補は本人の原文と別に保存します。「そう」を選ぶまで、事実や次の一手として確定しません。</p>
+  </section>
 
   <div class="home-secondary-actions">
     <button id="openCurrentLocation" class="secondary" type="button">現在地を見る</button>
@@ -344,6 +367,8 @@
 <script src="./bootstrap.js" defer></script>
 <script src="./app.js" defer></script>
 <script src="./profile.js" defer></script>
+<script src="./yos-ai-client.js" defer></script>
+<script src="./yos-auth.js" defer></script>
 <script src="./scenes.js" defer></script>
 <script src="./history.js" defer></script>
 <script src="./editor.js" defer></script>

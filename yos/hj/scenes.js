@@ -10,6 +10,7 @@
     scenes: 'hj-daily-scenes-v1'
   };
   const SCHEMA = 'hj-complete-backup-v2';
+  const YOS_AI_PRODUCTION_URL = 'https://project-y-yos-ai.vercel.app';
   const $ = (id) => document.getElementById(id);
   const uid = () => globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(16).slice(2)}`;
   const clean = (value, max = 600) => typeof value === 'string' ? value.trim().slice(0, max) : '';
@@ -49,6 +50,8 @@
         type,
         value: candidateValue,
         status: ['candidate', 'confirmed', 'rejected', 'unknown'].includes(item.status) ? item.status : 'candidate',
+        rawInputId: clean(item.rawInputId, 100),
+        sourceIds: textList(item.sourceIds, 8, 200),
         evidence: textList(item.evidence, 10, 400)
       };
     }).filter(Boolean).slice(0, 20);
@@ -73,7 +76,13 @@
       candidates: normalizeCandidates(value.candidates),
       evidence: textList(value.evidence, 20, 600),
       unknown: textList(value.unknown, 20, 80),
-      conversationStatus: rawInput && ['draft', 'raw', 'confirmed'].includes(value.conversationStatus) ? value.conversationStatus : '',
+      conversationStatus: rawInput && ['draft', 'raw', 'sending', 'confirming', 'reviewed', 'confirmed', 'local-only', 'failed'].includes(value.conversationStatus) ? value.conversationStatus : '',
+      aiAnswer: clean(value.aiAnswer, 4000),
+      aiRequestId: clean(value.aiRequestId, 160),
+      aiSafety: value.aiSafety && typeof value.aiSafety === 'object' ? {
+        level: ['normal', 'attention', 'blocked'].includes(value.aiSafety.level) ? value.aiSafety.level : 'normal',
+        notes: textList(value.aiSafety.notes, 10, 400)
+      } : { level: 'normal', notes: [] },
       feeling: clean(value.feeling, 400),
       choice: clean(value.choice, 400),
       result: clean(value.result, 400),
@@ -89,6 +98,16 @@
 
   let scenes = read(KEYS.scenes, []).map(normalizeScene).filter(Boolean).slice(0, 500);
   let activeRawInputId = '';
+  let activeAiSceneId = '';
+
+  const candidateLabels = {
+    fact: '事実として合ってる？',
+    assumption: 'YOSの解釈は近い？',
+    unknown: 'まだ分からないことで合ってる？',
+    conflict: '食い違いがありそう？',
+    nextAction: '次にこれをしてみる？',
+    memory: '今後の参考に残す候補？'
+  };
 
   function journeys() {
     const value = read(KEYS.journeys, []);
@@ -203,6 +222,12 @@
       .sort((a, b) => new Date(b.savedAt || b.occurredAt) - new Date(a.savedAt || a.occurredAt))[0] || null;
   }
 
+  function latestConfirmingScene() {
+    return scenes
+      .filter((scene) => scene.conversationStatus === 'confirming' && scene.candidates.some((item) => item.status === 'candidate'))
+      .sort((a, b) => new Date(b.savedAt || b.occurredAt) - new Date(a.savedAt || a.occurredAt))[0] || null;
+  }
+
   function focusedJourney() {
     const items = journeys();
     const profile = read(KEYS.profile, {});
@@ -225,6 +250,7 @@
   }
 
   function openConversation(scene = null) {
+    hideAiReview();
     activeRawInputId = scene?.id || '';
     $('rawInput').value = scene?.rawInput || '';
     $('conversationComposer').hidden = false;
@@ -281,7 +307,218 @@
     return scenes.find((scene) => scene.id === activeRawInputId) || null;
   }
 
-  function finishRawInput() {
+  const asCandidateText = (value) => {
+    if (typeof value === 'string') return clean(value, 400);
+    if (!value || typeof value !== 'object') return '';
+    for (const key of ['text', 'statement', 'content', 'value', 'title', 'action', 'reason']) {
+      const text = clean(value[key], 400);
+      if (text) return text;
+    }
+    return '';
+  };
+
+  function sourceIdsOf(value) {
+    if (!value || typeof value !== 'object') return [];
+    const direct = Array.isArray(value.sourceIds) ? value.sourceIds : Array.isArray(value.evidenceSourceIds) ? value.evidenceSourceIds : [];
+    const selected = clean(value.selected?.source?.id, 200);
+    const alternatives = Array.isArray(value.alternatives)
+      ? value.alternatives.map((item) => clean(item?.source?.id, 200)).filter(Boolean)
+      : [];
+    return [...new Set([...textList(direct, 8, 200), selected, ...alternatives].filter(Boolean))].slice(0, 8);
+  }
+
+  function mapAiCandidates(result, rawInputId) {
+    const mapped = [];
+    const add = (values, type) => (Array.isArray(values) ? values : []).forEach((value) => {
+      const text = asCandidateText(value);
+      if (!text) return;
+      mapped.push({
+        type,
+        value: text,
+        status: 'candidate',
+        rawInputId,
+        sourceIds: sourceIdsOf(value),
+        evidence: []
+      });
+    });
+    add(result?.facts, 'fact');
+    add(result?.assumptions, 'assumption');
+    add(result?.unknowns, 'unknown');
+    add(result?.conflicts, 'conflict');
+    if (result?.nextAction) add([result.nextAction], 'nextAction');
+    add(result?.memoryCandidates, 'memory');
+    return mapped.slice(0, 20);
+  }
+
+  const apiErrorMessage = (status) => ({
+    400: '入力内容を確認してください。話した内容は端末に保存済みです。',
+    401: 'GoogleでYOS AIへ接続してください。話した内容は端末に保存済みです。',
+    403: 'この画面からは接続できません。話した内容は端末に保存済みです。',
+    405: 'アプリ更新が必要です。話した内容は端末に保存済みです。',
+    413: '入力が長すぎます。短くして再試行してください。話した内容は端末に保存済みです。',
+    415: 'アプリ更新が必要です。話した内容は端末に保存済みです。',
+    429: '少し時間を空けてください。話した内容は端末に保存済みです。',
+    503: 'YOSへ接続できません。話した内容は端末に保存済みです。'
+  }[status] || 'YOSへ接続できません。話した内容は端末に保存済みです。');
+
+  function hideAiReview() {
+    activeAiSceneId = '';
+    if ($('aiReview')) $('aiReview').hidden = true;
+  }
+
+  function renderAiReview(scene = null) {
+    const target = scene || scenes.find((item) => item.id === activeAiSceneId) || latestConfirmingScene();
+    const panel = $('aiReview');
+    if (!panel) return;
+    const pending = target?.conversationStatus === 'confirming'
+      ? target.candidates.filter((item) => item.status === 'candidate' && (!item.rawInputId || item.rawInputId === target.id))
+      : [];
+    const candidate = pending[0];
+    const showAnswer = Boolean(target?.aiAnswer);
+    panel.hidden = !target || (!candidate && !showAnswer);
+    if (panel.hidden) {
+      activeAiSceneId = '';
+      return;
+    }
+    activeAiSceneId = target.id;
+    $('yosAnswer').textContent = target.aiAnswer || '';
+    $('yosAnswer').hidden = !showAnswer;
+    const safetyNotes = target.aiSafety?.notes || [];
+    $('yosSafety').textContent = safetyNotes.join(' ');
+    $('yosSafety').hidden = target.aiSafety?.level === 'normal' || safetyNotes.length === 0;
+    $('candidateQuestion').hidden = !candidate;
+    $('candidateText').hidden = !candidate;
+    $('candidateActions').hidden = !candidate;
+    $('candidateProgress').hidden = !candidate;
+    if (!candidate) return;
+    $('candidateQuestion').textContent = candidateLabels[candidate.type] || 'この整理は合ってる？';
+    $('candidateText').textContent = candidate.value;
+    $('candidateProgress').textContent = `未確認 ${pending.length}件`;
+  }
+
+  function currentLocationForAi() {
+    const focus = focusedJourney();
+    if (!focus) return undefined;
+    return clean(`${focus.name || ''}${focus.stage ? `｜${focus.stage}` : ''}`, 300) || undefined;
+  }
+
+  async function requestAiForScene(sceneId) {
+    const startIndex = scenes.findIndex((scene) => scene.id === sceneId);
+    if (startIndex < 0 || !scenes[startIndex].rawInput) return;
+    const rawInput = scenes[startIndex].rawInput;
+    scenes[startIndex] = normalizeScene({
+      ...scenes[startIndex],
+      candidates: [],
+      evidence: [],
+      aiAnswer: '',
+      aiRequestId: '',
+      aiSafety: { level: 'normal', notes: [] },
+      conversationStatus: 'sending',
+      savedAt: new Date().toISOString()
+    });
+    if (!write(KEYS.scenes, scenes)) return;
+    hideAiReview();
+    $('rawSaved').hidden = false;
+    $('rawSavedTitle').textContent = '話した内容を、そのまま残しました。';
+    $('rawSavedMessage').textContent = 'YOSへ接続しています。';
+
+    const baseUrl = typeof globalThis.YOS_AI_BASE_URL === 'string' && globalThis.YOS_AI_BASE_URL.trim()
+      ? globalThis.YOS_AI_BASE_URL.trim()
+      : YOS_AI_PRODUCTION_URL;
+    const getToken = globalThis.YOS_AUTH?.getGoogleIdToken;
+    const Client = globalThis.YosAiClient;
+    if (typeof getToken !== 'function' || typeof Client !== 'function') {
+      const index = scenes.findIndex((scene) => scene.id === sceneId);
+      if (index >= 0) scenes[index] = normalizeScene({ ...scenes[index], conversationStatus: 'local-only', savedAt: new Date().toISOString() });
+      write(KEYS.scenes, scenes);
+      $('rawSavedMessage').textContent = 'YOS AIはまだ利用できません。原文は端末に保存済みです。';
+      return;
+    }
+
+    try {
+      const client = new Client({ baseUrl, getGoogleIdToken: getToken });
+      const result = await client.chat({ userText: rawInput, currentLocation: currentLocationForAi() });
+      const index = scenes.findIndex((scene) => scene.id === sceneId);
+      if (index < 0 || scenes[index].rawInput !== rawInput || scenes[index].conversationStatus !== 'sending') return;
+      const candidates = mapAiCandidates(result, sceneId);
+      const evidence = [...new Set(candidates.flatMap((item) => item.sourceIds))].slice(0, 20);
+      scenes[index] = normalizeScene({
+        ...scenes[index],
+        candidates,
+        evidence,
+        aiAnswer: clean(result?.answer, 4000),
+        aiRequestId: clean(result?.requestId, 160),
+        aiSafety: result?.safety,
+        conversationStatus: candidates.length ? 'confirming' : 'reviewed',
+        savedAt: new Date().toISOString()
+      });
+      if (!write(KEYS.scenes, scenes)) {
+        $('rawSavedMessage').textContent = 'AIの整理を端末へ残せませんでした。原文は保存済みです。';
+        return;
+      }
+      $('rawSavedMessage').textContent = candidates.length
+        ? 'YOSの整理を受け取りました。1つだけ確認してください。'
+        : 'YOSから返事が届きました。確認が必要な候補はありません。';
+      renderAiReview(scenes[index]);
+      renderScenes();
+    } catch (error) {
+      const index = scenes.findIndex((scene) => scene.id === sceneId);
+      if (index >= 0) {
+        scenes[index] = normalizeScene({
+          ...scenes[index],
+          candidates: [],
+          evidence: [],
+          aiAnswer: '',
+          aiRequestId: '',
+          conversationStatus: 'failed',
+          savedAt: new Date().toISOString()
+        });
+        write(KEYS.scenes, scenes);
+      }
+      hideAiReview();
+      $('rawSavedMessage').textContent = apiErrorMessage(Number(error?.status) || 0);
+      renderScenes();
+    }
+  }
+
+  function decideAiCandidate(decision) {
+    const index = scenes.findIndex((scene) => scene.id === activeAiSceneId && scene.conversationStatus === 'confirming');
+    if (index < 0) return;
+    const scene = scenes[index];
+    const candidate = scene.candidates.find((item) => item.status === 'candidate' && (!item.rawInputId || item.rawInputId === scene.id));
+    if (!candidate) return;
+    candidate.status = decision === 'yes' ? 'confirmed' : decision === 'unknown' ? 'unknown' : 'rejected';
+    if (decision === 'yes' && candidate.type === 'fact' && !scene.confirmedFacts.includes(candidate.value)) {
+      scene.confirmedFacts.push(candidate.value);
+      if (!scene.fact) scene.fact = candidate.value;
+    }
+    if (decision === 'yes' && candidate.type === 'nextAction') {
+      scene.next = candidate.value;
+      const items = journeys();
+      const journey = items.find((item) => item.id === scene.domainId);
+      if (journey) {
+        journey.quest = candidate.value;
+        journey.updatedAt = new Date().toISOString();
+        write(KEYS.journeys, items);
+      }
+    }
+    if (decision === 'unknown' && !scene.unknown.includes(candidate.value)) scene.unknown.push(candidate.value);
+    const pending = scene.candidates.some((item) => item.status === 'candidate' && (!item.rawInputId || item.rawInputId === scene.id));
+    scenes[index] = normalizeScene({
+      ...scene,
+      conversationStatus: pending ? 'confirming' : 'confirmed',
+      savedAt: new Date().toISOString()
+    });
+    if (!write(KEYS.scenes, scenes)) {
+      setStatus('確認結果を保存できませんでした。');
+      return;
+    }
+    renderAiReview(scenes[index]);
+    renderScenes();
+    setStatus(pending ? '次の候補を確認してください。' : 'YOSの候補確認が終わりました。');
+  }
+
+  async function finishRawInput() {
     const saved = saveRawInputDraft();
     if (!saved) {
       $('rawDraftStatus').textContent = 'まず、今のことをそのまま話してください。';
@@ -289,18 +526,31 @@
       return;
     }
     const index = scenes.findIndex((scene) => scene.id === saved.id);
-    scenes[index] = normalizeScene({ ...scenes[index], conversationStatus: 'raw', savedAt: new Date().toISOString() });
+    scenes[index] = normalizeScene({
+      ...scenes[index],
+      candidates: [],
+      evidence: [],
+      aiAnswer: '',
+      aiRequestId: '',
+      aiSafety: { level: 'normal', notes: [] },
+      conversationStatus: 'raw',
+      savedAt: new Date().toISOString()
+    });
     if (!write(KEYS.scenes, scenes)) {
       $('rawDraftStatus').textContent = '本人の原文を残せませんでした。';
       return;
     }
+    const savedId = saved.id;
     activeRawInputId = '';
     $('conversationComposer').hidden = true;
     $('startConversation').hidden = false;
     $('rawSaved').hidden = false;
     renderConversationHome();
     renderScenes();
+    $('rawSavedTitle').textContent = '話した内容を、そのまま残しました。';
+    $('rawSavedMessage').textContent = 'YOSへ接続しています。';
     setStatus('本人の原文を、そのまま残しました。');
+    await requestAiForScene(savedId);
   }
 
   function openDetail(tab, targetId) {
@@ -386,6 +636,7 @@
       const domain = domains.find((item) => item.id === scene.domainId);
       const article = document.createElement('article');
       article.className = 'scene-item';
+      article.dataset.sceneId = scene.id;
 
       const meta = document.createElement('div');
       meta.className = 'scene-meta';
@@ -412,7 +663,7 @@
       appendDetail(article, '前へ出ていた力', archetypeNames.join('、'));
       appendDetail(article, '必要だった力', ARCHETYPES.find((item) => item.id === scene.neededArchetype)?.name || '');
 
-      if (scene.rawInput && !scene.fact) {
+      if (scene.rawInput && !scene.fact && scene.conversationStatus === 'draft') {
         const resume = document.createElement('button');
         resume.className = 'scene-continue';
         resume.type = 'button';
@@ -548,6 +799,9 @@
   $('startNewConversation')?.addEventListener('click', () => openConversation());
   $('rawInput')?.addEventListener('input', saveRawInputDraft);
   $('finishRawInput')?.addEventListener('click', finishRawInput);
+  document.querySelectorAll('[data-ai-decision]').forEach((button) => {
+    button.addEventListener('click', () => decideAiCandidate(button.dataset.aiDecision));
+  });
   $('openCurrentLocation')?.addEventListener('click', () => openDetail('journeys', 'currentLocationSection'));
   $('openPastStories')?.addEventListener('click', () => openDetail('story', 'storyHistorySection'));
   $('sceneDomain')?.addEventListener('change', syncSceneStage);
@@ -583,4 +837,5 @@
   populateArchetypeSelects();
   renderScenes();
   renderConversationHome();
+  renderAiReview();
 })();

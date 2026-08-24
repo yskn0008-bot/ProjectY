@@ -66,18 +66,48 @@ try {
   await page.screenshot({ path: `test-results/hj-resume-${browserName}.png`, fullPage: true });
   await page.locator('#startConversation').click();
   assert.match(await page.locator('#rawInput').inputValue(), /仕事のことが気になった/, '保存した原文から再開できない');
+  await page.evaluate(() => {
+    const fakeYosResult = {
+      requestId: 'hj-smoke-request',
+      answer: '話してくれてありがとう。まず確認したいことが1つあります。',
+      facts: [{ text: '仕事のことが気になった', sourceIds: ['00_law'] }],
+      assumptions: ['疲れが影響している可能性がある'],
+      unknowns: ['何が一番気になっているか'],
+      conflicts: [],
+      nextAction: '今日は休む',
+      memoryCandidates: [],
+      safety: { level: 'normal', notes: [] }
+    };
+    globalThis.YosAiClient = class {
+      constructor() {}
+
+      async chat() {
+        return fakeYosResult;
+      }
+    };
+    globalThis.YOS_AI_BASE_URL = location.origin;
+    globalThis.YOS_AUTH = { getGoogleIdToken: async () => 'header.payload.signature' };
+  });
   await page.locator('#finishRawInput').click();
   assert.equal(await visible('#rawSaved'), true, '原文保存完了が分からない');
+  await page.locator('#aiReview').waitFor({ state: 'visible' });
   assert.equal(await visible('#conversationResume'), false, '完了済みの原文を未完了の続きとして表示した');
   assert.equal(await visible('#startNewConversation'), false, '完了後も別会話導線を重複表示している');
   assert.equal(await page.locator('#startConversation').textContent(), '今のことを話す', '完了後に次回の自然な入口へ戻らない');
   const rawRecord = await page.evaluate(() => JSON.parse(localStorage.getItem('hj-daily-scenes-v1') || '[]')[0]);
-  assert.equal(rawRecord?.conversationStatus, 'raw', '本人の原文として保存完了できない');
-  assert.equal(rawRecord?.fact, '', '保存完了時に本人の原文を事実へ変換した');
+  assert.equal(rawRecord?.conversationStatus, 'confirming', 'AI候補を本人確認待ちとして保存できない');
+  assert.equal(rawRecord?.fact, '', '本人確認前に原文やAI候補を事実へ変換した');
+  assert.equal(rawRecord?.candidates?.[0]?.status, 'candidate', 'AI候補を未確認として分離できない');
 
   await page.reload({ waitUntil: 'networkidle' });
   assert.equal(await visible('#conversationResume'), false, '再起動後に完了済み原文を再開候補として表示した');
   assert.equal(await page.locator('#startConversation').textContent(), '今のことを話す', '再起動後に新しい会話入口へ戻らない');
+  assert.equal(await visible('#aiReview'), true, '再起動後に未確認のAI候補が分からない');
+  await page.locator('[data-ai-decision="yes"]').click();
+  const confirmedRecord = await page.evaluate(() => JSON.parse(localStorage.getItem('hj-daily-scenes-v1') || '[]')[0]);
+  assert.equal(confirmedRecord?.fact, '仕事のことが気になった', '本人が「そう」を選んだ事実だけを確定できない');
+  assert.deepEqual(confirmedRecord?.confirmedFacts, ['仕事のことが気になった']);
+  assert.equal(confirmedRecord?.candidates?.[1]?.status, 'candidate', '次のAI候補を一度に確定した');
 
   await page.locator('#openPastStories').click();
   assert.equal(await visible('#storyHistorySection'), true, 'これまでの物語を閲覧できない');
@@ -194,7 +224,14 @@ try {
   const questAfterScene = await page.evaluate(() => JSON.parse(localStorage.getItem('hj-domain-journeys-v1') || '[]')[0]?.quest);
   assert.equal(questAfterScene, '明日も一件だけ記録する。', 'シーンで本人が決めた次の一手が注目中の旅へつながらない');
 
-  await page.locator('#sceneHistory .scene-edit').first().click();
+  const manualSceneFact = 'テスト中に、今日の出来事を一件記録した。';
+  const manualSceneCard = page.locator('#sceneHistory .scene-item').filter({
+    has: page.locator('h3', { hasText: manualSceneFact })
+  });
+  assert.equal(await manualSceneCard.count(), 1, '編集対象の本人記録シーンを一意に特定できない');
+  const manualSceneId = await manualSceneCard.getAttribute('data-scene-id');
+  assert.ok(manualSceneId, '編集対象の本人記録シーンに安定IDがない');
+  await manualSceneCard.locator('.scene-edit').click();
   assert.equal(await page.locator('#sceneEditDialog').evaluate((node) => node.open), true, '編集画面が開かない');
   await page.locator('#editSceneResult').fill('編集後の結果が保存された。');
   await waitReload(() => page.locator('#sceneEditForm button[type="submit"]').click());
@@ -255,11 +292,17 @@ try {
   assert.equal(restored.journeys[0]?.compass, '生活を安全に立て直す', '復元後にコンパスが戻らない');
   assert.equal(restored.journeys[0]?.archetypes?.active?.length, 3, '復元後にアーキタイプが戻らない');
   assert.equal(restored.scenes.length, 2, '復元後に既存シーンと本人の原文が戻らない');
-  assert.equal(restored.scenes[0]?.result, '編集後の結果が保存された。', '編集済み結果が復元されない');
-  assert.equal(restored.scenes[0]?.feeling, 'まだ落ち着かない。', '復元後に感情が戻らない');
-  assert.equal(restored.scenes[0]?.activeArchetypes?.length, 2, '復元後に場面のアーキタイプが戻らない');
-  assert.match(restored.scenes[1]?.rawInput || '', /何が事実かはまだ整理できていない/, '復元後に本人の原文が戻らない');
-  assert.equal(restored.scenes[1]?.fact, '', '復元時に本人の原文を事実へ変換した');
+  const restoredManualScene = restored.scenes.find((scene) => scene.id === manualSceneId && scene.fact === manualSceneFact);
+  assert.ok(restoredManualScene, '復元後に安定IDで本人記録シーンを特定できない');
+  assert.equal(restoredManualScene.result, '編集後の結果が保存された。', '編集済み結果が復元されない');
+  assert.equal(restoredManualScene.feeling, 'まだ落ち着かない。', '復元後に感情が戻らない');
+  assert.equal(restoredManualScene.activeArchetypes?.length, 2, '復元後に場面のアーキタイプが戻らない');
+  const restoredRawScene = restored.scenes.find((scene) => scene.id === confirmedRecord.id);
+  assert.ok(restoredRawScene, '復元後に安定IDで本人の原文シーンを特定できない');
+  assert.match(restoredRawScene.rawInput || '', /何が事実かはまだ整理できていない/, '復元後に本人の原文が戻らない');
+  assert.equal(restoredRawScene.fact, '仕事のことが気になった', '本人が確認した事実が復元されない');
+  assert.deepEqual(restoredRawScene.confirmedFacts, ['仕事のことが気になった'], '本人が確認した事実だけを復元できない');
+  assert.equal(restoredRawScene.candidates?.[0]?.status, 'confirmed', '本人の明示確認が復元されない');
   assert.equal(restored.stories.length, 1, '復元後に作品が戻らない');
   assert.ok(restored.history.length > 0, '復元後に螺旋履歴が戻らない');
   assert.equal(restored.preferences.storyFormat, 'picturebook', '物語形式が復元されない');
@@ -280,7 +323,7 @@ try {
     await navigator.serviceWorker.ready;
     const paths = [
       './index.html', './styles.css', './onboarding.css', './scenes.css', './completion.css',
-      './archetypes.js', './bootstrap.js', './app.js', './profile.js', './scenes.js', './history.js',
+      './archetypes.js', './bootstrap.js', './app.js', './profile.js', './yos-ai-client.js', './yos-auth.js', './scenes.js', './history.js',
       './editor.js', './story-image.js', './data-complete.js', './current-location.js', './manifest.webmanifest'
     ];
     const entries = await Promise.all(paths.map(async (path) => {

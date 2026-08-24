@@ -7,7 +7,7 @@ const valid = {
   OPENAI_MODEL: 'gpt-5.6-terra',
   GOOGLE_CLIENT_ID: '123456789.apps.googleusercontent.com',
   YOS_ALLOWED_ORIGINS: 'https://yos.example',
-  GOOGLE_ALLOWED_SUBJECT_HASH: 'a'.repeat(64),
+  GOOGLE_ALLOWED_SUBJECT_HASH: 'AbCdEfGhIjKlMnOpQrStUvWxYz0123456789_-abcde',
   GOOGLE_AUTH_MODE: 'vercel_oidc',
   GCP_PROJECT_NUMBER: '123456789012',
   GCP_WORKLOAD_IDENTITY_POOL_ID: 'vercel-pool',
@@ -58,4 +58,22 @@ test('format warnings do not expose values or block an otherwise valid configura
   assert.equal(report.status, 'ready');
   assert.equal(report.failed, 0);
   assert.equal(report.warnings, 3);
+});
+
+test('subject hash format matches the runtime SHA-256 Base64URL digest', () => {
+  for (const invalidHash of [
+    'a'.repeat(64),
+    'a'.repeat(42),
+    'a'.repeat(44),
+    `${'a'.repeat(43)}=`,
+    `${'a'.repeat(42)}+`,
+    `${'a'.repeat(42)}/`
+  ]) {
+    const report = runProductionPreflight({...valid, GOOGLE_ALLOWED_SUBJECT_HASH: invalidHash});
+    assert.ok(report.checks.some((check) => check.id === 'subject_hash_format' && check.status === 'warning'));
+  }
+
+  const report = runProductionPreflight(valid);
+  assert.ok(report.checks.some((check) => check.id === 'subject_hash_format' && check.status === 'pass'));
+  assert.equal(report.checks.some((check) => check.id === 'subject_hash_format' && check.status === 'warning'), false);
 });

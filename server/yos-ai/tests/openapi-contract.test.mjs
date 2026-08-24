@@ -10,16 +10,18 @@ test('OpenAPI contract identifies YOS AI v0.4', () => {
   assert.equal(contract.info.version, '0.4.0');
 });
 
-test('OpenAPI contract exposes only the four supported paths', () => {
+test('OpenAPI contract exposes only the five supported paths', () => {
   assert.deepEqual(Object.keys(contract.paths).sort(), [
     '/api/yos/chat',
     '/api/yos/health',
     '/api/yos/nav-model',
+    '/api/yos/public-config',
     '/api/yos/taxi-event'
   ]);
   assert.ok(contract.paths['/api/yos/chat'].post);
   assert.ok(contract.paths['/api/yos/health'].get);
   assert.ok(contract.paths['/api/yos/nav-model'].get);
+  assert.ok(contract.paths['/api/yos/public-config'].get);
   assert.ok(contract.paths['/api/yos/taxi-event'].post);
 });
 
