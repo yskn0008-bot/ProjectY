@@ -19,7 +19,7 @@
       this.baseUrl = normalizeBaseUrl(options?.baseUrl);
       if (typeof options?.getGoogleIdToken !== 'function') throw new Error('getGoogleIdToken is required');
       this.getGoogleIdToken = options.getGoogleIdToken;
-      this.fetchImpl = options.fetchImpl || fetch;
+      this.fetchImpl = options.fetchImpl || globalThis.fetch.bind(globalThis);
       this.timeoutMilliseconds = boundedInteger(options.timeoutMilliseconds ?? 65000, 1000, 120000, 'timeoutMilliseconds');
       this.maxResponseBytes = boundedInteger(options.maxResponseBytes ?? 2000000, 1024, 10000000, 'maxResponseBytes');
     }
