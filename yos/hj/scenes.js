@@ -636,6 +636,7 @@
       const domain = domains.find((item) => item.id === scene.domainId);
       const article = document.createElement('article');
       article.className = 'scene-item';
+      article.dataset.sceneId = scene.id;
 
       const meta = document.createElement('div');
       meta.className = 'scene-meta';

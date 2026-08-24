@@ -136,3 +136,11 @@ test('offline manifest contains every current-location asset', async () => {
   }
   assert.match(worker, /key\.startsWith\("hj-multi-journey-"\)/);
 });
+
+test('scene editor maps rendered cards to stable scene ids', async () => {
+  const [scenes, editor] = await Promise.all([read('scenes.js'), read('editor.js')]);
+  assert.match(scenes, /article\.dataset\.sceneId = scene\.id/);
+  assert.match(editor, /c\.dataset\.sceneId/);
+  assert.match(editor, /ss\(\)\.find\(item=>item\.id===c\.dataset\.sceneId\)/);
+  assert.doesNotMatch(editor, /items\[i\]/, 'scene cards must not map to records by position');
+});
