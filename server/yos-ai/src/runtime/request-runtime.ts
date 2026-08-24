@@ -26,10 +26,7 @@ export class DefaultRequestRuntimeFactory implements RequestRuntimeFactory {
     if (!context.requestId.trim()) throw new Error('requestId is required');
     if (!context.subjectHash.trim()) throw new Error('subjectHash is required');
 
-    const accessTokenProvider = await createGoogleAccessTokenProvider(
-      this.options.config.googleWorkloadAuth,
-      context.vercelOidcToken
-    );
+    const accessTokenProvider = await createGoogleAccessTokenProvider(this.options.config.googleWorkloadAuth);
     const sourceProvider = new GoogleSourceProvider(
       new GoogleDriveClient(this.fetchImpl),
       new GoogleSheetsClient(this.fetchImpl),
