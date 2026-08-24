@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { mkdir } from 'node:fs/promises';
 import { createServer } from 'node:https';
+import { networkInterfaces } from 'node:os';
 import { chromium, webkit } from 'playwright';
 
 const baseURL = process.env.HJ_BASE_URL || 'http://127.0.0.1:4173/yos/hj/';
@@ -53,11 +54,15 @@ const apiServer = createServer({ key: TEST_TLS_KEY, cert: TEST_TLS_CERT }, (requ
 });
 await new Promise((resolve, reject) => {
   apiServer.once('error', reject);
-  apiServer.listen(0, '127.0.0.1', resolve);
+  apiServer.listen(0, '0.0.0.0', resolve);
 });
 const apiAddress = apiServer.address();
 if (!apiAddress || typeof apiAddress === 'string') throw new Error('HJ CORS test server did not start');
-const apiBaseUrl = `https://127.0.0.1:${apiAddress.port}`;
+const apiHost = Object.values(networkInterfaces())
+  .flat()
+  .find((address) => address?.family === 'IPv4' && !address.internal)?.address;
+if (!apiHost) throw new Error('HJ CORS test server has no non-loopback IPv4 address');
+const apiBaseUrl = `https://${apiHost}:${apiAddress.port}`;
 
 const browser = await engine.launch();
 const context = await browser.newContext({
