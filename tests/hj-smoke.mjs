@@ -379,6 +379,22 @@ try {
   }));
   assert.ok(overflow.scrollWidth <= overflow.width + 1, `横スクロールが発生: ${JSON.stringify(overflow)}`);
 
+  const localState = await page.evaluate(() => Array.from(
+    { length: localStorage.length },
+    (_, index) => {
+      const key = localStorage.key(index);
+      return [key, key === null ? null : localStorage.getItem(key)];
+    }
+  ));
+  await page.goto('http://127.0.0.1:4173/yos/hj/', { waitUntil: 'domcontentloaded' });
+  await page.evaluate((entries) => {
+    localStorage.clear();
+    for (const [key, value] of entries) {
+      if (key !== null && value !== null) localStorage.setItem(key, value);
+    }
+  }, localState);
+  await page.reload({ waitUntil: 'networkidle' });
+
   const cacheStatus = await page.evaluate(async () => {
     await navigator.serviceWorker.ready;
     const paths = [
