@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-08-24T14:17:32+09:00",
+  "updated_at": "2026-08-24T15:28:00+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -43,6 +43,16 @@
       "updated_at": "2026-08-08T14:30:23Z"
     },
     {
+      "id": "github-issue-120",
+      "title": "Issue #120 YOS AI：本番有効化・PWA接続・iPhone受入確認",
+      "type": "GitHub Issue",
+      "status": "open",
+      "priority": 3,
+      "next_action": "完成条件を確認し、次の安全な実装を1件進める",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/120",
+      "updated_at": "2026-08-24T06:27:49Z"
+    },
+    {
       "id": "github-issue-142",
       "title": "Issue #142 YOSをヒーローズジャーニーのメンターアプリへ統合する",
       "type": "GitHub Issue",
@@ -71,16 +81,6 @@
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/214",
       "updated_at": "2026-08-04T01:39:56Z"
-    },
-    {
-      "id": "github-issue-225",
-      "title": "Issue #225 [YOS→Codex] Life Service Workerの相互キャッシュ削除を止める",
-      "type": "GitHub Issue",
-      "status": "open",
-      "priority": 3,
-      "next_action": "完成条件を確認し、次の安全な実装を1件進める",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/225",
-      "updated_at": "2026-08-09T11:24:38Z"
     },
     {
       "id": "github-issue-4",
@@ -194,7 +194,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-08-24T14:17:32+09:00",
+      "last_update": "2026-08-24T15:28:00+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -269,13 +269,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 24件・Open PR 1件を自動同期中",
+      "next_action": "Open Issue 25件・Open PR 1件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-08-24T14:17:32+09:00",
+      "last_update": "2026-08-24T15:28:00+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -298,7 +298,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-08-24T14:17:32+09:00",
+      "last_update": "2026-08-24T15:28:00+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -380,5 +380,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "e75b1ab3b835ea064fc71b771a9efca080ecbfcfe4316c6ef1f6a1653b8325df"
+  "github_snapshot_hash": "0b373cb2445c8402dc9e9bcf495c5df47ead7988b55b77e0be3952f62759ab31"
 }
