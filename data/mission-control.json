@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-08-24T19:42:23+09:00",
+  "updated_at": "2026-08-24T20:23:35+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -12,16 +12,6 @@
     ]
   },
   "inbox": [
-    {
-      "id": "github-pr-263",
-      "title": "PR #263 fix(yos-ai): use trusted Vercel OIDC request context",
-      "type": "GitHub PR",
-      "status": "review",
-      "priority": 1,
-      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/263",
-      "updated_at": "2026-08-24T10:29:43Z"
-    },
     {
       "id": "github-pr-233",
       "title": "PR #233 Draft: Mission Controlに進捗率・残り時間を常時表示する",
@@ -135,39 +125,39 @@
   ],
   "recently_completed": [
     {
-      "id": "github-commit-8cdb88eddc28",
-      "title": "Merge pull request #261 from yskn0008-bot/codex/issue-120-yos-ai-v1",
-      "completed_at": "2026-08-24T05:17:18Z",
-      "result": "GitHub mainへ反映（8cdb88e）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/8cdb88eddc28f3684e85dee5fa6e8c658f3ecca9"
+      "id": "github-commit-78f99d59abcb",
+      "title": "Merge pull request #263 from yskn0008-bot/codex/issue-120-vercel-oidc-hotfix",
+      "completed_at": "2026-08-24T11:23:22Z",
+      "result": "GitHub mainへ反映（78f99d5）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/78f99d59abcbeabc0eaad4e29a688999e60ff5c0"
     },
     {
-      "id": "github-commit-e8023480a639",
-      "title": "chore: sync latest main into Issue #120 branch",
-      "completed_at": "2026-08-24T04:37:12Z",
-      "result": "GitHub mainへ反映（e802348）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/e8023480a639dc49be93b4dcaf28502cada9f975"
+      "id": "github-commit-bd8891f920c2",
+      "title": "fix(yos-ai): transport server-side OIDC migration",
+      "completed_at": "2026-08-24T11:22:30Z",
+      "result": "GitHub mainへ反映（bd8891f）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/bd8891f920c244d38985986c4c7769e9dbd16820"
     },
     {
-      "id": "github-commit-60dde9313e94",
-      "title": "fix: apply trusted Issue 232 artifact",
-      "completed_at": "2026-08-24T04:29:20Z",
-      "result": "GitHub mainへ反映（60dde93）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/60dde9313e94be00a52a12b12cfbe3d4bc1e9e5e"
+      "id": "github-commit-bad83bd5b72c",
+      "title": "fix(yos-ai): transport server-side OIDC migration",
+      "completed_at": "2026-08-24T11:22:23Z",
+      "result": "GitHub mainへ反映（bad83bd）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/bad83bd5b72cec1aea4977fe18ba17fc9d4ac031"
     },
     {
-      "id": "github-commit-5c21644f7010",
-      "title": "chore: trigger Issue #120 verification",
-      "completed_at": "2026-08-24T01:41:00Z",
-      "result": "GitHub mainへ反映（5c21644）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/5c21644f701001e3c235fa0a4e916530bcd4f281"
+      "id": "github-commit-0a7ad63bb7fc",
+      "title": "fix(yos-ai): transport server-side OIDC migration",
+      "completed_at": "2026-08-24T11:21:55Z",
+      "result": "GitHub mainへ反映（0a7ad63）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/0a7ad63bb7fc838b92b5502087e6499405e6086a"
     },
     {
-      "id": "github-commit-06d780362320",
-      "title": "fix: apply trusted Issue 232 artifact",
-      "completed_at": "2026-08-24T01:39:46Z",
-      "result": "GitHub mainへ反映（06d7803）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/06d7803623205d32f622cea979f75bf288db3209"
+      "id": "github-commit-364f3553aa25",
+      "title": "fix(yos-ai): transport server-side OIDC migration",
+      "completed_at": "2026-08-24T11:21:28Z",
+      "result": "GitHub mainへ反映（364f355）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/364f3553aa250e0cae23567fc76c9d19cf2425f4"
     },
     {
       "id": "complete-002",
@@ -194,7 +184,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #263をレビューして公開判断する",
+      "next_action": "PR #233をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -204,7 +194,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-08-24T19:42:23+09:00",
+      "last_update": "2026-08-24T20:23:35+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -279,13 +269,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 25件・Open PR 2件を自動同期中",
+      "next_action": "Open Issue 25件・Open PR 1件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-08-24T19:42:23+09:00",
+      "last_update": "2026-08-24T20:23:35+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -299,7 +289,7 @@
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #263をレビューして公開判断する",
+      "next_action": "PR #233をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -308,7 +298,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-08-24T19:42:23+09:00",
+      "last_update": "2026-08-24T20:23:35+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -390,5 +380,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "a3e10e895c11211ea1add083ec635effe2c6c24c921a0aa006001d81b5d15319"
+  "github_snapshot_hash": "fced16ae738c600d1982da344606047865e1f35c9bed6138180b8910c6f1531f"
 }
