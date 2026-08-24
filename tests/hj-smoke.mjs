@@ -224,7 +224,14 @@ try {
   const questAfterScene = await page.evaluate(() => JSON.parse(localStorage.getItem('hj-domain-journeys-v1') || '[]')[0]?.quest);
   assert.equal(questAfterScene, '明日も一件だけ記録する。', 'シーンで本人が決めた次の一手が注目中の旅へつながらない');
 
-  await page.locator('#sceneHistory .scene-edit').first().click();
+  const manualSceneFact = 'テスト中に、今日の出来事を一件記録した。';
+  const manualSceneCard = page.locator('#sceneHistory .scene-item').filter({
+    has: page.locator('h3', { hasText: manualSceneFact })
+  });
+  assert.equal(await manualSceneCard.count(), 1, '編集対象の本人記録シーンを一意に特定できない');
+  const manualSceneId = await manualSceneCard.getAttribute('data-scene-id');
+  assert.ok(manualSceneId, '編集対象の本人記録シーンに安定IDがない');
+  await manualSceneCard.locator('.scene-edit').click();
   assert.equal(await page.locator('#sceneEditDialog').evaluate((node) => node.open), true, '編集画面が開かない');
   await page.locator('#editSceneResult').fill('編集後の結果が保存された。');
   await waitReload(() => page.locator('#sceneEditForm button[type="submit"]').click());
@@ -285,11 +292,14 @@ try {
   assert.equal(restored.journeys[0]?.compass, '生活を安全に立て直す', '復元後にコンパスが戻らない');
   assert.equal(restored.journeys[0]?.archetypes?.active?.length, 3, '復元後にアーキタイプが戻らない');
   assert.equal(restored.scenes.length, 2, '復元後に既存シーンと本人の原文が戻らない');
-  assert.equal(restored.scenes[0]?.result, '編集後の結果が保存された。', '編集済み結果が復元されない');
-  assert.equal(restored.scenes[0]?.feeling, 'まだ落ち着かない。', '復元後に感情が戻らない');
-  assert.equal(restored.scenes[0]?.activeArchetypes?.length, 2, '復元後に場面のアーキタイプが戻らない');
-  assert.match(restored.scenes[1]?.rawInput || '', /何が事実かはまだ整理できていない/, '復元後に本人の原文が戻らない');
-  assert.equal(restored.scenes[1]?.fact, '', '復元時に本人の原文を事実へ変換した');
+  const restoredManualScene = restored.scenes.find((scene) => scene.id === manualSceneId && scene.fact === manualSceneFact);
+  assert.ok(restoredManualScene, '復元後に安定IDで本人記録シーンを特定できない');
+  assert.equal(restoredManualScene.result, '編集後の結果が保存された。', '編集済み結果が復元されない');
+  assert.equal(restoredManualScene.feeling, 'まだ落ち着かない。', '復元後に感情が戻らない');
+  assert.equal(restoredManualScene.activeArchetypes?.length, 2, '復元後に場面のアーキタイプが戻らない');
+  const restoredRawScene = restored.scenes.find((scene) => /何が事実かはまだ整理できていない/.test(scene.rawInput || ''));
+  assert.ok(restoredRawScene, '復元後に本人の原文が戻らない');
+  assert.equal(restoredRawScene.fact, '', '復元時に本人の原文を事実へ変換した');
   assert.equal(restored.stories.length, 1, '復元後に作品が戻らない');
   assert.ok(restored.history.length > 0, '復元後に螺旋履歴が戻らない');
   assert.equal(restored.preferences.storyFormat, 'picturebook', '物語形式が復元されない');
