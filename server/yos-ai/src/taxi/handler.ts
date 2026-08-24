@@ -1,5 +1,4 @@
 import {createGoogleAccessTokenProvider, GOOGLE_SHEETS_WRITE_SCOPES} from '../auth/google-runtime.js';
-import {readVercelOidcToken} from '../auth/vercel-oidc.js';
 import type {GoogleWorkloadAuthConfig} from '../config.js';
 import type {FetchLike} from '../http.js';
 import {GoogleSheetsClient} from '../sources/google-sheets-client.js';
@@ -64,10 +63,8 @@ export function createTaxiEventHandler(options: CreateTaxiEventHandlerOptions): 
     }
 
     try {
-      const oidcToken = readVercelOidcToken(request);
       const accessTokenProvider = await createGoogleAccessTokenProvider(
         options.googleWorkloadAuth,
-        oidcToken,
         GOOGLE_SHEETS_WRITE_SCOPES
       );
       const accessToken = await accessTokenProvider.getAccessToken();
