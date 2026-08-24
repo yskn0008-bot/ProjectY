@@ -297,9 +297,12 @@ try {
   assert.equal(restoredManualScene.result, '編集後の結果が保存された。', '編集済み結果が復元されない');
   assert.equal(restoredManualScene.feeling, 'まだ落ち着かない。', '復元後に感情が戻らない');
   assert.equal(restoredManualScene.activeArchetypes?.length, 2, '復元後に場面のアーキタイプが戻らない');
-  const restoredRawScene = restored.scenes.find((scene) => /何が事実かはまだ整理できていない/.test(scene.rawInput || ''));
-  assert.ok(restoredRawScene, '復元後に本人の原文が戻らない');
-  assert.equal(restoredRawScene.fact, '', '復元時に本人の原文を事実へ変換した');
+  const restoredRawScene = restored.scenes.find((scene) => scene.id === confirmedRecord.id);
+  assert.ok(restoredRawScene, '復元後に安定IDで本人の原文シーンを特定できない');
+  assert.match(restoredRawScene.rawInput || '', /何が事実かはまだ整理できていない/, '復元後に本人の原文が戻らない');
+  assert.equal(restoredRawScene.fact, '仕事のことが気になった', '本人が確認した事実が復元されない');
+  assert.deepEqual(restoredRawScene.confirmedFacts, ['仕事のことが気になった'], '本人が確認した事実だけを復元できない');
+  assert.equal(restoredRawScene.candidates?.[0]?.status, 'confirmed', '本人の明示確認が復元されない');
   assert.equal(restored.stories.length, 1, '復元後に作品が戻らない');
   assert.ok(restored.history.length > 0, '復元後に螺旋履歴が戻らない');
   assert.equal(restored.preferences.storyFormat, 'picturebook', '物語形式が復元されない');
