@@ -4,6 +4,7 @@ import {applyContextBudget, type ContextBudgetOptions} from './context-budget.js
 import {routeDomain} from './domain-router.js';
 import {validateGroundedFacts} from './grounding.js';
 import {validateMemoryCandidates} from './memory-candidates.js';
+import {ModelFailure, type ModelFailureStage} from './model-failure.js';
 import {sanitizeDocuments} from './privacy-filter.js';
 import type {
   EvidenceItem,
@@ -30,7 +31,8 @@ export type AnswerFailureStage =
   | 'source-load'
   | 'context-build'
   | 'model-request'
-  | 'model-output-validate';
+  | 'model-output-validate'
+  | ModelFailureStage;
 
 export class AnswerFailure extends Error {
   constructor(readonly stage: AnswerFailureStage) {
@@ -42,7 +44,9 @@ export class AnswerFailure extends Error {
 async function atAnswerStage<T>(stage: AnswerFailureStage, operation: () => Promise<T> | T): Promise<T> {
   try {
     return await operation();
-  } catch {
+  } catch (error) {
+    if (error instanceof AnswerFailure) throw error;
+    if (error instanceof ModelFailure) throw new AnswerFailure(error.stage);
     throw new AnswerFailure(stage);
   }
 }
