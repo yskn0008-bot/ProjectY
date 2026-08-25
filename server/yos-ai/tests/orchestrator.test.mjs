@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { YosOrchestrator } from '../dist/orchestrator.js';
+import { AnswerFailure, YosOrchestrator } from '../dist/orchestrator.js';
 
 const source = (id, title, priority, privacyLevel = 'L1', content = title) => ({
   source: { id, title, kind: 'master', priority },
@@ -44,4 +44,73 @@ test('orchestrator loads core and domain sources and removes L4 content', async 
   assert.equal(result.route.primary, 'taxi-live');
   assert.equal(result.safety.level, 'attention');
   assert.ok(result.safety.notes.some((note) => note.includes('secret')));
+});
+
+const request = {
+  requestId: 'req-private',
+  userText: 'private user question',
+  currentTime: '2026-07-29T23:00:00+09:00'
+};
+
+const modelOutput = () => ({
+  answer: 'private model answer',
+  facts: [],
+  assumptions: [],
+  unknowns: [],
+  memoryCandidates: [],
+  nextAction: null
+});
+
+async function rejectsAt(orchestrator, stage) {
+  await assert.rejects(orchestrator.answer(request), (error) => {
+    assert.ok(error instanceof AnswerFailure);
+    assert.equal(error.stage, stage);
+    assert.equal(error.cause, undefined);
+    assert.doesNotMatch(JSON.stringify(error), /private|secret|token|source-id|model answer/i);
+    assert.doesNotMatch(error.message, /private|secret|token|source-id|model answer/i);
+    return true;
+  });
+}
+
+test('orchestrator classifies failures at each real answer boundary without retaining details', async (t) => {
+  await t.test('source-load', async () => {
+    const provider = {
+      async loadCoreSources() { throw new Error('private source-id and token'); },
+      async loadDomainSources() { return []; }
+    };
+    await rejectsAt(new YosOrchestrator(provider, {async generate() { return modelOutput(); }}), 'source-load');
+  });
+
+  await t.test('context-build', async () => {
+    const privateDocument = source('private-source-id', 'private title', 1);
+    Object.defineProperty(privateDocument, 'content', {
+      get() { throw new Error('private context secret'); }
+    });
+    const provider = {
+      async loadCoreSources() { return [privateDocument]; },
+      async loadDomainSources() { return []; }
+    };
+    await rejectsAt(new YosOrchestrator(provider, {async generate() { return modelOutput(); }}), 'context-build');
+  });
+
+  await t.test('model-request', async () => {
+    const provider = {
+      async loadCoreSources() { return []; },
+      async loadDomainSources() { return []; }
+    };
+    const client = {async generate() { throw new Error('OPENAI_API_KEY=secret model input'); }};
+    await rejectsAt(new YosOrchestrator(provider, client), 'model-request');
+  });
+
+  await t.test('model-output-validate', async () => {
+    const provider = {
+      async loadCoreSources() { return []; },
+      async loadDomainSources() { return []; }
+    };
+    const output = modelOutput();
+    Object.defineProperty(output, 'facts', {
+      get() { throw new Error('private model output'); }
+    });
+    await rejectsAt(new YosOrchestrator(provider, {async generate() { return output; }}), 'model-output-validate');
+  });
 });
