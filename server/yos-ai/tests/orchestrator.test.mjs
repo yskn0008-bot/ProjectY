@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { ModelFailure } from '../dist/model-failure.js';
 import { AnswerFailure, YosOrchestrator } from '../dist/orchestrator.js';
 
 const source = (id, title, priority, privacyLevel = 'L1', content = title) => ({
@@ -100,6 +101,29 @@ test('orchestrator classifies failures at each real answer boundary without reta
     };
     const client = {async generate() { throw new Error('OPENAI_API_KEY=secret model input'); }};
     await rejectsAt(new YosOrchestrator(provider, client), 'model-request');
+  });
+
+  await t.test('fixed model failure stages', async (t) => {
+    const provider = {
+      async loadCoreSources() { return []; },
+      async loadDomainSources() { return []; }
+    };
+    const stages = [
+      'model-network',
+      'model-http-auth',
+      'model-http-quota',
+      'model-http-rate-limit',
+      'model-http-request',
+      'model-http-timeout',
+      'model-http-upstream',
+      'model-response-invalid'
+    ];
+    for (const stage of stages) {
+      await t.test(stage, async () => {
+        const client = {async generate() { throw new ModelFailure(stage); }};
+        await rejectsAt(new YosOrchestrator(provider, client), stage);
+      });
+    }
   });
 
   await t.test('model-output-validate', async () => {
