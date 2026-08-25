@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-08-26T07:33:31+09:00",
+  "updated_at": "2026-08-26T08:36:42+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -125,18 +125,39 @@
   ],
   "recently_completed": [
     {
-      "id": "github-commit-19e2793644bd",
-      "title": "fix(yos-ai): classify answer failure substages",
-      "completed_at": "2026-08-25T14:16:18Z",
-      "result": "GitHub mainへ反映（19e2793）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/19e2793644bdf8a72180af743e2d0ed88831e197"
+      "id": "github-commit-387c26f6e5e9",
+      "title": "Merge pull request #268 from yskn0008-bot/codex/issue-120-model-request-diagnostics",
+      "completed_at": "2026-08-25T23:36:27Z",
+      "result": "GitHub mainへ反映（387c26f）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/387c26f6e5e9c1276d88e66f9b790a9dd68f026b"
     },
     {
-      "id": "github-commit-f5c049428afd",
-      "title": "fix(yos-ai): identify fail-closed 503 stage (#265)",
-      "completed_at": "2026-08-24T22:42:40Z",
-      "result": "GitHub mainへ反映（f5c0494）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/f5c049428afd1943ed802121d1a35a613d00b026"
+      "id": "github-commit-3a450e012a68",
+      "title": "fix(yos-ai): reconcile complete safe model diagnostics",
+      "completed_at": "2026-08-25T23:34:51Z",
+      "result": "GitHub mainへ反映（3a450e0）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/3a450e012a686ba369c25edfde8c8f3c9ea2d60d"
+    },
+    {
+      "id": "github-commit-af8de6effa42",
+      "title": "fix(yos-ai): complete model request diagnostics",
+      "completed_at": "2026-08-25T23:34:25Z",
+      "result": "GitHub mainへ反映（af8de6e）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/af8de6effa420230fbdf5363228c53148a7ee8c2"
+    },
+    {
+      "id": "github-commit-79df493dfbb6",
+      "title": "fix(yos-ai): add safe model failure stages (6/6)",
+      "completed_at": "2026-08-25T19:04:58Z",
+      "result": "GitHub mainへ反映（79df493）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/79df493dfbb65c004fa1c4772e6c8789a425955f"
+    },
+    {
+      "id": "github-commit-4793addc3a4c",
+      "title": "fix(yos-ai): classify model request failure (5/6)",
+      "completed_at": "2026-08-25T19:04:57Z",
+      "result": "GitHub mainへ反映（4793add）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/4793addc3a4c3383cb5a94790883cebcfa3dc978"
     },
     {
       "id": "complete-002",
@@ -173,7 +194,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-08-26T07:33:31+09:00",
+      "last_update": "2026-08-26T08:36:42+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -254,7 +275,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-08-26T07:33:31+09:00",
+      "last_update": "2026-08-26T08:36:42+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -277,7 +298,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-08-26T07:33:31+09:00",
+      "last_update": "2026-08-26T08:36:42+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -359,5 +380,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "c8594150c49f064d5e652398633d979d1e9995c24c197854d7be2d683ef1fcc8"
+  "github_snapshot_hash": "3e6f29285cc2de160ec0a529de860cde9fdebe9e191b6e765d7191df3567e5df"
 }
