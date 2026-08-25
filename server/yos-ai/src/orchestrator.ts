@@ -26,6 +26,27 @@ const BASE_INSTRUCTION = [
   '営業中モードでは結論を短くする。'
 ].join('\n');
 
+export type AnswerFailureStage =
+  | 'source-load'
+  | 'context-build'
+  | 'model-request'
+  | 'model-output-validate';
+
+export class AnswerFailure extends Error {
+  constructor(readonly stage: AnswerFailureStage) {
+    super('YOS answer failed');
+    this.name = 'AnswerFailure';
+  }
+}
+
+async function atAnswerStage<T>(stage: AnswerFailureStage, operation: () => Promise<T> | T): Promise<T> {
+  try {
+    return await operation();
+  } catch {
+    throw new AnswerFailure(stage);
+  }
+}
+
 function collectEvidence(documents: SourceDocument[]): EvidenceItem[] {
   return documents.flatMap((document) => document.evidence ?? []);
 }
@@ -47,16 +68,20 @@ export class YosOrchestrator {
     assertRequest(request);
 
     const route = routeDomain(request.userText);
-    const [core, domain] = await Promise.all([
+    const [core, domain] = await atAnswerStage('source-load', () => Promise.all([
       this.sourceProvider.loadCoreSources(),
       this.sourceProvider.loadDomainSources(route, request)
-    ]);
+    ]));
 
-    const allDocuments = deduplicateDocuments([...core, ...domain]);
-    const privacy = sanitizeDocuments(allDocuments);
-    const budget = applyContextBudget(privacy.documents, this.contextBudget);
-    const conflicts = detectConflicts(collectEvidence(budget.documents));
-    const context = buildContext(route, budget.documents, conflicts);
+    const prepared = await atAnswerStage('context-build', () => {
+      const allDocuments = deduplicateDocuments([...core, ...domain]);
+      const privacy = sanitizeDocuments(allDocuments);
+      const budget = applyContextBudget(privacy.documents, this.contextBudget);
+      const conflicts = detectConflicts(collectEvidence(budget.documents));
+      const context = buildContext(route, budget.documents, conflicts);
+      return {privacy, budget, conflicts, context};
+    });
+    const {privacy, budget, conflicts, context} = prepared;
 
     const modelInput: ModelInput = {
       requestId: request.requestId,
@@ -68,45 +93,47 @@ export class YosOrchestrator {
       conflicts
     };
 
-    const modelOutput = await this.modelClient.generate(modelInput);
-    const groundedFacts = validateGroundedFacts(modelOutput.facts, modelInput.sourceRefs);
-    const candidates = validateMemoryCandidates(
-      modelOutput.memoryCandidates,
-      modelInput.sourceRefs,
-      [route.primary, ...route.related]
-    );
-    const unavailable = budget.documents.filter(
-      (document) => document.retrievalStatus && document.retrievalStatus !== 'ok'
-    );
-    const safetyNotes = [
-      ...privacy.notes,
-      ...budget.notes,
-      ...unavailable.map((document) => `${document.source.id}:${document.retrievalNote ?? '情報源未確認'}`),
-      ...groundedFacts.rejected.map((item) => `事実${item.index + 1}を除外:${item.reason}`),
-      ...candidates.rejected.map((item) => `保存候補${item.index + 1}を除外:${item.reason}`)
-    ];
-    if (privacy.blockedSourceIds.length > 0) {
-      safetyNotes.push(`L4情報源を除外:${privacy.blockedSourceIds.join(',')}`);
-    }
-
-    const attention = privacy.blockedSourceIds.length > 0
-      || unavailable.length > 0
-      || groundedFacts.rejected.length > 0
-      || candidates.rejected.length > 0;
-
-    return {
-      requestId: request.requestId,
-      route,
-      ...modelOutput,
-      facts: groundedFacts.accepted,
-      memoryCandidates: candidates.accepted,
-      conflicts,
-      sources: modelInput.sourceRefs,
-      safety: {
-        level: attention ? 'attention' : 'normal',
-        notes: safetyNotes
+    const modelOutput = await atAnswerStage('model-request', () => this.modelClient.generate(modelInput));
+    return atAnswerStage('model-output-validate', () => {
+      const groundedFacts = validateGroundedFacts(modelOutput.facts, modelInput.sourceRefs);
+      const candidates = validateMemoryCandidates(
+        modelOutput.memoryCandidates,
+        modelInput.sourceRefs,
+        [route.primary, ...route.related]
+      );
+      const unavailable = budget.documents.filter(
+        (document) => document.retrievalStatus && document.retrievalStatus !== 'ok'
+      );
+      const safetyNotes = [
+        ...privacy.notes,
+        ...budget.notes,
+        ...unavailable.map((document) => `${document.source.id}:${document.retrievalNote ?? '情報源未確認'}`),
+        ...groundedFacts.rejected.map((item) => `事実${item.index + 1}を除外:${item.reason}`),
+        ...candidates.rejected.map((item) => `保存候補${item.index + 1}を除外:${item.reason}`)
+      ];
+      if (privacy.blockedSourceIds.length > 0) {
+        safetyNotes.push(`L4情報源を除外:${privacy.blockedSourceIds.join(',')}`);
       }
-    };
+
+      const attention = privacy.blockedSourceIds.length > 0
+        || unavailable.length > 0
+        || groundedFacts.rejected.length > 0
+        || candidates.rejected.length > 0;
+
+      return {
+        requestId: request.requestId,
+        route,
+        ...modelOutput,
+        facts: groundedFacts.accepted,
+        memoryCandidates: candidates.accepted,
+        conflicts,
+        sources: modelInput.sourceRefs,
+        safety: {
+          level: attention ? 'attention' : 'normal',
+          notes: safetyNotes
+        }
+      };
+    });
   }
 }
 
