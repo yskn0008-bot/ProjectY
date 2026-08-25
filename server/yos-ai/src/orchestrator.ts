@@ -4,6 +4,7 @@ import {applyContextBudget, type ContextBudgetOptions} from './context-budget.js
 import {routeDomain} from './domain-router.js';
 import {validateGroundedFacts} from './grounding.js';
 import {validateMemoryCandidates} from './memory-candidates.js';
+import {ModelFailure} from './openai/model-failure.js';
 import {sanitizeDocuments} from './privacy-filter.js';
 import type {
   EvidenceItem,
@@ -93,7 +94,12 @@ export class YosOrchestrator {
       conflicts
     };
 
-    const modelOutput = await atAnswerStage('model-request', () => this.modelClient.generate(modelInput));
+    let modelOutput;
+    try {
+      modelOutput = await this.modelClient.generate(modelInput);
+    } catch (error) {
+      throw new AnswerFailure(error instanceof ModelFailure ? error.stage : 'model-request');
+    }
     return atAnswerStage('model-output-validate', () => {
       const groundedFacts = validateGroundedFacts(modelOutput.facts, modelInput.sourceRefs);
       const candidates = validateMemoryCandidates(

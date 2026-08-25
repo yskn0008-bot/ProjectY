@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { AnswerFailure, YosOrchestrator } from '../dist/orchestrator.js';
+import { ModelFailure } from '../dist/openai/model-failure.js';
 
 const source = (id, title, priority, privacyLevel = 'L1', content = title) => ({
   source: { id, title, kind: 'master', priority },
@@ -100,6 +101,15 @@ test('orchestrator classifies failures at each real answer boundary without reta
     };
     const client = {async generate() { throw new Error('OPENAI_API_KEY=secret model input'); }};
     await rejectsAt(new YosOrchestrator(provider, client), 'model-request');
+  });
+
+  await t.test('model client validation failure', async () => {
+    const provider = {
+      async loadCoreSources() { return []; },
+      async loadDomainSources() { return []; }
+    };
+    const client = {async generate() { throw new ModelFailure('model-output-validate'); }};
+    await rejectsAt(new YosOrchestrator(provider, client), 'model-output-validate');
   });
 
   await t.test('model-output-validate', async () => {

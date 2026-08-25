@@ -1,4 +1,5 @@
-import {assertOk, type FetchLike} from '../http.js';
+import type {FetchLike} from '../http.js';
+import {ModelFailure} from './model-failure.js';
 import type {
   GroundedFact,
   MemoryCandidate,
@@ -53,56 +54,46 @@ export class OpenAIResponsesClient implements ModelClient {
   }
 
   async generate(input: ModelInput): Promise<ModelOutput> {
-    const response = await this.fetchImpl(this.endpoint, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${this.options.apiKey}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        model: this.model,
-        instructions: input.instruction,
-        input: [
-          {
-            role: 'user',
-            content: [
-              {
-                type: 'input_text',
-                text: [
-                  `REQUEST_ID=${input.requestId}`,
-                  `USER_TEXT=${input.userText}`,
-                  '',
-                  input.context
-                ].join('\n')
-              }
-            ]
+    let response: Response;
+    try {
+      response = await this.fetchImpl(this.endpoint, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${this.options.apiKey}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          model: this.model,
+          instructions: input.instruction,
+          input: [{role: 'user', content: [{
+            type: 'input_text',
+            text: [`REQUEST_ID=${input.requestId}`, `USER_TEXT=${input.userText}`, '', input.context].join('\n')
+          }]}],
+          reasoning: {effort: input.route.liveMode ? 'low' : 'medium'},
+          max_output_tokens: input.route.liveMode ? this.liveMaxOutputTokens : this.maxOutputTokens,
+          store: false,
+          safety_identifier: this.options.safetyIdentifier,
+          text: {
+            verbosity: input.route.liveMode ? 'low' : 'medium',
+            format: {type: 'json_schema', name: 'yos_answer', strict: true, schema: this.options.responseSchema}
           }
-        ],
-        reasoning: {effort: input.route.liveMode ? 'low' : 'medium'},
-        max_output_tokens: input.route.liveMode ? this.liveMaxOutputTokens : this.maxOutputTokens,
-        store: false,
-        safety_identifier: this.options.safetyIdentifier,
-        text: {
-          verbosity: input.route.liveMode ? 'low' : 'medium',
-          format: {
-            type: 'json_schema',
-            name: 'yos_answer',
-            strict: true,
-            schema: this.options.responseSchema
-          }
-        }
-      })
-    });
+        })
+      });
+    } catch {
+      throw new ModelFailure('model-request');
+    }
 
-    await assertOk(response, 'OpenAI Responses request');
-    const payload = await response.json() as ResponsesApiResult;
-    const outputText = extractOutputText(payload);
-    const output = validateModelOutput(JSON.parse(outputText) as unknown);
-    const modelUsage = parseModelUsage(payload, this.model);
-    return {
-      ...output,
-      ...(modelUsage ? {modelUsage} : {})
-    };
+    if (!response.ok) throw new ModelFailure('model-request');
+
+    try {
+      const payload = await response.json() as ResponsesApiResult;
+      const outputText = extractOutputText(payload);
+      const output = validateModelOutput(JSON.parse(outputText) as unknown);
+      const modelUsage = parseModelUsage(payload, this.model);
+      return {...output, ...(modelUsage ? {modelUsage} : {})};
+    } catch {
+      throw new ModelFailure('model-output-validate');
+    }
   }
 }
 
