@@ -2,11 +2,12 @@ import {createAnswerAuditRecord, type AuditSink} from '../audit.js';
 import type {IdentityGate} from '../auth/identity-gate.js';
 import type {IdentityVerifier} from '../auth/types.js';
 import type {RateLimiter} from '../rate-limit.js';
+import {AnswerFailure, type AnswerFailureStage} from '../orchestrator.js';
 import type {RequestRuntimeFactory} from '../runtime/types.js';
 import type {YosRequest} from '../types.js';
 import {allowedOrigin, bearerToken, corsPreflight, secureJson, type CorsOptions} from './shared.js';
 
-export type ChatFailureStage = 'rate-limit' | 'runtime-create' | 'answer' | 'audit';
+export type ChatFailureStage = 'rate-limit' | 'runtime-create' | 'answer' | 'audit' | AnswerFailureStage;
 
 export interface ChatFailureEvent {
   stage: ChatFailureStage;
@@ -124,8 +125,11 @@ export function createChatHandler(options: ChatHandlerOptions): (request: Reques
         durationMilliseconds
       }));
       return secureJson(answer, 200, origin);
-    } catch {
-      reportFailure(options.failureReporter, {stage: failureStage, requestId});
+    } catch (error) {
+      const stage = failureStage === 'answer' && error instanceof AnswerFailure
+        ? error.stage
+        : failureStage;
+      reportFailure(options.failureReporter, {stage, requestId});
       return secureJson({error: 'YOS is temporarily unavailable', requestId}, 503, origin);
     }
   };
