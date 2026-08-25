@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {OpenAIResponsesClient} from '../dist/openai/responses-client.js';
+import {ModelFailure} from '../dist/openai/model-failure.js';
 
 const modelOutput = {
   answer: '結論',
@@ -83,6 +84,33 @@ test('Responses client allows missing usage without inventing values', async () 
   assert.equal(result.modelUsage, undefined);
 });
 
+async function rejectsAt(operation, stage) {
+  await assert.rejects(operation, (error) => {
+    assert.ok(error instanceof ModelFailure);
+    assert.equal(error.stage, stage);
+    assert.equal(error.cause, undefined);
+    assert.deepEqual(Object.keys(error), ['stage', 'name']);
+    return true;
+  });
+}
+
+test('Responses client classifies network and unsuccessful HTTP failures without retaining details', async (t) => {
+  await t.test('network', async () => {
+    const client = new OpenAIResponsesClient({
+      apiKey: 'test-key', safetyIdentifier: 'hashed-user', responseSchema: {type: 'object'},
+      fetchImpl: async () => { throw new Error('token=secret user text'); }
+    });
+    await rejectsAt(() => client.generate(modelInput()), 'model-request');
+  });
+  await t.test('provider HTTP', async () => {
+    const client = new OpenAIResponsesClient({
+      apiKey: 'test-key', safetyIdentifier: 'hashed-user', responseSchema: {type: 'object'},
+      fetchImpl: async () => new Response('provider-secret-body', {status: 500})
+    });
+    await rejectsAt(() => client.generate(modelInput()), 'model-request');
+  });
+});
+
 test('Responses client rejects malformed model output', async () => {
   const client = new OpenAIResponsesClient({
     apiKey: 'test-key',
@@ -93,7 +121,7 @@ test('Responses client rejects malformed model output', async () => {
     }), {status: 200, headers: {'content-type': 'application/json'}})
   });
 
-  await assert.rejects(() => client.generate(modelInput()), /answer must be a string/);
+  await rejectsAt(() => client.generate(modelInput()), 'model-output-validate');
 });
 
 test('Responses client rejects facts without source IDs', async () => {
@@ -112,7 +140,7 @@ test('Responses client rejects facts without source IDs', async () => {
     }), {status: 200, headers: {'content-type': 'application/json'}})
   });
 
-  await assert.rejects(() => client.generate(modelInput()), /non-empty sourceIds/);
+  await rejectsAt(() => client.generate(modelInput()), 'model-output-validate');
 });
 
 test('Responses client rejects corrupt usage counters', async () => {
@@ -126,5 +154,17 @@ test('Responses client rejects corrupt usage counters', async () => {
     }), {status: 200, headers: {'content-type': 'application/json'}})
   });
 
-  await assert.rejects(() => client.generate(modelInput()), /input_tokens/);
+  await rejectsAt(() => client.generate(modelInput()), 'model-output-validate');
+});
+
+test('Responses client classifies invalid provider JSON and missing output as validation failures', async (t) => {
+  for (const [name, body] of [['invalid JSON', '{'], ['missing output', '{}']]) {
+    await t.test(name, async () => {
+      const client = new OpenAIResponsesClient({
+        apiKey: 'test-key', safetyIdentifier: 'hashed-user', responseSchema: {type: 'object'},
+        fetchImpl: async () => new Response(body, {status: 200})
+      });
+      await rejectsAt(() => client.generate(modelInput()), 'model-output-validate');
+    });
+  }
 });
