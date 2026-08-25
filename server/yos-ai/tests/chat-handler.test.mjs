@@ -289,22 +289,7 @@ test('reports only a fixed safe stage for each fail-closed dependency boundary',
 });
 
 test('reports allowlisted answer substages while preserving the legacy answer fallback', async (t) => {
-  const stages = [
-    'source-load',
-    'context-build',
-    'model-request',
-    'model-network',
-    'model-http-auth',
-    'model-http-quota',
-    'model-http-rate-limit',
-    'model-http-request',
-    'model-http-timeout',
-    'model-http-upstream',
-    'model-response-invalid',
-    'model-output-validate',
-    'answer'
-  ];
-  for (const stage of stages) {
+  for (const stage of ['source-load', 'context-build', 'model-request', 'model-output-validate', 'answer']) {
     await t.test(stage, async () => {
       const events = [];
       const secret = 'OPENAI_API_KEY=private-secret user question model output';

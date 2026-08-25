@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { ModelFailure } from '../dist/model-failure.js';
 import { AnswerFailure, YosOrchestrator } from '../dist/orchestrator.js';
+import { ModelFailure } from '../dist/openai/model-failure.js';
 
 const source = (id, title, priority, privacyLevel = 'L1', content = title) => ({
   source: { id, title, kind: 'master', priority },
@@ -103,27 +103,13 @@ test('orchestrator classifies failures at each real answer boundary without reta
     await rejectsAt(new YosOrchestrator(provider, client), 'model-request');
   });
 
-  await t.test('fixed model failure stages', async (t) => {
+  await t.test('model client validation failure', async () => {
     const provider = {
       async loadCoreSources() { return []; },
       async loadDomainSources() { return []; }
     };
-    const stages = [
-      'model-network',
-      'model-http-auth',
-      'model-http-quota',
-      'model-http-rate-limit',
-      'model-http-request',
-      'model-http-timeout',
-      'model-http-upstream',
-      'model-response-invalid'
-    ];
-    for (const stage of stages) {
-      await t.test(stage, async () => {
-        const client = {async generate() { throw new ModelFailure(stage); }};
-        await rejectsAt(new YosOrchestrator(provider, client), stage);
-      });
-    }
+    const client = {async generate() { throw new ModelFailure('model-output-validate'); }};
+    await rejectsAt(new YosOrchestrator(provider, client), 'model-output-validate');
   });
 
   await t.test('model-output-validate', async () => {

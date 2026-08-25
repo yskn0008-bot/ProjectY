@@ -4,7 +4,7 @@ import {applyContextBudget, type ContextBudgetOptions} from './context-budget.js
 import {routeDomain} from './domain-router.js';
 import {validateGroundedFacts} from './grounding.js';
 import {validateMemoryCandidates} from './memory-candidates.js';
-import {ModelFailure, type ModelFailureStage} from './model-failure.js';
+import {ModelFailure} from './openai/model-failure.js';
 import {sanitizeDocuments} from './privacy-filter.js';
 import type {
   EvidenceItem,
@@ -31,8 +31,7 @@ export type AnswerFailureStage =
   | 'source-load'
   | 'context-build'
   | 'model-request'
-  | 'model-output-validate'
-  | ModelFailureStage;
+  | 'model-output-validate';
 
 export class AnswerFailure extends Error {
   constructor(readonly stage: AnswerFailureStage) {
@@ -44,9 +43,7 @@ export class AnswerFailure extends Error {
 async function atAnswerStage<T>(stage: AnswerFailureStage, operation: () => Promise<T> | T): Promise<T> {
   try {
     return await operation();
-  } catch (error) {
-    if (error instanceof AnswerFailure) throw error;
-    if (error instanceof ModelFailure) throw new AnswerFailure(error.stage);
+  } catch {
     throw new AnswerFailure(stage);
   }
 }
@@ -97,7 +94,12 @@ export class YosOrchestrator {
       conflicts
     };
 
-    const modelOutput = await atAnswerStage('model-request', () => this.modelClient.generate(modelInput));
+    let modelOutput;
+    try {
+      modelOutput = await this.modelClient.generate(modelInput);
+    } catch (error) {
+      throw new AnswerFailure(error instanceof ModelFailure ? error.stage : 'model-request');
+    }
     return atAnswerStage('model-output-validate', () => {
       const groundedFacts = validateGroundedFacts(modelOutput.facts, modelInput.sourceRefs);
       const candidates = validateMemoryCandidates(
