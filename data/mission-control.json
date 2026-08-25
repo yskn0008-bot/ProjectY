@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-08-26T06:34:26+09:00",
+  "updated_at": "2026-08-26T07:33:31+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -50,7 +50,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/120",
-      "updated_at": "2026-08-25T21:21:15Z"
+      "updated_at": "2026-08-25T22:24:49Z"
     },
     {
       "id": "github-issue-142",
@@ -139,13 +139,6 @@
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/f5c049428afd1943ed802121d1a35a613d00b026"
     },
     {
-      "id": "github-commit-53c0515bf18d",
-      "title": "Merge PR #264: diagnose real WebKit chat dispatch",
-      "completed_at": "2026-08-24T21:33:40Z",
-      "result": "GitHub mainへ反映（53c0515）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/53c0515bf18d5eac8b89e377b76aeca1ce3833f4"
-    },
-    {
       "id": "complete-002",
       "title": "iPhone向けMission Control Dashboardを実装",
       "completed_at": "2026-07-17T17:55:00+09:00",
@@ -180,7 +173,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-08-26T06:34:26+09:00",
+      "last_update": "2026-08-26T07:33:31+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -261,7 +254,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-08-26T06:34:26+09:00",
+      "last_update": "2026-08-26T07:33:31+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -284,7 +277,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-08-26T06:34:26+09:00",
+      "last_update": "2026-08-26T07:33:31+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -366,5 +359,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "ff24b17956dfd02ea8831057c314727bb1d621b2f2587ec8a843953e779773ec"
+  "github_snapshot_hash": "c8594150c49f064d5e652398633d979d1e9995c24c197854d7be2d683ef1fcc8"
 }
