@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createChatHandler} from '../dist/api/chat-handler.js';
+import {AnswerFailure} from '../dist/orchestrator.js';
 
 const origin = 'https://yos.example';
 const identity = {
@@ -285,4 +286,44 @@ test('reports only a fixed safe stage for each fail-closed dependency boundary',
       assert.doesNotMatch(responseBody, /private-user-text|secret|credential|payload|OPENAI|UPSTASH/);
     });
   }
+});
+
+test('reports allowlisted answer substages while preserving the legacy answer fallback', async (t) => {
+  for (const stage of ['source-load', 'context-build', 'model-request', 'model-output-validate', 'answer']) {
+    await t.test(stage, async () => {
+      const events = [];
+      const secret = 'OPENAI_API_KEY=private-secret user question model output';
+      const handler = createChatHandler(dependencies({
+        runtimeFactory: {
+          async create() {
+            return {
+              async answer() {
+                if (stage === 'answer') throw new Error(secret);
+                throw new AnswerFailure(stage);
+              }
+            };
+          }
+        },
+        failureReporter(event) { events.push(event); }
+      }));
+
+      const response = await handler(jsonRequest({userText: 'private user question'}));
+      const body = await response.json();
+      assert.equal(response.status, 503);
+      assert.deepEqual(body, {error: 'YOS is temporarily unavailable', requestId: 'req-test'});
+      assert.deepEqual(events, [{stage, requestId: 'req-test'}]);
+      assert.deepEqual(Object.keys(events[0]).sort(), ['requestId', 'stage']);
+      assert.doesNotMatch(JSON.stringify({body, events}), /private-secret|user question|model output|OPENAI_API_KEY/);
+    });
+  }
+});
+
+test('successful answers emit no failure diagnostic', async () => {
+  const events = [];
+  const handler = createChatHandler(dependencies({
+    failureReporter(event) { events.push(event); }
+  }));
+  const response = await handler(jsonRequest({userText: 'hello'}));
+  assert.equal(response.status, 200);
+  assert.deepEqual(events, []);
 });
