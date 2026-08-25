@@ -1,4 +1,5 @@
-import {assertOk, type FetchLike} from '../http.js';
+import {readErrorBody, type FetchLike} from '../http.js';
+import {ModelFailure, type ModelFailureStage} from '../model-failure.js';
 import type {
   GroundedFact,
   MemoryCandidate,
@@ -53,56 +54,92 @@ export class OpenAIResponsesClient implements ModelClient {
   }
 
   async generate(input: ModelInput): Promise<ModelOutput> {
-    const response = await this.fetchImpl(this.endpoint, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${this.options.apiKey}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        model: this.model,
-        instructions: input.instruction,
-        input: [
-          {
-            role: 'user',
-            content: [
-              {
-                type: 'input_text',
-                text: [
-                  `REQUEST_ID=${input.requestId}`,
-                  `USER_TEXT=${input.userText}`,
-                  '',
-                  input.context
-                ].join('\n')
-              }
-            ]
+    let response: Response;
+    try {
+      response = await this.fetchImpl(this.endpoint, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${this.options.apiKey}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          model: this.model,
+          instructions: input.instruction,
+          input: [
+            {
+              role: 'user',
+              content: [
+                {
+                  type: 'input_text',
+                  text: [
+                    `REQUEST_ID=${input.requestId}`,
+                    `USER_TEXT=${input.userText}`,
+                    '',
+                    input.context
+                  ].join('\n')
+                }
+              ]
+            }
+          ],
+          reasoning: {effort: input.route.liveMode ? 'low' : 'medium'},
+          max_output_tokens: input.route.liveMode ? this.liveMaxOutputTokens : this.maxOutputTokens,
+          store: false,
+          safety_identifier: this.options.safetyIdentifier,
+          text: {
+            verbosity: input.route.liveMode ? 'low' : 'medium',
+            format: {
+              type: 'json_schema',
+              name: 'yos_answer',
+              strict: true,
+              schema: this.options.responseSchema
+            }
           }
-        ],
-        reasoning: {effort: input.route.liveMode ? 'low' : 'medium'},
-        max_output_tokens: input.route.liveMode ? this.liveMaxOutputTokens : this.maxOutputTokens,
-        store: false,
-        safety_identifier: this.options.safetyIdentifier,
-        text: {
-          verbosity: input.route.liveMode ? 'low' : 'medium',
-          format: {
-            type: 'json_schema',
-            name: 'yos_answer',
-            strict: true,
-            schema: this.options.responseSchema
-          }
-        }
-      })
-    });
+        })
+      });
+    } catch {
+      throw new ModelFailure('model-network');
+    }
 
-    await assertOk(response, 'OpenAI Responses request');
-    const payload = await response.json() as ResponsesApiResult;
-    const outputText = extractOutputText(payload);
-    const output = validateModelOutput(JSON.parse(outputText) as unknown);
-    const modelUsage = parseModelUsage(payload, this.model);
-    return {
-      ...output,
-      ...(modelUsage ? {modelUsage} : {})
-    };
+    if (!response.ok) {
+      throw new ModelFailure(await classifyHttpFailure(response));
+    }
+
+    try {
+      const payload = await response.json() as ResponsesApiResult;
+      const outputText = extractOutputText(payload);
+      const output = validateModelOutput(JSON.parse(outputText) as unknown);
+      const modelUsage = parseModelUsage(payload, this.model);
+      return {
+        ...output,
+        ...(modelUsage ? {modelUsage} : {})
+      };
+    } catch {
+      throw new ModelFailure('model-response-invalid');
+    }
+  }
+}
+
+async function classifyHttpFailure(response: Response): Promise<ModelFailureStage> {
+  if (response.status === 401 || response.status === 403) return 'model-http-auth';
+  if (response.status === 408) return 'model-http-timeout';
+  if (response.status === 429) {
+    const code = await safeOpenAiErrorCode(response);
+    return code === 'insufficient_quota' || code === 'billing_hard_limit_reached'
+      ? 'model-http-quota'
+      : 'model-http-rate-limit';
+  }
+  if (response.status >= 500) return 'model-http-upstream';
+  return 'model-http-request';
+}
+
+async function safeOpenAiErrorCode(response: Response): Promise<string | undefined> {
+  const body = await readErrorBody(response);
+  try {
+    const payload = JSON.parse(body) as unknown;
+    if (!isRecord(payload) || !isRecord(payload.error)) return undefined;
+    return typeof payload.error.code === 'string' ? payload.error.code : undefined;
+  } catch {
+    return undefined;
   }
 }
 
