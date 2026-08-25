@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {ModelFailure} from '../dist/model-failure.js';
 import {OpenAIResponsesClient} from '../dist/openai/responses-client.js';
 
 const modelOutput = {
@@ -21,6 +22,26 @@ function modelInput(liveMode = false) {
     sourceRefs: [{id: 'source-1', title: 'Source', kind: 'master', priority: 1}],
     conflicts: []
   };
+}
+
+function clientReturning(response) {
+  return new OpenAIResponsesClient({
+    apiKey: 'test-key',
+    safetyIdentifier: 'hashed-user',
+    responseSchema: {type: 'object'},
+    fetchImpl: async () => response
+  });
+}
+
+async function rejectsWithSafeStage(client, stage) {
+  await assert.rejects(client.generate(modelInput()), (error) => {
+    assert.ok(error instanceof ModelFailure);
+    assert.equal(error.stage, stage);
+    assert.equal(error.cause, undefined);
+    assert.equal(error.message, 'Model request failed');
+    assert.doesNotMatch(JSON.stringify(error), /private|secret|token|user question|model output/i);
+    return true;
+  });
 }
 
 test('Responses client forces safe options and captures usage', async () => {
@@ -93,7 +114,7 @@ test('Responses client rejects malformed model output', async () => {
     }), {status: 200, headers: {'content-type': 'application/json'}})
   });
 
-  await assert.rejects(() => client.generate(modelInput()), /answer must be a string/);
+  await rejectsWithSafeStage(client, 'model-response-invalid');
 });
 
 test('Responses client rejects facts without source IDs', async () => {
@@ -112,7 +133,7 @@ test('Responses client rejects facts without source IDs', async () => {
     }), {status: 200, headers: {'content-type': 'application/json'}})
   });
 
-  await assert.rejects(() => client.generate(modelInput()), /non-empty sourceIds/);
+  await rejectsWithSafeStage(client, 'model-response-invalid');
 });
 
 test('Responses client rejects corrupt usage counters', async () => {
@@ -126,5 +147,53 @@ test('Responses client rejects corrupt usage counters', async () => {
     }), {status: 200, headers: {'content-type': 'application/json'}})
   });
 
-  await assert.rejects(() => client.generate(modelInput()), /input_tokens/);
+  await rejectsWithSafeStage(client, 'model-response-invalid');
+});
+
+test('Responses client classifies network failures without retaining details', async () => {
+  const client = new OpenAIResponsesClient({
+    apiKey: 'test-key',
+    safetyIdentifier: 'hashed-user',
+    responseSchema: {type: 'object'},
+    fetchImpl: async () => { throw new Error('private network token'); }
+  });
+  await rejectsWithSafeStage(client, 'model-network');
+});
+
+test('Responses client classifies fixed safe HTTP failure stages', async (t) => {
+  const cases = [
+    {name: 'auth', status: 401, body: {error: {message: 'private token'}}, stage: 'model-http-auth'},
+    {
+      name: 'quota',
+      status: 429,
+      body: {error: {code: 'insufficient_quota', message: 'private billing details'}},
+      stage: 'model-http-quota'
+    },
+    {
+      name: 'rate-limit',
+      status: 429,
+      body: {error: {code: 'rate_limit_exceeded', message: 'private rate details'}},
+      stage: 'model-http-rate-limit'
+    },
+    {name: 'request', status: 400, body: {error: {message: 'private model name'}}, stage: 'model-http-request'},
+    {name: 'timeout', status: 408, body: {error: {message: 'private timeout'}}, stage: 'model-http-timeout'},
+    {name: 'upstream', status: 500, body: {error: {message: 'private upstream'}}, stage: 'model-http-upstream'}
+  ];
+  for (const item of cases) {
+    await t.test(item.name, async () => {
+      const response = new Response(JSON.stringify(item.body), {
+        status: item.status,
+        headers: {'content-type': 'application/json'}
+      });
+      await rejectsWithSafeStage(clientReturning(response), item.stage);
+    });
+  }
+});
+
+test('Responses client classifies invalid successful payloads without retaining output', async () => {
+  const response = new Response('{"output":"private model output"}', {
+    status: 200,
+    headers: {'content-type': 'application/json'}
+  });
+  await rejectsWithSafeStage(clientReturning(response), 'model-response-invalid');
 });
