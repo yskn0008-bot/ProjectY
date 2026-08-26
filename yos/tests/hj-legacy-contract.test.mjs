@@ -38,12 +38,12 @@ test('YOS service worker precaches every Journey entry asset', async () => {
   assert.match(page, /src="\.\/journey\.js"/);
 });
 
-test('YOS home retains a single Journey entry', async () => {
+test('MY WAY keeps one primary Hero’s Journey entry and the legacy asset', async () => {
   const home = await read('index.html');
-  const entries = home.match(/class="domain-card journey" href="\.\/hj\/"/g) || [];
+  const entries = home.match(/href="\.\/hj\/"/g) || [];
 
-  assert.equal(entries.length, 1);
-  assert.match(home, />Hero's Journey</);
-  assert.equal((home.match(/href="\.\/journey\.html"/g) || []).length, 0);
+  assert.equal(entries.length, 3, 'primary navigation, destination and future/archive entries');
+  assert.match(home, />Hero’s Journey</);
+  assert.equal((home.match(/href="\.\/journey\.html"/g) || []).length, 1);
 });
 

@@ -1,7 +1,7 @@
 'use strict';
 
 const CACHE_PREFIX = 'yos-command-center-';
-const CACHE = `${CACHE_PREFIX}v5-hj-entry`;
+const CACHE = `${CACHE_PREFIX}v6-my-way-p0`;
 const STATIC = [
   './',
   './index.html',
