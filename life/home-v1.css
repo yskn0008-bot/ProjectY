@@ -51,6 +51,7 @@
 #lifeBottomNavV1 .nav span{font-size:17px;line-height:1}
 #lifeBottomNavV1 .nav b{font-size:9px}
 #lifeBottomNavV1 .nav.active{background:linear-gradient(145deg,var(--life-home-accent),#62b88e);color:white}
+#lifeBottomNavV1 .life-nav-compat-v1{position:absolute;top:0;left:0;width:1px;height:1px;min-width:0;min-height:0;margin:0;padding:0;border:0;opacity:0}
 .life-page-v1[data-page="schedule"]>.card:first-child,.life-page-v1[data-page="record"]>.card:first-child,.life-page-v1[data-page="improve"]>.card:first-child{margin-top:2px}
 .life-page-v1[data-page="record"] .metrics{margin-bottom:4px}
 .life-page-v1[data-page="improve"] .routine-grid{margin-bottom:4px}
