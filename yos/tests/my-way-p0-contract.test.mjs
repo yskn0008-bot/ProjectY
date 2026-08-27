@@ -10,6 +10,10 @@ test('P0 navigation and MY WAY identity are present',()=>{
   for(const label of ['Home','Life','Money','Hero’s Journey','Idea','過去の振り返り','記録 / ログ','目標 / 未来','過去の資産','Taxi','設定','ProjectY','YOS改善','ヘルプ']) assert.ok(html.includes(label),label);
   for(const label of ['今ここ','行き先','ここまで','次の一歩','現在状態','理由 / 背景','判断 / 行動']) assert.ok(html.includes(label),label);
 });
+test('second page has an explicit one-tap UI entry',()=>{
+  assert.match(html,/<button[^>]+data-page="archive"[^>]*>[^<]*2ページ目/);
+  assert.match(html,/<section id="archivePage"/);
+});
 test('final five-domain UI uses facts without fabricated Money values',()=>{
   for(const label of ['MY MONEY','MY JOURNEY','MY IDEA','今月のサマリー','お金の見える化','今日のひらめき']) assert.ok(html.includes(label),label);
   for(const page of ['home','money','journey','idea']) assert.match(html,new RegExp(`data-page="${page}"`));

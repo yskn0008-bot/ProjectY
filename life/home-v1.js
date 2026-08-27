@@ -28,6 +28,13 @@
     record:{label:'記録',icon:'＋'},
     improve:{label:'改善',icon:'↗'}
   };
+  const DOMAIN_NAV=[
+    {label:'Home',icon:'⌂',href:'../yos/'},
+    {label:'Life',icon:'♡',page:'home'},
+    {label:'Money',icon:'¥',href:'../yos/?page=money'},
+    {label:"Hero's Journey",icon:'↗',href:'../yos/hj/'},
+    {label:'Idea',icon:'✦',href:'../yos/?page=idea'}
+  ];
   let activePage='home';
   let refreshQueued=false;
 
@@ -637,13 +644,22 @@
     section.id='lifeHomeDashboardV1';
     section.className='home-dashboard-v1';
     section.innerHTML=`
+      <section class="life-today-menu-v1 card" aria-label="今日のくらし">
+        <div class="card-head"><h3>今日のくらし</h3></div>
+        <div class="life-today-actions-v1">
+          <button type="button" data-open-page="schedule"><span>📅</span><b>カレンダー</b></button>
+          <button type="button" data-open-page="home" data-focus-tasks="true"><span>✓</span><b>タスク</b></button>
+          <button type="button" data-open-page="improve"><span>🌱</span><b>習慣</b></button>
+          <button type="button" data-open-page="record"><span>✎</span><b>メモ</b></button>
+        </div>
+      </section>
       <section class="home-status-v1 card">
         <div class="status-ring-v1" id="homeRingV1"><div><strong id="homeCompletionV1">0%</strong><span>今日の進み</span></div></div>
-        <div class="status-copy-v1"><small>YOS LIFE</small><h2 id="homeStatusTitleV1">今日を整える</h2><p id="homeStatusDetailV1">今の状態から、無理のない順番をつくります。</p></div>
+        <div class="status-copy-v1"><small>暮らしのリズム</small><h2 id="homeStatusTitleV1">今日を整える</h2><p id="homeStatusDetailV1">今の状態から、無理のない順番をつくります。</p></div>
       </section>
       <section class="home-focus-v1 card">
         <button type="button" id="homeFocusDoneV1" class="home-focus-check-v1" aria-label="今日やることを完了">✓</button>
-        <div><small>今日やること1つ</small><strong id="homeFocusValueV1">まだありません</strong><p id="homeFocusDetailV1"></p></div>
+        <div><small>今日のタスク</small><strong id="homeFocusValueV1">まだありません</strong><p id="homeFocusDetailV1"></p></div>
         <button type="button" class="home-edit-v1" data-open-page="schedule">編集</button>
       </section>
       <section class="home-glance-v1" aria-label="今日の状態">
@@ -687,7 +703,9 @@
 
   function renderNav(nav){
     nav.id='lifeBottomNavV1';
-    nav.innerHTML=Object.entries(PAGE_META).map(([key,item])=>`<button type="button" class="nav" data-page="${key}"><span>${item.icon}</span><b>${item.label}</b></button>`).join('');
+    nav.innerHTML=DOMAIN_NAV.map(item=>item.href
+      ?`<a class="nav" href="${item.href}"><span>${item.icon}</span><b>${item.label}</b></a>`
+      :`<button type="button" class="nav active" data-page="${item.page}"><span>${item.icon}</span><b>${item.label}</b></button>`).join('');
     nav.addEventListener('click',event=>{
       const button=event.target.closest('button[data-page]');
       if(button)activatePage(button.dataset.page,true);
@@ -773,6 +791,15 @@
     layout.remove();
 
     renderNav(nav);
+    const sectionNav=document.createElement('nav');
+    sectionNav.className='life-section-nav-v1';
+    sectionNav.setAttribute('aria-label','Life内メニュー');
+    sectionNav.innerHTML=Object.entries(PAGE_META).map(([key,item])=>`<button type="button" data-open-page="${key}"><span>${item.icon}</span>${item.label}</button>`).join('');
+    top.insertAdjacentElement('afterend',sectionNav);
+    sectionNav.addEventListener('click',event=>{
+      const button=event.target.closest('[data-open-page]');
+      if(button)activatePage(button.dataset.openPage,true);
+    });
     activatePage('home',false);
 
     const observer=new MutationObserver(queueRefresh);
