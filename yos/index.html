@@ -3,9 +3,9 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#0b1020">
+  <meta name="theme-color" content="#faf8f2">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="YOS">
   <meta name="description" content="MY WAY by YOS。ようすけ自身の人生・道・体験をつなぐ人生ナビ。">
   <link rel="manifest" href="./manifest.webmanifest">
@@ -68,6 +68,28 @@
       </div>
     </section>
 
+    <section id="moneyPage" class="page domain-page money-page" aria-labelledby="moneyTitle" hidden>
+      <header class="page-head"><p>MONEY</p><h1 id="moneyTitle">MY MONEY</h1><span>by YOS｜お金の現在地を、確認できる事実だけで見る。</span></header>
+      <div class="summary-grid" aria-label="今月のサマリー">
+        <article><small>収入</small><strong id="moneyIncome">未設定</strong></article><article><small>支出</small><strong id="moneyExpense">未設定</strong></article><article><small>残高</small><strong id="moneyBalance">未設定</strong></article>
+      </div>
+      <article class="feature-card"><h2>お金の見える化</h2><div class="empty-chart" aria-label="カテゴリ別データなし"><span>データなし</span></div><p>接続済みの記録がないため、金額や比率は表示していません。</p></article>
+      <article class="feature-card"><h2>今月の目標</h2><strong>未設定</strong><p>目標・期限・進捗は、確認できる情報がある時だけ表示します。</p><button class="primary-action" type="button" data-prompt="【YOS｜Money】今のお金の状況を、確認できる事実だけで整理して。">現在のYOSに相談する</button></article>
+    </section>
+
+    <section id="journeyPage" class="page domain-page journey-page" aria-labelledby="journeyTitle" hidden>
+      <header class="page-head"><p>HERO'S JOURNEY</p><h1 id="journeyTitle">MY JOURNEY</h1><span>by YOS｜経験と成長の道を見る。</span></header>
+      <article class="feature-card journey-road"><h2>旅の記録</h2><small>現在ステージ</small><strong id="journeyStage">未設定</strong><div class="road-line" aria-hidden="true">● ─── ◇ ─── ⚑</div><p id="journeyScene">現在の景色：データなし</p></article>
+      <article class="feature-card"><h2>最近の経験</h2><p id="journeyRecent">データなし</p><a class="primary-action link-action" href="./hj/index.html">Hero’s Journeyを開く</a></article>
+      <article class="feature-card"><h2>次のテーマ</h2><strong id="journeyTheme">未設定</strong></article>
+    </section>
+
+    <section id="ideaPage" class="page domain-page idea-page" aria-labelledby="ideaTitle" hidden>
+      <header class="page-head"><p>IDEA</p><h1 id="ideaTitle">MY IDEA</h1><span>by YOS｜ひらめきを、小さな実験へ育てる。</span></header>
+      <article class="feature-card idea-card"><h2>今日のひらめき</h2><label for="ideaInput">アイデアメモ</label><textarea id="ideaInput" maxlength="500" placeholder="思いついたまま、ここに残す"></textarea><button id="saveIdea" class="idea-add" type="button" aria-label="今日のひらめきを保存">＋</button><small id="ideaSavedAt">未設定</small></article>
+      <button class="primary-action" type="button" data-prompt="【YOS｜Idea】保存したひらめきを、人生の道につながる小さな実験にして。">現在のYOSと育てる</button>
+    </section>
+
     <section id="archivePage" class="page" aria-labelledby="archiveTitle" hidden>
       <header class="page-head"><p>SECOND PAGE</p><h1 id="archiveTitle">道の続きを支えるもの</h1><span>これまでを残し、これからへつなぐ。</span></header>
       <div class="archive-list">
@@ -82,15 +104,19 @@
     <p id="appStatus" class="app-status" role="status" aria-live="polite"></p>
   </main>
 
-  <nav class="bottom-nav" aria-label="ページ切替">
-    <button class="active" type="button" data-page="home"><span>⌂</span>Home</button>
-    <button type="button" data-page="archive"><span>•••</span>2ページ目</button>
+  <nav class="bottom-nav" aria-label="主要5領域">
+    <button class="active home" type="button" data-page="home"><span>⌂</span>Home</button>
+    <a class="life" href="../life/"><span>♡</span>Life</a>
+    <button class="money" type="button" data-page="money"><span>¥</span>Money</button>
+    <button class="journey" type="button" data-page="journey"><span>↗</span><b>Journey</b></button>
+    <button class="idea" type="button" data-page="idea"><span>✦</span>Idea</button>
   </nav>
 
   <dialog id="menuDialog">
     <div class="dialog-body">
       <header><div><p>MY WAY by YOS</p><h2>メニュー</h2></div><button class="close" type="button" aria-label="閉じる">×</button></header>
       <nav class="menu-list" aria-label="管理メニュー">
+        <button type="button" data-prompt="【YOS】MY WAYの現在地から話を続けたい。">YOS <span>›</span></button>
         <button id="openSettings" type="button">設定 <span>›</span></button>
         <a href="../">ProjectY <span>›</span></a>
         <button type="button" data-prompt="【YOS改善】MY WAY by YOSを、YOSの識別と既存資産を守りながら改善したい。"><span>YOS改善</span><i>›</i></button>

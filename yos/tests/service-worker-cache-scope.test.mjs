@@ -18,7 +18,7 @@ const cachePrefix = readStringConstant('CACHE_PREFIX');
 
 test('cache identity is scoped to YOS command center', () => {
   assert.equal(cachePrefix, 'yos-command-center-');
-  assert.match(source, /const\s+CACHE\s*=\s*`\$\{CACHE_PREFIX\}v6-my-way-p0`/);
+  assert.match(source, /const\s+CACHE\s*=\s*`\$\{CACHE_PREFIX\}v7-my-way-final-ui`/);
   assert.match(source, /['"]\.\/hj-entry\.js['"]/);
 });
 

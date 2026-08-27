@@ -1,6 +1,6 @@
 'use strict';
 (() => {
-  const KEYS = { home: 'yos-home-settings-v2', legacy: 'yos-home-settings-v1', taxi: 'yos-taxi-settings-v2', state: 'yos-home-current-state-v1', life: 'yos-life-v1', journeys: 'hj-domain-journeys-v1', profile: 'hj-user-profile-v1', scenes: 'hj-daily-scenes-v1' };
+  const KEYS = { home: 'yos-home-settings-v2', legacy: 'yos-home-settings-v1', taxi: 'yos-taxi-settings-v2', state: 'yos-home-current-state-v1', life: 'yos-life-v1', ideas: 'yos-my-way-ideas-v1', journeys: 'hj-domain-journeys-v1', profile: 'hj-user-profile-v1', scenes: 'hj-daily-scenes-v1' };
   const JST = 'Asia/Tokyo';
   const $ = (id) => document.getElementById(id);
   const read = (key, fallback) => { try { return JSON.parse(localStorage.getItem(key) || 'null') ?? fallback; } catch { return fallback; } };
@@ -36,12 +36,21 @@
     const sceneCount = Array.isArray(scenes) ? scenes.length : 0;
     $('progressSummary').textContent = done !== null ? `今日の記録 ${done}件${sceneCount ? `・物語の記録 ${sceneCount}件` : ''}` : (sceneCount ? `物語の記録 ${sceneCount}件` : 'データなし');
     $('nextSummary').textContent = clean(today?.nextAction) || clean(today?.priority) || '未設定';
+    const money = life?.moneySafety || today?.money || {};
+    $('moneyIncome').textContent = clean(money.income || money.monthlyIncome) || '未設定';
+    $('moneyExpense').textContent = clean(money.expense || money.monthlyExpense) || '未設定';
+    $('moneyBalance').textContent = clean(money.currentBalance) || '未設定';
+    $('journeyStage').textContent = clean(journey?.stage) || '未設定';
+    $('journeyTheme').textContent = clean(journey?.theme) || clean(journey?.name) || '未設定';
+    const recentScene = Array.isArray(scenes) ? scenes.at(-1) : null;
+    $('journeyScene').textContent = `現在の景色：${clean(recentScene?.title || recentScene?.scene) || 'データなし'}`;
+    $('journeyRecent').textContent = clean(recentScene?.summary || recentScene?.title || recentScene?.scene) || 'データなし';
     document.querySelectorAll('[data-state-group="energy"]').forEach((button) => { const selected = button.dataset.value === state.energy; button.classList.toggle('selected', selected); button.setAttribute('aria-pressed', String(selected)); });
   }
   function showPage(name) {
-    const archive = name === 'archive';
-    $('homePage').hidden = archive; $('archivePage').hidden = !archive;
-    $('homePage').classList.toggle('active', !archive); $('archivePage').classList.toggle('active', archive);
+    const pages = { home: 'homePage', archive: 'archivePage', money: 'moneyPage', journey: 'journeyPage', idea: 'ideaPage' };
+    if (!pages[name]) name = 'home';
+    Object.entries(pages).forEach(([key, id]) => { $(id).hidden = key !== name; $(id).classList.toggle('active', key === name); });
     document.querySelectorAll('[data-page]').forEach((item) => item.classList.toggle('active', item.dataset.page === name));
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
@@ -56,6 +65,8 @@
   document.querySelectorAll('[data-prompt]').forEach((item) => item.addEventListener('click', () => openYos(item.dataset.prompt)));
   document.querySelectorAll('[data-state-group="energy"]').forEach((button) => button.addEventListener('click', () => { state.energy = button.dataset.value; renderData(); }));
   $('saveState').addEventListener('click', () => { state.focus = clean($('focusInput').value); state.savedAt = new Date().toISOString(); status(write(KEYS.state, state) ? '今ここを、このiPhoneに保存しました。' : '保存できませんでした。'); renderData(); });
+  const idea = read(KEYS.ideas, {}); $('ideaInput').value = clean(idea.text, 500); $('ideaSavedAt').textContent = idea.savedAt ? 'この端末に保存済み' : '未設定';
+  $('saveIdea').addEventListener('click', () => { const value = { text: clean($('ideaInput').value, 500), savedAt: new Date().toISOString() }; const saved = write(KEYS.ideas, value); $('ideaSavedAt').textContent = saved ? 'この端末に保存済み' : '保存できませんでした'; status(saved ? 'ひらめきを保存しました。' : '保存できませんでした。'); });
   $('openMenu').addEventListener('click', () => $('menuDialog').showModal());
   $('menuDialog').querySelector('.close').addEventListener('click', () => $('menuDialog').close());
   $('openSettings').addEventListener('click', () => { $('menuDialog').close(); $('yosUrl').value = sharedUrl(); $('settingsDialog').showModal(); });
