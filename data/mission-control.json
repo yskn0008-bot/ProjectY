@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-08-27T08:13:09+09:00",
+  "updated_at": "2026-08-27T17:45:03+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -12,6 +12,16 @@
     ]
   },
   "inbox": [
+    {
+      "id": "github-pr-273",
+      "title": "PR #273 feat(yos): integrate final MY WAY five-domain UI",
+      "type": "GitHub PR",
+      "status": "review",
+      "priority": 1,
+      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/273",
+      "updated_at": "2026-08-27T05:53:15Z"
+    },
     {
       "id": "github-pr-233",
       "title": "PR #233 Draft: Mission Controlに進捗率・残り時間を常時表示する",
@@ -153,13 +163,6 @@
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/a18be8172679d33964ce07b1d4c4790085e526a6"
     },
     {
-      "id": "github-commit-387c26f6e5e9",
-      "title": "Merge pull request #268 from yskn0008-bot/codex/issue-120-model-request-diagnostics",
-      "completed_at": "2026-08-25T23:36:27Z",
-      "result": "GitHub mainへ反映（387c26f）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/387c26f6e5e9c1276d88e66f9b790a9dd68f026b"
-    },
-    {
       "id": "complete-002",
       "title": "iPhone向けMission Control Dashboardを実装",
       "completed_at": "2026-07-17T17:55:00+09:00",
@@ -184,7 +187,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #233をレビューして公開判断する",
+      "next_action": "PR #273をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -194,7 +197,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-08-27T08:13:09+09:00",
+      "last_update": "2026-08-27T17:45:03+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -269,13 +272,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 26件・Open PR 1件を自動同期中",
+      "next_action": "Open Issue 26件・Open PR 2件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-08-27T08:13:09+09:00",
+      "last_update": "2026-08-27T17:45:03+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -289,7 +292,7 @@
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #233をレビューして公開判断する",
+      "next_action": "PR #273をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -298,7 +301,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-08-27T08:13:09+09:00",
+      "last_update": "2026-08-27T17:45:03+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -380,5 +383,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "13ae663f13dde0ecb549369f9bcfb821a4d3201afcff7749480b93ad876e1a03"
+  "github_snapshot_hash": "f1e72ab1395d6fc9caddb93fc163f2270b0af500a3b3a5b6db2fa0f79a065177"
 }
