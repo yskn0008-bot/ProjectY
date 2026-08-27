@@ -15,6 +15,12 @@ test('final Life identity and today-first controls are present',()=>{
 test('shared navigation exposes all five domains while Life tools remain',()=>{
   for(const label of ['Home','Life','Money',"Hero's Journey",'Idea'])assert.ok(js.includes(label),label);
   for(const label of ['ホーム','予定','記録','改善'])assert.ok(js.includes(`label:'${label}'`),label);
+  assert.match(js,/class="life-nav-compat-v1" data-page="record"/);
+  assert.match(js,/if\(button\)activatePage\(button\.dataset\.page,true\)/);
+  assert.match(css,/#lifeBottomNavV1\{grid-template-columns:repeat\(5,1fr\)\}/);
+  assert.match(css,/#lifeBottomNavV1 \.life-nav-compat-v1\{position:absolute;/);
+  const domainNav=js.match(/const DOMAIN_NAV=\[(.*?)\];/s)?.[1] || '';
+  assert.equal((domainNav.match(/\{label:/g) || []).length,5,'visible domain navigation must remain five items');
 });
 
 test('existing three-task persistence remains non-destructive',()=>{

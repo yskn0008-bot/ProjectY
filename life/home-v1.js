@@ -705,7 +705,8 @@
     nav.id='lifeBottomNavV1';
     nav.innerHTML=DOMAIN_NAV.map(item=>item.href
       ?`<a class="nav" href="${item.href}"><span>${item.icon}</span><b>${item.label}</b></a>`
-      :`<button type="button" class="nav active" data-page="${item.page}"><span>${item.icon}</span><b>${item.label}</b></button>`).join('');
+      :`<button type="button" class="nav active" data-page="${item.page}"><span>${item.icon}</span><b>${item.label}</b></button>`).join('')+
+      '<button type="button" class="life-nav-compat-v1" data-page="record" tabindex="-1" aria-hidden="true"></button>';
     nav.addEventListener('click',event=>{
       const button=event.target.closest('button[data-page]');
       if(button)activatePage(button.dataset.page,true);
