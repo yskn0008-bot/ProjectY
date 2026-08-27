@@ -1,5 +1,5 @@
 :root{
-  --life-home-accent:#ff7868;
+  --life-home-accent:#3f9b72;
   --life-home-ink:#243142;
   --life-home-muted:#7f8996;
   --life-home-card:#fff;
@@ -10,6 +10,13 @@
 .life-page-v1.active{display:grid}
 @keyframes lifePageInV1{from{opacity:.3;transform:translateY(5px)}to{opacity:1;transform:none}}
 .home-dashboard-v1{display:grid;gap:12px}
+.life-today-menu-v1 h3{margin:0;color:var(--life-home-ink)}
+.life-today-actions-v1{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.life-today-actions-v1 button{min-height:82px;border:1px solid var(--life-home-line);border-radius:17px;background:#fff;color:var(--life-home-ink);font-weight:900}
+.life-today-actions-v1 span,.life-today-actions-v1 b{display:block}.life-today-actions-v1 span{margin-bottom:7px;font-size:21px}
+.life-section-nav-v1{display:flex;gap:7px;overflow-x:auto;margin:0 0 12px;padding:2px 1px 4px;scrollbar-width:none}
+.life-section-nav-v1 button{flex:0 0 auto;min-height:40px;border:1px solid var(--life-home-line);border-radius:999px;padding:0 13px;background:#fff;color:var(--life-home-ink);font-weight:850}
+.life-section-nav-v1 span{margin-right:5px}
 .home-status-v1{display:grid;grid-template-columns:104px 1fr;gap:15px;align-items:center;padding:16px;background:linear-gradient(135deg,#fff 0,#fff7ef 54%,#edf9f4 100%)}
 .status-ring-v1{--progress:0deg;display:grid;place-items:center;width:102px;height:102px;border-radius:50%;background:conic-gradient(var(--life-home-accent) 0 var(--progress),#eeeef1 var(--progress) 360deg);box-shadow:inset 0 0 0 1px rgba(0,0,0,.025)}
 .status-ring-v1:before{content:"";grid-area:1/1;width:78px;height:78px;border-radius:50%;background:#fff;box-shadow:0 6px 16px rgba(42,50,64,.08)}
@@ -39,10 +46,11 @@
 .home-tip-v1{display:grid;grid-template-columns:38px 1fr;gap:10px;align-items:center;background:linear-gradient(135deg,#fff,#fff8e7)}
 .home-tip-v1>span{display:grid;place-items:center;width:38px;height:38px;border-radius:13px;background:#fff0bd;font-size:18px}
 .home-tip-v1 b{display:block;margin-top:4px;font-size:12px;line-height:1.5}
-#lifeBottomNavV1 .nav{display:grid;place-items:center;align-content:center;gap:3px;padding:5px}
+#lifeBottomNavV1{grid-template-columns:repeat(5,1fr)}
+#lifeBottomNavV1 .nav{display:grid;place-items:center;align-content:center;gap:3px;padding:5px;text-decoration:none}
 #lifeBottomNavV1 .nav span{font-size:17px;line-height:1}
 #lifeBottomNavV1 .nav b{font-size:9px}
-#lifeBottomNavV1 .nav.active{background:linear-gradient(145deg,var(--coral),#ff9e73);color:white}
+#lifeBottomNavV1 .nav.active{background:linear-gradient(145deg,var(--life-home-accent),#62b88e);color:white}
 .life-page-v1[data-page="schedule"]>.card:first-child,.life-page-v1[data-page="record"]>.card:first-child,.life-page-v1[data-page="improve"]>.card:first-child{margin-top:2px}
 .life-page-v1[data-page="record"] .metrics{margin-bottom:4px}
 .life-page-v1[data-page="improve"] .routine-grid{margin-bottom:4px}

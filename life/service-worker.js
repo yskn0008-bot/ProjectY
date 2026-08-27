@@ -1,5 +1,5 @@
 'use strict';
-const CACHE='yos-life-home-v10-read-first';
+const CACHE='yos-life-home-v11-read-first';
 const LIFE_CACHE_PREFIX='yos-life-';
 const STATIC=[
   './',

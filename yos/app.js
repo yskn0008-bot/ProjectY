@@ -71,6 +71,8 @@
   $('menuDialog').querySelector('.close').addEventListener('click', () => $('menuDialog').close());
   $('openSettings').addEventListener('click', () => { $('menuDialog').close(); $('yosUrl').value = sharedUrl(); $('settingsDialog').showModal(); });
   $('saveUrl').addEventListener('click', (event) => { event.preventDefault(); settings.yosUrl = clean($('yosUrl').value, 500); const saved = write(KEYS.home, settings); $('settingsDialog').close(); status(saved ? '現在のYOSチャットURLを保存しました。' : '設定を保存できませんでした。'); });
+  const requestedPage = new URLSearchParams(location.search).get('page');
+  if (['money', 'idea'].includes(requestedPage)) showPage(requestedPage);
   paintClock(); renderData(); setInterval(paintClock, 30000);
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('./service-worker.js').catch(() => status('オフライン準備に失敗しました。通常表示は利用できます。'));
 })();
