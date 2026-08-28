@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-08-28T13:08:57+09:00",
+  "updated_at": "2026-08-28T23:51:32+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -12,16 +12,6 @@
     ]
   },
   "inbox": [
-    {
-      "id": "github-pr-273",
-      "title": "PR #273 feat(yos): integrate final MY WAY five-domain UI",
-      "type": "GitHub PR",
-      "status": "review",
-      "priority": 1,
-      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/273",
-      "updated_at": "2026-08-28T01:22:08Z"
-    },
     {
       "id": "github-pr-233",
       "title": "PR #233 Draft: Mission Controlに進捗率・残り時間を常時表示する",
@@ -135,32 +125,39 @@
   ],
   "recently_completed": [
     {
-      "id": "github-commit-7d71826688c4",
-      "title": "Merge pull request #270 from yskn0008-bot/codex/implement-issue-#269-for-projecty",
-      "completed_at": "2026-08-26T10:41:02Z",
-      "result": "GitHub mainへ反映（7d71826）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/7d71826688c409a45205ae95d503f12e4ce88899"
+      "id": "github-commit-ab4d00a0ac9b",
+      "title": "Merge pull request #273 from yskn0008-bot/codex/github-mention-my-way-by-yosuilifeiphone",
+      "completed_at": "2026-08-28T14:51:15Z",
+      "result": "GitHub mainへ反映（ab4d00a）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/ab4d00a0ac9bb808bb2f430d1816f4d5e5c5b2a7"
     },
     {
-      "id": "github-commit-be60166fd9ff",
-      "title": "fix(yos): preserve legacy HJ smoke markup",
-      "completed_at": "2026-08-26T10:38:55Z",
-      "result": "GitHub mainへ反映（be60166）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/be60166fd9ff4f956abcede4c3ec6f50c70d8956"
+      "id": "github-commit-802e701f26e9",
+      "title": "test(yos): preserve compact UI compatibility paths",
+      "completed_at": "2026-08-28T14:47:32Z",
+      "result": "GitHub mainへ反映（802e701）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/802e701f26e901b402a216f561a49722fb89498d"
     },
     {
-      "id": "github-commit-75f75ba3c30e",
-      "title": "fix(yos): restore legacy HJ selector",
-      "completed_at": "2026-08-26T10:35:17Z",
-      "result": "GitHub mainへ反映（75f75ba）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/75f75ba3c30e1f322f0b75240af0fb5f65c1412e"
+      "id": "github-commit-0586d862bc71",
+      "title": "fix(yos): align Home and Life with compact visual SSOT",
+      "completed_at": "2026-08-28T14:44:16Z",
+      "result": "GitHub mainへ反映（0586d86）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/0586d862bc7123fe708951caa83335c642f3222a"
     },
     {
-      "id": "github-commit-a18be8172679",
-      "title": "feat(yos): implement MY WAY life navigation P0",
-      "completed_at": "2026-08-26T08:39:33Z",
-      "result": "GitHub mainへ反映（a18be81）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/a18be8172679d33964ce07b1d4c4790085e526a6"
+      "id": "github-commit-8be7dc89bba7",
+      "title": "Merge pull request #275 from yskn0008-bot/codex/github-mention-featyos-integrate-final-my-way-five-domai-7q29vh",
+      "completed_at": "2026-08-27T03:02:45Z",
+      "result": "GitHub mainへ反映（8be7dc8）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/8be7dc89bba704dc3c227f4947b912c7213b2a57"
+    },
+    {
+      "id": "github-commit-51ea63db1047",
+      "title": "fix(life): preserve legacy record nav contract",
+      "completed_at": "2026-08-27T03:01:11Z",
+      "result": "GitHub mainへ反映（51ea63d）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/51ea63db1047d6472cbd20deca7385c6c44c645f"
     },
     {
       "id": "complete-002",
@@ -187,7 +184,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #273をレビューして公開判断する",
+      "next_action": "PR #233をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -197,7 +194,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-08-28T13:08:57+09:00",
+      "last_update": "2026-08-28T23:51:32+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -272,13 +269,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 26件・Open PR 2件を自動同期中",
+      "next_action": "Open Issue 26件・Open PR 1件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-08-28T13:08:57+09:00",
+      "last_update": "2026-08-28T23:51:32+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -292,7 +289,7 @@
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #273をレビューして公開判断する",
+      "next_action": "PR #233をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -301,7 +298,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-08-28T13:08:57+09:00",
+      "last_update": "2026-08-28T23:51:32+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -383,5 +380,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "bcb4985596511b7b89aaab3ca5c404ae97cca01920c48234f01e6d31ecd4be07"
+  "github_snapshot_hash": "a0056dd9a9a038eea72850bbfa062936b9bf2aad8e9af2ff7954f240f0ddfe54"
 }
