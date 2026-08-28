@@ -1,7 +1,7 @@
 'use strict';
 
 const CACHE_PREFIX = 'yos-command-center-';
-const CACHE = `${CACHE_PREFIX}v6-my-way-p0`;
+const CACHE = `${CACHE_PREFIX}v7-visual-ssot`;
 const STATIC = [
   './',
   './index.html',
@@ -68,4 +68,3 @@ self.addEventListener('fetch', (event) => {
       .catch(() => caches.match(event.request).then((hit) => hit || caches.match('./index.html')))
   );
 });
-

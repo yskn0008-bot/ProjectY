@@ -13,7 +13,7 @@ const followingHour = new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString();
 
 const browser = await engine.launch();
 const context = await browser.newContext({
-  viewport: { width: 402, height: 874 },
+  viewport: { width: 390, height: 844 },
   deviceScaleFactor: 3,
   isMobile: true,
   hasTouch: true,
@@ -41,7 +41,7 @@ const pageErrors = [];
 page.on('pageerror', error => pageErrors.push(error.message));
 
 const waitForDailyFlow = async () => {
-  await page.waitForSelector('#lifeCalendarV1');
+  await page.waitForSelector('#lifeCalendarV1', { state: 'attached' });
   await page.waitForSelector('#lifeDailyFlowV1', { state: 'attached' });
   await page.waitForFunction(() => Boolean(document.getElementById('lifeFlowDateV1')?.textContent.trim()));
 };
@@ -56,7 +56,7 @@ const clickAndWaitForReload = async locator => {
 try {
   await page.goto(baseURL, { waitUntil: 'networkidle' });
   await waitForDailyFlow();
-  assert.equal(await page.locator('#lifeCalendarV1').isVisible(), true, 'Life calendar is missing on the first open');
+  assert.equal(await page.locator('#lifeCalendarV1').isVisible(), false, 'Life calendar detail must stay behind the compact home entry');
   await page.evaluate(() => navigator.serviceWorker.ready);
 
   const layout = await page.evaluate(() => ({
@@ -65,7 +65,7 @@ try {
     mainPaddingBottom: Number.parseFloat(getComputedStyle(document.querySelector('main')).paddingBottom)
   }));
   assert.ok(layout.scrollWidth <= layout.clientWidth + 1, `horizontal overflow: ${layout.scrollWidth}/${layout.clientWidth}`);
-  assert.ok(layout.mainPaddingBottom >= 90, 'fixed navigation does not have enough safe bottom space');
+  assert.ok(layout.mainPaddingBottom >= 76, 'fixed navigation does not have enough safe bottom space');
   assert.match(await page.locator('#lifeMorningNextEventV1').textContent(), /既存の予定/, 'existing schedule is not restored');
   assert.equal(await page.locator('.life-page-v1[data-page="home"] input').count(), 0, 'home must not ask for form input');
   assert.equal(await page.locator('#lifeDailyFlowV1').isVisible(), false, 'record form must stay behind the Record navigation');
@@ -74,8 +74,57 @@ try {
   assert.equal(await page.locator('#homeMoodV1').textContent(), '2/5', 'saved mood is not summarized on home');
   assert.equal(await page.locator('#homeFocusValueV1').textContent(), '既存タスク', 'saved task is not summarized on home');
   assert.equal(await page.locator('#homeDoneValueV1').textContent(), '既存のできたこと', 'saved done-today value is not summarized on home');
-  assert.equal(await page.locator('.life-page-v1[data-page="home"] > :first-child').getAttribute('id'), 'lifeCalendarV1', 'Life calendar is not the first home card');
-  assert.equal(await page.locator('#lifeCalendarV1').isVisible(), true, 'Life calendar is not visible on home');
+  assert.equal(await page.locator('.life-page-v1[data-page="home"] > :first-child').getAttribute('id'), 'lifeHomeDashboardV1', 'compact Life dashboard is not first');
+  const lifeVisual = await page.evaluate(() => {
+    const nav = document.getElementById('lifeBottomNavV1').getBoundingClientRect();
+    const rhythm = document.querySelector('.home-rhythm-v1').getBoundingClientRect();
+    return {
+      width: innerWidth,
+      height: innerHeight,
+      navTop: nav.top,
+      navHeight: nav.height,
+      contentBottom: rhythm.bottom,
+      text: document.querySelector('.life-page-v1[data-page="home"]').innerText
+    };
+  });
+  assert.equal(lifeVisual.width, 390);
+  assert.ok(lifeVisual.navHeight >= 48 && lifeVisual.navHeight <= 72, `unexpected Life nav height: ${lifeVisual.navHeight}`);
+  assert.ok(lifeVisual.contentBottom <= lifeVisual.navTop, `Life home exceeds one viewport: ${lifeVisual.contentBottom}/${lifeVisual.navTop}`);
+  for (const label of ['今日のくらし','カレンダー','タスク','習慣','メモ','今日の予定','次のタスク','暮らしのリズム']) {
+    assert.match(lifeVisual.text, new RegExp(label), `Life home is missing ${label}`);
+  }
+  await mkdir('test-results', { recursive: true });
+  await page.screenshot({ path: `test-results/life-home-390-${browserName}.png`, fullPage: false });
+
+  const yosPage = await context.newPage();
+  const yosURL = new URL('../yos/', baseURL).href;
+  await yosPage.goto(yosURL, { waitUntil: 'networkidle' });
+  await yosPage.waitForSelector('#homePage');
+  const yosVisual = await yosPage.evaluate(() => {
+    const nav = document.querySelector('.bottom-nav').getBoundingClientRect();
+    const next = document.querySelector('.next-step').getBoundingClientRect();
+    return {
+      width: innerWidth,
+      navTop: nav.top,
+      navHeight: nav.height,
+      contentBottom: next.bottom,
+      scrollWidth: document.documentElement.scrollWidth,
+      clientWidth: document.documentElement.clientWidth,
+      text: document.body.innerText
+    };
+  });
+  assert.equal(yosVisual.width, 390);
+  assert.ok(yosVisual.scrollWidth <= yosVisual.clientWidth + 1, `YOS horizontal overflow: ${yosVisual.scrollWidth}/${yosVisual.clientWidth}`);
+  assert.ok(yosVisual.navHeight >= 48 && yosVisual.navHeight <= 72, `unexpected YOS nav height: ${yosVisual.navHeight}`);
+  assert.ok(yosVisual.contentBottom <= yosVisual.navTop, `YOS home exceeds one viewport: ${yosVisual.contentBottom}/${yosVisual.navTop}`);
+  for (const label of ['MY WAY','人生ナビ','今ここ','行き先','ここまで','人生ルート','次の一歩','Home','Life','Money','Journey','Idea']) {
+    assert.match(yosVisual.text, new RegExp(label), `YOS home is missing ${label}`);
+  }
+  await yosPage.screenshot({ path: `test-results/yos-home-390-${browserName}.png`, fullPage: false });
+  await yosPage.close();
+
+  await page.locator('.life-feature-grid-v1 [data-open-page="schedule"]').first().click();
+  assert.equal(await page.locator('#lifeCalendarV1').isVisible(), true, 'Life calendar does not open from the compact home');
   assert.equal(await page.locator('#lifeCalendarTodayLabelV1').textContent(), '今日');
   assert.equal(await page.locator('#lifeCalendarTomorrowLabelV1').textContent(), '明日');
   assert.equal(await page.locator('#lifeCalendarSoonLabelV1').textContent(), 'もうすぐ');
@@ -203,7 +252,9 @@ try {
     await context.setOffline(true);
     await page.reload({ waitUntil: 'domcontentloaded' });
     await waitForDailyFlow();
-    assert.equal(await page.locator('#lifeCalendarV1').isVisible(), true, 'reading home is not available offline');
+    assert.equal(await page.locator('#lifeHomeDashboardV1').isVisible(), true, 'compact reading home is not available offline');
+    await page.locator('.life-feature-grid-v1 [data-open-page="schedule"]').first().click();
+    assert.equal(await page.locator('#lifeCalendarV1').isVisible(), true, 'calendar detail is not available offline');
     await page.locator('#lifeBottomNavV1 [data-page="record"]').click();
     assert.equal(await page.locator('#lifeDailyFlowV1').isVisible(), true, 'record flow is not available offline');
     await context.setOffline(false);
@@ -214,7 +265,6 @@ try {
     assert.equal(restoredDone, '連絡を一件返した', 'WebKit reload did not restore the closed day');
   }
   await page.locator('#lifeBottomNavV1 [data-page="home"]').click();
-  await mkdir('test-results', { recursive: true });
   await page.screenshot({ path: `test-results/life-calendar-iphone17-${browserName}.png`, fullPage: true });
   await page.setViewportSize({ width: 375, height: 667 });
   await page.reload({ waitUntil: 'domcontentloaded' });
