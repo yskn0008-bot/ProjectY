@@ -252,7 +252,9 @@ try {
     await context.setOffline(true);
     await page.reload({ waitUntil: 'domcontentloaded' });
     await waitForDailyFlow();
-    assert.equal(await page.locator('#lifeCalendarV1').isVisible(), true, 'reading home is not available offline');
+    assert.equal(await page.locator('#lifeHomeDashboardV1').isVisible(), true, 'compact reading home is not available offline');
+    await page.locator('.life-feature-grid-v1 [data-open-page="schedule"]').first().click();
+    assert.equal(await page.locator('#lifeCalendarV1').isVisible(), true, 'calendar detail is not available offline');
     await page.locator('#lifeBottomNavV1 [data-page="record"]').click();
     assert.equal(await page.locator('#lifeDailyFlowV1').isVisible(), true, 'record flow is not available offline');
     await context.setOffline(false);

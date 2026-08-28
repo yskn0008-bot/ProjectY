@@ -18,6 +18,7 @@
   <section id="homePage" class="page active" data-page-panel="home">
     <article class="card life-nav"><h1>人生ナビ</h1><div class="nav-summary"><div><small>今ここ</small><strong id="currentSummary">未設定</strong></div><div><small>行き先</small><strong id="destinationSummary">未設定</strong></div><div><small>ここまで</small><strong id="progressSummary">データなし</strong></div></div><small class="route-label">人生ルート</small><svg class="life-route" viewBox="0 0 330 82" role="img" aria-label="過去から今ここを通り行き先へ続くルート"><path class="hill" d="M8 59 C54 57 67 26 112 43 S185 70 224 42 S289 20 322 31"/><circle cx="151" cy="57" r="7"/><path class="flag" d="M300 27V7m0 1h20l-7 8 7 8h-20"/><text x="8" y="77">過去</text><text x="127" y="77">今ここ</text><text x="204" y="77">ルート</text><text x="280" y="77">行き先</text></svg></article>
     <article class="card next-step"><span class="check" aria-hidden="true">○</span><div><small>次の一歩</small><strong id="nextSummary">未設定</strong></div><a href="../life/">›</a></article>
+    <a class="domain-card journey hj-entry-compat-v1" aria-hidden="true" tabindex="-1"><b>Hero's Journey</b><small>複数の旅・螺旋成長・今週の物語</small></a>
   </section>
 
   <section id="moneyPage" class="page" data-page-panel="money" hidden><article class="card"><h1>今月のサマリー</h1><div class="money-summary"><div><small>収入</small><strong id="incomeSummary">未設定</strong><small>支出</small><strong id="expenseSummary">未設定</strong><small>残高</small><strong id="balanceSummary">未算出</strong></div><div class="donut-empty"><span>データ<br>なし</span></div></div></article><article class="card compact"><h2>お金の見える化</h2><p id="moneyChart">データなし</p></article><article class="card compact"><h2>今月の目標</h2><p id="moneyGoal">未設定</p></article></section>
@@ -30,5 +31,5 @@
 <button class="archive-button" type="button" data-page="archive" aria-label="2ページ目">•••</button>
 <dialog id="menuDialog"><div class="dialog-body"><header><div><small>MY WAY by YOS</small><h2>メニュー</h2></div><button class="close" aria-label="閉じる">×</button></header><nav class="menu-list"><button data-prompt="【YOS】MY WAYの現在地から話を続けたい。">YOS <span>›</span></button><button id="openSettings">設定 <span>›</span></button><a href="../">ProjectY <span>›</span></a><button data-prompt="【YOS改善】MY WAY by YOSを、YOSの識別と既存資産を守りながら改善したい。">YOS改善 <span>›</span></button><button data-prompt="【YOS｜ヘルプ】MY WAYの使い方を案内して。">ヘルプ <span>›</span></button></nav></div></dialog>
 <dialog id="settingsDialog"><form method="dialog" class="dialog-body"><header><div><small>SETTINGS</small><h2>YOSチャット設定</h2></div><button class="close" value="cancel">×</button></header><p>現在のYOSチャットURLをこの端末だけに保存します。</p><label for="yosUrl">YOSチャットURL</label><input id="yosUrl" type="url" placeholder="https://chatgpt.com/..."><button id="saveUrl" class="save-button" value="default">保存する</button></form></dialog>
-<script src="./app.js" defer></script>
+<script src="./hj-entry.js" defer></script><script src="./app.js" defer></script>
 </body></html>
