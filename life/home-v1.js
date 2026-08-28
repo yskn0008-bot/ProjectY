@@ -31,9 +31,9 @@
   const DOMAIN_NAV=[
     {label:'Home',icon:'⌂',href:'../yos/'},
     {label:'Life',icon:'♡',page:'home'},
-    {label:'Money',icon:'¥',href:'../yos/?page=money'},
-    {label:"Hero's Journey",icon:'↗',href:'../yos/hj/'},
-    {label:'Idea',icon:'✦',href:'../yos/?page=idea'}
+    {label:'Money',icon:'¥',href:'../yos/#money'},
+    {label:"Hero's Journey",icon:'△',href:'../yos/hj/'},
+    {label:'Idea',icon:'✦',href:'../yos/#idea'}
   ];
   let activePage='home';
   let refreshQueued=false;
@@ -644,37 +644,18 @@
     section.id='lifeHomeDashboardV1';
     section.className='home-dashboard-v1';
     section.innerHTML=`
-      <section class="life-today-menu-v1 card" aria-label="今日のくらし">
-        <div class="card-head"><h3>今日のくらし</h3></div>
-        <div class="life-today-actions-v1">
-          <button type="button" data-open-page="schedule"><span>📅</span><b>カレンダー</b></button>
-          <button type="button" data-open-page="home" data-focus-tasks="true"><span>✓</span><b>タスク</b></button>
-          <button type="button" data-open-page="improve"><span>🌱</span><b>習慣</b></button>
-          <button type="button" data-open-page="record"><span>✎</span><b>メモ</b></button>
-        </div>
+      <section class="life-glance-title-v1"><h2>今日のくらし</h2><span id="homeCompletionV1">0%</span><span id="homeStatusTitleV1" hidden></span><span id="homeStatusDetailV1" hidden></span><span id="homeRingV1" hidden></span></section>
+      <section class="life-feature-grid-v1" aria-label="今日のくらし">
+        <button type="button" data-open-page="schedule"><span>▣</span><b>カレンダー</b></button><button type="button" data-open-page="schedule"><span>✓</span><b>タスク</b></button><button type="button" data-open-page="improve"><span>↻</span><b>習慣</b></button><button type="button" data-open-page="record"><span>✎</span><b>メモ</b></button>
       </section>
-      <section class="home-status-v1 card">
-        <div class="status-ring-v1" id="homeRingV1"><div><strong id="homeCompletionV1">0%</strong><span>今日の進み</span></div></div>
-        <div class="status-copy-v1"><small>暮らしのリズム</small><h2 id="homeStatusTitleV1">今日を整える</h2><p id="homeStatusDetailV1">今の状態から、無理のない順番をつくります。</p></div>
-      </section>
+      <section class="home-schedule-preview-v1 card"><header><h3>今日の予定</h3><button type="button" data-open-page="schedule">すべて ›</button></header><div id="homeSchedulePreviewV1">予定を確認しています</div></section>
       <section class="home-focus-v1 card">
         <button type="button" id="homeFocusDoneV1" class="home-focus-check-v1" aria-label="今日やることを完了">✓</button>
-        <div><small>今日のタスク</small><strong id="homeFocusValueV1">まだありません</strong><p id="homeFocusDetailV1"></p></div>
+        <div><small>次のタスク</small><strong id="homeFocusValueV1">まだありません</strong><p id="homeFocusDetailV1"></p></div>
         <button type="button" class="home-edit-v1" data-open-page="schedule">編集</button>
       </section>
-      <section class="home-glance-v1" aria-label="今日の状態">
-        <button type="button" class="glance-card-v1 sleep" data-open-page="record"><span>🌙 睡眠</span><strong id="homeSleepV1">—</strong><small>時間</small></button>
-        <button type="button" class="glance-card-v1 health" data-open-page="record"><span>💚 体調</span><strong id="homeHealthV1">—</strong><small>5段階</small></button>
-        <button type="button" class="glance-card-v1 mood" data-open-page="record"><span>🙂 気分</span><strong id="homeMoodV1">—</strong><small>5段階</small></button>
-      </section>
-      <button type="button" class="home-money-summary-v1 card" data-open-page="record">
-        <span>Money｜今日の生活安全</span><strong id="homeMoneyBudgetV1">確認済み情報はまだありません</strong><small id="homeMoneyDetailV1">必要な時だけ記録できます。</small>
-      </button>
-      <section class="home-overview-v1 card">
-        <button type="button" class="home-habit-v1" data-open-page="improve"><span>🌱 習慣</span><b id="homeHabitV1">0/14</b><i><em id="homeHabitBarV1"></em></i></button>
-        <div class="home-done-v1"><span>✨ 今日できたこと</span><strong id="homeDoneValueV1">まだありません</strong></div>
-        <button type="button" class="home-done-save-v1" data-open-page="record">記録</button>
-      </section>`;
+      <section class="home-rhythm-v1 card"><div><small>暮らしのリズム</small><strong>習慣 <span id="homeHabitV1">0/14</span></strong></div><i><em id="homeHabitBarV1"></em></i><button type="button" data-open-page="improve">›</button></section>
+      <div hidden><span id="homeSleepV1"></span><span id="homeHealthV1"></span><span id="homeMoodV1"></span><span id="homeMoneyBudgetV1"></span><span id="homeMoneyDetailV1"></span><span id="homeDoneValueV1"></span></div>`;
 
     section.addEventListener('click',event=>{
       const pageButton=event.target.closest('[data-open-page]');
@@ -704,7 +685,7 @@
   function renderNav(nav){
     nav.id='lifeBottomNavV1';
     nav.innerHTML=DOMAIN_NAV.map(item=>item.href
-      ?`<a class="nav" href="${item.href}"><span>${item.icon}</span><b>${item.label}</b></a>`
+      ?`<a href="${item.href}"><span>${item.icon}</span><b>${item.label}</b></a>`
       :`<button type="button" class="nav active" data-page="${item.page}"><span>${item.icon}</span><b>${item.label}</b></button>`).join('')+
       '<button type="button" class="life-nav-compat-v1" data-page="record" tabindex="-1" aria-hidden="true"></button>';
     nav.addEventListener('click',event=>{
@@ -732,6 +713,8 @@
       focusButton.disabled=!focus.text;
     }
     set('homeFocusDetailV1',focusDetail(day));
+    const preview=document.getElementById('homeSchedulePreviewV1');
+    if(preview){const items=(day.schedule||[]).slice(0,3);preview.innerHTML=items.length?items.map(item=>`<p><time>${fmtTime(item.start)}</time><span>${clean(item.title,80)||'予定'}</span></p>`).join(''):'<p class="empty-preview-v1">今日の予定はありません</p>'}
     set('homeSleepV1',day.checkin.sleep?`${day.checkin.sleep}h`:'—');
     set('homeHealthV1',day.checkin.health?`${day.checkin.health}/5`:'—');
     set('homeMoodV1',day.checkin.mood?`${day.checkin.mood}/5`:'—');
@@ -778,8 +761,9 @@
     });
     top.insertAdjacentElement('afterend',host);
 
-    pages.home.append(buildLifeCalendar(),buildDashboard(),week);
-    [sunrise,scheduleCard,taskCard,planCard].filter(Boolean).forEach(card=>pages.schedule.appendChild(card));
+    const lifeCalendar=buildLifeCalendar();
+    pages.home.append(buildDashboard());
+    [sunrise,lifeCalendar,week,scheduleCard,taskCard,planCard].filter(Boolean).forEach(card=>pages.schedule.appendChild(card));
     pages.record.appendChild(buildDailyFlow());
     if(stateCard){
       const details=document.createElement('details');
@@ -792,15 +776,6 @@
     layout.remove();
 
     renderNav(nav);
-    const sectionNav=document.createElement('nav');
-    sectionNav.className='life-section-nav-v1';
-    sectionNav.setAttribute('aria-label','Life内メニュー');
-    sectionNav.innerHTML=Object.entries(PAGE_META).map(([key,item])=>`<button type="button" data-open-page="${key}"><span>${item.icon}</span>${item.label}</button>`).join('');
-    top.insertAdjacentElement('afterend',sectionNav);
-    sectionNav.addEventListener('click',event=>{
-      const button=event.target.closest('[data-open-page]');
-      if(button)activatePage(button.dataset.openPage,true);
-    });
     activatePage('home',false);
 
     const observer=new MutationObserver(queueRefresh);

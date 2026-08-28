@@ -73,7 +73,8 @@ assert.match(source, /homeDoneValueV1/, 'home must expose done-today as a readin
 assert.match(source, /homeMoneyBudgetV1/, 'home must reuse confirmed Money safety information');
 assert.doesNotMatch(source, /homeFocusInputV1|homeDoneInputV1/, 'home must not duplicate record inputs');
 assert.match(source, /day\.doneToday/, 'doneToday must remain in the existing Life day record');
-assert.match(source, /pages\.home\.append\(buildLifeCalendar\(\),buildDashboard\(\),week\)/, 'Life calendar must lead the reading home');
+assert.match(source, /pages\.home\.append\(buildDashboard\(\)\)/, 'compact Life dashboard must lead the reading home');
+assert.match(source, /\[sunrise,lifeCalendar,week,scheduleCard,taskCard,planCard\]/, 'Life calendar must remain available from the schedule detail');
 assert.match(source, /pages\.record\.appendChild\(buildDailyFlow\(\)\)/, 'existing Record navigation must own the input flow');
 assert.match(source, /activatePage\('home',false\)/, 'relaunch must start on the reading home');
 assert.doesNotMatch(source, /localStorage\.clear\(/, 'daily flow must never clear existing Life data');
