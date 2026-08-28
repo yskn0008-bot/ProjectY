@@ -11,6 +11,7 @@ test('final Life identity and today-first controls are present',()=>{
   for(const label of ['今日のくらし','カレンダー','タスク','習慣','メモ','今日の予定','次のタスク','暮らしのリズム'])assert.ok(js.includes(label),label);
   assert.match(css,/--life-home-accent:#5f866f/);
   assert.match(css,/Final Visual SSOT: a warm, compact day planner/);
+  assert.match(css,/min-height:calc\(100dvh/,'Life planner must use the lower iPhone viewport');
   for(const className of ['life-day-ribbon-v2','life-paper-grid-v2','life-rhythm-v2','life-memo-v2','life-yos-companion-v2'])assert.ok(js.includes(className),className);
 });
 
