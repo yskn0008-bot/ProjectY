@@ -10,7 +10,8 @@ test('final Life identity and today-first controls are present',()=>{
   for(const label of ['MY LIFE','by YOS'])assert.ok(html.includes(label),label);
   for(const label of ['今日のくらし','カレンダー','タスク','習慣','メモ','今日の予定','次のタスク','暮らしのリズム'])assert.ok(js.includes(label),label);
   assert.match(css,/--life-home-accent:#5f866f/);
-  assert.match(css,/Visual SSOT compact iPhone home/);
+  assert.match(css,/Final Visual SSOT: a warm, compact day planner/);
+  for(const className of ['life-day-ribbon-v2','life-paper-grid-v2','life-rhythm-v2','life-memo-v2','life-yos-companion-v2'])assert.ok(js.includes(className),className);
 });
 
 test('shared navigation exposes all five domains while Life tools remain',()=>{
@@ -30,4 +31,6 @@ test('existing three-task persistence remains non-destructive',()=>{
   assert.match(html,/while\(d\.tasks\.length<3\)/);
   assert.match(html,/localStorage\.setItem\(KEY,JSON\.stringify\(data\)\)/);
   assert.doesNotMatch(`${html}\n${js}`,/localStorage\.(?:removeItem|clear)\s*\(/);
+  assert.match(js,/toggleTaskAt\(Number\(taskButton\.dataset\.homeTaskIndex\)\)/);
+  assert.match(js,/\.\.\.\(data\.moneySafety&&typeof data\.moneySafety==='object'\?data\.moneySafety:\{\}\)/,'Life saves must retain compatible Money fields');
 });

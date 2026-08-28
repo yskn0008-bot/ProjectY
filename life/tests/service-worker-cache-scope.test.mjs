@@ -56,7 +56,9 @@ assert.equal(claimed, true, 'Life service worker must claim its clients after cl
 assert.match(source, /key\.startsWith\(LIFE_CACHE_PREFIX\)/, 'cleanup must be restricted by Life cache prefix');
 assert.match(source, /home-priority-v1\.css\?v=4/, 'priority home styles must be available offline');
 assert.match(source, /yos-suite-v3\.js\?v=8/, 'current suite script must be cached with its requested URL');
-assert.match(source, /home-v1\.js\?v=6/, 'current home script must be cached with its requested URL');
+assert.match(source, /home-v1\.js\?v=7/, 'current home script must be cached with its requested URL');
+assert.match(source, /home-v1\.css\?v=3/, 'current home styles must be cached with its requested URL');
+assert.match(source, /yos-life-home-v12-final-visual-ssot/, 'final Visual SSOT cache generation must be active');
 assert.doesNotMatch(source, /keys\.filter\(key=>key!==CACHE\)/, 'global cache deletion pattern must not return');
 
 console.log('Life service worker cache scope: PASS');
