@@ -184,7 +184,7 @@ html,body{background:#f7f0df!important;color:#2d3832}
 body{background-image:radial-gradient(circle at 8% 4%,rgba(246,208,134,.25),transparent 24%),radial-gradient(circle at 92% 28%,rgba(101,149,111,.12),transparent 26%),repeating-linear-gradient(93deg,rgba(74,62,41,.017) 0 1px,transparent 1px 6px)!important}
 .app{padding-right:14px;padding-left:14px}
 .top{height:48px;margin-bottom:5px}.brand h1{font-family:Georgia,"Yu Mincho",serif;font-size:21px;letter-spacing:.06em}.brand p{color:#527d62;font-size:9px;font-weight:900;letter-spacing:.14em}
-.life-page-v1[data-page="home"]{gap:0}.life-planner-v2{display:grid;grid-template-rows:auto 238px auto auto auto;align-content:start;gap:8px;min-height:calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 132px)}
+.life-page-v1[data-page="home"]{gap:0}.life-planner-v2{display:grid;grid-template-rows:auto 238px auto auto auto;align-content:space-between;gap:8px;min-height:calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 132px)}
 .life-day-ribbon-v2{overflow:hidden;border:1px solid rgba(75,69,50,.15);border-radius:20px;background:linear-gradient(145deg,rgba(255,250,233,.95),rgba(227,239,218,.84));box-shadow:0 9px 24px rgba(69,58,38,.08)}
 .life-day-ribbon-v2>header{display:flex;align-items:center;justify-content:space-between;gap:9px;padding:11px 12px 7px}
 .life-day-ribbon-v2>header>div>small{color:#5d8768;font-size:8px;font-weight:1000;letter-spacing:.13em}.life-day-ribbon-v2 h2{margin:2px 0 0;font-family:Georgia,"Yu Mincho",serif;font-size:18px;line-height:1.2}.life-day-ribbon-v2 p{margin:3px 0 0;color:#68726a;font-size:8px}

@@ -165,7 +165,16 @@ try {
   for (const label of ['37歳の逆襲ロードマップ','今ここ｜2026 / 37歳','土台を整える','試す','当てる','育てる','自立する','2031年 / 42歳','取り戻す']) {
     assert.match(roadmapVisual, new RegExp(label), `roadmap is missing ${label}`);
   }
+  await yosPage.evaluate(() => {
+    document.querySelector('.bottom-nav').style.position='absolute';
+    document.querySelector('.archive-button').style.position='absolute';
+  });
   await yosPage.screenshot({ path: `test-results/yos-roadmap-390-${browserName}.png`, fullPage: true });
+  await yosPage.evaluate(() => {
+    document.querySelector('.bottom-nav').style.position='';
+    document.querySelector('.archive-button').style.position='';
+    window.scrollTo(0,0);
+  });
   await yosPage.locator('.bottom-nav [data-page="home"]').click();
   await yosPage.waitForFunction(() => document.body.dataset.domain === 'home');
   const uniqueCompositions = await yosPage.evaluate(() => ({
@@ -301,7 +310,7 @@ try {
   const cacheStatus = await page.evaluate(async () => {
     const paths = [
       './', './index.html', './manifest.webmanifest', './yos-suite-v3.js?v=8',
-      './home-v1.js?v=7', './home-v1.css?v=3', './home-priority-v1.css?v=4'
+      './home-v1.js?v=7', './home-v1.css?v=4', './home-priority-v1.css?v=4'
     ];
     const entries = await Promise.all(paths.map(async path => [
       path,
