@@ -115,7 +115,9 @@ function showPage(name){
   document.body.dataset.domain=name;
   const nextHash=name==='home'?'':`#${name}`;
   if(location.hash!==nextHash)history.replaceState(null,'',`${location.pathname}${location.search}${nextHash}`);
-  window.scrollTo(0,0);
+  const resetScroll=()=>{document.documentElement.scrollTop=0;document.body.scrollTop=0;window.scrollTo(0,0)};
+  resetScroll();
+  requestAnimationFrame(resetScroll);
 }
 async function openYos(prompt){
   try{await navigator.clipboard.writeText(prompt)}catch{}

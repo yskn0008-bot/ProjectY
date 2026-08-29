@@ -114,6 +114,7 @@ try {
   const inspectYosDomain = async (domain, panelSelector, finalSelector, labels, screenshotName) => {
     if (domain !== 'home') await yosPage.locator(`.bottom-nav [data-page="${domain}"]`).click();
     await yosPage.waitForFunction(name => document.body.dataset.domain === name, domain);
+    await yosPage.waitForFunction(() => window.scrollY === 0);
     const visual = await yosPage.evaluate(({ panel, final }) => {
       const nav = document.querySelector('.bottom-nav').getBoundingClientRect();
       const activePanel = document.querySelector(panel);
