@@ -1,12 +1,14 @@
 'use strict';
 
 const CACHE_PREFIX = 'yos-command-center-';
-const CACHE = `${CACHE_PREFIX}v8-final-visual-ssot`;
+const CACHE = `${CACHE_PREFIX}v9-watercolor-visual-ssot`;
 const STATIC = [
   './',
   './index.html',
   './styles.css',
   './app.js',
+  './assets/home-life-path-watercolor-v1.webp',
+  './assets/journey-valley-watercolor-v1.webp',
   './taxi-live-v1.js',
   './hj-entry.js',
   './journey.html',
