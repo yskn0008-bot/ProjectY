@@ -166,13 +166,13 @@ try {
     assert.match(roadmapVisual, new RegExp(label), `roadmap is missing ${label}`);
   }
   await yosPage.evaluate(() => {
-    document.querySelector('.bottom-nav').style.position='absolute';
-    document.querySelector('.archive-button').style.position='absolute';
+    document.querySelector('.bottom-nav').style.visibility='hidden';
+    document.querySelector('.archive-button').style.visibility='hidden';
   });
   await yosPage.screenshot({ path: `test-results/yos-roadmap-390-${browserName}.png`, fullPage: true });
   await yosPage.evaluate(() => {
-    document.querySelector('.bottom-nav').style.position='';
-    document.querySelector('.archive-button').style.position='';
+    document.querySelector('.bottom-nav').style.visibility='';
+    document.querySelector('.archive-button').style.visibility='';
     window.scrollTo(0,0);
   });
   await yosPage.locator('.bottom-nav [data-page="home"]').click();
