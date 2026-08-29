@@ -114,9 +114,16 @@ try {
   const inspectYosDomain = async (domain, panelSelector, finalSelector, labels, screenshotName) => {
     if (domain !== 'home') await yosPage.locator(`.bottom-nav [data-page="${domain}"]`).click();
     await yosPage.waitForFunction(name => document.body.dataset.domain === name, domain);
-    await yosPage.waitForFunction(() => window.scrollY === 0);
+    await yosPage.evaluate(() => {
+      document.activeElement?.blur();
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+      window.scrollTo(0,0);
+    });
+    await yosPage.waitForTimeout(50);
     const visual = await yosPage.evaluate(({ panel, final }) => {
       const nav = document.querySelector('.bottom-nav').getBoundingClientRect();
+      const topbar = document.querySelector('.topbar').getBoundingClientRect();
       const activePanel = document.querySelector(panel);
       const content = activePanel.querySelector(final).getBoundingClientRect();
       const primary = activePanel.querySelector('.primary-surface')?.getBoundingClientRect();
@@ -125,6 +132,8 @@ try {
         height: innerHeight,
         navTop: nav.top,
         navHeight: nav.height,
+        scrollY: window.scrollY,
+        topbarTop: topbar.top,
         contentBottom: content.bottom,
         primaryHeight: primary?.height || 0,
         scrollWidth: document.documentElement.scrollWidth,
@@ -133,6 +142,8 @@ try {
       };
     }, { panel: panelSelector, final: finalSelector });
     assert.equal(visual.width, 390);
+    assert.equal(visual.scrollY, 0, `${domain} screenshot is not at the top`);
+    assert.ok(visual.topbarTop >= 0, `${domain} topbar is clipped: ${visual.topbarTop}`);
     assert.ok(visual.scrollWidth <= visual.clientWidth + 1, `${domain} horizontal overflow: ${visual.scrollWidth}/${visual.clientWidth}`);
     assert.ok(visual.navHeight >= 48 && visual.navHeight <= 72, `unexpected ${domain} nav height: ${visual.navHeight}`);
     assert.ok(visual.contentBottom >= visual.height * .62, `${domain} leaves too much unused lower space: ${visual.contentBottom}/${visual.height}`);

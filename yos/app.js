@@ -1,5 +1,6 @@
 'use strict';
 (()=>{
+if('scrollRestoration'in history)history.scrollRestoration='manual';
 const KEYS={home:'yos-home-settings-v2',legacy:'yos-home-settings-v1',taxi:'yos-taxi-settings-v2',state:'yos-home-current-state-v1',life:'yos-life-v1',journeys:'hj-domain-journeys-v1',profile:'hj-user-profile-v1',scenes:'hj-daily-scenes-v1',idea:'yos-my-way-ideas-v1',legacyIdea:'yos-idea-memo-v1'};
 const $=id=>document.getElementById(id);
 const clean=(value,max=120)=>typeof value==='string'?value.trim().slice(0,max):'';
@@ -117,7 +118,7 @@ function showPage(name){
   if(location.hash!==nextHash)history.replaceState(null,'',`${location.pathname}${location.search}${nextHash}`);
   const resetScroll=()=>{document.documentElement.scrollTop=0;document.body.scrollTop=0;window.scrollTo(0,0)};
   resetScroll();
-  requestAnimationFrame(resetScroll);
+  requestAnimationFrame(()=>requestAnimationFrame(resetScroll));
 }
 async function openYos(prompt){
   try{await navigator.clipboard.writeText(prompt)}catch{}
@@ -128,7 +129,7 @@ async function openYos(prompt){
   $('yosUrl').value=url;
   $('settingsDialog').showModal();
 }
-document.querySelectorAll('[data-page]').forEach(item=>item.addEventListener('click',()=>showPage(item.dataset.page)));
+document.querySelectorAll('[data-page]').forEach(item=>item.addEventListener('click',()=>{item.blur();showPage(item.dataset.page)}));
 document.querySelectorAll('[data-prompt]').forEach(item=>item.addEventListener('click',()=>openYos(item.dataset.prompt)));
 $('openMenu').addEventListener('click',()=>$('menuDialog').showModal());
 $('menuDialog').querySelector('.close').addEventListener('click',()=>$('menuDialog').close());
