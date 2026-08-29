@@ -246,9 +246,7 @@
     const beforeDay=dayData();
     const before=beforeDay.tasks[index]||{text:'',done:false};
     if(!String(before.text||'').trim())return;
-    const row=qsa('.task')[index]||qsa('.task')[0];
-    const button=row&&qs('button',row);
-    if(button)button.click();
+    if(typeof window.__yosLifeToggleTaskV1==='function')window.__yosLifeToggleTaskV1(index);
     else updateToday(day=>{
       day.tasks=Array.isArray(day.tasks)?day.tasks:[];
       while(day.tasks.length<=index)day.tasks.push({text:'',done:false,category:'personal'});

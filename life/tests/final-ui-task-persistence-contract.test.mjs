@@ -31,6 +31,8 @@ test('existing three-task persistence remains non-destructive',()=>{
   assert.ok(html.includes("SETTINGS='yos-life-settings-v1'"));
   assert.match(html,/while\(d\.tasks\.length<3\)/);
   assert.match(html,/localStorage\.setItem\(KEY,JSON\.stringify\(data\)\)/);
+  assert.match(html,/window\.__yosLifeToggleTaskV1=toggleTask/,'Home and detailed Life must share the same task save operation');
+  assert.match(js,/window\.__yosLifeToggleTaskV1\(index\)/);
   assert.doesNotMatch(`${html}\n${js}`,/localStorage\.(?:removeItem|clear)\s*\(/);
   assert.match(js,/toggleTaskAt\(Number\(taskButton\.dataset\.homeTaskIndex\)\)/);
   assert.match(js,/\.\.\.\(data\.moneySafety&&typeof data\.moneySafety==='object'\?data\.moneySafety:\{\}\)/,'Life saves must retain compatible Money fields');

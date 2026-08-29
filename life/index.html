@@ -338,12 +338,18 @@ function renderTasks(){
     const row=document.createElement('div');row.className=`task${t.done?' done':''}`;
     row.innerHTML=`<button aria-label="タスク${i+1}を完了">✓</button><input maxlength="70" placeholder="${i+1}. 今日やること"><select aria-label="分類">${Object.keys(LABELS).filter(k=>!['sleep','morning'].includes(k)).map(k=>`<option value="${k}">${LABELS[k]}</option>`).join('')}</select>`;
     const input=row.querySelector('input'),select=row.querySelector('select');input.value=t.text;select.value=t.category||'personal';
-    row.querySelector('button').onclick=()=>{t.done=!t.done;save()};
+    row.querySelector('button').onclick=()=>toggleTask(i);
     input.onchange=()=>{t.text=input.value.trim();save()};select.onchange=()=>{t.category=select.value;save()};
     box.appendChild(row);
   });
   const set=d.tasks.filter(t=>t.text),done=set.filter(t=>t.done).length;el('taskSummary').textContent=`${done}/${set.length||3}`;
 }
+function toggleTask(index){
+  const task=day().tasks[index];
+  if(!task||!String(task.text||'').trim())return false;
+  task.done=!task.done;save();return true;
+}
+window.__yosLifeToggleTaskV1=toggleTask;
 function minutesOf(value){
   const d=new Date(value);if(Number.isNaN(d.getTime()))return 0;
   const parts=new Intl.DateTimeFormat('en-GB',{hour:'2-digit',minute:'2-digit',hour12:false,timeZone:'Asia/Tokyo'}).format(d).split(':').map(Number);
