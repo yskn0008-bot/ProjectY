@@ -158,6 +158,16 @@ try {
   await inspectYosDomain('money','#moneyPage','.yos-companion',['MY MONEY','今月の状態','収入','支出','残り・見込み','内訳・守るお金','近い支払い'],'yos-money');
   await inspectYosDomain('journey','#journeyPage','.yos-companion',['MY JOURNEY','歩いてきた景色','現在のステージ','現在の景色','最近の経験','次のテーマ'],'yos-journey');
   await inspectYosDomain('idea','#ideaPage','.yos-companion',['MY IDEA','ひらめき、拾えてる','アイデアを残す','最近のアイデアの種'],'yos-idea');
+  await yosPage.locator('.archive-button').click();
+  await yosPage.waitForFunction(() => document.body.dataset.domain === 'archive');
+  await yosPage.evaluate(() => window.scrollTo(0,0));
+  const roadmapVisual = await yosPage.locator('#archivePage').innerText();
+  for (const label of ['37歳の逆襲ロードマップ','今ここ｜2026 / 37歳','土台を整える','試す','当てる','育てる','自立する','2031年 / 42歳','取り戻す']) {
+    assert.match(roadmapVisual, new RegExp(label), `roadmap is missing ${label}`);
+  }
+  await yosPage.screenshot({ path: `test-results/yos-roadmap-390-${browserName}.png`, fullPage: true });
+  await yosPage.locator('.bottom-nav [data-page="home"]').click();
+  await yosPage.waitForFunction(() => document.body.dataset.domain === 'home');
   const uniqueCompositions = await yosPage.evaluate(() => ({
     home: Boolean(document.querySelector('#homePage .home-scene')),
     money: Boolean(document.querySelector('#moneyPage .money-overview')),
