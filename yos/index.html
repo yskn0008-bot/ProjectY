@@ -29,6 +29,10 @@
     </header>
 
     <article class="home-scene primary-surface">
+      <svg class="home-route-thread" viewBox="0 0 390 390" preserveAspectRatio="none" aria-hidden="true">
+        <path d="M72 78 C175 76 304 104 306 183 C307 248 231 255 205 304 C184 344 130 350 83 326"/>
+        <circle cx="72" cy="78" r="5"/><circle cx="306" cy="183" r="5"/><circle cx="83" cy="326" r="5"/>
+      </svg>
       <svg class="home-watercolor" viewBox="0 0 390 430" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
         <defs>
           <linearGradient id="homeSky" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#f8e9b9"/><stop offset=".45" stop-color="#d8e8d5"/><stop offset="1" stop-color="#8bb18a"/></linearGradient>
@@ -51,6 +55,7 @@
       <span class="scene-route-label">人生ルート</span>
       <section class="scene-note progress-note"><small>ここまで</small><strong id="progressSummary">データなし</strong></section>
       <section class="scene-note destination-note"><small>行き先</small><strong id="destinationSummary">未設定</strong><span aria-hidden="true">⚑</span></section>
+      <div class="route-order" aria-hidden="true"><b>今ここ</b><i>→</i><b>行き先</b><i>→</i><b>次の一歩</b></div>
       <p class="route-caption">人生ナビ — 選択の連続が、未来をつくる。</p>
     </article>
 
@@ -66,7 +71,7 @@
   <section id="moneyPage" class="page money-world" data-page-panel="money" hidden>
     <header class="domain-heading money-heading"><span class="domain-emblem" aria-hidden="true">▣</span><div><small>MY MONEY</small><h1>今月の状態</h1><p>見通しを持って、安心を増やす。</p></div></header>
     <article class="money-overview primary-surface">
-      <header><small>今月のサマリー</small><span id="moneyMonth">----</span></header>
+      <header><small>今月のサマリー</small><span class="money-ledger-mark" aria-hidden="true">暮らしの家計簿</span><span id="moneyMonth">----</span></header>
       <div class="money-totals">
         <div><small>収入</small><strong id="incomeSummary">未設定</strong></div>
         <div><small>支出</small><strong id="expenseSummary">未設定</strong></div>
@@ -89,6 +94,7 @@
   <section id="journeyPage" class="page journey-world" data-page-panel="journey" hidden>
     <header class="domain-heading journey-heading"><span class="domain-emblem" aria-hidden="true">▲</span><div><small>MY JOURNEY</small><h1>歩いてきた景色</h1><p>経験が積み重なり、景色が変わっていく。</p></div></header>
     <article class="journey-scene primary-surface">
+      <svg class="journey-route-thread" viewBox="0 0 390 350" preserveAspectRatio="none" aria-hidden="true"><path d="M189 326 C177 278 203 244 188 209 C174 174 148 160 159 119"/><circle cx="189" cy="326" r="4"/><circle cx="159" cy="119" r="4"/></svg>
       <svg viewBox="0 0 390 360" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
         <defs><linearGradient id="journeySky" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#d9d5e8"/><stop offset=".55" stop-color="#ead7c3"/><stop offset="1" stop-color="#7f8e77"/></linearGradient><linearGradient id="journeyMountain" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#6d7190"/><stop offset="1" stop-color="#444c64"/></linearGradient></defs>
         <rect width="390" height="360" fill="url(#journeySky)"/>
@@ -110,6 +116,7 @@
   <section id="ideaPage" class="page idea-world" data-page-panel="idea" hidden>
     <header class="domain-heading idea-heading"><span class="domain-emblem" aria-hidden="true">✦</span><div><small>MY IDEA</small><h1>ひらめき、拾えてる？</h1><p>思いついたことを、すぐ残そう。</p></div></header>
     <article class="idea-capture primary-surface">
+      <span class="idea-tool-label" aria-hidden="true">ひらめきの道具箱</span>
       <div class="idea-rays" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
       <button id="focusIdea" class="idea-seed" type="button" aria-label="アイデアメモを入力"><span aria-hidden="true">♧</span><b>アイデアを残す</b><small>1タップで記録</small></button>
       <label for="ideaMemo">アイデアメモ</label>
@@ -122,7 +129,9 @@
 
   <section id="archivePage" class="page archive-world" data-page-panel="archive" hidden>
     <header class="domain-heading archive-heading"><span class="domain-emblem" aria-hidden="true">✥</span><div><small>MY WAY</small><h1>37歳の逆襲ロードマップ</h1><p>AI時代に、YOSと一緒に自分の人生を取り戻す。</p></div></header>
-    <section id="roadmap" class="roadmap" aria-label="37歳の逆襲ロードマップ">
+    <section id="roadmap" class="roadmap roadmap-journey" aria-label="37歳の逆襲ロードマップ">
+      <div class="roadmap-horizon" aria-hidden="true"><span>今ここ</span><b>今日の一歩が、42歳の景色を変える。</b></div>
+      <svg class="roadmap-route" viewBox="0 0 390 1440" preserveAspectRatio="none" aria-hidden="true"><path d="M73 128 C323 186 330 337 105 386 C-6 410 40 561 284 599 C401 618 350 786 92 808 C-7 817 16 996 281 1030 C401 1045 343 1228 92 1284"/></svg>
       <article class="roadmap-stage now"><small>今ここ｜2026 / 37歳</small><h2>やり直しのスタート</h2><ul><li>生活・お金・仕事・家族・自信の再建</li><li>AI時代の波に乗ると決めた</li><li>YOSと一緒に小さな準備を始める</li></ul></article>
       <article class="roadmap-stage foundation"><small>第1段階｜2026年後半</small><h2>土台を整える</h2><ul><li>生活と自立準備を整える</li><li>ココナラなどで小さく出す</li><li>プロフィールを整え、反応を見る</li><li>経験が価値になる形を探る</li></ul></article>
       <article class="roadmap-stage try"><small>第2段階｜2027年</small><h2>試す</h2><ul><li>複数案を小さく試す</li><li>困り事と反応の違いを見る</li><li>小さく受注し、実績の芽を作る</li></ul></article>

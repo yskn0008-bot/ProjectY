@@ -151,7 +151,7 @@
       const base=document.createElement('link');
       base.id='lifeHomeV1Styles';
       base.rel='stylesheet';
-      base.href='./home-v1.css?v=3';
+      base.href='./home-v1.css?v=4';
       document.head.appendChild(base);
     }
     if(!document.getElementById('lifeHomePriorityV1Styles')){
@@ -743,14 +743,14 @@
     if(preview){
       preview.replaceChildren();
       const items=(day.schedule||[]).slice().sort((a,b)=>new Date(a.start||0)-new Date(b.start||0)).slice(0,4);
-      if(!items.length){const empty=document.createElement('p');empty.className='empty-preview-v1';empty.textContent='今日の予定はありません';preview.appendChild(empty)}
+      if(!items.length){const empty=document.createElement('p');empty.className='empty-preview-v1';empty.textContent='今日の予定はありません\n空いた時間も、今日の余白。';preview.appendChild(empty)}
       items.forEach(item=>{const row=document.createElement('p'),time=document.createElement('time'),copy=document.createElement('span');time.textContent=fmtTime(item.start);copy.textContent=clean(item.title,80)||'予定';row.append(time,copy);preview.appendChild(row)});
     }
     const taskList=document.getElementById('homeTaskListV2');
     if(taskList){
       taskList.replaceChildren();
       const items=day.tasks.map((task,index)=>({task,index})).filter(item=>clean(item.task.text,70)).slice(0,3);
-      if(!items.length){const empty=document.createElement('p');empty.className='empty-preview-v1';empty.textContent='タスクはまだありません';taskList.appendChild(empty)}
+      if(!items.length){const empty=document.createElement('p');empty.className='empty-preview-v1';empty.textContent='タスクはまだありません\n＋から一つだけ残せます。';taskList.appendChild(empty)}
       items.forEach(({task,index})=>{const button=document.createElement('button');button.type='button';button.dataset.homeTaskIndex=String(index);button.className=task.done?'done':'';button.setAttribute('aria-pressed',String(Boolean(task.done)));const mark=document.createElement('span');mark.textContent=task.done?'✓':'';const copy=document.createElement('b');copy.textContent=clean(task.text,70);button.append(mark,copy);taskList.appendChild(button)});
     }
     set('homeSleepV1',day.checkin.sleep?`${day.checkin.sleep}h`:'—');
