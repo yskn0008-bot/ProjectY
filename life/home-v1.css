@@ -206,7 +206,7 @@ body{background-image:radial-gradient(circle at 8% 4%,rgba(246,208,134,.25),tran
 
 /* Visual Pixel Match: match the 390px MY LIFE planner proportions. */
 @media(max-width:520px){
-  .app{padding:calc(env(safe-area-inset-top) + 4px) 10px calc(env(safe-area-inset-bottom) + 57px)}
+  .app{padding:calc(env(safe-area-inset-top) + 4px) 10px calc(env(safe-area-inset-bottom) + 76px)}
   .top{height:39px;margin-bottom:2px}.brand h1{font-size:19px}.brand p{margin-top:2px;font-size:8px}
   .life-planner-v2{grid-template-rows:118px 270px 108px 84px 42px;align-content:start;gap:6px;min-height:0}
   .life-day-ribbon-v2{height:118px;border-radius:18px}.life-day-ribbon-v2>header{height:72px;padding:8px 10px 5px}.life-day-ribbon-v2 h2{font-size:17px}.life-day-ribbon-v2 p{font-size:7px}.life-day-ribbon-v2>header button{min-height:38px;padding:4px 7px}
