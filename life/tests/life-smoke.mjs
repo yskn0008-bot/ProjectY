@@ -44,7 +44,7 @@ await context.addInitScript(({ date, start, end }) => {
         }
       },
       activeGroup: 'wake',
-      moneySafety: { income: '248500', expense: '186300', currentBalance: '62200', requiredPayments: '固定費・変動費・投資', protectedMoney: '25000', freeMoney: '37200', nextPayment: '家賃', goal: '今月の支払いを確認する' }
+      moneySafety: { income: '310000', expense: '204800', currentBalance: '105200', requiredPayments: '家賃・光熱費', protectedMoney: '50000', freeMoney: '55200', nextPayment: '家賃', goal: '今月の支払いを確認する' }
     }));
   }
   if (!localStorage.getItem('hj-domain-journeys-v1')) localStorage.setItem('hj-domain-journeys-v1', JSON.stringify([{ id: 'life-rebuild', name: '人生の再建', stage: '挑戦者', theme: '価値を届ける力を高める' }]));
