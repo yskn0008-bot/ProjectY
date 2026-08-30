@@ -26,7 +26,7 @@ await context.addInitScript(({ date, start, end }) => {
       days: {
         [date]: {
           schedule: [
-            { id: 'existing-event', title: '朝のルーティン（既存の予定）', start, end, category: 'personal' },
+            { id: 'existing-event', title: '既存の予定', start, end, category: 'personal' },
             { id: 'visual-event-2', title: '買い物', start: `${date}T10:00:00+09:00`, end: `${date}T11:00:00+09:00`, category: 'personal' },
             { id: 'visual-event-3', title: 'ココナラ作業', start: `${date}T13:00:00+09:00`, end: `${date}T14:00:00+09:00`, category: 'work' },
             { id: 'visual-event-4', title: '読書タイム', start: `${date}T19:00:00+09:00`, end: `${date}T20:00:00+09:00`, category: 'personal' }
