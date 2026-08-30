@@ -1,7 +1,7 @@
 'use strict';
 
 const CACHE_PREFIX = 'yos-command-center-';
-const CACHE = `${CACHE_PREFIX}v10-visual-refinement`;
+const CACHE = `${CACHE_PREFIX}v11-visual-pixel-match`;
 const STATIC = [
   './',
   './index.html',

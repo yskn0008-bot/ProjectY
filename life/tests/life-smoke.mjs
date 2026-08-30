@@ -25,19 +25,29 @@ await context.addInitScript(({ date, start, end }) => {
     localStorage.setItem('yos-life-v1', JSON.stringify({
       days: {
         [date]: {
-          schedule: [{ id: 'existing-event', title: '既存の予定', start, end, category: 'personal' }],
-          tasks: [{ text: '既存タスク', done: false, category: 'personal' }],
-          routines: { wake: [0], before: [], home: [] },
+          schedule: [
+            { id: 'existing-event', title: '朝のルーティン（既存の予定）', start, end, category: 'personal' },
+            { id: 'visual-event-2', title: '買い物', start: `${date}T10:00:00+09:00`, end: `${date}T11:00:00+09:00`, category: 'personal' },
+            { id: 'visual-event-3', title: 'ココナラ作業', start: `${date}T13:00:00+09:00`, end: `${date}T14:00:00+09:00`, category: 'work' },
+            { id: 'visual-event-4', title: '読書タイム', start: `${date}T19:00:00+09:00`, end: `${date}T20:00:00+09:00`, category: 'personal' }
+          ],
+          tasks: [
+            { text: '既存タスク', done: false, category: 'personal' },
+            { text: 'サービス内容を見直す', done: false, category: 'work' },
+            { text: '提案文を作り直す', done: true, category: 'work' },
+            { text: '家の片付けをする', done: false, category: 'personal' }
+          ],
+          routines: { wake: [0, 1], before: [0], home: [0] },
           checkin: { sleep: '6.5', health: '3', mood: '2' },
           note: '明日の準備を小さく始める。',
           doneToday: '既存のできたこと'
         }
       },
       activeGroup: 'wake',
-      moneySafety: { income: '310000', expense: '204800', currentBalance: '105200', requiredPayments: '家賃・光熱費', protectedMoney: '50000', freeMoney: '55200', nextPayment: '家賃', goal: '今月の支払いを確認する' }
+      moneySafety: { income: '248500', expense: '186300', currentBalance: '62200', requiredPayments: '固定費・変動費・投資', protectedMoney: '25000', freeMoney: '37200', nextPayment: '家賃', goal: '今月の支払いを確認する' }
     }));
   }
-  if (!localStorage.getItem('hj-domain-journeys-v1')) localStorage.setItem('hj-domain-journeys-v1', JSON.stringify([{ id: 'life-rebuild', name: '人生の再建', stage: '冒険への誘い', theme: '生活の土台を整える' }]));
+  if (!localStorage.getItem('hj-domain-journeys-v1')) localStorage.setItem('hj-domain-journeys-v1', JSON.stringify([{ id: 'life-rebuild', name: '人生の再建', stage: '挑戦者', theme: '価値を届ける力を高める' }]));
   if (!localStorage.getItem('hj-user-profile-v1')) localStorage.setItem('hj-user-profile-v1', JSON.stringify({ focusDomain: 'life-rebuild' }));
   if (!localStorage.getItem('hj-daily-scenes-v1')) localStorage.setItem('hj-daily-scenes-v1', JSON.stringify([{ id: 'scene-1', domainId: 'life-rebuild', occurredAt: new Date().toISOString(), rawInput: '今日の予定をひとつ終えた。', next: '明日の準備をする。' }]));
   if (!localStorage.getItem('yos-my-way-ideas-v1')) localStorage.setItem('yos-my-way-ideas-v1', JSON.stringify({ text: '経験を暮らしの道具にする。' }));
@@ -169,7 +179,8 @@ try {
     document.querySelector('.bottom-nav').style.visibility='hidden';
     document.querySelector('.archive-button').style.visibility='hidden';
   });
-  await yosPage.screenshot({ path: `test-results/yos-roadmap-390-${browserName}.png`, fullPage: true });
+  await yosPage.screenshot({ path: `test-results/yos-roadmap-390-${browserName}.png`, fullPage: false });
+  await yosPage.locator('.roadmap-track').screenshot({ path: `test-results/yos-roadmap-panorama-${browserName}.png` });
   await yosPage.evaluate(() => {
     document.querySelector('.bottom-nav').style.visibility='';
     document.querySelector('.archive-button').style.visibility='';
@@ -310,7 +321,7 @@ try {
   const cacheStatus = await page.evaluate(async () => {
     const paths = [
       './', './index.html', './manifest.webmanifest', './yos-suite-v3.js?v=8',
-      './home-v1.js?v=7', './home-v1.css?v=4', './home-priority-v1.css?v=4'
+      './home-v1.js?v=7', './home-v1.css?v=5', './home-priority-v1.css?v=4'
     ];
     const entries = await Promise.all(paths.map(async path => [
       path,

@@ -151,7 +151,7 @@
       const base=document.createElement('link');
       base.id='lifeHomeV1Styles';
       base.rel='stylesheet';
-      base.href='./home-v1.css?v=4';
+      base.href='./home-v1.css?v=5';
       document.head.appendChild(base);
     }
     if(!document.getElementById('lifeHomePriorityV1Styles')){

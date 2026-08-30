@@ -203,3 +203,19 @@ body{background-image:radial-gradient(circle at 8% 4%,rgba(246,208,134,.25),tran
 #lifeBottomNavV1{border-top:1px solid rgba(75,69,50,.15);background:rgba(247,240,223,.95);backdrop-filter:blur(15px)}#lifeBottomNavV1 a,#lifeBottomNavV1 .nav{min-height:50px}#lifeBottomNavV1 .nav.active{background:rgba(82,125,98,.14);color:#527d62}
 @media(max-height:700px){.life-planner-v2{grid-template-rows:auto auto auto auto auto;gap:6px;min-height:0}.life-day-ribbon-v2>header{padding-top:8px;padding-bottom:5px}.life-week-v2 span{min-height:34px}.life-paper-grid-v2{min-height:170px}.life-paper-grid-v2 article{padding-top:8px;padding-bottom:8px}.life-rhythm-v2{padding-top:8px;padding-bottom:8px}.life-memo-v2{min-height:68px}.life-yos-companion-v2{min-height:42px}}
 @media(max-width:370px){.app{padding-right:10px;padding-left:10px}.life-paper-grid-v2{grid-template-columns:1fr 1.08fr}.life-paper-grid-v2 article{padding-right:8px;padding-left:8px}.life-habit-groups-v2{gap:4px}.life-habit-groups-v2>span{padding:5px 3px}}
+
+/* Visual Pixel Match: match the 390px MY LIFE planner proportions. */
+@media(max-width:520px){
+  .app{padding:calc(env(safe-area-inset-top) + 4px) 10px calc(env(safe-area-inset-bottom) + 57px)}
+  .top{height:39px;margin-bottom:2px}.brand h1{font-size:19px}.brand p{margin-top:2px;font-size:8px}
+  .life-planner-v2{grid-template-rows:118px 270px 108px 84px 42px;align-content:start;gap:6px;min-height:0}
+  .life-day-ribbon-v2{height:118px;border-radius:18px}.life-day-ribbon-v2>header{height:72px;padding:8px 10px 5px}.life-day-ribbon-v2 h2{font-size:17px}.life-day-ribbon-v2 p{font-size:7px}.life-day-ribbon-v2>header button{min-height:38px;padding:4px 7px}
+  .life-week-v2{height:46px;padding:3px 7px 6px}.life-week-v2 span{min-height:36px}.life-week-v2 b{font-size:10px}
+  .life-paper-grid-v2{height:270px;min-height:270px;border-radius:17px}.life-paper-grid-v2 article{padding:9px 8px;background-position:0 43px;background-image:repeating-linear-gradient(to bottom,transparent 0 28px,rgba(91,91,70,.055) 28px 29px)}.life-paper-grid-v2 header{min-height:25px}.life-paper-grid-v2 h3{font-size:11px}.life-paper-grid-v2 header button{min-width:25px;min-height:25px}
+  #homeSchedulePreviewV1 p{grid-template-columns:37px minmax(0,1fr);gap:4px;padding:6px 0;font-size:8px}#homeTaskListV2 button{min-height:31px}#homeTaskListV2 button>b{font-size:8px}
+  .empty-preview-v1{min-height:184px}
+  .life-rhythm-v2{height:108px;padding:9px 10px;border-radius:16px}.life-rhythm-v2 h3{font-size:11px}.life-habit-groups-v2{gap:5px;margin-top:7px}.life-habit-groups-v2>span{padding:5px}.life-rhythm-v2>i{margin-top:7px}
+  .life-memo-v2{height:84px;min-height:84px;grid-template-columns:1fr 82px;border-radius:16px}.life-memo-copy-v2{padding:9px 4px 9px 10px}.life-plant-v2 svg{width:76px;height:68px}
+  .life-yos-companion-v2{height:42px;min-height:42px;grid-template-columns:30px 1fr 11px;gap:7px;padding:5px 8px;border-radius:14px}.life-yos-face-v2{width:29px;height:27px;border-radius:9px;font-size:9px}.life-yos-companion-v2 b{font-size:8px}.life-yos-companion-v2 small{font-size:6px}
+  #lifeBottomNavV1{padding:3px 4px calc(env(safe-area-inset-bottom) + 3px)}#lifeBottomNavV1 a,#lifeBottomNavV1 .nav{min-height:47px;border-radius:11px}#lifeBottomNavV1 a span,#lifeBottomNavV1 .nav span{font-size:15px}#lifeBottomNavV1 a b,#lifeBottomNavV1 .nav b{font-size:7px}
+}

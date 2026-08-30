@@ -57,8 +57,8 @@ assert.match(source, /key\.startsWith\(LIFE_CACHE_PREFIX\)/, 'cleanup must be re
 assert.match(source, /home-priority-v1\.css\?v=4/, 'priority home styles must be available offline');
 assert.match(source, /yos-suite-v3\.js\?v=8/, 'current suite script must be cached with its requested URL');
 assert.match(source, /home-v1\.js\?v=7/, 'current home script must be cached with its requested URL');
-assert.match(source, /home-v1\.css\?v=4/, 'current home styles must be cached with its requested URL');
-assert.match(source, /yos-life-home-v13-visual-refinement/, 'Visual refinement cache generation must be active');
+assert.match(source, /home-v1\.css\?v=5/, 'current home styles must be cached with its requested URL');
+assert.match(source, /yos-life-home-v14-visual-pixel-match/, 'Visual Pixel Match cache generation must be active');
 assert.doesNotMatch(source, /keys\.filter\(key=>key!==CACHE\)/, 'global cache deletion pattern must not return');
 
 console.log('Life service worker cache scope: PASS');
