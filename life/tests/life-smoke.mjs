@@ -180,8 +180,16 @@ try {
     document.querySelector('.archive-button').style.visibility='hidden';
   });
   await yosPage.screenshot({ path: `test-results/yos-roadmap-390-${browserName}.png`, fullPage: false });
+  await yosPage.evaluate(() => {
+    document.querySelector('.app').style.maxWidth = 'none';
+    document.querySelector('.app').style.width = '1490px';
+    document.querySelector('.roadmap').style.overflow = 'visible';
+  });
   await yosPage.locator('.roadmap-track').screenshot({ path: `test-results/yos-roadmap-panorama-${browserName}.png` });
   await yosPage.evaluate(() => {
+    document.querySelector('.app').style.maxWidth='';
+    document.querySelector('.app').style.width='';
+    document.querySelector('.roadmap').style.overflow='';
     document.querySelector('.bottom-nav').style.visibility='';
     document.querySelector('.archive-button').style.visibility='';
     window.scrollTo(0,0);
@@ -321,7 +329,7 @@ try {
   const cacheStatus = await page.evaluate(async () => {
     const paths = [
       './', './index.html', './manifest.webmanifest', './yos-suite-v3.js?v=8',
-      './home-v1.js?v=7', './home-v1.css?v=5', './home-priority-v1.css?v=4'
+      './home-v1.js?v=7', './home-v1.css?v=6', './home-priority-v1.css?v=4'
     ];
     const entries = await Promise.all(paths.map(async path => [
       path,
