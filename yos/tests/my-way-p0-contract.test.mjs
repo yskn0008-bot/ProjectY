@@ -29,7 +29,7 @@ test('Visual SSOT uses distinct compositions and the complete roadmap',()=>{
   for(const label of ['37歳の逆襲ロードマップ','2026年後半','2027年','2028年','2029年','2030年','2031年 / 42歳','土台を整える','試す','当てる','育てる','自立する','取り戻す']) assert.ok(html.includes(label),label);
   assert.match(css,/\.home-scene\{/);assert.match(css,/\.money-overview\{/);assert.match(css,/\.journey-scene\{/);assert.match(css,/\.idea-capture\{/);
   assert.match(html,/class="roadmap-track"/,'roadmap must use one horizontal journey track');
-  assert.match(css,/grid-template-columns:repeat\(7,196px\)/,'roadmap stages must flow horizontally at 390px');
+  assert.match(css,/grid-template-columns:360px repeat\(6,178px\)/,'roadmap stages must flow horizontally with a wider current stage at 390px');
 });
 test('existing Life and HJ data are read safely without migrations',()=>{
   for(const key of ['yos-life-v1','hj-domain-journeys-v1','hj-user-profile-v1','hj-daily-scenes-v1']) assert.ok(js.includes(key),key);
