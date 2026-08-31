@@ -1,5 +1,5 @@
 'use strict';
-const CACHE='yos-life-home-v15-visual-pixel-match-density';
+const CACHE='yos-life-home-v16-visual-pixel-match-layout';
 const LIFE_CACHE_PREFIX='yos-life-';
 const STATIC=[
   './',
@@ -7,7 +7,7 @@ const STATIC=[
   './manifest.webmanifest',
   './yos-suite-v3.js?v=8',
   './home-v1.js?v=7',
-  './home-v1.css?v=6',
+  './home-v1.css?v=7',
   './home-priority-v1.css?v=4'
 ];
 async function inject(response){

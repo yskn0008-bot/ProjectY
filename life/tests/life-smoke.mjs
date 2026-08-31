@@ -329,7 +329,7 @@ try {
   const cacheStatus = await page.evaluate(async () => {
     const paths = [
       './', './index.html', './manifest.webmanifest', './yos-suite-v3.js?v=8',
-      './home-v1.js?v=7', './home-v1.css?v=6', './home-priority-v1.css?v=4'
+      './home-v1.js?v=7', './home-v1.css?v=7', './home-priority-v1.css?v=4'
     ];
     const entries = await Promise.all(paths.map(async path => [
       path,
