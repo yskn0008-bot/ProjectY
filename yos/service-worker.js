@@ -1,7 +1,7 @@
 'use strict';
 
 const CACHE_PREFIX = 'yos-command-center-';
-const CACHE = `${CACHE_PREFIX}v15-visual-pixel-match-roadmap-footer`;
+const CACHE = `${CACHE_PREFIX}v16-visual-pixel-match-roadmap-title`;
 const STATIC = [
   './',
   './index.html',
