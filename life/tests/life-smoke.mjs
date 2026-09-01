@@ -8,8 +8,9 @@ if (!engine) throw new Error(`Unsupported browser: ${browserName}`);
 
 const baseURL = process.env.LIFE_BASE_URL || 'http://127.0.0.1:4173/life/';
 const lifeDate = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Asia/Tokyo' }).format(new Date());
-const nextHour = new Date(Date.now() + 60 * 60 * 1000).toISOString();
-const followingHour = new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString();
+const fixedNow = `${lifeDate}T08:00:00+09:00`;
+const nextHour = `${lifeDate}T09:00:00+09:00`;
+const followingHour = `${lifeDate}T09:30:00+09:00`;
 
 const browser = await engine.launch();
 const context = await browser.newContext({
@@ -20,7 +21,12 @@ const context = await browser.newContext({
   locale: 'ja-JP',
   timezoneId: 'Asia/Tokyo'
 });
-await context.addInitScript(({ date, start, end }) => {
+await context.addInitScript(({ date, start, end, now }) => {
+  const NativeDate=Date,fixedTime=NativeDate.parse(now);
+  globalThis.Date=class extends NativeDate{
+    constructor(...args){super(...(args.length?args:[fixedTime]))}
+    static now(){return fixedTime}
+  };
   if (!localStorage.getItem('yos-life-v1')) {
     localStorage.setItem('yos-life-v1', JSON.stringify({
       days: {
@@ -51,7 +57,7 @@ await context.addInitScript(({ date, start, end }) => {
   if (!localStorage.getItem('hj-user-profile-v1')) localStorage.setItem('hj-user-profile-v1', JSON.stringify({ focusDomain: 'life-rebuild' }));
   if (!localStorage.getItem('hj-daily-scenes-v1')) localStorage.setItem('hj-daily-scenes-v1', JSON.stringify([{ id: 'scene-1', domainId: 'life-rebuild', occurredAt: new Date().toISOString(), rawInput: '今日の予定をひとつ終えた。', next: '明日の準備をする。' }]));
   if (!localStorage.getItem('yos-my-way-ideas-v1')) localStorage.setItem('yos-my-way-ideas-v1', JSON.stringify({ text: '経験を暮らしの道具にする。' }));
-}, { date: lifeDate, start: nextHour, end: followingHour });
+}, { date: lifeDate, start: nextHour, end: followingHour, now: fixedNow });
 
 const page = await context.newPage();
 const pageErrors = [];
