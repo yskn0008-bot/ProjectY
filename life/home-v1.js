@@ -32,7 +32,7 @@
     {label:'Home',icon:'⌂',href:'../yos/'},
     {label:'Life',icon:'♡',page:'home'},
     {label:'Money',icon:'¥',href:'../yos/#money'},
-    {label:"Hero's Journey",icon:'△',href:'../yos/hj/'},
+    {label:'Hero’s Journey',icon:'△',href:'../yos/hj/'},
     {label:'Idea',icon:'✦',href:'../yos/#idea'}
   ];
   let activePage='home';

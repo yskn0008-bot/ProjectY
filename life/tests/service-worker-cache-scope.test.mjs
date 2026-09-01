@@ -58,7 +58,7 @@ assert.match(source, /home-priority-v1\.css\?v=4/, 'priority home styles must be
 assert.match(source, /yos-suite-v3\.js\?v=8/, 'current suite script must be cached with its requested URL');
 assert.match(source, /home-v1\.js\?v=7/, 'current home script must be cached with its requested URL');
 assert.match(source, /home-v1\.css\?v=7/, 'current home styles must be cached with its requested URL');
-assert.match(source, /yos-life-home-v16-visual-pixel-match-layout/, 'Visual Pixel Match layout cache generation must be active');
+assert.match(source, /yos-life-home-v17-shared-domain-nav/, 'shared domain navigation cache generation must be active');
 assert.doesNotMatch(source, /keys\.filter\(key=>key!==CACHE\)/, 'global cache deletion pattern must not return');
 
 console.log('Life service worker cache scope: PASS');

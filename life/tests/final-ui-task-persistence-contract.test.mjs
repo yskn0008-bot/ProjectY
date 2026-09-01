@@ -16,7 +16,7 @@ test('final Life identity and today-first controls are present',()=>{
 });
 
 test('shared navigation exposes all five domains while Life tools remain',()=>{
-  for(const label of ['Home','Life','Money',"Hero's Journey",'Idea'])assert.ok(js.includes(label),label);
+  for(const label of ['Home','Life','Money','Hero’s Journey','Idea'])assert.ok(js.includes(label),label);
   for(const label of ['ホーム','予定','記録','改善'])assert.ok(js.includes(`label:'${label}'`),label);
   assert.match(js,/class="life-nav-compat-v1" data-page="record"/);
   assert.match(js,/if\(button\)activatePage\(button\.dataset\.page,true\)/);
@@ -24,6 +24,13 @@ test('shared navigation exposes all five domains while Life tools remain',()=>{
   assert.match(css,/#lifeBottomNavV1 \.life-nav-compat-v1\{position:absolute;/);
   const domainNav=js.match(/const DOMAIN_NAV=\[(.*?)\];/s)?.[1] || '';
   assert.equal((domainNav.match(/\{label:/g) || []).length,5,'visible domain navigation must remain five items');
+  for(const item of [
+    "{label:'Home',icon:'⌂'",
+    "{label:'Life',icon:'♡'",
+    "{label:'Money',icon:'¥'",
+    "{label:'Hero’s Journey',icon:'△'",
+    "{label:'Idea',icon:'✦'"
+  ]) assert.ok(domainNav.includes(item),item);
 });
 
 test('existing three-task persistence remains non-destructive',()=>{

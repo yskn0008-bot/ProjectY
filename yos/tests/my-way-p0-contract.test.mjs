@@ -10,6 +10,15 @@ test('P0 navigation and MY WAY identity are present',()=>{
   for(const label of ['Home','Life','Money','Hero’s Journey','Idea','過去の振り返り','記録 / ログ','目標 / 未来','過去の資産','Taxi','設定','ProjectY','YOS改善','ヘルプ']) assert.ok(html.includes(label),label);
   for(const label of ['今ここ','行き先','ここまで','人生ルート','次の一歩','現在状態','理由 / 背景','判断 / 行動']) assert.ok(html.includes(label),label);
 });
+test('shared five-domain navigation uses the approved icons, labels, and selected-state contract',()=>{
+  const nav=html.match(/<nav class="bottom-nav"[\s\S]*?<\/nav>/)?.[0]||'';
+  for(const [icon,label] of [
+    ['⌂','Home'],['♡','Life'],['¥','Money'],['△','Hero’s Journey'],['✦','Idea']
+  ]) assert.match(nav,new RegExp(`<span[^>]*>${icon}<\\/span><b>${label}<\\/b>`),label);
+  assert.match(nav,/class="active home-nav"/);
+  assert.match(js,/classList\.toggle\('active',item\.dataset\.page===name\)/);
+  assert.match(css,/\.bottom-nav \.active\{/);
+});
 test('second page has an explicit one-tap UI entry',()=>{
   assert.match(html,/<button[^>]+data-page="archive"[^>]+aria-label="2ページ目"/);
   assert.match(html,/<section id="archivePage"/);
@@ -30,6 +39,7 @@ test('Visual SSOT uses distinct compositions and the complete roadmap',()=>{
   assert.match(css,/\.home-scene\{/);assert.match(css,/\.money-overview\{/);assert.match(css,/\.journey-scene\{/);assert.match(css,/\.idea-capture\{/);
   assert.match(html,/class="roadmap-track"/,'roadmap must use one horizontal journey track');
   assert.match(css,/grid-template-columns:360px repeat\(6,178px\)/,'roadmap stages must flow horizontally with a wider current stage at 390px');
+  assert.match(css,/\.roadmap-stage ul\{[^}]*font-size:12px/,'roadmap body text must remain readable on an iPhone-width viewport');
 });
 test('existing Life and HJ data are read safely without migrations',()=>{
   for(const key of ['yos-life-v1','hj-domain-journeys-v1','hj-user-profile-v1','hj-daily-scenes-v1']) assert.ok(js.includes(key),key);
