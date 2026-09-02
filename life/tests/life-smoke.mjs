@@ -143,6 +143,8 @@ try {
       const activePanel = document.querySelector(panel);
       const content = activePanel.querySelector(final).getBoundingClientRect();
       const primary = activePanel.querySelector('.primary-surface')?.getBoundingClientRect();
+      const heading = activePanel.querySelector('.domain-heading')?.getBoundingClientRect();
+      const activeNav = document.querySelector('.bottom-nav .active')?.getBoundingClientRect();
       return {
         width: innerWidth,
         height: innerHeight,
@@ -152,6 +154,10 @@ try {
         topbarTop: topbar.top,
         contentBottom: content.bottom,
         primaryHeight: primary?.height || 0,
+        headingLeft: heading?.left ?? 0,
+        headingRight: heading?.right ?? 0,
+        activeNavLeft: activeNav?.left ?? 0,
+        activeNavRight: activeNav?.right ?? 0,
         scrollWidth: document.documentElement.scrollWidth,
         clientWidth: document.documentElement.clientWidth,
         text: activePanel.innerText
@@ -164,6 +170,8 @@ try {
     assert.ok(visual.navHeight >= 48 && visual.navHeight <= 72, `unexpected ${domain} nav height: ${visual.navHeight}`);
     assert.ok(visual.contentBottom >= visual.height * .62, `${domain} leaves too much unused lower space: ${visual.contentBottom}/${visual.height}`);
     assert.ok(visual.primaryHeight >= 240, `${domain} primary visual is not dominant: ${visual.primaryHeight}`);
+    assert.ok(visual.headingLeft >= 0 && visual.headingRight <= visual.width, `${domain} heading is horizontally clipped: ${visual.headingLeft}/${visual.headingRight}`);
+    assert.ok(visual.activeNavLeft >= 0 && visual.activeNavRight <= visual.width, `${domain} active nav is horizontally clipped: ${visual.activeNavLeft}/${visual.activeNavRight}`);
     for (const label of labels) assert.match(visual.text, new RegExp(label), `${domain} is missing ${label}`);
     await yosPage.screenshot({ path: `test-results/${screenshotName}-390-${browserName}.png`, fullPage: false });
     return visual;

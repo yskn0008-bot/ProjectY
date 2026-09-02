@@ -1,7 +1,7 @@
 'use strict';
 
 const CACHE_PREFIX = 'yos-command-center-';
-const CACHE = `${CACHE_PREFIX}v17-shared-nav-roadmap-legibility`;
+const CACHE = `${CACHE_PREFIX}v18-final-visual-readability`;
 const STATIC = [
   './',
   './index.html',

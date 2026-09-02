@@ -39,7 +39,9 @@ test('Visual SSOT uses distinct compositions and the complete roadmap',()=>{
   assert.match(css,/\.home-scene\{/);assert.match(css,/\.money-overview\{/);assert.match(css,/\.journey-scene\{/);assert.match(css,/\.idea-capture\{/);
   assert.match(html,/class="roadmap-track"/,'roadmap must use one horizontal journey track');
   assert.match(css,/grid-template-columns:360px repeat\(6,178px\)/,'roadmap stages must flow horizontally with a wider current stage at 390px');
-  assert.match(css,/\.roadmap-stage ul\{[^}]*font-size:12px/,'roadmap body text must remain readable on an iPhone-width viewport');
+  assert.match(css,/\.roadmap-stage ul\{[^}]*color:#2d3e35[^}]*font-size:13px[^}]*font-weight:650/,'roadmap body text must remain readable on an iPhone-width viewport');
+  for(const label of ['横にスワイプして、2031年へ','価値観','相棒','価値の式','自分の経験 × 他人の問題解決 ＝ 価値']) assert.ok(html.includes(label),label);
+  assert.doesNotMatch(css,/\.roadmap-track:after\{content:/,'roadmap guidance must not be compressed into one horizontal pseudo-element');
 });
 test('existing Life and HJ data are read safely without migrations',()=>{
   for(const key of ['yos-life-v1','hj-domain-journeys-v1','hj-user-profile-v1','hj-daily-scenes-v1']) assert.ok(js.includes(key),key);
