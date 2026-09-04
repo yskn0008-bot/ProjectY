@@ -86,12 +86,12 @@ function parseDecisionResponse(value, expectedHead) {
   if (value.targetHead !== expectedHead) throw new Error('stale YOS decision head');
   const allowedAction = value.allowedAction === null ? null : String(value.allowedAction || '');
   if (allowedAction !== null && !SAFE_ACTIONS.has(allowedAction)) throw new Error('unsafe YOS action');
-  if ((value.decision === 'HOLD' || value.decision === 'NEEDS_YOUSUKE') && allowedAction !== null) {
-    throw new Error('stopping decision cannot execute an action');
+  const stopping = value.decision === 'HOLD' || value.decision === 'NEEDS_YOUSUKE';
+  if (stopping && allowedAction !== null) throw new Error('stopping decision cannot execute an action');
+  if (!Array.isArray(value.evidenceSourceIds) || !value.evidenceSourceIds.every((id) => typeof id === 'string' && id.trim())) {
+    throw new Error('invalid YOS decision evidence');
   }
-  if (!Array.isArray(value.evidenceSourceIds) || value.evidenceSourceIds.length === 0 || !value.evidenceSourceIds.every((id) => typeof id === 'string' && id.trim())) {
-    throw new Error('YOS decision requires grounded evidence');
-  }
+  if (!stopping && value.evidenceSourceIds.length === 0) throw new Error('continuing YOS decision requires grounded evidence');
   if (!Array.isArray(value.unknowns) || !value.unknowns.every((item) => typeof item === 'string')) throw new Error('invalid unknowns');
   return {
     decision: value.decision,
@@ -162,6 +162,9 @@ async function performAllowedAction(api, pr, action, decision, head) {
 }
 
 function decisionComment(fingerprint, request, decision, actionResult) {
+  const evidence = decision.evidenceSourceIds.length
+    ? decision.evidenceSourceIds.map((id) => `\`${id}\``).join(', ')
+    : 'NONE (fail-closed stop; grounded evidence unavailable)';
   return [
     `<!-- ${DECISION_MARKER}${fingerprint} -->`,
     '## Issue #232｜YOS判断',
@@ -170,7 +173,7 @@ function decisionComment(fingerprint, request, decision, actionResult) {
     `- decision: \`${decision.decision}\``,
     `- allowed action: \`${decision.allowedAction || 'NONE'}\``,
     `- action result: \`${actionResult}\``,
-    `- evidence: ${decision.evidenceSourceIds.map((id) => `\`${id}\``).join(', ')}`,
+    `- evidence: ${evidence}`,
     `- unknown count: ${decision.unknowns.length}`,
     '- raw prompt / raw model response / token / secretはGitHubへ保存していない。',
     '- merge・本番公開・credential変更・破壊的変更・実機確認代替は自動実行しない。',
