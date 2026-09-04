@@ -36,14 +36,30 @@
       ]
     },
     "sourceRecordId": {
-      "type": ["string", "null"]
+      "oneOf": [
+        {
+          "type": "string",
+          "minLength": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
     },
     "capturedAt": {
       "type": "string",
       "minLength": 1
     },
     "occurredAt": {
-      "type": ["string", "null"]
+      "oneOf": [
+        {
+          "type": "string",
+          "minLength": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
     },
     "raw": {
       "oneOf": [
