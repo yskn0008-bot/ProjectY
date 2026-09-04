@@ -71,7 +71,7 @@ test('decision token boundary cannot express merge, deploy, credential, or destr
   assert.throws(() => parseDecisionToken('CONTINUE|DEPLOY'));
 });
 
-test('YOS answer maps only grounded safe decisions and fails closed on core-source errors', () => {
+test('YOS answer maps grounded safe decisions and records no fabricated evidence on source failure', () => {
   const answer = {
     answer: '安全な既存工程を継続できる',
     facts: [{text: 'Issue #232 applies', sourceIds: ['00_law', '04_system_master']}],
@@ -86,7 +86,13 @@ test('YOS answer maps only grounded safe decisions and fails closed on core-sour
   assert.equal(mapped.allowedAction, 'REQUEST_STATUS');
   assert.deepEqual(mapped.evidenceSourceIds, ['00_law', '04_system_master']);
 
+  const noFacts = mapYosAnswer({...answer, facts: []}, 'b'.repeat(40));
+  assert.equal(noFacts.decision, 'HOLD');
+  assert.equal(noFacts.allowedAction, null);
+  assert.deepEqual(noFacts.evidenceSourceIds, []);
+
   const blocked = mapYosAnswer({...answer, safety: {level: 'attention', notes: ['00_law:情報源取得に失敗']}}, 'b'.repeat(40));
   assert.equal(blocked.decision, 'HOLD');
   assert.equal(blocked.allowedAction, null);
+  assert.deepEqual(blocked.evidenceSourceIds, ['00_law', '04_system_master']);
 });
