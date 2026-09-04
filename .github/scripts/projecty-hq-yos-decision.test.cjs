@@ -27,7 +27,7 @@ test('decision fingerprint is stable and duplicate marker suppresses a second re
   assert.equal(hasDecision([], fingerprint), false);
 });
 
-test('decision response rejects stale head, unsafe action, and ungrounded evidence', () => {
+test('continuing decision requires real evidence while fail-closed stops may record none', () => {
   const valid = parseDecisionResponse({
     decision: 'CONTINUE',
     allowedAction: 'REQUEST_STATUS',
@@ -39,7 +39,25 @@ test('decision response rejects stale head, unsafe action, and ungrounded eviden
   assert.throws(() => parseDecisionResponse({...valid, targetHead: 'b'.repeat(40)}, HEAD));
   assert.throws(() => parseDecisionResponse({...valid, allowedAction: 'MERGE'}, HEAD));
   assert.throws(() => parseDecisionResponse({...valid, evidenceSourceIds: []}, HEAD));
-  assert.throws(() => parseDecisionResponse({...valid, decision: 'NEEDS_YOUSUKE'}, HEAD));
+
+  const hold = parseDecisionResponse({
+    decision: 'HOLD',
+    allowedAction: null,
+    targetHead: HEAD,
+    evidenceSourceIds: [],
+    unknowns: ['grounded facts unavailable'],
+  }, HEAD);
+  assert.equal(hold.allowedAction, null);
+  assert.deepEqual(hold.evidenceSourceIds, []);
+
+  const human = parseDecisionResponse({
+    decision: 'NEEDS_YOUSUKE',
+    allowedAction: null,
+    targetHead: HEAD,
+    evidenceSourceIds: [],
+    unknowns: ['human decision required'],
+  }, HEAD);
+  assert.equal(human.decision, 'NEEDS_YOUSUKE');
 });
 
 test('OIDC token request uses Actions runtime and never needs a long-lived secret', async () => {
