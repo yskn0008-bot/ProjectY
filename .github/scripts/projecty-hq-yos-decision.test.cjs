@@ -4,6 +4,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const {
   DECISION_MARKER,
+  boundedScope,
   decisionFingerprint,
   hasDecision,
   inferFailureClass,
@@ -18,6 +19,13 @@ test('target parser accepts only PR target keys', () => {
   assert.equal(targetPrNumber('PR#232'), 232);
   assert.throws(() => targetPrNumber('issue#232'));
   assert.throws(() => targetPrNumber('PR#0'));
+});
+
+test('scope is complete or rejected instead of silently truncating changed files', () => {
+  const hundred = Array.from({length: 100}, (_, index) => ({filename: `file-${index}.txt`}));
+  const hundredOne = [...hundred, {filename: 'file-100.txt'}];
+  assert.equal(boundedScope(hundred).length, 100);
+  assert.equal(boundedScope(hundredOne), null);
 });
 
 test('decision fingerprint is stable and duplicate marker suppresses a second request', () => {
@@ -49,6 +57,7 @@ test('continuing decision requires reason and real evidence while fail-closed st
   assert.throws(() => parseDecisionResponse({...valid, targetHead: 'b'.repeat(40)}, HEAD));
   assert.throws(() => parseDecisionResponse({...valid, reason: ''}, HEAD));
   assert.throws(() => parseDecisionResponse({...valid, allowedAction: 'MERGE'}, HEAD));
+  assert.throws(() => parseDecisionResponse({...valid, allowedAction: 'APPROVE_QA'}, HEAD));
   assert.throws(() => parseDecisionResponse({...valid, evidenceSourceIds: []}, HEAD));
 
   const hold = parseDecisionResponse({
