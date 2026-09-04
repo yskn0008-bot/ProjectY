@@ -61,14 +61,16 @@ test('decision request rejects unsafe action values and stale shapes', () => {
   });
   assert.equal(valid.target, 'PR#12');
   assert.throws(() => parseDecisionRequest({...valid, candidateActions: ['MERGE']}));
+  assert.throws(() => parseDecisionRequest({...valid, candidateActions: ['APPROVE_QA']}));
   assert.throws(() => parseDecisionRequest({...valid, extra: 'x'}));
 });
 
-test('decision token boundary cannot express merge, deploy, credential, or destructive actions', () => {
+test('decision token boundary cannot express merge, deploy, credential, or unsupported approval actions', () => {
   assert.deepEqual(parseDecisionToken('CONTINUE|REQUEST_STATUS'), {decision: 'CONTINUE', allowedAction: 'REQUEST_STATUS'});
   assert.deepEqual(parseDecisionToken('NEEDS_YOUSUKE|NONE'), {decision: 'NEEDS_YOUSUKE', allowedAction: null});
   assert.throws(() => parseDecisionToken('CONTINUE|MERGE'));
   assert.throws(() => parseDecisionToken('CONTINUE|DEPLOY'));
+  assert.throws(() => parseDecisionToken('CONTINUE|APPROVE_QA'));
 });
 
 test('YOS answer maps grounded safe decisions and records no fabricated evidence on source failure', () => {
