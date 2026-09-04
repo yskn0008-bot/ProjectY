@@ -8,7 +8,7 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "check:api": "node --check api/yos/chat.mjs && node --check api/yos/health.mjs && node --check api/yos/public-config.mjs && node --check api/yos/nav-model.mjs && node --check api/yos/taxi-event.mjs && node --check api/yos/taxi-health.mjs",
+    "check:api": "node --check api/yos/chat.mjs && node --check api/yos/health.mjs && node --check api/yos/public-config.mjs && node --check api/yos/nav-model.mjs && node --check api/yos/taxi-event.mjs && node --check api/yos/taxi-health.mjs && node --check api/yos/projecty-decision.mjs",
     "test": "npm run build && node --test tests/*.test.mjs && npm run check:api",
     "check": "npm run test",
     "preflight": "npm run build && node scripts/preflight.mjs",
