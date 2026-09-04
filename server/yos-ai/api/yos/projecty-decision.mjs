@@ -135,11 +135,11 @@ function coreSourceUnavailable(answer) {
 
 export function mapYosAnswer(answer, targetHead) {
   if (!answer || !Array.isArray(answer.facts) || answer.facts.length === 0) {
-    return {decision: 'HOLD', reason: '根拠付き事実を取得できないため自動判断を停止', allowedAction: null, targetHead, evidenceSourceIds: ['00_law'], unknowns: ['grounded facts unavailable']};
+    return {decision: 'HOLD', reason: '根拠付き事実を取得できないため自動判断を停止', allowedAction: null, targetHead, evidenceSourceIds: [], unknowns: ['grounded facts unavailable']};
   }
   const evidenceSourceIds = [...new Set(answer.facts.flatMap((fact) => fact.sourceIds || []))].slice(0, 12);
   if (coreSourceUnavailable(answer)) {
-    return {decision: 'HOLD', reason: '必要なcore sourceを取得できないため自動判断を停止', allowedAction: null, targetHead, evidenceSourceIds: evidenceSourceIds.length ? evidenceSourceIds : ['00_law'], unknowns: ['core source unavailable']};
+    return {decision: 'HOLD', reason: '必要なcore sourceを取得できないため自動判断を停止', allowedAction: null, targetHead, evidenceSourceIds, unknowns: ['core source unavailable']};
   }
   const parsed = parseDecisionToken(answer.nextAction);
   return {
