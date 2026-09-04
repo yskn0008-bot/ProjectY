@@ -13,7 +13,6 @@ const SAFE_ACTIONS = new Set([
   'REQUEST_TRANSPORT',
   'REQUEST_STATUS',
   'UPDATE_BRANCH',
-  'APPROVE_QA',
 ]);
 
 function apiClient(token, repository, fetchImpl = fetch) {
@@ -48,6 +47,11 @@ function targetPrNumber(target) {
   const match = /^PR#([1-9][0-9]*)$/.exec(String(target || ''));
   if (!match) throw new Error('TARGET must be PR#<number>');
   return Number(match[1]);
+}
+
+function boundedScope(rows) {
+  if (!Array.isArray(rows) || rows.length > 100) return null;
+  return rows.map((file) => file.filename);
 }
 
 function decisionFingerprint(request) {
@@ -163,12 +167,6 @@ async function performAllowedAction(api, pr, action, decision, head) {
     await api.request(`/actions/runs/${run.id}/rerun-failed-jobs`, { method: 'POST' });
     return `RERUN_FAILED_${run.id}`;
   }
-  if (action === 'APPROVE_QA') {
-    const run = runs.find((candidate) => candidate.status === 'waiting' || candidate.conclusion === 'action_required');
-    if (!run) return 'APPROVE_QA_SKIPPED_NO_WAITING_RUN';
-    await api.request(`/actions/runs/${run.id}/approve`, { method: 'POST' });
-    return `APPROVE_QA_${run.id}`;
-  }
   throw new Error('unsupported allowed action');
 }
 
@@ -205,7 +203,8 @@ async function run({ api, fetchImpl = fetch, environment = process.env, endpoint
   if (pr.state !== 'open' || pr.merged || pr.head?.sha !== targetState.head || pr.head?.repo?.full_name !== environment.REPOSITORY) {
     return { status: 'ignored', reason: 'unsafe or stale target' };
   }
-  const files = (await paginate(api, `/pulls/${prNumber}/files`)).map((file) => file.filename).slice(0, 100);
+  const files = boundedScope(await paginate(api, `/pulls/${prNumber}/files`));
+  if (!files) return { status: 'ignored', reason: 'PR scope exceeds 100 files; YOS decision requires complete scope' };
   const request = {
     target: key,
     currentHead: pr.head.sha,
@@ -243,6 +242,7 @@ module.exports = {
   OIDC_AUDIENCE,
   SAFE_ACTIONS,
   apiClient,
+  boundedScope,
   compactEvidence,
   decisionComment,
   decisionFingerprint,
