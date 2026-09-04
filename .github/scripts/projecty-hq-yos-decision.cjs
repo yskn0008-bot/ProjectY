@@ -79,11 +79,21 @@ function compactEvidence(target) {
   }).slice(0, 5000);
 }
 
+function inferFailureClass(target) {
+  const next = String(target?.next || '');
+  if (/branch conflict/i.test(next)) return 'BRANCH_CONFLICT';
+  if (/atomic transport retries exhausted/i.test(next)) return 'TRANSPORT_API_FAILURE';
+  if (/bounded recovery exhausted/i.test(next)) return 'BOUNDED_RECOVERY_EXHAUSTED';
+  return 'NEEDS_YOS';
+}
+
 function parseDecisionResponse(value, expectedHead) {
   if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error('invalid YOS decision response');
   const decisions = new Set(['CONTINUE', 'REVISE', 'HOLD', 'NEEDS_YOUSUKE']);
   if (!decisions.has(value.decision)) throw new Error('invalid decision');
   if (value.targetHead !== expectedHead) throw new Error('stale YOS decision head');
+  if (typeof value.reason !== 'string' || !value.reason.trim() || value.reason.length > 1000) throw new Error('invalid YOS decision reason');
+  const reason = value.reason.replace(/[\r\n]+/g, ' ').trim().slice(0, 500);
   const allowedAction = value.allowedAction === null ? null : String(value.allowedAction || '');
   if (allowedAction !== null && !SAFE_ACTIONS.has(allowedAction)) throw new Error('unsafe YOS action');
   const stopping = value.decision === 'HOLD' || value.decision === 'NEEDS_YOUSUKE';
@@ -95,6 +105,7 @@ function parseDecisionResponse(value, expectedHead) {
   if (!Array.isArray(value.unknowns) || !value.unknowns.every((item) => typeof item === 'string')) throw new Error('invalid unknowns');
   return {
     decision: value.decision,
+    reason,
     allowedAction,
     targetHead: value.targetHead,
     evidenceSourceIds: [...new Set(value.evidenceSourceIds)].slice(0, 12),
@@ -170,7 +181,9 @@ function decisionComment(fingerprint, request, decision, actionResult) {
     '## Issue #232｜YOS判断',
     `- target: ${request.target}`,
     `- current head: \`${request.currentHead}\``,
+    `- failure class: \`${request.failureClass}\``,
     `- decision: \`${decision.decision}\``,
+    `- reason: ${decision.reason}`,
     `- allowed action: \`${decision.allowedAction || 'NONE'}\``,
     `- action result: \`${actionResult}\``,
     `- evidence: ${evidence}`,
@@ -196,7 +209,7 @@ async function run({ api, fetchImpl = fetch, environment = process.env, endpoint
   const request = {
     target: key,
     currentHead: pr.head.sha,
-    failureClass: targetState.phase,
+    failureClass: inferFailureClass(targetState),
     evidenceSummary: compactEvidence(targetState),
     candidateActions: [...SAFE_ACTIONS],
     scope: files,
@@ -234,6 +247,7 @@ module.exports = {
   decisionComment,
   decisionFingerprint,
   hasDecision,
+  inferFailureClass,
   paginate,
   parseDecisionResponse,
   performAllowedAction,
