@@ -13,7 +13,7 @@ on:
   workflow_dispatch:
     inputs:
       dry_run:
-        description: Do not write comments, rerun QA, approve QA, or update a branch
+        description: Do not write comments, rerun QA, approve QA, update a branch, or request YOS decisions
         required: false
         type: boolean
         default: true
@@ -27,6 +27,7 @@ permissions:
   contents: write
   issues: write
   pull-requests: write
+  id-token: write
 
 concurrency:
   group: projecty-hq-issue-232
@@ -45,6 +46,7 @@ jobs:
           persist-credentials: false
 
       - name: Continue the next bounded safe GitHub action
+        id: continue
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           EVENT_NAME: ${{ github.event_name }}
@@ -52,4 +54,23 @@ jobs:
           REPOSITORY: ${{ github.repository }}
           DRY_RUN: ${{ inputs.dry_run || 'false' }}
           DISPATCH_EVENT_JSON: ${{ inputs.event_json }}
-        run: node .github/scripts/projecty-hq-autopilot.cjs
+        shell: bash
+        run: |
+          set -euo pipefail
+          result="$(node .github/scripts/projecty-hq-autopilot.cjs)"
+          printf '%s\n' "$result"
+          node - "$result" "$GITHUB_OUTPUT" <<'NODE'
+          const fs = require('node:fs');
+          const result = JSON.parse(process.argv[2]);
+          const recovery = result?.recovery || null;
+          fs.appendFileSync(process.argv[3], `needs_yos=${recovery?.action === 'NEEDS_YOS' ? 'true' : 'false'}\n`);
+          fs.appendFileSync(process.argv[3], `target=${recovery?.target || ''}\n`);
+          NODE
+
+      - name: Ask YOS and continue the same PR safely
+        if: steps.continue.outputs.needs_yos == 'true' && inputs.dry_run != true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPOSITORY: ${{ github.repository }}
+          TARGET: ${{ steps.continue.outputs.target }}
+        run: node .github/scripts/projecty-hq-yos-decision.cjs
