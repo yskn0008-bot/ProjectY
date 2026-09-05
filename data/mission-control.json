@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-05T09:28:23+09:00",
+  "updated_at": "2026-09-05T09:33:05+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -145,6 +145,27 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-efb7defb27db",
+      "title": "Merge PR #282: YOS decision 503 の安全なstage診断を追加",
+      "completed_at": "2026-09-05T00:32:52Z",
+      "result": "GitHub mainへ反映（efb7def）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/efb7defb27dbff0a3be76e66318fa900e27541e2"
+    },
+    {
+      "id": "github-commit-78f02d32db10",
+      "title": "test(yos-ai): cover safe ProjectY failure-stage diagnostics",
+      "completed_at": "2026-09-05T00:31:44Z",
+      "result": "GitHub mainへ反映（78f02d3）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/78f02d32db107727e76b31e1d71e5e6daeff6b11"
+    },
+    {
+      "id": "github-commit-baf146dbaeaf",
+      "title": "fix(yos-ai): expose safe ProjectY decision failure stage",
+      "completed_at": "2026-09-05T00:31:28Z",
+      "result": "GitHub mainへ反映（baf146d）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/baf146dbaeaf7769b7cbc9de95c807e8507fcbcf"
+    },
+    {
       "id": "github-commit-affc9ddc1f32",
       "title": "Merge PR #281: persisted NEEDS_YOS を本番で再送する",
       "completed_at": "2026-09-05T00:28:06Z",
@@ -157,27 +178,6 @@
       "completed_at": "2026-09-05T00:25:50Z",
       "result": "GitHub mainへ反映（78bc640）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/78bc640e6dd185c98b7e1d7858f1bcdcf28b4214"
-    },
-    {
-      "id": "github-commit-60ffd7d43cdb",
-      "title": "ci: replay persisted NEEDS_YOS targets",
-      "completed_at": "2026-09-05T00:25:40Z",
-      "result": "GitHub mainへ反映（60ffd7d）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/60ffd7d43cdb0756545dc61dde6d228b6f3b5a0c"
-    },
-    {
-      "id": "github-commit-7bc642dabf3a",
-      "title": "test: cover persisted NEEDS_YOS replay",
-      "completed_at": "2026-09-05T00:25:19Z",
-      "result": "GitHub mainへ反映（7bc642d）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/7bc642dabf3a033d5bfc7617c4e0610e1472367d"
-    },
-    {
-      "id": "github-commit-42e6b88c60a8",
-      "title": "fix: replay existing NEEDS_YOS targets safely",
-      "completed_at": "2026-09-05T00:25:09Z",
-      "result": "GitHub mainへ反映（42e6b88）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/42e6b88c60a8c8f07621b0eaf14dd3d14925e4e1"
     },
     {
       "id": "complete-002",
@@ -214,7 +214,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-05T09:28:23+09:00",
+      "last_update": "2026-09-05T09:33:05+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -295,7 +295,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-05T09:28:23+09:00",
+      "last_update": "2026-09-05T09:33:05+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -318,7 +318,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-05T09:28:23+09:00",
+      "last_update": "2026-09-05T09:33:05+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -400,5 +400,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "c649477a335f8347a848b70e54583779ea1c27b019f30c77494a1b109c56eb34"
+  "github_snapshot_hash": "6fb4b843f1e6f2f59cbff4358470eb89850ee6cadb1789c8a5c52b03d67b3863"
 }
