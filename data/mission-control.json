@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-05T14:30:37+09:00",
+  "updated_at": "2026-09-05T14:56:02+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -145,39 +145,39 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-81cd136e7c3f",
+      "title": "Merge PR #284: OpenAI request failureを安全に分類",
+      "completed_at": "2026-09-05T05:55:51Z",
+      "result": "GitHub mainへ反映（81cd136）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/81cd136e7c3ffeff04322e56fc0f3da8ada70654"
+    },
+    {
+      "id": "github-commit-26773486acd1",
+      "title": "fix(yos-ai): omit absent model diagnostics",
+      "completed_at": "2026-09-05T05:50:22Z",
+      "result": "GitHub mainへ反映（2677348）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/26773486acd1c0c327159aa61f7e24d0257d3aaa"
+    },
+    {
+      "id": "github-commit-b33fc21eadd2",
+      "title": "diagnostic(yos-ai): expose bounded OpenAI request status",
+      "completed_at": "2026-09-05T05:47:14Z",
+      "result": "GitHub mainへ反映（b33fc21）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/b33fc21eadd25158af9e7a28a9f4aec84bb9e526"
+    },
+    {
+      "id": "github-commit-c64e867e180f",
+      "title": "diagnostic(yos-ai): add bounded model request status",
+      "completed_at": "2026-09-05T05:44:26Z",
+      "result": "GitHub mainへ反映（c64e867）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/c64e867e180f77f82a3ca0e89e25fb2c9b02c51d"
+    },
+    {
       "id": "github-commit-1ef6144735a4",
       "title": "Merge PR #283: Google WIF のVercel audience整合を修正",
       "completed_at": "2026-09-05T00:37:58Z",
       "result": "GitHub mainへ反映（1ef6144）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/1ef6144735a457930721e7c35da74b3a0fe119e5"
-    },
-    {
-      "id": "github-commit-557144b767bb",
-      "title": "test(yos-ai): guard Vercel default WIF audience",
-      "completed_at": "2026-09-05T00:37:02Z",
-      "result": "GitHub mainへ反映（557144b）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/557144b767bb1ffd0dcac0f94feddbf228d7364a"
-    },
-    {
-      "id": "github-commit-850c89ef9d4a",
-      "title": "fix(yos-ai): keep Vercel default OIDC audience",
-      "completed_at": "2026-09-05T00:36:54Z",
-      "result": "GitHub mainへ反映（850c89e）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/850c89ef9d4abc72ef17ed448a166da4e5d462e3"
-    },
-    {
-      "id": "github-commit-8f7e7631fc3c",
-      "title": "fix(yos-ai): use configured Vercel audience for Google WIF",
-      "completed_at": "2026-09-05T00:36:46Z",
-      "result": "GitHub mainへ反映（8f7e763）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/8f7e7631fc3c922a3a8948e95182b1979dd06ecf"
-    },
-    {
-      "id": "github-commit-efb7defb27db",
-      "title": "Merge PR #282: YOS decision 503 の安全なstage診断を追加",
-      "completed_at": "2026-09-05T00:32:52Z",
-      "result": "GitHub mainへ反映（efb7def）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/efb7defb27dbff0a3be76e66318fa900e27541e2"
     },
     {
       "id": "complete-002",
@@ -214,7 +214,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-05T14:30:37+09:00",
+      "last_update": "2026-09-05T14:56:02+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -295,7 +295,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-05T14:30:37+09:00",
+      "last_update": "2026-09-05T14:56:02+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -318,7 +318,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-05T14:30:37+09:00",
+      "last_update": "2026-09-05T14:56:02+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -400,5 +400,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "4ed399fdcf11369eb5385774cca9bdb04ef0dea819c1376f792384fa8fdb5d71"
+  "github_snapshot_hash": "c47c2e91ec2123c6c3a21a0720e2a57b5f55504bffc0918bba96f6a23a7a3dd8"
 }
