@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-06T01:42:20+09:00",
+  "updated_at": "2026-09-06T02:07:33+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -145,6 +145,27 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-1b2f2f7b346e",
+      "title": "Merge PR #287: bound OpenAI 429 cause diagnostic",
+      "completed_at": "2026-09-05T17:07:17Z",
+      "result": "GitHub mainへ反映（1b2f2f7）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/1b2f2f7b346e3921e6aadbcf445237440dec04a8"
+    },
+    {
+      "id": "github-commit-711e052817a5",
+      "title": "test(yos-ai): bound OpenAI 429 diagnostics",
+      "completed_at": "2026-09-05T17:06:10Z",
+      "result": "GitHub mainへ反映（711e052）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/711e052817a5a7fff0cf438946a98d3d72178335"
+    },
+    {
+      "id": "github-commit-26becbdc9a7a",
+      "title": "diagnostic(yos-ai): classify bounded OpenAI 429 reasons",
+      "completed_at": "2026-09-05T17:05:45Z",
+      "result": "GitHub mainへ反映（26becbd）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/26becbdc9a7ab63a2d3e383ec1ae3cc8621e2144"
+    },
+    {
       "id": "github-commit-07b02709dcc1",
       "title": "Merge PR #285: fix ProjectY decision Structured Outputs schema",
       "completed_at": "2026-09-05T14:56:10Z",
@@ -157,27 +178,6 @@
       "completed_at": "2026-09-05T14:53:51Z",
       "result": "GitHub mainへ反映（182a5ce）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/182a5ce6cb5c1c8e15dcb7674c5d64d407911101"
-    },
-    {
-      "id": "github-commit-516112cff5bf",
-      "title": "fix(yos-ai): make ProjectY decision schema strict-output compatible",
-      "completed_at": "2026-09-05T14:53:27Z",
-      "result": "GitHub mainへ反映（516112c）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/516112cff5bf2b3aab3107c2fa83387942d35da1"
-    },
-    {
-      "id": "github-commit-81cd136e7c3f",
-      "title": "Merge PR #284: OpenAI request failureを安全に分類",
-      "completed_at": "2026-09-05T05:55:51Z",
-      "result": "GitHub mainへ反映（81cd136）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/81cd136e7c3ffeff04322e56fc0f3da8ada70654"
-    },
-    {
-      "id": "github-commit-26773486acd1",
-      "title": "fix(yos-ai): omit absent model diagnostics",
-      "completed_at": "2026-09-05T05:50:22Z",
-      "result": "GitHub mainへ反映（2677348）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/26773486acd1c0c327159aa61f7e24d0257d3aaa"
     },
     {
       "id": "complete-002",
@@ -214,7 +214,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-06T01:42:20+09:00",
+      "last_update": "2026-09-06T02:07:33+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -295,7 +295,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-06T01:42:20+09:00",
+      "last_update": "2026-09-06T02:07:33+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -318,7 +318,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-06T01:42:20+09:00",
+      "last_update": "2026-09-06T02:07:33+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -400,5 +400,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "dd9d209885c408319015ef58cf3f2e3511e3cd85a08d1e8006346cc011e52aeb"
+  "github_snapshot_hash": "eadf0e830495b2867e6db9ac4af8c7da2ae3d948c68a6e0eff37b917566e2ce1"
 }
