@@ -34,8 +34,11 @@ export async function createGoogleAccessTokenProvider(
     return new GoogleAuthAccessTokenProvider(client);
   }
 
-  const audience = workloadIdentityAudience(config);
-  const vercelOidcToken = await requireVercelOidcToken(audience);
+  // Google WIF validates the Vercel subject token against the provider's
+  // configured allowed audience (https://vercel.com/<team>). The provider
+  // resource name below is the external-account audience for Google STS; it
+  // must not be used as a custom audience for the Vercel token itself.
+  const vercelOidcToken = await requireVercelOidcToken();
   return new GoogleAuthAccessTokenProvider(
     createVercelIdentityPoolClient(config, vercelOidcToken, scopes)
   );
