@@ -1,0 +1,50 @@
+name: ProjectY HQ Safety
+
+on:
+  pull_request:
+    paths:
+      - '.github/scripts/projecty-hq-*.cjs'
+      - '.github/workflows/projecty-hq-autopilot.yml'
+      - '.github/workflows/projecty-hq-safety.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout PR code read-only
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          package-manager-cache: false
+
+      - name: Check automation syntax
+        run: |
+          node --check .github/scripts/projecty-hq-autopilot.cjs
+          node --check .github/scripts/projecty-hq-yos-decision.cjs
+          node --check .github/scripts/projecty-hq-autopilot.test.cjs
+          node --check .github/scripts/projecty-hq-yos-decision.test.cjs
+
+      - name: Run Issue 232 regression tests
+        run: node --test .github/scripts/projecty-hq-autopilot.test.cjs .github/scripts/projecty-hq-yos-decision.test.cjs
+
+      - name: Enforce read-only CI boundary
+        run: |
+          node - <<'NODE'
+          const fs = require('node:fs');
+          const workflow = fs.readFileSync('.github/workflows/projecty-hq-safety.yml', 'utf8');
+          if (!/permissions:\s*\n\s*contents: read/.test(workflow)) throw new Error('contents must stay read-only');
+          if (/id-token:\s*write|issues:\s*write|pull-requests:\s*write|actions:\s*write/.test(workflow)) throw new Error('safety CI must not gain write permissions');
+          const worker = fs.readFileSync('.github/scripts/projecty-hq-yos-decision.cjs', 'utf8');
+          for (const forbidden of ['MERGE', 'DEPLOY', 'DELETE_DATA', 'SET_CREDENTIAL']) {
+            if (worker.includes(`'${forbidden}'`) || worker.includes(`\"${forbidden}\"`)) throw new Error(`unsafe action token: ${forbidden}`);
+          }
+          NODE
