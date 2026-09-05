@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {generateKeyPairSync, sign} from 'node:crypto';
 import {
+  classifyFailureStage,
   mapYosAnswer,
   parseDecisionRequest,
   parseDecisionToken,
@@ -97,4 +98,11 @@ test('YOS answer maps grounded safe decisions and records no fabricated evidence
   assert.equal(blocked.decision, 'HOLD');
   assert.equal(blocked.allowedAction, null);
   assert.deepEqual(blocked.evidenceSourceIds, ['00_law', '04_system_master']);
+});
+
+test('failure diagnostics expose only bounded stage names', () => {
+  assert.equal(classifyFailureStage({stage: 'source-load'}, 'answer'), 'source-load');
+  assert.equal(classifyFailureStage({stage: 'model-request'}, 'answer'), 'model-request');
+  assert.equal(classifyFailureStage({stage: 'unexpected-secret-looking-value'}, 'runtime-create'), 'runtime-create');
+  assert.equal(classifyFailureStage(new Error('private details'), 'authorization'), 'authorization');
 });
