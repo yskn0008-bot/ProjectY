@@ -74,3 +74,10 @@ jobs:
           REPOSITORY: ${{ github.repository }}
           TARGET: ${{ steps.continue.outputs.target }}
         run: node .github/scripts/projecty-hq-yos-decision.cjs
+
+      - name: Replay one persisted NEEDS_YOS target safely
+        if: steps.continue.outputs.needs_yos != 'true' && inputs.dry_run != true && (github.event_name == 'schedule' || github.event_name == 'workflow_run')
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPOSITORY: ${{ github.repository }}
+        run: node .github/scripts/projecty-hq-yos-replay.cjs
