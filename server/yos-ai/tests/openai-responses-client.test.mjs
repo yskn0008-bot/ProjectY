@@ -84,12 +84,17 @@ test('Responses client allows missing usage without inventing values', async () 
   assert.equal(result.modelUsage, undefined);
 });
 
-async function rejectsAt(operation, stage) {
+async function rejectsAt(operation, stage, requestStatus) {
   await assert.rejects(operation, (error) => {
     assert.ok(error instanceof ModelFailure);
     assert.equal(error.stage, stage);
+    assert.equal(error.requestStatus, requestStatus);
     assert.equal(error.cause, undefined);
-    assert.deepEqual(Object.keys(error), ['stage', 'name']);
+    assert.deepEqual(
+      Object.keys(error),
+      requestStatus === undefined ? ['stage', 'name'] : ['stage', 'requestStatus', 'name']
+    );
+    assert.doesNotMatch(JSON.stringify(error), /provider-secret-body|token=secret|user text/i);
     return true;
   });
 }
@@ -100,15 +105,26 @@ test('Responses client classifies network and unsuccessful HTTP failures without
       apiKey: 'test-key', safetyIdentifier: 'hashed-user', responseSchema: {type: 'object'},
       fetchImpl: async () => { throw new Error('token=secret user text'); }
     });
-    await rejectsAt(() => client.generate(modelInput()), 'model-request');
+    await rejectsAt(() => client.generate(modelInput()), 'model-request', 'network');
   });
-  await t.test('provider HTTP', async () => {
-    const client = new OpenAIResponsesClient({
-      apiKey: 'test-key', safetyIdentifier: 'hashed-user', responseSchema: {type: 'object'},
-      fetchImpl: async () => new Response('provider-secret-body', {status: 500})
+
+  for (const [name, status, expected] of [
+    ['bad request', 400, '400'],
+    ['unauthorized', 401, '401'],
+    ['forbidden', 403, '403'],
+    ['not found', 404, '404'],
+    ['quota or rate limit', 429, '429'],
+    ['provider 5xx', 500, '5xx'],
+    ['other status', 418, 'other']
+  ]) {
+    await t.test(name, async () => {
+      const client = new OpenAIResponsesClient({
+        apiKey: 'test-key', safetyIdentifier: 'hashed-user', responseSchema: {type: 'object'},
+        fetchImpl: async () => new Response('provider-secret-body', {status})
+      });
+      await rejectsAt(() => client.generate(modelInput()), 'model-request', expected);
     });
-    await rejectsAt(() => client.generate(modelInput()), 'model-request');
-  });
+  }
 });
 
 test('Responses client rejects malformed model output', async () => {
@@ -121,7 +137,7 @@ test('Responses client rejects malformed model output', async () => {
     }), {status: 200, headers: {'content-type': 'application/json'}})
   });
 
-  await rejectsAt(() => client.generate(modelInput()), 'model-output-validate');
+  await rejectsAt(() => client.generate(modelInput()), 'model-output-validate', undefined);
 });
 
 test('Responses client rejects facts without source IDs', async () => {
@@ -140,7 +156,7 @@ test('Responses client rejects facts without source IDs', async () => {
     }), {status: 200, headers: {'content-type': 'application/json'}})
   });
 
-  await rejectsAt(() => client.generate(modelInput()), 'model-output-validate');
+  await rejectsAt(() => client.generate(modelInput()), 'model-output-validate', undefined);
 });
 
 test('Responses client rejects corrupt usage counters', async () => {
@@ -154,7 +170,7 @@ test('Responses client rejects corrupt usage counters', async () => {
     }), {status: 200, headers: {'content-type': 'application/json'}})
   });
 
-  await rejectsAt(() => client.generate(modelInput()), 'model-output-validate');
+  await rejectsAt(() => client.generate(modelInput()), 'model-output-validate', undefined);
 });
 
 test('Responses client classifies invalid provider JSON and missing output as validation failures', async (t) => {
@@ -164,7 +180,7 @@ test('Responses client classifies invalid provider JSON and missing output as va
         apiKey: 'test-key', safetyIdentifier: 'hashed-user', responseSchema: {type: 'object'},
         fetchImpl: async () => new Response(body, {status: 200})
       });
-      await rejectsAt(() => client.generate(modelInput()), 'model-output-validate');
+      await rejectsAt(() => client.generate(modelInput()), 'model-output-validate', undefined);
     });
   }
 });

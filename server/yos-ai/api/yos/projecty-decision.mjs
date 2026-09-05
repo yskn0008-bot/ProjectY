@@ -23,6 +23,7 @@ const TOKENS = new Set([
 ]);
 const CORE_IDS = ['00_law', '02_yos_master', '00_change_log'];
 const ANSWER_FAILURE_STAGES = new Set(['source-load', 'context-build', 'model-request', 'model-output-validate']);
+const MODEL_REQUEST_STATUSES = new Set(['network', '400', '401', '403', '404', '429', '5xx', 'other']);
 let jwksCache = {expiresAt: 0, keys: []};
 
 function base64urlJson(segment) {
@@ -156,6 +157,12 @@ export function classifyFailureStage(error, currentStage) {
   return answerStage || currentStage;
 }
 
+export function classifyModelRequestDiagnostic(error, failureStage) {
+  if (failureStage !== 'model-request' || !error || typeof error !== 'object') return null;
+  const value = error.modelRequestStatus;
+  return typeof value === 'string' && MODEL_REQUEST_STATUSES.has(value) ? value : null;
+}
+
 export function createProjectyDecisionHandler({environment = process.env, fetchImpl = fetch, clock = () => new Date().toISOString(), requestIdFactory = randomUUID} = {}) {
   const config = loadYosRuntimeConfig(environment);
   const runtimeFactory = new DefaultRequestRuntimeFactory({config, responseSchema, fetchImpl});
@@ -178,10 +185,13 @@ export function createProjectyDecisionHandler({environment = process.env, fetchI
       stage = 'response-map';
       return secureJson(mapYosAnswer(answer, input.currentHead), 200);
     } catch (error) {
+      const failureStage = classifyFailureStage(error, stage);
+      const modelRequestStatus = classifyModelRequestDiagnostic(error, failureStage);
       console.error(JSON.stringify({
         level: 'error',
         event: 'projecty_yos_decision_unavailable',
-        stage: classifyFailureStage(error, stage),
+        stage: failureStage,
+        ...(modelRequestStatus ? {modelRequestStatus} : {}),
         message: 'request rejected'
       }));
       return secureJson({error: 'YOS decision unavailable'}, 503);

@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {generateKeyPairSync, sign} from 'node:crypto';
 import {
   classifyFailureStage,
+  classifyModelRequestDiagnostic,
   mapYosAnswer,
   parseDecisionRequest,
   parseDecisionToken,
@@ -105,4 +106,13 @@ test('failure diagnostics expose only bounded stage names', () => {
   assert.equal(classifyFailureStage({stage: 'model-request'}, 'answer'), 'model-request');
   assert.equal(classifyFailureStage({stage: 'unexpected-secret-looking-value'}, 'runtime-create'), 'runtime-create');
   assert.equal(classifyFailureStage(new Error('private details'), 'authorization'), 'authorization');
+});
+
+test('model request diagnostics expose only bounded status labels', () => {
+  for (const status of ['network', '400', '401', '403', '404', '429', '5xx', 'other']) {
+    assert.equal(classifyModelRequestDiagnostic({modelRequestStatus: status}, 'model-request'), status);
+  }
+  assert.equal(classifyModelRequestDiagnostic({modelRequestStatus: '401 token=secret'}, 'model-request'), null);
+  assert.equal(classifyModelRequestDiagnostic({modelRequestStatus: '429'}, 'source-load'), null);
+  assert.equal(classifyModelRequestDiagnostic(new Error('private details'), 'model-request'), null);
 });

@@ -5,6 +5,7 @@ import {routeDomain} from './domain-router.js';
 import {validateGroundedFacts} from './grounding.js';
 import {validateMemoryCandidates} from './memory-candidates.js';
 import {ModelFailure} from './openai/model-failure.js';
+import type {ModelRequestStatus} from './openai/model-request-status.js';
 import {sanitizeDocuments} from './privacy-filter.js';
 import type {
   EvidenceItem,
@@ -34,8 +35,13 @@ export type AnswerFailureStage =
   | 'model-output-validate';
 
 export class AnswerFailure extends Error {
-  constructor(readonly stage: AnswerFailureStage) {
+  readonly stage: AnswerFailureStage;
+  readonly modelRequestStatus?: ModelRequestStatus;
+
+  constructor(stage: AnswerFailureStage, modelRequestStatus?: ModelRequestStatus) {
     super('YOS answer failed');
+    this.stage = stage;
+    if (stage === 'model-request' && modelRequestStatus) this.modelRequestStatus = modelRequestStatus;
     this.name = 'AnswerFailure';
   }
 }
@@ -98,7 +104,10 @@ export class YosOrchestrator {
     try {
       modelOutput = await this.modelClient.generate(modelInput);
     } catch (error) {
-      throw new AnswerFailure(error instanceof ModelFailure ? error.stage : 'model-request');
+      if (error instanceof ModelFailure) {
+        throw new AnswerFailure(error.stage, error.requestStatus);
+      }
+      throw new AnswerFailure('model-request');
     }
     return atAnswerStage('model-output-validate', () => {
       const groundedFacts = validateGroundedFacts(modelOutput.facts, modelInput.sourceRefs);
