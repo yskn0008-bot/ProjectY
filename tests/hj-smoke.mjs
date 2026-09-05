@@ -434,5 +434,6 @@ try {
   console.log(`HJ smoke test passed: ${browserName}`);
 } finally {
   await browser.close();
+  apiServer.closeAllConnections();
   await new Promise((resolve, reject) => apiServer.close((error) => error ? reject(error) : resolve()));
 }
