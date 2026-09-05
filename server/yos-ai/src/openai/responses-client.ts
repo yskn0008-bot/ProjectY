@@ -1,5 +1,6 @@
 import type {FetchLike} from '../http.js';
 import {ModelFailure} from './model-failure.js';
+import {classifyModelRequestStatus} from './model-request-status.js';
 import type {
   GroundedFact,
   MemoryCandidate,
@@ -80,10 +81,12 @@ export class OpenAIResponsesClient implements ModelClient {
         })
       });
     } catch {
-      throw new ModelFailure('model-request');
+      throw new ModelFailure('model-request', 'network');
     }
 
-    if (!response.ok) throw new ModelFailure('model-request');
+    if (!response.ok) {
+      throw new ModelFailure('model-request', classifyModelRequestStatus(response.status));
+    }
 
     try {
       const payload = await response.json() as ResponsesApiResult;

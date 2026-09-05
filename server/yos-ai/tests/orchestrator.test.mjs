@@ -62,10 +62,11 @@ const modelOutput = () => ({
   nextAction: null
 });
 
-async function rejectsAt(orchestrator, stage) {
+async function rejectsAt(orchestrator, stage, modelRequestStatus) {
   await assert.rejects(orchestrator.answer(request), (error) => {
     assert.ok(error instanceof AnswerFailure);
     assert.equal(error.stage, stage);
+    assert.equal(error.modelRequestStatus, modelRequestStatus);
     assert.equal(error.cause, undefined);
     assert.doesNotMatch(JSON.stringify(error), /private|secret|token|source-id|model answer/i);
     assert.doesNotMatch(error.message, /private|secret|token|source-id|model answer/i);
@@ -79,7 +80,7 @@ test('orchestrator classifies failures at each real answer boundary without reta
       async loadCoreSources() { throw new Error('private source-id and token'); },
       async loadDomainSources() { return []; }
     };
-    await rejectsAt(new YosOrchestrator(provider, {async generate() { return modelOutput(); }}), 'source-load');
+    await rejectsAt(new YosOrchestrator(provider, {async generate() { return modelOutput(); }}), 'source-load', undefined);
   });
 
   await t.test('context-build', async () => {
@@ -91,7 +92,7 @@ test('orchestrator classifies failures at each real answer boundary without reta
       async loadCoreSources() { return [privateDocument]; },
       async loadDomainSources() { return []; }
     };
-    await rejectsAt(new YosOrchestrator(provider, {async generate() { return modelOutput(); }}), 'context-build');
+    await rejectsAt(new YosOrchestrator(provider, {async generate() { return modelOutput(); }}), 'context-build', undefined);
   });
 
   await t.test('model-request', async () => {
@@ -100,7 +101,16 @@ test('orchestrator classifies failures at each real answer boundary without reta
       async loadDomainSources() { return []; }
     };
     const client = {async generate() { throw new Error('OPENAI_API_KEY=secret model input'); }};
-    await rejectsAt(new YosOrchestrator(provider, client), 'model-request');
+    await rejectsAt(new YosOrchestrator(provider, client), 'model-request', undefined);
+  });
+
+  await t.test('model request safe status propagation', async () => {
+    const provider = {
+      async loadCoreSources() { return []; },
+      async loadDomainSources() { return []; }
+    };
+    const client = {async generate() { throw new ModelFailure('model-request', '429'); }};
+    await rejectsAt(new YosOrchestrator(provider, client), 'model-request', '429');
   });
 
   await t.test('model client validation failure', async () => {
@@ -109,7 +119,7 @@ test('orchestrator classifies failures at each real answer boundary without reta
       async loadDomainSources() { return []; }
     };
     const client = {async generate() { throw new ModelFailure('model-output-validate'); }};
-    await rejectsAt(new YosOrchestrator(provider, client), 'model-output-validate');
+    await rejectsAt(new YosOrchestrator(provider, client), 'model-output-validate', undefined);
   });
 
   await t.test('model-output-validate', async () => {
@@ -121,6 +131,6 @@ test('orchestrator classifies failures at each real answer boundary without reta
     Object.defineProperty(output, 'facts', {
       get() { throw new Error('private model output'); }
     });
-    await rejectsAt(new YosOrchestrator(provider, {async generate() { return output; }}), 'model-output-validate');
+    await rejectsAt(new YosOrchestrator(provider, {async generate() { return output; }}), 'model-output-validate', undefined);
   });
 });
