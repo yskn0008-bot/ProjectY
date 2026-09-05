@@ -11,14 +11,14 @@ export function validateVercelOidcToken(value: string): string {
   return token;
 }
 
-export async function readVercelOidcToken(audience: string): Promise<string | undefined> {
-  const raw = await getVercelOidcToken({audience});
+export async function readVercelOidcToken(): Promise<string | undefined> {
+  const raw = await getVercelOidcToken();
   if (!raw?.trim()) return undefined;
   return validateVercelOidcToken(raw);
 }
 
-export async function requireVercelOidcToken(audience: string): Promise<string> {
-  const token = await readVercelOidcToken(audience);
+export async function requireVercelOidcToken(): Promise<string> {
+  const token = await readVercelOidcToken();
   if (!token) throw new Error('Vercel OIDC token is required');
   return token;
 }
