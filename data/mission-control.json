@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-05T09:20:31+09:00",
+  "updated_at": "2026-09-05T09:28:23+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -20,7 +20,7 @@
       "priority": 2,
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/233",
-      "updated_at": "2026-08-27T09:01:01Z"
+      "updated_at": "2026-09-05T00:22:21Z"
     },
     {
       "id": "github-pr-276",
@@ -145,39 +145,39 @@
   ],
   "recently_completed": [
     {
-      "id": "github-commit-05ee1407d989",
-      "title": "Merge PR #278: YOS即時判断で自動継続を拡張",
-      "completed_at": "2026-09-05T00:20:19Z",
-      "result": "GitHub mainへ反映（05ee140）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/05ee1407d98968d8150856d6344c83b97d2f3c5f"
+      "id": "github-commit-affc9ddc1f32",
+      "title": "Merge PR #281: persisted NEEDS_YOS を本番で再送する",
+      "completed_at": "2026-09-05T00:28:06Z",
+      "result": "GitHub mainへ反映（affc9dd）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/affc9ddc1f3206ce545dcfce764d036282e70478"
     },
     {
-      "id": "github-commit-5d47f8fc7d9b",
-      "title": "chore: sync PR 278 with current main",
-      "completed_at": "2026-09-04T17:49:42Z",
-      "result": "GitHub mainへ反映（5d47f8f）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/5d47f8fc7d9b3ad5e9ff0224b9eb2ce0b0e7792c"
+      "id": "github-commit-78bc640e6dd1",
+      "title": "test: include persisted NEEDS_YOS replay checks",
+      "completed_at": "2026-09-05T00:25:50Z",
+      "result": "GitHub mainへ反映（78bc640）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/78bc640e6dd185c98b7e1d7858f1bcdcf28b4214"
     },
     {
-      "id": "github-commit-1aa346d2483a",
-      "title": "test(yos-ai): reject unsupported QA approval action",
-      "completed_at": "2026-09-04T17:48:19Z",
-      "result": "GitHub mainへ反映（1aa346d）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/1aa346d2483a994929ef24dc8fcb8412a120964b"
+      "id": "github-commit-60ffd7d43cdb",
+      "title": "ci: replay persisted NEEDS_YOS targets",
+      "completed_at": "2026-09-05T00:25:40Z",
+      "result": "GitHub mainへ反映（60ffd7d）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/60ffd7d43cdb0756545dc61dde6d228b6f3b5a0c"
     },
     {
-      "id": "github-commit-29879a9ce6e2",
-      "title": "fix(yos-ai): remove unsupported QA approval token",
-      "completed_at": "2026-09-04T17:48:01Z",
-      "result": "GitHub mainへ反映（29879a9）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/29879a9ce6e27248858eb67f31067d30b840c863"
+      "id": "github-commit-7bc642dabf3a",
+      "title": "test: cover persisted NEEDS_YOS replay",
+      "completed_at": "2026-09-05T00:25:19Z",
+      "result": "GitHub mainへ反映（7bc642d）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/7bc642dabf3a033d5bfc7617c4e0610e1472367d"
     },
     {
-      "id": "github-commit-32fb481ca7ff",
-      "title": "fix(yos-ai): remove ambiguous QA approval action",
-      "completed_at": "2026-09-04T17:47:08Z",
-      "result": "GitHub mainへ反映（32fb481）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/32fb481ca7ffc7859571201127c8aa8e02fe6d9b"
+      "id": "github-commit-42e6b88c60a8",
+      "title": "fix: replay existing NEEDS_YOS targets safely",
+      "completed_at": "2026-09-05T00:25:09Z",
+      "result": "GitHub mainへ反映（42e6b88）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/42e6b88c60a8c8f07621b0eaf14dd3d14925e4e1"
     },
     {
       "id": "complete-002",
@@ -204,7 +204,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #280をレビューして公開判断する",
+      "next_action": "PR #233をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -214,7 +214,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-05T09:20:31+09:00",
+      "last_update": "2026-09-05T09:28:23+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -295,7 +295,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-05T09:20:31+09:00",
+      "last_update": "2026-09-05T09:28:23+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -309,7 +309,7 @@
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #280をレビューして公開判断する",
+      "next_action": "PR #233をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -318,7 +318,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-05T09:20:31+09:00",
+      "last_update": "2026-09-05T09:28:23+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -400,5 +400,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "0ec6e11dabf76b8406d4395dbe42c23aa23b084fc79540882f58d64196faf27d"
+  "github_snapshot_hash": "c649477a335f8347a848b70e54583779ea1c27b019f30c77494a1b109c56eb34"
 }
