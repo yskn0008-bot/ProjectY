@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {generateKeyPairSync, sign} from 'node:crypto';
+import responseSchema from '../schemas/yos-projecty-decision.schema.json' with {type: 'json'};
 import {
   classifyFailureStage,
   classifyModelRequestDiagnostic,
@@ -99,6 +100,47 @@ test('YOS answer maps grounded safe decisions and records no fabricated evidence
   assert.equal(blocked.decision, 'HOLD');
   assert.equal(blocked.allowedAction, null);
   assert.deepEqual(blocked.evidenceSourceIds, ['00_law', '04_system_master']);
+});
+
+test('ProjectY decision Structured Outputs schema stays inside the strict supported subset', () => {
+  const unsupportedKeywords = new Set([
+    '$schema',
+    'minLength',
+    'maxLength',
+    'uniqueItems',
+    'allOf',
+    'not',
+    'dependentRequired',
+    'dependentSchemas',
+    'if',
+    'then',
+    'else',
+  ]);
+
+  function inspect(node, path = '$') {
+    if (!node || typeof node !== 'object' || Array.isArray(node)) return;
+    for (const key of Object.keys(node)) {
+      assert.equal(unsupportedKeywords.has(key), false, `${path} contains unsupported keyword ${key}`);
+    }
+    if (node.type === 'object') {
+      assert.equal(node.additionalProperties, false, `${path} must set additionalProperties=false`);
+      const propertyNames = Object.keys(node.properties || {}).sort();
+      const requiredNames = [...(node.required || [])].sort();
+      assert.deepEqual(requiredNames, propertyNames, `${path} must require every declared property`);
+    }
+    if (node.properties) {
+      for (const [key, value] of Object.entries(node.properties)) inspect(value, `${path}.properties.${key}`);
+    }
+    if (node.items) inspect(node.items, `${path}.items`);
+    if (Array.isArray(node.anyOf)) node.anyOf.forEach((value, index) => inspect(value, `${path}.anyOf[${index}]`));
+    if (node.$defs) {
+      for (const [key, value] of Object.entries(node.$defs)) inspect(value, `${path}.$defs.${key}`);
+    }
+  }
+
+  inspect(responseSchema);
+  assert.equal(responseSchema.type, 'object');
+  assert.equal(responseSchema.properties.memoryCandidates.maxItems, 0);
 });
 
 test('failure diagnostics expose only bounded stage names', () => {
