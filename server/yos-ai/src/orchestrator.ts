@@ -36,7 +36,7 @@ export type AnswerFailureStage =
 
 export class AnswerFailure extends Error {
   readonly stage: AnswerFailureStage;
-  readonly modelRequestStatus?: ModelRequestStatus;
+  declare readonly modelRequestStatus?: ModelRequestStatus;
 
   constructor(stage: AnswerFailureStage, modelRequestStatus?: ModelRequestStatus) {
     super('YOS answer failed');
