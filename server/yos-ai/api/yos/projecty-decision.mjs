@@ -22,6 +22,7 @@ const TOKENS = new Set([
   'NEEDS_YOUSUKE|NONE',
 ]);
 const CORE_IDS = ['00_law', '02_yos_master', '00_change_log'];
+const ANSWER_FAILURE_STAGES = new Set(['source-load', 'context-build', 'model-request', 'model-output-validate']);
 let jwksCache = {expiresAt: 0, keys: []};
 
 function base64urlJson(segment) {
@@ -150,24 +151,39 @@ export function mapYosAnswer(answer, targetHead) {
   };
 }
 
+export function classifyFailureStage(error, currentStage) {
+  const answerStage = error && typeof error === 'object' && ANSWER_FAILURE_STAGES.has(error.stage) ? error.stage : null;
+  return answerStage || currentStage;
+}
+
 export function createProjectyDecisionHandler({environment = process.env, fetchImpl = fetch, clock = () => new Date().toISOString(), requestIdFactory = randomUUID} = {}) {
   const config = loadYosRuntimeConfig(environment);
   const runtimeFactory = new DefaultRequestRuntimeFactory({config, responseSchema, fetchImpl});
   return async function handle(request) {
     if (request.method !== 'POST') return secureJson({error: 'method not allowed'}, 405);
+    let stage = 'authorization';
     try {
       const token = bearer(request);
       const claims = await verifyGitHubActionsOidc(token, {fetchImpl});
+      stage = 'request-parse';
       const text = await request.text();
       if (Buffer.byteLength(text, 'utf8') > 16_384) return secureJson({error: 'payload too large'}, 413);
       const input = parseDecisionRequest(JSON.parse(text));
       const requestId = requestIdFactory();
       const subjectHash = createHash('sha256').update(`${claims.repository}:${claims.workflow_ref}`).digest('hex');
+      stage = 'runtime-create';
       const service = await runtimeFactory.create({requestId, subjectHash});
+      stage = 'answer';
       const answer = await service.answer({requestId, userText: buildDecisionPrompt(input), currentTime: clock()});
+      stage = 'response-map';
       return secureJson(mapYosAnswer(answer, input.currentHead), 200);
-    } catch {
-      console.error(JSON.stringify({level: 'error', event: 'projecty_yos_decision_unavailable', stage: 'request', message: 'request rejected'}));
+    } catch (error) {
+      console.error(JSON.stringify({
+        level: 'error',
+        event: 'projecty_yos_decision_unavailable',
+        stage: classifyFailureStage(error, stage),
+        message: 'request rejected'
+      }));
       return secureJson({error: 'YOS decision unavailable'}, 503);
     }
   };
