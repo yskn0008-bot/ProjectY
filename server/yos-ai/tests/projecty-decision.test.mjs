@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
 import {generateKeyPairSync, sign} from 'node:crypto';
 import {
   classifyFailureStage,
@@ -16,6 +17,7 @@ const publicJwk = publicKey.export({format: 'jwk'});
 publicJwk.kid = 'test-key';
 publicJwk.alg = 'RS256';
 publicJwk.use = 'sig';
+const decisionSchema = JSON.parse(readFileSync(new URL('../schemas/yos-projecty-decision.schema.json', import.meta.url), 'utf8'));
 
 function b64(value) {
   return Buffer.from(JSON.stringify(value)).toString('base64url');
@@ -37,6 +39,12 @@ function token(overrides = {}) {
   const signingInput = `${header}.${payload}`;
   const signature = sign('RSA-SHA256', Buffer.from(signingInput), privateKey).toString('base64url');
   return `${signingInput}.${signature}`;
+}
+
+function visitSchema(value, visitor) {
+  if (!value || typeof value !== 'object') return;
+  if (!Array.isArray(value)) visitor(value);
+  for (const child of Array.isArray(value) ? value : Object.values(value)) visitSchema(child, visitor);
 }
 
 const jwksFetch = async () => Response.json({keys: [publicJwk]});
@@ -99,6 +107,21 @@ test('YOS answer maps grounded safe decisions and records no fabricated evidence
   assert.equal(blocked.decision, 'HOLD');
   assert.equal(blocked.allowedAction, null);
   assert.deepEqual(blocked.evidenceSourceIds, ['00_law', '04_system_master']);
+});
+
+test('ProjectY decision schema avoids strict Structured Outputs incompatibilities', () => {
+  assert.equal(Object.hasOwn(decisionSchema, '$schema'), false);
+  visitSchema(decisionSchema, (node) => {
+    assert.equal(Object.hasOwn(node, 'uniqueItems'), false);
+    if (node.type === 'object') {
+      assert.equal(node.additionalProperties, false);
+      if (node.properties) {
+        assert.deepEqual([...(node.required ?? [])].sort(), Object.keys(node.properties).sort());
+      }
+    }
+  });
+  assert.equal(decisionSchema.properties.memoryCandidates.maxItems, 0);
+  assert.equal(decisionSchema.properties.memoryCandidates.items.type, 'string');
 });
 
 test('failure diagnostics expose only bounded stage names', () => {
