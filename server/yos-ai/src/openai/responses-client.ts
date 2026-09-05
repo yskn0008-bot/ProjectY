@@ -37,6 +37,22 @@ interface ResponsesApiResult {
   };
 }
 
+type Model429Reason =
+  | 'rate_limit'
+  | 'credit_balance_exhausted'
+  | 'organization_usage_limit_exceeded'
+  | 'organization_spend_limit_exceeded'
+  | 'project_spend_limit_exceeded'
+  | 'insufficient_quota'
+  | 'unknown';
+
+const QUOTA_429_CODES = new Set<Model429Reason>([
+  'credit_balance_exhausted',
+  'organization_usage_limit_exceeded',
+  'organization_spend_limit_exceeded',
+  'project_spend_limit_exceeded'
+]);
+
 export class OpenAIResponsesClient implements ModelClient {
   private readonly fetchImpl: FetchLike;
   private readonly endpoint: string;
@@ -85,6 +101,10 @@ export class OpenAIResponsesClient implements ModelClient {
     }
 
     if (!response.ok) {
+      if (response.status === 429) {
+        const reason = await classify429Reason(response);
+        console.error(JSON.stringify({level: 'error', event: 'openai_model_request_429', reason}));
+      }
       throw new ModelFailure('model-request', classifyModelRequestStatus(response.status));
     }
 
@@ -98,6 +118,32 @@ export class OpenAIResponsesClient implements ModelClient {
       throw new ModelFailure('model-output-validate');
     }
   }
+}
+
+async function classify429Reason(response: Response): Promise<Model429Reason> {
+  let payload: unknown;
+  try {
+    payload = await response.json();
+  } catch {
+    return hasRetryAfter(response.headers.get('retry-after')) ? 'rate_limit' : 'unknown';
+  }
+  if (!isRecord(payload) || !isRecord(payload.error)) {
+    return hasRetryAfter(response.headers.get('retry-after')) ? 'rate_limit' : 'unknown';
+  }
+  const code = typeof payload.error.code === 'string' ? payload.error.code : null;
+  if (code && QUOTA_429_CODES.has(code as Model429Reason)) return code as Model429Reason;
+  if (code === 'rate_limit_exceeded') return 'rate_limit';
+  const type = typeof payload.error.type === 'string' ? payload.error.type : null;
+  if (type === 'insufficient_quota') return 'insufficient_quota';
+  if (type === 'rate_limit_error') return 'rate_limit';
+  return hasRetryAfter(response.headers.get('retry-after')) ? 'rate_limit' : 'unknown';
+}
+
+function hasRetryAfter(value: string | null): boolean {
+  if (!value) return false;
+  const seconds = Number(value);
+  if (Number.isFinite(seconds) && seconds >= 0) return true;
+  return Number.isFinite(Date.parse(value));
 }
 
 export function extractOutputText(payload: ResponsesApiResult): string {

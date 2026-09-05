@@ -127,6 +127,44 @@ test('Responses client classifies network and unsuccessful HTTP failures without
   }
 });
 
+test('Responses client emits only allowlisted 429 reason values and never provider details', async (t) => {
+  const cases = [
+    ['credit code', {error: {code: 'credit_balance_exhausted', message: 'provider-secret-body'}}, {}, 'credit_balance_exhausted'],
+    ['org usage code', {error: {code: 'organization_usage_limit_exceeded'}}, {}, 'organization_usage_limit_exceeded'],
+    ['org spend code', {error: {code: 'organization_spend_limit_exceeded'}}, {}, 'organization_spend_limit_exceeded'],
+    ['project spend code', {error: {code: 'project_spend_limit_exceeded'}}, {}, 'project_spend_limit_exceeded'],
+    ['generic quota type', {error: {type: 'insufficient_quota', message: 'token=secret'}}, {}, 'insufficient_quota'],
+    ['rate limit code', {error: {code: 'rate_limit_exceeded'}}, {}, 'rate_limit'],
+    ['rate limit type', {error: {type: 'rate_limit_error'}}, {}, 'rate_limit'],
+    ['retry-after fallback', {error: {code: 'future-provider-code', message: 'user text'}}, {'retry-after': '2'}, 'rate_limit'],
+    ['unknown suppresses arbitrary code', {error: {code: 'token=secret', message: 'provider-secret-body'}}, {}, 'unknown']
+  ];
+
+  for (const [name, body, headers, expectedReason] of cases) {
+    await t.test(name, async () => {
+      const logs = [];
+      const original = console.error;
+      console.error = (value) => logs.push(String(value));
+      try {
+        const client = new OpenAIResponsesClient({
+          apiKey: 'test-key', safetyIdentifier: 'hashed-user', responseSchema: {type: 'object'},
+          fetchImpl: async () => new Response(JSON.stringify(body), {status: 429, headers})
+        });
+        await rejectsAt(() => client.generate(modelInput()), 'model-request', '429');
+      } finally {
+        console.error = original;
+      }
+      assert.equal(logs.length, 1);
+      assert.deepEqual(JSON.parse(logs[0]), {
+        level: 'error',
+        event: 'openai_model_request_429',
+        reason: expectedReason
+      });
+      assert.doesNotMatch(logs[0], /provider-secret-body|token=secret|user text|future-provider-code/i);
+    });
+  }
+});
+
 test('Responses client rejects malformed model output', async () => {
   const client = new OpenAIResponsesClient({
     apiKey: 'test-key',
