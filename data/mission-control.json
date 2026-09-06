@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-06T18:19:45+09:00",
+  "updated_at": "2026-09-06T23:03:37+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -12,6 +12,16 @@
     ]
   },
   "inbox": [
+    {
+      "id": "github-pr-290",
+      "title": "PR #290 fix: close final iPhone clipping and Life flash",
+      "type": "GitHub PR",
+      "status": "review",
+      "priority": 1,
+      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/290",
+      "updated_at": "2026-09-06T10:57:53Z"
+    },
     {
       "id": "github-pr-233",
       "title": "PR #233 Draft: Mission Controlに進捗率・残り時間を常時表示する",
@@ -194,7 +204,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #280をレビューして公開判断する",
+      "next_action": "PR #290をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -204,7 +214,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-06T18:19:45+09:00",
+      "last_update": "2026-09-06T23:03:37+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -279,13 +289,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 29件・Open PR 2件を自動同期中",
+      "next_action": "Open Issue 29件・Open PR 3件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-06T18:19:45+09:00",
+      "last_update": "2026-09-06T23:03:37+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -299,7 +309,7 @@
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #280をレビューして公開判断する",
+      "next_action": "PR #290をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -308,7 +318,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-06T18:19:45+09:00",
+      "last_update": "2026-09-06T23:03:37+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -390,5 +400,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "f368b9f7bc54d31fd51feea929cb850551056139a1c10ba98fc83b9eedb85884"
+  "github_snapshot_hash": "94f525b077f63067d34717d550536368a8db0f82ae7ad89ec5bdbdb55762bd18"
 }
