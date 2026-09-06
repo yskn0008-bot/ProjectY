@@ -53,7 +53,7 @@ let psk = readSecure(STORAGE.psk);
 let remoteMap = new Map();
 let remoteIndex = new Map();
 let quickCandidates = [];
-let bridgeBusy = false;
+let bridgeQueue = Promise.resolve();
 
 function readSecure(key) {
   return Keychain.contains(key) ? Keychain.get(key) : '';
@@ -240,66 +240,202 @@ function buildHTML() {
   const state = {host, count:remoteMap.size, support:support(), commands:commands()};
   const json = JSON.stringify(state).replace(/</g, '\\u003c');
   const btn = (label, action, cls = '') => '<button class="' + cls + '" data-action="' + action + '">' + label + '</button>';
+
   return `<!doctype html>
 <html lang="ja">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <style>
-:root{color-scheme:dark}*{box-sizing:border-box;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;min-height:100%;background:#000;color:#fff;font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",sans-serif}
-main{padding:18px 18px 42px;max-width:760px;margin:0 auto}
-h1{font-size:28px;margin:2px 0 3px}.meta{font-size:13px;color:#aaa;margin-bottom:14px}.section{font-size:14px;font-weight:700;margin:18px 0 8px}
-.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.grid.two{grid-template-columns:repeat(2,1fr)}
-button{border:0;border-radius:14px;background:#171717;color:#0a84ff;font-size:17px;min-height:48px;padding:10px 8px}
-button:active{background:#282828;transform:scale(.98)}button[disabled]{color:#555;background:#0d0d0d}.icon{font-size:24px;font-weight:600}
-.pad{height:235px;border-radius:28px;border:1px solid #343434;background:#111;touch-action:none;position:relative;overflow:hidden}
-.hint{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;color:#666;font-size:15px;line-height:1.7;pointer-events:none}
-.nub{width:62px;height:62px;border-radius:50%;border:1px solid #3a3a3a;background:#1c1c1e;position:absolute;left:50%;top:50%;margin:-31px;z-index:2;pointer-events:none}
-.status{height:20px;text-align:center;color:#8e8e93;font-size:12px;margin-top:7px}.footer{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:18px}
-.overlay{position:fixed;inset:0;background:rgba(0,0,0,.72);display:none;align-items:flex-end;z-index:10}.sheet{background:#151515;border-radius:22px 22px 0 0;max-height:78vh;width:100%;padding:14px 14px 26px;overflow:auto}
-.sheetHead{display:flex;justify-content:space-between;align-items:center;position:sticky;top:-14px;background:#151515;padding:10px 0;z-index:2}.sheetHead h2{margin:0;font-size:20px}.close{background:#2b2b2b;color:#fff;min-height:38px;font-size:14px;padding:6px 14px}.commandList{display:grid;grid-template-columns:1fr 1fr;gap:8px}.commandList button{font-size:14px;min-height:44px}
+:root{color-scheme:dark}
+*{box-sizing:border-box;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#000;color:#fff;font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",sans-serif}
+body{overscroll-behavior:none}
+main{height:100vh;max-width:760px;margin:0 auto;padding:7px 10px 8px;display:flex;flex-direction:column;gap:5px;overflow:hidden}
+.head{height:40px;display:flex;align-items:end;justify-content:space-between}
+h1{font-size:23px;line-height:1;margin:0}.meta{font-size:10.5px;color:#8e8e93;white-space:nowrap}
+.section{font-size:12px;font-weight:700;margin:2px 0 0;line-height:16px}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}
+.grid.two{grid-template-columns:repeat(2,1fr)}
+button{border:0;border-radius:11px;background:#171717;color:#0a84ff;font-size:15px;height:39px;padding:4px 5px}
+button:active{background:#282828;transform:scale(.98)}
+button[disabled]{color:#555;background:#0d0d0d}
+.icon{font-size:21px;font-weight:650}
+.pad{height:clamp(128px,20vh,155px);min-height:128px;border-radius:22px;border:1px solid #343434;background:#111;touch-action:none;position:relative;overflow:hidden}
+.hint{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;color:#606064;font-size:12px;line-height:1.55;pointer-events:none}
+.nub{width:48px;height:48px;border-radius:50%;border:1px solid #3a3a3a;background:#1c1c1e;position:absolute;left:50%;top:50%;margin:-24px;z-index:2;pointer-events:none;transition:transform .06s linear}
+.status{height:14px;text-align:center;color:#8e8e93;font-size:10.5px;line-height:14px}
+.footer{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:1px}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.72);display:none;align-items:flex-end;z-index:10}
+.sheet{background:#151515;border-radius:20px 20px 0 0;max-height:78vh;width:100%;padding:12px 12px 24px;overflow:auto}
+.sheetHead{display:flex;justify-content:space-between;align-items:center;position:sticky;top:-12px;background:#151515;padding:8px 0;z-index:2}
+.sheetHead h2{margin:0;font-size:19px}.close{background:#2b2b2b;color:#fff;height:36px;font-size:13px;padding:5px 12px}
+.commandList{display:grid;grid-template-columns:1fr 1fr;gap:6px}.commandList button{font-size:13px;height:40px}
+@media (max-height:680px){
+  main{padding-top:5px;gap:4px}.head{height:34px}h1{font-size:21px}.meta{font-size:9.5px}
+  button{height:35px;font-size:14px}.icon{font-size:19px}.pad{height:118px;min-height:118px}
+  .section{font-size:11px;line-height:14px}.status{height:12px;line-height:12px;font-size:9.5px}
+}
 </style>
 </head>
 <body>
 <main>
-<h1>BRAVIA</h1><div class="meta">接続済み · ${state.count}コマンド · ${htmlEscape(host)}</div>
+<div class="head"><h1>BRAVIA</h1><div class="meta">接続済み · ${state.count} · ${htmlEscape(host)}</div></div>
 <div class="grid">${btn('⏻ 電源','power')}${btn('入力','input')}${btn('クイック','quick')}</div>
-<div class="grid two" style="margin-top:8px">${btn('戻る','back')}${btn('ホーム','home')}</div>
+<div class="grid two">${btn('戻る','back')}${btn('ホーム','home')}</div>
+
 <div class="section">タッチパッド</div>
-<div id="pad" class="pad"><div id="nub" class="nub"></div><div class="hint">スワイプで移動<br>タップでOK</div></div>
-<div id="status" class="status">スワイプ＝移動 · タップ＝OK</div>
+<div id="pad" class="pad">
+  <div id="nub" class="nub"></div>
+  <div class="hint">スワイプ＝移動　タップ＝OK<br>右へ引いて保持＝早送り　左へ引いて保持＝巻き戻し</div>
+</div>
+<div id="status" class="status">右/左に引いたまま0.4秒で早送り/巻き戻し</div>
+
 <div class="section">音量・チャンネル</div>
 <div class="grid">${btn('音量−','volumeDown')}${btn('ミュート','mute')}${btn('音量＋','volumeUp')}</div>
-<div class="grid two" style="margin-top:8px">${btn('CH−','channelDown')}${btn('CH＋','channelUp')}</div>
+<div class="grid two">${btn('CH−','channelDown')}${btn('CH＋','channelUp')}</div>
+
 <div class="section">再生</div>
 <div class="grid">${btn('◀◀','rewind','icon')}${btn('▶','play','icon')}${btn('▶▶','forward','icon')}</div>
-<div class="grid" style="margin-top:8px">${btn('↶10','flashMinus','icon')}${btn('Ⅱ','pause','icon')}${btn('15↷','flashPlus','icon')}</div>
-<div class="grid" style="margin-top:8px">${btn('|◀','prev','icon')}${btn('■','stop','icon')}${btn('▶|','next','icon')}</div>
+<div class="grid">${btn('↶10','flashMinus','icon')}${btn('Ⅱ','pause','icon')}${btn('15↷','flashPlus','icon')}</div>
+<div class="grid">${btn('|◀','prev','icon')}${btn('■','stop','icon')}${btn('▶|','next','icon')}</div>
+
 <div class="footer"><button id="other">その他</button><button id="settings">設定</button></div>
 </main>
-<div id="overlay" class="overlay"><div class="sheet"><div class="sheetHead"><h2>その他のボタン</h2><button id="closeSheet" class="close">閉じる</button></div><div id="commandList" class="commandList"></div></div></div>
+
+<div id="overlay" class="overlay">
+  <div class="sheet">
+    <div class="sheetHead"><h2>その他のボタン</h2><button id="closeSheet" class="close">閉じる</button></div>
+    <div id="commandList" class="commandList"></div>
+  </div>
+</div>
+
 <script>
 const STATE=${json};
+
 function bridge(path, params={}){
   const q=Object.entries(params).map(([k,v])=>encodeURIComponent(k)+'='+encodeURIComponent(String(v))).join('&');
-  location.href='yosbravia://'+path+(q?'?'+q:'')+'&_='+Date.now();
+  location.href='yosbravia://'+path+(q?'?'+q:'')+(q?'&':'?')+'_='+Date.now();
 }
 function setStatus(t){document.getElementById('status').textContent=t||''}
+
 document.querySelectorAll('[data-action]').forEach(b=>{
   const a=b.dataset.action;
   if(!STATE.support[a]) b.disabled=true;
   b.addEventListener('click',()=>bridge('action',{name:a}));
 });
-const pad=document.getElementById('pad'),nub=document.getElementById('nub');
-let start=null,last=null;
-function reset(){nub.style.transform='translate(0px,0px)'}
-pad.addEventListener('pointerdown',e=>{start={x:e.clientX,y:e.clientY};last=start;try{pad.setPointerCapture(e.pointerId)}catch(_){}});
-pad.addEventListener('pointermove',e=>{if(!start)return;last={x:e.clientX,y:e.clientY};const dx=Math.max(-70,Math.min(70,last.x-start.x)),dy=Math.max(-70,Math.min(70,last.y-start.y));nub.style.transform='translate('+dx+'px,'+dy+'px)'});
-pad.addEventListener('pointerup',e=>{if(!start)return;const end=last||{x:e.clientX,y:e.clientY};const dx=end.x-start.x,dy=end.y-start.y,d=Math.hypot(dx,dy);start=null;last=null;reset();if(d<14){setStatus('OK');bridge('gesture',{name:'confirm',repeats:1});return}let a;if(Math.abs(dx)>Math.abs(dy))a=dx>0?'right':'left';else a=dy>0?'down':'up';const n=Math.min(6,Math.max(1,Math.round(d/52)));setStatus((a==='left'?'←':a==='right'?'→':a==='up'?'↑':'↓')+' × '+n);bridge('gesture',{name:a,repeats:n})});
-pad.addEventListener('pointercancel',()=>{start=null;last=null;reset()});
+
+const pad=document.getElementById('pad');
+const nub=document.getElementById('nub');
+let start=null;
+let last=null;
+let holdTimer=null;
+let holdDir=null;
+let seekActive=null;
+
+function resetNub(){nub.style.transform='translate(0px,0px)'}
+function clearHoldTimer(){
+  if(holdTimer){clearTimeout(holdTimer);holdTimer=null}
+  holdDir=null;
+}
+function horizontalSeekCandidate(dx,dy){
+  if(Math.abs(dx)<58 || Math.abs(dx)<=Math.abs(dy)*1.2) return null;
+  return dx>0?'forward':'rewind';
+}
+function armSeek(dir){
+  if(seekActive===dir || holdDir===dir) return;
+  clearHoldTimer();
+  holdDir=dir;
+  holdTimer=setTimeout(()=>{
+    holdTimer=null;
+    if(!start || holdDir!==dir) return;
+    seekActive=dir;
+    setStatus(dir==='forward'?'▶▶ 早送り中（離すと再生）':'◀◀ 巻き戻し中（離すと再生）');
+    bridge('seek-start',{name:dir});
+  },420);
+}
+function stopSeek(sendPlay){
+  clearHoldTimer();
+  if(seekActive){
+    seekActive=null;
+    if(sendPlay) bridge('seek-stop',{name:'play'});
+  }
+}
+
+pad.addEventListener('pointerdown',e=>{
+  start={x:e.clientX,y:e.clientY};
+  last=start;
+  try{pad.setPointerCapture(e.pointerId)}catch(_){}
+});
+
+pad.addEventListener('pointermove',e=>{
+  if(!start)return;
+  last={x:e.clientX,y:e.clientY};
+  const rawDx=last.x-start.x, rawDy=last.y-start.y;
+  const dx=Math.max(-82,Math.min(82,rawDx));
+  const dy=Math.max(-62,Math.min(62,rawDy));
+  nub.style.transform='translate('+dx+'px,'+dy+'px)';
+  const candidate=horizontalSeekCandidate(rawDx,rawDy);
+
+  if(seekActive && candidate!==seekActive){
+    stopSeek(true);
+    setStatus('スワイプ＝移動 · タップ＝OK');
+  }
+  if(!seekActive){
+    if(candidate) armSeek(candidate);
+    else clearHoldTimer();
+  }
+});
+
+pad.addEventListener('pointerup',e=>{
+  if(!start)return;
+  const end=last||{x:e.clientX,y:e.clientY};
+  const dx=end.x-start.x,dy=end.y-start.y,d=Math.hypot(dx,dy);
+  const wasSeeking=Boolean(seekActive);
+  start=null;last=null;
+  clearHoldTimer();
+  resetNub();
+
+  if(wasSeeking){
+    stopSeek(true);
+    setStatus('再生');
+    return;
+  }
+  if(d<13){
+    setStatus('OK');
+    bridge('gesture',{name:'confirm',repeats:1});
+    return;
+  }
+
+  let a;
+  if(Math.abs(dx)>Math.abs(dy)) a=dx>0?'right':'left';
+  else a=dy>0?'down':'up';
+  const n=Math.min(6,Math.max(1,Math.round(d/48)));
+  setStatus((a==='left'?'←':a==='right'?'→':a==='up'?'↑':'↓')+' × '+n);
+  bridge('gesture',{name:a,repeats:n});
+});
+
+pad.addEventListener('pointercancel',()=>{
+  const wasSeeking=Boolean(seekActive);
+  start=null;last=null;
+  clearHoldTimer();
+  resetNub();
+  if(wasSeeking) stopSeek(true);
+});
+
 const overlay=document.getElementById('overlay');
-document.getElementById('other').onclick=()=>{const list=document.getElementById('commandList');if(!list.childElementCount){for(const c of STATE.commands){const b=document.createElement('button');b.textContent=c.label;b.onclick=()=>{bridge('command',{name:c.name});overlay.style.display='none'};list.appendChild(b)}}overlay.style.display='flex'};
+document.getElementById('other').onclick=()=>{
+  const list=document.getElementById('commandList');
+  if(!list.childElementCount){
+    for(const c of STATE.commands){
+      const b=document.createElement('button');
+      b.textContent=c.label;
+      b.onclick=()=>{bridge('command',{name:c.name});overlay.style.display='none'};
+      list.appendChild(b);
+    }
+  }
+  overlay.style.display='flex';
+};
 document.getElementById('closeSheet').onclick=()=>overlay.style.display='none';
 overlay.addEventListener('click',e=>{if(e.target===overlay)overlay.style.display='none'});
 document.getElementById('settings').onclick=()=>bridge('settings');
@@ -367,22 +503,19 @@ async function settings(web) {
 async function handleBridge(url, web) {
   const e = parseBridge(url);
   if (!e) return;
-  if (bridgeBusy && e.path !== 'gesture') return;
-  bridgeBusy = true;
-  try {
-    if (e.path === 'action') {
-      if (e.params.name === 'quick') await sendQuick(); else await sendAction(e.params.name);
-    } else if (e.path === 'gesture') {
-      await sendRepeated(e.params.name, e.params.repeats);
-    } else if (e.path === 'command') {
-      await sendCommand(commandByName(e.params.name));
-    } else if (e.path === 'settings') {
-      await settings(web);
-    }
-  } catch (err) {
-    await showError(err);
-  } finally {
-    bridgeBusy = false;
+  if (e.path === 'action') {
+    if (e.params.name === 'quick') await sendQuick();
+    else await sendAction(e.params.name);
+  } else if (e.path === 'gesture') {
+    await sendRepeated(e.params.name, e.params.repeats);
+  } else if (e.path === 'seek-start') {
+    await sendAction(e.params.name);
+  } else if (e.path === 'seek-stop') {
+    if (resolveAction('play')) await sendAction('play', true);
+  } else if (e.path === 'command') {
+    await sendCommand(commandByName(e.params.name));
+  } else if (e.path === 'settings') {
+    await settings(web);
   }
 }
 
@@ -391,7 +524,9 @@ async function presentRemote() {
   web.shouldAllowRequest = request => {
     const url = request && request.url ? request.url : '';
     if (String(url).startsWith('yosbravia://')) {
-      handleBridge(url, web);
+      bridgeQueue = bridgeQueue
+        .then(() => handleBridge(url, web))
+        .catch(async err => { await showError(err); });
       return false;
     }
     return true;
