@@ -1,5 +1,21 @@
 'use strict';
 (()=>{
+  const app=document.querySelector('main.app');
+  if(app)app.style.visibility='hidden';
+  let revealed=false;
+  const reveal=()=>{
+    if(revealed)return;
+    revealed=true;
+    if(app)app.style.visibility='visible';
+  };
+  const waitForFinal=setInterval(()=>{
+    if(document.getElementById('lifePageHostV1')){
+      clearInterval(waitForFinal);
+      reveal();
+    }
+  },16);
+  setTimeout(()=>{clearInterval(waitForFinal);reveal()},3000);
+
   if(!document.getElementById('yosSuiteHomeV3')){
     const a=document.createElement('a');
     a.id='yosSuiteHomeV3';
