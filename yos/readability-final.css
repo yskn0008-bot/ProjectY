@@ -25,12 +25,12 @@ body,button,input,textarea,select{
 /* Fixed five-column nav uses its own compact scale. Never truncate the official Hero's Journey label. */
 .bottom-nav{grid-template-columns:repeat(5,minmax(0,1fr))!important}
 .bottom-nav a,.bottom-nav button{min-width:0!important;padding-left:1px!important;padding-right:1px!important;overflow:visible!important}
-.bottom-nav a b,.bottom-nav button b{display:block;max-width:none!important;overflow:visible!important;text-overflow:clip!important;font-size:8.6px!important;line-height:1.05!important;white-space:nowrap!important;letter-spacing:-.035em!important}
-.bottom-nav a:nth-child(4) b,.bottom-nav button:nth-child(4) b{font-size:7.7px!important;letter-spacing:-.075em!important;transform:scaleX(.94);transform-origin:center}
+.bottom-nav a b,.bottom-nav button b{display:block;max-width:none!important;overflow:visible!important;text-overflow:clip!important;font-size:8.8px!important;line-height:1.05!important;white-space:nowrap!important;letter-spacing:-.025em!important;text-align:center}
+.bottom-nav a:nth-child(4) b,.bottom-nav button:nth-child(4) b{width:100%;font-size:8.2px!important;line-height:.98!important;white-space:normal!important;letter-spacing:-.025em!important;transform:none!important}
 .archive-world{font-size:14px}
 .roadmap-horizon span,.roadmap-horizon b,.roadmap-horizon em,.roadmap-stage small{font-size:12px;line-height:1.5}
 .roadmap-stage li{font-size:14px;line-height:1.55}
 @media (max-width:390px){
-  .bottom-nav a b,.bottom-nav button b{font-size:8.2px!important}
-  .bottom-nav a:nth-child(4) b,.bottom-nav button:nth-child(4) b{font-size:7.3px!important;transform:scaleX(.92)}
+  .bottom-nav a b,.bottom-nav button b{font-size:8.5px!important}
+  .bottom-nav a:nth-child(4) b,.bottom-nav button:nth-child(4) b{font-size:8px!important;white-space:normal!important}
 }
