@@ -1,0 +1,19 @@
+/* Issue #272 final physical-iPhone readability pass.
+   The adopted MY LIFE composition stays; typography follows the clearer former-Life screen. */
+body,button,input,textarea,select{
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Hiragino Sans","Yu Gothic",sans-serif!important;
+  -webkit-text-size-adjust:100%;
+}
+#lifePageHostV1{font-size:16px}
+#lifePageHostV1 h1{font-size:28px;line-height:1.25}
+#lifePageHostV1 h2{font-size:24px;line-height:1.3}
+#lifePageHostV1 h3{font-size:18px;line-height:1.35}
+#lifePageHostV1 p,#lifePageHostV1 label,#lifePageHostV1 input,#lifePageHostV1 textarea,#lifePageHostV1 select{font-size:15px;line-height:1.55}
+#lifePageHostV1 small{font-size:12px;line-height:1.45}
+#lifePageHostV1 button{font-size:14px}
+.life-domain-nav-v1 button,.life-domain-nav-v1 a{font-size:11px;min-width:0}
+.life-domain-nav-v1 button:nth-child(4),.life-domain-nav-v1 a:nth-child(4){font-size:10px;letter-spacing:-.03em}
+@media (max-width:390px){
+  .life-domain-nav-v1 button,.life-domain-nav-v1 a{font-size:10px}
+  .life-domain-nav-v1 button:nth-child(4),.life-domain-nav-v1 a:nth-child(4){font-size:9px}
+}
