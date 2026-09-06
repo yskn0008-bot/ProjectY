@@ -1,0 +1,34 @@
+/* Issue #272 final physical-iPhone readability pass.
+   Keep the adopted visual compositions; use the clearer former-Life typography scale. */
+body,button,input,textarea,select{
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Hiragino Sans","Yu Gothic",sans-serif;
+  -webkit-text-size-adjust:100%;
+}
+/* Preserve the MY WAY editorial identity only where it carries the world-view. */
+.brand b,.domain-heading h1,.archive-world .domain-heading h1,.roadmap-stage h2,.roadmap-horizon strong{
+  font-family:Georgia,"Yu Mincho",serif;
+}
+.home-intro p{font-family:inherit;font-size:20px;line-height:1.45}
+.domain-heading small{font-family:inherit;font-size:11px}
+.domain-heading h1{font-size:23px;line-height:1.25}
+.domain-heading p{font-size:12px;line-height:1.5}
+.scene-note small{font-size:11px}.scene-note strong{font-size:14px}.scene-note em{font-size:11px}
+.scene-route-label,.route-caption,.route-order b{font-size:10px}
+.next-step small{font-size:11px}.next-step strong{font-size:14px}.next-step a{font-size:12px}
+.yos-companion b{font-size:12px}.yos-companion small{font-size:11px}
+.money-overview>header{font-size:11px}.money-ledger-mark{font-size:10px}
+.money-totals small{font-size:11px}.money-totals strong{font-size:21px}
+.money-chart p{font-size:12px}.chart-bars b{font-size:10px}
+.money-breakdown h2{font-size:15px}.money-breakdown dt{font-size:11px}.money-breakdown dd{font-size:12px}
+.money-donut span,.money-ring>small{font-size:10px}.money-next small{font-size:11px}.money-next strong{font-size:13px}
+.domain-nav a,.domain-nav button{font-size:11px;min-width:0}
+.domain-nav .nav-label{font-size:11px;white-space:nowrap}
+/* The long HJ label must remain readable rather than clipping. */
+.domain-nav a:nth-child(4),.domain-nav button:nth-child(4){font-size:10px;letter-spacing:-.03em}
+.archive-world{font-size:14px}
+.roadmap-horizon span,.roadmap-horizon b,.roadmap-horizon em,.roadmap-stage small{font-size:12px;line-height:1.5}
+.roadmap-stage li{font-size:14px;line-height:1.55}
+@media (max-width:390px){
+  .domain-nav a,.domain-nav button,.domain-nav .nav-label{font-size:10px}
+  .domain-nav a:nth-child(4),.domain-nav button:nth-child(4){font-size:9px}
+}
