@@ -1,5 +1,5 @@
 'use strict';
-const CACHE='yos-life-home-v19-no-legacy-flash';
+const CACHE='yos-life-home-v17-shared-domain-nav';
 const LIFE_CACHE_PREFIX='yos-life-';
 const STATIC=[
   './',
