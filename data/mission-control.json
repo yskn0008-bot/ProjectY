@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-07T06:10:24+09:00",
+  "updated_at": "2026-09-07T06:47:26+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -12,16 +12,6 @@
     ]
   },
   "inbox": [
-    {
-      "id": "github-pr-294",
-      "title": "PR #294 fix: lock Issue #272 final iPhone acceptance",
-      "type": "GitHub PR",
-      "status": "review",
-      "priority": 1,
-      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/294",
-      "updated_at": "2026-09-06T20:36:16Z"
-    },
     {
       "id": "github-pr-233",
       "title": "PR #233 Draft: Mission Controlに進捗率・残り時間を常時表示する",
@@ -60,7 +50,7 @@
       "priority": 2,
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/293",
-      "updated_at": "2026-09-06T21:02:50Z"
+      "updated_at": "2026-09-06T21:11:10Z"
     },
     {
       "id": "github-issue-10",
@@ -165,39 +155,39 @@
   ],
   "recently_completed": [
     {
-      "id": "github-commit-55e80aabe478",
-      "title": "Merge pull request #290 from yskn0008-bot/yos/my-way-iphone-hotfix-2",
-      "completed_at": "2026-09-06T15:41:22Z",
-      "result": "GitHub mainへ反映（55e80aa）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/55e80aabe478ca04a0da3880cf2f1046fc6db4a9"
+      "id": "github-commit-a316be8ad636",
+      "title": "Merge PR #294: lock Issue #272 final iPhone acceptance",
+      "completed_at": "2026-09-06T21:45:57Z",
+      "result": "GitHub mainへ反映（a316be8）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/a316be8ad63677216bb2c0b7036c5a3471bc1caa"
     },
     {
-      "id": "github-commit-af78d65e54ce",
-      "title": "fix: hide legacy Life shell before final dashboard install",
-      "completed_at": "2026-09-06T10:56:07Z",
-      "result": "GitHub mainへ反映（af78d65）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/af78d65e54cee6ed06ac257d702cffe72e6c7604"
+      "id": "github-commit-c197f96d4f05",
+      "title": "fix(yos): show full Hero's Journey label on two lines",
+      "completed_at": "2026-09-06T20:30:25Z",
+      "result": "GitHub mainへ反映（c197f96）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/c197f96d4f0532bf0c841fe3847562be79175030"
     },
     {
-      "id": "github-commit-e904faa9898a",
-      "title": "fix: keep Life navigation labels complete on iPhone",
-      "completed_at": "2026-09-06T10:55:57Z",
-      "result": "GitHub mainへ反映（e904faa）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/e904faa9898a8f39ce9dd78114a0fde9f87d4f1b"
+      "id": "github-commit-6d3fae0ef3e8",
+      "title": "test(yos): require completion-lock cache generation",
+      "completed_at": "2026-09-06T20:27:12Z",
+      "result": "GitHub mainへ反映（6d3fae0）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/6d3fae0ef3e8afaf544cf8b882b8a673fdf8bd8c"
     },
     {
-      "id": "github-commit-efadb28488be",
-      "title": "fix: prevent MY WAY text clipping on iPhone",
-      "completed_at": "2026-09-06T10:55:47Z",
-      "result": "GitHub mainへ反映（efadb28）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/efadb28488be5754265270e43c8015f5962a8dbb"
+      "id": "github-commit-6dde9c20bb17",
+      "title": "fix(yos): keep large type without clipping",
+      "completed_at": "2026-09-06T20:27:02Z",
+      "result": "GitHub mainへ反映（6dde9c2）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/6dde9c20bb17ff18f9349be6b01b4b35e634f6e5"
     },
     {
-      "id": "github-commit-42655bd2747e",
-      "title": "Merge pull request #289 from yskn0008-bot/yos/my-way-final-readability",
-      "completed_at": "2026-09-06T09:19:32Z",
-      "result": "GitHub mainへ反映（42655bd）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/42655bd2747e8eabf4411636c32f91da3271f936"
+      "id": "github-commit-ce36adf84b41",
+      "title": "fix(yos): force completion-lock readability asset",
+      "completed_at": "2026-09-06T20:26:45Z",
+      "result": "GitHub mainへ反映（ce36adf）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/ce36adf84b41e30c481fd711f75d671946ca8f64"
     },
     {
       "id": "complete-002",
@@ -224,7 +214,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #294をレビューして公開判断する",
+      "next_action": "PR #293をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -234,7 +224,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-07T06:10:24+09:00",
+      "last_update": "2026-09-07T06:47:26+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -309,13 +299,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 30件・Open PR 5件を自動同期中",
+      "next_action": "Open Issue 29件・Open PR 4件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-07T06:10:24+09:00",
+      "last_update": "2026-09-07T06:47:26+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -329,7 +319,7 @@
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #294をレビューして公開判断する",
+      "next_action": "PR #293をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -338,7 +328,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-07T06:10:24+09:00",
+      "last_update": "2026-09-07T06:47:26+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +410,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "5a629df27a77a7d693e8ac1726e2464a7fd128aa2be61c6b090febdf1d9f297a"
+  "github_snapshot_hash": "c4dde54a6cd090cfe18d28c031ffd862e0dd1940669aa1bbb439fc34a4298c3b"
 }
