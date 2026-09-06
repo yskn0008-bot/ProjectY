@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-07T06:59:28+09:00",
+  "updated_at": "2026-09-07T08:39:51+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -12,6 +12,16 @@
     ]
   },
   "inbox": [
+    {
+      "id": "github-pr-296",
+      "title": "PR #296 feat(yos): add private task progress dashboard",
+      "type": "GitHub PR",
+      "status": "review",
+      "priority": 1,
+      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/296",
+      "updated_at": "2026-09-06T22:05:56Z"
+    },
     {
       "id": "github-pr-233",
       "title": "PR #233 Draft: Mission Controlに進捗率・残り時間を常時表示する",
@@ -214,7 +224,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #293をレビューして公開判断する",
+      "next_action": "PR #296をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -224,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-07T06:59:28+09:00",
+      "last_update": "2026-09-07T08:39:51+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -299,13 +309,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 31件・Open PR 4件を自動同期中",
+      "next_action": "Open Issue 32件・Open PR 5件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-07T06:59:28+09:00",
+      "last_update": "2026-09-07T08:39:51+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -319,7 +329,7 @@
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #293をレビューして公開判断する",
+      "next_action": "PR #296をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -328,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-07T06:59:28+09:00",
+      "last_update": "2026-09-07T08:39:51+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -410,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "3d3ad73c4b7279659ff30ddb0054b97c8fc6ae6cc2b50b575b4f0d6db01c0462"
+  "github_snapshot_hash": "f5560fba05022cdb5cdfd7d121d5afe0570268b21dac1eb5b04be970508d31e2"
 }
