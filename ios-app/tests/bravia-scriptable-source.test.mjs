@@ -30,27 +30,37 @@ test('Scriptable BRAVIA keeps credentials on device and does not hardcode TV sec
   assert.doesNotMatch(source, /AAAAAQAAAAE/);
 });
 
-test('Scriptable BRAVIA exposes touchpad mode', () => {
+test('Scriptable BRAVIA exposes inline touchpad with pointer gestures', () => {
   assert.match(source, /new WebView\(\)/);
   assert.match(source, /タッチパッド/);
-  assert.match(source, /touchstart/);
-  assert.match(source, /touchend/);
-  assert.match(source, /yosRemoteAction/);
-  assert.match(source, /completion\(event\.detail\)/);
+  assert.match(source, /pointerdown/);
+  assert.match(source, /pointermove/);
+  assert.match(source, /pointerup/);
+  assert.match(source, /yosbravia:\/\//);
+});
+
+test('Scriptable BRAVIA supports hold right/left for seek and resumes on release', () => {
+  assert.match(source, /horizontalSeekCandidate/);
+  assert.match(source, /seek-start/);
+  assert.match(source, /seek-stop/);
+  assert.match(source, /forward/);
+  assert.match(source, /rewind/);
+  assert.match(source, /resolveAction\('play'\)/);
 });
 
 test('Scriptable BRAVIA uses transport symbols for media controls', () => {
-  for (const symbol of ['⏪', '▶︎', '⏩', '⏸︎', '⏹︎']) {
+  for (const symbol of ['◀◀', '▶', '▶▶', 'Ⅱ', '■']) {
     assert.match(source, new RegExp(symbol));
   }
   assert.match(source, /rewind: \['rewind'\]/);
   assert.match(source, /forward: \['forward'\]/);
 });
 
-test('Scriptable BRAVIA retains one-screen primary controls and updater', () => {
+test('Scriptable BRAVIA keeps the primary remote in one non-scrolling viewport', () => {
   for (const label of ['電源', '入力', 'クイック', '戻る', 'ホーム', '音量−', 'ミュート', '音量＋', '最新版へ更新']) {
     assert.match(source, new RegExp(label));
   }
-  assert.match(source, /new UITable\(\)/);
+  assert.match(source, /overflow:hidden/);
+  assert.match(source, /height:100vh/);
   assert.match(source, /UPDATE_URL/);
 });
