@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-07T00:54:07+09:00",
+  "updated_at": "2026-09-07T01:52:58+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -41,6 +41,16 @@
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/291",
       "updated_at": "2026-09-06T15:50:35Z"
+    },
+    {
+      "id": "github-pr-293",
+      "title": "PR #293 BRAVIA: add free Scriptable remote fallback",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/293",
+      "updated_at": "2026-09-06T16:00:39Z"
     },
     {
       "id": "github-issue-10",
@@ -204,7 +214,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #291をレビューして公開判断する",
+      "next_action": "PR #293をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -214,7 +224,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-07T00:54:07+09:00",
+      "last_update": "2026-09-07T01:52:58+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -289,13 +299,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 30件・Open PR 3件を自動同期中",
+      "next_action": "Open Issue 30件・Open PR 4件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-07T00:54:07+09:00",
+      "last_update": "2026-09-07T01:52:58+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -309,7 +319,7 @@
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #291をレビューして公開判断する",
+      "next_action": "PR #293をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -318,7 +328,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-07T00:54:07+09:00",
+      "last_update": "2026-09-07T01:52:58+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -400,5 +410,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "63fbc1c2da30a161b0ff922aa39a11374203d46c100383bc2f213d1814de6575"
+  "github_snapshot_hash": "dd9d7262b94f859d42a69f4cd40c150d97f6cc5acc440003a645a829c8c4122c"
 }
