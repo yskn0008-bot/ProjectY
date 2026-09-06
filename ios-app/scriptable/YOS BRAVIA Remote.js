@@ -1,12 +1,13 @@
 // YOS BRAVIA Remote — Scriptable fallback for Issue #292.
-// Reuses the Sony runtime-command discovery and IRCC safety boundary from Issue #254 / PR #255.
-// Requires Scriptable on iPhone and BRAVIA IP Control + Pre-Shared Key enabled on the TV.
+// Sony runtime command discovery + IRCC-IP. Secrets remain in Scriptable Keychain.
 
 const STORAGE = Object.freeze({
   host: 'yos.bravia.scriptable.host',
   psk: 'yos.bravia.scriptable.psk',
   quick: 'yos.bravia.scriptable.quick-command'
 });
+
+const UPDATE_URL = 'https://raw.githubusercontent.com/yskn0008-bot/ProjectY/codex/issue-292-bravia-scriptable/ios-app/scriptable/YOS%20BRAVIA%20Remote.js';
 
 const ACTION_ALIASES = Object.freeze({
   power: ['poweroff', 'power'],
@@ -26,6 +27,8 @@ const ACTION_ALIASES = Object.freeze({
   play: ['play'],
   pause: ['pause'],
   stop: ['stop'],
+  rewind: ['rewind'],
+  forward: ['forward'],
   flashMinus: ['flashminus'],
   flashPlus: ['flashplus'],
   prev: ['prev'],
@@ -53,6 +56,8 @@ const JAPANESE_REMOTE_LABELS = Object.freeze({
   play: '再生',
   pause: '一時停止',
   stop: '停止',
+  rewind: '巻き戻し',
+  forward: '早送り',
   flashminus: '10秒戻し',
   flashplus: '15秒送り',
   prev: '前',
@@ -202,11 +207,21 @@ async function sendCommand(command) {
   });
 }
 
-async function sendAction(action) {
+async function sendAction(action, silent = false) {
   try {
     await sendCommand(resolveAction(action));
+    return true;
   } catch (error) {
-    await showError(error);
+    if (!silent) await showError(error);
+    return false;
+  }
+}
+
+async function sendRepeated(action, repeats) {
+  const count = Math.min(8, Math.max(1, Number(repeats) || 1));
+  for (let index = 0; index < count; index += 1) {
+    const ok = await sendAction(action, index > 0);
+    if (!ok) break;
   }
 }
 
@@ -273,7 +288,7 @@ async function chooseQuickCandidate(sendAfterSelection) {
 
   const alert = new Alert();
   alert.title = 'クイック設定候補';
-  alert.message = '物理リモコンのクイック設定と同じ画面を開く候補を選んでください。最初は実機確認が必要です。';
+  alert.message = '物理リモコンのクイック設定と同じ画面を開く候補を選んでください。';
   for (const candidate of quickCandidates) {
     const label = japaneseLabel(candidate.name);
     alert.addAction(label === candidate.name ? candidate.name : label + '｜' + candidate.name);
@@ -375,6 +390,102 @@ function actionButton(title, action) {
   };
 }
 
+async function presentTouchpad() {
+  const web = new WebView();
+  const html = `<!doctype html>
+<html lang="ja">
+<head>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<style>
+  *{box-sizing:border-box;-webkit-user-select:none;user-select:none}
+  body{margin:0;background:#000;color:#fff;font-family:-apple-system,BlinkMacSystemFont,sans-serif;overflow:hidden}
+  .wrap{height:100vh;padding:18px;display:flex;flex-direction:column;gap:14px}
+  .head{display:flex;justify-content:space-between;align-items:end}
+  h1{font-size:24px;margin:0}.sub{font-size:13px;color:#aaa}
+  #pad{flex:1;min-height:390px;border-radius:30px;border:1px solid #333;
+    background:linear-gradient(145deg,#151515,#090909);
+    display:flex;align-items:center;justify-content:center;touch-action:none}
+  #hint{text-align:center;color:#777;font-size:15px;line-height:1.7}
+  .dot{width:70px;height:70px;border-radius:50%;border:1px solid #2b2b2b;
+    display:flex;align-items:center;justify-content:center;color:#777;font-weight:600}
+  .active{transform:scale(.96);background:#1c1c1e}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="head"><div><h1>タッチパッド</h1><div class="sub">スワイプで移動・タップでOK</div></div></div>
+  <div id="pad"><div class="dot">OK</div></div>
+  <div id="hint">長く・速くスワイプすると多めに移動します</div>
+</div>
+<script>
+  const pad = document.getElementById('pad');
+  let startX=0,startY=0,startAt=0;
+
+  function emit(detail){
+    document.dispatchEvent(new CustomEvent('yosRemoteAction',{detail}));
+  }
+
+  pad.addEventListener('touchstart', e => {
+    const t=e.touches[0];
+    startX=t.clientX;startY=t.clientY;startAt=Date.now();
+    pad.classList.add('active');
+    e.preventDefault();
+  }, {passive:false});
+
+  pad.addEventListener('touchend', e => {
+    pad.classList.remove('active');
+    const t=e.changedTouches[0];
+    const dx=t.clientX-startX, dy=t.clientY-startY;
+    const distance=Math.hypot(dx,dy);
+    const duration=Math.max(Date.now()-startAt,1);
+    if(distance<18){
+      emit({action:'confirm',repeats:1});
+      return;
+    }
+    const action=Math.abs(dx)>Math.abs(dy)
+      ? (dx>0?'right':'left')
+      : (dy>0?'down':'up');
+    const velocity=distance/duration;
+    const repeats=Math.min(8,Math.max(1,Math.floor(distance/45)+Math.floor(velocity/.7)));
+    emit({action,repeats});
+    e.preventDefault();
+  }, {passive:false});
+</script>
+</body>
+</html>`;
+
+  await web.loadHTML(html);
+
+  const register = () => web.evaluateJavaScript(`
+    (() => {
+      const handler = event => {
+        document.removeEventListener('yosRemoteAction', handler);
+        completion(event.detail);
+      };
+      document.addEventListener('yosRemoteAction', handler);
+    })();
+  `, true);
+
+  let closed = false;
+  const closedPromise = web.present(true).then(() => {
+    closed = true;
+    return { action: '__closed__', repeats: 0 };
+  });
+
+  while (!closed) {
+    let event;
+    try {
+      event = await Promise.race([register(), closedPromise]);
+    } catch (_) {
+      break;
+    }
+    if (!event || event.action === '__closed__' || closed) break;
+    if (['up', 'down', 'left', 'right', 'confirm'].includes(event.action)) {
+      await sendRepeated(event.action, event.repeats);
+    }
+  }
+}
+
 function renderMain() {
   table.removeAllRows();
   addTitle('BRAVIA', '接続済み · ' + remoteMap.size + 'コマンド · ' + host);
@@ -394,10 +505,12 @@ function renderMain() {
     actionButton('ホーム', 'home')
   ]);
 
-  addSection('方向キー');
-  addGridRow([null, actionButton('▲', 'up'), null], 50);
-  addGridRow([actionButton('◀', 'left'), actionButton('OK', 'confirm'), actionButton('▶', 'right')], 58);
-  addGridRow([null, actionButton('▼', 'down'), null], 50);
+  addSection('タッチパッド');
+  addGridRow([{
+    title: 'タッチパッドを開く',
+    supported: ['up', 'down', 'left', 'right', 'confirm'].every(isActionSupported),
+    onTap: presentTouchpad
+  }], 64);
 
   addSection('音量・チャンネル');
   addGridRow([
@@ -412,15 +525,20 @@ function renderMain() {
 
   addSection('再生');
   addGridRow([
-    actionButton('10秒戻し', 'flashMinus'),
-    actionButton('再生', 'play'),
-    actionButton('15秒送り', 'flashPlus')
-  ]);
+    actionButton('⏪', 'rewind'),
+    actionButton('▶︎', 'play'),
+    actionButton('⏩', 'forward')
+  ], 58);
   addGridRow([
-    actionButton('前', 'prev'),
-    actionButton('一時停止', 'pause'),
-    actionButton('次', 'next')
-  ], 48);
+    actionButton('↶10', 'flashMinus'),
+    actionButton('⏸︎', 'pause'),
+    actionButton('15↷', 'flashPlus')
+  ], 54);
+  addGridRow([
+    actionButton('⏮︎', 'prev'),
+    actionButton('⏹︎', 'stop'),
+    actionButton('⏭︎', 'next')
+  ], 54);
 
   addGridRow([
     { title: 'その他', onTap: renderAllCommands },
@@ -455,6 +573,22 @@ function renderAllCommands() {
   table.reload();
 }
 
+async function updateSelf() {
+  const request = new Request(UPDATE_URL);
+  const source = await request.loadString();
+  if (!source.includes('YOS BRAVIA Remote') || !source.includes('getRemoteControllerInfo')) {
+    throw new Error('更新ファイルを確認できませんでした。');
+  }
+  const fm = FileManager.iCloud();
+  const path = fm.joinPath(fm.documentsDirectory(), 'YOS BRAVIA Remote.js');
+  fm.writeString(path, source);
+  const alert = new Alert();
+  alert.title = '更新完了';
+  alert.message = 'いったんCloseで閉じ、YOS BRAVIA Remoteを開き直してください。';
+  alert.addAction('OK');
+  await alert.presentAlert();
+}
+
 function renderSettings() {
   table.removeAllRows();
   addTitle('BRAVIA設定', host);
@@ -486,6 +620,17 @@ function renderSettings() {
       if (Keychain.contains(STORAGE.quick)) Keychain.remove(STORAGE.quick);
       await chooseQuickCandidate(false);
       renderSettings();
+    }
+  }]);
+
+  addGridRow([{
+    title: '最新版へ更新',
+    onTap: async () => {
+      try {
+        await updateSelf();
+      } catch (error) {
+        await showError(error);
+      }
     }
   }]);
 
