@@ -3,33 +3,170 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#faf8f2">
+  <meta name="theme-color" content="#f7f0df">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="YOS">
-  <meta name="description" content="MY WAY by YOS。人生の現在地と次の一歩を見る人生ナビ。">
-  <link rel="manifest" href="./manifest.webmanifest"><link rel="stylesheet" href="./styles.css">
+  <meta name="description" content="MY WAY by YOS。人生を、自分で進んでいくための相棒アプリ。">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="stylesheet" href="./styles.css">
   <title>MY WAY by YOS｜人生ナビ</title>
 </head>
-<body>
+<body data-domain="home">
 <main class="app">
-  <header class="topbar"><button class="brand" type="button" data-page="home"><span id="brandTitle">MY WAY</span><b>by YOS</b></button><button id="openMenu" class="menu-button" type="button" aria-label="管理メニューを開く">≡</button></header>
+  <header class="topbar">
+    <button class="brand" type="button" data-page="home" aria-label="MY WAY Home">
+      <span class="brand-compass" aria-hidden="true">✥</span>
+      <span><b id="brandTitle">MY WAY</b><small>by YOS</small></span>
+    </button>
+    <button id="openMenu" class="menu-button" type="button" aria-label="管理メニューを開く">≡</button>
+  </header>
 
-  <section id="homePage" class="page active" data-page-panel="home">
-    <article class="card life-nav"><h1>人生ナビ</h1><div class="nav-summary"><div><small>今ここ</small><strong id="currentSummary">未設定</strong></div><div><small>行き先</small><strong id="destinationSummary">未設定</strong></div><div><small>ここまで</small><strong id="progressSummary">データなし</strong></div></div><small class="route-label">人生ルート</small><svg class="life-route" viewBox="0 0 330 82" role="img" aria-label="過去から今ここを通り行き先へ続くルート"><path class="hill" d="M8 59 C54 57 67 26 112 43 S185 70 224 42 S289 20 322 31"/><circle cx="151" cy="57" r="7"/><path class="flag" d="M300 27V7m0 1h20l-7 8 7 8h-20"/><text x="8" y="77">過去</text><text x="127" y="77">今ここ</text><text x="204" y="77">ルート</text><text x="280" y="77">行き先</text></svg></article>
-    <article class="card next-step"><span class="check" aria-hidden="true">○</span><div><small>次の一歩</small><strong id="nextSummary">未設定</strong></div><a href="../life/">›</a></article>
+  <section id="homePage" class="page home-world active" data-page-panel="home">
+    <header class="home-intro">
+      <div><p id="homeGreeting">おはよう、ようすけ！</p><h1>今日も、自分の道を進もう。</h1></div>
+      <div class="compass-seal" aria-hidden="true"><span>✦</span><i></i></div>
+    </header>
+
+    <article class="home-scene primary-surface">
+      <svg class="home-route-thread" viewBox="0 0 390 390" preserveAspectRatio="none" aria-hidden="true">
+        <path d="M72 78 C175 76 304 104 306 183 C307 248 231 255 205 304 C184 344 130 350 83 326"/>
+        <circle cx="72" cy="78" r="5"/><circle cx="306" cy="183" r="5"/><circle cx="83" cy="326" r="5"/>
+      </svg>
+      <svg class="home-watercolor" viewBox="0 0 390 430" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+        <defs>
+          <linearGradient id="homeSky" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#f8e9b9"/><stop offset=".45" stop-color="#d8e8d5"/><stop offset="1" stop-color="#8bb18a"/></linearGradient>
+          <linearGradient id="homeField" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#afc693"/><stop offset="1" stop-color="#4f7b5b"/></linearGradient>
+          <linearGradient id="homePath" x1=".2" y1="0" x2=".8" y2="1"><stop stop-color="#efe2bd"/><stop offset="1" stop-color="#c49a67"/></linearGradient>
+          <filter id="paperWash"><feTurbulence baseFrequency=".035" numOctaves="3" seed="8" result="noise"/><feDisplacementMap in="SourceGraphic" in2="noise" scale="4"/></filter>
+        </defs>
+        <rect width="390" height="430" fill="url(#homeSky)"/>
+        <circle cx="325" cy="77" r="31" fill="#fff2b3" opacity=".72"/>
+        <path d="M0 146L64 94l38 31 64-71 61 72 48-48 95 86v73H0z" fill="#789693" opacity=".5" filter="url(#paperWash)"/>
+        <path d="M0 174l79-65 45 46 50-61 71 70 58-44 87 72v74H0z" fill="#b7c5a4" opacity=".8"/>
+        <path d="M0 201c67-39 120-41 177-7 50 29 119 18 213-18v254H0z" fill="url(#homeField)"/>
+        <path d="M390 257c-88-21-170-9-238 43C96 343 67 391 55 430h173c-14-38-7-72 23-101 34-32 83-40 139-36z" fill="url(#homePath)" opacity=".95"/>
+        <path d="M375 268c-80-19-151-7-212 41-49 39-76 79-90 121" fill="none" stroke="#fff3d5" stroke-width="24" stroke-linecap="round" opacity=".5"/>
+        <g fill="#3e694b" opacity=".85"><circle cx="25" cy="227" r="28"/><circle cx="64" cy="216" r="19"/><circle cx="346" cy="220" r="28"/><circle cx="310" cy="233" r="20"/></g>
+        <g fill="#315e43"><ellipse cx="184" cy="320" rx="4" ry="8" transform="rotate(-25 184 320)"/><ellipse cx="168" cy="340" rx="4" ry="8" transform="rotate(25 168 340)"/><ellipse cx="151" cy="361" rx="4" ry="8" transform="rotate(-25 151 361)"/></g>
+        <path d="M328 278v-34m0 1h31l-10 11 10 11h-31" fill="none" stroke="#7c542b" stroke-width="4" stroke-linejoin="round"/>
+      </svg>
+      <section class="scene-note current-note"><span class="scene-pin" aria-hidden="true">●</span><small>今ここ</small><strong id="currentSummary">未設定</strong><em id="homeDate">----</em></section>
+      <span class="scene-route-label">人生ルート</span>
+      <section class="scene-note progress-note"><small>ここまで</small><strong id="progressSummary">データなし</strong></section>
+      <section class="scene-note destination-note"><small>行き先</small><strong id="destinationSummary">未設定</strong><span aria-hidden="true">⚑</span></section>
+      <div class="route-order" aria-hidden="true"><b>今ここ</b><i>→</i><b>行き先</b><i>→</i><b>次の一歩</b></div>
+      <p class="route-caption">人生ナビ — 選択の連続が、未来をつくる。</p>
+    </article>
+
+    <article class="next-step primary-action">
+      <button type="button" class="step-check" aria-label="次の一歩を確認">□</button>
+      <div><small>次の一歩〈今日やること〉</small><strong id="nextSummary">未設定</strong></div>
+      <a href="../life/">やる ›</a>
+    </article>
+    <button class="yos-companion" type="button" data-prompt="【YOS】MY WAYの今ここ・行き先・ここまで・次の一歩を一緒に確認したい。"><span class="yos-face" aria-hidden="true">••</span><span><b>YOSに相談</b><small>迷ったときは、人生の羅針盤へ戻ろう。</small></span><i>›</i></button>
     <a class="domain-card journey hj-entry-compat-v1" aria-hidden="true" tabindex="-1"><b>Hero's Journey</b><small>複数の旅・螺旋成長・今週の物語</small></a>
   </section>
 
-  <section id="moneyPage" class="page" data-page-panel="money" hidden><article class="card"><h1>今月のサマリー</h1><div class="money-summary"><div><small>収入</small><strong id="incomeSummary">未設定</strong><small>支出</small><strong id="expenseSummary">未設定</strong><small>残高</small><strong id="balanceSummary">未算出</strong></div><div class="donut-empty"><span>データ<br>なし</span></div></div></article><article class="card compact"><h2>お金の見える化</h2><p id="moneyChart">データなし</p></article><article class="card compact"><h2>今月の目標</h2><p id="moneyGoal">未設定</p></article></section>
-  <section id="journeyPage" class="page" data-page-panel="journey" hidden><article class="card"><h1>旅の記録</h1><div class="journey-route" aria-hidden="true">● ︵ ︵ ︵ ⚑</div><dl><dt>現在ステージ</dt><dd id="journeyStage">未設定</dd><dt>現在の景色</dt><dd id="journeyScene">データなし</dd></dl><a class="detail-link" href="./hj/">Hero's Journeyを開く ›</a></article><article class="card compact"><h2>最近の経験</h2><p id="recentExperience">データなし</p></article><article class="card compact"><h2>次のテーマ</h2><p id="nextTheme">未設定</p></article></section>
-  <section id="ideaPage" class="page" data-page-panel="idea" hidden><article class="card idea-card"><h1>今日のひらめき</h1><button id="focusIdea" class="idea-plus" type="button" aria-label="アイデアメモを入力">＋</button><label for="ideaMemo">アイデアメモ</label><textarea id="ideaMemo" rows="4" placeholder="思いついたことを残す"></textarea><button id="saveIdea" class="save-button" type="button">この端末に保存</button></article></section>
-  <section id="archivePage" class="page" data-page-panel="archive" hidden><h1>振り返りと資産</h1><div class="archive-list"><a href="./hj/#history">過去の振り返り <span>›</span></a><a href="../life/">記録 / ログ <span>›</span></a><a href="./hj/">目標 / 未来 <span>›</span></a><a href="./journey.html">過去の資産 <span>›</span></a><a href="../taxi/">Taxi <span>›</span></a></div></section>
-  <p id="appStatus" class="app-status" role="status" aria-live="polite"></p><div hidden>現在状態　理由 / 背景　判断 / 行動 <a href="./hj/">Hero’s Journey</a></div>
+  <section id="moneyPage" class="page money-world" data-page-panel="money" hidden>
+    <header class="domain-heading money-heading"><span class="domain-emblem" aria-hidden="true">▣</span><div><small>MY MONEY</small><h1>今月の状態</h1><p>見通しを持って、安心を増やす。</p></div></header>
+    <article class="money-overview primary-surface">
+      <header><small>今月のサマリー</small><span class="money-ledger-mark" aria-hidden="true">暮らしの家計簿</span><span id="moneyMonth">----</span></header>
+      <div class="money-totals">
+        <div><small>収入</small><strong id="incomeSummary">未設定</strong></div>
+        <div><small>支出</small><strong id="expenseSummary">未設定</strong></div>
+        <div class="balance"><small>残り・見込み</small><strong id="balanceSummary">未算出</strong></div>
+      </div>
+      <div class="money-chart" aria-label="お金の見える化">
+        <div class="chart-grid" aria-hidden="true"><i></i><i></i><i></i></div>
+        <div class="chart-bars"><span id="incomeBar"><b>収入</b></span><span id="expenseBar"><b>支出</b></span><span id="balanceBar"><b>残り</b></span></div>
+        <p id="moneyChartState">データなし</p>
+      </div>
+    </article>
+    <div class="money-detail-grid">
+      <article class="money-breakdown secondary-surface"><h2>内訳・守るお金</h2><dl><div><dt>必要な支払い</dt><dd id="moneyRequired">未設定</dd></div><div><dt>守るお金</dt><dd id="moneyProtected">未設定</dd></div><div><dt>自由に使える額</dt><dd id="moneyFree">未算出</dd></div></dl></article>
+      <article class="money-ring secondary-surface"><div id="moneyDonut" class="money-donut"><span id="moneyDonutState">データなし</span></div><small>実データから表示</small></article>
+    </div>
+    <article class="money-next inline-surface"><div><small>近い支払い</small><strong id="moneyNextPayment">未設定</strong></div><div><small>今月の目標</small><strong id="moneyGoal">未設定</strong></div></article>
+    <button class="yos-companion" type="button" data-prompt="【YOS｜Money】現在確認できるお金の事実だけで、次に確認することを一緒に整理したい。"><span class="yos-face" aria-hidden="true">••</span><span><b>YOSと見通しを整える</b><small>根拠のない金額は使いません。</small></span><i>›</i></button>
+  </section>
+
+  <section id="journeyPage" class="page journey-world" data-page-panel="journey" hidden>
+    <header class="domain-heading journey-heading"><span class="domain-emblem" aria-hidden="true">▲</span><div><small>MY JOURNEY</small><h1>歩いてきた景色</h1><p>経験が積み重なり、景色が変わっていく。</p></div></header>
+    <article class="journey-scene primary-surface">
+      <svg class="journey-route-thread" viewBox="0 0 390 350" preserveAspectRatio="none" aria-hidden="true"><path d="M189 326 C177 278 203 244 188 209 C174 174 148 160 159 119"/><circle cx="189" cy="326" r="4"/><circle cx="159" cy="119" r="4"/></svg>
+      <svg viewBox="0 0 390 360" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+        <defs><linearGradient id="journeySky" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#d9d5e8"/><stop offset=".55" stop-color="#ead7c3"/><stop offset="1" stop-color="#7f8e77"/></linearGradient><linearGradient id="journeyMountain" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#6d7190"/><stop offset="1" stop-color="#444c64"/></linearGradient></defs>
+        <rect width="390" height="360" fill="url(#journeySky)"/>
+        <circle cx="70" cy="75" r="35" fill="#f7dfad" opacity=".65"/>
+        <path d="M0 192L91 72l58 67 67-107 76 106 45-59 53 74v207H0z" fill="url(#journeyMountain)" opacity=".8"/>
+        <path d="M0 220l82-74 48 41 77-86 70 73 46-31 67 58v159H0z" fill="#849286"/>
+        <path d="M0 248c91-44 155-29 216 14 60 43 115 20 174-7v105H0z" fill="#607764"/>
+        <path d="M36 360c51-84 112-119 184-105 63 12 106 1 170-35" fill="none" stroke="#e5d6b4" stroke-width="27" opacity=".82"/>
+        <g fill="#252b35"><circle cx="202" cy="218" r="10"/><path d="M193 229c11-7 23-4 28 7l8 38-17 3-4-29-5 38-16-2 7-41z"/><path d="M195 239l-19 31m38-28 21 25" fill="none" stroke="#252b35" stroke-width="8" stroke-linecap="round"/></g>
+      </svg>
+      <section class="journey-stage-note"><small>現在のステージ</small><strong id="journeyStage">未設定</strong><em id="journeyCount">経験データなし</em></section>
+      <section class="journey-view-note"><small>現在の景色</small><strong id="journeyScene">データなし</strong></section>
+    </article>
+    <article class="journey-records secondary-surface"><header><h2>最近の経験</h2><a href="./hj/">旅の記録を開く ›</a></header><p id="recentExperience">データなし</p></article>
+    <article class="journey-theme inline-surface"><div><small>次のテーマ</small><strong id="nextTheme">未設定</strong></div><a class="detail-link" href="./hj/#current">テーマを見る</a></article>
+    <button class="yos-companion" type="button" data-prompt="【YOS｜Hero’s Journey】これまでの経験から、今いる景色と次のテーマを一緒に振り返りたい。"><span class="yos-face" aria-hidden="true">••</span><span><b>YOSと旅を振り返る</b><small>経験を、次の選択へつなげる。</small></span><i>›</i></button>
+  </section>
+
+  <section id="ideaPage" class="page idea-world" data-page-panel="idea" hidden>
+    <header class="domain-heading idea-heading"><span class="domain-emblem" aria-hidden="true">✦</span><div><small>MY IDEA</small><h1>ひらめき、拾えてる？</h1><p>思いついたことを、すぐ残そう。</p></div></header>
+    <article class="idea-capture primary-surface">
+      <span class="idea-tool-label" aria-hidden="true">ひらめきの道具箱</span>
+      <div class="idea-rays" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+      <button id="focusIdea" class="idea-seed" type="button" aria-label="アイデアメモを入力"><span aria-hidden="true">♧</span><b>アイデアを残す</b><small>1タップで記録</small></button>
+      <label for="ideaMemo">アイデアメモ</label>
+      <textarea id="ideaMemo" rows="3" maxlength="1000" placeholder="今、思いついたこと"></textarea>
+      <button id="saveIdea" class="save-button" type="button">この端末に保存</button>
+    </article>
+    <article class="idea-recent secondary-surface"><header><h2>最近のアイデアの種</h2><span>この端末</span></header><p id="recentIdea">まだありません</p></article>
+    <button class="yos-companion" type="button" data-prompt="【YOS｜Idea】保存したひらめきを、ようすけの経験と誰かの問題解決につなげたい。"><span class="yos-face" aria-hidden="true">••</span><span><b>YOSと種を育てる</b><small>自分の経験 × 他人の問題解決 ＝ 価値</small></span><i>›</i></button>
+  </section>
+
+  <section id="archivePage" class="page archive-world" data-page-panel="archive" hidden>
+    <header class="domain-heading archive-heading"><span class="domain-emblem" aria-hidden="true">✥</span><div><small>MY WAY</small><h1>37歳の逆襲ロードマップ</h1><p>AI時代に、YOSと一緒に自分の人生を取り戻す。</p></div></header>
+    <section id="roadmap" class="roadmap roadmap-journey" aria-label="37歳の逆襲ロードマップ">
+      <div class="roadmap-track">
+        <div class="roadmap-horizon"><strong>37歳の逆襲ロードマップ</strong><span>今ここ｜全7段階</span><b>今日の一歩が、42歳の景色を変える。</b><em>横にスワイプして、2031年へ&nbsp;→</em></div>
+        <svg class="roadmap-route" viewBox="0 0 1450 480" preserveAspectRatio="none" aria-hidden="true"><path d="M66 324 C170 220 278 216 392 290 S620 378 724 272 S936 165 1043 245 S1245 339 1382 205"/></svg>
+        <article class="roadmap-stage now"><small>今ここ｜2026 / 37歳</small><h2>やり直しのスタート</h2><ul><li>生活・お金・仕事・家族・自信の再建</li><li>AI時代の波に乗ると決めた</li><li>YOSと一緒に小さな準備を始める</li></ul></article>
+        <article class="roadmap-stage foundation"><small>第1段階｜2026年後半</small><h2>土台を整える</h2><ul><li>生活と自立準備を整える</li><li>ココナラなどで小さく出す</li><li>プロフィールを整え、反応を見る</li><li>経験が価値になる形を探る</li></ul></article>
+        <article class="roadmap-stage try"><small>第2段階｜2027年</small><h2>試す</h2><ul><li>複数案を小さく試す</li><li>困り事と反応の違いを見る</li><li>小さく受注し、実績の芽を作る</li></ul></article>
+        <article class="roadmap-stage hit"><small>第3段階｜2028年</small><h2>当てる</h2><ul><li>反応のあるものに絞る</li><li>勝ち筋を見つけ、商品を磨く</li><li>リピート・指名の芯を作る</li></ul></article>
+        <article class="roadmap-stage grow"><small>第4段階｜2029年</small><h2>育てる</h2><ul><li>商品・実績・顧客を育てる</li><li>信用を積み重ねる</li><li>単発から、回る仕組みへ近づける</li></ul></article>
+        <article class="roadmap-stage independent"><small>第5段階｜2030年</small><h2>自立する</h2><ul><li>収入を安定させ、生活を自力で回す</li><li>親に頼らず暮らす方向へ進む</li><li>自信を取り戻す</li></ul></article>
+        <article class="roadmap-stage reclaim"><small>第6段階｜2031年 / 42歳</small><h2>取り戻す</h2><ul><li>自立・方向性・戦略・将来性がある</li><li>自分の再建が、家族の安心につながる</li><li>兄弟からの信頼と、誇れる仕事がある</li><li>「あとはやるだけ」と言える</li></ul></article>
+      </div>
+    </section>
+    <article class="roadmap-principles" aria-label="ロードマップを進むための指針">
+      <p><small>価値観</small><b>羅針盤</b><span>迷ったときは、自分の大事なものへ戻る。</span></p>
+      <p><small>相棒</small><b>YOSと一緒に進む旅</b><span>経験を次の選択へつなげる。</span></p>
+      <p class="roadmap-formula"><small>価値の式</small><b>自分の経験 × 他人の問題解決 ＝ 価値</b></p>
+      <p class="roadmap-callout">今日の一歩が、42歳の景色を変える。</p>
+    </article>
+    <div class="archive-list"><a href="./hj/#history">過去の振り返り <span>›</span></a><a href="../life/">記録 / ログ <span>›</span></a><a href="./hj/">目標 / 未来 <span>›</span></a><a href="./journey.html">過去の資産 <span>›</span></a><a href="../taxi/">Taxi <span>›</span></a></div>
+  </section>
+
+  <p id="appStatus" class="app-status" role="status" aria-live="polite"></p>
+  <div hidden>現在状態　理由 / 背景　判断 / 行動 <a href="./hj/">Hero’s Journey</a></div>
 </main>
-<nav class="bottom-nav" aria-label="主要5領域"><button class="active" data-page="home"><span>⌂</span>Home</button><a href="../life/"><span>♡</span>Life</a><button data-page="money"><span>¥</span>Money</button><button data-page="journey"><span>△</span><b>Journey</b></button><button data-page="idea"><span>✦</span>Idea</button></nav>
+
+<nav class="bottom-nav" aria-label="主要5領域">
+  <button class="active home-nav" data-page="home"><span aria-hidden="true">⌂</span><b>Home</b></button>
+  <a class="life-nav" href="../life/"><span aria-hidden="true">♡</span><b>Life</b></a>
+  <button class="money-nav" data-page="money"><span aria-hidden="true">¥</span><b>Money</b></button>
+  <button class="journey-nav" data-page="journey"><span aria-hidden="true">△</span><b>Hero’s Journey</b></button>
+  <button class="idea-nav" data-page="idea"><span aria-hidden="true">✦</span><b>Idea</b></button>
+</nav>
 <button class="archive-button" type="button" data-page="archive" aria-label="2ページ目">•••</button>
+
 <dialog id="menuDialog"><div class="dialog-body"><header><div><small>MY WAY by YOS</small><h2>メニュー</h2></div><button class="close" aria-label="閉じる">×</button></header><nav class="menu-list"><button data-prompt="【YOS】MY WAYの現在地から話を続けたい。">YOS <span>›</span></button><button id="openSettings">設定 <span>›</span></button><a href="../">ProjectY <span>›</span></a><button data-prompt="【YOS改善】MY WAY by YOSを、YOSの識別と既存資産を守りながら改善したい。">YOS改善 <span>›</span></button><button data-prompt="【YOS｜ヘルプ】MY WAYの使い方を案内して。">ヘルプ <span>›</span></button></nav></div></dialog>
 <dialog id="settingsDialog"><form method="dialog" class="dialog-body"><header><div><small>SETTINGS</small><h2>YOSチャット設定</h2></div><button class="close" value="cancel">×</button></header><p>現在のYOSチャットURLをこの端末だけに保存します。</p><label for="yosUrl">YOSチャットURL</label><input id="yosUrl" type="url" placeholder="https://chatgpt.com/..."><button id="saveUrl" class="save-button" value="default">保存する</button></form></dialog>
-<script src="./hj-entry.js" defer></script><script src="./app.js" defer></script>
-</body></html>
+<script src="./hj-entry.js" defer></script>
+<script src="./app.js" defer></script>
+</body>
+</html>

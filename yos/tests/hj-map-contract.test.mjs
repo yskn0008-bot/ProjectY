@@ -115,6 +115,8 @@ test('HJ browser smoke uses the real client and requires cross-origin preflight 
   assert.match(smoke, /\['OPTIONS', 'POST'\]/);
   assert.match(smoke, /authorization/);
   assert.match(smoke, /access-control-allow-origin/i);
+  assert.match(smoke, /apiServer\.closeAllConnections\(\)/);
+  assert.match(smoke, /apiServer\.close\(/);
 });
 
 test('detailed HJ forms stay behind explicit progressive disclosure', async () => {

@@ -8,8 +8,9 @@ if (!engine) throw new Error(`Unsupported browser: ${browserName}`);
 
 const baseURL = process.env.LIFE_BASE_URL || 'http://127.0.0.1:4173/life/';
 const lifeDate = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Asia/Tokyo' }).format(new Date());
-const nextHour = new Date(Date.now() + 60 * 60 * 1000).toISOString();
-const followingHour = new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString();
+const fixedNow = `${lifeDate}T08:00:00+09:00`;
+const nextHour = `${lifeDate}T09:00:00+09:00`;
+const followingHour = `${lifeDate}T09:30:00+09:00`;
 
 const browser = await engine.launch();
 const context = await browser.newContext({
@@ -20,21 +21,43 @@ const context = await browser.newContext({
   locale: 'ja-JP',
   timezoneId: 'Asia/Tokyo'
 });
-await context.addInitScript(({ date, start, end }) => {
-  if (localStorage.getItem('yos-life-v1')) return;
-  localStorage.setItem('yos-life-v1', JSON.stringify({
-    days: {
-      [date]: {
-        schedule: [{ id: 'existing-event', title: '既存の予定', start, end, category: 'personal' }],
-        tasks: [{ text: '既存タスク', done: false, category: 'personal' }],
-        routines: { wake: [0], before: [], home: [] },
-        checkin: { sleep: '6.5', health: '3', mood: '2' },
-        doneToday: '既存のできたこと'
-      }
-    },
-    activeGroup: 'wake'
-  }));
-}, { date: lifeDate, start: nextHour, end: followingHour });
+await context.addInitScript(({ date, start, end, now }) => {
+  const NativeDate=Date,fixedTime=NativeDate.parse(now);
+  globalThis.Date=class extends NativeDate{
+    constructor(...args){super(...(args.length?args:[fixedTime]))}
+    static now(){return fixedTime}
+  };
+  if (!localStorage.getItem('yos-life-v1')) {
+    localStorage.setItem('yos-life-v1', JSON.stringify({
+      days: {
+        [date]: {
+          schedule: [
+            { id: 'existing-event', title: '既存の予定', start, end, category: 'personal' },
+            { id: 'visual-event-2', title: '買い物', start: `${date}T10:00:00+09:00`, end: `${date}T11:00:00+09:00`, category: 'personal' },
+            { id: 'visual-event-3', title: 'ココナラ作業', start: `${date}T13:00:00+09:00`, end: `${date}T14:00:00+09:00`, category: 'work' },
+            { id: 'visual-event-4', title: '読書タイム', start: `${date}T19:00:00+09:00`, end: `${date}T20:00:00+09:00`, category: 'personal' }
+          ],
+          tasks: [
+            { text: '既存タスク', done: false, category: 'personal' },
+            { text: 'サービス内容を見直す', done: false, category: 'work' },
+            { text: '提案文を作り直す', done: true, category: 'work' },
+            { text: '家の片付けをする', done: false, category: 'personal' }
+          ],
+          routines: { wake: [0, 1], before: [0], home: [0] },
+          checkin: { sleep: '6.5', health: '3', mood: '2' },
+          note: '明日の準備を小さく始める。',
+          doneToday: '既存のできたこと'
+        }
+      },
+      activeGroup: 'wake',
+      moneySafety: { income: '310000', expense: '204800', currentBalance: '105200', requiredPayments: '家賃・光熱費', protectedMoney: '50000', freeMoney: '55200', nextPayment: '家賃', goal: '今月の支払いを確認する' }
+    }));
+  }
+  if (!localStorage.getItem('hj-domain-journeys-v1')) localStorage.setItem('hj-domain-journeys-v1', JSON.stringify([{ id: 'life-rebuild', name: '人生の再建', stage: '挑戦者', theme: '価値を届ける力を高める' }]));
+  if (!localStorage.getItem('hj-user-profile-v1')) localStorage.setItem('hj-user-profile-v1', JSON.stringify({ focusDomain: 'life-rebuild' }));
+  if (!localStorage.getItem('hj-daily-scenes-v1')) localStorage.setItem('hj-daily-scenes-v1', JSON.stringify([{ id: 'scene-1', domainId: 'life-rebuild', occurredAt: new Date().toISOString(), rawInput: '今日の予定をひとつ終えた。', next: '明日の準備をする。' }]));
+  if (!localStorage.getItem('yos-my-way-ideas-v1')) localStorage.setItem('yos-my-way-ideas-v1', JSON.stringify({ text: '経験を暮らしの道具にする。' }));
+}, { date: lifeDate, start: nextHour, end: followingHour, now: fixedNow });
 
 const page = await context.newPage();
 const pageErrors = [];
@@ -77,19 +100,21 @@ try {
   assert.equal(await page.locator('.life-page-v1[data-page="home"] > :first-child').getAttribute('id'), 'lifeHomeDashboardV1', 'compact Life dashboard is not first');
   const lifeVisual = await page.evaluate(() => {
     const nav = document.getElementById('lifeBottomNavV1').getBoundingClientRect();
-    const rhythm = document.querySelector('.home-rhythm-v1').getBoundingClientRect();
+    const companion = document.querySelector('.life-yos-companion-v2').getBoundingClientRect();
     return {
       width: innerWidth,
       height: innerHeight,
       navTop: nav.top,
       navHeight: nav.height,
-      contentBottom: rhythm.bottom,
+      contentBottom: companion.bottom,
+      contentTop: document.querySelector('.life-day-ribbon-v2').getBoundingClientRect().top,
       text: document.querySelector('.life-page-v1[data-page="home"]').innerText
     };
   });
   assert.equal(lifeVisual.width, 390);
   assert.ok(lifeVisual.navHeight >= 48 && lifeVisual.navHeight <= 72, `unexpected Life nav height: ${lifeVisual.navHeight}`);
   assert.ok(lifeVisual.contentBottom <= lifeVisual.navTop, `Life home exceeds one viewport: ${lifeVisual.contentBottom}/${lifeVisual.navTop}`);
+  assert.ok(lifeVisual.contentBottom >= lifeVisual.height * .7, `Life leaves too much unused lower space: ${lifeVisual.contentBottom}/${lifeVisual.height}`);
   for (const label of ['今日のくらし','カレンダー','タスク','習慣','メモ','今日の予定','次のタスク','暮らしのリズム']) {
     assert.match(lifeVisual.text, new RegExp(label), `Life home is missing ${label}`);
   }
@@ -97,33 +122,112 @@ try {
   await page.screenshot({ path: `test-results/life-home-390-${browserName}.png`, fullPage: false });
 
   const yosPage = await context.newPage();
+  const yosErrors = [];
+  yosPage.on('pageerror', error => yosErrors.push(error.message));
   const yosURL = new URL('../yos/', baseURL).href;
   await yosPage.goto(yosURL, { waitUntil: 'networkidle' });
   await yosPage.waitForSelector('#homePage');
-  const yosVisual = await yosPage.evaluate(() => {
-    const nav = document.querySelector('.bottom-nav').getBoundingClientRect();
-    const next = document.querySelector('.next-step').getBoundingClientRect();
-    return {
-      width: innerWidth,
-      navTop: nav.top,
-      navHeight: nav.height,
-      contentBottom: next.bottom,
-      scrollWidth: document.documentElement.scrollWidth,
-      clientWidth: document.documentElement.clientWidth,
-      text: document.body.innerText
-    };
-  });
-  assert.equal(yosVisual.width, 390);
-  assert.ok(yosVisual.scrollWidth <= yosVisual.clientWidth + 1, `YOS horizontal overflow: ${yosVisual.scrollWidth}/${yosVisual.clientWidth}`);
-  assert.ok(yosVisual.navHeight >= 48 && yosVisual.navHeight <= 72, `unexpected YOS nav height: ${yosVisual.navHeight}`);
-  assert.ok(yosVisual.contentBottom <= yosVisual.navTop, `YOS home exceeds one viewport: ${yosVisual.contentBottom}/${yosVisual.navTop}`);
-  for (const label of ['MY WAY','人生ナビ','今ここ','行き先','ここまで','人生ルート','次の一歩','Home','Life','Money','Journey','Idea']) {
-    assert.match(yosVisual.text, new RegExp(label), `YOS home is missing ${label}`);
+  const inspectYosDomain = async (domain, panelSelector, finalSelector, labels, screenshotName) => {
+    if (domain !== 'home') await yosPage.locator(`.bottom-nav [data-page="${domain}"]`).click();
+    await yosPage.waitForFunction(name => document.body.dataset.domain === name, domain);
+    await yosPage.evaluate(() => {
+      document.activeElement?.blur();
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+      window.scrollTo(0,0);
+    });
+    await yosPage.waitForTimeout(50);
+    const visual = await yosPage.evaluate(({ panel, final }) => {
+      const nav = document.querySelector('.bottom-nav').getBoundingClientRect();
+      const topbar = document.querySelector('.topbar').getBoundingClientRect();
+      const activePanel = document.querySelector(panel);
+      const content = activePanel.querySelector(final).getBoundingClientRect();
+      const primary = activePanel.querySelector('.primary-surface')?.getBoundingClientRect();
+      const heading = activePanel.querySelector('.domain-heading')?.getBoundingClientRect();
+      const activeNav = document.querySelector('.bottom-nav .active')?.getBoundingClientRect();
+      return {
+        width: innerWidth,
+        height: innerHeight,
+        navTop: nav.top,
+        navHeight: nav.height,
+        scrollY: window.scrollY,
+        topbarTop: topbar.top,
+        contentBottom: content.bottom,
+        primaryHeight: primary?.height || 0,
+        headingLeft: heading?.left ?? 0,
+        headingRight: heading?.right ?? 0,
+        activeNavLeft: activeNav?.left ?? 0,
+        activeNavRight: activeNav?.right ?? 0,
+        scrollWidth: document.documentElement.scrollWidth,
+        clientWidth: document.documentElement.clientWidth,
+        text: activePanel.innerText
+      };
+    }, { panel: panelSelector, final: finalSelector });
+    assert.equal(visual.width, 390);
+    assert.equal(visual.scrollY, 0, `${domain} screenshot is not at the top`);
+    assert.ok(visual.topbarTop >= 0, `${domain} topbar is clipped: ${visual.topbarTop}`);
+    assert.ok(visual.scrollWidth <= visual.clientWidth + 1, `${domain} horizontal overflow: ${visual.scrollWidth}/${visual.clientWidth}`);
+    assert.ok(visual.navHeight >= 48 && visual.navHeight <= 72, `unexpected ${domain} nav height: ${visual.navHeight}`);
+    assert.ok(visual.contentBottom >= visual.height * .62, `${domain} leaves too much unused lower space: ${visual.contentBottom}/${visual.height}`);
+    assert.ok(visual.primaryHeight >= 240, `${domain} primary visual is not dominant: ${visual.primaryHeight}`);
+    assert.ok(visual.headingLeft >= 0 && visual.headingRight <= visual.width, `${domain} heading is horizontally clipped: ${visual.headingLeft}/${visual.headingRight}`);
+    assert.ok(visual.activeNavLeft >= 0 && visual.activeNavRight <= visual.width, `${domain} active nav is horizontally clipped: ${visual.activeNavLeft}/${visual.activeNavRight}`);
+    for (const label of labels) assert.match(visual.text, new RegExp(label), `${domain} is missing ${label}`);
+    await yosPage.screenshot({ path: `test-results/${screenshotName}-390-${browserName}.png`, fullPage: false });
+    return visual;
+  };
+  assert.equal(await yosPage.locator('#brandTitle').textContent(),'MY WAY','MY WAY identity is missing');
+  const yosVisual = await inspectYosDomain('home','#homePage','.yos-companion',['人生ナビ','今ここ','行き先','ここまで','人生ルート','次の一歩'],'yos-home');
+  assert.ok(yosVisual.contentBottom <= yosVisual.navTop + 1, `YOS home exceeds one viewport: ${yosVisual.contentBottom}/${yosVisual.navTop}`);
+  await inspectYosDomain('money','#moneyPage','.yos-companion',['MY MONEY','今月の状態','収入','支出','残り・見込み','内訳・守るお金','近い支払い'],'yos-money');
+  await inspectYosDomain('journey','#journeyPage','.yos-companion',['MY JOURNEY','歩いてきた景色','現在のステージ','現在の景色','最近の経験','次のテーマ'],'yos-journey');
+  await inspectYosDomain('idea','#ideaPage','.yos-companion',['MY IDEA','ひらめき、拾えてる','アイデアを残す','最近のアイデアの種'],'yos-idea');
+  await yosPage.locator('.archive-button').click();
+  await yosPage.waitForFunction(() => document.body.dataset.domain === 'archive');
+  await yosPage.evaluate(() => window.scrollTo(0,0));
+  const roadmapVisual = await yosPage.locator('#archivePage').innerText();
+  for (const label of ['37歳の逆襲ロードマップ','今ここ｜2026 / 37歳','土台を整える','試す','当てる','育てる','自立する','2031年 / 42歳','取り戻す']) {
+    assert.match(roadmapVisual, new RegExp(label), `roadmap is missing ${label}`);
   }
-  await yosPage.screenshot({ path: `test-results/yos-home-390-${browserName}.png`, fullPage: false });
+  await yosPage.evaluate(() => {
+    document.querySelector('.bottom-nav').style.visibility='hidden';
+    document.querySelector('.archive-button').style.visibility='hidden';
+  });
+  await yosPage.screenshot({ path: `test-results/yos-roadmap-390-${browserName}.png`, fullPage: false });
+  await yosPage.evaluate(() => {
+    document.querySelector('.app').style.maxWidth = 'none';
+    document.querySelector('.app').style.width = '1490px';
+    document.querySelector('.roadmap').style.overflow = 'visible';
+  });
+  await yosPage.locator('.roadmap-track').screenshot({ path: `test-results/yos-roadmap-panorama-${browserName}.png` });
+  await yosPage.evaluate(() => {
+    document.querySelector('.app').style.maxWidth='';
+    document.querySelector('.app').style.width='';
+    document.querySelector('.roadmap').style.overflow='';
+    document.querySelector('.bottom-nav').style.visibility='';
+    document.querySelector('.archive-button').style.visibility='';
+    window.scrollTo(0,0);
+  });
+  await yosPage.locator('.bottom-nav [data-page="home"]').click();
+  await yosPage.waitForFunction(() => document.body.dataset.domain === 'home');
+  const uniqueCompositions = await yosPage.evaluate(() => ({
+    home: Boolean(document.querySelector('#homePage .home-scene')),
+    money: Boolean(document.querySelector('#moneyPage .money-overview')),
+    journey: Boolean(document.querySelector('#journeyPage .journey-scene')),
+    idea: Boolean(document.querySelector('#ideaPage .idea-capture'))
+  }));
+  assert.deepEqual(uniqueCompositions,{home:true,money:true,journey:true,idea:true},'the four YOS domains must keep distinct compositions');
+  assert.deepEqual(yosErrors, []);
   await yosPage.close();
 
-  await page.locator('.life-feature-grid-v1 [data-open-page="schedule"]').first().click();
+  await page.locator('#homeTaskListV2 [data-home-task-index="0"]').click();
+  assert.equal(await page.evaluate(date => JSON.parse(localStorage.getItem('yos-life-v1')).days[date].tasks[0].done, lifeDate), true, 'visible Life task does not complete');
+  await page.reload({ waitUntil: 'networkidle' });
+  await waitForDailyFlow();
+  assert.equal(await page.locator('#homeTaskListV2 [data-home-task-index="0"]').getAttribute('aria-pressed'), 'true', 'completed Life task did not survive relaunch');
+  await page.locator('#homeTaskListV2 [data-home-task-index="0"]').click();
+
+  await page.locator('.life-day-ribbon-v2 [data-open-page="schedule"]').click();
   assert.equal(await page.locator('#lifeCalendarV1').isVisible(), true, 'Life calendar does not open from the compact home');
   assert.equal(await page.locator('#lifeCalendarTodayLabelV1').textContent(), '今日');
   assert.equal(await page.locator('#lifeCalendarTomorrowLabelV1').textContent(), '明日');
@@ -186,6 +290,8 @@ try {
   assert.equal(saved.days[lifeDate].tasks[0].text, '連絡を一件返す');
   assert.equal(saved.days[lifeDate].schedule[0].title, '既存の予定');
   assert.equal(saved.moneySafety.todayBudget, '3000');
+  assert.equal(saved.moneySafety.income, '310000', 'existing Money fields were removed by a Life save');
+  assert.equal(saved.moneySafety.expense, '204800', 'existing Money fields were removed by a Life save');
   assert.equal(saved.days[lifeDate].doneToday, '既存のできたこと');
   assert.equal(saved.lifeCalendar.length, 12, 'daily save removed the Life calendar source of truth');
 
@@ -237,7 +343,7 @@ try {
   const cacheStatus = await page.evaluate(async () => {
     const paths = [
       './', './index.html', './manifest.webmanifest', './yos-suite-v3.js?v=8',
-      './home-v1.js?v=6', './home-v1.css?v=2', './home-priority-v1.css?v=4'
+      './home-v1.js?v=7', './home-v1.css?v=7', './home-priority-v1.css?v=4'
     ];
     const entries = await Promise.all(paths.map(async path => [
       path,
@@ -253,7 +359,7 @@ try {
     await page.reload({ waitUntil: 'domcontentloaded' });
     await waitForDailyFlow();
     assert.equal(await page.locator('#lifeHomeDashboardV1').isVisible(), true, 'compact reading home is not available offline');
-    await page.locator('.life-feature-grid-v1 [data-open-page="schedule"]').first().click();
+    await page.locator('.life-day-ribbon-v2 [data-open-page="schedule"]').click();
     assert.equal(await page.locator('#lifeCalendarV1').isVisible(), true, 'calendar detail is not available offline');
     await page.locator('#lifeBottomNavV1 [data-page="record"]').click();
     assert.equal(await page.locator('#lifeDailyFlowV1').isVisible(), true, 'record flow is not available offline');

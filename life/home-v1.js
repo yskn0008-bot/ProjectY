@@ -32,7 +32,7 @@
     {label:'Home',icon:'⌂',href:'../yos/'},
     {label:'Life',icon:'♡',page:'home'},
     {label:'Money',icon:'¥',href:'../yos/#money'},
-    {label:"Hero's Journey",icon:'△',href:'../yos/hj/'},
+    {label:'Hero’s Journey',icon:'△',href:'../yos/hj/'},
     {label:'Idea',icon:'✦',href:'../yos/#idea'}
   ];
   let activePage='home';
@@ -151,7 +151,7 @@
       const base=document.createElement('link');
       base.id='lifeHomeV1Styles';
       base.rel='stylesheet';
-      base.href='./home-v1.css?v=2';
+      base.href='./home-v1.css?v=7';
       document.head.appendChild(base);
     }
     if(!document.getElementById('lifeHomePriorityV1Styles')){
@@ -242,21 +242,23 @@
     return{tone:'good',title:'今日の流れは整えられる',detail:'次の一つだけに集中して進めます。'};
   }
 
-  function toggleFocusTask(){
-    const before=focusTask(dayData());
-    if(!before.text.trim())return;
-    const index=before.index;
-    const row=qsa('.task')[index]||qsa('.task')[0];
-    const button=row&&qs('button',row);
-    if(button)button.click();
+  function toggleTaskAt(index){
+    const beforeDay=dayData();
+    const before=beforeDay.tasks[index]||{text:'',done:false};
+    if(!String(before.text||'').trim())return;
+    if(typeof window.__yosLifeToggleTaskV1==='function')window.__yosLifeToggleTaskV1(index);
     else updateToday(day=>{
       day.tasks=Array.isArray(day.tasks)?day.tasks:[];
       while(day.tasks.length<=index)day.tasks.push({text:'',done:false,category:'personal'});
       day.tasks[index].done=!day.tasks[index].done;
     });
     if(!before.done&&!dayData().doneToday){
-      saveDoneToday(before.text.trim());
+      saveDoneToday(String(before.text||'').trim());
     }
+  }
+
+  function toggleFocusTask(){
+    toggleTaskAt(focusTask(dayData()).index);
   }
 
   function saveDoneToday(value){
@@ -346,6 +348,7 @@
       endedAt:''
     };
     data.moneySafety={
+      ...(data.moneySafety&&typeof data.moneySafety==='object'?data.moneySafety:{}),
       currentBalance:clean(fieldValue('lifeMoneyBalanceV1'),40),
       nextIncomeDate:clean(fieldValue('lifeMoneyIncomeDateV1'),10),
       requiredPayments:clean(fieldValue('lifeMoneyRequiredV1'),120),
@@ -642,22 +645,30 @@
   function buildDashboard(){
     const section=document.createElement('section');
     section.id='lifeHomeDashboardV1';
-    section.className='home-dashboard-v1';
+    section.className='home-dashboard-v1 life-planner-v2';
     section.innerHTML=`
-      <section class="life-glance-title-v1"><h2>今日のくらし</h2><span id="homeCompletionV1">0%</span><span id="homeStatusTitleV1" hidden></span><span id="homeStatusDetailV1" hidden></span><span id="homeRingV1" hidden></span></section>
-      <section class="life-feature-grid-v1" aria-label="今日のくらし">
-        <button type="button" data-open-page="schedule"><span>▣</span><b>カレンダー</b></button><button type="button" data-open-page="schedule"><span>✓</span><b>タスク</b></button><button type="button" data-open-page="improve"><span>↻</span><b>習慣</b></button><button type="button" data-open-page="record"><span>✎</span><b>メモ</b></button>
+      <section class="life-day-ribbon-v2">
+        <header><div><small>今日</small><h2>今日のくらし</h2><p>暮らしを、ひとつずつ整える。</p></div><button type="button" data-open-page="schedule" aria-label="カレンダーを開く"><span aria-hidden="true">◷</span><small>カレンダー</small><b id="lifeTodayDateV2">----</b></button></header>
+        <div id="homeWeekV2" class="life-week-v2" aria-label="今週のカレンダー"></div>
       </section>
-      <section class="home-schedule-preview-v1 card"><header><h3>今日の予定</h3><button type="button" data-open-page="schedule">すべて ›</button></header><div id="homeSchedulePreviewV1">予定を確認しています</div></section>
-      <section class="home-focus-v1 card">
-        <button type="button" id="homeFocusDoneV1" class="home-focus-check-v1" aria-label="今日やることを完了">✓</button>
-        <div><small>次のタスク</small><strong id="homeFocusValueV1">まだありません</strong><p id="homeFocusDetailV1"></p></div>
-        <button type="button" class="home-edit-v1" data-open-page="schedule">編集</button>
+      <section class="life-paper-grid-v2">
+        <article class="life-schedule-sheet-v2"><header><h3>今日の予定</h3><button type="button" data-open-page="schedule">すべて ›</button></header><div id="homeSchedulePreviewV1">予定を確認しています</div></article>
+        <article class="life-task-sheet-v2"><header><div><small>次のタスク</small><h3>今日のタスク</h3></div><button type="button" data-open-page="schedule" aria-label="タスクを追加">＋</button></header><div id="homeTaskListV2"></div></article>
       </section>
-      <section class="home-rhythm-v1 card"><div><small>暮らしのリズム</small><strong>習慣 <span id="homeHabitV1">0/14</span></strong></div><i><em id="homeHabitBarV1"></em></i><button type="button" data-open-page="improve">›</button></section>
-      <div hidden><span id="homeSleepV1"></span><span id="homeHealthV1"></span><span id="homeMoodV1"></span><span id="homeMoneyBudgetV1"></span><span id="homeMoneyDetailV1"></span><span id="homeDoneValueV1"></span></div>`;
+      <section class="life-rhythm-v2">
+        <header><div><small>暮らしのリズム</small><h3>習慣 <span id="homeHabitV1">0/14</span></h3></div><button type="button" data-open-page="improve">整える ›</button></header>
+        <div id="homeHabitGroupsV2" class="life-habit-groups-v2"></div><i><em id="homeHabitBarV1"></em></i>
+      </section>
+      <section class="life-memo-v2">
+        <button type="button" class="life-memo-copy-v2" data-open-page="record"><small>メモ</small><strong id="homeMemoPreviewV2">まだありません</strong><span>書き留める ›</span></button>
+        <div class="life-plant-v2" aria-hidden="true"><svg viewBox="0 0 92 84"><path d="M43 69c-8-18-4-37 10-54M45 48c-11-14-21-15-28-15 3 13 12 21 28 22M50 36c5-13 14-19 25-20-1 14-9 23-25 26M43 69c9-13 20-17 32-15-3 14-13 21-31 21" fill="none" stroke="#5f8668" stroke-width="4" stroke-linecap="round"/><path d="M31 67h29l-4 15H35z" fill="#b88054"/><path d="M29 67h33" stroke="#77543d" stroke-width="4" stroke-linecap="round"/></svg></div>
+      </section>
+      <button class="life-yos-companion-v2" type="button" data-open-page="improve"><span class="life-yos-face-v2" aria-hidden="true">••</span><span><b>YOSに相談</b><small>今日の暮らしを、一緒に整える。</small></span><i>›</i></button>
+      <div hidden><span id="homeCompletionV1">0%</span><span id="homeStatusTitleV1"></span><span id="homeStatusDetailV1"></span><span id="homeRingV1"></span><button type="button" id="homeFocusDoneV1"></button><span id="homeFocusValueV1"></span><span id="homeFocusDetailV1"></span><span id="homeSleepV1"></span><span id="homeHealthV1"></span><span id="homeMoodV1"></span><span id="homeMoneyBudgetV1"></span><span id="homeMoneyDetailV1"></span><span id="homeDoneValueV1"></span></div>`;
 
     section.addEventListener('click',event=>{
+      const taskButton=event.target.closest('[data-home-task-index]');
+      if(taskButton){toggleTaskAt(Number(taskButton.dataset.homeTaskIndex));return}
       const pageButton=event.target.closest('[data-open-page]');
       if(pageButton){activatePage(pageButton.dataset.openPage,true);return}
       if(event.target.closest('#homeFocusDoneV1')){toggleFocusTask();return}
@@ -705,6 +716,21 @@
     set('homeStatusTitleV1',status.title);
     set('homeStatusDetailV1',status.detail);
     root.dataset.tone=status.tone;
+    const activeDate=today(),parts=dateParts(activeDate);
+    set('lifeTodayDateV2',dateLabel(activeDate));
+    const week=document.getElementById('homeWeekV2');
+    if(week&&parts){
+      week.replaceChildren();
+      const labels=['日','月','火','水','木','金','土'];
+      const start=addDays(activeDate,-parts.weekday);
+      labels.forEach((label,index)=>{
+        const date=addDays(start,index),datePart=dateParts(date),item=document.createElement('span');
+        if(date===activeDate)item.className='active';
+        const dayName=document.createElement('small');dayName.textContent=label;
+        const dayNumber=document.createElement('b');dayNumber.textContent=String(datePart?.day||'');
+        item.append(dayName,dayNumber);week.appendChild(item);
+      });
+    }
     set('homeFocusValueV1',focus.text||'まだありません');
     const focusButton=document.getElementById('homeFocusDoneV1');
     if(focusButton){
@@ -714,13 +740,31 @@
     }
     set('homeFocusDetailV1',focusDetail(day));
     const preview=document.getElementById('homeSchedulePreviewV1');
-    if(preview){const items=(day.schedule||[]).slice(0,3);preview.innerHTML=items.length?items.map(item=>`<p><time>${fmtTime(item.start)}</time><span>${clean(item.title,80)||'予定'}</span></p>`).join(''):'<p class="empty-preview-v1">今日の予定はありません</p>'}
+    if(preview){
+      preview.replaceChildren();
+      const items=(day.schedule||[]).slice().sort((a,b)=>new Date(a.start||0)-new Date(b.start||0)).slice(0,4);
+      if(!items.length){const empty=document.createElement('p');empty.className='empty-preview-v1';empty.textContent='今日の予定はありません\n空いた時間も、今日の余白。';preview.appendChild(empty)}
+      items.forEach(item=>{const row=document.createElement('p'),time=document.createElement('time'),copy=document.createElement('span');time.textContent=fmtTime(item.start);copy.textContent=clean(item.title,80)||'予定';row.append(time,copy);preview.appendChild(row)});
+    }
+    const taskList=document.getElementById('homeTaskListV2');
+    if(taskList){
+      taskList.replaceChildren();
+      const items=day.tasks.map((task,index)=>({task,index})).filter(item=>clean(item.task.text,70)).slice(0,3);
+      if(!items.length){const empty=document.createElement('p');empty.className='empty-preview-v1';empty.textContent='タスクはまだありません\n＋から一つだけ残せます。';taskList.appendChild(empty)}
+      items.forEach(({task,index})=>{const button=document.createElement('button');button.type='button';button.dataset.homeTaskIndex=String(index);button.className=task.done?'done':'';button.setAttribute('aria-pressed',String(Boolean(task.done)));const mark=document.createElement('span');mark.textContent=task.done?'✓':'';const copy=document.createElement('b');copy.textContent=clean(task.text,70);button.append(mark,copy);taskList.appendChild(button)});
+    }
     set('homeSleepV1',day.checkin.sleep?`${day.checkin.sleep}h`:'—');
     set('homeHealthV1',day.checkin.health?`${day.checkin.health}/5`:'—');
     set('homeMoodV1',day.checkin.mood?`${day.checkin.mood}/5`:'—');
     set('homeHabitV1',`${habit.done}/${habit.total}`);
+    const habitGroups=document.getElementById('homeHabitGroupsV2');
+    if(habitGroups){
+      habitGroups.replaceChildren();
+      [['wake','朝'],['before','外出前'],['home','帰宅後']].forEach(([key,label])=>{const group=document.createElement('span');const done=Array.isArray(day.routines[key])?day.routines[key].length:0;group.classList.toggle('done',done>=ROUTINE_TOTAL[key]);const mark=document.createElement('b');mark.textContent=done>=ROUTINE_TOTAL[key]?'✓':'○';const copy=document.createElement('small');copy.textContent=`${label} ${done}/${ROUTINE_TOTAL[key]}`;group.append(mark,copy);habitGroups.appendChild(group)});
+    }
     const habitBar=document.getElementById('homeHabitBarV1');
     if(habitBar)habitBar.style.width=`${habit.pct}%`;
+    set('homeMemoPreviewV2',clean(day.note,100)||'まだありません');
     set('homeDoneValueV1',day.doneToday||'まだありません');
     const money=readMoneySafety(readJson(DATA_KEY,{days:{}}));
     const danger={none:'危険なし',watch:'要確認',urgent:'急ぎで確認'}[money.danger];
