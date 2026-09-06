@@ -1,12 +1,14 @@
 'use strict';
 
 const CACHE_PREFIX = 'yos-command-center-';
-const CACHE = `${CACHE_PREFIX}v19-completion-lock`;
+const CACHE = `${CACHE_PREFIX}v20-task-dashboard`;
 const STATIC = [
   './',
   './index.html',
   './styles.css',
   './readability-final.css?v=2',
+  './task-dashboard.css?v=1',
+  './task-dashboard.js?v=1',
   './app.js',
   './assets/home-life-path-watercolor-v1.webp',
   './assets/journey-valley-watercolor-v1.webp',
@@ -24,8 +26,14 @@ async function inject(response) {
   if (!html.includes('readability-final.css')) {
     html = html.replace('</head>', '<link rel="stylesheet" href="./readability-final.css?v=2"></head>');
   }
+  if (!html.includes('task-dashboard.css')) {
+    html = html.replace('</head>', '<link rel="stylesheet" href="./task-dashboard.css?v=1"></head>');
+  }
   if (!html.includes('taxi-live-v1.js')) {
     html = html.replace('</body>', '<script src="./taxi-live-v1.js?v=4"></script></body>');
+  }
+  if (!html.includes('task-dashboard.js')) {
+    html = html.replace('</body>', '<script src="./task-dashboard.js?v=1" defer></script></body>');
   }
   const headers = new Headers(response.headers);
   headers.delete('content-length');
