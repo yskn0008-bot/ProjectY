@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-06T23:03:37+09:00",
+  "updated_at": "2026-09-07T00:41:37+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -12,16 +12,6 @@
     ]
   },
   "inbox": [
-    {
-      "id": "github-pr-290",
-      "title": "PR #290 fix: close final iPhone clipping and Life flash",
-      "type": "GitHub PR",
-      "status": "review",
-      "priority": 1,
-      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/290",
-      "updated_at": "2026-09-06T10:57:53Z"
-    },
     {
       "id": "github-pr-233",
       "title": "PR #233 Draft: Mission Controlに進捗率・残り時間を常時表示する",
@@ -145,39 +135,39 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-55e80aabe478",
+      "title": "Merge pull request #290 from yskn0008-bot/yos/my-way-iphone-hotfix-2",
+      "completed_at": "2026-09-06T15:41:22Z",
+      "result": "GitHub mainへ反映（55e80aa）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/55e80aabe478ca04a0da3880cf2f1046fc6db4a9"
+    },
+    {
+      "id": "github-commit-af78d65e54ce",
+      "title": "fix: hide legacy Life shell before final dashboard install",
+      "completed_at": "2026-09-06T10:56:07Z",
+      "result": "GitHub mainへ反映（af78d65）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/af78d65e54cee6ed06ac257d702cffe72e6c7604"
+    },
+    {
+      "id": "github-commit-e904faa9898a",
+      "title": "fix: keep Life navigation labels complete on iPhone",
+      "completed_at": "2026-09-06T10:55:57Z",
+      "result": "GitHub mainへ反映（e904faa）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/e904faa9898a8f39ce9dd78114a0fde9f87d4f1b"
+    },
+    {
+      "id": "github-commit-efadb28488be",
+      "title": "fix: prevent MY WAY text clipping on iPhone",
+      "completed_at": "2026-09-06T10:55:47Z",
+      "result": "GitHub mainへ反映（efadb28）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/efadb28488be5754265270e43c8015f5962a8dbb"
+    },
+    {
       "id": "github-commit-42655bd2747e",
       "title": "Merge pull request #289 from yskn0008-bot/yos/my-way-final-readability",
       "completed_at": "2026-09-06T09:19:32Z",
       "result": "GitHub mainへ反映（42655bd）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/42655bd2747e8eabf4411636c32f91da3271f936"
-    },
-    {
-      "id": "github-commit-a204e9b0004b",
-      "title": "fix: preserve tested Life cache identity",
-      "completed_at": "2026-09-06T09:15:28Z",
-      "result": "GitHub mainへ反映（a204e9b）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/a204e9b0004b7808e95fbbae28dd00eda961799e"
-    },
-    {
-      "id": "github-commit-7b957df04ca8",
-      "title": "fix: preserve tested YOS cache identity",
-      "completed_at": "2026-09-06T09:15:13Z",
-      "result": "GitHub mainへ反映（7b957df）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/7b957df04ca8477ecd66734ad10babd56ff695ef"
-    },
-    {
-      "id": "github-commit-0c3b246eef3f",
-      "title": "fix: reveal Life only after final dashboard is installed",
-      "completed_at": "2026-09-06T08:47:28Z",
-      "result": "GitHub mainへ反映（0c3b246）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/0c3b246eef3ffa143b1026948f69b2c80a4e5f01"
-    },
-    {
-      "id": "github-commit-560348bc3980",
-      "title": "fix: prevent legacy Life flash and load readable typography",
-      "completed_at": "2026-09-06T08:47:15Z",
-      "result": "GitHub mainへ反映（560348b）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/560348bc398064a53874e62a413ddc534fd44529"
     },
     {
       "id": "complete-002",
@@ -204,7 +194,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #290をレビューして公開判断する",
+      "next_action": "PR #280をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -214,7 +204,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-06T23:03:37+09:00",
+      "last_update": "2026-09-07T00:41:37+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -289,13 +279,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 29件・Open PR 3件を自動同期中",
+      "next_action": "Open Issue 29件・Open PR 2件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-06T23:03:37+09:00",
+      "last_update": "2026-09-07T00:41:37+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -309,7 +299,7 @@
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #290をレビューして公開判断する",
+      "next_action": "PR #280をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -318,7 +308,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-06T23:03:37+09:00",
+      "last_update": "2026-09-07T00:41:37+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -400,5 +390,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "94f525b077f63067d34717d550536368a8db0f82ae7ad89ec5bdbdb55762bd18"
+  "github_snapshot_hash": "20e4e74c0f4ec671e9e35439d09900806daf8cc421bdb3ce8fefb0f3617f7eb0"
 }
