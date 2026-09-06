@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-06T17:46:02+09:00",
+  "updated_at": "2026-09-06T18:19:45+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -135,39 +135,39 @@
   ],
   "recently_completed": [
     {
-      "id": "github-commit-ed7c352fb995",
-      "title": "revert accidental direct main write",
-      "completed_at": "2026-09-06T08:45:48Z",
-      "result": "GitHub mainへ反映（ed7c352）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/ed7c352fb99563fc0ee56d64dd2e947d8b909183"
+      "id": "github-commit-42655bd2747e",
+      "title": "Merge pull request #289 from yskn0008-bot/yos/my-way-final-readability",
+      "completed_at": "2026-09-06T09:19:32Z",
+      "result": "GitHub mainへ反映（42655bd）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/42655bd2747e8eabf4411636c32f91da3271f936"
     },
     {
-      "id": "github-commit-ba4bab5e488c",
-      "title": "test",
-      "completed_at": "2026-09-06T08:45:24Z",
-      "result": "GitHub mainへ反映（ba4bab5）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/ba4bab5e488c5d77c4277d1ecd50fb15903a1c50"
+      "id": "github-commit-a204e9b0004b",
+      "title": "fix: preserve tested Life cache identity",
+      "completed_at": "2026-09-06T09:15:28Z",
+      "result": "GitHub mainへ反映（a204e9b）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/a204e9b0004b7808e95fbbae28dd00eda961799e"
     },
     {
-      "id": "github-commit-33f9a8e34990",
-      "title": "Merge PR #276: finalize MY WAY Visual SSOT",
-      "completed_at": "2026-09-06T07:49:00Z",
-      "result": "GitHub mainへ反映（33f9a8e）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/33f9a8e349909035c501d90e72729121f64d190f"
+      "id": "github-commit-7b957df04ca8",
+      "title": "fix: preserve tested YOS cache identity",
+      "completed_at": "2026-09-06T09:15:13Z",
+      "result": "GitHub mainへ反映（7b957df）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/7b957df04ca8477ecd66734ad10babd56ff695ef"
     },
     {
-      "id": "github-commit-1b2f2f7b346e",
-      "title": "Merge PR #287: bound OpenAI 429 cause diagnostic",
-      "completed_at": "2026-09-05T17:07:17Z",
-      "result": "GitHub mainへ反映（1b2f2f7）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/1b2f2f7b346e3921e6aadbcf445237440dec04a8"
+      "id": "github-commit-0c3b246eef3f",
+      "title": "fix: reveal Life only after final dashboard is installed",
+      "completed_at": "2026-09-06T08:47:28Z",
+      "result": "GitHub mainへ反映（0c3b246）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/0c3b246eef3ffa143b1026948f69b2c80a4e5f01"
     },
     {
-      "id": "github-commit-711e052817a5",
-      "title": "test(yos-ai): bound OpenAI 429 diagnostics",
-      "completed_at": "2026-09-05T17:06:10Z",
-      "result": "GitHub mainへ反映（711e052）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/711e052817a5a7fff0cf438946a98d3d72178335"
+      "id": "github-commit-560348bc3980",
+      "title": "fix: prevent legacy Life flash and load readable typography",
+      "completed_at": "2026-09-06T08:47:15Z",
+      "result": "GitHub mainへ反映（560348b）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/560348bc398064a53874e62a413ddc534fd44529"
     },
     {
       "id": "complete-002",
@@ -204,7 +204,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-06T17:46:02+09:00",
+      "last_update": "2026-09-06T18:19:45+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -285,7 +285,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-06T17:46:02+09:00",
+      "last_update": "2026-09-06T18:19:45+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -308,7 +308,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-06T17:46:02+09:00",
+      "last_update": "2026-09-06T18:19:45+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -390,5 +390,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "c877f6377f062f27cd62b962a9b5c83ca61a5247ca6c861c9839ec282fd81657"
+  "github_snapshot_hash": "f368b9f7bc54d31fd51feea929cb850551056139a1c10ba98fc83b9eedb85884"
 }
