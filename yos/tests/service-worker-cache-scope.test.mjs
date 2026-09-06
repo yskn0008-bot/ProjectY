@@ -18,7 +18,8 @@ const cachePrefix = readStringConstant('CACHE_PREFIX');
 
 test('cache identity is scoped to YOS command center', () => {
   assert.equal(cachePrefix, 'yos-command-center-');
-  assert.match(source, /const\s+CACHE\s*=\s*`\$\{CACHE_PREFIX\}v18-final-visual-readability`/);
+  assert.match(source, /const\s+CACHE\s*=\s*`\$\{CACHE_PREFIX\}v19-completion-lock`/);
+  assert.match(source, /readability-final\.css\?v=2/);
   assert.match(source, /['"]\.\/hj-entry\.js['"]/);
   assert.match(source, /['"]\.\/assets\/home-life-path-watercolor-v1\.webp['"]/);
   assert.match(source, /['"]\.\/assets\/journey-valley-watercolor-v1\.webp['"]/);

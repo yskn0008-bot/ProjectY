@@ -1,12 +1,12 @@
 'use strict';
 
 const CACHE_PREFIX = 'yos-command-center-';
-const CACHE = `${CACHE_PREFIX}v18-final-visual-readability`;
+const CACHE = `${CACHE_PREFIX}v19-completion-lock`;
 const STATIC = [
   './',
   './index.html',
   './styles.css',
-  './readability-final.css',
+  './readability-final.css?v=2',
   './app.js',
   './assets/home-life-path-watercolor-v1.webp',
   './assets/journey-valley-watercolor-v1.webp',
@@ -20,8 +20,9 @@ const STATIC = [
 
 async function inject(response) {
   let html = await response.text();
+  html = html.replace(/<link rel="stylesheet" href="\.\/readability-final\.css\?v=1">/g, '<link rel="stylesheet" href="./readability-final.css?v=2">');
   if (!html.includes('readability-final.css')) {
-    html = html.replace('</head>', '<link rel="stylesheet" href="./readability-final.css?v=1"></head>');
+    html = html.replace('</head>', '<link rel="stylesheet" href="./readability-final.css?v=2"></head>');
   }
   if (!html.includes('taxi-live-v1.js')) {
     html = html.replace('</body>', '<script src="./taxi-live-v1.js?v=4"></script></body>');
@@ -57,7 +58,7 @@ self.addEventListener('fetch', (event) => {
 
   if (isHome) {
     event.respondWith(
-      fetch(event.request, { cache: 'no-cache' })
+      fetch(event.request, { cache: 'no-store' })
         .then(inject)
         .catch(() => caches.match('./index.html').then(inject))
     );
