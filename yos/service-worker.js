@@ -6,6 +6,7 @@ const STATIC = [
   './',
   './index.html',
   './styles.css',
+  './readability-final.css',
   './app.js',
   './assets/home-life-path-watercolor-v1.webp',
   './assets/journey-valley-watercolor-v1.webp',
@@ -19,6 +20,9 @@ const STATIC = [
 
 async function inject(response) {
   let html = await response.text();
+  if (!html.includes('readability-final.css')) {
+    html = html.replace('</head>', '<link rel="stylesheet" href="./readability-final.css?v=1"></head>');
+  }
   if (!html.includes('taxi-live-v1.js')) {
     html = html.replace('</body>', '<script src="./taxi-live-v1.js?v=4"></script></body>');
   }

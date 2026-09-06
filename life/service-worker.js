@@ -8,11 +8,14 @@ const STATIC=[
   './yos-suite-v3.js?v=8',
   './home-v1.js?v=7',
   './home-v1.css?v=7',
-  './home-priority-v1.css?v=4'
+  './home-priority-v1.css?v=4',
+  './readability-final.css?v=1'
 ];
 async function inject(response){
   let html=await response.text();
+  if(!html.includes('life-preinstall-guard'))html=html.replace('</head>','<style id="life-preinstall-guard">main.app{visibility:hidden}</style><link rel="stylesheet" href="./readability-final.css?v=1"></head>');
   if(!html.includes('yos-suite-v3.js'))html=html.replace('</body>','<script src="./yos-suite-v3.js?v=8"></script></body>');
+  if(!html.includes('life-final-reveal'))html=html.replace('</body>','<script id="life-final-reveal">(()=>{const t=setInterval(()=>{if(document.getElementById("lifePageHostV1")){document.querySelector("main.app")?.style.setProperty("visibility","visible");document.getElementById("life-preinstall-guard")?.remove();clearInterval(t)}},16);setTimeout(()=>{clearInterval(t);document.querySelector("main.app")?.style.setProperty("visibility","visible")},3000)})();</script></body>');
   const headers=new Headers(response.headers);
   headers.delete('content-length');
   headers.delete('content-encoding');
