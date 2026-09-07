@@ -1,15 +1,15 @@
 // YOS Light Widget — Panasonic HK9494 physical-button subset via Tapo H110.
 // Requires YOS Tapo H110 Core.js and one successful YOS Tapo H110 Setup run.
-// Home-screen widgets cannot measure press duration, so brightness uses a very short pulse burst.
-// For true press-and-hold dimming, tap the title to open YOS Light Remote.
+// Home-screen widgets cannot measure press duration, so brightness is one small step per tap.
+// Tap the title to open YOS Light Remote for press-and-hold control.
 
 const tapo = importModule('YOS Tapo H110 Core');
 const ACTIONS = Object.freeze({
   on:     {label:'点灯', icon:'power',        keys:['POWER ON','点灯']},
   off:    {label:'消灯', icon:'poweroff',     keys:['POWER OFF','消灯']},
   all:    {label:'全灯', icon:'sun.max.fill', keys:['全灯','All Lights']},
-  bright: {label:'明るい',icon:'sun.max',     keys:['BRIGHTNESS+','明るくする','明るい'], repeat:2},
-  dark:   {label:'暗い', icon:'sun.min',      keys:['BRIGHTNESS-','暗くする','暗い'], repeat:2},
+  bright: {label:'明るい',icon:'sun.max',     keys:['BRIGHTNESS+','明るくする','明るい']},
+  dark:   {label:'暗い', icon:'sun.min',      keys:['BRIGHTNESS-','暗くする','暗い']},
   night:  {label:'常夜灯',icon:'moon.fill',   keys:['常夜灯','Night Light']}
 });
 
@@ -18,16 +18,7 @@ const lightPredicate = r => /ライト|light/i.test(String(r.nickname||'')) || S
 async function runAction(name){
   const a=ACTIONS[name];
   if(!a) throw new Error('不明な照明操作です。');
-  if(!a.repeat) return tapo.fireFriendly(lightPredicate,a.keys);
-
-  const remote=tapo.findRemote(lightPredicate);
-  if(!remote) throw new Error('ライト リモコンが見つかりません。');
-  const key=tapo.findKey(remote,a.keys);
-  if(!key) throw new Error(`${a.label} のIRキーが見つかりません。`);
-
-  const c=await tapo.client();
-  for(let i=0;i<a.repeat;i++) await c.fire(remote.device_id,key.name);
-  return {remote,key,repeats:a.repeat};
+  return tapo.fireFriendly(lightPredicate,a.keys);
 }
 
 function runURL(action){
