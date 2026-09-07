@@ -66,7 +66,12 @@ class KlapV2 {
     if(!this.key)await this.handshake();this.seq=(this.seq+1)|0;const seqBytes=int32be(this.seq),iv=concat(this.ivPrefix,seqBytes),clear=utf8(JSON.stringify(payload)),cipher=await this.crypto.aesEncrypt(this.key,iv,clear),signature=await this.crypto.sha256(concat(this.sig,seqBytes,cipher));
     try{const resp=await this.post('request',concat(signature,cipher),this.cookie,`?seq=${this.seq}`);if(resp.bytes.length<33)throw new Error('H110の暗号化応答が不完全です。');const plain=await this.crypto.aesDecrypt(this.key,iv,resp.bytes.slice(32)),text=Data.fromBytes(plain).toRawString();if(!text)throw new Error('H110応答を復号できませんでした。');const obj=JSON.parse(text);if(obj&&obj.error_code&&obj.error_code!==0)throw new Error(`Tapo error_code ${obj.error_code}`);return obj;}catch(e){if(retry&&(e.status===403||/session|security|403/i.test(String(e.message)))){this.key=null;this.cookie='';await this.handshake();return this.query(payload,false);}throw e;}
   }
-  fire(deviceId,keyName){return this.query({method:'control_child',params:{device_id:deviceId,requestData:{method:'multipleRequest',params:{requests:[{method:'sendIrCmdById',params:{name:keyName}}]}}}});}
+  fire(deviceId,keyName){return this.fireBurst(deviceId,keyName,1);}
+  fireBurst(deviceId,keyName,count=1){
+    const n=Math.max(1,Math.min(6,Number(count)||1));
+    const requests=Array.from({length:n},()=>({method:'sendIrCmdById',params:{name:keyName}}));
+    return this.query({method:'control_child',params:{device_id:deviceId,requestData:{method:'multipleRequest',params:{requests}}}});
+  }
   controlAc(deviceId,state){return this.query({method:'control_child',params:{device_id:deviceId,requestData:{method:'multipleRequest',params:{requests:[{method:'sendIrCmdByStatus',params:state}]}}}});}
 }
 
