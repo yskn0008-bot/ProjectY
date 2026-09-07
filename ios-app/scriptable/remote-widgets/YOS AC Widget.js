@@ -67,6 +67,15 @@ function addButton(row,name){
   t.textColor=Color.white();
   t.centerAlignText();
 }
+function addBalancedRow(w,names){
+  const row=w.addStack();
+  row.layoutHorizontally();
+  row.addSpacer();
+  for(const name of names){
+    addButton(row,name);
+    row.addSpacer();
+  }
+}
 function makeWidget(){
   const w=new ListWidget();
   w.backgroundColor=new Color('#000000');
@@ -76,11 +85,9 @@ function makeWidget(){
   h.addSpacer();
   const sub=h.addText('SHARP');sub.font=Font.systemFont(11);sub.textColor=new Color('#8E8E93');
   w.addSpacer(6);
-  for(const names of [['cool','dry','heat','stop'],['tempDown','tempUp','fan','wind']]){
-    const row=w.addStack();row.layoutHorizontally();
-    names.forEach((n,i)=>{if(i)row.addSpacer(5);addButton(row,n);});
-    if(names[0]==='cool')w.addSpacer(5);
-  }
+  addBalancedRow(w,['cool','dry','heat','stop']);
+  w.addSpacer(5);
+  addBalancedRow(w,['tempDown','tempUp','fan','wind']);
   return w;
 }
 async function main(){
