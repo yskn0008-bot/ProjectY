@@ -52,7 +52,9 @@ function rowButtons(w,items,opt={}){
 function header(w){
   const top=w.addStack();top.centerAlignContent();top.url=remoteURL();
   const title=top.addText('BRAVIA');title.font=Font.boldSystemFont(21);title.textColor=Color.white();
-  top.addSpacer();const open=top.addText('開く ›');open.font=Font.systemFont(12);open.textColor=Color.gray();
+  top.addSpacer();
+  const icon=top.addImage(SFSymbol.named('arrow.up.right.square.fill').image);
+  icon.imageSize=new Size(17,17);icon.tintColor=new Color('#8E8E93');
 }
 function makeMedium(){
   const w=new ListWidget();
