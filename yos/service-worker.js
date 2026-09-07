@@ -1,7 +1,7 @@
 'use strict';
 
 const CACHE_PREFIX = 'yos-command-center-';
-const CACHE = `${CACHE_PREFIX}v20-task-dashboard`;
+const CACHE = `${CACHE_PREFIX}v21-task-auth`;
 const STATIC = [
   './',
   './index.html',

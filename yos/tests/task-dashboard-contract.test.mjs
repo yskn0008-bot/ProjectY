@@ -15,15 +15,24 @@ test('dashboard uses the requested daily groups without embedding current task r
   assert.doesNotMatch(js,/localStorage\.setItem\([^,]+,\s*credential/);
 });
 
-test('authentication starts only from the explicit update action',()=>{
-  assert.equal(js.match(/setupAuth\(/g)?.length,2);
-  assert.match(js,/addEventListener\('click',\(\)=>\{if\(initialized\).*setupAuth\(true\)/);
+test('authentication uses an explicit Google-rendered control instead of prompt-only auth',()=>{
+  assert.match(js,/googleId\.renderButton\(/);
+  assert.doesNotMatch(js,/\.prompt\(/);
+  assert.match(js,/taskDashboardGoogleButton/);
+  assert.match(js,/itp_support:true/);
+});
+
+test('authentication bootstrap is restricted to the production MY WAY origin',()=>{
+  assert.match(js,/AUTH_ORIGIN='https:\/\/yskn0008-bot\.github\.io'/);
+  assert.match(js,/location\.origin===AUTH_ORIGIN/);
+  assert.match(js,/if\(!canPrepareAuth\(\)\|\|initialized\)return/);
 });
 
 test('dashboard preserves iPhone-first non-horizontal visual contract',()=>{
   assert.match(css,/overflow-wrap:anywhere/);
   assert.doesNotMatch(css,/overflow-x:\s*auto|white-space:\s*nowrap[^}]*task-copy/);
   assert.match(css,/grid-template-columns:repeat\(3,1fr\)/);
+  assert.match(css,/task-google-button/);
 });
 
 test('service worker injects and caches dashboard assets',()=>{
