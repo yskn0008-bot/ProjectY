@@ -7,6 +7,6 @@ for(const name of files){
 }
 const a=new Alert();
 a.title='照明リモコン更新完了';
-a.message='連続送信で止まらなくなる問題を避けるため、明るい／暗いは一時的に1タップ1回へ戻しました。YOS Light Hold Probe を実行すると、物理リモコン同等の長押し実装に必要なIRデータを安全に取得できます。';
+a.message='明るい／暗いの長押しを、まとめ連射ではなく1回ずつ送る方式へ変更しました。離した後に送信済みの連射が残らない構成です。';
 a.addAction('OK');
 await a.presentAlert();
