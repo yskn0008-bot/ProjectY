@@ -71,12 +71,7 @@ function modeName(s){
 }
 
 function uiState(){
-  return {
-    power:!!state.P,
-    mode:modeName(state),
-    temp:state.T,
-    dry:state.M===4
-  };
+  return {power:!!state.P, mode:modeName(state), temp:state.T, dry:state.M===4};
 }
 
 async function showError(error){
@@ -135,13 +130,18 @@ function parseBridge(url){
 const html=`<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><style>
 *{box-sizing:border-box;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#000;color:#fff;font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",sans-serif}
-body{display:flex;align-items:center;justify-content:center}.wrap{width:min(94vw,520px);padding:14px}.head{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:10px}h1{margin:0;font-size:28px}.sub{font-size:12px;color:#8e8e93}
-.status{background:#111;border-radius:20px;padding:14px;margin-bottom:10px;display:grid;grid-template-columns:1fr 1fr;gap:8px;align-items:center}.mode{font-size:19px;font-weight:800}.temp{font-size:30px;font-weight:800;text-align:right}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}button{height:68px;border:0;border-radius:19px;background:#171717;color:#0a84ff;font-size:18px;font-weight:750;touch-action:manipulation}button:active{background:#2a2a2a;transform:scale(.985)}button.stop{color:#ff453a}.tempctl{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:9px}.lower{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:9px}.hint{margin-top:9px;text-align:center;color:#666;font-size:10px;line-height:1.4}
-</style></head><body><div class="wrap"><div class="head"><h1>エアコン</h1><div class="sub">SHARP A988JB</div></div><div class="status"><div class="mode" id="mode">-</div><div class="temp" id="temp">--°</div></div><div class="grid"><button data-action="cool">冷房</button><button data-action="dry">除湿</button><button data-action="heat">暖房</button><button class="stop" data-action="stop">停止</button></div><div class="tempctl"><button id="down" data-action="tempDown">温度 ▼</button><button id="up" data-action="tempUp">温度 ▲</button></div><div class="lower"><button id="fanBtn" data-action="fan">風量 切替</button><button data-action="wind">風向 切替</button></div><div class="hint">風量・風向は実機を見ながら切替。Tapo内部の数字は表示しません。</div></div><script>
+body{overscroll-behavior:none}
+main{height:100vh;width:100%;padding:12px;display:flex;flex-direction:column;gap:10px;overflow:hidden}
+.head{height:42px;display:flex;align-items:flex-end;justify-content:space-between;flex:0 0 auto}
+h1{margin:0;font-size:28px;line-height:1}.sub{font-size:12px;color:#8e8e93}
+.status{height:72px;flex:0 0 auto;background:#111;border-radius:20px;padding:12px 18px;display:grid;grid-template-columns:1fr 1fr;align-items:center}.mode{font-size:22px;font-weight:800}.temp{font-size:34px;font-weight:800;text-align:right}
+.controls{flex:1;min-height:0;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:repeat(4,minmax(0,1fr));gap:10px}
+button{min-height:0;border:0;border-radius:22px;background:#171717;color:#0a84ff;font-size:22px;font-weight:780;touch-action:manipulation}button:active{background:#2a2a2a;transform:scale(.985)}button.stop{color:#ff453a}button:disabled{opacity:.35}
+@media(max-height:720px){main{padding:9px;gap:8px}.head{height:34px}h1{font-size:24px}.status{height:58px;border-radius:17px}.mode{font-size:19px}.temp{font-size:29px}.controls{gap:8px}button{font-size:19px;border-radius:18px}}
+</style></head><body><main><div class="head"><h1>エアコン</h1><div class="sub">SHARP A988JB</div></div><div class="status"><div class="mode" id="mode">-</div><div class="temp" id="temp">--°</div></div><div class="controls"><button data-action="cool">冷房</button><button data-action="dry">除湿</button><button data-action="heat">暖房</button><button class="stop" data-action="stop">停止</button><button id="down" data-action="tempDown">温度 ▼</button><button id="up" data-action="tempUp">温度 ▲</button><button id="fanBtn" data-action="fan">風量 切替</button><button data-action="wind">風向 切替</button></div></main><script>
 function bridge(action){location.href='yosac://fire?action='+encodeURIComponent(action)+'&_='+Date.now()}
 document.querySelectorAll('[data-action]').forEach(b=>b.addEventListener('click',()=>bridge(b.dataset.action)));
-window.setState=function(s){document.getElementById('mode').textContent=s.mode;document.getElementById('temp').textContent=s.dry?'—':(s.temp+'°');document.getElementById('up').disabled=s.dry;document.getElementById('down').disabled=s.dry;document.getElementById('fanBtn').disabled=s.dry;document.querySelectorAll('button:disabled').forEach(b=>{b.style.opacity=.35});if(!s.dry){['up','down','fanBtn'].forEach(id=>document.getElementById(id).style.opacity=1)}};
+window.setState=function(s){document.getElementById('mode').textContent=s.mode;document.getElementById('temp').textContent=s.dry?'—':(s.temp+'°');document.getElementById('up').disabled=s.dry;document.getElementById('down').disabled=s.dry;document.getElementById('fanBtn').disabled=s.dry};
 window.setState(${JSON.stringify(uiState())});
 </script></body></html>`;
 
