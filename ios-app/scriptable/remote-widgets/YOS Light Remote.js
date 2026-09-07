@@ -1,5 +1,5 @@
-// YOS Light Remote — Panasonic HK9494 physical remote behavior via Tapo H110.
-// Brightness buttons repeat while held and stop when released.
+// YOS Light Remote — Panasonic HK9494 via Tapo H110.
+// Safe hold mode: never queues multi-command bursts, so release stops after at most the in-flight command.
 
 const tapo = importModule('YOS Tapo H110 Core');
 const lightPredicate = r => /ライト|light/i.test(String(r.nickname||'')) || String(r.model||'').toLowerCase()==='light';
@@ -20,18 +20,11 @@ const client = await tapo.client();
 let holdAction = null;
 let holdToken = 0;
 let sendQueue = Promise.resolve();
-const HOLD_BURST = 3;
 
 async function fire(action){
   const key = keys[action];
   if(!key) return;
   await client.fire(remote.device_id,key.name);
-}
-
-async function fireHoldBurst(action){
-  const key = keys[action];
-  if(!key) return;
-  await client.fireBurst(remote.device_id,key.name,HOLD_BURST);
 }
 
 async function showError(error){
@@ -59,7 +52,8 @@ function startHold(action){
   (async()=>{
     try{
       while(holdAction === action && token === holdToken){
-        await fireHoldBurst(action);
+        await fire(action);
+        if(holdAction !== action || token !== holdToken) break;
       }
     }catch(e){
       stopHold();
@@ -107,7 +101,7 @@ button:active,.holding{background:#2a2a2a;transform:scale(.985)}
 <button class="small" data-tap="all">全灯</button>
 <button class="small" data-tap="night">常夜灯</button>
 </div>
-<div class="note">明るい／暗いは押している間だけ連続調光</div>
+<div class="note">明るい／暗い：押している間だけ送信</div>
 </main>
 <script>
 function bridge(path, params={}){
