@@ -55,7 +55,7 @@
     const home=document.getElementById('homePage');const scene=home?.querySelector('.home-scene');if(!home||!scene||document.getElementById('taskDashboard'))return;
     const dashboard=el('section','task-dashboard');dashboard.id='taskDashboard';const header=el('header');const title=el('div');title.append(el('small','','TODAY'),el('h2','','今どうなってる？'));const status=el('span','task-dashboard-status','読み込み中');status.id='taskDashboardStatus';header.append(title,status);dashboard.append(header);const body=el('div');body.id='taskDashboardBody';body.append(el('p','task-empty','タスクを読み込んでいます'));dashboard.append(body);const auth=el('div','task-auth');auth.id='taskDashboardAuth';auth.hidden=true;auth.append(el('p','','タスクを更新するにはGoogle本人確認が必要です。'));const button=el('button','','Googleで更新');button.type='button';button.addEventListener('click',()=>{if(initialized)globalThis.google.accounts.id.prompt();else setupAuth(true)});auth.append(button);dashboard.append(auth);scene.before(dashboard);
     const map=el('details','life-map-details');const summary=el('summary','','人生ナビを見る');scene.before(map);map.append(summary,scene);home.classList.add('task-dashboard-ready');
-    const cached=readCache();if(cached){const age=Date.now()-Number(cached.savedAt||0);render(cached.data,age<CACHE_MAX_MS?'前回の状態':'更新待ち')}else showAuth('最初にGoogle本人確認をすると、現在のタスクが表示されます。');setupAuth(Boolean(cached));
+    const cached=readCache();if(cached){const age=Date.now()-Number(cached.savedAt||0);render(cached.data,age<CACHE_MAX_MS?'前回の状態':'更新待ち')}else showAuth('最初にGoogle本人確認をすると、現在のタスクが表示されます。');
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install,{once:true});else install();
 })();
