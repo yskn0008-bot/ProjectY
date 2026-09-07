@@ -1,6 +1,7 @@
 'use strict';
 (()=>{
   const API='https://project-y-yos-ai.vercel.app';
+  const AUTH_ORIGIN='https://yskn0008-bot.github.io';
   const GOOGLE_SCRIPT_URL='https://accounts.google.com/gsi/client';
   const CACHE_KEY='yos-task-dashboard-cache-v1';
   const CACHE_MAX_MS=6*60*60*1000;
@@ -14,6 +15,7 @@
   function dueLabel(value){if(!value)return'';const d=new Date(value);if(Number.isNaN(d.getTime()))return String(value);return new Intl.DateTimeFormat('ja-JP',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit',hour12:false,timeZone:'Asia/Tokyo'}).format(d)}
   function meta(task){const bits=[];const due=dueLabel(task.due);if(due)bits.push(`期限 ${due}`);if(task.state)bits.push(task.state);if(task.owner)bits.push(`担当 ${task.owner}`);return bits}
   function detailLine(label,value){if(!value)return null;const p=el('p');p.append(el('b','',label),document.createTextNode(value));return p}
+  function canPrepareAuth(){return location.origin===AUTH_ORIGIN}
 
   function taskRow(task){
     const details=el('details','task-row');const summary=el('summary');summary.append(el('span','task-order',padOrder(task.order)));
@@ -50,7 +52,7 @@
   function loadGoogleScript(){return new Promise((resolve,reject)=>{if(globalThis.google?.accounts?.id)return resolve(globalThis.google.accounts.id);const existing=document.querySelector(`script[src="${GOOGLE_SCRIPT_URL}"]`);const s=existing||document.createElement('script');const timeout=setTimeout(()=>reject(new Error('google timeout')),15000);const ready=()=>{clearTimeout(timeout);if(globalThis.google?.accounts?.id)resolve(globalThis.google.accounts.id);else reject(new Error('google unavailable'))};s.addEventListener('load',ready,{once:true});s.addEventListener('error',()=>{clearTimeout(timeout);reject(new Error('google unavailable'))},{once:true});if(!existing){s.src=GOOGLE_SCRIPT_URL;s.async=true;s.defer=true;s.referrerPolicy='strict-origin-when-cross-origin';s.dataset.yosTasksGoogle='1';document.head.append(s)}})}
 
   async function setupAuth(){
-    if(initialized)return;
+    if(!canPrepareAuth()||initialized)return;
     if(authSetupPromise)return authSetupPromise;
     authSetupPromise=Promise.all([loadPublicConfig(),loadGoogleScript()]).then(([config,googleId])=>{
       const host=document.getElementById('taskDashboardGoogleButton');if(!host)throw new Error('google host');
