@@ -1,5 +1,5 @@
 // YOS AC Widget — SHARP A988JB frequent controls via Tapo H110.
-// Title opens YOS AC Remote. Medium widget exposes the eight standard controls verified on-device.
+// Header includes a visible launch icon for the full YOS AC Remote.
 
 const tapo = importModule('YOS Tapo H110 Core');
 const remote = tapo.findRemote(r => String(r.model||'').toUpperCase()==='AC' || /エアコン|air.?con/i.test(String(r.nickname||'')));
@@ -71,10 +71,7 @@ function addBalancedRow(w,names){
   const row=w.addStack();
   row.layoutHorizontally();
   row.addSpacer();
-  for(const name of names){
-    addButton(row,name);
-    row.addSpacer();
-  }
+  for(const name of names){addButton(row,name);row.addSpacer();}
 }
 function makeWidget(){
   const w=new ListWidget();
@@ -84,6 +81,8 @@ function makeWidget(){
   const title=h.addText('エアコン');title.font=Font.boldSystemFont(18);title.textColor=Color.white();
   h.addSpacer();
   const sub=h.addText('SHARP');sub.font=Font.systemFont(11);sub.textColor=new Color('#8E8E93');
+  h.addSpacer(8);
+  const open=h.addImage(SFSymbol.named('arrow.up.right.square.fill').image);open.imageSize=new Size(16,16);open.tintColor=new Color('#8E8E93');
   w.addSpacer(6);
   addBalancedRow(w,['cool','dry','heat','stop']);
   w.addSpacer(5);
