@@ -20,11 +20,18 @@ const client = await tapo.client();
 let holdAction = null;
 let holdToken = 0;
 let sendQueue = Promise.resolve();
+const HOLD_BURST = 3;
 
 async function fire(action){
   const key = keys[action];
   if(!key) return;
   await client.fire(remote.device_id,key.name);
+}
+
+async function fireHoldBurst(action){
+  const key = keys[action];
+  if(!key) return;
+  await client.fireBurst(remote.device_id,key.name,HOLD_BURST);
 }
 
 async function showError(error){
@@ -52,7 +59,7 @@ function startHold(action){
   (async()=>{
     try{
       while(holdAction === action && token === holdToken){
-        await fire(action);
+        await fireHoldBurst(action);
       }
     }catch(e){
       stopHold();
