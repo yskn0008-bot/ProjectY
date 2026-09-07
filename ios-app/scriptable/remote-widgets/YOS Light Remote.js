@@ -1,5 +1,5 @@
 // YOS Light Remote — Panasonic HK9494 via Tapo H110.
-// Safety mode: brightness is one discrete IR command per tap while true hold behavior is being profiled.
+// Hold mode: one IR command at a time. Never pre-queues bursts, so release stops after at most the one command already in flight.
 
 const tapo = importModule('YOS Tapo H110 Core');
 const lightPredicate = r => /ライト|light/i.test(String(r.nickname||'')) || String(r.model||'').toLowerCase()==='light';
@@ -17,7 +17,12 @@ const keys = {
 for(const [name,key] of Object.entries(keys)) if(!key) throw new Error(`${name} のIRキーが見つかりません。`);
 
 const client = await tapo.client();
+const HOLD_LEASE_MS = 600;
 let sendQueue = Promise.resolve();
+let holdAction = null;
+let holdToken = 0;
+let holdLeaseUntil = 0;
+let holdPromise = Promise.resolve();
 
 async function fire(action){
   const key = keys[action];
@@ -34,7 +39,42 @@ async function showError(error){
 }
 
 function enqueueFire(action){
+  stopHold();
   sendQueue = sendQueue.then(() => fire(action)).catch(async e => { await showError(e); });
+  return sendQueue;
+}
+
+function stopHold(){
+  holdAction = null;
+  holdLeaseUntil = 0;
+  holdToken += 1;
+}
+
+function renewHold(action){
+  if(holdAction === action) holdLeaseUntil = Date.now() + HOLD_LEASE_MS;
+}
+
+function startHold(action){
+  if(action !== 'bright' && action !== 'dark') return;
+  stopHold();
+  holdAction = action;
+  holdLeaseUntil = Date.now() + HOLD_LEASE_MS;
+  const token = holdToken;
+  holdPromise = (async()=>{
+    try{
+      while(holdAction === action && token === holdToken && Date.now() < holdLeaseUntil){
+        // Important: exactly one stored command at a time. The captured Panasonic key
+        // already contains two IR frames (~270 ms total), so batching creates a long tail.
+        await fire(action);
+        if(holdAction !== action || token !== holdToken) break;
+      }
+    }catch(e){
+      if(token === holdToken) stopHold();
+      await showError(e);
+    }finally{
+      if(token === holdToken) stopHold();
+    }
+  })();
 }
 
 function parseBridge(url){
@@ -61,26 +101,71 @@ main{width:min(92vw,520px);padding:18px}
 .head{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:16px}
 h1{margin:0;font-size:28px}.sub{color:#8e8e93;font-size:12px}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-button{height:88px;border:0;border-radius:22px;background:#171717;color:#0a84ff;font-size:20px;font-weight:700;touch-action:manipulation}
-button:active{background:#2a2a2a;transform:scale(.985)}
+button{height:88px;border:0;border-radius:22px;background:#171717;color:#0a84ff;font-size:20px;font-weight:700;touch-action:none}
+button:active,.holding{background:#2a2a2a;transform:scale(.985)}
 .small{font-size:17px;color:#fff}
 .note{text-align:center;color:#777;font-size:11px;margin-top:14px;line-height:1.45}
 </style></head><body>
 <main>
 <div class="head"><h1>照明</h1><div class="sub">Panasonic HK9494</div></div>
 <div class="grid">
-<button data-action="on">点灯</button>
-<button data-action="off">消灯</button>
-<button data-action="bright">明るい</button>
-<button data-action="dark">暗い</button>
-<button class="small" data-action="all">全灯</button>
-<button class="small" data-action="night">常夜灯</button>
+<button data-tap="on">点灯</button>
+<button data-tap="off">消灯</button>
+<button id="bright">明るい</button>
+<button id="dark">暗い</button>
+<button class="small" data-tap="all">全灯</button>
+<button class="small" data-tap="night">常夜灯</button>
 </div>
-<div class="note">安全モード：明るい／暗いは現在1タップ1回<br>長押し波形を確認後に物理リモコン同等へ戻します</div>
+<div class="note">明るい／暗い：押している間だけ調光・離すと停止</div>
 </main>
 <script>
-function bridge(action){ location.href='yoslight://fire?action='+encodeURIComponent(action)+'&_='+Date.now(); }
-document.querySelectorAll('[data-action]').forEach(b=>b.addEventListener('click',()=>bridge(b.dataset.action)));
+function bridge(path, params={}){
+  const q=Object.entries(params).map(([k,v])=>encodeURIComponent(k)+'='+encodeURIComponent(String(v))).join('&');
+  location.href='yoslight://'+path+(q?'?'+q:'?')+(q?'&':'')+'_='+Date.now();
+}
+
+document.querySelectorAll('[data-tap]').forEach(b=>{
+  b.addEventListener('click',()=>bridge('fire',{action:b.dataset.tap}));
+});
+
+function bindHold(id,action){
+  const b=document.getElementById(id);
+  let active=false;
+  let heartbeat=null;
+  let pointerId=null;
+
+  const stop=e=>{
+    if(e) e.preventDefault();
+    if(!active) return;
+    active=false;
+    b.classList.remove('holding');
+    if(heartbeat){clearInterval(heartbeat);heartbeat=null;}
+    if(pointerId!==null){try{b.releasePointerCapture(pointerId);}catch(_){} pointerId=null;}
+    bridge('hold-stop',{action});
+  };
+
+  const start=e=>{
+    e.preventDefault();
+    if(active) return;
+    active=true;
+    pointerId=e.pointerId;
+    b.classList.add('holding');
+    try{b.setPointerCapture(pointerId);}catch(_){}
+    bridge('hold-start',{action});
+    heartbeat=setInterval(()=>{if(active)bridge('hold-heartbeat',{action});},150);
+  };
+
+  b.addEventListener('pointerdown',start);
+  b.addEventListener('pointerup',stop);
+  b.addEventListener('pointercancel',stop);
+  b.addEventListener('lostpointercapture',stop);
+  b.addEventListener('contextmenu',e=>e.preventDefault());
+  window.addEventListener('blur',stop);
+  document.addEventListener('visibilitychange',()=>{if(document.hidden)stop();});
+}
+
+bindHold('bright','bright');
+bindHold('dark','dark');
 </script></body></html>`;
 
 const web = new WebView();
@@ -88,7 +173,12 @@ web.shouldAllowRequest = request => {
   const url = request && request.url ? request.url : '';
   if(String(url).startsWith('yoslight://')){
     const evt = parseBridge(url);
-    if(evt && evt.path === 'fire') enqueueFire(evt.params.action);
+    if(evt){
+      if(evt.path === 'hold-start') startHold(evt.params.action);
+      else if(evt.path === 'hold-heartbeat') renewHold(evt.params.action);
+      else if(evt.path === 'hold-stop') stopHold();
+      else if(evt.path === 'fire') enqueueFire(evt.params.action);
+    }
     return false;
   }
   return true;
@@ -96,5 +186,6 @@ web.shouldAllowRequest = request => {
 
 await web.loadHTML(html);
 await web.present(true);
-await sendQueue;
+stopHold();
+await Promise.allSettled([sendQueue,holdPromise]);
 Script.complete();
