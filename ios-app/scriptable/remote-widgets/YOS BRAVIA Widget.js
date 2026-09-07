@@ -23,16 +23,30 @@ function remoteURL(){return 'scriptable:///run?scriptName='+encodeURIComponent('
 
 function addButton(row,label,action,opt={}){
   const s=row.addStack();
-  s.layoutVertically();s.centerAlignContent();s.cornerRadius=12;s.backgroundColor=new Color('#171717');s.url=runURL(action);
-  s.size=new Size(opt.width||0,opt.height||48);
+  s.layoutVertically();
+  s.centerAlignContent();
+  s.cornerRadius=12;
+  s.backgroundColor=new Color('#171717');
+  s.url=opt.url||runURL(action);
+  s.size=new Size(opt.width||72,opt.height||44);
   s.addSpacer();
-  const t=s.addText(label);t.font=Font.mediumSystemFont(opt.font||16);t.textColor=action==='power'?new Color('#FF453A'):Color.blue();t.centerAlignText();
+  const t=s.addText(label);
+  t.font=Font.mediumSystemFont(opt.font||13);
+  t.textColor=action==='power'?new Color('#FF453A'):Color.blue();
+  t.centerAlignText();
   s.addSpacer();
   return s;
 }
 function rowButtons(w,items,opt={}){
-  const r=w.addStack();r.layoutHorizontally();r.centerAlignContent();
-  items.forEach((x,i)=>{if(i)r.addSpacer(opt.gap||7);addButton(r,x[0],x[1],opt)});
+  const r=w.addStack();
+  r.layoutHorizontally();
+  r.centerAlignContent();
+  r.addSpacer();
+  items.forEach((x,i)=>{
+    if(i)r.addSpacer(opt.gap||6);
+    addButton(r,x[0],x[1],{...opt,url:x[2]||null});
+  });
+  r.addSpacer();
   return r;
 }
 function header(w){
@@ -41,19 +55,31 @@ function header(w){
   top.addSpacer();const open=top.addText('開く ›');open.font=Font.systemFont(12);open.textColor=Color.gray();
 }
 function makeMedium(){
-  const w=new ListWidget();w.backgroundColor=Color.black();w.setPadding(12,12,12,12);header(w);w.addSpacer(10);
-  rowButtons(w,[['⏻ 電源','power'],['入力','input'],['ホーム','home']],{height:48,font:16,gap:8});w.addSpacer(8);
-  rowButtons(w,[['音量−','volumeDown'],['ミュート','mute'],['音量＋','volumeUp']],{height:48,font:16,gap:8});
+  const w=new ListWidget();
+  w.backgroundColor=Color.black();
+  w.setPadding(12,12,12,12);
+  header(w);
+  w.addSpacer(10);
+  const o={width:88,height:48,font:15,gap:8};
+  rowButtons(w,[['⏻ 電源','power'],['入力','input'],['ホーム','home']],o);
+  w.addSpacer(8);
+  rowButtons(w,[['音量−','volumeDown'],['ミュート','mute'],['音量＋','volumeUp']],o);
   return w;
 }
 function makeLarge(){
-  const w=new ListWidget();w.backgroundColor=Color.black();w.setPadding(12,12,12,12);header(w);w.addSpacer(9);
-  const o={height:43,font:13,gap:6};
+  const w=new ListWidget();
+  w.backgroundColor=Color.black();
+  w.setPadding(12,12,12,12);
+  header(w);
+  w.addSpacer(9);
+  const o={width:72,height:43,font:13,gap:6};
+
+  // Default order: core keys → navigation → volume → channel/playback → transport/open.
   rowButtons(w,[['⏻ 電源','power'],['入力','input'],['ホーム','home'],['戻る','back']],o);w.addSpacer(6);
-  rowButtons(w,[['音量＋','volumeUp'],['▲','up'],['CH＋','channelUp'],['再生','play']],o);w.addSpacer(6);
-  rowButtons(w,[['音量−','volumeDown'],['◀','left'],['OK','confirm'],['▶','right']],o);w.addSpacer(6);
-  rowButtons(w,[['ミュート','mute'],['▼','down'],['CH−','channelDown'],['一時停止','pause']],o);w.addSpacer(6);
-  rowButtons(w,[['巻戻し','rewind'],['停止','stop'],['早送り','forward'],['開く','home']],o);
+  rowButtons(w,[['▲','up'],['◀','left'],['OK','confirm'],['▶','right']],o);w.addSpacer(6);
+  rowButtons(w,[['▼','down'],['音量−','volumeDown'],['ミュート','mute'],['音量＋','volumeUp']],o);w.addSpacer(6);
+  rowButtons(w,[['CH−','channelDown'],['CH＋','channelUp'],['再生','play'],['一時停止','pause']],o);w.addSpacer(6);
+  rowButtons(w,[['停止','stop'],['巻戻し','rewind'],['早送り','forward'],['開く',null,remoteURL()]],o);
   return w;
 }
 
