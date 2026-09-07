@@ -1,5 +1,5 @@
 // YOS Light Remote — Panasonic HK9494 via Tapo H110.
-// Safe hold mode: never queues multi-command bursts, so release stops after at most the in-flight command.
+// Fast bounded hold mode: short IR bursts while held, heartbeat lease, no unbounded queue.
 
 const tapo = importModule('YOS Tapo H110 Core');
 const lightPredicate = r => /ライト|light/i.test(String(r.nickname||'')) || String(r.model||'').toLowerCase()==='light';
@@ -17,14 +17,28 @@ const keys = {
 for(const [name,key] of Object.entries(keys)) if(!key) throw new Error(`${name} のIRキーが見つかりません。`);
 
 const client = await tapo.client();
+const HOLD_BURST = 6;
+const HOLD_CADENCE_MS = 330;
+const HOLD_LEASE_MS = 450;
 let holdAction = null;
 let holdToken = 0;
+let holdLeaseUntil = 0;
 let sendQueue = Promise.resolve();
+
+function sleep(ms){
+  return new Promise(resolve => Timer.schedule(ms / 1000, false, resolve));
+}
 
 async function fire(action){
   const key = keys[action];
   if(!key) return;
   await client.fire(remote.device_id,key.name);
+}
+
+async function fireHoldBurst(action){
+  const key = keys[action];
+  if(!key) return;
+  await client.fireBurst(remote.device_id,key.name,HOLD_BURST);
 }
 
 async function showError(error){
@@ -42,19 +56,29 @@ function enqueueFire(action){
 
 function stopHold(){
   holdAction = null;
+  holdLeaseUntil = 0;
   holdToken += 1;
+}
+
+function renewHold(action){
+  if(holdAction === action) holdLeaseUntil = Date.now() + HOLD_LEASE_MS;
 }
 
 function startHold(action){
   stopHold();
   holdAction = action;
+  holdLeaseUntil = Date.now() + HOLD_LEASE_MS;
   const token = holdToken;
   (async()=>{
     try{
-      while(holdAction === action && token === holdToken){
-        await fire(action);
-        if(holdAction !== action || token !== holdToken) break;
+      while(holdAction === action && token === holdToken && Date.now() < holdLeaseUntil){
+        const started = Date.now();
+        await fireHoldBurst(action);
+        if(holdAction !== action || token !== holdToken || Date.now() >= holdLeaseUntil) break;
+        const wait = HOLD_CADENCE_MS - (Date.now() - started);
+        if(wait > 0) await sleep(wait);
       }
+      if(token === holdToken && Date.now() >= holdLeaseUntil) stopHold();
     }catch(e){
       stopHold();
       await showError(e);
@@ -101,7 +125,7 @@ button:active,.holding{background:#2a2a2a;transform:scale(.985)}
 <button class="small" data-tap="all">全灯</button>
 <button class="small" data-tap="night">常夜灯</button>
 </div>
-<div class="note">明るい／暗い：押している間だけ送信</div>
+<div class="note">明るい／暗い：押している間だけ高速調光</div>
 </main>
 <script>
 function bridge(path, params={}){
@@ -116,6 +140,15 @@ document.querySelectorAll('[data-tap]').forEach(b=>{
 function bindHold(id,action){
   const b = document.getElementById(id);
   let active = false;
+  let heartbeat = null;
+  const stop = e => {
+    if(e) e.preventDefault();
+    if(!active) return;
+    active = false;
+    b.classList.remove('holding');
+    if(heartbeat){ clearInterval(heartbeat); heartbeat = null; }
+    bridge('hold-stop',{action});
+  };
   const start = e => {
     e.preventDefault();
     if(active) return;
@@ -123,19 +156,15 @@ function bindHold(id,action){
     b.classList.add('holding');
     try{ b.setPointerCapture(e.pointerId); }catch(_){}
     bridge('hold-start',{action});
-  };
-  const stop = e => {
-    if(e) e.preventDefault();
-    if(!active) return;
-    active = false;
-    b.classList.remove('holding');
-    bridge('hold-stop',{action});
+    heartbeat = setInterval(()=>{ if(active) bridge('hold-heartbeat',{action}); },120);
   };
   b.addEventListener('pointerdown',start);
   b.addEventListener('pointerup',stop);
   b.addEventListener('pointercancel',stop);
   b.addEventListener('lostpointercapture',stop);
   b.addEventListener('contextmenu',e=>e.preventDefault());
+  window.addEventListener('blur',stop);
+  document.addEventListener('visibilitychange',()=>{ if(document.hidden) stop(); });
 }
 bindHold('bright','bright');
 bindHold('dark','dark');
@@ -149,6 +178,8 @@ web.shouldAllowRequest = request => {
     if(evt){
       if(evt.path === 'hold-start' && (evt.params.action === 'bright' || evt.params.action === 'dark')){
         startHold(evt.params.action);
+      }else if(evt.path === 'hold-heartbeat'){
+        renewHold(evt.params.action);
       }else if(evt.path === 'hold-stop'){
         stopHold();
       }else if(evt.path === 'fire'){
