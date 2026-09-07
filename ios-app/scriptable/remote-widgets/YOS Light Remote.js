@@ -1,5 +1,5 @@
 // YOS Light Remote — Panasonic HK9494 physical remote behavior via Tapo H110.
-// Brightness buttons repeat while held and stop immediately when released.
+// Brightness buttons repeat while held and stop when released.
 
 const tapo = importModule('YOS Tapo H110 Core');
 const lightPredicate = r => /ライト|light/i.test(String(r.nickname||'')) || String(r.model||'').toLowerCase()==='light';
@@ -17,13 +17,70 @@ const keys = {
 for(const [name,key] of Object.entries(keys)) if(!key) throw new Error(`${name} のIRキーが見つかりません。`);
 
 const client = await tapo.client();
+let holdAction = null;
+let holdToken = 0;
+let sendQueue = Promise.resolve();
+
+async function fire(action){
+  const key = keys[action];
+  if(!key) return;
+  await client.fire(remote.device_id,key.name);
+}
+
+async function showError(error){
+  const a = new Alert();
+  a.title = '照明';
+  a.message = error && error.message ? error.message : String(error);
+  a.addAction('OK');
+  await a.presentAlert();
+}
+
+function enqueueFire(action){
+  sendQueue = sendQueue.then(() => fire(action)).catch(async e => { await showError(e); });
+  return sendQueue;
+}
+
+function stopHold(){
+  holdAction = null;
+  holdToken += 1;
+}
+
+function startHold(action){
+  stopHold();
+  holdAction = action;
+  const token = holdToken;
+  (async()=>{
+    try{
+      while(holdAction === action && token === holdToken){
+        await fire(action);
+      }
+    }catch(e){
+      stopHold();
+      await showError(e);
+    }
+  })();
+}
+
+function parseBridge(url){
+  const m = String(url || '').match(/^yoslight:\/\/([^?]+)(?:\?(.*))?$/i);
+  if(!m) return null;
+  const params = {};
+  for(const part of String(m[2] || '').split('&')){
+    if(!part) continue;
+    const i = part.indexOf('=');
+    const key = decodeURIComponent(i >= 0 ? part.slice(0,i) : part);
+    const value = decodeURIComponent(i >= 0 ? part.slice(i+1) : '');
+    params[key] = value;
+  }
+  return {path:m[1], params};
+}
 
 const html = `<!doctype html>
 <html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <style>
 *{box-sizing:border-box;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#000;color:#fff;font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",sans-serif}
-body{display:flex;align-items:center;justify-content:center}
+body{display:flex;align-items:center;justify-content:center;overscroll-behavior:none}
 main{width:min(92vw,520px);padding:18px}
 .head{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:16px}
 h1{margin:0;font-size:28px}.sub{color:#8e8e93;font-size:12px}
@@ -46,39 +103,64 @@ button:active,.holding{background:#2a2a2a;transform:scale(.985)}
 <div class="note">明るい／暗いは押している間だけ連続調光</div>
 </main>
 <script>
-window.__yosQ=[];window.__yosWaiter=null;
-window.__yosEmit=function(v){if(window.__yosWaiter){const r=window.__yosWaiter;window.__yosWaiter=null;r(v)}else window.__yosQ.push(v)};
-window.__yosNext=function(){return new Promise(r=>{if(window.__yosQ.length)r(window.__yosQ.shift());else window.__yosWaiter=r})};
-for(const b of document.querySelectorAll('[data-tap]')) b.addEventListener('click',()=>window.__yosEmit({type:'fire',action:b.dataset.tap}));
-function bindHold(id,action){
- const b=document.getElementById(id);let timer=null;let active=false;
- const start=e=>{e.preventDefault();if(active)return;active=true;b.classList.add('holding');window.__yosEmit({type:'fire',action});timer=setInterval(()=>{if(active)window.__yosEmit({type:'fire',action})},220)};
- const stop=e=>{if(e)e.preventDefault();if(!active)return;active=false;b.classList.remove('holding');if(timer){clearInterval(timer);timer=null};window.__yosQ=window.__yosQ.filter(x=>!(x&&x.type==='fire'&&x.action===action));window.__yosEmit({type:'stop',action})};
- b.addEventListener('touchstart',start,{passive:false});b.addEventListener('touchend',stop,{passive:false});b.addEventListener('touchcancel',stop,{passive:false});
- b.addEventListener('pointerdown',start);b.addEventListener('pointerup',stop);b.addEventListener('pointercancel',stop);b.addEventListener('pointerleave',stop);
+function bridge(path, params={}){
+  const q = Object.entries(params).map(([k,v])=>encodeURIComponent(k)+'='+encodeURIComponent(String(v))).join('&');
+  location.href = 'yoslight://'+path+(q?'?'+q:'?')+(q?'&':'')+'_='+Date.now();
 }
-bindHold('bright','bright');bindHold('dark','dark');
+
+document.querySelectorAll('[data-tap]').forEach(b=>{
+  b.addEventListener('click',()=>bridge('fire',{action:b.dataset.tap}));
+});
+
+function bindHold(id,action){
+  const b = document.getElementById(id);
+  let active = false;
+  const start = e => {
+    e.preventDefault();
+    if(active) return;
+    active = true;
+    b.classList.add('holding');
+    try{ b.setPointerCapture(e.pointerId); }catch(_){}
+    bridge('hold-start',{action});
+  };
+  const stop = e => {
+    if(e) e.preventDefault();
+    if(!active) return;
+    active = false;
+    b.classList.remove('holding');
+    bridge('hold-stop',{action});
+  };
+  b.addEventListener('pointerdown',start);
+  b.addEventListener('pointerup',stop);
+  b.addEventListener('pointercancel',stop);
+  b.addEventListener('lostpointercapture',stop);
+  b.addEventListener('contextmenu',e=>e.preventDefault());
+}
+bindHold('bright','bright');
+bindHold('dark','dark');
 </script></body></html>`;
 
 const web = new WebView();
-await web.loadHTML(html);
-const presented = web.present(false);
-
-async function fire(action){
-  const key=keys[action];
-  if(!key) return;
-  await client.fire(remote.device_id,key.name);
-}
-
-try{
-  while(true){
-    const raw = await web.evaluateJavaScript(`window.__yosNext().then(v=>completion(JSON.stringify(v)))`, true);
-    const evt = JSON.parse(String(raw));
-    if(!evt) continue;
-    if(evt.type==='fire') await fire(evt.action);
+web.shouldAllowRequest = request => {
+  const url = request && request.url ? request.url : '';
+  if(String(url).startsWith('yoslight://')){
+    const evt = parseBridge(url);
+    if(evt){
+      if(evt.path === 'hold-start' && (evt.params.action === 'bright' || evt.params.action === 'dark')){
+        startHold(evt.params.action);
+      }else if(evt.path === 'hold-stop'){
+        stopHold();
+      }else if(evt.path === 'fire'){
+        enqueueFire(evt.params.action);
+      }
+    }
+    return false;
   }
-}catch(_){
-  // Closing the WebView ends the bridge loop.
-}
-await presented;
+  return true;
+};
+
+await web.loadHTML(html);
+await web.present(true);
+stopHold();
+await sendQueue;
 Script.complete();
