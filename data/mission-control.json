@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-07T08:39:51+09:00",
+  "updated_at": "2026-09-07T23:39:15+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -12,16 +12,6 @@
     ]
   },
   "inbox": [
-    {
-      "id": "github-pr-296",
-      "title": "PR #296 feat(yos): add private task progress dashboard",
-      "type": "GitHub PR",
-      "status": "review",
-      "priority": 1,
-      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/296",
-      "updated_at": "2026-09-06T22:05:56Z"
-    },
     {
       "id": "github-pr-233",
       "title": "PR #233 Draft: Mission Controlに進捗率・残り時間を常時表示する",
@@ -165,39 +155,39 @@
   ],
   "recently_completed": [
     {
-      "id": "github-commit-a316be8ad636",
-      "title": "Merge PR #294: lock Issue #272 final iPhone acceptance",
-      "completed_at": "2026-09-06T21:45:57Z",
-      "result": "GitHub mainへ反映（a316be8）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/a316be8ad63677216bb2c0b7036c5a3471bc1caa"
+      "id": "github-commit-3bc3cec05c0b",
+      "title": "Merge pull request #296 from yskn0008-bot/yos/issue-295-task-dashboard",
+      "completed_at": "2026-09-07T14:38:56Z",
+      "result": "GitHub mainへ反映（3bc3cec）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/3bc3cec05c0bcb5df1c0a84f1bb03bcc3e9dffc5"
     },
     {
-      "id": "github-commit-c197f96d4f05",
-      "title": "fix(yos): show full Hero's Journey label on two lines",
-      "completed_at": "2026-09-06T20:30:25Z",
-      "result": "GitHub mainへ反映（c197f96）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/c197f96d4f0532bf0c841fe3847562be79175030"
+      "id": "github-commit-8e997114020b",
+      "title": "test(yos): lock task auth to explicit update action",
+      "completed_at": "2026-09-07T13:40:48Z",
+      "result": "GitHub mainへ反映（8e99711）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/8e997114020b64676d58d8b9dee25150064fb6a3"
     },
     {
-      "id": "github-commit-6d3fae0ef3e8",
-      "title": "test(yos): require completion-lock cache generation",
-      "completed_at": "2026-09-06T20:27:12Z",
-      "result": "GitHub mainへ反映（6d3fae0）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/6d3fae0ef3e8afaf544cf8b882b8a673fdf8bd8c"
+      "id": "github-commit-c015d56e18ef",
+      "title": "fix(yos): defer task dashboard authentication",
+      "completed_at": "2026-09-07T13:40:33Z",
+      "result": "GitHub mainへ反映（c015d56）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/c015d56e18ef19251d8cf5f04eac12dd5ead111c"
     },
     {
-      "id": "github-commit-6dde9c20bb17",
-      "title": "fix(yos): keep large type without clipping",
-      "completed_at": "2026-09-06T20:27:02Z",
-      "result": "GitHub mainへ反映（6dde9c2）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/6dde9c20bb17ff18f9349be6b01b4b35e634f6e5"
+      "id": "github-commit-ab9be52cac2b",
+      "title": "feat(yos): load task dashboard on first MY WAY view",
+      "completed_at": "2026-09-06T22:05:45Z",
+      "result": "GitHub mainへ反映（ab9be52）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/ab9be52cac2b5f8faa1514696887bb17814a650c"
     },
     {
-      "id": "github-commit-ce36adf84b41",
-      "title": "fix(yos): force completion-lock readability asset",
-      "completed_at": "2026-09-06T20:26:45Z",
-      "result": "GitHub mainへ反映（ce36adf）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/ce36adf84b41e30c481fd711f75d671946ca8f64"
+      "id": "github-commit-17bba9f5ae49",
+      "title": "test(yos-ai): cover task projection parsing and privacy",
+      "completed_at": "2026-09-06T22:03:45Z",
+      "result": "GitHub mainへ反映（17bba9f）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/17bba9f5ae49277c10bd5d47c1154d52d435bbff"
     },
     {
       "id": "complete-002",
@@ -224,7 +214,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #296をレビューして公開判断する",
+      "next_action": "PR #293をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -234,7 +224,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-07T08:39:51+09:00",
+      "last_update": "2026-09-07T23:39:15+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -309,13 +299,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 32件・Open PR 5件を自動同期中",
+      "next_action": "Open Issue 32件・Open PR 4件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-07T08:39:51+09:00",
+      "last_update": "2026-09-07T23:39:15+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -329,7 +319,7 @@
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #296をレビューして公開判断する",
+      "next_action": "PR #293をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -338,7 +328,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-07T08:39:51+09:00",
+      "last_update": "2026-09-07T23:39:15+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +410,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "f5560fba05022cdb5cdfd7d121d5afe0570268b21dac1eb5b04be970508d31e2"
+  "github_snapshot_hash": "e8b44b6f0ef5732e9cb6d107231dcdeea7a54a09cb66b19ee7641d382d687ef0"
 }
