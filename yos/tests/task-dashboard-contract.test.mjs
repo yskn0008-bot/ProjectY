@@ -15,6 +15,11 @@ test('dashboard uses the requested daily groups without embedding current task r
   assert.doesNotMatch(js,/localStorage\.setItem\([^,]+,\s*credential/);
 });
 
+test('authentication starts only from the explicit update action',()=>{
+  assert.equal(js.match(/setupAuth\(/g)?.length,2);
+  assert.match(js,/addEventListener\('click',\(\)=>\{if\(initialized\).*setupAuth\(true\)/);
+});
+
 test('dashboard preserves iPhone-first non-horizontal visual contract',()=>{
   assert.match(css,/overflow-wrap:anywhere/);
   assert.doesNotMatch(css,/overflow-x:\s*auto|white-space:\s*nowrap[^}]*task-copy/);
