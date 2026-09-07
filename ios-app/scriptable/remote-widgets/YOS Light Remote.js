@@ -63,8 +63,6 @@ function startHold(action){
   holdPromise = (async()=>{
     try{
       while(holdAction === action && token === holdToken && Date.now() < holdLeaseUntil){
-        // Important: exactly one stored command at a time. The captured Panasonic key
-        // already contains two IR frames (~270 ms total), so batching creates a long tail.
         await fire(action);
         if(holdAction !== action || token !== holdToken) break;
       }
@@ -96,15 +94,14 @@ const html = `<!doctype html>
 <style>
 *{box-sizing:border-box;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#000;color:#fff;font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",sans-serif}
-body{display:flex;align-items:center;justify-content:center;overscroll-behavior:none}
-main{width:min(92vw,520px);padding:18px}
-.head{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:16px}
-h1{margin:0;font-size:28px}.sub{color:#8e8e93;font-size:12px}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-button{height:88px;border:0;border-radius:22px;background:#171717;color:#0a84ff;font-size:20px;font-weight:700;touch-action:none}
-button:active,.holding{background:#2a2a2a;transform:scale(.985)}
-.small{font-size:17px;color:#fff}
-.note{text-align:center;color:#777;font-size:11px;margin-top:14px;line-height:1.45}
+body{overscroll-behavior:none}
+main{height:100vh;width:100%;padding:12px;display:flex;flex-direction:column;gap:10px;overflow:hidden}
+.head{height:44px;flex:0 0 auto;display:flex;align-items:flex-end;justify-content:space-between}
+h1{margin:0;font-size:28px;line-height:1}.sub{color:#8e8e93;font-size:12px}
+.grid{flex:1;min-height:0;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:repeat(3,minmax(0,1fr));gap:10px}
+button{min-height:0;border:0;border-radius:24px;background:#171717;color:#0a84ff;font-size:24px;font-weight:780;touch-action:none}button:active,.holding{background:#2a2a2a;transform:scale(.985)}
+.note{height:18px;flex:0 0 auto;text-align:center;color:#777;font-size:10px;line-height:18px}
+@media(max-height:720px){main{padding:9px;gap:8px}.head{height:34px}h1{font-size:24px}.grid{gap:8px}button{font-size:21px;border-radius:20px}.note{font-size:9px;height:14px;line-height:14px}}
 </style></head><body>
 <main>
 <div class="head"><h1>照明</h1><div class="sub">Panasonic HK9494</div></div>
@@ -113,8 +110,8 @@ button:active,.holding{background:#2a2a2a;transform:scale(.985)}
 <button data-tap="off">消灯</button>
 <button id="bright">明るい</button>
 <button id="dark">暗い</button>
-<button class="small" data-tap="all">全灯</button>
-<button class="small" data-tap="night">常夜灯</button>
+<button data-tap="all">全灯</button>
+<button data-tap="night">常夜灯</button>
 </div>
 <div class="note">明るい／暗い：押している間だけ調光・離すと停止</div>
 </main>
