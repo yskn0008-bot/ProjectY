@@ -33,34 +33,43 @@ function addButton(row, action){
   const s=row.addStack();
   s.layoutVertically();
   s.centerAlignContent();
-  s.cornerRadius=16;
+  s.cornerRadius=15;
   s.backgroundColor=new Color('#191919');
-  s.setPadding(8,6,7,6);
+  s.setPadding(6,5,5,5);
+  s.size=new Size(82,54);
   s.url=runURL(action);
   const img=s.addImage(SFSymbol.named(spec.icon).image);
-  img.imageSize=new Size(22,22);
+  img.imageSize=new Size(19,19);
   img.tintColor=new Color('#0A84FF');
-  s.addSpacer(4);
+  s.addSpacer(2);
   const t=s.addText(spec.label);
-  t.font=Font.semiboldSystemFont(13);
+  t.font=Font.semiboldSystemFont(12);
   t.textColor=Color.white();
   t.centerAlignText();
+}
+
+function addBalancedRow(w,names){
+  const row=w.addStack();
+  row.layoutHorizontally();
+  row.addSpacer();
+  for(const name of names){
+    addButton(row,name);
+    row.addSpacer();
+  }
 }
 
 function makeWidget(){
   const w=new ListWidget();
   w.backgroundColor=new Color('#000000');
-  w.setPadding(12,12,12,12);
+  w.setPadding(10,10,10,10);
   const h=w.addStack();h.centerAlignContent();h.url=remoteURL();
   const title=h.addText('照明');title.font=Font.boldSystemFont(18);title.textColor=Color.white();
   h.addSpacer();
   const sub=h.addText('Panasonic');sub.font=Font.systemFont(11);sub.textColor=new Color('#8E8E93');
-  w.addSpacer(8);
-  for(const names of [['on','off','all'],['bright','dark','night']]){
-    const row=w.addStack();row.layoutHorizontally();
-    names.forEach((n,i)=>{if(i)row.addSpacer(7);addButton(row,n);});
-    if(names[0]==='on')w.addSpacer(7);
-  }
+  w.addSpacer(6);
+  addBalancedRow(w,['on','off','all']);
+  w.addSpacer(5);
+  addBalancedRow(w,['bright','dark','night']);
   return w;
 }
 
