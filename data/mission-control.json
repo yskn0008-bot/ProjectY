@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-07T23:39:15+09:00",
+  "updated_at": "2026-09-08T03:53:19+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -155,39 +155,39 @@
   ],
   "recently_completed": [
     {
-      "id": "github-commit-3bc3cec05c0b",
-      "title": "Merge pull request #296 from yskn0008-bot/yos/issue-295-task-dashboard",
-      "completed_at": "2026-09-07T14:38:56Z",
-      "result": "GitHub mainへ反映（3bc3cec）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/3bc3cec05c0bcb5df1c0a84f1bb03bcc3e9dffc5"
+      "id": "github-commit-3aec66e8537a",
+      "title": "Merge PR #298: fix YOS task dashboard Google sign-in on iPhone",
+      "completed_at": "2026-09-07T18:53:09Z",
+      "result": "GitHub mainへ反映（3aec66e）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/3aec66e8537a8b6994c1213e686ca5dd75881ef9"
     },
     {
-      "id": "github-commit-8e997114020b",
-      "title": "test(yos): lock task auth to explicit update action",
-      "completed_at": "2026-09-07T13:40:48Z",
-      "result": "GitHub mainへ反映（8e99711）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/8e997114020b64676d58d8b9dee25150064fb6a3"
+      "id": "github-commit-2f1e22ddeafc",
+      "title": "test(yos): lock task auth bootstrap to production origin",
+      "completed_at": "2026-09-07T18:50:26Z",
+      "result": "GitHub mainへ反映（2f1e22d）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/2f1e22ddeafc95167f492965ca270d0f1ace188f"
     },
     {
-      "id": "github-commit-c015d56e18ef",
-      "title": "fix(yos): defer task dashboard authentication",
-      "completed_at": "2026-09-07T13:40:33Z",
-      "result": "GitHub mainへ反映（c015d56）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/c015d56e18ef19251d8cf5f04eac12dd5ead111c"
+      "id": "github-commit-9ae4e402dffe",
+      "title": "fix(yos): restrict task auth bootstrap to production origin",
+      "completed_at": "2026-09-07T18:50:12Z",
+      "result": "GitHub mainへ反映（9ae4e40）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/9ae4e402dffe9ac2245be4d2877055698d34c788"
     },
     {
-      "id": "github-commit-ab9be52cac2b",
-      "title": "feat(yos): load task dashboard on first MY WAY view",
-      "completed_at": "2026-09-06T22:05:45Z",
-      "result": "GitHub mainへ反映（ab9be52）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/ab9be52cac2b5f8faa1514696887bb17814a650c"
+      "id": "github-commit-2b7fc69c83e2",
+      "title": "test(yos): expect task auth cache generation",
+      "completed_at": "2026-09-07T18:47:24Z",
+      "result": "GitHub mainへ反映（2b7fc69）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/2b7fc69c83e2119cbc526b6610d8f00243f79d69"
     },
     {
-      "id": "github-commit-17bba9f5ae49",
-      "title": "test(yos-ai): cover task projection parsing and privacy",
-      "completed_at": "2026-09-06T22:03:45Z",
-      "result": "GitHub mainへ反映（17bba9f）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/17bba9f5ae49277c10bd5d47c1154d52d435bbff"
+      "id": "github-commit-c8f97acd2e3b",
+      "title": "chore(yos): rotate service-worker cache after task auth hotfix",
+      "completed_at": "2026-09-07T18:47:14Z",
+      "result": "GitHub mainへ反映（c8f97ac）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/c8f97acd2e3bf74ceac5c36f4e7f27507ad7f061"
     },
     {
       "id": "complete-002",
@@ -224,7 +224,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-07T23:39:15+09:00",
+      "last_update": "2026-09-08T03:53:19+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -305,7 +305,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-07T23:39:15+09:00",
+      "last_update": "2026-09-08T03:53:19+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -328,7 +328,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-07T23:39:15+09:00",
+      "last_update": "2026-09-08T03:53:19+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -410,5 +410,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "e8b44b6f0ef5732e9cb6d107231dcdeea7a54a09cb66b19ee7641d382d687ef0"
+  "github_snapshot_hash": "41ea16b8467c6c1c2c66bf914a56bb27dfc4c74e81743ad139ce34ee06344ea6"
 }
