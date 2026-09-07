@@ -53,7 +53,7 @@ for(const b of document.querySelectorAll('[data-tap]')) b.addEventListener('clic
 function bindHold(id,action){
  const b=document.getElementById(id);let timer=null;let active=false;
  const start=e=>{e.preventDefault();if(active)return;active=true;b.classList.add('holding');window.__yosEmit({type:'fire',action});timer=setInterval(()=>{if(active)window.__yosEmit({type:'fire',action})},220)};
- const stop=e=>{if(e)e.preventDefault();if(!active)return;active=false;b.classList.remove('holding');if(timer){clearInterval(timer);timer=null}window.__yosEmit({type:'stop',action})};
+ const stop=e=>{if(e)e.preventDefault();if(!active)return;active=false;b.classList.remove('holding');if(timer){clearInterval(timer);timer=null};window.__yosQ=window.__yosQ.filter(x=>!(x&&x.type==='fire'&&x.action===action));window.__yosEmit({type:'stop',action})};
  b.addEventListener('touchstart',start,{passive:false});b.addEventListener('touchend',stop,{passive:false});b.addEventListener('touchcancel',stop,{passive:false});
  b.addEventListener('pointerdown',start);b.addEventListener('pointerup',stop);b.addEventListener('pointercancel',stop);b.addEventListener('pointerleave',stop);
 }
