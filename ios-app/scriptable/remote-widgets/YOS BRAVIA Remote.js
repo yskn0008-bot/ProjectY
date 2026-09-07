@@ -1,0 +1,62 @@
+// YOS BRAVIA Remote — one-screen large-touch UI for MY REMOTE.
+// Sony commands are discovered at runtime. Host/PSK stay in Scriptable Keychain.
+
+const STORAGE=Object.freeze({host:'yos.bravia.scriptable.host',psk:'yos.bravia.scriptable.psk',quick:'yos.bravia.scriptable.quick-command'});
+const ACTIONS=Object.freeze({
+  power:['poweroff','power'],input:['input'],home:['home'],back:['return','back'],
+  up:['up'],left:['left'],confirm:['confirm','enter'],right:['right'],down:['down'],
+  volumeDown:['volumedown'],mute:['mute'],volumeUp:['volumeup'],channelDown:['channeldown'],channelUp:['channelup'],
+  rewind:['rewind'],play:['play'],forward:['forward'],flashMinus:['flashminus'],pause:['pause'],flashPlus:['flashplus'],
+  prev:['prev'],stop:['stop'],next:['next']
+});
+const LABELS=Object.freeze({
+  power:'電源',poweroff:'電源OFF',input:'入力',home:'ホーム',return:'戻る',back:'戻る',up:'上',down:'下',left:'左',right:'右',
+  confirm:'OK',enter:'OK',volumedown:'音量−',volumeup:'音量＋',mute:'ミュート',channeldown:'CH−',channelup:'CH＋',
+  play:'再生',pause:'一時停止',stop:'停止',rewind:'巻戻し',forward:'早送り',flashminus:'10秒戻し',flashplus:'15秒送り',prev:'前',next:'次',
+  options:'オプション',actionmenu:'アクションメニュー',quick:'クイック設定',settings:'設定',syncmenu:'BRAVIA Sync',display:'画面表示',
+  caption:'字幕',epg:'番組表',red:'赤',blue:'青',yellow:'黄',green:'緑',hdmi1:'HDMI1',hdmi2:'HDMI2',hdmi3:'HDMI3',hdmi4:'HDMI4'
+});
+
+function secure(key){return Keychain.contains(key)?Keychain.get(key):''}
+let host=secure(STORAGE.host),psk=secure(STORAGE.psk),remoteMap=new Map(),remoteIndex=new Map(),quickCandidates=[];
+
+function normalizeHost(v){const x=String(v||'').trim().replace(/^https?:\/\//i,'').replace(/:\d+$/,'');if(!x||/[\s/?#]/.test(x))throw new Error('テレビのIPアドレスまたはホスト名を確認してください。');return x}
+function esc(v){return String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&apos;'})[c])}
+function env(code){return '<?xml version="1.0"?><s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:X_SendIRCC xmlns:u="urn:schemas-sony-com:service:IRCC:1"><IRCCCode>'+esc(code)+'</IRCCCode></u:X_SendIRCC></s:Body></s:Envelope>'}
+async function request(url,opt){const r=new Request(url);r.method=opt.method||'GET';r.headers=opt.headers||{};if(opt.body)r.body=opt.body;const text=await r.loadString();const s=r.response?r.response.statusCode:0;if(s===403)throw new Error('PSK認証に失敗しました。');if(s<200||s>=300)throw new Error('BRAVIA HTTP '+s);return text}
+async function discover(){host=normalizeHost(host);const text=await request('http://'+host+'/sony/system',{method:'POST',headers:{'Content-Type':'application/json','X-Auth-PSK':psk},body:JSON.stringify({method:'getRemoteControllerInfo',params:[],id:1,version:'1.0'})});const p=JSON.parse(text),list=p&&p.result&&p.result[1];if(!Array.isArray(list))throw new Error('BRAVIAコマンド取得失敗');remoteMap=new Map(list.filter(x=>x&&x.name&&x.value).map(x=>[String(x.name),String(x.value)]));remoteIndex=new Map([...remoteMap].map(([n,c])=>[n.toLowerCase(),{name:n,code:c}]));quickCandidates=[...remoteMap].filter(([n])=>/option|actionmenu|quick|setting/i.test(n)).map(([name,code])=>({name,code}))}
+function resolve(action){for(const a of ACTIONS[action]||[]){const c=remoteIndex.get(a.toLowerCase());if(c)return c}return null}
+async function sendCommand(c){if(!c||!c.code)throw new Error('このテレビでは未対応です。');await request('http://'+host+'/sony/ircc',{method:'POST',headers:{'Content-Type':'text/xml; charset=UTF-8','X-Auth-PSK':psk,SOAPACTION:'"urn:schemas-sony-com:service:IRCC:1#X_SendIRCC"'},body:env(c.code)})}
+async function sendAction(action){return sendCommand(resolve(action))}
+function label(name){return LABELS[String(name||'').toLowerCase()]||name}
+
+async function configure(){const a=new Alert();a.title='BRAVIA設定';a.addTextField('テレビのIPまたはホスト名',host||'');a.addSecureTextField(psk?'PSK（変更しないなら空欄）':'PSK','');a.addAction('保存');a.addCancelAction('キャンセル');if(await a.presentAlert()<0)return false;const h=normalizeHost(a.textFieldValue(0));const entered=a.textFieldValue(1).trim();const nextPsk=entered||psk;if(!nextPsk)throw new Error('PSKを入力してください。');host=h;psk=nextPsk;Keychain.set(STORAGE.host,host);Keychain.set(STORAGE.psk,psk);return true}
+async function ensure(){if(host&&psk)return true;return configure()}
+async function chooseQuick(){if(!quickCandidates.length)throw new Error('クイック設定候補がありません。');const a=new Alert();a.title='クイック設定';for(const c of quickCandidates)a.addAction(label(c.name)+'｜'+c.name);a.addCancelAction('キャンセル');const i=await a.presentSheet();if(i<0)return;const c=quickCandidates[i];Keychain.set(STORAGE.quick,c.name);await sendCommand(c)}
+async function sendQuick(){if(Keychain.contains(STORAGE.quick)){const n=Keychain.get(STORAGE.quick);const c=remoteIndex.get(String(n).toLowerCase());if(c)return sendCommand(c)}return chooseQuick()}
+async function error(e){const a=new Alert();a.title='BRAVIA';a.message=e&&e.message?e.message:String(e);a.addAction('OK');await a.presentAlert()}
+
+if(!await ensure()){Script.complete();return}
+try{await discover()}catch(e){await error(e);Script.complete();return}
+
+function support(a){return Boolean(resolve(a))}
+const state={host,count:remoteMap.size,support:Object.fromEntries(Object.keys(ACTIONS).map(a=>[a,support(a)])),commands:[...remoteMap.keys()].map(n=>({name:n,label:label(n)})).sort((a,b)=>a.label.localeCompare(b.label,'ja'))};
+const json=JSON.stringify(state).replace(/</g,'\\u003c');
+
+const html=`<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><style>
+:root{color-scheme:dark}*{box-sizing:border-box;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#000;color:#fff;font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",sans-serif}body{overscroll-behavior:none}
+main{height:100vh;padding:10px;display:flex;flex-direction:column;gap:8px;overflow:hidden}.head{height:38px;flex:0 0 auto;display:flex;align-items:flex-end;justify-content:space-between}h1{margin:0;font-size:26px;line-height:1}.meta{font-size:10px;color:#8e8e93}
+.top{height:64px;flex:0 0 auto;display:grid;grid-template-columns:repeat(5,1fr);gap:7px}.pad{height:clamp(120px,22vh,190px);flex:0 0 auto;border-radius:24px;border:1px solid #343434;background:#111;position:relative;touch-action:none;overflow:hidden}.nub{width:54px;height:54px;border-radius:50%;border:1px solid #74b9ff;background:#38577d;position:absolute;left:50%;top:50%;margin:-27px;pointer-events:none;transition:transform .05s linear}.hint{position:absolute;inset:0;display:flex;align-items:flex-end;justify-content:center;padding-bottom:10px;color:#5d5d62;font-size:10px;pointer-events:none}
+.grid{flex:1;min-height:0;display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(4,minmax(0,1fr));gap:7px}button{min-width:0;min-height:0;border:0;border-radius:17px;background:#171717;color:#0a84ff;font-size:17px;font-weight:700;padding:3px;touch-action:manipulation}button:active{background:#2a2a2a;transform:scale(.985)}button.power{color:#ff453a}button:disabled{opacity:.25}.overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);display:none;align-items:flex-end;z-index:20}.sheet{width:100%;max-height:76vh;background:#151515;border-radius:22px 22px 0 0;padding:12px 12px 24px;overflow:auto}.sheetHead{display:flex;align-items:center;justify-content:space-between;position:sticky;top:-12px;background:#151515;padding:8px 0;z-index:2}.sheetHead h2{margin:0;font-size:19px}.commandList{display:grid;grid-template-columns:1fr 1fr;gap:7px}.commandList button{height:46px;font-size:13px}.close{height:38px;padding:0 14px;color:#fff;background:#2b2b2b}
+@media(max-height:720px){main{padding:7px;gap:6px}.head{height:30px}h1{font-size:22px}.top{height:52px;gap:5px}.pad{height:105px}.grid{gap:5px}button{font-size:14px;border-radius:14px}}
+</style></head><body><main><div class="head"><h1>BRAVIA</h1><div class="meta">接続済み · ${state.count}</div></div><div class="top"><button class="power" data-action="power">⏻ 電源</button><button data-action="input">入力</button><button id="quick">クイック</button><button data-action="back">戻る</button><button data-action="home">ホーム</button></div><div id="pad" class="pad"><div id="nub" class="nub"></div><div class="hint">スワイプ＝移動　タップ＝OK</div></div><div class="grid"><button data-action="volumeDown">音量−</button><button data-action="mute">ミュート</button><button data-action="volumeUp">音量＋</button><button data-action="channelDown">CH−</button><button data-action="channelUp">CH＋</button><button data-action="rewind">◀◀</button><button data-action="play">▶</button><button data-action="forward">▶▶</button><button data-action="flashMinus">↶10</button><button data-action="pause">Ⅱ</button><button data-action="flashPlus">15↷</button><button data-action="prev">|◀</button><button data-action="stop">■</button><button data-action="next">▶|</button><button id="other">その他</button><button id="settings">設定</button></div></main><div id="overlay" class="overlay"><div class="sheet"><div class="sheetHead"><h2>その他のボタン</h2><button id="close" class="close">閉じる</button></div><div id="commands" class="commandList"></div></div></div><script>
+const STATE=${json};
+function bridge(path,params={}){const q=Object.entries(params).map(([k,v])=>encodeURIComponent(k)+'='+encodeURIComponent(String(v))).join('&');location.href='yosbravia://'+path+(q?'?'+q:'?')+(q?'&':'')+'_='+Date.now()}
+document.querySelectorAll('[data-action]').forEach(b=>{const a=b.dataset.action;if(!STATE.support[a])b.disabled=true;b.addEventListener('click',()=>bridge('action',{name:a}))});document.getElementById('quick').addEventListener('click',()=>bridge('quick'));document.getElementById('settings').addEventListener('click',()=>bridge('settings'));
+const overlay=document.getElementById('overlay'),commands=document.getElementById('commands');document.getElementById('other').addEventListener('click',()=>{overlay.style.display='flex'});document.getElementById('close').addEventListener('click',()=>{overlay.style.display='none'});STATE.commands.forEach(c=>{const b=document.createElement('button');b.textContent=c.label;b.addEventListener('click',()=>{overlay.style.display='none';bridge('command',{name:c.name})});commands.appendChild(b)});
+const pad=document.getElementById('pad'),nub=document.getElementById('nub');let start=null,last=null,pid=null;function reset(){nub.style.transform='translate(0px,0px)'}pad.addEventListener('pointerdown',e=>{e.preventDefault();start={x:e.clientX,y:e.clientY};last=start;pid=e.pointerId;try{pad.setPointerCapture(pid)}catch(_){}});pad.addEventListener('pointermove',e=>{if(!start)return;last={x:e.clientX,y:e.clientY};const dx=Math.max(-55,Math.min(55,last.x-start.x)),dy=Math.max(-45,Math.min(45,last.y-start.y));nub.style.transform='translate('+dx+'px,'+dy+'px)'});function end(e){if(!start)return;e.preventDefault();const p=last||{x:e.clientX,y:e.clientY},dx=p.x-start.x,dy=p.y-start.y,ax=Math.abs(dx),ay=Math.abs(dy);if(ax<22&&ay<22)bridge('action',{name:'confirm'});else if(ax>ay)bridge('action',{name:dx>0?'right':'left'});else bridge('action',{name:dy>0?'down':'up'});start=null;last=null;pid=null;reset()}pad.addEventListener('pointerup',end);pad.addEventListener('pointercancel',()=>{start=null;last=null;pid=null;reset()});
+</script></body></html>`;
+
+function parse(url){const m=String(url||'').match(/^yosbravia:\/\/([^?]+)(?:\?(.*))?$/i);if(!m)return null;const params={};for(const p of String(m[2]||'').split('&')){if(!p)continue;const i=p.indexOf('=');params[decodeURIComponent(i>=0?p.slice(0,i):p)]=decodeURIComponent(i>=0?p.slice(i+1):'')}return{path:m[1],params}}
+let queue=Promise.resolve();function enqueue(fn){queue=queue.then(fn).catch(error)}
+const web=new WebView();web.shouldAllowRequest=req=>{const url=req&&req.url?req.url:'';if(String(url).startsWith('yosbravia://')){const e=parse(url);if(e){if(e.path==='action')enqueue(()=>sendAction(e.params.name));else if(e.path==='quick')enqueue(()=>sendQuick());else if(e.path==='command')enqueue(()=>sendCommand(remoteIndex.get(String(e.params.name||'').toLowerCase())));else if(e.path==='settings')enqueue(async()=>{if(await configure()){await discover();const a=new Alert();a.title='BRAVIA';a.message='設定を保存しました。次回起動から反映します。';a.addAction('OK');await a.presentAlert()}})}return false}return true};await web.loadHTML(html);await web.present(true);await queue;Script.complete();
