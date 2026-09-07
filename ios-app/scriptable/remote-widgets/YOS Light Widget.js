@@ -1,7 +1,7 @@
 // YOS Light Widget — Panasonic HK9494 physical-button subset via Tapo H110.
 // Requires YOS Tapo H110 Core.js and one successful YOS Tapo H110 Setup run.
 // Home-screen widgets cannot measure press duration, so brightness is one small step per tap.
-// Tap the title to open YOS Light Remote for press-and-hold control.
+// Header includes a visible launch icon for the full YOS Light Remote.
 
 const tapo = importModule('YOS Tapo H110 Core');
 const ACTIONS = Object.freeze({
@@ -52,10 +52,7 @@ function addBalancedRow(w,names){
   const row=w.addStack();
   row.layoutHorizontally();
   row.addSpacer();
-  for(const name of names){
-    addButton(row,name);
-    row.addSpacer();
-  }
+  for(const name of names){addButton(row,name);row.addSpacer();}
 }
 
 function makeWidget(){
@@ -66,6 +63,8 @@ function makeWidget(){
   const title=h.addText('照明');title.font=Font.boldSystemFont(18);title.textColor=Color.white();
   h.addSpacer();
   const sub=h.addText('Panasonic');sub.font=Font.systemFont(11);sub.textColor=new Color('#8E8E93');
+  h.addSpacer(8);
+  const open=h.addImage(SFSymbol.named('arrow.up.right.square.fill').image);open.imageSize=new Size(16,16);open.tintColor=new Color('#8E8E93');
   w.addSpacer(6);
   addBalancedRow(w,['on','off','all']);
   w.addSpacer(5);
