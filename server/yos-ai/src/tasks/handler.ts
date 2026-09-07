@@ -60,12 +60,21 @@ export function createTaskDashboardHandler(options: CreateTaskDashboardHandlerOp
       const accessTokenProvider = await createGoogleAccessTokenProvider(options.googleWorkloadAuth);
       const accessToken = await accessTokenProvider.getAccessToken();
       const projection = await drive.findByExactName(PROJECTION_NAME, SHEET_MIME, accessToken);
-      if (!projection) return secureJson({error: 'Task dashboard source is unavailable'}, 503, origin);
+      if (!projection) {
+        console.error(JSON.stringify({level:'error',event:'yos_tasks_source_unavailable',stage:'drive-find',source:PROJECTION_NAME}));
+        return secureJson({error: 'Task dashboard source is unavailable'}, 503, origin);
+      }
       const result = await sheets.batchGet(projection.id, [TASK_RANGE], accessToken);
       const rows = result.valueRanges[0]?.values ?? [];
       const parsed = parseProjection(rows);
       return secureJson(parsed, 200, origin, {'Cache-Control':'private, no-store'});
-    } catch {
+    } catch (error) {
+      console.error(JSON.stringify({
+        level:'error',
+        event:'yos_tasks_unavailable',
+        stage:'google-read',
+        message:error instanceof Error ? error.message : 'unknown error'
+      }));
       return secureJson({error: 'Task dashboard is temporarily unavailable'}, 503, origin);
     }
   };
