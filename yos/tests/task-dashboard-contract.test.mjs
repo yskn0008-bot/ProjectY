@@ -22,6 +22,12 @@ test('authentication uses an explicit Google-rendered control instead of prompt-
   assert.match(js,/itp_support:true/);
 });
 
+test('authentication bootstrap is restricted to the production MY WAY origin',()=>{
+  assert.match(js,/AUTH_ORIGIN='https:\/\/yskn0008-bot\.github\.io'/);
+  assert.match(js,/location\.origin===AUTH_ORIGIN/);
+  assert.match(js,/if\(!canPrepareAuth\(\)\|\|initialized\)return/);
+});
+
 test('dashboard preserves iPhone-first non-horizontal visual contract',()=>{
   assert.match(css,/overflow-wrap:anywhere/);
   assert.doesNotMatch(css,/overflow-x:\s*auto|white-space:\s*nowrap[^}]*task-copy/);
