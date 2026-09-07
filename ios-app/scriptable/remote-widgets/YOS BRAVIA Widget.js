@@ -1,8 +1,14 @@
 // YOS BRAVIA Widget — Issue #297
-// Medium Scriptable widget for stacking with Aircon / Light widgets.
+// Medium widget stays compact; large widget exposes the everyday physical-remote controls.
 
 const STORAGE={host:'yos.bravia.scriptable.host',psk:'yos.bravia.scriptable.psk'};
-const ACTIONS={power:['poweroff','power'],input:['input'],home:['home'],volumeDown:['volumedown'],mute:['mute'],volumeUp:['volumeup']};
+const ACTIONS={
+  power:['poweroff','power'],input:['input'],home:['home'],back:['return','back'],
+  up:['up'],left:['left'],confirm:['confirm','enter'],right:['right'],down:['down'],
+  volumeDown:['volumedown'],mute:['mute'],volumeUp:['volumeup'],
+  channelDown:['channeldown'],channelUp:['channelup'],
+  play:['play'],pause:['pause'],stop:['stop'],rewind:['rewind'],forward:['forward']
+};
 
 function secure(key){return Keychain.contains(key)?Keychain.get(key):''}
 const host=secure(STORAGE.host),psk=secure(STORAGE.psk);
@@ -13,11 +19,47 @@ async function request(url,opt){const r=new Request(url);r.method=opt.method;r.h
 async function discover(){if(!host||!psk)throw new Error('BRAVIA設定がありません。先にフルリモコンを起動してください。');const t=await request('http://'+host+'/sony/system',{method:'POST',headers:{'Content-Type':'application/json','X-Auth-PSK':psk},body:JSON.stringify({method:'getRemoteControllerInfo',params:[],id:1,version:'1.0'})});const p=JSON.parse(t),list=p&&p.result&&p.result[1];if(!Array.isArray(list))throw new Error('BRAVIAコマンド取得失敗');return new Map(list.map(x=>[String(x.name).toLowerCase(),x.value]))}
 async function send(action){const map=await discover();let code='';for(const a of ACTIONS[action]||[]){if(map.has(a)){code=map.get(a);break}}if(!code)throw new Error('未対応コマンド');await request('http://'+host+'/sony/ircc',{method:'POST',headers:{'Content-Type':'text/xml; charset=UTF-8','X-Auth-PSK':psk,SOAPACTION:'"urn:schemas-sony-com:service:IRCC:1#X_SendIRCC"'},body:env(code)})}
 function runURL(action){return 'scriptable:///run?scriptName='+encodeURIComponent(Script.name())+'&action='+encodeURIComponent(action)}
-function addButton(row,label,action){const s=row.addStack();s.layoutVertically();s.centerAlignContent();s.cornerRadius=12;s.backgroundColor=new Color('#171717');s.url=runURL(action);s.size=new Size(0,48);s.addSpacer();const t=s.addText(label);t.font=Font.mediumSystemFont(16);t.textColor=Color.blue();t.centerAlignText();s.addSpacer();return s}
-function makeWidget(){const w=new ListWidget();w.backgroundColor=Color.black();w.setPadding(12,12,12,12);const top=w.addStack();top.centerAlignContent();const title=top.addText('BRAVIA');title.font=Font.boldSystemFont(21);title.textColor=Color.white();top.addSpacer();const open=top.addText('開く ›');open.font=Font.systemFont(12);open.textColor=Color.gray();top.url='scriptable:///run?scriptName='+encodeURIComponent('YOS BRAVIA Remote');w.addSpacer(10);let r=w.addStack();r.spacing=8;addButton(r,'⏻ 電源','power');addButton(r,'入力','input');addButton(r,'ホーム','home');w.addSpacer(8);r=w.addStack();r.spacing=8;addButton(r,'音量−','volumeDown');addButton(r,'ミュート','mute');addButton(r,'音量＋','volumeUp');return w}
+function remoteURL(){return 'scriptable:///run?scriptName='+encodeURIComponent('YOS BRAVIA Remote')}
+
+function addButton(row,label,action,opt={}){
+  const s=row.addStack();
+  s.layoutVertically();s.centerAlignContent();s.cornerRadius=12;s.backgroundColor=new Color('#171717');s.url=runURL(action);
+  s.size=new Size(opt.width||0,opt.height||48);
+  s.addSpacer();
+  const t=s.addText(label);t.font=Font.mediumSystemFont(opt.font||16);t.textColor=action==='power'?new Color('#FF453A'):Color.blue();t.centerAlignText();
+  s.addSpacer();
+  return s;
+}
+function rowButtons(w,items,opt={}){
+  const r=w.addStack();r.layoutHorizontally();r.centerAlignContent();
+  items.forEach((x,i)=>{if(i)r.addSpacer(opt.gap||7);addButton(r,x[0],x[1],opt)});
+  return r;
+}
+function header(w){
+  const top=w.addStack();top.centerAlignContent();top.url=remoteURL();
+  const title=top.addText('BRAVIA');title.font=Font.boldSystemFont(21);title.textColor=Color.white();
+  top.addSpacer();const open=top.addText('開く ›');open.font=Font.systemFont(12);open.textColor=Color.gray();
+}
+function makeMedium(){
+  const w=new ListWidget();w.backgroundColor=Color.black();w.setPadding(12,12,12,12);header(w);w.addSpacer(10);
+  rowButtons(w,[['⏻ 電源','power'],['入力','input'],['ホーム','home']],{height:48,font:16,gap:8});w.addSpacer(8);
+  rowButtons(w,[['音量−','volumeDown'],['ミュート','mute'],['音量＋','volumeUp']],{height:48,font:16,gap:8});
+  return w;
+}
+function makeLarge(){
+  const w=new ListWidget();w.backgroundColor=Color.black();w.setPadding(12,12,12,12);header(w);w.addSpacer(9);
+  const o={height:43,font:13,gap:6};
+  rowButtons(w,[['⏻ 電源','power'],['入力','input'],['ホーム','home'],['戻る','back']],o);w.addSpacer(6);
+  rowButtons(w,[['音量＋','volumeUp'],['▲','up'],['CH＋','channelUp'],['再生','play']],o);w.addSpacer(6);
+  rowButtons(w,[['音量−','volumeDown'],['◀','left'],['OK','confirm'],['▶','right']],o);w.addSpacer(6);
+  rowButtons(w,[['ミュート','mute'],['▼','down'],['CH−','channelDown'],['一時停止','pause']],o);w.addSpacer(6);
+  rowButtons(w,[['巻戻し','rewind'],['停止','stop'],['早送り','forward'],['開く','home']],o);
+  return w;
+}
 
 const action=args.queryParameters.action||'';
 if(action){try{await send(action)}catch(e){const a=new Alert();a.title='BRAVIA';a.message=e.message||String(e);a.addAction('OK');await a.presentAlert()}Script.complete();return}
-const widget=makeWidget();
-if(config.runsInWidget){Script.setWidget(widget)}else{await widget.presentMedium()}
+const isLarge=config.widgetFamily==='large';
+const widget=isLarge?makeLarge():makeMedium();
+if(config.runsInWidget){Script.setWidget(widget)}else{if(isLarge)await widget.presentLarge();else await widget.presentMedium()}
 Script.complete();
