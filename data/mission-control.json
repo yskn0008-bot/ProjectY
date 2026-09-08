@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-08T04:47:06+09:00",
+  "updated_at": "2026-09-08T14:18:57+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -155,6 +155,27 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-d4fd47f54b15",
+      "title": "Remove unused MY WAY widget placeholder asset",
+      "completed_at": "2026-09-08T05:18:00Z",
+      "result": "GitHub mainへ反映（d4fd47f）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/d4fd47f54b1569556c9f54314327aa6c7f8e6f23"
+    },
+    {
+      "id": "github-commit-c7d10c4cb330",
+      "title": "Add MY WAY widget watercolor background asset",
+      "completed_at": "2026-09-08T05:17:43Z",
+      "result": "GitHub mainへ反映（c7d10c4）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/c7d10c4cb330252ad056d2ce99da2f5a67ebea03"
+    },
+    {
+      "id": "github-commit-0c5343e51d62",
+      "title": "Add MY WAY Scriptable widget prototype v1",
+      "completed_at": "2026-09-08T05:17:30Z",
+      "result": "GitHub mainへ反映（0c5343e）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/0c5343e51d62a164963795e8d6a71cf21ec4896b"
+    },
+    {
       "id": "github-commit-79224cac2680",
       "title": "revert: restore task handler after accidental direct main edit",
       "completed_at": "2026-09-07T19:01:19Z",
@@ -167,27 +188,6 @@
       "completed_at": "2026-09-07T19:00:53Z",
       "result": "GitHub mainへ反映（268f5af）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/268f5af1e047eddd03c1cf61dd500e3862409d25"
-    },
-    {
-      "id": "github-commit-3aec66e8537a",
-      "title": "Merge PR #298: fix YOS task dashboard Google sign-in on iPhone",
-      "completed_at": "2026-09-07T18:53:09Z",
-      "result": "GitHub mainへ反映（3aec66e）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/3aec66e8537a8b6994c1213e686ca5dd75881ef9"
-    },
-    {
-      "id": "github-commit-2f1e22ddeafc",
-      "title": "test(yos): lock task auth bootstrap to production origin",
-      "completed_at": "2026-09-07T18:50:26Z",
-      "result": "GitHub mainへ反映（2f1e22d）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/2f1e22ddeafc95167f492965ca270d0f1ace188f"
-    },
-    {
-      "id": "github-commit-9ae4e402dffe",
-      "title": "fix(yos): restrict task auth bootstrap to production origin",
-      "completed_at": "2026-09-07T18:50:12Z",
-      "result": "GitHub mainへ反映（9ae4e40）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/9ae4e402dffe9ac2245be4d2877055698d34c788"
     },
     {
       "id": "complete-002",
@@ -224,7 +224,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-08T04:47:06+09:00",
+      "last_update": "2026-09-08T14:18:57+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -305,7 +305,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-08T04:47:06+09:00",
+      "last_update": "2026-09-08T14:18:57+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -328,7 +328,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-08T04:47:06+09:00",
+      "last_update": "2026-09-08T14:18:57+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -410,5 +410,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "ec1cbfc586954791409e41f78891573bdcfaf058cb61745df698f5d75343ccda"
+  "github_snapshot_hash": "7d5ded19d9912b8f7f9740e01932f31fe04c3babb1ea011b577f515c43ebff47"
 }
