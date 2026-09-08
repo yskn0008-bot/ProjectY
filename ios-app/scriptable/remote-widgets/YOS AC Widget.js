@@ -1,5 +1,5 @@
 // YOS AC Widget — SHARP A988JB frequent controls via Tapo H110.
-// Header includes a visible launch icon for the full YOS AC Remote.
+// Header includes current set temperature and a launch icon for the full YOS AC Remote.
 
 const tapo = importModule('YOS Tapo H110 Core');
 const remote = tapo.findRemote(r => String(r.model||'').toUpperCase()==='AC' || /エアコン|air.?con/i.test(String(r.nickname||'')));
@@ -38,65 +38,28 @@ async function runAction(action){
 }
 function runURL(action){return `scriptable:///run?scriptName=${encodeURIComponent('YOS AC Widget')}&action=${encodeURIComponent(action)}`;}
 function remoteURL(){return `scriptable:///run?scriptName=${encodeURIComponent('YOS AC Remote')}`;}
-const ACTIONS={
-  cool:{label:'冷房',icon:'snowflake'},
-  dry:{label:'除湿',icon:'drop'},
-  heat:{label:'暖房',icon:'flame'},
-  stop:{label:'停止',icon:'power'},
-  tempDown:{label:'温度−',icon:'minus'},
-  tempUp:{label:'温度＋',icon:'plus'},
-  fan:{label:'風量',icon:'fanblades'},
-  wind:{label:'風向',icon:'arrow.up.and.down'}
-};
-function addButton(row,name){
-  const spec=ACTIONS[name];
-  const s=row.addStack();
-  s.layoutVertically();
-  s.centerAlignContent();
-  s.cornerRadius=15;
-  s.backgroundColor=new Color('#191919');
-  s.setPadding(6,5,5,5);
-  s.size=new Size(68,54);
-  s.url=runURL(name);
-  const img=s.addImage(SFSymbol.named(spec.icon).image);
-  img.imageSize=new Size(19,19);
-  img.tintColor=new Color(name==='stop'?'#FF453A':'#0A84FF');
-  s.addSpacer(2);
-  const t=s.addText(spec.label);
-  t.font=Font.semiboldSystemFont(11);
-  t.textColor=Color.white();
-  t.centerAlignText();
-}
-function addBalancedRow(w,names){
-  const row=w.addStack();
-  row.layoutHorizontally();
-  row.addSpacer();
-  for(const name of names){addButton(row,name);row.addSpacer();}
-}
-function makeWidget(){
-  const w=new ListWidget();
-  w.backgroundColor=new Color('#000000');
-  w.setPadding(10,10,10,10);
+const ACTIONS={cool:{label:'冷房',icon:'snowflake'},dry:{label:'除湿',icon:'drop'},heat:{label:'暖房',icon:'flame'},stop:{label:'停止',icon:'power'},tempDown:{label:'温度−',icon:'minus'},tempUp:{label:'温度＋',icon:'plus'},fan:{label:'風量',icon:'fanblades'},wind:{label:'風向',icon:'arrow.up.and.down'}};
+function addButton(row,name){const spec=ACTIONS[name];const s=row.addStack();s.layoutVertically();s.centerAlignContent();s.cornerRadius=15;s.backgroundColor=new Color('#191919');s.setPadding(6,5,5,5);s.size=new Size(68,54);s.url=runURL(name);const img=s.addImage(SFSymbol.named(spec.icon).image);img.imageSize=new Size(19,19);img.tintColor=new Color(name==='stop'?'#FF453A':'#0A84FF');s.addSpacer(2);const t=s.addText(spec.label);t.font=Font.semiboldSystemFont(11);t.textColor=Color.white();t.centerAlignText();}
+function addBalancedRow(w,names){const row=w.addStack();row.layoutHorizontally();row.addSpacer();for(const name of names){addButton(row,name);row.addSpacer();}}
+function makeWidget(state){
+  const w=new ListWidget();w.backgroundColor=new Color('#000000');w.setPadding(10,10,10,10);
   const h=w.addStack();h.centerAlignContent();h.url=remoteURL();
   const title=h.addText('エアコン');title.font=Font.boldSystemFont(18);title.textColor=Color.white();
   h.addSpacer();
+  const tempText=(state&&state.M===4)?'—':`${Math.round((state&&state.T)||26)}°`;
+  const temp=h.addText(tempText);temp.font=Font.boldSystemFont(17);temp.textColor=Color.white();
+  h.addSpacer(8);
   const sub=h.addText('SHARP');sub.font=Font.systemFont(11);sub.textColor=new Color('#8E8E93');
   h.addSpacer(8);
   const open=h.addImage(SFSymbol.named('arrow.up.right.square.fill').image);open.imageSize=new Size(16,16);open.tintColor=new Color('#8E8E93');
   w.addSpacer(6);
-  addBalancedRow(w,['cool','dry','heat','stop']);
-  w.addSpacer(5);
-  addBalancedRow(w,['tempDown','tempUp','fan','wind']);
+  addBalancedRow(w,['cool','dry','heat','stop']);w.addSpacer(5);addBalancedRow(w,['tempDown','tempUp','fan','wind']);
   return w;
 }
 async function main(){
   const action=args.queryParameters&&args.queryParameters.action;
-  if(action){
-    try{await runAction(action);}catch(e){const a=new Alert();a.title='エアコン';a.message=e.message||String(e);a.addAction('OK');await a.presentAlert();}
-    Script.complete();return;
-  }
-  const w=makeWidget();
-  if(config.runsInWidget)Script.setWidget(w);else await w.presentMedium();
-  Script.complete();
+  if(action){try{await runAction(action);}catch(e){const a=new Alert();a.title='エアコン';a.message=e.message||String(e);a.addAction('OK');await a.presentAlert();}Script.complete();return;}
+  let state=null;try{state=(await getClientAndState()).state;}catch(_){state=null;}
+  const w=makeWidget(state);if(config.runsInWidget)Script.setWidget(w);else await w.presentMedium();Script.complete();
 }
 await main();
