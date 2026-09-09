@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-09T23:19:41+09:00",
+  "updated_at": "2026-09-09T23:30:26+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -155,6 +155,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-3c69be485b0a",
+      "title": "feat(money): add reference design enhancer",
+      "completed_at": "2026-09-09T14:30:14Z",
+      "result": "GitHub mainへ反映（3c69be4）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/3c69be485b0a604cb0ac26785bc026f6d432f874"
+    },
+    {
       "id": "github-commit-d122b618cbce",
       "title": "fix(ui): hide Home dashboard when switching MY WAY domains",
       "completed_at": "2026-09-09T13:06:08Z",
@@ -181,13 +188,6 @@
       "completed_at": "2026-09-09T12:26:43Z",
       "result": "GitHub mainへ反映（5244e65）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/5244e6502062eab4e822129807c4d9066a578acc"
-    },
-    {
-      "id": "github-commit-fa2193863220",
-      "title": "test(yos): cover fixed Drive failure categories",
-      "completed_at": "2026-09-09T12:25:37Z",
-      "result": "GitHub mainへ反映（fa21938）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/fa2193863220f7b0b866b8ef6481448c8f0a41e7"
     },
     {
       "id": "complete-002",
@@ -224,7 +224,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-09T23:19:41+09:00",
+      "last_update": "2026-09-09T23:30:26+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -305,7 +305,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-09T23:19:41+09:00",
+      "last_update": "2026-09-09T23:30:26+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -328,7 +328,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-09T23:19:41+09:00",
+      "last_update": "2026-09-09T23:30:26+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -410,5 +410,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "408218a110873fdf0fb4b932be63f6bcbf8a91eb7d5c69aea0643a6b3d2e55b2"
+  "github_snapshot_hash": "0a1c345f103420dcd3c8aba4c6648814a4045c8eacee2a4836eb7e9f7b3c9c00"
 }
