@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-09T23:31:40+09:00",
+  "updated_at": "2026-09-09T23:32:27+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -155,6 +155,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-c2edaa6c7684",
+      "title": "feat(money): apply approved reference design",
+      "completed_at": "2026-09-09T14:32:14Z",
+      "result": "GitHub mainへ反映（c2edaa6）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/c2edaa6c76842ef18f7f05305476a95fe0721a45"
+    },
+    {
       "id": "github-commit-f6ae8cef74ee",
       "title": "feat(money): match approved Money visual reference",
       "completed_at": "2026-09-09T14:31:25Z",
@@ -181,13 +188,6 @@
       "completed_at": "2026-09-09T13:04:07Z",
       "result": "GitHub mainへ反映（3d1b426）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/3d1b4264ec1d1141ff381d4fbdcea67bc9b91a42"
-    },
-    {
-      "id": "github-commit-201180e4e78e",
-      "title": "fix(money): improve iPhone readability and calm visual density",
-      "completed_at": "2026-09-09T13:03:49Z",
-      "result": "GitHub mainへ反映（201180e）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/201180e4e78e9e3cd848a0dc66a33535bd16e38e"
     },
     {
       "id": "complete-002",
@@ -224,7 +224,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-09T23:31:40+09:00",
+      "last_update": "2026-09-09T23:32:27+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -305,7 +305,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-09T23:31:40+09:00",
+      "last_update": "2026-09-09T23:32:27+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -328,7 +328,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-09T23:31:40+09:00",
+      "last_update": "2026-09-09T23:32:27+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -410,5 +410,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "37224cd3ca765798d9fc5d6ad9c28e1ea34b9f8ff31e026ac08f3a9bd45e0c35"
+  "github_snapshot_hash": "a9ef0febc289797b03e09e200760bdb0bbba4d44bb6352977b3411246a2c984b"
 }
