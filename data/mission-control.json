@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-09T03:26:52+09:00",
+  "updated_at": "2026-09-09T09:55:23+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -155,6 +155,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-26aa304b305b",
+      "title": "Fix MY WAY image widget per-zone tap navigation",
+      "completed_at": "2026-09-09T00:55:11Z",
+      "result": "GitHub mainへ反映（26aa304）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/26aa304b305b79ceb2a30c9babe1a1149d7f0fc3"
+    },
+    {
       "id": "github-commit-04737e240e00",
       "title": "Add MY WAY watercolor five-domain widget prototype v2",
       "completed_at": "2026-09-08T05:19:16Z",
@@ -181,13 +188,6 @@
       "completed_at": "2026-09-08T05:17:30Z",
       "result": "GitHub mainへ反映（0c5343e）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/0c5343e51d62a164963795e8d6a71cf21ec4896b"
-    },
-    {
-      "id": "github-commit-79224cac2680",
-      "title": "revert: restore task handler after accidental direct main edit",
-      "completed_at": "2026-09-07T19:01:19Z",
-      "result": "GitHub mainへ反映（79224ca）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/79224cac26801e063afea3a5f38697be6b6bec11"
     },
     {
       "id": "complete-002",
@@ -224,7 +224,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-09T03:26:52+09:00",
+      "last_update": "2026-09-09T09:55:23+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -305,7 +305,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-09T03:26:52+09:00",
+      "last_update": "2026-09-09T09:55:23+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -328,7 +328,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-09T03:26:52+09:00",
+      "last_update": "2026-09-09T09:55:23+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -410,5 +410,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "142386e4e69802210073b94c3290c78f24a60278767e23eec1e71be6cfdc1731"
+  "github_snapshot_hash": "513ebf485ec6c1f64d67c6aae05bfc0a5a7305066ea8d59ee0dc87a562742e81"
 }
