@@ -1,5 +1,5 @@
 'use strict';
-const CACHE='yos-life-home-v19-my-way-refinement';
+const CACHE='yos-life-home-v20-my-way-refinement';
 const LIFE_CACHE_PREFIX='yos-life-';
 const STATIC=[
   './',

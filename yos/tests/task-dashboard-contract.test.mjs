@@ -12,6 +12,7 @@ test('dashboard uses the requested daily groups without embedding current task r
   assert.doesNotMatch(js,/1N7Pzs2ObijeiiLABtQR9uZUZf6-bNvBGXdCMnN-i-_c|965c6086-32c1-463d-93b4-87a9cb69b3ad/);
   assert.match(js,/Authorization:`Bearer \$\{token\}`/);
   assert.match(js,/localStorage\.setItem\(CACHE_KEY/);
+  assert.match(js,/保存済みのタスク/, 'cached state must use a clear label');
   assert.doesNotMatch(js,/localStorage\.setItem\([^,]+,\s*credential/);
 });
 
@@ -33,6 +34,7 @@ test('dashboard preserves iPhone-first non-horizontal visual contract',()=>{
   assert.doesNotMatch(css,/overflow-x:\s*auto|white-space:\s*nowrap[^}]*task-copy/);
   assert.match(css,/grid-template-columns:repeat\(3,1fr\)/);
   assert.match(css,/task-google-button/);
+  assert.match(css,/home-world\.task-dashboard-ready\{min-height:calc\(100dvh/, 'Home must use the first viewport without hiding its primary actions');
 });
 
 test('service worker injects and caches dashboard assets',()=>{

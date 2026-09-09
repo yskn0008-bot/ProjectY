@@ -829,6 +829,8 @@
     }
     [routineCard,yosCard].filter(Boolean).forEach(card=>pages.improve.appendChild(card));
     layout.remove();
+    sunrise.remove();
+    week.remove();
 
     renderNav(nav);
     const requested=location.hash.slice(1),remembered=localStorage.getItem(PAGE_KEY);

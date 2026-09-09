@@ -76,6 +76,8 @@ assert.match(source, /day\.doneToday/, 'doneToday must remain in the existing Li
 assert.match(source, /pages\.home\.append\(buildDashboard\(\)\)/, 'compact Life dashboard must lead the reading home');
 assert.match(source, /\[lifeCalendar,scheduleCard,taskCard\]/, 'the current Life calendar and actionable lists must lead the schedule detail');
 assert.doesNotMatch(source, /\[sunrise,lifeCalendar,week,scheduleCard,taskCard,planCard\]/, 'the legacy calendar composition must not remain');
+assert.match(source, /sunrise\.remove\(\)/, 'the legacy Life hero must be removed after the current shell mounts');
+assert.match(source, /week\.remove\(\)/, 'the legacy Life week strip must be removed after the current calendar mounts');
 assert.match(source, /id="lifeCalendarWeekV1" class="calendar-strip"/, 'the current week must use the shared calendar language');
 assert.match(source, /pages\.record\.appendChild\(buildDailyFlow\(\)\)/, 'existing Record navigation must own the input flow');
 assert.match(source, /PAGE_META\[requested\]\?requested/, 'a direct calendar link must open the requested Life detail');

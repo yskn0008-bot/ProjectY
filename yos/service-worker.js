@@ -1,7 +1,7 @@
 'use strict';
 
 const CACHE_PREFIX = 'yos-command-center-';
-const CACHE = `${CACHE_PREFIX}v26-my-way-refinement`;
+const CACHE = `${CACHE_PREFIX}v27-my-way-refinement`;
 const STATIC = [
   './',
   './index.html',
