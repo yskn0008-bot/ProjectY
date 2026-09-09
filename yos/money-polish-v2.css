@@ -1,0 +1,59 @@
+/* Money v2 readability polish: iPhone-first. Loaded after reference styles. */
+body[data-domain="money"]{font-size:16px;}
+.money-reference-v1 .money2-title small{font-size:12px!important;letter-spacing:.12em;}
+.money-reference-v1 .money2-title p{font-size:16px!important;line-height:1.35;}
+.money-reference-v1 .money2-heading:after{font-size:12px!important;line-height:1.55;}
+.money-reference-v1 .money-ref-safety{font-size:15px!important;}
+.money-reference-v1 .money-ref-safety b{font-size:17px!important;}
+.money-reference-v1 .money-ref-forecast small{font-size:14px!important;}
+.money-reference-v1 .money-ref-forecast strong{font-size:25px!important;}
+.money-reference-v1 .money2-tabs button{font-size:12px!important;min-height:42px!important;}
+.money-reference-v1 .money2-calendar-card>header div strong{font-size:21px!important;}
+.money-reference-v1 .money2-week{font-size:12px!important;}
+.money-reference-v1 .money2-day{min-height:60px!important;padding:7px 5px!important;}
+.money-reference-v1 .money2-day b{font-size:14px!important;}
+.money-reference-v1 .money2-day.today b{font-size:14px!important;}
+.money-reference-v1 .money2-chip{font-size:10px!important;line-height:1.2!important;}
+.money-reference-v1 .money2-day i{font-size:10px!important;}
+.money-reference-v1 .money2-calendar-card>footer{font-size:11px!important;}
+.money-reference-v1 .money2-calendar-card>footer button{font-size:12px!important;}
+.money-ref-calendar-summary small{font-size:11px!important;line-height:1.25!important;}
+.money-ref-calendar-summary strong{font-size:18px!important;line-height:1.1!important;}
+.money-ref-heading h2{font-size:18px!important;line-height:1.3!important;}
+.money-ref-heading small{font-size:11px!important;line-height:1.35!important;}
+.money-reference-v1 .money2-metrics small{font-size:12px!important;line-height:1.3!important;}
+.money-reference-v1 .money2-metrics strong,.money-reference-v1 .money2-metrics article.wide strong{font-size:19px!important;line-height:1.2!important;}
+.money-reference-v1 .money2-metrics em{font-size:11px!important;line-height:1.3!important;}
+.money-reference-v1 .money2-row-card small{font-size:12px!important;}
+.money-reference-v1 .money2-row-card strong{font-size:20px!important;line-height:1.3!important;}
+.money-reference-v1 .money2-row-card p{font-size:12px!important;line-height:1.4!important;}
+.money-reference-v1 .money2-row-card>button{font-size:13px!important;min-height:44px!important;}
+.money-reference-v1 .money2-status>div:not(.money-ref-heading)>strong{font-size:21px!important;line-height:1.3!important;}
+.money-reference-v1 .money2-status>div:not(.money-ref-heading)>p{font-size:13px!important;line-height:1.6!important;}
+.money-ref-section-label{font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif!important;font-size:19px!important;font-weight:800!important;line-height:1.35!important;letter-spacing:0!important;}
+.money-reference-v1 .money2-goal-card strong{font-size:18px!important;line-height:1.35!important;}
+.money-reference-v1 .money2-goal-card small,.money-reference-v1 .money2-goal-card p{font-size:12px!important;line-height:1.45!important;}
+.money-reference-v1 .money2-goal-card>button{font-size:13px!important;min-height:42px!important;}
+.money-ref-advice-label{font-size:18px!important;line-height:1.35!important;}
+.money-reference-v1 .money2-advice p{font-size:13px!important;line-height:1.6!important;}
+.money-reference-v1 .money2-empty{font-size:13px!important;line-height:1.55!important;}
+.money-reference-v1 .money2-account strong,.money-reference-v1 .money2-rule-row strong{font-size:15px!important;}
+.money-reference-v1 .money2-account small,.money-reference-v1 .money2-rule-row small,.money-reference-v1 .money2-payment-line small{font-size:12px!important;line-height:1.4!important;}
+.money-reference-v1 .money2-account>b,.money-reference-v1 .money2-rule-row>span,.money-reference-v1 .money2-payment-line>b{font-size:14px!important;}
+.money-reference-v1 .money2-payment-line strong{font-size:14px!important;}
+.money-reference-v1 .money2-payment-line>button{font-size:12px!important;min-height:36px!important;}
+.money-reference-v1 .money2-account-total small,.money-reference-v1 .money2-networth small{font-size:12px!important;}
+.money-reference-v1 .money2-account-total p,.money-reference-v1 .money2-networth p,.money-reference-v1 .money2-future p{font-size:12px!important;line-height:1.5!important;}
+.money-reference-v1 .money2-list-card h2,.money-reference-v1 .money2-rule-intro h2{font-size:17px!important;}
+.money-reference-v1 .money2-rule-intro ol{font-size:13px!important;line-height:1.55!important;}
+.money-reference-v1 .money2-settings-summary small,.money-reference-v1 .money2-asset-grid small{font-size:10px!important;line-height:1.3!important;}
+.money-reference-v1 .money2-settings-summary strong,.money-reference-v1 .money2-asset-grid strong{font-size:14px!important;}
+.money-reference-v1 .money-ref-privacy{width:40px!important;height:40px!important;right:52px!important;top:13px!important;font-size:17px!important;}
+.money-ref-menu{width:40px!important;height:40px!important;top:13px!important;font-size:16px!important;}
+@media(max-width:390px){
+  .money-reference-v1 .money2-title h1{font-size:50px!important;}
+  .money-reference-v1 .money-ref-forecast strong{font-size:22px!important;}
+  .money-reference-v1 .money2-day{min-height:56px!important;}
+  .money-ref-calendar-summary small{font-size:10px!important;}
+  .money-ref-calendar-summary strong{font-size:16px!important;}
+}
