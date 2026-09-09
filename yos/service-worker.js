@@ -1,7 +1,7 @@
 'use strict';
 
 const CACHE_PREFIX = 'yos-command-center-';
-const CACHE = `${CACHE_PREFIX}v21-task-auth`;
+const CACHE = `${CACHE_PREFIX}v22-money-v2`;
 const STATIC = [
   './',
   './index.html',
@@ -10,6 +10,8 @@ const STATIC = [
   './task-dashboard.css?v=1',
   './task-dashboard.js?v=1',
   './app.js',
+  './money-v2.css?v=1',
+  './money-v2.js?v=1',
   './assets/home-life-path-watercolor-v1.webp',
   './assets/journey-valley-watercolor-v1.webp',
   './taxi-live-v1.js',
@@ -29,11 +31,17 @@ async function inject(response) {
   if (!html.includes('task-dashboard.css')) {
     html = html.replace('</head>', '<link rel="stylesheet" href="./task-dashboard.css?v=1"></head>');
   }
+  if (!html.includes('money-v2.css')) {
+    html = html.replace('</head>', '<link rel="stylesheet" href="./money-v2.css?v=1"></head>');
+  }
   if (!html.includes('taxi-live-v1.js')) {
     html = html.replace('</body>', '<script src="./taxi-live-v1.js?v=4"></script></body>');
   }
   if (!html.includes('task-dashboard.js')) {
     html = html.replace('</body>', '<script src="./task-dashboard.js?v=1" defer></script></body>');
+  }
+  if (!html.includes('money-v2.js')) {
+    html = html.replace('</body>', '<script src="./money-v2.js?v=1" defer></script></body>');
   }
   const headers = new Headers(response.headers);
   headers.delete('content-length');
