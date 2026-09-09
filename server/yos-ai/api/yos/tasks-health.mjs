@@ -40,6 +40,20 @@ function notFound() {
   );
 }
 
+function classifyDriveFailure(error) {
+  const text = error instanceof Error ? error.message : '';
+  if (/accessNotConfigured|SERVICE_DISABLED|has not been used in project|is disabled/iu.test(text)) return 'api_disabled';
+  if (/insufficientPermissions|insufficient authentication scopes|ACCESS_TOKEN_SCOPE_INSUFFICIENT/iu.test(text)) return 'scope_denied';
+  if (/exact-name lookup is ambiguous/iu.test(text)) return 'ambiguous';
+  const status = /HTTP\s+(\d{3})/u.exec(text)?.[1] ?? '';
+  if (status === '400') return 'bad_request';
+  if (status === '401') return 'unauthorized';
+  if (status === '403') return 'forbidden';
+  if (status === '429') return 'rate_limited';
+  if (/^5\d\d$/u.test(status)) return 'upstream_error';
+  return 'fail';
+}
+
 export default {
   async fetch(request) {
     if (request.method !== 'GET') {
@@ -87,8 +101,8 @@ export default {
         return response(stages, 503);
       }
       stages.driveFind = 'pass';
-    } catch {
-      stages.driveFind = 'fail';
+    } catch (error) {
+      stages.driveFind = classifyDriveFailure(error);
       return response(stages, 503);
     }
 
