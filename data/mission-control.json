@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-09T21:24:20+09:00",
+  "updated_at": "2026-09-09T21:26:56+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -155,6 +155,27 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-5244e6502062",
+      "title": "Merge PR #300: classify production Drive lookup failure",
+      "completed_at": "2026-09-09T12:26:43Z",
+      "result": "GitHub mainへ反映（5244e65）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/5244e6502062eab4e822129807c4d9066a578acc"
+    },
+    {
+      "id": "github-commit-fa2193863220",
+      "title": "test(yos): cover fixed Drive failure categories",
+      "completed_at": "2026-09-09T12:25:37Z",
+      "result": "GitHub mainへ反映（fa21938）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/fa2193863220f7b0b866b8ef6481448c8f0a41e7"
+    },
+    {
+      "id": "github-commit-fb373a5b0e93",
+      "title": "diag(yos): classify Drive lookup failure without exposing error details",
+      "completed_at": "2026-09-09T12:25:25Z",
+      "result": "GitHub mainへ反映（fb373a5）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/fb373a5b0e939c257a05553a44fd9eaa785b5ec4"
+    },
+    {
       "id": "github-commit-2e9b66d0c2b4",
       "title": "feat(money): load Money v2 in MY WAY PWA",
       "completed_at": "2026-09-09T12:24:03Z",
@@ -167,27 +188,6 @@
       "completed_at": "2026-09-09T12:23:21Z",
       "result": "GitHub mainへ反映（53a9cfa）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/53a9cface5cb10fe31f5cae5cba89da3932ed2c8"
-    },
-    {
-      "id": "github-commit-0d6e71c7d59e",
-      "title": "feat(money): add MY WAY Money v2 functional dashboard",
-      "completed_at": "2026-09-09T12:22:31Z",
-      "result": "GitHub mainへ反映（0d6e71c）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/0d6e71c7d59e9b43a4e7915afee1c2b8255eded3"
-    },
-    {
-      "id": "github-commit-1422851f2f52",
-      "title": "Merge PR #299: add production-only task read health probe",
-      "completed_at": "2026-09-09T12:17:32Z",
-      "result": "GitHub mainへ反映（1422851）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/1422851f2f52653ec7ef1fbe1fe3c275ee95f3ee"
-    },
-    {
-      "id": "github-commit-d46a5061235f",
-      "title": "test(yos): lock production task health probe privacy boundary",
-      "completed_at": "2026-09-09T12:15:51Z",
-      "result": "GitHub mainへ反映（d46a506）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/d46a5061235f88bbdb40cd2dd870f1451001dc33"
     },
     {
       "id": "complete-002",
@@ -224,7 +224,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-09T21:24:20+09:00",
+      "last_update": "2026-09-09T21:26:56+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -305,7 +305,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-09T21:24:20+09:00",
+      "last_update": "2026-09-09T21:26:56+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -328,7 +328,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-09T21:24:20+09:00",
+      "last_update": "2026-09-09T21:26:56+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -410,5 +410,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "27ca423bf3fbd6b173b2866105dde28267fb7cf6d208f57ce863be2a17258b45"
+  "github_snapshot_hash": "023ba77892153b048a00778c52c4821a5800c5dceacce396eae091a41012a3b4"
 }
