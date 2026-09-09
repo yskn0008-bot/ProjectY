@@ -1,4 +1,5 @@
 .home-world.task-dashboard-ready{display:flex;flex-direction:column;gap:10px;align-content:initial;min-height:auto}
+.home-world.task-dashboard-ready[hidden]{display:none!important}
 .task-dashboard{border:1px solid rgba(74,62,39,.16);border-radius:20px;background:rgba(255,250,240,.94);box-shadow:0 10px 28px rgba(70,57,34,.09);padding:13px;overflow:hidden}
 .task-dashboard header{display:flex;align-items:end;justify-content:space-between;gap:10px;margin-bottom:9px}.task-dashboard header div{min-width:0}.task-dashboard header small{display:block;color:#55735f;font-size:10px;font-weight:900;letter-spacing:.08em}.task-dashboard header h2{margin:2px 0 0;font-size:20px;line-height:1.25}.task-dashboard-status{color:#7a786e;font-size:10px;white-space:nowrap}
 .task-section-title{display:flex;align-items:center;justify-content:space-between;margin:10px 1px 6px}.task-section-title h3{margin:0;font-size:13px}.task-section-title span{color:#718077;font-size:10px}
