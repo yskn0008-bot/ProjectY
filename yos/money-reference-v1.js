@@ -41,7 +41,7 @@
       head.append(menu);
     }
     const privacy=$('#moneyPrivacy',head);
-    if(privacy){privacy.classList.add('money-ref-privacy');privacy.setAttribute('aria-label','金額表示を切り替える')}
+    if(privacy){privacy.classList.add('money-ref-privacy');privacy.setAttribute('aria-label','金額の表示・非表示を切り替える');privacy.setAttribute('title','金額の表示・非表示')}
   }
 
   function state(){const d=read(KEY,{});return d&&typeof d==='object'?d:{}}
@@ -90,7 +90,7 @@
     const metrics=$('.money2-metrics',host);if(metrics&&!$('.money-ref-heading',metrics)){const h=document.createElement('header');h.className='money-ref-heading';h.innerHTML='<h2>↻ 今月の収支状況</h2><small>今月も、計画どおりに。</small>';metrics.prepend(h)}
     const next=$('.money2-row-card',host);if(next&&!$('.money-ref-heading',next)){const h=document.createElement('header');h.className='money-ref-heading';h.innerHTML='<h2>▣ 次の支払い</h2><small>支払いを済ませて、すっきりと。</small>';next.prepend(h)}
     const status=$('.money2-status',host);if(status&&!$('.money-ref-heading',status)){const h=document.createElement('header');h.className='money-ref-heading';h.innerHTML='<h2>▥ 今月の予測</h2><small>この先も、安心して進める。</small>';status.prepend(h)}
-    const goal=$('.money2-goal-card',host);if(goal&&!$('.money-ref-section-label',goal)){const label=document.createElement('div');label.className='money-ref-section-label';label.textContent='◎ 目標';goal.prepend(label)}
+    const goal=$('.money2-goal-card',host);if(goal&&!$('.money-ref-section-label',goal)){const label=document.createElement('div');label.className='money-ref-section-label';label.textContent='目標';goal.prepend(label)}
     const advice=$('.money2-advice',host);if(advice&&!$('.money-ref-advice-label',advice)){const label=document.createElement('div');label.className='money-ref-advice-label';label.textContent='💡 YOSからの提案';advice.prepend(label)}
   }
 
