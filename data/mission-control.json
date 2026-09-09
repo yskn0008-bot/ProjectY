@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-10T00:45:56+09:00",
+  "updated_at": "2026-09-10T00:59:09+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -40,7 +40,7 @@
       "priority": 2,
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/291",
-      "updated_at": "2026-09-09T15:44:43Z"
+      "updated_at": "2026-09-09T15:51:23Z"
     },
     {
       "id": "github-pr-293",
@@ -51,6 +51,16 @@
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/293",
       "updated_at": "2026-09-06T21:11:10Z"
+    },
+    {
+      "id": "github-pr-302",
+      "title": "PR #302 feat(my-way): YOS微調整指示書 v1を反映",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/302",
+      "updated_at": "2026-09-09T15:57:54Z"
     },
     {
       "id": "github-issue-10",
@@ -155,6 +165,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-54c2fd4b9fdb",
+      "title": "fix(money): enlarge explanatory text and prevent goal label wrapping",
+      "completed_at": "2026-09-09T15:58:54Z",
+      "result": "GitHub mainへ反映（54c2fd4）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/54c2fd4b9fdb10f68090445286686f8716057c57"
+    },
+    {
       "id": "github-commit-4a28f7cdd466",
       "title": "fix(money): ship readability polish and goal label repair",
       "completed_at": "2026-09-09T15:45:39Z",
@@ -183,13 +200,6 @@
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/5e2cc7517ef0d78cff9615002811a855106c160a"
     },
     {
-      "id": "github-commit-94f8ac3336b4",
-      "title": "test(yos): lock Sheets failure classification privacy",
-      "completed_at": "2026-09-09T14:37:23Z",
-      "result": "GitHub mainへ反映（94f8ac3）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/94f8ac3336b4259c07089aba3a6f6fe3967d14b9"
-    },
-    {
       "id": "complete-002",
       "title": "iPhone向けMission Control Dashboardを実装",
       "completed_at": "2026-07-17T17:55:00+09:00",
@@ -214,7 +224,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #291をレビューして公開判断する",
+      "next_action": "PR #302をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -224,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-10T00:45:56+09:00",
+      "last_update": "2026-09-10T00:59:09+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -299,13 +309,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 32件・Open PR 4件を自動同期中",
+      "next_action": "Open Issue 32件・Open PR 5件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-10T00:45:56+09:00",
+      "last_update": "2026-09-10T00:59:09+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -319,7 +329,7 @@
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #291をレビューして公開判断する",
+      "next_action": "PR #302をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -328,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-10T00:45:56+09:00",
+      "last_update": "2026-09-10T00:59:09+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -410,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "6c70e51c26db75f76a5efb743da33c092943ed7aa3da4520e2429dae785110a5"
+  "github_snapshot_hash": "a59aab55193fa77e9cac6e80cccecbb6fd28c651dcb5b87aaa8f99544a255cf1"
 }
