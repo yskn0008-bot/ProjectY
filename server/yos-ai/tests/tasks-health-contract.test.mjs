@@ -22,8 +22,15 @@ test('tasks health probe is production-only and reports fixed stages', () => {
   }
 });
 
-test('tasks health probe does not expose credentials, task data, ids, or internal errors', () => {
-  assert.doesNotMatch(source, /error\.message|error\.stack|String\(error\)|JSON\.stringify\(error\)/u);
+test('tasks health probe classifies Drive failures into fixed non-secret categories', () => {
+  for (const category of ['api_disabled', 'scope_denied', 'ambiguous', 'bad_request', 'unauthorized', 'forbidden', 'rate_limited', 'upstream_error']) {
+    assert.match(source, new RegExp(`return '${category}'`, 'u'));
+  }
+  assert.match(source, /stages\.driveFind = classifyDriveFailure\(error\)/u);
+});
+
+test('tasks health probe does not expose credentials, task data, ids, or raw errors', () => {
+  assert.doesNotMatch(source, /error\.stack|JSON\.stringify\(error\)|stages\.[A-Za-z]+\s*=\s*text/u);
   assert.doesNotMatch(source, /serviceAccountEmail|projectNumber|poolId|providerId/u);
   assert.doesNotMatch(source, /rowCount|taskCount|generatedAt|title:|nextAction:|completion:|blocker:|evidence:/u);
   assert.match(source, /\{status: status === 200 \? 'ready' : 'blocked', stages\}/u);
