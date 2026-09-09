@@ -40,24 +40,30 @@ function notFound() {
   );
 }
 
-function classifyDriveFailure(error) {
+function classifyGoogleReadFailure(error) {
   const text = error instanceof Error ? error.message : '';
   if (/accessNotConfigured|SERVICE_DISABLED|has not been used in project|is disabled/iu.test(text)) return 'api_disabled';
   if (/insufficientPermissions|insufficient authentication scopes|ACCESS_TOKEN_SCOPE_INSUFFICIENT/iu.test(text)) return 'scope_denied';
-  if (/exact-name lookup is ambiguous/iu.test(text)) return 'ambiguous';
   const status = /HTTP\s+(\d{3})/u.exec(text)?.[1] ?? '';
   if (status === '400') return 'bad_request';
   if (status === '401') return 'unauthorized';
   if (status === '403') return 'forbidden';
+  if (status === '404') return 'not_found';
   if (status === '429') return 'rate_limited';
   if (/^5\d\d$/u.test(status)) return 'upstream_error';
   return 'fail';
 }
 
+function classifyDriveFailure(error) {
+  const text = error instanceof Error ? error.message : '';
+  if (/exact-name lookup is ambiguous/iu.test(text)) return 'ambiguous';
+  return classifyGoogleReadFailure(error);
+}
+
 export default {
   async fetch(request) {
     if (request.method !== 'GET') {
-      return Response.json({status: 'method_not_allowed'}, {status: 405, headers: {'Cache-Control': 'no-store', Allow: 'GET'}});
+      return Response.json({status: 'method_not_allowed'}, {status: 405, headers: {'Cache-Control':'no-store', Allow:'GET'}});
     }
 
     // Preview is intentionally denied by the production-only Google WIF condition.
@@ -106,21 +112,23 @@ export default {
       return response(stages, 503);
     }
 
+    let rows;
     try {
       const sheets = new GoogleSheetsClient(fetch);
       const result = await sheets.batchGet(projection.id, [TASK_RANGE], accessToken);
-      const rows = result.valueRanges[0]?.values ?? [];
+      rows = result.valueRanges[0]?.values ?? [];
       stages.sheetsRead = 'pass';
-      const headerIndex = rows.findIndex((row) => EXPECTED_HEADER.every((name, index) => String(row?.[index] ?? '').trim() === name));
-      if (headerIndex < 0) {
-        stages.header = 'fail';
-        return response(stages, 503);
-      }
-      stages.header = 'pass';
-    } catch {
-      stages.sheetsRead = 'fail';
+    } catch (error) {
+      stages.sheetsRead = classifyGoogleReadFailure(error);
       return response(stages, 503);
     }
+
+    const headerIndex = rows.findIndex((row) => EXPECTED_HEADER.every((name,index) => String(row?.[index] ?? '').trim() === name));
+    if (headerIndex < 0) {
+      stages.header = 'fail';
+      return response(stages, 503);
+    }
+    stages.header = 'pass';
 
     return response(stages, 200);
   }

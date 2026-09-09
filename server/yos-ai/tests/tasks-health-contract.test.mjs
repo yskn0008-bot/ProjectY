@@ -22,11 +22,13 @@ test('tasks health probe is production-only and reports fixed stages', () => {
   }
 });
 
-test('tasks health probe classifies Drive failures into fixed non-secret categories', () => {
-  for (const category of ['api_disabled', 'scope_denied', 'ambiguous', 'bad_request', 'unauthorized', 'forbidden', 'rate_limited', 'upstream_error']) {
+test('tasks health probe classifies Google read failures into fixed non-secret categories', () => {
+  for (const category of ['api_disabled', 'scope_denied', 'bad_request', 'unauthorized', 'forbidden', 'not_found', 'rate_limited', 'upstream_error']) {
     assert.match(source, new RegExp(`return '${category}'`, 'u'));
   }
+  assert.match(source, /return 'ambiguous'/u);
   assert.match(source, /stages\.driveFind = classifyDriveFailure\(error\)/u);
+  assert.match(source, /stages\.sheetsRead = classifyGoogleReadFailure\(error\)/u);
 });
 
 test('tasks health probe does not expose credentials, task data, ids, or raw errors', () => {
