@@ -151,7 +151,7 @@
       const base=document.createElement('link');
       base.id='lifeHomeV1Styles';
       base.rel='stylesheet';
-      base.href='./home-v1.css?v=7';
+      base.href='./home-v1.css?v=8';
       document.head.appendChild(base);
     }
     if(!document.getElementById('lifeHomePriorityV1Styles')){
@@ -405,9 +405,10 @@
     section.className='life-calendar-v1 card';
     section.innerHTML=`
       <header class="life-calendar-head-v1">
-        <div><small>LIFE CALENDAR</small><h2>生活カレンダー</h2><p>覚えるのはLife。今日は必要なことだけ。</p></div>
+        <div><small>MY LIFE</small><h2>生活カレンダー</h2><p>今日と今週の暮らしを、ここで整える。</p></div>
         <span id="lifeCalendarDateV1"></span>
       </header>
+      <div id="lifeCalendarWeekV1" class="calendar-strip" aria-label="今週"></div>
       <div class="life-calendar-glance-v1">
         <section aria-labelledby="lifeCalendarTodayLabelV1"><h3 id="lifeCalendarTodayLabelV1">今日</h3><div id="lifeCalendarTodayV1"></div></section>
         <section aria-labelledby="lifeCalendarTomorrowLabelV1"><h3 id="lifeCalendarTomorrowLabelV1">明日</h3><div id="lifeCalendarTomorrowV1"></div></section>
@@ -505,6 +506,18 @@
     const allItems=upcomingCalendarItems(data,date,0,31);
     const label=document.getElementById('lifeCalendarDateV1');
     if(label)label.textContent=dateLabel(date);
+    const week=document.getElementById('lifeCalendarWeekV1'),parts=dateParts(date);
+    if(week&&parts){
+      week.replaceChildren();
+      const labels=['日','月','火','水','木','金','土'],start=addDays(date,-parts.weekday);
+      labels.forEach((dayName,index)=>{
+        const value=addDays(start,index),valueParts=dateParts(value),item=document.createElement('span');
+        if(value===date)item.className='active';
+        const small=document.createElement('small');small.textContent=dayName;
+        const b=document.createElement('b');b.textContent=String(valueParts?.day||'');
+        item.append(small,b);week.appendChild(item);
+      });
+    }
     renderCalendarList(document.getElementById('lifeCalendarTodayV1'),todayItems);
     renderCalendarList(document.getElementById('lifeCalendarTomorrowV1'),tomorrowItems);
     renderCalendarList(document.getElementById('lifeCalendarSoonV1'),soonItems,{showDate:true,empty:'近い期限はありません'});
@@ -656,12 +669,12 @@
         <article class="life-task-sheet-v2"><header><div><small>次のタスク</small><h3>今日のタスク</h3></div><button type="button" data-open-page="schedule" aria-label="タスクを追加">＋</button></header><div id="homeTaskListV2"></div></article>
       </section>
       <section class="life-rhythm-v2">
-        <header><div><small>暮らしのリズム</small><h3>習慣 <span id="homeHabitV1">0/14</span></h3></div><button type="button" data-open-page="improve">整える ›</button></header>
+        <header><div><small>暮らしのリズム</small><h3>習慣 <span id="homeHabitV1">0/14</span></h3><p id="homeHabitTodayV2">今日は0%</p></div><button type="button" data-open-page="improve">整える ›</button></header>
         <div id="homeHabitGroupsV2" class="life-habit-groups-v2"></div><i><em id="homeHabitBarV1"></em></i>
       </section>
       <section class="life-memo-v2">
         <button type="button" class="life-memo-copy-v2" data-open-page="record"><small>メモ</small><strong id="homeMemoPreviewV2">まだありません</strong><span>書き留める ›</span></button>
-        <div class="life-plant-v2" aria-hidden="true"><svg viewBox="0 0 92 84"><path d="M43 69c-8-18-4-37 10-54M45 48c-11-14-21-15-28-15 3 13 12 21 28 22M50 36c5-13 14-19 25-20-1 14-9 23-25 26M43 69c9-13 20-17 32-15-3 14-13 21-31 21" fill="none" stroke="#5f8668" stroke-width="4" stroke-linecap="round"/><path d="M31 67h29l-4 15H35z" fill="#b88054"/><path d="M29 67h33" stroke="#77543d" stroke-width="4" stroke-linecap="round"/></svg></div>
+        <a class="life-capture-shortcut-v2" href="../ios-app/shell/capture.html"><span aria-hidden="true">＋</span><b>気づきを残す</b><small>クイック入力</small></a>
       </section>
       <button class="life-yos-companion-v2" type="button" data-open-page="improve"><span class="life-yos-face-v2" aria-hidden="true">••</span><span><b>YOSに相談</b><small>今日の暮らしを、一緒に整える。</small></span><i>›</i></button>
       <div hidden><span id="homeCompletionV1">0%</span><span id="homeStatusTitleV1"></span><span id="homeStatusDetailV1"></span><span id="homeRingV1"></span><button type="button" id="homeFocusDoneV1"></button><span id="homeFocusValueV1"></span><span id="homeFocusDetailV1"></span><span id="homeSleepV1"></span><span id="homeHealthV1"></span><span id="homeMoodV1"></span><span id="homeMoneyBudgetV1"></span><span id="homeMoneyDetailV1"></span><span id="homeDoneValueV1"></span></div>`;
@@ -684,10 +697,7 @@
     qsa('.life-page-v1').forEach(page=>page.classList.toggle('active',page.dataset.page===key));
     qsa('#lifeBottomNavV1 button').forEach(button=>button.classList.toggle('active',button.dataset.page===key));
     const subtitle=qs('.brand p');
-    if(subtitle){
-      const copy={home:'今日の全体像',schedule:'予定とやること',record:'体調と気分',improve:'習慣と相談'};
-      subtitle.textContent=copy[key];
-    }
+    if(subtitle)subtitle.textContent='by YOS';
     if(remember)localStorage.setItem(PAGE_KEY,key);
     window.scrollTo({top:0,behavior:'smooth'});
     queueRefresh();
@@ -764,6 +774,7 @@
     }
     const habitBar=document.getElementById('homeHabitBarV1');
     if(habitBar)habitBar.style.width=`${habit.pct}%`;
+    set('homeHabitTodayV2',habit.done?`今日は${habit.pct}%・${habit.done}個できた`:'今日はここから');
     set('homeMemoPreviewV2',clean(day.note,100)||'まだありません');
     set('homeDoneValueV1',day.doneToday||'まだありません');
     const money=readMoneySafety(readJson(DATA_KEY,{days:{}}));
@@ -807,7 +818,7 @@
 
     const lifeCalendar=buildLifeCalendar();
     pages.home.append(buildDashboard());
-    [sunrise,lifeCalendar,week,scheduleCard,taskCard,planCard].filter(Boolean).forEach(card=>pages.schedule.appendChild(card));
+    [lifeCalendar,scheduleCard,taskCard].filter(Boolean).forEach(card=>pages.schedule.appendChild(card));
     pages.record.appendChild(buildDailyFlow());
     if(stateCard){
       const details=document.createElement('details');
@@ -820,7 +831,8 @@
     layout.remove();
 
     renderNav(nav);
-    activatePage('home',false);
+    const requested=location.hash.slice(1),remembered=localStorage.getItem(PAGE_KEY);
+    activatePage(PAGE_META[requested]?requested:PAGE_META[remembered]?remembered:'home',false);
 
     const observer=new MutationObserver(queueRefresh);
     [scheduleCard,taskCard,stateCard,routineCard].filter(Boolean).forEach(node=>observer.observe(node,{subtree:true,childList:true,characterData:true,attributes:true}));

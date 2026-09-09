@@ -62,10 +62,13 @@
 
     <article class="next-step primary-action">
       <button type="button" class="step-check" aria-label="次の一歩を確認">□</button>
-      <div><small>次の一歩〈今日やること〉</small><strong id="nextSummary">未設定</strong></div>
+      <div><small>今やる</small><strong id="nextSummary">未設定</strong><p class="next-step-meta"><span id="nextFollowing">次：未設定</span><span id="taskCountSummary">0件</span></p></div>
       <a href="../life/">やる ›</a>
     </article>
-    <button class="yos-companion" type="button" data-prompt="【YOS】MY WAYの今ここ・行き先・ここまで・次の一歩を一緒に確認したい。"><span class="yos-face" aria-hidden="true">••</span><span><b>YOSに相談</b><small>迷ったときは、人生の羅針盤へ戻ろう。</small></span><i>›</i></button>
+    <div class="home-assist-row">
+      <button class="yos-companion" type="button" data-prompt="【YOS】MY WAYの今ここ・行き先・ここまで・次の一歩を一緒に確認したい。"><span class="yos-face" aria-hidden="true">••</span><span><b>YOSに相談</b><small>迷ったときは、人生の羅針盤へ戻ろう。</small></span><i>›</i></button>
+      <a class="capture-shortcut" href="../ios-app/shell/capture.html"><span aria-hidden="true">＋</span><b>気づきを残す</b></a>
+    </div>
     <a class="domain-card journey hj-entry-compat-v1" aria-hidden="true" tabindex="-1"><b>Hero's Journey</b><small>複数の旅・螺旋成長・今週の物語</small></a>
   </section>
 
@@ -81,14 +84,14 @@
       <div class="money-chart" aria-label="お金の見える化">
         <div class="chart-grid" aria-hidden="true"><i></i><i></i><i></i></div>
         <div class="chart-bars"><span id="incomeBar"><b>収入</b></span><span id="expenseBar"><b>支出</b></span><span id="balanceBar"><b>残り</b></span></div>
-        <p id="moneyChartState">データなし</p>
+        <p id="moneyChartState">入力すると、今月の見通しがここに出ます。</p>
       </div>
     </article>
     <div class="money-detail-grid">
       <article class="money-breakdown secondary-surface"><h2>内訳・守るお金</h2><dl><div><dt>必要な支払い</dt><dd id="moneyRequired">未設定</dd></div><div><dt>守るお金</dt><dd id="moneyProtected">未設定</dd></div><div><dt>自由に使える額</dt><dd id="moneyFree">未算出</dd></div></dl></article>
       <article class="money-ring secondary-surface"><div id="moneyDonut" class="money-donut"><span id="moneyDonutState">データなし</span></div><small>実データから表示</small></article>
     </div>
-    <article class="money-next inline-surface"><div><small>近い支払い</small><strong id="moneyNextPayment">未設定</strong></div><div><small>今月の目標</small><strong id="moneyGoal">未設定</strong></div></article>
+    <article class="money-next inline-surface"><div><small>近い支払い</small><strong id="moneyNextPayment">入力待ち</strong></div><div><small>月末の見通し</small><strong id="moneyGoal">入力すると表示します</strong></div><a class="money-calendar-link" href="../life/#schedule"><span><small>お金のカレンダー</small><strong>月の流れを見る</strong></span><span id="moneyCalendarStrip" class="calendar-strip" aria-hidden="true"></span><i>›</i></a></article>
     <button class="yos-companion" type="button" data-prompt="【YOS｜Money】現在確認できるお金の事実だけで、次に確認することを一緒に整理したい。"><span class="yos-face" aria-hidden="true">••</span><span><b>YOSと見通しを整える</b><small>根拠のない金額は使いません。</small></span><i>›</i></button>
   </section>
 
@@ -122,10 +125,11 @@
       <button id="focusIdea" class="idea-seed" type="button" aria-label="アイデアメモを入力"><span aria-hidden="true">♧</span><b>アイデアを残す</b><small>1タップで記録</small></button>
       <label for="ideaMemo">アイデアメモ</label>
       <textarea id="ideaMemo" rows="3" maxlength="1000" placeholder="今、思いついたこと"></textarea>
-      <button id="saveIdea" class="save-button" type="button">この端末に保存</button>
+      <button id="saveIdea" class="save-button" type="button">この端末だけに保存</button>
+      <small class="idea-save-note">このメモは同期されません。整理したい内容はクイック入力へ。</small>
     </article>
     <article class="idea-recent secondary-surface"><header><h2>最近のアイデアの種</h2><span>この端末</span></header><p id="recentIdea">まだありません</p></article>
-    <button class="yos-companion" type="button" data-prompt="【YOS｜Idea】保存したひらめきを、ようすけの経験と誰かの問題解決につなげたい。"><span class="yos-face" aria-hidden="true">••</span><span><b>YOSと種を育てる</b><small>自分の経験 × 他人の問題解決 ＝ 価値</small></span><i>›</i></button>
+    <div class="idea-assist-row"><button class="yos-companion" type="button" data-prompt="【YOS｜Idea】保存したひらめきを、ようすけの経験と誰かの問題解決につなげたい。"><span class="yos-face" aria-hidden="true">••</span><span><b>YOSと種を育てる</b><small>自分の経験 × 他人の問題解決 ＝ 価値</small></span><i>›</i></button><a class="capture-shortcut" href="../ios-app/shell/capture.html"><span aria-hidden="true">＋</span><b>クイック入力</b></a></div>
   </section>
 
   <section id="archivePage" class="page archive-world" data-page-panel="archive" hidden>

@@ -35,7 +35,7 @@
   if(!document.getElementById('lifeHomeV1Script')){
     const script=document.createElement('script');
     script.id='lifeHomeV1Script';
-    script.src='./home-v1.js?v=7';
+    script.src='./home-v1.js?v=8';
     document.body.appendChild(script);
   }
 })();

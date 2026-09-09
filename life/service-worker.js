@@ -1,13 +1,13 @@
 'use strict';
-const CACHE='yos-life-home-v18-completion-lock';
+const CACHE='yos-life-home-v19-my-way-refinement';
 const LIFE_CACHE_PREFIX='yos-life-';
 const STATIC=[
   './',
   './index.html',
   './manifest.webmanifest',
   './yos-suite-v3.js?v=8',
-  './home-v1.js?v=7',
-  './home-v1.css?v=7',
+  './home-v1.js?v=8',
+  './home-v1.css?v=8',
   './home-priority-v1.css?v=4',
   './readability-final.css?v=2'
 ];

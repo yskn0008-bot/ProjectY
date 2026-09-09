@@ -57,10 +57,10 @@ assert.equal(claimed, true, 'Life service worker must claim its clients after cl
 assert.match(source, /key\.startsWith\(LIFE_CACHE_PREFIX\)/, 'cleanup must be restricted by Life cache prefix');
 assert.match(source, /home-priority-v1\.css\?v=4/, 'priority home styles must be available offline');
 assert.match(source, /yos-suite-v3\.js\?v=8/, 'current suite script must be cached with its requested URL');
-assert.match(source, /home-v1\.js\?v=7/, 'current home script must be cached with its requested URL');
-assert.match(source, /home-v1\.css\?v=7/, 'current home styles must be cached with its requested URL');
+assert.match(source, /home-v1\.js\?v=8/, 'current home script must be cached with its requested URL');
+assert.match(source, /home-v1\.css\?v=8/, 'current home styles must be cached with its requested URL');
 assert.match(source, /readability-final\.css\?v=2/, 'completion-lock readability asset must bypass stale v1 cache');
-assert.match(source, /yos-life-home-v18-completion-lock/, 'completion-lock cache generation must be active');
+assert.match(source, /yos-life-home-v19-my-way-refinement/, 'MY WAY refinement cache generation must be active');
 assert.match(source, /!document\.querySelector\("main\.app \.layout"\)/, 'legacy layout must be removed before Life is revealed');
 assert.match(source, /lifeBottomNavV1/, 'final Life nav must exist before reveal');
 assert.doesNotMatch(source, /keys\.filter\(key=>key!==CACHE\)/, 'global cache deletion pattern must not return');

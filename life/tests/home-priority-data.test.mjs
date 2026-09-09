@@ -74,9 +74,11 @@ assert.match(source, /homeMoneyBudgetV1/, 'home must reuse confirmed Money safet
 assert.doesNotMatch(source, /homeFocusInputV1|homeDoneInputV1/, 'home must not duplicate record inputs');
 assert.match(source, /day\.doneToday/, 'doneToday must remain in the existing Life day record');
 assert.match(source, /pages\.home\.append\(buildDashboard\(\)\)/, 'compact Life dashboard must lead the reading home');
-assert.match(source, /\[sunrise,lifeCalendar,week,scheduleCard,taskCard,planCard\]/, 'Life calendar must remain available from the schedule detail');
+assert.match(source, /\[lifeCalendar,scheduleCard,taskCard\]/, 'the current Life calendar and actionable lists must lead the schedule detail');
+assert.doesNotMatch(source, /\[sunrise,lifeCalendar,week,scheduleCard,taskCard,planCard\]/, 'the legacy calendar composition must not remain');
+assert.match(source, /id="lifeCalendarWeekV1" class="calendar-strip"/, 'the current week must use the shared calendar language');
 assert.match(source, /pages\.record\.appendChild\(buildDailyFlow\(\)\)/, 'existing Record navigation must own the input flow');
-assert.match(source, /activatePage\('home',false\)/, 'relaunch must start on the reading home');
+assert.match(source, /PAGE_META\[requested\]\?requested/, 'a direct calendar link must open the requested Life detail');
 assert.doesNotMatch(source, /localStorage\.clear\(/, 'daily flow must never clear existing Life data');
 
 console.log('Life home priority data: PASS');

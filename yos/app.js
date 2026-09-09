@@ -14,6 +14,22 @@ const lifeData=()=>read(KEYS.life,null);
 const todayData=(life=lifeData())=>life?.days?.[life.activeLifeDate||dateKey()]||life?.days?.[dateKey()]||null;
 const set=(id,value)=>{const node=$(id);if(node)node.textContent=value};
 
+function installMoneyFlow(){
+  const moneyNext=document.querySelector('.money-next');
+  if(moneyNext&&!moneyNext.querySelector('.money-flow')){
+    const flow=document.createElement('p');
+    flow.className='money-flow';
+    flow.setAttribute('aria-label','お金の整理順');
+    flow.append('支払う ');
+    for(const label of ['守る','使える']){
+      const arrow=document.createElement('span');
+      arrow.textContent='→';
+      flow.append(arrow,` ${label} `);
+    }
+    moneyNext.append(flow);
+  }
+}
+
 function array(value){return Array.isArray(value)?value:[]}
 function amountNumber(value){
   if(typeof value==='number')return Number.isFinite(value)?value:null;
@@ -43,6 +59,24 @@ function renderIdentity(){
   set('homeDate',new Intl.DateTimeFormat('ja-JP',{year:'numeric',month:'numeric',day:'numeric',weekday:'short',timeZone:'Asia/Tokyo'}).format(date));
   set('moneyMonth',new Intl.DateTimeFormat('ja-JP',{year:'numeric',month:'long',timeZone:'Asia/Tokyo'}).format(date));
 }
+function renderCalendarStrip(){
+  const host=$('moneyCalendarStrip');
+  if(!host)return;
+  host.replaceChildren();
+  const now=new Date();
+  const weekdayLabels=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const weekday=weekdayLabels.indexOf(new Intl.DateTimeFormat('en-US',{weekday:'short',timeZone:'Asia/Tokyo'}).format(now));
+  const start=new Date(now);start.setDate(now.getDate()-weekday);
+  const labels=['日','月','火','水','木','金','土'];
+  labels.forEach((label,index)=>{
+    const date=new Date(start);date.setDate(start.getDate()+index);
+    const item=document.createElement('span');
+    if(date.toDateString()===now.toDateString())item.className='active';
+    const small=document.createElement('small');small.textContent=label;
+    const b=document.createElement('b');b.textContent=String(date.getDate());
+    item.append(small,b);host.appendChild(item);
+  });
+}
 function renderHome(life,today,journey,scenes){
   const energy={low:'体力は低め',mid:'体力は普通',high:'体力は高め'}[state.energy];
   const checkin=[today?.checkin?.health&&`体調 ${today.checkin.health}/5`,today?.checkin?.mood&&`気分 ${today.checkin.mood}/5`].filter(Boolean).join('・');
@@ -58,6 +92,9 @@ function renderHome(life,today,journey,scenes){
   set('progressSummary',facts.join('・')||'データなし');
   const nextTask=tasks.find(task=>!task.done)?.text;
   set('nextSummary',clean(today?.nextAction)||clean(today?.priority)||clean(nextTask)||'未設定');
+  const remaining=tasks.filter(task=>!task.done);
+  set('nextFollowing',`次：${clean(remaining[1]?.text,50)||'未設定'}`);
+  set('taskCountSummary',`${remaining.length}件`);
 }
 function renderMoney(life,today){
   const money=life?.moneySafety || today?.money || {};
@@ -79,7 +116,7 @@ function renderMoney(life,today){
   const hasChart=maximum>0&&chartValues.some(value=>value!==null);
   ['incomeBar','expenseBar','balanceBar'].forEach((id,index)=>$(id)?.style.setProperty('--value',hasChart&&chartValues[index]!==null?`${Math.max(5,Math.round(chartValues[index]/maximum*100))}%`:'0%'));
   document.querySelector('.money-chart')?.classList.toggle('has-data',hasChart);
-  set('moneyChartState',hasChart?'実データを表示':'データなし');
+  set('moneyChartState',hasChart?'実データを表示':'入力すると、今月の見通しがここに出ます。');
   const donut=$('moneyDonut');
   const hasRatio=incomeNumber!==null&&incomeNumber>0&&expenseNumber!==null;
   if(donut)donut.style.setProperty('--spent',hasRatio?`${Math.min(360,Math.max(0,expenseNumber/incomeNumber*360))}deg`:'0deg');
@@ -92,7 +129,7 @@ function renderJourney(journey,scenes){
   set('journeyStage',clean(journey?.stage)||clean(journey?.name)||'未設定');
   set('journeyCount',scenes.length?`歩いてきた経験 ${scenes.length}件`:'経験データなし');
   set('journeyScene',sceneTitle||'データなし');
-  set('recentExperience',sceneDetail||'データなし');
+  set('recentExperience',sceneDetail||'最初の経験を残すと、ここから旅が始まります。');
   set('nextTheme',clean(journey?.theme)||clean(latest?.next)||'未設定');
 }
 function renderIdea(){
@@ -100,11 +137,11 @@ function renderIdea(){
   const legacy=read(KEYS.legacyIdea,{});
   const text=clean(primary?.text||primary?.memo||legacy?.text||legacy?.memo,1000);
   $('ideaMemo').value=text;
-  set('recentIdea',text||'まだありません');
+  set('recentIdea',text||'最初のひらめきを一つ残してみましょう。');
 }
 function render(){
   const life=lifeData(),today=todayData(life),journey=currentJourney(),scenes=currentScenes(journey);
-  renderIdentity();renderHome(life,today,journey,scenes);renderMoney(life,today);renderJourney(journey,scenes);renderIdea();
+  renderIdentity();renderCalendarStrip();renderHome(life,today,journey,scenes);renderMoney(life,today);renderJourney(journey,scenes);renderIdea();
 }
 
 const titles={home:'MY WAY',money:'MY MONEY',journey:'MY JOURNEY',idea:'MY IDEA',archive:'MY WAY'};
@@ -139,9 +176,10 @@ $('focusIdea').addEventListener('click',()=>$('ideaMemo').focus());
 $('saveIdea').addEventListener('click',()=>{
   const text=clean($('ideaMemo').value,1000);
   const saved=write(KEYS.idea,{text,memo:text,savedAt:new Date().toISOString()});
-  set('recentIdea',text||'まだありません');
+  set('recentIdea',text||'最初のひらめきを一つ残してみましょう。');
   set('appStatus',saved?'アイデアメモを保存しました。':'保存できませんでした。');
 });
+installMoneyFlow();
 render();
 const initial=location.hash.slice(1);
 showPage(['money','journey','idea','archive'].includes(initial)?initial:'home');
