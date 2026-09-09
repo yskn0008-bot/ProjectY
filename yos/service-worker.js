@@ -1,7 +1,7 @@
 'use strict';
 
 const CACHE_PREFIX = 'yos-command-center-';
-const CACHE = `${CACHE_PREFIX}v23-money-readability`;
+const CACHE = `${CACHE_PREFIX}v24-money-reference`;
 const STATIC = [
   './',
   './index.html',
@@ -12,6 +12,8 @@ const STATIC = [
   './app.js',
   './money-v2.css?v=2',
   './money-v2.js?v=1',
+  './money-reference-v1.css?v=1',
+  './money-reference-v1.js?v=1',
   './assets/home-life-path-watercolor-v1.webp',
   './assets/journey-valley-watercolor-v1.webp',
   './taxi-live-v1.js',
@@ -36,6 +38,9 @@ async function inject(response) {
   } else {
     html = html.replace(/\.\/money-v2\.css\?v=1/g, './money-v2.css?v=2');
   }
+  if (!html.includes('money-reference-v1.css')) {
+    html = html.replace('</head>', '<link rel="stylesheet" href="./money-reference-v1.css?v=1"></head>');
+  }
   if (!html.includes('taxi-live-v1.js')) {
     html = html.replace('</body>', '<script src="./taxi-live-v1.js?v=4"></script></body>');
   }
@@ -44,6 +49,9 @@ async function inject(response) {
   }
   if (!html.includes('money-v2.js')) {
     html = html.replace('</body>', '<script src="./money-v2.js?v=1" defer></script></body>');
+  }
+  if (!html.includes('money-reference-v1.js')) {
+    html = html.replace('</body>', '<script src="./money-reference-v1.js?v=1" defer></script></body>');
   }
   const headers = new Headers(response.headers);
   headers.delete('content-length');
