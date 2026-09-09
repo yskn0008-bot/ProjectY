@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-09T21:23:38+09:00",
+  "updated_at": "2026-09-09T21:24:20+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -155,6 +155,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-2e9b66d0c2b4",
+      "title": "feat(money): load Money v2 in MY WAY PWA",
+      "completed_at": "2026-09-09T12:24:03Z",
+      "result": "GitHub mainへ反映（2e9b66d）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/2e9b66d0c2b484ea7e445925dd20031738684669"
+    },
+    {
       "id": "github-commit-53a9cface5cb",
       "title": "feat(money): add Money v2 responsive styles",
       "completed_at": "2026-09-09T12:23:21Z",
@@ -181,13 +188,6 @@
       "completed_at": "2026-09-09T12:15:51Z",
       "result": "GitHub mainへ反映（d46a506）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/d46a5061235f88bbdb40cd2dd870f1451001dc33"
-    },
-    {
-      "id": "github-commit-63b69c62e68d",
-      "title": "diag(yos): add production-only task read health probe",
-      "completed_at": "2026-09-09T12:15:37Z",
-      "result": "GitHub mainへ反映（63b69c6）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/63b69c62e68dfc5969417aa4223cd4b27f50e9cf"
     },
     {
       "id": "complete-002",
@@ -224,7 +224,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-09T21:23:38+09:00",
+      "last_update": "2026-09-09T21:24:20+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -305,7 +305,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-09T21:23:38+09:00",
+      "last_update": "2026-09-09T21:24:20+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -328,7 +328,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-09T21:23:38+09:00",
+      "last_update": "2026-09-09T21:24:20+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -410,5 +410,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "b81c3193aab1b097d4e0750cc82eef9d979f6d8052721f695f3b052abad6872d"
+  "github_snapshot_hash": "27ca423bf3fbd6b173b2866105dde28267fb7cf6d208f57ce863be2a17258b45"
 }
