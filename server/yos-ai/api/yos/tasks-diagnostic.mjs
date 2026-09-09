@@ -3,7 +3,7 @@ import {loadYosRuntimeConfig} from '../../dist/config.js';
 import {GoogleDriveClient} from '../../dist/sources/google-drive-client.js';
 import {GoogleSheetsClient} from '../../dist/sources/google-sheets-client.js';
 
-// Preview retry after Vercel build-rate-limit clearance; diagnostic behavior is unchanged.
+// Preview retry after confirmed successful project-y-yos-ai builds; diagnostic behavior is unchanged.
 const PROJECTION_NAME = 'YOS Tasks｜MY WAY Read Projection';
 const SHEET_MIME = 'application/vnd.google-apps.spreadsheet';
 const TASK_RANGE = "'Tasks'!A1:J200";
