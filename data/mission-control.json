@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-09T22:05:25+09:00",
+  "updated_at": "2026-09-09T22:06:22+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -155,6 +155,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-d122b618cbce",
+      "title": "fix(ui): hide Home dashboard when switching MY WAY domains",
+      "completed_at": "2026-09-09T13:06:08Z",
+      "result": "GitHub mainへ反映（d122b61）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/d122b618cbce8f84c30b82ae7c23c3e79aba01c6"
+    },
+    {
       "id": "github-commit-3d1b4264ec1d",
       "title": "fix(money): refresh readable Money styles in PWA cache",
       "completed_at": "2026-09-09T13:04:07Z",
@@ -181,13 +188,6 @@
       "completed_at": "2026-09-09T12:25:37Z",
       "result": "GitHub mainへ反映（fa21938）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/fa2193863220f7b0b866b8ef6481448c8f0a41e7"
-    },
-    {
-      "id": "github-commit-fb373a5b0e93",
-      "title": "diag(yos): classify Drive lookup failure without exposing error details",
-      "completed_at": "2026-09-09T12:25:25Z",
-      "result": "GitHub mainへ反映（fb373a5）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/fb373a5b0e939c257a05553a44fd9eaa785b5ec4"
     },
     {
       "id": "complete-002",
@@ -224,7 +224,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-09T22:05:25+09:00",
+      "last_update": "2026-09-09T22:06:22+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -305,7 +305,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-09T22:05:25+09:00",
+      "last_update": "2026-09-09T22:06:22+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -328,7 +328,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-09T22:05:25+09:00",
+      "last_update": "2026-09-09T22:06:22+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -410,5 +410,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "1ec326ad45b227f88fe6f38622275c223e8f2c0d90c3f778fa42a50c041c4d81"
+  "github_snapshot_hash": "6ae37785ebb6fff4d2250782b36da504791d8eba121ea5c2101f2d2fe4112008"
 }
