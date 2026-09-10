@@ -1,0 +1,56 @@
+name: Shortcut Factory Distance PoC
+
+on:
+  push:
+    branches:
+      - poc/shortcut-factory-location-donor
+    paths:
+      - 'tools/shortcut-factory-poc/generate_distance_threshold_shortcut.py'
+      - 'tools/shortcut-factory-poc/sign_with_hubsign.py'
+      - '.github/workflows/shortcut-factory-distance-poc.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  generate-sign-verify:
+    runs-on: macos-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Generate distance-gated shortcut
+        run: |
+          mkdir -p build
+          python3 tools/shortcut-factory-poc/generate_distance_threshold_shortcut.py \
+            --output build/YOS-PoC4-Near-Lawson.shortcut \
+            --threshold-km 100
+          plutil -lint build/YOS-PoC4-Near-Lawson.shortcut
+
+      - name: Sign with HubSign PoC fallback
+        run: |
+          python3 tools/shortcut-factory-poc/sign_with_hubsign.py \
+            --input build/YOS-PoC4-Near-Lawson.shortcut \
+            --output build/YOS-PoC4-Near-Lawson-signed.shortcut \
+            --name 'YOS PoC4 - Near Lawson'
+
+      - name: Verify signed envelope
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('build/YOS-PoC4-Near-Lawson-signed.shortcut')
+          data = p.read_bytes()
+          assert data.startswith(b'AEA1'), 'signed shortcut does not start with AEA1'
+          print(f'OK: signed AEA1 shortcut, {len(data)} bytes')
+          PY
+
+      - name: Upload PoC4 artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: yos-shortcut-factory-poc4
+          path: build/YOS-PoC4-Near-Lawson-signed.shortcut
+          if-no-files-found: error
+          retention-days: 7
