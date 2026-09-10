@@ -25,19 +25,11 @@ def variable_for(output_uuid: str, output_name: str) -> dict:
     }
 
 
-def build() -> dict:
+def build(name: str) -> dict:
     search_uuid = uid()
     group = uid()
     return {
-        "WFWorkflowMinimumClientVersionString": "900",
-        "WFWorkflowMinimumClientVersion": 900,
-        "WFWorkflowIcon": {
-            "WFWorkflowIconStartColor": 255,
-            "WFWorkflowIconGlyphNumber": 61440,
-        },
-        "WFWorkflowClientVersion": 4711,
-        "WFWorkflowOutputContentItemClasses": [],
-        "WFWorkflowHasOutputFallback": False,
+        "WFWorkflowName": name,
         "WFWorkflowActions": [
             {
                 "WFWorkflowActionIdentifier": "is.workflow.actions.searchlocalbusinesses",
@@ -76,22 +68,25 @@ def build() -> dict:
                 "WFWorkflowActionParameters": {
                     "WFControlFlowMode": 2,
                     "GroupingIdentifier": group,
-                    "UUID": uid(),
                 },
             },
         ],
-        "WFWorkflowInputContentItemClasses": [
-            "WFAppContentItem", "WFAppStoreAppContentItem", "WFArticleContentItem",
-            "WFContactContentItem", "WFDateContentItem", "WFEmailAddressContentItem",
-            "WFFolderContentItem", "WFGenericFileContentItem", "WFImageContentItem",
-            "WFiTunesProductContentItem", "WFLocationContentItem", "WFDCMapsLinkContentItem",
-            "WFAVAssetContentItem", "WFPDFContentItem", "WFPhoneNumberContentItem",
-            "WFRichTextContentItem", "WFSafariWebPageContentItem", "WFStringContentItem",
-            "WFURLContentItem",
-        ],
+        "WFWorkflowClientVersion": "2607.1.3",
+        "WFWorkflowClientRelease": "26.0",
+        "WFWorkflowMinimumClientVersion": 900,
+        "WFWorkflowMinimumClientVersionString": "900",
+        "WFWorkflowIcon": {
+            "WFWorkflowIconStartColor": 463140863,
+            "WFWorkflowIconGlyphNumber": 59511,
+        },
         "WFWorkflowImportQuestions": [],
+        "WFWorkflowInputContentItemClasses": [
+            "WFLocationContentItem", "WFStringContentItem", "WFAppContentItem"
+        ],
+        "WFWorkflowOutputContentItemClasses": [],
+        "WFWorkflowTypes": [],
         "WFQuickActionSurfaces": [],
-        "WFWorkflowTypes": ["Watch", "WFWorkflowTypeShowInSearch"],
+        "WFWorkflowHasOutputFallback": False,
         "WFWorkflowHasShortcutInputVariables": False,
     }
 
@@ -99,10 +94,11 @@ def build() -> dict:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--name", default="YOS PoC3 - Location Safari")
     args = parser.parse_args()
     args.output.parent.mkdir(parents=True, exist_ok=True)
     with args.output.open("wb") as f:
-        plistlib.dump(build(), f, fmt=plistlib.FMT_BINARY, sort_keys=False)
+        plistlib.dump(build(args.name), f, fmt=plistlib.FMT_BINARY, sort_keys=False)
     workflow = plistlib.loads(args.output.read_bytes())
     actions = workflow["WFWorkflowActions"]
     assert [a["WFWorkflowActionIdentifier"] for a in actions] == [
