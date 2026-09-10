@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-10T08:59:20+09:00",
+  "updated_at": "2026-09-10T12:56:02+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -40,7 +40,7 @@
       "priority": 2,
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/291",
-      "updated_at": "2026-09-09T20:46:19Z"
+      "updated_at": "2026-09-10T03:53:58Z"
     },
     {
       "id": "github-pr-293",
@@ -165,6 +165,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-e668d07a823d",
+      "title": "feat: add MY WAY Shortcut Builder v1 shell",
+      "completed_at": "2026-09-10T03:55:51Z",
+      "result": "GitHub mainへ反映（e668d07）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/e668d07a823de6155ca5b99b18ed40ab4ba99ba5"
+    },
+    {
       "id": "github-commit-ddb02e8b692a",
       "title": "feat(widgets): redesign MY WAY five-domain widget interiors",
       "completed_at": "2026-09-09T16:01:54Z",
@@ -193,13 +200,6 @@
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/4a28f7cdd466074b362033945aa9f9b09f2c5cf4"
     },
     {
-      "id": "github-commit-2d6dac226165",
-      "title": "fix(money): repair goal label and clarify privacy control",
-      "completed_at": "2026-09-09T15:45:04Z",
-      "result": "GitHub mainへ反映（2d6dac2）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/2d6dac2261658692f843ac772118b6f27f00024f"
-    },
-    {
       "id": "complete-002",
       "title": "iPhone向けMission Control Dashboardを実装",
       "completed_at": "2026-07-17T17:55:00+09:00",
@@ -224,7 +224,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #305をレビューして公開判断する",
+      "next_action": "PR #291をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-10T08:59:20+09:00",
+      "last_update": "2026-09-10T12:56:02+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -315,7 +315,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-10T08:59:20+09:00",
+      "last_update": "2026-09-10T12:56:02+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -329,7 +329,7 @@
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #305をレビューして公開判断する",
+      "next_action": "PR #291をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-10T08:59:20+09:00",
+      "last_update": "2026-09-10T12:56:02+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "878a52e0ea8980f530a81295bdd1ad63e820d0adbabca463ffc799d06a9a7eac"
+  "github_snapshot_hash": "61179714f162e5cb8c3c2d01cc01c2b843c391af1ca4783f32638819fe7fcd0e"
 }
