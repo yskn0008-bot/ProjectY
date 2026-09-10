@@ -1,0 +1,54 @@
+name: Shortcut Factory Location PoC
+
+on:
+  push:
+    branches:
+      - poc/shortcut-factory-location-donor
+    paths:
+      - 'tools/shortcut-factory-poc/**'
+      - '.github/workflows/shortcut-factory-location-poc.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  generate-sign-verify:
+    runs-on: macos-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Generate donor-derived location shortcut
+        run: |
+          mkdir -p build
+          python3 tools/shortcut-factory-poc/generate_location_donor_shortcut.py \
+            --output build/YOS-PoC3-Location-Safari.shortcut
+          plutil -lint build/YOS-PoC3-Location-Safari.shortcut
+
+      - name: Sign with HubSign PoC fallback
+        run: |
+          python3 tools/shortcut-factory-poc/sign_with_hubsign.py \
+            --input build/YOS-PoC3-Location-Safari.shortcut \
+            --output build/YOS-PoC3-Location-Safari-signed.shortcut \
+            --name 'YOS PoC3 - Location Safari'
+
+      - name: Verify signed envelope
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('build/YOS-PoC3-Location-Safari-signed.shortcut')
+          data = p.read_bytes()
+          assert data.startswith(b'AEA1'), 'signed shortcut does not start with AEA1'
+          print(f'OK: signed AEA1 shortcut, {len(data)} bytes')
+          PY
+
+      - name: Upload PoC3 artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: yos-shortcut-factory-poc3
+          path: build/YOS-PoC3-Location-Safari-signed.shortcut
+          if-no-files-found: error
+          retention-days: 7
