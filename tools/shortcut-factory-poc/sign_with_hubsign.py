@@ -40,7 +40,9 @@ def main() -> int:
             method="POST",
             headers={
                 "Content-Type": "application/json",
-                "User-Agent": "ProjectY-YOS-Shortcut-Factory-PoC/1.0",
+                "User-Agent": "cherri/1.0",
+                "Origin": "https://routinehub.co",
+                "Referer": "https://routinehub.co/",
             },
         )
 
@@ -50,8 +52,10 @@ def main() -> int:
             if response.status != 200:
                 raise RuntimeError(f"HubSign HTTP {response.status}")
             if not signed.startswith(b"AEA1"):
+                preview = signed[:160].decode("utf-8", errors="replace").replace("\n", " ")
                 raise RuntimeError(
-                    f"HubSign response is not AEA1 signed data; content-type={content_type!r}, bytes={len(signed)}"
+                    "HubSign response is not AEA1 signed data; "
+                    f"content-type={content_type!r}, bytes={len(signed)}, preview={preview!r}"
                 )
 
         args.output.parent.mkdir(parents=True, exist_ok=True)
