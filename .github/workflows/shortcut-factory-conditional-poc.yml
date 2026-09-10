@@ -1,0 +1,63 @@
+name: Shortcut Factory Conditional PoC
+
+on:
+  push:
+    branches:
+      - poc/shortcut-factory-conditional
+    paths:
+      - 'tools/shortcut-factory-poc/**'
+      - '.github/workflows/shortcut-factory-conditional-poc.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  generate-sign-verify:
+    runs-on: macos-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Generate conditional shortcut
+        run: |
+          mkdir -p build
+          python3 tools/shortcut-factory-poc/generate_conditional_shortcut.py \
+            --output build/YOS-PoC2-If-Safari.shortcut \
+            --name 'YOS PoC2 - If Safari'
+
+      - name: Validate generated plist
+        run: |
+          python3 tools/shortcut-factory-poc/generate_conditional_shortcut.py \
+            --output build/YOS-PoC2-If-Safari.shortcut \
+            --validate-only
+          plutil -lint build/YOS-PoC2-If-Safari.shortcut
+
+      - name: Sign with HubSign PoC fallback
+        run: |
+          python3 tools/shortcut-factory-poc/sign_with_hubsign.py \
+            --input build/YOS-PoC2-If-Safari.shortcut \
+            --output build/YOS-PoC2-If-Safari-signed.shortcut \
+            --name 'YOS PoC2 - If Safari'
+
+      - name: Verify signed shortcut envelope
+        run: |
+          test -f build/YOS-PoC2-If-Safari-signed.shortcut
+          python3 - <<'PY'
+          from pathlib import Path
+          data = Path('build/YOS-PoC2-If-Safari-signed.shortcut').read_bytes()
+          if not data.startswith(b'AEA1'):
+              raise SystemExit('signed shortcut does not start with AEA1')
+          print(f'OK: signed AEA1 shortcut, {len(data)} bytes')
+          PY
+
+      - name: Upload PoC2 artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: yos-shortcut-factory-poc2
+          path: |
+            build/YOS-PoC2-If-Safari.shortcut
+            build/YOS-PoC2-If-Safari-signed.shortcut
+          retention-days: 7
