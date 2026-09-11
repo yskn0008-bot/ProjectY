@@ -6,11 +6,12 @@ const CONFIG = {
   ac: { remoteScript: "YOS AC Remote", actionScript: "YOS AC Widget" }
 }
 
+// Unified monochrome symbol language. Avoid mixed emoji-style glyphs.
 const TV_ACTIONS = [
   { action:"power", icon:"⏻", label:"電源" },
-  { action:"input", icon:"↪", label:"入力" },
+  { action:"input", icon:"↪︎", label:"入力" },
   { action:"home", icon:"⌂", label:"ホーム" },
-  { action:"quick", icon:"⚙", label:"クイック" },
+  { action:"quick", icon:"⚙︎", label:"クイック" },
   { action:"back", icon:"‹", label:"戻る" },
   { action:"up", icon:"↑", label:"上" },
   { action:"down", icon:"↓", label:"下" },
@@ -19,16 +20,16 @@ const TV_ACTIONS = [
   { action:"confirm", icon:"○", label:"OK" },
   { action:"volumeDown", icon:"−", label:"音量−" },
   { action:"mute", icon:"⊘", label:"ミュート" },
-  { action:"volumeUp", icon:"+", label:"音量＋" },
-  { action:"channelDown", icon:"−", label:"CH−" },
-  { action:"channelUp", icon:"+", label:"CH＋" },
-  { action:"rewind", icon:"⏪", label:"巻き戻し" },
-  { action:"play", icon:"▶", label:"再生" },
-  { action:"fastForward", icon:"⏩", label:"早送り" },
+  { action:"volumeUp", icon:"＋", label:"音量＋" },
+  { action:"channelDown", icon:"↓", label:"CH−" },
+  { action:"channelUp", icon:"↑", label:"CH＋" },
+  { action:"rewind", icon:"≪", label:"巻き戻し" },
+  { action:"play", icon:"▷", label:"再生" },
+  { action:"fastForward", icon:"≫", label:"早送り" },
   { action:"pause", icon:"Ⅱ", label:"一時停止" },
-  { action:"stop", icon:"■", label:"停止" },
-  { action:"prev", icon:"◀|", label:"前" },
-  { action:"next", icon:"|▶", label:"次" }
+  { action:"stop", icon:"□", label:"停止" },
+  { action:"prev", icon:"|‹", label:"前" },
+  { action:"next", icon:"›|", label:"次" }
 ]
 
 const TV_DEFAULT = [
@@ -45,12 +46,12 @@ const LEGACY_DEFAULT = [
 ]
 
 const LIGHT_BUTTONS = [
-  ["on","⏻","点灯"],["off","○","消灯"],["all","☼","全灯"],
-  ["bright","☼","明るい"],["dark","◉","暗い"],["night","☾","常夜灯"]
+  ["on","⏻","点灯"],["off","○","消灯"],["all","◎","全灯"],
+  ["bright","＋","明るい"],["dark","−","暗い"],["night","◐","常夜灯"]
 ]
 const AC_BUTTONS = [
-  ["cool","❄︎","冷房"],["dry","◇","除湿"],["heat","♨︎","暖房"],["stop","⏻","停止"],
-  ["tempDown","−","温度−"],["tempUp","+","温度＋"],["fan","✤","風量 自動"],["wind","↕","風向"]
+  ["cool","❄︎","冷房"],["dry","◌","除湿"],["heat","≋","暖房"],["stop","⏻","停止"],
+  ["tempDown","−","温度−"],["tempUp","＋","温度＋"],["fan","◎","風量 自動"],["wind","≈","風向"]
 ]
 
 const STORAGE = {
@@ -79,7 +80,7 @@ function makeButtons(device, items){
 }
 
 const html = `<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"><style>
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{margin:0;background:#000;color:#fff;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Helvetica Neue",sans-serif}body{min-height:100vh;padding:10px 12px max(20px,env(safe-area-inset-bottom))}.page{width:100%;max-width:500px;margin:0 auto;padding-top:92px}.card{margin-bottom:12px;padding:15px 14px;border:1px solid #45484e;border-radius:27px;background:linear-gradient(155deg,#101215,#050506)}.head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}.title{display:inline-flex;align-items:center;gap:7px;padding:6px 4px 6px 0;font-size:22px;font-weight:800;touch-action:manipulation}.title:after{content:"›";font-size:22px;color:#5b8fdc}.tools{display:flex;gap:6px}.tool{height:32px;padding:0 11px;border:1px solid #353941;border-radius:11px;background:#15171b;color:#438eff;font-weight:750}.grid{display:grid;gap:9px}.grid-3{grid-template-columns:repeat(3,1fr)}.grid-4{grid-template-columns:repeat(4,1fr)}.key{min-width:0;min-height:62px;padding:8px;border:1px solid #26292f;border-radius:19px;background:linear-gradient(145deg,#1c1e22,#15171a);color:#fff;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:5px;touch-action:manipulation}.key:active{transform:scale(.97);background:#25282d}.icon{font-size:25px;color:#438eff}.label{font-size:12px;font-weight:700;white-space:nowrap}.controls{margin-top:10px}.dpad{width:190px;height:154px;margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);gap:6px}.dpad .key{min-height:0;align-items:center}.up{grid-column:2}.left{grid-column:1;grid-row:2}.ok{grid-column:2;grid-row:2;border-radius:50%;background:#24384f}.right{grid-column:3;grid-row:2}.down{grid-column:2;grid-row:3}.media{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}.media .key{min-height:52px;align-items:center}.brand{font-size:12px;color:#8d8f95}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{margin:0;background:#000;color:#fff;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Helvetica Neue",sans-serif}body{min-height:100vh;padding:10px 12px max(20px,env(safe-area-inset-bottom))}.page{width:100%;max-width:500px;margin:0 auto;padding-top:92px}.card{margin-bottom:12px;padding:15px 14px;border:1px solid #45484e;border-radius:27px;background:linear-gradient(155deg,#101215,#050506)}.head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}.title{display:inline-flex;align-items:center;gap:7px;padding:6px 4px 6px 0;font-size:22px;font-weight:800;touch-action:manipulation}.title:after{content:"›";font-size:22px;color:#5b8fdc}.tools{display:flex;gap:6px}.tool{height:32px;padding:0 11px;border:1px solid #353941;border-radius:11px;background:#15171b;color:#438eff;font-weight:750}.grid{display:grid;gap:9px}.grid-3{grid-template-columns:repeat(3,1fr)}.grid-4{grid-template-columns:repeat(4,1fr)}.key{min-width:0;min-height:62px;padding:8px;border:1px solid #26292f;border-radius:19px;background:linear-gradient(145deg,#1c1e22,#15171a);color:#fff;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:5px;touch-action:manipulation}.key:active{transform:scale(.97);background:#25282d}.icon{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Helvetica Neue",sans-serif;font-size:25px;font-weight:500;line-height:1;color:#438eff;font-variant-emoji:text}.label{font-size:12px;font-weight:700;white-space:nowrap}.controls{margin-top:10px}.dpad{width:190px;height:154px;margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);gap:6px}.dpad .key{min-height:0;align-items:center}.up{grid-column:2}.left{grid-column:1;grid-row:2}.ok{grid-column:2;grid-row:2;border-radius:50%;background:#24384f}.right{grid-column:3;grid-row:2}.down{grid-column:2;grid-row:3}.media{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}.media .key{min-height:52px;align-items:center}.brand{font-size:12px;color:#8d8f95}
 </style></head><body><div class="page">
 <section class="card"><div class="head"><div class="title" onclick="openRemote('tv')">BRAVIA</div><div class="tools"><button class="tool" onclick="sendMenu(event)">MENU</button></div></div><div id="tvGrid" class="grid grid-3"></div><div id="controls" class="controls"></div></section>
 <section class="card"><div class="head"><div class="title" onclick="openRemote('light')">照明</div><div class="brand">Panasonic</div></div><div class="grid grid-3">${makeButtons("light", LIGHT_BUTTONS)}</div></section>
