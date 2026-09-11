@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-11T22:52:10+09:00",
+  "updated_at": "2026-09-12T03:19:44+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -12,16 +12,6 @@
     ]
   },
   "inbox": [
-    {
-      "id": "github-pr-233",
-      "title": "PR #233 Draft: Mission Controlに進捗率・残り時間を常時表示する",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/233",
-      "updated_at": "2026-09-05T00:22:21Z"
-    },
     {
       "id": "github-pr-280",
       "title": "PR #280 feat(yos-ai): add Point / Event Foundation v1 contract",
@@ -61,6 +51,16 @@
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/307",
       "updated_at": "2026-09-10T04:35:09Z"
+    },
+    {
+      "id": "github-pr-311",
+      "title": "PR #311 feat(remote): MY REMOTE UX v2",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/311",
+      "updated_at": "2026-09-11T17:37:40Z"
     },
     {
       "id": "github-issue-10",
@@ -224,7 +224,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #307をレビューして公開判断する",
+      "next_action": "PR #311をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-11T22:52:10+09:00",
+      "last_update": "2026-09-12T03:19:44+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -309,13 +309,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 33件・Open PR 5件を自動同期中",
+      "next_action": "Open Issue 33件・Open PR 6件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-11T22:52:10+09:00",
+      "last_update": "2026-09-12T03:19:44+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -329,7 +329,7 @@
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #307をレビューして公開判断する",
+      "next_action": "PR #311をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-11T22:52:10+09:00",
+      "last_update": "2026-09-12T03:19:44+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "407bc1fdc2ba5ab110e125ae1962171114d322b96918e2059a27755f8e5c87d4"
+  "github_snapshot_hash": "546e72fdf7a19a7fc67e0ede979bf96b3b524dfa2e426e014078dfa30462f1e6"
 }
