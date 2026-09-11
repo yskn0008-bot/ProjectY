@@ -1,11 +1,9 @@
 import type {FetchLike} from '../http.js';
 import type {RedisCommandClient} from '../storage/upstash-rest.js';
+import {CaptureInProgressError, createRawFirstProcessor} from './raw-first-processor.js';
 
 const DEFAULT_MAX_BODY_BYTES = 16_384;
 const MAX_RAW_TEXT_CHARACTERS = 6_000;
-const PROCESSING_TTL_SECONDS = 120;
-const DONE_TTL_SECONDS = 30 * 24 * 60 * 60;
-const NOTION_VERSION = '2022-06-28';
 
 export interface ClarityIntakeHandlerOptions {
   tokenSha256: string;
@@ -26,9 +24,13 @@ interface ClarityIntakeInput {
 
 export function createClarityIntakeHandler(options: ClarityIntakeHandlerOptions): (request: Request) => Promise<Response> {
   const tokenSha256 = normalizeHash(options.tokenSha256);
-  const notionToken = requiredSecret(options.notionToken, 'Notion token');
-  const notionPageId = normalizePageId(options.notionPageId);
   const fetchImpl = options.fetchImpl ?? fetch;
+  const processor = createRawFirstProcessor({
+    notionToken: options.notionToken,
+    notionPageId: options.notionPageId,
+    redis: options.redis,
+    fetchImpl
+  });
   const maxBodyBytes = options.maxBodyBytes ?? DEFAULT_MAX_BODY_BYTES;
   if (!Number.isSafeInteger(maxBodyBytes) || maxBodyBytes < 1 || maxBodyBytes > 1_000_000) {
     throw new Error('Invalid intake max body size');
@@ -78,42 +80,12 @@ export function createClarityIntakeHandler(options: ClarityIntakeHandlerOptions)
     if (!parsed.ok) return json({error: parsed.error}, 400);
     const input = parsed.value;
 
-    const dedupeKey = `yos:intake:clarity:v1:${input.captureId}`;
-    let claimed: string | null;
     try {
-      claimed = await options.redis.command<string | null>([
-        'SET',
-        dedupeKey,
-        'processing',
-        'NX',
-        'EX',
-        PROCESSING_TTL_SECONDS
-      ]);
-    } catch {
-      return json({error: 'Intake is temporarily unavailable'}, 503);
-    }
-
-    if (claimed !== 'OK') {
-      try {
-        const state = await options.redis.command<string | null>(['GET', dedupeKey]);
-        if (state === 'done') {
-          return json({ok: true, captureId: input.captureId, duplicate: true}, 200);
-        }
-      } catch {
-        return json({error: 'Intake is temporarily unavailable'}, 503);
-      }
-      return json({error: 'Capture is already being processed'}, 409);
-    }
-
-    try {
-      await appendToNotion({fetchImpl, notionToken, notionPageId, input});
-      await options.redis.command<string>(['SET', dedupeKey, 'done', 'EX', DONE_TTL_SECONDS]);
-      return json({ok: true, captureId: input.captureId, duplicate: false}, 201);
-    } catch {
-      try {
-        await options.redis.command<number>(['DEL', dedupeKey]);
-      } catch {
-        // The local Clarity raw record remains the fail-safe even if cleanup fails.
+      const result = await processor.process(input);
+      return json({ok: true, captureId: input.captureId, duplicate: result.duplicate}, result.duplicate ? 200 : 201);
+    } catch (error) {
+      if (error instanceof CaptureInProgressError) {
+        return json({error: 'Capture is already being processed'}, 409);
       }
       return json({error: 'YOS Inbox is temporarily unavailable'}, 503);
     }
@@ -156,47 +128,6 @@ function parseInput(value: unknown): {ok: true; value: ClarityIntakeInput} | {ok
   };
 }
 
-async function appendToNotion(options: {
-  fetchImpl: FetchLike;
-  notionToken: string;
-  notionPageId: string;
-  input: ClarityIntakeInput;
-}): Promise<void> {
-  const metadata = `${options.input.capturedAt} · clarity/${options.input.inputMode} · ${options.input.captureId}`;
-  const response = await options.fetchImpl(`https://api.notion.com/v1/blocks/${options.notionPageId}/children`, {
-    method: 'PATCH',
-    headers: {
-      Authorization: `Bearer ${options.notionToken}`,
-      'Content-Type': 'application/json',
-      'Notion-Version': NOTION_VERSION
-    },
-    body: JSON.stringify({
-      children: [
-        paragraph(metadata),
-        paragraph(options.input.rawText),
-        {object: 'block', type: 'divider', divider: {}}
-      ]
-    })
-  });
-  if (!response.ok) throw new Error('Notion append failed');
-}
-
-function paragraph(text: string): Record<string, unknown> {
-  return {
-    object: 'block',
-    type: 'paragraph',
-    paragraph: {
-      rich_text: splitText(text).map((content) => ({type: 'text', text: {content}}))
-    }
-  };
-}
-
-function splitText(text: string): string[] {
-  const chunks: string[] = [];
-  for (let offset = 0; offset < text.length; offset += 1_900) chunks.push(text.slice(offset, offset + 1_900));
-  return chunks.length > 0 ? chunks : [''];
-}
-
 function bearerToken(header: string | null): string | null {
   if (!header) return null;
   const match = /^Bearer ([^\s]{16,512})$/u.exec(header);
@@ -217,20 +148,6 @@ async function matchesSha256(value: string, expectedHex: string): Promise<boolea
 function normalizeHash(value: string): string {
   const normalized = value.trim().toLowerCase();
   if (!/^[a-f0-9]{64}$/u.test(normalized)) throw new Error('Invalid intake token hash');
-  return normalized;
-}
-
-function normalizePageId(value: string): string {
-  const normalized = value.trim();
-  if (!/^[a-f0-9-]{32,36}$/iu.test(normalized) || normalized.replaceAll('-', '').length !== 32) {
-    throw new Error('Invalid Notion page ID');
-  }
-  return normalized;
-}
-
-function requiredSecret(value: string, label: string): string {
-  const normalized = value.trim();
-  if (!normalized) throw new Error(`${label} is required`);
   return normalized;
 }
 
