@@ -1,4 +1,7 @@
-// YOS BRAVIA Remote — automatic navigation/media mode with physical D-pad.
+// YOS BRAVIA Remote — adaptive media/cursor cross.
+// Same physical five-button cross changes role automatically:
+// Navigation: Mute=Up, Rewind=Left, Play=OK, FastForward=Right, Pause=Down.
+// Playback: the same buttons are Mute/Rewind/Play/FastForward/Pause.
 
 const STORAGE = Object.freeze({
   host: "yos.bravia.scriptable.host",
@@ -14,399 +17,217 @@ const ALIASES = Object.freeze({
   quick: ["quick", "options", "actionmenu", "settings"],
   menu: ["actionmenu", "options", "androidmenu"],
   back: ["return", "back"],
-  up: ["up"],
-  down: ["down"],
-  left: ["left"],
-  right: ["right"],
+  up: ["up"], down: ["down"], left: ["left"], right: ["right"],
   confirm: ["confirm", "enter"],
-  volumeDown: ["volumedown"],
-  mute: ["mute"],
-  volumeUp: ["volumeup"],
-  channelDown: ["channeldown"],
-  channelUp: ["channelup"],
-  rewind: ["rewind", "backward"],
-  play: ["play"],
-  fastForward: ["forward", "fastforward"],
-  pause: ["pause"],
-  stop: ["stop"],
-  prev: ["prev"],
-  next: ["next"]
+  volumeDown: ["volumedown"], mute: ["mute"], volumeUp: ["volumeup"],
+  channelDown: ["channeldown"], channelUp: ["channelup"],
+  rewind: ["rewind", "backward"], play: ["play"], fastForward: ["forward", "fastforward"],
+  pause: ["pause"], stop: ["stop"], prev: ["prev"], next: ["next"]
 })
 
-const NAV_ACTIONS = new Set([
-  "input", "home", "quick", "menu", "back",
-  "up", "down", "left", "right", "confirm"
-])
-const MEDIA_ACTIONS = new Set([
-  "play", "pause", "stop", "rewind", "fastForward", "prev", "next"
-])
-const NAVIGATION_GRACE_MS = 10000
-
-function secure(key) {
-  return Keychain.contains(key) ? Keychain.get(key) : ""
+const ACTIONS = {
+  power:["⏻","電源"], input:["↪︎","入力"], home:["⌂","ホーム"], quick:["⚙︎","クイック"],
+  menu:["≡","MENU"], back:["‹","戻る"], up:["↑","上"], down:["↓","下"], left:["←","左"], right:["→","右"],
+  confirm:["○","OK"], volumeDown:["−","音量−"], mute:["⊘","ミュート"], volumeUp:["＋","音量＋"],
+  channelDown:["↓","CH−"], channelUp:["↑","CH＋"], rewind:["≪","巻き戻し"], play:["▷","再生"],
+  fastForward:["≫","早送り"], pause:["Ⅱ","一時停止"], stop:["□","停止"], prev:["|‹","前"], next:["›|","次"]
 }
 
-function normalizeHost(value) {
-  const host = String(value || "")
-    .trim()
-    .replace(/^https?:\/\//i, "")
-    .replace(/:\d+$/, "")
-  if (!host || /[\s/?#]/.test(host)) {
-    throw new Error("テレビのIPアドレスまたはホスト名を確認してください。")
-  }
+const LAYOUT = [
+  "input","home","quick",
+  "volumeDown","mute","volumeUp",
+  "rewind","play","fastForward",
+  "back","pause","stop"
+]
+const ADAPTIVE_NAV = { mute:"up", rewind:"left", play:"confirm", fastForward:"right", pause:"down" }
+const ADAPTIVE = new Set(Object.keys(ADAPTIVE_NAV))
+const NAV_ACTIONS = new Set(["input","home","quick","menu","back","up","down","left","right","confirm"])
+const MEDIA_ACTIONS = new Set(["play","pause","stop","rewind","fastForward","prev","next"])
+const NAVIGATION_GRACE_MS = 2200
+
+function secure(key){return Keychain.contains(key)?Keychain.get(key):""}
+function normalizeHost(value){
+  const host=String(value||"").trim().replace(/^https?:\/\//i,"").replace(/:\d+$/,"")
+  if(!host||/[\s/?#]/.test(host))throw new Error("テレビのIPアドレスまたはホスト名を確認してください。")
   return host
 }
+let host=secure(STORAGE.host),psk=secure(STORAGE.psk),commandIndex=new Map()
 
-let host = secure(STORAGE.host)
-let psk = secure(STORAGE.psk)
-let commandIndex = new Map()
-
-function loadMode() {
-  try {
-    if (Keychain.contains(STORAGE.mode)) {
-      const value = JSON.parse(Keychain.get(STORAGE.mode))
-      if (value && (value.mode === "navigation" || value.mode === "media")) {
-        return value
-      }
+function loadMode(){
+  try{
+    if(Keychain.contains(STORAGE.mode)){
+      const value=JSON.parse(Keychain.get(STORAGE.mode))
+      if(value&&(value.mode==="navigation"||value.mode==="media"))return value
     }
-  } catch (_) {}
-  return { mode: "navigation", navigationUntil: 0 }
+  }catch(_){}
+  return {mode:"navigation",navigationUntil:0}
 }
-
-let modeState = loadMode()
-
-function rememberMode(mode, action) {
-  const now = Date.now()
-  modeState = {
-    mode,
-    navigationUntil: mode === "navigation" ? now + NAVIGATION_GRACE_MS : 0,
-    lastAction: action || "",
-    updatedAt: now
-  }
-  Keychain.set(STORAGE.mode, JSON.stringify(modeState))
+let modeState=loadMode()
+function rememberMode(mode,action){
+  const now=Date.now()
+  modeState={mode,navigationUntil:mode==="navigation"?now+NAVIGATION_GRACE_MS:0,lastAction:action||"",updatedAt:now}
+  Keychain.set(STORAGE.mode,JSON.stringify(modeState))
 }
-
-function noteAction(action) {
-  if (NAV_ACTIONS.has(action)) rememberMode("navigation", action)
-  else if (MEDIA_ACTIONS.has(action)) rememberMode("media", action)
+function noteAction(action){
+  if(NAV_ACTIONS.has(action))rememberMode("navigation",action)
+  else if(MEDIA_ACTIONS.has(action))rememberMode("media",action)
 }
+function xmlEscape(v){return String(v).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&apos;")}
 
-function xmlEscape(value) {
-  return String(value)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&apos;")
-}
-
-async function configure() {
-  const alert = new Alert()
-  alert.title = "BRAVIA接続設定"
-  alert.addTextField("テレビのIPまたはホスト名", host)
-  alert.addSecureTextField(psk ? "PSK（変更しないなら空欄）" : "PSK", "")
-  alert.addAction("保存")
-  alert.addCancelAction("キャンセル")
-  if (await alert.presentAlert() < 0) return false
-
-  host = normalizeHost(alert.textFieldValue(0))
-  psk = alert.textFieldValue(1).trim() || psk
-  if (!psk) throw new Error("PSKを入力してください。")
-  Keychain.set(STORAGE.host, host)
-  Keychain.set(STORAGE.psk, psk)
+async function configure(){
+  const a=new Alert()
+  a.title="BRAVIA接続設定"
+  a.addTextField("テレビのIPまたはホスト名",host)
+  a.addSecureTextField(psk?"PSK（変更しないなら空欄）":"PSK","")
+  a.addAction("保存");a.addCancelAction("キャンセル")
+  if(await a.presentAlert()<0)return false
+  host=normalizeHost(a.textFieldValue(0))
+  psk=a.textFieldValue(1).trim()||psk
+  if(!psk)throw new Error("PSKを入力してください。")
+  Keychain.set(STORAGE.host,host);Keychain.set(STORAGE.psk,psk)
   return true
 }
-
-async function ensureConfigured() {
-  if (host && psk) {
-    host = normalizeHost(host)
-    return true
-  }
-  return configure()
+async function ensureConfigured(){if(host&&psk){host=normalizeHost(host);return true}return configure()}
+async function sonyJSON(service,method){
+  const r=new Request("http://"+host+"/sony/"+service)
+  r.method="POST";r.headers={"Content-Type":"application/json","X-Auth-PSK":psk}
+  r.body=JSON.stringify({method,params:[],id:1,version:"1.0"})
+  return JSON.parse(await r.loadString())
 }
-
-async function sonyJSON(service, method) {
-  const request = new Request("http://" + host + "/sony/" + service)
-  request.method = "POST"
-  request.headers = {
-    "Content-Type": "application/json",
-    "X-Auth-PSK": psk
-  }
-  request.body = JSON.stringify({
-    method,
-    params: [],
-    id: 1,
-    version: "1.0"
-  })
-  return JSON.parse(await request.loadString())
+async function discover(){
+  const data=await sonyJSON("system","getRemoteControllerInfo"),commands=data&&data.result&&data.result[1]
+  if(!Array.isArray(commands))throw new Error("BRAVIAコマンド取得失敗")
+  commandIndex=new Map()
+  commands.forEach(item=>{if(item&&item.name&&item.value)commandIndex.set(String(item.name).toLowerCase(),String(item.value))})
 }
-
-async function discover() {
-  const data = await sonyJSON("system", "getRemoteControllerInfo")
-  const commands = data && data.result && data.result[1]
-  if (!Array.isArray(commands)) throw new Error("BRAVIAコマンド取得失敗")
-  commandIndex = new Map()
-  commands.forEach(item => {
-    if (item && item.name && item.value) {
-      commandIndex.set(String(item.name).toLowerCase(), String(item.value))
-    }
-  })
-}
-
-function resolve(action) {
-  const aliases = ALIASES[action] || []
-  if (action === "quick" && Keychain.contains(STORAGE.quick)) {
-    const saved = String(Keychain.get(STORAGE.quick)).toLowerCase()
-    if (commandIndex.has(saved)) return commandIndex.get(saved)
+function resolve(action){
+  if(action==="quick"&&Keychain.contains(STORAGE.quick)){
+    const saved=String(Keychain.get(STORAGE.quick)).toLowerCase()
+    if(commandIndex.has(saved))return commandIndex.get(saved)
   }
-  for (const alias of aliases) {
-    if (commandIndex.has(alias.toLowerCase())) {
-      return commandIndex.get(alias.toLowerCase())
-    }
-  }
+  for(const alias of ALIASES[action]||[])if(commandIndex.has(alias.toLowerCase()))return commandIndex.get(alias.toLowerCase())
   return null
 }
-
-async function send(action) {
-  const code = resolve(action)
-  if (!code) throw new Error("このテレビでは未対応です：" + action)
-
+async function send(action){
+  const code=resolve(action)
+  if(!code)throw new Error("このテレビでは未対応です："+action)
   noteAction(action)
-  const request = new Request("http://" + host + "/sony/ircc")
-  request.method = "POST"
-  request.headers = {
-    "Content-Type": "text/xml; charset=UTF-8",
-    "X-Auth-PSK": psk,
-    SOAPACTION: '"urn:schemas-sony-com:service:IRCC:1#X_SendIRCC"'
-  }
-  request.body =
-    '<?xml version="1.0"?>' +
-    '<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/">' +
-    '<s:Body><u:X_SendIRCC xmlns:u="urn:schemas-sony-com:service:IRCC:1">' +
-    "<IRCCCode>" + xmlEscape(code) + "</IRCCCode>" +
-    "</u:X_SendIRCC></s:Body></s:Envelope>"
-  await request.loadString()
+  const r=new Request("http://"+host+"/sony/ircc")
+  r.method="POST"
+  r.headers={"Content-Type":"text/xml; charset=UTF-8","X-Auth-PSK":psk,SOAPACTION:'"urn:schemas-sony-com:service:IRCC:1#X_SendIRCC"'}
+  r.body='<?xml version="1.0"?><s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:X_SendIRCC xmlns:u="urn:schemas-sony-com:service:IRCC:1"><IRCCCode>'+xmlEscape(code)+'</IRCCCode></u:X_SendIRCC></s:Body></s:Envelope>'
+  await r.loadString()
 }
-
-function hasNavigationStatus(data) {
-  const list = data && data.result && data.result[0]
-  if (!Array.isArray(list)) return false
-  return list.some(item => item && ["cursorDisplay", "textInput", "webBrowse"].some(key => {
-    const value = item[key]
-    return value === true || value === "true" ||
-      value === "active" || value === "available"
+function hasNavigationStatus(data){
+  const list=data&&data.result&&data.result[0]
+  return Array.isArray(list)&&list.some(item=>item&&["cursorDisplay","textInput","webBrowse"].some(key=>{
+    const value=item[key]
+    return value===true||value==="true"||value==="active"||value==="available"
   }))
 }
-
-function hasPlaybackInfo(data) {
-  const info = data && data.result && data.result[0]
-  return Boolean(
-    info && typeof info === "object" &&
-    (info.uri || info.source || info.title || info.programTitle)
-  )
+function hasPlaybackInfo(data){
+  const info=data&&data.result&&data.result[0]
+  return Boolean(info&&typeof info==="object"&&(info.uri||info.source||info.title||info.programTitle))
 }
-
-async function inferMode() {
-  if (Date.now() < Number(modeState.navigationUntil || 0)) {
-    return modeState.mode
-  }
-
-  try {
-    if (hasNavigationStatus(
-      await sonyJSON("appControl", "getApplicationStatusList")
-    )) {
-      rememberMode("navigation", "status")
-      return modeState.mode
+async function inferMode(){
+  if(Date.now()<Number(modeState.navigationUntil||0))return modeState.mode
+  try{
+    if(hasNavigationStatus(await sonyJSON("appControl","getApplicationStatusList"))){
+      rememberMode("navigation","status");return modeState.mode
     }
-  } catch (_) {}
-
-  try {
-    if (hasPlaybackInfo(
-      await sonyJSON("avContent", "getPlayingContentInfo")
-    )) {
-      rememberMode("media", "status")
-      return modeState.mode
+  }catch(_){}
+  try{
+    if(hasPlaybackInfo(await sonyJSON("avContent","getPlayingContentInfo"))){
+      rememberMode("media","status");return modeState.mode
     }
-  } catch (_) {}
-
+  }catch(_){}
   return modeState.mode
 }
-
-async function showError(error) {
-  const alert = new Alert()
-  alert.title = "BRAVIA"
-  alert.message = error && error.message ? error.message : String(error)
-  alert.addAction("OK")
-  await alert.presentAlert()
+async function showError(error){
+  const a=new Alert();a.title="BRAVIA";a.message=error&&error.message?error.message:String(error);a.addAction("OK");await a.presentAlert()
 }
 
-if (!await ensureConfigured()) {
-  Script.complete()
-  return
-}
+async function main(){
+  if(!await ensureConfigured()){Script.complete();return}
+  try{await discover()}catch(error){await showError(error);Script.complete();return}
 
-try {
-  await discover()
-} catch (error) {
-  await showError(error)
-  Script.complete()
-  return
-}
+  const support=Object.fromEntries(Object.keys(ALIASES).map(action=>[action,Boolean(resolve(action))]))
+  const initialMode=await inferMode()
+  const state=JSON.stringify({mode:initialMode,support}).replace(/</g,"\\u003c")
+  const layout=JSON.stringify(LAYOUT)
+  const actions=JSON.stringify(ACTIONS)
+  const adaptive=JSON.stringify(ADAPTIVE_NAV)
 
-const initialMode = await inferMode()
-const support = Object.fromEntries(
-  Object.keys(ALIASES).map(action => [action, Boolean(resolve(action))])
-)
-const state = JSON.stringify({
-  mode: initialMode,
-  support
-}).replace(/</g, "\\u003c")
-
-const html = `<!doctype html>
-<html lang="ja">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<style>
+  const html=`<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"><style>
 :root{color-scheme:dark}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
 html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#000;color:#fff;font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",sans-serif}
-body{overscroll-behavior:none}
 main{height:100dvh;padding:68px 10px max(10px,env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:10px;overflow:hidden}
-header{display:flex;align-items:center;justify-content:space-between}
-h1{margin:0;font-size:24px}
-.status{color:#8e8e93;font-size:11px}
-.top,.media,.bottom{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-button{min-width:0;height:58px;border:1px solid #303238;border-radius:17px;background:linear-gradient(145deg,#1c1e22,#111315);color:#0a84ff;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Helvetica Neue",sans-serif;font-size:14px;font-weight:750;font-variant-emoji:text;touch-action:manipulation}
-button:active{transform:scale(.97);background:#272a30}
-button:disabled{opacity:.25}
-.power{color:#ff453a}
-.mode{flex:1;min-height:0;display:flex;align-items:center;justify-content:center}
-.dpad{width:min(260px,80vw);height:min(250px,34dvh);display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);gap:8px}
-.dpad button{height:auto}
-.up{grid-column:2}
-.left{grid-column:1;grid-row:2}
-.ok{grid-column:2;grid-row:2;border-radius:50%;background:#24384f;color:#fff}
-.right{grid-column:3;grid-row:2}
-.down{grid-column:2;grid-row:3}
-.media{width:100%}
-.media button{height:68px}
-@media(max-height:700px){
-  main{padding-top:54px;gap:6px}
-  button{height:46px}
-  .dpad{height:min(180px,30dvh)}
-  .media button{height:50px}
+header{display:flex;align-items:center;justify-content:space-between}h1{margin:0;font-size:24px}.status{color:#8e8e93;font-size:11px;font-weight:700}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;flex:1;min-height:0}
+button{min-width:0;min-height:0;border:1px solid #303238;border-radius:17px;background:linear-gradient(145deg,#1c1e22,#111315);color:#0a84ff;font-size:14px;font-weight:750;touch-action:manipulation}
+button:active{transform:scale(.97);background:#272a30}button:disabled{opacity:.25}.adaptive{border-color:#3a404a}.ok{background:#24384f;color:#fff}
+@media(max-height:700px){main{padding-top:54px;gap:6px}button{font-size:12px}}
+</style></head><body><main><header><h1>BRAVIA</h1><span id="status" class="status">判定中</span></header><div id="grid" class="grid"></div></main><script>
+const STATE=${state},LAYOUT=${layout},ACTIONS=${actions},ADAPTIVE_NAV=${adaptive},ADAPTIVE=new Set(Object.keys(ADAPTIVE_NAV))
+let mode=STATE.mode,nonce=0,timer=null
+function displayAction(slot){return mode==="navigation"&&ADAPTIVE.has(slot)?ADAPTIVE_NAV[slot]:slot}
+function bridge(path,params={}){
+  const q=Object.entries(params).map(([k,v])=>encodeURIComponent(k)+"="+encodeURIComponent(String(v))).join("&")
+  location.href="yosbravia://"+path+"?"+q+(q?"&":"")+"_="+Date.now()
 }
-</style>
-</head>
-<body>
-<main>
-<header><h1>BRAVIA</h1><span class="status">自動モード</span></header>
-<div id="top" class="top"></div>
-<div id="mode" class="mode"></div>
-<div id="bottom" class="bottom"></div>
-</main>
-<script>
-const STATE=${state}
-const NAV=new Set(["input","home","quick","menu","back","up","down","left","right","confirm"])
-const MEDIA=new Set(["play","pause","stop","rewind","fastForward","prev","next"])
-let mode=STATE.mode
-
-// Same monochrome symbol set as MY REMOTE Hub.
-const definitions={
-  power:["⏻","電源","power"],input:["↪︎","入力"],home:["⌂","ホーム"],
-  quick:["⚙︎","クイック"],menu:["≡","MENU"],back:["‹","戻る"],
-  up:["↑","上"],down:["↓","下"],left:["←","左"],right:["→","右"],
-  confirm:["○","OK"],volumeDown:["−","音量−"],mute:["⊘","ミュート"],
-  volumeUp:["＋","音量＋"],channelDown:["↓","CH−"],channelUp:["↑","CH＋"],
-  rewind:["≪","巻き戻し"],play:["▷","再生"],fastForward:["≫","早送り"],
-  pause:["Ⅱ","一時停止"],stop:["□","停止"],prev:["|‹","前"],next:["›|","次"]
-}
-
-function invoke(action){
-  if(NAV.has(action))mode="navigation"
-  else if(MEDIA.has(action))mode="media"
-  renderMode()
-  const frame=document.createElement("iframe")
-  frame.style.display="none"
-  frame.src="yosbravia://action?name="+encodeURIComponent(action)+"&_="+Date.now()
-  document.body.appendChild(frame)
-  setTimeout(()=>frame.remove(),1000)
-}
-
-function button(action,extra=""){
-  const spec=definitions[action]
-  const element=document.createElement("button")
-  element.className=extra+(action==="power"?" power":"")
-  element.textContent=spec[0]+" "+spec[1]
-  element.disabled=!STATE.support[action]
-  element.onclick=()=>invoke(action)
-  return element
-}
-
-function renderList(id,actions){
-  const root=document.getElementById(id)
-  root.innerHTML=""
-  actions.forEach(action=>root.appendChild(button(action)))
-}
-
-function renderMode(){
-  const root=document.getElementById("mode")
-  root.innerHTML=""
-  if(mode==="media"){
-    const media=document.createElement("div")
-    media.className="media"
-    ;["prev","play","next","rewind","pause","fastForward","stop"].forEach(
-      action=>media.appendChild(button(action))
-    )
-    root.appendChild(media)
-    return
+function render(){
+  const root=document.getElementById("grid");root.innerHTML=""
+  for(const slot of LAYOUT){
+    const action=displayAction(slot),spec=ACTIONS[action],b=document.createElement("button")
+    b.className=(ADAPTIVE.has(slot)?"adaptive ":"")+(action==="confirm"?"ok":"")
+    b.textContent=spec[0]+" "+spec[1]
+    b.disabled=!STATE.support[action]
+    b.onclick=()=>ADAPTIVE.has(slot)?bridge("adaptive",{slot}):bridge("action",{name:action})
+    root.appendChild(b)
   }
-  const pad=document.createElement("div")
-  pad.className="dpad"
-  ;[
-    ["up","up"],["left","left"],["confirm","ok"],
-    ["right","right"],["down","down"]
-  ].forEach(item=>pad.appendChild(button(item[0],item[1])))
-  root.appendChild(pad)
+  document.getElementById("status").textContent=mode==="media"?"動画":"カーソル"
 }
+function setMode(value){if(value!=="navigation"&&value!=="media")return;if(mode!==value){mode=value;render()}else document.getElementById("status").textContent=mode==="media"?"動画":"カーソル"}
+function requestMode(){bridge("mode")}
+render();requestMode();timer=setInterval(requestMode,1400);window.addEventListener("beforeunload",()=>{if(timer)clearInterval(timer)})
+</script></body></html>`
 
-renderList("top",["input","home","quick","menu","back","power"])
-renderList("bottom",["volumeDown","mute","volumeUp","channelDown","pause","channelUp"])
-renderMode()
-</script>
-</body>
-</html>`
-
-function parseURL(url) {
-  const match = String(url || "").match(/^yosbravia:\/\/([^?]+)(?:\?(.*))?$/i)
-  if (!match) return null
-  const params = {}
-  String(match[2] || "").split("&").forEach(pair => {
-    if (!pair) return
-    const position = pair.indexOf("=")
-    const key = position >= 0 ? pair.slice(0, position) : pair
-    const value = position >= 0 ? pair.slice(position + 1) : ""
-    params[decodeURIComponent(key)] = decodeURIComponent(value)
-  })
-  return { path: match[1], params }
-}
-
-let queue = Promise.resolve()
-const web = new WebView()
-
-web.shouldAllowRequest = request => {
-  const event = parseURL(request && request.url)
-  if (!event) return true
-  if (event.path === "action") {
-    queue = queue
-      .then(() => send(event.params.name))
-      .catch(showError)
+  function parseURL(url){
+    const m=String(url||"").match(/^yosbravia:\/\/([^?]+)(?:\?(.*))?$/i)
+    if(!m)return null
+    const params={}
+    String(m[2]||"").split("&").forEach(pair=>{if(!pair)return;const i=pair.indexOf("="),k=i>=0?pair.slice(0,i):pair,v=i>=0?pair.slice(i+1):"";params[decodeURIComponent(k)]=decodeURIComponent(v)})
+    return {path:m[1],params}
   }
-  return false
+
+  let queue=Promise.resolve()
+  const web=new WebView()
+  web.shouldAllowRequest=request=>{
+    const evt=parseURL(request&&request.url)
+    if(!evt)return true
+    queue=queue.then(async()=>{
+      if(evt.path==="mode"){
+        try{await web.evaluateJavaScript("setMode("+JSON.stringify(await inferMode())+")")}catch(_){}
+        return
+      }
+      let action=null
+      if(evt.path==="adaptive"){
+        const currentMode=await inferMode()
+        action=currentMode==="navigation"?(ADAPTIVE_NAV[evt.params.slot]||evt.params.slot):evt.params.slot
+      }else if(evt.path==="action"){
+        action=evt.params.name
+      }
+      if(action)await send(action)
+      try{await web.evaluateJavaScript("setMode("+JSON.stringify(await inferMode())+")")}catch(_){}
+    }).catch(showError)
+    return false
+  }
+
+  await web.loadHTML(html)
+  await web.present(true)
+  await queue
+  Script.complete()
 }
 
-await web.loadHTML(html)
-await web.present(true)
-await queue
-Script.complete()
+await main()
