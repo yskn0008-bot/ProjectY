@@ -277,7 +277,7 @@ header{display:flex;align-items:center;justify-content:space-between}
 h1{margin:0;font-size:24px}
 .status{color:#8e8e93;font-size:11px}
 .top,.media,.bottom{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-button{min-width:0;height:58px;border:1px solid #303238;border-radius:17px;background:linear-gradient(145deg,#1c1e22,#111315);color:#0a84ff;font-size:14px;font-weight:750;touch-action:manipulation}
+button{min-width:0;height:58px;border:1px solid #303238;border-radius:17px;background:linear-gradient(145deg,#1c1e22,#111315);color:#0a84ff;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Helvetica Neue",sans-serif;font-size:14px;font-weight:750;font-variant-emoji:text;touch-action:manipulation}
 button:active{transform:scale(.97);background:#272a30}
 button:disabled{opacity:.25}
 .power{color:#ff453a}
@@ -312,14 +312,15 @@ const NAV=new Set(["input","home","quick","menu","back","up","down","left","righ
 const MEDIA=new Set(["play","pause","stop","rewind","fastForward","prev","next"])
 let mode=STATE.mode
 
+// Same monochrome symbol set as MY REMOTE Hub.
 const definitions={
-  power:["⏻","電源","power"],input:["↪","入力"],home:["⌂","ホーム"],
-  quick:["⚙","クイック"],menu:["≡","MENU"],back:["‹","戻る"],
+  power:["⏻","電源","power"],input:["↪︎","入力"],home:["⌂","ホーム"],
+  quick:["⚙︎","クイック"],menu:["≡","MENU"],back:["‹","戻る"],
   up:["↑","上"],down:["↓","下"],left:["←","左"],right:["→","右"],
   confirm:["○","OK"],volumeDown:["−","音量−"],mute:["⊘","ミュート"],
-  volumeUp:["+","音量＋"],channelDown:["−","CH−"],channelUp:["+","CH＋"],
-  rewind:["⏪","巻き戻し"],play:["▶","再生"],fastForward:["⏩","早送り"],
-  pause:["Ⅱ","一時停止"],stop:["■","停止"],prev:["◀|","前"],next:["|▶","次"]
+  volumeUp:["＋","音量＋"],channelDown:["↓","CH−"],channelUp:["↑","CH＋"],
+  rewind:["≪","巻き戻し"],play:["▷","再生"],fastForward:["≫","早送り"],
+  pause:["Ⅱ","一時停止"],stop:["□","停止"],prev:["|‹","前"],next:["›|","次"]
 }
 
 function invoke(action){
