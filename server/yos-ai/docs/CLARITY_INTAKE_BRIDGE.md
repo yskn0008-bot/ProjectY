@@ -125,3 +125,16 @@ At activation time only:
 4. Put the original Clarity token and endpoint URL into the iPhone Shortcut once.
 
 The server-side Notion token must never be copied to the Shortcut.
+# Slack Events intake
+
+ClarityのSlack経路は `POST /api/yos/slack-events` で受信する。receiverはSlackのraw request bodyを使って署名を検証し、5分を超えたtimestampを拒否する。対象は `#yos-inbox` (`C0C0RU43TPA`) の通常のユーザーメッセージだけである。
+
+ACKは `@vercel/functions` の `waitUntil` でRaw-first処理から分離する。原文は既存のNotion YOS Inbox processorへ変更せず渡し、stable capture IDとUpstash claimで再送をdedupeする。初回成功時だけ元メッセージのthreadへ `YOS processed` を投稿する。失敗時はclaimを解放するため、同じeventを安全に再搬送できる。
+
+Vercelへ次の値をOwnerが設定するまでtransport readyではない。値はGitHub、Issue、Shortcutへ記録しない。
+
+- `YOS_SLACK_SIGNING_SECRET`
+- `YOS_SLACK_BOT_TOKEN`
+- 既存の`YOS_NOTION_API_TOKEN`、`YOS_NOTION_INBOX_PAGE_ID`、Upstash変数
+
+Slack App側ではEvent SubscriptionsのRequest URLをこのendpointへ向け、`#yos-inbox`を読めるbot event scopeと投稿scopeを設定する。Production deploy、Slack URL verification、physical iPhone 17のClarity text/voice E2EはOwner確認が終わるまで未完了である。
