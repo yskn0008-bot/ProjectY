@@ -1,5 +1,6 @@
-// YOS Remote Update Installer v0.1
+// YOS Remote Update Installer v0.2
 // One-run updater for MY REMOTE UX v2. Existing Scriptable files are backed up first.
+// On success, it opens YOS Remote Hub automatically so the user can immediately test reality.
 
 const BRANCH = 'work/issue-297-remote-ux-v2';
 const BASE = 'https://raw.githubusercontent.com/yskn0008-bot/ProjectY/' + encodeURIComponent(BRANCH).replace(/%2F/g,'/') + '/ios-app/scriptable/remote-widgets/';
@@ -12,6 +13,7 @@ const FILES = [
   'YOS Light Widget.js',
   'YOS Remote Hub.js'
 ];
+const HUB = 'YOS Remote Hub';
 
 const fm = FileManager.iCloud();
 const docs = fm.documentsDirectory();
@@ -51,11 +53,7 @@ async function main() {
     fm.writeString(target, text);
   }
 
-  const a = new Alert();
-  a.title = 'MY REMOTE 更新完了';
-  a.message = '7ファイルを更新しました。\n\n既存ファイルは「' + backupDir.split('/').pop() + '」へバックアップ済みです。\n\n次に「YOS Remote Hub」を開いて実機確認してください。';
-  a.addAction('OK');
-  await a.presentAlert();
+  Safari.open('scriptable:///run?scriptName=' + encodeURIComponent(HUB));
 }
 
 try {
