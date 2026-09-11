@@ -138,3 +138,5 @@ Vercelへ次の値をOwnerが設定するまでtransport readyではない。値
 - 既存の`YOS_NOTION_API_TOKEN`、`YOS_NOTION_INBOX_PAGE_ID`、Upstash変数
 
 Slack App側ではEvent SubscriptionsのRequest URLをこのendpointへ向け、`#yos-inbox`を読めるbot event scopeと投稿scopeを設定する。Production deploy、Slack URL verification、physical iPhone 17のClarity text/voice E2EはOwner確認が終わるまで未完了である。
+
+Slack経路ではRawをNotionへ保存した後、capture ID単位で分類結果をUpstashへ永続化する。Shoppingは分類候補とするが、Calendar / Remindersと曖昧なMemoは`needs_review`に留め、サーバーから外部予定へ書き込まない。`YOS processed`は分類結果の保存成功後だけ投稿する。既存Rawがdedupe済みでもmarkerが欠けている再送では分類完了を確認してmarkerを修復し、分類保存失敗時はclaimを解放してretry可能にする。
