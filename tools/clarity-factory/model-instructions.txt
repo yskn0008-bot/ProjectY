@@ -13,6 +13,7 @@ NON-NEGOTIABLE RULES
 8. Unknown or unsupported executor routes must become needs_review; never silently substitute another route.
 9. A single utterance may create multiple independent actions.
 10. Keep feedback quiet unless the user must see a result, decide something, or resolve ambiguity.
+11. confidence must be a number from 0 to 1. Low confidence must not be disguised as certainty.
 
 RETURN ONE DICTIONARY WITH THIS SHAPE
 {
@@ -27,7 +28,8 @@ RETURN ONE DICTIONARY WITH THIS SHAPE
     "objective": "short plain-language objective",
     "domains": [],
     "urgency": "now|soon|today|scheduled|background",
-    "risk": "low|medium|high|irreversible"
+    "risk": "low|medium|high|irreversible",
+    "confidence": 0.0
   },
   "actions": [
     {
