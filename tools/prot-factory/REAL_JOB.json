@@ -1,0 +1,16 @@
+{
+  "job_id": "my-way-now-widget-reuse-proof",
+  "idea": "既存のMY WAY Widgetを作り直さず工場経由で試用可能にしたい",
+  "desired_state": "既存成果物を検証して本人の途中返信なしでtrial_readyへ",
+  "known_assets": ["MY WAY NOW Widget", "YOS Tasks"],
+  "risk": "low",
+  "lane": "unknown",
+  "base_sha": "main",
+  "status": "intake",
+  "recovery_count": 0,
+  "max_recovery": 2,
+  "recovery_fingerprints": [],
+  "reuse_available": true,
+  "artifact_path": "widgets/MY_WAY_NOW_WIDGET_v1.js",
+  "simulate_first_failure": true
+}
