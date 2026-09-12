@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-12T20:10:30+09:00",
+  "updated_at": "2026-09-12T20:11:33+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -12,6 +12,16 @@
     ]
   },
   "inbox": [
+    {
+      "id": "github-pr-280",
+      "title": "PR #280 feat(yos-ai): add Point / Event Foundation v1 contract",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/280",
+      "updated_at": "2026-09-05T04:18:56Z"
+    },
     {
       "id": "github-pr-293",
       "title": "PR #293 BRAVIA: add free Scriptable remote fallback",
@@ -51,16 +61,6 @@
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/311",
       "updated_at": "2026-09-12T10:16:11Z"
-    },
-    {
-      "id": "github-pr-313",
-      "title": "PR #313 docs: align ProjectY development rules with master v3.0",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/313",
-      "updated_at": "2026-09-12T10:48:57Z"
     },
     {
       "id": "github-issue-10",
@@ -165,6 +165,20 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-446d3771ec53",
+      "title": "Merge pull request #313 from yskn0008-bot/docs/projecty-development-master-v3",
+      "completed_at": "2026-09-12T11:11:19Z",
+      "result": "GitHub mainへ反映（446d377）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/446d3771ec53df5af7e7271a88936a0f0c4977b6"
+    },
+    {
+      "id": "github-commit-6b80e8ab8307",
+      "title": "docs: align development rules with ProjectY master v3.0",
+      "completed_at": "2026-09-12T06:44:59Z",
+      "result": "GitHub mainへ反映（6b80e8a）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/6b80e8ab830733a5874007a57e107e17adb786f1"
+    },
+    {
       "id": "github-commit-7780cb5ec61f",
       "title": "Merge pull request #312 from yskn0008-bot/codex/issue-256-slack-yos-classification",
       "completed_at": "2026-09-12T01:56:09Z",
@@ -184,20 +198,6 @@
       "completed_at": "2026-09-11T22:15:00Z",
       "result": "GitHub mainへ反映（64a30ae）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/64a30aedd5730680a6b6f0eae1c3a2b44cafaf46"
-    },
-    {
-      "id": "github-commit-e4153a07e69d",
-      "title": "test(clarity): cover processed marker repair",
-      "completed_at": "2026-09-11T22:14:41Z",
-      "result": "GitHub mainへ反映（e4153a0）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/e4153a07e69da6c62d25b33a34416227d722d618"
-    },
-    {
-      "id": "github-commit-ee0bfbf6c96b",
-      "title": "docs(clarity): document classification boundary",
-      "completed_at": "2026-09-11T22:14:09Z",
-      "result": "GitHub mainへ反映（ee0bfbf）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/ee0bfbf6c96b2496765d076ee3f2d8b050b76dcc"
     },
     {
       "id": "complete-002",
@@ -224,7 +224,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #313をレビューして公開判断する",
+      "next_action": "PR #311をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-12T20:10:30+09:00",
+      "last_update": "2026-09-12T20:11:33+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -309,13 +309,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 35件・Open PR 7件を自動同期中",
+      "next_action": "Open Issue 35件・Open PR 6件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-12T20:10:30+09:00",
+      "last_update": "2026-09-12T20:11:33+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -329,7 +329,7 @@
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #313をレビューして公開判断する",
+      "next_action": "PR #311をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-12T20:10:30+09:00",
+      "last_update": "2026-09-12T20:11:33+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "ac83c353a202db87208de227209d64697b4406dabe657d3ac00363d2917d5ebe"
+  "github_snapshot_hash": "55eb53f3ab0be5113e096f9261ac48e889e817ef47d76a6052a3222a3aeb062f"
 }
