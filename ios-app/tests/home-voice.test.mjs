@@ -41,20 +41,21 @@ test('temperature is bounded to supported 18-30C parsing', () => {
   assert.equal(parseHomeVoice('エアコン31度にして').ok, false);
 });
 
-test('runtime adapter reuses secure existing boundaries and no hardcoded home secrets', () => {
+test('runtime adapter reuses secure existing boundaries and supports direct Japanese dictation', () => {
   const source = fs.readFileSync(new URL('../scriptable/remote-voice/YOS Home Voice.js', import.meta.url), 'utf8');
   assert.match(source, /importModule\('YOS Tapo H110 Core'\)/);
   assert.match(source, /yos\.bravia\.scriptable\.host/);
   assert.match(source, /yos\.bravia\.scriptable\.psk/);
   assert.match(source, /getRemoteControllerInfo/);
   assert.match(source, /getPowerStatus/);
+  assert.match(source, /Dictation\.start\('ja-JP'\)/);
   assert.doesNotMatch(source, /192\.168\./);
   assert.doesNotMatch(source, /xox[baprs]-|sk-[A-Za-z0-9_-]{20,}|BEGIN [A-Z ]*PRIVATE KEY/);
 });
 
-test('installer pins the verified voice build and leaves existing MY REMOTE files untouched', () => {
+test('installer pins the direct-dictation voice build and leaves existing MY REMOTE files untouched', () => {
   const source = fs.readFileSync(new URL('../scriptable/remote-voice/YOS Home Voice Installer.js', import.meta.url), 'utf8');
-  assert.match(source, /aa9029f923c17afd937f81eac5dcb3fb2a45f5fb/);
+  assert.match(source, /55e76fb268a1471583be1ba9116fff59b482e401/);
   assert.match(source, /YOS Home Voice Parser\.js/);
   assert.match(source, /YOS Home Voice\.js/);
   assert.match(source, /REQUIRED_EXISTING = \['YOS Tapo H110 Core\.js'\]/);
