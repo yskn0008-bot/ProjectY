@@ -14,16 +14,18 @@ const context=await browser.newContext({viewport:{width:390,height:844},deviceSc
 await context.addInitScript(({today,yesterday,now})=>{
   const NativeDate=Date,fixedTime=NativeDate.parse(now);
   globalThis.Date=class extends NativeDate{constructor(...args){super(...(args.length?args:[fixedTime]))}static now(){return fixedTime}};
-  localStorage.setItem('yos-life-v1',JSON.stringify({
-    activeLifeDate:yesterday,
-    days:{
-      [yesterday]:{
-        tasks:[{text:'夜の未完了',done:false,category:'personal'},{text:'完了済み',done:true,category:'personal'}],
-        lifeFlow:{startedAt:`${yesterday}T08:00:00.000Z`}
-      },
-      [today]:{tasks:[{text:'朝いち既存',done:false,category:'personal'}],schedule:[]}
-    }
-  }));
+  if(!localStorage.getItem('yos-life-v1')){
+    localStorage.setItem('yos-life-v1',JSON.stringify({
+      activeLifeDate:yesterday,
+      days:{
+        [yesterday]:{
+          tasks:[{text:'夜の未完了',done:false,category:'personal'},{text:'完了済み',done:true,category:'personal'}],
+          lifeFlow:{startedAt:`${yesterday}T08:00:00.000Z`}
+        },
+        [today]:{tasks:[{text:'朝いち既存',done:false,category:'personal'}],schedule:[]}
+      }
+    }));
+  }
 },{today,yesterday,now:fixedNow});
 
 const page=await context.newPage();
