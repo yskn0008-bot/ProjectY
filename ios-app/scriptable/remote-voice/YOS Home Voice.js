@@ -1,5 +1,6 @@
 // YOS Home Voice — voice command adapter for existing MY REMOTE assets.
-// Shortcut input: Dictate Text -> Run Script in Scriptable -> pass dictated text as Shortcut Parameter.
+// Preferred Shortcut input: Dictate Text -> Run Script in Scriptable -> pass dictated text as Shortcut Parameter.
+// Direct-run fallback: when no Shortcut Parameter exists, Scriptable Dictation is opened for Japanese voice input.
 
 const parser = importModule('YOS Home Voice Parser');
 const tapo = importModule('YOS Tapo H110 Core');
@@ -32,6 +33,12 @@ function shortcutInput() {
   if (value && typeof value === 'object') return String(value.text || value.command || '');
   if (Array.isArray(args.plainTexts) && args.plainTexts.length) return String(args.plainTexts[0] || '');
   return '';
+}
+
+async function commandInput() {
+  const supplied = shortcutInput().trim();
+  if (supplied) return supplied;
+  return String(await Dictation.start('ja-JP') || '').trim();
 }
 
 function secure(key) {
@@ -214,7 +221,12 @@ async function performLight(command) {
 }
 
 async function run() {
-  const raw = shortcutInput();
+  const raw = await commandInput();
+  if (!raw) {
+    Script.setShortcutOutput('音声入力がありませんでした');
+    Script.complete();
+    return;
+  }
   const command = parser.parseHomeVoice(raw);
   if (!command.ok) {
     Script.setShortcutOutput('わからなかったので、何も操作していません');
