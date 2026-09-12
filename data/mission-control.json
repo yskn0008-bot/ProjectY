@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-12T21:19:07+09:00",
+  "updated_at": "2026-09-12T21:27:26+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -165,39 +165,39 @@
   ],
   "recently_completed": [
     {
-      "id": "github-commit-446d3771ec53",
-      "title": "Merge pull request #313 from yskn0008-bot/docs/projecty-development-master-v3",
-      "completed_at": "2026-09-12T11:11:19Z",
-      "result": "GitHub mainへ反映（446d377）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/446d3771ec53df5af7e7271a88936a0f0c4977b6"
+      "id": "github-commit-6618b952f829",
+      "title": "Merge PR #317: fail closed on incomplete governance evidence",
+      "completed_at": "2026-09-12T12:27:12Z",
+      "result": "GitHub mainへ反映（6618b95）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/6618b952f829473954d7ad86b91c2b91a482232a"
     },
     {
-      "id": "github-commit-6b80e8ab8307",
-      "title": "docs: align development rules with ProjectY master v3.0",
-      "completed_at": "2026-09-12T06:44:59Z",
-      "result": "GitHub mainへ反映（6b80e8a）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/6b80e8ab830733a5874007a57e107e17adb786f1"
+      "id": "github-commit-8aa2f17f40b3",
+      "title": "fix(governance): keep evidence fields line bounded",
+      "completed_at": "2026-09-12T12:25:59Z",
+      "result": "GitHub mainへ反映（8aa2f17）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/8aa2f17f40b3a1a53ef9ba0314d0d048c7344333"
     },
     {
-      "id": "github-commit-7780cb5ec61f",
-      "title": "Merge pull request #312 from yskn0008-bot/codex/issue-256-slack-yos-classification",
-      "completed_at": "2026-09-12T01:56:09Z",
-      "result": "GitHub mainへ反映（7780cb5）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/7780cb5ec61fc09d31f4310bf6a45a5b7c47913e"
+      "id": "github-commit-5bb02ee2ceff",
+      "title": "fix(governance): correct evidence matcher escaping",
+      "completed_at": "2026-09-12T12:25:05Z",
+      "result": "GitHub mainへ反映（5bb02ee）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/5bb02ee2ceffe3a7ded1aa853f539a9d6ccacfa9"
     },
     {
-      "id": "github-commit-fb21e07e504e",
-      "title": "test(clarity): cover YOS capture classification",
-      "completed_at": "2026-09-11T22:15:12Z",
-      "result": "GitHub mainへ反映（fb21e07）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/fb21e07e504e4544fea34875f4183c2d2091872d"
+      "id": "github-commit-883b03d53330",
+      "title": "fix(governance): fail closed on incomplete PR evidence",
+      "completed_at": "2026-09-12T12:24:06Z",
+      "result": "GitHub mainへ反映（883b03d）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/883b03d533300a2862b4e515fa96fed5edafe7c2"
     },
     {
-      "id": "github-commit-64a30aedd573",
-      "title": "test(clarity): match recovered marker repair test",
-      "completed_at": "2026-09-11T22:15:00Z",
-      "result": "GitHub mainへ反映（64a30ae）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/64a30aedd5730680a6b6f0eae1c3a2b44cafaf46"
+      "id": "github-commit-79652615b23a",
+      "title": "test(governance): cover empty and complete evidence",
+      "completed_at": "2026-09-12T12:23:55Z",
+      "result": "GitHub mainへ反映（7965261）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/79652615b23a3c3e6d0239697724c5325fb693d9"
     },
     {
       "id": "complete-002",
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-12T21:19:07+09:00",
+      "last_update": "2026-09-12T21:27:26+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -315,7 +315,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-12T21:19:07+09:00",
+      "last_update": "2026-09-12T21:27:26+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-12T21:19:07+09:00",
+      "last_update": "2026-09-12T21:27:26+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "8e5cad6e5338427d9270f7631d9e557a8718acf528176b64bb83ca1d551f72dd"
+  "github_snapshot_hash": "65dccb7ef49cb9cbc1e1781ebbf0c8d5704e9e22d23c9c7bf98e637d22ecef22"
 }
