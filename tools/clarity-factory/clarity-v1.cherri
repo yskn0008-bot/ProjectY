@@ -5,7 +5,7 @@
 #include 'actions/documents'
 #include 'actions/intelligence'
 
-// Voice -> existing Raw First inbox -> ChatGPT Dictionary -> fail-closed top-level gate.
+// Voice -> existing Raw First inbox -> ChatGPT Dictionary -> fail-closed policy gate.
 // Existing Clarity Inbox.txt stays the only raw fail-safe; no second raw store is created.
 const originalInput = listen("After Pause", "jp-JP")
 const requestNumber = randomNumber(100000, 999999)
@@ -20,7 +20,7 @@ const echoedInput = "{parsedResult['original_input']}"
 const interpretationRaw = getValue(parsedResult, "interpretation")
 const interpretation = getDictionary(interpretationRaw)
 const risk = "{interpretation['risk']}"
-const actionsRaw = getValue(parsedResult, "actions")
+@actionsRaw = getValue(parsedResult, "actions")
 
 if echoedInput != "{originalInput}" {
     mustOutput("ここだけ確認して", "入力内容の確認が必要です")
@@ -30,8 +30,29 @@ if risk == "high" || risk == "irreversible" {
     mustOutput("ここだけ決めて", "大きな操作なので確認が必要です")
 }
 
-if !actionsRaw {
+if !@actionsRaw {
     mustOutput("ここだけ確認して", "やることを安全に判断できませんでした")
+}
+
+for actionItem in @actionsRaw {
+    const actionDict = getDictionary(@actionItem)
+    const executor = "{actionDict['executor']}"
+    const status = "{actionDict['status']}"
+    const dateTime = "{actionDict['date_time']}"
+
+    if status != "planned" {
+        mustOutput("ここだけ確認して", "実行済み扱いの内容は受け付けません")
+    }
+
+    if executor != "idea" && executor != "memo" && executor != "task" && executor != "calendar" && executor != "reminder" && executor != "shopping" && executor != "answer" {
+        mustOutput("ここだけ確認して", "対応外の操作は実行しません")
+    }
+
+    if executor == "calendar" || executor == "reminder" {
+        if !dateTime {
+            mustOutput("ここだけ確認して", "日時だけ確認してください")
+        }
+    }
 }
 
 const ledgerRecord = text("{CurrentDate}\t{requestNumber}\tplanned\t{modelResult}\n")
