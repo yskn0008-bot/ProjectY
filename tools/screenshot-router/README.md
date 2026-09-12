@@ -30,7 +30,7 @@ Apple documents that iOS 26 can run a Shortcut from double/triple Back Tap, so v
 
 There is no screenshot-taken Personal Automation trigger used by this prototype. Instead, the Shortcut itself performs the screenshot capture. That makes the capture event and routing one operation and avoids polling the Photos library.
 
-The prototype intentionally does not modify the current Clarity runtime while Issue #314 / its implementation is still moving. Its output is designed as a future Clarity input adapter: `index.tsv` preserves category + summary metadata, while the raw image remains recoverable.
+The prototype intentionally does not modify the current Clarity runtime while its new implementation is still moving. Its output is designed as a future Clarity input adapter: `index.tsv` preserves category + summary metadata, while the raw image remains recoverable.
 
 ## Safety / ownership
 
@@ -39,7 +39,7 @@ The prototype intentionally does not modify the current Clarity runtime while Is
 - Confidence below 0.70 must fail closed to `other / 未分類`.
 - v1 does **not** create Calendar events, Reminders, purchases, emails, messages, Idea records, or work records.
 - No API key, bearer token, account secret, private host, or user content is embedded in the Shortcut source.
-- HubSign receives only the secret-free compiled Shortcut definition; runtime screenshots/OCR are not part of the build artifact.
+- Runtime screenshots/OCR are not present in build artifacts or signing requests.
 
 ## Storage trade-off in v1
 
@@ -50,9 +50,22 @@ Each successful run keeps two file copies:
 
 This is deliberate for the prototype so a model/classification or later routing mistake cannot destroy the original. A later cleanup layer can remove aged Inbox copies only after iPhone E2E proves the categorized copy is durable. Do not add automatic deletion before that acceptance.
 
+## Build and signing status
+
+Repository compile acceptance and iPhone-installable signing are separate.
+
+- Source contracts: verified in CI.
+- Secret-free guard: verified in CI.
+- Cherri v2.3.0 compile: verified in CI.
+- Signed `.shortcut`: currently blocked by the signing environment, not by source compilation.
+
+The tested GitHub-hosted macOS runner cannot use Apple's native `shortcuts sign` because that runner is not signed into the owner's iCloud account. Cherri's public HubSign fallback was also unavailable during the verified attempt. For that reason, PR/push CI treats successful compilation as code acceptance and does not misreport an external signing outage as a source failure. A manual workflow dispatch can retry the signing path when a valid signer is available.
+
+The unsigned workflow artifact is proof-only and is **not** presented to the owner as an installable Shortcut.
+
 ## Intended iPhone setup
 
-After the signed Shortcut artifact is available:
+After a signed Shortcut artifact is genuinely available:
 
 1. Import `YOS Screenshot Router.shortcut` once.
 2. Allow Files / screenshot / ChatGPT permissions when iOS first asks.
@@ -77,7 +90,7 @@ A physical iPhone check must confirm:
 - no Calendar/Reminder/purchase/external write occurs;
 - Back Tap reliably launches the Shortcut in normal apps.
 
-Until those checks pass, call this `試せる`, not `利用可能`.
+Until those checks pass, do not call this `利用可能`.
 
 ## Future connection
 
