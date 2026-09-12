@@ -1,0 +1,86 @@
+name: Clarity Cherri proof
+
+on:
+  pull_request:
+    paths:
+      - 'tools/clarity-factory/**'
+      - '.github/workflows/clarity-cherri-proof.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  compile-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate model contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m json.tool tools/clarity-factory/clarity-spec.json >/dev/null
+          python3 -m unittest discover -s tools/clarity-factory/tests -v
+
+      - name: Install pinned Cherri v2.3.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          url='https://github.com/electrikmilk/cherri/releases/download/v2.3.0/cherri_linux-x86_64.zip'
+          expected='7ab2c384b7b26e7c72a30a8dfa56f89dae12c4068b7951bc1e3193f3698edbe9'
+          curl -fsSL "$url" -o /tmp/cherri.zip
+          printf '%s  %s\n' "$expected" /tmp/cherri.zip | sha256sum -c -
+          mkdir -p /tmp/cherri
+          unzip -q /tmp/cherri.zip -d /tmp/cherri
+          binary="$(find /tmp/cherri -type f -name cherri -print -quit)"
+          test -n "$binary"
+          sudo install -m 0755 "$binary" /usr/local/bin/cherri
+          cherri --version
+
+      - name: Compile ChatGPT action proof
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd tools/clarity-factory
+          rm -f ./*_unsigned.shortcut ./*.plist
+          cherri clarity-compiler-proof.cherri --skip-sign --debug
+          proof="$(find . -maxdepth 1 -type f -name 'Clarity Compiler Proof_unsigned.shortcut' -print -quit)"
+          test -n "$proof"
+          python3 validate_compiler_proof.py "$proof"
+          mkdir -p artifacts
+          cp "$proof" artifacts/Clarity-Compiler-Proof-unsigned.shortcut
+
+      - name: Compile Clarity Raw First runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd tools/clarity-factory
+          rm -f './Clarity_unsigned.shortcut' './Clarity.plist'
+          cherri clarity-v1.cherri --skip-sign --debug
+          runtime='./Clarity_unsigned.shortcut'
+          test -f "$runtime"
+          python3 validate_clarity_runtime.py "$runtime"
+          mkdir -p artifacts
+          cp "$runtime" artifacts/Clarity-v1-unsigned.shortcut
+
+      - name: Secret scan
+        shell: bash
+        run: |
+          set -euo pipefail
+          if grep -RIE --exclude='*.shortcut' --exclude='*.plist' \
+            '(gh[pousr]_[A-Za-z0-9_]{20,}|sk-[A-Za-z0-9_-]{20,}|xox[baprs]-[A-Za-z0-9-]{10,}|BEGIN [A-Z ]*PRIVATE KEY|192\.168\.[0-9]+\.[0-9]+)' \
+            tools/clarity-factory; then
+            echo 'Potential secret/private network value found.' >&2
+            exit 1
+          fi
+
+      - name: Upload unsigned artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: clarity-cherri-artifacts
+          path: |
+            tools/clarity-factory/artifacts/Clarity-Compiler-Proof-unsigned.shortcut
+            tools/clarity-factory/artifacts/Clarity-v1-unsigned.shortcut
+          if-no-files-found: error
