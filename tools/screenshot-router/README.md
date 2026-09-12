@@ -61,7 +61,7 @@ Repository compile acceptance and iPhone-installable signing are separate.
 
 The tested GitHub-hosted macOS runner cannot use Apple's native `shortcuts sign` because that runner is not signed into the owner's iCloud account. Cherri's public HubSign fallback was also unavailable during the verified attempt. For that reason, PR/push CI treats successful compilation as code acceptance and does not misreport an external signing outage as a source failure. A manual workflow dispatch can retry the signing path when a valid signer is available.
 
-The unsigned workflow artifact is proof-only and is **not** presented to the owner as an installable Shortcut.
+The unsigned workflow artifact is proof-only and is **not** presented to the owner as an installable Shortcut. Repository governance evidence must likewise report physical iPhone readiness separately from code readiness.
 
 ## Intended iPhone setup
 
