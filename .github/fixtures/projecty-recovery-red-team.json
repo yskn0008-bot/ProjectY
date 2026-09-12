@@ -16,7 +16,7 @@
     {"id":"branch-head-move","classification":"自動回復可能","lane":"Lane 4/5","safeNext":"新headを再評価しつつ同一原因の復旧回数を引き継ぐ"},
     {"id":"write-midway-failure","classification":"自動回復可能","lane":"Lane 3","safeNext":"旧版維持またはrollback。新旧混在を残さない"},
     {"id":"partial-distribution","classification":"自動回復可能","lane":"Lane 3","safeNext":"全payload準備前は切替せず、不完全集合を配布しない"},
-    {"id":"github-api-temporary","classification":"外部待ち","lane":"Lane 5","safeNext":"根拠あるbounded retry後はWAIT_EXTERNAL。本人判断へ直送しない"},
+    {"id":"github-api-temporary","classification":"自動回復可能","lane":"Lane 5","safeNext":"根拠あるbounded retryを1回。継続障害ならWAIT_EXTERNALへ遷移し本人判断へ直送しない"},
     {"id":"result-unknown","classification":"外部待ち","lane":"Lane 3/5","safeNext":"安定IDで照合するまで不可逆作用を再試行しない"},
     {"id":"duplicate-event","classification":"安全終了","lane":"Lane 4/5","safeNext":"同一deliveryはno-op。副作用を重複実行しない"},
     {"id":"retry-limit","classification":"本人判断必要","lane":"Lane 5","safeNext":"安全経路を使い切った場合のみNEEDS_OWNER。無限再試行しない"},
