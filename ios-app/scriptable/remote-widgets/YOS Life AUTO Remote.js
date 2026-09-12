@@ -221,7 +221,7 @@ async function sonyPowerOffSafe() {
   };
   req.body = '<?xml version="1.0"?>' +
     '<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/">' +
-    '<s:Body><u:X_SendIRCC xmlns:u="urn:schemas-com:service:IRCC:1#X_SendIRCC">' +
+    '<s:Body><u:X_SendIRCC xmlns:u="urn:schemas-sony-com:service:IRCC:1">' +
     '<IRCCCode>' + xmlEscape(powerOff.value) + '</IRCCCode>' +
     '</u:X_SendIRCC></s:Body></s:Envelope>';
   await req.loadString();
