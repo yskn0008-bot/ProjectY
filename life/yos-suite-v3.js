@@ -38,4 +38,10 @@
     script.src='./home-v1.js?v=7';
     document.body.appendChild(script);
   }
+  if(!document.getElementById('lifeDailyFlowOrchestratorV1Script')){
+    const script=document.createElement('script');
+    script.id='lifeDailyFlowOrchestratorV1Script';
+    script.src='./daily-flow-orchestrator-v1.js?v=1';
+    document.body.appendChild(script);
+  }
 })();
