@@ -1,6 +1,5 @@
 #define name Clarity Compiler Proof
 #define color blue
-#define glyph wand
 
 #include 'actions/intelligence'
 
