@@ -12,29 +12,29 @@ const REQUIRED_SECTIONS = [
 const PLACEHOLDER_PATTERNS = [
   /^\s*$/u,
   /describe the user-visible result/i,
-  /codex task reference or exception reason:\s*$/im,
-  /assigned directory:\s*$/im,
-  /files changed:\s*$/im,
-  /commands and tests executed:\s*$/im,
-  /results:\s*$/im,
   /list every manual check/i
 ];
 
+function escapeRegExp(value) {
+  return String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 function sectionMap(body) {
+  const text = String(body || '');
   const sections = new Map();
-  const matches = [...String(body || '').matchAll(/^##\s+(.+?)\s*$/gmu)];
+  const matches = [...text.matchAll(/^##\s+(.+?)\s*$/gmu)];
   for (let index = 0; index < matches.length; index += 1) {
     const title = matches[index][1].trim();
     const start = matches[index].index + matches[index][0].length;
-    const end = index + 1 < matches.length ? matches[index + 1].index : body.length;
-    sections.set(title, body.slice(start, end).trim());
+    const end = index + 1 < matches.length ? matches[index + 1].index : text.length;
+    sections.set(title, text.slice(start, end).trim());
   }
   return sections;
 }
 
 function fieldValue(section, label) {
-  const pattern = new RegExp(`^${label.replace(/[.*+?^${}()|[\\]\\]/g, '\\$&')}\\s*:\\s*(.+)$`, 'imu');
-  const match = section.match(pattern);
+  const pattern = new RegExp(`^${escapeRegExp(label)}\\s*:\\s*(.*)$`, 'imu');
+  const match = String(section || '').match(pattern);
   return match ? match[1].trim() : '';
 }
 
@@ -45,27 +45,28 @@ function substantive(value) {
   return !PLACEHOLDER_PATTERNS.some((pattern) => pattern.test(text));
 }
 
+function checked(section, label) {
+  const pattern = new RegExp(`^- \\[[xX]\\] ${escapeRegExp(label)}\\s*$`, 'mu');
+  return pattern.test(String(section || ''));
+}
+
 function checkedCount(section, labels) {
-  return labels.reduce((count, label) => {
-    const pattern = new RegExp(`^- \\[xX\\] ${label.replace(/[.*+?^${}()|[\\]\\]/g, '\\$&')}\\s*$`, 'mu');
-    return count + (pattern.test(section) ? 1 : 0);
-  }, 0);
+  return labels.reduce((count, label) => count + (checked(section, label) ? 1 : 0), 0);
 }
 
 function requireChecked(section, label, errors) {
-  const pattern = new RegExp(`^- \\[xX\\] ${label.replace(/[.*+?^${}()|[\\]\\]/g, '\\$&')}\\s*$`, 'mu');
-  if (!pattern.test(section)) errors.push(`Verification checkbox must be completed: ${label}`);
+  if (!checked(section, label)) errors.push(`Verification checkbox must be completed: ${label}`);
 }
 
 function readinessValue(section, label) {
-  const pattern = new RegExp(`^- ${label}:\\s*(.+)$`, 'imu');
-  const match = section.match(pattern);
+  const pattern = new RegExp(`^- ${escapeRegExp(label)}:\\s*(.+)$`, 'imu');
+  const match = String(section || '').match(pattern);
   return match ? match[1].trim().toLowerCase() : '';
 }
 
 function validatePrEvidence(body) {
   const errors = [];
-  const sections = sectionMap(String(body || ''));
+  const sections = sectionMap(body);
 
   for (const title of REQUIRED_SECTIONS) {
     if (!sections.has(title)) {
@@ -86,10 +87,10 @@ function validatePrEvidence(body) {
     'Codex unavailable or blocked',
     'Approved exception: no code change / emergency rollback'
   ];
-  const codexChecked = checkedCount(codex, codexOptions);
-  if (codexChecked !== 1) errors.push('Exactly one Codex execution option must be checked.');
-  const codexReason = fieldValue(codex, 'Codex task reference or exception reason');
-  if (!substantive(codexReason)) errors.push('Codex task reference or exception reason must be filled.');
+  if (checkedCount(codex, codexOptions) !== 1) errors.push('Exactly one Codex execution option must be checked.');
+  if (!substantive(fieldValue(codex, 'Codex task reference or exception reason'))) {
+    errors.push('Codex task reference or exception reason must be filled.');
+  }
 
   const scope = sections.get('Scope');
   if (!substantive(fieldValue(scope, 'Assigned directory'))) errors.push('Assigned directory must be filled.');
@@ -122,8 +123,7 @@ function validatePrEvidence(body) {
 }
 
 if (require.main === module) {
-  const body = process.env.PR_BODY || '';
-  const errors = validatePrEvidence(body);
+  const errors = validatePrEvidence(process.env.PR_BODY || '');
   if (errors.length) {
     for (const error of errors) console.error(`::error::${error}`);
     process.exit(1);
