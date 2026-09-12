@@ -17,7 +17,7 @@ permissions:
   contents: read
 
 jobs:
-  build-screenshot-router:
+  compile-proof:
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
@@ -34,22 +34,86 @@ jobs:
           python3 tools/screenshot-router/validate_secret_free.py \
             'tools/screenshot-router/YOS Screenshot Router.cherri'
 
-      - name: Build Cherri v2.3.0
+      - name: Install pinned Cherri v2.3.0
+        shell: bash
         run: |
-          git clone --depth 1 --branch v2.3.0 https://github.com/electrikmilk/cherri.git /tmp/cherri
-          (cd /tmp/cherri && go build -o /tmp/cherri-bin .)
-          /tmp/cherri-bin --help >/dev/null
+          set -euo pipefail
+          url='https://github.com/electrikmilk/cherri/releases/download/v2.3.0/cherri_linux-x86_64.zip'
+          expected='7ab2c384b7b26e7c72a30a8dfa56f89dae12c4068b7951bc1e3193f3698edbe9'
+          curl -fsSL "$url" -o /tmp/cherri.zip
+          printf '%s  %s\n' "$expected" /tmp/cherri.zip | sha256sum -c -
+          mkdir -p /tmp/cherri
+          unzip -q /tmp/cherri.zip -d /tmp/cherri
+          binary="$(find /tmp/cherri -type f -name cherri -print -quit)"
+          test -n "$binary"
+          sudo install -m 0755 "$binary" /usr/local/bin/cherri
+          cherri --version
 
-      - name: Compile and sign Screenshot Router
+      - name: Compile unsigned proof
+        shell: bash
         run: |
+          set -euo pipefail
+          cd tools/screenshot-router
+          rm -f './YOS Screenshot Router_unsigned.shortcut' './YOS Screenshot Router.plist'
+          cherri 'YOS Screenshot Router.cherri' --skip-sign --debug --derive-uuids
+          test -s './YOS Screenshot Router_unsigned.shortcut'
+          test -s './YOS Screenshot Router.plist'
+          echo 'OK: Screenshot Router compiles on pinned Cherri v2.3.0'
+
+  sign-shortcut:
+    needs: compile-proof
+    runs-on: macos-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install pinned Cherri v2.3.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          arch="$(uname -m)"
+          case "$arch" in
+            arm64)
+              asset='cherri_darwin-arm64.zip'
+              expected='15e4651d4c957a03cdfeb6c5fd74ea8ac66f1d6e20897883fef3547fdd36d264'
+              ;;
+            x86_64)
+              asset='cherri_darwin-x86_64.zip'
+              expected='a9555b8e93e5e374a0dacd0df66d3b952493539eddc0bcccaf8030ecf1d96b82'
+              ;;
+            *)
+              echo "unsupported macOS runner arch: $arch" >&2
+              exit 1
+              ;;
+          esac
+          url="https://github.com/electrikmilk/cherri/releases/download/v2.3.0/$asset"
+          curl -fsSL "$url" -o /tmp/cherri.zip
+          actual="$(shasum -a 256 /tmp/cherri.zip | awk '{print $1}')"
+          test "$actual" = "$expected"
+          mkdir -p /tmp/cherri
+          unzip -q /tmp/cherri.zip -d /tmp/cherri
+          binary="$(find /tmp/cherri -type f -name cherri -print -quit)"
+          test -n "$binary"
+          sudo install -m 0755 "$binary" /usr/local/bin/cherri
+          cherri --version
+          shortcuts help >/dev/null
+
+      - name: Compile and Apple-sign Screenshot Router
+        shell: bash
+        run: |
+          set -euo pipefail
           mkdir -p build
-          /tmp/cherri-bin 'tools/screenshot-router/YOS Screenshot Router.cherri' \
-            --hubsign \
+          cherri 'tools/screenshot-router/YOS Screenshot Router.cherri' \
             --derive-uuids \
+            --share=anyone \
             --output='build/YOS Screenshot Router.shortcut'
 
       - name: Verify signed artifact
+        shell: bash
         run: |
+          set -euo pipefail
           test -s 'build/YOS Screenshot Router.shortcut'
           python3 - <<'PY'
           from pathlib import Path
@@ -59,7 +123,7 @@ jobs:
               raise SystemExit(f'expected signed AEA1 shortcut, got {data[:8]!r}')
           if len(data) < 500:
               raise SystemExit(f'artifact unexpectedly small: {len(data)} bytes')
-          print(f'OK: signed Screenshot Router artifact, {len(data)} bytes')
+          print(f'OK: Apple-signed Screenshot Router artifact, {len(data)} bytes')
           PY
 
       - name: Upload Shortcut
