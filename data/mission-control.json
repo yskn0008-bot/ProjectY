@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-13T05:49:56+09:00",
+  "updated_at": "2026-09-13T06:03:14+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -23,6 +23,16 @@
       "updated_at": "2026-09-12T16:58:34Z"
     },
     {
+      "id": "github-pr-332",
+      "title": "PR #332 chore(remote): organize Scriptable remote scripts safely",
+      "type": "GitHub PR",
+      "status": "review",
+      "priority": 1,
+      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/332",
+      "updated_at": "2026-09-12T20:55:05Z"
+    },
+    {
       "id": "github-pr-325",
       "title": "PR #325 Draft: prove template-free Clarity ChatGPT action with Cherri (#314)",
       "type": "GitHub PR",
@@ -31,16 +41,6 @@
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/325",
       "updated_at": "2026-09-12T16:56:24Z"
-    },
-    {
-      "id": "github-pr-327",
-      "title": "PR #327 proto(review): friction auto-discovery candidate engine",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/327",
-      "updated_at": "2026-09-12T16:50:42Z"
     },
     {
       "id": "github-pr-330",
@@ -83,26 +83,6 @@
       "updated_at": "2026-08-25T23:41:09Z"
     },
     {
-      "id": "github-issue-142",
-      "title": "Issue #142 YOSをヒーローズジャーニーのメンターアプリへ統合する",
-      "type": "GitHub Issue",
-      "status": "open",
-      "priority": 3,
-      "next_action": "完成条件を確認し、次の安全な実装を1件進める",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/142",
-      "updated_at": "2026-08-02T05:43:26Z"
-    },
-    {
-      "id": "github-issue-214",
-      "title": "Issue #214 [YOS→Codex] Taxi開発キュー：PR #213のActions実行・修正",
-      "type": "GitHub Issue",
-      "status": "open",
-      "priority": 3,
-      "next_action": "完成条件を確認し、次の安全な実装を1件進める",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/214",
-      "updated_at": "2026-08-04T01:39:56Z"
-    },
-    {
       "id": "github-issue-225",
       "title": "Issue #225 [YOS→Codex] Life Service Workerの相互キャッシュ削除を止める",
       "type": "GitHub Issue",
@@ -140,7 +120,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-09-12T20:49:18Z"
+      "updated_at": "2026-09-12T20:55:24Z"
     },
     {
       "id": "github-issue-234",
@@ -151,6 +131,26 @@
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/234",
       "updated_at": "2026-08-22T13:41:40Z"
+    },
+    {
+      "id": "github-issue-236",
+      "title": "Issue #236 [YOS→Codex] Taxi｜明日営業用の最小統合：需要カレンダーをホーム1タップ化",
+      "type": "GitHub Issue",
+      "status": "open",
+      "priority": 3,
+      "next_action": "完成条件を確認し、次の安全な実装を1件進める",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/236",
+      "updated_at": "2026-08-07T08:04:35Z"
+    },
+    {
+      "id": "github-issue-238",
+      "title": "Issue #238 [YOS→Codex] Taxi｜営業意思決定ループ最終統合",
+      "type": "GitHub Issue",
+      "status": "open",
+      "priority": 3,
+      "next_action": "完成条件を確認し、次の安全な実装を1件進める",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/238",
+      "updated_at": "2026-08-12T12:04:15Z"
     },
     {
       "id": "github-issue-51",
@@ -224,7 +224,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #329をレビューして公開判断する",
+      "next_action": "PR #332をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-13T05:49:56+09:00",
+      "last_update": "2026-09-13T06:03:14+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -309,13 +309,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 31件・Open PR 19件を自動同期中",
+      "next_action": "Open Issue 30件・Open PR 20件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-13T05:49:56+09:00",
+      "last_update": "2026-09-13T06:03:14+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -329,7 +329,7 @@
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #329をレビューして公開判断する",
+      "next_action": "PR #332をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-13T05:49:56+09:00",
+      "last_update": "2026-09-13T06:03:14+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "fe092f9d553165666a4f1c0cd8f2549a19563566e42aca6028f50cbe70e894fe"
+  "github_snapshot_hash": "589efe49c966fbc68c1d1ef102440ab393ddc2e349d9d62441daf829d41e5383"
 }
