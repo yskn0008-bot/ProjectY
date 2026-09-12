@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-13T01:53:28+09:00",
+  "updated_at": "2026-09-13T04:06:09+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -20,7 +20,7 @@
       "priority": 1,
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/329",
-      "updated_at": "2026-09-12T16:50:27Z"
+      "updated_at": "2026-09-12T16:58:34Z"
     },
     {
       "id": "github-pr-325",
@@ -30,17 +30,7 @@
       "priority": 2,
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/325",
-      "updated_at": "2026-09-12T16:51:46Z"
-    },
-    {
-      "id": "github-pr-326",
-      "title": "PR #326 proto(review): weekly continue / stop / automate candidates",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/326",
-      "updated_at": "2026-09-12T16:50:34Z"
+      "updated_at": "2026-09-12T16:56:24Z"
     },
     {
       "id": "github-pr-327",
@@ -60,7 +50,17 @@
       "priority": 2,
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/330",
-      "updated_at": "2026-09-12T16:53:24Z"
+      "updated_at": "2026-09-12T17:03:21Z"
+    },
+    {
+      "id": "github-pr-331",
+      "title": "PR #331 feat(widget): MY WAY NOW home widget prototype",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/331",
+      "updated_at": "2026-09-12T16:55:39Z"
     },
     {
       "id": "github-issue-110",
@@ -81,16 +81,6 @@
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/120",
       "updated_at": "2026-08-25T23:41:09Z"
-    },
-    {
-      "id": "github-issue-142",
-      "title": "Issue #142 YOSをヒーローズジャーニーのメンターアプリへ統合する",
-      "type": "GitHub Issue",
-      "status": "open",
-      "priority": 3,
-      "next_action": "完成条件を確認し、次の安全な実装を1件進める",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/142",
-      "updated_at": "2026-08-02T05:43:26Z"
     },
     {
       "id": "github-issue-214",
@@ -140,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-09-12T16:52:06Z"
+      "updated_at": "2026-09-12T17:51:07Z"
     },
     {
       "id": "github-issue-234",
@@ -151,6 +141,16 @@
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/234",
       "updated_at": "2026-08-22T13:41:40Z"
+    },
+    {
+      "id": "github-issue-236",
+      "title": "Issue #236 [YOS→Codex] Taxi｜明日営業用の最小統合：需要カレンダーをホーム1タップ化",
+      "type": "GitHub Issue",
+      "status": "open",
+      "priority": 3,
+      "next_action": "完成条件を確認し、次の安全な実装を1件進める",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/236",
+      "updated_at": "2026-08-07T08:04:35Z"
     },
     {
       "id": "github-issue-51",
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-13T01:53:28+09:00",
+      "last_update": "2026-09-13T04:06:09+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -309,13 +309,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 31件・Open PR 19件を自動同期中",
+      "next_action": "Open Issue 30件・Open PR 20件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-13T01:53:28+09:00",
+      "last_update": "2026-09-13T04:06:09+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-13T01:53:28+09:00",
+      "last_update": "2026-09-13T04:06:09+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "e38ebe9102977d5a11e56e23694284eb2822972e1c867c01a6042548867bca38"
+  "github_snapshot_hash": "f7cf596dc07b71798005a62e95d9423a0b950789ac1c54f24c1de2f7e516fd82"
 }
