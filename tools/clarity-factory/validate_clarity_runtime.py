@@ -28,6 +28,10 @@ def find_index(actions: list[dict], suffix: str) -> int:
     return matches[0]
 
 
+def find_indexes(actions: list[dict], suffix: str) -> list[int]:
+    return [i for i, action in enumerate(actions) if action_id(action).endswith(suffix)]
+
+
 def validate(path: Path) -> None:
     with path.open("rb") as fh:
         root = plistlib.load(fh)
@@ -36,24 +40,44 @@ def validate(path: Path) -> None:
         raise AssertionError("WFWorkflowActions missing")
 
     dictate_i = find_index(actions, "dictatetext")
-    append_i = find_index(actions, "file.append")
+    append_indexes = find_indexes(actions, "file.append")
+    if len(append_indexes) != 2:
+        raise AssertionError(f"expected Raw + Ledger appends, found {len(append_indexes)}")
+    raw_i, ledger_i = append_indexes
     model_i = find_index(actions, "askllm")
-    if not dictate_i < append_i < model_i:
+    if not dictate_i < raw_i < model_i < ledger_i:
         raise AssertionError(
-            f"Raw First order violated: dictation={dictate_i}, append={append_i}, model={model_i}"
+            "order violated: "
+            f"dictation={dictate_i}, raw={raw_i}, model={model_i}, ledger={ledger_i}"
         )
 
-    append_params = actions[append_i].get("WFWorkflowActionParameters", {})
-    if append_params.get("WFAppendFileWriteMode") != "Append":
+    raw_params = actions[raw_i].get("WFWorkflowActionParameters", {})
+    if raw_params.get("WFAppendFileWriteMode") != "Append":
         raise AssertionError("Raw record must append, not replace/prepend")
-    if append_params.get("WFFilePath") != "Clarity Inbox.txt":
-        raise AssertionError(f"unexpected Raw destination: {append_params.get('WFFilePath')!r}")
+    if raw_params.get("WFFilePath") != "Clarity Inbox.txt":
+        raise AssertionError(f"unexpected Raw destination: {raw_params.get('WFFilePath')!r}")
+
+    ledger_params = actions[ledger_i].get("WFWorkflowActionParameters", {})
+    if ledger_params.get("WFAppendFileWriteMode") != "Append":
+        raise AssertionError("Ledger record must append, not replace/prepend")
+    if ledger_params.get("WFFilePath") != "Clarity Ledger.txt":
+        raise AssertionError(f"unexpected Ledger destination: {ledger_params.get('WFFilePath')!r}")
 
     model_params = actions[model_i].get("WFWorkflowActionParameters", {})
     if model_params.get("FollowUp") is not False:
         raise AssertionError("ChatGPT FollowUp must be false")
     if model_params.get("WFGenerativeResultType") != "Dictionary":
         raise AssertionError("ChatGPT output must be Dictionary")
+
+    # Runtime gate must parse nested dictionaries and contain conditional/output guards
+    # before any later executor is added.
+    identifiers = [action_id(action) for action in actions]
+    if sum(ident.endswith("detect.dictionary") for ident in identifiers) < 2:
+        raise AssertionError("model result and interpretation must be parsed as dictionaries")
+    if not any(ident.endswith("conditional") for ident in identifiers):
+        raise AssertionError("fail-closed conditional gate missing")
+    if not any(ident.endswith("output") for ident in identifiers):
+        raise AssertionError("blocking user output missing")
 
     serialized = repr(root)
     for pattern in SECRET_PATTERNS:
