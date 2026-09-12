@@ -1,0 +1,58 @@
+{
+  "version": "1.0",
+  "domains": [
+    "life",
+    "work",
+    "money",
+    "home",
+    "idea",
+    "shopping",
+    "communication",
+    "knowledge",
+    "system",
+    "other"
+  ],
+  "intents": [
+    "remember",
+    "answer",
+    "create",
+    "update",
+    "find",
+    "compare",
+    "decide",
+    "execute",
+    "monitor",
+    "notify",
+    "send",
+    "buy",
+    "organize"
+  ],
+  "urgencies": ["now", "soon", "today", "scheduled", "background"],
+  "risks": ["low", "medium", "high", "irreversible"],
+  "v1_executors": [
+    "idea",
+    "memo",
+    "task",
+    "calendar",
+    "reminder",
+    "shopping",
+    "answer"
+  ],
+  "confirmation_required_for": [
+    "high",
+    "irreversible",
+    "money_movement",
+    "contract_or_legal_commitment",
+    "destructive_action",
+    "major_external_send",
+    "identity_or_authentication"
+  ],
+  "policy": {
+    "raw_first": true,
+    "preserve_original_input": true,
+    "unknown_executor": "needs_review",
+    "ambiguous_calendar_or_reminder_time": "needs_review",
+    "external_write_default": false,
+    "silent_when_no_feedback_needed": true
+  }
+}
