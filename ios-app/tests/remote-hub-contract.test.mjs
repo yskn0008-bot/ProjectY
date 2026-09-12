@@ -35,3 +35,8 @@ test('user layout persistence contract is retained', () => {
   assert.match(source, /const LAYOUT_KEY="yos\.remote\.tv\.buttons\.v52"/);
   assert.match(source, /localStorage\.setItem\(LAYOUT_KEY,JSON\.stringify\(layout\)\)/);
 });
+
+test('runtime errors are surfaced instead of silently looking successful', () => {
+  assert.match(source, /if\(result&&result\.ok===false\)/);
+  assert.match(source, /textContent="エラー"/);
+});
