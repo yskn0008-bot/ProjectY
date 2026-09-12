@@ -33,7 +33,7 @@ function sectionMap(body) {
 }
 
 function fieldValue(section, label) {
-  const pattern = new RegExp(`^${escapeRegExp(label)}\\s*:\\s*(.*)$`, 'imu');
+  const pattern = new RegExp(`^${escapeRegExp(label)}[ \\t]*:[ \\t]*(.*)$`, 'imu');
   const match = String(section || '').match(pattern);
   return match ? match[1].trim() : '';
 }
@@ -46,7 +46,7 @@ function substantive(value) {
 }
 
 function checked(section, label) {
-  const pattern = new RegExp(`^- \\[[xX]\\] ${escapeRegExp(label)}\\s*$`, 'mu');
+  const pattern = new RegExp(`^- \\[[xX]\\] ${escapeRegExp(label)}[ \\t]*$`, 'mu');
   return pattern.test(String(section || ''));
 }
 
@@ -59,7 +59,7 @@ function requireChecked(section, label, errors) {
 }
 
 function readinessValue(section, label) {
-  const pattern = new RegExp(`^- ${escapeRegExp(label)}:\\s*(.+)$`, 'imu');
+  const pattern = new RegExp(`^- ${escapeRegExp(label)}:[ \\t]*(.+)$`, 'imu');
   const match = String(section || '').match(pattern);
   return match ? match[1].trim().toLowerCase() : '';
 }
