@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-12T09:02:10+09:00",
+  "updated_at": "2026-09-12T10:56:20+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -12,6 +12,16 @@
     ]
   },
   "inbox": [
+    {
+      "id": "github-pr-280",
+      "title": "PR #280 feat(yos-ai): add Point / Event Foundation v1 contract",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/280",
+      "updated_at": "2026-09-05T04:18:56Z"
+    },
     {
       "id": "github-pr-293",
       "title": "PR #293 BRAVIA: add free Scriptable remote fallback",
@@ -51,16 +61,6 @@
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/311",
       "updated_at": "2026-09-11T23:37:43Z"
-    },
-    {
-      "id": "github-pr-312",
-      "title": "PR #312 Draft: persist YOS classifications after Clarity Raw intake",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/312",
-      "updated_at": "2026-09-11T23:36:44Z"
     },
     {
       "id": "github-issue-10",
@@ -165,32 +165,39 @@
   ],
   "recently_completed": [
     {
-      "id": "github-commit-5a3b21649d03",
-      "title": "feat(yos-ai): add Slack Events intake for Clarity (#310)",
-      "completed_at": "2026-09-11T13:51:58Z",
-      "result": "GitHub mainへ反映（5a3b216）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/5a3b21649d03733a4c011baac9d2efdc665ddecd"
+      "id": "github-commit-7780cb5ec61f",
+      "title": "Merge pull request #312 from yskn0008-bot/codex/issue-256-slack-yos-classification",
+      "completed_at": "2026-09-12T01:56:09Z",
+      "result": "GitHub mainへ反映（7780cb5）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/7780cb5ec61fc09d31f4310bf6a45a5b7c47913e"
     },
     {
-      "id": "github-commit-d1a2a7bd6dda",
-      "title": "feat(yos-ai): add Clarity intake bridge to YOS Inbox (#291)",
-      "completed_at": "2026-09-10T11:30:57Z",
-      "result": "GitHub mainへ反映（d1a2a7b）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/d1a2a7bd6dda2884cd08b5a7935e42fb8505cfc1"
+      "id": "github-commit-fb21e07e504e",
+      "title": "test(clarity): cover YOS capture classification",
+      "completed_at": "2026-09-11T22:15:12Z",
+      "result": "GitHub mainへ反映（fb21e07）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/fb21e07e504e4544fea34875f4183c2d2091872d"
     },
     {
-      "id": "github-commit-01b83f995967",
-      "title": "feat: add Shortcut Builder v1 generator",
-      "completed_at": "2026-09-10T03:56:41Z",
-      "result": "GitHub mainへ反映（01b83f9）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/01b83f9959678ea18b3f5b32fd2ddba68587e705"
+      "id": "github-commit-64a30aedd573",
+      "title": "test(clarity): match recovered marker repair test",
+      "completed_at": "2026-09-11T22:15:00Z",
+      "result": "GitHub mainへ反映（64a30ae）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/64a30aedd5730680a6b6f0eae1c3a2b44cafaf46"
     },
     {
-      "id": "github-commit-3e4070250cf4",
-      "title": "feat: style MY WAY Shortcut Builder v1",
-      "completed_at": "2026-09-10T03:56:07Z",
-      "result": "GitHub mainへ反映（3e40702）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/3e4070250cf4fcb639e8cc6c6970bb0385543878"
+      "id": "github-commit-e4153a07e69d",
+      "title": "test(clarity): cover processed marker repair",
+      "completed_at": "2026-09-11T22:14:41Z",
+      "result": "GitHub mainへ反映（e4153a0）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/e4153a07e69da6c62d25b33a34416227d722d618"
+    },
+    {
+      "id": "github-commit-ee0bfbf6c96b",
+      "title": "docs(clarity): document classification boundary",
+      "completed_at": "2026-09-11T22:14:09Z",
+      "result": "GitHub mainへ反映（ee0bfbf）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/ee0bfbf6c96b2496765d076ee3f2d8b050b76dcc"
     },
     {
       "id": "complete-002",
@@ -227,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-12T09:02:10+09:00",
+      "last_update": "2026-09-12T10:56:20+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -302,13 +309,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 33件・Open PR 7件を自動同期中",
+      "next_action": "Open Issue 33件・Open PR 6件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-12T09:02:10+09:00",
+      "last_update": "2026-09-12T10:56:20+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -331,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-12T09:02:10+09:00",
+      "last_update": "2026-09-12T10:56:20+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -413,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "9b2edae420f9767582a5fdc95c5fe664a1b0e180728b0ca153b099cb8bb4fb26"
+  "github_snapshot_hash": "4ae55dfe05c78ef60c2a49eaa38a4818a459f89a66b4f6e9972ccd751663a67d"
 }
