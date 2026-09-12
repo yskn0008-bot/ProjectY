@@ -6,6 +6,7 @@
 #include 'actions/intelligence'
 #include 'actions/documents'
 #include 'actions/calendar'
+#include 'actions/text'
 
 // Screenshot-first capture layer for iPhone.
 // Intended trigger: Back Tap -> this Shortcut.
@@ -40,10 +41,10 @@ ocr_text:
 {extractedText}"
 
 @modelResult = askChatGPT(modelPrompt, false, "Dictionary")
-@category = @modelResult['category']
-@confidence = @modelResult['confidence']
-@summary = @modelResult['summary']
-@needsReview = @modelResult['needs_review']
+@category = getText(@modelResult['category'])
+@confidence = getText(@modelResult['confidence'])
+@summary = getText(@modelResult['summary'])
+@needsReview = getText(@modelResult['needs_review'])
 @folder = "未分類"
 
 if @category == "reference" {
