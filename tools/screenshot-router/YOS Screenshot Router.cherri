@@ -20,34 +20,24 @@ createFolder("YOS Screenshots/Inbox")
 saveFile("YOS Screenshots/Inbox/{stamp}.png", screenshot, false)
 
 const extractedText = extractImageText(screenshot)
-const modelPrompt = text("""
-You classify one iPhone screenshot for MY WAY by YOS.
+const modelPrompt = "You classify one iPhone screenshot for MY WAY by YOS.
 Use only visible/OCR evidence. Never invent content that is not present.
-Return only a Dictionary with exactly these keys:
-category, confidence, summary, needs_review.
-
-category must be exactly one of:
-reference, shopping, schedule, idea, work, other.
-
-Definitions:
+Return only a Dictionary with exactly these keys: category, confidence, summary, needs_review.
+Category must be exactly one of: reference, shopping, schedule, idea, work, other.
 reference = information/article/manual/map/reference material kept for later.
 shopping = product, price, sale, stock, purchase candidate, shop item.
 schedule = event, reservation, appointment, date/time/deadline candidate.
 idea = inspiration, concept, note-worthy idea, thing to try or build.
 work = job, client, application, work instruction, business/admin work.
 other = cannot safely classify from the evidence.
-
-Rules:
-- If multiple categories are plausible, choose the main reason the screenshot is worth keeping.
-- If confidence is below 0.70, set category=other and needs_review=true.
-- A schedule-looking screenshot is only a candidate; never claim a calendar event was created.
-- A shopping-looking screenshot is only a candidate; never claim anything was purchased.
-- Do not output secrets or infer hidden/private attributes.
-
+If multiple categories are plausible, choose the main reason the screenshot is worth keeping.
+If confidence is below 0.70, set category=other and needs_review=true.
+A schedule-looking screenshot is only a candidate; never claim a calendar event was created.
+A shopping-looking screenshot is only a candidate; never claim anything was purchased.
+Do not output secrets or infer hidden/private attributes.
 captured_at: {CurrentDate}
 ocr_text:
-{extractedText}
-""")
+{extractedText}"
 
 @modelResult = askChatGPT(modelPrompt, false, "Dictionary")
 @category = @modelResult['category']
