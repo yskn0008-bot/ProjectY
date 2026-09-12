@@ -38,7 +38,7 @@ jobs:
           set -euo pipefail
           cd tools/clarity-factory
           rm -f ./*_unsigned.shortcut ./*.plist
-          cherri --skip-sign --debug clarity-compiler-proof.cherri
+          cherri clarity-compiler-proof.cherri --skip-sign --debug
           proof="$(find . -maxdepth 1 -type f -name '*_unsigned.shortcut' -print -quit)"
           test -n "$proof"
           python3 validate_compiler_proof.py "$proof"
