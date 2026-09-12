@@ -1,10 +1,18 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import { createRequire } from 'node:module';
+import vm from 'node:vm';
 
-const require = createRequire(import.meta.url);
-const { parseHomeVoice } = require('../scriptable/remote-voice/YOS Home Voice Parser.js');
+const parserSource = fs.readFileSync(
+  new URL('../scriptable/remote-voice/YOS Home Voice Parser.js', import.meta.url),
+  'utf8'
+);
+const scriptableModule = { exports: {} };
+vm.runInNewContext(parserSource, {
+  module: scriptableModule,
+  exports: scriptableModule.exports,
+});
+const { parseHomeVoice } = scriptableModule.exports;
 
 test('routes the first physical acceptance phrases', () => {
   assert.deepEqual(parseHomeVoice('テレビつけて'), {ok:true,device:'tv',action:'power_on',value:null});
