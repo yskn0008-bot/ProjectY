@@ -119,3 +119,10 @@ test('failed Slack processing releases its event claim for retry', async () => {
   await assert.rejects(jobs[0], /downstream unavailable/u);
   assert.equal(redis.state.has('yos:slack:event:v1:Ev-0911-001'), false);
 });
+
+test('a duplicate Raw repairs a missing processed marker after downstream success', async () => {
+  const {handler, jobs, slackBodies} = setup({processor: {async process() { return {duplicate: true}; }}});
+  await handler(signedRequest(eventPayload()));
+  await jobs[0];
+  assert.deepEqual(slackBodies, [{channel: 'C0C0RU43TPA', thread_ts: '1789000000.123456', text: 'YOS processed'}]);
+});

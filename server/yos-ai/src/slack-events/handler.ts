@@ -107,14 +107,16 @@ async function processEvent(options: {
 
   try {
     const captureId = await stableCaptureId(options.teamId, YOS_INBOX_CHANNEL_ID, options.messageTs);
-    const result = await options.processor.process({
+    await options.processor.process({
       rawText: options.rawText,
       capturedAt: new Date(Number.parseFloat(options.messageTs) * 1_000).toISOString(),
       inputMode: 'text',
       source: 'clarity',
       captureId
     });
-    if (!result.duplicate) await postProcessedMarker(options.fetchImpl, options.botToken, options.messageTs);
+    // The marker represents successful downstream processing, not merely the first Raw append.
+    // Posting for a duplicate Raw safely repairs a marker that was missed after an earlier save.
+    await postProcessedMarker(options.fetchImpl, options.botToken, options.messageTs);
     await options.redis.command<string>(['SET', eventKey, 'done', 'EX', EVENT_DONE_TTL_SECONDS]);
   } catch (error) {
     try {
