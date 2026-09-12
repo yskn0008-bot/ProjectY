@@ -1,0 +1,28 @@
+{
+  "version": 1,
+  "issue": 315,
+  "base": "f47b014897c8233f4bfba639fd28834c6d935528",
+  "allowedClassifications": [
+    "自動回復可能",
+    "外部待ち",
+    "本人判断必要",
+    "安全終了"
+  ],
+  "scenarios": [
+    {"id":"required-qa-missing","classification":"自動回復可能","lane":"Lane 2","safeNext":"必要QAをcurrent headで起動またはQA_BOOTSTRAP_BLOCKED。QA_SUCCESSは禁止"},
+    {"id":"required-qa-failure","classification":"自動回復可能","lane":"Lane 2","safeNext":"QA_FAILUREから最小修正へ。QA_SUCCESSは禁止"},
+    {"id":"qa-pending","classification":"外部待ち","lane":"Lane 2","safeNext":"AWAITING_QA。完了前に成功扱いしない"},
+    {"id":"old-head-success","classification":"自動回復可能","lane":"Lane 2","safeNext":"current-head QAを要求。old-head greenを流用しない"},
+    {"id":"branch-head-move","classification":"自動回復可能","lane":"Lane 4/5","safeNext":"新headを再評価しつつ同一原因の復旧回数を引き継ぐ"},
+    {"id":"write-midway-failure","classification":"自動回復可能","lane":"Lane 3","safeNext":"旧版維持またはrollback。新旧混在を残さない"},
+    {"id":"partial-distribution","classification":"自動回復可能","lane":"Lane 3","safeNext":"全payload準備前は切替せず、不完全集合を配布しない"},
+    {"id":"github-api-temporary","classification":"外部待ち","lane":"Lane 5","safeNext":"根拠あるbounded retry後はWAIT_EXTERNAL。本人判断へ直送しない"},
+    {"id":"result-unknown","classification":"外部待ち","lane":"Lane 3/5","safeNext":"安定IDで照合するまで不可逆作用を再試行しない"},
+    {"id":"duplicate-event","classification":"安全終了","lane":"Lane 4/5","safeNext":"同一deliveryはno-op。副作用を重複実行しない"},
+    {"id":"retry-limit","classification":"本人判断必要","lane":"Lane 5","safeNext":"安全経路を使い切った場合のみNEEDS_OWNER。無限再試行しない"},
+    {"id":"codex-unavailable","classification":"自動回復可能","lane":"Lane 4/5","safeNext":"成果保全→許可済み代替実装/搬送。利用不能だけで停止しない"},
+    {"id":"external-service-outage","classification":"外部待ち","lane":"Lane 5","safeNext":"bounded retry後にWAIT_EXTERNAL。再開条件を残す"},
+    {"id":"branch-conflict","classification":"本人判断必要","lane":"Lane 5/6","safeNext":"真正な競合は推測解決せずNEEDS_OWNER"},
+    {"id":"long-stalled","classification":"自動回復可能","lane":"Lane 5","safeNext":"閾値超過後に一度だけstatus/recovery。変化なしで無限再起動しない"}
+  ]
+}
