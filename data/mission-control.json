@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-13T04:06:09+09:00",
+  "updated_at": "2026-09-13T05:49:56+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -83,6 +83,16 @@
       "updated_at": "2026-08-25T23:41:09Z"
     },
     {
+      "id": "github-issue-142",
+      "title": "Issue #142 YOSをヒーローズジャーニーのメンターアプリへ統合する",
+      "type": "GitHub Issue",
+      "status": "open",
+      "priority": 3,
+      "next_action": "完成条件を確認し、次の安全な実装を1件進める",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/142",
+      "updated_at": "2026-08-02T05:43:26Z"
+    },
+    {
       "id": "github-issue-214",
       "title": "Issue #214 [YOS→Codex] Taxi開発キュー：PR #213のActions実行・修正",
       "type": "GitHub Issue",
@@ -130,7 +140,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-09-12T17:51:07Z"
+      "updated_at": "2026-09-12T20:49:18Z"
     },
     {
       "id": "github-issue-234",
@@ -141,16 +151,6 @@
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/234",
       "updated_at": "2026-08-22T13:41:40Z"
-    },
-    {
-      "id": "github-issue-236",
-      "title": "Issue #236 [YOS→Codex] Taxi｜明日営業用の最小統合：需要カレンダーをホーム1タップ化",
-      "type": "GitHub Issue",
-      "status": "open",
-      "priority": 3,
-      "next_action": "完成条件を確認し、次の安全な実装を1件進める",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/236",
-      "updated_at": "2026-08-07T08:04:35Z"
     },
     {
       "id": "github-issue-51",
@@ -164,6 +164,13 @@
     }
   ],
   "recently_completed": [
+    {
+      "id": "github-commit-43923e66b44c",
+      "title": "feat(remote): complete MY REMOTE UX v2",
+      "completed_at": "2026-09-12T20:49:17Z",
+      "result": "GitHub mainへ反映（43923e6）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/43923e66b44ce56e87168aae65afb91d660359e2"
+    },
     {
       "id": "github-commit-6618b952f829",
       "title": "Merge PR #317: fail closed on incomplete governance evidence",
@@ -191,13 +198,6 @@
       "completed_at": "2026-09-12T12:24:06Z",
       "result": "GitHub mainへ反映（883b03d）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/883b03d533300a2862b4e515fa96fed5edafe7c2"
-    },
-    {
-      "id": "github-commit-79652615b23a",
-      "title": "test(governance): cover empty and complete evidence",
-      "completed_at": "2026-09-12T12:23:55Z",
-      "result": "GitHub mainへ反映（7965261）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/79652615b23a3c3e6d0239697724c5325fb693d9"
     },
     {
       "id": "complete-002",
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-13T04:06:09+09:00",
+      "last_update": "2026-09-13T05:49:56+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -309,13 +309,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 30件・Open PR 20件を自動同期中",
+      "next_action": "Open Issue 31件・Open PR 19件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-13T04:06:09+09:00",
+      "last_update": "2026-09-13T05:49:56+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-13T04:06:09+09:00",
+      "last_update": "2026-09-13T05:49:56+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "f7cf596dc07b71798005a62e95d9423a0b950789ac1c54f24c1de2f7e516fd82"
+  "github_snapshot_hash": "fe092f9d553165666a4f1c0cd8f2549a19563566e42aca6028f50cbe70e894fe"
 }
