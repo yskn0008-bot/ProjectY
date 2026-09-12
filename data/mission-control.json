@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-12T06:38:11+09:00",
+  "updated_at": "2026-09-12T09:02:10+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -12,16 +12,6 @@
     ]
   },
   "inbox": [
-    {
-      "id": "github-pr-280",
-      "title": "PR #280 feat(yos-ai): add Point / Event Foundation v1 contract",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/280",
-      "updated_at": "2026-09-05T04:18:56Z"
-    },
     {
       "id": "github-pr-293",
       "title": "PR #293 BRAVIA: add free Scriptable remote fallback",
@@ -60,7 +50,17 @@
       "priority": 2,
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/311",
-      "updated_at": "2026-09-11T19:47:54Z"
+      "updated_at": "2026-09-11T23:37:43Z"
+    },
+    {
+      "id": "github-pr-312",
+      "title": "PR #312 Draft: persist YOS classifications after Clarity Raw intake",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/312",
+      "updated_at": "2026-09-11T23:36:44Z"
     },
     {
       "id": "github-issue-10",
@@ -193,13 +193,6 @@
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/3e4070250cf4fcb639e8cc6c6970bb0385543878"
     },
     {
-      "id": "github-commit-e668d07a823d",
-      "title": "feat: add MY WAY Shortcut Builder v1 shell",
-      "completed_at": "2026-09-10T03:55:51Z",
-      "result": "GitHub mainへ反映（e668d07）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/e668d07a823de6155ca5b99b18ed40ab4ba99ba5"
-    },
-    {
       "id": "complete-002",
       "title": "iPhone向けMission Control Dashboardを実装",
       "completed_at": "2026-07-17T17:55:00+09:00",
@@ -234,7 +227,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-12T06:38:11+09:00",
+      "last_update": "2026-09-12T09:02:10+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -309,13 +302,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 33件・Open PR 6件を自動同期中",
+      "next_action": "Open Issue 33件・Open PR 7件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-12T06:38:11+09:00",
+      "last_update": "2026-09-12T09:02:10+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -338,7 +331,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-12T06:38:11+09:00",
+      "last_update": "2026-09-12T09:02:10+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +413,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "97550ee58b672253027f22c5d3e78a2fd37b48a3d596ad6484abf3e7a456c94b"
+  "github_snapshot_hash": "9b2edae420f9767582a5fdc95c5fe664a1b0e180728b0ca153b099cb8bb4fb26"
 }
