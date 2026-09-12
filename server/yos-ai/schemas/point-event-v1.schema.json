@@ -1,0 +1,134 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://projecty.local/schemas/point-event-v1.schema.json",
+  "title": "PointEventRefV1",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "pointId",
+    "sourceSystem",
+    "sourceRecordId",
+    "capturedAt",
+    "occurredAt",
+    "raw",
+    "status",
+    "provenance"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": 1
+    },
+    "pointId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "sourceSystem": {
+      "enum": [
+        "yos-capture",
+        "hj",
+        "taxi",
+        "life",
+        "life-stream",
+        "morning",
+        "night",
+        "notification",
+        "other"
+      ]
+    },
+    "sourceRecordId": {
+      "oneOf": [
+        {
+          "type": "string",
+          "minLength": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "capturedAt": {
+      "type": "string",
+      "minLength": 1
+    },
+    "occurredAt": {
+      "oneOf": [
+        {
+          "type": "string",
+          "minLength": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "raw": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": ["mode", "value"],
+          "properties": {
+            "mode": {
+              "const": "snapshot"
+            },
+            "value": {}
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": ["mode", "ref"],
+          "properties": {
+            "mode": {
+              "const": "reference"
+            },
+            "ref": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "status": {
+      "const": "raw"
+    },
+    "provenance": {
+      "type": "object",
+      "required": ["id", "title", "kind", "priority"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "kind": {
+          "enum": [
+            "law",
+            "master",
+            "change-log",
+            "code",
+            "sheet",
+            "original",
+            "web",
+            "memory"
+          ]
+        },
+        "priority": {
+          "type": "number"
+        },
+        "modifiedAt": {
+          "type": "string"
+        },
+        "locator": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}
