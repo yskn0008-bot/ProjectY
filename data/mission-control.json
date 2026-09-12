@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-13T06:03:14+09:00",
+  "updated_at": "2026-09-13T06:06:45+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -120,7 +120,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-09-12T20:55:24Z"
+      "updated_at": "2026-09-12T21:06:40Z"
     },
     {
       "id": "github-issue-234",
@@ -165,6 +165,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-0e798b0e9530",
+      "title": "feat(prot-factory): add no-wait prototype factory v0.1 (#334)",
+      "completed_at": "2026-09-12T21:06:33Z",
+      "result": "GitHub mainへ反映（0e798b0）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/0e798b0e9530ec44fffd9b10bf66187743f39b51"
+    },
+    {
       "id": "github-commit-43923e66b44c",
       "title": "feat(remote): complete MY REMOTE UX v2",
       "completed_at": "2026-09-12T20:49:17Z",
@@ -191,13 +198,6 @@
       "completed_at": "2026-09-12T12:25:05Z",
       "result": "GitHub mainへ反映（5bb02ee）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/5bb02ee2ceffe3a7ded1aa853f539a9d6ccacfa9"
-    },
-    {
-      "id": "github-commit-883b03d53330",
-      "title": "fix(governance): fail closed on incomplete PR evidence",
-      "completed_at": "2026-09-12T12:24:06Z",
-      "result": "GitHub mainへ反映（883b03d）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/883b03d533300a2862b4e515fa96fed5edafe7c2"
     },
     {
       "id": "complete-002",
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-13T06:03:14+09:00",
+      "last_update": "2026-09-13T06:06:45+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -315,7 +315,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-13T06:03:14+09:00",
+      "last_update": "2026-09-13T06:06:45+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-13T06:03:14+09:00",
+      "last_update": "2026-09-13T06:06:45+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "589efe49c966fbc68c1d1ef102440ab393ddc2e349d9d62441daf829d41e5383"
+  "github_snapshot_hash": "542de34565e68bdaa8e2dda16b25eeee731c09a886d24bd4f004b459d97b9b62"
 }
