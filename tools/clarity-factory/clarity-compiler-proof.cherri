@@ -1,0 +1,16 @@
+#define name Clarity Compiler Proof
+#define color blue
+#define glyph wand
+
+#include 'actions/intelligence'
+
+// Secret-free compile proof for Issue #314.
+// This validates that the current Cherri compiler can serialize the exact
+// ChatGPT action Clarity needs without an owner-exported template.
+const modelResult = askChatGPT(
+  "Return a Dictionary with exactly one key named status and the value ready.",
+  false,
+  "Dictionary"
+)
+
+show("{modelResult}")
