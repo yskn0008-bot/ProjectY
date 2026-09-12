@@ -1,7 +1,7 @@
-// YOS Home Voice Installer v0.1
-// Installs the already-verified Home Voice adapter + parser without touching existing MY REMOTE files.
+// YOS Home Voice Installer v0.2
+// Installs the pinned Home Voice adapter + parser without touching existing MY REMOTE files.
 
-const SOURCE_SHA = 'aa9029f923c17afd937f81eac5dcb3fb2a45f5fb';
+const SOURCE_SHA = '55e76fb268a1471583be1ba9116fff59b482e401';
 const BASE = 'https://raw.githubusercontent.com/yskn0008-bot/ProjectY/' + SOURCE_SHA + '/ios-app/scriptable/remote-voice/';
 const FILES = ['YOS Home Voice Parser.js', 'YOS Home Voice.js'];
 const REQUIRED_EXISTING = ['YOS Tapo H110 Core.js'];
@@ -75,7 +75,7 @@ async function run() {
 
   const a = new Alert();
   a.title = '家の音声操作 準備完了';
-  a.message = '音声操作の本体を入れました。次はiPhoneショートカットから YOS Home Voice を呼ぶだけです。';
+  a.message = '音声操作の本体を入れました。すぐ試すなら Scriptable で YOS Home Voice を実行して話してください。';
   a.addAction('OK');
   await a.presentAlert();
 }
