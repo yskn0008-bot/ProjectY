@@ -1,0 +1,93 @@
+name: Shortcut Factory PoC
+
+on:
+  push:
+    branches:
+      - poc/shortcut-factory-signing
+    paths:
+      - 'tools/shortcut-factory-poc/**'
+      - '.github/workflows/shortcut-factory-poc.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  generate-and-sign:
+    runs-on: macos-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Generate unsigned Safari shortcut
+        run: |
+          mkdir -p build
+          python3 tools/shortcut-factory-poc/generate_safari_shortcut.py \
+            --output build/YOS-PoC-Safari.shortcut \
+            --name 'YOS PoC - Safari'
+
+      - name: Validate plist structure
+        run: |
+          python3 tools/shortcut-factory-poc/generate_safari_shortcut.py \
+            --output build/YOS-PoC-Safari.shortcut \
+            --validate-only
+          plutil -lint build/YOS-PoC-Safari.shortcut
+          file build/YOS-PoC-Safari.shortcut
+          xxd -l 8 build/YOS-PoC-Safari.shortcut
+
+      - name: Confirm Apple Shortcuts CLI
+        run: |
+          which shortcuts
+          shortcuts sign --help
+
+      - name: Try Apple shortcuts sign
+        id: apple_sign
+        continue-on-error: true
+        shell: bash
+        run: |
+          set +e
+          set -o pipefail
+          shortcuts sign \
+            --mode anyone \
+            --input build/YOS-PoC-Safari.shortcut \
+            --output build/YOS-PoC-Safari-signed.shortcut \
+            2>&1 | tee build/apple-sign.log
+          status=${PIPESTATUS[0]}
+          echo "shortcuts sign exit code: ${status}" | tee -a build/apple-sign.log
+          exit "${status}"
+
+      - name: Sign with HubSign fallback (PoC only)
+        if: steps.apple_sign.outcome != 'success'
+        run: |
+          python3 tools/shortcut-factory-poc/sign_with_hubsign.py \
+            --input build/YOS-PoC-Safari.shortcut \
+            --output build/YOS-PoC-Safari-signed.shortcut \
+            --name 'YOS PoC - Safari' \
+            2>&1 | tee build/hubsign.log
+
+      - name: Verify signed shortcut envelope
+        run: |
+          test -f build/YOS-PoC-Safari-signed.shortcut
+          file build/YOS-PoC-Safari-signed.shortcut || true
+          xxd -l 16 build/YOS-PoC-Safari-signed.shortcut | tee build/signed-header.log
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('build/YOS-PoC-Safari-signed.shortcut')
+          data = p.read_bytes()
+          if not data.startswith(b'AEA1'):
+              raise SystemExit('signed shortcut does not start with AEA1')
+          print(f'OK: signed AEA1 shortcut, {len(data)} bytes')
+          PY
+
+      - name: Upload PoC evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: yos-shortcut-factory-poc
+          path: |
+            build/*.shortcut
+            build/*.log
+          if-no-files-found: error
+          retention-days: 7
