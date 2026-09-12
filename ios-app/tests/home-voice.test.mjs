@@ -3,25 +3,21 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import vm from 'node:vm';
 
-const parserSource = fs.readFileSync(
-  new URL('../scriptable/remote-voice/YOS Home Voice Parser.js', import.meta.url),
-  'utf8'
-);
-const scriptableModule = { exports: {} };
-vm.runInNewContext(parserSource, {
-  module: scriptableModule,
-  exports: scriptableModule.exports,
-});
-const { parseHomeVoice } = scriptableModule.exports;
+const parserUrl = new URL('../scriptable/remote-voice/YOS Home Voice Parser.js', import.meta.url);
+const parserSource = fs.readFileSync(parserUrl, 'utf8');
+const sandbox = { module: { exports: {} }, exports: {} };
+vm.runInNewContext(parserSource, sandbox, { filename: parserUrl.pathname });
+const { parseHomeVoice } = sandbox.module.exports;
+const plain = value => JSON.parse(JSON.stringify(value));
 
 test('routes the first physical acceptance phrases', () => {
-  assert.deepEqual(parseHomeVoice('テレビつけて'), {ok:true,device:'tv',action:'power_on',value:null});
-  assert.deepEqual(parseHomeVoice('テレビ消して'), {ok:true,device:'tv',action:'power_off',value:null});
-  assert.deepEqual(parseHomeVoice('音量下げて'), {ok:true,device:'tv',action:'volume_down',value:null});
-  assert.deepEqual(parseHomeVoice('エアコンつけて'), {ok:true,device:'ac',action:'power_on',value:null});
-  assert.deepEqual(parseHomeVoice('エアコン24度にして'), {ok:true,device:'ac',action:'set_temperature',value:24});
-  assert.deepEqual(parseHomeVoice('電気つけて'), {ok:true,device:'light',action:'power_on',value:null});
-  assert.deepEqual(parseHomeVoice('電気消して'), {ok:true,device:'light',action:'power_off',value:null});
+  assert.deepEqual(plain(parseHomeVoice('テレビつけて')), {ok:true,device:'tv',action:'power_on',value:null});
+  assert.deepEqual(plain(parseHomeVoice('テレビ消して')), {ok:true,device:'tv',action:'power_off',value:null});
+  assert.deepEqual(plain(parseHomeVoice('音量下げて')), {ok:true,device:'tv',action:'volume_down',value:null});
+  assert.deepEqual(plain(parseHomeVoice('エアコンつけて')), {ok:true,device:'ac',action:'power_on',value:null});
+  assert.deepEqual(plain(parseHomeVoice('エアコン24度にして')), {ok:true,device:'ac',action:'set_temperature',value:24});
+  assert.deepEqual(plain(parseHomeVoice('電気つけて')), {ok:true,device:'light',action:'power_on',value:null});
+  assert.deepEqual(plain(parseHomeVoice('電気消して')), {ok:true,device:'light',action:'power_off',value:null});
 });
 
 test('rejects broad scene or ambiguous phrases', () => {
