@@ -1,11 +1,11 @@
-// YOS Remote Hub v6.0 — play-anchored adaptive cross + swipe cursor + original-action fallback + user layout editor.
+// YOS Remote Hub v6.1 — play-anchored adaptive cross + expanded center swipe pad + original-action fallback + user layout editor.
 // The 12 visible BRAVIA slots are user-configurable and persisted in WebView localStorage.
 // The adaptive cursor cross is geometric: the Play button is always the center anchor.
 // Navigation: Above/Left/Play/Right/Below => Up/Left/OK/Right/Down.
 // Playback: every slot keeps the user's configured button.
 // Hybrid (playback overlay / paused cursor): Above/Below => Up/Down; Left/Play/Right keep configured media actions.
-// In navigation/hybrid, swiping from any of the five cross keys sends cursor Up/Down/Left/Right while taps keep each key's visible action.
-// When a configured button is temporarily replaced by a cursor action, long-press sends the original configured action.
+// Swipe starts only from the center/OK pad, but its invisible hit area expands into the four surrounding cursor keys.
+// Taps on the surrounding keys remain their visible actions; configured buttons hidden by cursor mode remain available by long-press.
 
 const CONFIG = {
   tv: { remoteScript: "YOS BRAVIA Remote" },
@@ -101,7 +101,7 @@ body{padding:0 8px}
 .tool{height:28px;padding:0 8px;border:1px solid #353941;border-radius:10px;background:#15171b;color:#438eff;font-size:11px;font-weight:750}
 .grid{display:grid;gap:6px}.grid-3{grid-template-columns:repeat(3,1fr)}.grid-4{grid-template-columns:repeat(4,1fr)}
 .key{position:relative;min-width:0;height:62px;padding:7px;border:1px solid #26292f;border-radius:18px;background:linear-gradient(145deg,#1c1e22,#15171a);color:#fff;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:4px;touch-action:manipulation;-webkit-touch-callout:none;user-select:none}
-.key.gesture{touch-action:none}
+.key.gesture-center{touch-action:none}
 .key:active{transform:scale(.97);background:#25282d}.key.adaptive{border-color:#343942}.key.ok{background:#24384f}
 .icon{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Helvetica Neue",sans-serif;font-size:23px;font-weight:500;line-height:1;color:#438eff;font-variant-emoji:text}
 .label{font-size:11px;font-weight:700;white-space:nowrap}.alt-label{position:absolute;right:7px;bottom:5px;font-size:7px;font-weight:700;color:#777b83;line-height:1;white-space:nowrap}.brand{font-size:10px;color:#8d8f95}.ac-temp{font-size:17px;font-weight:800;color:#fff;min-width:34px;text-align:right}
@@ -120,11 +120,11 @@ body{padding:0 8px}
 <section class="card"><div class="head"><div class="title" onclick="openRemote('light')">照明</div><div class="brand">Panasonic</div></div><div class="grid grid-3">${makeButtons("light", LIGHT_BUTTONS)}</div></section>
 <section class="card"><div class="head"><div class="title" onclick="openRemote('ac')">エアコン</div><div class="ac-meta"><span id="acTemp" class="ac-temp">--°</span><span class="brand">SHARP</span></div></div><div class="grid grid-4">${makeButtons("ac", AC_BUTTONS)}</div></section>
 </div>
-<div id="configLayer" class="config-layer"><div class="config-card"><div class="config-head"><div class="config-title">BRAVIA 配置</div><div class="config-actions"><button class="tool" onclick="resetLayout(event)">初期化</button><button class="tool" onclick="closeLayoutEditor(event)">完了</button></div></div><p class="config-help">12枠内は「移動元 → 移動先」で入れ替え。再生ボタンの上下左右＋再生位置が自動カーソル切替。カーソル中は十字のどこからでもスワイプで移動、タップは表示中のキー、切替中の長押しは元のボタンです。</p><div class="section-label">表示中の12枠</div><div id="configGrid" class="config-grid"></div><div class="section-label">使えるBRAVIAボタン</div><div id="palette" class="palette"></div></div></div>
+<div id="configLayer" class="config-layer"><div class="config-card"><div class="config-head"><div class="config-title">BRAVIA 配置</div><div class="config-actions"><button class="tool" onclick="resetLayout(event)">初期化</button><button class="tool" onclick="closeLayoutEditor(event)">完了</button></div></div><p class="config-help">12枠内は「移動元 → 移動先」で入れ替え。再生位置が自動カーソルの中心。スワイプは中央キーだけですが、反応範囲は上下左右キーへ重なるまで広げています。周囲キーのタップと、切替中の長押し元機能はそのまま使えます。</p><div class="section-label">表示中の12枠</div><div id="configGrid" class="config-grid"></div><div class="section-label">使えるBRAVIAボタン</div><div id="palette" class="palette"></div></div></div>
 <script>
 const REMOTES=${JSON.stringify(REMOTES)},ACTIONS=${JSON.stringify(TV_ACTIONS)},DEFAULT=${JSON.stringify(TV_DEFAULT)},CROSS_NAV=${JSON.stringify(CROSS_NAV)}
 const LAYOUT_KEY="yos.remote.tv.buttons.v52"
-let mode="navigation",nonce=0,pollTimer=null,acTimer=null,selectedSlot=null
+let mode="navigation",nonce=0,pollTimer=null,acTimer=null,selectedSlot=null,gestureSuppressUntil=0
 function meta(action){return ACTIONS.find(item=>item.action===action)}
 function validAction(action){return ACTIONS.some(item=>item.action===action)}
 function loadLayout(){let saved=[];try{saved=JSON.parse(localStorage.getItem(LAYOUT_KEY))}catch(_){}const clean=Array.isArray(saved)?saved.filter(validAction).slice(0,12):[];for(const action of DEFAULT){if(clean.length>=12)break;if(!clean.includes(action))clean.push(action)}for(const item of ACTIONS){if(clean.length>=12)break;if(!clean.includes(item.action))clean.push(item.action)}return clean.slice(0,12)}
@@ -154,47 +154,63 @@ function swipeAction(dx,dy){
   return Math.abs(dx)>Math.abs(dy)?(dx>0?"right":"left"):(dy>0?"down":"up")
 }
 function makeTVKey(baseAction,index){
-  const role=crossRole(index),action=displayAction(index,baseAction),item=meta(action),base=meta(baseAction),b=document.createElement("button"),overridden=action!==baseAction,cursorGesture=Boolean(role&&mode!=="media")
-  b.className="key"+(role?" adaptive":"")+(cursorGesture?" gesture":"")+(action==="confirm"?" ok":"")
+  const role=crossRole(index),action=displayAction(index,baseAction),item=meta(action),base=meta(baseAction),b=document.createElement("button"),overridden=action!==baseAction,centerGesture=Boolean(role==="center"&&mode!=="media")
+  b.className="key"+(role?" adaptive":"")+(centerGesture?" gesture-center":"")+(action==="confirm"?" ok":"")
   b.innerHTML='<span class="icon">'+item.icon+'</span><span class="label">'+item.label+'</span>'+(overridden?'<span class="alt-label">長押し '+base.label+'</span>':'')
   let holdTimer=null,suppressUntil=0,startX=0,startY=0,tracking=false
   const cancelHold=()=>{if(holdTimer){clearTimeout(holdTimer);holdTimer=null}}
-  if(cursorGesture||overridden){
+  if(overridden){
     b.addEventListener("touchstart",e=>{
       const t=e.touches&&e.touches[0];if(!t)return
       startX=t.clientX;startY=t.clientY;tracking=true
-      if(overridden){cancelHold();holdTimer=setTimeout(()=>{holdTimer=null;suppressUntil=Date.now()+900;nativeAction("tvOriginal",baseAction,base.label)},550)}
+      cancelHold();holdTimer=setTimeout(()=>{holdTimer=null;suppressUntil=Date.now()+900;nativeAction("tvOriginal",baseAction,base.label)},550)
     },{passive:true})
     b.addEventListener("touchmove",e=>{
       if(!tracking)return
       const t=e.touches&&e.touches[0];if(!t)return
-      const dx=t.clientX-startX,dy=t.clientY-startY
-      if(Math.max(Math.abs(dx),Math.abs(dy))>10)cancelHold()
-      if(cursorGesture&&Math.max(Math.abs(dx),Math.abs(dy))>10)e.preventDefault()
-    },{passive:false})
-    b.addEventListener("touchend",e=>{
-      const t=e.changedTouches&&e.changedTouches[0]
-      cancelHold()
-      if(!tracking||!t){tracking=false;return}
-      const dx=t.clientX-startX,dy=t.clientY-startY
-      tracking=false
-      if(cursorGesture){
-        const swipe=swipeAction(dx,dy)
-        if(swipe){
-          e.preventDefault();suppressUntil=Date.now()+900
-          const spec=meta(swipe)
-          nativeAction("tvCursor",swipe,spec?spec.label:swipe)
-        }
-      }
-    },{passive:false})
+      if(Math.max(Math.abs(t.clientX-startX),Math.abs(t.clientY-startY))>10)cancelHold()
+    },{passive:true})
+    b.addEventListener("touchend",()=>{tracking=false;cancelHold()},{passive:true})
     b.addEventListener("touchcancel",()=>{tracking=false;cancelHold()},{passive:true})
     b.oncontextmenu=e=>{e.preventDefault();return false}
   }
-  b.onclick=e=>{e.preventDefault();e.stopPropagation();if(Date.now()<suppressUntil)return;if(role)nativeAction("tvAdaptive",baseAction,item.label,role);else nativeAction("tv",baseAction,item.label)}
+  b.onclick=e=>{e.preventDefault();e.stopPropagation();if(Date.now()<gestureSuppressUntil||Date.now()<suppressUntil)return;if(role)nativeAction("tvAdaptive",baseAction,item.label,role);else nativeAction("tv",baseAction,item.label)}
   return b
 }
+function installCenterSwipePad(){
+  const root=document.getElementById("tvGrid")
+  if(!root||root.dataset.swipeBound==="1")return
+  root.dataset.swipeBound="1"
+  let active=false,startX=0,startY=0
+  function insideExpandedCenter(x,y){
+    if(mode==="media")return false
+    const center=layout.indexOf("play"),el=root.children[center]
+    if(center<0||!el)return false
+    const r=el.getBoundingClientRect(),xPad=r.width*.55,yPad=r.height*.90
+    return x>=r.left-xPad&&x<=r.right+xPad&&y>=r.top-yPad&&y<=r.bottom+yPad
+  }
+  root.addEventListener("touchstart",e=>{
+    const t=e.touches&&e.touches[0];if(!t||!insideExpandedCenter(t.clientX,t.clientY)){active=false;return}
+    active=true;startX=t.clientX;startY=t.clientY
+  },{passive:true})
+  root.addEventListener("touchmove",e=>{
+    if(!active)return
+    const t=e.touches&&e.touches[0];if(!t)return
+    if(Math.max(Math.abs(t.clientX-startX),Math.abs(t.clientY-startY))>=20)e.preventDefault()
+  },{passive:false})
+  root.addEventListener("touchend",e=>{
+    if(!active)return
+    active=false
+    const t=e.changedTouches&&e.changedTouches[0];if(!t)return
+    const swipe=swipeAction(t.clientX-startX,t.clientY-startY)
+    if(!swipe)return
+    e.preventDefault();gestureSuppressUntil=Date.now()+900
+    const spec=meta(swipe);nativeAction("tvCursor",swipe,spec?spec.label:swipe)
+  },{passive:false})
+  root.addEventListener("touchcancel",()=>{active=false},{passive:true})
+}
 function modeLabel(){return mode==="media"?"動画":mode==="hybrid"?"動画＋操作":"カーソル"}
-function renderTV(){const root=document.getElementById("tvGrid");root.innerHTML="";layout.forEach((action,index)=>root.appendChild(makeTVKey(action,index)));document.getElementById("modeBadge").textContent=modeLabel()}
+function renderTV(){const root=document.getElementById("tvGrid");root.innerHTML="";layout.forEach((action,index)=>root.appendChild(makeTVKey(action,index)));document.getElementById("modeBadge").textContent=modeLabel();installCenterSwipePad()}
 function setMode(value){if(!["navigation","hybrid","media"].includes(value))return;if(mode!==value){mode=value;renderTV()}else document.getElementById("modeBadge").textContent=modeLabel()}
 function renderConfig(){
   const grid=document.getElementById("configGrid"),palette=document.getElementById("palette")
