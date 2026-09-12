@@ -1,0 +1,67 @@
+name: Shortcut Factory v3
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - feat/shortcut-factory-v3
+    paths:
+      - 'tools/shortcut-factory/**'
+      - '.github/workflows/shortcut-factory-v3.yml'
+  pull_request:
+    paths:
+      - 'tools/shortcut-factory/**'
+      - '.github/workflows/shortcut-factory-v3.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  build-stash:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Secret-free source guard
+        run: |
+          python3 tools/shortcut-factory/validate_secret_free.py \
+            tools/shortcut-factory/shortcuts/STASH.cherri
+
+      - name: Build Cherri v2.3.0
+        run: |
+          git clone --depth 1 --branch v2.3.0 https://github.com/electrikmilk/cherri.git /tmp/cherri
+          (cd /tmp/cherri && go build -o /tmp/cherri-bin .)
+          /tmp/cherri-bin --help >/dev/null
+
+      - name: Compile and sign STASH
+        run: |
+          mkdir -p build
+          /tmp/cherri-bin tools/shortcut-factory/shortcuts/STASH.cherri \
+            --hubsign \
+            --derive-uuids \
+            --output=build/STASH.shortcut
+
+      - name: Verify signed artifact
+        run: |
+          test -s build/STASH.shortcut
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('build/STASH.shortcut')
+          data = p.read_bytes()
+          if not data.startswith(b'AEA1'):
+              raise SystemExit(f'expected signed AEA1 shortcut, got {data[:8]!r}')
+          if len(data) < 500:
+              raise SystemExit(f'artifact unexpectedly small: {len(data)} bytes')
+          print(f'OK: signed STASH artifact, {len(data)} bytes')
+          PY
+
+      - name: Upload STASH
+        uses: actions/upload-artifact@v4
+        with:
+          name: STASH-shortcut
+          path: build/STASH.shortcut
+          if-no-files-found: error
+          retention-days: 14
