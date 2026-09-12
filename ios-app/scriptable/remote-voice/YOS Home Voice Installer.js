@@ -1,7 +1,7 @@
-// YOS Home Voice Installer v0.2
+// YOS Home Voice Installer v0.3
 // Installs the pinned Home Voice adapter + parser without touching existing MY REMOTE files.
 
-const SOURCE_SHA = '55e76fb268a1471583be1ba9116fff59b482e401';
+const SOURCE_SHA = 'af0e21df207990799487108c1a75dc2ced4ba63d';
 const BASE = 'https://raw.githubusercontent.com/yskn0008-bot/ProjectY/' + SOURCE_SHA + '/ios-app/scriptable/remote-voice/';
 const FILES = ['YOS Home Voice Parser.js', 'YOS Home Voice.js'];
 const REQUIRED_EXISTING = ['YOS Tapo H110 Core.js'];
