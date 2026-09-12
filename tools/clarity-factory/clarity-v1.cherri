@@ -5,8 +5,8 @@
 #include 'actions/documents'
 #include 'actions/intelligence'
 
-// Phase 1 runtime: voice -> existing Raw First inbox -> ChatGPT Dictionary.
-// Reuse the current Clarity Inbox.txt fail-safe instead of creating a second raw store.
+// Voice -> existing Raw First inbox -> ChatGPT Dictionary -> fail-closed top-level gate.
+// Existing Clarity Inbox.txt stays the only raw fail-safe; no second raw store is created.
 const originalInput = listen("After Pause", "jp-JP")
 const requestNumber = randomNumber(100000, 999999)
 const rawRecord = text("{CurrentDate}\t{requestNumber}\t{originalInput}\n")
@@ -15,4 +15,23 @@ appendToFile("Clarity Inbox.txt", rawRecord)
 const modelPrompt = text("You are Clarity, the single natural-language gateway for MY WAY by YOS.\nPreserve original_input exactly. Never claim execution. Never invent dates, recipients, prices, accounts, destinations, or device state.\nReturn only a Dictionary. Use only executors idea, memo, task, calendar, reminder, shopping, answer.\nUse only domains life, work, money, home, idea, shopping, communication, knowledge, system, other.\nUse only urgencies now, soon, today, scheduled, background.\nUse only risks low, medium, high, irreversible.\nIf calendar or reminder date/time is ambiguous, set needs_review=true rather than guessing.\nHigh or irreversible risk requires requires_confirmation=true. external_write=true also requires confirmation. Every action status must be planned.\nrequest_id: {requestNumber}\ncurrent_time: {CurrentDate}\noriginal_input: {originalInput}\nReturn keys request_id, original_input, context, interpretation, actions, watches, feedback. context has current_time, current_priorities, relevant_state. interpretation has objective, domains, urgency, risk, confidence. Each action has id, executor, domain, intent, target, content, conditions, destination, requires_confirmation, external_write, needs_review, dependency, status, date_time. Each watch has condition, check_target, action_when_true. feedback has summary, next_action, whisper_line.")
 
 const modelResult = askChatGPT(modelPrompt, false, "Dictionary")
+const parsedResult = getDictionary(modelResult)
+const echoedInput = "{parsedResult['original_input']}"
+const interpretationRaw = getValue(parsedResult, "interpretation")
+const interpretation = getDictionary(interpretationRaw)
+const risk = "{interpretation['risk']}"
+const actionsRaw = getValue(parsedResult, "actions")
+
+if echoedInput != "{originalInput}" {
+    mustOutput("ここだけ確認して", "入力内容の確認が必要です")
+}
+
+if risk == "high" || risk == "irreversible" {
+    mustOutput("ここだけ決めて", "大きな操作なので確認が必要です")
+}
+
+if !actionsRaw {
+    mustOutput("ここだけ確認して", "やることを安全に判断できませんでした")
+}
+
 show("{modelResult}")
