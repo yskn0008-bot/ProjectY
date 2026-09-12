@@ -84,11 +84,16 @@
     const data=readStore();
     const key=activeLifeDate(data);
     const prepared=data.days?.[key]?.lifeFlow?.preparedFromNight;
-    if(!prepared?.sourceDate){node.hidden=true;node.textContent='';return}
-    node.hidden=false;
-    node.textContent=prepared.firstStep
+    if(!prepared?.sourceDate){
+      if(!node.hidden)node.hidden=true;
+      if(node.textContent)node.textContent='';
+      return;
+    }
+    const text=prepared.firstStep
       ?`昨夜の準備済み｜最初の一歩「${clean(prepared.firstStep,70)}」`
       :'昨夜の準備済み｜未完了はありません';
+    if(node.hidden)node.hidden=false;
+    if(node.textContent!==text)node.textContent=text;
   }
 
   function bind(){
