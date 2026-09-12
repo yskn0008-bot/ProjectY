@@ -39,18 +39,31 @@ jobs:
           sudo install -m 0755 "$binary" /usr/local/bin/cherri
           cherri --version
 
-      - name: Compile secret-free ChatGPT Dictionary proof
+      - name: Compile ChatGPT action proof
         shell: bash
         run: |
           set -euo pipefail
           cd tools/clarity-factory
           rm -f ./*_unsigned.shortcut ./*.plist
           cherri clarity-compiler-proof.cherri --skip-sign --debug
-          proof="$(find . -maxdepth 1 -type f -name '*_unsigned.shortcut' -print -quit)"
+          proof="$(find . -maxdepth 1 -type f -name 'Clarity Compiler Proof_unsigned.shortcut' -print -quit)"
           test -n "$proof"
           python3 validate_compiler_proof.py "$proof"
           mkdir -p artifacts
           cp "$proof" artifacts/Clarity-Compiler-Proof-unsigned.shortcut
+
+      - name: Compile Clarity Raw First runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd tools/clarity-factory
+          rm -f './Clarity_unsigned.shortcut' './Clarity.plist'
+          cherri clarity-v1.cherri --skip-sign --debug
+          runtime='./Clarity_unsigned.shortcut'
+          test -f "$runtime"
+          python3 validate_clarity_runtime.py "$runtime"
+          mkdir -p artifacts
+          cp "$runtime" artifacts/Clarity-v1-unsigned.shortcut
 
       - name: Secret scan
         shell: bash
@@ -63,9 +76,11 @@ jobs:
             exit 1
           fi
 
-      - name: Upload unsigned proof
+      - name: Upload unsigned artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: clarity-cherri-compiler-proof
-          path: tools/clarity-factory/artifacts/Clarity-Compiler-Proof-unsigned.shortcut
+          name: clarity-cherri-artifacts
+          path: |
+            tools/clarity-factory/artifacts/Clarity-Compiler-Proof-unsigned.shortcut
+            tools/clarity-factory/artifacts/Clarity-v1-unsigned.shortcut
           if-no-files-found: error
