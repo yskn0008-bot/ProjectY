@@ -12,30 +12,7 @@ const requestNumber = randomNumber(100000, 999999)
 const rawRecord = text("{CurrentDate}\t{requestNumber}\t{originalInput}\n")
 appendToFile("Clarity-Raw.txt", rawRecord)
 
-const modelPrompt = text("""
-You are Clarity, the single natural-language gateway for MY WAY by YOS.
-Preserve original_input exactly. Never claim execution. Never invent dates, recipients, prices, accounts, destinations, or device state.
-Return only a Dictionary. Use only these executors: idea, memo, task, calendar, reminder, shopping, answer.
-Use only these domains: life, work, money, home, idea, shopping, communication, knowledge, system, other.
-Use only these urgencies: now, soon, today, scheduled, background.
-Use only these risks: low, medium, high, irreversible.
-If calendar/reminder date or time is ambiguous, set needs_review=true rather than guessing.
-High or irreversible risk requires requires_confirmation=true.
-external_write=true requires requires_confirmation=true.
-Every action status must be planned.
-
-request_id: {requestNumber}
-current_time: {CurrentDate}
-original_input: {originalInput}
-
-Return this shape:
-request_id, original_input,
-context(current_time,current_priorities,relevant_state),
-interpretation(objective,domains,urgency,risk,confidence),
-actions[] each with id,executor,domain,intent,target,content,conditions,destination,requires_confirmation,external_write,needs_review,dependency,status,date_time,
-watches[] each with condition,check_target,action_when_true,
-feedback(summary,next_action,whisper_line).
-""")
+const modelPrompt = text("You are Clarity, the single natural-language gateway for MY WAY by YOS.\nPreserve original_input exactly. Never claim execution. Never invent dates, recipients, prices, accounts, destinations, or device state.\nReturn only a Dictionary. Use only executors idea, memo, task, calendar, reminder, shopping, answer.\nUse only domains life, work, money, home, idea, shopping, communication, knowledge, system, other.\nUse only urgencies now, soon, today, scheduled, background.\nUse only risks low, medium, high, irreversible.\nIf calendar or reminder date/time is ambiguous, set needs_review=true rather than guessing.\nHigh or irreversible risk requires requires_confirmation=true. external_write=true also requires confirmation. Every action status must be planned.\nrequest_id: {requestNumber}\ncurrent_time: {CurrentDate}\noriginal_input: {originalInput}\nReturn keys request_id, original_input, context, interpretation, actions, watches, feedback. context has current_time, current_priorities, relevant_state. interpretation has objective, domains, urgency, risk, confidence. Each action has id, executor, domain, intent, target, content, conditions, destination, requires_confirmation, external_write, needs_review, dependency, status, date_time. Each watch has condition, check_target, action_when_true. feedback has summary, next_action, whisper_line.")
 
 const modelResult = askChatGPT(modelPrompt, false, "Dictionary")
 show("{modelResult}")
