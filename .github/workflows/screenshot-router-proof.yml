@@ -58,9 +58,24 @@ jobs:
           cherri 'YOS Screenshot Router.cherri' --skip-sign --debug --derive-uuids
           test -s './YOS Screenshot Router_unsigned.shortcut'
           test -s './YOS Screenshot Router.plist'
+          mkdir -p artifacts
+          cp './YOS Screenshot Router_unsigned.shortcut' artifacts/YOS-Screenshot-Router-unsigned-proof.shortcut
           echo 'OK: Screenshot Router compiles on pinned Cherri v2.3.0'
 
+      - name: Upload compile proof
+        uses: actions/upload-artifact@v4
+        with:
+          name: YOS-Screenshot-Router-unsigned-proof
+          path: tools/screenshot-router/artifacts/YOS-Screenshot-Router-unsigned-proof.shortcut
+          if-no-files-found: error
+          retention-days: 14
+
+  # Signing is deliberately not part of PR/push acceptance. GitHub-hosted macOS
+  # runners are not signed into the owner's iCloud account, and public HubSign
+  # availability is external to this repository. A manual dispatch may retry
+  # signing without making an external signing outage look like a code failure.
   sign-shortcut:
+    if: github.event_name == 'workflow_dispatch'
     needs: compile-proof
     runs-on: macos-latest
     timeout-minutes: 10
@@ -100,7 +115,7 @@ jobs:
           cherri --version
           shortcuts help >/dev/null
 
-      - name: Compile and Apple-sign Screenshot Router
+      - name: Compile and sign Screenshot Router
         shell: bash
         run: |
           set -euo pipefail
@@ -123,10 +138,10 @@ jobs:
               raise SystemExit(f'expected signed AEA1 shortcut, got {data[:8]!r}')
           if len(data) < 500:
               raise SystemExit(f'artifact unexpectedly small: {len(data)} bytes')
-          print(f'OK: Apple-signed Screenshot Router artifact, {len(data)} bytes')
+          print(f'OK: signed Screenshot Router artifact, {len(data)} bytes')
           PY
 
-      - name: Upload Shortcut
+      - name: Upload signed Shortcut
         uses: actions/upload-artifact@v4
         with:
           name: YOS-Screenshot-Router-shortcut
