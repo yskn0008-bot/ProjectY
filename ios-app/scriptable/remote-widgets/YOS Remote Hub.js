@@ -1,5 +1,6 @@
-// YOS Remote Hub v5.6 — hybrid BRAVIA controls + user layout editor + safe top frame.
+// YOS Remote Hub v5.7 — hybrid BRAVIA controls + user layout editor + safe top frame.
 // The 12 visible BRAVIA slots are user-configurable and persisted in WebView localStorage.
+// In layout mode, tap a source slot and then a destination slot to swap them directly.
 // Adaptive slots still change by state when their source actions are placed:
 // Navigation: Mute=Up, Rewind=Left, Play=OK, FastForward=Right, Pause=Down.
 // Playback: Mute/Rewind/Play/FastForward/Pause.
@@ -110,7 +111,7 @@ body{padding:0 8px}
 .config-help{font-size:11px;line-height:1.4;color:#a4a6ab;margin:0 0 10px}
 .config-grid,.palette{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.config-grid{margin-bottom:12px}
 .config-slot,.palette-key{height:54px;border:1px solid #2d3137;border-radius:15px;background:#17191d;color:#fff;display:flex;align-items:center;justify-content:center;gap:5px;font-weight:700;font-size:11px}
-.config-slot.selected{border-color:#438eff;background:#24384f}.palette-key.used{opacity:.45}.palette-key .picon{font-size:18px;color:#438eff}.palette-key .plabel{font-size:10px}
+.config-slot.selected{border-color:#438eff;background:#24384f}.palette-key.used{opacity:.45}.palette-key:disabled{opacity:.25}.palette-key .picon{font-size:18px;color:#438eff}.palette-key .plabel{font-size:10px}
 .section-label{font-size:11px;font-weight:800;color:#8e8e93;margin:4px 0 7px}
 @media(max-height:800px){.page{padding-top:max(52px,calc(env(safe-area-inset-top) + 2px));gap:4px}.tv-card:before{top:-29px;height:30px}.card{padding:6px 8px 7px}.head{height:24px;margin-bottom:4px}.title{font-size:17px}.grid{gap:5px}}
 </style></head><body><div class="page">
@@ -118,11 +119,11 @@ body{padding:0 8px}
 <section class="card"><div class="head"><div class="title" onclick="openRemote('light')">照明</div><div class="brand">Panasonic</div></div><div class="grid grid-3">${makeButtons("light", LIGHT_BUTTONS)}</div></section>
 <section class="card"><div class="head"><div class="title" onclick="openRemote('ac')">エアコン</div><div class="ac-meta"><span id="acTemp" class="ac-temp">--°</span><span class="brand">SHARP</span></div></div><div class="grid grid-4">${makeButtons("ac", AC_BUTTONS)}</div></section>
 </div>
-<div id="configLayer" class="config-layer"><div class="config-card"><div class="config-head"><div class="config-title">BRAVIA 配置</div><div class="config-actions"><button class="tool" onclick="resetLayout(event)">初期化</button><button class="tool" onclick="closeLayoutEditor(event)">完了</button></div></div><p class="config-help">変えたい場所を選んで、その下から置きたいボタンをタップ。すでに使っているボタンを選ぶと位置を入れ替えます。</p><div class="section-label">表示中の12枠</div><div id="configGrid" class="config-grid"></div><div class="section-label">使えるBRAVIAボタン</div><div id="palette" class="palette"></div></div></div>
+<div id="configLayer" class="config-layer"><div class="config-card"><div class="config-head"><div class="config-title">BRAVIA 配置</div><div class="config-actions"><button class="tool" onclick="resetLayout(event)">初期化</button><button class="tool" onclick="closeLayoutEditor(event)">完了</button></div></div><p class="config-help">12枠内は「移動元 → 移動先」の順にタップで入れ替え。下の候補から置く場合は、置きたい枠を選んでからボタンをタップ。</p><div class="section-label">表示中の12枠</div><div id="configGrid" class="config-grid"></div><div class="section-label">使えるBRAVIAボタン</div><div id="palette" class="palette"></div></div></div>
 <script>
 const REMOTES=${JSON.stringify(REMOTES)},ACTIONS=${JSON.stringify(TV_ACTIONS)},DEFAULT=${JSON.stringify(TV_DEFAULT)},ADAPTIVE_NAV=${JSON.stringify(ADAPTIVE_NAV)},ADAPTIVE_HYBRID=${JSON.stringify(ADAPTIVE_HYBRID)},ADAPTIVE=new Set(Object.keys(ADAPTIVE_NAV))
 const LAYOUT_KEY="yos.remote.tv.buttons.v52"
-let mode="navigation",nonce=0,pollTimer=null,acTimer=null,selectedSlot=0
+let mode="navigation",nonce=0,pollTimer=null,acTimer=null,selectedSlot=null
 function meta(action){return ACTIONS.find(item=>item.action===action)}
 function validAction(action){return ACTIONS.some(item=>item.action===action)}
 function loadLayout(){let saved=[];try{saved=JSON.parse(localStorage.getItem(LAYOUT_KEY))}catch(_){}const clean=Array.isArray(saved)?saved.filter(validAction).slice(0,12):[];for(const action of DEFAULT){if(clean.length>=12)break;if(!clean.includes(action))clean.push(action)}for(const item of ACTIONS){if(clean.length>=12)break;if(!clean.includes(item.action))clean.push(item.action)}return clean.slice(0,12)}
@@ -134,10 +135,51 @@ function makeTVKey(slot){const action=displayAction(slot),item=meta(action),b=do
 function modeLabel(){return mode==="media"?"動画":mode==="hybrid"?"動画＋操作":"カーソル"}
 function renderTV(){const root=document.getElementById("tvGrid");root.innerHTML="";layout.forEach(slot=>root.appendChild(makeTVKey(slot)));document.getElementById("modeBadge").textContent=modeLabel()}
 function setMode(value){if(!["navigation","hybrid","media"].includes(value))return;if(mode!==value){mode=value;renderTV()}else document.getElementById("modeBadge").textContent=modeLabel()}
-function renderConfig(){const grid=document.getElementById("configGrid"),palette=document.getElementById("palette");if(!grid||!palette)return;grid.innerHTML="";layout.forEach((action,index)=>{const item=meta(action),b=document.createElement("button");b.className="config-slot"+(index===selectedSlot?" selected":"");b.innerHTML='<span class="picon">'+item.icon+'</span><span class="plabel">'+item.label+'</span>';b.onclick=e=>{e.preventDefault();selectedSlot=index;renderConfig()};grid.appendChild(b)});palette.innerHTML="";ACTIONS.forEach(item=>{const b=document.createElement("button");b.className="palette-key"+(layout.includes(item.action)?" used":"");b.innerHTML='<span class="picon">'+item.icon+'</span><span class="plabel">'+item.label+'</span>';b.onclick=e=>{e.preventDefault();const current=layout[selectedSlot],other=layout.indexOf(item.action);if(other>=0&&other!==selectedSlot)layout[other]=current;layout[selectedSlot]=item.action;saveLayout();renderTV();renderConfig()};palette.appendChild(b)})}
-function openLayoutEditor(e){if(e){e.preventDefault();e.stopPropagation()}selectedSlot=Math.max(0,Math.min(layout.length-1,selectedSlot));document.getElementById("configLayer").classList.add("open");renderConfig()}
-function closeLayoutEditor(e){if(e){e.preventDefault();e.stopPropagation()}document.getElementById("configLayer").classList.remove("open")}
-function resetLayout(e){if(e){e.preventDefault();e.stopPropagation()}layout=DEFAULT.slice();selectedSlot=0;saveLayout();renderTV();renderConfig()}
+function renderConfig(){
+  const grid=document.getElementById("configGrid"),palette=document.getElementById("palette")
+  if(!grid||!palette)return
+  grid.innerHTML=""
+  layout.forEach((action,index)=>{
+    const item=meta(action),b=document.createElement("button")
+    b.className="config-slot"+(index===selectedSlot?" selected":"")
+    b.innerHTML='<span class="picon">'+item.icon+'</span><span class="plabel">'+item.label+"</span>"
+    b.onclick=e=>{
+      e.preventDefault()
+      if(selectedSlot===null){selectedSlot=index;renderConfig();return}
+      if(selectedSlot===index){selectedSlot=null;renderConfig();return}
+      const temporary=layout[selectedSlot]
+      layout[selectedSlot]=layout[index]
+      layout[index]=temporary
+      selectedSlot=null
+      saveLayout()
+      renderTV()
+      renderConfig()
+    }
+    grid.appendChild(b)
+  })
+  palette.innerHTML=""
+  ACTIONS.forEach(item=>{
+    const b=document.createElement("button")
+    b.className="palette-key"+(layout.includes(item.action)?" used":"")
+    b.disabled=selectedSlot===null
+    b.innerHTML='<span class="picon">'+item.icon+'</span><span class="plabel">'+item.label+"</span>"
+    b.onclick=e=>{
+      e.preventDefault()
+      if(selectedSlot===null)return
+      const current=layout[selectedSlot],other=layout.indexOf(item.action)
+      if(other>=0&&other!==selectedSlot)layout[other]=current
+      layout[selectedSlot]=item.action
+      selectedSlot=null
+      saveLayout()
+      renderTV()
+      renderConfig()
+    }
+    palette.appendChild(b)
+  })
+}
+function openLayoutEditor(e){if(e){e.preventDefault();e.stopPropagation()}selectedSlot=null;document.getElementById("configLayer").classList.add("open");renderConfig()}
+function closeLayoutEditor(e){if(e){e.preventDefault();e.stopPropagation()}selectedSlot=null;document.getElementById("configLayer").classList.remove("open")}
+function resetLayout(e){if(e){e.preventDefault();e.stopPropagation()}layout=DEFAULT.slice();selectedSlot=null;saveLayout();renderTV();renderConfig()}
 function setACState(s){const el=document.getElementById("acTemp");if(!el)return;if(!s){el.textContent="--°";return}el.textContent=s.dry?"—":(Number.isFinite(Number(s.temp))?Math.round(Number(s.temp))+"°":"--°")}
 function nativeResult(result){if(result&&result.mode)setMode(result.mode);if(result&&Object.prototype.hasOwnProperty.call(result,"ac"))setACState(result.ac)}
 function requestMode(){nativeAction("system","refreshMode","")}function requestAC(){nativeAction("system","refreshAC","")}
