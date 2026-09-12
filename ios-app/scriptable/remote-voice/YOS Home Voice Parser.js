@@ -37,6 +37,11 @@ function parseHomeVoice(input) {
     return fail('unknown_ac');
   }
 
+  const bareTemp = s.match(/^(1[89]|2\d|30)度(?:に)?(?:して|設定して|設定)?$/);
+  if (bareTemp) return ok('ac', 'set_temperature', Number(bareTemp[1]));
+  if (/^(1度|一度)(上げて|あげて)$/.test(s)) return ok('ac', 'temperature_up');
+  if (/^(1度|一度)(下げて|さげて)$/.test(s)) return ok('ac', 'temperature_down');
+
   if (/(電気|照明|ライト)/.test(s)) {
     if (/(消して|切って|オフ)/.test(s)) return ok('light', 'power_off');
     if (/(つけて|付けて|オン|点けて|点灯)/.test(s)) return ok('light', 'power_on');
