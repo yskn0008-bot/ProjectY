@@ -1,9 +1,10 @@
-// YOS Remote Hub v5.8 — play-anchored adaptive cross + user layout editor + safe top frame.
+// YOS Remote Hub v5.9 — play-anchored adaptive cross + original-action fallback + user layout editor.
 // The 12 visible BRAVIA slots are user-configurable and persisted in WebView localStorage.
 // The adaptive cursor cross is geometric: the Play button is always the center anchor.
 // Navigation: Above/Left/Play/Right/Below => Up/Left/OK/Right/Down.
 // Playback: every slot keeps the user's configured button.
 // Hybrid (playback overlay / paused cursor): Above/Below => Up/Down; Left/Play/Right keep configured media actions.
+// When a configured button is temporarily replaced by a cursor action, long-press sends the original configured action.
 
 const CONFIG = {
   tv: { remoteScript: "YOS BRAVIA Remote" },
@@ -98,10 +99,10 @@ body{padding:0 8px}
 .mode-badge{font-size:9px;font-weight:700;color:#8e8e93;min-width:44px;text-align:right}
 .tool{height:28px;padding:0 8px;border:1px solid #353941;border-radius:10px;background:#15171b;color:#438eff;font-size:11px;font-weight:750}
 .grid{display:grid;gap:6px}.grid-3{grid-template-columns:repeat(3,1fr)}.grid-4{grid-template-columns:repeat(4,1fr)}
-.key{min-width:0;height:62px;padding:7px;border:1px solid #26292f;border-radius:18px;background:linear-gradient(145deg,#1c1e22,#15171a);color:#fff;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:4px;touch-action:manipulation}
+.key{position:relative;min-width:0;height:62px;padding:7px;border:1px solid #26292f;border-radius:18px;background:linear-gradient(145deg,#1c1e22,#15171a);color:#fff;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:4px;touch-action:manipulation;-webkit-touch-callout:none;user-select:none}
 .key:active{transform:scale(.97);background:#25282d}.key.adaptive{border-color:#343942}.key.ok{background:#24384f}
 .icon{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Helvetica Neue",sans-serif;font-size:23px;font-weight:500;line-height:1;color:#438eff;font-variant-emoji:text}
-.label{font-size:11px;font-weight:700;white-space:nowrap}.brand{font-size:10px;color:#8d8f95}.ac-temp{font-size:17px;font-weight:800;color:#fff;min-width:34px;text-align:right}
+.label{font-size:11px;font-weight:700;white-space:nowrap}.alt-label{position:absolute;right:7px;bottom:5px;font-size:7px;font-weight:700;color:#777b83;line-height:1;white-space:nowrap}.brand{font-size:10px;color:#8d8f95}.ac-temp{font-size:17px;font-weight:800;color:#fff;min-width:34px;text-align:right}
 .config-layer{display:none;position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.94);padding:max(58px,calc(env(safe-area-inset-top) + 4px)) 10px max(12px,env(safe-area-inset-bottom));overflow:auto}
 .config-layer.open{display:block}
 .config-card{width:100%;max-width:500px;margin:0 auto;padding:12px;border:1px solid #45484e;border-radius:22px;background:#0d0f12}
@@ -117,7 +118,7 @@ body{padding:0 8px}
 <section class="card"><div class="head"><div class="title" onclick="openRemote('light')">照明</div><div class="brand">Panasonic</div></div><div class="grid grid-3">${makeButtons("light", LIGHT_BUTTONS)}</div></section>
 <section class="card"><div class="head"><div class="title" onclick="openRemote('ac')">エアコン</div><div class="ac-meta"><span id="acTemp" class="ac-temp">--°</span><span class="brand">SHARP</span></div></div><div class="grid grid-4">${makeButtons("ac", AC_BUTTONS)}</div></section>
 </div>
-<div id="configLayer" class="config-layer"><div class="config-card"><div class="config-head"><div class="config-title">BRAVIA 配置</div><div class="config-actions"><button class="tool" onclick="resetLayout(event)">初期化</button><button class="tool" onclick="closeLayoutEditor(event)">完了</button></div></div><p class="config-help">12枠内は「移動元 → 移動先」で入れ替え。再生ボタンの上下左右＋再生位置が、自動カーソル切替の十字になります。</p><div class="section-label">表示中の12枠</div><div id="configGrid" class="config-grid"></div><div class="section-label">使えるBRAVIAボタン</div><div id="palette" class="palette"></div></div></div>
+<div id="configLayer" class="config-layer"><div class="config-card"><div class="config-head"><div class="config-title">BRAVIA 配置</div><div class="config-actions"><button class="tool" onclick="resetLayout(event)">初期化</button><button class="tool" onclick="closeLayoutEditor(event)">完了</button></div></div><p class="config-help">12枠内は「移動元 → 移動先」で入れ替え。再生ボタンの上下左右＋再生位置が自動カーソル切替。切替中も長押しで元のボタンを実行できます。</p><div class="section-label">表示中の12枠</div><div id="configGrid" class="config-grid"></div><div class="section-label">使えるBRAVIAボタン</div><div id="palette" class="palette"></div></div></div>
 <script>
 const REMOTES=${JSON.stringify(REMOTES)},ACTIONS=${JSON.stringify(TV_ACTIONS)},DEFAULT=${JSON.stringify(TV_DEFAULT)},CROSS_NAV=${JSON.stringify(CROSS_NAV)}
 const LAYOUT_KEY="yos.remote.tv.buttons.v52"
@@ -147,10 +148,18 @@ function displayAction(index,baseAction){
 }
 function nativeAction(device,action,label,slot=""){nonce++;window.location.href="/__action?device="+encodeURIComponent(device)+"&action="+encodeURIComponent(action||"")+"&label="+encodeURIComponent(label||"")+"&slot="+encodeURIComponent(slot||"")+"&n="+nonce}
 function makeTVKey(baseAction,index){
-  const role=crossRole(index),action=displayAction(index,baseAction),item=meta(action),b=document.createElement("button")
+  const role=crossRole(index),action=displayAction(index,baseAction),item=meta(action),base=meta(baseAction),b=document.createElement("button"),overridden=action!==baseAction
   b.className="key"+(role?" adaptive":"")+(action==="confirm"?" ok":"")
-  b.innerHTML='<span class="icon">'+item.icon+'</span><span class="label">'+item.label+"</span>"
-  b.onclick=e=>{e.preventDefault();e.stopPropagation();if(role)nativeAction("tvAdaptive",baseAction,item.label,role);else nativeAction("tv",baseAction,item.label)}
+  b.innerHTML='<span class="icon">'+item.icon+'</span><span class="label">'+item.label+'</span>'+(overridden?'<span class="alt-label">長押し '+base.label+'</span>':'')
+  let holdTimer=null,suppressUntil=0
+  if(overridden){
+    b.addEventListener("touchstart",()=>{if(holdTimer)clearTimeout(holdTimer);holdTimer=setTimeout(()=>{suppressUntil=Date.now()+900;nativeAction("tv",baseAction,base.label)},550)},{passive:true})
+    const cancelHold=()=>{if(holdTimer){clearTimeout(holdTimer);holdTimer=null}}
+    b.addEventListener("touchend",cancelHold,{passive:true})
+    b.addEventListener("touchcancel",cancelHold,{passive:true})
+    b.oncontextmenu=e=>{e.preventDefault();return false}
+  }
+  b.onclick=e=>{e.preventDefault();e.stopPropagation();if(Date.now()<suppressUntil)return;if(role)nativeAction("tvAdaptive",baseAction,item.label,role);else nativeAction("tv",baseAction,item.label)}
   return b
 }
 function modeLabel(){return mode==="media"?"動画":mode==="hybrid"?"動画＋操作":"カーソル"}
@@ -163,7 +172,7 @@ function renderConfig(){
   layout.forEach((action,index)=>{
     const item=meta(action),b=document.createElement("button")
     b.className="config-slot"+(index===selectedSlot?" selected":"")
-    b.innerHTML='<span class="picon">'+item.icon+'</span><span class="plabel">'+item.label+"</span>"
+    b.innerHTML='<span class="picon">'+item.icon+'</span><span class="plabel">'+item.label+'</span>'
     b.onclick=e=>{
       e.preventDefault()
       if(selectedSlot===null){selectedSlot=index;renderConfig();return}
@@ -181,7 +190,7 @@ function renderConfig(){
     const b=document.createElement("button")
     b.className="palette-key"+(layout.includes(item.action)?" used":"")
     b.disabled=selectedSlot===null
-    b.innerHTML='<span class="picon">'+item.icon+'</span><span class="plabel">'+item.label+"</span>"
+    b.innerHTML='<span class="picon">'+item.icon+'</span><span class="plabel">'+item.label+'</span>'
     b.onclick=e=>{
       e.preventDefault();if(selectedSlot===null)return
       const current=layout[selectedSlot],other=layout.indexOf(item.action)
