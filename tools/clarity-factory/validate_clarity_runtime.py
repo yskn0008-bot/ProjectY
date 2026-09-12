@@ -46,7 +46,7 @@ def validate(path: Path) -> None:
     append_params = actions[append_i].get("WFWorkflowActionParameters", {})
     if append_params.get("WFAppendFileWriteMode") != "Append":
         raise AssertionError("Raw record must append, not replace/prepend")
-    if append_params.get("WFFilePath") != "Clarity-Raw.txt":
+    if append_params.get("WFFilePath") != "Clarity Inbox.txt":
         raise AssertionError(f"unexpected Raw destination: {append_params.get('WFFilePath')!r}")
 
     model_params = actions[model_i].get("WFWorkflowActionParameters", {})
