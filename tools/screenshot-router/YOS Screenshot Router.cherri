@@ -1,0 +1,83 @@
+#define name YOS Screenshot Router
+#define color blue
+
+#include 'actions/media'
+#include 'actions/images'
+#include 'actions/intelligence'
+#include 'actions/documents'
+#include 'actions/calendar'
+
+// Screenshot-first capture layer for iPhone.
+// Intended trigger: Back Tap -> this Shortcut.
+// It deliberately does not create Calendar/Reminder/Shopping/Idea records yet.
+// Raw image is preserved first; classification only determines the routed copy.
+
+const screenshot = takeScreenshot()
+const stamp = formatDate("{CurrentDate}", "Custom", "yyyyMMdd-HHmmss")
+
+createFolder("YOS Screenshots")
+createFolder("YOS Screenshots/Inbox")
+saveFile("YOS Screenshots/Inbox/{stamp}.png", screenshot, false)
+
+const extractedText = extractImageText(screenshot)
+const modelPrompt = text("""
+You classify one iPhone screenshot for MY WAY by YOS.
+Use only visible/OCR evidence. Never invent content that is not present.
+Return only a Dictionary with exactly these keys:
+category, confidence, summary, needs_review.
+
+category must be exactly one of:
+reference, shopping, schedule, idea, work, other.
+
+Definitions:
+reference = information/article/manual/map/reference material kept for later.
+shopping = product, price, sale, stock, purchase candidate, shop item.
+schedule = event, reservation, appointment, date/time/deadline candidate.
+idea = inspiration, concept, note-worthy idea, thing to try or build.
+work = job, client, application, work instruction, business/admin work.
+other = cannot safely classify from the evidence.
+
+Rules:
+- If multiple categories are plausible, choose the main reason the screenshot is worth keeping.
+- If confidence is below 0.70, set category=other and needs_review=true.
+- A schedule-looking screenshot is only a candidate; never claim a calendar event was created.
+- A shopping-looking screenshot is only a candidate; never claim anything was purchased.
+- Do not output secrets or infer hidden/private attributes.
+
+captured_at: {CurrentDate}
+ocr_text:
+{extractedText}
+""")
+
+@modelResult = askChatGPT(modelPrompt, false, "Dictionary")
+@category = @modelResult['category']
+@confidence = @modelResult['confidence']
+@summary = @modelResult['summary']
+@needsReview = @modelResult['needs_review']
+@folder = "未分類"
+
+if @category == "reference" {
+    @folder = "資料"
+}
+if @category == "shopping" {
+    @folder = "買い物"
+}
+if @category == "schedule" {
+    @folder = "予定"
+}
+if @category == "idea" {
+    @folder = "Idea"
+}
+if @category == "work" {
+    @folder = "仕事"
+}
+
+createFolder("YOS Screenshots/{@folder}")
+saveFile("YOS Screenshots/{@folder}/{stamp}.png", screenshot, false)
+
+@indexRecord = "{stamp}\t{@category}\t{@confidence}\t{@needsReview}\t{@summary}\n"
+appendToFile("YOS Screenshots/index.tsv", @indexRecord)
+
+// Success stays silent. The categorized copy is the user-facing result;
+// Inbox is a raw recovery copy until a later verified cleanup layer exists.
+nothing()
