@@ -76,4 +76,6 @@ python3 tools/prot-factory/factory.py job.json \
 - **Factory operational:** one real low-risk prototype is manufactured through the factory without asking the owner to say “continue”.
 - **Physical complete:** any unavoidable iPhone/device step has been completed and verified on the actual device.
 
+The v0.1 core being green does **not** mean the operational factory is complete. Operational completion requires a real prototype to traverse the factory and produce a usable artifact or preview without an owner “continue” step.
+
 Issue: #333
