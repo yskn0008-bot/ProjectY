@@ -1,4 +1,4 @@
-// YOS Remote Hub v6.3 — play-anchored adaptive cross + real center swipe overlay + original-action fallback + user layout editor.
+// YOS Remote Hub v6.3.1 — play-anchored adaptive cross + real center swipe overlay + original-action fallback + user layout editor.
 // The 12 visible BRAVIA slots are user-configurable and persisted in WebView localStorage.
 // The adaptive cursor cross is geometric: the Play button is always the center anchor.
 // Navigation: Above/Left/Play/Right/Below => Up/Left/OK/Right/Down.
