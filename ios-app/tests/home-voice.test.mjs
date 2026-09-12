@@ -51,3 +51,13 @@ test('runtime adapter reuses secure existing boundaries and no hardcoded home se
   assert.doesNotMatch(source, /192\.168\./);
   assert.doesNotMatch(source, /xox[baprs]-|sk-[A-Za-z0-9_-]{20,}|BEGIN [A-Z ]*PRIVATE KEY/);
 });
+
+test('installer pins the verified voice build and leaves existing MY REMOTE files untouched', () => {
+  const source = fs.readFileSync(new URL('../scriptable/remote-voice/YOS Home Voice Installer.js', import.meta.url), 'utf8');
+  assert.match(source, /aa9029f923c17afd937f81eac5dcb3fb2a45f5fb/);
+  assert.match(source, /YOS Home Voice Parser\.js/);
+  assert.match(source, /YOS Home Voice\.js/);
+  assert.match(source, /REQUIRED_EXISTING = \['YOS Tapo H110 Core\.js'\]/);
+  assert.doesNotMatch(source, /YOS Remote Hub\.js|YOS AC Remote\.js|YOS Light Remote\.js/);
+  assert.doesNotMatch(source, /192\.168\.|xox[baprs]-|sk-[A-Za-z0-9_-]{20,}|BEGIN [A-Z ]*PRIVATE KEY/);
+});
