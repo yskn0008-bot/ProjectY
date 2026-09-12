@@ -38,12 +38,13 @@ jobs:
       - name: Check Life JavaScript syntax
         run: |
           node --check life/home-v1.js
+          node --check life/daily-flow-orchestrator-v1.js
           node --check life/service-worker.js
           node --check life/yos-suite-v3.js
           sed -n '/^<script>$/,/^<\/script>$/p' life/index.html | sed '1d;$d' | node --check
 
       - name: Run Life data and cache boundary tests
-        run: node --test life/tests/home-priority-data.test.mjs life/tests/life-calendar-contract.test.mjs life/tests/daily-flow-contract.test.mjs life/tests/service-worker-cache-scope.test.mjs
+        run: node --test life/tests/home-priority-data.test.mjs life/tests/life-calendar-contract.test.mjs life/tests/daily-flow-contract.test.mjs life/tests/daily-flow-orchestrator.test.mjs life/tests/service-worker-cache-scope.test.mjs
 
   life-browser-smoke:
     name: Life iPhone smoke (${{ matrix.browser }})
