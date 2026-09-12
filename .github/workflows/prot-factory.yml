@@ -110,13 +110,48 @@ jobs:
           assert data['failure_fingerprint'], data
           PY
 
-      - name: Upload synthetic results
+      - name: Real no-wait reuse proof on MY WAY NOW Widget
+        shell: bash
+        run: |
+          cat > /tmp/prot-real-reuse.json <<'JSON'
+          {
+            "job_id": "my-way-now-widget-reuse-proof",
+            "idea": "既存のMY WAY Widgetを作り直さず工場経由で試用可能にしたい",
+            "desired_state": "既存成果物を検証して本人の途中返信なしでtrial_readyへ",
+            "known_assets": ["MY WAY NOW Widget", "YOS Tasks"],
+            "risk": "low",
+            "lane": "unknown",
+            "base_sha": "${{ github.sha }}",
+            "status": "intake",
+            "recovery_count": 0,
+            "max_recovery": 2,
+            "recovery_fingerprints": [],
+            "reuse_available": true,
+            "artifact_path": "widgets/MY_WAY_NOW_WIDGET_v1.js",
+            "simulate_first_failure": true
+          }
+          JSON
+          python3 tools/prot-factory/runner.py /tmp/prot-real-reuse.json --repo-root . > /tmp/prot-real-reuse-result.json
+          node --check widgets/MY_WAY_NOW_WIDGET_v1.js
+          python3 - <<'PY'
+          import json
+          data = json.load(open('/tmp/prot-real-reuse-result.json', encoding='utf-8'))
+          assert data['status'] == 'trial_ready', data
+          assert data['lane'] == 'reuse', data
+          assert data['recovery_count'] == 1, data
+          assert data['recovered_from_intentional_failure'] is True, data
+          assert data['owner_continue_required'] is False, data
+          assert data['artifact_sha256'], data
+          PY
+
+      - name: Upload factory results
         uses: actions/upload-artifact@v4
         with:
-          name: prot-factory-synthetic-results
+          name: prot-factory-results
           path: |
             /tmp/prot-low-result.json
             /tmp/prot-high-result.json
             /tmp/prot-recovery-result.json
+            /tmp/prot-real-reuse-result.json
           if-no-files-found: error
           retention-days: 7
