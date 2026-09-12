@@ -17,6 +17,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Validate model contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m json.tool tools/clarity-factory/clarity-spec.json >/dev/null
+          python3 -m unittest discover -s tools/clarity-factory/tests -v
+
       - name: Install pinned Cherri v2.3.0
         shell: bash
         run: |
