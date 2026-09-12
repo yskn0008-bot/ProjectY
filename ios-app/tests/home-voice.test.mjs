@@ -59,9 +59,9 @@ test('runtime adapter reuses secure existing boundaries and supports direct Japa
   assert.doesNotMatch(source, /xox[baprs]-|sk-[A-Za-z0-9_-]{20,}|BEGIN [A-Z ]*PRIVATE KEY/);
 });
 
-test('installer pins the voice build and leaves existing MY REMOTE files untouched', () => {
+test('installer pins the natural-phrase voice build and leaves existing MY REMOTE files untouched', () => {
   const source = fs.readFileSync(new URL('../scriptable/remote-voice/YOS Home Voice Installer.js', import.meta.url), 'utf8');
-  assert.match(source, /55e76fb268a1471583be1ba9116fff59b482e401/);
+  assert.match(source, /af0e21df207990799487108c1a75dc2ced4ba63d/);
   assert.match(source, /YOS Home Voice Parser\.js/);
   assert.match(source, /YOS Home Voice\.js/);
   assert.match(source, /REQUIRED_EXISTING = \['YOS Tapo H110 Core\.js'\]/);
