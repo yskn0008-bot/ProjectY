@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-12T22:30:07+09:00",
+  "updated_at": "2026-09-13T01:53:28+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -13,64 +13,54 @@
   },
   "inbox": [
     {
-      "id": "github-pr-280",
-      "title": "PR #280 feat(yos-ai): add Point / Event Foundation v1 contract",
+      "id": "github-pr-329",
+      "title": "PR #329 feat(life): connect Morning Flow and Night Reset",
+      "type": "GitHub PR",
+      "status": "review",
+      "priority": 1,
+      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/329",
+      "updated_at": "2026-09-12T16:50:27Z"
+    },
+    {
+      "id": "github-pr-325",
+      "title": "PR #325 Draft: prove template-free Clarity ChatGPT action with Cherri (#314)",
       "type": "GitHub PR",
       "status": "draft",
       "priority": 2,
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/280",
-      "updated_at": "2026-09-05T04:18:56Z"
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/325",
+      "updated_at": "2026-09-12T16:51:46Z"
     },
     {
-      "id": "github-pr-293",
-      "title": "PR #293 BRAVIA: add free Scriptable remote fallback",
+      "id": "github-pr-326",
+      "title": "PR #326 proto(review): weekly continue / stop / automate candidates",
       "type": "GitHub PR",
       "status": "draft",
       "priority": 2,
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/293",
-      "updated_at": "2026-09-06T21:11:10Z"
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/326",
+      "updated_at": "2026-09-12T16:50:34Z"
     },
     {
-      "id": "github-pr-305",
-      "title": "PR #305 feat(my-way): YOS微調整指示書 v1を反映",
+      "id": "github-pr-327",
+      "title": "PR #327 proto(review): friction auto-discovery candidate engine",
       "type": "GitHub PR",
       "status": "draft",
       "priority": 2,
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/305",
-      "updated_at": "2026-09-09T22:00:10Z"
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/327",
+      "updated_at": "2026-09-12T16:50:42Z"
     },
     {
-      "id": "github-pr-307",
-      "title": "PR #307 PoC: auto-generate and sign an iPhone Shortcut",
+      "id": "github-pr-330",
+      "title": "PR #330 Prototype: YOS Screenshot Router v1",
       "type": "GitHub PR",
       "status": "draft",
       "priority": 2,
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/307",
-      "updated_at": "2026-09-10T04:35:09Z"
-    },
-    {
-      "id": "github-pr-311",
-      "title": "PR #311 feat(remote): MY REMOTE UX v2",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/311",
-      "updated_at": "2026-09-12T10:16:11Z"
-    },
-    {
-      "id": "github-issue-10",
-      "title": "Issue #10 Mission Control v2：GitHubのIssue・PR・Commitを自動集約する",
-      "type": "GitHub Issue",
-      "status": "open",
-      "priority": 3,
-      "next_action": "完成条件を確認し、次の安全な実装を1件進める",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/10",
-      "updated_at": "2026-07-17T11:08:22Z"
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/330",
+      "updated_at": "2026-09-12T16:53:24Z"
     },
     {
       "id": "github-issue-110",
@@ -103,16 +93,6 @@
       "updated_at": "2026-08-02T05:43:26Z"
     },
     {
-      "id": "github-issue-158",
-      "title": "Issue #158 HJ / YOS思想・体験設計の正式引き継ぎ",
-      "type": "GitHub Issue",
-      "status": "open",
-      "priority": 3,
-      "next_action": "完成条件を確認し、次の安全な実装を1件進める",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/158",
-      "updated_at": "2026-08-01T12:24:21Z"
-    },
-    {
       "id": "github-issue-214",
       "title": "Issue #214 [YOS→Codex] Taxi開発キュー：PR #213のActions実行・修正",
       "type": "GitHub Issue",
@@ -123,24 +103,54 @@
       "updated_at": "2026-08-04T01:39:56Z"
     },
     {
-      "id": "github-issue-4",
-      "title": "Issue #4 YOS Mission Control v1.0を構築する",
+      "id": "github-issue-225",
+      "title": "Issue #225 [YOS→Codex] Life Service Workerの相互キャッシュ削除を止める",
       "type": "GitHub Issue",
       "status": "open",
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/4",
-      "updated_at": "2026-07-17T10:35:18Z"
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/225",
+      "updated_at": "2026-08-09T11:24:38Z"
     },
     {
-      "id": "github-issue-40",
-      "title": "Issue #40 YOS Taxiの成果を30営業日で証明する",
+      "id": "github-issue-229",
+      "title": "Issue #229 Mission Controlに各開発の進捗率と残り時間を常時表示する",
       "type": "GitHub Issue",
       "status": "open",
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/40",
-      "updated_at": "2026-07-18T04:03:30Z"
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/229",
+      "updated_at": "2026-08-11T01:57:47Z"
+    },
+    {
+      "id": "github-issue-230",
+      "title": "Issue #230 [YOS→Codex] HJを「人生の地図＋12アーキタイプ」へ改修",
+      "type": "GitHub Issue",
+      "status": "open",
+      "priority": 3,
+      "next_action": "完成条件を確認し、次の安全な実装を1件進める",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/230",
+      "updated_at": "2026-08-22T13:41:39Z"
+    },
+    {
+      "id": "github-issue-232",
+      "title": "Issue #232 [YOS HQ] ProjectY自動司令部 v1｜毎時監視・安全な自動継続",
+      "type": "GitHub Issue",
+      "status": "open",
+      "priority": 3,
+      "next_action": "完成条件を確認し、次の安全な実装を1件進める",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
+      "updated_at": "2026-09-12T16:52:06Z"
+    },
+    {
+      "id": "github-issue-234",
+      "title": "Issue #234 [YOS HQ] Life｜「おはよう→今日を生きる→おやすみ」を一続きにする統合体験",
+      "type": "GitHub Issue",
+      "status": "open",
+      "priority": 3,
+      "next_action": "完成条件を確認し、次の安全な実装を1件進める",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/234",
+      "updated_at": "2026-08-22T13:41:40Z"
     },
     {
       "id": "github-issue-51",
@@ -151,16 +161,6 @@
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/51",
       "updated_at": "2026-09-04T23:21:43Z"
-    },
-    {
-      "id": "github-issue-86",
-      "title": "Issue #86 YOSナビ v35 本番自動学習を有効化",
-      "type": "GitHub Issue",
-      "status": "open",
-      "priority": 3,
-      "next_action": "完成条件を確認し、次の安全な実装を1件進める",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/86",
-      "updated_at": "2026-07-30T17:33:32Z"
     }
   ],
   "recently_completed": [
@@ -224,7 +224,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #311をレビューして公開判断する",
+      "next_action": "PR #329をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-12T22:30:07+09:00",
+      "last_update": "2026-09-13T01:53:28+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -309,13 +309,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 36件・Open PR 6件を自動同期中",
+      "next_action": "Open Issue 31件・Open PR 19件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-12T22:30:07+09:00",
+      "last_update": "2026-09-13T01:53:28+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -329,7 +329,7 @@
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #311をレビューして公開判断する",
+      "next_action": "PR #329をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-12T22:30:07+09:00",
+      "last_update": "2026-09-13T01:53:28+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "a5ff052aa3506e88db78c53d70c1bf8c90b5697ea396bcf30dcdaa03dbd19224"
+  "github_snapshot_hash": "e38ebe9102977d5a11e56e23694284eb2822972e1c867c01a6042548867bca38"
 }
