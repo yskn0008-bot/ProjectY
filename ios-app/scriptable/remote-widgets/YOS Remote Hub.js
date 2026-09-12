@@ -1,10 +1,9 @@
-// YOS Remote Hub v5.7 — hybrid BRAVIA controls + user layout editor + safe top frame.
+// YOS Remote Hub v5.8 — play-anchored adaptive cross + user layout editor + safe top frame.
 // The 12 visible BRAVIA slots are user-configurable and persisted in WebView localStorage.
-// In layout mode, tap a source slot and then a destination slot to swap them directly.
-// Adaptive slots still change by state when their source actions are placed:
-// Navigation: Mute=Up, Rewind=Left, Play=OK, FastForward=Right, Pause=Down.
-// Playback: Mute/Rewind/Play/FastForward/Pause.
-// Playback overlay / paused cursor: Up=Up, Rewind=Rewind, Play=Play, FastForward=FastForward, Down=Down.
+// The adaptive cursor cross is geometric: the Play button is always the center anchor.
+// Navigation: Above/Left/Play/Right/Below => Up/Left/OK/Right/Down.
+// Playback: every slot keeps the user's configured button.
+// Hybrid (playback overlay / paused cursor): Above/Below => Up/Down; Left/Play/Right keep configured media actions.
 
 const CONFIG = {
   tv: { remoteScript: "YOS BRAVIA Remote" },
@@ -45,9 +44,8 @@ const TV_DEFAULT = [
   "back", "pause", "stop"
 ]
 
-const ADAPTIVE_NAV = { mute:"up", rewind:"left", play:"confirm", fastForward:"right", pause:"down" }
-const ADAPTIVE_HYBRID = { mute:"up", rewind:"rewind", play:"play", fastForward:"fastForward", pause:"down" }
-const ADAPTIVE_SLOTS = new Set(Object.keys(ADAPTIVE_NAV))
+const CROSS_NAV = { up:"up", left:"left", center:"confirm", right:"right", down:"down" }
+const HYBRID_CURSOR_ROLES = new Set(["up","down"])
 
 const LIGHT_BUTTONS = [
   ["on","⏻","点灯"],["off","○","消灯"],["all","◎","全灯"],
@@ -119,9 +117,9 @@ body{padding:0 8px}
 <section class="card"><div class="head"><div class="title" onclick="openRemote('light')">照明</div><div class="brand">Panasonic</div></div><div class="grid grid-3">${makeButtons("light", LIGHT_BUTTONS)}</div></section>
 <section class="card"><div class="head"><div class="title" onclick="openRemote('ac')">エアコン</div><div class="ac-meta"><span id="acTemp" class="ac-temp">--°</span><span class="brand">SHARP</span></div></div><div class="grid grid-4">${makeButtons("ac", AC_BUTTONS)}</div></section>
 </div>
-<div id="configLayer" class="config-layer"><div class="config-card"><div class="config-head"><div class="config-title">BRAVIA 配置</div><div class="config-actions"><button class="tool" onclick="resetLayout(event)">初期化</button><button class="tool" onclick="closeLayoutEditor(event)">完了</button></div></div><p class="config-help">12枠内は「移動元 → 移動先」の順にタップで入れ替え。下の候補から置く場合は、置きたい枠を選んでからボタンをタップ。</p><div class="section-label">表示中の12枠</div><div id="configGrid" class="config-grid"></div><div class="section-label">使えるBRAVIAボタン</div><div id="palette" class="palette"></div></div></div>
+<div id="configLayer" class="config-layer"><div class="config-card"><div class="config-head"><div class="config-title">BRAVIA 配置</div><div class="config-actions"><button class="tool" onclick="resetLayout(event)">初期化</button><button class="tool" onclick="closeLayoutEditor(event)">完了</button></div></div><p class="config-help">12枠内は「移動元 → 移動先」で入れ替え。再生ボタンの上下左右＋再生位置が、自動カーソル切替の十字になります。</p><div class="section-label">表示中の12枠</div><div id="configGrid" class="config-grid"></div><div class="section-label">使えるBRAVIAボタン</div><div id="palette" class="palette"></div></div></div>
 <script>
-const REMOTES=${JSON.stringify(REMOTES)},ACTIONS=${JSON.stringify(TV_ACTIONS)},DEFAULT=${JSON.stringify(TV_DEFAULT)},ADAPTIVE_NAV=${JSON.stringify(ADAPTIVE_NAV)},ADAPTIVE_HYBRID=${JSON.stringify(ADAPTIVE_HYBRID)},ADAPTIVE=new Set(Object.keys(ADAPTIVE_NAV))
+const REMOTES=${JSON.stringify(REMOTES)},ACTIONS=${JSON.stringify(TV_ACTIONS)},DEFAULT=${JSON.stringify(TV_DEFAULT)},CROSS_NAV=${JSON.stringify(CROSS_NAV)}
 const LAYOUT_KEY="yos.remote.tv.buttons.v52"
 let mode="navigation",nonce=0,pollTimer=null,acTimer=null,selectedSlot=null
 function meta(action){return ACTIONS.find(item=>item.action===action)}
@@ -129,11 +127,34 @@ function validAction(action){return ACTIONS.some(item=>item.action===action)}
 function loadLayout(){let saved=[];try{saved=JSON.parse(localStorage.getItem(LAYOUT_KEY))}catch(_){}const clean=Array.isArray(saved)?saved.filter(validAction).slice(0,12):[];for(const action of DEFAULT){if(clean.length>=12)break;if(!clean.includes(action))clean.push(action)}for(const item of ACTIONS){if(clean.length>=12)break;if(!clean.includes(item.action))clean.push(item.action)}return clean.slice(0,12)}
 let layout=loadLayout()
 function saveLayout(){try{localStorage.setItem(LAYOUT_KEY,JSON.stringify(layout))}catch(_){}}
-function displayAction(slot){if(!ADAPTIVE.has(slot))return slot;if(mode==="navigation")return ADAPTIVE_NAV[slot];if(mode==="hybrid")return ADAPTIVE_HYBRID[slot];return slot}
-function nativeAction(device,action,label,slot=""){nonce++;window.location.href="/__action?device="+encodeURIComponent(device)+"&action="+encodeURIComponent(action)+"&label="+encodeURIComponent(label||"")+"&slot="+encodeURIComponent(slot||"")+"&n="+nonce}
-function makeTVKey(slot){const action=displayAction(slot),item=meta(action),b=document.createElement("button");b.className="key"+(ADAPTIVE.has(slot)?" adaptive":"")+(action==="confirm"?" ok":"");b.innerHTML='<span class="icon">'+item.icon+'</span><span class="label">'+item.label+"</span>";b.onclick=e=>{e.preventDefault();e.stopPropagation();if(ADAPTIVE.has(slot))nativeAction("tvAdaptive","",item.label,slot);else nativeAction("tv",action,item.label)};return b}
+function crossRole(index){
+  const center=layout.indexOf("play")
+  if(center<0)return null
+  const cr=Math.floor(center/3),cc=center%3,r=Math.floor(index/3),c=index%3
+  if(index===center)return "center"
+  if(r===cr-1&&c===cc)return "up"
+  if(r===cr+1&&c===cc)return "down"
+  if(r===cr&&c===cc-1)return "left"
+  if(r===cr&&c===cc+1)return "right"
+  return null
+}
+function displayAction(index,baseAction){
+  const role=crossRole(index)
+  if(!role)return baseAction
+  if(mode==="navigation")return CROSS_NAV[role]
+  if(mode==="hybrid"&&(role==="up"||role==="down"))return CROSS_NAV[role]
+  return baseAction
+}
+function nativeAction(device,action,label,slot=""){nonce++;window.location.href="/__action?device="+encodeURIComponent(device)+"&action="+encodeURIComponent(action||"")+"&label="+encodeURIComponent(label||"")+"&slot="+encodeURIComponent(slot||"")+"&n="+nonce}
+function makeTVKey(baseAction,index){
+  const role=crossRole(index),action=displayAction(index,baseAction),item=meta(action),b=document.createElement("button")
+  b.className="key"+(role?" adaptive":"")+(action==="confirm"?" ok":"")
+  b.innerHTML='<span class="icon">'+item.icon+'</span><span class="label">'+item.label+"</span>"
+  b.onclick=e=>{e.preventDefault();e.stopPropagation();if(role)nativeAction("tvAdaptive",baseAction,item.label,role);else nativeAction("tv",baseAction,item.label)}
+  return b
+}
 function modeLabel(){return mode==="media"?"動画":mode==="hybrid"?"動画＋操作":"カーソル"}
-function renderTV(){const root=document.getElementById("tvGrid");root.innerHTML="";layout.forEach(slot=>root.appendChild(makeTVKey(slot)));document.getElementById("modeBadge").textContent=modeLabel()}
+function renderTV(){const root=document.getElementById("tvGrid");root.innerHTML="";layout.forEach((action,index)=>root.appendChild(makeTVKey(action,index)));document.getElementById("modeBadge").textContent=modeLabel()}
 function setMode(value){if(!["navigation","hybrid","media"].includes(value))return;if(mode!==value){mode=value;renderTV()}else document.getElementById("modeBadge").textContent=modeLabel()}
 function renderConfig(){
   const grid=document.getElementById("configGrid"),palette=document.getElementById("palette")
@@ -151,9 +172,7 @@ function renderConfig(){
       layout[selectedSlot]=layout[index]
       layout[index]=temporary
       selectedSlot=null
-      saveLayout()
-      renderTV()
-      renderConfig()
+      saveLayout();renderTV();renderConfig()
     }
     grid.appendChild(b)
   })
@@ -164,15 +183,12 @@ function renderConfig(){
     b.disabled=selectedSlot===null
     b.innerHTML='<span class="picon">'+item.icon+'</span><span class="plabel">'+item.label+"</span>"
     b.onclick=e=>{
-      e.preventDefault()
-      if(selectedSlot===null)return
+      e.preventDefault();if(selectedSlot===null)return
       const current=layout[selectedSlot],other=layout.indexOf(item.action)
       if(other>=0&&other!==selectedSlot)layout[other]=current
       layout[selectedSlot]=item.action
       selectedSlot=null
-      saveLayout()
-      renderTV()
-      renderConfig()
+      saveLayout();renderTV();renderConfig()
     }
     palette.appendChild(b)
   })
@@ -210,6 +226,6 @@ async function readScript(scriptName){for(const manager of [FileManager.iCloud()
 async function runExisting(scriptName,action){const source=await readScript(scriptName);const fakeArgs={queryParameters:{action},shortcutParameter:null,widgetParameter:null,plainTexts:[],urls:[],fileURLs:[],images:[],notification:null};const fakeScript={name:()=>scriptName,complete:()=>{},setShortcutOutput:()=>{},setWidget:()=>{}};const fakeConfig={runsInApp:true,runsInWidget:false,runsWithSiri:false,runsInNotification:false};const AsyncFunction=Object.getPrototypeOf(async function(){}).constructor;await new AsyncFunction("args","Script","config",source)(fakeArgs,fakeScript,fakeConfig)}
 function parseQuery(url){const output={},position=String(url).indexOf("?");if(position<0)return output;String(url).slice(position+1).split("&").forEach(pair=>{const sep=pair.indexOf("="),key=sep>=0?pair.slice(0,sep):pair,value=sep>=0?pair.slice(sep+1):"";output[decodeURIComponent(key)]=decodeURIComponent(value)});return output}
 const queue=[];let running=false,web=null
-async function processQueue(){if(running)return;running=true;while(queue.length){const item=queue.shift();let result;try{if(item.device==="system"&&item.action==="refreshMode")result={ok:true,mode:await inferMode()};else if(item.device==="system"&&item.action==="refreshAC")result={ok:true,ac:await readACSummary()};else if(item.device==="tvAdaptive"){const currentMode=await inferMode();const map=currentMode==="navigation"?ADAPTIVE_NAV:currentMode==="hybrid"?ADAPTIVE_HYBRID:null;const action=map?(map[item.slot]||item.slot):item.slot;await sonyAction(action);result={ok:true,label:item.label,action,mode:await inferMode()}}else if(item.device==="tv"){await sonyAction(item.action);result={ok:true,label:item.label,mode:await inferMode()}}else if(item.device==="light"){await runExisting(CONFIG.light.actionScript,item.action);result={ok:true,label:item.label}}else if(item.device==="ac"){await runExisting(CONFIG.ac.actionScript,item.action);result={ok:true,label:item.label,ac:await readACSummary()}}else throw new Error("不明なデバイスです")}catch(error){result={ok:false,message:error&&error.message?error.message:String(error)}}try{await web.evaluateJavaScript("nativeResult("+JSON.stringify(result)+")")}catch(_){}}running=false}
+async function processQueue(){if(running)return;running=true;while(queue.length){const item=queue.shift();let result;try{if(item.device==="system"&&item.action==="refreshMode")result={ok:true,mode:await inferMode()};else if(item.device==="system"&&item.action==="refreshAC")result={ok:true,ac:await readACSummary()};else if(item.device==="tvAdaptive"){const currentMode=await inferMode();let action=item.action;if(currentMode==="navigation"&&CROSS_NAV[item.slot])action=CROSS_NAV[item.slot];else if(currentMode==="hybrid"&&HYBRID_CURSOR_ROLES.has(item.slot))action=CROSS_NAV[item.slot];await sonyAction(action);result={ok:true,label:item.label,action,mode:await inferMode()}}else if(item.device==="tv"){await sonyAction(item.action);result={ok:true,label:item.label,mode:await inferMode()}}else if(item.device==="light"){await runExisting(CONFIG.light.actionScript,item.action);result={ok:true,label:item.label}}else if(item.device==="ac"){await runExisting(CONFIG.ac.actionScript,item.action);result={ok:true,label:item.label,ac:await readACSummary()}}else throw new Error("不明なデバイスです")}catch(error){result={ok:false,message:error&&error.message?error.message:String(error)}}try{await web.evaluateJavaScript("nativeResult("+JSON.stringify(result)+")")}catch(_){}}running=false}
 web=new WebView();web.shouldAllowRequest=request=>{const url=String(request.url||"");if(!url.startsWith("https://yos-remote.local/__action?"))return true;const query=parseQuery(url);queue.push({device:query.device,action:query.action,label:query.label,slot:query.slot});processQueue();return false}
 await web.loadHTML(html,"https://yos-remote.local/");try{await web.evaluateJavaScript("setMode("+JSON.stringify(await inferMode())+")")}catch(_){}try{await web.evaluateJavaScript("setACState("+JSON.stringify(await readACSummary())+")")}catch(_){}await web.present(true);Script.complete()
