@@ -175,7 +175,7 @@ try {
   assert.equal(await page.locator('#storyPanel input:visible, #storyPanel textarea:visible, #storyPanel select:visible').count(), 0, 'これまでを見る画面に入力欄が露出している');
   await page.screenshot({ path: `test-results/hj-past-read-first-${browserName}.png`, fullPage: true });
 
-  await page.locator('#editProfile').click();
+  await page.getByRole('button', { name: '設定・メニュー', exact: true }).click();
   assert.equal(await page.locator('#onboardingDialog').evaluate((node) => node.open), true, '設定を任意で開けない');
   assert.equal(await page.locator('#profileStage').inputValue(), '', '新規利用者の現在地が「分からない」にならない');
 

@@ -828,9 +828,15 @@
       pages.record.appendChild(details);
     }
     [routineCard,yosCard].filter(Boolean).forEach(card=>pages.improve.appendChild(card));
-    layout.remove();
-    sunrise.remove();
-    week.remove();
+    // Legacy renderers still refresh these nodes after saves. Keep them inert,
+    // outside the visible app, until those renderers are retired together.
+    const legacy=document.createElement('div');
+    legacy.id='lifeLegacyRenderTargets';
+    legacy.hidden=true;
+    legacy.inert=true;
+    legacy.style.setProperty('display','none','important');
+    legacy.append(layout,sunrise,week);
+    document.body.appendChild(legacy);
 
     renderNav(nav);
     const requested=location.hash.slice(1),remembered=localStorage.getItem(PAGE_KEY);
