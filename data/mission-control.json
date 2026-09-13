@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-13T19:06:09+09:00",
+  "updated_at": "2026-09-13T20:18:15+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -20,7 +20,7 @@
       "priority": 2,
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/305",
-      "updated_at": "2026-09-13T04:45:22Z"
+      "updated_at": "2026-09-13T10:41:51Z"
     },
     {
       "id": "github-pr-320",
@@ -50,7 +50,7 @@
       "priority": 2,
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/325",
-      "updated_at": "2026-09-13T00:14:08Z"
+      "updated_at": "2026-09-13T10:50:32Z"
     },
     {
       "id": "github-pr-335",
@@ -140,7 +140,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-09-13T04:45:32Z"
+      "updated_at": "2026-09-13T11:18:01Z"
     },
     {
       "id": "github-issue-234",
@@ -164,6 +164,13 @@
     }
   ],
   "recently_completed": [
+    {
+      "id": "github-commit-e33b5d65ec51",
+      "title": "feat(trial): add iPhone Trial Pack",
+      "completed_at": "2026-09-13T11:18:04Z",
+      "result": "GitHub mainへ反映（e33b5d6）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/e33b5d65ec516e9265249ee67509d54d1327c889"
+    },
     {
       "id": "github-commit-92b3a6d93218",
       "title": "chore(remote): organize Scriptable remote scripts safely (#332)",
@@ -191,13 +198,6 @@
       "completed_at": "2026-09-12T21:06:33Z",
       "result": "GitHub mainへ反映（0e798b0）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/0e798b0e9530ec44fffd9b10bf66187743f39b51"
-    },
-    {
-      "id": "github-commit-43923e66b44c",
-      "title": "feat(remote): complete MY REMOTE UX v2",
-      "completed_at": "2026-09-12T20:49:17Z",
-      "result": "GitHub mainへ反映（43923e6）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/43923e66b44ce56e87168aae65afb91d660359e2"
     },
     {
       "id": "complete-002",
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-13T19:06:09+09:00",
+      "last_update": "2026-09-13T20:18:15+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -315,7 +315,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-13T19:06:09+09:00",
+      "last_update": "2026-09-13T20:18:15+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-13T19:06:09+09:00",
+      "last_update": "2026-09-13T20:18:15+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "85d87dabc6dab0bad28e69afbfde9aca4cd663451911701bc52973f8b012e18f"
+  "github_snapshot_hash": "8017fe28d8c8c220a612320eeb0dc752f0b3b2d9fdc72cffd8424ac29c6988ee"
 }
