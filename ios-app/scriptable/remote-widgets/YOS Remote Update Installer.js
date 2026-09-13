@@ -1,9 +1,9 @@
-// YOS Remote Update Installer v0.3
+// YOS Remote Update Installer v0.4
 // Transactional updater for MY REMOTE UX v2.
 // Downloads from a fixed verified commit, stages every file, snapshots the old set,
 // then switches live files. Any caught failure rolls back; interrupted commits recover on next run.
 
-const SOURCE_SHA = '71d6832551d63a1b0f0eda2e9f1d67b1d012369a';
+const SOURCE_SHA = '4741b4f13f014e3d13d40ffb2cd084c3bfe6eba9';
 const BASE = 'https://raw.githubusercontent.com/yskn0008-bot/ProjectY/' + SOURCE_SHA + '/ios-app/scriptable/remote-widgets/';
 const FILES = [
   'YOS Tapo H110 Core.js',
