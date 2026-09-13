@@ -2,8 +2,17 @@
 // Scriptable
 // Same script for all 5 widgets.
 // Widget Parameter: HOME / LIFE / MONEY / HJ / IDEA
+// HOME reuses the private YOS Tasks widget feed and existing Keychain token.
+// Small widgets are navigation/read surfaces only and do not expose private task data.
 
 const PARAM = (args.widgetParameter || "HOME").trim().toUpperCase();
+
+const CONFIG = {
+  feedUrl: "https://project-y-yos-ai.vercel.app/api/yos/widget",
+  keychainKey: "MY_WAY_WIDGET_TOKEN",
+  cacheFile: "my-way-now-widget-cache-v1.json",
+  refreshMinutes: 15,
+};
 
 const URLS = {
   HOME: "https://yskn0008-bot.github.io/ProjectY/yos/",
@@ -74,6 +83,8 @@ const THEMES = {
 
 const key = THEMES[PARAM] ? PARAM : "HOME";
 const theme = THEMES[key];
+const fm = FileManager.local();
+const cachePath = fm.joinPath(fm.documentsDirectory(), CONFIG.cacheFile);
 
 function c(hex, alpha = 1) { return new Color(hex, alpha); }
 function font(size, weight = "regular") {
@@ -83,12 +94,57 @@ function font(size, weight = "regular") {
   return Font.systemFont(size);
 }
 
-function symbol(name, size, color) {
-  const sf = SFSymbol.named(name);
-  sf.applyFont(Font.systemFont(size));
-  const image = sf.image;
-  const stack = new StackPlaceholder();
-  return { image, size, color };
+function cleanTitle(value) {
+  return String(value || "").replace(/^\d{1,3}\s*[｜|]\s*/u, "").trim();
+}
+
+function readCache() {
+  try {
+    if (!fm.fileExists(cachePath)) return null;
+    const parsed = JSON.parse(fm.readString(cachePath));
+    return parsed && typeof parsed === "object" ? parsed : null;
+  } catch {
+    return null;
+  }
+}
+
+function writeCache(data) {
+  try {
+    fm.writeString(cachePath, JSON.stringify({ savedAt: Date.now(), data }));
+  } catch {}
+}
+
+async function fetchFeed(token) {
+  const request = new Request(CONFIG.feedUrl);
+  request.method = "GET";
+  request.headers = {
+    Authorization: `Bearer ${token}`,
+    Accept: "application/json",
+  };
+  request.timeoutInterval = 10;
+  const data = await request.loadJSON();
+  const status = Number(request.response?.statusCode || 0);
+  if (status !== 200 || !data || typeof data !== "object") {
+    throw new Error(`feed ${status}`);
+  }
+  writeCache(data);
+  return { data, stale: false, needsSetup: false };
+}
+
+async function loadHomeFeed() {
+  const cached = readCache();
+  if (!Keychain.contains(CONFIG.keychainKey)) {
+    return { data: cached?.data || null, stale: true, needsSetup: true };
+  }
+  const token = Keychain.get(CONFIG.keychainKey).trim();
+  if (!token) {
+    return { data: cached?.data || null, stale: true, needsSetup: true };
+  }
+  try {
+    return await fetchFeed(token);
+  } catch {
+    return { data: cached?.data || null, stale: true, needsSetup: false };
+  }
 }
 
 function addSymbol(parent, name, size, color) {
@@ -121,7 +177,43 @@ function addPill(parent, text, accent, fill, size = 11) {
   return pill;
 }
 
-function makeHome() {
+function addHomeLiveState(parent, result) {
+  const task = result?.data?.task || null;
+
+  const live = parent.addStack();
+  live.layoutHorizontally();
+  live.centerAlignContent();
+
+  const left = live.addStack();
+  left.layoutVertically();
+
+  const label = left.addText(result?.stale ? "今やる • 前回" : "今やる");
+  label.font = font(9, "bold");
+  label.textColor = c(result?.stale ? "#8A7A61" : "#A77D35");
+
+  let mainText = "今すぐやることなし";
+  if (result?.needsSetup && !result?.data) mainText = "接続設定が必要";
+  else if (task?.title) mainText = cleanTitle(task.title);
+
+  const main = left.addText(mainText);
+  main.font = font(14, "semibold");
+  main.textColor = c("#35433E");
+  main.lineLimit = 2;
+  main.minimumScaleFactor = 0.78;
+
+  if (task?.nextAction) {
+    const next = left.addText(String(task.nextAction).trim());
+    next.font = font(9, "medium");
+    next.textColor = c("#77756E");
+    next.lineLimit = 1;
+    next.minimumScaleFactor = 0.75;
+  }
+
+  live.addSpacer();
+  addPill(live, "OPEN", theme.accent, "#F1E6C9", 10);
+}
+
+function makeHome(result) {
   const w = new ListWidget();
   setBackground(w, theme);
   w.setPadding(15, 16, 14, 16);
@@ -187,21 +279,7 @@ function makeHome() {
   }
 
   w.addSpacer(10);
-
-  const bottom = w.addStack();
-  bottom.layoutHorizontally();
-  bottom.centerAlignContent();
-  const left = bottom.addStack();
-  left.layoutVertically();
-  const small = left.addText("5 AREAS • ONE LIFE");
-  small.font = font(9, "bold");
-  small.textColor = c("#8A7A61");
-  const main = left.addText("今ここ → 次の一歩");
-  main.font = font(14, "semibold");
-  main.textColor = c("#35433E");
-  bottom.addSpacer();
-  addPill(bottom, "OPEN", theme.accent, "#F1E6C9", 10);
-
+  addHomeLiveState(w, result);
   return w;
 }
 
@@ -270,14 +348,55 @@ function makeSmall() {
   return w;
 }
 
-let widget = key === "HOME" ? makeHome() : makeSmall();
-widget.refreshAfterDate = new Date(Date.now() + 30 * 60 * 1000);
+async function promptToken() {
+  const alert = new Alert();
+  alert.title = "MY WAY Widget 接続";
+  alert.message = "YOS_WIDGET_TOKENを1回だけ貼り付けます。iPhoneのKeychainに保存され、Widgetコードには残りません。";
+  alert.addSecureTextField("接続トークン");
+  alert.addAction("保存");
+  alert.addCancelAction("キャンセル");
+  const choice = await alert.presentAlert();
+  if (choice === -1) return false;
 
-if (config.runsInWidget) {
-  Script.setWidget(widget);
-} else {
-  if (key === "HOME") await widget.presentMedium();
-  else await widget.presentSmall();
+  const token = alert.textFieldValue(0).trim();
+  if (token.length < 32) {
+    const error = new Alert();
+    error.title = "保存できません";
+    error.message = "接続トークンが短すぎます。";
+    error.addAction("OK");
+    await error.presentAlert();
+    return false;
+  }
+
+  Keychain.set(CONFIG.keychainKey, token);
+  return true;
 }
 
-Script.complete();
+async function configureHomeTokenIfNeeded() {
+  if (key !== "HOME" || config.runsInWidget) return true;
+
+  const hasToken =
+    Keychain.contains(CONFIG.keychainKey) &&
+    Keychain.get(CONFIG.keychainKey).trim();
+
+  if (hasToken) return true;
+  return await promptToken();
+}
+
+const shouldContinue = await configureHomeTokenIfNeeded();
+if (shouldContinue === false) {
+  Script.complete();
+} else {
+  const homeResult = key === "HOME" ? await loadHomeFeed() : null;
+  const widget = key === "HOME" ? makeHome(homeResult) : makeSmall();
+  widget.refreshAfterDate = new Date(Date.now() + CONFIG.refreshMinutes * 60 * 1000);
+
+  if (config.runsInWidget) {
+    Script.setWidget(widget);
+  } else {
+    if (key === "HOME") await widget.presentMedium();
+    else await widget.presentSmall();
+  }
+
+  Script.complete();
+}
