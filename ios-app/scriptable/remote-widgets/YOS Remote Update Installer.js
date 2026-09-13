@@ -1,23 +1,46 @@
-// YOS Remote Update Installer v0.3
-// Transactional updater for MY REMOTE UX v2.
-// Downloads from a fixed verified commit, stages every file, snapshots the old set,
-// then switches live files. Any caught failure rolls back; interrupted commits recover on next run.
+// YOS Remote Update Installer v0.5
+// Safe Japanese-name installer for MY REMOTE.
+// New Japanese scripts are staged and verified before legacy English scripts are archived.
+// Existing Keychain/settings are untouched. Any commit failure restores the previous Japanese targets.
 
-const SOURCE_SHA = '71d6832551d63a1b0f0eda2e9f1d67b1d012369a';
+const SOURCE_SHA = '4741b4f13f014e3d13d40ffb2cd084c3bfe6eba9';
 const BASE = 'https://raw.githubusercontent.com/yskn0008-bot/ProjectY/' + SOURCE_SHA + '/ios-app/scriptable/remote-widgets/';
-const FILES = [
-  'YOS Tapo H110 Core.js',
+const PACKAGE = [
+  { source: 'YOS Remote Hub.js', target: 'リモコン.js' },
+  { source: 'YOS BRAVIA Remote.js', target: 'テレビリモコン.js' },
+  { source: 'YOS AC Remote.js', target: 'エアコンリモコン.js' },
+  { source: 'YOS AC Widget.js', target: 'エアコンウィジェット.js' },
+  { source: 'YOS Light Remote.js', target: '照明リモコン.js' },
+  { source: 'YOS Light Widget.js', target: '照明ウィジェット.js' },
+  { source: 'YOS Tapo H110 Core.js', target: 'リモコン/内部/Tapo共通.js' },
+];
+const ORGANIZER_TARGET = 'リモコン整理.js';
+const HUB = 'リモコン';
+const RECOVERY_NAME = 'リモコン更新_復旧中';
+const BACKUP_PREFIX = 'リモコン/保管/更新前 ';
+const FAILED_PREFIX = 'リモコン/保管/更新失敗 ';
+const LEGACY_ROOT = [
+  'YOS Remote Hub.js',
+  'YOS Remote Update Installer.js',
+  'YOS Remote Script Organizer.js',
+  'YOS BRAVIA Remote.js',
   'YOS AC Remote.js',
   'YOS AC Widget.js',
-  'YOS BRAVIA Remote.js',
   'YOS Light Remote.js',
   'YOS Light Widget.js',
-  'YOS Remote Hub.js'
+  'YOS Tapo H110 Core.js',
 ];
-const HUB = 'YOS Remote Hub';
-const RECOVERY_NAME = 'YOS Remote Update Recovery';
-const BACKUP_PREFIX = 'YOS Remote Backup ';
-const FAILED_PREFIX = 'YOS Remote Failed Update ';
+const NAME_REPLACEMENTS = [
+  ['YOS Remote Hub', 'リモコン'],
+  ['YOS BRAVIA Remote', 'テレビリモコン'],
+  ['YOS AC Remote', 'エアコンリモコン'],
+  ['YOS AC Widget', 'エアコンウィジェット'],
+  ['YOS Light Remote', '照明リモコン'],
+  ['YOS Light Widget', '照明ウィジェット'],
+  ['YOS Tapo H110 Core', 'リモコン/内部/Tapo共通'],
+];
+
+const ORGANIZER_SOURCE = `// リモコン整理 v2.0\n// 英語名の旧版・重複だけを削除せず「リモコン/保管」へ移します。\n\nconst LEGACY=${JSON.stringify(LEGACY_ROOT)};\nconst PREFIX='リモコン/保管/整理 ';\nfunction stamp(){return new Date().toISOString().replace(/[:.]/g,'-')}\nfunction stem(name){return String(name).replace(/\\.js$/i,'').trim()}\nfunction lower(v){return String(v).trim().toLowerCase()}\nfunction recognized(name){if(!/\\.js$/i.test(String(name)))return false;const candidate=lower(stem(name));for(const canonical of LEGACY){const base=lower(stem(canonical));if(candidate===base)return true;if(!candidate.startsWith(base))continue;const suffix=candidate.slice(base.length).replace(/^[\\s._-]+/,'');if(/^(?:\\(\\d+\\)|\\d+|copy(?:\\s*\\d+)?|old(?:\\s*\\d+)?|backup(?:\\s*\\d+)?|bak(?:\\s*\\d+)?|legacy(?:\\s*\\d+)?|v\\d+(?:[._-]\\d+)*)$/i.test(suffix))return true}return false}\nfunction parent(path){const i=String(path).lastIndexOf('/');return i<=0?'/':String(path).slice(0,i)}\nfunction ensureDir(fm,path){if(!fm.fileExists(path))fm.createDirectory(path,true)}\nasync function tidy(fm){if(!fm)return[];const docs=fm.documentsDirectory();let names=[];try{names=fm.listContents(docs)}catch(_){return[]}const candidates=names.filter(recognized);if(!candidates.length)return[];const dir=fm.joinPath(docs,PREFIX+stamp());ensureDir(fm,dir);const moved=[];for(const name of candidates){const src=fm.joinPath(docs,name);if(!fm.fileExists(src))continue;try{if(typeof fm.isFileStoredIniCloud==='function'&&fm.isFileStoredIniCloud(src))await fm.downloadFileFromiCloud(src)}catch(_){}let dst=fm.joinPath(dir,name),n=2;while(fm.fileExists(dst)){dst=fm.joinPath(dir,stem(name)+' '+n+'.js');n++}fm.move(src,dst);moved.push(name)}return moved}\nasync function main(){const a=new Alert();try{const moved=[...await tidy(FileManager.iCloud()),...await tidy(typeof FileManager.local==='function'?FileManager.local():null)];a.title='リモコン整理完了';a.message=moved.length?moved.length+'件を削除せず保管フォルダへ移動しました。':'整理対象はありません。'}catch(e){a.title='リモコン整理失敗';a.message=e&&e.message?e.message:String(e)}a.addAction('OK');await a.presentAlert()}\nawait main();Script.complete();\n`;
 
 const fm = FileManager.iCloud();
 const docs = fm.documentsDirectory();
@@ -28,23 +51,35 @@ const manifestPath = fm.joinPath(recoveryDir, 'manifest.json');
 
 function stamp() { return new Date().toISOString().replace(/[:.]/g, '-'); }
 function join(dir, name) { return fm.joinPath(dir, name); }
-function livePath(name) { return join(docs, name); }
-function stagedPath(name) { return join(stageDir, name); }
-function backedUpPath(name) { return join(backupDir, name); }
+function livePath(target) { return join(docs, target); }
+function stagedPath(target) { return join(stageDir, target); }
+function backedUpPath(target) { return join(backupDir, target); }
 function rawURL(name) { return BASE + name.split('/').map(encodeURIComponent).join('/'); }
+function parent(path) { const i = String(path).lastIndexOf('/'); return i <= 0 ? '/' : String(path).slice(0, i); }
+function ensureDir(manager, path) { if (!manager.fileExists(path)) manager.createDirectory(path, true); }
+function ensureParent(manager, path) { ensureDir(manager, parent(path)); }
 function hook(name, detail) {
   const hooks = globalThis.__YOS_INSTALLER_TEST_HOOKS__;
   if (hooks && typeof hooks[name] === 'function') hooks[name](detail);
 }
 
-async function ensureLocal(path) {
-  if (!fm.fileExists(path)) return;
+function transformSource(text) {
+  let out = String(text);
+  for (const [from, to] of NAME_REPLACEMENTS) out = out.split(from).join(to);
+  return out;
+}
+
+async function ensureLocal(manager, path) {
+  if (!manager || !manager.fileExists(path)) return;
   try {
-    if (fm.isFileStoredIniCloud(path)) await fm.downloadFileFromiCloud(path);
+    if (typeof manager.isFileStoredIniCloud === 'function' && manager.isFileStoredIniCloud(path)) {
+      await manager.downloadFileFromiCloud(path);
+    }
   } catch (_) {}
 }
 
 function writeJSON(path, value) {
+  ensureParent(fm, path);
   fm.writeString(path, JSON.stringify(value));
   const check = JSON.parse(fm.readString(path));
   if (!check || check.phase !== value.phase) throw new Error('復旧情報の保存検証に失敗しました。');
@@ -54,16 +89,11 @@ function readManifest(dir = recoveryDir) {
   const path = join(dir, 'manifest.json');
   if (!fm.fileExists(path)) return null;
   try { return JSON.parse(fm.readString(path)); }
-  catch (_) { throw new Error('復旧情報が破損しています。Recoveryフォルダを保持したまま停止します。'); }
+  catch (_) { throw new Error('復旧情報が破損しています。復旧フォルダを保持したまま停止します。'); }
 }
 
-function removeIfExists(path) {
-  if (fm.fileExists(path)) fm.remove(path);
-}
-
-function sameText(path, expected) {
-  return fm.fileExists(path) && fm.readString(path) === expected;
-}
+function removeIfExists(path) { if (fm.fileExists(path)) fm.remove(path); }
+function sameText(path, expected) { return fm.fileExists(path) && fm.readString(path) === expected; }
 
 async function downloadText(name) {
   const req = new Request(rawURL(name));
@@ -79,12 +109,13 @@ async function downloadText(name) {
 async function restoreOldSet(manifest) {
   const failures = [];
   for (const entry of manifest.entries || []) {
-    const target = livePath(entry.name);
+    const target = livePath(entry.target);
     try {
       if (entry.existed) {
-        const backup = backedUpPath(entry.name);
+        const backup = backedUpPath(entry.target);
         if (!fm.fileExists(backup)) throw new Error('backup missing');
         const oldText = fm.readString(backup);
+        ensureParent(fm, target);
         fm.writeString(target, oldText);
         if (!sameText(target, oldText)) throw new Error('restore verify failed');
       } else {
@@ -92,7 +123,7 @@ async function restoreOldSet(manifest) {
         if (fm.fileExists(target)) throw new Error('remove verify failed');
       }
     } catch (e) {
-      failures.push(entry.name + ': ' + (e && e.message ? e.message : String(e)));
+      failures.push(entry.target + ': ' + (e && e.message ? e.message : String(e)));
     }
   }
   if (failures.length) throw new Error('rollback失敗: ' + failures.join(' / '));
@@ -101,9 +132,11 @@ async function restoreOldSet(manifest) {
 function archiveRecovery(prefix, manifest) {
   manifest.archivedAt = new Date().toISOString();
   writeJSON(manifestPath, manifest);
-  let destination = join(docs, prefix + manifest.id);
+  const base = join(docs, prefix + manifest.id);
+  ensureDir(fm, parent(base));
+  let destination = base;
   let suffix = 2;
-  while (fm.fileExists(destination)) destination = join(docs, prefix + manifest.id + '-' + suffix++);
+  while (fm.fileExists(destination)) destination = base + '-' + suffix++;
   fm.move(recoveryDir, destination);
   return destination;
 }
@@ -111,9 +144,7 @@ function archiveRecovery(prefix, manifest) {
 async function recoverInterrupted() {
   if (!fm.fileExists(recoveryDir)) return false;
   const manifest = readManifest();
-  if (!manifest) {
-    throw new Error('Recoveryフォルダにmanifestがありません。自動上書きを停止します。');
-  }
+  if (!manifest) throw new Error('復旧フォルダにmanifestがありません。自動上書きを停止します。');
 
   if (manifest.phase === 'prepared') {
     archiveRecovery(FAILED_PREFIX, { ...manifest, phase: 'abandoned_before_commit' });
@@ -123,8 +154,8 @@ async function recoverInterrupted() {
   if (manifest.phase === 'committed') {
     let valid = true;
     for (const entry of manifest.entries || []) {
-      const staged = stagedPath(entry.name);
-      const live = livePath(entry.name);
+      const staged = stagedPath(entry.target);
+      const live = livePath(entry.target);
       if (!fm.fileExists(staged) || !sameText(live, fm.readString(staged))) { valid = false; break; }
     }
     if (valid) {
@@ -148,20 +179,19 @@ async function recoverInterrupted() {
     }
   }
 
-  if (manifest.phase === 'rolled_back' || manifest.phase === 'recovered' || manifest.phase === 'abandoned_before_commit') {
+  if (['rolled_back','recovered','abandoned_before_commit'].includes(manifest.phase)) {
     archiveRecovery(FAILED_PREFIX, manifest);
     return true;
   }
-
-  throw new Error('未知のRecovery状態です（' + String(manifest.phase) + '）。自動上書きを停止します。');
+  throw new Error('未知の復旧状態です（' + String(manifest.phase) + '）。自動上書きを停止します。');
 }
 
 function latestSuccessfulBackup() {
-  const names = fm.listContents(docs)
-    .filter(name => name.startsWith(BACKUP_PREFIX))
-    .sort().reverse();
+  const baseDir = join(docs, 'リモコン/保管');
+  if (!fm.fileExists(baseDir)) return null;
+  const names = fm.listContents(baseDir).filter(name => name.startsWith('更新前 ')).sort().reverse();
   for (const name of names) {
-    const dir = join(docs, name);
+    const dir = join(baseDir, name);
     try {
       const manifest = readManifest(dir);
       if (manifest && manifest.phase === 'committed' && !manifest.manualRollbackAt) return { dir, manifest };
@@ -195,48 +225,45 @@ async function prepareTransaction() {
   fm.createDirectory(recoveryDir, true);
   fm.createDirectory(stageDir, true);
   fm.createDirectory(backupDir, true);
-
   const entries = [];
   try {
-    for (const name of FILES) {
-      const text = await downloadText(name);
-      fm.writeString(stagedPath(name), text);
-      if (!sameText(stagedPath(name), text)) throw new Error(name + ' のstage検証に失敗しました。');
+    for (const item of PACKAGE) {
+      const text = transformSource(await downloadText(item.source));
+      const path = stagedPath(item.target);
+      ensureParent(fm, path);
+      fm.writeString(path, text);
+      if (!sameText(path, text)) throw new Error(item.target + ' のstage検証に失敗しました。');
+      entries.push({ source: item.source, target: item.target });
     }
+    const organizerStage = stagedPath(ORGANIZER_TARGET);
+    ensureParent(fm, organizerStage);
+    fm.writeString(organizerStage, ORGANIZER_SOURCE);
+    if (!sameText(organizerStage, ORGANIZER_SOURCE)) throw new Error(ORGANIZER_TARGET + ' のstage検証に失敗しました。');
+    entries.push({ source: 'inline:organizer', target: ORGANIZER_TARGET });
 
-    for (const name of FILES) {
-      const target = livePath(name);
+    for (const entry of entries) {
+      const target = livePath(entry.target);
       const existed = fm.fileExists(target);
+      entry.existed = existed;
       if (existed) {
-        await ensureLocal(target);
+        await ensureLocal(fm, target);
         const oldText = fm.readString(target);
-        fm.writeString(backedUpPath(name), oldText);
-        if (!sameText(backedUpPath(name), oldText)) throw new Error(name + ' のbackup検証に失敗しました。');
+        const backup = backedUpPath(entry.target);
+        ensureParent(fm, backup);
+        fm.writeString(backup, oldText);
+        if (!sameText(backup, oldText)) throw new Error(entry.target + ' のbackup検証に失敗しました。');
       }
-      entries.push({ name, existed });
     }
 
-    const manifest = {
-      version: 1,
-      id,
-      sourceSha: SOURCE_SHA,
-      phase: 'prepared',
-      createdAt: new Date().toISOString(),
-      entries,
-      applied: []
-    };
+    const manifest = { version: 2, id, sourceSha: SOURCE_SHA, phase: 'prepared', createdAt: new Date().toISOString(), entries, applied: [] };
     writeJSON(manifestPath, manifest);
     return manifest;
   } catch (e) {
     if (fm.fileExists(recoveryDir)) {
       try {
-        const fallback = {
-          version: 1, id, sourceSha: SOURCE_SHA, phase: 'abandoned_before_commit',
-          createdAt: new Date().toISOString(), entries, applied: [],
-          lastError: e && e.message ? e.message : String(e)
-        };
+        const fallback = { version: 2, id, sourceSha: SOURCE_SHA, phase: 'abandoned_before_commit', createdAt: new Date().toISOString(), entries, applied: [], lastError: e && e.message ? e.message : String(e) };
         if (fm.fileExists(manifestPath)) writeJSON(manifestPath, fallback);
-        else fm.writeString(manifestPath, JSON.stringify(fallback));
+        else { ensureParent(fm, manifestPath); fm.writeString(manifestPath, JSON.stringify(fallback)); }
         archiveRecovery(FAILED_PREFIX, fallback);
       } catch (_) {}
     }
@@ -247,23 +274,22 @@ async function prepareTransaction() {
 async function commitTransaction(manifest) {
   manifest.phase = 'committing';
   writeJSON(manifestPath, manifest);
-
   try {
     for (const entry of manifest.entries) {
-      hook('beforeLiveWrite', { name: entry.name, applied: manifest.applied.slice() });
-      const text = fm.readString(stagedPath(entry.name));
-      fm.writeString(livePath(entry.name), text);
-      if (!sameText(livePath(entry.name), text)) throw new Error(entry.name + ' の切替検証に失敗しました。');
-      manifest.applied.push(entry.name);
+      hook('beforeLiveWrite', { target: entry.target, applied: manifest.applied.slice() });
+      const text = fm.readString(stagedPath(entry.target));
+      const target = livePath(entry.target);
+      ensureParent(fm, target);
+      fm.writeString(target, text);
+      if (!sameText(target, text)) throw new Error(entry.target + ' の切替検証に失敗しました。');
+      manifest.applied.push(entry.target);
       writeJSON(manifestPath, manifest);
-      hook('afterLiveWrite', { name: entry.name, applied: manifest.applied.slice() });
+      hook('afterLiveWrite', { target: entry.target, applied: manifest.applied.slice() });
     }
-
     for (const entry of manifest.entries) {
-      const staged = fm.readString(stagedPath(entry.name));
-      if (!sameText(livePath(entry.name), staged)) throw new Error(entry.name + ' の最終整合検証に失敗しました。');
+      const staged = fm.readString(stagedPath(entry.target));
+      if (!sameText(livePath(entry.target), staged)) throw new Error(entry.target + ' の最終整合検証に失敗しました。');
     }
-
     manifest.phase = 'committed';
     manifest.committedAt = new Date().toISOString();
     writeJSON(manifestPath, manifest);
@@ -289,18 +315,54 @@ async function commitTransaction(manifest) {
   }
 }
 
+function legacyVariant(name) {
+  if (!/\.js$/i.test(String(name))) return false;
+  const stem = v => String(v).replace(/\.js$/i, '').trim().toLowerCase();
+  const candidate = stem(name);
+  for (const canonical of LEGACY_ROOT) {
+    const base = stem(canonical);
+    if (candidate === base) return true;
+    if (!candidate.startsWith(base)) continue;
+    const suffix = candidate.slice(base.length).replace(/^[\s._-]+/, '');
+    if (/^(?:\(\d+\)|\d+|copy(?:\s*\d+)?|old(?:\s*\d+)?|backup(?:\s*\d+)?|bak(?:\s*\d+)?|legacy(?:\s*\d+)?|v\d+(?:[._-]\d+)*)$/i.test(suffix)) return true;
+  }
+  return false;
+}
+
+async function archiveLegacy(manager) {
+  if (!manager) return [];
+  const root = manager.documentsDirectory();
+  let names = [];
+  try { names = manager.listContents(root); } catch (_) { return []; }
+  const candidates = names.filter(legacyVariant);
+  if (!candidates.length) return [];
+  const archiveDir = manager.joinPath(root, 'リモコン/保管/英語旧版 ' + stamp());
+  ensureDir(manager, archiveDir);
+  const moved = [];
+  for (const name of candidates) {
+    const source = manager.joinPath(root, name);
+    if (!manager.fileExists(source)) continue;
+    await ensureLocal(manager, source);
+    let destination = manager.joinPath(archiveDir, name);
+    let n = 2;
+    while (manager.fileExists(destination)) destination = manager.joinPath(archiveDir, String(name).replace(/\.js$/i, '') + ' ' + n++ + '.js');
+    manager.move(source, destination);
+    if (!manager.fileExists(destination)) throw new Error(name + ' の旧版保管に失敗しました。');
+    moved.push(name);
+  }
+  return moved;
+}
+
 async function main() {
   const action = args && args.queryParameters ? args.queryParameters.action : null;
-  if (action === 'recover') {
-    await recoverInterrupted();
-    return;
-  }
-  if (action === 'rollback') {
-    await manualRollback();
-    return;
-  }
+  if (action === 'recover') { await recoverInterrupted(); return; }
+  if (action === 'rollback') { await manualRollback(); return; }
   const manifest = await prepareTransaction();
   await commitTransaction(manifest);
+  try {
+    await archiveLegacy(fm);
+    if (typeof FileManager.local === 'function') await archiveLegacy(FileManager.local());
+  } catch (_) {}
   Safari.open('scriptable:///run?scriptName=' + encodeURIComponent(HUB));
 }
 
@@ -308,7 +370,7 @@ try {
   await main();
 } catch (e) {
   const a = new Alert();
-  a.title = 'MY REMOTE 更新失敗';
+  a.title = 'リモコン更新失敗';
   a.message = e && e.message ? e.message : String(e);
   a.addAction('OK');
   await a.presentAlert();

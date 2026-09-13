@@ -1,10 +1,11 @@
-// YOS Remote Hub v6.4 — tap-first adaptive cross + reliable center gesture + top quick actions + user layout editor.
+// YOS Remote Hub v6.5 — tap-first adaptive cross + reliable center gesture + top quick actions + user layout editor.
 // Reliability rule: a center tap must always win over gesture convenience.
 // Navigation: Above/Left/Play/Right/Below => Up/Left/OK/Right/Down.
 // Playback: every slot keeps the user's configured button.
 // Hybrid: Above/Below => Up/Down; Left/Play/Right keep configured media actions.
 // Center swipe is handled directly by the real center button; no transparent overlay can swallow OK taps.
 // Top safe-frame space is used for fixed Input/Home quick actions.
+// Light brightness: tap stays one step; sustained hold uses two IR commands per round trip after the first step.
 
 const CONFIG = {
   tv: { remoteScript: "YOS BRAVIA Remote" },
@@ -90,9 +91,12 @@ assertHubIntegrity()
 function runURL(name){ return "scriptable:///run?scriptName=" + encodeURIComponent(name) }
 const REMOTES = { tv:runURL(CONFIG.tv.remoteScript), light:runURL(CONFIG.light.remoteScript), ac:runURL(CONFIG.ac.remoteScript) }
 function makeButtons(device, items){
-  return items.map(([action,icon,label]) =>
-    `<button class="key" onclick="sendOther(event,'${device}','${action}','${label}')"><span class="icon">${icon}</span><span class="label">${label}</span></button>`
-  ).join("")
+  return items.map(([action,icon,label]) => {
+    if(device==="light"&&(action==="bright"||action==="dark")){
+      return `<button class="key light-hold-key" data-light-hold="${action}" data-light-label="${label}"><span class="icon">${icon}</span><span class="label">${label}</span></button>`
+    }
+    return `<button class="key" onclick="sendOther(event,'${device}','${action}','${label}')"><span class="icon">${icon}</span><span class="label">${label}</span></button>`
+  }).join("")
 }
 
 const html = `<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"><style>
@@ -114,8 +118,8 @@ body{padding:0 8px}
 .tool{height:28px;padding:0 8px;border:1px solid #353941;border-radius:10px;background:#15171b;color:#438eff;font-size:11px;font-weight:750}
 .grid{display:grid;gap:6px}.grid-3{grid-template-columns:repeat(3,1fr)}.grid-4{grid-template-columns:repeat(4,1fr)}
 .key{position:relative;min-width:0;height:62px;padding:7px;border:1px solid #26292f;border-radius:18px;background:linear-gradient(145deg,#1c1e22,#15171a);color:#fff;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:4px;touch-action:manipulation;-webkit-touch-callout:none;user-select:none}
-.key.gesture-center{touch-action:none;z-index:2}
-.key:active{transform:scale(.97);background:#25282d}.key.adaptive{border-color:#343942}.key.ok{background:#24384f}
+.key.gesture-center,.key.light-hold-key{touch-action:none}.key.gesture-center{z-index:2}
+.key:active,.key.holding{transform:scale(.97);background:#25282d}.key.adaptive{border-color:#343942}.key.ok{background:#24384f}
 .icon{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Helvetica Neue",sans-serif;font-size:23px;font-weight:500;line-height:1;color:#438eff;font-variant-emoji:text}
 .label{font-size:11px;font-weight:700;white-space:nowrap}.alt-label{position:absolute;right:7px;bottom:5px;font-size:7px;font-weight:700;color:#777b83;line-height:1;white-space:nowrap}.brand{font-size:10px;color:#8d8f95}.ac-temp{font-size:17px;font-weight:800;color:#fff;min-width:34px;text-align:right}
 .config-layer{display:none;position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.94);padding:max(58px,calc(env(safe-area-inset-top) + 4px)) 10px max(12px,env(safe-area-inset-bottom));overflow:auto}
@@ -290,8 +294,43 @@ function requestMode(){nativeAction("system","refreshMode","")}function requestA
 function sendMenu(e){e.preventDefault();e.stopPropagation();nativeAction("tv","menu","MENU")}
 function sendTVShortcut(e,action,label){e.preventDefault();e.stopPropagation();nativeAction("tv",action,label)}
 function sendOther(e,device,action,label){e.preventDefault();e.stopPropagation();nativeAction(device,action,label)}
+function bindLightHoldButtons(){
+  document.querySelectorAll("[data-light-hold]").forEach(b=>{
+    const action=b.dataset.lightHold,label=b.dataset.lightLabel||action
+    let active=false,holdStarted=false,holdTimer=null,heartbeat=null,pointerId=null
+    const clearHoldTimer=()=>{if(holdTimer){clearTimeout(holdTimer);holdTimer=null}}
+    const releasePointer=()=>{if(pointerId!==null){try{b.releasePointerCapture(pointerId)}catch(_){}pointerId=null}}
+    const stop=e=>{
+      if(e){e.preventDefault();e.stopPropagation()}
+      if(!active)return
+      active=false;clearHoldTimer();b.classList.remove("holding")
+      if(heartbeat){clearInterval(heartbeat);heartbeat=null}
+      releasePointer()
+      if(holdStarted){holdStarted=false;nativeAction("lightHoldStop",action,label)}
+      else nativeAction("light",action,label)
+    }
+    const start=e=>{
+      e.preventDefault();e.stopPropagation();if(active)return
+      active=true;holdStarted=false;pointerId=e.pointerId;b.classList.add("holding")
+      try{b.setPointerCapture(pointerId)}catch(_){}
+      holdTimer=setTimeout(()=>{
+        holdTimer=null;if(!active)return
+        holdStarted=true;nativeAction("lightHoldStart",action,label)
+        heartbeat=setInterval(()=>{if(active&&holdStarted)nativeAction("lightHoldHeartbeat",action,label)},150)
+      },180)
+    }
+    b.addEventListener("pointerdown",start)
+    b.addEventListener("pointerup",stop)
+    b.addEventListener("pointercancel",stop)
+    b.addEventListener("lostpointercapture",stop)
+    b.addEventListener("click",e=>{e.preventDefault();e.stopPropagation()})
+    b.addEventListener("contextmenu",e=>e.preventDefault())
+    window.addEventListener("blur",stop)
+    document.addEventListener("visibilitychange",()=>{if(document.hidden)stop()})
+  })
+}
 function openRemote(device){window.location.href=REMOTES[device]}
-renderTV();requestMode();requestAC();pollTimer=setInterval(requestMode,1600);acTimer=setInterval(requestAC,30000);window.addEventListener("beforeunload",()=>{if(pollTimer)clearInterval(pollTimer);if(acTimer)clearInterval(acTimer)})
+bindLightHoldButtons();renderTV();requestMode();requestAC();pollTimer=setInterval(requestMode,1600);acTimer=setInterval(requestAC,30000);window.addEventListener("beforeunload",()=>{if(pollTimer)clearInterval(pollTimer);if(acTimer)clearInterval(acTimer)})
 </script></body></html>`
 
 function secure(key){return Keychain.contains(key)?Keychain.get(key):""}
@@ -316,7 +355,31 @@ function normalizeName(value){return String(value).replace(/\.js$/i,"").replace(
 async function readScript(scriptName){for(const manager of [FileManager.iCloud(),FileManager.local()]){const directory=manager.documentsDirectory();let files=[];try{files=manager.listContents(directory)}catch(_){}for(const file of files){if(normalizeName(file)!==normalizeName(scriptName)&&normalizeName(file)!==normalizeName(scriptName+".js"))continue;const path=manager.joinPath(directory,file);try{if(manager.isFileStoredIniCloud(path))await manager.downloadFileFromiCloud(path)}catch(_){}return manager.readString(path)}}throw new Error(scriptName+" が見つかりません")}
 async function runExisting(scriptName,action){const source=await readScript(scriptName);const fakeArgs={queryParameters:{action},shortcutParameter:null,widgetParameter:null,plainTexts:[],urls:[],fileURLs:[],images:[],notification:null};const fakeScript={name:()=>scriptName,complete:()=>{},setShortcutOutput:()=>{},setWidget:()=>{}};const fakeConfig={runsInApp:true,runsInWidget:false,runsWithSiri:false,runsInNotification:false};const AsyncFunction=Object.getPrototypeOf(async function(){}).constructor;await new AsyncFunction("args","Script","config",source)(fakeArgs,fakeScript,fakeConfig)}
 function parseQuery(url){const output={},position=String(url).indexOf("?");if(position<0)return output;String(url).slice(position+1).split("&").forEach(pair=>{const sep=pair.indexOf("="),key=sep>=0?pair.slice(0,sep):pair,value=sep>=0?pair.slice(sep+1):"";output[decodeURIComponent(key)]=decodeURIComponent(value)});return output}
+
+const LIGHT_HOLD_LEASE_MS=600
+const LIGHT_HOLD_BURST=2
+const LIGHT_HOLD_KEYS={bright:["BRIGHTNESS+","明るくする","明るい"],dark:["BRIGHTNESS-","暗くする","暗い"]}
+let lightHoldAction=null,lightHoldToken=0,lightHoldLeaseUntil=0,lightHoldPromise=Promise.resolve(),lightHoldTransport=null
+async function getLightHoldTransport(){
+  if(lightHoldTransport)return lightHoldTransport
+  const tapo=importModule("YOS Tapo H110 Core")
+  const remote=tapo.findRemote(r=>/ライト|light/i.test(String(r.nickname||""))||String(r.model||"").toLowerCase()==="light")
+  if(!remote)throw new Error("ライト リモコンが見つかりません。YOS Tapo H110 Setup を再実行してください。")
+  const keys={}
+  for(const [action,candidates] of Object.entries(LIGHT_HOLD_KEYS)){const key=tapo.findKey(remote,candidates);if(!key)throw new Error(action+" のIRキーが見つかりません。");keys[action]=key}
+  const client=await tapo.client()
+  lightHoldTransport={remote,keys,client}
+  return lightHoldTransport
+}
+function stopLightHold(){lightHoldAction=null;lightHoldLeaseUntil=0;lightHoldToken+=1}
+function renewLightHold(action){if(lightHoldAction===action)lightHoldLeaseUntil=Date.now()+LIGHT_HOLD_LEASE_MS}
+function startLightHold(action){
+  if(!LIGHT_HOLD_KEYS[action])return
+  stopLightHold();lightHoldAction=action;lightHoldLeaseUntil=Date.now()+LIGHT_HOLD_LEASE_MS;const token=lightHoldToken
+  lightHoldPromise=(async()=>{let first=true;try{const transport=await getLightHoldTransport();while(lightHoldAction===action&&token===lightHoldToken&&Date.now()<lightHoldLeaseUntil){const key=transport.keys[action];await transport.client.fireBurst(transport.remote.device_id,key.name,first?1:LIGHT_HOLD_BURST);first=false;if(lightHoldAction!==action||token!==lightHoldToken)break}}catch(error){lightHoldTransport=null;if(token===lightHoldToken)stopLightHold();try{await web.evaluateJavaScript("nativeResult("+JSON.stringify({ok:false,message:error&&error.message?error.message:String(error)})+")")}catch(_){}}finally{if(token===lightHoldToken)stopLightHold()}})()
+}
+
 const queue=[];let running=false,web=null
 async function processQueue(){if(running)return;running=true;while(queue.length){const item=queue.shift();let result;try{if(item.device==="system"&&item.action==="refreshMode")result={ok:true,mode:await inferMode()};else if(item.device==="system"&&item.action==="refreshAC")result={ok:true,ac:await readACSummary()};else if(item.device==="tvCursor"){await sonyAction(item.action,false);result={ok:true,label:item.label,action:item.action,mode:await inferMode()}}else if(item.device==="tvAdaptive"){const currentMode=await inferMode();let action=item.action;if(currentMode==="navigation"&&CROSS_NAV[item.slot])action=CROSS_NAV[item.slot];else if(currentMode==="hybrid"&&HYBRID_CURSOR_ROLES.has(item.slot))action=CROSS_NAV[item.slot];await sonyAction(action);result={ok:true,label:item.label,action,mode:await inferMode()}}else if(item.device==="tvOriginal"){await sonyAction(item.action,false);result={ok:true,label:item.label,action:item.action,mode:await inferMode()}}else if(item.device==="tv"){await sonyAction(item.action);result={ok:true,label:item.label,action:item.action,mode:await inferMode()}}else if(item.device==="light"){await runExisting(CONFIG.light.actionScript,item.action);result={ok:true,label:item.label}}else if(item.device==="ac"){await runExisting(CONFIG.ac.actionScript,item.action);result={ok:true,label:item.label,ac:await readACSummary()}}else throw new Error("不明なデバイスです")}catch(error){result={ok:false,message:error&&error.message?error.message:String(error)}}try{await web.evaluateJavaScript("nativeResult("+JSON.stringify(result)+")")}catch(_){}}running=false}
-web=new WebView();web.shouldAllowRequest=request=>{const url=String(request.url||"");if(!url.startsWith("https://yos-remote.local/__action?"))return true;const query=parseQuery(url);queue.push({device:query.device,action:query.action,label:query.label,slot:query.slot});processQueue();return false}
-await web.loadHTML(html,"https://yos-remote.local/");try{await web.evaluateJavaScript("setMode("+JSON.stringify(await inferMode())+")")}catch(_){}try{await web.evaluateJavaScript("setACState("+JSON.stringify(await readACSummary())+")")}catch(_){}await web.present(true);Script.complete()
+web=new WebView();web.shouldAllowRequest=request=>{const url=String(request.url||"");if(!url.startsWith("https://yos-remote.local/__action?"))return true;const query=parseQuery(url);if(query.device==="lightHoldStart"){startLightHold(query.action);return false}if(query.device==="lightHoldHeartbeat"){renewLightHold(query.action);return false}if(query.device==="lightHoldStop"){stopLightHold();return false}queue.push({device:query.device,action:query.action,label:query.label,slot:query.slot});processQueue();return false}
+await web.loadHTML(html,"https://yos-remote.local/");try{await web.evaluateJavaScript("setMode("+JSON.stringify(await inferMode())+")")}catch(_){}try{await web.evaluateJavaScript("setACState("+JSON.stringify(await readACSummary())+")")}catch(_){}await web.present(true);stopLightHold();await Promise.allSettled([lightHoldPromise]);Script.complete()

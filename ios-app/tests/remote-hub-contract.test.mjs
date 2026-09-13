@@ -3,9 +3,10 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
 const source = fs.readFileSync(new URL('../scriptable/remote-widgets/YOS Remote Hub.js', import.meta.url), 'utf8');
+const lightRemote = fs.readFileSync(new URL('../scriptable/remote-widgets/YOS Light Remote.js', import.meta.url), 'utf8');
 
-test('v6.4 keeps the real center button as the gesture owner', () => {
-  assert.match(source, /YOS Remote Hub v6\.4/);
+test('v6.5 keeps the real center button as the gesture owner', () => {
+  assert.match(source, /YOS Remote Hub v6\.5/);
   assert.match(source, /Reliability rule: a center tap must always win over gesture convenience/);
   assert.match(source, /function installCenterGesture\(/);
   assert.match(source, /role!=="center"\|\|mode==="media"/);
@@ -39,4 +40,23 @@ test('user layout persistence contract is retained', () => {
 test('runtime errors are surfaced instead of silently looking successful', () => {
   assert.match(source, /if\(result&&result\.ok===false\)/);
   assert.match(source, /textContent="エラー"/);
+});
+
+test('hub light brightness keeps tap at one step and doubles sustained hold', () => {
+  assert.match(source, /data-light-hold=/);
+  assert.match(source, /else nativeAction\("light",action,label\)/);
+  assert.match(source, /const LIGHT_HOLD_BURST=2/);
+  assert.match(source, /first\?1:LIGHT_HOLD_BURST/);
+  assert.match(source, /fireBurst\(transport\.remote\.device_id,key\.name,first\?1:LIGHT_HOLD_BURST\)/);
+  assert.match(source, /lightHoldHeartbeat/);
+  assert.match(source, /lightHoldStop/);
+});
+
+test('individual light remote keeps tap single and uses two-command bursts only after the first held step', () => {
+  assert.match(lightRemote, /async function fire\(action,count=1\)/);
+  assert.match(lightRemote, /client\.fireBurst\(remote\.device_id,key\.name,count\)/);
+  assert.match(lightRemote, /sendQueue=sendQueue\.then\(\(\)=>fire\(action,1\)\)/);
+  assert.match(lightRemote, /await fire\(action,first\?1:2\)/);
+  assert.match(lightRemote, /hold-heartbeat/);
+  assert.match(lightRemote, /hold-stop/);
 });
