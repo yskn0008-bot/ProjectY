@@ -192,7 +192,7 @@ try {
   assert.equal(initialJourney?.stageUnknown, true, '現在地不明のまま初回設定を保存できない');
   assert.equal(await page.locator('#activeStage').textContent(), '分からない', '保存後に現在地不明を表示できない');
 
-  await page.locator('#editProfile').click();
+  await page.getByRole('button', { name: '設定・メニュー', exact: true }).click();
   assert.equal(await page.locator('#onboardingDialog').evaluate((node) => node.open), true, '設定を開き直せない');
   assert.equal(await page.locator('#profileStage').inputValue(), '', '設定を開き直すと現在地不明が失われる');
   await page.locator('#profileStage').selectOption({ label: '冒険への誘い' });
