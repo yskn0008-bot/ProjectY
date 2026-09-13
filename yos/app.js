@@ -184,6 +184,10 @@ render();
 const initial=location.hash.slice(1);
 showPage(['money','journey','idea','archive'].includes(initial)?initial:'home');
 document.addEventListener('myway:navigate',event=>showPage(event.detail));
+window.addEventListener('hashchange',()=>{
+  const requested=location.hash.slice(1);
+  showPage(['money','journey','idea','archive'].includes(requested)?requested:'home');
+});
 setInterval(renderIdentity,60000);
 window.addEventListener('pageshow',renderIdentity);
 window.addEventListener('storage',render);

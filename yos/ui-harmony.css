@@ -58,3 +58,27 @@ html[data-myway-ui] .myway-theme-close{width:100%;min-height:48px;border:0;borde
 html[data-myway-ui] :focus-visible{outline:3px solid var(--ui-accent);outline-offset:3px}
 @media(max-width:390px){html[data-myway-ui] :is(.domain-heading p,.home-intro h1,.task-empty,.task-auth p,.life-page-v1 p,.idea-recent p,.journey-records p,.scene-note strong){font-size:15px!important}}
 @media(prefers-reduced-motion:reduce){html[data-myway-ui] *{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
+
+/* Let readable Life content determine height instead of legacy viewport slots. */
+html[data-myway-ui] .life-planner-v2{grid-template-rows:none!important;grid-auto-rows:auto;align-content:start;gap:16px;min-height:0!important}
+html[data-myway-ui] :is(.life-day-ribbon-v2,.life-day-ribbon-v2>header,.life-paper-grid-v2,.life-rhythm-v2,.life-memo-v2){height:auto!important;min-height:0!important;overflow:visible}
+html[data-myway-ui] .life-day-ribbon-v2>header{padding:16px!important;gap:12px;align-items:start}
+html[data-myway-ui] .life-day-ribbon-v2>header>div{min-width:0}
+html[data-myway-ui] .life-day-ribbon-v2>header p{font-size:13px!important}
+html[data-myway-ui] .life-paper-grid-v2{grid-template-columns:1fr!important;gap:12px;background:transparent;border:0;box-shadow:none}
+html[data-myway-ui] .life-paper-grid-v2 article{padding:16px!important;background-image:none;border:1px solid var(--ui-line)}
+html[data-myway-ui] .life-paper-grid-v2 h3{font-size:21px!important;white-space:nowrap}
+html[data-myway-ui] #homeSchedulePreviewV1 .empty-preview-v1{display:block!important;min-height:0;padding:16px 0!important;font-size:16px!important;white-space:normal!important;text-align:left}
+html[data-myway-ui] .empty-preview-v1{min-height:0!important;padding:16px 0!important;font-size:16px!important;white-space:normal!important;text-align:left}
+html[data-myway-ui] .empty-preview-v1:before,html[data-myway-ui] .empty-preview-v1:after{content:none!important}
+html[data-myway-ui] .life-rhythm-v2{padding:16px!important}
+html[data-myway-ui] .life-habit-groups-v2{grid-template-columns:1fr!important}
+html[data-myway-ui] :is(#homeTaskListV2 button>b,.life-memo-copy-v2 strong){font-size:16px!important}
+html[data-myway-ui] :is(.life-week-v2,.calendar-strip) .active :is(small,b){color:white!important}
+/* Palette applies to Money's neutral labels and actions; income/expense/warnings keep semantic colors. */
+html[data-myway-ui] .money-reference-v1 :is(.money2-day,.money2-calendar-card>header div strong,.money2-calendar-card>header button,.money-ref-calendar-summary strong,.money2-row-card strong,.money2-goal-card strong,.money-ref-section-label,.money-ref-advice-label,.money2-status strong){color:var(--ui-ink)!important}
+html[data-myway-ui] .money-reference-v1 :is(.money2-metrics small,.money2-week,.money-ref-calendar-summary small,.money2-advice p,.money2-status p,.money-ref-forecast small){color:var(--ui-muted)!important}
+html[data-myway-ui] .money-reference-v1 :is(.money2-row-card>button,.money2-goal-card>button,.money2-dialog footer button.primary,.money2-progress i){background:var(--ui-accent)!important;color:white!important}
+html[data-myway-ui] .money-reference-v1 .money2-day.today{box-shadow:inset 0 0 0 2px var(--ui-accent)!important}
+html[data-myway-ui] .money-reference-v1 .money2-day.today b{background:var(--ui-accent)!important;color:white!important}
+html[data-myway-ui] .money-reference-v1 :is(.money2-status,.money2-metrics article,.money-ref-calendar-summary article){background:var(--ui-surface)!important;border-color:var(--ui-line)!important}
