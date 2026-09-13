@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#f7f1e6" />
+  <title>YOS Trial Hub</title>
+  <style>
+    :root{--bg:#f7f1e6;--card:#fffdf8;--ink:#2f3734;--muted:#746f66;--line:#e7dcc8;--accent:#9b7435;--ok:#506c5f;--wait:#8b7553}
+    *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif}
+    main{max-width:680px;margin:0 auto;padding:calc(22px + env(safe-area-inset-top)) 16px calc(34px + env(safe-area-inset-bottom))}
+    .eyebrow{font-size:12px;letter-spacing:.08em;color:var(--accent);font-weight:800;margin-bottom:8px}
+    h1{font-size:29px;line-height:1.18;margin:0 0 8px} .lead{font-size:15px;line-height:1.65;color:var(--muted);margin:0 0 20px}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:17px;margin:12px 0;box-shadow:0 4px 16px rgba(76,59,35,.045)}
+    .status{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:5px 9px;font-size:11px;font-weight:800;background:#edf3ef;color:var(--ok)}
+    .status.wait{background:#f2ede5;color:var(--wait)}
+    h2{font-size:18px;margin:10px 0 7px} h3{font-size:15px;margin:0 0 7px}.small{font-size:13px;line-height:1.6;color:var(--muted)}
+    .steps{counter-reset:s}.step{display:flex;gap:12px;margin:14px 0}.step:before{counter-increment:s;content:counter(s);width:28px;height:28px;flex:0 0 28px;border-radius:50%;display:grid;place-items:center;background:#eee3cf;color:#7d602e;font-weight:900}
+    button,a.btn{appearance:none;border:0;text-decoration:none;width:100%;display:block;text-align:center;border-radius:14px;padding:13px 14px;font-size:15px;font-weight:800;background:#2f3b37;color:white;margin-top:10px}
+    a.btn.secondary,button.secondary{background:#eee6d8;color:#443d33}.grid{display:grid;gap:10px}.phrase{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f4eee3;border-radius:10px;padding:8px 10px;font-size:12px;margin:5px 0}
+    details{margin-top:12px} summary{font-weight:800;cursor:pointer}.blocked{opacity:.85}.note{padding:12px 13px;border-left:3px solid #b28b4d;background:#f4ecdf;border-radius:0 12px 12px 0;font-size:13px;line-height:1.6}
+    textarea{width:100%;min-height:150px;border:1px solid var(--line);border-radius:12px;padding:10px;font:11px ui-monospace,SFMono-Regular,Menlo,monospace;background:#fff}
+  </style>
+</head>
+<body><main>
+  <div class="eyebrow">PROJECTY · IPHONE TRIAL</div>
+  <h1>今、試せるものを<br>ここにまとめた。</h1>
+  <p class="lead">完成待ちにせず、本人端末で価値を確かめられるものだけ先に試すための入口。最初のセットアップは1回だけ。</p>
+
+  <section class="card">
+    <span class="status">最初に1回</span>
+    <h2>試用セットを入れる</h2>
+    <div class="step"><div><b>インストーラをコピー</b><div class="small">下のボタンでコード全部をコピー。</div></div></div>
+    <button id="copyInstaller">インストーラをコピー</button>
+    <div class="step"><div><b>Scriptableで新規スクリプト</b><div class="small">開いたら貼り付けて、▶︎を1回。</div></div></div>
+    <a class="btn secondary" href="scriptable:///add">Scriptableを開く</a>
+    <div class="step"><div><b>あとはLauncherから試す</b><div class="small">インストール後は1画面から順番に試せる。</div></div></div>
+    <a class="btn" href="https://open.scriptable.app/run/YOS%20Trial%20Launcher">Trial Launcherを開く</a>
+    <details><summary>コピーが失敗した時だけ</summary><p class="small">下のコードを長押し→すべて選択→コピー。</p><textarea id="fallback" readonly>読み込み中…</textarea></details>
+  </section>
+
+  <section class="card">
+    <span class="status">試せる</span>
+    <h2>① 家の音声操作</h2>
+    <p class="small">既存MY REMOTEをそのまま使う音声入口。曖昧な命令は何も実行しない。</p>
+    <div class="phrase">テレビつけて</div><div class="phrase">音量下げて</div><div class="phrase">エアコン24度にして</div><div class="phrase">電気消して</div>
+    <a class="btn" href="https://open.scriptable.app/run/YOS%20Home%20Voice">音声操作を試す</a>
+  </section>
+
+  <section class="card">
+    <span class="status">試せる</span>
+    <h2>② 出発チェック</h2>
+    <p class="small">次の予定・iPhone/AirPods残量・出発時刻・持ち物を見る。問題がなければ静かなまま。</p>
+    <div class="note">テスト用に次の6時間以内の予定があると分かりやすい。予定メモに <b>持: 保険証, 診察券</b> や <b>出発: 60</b> を入れて試せる。</div>
+    <a class="btn" href="https://open.scriptable.app/run/YOS%20Departure%20Guard">出発チェックを試す</a>
+  </section>
+
+  <section class="card">
+    <span class="status wait">導入して確認できる</span>
+    <h2>③ MY WAY NOW Widget</h2>
+    <p class="small">ホーム画面に「今やること」1件だけ出す。スクリプト自体は試用セットに入る。初回だけ接続トークンが必要。</p>
+    <a class="btn" href="https://open.scriptable.app/run/MY_WAY_NOW_WIDGET_v1">Widgetをプレビュー</a>
+  </section>
+
+  <section class="card">
+    <span class="status">そのまま試せる</span>
+    <h2>④ MY WAY Home</h2>
+    <p class="small">30秒で「今日・今やる・次」を見る運転席。追加セットアップなし。</p>
+    <a class="btn" href="https://yskn0008-bot.github.io/ProjectY/yos/">MY WAYを開く</a>
+  </section>
+
+  <section class="card blocked">
+    <span class="status wait">まだ本人試用に出さない</span>
+    <h2>今は待つもの</h2>
+    <div class="grid small">
+      <div><b>Clarity</b> — 本体生成済み。iPhoneへ安全に入れる署名・受け渡しが残り。</div>
+      <div><b>スクショ自動整理</b> — コード試作完成。Clarityと同じくShortcut署名待ち。</div>
+      <div><b>Morning Flow ↔ Night Reset</b> — 機能試験は通過しているが、別のLife画面検査が赤のため今は実機へ出さない。</div>
+      <div><b>Money Capture</b> — 記録候補を作るところまで。Moneyの正本へ書く契約が未確定。</div>
+      <div><b>週次レビュー / 不便の自動発見</b> — 中の判断エンジンは完成。実データとの接続待ち。</div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>試した後</h2>
+    <p class="small">細かい報告はいらない。これだけ返せば次へ進める。</p>
+    <div class="phrase">音声操作：OK / NG<br>出発チェック：OK / NG<br>NOW Widget：OK / NG / トークン待ち<br>MY WAY：OK / NG</div>
+    <button class="secondary" id="copyResult">結果テンプレをコピー</button>
+  </section>
+
+<script>
+const installerUrl='./YOS%20Trial%20Pack%20Installer.js';
+let installer='';
+fetch(installerUrl).then(r=>r.text()).then(t=>{installer=t;document.getElementById('fallback').value=t}).catch(()=>{});
+async function copyText(text,button,done){
+  try{await navigator.clipboard.writeText(text);const old=button.textContent;button.textContent=done;setTimeout(()=>button.textContent=old,1600)}catch{document.getElementById('fallback').focus();document.getElementById('fallback').select()}
+}
+document.getElementById('copyInstaller').onclick=()=>copyText(installer,document.getElementById('copyInstaller'),'コピーした ✓');
+document.getElementById('copyResult').onclick=()=>copyText('音声操作：OK / NG\n出発チェック：OK / NG\nNOW Widget：OK / NG / トークン待ち\nMY WAY：OK / NG',document.getElementById('copyResult'),'コピーした ✓');
+</script>
+</main></body></html>
