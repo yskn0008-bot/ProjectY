@@ -18,6 +18,7 @@ function makeManager(root) {
     documentsDirectory() { return root; },
     joinPath(a, b) { return a.replace(/\/$/, '') + '/' + b; },
     fileExists(path) { return files.has(path) || dirs.has(path); },
+    isDirectory(path) { return dirs.has(path); },
     createDirectory(path) {
       const parts = path.split('/').filter(Boolean);
       let cur = '';
@@ -40,14 +41,20 @@ function makeManager(root) {
       files.delete(src);
       files.set(dst, value);
     },
+    readString(path) {
+      if (!files.has(path)) throw new Error('missing ' + path);
+      return files.get(path);
+    },
     isFileStoredIniCloud() { return false; },
     async downloadFileFromiCloud() {}
   };
   return manager;
 }
 
-function put(manager, name, content = 'x') {
-  manager.files.set(manager.joinPath(manager.documentsDirectory(), name), content);
+function put(manager, relative, content = 'x') {
+  const path = manager.joinPath(manager.documentsDirectory(), relative);
+  manager.createDirectory(parent(path));
+  manager.files.set(path, content);
 }
 
 async function run(iCloud, local) {
@@ -65,64 +72,54 @@ async function run(iCloud, local) {
   return alerts;
 }
 
-function rootNames(manager) {
-  return manager.listContents(manager.documentsDirectory()).sort();
-}
+function filePaths(manager) { return [...manager.files.keys()].sort(); }
 
-function archivedNames(manager) {
-  const archive = rootNames(manager).find(name => name.startsWith('YOS Remote Script Archive '));
-  if (!archive) return [];
-  return manager.listContents(manager.joinPath(manager.documentsDirectory(), archive)).sort();
-}
-
-test('archives only recognized iCloud variants and keeps canonical/unknown scripts', async () => {
+test('keeps current Japanese scripts and archives legacy root scripts as .bak', async () => {
   const iCloud = makeManager('/icloud');
   const local = makeManager('/local');
-  put(iCloud, 'YOS Remote Hub.js');
-  put(iCloud, 'YOS Remote Hub copy.js');
-  put(iCloud, 'YOS AC Widget v5.2.js');
-  put(iCloud, 'YOS Battery Widget.js');
+  put(iCloud, 'リモコン.js', 'CURRENT');
+  put(iCloud, 'YOS Remote Hub.js', 'OLD');
+  put(iCloud, 'YOS Light Remote copy.js', 'OLD2');
+  put(iCloud, 'MY WAY Widgets.js', 'OTHER');
 
   await run(iCloud, local);
 
-  assert.ok(iCloud.files.has('/icloud/YOS Remote Hub.js'));
-  assert.ok(iCloud.files.has('/icloud/YOS Battery Widget.js'));
-  assert.equal(iCloud.files.has('/icloud/YOS Remote Hub copy.js'), false);
-  assert.equal(iCloud.files.has('/icloud/YOS AC Widget v5.2.js'), false);
-  assert.deepEqual(archivedNames(iCloud), ['YOS AC Widget v5.2.js', 'YOS Remote Hub copy.js']);
+  assert.equal(iCloud.files.get('/icloud/リモコン.js'), 'CURRENT');
+  assert.equal(iCloud.files.get('/icloud/MY WAY Widgets.js'), 'OTHER');
+  assert.equal(iCloud.files.has('/icloud/YOS Remote Hub.js'), false);
+  assert.equal(iCloud.files.has('/icloud/YOS Light Remote copy.js'), false);
+  assert.ok(filePaths(iCloud).some(path => path.endsWith('/YOS Remote Hub.js.bak')));
+  assert.ok(filePaths(iCloud).some(path => path.endsWith('/YOS Light Remote copy.js.bak')));
 });
 
-test('archives exact local canonical duplicate only when iCloud canonical exists', async () => {
+test('archives an Untitled exact duplicate but leaves unique Untitled content untouched', async () => {
   const iCloud = makeManager('/icloud');
   const local = makeManager('/local');
-  put(iCloud, 'YOS Remote Hub.js');
-  put(local, 'YOS Remote Hub.js');
-  put(local, 'YOS BRAVIA Remote.js');
-  put(local, 'YOS Light Remote old.js');
+  put(iCloud, 'リモコン.js', 'SAME');
+  put(iCloud, 'Untitled Script 11.js', 'SAME');
+  put(iCloud, 'Untitled Script 14.js', 'personal unique utility');
 
   await run(iCloud, local);
 
-  assert.equal(local.files.has('/local/YOS Remote Hub.js'), false);
-  assert.ok(local.files.has('/local/YOS BRAVIA Remote.js'));
-  assert.equal(local.files.has('/local/YOS Light Remote old.js'), false);
-  assert.deepEqual(archivedNames(local), ['YOS Light Remote old.js', 'YOS Remote Hub.js']);
+  assert.equal(iCloud.files.has('/icloud/Untitled Script 11.js'), false);
+  assert.equal(iCloud.files.get('/icloud/Untitled Script 14.js'), 'personal unique utility');
+  assert.ok(filePaths(iCloud).some(path => path.endsWith('/Untitled Script 11.js.bak')));
 });
 
-test('is non-destructive and idempotent when no clutter is present', async () => {
+test('hides .js inside legacy archive folders but preserves successful update backup scripts for rollback', async () => {
   const iCloud = makeManager('/icloud');
   const local = makeManager('/local');
-  put(iCloud, 'YOS Remote Hub.js', 'hub');
-  put(iCloud, 'YOS Remote Update Installer.js', 'installer');
-  put(local, 'Personal Utility.js', 'personal');
+  put(iCloud, 'リモコン.js', 'CURRENT');
+  put(iCloud, 'リモコン/保管/英語旧版 2026/YOS Remote Hub.js', 'OLD');
+  put(iCloud, 'リモコン/保管/整理 2026/YOS Light Remote.js', 'OLD2');
+  put(iCloud, 'リモコン/保管/更新前 2026/backup/リモコン.js', 'ROLLBACK');
+  put(iCloud, 'YOS Remote Script Archive 2026/YOS AC Widget.js', 'OLD3');
 
-  const first = await run(iCloud, local);
-  const second = await run(iCloud, local);
+  await run(iCloud, local);
 
-  assert.equal(iCloud.files.get('/icloud/YOS Remote Hub.js'), 'hub');
-  assert.equal(iCloud.files.get('/icloud/YOS Remote Update Installer.js'), 'installer');
-  assert.equal(local.files.get('/local/Personal Utility.js'), 'personal');
-  assert.equal(rootNames(iCloud).some(name => name.startsWith('YOS Remote Script Archive ')), false);
-  assert.equal(rootNames(local).some(name => name.startsWith('YOS Remote Script Archive ')), false);
-  assert.match(first[0].message, /見つかりませんでした/);
-  assert.match(second[0].message, /見つかりませんでした/);
+  assert.equal(iCloud.files.has('/icloud/リモコン/保管/英語旧版 2026/YOS Remote Hub.js'), false);
+  assert.ok(iCloud.files.has('/icloud/リモコン/保管/英語旧版 2026/YOS Remote Hub.js.bak'));
+  assert.ok(iCloud.files.has('/icloud/リモコン/保管/整理 2026/YOS Light Remote.js.bak'));
+  assert.ok(iCloud.files.has('/icloud/YOS Remote Script Archive 2026/YOS AC Widget.js.bak'));
+  assert.equal(iCloud.files.get('/icloud/リモコン/保管/更新前 2026/backup/リモコン.js'), 'ROLLBACK');
 });
