@@ -399,7 +399,7 @@ function paintCheckinRating(name,value){
 function paint(){
   const d=day(),n=new Date(),copy=stateCopy();
   el('clock').textContent=new Intl.DateTimeFormat('ja-JP',{hour:'2-digit',minute:'2-digit',hour12:false,timeZone:'Asia/Tokyo'}).format(n);
-  el('donutTime').textContent=el('clock').textContent;
+  if(el('donutTime')&&el('clock'))el('donutTime').textContent=el('clock').textContent;
   el('date').textContent=new Intl.DateTimeFormat('ja-JP',{month:'numeric',day:'numeric',weekday:'short',timeZone:'Asia/Tokyo'}).format(n);
   el('greeting').textContent=greeting();el('stateTitle').textContent=copy[0];el('stateDetail').textContent=copy[1];
   el('sleepMetric').textContent=d.checkin.sleep?`${d.checkin.sleep}h`:'—';el('healthMetric').textContent=d.checkin.health?`${d.checkin.health}/5`:'—';el('moodMetric').textContent=d.checkin.mood?`${d.checkin.mood}/5`:'—';el('streakMetric').textContent=`${streak()}日`;
@@ -443,7 +443,7 @@ el('settingsButton').onclick=openSettings;el('settingsNav').onclick=openSettings
 el('saveSettings').onclick=()=>{settings.yosUrl=el('yosUrl').value.trim();localStorage.setItem(SETTINGS,JSON.stringify(settings))};
 el('consultNav').onclick=()=>el('sendButton').click();el('recordNav').onclick=()=>el('sleep').focus();el('planNav').onclick=()=>scrollTo({top:0,behavior:'smooth'});
 el('sendButton').onclick=async()=>{day().note=el('note').value;save();const text=summary();try{await navigator.clipboard.writeText(text)}catch{prompt('この内容をコピーしてください',text);return}const url=settings.yosUrl||taxiUrl();if(url.startsWith('https://chatgpt.com/'))location.href=url;else{alert('内容をコピーしました。設定でYOSチャットURLを登録してください。');openSettings()}};
-importFromUrl();paint();setInterval(()=>{el('clock').textContent=new Intl.DateTimeFormat('ja-JP',{hour:'2-digit',minute:'2-digit',hour12:false,timeZone:'Asia/Tokyo'}).format(new Date());el('donutTime').textContent=el('clock').textContent},30000);
+importFromUrl();paint();setInterval(()=>{el('clock').textContent=new Intl.DateTimeFormat('ja-JP',{hour:'2-digit',minute:'2-digit',hour12:false,timeZone:'Asia/Tokyo'}).format(new Date());if(el('donutTime')&&el('clock'))el('donutTime').textContent=el('clock').textContent},30000);
 if('serviceWorker'in navigator)navigator.serviceWorker.register('./service-worker.js');
 })();
 </script>
