@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-14T07:03:29+09:00",
+  "updated_at": "2026-09-14T07:07:45+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -120,7 +120,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-09-13T21:50:11Z"
+      "updated_at": "2026-09-13T22:07:02Z"
     },
     {
       "id": "github-issue-234",
@@ -165,6 +165,27 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-72ad5e6da9df",
+      "title": "Merge pull request #345 from yskn0008-bot/feat/issue-344-scriptable-classifier",
+      "completed_at": "2026-09-13T22:07:31Z",
+      "result": "GitHub mainへ反映（72ad5e6）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/72ad5e6da9df64a328e388e643f0c639e30c12b1"
+    },
+    {
+      "id": "github-commit-be9a65fbeba4",
+      "title": "test(scriptable): lock cleanup classifier safety",
+      "completed_at": "2026-09-13T22:04:36Z",
+      "result": "GitHub mainへ反映（be9a65f）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/be9a65fbeba41d55f93d2002828c0a6db2a6cf44"
+    },
+    {
+      "id": "github-commit-45ec54a09fb8",
+      "title": "feat(scriptable): add safe script classifier",
+      "completed_at": "2026-09-13T22:04:24Z",
+      "result": "GitHub mainへ反映（45ec54a）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/45ec54a09fb881d1a6ed748bdba62b93c4f69553"
+    },
+    {
       "id": "github-commit-1d9a8dff2d34",
       "title": "docs: local-first / cloud-minimal development rule v3.1",
       "completed_at": "2026-09-13T21:50:11Z",
@@ -177,27 +198,6 @@
       "completed_at": "2026-09-13T21:48:06Z",
       "result": "GitHub mainへ反映（4104dc2）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/4104dc28edf4f638959c952c1f7df0e709129e9c"
-    },
-    {
-      "id": "github-commit-812bd9b7d7c5",
-      "title": "chore: prepare local-first policy audit note",
-      "completed_at": "2026-09-13T21:47:52Z",
-      "result": "GitHub mainへ反映（812bd9b）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/812bd9b7d7c577f158270fdac5c73be2807fdb70"
-    },
-    {
-      "id": "github-commit-5895c2093f92",
-      "title": "Merge pull request #342 from yskn0008-bot/fix/issue-341-scriptable-archive-hide",
-      "completed_at": "2026-09-13T21:21:55Z",
-      "result": "GitHub mainへ反映（5895c20）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/5895c2093f92460dcf07d2400ca73ca546028d08"
-    },
-    {
-      "id": "github-commit-975bc2ec0d79",
-      "title": "test(scriptable): cover archive hiding and safe duplicate cleanup",
-      "completed_at": "2026-09-13T21:19:33Z",
-      "result": "GitHub mainへ反映（975bc2e）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/975bc2ec0d795e38d73654c3ba6b95ba5315172e"
     },
     {
       "id": "complete-002",
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-14T07:03:29+09:00",
+      "last_update": "2026-09-14T07:07:45+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -315,7 +315,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-14T07:03:29+09:00",
+      "last_update": "2026-09-14T07:07:45+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-14T07:03:29+09:00",
+      "last_update": "2026-09-14T07:07:45+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "8b2ef49ee8cec867628e4e4785e316e398155dde4fecb97e889b23da53f31463"
+  "github_snapshot_hash": "61c53403394650a49fc78993d3b2dffa94b79930a7f0166348a6ca897d560864"
 }
