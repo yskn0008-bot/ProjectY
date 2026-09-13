@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-10T00:45:56+09:00",
+  "updated_at": "2026-09-13T13:16:51+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -13,54 +13,54 @@
   },
   "inbox": [
     {
-      "id": "github-pr-233",
-      "title": "PR #233 Draft: Mission Controlに進捗率・残り時間を常時表示する",
+      "id": "github-pr-320",
+      "title": "PR #320 Prototype: YOS Departure Guard v0.1",
       "type": "GitHub PR",
       "status": "draft",
       "priority": 2,
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/233",
-      "updated_at": "2026-09-05T00:22:21Z"
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/320",
+      "updated_at": "2026-09-12T21:39:03Z"
     },
     {
-      "id": "github-pr-280",
-      "title": "PR #280 feat(yos-ai): add Point / Event Foundation v1 contract",
+      "id": "github-pr-322",
+      "title": "PR #322 feat(hq): add Lane 4 One Enter orchestration engine",
       "type": "GitHub PR",
       "status": "draft",
       "priority": 2,
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/280",
-      "updated_at": "2026-09-05T04:18:56Z"
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/322",
+      "updated_at": "2026-09-13T01:07:22Z"
     },
     {
-      "id": "github-pr-291",
-      "title": "PR #291 feat(yos-ai): add Clarity intake bridge to YOS Inbox",
+      "id": "github-pr-325",
+      "title": "PR #325 Draft: prove template-free Clarity ChatGPT action with Cherri (#314)",
       "type": "GitHub PR",
       "status": "draft",
       "priority": 2,
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/291",
-      "updated_at": "2026-09-09T15:44:43Z"
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/325",
+      "updated_at": "2026-09-13T00:14:08Z"
     },
     {
-      "id": "github-pr-293",
-      "title": "PR #293 BRAVIA: add free Scriptable remote fallback",
+      "id": "github-pr-330",
+      "title": "PR #330 Prototype: YOS Screenshot Router v1",
       "type": "GitHub PR",
       "status": "draft",
       "priority": 2,
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/293",
-      "updated_at": "2026-09-06T21:11:10Z"
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/330",
+      "updated_at": "2026-09-12T17:03:21Z"
     },
     {
-      "id": "github-issue-10",
-      "title": "Issue #10 Mission Control v2：GitHubのIssue・PR・Commitを自動集約する",
-      "type": "GitHub Issue",
-      "status": "open",
-      "priority": 3,
-      "next_action": "完成条件を確認し、次の安全な実装を1件進める",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/10",
-      "updated_at": "2026-07-17T11:08:22Z"
+      "id": "github-pr-335",
+      "title": "PR #335 feat(prot-factory): prove real no-wait reuse path",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/335",
+      "updated_at": "2026-09-12T22:54:37Z"
     },
     {
       "id": "github-issue-110",
@@ -93,16 +93,6 @@
       "updated_at": "2026-08-02T05:43:26Z"
     },
     {
-      "id": "github-issue-158",
-      "title": "Issue #158 HJ / YOS思想・体験設計の正式引き継ぎ",
-      "type": "GitHub Issue",
-      "status": "open",
-      "priority": 3,
-      "next_action": "完成条件を確認し、次の安全な実装を1件進める",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/158",
-      "updated_at": "2026-08-01T12:24:21Z"
-    },
-    {
       "id": "github-issue-214",
       "title": "Issue #214 [YOS→Codex] Taxi開発キュー：PR #213のActions実行・修正",
       "type": "GitHub Issue",
@@ -113,24 +103,54 @@
       "updated_at": "2026-08-04T01:39:56Z"
     },
     {
-      "id": "github-issue-4",
-      "title": "Issue #4 YOS Mission Control v1.0を構築する",
+      "id": "github-issue-225",
+      "title": "Issue #225 [YOS→Codex] Life Service Workerの相互キャッシュ削除を止める",
       "type": "GitHub Issue",
       "status": "open",
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/4",
-      "updated_at": "2026-07-17T10:35:18Z"
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/225",
+      "updated_at": "2026-08-09T11:24:38Z"
     },
     {
-      "id": "github-issue-40",
-      "title": "Issue #40 YOS Taxiの成果を30営業日で証明する",
+      "id": "github-issue-229",
+      "title": "Issue #229 Mission Controlに各開発の進捗率と残り時間を常時表示する",
       "type": "GitHub Issue",
       "status": "open",
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/40",
-      "updated_at": "2026-07-18T04:03:30Z"
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/229",
+      "updated_at": "2026-08-11T01:57:47Z"
+    },
+    {
+      "id": "github-issue-230",
+      "title": "Issue #230 [YOS→Codex] HJを「人生の地図＋12アーキタイプ」へ改修",
+      "type": "GitHub Issue",
+      "status": "open",
+      "priority": 3,
+      "next_action": "完成条件を確認し、次の安全な実装を1件進める",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/230",
+      "updated_at": "2026-08-22T13:41:39Z"
+    },
+    {
+      "id": "github-issue-232",
+      "title": "Issue #232 [YOS HQ] ProjectY自動司令部 v1｜毎時監視・安全な自動継続",
+      "type": "GitHub Issue",
+      "status": "open",
+      "priority": 3,
+      "next_action": "完成条件を確認し、次の安全な実装を1件進める",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
+      "updated_at": "2026-09-13T01:07:23Z"
+    },
+    {
+      "id": "github-issue-234",
+      "title": "Issue #234 [YOS HQ] Life｜「おはよう→今日を生きる→おやすみ」を一続きにする統合体験",
+      "type": "GitHub Issue",
+      "status": "open",
+      "priority": 3,
+      "next_action": "完成条件を確認し、次の安全な実装を1件進める",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/234",
+      "updated_at": "2026-08-22T13:41:40Z"
     },
     {
       "id": "github-issue-51",
@@ -141,53 +161,43 @@
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/51",
       "updated_at": "2026-09-04T23:21:43Z"
-    },
-    {
-      "id": "github-issue-86",
-      "title": "Issue #86 YOSナビ v35 本番自動学習を有効化",
-      "type": "GitHub Issue",
-      "status": "open",
-      "priority": 3,
-      "next_action": "完成条件を確認し、次の安全な実装を1件進める",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/86",
-      "updated_at": "2026-07-30T17:33:32Z"
     }
   ],
   "recently_completed": [
     {
-      "id": "github-commit-4a28f7cdd466",
-      "title": "fix(money): ship readability polish and goal label repair",
-      "completed_at": "2026-09-09T15:45:39Z",
-      "result": "GitHub mainへ反映（4a28f7c）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/4a28f7cdd466074b362033945aa9f9b09f2c5cf4"
+      "id": "github-commit-92b3a6d93218",
+      "title": "chore(remote): organize Scriptable remote scripts safely (#332)",
+      "completed_at": "2026-09-13T04:16:29Z",
+      "result": "GitHub mainへ反映（92b3a6d）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/92b3a6d93218046900e5519c2721c131a317657b"
     },
     {
-      "id": "github-commit-2d6dac226165",
-      "title": "fix(money): repair goal label and clarify privacy control",
-      "completed_at": "2026-09-09T15:45:04Z",
-      "result": "GitHub mainへ反映（2d6dac2）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/2d6dac2261658692f843ac772118b6f27f00024f"
+      "id": "github-commit-2b7dd9b16bb6",
+      "title": "feat(yos): make MY WAY Home a 30-second daily cockpit",
+      "completed_at": "2026-09-12T23:24:22Z",
+      "result": "GitHub mainへ反映（2b7dd9b）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/2b7dd9b16bb6c490f427dcc74303698e7ce3566a"
     },
     {
-      "id": "github-commit-4b34816b39a7",
-      "title": "fix(money): enlarge small text and improve readability",
-      "completed_at": "2026-09-09T15:44:37Z",
-      "result": "GitHub mainへ反映（4b34816）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/4b34816b39a7d0c1a6e6f849afab439560817224"
+      "id": "github-commit-2cfb23928053",
+      "title": "feat(widget): MY WAY NOW home widget prototype",
+      "completed_at": "2026-09-12T21:44:36Z",
+      "result": "GitHub mainへ反映（2cfb239）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/2cfb23928053e46a94818c1b6d3d2eba6fce7279"
     },
     {
-      "id": "github-commit-5e2cc7517ef0",
-      "title": "Merge PR #301: classify production Sheets read failure",
-      "completed_at": "2026-09-09T14:38:39Z",
-      "result": "GitHub mainへ反映（5e2cc75）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/5e2cc7517ef0d78cff9615002811a855106c160a"
+      "id": "github-commit-0e798b0e9530",
+      "title": "feat(prot-factory): add no-wait prototype factory v0.1 (#334)",
+      "completed_at": "2026-09-12T21:06:33Z",
+      "result": "GitHub mainへ反映（0e798b0）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/0e798b0e9530ec44fffd9b10bf66187743f39b51"
     },
     {
-      "id": "github-commit-94f8ac3336b4",
-      "title": "test(yos): lock Sheets failure classification privacy",
-      "completed_at": "2026-09-09T14:37:23Z",
-      "result": "GitHub mainへ反映（94f8ac3）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/94f8ac3336b4259c07089aba3a6f6fe3967d14b9"
+      "id": "github-commit-43923e66b44c",
+      "title": "feat(remote): complete MY REMOTE UX v2",
+      "completed_at": "2026-09-12T20:49:17Z",
+      "result": "GitHub mainへ反映（43923e6）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/43923e66b44ce56e87168aae65afb91d660359e2"
     },
     {
       "id": "complete-002",
@@ -214,7 +224,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #291をレビューして公開判断する",
+      "next_action": "PR #329をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -224,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-10T00:45:56+09:00",
+      "last_update": "2026-09-13T13:16:51+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -299,13 +309,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 32件・Open PR 4件を自動同期中",
+      "next_action": "Open Issue 32件・Open PR 18件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-10T00:45:56+09:00",
+      "last_update": "2026-09-13T13:16:51+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -319,7 +329,7 @@
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #291をレビューして公開判断する",
+      "next_action": "PR #329をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -328,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-10T00:45:56+09:00",
+      "last_update": "2026-09-13T13:16:51+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -410,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "6c70e51c26db75f76a5efb743da33c092943ed7aa3da4520e2429dae785110a5"
+  "github_snapshot_hash": "492b0651ac3a3257f6f67e6722f861a4cf0df4180f70e26ee0c8af840ef58a2c"
 }

@@ -32,7 +32,7 @@
     {label:'Home',icon:'⌂',href:'../yos/'},
     {label:'Life',icon:'♡',page:'home'},
     {label:'Money',icon:'¥',href:'../yos/#money'},
-    {label:'Hero’s Journey',icon:'△',href:'../yos/hj/'},
+    {label:'Hero’s Journey',icon:'△',href:'../yos/#journey'},
     {label:'Idea',icon:'✦',href:'../yos/#idea'}
   ];
   let activePage='home';
@@ -151,7 +151,7 @@
       const base=document.createElement('link');
       base.id='lifeHomeV1Styles';
       base.rel='stylesheet';
-      base.href='./home-v1.css?v=8';
+      base.href='./home-v1.css?v=9';
       document.head.appendChild(base);
     }
     if(!document.getElementById('lifeHomePriorityV1Styles')){

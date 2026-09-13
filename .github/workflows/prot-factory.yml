@@ -1,0 +1,122 @@
+name: PROT Factory
+
+on:
+  pull_request:
+    paths:
+      - "tools/prot-factory/**"
+      - ".github/workflows/prot-factory.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Unit tests
+        run: python3 -m unittest discover -s tools/prot-factory/tests -v
+
+      - name: Low-risk no-wait synthetic E2E
+        shell: bash
+        run: |
+          cat > /tmp/prot-low.json <<'JSON'
+          {
+            "job_id": "ci-low-risk",
+            "idea": "今日の状態をすぐ見たい",
+            "desired_state": "試用可能な小型Web試作",
+            "known_assets": ["MY WAY"],
+            "risk": "low",
+            "lane": "unknown",
+            "base_sha": "${{ github.sha }}",
+            "status": "intake",
+            "recovery_count": 0,
+            "max_recovery": 2,
+            "recovery_fingerprints": [],
+            "prototype_type": "web"
+          }
+          JSON
+          python3 tools/prot-factory/factory.py /tmp/prot-low.json > /tmp/prot-low-result.json
+          python3 - <<'PY'
+          import json
+          data = json.load(open('/tmp/prot-low-result.json', encoding='utf-8'))
+          assert data['status'] == 'trial_ready', data
+          assert data['outcome'] == 'trial_ready', data
+          PY
+
+      - name: High-risk fail-closed synthetic E2E
+        shell: bash
+        run: |
+          cat > /tmp/prot-high.json <<'JSON'
+          {
+            "job_id": "ci-high-risk",
+            "idea": "重要データを書き換える",
+            "desired_state": "外部へ反映",
+            "known_assets": [],
+            "risk": "high",
+            "lane": "unknown",
+            "base_sha": "${{ github.sha }}",
+            "status": "intake",
+            "recovery_count": 0,
+            "max_recovery": 2,
+            "recovery_fingerprints": [],
+            "prototype_type": "web"
+          }
+          JSON
+          python3 tools/prot-factory/factory.py /tmp/prot-high.json > /tmp/prot-high-result.json
+          python3 - <<'PY'
+          import json
+          data = json.load(open('/tmp/prot-high-result.json', encoding='utf-8'))
+          assert data['status'] == 'needs_yos', data
+          assert data['outcome'] == 'blocked', data
+          PY
+
+      - name: Recovery fingerprint synthetic E2E
+        shell: bash
+        run: |
+          cat > /tmp/prot-recovery.json <<'JSON'
+          {
+            "job_id": "ci-recovery",
+            "idea": "synthetic recovery",
+            "desired_state": "bounded retry",
+            "known_assets": [],
+            "risk": "low",
+            "lane": "web",
+            "base_sha": "${{ github.sha }}",
+            "status": "qa",
+            "recovery_count": 0,
+            "max_recovery": 2,
+            "recovery_fingerprints": []
+          }
+          JSON
+          python3 tools/prot-factory/factory.py /tmp/prot-recovery.json \
+            --recover SYNTHETIC_FAILURE \
+            --evidence "intentional failure" > /tmp/prot-recovery-result.json
+          python3 - <<'PY'
+          import json
+          data = json.load(open('/tmp/prot-recovery-result.json', encoding='utf-8'))
+          assert data['outcome'] == 'retry_allowed', data
+          assert data['recovery_count'] == 1, data
+          assert data['failure_fingerprint'], data
+          PY
+
+      - name: Upload synthetic results
+        uses: actions/upload-artifact@v4
+        with:
+          name: prot-factory-synthetic-results
+          path: |
+            /tmp/prot-low-result.json
+            /tmp/prot-high-result.json
+            /tmp/prot-recovery-result.json
+          if-no-files-found: error
+          retention-days: 7

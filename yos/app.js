@@ -54,7 +54,7 @@ function currentScenes(journey){
 }
 function renderIdentity(){
   const date=new Date();
-  const hour=Number(new Intl.DateTimeFormat('ja-JP',{hour:'numeric',hourCycle:'h23',timeZone:'Asia/Tokyo'}).format(date));
+  const hour=Number(new Intl.DateTimeFormat('ja-JP',{hour:'numeric',hourCycle:'h23',timeZone:'Asia/Tokyo'}).formatToParts(date).find(part=>part.type==='hour').value);
   set('homeGreeting',`${hour<11?'おはよう':hour<18?'こんにちは':'こんばんは'}、ようすけ！`);
   set('homeDate',new Intl.DateTimeFormat('ja-JP',{year:'numeric',month:'numeric',day:'numeric',weekday:'short',timeZone:'Asia/Tokyo'}).format(date));
   set('moneyMonth',new Intl.DateTimeFormat('ja-JP',{year:'numeric',month:'long',timeZone:'Asia/Tokyo'}).format(date));
@@ -183,6 +183,9 @@ installMoneyFlow();
 render();
 const initial=location.hash.slice(1);
 showPage(['money','journey','idea','archive'].includes(initial)?initial:'home');
+document.addEventListener('myway:navigate',event=>showPage(event.detail));
+setInterval(renderIdentity,60000);
+window.addEventListener('pageshow',renderIdentity);
 window.addEventListener('storage',render);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)render()});
 if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js').catch(()=>{}));
