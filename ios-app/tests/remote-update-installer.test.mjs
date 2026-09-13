@@ -7,7 +7,7 @@ const FILES = [
   'YOS Tapo H110 Core.js','YOS AC Remote.js','YOS AC Widget.js','YOS BRAVIA Remote.js',
   'YOS Light Remote.js','YOS Light Widget.js','YOS Remote Hub.js'
 ];
-const SOURCE_SHA = '71d6832551d63a1b0f0eda2e9f1d67b1d012369a';
+const SOURCE_SHA = '4741b4f13f014e3d13d40ffb2cd084c3bfe6eba9';
 
 function parent(path){ const i=path.lastIndexOf('/'); return i<=0?'/':path.slice(0,i); }
 function makeEnv({failLiveName=null}={}){
