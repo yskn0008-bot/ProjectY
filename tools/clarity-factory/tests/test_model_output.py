@@ -102,6 +102,47 @@ class ClarityModelOutputTests(unittest.TestCase):
         payload["interpretation"]["domains"] = ["idea", "shopping"]
         self.assertEqual(validate(payload), [])
 
+    def test_shortcut_factory_route_is_supported(self):
+        payload = valid_payload()
+        payload["original_input"] = "毎朝この操作を自動にして"
+        payload["interpretation"].update(
+            objective="毎朝のiPhone操作を自動化する",
+            domains=["system"],
+            risk="low",
+        )
+        payload["actions"][0].update(
+            executor="shortcut_factory",
+            domain="system",
+            intent="automate",
+            destination="Shortcut Factory",
+            content="毎朝この操作を自動にして",
+        )
+        self.assertEqual(validate(payload), [])
+
+    def test_shortcut_factory_wrong_route_fails_closed(self):
+        payload = valid_payload()
+        payload["actions"][0].update(
+            executor="shortcut_factory",
+            domain="life",
+            intent="create",
+            destination="Shortcut Factory",
+        )
+        self.assertTrue(any("shortcut_factory" in e for e in validate(payload)))
+
+    def test_shortcut_factory_external_distribution_requires_confirmation(self):
+        payload = valid_payload()
+        payload["interpretation"]["domains"] = ["system"]
+        payload["actions"][0].update(
+            executor="shortcut_factory",
+            domain="system",
+            intent="automate",
+            destination="Shortcut Factory",
+            external_write=True,
+            requires_confirmation=False,
+        )
+        errors = validate(payload)
+        self.assertTrue(any("external" in e for e in errors))
+
 
 if __name__ == "__main__":
     unittest.main()
