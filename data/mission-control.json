@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-13T23:16:20+09:00",
+  "updated_at": "2026-09-14T02:25:32+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -23,16 +23,6 @@
       "updated_at": "2026-09-13T10:41:51Z"
     },
     {
-      "id": "github-pr-320",
-      "title": "PR #320 Prototype: YOS Departure Guard v0.1",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/320",
-      "updated_at": "2026-09-12T21:39:03Z"
-    },
-    {
       "id": "github-pr-322",
       "title": "PR #322 feat(hq): add Lane 4 One Enter orchestration engine",
       "type": "GitHub PR",
@@ -41,6 +31,16 @@
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/322",
       "updated_at": "2026-09-13T01:07:22Z"
+    },
+    {
+      "id": "github-pr-324",
+      "title": "PR #324 feat: Shortcut Factory v3 + STASH auto-build",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/324",
+      "updated_at": "2026-09-13T15:02:34Z"
     },
     {
       "id": "github-pr-325",
@@ -81,16 +81,6 @@
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/120",
       "updated_at": "2026-08-25T23:41:09Z"
-    },
-    {
-      "id": "github-issue-142",
-      "title": "Issue #142 YOSをヒーローズジャーニーのメンターアプリへ統合する",
-      "type": "GitHub Issue",
-      "status": "open",
-      "priority": 3,
-      "next_action": "完成条件を確認し、次の安全な実装を1件進める",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/142",
-      "updated_at": "2026-08-02T05:43:26Z"
     },
     {
       "id": "github-issue-214",
@@ -140,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-09-13T11:40:20Z"
+      "updated_at": "2026-09-13T15:02:35Z"
     },
     {
       "id": "github-issue-234",
@@ -151,6 +141,16 @@
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/234",
       "updated_at": "2026-08-22T13:41:40Z"
+    },
+    {
+      "id": "github-issue-236",
+      "title": "Issue #236 [YOS→Codex] Taxi｜明日営業用の最小統合：需要カレンダーをホーム1タップ化",
+      "type": "GitHub Issue",
+      "status": "open",
+      "priority": 3,
+      "next_action": "完成条件を確認し、次の安全な実装を1件進める",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/236",
+      "updated_at": "2026-08-07T08:04:35Z"
     },
     {
       "id": "github-issue-51",
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-13T23:16:20+09:00",
+      "last_update": "2026-09-14T02:25:32+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -315,7 +315,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-13T23:16:20+09:00",
+      "last_update": "2026-09-14T02:25:32+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-13T23:16:20+09:00",
+      "last_update": "2026-09-14T02:25:32+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "ac1316d4ae31f2221c17f2991e8ac514d0b7594201ac309286a8785f726f246e"
+  "github_snapshot_hash": "5ac5666f9e8034dc7558e8359a9d491d4804833c351e0596ad658c9f97481272"
 }
