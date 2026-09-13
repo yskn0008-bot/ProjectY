@@ -105,6 +105,12 @@ def validate(payload: Any) -> list[str]:
                 if action.get("needs_review") is not True:
                     errors.append(f"{prefix} has ambiguous/missing date_time and must needs_review")
 
+        if executor == "shortcut_factory":
+            if action.get("domain") != "system" or action.get("intent") != "automate":
+                errors.append(f"{prefix} shortcut_factory must use domain=system and intent=automate")
+            if action.get("external_write") is True and action.get("requires_confirmation") is not True:
+                errors.append(f"{prefix} shortcut_factory external distribution requires confirmation")
+
         if action.get("external_write") is True and action.get("requires_confirmation") is not True:
             errors.append(f"{prefix} external_write requires confirmation in v1")
 
