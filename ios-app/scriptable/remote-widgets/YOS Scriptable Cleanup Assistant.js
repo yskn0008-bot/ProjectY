@@ -1,11 +1,15 @@
-// YOS Scriptable Cleanup Assistant v1.0
+// YOS Scriptable Cleanup Assistant v1.1
 // Classifies Scriptable scripts into: keep / safe-to-archive / review-needed.
-// Never deletes. Safe candidates are archived as .js.bak only after explicit confirmation.
+// Never deletes. User already approved safe cleanup in chat, so safe candidates are archived automatically as .js.bak.
 
 const KEEP_EXACT = new Set([
   'リモコン.js','リモコン更新.js','テレビリモコン.js','エアコンリモコン.js','エアコンウィジェット.js',
   '照明リモコン.js','照明ウィジェット.js','リモコン整理.js','スクリプト整理.js',
-  'MY WAY Widgets.js','MY WAY Widget.js','MY_WAY_5_WIDGETS_v1.js','YOS Battery Widget.js'
+  'MY_WAY_5_WIDGETS_v1.js','YOS Battery Widget.js'
+]);
+
+const REVIEW_OLD_MYWAY = new Set([
+  'MY WAY Widgets.js','MY WAY Widget.js'
 ]);
 
 const SAFE_LEGACY = new Set([
@@ -29,6 +33,11 @@ function normalizeText(v){ return String(v||'').replace(/\r\n/g,'\n').trim(); }
 function stem(name){ return String(name).replace(/\.js$/i,'').trim(); }
 function isJs(name){ return /\.js$/i.test(String(name)); }
 function isUntitled(name){ return /^untitled script(?: \d+)?\.js$/i.test(String(name)); }
+function isDefaultUntitled(text){
+  const t=normalizeText(text);
+  if(!t) return true;
+  return /^\/\/ Variables used by Scriptable\.?\s*$/i.test(t) || /^\/\/ Scriptable\s*$/i.test(t);
+}
 function variantOf(base,name){
   const b=lower(stem(base)), n=lower(stem(name));
   if(n===b) return false;
@@ -37,10 +46,9 @@ function variantOf(base,name){
   return /^(?:\(\d+\)|\d+|copy(?:\s*\d+)?|old(?:\s*\d+)?|backup(?:\s*\d+)?|bak(?:\s*\d+)?|legacy(?:\s*\d+)?|v\d+(?:[._-]\d+)*)$/i.test(suffix);
 }
 function knownVariant(name){
-  for(const base of [...KEEP_EXACT,...SAFE_LEGACY]) if(variantOf(base,name)) return true;
+  for(const base of [...KEEP_EXACT,...REVIEW_OLD_MYWAY,...SAFE_LEGACY]) if(variantOf(base,name)) return true;
   return false;
 }
-function parent(path){ const i=String(path).lastIndexOf('/'); return i<=0?'/':String(path).slice(0,i); }
 function ensureDir(fm,path){ if(!fm.fileExists(path)) fm.createDirectory(path,true); }
 async function ensureLocal(fm,path){
   if(!fm || !fm.fileExists(path)) return;
@@ -53,8 +61,6 @@ async function readScript(fm,name){
   const path=fm.joinPath(fm.documentsDirectory(),name);
   try{await ensureLocal(fm,path);return fm.readString(path);}catch(_){return'';}
 }
-function canonicalKeepNames(names){ return new Set(names.filter(n=>KEEP_EXACT.has(n))); }
-
 async function scanStore(fm,kind){
   if(!fm) return {kind,items:[],contents:new Map()};
   const names=listRootJs(fm);
@@ -63,14 +69,26 @@ async function scanStore(fm,kind){
   return {kind,items:names,contents};
 }
 
+function preferenceScore(name){
+  if(KEEP_EXACT.has(name)) return 1000;
+  if(REVIEW_OLD_MYWAY.has(name)) return 600;
+  if(!isUntitled(name)) return 400 - Math.min(String(name).length,200);
+  return 0;
+}
 function buildContentOwners(stores){
-  const owners=new Map();
+  const groups=new Map();
   for(const store of stores){
     for(const name of store.items){
-      if(!KEEP_EXACT.has(name)) continue;
       const text=store.contents.get(name)||'';
-      if(text) owners.set(text,{kind:store.kind,name});
+      if(!text) continue;
+      if(!groups.has(text)) groups.set(text,[]);
+      groups.get(text).push({kind:store.kind,name});
     }
+  }
+  const owners=new Map();
+  for(const [text,items] of groups){
+    const ranked=[...items].sort((a,b)=>preferenceScore(b.name)-preferenceScore(a.name)||a.name.localeCompare(b.name,'ja'));
+    owners.set(text,{owner:ranked[0],count:items.length});
   }
   return owners;
 }
@@ -78,12 +96,21 @@ function buildContentOwners(stores){
 function classifyOne(store,name,owners){
   const text=store.contents.get(name)||'';
   if(KEEP_EXACT.has(name)) return {bucket:'keep',reason:'現行として残す'};
+  if(REVIEW_OLD_MYWAY.has(name)) return {bucket:'review',reason:'旧MY WAY候補。ホーム画面参照の可能性があるため確認必要'};
   if(SAFE_LEGACY.has(name)) return {bucket:'safe',reason:'既知の旧版'};
   if(knownVariant(name)) return {bucket:'safe',reason:'既知スクリプトの重複・旧版名'};
-  const owner=text?owners.get(text):null;
-  if(owner && owner.name!==name) return {bucket:'safe',reason:`現行 ${owner.name} と内容が完全一致`};
+
+  const group=text?owners.get(text):null;
+  if(group && group.count>1 && (group.owner.name!==name || group.owner.kind!==store.kind)){
+    return {bucket:'safe',reason:`${group.owner.name} と内容が完全一致する重複`};
+  }
+
   if(isUntitled(name)){
+    if(isDefaultUntitled(text)) return {bucket:'safe',reason:'空またはScriptable初期テンプレート'};
     if(REMOTE_MARKERS.some(marker=>text.includes(marker))) return {bucket:'safe',reason:'Untitledだが旧MY REMOTE内容と確定'};
+    if(text.includes('MY WAY by YOS — NOW Widget v1') || text.includes('MY_WAY_NOW_WIDGET')){
+      return {bucket:'review',reason:'旧MY WAY NOW候補。ホーム画面参照の可能性があるため確認必要'};
+    }
     return {bucket:'review',reason:'Untitledのため中身確認が必要'};
   }
   if(REMOTE_MARKERS.some(marker=>text.includes(marker))) return {bucket:'safe',reason:'旧MY REMOTE内容と確定'};
@@ -102,13 +129,13 @@ function classify(stores){
   return out;
 }
 
-function reportText(result){
+function reportText(result,moved=0){
   const section=(title,items)=>[title, ...items.map(x=>`- [${x.kind}] ${x.name} — ${x.reason}`), ''].join('\n');
   return [
     `Scriptable 自動分類 ${new Date().toLocaleString('ja-JP')}`,'',
-    `残す: ${result.keep.length}件 / 安全に保管可能: ${result.safe.length}件 / 要確認: ${result.review.length}件`,'',
+    `残す: ${result.keep.length}件 / 安全に保管可能: ${result.safe.length}件 / 要確認: ${result.review.length}件 / 今回保管: ${moved}件`,'',
     section('【残す】',result.keep),section('【安全に保管可能】',result.safe),section('【要確認】',result.review),
-    '※ 物理削除はしません。安全候補は実行時の確認後に .js.bak として保管します。'
+    '※ 物理削除はしていません。安全候補だけ .js.bak として退避しています。'
   ].join('\n');
 }
 
@@ -148,30 +175,17 @@ async function main(){
   const scanned=[await scanStore(iCloud,'iCloud'),await scanStore(local,'ローカル')].filter(Boolean);
   const stores=scanned.map(s=>({...s,fm:s.kind==='iCloud'?iCloud:local}));
   const result=classify(stores);
-  const text=reportText(result);
-  saveReport(iCloud,text);
-
-  const a=new Alert();
-  a.title='スクリプト整理';
-  const safePreview=result.safe.slice(0,8).map(x=>'• '+x.name).join('\n');
-  const reviewPreview=result.review.slice(0,8).map(x=>'• '+x.name).join('\n');
-  a.message=`残す ${result.keep.length}件\n安全に保管可能 ${result.safe.length}件\n要確認 ${result.review.length}件`+
-    (safePreview?`\n\n【安全候補】\n${safePreview}${result.safe.length>8?'\n…':''}`:'')+
-    (reviewPreview?`\n\n【要確認】\n${reviewPreview}${result.review.length>8?'\n…':''}`:'')+
-    `\n\n詳細はiCloud Drive/Scriptable/${ARCHIVE_ROOT}/${REPORT_NAME} に保存しました。`;
-  a.addAction('安全候補を保管');
-  a.addCancelAction('見るだけ');
-  const choice=await a.presentAlert();
-  if(choice!==0) return;
 
   const runStamp=stamp();
   let moved=0;
   for(const store of stores){
     moved+=await archiveSafe(store,result.safe.filter(x=>x.kind===store.kind),runStamp);
   }
+  saveReport(iCloud,reportText(result,moved));
+
   const done=new Alert();
   done.title='スクリプト整理完了';
-  done.message=`${moved}件を削除せず .js.bak として保管しました。\n要確認 ${result.review.length}件には触れていません。`;
+  done.message=`${moved}件を一覧から外して .js.bak で保管しました。\n残す ${result.keep.length}件\n要確認 ${result.review.length}件\n\n要確認には触れていません。`;
   done.addAction('OK');
   await done.presentAlert();
 }
