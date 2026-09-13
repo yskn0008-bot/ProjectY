@@ -1,5 +1,6 @@
 // YOS Light Remote — Panasonic HK9494 via Tapo H110.
-// Hold mode: one IR command at a time. Never pre-queues bursts, so release stops after at most the one command already in flight.
+// Hold mode: first step is single; sustained hold sends two IR commands per round trip.
+// Never pre-queues unbounded bursts, so release stops after at most the one burst already in flight.
 
 const tapo = importModule('YOS Tapo H110 Core');
 const lightPredicate = r => /ライト|light/i.test(String(r.nickname||'')) || String(r.model||'').toLowerCase()==='light';
@@ -24,15 +25,15 @@ let holdToken = 0;
 let holdLeaseUntil = 0;
 let holdPromise = Promise.resolve();
 
-async function fire(action){const key=keys[action];if(!key)return;await client.fire(remote.device_id,key.name);}
+async function fire(action,count=1){const key=keys[action];if(!key)return;await client.fireBurst(remote.device_id,key.name,count);}
 async function showError(error){const a=new Alert();a.title='照明';a.message=error&&error.message?error.message:String(error);a.addAction('OK');await a.presentAlert();}
-function enqueueFire(action){stopHold();sendQueue=sendQueue.then(()=>fire(action)).catch(async e=>{await showError(e);});return sendQueue;}
+function enqueueFire(action){stopHold();sendQueue=sendQueue.then(()=>fire(action,1)).catch(async e=>{await showError(e);});return sendQueue;}
 function stopHold(){holdAction=null;holdLeaseUntil=0;holdToken+=1;}
 function renewHold(action){if(holdAction===action)holdLeaseUntil=Date.now()+HOLD_LEASE_MS;}
 function startHold(action){
   if(action!=='bright'&&action!=='dark')return;
   stopHold();holdAction=action;holdLeaseUntil=Date.now()+HOLD_LEASE_MS;const token=holdToken;
-  holdPromise=(async()=>{try{while(holdAction===action&&token===holdToken&&Date.now()<holdLeaseUntil){await fire(action);if(holdAction!==action||token!==holdToken)break;}}catch(e){if(token===holdToken)stopHold();await showError(e);}finally{if(token===holdToken)stopHold();}})();
+  holdPromise=(async()=>{let first=true;try{while(holdAction===action&&token===holdToken&&Date.now()<holdLeaseUntil){await fire(action,first?1:2);first=false;if(holdAction!==action||token!==holdToken)break;}}catch(e){if(token===holdToken)stopHold();await showError(e);}finally{if(token===holdToken)stopHold();}})();
 }
 function parseBridge(url){const m=String(url||'').match(/^yoslight:\/\/([^?]+)(?:\?(.*))?$/i);if(!m)return null;const params={};for(const part of String(m[2]||'').split('&')){if(!part)continue;const i=part.indexOf('=');const key=decodeURIComponent(i>=0?part.slice(0,i):part);const value=decodeURIComponent(i>=0?part.slice(i+1):'');params[key]=value;}return {path:m[1],params};}
 
