@@ -16,6 +16,7 @@ for(const [route,title,name] of [['/yos/','MY WAY','home'],['/life/','MY LIFE','
  const box=await page.locator('#mywayTitle').boundingBox();const font=await page.locator('#mywayTitle').evaluate(e=>({family:getComputedStyle(e).fontFamily,size:getComputedStyle(e).fontSize}));
  result.push({name,box,font});assert.equal(font.size,'22px');assert.ok(Math.abs(box.x-16)<1);assert.ok(Math.abs(box.y-result[0].box.y)<1);
  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true,`${name}: horizontal overflow`);
+ await page.waitForTimeout(450);
  await page.screenshot({path:`test-results/myway-${name}-${engine}.png`,fullPage:true});
 }
 await page.goto(base+'/yos/');await page.getByRole('button',{name:'配色を選ぶ'}).click();await page.getByRole('button',{name:'ミスト 静かなブルー'}).click();await page.getByRole('button',{name:'閉じる',exact:true}).click();
@@ -24,7 +25,8 @@ await page.goto(base+'/life/');await page.waitForFunction(()=>!document.document
 await page.goto(base+'/yos/#money');await page.locator('#money2Body').waitFor();assert.equal(await page.locator('html').getAttribute('data-myway-theme'),'mist');
 assert.equal(await page.locator('.money2-heading').evaluate(e=>getComputedStyle(e,'::after').content),'none');
 // Horizontal gestures navigate; vertical gestures and dialog gestures do not.
-async function swipe(dx,dy){await page.evaluate(({dx,dy})=>{const el=document.querySelector('#money2Body')||document.querySelector('main.app');const start=new Touch({identifier:1,target:el,clientX:240,clientY:300});el.dispatchEvent(new TouchEvent('touchstart',{touches:[start],bubbles:true}));const end=new Touch({identifier:1,target:el,clientX:240+dx,clientY:300+dy});el.dispatchEvent(new TouchEvent('touchmove',{touches:[end],bubbles:true}));el.dispatchEvent(new TouchEvent('touchend',{touches:[],changedTouches:[end],bubbles:true}));},{dx,dy});}
+async function swipe(dx,dy){await page.evaluate(({dx,dy})=>{const el=document.querySelector('#money2Body')||document.querySelector('main.app');const start={identifier:1,target:el,clientX:240,clientY:300};const end={...start,clientX:240+dx,clientY:300+dy};for(const [type,touches,changed] of [['touchstart',[start],[start]],['touchmove',[end],[end]],['touchend',[],[end]]]){const event=new Event(type,{bubbles:true});Object.defineProperties(event,{touches:{value:touches},changedTouches:{value:changed}});el.dispatchEvent(event);}},{dx,dy});}
+
 await swipe(-120,100);assert.equal(await page.locator('#mywayTitle').textContent(),'MY MONEY');
 await swipe(-120,5);assert.equal(await page.locator('#mywayTitle').textContent(),'MY JOURNEY');
 await page.getByRole('button',{name:'配色を選ぶ'}).click();await swipe(-120,5);assert.equal(await page.locator('#mywayTitle').textContent(),'MY JOURNEY');await page.getByRole('button',{name:'閉じる',exact:true}).click();

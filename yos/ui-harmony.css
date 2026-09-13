@@ -82,3 +82,9 @@ html[data-myway-ui] .money-reference-v1 :is(.money2-row-card>button,.money2-goal
 html[data-myway-ui] .money-reference-v1 .money2-day.today{box-shadow:inset 0 0 0 2px var(--ui-accent)!important}
 html[data-myway-ui] .money-reference-v1 .money2-day.today b{background:var(--ui-accent)!important;color:white!important}
 html[data-myway-ui] .money-reference-v1 :is(.money2-status,.money2-metrics article,.money-ref-calendar-summary article){background:var(--ui-surface)!important;border-color:var(--ui-line)!important}
+
+html[data-myway-ui] :is(.idea-capture,.journey-theme){background:var(--ui-surface)!important}
+html[data-myway-ui] .idea-capture:before{content:none}
+html[data-myway-ui] :is(.save-button,.journey-theme button,.journey-theme a){background:var(--ui-accent)!important;color:white!important}
+html[data-myway-ui] :is(.idea-capture label,.idea-recent header span,.journey-records header a,.journey-theme small){color:var(--ui-muted)!important;font-size:13px!important}
+html[data-myway-ui] .idea-capture textarea{background:var(--ui-surface)!important;border-color:var(--ui-line)!important}
