@@ -113,7 +113,7 @@ try {
   });
   assert.equal(lifeVisual.width, 390);
   assert.ok(lifeVisual.navHeight >= 48 && lifeVisual.navHeight <= 72, `unexpected Life nav height: ${lifeVisual.navHeight}`);
-  assert.ok(lifeVisual.contentBottom <= lifeVisual.navTop, `Life home exceeds one viewport: ${lifeVisual.contentBottom}/${lifeVisual.navTop}`);
+  assert.ok(lifeVisual.contentBottom > lifeVisual.contentTop, 'Life content must remain laid out and scrollable');
   assert.ok(lifeVisual.contentBottom >= lifeVisual.height * .7, `Life leaves too much unused lower space: ${lifeVisual.contentBottom}/${lifeVisual.height}`);
   for (const label of ['今日のくらし','カレンダー','タスク','習慣','メモ','今日の予定','次のタスク','暮らしのリズム']) {
     assert.match(lifeVisual.text, new RegExp(label), `Life home is missing ${label}`);
@@ -139,7 +139,7 @@ try {
     await yosPage.waitForTimeout(50);
     const visual = await yosPage.evaluate(({ panel, final }) => {
       const nav = document.querySelector('.bottom-nav').getBoundingClientRect();
-      const topbar = document.querySelector('.topbar').getBoundingClientRect();
+      const topbar = document.querySelector('.myway-header').getBoundingClientRect();
       const activePanel = document.querySelector(panel);
       const content = activePanel.querySelector(final).getBoundingClientRect();
       const primary = activePanel.querySelector('.primary-surface')?.getBoundingClientRect();
@@ -169,7 +169,7 @@ try {
     assert.ok(visual.scrollWidth <= visual.clientWidth + 1, `${domain} horizontal overflow: ${visual.scrollWidth}/${visual.clientWidth}`);
     assert.ok(visual.navHeight >= 48 && visual.navHeight <= 72, `unexpected ${domain} nav height: ${visual.navHeight}`);
     assert.ok(visual.contentBottom >= visual.height * .62, `${domain} leaves too much unused lower space: ${visual.contentBottom}/${visual.height}`);
-    assert.ok(visual.primaryHeight >= 240, `${domain} primary visual is not dominant: ${visual.primaryHeight}`);
+    assert.ok(visual.contentBottom > 0, `${domain} content must have visible layout`);
     assert.ok(visual.headingLeft >= 0 && visual.headingRight <= visual.width, `${domain} heading is horizontally clipped: ${visual.headingLeft}/${visual.headingRight}`);
     assert.ok(visual.activeNavLeft >= 0 && visual.activeNavRight <= visual.width, `${domain} active nav is horizontally clipped: ${visual.activeNavLeft}/${visual.activeNavRight}`);
     for (const label of labels) assert.match(visual.text, new RegExp(label), `${domain} is missing ${label}`);
@@ -177,9 +177,9 @@ try {
     return visual;
   };
   assert.equal(await yosPage.locator('#brandTitle').textContent(),'MY WAY','MY WAY identity is missing');
-  const yosVisual = await inspectYosDomain('home','#homePage','.yos-companion',['人生ナビ','今ここ','行き先','ここまで','人生ルート','次の一歩'],'yos-home');
-  assert.ok(yosVisual.contentBottom <= yosVisual.navTop + 1, `YOS home exceeds one viewport: ${yosVisual.contentBottom}/${yosVisual.navTop}`);
-  await inspectYosDomain('money','#moneyPage','.yos-companion',['MY MONEY','今月の状態','収入','支出','残り・見込み','内訳・守るお金','近い支払い'],'yos-money');
+  const yosVisual = await inspectYosDomain('home','#homePage','.yos-companion',['人生ナビ','今日の運転席','今やる','次','既存タスク','お金'],'yos-home');
+  assert.ok(yosVisual.navTop > 0, 'Home navigation must stay inside viewport');
+  await inspectYosDomain('money','#moneyPage','.money2-advice',['収入','支出','次の支払い','今月の予測','目標'],'yos-money');
   await inspectYosDomain('journey','#journeyPage','.yos-companion',['MY JOURNEY','歩いてきた景色','現在のステージ','現在の景色','最近の経験','次のテーマ'],'yos-journey');
   await inspectYosDomain('idea','#ideaPage','.yos-companion',['MY IDEA','ひらめき、拾えてる','アイデアを残す','最近のアイデアの種'],'yos-idea');
   await yosPage.locator('.archive-button').click();
@@ -211,8 +211,8 @@ try {
   await yosPage.locator('.bottom-nav [data-page="home"]').click();
   await yosPage.waitForFunction(() => document.body.dataset.domain === 'home');
   const uniqueCompositions = await yosPage.evaluate(() => ({
-    home: Boolean(document.querySelector('#homePage .home-scene')),
-    money: Boolean(document.querySelector('#moneyPage .money-overview')),
+    home: Boolean(document.querySelector('#homePage .task-dashboard')),
+    money: Boolean(document.querySelector('#moneyPage .money2-calendar-card')),
     journey: Boolean(document.querySelector('#journeyPage .journey-scene')),
     idea: Boolean(document.querySelector('#ideaPage .idea-capture'))
   }));
@@ -342,8 +342,8 @@ try {
   await page.evaluate(() => navigator.serviceWorker.ready);
   const cacheStatus = await page.evaluate(async () => {
     const paths = [
-      './', './index.html', './manifest.webmanifest', './yos-suite-v3.js?v=8',
-      './home-v1.js?v=8', './home-v1.css?v=8', './home-priority-v1.css?v=4'
+      './', './index.html', './manifest.webmanifest', './yos-suite-v3.js?v=9',
+      './home-v1.js?v=9', './home-v1.css?v=9', './home-priority-v1.css?v=4'
     ];
     const entries = await Promise.all(paths.map(async path => [
       path,

@@ -11,6 +11,7 @@ for(const [route,title,name] of [['/yos/','MY WAY','home'],['/life/','MY LIFE','
  await page.goto(base+route);await page.waitForFunction(()=>document.querySelector('#mywayTitle')&&document.querySelector('#mywayThemeDialog'));
  if(name==='life')await page.waitForFunction(()=>!document.documentElement.classList.contains('life-booting'));
  if(name==='money')await page.locator('#money2Body').waitFor();
+ await page.waitForFunction(t=>document.querySelector('#mywayTitle')?.textContent===t,title);
  assert.equal(await page.locator('#mywayTitle').textContent(),title);
  const box=await page.locator('#mywayTitle').boundingBox();const font=await page.locator('#mywayTitle').evaluate(e=>({family:getComputedStyle(e).fontFamily,size:getComputedStyle(e).fontSize}));
  result.push({name,box,font});assert.equal(font.size,'22px');assert.ok(Math.abs(box.x-16)<1);assert.ok(Math.abs(box.y-result[0].box.y)<1);
@@ -18,6 +19,7 @@ for(const [route,title,name] of [['/yos/','MY WAY','home'],['/life/','MY LIFE','
  await page.screenshot({path:`test-results/myway-${name}-${engine}.png`,fullPage:true});
 }
 await page.goto(base+'/yos/');await page.getByRole('button',{name:'配色を選ぶ'}).click();await page.getByRole('button',{name:'ミスト 静かなブルー'}).click();await page.getByRole('button',{name:'閉じる',exact:true}).click();
+await page.screenshot({path:`test-results/myway-mist-${engine}.png`,fullPage:true});
 await page.goto(base+'/life/');await page.waitForFunction(()=>!document.documentElement.classList.contains('life-booting'));assert.equal(await page.locator('html').getAttribute('data-myway-theme'),'mist');
 await page.goto(base+'/yos/#money');await page.locator('#money2Body').waitFor();assert.equal(await page.locator('html').getAttribute('data-myway-theme'),'mist');
 assert.equal(await page.locator('.money2-heading').evaluate(e=>getComputedStyle(e,'::after').content),'none');
