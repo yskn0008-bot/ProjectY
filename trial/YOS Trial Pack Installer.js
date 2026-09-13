@@ -1,0 +1,129 @@
+// YOS Trial Pack Installer v1
+// Installs only isolated, currently testable Scriptable prototypes.
+// Existing files are backed up before replacement. No secrets are embedded.
+
+const SOURCES = [
+  {
+    name: 'YOS Home Voice Parser.js',
+    url: 'https://raw.githubusercontent.com/yskn0008-bot/ProjectY/530f8122f00c75143487a3ab95f67f3c6da22985/ios-app/scriptable/remote-voice/YOS%20Home%20Voice%20Parser.js',
+  },
+  {
+    name: 'YOS Home Voice.js',
+    url: 'https://raw.githubusercontent.com/yskn0008-bot/ProjectY/530f8122f00c75143487a3ab95f67f3c6da22985/ios-app/scriptable/remote-voice/YOS%20Home%20Voice.js',
+  },
+  {
+    name: 'YOS Departure Guard.js',
+    url: 'https://raw.githubusercontent.com/yskn0008-bot/ProjectY/038599e5aaf6dd12fc1e972a65b6678f28f0fd2e/tools/departure-guard/YOS%20Departure%20Guard.js',
+  },
+  {
+    name: 'MY_WAY_NOW_WIDGET_v1.js',
+    url: 'https://raw.githubusercontent.com/yskn0008-bot/ProjectY/bd194474ab2b9602064a0ebab19a51d7af395fe2/widgets/MY_WAY_NOW_WIDGET_v1.js',
+  },
+  {
+    name: 'YOS Trial Launcher.js',
+    url: 'https://raw.githubusercontent.com/yskn0008-bot/ProjectY/b54072218c9a3954306f918e0fc098baa02db640/trial/YOS%20Trial%20Launcher.js',
+  },
+];
+
+const fm = FileManager.iCloud();
+const docs = fm.documentsDirectory();
+const backupRoot = fm.joinPath(docs, 'YOS Trial Pack Backups');
+
+function targetPath(name) { return fm.joinPath(docs, name); }
+function stamp() { return new Date().toISOString().replace(/[:.]/g, '-'); }
+
+async function ensureLocal(path) {
+  if (!fm.fileExists(path)) return;
+  try {
+    if (fm.isFileStoredIniCloud(path)) await fm.downloadFileFromiCloud(path);
+  } catch (_) {}
+}
+
+async function fetchText(source) {
+  const request = new Request(source.url);
+  request.timeoutInterval = 25;
+  const text = await request.loadString();
+  const status = Number(request.response?.statusCode || 0);
+  if (status < 200 || status >= 300 || !text || text.length < 80) {
+    throw new Error(`${source.name} の取得に失敗しました（HTTP ${status}）`);
+  }
+  return text;
+}
+
+function existingRemoteCore() {
+  const names = ['YOS Tapo H110 Core.js'];
+  const local = FileManager.local();
+  for (const name of names) {
+    if (fm.fileExists(targetPath(name))) return true;
+    if (local.fileExists(local.joinPath(local.documentsDirectory(), name))) return true;
+  }
+  return false;
+}
+
+async function run() {
+  const downloaded = {};
+  for (const source of SOURCES) downloaded[source.name] = await fetchText(source);
+
+  if (!fm.fileExists(backupRoot)) fm.createDirectory(backupRoot, true);
+  const backupDir = fm.joinPath(backupRoot, stamp());
+  let backupCreated = false;
+
+  for (const source of SOURCES) {
+    const target = targetPath(source.name);
+    if (!fm.fileExists(target)) continue;
+    if (!backupCreated) {
+      fm.createDirectory(backupDir, true);
+      backupCreated = true;
+    }
+    await ensureLocal(target);
+    fm.writeString(fm.joinPath(backupDir, source.name), fm.readString(target));
+  }
+
+  const written = [];
+  try {
+    for (const source of SOURCES) {
+      const target = targetPath(source.name);
+      const text = downloaded[source.name];
+      fm.writeString(target, text);
+      if (fm.readString(target) !== text) throw new Error(`${source.name} の保存確認に失敗しました`);
+      written.push(source.name);
+    }
+  } catch (error) {
+    for (const name of [...written].reverse()) {
+      const target = targetPath(name);
+      const backup = backupCreated ? fm.joinPath(backupDir, name) : null;
+      if (backup && fm.fileExists(backup)) fm.writeString(target, fm.readString(backup));
+      else if (fm.fileExists(target)) fm.remove(target);
+    }
+    throw error;
+  }
+
+  const lines = [
+    '✓ 家の音声操作',
+    '✓ 出発チェック',
+    '✓ MY WAY NOW Widget',
+    '✓ Trial Launcher',
+  ];
+  if (!existingRemoteCore()) lines.push('', '※ 家の音声操作だけ、先にMY REMOTE更新が必要です');
+  lines.push('', '次は Trial Launcher を開けば、試せるものを1画面から順番に試せます。');
+
+  const alert = new Alert();
+  alert.title = '試用セット 準備完了';
+  alert.message = lines.join('\n');
+  alert.addAction('試す');
+  alert.addCancelAction('あとで');
+  const choice = await alert.presentAlert();
+  if (choice === 0) Safari.open('scriptable:///run/YOS%20Trial%20Launcher');
+}
+
+try {
+  await run();
+} catch (error) {
+  const alert = new Alert();
+  alert.title = '試用セットの準備に失敗';
+  alert.message = error?.message || String(error);
+  alert.addAction('OK');
+  await alert.presentAlert();
+}
+
+Script.complete();
