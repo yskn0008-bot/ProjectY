@@ -14,7 +14,7 @@ TOP_REQUIRED = {"request_id", "original_input", "context", "interpretation", "ac
 ACTION_REQUIRED = {
     "id", "executor", "domain", "intent", "target", "content", "conditions",
     "destination", "requires_confirmation", "external_write", "needs_review",
-    "dependency", "status", "date_time"
+    "dependency", "status", "date_time", "end_date_time"
 }
 
 
@@ -104,6 +104,10 @@ def validate(payload: Any) -> list[str]:
             if not _text(action.get("date_time")) or not action.get("date_time", "").strip():
                 if action.get("needs_review") is not True:
                     errors.append(f"{prefix} has ambiguous/missing date_time and must needs_review")
+
+        if executor == "calendar" and action.get("needs_review") is not True:
+            if not _text(action.get("end_date_time")) or not action.get("end_date_time", "").strip():
+                errors.append(f"{prefix}.end_date_time is required for executable calendar actions")
 
         if executor == "shortcut_factory":
             if action.get("domain") != "system" or action.get("intent") != "automate":
