@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-15T05:08:04+09:00",
+  "updated_at": "2026-09-15T05:16:47+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -120,7 +120,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-09-14T19:45:02Z"
+      "updated_at": "2026-09-14T20:16:29Z"
     },
     {
       "id": "github-issue-234",
@@ -165,39 +165,39 @@
   ],
   "recently_completed": [
     {
-      "id": "github-commit-63e3b3f39005",
-      "title": "feat(clarity): add secure server-side model gateway",
-      "completed_at": "2026-09-14T20:07:50Z",
-      "result": "GitHub mainへ反映（63e3b3f）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/63e3b3f39005926e6735a5d33bae07bbfd530384"
+      "id": "github-commit-a31a042cc02c",
+      "title": "Merge pull request #355 from yskn0008-bot/clarity/server-openai-shortcut",
+      "completed_at": "2026-09-14T20:16:34Z",
+      "result": "GitHub mainへ反映（a31a042）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/a31a042cc02c256a0985d6d9a6e2bb716c2dee9d"
     },
     {
-      "id": "github-commit-82620ad8094b",
-      "title": "fix(clarity): parse ChatGPT actions from JSON text (#354)",
-      "completed_at": "2026-09-14T19:45:16Z",
-      "result": "GitHub mainへ反映（82620ad）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/82620ad8094bae4940e75c32a9f35605a21bf5b7"
+      "id": "github-commit-1b1d80871de7",
+      "title": "docs(clarity): record server model security boundary",
+      "completed_at": "2026-09-14T20:14:31Z",
+      "result": "GitHub mainへ反映（1b1d808）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/1b1d80871de76890cf58cd5a2ae7095a34272d85"
     },
     {
-      "id": "github-commit-2fa3c01cedce",
-      "title": "revert accidental placeholder file",
-      "completed_at": "2026-09-14T19:42:58Z",
-      "result": "GitHub mainへ反映（2fa3c01）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/2fa3c01cedce2a897c96c37922fcfe20d8f46a62"
+      "id": "github-commit-37b84d314860",
+      "title": "test(clarity): include model gateway api check",
+      "completed_at": "2026-09-14T20:14:21Z",
+      "result": "GitHub mainへ反映（37b84d3）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/37b84d3148608536f008bb503e1f5337e0ea3dc5"
     },
     {
-      "id": "github-commit-813aed1a5cad",
-      "title": "fix(clarity): parse ChatGPT as JSON text",
-      "completed_at": "2026-09-14T19:42:46Z",
-      "result": "GitHub mainへ反映（813aed1）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/813aed1a5cad40fcc90342107f09f995f43c6c09"
+      "id": "github-commit-831630ed5fdb",
+      "title": "test(clarity): cover secure model gateway",
+      "completed_at": "2026-09-14T20:14:04Z",
+      "result": "GitHub mainへ反映（831630e）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/831630ed5fdb01509eae7cbea37228be37d203ca"
     },
     {
-      "id": "github-commit-2fec91f9ee30",
-      "title": "fix(clarity): require actions for clear everyday speech",
-      "completed_at": "2026-09-14T19:23:09Z",
-      "result": "GitHub mainへ反映（2fec91f）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/2fec91f9ee300686e647706161a0d0db7578f08c"
+      "id": "github-commit-0abb1d308252",
+      "title": "ci(clarity): prove server model gateway shortcut",
+      "completed_at": "2026-09-14T20:13:52Z",
+      "result": "GitHub mainへ反映（0abb1d3）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/0abb1d308252c4c94ac543e31e2a6874fd805ce9"
     },
     {
       "id": "complete-002",
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-15T05:08:04+09:00",
+      "last_update": "2026-09-15T05:16:47+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -315,7 +315,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-15T05:08:04+09:00",
+      "last_update": "2026-09-15T05:16:47+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-15T05:08:04+09:00",
+      "last_update": "2026-09-15T05:16:47+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "8e9b986d314d282905ed90d1c2846b6ebfb4216ec6122f94ffecccbdfaa5c1e6"
+  "github_snapshot_hash": "a9a5b16348602c86822a1f620f86534b3a1aab2e5381e4f4ca0fcf48efae0f6a"
 }
