@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-15T04:07:42+09:00",
+  "updated_at": "2026-09-15T04:10:06+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -120,7 +120,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-09-14T18:59:44Z"
+      "updated_at": "2026-09-14T19:09:51Z"
     },
     {
       "id": "github-issue-234",
@@ -165,39 +165,39 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-f635419e9f9f",
+      "title": "fix(clarity): understand everyday Japanese time expressions (#350)",
+      "completed_at": "2026-09-14T19:09:50Z",
+      "result": "GitHub mainへ反映（f635419）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/f635419e9f9ff1305718193ad298ef8586ab7aad"
+    },
+    {
+      "id": "github-commit-87d77a73248d",
+      "title": "fix(clarity): patch serialized prompt recursively",
+      "completed_at": "2026-09-14T19:08:38Z",
+      "result": "GitHub mainへ反映（87d77a7）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/87d77a73248d653ffab5289b5771a829208031d5"
+    },
+    {
+      "id": "github-commit-fdd6d133bcce",
+      "title": "test(clarity): enforce natural-language routing policy",
+      "completed_at": "2026-09-14T19:07:59Z",
+      "result": "GitHub mainへ反映（fdd6d13）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/fdd6d133bcce61014e7ab256cb149e7317e80679"
+    },
+    {
+      "id": "github-commit-b98615c6c408",
+      "title": "fix(clarity): normalize everyday relative-time language",
+      "completed_at": "2026-09-14T19:07:41Z",
+      "result": "GitHub mainへ反映（b98615c）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/b98615c6c408ff58fdd39aa51413ef052eafc74e"
+    },
+    {
       "id": "github-commit-4fc7ff86c7f1",
       "title": "chore: remove accidental branch marker",
       "completed_at": "2026-09-14T19:07:20Z",
       "result": "GitHub mainへ反映（4fc7ff8）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/4fc7ff86c7f152e335ba4a55a40178f68be33268"
-    },
-    {
-      "id": "github-commit-79f9fa3ee5d2",
-      "title": "chore: branch marker",
-      "completed_at": "2026-09-14T19:07:02Z",
-      "result": "GitHub mainへ反映（79f9fa3）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/79f9fa3ee5d2f8355bf1761c856d9c6cacaba25c"
-    },
-    {
-      "id": "github-commit-58f22f18c6bc",
-      "title": "Merge pull request #349 from yskn0008-bot/clarity/fix-ios-persistence-v3",
-      "completed_at": "2026-09-14T18:59:43Z",
-      "result": "GitHub mainへ反映（58f22f1）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/58f22f18c6bc76c1d80add6b75c6f9c722354e27"
-    },
-    {
-      "id": "github-commit-574b7f38ec8c",
-      "title": "fix(clarity): replace append with iPhone-safe read merge save",
-      "completed_at": "2026-09-14T18:58:27Z",
-      "result": "GitHub mainへ反映（574b7f3）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/574b7f38ec8c48e1f1bdbd530a233692167ec3b1"
-    },
-    {
-      "id": "github-commit-4631f6f68d35",
-      "title": "chore: remove accidental noop marker",
-      "completed_at": "2026-09-14T18:57:55Z",
-      "result": "GitHub mainへ反映（4631f6f）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/4631f6f68d35a480df86c05b8eae5800537a6ab6"
     },
     {
       "id": "complete-002",
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-15T04:07:42+09:00",
+      "last_update": "2026-09-15T04:10:06+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -315,7 +315,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-15T04:07:42+09:00",
+      "last_update": "2026-09-15T04:10:06+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-15T04:07:42+09:00",
+      "last_update": "2026-09-15T04:10:06+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "e5c726e32d13dc11590c4b5e9605b25665db96036bd8b80b11255fd307640061"
+  "github_snapshot_hash": "6333d1ebecda3026468619cefe4b2e5b3196dd1218efe15ee0d5f59e77c0ed9d"
 }
