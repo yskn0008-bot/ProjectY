@@ -1,4 +1,4 @@
-// YOS Trial Pack Installer v1.1
+// YOS Trial Pack Installer v1.2
 // Installs only isolated, currently testable Scriptable prototypes.
 // Existing files are backed up before replacement. No secrets are embedded.
 
@@ -51,9 +51,16 @@ async function fetchText(source) {
 }
 
 function patchForTrial(name, text) {
+  if (name === 'YOS Home Voice Parser.js') {
+    const marker = "  if (/(テレビ|tv)/.test(s)) {";
+    const youtubeRule = "  if (/(youtube|ユーチューブ)/.test(s) && /(見せて|みせて|開いて|ひらいて|つけて|付けて|起動)/.test(s)) return ok('tv', 'youtube');\n\n";
+    if (!text.includes(marker)) throw new Error('Home Voice Parserの修正対象を確認できませんでした');
+    text = text.replace(marker, youtubeRule + marker);
+  }
+
   if (name === 'YOS Home Voice.js') {
     const oldLine = "  return String(await Dictation.start('ja-JP') || '').trim();";
-    const replacement = [
+    const inputReplacement = [
       "  const a = new Alert();",
       "  a.title = '家の音声操作';",
       "  a.message = '入力欄をタップして、キーボードのマイクで話してください。';",
@@ -64,8 +71,92 @@ function patchForTrial(name, text) {
       "  if (choice < 0) return '';",
       "  return String(a.textFieldValue(0) || '').trim();",
     ].join('\n');
-    if (!text.includes(oldLine)) throw new Error('Home Voiceの修正対象を確認できませんでした');
-    text = text.replace(oldLine, replacement);
+    if (!text.includes(oldLine)) throw new Error('Home Voice入力の修正対象を確認できませんでした');
+    text = text.replace(oldLine, inputReplacement);
+
+    const powerBlock = [
+      "  if (command.action === 'power_on' || command.action === 'power_off') {",
+      "    const state = await sonyJSON(host, psk, 'system', 'getPowerStatus');",
+      "    const status = String(state && state.result && state.result[0] && state.result[0].status || '').toLowerCase();",
+      "    const isOn = status === 'active';",
+      "    const wantOn = command.action === 'power_on';",
+      "    if (isOn === wantOn) return wantOn ? 'テレビはすでについています' : 'テレビはすでに消えています';",
+      "    const code = resolveTV(index, 'power');",
+      "    if (!code) throw new Error('このテレビでは電源操作を確認できません。');",
+      "    await sendIRCC(host, psk, code);",
+      "    return wantOn ? 'テレビをつけました' : 'テレビを消しました';",
+      "  }",
+    ].join('\n');
+
+    const enhancedTvBlock = [
+      "  if (command.action === 'youtube') {",
+      "    const data = await sonyJSON(host, psk, 'appControl', 'getApplicationList');",
+      "    const apps = walk(data, []).filter(x => x && typeof x.uri === 'string');",
+      "    const app = apps.find(x => /youtube/i.test(String(x.title || x.name || '')));",
+      "    if (!app) throw new Error('テレビのYouTubeアプリを見つけられませんでした。');",
+      "    await sonyJSON(host, psk, 'appControl', 'setActiveApp', [{ uri: app.uri }]);",
+      "    return 'YouTubeを開きました';",
+      "  }",
+      "",
+      "  if (command.action === 'power_on' || command.action === 'power_off') {",
+      "    const wantOn = command.action === 'power_on';",
+      "    let isOn = null;",
+      "    try {",
+      "      const state = await sonyJSON(host, psk, 'system', 'getPowerStatus');",
+      "      const status = String(state && state.result && state.result[0] && state.result[0].status || '').toLowerCase();",
+      "      isOn = status === 'active';",
+      "    } catch (_) {}",
+      "    if (isOn === wantOn) return wantOn ? 'テレビはすでについています' : 'テレビはすでに消えています';",
+      "    if (wantOn) {",
+      "      try {",
+      "        await sonyJSON(host, psk, 'system', 'setPowerStatus', [{ status: true }]);",
+      "        return 'テレビをつけました';",
+      "      } catch (_) {}",
+      "    }",
+      "    const code = resolveTV(index, 'power');",
+      "    if (!code) throw new Error('このテレビでは電源操作を確認できません。');",
+      "    try {",
+      "      await sendIRCC(host, psk, code);",
+      "    } catch (error) {",
+      "      if (wantOn) throw new Error('テレビを起動できません。テレビ側のリモート起動／ネットワークスタンバイ設定を確認してください。');",
+      "      throw error;",
+      "    }",
+      "    return wantOn ? 'テレビをつけました' : 'テレビを消しました';",
+      "  }",
+    ].join('\n');
+    if (!text.includes(powerBlock)) throw new Error('Home Voiceテレビ操作の修正対象を確認できませんでした');
+    text = text.replace(powerBlock, enhancedTvBlock);
+
+    const successMarker = "  Script.setShortcutOutput(message);\n  Script.complete();";
+    const successReplacement = [
+      "  if (config.runsInApp) {",
+      "    const a = new Alert();",
+      "    a.title = '家の音声操作';",
+      "    a.message = message;",
+      "    a.addAction('OK');",
+      "    await a.presentAlert();",
+      "  }",
+      "  Script.setShortcutOutput(message);",
+      "  Script.complete();",
+    ].join('\n');
+    if (!text.includes(successMarker)) throw new Error('Home Voice成功表示の修正対象を確認できませんでした');
+    text = text.replace(successMarker, successReplacement);
+
+    const errorMarker = "  Script.setShortcutOutput(`操作できませんでした：${message}`);\n  console.error(message);\n  Script.complete();";
+    const errorReplacement = [
+      "  if (config.runsInApp) {",
+      "    const a = new Alert();",
+      "    a.title = '操作できませんでした';",
+      "    a.message = message;",
+      "    a.addAction('OK');",
+      "    await a.presentAlert();",
+      "  }",
+      "  Script.setShortcutOutput(`操作できませんでした：${message}`);",
+      "  console.error(message);",
+      "  Script.complete();",
+    ].join('\n');
+    if (!text.includes(errorMarker)) throw new Error('Home Voiceエラー表示の修正対象を確認できませんでした');
+    text = text.replace(errorMarker, errorReplacement);
   }
 
   if (name === 'YOS Departure Guard.js') {
