@@ -1,4 +1,4 @@
-// YOS Trial Pack Installer v1
+// YOS Trial Pack Installer v1.1
 // Installs only isolated, currently testable Scriptable prototypes.
 // Existing files are backed up before replacement. No secrets are embedded.
 
@@ -47,6 +47,51 @@ async function fetchText(source) {
   if (status < 200 || status >= 300 || !text || text.length < 80) {
     throw new Error(`${source.name} の取得に失敗しました（HTTP ${status}）`);
   }
+  return patchForTrial(source.name, text);
+}
+
+function patchForTrial(name, text) {
+  if (name === 'YOS Home Voice.js') {
+    const oldLine = "  return String(await Dictation.start('ja-JP') || '').trim();";
+    const replacement = [
+      "  const a = new Alert();",
+      "  a.title = '家の音声操作';",
+      "  a.message = '入力欄をタップして、キーボードのマイクで話してください。';",
+      "  a.addTextField('例：テレビをつけて');",
+      "  a.addAction('実行');",
+      "  a.addCancelAction('やめる');",
+      "  const choice = await a.presentAlert();",
+      "  if (choice < 0) return '';",
+      "  return String(a.textFieldValue(0) || '').trim();",
+    ].join('\n');
+    if (!text.includes(oldLine)) throw new Error('Home Voiceの修正対象を確認できませんでした');
+    text = text.replace(oldLine, replacement);
+  }
+
+  if (name === 'YOS Departure Guard.js') {
+    const marker = "  Script.complete()\n}\n\nasync function findNextEvent";
+    const replacement = [
+      "  if (config.runsInApp) {",
+      "    const a = new Alert();",
+      "    a.title = '出発チェック';",
+      "    const lines = [];",
+      "    if (nextEvent) lines.push(`次: ${formatTime(nextEvent.startDate)} ${nextEvent.title || '予定'}`);",
+      "    if (decision.departureAt) lines.push(`出発目安: ${formatTime(decision.departureAt)}`);",
+      "    if (decision.warningLines.length) lines.push(...decision.warningLines.map(x => `⚠︎ ${x}`));",
+      "    if (!lines.length) lines.push('今は対応が必要な項目はありません。');",
+      "    a.message = lines.join('\\n');",
+      "    a.addAction('OK');",
+      "    await a.presentAlert();",
+      "  }",
+      "  Script.complete()",
+      "}",
+      "",
+      "async function findNextEvent",
+    ].join('\n');
+    if (!text.includes(marker)) throw new Error('Departure Guardの修正対象を確認できませんでした');
+    text = text.replace(marker, replacement);
+  }
+
   return text;
 }
 
