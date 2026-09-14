@@ -5,6 +5,9 @@ on:
     paths:
       - 'tools/clarity-factory/**'
       - '.github/workflows/clarity-cherri-proof.yml'
+      - 'server/yos-ai/api/yos/clarity-model.mjs'
+      - 'server/yos-ai/tests/clarity-model-api.test.mjs'
+      - 'server/yos-ai/package.json'
   workflow_dispatch:
 
 permissions:
@@ -23,6 +26,15 @@ jobs:
           set -euo pipefail
           python3 -m json.tool tools/clarity-factory/clarity-spec.json >/dev/null
           python3 -m unittest discover -s tools/clarity-factory/tests -v
+
+      - name: Test secure Clarity model gateway
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd server/yos-ai
+          npm install --ignore-scripts
+          node --test tests/clarity-model-api.test.mjs
+          node --check api/yos/clarity-model.mjs
 
       - name: Install pinned Cherri v2.3.0
         shell: bash
@@ -65,7 +77,7 @@ jobs:
           python3 patch_natural_language_policy.py "$runtime"
           python3 patch_raw_first_authority.py "$runtime"
           python3 patch_action_extraction_policy.py "$runtime"
-          python3 patch_chatgpt_json_text.py "$runtime"
+          python3 patch_server_model_gateway.py "$runtime"
           python3 patch_append_file_paths.py "$runtime"
           mkdir -p artifacts
           cp "$runtime" artifacts/Clarity-v1-unsigned.shortcut
@@ -76,7 +88,7 @@ jobs:
           set -euo pipefail
           if grep -RIE --exclude='*.shortcut' --exclude='*.plist' \
             '(gh[pousr]_[A-Za-z0-9_]{20,}|sk-[A-Za-z0-9_-]{20,}|xox[baprs]-[A-Za-z0-9-]{10,}|BEGIN [A-Z ]*PRIVATE KEY|192\.168\.[0-9]+\.[0-9]+)' \
-            tools/clarity-factory; then
+            tools/clarity-factory server/yos-ai/api/yos/clarity-model.mjs; then
             echo 'Potential secret/private network value found.' >&2
             exit 1
           fi
