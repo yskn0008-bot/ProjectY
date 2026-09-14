@@ -36,6 +36,14 @@ def serialized_params(action: dict) -> str:
     return repr(action.get("WFWorkflowActionParameters", {}))
 
 
+def find_get_file(actions: list[dict], path: str) -> list[int]:
+    return [
+        i for i, action in enumerate(actions)
+        if action_id(action).endswith("documentpicker.open")
+        and action.get("WFWorkflowActionParameters", {}).get("WFGetFilePath") == path
+    ]
+
+
 def validate(path: Path) -> None:
     with path.open("rb") as fh:
         root = plistlib.load(fh)
@@ -49,39 +57,41 @@ def validate(path: Path) -> None:
         raise AssertionError(f"expected Raw, Ledger, and local destination appends; found {len(append_indexes)}")
     model_i = find_index(actions, "askllm")
 
-    raw_candidates = [
-        i for i in append_indexes
-        if actions[i].get("WFWorkflowActionParameters", {}).get("WFFilePath") == "Clarity Inbox.txt"
-    ]
+    # Real-device persistence guard: every append must use a resolved WFFile reference.
+    # Path-only WFFilePath compiled successfully but did not persist on the target iPhone.
+    for i in append_indexes:
+        params = actions[i].get("WFWorkflowActionParameters", {})
+        if "WFFile" not in params:
+            raise AssertionError(f"file.append at index {i} missing resolved WFFile reference")
+        if "WFFilePath" in params:
+            raise AssertionError(f"file.append at index {i} regressed to path-only WFFilePath")
+        if params.get("WFAppendFileWriteMode") != "Append":
+            raise AssertionError(f"file.append at index {i} must append")
+
+    inbox_gets = find_get_file(actions, "Clarity Inbox.txt")
+    ledger_gets = find_get_file(actions, "Clarity Ledger.txt")
+    idea_gets = find_get_file(actions, "Idea in Box.txt")
+    if len(inbox_gets) != 1:
+        raise AssertionError(f"expected one Clarity Inbox file resolver, found {len(inbox_gets)}")
+    if len(ledger_gets) != 1:
+        raise AssertionError(f"expected one Clarity Ledger file resolver, found {len(ledger_gets)}")
+    if len(idea_gets) != 1:
+        raise AssertionError(f"expected one Idea in Box file resolver, found {len(idea_gets)}")
+
+    inbox_i = inbox_gets[0]
+    ledger_i = ledger_gets[0]
+    idea_i = idea_gets[0]
+    raw_candidates = [i for i in append_indexes if inbox_i < i < model_i]
     if len(raw_candidates) != 1:
-        raise AssertionError(f"expected exactly one Raw First append, found {len(raw_candidates)}")
+        raise AssertionError(f"expected exactly one Raw First append between inbox resolve and model, found {len(raw_candidates)}")
     raw_i = raw_candidates[0]
-    if not dictate_i < raw_i < model_i:
+    if not dictate_i < inbox_i < raw_i < ledger_i < model_i:
         raise AssertionError(
             "Raw First order violated: "
-            f"dictation={dictate_i}, raw={raw_i}, model={model_i}"
+            f"dictation={dictate_i}, inbox_get={inbox_i}, raw={raw_i}, ledger_get={ledger_i}, model={model_i}"
         )
-
-    raw_params = actions[raw_i].get("WFWorkflowActionParameters", {})
-    if raw_params.get("WFAppendFileWriteMode") != "Append":
-        raise AssertionError("Raw record must append, not replace/prepend")
-
-    ledger_indexes = [
-        i for i in append_indexes
-        if actions[i].get("WFWorkflowActionParameters", {}).get("WFFilePath") == "Clarity Ledger.txt"
-    ]
-    if not ledger_indexes or not all(i > model_i for i in ledger_indexes):
-        raise AssertionError("Ledger records must be written only after model output exists")
-    for i in ledger_indexes:
-        if actions[i].get("WFWorkflowActionParameters", {}).get("WFAppendFileWriteMode") != "Append":
-            raise AssertionError("Ledger records must append")
-
-    idea_indexes = [
-        i for i in append_indexes
-        if actions[i].get("WFWorkflowActionParameters", {}).get("WFFilePath") == "Idea in Box.txt"
-    ]
-    if len(idea_indexes) != 1 or idea_indexes[0] <= model_i:
-        raise AssertionError("Idea executor append missing or before policy/model")
+    if idea_i <= model_i:
+        raise AssertionError("Idea file must be resolved only inside the post-policy idea executor")
 
     model_params = actions[model_i].get("WFWorkflowActionParameters", {})
     if model_params.get("FollowUp") is not False:
