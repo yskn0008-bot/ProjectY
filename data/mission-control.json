@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-15T04:44:03+09:00",
+  "updated_at": "2026-09-15T04:45:30+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -120,7 +120,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-09-14T19:22:58Z"
+      "updated_at": "2026-09-14T19:45:02Z"
     },
     {
       "id": "github-issue-234",
@@ -165,6 +165,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-82620ad8094b",
+      "title": "fix(clarity): parse ChatGPT actions from JSON text (#354)",
+      "completed_at": "2026-09-14T19:45:16Z",
+      "result": "GitHub mainへ反映（82620ad）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/82620ad8094bae4940e75c32a9f35605a21bf5b7"
+    },
+    {
       "id": "github-commit-2fa3c01cedce",
       "title": "revert accidental placeholder file",
       "completed_at": "2026-09-14T19:42:58Z",
@@ -191,13 +198,6 @@
       "completed_at": "2026-09-14T19:22:10Z",
       "result": "GitHub mainへ反映（dde113d）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/dde113de5a8cf5ab1c578ff02a729c10fb69a9e0"
-    },
-    {
-      "id": "github-commit-bd8b145943b0",
-      "title": "ci(clarity): validate everyday action extraction policy",
-      "completed_at": "2026-09-14T19:21:14Z",
-      "result": "GitHub mainへ反映（bd8b145）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/bd8b145943b024204b68321ebc98e66ab627c01a"
     },
     {
       "id": "complete-002",
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-15T04:44:03+09:00",
+      "last_update": "2026-09-15T04:45:30+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -315,7 +315,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-15T04:44:03+09:00",
+      "last_update": "2026-09-15T04:45:30+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-15T04:44:03+09:00",
+      "last_update": "2026-09-15T04:45:30+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "80163d399469799c1b7508fcdb8b831a3da1391f82f2c9a4af57006f530a61f2"
+  "github_snapshot_hash": "3db57565432f98ce4ef6793ae3beb721c5b0acbfd06a2642f63ddb107a12a0f3"
 }
