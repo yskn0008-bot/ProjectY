@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-15T04:10:06+09:00",
+  "updated_at": "2026-09-15T04:17:14+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -120,7 +120,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-09-14T19:09:51Z"
+      "updated_at": "2026-09-14T19:16:51Z"
     },
     {
       "id": "github-issue-234",
@@ -165,39 +165,39 @@
   ],
   "recently_completed": [
     {
-      "id": "github-commit-f635419e9f9f",
-      "title": "fix(clarity): understand everyday Japanese time expressions (#350)",
-      "completed_at": "2026-09-14T19:09:50Z",
-      "result": "GitHub mainへ反映（f635419）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/f635419e9f9ff1305718193ad298ef8586ab7aad"
+      "id": "github-commit-7796f814484b",
+      "title": "Merge pull request #351 from yskn0008-bot/clarity/raw-first-authoritative",
+      "completed_at": "2026-09-14T19:16:59Z",
+      "result": "GitHub mainへ反映（7796f81）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/7796f814484b85c84b75360ee068a525546ddcc4"
     },
     {
-      "id": "github-commit-87d77a73248d",
-      "title": "fix(clarity): patch serialized prompt recursively",
-      "completed_at": "2026-09-14T19:08:38Z",
-      "result": "GitHub mainへ反映（87d77a7）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/87d77a73248d653ffab5289b5771a829208031d5"
+      "id": "github-commit-2a07dfb9dcac",
+      "title": "test(clarity): add Raw First authority marker",
+      "completed_at": "2026-09-14T19:15:58Z",
+      "result": "GitHub mainへ反映（2a07dfb）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/2a07dfb9dcac3f14de5b7a122a7116a2cc6192cf"
     },
     {
-      "id": "github-commit-fdd6d133bcce",
-      "title": "test(clarity): enforce natural-language routing policy",
-      "completed_at": "2026-09-14T19:07:59Z",
-      "result": "GitHub mainへ反映（fdd6d13）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/fdd6d133bcce61014e7ab256cb149e7317e80679"
+      "id": "github-commit-0fdd4ae30acf",
+      "title": "docs(clarity): record Raw First authority invariant",
+      "completed_at": "2026-09-14T19:15:50Z",
+      "result": "GitHub mainへ反映（0fdd4ae）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/0fdd4ae30acf8fa204a6c6e01ae55d66f6caf7b9"
     },
     {
-      "id": "github-commit-b98615c6c408",
-      "title": "fix(clarity): normalize everyday relative-time language",
-      "completed_at": "2026-09-14T19:07:41Z",
-      "result": "GitHub mainへ反映（b98615c）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/b98615c6c408ff58fdd39aa51413ef052eafc74e"
+      "id": "github-commit-da6f31f3caae",
+      "title": "test(clarity): verify Raw First authority",
+      "completed_at": "2026-09-14T19:15:44Z",
+      "result": "GitHub mainへ反映（da6f31f）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/da6f31f3caaeee97917b97f9c5e97732f353aec9"
     },
     {
-      "id": "github-commit-4fc7ff86c7f1",
-      "title": "chore: remove accidental branch marker",
-      "completed_at": "2026-09-14T19:07:20Z",
-      "result": "GitHub mainへ反映（4fc7ff8）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/4fc7ff86c7f152e335ba4a55a40178f68be33268"
+      "id": "github-commit-0b71cca88fd1",
+      "title": "fix(clarity): make Raw First authoritative",
+      "completed_at": "2026-09-14T19:15:26Z",
+      "result": "GitHub mainへ反映（0b71cca）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/0b71cca88fd171f46b5ac0d3c30b9d4101d3e704"
     },
     {
       "id": "complete-002",
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-15T04:10:06+09:00",
+      "last_update": "2026-09-15T04:17:14+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -315,7 +315,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-15T04:10:06+09:00",
+      "last_update": "2026-09-15T04:17:14+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-15T04:10:06+09:00",
+      "last_update": "2026-09-15T04:17:14+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "6333d1ebecda3026468619cefe4b2e5b3196dd1218efe15ee0d5f59e77c0ed9d"
+  "github_snapshot_hash": "ed0e31e095dfbcf82e58f97463da62cad4b47851e07efd4aade23e33122421ff"
 }
