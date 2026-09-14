@@ -41,6 +41,9 @@ for actionItem in @actionsRaw {
     const intent = "{actionDict['intent']}"
     const status = "{actionDict['status']}"
     const dateTime = "{actionDict['date_time']}"
+    const requiresConfirmation = getValue(actionDict, "requires_confirmation")
+    const externalWrite = getValue(actionDict, "external_write")
+    const needsReview = getValue(actionDict, "needs_review")
 
     if status != "planned" {
         mustOutput("ここだけ確認して", "実行済み扱いの内容は受け付けません")
@@ -60,6 +63,18 @@ for actionItem in @actionsRaw {
         if !dateTime {
             mustOutput("ここだけ確認して", "日時だけ確認してください")
         }
+    }
+
+    if needsReview {
+        mustOutput("ここだけ確認して", "曖昧な点があるため自動では進めません")
+    }
+
+    if externalWrite && !requiresConfirmation {
+        mustOutput("ここだけ確認して", "外部への変更は確認なしでは実行しません")
+    }
+
+    if requiresConfirmation {
+        mustOutput("ここだけ決めて", "実行前に確認が必要です")
     }
 }
 
