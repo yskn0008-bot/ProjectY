@@ -62,6 +62,7 @@ jobs:
           runtime='./Clarity_unsigned.shortcut'
           test -f "$runtime"
           python3 validate_clarity_runtime.py "$runtime"
+          python3 patch_natural_language_policy.py "$runtime"
           python3 patch_append_file_paths.py "$runtime"
           mkdir -p artifacts
           cp "$runtime" artifacts/Clarity-v1-unsigned.shortcut
