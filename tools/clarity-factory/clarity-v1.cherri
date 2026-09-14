@@ -1,0 +1,189 @@
+#define name Clarity
+#define color blue
+
+#include 'actions/text'
+#include 'actions/documents'
+#include 'actions/intelligence'
+#include 'actions/calendar'
+
+// Voice -> Raw First -> ChatGPT Dictionary -> fail-closed policy -> local v1 executors -> Verify/Ledger.
+// Existing Clarity Inbox.txt stays the raw fail-safe. Executor writes are local/reversible only.
+const originalInput = listen("After Pause", "jp-JP")
+const requestNumber = randomNumber(100000, 999999)
+const rawRecord = text("{CurrentDate}\t{requestNumber}\tRAW\t{originalInput}\n")
+appendToFile("Clarity Inbox.txt", rawRecord)
+
+const modelPrompt = text("You are Clarity, the single natural-language gateway for MY WAY by YOS.\nPreserve original_input exactly. Never claim execution. Never invent dates, recipients, prices, accounts, destinations, device state, or automation capabilities.\nReturn only a Dictionary. Use only executors idea, memo, task, calendar, reminder, shopping, answer, shortcut_factory.\nUse only domains life, work, money, home, idea, shopping, communication, knowledge, system, other.\nUse only intents remember, answer, create, update, find, compare, decide, execute, monitor, notify, send, buy, organize, automate.\nUse only urgencies now, soon, today, scheduled, background.\nUse only risks low, medium, high, irreversible.\nCalendar, Reminders, Shopping, Idea in Box, and Clarity Inbox are allowlisted local reversible destinations: set external_write=false for those. external_write=true means a write to another person, remote service, purchase, contract, destructive system, or other non-local side effect.\nIf calendar or reminder date/time is ambiguous, set needs_review=true rather than guessing. For calendar only: when the start date/time is unambiguous but the user gives no duration/end time, set end_date_time to exactly 60 minutes after date_time. Never use that default to resolve an ambiguous start.\nHigh or irreversible risk requires requires_confirmation=true. external_write=true also requires confirmation. Every action status must be planned.\nUse action.content as the human-readable item/event/idea text to save. For shopping, use only the item text in content, without commentary. For idea, preserve the idea itself in content.\nWhen the user asks to remove a repeated iPhone operation, create an Apple Shortcut, or automate an iPhone workflow, use executor shortcut_factory, domain system, intent automate. Shortcut generation/validation may be planned for low-risk requests without confirmation, but never claim installed, signed, published, or usable until a downstream executor verifies it.\nrequest_id: {requestNumber}\ncurrent_time: {CurrentDate}\noriginal_input: {originalInput}\nReturn keys request_id, original_input, context, interpretation, actions, watches, feedback. context has current_time, current_priorities, relevant_state. interpretation has objective, domains, urgency, risk, confidence. Each action has id, executor, domain, intent, target, content, conditions, destination, requires_confirmation, external_write, needs_review, dependency, status, date_time, end_date_time. Each watch has condition, check_target, action_when_true. feedback has summary, next_action, whisper_line. For a pure answer request, put the answer in feedback.summary. For captures or planned actions, keep feedback.summary empty unless the user must see something now.")
+
+const modelResult = askChatGPT(modelPrompt, false, "Dictionary")
+const parsedResult = getDictionary(modelResult)
+const echoedInput = "{parsedResult['original_input']}"
+const interpretationRaw = getValue(parsedResult, "interpretation")
+const interpretation = getDictionary(interpretationRaw)
+const risk = "{interpretation['risk']}"
+@actionsRaw = getValue(parsedResult, "actions")
+
+if echoedInput != "{originalInput}" {
+    const blockedOriginalRecord = text("{CurrentDate}\t{requestNumber}\tBLOCKED\toriginal_input_mismatch\n")
+    appendToFile("Clarity Ledger.txt", blockedOriginalRecord)
+    mustOutput("ここだけ確認して", "入力内容の確認が必要です")
+}
+
+if risk == "high" || risk == "irreversible" {
+    const blockedRiskRecord = text("{CurrentDate}\t{requestNumber}\tBLOCKED\thigh_risk\n")
+    appendToFile("Clarity Ledger.txt", blockedRiskRecord)
+    mustOutput("ここだけ決めて", "大きな操作なので確認が必要です")
+}
+
+if !@actionsRaw {
+    const blockedNoActionsRecord = text("{CurrentDate}\t{requestNumber}\tBLOCKED\tno_actions\n")
+    appendToFile("Clarity Ledger.txt", blockedNoActionsRecord)
+    mustOutput("ここだけ確認して", "やることを安全に判断できませんでした")
+}
+
+for actionItem in @actionsRaw {
+    const actionDict = getDictionary(@actionItem)
+    const actionId = "{actionDict['id']}"
+    const executor = "{actionDict['executor']}"
+    const domain = "{actionDict['domain']}"
+    const intent = "{actionDict['intent']}"
+    const status = "{actionDict['status']}"
+    const content = "{actionDict['content']}"
+    const dateTime = "{actionDict['date_time']}"
+    const endDateTime = "{actionDict['end_date_time']}"
+    const requiresConfirmation = getValue(actionDict, "requires_confirmation")
+    const externalWrite = getValue(actionDict, "external_write")
+    const needsReview = getValue(actionDict, "needs_review")
+
+    if status != "planned" {
+        const blockedStatusRecord = text("{CurrentDate}\t{requestNumber}\t{actionId}\tBLOCKED\tmodel_claimed_execution\n")
+        appendToFile("Clarity Ledger.txt", blockedStatusRecord)
+        mustOutput("ここだけ確認して", "実行済み扱いの内容は受け付けません")
+    }
+
+    if executor != "idea" && executor != "memo" && executor != "task" && executor != "calendar" && executor != "reminder" && executor != "shopping" && executor != "answer" && executor != "shortcut_factory" {
+        const blockedExecutorRecord = text("{CurrentDate}\t{requestNumber}\t{actionId}\tBLOCKED\tunsupported_executor\n")
+        appendToFile("Clarity Ledger.txt", blockedExecutorRecord)
+        mustOutput("ここだけ確認して", "対応外の操作は実行しません")
+    }
+
+    if executor == "shortcut_factory" {
+        if domain != "system" || intent != "automate" {
+            const blockedAutomationRecord = text("{CurrentDate}\t{requestNumber}\t{actionId}\tBLOCKED\tunsafe_automation_contract\n")
+            appendToFile("Clarity Ledger.txt", blockedAutomationRecord)
+            mustOutput("ここだけ確認して", "自動化の内容を安全に整理できませんでした")
+        }
+    }
+
+    if executor == "calendar" {
+        if !dateTime || !endDateTime {
+            const blockedCalendarTimeRecord = text("{CurrentDate}\t{requestNumber}\t{actionId}\tBLOCKED\tmissing_calendar_time\n")
+            appendToFile("Clarity Ledger.txt", blockedCalendarTimeRecord)
+            mustOutput("ここだけ確認して", "予定の日時だけ確認してください")
+        }
+    }
+
+    if executor == "reminder" {
+        if !dateTime {
+            const blockedReminderTimeRecord = text("{CurrentDate}\t{requestNumber}\t{actionId}\tBLOCKED\tmissing_reminder_time\n")
+            appendToFile("Clarity Ledger.txt", blockedReminderTimeRecord)
+            mustOutput("ここだけ確認して", "通知する日時だけ確認してください")
+        }
+    }
+
+    if needsReview {
+        const blockedReviewRecord = text("{CurrentDate}\t{requestNumber}\t{actionId}\tBLOCKED\tneeds_review\n")
+        appendToFile("Clarity Ledger.txt", blockedReviewRecord)
+        mustOutput("ここだけ確認して", "曖昧な点があるため自動では進めません")
+    }
+
+    if externalWrite && !requiresConfirmation {
+        const blockedExternalRecord = text("{CurrentDate}\t{requestNumber}\t{actionId}\tBLOCKED\texternal_write_without_confirmation\n")
+        appendToFile("Clarity Ledger.txt", blockedExternalRecord)
+        mustOutput("ここだけ確認して", "外部への変更は確認なしでは実行しません")
+    }
+
+    if requiresConfirmation {
+        const blockedConfirmationRecord = text("{CurrentDate}\t{requestNumber}\t{actionId}\tBLOCKED\trequires_confirmation\n")
+        appendToFile("Clarity Ledger.txt", blockedConfirmationRecord)
+        mustOutput("ここだけ決めて", "実行前に確認が必要です")
+    }
+
+    if executor == "idea" {
+        const ideaExecutingRecord = text("{CurrentDate}\t{requestNumber}\t{actionId}\tEXECUTING\tidea\n")
+        appendToFile("Clarity Ledger.txt", ideaExecutingRecord)
+        const ideaPayloadRecord = text("{CurrentDate}\tYOS-CLARITY-ID:{requestNumber}-{actionId}\t{content}\n")
+        appendToFile("Idea in Box.txt", ideaPayloadRecord)
+        const ideaAppliedRecord = text("{CurrentDate}\t{requestNumber}\t{actionId}\tAPPLIED\tIdea in Box.txt\n")
+        appendToFile("Clarity Ledger.txt", ideaAppliedRecord)
+    }
+
+    if executor == "memo" {
+        // Raw First already persisted the exact input in Clarity Inbox.txt before AI ran.
+        const memoAppliedRecord = text("{CurrentDate}\t{requestNumber}\t{actionId}\tAPPLIED\tClarity Inbox.txt\n")
+        appendToFile("Clarity Ledger.txt", memoAppliedRecord)
+    }
+
+    if executor == "calendar" {
+        const calendarExecutingRecord = text("{CurrentDate}\t{requestNumber}\t{actionId}\tEXECUTING\tcalendar\n")
+        appendToFile("Clarity Ledger.txt", calendarExecutingRecord)
+        const startDate = date("{dateTime}")
+        const endDate = date("{endDateTime}")
+        rawAction("is.workflow.actions.addnewevent", {
+            "WFCalendarItemTitle": "{content}",
+            "WFCalendarItemStartDate": "${startDate}",
+            "WFCalendarItemEndDate": "${endDate}",
+            "WFCalendarItemNotes": "YOS-CLARITY-ID:{requestNumber}-{actionId}"
+        })
+        const calendarAppliedRecord = text("{CurrentDate}\t{requestNumber}\t{actionId}\tAPPLIED\tcalendar\tYOS-CLARITY-ID:{requestNumber}-{actionId}\n")
+        appendToFile("Clarity Ledger.txt", calendarAppliedRecord)
+    }
+
+    if executor == "reminder" {
+        const reminderExecutingRecord = text("{CurrentDate}\t{requestNumber}\t{actionId}\tEXECUTING\treminder\n")
+        appendToFile("Clarity Ledger.txt", reminderExecutingRecord)
+        const alertDate = date("{dateTime}")
+        rawAction("is.workflow.actions.addnewreminder", {
+            "WFCalendarItemTitle": "{content}",
+            "WFCalendarItemAlert": true,
+            "WFAlertTrigger": "At Time",
+            "WFAlertCustomTime": "${alertDate}",
+            "WFCalendarItemNotes": "YOS-CLARITY-ID:{requestNumber}-{actionId}"
+        })
+        const reminderAppliedRecord = text("{CurrentDate}\t{requestNumber}\t{actionId}\tAPPLIED\treminder\tYOS-CLARITY-ID:{requestNumber}-{actionId}\n")
+        appendToFile("Clarity Ledger.txt", reminderAppliedRecord)
+    }
+
+    if executor == "task" || executor == "shopping" {
+        const taskExecutingRecord = text("{CurrentDate}\t{requestNumber}\t{actionId}\tEXECUTING\t{executor}\n")
+        appendToFile("Clarity Ledger.txt", taskExecutingRecord)
+        rawAction("is.workflow.actions.addnewreminder", {
+            "WFCalendarItemTitle": "{content}",
+            "WFCalendarItemAlert": false,
+            "WFCalendarItemNotes": "YOS-CLARITY-ID:{requestNumber}-{actionId}"
+        })
+        const taskAppliedRecord = text("{CurrentDate}\t{requestNumber}\t{actionId}\tAPPLIED\t{executor}\tYOS-CLARITY-ID:{requestNumber}-{actionId}\n")
+        appendToFile("Clarity Ledger.txt", taskAppliedRecord)
+    }
+
+    if executor == "answer" {
+        const answerHandledRecord = text("{CurrentDate}\t{requestNumber}\t{actionId}\tHANDLED\tanswer\n")
+        appendToFile("Clarity Ledger.txt", answerHandledRecord)
+    }
+
+    if executor == "shortcut_factory" {
+        // Generation/install is a different execution lane. Keep the request, never claim it ran here.
+        const shortcutQueuedRecord = text("{CurrentDate}\t{requestNumber}\t{actionId}\tPLANNED\tshortcut_factory\n")
+        appendToFile("Clarity Ledger.txt", shortcutQueuedRecord)
+    }
+}
+
+const requestDone = text("{CurrentDate}\t{requestNumber}\tREQUEST_DONE\n")
+appendToFile("Clarity Ledger.txt", requestDone)
+
+const feedbackRaw = getValue(parsedResult, "feedback")
+const feedback = getDictionary(feedbackRaw)
+const summary = "{feedback['summary']}"
+if summary {
+    show("{summary}")
+}
