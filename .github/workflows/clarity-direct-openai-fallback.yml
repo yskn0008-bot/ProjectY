@@ -1,0 +1,125 @@
+name: Clarity direct OpenAI fallback
+
+on:
+  pull_request:
+    paths:
+      - 'tools/clarity-factory/**'
+      - '.github/workflows/clarity-direct-openai-fallback.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-fallback:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate model contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m json.tool tools/clarity-factory/clarity-spec.json >/dev/null
+          python3 -m unittest discover -s tools/clarity-factory/tests -v
+
+      - name: Install pinned Cherri v2.3.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          url='https://github.com/electrikmilk/cherri/releases/download/v2.3.0/cherri_linux-x86_64.zip'
+          expected='7ab2c384b7b26e7c72a30a8dfa56f89dae12c4068b7951bc1e3193f3698edbe9'
+          curl -fsSL "$url" -o /tmp/cherri.zip
+          printf '%s  %s\n' "$expected" /tmp/cherri.zip | sha256sum -c -
+          mkdir -p /tmp/cherri
+          unzip -q /tmp/cherri.zip -d /tmp/cherri
+          binary="$(find /tmp/cherri -type f -name cherri -print -quit)"
+          test -n "$binary"
+          sudo install -m 0755 "$binary" /usr/local/bin/cherri
+
+      - name: Compile direct OpenAI fallback
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd tools/clarity-factory
+          rm -f './Clarity_unsigned.shortcut' './Clarity.plist'
+          cherri clarity-v1.cherri --skip-sign --debug
+          runtime='./Clarity_unsigned.shortcut'
+          test -f "$runtime"
+          python3 validate_clarity_runtime.py "$runtime"
+          python3 patch_natural_language_policy.py "$runtime"
+          python3 patch_raw_first_authority.py "$runtime"
+          python3 patch_action_extraction_policy.py "$runtime"
+          python3 patch_append_file_paths.py "$runtime"
+          python3 patch_direct_openai_fallback.py "$runtime"
+          mkdir -p artifacts-direct
+          cp "$runtime" artifacts-direct/Clarity-direct-openai-unsigned.shortcut
+
+      - name: Inspect direct API artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import plistlib
+          from pathlib import Path
+          p = Path('tools/clarity-factory/artifacts-direct/Clarity-direct-openai-unsigned.shortcut')
+          root = plistlib.loads(p.read_bytes())
+          actions = root['WFWorkflowActions']
+          assert sum(a['WFWorkflowActionIdentifier'] == 'is.workflow.actions.askllm' for a in actions) == 0
+          nets = [a for a in actions if a['WFWorkflowActionIdentifier'] == 'is.workflow.actions.downloadurl']
+          assert len(nets) == 1
+          params = nets[0]['WFWorkflowActionParameters']
+          assert params['WFURL'] == 'https://api.openai.com/v1/responses'
+          body = repr(params['WFJSONValues'])
+          assert 'gpt-5.6-terra' in body
+          assert 'store' in body
+          assert 'json_object' in body
+          assert 'sk-' not in repr(root)
+          q = [q for q in root.get('WFWorkflowImportQuestions', []) if q.get('Text') == 'OpenAI APIキー']
+          assert len(q) == 1
+          target = actions[q[0]['ActionIndex']]
+          assert target['WFWorkflowActionParameters']['CustomOutputName'] == 'openAIAPIKey'
+          extract = [a for a in actions if a['WFWorkflowActionIdentifier'] == 'is.workflow.actions.getvalueforkey' and a['WFWorkflowActionParameters'].get('WFDictionaryKey') == 'output.1.content.1.text']
+          assert len(extract) == 1
+          print('Direct OpenAI fallback artifact inspection: PASS')
+          PY
+
+      - name: Secret scan
+        shell: bash
+        run: |
+          set -euo pipefail
+          if grep -RIE --exclude='*.shortcut' --exclude='*.plist' \
+            '(gh[pousr]_[A-Za-z0-9_]{20,}|sk-[A-Za-z0-9_-]{20,}|xox[baprs]-[A-Za-z0-9-]{10,}|BEGIN [A-Z ]*PRIVATE KEY|192\.168\.[0-9]+\.[0-9]+)' \
+            tools/clarity-factory; then
+            echo 'Potential secret/private network value found.' >&2
+            exit 1
+          fi
+
+      - name: Sign direct fallback with HubSign
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/clarity-factory/sign_with_hubsign.py \
+            --input tools/clarity-factory/artifacts-direct/Clarity-direct-openai-unsigned.shortcut \
+            --output tools/clarity-factory/artifacts-direct/Clarity-direct-openai-signed.shortcut \
+            --name 'Clarity Direct OpenAI' \
+            2>&1 | tee tools/clarity-factory/artifacts-direct/hubsign.log
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('tools/clarity-factory/artifacts-direct/Clarity-direct-openai-signed.shortcut')
+          data = p.read_bytes()
+          assert data.startswith(b'AEA1'), data[:8]
+          assert len(data) > 500
+          print(f'Signed direct OpenAI fallback: PASS ({len(data)} bytes)')
+          PY
+
+      - name: Upload direct fallback
+        uses: actions/upload-artifact@v4
+        with:
+          name: clarity-direct-openai-fallback
+          path: |
+            tools/clarity-factory/artifacts-direct/Clarity-direct-openai-unsigned.shortcut
+            tools/clarity-factory/artifacts-direct/Clarity-direct-openai-signed.shortcut
+            tools/clarity-factory/artifacts-direct/hubsign.log
+          if-no-files-found: error
