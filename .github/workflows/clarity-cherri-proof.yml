@@ -64,6 +64,7 @@ jobs:
           python3 validate_clarity_runtime.py "$runtime"
           python3 patch_natural_language_policy.py "$runtime"
           python3 patch_raw_first_authority.py "$runtime"
+          python3 patch_action_extraction_policy.py "$runtime"
           python3 patch_append_file_paths.py "$runtime"
           mkdir -p artifacts
           cp "$runtime" artifacts/Clarity-v1-unsigned.shortcut
