@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-15T05:16:47+09:00",
+  "updated_at": "2026-09-15T05:19:59+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -120,7 +120,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-09-14T20:16:29Z"
+      "updated_at": "2026-09-14T20:19:43Z"
     },
     {
       "id": "github-issue-234",
@@ -165,6 +165,20 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-472d04bbef62",
+      "title": "Merge pull request #356 from yskn0008-bot/clarity/fix-server-token-question",
+      "completed_at": "2026-09-14T20:19:44Z",
+      "result": "GitHub mainへ反映（472d04b）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/472d04bbef622617824029e92bbd8bd40e84a5e8"
+    },
+    {
+      "id": "github-commit-2381f3a84d62",
+      "title": "fix(clarity): bind token question after persistence rewrite",
+      "completed_at": "2026-09-14T20:17:55Z",
+      "result": "GitHub mainへ反映（2381f3a）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/2381f3a84d628cf2a5c9c6a106e6cb96b37069a9"
+    },
+    {
       "id": "github-commit-a31a042cc02c",
       "title": "Merge pull request #355 from yskn0008-bot/clarity/server-openai-shortcut",
       "completed_at": "2026-09-14T20:16:34Z",
@@ -184,20 +198,6 @@
       "completed_at": "2026-09-14T20:14:21Z",
       "result": "GitHub mainへ反映（37b84d3）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/37b84d3148608536f008bb503e1f5337e0ea3dc5"
-    },
-    {
-      "id": "github-commit-831630ed5fdb",
-      "title": "test(clarity): cover secure model gateway",
-      "completed_at": "2026-09-14T20:14:04Z",
-      "result": "GitHub mainへ反映（831630e）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/831630ed5fdb01509eae7cbea37228be37d203ca"
-    },
-    {
-      "id": "github-commit-0abb1d308252",
-      "title": "ci(clarity): prove server model gateway shortcut",
-      "completed_at": "2026-09-14T20:13:52Z",
-      "result": "GitHub mainへ反映（0abb1d3）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/0abb1d308252c4c94ac543e31e2a6874fd805ce9"
     },
     {
       "id": "complete-002",
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-15T05:16:47+09:00",
+      "last_update": "2026-09-15T05:19:59+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -315,7 +315,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-15T05:16:47+09:00",
+      "last_update": "2026-09-15T05:19:59+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-15T05:16:47+09:00",
+      "last_update": "2026-09-15T05:19:59+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "a9a5b16348602c86822a1f620f86534b3a1aab2e5381e4f4ca0fcf48efae0f6a"
+  "github_snapshot_hash": "a46af65b82813aadf589895f16a306774e835975305104341a89efa1177e7861"
 }
