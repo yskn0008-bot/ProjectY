@@ -6,7 +6,7 @@ import plistlib
 import uuid
 from pathlib import Path
 
-ENDPOINT = "https://project-y-yos-ai.vercel.app/api/yos/clarity-model"
+ENDPOINT = "https://project-y-yos-ai.vercel.app/api/yos/intake?mode=model"
 TOKEN_PROMPT = "Clarity接続トークン"
 
 
