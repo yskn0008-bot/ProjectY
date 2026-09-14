@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate action ordering and safe model configuration in compiled Clarity v1."""
+"""Validate action ordering, local v1 executors, and safe model configuration in compiled Clarity."""
 
 from __future__ import annotations
 
@@ -32,6 +32,10 @@ def find_indexes(actions: list[dict], suffix: str) -> list[int]:
     return [i for i, action in enumerate(actions) if action_id(action).endswith(suffix)]
 
 
+def serialized_params(action: dict) -> str:
+    return repr(action.get("WFWorkflowActionParameters", {}))
+
+
 def validate(path: Path) -> None:
     with path.open("rb") as fh:
         root = plistlib.load(fh)
@@ -41,27 +45,43 @@ def validate(path: Path) -> None:
 
     dictate_i = find_index(actions, "dictatetext")
     append_indexes = find_indexes(actions, "file.append")
-    if len(append_indexes) != 2:
-        raise AssertionError(f"expected Raw + Ledger appends, found {len(append_indexes)}")
-    raw_i, ledger_i = append_indexes
+    if len(append_indexes) < 5:
+        raise AssertionError(f"expected Raw, Ledger, and local destination appends; found {len(append_indexes)}")
     model_i = find_index(actions, "askllm")
-    if not dictate_i < raw_i < model_i < ledger_i:
+
+    raw_candidates = [
+        i for i in append_indexes
+        if actions[i].get("WFWorkflowActionParameters", {}).get("WFFilePath") == "Clarity Inbox.txt"
+    ]
+    if len(raw_candidates) != 1:
+        raise AssertionError(f"expected exactly one Raw First append, found {len(raw_candidates)}")
+    raw_i = raw_candidates[0]
+    if not dictate_i < raw_i < model_i:
         raise AssertionError(
-            "order violated: "
-            f"dictation={dictate_i}, raw={raw_i}, model={model_i}, ledger={ledger_i}"
+            "Raw First order violated: "
+            f"dictation={dictate_i}, raw={raw_i}, model={model_i}"
         )
 
     raw_params = actions[raw_i].get("WFWorkflowActionParameters", {})
     if raw_params.get("WFAppendFileWriteMode") != "Append":
         raise AssertionError("Raw record must append, not replace/prepend")
-    if raw_params.get("WFFilePath") != "Clarity Inbox.txt":
-        raise AssertionError(f"unexpected Raw destination: {raw_params.get('WFFilePath')!r}")
 
-    ledger_params = actions[ledger_i].get("WFWorkflowActionParameters", {})
-    if ledger_params.get("WFAppendFileWriteMode") != "Append":
-        raise AssertionError("Ledger record must append, not replace/prepend")
-    if ledger_params.get("WFFilePath") != "Clarity Ledger.txt":
-        raise AssertionError(f"unexpected Ledger destination: {ledger_params.get('WFFilePath')!r}")
+    ledger_indexes = [
+        i for i in append_indexes
+        if actions[i].get("WFWorkflowActionParameters", {}).get("WFFilePath") == "Clarity Ledger.txt"
+    ]
+    if not ledger_indexes or not all(i > model_i for i in ledger_indexes):
+        raise AssertionError("Ledger records must be written only after model output exists")
+    for i in ledger_indexes:
+        if actions[i].get("WFWorkflowActionParameters", {}).get("WFAppendFileWriteMode") != "Append":
+            raise AssertionError("Ledger records must append")
+
+    idea_indexes = [
+        i for i in append_indexes
+        if actions[i].get("WFWorkflowActionParameters", {}).get("WFFilePath") == "Idea in Box.txt"
+    ]
+    if len(idea_indexes) != 1 or idea_indexes[0] <= model_i:
+        raise AssertionError("Idea executor append missing or before policy/model")
 
     model_params = actions[model_i].get("WFWorkflowActionParameters", {})
     if model_params.get("FollowUp") is not False:
@@ -69,8 +89,6 @@ def validate(path: Path) -> None:
     if model_params.get("WFGenerativeResultType") != "Dictionary":
         raise AssertionError("ChatGPT output must be Dictionary")
 
-    # Runtime gate must parse nested dictionaries and contain conditional/output guards
-    # before any later executor is added.
     identifiers = [action_id(action) for action in actions]
     if sum(ident.endswith("detect.dictionary") for ident in identifiers) < 2:
         raise AssertionError("model result and interpretation must be parsed as dictionaries")
@@ -79,7 +97,41 @@ def validate(path: Path) -> None:
     if not any(ident.endswith("output") for ident in identifiers):
         raise AssertionError("blocking user output missing")
 
+    event_indexes = find_indexes(actions, "addnewevent")
+    reminder_indexes = find_indexes(actions, "addnewreminder")
+    if len(event_indexes) != 1:
+        raise AssertionError(f"expected one calendar executor, found {len(event_indexes)}")
+    if len(reminder_indexes) != 2:
+        raise AssertionError(f"expected timed reminder + task/shopping executors, found {len(reminder_indexes)}")
+
+    if event_indexes[0] <= model_i or any(i <= model_i for i in reminder_indexes):
+        raise AssertionError("external destination action appears before model/policy")
+
+    event_params = serialized_params(actions[event_indexes[0]])
+    for required in ("WFCalendarItemTitle", "WFCalendarItemStartDate", "WFCalendarItemEndDate", "WFCalendarItemNotes"):
+        if required not in event_params:
+            raise AssertionError(f"calendar executor missing {required}")
+    if "YOS-CLARITY-ID:" not in event_params:
+        raise AssertionError("calendar executor missing idempotency marker")
+
+    reminder_params = [serialized_params(actions[i]) for i in reminder_indexes]
+    if not all("WFCalendarItemTitle" in params and "YOS-CLARITY-ID:" in params for params in reminder_params):
+        raise AssertionError("reminder executor missing title or idempotency marker")
+    if not any("WFAlertCustomTime" in params for params in reminder_params):
+        raise AssertionError("timed reminder executor missing alert time")
+
     serialized = repr(root)
+    for token in ("EXECUTING", "APPLIED", "BLOCKED", "REQUEST_DONE"):
+        if token not in serialized:
+            raise AssertionError(f"ledger state {token!r} missing")
+
+    # Clarity v1 must remain local-only after the model call. No network executor may be introduced here.
+    forbidden_action_fragments = ("downloadurl", "url.upload", "sendemail", "sendmessage", "http", "ssh")
+    for ident in identifiers:
+        lowered = ident.lower()
+        if any(fragment in lowered for fragment in forbidden_action_fragments):
+            raise AssertionError(f"forbidden network/external executor found: {ident}")
+
     for pattern in SECRET_PATTERNS:
         if pattern.search(serialized):
             raise AssertionError(f"secret/private-network pattern found: {pattern.pattern}")
