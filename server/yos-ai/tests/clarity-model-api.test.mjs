@@ -1,13 +1,13 @@
 import assert from 'node:assert/strict';
 import crypto from 'node:crypto';
 import test from 'node:test';
-import handler from '../api/yos/clarity-model.mjs';
+import {handleClarityModel} from '../api/yos/intake.mjs';
 
 const token = 'clarity-test-token-1234567890';
 const hash = crypto.createHash('sha256').update(token, 'utf8').digest('hex');
 
 function request(auth = `Bearer ${token}`, body = {prompt: 'test prompt'}) {
-  return new Request('https://example.test/api/yos/clarity-model', {
+  return new Request('https://example.test/api/yos/intake?mode=model', {
     method: 'POST',
     headers: {
       Authorization: auth,
@@ -40,7 +40,7 @@ test('rejects missing bearer token without contacting OpenAI', async () => {
   await withEnv(async () => {
     let called = false;
     globalThis.fetch = async () => { called = true; throw new Error('must not call'); };
-    const response = await handler.fetch(request(''));
+    const response = await handleClarityModel(request(''));
     assert.equal(response.status, 401);
     assert.equal(called, false);
   });
@@ -64,7 +64,7 @@ test('forwards prompt server-side and returns the Clarity contract root', async 
         })
       });
     };
-    const response = await handler.fetch(request());
+    const response = await handleClarityModel(request());
     assert.equal(response.status, 200);
     const body = await response.json();
     assert.equal(body.request_id, '123456');
@@ -76,7 +76,7 @@ test('forwards prompt server-side and returns the Clarity contract root', async 
 test('fails closed when server OpenAI key is absent', async () => {
   await withEnv(async () => {
     delete process.env.OPENAI_API_KEY;
-    const response = await handler.fetch(request());
+    const response = await handleClarityModel(request());
     assert.equal(response.status, 503);
   });
 });
@@ -84,7 +84,7 @@ test('fails closed when server OpenAI key is absent', async () => {
 test('fails closed on non-JSON model output', async () => {
   await withEnv(async () => {
     globalThis.fetch = async () => Response.json({output_text: 'not-json'});
-    const response = await handler.fetch(request());
+    const response = await handleClarityModel(request());
     assert.equal(response.status, 502);
   });
 });
