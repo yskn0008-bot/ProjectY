@@ -29,14 +29,10 @@ function matchesSha256(value, expectedHex) {
 }
 
 function extractOutputText(payload) {
-  if (typeof payload?.output_text === 'string' && payload.output_text.trim()) {
-    return payload.output_text.trim();
-  }
+  if (typeof payload?.output_text === 'string' && payload.output_text.trim()) return payload.output_text.trim();
   for (const item of Array.isArray(payload?.output) ? payload.output : []) {
     for (const content of Array.isArray(item?.content) ? item.content : []) {
-      if (content?.type === 'output_text' && typeof content.text === 'string' && content.text.trim()) {
-        return content.text.trim();
-      }
+      if (content?.type === 'output_text' && typeof content.text === 'string' && content.text.trim()) return content.text.trim();
     }
   }
   return null;
@@ -44,97 +40,56 @@ function extractOutputText(payload) {
 
 export default {
   async fetch(request) {
-    if (request.method !== 'POST') {
-      return json({error: 'Method not allowed'}, 405);
-    }
+    if (request.method !== 'POST') return json({error: 'Method not allowed'}, 405);
 
     const token = bearerToken(request.headers.get('authorization'));
-    if (!token || !matchesSha256(token, process.env.YOS_CLARITY_INTAKE_TOKEN_SHA256)) {
-      return json({error: 'Unauthorized'}, 401);
-    }
+    if (!token || !matchesSha256(token, process.env.YOS_CLARITY_INTAKE_TOKEN_SHA256)) return json({error: 'Unauthorized'}, 401);
 
     if (request.headers.get('content-type')?.split(';', 1)[0]?.trim().toLowerCase() !== 'application/json') {
       return json({error: 'Content-Type must be application/json'}, 415);
     }
 
     let bodyText;
-    try {
-      bodyText = await request.text();
-    } catch {
-      return json({error: 'Invalid request body'}, 400);
-    }
-    if (new TextEncoder().encode(bodyText).byteLength > MAX_BODY_BYTES) {
-      return json({error: 'Request body is too large'}, 413);
-    }
+    try { bodyText = await request.text(); } catch { return json({error: 'Invalid request body'}, 400); }
+    if (new TextEncoder().encode(bodyText).byteLength > MAX_BODY_BYTES) return json({error: 'Request body is too large'}, 413);
 
     let body;
-    try {
-      body = JSON.parse(bodyText);
-    } catch {
-      return json({error: 'Invalid JSON'}, 400);
-    }
-
+    try { body = JSON.parse(bodyText); } catch { return json({error: 'Invalid JSON'}, 400); }
     const prompt = typeof body?.prompt === 'string' ? body.prompt.trim() : '';
-    if (!prompt || prompt.length > 20_000) {
-      return json({error: 'prompt is required'}, 400);
-    }
+    if (!prompt || prompt.length > 20_000) return json({error: 'prompt is required'}, 400);
 
     const apiKey = process.env.OPENAI_API_KEY;
-    if (!apiKey) {
-      return json({error: 'Clarity model gateway is not configured'}, 503);
-    }
+    if (!apiKey) return json({error: 'Clarity model gateway is not configured'}, 503);
 
     let upstream;
     try {
       upstream = await fetch('https://api.openai.com/v1/responses', {
         method: 'POST',
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-          'Content-Type': 'application/json'
-        },
+        headers: {Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json'},
         body: JSON.stringify({
           model: process.env.OPENAI_MODEL || DEFAULT_MODEL,
           input: prompt,
           store: false,
-          text: {
-            format: {
-              type: 'json_object'
-            }
-          }
+          text: {format: {type: 'json_object'}}
         })
       });
-    } catch {
-      return json({error: 'OpenAI request failed'}, 503);
-    }
+    } catch { return json({error: 'OpenAI request failed'}, 503); }
 
     let payload;
-    try {
-      payload = await upstream.json();
-    } catch {
-      return json({error: 'OpenAI returned an invalid response'}, 502);
-    }
-
+    try { payload = await upstream.json(); } catch { return json({error: 'OpenAI returned an invalid response'}, 502); }
     if (!upstream.ok) {
       const code = typeof payload?.error?.code === 'string' ? payload.error.code : 'upstream_error';
       return json({error: 'OpenAI request failed', code}, upstream.status >= 500 ? 503 : 502);
     }
 
     const outputText = extractOutputText(payload);
-    if (!outputText) {
-      return json({error: 'OpenAI returned no model output'}, 502);
-    }
+    if (!outputText) return json({error: 'OpenAI returned no model output'}, 502);
 
     let result;
-    try {
-      result = JSON.parse(outputText);
-    } catch {
-      return json({error: 'Model output was not valid JSON'}, 502);
-    }
+    try { result = JSON.parse(outputText); } catch { return json({error: 'Model output was not valid JSON'}, 502); }
+    if (!result || typeof result !== 'object' || Array.isArray(result)) return json({error: 'Model output root must be an object'}, 502);
 
-    if (!result || typeof result !== 'object' || Array.isArray(result)) {
-      return json({error: 'Model output root must be an object'}, 502);
-    }
-
-    return json({ok: true, result});
+    // Return the Clarity contract itself so Shortcuts can feed it directly into the existing router.
+    return json(result);
   }
 };
