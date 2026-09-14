@@ -8,4 +8,6 @@ Required order for Raw First is:
 
 `dictation -> resolve Clarity Inbox.txt -> append through WFFile -> resolve Clarity Ledger.txt -> model`
 
+After replacing the previous Shortcut on the target iPhone, the first physical check is that one dictated phrase creates a new `RAW` line in `Clarity Inbox.txt`.
+
 The generated artifact must still pass physical iPhone E2E before whole-Clarity completion is claimed.
