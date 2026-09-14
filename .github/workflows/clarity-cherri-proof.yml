@@ -76,11 +76,31 @@ jobs:
             exit 1
           fi
 
-      - name: Upload unsigned artifacts
+      - name: Sign secret-free Clarity runtime with proven HubSign fallback
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/clarity-factory/sign_with_hubsign.py \
+            --input tools/clarity-factory/artifacts/Clarity-v1-unsigned.shortcut \
+            --output tools/clarity-factory/artifacts/Clarity-v1-signed.shortcut \
+            --name 'Clarity'
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('tools/clarity-factory/artifacts/Clarity-v1-signed.shortcut')
+          data = p.read_bytes()
+          if not data.startswith(b'AEA1'):
+              raise SystemExit(f'expected signed AEA1 shortcut, got {data[:8]!r}')
+          if len(data) < 500:
+              raise SystemExit(f'artifact unexpectedly small: {len(data)} bytes')
+          print(f'OK: signed Clarity artifact, {len(data)} bytes')
+          PY
+
+      - name: Upload Clarity artifacts
         uses: actions/upload-artifact@v4
         with:
           name: clarity-cherri-artifacts
           path: |
             tools/clarity-factory/artifacts/Clarity-Compiler-Proof-unsigned.shortcut
             tools/clarity-factory/artifacts/Clarity-v1-unsigned.shortcut
+            tools/clarity-factory/artifacts/Clarity-v1-signed.shortcut
           if-no-files-found: error
