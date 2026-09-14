@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-15T03:54:28+09:00",
+  "updated_at": "2026-09-15T03:58:13+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -165,6 +165,20 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-4631f6f68d35",
+      "title": "chore: remove accidental noop marker",
+      "completed_at": "2026-09-14T18:57:55Z",
+      "result": "GitHub mainへ反映（4631f6f）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/4631f6f68d35a480df86c05b8eae5800537a6ab6"
+    },
+    {
+      "id": "github-commit-fd1c7c9d3b22",
+      "title": "x",
+      "completed_at": "2026-09-14T18:57:39Z",
+      "result": "GitHub mainへ反映（fd1c7c9）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/fd1c7c9d3b223b502887d008f616c1882bd864a2"
+    },
+    {
       "id": "github-commit-81b21dd96710",
       "title": "Merge pull request #348 from yskn0008-bot/clarity/fix-append-file-path",
       "completed_at": "2026-09-14T18:54:10Z",
@@ -184,20 +198,6 @@
       "completed_at": "2026-09-14T18:52:46Z",
       "result": "GitHub mainへ反映（a55b09d）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/a55b09d6971b1f1be2969c240bb48b7ba6de9713"
-    },
-    {
-      "id": "github-commit-068b2630326b",
-      "title": "fix(clarity): patch append destinations for iOS 26",
-      "completed_at": "2026-09-14T18:52:32Z",
-      "result": "GitHub mainへ反映（068b263）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/068b2630326bf3192225c3c1a4e15ee9340d8af6"
-    },
-    {
-      "id": "github-commit-6aaefec4f3cf",
-      "title": "fix(clarity): use resolved file references for persistence (#347)",
-      "completed_at": "2026-09-14T18:43:09Z",
-      "result": "GitHub mainへ反映（6aaefec）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/6aaefec4f3cf2d629579da15703c409ee65707c6"
     },
     {
       "id": "complete-002",
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-15T03:54:28+09:00",
+      "last_update": "2026-09-15T03:58:13+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -315,7 +315,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-15T03:54:28+09:00",
+      "last_update": "2026-09-15T03:58:13+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-15T03:54:28+09:00",
+      "last_update": "2026-09-15T03:58:13+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "c4ea1dfb5fa06e0cd74fb504ca61908d2588695df700450586b827544d7b5f6c"
+  "github_snapshot_hash": "1dd4206d2cf26eb7d4e4c50b078c36aabf12e47e06ec57f05f57c2ab60a93597"
 }
