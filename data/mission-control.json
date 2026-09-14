@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-15T03:28:47+09:00",
+  "updated_at": "2026-09-15T03:43:21+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -120,7 +120,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-09-14T16:30:59Z"
+      "updated_at": "2026-09-14T18:43:01Z"
     },
     {
       "id": "github-issue-234",
@@ -165,6 +165,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-6aaefec4f3cf",
+      "title": "fix(clarity): use resolved file references for persistence (#347)",
+      "completed_at": "2026-09-14T18:43:09Z",
+      "result": "GitHub mainへ反映（6aaefec）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/6aaefec4f3cf2d629579da15703c409ee65707c6"
+    },
+    {
       "id": "github-commit-09161a72a8fb",
       "title": "feat(clarity): add universal gateway v1 source and runtime proof (#325)",
       "completed_at": "2026-09-14T01:57:39Z",
@@ -191,13 +198,6 @@
       "completed_at": "2026-09-13T22:04:36Z",
       "result": "GitHub mainへ反映（be9a65f）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/be9a65fbeba41d55f93d2002828c0a6db2a6cf44"
-    },
-    {
-      "id": "github-commit-45ec54a09fb8",
-      "title": "feat(scriptable): add safe script classifier",
-      "completed_at": "2026-09-13T22:04:24Z",
-      "result": "GitHub mainへ反映（45ec54a）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/45ec54a09fb881d1a6ed748bdba62b93c4f69553"
     },
     {
       "id": "complete-002",
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-15T03:28:47+09:00",
+      "last_update": "2026-09-15T03:43:21+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -315,7 +315,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-15T03:28:47+09:00",
+      "last_update": "2026-09-15T03:43:21+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-15T03:28:47+09:00",
+      "last_update": "2026-09-15T03:43:21+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "46955ae22daaceaedc0883cd18dbc17bf5cf82d043606e823823a369eec15958"
+  "github_snapshot_hash": "416b056a3fd8752c647001cec68e5d7a6f0659fad20e3c0331f995c7922ba185"
 }
