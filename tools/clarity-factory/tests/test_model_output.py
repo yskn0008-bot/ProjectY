@@ -42,6 +42,7 @@ def valid_payload():
                 "dependency": None,
                 "status": "planned",
                 "date_time": "",
+                "end_date_time": "",
             }
         ],
         "watches": [],
@@ -67,11 +68,29 @@ class ClarityModelOutputTests(unittest.TestCase):
             intent="create",
             destination="Calendar",
             date_time="",
+            end_date_time="",
             needs_review=False,
         )
-        self.assertTrue(any("date_time" in e for e in validate(payload)))
+        errors = validate(payload)
+        self.assertTrue(any("date_time" in e for e in errors))
         payload["actions"][0]["needs_review"] = True
         self.assertFalse(any("date_time" in e for e in validate(payload)))
+
+    def test_calendar_requires_end_time_when_executable(self):
+        payload = valid_payload()
+        payload["interpretation"]["domains"] = ["life"]
+        payload["actions"][0].update(
+            executor="calendar",
+            domain="life",
+            intent="create",
+            destination="Calendar",
+            date_time="2026-09-15T15:00:00+09:00",
+            end_date_time="",
+            needs_review=False,
+        )
+        self.assertTrue(any("end_date_time" in e for e in validate(payload)))
+        payload["actions"][0]["end_date_time"] = "2026-09-15T16:00:00+09:00"
+        self.assertEqual(validate(payload), [])
 
     def test_high_risk_requires_confirmation(self):
         payload = valid_payload()
