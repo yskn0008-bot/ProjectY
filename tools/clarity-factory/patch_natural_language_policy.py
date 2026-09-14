@@ -24,30 +24,42 @@ NEW = (
 )
 
 
+def rewrite(value: object) -> tuple[object, int]:
+    if isinstance(value, str):
+        if OLD in value:
+            return value.replace(OLD, NEW), value.count(OLD)
+        return value, 0
+    if isinstance(value, list):
+        out = []
+        hits = 0
+        for item in value:
+            new_item, count = rewrite(item)
+            out.append(new_item)
+            hits += count
+        return out, hits
+    if isinstance(value, dict):
+        out = {}
+        hits = 0
+        for key, item in value.items():
+            new_item, count = rewrite(item)
+            out[key] = new_item
+            hits += count
+        return out, hits
+    return value, 0
+
+
 def patch(path: Path) -> None:
     with path.open("rb") as fh:
         root = plistlib.load(fh)
-    actions = root.get("WFWorkflowActions")
-    if not isinstance(actions, list):
+    if not isinstance(root.get("WFWorkflowActions"), list):
         raise SystemExit("WFWorkflowActions missing")
 
-    hits = 0
-    for action in actions:
-        params = action.get("WFWorkflowActionParameters")
-        if not isinstance(params, dict):
-            continue
-        for key, value in list(params.items()):
-            if isinstance(value, str) and "You are Clarity, the single natural-language gateway" in value:
-                if OLD not in value:
-                    raise SystemExit("Clarity model prompt found but old ambiguity policy was not present")
-                params[key] = value.replace(OLD, NEW)
-                hits += 1
-
+    rewritten, hits = rewrite(root)
     if hits != 1:
-        raise SystemExit(f"expected exactly one Clarity model prompt, found {hits}")
+        raise SystemExit(f"expected exactly one ambiguity policy replacement, found {hits}")
 
     with path.open("wb") as fh:
-        plistlib.dump(root, fh, fmt=plistlib.FMT_XML, sort_keys=False)
+        plistlib.dump(rewritten, fh, fmt=plistlib.FMT_XML, sort_keys=False)
 
     with path.open("rb") as fh:
         verify = plistlib.load(fh)
