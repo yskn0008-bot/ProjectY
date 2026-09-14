@@ -21,6 +21,19 @@ EXTRA = (
 )
 
 
+def prompt_string(params: dict) -> tuple[dict, str] | None:
+    text = params.get("WFTextActionText")
+    if not isinstance(text, dict):
+        return None
+    value = text.get("Value")
+    if not isinstance(value, dict):
+        return None
+    string = value.get("string")
+    if not isinstance(string, str):
+        return None
+    return value, string
+
+
 def patch(path: Path) -> None:
     with path.open("rb") as fh:
         root = plistlib.load(fh)
@@ -31,20 +44,21 @@ def patch(path: Path) -> None:
 
     hits = 0
     for action in actions:
-        params = action.get("WFWorkflowActionParameters")
+        params = action.get("WFWorkflowActionParameters", {})
         if not isinstance(params, dict):
             continue
-        for key, value in list(params.items()):
-            if not isinstance(value, str):
-                continue
-            if "You are Clarity, the single natural-language gateway" not in value:
-                continue
-            if MARKER not in value:
-                raise SystemExit("Clarity model prompt found but return-contract marker missing")
-            if EXTRA in value:
-                raise SystemExit("action extraction policy already present")
-            params[key] = value.replace(MARKER, EXTRA + MARKER)
-            hits += 1
+        found = prompt_string(params)
+        if not found:
+            continue
+        value, string = found
+        if "You are Clarity, the single natural-language gateway" not in string:
+            continue
+        if MARKER not in string:
+            raise SystemExit("Clarity model prompt found but return-contract marker missing")
+        if EXTRA in string:
+            raise SystemExit("action extraction policy already present")
+        value["string"] = string.replace(MARKER, EXTRA + MARKER)
+        hits += 1
 
     if hits != 1:
         raise SystemExit(f"expected exactly one Clarity model prompt, found {hits}")
