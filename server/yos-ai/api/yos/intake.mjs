@@ -20,6 +20,17 @@ function json(body, status = 200) {
   });
 }
 
+function modelJsonText(body) {
+  return new Response(JSON.stringify(body), {
+    status: 200,
+    headers: {
+      'Cache-Control': 'no-store',
+      'Content-Type': 'text/plain; charset=utf-8',
+      'X-Content-Type-Options': 'nosniff'
+    }
+  });
+}
+
 function bearerToken(header) {
   if (!header) return null;
   const match = /^Bearer ([^\s]{16,512})$/u.exec(header);
@@ -95,7 +106,12 @@ export async function handleClarityModel(request) {
   try { result = JSON.parse(outputText); } catch { return json({error: 'Model output was not valid JSON'}, 502); }
   if (!result || typeof result !== 'object' || Array.isArray(result)) return json({error: 'Model output root must be an object'}, 502);
 
-  return json(result);
+  // Shortcuts' Get Contents of URL auto-converts application/json into a native
+  // Dictionary. Clarity's proven downstream path deliberately performs its own
+  // Get Dictionary from Input step. Return validated JSON as text so that path
+  // receives the same representation as the former ChatGPT Text action and
+  // nested actions[] survives intact on iPhone.
+  return modelJsonText(result);
 }
 
 export default {
