@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-15T23:01:54+09:00",
+  "updated_at": "2026-09-15T23:14:18+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -33,6 +33,16 @@
       "updated_at": "2026-09-13T10:41:51Z"
     },
     {
+      "id": "github-pr-322",
+      "title": "PR #322 feat(hq): add Lane 4 One Enter orchestration engine",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/322",
+      "updated_at": "2026-09-13T01:07:22Z"
+    },
+    {
       "id": "github-pr-324",
       "title": "PR #324 feat: Shortcut Factory v3 + STASH auto-build",
       "type": "GitHub PR",
@@ -51,16 +61,6 @@
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/330",
       "updated_at": "2026-09-14T05:09:58Z"
-    },
-    {
-      "id": "github-pr-335",
-      "title": "PR #335 feat(prot-factory): prove real no-wait reuse path",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/335",
-      "updated_at": "2026-09-14T23:15:57Z"
     },
     {
       "id": "github-issue-110",
@@ -120,7 +120,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-09-15T14:01:37Z"
+      "updated_at": "2026-09-15T14:14:03Z"
     },
     {
       "id": "github-issue-234",
@@ -143,14 +143,14 @@
       "updated_at": "2026-08-12T12:04:15Z"
     },
     {
-      "id": "github-issue-245",
-      "title": "Issue #245 Taxi｜営業・カレンダーUI改善",
+      "id": "github-issue-240",
+      "title": "Issue #240 [QA] Taxi PR #239｜iPhone17 / iPhone SE3 smoke失敗の切り分け",
       "type": "GitHub Issue",
       "status": "open",
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/245",
-      "updated_at": "2026-08-11T07:31:09Z"
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/240",
+      "updated_at": "2026-08-07T16:24:42Z"
     },
     {
       "id": "github-issue-51",
@@ -164,6 +164,20 @@
     }
   ],
   "recently_completed": [
+    {
+      "id": "github-commit-f3a40f45e124",
+      "title": "Merge pull request #335 from yskn0008-bot/prot/factory-operational-v0.2",
+      "completed_at": "2026-09-15T14:14:01Z",
+      "result": "GitHub mainへ反映（f3a40f4）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/f3a40f45e1243a3c0e829b5dfc7b2548f9b7ff66"
+    },
+    {
+      "id": "github-commit-1ef352c7d95b",
+      "title": "docs(prot-factory): record operational proof verification",
+      "completed_at": "2026-09-15T14:11:43Z",
+      "result": "GitHub mainへ反映（1ef352c）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/1ef352c7d95b602bb19f355a66da90007527bdc2"
+    },
     {
       "id": "github-commit-0f74904ff8d0",
       "title": "Merge pull request #365 from yskn0008-bot/clarity/final-write-verification",
@@ -184,20 +198,6 @@
       "completed_at": "2026-09-15T13:53:27Z",
       "result": "GitHub mainへ反映（92a64ea）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/92a64eaa11913c27fbb1ce84e42b8e39fd551ccf"
-    },
-    {
-      "id": "github-commit-cfdd76c57f03",
-      "title": "fix(clarity): use current iOS reminder wire format",
-      "completed_at": "2026-09-15T13:52:48Z",
-      "result": "GitHub mainへ反映（cfdd76c）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/cfdd76c57f03158ec7cd2eb9ef7709c9927e4903"
-    },
-    {
-      "id": "github-commit-9ec294bbf5d0",
-      "title": "test(clarity): validate final iPhone write artifact",
-      "completed_at": "2026-09-15T13:52:00Z",
-      "result": "GitHub mainへ反映（9ec294b）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/9ec294bbf5d0d215d846f30e09ae85931ae249a3"
     },
     {
       "id": "complete-002",
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-15T23:01:54+09:00",
+      "last_update": "2026-09-15T23:14:18+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -309,13 +309,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 33件・Open PR 17件を自動同期中",
+      "next_action": "Open Issue 34件・Open PR 16件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-15T23:01:54+09:00",
+      "last_update": "2026-09-15T23:14:18+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-15T23:01:54+09:00",
+      "last_update": "2026-09-15T23:14:18+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "b5a53cc1f1fd006efc7038fea077e2e27def11bb26c55f87a663788892f65dda"
+  "github_snapshot_hash": "7ad7cda88b33cce3211ca7ff41d8aacf34a2485312e426417a3dff583ea885c4"
 }
