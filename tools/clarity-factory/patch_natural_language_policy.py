@@ -14,12 +14,15 @@ OLD = (
 NEW = (
     "Interpret ordinary Japanese everyday time expressions from current_time before deciding they are ambiguous. "
     "Examples that are normally resolvable without review include 今日, 明日, 明後日, 今夜, 朝, 昼, 午後, 夜, "
-    "明日3時, 明日の午後3時, and relative reminders such as 30分前 when they clearly refer to a scheduled event in the same input. "
+    "明日3時, 明日10時, 明日の午後3時, and relative reminders such as 30分前 when they clearly refer to a scheduled event in the same input. "
+    "A date word such as 今日/明日/明後日 plus an ordinary bare clock hour from 1時 through 11時 is normally the daytime occurrence; "
+    "for example 明日10時 means tomorrow at 10:00 local time and must not be marked needs_review merely because 22:00 also exists. "
+    "Explicit 午後/夜 overrides that daytime convention. 12時 should use surrounding 朝/昼/夜 context when present. "
     "For a linked reminder like 30分前, derive date_time from the referenced calendar action and record the dependency. "
     "Do not require the user to restate a full date when current_time plus the utterance determines it. "
     "Shopping/task/idea actions do not need a date unless the user explicitly asks for one; phrases such as 帰りにトマト買う should become shopping content トマト without needs_review. "
-    "Set needs_review=true only when multiple materially different interpretations remain after using current_time and same-input context, "
-    "for example 3時 with no usable AM/PM context when either interpretation is plausible, an unclear target event for 30分前, or a genuinely missing required date. "
+    "Set needs_review=true only when multiple materially different interpretations remain after applying these Japanese time conventions, current_time, and same-input context, "
+    "for example an unclear target event for 30分前 or a genuinely missing required date. "
     "For calendar only: when the start date/time is resolved but the user gives no duration/end time, set end_date_time to exactly 60 minutes after date_time."
 )
 
@@ -64,7 +67,7 @@ def patch(path: Path) -> None:
     with path.open("rb") as fh:
         verify = plistlib.load(fh)
     blob = repr(verify)
-    required = ["明日3時", "30分前", "帰りにトマト買う", "multiple materially different interpretations"]
+    required = ["明日3時", "明日10時", "tomorrow at 10:00 local time", "30分前", "帰りにトマト買う", "multiple materially different interpretations"]
     for needle in required:
         if needle not in blob:
             raise SystemExit(f"missing natural-language policy marker: {needle}")
