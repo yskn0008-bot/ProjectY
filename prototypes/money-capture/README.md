@@ -6,7 +6,9 @@ Turn a natural one-line input such as `コンビニ850円` into a safe MY WAY Mo
 
 ## Boundary
 
-This prototype **does not write to MY WAY Money**. Current Money UI reads aggregate values from existing Life data (`life.moneySafety` / `today.money`) and no individual-spend ledger is established as SSOT yet. The prototype therefore emits a candidate object that Clarity can route later.
+This prototype **does not write to MY WAY Money**. It emits a candidate object and has no external side effects.
+
+At prototype creation time there was no established individual-transaction SSOT. As of 2026-09-15, current `main` contains `yos-money-v2` with a `transactions[]` collection in `yos/money-master-v1.js`, so that original storage-gap premise has changed. Persistence is still kept outside this parser PR because the current Clarity iPhone distribution is blocked at signed Shortcut generation; this prototype must not introduce an unreviewed second write path just to bypass that distribution boundary.
 
 Raw input is preserved unchanged. Missing amount and income-like input fail closed to `needs_review`. Ambiguous categories stay `未分類` rather than forcing a guess.
 
@@ -22,11 +24,9 @@ The output maps directly to the existing Clarity Universal Gateway contract:
 - `destination = MY_WAY_Money`
 - `applied = false`
 
-Future flow:
+Target flow after the current signed Clarity runtime is available:
 
 `Clarity raw input -> model/fast parser -> Money Capture candidate -> Money executor -> verify -> ledger`
-
-The Money executor should only be added after the individual transaction storage contract is fixed. Until then, this candidate layer avoids creating a second financial SSOT.
 
 ## Example
 
@@ -51,4 +51,8 @@ Candidate:
 }
 ```
 
-No user confirmation is required merely because the category is unknown; the expense can remain unclassified until the Money ledger/executor policy is defined.
+No user confirmation is required merely because the category is unknown; the expense can remain unclassified until the Money executor policy applies it.
+
+## Verification checkpoint — 2026-09-15
+
+The unchanged parser contract was re-run against all seven existing acceptance cases and passed 7/7. Current main's Money storage contract was separately checked before updating this document. This checkpoint does not claim iPhone persistence or physical E2E.
