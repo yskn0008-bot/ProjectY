@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-15T22:52:11+09:00",
+  "updated_at": "2026-09-15T23:01:54+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -120,7 +120,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-09-15T13:34:43Z"
+      "updated_at": "2026-09-15T14:01:37Z"
     },
     {
       "id": "github-issue-234",
@@ -165,39 +165,39 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-0f74904ff8d0",
+      "title": "Merge pull request #365 from yskn0008-bot/clarity/final-write-verification",
+      "completed_at": "2026-09-15T14:01:36Z",
+      "result": "GitHub mainへ反映（0f74904）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/0f74904ff8d0dda675277c6bda71f801e17d3504"
+    },
+    {
+      "id": "github-commit-7673236645b8",
+      "title": "ci(clarity): retry transient HubSign timeouts",
+      "completed_at": "2026-09-15T13:55:55Z",
+      "result": "GitHub mainへ反映（7673236）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/7673236645b861e5e3477bd388468923c036c0dd"
+    },
+    {
+      "id": "github-commit-92a64eaa1191",
+      "title": "ci(clarity): verify final iPhone writer artifact",
+      "completed_at": "2026-09-15T13:53:27Z",
+      "result": "GitHub mainへ反映（92a64ea）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/92a64eaa11913c27fbb1ce84e42b8e39fd551ccf"
+    },
+    {
+      "id": "github-commit-cfdd76c57f03",
+      "title": "fix(clarity): use current iOS reminder wire format",
+      "completed_at": "2026-09-15T13:52:48Z",
+      "result": "GitHub mainへ反映（cfdd76c）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/cfdd76c57f03158ec7cd2eb9ef7709c9927e4903"
+    },
+    {
       "id": "github-commit-9ec294bbf5d0",
       "title": "test(clarity): validate final iPhone write artifact",
       "completed_at": "2026-09-15T13:52:00Z",
       "result": "GitHub mainへ反映（9ec294b）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/9ec294bbf5d0d215d846f30e09ae85931ae249a3"
-    },
-    {
-      "id": "github-commit-5c74d031c6f4",
-      "title": "fix(money): force fresh Money master on iPhone",
-      "completed_at": "2026-09-15T13:51:12Z",
-      "result": "GitHub mainへ反映（5c74d03）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/5c74d031c6f44e5bcfc7ce8c4e6d014674cf8593"
-    },
-    {
-      "id": "github-commit-6f439ee47b85",
-      "title": "fix(money): populate MY WAY Money from 00_Money master facts",
-      "completed_at": "2026-09-15T13:50:50Z",
-      "result": "GitHub mainへ反映（6f439ee）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/6f439ee47b8543ccd12af5a946e8e0dbcc238582"
-    },
-    {
-      "id": "github-commit-35ddb21468f0",
-      "title": "fix(my-way): force Money master seed and cache refresh",
-      "completed_at": "2026-09-15T13:38:10Z",
-      "result": "GitHub mainへ反映（35ddb21）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/35ddb21468f0e269198c3a88619115960e8d290d"
-    },
-    {
-      "id": "github-commit-2bcd8972d058",
-      "title": "fix(my-way): seed Money from current master facts",
-      "completed_at": "2026-09-15T13:37:51Z",
-      "result": "GitHub mainへ反映（2bcd897）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/2bcd8972d058bb151b95d1c9ce3325e1beb878a1"
     },
     {
       "id": "complete-002",
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-15T22:52:11+09:00",
+      "last_update": "2026-09-15T23:01:54+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -315,7 +315,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-15T22:52:11+09:00",
+      "last_update": "2026-09-15T23:01:54+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-15T22:52:11+09:00",
+      "last_update": "2026-09-15T23:01:54+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "7be21d3b6770c6233468b08344ad3cae5c1b8b268ff6a5ba1cf730c2738e5b65"
+  "github_snapshot_hash": "b5a53cc1f1fd006efc7038fea077e2e27def11bb26c55f87a663788892f65dda"
 }
