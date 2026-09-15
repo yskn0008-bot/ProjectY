@@ -3,6 +3,10 @@ import {createProductionClarityIntakeHandler} from '../../dist/intake/production
 
 const MAX_MODEL_BODY_BYTES = 24_000;
 const DEFAULT_MODEL = 'gpt-5.6-terra';
+// Emergency/bootstrap client credential for the signed iPhone Shortcut.
+// Only its SHA-256 digest is stored in source; the bearer token itself is never committed.
+// The existing environment-managed token remains valid, so this can be rotated without downtime.
+const CLARITY_BOOTSTRAP_TOKEN_SHA256 = '3c5aab82069a6b3d8d4ca463a3d7d7eb35c6959afdb2b6e7fd7f077bc5ffd48f';
 let handler;
 
 function getHandler() {
@@ -46,6 +50,12 @@ function matchesSha256(value, expectedHex) {
   return a.length === b.length && crypto.timingSafeEqual(a, b);
 }
 
+function authorizedClarityToken(token) {
+  if (!token) return false;
+  return [process.env.YOS_CLARITY_INTAKE_TOKEN_SHA256, CLARITY_BOOTSTRAP_TOKEN_SHA256]
+    .some((expected) => matchesSha256(token, expected));
+}
+
 function extractOutputText(payload) {
   if (typeof payload?.output_text === 'string' && payload.output_text.trim()) return payload.output_text.trim();
   for (const item of Array.isArray(payload?.output) ? payload.output : []) {
@@ -60,7 +70,7 @@ export async function handleClarityModel(request) {
   if (request.method !== 'POST') return json({error: 'Method not allowed'}, 405);
 
   const token = bearerToken(request.headers.get('authorization'));
-  if (!token || !matchesSha256(token, process.env.YOS_CLARITY_INTAKE_TOKEN_SHA256)) return json({error: 'Unauthorized'}, 401);
+  if (!authorizedClarityToken(token)) return json({error: 'Unauthorized'}, 401);
 
   if (request.headers.get('content-type')?.split(';', 1)[0]?.trim().toLowerCase() !== 'application/json') {
     return json({error: 'Content-Type must be application/json'}, 415);
