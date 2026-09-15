@@ -80,6 +80,8 @@ jobs:
           python3 patch_action_extraction_policy.py "$runtime"
           python3 patch_append_file_paths.py "$runtime"
           python3 patch_server_model_gateway.py "$runtime"
+          python3 patch_reminder_wire_format.py "$runtime"
+          python3 validate_clarity_final.py "$runtime"
           mkdir -p artifacts
           cp "$runtime" artifacts/Clarity-v1-unsigned.shortcut
 
