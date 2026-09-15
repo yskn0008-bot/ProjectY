@@ -9,20 +9,13 @@ const hash = crypto.createHash('sha256').update(token, 'utf8').digest('hex');
 function request(auth = `Bearer ${token}`, body = {prompt: 'test prompt'}) {
   return new Request('https://example.test/api/yos/intake?mode=model', {
     method: 'POST',
-    headers: {
-      Authorization: auth,
-      'Content-Type': 'application/json'
-    },
+    headers: {Authorization: auth, 'Content-Type': 'application/json'},
     body: JSON.stringify(body)
   });
 }
 
 async function withEnv(fn) {
-  const before = {
-    token: process.env.YOS_CLARITY_INTAKE_TOKEN_SHA256,
-    key: process.env.OPENAI_API_KEY,
-    model: process.env.OPENAI_MODEL
-  };
+  const before = {token: process.env.YOS_CLARITY_INTAKE_TOKEN_SHA256, key: process.env.OPENAI_API_KEY, model: process.env.OPENAI_MODEL};
   const oldFetch = globalThis.fetch;
   process.env.YOS_CLARITY_INTAKE_TOKEN_SHA256 = hash;
   process.env.OPENAI_API_KEY = 'test-key-never-sent-to-client';
@@ -46,7 +39,7 @@ test('rejects missing bearer token without contacting OpenAI', async () => {
   });
 });
 
-test('forwards prompt server-side and returns the Clarity contract root', async () => {
+test('returns validated Clarity JSON as text so Shortcuts parses nested actions itself', async () => {
   await withEnv(async () => {
     globalThis.fetch = async (url, init) => {
       assert.equal(url, 'https://api.openai.com/v1/responses');
@@ -55,19 +48,15 @@ test('forwards prompt server-side and returns the Clarity contract root', async 
       assert.equal(sent.input, 'test prompt');
       assert.equal(sent.store, false);
       assert.equal(sent.model, 'test-model');
-      return Response.json({
-        output_text: JSON.stringify({
-          request_id: '123456',
-          interpretation: {risk: 'low'},
-          actions: [{id: 'a1', executor: 'shopping', status: 'planned'}],
-          feedback: {summary: ''}
-        })
-      });
+      return Response.json({output_text: JSON.stringify({request_id: '123456', interpretation: {risk: 'low'}, actions: [{id: 'a1', executor: 'shopping', status: 'planned'}], feedback: {summary: ''}})});
     };
     const response = await handleClarityModel(request());
     assert.equal(response.status, 200);
-    const body = await response.json();
+    assert.match(response.headers.get('content-type') || '', /^text\/plain/u);
+    const raw = await response.text();
+    const body = JSON.parse(raw);
     assert.equal(body.request_id, '123456');
+    assert.equal(body.actions.length, 1);
     assert.equal(body.actions[0].executor, 'shopping');
     assert.equal('ok' in body, false);
   });
