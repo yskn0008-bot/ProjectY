@@ -22,4 +22,6 @@ Proof contract:
 7. emit a machine-readable `trial_ready` result with artifact SHA-256;
 8. require no owner `continue` step.
 
+Current-head verification checkpoint: GitHub Actions `PROT Factory` run `34723955117` completed successfully on head `8ed80b8314154c82aacd7e9ca37622f987a50250`; the PR evidence was then refreshed to replace the original pending placeholders with the completed test result. This documentation-only checkpoint intentionally triggers a fresh current-head governance/PROT Factory validation.
+
 This does **not** claim the widget is already usable on the physical iPhone. Production token/configuration and iPhone Scriptable acceptance remain their own final boundary. The proof is specifically for the Factory's ability to keep moving until the genuine owner-only boundary.
