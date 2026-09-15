@@ -1,8 +1,10 @@
 import crypto from 'node:crypto';
 import {createProductionClarityIntakeHandler} from '../../dist/intake/production.js';
+import {CLARITY_RESPONSE_FORMAT, repairPrompt, validateClarityModelResult} from '../../clarity-model-contract.mjs';
 
 const MAX_MODEL_BODY_BYTES = 24_000;
 const DEFAULT_MODEL = 'gpt-5.6-terra';
+const MAX_MODEL_ATTEMPTS = 2;
 // Emergency/bootstrap client credential for the signed iPhone Shortcut.
 // Only its SHA-256 digest is stored in source; the bearer token itself is never committed.
 // The existing environment-managed token remains valid, so this can be rotated without downtime.
@@ -66,6 +68,43 @@ function extractOutputText(payload) {
   return null;
 }
 
+async function requestStructuredPlan(apiKey, model, prompt) {
+  let upstream;
+  try {
+    upstream = await fetch('https://api.openai.com/v1/responses', {
+      method: 'POST',
+      headers: {Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        model,
+        input: prompt,
+        store: false,
+        text: {format: CLARITY_RESPONSE_FORMAT}
+      })
+    });
+  } catch {
+    return {response: json({error: 'OpenAI request failed'}, 503)};
+  }
+
+  let payload;
+  try { payload = await upstream.json(); }
+  catch { return {response: json({error: 'OpenAI returned an invalid response'}, 502)}; }
+
+  if (!upstream.ok) {
+    const code = typeof payload?.error?.code === 'string' ? payload.error.code : 'upstream_error';
+    return {response: json({error: 'OpenAI request failed', code}, upstream.status >= 500 ? 503 : 502)};
+  }
+
+  const outputText = extractOutputText(payload);
+  if (!outputText) return {errors: ['OpenAI returned no model output']};
+
+  let result;
+  try { result = JSON.parse(outputText); }
+  catch { return {errors: ['Model output was not valid JSON']}; }
+
+  const errors = validateClarityModelResult(result);
+  return errors.length ? {errors} : {result};
+}
+
 export async function handleClarityModel(request) {
   if (request.method !== 'POST') return json({error: 'Method not allowed'}, 405);
 
@@ -87,41 +126,24 @@ export async function handleClarityModel(request) {
 
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) return json({error: 'Clarity model gateway is not configured'}, 503);
+  const model = process.env.OPENAI_MODEL || DEFAULT_MODEL;
 
-  let upstream;
-  try {
-    upstream = await fetch('https://api.openai.com/v1/responses', {
-      method: 'POST',
-      headers: {Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json'},
-      body: JSON.stringify({
-        model: process.env.OPENAI_MODEL || DEFAULT_MODEL,
-        input: prompt,
-        store: false,
-        text: {format: {type: 'json_object'}}
-      })
-    });
-  } catch { return json({error: 'OpenAI request failed'}, 503); }
-
-  let payload;
-  try { payload = await upstream.json(); } catch { return json({error: 'OpenAI returned an invalid response'}, 502); }
-  if (!upstream.ok) {
-    const code = typeof payload?.error?.code === 'string' ? payload.error.code : 'upstream_error';
-    return json({error: 'OpenAI request failed', code}, upstream.status >= 500 ? 503 : 502);
+  let currentPrompt = prompt;
+  let lastErrors = [];
+  for (let attempt = 1; attempt <= MAX_MODEL_ATTEMPTS; attempt += 1) {
+    const outcome = await requestStructuredPlan(apiKey, model, currentPrompt);
+    if (outcome.response) return outcome.response;
+    if (outcome.result) {
+      // Shortcuts' Get Contents of URL auto-converts application/json into a native
+      // Dictionary. Clarity deliberately performs its own Get Dictionary from Input
+      // step, so return schema-validated JSON as text and preserve nested actions[].
+      return modelJsonText(outcome.result);
+    }
+    lastErrors = outcome.errors || ['unknown model contract error'];
+    if (attempt < MAX_MODEL_ATTEMPTS) currentPrompt = repairPrompt(prompt, lastErrors);
   }
 
-  const outputText = extractOutputText(payload);
-  if (!outputText) return json({error: 'OpenAI returned no model output'}, 502);
-
-  let result;
-  try { result = JSON.parse(outputText); } catch { return json({error: 'Model output was not valid JSON'}, 502); }
-  if (!result || typeof result !== 'object' || Array.isArray(result)) return json({error: 'Model output root must be an object'}, 502);
-
-  // Shortcuts' Get Contents of URL auto-converts application/json into a native
-  // Dictionary. Clarity's proven downstream path deliberately performs its own
-  // Get Dictionary from Input step. Return validated JSON as text so that path
-  // receives the same representation as the former ChatGPT Text action and
-  // nested actions[] survives intact on iPhone.
-  return modelJsonText(result);
+  return json({error: 'Model output failed Clarity contract'}, 502);
 }
 
 export default {
