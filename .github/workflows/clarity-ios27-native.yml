@@ -1,0 +1,123 @@
+name: Clarity iOS 27 native
+
+on:
+  pull_request:
+    paths:
+      - 'tools/clarity-factory/**'
+      - '.github/workflows/clarity-ios27-native.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-native:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate Clarity factory tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m json.tool tools/clarity-factory/clarity-spec.json >/dev/null
+          python3 -m unittest discover -s tools/clarity-factory/tests -v
+
+      - name: Install pinned Cherri v2.3.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          url='https://github.com/electrikmilk/cherri/releases/download/v2.3.0/cherri_linux-x86_64.zip'
+          expected='7ab2c384b7b26e7c72a30a8dfa56f89dae12c4068b7951bc1e3193f3698edbe9'
+          curl -fsSL "$url" -o /tmp/cherri.zip
+          printf '%s  %s\n' "$expected" /tmp/cherri.zip | sha256sum -c -
+          mkdir -p /tmp/cherri
+          unzip -q /tmp/cherri.zip -d /tmp/cherri
+          binary="$(find /tmp/cherri -type f -name cherri -print -quit)"
+          test -n "$binary"
+          sudo install -m 0755 "$binary" /usr/local/bin/cherri
+          cherri --version
+
+      - name: Compile direct ChatGPT Clarity runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd tools/clarity-factory
+          rm -f './Clarity_unsigned.shortcut' './Clarity.plist'
+          cherri clarity-v1.cherri --skip-sign --debug
+          runtime='./Clarity_unsigned.shortcut'
+          test -f "$runtime"
+          python3 validate_clarity_runtime.py "$runtime"
+
+          # Keep the proven iPhone hardening, but deliberately do NOT apply
+          # patch_server_model_gateway.py. The final artifact must retain the
+          # native Shortcuts Use Model / ChatGPT extension action.
+          python3 patch_natural_language_policy.py "$runtime"
+          python3 patch_raw_first_authority.py "$runtime"
+          python3 patch_action_extraction_policy.py "$runtime"
+          python3 patch_append_file_paths.py "$runtime"
+          python3 patch_reminder_wire_format.py "$runtime"
+          python3 patch_destination_readback.py "$runtime"
+          python3 validate_clarity_ios27_native.py "$runtime"
+
+          mkdir -p artifacts
+          cp "$runtime" artifacts/Clarity-iOS27-native-unsigned.shortcut
+          sha256sum artifacts/Clarity-iOS27-native-unsigned.shortcut | tee artifacts/native-unsigned.sha256
+
+      - name: Secret and cloud dependency scan
+        shell: bash
+        run: |
+          set -euo pipefail
+          if grep -RIE --exclude='*.shortcut' --exclude='*.plist' \
+            '(gh[pousr]_[A-Za-z0-9_]{20,}|sk-[A-Za-z0-9_-]{20,}|xox[baprs]-[A-Za-z0-9-]{10,}|BEGIN [A-Z ]*PRIVATE KEY|192\.168\.[0-9]+\.[0-9]+)' \
+            tools/clarity-factory; then
+            echo 'Potential secret/private network value found.' >&2
+            exit 1
+          fi
+
+      - name: Sign native Clarity with HubSign
+        id: hubsign
+        continue-on-error: true
+        shell: bash
+        run: |
+          set +e
+          set -o pipefail
+          python3 tools/clarity-factory/sign_with_hubsign.py \
+            --input tools/clarity-factory/artifacts/Clarity-iOS27-native-unsigned.shortcut \
+            --output tools/clarity-factory/artifacts/Clarity-iOS27-native-signed.shortcut \
+            --name 'Clarity' \
+            2>&1 | tee tools/clarity-factory/artifacts/hubsign-native.log
+          status=${PIPESTATUS[0]}
+          echo "HubSign exit code: ${status}" | tee -a tools/clarity-factory/artifacts/hubsign-native.log
+          exit "${status}"
+
+      - name: Verify signed native Clarity artifact
+        if: steps.hubsign.outcome == 'success'
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib
+          p = Path('tools/clarity-factory/artifacts/Clarity-iOS27-native-signed.shortcut')
+          data = p.read_bytes()
+          if not data.startswith(b'AEA1'):
+              raise SystemExit(f'expected signed AEA1 shortcut, got {data[:8]!r}')
+          if len(data) < 500:
+              raise SystemExit(f'artifact unexpectedly small: {len(data)} bytes')
+          print(f'OK: signed native Clarity artifact, {len(data)} bytes')
+          print('SHA256:', hashlib.sha256(data).hexdigest())
+          PY
+
+      - name: Upload native Clarity artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: clarity-ios27-native-artifacts
+          path: |
+            tools/clarity-factory/artifacts/Clarity-iOS27-native-unsigned.shortcut
+            tools/clarity-factory/artifacts/Clarity-iOS27-native-signed.shortcut
+            tools/clarity-factory/artifacts/hubsign-native.log
+            tools/clarity-factory/artifacts/native-unsigned.sha256
+          if-no-files-found: error
