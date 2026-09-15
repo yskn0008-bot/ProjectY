@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-15T22:22:10+09:00",
+  "updated_at": "2026-09-15T22:35:00+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -21,6 +21,16 @@
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/329",
       "updated_at": "2026-09-14T16:30:44Z"
+    },
+    {
+      "id": "github-pr-305",
+      "title": "PR #305 feat(my-way): 全ページの文字・配色・タイトル統一とスワイプ",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/305",
+      "updated_at": "2026-09-13T10:41:51Z"
     },
     {
       "id": "github-pr-324",
@@ -53,14 +63,14 @@
       "updated_at": "2026-09-14T23:15:57Z"
     },
     {
-      "id": "github-pr-362",
-      "title": "PR #362 fix(my-way): address iPhone review findings (#353)",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/362",
-      "updated_at": "2026-09-15T12:03:01Z"
+      "id": "github-issue-110",
+      "title": "Issue #110 ProjectYライブ連携を本番有効化",
+      "type": "GitHub Issue",
+      "status": "open",
+      "priority": 3,
+      "next_action": "完成条件を確認し、次の安全な実装を1件進める",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/110",
+      "updated_at": "2026-08-08T14:30:23Z"
     },
     {
       "id": "github-issue-120",
@@ -110,7 +120,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-09-15T12:03:02Z"
+      "updated_at": "2026-09-15T13:34:43Z"
     },
     {
       "id": "github-issue-234",
@@ -143,16 +153,6 @@
       "updated_at": "2026-08-11T07:31:09Z"
     },
     {
-      "id": "github-issue-250",
-      "title": "Issue #250 [YOS→Codex] YOS AI Core｜モデル依存分離 Phase 1",
-      "type": "GitHub Issue",
-      "status": "open",
-      "priority": 3,
-      "next_action": "完成条件を確認し、次の安全な実装を1件進める",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/250",
-      "updated_at": "2026-08-12T12:35:23Z"
-    },
-    {
       "id": "github-issue-51",
       "title": "Issue #51 ProjectY 4本並行開発の全体管理",
       "type": "GitHub Issue",
@@ -164,6 +164,13 @@
     }
   ],
   "recently_completed": [
+    {
+      "id": "github-commit-fcc8429cecbb",
+      "title": "fix(my-way): make current review fixes usable (#353)",
+      "completed_at": "2026-09-15T13:34:48Z",
+      "result": "GitHub mainへ反映（fcc8429）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/fcc8429cecbb48fde6260c9c3c83a03a86d21c63"
+    },
     {
       "id": "github-commit-35c0a36a0fbb",
       "title": "Merge pull request #364 from yskn0008-bot/clarity/fix-runtime-auth-token",
@@ -191,13 +198,6 @@
       "completed_at": "2026-09-15T10:33:03Z",
       "result": "GitHub mainへ反映（fda089a）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/fda089afe0affdc92f16a13661f395425c1752f6"
-    },
-    {
-      "id": "github-commit-1c976665f116",
-      "title": "fix(clarity): preserve model JSON as text for Shortcuts parser",
-      "completed_at": "2026-09-15T10:32:48Z",
-      "result": "GitHub mainへ反映（1c97666）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/1c976665f1163c38ea8b42be6dea298ec6c423fc"
     },
     {
       "id": "complete-002",
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-15T22:22:10+09:00",
+      "last_update": "2026-09-15T22:35:00+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -309,13 +309,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 32件・Open PR 18件を自動同期中",
+      "next_action": "Open Issue 33件・Open PR 17件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-15T22:22:10+09:00",
+      "last_update": "2026-09-15T22:35:00+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-15T22:22:10+09:00",
+      "last_update": "2026-09-15T22:35:00+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "c128cd6ff290f728248e5722f979fed7a85a017d6e6fce90416b9267dbc1a16c"
+  "github_snapshot_hash": "655b21d3d77008926c9128da8579b9d121f639fb3335348dfd7f83d22336794d"
 }
