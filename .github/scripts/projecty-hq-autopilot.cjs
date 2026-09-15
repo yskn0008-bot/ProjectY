@@ -10,7 +10,51 @@ const SCOPE_RE = /<!-- projecty-autopilot-scope:([A-Za-z0-9_-]+) -->/;
 const CODEX_ACTOR = 'chatgpt-codex-connector[bot]';
 const STALL_MS = 45 * 60 * 1000;
 const MAX_SEEN = 12;
-const QA_NAMES = new Set(['Codex governance', 'Taxi iPhone17 Smoke', 'Taxi Demand Calendar', 'YOS AI Core', 'YOSナビ Safety', 'YOS Service Worker']);
+const QA_RULES = Object.freeze([
+  { name: 'Codex governance', always: true },
+  {
+    name: 'ProjectY HQ Safety',
+    paths: [
+      /^\.github\/scripts\/projecty-hq-[^/]*\.cjs$/,
+      /^\.github\/workflows\/projecty-hq-(?:autopilot|safety)\.yml$/,
+    ],
+  },
+  { name: 'Taxi iPhone17 Smoke', paths: [/^taxi\//, /^\.github\/workflows\/taxi-iphone17\.yml$/] },
+  {
+    name: 'Taxi Demand Calendar',
+    paths: [
+      /^taxi\/(?:demand-calendar\.html|demand-calendar-v1\.json|demand-home-v144\.css|demand-home-v144\.js|index\.html|service-worker\.js)$/,
+      /^taxi\/tests\/[^/]+\.test\.mjs$/,
+      /^\.github\/workflows\/taxi-demand-calendar\.yml$/,
+    ],
+  },
+  { name: 'YOS AI Core', paths: [/^server\/yos-ai\//, /^\.github\/workflows\/yos-ai-core\.yml$/] },
+  { name: 'YOSナビ Safety', paths: [/^nav\//, /^\.github\/workflows\/yos-nav-safety\.yml$/] },
+  {
+    name: 'YOS Service Worker',
+    paths: [
+      /^yos\/service-worker\.js$/,
+      /^yos\/tests\/service-worker-cache-scope\.test\.mjs$/,
+      /^\.github\/workflows\/yos-service-worker\.yml$/,
+    ],
+  },
+  { name: 'YOS BRAVIA safety', paths: [/^ios-app\//, /^\.github\/workflows\/yos-bravia-safety\.yml$/] },
+  { name: 'YOS Capture Safety', paths: [/^ios-app\//, /^\.github\/workflows\/yos-capture-safety\.yml$/] },
+  { name: 'YOS Life Safety', paths: [/^life\//, /^\.github\/workflows\/yos-life-safety\.yml$/] },
+  {
+    name: 'HJ iPhone Smoke',
+    paths: [
+      /^yos\/hj\//,
+      /^yos\/hj-entry\.js$/,
+      /^yos\/service-worker\.js$/,
+      /^yos\/tests\/hj-[^/]*\.test\.mjs$/,
+      /^tests\/hj-smoke\.mjs$/,
+      /^tests\/hj-home-smoke\.mjs$/,
+      /^\.github\/workflows\/hj-smoke\.yml$/,
+    ],
+  },
+]);
+const QA_NAMES = new Set(QA_RULES.map((rule) => rule.name));
 const UI_FILE = /^(taxi|life|yos|nav)\/(?:[^/]+\/)*(?:[^/]+\.(?:css|html)|final-app-v\d+\.js|[^/]*(?:style|theme|view|screen|component)[^/]*\.(?:js|cjs|mjs|ts|tsx|jsx))$/i;
 const SENSITIVE_FILE = /(^|\/)(?:service-worker|sw)\.(?:js|cjs|mjs|ts)$|(^|\/)(?:auth|api|deploy|deployment|infrastructure|manifest)(?:\/|\.|-)|(^|\/)\.github\/|(?:^|\/)vercel\.json$/i;
 const TRANSIENT_RE = /(?:hosted runner|runner (?:lost|offline|infrastructure)|network (?:error|failure)|timed?\s*out|rate.?limit|service unavailable|bad gateway|gateway timeout|ECONNRESET|HTTP\s*5\d\d|api-deployments-free-per-day)/i;
@@ -25,6 +69,14 @@ function classifyQaLevel(body, files) {
   return /(?:^|\n)\s*(?:QA\s*)?Level\s*1\b/im.test(body || '') && files.length && files.every((file) => UI_FILE.test(file)) ? 1 : 2;
 }
 
+function requiredQaNames(files) {
+  const required = new Set();
+  for (const rule of QA_RULES) {
+    if (rule.always || (rule.paths || []).some((pattern) => files.some((file) => pattern.test(file)))) required.add(rule.name);
+  }
+  return required;
+}
+
 function newestQaRuns(runs, head) {
   const result = new Map();
   const order = (r) => [Date.parse(r.created_at || 0) || 0, Number(r.run_attempt || 0), Number(r.id || 0)];
@@ -36,15 +88,23 @@ function newestQaRuns(runs, head) {
   return [...result.values()].sort((a, b) => a.name.localeCompare(b.name));
 }
 
-function qaState(runs) {
-  if (!runs.length) return { status: 'current-head QA run待ち。', next: 'QA_BOOTSTRAP_BLOCKED', nextStep: 'current-head QA run待ち。' };
-  const pending = runs.some((r) => !r.conclusion || ['queued', 'in_progress', 'waiting', 'pending', 'requested'].includes(r.status));
-  const failed = runs.some((r) => r.conclusion && r.conclusion !== 'success');
-  const next = pending ? 'AWAITING_QA' : failed ? 'QA_FAILURE' : 'QA_SUCCESS';
+function qaState(runs, required = new Set(['Codex governance'])) {
+  const names = [...required].sort((a, b) => a.localeCompare(b));
+  const byName = new Map(runs.map((run) => [run.name, run]));
+  const missing = names.filter((name) => !byName.has(name));
+  const requiredRuns = names.map((name) => byName.get(name)).filter(Boolean);
+  const pending = requiredRuns.some((run) => !run.conclusion || run.conclusion === 'action_required' || ['queued', 'in_progress', 'waiting', 'pending', 'requested'].includes(run.status));
+  const failed = requiredRuns.some((run) => run.conclusion && run.conclusion !== 'success');
+  const next = pending ? 'AWAITING_QA' : failed ? 'QA_FAILURE' : missing.length ? 'QA_BOOTSTRAP_BLOCKED' : 'QA_SUCCESS';
+  const status = names.map((name) => {
+    const run = byName.get(name);
+    return `${name}=${run ? (run.conclusion || run.status || 'unknown') : 'missing'}`;
+  }).join(', ');
   return {
-    status: runs.map((r) => `${r.name}=${r.conclusion || r.status || 'unknown'}`).join(', '),
+    status: status || 'required QAなし。',
     next,
-    nextStep: pending ? 'QA実行中。' : failed ? 'QA失敗。' : 'QA成功。',
+    nextStep: pending ? '必要QA実行中。' : failed ? '必要QA失敗。' : missing.length ? '必要QA run待ち。' : '必要QA成功。',
+    missing,
   };
 }
 
@@ -189,12 +249,13 @@ function transientEvidence(jobs) {
   return { proven: TRANSIENT_RE.test(text), text };
 }
 
-async function getDetails(api, pr) {
+async function getDetails(api, pr, head = pr.head.sha) {
   const [files, runs] = await Promise.all([
     paginate(api, `/pulls/${pr.number}/files`),
-    paginate(api, `/actions/runs?head_sha=${encodeURIComponent(pr.head.sha)}`, 'workflow_runs'),
+    paginate(api, `/actions/runs?head_sha=${encodeURIComponent(head)}`, 'workflow_runs'),
   ]);
-  return { files: files.map((f) => f.filename), runs: newestQaRuns(runs, pr.head.sha) };
+  const filenames = [...new Set(files.flatMap((file) => [file.filename, file.previous_filename]).filter(Boolean))];
+  return { files: filenames, runs: newestQaRuns(runs, head), requiredQa: requiredQaNames(filenames) };
 }
 
 function requestText(action, pr, evidence) {
@@ -231,17 +292,17 @@ async function applyDecision(api, target, decision, pr, evidence, dryRun, now) {
 }
 
 async function continueQa(api, pr, target, dryRun, now) {
-  const runs = newestQaRuns(await paginate(api, `/actions/runs?head_sha=${encodeURIComponent(target.head)}`, 'workflow_runs'), target.head);
-  const eligible = runs.find((run) => run.head_sha === target.head && run.event === 'pull_request' && run.pull_requests?.some((linked) => linked.number === pr.number) && (run.status === 'waiting' || run.conclusion === 'action_required'));
+  const details = await getDetails(api, pr, target.head);
+  const qa = qaState(details.runs, details.requiredQa);
+  const eligible = details.runs.find((run) => details.requiredQa.has(run.name) && run.head_sha === target.head && run.event === 'pull_request' && run.pull_requests?.some((linked) => linked.number === pr.number) && (run.status === 'waiting' || run.conclusion === 'action_required'));
   if (eligible) {
     target.phase = 'AWAITING_QA'; target.lastAction = 'APPROVE_QA';
     if (!dryRun) {
       try { await api.request(`/actions/runs/${eligible.id}/approve`, { method: 'POST' }); target.lastAction = 'QA_APPROVED'; target.progressAt = nowIso(now); }
       catch (error) { target.phase = 'RECOVERY_API_FAILED'; target.lastError = String(error.message || error).slice(0, 500); }
     }
-  } else if (!runs.length) { target.phase = 'QA_BOOTSTRAP_BLOCKED'; target.next = 'current-head QA run or bounded watchdog recovery'; }
-  else target.phase = qaState(runs).next;
-  return { runs, action: eligible ? 'APPROVE_QA' : 'NONE' };
+  } else target.phase = qa.next;
+  return { runs: details.runs, requiredQa: details.requiredQa, action: eligible ? 'APPROVE_QA' : 'NONE' };
 }
 
 async function processOne({ api, pr, eventName, payload, comments, state, dryRun, now, repository, owner }) {
@@ -292,6 +353,12 @@ async function processOne({ api, pr, eventName, payload, comments, state, dryRun
     await applyDecision(api, target, decision, pr, evidence, dryRun, now);
   } else if (eventName === 'workflow_run' && payload.workflow_run?.conclusion === 'failure') {
     const run = payload.workflow_run;
+    const details = await getDetails(api, pr, pr.head.sha);
+    const currentRun = details.runs.find((candidate) => candidate.name === run.name);
+    if (!details.requiredQa.has(run.name) || !currentRun || currentRun.id !== run.id) {
+      target.phase = qaState(details.runs, details.requiredQa).next;
+      return { key, target, action };
+    }
     const jobs = await paginate(api, `/actions/runs/${run.id}/jobs`, 'jobs');
     const proof = transientEvidence(jobs);
     const kind = proof.proven ? 'ACTION_TRANSIENT_FAILURE' : 'ACTION_CODE_FAILURE';
@@ -348,8 +415,9 @@ async function processEvent({ api, eventName, payload = {}, dryRun = false, now 
   }
 
   const pr = prs.find((p) => targetKey(p) === selected?.key) || prs[0];
-  const details = await getDetails(api, pr);
-  const chosen = { key: targetKey(pr), target: state.targets[targetKey(pr)], qa: qaState(details.runs) };
+  const chosenTarget = state.targets[targetKey(pr)];
+  const details = await getDetails(api, pr, chosenTarget?.head || pr.head.sha);
+  const chosen = { key: targetKey(pr), target: chosenTarget, qa: qaState(details.runs, details.requiredQa) };
   chosen.target.level = classifyQaLevel(pr.body || '', details.files);
   const body = renderState(chosen, state);
   const mutation = chooseCommentMutation(issueComments, body);
@@ -383,5 +451,5 @@ async function main() {
   console.log(JSON.stringify(result));
 }
 
-module.exports = { CODEX_ACTOR, MARKER, STALL_MS, atomicTransport, branchCondition, buildTransportPlan, chooseCommentMutation, classifyQaLevel, compactTarget, decide, failureId, isAck, isTarget, isTrustedFinal, newestQaRuns, paginate, parseArtifact, parseRecovery, parseScope, processEvent, qaState, renderState, syntheticEvent, transientEvidence, validPath };
+module.exports = { CODEX_ACTOR, MARKER, STALL_MS, atomicTransport, branchCondition, buildTransportPlan, chooseCommentMutation, classifyQaLevel, compactTarget, decide, failureId, isAck, isTarget, isTrustedFinal, newestQaRuns, paginate, parseArtifact, parseRecovery, parseScope, processEvent, qaState, renderState, requiredQaNames, syntheticEvent, transientEvidence, validPath };
 if (require.main === module) main().catch((error) => { console.error(error); process.exitCode = 1; });
