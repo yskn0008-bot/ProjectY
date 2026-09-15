@@ -14,13 +14,24 @@
       reveal();
     }
   },16);
-  setTimeout(()=>{clearInterval(waitForFinal);reveal()},3000);
+  // Never reveal the legacy Life UI while the final UI is still loading.
+  // If final rendering fails, fail visibly instead of flashing the retired screen.
+  setTimeout(()=>{
+    clearInterval(waitForFinal);
+    if(!revealed){
+      const message=document.createElement('div');
+      message.setAttribute('role','status');
+      message.textContent='Lifeを読み込めませんでした。再読み込みしてください。';
+      message.style.cssText='margin:calc(env(safe-area-inset-top) + 80px) 18px;padding:18px;border-radius:18px;background:#fff;color:#243142;text-align:center;font-weight:800';
+      document.body.appendChild(message);
+    }
+  },8000);
 
   if(!document.getElementById('yosSuiteHomeV3')){
     const a=document.createElement('a');
     a.id='yosSuiteHomeV3';
-    a.href='../yos/';
-    a.setAttribute('aria-label','YOSへ戻る');
+    a.href='../yos/?menu=1';
+    a.setAttribute('aria-label','共通メニューを開く');
     a.textContent='≡';
     a.style.cssText='position:fixed;z-index:9996;right:16px;top:calc(env(safe-area-inset-top) + 10px);display:flex;align-items:center;justify-content:center;width:38px;height:38px;border:1px solid #e6e0d5;border-radius:13px;background:#fffefa;color:#2f3431;text-decoration:none;font-size:22px;font-weight:800';
     document.body.appendChild(a);
