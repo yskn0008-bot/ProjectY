@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-15T16:32:05+09:00",
+  "updated_at": "2026-09-15T19:35:11+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -21,16 +21,6 @@
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/329",
       "updated_at": "2026-09-14T16:30:44Z"
-    },
-    {
-      "id": "github-pr-305",
-      "title": "PR #305 feat(my-way): 全ページの文字・配色・タイトル統一とスワイプ",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/305",
-      "updated_at": "2026-09-13T10:41:51Z"
     },
     {
       "id": "github-pr-324",
@@ -63,14 +53,14 @@
       "updated_at": "2026-09-14T23:15:57Z"
     },
     {
-      "id": "github-issue-110",
-      "title": "Issue #110 ProjectYライブ連携を本番有効化",
-      "type": "GitHub Issue",
-      "status": "open",
-      "priority": 3,
-      "next_action": "完成条件を確認し、次の安全な実装を1件進める",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/110",
-      "updated_at": "2026-08-08T14:30:23Z"
+      "id": "github-pr-362",
+      "title": "PR #362 fix(my-way): address iPhone review findings (#353)",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/362",
+      "updated_at": "2026-09-15T10:33:13Z"
     },
     {
       "id": "github-issue-120",
@@ -120,7 +110,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-09-15T06:34:35Z"
+      "updated_at": "2026-09-15T10:34:52Z"
     },
     {
       "id": "github-issue-234",
@@ -153,6 +143,16 @@
       "updated_at": "2026-08-11T07:31:09Z"
     },
     {
+      "id": "github-issue-250",
+      "title": "Issue #250 [YOS→Codex] YOS AI Core｜モデル依存分離 Phase 1",
+      "type": "GitHub Issue",
+      "status": "open",
+      "priority": 3,
+      "next_action": "完成条件を確認し、次の安全な実装を1件進める",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/250",
+      "updated_at": "2026-08-12T12:35:23Z"
+    },
+    {
       "id": "github-issue-51",
       "title": "Issue #51 ProjectY 4本並行開発の全体管理",
       "type": "GitHub Issue",
@@ -164,6 +164,27 @@
     }
   ],
   "recently_completed": [
+    {
+      "id": "github-commit-52eec367fca8",
+      "title": "Merge pull request #363 from yskn0008-bot/clarity/fix-server-dictionary-actions",
+      "completed_at": "2026-09-15T10:34:55Z",
+      "result": "GitHub mainへ反映（52eec36）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/52eec367fca8b7b9db7090f36b7917c5ebbb2d80"
+    },
+    {
+      "id": "github-commit-fda089afe0af",
+      "title": "test(clarity): require JSON text gateway response",
+      "completed_at": "2026-09-15T10:33:03Z",
+      "result": "GitHub mainへ反映（fda089a）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/fda089afe0affdc92f16a13661f395425c1752f6"
+    },
+    {
+      "id": "github-commit-1c976665f116",
+      "title": "fix(clarity): preserve model JSON as text for Shortcuts parser",
+      "completed_at": "2026-09-15T10:32:48Z",
+      "result": "GitHub mainへ反映（1c97666）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/1c976665f1163c38ea8b42be6dea298ec6c423fc"
+    },
     {
       "id": "github-commit-81e92ca07bac",
       "title": "fix(vercel): keep Clarity gateway within Hobby function limit (#361)",
@@ -177,27 +198,6 @@
       "completed_at": "2026-09-14T21:10:38Z",
       "result": "GitHub mainへ反映（13fac9c）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/13fac9cb01b4ab513b2d87878b44c2cf67f0a69b"
-    },
-    {
-      "id": "github-commit-cb4c10160344",
-      "title": "chore: remove accidental temporary file",
-      "completed_at": "2026-09-14T21:08:20Z",
-      "result": "GitHub mainへ反映（cb4c101）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/cb4c101603440f134707694faadef73b8e7e9655"
-    },
-    {
-      "id": "github-commit-dd40751ffa5c",
-      "title": "tmp",
-      "completed_at": "2026-09-14T21:08:01Z",
-      "result": "GitHub mainへ反映（dd40751）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/dd40751ffa5cede76d23d383cef287e69b0f6d54"
-    },
-    {
-      "id": "github-commit-4bf23627e0e3",
-      "title": "fix(trial): repair iPhone trial interactions (#358)",
-      "completed_at": "2026-09-14T20:47:19Z",
-      "result": "GitHub mainへ反映（4bf2362）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/4bf23627e0e34e0e6ee6549faeea220415476b24"
     },
     {
       "id": "complete-002",
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-15T16:32:05+09:00",
+      "last_update": "2026-09-15T19:35:11+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -309,13 +309,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 33件・Open PR 17件を自動同期中",
+      "next_action": "Open Issue 32件・Open PR 18件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-15T16:32:05+09:00",
+      "last_update": "2026-09-15T19:35:11+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-15T16:32:05+09:00",
+      "last_update": "2026-09-15T19:35:11+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "3180b16d2c47ba8fd74c61033788473f491d971a89f9e486a16dcb7ec1282efc"
+  "github_snapshot_hash": "416263241d80976afb5fcb384c69dca5c3ce7f4646985065d0f77e5ef2a5b8f5"
 }
