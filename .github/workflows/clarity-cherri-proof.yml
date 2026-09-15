@@ -6,6 +6,7 @@ on:
       - 'tools/clarity-factory/**'
       - '.github/workflows/clarity-cherri-proof.yml'
       - 'server/yos-ai/api/yos/intake.mjs'
+      - 'server/yos-ai/clarity-model-contract.mjs'
       - 'server/yos-ai/tests/clarity-model-api.test.mjs'
       - 'server/yos-ai/package.json'
   workflow_dispatch:
@@ -36,6 +37,7 @@ jobs:
           npm run build
           node --test tests/clarity-model-api.test.mjs
           node --check api/yos/intake.mjs
+          node --check clarity-model-contract.mjs
 
       - name: Install pinned Cherri v2.3.0
         shell: bash
@@ -81,6 +83,7 @@ jobs:
           python3 patch_append_file_paths.py "$runtime"
           python3 patch_server_model_gateway.py "$runtime"
           python3 patch_reminder_wire_format.py "$runtime"
+          python3 patch_destination_readback.py "$runtime"
           python3 validate_clarity_final.py "$runtime"
           mkdir -p artifacts
           cp "$runtime" artifacts/Clarity-v1-unsigned.shortcut
@@ -91,7 +94,7 @@ jobs:
           set -euo pipefail
           if grep -RIE --exclude='*.shortcut' --exclude='*.plist' \
             '(gh[pousr]_[A-Za-z0-9_]{20,}|sk-[A-Za-z0-9_-]{20,}|xox[baprs]-[A-Za-z0-9-]{10,}|BEGIN [A-Z ]*PRIVATE KEY|192\.168\.[0-9]+\.[0-9]+)' \
-            tools/clarity-factory server/yos-ai/api/yos/intake.mjs; then
+            tools/clarity-factory server/yos-ai/api/yos/intake.mjs server/yos-ai/clarity-model-contract.mjs; then
             echo 'Potential secret/private network value found.' >&2
             exit 1
           fi
