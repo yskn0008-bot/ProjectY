@@ -1,7 +1,11 @@
 "use strict";
 
-const CACHE = "hj-multi-journey-v10-yos-ai";
+const CACHE = "hj-multi-journey-v11-ui-harmony";
 const STATIC = [
+  '../ui-theme.js?v=1',
+  '../ui-harmony.css?v=1',
+  '../ui-harmony.js?v=1',
+
   "./",
   "./index.html",
   "./styles.css",

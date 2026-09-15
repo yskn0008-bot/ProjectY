@@ -1,8 +1,12 @@
 'use strict';
 
 const CACHE_PREFIX = 'yos-command-center-';
-const CACHE = `${CACHE_PREFIX}v26-money-readable`;
+const CACHE = `${CACHE_PREFIX}v27-ui-harmony`;
 const STATIC = [
+  './ui-theme.js?v=1',
+  './ui-harmony.css?v=1',
+  './ui-harmony.js?v=1',
+
   './',
   './index.html',
   './styles.css',

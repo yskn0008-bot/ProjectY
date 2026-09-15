@@ -16,3 +16,5 @@
 .life-map-details{border:1px solid rgba(74,62,39,.14);border-radius:16px;background:rgba(255,250,240,.82);overflow:hidden}.life-map-details>summary{list-style:none;display:flex;align-items:center;justify-content:space-between;min-height:43px;padding:9px 12px;color:#45644d;font-size:11px;font-weight:900;cursor:pointer}.life-map-details>summary::-webkit-details-marker{display:none}.life-map-details>summary:after{content:'›';font-size:18px;transition:transform .2s}.life-map-details[open]>summary:after{transform:rotate(90deg)}.life-map-details .home-scene{border:0;border-radius:0;box-shadow:none}
 .home-world.task-dashboard-ready>.next-step{display:none}
 @media(max-width:390px){.task-dashboard{padding:12px}.task-dashboard>header h2{font-size:21px}.cockpit-card{padding:10px}.now-card .cockpit-value{font-size:17px}.cockpit-grid{gap:7px}.cockpit-grid .cockpit-card{min-height:100px}.task-row>summary{grid-template-columns:29px 1fr auto;padding:7px}.task-order{width:29px;height:29px}.task-state{font-size:8px}.task-buckets{gap:5px}}
+
+.home-world.task-dashboard-ready{min-height:calc(100dvh - 180px)}

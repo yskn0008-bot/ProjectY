@@ -20,7 +20,7 @@
     if(!host||!head)return;
     host.classList.add('money-reference-v1');
     const small=$('.money2-title small',head),title=$('.money2-title h1',head),sub=$('.money2-title p',head),icon=$('.money2-title>span',head);
-    if(small)small.textContent='MY WAY  |  自分らしい、これからを。';
+    if(small)small.remove();
     if(title)title.textContent='Money';
     if(sub)sub.textContent='今月のお金の見通し';
     if(icon)icon.setAttribute('aria-hidden','true');

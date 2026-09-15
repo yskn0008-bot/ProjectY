@@ -163,7 +163,7 @@
     const body=el('div','cockpit-body');body.id='taskDashboardBody';body.append(el('p','task-empty','今日の状態を読み込んでいます'));dashboard.append(body);
     const auth=el('div','task-auth');auth.id='taskDashboardAuth';auth.hidden=true;auth.append(el('p','','YOS Tasksを最新にするにはGoogle本人確認が必要です。'));const googleButton=el('div','task-google-button');googleButton.id='taskDashboardGoogleButton';auth.append(googleButton);dashboard.append(auth);scene.before(dashboard);
     const map=el('details','life-map-details');const summary=el('summary','','人生ナビ・詳細を見る');scene.before(map);map.append(summary,scene);home.classList.add('task-dashboard-ready','cockpit-ready');
-    const cached=readCache();if(cached){const age=Date.now()-Number(cached.savedAt||0);render(cached.data,age<CACHE_MAX_MS?'前回のTasks':'Tasks更新待ち');if(age>=CACHE_MAX_MS){showAuth('YOS Tasksは更新待ちです。Google本人確認で最新化できます。');setupAuth()}}else{render({tasks:[]},'Life / Money');showAuth('YOS Tasks未連携。本人確認すると「今やる」「次」に統合します。');setupAuth()}
+    const cached=readCache();if(cached){const age=Date.now()-Number(cached.savedAt||0);render(cached.data,age<CACHE_MAX_MS?'保存済みのタスク':'Tasks更新待ち');if(age>=CACHE_MAX_MS){showAuth('YOS Tasksは更新待ちです。Google本人確認で最新化できます。');setupAuth()}}else{render({tasks:[]},'Life / Money');showAuth('YOS Tasks未連携。本人確認すると「今やる」「次」に統合します。');setupAuth()}
   }
 
   window.addEventListener('storage',event=>{if([LIFE_KEY,HOME_STATE_KEY,JOURNEYS_KEY,PROFILE_KEY,CACHE_KEY].includes(event.key))render(readCache()?.data||latestTaskData,'更新');});

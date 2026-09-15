@@ -33,6 +33,14 @@ test('final five-domain UI uses facts without fabricated Money values',()=>{
   assert.ok(js.includes('yos-my-way-ideas-v1'));
   assert.ok(js.includes('yos-idea-memo-v1'),'legacy Idea storage remains readable');
 });
+test('MY WAY refinement keeps headers, first actions, calendars and capture layer coherent',()=>{
+  for(const label of ['今やる','次：未設定','気づきを残す','月の流れを見る','この端末だけに保存','クイック入力']) assert.ok(html.includes(label),label);
+  assert.match(html,/href="\.\.\/life\/#schedule"/,'Money calendar must lead to the Life calendar language');
+  assert.match(html,/href="\.\.\/ios-app\/shell\/capture\.html"/,'Clarity must remain a contextual capture entry instead of a sixth domain');
+  assert.match(css,/--font-serif:/);assert.match(css,/--font-sans:/);
+  assert.match(css,/\.home-world\{grid-template-rows:52px 378px/,'Home greeting must be compact enough to expose the action area');
+  assert.match(js,/set\('taskCountSummary'/,'Home must summarize remaining work in the first view');
+});
 test('Visual SSOT uses distinct compositions and the complete roadmap',()=>{
   for(const className of ['home-scene','life-nav','money-overview','journey-scene','idea-capture']) assert.match(html,new RegExp(`class="[^"]*${className}`),className);
   for(const label of ['37歳の逆襲ロードマップ','2026年後半','2027年','2028年','2029年','2030年','2031年 / 42歳','土台を整える','試す','当てる','育てる','自立する','取り戻す']) assert.ok(html.includes(label),label);

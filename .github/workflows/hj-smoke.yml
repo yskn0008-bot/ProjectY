@@ -3,7 +3,9 @@ name: HJ iPhone Smoke
 on:
   pull_request:
     paths:
-      - 'yos/hj/**'
+      - 'yos/**'
+      - 'life/**'
+      - 'tests/myway-ui-smoke.mjs'
       - 'yos/hj-entry.js'
       - 'yos/service-worker.js'
       - 'yos/tests/hj-*.test.mjs'
@@ -54,6 +56,11 @@ jobs:
           done
           cat /tmp/hj-server.log
           exit 1
+
+      - name: Test MY WAY shared UI
+        env:
+          HJ_BROWSER: ${{ matrix.browser }}
+        run: node tests/myway-ui-smoke.mjs
 
       - name: Test YOS home to HJ entry
         env:

@@ -1,6 +1,7 @@
 <!doctype html>
-<html lang="ja">
+<html lang="ja" class="life-booting">
 <head>
+<script src="../yos/ui-theme.js?v=1"></script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#fff8ef">
@@ -130,9 +131,17 @@ dialog::backdrop{background:rgba(35,42,53,.38);backdrop-filter:blur(5px)}
   .metrics{grid-template-columns:repeat(2,1fr)}.routine-grid{gap:6px}.routine-card{padding:11px 8px}.task{grid-template-columns:32px 1fr}.task select{grid-column:2}
 }
 </style>
+<link rel="stylesheet" href="../yos/ui-harmony.css?v=1">
+<script src="../yos/ui-harmony.js?v=1" defer></script>
+<link id="lifeHomeV1Styles" rel="stylesheet" href="./home-v1.css?v=9">
+<link id="lifeHomePriorityV1Styles" rel="stylesheet" href="./home-priority-v1.css?v=4">
+<style id="life-first-paint">html.life-booting main.app{visibility:hidden!important}#lifeBootStatus{display:none}html.life-booting #lifeBootStatus{display:block;position:fixed;inset:22vh 24px auto;text-align:center;color:#35453d;font:16px/1.6 -apple-system,sans-serif}#lifeBootRetry{display:none}</style>
 </head>
-<body>
+<body data-domain="life">
+<div id="lifeBootStatus" role="status">MY LIFEを開いています…<p><a id="lifeBootRetry" href="./">もう一度開く</a></p></div>
+<noscript>MY LIFEを開くにはJavaScriptを有効にしてください。</noscript>
 <main class="app">
+<header class="myway-header"><a class="myway-identity" href="../yos/" aria-label="MY WAY Home"><strong id="mywayTitle">MY LIFE</strong><small>by YOS</small></a><button class="myway-theme-button" type="button" aria-label="配色を選ぶ">◐</button></header>
 <header class="top">
   <div class="brand"><h1>MY LIFE</h1><p>by YOS</p></div>
   <div class="clock"><strong id="clock">--:--</strong><span id="date">----</span></div>
@@ -390,7 +399,7 @@ function paintCheckinRating(name,value){
 function paint(){
   const d=day(),n=new Date(),copy=stateCopy();
   el('clock').textContent=new Intl.DateTimeFormat('ja-JP',{hour:'2-digit',minute:'2-digit',hour12:false,timeZone:'Asia/Tokyo'}).format(n);
-  el('donutTime').textContent=el('clock').textContent;
+  if(el('donutTime')&&el('clock'))el('donutTime').textContent=el('clock').textContent;
   el('date').textContent=new Intl.DateTimeFormat('ja-JP',{month:'numeric',day:'numeric',weekday:'short',timeZone:'Asia/Tokyo'}).format(n);
   el('greeting').textContent=greeting();el('stateTitle').textContent=copy[0];el('stateDetail').textContent=copy[1];
   el('sleepMetric').textContent=d.checkin.sleep?`${d.checkin.sleep}h`:'—';el('healthMetric').textContent=d.checkin.health?`${d.checkin.health}/5`:'—';el('moodMetric').textContent=d.checkin.mood?`${d.checkin.mood}/5`:'—';el('streakMetric').textContent=`${streak()}日`;
@@ -434,10 +443,11 @@ el('settingsButton').onclick=openSettings;el('settingsNav').onclick=openSettings
 el('saveSettings').onclick=()=>{settings.yosUrl=el('yosUrl').value.trim();localStorage.setItem(SETTINGS,JSON.stringify(settings))};
 el('consultNav').onclick=()=>el('sendButton').click();el('recordNav').onclick=()=>el('sleep').focus();el('planNav').onclick=()=>scrollTo({top:0,behavior:'smooth'});
 el('sendButton').onclick=async()=>{day().note=el('note').value;save();const text=summary();try{await navigator.clipboard.writeText(text)}catch{prompt('この内容をコピーしてください',text);return}const url=settings.yosUrl||taxiUrl();if(url.startsWith('https://chatgpt.com/'))location.href=url;else{alert('内容をコピーしました。設定でYOSチャットURLを登録してください。');openSettings()}};
-importFromUrl();paint();setInterval(()=>{el('clock').textContent=new Intl.DateTimeFormat('ja-JP',{hour:'2-digit',minute:'2-digit',hour12:false,timeZone:'Asia/Tokyo'}).format(new Date());el('donutTime').textContent=el('clock').textContent},30000);
+importFromUrl();paint();setInterval(()=>{el('clock').textContent=new Intl.DateTimeFormat('ja-JP',{hour:'2-digit',minute:'2-digit',hour12:false,timeZone:'Asia/Tokyo'}).format(new Date());if(el('donutTime')&&el('clock'))el('donutTime').textContent=el('clock').textContent},30000);
 if('serviceWorker'in navigator)navigator.serviceWorker.register('./service-worker.js');
 })();
 </script>
-<script src="./yos-suite-v3.js?v=8"></script>
+<script src="./home-v1.js?v=9"></script>
+<script src="./yos-suite-v3.js?v=9"></script>
 </body>
 </html>
