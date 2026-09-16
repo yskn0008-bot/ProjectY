@@ -1,0 +1,95 @@
+name: Clarity mini model proof
+
+on:
+  pull_request:
+    paths:
+      - 'tools/clarity-factory/clarity-mini-model.cherri'
+      - '.github/workflows/clarity-mini-model-proof.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-mini:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pinned Cherri v2.3.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          url='https://github.com/electrikmilk/cherri/releases/download/v2.3.0/cherri_linux-x86_64.zip'
+          expected='7ab2c384b7b26e7c72a30a8dfa56f89dae12c4068b7951bc1e3193f3698edbe9'
+          curl -fsSL "$url" -o /tmp/cherri.zip
+          printf '%s  %s\n' "$expected" /tmp/cherri.zip | sha256sum -c -
+          mkdir -p /tmp/cherri
+          unzip -q /tmp/cherri.zip -d /tmp/cherri
+          binary="$(find /tmp/cherri -type f -name cherri -print -quit)"
+          test -n "$binary"
+          sudo install -m 0755 "$binary" /usr/local/bin/cherri
+
+      - name: Compile minimal voice-model-calendar shortcut
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd tools/clarity-factory
+          rm -f './Clarity Mini Model_unsigned.shortcut' './Clarity Mini Model.plist'
+          cherri clarity-mini-model.cherri --skip-sign --debug
+          test -f './Clarity Mini Model_unsigned.shortcut'
+          mkdir -p artifacts-mini
+          cp './Clarity Mini Model_unsigned.shortcut' artifacts-mini/Clarity-mini-model-unsigned.shortcut
+
+      - name: Inspect minimal contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import plistlib
+          from pathlib import Path
+          p = Path('tools/clarity-factory/artifacts-mini/Clarity-mini-model-unsigned.shortcut')
+          root = plistlib.loads(p.read_bytes())
+          actions = root['WFWorkflowActions']
+          ids = [a['WFWorkflowActionIdentifier'] for a in actions]
+          assert ids.count('is.workflow.actions.dictatetext') == 1, ids
+          assert ids.count('is.workflow.actions.askllm') == 1, ids
+          assert ids.count('is.workflow.actions.addnewevent') == 1, ids
+          assert 'is.workflow.actions.downloadurl' not in ids, ids
+          assert not root.get('WFWorkflowImportQuestions'), root.get('WFWorkflowImportQuestions')
+          ask = next(a for a in actions if a['WFWorkflowActionIdentifier'] == 'is.workflow.actions.askllm')
+          assert ask['WFWorkflowActionParameters'].get('WFLLMModel') == 'ChatGPT'
+          print(f'Mini contract PASS: {len(actions)} actions; no server/token/API action')
+          PY
+
+      - name: Sign with existing HubSign path
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/clarity-factory/sign_with_hubsign.py \
+            --input tools/clarity-factory/artifacts-mini/Clarity-mini-model-unsigned.shortcut \
+            --output tools/clarity-factory/artifacts-mini/Clarity-mini-model-signed.shortcut \
+            --name 'Clarity Mini Model'
+
+      - name: Verify AEA1 signature
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('tools/clarity-factory/artifacts-mini/Clarity-mini-model-signed.shortcut')
+          data = p.read_bytes()
+          assert data.startswith(b'AEA1'), data[:8]
+          assert len(data) > 500, len(data)
+          print(f'AEA1 PASS: {len(data)} bytes')
+          PY
+
+      - name: Upload mini artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: clarity-mini-model-artifact
+          path: |
+            tools/clarity-factory/artifacts-mini/Clarity-mini-model-unsigned.shortcut
+            tools/clarity-factory/artifacts-mini/Clarity-mini-model-signed.shortcut
+          if-no-files-found: error
