@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-16T13:40:32+09:00",
+  "updated_at": "2026-09-16T18:47:45+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -43,14 +43,14 @@
       "updated_at": "2026-09-15T22:36:16Z"
     },
     {
-      "id": "github-pr-324",
-      "title": "PR #324 feat: Shortcut Factory v3 + STASH auto-build",
+      "id": "github-pr-369",
+      "title": "PR #369 experiment: Clarity mini voice-model-calendar shortcut",
       "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
+      "status": "review",
+      "priority": 1,
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/324",
-      "updated_at": "2026-09-13T15:02:34Z"
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/369",
+      "updated_at": "2026-09-16T05:24:47Z"
     },
     {
       "id": "github-pr-330",
@@ -120,7 +120,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-09-16T00:38:52Z"
+      "updated_at": "2026-09-16T05:20:32Z"
     },
     {
       "id": "github-issue-234",
@@ -143,14 +143,14 @@
       "updated_at": "2026-08-12T12:04:15Z"
     },
     {
-      "id": "github-issue-240",
-      "title": "Issue #240 [QA] Taxi PR #239｜iPhone17 / iPhone SE3 smoke失敗の切り分け",
+      "id": "github-issue-245",
+      "title": "Issue #245 Taxi｜営業・カレンダーUI改善",
       "type": "GitHub Issue",
       "status": "open",
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/240",
-      "updated_at": "2026-08-07T16:24:42Z"
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/245",
+      "updated_at": "2026-08-11T07:31:09Z"
     },
     {
       "id": "github-issue-51",
@@ -224,7 +224,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #367をレビューして公開判断する",
+      "next_action": "PR #369をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-16T13:40:32+09:00",
+      "last_update": "2026-09-16T18:47:45+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -309,13 +309,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 33件・Open PR 17件を自動同期中",
+      "next_action": "Open Issue 32件・Open PR 18件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-16T13:40:32+09:00",
+      "last_update": "2026-09-16T18:47:45+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -329,7 +329,7 @@
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #367をレビューして公開判断する",
+      "next_action": "PR #369をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-16T13:40:32+09:00",
+      "last_update": "2026-09-16T18:47:45+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "a5b3e229947e89f897abf36d59af09371865a02318c616f84b9d9f62f6fe72ed"
+  "github_snapshot_hash": "764dffbdca318dc76080a2dc688921be4d6ee6ea813ac7eb1a66d5ad1975d963"
 }
