@@ -55,4 +55,10 @@
     script.src='./daily-flow-orchestrator-v1.js?v=1';
     document.body.appendChild(script);
   }
+  if(!document.getElementById('lifeTaskQuickAddV1Script')){
+    const script=document.createElement('script');
+    script.id='lifeTaskQuickAddV1Script';
+    script.src='./task-quick-add-v1.js?v=1';
+    document.body.appendChild(script);
+  }
 })();
