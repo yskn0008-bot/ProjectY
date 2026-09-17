@@ -1,10 +1,10 @@
-// YOS Life AUTO Bootstrap v0.1
+// YOS Life AUTO Bootstrap v0.2
 // One-paste bootstrap: installs the pinned Life AUTO Installer, then opens it.
 
-const INSTALLER_SHA = '87af5bfe67c98946d4b6549f7c480fe52fd2839c'
+const INSTALLER_SHA = 'bb4c089e6e3ea701e4bea66bc9e6117057031ec2'
 const URL = `https://raw.githubusercontent.com/yskn0008-bot/ProjectY/${INSTALLER_SHA}/ios-app/scriptable/life-auto/YOS%20Life%20AUTO%20Installer.js`
 const NAME = 'YOS Life AUTO Installer.js'
-const MARKERS = ['YOS Life AUTO Installer v0.1', 'backup + rollback', 'YOS Life AUTO Router.js']
+const MARKERS = ['YOS Life AUTO Installer v0.2', 'backup + rollback', 'YOS Life AUTO Router.js', 'FORBIDDEN_MARKERS']
 
 const req = new Request(URL)
 req.timeoutInterval = 20
