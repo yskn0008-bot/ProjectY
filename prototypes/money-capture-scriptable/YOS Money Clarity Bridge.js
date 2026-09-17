@@ -1,6 +1,6 @@
 // Money Bridge
 // Internal executor adapter only. Normal user input must originate in Clarity.
-// Loads the existing Money Capture core from the explicit iCloud path to avoid Scriptable importModule name collisions.
+// Import the existing Money Capture core by explicit iCloud path to avoid name collisions.
 
 const fm = FileManager.iCloud();
 const ROOT = fm.joinPath(fm.documentsDirectory(), 'YOS Money');
@@ -13,14 +13,7 @@ const SCHEMA_VERSION = 'yos-money-capture-p0-v1';
 async function loadCore() {
   if (!fm.fileExists(CORE_PATH)) throw new Error('Money Core.js not found');
   try { await fm.downloadFileFromiCloud(CORE_PATH); } catch (_) {}
-  const source = fm.readString(CORE_PATH);
-  if (!source || !source.includes('module.exports={parseJapaneseNumberToken')) {
-    throw new Error('Money Core.js is not the expected Money Capture core');
-  }
-  const AsyncFunction = Object.getPrototypeOf(async function(){}).constructor;
-  const moduleShim = { exports: {} };
-  const loader = new AsyncFunction('module', 'exports', `${source}\n;return module.exports;`);
-  const core = await loader(moduleShim, moduleShim.exports);
+  const core = importModule(CORE_PATH);
   if (!core || typeof core.parseMoneyInput !== 'function' || typeof core.toTransaction !== 'function') {
     throw new Error('Money Core exports unavailable');
   }
@@ -74,7 +67,17 @@ function appendQuery(base, params) {
   const query = Object.entries(params).map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(String(v ?? ''))}`).join('&');
   return `${base}${base.includes('?') ? '&' : '?'}${query}`;
 }
-function finish(payload) {
+async function maybeShowDebug(payload) {
+  const qp = args.queryParameters || {};
+  if (qp.debug !== '1') return;
+  const a = new Alert();
+  a.title = `Money Bridge: ${payload.status}`;
+  a.message = `${payload.error_code || 'ok'}\n${payload.result || ''}`;
+  a.addAction('OK');
+  await a.presentAlert();
+}
+async function finish(payload) {
+  await maybeShowDebug(payload);
   const qp = args.queryParameters || {};
   const success = qp['x-success'];
   if (success) {
@@ -91,21 +94,21 @@ try {
   const qp = args.queryParameters || {};
   const rawInput = String(qp.text || '').trim();
   if (!rawInput) {
-    finish(callbackPayload('blocked', false, { message: '入力内容がありません', missing: ['raw_input'] }, 'missing_raw_input'));
+    await finish(callbackPayload('blocked', false, { message: '入力内容がありません', missing: ['raw_input'] }, 'missing_raw_input'));
   } else {
     let store = await loadStore();
     const candidate = core.parseMoneyInput(rawInput, new Date());
     if (!candidate.can_save) {
-      finish(callbackPayload('blocked', false, { message: `未保存｜${candidate.missing.join(',')}の確認が必要です`, missing: candidate.missing, raw_input: rawInput }, 'missing_required_info'));
+      await finish(callbackPayload('blocked', false, { message: `未保存｜${candidate.missing.join(',')}の確認が必要です`, missing: candidate.missing, raw_input: rawInput }, 'missing_required_info'));
     } else {
       const now = new Date();
       if (core.isDuplicate(store.transactions, candidate, now.toISOString())) {
-        finish(callbackPayload('success', true, { message: '同じ内容が直前に記録済みです', duplicate: true, raw_input: rawInput }, ''));
+        await finish(callbackPayload('success', true, { message: '同じ内容が直前に記録済みです', duplicate: true, raw_input: rawInput }, ''));
       } else {
         const tx = core.toTransaction(candidate, 'clarity', now);
         store.transactions.push(tx);
         await saveStore(store);
-        finish(callbackPayload('success', true, {
+        await finish(callbackPayload('success', true, {
           message: core.feedback(tx), duplicate: false, transaction_id: tx.id, type: tx.type, amount: tx.amount,
           category: tx.category, date: tx.date, merchant: tx.merchant, raw_input: tx.raw_input
         }, ''));
@@ -113,5 +116,5 @@ try {
     }
   }
 } catch (err) {
-  finish(callbackPayload('failed', false, { message: `Money Bridge エラー：${err?.message || String(err)}` }, 'money_bridge_error'));
+  await finish(callbackPayload('failed', false, { message: `Money Bridge エラー：${err?.message || String(err)}` }, 'money_bridge_error'));
 }
