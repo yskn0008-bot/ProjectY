@@ -1,0 +1,95 @@
+#define name YOS_Money
+#define color green
+
+#include 'actions/web'
+
+// Stop and Output normally has a text-oriented Cherri wrapper. This local definition
+// preserves the x-callback dictionary as a typed Shortcut output for the parent router.
+action 'is.workflow.actions.output' outputValue(variable value: 'WFOutput')
+
+const inputType = typeOf(ShortcutInput)
+if inputType != "Dictionary" {
+    const invalidInput = {
+        "status": "blocked",
+        "verified": false,
+        "result": {
+            "message": "Money入力を受け取れませんでした"
+        },
+        "error_code": "invalid_money_input"
+    }
+    outputValue(invalidInput)
+}
+
+const input = getDictionary(ShortcutInput)
+const rawInputValue = getValue(input, "raw_input")
+const rawInput = "{rawInputValue}"
+if !rawInput {
+    const missingInput = {
+        "status": "blocked",
+        "verified": false,
+        "result": {
+            "message": "Money入力が空です"
+        },
+        "error_code": "missing_raw_input"
+    }
+    outputValue(missingInput)
+}
+
+const encodedInput = urlEncode("{rawInput}")
+const bridgeURL = "scriptable:///run/YOS%20Money%20Clarity%20Bridge?text={encodedInput}&source=clarity"
+const callbackRaw = openXCallbackURL(bridgeURL)
+const callbackType = typeOf(callbackRaw)
+
+if callbackType != "Dictionary" {
+    const invalidCallback = {
+        "status": "failed",
+        "verified": false,
+        "result": {
+            "message": "Money実行結果を確認できませんでした"
+        },
+        "error_code": "invalid_money_callback"
+    }
+    outputValue(invalidCallback)
+}
+
+const callback = getDictionary(callbackRaw)
+const statusValue = getValue(callback, "status")
+const verifiedValue = getValue(callback, "verified")
+const resultValue = getValue(callback, "result")
+const errorValue = getValue(callback, "error_code")
+const status = "{statusValue}"
+const verifiedText = "{verifiedValue}"
+const resultText = "{resultValue}"
+const errorCode = "{errorValue}"
+
+if !status || !verifiedText || !resultText {
+    const incompleteCallback = {
+        "status": "failed",
+        "verified": false,
+        "result": {
+            "message": "Money実行結果が不完全です"
+        },
+        "error_code": "incomplete_money_callback"
+    }
+    outputValue(incompleteCallback)
+}
+
+const result = getDictionary(resultText)
+
+if verifiedText == "true" {
+    const verifiedOutput = {
+        "status": "{status}",
+        "verified": true,
+        "result": "{result}",
+        "error_code": "{errorCode}"
+    }
+    outputValue(verifiedOutput)
+}
+
+const unverifiedOutput = {
+    "status": "{status}",
+    "verified": false,
+    "result": "{result}",
+    "error_code": "{errorCode}"
+}
+outputValue(unverifiedOutput)
