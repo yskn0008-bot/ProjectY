@@ -1,0 +1,64 @@
+{
+  "version": "1.0",
+  "purpose": "Additive Clarity Router-to-child-Shortcut contract. Existing Clarity v1 executors remain the fallback until physical iPhone E2E passes.",
+  "action": {
+    "required": [
+      "id",
+      "module",
+      "input",
+      "risk",
+      "external_write",
+      "needs_review",
+      "needs_confirmation",
+      "status"
+    ],
+    "status": ["planned"],
+    "risk": ["low", "medium", "high", "irreversible"],
+    "input_type": "dictionary",
+    "unknown_values": "null_or_empty_never_guess"
+  },
+  "child_result": {
+    "required": ["status", "verified", "result", "error_code"],
+    "status": ["success", "failed", "blocked"],
+    "verified_type": "boolean",
+    "result_type": "dictionary",
+    "error_code_type": "string"
+  },
+  "parent_policy": {
+    "registered_modules_only": true,
+    "unregistered_module": "blocked",
+    "invalid_action_schema": "blocked",
+    "missing_child_or_invalid_child_result": "failed",
+    "model_may_report_execution": false,
+    "success_requires_verified_true_for_applied": true,
+    "unverified_success": "unverified",
+    "no_guessing_or_substitution": true
+  },
+  "legacy_compatibility": {
+    "keep_existing_executor_path": true,
+    "keep_existing_requires_confirmation": true,
+    "normalization": "needs_confirmation is canonical for modular actions; when a legacy action is adapted, effective confirmation is needs_confirmation OR requires_confirmation.",
+    "cutover": "Do not remove or bypass the existing executor path until modular physical iPhone E2E and rollback checks pass."
+  },
+  "ledger_mapping": {
+    "success_verified": "APPLIED",
+    "success_unverified": "UNVERIFIED",
+    "failed": "FAILED",
+    "blocked": "BLOCKED"
+  },
+  "initial_registry": {
+    "YOS_Test": {
+      "enabled": false,
+      "side_effect": false,
+      "purpose": "Phase 2 echo-only dispatcher proof"
+    },
+    "YOS_Timer": {
+      "enabled": false,
+      "side_effect": true,
+      "input_schema": {
+        "duration_seconds": "positive_integer"
+      },
+      "purpose": "Phase 3 first physical iPhone E2E"
+    }
+  }
+}
