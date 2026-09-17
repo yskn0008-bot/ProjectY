@@ -1,0 +1,80 @@
+name: YOS Cockpit Safety
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'yos/task-dashboard.js'
+      - 'yos/task-dashboard.css'
+      - 'yos/tests/cockpit-browser-smoke.mjs'
+      - '.github/workflows/yos-cockpit-safety.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'yos/task-dashboard.js'
+      - 'yos/task-dashboard.css'
+      - 'yos/tests/cockpit-browser-smoke.mjs'
+      - '.github/workflows/yos-cockpit-safety.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: yos-cockpit-safety-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  cockpit-contract:
+    name: Cockpit contract
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: ''
+      - name: Check dashboard JavaScript
+        run: node --check yos/task-dashboard.js
+      - name: Run existing dashboard contracts
+        run: node --test yos/tests/task-dashboard-contract.test.mjs
+
+  cockpit-browser-smoke:
+    name: Cockpit 390px smoke (${{ matrix.browser }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, webkit]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: ''
+      - name: Install Playwright
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps ${{ matrix.browser }}
+      - name: Start static server
+        run: |
+          python3 -m http.server 4173 --directory . > /tmp/yos-cockpit-server.log 2>&1 &
+          for i in {1..30}; do
+            curl -fsS http://127.0.0.1:4173/yos/ >/dev/null && exit 0
+            sleep 1
+          done
+          cat /tmp/yos-cockpit-server.log
+          exit 1
+      - name: Run cockpit browser smoke
+        env:
+          YOS_BROWSER: ${{ matrix.browser }}
+        run: node yos/tests/cockpit-browser-smoke.mjs
+      - name: Upload cockpit screenshot
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: yos-cockpit-${{ matrix.browser }}
+          path: test-results/yos-cockpit-390-${{ matrix.browser }}.png
+          if-no-files-found: warn
