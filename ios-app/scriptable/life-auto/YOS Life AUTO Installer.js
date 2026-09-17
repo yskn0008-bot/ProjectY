@@ -1,21 +1,25 @@
-// YOS Life AUTO Installer v0.1
+// YOS Life AUTO Installer v0.2
 // Installs/updates YOS Life AUTO Router into Scriptable iCloud with backup + rollback.
 
-const SOURCE_SHA = '067b558642b9a822887ca6e7a152241e96507a70'
+const SOURCE_SHA = 'f7316540bcb0c8c975da7d5f49b0e298d090b344'
 const SOURCE_URL = `https://raw.githubusercontent.com/yskn0008-bot/ProjectY/${SOURCE_SHA}/ios-app/scriptable/life-auto/YOS%20Life%20AUTO%20Router.js`
 const TARGET_NAME = 'YOS Life AUTO Router.js'
 const REQUIRED_MARKERS = [
-  'YOS Life AUTO Router v0.2',
-  "const SCHEMA = 'yos.life-auto-router.v0.2'",
-  'shortcuts://x-callback-url/run-shortcut',
+  'YOS Life AUTO Router v0.3',
+  "const SCHEMA = 'yos.life-auto-router.v0.3'",
+  "executor: 'ios-shortcuts'",
   "label: '起床'",
   "label: '就寝'"
 ]
+const FORBIDDEN_MARKERS = ['CallbackURL', 'x-callback-url/run-shortcut']
 
 function assertSource(text) {
   if (!text || text.length < 1000) throw new Error('Router source is unexpectedly short')
   for (const marker of REQUIRED_MARKERS) {
     if (!text.includes(marker)) throw new Error(`Router verification failed: ${marker}`)
+  }
+  for (const marker of FORBIDDEN_MARKERS) {
+    if (text.includes(marker)) throw new Error(`Router contains unsupported child execution: ${marker}`)
   }
 }
 
