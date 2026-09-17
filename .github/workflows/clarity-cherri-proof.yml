@@ -67,6 +67,25 @@ jobs:
           mkdir -p artifacts
           cp "$proof" artifacts/Clarity-Compiler-Proof-unsigned.shortcut
 
+      - name: Compile modular dispatcher proof
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd tools/clarity-factory
+          rm -f './Clarity Dispatcher Proof_unsigned.shortcut' './Clarity Dispatcher Proof.plist' './YOS_Test_unsigned.shortcut' './YOS_Test.plist'
+          cherri clarity-dispatcher-proof.cherri --skip-sign --debug
+          cherri yos-test.cherri --skip-sign --debug
+          dispatcher='./Clarity Dispatcher Proof_unsigned.shortcut'
+          child='./YOS_Test_unsigned.shortcut'
+          test -f "$dispatcher"
+          test -f "$child"
+          grep -q 'is.workflow.actions.runworkflow' "$dispatcher"
+          grep -q 'WFWorkflowName' "$dispatcher"
+          grep -q 'YOS_Test' "$dispatcher"
+          mkdir -p artifacts
+          cp "$dispatcher" artifacts/Clarity-Dispatcher-Proof-unsigned.shortcut
+          cp "$child" artifacts/YOS-Test-unsigned.shortcut
+
       - name: Compile Clarity Raw First runtime
         shell: bash
         run: |
@@ -138,6 +157,8 @@ jobs:
           name: clarity-cherri-artifacts
           path: |
             tools/clarity-factory/artifacts/Clarity-Compiler-Proof-unsigned.shortcut
+            tools/clarity-factory/artifacts/Clarity-Dispatcher-Proof-unsigned.shortcut
+            tools/clarity-factory/artifacts/YOS-Test-unsigned.shortcut
             tools/clarity-factory/artifacts/Clarity-v1-unsigned.shortcut
             tools/clarity-factory/artifacts/Clarity-v1-signed.shortcut
             tools/clarity-factory/artifacts/hubsign.log
