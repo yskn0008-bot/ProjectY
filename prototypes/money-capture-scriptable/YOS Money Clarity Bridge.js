@@ -1,50 +1,59 @@
-// Money Clarity Bridge
+// Money Bridge
 // Internal executor adapter only. Normal user input must originate in Clarity.
-// Reuses the existing Money Capture parser and writes the same iCloud ledger.
-
-const core = importModule('Money Core');
+// Loads the existing Money Capture core from the explicit iCloud path to avoid Scriptable importModule name collisions.
 
 const fm = FileManager.iCloud();
 const ROOT = fm.joinPath(fm.documentsDirectory(), 'YOS Money');
 const BACKUP_DIR = fm.joinPath(ROOT, '_backups');
 const DATA_PATH = fm.joinPath(ROOT, 'transactions.json');
 const CSV_PATH = fm.joinPath(ROOT, 'transactions.csv');
+const CORE_PATH = fm.joinPath(fm.documentsDirectory(), 'Money Core.js');
 const SCHEMA_VERSION = 'yos-money-capture-p0-v1';
+
+async function loadCore() {
+  if (!fm.fileExists(CORE_PATH)) throw new Error('Money Core.js not found');
+  try { await fm.downloadFileFromiCloud(CORE_PATH); } catch (_) {}
+  const source = fm.readString(CORE_PATH);
+  if (!source || !source.includes('module.exports={parseJapaneseNumberToken')) {
+    throw new Error('Money Core.js is not the expected Money Capture core');
+  }
+  const AsyncFunction = Object.getPrototypeOf(async function(){}).constructor;
+  const moduleShim = { exports: {} };
+  const loader = new AsyncFunction('module', 'exports', `${source}\n;return module.exports;`);
+  const core = await loader(moduleShim, moduleShim.exports);
+  if (!core || typeof core.parseMoneyInput !== 'function' || typeof core.toTransaction !== 'function') {
+    throw new Error('Money Core exports unavailable');
+  }
+  return core;
+}
 
 function csvEscape(v) {
   const s = String(v ?? '');
   return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
 }
-
 async function ensureDownloaded(path) {
   if (!fm.fileExists(path)) return;
   try { await fm.downloadFileFromiCloud(path); } catch (_) {}
 }
-
 async function loadStore() {
   if (!fm.fileExists(ROOT)) fm.createDirectory(ROOT, true);
   if (!fm.fileExists(BACKUP_DIR)) fm.createDirectory(BACKUP_DIR, true);
   await ensureDownloaded(DATA_PATH);
-  if (!fm.fileExists(DATA_PATH)) {
-    return { schema_version: SCHEMA_VERSION, updated_at: null, transactions: [] };
-  }
+  if (!fm.fileExists(DATA_PATH)) return { schema_version: SCHEMA_VERSION, updated_at: null, transactions: [] };
   const parsed = JSON.parse(fm.readString(DATA_PATH));
   if (!Array.isArray(parsed.transactions)) throw new Error('invalid_transactions_store');
   return parsed;
 }
-
 function writeCsv(transactions) {
   const header = ['id','type','amount','category','date','merchant','memo','source','created_at','updated_at','raw_input'];
   const rows = [header.join(',')];
   for (const tx of transactions) rows.push(header.map(k => csvEscape(tx[k])).join(','));
   fm.writeString(CSV_PATH, rows.join('\n'));
 }
-
 function pruneBackups() {
   const files = fm.listContents(BACKUP_DIR).filter(x => x.endsWith('.json')).sort();
   while (files.length > 14) fm.remove(fm.joinPath(BACKUP_DIR, files.shift()));
 }
-
 async function saveStore(store) {
   const now = new Date();
   if (fm.fileExists(DATA_PATH)) {
@@ -58,23 +67,13 @@ async function saveStore(store) {
   pruneBackups();
   return next;
 }
-
 function callbackPayload(status, verified, result = {}, errorCode = '') {
-  return {
-    status,
-    verified: verified ? 'true' : 'false',
-    result: JSON.stringify(result),
-    error_code: errorCode || ''
-  };
+  return { status, verified: verified ? 'true' : 'false', result: JSON.stringify(result), error_code: errorCode || '' };
 }
-
 function appendQuery(base, params) {
-  const query = Object.entries(params)
-    .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(String(v ?? ''))}`)
-    .join('&');
+  const query = Object.entries(params).map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(String(v ?? ''))}`).join('&');
   return `${base}${base.includes('?') ? '&' : '?'}${query}`;
 }
-
 function finish(payload) {
   const qp = args.queryParameters || {};
   const success = qp['x-success'];
@@ -88,6 +87,7 @@ function finish(payload) {
 }
 
 try {
+  const core = await loadCore();
   const qp = args.queryParameters || {};
   const rawInput = String(qp.text || '').trim();
   if (!rawInput) {
@@ -96,39 +96,22 @@ try {
     let store = await loadStore();
     const candidate = core.parseMoneyInput(rawInput, new Date());
     if (!candidate.can_save) {
-      finish(callbackPayload('blocked', false, {
-        message: `未保存｜${candidate.missing.join(',')}の確認が必要です`,
-        missing: candidate.missing,
-        raw_input: rawInput
-      }, 'missing_required_info'));
+      finish(callbackPayload('blocked', false, { message: `未保存｜${candidate.missing.join(',')}の確認が必要です`, missing: candidate.missing, raw_input: rawInput }, 'missing_required_info'));
     } else {
       const now = new Date();
       if (core.isDuplicate(store.transactions, candidate, now.toISOString())) {
-        finish(callbackPayload('success', true, {
-          message: '同じ内容が直前に記録済みです',
-          duplicate: true,
-          raw_input: rawInput
-        }, ''));
+        finish(callbackPayload('success', true, { message: '同じ内容が直前に記録済みです', duplicate: true, raw_input: rawInput }, ''));
       } else {
         const tx = core.toTransaction(candidate, 'clarity', now);
         store.transactions.push(tx);
-        store = await saveStore(store);
+        await saveStore(store);
         finish(callbackPayload('success', true, {
-          message: core.feedback(tx),
-          duplicate: false,
-          transaction_id: tx.id,
-          type: tx.type,
-          amount: tx.amount,
-          category: tx.category,
-          date: tx.date,
-          merchant: tx.merchant,
-          raw_input: tx.raw_input
+          message: core.feedback(tx), duplicate: false, transaction_id: tx.id, type: tx.type, amount: tx.amount,
+          category: tx.category, date: tx.date, merchant: tx.merchant, raw_input: tx.raw_input
         }, ''));
       }
     }
   }
 } catch (err) {
-  finish(callbackPayload('failed', false, {
-    message: `Money Bridge エラー：${err?.message || String(err)}`
-  }, 'money_bridge_error'));
+  finish(callbackPayload('failed', false, { message: `Money Bridge エラー：${err?.message || String(err)}` }, 'money_bridge_error'));
 }
