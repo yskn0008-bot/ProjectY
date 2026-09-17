@@ -4,6 +4,10 @@
 
 #include 'actions/shortcuts'
 
+// Cherri's stock Stop and Output wrapper is text-only. This local typed
+// definition preserves Dictionary child results for the parent dispatcher.
+action 'is.workflow.actions.output' outputValue(variable value: 'WFOutput')
+
 /*
 Phase 2 technical proof only.
 No production cutover and no side-effecting module is enabled here.
@@ -33,9 +37,9 @@ if @module == "YOS_Test" {
 }
 
 if @registered == false {
-    output({"status":"blocked","verified":false,"result":{},"error_code":"UNREGISTERED_MODULE"})
-    stop()
+    @blocked = {"status":"blocked","verified":false,"result":{},"error_code":"UNREGISTERED_MODULE"}
+    outputValue(@blocked)
 }
 
-const childResult = run(@childName, @childInput)
-output(childResult)
+@childResult = run(@childName, @childInput)
+outputValue(@childResult)
