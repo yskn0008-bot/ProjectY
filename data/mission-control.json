@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-17T14:57:23+09:00",
+  "updated_at": "2026-09-17T15:31:52+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -90,7 +90,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-09-17T04:18:35Z"
+      "updated_at": "2026-09-17T06:31:41Z"
     },
     {
       "id": "github-issue-234",
@@ -165,39 +165,39 @@
   ],
   "recently_completed": [
     {
-      "id": "github-commit-ed911e22d74a",
-      "title": "YOS統合アプリ P1｜共通データSSOT v1 (#372)",
-      "completed_at": "2026-09-17T01:45:45Z",
-      "result": "GitHub mainへ反映（ed911e2）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/ed911e22d74accb4fcf11684c2330b8637668b01"
+      "id": "github-commit-33b4dbadae50",
+      "title": "Merge PR #377: connect Morning Flow and Night Reset",
+      "completed_at": "2026-09-17T06:31:40Z",
+      "result": "GitHub mainへ反映（33b4dba）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/33b4dbadae50e495972af96ccb940a9ba32df98a"
     },
     {
-      "id": "github-commit-aa212db15977",
-      "title": "fix(clarity): harden destination verification and structured model contract",
-      "completed_at": "2026-09-15T20:14:06Z",
-      "result": "GitHub mainへ反映（aa212db）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/aa212db15977224bb6aaf464adde2543db52522d"
+      "id": "github-commit-0954e2e7907f",
+      "title": "feat(life): load Morning Night handoff on latest Life shell",
+      "completed_at": "2026-09-17T06:28:53Z",
+      "result": "GitHub mainへ反映（0954e2e）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/0954e2e7907fabb4493afe22dea653b01c38028f"
     },
     {
-      "id": "github-commit-0bf37a94186b",
-      "title": "Merge pull request #328 from yskn0008-bot/proto/money-capture-v1",
-      "completed_at": "2026-09-15T14:22:11Z",
-      "result": "GitHub mainへ反映（0bf37a9）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/0bf37a94186bbea3a05b4e5d6f82690c27e5b019"
+      "id": "github-commit-8393c76e77ee",
+      "title": "test(life): cover Morning Night offline cache",
+      "completed_at": "2026-09-17T06:28:42Z",
+      "result": "GitHub mainへ反映（8393c76）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/8393c76e77eeed2f489f12d98fe2fe280158dcb7"
     },
     {
-      "id": "github-commit-dcd1f6fd2ff1",
-      "title": "docs(money-capture): refresh current storage boundary",
-      "completed_at": "2026-09-15T14:20:31Z",
-      "result": "GitHub mainへ反映（dcd1f6f）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/dcd1f6fd2ff152a21718310289d092dd6733527f"
+      "id": "github-commit-8fb1282a6bd9",
+      "title": "feat(life): cache Morning Night handoff offline",
+      "completed_at": "2026-09-17T06:28:34Z",
+      "result": "GitHub mainへ反映（8fb1282）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/8fb1282a6bd9a36533d6f5560d10fa1dcfd5b9ac"
     },
     {
-      "id": "github-commit-f3a40f45e124",
-      "title": "Merge pull request #335 from yskn0008-bot/prot/factory-operational-v0.2",
-      "completed_at": "2026-09-15T14:14:01Z",
-      "result": "GitHub mainへ反映（f3a40f4）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/f3a40f45e1243a3c0e829b5dfc7b2548f9b7ff66"
+      "id": "github-commit-d1282050d53f",
+      "title": "test(life): add Morning Night orchestrator regression",
+      "completed_at": "2026-09-17T06:28:25Z",
+      "result": "GitHub mainへ反映（d128205）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/d1282050d53fc8c8335123447fc64a371541141d"
     },
     {
       "id": "complete-002",
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-17T14:57:23+09:00",
+      "last_update": "2026-09-17T15:31:52+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -315,7 +315,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-17T14:57:23+09:00",
+      "last_update": "2026-09-17T15:31:52+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-17T14:57:23+09:00",
+      "last_update": "2026-09-17T15:31:52+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "fb78d3d6dc3b46648f880c7c8c35b191e95ad4f85a1d39349bba426b5b81a5ce"
+  "github_snapshot_hash": "7bff4adc702cc4a9c7782f9f4598e710c8090e8c9eccec4c888751d3c3db2a9b"
 }
