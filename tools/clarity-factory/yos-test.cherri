@@ -8,5 +8,7 @@ action 'is.workflow.actions.output' outputValue(variable value: 'WFOutput')
 /* Phase 2 child: side-effect-free echo/contract proof. */
 
 @payload = getDictionary(ShortcutInput)
-@result = {"status":"success","verified":true,"result":@payload,"error_code":""}
+@echoValue = getValue(@payload, "echo")
+@echo = "{@echoValue}"
+@result = {"status":"success","verified":true,"result":{"echo":"{@echo}"},"error_code":""}
 outputValue(@result)
