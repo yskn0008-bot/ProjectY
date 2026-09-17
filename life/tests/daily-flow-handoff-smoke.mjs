@@ -38,6 +38,19 @@ const waitForFlow=async()=>{
 try{
   await page.goto(baseURL,{waitUntil:'networkidle'});
   await waitForFlow();
+
+  await page.waitForFunction(()=>document.querySelector('.life-task-sheet-v2 button[aria-label="タスクを追加"]')?.dataset.lifeTaskQuickAddV1==='1');
+  await page.locator('.life-task-sheet-v2 button[aria-label="タスクを追加"]').click();
+  await page.waitForSelector('#lifeTaskQuickAddInputV1',{state:'visible'});
+  await page.locator('#lifeTaskQuickAddInputV1').fill('動作確認');
+  await Promise.all([
+    page.waitForNavigation({waitUntil:'domcontentloaded'}),
+    page.locator('#lifeTaskQuickAddV1 button[type="submit"]').click()
+  ]);
+  await waitForFlow();
+  const quickAdded=await page.evaluate(({yesterday})=>JSON.parse(localStorage.getItem('yos-life-v1')).days[yesterday].tasks.map(task=>task.text),{yesterday});
+  assert.deepEqual(quickAdded,['夜の未完了','完了済み','動作確認'],'home plus must add an unfinished task instead of opening schedule');
+
   await page.locator('#lifeBottomNavV1 [data-page="record"]').click();
   await page.locator('[data-life-flow-tab="night"]').click();
   await page.locator('#lifeTomorrowImportantV1').fill('起きたら予定を確認する');
@@ -52,20 +65,21 @@ try{
     return {closed:data.days[yesterday],next:data.days[today]};
   },{today,yesterday});
   assert.ok(state.closed.lifeFlow.endedAt,'Night Reset must close the active Life day');
-  assert.equal(state.closed.lifeFlow.nightReset.remainingCount,1);
-  assert.equal(state.closed.lifeFlow.nightReset.carriedCount,1);
+  assert.equal(state.closed.lifeFlow.nightReset.remainingCount,2);
+  assert.equal(state.closed.lifeFlow.nightReset.carriedCount,2);
   assert.equal(state.closed.lifeFlow.nightReset.firstStep,'朝いち既存');
   assert.equal(state.next.lifeFlow.preparedFromNight.firstStep,'朝いち既存');
   assert.equal(state.next.lifeFlow.preparedFromNight.important,'起きたら予定を確認する');
-  assert.deepEqual(state.next.tasks.map(task=>task.text),['朝いち既存','夜の未完了']);
+  assert.deepEqual(state.next.tasks.map(task=>task.text),['朝いち既存','夜の未完了','動作確認']);
   assert.equal(state.next.tasks[1].carriedFrom,yesterday);
+  assert.equal(state.next.tasks[2].carriedFrom,yesterday);
 
   await page.locator('#lifeBottomNavV1 [data-page="record"]').click();
   await page.locator('[data-life-flow-tab="morning"]').click();
   await page.waitForSelector('#lifeMorningPreparedV1',{state:'visible'});
   assert.match(await page.locator('#lifeMorningPreparedV1').textContent(),/朝いち既存/,'Morning Flow must surface the prepared first step');
   assert.deepEqual(pageErrors,[],`page errors: ${pageErrors.join(' | ')}`);
-  console.log(`Daily flow handoff smoke passed: ${browserName}`);
+  console.log(`Daily flow + quick add handoff smoke passed: ${browserName}`);
 }finally{
   await browser.close();
 }
