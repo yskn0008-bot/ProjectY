@@ -2,7 +2,7 @@
 // Internal executor adapter only. Normal user input must originate in Clarity.
 // Reuses the existing Money Capture parser and writes the same iCloud ledger.
 
-const core = importModule('Money Capture');
+const core = importModule('Money Core');
 
 const fm = FileManager.iCloud();
 const ROOT = fm.joinPath(fm.documentsDirectory(), 'YOS Money');
