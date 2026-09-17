@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate the compiled Clarity-only YOS_Money child Shortcut."""
+"""Validate the compiled Clarity-only Money child Shortcut."""
 
 from __future__ import annotations
 
@@ -38,7 +38,7 @@ def validate(path: Path) -> None:
     # upstream Text action rather than literally inside the callback action parameters.
     serialized = repr(root)
     for required in (
-        "scriptable:///run/YOS%20Money%20Clarity%20Bridge",
+        "scriptable:///run/Money%20Clarity%20Bridge",
         "source=clarity",
         "raw_input",
         "status",
@@ -85,4 +85,4 @@ if __name__ == "__main__":
     parser.add_argument("shortcut", type=Path)
     args = parser.parse_args()
     validate(args.shortcut)
-    print("YOS_Money child contract: PASS")
+    print("Money child contract: PASS")
