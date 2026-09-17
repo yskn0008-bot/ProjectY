@@ -2,7 +2,11 @@
 #define color blue
 #define version 18
 
+// Cherri's stock Stop and Output wrapper is text-only. Keep the contract typed.
+action 'is.workflow.actions.output' outputValue(variable value: 'WFOutput')
+
 /* Phase 2 child: side-effect-free echo/contract proof. */
 
 @payload = getDictionary(ShortcutInput)
-output({"status":"success","verified":true,"result":@payload,"error_code":""})
+@result = {"status":"success","verified":true,"result":@payload,"error_code":""}
+outputValue(@result)
