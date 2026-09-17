@@ -12,6 +12,16 @@ class ModuleContractTests(unittest.TestCase):
     def setUpClass(cls):
         cls.contract = json.loads(CONTRACT.read_text(encoding="utf-8"))
 
+    def test_use_model_is_preferred_understand_layer_without_removing_fallback(self):
+        understand = self.contract["understand_layer"]
+        self.assertEqual(understand["preferred_runtime"], "apple_shortcuts_use_model")
+        self.assertEqual(understand["role"], "structure_intents_only")
+        self.assertEqual(understand["output_contract"], "action")
+        self.assertTrue(understand["supports_multiple_actions"])
+        self.assertEqual(understand["fallback"], "existing_clarity_executor_path")
+        observed = set(understand["physical_device_evidence"]["observed_domains"])
+        self.assertTrue({"calendar", "shopping", "idea"}.issubset(observed))
+
     def test_action_contract_is_structured_and_planned_only(self):
         action = self.contract["action"]
         self.assertIn("module", action["required"])
@@ -40,6 +50,7 @@ class ModuleContractTests(unittest.TestCase):
         legacy = self.contract["legacy_compatibility"]
         self.assertTrue(legacy["keep_existing_executor_path"])
         self.assertTrue(legacy["keep_existing_requires_confirmation"])
+        self.assertIn("Use Model", legacy["cutover"])
 
     def test_modules_are_disabled_until_their_phase_proves_them(self):
         registry = self.contract["initial_registry"]
