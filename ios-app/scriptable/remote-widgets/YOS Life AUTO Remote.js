@@ -13,7 +13,7 @@ const CONFIG = Object.freeze({
 
 // Conservative defaults:
 // - 帰宅: light on + AC cooling while preserving the current set temperature.
-// - くつろぐ: brightness one step darker. TV/AC state is preserved.
+// - くつろぐ: use night-light mode during the prototype test so the change is clearly visible. TV/AC state is preserved.
 // - 就寝: BRAVIA OFF (PowerOff only; generic toggle is never used) + light off. AC state is preserved.
 // - 外出: BRAVIA OFF + light off + AC stop.
 // Exact sleep AC behavior is intentionally not fixed until the preferred sleep setting is confirmed.
@@ -30,7 +30,7 @@ const SCENES = Object.freeze({
     label: 'くつろぐ',
     aliases: Object.freeze(['relax', 'chill', 'くつろぐ', 'くつろぎ', 'リラックス']),
     steps: Object.freeze([
-      Object.freeze({ device: 'light', action: 'dark', label: '照明を1段暗く' }),
+      Object.freeze({ device: 'light', action: 'night', label: '常夜灯' }),
     ]),
   }),
   sleep: Object.freeze({
