@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-18T01:43:10+09:00",
+  "updated_at": "2026-09-18T01:43:37+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -33,6 +33,16 @@
       "updated_at": "2026-09-17T12:03:59Z"
     },
     {
+      "id": "github-pr-373",
+      "title": "PR #373 Clarity: modular iPhone router Phase 1 contract",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/373",
+      "updated_at": "2026-09-17T16:43:23Z"
+    },
+    {
       "id": "github-pr-374",
       "title": "PR #374 Clarity: add Clarity-only Money executor bridge",
       "type": "GitHub PR",
@@ -41,16 +51,6 @@
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/374",
       "updated_at": "2026-09-17T16:40:58Z"
-    },
-    {
-      "id": "github-pr-379",
-      "title": "PR #379 Prototype: Life AUTO Router v0.2",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/379",
-      "updated_at": "2026-09-17T10:27:05Z"
     },
     {
       "id": "github-pr-382",
@@ -90,7 +90,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-09-17T16:40:12Z"
+      "updated_at": "2026-09-17T16:43:19Z"
     },
     {
       "id": "github-issue-234",
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-18T01:43:10+09:00",
+      "last_update": "2026-09-18T01:43:37+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -315,7 +315,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-18T01:43:10+09:00",
+      "last_update": "2026-09-18T01:43:37+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-18T01:43:10+09:00",
+      "last_update": "2026-09-18T01:43:37+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "2d38c9da05e05f3d7b0c6ff1c6af9aefa2757254d57728663ba2f14debd04d74"
+  "github_snapshot_hash": "d47ff37c37c7e4830805a4c52909e2deb1d1474f43db949ea4713332c3ac27b4"
 }
