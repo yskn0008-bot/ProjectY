@@ -3,6 +3,7 @@
 
 #include 'actions/web'
 
+// Internal executor only: Clarity is the sole normal user entry.
 // Stop and Output normally has a text-oriented Cherri wrapper. This local definition
 // preserves the x-callback dictionary as a typed Shortcut output for the parent router.
 action 'is.workflow.actions.output' outputValue(variable value: 'WFOutput')
