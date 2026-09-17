@@ -34,11 +34,9 @@ def validate(path: Path) -> None:
     if len(callback_indexes) != 1:
         raise AssertionError(f"expected one x-callback executor, found {len(callback_indexes)}")
 
-    # The callback action receives a Magic Variable, so the Scriptable URL lives in the
-    # upstream Text action rather than literally inside the callback action parameters.
     serialized = repr(root)
     for required in (
-        "scriptable:///run/Money%20Clarity%20Bridge",
+        "scriptable:///run/Money%20Bridge",
         "source=clarity",
         "raw_input",
         "status",
@@ -54,7 +52,6 @@ def validate(path: Path) -> None:
         if required not in serialized:
             raise AssertionError(f"Money child contract marker missing: {required}")
 
-    # This child is an executor only. It must not create another user-input surface or AI path.
     forbidden_action_fragments = (
         "dictatetext",
         "askllm",
