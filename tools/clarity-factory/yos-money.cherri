@@ -5,7 +5,7 @@
 
 // Internal executor only: Clarity is the sole normal user entry.
 // Stop and Output normally has a text-oriented Cherri wrapper. This local definition
-// preserves the x-callback dictionary as a typed Shortcut output for the parent router.
+// preserves Dictionary child results for the parent router.
 action 'is.workflow.actions.output' outputValue(variable value: 'WFOutput')
 
 const inputType = typeOf(ShortcutInput)
@@ -14,7 +14,8 @@ if inputType != "Dictionary" {
         "status": "blocked",
         "verified": false,
         "result": {
-            "message": "Money入力を受け取れませんでした"
+            "message": "Money入力を受け取れませんでした",
+            "payload_json": ""
         },
         "error_code": "invalid_money_input"
     }
@@ -29,7 +30,8 @@ if !rawInput {
         "status": "blocked",
         "verified": false,
         "result": {
-            "message": "Money入力が空です"
+            "message": "Money入力が空です",
+            "payload_json": ""
         },
         "error_code": "missing_raw_input"
     }
@@ -46,7 +48,8 @@ if callbackType != "Dictionary" {
         "status": "failed",
         "verified": false,
         "result": {
-            "message": "Money実行結果を確認できませんでした"
+            "message": "Money実行結果を確認できませんでした",
+            "payload_json": ""
         },
         "error_code": "invalid_money_callback"
     }
@@ -68,20 +71,26 @@ if !status || !verifiedText || !resultText {
         "status": "failed",
         "verified": false,
         "result": {
-            "message": "Money実行結果が不完全です"
+            "message": "Money実行結果が不完全です",
+            "payload_json": ""
         },
         "error_code": "incomplete_money_callback"
     }
     outputValue(incompleteCallback)
 }
 
-const result = getDictionary(resultText)
+const resultDictionary = getDictionary(resultText)
+const messageValue = getValue(resultDictionary, "message")
+const message = "{messageValue}"
 
 if verifiedText == "true" {
     const verifiedOutput = {
         "status": "{status}",
         "verified": true,
-        "result": "{result}",
+        "result": {
+            "message": "{message}",
+            "payload_json": "{resultText}"
+        },
         "error_code": "{errorCode}"
     }
     outputValue(verifiedOutput)
@@ -90,7 +99,10 @@ if verifiedText == "true" {
 const unverifiedOutput = {
     "status": "{status}",
     "verified": false,
-    "result": "{result}",
+    "result": {
+        "message": "{message}",
+        "payload_json": "{resultText}"
+    },
     "error_code": "{errorCode}"
 }
 outputValue(unverifiedOutput)
