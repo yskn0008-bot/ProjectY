@@ -1,8 +1,16 @@
-// YOS Money Clarity Bridge
+// Money Clarity Bridge
 // Internal executor adapter only. Normal user input must originate in Clarity.
-// It reuses the already device-tested Money parser and writes the same iCloud ledger.
+// Reuses the existing Money Capture parser and writes the same iCloud ledger.
 
-const core = importModule('YOS Money Capture');
+let core = null;
+for (const moduleName of ['Money Capture', 'YOS Money Capture']) {
+  try {
+    core = importModule(moduleName);
+    if (core) break;
+  } catch (_) {}
+}
+if (!core) throw new Error('Money Capture module not found');
+
 const fm = FileManager.iCloud();
 const ROOT = fm.joinPath(fm.documentsDirectory(), 'YOS Money');
 const BACKUP_DIR = fm.joinPath(ROOT, '_backups');
