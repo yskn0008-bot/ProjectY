@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-17T10:47:25+09:00",
+  "updated_at": "2026-09-17T14:57:23+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -13,16 +13,6 @@
   },
   "inbox": [
     {
-      "id": "github-pr-368",
-      "title": "PR #368 build(clarity): rebuild as native iOS 27 ChatGPT Shortcut",
-      "type": "GitHub PR",
-      "status": "review",
-      "priority": 1,
-      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/368",
-      "updated_at": "2026-09-16T09:56:46Z"
-    },
-    {
       "id": "github-pr-369",
       "title": "PR #369 experiment: Clarity mini voice-model-calendar shortcut",
       "type": "GitHub PR",
@@ -31,6 +21,16 @@
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/369",
       "updated_at": "2026-09-16T21:27:15Z"
+    },
+    {
+      "id": "github-pr-376",
+      "title": "PR #376 YOS統合アプリ P2｜本人Queue・進捗HOME",
+      "type": "GitHub PR",
+      "status": "review",
+      "priority": 1,
+      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/376",
+      "updated_at": "2026-09-17T04:18:35Z"
     },
     {
       "id": "github-pr-370",
@@ -50,7 +50,7 @@
       "priority": 2,
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/373",
-      "updated_at": "2026-09-17T01:37:33Z"
+      "updated_at": "2026-09-17T03:07:33Z"
     },
     {
       "id": "github-pr-374",
@@ -60,7 +60,7 @@
       "priority": 2,
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/374",
-      "updated_at": "2026-09-17T01:41:36Z"
+      "updated_at": "2026-09-17T04:16:49Z"
     },
     {
       "id": "github-issue-120",
@@ -90,7 +90,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-09-17T01:42:49Z"
+      "updated_at": "2026-09-17T04:18:35Z"
     },
     {
       "id": "github-issue-234",
@@ -101,16 +101,6 @@
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/234",
       "updated_at": "2026-08-22T13:41:40Z"
-    },
-    {
-      "id": "github-issue-238",
-      "title": "Issue #238 [YOS→Codex] Taxi｜営業意思決定ループ最終統合",
-      "type": "GitHub Issue",
-      "status": "open",
-      "priority": 3,
-      "next_action": "完成条件を確認し、次の安全な実装を1件進める",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/238",
-      "updated_at": "2026-08-12T12:04:15Z"
     },
     {
       "id": "github-issue-250",
@@ -151,6 +141,16 @@
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/254",
       "updated_at": "2026-08-23T16:45:10Z"
+    },
+    {
+      "id": "github-issue-256",
+      "title": "Issue #256 [YOS→Codex] YOS Capture｜思いつきを1秒で失わず保存・自動整理",
+      "type": "GitHub Issue",
+      "status": "open",
+      "priority": 3,
+      "next_action": "完成条件を確認し、次の安全な実装を1件進める",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/256",
+      "updated_at": "2026-09-12T03:34:43Z"
     },
     {
       "id": "github-issue-51",
@@ -224,7 +224,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #369をレビューして公開判断する",
+      "next_action": "PR #376をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-17T10:47:25+09:00",
+      "last_update": "2026-09-17T14:57:23+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -309,13 +309,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 29件・Open PR 20件を自動同期中",
+      "next_action": "Open Issue 28件・Open PR 20件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-17T10:47:25+09:00",
+      "last_update": "2026-09-17T14:57:23+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -329,7 +329,7 @@
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #369をレビューして公開判断する",
+      "next_action": "PR #376をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-17T10:47:25+09:00",
+      "last_update": "2026-09-17T14:57:23+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "9cadeb5da41f55500f03f7399bdef7337864c738de42055d5114323927a4de9a"
+  "github_snapshot_hash": "fb78d3d6dc3b46648f880c7c8c35b191e95ad4f85a1d39349bba426b5b81a5ce"
 }
