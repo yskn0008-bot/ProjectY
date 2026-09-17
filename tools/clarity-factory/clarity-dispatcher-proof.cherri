@@ -14,12 +14,14 @@ Shortcut Input is a dictionary containing:
 - input: dictionary passed unchanged to the child Shortcut
 
 The registry is intentionally tiny for proof. Unknown modules fail closed.
-The child name is held in a variable and passed to Cherri's run() action,
-which maps to Apple's Run Shortcut action.
+Dictionary values are normalized through text interpolation before comparison
+because Cherri getValue() returns the generic variable type.
+The selected child name is then passed to Apple's Run Shortcut action.
 */
 
 @request = getDictionary(ShortcutInput)
-@module = getValue(@request, "module")
+@moduleValue = getValue(@request, "module")
+@module = "{@moduleValue}"
 @childInput = getValue(@request, "input")
 
 @registered = false
