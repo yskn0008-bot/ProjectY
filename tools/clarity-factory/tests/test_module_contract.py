@@ -45,6 +45,14 @@ class ModuleContractTests(unittest.TestCase):
         registry = self.contract["initial_registry"]
         self.assertFalse(registry["YOS_Test"]["enabled"])
         self.assertFalse(registry["YOS_Timer"]["enabled"])
+        self.assertFalse(registry["YOS_Money"]["enabled"])
+
+    def test_money_module_is_clarity_only_and_preserves_raw_input(self):
+        money = self.contract["initial_registry"]["YOS_Money"]
+        self.assertEqual(money["entry_policy"], "clarity_only")
+        self.assertTrue(money["preserve_original_input"])
+        self.assertEqual(money["input_schema"], {"raw_input": "non_empty_string"})
+        self.assertTrue(money["side_effect"])
 
 
 if __name__ == "__main__":
