@@ -3,9 +3,9 @@ import fs from 'node:fs'
 
 const source = fs.readFileSync(new URL('../scriptable/life-auto/YOS Life AUTO Bootstrap.js', import.meta.url), 'utf8')
 
-assert.match(source, /bb4c089e6e3ea701e4bea66bc9e6117057031ec2/)
+assert.match(source, /bc803305438d7fa3aeb48b67f9fb26f2d46163d1/)
 assert.match(source, /YOS Life AUTO Installer\.js/)
-assert.match(source, /YOS Life AUTO Installer v0\.2/)
+assert.match(source, /YOS Life AUTO Installer v0\.3/)
 assert.match(source, /FORBIDDEN_MARKERS/)
 assert.match(source, /FileManager\.iCloud\(\)/)
 assert.match(source, /fm\.writeString\(target, source\)/)
