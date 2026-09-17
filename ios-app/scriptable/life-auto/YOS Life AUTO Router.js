@@ -1,10 +1,11 @@
-// YOS Life AUTO Router v0.2
-// Receives a life-state from iOS Shortcuts, persists it, and executes only the
-// allowlisted existing shortcuts for that state through Apple's x-callback URL.
+// YOS Life AUTO Router v0.3
+// Receives a life-state from iOS Shortcuts, normalizes it, persists the current state,
+// and returns the ordered existing shortcuts that iOS Shortcuts should run next.
+// Important: child shortcuts are NOT launched from Scriptable. Scriptable CallbackURL
+// cannot invoke Shortcuts while this script itself is running inside Shortcuts/Siri.
 
-const SCHEMA = 'yos.life-auto-router.v0.2'
+const SCHEMA = 'yos.life-auto-router.v0.3'
 const STATE_KEY = 'yos.life.auto.state.v1'
-const SHORTCUT_CALLBACK = 'shortcuts://x-callback-url/run-shortcut'
 
 const ROUTES = {
   wake: {
@@ -75,7 +76,6 @@ function buildPlan(input) {
   const parsed = parseInput(input)
   const state = normalizeState(parsed.state ?? parsed.status ?? parsed.mode ?? input)
   const now = new Date().toISOString()
-  const execute = parsed.execute !== false && parsed.dryRun !== true
 
   if (!state) {
     return {
@@ -84,7 +84,6 @@ function buildPlan(input) {
       state: null,
       label: '未判定',
       actions: [],
-      execute: false,
       changedAt: now,
       reason: 'unknown_state'
     }
@@ -97,51 +96,24 @@ function buildPlan(input) {
     state,
     label: route.label,
     actions: route.actions,
-    execute,
     changedAt: now,
+    executor: 'ios-shortcuts',
     pilot: true
   }
 }
 
 function persist(plan) {
   if (!plan.ok || typeof Keychain === 'undefined') return
-  const snapshot = JSON.stringify({
+  Keychain.set(STATE_KEY, JSON.stringify({
     schema: plan.schema,
     state: plan.state,
     label: plan.label,
     changedAt: plan.changedAt
-  })
-  Keychain.set(STATE_KEY, snapshot)
+  }))
 }
 
-async function runShortcut(name) {
-  if (typeof CallbackURL === 'undefined') {
-    throw new Error('CallbackURL unavailable')
-  }
-  const callback = new CallbackURL(SHORTCUT_CALLBACK)
-  callback.addParameter('name', name)
-  return await callback.open()
-}
-
-async function executePlan(plan) {
-  const results = []
-  if (!plan.ok || !plan.execute) return results
-
-  for (const action of plan.actions) {
-    if (action.type !== 'runShortcut') continue
-    try {
-      const response = await runShortcut(action.name)
-      results.push({ name: action.name, ok: true, response: response ?? null })
-    } catch (error) {
-      results.push({ name: action.name, ok: false, error: String(error?.message ?? error) })
-    }
-  }
-  return results
-}
-
-function finish(plan, execution) {
-  const payload = { ...plan, execution }
-  const text = JSON.stringify(payload)
+function finish(plan) {
+  const text = JSON.stringify(plan)
   if (typeof Script !== 'undefined' && typeof Script.setShortcutOutput === 'function') {
     Script.setShortcutOutput(text)
     if (typeof Script.complete === 'function') Script.complete()
@@ -150,12 +122,7 @@ function finish(plan, execution) {
   }
 }
 
-async function main() {
-  const shortcutInput = typeof args !== 'undefined' ? args.shortcutParameter : null
-  const plan = buildPlan(shortcutInput)
-  persist(plan)
-  const execution = await executePlan(plan)
-  finish(plan, execution)
-}
-
-main()
+const shortcutInput = typeof args !== 'undefined' ? args.shortcutParameter : null
+const plan = buildPlan(shortcutInput)
+persist(plan)
+finish(plan)
