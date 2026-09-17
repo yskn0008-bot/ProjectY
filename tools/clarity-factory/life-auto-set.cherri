@@ -2,7 +2,7 @@
 #define color orange
 #define inputs text
 #define noinput stopwith "生活状態（帰宅・くつろぐ・就寝・外出）が必要です"
-#define version 18.0
+#define version 18
 
 // Thin bridge only. Appliance logic remains in Scriptable: YOS Life AUTO Remote.
 @scene = "{ShortcutInput}"
