@@ -1,0 +1,32 @@
+#define name 生活AUTOセット
+#define color orange
+#define inputs text
+#define noinput stopwith "生活状態（帰宅・くつろぐ・就寝・外出）が必要です"
+#define version 18.0
+
+// Thin bridge only. Appliance logic remains in Scriptable: YOS Life AUTO Remote.
+@scene = "{ShortcutInput}"
+
+if @scene == "帰宅" || @scene == "home" {
+    rawAction("is.workflow.actions.openurl", {
+        "WFInput": "scriptable:///run?scriptName=YOS%20Life%20AUTO%20Remote&scene=home"
+    })
+}
+
+if @scene == "くつろぐ" || @scene == "relax" {
+    rawAction("is.workflow.actions.openurl", {
+        "WFInput": "scriptable:///run?scriptName=YOS%20Life%20AUTO%20Remote&scene=relax"
+    })
+}
+
+if @scene == "就寝" || @scene == "sleep" {
+    rawAction("is.workflow.actions.openurl", {
+        "WFInput": "scriptable:///run?scriptName=YOS%20Life%20AUTO%20Remote&scene=sleep"
+    })
+}
+
+if @scene == "外出" || @scene == "away" {
+    rawAction("is.workflow.actions.openurl", {
+        "WFInput": "scriptable:///run?scriptName=YOS%20Life%20AUTO%20Remote&scene=away"
+    })
+}
