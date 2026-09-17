@@ -1,0 +1,100 @@
+name: Life AUTO shortcut
+
+on:
+  pull_request:
+    paths:
+      - 'tools/clarity-factory/life-auto-set.cherri'
+      - 'tools/clarity-factory/sign_with_hubsign.py'
+      - '.github/workflows/life-auto-shortcut.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pinned Cherri v2.3.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          url='https://github.com/electrikmilk/cherri/releases/download/v2.3.0/cherri_linux-x86_64.zip'
+          expected='7ab2c384b7b26e7c72a30a8dfa56f89dae12c4068b7951bc1e3193f3698edbe9'
+          curl -fsSL "$url" -o /tmp/cherri.zip
+          printf '%s  %s\n' "$expected" /tmp/cherri.zip | sha256sum -c -
+          mkdir -p /tmp/cherri
+          unzip -q /tmp/cherri.zip -d /tmp/cherri
+          binary="$(find /tmp/cherri -type f -name cherri -print -quit)"
+          test -n "$binary"
+          sudo install -m 0755 "$binary" /usr/local/bin/cherri
+          cherri --version
+
+      - name: Compile 生活AUTOセット
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd tools/clarity-factory
+          rm -f './生活AUTOセット_unsigned.shortcut' './生活AUTOセット.plist'
+          cherri life-auto-set.cherri --skip-sign --debug
+          test -f './生活AUTOセット_unsigned.shortcut'
+          mkdir -p artifacts-life-auto
+          cp './生活AUTOセット_unsigned.shortcut' artifacts-life-auto/life-auto-set-unsigned.shortcut
+          cp './生活AUTOセット.plist' artifacts-life-auto/life-auto-set.plist
+
+      - name: Validate bridge shape
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import plistlib
+          from pathlib import Path
+          p=Path('tools/clarity-factory/artifacts-life-auto/life-auto-set-unsigned.shortcut')
+          d=plistlib.loads(p.read_bytes())
+          actions=d.get('WFWorkflowActions',[])
+          ids=[a.get('WFWorkflowActionIdentifier') for a in actions]
+          if ids.count('is.workflow.actions.openurl') != 4:
+              raise SystemExit(f'expected 4 openurl actions, got {ids.count("is.workflow.actions.openurl")}')
+          raw=p.read_bytes()
+          for needle in [b'scene=home',b'scene=relax',b'scene=sleep',b'scene=away']:
+              if needle not in raw:
+                  raise SystemExit(f'missing {needle!r}')
+          print('OK: life AUTO bridge shape validated')
+          PY
+
+      - name: Sign with proven HubSign fallback
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/clarity-factory/sign_with_hubsign.py \
+            --input tools/clarity-factory/artifacts-life-auto/life-auto-set-unsigned.shortcut \
+            --output tools/clarity-factory/artifacts-life-auto/生活AUTOセット.shortcut \
+            --name '生活AUTOセット'
+
+      - name: Verify signed artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('tools/clarity-factory/artifacts-life-auto/生活AUTOセット.shortcut')
+          data=p.read_bytes()
+          if not data.startswith(b'AEA1'):
+              raise SystemExit(f'expected signed AEA1 shortcut, got {data[:8]!r}')
+          if len(data) < 500:
+              raise SystemExit(f'artifact unexpectedly small: {len(data)} bytes')
+          print(f'OK: signed artifact {len(data)} bytes')
+          PY
+
+      - name: Upload 生活AUTOセット
+        uses: actions/upload-artifact@v4
+        with:
+          name: life-auto-shortcut
+          path: |
+            tools/clarity-factory/artifacts-life-auto/生活AUTOセット.shortcut
+            tools/clarity-factory/artifacts-life-auto/life-auto-set-unsigned.shortcut
+            tools/clarity-factory/artifacts-life-auto/life-auto-set.plist
+          if-no-files-found: error
