@@ -67,6 +67,25 @@ jobs:
           mkdir -p artifacts
           cp "$proof" artifacts/Clarity-Compiler-Proof-unsigned.shortcut
 
+      - name: Compile modular dispatcher proof
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd tools/clarity-factory
+          rm -f './Clarity Dispatcher Proof_unsigned.shortcut' './Clarity Dispatcher Proof.plist' './YOS_Test_unsigned.shortcut' './YOS_Test.plist'
+          cherri clarity-dispatcher-proof.cherri --skip-sign --debug
+          cherri yos-test.cherri --skip-sign --debug
+          dispatcher='./Clarity Dispatcher Proof_unsigned.shortcut'
+          child='./YOS_Test_unsigned.shortcut'
+          test -f "$dispatcher"
+          test -f "$child"
+          grep -q 'is.workflow.actions.runworkflow' "$dispatcher"
+          grep -q 'WFWorkflowName' "$dispatcher"
+          grep -q 'YOS_Test' "$dispatcher"
+          mkdir -p artifacts
+          cp "$dispatcher" artifacts/Clarity-Dispatcher-Proof-unsigned.shortcut
+          cp "$child" artifacts/YOS-Test-unsigned.shortcut
+
       - name: Compile Clarity Raw First runtime
         shell: bash
         run: |
@@ -98,6 +117,56 @@ jobs:
             echo 'Potential secret/private network value found.' >&2
             exit 1
           fi
+
+      - name: Sign modular proof shortcuts with proven HubSign path
+        id: hubsign_modules
+        continue-on-error: true
+        shell: bash
+        run: |
+          set +e
+          set -o pipefail
+          log='tools/clarity-factory/artifacts/hubsign-modules.log'
+          : > "$log"
+
+          python3 tools/clarity-factory/sign_with_hubsign.py \
+            --input tools/clarity-factory/artifacts/Clarity-Dispatcher-Proof-unsigned.shortcut \
+            --output tools/clarity-factory/artifacts/Clarity-Dispatcher-Proof-signed.shortcut \
+            --name 'Clarity Dispatcher Proof' \
+            2>&1 | tee -a "$log"
+          dispatcher_status=${PIPESTATUS[0]}
+          echo "Dispatcher HubSign exit code: ${dispatcher_status}" | tee -a "$log"
+
+          python3 tools/clarity-factory/sign_with_hubsign.py \
+            --input tools/clarity-factory/artifacts/YOS-Test-unsigned.shortcut \
+            --output tools/clarity-factory/artifacts/YOS-Test-signed.shortcut \
+            --name 'YOS_Test' \
+            2>&1 | tee -a "$log"
+          child_status=${PIPESTATUS[0]}
+          echo "YOS_Test HubSign exit code: ${child_status}" | tee -a "$log"
+
+          if [ "$dispatcher_status" -ne 0 ] || [ "$child_status" -ne 0 ]; then
+            exit 1
+          fi
+
+      - name: Verify signed modular proof artifacts when HubSign succeeds
+        if: steps.hubsign_modules.outcome == 'success'
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PYVERIFY'
+          from pathlib import Path
+          for rel in (
+              'tools/clarity-factory/artifacts/Clarity-Dispatcher-Proof-signed.shortcut',
+              'tools/clarity-factory/artifacts/YOS-Test-signed.shortcut',
+          ):
+              p = Path(rel)
+              data = p.read_bytes()
+              if not data.startswith(b'AEA1'):
+                  raise SystemExit(f'expected signed AEA1 shortcut for {p.name}, got {data[:8]!r}')
+              if len(data) < 500:
+                  raise SystemExit(f'{p.name} unexpectedly small: {len(data)} bytes')
+              print(f'OK: signed {p.name}, {len(data)} bytes')
+          PYVERIFY
 
       - name: Try proven HubSign fallback for secret-free runtime
         id: hubsign
@@ -138,6 +207,11 @@ jobs:
           name: clarity-cherri-artifacts
           path: |
             tools/clarity-factory/artifacts/Clarity-Compiler-Proof-unsigned.shortcut
+            tools/clarity-factory/artifacts/Clarity-Dispatcher-Proof-unsigned.shortcut
+            tools/clarity-factory/artifacts/Clarity-Dispatcher-Proof-signed.shortcut
+            tools/clarity-factory/artifacts/YOS-Test-unsigned.shortcut
+            tools/clarity-factory/artifacts/YOS-Test-signed.shortcut
+            tools/clarity-factory/artifacts/hubsign-modules.log
             tools/clarity-factory/artifacts/Clarity-v1-unsigned.shortcut
             tools/clarity-factory/artifacts/Clarity-v1-signed.shortcut
             tools/clarity-factory/artifacts/hubsign.log
