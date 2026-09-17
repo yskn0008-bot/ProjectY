@@ -1,6 +1,19 @@
 {
-  "version": "1.0",
-  "purpose": "Additive Clarity Router-to-child-Shortcut contract. Existing Clarity v1 executors remain the fallback until physical iPhone E2E passes.",
+  "version": "1.1",
+  "purpose": "Additive Clarity Router-to-child-Shortcut contract. Existing Clarity executors remain the fallback until physical iPhone E2E passes.",
+  "understand_layer": {
+    "preferred_runtime": "apple_shortcuts_use_model",
+    "role": "structure_intents_only",
+    "output_contract": "action",
+    "supports_multiple_actions": true,
+    "physical_device_evidence": {
+      "platform": "iphone",
+      "observed_domains": ["calendar", "shopping", "idea"],
+      "status": "observed_on_device_2026-09-18"
+    },
+    "fallback": "existing_clarity_executor_path",
+    "cutover_rule": "Keep fallback until the Use Model -> Router -> child Shortcut path passes physical iPhone E2E."
+  },
   "action": {
     "required": [
       "id",
@@ -38,7 +51,7 @@
     "keep_existing_executor_path": true,
     "keep_existing_requires_confirmation": true,
     "normalization": "needs_confirmation is canonical for modular actions; when a legacy action is adapted, effective confirmation is needs_confirmation OR requires_confirmation.",
-    "cutover": "Do not remove or bypass the existing executor path until modular physical iPhone E2E and rollback checks pass."
+    "cutover": "Do not remove or bypass the existing executor path until the preferred Use Model modular path passes physical iPhone E2E and rollback checks."
   },
   "ledger_mapping": {
     "success_verified": "APPLIED",
