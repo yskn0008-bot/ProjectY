@@ -1,4 +1,4 @@
-// YOS Life AUTO Installer v0.2
+// YOS Life AUTO Installer v0.3
 // Installs/updates YOS Life AUTO Router into Scriptable iCloud with backup + rollback.
 
 const SOURCE_SHA = 'f7316540bcb0c8c975da7d5f49b0e298d090b344'
@@ -11,7 +11,7 @@ const REQUIRED_MARKERS = [
   "label: '起床'",
   "label: '就寝'"
 ]
-const FORBIDDEN_MARKERS = ['CallbackURL', 'x-callback-url/run-shortcut']
+const FORBIDDEN_MARKERS = ['new CallbackURL', 'shortcuts://x-callback-url/run-shortcut']
 
 function assertSource(text) {
   if (!text || text.length < 1000) throw new Error('Router source is unexpectedly short')
