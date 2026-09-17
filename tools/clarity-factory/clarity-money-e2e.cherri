@@ -1,0 +1,98 @@
+#define name Clarity Money E2E
+#define color blue
+#define version 18
+
+#include 'actions/text'
+#include 'actions/documents'
+#include 'actions/shortcuts'
+
+// Physical iPhone acceptance harness only. Not a normal daily entry point.
+// It proves Clarity Raw First -> YOS_Money -> Scriptable bridge -> Money ledger -> verified child result.
+action 'file.append' appendResolvedFile(
+    variable file: 'WFFile',
+    variable input: 'WFInput'
+) {
+    "WFAppendFileWriteMode": "Append"
+}
+
+action 'is.workflow.actions.output' outputValue(variable value: 'WFOutput')
+
+const originalInput = listen("After Pause", "jp-JP")
+const requestNumber = randomNumber(100000, 999999)
+const rawRecord = text("{CurrentDate}\t{requestNumber}\tRAW\t{originalInput}\n")
+const inboxFile = getFile("Clarity Inbox.txt")
+appendResolvedFile(inboxFile, rawRecord)
+const ledgerFile = getFile("Clarity Ledger.txt")
+
+const childInput = {
+    "raw_input": "{originalInput}"
+}
+const childRaw = run("YOS_Money", childInput)
+const childType = typeOf(childRaw)
+
+if childType != "Dictionary" {
+    const invalidRecord = text("{CurrentDate}\t{requestNumber}\tFAILED\tYOS_Money\tinvalid_child_result\n")
+    appendResolvedFile(ledgerFile, invalidRecord)
+    const invalidOutput = {
+        "status": "failed",
+        "verified": false,
+        "result": {
+            "message": "Money実行結果を確認できませんでした"
+        },
+        "error_code": "invalid_child_result"
+    }
+    outputValue(invalidOutput)
+}
+
+const child = getDictionary(childRaw)
+const statusValue = getValue(child, "status")
+const verifiedValue = getValue(child, "verified")
+const resultValue = getValue(child, "result")
+const errorValue = getValue(child, "error_code")
+const status = "{statusValue}"
+const verifiedText = "{verifiedValue}"
+const resultText = "{resultValue}"
+const errorCode = "{errorValue}"
+
+if !status || !verifiedText || !resultText {
+    const incompleteRecord = text("{CurrentDate}\t{requestNumber}\tFAILED\tYOS_Money\tincomplete_child_result\n")
+    appendResolvedFile(ledgerFile, incompleteRecord)
+    const incompleteOutput = {
+        "status": "failed",
+        "verified": false,
+        "result": {
+            "message": "Money実行結果が不完全です"
+        },
+        "error_code": "incomplete_child_result"
+    }
+    outputValue(incompleteOutput)
+}
+
+const resultDictionary = getDictionary(resultText)
+const messageValue = getValue(resultDictionary, "message")
+const message = "{messageValue}"
+
+if status == "success" && verifiedText == "true" {
+    const appliedRecord = text("{CurrentDate}\t{requestNumber}\tAPPLIED\tYOS_Money\t{originalInput}\n")
+    appendResolvedFile(ledgerFile, appliedRecord)
+    if message {
+        show("{message}")
+    }
+    outputValue(child)
+}
+
+if status == "blocked" {
+    const blockedRecord = text("{CurrentDate}\t{requestNumber}\tBLOCKED\tYOS_Money\t{errorCode}\n")
+    appendResolvedFile(ledgerFile, blockedRecord)
+    if message {
+        show("{message}")
+    }
+    outputValue(child)
+}
+
+const failedRecord = text("{CurrentDate}\t{requestNumber}\tFAILED\tYOS_Money\t{errorCode}\n")
+appendResolvedFile(ledgerFile, failedRecord)
+if message {
+    show("{message}")
+}
+outputValue(child)
