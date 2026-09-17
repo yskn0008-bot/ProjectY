@@ -34,21 +34,18 @@ def validate(path: Path) -> None:
     if len(callback_indexes) != 1:
         raise AssertionError(f"expected one x-callback executor, found {len(callback_indexes)}")
 
-    callback_params = repr(actions[callback_indexes[0]].get("WFWorkflowActionParameters", {}))
+    # The callback action receives a Magic Variable, so the Scriptable URL lives in the
+    # upstream Text action rather than literally inside the callback action parameters.
+    serialized = repr(root)
     for required in (
         "scriptable:///run/YOS%20Money%20Clarity%20Bridge",
         "source=clarity",
-    ):
-        if required not in callback_params:
-            raise AssertionError(f"Money callback missing {required!r}")
-
-    serialized = repr(root)
-    for required in (
         "raw_input",
         "status",
         "verified",
         "result",
         "error_code",
+        "payload_json",
         "invalid_money_input",
         "missing_raw_input",
         "invalid_money_callback",
@@ -73,8 +70,8 @@ def validate(path: Path) -> None:
         if any(fragment in lowered for fragment in forbidden_action_fragments):
             raise AssertionError(f"forbidden Money child action found: {ident}")
 
-    if not any(ident.endswith("detect.dictionary") for ident in identifiers):
-        raise AssertionError("Money child must validate dictionary input/callback")
+    if sum(ident.endswith("detect.dictionary") for ident in identifiers) < 2:
+        raise AssertionError("Money child must validate dictionary input and callback payload")
     if not any(ident.endswith("output") for ident in identifiers):
         raise AssertionError("Money child must return a parent-verifiable result")
 
