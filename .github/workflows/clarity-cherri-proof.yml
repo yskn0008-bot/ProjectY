@@ -88,18 +88,18 @@ jobs:
           mkdir -p artifacts
           cp "$runtime" artifacts/Clarity-v1-unsigned.shortcut
 
-      - name: Compile YOS_Money child runtime
+      - name: Compile Money child runtime
         shell: bash
         run: |
           set -euo pipefail
           cd tools/clarity-factory
-          rm -f './YOS_Money_unsigned.shortcut' './YOS_Money.plist'
+          rm -f './Money_unsigned.shortcut' './Money.plist'
           cherri yos-money.cherri --skip-sign --debug
-          runtime='./YOS_Money_unsigned.shortcut'
+          runtime='./Money_unsigned.shortcut'
           test -f "$runtime"
           python3 validate_yos_money.py "$runtime"
           mkdir -p artifacts
-          cp "$runtime" artifacts/YOS-Money-unsigned.shortcut
+          cp "$runtime" artifacts/Money-unsigned.shortcut
 
       - name: Secret scan
         shell: bash
@@ -144,7 +144,7 @@ jobs:
           print(f'OK: signed Clarity artifact, {len(data)} bytes')
           PY
 
-      - name: Try HubSign for YOS_Money child
+      - name: Try HubSign for Money child
         id: hubsign_money
         continue-on-error: true
         shell: bash
@@ -152,28 +152,28 @@ jobs:
           set +e
           set -o pipefail
           python3 tools/clarity-factory/sign_with_hubsign.py \
-            --input tools/clarity-factory/artifacts/YOS-Money-unsigned.shortcut \
-            --output tools/clarity-factory/artifacts/YOS-Money-signed.shortcut \
-            --name 'YOS_Money' \
+            --input tools/clarity-factory/artifacts/Money-unsigned.shortcut \
+            --output tools/clarity-factory/artifacts/Money-signed.shortcut \
+            --name 'Money' \
             2>&1 | tee tools/clarity-factory/artifacts/hubsign-money.log
           status=${PIPESTATUS[0]}
           echo "HubSign exit code: ${status}" | tee -a tools/clarity-factory/artifacts/hubsign-money.log
           exit "${status}"
 
-      - name: Verify signed YOS_Money artifact when HubSign succeeds
+      - name: Verify signed Money artifact when HubSign succeeds
         if: steps.hubsign_money.outcome == 'success'
         shell: bash
         run: |
           set -euo pipefail
           python3 - <<'PY'
           from pathlib import Path
-          p = Path('tools/clarity-factory/artifacts/YOS-Money-signed.shortcut')
+          p = Path('tools/clarity-factory/artifacts/Money-signed.shortcut')
           data = p.read_bytes()
           if not data.startswith(b'AEA1'):
               raise SystemExit(f'expected signed AEA1 shortcut, got {data[:8]!r}')
           if len(data) < 300:
               raise SystemExit(f'artifact unexpectedly small: {len(data)} bytes')
-          print(f'OK: signed YOS_Money artifact, {len(data)} bytes')
+          print(f'OK: signed Money artifact, {len(data)} bytes')
           PY
 
       - name: Upload Clarity artifacts and signing evidence
@@ -185,8 +185,8 @@ jobs:
             tools/clarity-factory/artifacts/Clarity-Compiler-Proof-unsigned.shortcut
             tools/clarity-factory/artifacts/Clarity-v1-unsigned.shortcut
             tools/clarity-factory/artifacts/Clarity-v1-signed.shortcut
-            tools/clarity-factory/artifacts/YOS-Money-unsigned.shortcut
-            tools/clarity-factory/artifacts/YOS-Money-signed.shortcut
+            tools/clarity-factory/artifacts/Money-unsigned.shortcut
+            tools/clarity-factory/artifacts/Money-signed.shortcut
             tools/clarity-factory/artifacts/hubsign.log
             tools/clarity-factory/artifacts/hubsign-money.log
           if-no-files-found: error
