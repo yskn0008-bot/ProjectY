@@ -1,0 +1,101 @@
+name: Home arrival AUTO shortcut
+
+on:
+  pull_request:
+    paths:
+      - 'tools/clarity-factory/home-arrival-auto.cherri'
+      - 'tools/clarity-factory/sign_with_hubsign.py'
+      - '.github/workflows/home-arrival-auto-shortcut.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pinned Cherri v2.3.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          url='https://github.com/electrikmilk/cherri/releases/download/v2.3.0/cherri_linux-x86_64.zip'
+          expected='7ab2c384b7b26e7c72a30a8dfa56f89dae12c4068b7951bc1e3193f3698edbe9'
+          curl -fsSL "$url" -o /tmp/cherri.zip
+          printf '%s  %s\n' "$expected" /tmp/cherri.zip | sha256sum -c -
+          mkdir -p /tmp/cherri
+          unzip -q /tmp/cherri.zip -d /tmp/cherri
+          binary="$(find /tmp/cherri -type f -name cherri -print -quit)"
+          test -n "$binary"
+          sudo install -m 0755 "$binary" /usr/local/bin/cherri
+          cherri --version
+
+      - name: Compile 帰宅AUTO
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd tools/clarity-factory
+          rm -f './帰宅AUTO_unsigned.shortcut' './帰宅AUTO.plist'
+          cherri home-arrival-auto.cherri --skip-sign --debug
+          test -f './帰宅AUTO_unsigned.shortcut'
+          mkdir -p artifacts-home-arrival
+          cp './帰宅AUTO_unsigned.shortcut' artifacts-home-arrival/home-arrival-auto-unsigned.shortcut
+          cp './帰宅AUTO.plist' artifacts-home-arrival/home-arrival-auto.plist
+
+      - name: Validate light-only bridge
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import plistlib
+          from pathlib import Path
+          p=Path('tools/clarity-factory/artifacts-home-arrival/home-arrival-auto-unsigned.shortcut')
+          d=plistlib.loads(p.read_bytes())
+          actions=d.get('WFWorkflowActions',[])
+          ids=[a.get('WFWorkflowActionIdentifier') for a in actions]
+          if ids.count('is.workflow.actions.openurl') != 1:
+              raise SystemExit(f'expected 1 openurl action, got {ids.count("is.workflow.actions.openurl")}')
+          raw=p.read_bytes()
+          if b'YOS%20Light%20Widget&action=on' not in raw:
+              raise SystemExit('missing light ON target')
+          if b'YOS%20AC%20Widget' in raw or b'YOS%20Life%20AUTO%20Remote' in raw:
+              raise SystemExit('unexpected AC/Life AUTO dependency')
+          print('OK: light-only arrival bridge validated')
+          PY
+
+      - name: Sign with proven HubSign fallback
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/clarity-factory/sign_with_hubsign.py \
+            --input tools/clarity-factory/artifacts-home-arrival/home-arrival-auto-unsigned.shortcut \
+            --output tools/clarity-factory/artifacts-home-arrival/帰宅AUTO.shortcut \
+            --name '帰宅AUTO'
+
+      - name: Verify signed artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('tools/clarity-factory/artifacts-home-arrival/帰宅AUTO.shortcut')
+          data=p.read_bytes()
+          if not data.startswith(b'AEA1'):
+              raise SystemExit(f'expected signed AEA1 shortcut, got {data[:8]!r}')
+          if len(data) < 500:
+              raise SystemExit(f'artifact unexpectedly small: {len(data)} bytes')
+          print(f'OK: signed artifact {len(data)} bytes')
+          PY
+
+      - name: Upload 帰宅AUTO
+        uses: actions/upload-artifact@v4
+        with:
+          name: home-arrival-auto-shortcut
+          path: |
+            tools/clarity-factory/artifacts-home-arrival/帰宅AUTO.shortcut
+            tools/clarity-factory/artifacts-home-arrival/home-arrival-auto-unsigned.shortcut
+            tools/clarity-factory/artifacts-home-arrival/home-arrival-auto.plist
+          if-no-files-found: error
