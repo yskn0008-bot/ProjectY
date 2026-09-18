@@ -76,6 +76,6 @@ if @intentCount < 1 {
     outputValue(@blocked)
 }
 
-@passed = {"status":"success","verified":true,"result":{"message":"MODEL_ROUTER_E2E_PASS","intent_count":@intentCount},"error_code":""}
+@passed = {"status":"success","verified":true,"result":{"message":"MODEL_ROUTER_E2E_PASS"},"error_code":""}
 show("Clarity Model Router Proof\nPASS\nMODEL_ROUTER_E2E_PASS\nIntents: {@intentCount}")
 outputValue(@passed)
