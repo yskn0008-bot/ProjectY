@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-18T13:36:48+09:00",
+  "updated_at": "2026-09-18T13:45:56+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -90,7 +90,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-09-18T03:42:35Z"
+      "updated_at": "2026-09-18T04:45:30Z"
     },
     {
       "id": "github-issue-234",
@@ -165,39 +165,39 @@
   ],
   "recently_completed": [
     {
-      "id": "github-commit-24d144ed337b",
-      "title": "Merge PR #376: YOS統合アプリ P2｜本人Queue・進捗HOME",
-      "completed_at": "2026-09-18T04:36:32Z",
-      "result": "GitHub mainへ反映（24d144e）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/24d144ed337b52b148995f90db58a1f15c03f077"
+      "id": "github-commit-200df426a8a6",
+      "title": "Merge PR #384: YOS iPhone public entry",
+      "completed_at": "2026-09-18T04:45:41Z",
+      "result": "GitHub mainへ反映（200df42）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/200df426a8a67e5c587c677c3e74891a1a24e4ea"
     },
     {
-      "id": "github-commit-f3938951725c",
-      "title": "preview: add standalone YOS iPhone device check (#381)",
-      "completed_at": "2026-09-17T08:19:22Z",
-      "result": "GitHub mainへ反映（f393895）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/f3938951725c254049908cbc368dc9e47aa198c6"
+      "id": "github-commit-4eae86aece2a",
+      "title": "refactor: reuse existing YOS shell entry",
+      "completed_at": "2026-09-18T04:43:52Z",
+      "result": "GitHub mainへ反映（4eae86a）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/4eae86aece2a45e0880491c657a467a986260d6c"
     },
     {
-      "id": "github-commit-f16b60043a16",
-      "title": "Merge PR #380: fix Life task quick add",
-      "completed_at": "2026-09-17T06:59:07Z",
-      "result": "GitHub mainへ反映（f16b600）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/f16b60043a16d80f4503a91c3327f59a000f08c6"
+      "id": "github-commit-48f74a23a83a",
+      "title": "refactor: reuse existing YOS shell entry",
+      "completed_at": "2026-09-18T04:43:50Z",
+      "result": "GitHub mainへ反映（48f74a2）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/48f74a23a83af1aff0ff029d058586ed2467d984"
     },
     {
-      "id": "github-commit-791f77873f4f",
-      "title": "test(life): gate task quick add",
-      "completed_at": "2026-09-17T06:56:26Z",
-      "result": "GitHub mainへ反映（791f778）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/791f77873f4f732204875588f579cee4595cf111"
+      "id": "github-commit-59b5cc69f811",
+      "title": "refactor: reuse existing YOS shell entry",
+      "completed_at": "2026-09-18T04:43:47Z",
+      "result": "GitHub mainへ反映（59b5cc6）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/59b5cc69f811f64099bfbd51a66742d4284439d0"
     },
     {
-      "id": "github-commit-b8fc193c1393",
-      "title": "test(life): verify plus adds task on iPhone flow",
-      "completed_at": "2026-09-17T06:56:07Z",
-      "result": "GitHub mainへ反映（b8fc193）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/b8fc193c13934dbb9b8b7d7fea53c801708dab4d"
+      "id": "github-commit-947d76270316",
+      "title": "refactor: reuse existing YOS shell entry",
+      "completed_at": "2026-09-18T04:43:45Z",
+      "result": "GitHub mainへ反映（947d762）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/947d762703169aedf41dd5c267dc61fc719de0b3"
     },
     {
       "id": "complete-002",
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-18T13:36:48+09:00",
+      "last_update": "2026-09-18T13:45:56+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -315,7 +315,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-18T13:36:48+09:00",
+      "last_update": "2026-09-18T13:45:56+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-18T13:36:48+09:00",
+      "last_update": "2026-09-18T13:45:56+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "ceb231748a3ed19641874a141b613473e41e0d13f7a7916c153868c60ee18e92"
+  "github_snapshot_hash": "fa9e3fb873923aa432b6fdb7655186a0c86ce99280caf8c904766eed9f4e38ce"
 }
