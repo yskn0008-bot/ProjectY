@@ -1,0 +1,102 @@
+name: Mother Shadow shortcut
+
+on:
+  pull_request:
+    paths:
+      - 'tools/departure-guard/mother-shadow-v1.cherri'
+      - 'tools/clarity-factory/sign_with_hubsign.py'
+      - '.github/workflows/mother-shadow-shortcut.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pinned Cherri v2.3.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          url='https://github.com/electrikmilk/cherri/releases/download/v2.3.0/cherri_linux-x86_64.zip'
+          expected='7ab2c384b7b26e7c72a30a8dfa56f89dae12c4068b7951bc1e3193f3698edbe9'
+          curl -fsSL "$url" -o /tmp/cherri.zip
+          printf '%s  %s\n' "$expected" /tmp/cherri.zip | sha256sum -c -
+          mkdir -p /tmp/cherri
+          unzip -q /tmp/cherri.zip -d /tmp/cherri
+          binary="$(find /tmp/cherri -type f -name cherri -print -quit)"
+          test -n "$binary"
+          sudo install -m 0755 "$binary" /usr/local/bin/cherri
+          cherri --version
+
+      - name: Compile Mother Shadow v1
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd tools/departure-guard
+          rm -f './Mother Shadow v1_unsigned.shortcut' './Mother Shadow v1.plist'
+          cherri mother-shadow-v1.cherri --skip-sign --debug
+          test -f './Mother Shadow v1_unsigned.shortcut'
+          mkdir -p artifacts-mother-shadow
+          cp './Mother Shadow v1_unsigned.shortcut' artifacts-mother-shadow/mother-shadow-v1-unsigned.shortcut
+          cp './Mother Shadow v1.plist' artifacts-mother-shadow/mother-shadow-v1.plist
+
+      - name: Validate Shadow bridge
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import plistlib
+          from pathlib import Path
+          p=Path('tools/departure-guard/artifacts-mother-shadow/mother-shadow-v1-unsigned.shortcut')
+          d=plistlib.loads(p.read_bytes())
+          actions=d.get('WFWorkflowActions',[])
+          ids=[a.get('WFWorkflowActionIdentifier') for a in actions]
+          if ids.count('is.workflow.actions.openurl') != 1:
+              raise SystemExit(f'expected exactly 1 openurl action, got {ids.count("is.workflow.actions.openurl")}')
+          def strings(x):
+              if isinstance(x, dict):
+                  for k,v in x.items():
+                      yield from strings(k); yield from strings(v)
+              elif isinstance(x, (list,tuple)):
+                  for v in x: yield from strings(v)
+              elif isinstance(x, str):
+                  yield x
+          vals=list(strings(d))
+          target='scriptable:///run?scriptName=YOS%20Departure%20Guard2&openEditor=false'
+          if target not in vals:
+              raise SystemExit('missing exact YOS Departure Guard2 target')
+          print('OK: Mother Shadow bridge validated')
+          PY
+
+      - name: Sign Mother Shadow v1
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/clarity-factory/sign_with_hubsign.py             --input 'tools/departure-guard/artifacts-mother-shadow/mother-shadow-v1-unsigned.shortcut'             --output 'tools/departure-guard/artifacts-mother-shadow/Mother Shadow v1.shortcut'             --name 'Mother Shadow v1'
+
+      - name: Verify signed artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('tools/departure-guard/artifacts-mother-shadow/Mother Shadow v1.shortcut')
+          data=p.read_bytes()
+          if not data.startswith(b'AEA1'):
+              raise SystemExit(f'expected signed AEA1 shortcut, got {data[:8]!r}')
+          if len(data) < 500:
+              raise SystemExit(f'artifact unexpectedly small: {len(data)} bytes')
+          print(f'OK: signed Mother Shadow v1 artifact {len(data)} bytes')
+          PY
+
+      - name: Upload signed shortcut
+        uses: actions/upload-artifact@v4
+        with:
+          name: mother-shadow-v1-shortcut
+          path: tools/departure-guard/artifacts-mother-shadow/Mother Shadow v1.shortcut
+          if-no-files-found: error
