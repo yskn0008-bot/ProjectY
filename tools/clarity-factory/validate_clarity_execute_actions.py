@@ -28,22 +28,26 @@ def validate(path: Path) -> None:
     if "is.workflow.actions.dictatetext" in ids:
         raise AssertionError("executor child must not contain Dictate Text")
 
-    if ids.count("is.workflow.actions.addnewevent") != 1:
-        raise AssertionError("Calendar writer missing")
+    if ids.count("is.workflow.actions.addnewevent") != 2:
+        raise AssertionError("Calendar alert/no-alert writers missing")
     if ids.count("is.workflow.actions.addnewreminder") != 2:
         raise AssertionError("Reminder/Shopping writers missing")
 
-    if ids.count("is.workflow.actions.properties.calendarevents") < 5:
+    if ids.count("is.workflow.actions.properties.calendarevents") < 12:
         raise AssertionError("Calendar readback verification missing")
     if ids.count("is.workflow.actions.properties.reminders") < 9:
         raise AssertionError("Reminder/Shopping readback verification missing")
 
-    calendar = next(
+    calendars = [
         a for a in actions
         if a.get("WFWorkflowActionIdentifier") == "is.workflow.actions.addnewevent"
-    )
-    if params(calendar).get("WFCalendarItemDates") is not True:
+    ]
+    if any(params(calendar).get("WFCalendarItemDates") is not True for calendar in calendars):
         raise AssertionError("Calendar date-enable flag missing")
+    alert_writers = [calendar for calendar in calendars if "WFAlertTime" in params(calendar)]
+    no_alert_writers = [calendar for calendar in calendars if "WFAlertTime" not in params(calendar)]
+    if len(alert_writers) != 1 or len(no_alert_writers) != 1:
+        raise AssertionError("Calendar alert/no-alert branch contract missing")
 
     saves = [
         params(a)
@@ -69,6 +73,9 @@ def validate(path: Path) -> None:
         "BLOCKED",
         "REQUEST_DONE",
         "calendarVerifiedTitle",
+        "calendarVerifiedHasAlarms_",
+        "calendar_alert_state_mismatch",
+        "UNSUPPORTED_CALENDAR_ALERT",
         "reminderVerifiedDueDate",
         "task_shoppingVerifiedList",
         "Verified Idea in Box contents",
