@@ -1,0 +1,288 @@
+#define name Clarity Actions v1
+#define color blue
+#define version 18
+
+#include 'actions/text'
+#include 'actions/documents'
+#include 'actions/shortcuts'
+#include 'actions/calendar'
+
+// Execution child for the working physical "Clarity Demo".
+// It accepts the exact structured Dictionary produced by clarity-demo-auto:
+// {
+//   "original_input": "...",
+//   "actions": [
+//     {
+//       "id": "a1",
+//       "module": "Calendar|Reminder|Money|Shopping|Idea|Other",
+//       "input": {
+//         "text": "",
+//         "title": "",
+//         "date_time": "",
+//         "end_date_time": "",
+//         "alert_minutes_before": "",
+//         "amount": "",
+//         "merchant": "",
+//         "item": "",
+//         "note": "",
+//         "raw_input": ""
+//       },
+//       "needs_review": false,
+//       "status": "planned"
+//     }
+//   ]
+// }
+// UNDERSTAND remains in Clarity Demo. This child never asks a model to claim execution.
+
+action 'file.append' appendResolvedFile(
+    variable file: 'WFFile',
+    variable input: 'WFInput'
+) {
+    "WFAppendFileWriteMode": "Append"
+}
+
+action 'is.workflow.actions.output' outputValue(variable value: 'WFOutput')
+
+@request = getDictionary(ShortcutInput)
+@originalInputValue = getValue(@request, "original_input")
+@originalInput = "{@originalInputValue}"
+@actionsRaw = getValue(@request, "actions")
+
+const requestNumber = randomNumber(100000, 999999)
+const ledgerFile = getFile("Clarity Ledger.txt")
+
+if !@originalInput {
+    const blockedOriginal = text("{CurrentDate}\t{requestNumber}\tBLOCKED\tmissing_original_input\n")
+    appendResolvedFile(ledgerFile, blockedOriginal)
+    @out = {"status":"blocked","verified":false,"result":{"message":"元の入力を受け取れませんでした"},"error_code":"MISSING_ORIGINAL_INPUT"}
+    outputValue(@out)
+}
+
+if !@actionsRaw {
+    const blockedActions = text("{CurrentDate}\t{requestNumber}\tBLOCKED\tmissing_actions\n")
+    appendResolvedFile(ledgerFile, blockedActions)
+    @out = {"status":"blocked","verified":false,"result":{"message":"実行するACTIONがありません"},"error_code":"MISSING_ACTIONS"}
+    outputValue(@out)
+}
+
+@handled = 0
+
+for actionItem in @actionsRaw {
+    const actionDict = getDictionary(@actionItem)
+    const actionId = "{actionDict['id']}"
+    const module = "{actionDict['module']}"
+    const status = "{actionDict['status']}"
+    const needsReview = getValue(actionDict, "needs_review")
+    @inputRaw = getValue(actionDict, "input")
+
+    if status != "planned" {
+        const blockedStatus = text("{CurrentDate}\t{requestNumber}\t{actionId}\tBLOCKED\tmodel_claimed_execution\n")
+        appendResolvedFile(ledgerFile, blockedStatus)
+        @out = {"status":"blocked","verified":false,"result":{"message":"実行前ACTIONではありません"},"error_code":"INVALID_ACTION_STATUS"}
+        outputValue(@out)
+    }
+
+    if needsReview {
+        const blockedReview = text("{CurrentDate}\t{requestNumber}\t{actionId}\tBLOCKED\tneeds_review\n")
+        appendResolvedFile(ledgerFile, blockedReview)
+        @out = {"status":"blocked","verified":false,"result":{"message":"曖昧なACTIONがあるため停止しました"},"error_code":"NEEDS_REVIEW"}
+        outputValue(@out)
+    }
+
+    if !@inputRaw {
+        const blockedInput = text("{CurrentDate}\t{requestNumber}\t{actionId}\tBLOCKED\tmissing_action_input\n")
+        appendResolvedFile(ledgerFile, blockedInput)
+        @out = {"status":"blocked","verified":false,"result":{"message":"ACTION入力がありません"},"error_code":"MISSING_ACTION_INPUT"}
+        outputValue(@out)
+    }
+
+    @input = getDictionary(@inputRaw)
+    @textValue = getValue(@input, "text")
+    @titleValue = getValue(@input, "title")
+    @dateTimeValue = getValue(@input, "date_time")
+    @endDateTimeValue = getValue(@input, "end_date_time")
+    @itemValue = getValue(@input, "item")
+    @noteValue = getValue(@input, "note")
+    @rawInputValue = getValue(@input, "raw_input")
+    @alertMinutesValue = getValue(@input, "alert_minutes_before")
+
+    @text = "{@textValue}"
+    @title = "{@titleValue}"
+    @dateTime = "{@dateTimeValue}"
+    @endDateTime = "{@endDateTimeValue}"
+    @item = "{@itemValue}"
+    @note = "{@noteValue}"
+    @rawInput = "{@rawInputValue}"
+    @alertMinutes = "{@alertMinutesValue}"
+
+    // These names intentionally mirror the full Clarity runtime so the same
+    // post-compile destination readback verifier can prove the write before APPLIED.
+    const content = "{@title}{@text}{@item}{@note}"
+
+    if module == "Other" {
+        const blockedOther = text("{CurrentDate}\t{requestNumber}\t{actionId}\tBLOCKED\tother_requires_new_capability\n")
+        appendResolvedFile(ledgerFile, blockedOther)
+        @out = {"status":"blocked","verified":false,"result":{"message":"このACTIONはまだ実行モジュール未接続です"},"error_code":"UNREGISTERED_MODULE"}
+        outputValue(@out)
+    }
+
+    if module != "Calendar" && module != "Reminder" && module != "Money" && module != "Shopping" && module != "Idea" && module != "Other" {
+        const blockedModule = text("{CurrentDate}\t{requestNumber}\t{actionId}\tBLOCKED\tunregistered_module\t{module}\n")
+        appendResolvedFile(ledgerFile, blockedModule)
+        @out = {"status":"blocked","verified":false,"result":{"message":"未登録のACTIONです"},"error_code":"UNREGISTERED_MODULE"}
+        outputValue(@out)
+    }
+
+    if module == "Idea" {
+        if !@note {
+            const blockedContent = text("{CurrentDate}\t{requestNumber}\t{actionId}\tBLOCKED\tmissing_idea_content\n")
+            appendResolvedFile(ledgerFile, blockedContent)
+            @out = {"status":"blocked","verified":false,"result":{"message":"Ideaの内容がありません"},"error_code":"MISSING_CONTENT"}
+            outputValue(@out)
+        }
+        const ideaExecutingRecord = text("{CurrentDate}\t{requestNumber}\t{actionId}\tEXECUTING\tIdea\n")
+        appendResolvedFile(ledgerFile, ideaExecutingRecord)
+        const ideaPayloadRecord = text("{CurrentDate}\tYOS-CLARITY-ID:{requestNumber}-{actionId}\t{@note}\n")
+        const ideaFile = getFile("Idea in Box.txt")
+        appendResolvedFile(ideaFile, ideaPayloadRecord)
+        const ideaAppliedRecord = text("{CurrentDate}\t{requestNumber}\t{actionId}\tAPPLIED\tIdea in Box.txt\n")
+        appendResolvedFile(ledgerFile, ideaAppliedRecord)
+        @handled += 1
+    }
+
+    if module == "Calendar" {
+        if !@title || !@dateTime || !@endDateTime {
+            const blockedCalendar = text("{CurrentDate}\t{requestNumber}\t{actionId}\tBLOCKED\tmissing_calendar_fields\n")
+            appendResolvedFile(ledgerFile, blockedCalendar)
+            @out = {"status":"blocked","verified":false,"result":{"message":"Calendarの日時を確認してください"},"error_code":"MISSING_CALENDAR_FIELDS"}
+            outputValue(@out)
+        }
+
+        @calendarAlert = ""
+        if @alertMinutes == "5" {
+            @calendarAlert = "5 minutes before"
+        }
+        if @alertMinutes == "15" {
+            @calendarAlert = "15 minutes before"
+        }
+        if @alertMinutes == "30" {
+            @calendarAlert = "30 minutes before"
+        }
+        if @alertMinutes == "60" {
+            @calendarAlert = "1 hour before"
+        }
+        if @alertMinutes == "120" {
+            @calendarAlert = "2 hours before"
+        }
+        if @alertMinutes == "1440" {
+            @calendarAlert = "1 day before"
+        }
+        if @alertMinutes != "" && @calendarAlert == "" {
+            const blockedAlert = text("{CurrentDate}\t{requestNumber}\t{actionId}\tBLOCKED\tunsupported_calendar_alert\n")
+            appendResolvedFile(ledgerFile, blockedAlert)
+            @out = {"status":"blocked","verified":false,"result":{"message":"Calendar通知間隔を安全に設定できません"},"error_code":"UNSUPPORTED_CALENDAR_ALERT"}
+            outputValue(@out)
+        }
+
+        const calendarExecutingRecord = text("{CurrentDate}\t{requestNumber}\t{actionId}\tEXECUTING\tCalendar\n")
+        appendResolvedFile(ledgerFile, calendarExecutingRecord)
+        const startDate = date("{@dateTime}")
+        const endDate = date("{@endDateTime}")
+
+        if @calendarAlert != "" {
+            rawAction("is.workflow.actions.addnewevent", {
+                "WFCalendarItemTitle": "{@title}",
+                "WFCalendarItemStartDate": "${startDate}",
+                "WFCalendarItemEndDate": "${endDate}",
+                "WFAlertTime": "{@calendarAlert}",
+                "WFCalendarItemNotes": "YOS-CLARITY-ID:{requestNumber}-{actionId}"
+            })
+        } else {
+            rawAction("is.workflow.actions.addnewevent", {
+                "WFCalendarItemTitle": "{@title}",
+                "WFCalendarItemStartDate": "${startDate}",
+                "WFCalendarItemEndDate": "${endDate}",
+                "WFCalendarItemNotes": "YOS-CLARITY-ID:{requestNumber}-{actionId}"
+            })
+        }
+
+        const calendarAppliedRecord = text("{CurrentDate}\t{requestNumber}\t{actionId}\tAPPLIED\tCalendar\tYOS-CLARITY-ID:{requestNumber}-{actionId}\n")
+        appendResolvedFile(ledgerFile, calendarAppliedRecord)
+        @handled += 1
+    }
+
+    if module == "Reminder" {
+        if !@text || !@dateTime {
+            const blockedReminder = text("{CurrentDate}\t{requestNumber}\t{actionId}\tBLOCKED\tmissing_reminder_fields\n")
+            appendResolvedFile(ledgerFile, blockedReminder)
+            @out = {"status":"blocked","verified":false,"result":{"message":"Reminderの日時を確認してください"},"error_code":"MISSING_REMINDER_FIELDS"}
+            outputValue(@out)
+        }
+        const reminderExecutingRecord = text("{CurrentDate}\t{requestNumber}\t{actionId}\tEXECUTING\tReminder\n")
+        appendResolvedFile(ledgerFile, reminderExecutingRecord)
+        const alertDate = date("{@dateTime}")
+        rawAction("is.workflow.actions.addnewreminder", {
+            "WFCalendarItemTitle": "{@text}",
+            "WFCalendarItemAlert": true,
+            "WFAlertTrigger": "At Time",
+            "WFAlertCustomTime": "${alertDate}",
+            "WFCalendarItemNotes": "YOS-CLARITY-ID:{requestNumber}-{actionId}"
+        })
+        const reminderAppliedRecord = text("{CurrentDate}\t{requestNumber}\t{actionId}\tAPPLIED\tReminder\tYOS-CLARITY-ID:{requestNumber}-{actionId}\n")
+        appendResolvedFile(ledgerFile, reminderAppliedRecord)
+        @handled += 1
+    }
+
+    if module == "Shopping" {
+        if !@item {
+            const blockedShopping = text("{CurrentDate}\t{requestNumber}\t{actionId}\tBLOCKED\tmissing_shopping_content\n")
+            appendResolvedFile(ledgerFile, blockedShopping)
+            @out = {"status":"blocked","verified":false,"result":{"message":"Shoppingの内容がありません"},"error_code":"MISSING_CONTENT"}
+            outputValue(@out)
+        }
+        const shoppingExecutingRecord = text("{CurrentDate}\t{requestNumber}\t{actionId}\tEXECUTING\tShopping\n")
+        appendResolvedFile(ledgerFile, shoppingExecutingRecord)
+        rawAction("is.workflow.actions.addnewreminder", {
+            "WFCalendarItemTitle": "{@item}",
+            "WFCalendarItemAlert": false,
+            "WFCalendarItemNotes": "YOS-CLARITY-ID:{requestNumber}-{actionId}"
+        })
+        const shoppingAppliedRecord = text("{CurrentDate}\t{requestNumber}\t{actionId}\tAPPLIED\tShopping\tYOS-CLARITY-ID:{requestNumber}-{actionId}\n")
+        appendResolvedFile(ledgerFile, shoppingAppliedRecord)
+        @handled += 1
+    }
+
+    if module == "Money" {
+        @moneyRaw = @rawInput
+        if !@moneyRaw {
+            @moneyRaw = @originalInput
+        }
+        const moneyExecutingRecord = text("{CurrentDate}\t{requestNumber}\t{actionId}\tEXECUTING\tMoney\n")
+        appendResolvedFile(ledgerFile, moneyExecutingRecord)
+        @moneyInput = {"raw_input":"{@moneyRaw}"}
+        @moneyChildRaw = run("Money", @moneyInput)
+        @moneyChild = getDictionary(@moneyChildRaw)
+        @moneyStatusValue = getValue(@moneyChild, "status")
+        @moneyStatus = "{@moneyStatusValue}"
+        @moneyVerified = getValue(@moneyChild, "verified")
+        @moneyErrorValue = getValue(@moneyChild, "error_code")
+        @moneyError = "{@moneyErrorValue}"
+
+        if @moneyStatus != "success" || !@moneyVerified {
+            const failedMoney = text("{CurrentDate}\t{requestNumber}\t{actionId}\tFAILED\tMoney\t{@moneyError}\n")
+            appendResolvedFile(ledgerFile, failedMoney)
+            @out = {"status":"failed","verified":false,"result":{"message":"Moneyの保存確認に失敗しました"},"error_code":"MONEY_UNVERIFIED"}
+            outputValue(@out)
+        }
+
+        const moneyApplied = text("{CurrentDate}\t{requestNumber}\t{actionId}\tAPPLIED\tMoney\n")
+        appendResolvedFile(ledgerFile, moneyApplied)
+        @handled += 1
+    }
+}
+
+const done = text("{CurrentDate}\t{requestNumber}\tREQUEST_DONE\t{@handled}\n")
+appendResolvedFile(ledgerFile, done)
+
+@success = {"status":"success","verified":true,"result":{"message":"CLARITY_EXECUTE_ACTIONS_PASS","handled":"{@handled}"},"error_code":""}
+outputValue(@success)
