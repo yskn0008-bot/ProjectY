@@ -72,6 +72,16 @@
         "duration_seconds": "positive_integer"
       },
       "purpose": "Phase 3 first physical iPhone E2E"
+    },
+    "YOS_Money": {
+      "enabled": false,
+      "side_effect": true,
+      "input_schema": {
+        "raw_input": "non_empty_string"
+      },
+      "entry_policy": "clarity_only",
+      "preserve_original_input": true,
+      "purpose": "Clarity-only Money Capture executor. Direct Money UI remains recovery/test only until physical E2E passes."
     }
   }
 }

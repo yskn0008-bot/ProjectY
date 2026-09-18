@@ -1,0 +1,92 @@
+name: Clarity Money E2E proof
+
+on:
+  push:
+    branches:
+      - clarity/money-executor-p0
+    paths:
+      - 'tools/clarity-factory/clarity-money-e2e.cherri'
+      - 'tools/clarity-factory/patch_append_file_paths.py'
+      - 'tools/clarity-factory/sign_with_hubsign.py'
+      - '.github/workflows/clarity-money-e2e-proof.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-sign:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pinned Cherri v2.3.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          url='https://github.com/electrikmilk/cherri/releases/download/v2.3.0/cherri_linux-x86_64.zip'
+          expected='7ab2c384b7b26e7c72a30a8dfa56f89dae12c4068b7951bc1e3193f3698edbe9'
+          curl -fsSL "$url" -o /tmp/cherri.zip
+          printf '%s  %s\n' "$expected" /tmp/cherri.zip | sha256sum -c -
+          mkdir -p /tmp/cherri
+          unzip -q /tmp/cherri.zip -d /tmp/cherri
+          binary="$(find /tmp/cherri -type f -name cherri -print -quit)"
+          test -n "$binary"
+          sudo install -m 0755 "$binary" /usr/local/bin/cherri
+          cherri --version
+
+      - name: Compile Clarity Money physical E2E harness
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd tools/clarity-factory
+          rm -f './Clarity Money E2E_unsigned.shortcut' './Clarity Money E2E.plist'
+          cherri clarity-money-e2e.cherri --skip-sign --debug
+          runtime='./Clarity Money E2E_unsigned.shortcut'
+          test -f "$runtime"
+          python3 patch_append_file_paths.py "$runtime"
+          python3 - <<'PY'
+          import plistlib
+          from pathlib import Path
+          p = Path('Clarity Money E2E_unsigned.shortcut')
+          root = plistlib.loads(p.read_bytes())
+          actions = root.get('WFWorkflowActions', [])
+          serialized = repr(root)
+          ids = [str(a.get('WFWorkflowActionIdentifier','')) for a in actions]
+          assert any(x.endswith('runworkflow') for x in ids), 'missing Run Shortcut action'
+          for marker in ('Money','raw_input','Clarity Inbox.txt','Clarity Ledger.txt','status','verified','result','error_code'):
+              assert marker in serialized, f'missing marker: {marker}'
+          assert 'scriptable:///run/' not in serialized, 'parent must not call Scriptable directly'
+          print(f'OK: Clarity Money E2E harness, {len(actions)} actions')
+          PY
+          mkdir -p artifacts
+          cp "$runtime" artifacts/Clarity-Money-E2E-unsigned.shortcut
+
+      - name: HubSign Clarity Money E2E harness
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/clarity-factory/sign_with_hubsign.py \
+            --input tools/clarity-factory/artifacts/Clarity-Money-E2E-unsigned.shortcut \
+            --output tools/clarity-factory/artifacts/Clarity-Money-E2E-signed.shortcut \
+            --name 'Clarity Money E2E' \
+            2>&1 | tee tools/clarity-factory/artifacts/hubsign-money-e2e.log
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('tools/clarity-factory/artifacts/Clarity-Money-E2E-signed.shortcut')
+          data = p.read_bytes()
+          assert data.startswith(b'AEA1'), data[:8]
+          assert len(data) > 300
+          print(f'OK: signed E2E harness, {len(data)} bytes')
+          PY
+
+      - name: Upload physical E2E artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: clarity-money-e2e-artifact
+          path: |
+            tools/clarity-factory/artifacts/Clarity-Money-E2E-unsigned.shortcut
+            tools/clarity-factory/artifacts/Clarity-Money-E2E-signed.shortcut
+            tools/clarity-factory/artifacts/hubsign-money-e2e.log
+          if-no-files-found: error
