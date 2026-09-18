@@ -1,0 +1,9 @@
+#define name Mother外出
+#define color orange
+#define version 18
+
+// Dedicated home-departure bridge.
+// The Scriptable URL query is read as args.queryParameters and mapped to source=leaving.
+rawAction("is.workflow.actions.openurl", {
+    "WFInput": "scriptable:///run?scriptName=YOS%20Departure%20Guard2&openEditor=false&source=leaving"
+})
