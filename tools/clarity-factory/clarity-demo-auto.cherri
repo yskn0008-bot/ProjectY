@@ -18,11 +18,11 @@ const modelResult = askChatGPT(modelPrompt, false, "Dictionary")
 @actionsRaw = getValue(@parsed, "actions")
 
 if @echoedInput != "{originalInput}" {
-    show("Clarity Demo Auto\nBLOCKED\noriginal_input mismatch")
+    mustOutput("Clarity Demo Auto", "BLOCKED\noriginal_input mismatch")
 }
 
 if !@actionsRaw {
-    show("Clarity Demo Auto\nBLOCKED\nactions missing")
+    mustOutput("Clarity Demo Auto", "BLOCKED\nactions missing")
 }
 
 @calendar = false
@@ -39,9 +39,8 @@ for actionItem in @actionsRaw {
     @module = "{@moduleValue}"
     @statusValue = getValue(@action, "status")
     @status = "{@statusValue}"
-    @inputRaw = getValue(@action, "input")
 
-    if @status != "planned" || !@inputRaw {
+    if @status != "planned" {
         @blocked = true
     }
 
@@ -70,7 +69,7 @@ for actionItem in @actionsRaw {
 }
 
 if @blocked {
-    show("Clarity Demo Auto\nBLOCKED\ninvalid action schema/module")
+    mustOutput("Clarity Demo Auto", "BLOCKED\ninvalid action schema/module")
 }
 
 show("Clarity Demo Auto\nROUTER PASS\nCalendar: {@calendar}\nReminder: {@reminder}\nMoney: {@money}\nShopping: {@shopping}\nIdea: {@idea}\nOther: {@other}")
