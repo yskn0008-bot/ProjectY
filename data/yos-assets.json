@@ -1,14 +1,14 @@
 {
   "schema_version": "1.0.0",
   "ssot": "YOS asset registry",
-  "updated_at": "2026-09-18T23:42:00+09:00",
+  "updated_at": "2026-09-18T23:19:00+09:00",
   "source": {
     "repository": "yskn0008-bot/ProjectY",
     "base_branch": "main",
-    "base_sha": "5d778d78f5b6af3130765c8ecc04ffeafd7f1345",
+    "base_sha": "6d582e6592d5453f7fcf4abb4c9e0771eca617bd",
     "issue": "https://github.com/yskn0008-bot/ProjectY/issues/371",
     "legacy_22_asset_table_verified": false,
-    "note": "Initial 22 rows are reconstructed from current GitHub evidence and the explicitly defined YOS integration scope. Preserve names; reconcile rows when stronger evidence appears."
+    "note": "Reconciled 2026-09-18 with current main, iPhone visual evidence, and passing automated checks. Preserve names; continue evidence-based updates."
   },
   "progress_model": {
     "weights": {
@@ -50,21 +50,21 @@
   },
   "summary": {
     "asset_count": 22,
-    "overall_progress": 54,
-    "needs_user_action_count": 7
+    "overall_progress": 58,
+    "needs_user_action_count": 6
   },
   "assets": [
     {
       "id": "yos",
       "name": "YOS",
       "area": "core",
-      "status": "awaiting_device_verification",
+      "status": "awaiting_production_verification",
       "priority": 1,
-      "current": "YOSの共通ルールとYOS画面系コードは存在する。統合アプリとしてのiPhone実機・本番確認は未完了。",
-      "next_action": "P2でYOS統合アプリHOMEからYOSの既存機能を呼び出す。",
-      "blocker": null,
+      "current": "YOS統合HOMEはiPhone実機で公開入口とローカルHARMONY HOMEの起動を確認済み。MY WAY / Money / Life / Idea / Journeyの主要画面へ到達できる。",
+      "next_action": "GitHub/Vercel障害時でも主要機能を開けるよう、YOS機能本体のローカル実行経路をFactory Coreへ移す。",
+      "blocker": "主要機能本体の一部はまだWeb入口に依存。",
       "needs_user_action": false,
-      "device_verified": false,
+      "device_verified": true,
       "production_verified": false,
       "deep_link": "/yos/",
       "completion_criteria": [
@@ -72,46 +72,50 @@
       ],
       "evidence": [
         "path:AGENTS.md",
-        "PR#319"
+        "PR#319",
+        "iPhone実機: YOS公開入口を開けた確認 2026-09-18",
+        "iPhone実機: HARMONY HOME起動確認 2026-09-18"
       ],
       "progress_basis": {
         "spec": true,
         "implementation": true,
         "test": true,
-        "device": false,
+        "device": true,
         "production": false
       },
-      "progress": 65,
-      "updated_at": "2026-09-17T10:01:41+09:00"
+      "progress": 85,
+      "updated_at": "2026-09-18T23:19:00+09:00"
     },
     {
       "id": "my-way",
       "name": "MY WAY",
       "area": "core",
-      "status": "awaiting_device_verification",
+      "status": "awaiting_production_verification",
       "priority": 1,
-      "current": "30秒コックピット実装がmainへ統合済み。統合アプリ内での実機確認は未完了。",
-      "next_action": "iPhoneで既存MY WAY表示を確認し、P2の統合画面へ接続する。",
-      "blocker": "最新統合画面でのiPhone実機確認が必要。",
-      "needs_user_action": true,
-      "device_verified": false,
+      "current": "MY WAY統合画面はiPhone実機で表示確認済み。共通YOSヘッダーとHome導線も実装・自動検査済み。",
+      "next_action": "GitHub Pagesに依存しないローカル入口へ同じMY WAY画面・データを接続する。",
+      "blocker": "現在の正式画面入口はWeb配信を併用。",
+      "needs_user_action": false,
+      "device_verified": true,
       "production_verified": false,
       "deep_link": "/yos/",
       "completion_criteria": [
         "MY WAYの既存データと画面を再利用する / 統合アプリから到達できる / iPhone実機と本番運用を確認する"
       ],
       "evidence": [
-        "PR#319"
+        "PR#319",
+        "iPhone実機スクリーンショット: MY WAY 2026-09-18",
+        "YOS Cockpit Safety: Chromium/WebKit PASS 2026-09-18"
       ],
       "progress_basis": {
         "spec": true,
         "implementation": true,
         "test": true,
-        "device": false,
+        "device": true,
         "production": false
       },
-      "progress": 65,
-      "updated_at": "2026-09-17T10:01:41+09:00"
+      "progress": 85,
+      "updated_at": "2026-09-18T23:19:00+09:00"
     },
     {
       "id": "clarity",
@@ -147,13 +151,13 @@
       "id": "money",
       "name": "Money",
       "area": "finance",
-      "status": "awaiting_device_verification",
+      "status": "awaiting_production_verification",
       "priority": 1,
-      "current": "MY WAY側のMoney導線とMoney Capture関連実装が存在する。統合アプリとしての実機・本番確認は未完了。",
-      "next_action": "既存MoneyデータをP2の統合画面から読み取り、Money Captureと同じSSOT導線へ揃える。",
-      "blocker": null,
+      "current": "MY MONEY統合画面はiPhone実機で表示確認済み。既存Money表示をYOS内で利用できる。",
+      "next_action": "Money画面をローカル実行経路へ接続し、Money Captureとの保存先整合を確認する。",
+      "blocker": "現在の正式画面入口はWeb配信を併用。",
       "needs_user_action": false,
-      "device_verified": false,
+      "device_verified": true,
       "production_verified": false,
       "deep_link": "/yos/",
       "completion_criteria": [
@@ -161,46 +165,49 @@
       ],
       "evidence": [
         "PR#319",
-        "PR#328"
+        "PR#328",
+        "iPhone実機スクリーンショット: MY MONEY 2026-09-18"
       ],
       "progress_basis": {
         "spec": true,
         "implementation": true,
         "test": true,
-        "device": false,
+        "device": true,
         "production": false
       },
-      "progress": 65,
-      "updated_at": "2026-09-17T10:01:41+09:00"
+      "progress": 85,
+      "updated_at": "2026-09-18T23:19:00+09:00"
     },
     {
       "id": "life",
       "name": "Life",
       "area": "life",
-      "status": "awaiting_device_verification",
+      "status": "awaiting_production_verification",
       "priority": 2,
-      "current": "Life画面とMorning Flow / Night Reset接続作業が存在する。最新統合状態の実機確認は未完了。",
-      "next_action": "Morning Flow / Night Resetの接続状態を確定し、P2でLife入口を統合する。",
-      "blocker": "既存Life系の広域iPhone smokeに未解決項目がある。",
+      "current": "MY LIFE統合画面はiPhone実機で表示確認済み。MY WAYと共通のタイトル構造・位置へ統一し、Morning/Night handoffの自動検査も通過。",
+      "next_action": "Life画面をローカル実行経路へ接続し、最新タイトル位置をiPhone実機で再確認する。",
+      "blocker": "現在の正式画面入口はWeb配信を併用。",
       "needs_user_action": false,
-      "device_verified": false,
+      "device_verified": true,
       "production_verified": false,
       "deep_link": "/life/",
       "completion_criteria": [
         "Lifeの既存画面・データを再利用する / Morning Flow / Night Resetとの整合を保つ / iPhone実機と本番運用を確認する"
       ],
       "evidence": [
-        "PR#329"
+        "PR#329",
+        "iPhone実機スクリーンショット: MY LIFE 2026-09-18",
+        "Morning/Night handoff: Chromium/WebKit PASS 2026-09-18"
       ],
       "progress_basis": {
         "spec": true,
         "implementation": true,
         "test": true,
-        "device": false,
+        "device": true,
         "production": false
       },
-      "progress": 65,
-      "updated_at": "2026-09-17T10:01:41+09:00"
+      "progress": 85,
+      "updated_at": "2026-09-18T23:19:00+09:00"
     },
     {
       "id": "heros-journey",

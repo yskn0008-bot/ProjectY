@@ -13,14 +13,14 @@
   const fallbackAssets = {
     schema_version: "1.0.0",
     ssot: "YOS asset registry",
-    updated_at: "2026-09-18T21:09:00+09:00",
+    updated_at: "2026-09-18T23:19:00+09:00",
     design: { theme: "調和" },
-    summary: { asset_count: 22, overall_progress: 53, needs_user_action_count: 0 },
+    summary: { asset_count: 22, overall_progress: 58, needs_user_action_count: 0 },
     assets: [
-      ["my-way","MY WAY","core",65,"今ここ・行き先・次の一歩","iPhoneで主要導線を確認する"],
+      ["my-way","MY WAY","core",85,"iPhone実機でMY WAY表示確認済み","Web依存を外したローカル入口へ接続する"],
       ["clarity","Clarity","core",65,"音声・テキストの入口","入力→判断→実行→確認をE2E確認する"],
-      ["money","Money","finance",65,"収支とMoney Capture","既存Moneyデータを統合する"],
-      ["life","Life","life",65,"生活・Morning Flow・Night Reset","Life入口を統合する"],
+      ["money","Money","finance",85,"iPhone実機でMY MONEY表示確認済み","ローカル入口とMoney Capture保存先を揃える"],
+      ["life","Life","life",85,"iPhone実機でMY LIFE表示確認済み","ローカル入口へ接続する"],
       ["idea","Idea","ideas",20,"アイデア保存・確認","既存保存先を正式接続する"],
       ["heros-journey","Hero’s Journey","journey",20,"人生地図","既存データを保ったまま統合する"],
       ["my-remote","MY REMOTE","remote",65,"照明・BRAVIAなどの操作","最新状態を実機確認する"],
@@ -38,7 +38,7 @@
       ["yos-mission-control","YOS Mission Control","operations",65,"運用状態の補助情報","資産SSOTと役割分離を保つ"],
       ["notifications","Notifications","notification",20,"必要時だけ通知","SSOT差分通知を接続する"],
       ["my-way-widget","MY WAY Widget","widget",65,"ホーム画面Widget","共通SSOTへ接続する"],
-      ["yos","YOS","core",65,"統合HOME","主要導線を実機確認する"]
+      ["yos","YOS","core",85,"公開入口とHARMONY HOMEをiPhone実機確認済み","主要機能本体をローカル実行へ移す"]
     ].map(([id,name,area,progress,current,next_action]) => ({id,name,area,progress,current,next_action,status:"local_snapshot"}))
   };
 
@@ -63,8 +63,29 @@
     }
   }
 
-  const assets = await loadJson(assetsPath, fallbackAssets);
+  const savedAssets = await loadJson(assetsPath, fallbackAssets);
   const tasks = await loadJson(tasksPath, fallbackTasks);
+
+  // Reconcile an older local snapshot with newer verified evidence embedded in this script.
+  // Never lower locally recorded progress.
+  function mergeAssetSnapshot(saved, fresh) {
+    const savedRows = Array.isArray(saved?.assets) ? saved.assets : [];
+    const freshRows = Array.isArray(fresh?.assets) ? fresh.assets : [];
+    const byId = new Map(savedRows.map(row => [row.id, row]));
+    const rows = freshRows.map(row => {
+      const previous = byId.get(row.id) || {};
+      return {...previous, ...row, progress: Math.max(Number(previous.progress)||0, Number(row.progress)||0)};
+    });
+    for (const row of savedRows) if (!freshRows.some(item => item.id === row.id)) rows.push(row);
+    const overall = Math.round(rows.reduce((sum,row)=>sum+(Number(row.progress)||0),0)/Math.max(1,rows.length));
+    return {...saved, ...fresh, assets: rows, summary: {...saved?.summary, ...fresh?.summary, asset_count: rows.length, overall_progress: overall}};
+  }
+
+  const savedAt = Date.parse(savedAssets?.updated_at || 0) || 0;
+  const freshAt = Date.parse(fallbackAssets.updated_at || 0) || 0;
+  const assets = freshAt > savedAt ? mergeAssetSnapshot(savedAssets, fallbackAssets) : savedAssets;
+  if (freshAt > savedAt) fm.writeString(assetsPath, JSON.stringify(assets, null, 2));
+
   const rows = Array.isArray(assets.assets) ? assets.assets : [];
   const queue = Array.isArray(tasks.tasks) ? tasks.tasks : [];
 
@@ -84,7 +105,7 @@
   }[ch]));
 
   const progressOf = a => Math.max(0, Math.min(100, Number(a.progress) || 0));
-  const overall = Number(assets.summary?.overall_progress) || Math.round(rows.reduce((s,a)=>s+progressOf(a),0)/Math.max(1,rows.length));
+  const overall = Math.round(rows.reduce((s,a)=>s+progressOf(a),0)/Math.max(1,rows.length));
   const ownerWait = queue.length;
 
   const primaryIds = new Set(["my-way","clarity","money","life","idea","heros-journey","my-remote"]);
