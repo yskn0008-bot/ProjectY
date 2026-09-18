@@ -115,10 +115,20 @@ jobs:
           ids=[a.get('WFWorkflowActionIdentifier') for a in actions]
           if ids.count('is.workflow.actions.openurl') != 1:
               raise SystemExit(f'expected 1 openurl action, got {ids.count("is.workflow.actions.openurl")}')
-          raw=p.read_bytes()
-          if b'YOS%20Light%20Widget&action=on' not in raw:
+          def strings(x):
+              if isinstance(x, dict):
+                  for k, v in x.items():
+                      yield from strings(k)
+                      yield from strings(v)
+              elif isinstance(x, (list, tuple)):
+                  for v in x:
+                      yield from strings(v)
+              elif isinstance(x, str):
+                  yield x
+          values=list(strings(d))
+          if not any('YOS%20Light%20Widget' in v and 'action=on' in v for v in values):
               raise SystemExit('missing light ON target')
-          if b'YOS%20AC%20Widget' in raw or b'YOS%20Life%20AUTO%20Remote' in raw:
+          if any('YOS%20AC%20Widget' in v or 'YOS%20Life%20AUTO%20Remote' in v for v in values):
               raise SystemExit('unexpected AC/Life AUTO dependency')
           print('OK: home arrival is light-only')
           PY
