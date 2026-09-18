@@ -1,5 +1,7 @@
 # YOS Departure Guard v0.2 — Mother minimal experiment
 
+Installed iPhone script name: **`YOS Departure Guard2`**. The repository filename remains `YOS Departure Guard.js`; automation wiring must use the installed iPhone name.
+
 ## Status
 
 Isolated Scriptable prototype. It does not modify MY WAY, Life, Morning Flow, Battery Widget, Remote, or production data.
