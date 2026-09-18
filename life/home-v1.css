@@ -229,7 +229,7 @@ body{background-image:radial-gradient(circle at 8% 4%,rgba(246,208,134,.25),tran
 .brand h1{margin:0;font-family:Georgia,"Yu Mincho",serif;font-size:21px;line-height:1;letter-spacing:.035em;font-weight:700;white-space:nowrap}
 .brand p{display:block;margin:2px 0 0;color:#376b4d;font-size:9px;font-weight:900;line-height:1.2;letter-spacing:.13em;white-space:nowrap}
 @media(max-width:520px){
-  .app{width:min(100%,520px);margin:auto;padding:calc(env(safe-area-inset-top) + 4px) 10px calc(env(safe-area-inset-bottom) + 58px)}
+  .app{width:min(100%,520px);margin:auto;padding:calc(env(safe-area-inset-top) + 4px) 10px calc(env(safe-area-inset-bottom) + 76px)}
   .top{height:40px;margin-bottom:2px}
   .top>.brand{gap:6px}
   .brand-compass{width:30px;height:30px;flex-basis:30px;font-size:17px}
