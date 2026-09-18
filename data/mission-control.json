@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-18T23:58:05+09:00",
+  "updated_at": "2026-09-19T00:58:32+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -90,7 +90,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-09-18T14:56:18Z"
+      "updated_at": "2026-09-18T15:58:28Z"
     },
     {
       "id": "github-issue-234",
@@ -165,39 +165,39 @@
   ],
   "recently_completed": [
     {
-      "id": "github-commit-4da549ed6d0f",
-      "title": "data: record Mother Shadow Factory artifact",
-      "completed_at": "2026-09-18T14:57:53Z",
-      "result": "GitHub mainへ反映（4da549e）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/4da549ed6d0fcdc2ee4548eed76d6c3cb001fcf3"
+      "id": "github-commit-94831c5d0ef7",
+      "title": "Merge pull request #388 from yskn0008-bot/one-enter/codex-optional-default",
+      "completed_at": "2026-09-18T15:58:20Z",
+      "result": "GitHub mainへ反映（94831c5）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/94831c5d0ef7cb9cdd19b6f89e36aa4a7c0924ca"
     },
     {
-      "id": "github-commit-86323fd890a8",
-      "title": "Factory: auto-generate Mother Shadow v1 shortcut",
-      "completed_at": "2026-09-18T14:56:36Z",
-      "result": "GitHub mainへ反映（86323fd）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/86323fd890a87b6274692f7a0dd1cddd833ab2a3"
+      "id": "github-commit-8744540da5a3",
+      "title": "Factory: remove default Codex delegation wording",
+      "completed_at": "2026-09-18T15:56:58Z",
+      "result": "GitHub mainへ反映（8744540）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/8744540da5a3d5be3a29a20f8e011d5f10210629"
     },
     {
-      "id": "github-commit-2ecdce84da11",
-      "title": "data: fix device evidence and recompute YOS progress",
-      "completed_at": "2026-09-18T14:49:17Z",
-      "result": "GitHub mainへ反映（2ecdce8）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/2ecdce84da11085e4cc7377d1e2f7b7cd60e60c1"
+      "id": "github-commit-374ee73055cc",
+      "title": "Governance: test Codex-optional PR evidence",
+      "completed_at": "2026-09-18T15:56:55Z",
+      "result": "GitHub mainへ反映（374ee73）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/374ee73055cce837a51f24969a3c4be70e99165c"
     },
     {
-      "id": "github-commit-cdab914d07c3",
-      "title": "yos: reconcile verified iPhone progress into local SSOT",
-      "completed_at": "2026-09-18T14:47:30Z",
-      "result": "GitHub mainへ反映（cdab914）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/cdab914d07c3652cb789e7cf55a54e42a1dd5a7b"
+      "id": "github-commit-0f44592a1fcb",
+      "title": "Governance: accept Codex-optional implementation route",
+      "completed_at": "2026-09-18T15:56:51Z",
+      "result": "GitHub mainへ反映（0f44592）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/0f44592a1fcb894dd8e780fb53874a3bbe689b6e"
     },
     {
-      "id": "github-commit-6d582e6592d5",
-      "title": "docs(departure): record installed Scriptable name",
-      "completed_at": "2026-09-18T14:47:21Z",
-      "result": "GitHub mainへ反映（6d582e6）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/6d582e6592d5453f7fcf4abb4c9e0771eca617bd"
+      "id": "github-commit-a2fcfa6de2e8",
+      "title": "Governance: record implementation route without requiring Codex",
+      "completed_at": "2026-09-18T15:56:48Z",
+      "result": "GitHub mainへ反映（a2fcfa6）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/a2fcfa6de2e8062f861c2203bf15de6b4f520f0f"
     },
     {
       "id": "complete-002",
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-18T23:58:05+09:00",
+      "last_update": "2026-09-19T00:58:32+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -315,7 +315,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-18T23:58:05+09:00",
+      "last_update": "2026-09-19T00:58:32+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-18T23:58:05+09:00",
+      "last_update": "2026-09-19T00:58:32+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "bb14ddec6dc32f956a29e0f7bc7e1fc59f8f402fa83f49558f8f9b71d3efba6a"
+  "github_snapshot_hash": "a0caf23a5787f357d04e07b5962589f3827fbdf4aba036e503c35247382d4a33"
 }
