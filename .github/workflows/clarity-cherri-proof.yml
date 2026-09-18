@@ -122,6 +122,23 @@ jobs:
           mkdir -p artifacts
           cp "$proof" artifacts/Clarity-Model-Router-Proof-unsigned.shortcut
 
+      - name: Compile Clarity Demo Auto router
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd tools/clarity-factory
+          rm -f './Clarity Demo Auto_unsigned.shortcut' './Clarity Demo Auto.plist'
+          cherri clarity-demo-auto.cherri --skip-sign --debug
+          demo='./Clarity Demo Auto_unsigned.shortcut'
+          test -f "$demo"
+          grep -q 'is.workflow.actions.askllm' "$demo"
+          grep -q 'Calendar' "$demo"
+          grep -q 'Shopping' "$demo"
+          grep -q 'Idea' "$demo"
+          grep -q 'ROUTER PASS' "$demo"
+          mkdir -p artifacts
+          cp "$demo" artifacts/Clarity-Demo-Auto-unsigned.shortcut
+
       - name: Compile Clarity Raw First runtime
         shell: bash
         run: |
@@ -233,6 +250,38 @@ jobs:
               print(f'OK: signed {p.name}, {len(data)} bytes')
           PYVERIFY
 
+      - name: Sign Clarity Demo Auto router
+        id: hubsign_demo_auto
+        continue-on-error: true
+        shell: bash
+        run: |
+          set +e
+          set -o pipefail
+          python3 tools/clarity-factory/sign_with_hubsign.py \
+            --input tools/clarity-factory/artifacts/Clarity-Demo-Auto-unsigned.shortcut \
+            --output tools/clarity-factory/artifacts/Clarity-Demo-Auto-signed.shortcut \
+            --name 'Clarity Demo Auto' \
+            2>&1 | tee tools/clarity-factory/artifacts/hubsign-demo-auto.log
+          status=${PIPESTATUS[0]}
+          echo "Demo Auto HubSign exit code: ${status}" | tee -a tools/clarity-factory/artifacts/hubsign-demo-auto.log
+          exit "${status}"
+
+      - name: Verify signed Clarity Demo Auto when HubSign succeeds
+        if: steps.hubsign_demo_auto.outcome == 'success'
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PYDEMO'
+          from pathlib import Path
+          p = Path('tools/clarity-factory/artifacts/Clarity-Demo-Auto-signed.shortcut')
+          data = p.read_bytes()
+          if not data.startswith(b'AEA1'):
+              raise SystemExit(f'expected signed AEA1 shortcut, got {data[:8]!r}')
+          if len(data) < 500:
+              raise SystemExit(f'artifact unexpectedly small: {len(data)} bytes')
+          print(f'OK: signed Clarity Demo Auto, {len(data)} bytes')
+          PYDEMO
+
       - name: Sign direct-model execution E2E
         id: hubsign_direct_e2e
         continue-on-error: true
@@ -311,6 +360,9 @@ jobs:
             tools/clarity-factory/artifacts/Clarity-Model-Router-Proof-unsigned.shortcut
             tools/clarity-factory/artifacts/Clarity-Model-Router-Proof-signed.shortcut
             tools/clarity-factory/artifacts/hubsign-modules.log
+            tools/clarity-factory/artifacts/Clarity-Demo-Auto-unsigned.shortcut
+            tools/clarity-factory/artifacts/Clarity-Demo-Auto-signed.shortcut
+            tools/clarity-factory/artifacts/hubsign-demo-auto.log
             tools/clarity-factory/artifacts/Clarity-Direct-E2E-unsigned.shortcut
             tools/clarity-factory/artifacts/Clarity-Direct-E2E-signed.shortcut
             tools/clarity-factory/artifacts/hubsign-direct-e2e.log
