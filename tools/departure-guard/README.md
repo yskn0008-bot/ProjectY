@@ -1,10 +1,11 @@
-# YOS Departure Guard v0.1
+# YOS Departure Guard v0.2 — Mother minimal experiment
 
 ## Status
 
 Isolated Scriptable prototype. It does not modify MY WAY, Life, Morning Flow, Battery Widget, Remote, or production data.
 
 - Repository implementation: prototype branch only
+- Default runtime mode: **Shadow Mode (silent, log only)**
 - Physical iPhone: **not yet verified**
 - Calendar / notification permissions: **not yet verified on the physical iPhone**
 - Existing Shortcut Factory PoC is not used as a completion claim because its current generated action is only an Open App PoC and physical import is still unverified.
@@ -12,6 +13,26 @@ Isolated Scriptable prototype. It does not modify MY WAY, Life, Morning Flow, Ba
 ## Purpose
 
 Run an outward-bound check without creating another screen to manage.
+
+v0.2 is also the first narrow Mother / Decision Readiness experiment. It does **not** build a general Mother system. It tests one closed loop only:
+
+```text
+Calendar / local battery observation
+→ derived Current View
+→ Decision Opportunity
+→ Decision Pack
+→ Presentation Gate
+→ local Event Store
+→ later: user decision → Clarity → Verify
+```
+
+The default mode is **Shadow Mode**. In Shadow Mode the script prepares and logs candidates but never notifies and never executes a proposed action.
+
+The Event Store is local-only (`YOS-Departure-Guard-EventStore-v0.json`), capped at the newest 200 evaluations, and intentionally omits event title/full location from experiment records.
+
+A Decision Pack contains `candidate_id`, `trigger_event_id`, timestamps, evidence, confidence, reversibility, user decision/result placeholders, and typed **proposed** Action Contracts. Every proposed Action Contract is `approved_by_user: false`; v0.2 does not send them to Clarity.
+
+Each evaluation also logs `baseline_would_notify`, allowing later comparison against the old fixed 20-minute departure rule without treating a user choice as proof that a prediction was correct.
 
 The default behavior is silent. A notification appears only when there is something useful to act on:
 
@@ -113,13 +134,13 @@ No exceptional carry items
 
 Repeated identical warnings are suppressed for 25 minutes.
 
-## Important limitation in v0.1
+## Important limitation in v0.2
 
 The prototype calculates departure time as `event start - lead minutes`. It does **not** yet calculate live route/travel time from the current position to the event location.
 
 That is intentional: the Scriptable APIs used here expose Calendar event location but not a verified native travel-time API. The next upgrade should connect a verified Apple Maps/Shortcuts travel-time action rather than guessing a private Shortcut schema.
 
-Also, “forgotten item” means a departure reminder from calendar notes in v0.1. Actual possession detection would require a separate trusted signal such as a supported device/location presence source.
+Also, “forgotten item” means a departure reminder from calendar notes in v0.2. Actual possession detection would require a separate trusted signal such as a supported device/location presence source.
 
 ## Physical acceptance
 
