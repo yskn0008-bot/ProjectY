@@ -40,7 +40,7 @@ const batteryPath = fm.joinPath(fm.documentsDirectory(), CONFIG.batteryDataFile)
 const statePath = fm.joinPath(fm.documentsDirectory(), CONFIG.stateFile)
 const eventStorePath = fm.joinPath(fm.documentsDirectory(), CONFIG.eventStoreFile)
 const now = new Date()
-const invocation = parseInvocation(args.shortcutParameter, args.queryParameters)
+const invocation = parseInvocation(args.shortcutParameter)
 const source = invocation.source
 
 await main()
@@ -457,39 +457,32 @@ function rememberNotification(fingerprint) {
   } catch (_) {}
 }
 
-function parseInvocation(raw, queryParameters) {
+function parseInvocation(raw) {
   const out = { source: "auto", mode: CONFIG.defaultMode }
+  if (raw == null) return out
 
-  function applyObject(value) {
-    if (!value || typeof value !== "object") return
-    if (value.source) out.source = String(value.source).trim().toLowerCase() || "auto"
-    if (value.mode) out.mode = normalizeMode(value.mode)
+  if (typeof raw === "object") {
+    if (raw.source) out.source = String(raw.source).trim().toLowerCase() || "auto"
+    if (raw.mode) out.mode = normalizeMode(raw.mode)
+    return out
   }
 
-  if (typeof raw === "object" && raw != null) {
-    applyObject(raw)
-  } else if (typeof raw === "string") {
+  if (typeof raw === "string") {
     const text = raw.trim()
-    if (text) {
-      try {
-        const obj = JSON.parse(text)
-        if (obj && typeof obj === "object") applyObject(obj)
-        else {
-          const lowered = text.toLowerCase()
-          if (["shadow", "active"].includes(lowered)) out.mode = lowered
-          else out.source = lowered
-        }
-      } catch (_) {
-        const lowered = text.toLowerCase()
-        if (["shadow", "active"].includes(lowered)) out.mode = lowered
-        else out.source = lowered
+    if (!text) return out
+    try {
+      const obj = JSON.parse(text)
+      if (obj && typeof obj === "object") {
+        if (obj.source) out.source = String(obj.source).trim().toLowerCase() || "auto"
+        if (obj.mode) out.mode = normalizeMode(obj.mode)
+        return out
       }
-    }
-  }
+    } catch (_) {}
 
-  // URL-scheme invocation is authoritative for automation context.
-  // Scriptable exposes arbitrary query parameters through args.queryParameters.
-  applyObject(queryParameters)
+    const lowered = text.toLowerCase()
+    if (["shadow", "active"].includes(lowered)) out.mode = lowered
+    else out.source = lowered
+  }
   return out
 }
 
