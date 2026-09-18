@@ -8,6 +8,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="YOS Life">
 <link rel="manifest" href="./manifest.webmanifest">
+<style id="life-preinstall-guard">main.app,.bottom-nav{visibility:hidden!important}</style>
+<link id="lifeHomeV1Styles" rel="stylesheet" href="./home-v1.css?v=7">
+<link id="lifeHomePriorityV1Styles" rel="stylesheet" href="./home-priority-v1.css?v=4">
+<link rel="stylesheet" href="./readability-final.css?v=2">
 <title>MY LIFE by YOS</title>
 <style>
 :root{
@@ -438,6 +442,6 @@ importFromUrl();paint();setInterval(()=>{el('clock').textContent=new Intl.DateTi
 if('serviceWorker'in navigator)navigator.serviceWorker.register('./service-worker.js');
 })();
 </script>
-<script src="./yos-suite-v3.js?v=8"></script>
+<script src="./yos-suite-v3.js?v=9"></script>
 </body>
 </html>
