@@ -1,0 +1,36 @@
+name: Build local LZFSE tool
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/build-lzfse-tool.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build upstream lzfse CLI
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone --depth 1 https://github.com/lzfse/lzfse.git /tmp/lzfse
+          make -C /tmp/lzfse -j2
+          bin="$(find /tmp/lzfse -type f -name lzfse -perm -111 | head -1)"
+          test -n "$bin"
+          mkdir -p artifacts
+          cp "$bin" artifacts/lzfse
+          chmod +x artifacts/lzfse
+          artifacts/lzfse -h >/dev/null 2>&1 || true
+          file artifacts/lzfse
+      - name: Upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: lzfse-linux
+          path: artifacts/lzfse
+          if-no-files-found: error
