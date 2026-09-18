@@ -4,33 +4,62 @@ Status: One Enter development SSOT update
 
 ## Decision
 
-Treat Apple Shortcuts **Use Model / モデルを使用** as the preferred implementation path to validate for Clarity's **UNDERSTAND** layer.
+Treat Apple Shortcuts **Use Model / モデルを使用** as the preferred implementation path for Clarity's **UNDERSTAND** layer.
+
+The current physical-iPhone entry prototype is **Clarity Demo**. It is the entry path to extend next.
 
 This is **not** a retirement of the existing Clarity implementation. It is a newly discovered preferred implementation path and remains subject to physical iPhone E2E acceptance.
 
 ## Physical iPhone evidence already observed
 
-A single natural-language input was successfully decomposed into multiple actions on a physical iPhone using Shortcuts' model action.
+On the physical iPhone, **Clarity Demo** currently runs:
 
-Observed intent decomposition included:
+```text
+voice input
+→ ChatGPT / モデルを使用
+→ natural-language understanding
+→ multi-intent decomposition
+→ display result
+```
+
+A single natural-language input was successfully decomposed into multiple actions.
+
+Observed decomposition included:
 
 - Calendar
-- Shopping
+- Reminder / Shopping-style follow-up
 - Idea
 
-This establishes that model-assisted multi-intent decomposition is viable enough to prioritize for the next integration step. It does not by itself prove the complete Clarity execution pipeline.
+Example physical result showed one spoken input being separated into Calendar, Reminder and Idea intents.
+
+This proves that the **Clarity Demo entry + model understanding** path is viable enough to become the implementation priority. It does not yet prove structured Router execution.
+
+## Important correction — proof Shortcuts are not the entry path
+
+The following proof artifacts are **repository / compile / signing proofs only** and must not be treated as the normal physical-iPhone entry or as the next owner installation path:
+
+- `YOS_Test`
+- `Clarity Dispatcher Proof`
+- `Clarity Model Router Proof`
+
+Repeated physical-device correction attempts around those proof Shortcuts do not replace the working Clarity Demo entry direction.
+
+Do **not** ask the owner to install or use those three as the normal Clarity entry.
+
+Their useful repository evidence may be retained, but future physical integration should start from the working **Clarity Demo** prototype and connect that path forward.
 
 ## Preferred architecture
 
 ```text
-INPUT
+Clarity Demo / final Clarity entry
+→ INPUT
 → RAW FIRST
 → CONTEXT
-→ UNDERSTAND (Shortcuts model action prioritized for validation)
-→ structured intent/action data
+→ UNDERSTAND (Shortcuts model action)
+→ structured multi-ACTION data
 → PLAN / POLICY
-→ existing ROUTER contract
-→ YOS child Shortcuts
+→ existing Router contract
+→ approved child executors
 → EXECUTE
 → VERIFY
 → LEDGER
@@ -39,35 +68,53 @@ INPUT
 
 Do not grow a giant fixed Router to perform language understanding. The preferred separation is:
 
-1. Model interprets natural language and produces structured intent/action data.
-2. Existing Router consumes that structure and selects the appropriate execution path.
-3. Existing `YOS_*` / approved child Shortcut executes the iPhone-side action.
-4. Existing Policy, Verify, Ledger, and Feedback controls remain responsible for safety and outcome verification.
+1. Clarity receives one natural voice/text input.
+2. The model interprets it and emits structured multi-ACTION data.
+3. Existing Policy checks the structured actions.
+4. Existing Router consumes that structure and selects the appropriate child executor.
+5. Child executors perform the iPhone-side action.
+6. Verify / Ledger / Feedback confirm the outcome.
 
 ## Preserve / do not remove
 
-- Existing Clarity
+- Existing Clarity assets
+- Clarity Demo as the current physical prototype entry
 - Raw First
 - Context handling
 - Policy
 - Verify
 - Ledger / Feedback
 - Existing Router contract
-- Existing YOS child Shortcut structure
+- Existing child-executor structure
 - Existing execution path as fallback until the new path passes physical iPhone E2E
 
 No destructive cutover is authorized by this handoff.
 
 ## Next implementation step
 
-Change the model output from display-oriented prose to **structured data** and connect it to the existing Router contract.
+Modify **Clarity Demo** rather than replacing the entry with proof Shortcuts.
 
-The structured output must preserve enough information for downstream Policy and Verify stages and must support multiple ACTIONs from one natural-language input.
+Change the model output from the current display-oriented prose into **structured data** that supports multiple ACTIONs from one natural-language input.
 
-Do not enable normal cutover until physical iPhone E2E proves the new path end-to-end. On failure, retain/fall back to the existing Clarity execution path.
+Then connect that structured output to the existing Router contract while preserving Policy / Verify / Ledger / Feedback and fallback behavior.
+
+The immediate target is:
+
+```text
+Clarity Demo
+→ one natural input
+→ structured ACTION[]
+→ existing Router
+→ child executor
+→ verified result
+```
+
+Do not enable normal cutover until physical iPhone E2E proves this path end-to-end.
 
 ## Coordination rule
 
-All One Enter / Clarity development should consult this handoff before extending the UNDERSTAND or Router layers. New work that assumes the previous fixed-language-understanding approach is the preferred path should be reconciled with this decision first.
+All One Enter / Clarity development should consult this handoff before extending the UNDERSTAND or Router layers.
 
-PR #374 remains relevant for the Money child executor and physical acceptance work; this handoff changes the preferred UNDERSTAND implementation path, not the child executor contract or rollback requirement.
+If another branch/chat proposes installing or using `YOS_Test`, `Clarity Dispatcher Proof`, or `Clarity Model Router Proof` as the main entry, treat that as stale implementation direction and reconcile it with this handoff first.
+
+PR #374 remains relevant for the Money child executor and physical acceptance boundary. This handoff changes the preferred entry/UNDERSTAND integration path, not the Money ledger or rollback requirements.
