@@ -1,0 +1,84 @@
+name: YOS iOS App Safety
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'ios-app/**'
+      - 'yos/**'
+      - 'life/**'
+      - 'data/yos-assets.json'
+      - 'data/yos-user-tasks.json'
+      - '.github/workflows/yos-ios-app-safety.yml'
+  pull_request:
+    paths:
+      - 'ios-app/**'
+      - 'yos/**'
+      - 'life/**'
+      - 'data/yos-assets.json'
+      - 'data/yos-user-tasks.json'
+      - '.github/workflows/yos-ios-app-safety.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: yos-ios-app-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  contract:
+    name: App contract and bundle
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ios-app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+      - name: Run app contracts
+        run: npm test
+      - name: Prepare bundled web assets
+        run: npm run prepare:web
+      - name: Verify offline app bundle
+        run: |
+          test -f www/index.html
+          test -f www/system.html
+          test -f www/yos/index.html
+          test -f www/yos/app.js
+          test -f www/life/index.html
+          test -f www/capture.html
+          test -f www/bravia.html
+          grep -q "MY WAY" www/yos/index.html
+          grep -q "native-yos-boot" www/index.html
+
+  native-simulator:
+    name: Native iOS simulator build
+    runs-on: macos-latest
+    defaults:
+      run:
+        working-directory: ios-app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+      - name: Generate Capacitor iOS project
+        run: npm run native:init
+      - name: Build without signing
+        run: |
+          xcodebuild \
+            -project ios/App/App.xcodeproj \
+            -scheme App \
+            -configuration Debug \
+            -sdk iphonesimulator \
+            -derivedDataPath build/DerivedData \
+            CODE_SIGNING_ALLOWED=NO \
+            build

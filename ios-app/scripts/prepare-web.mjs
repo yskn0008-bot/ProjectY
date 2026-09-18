@@ -10,8 +10,10 @@ const webDir = resolve(appDir, 'www');
 await rm(webDir, { recursive: true, force: true });
 await mkdir(webDir, { recursive: true });
 
-await cp(resolve(repoDir, 'taxi'), resolve(webDir, 'taxi'), { recursive: true });
+await cp(resolve(repoDir, 'yos'), resolve(webDir, 'yos'), { recursive: true });
 await cp(resolve(repoDir, 'life'), resolve(webDir, 'life'), { recursive: true });
+// Taxi remains bundled only as a compatibility screen; it is not a primary YOS domain.
+await cp(resolve(repoDir, 'taxi'), resolve(webDir, 'taxi'), { recursive: true });
 await cp(resolve(appDir, 'shell'), webDir, { recursive: true });
 
 await mkdir(resolve(webDir, 'data'), { recursive: true });

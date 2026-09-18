@@ -20,6 +20,9 @@ const write=(key,value)=>{try{localStorage.setItem(key,JSON.stringify(value));re
 const dateKey=()=>new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Tokyo'}).format(new Date());
 const settings=read(KEYS.home,{});
 const state=read(KEYS.state,{});
+const nativeShell=location.protocol==='capacitor:'||location.protocol==='ionic:';
+document.querySelectorAll('[data-native-only]').forEach(node=>{node.hidden=!nativeShell;node.style.display=nativeShell?'':'none'});
+document.querySelectorAll('[data-web-only]').forEach(node=>{node.hidden=nativeShell;node.style.display=nativeShell?'none':''});
 const sharedUrl=()=>clean(settings.yosUrl||read(KEYS.legacy,{}).yosUrl||read(KEYS.taxi,{}).yosUrl,500);
 const lifeData=()=>read(KEYS.life,null);
 const todayData=(life=lifeData())=>life?.days?.[life.activeLifeDate||dateKey()]||life?.days?.[dateKey()]||null;

@@ -2,13 +2,35 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
-test('existing YOS shell supports GitHub Pages as iPhone public entry', async () => {
-  const dashboard = await readFile(new URL('../shell/yos-dashboard.js', import.meta.url), 'utf8');
-  const index = await readFile(new URL('../shell/index.html', import.meta.url), 'utf8');
-  assert.match(index, /本人タスクQueue/);
-  assert.match(index, /資産進捗/);
+test('YOS iOS shell opens MY WAY natively while preserving the public system entry', async () => {
+  const [dashboard, index, system, prepare, yosIndex, yosApp] = await Promise.all([
+    readFile(new URL('../shell/yos-dashboard.js', import.meta.url), 'utf8'),
+    readFile(new URL('../shell/index.html', import.meta.url), 'utf8'),
+    readFile(new URL('../shell/system.html', import.meta.url), 'utf8'),
+    readFile(new URL('../scripts/prepare-web.mjs', import.meta.url), 'utf8'),
+    readFile(new URL('../../yos/index.html', import.meta.url), 'utf8'),
+    readFile(new URL('../../yos/app.js', import.meta.url), 'utf8')
+  ]);
+
+  assert.match(index, /id="native-yos-boot"/);
+  assert.match(index, /location\.protocol === 'capacitor:'/);
+  assert.match(index, /location\.replace\('\.\/yos\/'\)/);
+
+  assert.match(system, /本人タスクQueue/);
+  assert.match(system, /資産進捗/);
+  assert.match(system, /yos-dashboard\.js/);
+
+  assert.match(prepare, /resolve\(repoDir, 'yos'\)/);
+  assert.match(prepare, /resolve\(webDir, 'yos'\)/);
+  assert.match(prepare, /resolve\(repoDir, 'life'\)/);
+
+  assert.match(yosIndex, /id="brandTitle">MY WAY/);
+  assert.match(yosIndex, /data-native-only hidden href="\.\.\/capture\.html"/);
+  assert.match(yosIndex, /data-native-only hidden href="\.\.\/bravia\.html"/);
+  assert.match(yosIndex, /data-native-only hidden href="\.\.\/system\.html"/);
+  assert.match(yosApp, /const nativeShell=location\.protocol==='capacitor:'/);
+
   assert.match(dashboard, /location\.hostname\.endsWith\('github\.io'\)/);
   assert.match(dashboard, /\.\.\/\.\.\/data\/\$\{filename\}/);
   assert.match(dashboard, /\.\.\/\.\.\/life\//);
-  assert.match(dashboard, /\.\.\/\.\.\/taxi\//);
 });
