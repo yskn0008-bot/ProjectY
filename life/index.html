@@ -43,10 +43,12 @@ body{
 button,input,select,textarea{font:inherit}
 button{touch-action:manipulation}
 .app{width:min(100%,760px);margin:auto;padding:calc(env(safe-area-inset-top) + 12px) 14px calc(env(safe-area-inset-bottom) + 92px)}
-.top{display:grid;grid-template-columns:48px 1fr auto;gap:11px;align-items:center;margin-bottom:12px}
-.logo{display:grid;place-items:center;width:48px;height:48px;border-radius:17px;background:linear-gradient(145deg,var(--coral),#ff9e73);color:white;font-size:23px;font-weight:1000;box-shadow:0 10px 24px rgba(255,120,104,.26)}
-.brand h1{margin:0;font-family:Georgia,"Yu Mincho",serif;font-size:21px;line-height:1;letter-spacing:.035em;font-weight:700}
-.brand p{margin:2px 0 0;color:#2f7b63;font-size:9px;font-weight:900;line-height:1.2;letter-spacing:.13em}
+.top{display:flex;align-items:center;justify-content:space-between;height:50px;margin-bottom:6px}
+.top>.brand{display:flex;align-items:center;gap:8px;min-width:0}
+.brand-compass{display:grid;place-items:center;width:34px;height:34px;flex:0 0 34px;border:1px solid #9b7a35;border-radius:50%;background:#fff9e8;color:#7e5d1f;font-size:21px;box-shadow:inset 0 0 0 3px #efe1bd}
+.brand-copy{display:block;min-width:0}
+.brand h1{margin:0;font-family:Georgia,"Yu Mincho",serif;font-size:21px;line-height:1;letter-spacing:.035em;font-weight:700;white-space:nowrap}
+.brand p{margin:2px 0 0;color:#2f7b63;font-size:9px;font-weight:900;line-height:1.2;letter-spacing:.13em;white-space:nowrap}
 .clock{text-align:right;font-variant-numeric:tabular-nums}
 .clock strong{display:block;font-size:20px}
 .clock span{display:block;color:var(--muted);font-size:10px;margin-top:2px}
@@ -138,7 +140,10 @@ dialog::backdrop{background:rgba(35,42,53,.38);backdrop-filter:blur(5px)}
 <body>
 <main class="app">
 <header class="top">
-  <div class="brand"><h1>MY LIFE</h1><p>by YOS</p></div>
+  <div class="brand" aria-label="MY LIFE by YOS">
+    <span class="brand-compass" aria-hidden="true">✥</span>
+    <span class="brand-copy"><h1>MY LIFE</h1><p>by YOS</p></span>
+  </div>
   <div class="clock"><strong id="clock">--:--</strong><span id="date">----</span></div>
 </header>
 
