@@ -22,7 +22,7 @@ const rawRecord = text("{CurrentDate}\t{requestNumber}\tRAW\t{originalInput}\n")
 const inboxFile = getFile("Clarity Inbox.txt")
 appendResolvedFile(inboxFile, rawRecord)
 
-const modelPrompt = text("あなたはiPhoneの個人AIルーター「Clarity」のUNDERSTAND層です。\n役割は自然な1入力を実行前の構造化ACTIONへ分解することだけです。実行・保存・登録・送信したと主張しません。\ncurrent_time: {CurrentDate}\n最重要ルール: 1目的=1ACTION。異なるmoduleの目的を混ぜない。Calendarは予定・予約・イベントだけ。Shoppingは買う物だけで別ACTION。Ideaは思いつき・アイデアだけで別ACTION。Reminderは独立した後で行うこと・期限・通知だけ。Calendarに付随する通知はCalendarのalert_minutes_beforeへ入れ、同内容のReminderを重複生成しない。Moneyは支出・収入・金額記録だけ。original_inputは入力をそのまま保持。入力にない内容は作らない。\n日時: current_timeを基準に今日/明日/明後日/今夜/明日15時など通常の日本語日時を解決し、date_timeとend_date_timeはISO 8601のローカル日時で返す。開始日時が一意に決まり、終了指定がないCalendarはend_date_timeを開始60分後にする。午前午後が本当に曖昧な「3時」などは推測せずneeds_review=true。Shopping/Ideaは日時指定がなければ日時不要でneeds_review=false。\nCalendar alert_minutes_beforeは通知指定がある時だけ数値で、対応値は5,15,30,60,120,1440。その他の通知間隔はneeds_review=true。\n不明な値は推測せず空文字またはnull。不明点があるACTIONはneeds_review=true。riskは通常low。external_writeはローカルCalendar/Reminders/Idea/Money候補ではfalse。needs_confirmationは通常false。statusは必ずplanned。\n利用可能module: Calendar, Reminder, Money, Shopping, Idea, Other。\nReturn only a Dictionary. Keys: original_input, actions. actions is an array. Each action has id, module, input, risk, external_write, needs_review, needs_confirmation, status. input is a Dictionary with text,title,date_time,end_date_time,alert_minutes_before,amount,merchant,item,note,raw_input.\nCalendar: titleは予定名のみ。Shopping: itemに買う物、条件はnote。Idea: noteに発想内容。Reminder: textに内容、必要ならdate_time。Money: raw_inputにMoney意図の自然文を保持し、金額や店名を推測しない。Otherは既存実行先が無い場合だけ。\n入力: {originalInput}")
+const modelPrompt = text("あなたはiPhoneの個人AIルーター「Clarity」のUNDERSTAND層です。\n役割は自然な1入力を実行前の構造化ACTIONへ分解することだけです。実行・保存・登録・送信したと主張しません。\ncurrent_time: {CurrentDate}\n最重要ルール: 1目的=1ACTION。異なるmoduleの目的を混ぜない。Calendarは予定・予約・イベントだけ。Shoppingは買う物だけで別ACTION。Ideaは思いつき・アイデアだけで別ACTION。Reminderは独立した後で行うこと・期限・通知だけ。Calendarに付随する通知はCalendarのalert_minutes_beforeへ入れ、同内容のReminderを重複生成しない。Moneyは支出・収入・金額記録だけ。original_inputは入力をそのまま保持。入力にない内容は作らない。\n日時: current_timeを基準に今日/明日/明後日/今夜/明日15時など通常の日本語日時を解決し、date_timeとend_date_timeはISO 8601のローカル日時で返す。開始日時が一意に決まり、終了指定がないCalendarはend_date_timeを開始60分後にする。午前午後が本当に曖昧な「3時」などは推測せずneeds_review=true。Shopping/Ideaは日時指定がなければ日時不要でneeds_review=false。\nCalendar alert_minutes_beforeは通知指定がある時だけ数値で、対応値は5,15,30,60,120,1440。その他の通知間隔はneeds_review=true。\n不明な値は推測せず空文字またはnull。不明点があるACTIONはneeds_review=true。riskは通常low。external_writeはローカルCalendar/Reminders/Idea/Money候補ではfalse。needs_confirmationは通常false。statusは必ずplanned。\n利用可能module: Calendar, Reminder, Money, Shopping, Idea, Development, Other。\nDevelopmentは、ProjectY・Clarity・Shortcut・Scriptable・アプリ・コード・自動化など、デジタル資産を「作る／直す／変更する／完成させる」依頼。単なる相談や説明はDevelopmentにしない。Developmentのinput.raw_inputには開発依頼そのものを保持する。送信先はモデルが決めず、固定の本人所有One Enter入口だけを使うため external_write=true, needs_confirmation=false, risk=low とする。\nReturn only a Dictionary. Keys: original_input, actions. actions is an array. Each action has id, module, input, risk, external_write, needs_review, needs_confirmation, status. input is a Dictionary with text,title,date_time,end_date_time,alert_minutes_before,amount,merchant,item,note,raw_input.\nCalendar: titleは予定名のみ。Shopping: itemに買う物、条件はnote。Idea: noteに発想内容。Reminder: textに内容、必要ならdate_time。Money: raw_inputにMoney意図の自然文を保持し、金額や店名を推測しない。Otherは既存実行先が無い場合だけ。\n入力: {originalInput}")
 
 const modelResult = askChatGPT(modelPrompt, false, "Dictionary")
 @parsed = getDictionary(modelResult)
@@ -43,6 +43,7 @@ if !@actionsRaw {
 @money = false
 @shopping = false
 @idea = false
+@development = false
 @other = false
 @blocked = false
 
@@ -64,7 +65,10 @@ for actionItem in @actionsRaw {
     if @risk == "high" || @risk == "irreversible" {
         @blocked = true
     }
-    if @externalWrite || @needsReview || @needsConfirmation {
+    if @externalWrite && @module != "Development" {
+        @blocked = true
+    }
+    if @needsReview || @needsConfirmation {
         @blocked = true
     }
 
@@ -83,12 +87,15 @@ for actionItem in @actionsRaw {
     if @module == "Idea" {
         @idea = true
     }
+    if @module == "Development" {
+        @development = true
+    }
     if @module == "Other" {
         @other = true
         @blocked = true
     }
 
-    if @module != "Calendar" && @module != "Reminder" && @module != "Money" && @module != "Shopping" && @module != "Idea" && @module != "Other" {
+    if @module != "Calendar" && @module != "Reminder" && @module != "Money" && @module != "Shopping" && @module != "Idea" && @module != "Development" && @module != "Other" {
         @blocked = true
     }
 }
@@ -109,4 +116,4 @@ if @childStatus != "success" || !@childVerified {
     mustOutput("Clarity", "FAILED\n{@childError}")
 }
 
-show("Clarity\nE2E PASS\nCalendar: {@calendar}\nReminder: {@reminder}\nMoney: {@money}\nShopping: {@shopping}\nIdea: {@idea}\n実行結果をVerify/Ledgerまで確認済み")
+show("Clarity\nE2E PASS\nCalendar: {@calendar}\nReminder: {@reminder}\nMoney: {@money}\nShopping: {@shopping}\nIdea: {@idea}\nDevelopment: {@development}\n実行結果をVerify/Ledgerまで確認済み")
