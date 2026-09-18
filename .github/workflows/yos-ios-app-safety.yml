@@ -84,6 +84,7 @@ jobs:
             build
       - name: Launch YOS in iPhone simulator
         shell: bash
+        timeout-minutes: 4
         run: |
           set -euo pipefail
           UDID="$(python3 - <<'PY'
@@ -102,7 +103,23 @@ jobs:
           APP_PATH="$(find build/DerivedData/Build/Products/Debug-iphonesimulator -maxdepth 1 -name '*.app' -print -quit)"
           test -n "$APP_PATH"
           xcrun simctl boot "$UDID" >/dev/null 2>&1 || true
-          xcrun simctl bootstatus "$UDID" -b
+          STATE=""
+          for _ in $(seq 1 45); do
+            STATE="$(UDID="$UDID" python3 - <<'PY'
+          import json, os, subprocess
+          data=json.loads(subprocess.check_output(['xcrun','simctl','list','devices','--json']))
+          udid=os.environ['UDID']
+          for devices in data.get('devices',{}).values():
+              for device in devices:
+                  if device.get('udid') == udid:
+                      print(device.get('state',''))
+                      raise SystemExit(0)
+          PY
+          )"
+            [ "$STATE" = "Booted" ] && break
+            sleep 2
+          done
+          test "$STATE" = "Booted"
           xcrun simctl install "$UDID" "$APP_PATH"
           xcrun simctl launch "$UDID" jp.yos.onlysystem
           sleep 6
