@@ -1,0 +1,501 @@
+{
+  "version": "1.0",
+  "name": "Clarity iPhone Capability Registry",
+  "target_platform": "iPhone / iOS 26+",
+  "owner_entry_policy": "Clarity is the single normal user entry point for all supported iPhone actions.",
+  "scope": {
+    "executable": "Every capability exposed on the target iPhone through Apple Shortcuts, App Intents, approved URL/deep-link handoff, or an existing YOS child asset.",
+    "protected": "When iOS requires explicit user interaction or does not expose a public automation API, Clarity must route to the nearest native UI and state that execution still requires the user.",
+    "dynamic_apps": "Third-party app capabilities are included when the installed app exposes a usable App Intent/Shortcut action."
+  },
+  "completion_gate": {
+    "registry_has_no_unknown_capability_state": true,
+    "all_available_direct_or_child_capabilities_have_verified_route": true,
+    "all_protected_capabilities_have_explicit_ui_handoff": true,
+    "all_side_effecting_routes_require_policy": true,
+    "all_applied_results_require_verify": true,
+    "physical_iphone_e2e_required": true,
+    "fallback_kept_until_replacement_route_passes_e2e": true
+  },
+  "execution_modes": [
+    "direct_shortcuts",
+    "existing_yos_asset",
+    "registered_child_shortcut",
+    "app_intent_child",
+    "open_native_ui",
+    "not_publicly_automatable"
+  ],
+  "statuses": [
+    "implemented",
+    "existing_asset",
+    "pending_module",
+    "needs_device_verification",
+    "dynamic_by_device",
+    "ui_handoff_required",
+    "not_publicly_automatable"
+  ],
+  "capabilities": [
+    {
+      "id": "input.voice",
+      "domain": "input",
+      "mode": "direct_shortcuts",
+      "status": "implemented"
+    },
+    {
+      "id": "input.text",
+      "domain": "input",
+      "mode": "direct_shortcuts",
+      "status": "pending_module"
+    },
+    {
+      "id": "input.clipboard",
+      "domain": "input",
+      "mode": "direct_shortcuts",
+      "status": "pending_module"
+    },
+    {
+      "id": "input.share_sheet",
+      "domain": "input",
+      "mode": "direct_shortcuts",
+      "status": "pending_module"
+    },
+    {
+      "id": "input.screenshot",
+      "domain": "input",
+      "mode": "existing_yos_asset",
+      "status": "existing_asset"
+    },
+    {
+      "id": "calendar.create",
+      "domain": "calendar",
+      "mode": "direct_shortcuts",
+      "status": "implemented"
+    },
+    {
+      "id": "calendar.find",
+      "domain": "calendar",
+      "mode": "direct_shortcuts",
+      "status": "pending_module"
+    },
+    {
+      "id": "calendar.update",
+      "domain": "calendar",
+      "mode": "direct_shortcuts",
+      "status": "pending_module"
+    },
+    {
+      "id": "calendar.delete",
+      "domain": "calendar",
+      "mode": "direct_shortcuts",
+      "status": "pending_module"
+    },
+    {
+      "id": "reminders.create",
+      "domain": "reminders",
+      "mode": "direct_shortcuts",
+      "status": "implemented"
+    },
+    {
+      "id": "reminders.find",
+      "domain": "reminders",
+      "mode": "direct_shortcuts",
+      "status": "pending_module"
+    },
+    {
+      "id": "reminders.update",
+      "domain": "reminders",
+      "mode": "direct_shortcuts",
+      "status": "pending_module"
+    },
+    {
+      "id": "reminders.delete",
+      "domain": "reminders",
+      "mode": "direct_shortcuts",
+      "status": "pending_module"
+    },
+    {
+      "id": "shopping.add",
+      "domain": "shopping",
+      "mode": "direct_shortcuts",
+      "status": "implemented"
+    },
+    {
+      "id": "idea.capture",
+      "domain": "idea",
+      "mode": "direct_shortcuts",
+      "status": "implemented"
+    },
+    {
+      "id": "notes.create",
+      "domain": "notes",
+      "mode": "registered_child_shortcut",
+      "status": "pending_module"
+    },
+    {
+      "id": "notes.append",
+      "domain": "notes",
+      "mode": "registered_child_shortcut",
+      "status": "pending_module"
+    },
+    {
+      "id": "money.capture",
+      "domain": "money",
+      "mode": "existing_yos_asset",
+      "status": "needs_device_verification"
+    },
+    {
+      "id": "files.read",
+      "domain": "files",
+      "mode": "direct_shortcuts",
+      "status": "pending_module"
+    },
+    {
+      "id": "files.write",
+      "domain": "files",
+      "mode": "direct_shortcuts",
+      "status": "pending_module"
+    },
+    {
+      "id": "files.append",
+      "domain": "files",
+      "mode": "direct_shortcuts",
+      "status": "implemented"
+    },
+    {
+      "id": "files.move",
+      "domain": "files",
+      "mode": "direct_shortcuts",
+      "status": "pending_module"
+    },
+    {
+      "id": "files.delete",
+      "domain": "files",
+      "mode": "direct_shortcuts",
+      "status": "pending_module"
+    },
+    {
+      "id": "photos.select",
+      "domain": "photos",
+      "mode": "direct_shortcuts",
+      "status": "pending_module"
+    },
+    {
+      "id": "photos.save",
+      "domain": "photos",
+      "mode": "direct_shortcuts",
+      "status": "pending_module"
+    },
+    {
+      "id": "camera.photo",
+      "domain": "camera",
+      "mode": "direct_shortcuts",
+      "status": "pending_module"
+    },
+    {
+      "id": "camera.video",
+      "domain": "camera",
+      "mode": "direct_shortcuts",
+      "status": "pending_module"
+    },
+    {
+      "id": "camera.scan_document",
+      "domain": "camera",
+      "mode": "app_intent_child",
+      "status": "needs_device_verification"
+    },
+    {
+      "id": "camera.scan_qr",
+      "domain": "camera",
+      "mode": "direct_shortcuts",
+      "status": "needs_device_verification"
+    },
+    {
+      "id": "clock.timer.start",
+      "domain": "clock",
+      "mode": "registered_child_shortcut",
+      "status": "pending_module"
+    },
+    {
+      "id": "clock.timer.stop",
+      "domain": "clock",
+      "mode": "registered_child_shortcut",
+      "status": "pending_module"
+    },
+    {
+      "id": "clock.alarm.create",
+      "domain": "clock",
+      "mode": "registered_child_shortcut",
+      "status": "pending_module"
+    },
+    {
+      "id": "clock.alarm.toggle",
+      "domain": "clock",
+      "mode": "registered_child_shortcut",
+      "status": "pending_module"
+    },
+    {
+      "id": "device.brightness.set",
+      "domain": "device",
+      "mode": "direct_shortcuts",
+      "status": "pending_module"
+    },
+    {
+      "id": "device.volume.set",
+      "domain": "device",
+      "mode": "direct_shortcuts",
+      "status": "pending_module"
+    },
+    {
+      "id": "device.focus.set",
+      "domain": "device",
+      "mode": "direct_shortcuts",
+      "status": "pending_module"
+    },
+    {
+      "id": "device.low_power.set",
+      "domain": "device",
+      "mode": "direct_shortcuts",
+      "status": "pending_module"
+    },
+    {
+      "id": "device.appearance.set",
+      "domain": "device",
+      "mode": "direct_shortcuts",
+      "status": "pending_module"
+    },
+    {
+      "id": "device.orientation_lock.set",
+      "domain": "device",
+      "mode": "direct_shortcuts",
+      "status": "needs_device_verification"
+    },
+    {
+      "id": "device.info.read",
+      "domain": "device",
+      "mode": "direct_shortcuts",
+      "status": "pending_module"
+    },
+    {
+      "id": "connectivity.wifi.set",
+      "domain": "connectivity",
+      "mode": "direct_shortcuts",
+      "status": "needs_device_verification"
+    },
+    {
+      "id": "connectivity.bluetooth.set",
+      "domain": "connectivity",
+      "mode": "direct_shortcuts",
+      "status": "needs_device_verification"
+    },
+    {
+      "id": "connectivity.cellular.set",
+      "domain": "connectivity",
+      "mode": "open_native_ui",
+      "status": "ui_handoff_required"
+    },
+    {
+      "id": "connectivity.airplane_mode.set",
+      "domain": "connectivity",
+      "mode": "open_native_ui",
+      "status": "ui_handoff_required"
+    },
+    {
+      "id": "location.current",
+      "domain": "location",
+      "mode": "direct_shortcuts",
+      "status": "pending_module"
+    },
+    {
+      "id": "maps.search",
+      "domain": "maps",
+      "mode": "direct_shortcuts",
+      "status": "pending_module"
+    },
+    {
+      "id": "maps.directions",
+      "domain": "maps",
+      "mode": "direct_shortcuts",
+      "status": "pending_module"
+    },
+    {
+      "id": "maps.open_location",
+      "domain": "maps",
+      "mode": "direct_shortcuts",
+      "status": "pending_module"
+    },
+    {
+      "id": "contacts.find",
+      "domain": "contacts",
+      "mode": "direct_shortcuts",
+      "status": "pending_module"
+    },
+    {
+      "id": "contacts.create",
+      "domain": "contacts",
+      "mode": "direct_shortcuts",
+      "status": "pending_module"
+    },
+    {
+      "id": "contacts.update",
+      "domain": "contacts",
+      "mode": "direct_shortcuts",
+      "status": "pending_module"
+    },
+    {
+      "id": "communication.call",
+      "domain": "communication",
+      "mode": "direct_shortcuts",
+      "status": "pending_module"
+    },
+    {
+      "id": "communication.message",
+      "domain": "communication",
+      "mode": "direct_shortcuts",
+      "status": "pending_module"
+    },
+    {
+      "id": "communication.email",
+      "domain": "communication",
+      "mode": "direct_shortcuts",
+      "status": "pending_module"
+    },
+    {
+      "id": "apps.open",
+      "domain": "apps",
+      "mode": "direct_shortcuts",
+      "status": "pending_module"
+    },
+    {
+      "id": "shortcuts.run_registered",
+      "domain": "shortcuts",
+      "mode": "registered_child_shortcut",
+      "status": "implemented"
+    },
+    {
+      "id": "shortcuts.create",
+      "domain": "shortcuts",
+      "mode": "registered_child_shortcut",
+      "status": "pending_module"
+    },
+    {
+      "id": "third_party.app_intent",
+      "domain": "apps",
+      "mode": "app_intent_child",
+      "status": "dynamic_by_device"
+    },
+    {
+      "id": "media.play_pause",
+      "domain": "media",
+      "mode": "direct_shortcuts",
+      "status": "pending_module"
+    },
+    {
+      "id": "media.music.play",
+      "domain": "media",
+      "mode": "direct_shortcuts",
+      "status": "pending_module"
+    },
+    {
+      "id": "media.music.search",
+      "domain": "media",
+      "mode": "direct_shortcuts",
+      "status": "pending_module"
+    },
+    {
+      "id": "media.playback_destination",
+      "domain": "media",
+      "mode": "direct_shortcuts",
+      "status": "needs_device_verification"
+    },
+    {
+      "id": "home.scene",
+      "domain": "home",
+      "mode": "existing_yos_asset",
+      "status": "existing_asset"
+    },
+    {
+      "id": "home.accessory",
+      "domain": "home",
+      "mode": "existing_yos_asset",
+      "status": "existing_asset"
+    },
+    {
+      "id": "home.bravia",
+      "domain": "home",
+      "mode": "existing_yos_asset",
+      "status": "existing_asset"
+    },
+    {
+      "id": "web.open_url",
+      "domain": "web",
+      "mode": "direct_shortcuts",
+      "status": "pending_module"
+    },
+    {
+      "id": "web.fetch",
+      "domain": "web",
+      "mode": "direct_shortcuts",
+      "status": "pending_module"
+    },
+    {
+      "id": "web.search",
+      "domain": "web",
+      "mode": "direct_shortcuts",
+      "status": "pending_module"
+    },
+    {
+      "id": "translate.text",
+      "domain": "language",
+      "mode": "app_intent_child",
+      "status": "needs_device_verification"
+    },
+    {
+      "id": "health.read",
+      "domain": "health",
+      "mode": "app_intent_child",
+      "status": "needs_device_verification"
+    },
+    {
+      "id": "health.write",
+      "domain": "health",
+      "mode": "app_intent_child",
+      "status": "needs_device_verification"
+    },
+    {
+      "id": "chatgpt.one_enter_task",
+      "domain": "chatgpt",
+      "mode": "registered_child_shortcut",
+      "status": "pending_module"
+    },
+    {
+      "id": "chatgpt.open_target",
+      "domain": "chatgpt",
+      "mode": "open_native_ui",
+      "status": "pending_module"
+    },
+    {
+      "id": "settings.open",
+      "domain": "settings",
+      "mode": "open_native_ui",
+      "status": "pending_module"
+    },
+    {
+      "id": "wallet.payment_authorize",
+      "domain": "wallet",
+      "mode": "not_publicly_automatable",
+      "status": "not_publicly_automatable"
+    },
+    {
+      "id": "security.face_id_enrollment",
+      "domain": "security",
+      "mode": "not_publicly_automatable",
+      "status": "not_publicly_automatable"
+    },
+    {
+      "id": "security.passcode_change",
+      "domain": "security",
+      "mode": "open_native_ui",
+      "status": "ui_handoff_required"
+    }
+  ]
+}
