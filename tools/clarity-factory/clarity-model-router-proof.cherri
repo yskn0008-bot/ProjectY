@@ -5,14 +5,16 @@
 #include 'actions/shortcuts'
 
 // Side-effect-free physical proof for:
-// natural input -> Use Model structured actions -> existing Router -> child Shortcut.
-// Every terminal path shows an explicit diagnostic before returning the typed result,
-// so the physical acceptance harness cannot succeed or fail silently.
+// natural input -> Use Model -> multi-intent structure -> canonical Router request -> child Shortcut.
+//
+// Important: the model is responsible only for UNDERSTAND.
+// The parent normalizes each model intent into the fixed YOS_Test action contract.
+// This avoids letting the model invent policy/risk/executor metadata during the proof.
 action 'is.workflow.actions.output' outputValue(variable value: 'WFOutput')
 
 const originalInput = listen("After Pause", "jp-JP")
 
-const modelPrompt = text("You are Clarity's UNDERSTAND layer. Structure the user's natural input into one or more actions. Preserve original_input exactly. Never claim execution. Return only a Dictionary with keys original_input and actions. actions must be an array. Each action must contain exactly these contract fields: id, module, input, risk, external_write, needs_review, needs_confirmation, status. For this side-effect-free proof only: module must always be YOS_Test; input must be a Dictionary with one key echo containing only the individual intent text; risk must be low; external_write=false; needs_review=false; needs_confirmation=false; status=planned. Split multiple intents into separate actions in their original order. Do not invent missing content. original_input: {originalInput}")
+const modelPrompt = text("You are Clarity's UNDERSTAND layer. Preserve original_input exactly. Never claim execution. Split the user's natural input into independent intents in original order. Do not invent missing content. Return only a Dictionary with exactly two keys: original_input and intents. intents must be an array. Each intents item must be a Dictionary with exactly one key named text. text must contain only that individual intent in natural Japanese. original_input: {originalInput}")
 
 const modelResult = askChatGPT(
   modelPrompt,
@@ -23,7 +25,7 @@ const modelResult = askChatGPT(
 @parsed = getDictionary(modelResult)
 @echoedInputValue = getValue(@parsed, "original_input")
 @echoedInput = "{@echoedInputValue}"
-@actionsRaw = getValue(@parsed, "actions")
+@intentsRaw = getValue(@parsed, "intents")
 
 if @echoedInput != "{originalInput}" {
     @blocked = {"status":"blocked","verified":false,"result":{"message":"original_input_mismatch"},"error_code":"ORIGINAL_INPUT_MISMATCH"}
@@ -31,45 +33,28 @@ if @echoedInput != "{originalInput}" {
     outputValue(@blocked)
 }
 
-if !@actionsRaw {
-    @blocked = {"status":"blocked","verified":false,"result":{"message":"actions_missing"},"error_code":"INVALID_ACTION_SCHEMA"}
-    show("Clarity Model Router Proof\nBLOCKED\nINVALID_ACTION_SCHEMA")
+if !@intentsRaw {
+    @blocked = {"status":"blocked","verified":false,"result":{"message":"intents_missing"},"error_code":"INVALID_UNDERSTAND_OUTPUT"}
+    show("Clarity Model Router Proof\nBLOCKED\nINVALID_UNDERSTAND_OUTPUT")
     outputValue(@blocked)
 }
 
-for actionItem in @actionsRaw {
-    @action = getDictionary(@actionItem)
+@intentCount = 0
 
-    @idValue = getValue(@action, "id")
-    @id = "{@idValue}"
-    @moduleValue = getValue(@action, "module")
-    @module = "{@moduleValue}"
-    @statusValue = getValue(@action, "status")
-    @status = "{@statusValue}"
-    @riskValue = getValue(@action, "risk")
-    @risk = "{@riskValue}"
-    @externalWrite = getValue(@action, "external_write")
-    @needsReview = getValue(@action, "needs_review")
-    @needsConfirmation = getValue(@action, "needs_confirmation")
-    @inputRaw = getValue(@action, "input")
+for intentItem in @intentsRaw {
+    @intent = getDictionary(@intentItem)
+    @intentTextValue = getValue(@intent, "text")
+    @intentText = "{@intentTextValue}"
 
-    if !@id || @module != "YOS_Test" || @status != "planned" || @risk != "low" || @externalWrite || @needsReview || @needsConfirmation || !@inputRaw {
-        @blocked = {"status":"blocked","verified":false,"result":{"message":"invalid_action_schema"},"error_code":"INVALID_ACTION_SCHEMA"}
-        show("Clarity Model Router Proof\nBLOCKED\nINVALID_ACTION_SCHEMA")
+    if !@intentText {
+        @blocked = {"status":"blocked","verified":false,"result":{"message":"intent_text_missing"},"error_code":"INVALID_UNDERSTAND_OUTPUT"}
+        show("Clarity Model Router Proof\nBLOCKED\nINVALID_UNDERSTAND_OUTPUT")
         outputValue(@blocked)
     }
 
-    @input = getDictionary(@inputRaw)
-    @echoValue = getValue(@input, "echo")
-    @echo = "{@echoValue}"
-
-    if !@echo {
-        @blocked = {"status":"blocked","verified":false,"result":{"message":"missing_echo"},"error_code":"INVALID_ACTION_INPUT"}
-        show("Clarity Model Router Proof\nBLOCKED\nINVALID_ACTION_INPUT")
-        outputValue(@blocked)
-    }
-
-    @routerRequest = {"module":"YOS_Test","input":{"echo":"{@echo}"}}
+    // Parent-owned canonical action normalization for this side-effect-free proof.
+    // The model does not choose module/risk/policy values.
+    @routerRequest = {"module":"YOS_Test","input":{"echo":"{@intentText}"}}
     @childRaw = run("Clarity Dispatcher Proof", @routerRequest)
     @child = getDictionary(@childRaw)
     @childStatusValue = getValue(@child, "status")
@@ -81,8 +66,16 @@ for actionItem in @actionsRaw {
         show("Clarity Model Router Proof\nFAILED\nCHILD_RESULT_UNVERIFIED")
         outputValue(@failed)
     }
+
+    @intentCount += 1
 }
 
-@passed = {"status":"success","verified":true,"result":{"message":"MODEL_ROUTER_E2E_PASS"},"error_code":""}
-show("Clarity Model Router Proof\nPASS\nMODEL_ROUTER_E2E_PASS")
+if @intentCount < 1 {
+    @blocked = {"status":"blocked","verified":false,"result":{"message":"no_intents"},"error_code":"INVALID_UNDERSTAND_OUTPUT"}
+    show("Clarity Model Router Proof\nBLOCKED\nINVALID_UNDERSTAND_OUTPUT")
+    outputValue(@blocked)
+}
+
+@passed = {"status":"success","verified":true,"result":{"message":"MODEL_ROUTER_E2E_PASS","intent_count":@intentCount},"error_code":""}
+show("Clarity Model Router Proof\nPASS\nMODEL_ROUTER_E2E_PASS\nIntents: {@intentCount}")
 outputValue(@passed)
