@@ -176,6 +176,24 @@ try {
     await yosPage.screenshot({ path: `test-results/${screenshotName}-390-${browserName}.png`, fullPage: false });
     return visual;
   };
+  const [lifeBrandBox,yosBrandBox,lifeEmblemBox,yosEmblemBox]=await Promise.all([
+    page.locator('.top .brand').boundingBox(),
+    yosPage.locator('.topbar .brand').boundingBox(),
+    page.locator('.top .brand-compass').boundingBox(),
+    yosPage.locator('.topbar .brand-compass').boundingBox()
+  ]);
+  assert.equal(await page.locator('.top .brand p').textContent(),'by YOS','Life brand subtitle must stay aligned with the shared YOS brand');
+  for(const [axis,lifeValue,yosValue] of [
+    ['x',lifeBrandBox?.x,yosBrandBox?.x],
+    ['y',lifeBrandBox?.y,yosBrandBox?.y],
+    ['emblem-x',lifeEmblemBox?.x,yosEmblemBox?.x],
+    ['emblem-y',lifeEmblemBox?.y,yosEmblemBox?.y],
+    ['emblem-width',lifeEmblemBox?.width,yosEmblemBox?.width],
+    ['emblem-height',lifeEmblemBox?.height,yosEmblemBox?.height]
+  ]){
+    assert.ok(Number.isFinite(lifeValue)&&Number.isFinite(yosValue),`missing header geometry: ${axis}`);
+    assert.ok(Math.abs(lifeValue-yosValue)<=0.5,`Life/YOS header mismatch ${axis}: ${lifeValue}/${yosValue}`);
+  }
   assert.equal(await yosPage.locator('#brandTitle').textContent(),'MY WAY','MY WAY identity is missing');
   const yosVisual = await inspectYosDomain('home','#homePage','.yos-companion',['人生ナビ','今ここ','行き先','ここまで','人生ルート','次の一歩'],'yos-home');
   assert.ok(yosVisual.contentBottom <= yosVisual.navTop + 1, `YOS home exceeds one viewport: ${yosVisual.contentBottom}/${yosVisual.navTop}`);

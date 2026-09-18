@@ -219,3 +219,18 @@ body{background-image:radial-gradient(circle at 8% 4%,rgba(246,208,134,.25),tran
   .life-yos-companion-v2{align-self:end;justify-self:end;display:grid;grid-template-columns:1fr;width:48px;height:40px;min-height:40px;padding:3px;border-radius:20px}.life-yos-face-v2{width:38px;height:32px;border-radius:11px;font-size:10px}.life-yos-companion-v2>span:nth-child(2),.life-yos-companion-v2 i{display:none}
   #lifeBottomNavV1{padding:3px 4px calc(env(safe-area-inset-bottom) + 3px)}#lifeBottomNavV1 a,#lifeBottomNavV1 .nav{min-height:47px;border-radius:11px}#lifeBottomNavV1 a span,#lifeBottomNavV1 .nav span{font-size:15px}#lifeBottomNavV1 a b,#lifeBottomNavV1 .nav b{font-size:7px}
 }
+
+/* YOS Harmony Header SSOT: exact shared title geometry. */
+.app{width:min(100%,520px);margin:auto;padding:calc(env(safe-area-inset-top) + 7px) 14px calc(env(safe-area-inset-bottom) + 78px)}
+.top{height:50px;display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.top>.brand{display:flex;align-items:center;gap:8px;min-width:0}
+.brand-compass{display:grid;place-items:center;width:34px;height:34px;flex:0 0 34px;border:1px solid #9b7a35;border-radius:50%;background:#fff9e8;color:#7e5d1f;font-size:21px;box-shadow:inset 0 0 0 3px #efe1bd}
+.brand-copy{display:block;min-width:0}
+.brand h1{margin:0;font-family:Georgia,"Yu Mincho",serif;font-size:21px;line-height:1;letter-spacing:.035em;font-weight:700;white-space:nowrap}
+.brand p{display:block;margin:2px 0 0;color:#376b4d;font-size:9px;font-weight:900;line-height:1.2;letter-spacing:.13em;white-space:nowrap}
+@media(max-width:520px){
+  .app{width:min(100%,520px);margin:auto;padding:calc(env(safe-area-inset-top) + 7px) 14px calc(env(safe-area-inset-bottom) + 78px)}
+  .top{height:50px;margin-bottom:6px}
+  .brand h1{font-size:21px;letter-spacing:.035em}
+  .brand p{margin-top:2px;font-size:9px;letter-spacing:.13em}
+}
