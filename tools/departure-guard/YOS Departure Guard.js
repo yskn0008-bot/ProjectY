@@ -63,7 +63,7 @@ async function main() {
     rememberNotification(decisionPack.fingerprint)
   }
 
-  appendEventRecord({
+  const eventStoreSaved = appendEventRecord({
     schema_version: "0.2",
     event_type: "decision_opportunity_evaluated",
     experiment_id: CONFIG.experimentId,
@@ -86,6 +86,10 @@ async function main() {
     execution_result: null,
   })
 
+  if (config.runsInApp) {
+    await showAcceptanceSummary({ nextEvent, decision, decisionPack, gate, eventStoreSaved, notified })
+  }
+
   Script.setShortcutOutput({
     ok: true,
     version: CONFIG.version,
@@ -97,6 +101,7 @@ async function main() {
     gate,
     notified,
     duplicate,
+    eventStoreSaved,
     decisionPack,
   })
   Script.complete()
@@ -337,9 +342,35 @@ function appendEventRecord(record) {
     store.updated_at = new Date().toISOString()
     store.events = [...store.events, record].slice(-CONFIG.maxEventRecords)
     fm.writeString(eventStorePath, JSON.stringify(store, null, 2))
+    if (!fm.fileExists(eventStorePath)) return false
+    const saved = JSON.parse(fm.readString(eventStorePath))
+    return Array.isArray(saved.events) && saved.events.length > 0
   } catch (_) {
     // Experiment logging must never block departure preparation.
+    return false
   }
+}
+
+async function showAcceptanceSummary({ nextEvent, decision, decisionPack, gate, eventStoreSaved, notified }) {
+  const alert = new Alert()
+  alert.title = "Mother出発実験"
+  const lines = [
+    `Shadow Mode: ${invocation.mode === "shadow" ? "OK" : "OFF"}`,
+    `Event Store: ${eventStoreSaved ? "保存OK" : "保存NG"}`,
+    `通知: ${notified ? "実行" : "なし"}`,
+    `Gate: ${gate.level}`,
+  ]
+  if (nextEvent) {
+    lines.push(`予定取得: OK（${formatTime(nextEvent.startDate)}）`)
+    lines.push(`Decision Pack: ${decisionPack ? "作成" : "今回は不要"}`)
+    if (decision.minutesToDeparture != null) lines.push(`出発目安まで: ${decision.minutesToDeparture}分`)
+  } else {
+    lines.push("予定取得: OK（6時間以内の予定なし）")
+    lines.push("Decision Pack: 今回は不要")
+  }
+  alert.message = lines.join("\n")
+  alert.addAction("OK")
+  await alert.presentAlert()
 }
 
 function stableHash(input) {
