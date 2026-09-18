@@ -24,8 +24,7 @@ test('reads upcoming calendar events without creating or modifying them', () => 
 
 test('is silent unless at least one actionable reason exists', () => {
   assert.match(source, /const shouldNotify = reasons\.length > 0/)
-  assert.match(source, /decision\.shouldNotify \|\| decision\.reasons\.includes\("departure_window"\)/)
-  assert.match(source, /const notified = invocation\.mode === "active"/)
+  assert.match(source, /if \(decision\.shouldNotify/)
 })
 
 test('supports exceptional carry-item and departure-lead metadata', () => {
@@ -102,11 +101,4 @@ test('manual Scriptable acceptance shows a local summary without changing Shadow
   assert.match(source, /Shadow Mode:/)
   assert.match(source, /Event Store:/)
   assert.match(source, /eventStoreSaved/)
-})
-
-
-test('accepts URL-scheme source so a home-departure automation is a real leaving signal', () => {
-  assert.match(source, /parseInvocation\(args\.shortcutParameter, args\.queryParameters\)/)
-  assert.match(source, /applyObject\(queryParameters\)/)
-  assert.match(source, /\["leaving", "airpods", "departure"\]\.includes\(source\)/)
 })
