@@ -154,8 +154,13 @@ jobs:
           child='./Clarity Actions v1_unsigned.shortcut'
           test -f "$parent"
           test -f "$child"
+          python3 patch_append_file_paths.py "$parent"
           grep -q 'Clarity Actions v1' "$parent"
           grep -q 'E2E PASS' "$parent"
+          if grep -q 'file.append' "$parent"; then
+            echo 'parent still contains file.append' >&2
+            exit 1
+          fi
           python3 patch_append_file_paths.py "$child"
           python3 patch_reminder_wire_format.py "$child"
           python3 patch_execute_actions_readback.py "$child"
