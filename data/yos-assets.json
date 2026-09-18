@@ -1,11 +1,11 @@
 {
   "schema_version": "1.0.0",
   "ssot": "YOS asset registry",
-  "updated_at": "2026-09-18T23:56:00+09:00",
+  "updated_at": "2026-09-19T04:15:00+09:00",
   "source": {
     "repository": "yskn0008-bot/ProjectY",
     "base_branch": "main",
-    "base_sha": "fa98613f9d9292bb573d23deed09cb223526cbad",
+    "base_sha": "08b28945a4fa180996893e0973eeceb4971bbf95",
     "issue": "https://github.com/yskn0008-bot/ProjectY/issues/371",
     "legacy_22_asset_table_verified": false,
     "note": "Reconciled 2026-09-18 with current main, iPhone visual evidence, and passing automated checks. Preserve names; continue evidence-based updates."
@@ -51,7 +51,7 @@
   "summary": {
     "asset_count": 22,
     "overall_progress": 58,
-    "needs_user_action_count": 6
+    "needs_user_action_count": 7
   },
   "assets": [
     {
@@ -60,10 +60,10 @@
       "area": "core",
       "status": "awaiting_production_verification",
       "priority": 1,
-      "current": "YOS統合HOMEはiPhone実機で公開入口とローカルHARMONY HOMEの起動を確認済み。MY WAY / Money / Life / Idea / Journeyの主要画面へ到達できる。",
-      "next_action": "GitHub/Vercel障害時でも主要機能を開けるよう、YOS機能本体のローカル実行経路をFactory Coreへ移す。",
-      "blocker": "主要機能本体の一部はまだWeb入口に依存。",
-      "needs_user_action": false,
+      "current": "YOS iOS AppはMY WAYを起動HOMEとして同梱し、Life/Money/Hero’s Journey/Idea/System/Clarity/BRAVIAへのアプリ内導線を実装。Capacitor iOS生成・署名前Simulator build・生成済み.app内のMY WAY同梱検査までPASS。",
+      "next_action": "Apple Developer署名情報を接続し、クラウド署名→IPA→TestFlight配布を実行する。",
+      "blocker": "Apple Developer Program / App Store Connectの本人アカウント側で署名・配布情報の準備が必要。",
+      "needs_user_action": true,
       "device_verified": true,
       "production_verified": false,
       "deep_link": "/yos/",
@@ -74,7 +74,10 @@
         "path:AGENTS.md",
         "PR#319",
         "device:iPhone YOS public entry opened successfully 2026-09-18",
-        "device:iPhone Scriptable HARMONY HOME opened successfully 2026-09-18"
+        "device:iPhone Scriptable HARMONY HOME opened successfully 2026-09-18",
+        "CI:YOS iOS App Safety run 35384910156 contract/bundle PASS",
+        "CI:YOS iOS App Safety run 35384910156 native iOS simulator build PASS",
+        "CI:YOS iOS App Safety run 35384910156 packaged App.app contains native boot -> MY WAY PASS"
       ],
       "progress_basis": {
         "spec": true,
@@ -84,7 +87,7 @@
         "production": false
       },
       "progress": 85,
-      "updated_at": "2026-09-18T23:19:00+09:00"
+      "updated_at": "2026-09-19T04:15:00+09:00"
     },
     {
       "id": "my-way",
