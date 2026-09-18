@@ -86,6 +86,22 @@ jobs:
           cp "$dispatcher" artifacts/Clarity-Dispatcher-Proof-unsigned.shortcut
           cp "$child" artifacts/YOS-Test-unsigned.shortcut
 
+      - name: Compile Use Model to Router proof
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd tools/clarity-factory
+          rm -f './Clarity Model Router Proof_unsigned.shortcut' './Clarity Model Router Proof.plist'
+          cherri clarity-model-router-proof.cherri --skip-sign --debug
+          proof='./Clarity Model Router Proof_unsigned.shortcut'
+          test -f "$proof"
+          grep -q 'is.workflow.actions.askllm' "$proof"
+          grep -q 'is.workflow.actions.runworkflow' "$proof"
+          grep -q 'Clarity Dispatcher Proof' "$proof"
+          grep -q 'YOS_Test' "$proof"
+          mkdir -p artifacts
+          cp "$proof" artifacts/Clarity-Model-Router-Proof-unsigned.shortcut
+
       - name: Compile Clarity Raw First runtime
         shell: bash
         run: |
@@ -144,7 +160,15 @@ jobs:
           child_status=${PIPESTATUS[0]}
           echo "YOS_Test HubSign exit code: ${child_status}" | tee -a "$log"
 
-          if [ "$dispatcher_status" -ne 0 ] || [ "$child_status" -ne 0 ]; then
+          python3 tools/clarity-factory/sign_with_hubsign.py \
+            --input tools/clarity-factory/artifacts/Clarity-Model-Router-Proof-unsigned.shortcut \
+            --output tools/clarity-factory/artifacts/Clarity-Model-Router-Proof-signed.shortcut \
+            --name 'Clarity Model Router Proof' \
+            2>&1 | tee -a "$log"
+          model_router_status=${PIPESTATUS[0]}
+          echo "Model Router HubSign exit code: ${model_router_status}" | tee -a "$log"
+
+          if [ "$dispatcher_status" -ne 0 ] || [ "$child_status" -ne 0 ] || [ "$model_router_status" -ne 0 ]; then
             exit 1
           fi
 
@@ -158,6 +182,7 @@ jobs:
           for rel in (
               'tools/clarity-factory/artifacts/Clarity-Dispatcher-Proof-signed.shortcut',
               'tools/clarity-factory/artifacts/YOS-Test-signed.shortcut',
+              'tools/clarity-factory/artifacts/Clarity-Model-Router-Proof-signed.shortcut',
           ):
               p = Path(rel)
               data = p.read_bytes()
@@ -211,6 +236,8 @@ jobs:
             tools/clarity-factory/artifacts/Clarity-Dispatcher-Proof-signed.shortcut
             tools/clarity-factory/artifacts/YOS-Test-unsigned.shortcut
             tools/clarity-factory/artifacts/YOS-Test-signed.shortcut
+            tools/clarity-factory/artifacts/Clarity-Model-Router-Proof-unsigned.shortcut
+            tools/clarity-factory/artifacts/Clarity-Model-Router-Proof-signed.shortcut
             tools/clarity-factory/artifacts/hubsign-modules.log
             tools/clarity-factory/artifacts/Clarity-v1-unsigned.shortcut
             tools/clarity-factory/artifacts/Clarity-v1-signed.shortcut
