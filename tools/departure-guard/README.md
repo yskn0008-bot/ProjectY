@@ -26,7 +26,9 @@ Calendar / local battery observation
 → later: user decision → Clarity → Verify
 ```
 
-The default mode is **Shadow Mode**. In Shadow Mode the script prepares and logs candidates but never notifies and never executes a proposed action.
+The default mode is **Shadow Mode**. In Shadow Mode the script prepares and logs candidates but never sends a notification and never executes a proposed action.
+
+When the script is run manually inside the Scriptable app, it shows a local acceptance summary after processing. This summary is only for device verification and reports Shadow status, Event Store save/read-back, Calendar lookup result, Presentation Gate, and whether a Decision Pack was prepared. Normal Shortcut/automation execution remains silent in Shadow Mode.
 
 The Event Store is local-only (`YOS-Departure-Guard-EventStore-v0.json`), capped at the newest 200 evaluations, and intentionally omits event title/full location from experiment records.
 
