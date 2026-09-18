@@ -102,3 +102,10 @@ test('manual Scriptable acceptance shows a local summary without changing Shadow
   assert.match(source, /Event Store:/)
   assert.match(source, /eventStoreSaved/)
 })
+
+
+test('accepts URL-scheme source so a home-departure automation is a real leaving signal', () => {
+  assert.match(source, /parseInvocation\(args\.shortcutParameter, args\.queryParameters\)/)
+  assert.match(source, /applyObject\(queryParameters\)/)
+  assert.match(source, /\["leaving", "airpods", "departure"\]\.includes\(source\)/)
+})
