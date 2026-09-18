@@ -5,7 +5,7 @@
   "source": {
     "repository": "yskn0008-bot/ProjectY",
     "base_branch": "main",
-    "base_sha": "6d582e6592d5453f7fcf4abb4c9e0771eca617bd",
+    "base_sha": "fa98613f9d9292bb573d23deed09cb223526cbad",
     "issue": "https://github.com/yskn0008-bot/ProjectY/issues/371",
     "legacy_22_asset_table_verified": false,
     "note": "Reconciled 2026-09-18 with current main, iPhone visual evidence, and passing automated checks. Preserve names; continue evidence-based updates."
@@ -73,8 +73,8 @@
       "evidence": [
         "path:AGENTS.md",
         "PR#319",
-        "iPhone実機: YOS公開入口を開けた確認 2026-09-18",
-        "iPhone実機: HARMONY HOME起動確認 2026-09-18"
+        "device:iPhone YOS public entry opened successfully 2026-09-18",
+        "device:iPhone Scriptable HARMONY HOME opened successfully 2026-09-18"
       ],
       "progress_basis": {
         "spec": true,
@@ -104,8 +104,8 @@
       ],
       "evidence": [
         "PR#319",
-        "iPhone実機スクリーンショット: MY WAY 2026-09-18",
-        "YOS Cockpit Safety: Chromium/WebKit PASS 2026-09-18"
+        "YOS Cockpit Safety: Chromium/WebKit PASS 2026-09-18",
+        "device:iPhone MY WAY screen visually confirmed 2026-09-18"
       ],
       "progress_basis": {
         "spec": true,
@@ -166,7 +166,7 @@
       "evidence": [
         "PR#319",
         "PR#328",
-        "iPhone実機スクリーンショット: MY MONEY 2026-09-18"
+        "device:iPhone MY MONEY screen visually confirmed 2026-09-18"
       ],
       "progress_basis": {
         "spec": true,
@@ -196,8 +196,8 @@
       ],
       "evidence": [
         "PR#329",
-        "iPhone実機スクリーンショット: MY LIFE 2026-09-18",
-        "Morning/Night handoff: Chromium/WebKit PASS 2026-09-18"
+        "Morning/Night handoff: Chromium/WebKit PASS 2026-09-18",
+        "device:iPhone MY LIFE screen visually confirmed 2026-09-18"
       ],
       "progress_basis": {
         "spec": true,
@@ -522,7 +522,7 @@
       ],
       "evidence": [
         "PR#320 merged: f3076e87625e65d7b0602e329243d30b3e57a691",
-        "iPhone acceptance 2026-09-18: Shadow/Event Store/Calendar/Decision Pack/Active notification/duplicate suppression/state restore PASS"
+        "device:iPhone acceptance 2026-09-18: Shadow/Event Store/Calendar/Decision Pack/Active notification/duplicate suppression/state restore PASS"
       ],
       "progress_basis": {
         "spec": true,
@@ -531,7 +531,7 @@
         "device": true,
         "production": false
       },
-      "progress": 80,
+      "progress": 85,
       "updated_at": "2026-09-18T23:42:00+09:00"
     },
     {
