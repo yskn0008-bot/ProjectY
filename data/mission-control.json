@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-18T19:10:57+09:00",
+  "updated_at": "2026-09-18T21:16:44+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -20,7 +20,7 @@
       "priority": 1,
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/383",
-      "updated_at": "2026-09-18T05:17:53Z"
+      "updated_at": "2026-09-18T12:15:44Z"
     },
     {
       "id": "github-pr-370",
@@ -40,7 +40,7 @@
       "priority": 2,
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/373",
-      "updated_at": "2026-09-18T10:10:51Z"
+      "updated_at": "2026-09-18T10:18:58Z"
     },
     {
       "id": "github-pr-374",
@@ -90,7 +90,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-09-18T10:10:43Z"
+      "updated_at": "2026-09-18T12:12:48Z"
     },
     {
       "id": "github-issue-234",
@@ -165,6 +165,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-5baeef35d1b1",
+      "title": "ui: apply Harmony theme to local YOS HOME",
+      "completed_at": "2026-09-18T12:16:31Z",
+      "result": "GitHub mainへ反映（5baeef3）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/5baeef35d1b13614ea938e132041b8b0f1229202"
+    },
+    {
       "id": "github-commit-96a049e113c4",
       "title": "factory: add local-first core and provider fallback",
       "completed_at": "2026-09-18T05:40:48Z",
@@ -191,13 +198,6 @@
       "completed_at": "2026-09-18T04:43:50Z",
       "result": "GitHub mainへ反映（48f74a2）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/48f74a23a83af1aff0ff029d058586ed2467d984"
-    },
-    {
-      "id": "github-commit-59b5cc69f811",
-      "title": "refactor: reuse existing YOS shell entry",
-      "completed_at": "2026-09-18T04:43:47Z",
-      "result": "GitHub mainへ反映（59b5cc6）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/59b5cc69f811f64099bfbd51a66742d4284439d0"
     },
     {
       "id": "complete-002",
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-18T19:10:57+09:00",
+      "last_update": "2026-09-18T21:16:44+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -315,7 +315,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-18T19:10:57+09:00",
+      "last_update": "2026-09-18T21:16:44+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-18T19:10:57+09:00",
+      "last_update": "2026-09-18T21:16:44+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "3564793f617d184d6db7ada5eb9f3b4ae1afa786a1d4f39a63c8d99c1ba597a0"
+  "github_snapshot_hash": "3eb82cc9cacc16fdfcba7f32883fdd26f601908979a5bd06ae8de16a0939c719"
 }
