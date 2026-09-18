@@ -472,6 +472,11 @@ jobs:
             tools/clarity-factory/artifacts/Clarity-Execute-Actions-unsigned.shortcut
             tools/clarity-factory/artifacts/Clarity-Execute-Actions-signed.shortcut
             tools/clarity-factory/artifacts/hubsign-execute-actions.log
+            tools/clarity-factory/artifacts/Clarity-E2E-v1-unsigned.shortcut
+            tools/clarity-factory/artifacts/Clarity-E2E-v1-signed.shortcut
+            tools/clarity-factory/artifacts/Clarity-Actions-v1-unsigned.shortcut
+            tools/clarity-factory/artifacts/Clarity-Actions-v1-signed.shortcut
+            tools/clarity-factory/artifacts/hubsign-e2e-v1.log
             tools/clarity-factory/artifacts/Clarity-Direct-E2E-unsigned.shortcut
             tools/clarity-factory/artifacts/Clarity-Direct-E2E-signed.shortcut
             tools/clarity-factory/artifacts/hubsign-direct-e2e.log
