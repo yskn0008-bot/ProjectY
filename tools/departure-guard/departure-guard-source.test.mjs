@@ -24,7 +24,8 @@ test('reads upcoming calendar events without creating or modifying them', () => 
 
 test('is silent unless at least one actionable reason exists', () => {
   assert.match(source, /const shouldNotify = reasons\.length > 0/)
-  assert.match(source, /if \(decision\.shouldNotify/)
+  assert.match(source, /decision\.shouldNotify \|\| decision\.reasons\.includes\("departure_window"\)/)
+  assert.match(source, /const notified = invocation\.mode === "active"/)
 })
 
 test('supports exceptional carry-item and departure-lead metadata', () => {
