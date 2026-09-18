@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0.0",
   "ssot": "YOS asset registry",
-  "updated_at": "2026-09-18T23:19:00+09:00",
+  "updated_at": "2026-09-18T23:56:00+09:00",
   "source": {
     "repository": "yskn0008-bot/ProjectY",
     "base_branch": "main",
@@ -510,9 +510,9 @@
       "area": "automation",
       "status": "building",
       "priority": 2,
-      "current": "YOS Departure Guard2 / v0.2（Mother最小実験）をmainへ統合済み。iPhone実機でShadow Mode、Event Store、Calendar取得、Decision Pack、Active通知、重複通知防止、状態復元までPASS。",
-      "next_action": "既存の安全なiPhoneトリガーへ YOS Departure Guard2 を追加し、7日間Shadow観測を開始する。",
-      "blocker": "1回だけiPhone側で自動化トリガー接続が必要。その後は7日間の観測待ち。",
+      "current": "YOS Departure Guard2 / v0.2 実機acceptance PASS。Automation First方針に従い、既存Cherri + HubSign Factoryで署名済み `Mother Shadow v1.shortcut` を自動生成・検証し、mainへ統合済み。",
+      "next_action": "署名済み `Mother Shadow v1.shortcut` をiPhoneへ追加し、既存Personal Automationへ1回だけ接続して7日間Shadow観測を開始する。",
+      "blocker": "AppleのPersonal Automationへのトリガー接続はiPhone実機側の初回操作が必要。",
       "needs_user_action": true,
       "device_verified": true,
       "production_verified": false,
@@ -522,7 +522,9 @@
       ],
       "evidence": [
         "PR#320 merged: f3076e87625e65d7b0602e329243d30b3e57a691",
-        "device:iPhone acceptance 2026-09-18: Shadow/Event Store/Calendar/Decision Pack/Active notification/duplicate suppression/state restore PASS"
+        "device:iPhone acceptance 2026-09-18: Shadow/Event Store/Calendar/Decision Pack/Active notification/duplicate suppression/state restore PASS",
+        "PR#387 merged: 86323fd890a87b6274692f7a0dd1cddd833ab2a3",
+        "GitHub Actions 35359214945: compile/validate/HubSign/AEA1/package PASS"
       ],
       "progress_basis": {
         "spec": true,
@@ -532,7 +534,7 @@
         "production": false
       },
       "progress": 85,
-      "updated_at": "2026-09-18T23:42:00+09:00"
+      "updated_at": "2026-09-18T23:56:00+09:00"
     },
     {
       "id": "yos-screenshot-router",
