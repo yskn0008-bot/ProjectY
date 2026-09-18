@@ -4,7 +4,7 @@
 This runner turns an already-built ProjectY asset into a verified trial-ready
 artifact without waiting for an owner reply. It intentionally stays narrow:
 only the safest REUSE lane is executable here. Other lanes remain delegated to
-existing ProjectY/Codex/One Enter machinery.
+existing ProjectY/One Enter machinery; Codex may be added only when useful.
 """
 
 from __future__ import annotations
