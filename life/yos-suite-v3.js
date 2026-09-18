@@ -1,17 +1,28 @@
 'use strict';
 (()=>{
   const app=document.querySelector('main.app');
+  const initialNav=document.querySelector('.bottom-nav');
   if(app)app.style.visibility='hidden';
+  if(initialNav)initialNav.style.visibility='hidden';
   let revealed=false;
+  const finalReady=()=>Boolean(
+    document.getElementById('lifePageHostV1') &&
+    !document.querySelector('main.app .layout') &&
+    document.getElementById('lifeBottomNavV1') &&
+    document.querySelector('#lifePageHostV1 [data-page="home"]')
+  );
   const reveal=()=>{
-    if(revealed)return;
+    if(revealed||!finalReady())return;
     revealed=true;
+    document.getElementById('life-preinstall-guard')?.remove();
     if(app)app.style.visibility='visible';
+    const nav=document.getElementById('lifeBottomNavV1');
+    if(nav)nav.style.visibility='visible';
   };
   const waitForFinal=setInterval(()=>{
-    if(document.getElementById('lifePageHostV1')){
+    if(finalReady()){
       clearInterval(waitForFinal);
-      reveal();
+      requestAnimationFrame(()=>requestAnimationFrame(reveal));
     }
   },16);
   // Never reveal the legacy Life UI while the final UI is still loading.
