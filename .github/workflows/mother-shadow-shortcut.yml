@@ -4,6 +4,9 @@ on:
   pull_request:
     paths:
       - 'tools/departure-guard/mother-shadow-v1.cherri'
+      - 'tools/departure-guard/mother-home-exit.cherri'
+      - 'tools/departure-guard/YOS Departure Guard.js'
+      - 'tools/departure-guard/departure-guard-source.test.mjs'
       - 'tools/clarity-factory/sign_with_hubsign.py'
       - '.github/workflows/mother-shadow-shortcut.yml'
   workflow_dispatch:
@@ -32,6 +35,12 @@ jobs:
           test -n "$binary"
           sudo install -m 0755 "$binary" /usr/local/bin/cherri
           cherri --version
+
+      - name: Test Departure Guard source contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --test tools/departure-guard/departure-guard-source.test.mjs
 
       - name: Compile Mother Shadow v1
         shell: bash
@@ -73,11 +82,51 @@ jobs:
           print('OK: Mother Shadow bridge validated')
           PY
 
+      - name: Compile Mother home-exit bridge
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd tools/departure-guard
+          rm -f './Mother外出_unsigned.shortcut' './Mother外出.plist'
+          cherri mother-home-exit.cherri --skip-sign --debug
+          test -f './Mother外出_unsigned.shortcut'
+          cp './Mother外出_unsigned.shortcut' artifacts-mother-shadow/mother-home-exit-unsigned.shortcut
+          cp './Mother外出.plist' artifacts-mother-shadow/mother-home-exit.plist
+          python3 - <<'PY'
+          import plistlib
+          from pathlib import Path
+          p=Path('artifacts-mother-shadow/mother-home-exit-unsigned.shortcut')
+          d=plistlib.loads(p.read_bytes())
+          actions=d.get('WFWorkflowActions',[])
+          ids=[a.get('WFWorkflowActionIdentifier') for a in actions]
+          if ids.count('is.workflow.actions.openurl') != 1:
+              raise SystemExit(f'expected exactly 1 openurl action, got {ids.count("is.workflow.actions.openurl")}')
+          def strings(x):
+              if isinstance(x, dict):
+                  for k,v in x.items():
+                      yield from strings(k); yield from strings(v)
+              elif isinstance(x, (list,tuple)):
+                  for v in x: yield from strings(v)
+              elif isinstance(x, str):
+                  yield x
+          vals=list(strings(d))
+          target='scriptable:///run?scriptName=YOS%20Departure%20Guard2&openEditor=false&source=leaving'
+          if target not in vals:
+              raise SystemExit('missing exact home-departure target')
+          print('OK: Mother home-exit bridge validated')
+          PY
+
       - name: Sign Mother Shadow v1
         shell: bash
         run: |
           set -euo pipefail
           python3 tools/clarity-factory/sign_with_hubsign.py             --input 'tools/departure-guard/artifacts-mother-shadow/mother-shadow-v1-unsigned.shortcut'             --output 'tools/departure-guard/artifacts-mother-shadow/Mother Shadow v1.shortcut'             --name 'Mother Shadow v1'
+
+      - name: Sign Mother home-exit bridge
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/clarity-factory/sign_with_hubsign.py             --input 'tools/departure-guard/artifacts-mother-shadow/mother-home-exit-unsigned.shortcut'             --output 'tools/departure-guard/artifacts-mother-shadow/Mother外出.shortcut'             --name 'Mother外出'
 
       - name: Verify signed artifact
         shell: bash
@@ -85,18 +134,24 @@ jobs:
           set -euo pipefail
           python3 - <<'PY'
           from pathlib import Path
-          p=Path('tools/departure-guard/artifacts-mother-shadow/Mother Shadow v1.shortcut')
-          data=p.read_bytes()
-          if not data.startswith(b'AEA1'):
-              raise SystemExit(f'expected signed AEA1 shortcut, got {data[:8]!r}')
-          if len(data) < 500:
-              raise SystemExit(f'artifact unexpectedly small: {len(data)} bytes')
-          print(f'OK: signed Mother Shadow v1 artifact {len(data)} bytes')
+          for rel in (
+              'tools/departure-guard/artifacts-mother-shadow/Mother Shadow v1.shortcut',
+              'tools/departure-guard/artifacts-mother-shadow/Mother外出.shortcut',
+          ):
+              p=Path(rel)
+              data=p.read_bytes()
+              if not data.startswith(b'AEA1'):
+                  raise SystemExit(f'expected signed AEA1 shortcut for {p.name}, got {data[:8]!r}')
+              if len(data) < 500:
+                  raise SystemExit(f'{p.name} unexpectedly small: {len(data)} bytes')
+              print(f'OK: signed {p.name} artifact {len(data)} bytes')
           PY
 
       - name: Upload signed shortcut
         uses: actions/upload-artifact@v4
         with:
           name: mother-shadow-v1-shortcut
-          path: tools/departure-guard/artifacts-mother-shadow/Mother Shadow v1.shortcut
+          path: |
+            tools/departure-guard/artifacts-mother-shadow/Mother Shadow v1.shortcut
+            tools/departure-guard/artifacts-mother-shadow/Mother外出.shortcut
           if-no-files-found: error
