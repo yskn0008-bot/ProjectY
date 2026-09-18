@@ -8,8 +8,6 @@
 #include 'actions/calendar'
 #include 'actions/sharing'
 
-#question oneEnterEmail "One Enter送信先のGmailアドレス" ""
-
 // Execution child for the working physical "Clarity Demo".
 // It accepts the exact structured Dictionary produced by clarity-demo-auto:
 // {
@@ -45,9 +43,6 @@ action 'file.append' appendResolvedFile(
 }
 
 action 'is.workflow.actions.output' outputValue(variable value: 'WFOutput')
-
-// Bind the import question to the first runtime action so post-compile insertions cannot invalidate its ActionIndex.
-const oneEnterEmailText = text(oneEnterEmail)
 
 @request = getDictionary(ShortcutInput)
 @originalInputValue = getValue(@request, "original_input")
@@ -142,7 +137,7 @@ for actionItem in @actionsRaw {
 
         const developmentExecuting = text("{CurrentDate}\t{requestNumber}\t{actionId}\tEXECUTING\tDevelopment\n")
         appendResolvedFile(ledgerFile, developmentExecuting)
-        const oneEnterContact = emailAddress(oneEnterEmailText)
+        const oneEnterContact = emailAddress("ysk.n0531.89@gmail.com")
         const oneEnterSubject = text("[ONE_ENTER] Clarity {requestNumber}-{actionId}")
         const oneEnterBody = text("ONE_ENTER_REQUEST\nsource: clarity\nrequest_id: {requestNumber}-{actionId}\noriginal_input:\n{@originalInput}\n\nrequest:\n{@developmentRequest}\n")
         sendEmail(oneEnterContact, "", oneEnterSubject, oneEnterBody, false, false)
