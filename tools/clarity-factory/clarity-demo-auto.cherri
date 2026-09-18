@@ -1,0 +1,76 @@
+#define name Clarity Demo Auto
+#define color blue
+
+#include 'actions/text'
+#include 'actions/intelligence'
+
+// Auto-generated physical router harness for the working Clarity Demo entry.
+// No side effects in this stage: it only proves structured multi-action routing.
+
+const originalInput = listen("After Pause", "jp-JP")
+
+const modelPrompt = text("あなたはiPhoneの個人AIルーター「Clarity」のUNDERSTAND層です。\n役割は自然な1入力を実行前の構造化ACTIONへ分解することだけです。実行・保存・登録・送信はしません。\n最重要ルール: 1目的=1ACTION。異なるmoduleの目的を1つに混ぜない。Calendarは予定・予約・イベントだけ。Shoppingは買う物だけで、予定の帰りに買う場合でも別Shopping ACTIONにする。Ideaは思いつき・アイデアだけで、入力に存在する場合は別Idea ACTIONにする。Reminderは独立した後で行うこと・期限・通知だけ。Calendarに付随する30分前通知はReminderを作らずCalendarのalert_minutes_beforeに入れる。Moneyは支出・収入・金額記録だけ。original_inputは入力をそのまま保持。入力にない内容は作らない。不明な値は推測せず空文字またはnull。不明点があるACTIONはneeds_review=true。statusは必ずplanned。実行済み等を主張しない。\n利用可能module: Calendar, Reminder, Money, Shopping, Idea, Other。\nReturn only a Dictionary. Keys: original_input, actions. actions is an array. Each action has id, module, input, risk, external_write, needs_review, needs_confirmation, status. input is a Dictionary with text,title,date_time,end_date_time,alert_minutes_before,amount,merchant,item,note,raw_input. external_write=false. status=planned.\nCalendar: titleは予定名のみ。買い物内容を入れない。30分前通知はalert_minutes_before。Shopping: itemに買う物、帰りになどの条件はnote。Idea: noteに発想内容。Reminder: Calendar付随通知は作らない。Money: 金額や店名を推測しない。\n入力: {originalInput}")
+
+const modelResult = askChatGPT(modelPrompt, false, "Dictionary")
+@parsed = getDictionary(modelResult)
+@echoValue = getValue(@parsed, "original_input")
+@echoedInput = "{@echoValue}"
+@actionsRaw = getValue(@parsed, "actions")
+
+if @echoedInput != "{originalInput}" {
+    show("Clarity Demo Auto\nBLOCKED\noriginal_input mismatch")
+}
+
+if !@actionsRaw {
+    show("Clarity Demo Auto\nBLOCKED\nactions missing")
+}
+
+@calendar = false
+@reminder = false
+@money = false
+@shopping = false
+@idea = false
+@other = false
+@blocked = false
+
+for actionItem in @actionsRaw {
+    @action = getDictionary(@actionItem)
+    @moduleValue = getValue(@action, "module")
+    @module = "{@moduleValue}"
+    @statusValue = getValue(@action, "status")
+    @status = "{@statusValue}"
+    @inputRaw = getValue(@action, "input")
+
+    if @status != "planned" || !@inputRaw {
+        @blocked = true
+    }
+
+    if @module == "Calendar" {
+        @calendar = true
+    }
+    if @module == "Reminder" {
+        @reminder = true
+    }
+    if @module == "Money" {
+        @money = true
+    }
+    if @module == "Shopping" {
+        @shopping = true
+    }
+    if @module == "Idea" {
+        @idea = true
+    }
+    if @module == "Other" {
+        @other = true
+    }
+
+    if @module != "Calendar" && @module != "Reminder" && @module != "Money" && @module != "Shopping" && @module != "Idea" && @module != "Other" {
+        @blocked = true
+    }
+}
+
+if @blocked {
+    show("Clarity Demo Auto\nBLOCKED\ninvalid action schema/module")
+}
+
+show("Clarity Demo Auto\nROUTER PASS\nCalendar: {@calendar}\nReminder: {@reminder}\nMoney: {@money}\nShopping: {@shopping}\nIdea: {@idea}\nOther: {@other}")
