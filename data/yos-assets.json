@@ -513,9 +513,9 @@
       "area": "automation",
       "status": "building",
       "priority": 2,
-      "current": "YOS Departure Guard2 / v0.2 実機acceptance PASS。Automation First方針に従い、既存Cherri + HubSign Factoryで署名済み `Mother Shadow v1.shortcut` を自動生成・検証し、mainへ統合済み。",
-      "next_action": "署名済み `Mother Shadow v1.shortcut` をiPhoneへ追加し、既存Personal Automationへ1回だけ接続して7日間Shadow観測を開始する。",
-      "blocker": "AppleのPersonal Automationへのトリガー接続はiPhone実機側の初回操作が必要。",
+      "current": "YOS Departure Guard2 / v0.2 実機acceptance PASS。AirPods依存をやめるため、位置ベースの自宅出発を主トリガーにする `Mother外出` bridgeを追加。Scriptable URL query `source=leaving` を正式入力として扱う実装・自動テスト・署名Factoryを準備済み。",
+      "next_action": "署名済み `Mother外出.shortcut` をiPhoneへ追加し、Personal Automationの「自宅を出発」をトリガーにして `Mother外出` を1回だけ接続する。",
+      "blocker": "Appleの位置ベースPersonal Automation作成はiPhone実機側の初回操作が必要。",
       "needs_user_action": true,
       "device_verified": true,
       "production_verified": false,
@@ -527,7 +527,8 @@
         "PR#320 merged: f3076e87625e65d7b0602e329243d30b3e57a691",
         "device:iPhone acceptance 2026-09-18: Shadow/Event Store/Calendar/Decision Pack/Active notification/duplicate suppression/state restore PASS",
         "PR#387 merged: 86323fd890a87b6274692f7a0dd1cddd833ab2a3",
-        "GitHub Actions 35359214945: compile/validate/HubSign/AEA1/package PASS"
+        "GitHub Actions 35359214945: compile/validate/HubSign/AEA1/package PASS",
+        "design 2026-09-19: primary trigger switched from AirPods to leave-home location"
       ],
       "progress_basis": {
         "spec": true,
@@ -537,7 +538,7 @@
         "production": false
       },
       "progress": 85,
-      "updated_at": "2026-09-18T23:56:00+09:00"
+      "updated_at": "2026-09-19T05:10:00+09:00"
     },
     {
       "id": "yos-screenshot-router",
