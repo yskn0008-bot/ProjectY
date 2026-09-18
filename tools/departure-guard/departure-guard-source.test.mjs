@@ -93,3 +93,12 @@ test('Decision Pack schema is machine-readable and keeps proposed actions unappr
   assert.equal(actionSchema.properties.status.const, 'proposed')
   assert.equal(actionSchema.properties.approved_by_user.const, false)
 })
+
+
+test('manual Scriptable acceptance shows a local summary without changing Shadow notification behavior', () => {
+  assert.match(source, /if \(config\.runsInApp\)/)
+  assert.match(source, /showAcceptanceSummary\(/)
+  assert.match(source, /Shadow Mode:/)
+  assert.match(source, /Event Store:/)
+  assert.match(source, /eventStoreSaved/)
+})
