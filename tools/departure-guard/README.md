@@ -109,6 +109,20 @@ This is sufficient to start the silent observation phase. The user should not be
 An AirPods-connect trigger may be used later if the 7-day evidence shows that wake/morning invocations miss useful departure windows. It is not required to begin Shadow observation.
 
 If used, Battery Sync must remain first so the local AirPods/case snapshot is fresh before Mother evaluates it.
+
+## Shadow observation exit criteria
+
+Observe silently for 7 days using the existing automatic route. Do not add user-facing notifications during this phase.
+
+At the end of the window, compare:
+
+- number of evaluations and Decision Packs
+- `baseline_would_notify` versus Mother `presentation_level`
+- duplicate/no-op evaluations
+- how often useful departure windows were present within the current 6-hour look-ahead
+
+Only add another trigger if the evidence shows the existing route misses useful windows. If the fixed rule performs equally well, prefer the simpler fixed automation.
+
 ## Decision behavior
 
 Examples:
@@ -164,4 +178,4 @@ Still unverified and intentionally **not** a blocker for Shadow observation:
 - production-mode user presentation
 ## Rollback
 
-Remove the final `YOS Departure Guard` action from Morning Flow / AirPods Automation and delete the Scriptable script. Existing Battery Widget and Battery Sync remain untouched.
+Shadow observation does not require adding another Personal Automation. To roll back the current device hook, restore the pre-Mother `YOS Battery Widget.js` backup created by the installer (or remove only the marked Mother hook block). `YOS Battery Sync`, the original Battery Widget behavior, Morning Flow, and other automations remain otherwise unchanged.
