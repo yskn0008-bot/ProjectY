@@ -104,7 +104,7 @@ if @blocked {
     mustOutput("Clarity", "BLOCKED\n確認が必要なACTIONがあります")
 }
 
-@childRaw = run("Clarity Actions Gmail", @parsed)
+@childRaw = run("Clarity Actions", @parsed)
 @child = getDictionary(@childRaw)
 @childStatusValue = getValue(@child, "status")
 @childStatus = "{@childStatusValue}"
