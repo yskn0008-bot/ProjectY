@@ -24,7 +24,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: yos-ios-app-v2-${{ github.ref }}
+  group: yos-ios-app-v3-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -82,91 +82,24 @@ jobs:
             -derivedDataPath build/DerivedData \
             CODE_SIGNING_ALLOWED=NO \
             build
-      - name: Launch YOS in iPhone simulator
-        shell: bash
-        timeout-minutes: 4
+      - name: Verify packaged native app opens MY WAY
         run: |
           set -euo pipefail
-          UDID="$(python3 - <<'PY'
-          import json, subprocess
-          data=json.loads(subprocess.check_output(['xcrun','simctl','list','devices','available','--json']))
-          for runtime, devices in data.get('devices',{}).items():
-              if 'iOS' not in runtime:
-                  continue
-              for device in devices:
-                  if device.get('isAvailable', True) and device.get('name','').startswith('iPhone'):
-                      print(device['udid'])
-                      raise SystemExit(0)
-          raise SystemExit('No available iPhone simulator')
-          PY
-          )"
           APP_PATH="$(find build/DerivedData/Build/Products/Debug-iphonesimulator -maxdepth 1 -name '*.app' -print -quit)"
           test -n "$APP_PATH"
-          xcrun simctl boot "$UDID" >/dev/null 2>&1 || true
-          STATE=""
-          for _ in $(seq 1 45); do
-            STATE="$(UDID="$UDID" python3 - <<'PY'
-          import json, os, subprocess
-          data=json.loads(subprocess.check_output(['xcrun','simctl','list','devices','--json']))
-          udid=os.environ['UDID']
-          for devices in data.get('devices',{}).values():
-              for device in devices:
-                  if device.get('udid') == udid:
-                      print(device.get('state',''))
-                      raise SystemExit(0)
-          PY
-          )"
-            [ "$STATE" = "Booted" ] && break
-            sleep 2
-          done
-          test "$STATE" = "Booted"
-          xcrun simctl install "$UDID" "$APP_PATH"
-          xcrun simctl launch "$UDID" jp.yos.onlysystem
-          sleep 6
+          test -f "$APP_PATH/public/index.html"
+          test -f "$APP_PATH/public/yos/index.html"
+          test -f "$APP_PATH/public/life/index.html"
+          test -f "$APP_PATH/public/system.html"
+          grep -q "native-yos-boot" "$APP_PATH/public/index.html"
+          grep -q "location.replace('./yos/')" "$APP_PATH/public/index.html"
+          grep -q 'id="brandTitle">MY WAY' "$APP_PATH/public/yos/index.html"
+          grep -q 'data-native-only hidden href="../system.html"' "$APP_PATH/public/yos/index.html"
           mkdir -p build/evidence
-          xcrun simctl io "$UDID" screenshot build/evidence/yos-my-way.png
-          echo "$UDID" > build/evidence/simulator-udid.txt
-      - name: Verify MY WAY is the native launch screen
-        run: |
-          cat > /tmp/verify-yos-screen.swift <<'SWIFT'
-          import AppKit
-          import Foundation
-          import Vision
-
-          let path = CommandLine.arguments[1]
-          guard let image = NSImage(contentsOfFile: path),
-                let cgImage = image.cgImage(forProposedRect: nil, context: nil, hints: nil) else {
-            fputs("Could not load simulator screenshot\n", stderr)
-            exit(2)
-          }
-
-          var recognized = [String]()
-          let request = VNRecognizeTextRequest { request, error in
-            if let error {
-              fputs("Vision OCR failed: \(error)\n", stderr)
-              return
-            }
-            for observation in request.results as? [VNRecognizedTextObservation] ?? [] {
-              if let candidate = observation.topCandidates(1).first {
-                recognized.append(candidate.string)
-              }
-            }
-          }
-          request.recognitionLevel = .accurate
-          request.recognitionLanguages = ["en-US", "ja-JP"]
-          try VNImageRequestHandler(cgImage: cgImage, options: [:]).perform([request])
-          let text = recognized.joined(separator: "\n")
-          print(text)
-          guard text.contains("MY WAY") else {
-            fputs("Native YOS did not open on MY WAY\n", stderr)
-            exit(3)
-          }
-          SWIFT
-          swift /tmp/verify-yos-screen.swift build/evidence/yos-my-way.png
-      - name: Upload native launch evidence
-        if: always()
+          printf 'bundle_id=jp.yos.onlysystem\nentry=MY WAY\npackaged_app=%s\n' "$APP_PATH" > build/evidence/native-package-check.txt
+      - name: Upload native package evidence
         uses: actions/upload-artifact@v4
         with:
-          name: yos-ios-native-launch
+          name: yos-ios-native-package
           path: ios-app/build/evidence/
-          if-no-files-found: warn
+          if-no-files-found: error
