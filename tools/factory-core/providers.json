@@ -1,0 +1,67 @@
+{
+  "schema_version": "1.0",
+  "policy": {
+    "development_must_not_stop_on_optional_provider_failure": true,
+    "canonical_source": "local_store",
+    "github_is_optional_mirror": true,
+    "vercel_is_optional_public_host": true
+  },
+  "providers": [
+    {
+      "id": "local_store",
+      "roles": ["source_store", "change_history", "rollback", "artifact_store"],
+      "priority": 0,
+      "external": false,
+      "mode": "filesystem",
+      "enabled": true
+    },
+    {
+      "id": "local_runner",
+      "roles": ["qa_runner"],
+      "priority": 0,
+      "external": false,
+      "mode": "process",
+      "enabled": true
+    },
+    {
+      "id": "iphone_bundle",
+      "roles": ["distribution"],
+      "priority": 0,
+      "external": false,
+      "mode": "offline_bundle",
+      "enabled": true
+    },
+    {
+      "id": "google_drive",
+      "roles": ["source_mirror", "artifact_mirror", "backup"],
+      "priority": 10,
+      "external": true,
+      "mode": "mirror",
+      "enabled": true
+    },
+    {
+      "id": "github",
+      "roles": ["source_mirror", "change_history_mirror", "qa_runner", "backup"],
+      "priority": 20,
+      "external": true,
+      "mode": "mirror",
+      "enabled": true
+    },
+    {
+      "id": "github_pages",
+      "roles": ["public_host", "distribution"],
+      "priority": 20,
+      "external": true,
+      "mode": "static_host",
+      "enabled": true
+    },
+    {
+      "id": "vercel",
+      "roles": ["public_host", "api_host"],
+      "priority": 30,
+      "external": true,
+      "mode": "host",
+      "enabled": true
+    }
+  ]
+}
