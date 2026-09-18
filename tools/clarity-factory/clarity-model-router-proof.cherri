@@ -6,6 +6,8 @@
 
 // Side-effect-free physical proof for:
 // natural input -> Use Model structured actions -> existing Router -> child Shortcut.
+// Every terminal path shows an explicit diagnostic before returning the typed result,
+// so the physical acceptance harness cannot succeed or fail silently.
 action 'is.workflow.actions.output' outputValue(variable value: 'WFOutput')
 
 const originalInput = listen("After Pause", "jp-JP")
@@ -25,11 +27,13 @@ const modelResult = askChatGPT(
 
 if @echoedInput != "{originalInput}" {
     @blocked = {"status":"blocked","verified":false,"result":{"message":"original_input_mismatch"},"error_code":"ORIGINAL_INPUT_MISMATCH"}
+    show("Clarity Model Router Proof\nBLOCKED\nORIGINAL_INPUT_MISMATCH")
     outputValue(@blocked)
 }
 
 if !@actionsRaw {
     @blocked = {"status":"blocked","verified":false,"result":{"message":"actions_missing"},"error_code":"INVALID_ACTION_SCHEMA"}
+    show("Clarity Model Router Proof\nBLOCKED\nINVALID_ACTION_SCHEMA")
     outputValue(@blocked)
 }
 
@@ -51,6 +55,7 @@ for actionItem in @actionsRaw {
 
     if !@id || @module != "YOS_Test" || @status != "planned" || @risk != "low" || @externalWrite || @needsReview || @needsConfirmation || !@inputRaw {
         @blocked = {"status":"blocked","verified":false,"result":{"message":"invalid_action_schema"},"error_code":"INVALID_ACTION_SCHEMA"}
+        show("Clarity Model Router Proof\nBLOCKED\nINVALID_ACTION_SCHEMA")
         outputValue(@blocked)
     }
 
@@ -60,6 +65,7 @@ for actionItem in @actionsRaw {
 
     if !@echo {
         @blocked = {"status":"blocked","verified":false,"result":{"message":"missing_echo"},"error_code":"INVALID_ACTION_INPUT"}
+        show("Clarity Model Router Proof\nBLOCKED\nINVALID_ACTION_INPUT")
         outputValue(@blocked)
     }
 
@@ -72,9 +78,11 @@ for actionItem in @actionsRaw {
 
     if @childStatus != "success" || !@childVerified {
         @failed = {"status":"failed","verified":false,"result":{"message":"child_unverified"},"error_code":"CHILD_RESULT_UNVERIFIED"}
+        show("Clarity Model Router Proof\nFAILED\nCHILD_RESULT_UNVERIFIED")
         outputValue(@failed)
     }
 }
 
 @passed = {"status":"success","verified":true,"result":{"message":"MODEL_ROUTER_E2E_PASS"},"error_code":""}
+show("Clarity Model Router Proof\nPASS\nMODEL_ROUTER_E2E_PASS")
 outputValue(@passed)
