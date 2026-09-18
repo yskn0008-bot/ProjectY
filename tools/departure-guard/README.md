@@ -85,31 +85,35 @@ Nothing is required for normal events. Only exceptional events need metadata.
 
 ## Recommended wiring
 
-### Existing AirPods connection Automation
+### Primary: leave-home Personal Automation
 
-Keep the existing Battery Sync first, then run this script second.
+Use the iPhone location departure trigger as the primary automatic signal.
 
 ```text
-AirPods connected
+Leave Home
+→ Run Shortcut “Mother外出”
+→ Scriptable “YOS Departure Guard2”
+   source=leaving
+   mode=shadow
+```
+
+`Mother外出` is a dedicated signed bridge. It passes `source=leaving` through Scriptable's URL-scheme query parameters, so a real home departure is treated as a leaving signal without depending on AirPods.
+
+### Optional supplemental triggers
+
+AirPods connection and Morning Flow may still call the existing guard, but they are not required for the primary departure trigger.
+
+```text
+AirPods connected (optional)
 → YOS Battery Sync
-→ Scriptable: Run Script “YOS Departure Guard”
-   Parameter: leaving
-```
+→ existing guard
 
-This gives the guard a fresh AirPods/case reading immediately before it decides whether to interrupt.
-
-### Morning Flow
-
-At the end of Morning Flow, add this script with parameter `morning`.
-
-```text
-Morning Flow
+Morning Flow (optional)
 → existing flow
-→ Scriptable: Run Script “YOS Departure Guard”
-   Parameter: morning
+→ existing guard
 ```
 
-Because the guard is silent by default, adding it does not create another daily confirmation screen.
+The guard remains silent by default in Shadow Mode.
 
 ## Decision behavior
 
@@ -161,4 +165,4 @@ Do not call this complete until the physical iPhone confirms all of the followin
 
 ## Rollback
 
-Remove the final `YOS Departure Guard` action from Morning Flow / AirPods Automation and delete the Scriptable script. Existing Battery Widget and Battery Sync remain untouched.
+Delete or disable the leave-home Personal Automation that runs `Mother外出`. Optional Morning Flow / AirPods hooks can be removed independently. Existing Battery Widget and Battery Sync remain untouched.
