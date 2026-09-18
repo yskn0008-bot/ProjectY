@@ -58,7 +58,7 @@ assert.deepEqual(deleted, ['yos-life-home-v2','yos-life-home-v4','yos-life-home-
 assert.equal(claimed, true, 'Life service worker must claim its clients after cleanup');
 assert.match(source, /key\.startsWith\(LIFE_CACHE_PREFIX\)/, 'cleanup must be restricted by Life cache prefix');
 assert.match(source, /home-priority-v1\.css\?v=4/, 'priority home styles must be available offline');
-assert.match(source, /yos-suite-v3\\.js\\?v=9/, 'current suite script must be cached with its requested URL');
+assert.match(source, /yos-suite-v3\.js\?v=9/, 'current suite script must be cached with its requested URL');
 assert.match(source, /home-v1\.js\?v=7/, 'current home script must be cached with its requested URL');
 assert.match(source, /daily-flow-orchestrator-v1\.js\?v=1/, 'Morning/Night handoff must be available offline');
 assert.match(source, /task-quick-add-v1\.js\?v=1/, 'task quick add must be available offline');
