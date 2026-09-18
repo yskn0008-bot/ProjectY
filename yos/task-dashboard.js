@@ -123,12 +123,13 @@
     grid.append(cockpitCard('重要なこと',facts.important,'見落とし防止','important-card'));
     host.append(grid);
 
-    const details=el('details','cockpit-details');const summary=el('summary','','タスク詳細を見る');details.append(summary);
+    document.getElementById('taskDashboardDetails')?.remove();
+    const details=el('details','cockpit-details task-dashboard-details');details.id='taskDashboardDetails';const summary=el('summary','','タスク詳細を見る');details.append(summary);
     const activeTitle=el('div','task-section-title');activeTitle.append(el('h3','','今やる'),el('span','',`${facts.groups.active.length}件`));details.append(activeTitle);
     const activeList=el('div','task-list');facts.groups.active.slice(0,3).forEach(t=>activeList.append(taskRow(t)));if(!activeList.childElementCount)activeList.append(el('p','task-empty','今すぐのタスクはありません'));details.append(activeList);
     const nextTitle=el('div','task-section-title');nextTitle.append(el('h3','','次'),el('span','',`${facts.groups.next.length}件`));details.append(nextTitle);
     const nextList=el('div','task-list task-next-list');facts.groups.next.slice(0,4).forEach(t=>nextList.append(taskRow(t)));if(!nextList.childElementCount)nextList.append(el('p','task-empty','次のタスクはありません'));details.append(nextList);
-    const buckets=el('div','task-buckets');[['待ち',facts.groups.waiting],['保留',facts.groups.hold],['完了',facts.groups.done]].forEach(([label,list])=>{const d=el('details');const s=el('summary');s.append(el('b','',label),el('span','',String(list.length)));d.append(s);const content=el('div','bucket-content');list.forEach(t=>content.append(taskRow(t)));if(!list.length)content.append(el('p','task-empty','ありません'));d.append(content);buckets.append(d)});details.append(buckets);host.append(details);
+    const buckets=el('div','task-buckets');[['待ち',facts.groups.waiting],['保留',facts.groups.hold],['完了',facts.groups.done]].forEach(([label,list])=>{const d=el('details');const s=el('summary');s.append(el('b','',label),el('span','',String(list.length)));d.append(s);const content=el('div','bucket-content');list.forEach(t=>content.append(taskRow(t)));if(!list.length)content.append(el('p','task-empty','ありません'));d.append(content);buckets.append(d)});details.append(buckets);document.getElementById('taskDashboard')?.after(details);
     const auth=document.getElementById('taskDashboardAuth');if(auth)auth.hidden=true;
   }
 

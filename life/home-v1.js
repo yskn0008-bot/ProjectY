@@ -684,10 +684,7 @@
     qsa('.life-page-v1').forEach(page=>page.classList.toggle('active',page.dataset.page===key));
     qsa('#lifeBottomNavV1 button').forEach(button=>button.classList.toggle('active',button.dataset.page===key));
     const subtitle=qs('.brand p');
-    if(subtitle){
-      const copy={home:'今日の全体像',schedule:'予定とやること',record:'体調と気分',improve:'習慣と相談'};
-      subtitle.textContent=copy[key];
-    }
+    if(subtitle)subtitle.textContent='by YOS';
     if(remember)localStorage.setItem(PAGE_KEY,key);
     window.scrollTo({top:0,behavior:'smooth'});
     queueRefresh();

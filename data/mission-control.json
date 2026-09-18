@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-18T22:41:05+09:00",
+  "updated_at": "2026-09-18T23:43:11+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -30,7 +30,17 @@
       "priority": 1,
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/386",
-      "updated_at": "2026-09-18T12:52:19Z"
+      "updated_at": "2026-09-18T13:41:43Z"
+    },
+    {
+      "id": "github-pr-320",
+      "title": "PR #320 Prototype: YOS Departure Guard v0.2 — Mother minimal experiment",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/320",
+      "updated_at": "2026-09-18T14:39:22Z"
     },
     {
       "id": "github-pr-373",
@@ -40,7 +50,7 @@
       "priority": 2,
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/373",
-      "updated_at": "2026-09-18T13:40:28Z"
+      "updated_at": "2026-09-18T14:42:46Z"
     },
     {
       "id": "github-pr-382",
@@ -50,17 +60,7 @@
       "priority": 2,
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/382",
-      "updated_at": "2026-09-18T12:21:42Z"
-    },
-    {
-      "id": "github-pr-385",
-      "title": "PR #385 試作: 帰宅AUTO.shortcut 自動生成",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/385",
-      "updated_at": "2026-09-18T12:20:00Z"
+      "updated_at": "2026-09-18T13:50:51Z"
     },
     {
       "id": "github-issue-120",
@@ -90,7 +90,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-09-18T13:40:58Z"
+      "updated_at": "2026-09-18T14:39:13Z"
     },
     {
       "id": "github-issue-234",
@@ -165,39 +165,39 @@
   ],
   "recently_completed": [
     {
-      "id": "github-commit-b9cd8b79f50f",
-      "title": "life: match MY LIFE header structure to YOS brand",
-      "completed_at": "2026-09-18T13:40:51Z",
-      "result": "GitHub mainへ反映（b9cd8b7）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/b9cd8b79f50f649d1586deb92c8cd4d253248134"
+      "id": "github-commit-5383f5b90cf6",
+      "title": "yos: keep cockpit within first iPhone viewport",
+      "completed_at": "2026-09-18T14:38:48Z",
+      "result": "GitHub mainへ反映（5383f5b）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/5383f5b90cf6b8480a60f047108692f5c2738fcf"
     },
     {
-      "id": "github-commit-d6f34c9e0e30",
-      "title": "life: align MY LIFE brand typography with YOS domains",
-      "completed_at": "2026-09-18T13:35:27Z",
-      "result": "GitHub mainへ反映（d6f34c9）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/d6f34c9e0e30e4a14a9a853b36f41bc41043bba0"
+      "id": "github-commit-a956aeb3b872",
+      "title": "test(life): lock current Harmony home and title geometry",
+      "completed_at": "2026-09-18T14:36:46Z",
+      "result": "GitHub mainへ反映（a956aeb）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/a956aeb3b872b6db009c76d13c9e2d3771db1e5d"
     },
     {
-      "id": "github-commit-7235e6080429",
-      "title": "test(life): smoke current no-flash suite",
-      "completed_at": "2026-09-18T13:30:18Z",
-      "result": "GitHub mainへ反映（7235e60）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/7235e608042964fa233d732a56f9210418a0403c"
+      "id": "github-commit-d8460ae74fed",
+      "title": "life: keep title lock with safe bottom navigation spacing",
+      "completed_at": "2026-09-18T14:30:13Z",
+      "result": "GitHub mainへ反映（d8460ae）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/d8460ae74fedae8b0fbc95690af2652f2290a65b"
     },
     {
-      "id": "github-commit-678711af8336",
-      "title": "test(life): track no-flash cache generation",
-      "completed_at": "2026-09-18T13:30:15Z",
-      "result": "GitHub mainへ反映（678711a）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/678711af8336e393be4b133daebf7614dbfe6e5c"
+      "id": "github-commit-232fd33117b5",
+      "title": "life: enforce shared title coordinates in inline shell",
+      "completed_at": "2026-09-18T14:29:09Z",
+      "result": "GitHub mainへ反映（232fd33）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/232fd33117b58105acf3d5647afe57ae6b5fa7bf"
     },
     {
-      "id": "github-commit-78b43f7c96cf",
-      "title": "test(life): accept no-flash suite v9",
-      "completed_at": "2026-09-18T13:30:13Z",
-      "result": "GitHub mainへ反映（78b43f7）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/78b43f7c96cfc0717ff8e64a43ae13ad31f311d9"
+      "id": "github-commit-3a3a90c1de9e",
+      "title": "life: preserve one-screen home under shared header",
+      "completed_at": "2026-09-18T14:26:47Z",
+      "result": "GitHub mainへ反映（3a3a90c）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/3a3a90c1de9efc684021e88e58cf06010635a828"
     },
     {
       "id": "complete-002",
@@ -224,7 +224,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #383をレビューして公開判断する",
+      "next_action": "PR #386をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-18T22:41:05+09:00",
+      "last_update": "2026-09-18T23:43:11+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -315,7 +315,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-18T22:41:05+09:00",
+      "last_update": "2026-09-18T23:43:11+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -329,7 +329,7 @@
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #383をレビューして公開判断する",
+      "next_action": "PR #386をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-18T22:41:05+09:00",
+      "last_update": "2026-09-18T23:43:11+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "132de1229c64136e4c2a9ecb7eb20e6acc6e98904f2f0a31072f4ed1d14c6bef"
+  "github_snapshot_hash": "35813ad1ff5eba41275dc7f71dc16f6ec62e2c7e891af1508d90995d846a2b83"
 }

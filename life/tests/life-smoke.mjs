@@ -79,6 +79,8 @@ const clickAndWaitForReload = async locator => {
 try {
   await page.goto(baseURL, { waitUntil: 'networkidle' });
   await waitForDailyFlow();
+  await page.waitForSelector('#lifeHomeDashboardV1', { state: 'visible' });
+  await page.waitForFunction(() => document.getElementById('lifeHomeDashboardV1')?.innerText.includes('今日のくらし'));
   assert.equal(await page.locator('#lifeCalendarV1').isVisible(), false, 'Life calendar detail must stay behind the compact home entry');
   await page.evaluate(() => navigator.serviceWorker.ready);
 
@@ -176,8 +178,26 @@ try {
     await yosPage.screenshot({ path: `test-results/${screenshotName}-390-${browserName}.png`, fullPage: false });
     return visual;
   };
+  const [lifeBrandBox,yosBrandBox,lifeEmblemBox,yosEmblemBox]=await Promise.all([
+    page.locator('.top .brand').boundingBox(),
+    yosPage.locator('.topbar .brand').boundingBox(),
+    page.locator('.top .brand-compass').boundingBox(),
+    yosPage.locator('.topbar .brand-compass').boundingBox()
+  ]);
+  assert.equal(await page.locator('.top .brand p').textContent(),'by YOS','Life brand subtitle must stay aligned with the shared YOS brand');
+  for(const [axis,lifeValue,yosValue] of [
+    ['x',lifeBrandBox?.x,yosBrandBox?.x],
+    ['y',lifeBrandBox?.y,yosBrandBox?.y],
+    ['emblem-x',lifeEmblemBox?.x,yosEmblemBox?.x],
+    ['emblem-y',lifeEmblemBox?.y,yosEmblemBox?.y],
+    ['emblem-width',lifeEmblemBox?.width,yosEmblemBox?.width],
+    ['emblem-height',lifeEmblemBox?.height,yosEmblemBox?.height]
+  ]){
+    assert.ok(Number.isFinite(lifeValue)&&Number.isFinite(yosValue),`missing header geometry: ${axis}`);
+    assert.ok(Math.abs(lifeValue-yosValue)<=0.5,`Life/YOS header mismatch ${axis}: ${lifeValue}/${yosValue}`);
+  }
   assert.equal(await yosPage.locator('#brandTitle').textContent(),'MY WAY','MY WAY identity is missing');
-  const yosVisual = await inspectYosDomain('home','#homePage','.yos-companion',['人生ナビ','今ここ','行き先','ここまで','人生ルート','次の一歩'],'yos-home');
+  const yosVisual = await inspectYosDomain('home','#homePage','#taskDashboard',['今日の運転席','今日','今やる','次','予定','お金','重要なこと'],'yos-home');
   assert.ok(yosVisual.contentBottom <= yosVisual.navTop + 1, `YOS home exceeds one viewport: ${yosVisual.contentBottom}/${yosVisual.navTop}`);
   await inspectYosDomain('money','#moneyPage','.yos-companion',['MY MONEY','今月の状態','収入','支出','残り・見込み','内訳・守るお金','近い支払い'],'yos-money');
   await inspectYosDomain('journey','#journeyPage','.yos-companion',['MY JOURNEY','歩いてきた景色','現在のステージ','現在の景色','最近の経験','次のテーマ'],'yos-journey');
@@ -224,6 +244,8 @@ try {
   assert.equal(await page.evaluate(date => JSON.parse(localStorage.getItem('yos-life-v1')).days[date].tasks[0].done, lifeDate), true, 'visible Life task does not complete');
   await page.reload({ waitUntil: 'networkidle' });
   await waitForDailyFlow();
+  await page.waitForSelector('#lifeHomeDashboardV1', { state: 'visible' });
+  await page.waitForFunction(() => document.getElementById('lifeHomeDashboardV1')?.innerText.includes('今日のくらし'));
   assert.equal(await page.locator('#homeTaskListV2 [data-home-task-index="0"]').getAttribute('aria-pressed'), 'true', 'completed Life task did not survive relaunch');
   await page.locator('#homeTaskListV2 [data-home-task-index="0"]').click();
 
