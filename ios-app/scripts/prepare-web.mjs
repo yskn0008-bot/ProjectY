@@ -14,6 +14,10 @@ await cp(resolve(repoDir, 'taxi'), resolve(webDir, 'taxi'), { recursive: true })
 await cp(resolve(repoDir, 'life'), resolve(webDir, 'life'), { recursive: true });
 await cp(resolve(appDir, 'shell'), webDir, { recursive: true });
 
+await mkdir(resolve(webDir, 'data'), { recursive: true });
+await cp(resolve(repoDir, 'data', 'yos-assets.json'), resolve(webDir, 'data', 'yos-assets.json'));
+await cp(resolve(repoDir, 'data', 'yos-user-tasks.json'), resolve(webDir, 'data', 'yos-user-tasks.json'));
+
 await writeFile(
   resolve(webDir, 'build-info.json'),
   JSON.stringify({ builtAt: new Date().toISOString(), source: 'ProjectY' }, null, 2),
