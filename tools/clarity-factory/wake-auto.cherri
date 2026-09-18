@@ -1,0 +1,8 @@
+#define name 起床AUTO
+#define color yellow
+#define version 18
+
+// Thin wrapper only. Existing child Shortcuts remain the source of truth.
+// Battery sync runs first so Morning Flow can safely stop at its display step.
+run("YOS Battery Sync", nil)
+run("Morning Flow", nil)
