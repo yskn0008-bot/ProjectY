@@ -135,7 +135,10 @@ jobs:
           grep -q 'Calendar' "$demo"
           grep -q 'Shopping' "$demo"
           grep -q 'Idea' "$demo"
-          grep -q 'ROUTER PASS' "$demo"
+          grep -q 'is.workflow.actions.runworkflow' "$demo"
+          grep -q 'Clarity Execute Actions' "$demo"
+          grep -q 'E2E PASS' "$demo"
+          grep -q 'Clarity Inbox.txt' "$demo"
           mkdir -p artifacts
           cp "$demo" artifacts/Clarity-Demo-Auto-unsigned.shortcut
 
