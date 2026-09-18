@@ -5,10 +5,11 @@ Describe the user-visible result and why this change is needed.
 ## Codex execution
 
 - [ ] Used Codex for implementation
+- [ ] Codex not required; One Enter / ChatGPT / Factory used
 - [ ] Codex unavailable or blocked
 - [ ] Approved exception: no code change / emergency rollback
 
-Codex task reference or exception reason:
+Implementation route / Codex reference:
 
 ## Scope
 

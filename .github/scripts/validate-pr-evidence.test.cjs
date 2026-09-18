@@ -11,10 +11,11 @@ Tighten governance so placeholder-only PR evidence cannot be accepted as complet
 ## Codex execution
 
 - [ ] Used Codex for implementation
-- [x] Codex unavailable or blocked
+- [x] Codex not required; One Enter / ChatGPT / Factory used
+- [ ] Codex unavailable or blocked
 - [ ] Approved exception: no code change / emergency rollback
 
-Codex task reference or exception reason: No Codex execution surface is available in this runtime; YOS used the documented fallback.
+Implementation route / Codex reference: One Enter used the connected GitHub tools directly; Codex was not needed.
 
 ## Scope
 
@@ -58,10 +59,11 @@ Describe the user-visible result and why this change is needed.
 ## Codex execution
 
 - [ ] Used Codex for implementation
+- [ ] Codex not required; One Enter / ChatGPT / Factory used
 - [ ] Codex unavailable or blocked
 - [ ] Approved exception: no code change / emergency rollback
 
-Codex task reference or exception reason:
+Implementation route / Codex reference:
 
 ## Scope
 
@@ -97,12 +99,12 @@ List every manual check, deployment step, external setting, or follow-up that is
 
 test('rejects headings plus keyword stuffing without completed evidence', () => {
   const body = validBody
-    .replace('- [x] Codex unavailable or blocked', '- [ ] Codex unavailable or blocked')
+    .replace('- [x] Codex not required; One Enter / ChatGPT / Factory used', '- [ ] Codex not required; One Enter / ChatGPT / Factory used')
     .replace('Assigned directory: .github/workflows/**, .github/scripts/**', 'Assigned directory:')
     .replace('- [x] Relevant automated checks pass', '- [ ] Relevant automated checks pass')
     .replace('- Code: verified', '- Code: verified / unverified');
   const errors = validatePrEvidence(body);
-  assert.ok(errors.some((value) => value.includes('Exactly one Codex')));
+  assert.ok(errors.some((value) => value.includes('Exactly one implementation-route')));
   assert.ok(errors.some((value) => value.includes('Assigned directory')));
   assert.ok(errors.some((value) => value.includes('Relevant automated checks pass')));
   assert.ok(errors.some((value) => value.includes('Code readiness')));

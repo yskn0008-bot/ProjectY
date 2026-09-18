@@ -84,12 +84,13 @@ function validatePrEvidence(body) {
   const codex = sections.get('Codex execution');
   const codexOptions = [
     'Used Codex for implementation',
+    'Codex not required; One Enter / ChatGPT / Factory used',
     'Codex unavailable or blocked',
     'Approved exception: no code change / emergency rollback'
   ];
-  if (checkedCount(codex, codexOptions) !== 1) errors.push('Exactly one Codex execution option must be checked.');
-  if (!substantive(fieldValue(codex, 'Codex task reference or exception reason'))) {
-    errors.push('Codex task reference or exception reason must be filled.');
+  if (checkedCount(codex, codexOptions) !== 1) errors.push('Exactly one implementation-route option must be checked.');
+  if (!substantive(fieldValue(codex, 'Implementation route / Codex reference'))) {
+    errors.push('Implementation route / Codex reference must be filled.');
   }
 
   const scope = sections.get('Scope');
