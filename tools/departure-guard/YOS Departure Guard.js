@@ -1,6 +1,7 @@
-// YOS Departure Guard v0.1
-// Silent-by-default departure check for Scriptable on iPhone.
+// YOS Departure Guard v0.2 — Mother decision-readiness experiment
+// Event-driven, local-only, shadow-first departure preparation for Scriptable on iPhone.
 // Reuses YOS Battery Widget's local data and iOS Calendar data.
+// The user still owns the decision. This prototype never invokes Clarity automatically.
 //
 // Optional Shortcut parameter:
 //   "leaving"  -> run when AirPods connect / user is likely leaving
@@ -12,8 +13,11 @@
 //   出発: 45        // minutes before event start (override default)
 
 const CONFIG = {
-  version: "0.1",
+  version: "0.2",
+  experimentId: "calendar-decision-readiness-v0",
+  defaultMode: "shadow",
   lookAheadHours: 6,
+  preparationWindowMinutes: 60,
   defaultDepartureLeadMinutes: 45,
   notifyWhenDepartureWithinMinutes: 20,
   carryReminderWithinMinutes: 60,
@@ -27,13 +31,17 @@ const CONFIG = {
   duplicateSuppressMinutes: 25,
   batteryDataFile: "YOS-Battery-Widget-v1.json",
   stateFile: "YOS-Departure-Guard-v0.json",
+  eventStoreFile: "YOS-Departure-Guard-EventStore-v0.json",
+  maxEventRecords: 200,
 }
 
 const fm = FileManager.local()
 const batteryPath = fm.joinPath(fm.documentsDirectory(), CONFIG.batteryDataFile)
 const statePath = fm.joinPath(fm.documentsDirectory(), CONFIG.stateFile)
+const eventStorePath = fm.joinPath(fm.documentsDirectory(), CONFIG.eventStoreFile)
 const now = new Date()
-const source = parseSource(args.shortcutParameter)
+const invocation = parseInvocation(args.shortcutParameter)
+const source = invocation.source
 
 await main()
 
@@ -41,27 +49,55 @@ async function main() {
   const nextEvent = await findNextEvent(now)
   const battery = readBatterySnapshot()
   const decision = decide({ now, source, nextEvent, battery })
+  const decisionPack = decision.shouldNotify || decision.reasons.includes("departure_window")
+    ? buildDecisionPack({ nextEvent, battery, decision })
+    : null
+  const gate = evaluatePresentationGate(decision)
+  const baselineWouldNotify = fixedRuleWouldNotify(decision)
+  const duplicate = decisionPack ? isDuplicate(decisionPack.fingerprint) : false
 
-  if (decision.shouldNotify && !isDuplicate(decision.fingerprint)) {
+  // Shadow Mode is the default: prepare + log, but never interrupt.
+  const notified = invocation.mode === "active" && gate.level === "active" && !!decisionPack && !duplicate
+  if (notified) {
     await sendNotification(decision)
-    rememberNotification(decision.fingerprint)
+    rememberNotification(decisionPack.fingerprint)
   }
+
+  appendEventRecord({
+    schema_version: "0.2",
+    event_type: "decision_opportunity_evaluated",
+    experiment_id: CONFIG.experimentId,
+    observed_at: now.toISOString(),
+    source,
+    mode: invocation.mode,
+    trigger_event_id: decisionPack ? decisionPack.trigger_event_id : null,
+    candidate_id: decisionPack ? decisionPack.candidate_id : null,
+    event_start_at: nextEvent ? nextEvent.startDate.toISOString() : null,
+    has_location: !!(nextEvent && String(nextEvent.location || "").trim()),
+    minutes_to_departure: decision.minutesToDeparture,
+    reasons: decision.reasons,
+    presentation_level: gate.level,
+    gate_reasons: gate.reasons,
+    baseline_would_notify: baselineWouldNotify,
+    decision_pack_prepared: !!decisionPack,
+    notified,
+    duplicate,
+    user_decision: null,
+    execution_result: null,
+  })
 
   Script.setShortcutOutput({
     ok: true,
     version: CONFIG.version,
+    experimentId: CONFIG.experimentId,
     source,
-    notified: decision.shouldNotify && !decision.duplicate,
-    reasons: decision.reasons,
-    nextEvent: nextEvent ? {
-      title: nextEvent.title,
-      startDate: nextEvent.startDate.toISOString(),
-      location: nextEvent.location || null,
-      departureAt: decision.departureAt ? decision.departureAt.toISOString() : null,
-      departureLeadMinutes: decision.departureLeadMinutes,
-      carryItems: decision.carryItems,
-    } : null,
-    battery,
+    mode: invocation.mode,
+    shadow: invocation.mode === "shadow",
+    baselineWouldNotify,
+    gate,
+    notified,
+    duplicate,
+    decisionPack,
   })
   Script.complete()
 }
@@ -128,6 +164,8 @@ function decide({ now, source, nextEvent, battery }) {
     } else if (minutesToDeparture <= CONFIG.notifyWhenDepartureWithinMinutes) {
       reasons.push("departure_soon")
       warningLines.push(`出発まであと${minutesToDeparture}分`)
+    } else if (minutesToDeparture <= CONFIG.preparationWindowMinutes) {
+      reasons.push("departure_window")
     }
 
     if (carryItems.length && (leavingSignal || minutesToDeparture <= CONFIG.carryReminderWithinMinutes)) {
@@ -168,6 +206,150 @@ function decide({ now, source, nextEvent, battery }) {
     minutesToDeparture,
     carryItems,
   }
+}
+
+function buildDecisionPack({ nextEvent, battery, decision }) {
+  const eventSeed = nextEvent
+    ? `${nextEvent.identifier || nextEvent.title}|${nextEvent.startDate.getTime()}`
+    : `no-event|${source}`
+  const triggerEventId = `evt_${stableHash(eventSeed)}`
+  const candidateId = `cand_${stableHash(`${triggerEventId}|${[...decision.reasons].sort().join(",")}`)}`
+  const expiresAt = nextEvent
+    ? nextEvent.startDate.toISOString()
+    : new Date(now.getTime() + 30 * 60 * 1000).toISOString()
+
+  const options = []
+  if (nextEvent && decision.minutesToDeparture != null && decision.minutesToDeparture <= CONFIG.notifyWhenDepartureWithinMinutes) {
+    options.push({
+      id: "leave_now",
+      label: "今出る",
+      reversible: true,
+      action_contract: {
+        schema_version: "0.1",
+        action: "departure.leave_now",
+        status: "proposed",
+        approved_by_user: false,
+        candidate_id: candidateId,
+        payload: {
+          event_start_at: nextEvent.startDate.toISOString(),
+          destination: String(nextEvent.location || "").trim() || null,
+        },
+      },
+    })
+  }
+
+  if (nextEvent && String(nextEvent.location || "").trim()) {
+    options.push({
+      id: "open_navigation",
+      label: "ナビを開く",
+      reversible: true,
+      action_contract: {
+        schema_version: "0.1",
+        action: "navigation.start",
+        status: "proposed",
+        approved_by_user: false,
+        candidate_id: candidateId,
+        payload: { destination: String(nextEvent.location).trim() },
+      },
+    })
+  }
+
+  options.push({
+    id: "do_nothing",
+    label: "何もしない",
+    reversible: true,
+    action_contract: null,
+  })
+
+  const evidence = []
+  if (nextEvent) {
+    evidence.push({
+      type: "calendar.event",
+      observed_at: now.toISOString(),
+      start_at: nextEvent.startDate.toISOString(),
+      has_location: !!String(nextEvent.location || "").trim(),
+      departure_lead_minutes: decision.departureLeadMinutes,
+    })
+  }
+  evidence.push({
+    type: "device.battery",
+    observed_at: now.toISOString(),
+    iphone_level: battery.iphone.level,
+    airpods_known: battery.airpods.level != null && !battery.airpods.stale,
+    case_known: battery.case.level != null && !battery.case.stale,
+  })
+
+  return {
+    schema_version: "0.2",
+    experiment_id: CONFIG.experimentId,
+    candidate_id: candidateId,
+    trigger_event_id: triggerEventId,
+    created_at: now.toISOString(),
+    expires_at: expiresAt,
+    decision_deadline: decision.departureAt ? decision.departureAt.toISOString() : null,
+    evidence,
+    reasons: [...new Set(decision.reasons)],
+    confidence: confidenceFor(decision),
+    status: invocation.mode === "shadow" ? "shadow" : "prepared",
+    user_decision: null,
+    execution_result: null,
+    reversible: true,
+    options,
+    fingerprint: decision.fingerprint,
+  }
+}
+
+function evaluatePresentationGate(decision) {
+  if (!decision.reasons.length) return { level: "silent", reasons: ["no_decision_opportunity"] }
+  if (decision.reasons.includes("departure_due") || decision.reasons.includes("departure_soon")) {
+    return { level: "active", reasons: ["time_sensitive_departure"] }
+  }
+  if (["leaving", "airpods", "departure"].includes(source) &&
+      decision.reasons.some(r => ["iphone_low", "airpods_low", "case_low"].includes(r))) {
+    return { level: "active", reasons: ["low_battery_while_leaving"] }
+  }
+  if (decision.reasons.includes("carry_items") && decision.minutesToDeparture != null &&
+      decision.minutesToDeparture <= CONFIG.carryReminderWithinMinutes) {
+    return { level: "active", reasons: ["declared_carry_items_near_departure"] }
+  }
+  return { level: "passive", reasons: ["prepare_without_interrupting"] }
+}
+
+function fixedRuleWouldNotify(decision) {
+  return decision.reasons.includes("departure_due") || decision.reasons.includes("departure_soon")
+}
+
+function confidenceFor(decision) {
+  if (decision.reasons.includes("departure_due") || decision.reasons.includes("departure_soon")) return "high"
+  if (decision.nextEvent) return "medium"
+  return "low"
+}
+
+function appendEventRecord(record) {
+  try {
+    let store = { schema_version: "0.2", experiment_id: CONFIG.experimentId, events: [] }
+    if (fm.fileExists(eventStorePath)) {
+      const existing = JSON.parse(fm.readString(eventStorePath))
+      if (existing && Array.isArray(existing.events)) store = existing
+    }
+    store.schema_version = "0.2"
+    store.experiment_id = CONFIG.experimentId
+    store.updated_at = new Date().toISOString()
+    store.events = [...store.events, record].slice(-CONFIG.maxEventRecords)
+    fm.writeString(eventStorePath, JSON.stringify(store, null, 2))
+  } catch (_) {
+    // Experiment logging must never block departure preparation.
+  }
+}
+
+function stableHash(input) {
+  let hash = 2166136261
+  const text = String(input || "")
+  for (let i = 0; i < text.length; i++) {
+    hash ^= text.charCodeAt(i)
+    hash = Math.imul(hash, 16777619)
+  }
+  return (hash >>> 0).toString(36)
 }
 
 function addBatteryWarning(label, device, threshold, reason, reasons, lines) {
@@ -244,19 +426,38 @@ function rememberNotification(fingerprint) {
   } catch (_) {}
 }
 
-function parseSource(raw) {
-  if (raw == null) return "auto"
-  if (typeof raw === "object" && raw.source) return String(raw.source).trim().toLowerCase()
+function parseInvocation(raw) {
+  const out = { source: "auto", mode: CONFIG.defaultMode }
+  if (raw == null) return out
+
+  if (typeof raw === "object") {
+    if (raw.source) out.source = String(raw.source).trim().toLowerCase() || "auto"
+    if (raw.mode) out.mode = normalizeMode(raw.mode)
+    return out
+  }
+
   if (typeof raw === "string") {
     const text = raw.trim()
-    if (!text) return "auto"
+    if (!text) return out
     try {
       const obj = JSON.parse(text)
-      if (obj && obj.source) return String(obj.source).trim().toLowerCase()
+      if (obj && typeof obj === "object") {
+        if (obj.source) out.source = String(obj.source).trim().toLowerCase() || "auto"
+        if (obj.mode) out.mode = normalizeMode(obj.mode)
+        return out
+      }
     } catch (_) {}
-    return text.toLowerCase()
+
+    const lowered = text.toLowerCase()
+    if (["shadow", "active"].includes(lowered)) out.mode = lowered
+    else out.source = lowered
   }
-  return "auto"
+  return out
+}
+
+function normalizeMode(value) {
+  const mode = String(value || "").trim().toLowerCase()
+  return mode === "active" ? "active" : "shadow"
 }
 
 function formatTime(date) {
