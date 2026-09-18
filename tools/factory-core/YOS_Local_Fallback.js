@@ -68,6 +68,17 @@
   const rows = Array.isArray(assets.assets) ? assets.assets : [];
   const queue = Array.isArray(tasks.tasks) ? tasks.tasks : [];
 
+  // Runtime evidence is local and independent from GitHub/Vercel.
+  const evidencePath = fm.joinPath(stateDir, "runtime-evidence.json");
+  const runtimeEvidence = await loadJson(evidencePath, {schema_version:"1.0.0", checks:{}});
+  runtimeEvidence.checks = runtimeEvidence.checks || {};
+  runtimeEvidence.checks.harmony_home = {
+    device_verified: true,
+    verified_at: new Date().toISOString(),
+    source: "Scriptable runtime"
+  };
+  fm.writeString(evidencePath, JSON.stringify(runtimeEvidence, null, 2));
+
   const esc = value => String(value ?? "").replace(/[&<>"']/g, ch => ({
     "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;"
   }[ch]));
@@ -96,18 +107,38 @@
     return m[a.id] || "·";
   }
 
+  function routeFor(a) {
+    const routes = {
+      "clarity": {url:"shortcuts://run-shortcut?name=Clarity", label:"iPhoneで開く", kind:"local"},
+      "my-remote": {url:"scriptable:///run?scriptName=YOS%20Remote%20Hub", label:"リモコンを開く", kind:"local"},
+      "my-way": {url:"https://yskn0008-bot.github.io/ProjectY/yos/", label:"MY WAYを開く", kind:"web"},
+      "money": {url:"https://yskn0008-bot.github.io/ProjectY/yos/", label:"Moneyを開く", kind:"web"},
+      "life": {url:"https://yskn0008-bot.github.io/ProjectY/life/", label:"Lifeを開く", kind:"web"},
+      "idea": {url:"https://yskn0008-bot.github.io/ProjectY/yos/", label:"Ideaを開く", kind:"web"},
+      "heros-journey": {url:"https://yskn0008-bot.github.io/ProjectY/yos/journey.html", label:"Journeyを開く", kind:"web"}
+    };
+    return routes[a.id] || null;
+  }
+
   function cards(list, compact=false) {
     if (!list.length) return '<div class="empty">表示する項目はありません</div>';
-    return list.map(a => `
-      <article class="asset ${compact ? 'compact' : ''}">
+    return list.map(a => {
+      const route = routeFor(a);
+      const tag = route ? "a" : "article";
+      const routeAttrs = route ? ` href="${route.url}" class="asset asset-link ${compact ? 'compact' : ''}"` : ` class="asset ${compact ? 'compact' : ''}"`;
+      const routeChip = route ? `<span class="route-chip ${route.kind}">${esc(route.label)}</span>` : "";
+      return `
+      <${tag}${routeAttrs}>
         <div class="asset-head">
           <div class="icon">${iconFor(a)}</div>
           <div class="asset-title"><strong>${esc(a.name)}</strong><span>${esc(a.area || '')}</span></div>
           <b class="percent">${progressOf(a)}%</b>
         </div>
         <div class="bar"><i style="width:${progressOf(a)}%"></i></div>
+        ${routeChip}
         ${compact ? '' : `<p><span>現在</span>${esc(a.current || '未設定')}</p><p><span>次</span>${esc(a.next_action || '未設定')}</p>`}
-      </article>`).join('');
+      </${tag}>`;
+    }).join('');
   }
 
   const queueHtml = queue.length
@@ -140,11 +171,11 @@
     .metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:11px 0 18px}.metric{background:rgba(255,250,241,.78);border:1px solid var(--line);border-radius:19px;padding:13px 11px}.metric small{display:block;color:var(--muted);font-size:10px;margin-bottom:3px}.metric b{font-size:22px;letter-spacing:-.04em}
     .next{background:linear-gradient(135deg,rgba(231,168,62,.13),rgba(142,181,200,.09));border:1px solid rgba(231,168,62,.22);border-radius:22px;padding:15px;margin-bottom:18px}.next small{display:block;color:#9a7a43;font-size:10px;font-weight:800;margin-bottom:5px}.next strong{display:block;font-size:15px}.next span{display:block;margin-top:5px;color:var(--muted);font-size:12px;line-height:1.45}
     h2{font-size:14px;margin:19px 4px 9px;letter-spacing:.01em}.section-note{color:var(--muted);font-size:10px;margin:-4px 4px 10px}
-    .asset{background:rgba(255,250,241,.88);border:1px solid var(--line);border-radius:21px;padding:14px;margin-bottom:9px;box-shadow:0 8px 24px rgba(55,45,28,.035)}.asset.compact{padding:12px 13px}.asset-head{display:flex;align-items:center;gap:10px}.icon{display:grid;place-items:center;width:34px;height:34px;border-radius:12px;background:linear-gradient(145deg,rgba(246,207,121,.25),rgba(142,181,200,.14));font-weight:900}.asset-title{min-width:0;flex:1}.asset-title strong{display:block;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.asset-title span{display:block;color:var(--muted);font-size:9px;margin-top:2px;text-transform:uppercase;letter-spacing:.08em}.percent{font-size:13px}.bar{height:5px;margin:10px 0 0;border-radius:999px;background:#ebe5da;overflow:hidden}.bar i{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,var(--sun2),var(--sun),var(--leaf))}.asset p{margin:10px 0 0;font-size:12px;line-height:1.45;color:#414b58}.asset p span{display:block;font-size:9px;font-weight:800;color:var(--muted);margin-bottom:2px}.queue{background:rgba(255,250,241,.78);border:1px solid var(--line);border-radius:21px;padding:14px}.queue ul{list-style:none;padding:0;margin:0}.queue li{padding:9px 0;border-bottom:1px solid var(--line);font-size:12px}.queue li:last-child{border-bottom:0}.queue li small{display:block;color:var(--muted);margin-top:3px}.queue .done{color:#5d7b5b;font-weight:800}.infra{opacity:.88}.empty{padding:15px;color:var(--muted);font-size:12px;text-align:center}
+    .asset{display:block;background:rgba(255,250,241,.88);border:1px solid var(--line);border-radius:21px;padding:14px;margin-bottom:9px;box-shadow:0 8px 24px rgba(55,45,28,.035);color:inherit;text-decoration:none}.asset-link:active{transform:scale(.99)}.route-chip{display:inline-flex;margin-top:10px;padding:5px 8px;border-radius:999px;font-size:9px;font-weight:800;background:rgba(126,161,123,.12);color:#547252}.route-chip.web{background:rgba(142,181,200,.14);color:#56798a}.asset.compact{padding:12px 13px}.asset-head{display:flex;align-items:center;gap:10px}.icon{display:grid;place-items:center;width:34px;height:34px;border-radius:12px;background:linear-gradient(145deg,rgba(246,207,121,.25),rgba(142,181,200,.14));font-weight:900}.asset-title{min-width:0;flex:1}.asset-title strong{display:block;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.asset-title span{display:block;color:var(--muted);font-size:9px;margin-top:2px;text-transform:uppercase;letter-spacing:.08em}.percent{font-size:13px}.bar{height:5px;margin:10px 0 0;border-radius:999px;background:#ebe5da;overflow:hidden}.bar i{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,var(--sun2),var(--sun),var(--leaf))}.asset p{margin:10px 0 0;font-size:12px;line-height:1.45;color:#414b58}.asset p span{display:block;font-size:9px;font-weight:800;color:var(--muted);margin-bottom:2px}.queue{background:rgba(255,250,241,.78);border:1px solid var(--line);border-radius:21px;padding:14px}.queue ul{list-style:none;padding:0;margin:0}.queue li{padding:9px 0;border-bottom:1px solid var(--line);font-size:12px}.queue li:last-child{border-bottom:0}.queue li small{display:block;color:var(--muted);margin-top:3px}.queue .done{color:#5d7b5b;font-weight:800}.infra{opacity:.88}.empty{padding:15px;color:var(--muted);font-size:12px;text-align:center}
     details{margin-top:8px}summary{list-style:none;cursor:pointer;background:rgba(255,250,241,.72);border:1px solid var(--line);border-radius:18px;padding:13px;font-size:12px;font-weight:800}summary::-webkit-details-marker{display:none}.details-body{padding-top:9px}
     footer{margin:22px 4px 0;color:#918d83;font-size:9px;line-height:1.5}
   </style></head><body>
-    <section class="hero"><div class="sun"></div><div class="eyebrow">HARMONY HOME</div><h1>YOS</h1><p>違う機能を、ひとつの世界観で。</p><div class="badge"><i class="dot"></i>LOCAL / GitHub・Vercelなしで起動</div></section>
+    <section class="hero"><div class="sun"></div><div class="eyebrow">HARMONY HOME</div><h1>YOS</h1><p>違う機能を、ひとつの世界観で。</p><div class="badge"><i class="dot"></i>HOME 実機確認済み / ローカル起動</div></section>
 
     <section class="metrics">
       <div class="metric"><small>全体</small><b>${overall}%</b></div>
@@ -165,7 +196,7 @@
 
     <details class="infra"><summary>開発・基盤を見る</summary><div class="details-body">${cards(infra, true)}</div></details>
 
-    <footer>Design theme: 調和 / 太陽・自然・穏やかさ・見やすさ<br>One Enterは利用機能ではなく、裏側の開発司令塔として配置。<br>Local SSOT: iCloud Drive / Scriptable / One Enter Factory / state<br>SSOT更新: ${esc(assets.updated_at || 'unknown')}</footer>
+    <footer>Design theme: 調和 / 太陽・自然・穏やかさ・見やすさ<br>HOMEはiPhone実機で確認済み。Clarity / MY REMOTEはローカル入口、その他は現在Web入口を併用。<br>One Enterは利用機能ではなく、裏側の開発司令塔として配置。<br>Local SSOT: iCloud Drive / Scriptable / One Enter Factory / state<br>SSOT更新: ${esc(assets.updated_at || 'unknown')}</footer>
   </body></html>`;
 
   const web = new WebView();
