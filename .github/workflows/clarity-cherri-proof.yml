@@ -169,6 +169,33 @@ jobs:
           cp "$parent" artifacts/Clarity-E2E-v1-unsigned.shortcut
           cp "$child" artifacts/Clarity-Actions-v1-unsigned.shortcut
 
+      - name: Compile Clarity RC1 production candidate pair
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd tools/clarity-factory
+          rm -f './Clarity RC1_unsigned.shortcut' './Clarity RC1.plist' './Clarity Actions RC1_unsigned.shortcut' './Clarity Actions RC1.plist'
+          cherri clarity-rc1.cherri --skip-sign --debug
+          cherri clarity-actions-rc1.cherri --skip-sign --debug
+          parent='./Clarity RC1_unsigned.shortcut'
+          child='./Clarity Actions RC1_unsigned.shortcut'
+          test -f "$parent"
+          test -f "$child"
+          python3 patch_append_file_paths.py "$parent"
+          grep -q 'Clarity Actions RC1' "$parent"
+          grep -q 'E2E PASS' "$parent"
+          if grep -q 'file.append' "$parent"; then
+            echo 'RC1 parent still contains file.append' >&2
+            exit 1
+          fi
+          python3 patch_append_file_paths.py "$child"
+          python3 patch_reminder_wire_format.py "$child"
+          python3 patch_execute_actions_readback.py "$child"
+          python3 validate_clarity_execute_actions.py "$child"
+          mkdir -p artifacts
+          cp "$parent" artifacts/Clarity-RC1-unsigned.shortcut
+          cp "$child" artifacts/Clarity-Actions-RC1-unsigned.shortcut
+
       - name: Compile Clarity Raw First runtime
         shell: bash
         run: |
@@ -392,6 +419,47 @@ jobs:
                   raise SystemExit(f'{name}: unexpectedly small')
           print('Clarity E2E v1 signed pair: PASS')
           PYV1
+
+      - name: Sign Clarity RC1 production candidate pair
+        id: hubsign_rc1
+        continue-on-error: true
+        shell: bash
+        run: |
+          set +e
+          set -o pipefail
+          log='tools/clarity-factory/artifacts/hubsign-rc1.log'
+          : > "$log"
+          python3 tools/clarity-factory/sign_with_hubsign.py \
+            --input tools/clarity-factory/artifacts/Clarity-Actions-RC1-unsigned.shortcut \
+            --output tools/clarity-factory/artifacts/Clarity-Actions-RC1-signed.shortcut \
+            --name 'Clarity Actions RC1' \
+            2>&1 | tee -a "$log"
+          child_status=${PIPESTATUS[0]}
+          python3 tools/clarity-factory/sign_with_hubsign.py \
+            --input tools/clarity-factory/artifacts/Clarity-RC1-unsigned.shortcut \
+            --output tools/clarity-factory/artifacts/Clarity-RC1-signed.shortcut \
+            --name 'Clarity RC1' \
+            2>&1 | tee -a "$log"
+          parent_status=${PIPESTATUS[0]}
+          echo "child=${child_status} parent=${parent_status}" | tee -a "$log"
+          if [ "$child_status" -ne 0 ] || [ "$parent_status" -ne 0 ]; then exit 1; fi
+
+      - name: Verify signed Clarity RC1 production candidate pair
+        if: steps.hubsign_rc1.outcome == 'success'
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PYRC1'
+          from pathlib import Path
+          for name in ('Clarity-Actions-RC1-signed.shortcut','Clarity-RC1-signed.shortcut'):
+              p=Path('tools/clarity-factory/artifacts')/name
+              data=p.read_bytes()
+              if not data.startswith(b'AEA1'):
+                  raise SystemExit(f'{name}: unsigned/invalid')
+              if len(data) < 500:
+                  raise SystemExit(f'{name}: unexpectedly small')
+          print('Clarity RC1 signed pair: PASS')
+          PYRC1
 
       - name: Sign direct-model execution E2E
         id: hubsign_direct_e2e
