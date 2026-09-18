@@ -234,8 +234,9 @@ def patch(path: Path) -> None:
             kind = "reminder" if "WFAlertCustomTime" in params else "task_shopping"
             writers.append((index, kind, action))
 
-    if [entry[1] for entry in writers] != ["calendar", "reminder", "task_shopping"]:
-        raise SystemExit(f"unexpected destination writers: {[entry[1] for entry in writers]}")
+    kinds = [entry[1] for entry in writers]
+    if kinds != ["calendar", "calendar", "reminder", "task_shopping"]:
+        raise SystemExit(f"unexpected destination writers: {kinds}")
 
     # Work from the end so original indexes stay valid while inserting readbacks.
     for index, kind, writer in reversed(writers):
@@ -301,6 +302,21 @@ def patch(path: Path) -> None:
                 )
                 inserted.append(action)
                 checks.append((uid, output_name, 100, None, reason))
+
+            alarm_name = f"calendarVerifiedHasAlarms_{writer_uuid[:8]}"
+            uid, action = detail_action(
+                details_identifier, writer_uuid, writer_name, "Has Alarms", alarm_name
+            )
+            inserted.append(action)
+            checks.append(
+                (
+                    uid,
+                    alarm_name,
+                    100 if "WFAlertTime" in params else 101,
+                    None,
+                    "calendar_alert_state_mismatch",
+                )
+            )
         else:
             list_name = f"{kind}VerifiedList"
             uid, action = detail_action(details_identifier, writer_uuid, writer_name, "List", list_name)
@@ -401,15 +417,19 @@ def patch(path: Path) -> None:
         verify = plistlib.load(fh)
     final_actions = verify.get("WFWorkflowActions", [])
     identifiers = [action.get("WFWorkflowActionIdentifier") for action in final_actions]
-    if identifiers.count(CALENDAR_DETAILS) < 5 or identifiers.count(REMINDER_DETAILS) < 9:
+    if identifiers.count(CALENDAR_DETAILS) < 12 or identifiers.count(REMINDER_DETAILS) < 9:
         raise SystemExit("destination readback actions missing")
     calendars = [
         action.get("WFWorkflowActionParameters", {})
         for action in final_actions
         if action.get("WFWorkflowActionIdentifier") == CALENDAR_WRITER
     ]
-    if len(calendars) != 1 or calendars[0].get("WFCalendarItemDates") is not True:
+    if len(calendars) != 2 or any(item.get("WFCalendarItemDates") is not True for item in calendars):
         raise SystemExit("calendar date-enable flag missing")
+    alert_writers = [item for item in calendars if "WFAlertTime" in item]
+    no_alert_writers = [item for item in calendars if "WFAlertTime" not in item]
+    if len(alert_writers) != 1 or len(no_alert_writers) != 1:
+        raise SystemExit("calendar alert/no-alert branches missing")
     timed = [
         action.get("WFWorkflowActionParameters", {})
         for action in final_actions
@@ -425,6 +445,8 @@ def patch(path: Path) -> None:
     for marker in (
         "FAILED",
         "calendarVerifiedTitle",
+        "calendarVerifiedHasAlarms_",
+        "calendar_alert_state_mismatch",
         "reminderVerifiedDueDate",
         "task_shoppingVerifiedList",
         "Verified Idea in Box contents",
