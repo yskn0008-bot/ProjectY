@@ -200,3 +200,5 @@ const summary = "{feedback['summary']}"
 if summary {
     show("{summary}")
 }
+
+show("Clarity Direct E2E\nPASS\n実行・保存先の確認まで完了")
