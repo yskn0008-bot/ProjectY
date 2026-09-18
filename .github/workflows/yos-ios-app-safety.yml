@@ -82,3 +82,74 @@ jobs:
             -derivedDataPath build/DerivedData \
             CODE_SIGNING_ALLOWED=NO \
             build
+      - name: Launch YOS in iPhone simulator
+        shell: bash
+        run: |
+          set -euo pipefail
+          UDID="$(python3 - <<'PY'
+          import json, subprocess
+          data=json.loads(subprocess.check_output(['xcrun','simctl','list','devices','available','--json']))
+          for runtime, devices in data.get('devices',{}).items():
+              if 'iOS' not in runtime:
+                  continue
+              for device in devices:
+                  if device.get('isAvailable', True) and device.get('name','').startswith('iPhone'):
+                      print(device['udid'])
+                      raise SystemExit(0)
+          raise SystemExit('No available iPhone simulator')
+          PY
+          )"
+          APP_PATH="$(find build/DerivedData/Build/Products/Debug-iphonesimulator -maxdepth 1 -name '*.app' -print -quit)"
+          test -n "$APP_PATH"
+          xcrun simctl boot "$UDID" >/dev/null 2>&1 || true
+          xcrun simctl bootstatus "$UDID" -b
+          xcrun simctl install "$UDID" "$APP_PATH"
+          xcrun simctl launch "$UDID" jp.yos.onlysystem
+          sleep 6
+          mkdir -p build/evidence
+          xcrun simctl io "$UDID" screenshot build/evidence/yos-my-way.png
+          echo "$UDID" > build/evidence/simulator-udid.txt
+      - name: Verify MY WAY is the native launch screen
+        run: |
+          cat > /tmp/verify-yos-screen.swift <<'SWIFT'
+          import AppKit
+          import Foundation
+          import Vision
+
+          let path = CommandLine.arguments[1]
+          guard let image = NSImage(contentsOfFile: path),
+                let cgImage = image.cgImage(forProposedRect: nil, context: nil, hints: nil) else {
+            fputs("Could not load simulator screenshot\n", stderr)
+            exit(2)
+          }
+
+          var recognized = [String]()
+          let request = VNRecognizeTextRequest { request, error in
+            if let error {
+              fputs("Vision OCR failed: \(error)\n", stderr)
+              return
+            }
+            for observation in request.results as? [VNRecognizedTextObservation] ?? [] {
+              if let candidate = observation.topCandidates(1).first {
+                recognized.append(candidate.string)
+              }
+            }
+          }
+          request.recognitionLevel = .accurate
+          request.recognitionLanguages = ["en-US", "ja-JP"]
+          try VNImageRequestHandler(cgImage: cgImage, options: [:]).perform([request])
+          let text = recognized.joined(separator: "\n")
+          print(text)
+          guard text.contains("MY WAY") else {
+            fputs("Native YOS did not open on MY WAY\n", stderr)
+            exit(3)
+          }
+          SWIFT
+          swift /tmp/verify-yos-screen.swift build/evidence/yos-my-way.png
+      - name: Upload native launch evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: yos-ios-native-launch
+          path: ios-app/build/evidence/
+          if-no-files-found: warn
