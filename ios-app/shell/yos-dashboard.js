@@ -9,10 +9,30 @@ const statusLabel = {
   complete: '完成'
 };
 
+function candidateJsonPaths(path) {
+  if (!location.hostname.endsWith('github.io')) return [path];
+  const filename = path.split('/').pop();
+  return [path, `../../data/${filename}`];
+}
+
 async function loadJson(path) {
-  const response = await fetch(path, { cache: 'no-store' });
-  if (!response.ok) throw new Error(`${path}: ${response.status}`);
-  return response.json();
+  let lastError = null;
+  for (const candidate of candidateJsonPaths(path)) {
+    try {
+      const response = await fetch(candidate, { cache: 'no-store' });
+      if (!response.ok) throw new Error(`${candidate}: ${response.status}`);
+      return await response.json();
+    } catch (error) {
+      lastError = error;
+    }
+  }
+  throw lastError || new Error(`${path}: unavailable`);
+}
+
+function configurePublicEntryLinks() {
+  if (!location.hostname.endsWith('github.io')) return;
+  document.querySelectorAll('a[href="./life/"]').forEach((link) => { link.href = '../../life/'; });
+  document.querySelectorAll('a[href="./taxi/"]').forEach((link) => { link.href = '../../taxi/'; });
 }
 
 function sortAssets(assets) {
@@ -52,6 +72,7 @@ function escapeHtml(value) {
 }
 
 async function init() {
+  configurePublicEntryLinks();
   try {
     const [assetData, taskData] = await Promise.all([
       loadJson('./data/yos-assets.json'),
