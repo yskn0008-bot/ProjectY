@@ -180,6 +180,22 @@ jobs:
           mkdir -p artifacts
           cp "$runtime" artifacts/Clarity-Direct-E2E-unsigned.shortcut
 
+      - name: Compile Clarity Demo execution child
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd tools/clarity-factory
+          rm -f './Clarity Execute Actions_unsigned.shortcut' './Clarity Execute Actions.plist'
+          cherri clarity-execute-actions.cherri --skip-sign --debug
+          executor='./Clarity Execute Actions_unsigned.shortcut'
+          test -f "$executor"
+          python3 patch_append_file_paths.py "$executor"
+          python3 patch_reminder_wire_format.py "$executor"
+          python3 patch_execute_actions_readback.py "$executor"
+          python3 validate_clarity_execute_actions.py "$executor"
+          mkdir -p artifacts
+          cp "$executor" artifacts/Clarity-Execute-Actions-unsigned.shortcut
+
       - name: Secret scan
         shell: bash
         run: |
@@ -282,6 +298,38 @@ jobs:
           print(f'OK: signed Clarity Demo Auto, {len(data)} bytes')
           PYDEMO
 
+      - name: Sign Clarity Demo execution child
+        id: hubsign_execute_actions
+        continue-on-error: true
+        shell: bash
+        run: |
+          set +e
+          set -o pipefail
+          python3 tools/clarity-factory/sign_with_hubsign.py \
+            --input tools/clarity-factory/artifacts/Clarity-Execute-Actions-unsigned.shortcut \
+            --output tools/clarity-factory/artifacts/Clarity-Execute-Actions-signed.shortcut \
+            --name 'Clarity Execute Actions' \
+            2>&1 | tee tools/clarity-factory/artifacts/hubsign-execute-actions.log
+          status=${PIPESTATUS[0]}
+          echo "Execute Actions HubSign exit code: ${status}" | tee -a tools/clarity-factory/artifacts/hubsign-execute-actions.log
+          exit "${status}"
+
+      - name: Verify signed Clarity Demo execution child
+        if: steps.hubsign_execute_actions.outcome == 'success'
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PYEXECUTOR'
+          from pathlib import Path
+          p = Path('tools/clarity-factory/artifacts/Clarity-Execute-Actions-signed.shortcut')
+          data = p.read_bytes()
+          if not data.startswith(b'AEA1'):
+              raise SystemExit(f'expected signed AEA1 shortcut, got {data[:8]!r}')
+          if len(data) < 500:
+              raise SystemExit(f'artifact unexpectedly small: {len(data)} bytes')
+          print(f'OK: signed Clarity Execute Actions, {len(data)} bytes')
+          PYEXECUTOR
+
       - name: Sign direct-model execution E2E
         id: hubsign_direct_e2e
         continue-on-error: true
@@ -363,6 +411,9 @@ jobs:
             tools/clarity-factory/artifacts/Clarity-Demo-Auto-unsigned.shortcut
             tools/clarity-factory/artifacts/Clarity-Demo-Auto-signed.shortcut
             tools/clarity-factory/artifacts/hubsign-demo-auto.log
+            tools/clarity-factory/artifacts/Clarity-Execute-Actions-unsigned.shortcut
+            tools/clarity-factory/artifacts/Clarity-Execute-Actions-signed.shortcut
+            tools/clarity-factory/artifacts/hubsign-execute-actions.log
             tools/clarity-factory/artifacts/Clarity-Direct-E2E-unsigned.shortcut
             tools/clarity-factory/artifacts/Clarity-Direct-E2E-signed.shortcut
             tools/clarity-factory/artifacts/hubsign-direct-e2e.log
