@@ -44,3 +44,16 @@ test('existing three-task persistence remains non-destructive',()=>{
   assert.match(js,/toggleTaskAt\(Number\(taskButton\.dataset\.homeTaskIndex\)\)/);
   assert.match(js,/\.\.\.\(data\.moneySafety&&typeof data\.moneySafety==='object'\?data\.moneySafety:\{\}\)/,'Life saves must retain compatible Money fields');
 });
+
+
+test('legacy Life markup stays hidden until final Home is ready',()=>{
+  assert.match(html, /id="life-preinstall-guard"[^>]*>main\.app,\.bottom-nav\{visibility:hidden!important\}/);
+  assert.match(html, /id="lifeHomeV1Styles"[^>]*home-v1\.css\?v=7/);
+  assert.match(html, /id="lifeHomePriorityV1Styles"[^>]*home-priority-v1\.css\?v=4/);
+  assert.match(html, /readability-final\.css\?v=2/);
+  const suite=readFileSync(new URL('../yos-suite-v3.js',import.meta.url),'utf8');
+  assert.match(suite, /const finalReady=/);
+  assert.match(suite, /!document\.querySelector\('main\.app \.layout'\)/);
+  assert.match(suite, /document\.getElementById\('lifeBottomNavV1'\)/);
+  assert.match(suite, /document\.getElementById\('life-preinstall-guard'\)\?\.remove\(\)/);
+});
