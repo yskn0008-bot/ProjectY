@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-19T04:18:47+09:00",
+  "updated_at": "2026-09-19T05:34:58+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -60,7 +60,7 @@
       "priority": 2,
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/392",
-      "updated_at": "2026-09-18T19:18:22Z"
+      "updated_at": "2026-09-18T19:55:17Z"
     },
     {
       "id": "github-issue-120",
@@ -80,7 +80,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-09-18T19:18:22Z"
+      "updated_at": "2026-09-18T20:33:41Z"
     },
     {
       "id": "github-issue-254",
@@ -165,39 +165,39 @@
   ],
   "recently_completed": [
     {
-      "id": "github-commit-1b5d2d0257e7",
-      "title": "ios: prepare cloud signing and TestFlight delivery",
-      "completed_at": "2026-09-18T19:18:31Z",
-      "result": "GitHub mainへ反映（1b5d2d0）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/1b5d2d0257e712f6a469ceeac7d454b08ece4048"
+      "id": "github-commit-46f69f376c9d",
+      "title": "Merge pull request #395 from yskn0008-bot/one-enter/local-asset-snapshot",
+      "completed_at": "2026-09-18T20:34:46Z",
+      "result": "GitHub mainへ反映（46f69f3）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/46f69f376c9dd662f4eaa7210392c6b5156a0a7a"
     },
     {
-      "id": "github-commit-966d8a5ea9e4",
-      "title": "ci(ios): verify MY WAY inside packaged native app",
-      "completed_at": "2026-09-18T19:15:22Z",
-      "result": "GitHub mainへ反映（966d8a5）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/966d8a5ea9e4daa15732aedf33a937ba3dca1d90"
+      "id": "github-commit-5031c85ae7bf",
+      "title": "Record physically verified device diagnostics",
+      "completed_at": "2026-09-18T20:33:16Z",
+      "result": "GitHub mainへ反映（5031c85）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/5031c85ae7bff80f21bc5d6cc02313e56e7cfa25"
     },
     {
-      "id": "github-commit-c3e6b707ce33",
-      "title": "ci(ios): move launch verification to bounded concurrency lane",
-      "completed_at": "2026-09-18T19:12:46Z",
-      "result": "GitHub mainへ反映（c3e6b70）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/c3e6b707ce331c1446a806e3624f8ebf024502b9"
+      "id": "github-commit-35551034c66a",
+      "title": "Keep snapshot at physically verified v1",
+      "completed_at": "2026-09-18T20:32:13Z",
+      "result": "GitHub mainへ反映（3555103）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/35551034c66ad7a0c7aaac6bc9bd59ba6c09f1a0"
     },
     {
-      "id": "github-commit-214a2a2c264b",
-      "title": "ci(ios): bound simulator boot and avoid bootstatus hang",
-      "completed_at": "2026-09-18T19:11:32Z",
-      "result": "GitHub mainへ反映（214a2a2）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/214a2a2c264b1fb08cf36d86ab473414eef44f02"
+      "id": "github-commit-c3e94e49a0de",
+      "title": "Add read-only device diagnostics for router and Mother runtime",
+      "completed_at": "2026-09-18T20:29:24Z",
+      "result": "GitHub mainへ反映（c3e94e4）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/c3e94e49a0de29cd2cca0eb2baf1dba46185847e"
     },
     {
-      "id": "github-commit-9744a763b76e",
-      "title": "ci(ios): verify YOS launches to MY WAY in simulator",
-      "completed_at": "2026-09-18T19:08:10Z",
-      "result": "GitHub mainへ反映（9744a76）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/9744a763b76e6b8df09de316dce927b1d72e0a1f"
+      "id": "github-commit-e27e9a174371",
+      "title": "Expand local snapshot with safe semantic diagnostics",
+      "completed_at": "2026-09-18T20:27:40Z",
+      "result": "GitHub mainへ反映（e27e9a1）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/e27e9a174371ac9a1cf36ae9e9c497643585ecdf"
     },
     {
       "id": "complete-002",
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-19T04:18:47+09:00",
+      "last_update": "2026-09-19T05:34:58+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -315,7 +315,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-19T04:18:47+09:00",
+      "last_update": "2026-09-19T05:34:58+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-19T04:18:47+09:00",
+      "last_update": "2026-09-19T05:34:58+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "a07957325576f6f835d1930d154b1d1427ef47c2fc0b3f0bd877af28c989f057"
+  "github_snapshot_hash": "a90832882fd7cca7cd6af6dfde2dc1552b066380f5e12dd3480d54bfc37868f3"
 }
