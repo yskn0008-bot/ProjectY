@@ -1,0 +1,9 @@
+#define name 帰宅AUTO
+#define color orange
+#define version 18
+
+// Dedicated arrival shortcut. Intentionally controls only the light.
+// AC is excluded to avoid accidental activation on Wi-Fi reconnect.
+rawAction("is.workflow.actions.openurl", {
+    "WFInput": "scriptable:///run?scriptName=YOS%20Light%20Widget&action=on"
+})
