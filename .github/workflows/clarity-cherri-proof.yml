@@ -196,6 +196,33 @@ jobs:
           cp "$parent" artifacts/Clarity-RC1-unsigned.shortcut
           cp "$child" artifacts/Clarity-Actions-RC1-unsigned.shortcut
 
+      - name: Compile Clarity production pair from physical RC1
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd tools/clarity-factory
+          rm -f './Clarity_unsigned.shortcut' './Clarity.plist' './Clarity Actions_unsigned.shortcut' './Clarity Actions.plist'
+          cherri clarity-production.cherri --skip-sign --debug
+          cherri clarity-actions-production.cherri --skip-sign --debug
+          parent='./Clarity_unsigned.shortcut'
+          child='./Clarity Actions_unsigned.shortcut'
+          test -f "$parent"
+          test -f "$child"
+          python3 patch_append_file_paths.py "$parent"
+          grep -q 'Clarity Actions' "$parent"
+          grep -q 'E2E PASS' "$parent"
+          if grep -q 'file.append' "$parent"; then
+            echo 'production parent still contains file.append' >&2
+            exit 1
+          fi
+          python3 patch_append_file_paths.py "$child"
+          python3 patch_reminder_wire_format.py "$child"
+          python3 patch_execute_actions_readback.py "$child"
+          python3 validate_clarity_execute_actions.py "$child"
+          mkdir -p artifacts
+          cp "$parent" artifacts/Clarity-production-unsigned.shortcut
+          cp "$child" artifacts/Clarity-Actions-production-unsigned.shortcut
+
       - name: Compile Clarity Raw First runtime
         shell: bash
         run: |
@@ -461,6 +488,47 @@ jobs:
           print('Clarity RC1 signed pair: PASS')
           PYRC1
 
+      - name: Sign Clarity production pair from physical RC1
+        id: hubsign_production
+        continue-on-error: true
+        shell: bash
+        run: |
+          set +e
+          set -o pipefail
+          log='tools/clarity-factory/artifacts/hubsign-production.log'
+          : > "$log"
+          python3 tools/clarity-factory/sign_with_hubsign.py \
+            --input tools/clarity-factory/artifacts/Clarity-Actions-production-unsigned.shortcut \
+            --output tools/clarity-factory/artifacts/Clarity-Actions-production-signed.shortcut \
+            --name 'Clarity Actions' \
+            2>&1 | tee -a "$log"
+          child_status=${PIPESTATUS[0]}
+          python3 tools/clarity-factory/sign_with_hubsign.py \
+            --input tools/clarity-factory/artifacts/Clarity-production-unsigned.shortcut \
+            --output tools/clarity-factory/artifacts/Clarity-production-signed.shortcut \
+            --name 'Clarity' \
+            2>&1 | tee -a "$log"
+          parent_status=${PIPESTATUS[0]}
+          echo "child=${child_status} parent=${parent_status}" | tee -a "$log"
+          if [ "$child_status" -ne 0 ] || [ "$parent_status" -ne 0 ]; then exit 1; fi
+
+      - name: Verify signed Clarity production pair
+        if: steps.hubsign_production.outcome == 'success'
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PYPROD'
+          from pathlib import Path
+          for name in ('Clarity-Actions-production-signed.shortcut','Clarity-production-signed.shortcut'):
+              p=Path('tools/clarity-factory/artifacts')/name
+              data=p.read_bytes()
+              if not data.startswith(b'AEA1'):
+                  raise SystemExit(f'{name}: unsigned/invalid')
+              if len(data) < 500:
+                  raise SystemExit(f'{name}: unexpectedly small')
+          print('Clarity production signed pair: PASS')
+          PYPROD
+
       - name: Sign direct-model execution E2E
         id: hubsign_direct_e2e
         continue-on-error: true
@@ -555,6 +623,11 @@ jobs:
             tools/clarity-factory/artifacts/Clarity-Actions-RC1-unsigned.shortcut
             tools/clarity-factory/artifacts/Clarity-Actions-RC1-signed.shortcut
             tools/clarity-factory/artifacts/hubsign-rc1.log
+            tools/clarity-factory/artifacts/Clarity-production-unsigned.shortcut
+            tools/clarity-factory/artifacts/Clarity-production-signed.shortcut
+            tools/clarity-factory/artifacts/Clarity-Actions-production-unsigned.shortcut
+            tools/clarity-factory/artifacts/Clarity-Actions-production-signed.shortcut
+            tools/clarity-factory/artifacts/hubsign-production.log
             tools/clarity-factory/artifacts/Clarity-Direct-E2E-unsigned.shortcut
             tools/clarity-factory/artifacts/Clarity-Direct-E2E-signed.shortcut
             tools/clarity-factory/artifacts/hubsign-direct-e2e.log
