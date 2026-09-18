@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - 'tools/clarity-factory/life-auto-set.cherri'
+      - 'tools/clarity-factory/home-arrival-auto.cherri'
       - 'tools/clarity-factory/sign_with_hubsign.py'
       - '.github/workflows/life-auto-shortcut.yml'
   workflow_dispatch:
@@ -45,7 +46,7 @@ jobs:
           cp './生活AUTOセット_unsigned.shortcut' artifacts-life-auto/life-auto-set-unsigned.shortcut
           cp './生活AUTOセット.plist' artifacts-life-auto/life-auto-set.plist
 
-      - name: Validate bridge shape
+      - name: Validate life bridge shape
         shell: bash
         run: |
           set -euo pipefail
@@ -65,7 +66,7 @@ jobs:
           print('OK: life AUTO bridge shape validated')
           PY
 
-      - name: Sign with proven HubSign fallback
+      - name: Sign 生活AUTOセット
         shell: bash
         run: |
           set -euo pipefail
@@ -74,7 +75,7 @@ jobs:
             --output tools/clarity-factory/artifacts-life-auto/生活AUTOセット.shortcut \
             --name '生活AUTOセット'
 
-      - name: Verify signed artifact
+      - name: Verify signed 生活AUTOセット
         shell: bash
         run: |
           set -euo pipefail
@@ -86,15 +87,71 @@ jobs:
               raise SystemExit(f'expected signed AEA1 shortcut, got {data[:8]!r}')
           if len(data) < 500:
               raise SystemExit(f'artifact unexpectedly small: {len(data)} bytes')
-          print(f'OK: signed artifact {len(data)} bytes')
+          print(f'OK: signed life AUTO artifact {len(data)} bytes')
           PY
 
-      - name: Upload 生活AUTOセット
+      - name: Compile 帰宅AUTO
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd tools/clarity-factory
+          rm -f './帰宅AUTO_unsigned.shortcut' './帰宅AUTO.plist'
+          cherri home-arrival-auto.cherri --skip-sign --debug
+          test -f './帰宅AUTO_unsigned.shortcut'
+          mkdir -p artifacts-home-arrival
+          cp './帰宅AUTO_unsigned.shortcut' artifacts-home-arrival/home-arrival-auto-unsigned.shortcut
+          cp './帰宅AUTO.plist' artifacts-home-arrival/home-arrival-auto.plist
+
+      - name: Validate 帰宅AUTO light-only bridge
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import plistlib
+          from pathlib import Path
+          p=Path('tools/clarity-factory/artifacts-home-arrival/home-arrival-auto-unsigned.shortcut')
+          d=plistlib.loads(p.read_bytes())
+          actions=d.get('WFWorkflowActions',[])
+          ids=[a.get('WFWorkflowActionIdentifier') for a in actions]
+          if ids.count('is.workflow.actions.openurl') != 1:
+              raise SystemExit(f'expected 1 openurl action, got {ids.count("is.workflow.actions.openurl")}')
+          raw=p.read_bytes()
+          if b'YOS%20Light%20Widget&action=on' not in raw:
+              raise SystemExit('missing light ON target')
+          if b'YOS%20AC%20Widget' in raw or b'YOS%20Life%20AUTO%20Remote' in raw:
+              raise SystemExit('unexpected AC/Life AUTO dependency')
+          print('OK: home arrival is light-only')
+          PY
+
+      - name: Sign 帰宅AUTO
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/clarity-factory/sign_with_hubsign.py \
+            --input tools/clarity-factory/artifacts-home-arrival/home-arrival-auto-unsigned.shortcut \
+            --output tools/clarity-factory/artifacts-home-arrival/帰宅AUTO.shortcut \
+            --name '帰宅AUTO'
+
+      - name: Verify signed 帰宅AUTO
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('tools/clarity-factory/artifacts-home-arrival/帰宅AUTO.shortcut')
+          data=p.read_bytes()
+          if not data.startswith(b'AEA1'):
+              raise SystemExit(f'expected signed AEA1 shortcut, got {data[:8]!r}')
+          if len(data) < 500:
+              raise SystemExit(f'artifact unexpectedly small: {len(data)} bytes')
+          print(f'OK: signed home arrival artifact {len(data)} bytes')
+          PY
+
+      - name: Upload shortcuts
         uses: actions/upload-artifact@v4
         with:
-          name: life-auto-shortcut
+          name: life-auto-shortcuts
           path: |
             tools/clarity-factory/artifacts-life-auto/生活AUTOセット.shortcut
-            tools/clarity-factory/artifacts-life-auto/life-auto-set-unsigned.shortcut
-            tools/clarity-factory/artifacts-life-auto/life-auto-set.plist
+            tools/clarity-factory/artifacts-home-arrival/帰宅AUTO.shortcut
           if-no-files-found: error
