@@ -1,0 +1,9 @@
+#define name Mother Shadow v1
+#define color orange
+#define version 18
+
+// Auto-generated thin bridge for the verified Scriptable Shadow experiment.
+// Installed Scriptable target: YOS Departure Guard2
+rawAction("is.workflow.actions.openurl", {
+    "WFInput": "scriptable:///run?scriptName=YOS%20Departure%20Guard2&openEditor=false"
+})
