@@ -68,9 +68,19 @@ def validate(path: Path) -> None:
         "task_shoppingVerifiedList",
         "Verified Idea in Box contents",
         "YOS-CLARITY-ID:",
+        "Clarity Direct E2E",
+        "PASS",
+        "実行・保存先の確認まで完了",
     ):
         if marker not in serialized:
             raise AssertionError(f"missing verification marker: {marker}")
+
+    show_indexes = [
+        i for i, action in enumerate(actions)
+        if action.get("WFWorkflowActionIdentifier") == "is.workflow.actions.showresult"
+    ]
+    if not show_indexes:
+        raise AssertionError("direct E2E success result is not visible")
 
     print("Clarity Direct E2E artifact contract: PASS")
 
