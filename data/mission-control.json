@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-19T05:34:58+09:00",
+  "updated_at": "2026-09-19T05:48:52+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -12,6 +12,16 @@
     ]
   },
   "inbox": [
+    {
+      "id": "github-pr-386",
+      "title": "PR #386 Prototype: PROT Factory Web v0.1",
+      "type": "GitHub PR",
+      "status": "review",
+      "priority": 1,
+      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/386",
+      "updated_at": "2026-09-18T13:41:43Z"
+    },
     {
       "id": "github-pr-373",
       "title": "PR #373 Clarity: modular iPhone router Phase 1 contract",
@@ -43,16 +53,6 @@
       "updated_at": "2026-09-18T16:15:02Z"
     },
     {
-      "id": "github-pr-391",
-      "title": "PR #391 CI: build local LZFSE utility",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/391",
-      "updated_at": "2026-09-18T18:36:56Z"
-    },
-    {
       "id": "github-pr-392",
       "title": "PR #392 Clarity: add One Enter Gmail development bridge",
       "type": "GitHub PR",
@@ -80,7 +80,17 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-09-18T20:33:41Z"
+      "updated_at": "2026-09-18T20:47:18Z"
+    },
+    {
+      "id": "github-issue-234",
+      "title": "Issue #234 [YOS HQ] Life｜「おはよう→今日を生きる→おやすみ」を一続きにする統合体験",
+      "type": "GitHub Issue",
+      "status": "open",
+      "priority": 3,
+      "next_action": "完成条件を確認し、次の安全な実装を1件進める",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/234",
+      "updated_at": "2026-08-22T13:41:40Z"
     },
     {
       "id": "github-issue-254",
@@ -143,16 +153,6 @@
       "updated_at": "2026-09-04T17:50:51Z"
     },
     {
-      "id": "github-issue-288",
-      "title": "Issue #288 [YOS→Codex] Notification / Morning / Night｜ProjectY通知基盤＋Life起動",
-      "type": "GitHub Issue",
-      "status": "open",
-      "priority": 3,
-      "next_action": "完成条件を確認し、次の安全な実装を1件進める",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/288",
-      "updated_at": "2026-09-06T08:17:33Z"
-    },
-    {
       "id": "github-issue-51",
       "title": "Issue #51 ProjectY 4本並行開発の全体管理",
       "type": "GitHub Issue",
@@ -164,6 +164,13 @@
     }
   ],
   "recently_completed": [
+    {
+      "id": "github-commit-c6c40edd278a",
+      "title": "Mother: start Shadow observation from existing wake path",
+      "completed_at": "2026-09-18T20:48:41Z",
+      "result": "GitHub mainへ反映（c6c40ed）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/c6c40edd278ad2f4063c3bc3321faaf7c02cb568"
+    },
     {
       "id": "github-commit-46f69f376c9d",
       "title": "Merge pull request #395 from yskn0008-bot/one-enter/local-asset-snapshot",
@@ -191,13 +198,6 @@
       "completed_at": "2026-09-18T20:29:24Z",
       "result": "GitHub mainへ反映（c3e94e4）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/c3e94e49a0de29cd2cca0eb2baf1dba46185847e"
-    },
-    {
-      "id": "github-commit-e27e9a174371",
-      "title": "Expand local snapshot with safe semantic diagnostics",
-      "completed_at": "2026-09-18T20:27:40Z",
-      "result": "GitHub mainへ反映（e27e9a1）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/e27e9a174371ac9a1cf36ae9e9c497643585ecdf"
     },
     {
       "id": "complete-002",
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-19T05:34:58+09:00",
+      "last_update": "2026-09-19T05:48:52+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -309,13 +309,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 23件・Open PR 20件を自動同期中",
+      "next_action": "Open Issue 24件・Open PR 20件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-19T05:34:58+09:00",
+      "last_update": "2026-09-19T05:48:52+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-19T05:34:58+09:00",
+      "last_update": "2026-09-19T05:48:52+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "a90832882fd7cca7cd6af6dfde2dc1552b066380f5e12dd3480d54bfc37868f3"
+  "github_snapshot_hash": "9364d4d0f5f0033da35f89c9cb907b4e707b71a50eba010da8654336f4a0a1c9"
 }
