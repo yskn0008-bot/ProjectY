@@ -51,7 +51,7 @@
   "summary": {
     "asset_count": 22,
     "overall_progress": 58,
-    "needs_user_action_count": 7
+    "needs_user_action_count": 6
   },
   "assets": [
     {
@@ -513,10 +513,10 @@
       "area": "automation",
       "status": "building",
       "priority": 2,
-      "current": "YOS Departure Guard2 / v0.2 実機acceptance PASS。Automation First方針に従い、既存Cherri + HubSign Factoryで署名済み `Mother Shadow v1.shortcut` を自動生成・検証し、mainへ統合済み。",
-      "next_action": "署名済み `Mother Shadow v1.shortcut` をiPhoneへ追加し、既存Personal Automationへ1回だけ接続して7日間Shadow観測を開始する。",
-      "blocker": "AppleのPersonal Automationへのトリガー接続はiPhone実機側の初回操作が必要。",
-      "needs_user_action": true,
+      "current": "YOS Departure Guard2 / v0.2 の物理acceptanceはPASS。署名済み Mother Shadow v1 はmain統合済み。iPhoneでは既存の 起床時 → Run Script → YOS Battery Sync → YOS Battery Widget 経路を再利用し、Battery Widget側のMother Shadow hook自己試験でEvent Store記録を確認済み。専用AirPodsトリガーを新設せずShadow観測を開始できる状態。",
+      "next_action": "本人操作を増やさず既存の自動経路でShadow観測を継続し、7日分のEvent Storeで decision_pack_prepared / baseline_would_notify / presentation_level を比較する。専用AirPodsトリガーは観測で不足が出た場合だけ追加検討する。",
+      "blocker": null,
+      "needs_user_action": false,
       "device_verified": true,
       "production_verified": false,
       "deep_link": null,
@@ -527,7 +527,9 @@
         "PR#320 merged: f3076e87625e65d7b0602e329243d30b3e57a691",
         "device:iPhone acceptance 2026-09-18: Shadow/Event Store/Calendar/Decision Pack/Active notification/duplicate suppression/state restore PASS",
         "PR#387 merged: 86323fd890a87b6274692f7a0dd1cddd833ab2a3",
-        "GitHub Actions 35359214945: compile/validate/HubSign/AEA1/package PASS"
+        "GitHub Actions 35359214945: compile/validate/HubSign/AEA1/package PASS",
+        "device:iPhone 2026-09-19: existing 起床時 → Run Script → YOS Battery Sync → YOS Battery Widget route visually confirmed",
+        "device:iPhone 2026-09-19: Mother Battery Widget hook self-test created local Event Store record (baseline 1)"
       ],
       "progress_basis": {
         "spec": true,
@@ -537,7 +539,7 @@
         "production": false
       },
       "progress": 85,
-      "updated_at": "2026-09-18T23:56:00+09:00"
+      "updated_at": "2026-09-19T05:40:00+09:00"
     },
     {
       "id": "yos-screenshot-router",
