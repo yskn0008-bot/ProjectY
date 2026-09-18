@@ -1,78 +1,182 @@
-// YOS Local Fallback v1 — network independent Scriptable entry.
-// Uses iCloud Drive/Scriptable/One Enter Factory/state as the local state store.
+// YOS Local Fallback v2 — Harmony HOME
+// Runtime: local-first. GitHub/Vercel are not required to open this dashboard.
 (async () => {
   const fm = FileManager.iCloud();
   const base = fm.joinPath(fm.documentsDirectory(), "One Enter Factory");
   const stateDir = fm.joinPath(base, "state");
-  if (!fm.fileExists(base)) fm.createDirectory(base);
-  if (!fm.fileExists(stateDir)) fm.createDirectory(stateDir);
+  if (!fm.fileExists(base)) fm.createDirectory(base, true);
+  if (!fm.fileExists(stateDir)) fm.createDirectory(stateDir, true);
 
   const assetsPath = fm.joinPath(stateDir, "yos-assets.json");
   const tasksPath = fm.joinPath(stateDir, "yos-user-tasks.json");
-  const embeddedAssets = {"schema_version":"1.0.0","ssot":"YOS asset registry","updated_at":"2026-09-17T10:01:41+09:00","source":{"repository":"yskn0008-bot/ProjectY","base_branch":"main","base_sha":"5d778d78f5b6af3130765c8ecc04ffeafd7f1345","issue":"https://github.com/yskn0008-bot/ProjectY/issues/371","legacy_22_asset_table_verified":false,"note":"Initial 22 rows are reconstructed from current GitHub evidence and the explicitly defined YOS integration scope. Preserve names; reconcile rows when stronger evidence appears."},"progress_model":{"weights":{"spec":20,"implementation":30,"test":15,"device":20,"production":15},"rule":"progress is the sum of verified stages only","overall_rule":"equal-weight arithmetic mean of asset progress, rounded to nearest integer"},"design":{"theme":"太陽・調和","color_names":["生成り白","深い紺","太陽ゴールド","朝焼けオレンジ","空ブルー","若葉グリーン","夕焼けコーラル"],"token_values":"P2で既存Visual SSOTを確認して確定。未確認のHEX値はP1で作らない。"},"notification_policy":{"notify_only":["completed","needs_user_action","major_blocker","progress_regression","unified_app_ready_for_real_use"],"do_not_notify":["no_change","internal_processing","intermediate_progress"]},"summary":{"asset_count":22,"overall_progress":53,"needs_user_action_count":7},"assets":[{"id":"yos","name":"YOS","area":"core","status":"awaiting_device_verification","priority":1,"current":"YOSの共通ルールとYOS画面系コードは存在する。統合アプリとしてのiPhone実機・本番確認は未完了。","next_action":"P2でYOS統合アプリHOMEからYOSの既存機能を呼び出す。","blocker":null,"needs_user_action":false,"device_verified":false,"production_verified":false,"deep_link":"/yos/","completion_criteria":["YOSの既存機能を統合アプリから利用できる / iPhone実機で主要導線を確認する / 本番環境で運用確認する"],"evidence":["path:AGENTS.md","PR#319"],"progress_basis":{"spec":true,"implementation":true,"test":true,"device":false,"production":false},"progress":65,"updated_at":"2026-09-17T10:01:41+09:00"},{"id":"my-way","name":"MY WAY","area":"core","status":"awaiting_device_verification","priority":1,"current":"30秒コックピット実装がmainへ統合済み。統合アプリ内での実機確認は未完了。","next_action":"iPhoneで既存MY WAY表示を確認し、P2の統合画面へ接続する。","blocker":"最新統合画面でのiPhone実機確認が必要。","needs_user_action":true,"device_verified":false,"production_verified":false,"deep_link":"/yos/","completion_criteria":["MY WAYの既存データと画面を再利用する / 統合アプリから到達できる / iPhone実機と本番運用を確認する"],"evidence":["PR#319"],"progress_basis":{"spec":true,"implementation":true,"test":true,"device":false,"production":false},"progress":65,"updated_at":"2026-09-17T10:01:41+09:00"},{"id":"clarity","name":"Clarity","area":"core","status":"awaiting_device_verification","priority":1,"current":"Universal Gatewayと後続修正が実装済み。最終的なiPhone実機E2Eは継続中。","next_action":"現在のClarity入力→判断→実行→確認経路をiPhoneでE2E確認し、P5でSSOT自動更新へ接続する。","blocker":"iPhone実機E2Eの確認が残る。","needs_user_action":true,"device_verified":false,"production_verified":false,"deep_link":null,"completion_criteria":["Raw Firstから実行・成功確認・Ledgerまで通る / 統合アプリから状態を参照できる / iPhone実機と本番でE2E確認する"],"evidence":["PR#325","PR#366"],"progress_basis":{"spec":true,"implementation":true,"test":true,"device":false,"production":false},"progress":65,"updated_at":"2026-09-17T10:01:41+09:00"},{"id":"money","name":"Money","area":"finance","status":"awaiting_device_verification","priority":1,"current":"MY WAY側のMoney導線とMoney Capture関連実装が存在する。統合アプリとしての実機・本番確認は未完了。","next_action":"既存MoneyデータをP2の統合画面から読み取り、Money Captureと同じSSOT導線へ揃える。","blocker":null,"needs_user_action":false,"device_verified":false,"production_verified":false,"deep_link":"/yos/","completion_criteria":["既存Moneyデータを再利用する / 収支状態を統合アプリから確認できる / iPhone実機と本番運用を確認する"],"evidence":["PR#319","PR#328"],"progress_basis":{"spec":true,"implementation":true,"test":true,"device":false,"production":false},"progress":65,"updated_at":"2026-09-17T10:01:41+09:00"},{"id":"life","name":"Life","area":"life","status":"awaiting_device_verification","priority":2,"current":"Life画面とMorning Flow / Night Reset接続作業が存在する。最新統合状態の実機確認は未完了。","next_action":"Morning Flow / Night Resetの接続状態を確定し、P2でLife入口を統合する。","blocker":"既存Life系の広域iPhone smokeに未解決項目がある。","needs_user_action":false,"device_verified":false,"production_verified":false,"deep_link":"/life/","completion_criteria":["Lifeの既存画面・データを再利用する / Morning Flow / Night Resetとの整合を保つ / iPhone実機と本番運用を確認する"],"evidence":["PR#329"],"progress_basis":{"spec":true,"implementation":true,"test":true,"device":false,"production":false},"progress":65,"updated_at":"2026-09-17T10:01:41+09:00"},{"id":"heros-journey","name":"Hero’s Journey","area":"journey","status":"planned","priority":2,"current":"人生地図＋12 archetypesへの再設計Issueが存在する。完成実装・テストは未確認。","next_action":"Issue #230の完成条件を確定し、既存データを壊さずP2の入口だけ接続できる状態にする。","blocker":"再設計の完成条件と現行実装の差分が残る。","needs_user_action":false,"device_verified":false,"production_verified":false,"deep_link":"/yos/","completion_criteria":["人生地図としての完成条件を確定する / 既存データを保持して統合アプリから参照できる / iPhone実機と本番運用を確認する"],"evidence":["Issue#230"],"progress_basis":{"spec":true,"implementation":false,"test":false,"device":false,"production":false},"progress":20,"updated_at":"2026-09-17T10:01:41+09:00"},{"id":"idea","name":"Idea","area":"ideas","status":"planned","priority":2,"current":"ClarityのIdea保存先とMY WAY Widget上のIdea表示は存在するが、Idea領域単体の正式実装・テストは未確認。","next_action":"既存Idea保存先を正本として特定し、P2で参照専用入口を接続する。","blocker":"Idea単体の正式なデータ契約が未確認。","needs_user_action":false,"device_verified":false,"production_verified":false,"deep_link":null,"completion_criteria":["既存Idea保存先を特定して再利用する / 統合アプリから一覧・追加導線を提供する / iPhone実機と本番運用を確認する"],"evidence":["PR#340","PR#325"],"progress_basis":{"spec":true,"implementation":false,"test":false,"device":false,"production":false},"progress":20,"updated_at":"2026-09-17T10:01:41+09:00"},{"id":"yos-mission-control","name":"YOS Mission Control","area":"operations","status":"awaiting_device_verification","priority":1,"current":"GitHub状態の自動同期とMission Control JSONがmainで運用中。資産SSOTとは分離して再利用する。","next_action":"P2でYOS資産SSOTを表示し、必要に応じて既存Mission Controlの運用状態を補助情報として読む。","blocker":null,"needs_user_action":false,"device_verified":false,"production_verified":false,"deep_link":"/","completion_criteria":["既存Mission Controlの自動同期を壊さない / 資産SSOTと役割を分離する / 統合画面で必要な運用状態を参照できる"],"evidence":["path:data/mission-control.json","path:scripts/sync_mission_control.py","Issue#229"],"progress_basis":{"spec":true,"implementation":true,"test":true,"device":false,"production":false},"progress":65,"updated_at":"2026-09-17T10:01:41+09:00"},{"id":"my-way-widget","name":"MY WAY Widget","area":"widget","status":"awaiting_device_verification","priority":1,"current":"MY_WAY_5_WIDGETS_v1がmainへ統合済み。統合アプリと共通SSOTを読む改修はP3。","next_action":"iPhoneで現行Widgetを確認し、P3でyos-assets SSOT参照へ切り替える。","blocker":"現行WidgetのiPhone実機確認とP3接続が必要。","needs_user_action":true,"device_verified":false,"production_verified":false,"deep_link":null,"completion_criteria":["既存Widgetを再利用する / 小・中・大Widgetが同じ資産SSOTを読む / タップで対象画面へ遷移しiPhone実機で確認する"],"evidence":["PR#340"],"progress_basis":{"spec":true,"implementation":true,"test":true,"device":false,"production":false},"progress":65,"updated_at":"2026-09-17T10:01:41+09:00"},{"id":"notifications","name":"Notifications","area":"notification","status":"planned","priority":2,"current":"通知条件は今回のYOS統合アプリ仕様として確定。統合実装はP4。","next_action":"P4でSSOT差分から通知対象だけを判定する。","blocker":"P2アプリ本体とP3 Widgetの共通SSOT接続が前提。","needs_user_action":false,"device_verified":false,"production_verified":false,"deep_link":null,"completion_criteria":["完成・本人操作必要・重大停止・進捗後退・統合アプリ実利用可能だけ通知する / 変化なし・内部処理・途中経過を通知しない / iPhone実機で通知とdeep linkを確認する"],"evidence":["Issue#371"],"progress_basis":{"spec":true,"implementation":false,"test":false,"device":false,"production":false},"progress":20,"updated_at":"2026-09-17T10:01:41+09:00"},{"id":"money-capture","name":"Money Capture","area":"finance","status":"awaiting_device_verification","priority":1,"current":"自然文parserとiPhone向けP0試作が存在し、ローカルテスト証拠がある。iPhone実機確認は未完了。","next_action":"iPhoneのScriptable/Shortcut経路で入力→保存を実機確認する。","blocker":"iPhone実機での保存確認が必要。","needs_user_action":true,"device_verified":false,"production_verified":false,"deep_link":null,"completion_criteria":["自然文から金額・カテゴリ・日付・収支種別を解釈する / 既存Money保存先へ重複なく保存する / iPhone実機と運用環境で確認する"],"evidence":["PR#328","PR#370"],"progress_basis":{"spec":true,"implementation":true,"test":true,"device":false,"production":false},"progress":65,"updated_at":"2026-09-17T10:01:41+09:00"},{"id":"morning-flow","name":"Morning Flow","area":"routine","status":"awaiting_device_verification","priority":2,"current":"Lifeとの接続実装・テストが進行中。統合後のiPhone実機確認は未完了。","next_action":"Life接続の未解決smoke項目を切り分けてからiPhone実機確認へ進む。","blocker":"Life系の既存smoke失敗の切り分けが必要。","needs_user_action":false,"device_verified":false,"production_verified":false,"deep_link":null,"completion_criteria":["既存Morning Flowを再利用する / Lifeと二重実装せず接続する / iPhone実機と本番運用を確認する"],"evidence":["PR#329"],"progress_basis":{"spec":true,"implementation":true,"test":true,"device":false,"production":false},"progress":65,"updated_at":"2026-09-17T10:01:41+09:00"},{"id":"night-reset","name":"Night Reset","area":"routine","status":"awaiting_device_verification","priority":2,"current":"Lifeとの接続実装・テストが進行中。統合後のiPhone実機確認は未完了。","next_action":"Life接続の未解決smoke項目を切り分けてからiPhone実機確認へ進む。","blocker":"Life系の既存smoke失敗の切り分けが必要。","needs_user_action":false,"device_verified":false,"production_verified":false,"deep_link":null,"completion_criteria":["既存Night Resetを再利用する / Lifeと二重実装せず接続する / iPhone実機と本番運用を確認する"],"evidence":["PR#329"],"progress_basis":{"spec":true,"implementation":true,"test":true,"device":false,"production":false},"progress":65,"updated_at":"2026-09-17T10:01:41+09:00"},{"id":"my-remote","name":"MY REMOTE","area":"remote","status":"awaiting_device_verification","priority":2,"current":"v2実装と後続の照明長押し速度調整がmainへ統合済み。最新変更後のiPhone実機確認は未完了。","next_action":"iPhoneで3画面・照明長押し速度・BRAVIA操作を最新main相当で確認する。","blocker":"最新変更後の物理iPhone/機器確認が必要。","needs_user_action":true,"device_verified":false,"production_verified":false,"deep_link":null,"completion_criteria":["既存3画面を維持する / 照明・BRAVIA操作が既存仕様通り動く / 最新変更をiPhone実機で確認する"],"evidence":["PR#311","PR#338"],"progress_basis":{"spec":true,"implementation":true,"test":true,"device":false,"production":false},"progress":65,"updated_at":"2026-09-17T10:01:41+09:00"},{"id":"yos-home-voice","name":"YOS Home Voice","area":"automation","status":"awaiting_device_verification","priority":2,"current":"MY REMOTE向けHome Voice adapter実装とコード検証がある。物理iPhone確認は未完了。","next_action":"iPhone音声入力からMY REMOTE操作まで実機確認する。","blocker":"物理iPhoneでの音声→操作確認が必要。","needs_user_action":true,"device_verified":false,"production_verified":false,"deep_link":null,"completion_criteria":["既存MY REMOTEをadapter経由で呼ぶ / 音声入力の失敗時に安全に停止する / iPhone実機で操作を確認する"],"evidence":["Issue#318"],"progress_basis":{"spec":true,"implementation":true,"test":true,"device":false,"production":false},"progress":65,"updated_at":"2026-09-17T10:01:41+09:00"},{"id":"yos-departure-guard","name":"YOS Departure Guard","area":"automation","status":"awaiting_device_verification","priority":2,"current":"v0.1コードとsource-contractテストがある。Calendar/Battery/通知を含むiPhone実機acceptanceは未完了。","next_action":"iPhoneでCalendar/Battery/通知を使うacceptanceを実施する。","blocker":"物理iPhoneと実データ権限での確認が必要。","needs_user_action":true,"device_verified":false,"production_verified":false,"deep_link":null,"completion_criteria":["出発前に必要な確認を既存データから判定する / 誤通知を避ける / Calendar/Battery/通知をiPhone実機で確認する"],"evidence":["Issue#320"],"progress_basis":{"spec":true,"implementation":true,"test":true,"device":false,"production":false},"progress":65,"updated_at":"2026-09-17T10:01:41+09:00"},{"id":"yos-screenshot-router","name":"YOS Screenshot Router","area":"automation","status":"awaiting_device_verification","priority":3,"current":"コード・compile・テスト証拠がある。署名済み実機artifactがなくiPhone確認は未完了。","next_action":"実機検証可能なartifact経路を用意してからiPhone acceptanceを実施する。","blocker":"実機検証用artifact/署名経路が未完了。","needs_user_action":false,"device_verified":false,"production_verified":false,"deep_link":null,"completion_criteria":["スクリーンショットを安全に分類・振分する / 失敗時に原本を失わない / 署名済みartifactをiPhone実機で確認する"],"evidence":["Issue#330"],"progress_basis":{"spec":true,"implementation":true,"test":true,"device":false,"production":false},"progress":65,"updated_at":"2026-09-17T10:01:41+09:00"},{"id":"weekly-review","name":"Weekly Review","area":"review","status":"planned","priority":3,"current":"候補抽出engineのコード/テストはあるが、live adapterとscheduler接続が未完了。","next_action":"既存engineを再利用し、live data adapterとAutomation接続を実装する。","blocker":"live adapter / scheduler未接続。","needs_user_action":false,"device_verified":false,"production_verified":false,"deep_link":null,"completion_criteria":["1週間から続ける・やめる・自動化候補を抽出する / live dataから自動生成する / 必要な候補だけをiPhoneで確認できる"],"evidence":["Issue#326"],"progress_basis":{"spec":true,"implementation":false,"test":false,"device":false,"production":false},"progress":20,"updated_at":"2026-09-17T10:01:41+09:00"},{"id":"friction-discovery","name":"Friction Discovery","area":"review","status":"planned","priority":3,"current":"候補抽出engineのコード/テストはあるが、live adapterとAutomation接続が未完了。","next_action":"既存engineを再利用し、実生活ログから候補を抽出するadapterを接続する。","blocker":"live adapter / Automation未接続。","needs_user_action":false,"device_verified":false,"production_verified":false,"deep_link":null,"completion_criteria":["繰り返し操作・迷いを候補化する / 効果がある候補だけ残す / 必要時だけプロト君へ接続する"],"evidence":["Issue#327"],"progress_basis":{"spec":true,"implementation":false,"test":false,"device":false,"production":false},"progress":20,"updated_at":"2026-09-17T10:01:41+09:00"},{"id":"one-enter","name":"One Enter","area":"development","status":"awaiting_device_verification","priority":2,"current":"オーケストレーションコードとGitHub Actionsの検証証拠がある。統合Laneと実利用確認は未完了。","next_action":"Integration側の現行mainと接続し、実案件1件をE2Eで通す。","blocker":"Integration LaneとのE2Eが未完了。","needs_user_action":false,"device_verified":false,"production_verified":false,"deep_link":null,"completion_criteria":["既存資産発見→担当→実装→テスト→修復を一経路で扱う / main直変更をしない / 実案件でE2E確認する"],"evidence":["Issue#322","Issue#323"],"progress_basis":{"spec":true,"implementation":true,"test":true,"device":false,"production":false},"progress":65,"updated_at":"2026-09-17T10:01:41+09:00"},{"id":"shortcut-factory-stash","name":"Shortcut Factory + STASH","area":"development","status":"building","priority":3,"current":"Factory v3とSTASH自動構築の実装資産があるが、import/acceptance完了は未確認。","next_action":"既存artifactのimport経路とacceptanceを完成させる。","blocker":"import可能artifactのacceptanceが未完了。","needs_user_action":false,"device_verified":false,"production_verified":false,"deep_link":null,"completion_criteria":["iPhoneで取り込めるShortcut artifactを生成する / STASH既存運用を壊さない / importから実行まで確認する"],"evidence":["Issue#324"],"progress_basis":{"spec":true,"implementation":true,"test":false,"device":false,"production":false},"progress":50,"updated_at":"2026-09-17T10:01:41+09:00"},{"id":"projecty-hq","name":"ProjectY HQ","area":"development","status":"building","priority":2,"current":"ProjectY v3.0の開発環境・監査・自動司令部が存在するが、異常系を含む全体検証は継続中。","next_action":"Issue #315の異常系検証を完遂し、YOS統合アプリP2以降の開発基盤として利用する。","blocker":"v3.0開発環境の異常系検証が継続中。","needs_user_action":false,"device_verified":false,"production_verified":false,"deep_link":"/","completion_criteria":["v3.0ルールに従う開発環境が機能する / 異常系・rollback・secret安全性を検証する / P2以降を専用branch/PRで安全に進められる"],"evidence":["Issue#315","Issue#232"],"progress_basis":{"spec":true,"implementation":true,"test":false,"device":false,"production":false},"progress":50,"updated_at":"2026-09-17T10:01:41+09:00"}]};
-  const embeddedTasks = {
-  "schema_version": "1.0.0",
-  "ssot": "YOS user-only ChatGPT task queue",
-  "updated_at": "2026-09-17T12:04:00+09:00",
-  "scope": {
-    "include": "ChatGPT内で本人にしか実行できない操作",
-    "exclude": ["生活タスク", "AIまたはGitHub connectorで実行可能な作業"],
-    "rule": "AI側で実行可能になった項目は本人Queueへ入れない。本人操作が解放された時だけactiveにする。"
-  },
-  "summary": {
-    "active_count": 0,
-    "completed_count": 0
-  },
-  "tasks": []
-};
 
-  async function ensureJson(path, fallback) {
-    if (!fm.fileExists(path)) fm.writeString(path, JSON.stringify(fallback, null, 2));
-    if (!fm.isFileDownloaded(path)) await fm.downloadFileFromiCloud(path);
-    try { return JSON.parse(fm.readString(path)); } catch (_) { return fallback; }
+  const fallbackAssets = {
+    schema_version: "1.0.0",
+    ssot: "YOS asset registry",
+    updated_at: "2026-09-18T21:09:00+09:00",
+    design: { theme: "調和" },
+    summary: { asset_count: 22, overall_progress: 53, needs_user_action_count: 0 },
+    assets: [
+      ["my-way","MY WAY","core",65,"今ここ・行き先・次の一歩","iPhoneで主要導線を確認する"],
+      ["clarity","Clarity","core",65,"音声・テキストの入口","入力→判断→実行→確認をE2E確認する"],
+      ["money","Money","finance",65,"収支とMoney Capture","既存Moneyデータを統合する"],
+      ["life","Life","life",65,"生活・Morning Flow・Night Reset","Life入口を統合する"],
+      ["idea","Idea","ideas",20,"アイデア保存・確認","既存保存先を正式接続する"],
+      ["heros-journey","Hero’s Journey","journey",20,"人生地図","既存データを保ったまま統合する"],
+      ["my-remote","MY REMOTE","remote",65,"照明・BRAVIAなどの操作","最新状態を実機確認する"],
+      ["money-capture","Money Capture","finance",65,"自然文で支出入力","入力→保存を実機確認する"],
+      ["morning-flow","Morning Flow","routine",65,"朝の流れ","Life接続後に実機確認する"],
+      ["night-reset","Night Reset","routine",65,"夜のリセット","Life接続後に実機確認する"],
+      ["yos-home-voice","YOS Home Voice","automation",65,"音声操作","音声→操作を実機確認する"],
+      ["yos-departure-guard","Departure Guard","automation",65,"外出前チェック","Calendar/Battery/通知を実機確認する"],
+      ["yos-screenshot-router","Screenshot Router","automation",65,"スクショ整理","実機検証経路を完成する"],
+      ["weekly-review","Weekly Review","review",20,"週次レビュー","live dataへ接続する"],
+      ["friction-discovery","Friction Discovery","review",20,"不便の自動発見","実生活ログへ接続する"],
+      ["one-enter","One Enter","development",65,"ChatGPT側の開発司令塔","Factory Core経由で実案件をE2E完遂する"],
+      ["projecty-hq","ProjectY HQ","development",50,"開発基盤・監査","異常系検証を完成する"],
+      ["shortcut-factory-stash","Shortcut Factory + STASH","development",50,"ショートカット製造・保管","import→実行を確認する"],
+      ["yos-mission-control","YOS Mission Control","operations",65,"運用状態の補助情報","資産SSOTと役割分離を保つ"],
+      ["notifications","Notifications","notification",20,"必要時だけ通知","SSOT差分通知を接続する"],
+      ["my-way-widget","MY WAY Widget","widget",65,"ホーム画面Widget","共通SSOTへ接続する"],
+      ["yos","YOS","core",65,"統合HOME","主要導線を実機確認する"]
+    ].map(([id,name,area,progress,current,next_action]) => ({id,name,area,progress,current,next_action,status:"local_snapshot"}))
+  };
+
+  const fallbackTasks = {
+    schema_version: "1.0.0",
+    updated_at: "2026-09-18T21:09:00+09:00",
+    summary: { active_count: 0, completed_count: 0 },
+    tasks: []
+  };
+
+  async function loadJson(path, fallback) {
+    try {
+      if (!fm.fileExists(path)) {
+        fm.writeString(path, JSON.stringify(fallback, null, 2));
+        return fallback;
+      }
+      if (!fm.isFileDownloaded(path)) await fm.downloadFileFromiCloud(path);
+      const parsed = JSON.parse(fm.readString(path));
+      return parsed && typeof parsed === "object" ? parsed : fallback;
+    } catch (_) {
+      return fallback;
+    }
   }
 
-  const assets = await ensureJson(assetsPath, embeddedAssets);
-  const tasks = await ensureJson(tasksPath, embeddedTasks);
-  const summary = assets.summary || {};
+  const assets = await loadJson(assetsPath, fallbackAssets);
+  const tasks = await loadJson(tasksPath, fallbackTasks);
   const rows = Array.isArray(assets.assets) ? assets.assets : [];
   const queue = Array.isArray(tasks.tasks) ? tasks.tasks : [];
 
-  const esc = value => String(value ?? "").replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[ch]));
-  const assetCards = rows.map(a => `
-    <article class="card">
-      <div class="row"><strong>${esc(a.name)}</strong><b>${Number(a.progress)||0}%</b></div>
-      <div class="bar"><span style="width:${Math.max(0,Math.min(100,Number(a.progress)||0))}%"></span></div>
-      <p><small>現在地</small>${esc(a.current)}</p>
-      <p><small>次</small>${esc(a.next_action)}</p>
-    </article>`).join('');
-  const queueHtml = queue.length ? queue.map(t => `<li>${esc(t.title || t.task || t.id)}</li>`).join('') : '<li>本人タスクなし</li>';
-  const updated = esc(assets.updated_at || 'unknown');
+  const esc = value => String(value ?? "").replace(/[&<>"']/g, ch => ({
+    "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;"
+  }[ch]));
 
-  const html = `<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>
-    :root{color-scheme:light;--bg:#f7f3eb;--card:#fffdf8;--ink:#162238;--muted:#69717d;--gold:#d79b23;--line:#e7dfd1}
-    *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,sans-serif;padding:calc(env(safe-area-inset-top) + 18px) 16px 40px}
-    h1{margin:0;font-size:28px} .local{display:inline-block;margin:8px 0 18px;padding:5px 9px;border-radius:999px;background:#e8f5e9;font-size:11px;font-weight:800}
-    .metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px} .metric,.card,.queue{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px}
-    .metric b{display:block;font-size:23px} .metric small,.card small{display:block;color:var(--muted);font-size:11px;margin-bottom:4px}
-    .queue{margin-bottom:14px} .queue h2{font-size:15px;margin:0 0 8px} .queue ul{margin:0;padding-left:20px}
-    .card{margin-bottom:10px} .row{display:flex;justify-content:space-between;gap:10px;align-items:center} .row strong{font-size:16px} .row b{font-size:16px}
-    .bar{height:7px;background:#eee7da;border-radius:999px;overflow:hidden;margin:10px 0} .bar span{display:block;height:100%;background:linear-gradient(90deg,#f4b740,var(--gold))}
-    .card p{font-size:13px;line-height:1.45;margin:9px 0 0} footer{color:var(--muted);font-size:11px;margin-top:16px}
+  const progressOf = a => Math.max(0, Math.min(100, Number(a.progress) || 0));
+  const overall = Number(assets.summary?.overall_progress) || Math.round(rows.reduce((s,a)=>s+progressOf(a),0)/Math.max(1,rows.length));
+  const ownerWait = queue.length;
+
+  const primaryIds = new Set(["my-way","clarity","money","life","idea","heros-journey","my-remote"]);
+  const automationAreas = new Set(["automation","routine","review","notification","widget"]);
+  const infraAreas = new Set(["development","operations"]);
+
+  const primary = rows.filter(a => primaryIds.has(a.id));
+  const supporting = rows.filter(a => !primaryIds.has(a.id) && automationAreas.has(a.area));
+  const infra = rows.filter(a => infraAreas.has(a.area) || a.id === "one-enter" || a.id === "projecty-hq");
+
+  function iconFor(a) {
+    const m = {
+      "my-way":"◎", "clarity":"✦", "money":"¥", "life":"⌂", "idea":"◌",
+      "heros-journey":"↗", "my-remote":"⌁", "money-capture":"＋", "morning-flow":"☼",
+      "night-reset":"◐", "yos-home-voice":"◉", "yos-departure-guard":"⇢",
+      "yos-screenshot-router":"▣", "weekly-review":"✓", "friction-discovery":"∿",
+      "notifications":"•", "my-way-widget":"▤", "one-enter":"◇", "projecty-hq":"⌘",
+      "shortcut-factory-stash":"⚙", "yos-mission-control":"◫", "yos":"○"
+    };
+    return m[a.id] || "·";
+  }
+
+  function cards(list, compact=false) {
+    if (!list.length) return '<div class="empty">表示する項目はありません</div>';
+    return list.map(a => `
+      <article class="asset ${compact ? 'compact' : ''}">
+        <div class="asset-head">
+          <div class="icon">${iconFor(a)}</div>
+          <div class="asset-title"><strong>${esc(a.name)}</strong><span>${esc(a.area || '')}</span></div>
+          <b class="percent">${progressOf(a)}%</b>
+        </div>
+        <div class="bar"><i style="width:${progressOf(a)}%"></i></div>
+        ${compact ? '' : `<p><span>現在</span>${esc(a.current || '未設定')}</p><p><span>次</span>${esc(a.next_action || '未設定')}</p>`}
+      </article>`).join('');
+  }
+
+  const queueHtml = queue.length
+    ? queue.map(t => `<li><strong>${esc(t.title || t.task || t.id)}</strong>${t.next_action ? `<small>${esc(t.next_action)}</small>` : ''}</li>`).join('')
+    : '<li class="done">本人タスクなし</li>';
+
+  const topNext = rows
+    .filter(a => !infraAreas.has(a.area))
+    .sort((a,b)=>(Number(a.priority)||9)-(Number(b.priority)||9))[0];
+
+  const html = `<!doctype html>
+  <html lang="ja"><head>
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="color-scheme" content="light">
+  <style>
+    :root{
+      --paper:#f7f1e7; --paper2:#fffaf1; --ink:#17243a; --muted:#77766f;
+      --line:rgba(58,54,47,.10); --sun:#e7a83e; --sun2:#f6cf79; --leaf:#7ea17b;
+      --sky:#8eb5c8; --coral:#d98e7b; --shadow:0 14px 34px rgba(55,45,28,.07);
+    }
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+    body{margin:0;background:
+      radial-gradient(circle at 85% -4%,rgba(246,207,121,.33),transparent 31%),
+      linear-gradient(180deg,#fbf7ef 0%,var(--paper) 100%);
+      color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans",sans-serif;
+      padding:calc(env(safe-area-inset-top) + 18px) 15px calc(env(safe-area-inset-bottom) + 34px)}
+    .hero{position:relative;overflow:hidden;background:rgba(255,250,241,.84);border:1px solid var(--line);border-radius:28px;padding:20px;box-shadow:var(--shadow);backdrop-filter:blur(20px)}
+    .sun{position:absolute;right:-30px;top:-46px;width:138px;height:138px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#fff8d9 0 15%,var(--sun2) 34%,var(--sun) 78%);opacity:.88;box-shadow:0 0 70px rgba(231,168,62,.24)}
+    .eyebrow{font-size:11px;font-weight:800;letter-spacing:.15em;color:#9a7a43}.hero h1{margin:5px 0 2px;font-size:31px;letter-spacing:-.03em}.hero p{margin:0;color:var(--muted);font-size:13px}.badge{display:inline-flex;align-items:center;gap:6px;margin-top:15px;padding:7px 10px;border-radius:999px;background:rgba(126,161,123,.11);color:#547252;font-size:11px;font-weight:800}.dot{width:7px;height:7px;border-radius:50%;background:var(--leaf)}
+    .metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:11px 0 18px}.metric{background:rgba(255,250,241,.78);border:1px solid var(--line);border-radius:19px;padding:13px 11px}.metric small{display:block;color:var(--muted);font-size:10px;margin-bottom:3px}.metric b{font-size:22px;letter-spacing:-.04em}
+    .next{background:linear-gradient(135deg,rgba(231,168,62,.13),rgba(142,181,200,.09));border:1px solid rgba(231,168,62,.22);border-radius:22px;padding:15px;margin-bottom:18px}.next small{display:block;color:#9a7a43;font-size:10px;font-weight:800;margin-bottom:5px}.next strong{display:block;font-size:15px}.next span{display:block;margin-top:5px;color:var(--muted);font-size:12px;line-height:1.45}
+    h2{font-size:14px;margin:19px 4px 9px;letter-spacing:.01em}.section-note{color:var(--muted);font-size:10px;margin:-4px 4px 10px}
+    .asset{background:rgba(255,250,241,.88);border:1px solid var(--line);border-radius:21px;padding:14px;margin-bottom:9px;box-shadow:0 8px 24px rgba(55,45,28,.035)}.asset.compact{padding:12px 13px}.asset-head{display:flex;align-items:center;gap:10px}.icon{display:grid;place-items:center;width:34px;height:34px;border-radius:12px;background:linear-gradient(145deg,rgba(246,207,121,.25),rgba(142,181,200,.14));font-weight:900}.asset-title{min-width:0;flex:1}.asset-title strong{display:block;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.asset-title span{display:block;color:var(--muted);font-size:9px;margin-top:2px;text-transform:uppercase;letter-spacing:.08em}.percent{font-size:13px}.bar{height:5px;margin:10px 0 0;border-radius:999px;background:#ebe5da;overflow:hidden}.bar i{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,var(--sun2),var(--sun),var(--leaf))}.asset p{margin:10px 0 0;font-size:12px;line-height:1.45;color:#414b58}.asset p span{display:block;font-size:9px;font-weight:800;color:var(--muted);margin-bottom:2px}.queue{background:rgba(255,250,241,.78);border:1px solid var(--line);border-radius:21px;padding:14px}.queue ul{list-style:none;padding:0;margin:0}.queue li{padding:9px 0;border-bottom:1px solid var(--line);font-size:12px}.queue li:last-child{border-bottom:0}.queue li small{display:block;color:var(--muted);margin-top:3px}.queue .done{color:#5d7b5b;font-weight:800}.infra{opacity:.88}.empty{padding:15px;color:var(--muted);font-size:12px;text-align:center}
+    details{margin-top:8px}summary{list-style:none;cursor:pointer;background:rgba(255,250,241,.72);border:1px solid var(--line);border-radius:18px;padding:13px;font-size:12px;font-weight:800}summary::-webkit-details-marker{display:none}.details-body{padding-top:9px}
+    footer{margin:22px 4px 0;color:#918d83;font-size:9px;line-height:1.5}
   </style></head><body>
-    <h1>YOS</h1><div class="local">LOCAL / GitHub・Vercel不要</div>
+    <section class="hero"><div class="sun"></div><div class="eyebrow">HARMONY HOME</div><h1>YOS</h1><p>違う機能を、ひとつの世界観で。</p><div class="badge"><i class="dot"></i>LOCAL / GitHub・Vercelなしで起動</div></section>
+
     <section class="metrics">
-      <div class="metric"><small>全体</small><b>${Number(summary.overall_progress)||0}%</b></div>
-      <div class="metric"><small>資産</small><b>${Number(summary.asset_count)||rows.length}</b></div>
-      <div class="metric"><small>本人待ち</small><b>${queue.length}</b></div>
+      <div class="metric"><small>全体</small><b>${overall}%</b></div>
+      <div class="metric"><small>資産</small><b>${Number(assets.summary?.asset_count)||rows.length}</b></div>
+      <div class="metric"><small>本人待ち</small><b>${ownerWait}</b></div>
     </section>
-    <section class="queue"><h2>本人タスクQueue</h2><ul>${queueHtml}</ul></section>
-    ${assetCards}
-    <footer>Local SSOT: iCloud Drive / Scriptable / One Enter Factory / state<br>元データ更新: ${updated}</footer>
+
+    ${topNext ? `<section class="next"><small>次の一手</small><strong>${esc(topNext.name)}</strong><span>${esc(topNext.next_action || topNext.current || '')}</span></section>` : ''}
+
+    <h2>毎日使う機能</h2><div class="section-note">生活・判断・記録の中心</div>
+    ${cards(primary)}
+
+    <h2>本人タスクQueue</h2>
+    <section class="queue"><ul>${queueHtml}</ul></section>
+
+    <h2>自動化・補助</h2><div class="section-note">必要な時だけ表に出る機能</div>
+    ${cards(supporting, true)}
+
+    <details class="infra"><summary>開発・基盤を見る</summary><div class="details-body">${cards(infra, true)}</div></details>
+
+    <footer>Design theme: 調和 / 太陽・自然・穏やかさ・見やすさ<br>One Enterは利用機能ではなく、裏側の開発司令塔として配置。<br>Local SSOT: iCloud Drive / Scriptable / One Enter Factory / state<br>SSOT更新: ${esc(assets.updated_at || 'unknown')}</footer>
   </body></html>`;
 
   const web = new WebView();
   await web.loadHTML(html);
   await web.present(true);
   Script.complete();
-})();
+})().catch(async error => {
+  const alert = new Alert();
+  alert.title = "YOS";
+  alert.message = String(error);
+  alert.addAction("OK");
+  await alert.present();
+  Script.complete();
+});
