@@ -99,6 +99,26 @@ jobs:
           grep -q 'is.workflow.actions.runworkflow' "$proof"
           grep -q 'Clarity Dispatcher Proof' "$proof"
           grep -q 'YOS_Test' "$proof"
+          python3 - <<'PYMODEL'
+          import plistlib
+          from pathlib import Path
+          p = Path("Clarity Model Router Proof_unsigned.shortcut")
+          root = plistlib.loads(p.read_bytes())
+          actions = root.get("WFWorkflowActions", [])
+          ids = [str(a.get("WFWorkflowActionIdentifier", "")) for a in actions]
+          runs = [i for i, ident in enumerate(ids) if ident.endswith("runworkflow")]
+          shows = [i for i, ident in enumerate(ids) if ident.endswith("showresult")]
+          if not runs:
+              raise SystemExit("model-router proof missing Run Shortcut")
+          if not shows:
+              raise SystemExit("model-router proof missing visible result")
+          if max(shows) <= max(runs):
+              raise SystemExit("model-router proof may terminate silently after child execution")
+          serialized = repr(root)
+          if "MODEL_ROUTER_E2E_PASS" not in serialized:
+              raise SystemExit("model-router proof missing deterministic PASS diagnostic")
+          print("Model Router observable-result contract: PASS")
+          PYMODEL
           mkdir -p artifacts
           cp "$proof" artifacts/Clarity-Model-Router-Proof-unsigned.shortcut
 
