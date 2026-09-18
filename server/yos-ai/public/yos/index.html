@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#fffaf0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="YOS">
+<title>YOS</title>
+<style>
+:root{--cream:#fffaf0;--navy:#17243d;--gold:#e2aa35;--orange:#ef8c3a;--leaf:#6cab72;--card:#fff;--muted:#6d7480;--line:rgba(23,36,61,.1);--danger:#b54c43}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:radial-gradient(circle at 90% 0,rgba(226,170,53,.2),transparent 30%),linear-gradient(180deg,#fff8e8,var(--cream));color:var(--navy);font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif}
+.app{width:min(100%,680px);margin:auto;padding:calc(env(safe-area-inset-top) + 20px) 16px calc(env(safe-area-inset-bottom) + 36px)}
+.top{display:flex;align-items:center;gap:12px}.sun{display:grid;place-items:center;width:52px;height:52px;border-radius:50%;background:linear-gradient(145deg,#ffd976,var(--gold));font-weight:1000;box-shadow:0 10px 28px rgba(226,170,53,.25)}h1{margin:0;font-size:30px}.subtitle,.updated{color:var(--muted);font-size:11px}
+.hero{margin-top:18px;padding:20px;border:1px solid rgba(226,170,53,.22);border-radius:28px;background:rgba(255,255,255,.84);box-shadow:0 20px 60px rgba(23,36,61,.08)}
+.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.metric{padding:13px 10px;border-radius:18px;background:#fff8e8}.metric small{display:block;color:var(--muted);font-size:10px}.metric strong{display:block;margin-top:4px;font-size:24px}
+.now{margin-top:14px;padding:16px;border-radius:20px;background:linear-gradient(135deg,#fff0d2,#fff8ea)}.now small{color:var(--orange);font-weight:900}.now h2{margin:6px 0 4px;font-size:20px}.now p{margin:0;color:var(--muted);font-size:12px;line-height:1.55}
+.nav{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:12px}.nav a,.nav button{padding:11px 6px;border:1px solid var(--line);border-radius:15px;background:rgba(255,255,255,.7);color:var(--navy);text-decoration:none;text-align:center;font-size:12px;font-weight:800;font-family:inherit}
+.section{margin-top:28px}.section-title{display:flex;align-items:end;justify-content:space-between;margin-bottom:10px}.section-title h2{margin:0;font-size:22px}.asset-list,.task-list{display:grid;gap:10px}.asset-card,.task-card,.empty{padding:16px;border:1px solid var(--line);border-radius:21px;background:rgba(255,255,255,.88)}
+.asset-head{display:flex;align-items:center;gap:8px}.asset-head>div{display:flex;align-items:center;gap:8px;flex:1}.asset-head>b{margin-left:auto}.priority{display:inline-grid;place-items:center;min-width:30px;padding:4px 7px;border-radius:999px;background:#fff0cf;color:#8a5a00;font-size:10px;font-weight:950}
+.progress{height:7px;margin:10px 0 7px;border-radius:999px;background:#edf0f3;overflow:hidden}.progress span{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,var(--gold),var(--orange))}
+.status{margin:0 0 8px;color:var(--leaf);font-size:11px;font-weight:900}.meta,.action{margin:5px 0;color:var(--muted);font-size:12px;line-height:1.55}.meta b,.action b{color:var(--navy)}.action{padding:10px;border-radius:12px;background:#eef7ff}.danger{color:var(--danger)!important}.empty{text-align:center;color:var(--muted);font-size:13px;line-height:1.6}.footer{margin-top:24px;text-align:center;color:var(--muted);font-size:10px}
+button{cursor:pointer}
+</style>
+</head>
+<body>
+<main class="app">
+<header class="top"><div class="sun">Y</div><div><h1>YOS</h1><div class="subtitle">太陽・調和｜統合HOME</div></div></header>
+<section class="hero">
+<div class="metrics">
+<div class="metric"><small>全体進捗</small><strong id="overall-progress">—</strong></div>
+<div class="metric"><small>資産数</small><strong id="asset-count">—</strong></div>
+<div class="metric"><small>本人待ち</small><strong id="waiting-count">—</strong></div>
+</div>
+<div class="now"><small>今、俺がやる1件</small><h2 id="now-task">読込中</h2><p id="next-action">SSOTを確認しています。</p></div>
+<div class="nav"><a href="#tasks">本人Queue</a><a href="#assets">資産進捗</a></div>
+</section>
+<section class="section" id="tasks"><div class="section-title"><h2>本人タスクQueue</h2><span class="updated">生活タスクとは分離</span></div><div class="task-list" id="task-list"><div class="empty">読込中</div></div></section>
+<section class="section" id="assets"><div class="section-title"><h2>資産進捗</h2><span class="updated">SSOT</span></div><div class="asset-list" id="asset-list"><div class="empty">読込中</div></div></section>
+<footer class="footer" id="data-state">SSOT読込中</footer>
+</main>
+<script>
+const REMOTE_BASE='https://raw.githubusercontent.com/yskn0008-bot/ProjectY/main/data/';
+const LOCAL_BASE='./data/';
+const $=id=>document.getElementById(id);
+const statusLabel={planned:'予定',building:'開発中',awaiting_device_verification:'実機確認待ち',awaiting_production_verification:'運用確認待ち',blocked:'停止中',complete:'完成'};
+const esc=v=>String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+async function getJson(name){
+  for(const base of [REMOTE_BASE,LOCAL_BASE]){
+    try{const r=await fetch(base+name,{cache:'no-store'});if(r.ok)return {data:await r.json(),source:base===REMOTE_BASE?'GitHub main':'公開入口の同梱データ'};}catch{}
+  }
+  throw new Error(name+' を取得できません');
+}
+function sortAssets(xs){return [...xs].sort((a,b)=>a.priority-b.priority||Number(b.needs_user_action)-Number(a.needs_user_action)||a.name.localeCompare(b.name,'ja'))}
+function sortTasks(xs){return [...xs].filter(t=>!t.completed&&t.status!=='completed').sort((a,b)=>a.priority-b.priority||String(a.task).localeCompare(String(b.task),'ja'))}
+function assetCard(a){const blocker=a.blocker?`<p class="meta danger"><b>障害</b> ${esc(a.blocker)}</p>`:'';return `<article class="asset-card"><div class="asset-head"><div><span class="priority">P${esc(a.priority)}</span><strong>${esc(a.name)}</strong></div><b>${esc(a.progress)}%</b></div><div class="progress"><span style="width:${Math.max(0,Math.min(100,Number(a.progress)||0))}%"></span></div><p class="status">${esc(statusLabel[a.status]||a.status)}</p><p class="meta"><b>現在地</b> ${esc(a.current)}</p><p class="meta"><b>次の一手</b> ${esc(a.next_action)}</p>${blocker}<p class="updated">更新 ${esc(a.updated_at)}</p></article>`}
+function taskCard(t){return `<article class="task-card"><div class="asset-head"><span class="priority">P${esc(t.priority)}</span><strong>${esc(t.task)}</strong><b>${esc(t.estimated_time||'')}</b></div><p class="meta"><b>対象</b> ${esc(t.project)}</p><p class="meta"><b>本人限定の理由</b> ${esc(t.why_user_only)}</p><p class="action"><b>やること</b> ${esc(t.exact_action)}</p></article>`}
+async function init(){
+  try{
+    const [ar,tr]=await Promise.all([getJson('yos-assets.json'),getJson('yos-user-tasks.json')]);
+    const assets=sortAssets(ar.data.assets||[]),tasks=sortTasks(tr.data.tasks||[]);
+    const top=assets[0],task=tasks[0];
+    $('overall-progress').textContent=`${ar.data.summary?.overall_progress??0}%`;
+    $('asset-count').textContent=String(ar.data.summary?.asset_count??assets.length);
+    $('waiting-count').textContent=String(tasks.length);
+    $('now-task').textContent=task?task.task:'現在なし';
+    $('next-action').textContent=task?task.exact_action:(top?.next_action||'次の本人操作はありません');
+    $('task-list').innerHTML=tasks.length?tasks.map(taskCard).join(''):'<div class="empty">現在、本人にしかできないChatGPT内操作はありません。AI側の作業を先に進めます。</div>';
+    $('asset-list').innerHTML=assets.map(assetCard).join('');
+    $('data-state').textContent=`SSOT更新 ${ar.data.updated_at} / ${ar.source}`;
+  }catch(e){$('data-state').textContent='SSOT読込エラー：'+e.message;$('data-state').classList.add('danger')}
+}
+init();
+</script>
+</body>
+</html>
