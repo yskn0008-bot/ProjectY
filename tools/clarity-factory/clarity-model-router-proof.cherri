@@ -1,7 +1,5 @@
 #define name Clarity Model Router Proof
 #define color blue
-#define version 18
-
 #include 'actions/text'
 #include 'actions/intelligence'
 #include 'actions/shortcuts'
