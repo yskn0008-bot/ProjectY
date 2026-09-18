@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-18T22:13:08+09:00",
+  "updated_at": "2026-09-18T22:15:46+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -40,7 +40,7 @@
       "priority": 2,
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/373",
-      "updated_at": "2026-09-18T13:12:53Z"
+      "updated_at": "2026-09-18T13:15:34Z"
     },
     {
       "id": "github-pr-382",
@@ -90,7 +90,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-09-18T13:12:48Z"
+      "updated_at": "2026-09-18T13:15:42Z"
     },
     {
       "id": "github-issue-234",
@@ -165,39 +165,39 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-5b26d0e7e535",
+      "title": "test(life): prevent legacy design flash",
+      "completed_at": "2026-09-18T13:15:34Z",
+      "result": "GitHub mainへ反映（5b26d0e）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/5b26d0e7e535f320f1e71aaaf2170a580b883d68"
+    },
+    {
+      "id": "github-commit-e99e0de4f6ae",
+      "title": "life: cache no-flash shell",
+      "completed_at": "2026-09-18T13:15:31Z",
+      "result": "GitHub mainへ反映（e99e0de）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/e99e0de4f6ae97db9438b45d2e8851a53ae3296a"
+    },
+    {
+      "id": "github-commit-bac3e0ea45eb",
+      "title": "life: reveal only final Home after transform",
+      "completed_at": "2026-09-18T13:15:29Z",
+      "result": "GitHub mainへ反映（bac3e0e）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/bac3e0ea45eb4cfc92f5ee456e23488f583c9525"
+    },
+    {
+      "id": "github-commit-f907c792e54d",
+      "title": "life: hide retired UI before first paint",
+      "completed_at": "2026-09-18T13:15:26Z",
+      "result": "GitHub mainへ反映（f907c79）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/f907c792e54d6b768bc6dc8c5db95be0254023a7"
+    },
+    {
       "id": "github-commit-628406a56715",
       "title": "yos: verify Harmony Home and wire safe feature entries",
       "completed_at": "2026-09-18T13:09:43Z",
       "result": "GitHub mainへ反映（628406a）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/628406a56715bc55ba3236e377a97a57c17fa4d6"
-    },
-    {
-      "id": "github-commit-1b374bd8b23b",
-      "title": "factory: add Scriptable installer v2 with verified handoff",
-      "completed_at": "2026-09-18T13:06:13Z",
-      "result": "GitHub mainへ反映（1b374bd）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/1b374bd8b23bd6c52958d6bcdc0de96a1a06e086"
-    },
-    {
-      "id": "github-commit-63a71f232482",
-      "title": "design: add YOS Harmony design contract",
-      "completed_at": "2026-09-18T12:16:46Z",
-      "result": "GitHub mainへ反映（63a71f2）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/63a71f2324825842498c3e541aaddfef1f63ee0c"
-    },
-    {
-      "id": "github-commit-5baeef35d1b1",
-      "title": "ui: apply Harmony theme to local YOS HOME",
-      "completed_at": "2026-09-18T12:16:31Z",
-      "result": "GitHub mainへ反映（5baeef3）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/5baeef35d1b13614ea938e132041b8b0f1229202"
-    },
-    {
-      "id": "github-commit-96a049e113c4",
-      "title": "factory: add local-first core and provider fallback",
-      "completed_at": "2026-09-18T05:40:48Z",
-      "result": "GitHub mainへ反映（96a049e）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/96a049e113c44f1c621736b65eb05cee3ab05623"
     },
     {
       "id": "complete-002",
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-18T22:13:08+09:00",
+      "last_update": "2026-09-18T22:15:46+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -315,7 +315,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-18T22:13:08+09:00",
+      "last_update": "2026-09-18T22:15:46+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-18T22:13:08+09:00",
+      "last_update": "2026-09-18T22:15:46+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "2e6d8a8887249ad74db4bfee13b2376c4a1db340b302d0fd314a19eac1c18874"
+  "github_snapshot_hash": "461f0d469bd2b155e2a676d71d57c06c9c79da3d01640df2a8d3ec6095f73ac9"
 }
