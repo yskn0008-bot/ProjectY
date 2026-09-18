@@ -104,6 +104,7 @@ for actionItem in @actionsRaw {
     @itemValue = getValue(@input, "item")
     @noteValue = getValue(@input, "note")
     @rawInputValue = getValue(@input, "raw_input")
+    @alertMinutesValue = getValue(@input, "alert_minutes_before")
 
     @text = "{@textValue}"
     @title = "{@titleValue}"
@@ -112,6 +113,7 @@ for actionItem in @actionsRaw {
     @item = "{@itemValue}"
     @note = "{@noteValue}"
     @rawInput = "{@rawInputValue}"
+    @alertMinutes = "{@alertMinutesValue}"
 
     // These names intentionally mirror the full Clarity runtime so the same
     // post-compile destination readback verifier can prove the write before APPLIED.
@@ -155,16 +157,55 @@ for actionItem in @actionsRaw {
             @out = {"status":"blocked","verified":false,"result":{"message":"Calendarの日時を確認してください"},"error_code":"MISSING_CALENDAR_FIELDS"}
             outputValue(@out)
         }
+
+        @calendarAlert = ""
+        if @alertMinutes == "5" {
+            @calendarAlert = "5 minutes before"
+        }
+        if @alertMinutes == "15" {
+            @calendarAlert = "15 minutes before"
+        }
+        if @alertMinutes == "30" {
+            @calendarAlert = "30 minutes before"
+        }
+        if @alertMinutes == "60" {
+            @calendarAlert = "1 hour before"
+        }
+        if @alertMinutes == "120" {
+            @calendarAlert = "2 hours before"
+        }
+        if @alertMinutes == "1440" {
+            @calendarAlert = "1 day before"
+        }
+        if @alertMinutes != "" && @calendarAlert == "" {
+            const blockedAlert = text("{CurrentDate}\t{requestNumber}\t{actionId}\tBLOCKED\tunsupported_calendar_alert\n")
+            appendResolvedFile(ledgerFile, blockedAlert)
+            @out = {"status":"blocked","verified":false,"result":{"message":"Calendar通知間隔を安全に設定できません"},"error_code":"UNSUPPORTED_CALENDAR_ALERT"}
+            outputValue(@out)
+        }
+
         const calendarExecutingRecord = text("{CurrentDate}\t{requestNumber}\t{actionId}\tEXECUTING\tCalendar\n")
         appendResolvedFile(ledgerFile, calendarExecutingRecord)
         const startDate = date("{@dateTime}")
         const endDate = date("{@endDateTime}")
-        rawAction("is.workflow.actions.addnewevent", {
-            "WFCalendarItemTitle": "{@title}",
-            "WFCalendarItemStartDate": "${startDate}",
-            "WFCalendarItemEndDate": "${endDate}",
-            "WFCalendarItemNotes": "YOS-CLARITY-ID:{requestNumber}-{actionId}"
-        })
+
+        if @calendarAlert != "" {
+            rawAction("is.workflow.actions.addnewevent", {
+                "WFCalendarItemTitle": "{@title}",
+                "WFCalendarItemStartDate": "${startDate}",
+                "WFCalendarItemEndDate": "${endDate}",
+                "WFAlertTime": "{@calendarAlert}",
+                "WFCalendarItemNotes": "YOS-CLARITY-ID:{requestNumber}-{actionId}"
+            })
+        } else {
+            rawAction("is.workflow.actions.addnewevent", {
+                "WFCalendarItemTitle": "{@title}",
+                "WFCalendarItemStartDate": "${startDate}",
+                "WFCalendarItemEndDate": "${endDate}",
+                "WFCalendarItemNotes": "YOS-CLARITY-ID:{requestNumber}-{actionId}"
+            })
+        }
+
         const calendarAppliedRecord = text("{CurrentDate}\t{requestNumber}\t{actionId}\tAPPLIED\tCalendar\tYOS-CLARITY-ID:{requestNumber}-{actionId}\n")
         appendResolvedFile(ledgerFile, calendarAppliedRecord)
         @handled += 1
