@@ -44,3 +44,52 @@ test('suppresses repeated identical notifications', () => {
   assert.match(source, /makeFingerprint\(/)
   assert.match(source, /rememberNotification\(/)
 })
+
+
+test('defaults to shadow mode and requires explicit active mode for notification', () => {
+  assert.match(source, /defaultMode:\s*"shadow"/)
+  assert.match(source, /invocation\.mode === "active" && gate\.level === "active"/)
+  assert.doesNotMatch(source, /defaultMode:\s*"active"/)
+})
+
+test('builds a Decision Pack with audit fields and typed unapproved actions', () => {
+  for (const field of [
+    'candidate_id',
+    'trigger_event_id',
+    'created_at',
+    'expires_at',
+    'evidence',
+    'confidence',
+    'user_decision',
+    'execution_result',
+    'reversible',
+  ]) assert.match(source, new RegExp(field))
+  assert.match(source, /action:\s*"navigation\.start"/)
+  assert.match(source, /approved_by_user:\s*false/)
+  assert.doesNotMatch(source, /approved_by_user:\s*true/)
+})
+
+test('uses a local capped Event Store and logs fixed-rule baseline separately', () => {
+  assert.match(source, /YOS-Departure-Guard-EventStore-v0\.json/)
+  assert.match(source, /maxEventRecords:\s*200/)
+  assert.match(source, /slice\(-CONFIG\.maxEventRecords\)/)
+  assert.match(source, /baseline_would_notify/)
+  assert.match(source, /fixedRuleWouldNotify/)
+})
+
+test('supports silent passive and active presentation levels', () => {
+  assert.match(source, /level:\s*"silent"/)
+  assert.match(source, /level:\s*"passive"/)
+  assert.match(source, /level:\s*"active"/)
+})
+
+test('Decision Pack schema is machine-readable and keeps proposed actions unapproved', async () => {
+  const schemaUrl = new URL('./decision-pack.schema.json', import.meta.url)
+  const schema = JSON.parse(await readFile(schemaUrl, 'utf8'))
+  assert.equal(schema.properties.schema_version.const, '0.2')
+  assert.ok(schema.required.includes('candidate_id'))
+  assert.ok(schema.required.includes('trigger_event_id'))
+  const actionSchema = schema.properties.options.items.properties.action_contract.oneOf[1]
+  assert.equal(actionSchema.properties.status.const, 'proposed')
+  assert.equal(actionSchema.properties.approved_by_user.const, false)
+})
