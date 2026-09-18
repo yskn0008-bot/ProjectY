@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-19T03:15:24+09:00",
+  "updated_at": "2026-09-19T04:05:24+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -12,26 +12,6 @@
     ]
   },
   "inbox": [
-    {
-      "id": "github-pr-383",
-      "title": "PR #383 docs: Clarity UNDERSTAND実装優先経路 handoff",
-      "type": "GitHub PR",
-      "status": "review",
-      "priority": 1,
-      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/383",
-      "updated_at": "2026-09-18T13:19:12Z"
-    },
-    {
-      "id": "github-pr-386",
-      "title": "PR #386 Prototype: PROT Factory Web v0.1",
-      "type": "GitHub PR",
-      "status": "review",
-      "priority": 1,
-      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/386",
-      "updated_at": "2026-09-18T13:41:43Z"
-    },
     {
       "id": "github-pr-373",
       "title": "PR #373 Clarity: modular iPhone router Phase 1 contract",
@@ -63,6 +43,26 @@
       "updated_at": "2026-09-18T16:15:02Z"
     },
     {
+      "id": "github-pr-391",
+      "title": "PR #391 CI: build local LZFSE utility",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/391",
+      "updated_at": "2026-09-18T18:36:56Z"
+    },
+    {
+      "id": "github-pr-392",
+      "title": "PR #392 Clarity: add One Enter Gmail development bridge",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/392",
+      "updated_at": "2026-09-18T18:41:10Z"
+    },
+    {
       "id": "github-issue-120",
       "title": "Issue #120 YOS AI：本番有効化・PWA接続・iPhone受入確認",
       "type": "GitHub Issue",
@@ -73,16 +73,6 @@
       "updated_at": "2026-08-25T23:41:09Z"
     },
     {
-      "id": "github-issue-230",
-      "title": "Issue #230 [YOS→Codex] HJを「人生の地図＋12アーキタイプ」へ改修",
-      "type": "GitHub Issue",
-      "status": "open",
-      "priority": 3,
-      "next_action": "完成条件を確認し、次の安全な実装を1件進める",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/230",
-      "updated_at": "2026-08-22T13:41:39Z"
-    },
-    {
       "id": "github-issue-232",
       "title": "Issue #232 [YOS HQ] ProjectY自動司令部 v1｜毎時監視・安全な自動継続",
       "type": "GitHub Issue",
@@ -90,17 +80,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-09-18T17:17:16Z"
-    },
-    {
-      "id": "github-issue-234",
-      "title": "Issue #234 [YOS HQ] Life｜「おはよう→今日を生きる→おやすみ」を一続きにする統合体験",
-      "type": "GitHub Issue",
-      "status": "open",
-      "priority": 3,
-      "next_action": "完成条件を確認し、次の安全な実装を1件進める",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/234",
-      "updated_at": "2026-08-22T13:41:40Z"
+      "updated_at": "2026-09-18T18:38:45Z"
     },
     {
       "id": "github-issue-254",
@@ -153,6 +133,26 @@
       "updated_at": "2026-09-04T23:28:41Z"
     },
     {
+      "id": "github-issue-279",
+      "title": "Issue #279 [YOS HQ] Multi-Engine Dispatch v1｜独立AI資源の安全並列化",
+      "type": "GitHub Issue",
+      "status": "open",
+      "priority": 3,
+      "next_action": "完成条件を確認し、次の安全な実装を1件進める",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/279",
+      "updated_at": "2026-09-04T17:50:51Z"
+    },
+    {
+      "id": "github-issue-288",
+      "title": "Issue #288 [YOS→Codex] Notification / Morning / Night｜ProjectY通知基盤＋Life起動",
+      "type": "GitHub Issue",
+      "status": "open",
+      "priority": 3,
+      "next_action": "完成条件を確認し、次の安全な実装を1件進める",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/288",
+      "updated_at": "2026-09-06T08:17:33Z"
+    },
+    {
       "id": "github-issue-51",
       "title": "Issue #51 ProjectY 4本並行開発の全体管理",
       "type": "GitHub Issue",
@@ -164,6 +164,13 @@
     }
   ],
   "recently_completed": [
+    {
+      "id": "github-commit-f0f92ef4a3eb",
+      "title": "ios: make MY WAY the native YOS app home",
+      "completed_at": "2026-09-18T19:05:07Z",
+      "result": "GitHub mainへ反映（f0f92ef）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/f0f92ef4a3ebab1d7d625b31f21c948bcfac69c9"
+    },
     {
       "id": "github-commit-94831c5d0ef7",
       "title": "Merge pull request #388 from yskn0008-bot/one-enter/codex-optional-default",
@@ -191,13 +198,6 @@
       "completed_at": "2026-09-18T15:56:51Z",
       "result": "GitHub mainへ反映（0f44592）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/0f44592a1fcb894dd8e780fb53874a3bbe689b6e"
-    },
-    {
-      "id": "github-commit-a2fcfa6de2e8",
-      "title": "Governance: record implementation route without requiring Codex",
-      "completed_at": "2026-09-18T15:56:48Z",
-      "result": "GitHub mainへ反映（a2fcfa6）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/a2fcfa6de2e8062f861c2203bf15de6b4f520f0f"
     },
     {
       "id": "complete-002",
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-19T03:15:24+09:00",
+      "last_update": "2026-09-19T04:05:24+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -309,13 +309,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 25件・Open PR 20件を自動同期中",
+      "next_action": "Open Issue 23件・Open PR 20件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-19T03:15:24+09:00",
+      "last_update": "2026-09-19T04:05:24+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-19T03:15:24+09:00",
+      "last_update": "2026-09-19T04:05:24+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "9808974b6e6ccafbf94f0cd00774cbc6ce9a09e1cabd384654b36c70ec9befeb"
+  "github_snapshot_hash": "6c66e36628cbd1054e2f2a286d65ae5424fc257bb8f4baa2c34c629c7f81f5f7"
 }
