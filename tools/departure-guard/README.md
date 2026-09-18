@@ -93,11 +93,10 @@ Use the iPhone location departure trigger as the primary automatic signal.
 Leave Home
 → Run Shortcut “Mother外出”
 → Scriptable “YOS Departure Guard2”
-   source=leaving
    mode=shadow
 ```
 
-`Mother外出` is a dedicated signed bridge. It passes `source=leaving` through Scriptable's URL-scheme query parameters, so a real home departure is treated as a leaving signal without depending on AirPods.
+`Mother外出` is a dedicated signed bridge to the already-installed `YOS Departure Guard2`. The iPhone Personal Automation supplies the reliable real-world trigger; the existing Scriptable runtime itself is left unchanged.
 
 ### Optional supplemental triggers
 
