@@ -24,7 +24,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: yos-ios-app-${{ github.ref }}
+  group: yos-ios-app-v2-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
