@@ -212,9 +212,9 @@ for actionItem in @actionsRaw {
     }
 
     if module == "Money" {
-        @moneyRaw = rawInput
+        @moneyRaw = @rawInput
         if !@moneyRaw {
-            @moneyRaw = originalInput
+            @moneyRaw = @originalInput
         }
         const moneyExecutingRecord = text("{CurrentDate}\t{requestNumber}\t{actionId}\tEXECUTING\tMoney\n")
         appendResolvedFile(ledgerFile, moneyExecutingRecord)
