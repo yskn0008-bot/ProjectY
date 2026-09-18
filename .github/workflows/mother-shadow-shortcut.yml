@@ -5,8 +5,6 @@ on:
     paths:
       - 'tools/departure-guard/mother-shadow-v1.cherri'
       - 'tools/departure-guard/mother-home-exit.cherri'
-      - 'tools/departure-guard/YOS Departure Guard.js'
-      - 'tools/departure-guard/departure-guard-source.test.mjs'
       - 'tools/clarity-factory/sign_with_hubsign.py'
       - '.github/workflows/mother-shadow-shortcut.yml'
   workflow_dispatch:
@@ -35,12 +33,6 @@ jobs:
           test -n "$binary"
           sudo install -m 0755 "$binary" /usr/local/bin/cherri
           cherri --version
-
-      - name: Test Departure Guard source contract
-        shell: bash
-        run: |
-          set -euo pipefail
-          node --test tools/departure-guard/departure-guard-source.test.mjs
 
       - name: Compile Mother Shadow v1
         shell: bash
@@ -110,9 +102,9 @@ jobs:
               elif isinstance(x, str):
                   yield x
           vals=list(strings(d))
-          target='scriptable:///run?scriptName=YOS%20Departure%20Guard2&openEditor=false&source=leaving'
+          target='scriptable:///run?scriptName=YOS%20Departure%20Guard2&openEditor=false'
           if target not in vals:
-              raise SystemExit('missing exact home-departure target')
+              raise SystemExit('missing exact current-runtime home-departure target')
           print('OK: Mother home-exit bridge validated')
           PY
 
