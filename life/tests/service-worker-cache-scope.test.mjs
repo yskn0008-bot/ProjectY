@@ -24,6 +24,8 @@ const context = {
       'yos-life-home-v8-first-open',
       'yos-life-home-v9-deadline-state',
       'yos-life-home-v17-shared-domain-nav',
+      'yos-life-home-v18-completion-lock',
+      'yos-life-home-v19-daily-handoff',
       'yos-taxi-v138',
       'yos-nav-v106',
       'yos-home-v1',
@@ -52,15 +54,18 @@ let activation;
 listeners.activate({ waitUntil: promise => { activation = Promise.resolve(promise); } });
 await activation;
 
-assert.deepEqual(deleted, ['yos-life-home-v2','yos-life-home-v4','yos-life-home-v5','yos-life-home-v6-daily-flow','yos-life-home-v7-life-calendar','yos-life-home-v8-first-open','yos-life-home-v9-deadline-state','yos-life-home-v17-shared-domain-nav'], 'only stale Life caches may be deleted');
+assert.deepEqual(deleted, ['yos-life-home-v2','yos-life-home-v4','yos-life-home-v5','yos-life-home-v6-daily-flow','yos-life-home-v7-life-calendar','yos-life-home-v8-first-open','yos-life-home-v9-deadline-state','yos-life-home-v17-shared-domain-nav','yos-life-home-v18-completion-lock','yos-life-home-v19-daily-handoff'], 'only stale Life caches may be deleted');
 assert.equal(claimed, true, 'Life service worker must claim its clients after cleanup');
 assert.match(source, /key\.startsWith\(LIFE_CACHE_PREFIX\)/, 'cleanup must be restricted by Life cache prefix');
 assert.match(source, /home-priority-v1\.css\?v=4/, 'priority home styles must be available offline');
-assert.match(source, /yos-suite-v3\.js\?v=8/, 'current suite script must be cached with its requested URL');
+assert.match(source, /yos-suite-v3\\.js\\?v=9/, 'current suite script must be cached with its requested URL');
 assert.match(source, /home-v1\.js\?v=7/, 'current home script must be cached with its requested URL');
+assert.match(source, /daily-flow-orchestrator-v1\.js\?v=1/, 'Morning/Night handoff must be available offline');
+assert.match(source, /task-quick-add-v1\.js\?v=1/, 'task quick add must be available offline');
+assert.match(source, /html\.includes\('task-quick-add-v1\.js'\)/, 'page injection must recover quick add even from an older suite cache');
 assert.match(source, /home-v1\.css\?v=7/, 'current home styles must be cached with its requested URL');
 assert.match(source, /readability-final\.css\?v=2/, 'completion-lock readability asset must bypass stale v1 cache');
-assert.match(source, /yos-life-home-v18-completion-lock/, 'completion-lock cache generation must be active');
+assert.match(source, /yos-life-home-v21-no-legacy-flash/, 'task-quick-add cache generation must be active');
 assert.match(source, /!document\.querySelector\("main\.app \.layout"\)/, 'legacy layout must be removed before Life is revealed');
 assert.match(source, /lifeBottomNavV1/, 'final Life nav must exist before reveal');
 assert.doesNotMatch(source, /keys\.filter\(key=>key!==CACHE\)/, 'global cache deletion pattern must not return');

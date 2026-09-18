@@ -1,0 +1,27 @@
+name: YOS Asset SSOT
+
+on:
+  pull_request:
+    paths:
+      - "data/yos-assets.json"
+      - "scripts/validate_yos_assets.py"
+      - "docs/YOS_ASSET_SSOT_v1.md"
+      - ".github/workflows/yos-assets-ssot.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "data/yos-assets.json"
+      - "scripts/validate_yos_assets.py"
+      - ".github/workflows/yos-assets-ssot.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate YOS asset SSOT
+        run: python3 scripts/validate_yos_assets.py

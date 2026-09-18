@@ -1,0 +1,15 @@
+{
+  "schema_version": "1.0.0",
+  "ssot": "YOS user-only ChatGPT task queue",
+  "updated_at": "2026-09-17T12:04:00+09:00",
+  "scope": {
+    "include": "ChatGPT内で本人にしか実行できない操作",
+    "exclude": ["生活タスク", "AIまたはGitHub connectorで実行可能な作業"],
+    "rule": "AI側で実行可能になった項目は本人Queueへ入れない。本人操作が解放された時だけactiveにする。"
+  },
+  "summary": {
+    "active_count": 0,
+    "completed_count": 0
+  },
+  "tasks": []
+}

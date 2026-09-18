@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://projecty.local/prot-factory/factory.schema.json",
+  "title": "PROT Factory Job v0.1",
+  "type": "object",
+  "required": [
+    "job_id",
+    "idea",
+    "desired_state",
+    "known_assets",
+    "risk",
+    "base_sha",
+    "status",
+    "recovery_count",
+    "max_recovery"
+  ],
+  "properties": {
+    "job_id": {"type": "string", "minLength": 1},
+    "idea": {"type": "string", "minLength": 1},
+    "desired_state": {"type": "string", "minLength": 1},
+    "known_assets": {"type": "array", "items": {"type": "string"}},
+    "risk": {"enum": ["low", "medium", "high", "irreversible"]},
+    "lane": {"enum": ["reuse", "shortcut", "web", "product", "external", "unknown"]},
+    "base_sha": {"type": "string", "minLength": 7},
+    "status": {
+      "enum": [
+        "intake",
+        "inventory",
+        "planned",
+        "building",
+        "qa",
+        "recovering",
+        "trial_ready",
+        "needs_yos",
+        "done",
+        "stopped"
+      ]
+    },
+    "recovery_count": {"type": "integer", "minimum": 0, "maximum": 2},
+    "max_recovery": {"type": "integer", "minimum": 0, "maximum": 2},
+    "recovery_fingerprints": {"type": "array", "items": {"type": "string"}},
+    "reuse_available": {"type": "boolean"},
+    "requires_product_change": {"type": "boolean"},
+    "requires_external": {"type": "boolean"},
+    "prototype_type": {"enum": ["shortcut", "web", "unknown"]}
+  },
+  "additionalProperties": true
+}
