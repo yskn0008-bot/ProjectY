@@ -499,11 +499,11 @@
     },
     {
       "id": "yos-departure-guard",
-      "name": "YOS Departure Guard",
+      "name": "YOS Departure Guard2",
       "area": "automation",
       "status": "building",
       "priority": 2,
-      "current": "v0.2（Mother最小実験）をmainへ統合済み。iPhone実機でShadow Mode、Event Store、Calendar取得、Decision Pack、Active通知、重複通知防止、状態復元までPASS。",
+      "current": "YOS Departure Guard2 / v0.2（Mother最小実験）をmainへ統合済み。iPhone実機でShadow Mode、Event Store、Calendar取得、Decision Pack、Active通知、重複通知防止、状態復元までPASS。",
       "next_action": "既存の安全なiPhoneトリガーへ YOS Departure Guard2 を追加し、7日間Shadow観測を開始する。",
       "blocker": "1回だけiPhone側で自動化トリガー接続が必要。その後は7日間の観測待ち。",
       "needs_user_action": true,
