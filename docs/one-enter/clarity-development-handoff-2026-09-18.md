@@ -118,3 +118,31 @@ All One Enter / Clarity development should consult this handoff before extending
 If another branch/chat proposes installing or using `YOS_Test`, `Clarity Dispatcher Proof`, or `Clarity Model Router Proof` as the main entry, treat that as stale implementation direction and reconcile it with this handoff first.
 
 PR #374 remains relevant for the Money child executor and physical acceptance boundary. This handoff changes the preferred entry/UNDERSTAND integration path, not the Money ledger or rollback requirements.
+
+## Automation-first implementation rule
+
+For One Enter / Clarity iPhone work, do not default to asking the owner to manually assemble Shortcut actions.
+
+Preferred implementation order:
+
+1. Reuse the existing Clarity Factory / code-generation path.
+2. Generate or patch the Shortcut in source.
+3. Compile automatically.
+4. Run repository validation automatically.
+5. Sign automatically when the established signing path is available.
+6. Give the owner only the finished signed Shortcut.
+7. Ask for physical-device verification only where the owner is the only party who can perform it.
+
+Additional guardrails:
+
+- Do not use repeated manual "add action / if / dictionary / repeat" construction as the standard path.
+- If the same class of physical failure requires a second correction, stop local hand-editing and fix the Factory/source instead.
+- Do not repeatedly ask the owner to paste replacement code when the repository/Factory path can produce the corrected artifact.
+- Proof-only Shortcuts remain proof assets and must not be substituted for the actual owner-facing entry.
+- A generated Shortcut is not complete until physical iPhone E2E confirms the intended path.
+- Preserve rollback/fallback until that physical acceptance passes.
+
+Current generated physical harness:
+- `Clarity Demo Auto`
+- source: `tools/clarity-factory/clarity-demo-auto.cherri`
+- purpose: automate the structured JSON → Router validation for the working Clarity Demo direction without requiring manual Shortcut construction.
