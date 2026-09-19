@@ -5,6 +5,9 @@
 #include 'actions/documents'
 #include 'actions/intelligence'
 #include 'actions/calendar'
+#include 'actions/device'
+#include 'actions/settings'
+#include 'actions/web'
 
 // iOS 26 real-device compatibility: resolve the file first, then append through WFFile.
 // Cherri v2.3.0's stock appendToFile() emits path-only WFFilePath, which can complete
@@ -25,7 +28,7 @@ const inboxFile = getFile("Clarity Inbox.txt")
 appendResolvedFile(inboxFile, rawRecord)
 const ledgerFile = getFile("Clarity Ledger.txt")
 
-const modelPrompt = text("You are Clarity, the single natural-language gateway for MY WAY by YOS.\nPreserve original_input exactly. Never claim execution. Never invent dates, recipients, prices, accounts, destinations, device state, or automation capabilities.\nReturn only a Dictionary. Use only executors idea, memo, task, calendar, reminder, shopping, answer, shortcut_factory.\nUse only domains life, work, money, home, idea, shopping, communication, knowledge, system, other.\nUse only intents remember, answer, create, update, find, compare, decide, execute, monitor, notify, send, buy, organize, automate.\nUse only urgencies now, soon, today, scheduled, background.\nUse only risks low, medium, high, irreversible.\nCalendar, Reminders, Shopping, Idea in Box, and Clarity Inbox are allowlisted local reversible destinations: set external_write=false for those. external_write=true means a write to another person, remote service, purchase, contract, destructive system, or other non-local side effect.\nIf calendar or reminder date/time is ambiguous, set needs_review=true rather than guessing. For calendar only: when the start date/time is unambiguous but the user gives no duration/end time, set end_date_time to exactly 60 minutes after date_time. Never use that default to resolve an ambiguous start.\nHigh or irreversible risk requires requires_confirmation=true. external_write=true also requires confirmation. Every action status must be planned.\nUse action.content as the human-readable item/event/idea text to save. For shopping, use only the item text in content, without commentary. For idea, preserve the idea itself in content.\nWhen the user asks to remove a repeated iPhone operation, create an Apple Shortcut, or automate an iPhone workflow, use executor shortcut_factory, domain system, intent automate. Shortcut generation/validation may be planned for low-risk requests without confirmation, but never claim installed, signed, published, or usable until a downstream executor verifies it.\nrequest_id: {requestNumber}\ncurrent_time: {CurrentDate}\noriginal_input: {originalInput}\nReturn keys request_id, original_input, context, interpretation, actions, watches, feedback. context has current_time, current_priorities, relevant_state. interpretation has objective, domains, urgency, risk, confidence. Each action has id, executor, domain, intent, target, content, conditions, destination, requires_confirmation, external_write, needs_review, dependency, status, date_time, end_date_time. Each watch has condition, check_target, action_when_true. feedback has summary, next_action, whisper_line. For a pure answer request, put the answer in feedback.summary. For captures or planned actions, keep feedback.summary empty unless the user must see something now.")
+const modelPrompt = text("You are Clarity, the single natural-language gateway for MY WAY by YOS.\nPreserve original_input exactly. Never claim execution. Never invent dates, recipients, prices, accounts, destinations, device state, app availability, setting state, or automation capabilities.\nReturn only a Dictionary. Use only executors idea, memo, task, calendar, reminder, shopping, answer, shortcut_factory, open_app, device_setting, myway.\nUse only domains life, work, money, home, idea, shopping, communication, knowledge, system, other.\nUse only intents remember, answer, create, update, find, compare, decide, execute, monitor, notify, send, buy, organize, automate.\nUse only urgencies now, soon, today, scheduled, background.\nUse only risks low, medium, high, irreversible.\nCalendar, Reminders, Shopping, Idea in Box, Clarity Inbox, opening an allowlisted app, changing an allowlisted local device setting, and opening the existing MY WAY Home are local reversible destinations: set external_write=false for those. external_write=true means a write to another person, remote service, purchase, contract, destructive system, or other non-local side effect.\nIf calendar or reminder date/time is ambiguous, set needs_review=true rather than guessing. For calendar only: when the start date/time is unambiguous but the user gives no duration/end time, set end_date_time to exactly 60 minutes after date_time. Never use that default to resolve an ambiguous start.\nHigh or irreversible risk requires requires_confirmation=true. external_write=true also requires confirmation. Every action status must be planned.\nUse action.content as the human-readable item/event/idea text to save. For shopping, use only the item text in content, without commentary. For idea, preserve the idea itself in content.\nFor app opening, use executor=open_app, domain=system, intent=execute, destination=App. Put one canonical target in target and the user's app label in content. Executable app targets are: safari, shortcuts, files, notes, phone, reminders, mail, music, calendar, maps, contacts, health, photos, appstore, facetime, chatgpt, scriptable, youtube, spotify, google_sheets. Normalize obvious Japanese/English names to those keys. If the requested app is not in this allowlist, preserve its name in target/content and set needs_review=true instead of guessing a bundle id.\nFor local device settings, use executor=device_setting, domain=system, intent=update, destination=iPhone. Executable targets are wifi, bluetooth, cellular_data, airplane_mode, low_power_mode, brightness, volume, appearance, flashlight, do_not_disturb. For wifi/bluetooth/cellular_data/airplane_mode/low_power_mode/flashlight/do_not_disturb, content must be on, off, or toggle. For appearance, content must be light, dark, or toggle. For brightness and volume, content must be a decimal integer from 0 through 100 representing percent. If the desired value is unclear or a different setting is requested, set needs_review=true instead of guessing.\nWhen the user asks to see, open, summarize, or check MY WAY / MYWAY / マイウェイの current information, use executor=myway, domain=life, intent=find, target=home, destination=MY WAY Home, external_write=false, needs_review=false. This opens the existing MY WAY Home, which already combines 今ここ・ここまで・行き先・次の一歩; do not create a duplicate summary.\nWhen the user asks to remove a repeated iPhone operation, create an Apple Shortcut, or automate an iPhone workflow, use executor shortcut_factory, domain system, intent automate. Shortcut generation/validation may be planned for low-risk requests without confirmation, but never claim installed, signed, published, or usable until a downstream executor verifies it.\nIf multiple actions include open_app or myway, put display/opening actions after settings or local writes so the Shortcut can finish earlier actions before switching apps.\nrequest_id: {requestNumber}\ncurrent_time: {CurrentDate}\noriginal_input: {originalInput}\nReturn keys request_id, original_input, context, interpretation, actions, watches, feedback. context has current_time, current_priorities, relevant_state. interpretation has objective, domains, urgency, risk, confidence. Each action has id, executor, domain, intent, target, content, conditions, destination, requires_confirmation, external_write, needs_review, dependency, status, date_time, end_date_time. Each watch has condition, check_target, action_when_true. feedback has summary, next_action, whisper_line. For a pure answer request, put the answer in feedback.summary. For captures or planned actions, keep feedback.summary empty unless the user must see something now.")
 
 const modelResult = askChatGPT(modelPrompt, false, "Dictionary")
 const parsedResult = getDictionary(modelResult)
@@ -73,7 +76,7 @@ for actionItem in @actionsRaw {
         mustOutput("ここだけ確認して", "実行済み扱いの内容は受け付けません")
     }
 
-    if executor != "idea" && executor != "memo" && executor != "task" && executor != "calendar" && executor != "reminder" && executor != "shopping" && executor != "answer" && executor != "shortcut_factory" {
+    if executor != "idea" && executor != "memo" && executor != "task" && executor != "calendar" && executor != "reminder" && executor != "shopping" && executor != "answer" && executor != "shortcut_factory" && executor != "open_app" && executor != "device_setting" && executor != "myway" {
         const blockedExecutorRecord = text("{CurrentDate}\t{requestNumber}\t{actionId}\tBLOCKED\tunsupported_executor\n")
         appendResolvedFile(ledgerFile, blockedExecutorRecord)
         mustOutput("ここだけ確認して", "対応外の操作は実行しません")
@@ -84,6 +87,30 @@ for actionItem in @actionsRaw {
             const blockedAutomationRecord = text("{CurrentDate}\t{requestNumber}\t{actionId}\tBLOCKED\tunsafe_automation_contract\n")
             appendResolvedFile(ledgerFile, blockedAutomationRecord)
             mustOutput("ここだけ確認して", "自動化の内容を安全に整理できませんでした")
+        }
+    }
+
+    if executor == "open_app" {
+        if domain != "system" || intent != "execute" {
+            const blockedOpenAppRouteRecord = text("{CurrentDate}\t{requestNumber}\t{actionId}\tBLOCKED\tunsafe_open_app_contract\n")
+            appendResolvedFile(ledgerFile, blockedOpenAppRouteRecord)
+            mustOutput("ここだけ確認して", "アプリ起動の内容を安全に整理できませんでした")
+        }
+    }
+
+    if executor == "device_setting" {
+        if domain != "system" || intent != "update" {
+            const blockedSettingRouteRecord = text("{CurrentDate}\t{requestNumber}\t{actionId}\tBLOCKED\tunsafe_device_setting_contract\n")
+            appendResolvedFile(ledgerFile, blockedSettingRouteRecord)
+            mustOutput("ここだけ確認して", "設定変更の内容を安全に整理できませんでした")
+        }
+    }
+
+    if executor == "myway" {
+        if domain != "life" || intent != "find" {
+            const blockedMyWayRouteRecord = text("{CurrentDate}\t{requestNumber}\t{actionId}\tBLOCKED\tunsafe_myway_contract\n")
+            appendResolvedFile(ledgerFile, blockedMyWayRouteRecord)
+            mustOutput("ここだけ確認して", "MY WAY表示の内容を安全に整理できませんでした")
         }
     }
 
@@ -182,6 +209,145 @@ for actionItem in @actionsRaw {
     if executor == "answer" {
         const answerHandledRecord = text("{CurrentDate}\t{requestNumber}\t{actionId}\tHANDLED\tanswer\n")
         appendResolvedFile(ledgerFile, answerHandledRecord)
+    }
+
+    if executor == "device_setting" {
+        const settingExecutingRecord = text("{CurrentDate}\t{requestNumber}\t{actionId}\tEXECUTING\tdevice_setting\t{target}={content}\n")
+        appendResolvedFile(ledgerFile, settingExecutingRecord)
+
+        if target != "wifi" && target != "bluetooth" && target != "cellular_data" && target != "airplane_mode" && target != "low_power_mode" && target != "brightness" && target != "volume" && target != "appearance" && target != "flashlight" && target != "do_not_disturb" {
+            const blockedSettingTargetRecord = text("{CurrentDate}\t{requestNumber}\t{actionId}\tBLOCKED\tunsupported_device_setting\n")
+            appendResolvedFile(ledgerFile, blockedSettingTargetRecord)
+            mustOutput("ここだけ確認して", "この設定変更にはまだ対応していません")
+        }
+
+        if target == "wifi" || target == "bluetooth" || target == "cellular_data" || target == "airplane_mode" || target == "low_power_mode" || target == "flashlight" || target == "do_not_disturb" {
+            if content != "on" && content != "off" && content != "toggle" {
+                const blockedSettingValueRecord = text("{CurrentDate}\t{requestNumber}\t{actionId}\tBLOCKED\tinvalid_device_setting_value\n")
+                appendResolvedFile(ledgerFile, blockedSettingValueRecord)
+                mustOutput("ここだけ確認して", "設定する値を安全に判断できませんでした")
+            }
+        }
+
+        if target == "appearance" {
+            if content != "light" && content != "dark" && content != "toggle" {
+                const blockedAppearanceValueRecord = text("{CurrentDate}\t{requestNumber}\t{actionId}\tBLOCKED\tinvalid_appearance_value\n")
+                appendResolvedFile(ledgerFile, blockedAppearanceValueRecord)
+                mustOutput("ここだけ確認して", "表示モードを安全に判断できませんでした")
+            }
+        }
+
+        if target == "wifi" {
+            if content == "on" { setWifi(true) }
+            if content == "off" { setWifi(false) }
+            if content == "toggle" { toggleWifi() }
+        }
+        if target == "bluetooth" {
+            if content == "on" { setBluetooth(true) }
+            if content == "off" { setBluetooth(false) }
+            if content == "toggle" { toggleBluetooth() }
+        }
+        if target == "cellular_data" {
+            if content == "on" { setCellularData(true) }
+            if content == "off" { setCellularData(false) }
+            if content == "toggle" { toggleCellularData() }
+        }
+        if target == "airplane_mode" {
+            if content == "on" { setAirplaneMode(true) }
+            if content == "off" { setAirplaneMode(false) }
+            if content == "toggle" { toggleAirplaneMode() }
+        }
+        if target == "low_power_mode" {
+            if content == "on" { setLowPowerMode(true) }
+            if content == "off" { setLowPowerMode(false) }
+            if content == "toggle" { toggleLowPowerMode() }
+        }
+        if target == "appearance" {
+            if content == "light" { lightMode() }
+            if content == "dark" { darkMode() }
+            if content == "toggle" { toggleAppearance() }
+        }
+        if target == "flashlight" {
+            if content == "on" { flashlightOn() }
+            if content == "off" { flashlightOff() }
+            if content == "toggle" { toggleFlashlight() }
+        }
+        if target == "do_not_disturb" {
+            if content == "on" { DNDOn() }
+            if content == "off" { DNDOff() }
+            if content == "toggle" { toggleDND() }
+        }
+        if target == "brightness" {
+            const brightnessPercent = getNumbers("{content}")
+            if brightnessPercent < 0 || brightnessPercent > 100 {
+                const blockedBrightnessRecord = text("{CurrentDate}\t{requestNumber}\t{actionId}\tBLOCKED\tbrightness_out_of_range\n")
+                appendResolvedFile(ledgerFile, blockedBrightnessRecord)
+                mustOutput("ここだけ確認して", "明るさは0〜100%で指定してください")
+            }
+            const brightnessRatio = brightnessPercent / 100
+            setBrightness(brightnessRatio)
+        }
+        if target == "volume" {
+            const volumePercent = getNumbers("{content}")
+            if volumePercent < 0 || volumePercent > 100 {
+                const blockedVolumeRecord = text("{CurrentDate}\t{requestNumber}\t{actionId}\tBLOCKED\tvolume_out_of_range\n")
+                appendResolvedFile(ledgerFile, blockedVolumeRecord)
+                mustOutput("ここだけ確認して", "音量は0〜100%で指定してください")
+            }
+            const volumeRatio = volumePercent / 100
+            setVolume(volumeRatio)
+        }
+
+        const settingAppliedRecord = text("{CurrentDate}\t{requestNumber}\t{actionId}\tAPPLIED\tdevice_setting\t{target}={content}\n")
+        appendResolvedFile(ledgerFile, settingAppliedRecord)
+    }
+
+    if executor == "open_app" {
+        const appExecutingRecord = text("{CurrentDate}\t{requestNumber}\t{actionId}\tEXECUTING\topen_app\t{target}\n")
+        appendResolvedFile(ledgerFile, appExecutingRecord)
+
+        if target != "safari" && target != "shortcuts" && target != "files" && target != "notes" && target != "phone" && target != "reminders" && target != "mail" && target != "music" && target != "calendar" && target != "maps" && target != "contacts" && target != "health" && target != "photos" && target != "appstore" && target != "facetime" && target != "chatgpt" && target != "scriptable" && target != "youtube" && target != "spotify" && target != "google_sheets" {
+            const blockedAppTargetRecord = text("{CurrentDate}\t{requestNumber}\t{actionId}\tBLOCKED\tunsupported_app\n")
+            appendResolvedFile(ledgerFile, blockedAppTargetRecord)
+            mustOutput("ここだけ確認して", "このアプリはまだ起動リストにありません")
+        }
+
+        if target == "safari" { openApp("safari") }
+        if target == "shortcuts" { openApp("shortcuts") }
+        if target == "files" { openApp("files") }
+        if target == "notes" { openApp("notes") }
+        if target == "phone" { openApp("phone") }
+        if target == "reminders" { openApp("reminders") }
+        if target == "mail" { openApp("mail") }
+        if target == "music" { openApp("music") }
+        if target == "calendar" { openApp("calendar") }
+        if target == "maps" { openApp("maps") }
+        if target == "contacts" { openApp("contacts") }
+        if target == "health" { openApp("health") }
+        if target == "photos" { openApp("photos") }
+        if target == "appstore" { openApp("appstore") }
+        if target == "facetime" { openApp("facetime") }
+        if target == "chatgpt" { openApp("com.openai.chat") }
+        if target == "scriptable" { openApp("dk.simonbs.Scriptable") }
+        if target == "youtube" { openApp("com.google.ios.youtube") }
+        if target == "spotify" { openApp("com.spotify.client") }
+        if target == "google_sheets" { openApp("com.google.Sheets") }
+
+        const appAppliedRecord = text("{CurrentDate}\t{requestNumber}\t{actionId}\tAPPLIED\topen_app\t{target}\n")
+        appendResolvedFile(ledgerFile, appAppliedRecord)
+    }
+
+    if executor == "myway" {
+        if target != "home" {
+            const blockedMyWayTargetRecord = text("{CurrentDate}\t{requestNumber}\t{actionId}\tBLOCKED\tunsupported_myway_target\n")
+            appendResolvedFile(ledgerFile, blockedMyWayTargetRecord)
+            mustOutput("ここだけ確認して", "表示するMY WAY画面を判断できませんでした")
+        }
+        const myWayExecutingRecord = text("{CurrentDate}\t{requestNumber}\t{actionId}\tEXECUTING\tmyway\thome\n")
+        appendResolvedFile(ledgerFile, myWayExecutingRecord)
+        openURL("https://yskn0008-bot.github.io/ProjectY/yos/")
+        const myWayAppliedRecord = text("{CurrentDate}\t{requestNumber}\t{actionId}\tAPPLIED\tmyway\thome\n")
+        appendResolvedFile(ledgerFile, myWayAppliedRecord)
     }
 
     if executor == "shortcut_factory" {
