@@ -65,10 +65,10 @@
   function futurePlan(){
     const today=isoToday(),month=monthKey(),liquid=currentLiquid();
     const future=data.transactions.filter(tx=>tx.status!=='done'&&tx.date>=today&&String(tx.date).slice(0,7)===month).sort((a,b)=>a.date.localeCompare(b.date)||String(a.id).localeCompare(String(b.id)));
-    if(liquid===null)return {liquid:null,projected:null,shortfall:null,firstBreak:null,nextPayment:null,nextIncome:null,daily:null,daysToNextPayment:null};
+    const nextPayment=future.find(isOutgoing)||null,nextIncome=future.find(tx=>tx.type==='income')||null;
+    if(liquid===null)return {liquid:null,projected:null,shortfall:null,firstBreak:null,nextPayment,nextIncome,daily:null,daysToNextPayment:nextPayment?Math.max(0,daysBetween(parseDate(today),parseDate(nextPayment.date))):null};
     let running=liquid,firstBreak=null;
     for(const tx of future){running+=txSign(tx)*n(tx.amount);if(running<0&&!firstBreak)firstBreak={tx,balance:running}}
-    const nextPayment=future.find(isOutgoing)||null,nextIncome=future.find(tx=>tx.type==='income')||null;
     const endDay=new Date(Number(month.slice(0,4)),Number(month.slice(5,7)),0).getDate();
     const anchor=nextIncome?.date||`${month}-${String(endDay).padStart(2,'0')}`;
     const outgoingUntilAnchor=future.filter(tx=>isOutgoing(tx)&&tx.date<=anchor).reduce((s,tx)=>s+n(tx.amount),0);
@@ -80,7 +80,7 @@
   const primaryGoal=()=>[...data.goals].sort((a,b)=>(Number(b.priority)||0)-(Number(a.priority)||0))[0]||null;
   const netWorth=()=> (currentLiquid()??0)+data.assets.reduce((s,a)=>s+n(a.value),0)-totalDebt();
   const signedYen=value=>`${n(value)>=0?'+':'−'}${yen(Math.abs(n(value)))}`;
-  const formatMD=date=>{const d=parseDate(date);return d?`${d.getMonth()+1}/${d.getDate()}`:date};
+  const formatMD=date=>{const d=parseDate(date);return d?new Intl.DateTimeFormat('ja-JP',{timeZone:TZ,month:'numeric',day:'numeric'}).format(d):date};
   const escapeHtml=value=>String(value??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
   const privacyAmount=value=>data.privacy?'••••••':yen(value);
   const compactAmount=value=>{const v=Math.abs(n(value));return v>=10000?`${Math.round(v/1000)/10}万`:Math.round(v).toLocaleString('ja-JP')};
@@ -95,7 +95,7 @@
     const host=document.getElementById('moneyPage');
     if(!host||host.dataset.moneyV2==='1')return host;
     host.dataset.moneyV2='1';
-    host.innerHTML=`<header class="money2-heading"><div class="money2-title"><span>¥</span><div><small>MY WAY MONEY</small><h1>お金の現在地</h1><p>今日から未来まで、資金繰りを見通す。</p></div></div><button id="moneyPrivacy" class="money2-icon-btn" type="button" aria-label="金額表示を切り替える">◉</button></header><nav class="money2-tabs" aria-label="Money画面"><button data-money-tab="dashboard" class="active">Dashboard</button><button data-money-tab="accounts">口座・支払い</button><button data-money-tab="rules">目標・ルール</button><button data-money-tab="assets">資産</button></nav><div id="money2Body"></div><button id="moneyQuickAdd" class="money2-fab" type="button" aria-label="入出金を追加">＋</button><dialog id="money2Dialog" class="money2-dialog"><form method="dialog" id="money2DialogForm"></form></dialog>`;
+    host.innerHTML=`<header class="money2-heading"><div class="money2-title"><span>¥</span><div><small>MY MONEY</small><h1>お金の現在地</h1><p>今日から未来まで、資金繰りを見通す。</p></div></div><button id="moneyPrivacy" class="money2-icon-btn" type="button" aria-label="金額表示を切り替える">◉</button></header><nav class="money2-tabs" aria-label="Money画面"><button data-money-tab="dashboard" class="active">今月</button><button data-money-tab="accounts">口座・支払い</button><button data-money-tab="rules">目標・ルール</button><button data-money-tab="assets">資産</button></nav><div id="money2Body"></div><button id="moneyQuickAdd" class="money2-fab" type="button" aria-label="入出金を追加">＋</button><dialog id="money2Dialog" class="money2-dialog"><form method="dialog" id="money2DialogForm"></form></dialog>`;
     host.addEventListener('click',handleClick);
     return host;
   }
@@ -186,7 +186,7 @@
   const form=()=>document.getElementById('money2DialogForm');
   function openDialog(title,body,onSubmit,submitLabel='保存'){
     const d=dialog(),f=form();if(!d||!f)return;
-    f.innerHTML=`<header><div><small>MY WAY MONEY</small><h2>${escapeHtml(title)}</h2></div><button type="button" data-dialog-close>×</button></header><div class="money2-form-body">${body}</div><footer><button type="button" data-dialog-close>キャンセル</button><button class="primary" type="submit">${escapeHtml(submitLabel)}</button></footer>`;
+    f.innerHTML=`<header><div><small>MY MONEY</small><h2>${escapeHtml(title)}</h2></div><button type="button" data-dialog-close>×</button></header><div class="money2-form-body">${body}</div><footer><button type="button" data-dialog-close>キャンセル</button><button class="primary" type="submit">${escapeHtml(submitLabel)}</button></footer>`;
     f.querySelectorAll('[data-dialog-close]').forEach(b=>b.addEventListener('click',()=>d.close()));
     f.onsubmit=e=>{e.preventDefault();onSubmit(new FormData(f),d)};d.showModal();
   }
