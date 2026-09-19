@@ -12,7 +12,7 @@
 <style id="life-preinstall-guard">main.app,.bottom-nav{visibility:hidden!important}</style>
 <link id="lifeHomeV1Styles" rel="stylesheet" href="./home-v1.css?v=7">
 <link id="lifeHomePriorityV1Styles" rel="stylesheet" href="./home-priority-v1.css?v=4">
-<link rel="stylesheet" href="./readability-final.css?v=2">
+<link rel="stylesheet" href="./readability-final.css?v=3">
 <title>MY LIFE by YOS</title>
 <style>
 :root{
@@ -132,6 +132,9 @@ dialog::backdrop{background:rgba(35,42,53,.38);backdrop-filter:blur(5px)}
 .dialog{padding:18px}.dialog h3{margin:0 0 12px}.dialog p{color:var(--muted);font-size:11px;line-height:1.6}
 .field{display:grid;gap:5px;margin-top:10px}.field label{font-size:10px;color:var(--muted)}.field input,.field textarea{width:100%;min-height:46px;border:1px solid #e0e4e9;border-radius:12px;padding:10px;background:#fff;color:var(--ink)}
 .dialog-actions{display:grid;grid-template-columns:1fr 1.5fr;gap:8px;margin-top:12px}.dialog-actions button{min-height:46px;border:1px solid #e2e5e9;border-radius:12px;background:white;color:var(--ink);font-weight:900}.dialog-actions .primary{border:0;background:var(--coral);color:white}
+#syncDialog #syncRetryButton,#syncDialog #importButton{min-height:44px;width:100%;border:1px solid var(--line);border-radius:12px;padding:10px;font-weight:700}
+#syncDialog #syncRetryButton{background:var(--coral);color:white;border:0}
+#syncDialog details{margin-top:16px}#syncDialog summary{min-height:44px;padding:12px 0}
 @media(max-width:520px){
   .app{width:min(100%,520px);margin:auto;padding:calc(env(safe-area-inset-top) + 4px) 10px calc(env(safe-area-inset-bottom) + 76px)}
   .top{height:40px;margin-bottom:2px}
@@ -168,6 +171,8 @@ dialog::backdrop{background:rgba(35,42,53,.38);backdrop-filter:blur(5px)}
 <section class="card">
   <div class="card-head"><h3>📅 今日の予定</h3><button id="syncButton" class="sync-button">カレンダー更新</button></div>
   <div id="syncState" class="sync-state"></div>
+  <p id="syncLaunchStatus" class="sync-state" role="status" hidden></p>
+  <button id="syncHelpButton" type="button" class="sync-button" hidden>更新できないとき</button>
   <div id="schedule" class="schedule"></div>
 </section>
 
@@ -228,9 +233,13 @@ dialog::backdrop{background:rgba(35,42,53,.38);backdrop-filter:blur(5px)}
 <dialog id="syncDialog">
   <form method="dialog" class="dialog">
     <h3>カレンダー連携</h3>
-    <p>GoogleカレンダーをiPhone標準カレンダーへ同期し、ショートカットから今日の予定をLife OSへ渡します。認証情報は保存しません。</p>
-    <div class="field"><label for="syncJson">手動テスト用JSON</label><textarea id="syncJson" placeholder='{"date":"2026-07-18","events":[]}'></textarea></div>
-    <div class="dialog-actions"><button value="cancel">閉じる</button><button id="importButton" class="primary" value="default">予定を取り込む</button></div>
+    <p>Scriptableの「YOS Life Calendar Sync」で今日の予定を取得します。開かない場合は、Scriptableで同じ名前のスクリプトを実行してください。</p>
+    <button id="syncRetryButton" type="button" class="primary">Scriptableで更新</button>
+    <details><summary>手動取り込み（補助）</summary>
+      <div class="field"><label for="syncJson">同期データ</label><textarea id="syncJson" placeholder="取得済みの同期データを貼り付け"></textarea></div>
+      <button id="importButton" type="button">予定を取り込む</button>
+    </details>
+    <div class="dialog-actions"><button value="cancel">閉じる</button></div>
   </form>
 </dialog>
 
@@ -328,7 +337,7 @@ function renderSchedule(){
   if(!events.length){box.innerHTML='<div class="empty">カレンダー更新を押して、今日の予定を取り込みます。<br>予定がない日は、空き時間として表示します。</div>';return}
   events.forEach(e=>{
     const c=categoryOf(e),row=document.createElement('div');row.className='event';
-    row.innerHTML=`<div class="event-time">${fmtTime(e.start)}<br>${fmtTime(e.end)}</div><div class="event-bar" style="background:${COLORS[c]}"></div><div class="event-main"><b>${escapeHtml(e.title||'予定')}</b><small>${escapeHtml(e.location||LABELS[c])}</small></div>`;
+    row.innerHTML=`<div class="event-time">${e.isAllDay===true?'終日':`${fmtTime(e.start)}<br>${fmtTime(e.end)}`}</div><div class="event-bar" style="background:${COLORS[c]}"></div><div class="event-main"><b>${escapeHtml(e.title||'予定')}</b><small>${escapeHtml(e.location||LABELS[c])}</small></div>`;
     box.appendChild(row);
   });
 }
@@ -374,8 +383,8 @@ function minutesOf(value){
   return parts[0]*60+parts[1];
 }
 function renderDonut(){
-  const events=[...day().schedule].sort((a,b)=>new Date(a.start)-new Date(b.start));
-  if(!events.length){el('donut').style.setProperty('--segments','#e8edf2 0deg 360deg');el('legend').innerHTML='<div class="empty">予定を同期すると<br>24時間の流れを表示</div>';return}
+  const events=day().schedule.filter(e=>e.isAllDay!==true).sort((a,b)=>new Date(a.start)-new Date(b.start));
+  if(!events.length){el('donut').style.setProperty('--segments','#e8edf2 0deg 360deg');el('legend').innerHTML=day().schedule.some(e=>e.isAllDay===true)?'<div class="empty">終日の予定は上の一覧に表示しています</div>':'<div class="empty">予定を同期すると<br>24時間の流れを表示</div>';return}
   const items=[];events.forEach(e=>{
     let s=minutesOf(e.start),end=minutesOf(e.end);if(end<=s)end+=1440;
     s=Math.max(0,Math.min(1440,s));end=Math.max(s,Math.min(1440,end));
@@ -425,7 +434,7 @@ function decodeBase64Url(value){
 function importPayload(payload){
   if(!payload||typeof payload!=='object')throw new Error('同期データが不正です');
   const date=payload.date||today(),d=day(date);
-  if(Array.isArray(payload.events))d.schedule=payload.events.map((e,i)=>({id:e.id||`sync-${Date.now()}-${i}`,title:String(e.title||'予定'),start:e.start,end:e.end,location:String(e.location||''),category:categoryOf(e)})).filter(e=>e.start&&e.end);
+  if(Array.isArray(payload.events))d.schedule=payload.events.map((e,i)=>({id:e.id||`sync-${Date.now()}-${i}`,title:String(e.title||'予定'),start:e.start,end:e.end,isAllDay:e.isAllDay===true||e.allDay===true,location:String(e.location||''),category:categoryOf(e)})).filter(e=>e.start&&e.end);
   if(Array.isArray(payload.tasks))d.tasks=payload.tasks.slice(0,3).map(t=>({text:String(t.text||''),done:Boolean(t.done),category:t.category&&COLORS[t.category]?t.category:'personal'}));
   while(d.tasks.length<3)d.tasks.push({text:'',done:false,category:'personal'});
   d.lastSync=new Date().toISOString();localStorage.setItem(KEY,JSON.stringify(data));paint();
@@ -436,7 +445,7 @@ function importFromUrl(){
 }
 function taxiUrl(){try{return JSON.parse(localStorage.getItem(TAXI)||'{}').yosUrl||''}catch{return''}}
 function summary(){
-  const d=day(),events=d.schedule.map(e=>`${fmtTime(e.start)} ${e.title}`).join('、')||'なし',open=d.tasks.filter(t=>t.text&&!t.done).map(t=>t.text).join('、')||'なし';
+  const d=day(),events=d.schedule.map(e=>`${e.isAllDay===true?'終日':fmtTime(e.start)} ${e.title}`).join('、')||'なし',open=d.tasks.filter(t=>t.text&&!t.done).map(t=>t.text).join('、')||'なし';
   return[`【今日の予定】Life OSから相談`,`日付：${today()}`,`予定：${events}`,`残りタスク：${open}`,`睡眠：${d.checkin.sleep||'未記録'}時間`,`体調：${d.checkin.health||'未記録'}/5`,`気分：${d.checkin.mood||'未記録'}/5`,`完了率：${completion()}%`,`違和感・相談：${d.note||'なし'}`,`今日の流れを、無理なく実行できる順番に整えて。`].join('\n');
 }
 document.querySelectorAll('[data-checkin-rating]').forEach(button=>button.onclick=()=>{
@@ -445,7 +454,16 @@ document.querySelectorAll('[data-checkin-rating]').forEach(button=>button.onclic
 el('saveCheckin').onclick=()=>{day().checkin={sleep:el('sleep').value,health:el('health').value,mood:el('mood').value};save();window.dispatchEvent(new CustomEvent('yos-life-record-saved'))};
 document.querySelectorAll('.routine-card').forEach(b=>b.onclick=()=>{data.activeGroup=b.dataset.group;save()});
 el('note').onchange=()=>{day().note=el('note').value;save()};
-el('syncButton').onclick=()=>el('syncDialog').showModal();
+function launchCalendarSync(){
+  el('syncLaunchStatus').hidden=false;
+  el('syncLaunchStatus').textContent='Scriptableで予定を取得します。戻っても更新されない場合は「更新できないとき」を開いてください。';
+  el('syncHelpButton').hidden=false;
+  if(el('syncDialog').open)el('syncDialog').close();
+  location.href='scriptable:///run?scriptName=YOS%20Life%20Calendar%20Sync&openEditor=false';
+}
+el('syncButton').onclick=launchCalendarSync;
+el('syncRetryButton').onclick=launchCalendarSync;
+el('syncHelpButton').onclick=()=>el('syncDialog').showModal();
 el('importButton').onclick=()=>{try{importPayload(JSON.parse(el('syncJson').value));alert('予定を取り込みました')}catch(e){alert(`取り込みに失敗しました：${e.message}`)}};
 function openSettings(){el('yosUrl').value=settings.yosUrl||'';el('settingsDialog').showModal()}
 el('settingsButton').onclick=openSettings;el('settingsNav').onclick=openSettings;
@@ -457,6 +475,6 @@ if('serviceWorker'in navigator)window.addEventListener('load',async()=>{try{cons
 })();
 </script>
 <script src="../yos/shared-state-v1.js?v=1"></script>
-<script src="./yos-suite-v3.js?v=9"></script>
+<script src="./yos-suite-v3.js?v=10"></script>
 </body>
 </html>

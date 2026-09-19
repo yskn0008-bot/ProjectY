@@ -229,7 +229,7 @@
   function focusDetail(day){
     const event=upcomingEvent(day);
     const open=day.tasks.filter(task=>String(task.text||'').trim()&&!task.done).length;
-    if(event)return`次の予定 ${fmtTime(event.start)}「${event.title||'予定'}」・残り${open}件`;
+    if(event)return`次の予定 ${event.isAllDay===true?'終日':fmtTime(event.start)}「${event.title||'予定'}」・残り${open}件`;
     return open?`未完了は${open}件。今はこの1件だけに集中。`:'今日の予定に余白があります。';
   }
 
@@ -299,6 +299,7 @@
         title:clean(event.title,140),
         start:clean(event.start,40),
         end:clean(event.end,40),
+        isAllDay:event.isAllDay===true,
         category:clean(event.category,40)
       })),
       habits:{
@@ -607,7 +608,7 @@
     set('lifeFlowMetaV1',open?'始めた日の続きです。0時で分けません。':'今の状態を確認し、今日の一手を1つ決めます。');
     set('lifeFlowDateV1',date);
     const next=upcomingEvent({...day,schedule:Array.isArray(day.schedule)?day.schedule:[]});
-    set('lifeMorningNextEventV1',next?`次の予定 ${fmtTime(next.start)}「${clean(next.title,80)||'予定'}」`:'次の予定は未登録です。');
+    set('lifeMorningNextEventV1',next?`次の予定 ${next.isAllDay===true?'終日':fmtTime(next.start)}「${clean(next.title,80)||'予定'}」`:'次の予定は未登録です。');
     writeField('lifeWorkModeV1',flow.workMode||'unknown');
     writeField('lifeMorningSleepV1',day.checkin?.sleep||'');
     writeField('lifeMorningHealthV1',day.checkin?.health||'');
@@ -637,7 +638,7 @@
     const remaining=(day.tasks||[]).filter(task=>clean(task.text,70)&&!task.done).map(task=>clean(task.text,70));
     set('lifeRemainingTasksV1',remaining.length?`残っているタスク：${remaining.join('、')}`:'残っているタスク：なし');
     const tomorrow=firstEvent(data.days?.[addDays(date,1)]||{});
-    set('lifeNightSummaryV1',tomorrow?`明日の予定 ${fmtTime(tomorrow.start)}「${clean(tomorrow.title,80)||'予定'}」`:'明日の予定は未登録です。');
+    set('lifeNightSummaryV1',tomorrow?`明日の予定 ${tomorrow.isAllDay===true?'終日':fmtTime(tomorrow.start)}「${clean(tomorrow.title,80)||'予定'}」`:'明日の予定は未登録です。');
     const snapshot=day.hjSnapshot||closed?.hjSnapshot;
     set('lifeSnapshotPreviewV1',snapshot?JSON.stringify(snapshot,null,2):'おやすみを保存すると、本人が入力した事実だけのスナップショットを作ります。');
     if(open)activateFlowPane('night');
@@ -742,7 +743,7 @@
       preview.replaceChildren();
       const items=(day.schedule||[]).slice().sort((a,b)=>new Date(a.start||0)-new Date(b.start||0)).slice(0,4);
       if(!items.length){const empty=document.createElement('p');empty.className='empty-preview-v1';empty.textContent='今日の予定はありません\n空いた時間も、今日の余白。';preview.appendChild(empty)}
-      items.forEach(item=>{const row=document.createElement('p'),time=document.createElement('time'),copy=document.createElement('span');time.textContent=fmtTime(item.start);copy.textContent=clean(item.title,80)||'予定';row.append(time,copy);preview.appendChild(row)});
+      items.forEach(item=>{const row=document.createElement('p'),time=document.createElement('time'),copy=document.createElement('span');time.textContent=item.isAllDay===true?'終日':fmtTime(item.start);copy.textContent=clean(item.title,80)||'予定';row.append(time,copy);preview.appendChild(row)});
     }
     const taskList=document.getElementById('homeTaskListV2');
     if(taskList){
