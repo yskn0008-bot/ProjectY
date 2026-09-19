@@ -4,6 +4,8 @@ on:
   pull_request:
     paths:
       - '.github/scripts/projecty-hq-*.cjs'
+      - '.github/scripts/projecty-recovery-red-team.test.cjs'
+      - '.github/fixtures/projecty-recovery-red-team.json'
       - '.github/workflows/projecty-hq-autopilot.yml'
       - '.github/workflows/projecty-hq-safety.yml'
 
@@ -34,9 +36,10 @@ jobs:
           node --check .github/scripts/projecty-hq-autopilot.test.cjs
           node --check .github/scripts/projecty-hq-yos-decision.test.cjs
           node --check .github/scripts/projecty-hq-yos-replay.test.cjs
+          node --check .github/scripts/projecty-recovery-red-team.test.cjs
 
-      - name: Run Issue 232 regression tests
-        run: node --test .github/scripts/projecty-hq-autopilot.test.cjs .github/scripts/projecty-hq-yos-decision.test.cjs .github/scripts/projecty-hq-yos-replay.test.cjs
+      - name: Run Issue 232 regression and Issue 315 recovery red-team tests
+        run: node --test .github/scripts/projecty-hq-autopilot.test.cjs .github/scripts/projecty-hq-yos-decision.test.cjs .github/scripts/projecty-hq-yos-replay.test.cjs .github/scripts/projecty-recovery-red-team.test.cjs
 
       - name: Enforce read-only CI boundary
         run: |
