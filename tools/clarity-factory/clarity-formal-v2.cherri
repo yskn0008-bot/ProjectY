@@ -48,6 +48,7 @@ if !@actionsRaw {
 @myWay = false
 @other = false
 @blocked = false
+@seenDisplaySwitch = false
 
 for actionItem in @actionsRaw {
     @action = getDictionary(@actionItem)
@@ -69,6 +70,13 @@ for actionItem in @actionsRaw {
     }
     if @externalWrite || @needsReview || @needsConfirmation {
         @blocked = true
+    }
+
+    if @seenDisplaySwitch && @module != "OpenApp" && @module != "MyWay" {
+        @blocked = true
+    }
+    if @module == "OpenApp" || @module == "MyWay" {
+        @seenDisplaySwitch = true
     }
 
     if @module == "Calendar" {
