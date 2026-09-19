@@ -1,0 +1,10 @@
+#define name Clarity Brightness Probe
+#define color blue
+
+#include 'actions/basic'
+
+rawAction("is.workflow.actions.setbrightness", {
+    "WFBrightness": 0.35
+})
+
+show("CLARITY_BRIGHTNESS_PROBE_RAN\nTarget: 35%")
