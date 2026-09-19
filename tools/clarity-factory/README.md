@@ -24,6 +24,9 @@ Issue #314 の「Clarity Universal Gateway v1」を、iPhoneからテンプレ�
 - `shopping` → Apple Reminders の通常項目（実機側の買い物list mappingはConfig/導入側で固定する）
 - `answer` → その場の短い回答
 - `shortcut_factory` → このLaneでは外部実行せず planned のままLedgerへ残す
+- `open_app` → 明示allowlist内のiPhoneアプリを起動
+- `device_setting` → 明示allowlist内のローカル設定を変更（Wi‑Fi / Bluetooth / モバイル通信 / 機内モード / 低電力 / 明るさ / 音量 / 外観 / ライト / おやすみモード）
+- `myway` → 既存のMY WAY Homeを開き、「今ここ・ここまで・行き先・次の一歩」を再利用して表示
 
 Calendar / Reminder / Task / Shopping には `YOS-CLARITY-ID:<request>-<action>` markerを付与する。
 
@@ -63,3 +66,15 @@ GitHub Actions `Clarity Cherri proof` で以下を固定headごとに検査す�
 `明日3時に歯医者。30分前に教えて。帰りにトマト買う。あと棚のアイデア思いついた。`
 
 期待結果は Calendar / Reminder / Shopping / Idea の4 actionへ分解され、実際の保存先とLedgerの `APPLIED` が一致すること。
+
+
+## 追加E2E（app / settings / MY WAY）
+
+実機では最低限次を確認する。
+
+- `ChatGPT開いて` → ChatGPTが開く
+- `Wi-Fi切って` → Wi-Fiがオフになる
+- `明るさ35%` → 画面の明るさが35%相当になる
+- `MYWAYまとめ見せて` → 既存MY WAY Homeが開く
+
+未登録アプリ、未対応設定、値が曖昧な設定は fail closed で停止する。

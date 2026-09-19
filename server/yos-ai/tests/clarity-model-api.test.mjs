@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import crypto from 'node:crypto';
 import test from 'node:test';
 import {handleClarityModel} from '../api/yos/intake.mjs';
+import {validateClarityModelResult} from '../clarity-model-contract.mjs';
 
 const token = 'clarity-test-token-1234567890';
 const hash = crypto.createHash('sha256').update(token, 'utf8').digest('hex');
@@ -51,6 +52,50 @@ async function withEnv(fn) {
     if (before.model === undefined) delete process.env.OPENAI_MODEL; else process.env.OPENAI_MODEL = before.model;
   }
 }
+
+test('accepts canonical app, device setting, and MY WAY routes', () => {
+  const app = validResult();
+  app.interpretation.domains = ['system'];
+  app.actions[0].executor = 'open_app';
+  app.actions[0].domain = 'system';
+  app.actions[0].intent = 'execute';
+  app.actions[0].target = 'chatgpt';
+  app.actions[0].content = 'ChatGPT';
+  assert.deepEqual(validateClarityModelResult(app), []);
+
+  const setting = structuredClone(app);
+  setting.actions[0].executor = 'device_setting';
+  setting.actions[0].intent = 'update';
+  setting.actions[0].target = 'brightness';
+  setting.actions[0].content = '35';
+  assert.deepEqual(validateClarityModelResult(setting), []);
+
+  const myway = structuredClone(app);
+  myway.interpretation.domains = ['life'];
+  myway.actions[0].executor = 'myway';
+  myway.actions[0].domain = 'life';
+  myway.actions[0].intent = 'find';
+  myway.actions[0].target = 'home';
+  myway.actions[0].content = '';
+  assert.deepEqual(validateClarityModelResult(myway), []);
+});
+
+test('rejects unsupported executable app and invalid setting value', () => {
+  const app = validResult();
+  app.interpretation.domains = ['system'];
+  app.actions[0].executor = 'open_app';
+  app.actions[0].domain = 'system';
+  app.actions[0].intent = 'execute';
+  app.actions[0].target = 'invented-app';
+  assert.ok(validateClarityModelResult(app).some((error) => error.includes('open_app target')));
+
+  const setting = structuredClone(app);
+  setting.actions[0].executor = 'device_setting';
+  setting.actions[0].intent = 'update';
+  setting.actions[0].target = 'volume';
+  setting.actions[0].content = '101';
+  assert.ok(validateClarityModelResult(setting).some((error) => error.includes('percent')));
+});
 
 test('rejects missing bearer token without contacting OpenAI', async () => {
   await withEnv(async () => {

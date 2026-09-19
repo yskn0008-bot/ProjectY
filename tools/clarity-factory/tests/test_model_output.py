@@ -162,6 +162,65 @@ class ClarityModelOutputTests(unittest.TestCase):
         errors = validate(payload)
         self.assertTrue(any("external" in e for e in errors))
 
+    def test_open_app_allowlist(self):
+        payload = valid_payload()
+        payload["interpretation"]["domains"] = ["system"]
+        payload["actions"][0].update(
+            executor="open_app",
+            domain="system",
+            intent="execute",
+            target="spotify",
+            content="Spotify",
+            destination="App",
+        )
+        self.assertEqual(validate(payload), [])
+        payload["actions"][0]["target"] = "invented.app"
+        self.assertTrue(any("open_app target" in e for e in validate(payload)))
+
+    def test_device_setting_contract(self):
+        payload = valid_payload()
+        payload["interpretation"]["domains"] = ["system"]
+        payload["actions"][0].update(
+            executor="device_setting",
+            domain="system",
+            intent="update",
+            target="wifi",
+            content="off",
+            destination="iPhone",
+        )
+        self.assertEqual(validate(payload), [])
+        payload["actions"][0]["content"] = "maybe"
+        self.assertTrue(any("device_setting value" in e for e in validate(payload)))
+
+    def test_device_setting_percent_contract(self):
+        payload = valid_payload()
+        payload["interpretation"]["domains"] = ["system"]
+        payload["actions"][0].update(
+            executor="device_setting",
+            domain="system",
+            intent="update",
+            target="brightness",
+            content="35",
+            destination="iPhone",
+        )
+        self.assertEqual(validate(payload), [])
+        payload["actions"][0]["content"] = "101"
+        self.assertTrue(any("percent" in e for e in validate(payload)))
+
+    def test_myway_reuses_home(self):
+        payload = valid_payload()
+        payload["original_input"] = "MYWAYまとめ見せて"
+        payload["interpretation"]["domains"] = ["life"]
+        payload["actions"][0].update(
+            executor="myway",
+            domain="life",
+            intent="find",
+            target="home",
+            content="",
+            destination="MY WAY Home",
+        )
+        self.assertEqual(validate(payload), [])
+
 
 if __name__ == "__main__":
     unittest.main()
