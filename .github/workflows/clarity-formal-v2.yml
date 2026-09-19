@@ -280,6 +280,48 @@ jobs:
               print(f'{name}: PASS ({len(data)} bytes)')
           PY
 
+      - name: Compile post-install v2U probe
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd tools/clarity-factory
+          rm -f './Clarity DeviceSetting Probe v2U_unsigned.shortcut' './Clarity DeviceSetting Probe v2U.plist'
+          cherri clarity-device-setting-probe-v2u.cherri --skip-sign --debug
+          probe='./Clarity DeviceSetting Probe v2U_unsigned.shortcut'
+          test -f "$probe"
+          grep -q 'Clarity Actions Formal v2T' "$probe"
+          mkdir -p artifacts-formal-v2u
+          cp "$probe" artifacts-formal-v2u/Clarity-DeviceSetting-Probe-v2U-unsigned.shortcut
+
+      - name: Sign post-install v2U probe
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/clarity-factory/sign_with_hubsign.py \
+            --input tools/clarity-factory/artifacts-formal-v2u/Clarity-DeviceSetting-Probe-v2U-unsigned.shortcut \
+            --output tools/clarity-factory/artifacts-formal-v2u/Clarity-DeviceSetting-Probe-v2U-signed.shortcut \
+            --name 'Clarity DeviceSetting Probe v2U'
+
+      - name: Verify signed post-install v2U probe
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('tools/clarity-factory/artifacts-formal-v2u/Clarity-DeviceSetting-Probe-v2U-signed.shortcut')
+          data = p.read_bytes()
+          assert data.startswith(b'AEA1'), data[:8]
+          assert len(data) > 500, len(data)
+          print(f'{p.name}: PASS ({len(data)} bytes)')
+          PY
+
+      - name: Upload post-install v2U probe
+        uses: actions/upload-artifact@v4
+        with:
+          name: clarity-formal-v2u
+          path: tools/clarity-factory/artifacts-formal-v2u/Clarity-DeviceSetting-Probe-v2U-signed.shortcut
+          if-no-files-found: error
+
       - name: Upload fresh-install v2T artifacts
         uses: actions/upload-artifact@v4
         with:
