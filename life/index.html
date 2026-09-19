@@ -68,7 +68,7 @@ button{touch-action:manipulation}
 .card{border:1px solid var(--line);border-radius:24px;background:rgba(255,255,255,.94);box-shadow:var(--shadow);padding:15px}
 .card-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:11px}
 .card-head h3{margin:0;font-size:18px}
-.card-head span,.sync-state{color:var(--muted);font-size:10px}
+.card-head span,.sync-state{color:var(--muted);font-size:10px}.sync-feedback{display:block;min-height:1.4em;color:var(--muted);font-size:11px;line-height:1.45}.sync-feedback[data-tone="error"]{color:#b94f43}.sync-feedback[data-tone="success"]{color:#34724d}
 .sync-button,.minor-button{min-height:38px;border:0;border-radius:12px;padding:0 12px;background:#eff7ff;color:#327dbb;font-weight:900;font-size:11px}
 .schedule{display:grid;gap:8px}
 .event{display:grid;grid-template-columns:61px 5px 1fr;gap:10px;align-items:stretch;padding:8px 0}
@@ -227,9 +227,9 @@ dialog::backdrop{background:rgba(35,42,53,.38);backdrop-filter:blur(5px)}
 <dialog id="syncDialog">
   <form method="dialog" class="dialog">
     <h3>カレンダー連携</h3>
-    <p>GoogleカレンダーをiPhone標準カレンダーへ同期し、ショートカットから今日の予定をLife OSへ渡します。認証情報は保存しません。</p>
-    <div class="field"><label for="syncJson">手動テスト用JSON</label><textarea id="syncJson" placeholder='{"date":"2026-07-18","events":[]}'></textarea></div>
-    <div class="dialog-actions"><button value="cancel">閉じる</button><button id="importButton" class="primary" value="default">予定を取り込む</button></div>
+    <p>iPhoneカレンダーの予定は、ショートカットから同期URLを開いて取り込みます。手動確認するときは、今日の日付のJSONを貼り付けてください。</p>
+    <div class="field"><label for="syncJson">今日の予定（JSON）</label><textarea id="syncJson" data-sync-example placeholder='{"date":"今日の日付","events":[]}'></textarea><small id="syncFeedback" class="sync-feedback" role="status" aria-live="polite"></small></div>
+    <div class="dialog-actions"><button type="button" id="closeSyncButton">閉じる</button><button type="button" id="importButton" class="primary">予定を取り込む</button></div>
   </form>
 </dialog>
 
@@ -421,17 +421,39 @@ function decodeBase64Url(value){
   const bytes=Uint8Array.from(atob(padded),c=>c.charCodeAt(0));
   return new TextDecoder().decode(bytes);
 }
+function setSyncFeedback(message,tone=''){
+  const node=el('syncFeedback');
+  if(node){node.textContent=message;node.dataset.tone=tone}
+}
+function prepareSyncDialog(){
+  const input=el('syncJson');
+  if(input){
+    input.placeholder=JSON.stringify({date:today(),events:[]});
+  }
+  setSyncFeedback('');
+}
 function importPayload(payload){
   if(!payload||typeof payload!=='object')throw new Error('同期データが不正です');
-  const date=payload.date||today(),d=day(date);
-  if(Array.isArray(payload.events))d.schedule=payload.events.map((e,i)=>({id:e.id||`sync-${Date.now()}-${i}`,title:String(e.title||'予定'),start:e.start,end:e.end,location:String(e.location||''),category:categoryOf(e)})).filter(e=>e.start&&e.end);
+  const date=String(payload.date||today()).slice(0,10);
+  if(!/^\\d{4}-\\d{2}-\\d{2}$/.test(date))throw new Error('日付はYYYY-MM-DD形式で入力してください');
+  if(date!==today())throw new Error(`予定の日付が${date}です。今日（${today()}）の予定だけ取り込めます`);
+  if(!Array.isArray(payload.events))throw new Error('events配列がありません');
+  const d=day(date);
+  d.schedule=payload.events.map((e,i)=>({id:e.id||`sync-${Date.now()}-${i}`,title:String(e.title||'予定'),start:e.start,end:e.end,location:String(e.location||''),category:categoryOf(e)})).filter(e=>e.start&&e.end);
   if(Array.isArray(payload.tasks))d.tasks=payload.tasks.slice(0,3).map(t=>({text:String(t.text||''),done:Boolean(t.done),category:t.category&&COLORS[t.category]?t.category:'personal'}));
   while(d.tasks.length<3)d.tasks.push({text:'',done:false,category:'personal'});
   d.lastSync=new Date().toISOString();localStorage.setItem(KEY,JSON.stringify(data));paint();
+  return d.schedule.length;
 }
 function importFromUrl(){
   const params=new URLSearchParams(location.search),sync=params.get('sync');if(!sync)return;
-  try{importPayload(JSON.parse(decodeBase64Url(sync)));history.replaceState({},'',location.pathname)}catch(e){alert(`カレンダー同期に失敗しました：${e.message}`)}
+  try{
+    const count=importPayload(JSON.parse(decodeBase64Url(sync)));
+    history.replaceState({},'',location.pathname);
+    const state=el('syncState');if(state)state.textContent=`カレンダー更新済み（今日${count}件）`;
+  }catch(e){
+    const state=el('syncState');if(state)state.textContent=`更新できませんでした：${e.message}`;
+  }
 }
 function taxiUrl(){try{return JSON.parse(localStorage.getItem(TAXI)||'{}').yosUrl||''}catch{return''}}
 function summary(){
@@ -444,8 +466,15 @@ document.querySelectorAll('[data-checkin-rating]').forEach(button=>button.onclic
 el('saveCheckin').onclick=()=>{day().checkin={sleep:el('sleep').value,health:el('health').value,mood:el('mood').value};save();window.dispatchEvent(new CustomEvent('yos-life-record-saved'))};
 document.querySelectorAll('.routine-card').forEach(b=>b.onclick=()=>{data.activeGroup=b.dataset.group;save()});
 el('note').onchange=()=>{day().note=el('note').value;save()};
-el('syncButton').onclick=()=>el('syncDialog').showModal();
-el('importButton').onclick=()=>{try{importPayload(JSON.parse(el('syncJson').value));alert('予定を取り込みました')}catch(e){alert(`取り込みに失敗しました：${e.message}`)}};
+el('syncButton').onclick=()=>{prepareSyncDialog();el('syncDialog').showModal()};
+el('closeSyncButton').onclick=()=>el('syncDialog').close();
+el('importButton').onclick=()=>{
+  try{
+    const count=importPayload(JSON.parse(el('syncJson').value));
+    setSyncFeedback(`取り込み完了：今日の予定${count}件`,'success');
+    el('syncDialog').close();
+  }catch(e){setSyncFeedback(`取り込めません：${e.message}`,'error')}
+};
 function openSettings(){el('yosUrl').value=settings.yosUrl||'';el('settingsDialog').showModal()}
 el('settingsButton').onclick=openSettings;el('settingsNav').onclick=openSettings;
 el('saveSettings').onclick=()=>{settings.yosUrl=el('yosUrl').value.trim();localStorage.setItem(SETTINGS,JSON.stringify(settings))};
