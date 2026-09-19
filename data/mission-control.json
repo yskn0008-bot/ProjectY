@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-19T20:51:09+09:00",
+  "updated_at": "2026-09-19T20:51:56+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -165,6 +165,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-0d2f14be2a32",
+      "title": "test(pwa): match root worker scopes exactly",
+      "completed_at": "2026-09-19T11:51:43Z",
+      "result": "GitHub mainへ反映（0d2f14b）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/0d2f14be2a3253dc0b70906f4fdeb1ea8be2e683"
+    },
+    {
       "id": "github-commit-afe02c239ba5",
       "title": "test(pwa): verify unified YOS online and offline",
       "completed_at": "2026-09-19T11:50:56Z",
@@ -191,13 +198,6 @@
       "completed_at": "2026-09-19T11:28:04Z",
       "result": "GitHub mainへ反映（ca15520）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/ca155206181bbd2ab5f25af923ddfb95eb0e5a63"
-    },
-    {
-      "id": "github-commit-c6c40edd278a",
-      "title": "Mother: start Shadow observation from existing wake path",
-      "completed_at": "2026-09-18T20:48:41Z",
-      "result": "GitHub mainへ反映（c6c40ed）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/c6c40edd278ad2f4063c3bc3321faaf7c02cb568"
     },
     {
       "id": "complete-002",
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-19T20:51:09+09:00",
+      "last_update": "2026-09-19T20:51:56+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -315,7 +315,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-19T20:51:09+09:00",
+      "last_update": "2026-09-19T20:51:56+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-19T20:51:09+09:00",
+      "last_update": "2026-09-19T20:51:56+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "271de584eb83b40aa981bf69365cb652e4a4e8217f6ba516ed5faff3f0893337"
+  "github_snapshot_hash": "fd13ef5f5f1c1f79aaa7c5b1c7ed9fa609a2ed828afc75a898b2521f7eae8c3b"
 }
