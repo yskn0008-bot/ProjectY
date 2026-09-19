@@ -194,6 +194,42 @@ jobs:
           print(f'{p.name}: PASS ({len(data)} bytes)')
           PY
 
+      - name: Compile DeviceSetting child probe
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd tools/clarity-factory
+          rm -f './Clarity DeviceSetting Probe_unsigned.shortcut' './Clarity DeviceSetting Probe.plist'
+          cherri clarity-device-setting-probe.cherri --skip-sign --debug
+          probe='./Clarity DeviceSetting Probe_unsigned.shortcut'
+          test -f "$probe"
+          grep -q 'Clarity Actions Formal v2' "$probe"
+          grep -q 'DeviceSetting' "$probe"
+          grep -q 'brightness' "$probe"
+          cp "$probe" artifacts-formal-v2/Clarity-DeviceSetting-Probe-unsigned.shortcut
+
+      - name: Sign DeviceSetting child probe
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/clarity-factory/sign_with_hubsign.py \
+            --input tools/clarity-factory/artifacts-formal-v2/Clarity-DeviceSetting-Probe-unsigned.shortcut \
+            --output tools/clarity-factory/artifacts-formal-v2/Clarity-DeviceSetting-Probe-signed.shortcut \
+            --name 'Clarity DeviceSetting Probe'
+
+      - name: Verify signed DeviceSetting child probe
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('tools/clarity-factory/artifacts-formal-v2/Clarity-DeviceSetting-Probe-signed.shortcut')
+          data = p.read_bytes()
+          assert data.startswith(b'AEA1'), data[:8]
+          assert len(data) > 500, len(data)
+          print(f'{p.name}: PASS ({len(data)} bytes)')
+          PY
+
       - name: Upload Formal v2 pair
         uses: actions/upload-artifact@v4
         with:
@@ -205,5 +241,7 @@ jobs:
             tools/clarity-factory/artifacts-formal-v2/Clarity-Actions-Formal-v2-signed.shortcut
             tools/clarity-factory/artifacts-formal-v2/Clarity-Brightness-Probe-unsigned.shortcut
             tools/clarity-factory/artifacts-formal-v2/Clarity-Brightness-Probe-signed.shortcut
+            tools/clarity-factory/artifacts-formal-v2/Clarity-DeviceSetting-Probe-unsigned.shortcut
+            tools/clarity-factory/artifacts-formal-v2/Clarity-DeviceSetting-Probe-signed.shortcut
             tools/clarity-factory/artifacts-formal-v2/hubsign-formal-v2.log
           if-no-files-found: error
