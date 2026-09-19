@@ -26,7 +26,7 @@ test('root manifest installs one YOS app across all main domains', async () => {
 
 test('domain pages replace scoped workers with the root YOS worker', async () => {
   const [yosApp,life,hjApp] = await Promise.all([read('yos/app.js'),read('life/index.html'),read('yos/hj/app.js')]);
-  assert.match(yosApp,/register\('\.\.\/service-worker\.js',\{scope:'\.\.'\,/);
+  assert.match(yosApp,/register\('\.\.\/service-worker\.js',\{scope:'\.\.\/'\,/);
   assert.match(life,/register\('\.\.\/service-worker\.js',\{scope:'\.\.'\,/);
-  assert.match(hjApp,/register\('\.\.\/\.\.\/service-worker\.js',\{scope:'\.\.\/\.\.'\,/);
+  assert.match(hjApp,/register\('\.\.\/\.\.\/service-worker\.js',\{scope:'\.\.\/\.\.\/'\,/);
 });
