@@ -1,37 +1,29 @@
 # GitHub Pages 公開設定
 
-YOS Mission Control DashboardはGitHub Actionsで公開する。
+GitHub PagesはYOS PWAの公開経路です。日常の入口はMY WAY、Mission ControlはSystemへ分離しています。
 
-## 初回だけ必要な設定
+## 公開URL
 
-GitHubの`ProjectY`を開き、次を設定する。
+- YOS: `https://yskn0008-bot.github.io/ProjectY/`
+- MY WAY: `https://yskn0008-bot.github.io/ProjectY/yos/`
+- Life: `https://yskn0008-bot.github.io/ProjectY/life/`
+- System: `https://yskn0008-bot.github.io/ProjectY/system/`
 
-1. `Settings`
-2. `Pages`
-3. `Build and deployment`
-4. `Source`を`GitHub Actions`にする
+ルートURLは自動的にMY WAYへ移動します。
 
-以後、`main`へ変更が入ると自動公開される。
+## Pages設定
 
-想定URL：
+`Settings → Pages → Build and deployment → Source: GitHub Actions`
 
-`https://yskn0008-bot.github.io/ProjectY/`
+`.github/workflows/deploy-pages.yml` がmainの静的資産を公開します。
 
-## 初回公開時の注意
+## PWA
 
-`Source`を`GitHub Actions`へ変更しただけでは、すでに終わった過去のコミットは自動で再実行されない場合がある。
-その場合は、設定後に`main`へ新しい変更を反映し、Pages用Workflowをもう一度起動する。
+ルート `manifest.webmanifest` のscopeをProjectY全体にし、`service-worker.js` がMY WAY / Life / Hero’s Journey / Systemの主要資産を保存します。
 
-## 自動処理
-
-`.github/workflows/deploy-pages.yml`が次を実行する。
-
-- リポジトリ取得
-- Pages設定
-- 静的ファイルのアップロード
-- GitHub Pagesへ公開
+これにより、ホーム画面へ追加したYOSは領域を跨いでも同じPWA内で動き、初回キャッシュ後は主要画面をオフラインでも開けます。
 
 ## 注意
 
-- 公開リポジトリなので個人情報・認証情報・営業機密を保存しない
-- 初回設定後も公開できない場合はActionsの失敗内容を確認する
+- 公開リポジトリへ秘密情報・認証情報を保存しない。
+- GitHub Pagesは配信経路であり、YOSの唯一の正本・唯一の実行経路にはしない。
