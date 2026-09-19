@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-20T07:14:47+09:00",
+  "updated_at": "2026-09-20T07:30:25+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -80,7 +80,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-09-19T22:12:15Z"
+      "updated_at": "2026-09-19T22:29:18Z"
     },
     {
       "id": "github-issue-256",
@@ -165,6 +165,20 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-8729c44f399a",
+      "title": "Merge pull request #406 from yskn0008-bot/fix/life-auto-calendar",
+      "completed_at": "2026-09-19T22:30:14Z",
+      "result": "GitHub mainへ反映（8729c44）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/8729c44f399abbc33273c68080f24df20125bad1"
+    },
+    {
+      "id": "github-commit-6cfaecba033c",
+      "title": "feat(life): refresh calendar on iPhone entry without sync return loops",
+      "completed_at": "2026-09-19T22:28:20Z",
+      "result": "GitHub mainへ反映（6cfaecb）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/6cfaecba033c48a02538667cc3f5cd0560302296"
+    },
+    {
       "id": "github-commit-2bb08a6dce76",
       "title": "Merge pull request #404 from yskn0008-bot/fix/life-all-day-layout",
       "completed_at": "2026-09-19T22:14:35Z",
@@ -184,20 +198,6 @@
       "completed_at": "2026-09-19T22:08:56Z",
       "result": "GitHub mainへ反映（b3add50）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/b3add50b3464c74ee1f79ce754336447ab69493d"
-    },
-    {
-      "id": "github-commit-214fc6fce927",
-      "title": "fix(life): connect calendar refresh to installed Scriptable sync",
-      "completed_at": "2026-09-19T22:04:21Z",
-      "result": "GitHub mainへ反映（214fc6f）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/214fc6fce9274809af060b28ed3684d94153262b"
-    },
-    {
-      "id": "github-commit-798a85264e5a",
-      "title": "fix(life): connect calendar refresh to installed Scriptable sync",
-      "completed_at": "2026-09-19T22:04:20Z",
-      "result": "GitHub mainへ反映（798a852）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/798a85264e5abf47836f01db244155090e7fbf56"
     },
     {
       "id": "complete-002",
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-20T07:14:47+09:00",
+      "last_update": "2026-09-20T07:30:25+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -315,7 +315,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-20T07:14:47+09:00",
+      "last_update": "2026-09-20T07:30:25+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-20T07:14:47+09:00",
+      "last_update": "2026-09-20T07:30:25+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "8271e94504d7a108f284552d06677292ceccb14226e150245229b695e644547d"
+  "github_snapshot_hash": "0aa747d25e304f2aee0f9b1b74414abb1424d969e5d57e297988d8d0992f270e"
 }
