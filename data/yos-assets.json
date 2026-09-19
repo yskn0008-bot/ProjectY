@@ -1,11 +1,11 @@
 {
   "schema_version": "1.0.0",
   "ssot": "YOS asset registry",
-  "updated_at": "2026-09-20T05:22:00+09:00",
+  "updated_at": "2026-09-20T05:40:00+09:00",
   "source": {
     "repository": "yskn0008-bot/ProjectY",
     "base_branch": "main",
-    "base_sha": "e1744fa2e302fd21ffe5feec7cbcc9e5a1209b55",
+    "base_sha": "72f06793b8e871b86dcf6b07b8c1b85be3cc1b00",
     "issue": "https://github.com/yskn0008-bot/ProjectY/issues/371",
     "legacy_22_asset_table_verified": false,
     "note": "Reconciled 2026-09-18 with current main, iPhone visual evidence, and passing automated checks. Preserve names; continue evidence-based updates."
@@ -60,9 +60,9 @@
       "area": "core",
       "status": "awaiting_production_verification",
       "priority": 1,
-      "current": "Apple有料署名は保留。現在は無料で使える統合YOS PWAを完成優先。ルート起動→MY WAY、Life/Money/Hero’s Journey/Idea/System、Clarity/MY REMOTE導線、統合root Service Workerまで実装済み。",
-      "next_action": "統合YOS PWAをiPhoneで最終受入確認し、ホーム画面追加・主要5領域・保存・再起動・オフライン利用を実機で確認する。",
-      "blocker": "コード側の重大ブロッカーなし。最終完成判定にはiPhone実機での受入確認が必要。",
+      "current": "無料版YOS PWAはMY WAYをHOMEとして統合済み。Life/Money/Hero’s Journey/Idea/System、Clarity/MY REMOTE導線、root Service Worker、ホーム画面用YOSアイコンまで実装し、統合PWA Safetyでcontract/Chromium/WebKit PASS。公開配信も成功。",
+      "next_action": "iPhone Safariで公開YOSをホーム画面に追加し、YOSアイコンから起動→MY WAY/Life/Money/Journey/Idea→保存→再起動→オフライン起動を実機で最終受入確認する。",
+      "blocker": "コード側の重大ブロッカーなし。残りは本人しか確認できないiPhoneホーム画面・オフライン実機受入のみ。",
       "needs_user_action": true,
       "device_verified": true,
       "production_verified": false,
@@ -81,7 +81,12 @@
         "implementation:root PWA manifest opens ./yos/ and scopes entire ProjectY",
         "implementation:unified root service worker caches MY WAY/Life/Hero’s Journey/System",
         "CI:YOS Unified PWA Safety contract + Chromium + WebKit PASS 2026-09-19",
-        "decision:Apple Developer paid signing postponed until PWA practical completion"
+        "decision:Apple Developer paid signing postponed until PWA practical completion",
+        "CI:YOS Unified PWA Safety run 35468056336 contract PASS",
+        "CI:YOS Unified PWA Safety run 35468056336 Chromium online/offline PASS",
+        "CI:YOS Unified PWA Safety run 35468056336 WebKit UI PASS",
+        "production:GitHub Pages deploy workflow run 35468087159 success",
+        "implementation:YOS 180x180 and 512x512 install icons bundled and cached"
       ],
       "progress_basis": {
         "spec": true,
@@ -91,7 +96,7 @@
         "production": false
       },
       "progress": 85,
-      "updated_at": "2026-09-20T05:22:00+09:00"
+      "updated_at": "2026-09-20T05:40:00+09:00"
     },
     {
       "id": "my-way",
