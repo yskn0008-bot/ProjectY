@@ -18,7 +18,7 @@ const cachePrefix = readStringConstant('CACHE_PREFIX');
 
 test('cache identity is scoped to YOS command center', () => {
   assert.equal(cachePrefix, 'yos-command-center-');
-  assert.match(source, /const\s+CACHE\s*=\s*`\$\{CACHE_PREFIX\}v21-task-auth`/);
+  assert.match(source, /const\s+CACHE\s*=\s*`\$\{CACHE_PREFIX\}v29-money-shared-design`/);
   assert.match(source, /readability-final\.css\?v=2/);
   assert.match(source, /task-dashboard\.css\?v=1/);
   assert.match(source, /task-dashboard\.js\?v=1/);
@@ -35,9 +35,10 @@ test('activate deletes only old YOS command center cache generations', () => {
 });
 
 test('activate cleanup does not name or target sibling app caches', () => {
-  const activateMatch = source.match(/self\.addEventListener\('activate', \(event\) => \{([\s\S]*?)\n\}\);/);
-  assert.ok(activateMatch, 'activate handler must exist');
-  const activateBlock = activateMatch[1];
+  const activateStart=source.indexOf("self.addEventListener('activate'");
+  const fetchStart=source.indexOf("self.addEventListener('fetch'",activateStart);
+  assert.ok(activateStart>=0 && fetchStart>activateStart,'activate handler must exist before fetch');
+  const activateBlock=source.slice(activateStart,fetchStart);
   assert.doesNotMatch(activateBlock, /taxi|life|nav|server/i);
   assert.doesNotMatch(activateBlock, /caches\.delete\((?:'|")/);
 });
