@@ -22,3 +22,17 @@ body,button,input,textarea,select{
   .bottom-nav a b,.bottom-nav button b{font-size:8.5px!important}
   .bottom-nav a:nth-child(4) b,.bottom-nav button:nth-child(4) b{font-size:7.7px!important}
 }
+
+/* Keep readable text in intrinsic-width columns, including narrow iPhones. */
+#lifePageHostV1 #homeSchedulePreviewV1 p{
+  grid-template-columns:max-content minmax(0,1fr);column-gap:10px;align-items:start;
+}
+#homeSchedulePreviewV1 time{white-space:nowrap;font-variant-numeric:tabular-nums}
+#homeSchedulePreviewV1 span{min-width:0;white-space:normal;overflow-wrap:anywhere}
+#lifePageHostV1 .life-calendar-glance-v1>section{
+  grid-template-columns:max-content minmax(0,1fr);column-gap:12px;
+}
+#lifePageHostV1 .life-calendar-glance-v1>section>h3{white-space:nowrap}
+#schedule .event{grid-template-columns:max-content 6px minmax(0,1fr)}
+#schedule .event-time{min-width:5ch;white-space:nowrap}
+#schedule .event-main{min-width:0;overflow-wrap:anywhere}
