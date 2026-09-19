@@ -1,0 +1,407 @@
+name: Clarity Formal v2
+
+on:
+  pull_request:
+    paths:
+      - 'tools/clarity-factory/**'
+      - '.github/workflows/clarity-formal-v2.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-sign:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Source contract tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m json.tool tools/clarity-factory/clarity-module-contract-v1.json >/dev/null
+          python3 -m json.tool tools/clarity-factory/clarity-capability-registry-v1.json >/dev/null
+          python3 -m unittest tools.clarity-factory.tests.test_formal_v2_source -v
+
+      - name: Verify accepted production sources unchanged in v2 candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f tools/clarity-factory/clarity-production.cherri
+          test -f tools/clarity-factory/clarity-actions-production.cherri
+          grep -q '^#define name Clarity$' tools/clarity-factory/clarity-production.cherri
+          grep -q '^#define name Clarity Actions$' tools/clarity-factory/clarity-actions-production.cherri
+
+      - name: Install pinned Cherri v2.3.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          url='https://github.com/electrikmilk/cherri/releases/download/v2.3.0/cherri_linux-x86_64.zip'
+          expected='7ab2c384b7b26e7c72a30a8dfa56f89dae12c4068b7951bc1e3193f3698edbe9'
+          curl -fsSL "$url" -o /tmp/cherri.zip
+          printf '%s  %s\n' "$expected" /tmp/cherri.zip | sha256sum -c -
+          mkdir -p /tmp/cherri
+          unzip -q /tmp/cherri.zip -d /tmp/cherri
+          binary="$(find /tmp/cherri -type f -name cherri -print -quit)"
+          test -n "$binary"
+          sudo install -m 0755 "$binary" /usr/local/bin/cherri
+          cherri --version
+
+      - name: Compile and patch Formal v2 pair
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd tools/clarity-factory
+          rm -f './Clarity Formal v2_unsigned.shortcut' './Clarity Formal v2.plist'
+          rm -f './Clarity Actions Formal v2_unsigned.shortcut' './Clarity Actions Formal v2.plist'
+          cherri clarity-formal-v2.cherri --skip-sign --debug
+          cherri clarity-actions-formal-v2.cherri --skip-sign --debug
+          parent='./Clarity Formal v2_unsigned.shortcut'
+          child='./Clarity Actions Formal v2_unsigned.shortcut'
+          test -f "$parent"
+          test -f "$child"
+
+          python3 patch_append_file_paths.py "$parent"
+          grep -q 'Clarity Actions Formal v2' "$parent"
+          grep -q 'E2E PASS' "$parent"
+          grep -q 'OpenApp' "$parent"
+          grep -q 'DeviceSetting' "$parent"
+          grep -q 'MyWay' "$parent"
+          if grep -q 'file.append' "$parent"; then
+            echo 'Formal v2 parent still contains file.append' >&2
+            exit 1
+          fi
+
+          python3 patch_append_file_paths.py "$child"
+          python3 patch_reminder_wire_format.py "$child"
+          python3 patch_execute_actions_readback.py "$child"
+          python3 validate_clarity_execute_actions.py "$child"
+
+          python3 - "$parent" "$child" <<'PY'
+          import plistlib, sys
+          parent_path, child_path = sys.argv[1:3]
+          with open(parent_path, 'rb') as fh:
+              parent = plistlib.load(fh)
+          with open(child_path, 'rb') as fh:
+              child = plistlib.load(fh)
+          ptxt = repr(parent)
+          ctxt = repr(child)
+          pids = [a.get('WFWorkflowActionIdentifier','') for a in parent.get('WFWorkflowActions',[])]
+          cids = [a.get('WFWorkflowActionIdentifier','') for a in child.get('WFWorkflowActions',[])]
+          assert 'Clarity Actions Formal v2' in ptxt
+          assert 'OpenApp' in ptxt and 'DeviceSetting' in ptxt and 'MyWay' in ptxt
+          assert 'is.workflow.actions.askllm' in pids
+          for marker in ('UNSUPPORTED_APP','UNSUPPORTED_DEVICE_SETTING','UNSUPPORTED_MYWAY_TARGET'):
+              assert marker in ctxt, marker
+          for suffix in ('openapp','setbrightness','setvolume','openurl'):
+              assert any(i.endswith(suffix) for i in cids), suffix
+          assert 'setCellularData' not in ctxt
+          assert 'setAirplaneMode' not in ctxt
+          print('Formal v2 compiled contract: PASS')
+          PY
+
+          mkdir -p artifacts-formal-v2
+          cp "$parent" artifacts-formal-v2/Clarity-Formal-v2-unsigned.shortcut
+          cp "$child" artifacts-formal-v2/Clarity-Actions-Formal-v2-unsigned.shortcut
+
+      - name: Secret scan
+        shell: bash
+        run: |
+          set -euo pipefail
+          if grep -RIE --exclude='*.shortcut' --exclude='*.plist' \
+            '(gh[pousr]_[A-Za-z0-9_]{20,}|sk-[A-Za-z0-9_-]{20,}|xox[baprs]-[A-Za-z0-9-]{10,}|BEGIN [A-Z ]*PRIVATE KEY|192\.168\.[0-9]+\.[0-9]+)' \
+            tools/clarity-factory; then
+            echo 'Potential secret/private network value found.' >&2
+            exit 1
+          fi
+
+      - name: Sign Formal v2 pair with HubSign
+        shell: bash
+        run: |
+          set -euo pipefail
+          log='tools/clarity-factory/artifacts-formal-v2/hubsign-formal-v2.log'
+          : > "$log"
+          python3 tools/clarity-factory/sign_with_hubsign.py \
+            --input tools/clarity-factory/artifacts-formal-v2/Clarity-Actions-Formal-v2-unsigned.shortcut \
+            --output tools/clarity-factory/artifacts-formal-v2/Clarity-Actions-Formal-v2-signed.shortcut \
+            --name 'Clarity Actions Formal v2' \
+            2>&1 | tee -a "$log"
+          python3 tools/clarity-factory/sign_with_hubsign.py \
+            --input tools/clarity-factory/artifacts-formal-v2/Clarity-Formal-v2-unsigned.shortcut \
+            --output tools/clarity-factory/artifacts-formal-v2/Clarity-Formal-v2-signed.shortcut \
+            --name 'Clarity Formal v2' \
+            2>&1 | tee -a "$log"
+
+      - name: Verify signed AEA1 pair
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          base = Path('tools/clarity-factory/artifacts-formal-v2')
+          for name in ('Clarity-Actions-Formal-v2-signed.shortcut','Clarity-Formal-v2-signed.shortcut'):
+              p = base / name
+              data = p.read_bytes()
+              assert data.startswith(b'AEA1'), (name, data[:8])
+              assert len(data) > 500, (name, len(data))
+              print(f'{name}: PASS ({len(data)} bytes)')
+          PY
+
+      - name: Compile deterministic brightness probe
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd tools/clarity-factory
+          rm -f './Clarity Brightness Probe_unsigned.shortcut' './Clarity Brightness Probe.plist'
+          cherri clarity-brightness-probe.cherri --skip-sign --debug
+          probe='./Clarity Brightness Probe_unsigned.shortcut'
+          test -f "$probe"
+          python3 - "$probe" <<'PY'
+          import plistlib, sys
+          with open(sys.argv[1], 'rb') as fh:
+              root = plistlib.load(fh)
+          acts = root.get('WFWorkflowActions', [])
+          found = [a for a in acts if a.get('WFWorkflowActionIdentifier') == 'is.workflow.actions.setbrightness']
+          assert len(found) == 1, len(found)
+          value = found[0].get('WFWorkflowActionParameters', {}).get('WFBrightness')
+          assert value == 0.35, value
+          print('Brightness probe compile contract: PASS')
+          PY
+          cp "$probe" artifacts-formal-v2/Clarity-Brightness-Probe-unsigned.shortcut
+
+      - name: Sign deterministic brightness probe
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/clarity-factory/sign_with_hubsign.py \
+            --input tools/clarity-factory/artifacts-formal-v2/Clarity-Brightness-Probe-unsigned.shortcut \
+            --output tools/clarity-factory/artifacts-formal-v2/Clarity-Brightness-Probe-signed.shortcut \
+            --name 'Clarity Brightness Probe'
+
+      - name: Verify signed brightness probe
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('tools/clarity-factory/artifacts-formal-v2/Clarity-Brightness-Probe-signed.shortcut')
+          data = p.read_bytes()
+          assert data.startswith(b'AEA1'), data[:8]
+          assert len(data) > 500, len(data)
+          print(f'{p.name}: PASS ({len(data)} bytes)')
+          PY
+
+      - name: Compile DeviceSetting child probe
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd tools/clarity-factory
+          rm -f './Clarity DeviceSetting Probe_unsigned.shortcut' './Clarity DeviceSetting Probe.plist'
+          cherri clarity-device-setting-probe.cherri --skip-sign --debug
+          probe='./Clarity DeviceSetting Probe_unsigned.shortcut'
+          test -f "$probe"
+          grep -q 'Clarity Actions Formal v2' "$probe"
+          grep -q 'DeviceSetting' "$probe"
+          grep -q 'brightness' "$probe"
+          cp "$probe" artifacts-formal-v2/Clarity-DeviceSetting-Probe-unsigned.shortcut
+
+      - name: Sign DeviceSetting child probe
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/clarity-factory/sign_with_hubsign.py \
+            --input tools/clarity-factory/artifacts-formal-v2/Clarity-DeviceSetting-Probe-unsigned.shortcut \
+            --output tools/clarity-factory/artifacts-formal-v2/Clarity-DeviceSetting-Probe-signed.shortcut \
+            --name 'Clarity DeviceSetting Probe'
+
+      - name: Verify signed DeviceSetting child probe
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('tools/clarity-factory/artifacts-formal-v2/Clarity-DeviceSetting-Probe-signed.shortcut')
+          data = p.read_bytes()
+          assert data.startswith(b'AEA1'), data[:8]
+          assert len(data) > 500, len(data)
+          print(f'{p.name}: PASS ({len(data)} bytes)')
+          PY
+
+      - name: Compile fresh-install v2T child and probe
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd tools/clarity-factory
+          rm -f './Clarity Actions Formal v2T_unsigned.shortcut' './Clarity Actions Formal v2T.plist'
+          rm -f './Clarity DeviceSetting Probe v2T_unsigned.shortcut' './Clarity DeviceSetting Probe v2T.plist'
+          cherri clarity-actions-formal-v2t.cherri --skip-sign --debug
+          cherri clarity-device-setting-probe-v2t.cherri --skip-sign --debug
+          child='./Clarity Actions Formal v2T_unsigned.shortcut'
+          probe='./Clarity DeviceSetting Probe v2T_unsigned.shortcut'
+          test -f "$child"
+          test -f "$probe"
+          python3 patch_append_file_paths.py "$child"
+          python3 patch_reminder_wire_format.py "$child"
+          python3 patch_execute_actions_readback.py "$child"
+          python3 validate_clarity_execute_actions.py "$child"
+          grep -q 'Clarity Actions Formal v2T' "$probe"
+          mkdir -p artifacts-formal-v2t
+          cp "$child" artifacts-formal-v2t/Clarity-Actions-Formal-v2T-unsigned.shortcut
+          cp "$probe" artifacts-formal-v2t/Clarity-DeviceSetting-Probe-v2T-unsigned.shortcut
+
+      - name: Sign fresh-install v2T child and probe
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/clarity-factory/sign_with_hubsign.py \
+            --input tools/clarity-factory/artifacts-formal-v2t/Clarity-Actions-Formal-v2T-unsigned.shortcut \
+            --output tools/clarity-factory/artifacts-formal-v2t/Clarity-Actions-Formal-v2T-signed.shortcut \
+            --name 'Clarity Actions Formal v2T'
+          python3 tools/clarity-factory/sign_with_hubsign.py \
+            --input tools/clarity-factory/artifacts-formal-v2t/Clarity-DeviceSetting-Probe-v2T-unsigned.shortcut \
+            --output tools/clarity-factory/artifacts-formal-v2t/Clarity-DeviceSetting-Probe-v2T-signed.shortcut \
+            --name 'Clarity DeviceSetting Probe v2T'
+
+      - name: Verify signed fresh-install v2T artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          base = Path('tools/clarity-factory/artifacts-formal-v2t')
+          for name in ('Clarity-Actions-Formal-v2T-signed.shortcut','Clarity-DeviceSetting-Probe-v2T-signed.shortcut'):
+              p = base / name
+              data = p.read_bytes()
+              assert data.startswith(b'AEA1'), (name, data[:8])
+              assert len(data) > 500, (name, len(data))
+              print(f'{name}: PASS ({len(data)} bytes)')
+          PY
+
+      - name: Compile post-install v2U probe
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd tools/clarity-factory
+          rm -f './Clarity DeviceSetting Probe v2U_unsigned.shortcut' './Clarity DeviceSetting Probe v2U.plist'
+          cherri clarity-device-setting-probe-v2u.cherri --skip-sign --debug
+          probe='./Clarity DeviceSetting Probe v2U_unsigned.shortcut'
+          test -f "$probe"
+          grep -q 'Clarity Actions Formal v2T' "$probe"
+          mkdir -p artifacts-formal-v2u
+          cp "$probe" artifacts-formal-v2u/Clarity-DeviceSetting-Probe-v2U-unsigned.shortcut
+
+      - name: Sign post-install v2U probe
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/clarity-factory/sign_with_hubsign.py \
+            --input tools/clarity-factory/artifacts-formal-v2u/Clarity-DeviceSetting-Probe-v2U-unsigned.shortcut \
+            --output tools/clarity-factory/artifacts-formal-v2u/Clarity-DeviceSetting-Probe-v2U-signed.shortcut \
+            --name 'Clarity DeviceSetting Probe v2U'
+
+      - name: Verify signed post-install v2U probe
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('tools/clarity-factory/artifacts-formal-v2u/Clarity-DeviceSetting-Probe-v2U-signed.shortcut')
+          data = p.read_bytes()
+          assert data.startswith(b'AEA1'), data[:8]
+          assert len(data) > 500, len(data)
+          print(f'{p.name}: PASS ({len(data)} bytes)')
+          PY
+
+      - name: Compile import-safe V2X child and probe
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd tools/clarity-factory
+          rm -f './ClarityActionsV2X_unsigned.shortcut' './ClarityActionsV2X.plist'
+          rm -f './ClarityProbeV2X_unsigned.shortcut' './ClarityProbeV2X.plist'
+          cherri clarity-actions-v2x.cherri --skip-sign --debug
+          cherri clarity-probe-v2x.cherri --skip-sign --debug
+          child='./ClarityActionsV2X_unsigned.shortcut'
+          probe='./ClarityProbeV2X_unsigned.shortcut'
+          test -f "$child"
+          test -f "$probe"
+          python3 patch_append_file_paths.py "$child"
+          python3 patch_reminder_wire_format.py "$child"
+          python3 patch_execute_actions_readback.py "$child"
+          python3 validate_clarity_execute_actions.py "$child"
+          grep -q 'ClarityActionsV2X' "$probe"
+          mkdir -p artifacts-formal-v2x
+          cp "$child" artifacts-formal-v2x/ClarityActionsV2X.shortcut
+          cp "$probe" artifacts-formal-v2x/ClarityProbeV2X.shortcut
+
+      - name: Sign import-safe V2X child and probe
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/clarity-factory/sign_with_hubsign.py \
+            --input tools/clarity-factory/artifacts-formal-v2x/ClarityActionsV2X.shortcut \
+            --output tools/clarity-factory/artifacts-formal-v2x/ClarityActionsV2X-signed.shortcut \
+            --name 'ClarityActionsV2X'
+          python3 tools/clarity-factory/sign_with_hubsign.py \
+            --input tools/clarity-factory/artifacts-formal-v2x/ClarityProbeV2X.shortcut \
+            --output tools/clarity-factory/artifacts-formal-v2x/ClarityProbeV2X-signed.shortcut \
+            --name 'ClarityProbeV2X'
+
+      - name: Verify signed import-safe V2X artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          base = Path('tools/clarity-factory/artifacts-formal-v2x')
+          for name in ('ClarityActionsV2X-signed.shortcut','ClarityProbeV2X-signed.shortcut'):
+              p = base / name
+              data = p.read_bytes()
+              assert data.startswith(b'AEA1'), (name, data[:8])
+              assert len(data) > 500, (name, len(data))
+              print(f'{name}: PASS ({len(data)} bytes)')
+          PY
+
+      - name: Upload import-safe V2X artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: clarity-formal-v2x
+          path: |
+            tools/clarity-factory/artifacts-formal-v2x/ClarityActionsV2X-signed.shortcut
+            tools/clarity-factory/artifacts-formal-v2x/ClarityProbeV2X-signed.shortcut
+          if-no-files-found: error
+
+      - name: Upload post-install v2U probe
+        uses: actions/upload-artifact@v4
+        with:
+          name: clarity-formal-v2u
+          path: tools/clarity-factory/artifacts-formal-v2u/Clarity-DeviceSetting-Probe-v2U-signed.shortcut
+          if-no-files-found: error
+
+      - name: Upload fresh-install v2T artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: clarity-formal-v2t
+          path: |
+            tools/clarity-factory/artifacts-formal-v2t/Clarity-Actions-Formal-v2T-signed.shortcut
+            tools/clarity-factory/artifacts-formal-v2t/Clarity-DeviceSetting-Probe-v2T-signed.shortcut
+          if-no-files-found: error
+
+      - name: Upload Formal v2 pair
+        uses: actions/upload-artifact@v4
+        with:
+          name: clarity-formal-v2
+          path: |
+            tools/clarity-factory/artifacts-formal-v2/Clarity-Formal-v2-unsigned.shortcut
+            tools/clarity-factory/artifacts-formal-v2/Clarity-Formal-v2-signed.shortcut
+            tools/clarity-factory/artifacts-formal-v2/Clarity-Actions-Formal-v2-unsigned.shortcut
+            tools/clarity-factory/artifacts-formal-v2/Clarity-Actions-Formal-v2-signed.shortcut
+            tools/clarity-factory/artifacts-formal-v2/Clarity-Brightness-Probe-unsigned.shortcut
+            tools/clarity-factory/artifacts-formal-v2/Clarity-Brightness-Probe-signed.shortcut
+            tools/clarity-factory/artifacts-formal-v2/Clarity-DeviceSetting-Probe-unsigned.shortcut
+            tools/clarity-factory/artifacts-formal-v2/Clarity-DeviceSetting-Probe-signed.shortcut
+            tools/clarity-factory/artifacts-formal-v2/hubsign-formal-v2.log
+          if-no-files-found: error

@@ -1,0 +1,81 @@
+#define name Clarity Model Router Proof
+#define color blue
+#include 'actions/text'
+#include 'actions/intelligence'
+#include 'actions/shortcuts'
+
+// Side-effect-free physical proof for:
+// natural input -> Use Model -> multi-intent structure -> canonical Router request -> child Shortcut.
+//
+// Important: the model is responsible only for UNDERSTAND.
+// The parent normalizes each model intent into the fixed YOS_Test action contract.
+// This avoids letting the model invent policy/risk/executor metadata during the proof.
+action 'is.workflow.actions.output' outputValue(variable value: 'WFOutput')
+
+const originalInput = listen("After Pause", "jp-JP")
+
+const modelPrompt = text("You are Clarity's UNDERSTAND layer. Preserve original_input exactly. Never claim execution. Split the user's natural input into independent intents in original order. Do not invent missing content. Return only a Dictionary with exactly two keys: original_input and intents. intents must be an array. Each intents item must be a Dictionary with exactly one key named text. text must contain only that individual intent in natural Japanese. original_input: {originalInput}")
+
+const modelResult = askChatGPT(
+  modelPrompt,
+  false,
+  "Dictionary"
+)
+
+@parsed = getDictionary(modelResult)
+@echoedInputValue = getValue(@parsed, "original_input")
+@echoedInput = "{@echoedInputValue}"
+@intentsRaw = getValue(@parsed, "intents")
+
+if @echoedInput != "{originalInput}" {
+    @blocked = {"status":"blocked","verified":false,"result":{"message":"original_input_mismatch"},"error_code":"ORIGINAL_INPUT_MISMATCH"}
+    show("Clarity Model Router Proof\nBLOCKED\nORIGINAL_INPUT_MISMATCH")
+    outputValue(@blocked)
+}
+
+if !@intentsRaw {
+    @blocked = {"status":"blocked","verified":false,"result":{"message":"intents_missing"},"error_code":"INVALID_UNDERSTAND_OUTPUT"}
+    show("Clarity Model Router Proof\nBLOCKED\nINVALID_UNDERSTAND_OUTPUT")
+    outputValue(@blocked)
+}
+
+@intentCount = 0
+
+for intentItem in @intentsRaw {
+    @intent = getDictionary(@intentItem)
+    @intentTextValue = getValue(@intent, "text")
+    @intentText = "{@intentTextValue}"
+
+    if !@intentText {
+        @blocked = {"status":"blocked","verified":false,"result":{"message":"intent_text_missing"},"error_code":"INVALID_UNDERSTAND_OUTPUT"}
+        show("Clarity Model Router Proof\nBLOCKED\nINVALID_UNDERSTAND_OUTPUT")
+        outputValue(@blocked)
+    }
+
+    // Parent-owned canonical action normalization for this side-effect-free proof.
+    // The model does not choose module/risk/policy values.
+    @routerRequest = {"module":"YOS_Test","input":{"echo":"{@intentText}"}}
+    @childRaw = run("Clarity Dispatcher Proof", @routerRequest)
+    @child = getDictionary(@childRaw)
+    @childStatusValue = getValue(@child, "status")
+    @childStatus = "{@childStatusValue}"
+    @childVerified = getValue(@child, "verified")
+
+    if @childStatus != "success" || !@childVerified {
+        @failed = {"status":"failed","verified":false,"result":{"message":"child_unverified"},"error_code":"CHILD_RESULT_UNVERIFIED"}
+        show("Clarity Model Router Proof\nFAILED\nCHILD_RESULT_UNVERIFIED")
+        outputValue(@failed)
+    }
+
+    @intentCount += 1
+}
+
+if @intentCount < 1 {
+    @blocked = {"status":"blocked","verified":false,"result":{"message":"no_intents"},"error_code":"INVALID_UNDERSTAND_OUTPUT"}
+    show("Clarity Model Router Proof\nBLOCKED\nINVALID_UNDERSTAND_OUTPUT")
+    outputValue(@blocked)
+}
+
+@passed = {"status":"success","verified":true,"result":{"message":"MODEL_ROUTER_E2E_PASS"},"error_code":""}
+show("Clarity Model Router Proof\nPASS\nMODEL_ROUTER_E2E_PASS\nIntents: {@intentCount}")
+outputValue(@passed)

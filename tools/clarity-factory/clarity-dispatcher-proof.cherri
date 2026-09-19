@@ -1,0 +1,45 @@
+#define name Clarity Dispatcher Proof
+#define color blue
+#define version 18
+
+#include 'actions/shortcuts'
+
+// Cherri's stock Stop and Output wrapper is text-only. This local typed
+// definition preserves Dictionary child results for the parent dispatcher.
+action 'is.workflow.actions.output' outputValue(variable value: 'WFOutput')
+
+/*
+Phase 2 technical proof only.
+No production cutover and no side-effecting module is enabled here.
+
+Contract:
+Shortcut Input is a dictionary containing:
+- module: registered module name
+- input: dictionary passed unchanged to the child Shortcut
+
+The registry is intentionally tiny for proof. Unknown modules fail closed.
+Dictionary values are normalized through text interpolation before comparison
+because Cherri getValue() returns the generic variable type.
+The selected child name is then passed to Apple's Run Shortcut action.
+*/
+
+@request = getDictionary(ShortcutInput)
+@moduleValue = getValue(@request, "module")
+@module = "{@moduleValue}"
+@childInput = getValue(@request, "input")
+
+@registered = false
+@childName = ""
+
+if @module == "YOS_Test" {
+    @registered = true
+    @childName = "YOS_Test"
+}
+
+if @registered == false {
+    @blocked = {"status":"blocked","verified":false,"result":{},"error_code":"UNREGISTERED_MODULE"}
+    outputValue(@blocked)
+}
+
+@childResult = run(@childName, @childInput)
+outputValue(@childResult)

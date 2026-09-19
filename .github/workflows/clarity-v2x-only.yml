@@ -1,0 +1,87 @@
+name: Clarity V2X import-safe pair
+
+on:
+  pull_request:
+    paths:
+      - 'tools/clarity-factory/clarity-actions-v2x.cherri'
+      - 'tools/clarity-factory/clarity-probe-v2x.cherri'
+      - '.github/workflows/clarity-v2x-only.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-sign-v2x:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pinned Cherri v2.3.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          url='https://github.com/electrikmilk/cherri/releases/download/v2.3.0/cherri_linux-x86_64.zip'
+          expected='7ab2c384b7b26e7c72a30a8dfa56f89dae12c4068b7951bc1e3193f3698edbe9'
+          curl -fsSL "$url" -o /tmp/cherri.zip
+          printf '%s  %s\n' "$expected" /tmp/cherri.zip | sha256sum -c -
+          mkdir -p /tmp/cherri
+          unzip -q /tmp/cherri.zip -d /tmp/cherri
+          binary="$(find /tmp/cherri -type f -name cherri -print -quit)"
+          sudo install -m 0755 "$binary" /usr/local/bin/cherri
+
+      - name: Compile V2X
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd tools/clarity-factory
+          cherri clarity-actions-v2x.cherri --skip-sign --debug
+          cherri clarity-probe-v2x.cherri --skip-sign --debug
+          child='./ClarityActionsV2X_unsigned.shortcut'
+          probe='./ClarityProbeV2X_unsigned.shortcut'
+          test -f "$child"
+          test -f "$probe"
+          python3 patch_append_file_paths.py "$child"
+          python3 patch_reminder_wire_format.py "$child"
+          python3 patch_execute_actions_readback.py "$child"
+          python3 validate_clarity_execute_actions.py "$child"
+          grep -q 'ClarityActionsV2X' "$probe"
+          mkdir -p artifacts-v2x
+          cp "$child" artifacts-v2x/ClarityActionsV2X.shortcut
+          cp "$probe" artifacts-v2x/ClarityProbeV2X.shortcut
+
+      - name: Sign V2X
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/clarity-factory/sign_with_hubsign.py \
+            --input tools/clarity-factory/artifacts-v2x/ClarityActionsV2X.shortcut \
+            --output tools/clarity-factory/artifacts-v2x/ClarityActionsV2X-signed.shortcut \
+            --name 'ClarityActionsV2X'
+          python3 tools/clarity-factory/sign_with_hubsign.py \
+            --input tools/clarity-factory/artifacts-v2x/ClarityProbeV2X.shortcut \
+            --output tools/clarity-factory/artifacts-v2x/ClarityProbeV2X-signed.shortcut \
+            --name 'ClarityProbeV2X'
+
+      - name: Verify AEA1
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          base=Path('tools/clarity-factory/artifacts-v2x')
+          for name in ('ClarityActionsV2X-signed.shortcut','ClarityProbeV2X-signed.shortcut'):
+              data=(base/name).read_bytes()
+              assert data.startswith(b'AEA1')
+              assert len(data)>500
+              print(name, len(data))
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: clarity-v2x
+          path: |
+            tools/clarity-factory/artifacts-v2x/ClarityActionsV2X-signed.shortcut
+            tools/clarity-factory/artifacts-v2x/ClarityProbeV2X-signed.shortcut
+          if-no-files-found: error
