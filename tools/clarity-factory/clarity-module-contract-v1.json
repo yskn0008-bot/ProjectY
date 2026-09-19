@@ -1,5 +1,5 @@
 {
-  "version": "1.1",
+  "version": "1.2",
   "purpose": "Additive Clarity Router-to-child-Shortcut contract. Existing Clarity executors remain the fallback until physical iPhone E2E passes.",
   "understand_layer": {
     "preferred_runtime": "apple_shortcuts_use_model",
@@ -100,5 +100,73 @@
     "protected_action_rule": "If iOS requires explicit user interaction or exposes no public automation API, route to the nearest native UI instead of pretending the action ran.",
     "dynamic_app_rule": "Installed third-party App Intents are device-dependent and must be registered/verified before execution.",
     "physical_acceptance": "No capability route is complete until its real iPhone path reaches Verify/Ledger successfully."
+  },
+  "formal_v2": {
+    "candidate_parent": "Clarity Formal v2",
+    "candidate_child": "Clarity Actions Formal v2",
+    "architecture": "Raw First -> Apple Shortcuts Use Model -> ACTION[] -> policy/router -> child executor -> Verify/Ledger",
+    "new_modules": {
+      "OpenApp": {
+        "mode": "direct_shortcuts",
+        "target_field": "target",
+        "allowlist": [
+          "safari",
+          "shortcuts",
+          "files",
+          "notes",
+          "phone",
+          "reminders",
+          "mail",
+          "music",
+          "calendar",
+          "maps",
+          "contacts",
+          "health",
+          "photos",
+          "appstore",
+          "facetime",
+          "chatgpt",
+          "scriptable",
+          "youtube",
+          "spotify",
+          "google_sheets"
+        ],
+        "unknown": "needs_review_then_block"
+      },
+      "DeviceSetting": {
+        "mode": "direct_shortcuts",
+        "target_field": "target",
+        "value_field": "value",
+        "supported": [
+          "wifi",
+          "bluetooth",
+          "low_power_mode",
+          "brightness",
+          "volume",
+          "appearance",
+          "flashlight",
+          "do_not_disturb"
+        ],
+        "unsupported_direct": [
+          "cellular_data",
+          "airplane_mode"
+        ],
+        "unknown": "needs_review_then_block"
+      },
+      "MyWay": {
+        "mode": "existing_asset",
+        "target": "home",
+        "url": "https://yskn0008-bot.github.io/ProjectY/yos/",
+        "write_path": "pending_not_added"
+      }
+    },
+    "ordering": "OpenApp and MyWay must be last display-switch actions after local writes/settings.",
+    "acceptance": {
+      "repository_compile_required": true,
+      "signed_pair_required": true,
+      "physical_iphone_e2e_required": true,
+      "status_before_device_test": "needs_device_verification",
+      "production_names_unchanged_until_acceptance": true
+    }
   }
 }
