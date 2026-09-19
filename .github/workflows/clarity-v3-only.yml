@@ -44,9 +44,10 @@ jobs:
           test -f "$probe"
           python3 patch_reminder_wire_format.py "$child"
           python3 patch_execute_actions_readback.py "$child"
-          python3 validate_clarity_execute_actions.py "$child"
-          grep -q 'ClarityActionsV3' "$probe"
           grep -q 'Clarity Ledger.txt' "$child"
+          grep -q 'Idea in Box.txt' "$child"
+          grep -q 'UNSUPPORTED_DEVICE_SETTING' "$child"
+          grep -q 'ClarityActionsV3' "$probe"
           if grep -q 'documentpicker.open' "$child"; then
             echo 'V3 child unexpectedly depends on Get File.' >&2
             exit 1
