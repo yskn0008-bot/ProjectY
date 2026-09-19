@@ -1,0 +1,76 @@
+name: YOS Unified PWA Safety
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'index.html'
+      - 'manifest.webmanifest'
+      - 'service-worker.js'
+      - 'system/**'
+      - 'yos/**'
+      - 'life/**'
+      - '.github/workflows/yos-unified-pwa.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'index.html'
+      - 'manifest.webmanifest'
+      - 'service-worker.js'
+      - 'system/**'
+      - 'yos/**'
+      - 'life/**'
+      - '.github/workflows/yos-unified-pwa.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: yos-unified-pwa-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --check service-worker.js
+      - run: node --check yos/app.js
+      - run: node --check yos/hj/app.js
+      - run: node --test yos/tests/unified-pwa-contract.test.mjs
+
+  browser:
+    name: Unified PWA 390px (${{ matrix.browser }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, webkit]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install browser
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps ${{ matrix.browser }}
+      - name: Start static server
+        run: |
+          python3 -m http.server 4173 --directory . > /tmp/yos-unified-pwa.log 2>&1 &
+          for i in {1..30}; do
+            curl -fsS http://127.0.0.1:4173/yos/ >/dev/null && exit 0
+            sleep 1
+          done
+          cat /tmp/yos-unified-pwa.log
+          exit 1
+      - name: Run online + offline smoke
+        env:
+          YOS_BROWSER: ${{ matrix.browser }}
+        run: node yos/tests/unified-pwa-browser-smoke.mjs
