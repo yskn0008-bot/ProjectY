@@ -150,6 +150,50 @@ jobs:
               print(f'{name}: PASS ({len(data)} bytes)')
           PY
 
+      - name: Compile deterministic brightness probe
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd tools/clarity-factory
+          rm -f './Clarity Brightness Probe_unsigned.shortcut' './Clarity Brightness Probe.plist'
+          cherri clarity-brightness-probe.cherri --skip-sign --debug
+          probe='./Clarity Brightness Probe_unsigned.shortcut'
+          test -f "$probe"
+          python3 - "$probe" <<'PY'
+          import plistlib, sys
+          with open(sys.argv[1], 'rb') as fh:
+              root = plistlib.load(fh)
+          acts = root.get('WFWorkflowActions', [])
+          found = [a for a in acts if a.get('WFWorkflowActionIdentifier') == 'is.workflow.actions.setbrightness']
+          assert len(found) == 1, len(found)
+          value = found[0].get('WFWorkflowActionParameters', {}).get('WFBrightness')
+          assert value == 0.35, value
+          print('Brightness probe compile contract: PASS')
+          PY
+          cp "$probe" artifacts-formal-v2/Clarity-Brightness-Probe-unsigned.shortcut
+
+      - name: Sign deterministic brightness probe
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/clarity-factory/sign_with_hubsign.py \
+            --input tools/clarity-factory/artifacts-formal-v2/Clarity-Brightness-Probe-unsigned.shortcut \
+            --output tools/clarity-factory/artifacts-formal-v2/Clarity-Brightness-Probe-signed.shortcut \
+            --name 'Clarity Brightness Probe'
+
+      - name: Verify signed brightness probe
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('tools/clarity-factory/artifacts-formal-v2/Clarity-Brightness-Probe-signed.shortcut')
+          data = p.read_bytes()
+          assert data.startswith(b'AEA1'), data[:8]
+          assert len(data) > 500, len(data)
+          print(f'{p.name}: PASS ({len(data)} bytes)')
+          PY
+
       - name: Upload Formal v2 pair
         uses: actions/upload-artifact@v4
         with:
@@ -159,5 +203,7 @@ jobs:
             tools/clarity-factory/artifacts-formal-v2/Clarity-Formal-v2-signed.shortcut
             tools/clarity-factory/artifacts-formal-v2/Clarity-Actions-Formal-v2-unsigned.shortcut
             tools/clarity-factory/artifacts-formal-v2/Clarity-Actions-Formal-v2-signed.shortcut
+            tools/clarity-factory/artifacts-formal-v2/Clarity-Brightness-Probe-unsigned.shortcut
+            tools/clarity-factory/artifacts-formal-v2/Clarity-Brightness-Probe-signed.shortcut
             tools/clarity-factory/artifacts-formal-v2/hubsign-formal-v2.log
           if-no-files-found: error
