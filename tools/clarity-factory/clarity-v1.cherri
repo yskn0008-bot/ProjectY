@@ -285,7 +285,7 @@ for actionItem in @actionsRaw {
                 appendResolvedFile(ledgerFile, blockedBrightnessRecord)
                 mustOutput("ここだけ確認して", "明るさは0〜100%で指定してください")
             }
-            const brightnessRatio = brightnessPercent / 100
+            const brightnessRatio = brightnessPercent * 0.01
             setBrightness(brightnessRatio)
         }
         if target == "volume" {
@@ -295,7 +295,7 @@ for actionItem in @actionsRaw {
                 appendResolvedFile(ledgerFile, blockedVolumeRecord)
                 mustOutput("ここだけ確認して", "音量は0〜100%で指定してください")
             }
-            const volumeRatio = volumePercent / 100
+            const volumeRatio = volumePercent * 0.01
             setVolume(volumeRatio)
         }
 
