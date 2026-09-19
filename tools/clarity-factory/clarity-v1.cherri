@@ -9,6 +9,9 @@
 #include 'actions/settings'
 #include 'actions/web'
 
+action 'setbrightness' setBrightnessNumber(number brightness: 'WFBrightness')
+action 'setvolume' setVolumeNumber(number volume: 'WFVolume')
+
 // iOS 26 real-device compatibility: resolve the file first, then append through WFFile.
 // Cherri v2.3.0's stock appendToFile() emits path-only WFFilePath, which can complete
 // without persisting on current Shortcuts. This definition intentionally uses WFFile.
@@ -286,7 +289,7 @@ for actionItem in @actionsRaw {
                 mustOutput("ここだけ確認して", "明るさは0〜100%で指定してください")
             }
             const brightnessRatio = brightnessPercent * 0.01
-            setBrightness(brightnessRatio)
+            setBrightnessNumber(brightnessRatio)
         }
         if target == "volume" {
             const volumePercent = getNumbers(content)
@@ -296,7 +299,7 @@ for actionItem in @actionsRaw {
                 mustOutput("ここだけ確認して", "音量は0〜100%で指定してください")
             }
             const volumeRatio = volumePercent * 0.01
-            setVolume(volumeRatio)
+            setVolumeNumber(volumeRatio)
         }
 
         const settingAppliedRecord = text("{CurrentDate}\t{requestNumber}\t{actionId}\tAPPLIED\tdevice_setting\t{target}={content}\n")
