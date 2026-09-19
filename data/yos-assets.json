@@ -1,11 +1,11 @@
 {
   "schema_version": "1.0.0",
   "ssot": "YOS asset registry",
-  "updated_at": "2026-09-19T04:15:00+09:00",
+  "updated_at": "2026-09-20T05:22:00+09:00",
   "source": {
     "repository": "yskn0008-bot/ProjectY",
     "base_branch": "main",
-    "base_sha": "08b28945a4fa180996893e0973eeceb4971bbf95",
+    "base_sha": "e1744fa2e302fd21ffe5feec7cbcc9e5a1209b55",
     "issue": "https://github.com/yskn0008-bot/ProjectY/issues/371",
     "legacy_22_asset_table_verified": false,
     "note": "Reconciled 2026-09-18 with current main, iPhone visual evidence, and passing automated checks. Preserve names; continue evidence-based updates."
@@ -60,9 +60,9 @@
       "area": "core",
       "status": "awaiting_production_verification",
       "priority": 1,
-      "current": "YOS iOS AppはMY WAYを起動HOMEとして同梱し、Life/Money/Hero’s Journey/Idea/System/Clarity/BRAVIAへのアプリ内導線を実装。Capacitor iOS生成・署名前Simulator build・生成済み.app内のMY WAY同梱検査までPASS。",
-      "next_action": "Apple Developer署名情報を接続し、クラウド署名→IPA→TestFlight配布を実行する。",
-      "blocker": "Apple Developer Program / App Store Connectの本人アカウント側で署名・配布情報の準備が必要。",
+      "current": "Apple有料署名は保留。現在は無料で使える統合YOS PWAを完成優先。ルート起動→MY WAY、Life/Money/Hero’s Journey/Idea/System、Clarity/MY REMOTE導線、統合root Service Workerまで実装済み。",
+      "next_action": "統合YOS PWAをiPhoneで最終受入確認し、ホーム画面追加・主要5領域・保存・再起動・オフライン利用を実機で確認する。",
+      "blocker": "コード側の重大ブロッカーなし。最終完成判定にはiPhone実機での受入確認が必要。",
       "needs_user_action": true,
       "device_verified": true,
       "production_verified": false,
@@ -77,7 +77,11 @@
         "device:iPhone Scriptable HARMONY HOME opened successfully 2026-09-18",
         "CI:YOS iOS App Safety run 35384910156 contract/bundle PASS",
         "CI:YOS iOS App Safety run 35384910156 native iOS simulator build PASS",
-        "CI:YOS iOS App Safety run 35384910156 packaged App.app contains native boot -> MY WAY PASS"
+        "CI:YOS iOS App Safety run 35384910156 packaged App.app contains native boot -> MY WAY PASS",
+        "implementation:root PWA manifest opens ./yos/ and scopes entire ProjectY",
+        "implementation:unified root service worker caches MY WAY/Life/Hero’s Journey/System",
+        "CI:YOS Unified PWA Safety contract + Chromium + WebKit PASS 2026-09-19",
+        "decision:Apple Developer paid signing postponed until PWA practical completion"
       ],
       "progress_basis": {
         "spec": true,
@@ -87,7 +91,7 @@
         "production": false
       },
       "progress": 85,
-      "updated_at": "2026-09-19T04:15:00+09:00"
+      "updated_at": "2026-09-20T05:22:00+09:00"
     },
     {
       "id": "my-way",
