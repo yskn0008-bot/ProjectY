@@ -43,7 +43,6 @@ jobs:
           test -f "$child"
           test -f "$probe"
           python3 patch_reminder_wire_format.py "$child"
-          python3 patch_execute_actions_readback.py "$child"
           grep -q 'Clarity Ledger.txt' "$child"
           grep -q 'Idea in Box.txt' "$child"
           grep -q 'UNSUPPORTED_DEVICE_SETTING' "$child"
