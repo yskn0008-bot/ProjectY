@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-19T20:53:09+09:00",
+  "updated_at": "2026-09-19T20:53:41+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -165,6 +165,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-16458d454211",
+      "title": "pwa: expose Clarity Remote and System from MY WAY",
+      "completed_at": "2026-09-19T11:53:28Z",
+      "result": "GitHub mainへ反映（16458d4）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/16458d4542116f04018392144df24e4ccb6f7349"
+    },
+    {
       "id": "github-commit-a28ee2612555",
       "title": "test(pwa): match Life root worker scope",
       "completed_at": "2026-09-19T11:52:55Z",
@@ -191,13 +198,6 @@
       "completed_at": "2026-09-19T11:50:25Z",
       "result": "GitHub mainへ反映（36c0a4f）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/36c0a4f9d2fbc51b4a34286c97c7646fa567bd88"
-    },
-    {
-      "id": "github-commit-8dff4efe8ff2",
-      "title": "fix(money): load latest Money UI in YOS",
-      "completed_at": "2026-09-19T11:28:43Z",
-      "result": "GitHub mainへ反映（8dff4ef）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/8dff4efe8ff2891ddd2f2df92f5744640c2516ab"
     },
     {
       "id": "complete-002",
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-19T20:53:09+09:00",
+      "last_update": "2026-09-19T20:53:41+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -315,7 +315,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-19T20:53:09+09:00",
+      "last_update": "2026-09-19T20:53:41+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-19T20:53:09+09:00",
+      "last_update": "2026-09-19T20:53:41+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "e23aa91e9b3497f43c464757166702649111ffa43cfa7780e44b19ed8716e068"
+  "github_snapshot_hash": "c310196126b92a55bfcf637a196e713eb9603b35663d94273b83d20cfba59121"
 }
