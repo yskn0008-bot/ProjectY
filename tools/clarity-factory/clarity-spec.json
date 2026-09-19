@@ -28,8 +28,19 @@
     "organize",
     "automate"
   ],
-  "urgencies": ["now", "soon", "today", "scheduled", "background"],
-  "risks": ["low", "medium", "high", "irreversible"],
+  "urgencies": [
+    "now",
+    "soon",
+    "today",
+    "scheduled",
+    "background"
+  ],
+  "risks": [
+    "low",
+    "medium",
+    "high",
+    "irreversible"
+  ],
   "v1_executors": [
     "idea",
     "memo",
@@ -38,7 +49,10 @@
     "reminder",
     "shopping",
     "answer",
-    "shortcut_factory"
+    "shortcut_factory",
+    "open_app",
+    "device_setting",
+    "myway"
   ],
   "confirmation_required_for": [
     "high",
@@ -57,6 +71,82 @@
     "external_write_default": false,
     "silent_when_no_feedback_needed": true,
     "shortcut_generation": "allowed_after_validation",
-    "shortcut_install_sign_or_publish": "needs_review_until_trusted_distribution_ready"
-  }
+    "shortcut_install_sign_or_publish": "needs_review_until_trusted_distribution_ready",
+    "local_device_changes": "explicit_allowlist_only",
+    "open_app": "explicit_allowlist_only",
+    "myway_summary": "reuse_existing_home"
+  },
+  "v1_open_apps": [
+    "safari",
+    "shortcuts",
+    "files",
+    "notes",
+    "phone",
+    "reminders",
+    "mail",
+    "music",
+    "calendar",
+    "maps",
+    "contacts",
+    "health",
+    "photos",
+    "appstore",
+    "facetime",
+    "chatgpt",
+    "scriptable",
+    "youtube",
+    "spotify",
+    "google_sheets"
+  ],
+  "v1_device_settings": {
+    "wifi": [
+      "on",
+      "off",
+      "toggle"
+    ],
+    "bluetooth": [
+      "on",
+      "off",
+      "toggle"
+    ],
+    "cellular_data": [
+      "on",
+      "off",
+      "toggle"
+    ],
+    "airplane_mode": [
+      "on",
+      "off",
+      "toggle"
+    ],
+    "low_power_mode": [
+      "on",
+      "off",
+      "toggle"
+    ],
+    "brightness": [
+      "0..100"
+    ],
+    "volume": [
+      "0..100"
+    ],
+    "appearance": [
+      "light",
+      "dark",
+      "toggle"
+    ],
+    "flashlight": [
+      "on",
+      "off",
+      "toggle"
+    ],
+    "do_not_disturb": [
+      "on",
+      "off",
+      "toggle"
+    ]
+  },
+  "v1_myway_targets": [
+    "home"
+  ]
 }
