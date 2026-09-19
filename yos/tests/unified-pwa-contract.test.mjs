@@ -22,6 +22,9 @@ test('root manifest installs one YOS app across all main domains', async () => {
   assert.match(life,/href="\.\.\/manifest\.webmanifest"/);
   assert.match(hj,/href="\.\.\/\.\.\/manifest\.webmanifest"/);
   assert.match(system,/YOS System｜Mission Control/);
+  assert.match(yos,/data-web-only href="shortcuts:\/\/run-shortcut\?name=Clarity"/);
+  assert.match(yos,/data-web-only href="scriptable:\/\/\/run\?scriptName=YOS%20Remote%20Hub"/);
+  assert.match(yos,/data-web-only href="\.\.\/system\/"/);
 });
 
 test('domain pages replace scoped workers with the root YOS worker', async () => {
