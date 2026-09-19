@@ -26,3 +26,16 @@ test('detail renders all-day label without midnight times; timed midnight stays 
   assert.equal(rows.length,1);assert.equal(rows[0].innerHTML.includes('終日'),isAllDay);assert.equal(rows[0].innerHTML.includes('00:00'),!isAllDay);
  }
 });
+
+test('calendar update launches the installed script without opening JSON input or claiming success',()=>{
+ const nodes={syncLaunchStatus:{hidden:true},syncHelpButton:{hidden:true},syncDialog:{open:false,showModal(){throw Error('manual dialog opened')}}};
+ const location={};
+ const fn=html.slice(html.indexOf('function launchCalendarSync('),html.indexOf("el('syncButton').onclick=launchCalendarSync;"));
+ vm.runInNewContext(fn+';launchCalendarSync()',{el:id=>nodes[id],location});
+ const url=new URL(location.href);
+ assert.equal(url.protocol,'scriptable:');
+ assert.equal(url.pathname,'/run');
+ assert.equal(url.searchParams.get('scriptName'),'YOS Life Calendar Sync');
+ assert.equal(nodes.syncHelpButton.hidden,false);
+ assert.doesNotMatch(nodes.syncLaunchStatus.textContent,/更新しました|取り込みました/);
+});
