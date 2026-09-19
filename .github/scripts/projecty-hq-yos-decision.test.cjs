@@ -104,7 +104,7 @@ test('YOS transport and status actions do not invoke Codex', async () => {
   assert.match(comments[1], /direct-status-required/);
 });
 
-test('YOS uses Codex only for a real code-fix fallback', async () => {
+test('YOS code-fix requests also stay on direct tools by default', async () => {
   let body = '';
   const api = {
     async request(path, options = {}) {
@@ -116,8 +116,9 @@ test('YOS uses Codex only for a real code-fix fallback', async () => {
     },
   };
   await performAllowedAction(api, {number: 4}, 'REQUEST_CODE_FIX', {}, HEAD);
-  assert.match(body, /@codex/);
-  assert.match(body, /PROJECTY_FULL_FILE/);
+  assert.doesNotMatch(body, /@codex/i);
+  assert.match(body, /direct-code-fix-required/);
+  assert.match(body, /Do not auto-start Codex/);
 });
 
 test('OIDC token request uses Actions runtime and never needs a long-lived secret', async () => {
