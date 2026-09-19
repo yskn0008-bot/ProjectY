@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-20T05:40:46+09:00",
+  "updated_at": "2026-09-20T05:41:54+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -70,7 +70,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-09-19T20:40:23Z"
+      "updated_at": "2026-09-19T20:40:59Z"
     },
     {
       "id": "github-issue-256",
@@ -165,6 +165,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-7f8509674330",
+      "title": "data: record unified YOS PWA release gate",
+      "completed_at": "2026-09-19T20:41:42Z",
+      "result": "GitHub mainへ反映（7f85096）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/7f85096743305a741728fb46a41150f61fc664a9"
+    },
+    {
       "id": "github-commit-000a78c64f34",
       "title": "ios: bundle unified YOS manifest worker and icons",
       "completed_at": "2026-09-19T20:39:57Z",
@@ -191,13 +198,6 @@
       "completed_at": "2026-09-19T20:23:26Z",
       "result": "GitHub mainへ反映（0bd6d5e）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/0bd6d5e6612a967794f45f604aab4a8700d7b46b"
-    },
-    {
-      "id": "github-commit-f6e6b0c6a18a",
-      "title": "Governance: make Codex opt-in and cost-first",
-      "completed_at": "2026-09-19T18:36:24Z",
-      "result": "GitHub mainへ反映（f6e6b0c）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/f6e6b0c6a18ac0e0e2eee12b3cf8bb11691c02de"
     },
     {
       "id": "complete-002",
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-20T05:40:46+09:00",
+      "last_update": "2026-09-20T05:41:54+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -315,7 +315,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-20T05:40:46+09:00",
+      "last_update": "2026-09-20T05:41:54+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-20T05:40:46+09:00",
+      "last_update": "2026-09-20T05:41:54+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "7a9795925d061cb2700cfa0324e9740ae437a4b840c4a32f74bc3bd9ede62e06"
+  "github_snapshot_hash": "a198216bbefc4c7664402e599ed27fe3f0d24a6750275b5b3ef210bac3485891"
 }
