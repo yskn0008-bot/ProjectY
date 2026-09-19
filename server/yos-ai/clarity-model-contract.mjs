@@ -2,7 +2,10 @@ const DOMAINS = ['life', 'work', 'money', 'home', 'idea', 'shopping', 'communica
 const INTENTS = ['remember', 'answer', 'create', 'update', 'find', 'compare', 'decide', 'execute', 'monitor', 'notify', 'send', 'buy', 'organize', 'automate'];
 const URGENCIES = ['now', 'soon', 'today', 'scheduled', 'background'];
 const RISKS = ['low', 'medium', 'high', 'irreversible'];
-const EXECUTORS = ['idea', 'memo', 'task', 'calendar', 'reminder', 'shopping', 'answer', 'shortcut_factory'];
+const EXECUTORS = ['idea', 'memo', 'task', 'calendar', 'reminder', 'shopping', 'answer', 'shortcut_factory', 'open_app', 'device_setting', 'myway'];
+const OPEN_APPS = new Set(['safari', 'shortcuts', 'files', 'notes', 'phone', 'reminders', 'mail', 'music', 'calendar', 'maps', 'contacts', 'health', 'photos', 'appstore', 'facetime', 'chatgpt', 'scriptable', 'youtube', 'spotify', 'google_sheets']);
+const TOGGLE_SETTINGS = new Set(['wifi', 'bluetooth', 'cellular_data', 'airplane_mode', 'low_power_mode', 'flashlight', 'do_not_disturb']);
+const DEVICE_SETTINGS = new Set([...TOGGLE_SETTINGS, 'brightness', 'volume', 'appearance']);
 
 const actionProperties = {
   id: {type: 'string'},
@@ -137,6 +140,29 @@ export function validateClarityModelResult(result) {
     }
     if (action.executor === 'shortcut_factory' && (action.domain !== 'system' || action.intent !== 'automate')) {
       errors.push(`${prefix}.shortcut_factory route is invalid`);
+    }
+    if (action.executor === 'open_app') {
+      if (action.domain !== 'system' || action.intent !== 'execute') errors.push(`${prefix}.open_app route is invalid`);
+      if (action.needs_review !== true && !OPEN_APPS.has(action.target)) errors.push(`${prefix}.open_app target is unsupported`);
+    }
+    if (action.executor === 'device_setting') {
+      if (action.domain !== 'system' || action.intent !== 'update') errors.push(`${prefix}.device_setting route is invalid`);
+      if (action.needs_review !== true && !DEVICE_SETTINGS.has(action.target)) errors.push(`${prefix}.device_setting target is unsupported`);
+      if (action.needs_review !== true && TOGGLE_SETTINGS.has(action.target) && !['on', 'off', 'toggle'].includes(action.content)) {
+        errors.push(`${prefix}.device_setting value is invalid`);
+      }
+      if (action.needs_review !== true && action.target === 'appearance' && !['light', 'dark', 'toggle'].includes(action.content)) {
+        errors.push(`${prefix}.appearance value is invalid`);
+      }
+      if (action.needs_review !== true && ['brightness', 'volume'].includes(action.target)) {
+        const percent = Number(action.content);
+        if (!/^(?:0|[1-9]\d?|100)$/u.test(action.content) || !Number.isFinite(percent) || percent < 0 || percent > 100) {
+          errors.push(`${prefix}.device_setting percent is invalid`);
+        }
+      }
+    }
+    if (action.executor === 'myway') {
+      if (action.domain !== 'life' || action.intent !== 'find' || action.target !== 'home') errors.push(`${prefix}.myway route is invalid`);
     }
     if (action.needs_review !== true) {
       if ((action.executor === 'calendar' || action.executor === 'reminder') && !nonEmptyText(action.date_time)) {
