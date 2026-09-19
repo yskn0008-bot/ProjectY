@@ -1,0 +1,44 @@
+#define name Clarity DeviceSetting Probe
+#define color blue
+
+#include 'actions/text'
+#include 'actions/shortcuts'
+
+const payload = {
+    "original_input":"brightness-probe",
+    "actions":[
+        {
+            "id":"a1",
+            "module":"DeviceSetting",
+            "input":{
+                "text":"",
+                "title":"",
+                "date_time":"",
+                "end_date_time":"",
+                "alert_minutes_before":"",
+                "amount":"",
+                "merchant":"",
+                "item":"",
+                "note":"",
+                "raw_input":"brightness-probe",
+                "target":"brightness",
+                "value":"35"
+            },
+            "risk":"low",
+            "external_write":false,
+            "needs_review":false,
+            "needs_confirmation":false,
+            "status":"planned"
+        }
+    ]
+}
+
+const childRaw = run("Clarity Actions Formal v2", payload)
+@child = getDictionary(childRaw)
+@statusValue = getValue(@child, "status")
+@status = "{@statusValue}"
+@verified = getValue(@child, "verified")
+@errorValue = getValue(@child, "error_code")
+@error = "{@errorValue}"
+
+show("Clarity DeviceSetting Probe\nstatus: {@status}\nverified: {@verified}\nerror: {@error}")
