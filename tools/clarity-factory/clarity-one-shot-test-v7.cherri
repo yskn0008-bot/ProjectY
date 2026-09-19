@@ -31,6 +31,7 @@ const childRaw = run("ClarityOneShotChildV7", payload)
 wait(1)
 
 const currentBrightness = getDeviceDetail("Current Brightness")
+@currentBrightnessText = "{currentBrightness}"
 const ledgerFile = getFile("Clarity One Shot V7.txt")
 
 @ledgerText = ""
@@ -53,7 +54,7 @@ if childRaw {
 }
 
 @brightnessOK = false
-if currentBrightness == 0.35 {
+if @currentBrightnessText == "0.35" {
     @brightnessOK = true
 }
 
