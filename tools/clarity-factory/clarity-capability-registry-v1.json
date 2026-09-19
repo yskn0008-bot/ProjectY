@@ -1,5 +1,5 @@
 {
-  "version": "1.0",
+  "version": "1.2",
   "name": "Clarity iPhone Capability Registry",
   "target_platform": "iPhone / iOS 26+",
   "owner_entry_policy": "Clarity is the single normal user entry point for all supported iPhone actions.",
@@ -237,31 +237,31 @@
       "id": "device.brightness.set",
       "domain": "device",
       "mode": "direct_shortcuts",
-      "status": "pending_module"
+      "status": "needs_device_verification"
     },
     {
       "id": "device.volume.set",
       "domain": "device",
       "mode": "direct_shortcuts",
-      "status": "pending_module"
+      "status": "needs_device_verification"
     },
     {
       "id": "device.focus.set",
       "domain": "device",
       "mode": "direct_shortcuts",
-      "status": "pending_module"
+      "status": "needs_device_verification"
     },
     {
       "id": "device.low_power.set",
       "domain": "device",
       "mode": "direct_shortcuts",
-      "status": "pending_module"
+      "status": "needs_device_verification"
     },
     {
       "id": "device.appearance.set",
       "domain": "device",
       "mode": "direct_shortcuts",
-      "status": "pending_module"
+      "status": "needs_device_verification"
     },
     {
       "id": "device.orientation_lock.set",
@@ -363,7 +363,7 @@
       "id": "apps.open",
       "domain": "apps",
       "mode": "direct_shortcuts",
-      "status": "pending_module"
+      "status": "needs_device_verification"
     },
     {
       "id": "shortcuts.run_registered",
@@ -496,6 +496,25 @@
       "domain": "security",
       "mode": "open_native_ui",
       "status": "ui_handoff_required"
+    },
+    {
+      "id": "device.flashlight.set",
+      "domain": "device",
+      "mode": "direct_shortcuts",
+      "status": "needs_device_verification"
+    },
+    {
+      "id": "myway.home.open",
+      "domain": "myway",
+      "mode": "existing_yos_asset",
+      "status": "needs_device_verification"
+    },
+    {
+      "id": "myway.input.route",
+      "domain": "myway",
+      "mode": "registered_child_shortcut",
+      "status": "pending_module"
     }
-  ]
+  ],
+  "formal_v2_note": "OpenApp, reversible device settings, and MY WAY Home are candidates only until physical iPhone E2E passes. Cellular data and airplane mode remain outside the verified direct set."
 }
