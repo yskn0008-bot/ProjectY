@@ -171,7 +171,7 @@ function decide(target, kind, evidence) {
   const old = target.failures[id] || { attempts: 0, seen: [] };
   const delivery = String(evidence.delivery || '');
   if (delivery && old.seen.includes(delivery)) return { action: 'NONE', id, record: old };
-  const record = { ...old, seen: [...old.seen, delivery].filter(Boolean).slice(-MAX_SEEN) };
+  const record = { ...old, failureClass: kind, seen: [...old.seen, delivery].filter(Boolean).slice(-MAX_SEEN) };
   const ladders = {
     ACTION_TRANSIENT_FAILURE: ['RERUN_FAILED', 'REQUEST_CODE_FIX'],
     ACTION_CODE_FAILURE: ['REQUEST_CODE_FIX'], TASK_STALLED: ['REQUEST_STATUS'],

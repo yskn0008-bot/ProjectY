@@ -2,6 +2,7 @@
 
 const crypto = require('node:crypto');
 const { parseRecovery } = require('./projecty-hq-autopilot.cjs');
+const { deterministicDecision, supervisorFingerprint, toLegacyDecision } = require('./projecty-development-supervisor.cjs');
 
 const ISSUE_NUMBER = 232;
 const DECISION_MARKER = 'projecty-yos-decision:';
@@ -72,6 +73,7 @@ function compactEvidence(target) {
     id,
     attempts: Number(value?.attempts || 0),
     phase: value?.phase || null,
+    failureClass: value?.failureClass || null,
     lastError: value?.lastError ? String(value.lastError).slice(0, 300) : null,
   }));
   return JSON.stringify({
@@ -84,6 +86,8 @@ function compactEvidence(target) {
 }
 
 function inferFailureClass(target) {
+  const latest = Object.values(target?.failures || {}).reverse().find((value) => value?.failureClass);
+  if (latest?.failureClass) return String(latest.failureClass).toUpperCase();
   const next = String(target?.next || '');
   if (/branch conflict/i.test(next)) return 'BRANCH_CONFLICT';
   if (/atomic transport retries exhausted/i.test(next)) return 'TRANSPORT_API_FAILURE';
@@ -214,6 +218,39 @@ async function run({ api, fetchImpl = fetch, environment = process.env, endpoint
     scope: files,
     unknowns: [targetState.next || 'next condition not recorded'].filter(Boolean),
   };
+  const supervisorBase = supervisorFingerprint({ target: key, targetState, failure: request.failureClass });
+  const supervisorAutoFingerprint = `${supervisorBase}a`;
+  const supervisorStopFingerprint = `${supervisorBase}s`;
+  if (hasDecision(issueComments, supervisorStopFingerprint)) {
+    return { status: 'ignored', reason: 'development supervisor stop already recorded', fingerprint: supervisorStopFingerprint };
+  }
+  const supervisorAlreadyAttempted = hasDecision(issueComments, supervisorAutoFingerprint);
+  const supervisor = deterministicDecision({ target: key, targetState, alreadyAttempted: supervisorAlreadyAttempted });
+  if (supervisor) {
+    const supervisorDecision = toLegacyDecision(supervisor, request.currentHead);
+    const supervisorDecisionFingerprint = supervisor.decision === 'WAIT_USER' || supervisor.decision === 'COMPLETE'
+      ? supervisorStopFingerprint
+      : supervisorAutoFingerprint;
+    const freshPr = await api.request(`/pulls/${prNumber}`);
+    if (freshPr.head?.sha !== supervisorDecision.targetHead) {
+      return { status: 'ignored', reason: 'head moved after supervisor decision', fingerprint: supervisorDecisionFingerprint };
+    }
+    const actionResult = await performAllowedAction(api, freshPr, supervisorDecision.allowedAction, supervisorDecision, supervisorDecision.targetHead);
+    await api.request(`/issues/${ISSUE_NUMBER}/comments`, {
+      method: 'POST',
+      body: JSON.stringify({ body: decisionComment(supervisorDecisionFingerprint, request, supervisorDecision, actionResult) }),
+    });
+    return {
+      status: 'recorded',
+      source: 'development_supervisor',
+      fingerprint: supervisorDecisionFingerprint,
+      decision: supervisorDecision.decision,
+      supervisorDecision: supervisor.supervisorDecision || supervisor.decision,
+      allowedAction: supervisorDecision.allowedAction,
+      actionResult,
+    };
+  }
+
   const fingerprint = decisionFingerprint(request);
   if (hasDecision(issueComments, fingerprint)) return { status: 'ignored', reason: 'decision already recorded', fingerprint };
 
