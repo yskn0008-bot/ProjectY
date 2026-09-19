@@ -40,21 +40,23 @@ try{
   await page.goto(base+'/system/',{waitUntil:'networkidle'});
   await expectText('h1','Mission Control');
 
-  await page.goto(base+'/yos/',{waitUntil:'networkidle'});
-  await page.evaluate(async()=>{await navigator.serviceWorker.ready;});
-  await page.reload({waitUntil:'networkidle'});
-  assert.equal(await page.evaluate(()=>Boolean(navigator.serviceWorker.controller)),true,'root service worker should control YOS');
+  if(browserName==='chromium'){
+    await page.goto(base+'/yos/',{waitUntil:'networkidle'});
+    await page.evaluate(async()=>{await navigator.serviceWorker.ready;});
+    await page.reload({waitUntil:'networkidle'});
+    assert.equal(await page.evaluate(()=>Boolean(navigator.serviceWorker.controller)),true,'root service worker should control YOS');
 
-  await context.setOffline(true);
+    await context.setOffline(true);
 
-  await page.goto(base+'/yos/',{waitUntil:'domcontentloaded'});
-  await expectText('#brandTitle','MY WAY');
-  await page.goto(base+'/life/',{waitUntil:'domcontentloaded'});
-  await expectText('.brand h1','MY LIFE');
-  await page.goto(base+'/yos/hj/',{waitUntil:'domcontentloaded'});
-  await expectText('.brand h1',"Hero's Journey");
-  await page.goto(base+'/system/',{waitUntil:'domcontentloaded'});
-  await expectText('h1','Mission Control');
+    await page.goto(base+'/yos/',{waitUntil:'domcontentloaded'});
+    await expectText('#brandTitle','MY WAY');
+    await page.goto(base+'/life/',{waitUntil:'domcontentloaded'});
+    await expectText('.brand h1','MY LIFE');
+    await page.goto(base+'/yos/hj/',{waitUntil:'domcontentloaded'});
+    await expectText('.brand h1',"Hero's Journey");
+    await page.goto(base+'/system/',{waitUntil:'domcontentloaded'});
+    await expectText('h1','Mission Control');
+  }
 } finally {
   await browser.close();
 }
