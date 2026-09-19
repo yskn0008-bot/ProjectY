@@ -2,12 +2,14 @@
 
 const REQUIRED_SECTIONS = [
   'Summary',
-  'Codex execution',
   'Scope',
   'Verification',
   'Readiness',
   'Remaining work'
 ];
+
+const ROUTE_SECTION = 'Implementation route / cost control';
+const LEGACY_ROUTE_SECTION = 'Codex execution';
 
 const PLACEHOLDER_PATTERNS = [
   /^\s*$/u,
@@ -81,16 +83,35 @@ function validatePrEvidence(body) {
   const summary = sections.get('Summary');
   if (!substantive(summary) || summary.length < 24) errors.push('Summary must contain a substantive result and reason.');
 
-  const codex = sections.get('Codex execution');
-  const codexOptions = [
-    'Used Codex for implementation',
-    'Codex not required; One Enter / ChatGPT / Factory used',
-    'Codex unavailable or blocked',
-    'Approved exception: no code change / emergency rollback'
-  ];
-  if (checkedCount(codex, codexOptions) !== 1) errors.push('Exactly one implementation-route option must be checked.');
-  if (!substantive(fieldValue(codex, 'Implementation route / Codex reference'))) {
-    errors.push('Implementation route / Codex reference must be filled.');
+  const route = sections.get(ROUTE_SECTION);
+  const legacyRoute = sections.get(LEGACY_ROUTE_SECTION);
+  if (!route && !legacyRoute) {
+    errors.push(`Missing required PR section: ## ${ROUTE_SECTION}`);
+  } else if (route) {
+    const routeOptions = [
+      'One Enter / ChatGPT / GitHub / Factory used directly (default)',
+      'Codex used because direct route was insufficient',
+      'No implementation change / emergency rollback'
+    ];
+    if (checkedCount(route, routeOptions) !== 1) errors.push('Exactly one implementation-route option must be checked.');
+    if (!substantive(fieldValue(route, 'Implementation route'))) {
+      errors.push('Implementation route must be filled.');
+    }
+    if (checked(route, 'Codex used because direct route was insufficient')
+      && !substantive(fieldValue(route, 'Codex reason (required only when Codex selected)'))) {
+      errors.push('Codex reason is required when Codex is selected.');
+    }
+  } else {
+    const codexOptions = [
+      'Used Codex for implementation',
+      'Codex not required; One Enter / ChatGPT / Factory used',
+      'Codex unavailable or blocked',
+      'Approved exception: no code change / emergency rollback'
+    ];
+    if (checkedCount(legacyRoute, codexOptions) !== 1) errors.push('Exactly one implementation-route option must be checked.');
+    if (!substantive(fieldValue(legacyRoute, 'Implementation route / Codex reference'))) {
+      errors.push('Implementation route / Codex reference must be filled.');
+    }
   }
 
   const scope = sections.get('Scope');
