@@ -232,7 +232,7 @@ try {
   await yosPage.waitForFunction(() => document.body.dataset.domain === 'home');
   const uniqueCompositions = await yosPage.evaluate(() => ({
     home: Boolean(document.querySelector('#homePage .home-scene')),
-    money: Boolean(document.querySelector('#moneyPage .money-overview')),
+    money: Boolean(document.querySelector('#moneyPage .money2-calendar-card')),
     journey: Boolean(document.querySelector('#journeyPage .journey-scene')),
     idea: Boolean(document.querySelector('#ideaPage .idea-capture'))
   }));
