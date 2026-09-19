@@ -11,7 +11,7 @@
 <style id="life-preinstall-guard">main.app,.bottom-nav{visibility:hidden!important}</style>
 <link id="lifeHomeV1Styles" rel="stylesheet" href="./home-v1.css?v=7">
 <link id="lifeHomePriorityV1Styles" rel="stylesheet" href="./home-priority-v1.css?v=4">
-<link rel="stylesheet" href="./readability-final.css?v=2">
+<link rel="stylesheet" href="./readability-final.css?v=3">
 <title>MY LIFE by YOS</title>
 <style>
 :root{
@@ -327,7 +327,7 @@ function renderSchedule(){
   if(!events.length){box.innerHTML='<div class="empty">カレンダー更新を押して、今日の予定を取り込みます。<br>予定がない日は、空き時間として表示します。</div>';return}
   events.forEach(e=>{
     const c=categoryOf(e),row=document.createElement('div');row.className='event';
-    row.innerHTML=`<div class="event-time">${fmtTime(e.start)}<br>${fmtTime(e.end)}</div><div class="event-bar" style="background:${COLORS[c]}"></div><div class="event-main"><b>${escapeHtml(e.title||'予定')}</b><small>${escapeHtml(e.location||LABELS[c])}</small></div>`;
+    row.innerHTML=`<div class="event-time">${e.isAllDay===true?'終日':`${fmtTime(e.start)}<br>${fmtTime(e.end)}`}</div><div class="event-bar" style="background:${COLORS[c]}"></div><div class="event-main"><b>${escapeHtml(e.title||'予定')}</b><small>${escapeHtml(e.location||LABELS[c])}</small></div>`;
     box.appendChild(row);
   });
 }
@@ -373,8 +373,8 @@ function minutesOf(value){
   return parts[0]*60+parts[1];
 }
 function renderDonut(){
-  const events=[...day().schedule].sort((a,b)=>new Date(a.start)-new Date(b.start));
-  if(!events.length){el('donut').style.setProperty('--segments','#e8edf2 0deg 360deg');el('legend').innerHTML='<div class="empty">予定を同期すると<br>24時間の流れを表示</div>';return}
+  const events=day().schedule.filter(e=>e.isAllDay!==true).sort((a,b)=>new Date(a.start)-new Date(b.start));
+  if(!events.length){el('donut').style.setProperty('--segments','#e8edf2 0deg 360deg');el('legend').innerHTML=day().schedule.some(e=>e.isAllDay===true)?'<div class="empty">終日の予定は上の一覧に表示しています</div>':'<div class="empty">予定を同期すると<br>24時間の流れを表示</div>';return}
   const items=[];events.forEach(e=>{
     let s=minutesOf(e.start),end=minutesOf(e.end);if(end<=s)end+=1440;
     s=Math.max(0,Math.min(1440,s));end=Math.max(s,Math.min(1440,end));
@@ -424,7 +424,7 @@ function decodeBase64Url(value){
 function importPayload(payload){
   if(!payload||typeof payload!=='object')throw new Error('同期データが不正です');
   const date=payload.date||today(),d=day(date);
-  if(Array.isArray(payload.events))d.schedule=payload.events.map((e,i)=>({id:e.id||`sync-${Date.now()}-${i}`,title:String(e.title||'予定'),start:e.start,end:e.end,location:String(e.location||''),category:categoryOf(e)})).filter(e=>e.start&&e.end);
+  if(Array.isArray(payload.events))d.schedule=payload.events.map((e,i)=>({id:e.id||`sync-${Date.now()}-${i}`,title:String(e.title||'予定'),start:e.start,end:e.end,isAllDay:e.isAllDay===true||e.allDay===true,location:String(e.location||''),category:categoryOf(e)})).filter(e=>e.start&&e.end);
   if(Array.isArray(payload.tasks))d.tasks=payload.tasks.slice(0,3).map(t=>({text:String(t.text||''),done:Boolean(t.done),category:t.category&&COLORS[t.category]?t.category:'personal'}));
   while(d.tasks.length<3)d.tasks.push({text:'',done:false,category:'personal'});
   d.lastSync=new Date().toISOString();localStorage.setItem(KEY,JSON.stringify(data));paint();
@@ -435,7 +435,7 @@ function importFromUrl(){
 }
 function taxiUrl(){try{return JSON.parse(localStorage.getItem(TAXI)||'{}').yosUrl||''}catch{return''}}
 function summary(){
-  const d=day(),events=d.schedule.map(e=>`${fmtTime(e.start)} ${e.title}`).join('、')||'なし',open=d.tasks.filter(t=>t.text&&!t.done).map(t=>t.text).join('、')||'なし';
+  const d=day(),events=d.schedule.map(e=>`${e.isAllDay===true?'終日':fmtTime(e.start)} ${e.title}`).join('、')||'なし',open=d.tasks.filter(t=>t.text&&!t.done).map(t=>t.text).join('、')||'なし';
   return[`【今日の予定】Life OSから相談`,`日付：${today()}`,`予定：${events}`,`残りタスク：${open}`,`睡眠：${d.checkin.sleep||'未記録'}時間`,`体調：${d.checkin.health||'未記録'}/5`,`気分：${d.checkin.mood||'未記録'}/5`,`完了率：${completion()}%`,`違和感・相談：${d.note||'なし'}`,`今日の流れを、無理なく実行できる順番に整えて。`].join('\n');
 }
 document.querySelectorAll('[data-checkin-rating]').forEach(button=>button.onclick=()=>{
@@ -455,6 +455,6 @@ importFromUrl();paint();setInterval(()=>{el('clock').textContent=new Intl.DateTi
 if('serviceWorker'in navigator)window.addEventListener('load',async()=>{try{const regs=await navigator.serviceWorker.getRegistrations();await Promise.all(regs.filter(reg=>/\/life\/?$/.test(new URL(reg.scope).pathname)).map(reg=>reg.unregister()));await navigator.serviceWorker.register('../service-worker.js',{scope:'../',updateViaCache:'none'})}catch{}});
 })();
 </script>
-<script src="./yos-suite-v3.js?v=9"></script>
+<script src="./yos-suite-v3.js?v=10"></script>
 </body>
 </html>

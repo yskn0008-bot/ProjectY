@@ -1,0 +1,1 @@
+Base: 7c074c9. Scope: life only. Fix all-day transport/storage/rendering and narrow layout; no calendar writes or inferred all-day migration. Implementation: Codex. Rollback: revert this commit. Existing records require one re-sync with calendar-sync-scriptable.js. Production and physical iPhone verification pending.
