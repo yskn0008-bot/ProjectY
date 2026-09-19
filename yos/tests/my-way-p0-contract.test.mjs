@@ -53,3 +53,9 @@ test('iPhone width and offline assets remain supported',()=>{
   for(const asset of ['./index.html','./styles.css','./app.js','./manifest.webmanifest']) assert.ok(sw.includes(asset),asset);
   assert.match(sw,/CACHE_PREFIX/); assert.match(sw,/key\.startsWith\(CACHE_PREFIX\)/);
 });
+
+
+test('MY WAY consumes the shared Life Money Journey Idea state bridge',()=>{
+  assert.ok(js.includes('yos-my-way-ideas-v1'));
+  assert.ok(html.includes('shared-state-v1.js'));
+});

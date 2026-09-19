@@ -18,6 +18,24 @@ try{
   await page.goto(base+'/',{waitUntil:'networkidle'});
   assert.match(page.url(),/\/yos\/?$/);
   await expectText('#brandTitle','MY WAY');
+  await page.evaluate(() => {
+    const today=new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Tokyo'}).format(new Date());
+    const tomorrow=new Date();tomorrow.setDate(tomorrow.getDate()+1);
+    const tomorrowKey=new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Tokyo'}).format(tomorrow);
+    localStorage.setItem('yos-life-v1',JSON.stringify({activeLifeDate:today,days:{[today]:{schedule:[],tasks:[]}}}));
+    localStorage.setItem('yos-money-v2',JSON.stringify({version:2,privacy:false,accounts:[{id:'test',name:'test',balance:12345}],transactions:[{id:'pay',type:'expense',label:'連携テスト支払い',amount:500,date:tomorrowKey,status:'planned'}],goals:[],debts:[],assets:[],updatedAt:new Date().toISOString()}));
+    localStorage.setItem('hj-domain-journeys-v1',JSON.stringify([{id:'main',name:'人生',stage:'日常世界',theme:'',quest:'連携された次の一手'}]));
+    localStorage.setItem('hj-user-profile-v1',JSON.stringify({focusDomain:'main'}));
+    localStorage.setItem('yos-my-way-ideas-v1',JSON.stringify({text:'連携されたIdea',savedAt:new Date().toISOString()}));
+  });
+  await page.reload({waitUntil:'networkidle'});
+  await page.waitForSelector('#taskDashboardBody',{state:'visible'});
+  await expectText('#taskDashboardBody','12,345円');
+  await expectText('#taskDashboardBody','Life連携済み');
+  await expectText('#taskDashboardBody','連携された次の一手');
+  const shared=await page.evaluate(()=>window.YOSSharedStateV1?.snapshot?.());
+  assert.equal(shared?.idea?.text,'連携されたIdea','all five YOS domains share state');
+  assert.equal(shared?.money?.balance,12345,'Money must feed shared YOS state');
 
   await page.locator('.money-nav').click();
   await expectText('#brandTitle','MY MONEY');

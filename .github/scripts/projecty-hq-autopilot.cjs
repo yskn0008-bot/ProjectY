@@ -198,9 +198,13 @@ async function getDetails(api, pr) {
 }
 
 function requestText(action, pr, evidence) {
-  if (action === 'REQUEST_TRANSPORT') return `@codex Transport recovery only for this SAME PR #${pr.number}. FINAL RESPONSE must contain PROJECTY_BASE_HEAD:${pr.head.sha} and complete PROJECTY_FULL_FILE:<path> fenced blocks for every changed file; no git push, gh, links, excerpts, or local-only state.`;
-  if (action === 'REQUEST_CODE_FIX') return `@codex Fix this current-head failure on the SAME PR with the minimum scoped change. Evidence: ${String(evidence.text || '').slice(0, 1000)}`;
-  return '@codex This SAME PR task has not made meaningful progress for 45 minutes. Recover without broadening scope and return durable final evidence.';
+  if (action === 'REQUEST_TRANSPORT') {
+    return `<!-- projecty-direct-transport-required --> Direct GitHub transport required for SAME PR #${pr.number} at head ${pr.head.sha}. Use One Enter / ChatGPT / GitHub write tools or an already available complete artifact. Do not start a new Codex task only to move files.`;
+  }
+  if (action === 'REQUEST_CODE_FIX') {
+    return `<!-- projecty-direct-code-fix-required --> Direct current-head code fix required for SAME PR #${pr.number}. Use One Enter / ChatGPT / GitHub / Factory first. Do not auto-start Codex; Codex may be chosen manually only if direct routes are unavailable or clearly inferior. Evidence: ${String(evidence.text || '').slice(0, 1000)}`;
+  }
+  return `<!-- projecty-direct-status-required --> Direct status/recovery check required for SAME PR #${pr.number}. Prefer One Enter / ChatGPT / GitHub inspection. Do not start Codex only to report status.`;
 }
 
 async function perform(api, action, pr, evidence) {
@@ -215,8 +219,16 @@ async function applyDecision(api, target, decision, pr, evidence, dryRun, now) {
   target.lastAction = decision.action;
   if (decision.action === 'NONE') return;
   if (decision.action === 'NEEDS_YOS') { target.phase = 'NEEDS_YOS'; target.next = 'bounded recovery exhausted'; return; }
-  target.phase = decision.action.startsWith('REQUEST_') ? 'RUNNING' : 'RECOVERING';
-  if (target.phase === 'RUNNING') target.runningSince = nowIso(now);
+  if (decision.action === 'REQUEST_CODE_FIX' || decision.action === 'REQUEST_TRANSPORT' || decision.action === 'REQUEST_STATUS') {
+    target.phase = 'AWAITING_DIRECT_TOOL';
+    target.next = decision.action === 'REQUEST_CODE_FIX'
+      ? 'direct code fix; no automatic Codex invocation'
+      : decision.action === 'REQUEST_TRANSPORT'
+        ? 'direct GitHub transport; no automatic Codex invocation'
+        : 'direct status inspection; no automatic Codex invocation';
+  } else {
+    target.phase = 'RECOVERING';
+  }
   if (dryRun) return;
   try {
     await perform(api, decision.action, pr, evidence); target.progressAt = nowIso(now);
@@ -383,5 +395,5 @@ async function main() {
   console.log(JSON.stringify(result));
 }
 
-module.exports = { CODEX_ACTOR, MARKER, STALL_MS, atomicTransport, branchCondition, buildTransportPlan, chooseCommentMutation, classifyQaLevel, compactTarget, decide, failureId, isAck, isTarget, isTrustedFinal, newestQaRuns, paginate, parseArtifact, parseRecovery, parseScope, processEvent, qaState, renderState, syntheticEvent, transientEvidence, validPath };
+module.exports = { CODEX_ACTOR, MARKER, STALL_MS, atomicTransport, branchCondition, buildTransportPlan, chooseCommentMutation, classifyQaLevel, compactTarget, decide, failureId, isAck, isTarget, isTrustedFinal, newestQaRuns, paginate, parseArtifact, parseRecovery, parseScope, processEvent, qaState, renderState, requestText, syntheticEvent, transientEvidence, validPath };
 if (require.main === module) main().catch((error) => { console.error(error); process.exitCode = 1; });

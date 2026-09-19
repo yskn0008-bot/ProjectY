@@ -16,6 +16,12 @@ await cp(resolve(repoDir, 'life'), resolve(webDir, 'life'), { recursive: true })
 await cp(resolve(repoDir, 'taxi'), resolve(webDir, 'taxi'), { recursive: true });
 await cp(resolve(appDir, 'shell'), webDir, { recursive: true });
 
+await cp(resolve(repoDir, 'manifest.webmanifest'), resolve(webDir, 'manifest.webmanifest'));
+await cp(resolve(repoDir, 'service-worker.js'), resolve(webDir, 'service-worker.js'));
+await mkdir(resolve(webDir, 'assets'), { recursive: true });
+await cp(resolve(repoDir, 'assets', 'yos-icon-180.png'), resolve(webDir, 'assets', 'yos-icon-180.png'));
+await cp(resolve(repoDir, 'assets', 'yos-icon-512.png'), resolve(webDir, 'assets', 'yos-icon-512.png'));
+
 await mkdir(resolve(webDir, 'data'), { recursive: true });
 await cp(resolve(repoDir, 'data', 'yos-assets.json'), resolve(webDir, 'data', 'yos-assets.json'));
 await cp(resolve(repoDir, 'data', 'yos-user-tasks.json'), resolve(webDir, 'data', 'yos-user-tasks.json'));

@@ -23,6 +23,7 @@ const {
   parseRecovery,
   processEvent,
   qaState,
+  requestText,
   syntheticEvent,
   transientEvidence,
   validPath,
@@ -258,6 +259,18 @@ test('atomic transport stops on a concurrent head move', async () => {
   assert.equal(api.calls.some((call) => call.path.startsWith('/git/refs/heads/')), false);
 });
 
+test('automatic recovery never invokes Codex for code, transport, or status', () => {
+  const pr = ownerPr();
+  const transport = requestText('REQUEST_TRANSPORT', pr, {});
+  const status = requestText('REQUEST_STATUS', pr, {});
+  const codeFix = requestText('REQUEST_CODE_FIX', pr, { text: 'assertion failed' });
+  for (const body of [transport, status, codeFix]) assert.doesNotMatch(body, /@codex/i);
+  assert.match(transport, /Direct GitHub transport required/);
+  assert.match(status, /Direct status\/recovery check required/);
+  assert.match(codeFix, /Direct current-head code fix required/);
+  assert.match(codeFix, /Do not auto-start Codex/);
+});
+
 test('bounded transient ladder is idempotent and cannot repeat forever', () => {
   const target = { failures: {} };
   const base = { target: 'PR#4', head: HEAD, workflowId: 8, runId: 9 };
@@ -474,11 +487,15 @@ test('watchdog performs only one stalled recovery action per schedule', async ()
     number: 2,
     head: { sha: 'd'.repeat(40), ref: 'feature-two', repo: { full_name: REPOSITORY } },
   });
+  let statusComment = '';
   const api = recordingApi((requestPath, options) => {
     if (requestPath.startsWith('/issues/232/comments') && !options.method) return [managedComment(state, 5)];
     if (requestPath === '/pulls/1') return pr1;
     if (requestPath === '/pulls/2') return pr2;
-    if (requestPath === '/issues/1/comments' && options.method === 'POST') return { id: 10 };
+    if (requestPath === '/issues/1/comments' && options.method === 'POST') {
+      statusComment = JSON.parse(options.body).body;
+      return { id: 10 };
+    }
     if (requestPath.startsWith('/pulls/1/files')) return [{ filename: 'docs/a.md' }];
     if (requestPath.startsWith('/actions/runs?')) return { workflow_runs: [] };
     if (requestPath === '/issues/comments/5' && options.method === 'PATCH') return {};
@@ -495,6 +512,9 @@ test('watchdog performs only one stalled recovery action per schedule', async ()
   assert.equal(result.recovery.action, 'REQUEST_STATUS');
   assert.equal(api.calls.filter((call) => call.path === '/issues/1/comments').length, 1);
   assert.equal(api.calls.filter((call) => call.path === '/issues/2/comments').length, 0);
+  assert.doesNotMatch(statusComment, /@codex/i);
+  assert.match(statusComment, /direct-status-required/);
+  assert.equal(result.state.targets['PR#1'].phase, 'AWAITING_DIRECT_TOOL');
 });
 
 test('workflow-run delivery rebuilds state from latest current-head evidence', async () => {

@@ -23,6 +23,10 @@ test('YOS iOS shell opens MY WAY natively while preserving the public system ent
   assert.match(prepare, /resolve\(repoDir, 'yos'\)/);
   assert.match(prepare, /resolve\(webDir, 'yos'\)/);
   assert.match(prepare, /resolve\(repoDir, 'life'\)/);
+  assert.match(prepare, /manifest\.webmanifest/);
+  assert.match(prepare, /service-worker\.js/);
+  assert.match(prepare, /yos-icon-180\.png/);
+  assert.match(prepare, /yos-icon-512\.png/);
 
   assert.match(yosIndex, /id="brandTitle">MY WAY/);
   assert.match(yosIndex, /data-native-only hidden href="\.\.\/capture\.html"/);

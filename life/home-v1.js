@@ -273,14 +273,15 @@
 
   function readMoneySafety(data){
     const value=data.moneySafety&&typeof data.moneySafety==='object'?data.moneySafety:{};
+    const shared=window.YOSSharedStateV1?.snapshot?.()?.money;
     return {
-      currentBalance:clean(value.currentBalance,40),
-      nextIncomeDate:clean(value.nextIncomeDate,10),
+      currentBalance:shared?.connected?clean(shared.balanceText,40):clean(value.currentBalance,40),
+      nextIncomeDate:shared?.connected?clean(shared.nextIncomeDate,10):clean(value.nextIncomeDate,10),
       requiredPayments:clean(value.requiredPayments,120),
       protectedMoney:clean(value.protectedMoney,40),
       freeMoney:clean(value.freeMoney,40),
       todayBudget:clean(value.todayBudget,40),
-      nextPayment:clean(value.nextPayment,120),
+      nextPayment:shared?.connected?clean(shared.nextPaymentText,120):clean(value.nextPayment,120),
       danger:['none','watch','urgent'].includes(value.danger)?value.danger:'none'
     };
   }

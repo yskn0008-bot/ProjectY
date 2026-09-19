@@ -153,10 +153,10 @@ async function performAllowedAction(api, pr, action, decision, head) {
   }
   if (action === 'REQUEST_CODE_FIX' || action === 'REQUEST_TRANSPORT' || action === 'REQUEST_STATUS') {
     const text = action === 'REQUEST_CODE_FIX'
-      ? `@codex YOS decision for SAME PR #${pr.number}: revise the current-head implementation with the minimum scoped fix. Do not broaden scope or merge.`
+      ? `<!-- projecty-direct-code-fix-required --> YOS decision for SAME PR #${pr.number}: use One Enter / ChatGPT / GitHub / Factory for the current-head code repair first. Do not auto-start Codex; choose Codex manually only when direct routes are unavailable or clearly inferior. Current head: ${head}.`
       : action === 'REQUEST_TRANSPORT'
-        ? `@codex YOS decision for SAME PR #${pr.number}: transport current scoped work only. Return complete PROJECTY_BASE_HEAD:${head} + PROJECTY_FULL_FILE blocks if push is unavailable.`
-        : `@codex YOS decision for SAME PR #${pr.number}: report current-head status and recover the existing task without broadening scope.`;
+        ? `<!-- projecty-direct-transport-required --> YOS decision for SAME PR #${pr.number}: use direct GitHub transport from One Enter / ChatGPT / existing artifacts. Do not start Codex only to move files. Current head: ${head}.`
+        : `<!-- projecty-direct-status-required --> YOS decision for SAME PR #${pr.number}: inspect current-head status through One Enter / ChatGPT / GitHub. Do not start Codex only for status reporting.`;
     await api.request(`/issues/${pr.number}/comments`, { method: 'POST', body: JSON.stringify({ body: text }) });
     return `${action}_COMMENTED`;
   }

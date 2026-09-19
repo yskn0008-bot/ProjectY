@@ -1,14 +1,14 @@
 {
   "schema_version": "1.0.0",
   "ssot": "YOS asset registry",
-  "updated_at": "2026-09-19T04:15:00+09:00",
+  "updated_at": "2026-09-20T05:56:00+09:00",
   "source": {
     "repository": "yskn0008-bot/ProjectY",
     "base_branch": "main",
-    "base_sha": "08b28945a4fa180996893e0973eeceb4971bbf95",
+    "base_sha": "f5d848761bf57f155681a8efacf18a945983fdab",
     "issue": "https://github.com/yskn0008-bot/ProjectY/issues/371",
     "legacy_22_asset_table_verified": false,
-    "note": "Reconciled 2026-09-18 with current main, iPhone visual evidence, and passing automated checks. Preserve names; continue evidence-based updates."
+    "note": "Reconciled with iPhone standalone/offline acceptance evidence on 2026-09-20."
   },
   "progress_model": {
     "weights": {
@@ -50,22 +50,22 @@
   },
   "summary": {
     "asset_count": 22,
-    "overall_progress": 58,
-    "needs_user_action_count": 6
+    "overall_progress": 59,
+    "needs_user_action_count": 5
   },
   "assets": [
     {
       "id": "yos",
       "name": "YOS",
       "area": "core",
-      "status": "awaiting_production_verification",
+      "status": "complete",
       "priority": 1,
-      "current": "YOS iOS AppはMY WAYを起動HOMEとして同梱し、Life/Money/Hero’s Journey/Idea/System/Clarity/BRAVIAへのアプリ内導線を実装。Capacitor iOS生成・署名前Simulator build・生成済み.app内のMY WAY同梱検査までPASS。",
-      "next_action": "Apple Developer署名情報を接続し、クラウド署名→IPA→TestFlight配布を実行する。",
-      "blocker": "Apple Developer Program / App Store Connectの本人アカウント側で署名・配布情報の準備が必要。",
-      "needs_user_action": true,
+      "current": "無料版YOS PWAは実用完成。iPhoneホーム画面からスタンドアロン起動し、機内モード状態でもMY WAYが再起動表示されることを実機確認。Life/Money/Hero’s Journey/Idea/System、Clarity/MY REMOTE導線、保存・再起動・オフライン回帰は自動検査済み。",
+      "next_action": "通常利用へ移行。Apple Developer有料署名/TestFlightは必要性が出た時だけ再開する。",
+      "blocker": null,
+      "needs_user_action": false,
       "device_verified": true,
-      "production_verified": false,
+      "production_verified": true,
       "deep_link": "/yos/",
       "completion_criteria": [
         "YOSの既存機能を統合アプリから利用できる / iPhone実機で主要導線を確認する / 本番環境で運用確認する"
@@ -77,30 +77,41 @@
         "device:iPhone Scriptable HARMONY HOME opened successfully 2026-09-18",
         "CI:YOS iOS App Safety run 35384910156 contract/bundle PASS",
         "CI:YOS iOS App Safety run 35384910156 native iOS simulator build PASS",
-        "CI:YOS iOS App Safety run 35384910156 packaged App.app contains native boot -> MY WAY PASS"
+        "CI:YOS iOS App Safety run 35384910156 packaged App.app contains native boot -> MY WAY PASS",
+        "implementation:root PWA manifest opens ./yos/ and scopes entire ProjectY",
+        "implementation:unified root service worker caches MY WAY/Life/Hero’s Journey/System",
+        "CI:YOS Unified PWA Safety contract + Chromium + WebKit PASS 2026-09-19",
+        "decision:Apple Developer paid signing postponed until PWA practical completion",
+        "CI:YOS Unified PWA Safety run 35468056336 contract PASS",
+        "CI:YOS Unified PWA Safety run 35468056336 Chromium online/offline PASS",
+        "CI:YOS Unified PWA Safety run 35468056336 WebKit UI PASS",
+        "production:GitHub Pages deploy workflow run 35468087159 success",
+        "implementation:YOS 180x180 and 512x512 install icons bundled and cached",
+        "device:iPhone standalone YOS launched from Home Screen in airplane mode and displayed MY WAY 2026-09-20 05:56 JST",
+        "production:offline standalone relaunch acceptance passed on iPhone 2026-09-20"
       ],
       "progress_basis": {
         "spec": true,
         "implementation": true,
         "test": true,
         "device": true,
-        "production": false
+        "production": true
       },
-      "progress": 85,
-      "updated_at": "2026-09-19T04:15:00+09:00"
+      "progress": 100,
+      "updated_at": "2026-09-20T05:56:00+09:00"
     },
     {
       "id": "my-way",
       "name": "MY WAY",
       "area": "core",
-      "status": "awaiting_production_verification",
+      "status": "complete",
       "priority": 1,
-      "current": "MY WAY統合画面はiPhone実機で表示確認済み。共通YOSヘッダーとHome導線も実装・自動検査済み。",
-      "next_action": "GitHub Pagesに依存しないローカル入口へ同じMY WAY画面・データを接続する。",
-      "blocker": "現在の正式画面入口はWeb配信を併用。",
+      "current": "MY WAYはYOSの正式HOMEとして、iPhoneホーム画面からスタンドアロン起動・機内モード再起動まで実機確認済み。",
+      "next_action": "通常利用。",
+      "blocker": null,
       "needs_user_action": false,
       "device_verified": true,
-      "production_verified": false,
+      "production_verified": true,
       "deep_link": "/yos/",
       "completion_criteria": [
         "MY WAYの既存データと画面を再利用する / 統合アプリから到達できる / iPhone実機と本番運用を確認する"
@@ -108,17 +119,19 @@
       "evidence": [
         "PR#319",
         "YOS Cockpit Safety: Chromium/WebKit PASS 2026-09-18",
-        "device:iPhone MY WAY screen visually confirmed 2026-09-18"
+        "device:iPhone MY WAY screen visually confirmed 2026-09-18",
+        "device:iPhone Home Screen standalone MY WAY in airplane mode 2026-09-20 05:56 JST",
+        "production:YOS PWA offline relaunch accepted 2026-09-20"
       ],
       "progress_basis": {
         "spec": true,
         "implementation": true,
         "test": true,
         "device": true,
-        "production": false
+        "production": true
       },
-      "progress": 85,
-      "updated_at": "2026-09-18T23:19:00+09:00"
+      "progress": 100,
+      "updated_at": "2026-09-20T05:56:00+09:00"
     },
     {
       "id": "clarity",

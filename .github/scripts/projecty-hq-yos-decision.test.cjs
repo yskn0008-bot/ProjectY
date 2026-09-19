@@ -9,6 +9,7 @@ const {
   hasDecision,
   inferFailureClass,
   parseDecisionResponse,
+  performAllowedAction,
   requestOidcToken,
   targetPrNumber,
 } = require('./projecty-hq-yos-decision.cjs');
@@ -80,6 +81,44 @@ test('continuing decision requires reason and real evidence while fail-closed st
     unknowns: ['human decision required'],
   }, HEAD);
   assert.equal(human.decision, 'NEEDS_YOUSUKE');
+});
+
+
+test('YOS transport and status actions do not invoke Codex', async () => {
+  const comments = [];
+  const api = {
+    async request(path, options = {}) {
+      if (path === '/issues/4/comments' && options.method === 'POST') {
+        comments.push(JSON.parse(options.body).body);
+        return {id: comments.length};
+      }
+      throw new Error('unexpected request ' + path);
+    },
+  };
+  const pr = {number: 4};
+  assert.equal(await performAllowedAction(api, pr, 'REQUEST_TRANSPORT', {}, HEAD), 'REQUEST_TRANSPORT_COMMENTED');
+  assert.equal(await performAllowedAction(api, pr, 'REQUEST_STATUS', {}, HEAD), 'REQUEST_STATUS_COMMENTED');
+  assert.doesNotMatch(comments[0], /@codex/i);
+  assert.doesNotMatch(comments[1], /@codex/i);
+  assert.match(comments[0], /direct-transport-required/);
+  assert.match(comments[1], /direct-status-required/);
+});
+
+test('YOS code-fix requests also stay on direct tools by default', async () => {
+  let body = '';
+  const api = {
+    async request(path, options = {}) {
+      if (path === '/issues/4/comments' && options.method === 'POST') {
+        body = JSON.parse(options.body).body;
+        return {id: 1};
+      }
+      throw new Error('unexpected request ' + path);
+    },
+  };
+  await performAllowedAction(api, {number: 4}, 'REQUEST_CODE_FIX', {}, HEAD);
+  assert.doesNotMatch(body, /@codex/i);
+  assert.match(body, /direct-code-fix-required/);
+  assert.match(body, /Do not auto-start Codex/);
 });
 
 test('OIDC token request uses Actions runtime and never needs a long-lived secret', async () => {

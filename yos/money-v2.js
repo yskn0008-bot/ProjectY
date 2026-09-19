@@ -33,7 +33,7 @@
   let data=state();
   let activeTab='dashboard';
   let calendarMonth=monthKey();
-  function save(){data.updatedAt=new Date().toISOString();write(KEY,data);render();}
+  function save(){data.updatedAt=new Date().toISOString();const saved=write(KEY,data);render();if(saved)window.YOSSharedStateV1?.refresh?.('money');}
 
   function legacyMoney(){
     const life=read(LIFE_KEY,null);
