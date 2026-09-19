@@ -23,6 +23,9 @@ jobs:
       - name: Test governance validator
         run: node --test .github/scripts/validate-pr-evidence.test.cjs
 
+      - name: Test ProjectY HQ cost-first recovery routing
+        run: node --test .github/scripts/projecty-hq-autopilot.test.cjs .github/scripts/projecty-hq-yos-decision.test.cjs
+
       - name: Validate current PR evidence
         env:
           PR_BODY: ${{ github.event.pull_request.body }}
