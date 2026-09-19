@@ -33,3 +33,20 @@ test('domain pages replace scoped workers with the root YOS worker', async () =>
   assert.match(life,/register\('\.\.\/service-worker\.js',\{scope:'\.\.\/'\,/);
   assert.match(hjApp,/register\('\.\.\/\.\.\/service-worker\.js',\{scope:'\.\.\/\.\.\/'\,/);
 });
+
+
+test('manifest icons are install-ready across YOS entry pages', async () => {
+  const [manifest,index,yos,life,hj,system,sw] = await Promise.all([
+    read('manifest.webmanifest'), read('index.html'), read('yos/index.html'), read('life/index.html'),
+    read('yos/hj/index.html'), read('system/index.html'), read('service-worker.js')
+  ]);
+  const parsed=JSON.parse(manifest);
+  assert.deepEqual(parsed.icons?.map(icon=>icon.sizes),['180x180','512x512']);
+  assert.match(index,/apple-touch-icon[^>]+\.\/assets\/yos-icon-180\.png/);
+  assert.match(yos,/apple-touch-icon[^>]+\.\.\/assets\/yos-icon-180\.png/);
+  assert.match(life,/apple-touch-icon[^>]+\.\.\/assets\/yos-icon-180\.png/);
+  assert.match(hj,/apple-touch-icon[^>]+\.\.\/\.\.\/assets\/yos-icon-180\.png/);
+  assert.match(system,/apple-touch-icon[^>]+\.\.\/assets\/yos-icon-180\.png/);
+  assert.match(sw,/\.\/assets\/yos-icon-180\.png/);
+  assert.match(sw,/\.\/assets\/yos-icon-512\.png/);
+});

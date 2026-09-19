@@ -1,8 +1,8 @@
 'use strict';
 const CACHE_PREFIX='yos-unified-';
-const CACHE_NAME=CACHE_PREFIX+'v1-harmony-pwa';
+const CACHE_NAME=CACHE_PREFIX+'v2-home-icon';
 const STATIC=[
-  './','./index.html','./manifest.webmanifest',
+  './','./index.html','./manifest.webmanifest','./assets/yos-icon-180.png','./assets/yos-icon-512.png',
   './yos/','./yos/index.html','./yos/styles.css','./yos/readability-final.css',
   './yos/task-dashboard.css','./yos/task-dashboard.js','./yos/app.js',
   './yos/money-v2.css','./yos/money-master-v1.js','./yos/money-v2.js',
