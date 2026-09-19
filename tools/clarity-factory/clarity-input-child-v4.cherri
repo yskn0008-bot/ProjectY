@@ -1,0 +1,12 @@
+#define name ClarityInputChildV4
+#define color blue
+
+#include 'actions/device'
+
+@input = ShortcutInput
+
+if @input {
+    setBrightness(0.35)
+} else {
+    setBrightness(0.20)
+}
