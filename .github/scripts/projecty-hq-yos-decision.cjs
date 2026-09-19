@@ -153,7 +153,7 @@ async function performAllowedAction(api, pr, action, decision, head) {
   }
   if (action === 'REQUEST_CODE_FIX' || action === 'REQUEST_TRANSPORT' || action === 'REQUEST_STATUS') {
     const text = action === 'REQUEST_CODE_FIX'
-      ? `@codex YOS code-fix fallback for SAME PR #${pr.number}: use Codex only because a real code repair is required and no direct implementation agent is active. Keep the fix minimal. If push is unavailable, return complete PROJECTY_BASE_HEAD:${head} + PROJECTY_FULL_FILE blocks so transport does not require a second Codex run.`
+      ? `<!-- projecty-direct-code-fix-required --> YOS decision for SAME PR #${pr.number}: use One Enter / ChatGPT / GitHub / Factory for the current-head code repair first. Do not auto-start Codex; choose Codex manually only when direct routes are unavailable or clearly inferior. Current head: ${head}.`
       : action === 'REQUEST_TRANSPORT'
         ? `<!-- projecty-direct-transport-required --> YOS decision for SAME PR #${pr.number}: use direct GitHub transport from One Enter / ChatGPT / existing artifacts. Do not start Codex only to move files. Current head: ${head}.`
         : `<!-- projecty-direct-status-required --> YOS decision for SAME PR #${pr.number}: inspect current-head status through One Enter / ChatGPT / GitHub. Do not start Codex only for status reporting.`;
