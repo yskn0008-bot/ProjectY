@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-19T20:28:16+09:00",
+  "updated_at": "2026-09-19T20:28:58+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -13,14 +13,14 @@
   },
   "inbox": [
     {
-      "id": "github-pr-399",
-      "title": "PR #399 Fix Money display to load latest Money UI",
+      "id": "github-pr-386",
+      "title": "PR #386 Prototype: PROT Factory Web v0.1",
       "type": "GitHub PR",
       "status": "review",
       "priority": 1,
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/399",
-      "updated_at": "2026-09-19T11:25:22Z"
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/386",
+      "updated_at": "2026-09-18T13:41:43Z"
     },
     {
       "id": "github-pr-373",
@@ -83,6 +83,16 @@
       "updated_at": "2026-09-19T11:26:33Z"
     },
     {
+      "id": "github-issue-254",
+      "title": "Issue #254 [YOS→Codex] YOS iOS App｜BRAVIAリモコン統合",
+      "type": "GitHub Issue",
+      "status": "open",
+      "priority": 3,
+      "next_action": "完成条件を確認し、次の安全な実装を1件進める",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/254",
+      "updated_at": "2026-08-23T16:45:10Z"
+    },
+    {
       "id": "github-issue-256",
       "title": "Issue #256 [YOS→Codex] YOS Capture｜思いつきを1秒で失わず保存・自動整理",
       "type": "GitHub Issue",
@@ -143,16 +153,6 @@
       "updated_at": "2026-09-06T08:17:33Z"
     },
     {
-      "id": "github-issue-292",
-      "title": "Issue #292 BRAVIA｜Scriptable無料リモコンMVP",
-      "type": "GitHub Issue",
-      "status": "open",
-      "priority": 3,
-      "next_action": "完成条件を確認し、次の安全な実装を1件進める",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/292",
-      "updated_at": "2026-09-06T15:53:56Z"
-    },
-    {
       "id": "github-issue-51",
       "title": "Issue #51 ProjectY 4本並行開発の全体管理",
       "type": "GitHub Issue",
@@ -164,6 +164,13 @@
     }
   ],
   "recently_completed": [
+    {
+      "id": "github-commit-8dff4efe8ff2",
+      "title": "fix(money): load latest Money UI in YOS",
+      "completed_at": "2026-09-19T11:28:43Z",
+      "result": "GitHub mainへ反映（8dff4ef）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/8dff4efe8ff2891ddd2f2df92f5744640c2516ab"
+    },
     {
       "id": "github-commit-ca155206181b",
       "title": "Clarity: open apps, change settings, and open MY WAY",
@@ -193,13 +200,6 @@
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/5031c85ae7bff80f21bc5d6cc02313e56e7cfa25"
     },
     {
-      "id": "github-commit-35551034c66a",
-      "title": "Keep snapshot at physically verified v1",
-      "completed_at": "2026-09-18T20:32:13Z",
-      "result": "GitHub mainへ反映（3555103）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/35551034c66ad7a0c7aaac6bc9bd59ba6c09f1a0"
-    },
-    {
       "id": "complete-002",
       "title": "iPhone向けMission Control Dashboardを実装",
       "completed_at": "2026-07-17T17:55:00+09:00",
@@ -224,7 +224,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #399をレビューして公開判断する",
+      "next_action": "PR #386をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-19T20:28:16+09:00",
+      "last_update": "2026-09-19T20:28:58+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -309,13 +309,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 23件・Open PR 20件を自動同期中",
+      "next_action": "Open Issue 24件・Open PR 20件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-19T20:28:16+09:00",
+      "last_update": "2026-09-19T20:28:58+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -329,7 +329,7 @@
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #399をレビューして公開判断する",
+      "next_action": "PR #386をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-19T20:28:16+09:00",
+      "last_update": "2026-09-19T20:28:58+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "478f61db3b50fba04558ad8fc2afdc4127ef3ac87127fee1912e3aa4f5c23d73"
+  "github_snapshot_hash": "b71731710b04123eb6825576004f01d432603cbea29ec13033e44b216979d9b9"
 }
