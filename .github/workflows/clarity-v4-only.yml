@@ -55,11 +55,13 @@ jobs:
           python3 tools/clarity-factory/sign_with_hubsign.py \
             --input tools/clarity-factory/artifacts-v4/ClarityInputChildV4.shortcut \
             --output tools/clarity-factory/artifacts-v4/ClarityInputChildV4-signed.shortcut \
-            --name 'ClarityInputChildV4'
+            --name 'ClarityInputChildV4' \
+            --timeout 180
           python3 tools/clarity-factory/sign_with_hubsign.py \
             --input tools/clarity-factory/artifacts-v4/ClarityInputProbeV4.shortcut \
             --output tools/clarity-factory/artifacts-v4/ClarityInputProbeV4-signed.shortcut \
-            --name 'ClarityInputProbeV4'
+            --name 'ClarityInputProbeV4' \
+            --timeout 180
 
       - name: Verify AEA1
         shell: bash
