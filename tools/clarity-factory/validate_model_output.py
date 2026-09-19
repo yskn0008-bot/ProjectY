@@ -115,6 +115,35 @@ def validate(payload: Any) -> list[str]:
             if action.get("external_write") is True and action.get("requires_confirmation") is not True:
                 errors.append(f"{prefix} shortcut_factory external distribution requires confirmation")
 
+        if executor == "open_app":
+            if action.get("domain") != "system" or action.get("intent") != "execute":
+                errors.append(f"{prefix} open_app must use domain=system and intent=execute")
+            if action.get("needs_review") is not True and action.get("target") not in SPEC["v1_open_apps"]:
+                errors.append(f"{prefix} open_app target is unsupported")
+
+        if executor == "device_setting":
+            target = action.get("target")
+            content = action.get("content")
+            if action.get("domain") != "system" or action.get("intent") != "update":
+                errors.append(f"{prefix} device_setting must use domain=system and intent=update")
+            if action.get("needs_review") is not True and target not in SPEC["v1_device_settings"]:
+                errors.append(f"{prefix} device_setting target is unsupported")
+            elif action.get("needs_review") is not True and target in SPEC["v1_device_settings"]:
+                allowed = SPEC["v1_device_settings"][target]
+                if allowed == ["0..100"]:
+                    try:
+                        percent = int(content)
+                    except (TypeError, ValueError):
+                        percent = -1
+                    if str(percent) != str(content) or not 0 <= percent <= 100:
+                        errors.append(f"{prefix} device_setting percent is invalid")
+                elif content not in allowed:
+                    errors.append(f"{prefix} device_setting value is invalid")
+
+        if executor == "myway":
+            if action.get("domain") != "life" or action.get("intent") != "find" or action.get("target") not in SPEC["v1_myway_targets"]:
+                errors.append(f"{prefix} myway route is invalid")
+
         if action.get("external_write") is True and action.get("requires_confirmation") is not True:
             errors.append(f"{prefix} external_write requires confirmation in v1")
 
