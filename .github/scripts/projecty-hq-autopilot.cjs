@@ -202,7 +202,7 @@ function requestText(action, pr, evidence) {
     return `<!-- projecty-direct-transport-required --> Direct GitHub transport required for SAME PR #${pr.number} at head ${pr.head.sha}. Use One Enter / ChatGPT / GitHub write tools or an already available complete artifact. Do not start a new Codex task only to move files.`;
   }
   if (action === 'REQUEST_CODE_FIX') {
-    return `@codex Code-fix fallback for SAME PR #${pr.number}. Use Codex only because a real current-head code failure remains and no direct implementation agent is active. Keep the change minimal. If push is unavailable, FINAL RESPONSE must include PROJECTY_BASE_HEAD:${pr.head.sha} and complete PROJECTY_FULL_FILE:<path> blocks so GitHub automation can transport without a second Codex run. Evidence: ${String(evidence.text || '').slice(0, 1000)}`;
+    return `<!-- projecty-direct-code-fix-required --> Direct current-head code fix required for SAME PR #${pr.number}. Use One Enter / ChatGPT / GitHub / Factory first. Do not auto-start Codex; Codex may be chosen manually only if direct routes are unavailable or clearly inferior. Evidence: ${String(evidence.text || '').slice(0, 1000)}`;
   }
   return `<!-- projecty-direct-status-required --> Direct status/recovery check required for SAME PR #${pr.number}. Prefer One Enter / ChatGPT / GitHub inspection. Do not start Codex only to report status.`;
 }
@@ -219,14 +219,13 @@ async function applyDecision(api, target, decision, pr, evidence, dryRun, now) {
   target.lastAction = decision.action;
   if (decision.action === 'NONE') return;
   if (decision.action === 'NEEDS_YOS') { target.phase = 'NEEDS_YOS'; target.next = 'bounded recovery exhausted'; return; }
-  if (decision.action === 'REQUEST_CODE_FIX') {
-    target.phase = 'RUNNING';
-    target.runningSince = nowIso(now);
-  } else if (decision.action === 'REQUEST_TRANSPORT' || decision.action === 'REQUEST_STATUS') {
+  if (decision.action === 'REQUEST_CODE_FIX' || decision.action === 'REQUEST_TRANSPORT' || decision.action === 'REQUEST_STATUS') {
     target.phase = 'AWAITING_DIRECT_TOOL';
-    target.next = decision.action === 'REQUEST_TRANSPORT'
-      ? 'direct GitHub transport; no Codex transport retry'
-      : 'direct status inspection; no Codex status retry';
+    target.next = decision.action === 'REQUEST_CODE_FIX'
+      ? 'direct code fix; no automatic Codex invocation'
+      : decision.action === 'REQUEST_TRANSPORT'
+        ? 'direct GitHub transport; no automatic Codex invocation'
+        : 'direct status inspection; no automatic Codex invocation';
   } else {
     target.phase = 'RECOVERING';
   }
