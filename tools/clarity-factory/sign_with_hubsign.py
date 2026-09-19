@@ -23,7 +23,7 @@ MAX_ATTEMPTS = 3
 TIMEOUT_SECONDS = 60
 
 
-def sign_once(payload: bytes) -> bytes:
+def sign_once(payload: bytes, timeout_seconds: int = TIMEOUT_SECONDS) -> bytes:
     request = urllib.request.Request(
         HUBSIGN_URL,
         data=payload,
@@ -35,7 +35,7 @@ def sign_once(payload: bytes) -> bytes:
             "Referer": "https://routinehub.co/",
         },
     )
-    with urllib.request.urlopen(request, timeout=TIMEOUT_SECONDS) as response:
+    with urllib.request.urlopen(request, timeout=timeout_seconds) as response:
         content_type = response.headers.get("Content-Type", "")
         signed = response.read()
         if response.status != 200:
@@ -54,6 +54,7 @@ def main() -> int:
     parser.add_argument("--input", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--name", default="Clarity")
+    parser.add_argument("--timeout", type=int, default=TIMEOUT_SECONDS)
     args = parser.parse_args()
 
     try:
@@ -70,7 +71,7 @@ def main() -> int:
     last_error: Exception | None = None
     for attempt in range(1, MAX_ATTEMPTS + 1):
         try:
-            signed = sign_once(payload)
+            signed = sign_once(payload, args.timeout)
             args.output.parent.mkdir(parents=True, exist_ok=True)
             args.output.write_bytes(signed)
             print(f"OK: HubSign returned AEA1 signed shortcut ({len(signed)} bytes) on attempt {attempt}")
