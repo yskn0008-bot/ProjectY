@@ -74,6 +74,7 @@ const clickAndWaitForReload = async locator => {
     locator.click()
   ]);
   await waitForDailyFlow();
+  await page.waitForSelector('.life-page-v1[data-page="home"].active', { state: 'visible' });
 };
 
 try {
@@ -364,7 +365,7 @@ try {
   await page.evaluate(() => navigator.serviceWorker.ready);
   const cacheStatus = await page.evaluate(async () => {
     const paths = [
-      './', './index.html', './manifest.webmanifest', './yos-suite-v3.js?v=9',
+      './', './index.html', '../manifest.webmanifest', './yos-suite-v3.js?v=9',
       './home-v1.js?v=7', './home-v1.css?v=7', './home-priority-v1.css?v=4'
     ];
     const entries = await Promise.all(paths.map(async path => [
