@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-20T06:40:56+09:00",
+  "updated_at": "2026-09-20T06:45:07+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -40,7 +40,7 @@
       "priority": 2,
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/373",
-      "updated_at": "2026-09-19T21:34:59Z"
+      "updated_at": "2026-09-19T21:42:18Z"
     },
     {
       "id": "github-pr-382",
@@ -70,7 +70,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-09-19T21:35:26Z"
+      "updated_at": "2026-09-19T21:42:57Z"
     },
     {
       "id": "github-issue-256",
@@ -165,6 +165,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-70817571e10e",
+      "title": "test(life): wait for Home after reload and use root manifest cache",
+      "completed_at": "2026-09-19T21:43:37Z",
+      "result": "GitHub mainへ反映（7081757）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/70817571e10e0c019cb4ed52c38b9bda349571e2"
+    },
+    {
       "id": "github-commit-7c13d9e7e674",
       "title": "test(life): recognize current Money v2 composition",
       "completed_at": "2026-09-19T21:40:46Z",
@@ -191,13 +198,6 @@
       "completed_at": "2026-09-19T20:57:32Z",
       "result": "GitHub mainへ反映（8cd081a）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/8cd081afc939fbbd36ab54a3e55108b08ca50fa7"
-    },
-    {
-      "id": "github-commit-7f8509674330",
-      "title": "data: record unified YOS PWA release gate",
-      "completed_at": "2026-09-19T20:41:42Z",
-      "result": "GitHub mainへ反映（7f85096）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/7f85096743305a741728fb46a41150f61fc664a9"
     },
     {
       "id": "complete-002",
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-20T06:40:56+09:00",
+      "last_update": "2026-09-20T06:45:07+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -315,7 +315,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-20T06:40:56+09:00",
+      "last_update": "2026-09-20T06:45:07+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-20T06:40:56+09:00",
+      "last_update": "2026-09-20T06:45:07+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "f9d9029b5dc411e92c3cabdc9494922e27fe4f3ac74683a83fc076be189e6668"
+  "github_snapshot_hash": "e06ede518813c6a308aff422e8e7bd4340c4584fbcb5b6d9c9fa76950f690bfa"
 }
