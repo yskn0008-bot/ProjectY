@@ -315,6 +315,65 @@ jobs:
           print(f'{p.name}: PASS ({len(data)} bytes)')
           PY
 
+      - name: Compile import-safe V2X child and probe
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd tools/clarity-factory
+          rm -f './ClarityActionsV2X_unsigned.shortcut' './ClarityActionsV2X.plist'
+          rm -f './ClarityProbeV2X_unsigned.shortcut' './ClarityProbeV2X.plist'
+          cherri clarity-actions-v2x.cherri --skip-sign --debug
+          cherri clarity-probe-v2x.cherri --skip-sign --debug
+          child='./ClarityActionsV2X_unsigned.shortcut'
+          probe='./ClarityProbeV2X_unsigned.shortcut'
+          test -f "$child"
+          test -f "$probe"
+          python3 patch_append_file_paths.py "$child"
+          python3 patch_reminder_wire_format.py "$child"
+          python3 patch_execute_actions_readback.py "$child"
+          python3 validate_clarity_execute_actions.py "$child"
+          grep -q 'ClarityActionsV2X' "$probe"
+          mkdir -p artifacts-formal-v2x
+          cp "$child" artifacts-formal-v2x/ClarityActionsV2X.shortcut
+          cp "$probe" artifacts-formal-v2x/ClarityProbeV2X.shortcut
+
+      - name: Sign import-safe V2X child and probe
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/clarity-factory/sign_with_hubsign.py \
+            --input tools/clarity-factory/artifacts-formal-v2x/ClarityActionsV2X.shortcut \
+            --output tools/clarity-factory/artifacts-formal-v2x/ClarityActionsV2X-signed.shortcut \
+            --name 'ClarityActionsV2X'
+          python3 tools/clarity-factory/sign_with_hubsign.py \
+            --input tools/clarity-factory/artifacts-formal-v2x/ClarityProbeV2X.shortcut \
+            --output tools/clarity-factory/artifacts-formal-v2x/ClarityProbeV2X-signed.shortcut \
+            --name 'ClarityProbeV2X'
+
+      - name: Verify signed import-safe V2X artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          base = Path('tools/clarity-factory/artifacts-formal-v2x')
+          for name in ('ClarityActionsV2X-signed.shortcut','ClarityProbeV2X-signed.shortcut'):
+              p = base / name
+              data = p.read_bytes()
+              assert data.startswith(b'AEA1'), (name, data[:8])
+              assert len(data) > 500, (name, len(data))
+              print(f'{name}: PASS ({len(data)} bytes)')
+          PY
+
+      - name: Upload import-safe V2X artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: clarity-formal-v2x
+          path: |
+            tools/clarity-factory/artifacts-formal-v2x/ClarityActionsV2X-signed.shortcut
+            tools/clarity-factory/artifacts-formal-v2x/ClarityProbeV2X-signed.shortcut
+          if-no-files-found: error
+
       - name: Upload post-install v2U probe
         uses: actions/upload-artifact@v4
         with:
