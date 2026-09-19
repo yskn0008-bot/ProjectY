@@ -27,6 +27,9 @@ try{
   await page.locator('#ideaMemo').fill('YOS unified PWA smoke');
   await page.locator('#saveIdea').click();
   await expectText('#recentIdea','YOS unified PWA smoke');
+  await page.reload({waitUntil:'networkidle'});
+  await expectText('#brandTitle','MY IDEA');
+  await expectText('#recentIdea','YOS unified PWA smoke');
 
   await page.locator('.journey-nav').click();
   await expectText('#brandTitle','MY JOURNEY');
