@@ -42,15 +42,28 @@ jobs:
           probe='./ClarityProbeV3_unsigned.shortcut'
           test -f "$child"
           test -f "$probe"
+          python3 patch_append_file_paths.py "$child"
           python3 patch_reminder_wire_format.py "$child"
           grep -q 'Clarity Ledger.txt' "$child"
           grep -q 'Idea in Box.txt' "$child"
           grep -q 'UNSUPPORTED_DEVICE_SETTING' "$child"
           grep -q 'ClarityActionsV3' "$probe"
-          if grep -q 'documentpicker.open' "$child"; then
-            echo 'V3 child unexpectedly depends on Get File.' >&2
-            exit 1
-          fi
+          python3 - "$child" <<'PY'
+          import plistlib, sys
+          with open(sys.argv[1], "rb") as fh:
+              root = plistlib.load(fh)
+          actions = root.get("WFWorkflowActions", [])
+          assert not any(str(a.get("WFWorkflowActionIdentifier","")).endswith("file.append") for a in actions)
+          opens = [
+              a.get("WFWorkflowActionParameters", {})
+              for a in actions
+              if str(a.get("WFWorkflowActionIdentifier","")).endswith("documentpicker.open")
+              and a.get("WFWorkflowActionParameters", {}).get("WFGetFilePath") in {"Clarity Ledger.txt","Idea in Box.txt"}
+          ]
+          assert opens, "no rewritten persistence reads found"
+          assert all(p.get("WFFileErrorIfNotFound") is False for p in opens), opens
+          print("V3 missing-file-safe persistence: PASS")
+          PY
           mkdir -p artifacts-v3
           cp "$child" artifacts-v3/ClarityActionsV3.shortcut
           cp "$probe" artifacts-v3/ClarityProbeV3.shortcut
@@ -62,11 +75,13 @@ jobs:
           python3 tools/clarity-factory/sign_with_hubsign.py \
             --input tools/clarity-factory/artifacts-v3/ClarityActionsV3.shortcut \
             --output tools/clarity-factory/artifacts-v3/ClarityActionsV3-signed.shortcut \
-            --name 'ClarityActionsV3'
+            --name 'ClarityActionsV3' \
+            --timeout 180
           python3 tools/clarity-factory/sign_with_hubsign.py \
             --input tools/clarity-factory/artifacts-v3/ClarityProbeV3.shortcut \
             --output tools/clarity-factory/artifacts-v3/ClarityProbeV3-signed.shortcut \
-            --name 'ClarityProbeV3'
+            --name 'ClarityProbeV3' \
+            --timeout 180
 
       - name: Verify AEA1
         shell: bash
