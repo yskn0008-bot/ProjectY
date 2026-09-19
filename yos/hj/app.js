@@ -75,6 +75,6 @@ $('copyStory').addEventListener('click',async()=>setStatus(await copyText(previe
 $('exportData').addEventListener('click',exportData);$('resetData').addEventListener('click',resetData);
 $('today').textContent=new Intl.DateTimeFormat('ja-JP',{month:'numeric',day:'numeric',weekday:'short',timeZone:'Asia/Tokyo'}).format(new Date());
 renderAll();
-if('serviceWorker'in navigator)navigator.serviceWorker.register('./service-worker.js').catch(()=>setStatus('オフライン準備に失敗しました。通常利用はできます。'));
+if('serviceWorker'in navigator)window.addEventListener('load',async()=>{try{const regs=await navigator.serviceWorker.getRegistrations();await Promise.all(regs.filter(reg=>/\/yos\/hj\/?$/.test(new URL(reg.scope).pathname)).map(reg=>reg.unregister()));await navigator.serviceWorker.register('../../service-worker.js',{scope:'../../',updateViaCache:'none'})}catch{setStatus('オフライン準備に失敗しました。通常利用はできます。')}});
 })();
 

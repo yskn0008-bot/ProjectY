@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="YOS Life">
-<link rel="manifest" href="./manifest.webmanifest">
+<link rel="manifest" href="../manifest.webmanifest">
 <style id="life-preinstall-guard">main.app,.bottom-nav{visibility:hidden!important}</style>
 <link id="lifeHomeV1Styles" rel="stylesheet" href="./home-v1.css?v=7">
 <link id="lifeHomePriorityV1Styles" rel="stylesheet" href="./home-priority-v1.css?v=4">
@@ -452,7 +452,7 @@ el('saveSettings').onclick=()=>{settings.yosUrl=el('yosUrl').value.trim();localS
 el('consultNav').onclick=()=>el('sendButton').click();el('recordNav').onclick=()=>el('sleep').focus();el('planNav').onclick=()=>scrollTo({top:0,behavior:'smooth'});
 el('sendButton').onclick=async()=>{day().note=el('note').value;save();const text=summary();try{await navigator.clipboard.writeText(text)}catch{prompt('この内容をコピーしてください',text);return}const url=settings.yosUrl||taxiUrl();if(url.startsWith('https://chatgpt.com/'))location.href=url;else{alert('内容をコピーしました。設定でYOSチャットURLを登録してください。');openSettings()}};
 importFromUrl();paint();setInterval(()=>{el('clock').textContent=new Intl.DateTimeFormat('ja-JP',{hour:'2-digit',minute:'2-digit',hour12:false,timeZone:'Asia/Tokyo'}).format(new Date());el('donutTime').textContent=el('clock').textContent},30000);
-if('serviceWorker'in navigator)navigator.serviceWorker.register('./service-worker.js');
+if('serviceWorker'in navigator)window.addEventListener('load',async()=>{try{const regs=await navigator.serviceWorker.getRegistrations();await Promise.all(regs.filter(reg=>/\/life\/?$/.test(new URL(reg.scope).pathname)).map(reg=>reg.unregister()));await navigator.serviceWorker.register('../service-worker.js',{scope:'../',updateViaCache:'none'})}catch{}});
 })();
 </script>
 <script src="./yos-suite-v3.js?v=9"></script>

@@ -1,13 +1,17 @@
 {
-  "name": "YOS Mission Control",
+  "name": "YOS",
   "short_name": "YOS",
-  "description": "YOSが全プロジェクトの現在地と次の作業を把握する司令室",
+  "description": "MY WAY / Life / Money / Hero’s Journey / Ideaをひとつに統合したYOS",
   "lang": "ja",
-  "start_url": "./",
+  "start_url": "./yos/",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait-primary",
-  "background_color": "#080808",
-  "theme_color": "#0a0a0a",
-  "categories": ["productivity", "utilities"]
+  "background_color": "#f7f0df",
+  "theme_color": "#f7f0df",
+  "categories": [
+    "productivity",
+    "lifestyle",
+    "utilities"
+  ]
 }
