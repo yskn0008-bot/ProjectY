@@ -2,7 +2,6 @@
 #define color blue
 
 #include 'actions/device'
-#include 'actions/dictionaries'
 
 setBrightness(0.10)
 
