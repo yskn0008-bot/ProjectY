@@ -1,0 +1,44 @@
+#define name ClarityStageChildV5
+#define color blue
+
+#include 'actions/device'
+#include 'actions/dictionaries'
+
+setBrightness(0.10)
+
+@request = getDictionary(ShortcutInput)
+@original = getValue(@request, "original_input")
+if @original {
+    setBrightness(0.20)
+}
+
+@actionsRaw = getValue(@request, "actions")
+if @actionsRaw {
+    setBrightness(0.30)
+}
+
+for actionItem in @actionsRaw {
+    const actionDict = getDictionary(@actionItem)
+    const module = "{actionDict['module']}"
+    if module == "DeviceSetting" {
+        setBrightness(0.40)
+    }
+
+    @inputRaw = getValue(actionDict, "input")
+    if @inputRaw {
+        setBrightness(0.45)
+    }
+
+    @input = getDictionary(@inputRaw)
+    @targetValue = getValue(@input, "target")
+    @target = "{@targetValue}"
+    if @target == "brightness" {
+        setBrightness(0.50)
+    }
+
+    @valueValue = getValue(@input, "value")
+    @value = "{@valueValue}"
+    if @value == "35" {
+        setBrightness(0.60)
+    }
+}
