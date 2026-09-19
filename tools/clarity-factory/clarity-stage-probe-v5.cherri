@@ -1,0 +1,31 @@
+#define name ClarityStageProbeV5
+#define color blue
+
+#include 'actions/shortcuts'
+#include 'actions/device'
+#include 'actions/text'
+
+setBrightness(0.80)
+wait(1)
+
+const payload = {
+    "original_input":"stage-probe-v5",
+    "actions":[
+        {
+            "id":"a1",
+            "module":"DeviceSetting",
+            "input":{
+                "target":"brightness",
+                "value":"35"
+            },
+            "needs_review":false,
+            "status":"planned"
+        }
+    ]
+}
+
+const childResult = run("ClarityStageChildV5", payload)
+wait(1)
+const currentBrightness = getDeviceDetail("Current Brightness")
+
+show("ClarityStageProbeV5\nBrightness: {currentBrightness}\n0.10=input unreadable\n0.20=original_input only\n0.30=actions found\n0.40=module parsed\n0.45=nested input found\n0.50=target parsed\n0.60=value parsed")
