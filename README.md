@@ -1,64 +1,59 @@
 # YOS
 
-YOS のメインプロジェクトです。iPhoneでの運用を主な前提として、YOS全体の仕様、Mission Control、Taxi関連資産、UI、補助スクリプトを管理します。
+iPhone中心で使う統合システムです。日常の表側は **MY WAY**、Life / Money / Hero’s Journey / Idea を同じYOS内で扱います。
 
-## 基本方針
+## 現在の入口
 
-- **既存資産を保護する**：削除・置換より、改善と統合を優先する
-- **iPhoneを優先する**：モバイルSafari、タッチ操作、縦向きで使いやすくする
-- **正本を明確にする**：重要な仕様・進捗・判断を会話だけに残さない
-- **役割を分ける**：YOSが判断、Labが設計・検証、Codexが実装、GitHubが保存する
-- **変更を追跡する**：ブランチ、Pull Request、Commitで履歴を残す
+- YOS PWA: `/` → `/yos/`（MY WAY）
+- Life: `/life/`
+- Hero’s Journey詳細: `/yos/hj/`
+- System / Mission Control: `/system/`
+- Native iOS source: `/ios-app/`
 
-## ディレクトリ構成
+ルートPWAのscopeはProjectY全体です。MY WAY / Life / Money / Journey / Idea / Systemを1つのホーム画面アプリとして扱い、主要静的資産はService Workerへ保存します。
+
+## 方針
+
+- **日常のHOMEはMY WAY**。開発進捗やOne Enterを通常画面の主役にしない。
+- **既存資産を再利用**し、同じ機能を別名で作り直さない。
+- **iPhone優先**。390px / WebKitを安全検査対象にする。
+- **ローカル優先**。GitHub/Vercelは停止しても日常画面が開けるよう、PWAキャッシュとFactory Coreを併用する。
+- **GitHubは履歴・CI・配信ミラー**として使い、唯一の実行依存にはしない。
+- 外部送信・支払い・公開・不可逆操作は本人承認境界を守る。
+
+## 主要ディレクトリ
 
 ```text
 .
-├── assets/     # 画像、アイコンなどの静的素材
-├── data/       # Mission Controlなどの機械可読な現在状態
-├── docs/       # 仕様書、ADR、運用テンプレート
-├── scripts/    # 開発・運用を補助するスクリプト
-├── ui/         # UI設計・画面資産・将来の実装
-├── index.html  # iPhone向けエントリーポイント
-└── README.md
+├── yos/                 # MY WAY / Money / Journey / Idea
+├── life/                # MY LIFE
+├── system/              # Mission Control / 開発状態
+├── ios-app/             # YOSネイティブiOS版
+├── tools/factory-core/  # One Enter Factory Core / ローカル退避
+├── data/                # 資産SSOT・Mission Controlデータ
+├── widgets/             # MY WAY Widget
+├── taxi/                # Taxi互換資産
+├── manifest.webmanifest # 統合YOS PWA manifest
+├── service-worker.js    # 統合YOS PWA root worker
+└── index.html           # MY WAYへ入るYOS入口
 ```
 
-## 主要仕様
+## 検証
 
-- [YOS Mission Control v1.0](docs/YOS_Mission_Control_v1.0.md)：全プロジェクトの状況、次の作業、承認待ち、問題を一か所で把握する正式仕様
-- [ADR-001：Mission ControlをGitHub中心で運用する](docs/ADR-001_YOS-Mission-Control.md)：保存場所と役割分担の正式な設計判断
-- [営業終了テンプレート v1.0](docs/営業終了テンプレート_v1.0.md)：日報提出、営業分析、学びの資産化を行う正式テンプレート
+- `YOS Unified PWA Safety`: 5領域・System・オンライン/オフライン導線を検査
+- `YOS iOS App Safety`: Capacitor生成、署名前iOS build、MY WAY同梱を検査
+- Life / Cockpit / HJ等は各専用Safetyで回帰検査
 
-## Mission Control正本
+## Native iOS
 
-- 現在状態：[`data/mission-control.json`](data/mission-control.json)
-- 個別タスク：GitHub Issues
-- 実装変更：GitHub Pull Requests
-- 実行履歴：GitHub Commits
+Bundle ID: `jp.yos.onlysystem`
 
-## 現在の状態
+Native版はMY WAYを起動HOMEとして生成・署名前buildまで自動化済みです。Apple Developer Programへの加入とTestFlight署名は、PWA版を実用完成させた後に行います。
 
-- ProjectYをYOSの主リポジトリとして正式採用
-- Mission Control v1.0の仕様と初期状態を作成済み
-- GitHub IssuesをTasks・Inboxとして運用開始
-- CodexはブランチとPull Requestによる実装フローを使用
-- iPhone向けDashboard画面は未実装
+## Mission Control
 
-## 次の段階
+Mission Controlは利用者HOMEではなく裏側の状態確認画面です。
 
-1. `data/mission-control.json`を読み込むiPhone向けDashboardを実装する
-2. GitHubのIssue・Pull Request・Commitを自動集約する
-3. YOS Master v2.0へ新しい役割分担を反映する
-4. Google Drive、Calendar、Project75の連携を追加する
-
-## 運用コマンド
-
-YOSで次の言葉を使う。
-
-- `進捗`：全体状況を確認
-- `次`：今やることを一つ表示
-- `開始`：作業開始を記録
-- `完了`：結果と次の作業を記録
-- `保留`：理由と再開条件を記録
-- `問題`：ブロッカーを記録
-- `追加`：新しい対象を登録
+- UI: `/system/`
+- 状態: `data/mission-control.json`
+- 資産SSOT: `data/yos-assets.json`
