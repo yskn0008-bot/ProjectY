@@ -23,6 +23,7 @@ const {
   parseRecovery,
   processEvent,
   qaState,
+  requiredQaNames,
   syntheticEvent,
   transientEvidence,
   validPath,
@@ -90,6 +91,19 @@ function recordingApi(handler) {
   };
 }
 
+function qaRun(name, overrides = {}) {
+  return {
+    id: overrides.id || 1,
+    name,
+    head_sha: overrides.head_sha || HEAD,
+    status: overrides.status || 'completed',
+    conclusion: Object.hasOwn(overrides, 'conclusion') ? overrides.conclusion : 'success',
+    created_at: overrides.created_at || '2026-09-13T00:00:00Z',
+    pull_requests: overrides.pull_requests || [],
+    ...overrides,
+  };
+}
+
 test('QA classification preserves Level 1 boundaries and sensitive Level 3 paths', () => {
   assert.equal(classifyQaLevel('QA Level 1', ['life/index.html', 'life/styles/main.css']), 1);
   assert.equal(classifyQaLevel('', ['life/index.html']), 2);
@@ -135,6 +149,58 @@ test('newest current-head success replaces stale and unrelated failures', () => 
   assert.equal(runs[0].conclusion, 'success');
   assert.equal(qaState(runs).next, 'QA_SUCCESS');
   assert.equal(qaState([]).next, 'QA_BOOTSTRAP_BLOCKED');
+});
+
+test('required QA set follows changed files and BRAVIA cannot be omitted', () => {
+  assert.deepEqual([...requiredQaNames(['.github/scripts/projecty-hq-autopilot.cjs'])].sort(), [
+    'Codex governance',
+    'ProjectY HQ Safety',
+  ].sort());
+  assert.deepEqual([...requiredQaNames(['ios-app/shell/bravia.js'])].sort(), [
+    'Codex governance',
+    'YOS BRAVIA safety',
+    'YOS Capture Safety',
+  ].sort());
+  assert.deepEqual([...requiredQaNames(['life/index.html'])].sort(), [
+    'Codex governance',
+    'YOS Life Safety',
+  ].sort());
+  assert.deepEqual([...requiredQaNames(['taxi/index.html'])].sort(), [
+    'Codex governance',
+    'Taxi Demand Calendar',
+    'Taxi iPhone17 Smoke',
+  ].sort());
+});
+
+test('required BRAVIA QA fails closed for missing, failure, pending, cancelled, and old-head green', () => {
+  const required = requiredQaNames(['ios-app/shell/bravia.js']);
+  const base = [
+    qaRun('Codex governance', { id: 101 }),
+    qaRun('YOS Capture Safety', { id: 102 }),
+  ];
+
+  assert.equal(qaState(base, required).next, 'QA_BOOTSTRAP_BLOCKED');
+  assert.equal(qaState([...base, qaRun('YOS BRAVIA safety', { id: 103, conclusion: 'failure' })], required).next, 'QA_FAILURE');
+  assert.equal(qaState([...base, qaRun('YOS BRAVIA safety', { id: 104, conclusion: null, status: 'in_progress' })], required).next, 'AWAITING_QA');
+  assert.equal(qaState([...base, qaRun('YOS BRAVIA safety', { id: 105, conclusion: 'cancelled' })], required).next, 'QA_FAILURE');
+
+  const stale = newestQaRuns([
+    ...base,
+    qaRun('YOS BRAVIA safety', { id: 106, head_sha: 'old-head' }),
+  ], HEAD);
+  assert.equal(qaState(stale, required).next, 'QA_BOOTSTRAP_BLOCKED');
+
+  assert.equal(qaState([...base, qaRun('YOS BRAVIA safety', { id: 107 })], required).next, 'QA_SUCCESS');
+});
+
+test('unrelated managed workflow failure is excluded from required QA aggregate', () => {
+  const required = requiredQaNames(['life/index.html']);
+  const runs = [
+    qaRun('Codex governance', { id: 111 }),
+    qaRun('YOS Life Safety', { id: 112 }),
+    qaRun('YOS AI Core', { id: 113, conclusion: 'failure' }),
+  ];
+  assert.equal(qaState(runs, required).next, 'QA_SUCCESS');
 });
 
 test('pagination continues past 100 rows', async () => {
@@ -322,7 +388,8 @@ test('manual dry-run evaluates an owner PR without writes', async () => {
     owner: OWNER,
   });
   assert.equal(result.kind, 'create');
-  assert.match(result.body, /QA run待ち/);
+  assert.match(result.body, /QA_BOOTSTRAP_BLOCKED/);
+  assert.match(result.body, /YOS Life Safety=missing/);
 });
 
 test('clean behind owner branch uses GitHub update-branch once', async () => {
@@ -413,6 +480,42 @@ test('workflow action API failure is persisted in managed recovery state', async
   assert.match(Object.values(target.failures)[0].lastError, /503/);
   assert.match(writtenBody, /projecty-hq-recovery:/);
   assert.match(JSON.stringify(parseRecovery([{ body: writtenBody }])), /503/);
+});
+
+test('unrelated current-head workflow failure does not enter recovery', async () => {
+  const pr = ownerPr({ number: 22 });
+  const unrelated = qaRun('YOS AI Core', {
+    id: 220,
+    workflow_id: 88,
+    conclusion: 'failure',
+    pull_requests: [{ number: 22 }],
+  });
+  const runs = [
+    qaRun('Codex governance', { id: 221 }),
+    qaRun('YOS Life Safety', { id: 222 }),
+    unrelated,
+  ];
+  const api = recordingApi((requestPath, options) => {
+    if (requestPath.startsWith('/issues/232/comments') && !options.method) return [];
+    if (requestPath === '/pulls/22') return pr;
+    if (requestPath.startsWith('/issues/22/comments')) return [];
+    if (requestPath.startsWith('/pulls/22/files')) return [{ filename: 'life/index.html' }];
+    if (requestPath.startsWith('/actions/runs?')) return { workflow_runs: runs };
+    if (requestPath === '/issues/232/comments' && options.method === 'POST') return { id: 4 };
+    throw new Error('unexpected request ' + requestPath);
+  });
+  const result = await processEvent({
+    api,
+    eventName: 'workflow_run',
+    payload: { workflow_run: unrelated },
+    repository: REPOSITORY,
+    owner: OWNER,
+  });
+  assert.equal(result.recovery, null);
+  assert.equal(api.calls.some((call) => call.path.includes('/actions/runs/220/jobs')), false);
+  assert.match(result.body, /Codex governance=success/);
+  assert.match(result.body, /YOS Life Safety=success/);
+  assert.doesNotMatch(result.body, /YOS AI Core=failure/);
 });
 
 test('current-head action-required QA approval is narrowly continued', async () => {
@@ -518,7 +621,6 @@ test('workflow-run delivery rebuilds state from latest current-head evidence', a
     if (requestPath.startsWith('/issues/232/comments')) return [];
     if (requestPath === '/pulls/21') return pr;
     if (requestPath.startsWith('/issues/21/comments')) return [];
-    if (requestPath.startsWith('/actions/runs/5/jobs')) return { jobs: [] };
     if (requestPath.startsWith('/pulls/21/files')) return [{ filename: 'docs/a.md' }];
     if (requestPath.startsWith('/actions/runs?')) return { workflow_runs: [stale, latest] };
     throw new Error('unexpected request ' + requestPath);
@@ -533,6 +635,7 @@ test('workflow-run delivery rebuilds state from latest current-head evidence', a
   });
   assert.match(result.body, /Codex governance=success/);
   assert.doesNotMatch(result.body, /Codex governance=failure/);
+  assert.equal(api.calls.some((call) => call.path.includes('/actions/runs/5/jobs')), false);
 });
 
 test('synthetic manual payload selects only an explicit supported event shape', () => {
@@ -551,6 +654,11 @@ test('production workflow is trusted-base, event-driven, and has a five-minute w
   assert.match(workflow, /persist-credentials: false/);
   assert.match(workflow, /contents: write/);
   assert.match(workflow, /pull-requests: write/);
+  assert.match(workflow, /ProjectY HQ Safety/);
+  assert.match(workflow, /YOS BRAVIA safety/);
+  assert.match(workflow, /YOS Capture Safety/);
+  assert.match(workflow, /YOS Life Safety/);
+  assert.match(workflow, /HJ iPhone Smoke/);
   assert.doesNotMatch(workflow, /^  pull_request:/m);
   assert.doesNotMatch(workflow, /github\.workflow_sha/);
   assert.doesNotMatch(workflow, /git push/);
