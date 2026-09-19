@@ -117,6 +117,29 @@ def validate(path: Path) -> None:
     if event_indexes[0] <= model_i or any(i <= model_i for i in reminder_indexes):
         raise AssertionError("external destination action appears before model/policy")
 
+    open_app_indexes = find_indexes(actions, "openapp")
+    if len(open_app_indexes) < 20:
+        raise AssertionError(f"expected allowlisted app launch actions, found {len(open_app_indexes)}")
+    if any(i <= model_i for i in open_app_indexes):
+        raise AssertionError("app launch action appears before model/policy")
+
+    required_local_action_suffixes = (
+        "wifi.set",
+        "bluetooth.set",
+        "cellulardata.set",
+        "airplanemode.set",
+        "lowpowermode.set",
+        "brightness",
+        "volume",
+        "appearance",
+        "flashlight",
+        "dnd.set",
+        "openurl",
+    )
+    for suffix in required_local_action_suffixes:
+        if not any(ident.endswith(suffix) for ident in identifiers):
+            raise AssertionError(f"missing local Clarity executor action: {suffix}")
+
     event_params = serialized_params(actions[event_indexes[0]])
     for required in ("WFCalendarItemTitle", "WFCalendarItemStartDate", "WFCalendarItemEndDate", "WFCalendarItemNotes"):
         if required not in event_params:
