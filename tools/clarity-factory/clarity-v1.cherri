@@ -279,7 +279,7 @@ for actionItem in @actionsRaw {
             if content == "toggle" { toggleDND() }
         }
         if target == "brightness" {
-            const brightnessPercent = getNumbers("{content}")
+            const brightnessPercent = getNumbers(content)
             if brightnessPercent < 0 || brightnessPercent > 100 {
                 const blockedBrightnessRecord = text("{CurrentDate}\t{requestNumber}\t{actionId}\tBLOCKED\tbrightness_out_of_range\n")
                 appendResolvedFile(ledgerFile, blockedBrightnessRecord)
@@ -289,7 +289,7 @@ for actionItem in @actionsRaw {
             setBrightness(brightnessRatio)
         }
         if target == "volume" {
-            const volumePercent = getNumbers("{content}")
+            const volumePercent = getNumbers(content)
             if volumePercent < 0 || volumePercent > 100 {
                 const blockedVolumeRecord = text("{CurrentDate}\t{requestNumber}\t{actionId}\tBLOCKED\tvolume_out_of_range\n")
                 appendResolvedFile(ledgerFile, blockedVolumeRecord)
