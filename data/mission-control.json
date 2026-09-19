@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-19T20:28:58+09:00",
+  "updated_at": "2026-09-19T20:50:38+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -165,6 +165,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-36c0a4f9d2fb",
+      "title": "pwa: make MY WAY the unified offline YOS app",
+      "completed_at": "2026-09-19T11:50:25Z",
+      "result": "GitHub mainへ反映（36c0a4f）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/36c0a4f9d2fbc51b4a34286c97c7646fa567bd88"
+    },
+    {
       "id": "github-commit-8dff4efe8ff2",
       "title": "fix(money): load latest Money UI in YOS",
       "completed_at": "2026-09-19T11:28:43Z",
@@ -191,13 +198,6 @@
       "completed_at": "2026-09-18T20:34:46Z",
       "result": "GitHub mainへ反映（46f69f3）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/46f69f376c9dd662f4eaa7210392c6b5156a0a7a"
-    },
-    {
-      "id": "github-commit-5031c85ae7bf",
-      "title": "Record physically verified device diagnostics",
-      "completed_at": "2026-09-18T20:33:16Z",
-      "result": "GitHub mainへ反映（5031c85）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/5031c85ae7bff80f21bc5d6cc02313e56e7cfa25"
     },
     {
       "id": "complete-002",
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-19T20:28:58+09:00",
+      "last_update": "2026-09-19T20:50:38+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -315,7 +315,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-19T20:28:58+09:00",
+      "last_update": "2026-09-19T20:50:38+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-19T20:28:58+09:00",
+      "last_update": "2026-09-19T20:50:38+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "b71731710b04123eb6825576004f01d432603cbea29ec13033e44b216979d9b9"
+  "github_snapshot_hash": "ce44dce7590bb440079c2905ce90dec39b84b6c5d9809e495598dae71f54df39"
 }
