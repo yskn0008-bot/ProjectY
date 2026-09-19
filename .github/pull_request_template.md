@@ -2,14 +2,14 @@
 
 Describe the user-visible result and why this change is needed.
 
-## Codex execution
+## Implementation route / cost control
 
-- [ ] Used Codex for implementation
-- [ ] Codex not required; One Enter / ChatGPT / Factory used
-- [ ] Codex unavailable or blocked
-- [ ] Approved exception: no code change / emergency rollback
+- [ ] One Enter / ChatGPT / GitHub / Factory used directly (default)
+- [ ] Codex used because direct route was insufficient
+- [ ] No implementation change / emergency rollback
 
-Implementation route / Codex reference:
+Implementation route:
+Codex reason (required only when Codex selected):
 
 ## Scope
 
