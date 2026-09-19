@@ -7,6 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="YOS Life">
+<link rel="apple-touch-icon" sizes="180x180" href="../assets/yos-icon-180.png">
 <link rel="manifest" href="../manifest.webmanifest">
 <style id="life-preinstall-guard">main.app,.bottom-nav{visibility:hidden!important}</style>
 <link id="lifeHomeV1Styles" rel="stylesheet" href="./home-v1.css?v=7">
@@ -131,6 +132,9 @@ dialog::backdrop{background:rgba(35,42,53,.38);backdrop-filter:blur(5px)}
 .dialog{padding:18px}.dialog h3{margin:0 0 12px}.dialog p{color:var(--muted);font-size:11px;line-height:1.6}
 .field{display:grid;gap:5px;margin-top:10px}.field label{font-size:10px;color:var(--muted)}.field input,.field textarea{width:100%;min-height:46px;border:1px solid #e0e4e9;border-radius:12px;padding:10px;background:#fff;color:var(--ink)}
 .dialog-actions{display:grid;grid-template-columns:1fr 1.5fr;gap:8px;margin-top:12px}.dialog-actions button{min-height:46px;border:1px solid #e2e5e9;border-radius:12px;background:white;color:var(--ink);font-weight:900}.dialog-actions .primary{border:0;background:var(--coral);color:white}
+#syncDialog #syncRetryButton,#syncDialog #importButton{min-height:44px;width:100%;border:1px solid var(--line);border-radius:12px;padding:10px;font-weight:700}
+#syncDialog #syncRetryButton{background:var(--coral);color:white;border:0}
+#syncDialog details{margin-top:16px}#syncDialog summary{min-height:44px;padding:12px 0}
 @media(max-width:520px){
   .app{width:min(100%,520px);margin:auto;padding:calc(env(safe-area-inset-top) + 4px) 10px calc(env(safe-area-inset-bottom) + 76px)}
   .top{height:40px;margin-bottom:2px}
@@ -167,6 +171,8 @@ dialog::backdrop{background:rgba(35,42,53,.38);backdrop-filter:blur(5px)}
 <section class="card">
   <div class="card-head"><h3>📅 今日の予定</h3><button id="syncButton" class="sync-button">カレンダー更新</button></div>
   <div id="syncState" class="sync-state"></div>
+  <p id="syncLaunchStatus" class="sync-state" role="status" hidden></p>
+  <button id="syncHelpButton" type="button" class="sync-button" hidden>更新できないとき</button>
   <div id="schedule" class="schedule"></div>
 </section>
 
@@ -227,9 +233,13 @@ dialog::backdrop{background:rgba(35,42,53,.38);backdrop-filter:blur(5px)}
 <dialog id="syncDialog">
   <form method="dialog" class="dialog">
     <h3>カレンダー連携</h3>
-    <p>GoogleカレンダーをiPhone標準カレンダーへ同期し、ショートカットから今日の予定をLife OSへ渡します。認証情報は保存しません。</p>
-    <div class="field"><label for="syncJson">手動テスト用JSON</label><textarea id="syncJson" placeholder='{"date":"2026-07-18","events":[]}'></textarea></div>
-    <div class="dialog-actions"><button value="cancel">閉じる</button><button id="importButton" class="primary" value="default">予定を取り込む</button></div>
+    <p>Scriptableの「YOS Life Calendar Sync」で今日の予定を取得します。開かない場合は、Scriptableで同じ名前のスクリプトを実行してください。</p>
+    <button id="syncRetryButton" type="button" class="primary">Scriptableで更新</button>
+    <details><summary>手動取り込み（補助）</summary>
+      <div class="field"><label for="syncJson">同期データ</label><textarea id="syncJson" placeholder="取得済みの同期データを貼り付け"></textarea></div>
+      <button id="importButton" type="button">予定を取り込む</button>
+    </details>
+    <div class="dialog-actions"><button value="cancel">閉じる</button></div>
   </form>
 </dialog>
 
@@ -444,7 +454,16 @@ document.querySelectorAll('[data-checkin-rating]').forEach(button=>button.onclic
 el('saveCheckin').onclick=()=>{day().checkin={sleep:el('sleep').value,health:el('health').value,mood:el('mood').value};save();window.dispatchEvent(new CustomEvent('yos-life-record-saved'))};
 document.querySelectorAll('.routine-card').forEach(b=>b.onclick=()=>{data.activeGroup=b.dataset.group;save()});
 el('note').onchange=()=>{day().note=el('note').value;save()};
-el('syncButton').onclick=()=>el('syncDialog').showModal();
+function launchCalendarSync(){
+  el('syncLaunchStatus').hidden=false;
+  el('syncLaunchStatus').textContent='Scriptableで予定を取得します。戻っても更新されない場合は「更新できないとき」を開いてください。';
+  el('syncHelpButton').hidden=false;
+  if(el('syncDialog').open)el('syncDialog').close();
+  location.href='scriptable:///run?scriptName=YOS%20Life%20Calendar%20Sync&openEditor=false';
+}
+el('syncButton').onclick=launchCalendarSync;
+el('syncRetryButton').onclick=launchCalendarSync;
+el('syncHelpButton').onclick=()=>el('syncDialog').showModal();
 el('importButton').onclick=()=>{try{importPayload(JSON.parse(el('syncJson').value));alert('予定を取り込みました')}catch(e){alert(`取り込みに失敗しました：${e.message}`)}};
 function openSettings(){el('yosUrl').value=settings.yosUrl||'';el('settingsDialog').showModal()}
 el('settingsButton').onclick=openSettings;el('settingsNav').onclick=openSettings;
@@ -455,6 +474,7 @@ importFromUrl();paint();setInterval(()=>{el('clock').textContent=new Intl.DateTi
 if('serviceWorker'in navigator)window.addEventListener('load',async()=>{try{const regs=await navigator.serviceWorker.getRegistrations();await Promise.all(regs.filter(reg=>/\/life\/?$/.test(new URL(reg.scope).pathname)).map(reg=>reg.unregister()));await navigator.serviceWorker.register('../service-worker.js',{scope:'../',updateViaCache:'none'})}catch{}});
 })();
 </script>
+<script src="../yos/shared-state-v1.js?v=1"></script>
 <script src="./yos-suite-v3.js?v=10"></script>
 </body>
 </html>
