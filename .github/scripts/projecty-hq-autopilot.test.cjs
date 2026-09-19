@@ -259,17 +259,16 @@ test('atomic transport stops on a concurrent head move', async () => {
   assert.equal(api.calls.some((call) => call.path.startsWith('/git/refs/heads/')), false);
 });
 
-test('transport and status recovery never spend another Codex run', () => {
+test('automatic recovery never invokes Codex for code, transport, or status', () => {
   const pr = ownerPr();
   const transport = requestText('REQUEST_TRANSPORT', pr, {});
   const status = requestText('REQUEST_STATUS', pr, {});
   const codeFix = requestText('REQUEST_CODE_FIX', pr, { text: 'assertion failed' });
-  assert.doesNotMatch(transport, /@codex/i);
-  assert.doesNotMatch(status, /@codex/i);
+  for (const body of [transport, status, codeFix]) assert.doesNotMatch(body, /@codex/i);
   assert.match(transport, /Direct GitHub transport required/);
   assert.match(status, /Direct status\/recovery check required/);
-  assert.match(codeFix, /@codex/);
-  assert.match(codeFix, /complete PROJECTY_FULL_FILE/);
+  assert.match(codeFix, /Direct current-head code fix required/);
+  assert.match(codeFix, /Do not auto-start Codex/);
 });
 
 test('bounded transient ladder is idempotent and cannot repeat forever', () => {
