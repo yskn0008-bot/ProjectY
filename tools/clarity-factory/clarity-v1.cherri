@@ -63,6 +63,7 @@ for actionItem in @actionsRaw {
     const domain = "{actionDict['domain']}"
     const intent = "{actionDict['intent']}"
     const status = "{actionDict['status']}"
+    const target = "{actionDict['target']}"
     const content = "{actionDict['content']}"
     const dateTime = "{actionDict['date_time']}"
     const endDateTime = "{actionDict['end_date_time']}"
