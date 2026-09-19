@@ -1,0 +1,27 @@
+#define name Clarity Mini Model
+#define color blue
+
+#include 'actions/text'
+#include 'actions/intelligence'
+#include 'actions/calendar'
+
+// Minimal experiment: voice -> ChatGPT model action -> Calendar.
+// No Vercel, no bearer token, no external API key.
+const originalInput = listen("After Pause", "jp-JP")
+
+const modelPrompt = text("あなたはiPhoneショートカット内の予定抽出器です。\n現在日時: {CurrentDate}\n音声入力: {originalInput}\n\n予定を1件だけ抽出してください。日本語の通常表現を自然に解釈してください。\n- 『明日10時』は端末のローカル日時で翌日の10:00。\n- 午前/午後/夜が明示された場合はそれを優先。\n- 終了時刻がなければ開始から60分後。\n- タイトルから日時表現だけを取り除き、残りを自然な予定名にする。\n- 推測で別の日付や別の用件を作らない。\n\nDictionaryだけを返してください。キーは title, start, end の3つ。start/endは yyyy-MM-dd HH:mm 形式。")
+const modelResult = askChatGPT(modelPrompt, false, "Dictionary")
+const parsed = getDictionary(modelResult)
+const title = "{parsed['title']}"
+const startText = "{parsed['start']}"
+const endText = "{parsed['end']}"
+const startDate = date("{startText}")
+const endDate = date("{endText}")
+
+rawAction("is.workflow.actions.addnewevent", {
+    "WFCalendarItemTitle": "{title}",
+    "WFCalendarItemStartDate": "${startDate}",
+    "WFCalendarItemEndDate": "${endDate}"
+})
+
+show("追加しました: {title}")
