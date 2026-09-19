@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-19T21:19:10+09:00",
+  "updated_at": "2026-09-19T21:29:30+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -12,6 +12,16 @@
     ]
   },
   "inbox": [
+    {
+      "id": "github-pr-386",
+      "title": "PR #386 Prototype: PROT Factory Web v0.1",
+      "type": "GitHub PR",
+      "status": "review",
+      "priority": 1,
+      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/386",
+      "updated_at": "2026-09-18T13:41:43Z"
+    },
     {
       "id": "github-pr-373",
       "title": "PR #373 Clarity: modular iPhone router Phase 1 contract",
@@ -53,16 +63,6 @@
       "updated_at": "2026-09-18T19:55:17Z"
     },
     {
-      "id": "github-pr-400",
-      "title": "PR #400 fix(Money): 他4領域とデザインを統一し、既知の支払い予定を維持",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/400",
-      "updated_at": "2026-09-19T12:19:06Z"
-    },
-    {
       "id": "github-issue-120",
       "title": "Issue #120 YOS AI：本番有効化・PWA接続・iPhone受入確認",
       "type": "GitHub Issue",
@@ -80,7 +80,17 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-09-19T12:18:52Z"
+      "updated_at": "2026-09-19T12:29:18Z"
+    },
+    {
+      "id": "github-issue-254",
+      "title": "Issue #254 [YOS→Codex] YOS iOS App｜BRAVIAリモコン統合",
+      "type": "GitHub Issue",
+      "status": "open",
+      "priority": 3,
+      "next_action": "完成条件を確認し、次の安全な実装を1件進める",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/254",
+      "updated_at": "2026-08-23T16:45:10Z"
     },
     {
       "id": "github-issue-256",
@@ -143,16 +153,6 @@
       "updated_at": "2026-09-06T08:17:33Z"
     },
     {
-      "id": "github-issue-292",
-      "title": "Issue #292 BRAVIA｜Scriptable無料リモコンMVP",
-      "type": "GitHub Issue",
-      "status": "open",
-      "priority": 3,
-      "next_action": "完成条件を確認し、次の安全な実装を1件進める",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/292",
-      "updated_at": "2026-09-06T15:53:56Z"
-    },
-    {
       "id": "github-issue-51",
       "title": "Issue #51 ProjectY 4本並行開発の全体管理",
       "type": "GitHub Issue",
@@ -165,6 +165,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-850b3eeb157a",
+      "title": "Merge pull request #400 from yskn0008-bot/fix/money-shared-design-20260919",
+      "completed_at": "2026-09-19T12:29:16Z",
+      "result": "GitHub mainへ反映（850b3ee）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/850b3eeb157a4025dce70700fa33484be1653974"
+    },
+    {
       "id": "github-commit-1b41d74795eb",
       "title": "Clarity: add token-free local ChatGPT build",
       "completed_at": "2026-09-19T12:18:57Z",
@@ -172,32 +179,25 @@
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/1b41d74795eb160f538014848b23046d81aaed17"
     },
     {
+      "id": "github-commit-61eb5d487eea",
+      "title": "docs(qa): record Money shared design comparison",
+      "completed_at": "2026-09-19T12:18:47Z",
+      "result": "GitHub mainへ反映（61eb5d4）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/61eb5d487eea807bc8a698442cc6a94039e75757"
+    },
+    {
+      "id": "github-commit-9f6af0578aaa",
+      "title": "test(yos): keep service worker cache cleanup contract readable",
+      "completed_at": "2026-09-19T12:18:46Z",
+      "result": "GitHub mainへ反映（9f6af05）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/9f6af0578aaab9a69eceddbbddcc75a7feeb1255"
+    },
+    {
       "id": "github-commit-7cd189739ae9",
       "title": "Clarity: rotate bootstrap connection token digest",
       "completed_at": "2026-09-19T12:11:57Z",
       "result": "GitHub mainへ反映（7cd1897）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/7cd189739ae9eb3e069a57c6ac4dc3698671a57b"
-    },
-    {
-      "id": "github-commit-eb9ca6b58ef1",
-      "title": "docs: document YOS PWA and System routes",
-      "completed_at": "2026-09-19T12:01:14Z",
-      "result": "GitHub mainへ反映（eb9ca6b）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/eb9ca6b58ef1b8ca4dd568661fd1ca588aa36256"
-    },
-    {
-      "id": "github-commit-8ccce6d5454f",
-      "title": "docs: align repository with unified YOS architecture",
-      "completed_at": "2026-09-19T12:01:11Z",
-      "result": "GitHub mainへ反映（8ccce6d）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/8ccce6d5454f94fa2d564011c03e68199c9efd2b"
-    },
-    {
-      "id": "github-commit-1c345978eec3",
-      "title": "pwa: keep Taxi system link after YOS root switch",
-      "completed_at": "2026-09-19T12:00:30Z",
-      "result": "GitHub mainへ反映（1c34597）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/1c345978eec3a08ae9c79c5a1d690e485a7acf7c"
     },
     {
       "id": "complete-002",
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-19T21:19:10+09:00",
+      "last_update": "2026-09-19T21:29:30+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -309,13 +309,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 23件・Open PR 20件を自動同期中",
+      "next_action": "Open Issue 24件・Open PR 20件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-19T21:19:10+09:00",
+      "last_update": "2026-09-19T21:29:30+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-19T21:19:10+09:00",
+      "last_update": "2026-09-19T21:29:30+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "0283d3b3fe6252477a9d89084f942980185046d93080546c5d11e3540f96d003"
+  "github_snapshot_hash": "660d3d5d52502de4a386c5a1dd3c6eca6913ef334a7a6a2b2c0a2740d7b02724"
 }
