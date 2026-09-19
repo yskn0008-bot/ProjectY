@@ -43,6 +43,7 @@ jobs:
           test -f "$child"
           test -f "$probe"
           python3 patch_reminder_wire_format.py "$child"
+          python3 patch_execute_actions_readback.py "$child"
           python3 validate_clarity_execute_actions.py "$child"
           grep -q 'ClarityActionsV3' "$probe"
           grep -q 'Clarity Ledger.txt' "$child"
