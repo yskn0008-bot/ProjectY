@@ -1,6 +1,6 @@
 #define name Clarity Actions Formal v2
 #define color blue
-#define version 19
+#define version 18
 
 #include 'actions/text'
 #include 'actions/documents'
