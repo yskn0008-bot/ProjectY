@@ -1,0 +1,33 @@
+#define name ClarityStageChildV6
+#define color blue
+
+#include 'actions/device'
+#include 'actions/documents'
+
+@request = getDictionary(ShortcutInput)
+@actionsRaw = getValue(@request, "actions")
+
+for actionItem in @actionsRaw {
+    const actionDict = getDictionary(@actionItem)
+    @inputRaw = getValue(actionDict, "input")
+    @input = getDictionary(@inputRaw)
+    @targetValue = getValue(@input, "target")
+    @target = "{@targetValue}"
+    @valueValue = getValue(@input, "value")
+    @value = "{@valueValue}"
+
+    if @target == "brightness" && @value == "35" {
+        setBrightness(0.60)
+
+        const stageRecord = text("V6_STAGE_LEDGER\n")
+        appendToFile("Clarity Ledger.txt", stageRecord)
+
+        setBrightness(0.70)
+
+        const brightnessPercent = getNumbers(@value)
+        const brightnessRatio = brightnessPercent * 0.01
+        rawAction("is.workflow.actions.setbrightness", {
+            "WFBrightness": "${brightnessRatio}"
+        })
+    }
+}
