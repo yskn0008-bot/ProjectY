@@ -8,7 +8,7 @@ const MAX_MODEL_ATTEMPTS = 2;
 // Emergency/bootstrap client credential for the signed iPhone Shortcut.
 // Only its SHA-256 digest is stored in source; the bearer token itself is never committed.
 // The existing environment-managed token remains valid, so this can be rotated without downtime.
-const CLARITY_BOOTSTRAP_TOKEN_SHA256 = '3c5aab82069a6b3d8d4ca463a3d7d7eb35c6959afdb2b6e7fd7f077bc5ffd48f';
+const CLARITY_BOOTSTRAP_TOKEN_SHA256 = '4227fb9887f3018d5f0bbc7dc98e1c672a2954c444133a402d83d1de09875b7c';
 let handler;
 
 function getHandler() {
