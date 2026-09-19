@@ -455,6 +455,7 @@ el('saveCheckin').onclick=()=>{day().checkin={sleep:el('sleep').value,health:el(
 document.querySelectorAll('.routine-card').forEach(b=>b.onclick=()=>{data.activeGroup=b.dataset.group;save()});
 el('note').onchange=()=>{day().note=el('note').value;save()};
 function launchCalendarSync(){
+  try{localStorage.setItem('yos-life-calendar-launch-v1',String(Date.now()))}catch{}
   el('syncLaunchStatus').hidden=false;
   el('syncLaunchStatus').textContent='Scriptableで予定を取得します。戻っても更新されない場合は「更新できないとき」を開いてください。';
   el('syncHelpButton').hidden=false;
@@ -470,6 +471,32 @@ el('settingsButton').onclick=openSettings;el('settingsNav').onclick=openSettings
 el('saveSettings').onclick=()=>{settings.yosUrl=el('yosUrl').value.trim();localStorage.setItem(SETTINGS,JSON.stringify(settings))};
 el('consultNav').onclick=()=>el('sendButton').click();el('recordNav').onclick=()=>el('sleep').focus();el('planNav').onclick=()=>scrollTo({top:0,behavior:'smooth'});
 el('sendButton').onclick=async()=>{day().note=el('note').value;save();const text=summary();try{await navigator.clipboard.writeText(text)}catch{prompt('この内容をコピーしてください',text);return}const url=settings.yosUrl||taxiUrl();if(url.startsWith('https://chatgpt.com/'))location.href=url;else{alert('内容をコピーしました。設定でYOSチャットURLを登録してください。');openSettings()}};
+
+function installCalendarAutoSync(){
+  const returningFromSync=new URLSearchParams(location.search).has('sync');
+  const isIOS=/iPhone|iPad|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+  if(!isIOS)return;
+  let firstShow=true;
+  let attemptedAt=returningFromSync?Date.now():0;
+  function attempt(){
+    if(document.visibilityState!=='visible')return;
+    if(firstShow){firstShow=false;if(returningFromSync)return;}
+    // Read current persisted state too: Scriptable may return into another Safari tab.
+    let stored;
+    try{stored=JSON.parse(localStorage.getItem(KEY)||'{}')}catch{return;}
+    const lastSync=Math.max(0,...Object.values(stored.days||{}).map(d=>Date.parse(d.lastSync)||0));
+    if(!lastSync)return; // First-time setup remains an explicit manual action.
+    let previous=0;
+    try{previous=Number(localStorage.getItem('yos-life-calendar-launch-v1'))||0}catch{return;}
+    const now=Date.now();
+    if(now-Math.max(lastSync,previous,attemptedAt)<60000)return;
+    attemptedAt=now; // No automatic retry loop if Safari blocks the app launch.
+    launchCalendarSync();
+  }
+  window.addEventListener('pageshow',attempt);
+  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')attempt()});
+}
+installCalendarAutoSync();
 importFromUrl();paint();setInterval(()=>{el('clock').textContent=new Intl.DateTimeFormat('ja-JP',{hour:'2-digit',minute:'2-digit',hour12:false,timeZone:'Asia/Tokyo'}).format(new Date());el('donutTime').textContent=el('clock').textContent},30000);
 if('serviceWorker'in navigator)window.addEventListener('load',async()=>{try{const regs=await navigator.serviceWorker.getRegistrations();await Promise.all(regs.filter(reg=>/\/life\/?$/.test(new URL(reg.scope).pathname)).map(reg=>reg.unregister()));await navigator.serviceWorker.register('../service-worker.js',{scope:'../',updateViaCache:'none'})}catch{}});
 })();

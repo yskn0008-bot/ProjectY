@@ -31,7 +31,7 @@ test('calendar update launches the installed script without opening JSON input o
  const nodes={syncLaunchStatus:{hidden:true},syncHelpButton:{hidden:true},syncDialog:{open:false,showModal(){throw Error('manual dialog opened')}}};
  const location={};
  const fn=html.slice(html.indexOf('function launchCalendarSync('),html.indexOf("el('syncButton').onclick=launchCalendarSync;"));
- vm.runInNewContext(fn+';launchCalendarSync()',{el:id=>nodes[id],location});
+ vm.runInNewContext(fn+';launchCalendarSync()',{el:id=>nodes[id],location,localStorage:{setItem(){}}});
  const url=new URL(location.href);
  assert.equal(url.protocol,'scriptable:');
  assert.equal(url.pathname,'/run');
