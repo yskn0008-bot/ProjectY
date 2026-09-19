@@ -11,8 +11,10 @@ cross-platform Files actions:
 
     Get File -> Get Text from Input -> Text(existing + new record) -> Save File
 
-``Save File`` writes back to the same path in the Shortcuts folder with overwrite
-enabled. No Get Parent Directory action is emitted.
+``Get File`` is explicitly non-fatal when the file does not exist. The following
+Get Text step therefore yields empty text for a missing file, and ``Save File``
+creates the file with the new record. Existing files are read, merged, and
+written back with overwrite enabled. No Get Parent Directory action is emitted.
 """
 
 from __future__ import annotations
@@ -89,7 +91,7 @@ def rewrite_append(target: str, original_input: dict) -> list[dict]:
             "UUID": open_uuid,
             "CustomOutputName": f"Current {target}",
             "WFGetFilePath": target,
-            "WFFileErrorIfNotFound": True,
+            "WFFileErrorIfNotFound": False,
         },
     }
 
