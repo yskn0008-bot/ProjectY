@@ -50,7 +50,7 @@ test('legacy Life markup stays hidden until final Home is ready',()=>{
   assert.match(html, /id="life-preinstall-guard"[^>]*>main\.app,\.bottom-nav\{visibility:hidden!important\}/);
   assert.match(html, /id="lifeHomeV1Styles"[^>]*home-v1\.css\?v=7/);
   assert.match(html, /id="lifeHomePriorityV1Styles"[^>]*home-priority-v1\.css\?v=4/);
-  assert.match(html, /readability-final\.css\?v=3/);
+  assert.match(html, /readability-final\.css\?v=4/);
   const suite=readFileSync(new URL('../yos-suite-v3.js',import.meta.url),'utf8');
   assert.match(suite, /const finalReady=/);
   assert.match(suite, /!document\.querySelector\('main\.app \.layout'\)/);

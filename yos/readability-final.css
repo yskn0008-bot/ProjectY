@@ -34,3 +34,6 @@ body,button,input,textarea,select{
   .bottom-nav a b,.bottom-nav button b{font-size:8.5px!important}
   .bottom-nav a:nth-child(4) b,.bottom-nav button:nth-child(4) b{font-size:8px!important;white-space:normal!important}
 }
+
+/* Use the device system font for all text, including legacy serif headings. */
+html body,html body *{font-family:-apple-system,BlinkMacSystemFont,system-ui,sans-serif!important}
