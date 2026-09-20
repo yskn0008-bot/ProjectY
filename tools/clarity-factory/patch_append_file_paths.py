@@ -148,6 +148,8 @@ def patch(path: Path) -> None:
         raise SystemExit("WFWorkflowActions missing")
 
     # Map existing Cherri getFile(path) outputs to their concrete target files.
+    # These resolver actions run before any append rewrite. If the file does not
+    # exist yet, iOS would otherwise stop the shortcut before Save File can create it.
     file_outputs: dict[str, str] = {}
     for action in actions:
         ident = str(action.get("WFWorkflowActionIdentifier", ""))
@@ -155,8 +157,10 @@ def patch(path: Path) -> None:
         if ident.endswith("documentpicker.open") and isinstance(params, dict):
             file_path = params.get("WFGetFilePath")
             action_uuid = params.get("UUID")
-            if file_path in TARGETS and action_uuid:
-                file_outputs[str(action_uuid)] = str(file_path)
+            if file_path in TARGETS:
+                params["WFFileErrorIfNotFound"] = False
+                if action_uuid:
+                    file_outputs[str(action_uuid)] = str(file_path)
 
     rewritten: list[dict] = []
     append_count = 0
