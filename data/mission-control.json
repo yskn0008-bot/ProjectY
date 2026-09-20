@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-20T14:57:19+09:00",
+  "updated_at": "2026-09-20T19:55:44+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -53,14 +53,14 @@
       "updated_at": "2026-09-19T21:32:22Z"
     },
     {
-      "id": "github-pr-390",
-      "title": "PR #390 feat(hq): add deterministic Development Supervisor",
+      "id": "github-pr-392",
+      "title": "PR #392 Clarity: add One Enter Gmail development bridge",
       "type": "GitHub PR",
       "status": "draft",
       "priority": 2,
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/390",
-      "updated_at": "2026-09-19T23:27:06Z"
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/392",
+      "updated_at": "2026-09-20T06:26:15Z"
     },
     {
       "id": "github-issue-120",
@@ -80,7 +80,17 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-09-20T03:08:03Z"
+      "updated_at": "2026-09-20T10:55:31Z"
+    },
+    {
+      "id": "github-issue-254",
+      "title": "Issue #254 [YOS→Codex] YOS iOS App｜BRAVIAリモコン統合",
+      "type": "GitHub Issue",
+      "status": "open",
+      "priority": 3,
+      "next_action": "完成条件を確認し、次の安全な実装を1件進める",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/254",
+      "updated_at": "2026-08-23T16:45:10Z"
     },
     {
       "id": "github-issue-256",
@@ -143,16 +153,6 @@
       "updated_at": "2026-09-06T08:17:33Z"
     },
     {
-      "id": "github-issue-292",
-      "title": "Issue #292 BRAVIA｜Scriptable無料リモコンMVP",
-      "type": "GitHub Issue",
-      "status": "open",
-      "priority": 3,
-      "next_action": "完成条件を確認し、次の安全な実装を1件進める",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/292",
-      "updated_at": "2026-09-06T15:53:56Z"
-    },
-    {
       "id": "github-issue-51",
       "title": "Issue #51 ProjectY 4本並行開発の全体管理",
       "type": "GitHub Issue",
@@ -164,6 +164,13 @@
     }
   ],
   "recently_completed": [
+    {
+      "id": "github-commit-e69468c8f8f7",
+      "title": "Merge pull request #390 from yskn0008-bot/feat/development-decision-proxy-v1",
+      "completed_at": "2026-09-20T10:55:34Z",
+      "result": "GitHub mainへ反映（e69468c）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/e69468c8f8f7b7c824e0e8eec0b139caa67febbf"
+    },
     {
       "id": "github-commit-8729c44f399a",
       "title": "Merge pull request #406 from yskn0008-bot/fix/life-auto-calendar",
@@ -191,13 +198,6 @@
       "completed_at": "2026-09-19T22:10:31Z",
       "result": "GitHub mainへ反映（8c9407a）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/8c9407a954410188a4ff33f91e940643e7a024b8"
-    },
-    {
-      "id": "github-commit-b3add50b3464",
-      "title": "Merge main into calendar fix, preserving shared state and verified Life changes",
-      "completed_at": "2026-09-19T22:08:56Z",
-      "result": "GitHub mainへ反映（b3add50）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/b3add50b3464c74ee1f79ce754336447ab69493d"
     },
     {
       "id": "complete-002",
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-20T14:57:19+09:00",
+      "last_update": "2026-09-20T19:55:44+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -309,13 +309,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 23件・Open PR 20件を自動同期中",
+      "next_action": "Open Issue 24件・Open PR 20件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-20T14:57:19+09:00",
+      "last_update": "2026-09-20T19:55:44+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-20T14:57:19+09:00",
+      "last_update": "2026-09-20T19:55:44+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "2ee6c200a852ae6165906823513859d53da77cf081df8a75179c951b1e9934f0"
+  "github_snapshot_hash": "2fd0762bae382fa5a8e47469df86ee5a84cb884167bc8ba64b4008352432a4d8"
 }
