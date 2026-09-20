@@ -62,15 +62,16 @@ jobs:
           assert 'DeviceSetting' in ptxt and 'OpenApp' in ptxt and 'MyWay' in ptxt
           for marker in ('UNSUPPORTED_APP','UNSUPPORTED_DEVICE_SETTING','UNSUPPORTED_MYWAY_TARGET'):
               assert marker in ctxt, marker
-          opens=[]
+          resolver_names={'inboxFile','ledgerFile','ideaFile'}
+          resolvers=[]
           for root in (parent, child):
               for a in root.get('WFWorkflowActions',[]):
                   ident=str(a.get('WFWorkflowActionIdentifier',''))
                   params=a.get('WFWorkflowActionParameters',{})
-                  if ident.endswith('documentpicker.open') and params.get('WFGetFilePath') in {'Clarity Inbox.txt','Clarity Ledger.txt','Idea in Box.txt'}:
-                      opens.append(params)
-          assert opens
-          assert all(p.get('WFFileErrorIfNotFound') is False for p in opens), opens
+                  if ident.endswith('documentpicker.open') and params.get('CustomOutputName') in resolver_names:
+                      resolvers.append(params)
+          assert resolvers, 'original persistence resolvers missing'
+          assert all(p.get('WFFileErrorIfNotFound') is False for p in resolvers), resolvers
           print('Formal V8 immutable contract: PASS')
           PY
 
