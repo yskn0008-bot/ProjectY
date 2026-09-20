@@ -22,7 +22,7 @@ const rawRecord = text("{CurrentDate}\t{requestNumber}\tRAW\t{originalInput}\n")
 const inboxFile = getFile("Clarity Inbox.txt")
 appendResolvedFile(inboxFile, rawRecord)
 
-const modelPrompt = text("あなたはiPhoneの個人AIルーター「Clarity」のUNDERSTAND層です。\n役割は自然な1入力を実行前の構造化ACTIONへ分解することだけです。実行・保存・登録・送信したと主張しません。\ncurrent_time: {CurrentDate}\n最重要ルール: 1目的=1ACTION。異なるmoduleの目的を混ぜない。Calendarは予定・予約・イベントだけ。Shoppingは買う物だけで別ACTION。Ideaは思いつき・アイデアだけで別ACTION。Reminderは独立した後で行うこと・期限・通知だけ。Calendarに付随する通知はCalendarのalert_minutes_beforeへ入れ、同内容のReminderを重複生成しない。Moneyは支出・収入・金額記録だけ。original_inputは入力をそのまま保持。入力にない内容は作らない。\n日時: current_timeを基準に今日/明日/明後日/今夜/明日15時など通常の日本語日時を解決し、date_timeとend_date_timeはISO 8601のローカル日時で返す。開始日時が一意に決まり、終了指定がないCalendarはend_date_timeを開始60分後にする。午前午後が本当に曖昧な「3時」などは推測せずneeds_review=true。Shopping/Ideaは日時指定がなければ日時不要でneeds_review=false。\nCalendar alert_minutes_beforeは通知指定がある時だけ数値で、対応値は5,15,30,60,120,1440。その他の通知間隔はneeds_review=true。\n不明な値は推測せず空文字またはnull。不明点があるACTIONはneeds_review=true。riskは通常low。external_writeはローカルCalendar/Reminders/Idea/Money候補、OpenApp、DeviceSetting、MyWayではfalse。needs_confirmationは通常false。statusは必ずplanned。\n利用可能module: Calendar, Reminder, Money, Shopping, Idea, OpenApp, DeviceSetting, MyWay, Other。\nReturn only valid JSON text with no markdown fence, prose, or commentary. The JSON root must be an object and must contain the required keys. Keys: original_input, actions. actions is an array. Each action has id, module, input, risk, external_write, needs_review, needs_confirmation, status. input is a Dictionary with text,title,date_time,end_date_time,alert_minutes_before,amount,merchant,item,note,raw_input,target,value.\nCalendar: titleは予定名のみ。Shopping: itemに買う物、条件はnote。Idea: noteに発想内容。Reminder: textに内容、必要ならdate_time。Money: raw_inputにMoney意図の自然文を保持し、金額や店名を推測しない。OpenApp: targetは safari,shortcuts,files,notes,phone,reminders,mail,music,calendar,maps,contacts,health,photos,appstore,facetime,chatgpt,scriptable,youtube,spotify,google_sheets のいずれか。未登録アプリはneeds_review=true。DeviceSetting: targetは wifi,bluetooth,low_power_mode,brightness,volume,appearance,flashlight,do_not_disturb のいずれか。wifi/bluetooth/low_power_mode/flashlight/do_not_disturb のvalueは on,off,toggle。appearanceは light,dark,toggle。brightness/volumeは0〜100の整数。曖昧または未対応設定はneeds_review=true。明示された対応済みDeviceSettingはrisk=low, external_write=false, needs_review=false, needs_confirmation=false, status=planned とする。安全判定の最終権限はRouter側にあり、モデルは実行可否を決定しない。MyWay: MY WAY/MYWAY/マイウェイを見たい・開きたい・まとめを見たい場合はtarget=home,value=open。OpenAppとMyWayは他のACTIONより後ろに置く。Otherは既存実行先が無い場合だけ。\n入力: {originalInput}")
+const modelPrompt = text("あなたはiPhoneの個人AIルーター「Clarity」のUNDERSTAND層です。\n役割は自然な1入力を実行前の構造化ACTIONへ分解することだけです。実行・保存・登録・送信したと主張しません。\ncurrent_time: {CurrentDate}\n最重要ルール: 1目的=1ACTION。異なるmoduleの目的を混ぜない。Calendarは予定・予約・イベントだけ。Shoppingは買う物だけで別ACTION。Ideaは思いつき・アイデアだけで別ACTION。Reminderは独立した後で行うこと・期限・通知だけ。Calendarに付随する通知はCalendarのalert_minutes_beforeへ入れ、同内容のReminderを重複生成しない。Moneyは支出・収入・金額記録だけ。original_inputは入力をそのまま保持。入力にない内容は作らない。\n日時: current_timeを基準に今日/明日/明後日/今夜/明日15時など通常の日本語日時を解決し、date_timeとend_date_timeはISO 8601のローカル日時で返す。開始日時が一意に決まり、終了指定がないCalendarはend_date_timeを開始60分後にする。午前午後が本当に曖昧な「3時」などは推測せずneeds_review=true。Shopping/Ideaは日時指定がなければ日時不要でneeds_review=false。\nCalendar alert_minutes_beforeは通知指定がある時だけ数値で、対応値は5,15,30,60,120,1440。その他の通知間隔はneeds_review=true。\n不明な値は推測せず空文字またはnull。不明点があるACTIONはneeds_review=true。riskは通常low。external_writeはローカルCalendar/Reminders/Idea/Money候補、OpenApp、DeviceSetting、MyWayではfalse。needs_confirmationは通常false。statusは必ずplanned。\n利用可能module: Calendar, Reminder, Money, Shopping, Idea, OpenApp, DeviceSetting, MyWay, Other。\nReturn only valid JSON text with no markdown fence, prose, or commentary. The JSON root must be an object and must contain the required keys. Keys: original_input, actions. actions is an array. Each action has id, module, input, risk, external_write, needs_review, needs_confirmation, status. input is a Dictionary with text,title,date_time,end_date_time,alert_minutes_before,amount,merchant,item,note,raw_input,target,value.\nCalendar: titleは予定名のみ。Shopping: itemに買う物、条件はnote。Idea: noteに発想内容。Reminder: textに内容、必要ならdate_time。Money: raw_inputにMoney意図の自然文を保持し、金額や店名を推測しない。OpenApp: targetは safari,shortcuts,files,notes,phone,reminders,mail,music,calendar,maps,contacts,health,photos,appstore,facetime,chatgpt,scriptable,youtube,spotify,google_sheets のいずれか。未登録アプリはneeds_review=true。DeviceSetting: targetは wifi,bluetooth,low_power_mode,brightness,volume,appearance,flashlight,do_not_disturb のいずれか。wifi/bluetooth/low_power_mode/flashlight/do_not_disturb のvalueは on,off,toggle。appearanceは light,dark,toggle。brightness/volumeは0〜100の整数。曖昧または未対応設定はneeds_review=true。明示された対応済みDeviceSettingはrisk=low, external_write=false, needs_review=false, needs_confirmation=false, status=planned とする。MyWay: MY WAY/MYWAY/マイウェイを見たい・開きたい・まとめを見たい場合はtarget=home,value=open。OpenAppとMyWayは他のACTIONより後ろに置く。Otherは既存実行先が無い場合だけ。\n入力: {originalInput}")
 
 const modelResult = askChatGPT(modelPrompt, false, "Text")
 @parsed = getDictionary(modelResult)
@@ -49,12 +49,9 @@ if !@actionsRaw {
 @other = false
 @blocked = false
 @seenDisplaySwitch = false
-@normalizedActions = []
 
 for actionItem in @actionsRaw {
     @action = getDictionary(@actionItem)
-    @actionIdValue = getValue(@action, "id")
-    @actionId = "{@actionIdValue}"
     @moduleValue = getValue(@action, "module")
     @module = "{@moduleValue}"
     @statusValue = getValue(@action, "status")
@@ -64,18 +61,27 @@ for actionItem in @actionsRaw {
     @externalWrite = getValue(@action, "external_write")
     @needsReview = getValue(@action, "needs_review")
     @needsConfirmation = getValue(@action, "needs_confirmation")
-    @inputRaw = getValue(@action, "input")
-    @input = getDictionary(@inputRaw)
-    @targetValue = getValue(@input, "target")
-    @target = "{@targetValue}"
-    @valueValue = getValue(@input, "value")
-    @value = "{@valueValue}"
-    @rawInputValue = getValue(@input, "raw_input")
-    @rawInput = "{@rawInputValue}"
+
+    if @status != "planned" {
+        @blocked = true
+    }
+
+    @routerLowRisk = false
+    if @module == "DeviceSetting" || @module == "OpenApp" || @module == "MyWay" {
+        @routerLowRisk = true
+    }
+
+    if !@routerLowRisk {
+        if @risk == "high" || @risk == "irreversible" {
+            @blocked = true
+        }
+        if @externalWrite || @needsReview || @needsConfirmation {
+            @blocked = true
+        }
+    }
 
     if @seenDisplaySwitch && @module != "OpenApp" && @module != "MyWay" {
         @blocked = true
-        @blockReason = "action_after_display_switch"
     }
     if @module == "OpenApp" || @module == "MyWay" {
         @seenDisplaySwitch = true
@@ -108,89 +114,18 @@ for actionItem in @actionsRaw {
     if @module == "Other" {
         @other = true
         @blocked = true
-        @blockReason = "other"
     }
 
     if @module != "Calendar" && @module != "Reminder" && @module != "Money" && @module != "Shopping" && @module != "Idea" && @module != "OpenApp" && @module != "DeviceSetting" && @module != "MyWay" && @module != "Other" {
         @blocked = true
-        @blockReason = "unregistered_module"
-    }
-
-    if @module == "DeviceSetting" {
-        @safeDeviceSetting = false
-
-        if @target == "brightness" || @target == "volume" {
-            const numericValue = getNumbers(@value)
-            if numericValue >= 0 && numericValue <= 100 {
-                @safeDeviceSetting = true
-            }
-        }
-
-        if @target == "wifi" || @target == "bluetooth" || @target == "low_power_mode" || @target == "flashlight" || @target == "do_not_disturb" {
-            if @value == "on" || @value == "off" || @value == "toggle" {
-                @safeDeviceSetting = true
-            }
-        }
-
-        if @target == "appearance" {
-            if @value == "light" || @value == "dark" || @value == "toggle" {
-                @safeDeviceSetting = true
-            }
-        }
-
-        if !@safeDeviceSetting {
-            @blocked = true
-            @blockReason = "invalid_device_setting"
-        }
-
-        if @status != "planned" {
-            @blocked = true
-            @blockReason = "device_status_not_planned"
-        }
-
-        if @safeDeviceSetting && @status == "planned" {
-            @safeAction = {
-                "id":"{@actionId}",
-                "module":"DeviceSetting",
-                "input":{
-                    "raw_input":"{@rawInput}",
-                    "target":"{@target}",
-                    "value":"{@value}"
-                },
-                "risk":"low",
-                "external_write":false,
-                "needs_review":false,
-                "needs_confirmation":false,
-                "status":"planned"
-            }
-            @normalizedActions += @safeAction
-        }
-    } else {
-        if @status != "planned" {
-            @blocked = true
-            @blockReason = "status"
-        }
-        if @risk == "high" || @risk == "irreversible" {
-            @blocked = true
-            @blockReason = "risk"
-        }
-        if @externalWrite || @needsReview || @needsConfirmation {
-            @blocked = true
-            @blockReason = "review_or_confirmation"
-        }
-        @normalizedActions += @action
     }
 }
 
 if @blocked {
-    mustOutput("Clarity V11 BLOCKED\nreason: {@blockReason}\nmodule: {@module}\nstatus: {@status}\nrisk: {@risk}\nexternal_write: {@externalWrite}\nneeds_review: {@needsReview}\nneeds_confirmation: {@needsConfirmation}\ntarget: {@target}\nvalue: {@value}", "Clarity V11 BLOCKED")
+    mustOutput("Clarity", "BLOCKED\n確認が必要なACTIONがあります")
 }
 
-@normalized = {
-    "original_input":"{originalInput}",
-    "actions":@normalizedActions
-}
-@childRaw = run("ClarityActionsV8A", @normalized)
+@childRaw = run("ClarityActionsV11A", @parsed)
 @child = getDictionary(@childRaw)
 @childStatusValue = getValue(@child, "status")
 @childStatus = "{@childStatusValue}"
