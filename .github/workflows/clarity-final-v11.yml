@@ -1,6 +1,14 @@
 name: Clarity Final V11 deterministic DeviceSetting
 
 on:
+  push:
+    branches:
+      - 'clarity/modular-router-phase1'
+    paths:
+      - 'tools/clarity-factory/clarity-final-v11.cherri'
+      - 'tools/clarity-factory/clarity-actions-v11a.cherri'
+      - 'tools/clarity-factory/patch_append_file_paths.py'
+      - '.github/workflows/clarity-final-v11.yml'
   pull_request:
     paths:
       - 'tools/clarity-factory/clarity-final-v11.cherri'
