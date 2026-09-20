@@ -71,6 +71,9 @@ if !@actionsRaw {
 }
 
 @handled = 0
+@handoffType = ""
+@handoffTarget = ""
+@handoffURL = ""
 
 for actionItem in @actionsRaw {
     const actionDict = getDictionary(@actionItem)
@@ -360,32 +363,16 @@ for actionItem in @actionsRaw {
             outputValue(@out)
         }
 
-        const appExecuting = text("{CurrentDate}\t{requestNumber}\t{actionId}\tEXECUTING\tOpenApp\t{@target}\n")
-        appendResolvedFile(ledgerFile, appExecuting)
-
-        if @target == "safari" { openApp("safari") }
-        if @target == "shortcuts" { openApp("shortcuts") }
-        if @target == "files" { openApp("files") }
-        if @target == "notes" { openApp("notes") }
-        if @target == "phone" { openApp("phone") }
-        if @target == "reminders" { openApp("reminders") }
-        if @target == "mail" { openApp("mail") }
-        if @target == "music" { openApp("music") }
-        if @target == "calendar" { openApp("calendar") }
-        if @target == "maps" { openApp("maps") }
-        if @target == "contacts" { openApp("contacts") }
-        if @target == "health" { openApp("health") }
-        if @target == "photos" { openApp("photos") }
-        if @target == "appstore" { openApp("appstore") }
-        if @target == "facetime" { openApp("facetime") }
-        if @target == "chatgpt" { openApp("com.openai.chat") }
-        if @target == "scriptable" { openApp("dk.simonbs.Scriptable") }
-        if @target == "youtube" { openApp("com.google.ios.youtube") }
-        if @target == "spotify" { openApp("com.spotify.client") }
-        if @target == "google_sheets" { openApp("com.google.Sheets") }
-
-        const appApplied = text("{CurrentDate}\t{requestNumber}\t{actionId}\tAPPLIED\tOpenApp\t{@target}\n")
-        appendResolvedFile(ledgerFile, appApplied)
+        if @handoffType != "" {
+            const blockedMultipleMyWayHandoffs = text("{CurrentDate}\t{requestNumber}\t{actionId}\tBLOCKED\tmultiple_ui_handoffs\n")
+            appendResolvedFile(ledgerFile, blockedMultipleMyWayHandoffs)
+            @out = {"status":"blocked","verified":false,"result":{"message":"画面を開く操作は1回に1つだけ指定してください"},"error_code":"MULTIPLE_UI_HANDOFFS"}
+            outputValue(@out)
+        }
+        @handoffType = "app"
+        @handoffTarget = "{@target}"
+        const appReady = text("{CurrentDate}\t{requestNumber}\t{actionId}\tHANDOFF_READY\tOpenApp\t{@target}\n")
+        appendResolvedFile(ledgerFile, appReady)
         @handled += 1
     }
 
@@ -396,11 +383,17 @@ for actionItem in @actionsRaw {
             @out = {"status":"blocked","verified":false,"result":{"message":"MY WAYの表示先を安全に判断できません"},"error_code":"UNSUPPORTED_MYWAY_TARGET"}
             outputValue(@out)
         }
-        const myWayExecuting = text("{CurrentDate}\t{requestNumber}\t{actionId}\tEXECUTING\tMyWay\thome\n")
-        appendResolvedFile(ledgerFile, myWayExecuting)
-        openURL("https://yskn0008-bot.github.io/ProjectY/yos/")
-        const myWayApplied = text("{CurrentDate}\t{requestNumber}\t{actionId}\tAPPLIED\tMyWay\thome\n")
-        appendResolvedFile(ledgerFile, myWayApplied)
+        if @handoffType != "" {
+            const blockedMultipleHandoffs = text("{CurrentDate}\t{requestNumber}\t{actionId}\tBLOCKED\tmultiple_ui_handoffs\n")
+            appendResolvedFile(ledgerFile, blockedMultipleHandoffs)
+            @out = {"status":"blocked","verified":false,"result":{"message":"画面を開く操作は1回に1つだけ指定してください"},"error_code":"MULTIPLE_UI_HANDOFFS"}
+            outputValue(@out)
+        }
+        @handoffType = "myway"
+        @handoffTarget = "home"
+        @handoffURL = "https://yskn0008-bot.github.io/ProjectY/yos/"
+        const myWayReady = text("{CurrentDate}\t{requestNumber}\t{actionId}\tHANDOFF_READY\tMyWay\thome\n")
+        appendResolvedFile(ledgerFile, myWayReady)
         @handled += 1
     }
 
@@ -436,5 +429,5 @@ for actionItem in @actionsRaw {
 const done = text("{CurrentDate}\t{requestNumber}\tREQUEST_DONE\t{@handled}\n")
 appendResolvedFile(ledgerFile, done)
 
-@success = {"status":"success","verified":true,"result":{"message":"CLARITY_EXECUTE_ACTIONS_PASS","handled":"{@handled}"},"error_code":""}
+@success = {"status":"success","verified":true,"result":{"message":"CLARITY_EXECUTE_ACTIONS_PASS","handled":"{@handled}","handoff_type":"{@handoffType}","handoff_target":"{@handoffTarget}","handoff_url":"{@handoffURL}"},"error_code":""}
 outputValue(@success)

@@ -5,6 +5,7 @@
 #include 'actions/documents'
 #include 'actions/intelligence'
 #include 'actions/shortcuts'
+#include 'actions/web'
 
 // Auto-generated owner-facing Clarity Demo entry.
 // Factory path: voice -> Raw First -> Use Model -> policy/router -> execution child -> verified result.
@@ -49,6 +50,7 @@ if !@actionsRaw {
 @other = false
 @blocked = false
 @seenDisplaySwitch = false
+@displaySwitchCount = 0
 
 for actionItem in @actionsRaw {
     @action = getDictionary(@actionItem)
@@ -85,6 +87,10 @@ for actionItem in @actionsRaw {
     }
     if @module == "OpenApp" || @module == "MyWay" {
         @seenDisplaySwitch = true
+        @displaySwitchCount += 1
+        if @displaySwitchCount > 1 {
+            @blocked = true
+        }
     }
 
     if @module == "Calendar" {
@@ -132,9 +138,46 @@ if @blocked {
 @childVerified = getValue(@child, "verified")
 @childErrorValue = getValue(@child, "error_code")
 @childError = "{@childErrorValue}"
+@childResultRaw = getValue(@child, "result")
+@childResult = getDictionary(@childResultRaw)
+@handoffTypeValue = getValue(@childResult, "handoff_type")
+@handoffType = "{@handoffTypeValue}"
+@handoffTargetValue = getValue(@childResult, "handoff_target")
+@handoffTarget = "{@handoffTargetValue}"
+@handoffURLValue = getValue(@childResult, "handoff_url")
+@handoffURL = "{@handoffURLValue}"
 
 if @childStatus != "success" || !@childVerified {
     mustOutput("Clarity", "FAILED\n{@childError}")
 }
 
-show("ClarityFinalV11\nE2E PASS\nCalendar: {@calendar}\nReminder: {@reminder}\nMoney: {@money}\nShopping: {@shopping}\nIdea: {@idea}\nOpenApp: {@openApp}\nDeviceSetting: {@deviceSetting}\nMyWay: {@myWay}\n実行結果をVerify/Ledgerまで確認済み")
+// A UI handoff must be the final visible operation. Nothing after these
+// branches may show a result or open another destination.
+if @handoffType == "myway" {
+    openURL(@handoffURL)
+}
+if @handoffType == "app" {
+    if @handoffTarget == "safari" { openApp("safari") }
+    if @handoffTarget == "shortcuts" { openApp("shortcuts") }
+    if @handoffTarget == "files" { openApp("files") }
+    if @handoffTarget == "notes" { openApp("notes") }
+    if @handoffTarget == "phone" { openApp("phone") }
+    if @handoffTarget == "reminders" { openApp("reminders") }
+    if @handoffTarget == "mail" { openApp("mail") }
+    if @handoffTarget == "music" { openApp("music") }
+    if @handoffTarget == "calendar" { openApp("calendar") }
+    if @handoffTarget == "maps" { openApp("maps") }
+    if @handoffTarget == "contacts" { openApp("contacts") }
+    if @handoffTarget == "health" { openApp("health") }
+    if @handoffTarget == "photos" { openApp("photos") }
+    if @handoffTarget == "appstore" { openApp("appstore") }
+    if @handoffTarget == "facetime" { openApp("facetime") }
+    if @handoffTarget == "chatgpt" { openApp("com.openai.chat") }
+    if @handoffTarget == "scriptable" { openApp("dk.simonbs.Scriptable") }
+    if @handoffTarget == "youtube" { openApp("com.google.ios.youtube") }
+    if @handoffTarget == "spotify" { openApp("com.spotify.client") }
+    if @handoffTarget == "google_sheets" { openApp("com.google.Sheets") }
+}
+if @handoffType == "" {
+    show("ClarityFinalV11\nE2E PASS\nCalendar: {@calendar}\nReminder: {@reminder}\nMoney: {@money}\nShopping: {@shopping}\nIdea: {@idea}\nDeviceSetting: {@deviceSetting}\n実行済み項目をVerify/Ledger確認済み")
+}

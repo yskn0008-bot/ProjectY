@@ -72,7 +72,11 @@ jobs:
           assert 'UNSUPPORTED_DEVICE_SETTING' in cblob
           assert 'UNSUPPORTED_APP' in cblob
           assert 'UNSUPPORTED_MYWAY_TARGET' in cblob
-          print('Clarity Final V11 deterministic router/executor contract: PASS')
+          assert 'MULTIPLE_UI_HANDOFFS' in cblob
+          assert 'HANDOFF_READY' in cblob
+          assert 'openURL' not in cblob
+          assert 'handoff_type' in pblob and 'handoff_type' in cblob
+          print('Clarity Final V11 deferred handoff router/executor contract: PASS')
           PY
           mkdir -p artifacts-v11
           cp "$parent" artifacts-v11/ClarityFinalV11.shortcut
