@@ -1,0 +1,49 @@
+#define name ClarityV3FinalCheck
+#define color blue
+
+#include 'actions/shortcuts'
+#include 'actions/device'
+#include 'actions/text'
+
+setBrightness(0.80)
+wait(1)
+
+const payload = {
+    "original_input":"brightness-final-check",
+    "actions":[
+        {
+            "id":"a1",
+            "module":"DeviceSetting",
+            "input":{
+                "text":"",
+                "title":"",
+                "date_time":"",
+                "end_date_time":"",
+                "alert_minutes_before":"",
+                "amount":"",
+                "merchant":"",
+                "item":"",
+                "note":"",
+                "raw_input":"brightness-final-check",
+                "target":"brightness",
+                "value":"35"
+            },
+            "risk":"low",
+            "external_write":false,
+            "needs_review":false,
+            "needs_confirmation":false,
+            "status":"planned"
+        }
+    ]
+}
+
+const childRaw = run("ClarityActionsV3", payload)
+wait(1)
+const currentBrightness = getDeviceDetail("Current Brightness")
+@brightnessText = "{currentBrightness}"
+
+if @brightnessText == "0.35" {
+    show("CLARITY V3 FINAL CHECK\nPASS\nBrightness: {currentBrightness}")
+} else {
+    show("CLARITY V3 FINAL CHECK\nFAIL\nBrightness: {currentBrightness}")
+}
