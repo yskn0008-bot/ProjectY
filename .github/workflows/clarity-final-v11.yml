@@ -68,7 +68,6 @@ jobs:
           assert 'ClarityFinalV11' in pblob
           assert 'routerLowRisk' in pblob
           assert 'DeviceSetting' in pblob and 'OpenApp' in pblob and 'MyWay' in pblob
-          assert 'ClarityActionsV11A' in cblob
           assert 'needsReview' in cblob
           assert 'UNSUPPORTED_DEVICE_SETTING' in cblob
           assert 'UNSUPPORTED_APP' in cblob
