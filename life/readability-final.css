@@ -36,3 +36,6 @@ body,button,input,textarea,select{
 #schedule .event{grid-template-columns:max-content 6px minmax(0,1fr)}
 #schedule .event-time{min-width:5ch;white-space:nowrap}
 #schedule .event-main{min-width:0;overflow-wrap:anywhere}
+
+/* Use the device system font for all text, including legacy serif headings. */
+html body,html body *{font-family:-apple-system,BlinkMacSystemFont,system-ui,sans-serif!important}
