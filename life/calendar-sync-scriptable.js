@@ -42,7 +42,8 @@ async function run() {
 
   const payload = { date: localDateKey(now), events: normalized };
   const url = `${LIFE_URL}${base64Url(JSON.stringify(payload))}`;
-  Safari.open(url);
+  const after = typeof args !== 'undefined' && args.queryParameters?.destination === 'myway' ? '&after=myway' : '';
+  Safari.open(url + after);
 
   // URLを開いただけではLifeでの保存成功を確認できないため、成功通知は出さない。
 
