@@ -1,0 +1,92 @@
+name: Clarity Final V11 deterministic DeviceSetting
+
+on:
+  pull_request:
+    paths:
+      - 'tools/clarity-factory/clarity-final-v11.cherri'
+      - 'tools/clarity-factory/patch_append_file_paths.py'
+      - '.github/workflows/clarity-final-v11.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-sign-v11:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pinned Cherri v2.3.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          url='https://github.com/electrikmilk/cherri/releases/download/v2.3.0/cherri_linux-x86_64.zip'
+          expected='7ab2c384b7b26e7c72a30a8dfa56f89dae12c4068b7951bc1e3193f3698edbe9'
+          curl -fsSL "$url" -o /tmp/cherri.zip
+          printf '%s  %s\n' "$expected" /tmp/cherri.zip | sha256sum -c -
+          mkdir -p /tmp/cherri
+          unzip -q /tmp/cherri.zip -d /tmp/cherri
+          binary="$(find /tmp/cherri -type f -name cherri -print -quit)"
+          sudo install -m 0755 "$binary" /usr/local/bin/cherri
+
+      - name: Compile and inspect V11
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd tools/clarity-factory
+          cherri clarity-final-v11.cherri --skip-sign --debug
+          parent='./ClarityFinalV11_unsigned.shortcut'
+          test -f "$parent"
+          python3 patch_append_file_paths.py "$parent"
+          python3 - "$parent" <<'PY'
+          import plistlib, sys
+          with open(sys.argv[1], 'rb') as fh:
+              root=plistlib.load(fh)
+          actions=root.get('WFWorkflowActions',[])
+          blob=repr(root)
+          llm=[a for a in actions if a.get('WFWorkflowActionIdentifier')=='is.workflow.actions.askllm']
+          assert len(llm)==1
+          p=llm[0].get('WFWorkflowActionParameters',{})
+          assert p.get('WFLLMModel')=='ChatGPT'
+          assert p.get('WFGenerativeResultType')=='Text'
+          assert 'ClarityActionsV8A' in blob
+          assert 'ClarityFinalV11' in blob
+          assert 'safeDeviceSetting' in blob
+          assert 'needs_review' in blob
+          assert 'DeviceSetting' in blob
+          assert 'Clarity V11 BLOCKED' in blob
+          print('Clarity Final V11 deterministic router contract: PASS')
+          PY
+          mkdir -p artifacts-v11
+          cp "$parent" artifacts-v11/ClarityFinalV11.shortcut
+
+      - name: Sign V11
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/clarity-factory/sign_with_hubsign.py \
+            --input tools/clarity-factory/artifacts-v11/ClarityFinalV11.shortcut \
+            --output tools/clarity-factory/artifacts-v11/ClarityFinalV11-signed.shortcut \
+            --name 'ClarityFinalV11' \
+            --timeout 180
+
+      - name: Verify AEA1
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('tools/clarity-factory/artifacts-v11/ClarityFinalV11-signed.shortcut')
+          data=p.read_bytes()
+          assert data.startswith(b'AEA1')
+          assert len(data)>500
+          print(p.name, len(data))
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: clarity-final-v11
+          path: tools/clarity-factory/artifacts-v11/ClarityFinalV11-signed.shortcut
+          if-no-files-found: error
