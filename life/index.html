@@ -441,7 +441,7 @@ function importPayload(payload){
 }
 function importFromUrl(){
   const params=new URLSearchParams(location.search),sync=params.get('sync');if(!sync)return;
-  try{importPayload(JSON.parse(decodeBase64Url(sync)));history.replaceState({},'',location.pathname)}catch(e){alert(`カレンダー同期に失敗しました：${e.message}`)}
+  try{importPayload(JSON.parse(decodeBase64Url(sync)));history.replaceState({},'',location.pathname);if(params.get('after')==='myway')location.replace('../yos/')}catch(e){alert(`カレンダー同期に失敗しました：${e.message}`)}
 }
 function taxiUrl(){try{return JSON.parse(localStorage.getItem(TAXI)||'{}').yosUrl||''}catch{return''}}
 function summary(){
