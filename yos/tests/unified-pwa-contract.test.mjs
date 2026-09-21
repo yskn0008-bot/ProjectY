@@ -7,7 +7,7 @@ const read = path => readFile(new URL('../../' + path, import.meta.url), 'utf8')
 test('root manifest installs one YOS app across all main domains', async () => {
   const [manifest,index,sw,yos,guide,guideApp,life,hj,system] = await Promise.all([
     read('manifest.webmanifest'), read('index.html'), read('service-worker.js'),
-    read('yos/index.html'), read('yos/guide.html'), read('yos/guide.js'),
+    read('yos/index.html'), read('yos/guide.html'), read('yos/guide-v2.js'),
     read('life/index.html'), read('yos/hj/index.html'), read('system/index.html')
   ]);
   const parsed=JSON.parse(manifest);
@@ -16,7 +16,7 @@ test('root manifest installs one YOS app across all main domains', async () => {
   assert.equal(parsed.scope,'./');
   assert.match(index,/location\.replace\("\.\/yos\/"\)/);
   assert.match(sw,/yos-unified-/);
-  for(const path of ['./yos/index.html','./yos/guide.html','./yos/guide.css','./yos/guide.js','./life/index.html','./yos/hj/index.html','./system/index.html']){
+  for(const path of ['./yos/index.html','./yos/guide.html','./yos/guide.css','./yos/guide.js','./yos/guide-v2.css','./yos/guide-v2.js','./life/index.html','./yos/hj/index.html','./system/index.html']){
     assert.ok(sw.includes("'"+path+"'"),'missing root PWA cache entry: '+path);
   }
   assert.match(yos,/href="\.\.\/manifest\.webmanifest"/);
@@ -26,10 +26,10 @@ test('root manifest installs one YOS app across all main domains', async () => {
   assert.match(system,/href="\.\.\/manifest\.webmanifest"/);
   assert.match(yos,/data-web-only href="shortcuts:\/\/run-shortcut\?name=Clarity"/);
   assert.match(yos,/data-web-only href="scriptable:\/\/\/run\?scriptName=YOS%20Remote%20Hub"/);
-  assert.match(yos,/class="yos-companion" href="\.\/guide\.html"/);
+  assert.match(yos,/class="yos-companion" href="\.\/guide\.html"/);\n  assert.match(yos,/class="guide-shortcut" href="\.\/guide\.html"/);
   assert.match(yos,/data-web-only href="\.\.\/system\/"/);
-  assert.match(guide,/何かあった？/);
-  assert.match(guide,/どこで処理するかはYOSが決めます/);
+  assert.match(guide,/今日は、どうする？/);
+  assert.match(guide,/YOSに話す/);
   assert.match(guide,/data-mode="normal"/);
   assert.match(guide,/data-mode="build"/);
   assert.match(guide,/data-mode="scout"/);
