@@ -1,13 +1,15 @@
 // YOS AC Widget — SHARP A988JB frequent controls via Tapo H110.
 // Header includes current set temperature and a launch icon for the full YOS AC Remote.
-// Fan speed follows the SHARP remote order: Auto -> Quiet -> Soft -> Low -> High.
+// Fan speed uses the H110 AC profile values verified by current integrations: Auto(0) -> Low(1) -> High(3).
 
 const tapo = importModule('YOS Tapo H110 Core');
 const remote = tapo.findRemote(r => String(r.model||'').toUpperCase()==='AC' || /エアコン|air.?con/i.test(String(r.nickname||'')));
 if(!remote) throw new Error('エアコン リモコンが見つかりません。YOS Tapo H110 Setup を再実行してください。');
 
-const FAN_LABELS=Object.freeze(['自動','静音','微','弱','強']);
-function fanName(s){const n=Math.max(0,Math.min(4,Number(s&&s.S)||0));return FAN_LABELS[n]||'自動';}
+const FAN_STEPS=Object.freeze([0,1,3]);
+const FAN_LABELS=Object.freeze({0:'自動',1:'弱',3:'強'});
+function fanName(s){const n=Number(s&&s.S);return Object.prototype.hasOwnProperty.call(FAN_LABELS,n)?FAN_LABELS[n]:(Number.isFinite(n)?String(n):'自動');}
+function nextFanValue(value){const n=Number(value),i=FAN_STEPS.indexOf(n);return FAN_STEPS[i>=0?(i+1)%FAN_STEPS.length:0];}
 function walk(value,out=[]){if(Array.isArray(value))for(const v of value)walk(v,out);else if(value&&typeof value==='object'){out.push(value);for(const v of Object.values(value))walk(v,out);}return out;}
 async function getClientAndState(){
   const client=await tapo.client();
@@ -36,7 +38,7 @@ async function runAction(action){
   else if(action==='stop'){s.P=0;}
   else if(action==='tempUp'){if(s.M===4)return;s.P=1;s.T=Math.min(30,(s.T||26)+1);}
   else if(action==='tempDown'){if(s.M===4)return;s.P=1;s.T=Math.max(18,(s.T||26)-1);}
-  else if(action==='fan'){if(s.M===4)return;s.P=1;s.S=(Math.max(0,Math.min(4,Number(s.S)||0))+1)%5;}
+  else if(action==='fan'){if(s.M===4)return;s.P=1;s.S=nextFanValue(s.S);}
   else if(action==='wind'){s.P=1;s.D=(s.D+1)%7;}
   else throw new Error('不明なエアコン操作です。');
   await client.controlAc(remote.device_id,payload(s));
