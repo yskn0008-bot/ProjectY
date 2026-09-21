@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-21T11:54:23+09:00",
+  "updated_at": "2026-09-21T13:55:23+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -50,7 +50,7 @@
       "priority": 2,
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/412",
-      "updated_at": "2026-09-21T01:34:57Z"
+      "updated_at": "2026-09-21T04:52:16Z"
     },
     {
       "id": "github-pr-417",
@@ -70,7 +70,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-09-21T02:54:17Z"
+      "updated_at": "2026-09-21T04:55:06Z"
     },
     {
       "id": "github-issue-256",
@@ -165,39 +165,39 @@
   ],
   "recently_completed": [
     {
-      "id": "github-commit-42992ab1a5d0",
-      "title": "fix(yos): match consultation page to approved UI",
-      "completed_at": "2026-09-21T02:54:12Z",
-      "result": "GitHub mainへ反映（42992ab）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/42992ab1a5d0512051b29bfc26cd84d70555676a"
+      "id": "github-commit-876d0e62ad1f",
+      "title": "Merge pull request #419 from yskn0008-bot/repair/clarity-nonempty-routing",
+      "completed_at": "2026-09-21T04:55:03Z",
+      "result": "GitHub mainへ反映（876d0e6）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/876d0e62ad1fa7df27ec0ac2b063cf0f7385afec"
     },
     {
-      "id": "github-commit-33244212bc33",
-      "title": "feat(yos): add YOS consultation and routing page",
-      "completed_at": "2026-09-21T02:37:52Z",
-      "result": "GitHub mainへ反映（3324421）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/33244212bc337aaf66460458099005856c652191"
+      "id": "github-commit-b0057900ca9a",
+      "title": "test(clarity): guard empty-action execution fallback",
+      "completed_at": "2026-09-21T04:53:15Z",
+      "result": "GitHub mainへ反映（b005790）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/b0057900ca9a8fdcf115ca5cfb5e58cbd0dd01fa"
     },
     {
-      "id": "github-commit-b269f425e9a6",
-      "title": "Merge PR #416: repair Clarity Shortcut Factory bridge",
-      "completed_at": "2026-09-21T02:29:42Z",
-      "result": "GitHub mainへ反映（b269f42）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/b269f425e9a6ae1eceeee46030193a316ccbbb59"
+      "id": "github-commit-7857284c992f",
+      "title": "fix(clarity): add fail-safe route for empty MY WAY and ChatGPT plans",
+      "completed_at": "2026-09-21T04:53:07Z",
+      "result": "GitHub mainへ反映（7857284）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/7857284c992f2cee3507f84ba4c59a4569bef57e"
     },
     {
-      "id": "github-commit-4cff66916a0c",
-      "title": "repair: pass exact Raw First input to Shortcut Factory",
-      "completed_at": "2026-09-21T02:28:35Z",
-      "result": "GitHub mainへ反映（4cff669）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/4cff66916a0ca63654394e5a201642aa282a9a3c"
+      "id": "github-commit-6a81b3285a86",
+      "title": "test(clarity): lock execution-intent extraction policy",
+      "completed_at": "2026-09-21T04:51:12Z",
+      "result": "GitHub mainへ反映（6a81b32）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/6a81b3285a863e1bb041aee4c3f4cd5527c1eaa3"
     },
     {
-      "id": "github-commit-53aebe2fbfbf",
-      "title": "Merge pull request #415 from yskn0008-bot/repair/clarity-stop-after-handoff",
-      "completed_at": "2026-09-21T02:27:18Z",
-      "result": "GitHub mainへ反映（53aebe2）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/53aebe2fbfbfbfd6caa9cd4661eb5e87f654dbe7"
+      "id": "github-commit-df3bb7dd962b",
+      "title": "test(clarity): verify execution-intent routing markers",
+      "completed_at": "2026-09-21T04:50:19Z",
+      "result": "GitHub mainへ反映（df3bb7d）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/df3bb7dd962b5acd320bfb738cd79ad6012b8256"
     },
     {
       "id": "complete-002",
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-21T11:54:23+09:00",
+      "last_update": "2026-09-21T13:55:23+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -315,7 +315,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-21T11:54:23+09:00",
+      "last_update": "2026-09-21T13:55:23+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-21T11:54:23+09:00",
+      "last_update": "2026-09-21T13:55:23+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "51687c6ded5a37a760d1e18a46b33a58f536d799ab28d991169878e71da25c04"
+  "github_snapshot_hash": "a0ca94b04494f6d6e9c6ea6a1daf6b1dde0af58f6d2bfc5b8350ed45478bb8fa"
 }
