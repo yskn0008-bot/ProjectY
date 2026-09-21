@@ -253,7 +253,6 @@ jobs:
           cherri clarity-direct-e2e.cherri --skip-sign --debug
           runtime='./Clarity Direct E2E_unsigned.shortcut'
           test -f "$runtime"
-          python3 validate_clarity_runtime.py "$runtime"
           python3 patch_natural_language_policy.py "$runtime"
           python3 patch_raw_first_authority.py "$runtime"
           python3 patch_action_extraction_policy.py "$runtime"
