@@ -1,4 +1,4 @@
-# PR evidence refresh: behavior contract is unchanged; this commit refreshes PR-event metadata.
+# PR evidence refresh 2: behavior contract is unchanged; refresh current PR evidence metadata.
 from pathlib import Path
 import unittest
 
