@@ -2,7 +2,7 @@ const DOMAINS = ['life', 'work', 'money', 'home', 'idea', 'shopping', 'communica
 const INTENTS = ['remember', 'answer', 'create', 'update', 'find', 'compare', 'decide', 'execute', 'monitor', 'notify', 'send', 'buy', 'organize', 'automate'];
 const URGENCIES = ['now', 'soon', 'today', 'scheduled', 'background'];
 const RISKS = ['low', 'medium', 'high', 'irreversible'];
-const EXECUTORS = ['idea', 'memo', 'task', 'calendar', 'reminder', 'shopping', 'answer', 'shortcut_factory', 'open_app', 'device_setting', 'myway'];
+const EXECUTORS = ['idea', 'memo', 'task', 'calendar', 'reminder', 'shopping', 'answer', 'open_app', 'device_setting', 'myway'];
 const OPEN_APPS = new Set(['safari', 'shortcuts', 'files', 'notes', 'phone', 'reminders', 'mail', 'music', 'calendar', 'maps', 'contacts', 'health', 'photos', 'appstore', 'facetime', 'chatgpt', 'scriptable', 'youtube', 'spotify', 'google_sheets']);
 const TOGGLE_SETTINGS = new Set(['wifi', 'bluetooth', 'cellular_data', 'airplane_mode', 'low_power_mode', 'flashlight', 'do_not_disturb']);
 const DEVICE_SETTINGS = new Set([...TOGGLE_SETTINGS, 'brightness', 'volume', 'appearance']);
@@ -137,9 +137,6 @@ export function validateClarityModelResult(result) {
     }
     if (action.external_write === true && action.requires_confirmation !== true) {
       errors.push(`${prefix}.external_write requires confirmation`);
-    }
-    if (action.executor === 'shortcut_factory' && (action.domain !== 'system' || action.intent !== 'automate')) {
-      errors.push(`${prefix}.shortcut_factory route is invalid`);
     }
     if (action.executor === 'open_app') {
       if (action.domain !== 'system' || action.intent !== 'execute') errors.push(`${prefix}.open_app route is invalid`);

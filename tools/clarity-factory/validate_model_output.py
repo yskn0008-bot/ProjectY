@@ -109,11 +109,6 @@ def validate(payload: Any) -> list[str]:
             if not _text(action.get("end_date_time")) or not action.get("end_date_time", "").strip():
                 errors.append(f"{prefix}.end_date_time is required for executable calendar actions")
 
-        if executor == "shortcut_factory":
-            if action.get("domain") != "system" or action.get("intent") != "automate":
-                errors.append(f"{prefix} shortcut_factory must use domain=system and intent=automate")
-            if action.get("external_write") is True and action.get("requires_confirmation") is not True:
-                errors.append(f"{prefix} shortcut_factory external distribution requires confirmation")
 
         if executor == "open_app":
             if action.get("domain") != "system" or action.get("intent") != "execute":
