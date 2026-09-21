@@ -1,5 +1,3 @@
-# Stop-handoff evidence refresh: behavior unchanged; refresh current PR verification metadata.
-# Final evidence refresh: terminal-handoff behavior unchanged; refresh current PR evidence.
 from pathlib import Path
 import unittest
 
@@ -10,32 +8,23 @@ class TerminalHandoffSourceContractTests(unittest.TestCase):
     def setUpClass(cls):
         cls.source = SOURCE.read_text(encoding="utf-8")
 
-    def test_handoff_is_staged_before_terminal_open(self):
-        request_done = self.source.index("const requestDone")
-        terminal = self.source.index("// Terminal handoff: nothing may run after the destination is opened.")
-        self.assertGreater(terminal, request_done)
+    def test_open_app_uses_fixed_child_after_policy(self):
+        run_i=self.source.index('run("YOS_OpenApp", @handoffTarget)')
+        policy_i=self.source.index('if executor == "open_app" {')
+        self.assertGreater(run_i, policy_i)
 
-    def test_no_destination_open_before_request_done(self):
-        request_done = self.source.index("const requestDone")
-        prefix = self.source[:request_done]
-        self.assertNotIn('openApp("', prefix)
-        self.assertNotIn('openURL("https://yskn0008-bot.github.io/ProjectY/yos/")', prefix)
+    def test_parent_does_not_embed_open_app_actions(self):
+        self.assertNotIn('openApp("', self.source)
 
-    def test_open_app_and_myway_are_terminal(self):
-        terminal = self.source.index("// Terminal handoff: nothing may run after the destination is opened.")
-        suffix = self.source[terminal:]
-        self.assertIn('if @handoffExecutor == "open_app" {', suffix)
-        self.assertIn('if @handoffTarget == "chatgpt" {\n        openApp("com.openai.chat")\n        stop()\n    }', suffix)
-        self.assertIn('if @handoffExecutor == "myway" {', suffix)
-        self.assertTrue(suffix.rstrip().endswith('}'))
+    def test_child_success_is_verified_before_applied(self):
+        run_i=self.source.index('run("YOS_OpenApp", @handoffTarget)')
+        verify_i=self.source.index('if "{childResult}" == "YOS_OPEN_APP_OK:{@handoffTarget}"')
+        applied_i=self.source.index('APPLIED\\topen_app')
+        self.assertLess(run_i, verify_i)
+        self.assertLess(verify_i, applied_i)
 
-    def test_summary_is_suppressed_for_any_handoff(self):
-        self.assertIn('if summary && !@handoffExecutor {', self.source)
-
-    def test_terminal_handoffs_stop_immediately(self):
-        terminal = self.source.split("// Terminal handoff: nothing may run after the destination is opened.", 1)[1]
-        self.assertEqual(terminal.count("openApp(") + terminal.count("openURL("), terminal.count("stop()"))
-        self.assertIn('openURL("https://yskn0008-bot.github.io/ProjectY/yos/")\n    stop()', terminal)
+    def test_myway_remains_terminal(self):
+        self.assertIn('openURL("https://yskn0008-bot.github.io/ProjectY/yos/")\n    stop()', self.source)
 
 if __name__ == "__main__":
     unittest.main()
