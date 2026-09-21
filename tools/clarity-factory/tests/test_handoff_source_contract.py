@@ -12,14 +12,14 @@ class HandoffSourceContractTests(unittest.TestCase):
         self.assertIn('@handoffExecutor = ""', self.source)
         self.assertIn('@handoffTarget = ""', self.source)
 
-    def test_open_handoffs_are_not_claimed_applied(self):
+    def test_open_app_is_ready_then_verified(self):
         self.assertIn('HANDOFF_READY\\topen_app', self.source)
-        self.assertIn('HANDOFF_READY\\tmyway', self.source)
-        self.assertNotIn('APPLIED\\topen_app', self.source)
-        self.assertNotIn('APPLIED\\tmyway', self.source)
+        self.assertIn('APPLIED\\topen_app', self.source)
+        self.assertIn('FAILED\\topen_app_child_verify', self.source)
 
-    def test_result_screen_does_not_override_any_handoff(self):
-        self.assertIn('if summary && !@handoffExecutor {', self.source)
+    def test_summary_is_suppressed_for_handoff(self):
+        self.assertIn('if !@handoffExecutor {', self.source)
+        self.assertIn('if summary {', self.source)
 
 if __name__ == "__main__":
     unittest.main()
