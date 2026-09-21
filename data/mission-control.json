@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-21T19:34:26+09:00",
+  "updated_at": "2026-09-21T20:30:21+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -70,7 +70,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-09-21T07:05:00Z"
+      "updated_at": "2026-09-21T11:29:41Z"
     },
     {
       "id": "github-issue-256",
@@ -165,39 +165,39 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-71bd108278bd",
+      "title": "Merge pull request #422 from yskn0008-bot/repair/clarity-local-factory-no-token",
+      "completed_at": "2026-09-21T11:30:06Z",
+      "result": "GitHub mainへ反映（71bd108）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/71bd108278bdc7561153e0868c482f2a6ace6ad0"
+    },
+    {
+      "id": "github-commit-f3825d996301",
+      "title": "ci(clarity): build token-free local Factory artifact",
+      "completed_at": "2026-09-21T11:26:56Z",
+      "result": "GitHub mainへ反映（f3825d9）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/f3825d996301c02406c01cf94079f7ebd5383841"
+    },
+    {
+      "id": "github-commit-39265e8010a7",
+      "title": "test(clarity): validate token-free local Factory artifact",
+      "completed_at": "2026-09-21T11:26:37Z",
+      "result": "GitHub mainへ反映（39265e8）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/39265e8010a7d6969e9a3b8fdc6e4a573c3ff637"
+    },
+    {
+      "id": "github-commit-6ebc4ef5a4f8",
+      "title": "fix(clarity): add token-free local Shortcut Factory patch",
+      "completed_at": "2026-09-21T11:26:34Z",
+      "result": "GitHub mainへ反映（6ebc4ef）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/6ebc4ef5a4f821d26a860c4d4acf501d96a6dc6e"
+    },
+    {
       "id": "github-commit-f91fa42af530",
       "title": "Merge pull request #421 from yskn0008-bot/repair/clarity-proof-main-trigger",
       "completed_at": "2026-09-21T05:35:39Z",
       "result": "GitHub mainへ反映（f91fa42）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/f91fa42af5302c4ecb9e3388d926321db4b8b302"
-    },
-    {
-      "id": "github-commit-515e6ffa65fb",
-      "title": "ci(clarity): run full proof on main changes",
-      "completed_at": "2026-09-21T05:35:19Z",
-      "result": "GitHub mainへ反映（515e6ff）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/515e6ffa65fb414b8a8c5690611855769132479e"
-    },
-    {
-      "id": "github-commit-e87c2bd97f0f",
-      "title": "Merge pull request #420 from yskn0008-bot/repair/clarity-shortcut-factory-integrated",
-      "completed_at": "2026-09-21T05:34:10Z",
-      "result": "GitHub mainへ反映（e87c2bd）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/e87c2bd97f0fc0763fb1e27fe326097bae0b36f5"
-    },
-    {
-      "id": "github-commit-07e58bf8f02b",
-      "title": "test(clarity): lock safe Shortcut Factory integration",
-      "completed_at": "2026-09-21T05:32:56Z",
-      "result": "GitHub mainへ反映（07e58bf）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/07e58bf8f02b39a4c577ec97ca6d0a899cdcecc0"
-    },
-    {
-      "id": "github-commit-f57f9c315450",
-      "title": "fix(clarity): integrate Safari factory routing without overwriting current repairs",
-      "completed_at": "2026-09-21T05:30:44Z",
-      "result": "GitHub mainへ反映（f57f9c3）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/f57f9c3154503bfb2075f7d812ff4500fe5dc287"
     },
     {
       "id": "complete-002",
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-21T19:34:26+09:00",
+      "last_update": "2026-09-21T20:30:21+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -315,7 +315,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-21T19:34:26+09:00",
+      "last_update": "2026-09-21T20:30:21+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-21T19:34:26+09:00",
+      "last_update": "2026-09-21T20:30:21+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "584d519e5f2f944afc32cfad69c48e752a5b53758136453d5cd40a922dc76151"
+  "github_snapshot_hash": "eb9f89d001c7940c3d73196c0a21f4e185545227a9061bd923968c6eef3f0485"
 }
