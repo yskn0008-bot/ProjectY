@@ -51,16 +51,35 @@ if risk == "high" || risk == "irreversible" {
     mustOutput("ここだけ決めて", "大きな操作なので確認が必要です")
 }
 
-if !@actionsRaw {
-    const blockedNoActionsRecord = text("{CurrentDate}\t{requestNumber}\tBLOCKED\tno_actions\n")
-    appendResolvedFile(ledgerFile, blockedNoActionsRecord)
-    mustOutput("ここだけ確認して", "やることを安全に判断できませんでした")
-}
-
 @lastExecutor = ""
 @handoffExecutor = ""
 @handoffTarget = ""
 @handoffFactoryRequest = ""
+
+// Fail-safe only for high-confidence local display requests.
+// This runs only when the model returned no actions, so it cannot override a valid model plan.
+if !@actionsRaw {
+    if originalInput contains "開いて" {
+        if originalInput contains "MY WAY" || originalInput contains "MYWAY" || originalInput contains "マイウェイ" {
+            @handoffExecutor = "myway"
+            @handoffTarget = "home"
+            const fallbackMyWayRecord = text("{CurrentDate}\t{requestNumber}\tFALLBACK_ROUTE\tmyway\thome\n")
+            appendResolvedFile(ledgerFile, fallbackMyWayRecord)
+        }
+        if originalInput contains "ChatGPT" || originalInput contains "チャットGPT" {
+            @handoffExecutor = "open_app"
+            @handoffTarget = "chatgpt"
+            const fallbackChatGPTRecord = text("{CurrentDate}\t{requestNumber}\tFALLBACK_ROUTE\topen_app\tchatgpt\n")
+            appendResolvedFile(ledgerFile, fallbackChatGPTRecord)
+        }
+    }
+}
+
+if !@actionsRaw && !@handoffExecutor {
+    const blockedNoActionsRecord = text("{CurrentDate}\t{requestNumber}\tBLOCKED\tno_actions\n")
+    appendResolvedFile(ledgerFile, blockedNoActionsRecord)
+    mustOutput("ここだけ確認して", "やることを安全に判断できませんでした")
+}
 
 for actionItem in @actionsRaw {
     const actionDict = getDictionary(@actionItem)
