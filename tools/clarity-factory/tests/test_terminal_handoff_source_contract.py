@@ -1,3 +1,4 @@
+# Stop-handoff evidence refresh: behavior unchanged; refresh current PR verification metadata.
 # Final evidence refresh: terminal-handoff behavior unchanged; refresh current PR evidence.
 from pathlib import Path
 import unittest
