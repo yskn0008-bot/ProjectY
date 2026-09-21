@@ -27,7 +27,7 @@
     <p>そのまま書けばOK。どこで処理するかはYOSが決めます。</p>
 
     <label for="guideInput">今起きていること</label>
-    <textarea id="guideInput" rows="4" maxlength="1200" placeholder="例：エアコンの風量が変わらない&#10;例：これを自動化したい&#10;例：今の判断を別の視点で確認したい"></textarea>
+    <textarea id="guideInput" rows="5" maxlength="4000" placeholder="例：エアコンの風量が変わらない&#10;例：これを自動化したい&#10;例：今の判断を別の視点で確認したい"></textarea>
     <button id="askYos" class="primary-action" type="button">
       <span aria-hidden="true">✦</span>
       <b>YOSに相談する</b>
@@ -58,13 +58,20 @@
   </section>
 
   <section class="quick-grid" aria-label="直接開く">
-    <a href="shortcuts://run-shortcut?name=Clarity"><span>◉</span><b>Clarity</b><small>記録・実行</small></a>
+    <a data-web-only href="shortcuts://run-shortcut?name=Clarity"><span>◉</span><b>Clarity</b><small>記録・実行</small></a>
+    <a data-native-only hidden href="../capture.html"><span>◉</span><b>Clarity</b><small>記録・実行</small></a>
     <a href="../system/"><span>◇</span><b>System Health</b><small>故障・状態確認</small></a>
   </section>
 
   <section class="guide-rule">
     <b>普段はMY WAY。</b>
     <p>何か起きた時だけこのページ。Project名を覚える必要はありません。</p>
+  </section>
+
+  <section id="guideFallback" class="guide-fallback" hidden>
+    <b>相談内容はコピー済みです。</b>
+    <p>YOSチャットURLがまだこの端末に登録されていません。</p>
+    <a href="./">MY WAYへ戻る</a>
   </section>
 </main>
 <script src="./guide.js?v=1" defer></script>
