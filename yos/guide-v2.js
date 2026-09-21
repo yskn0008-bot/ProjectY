@@ -1,5 +1,6 @@
 'use strict';
 (()=>{
+  document.documentElement.dataset.guideUi='v2';
   const SETTINGS_KEY='yos-home-settings-v2';
   const LEGACY_KEY='yos-home-settings-v1';
   const TAXI_KEY='yos-taxi-settings-v2';
