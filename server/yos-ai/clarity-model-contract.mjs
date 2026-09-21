@@ -2,7 +2,7 @@ const DOMAINS = ['life', 'work', 'money', 'home', 'idea', 'shopping', 'communica
 const INTENTS = ['remember', 'answer', 'create', 'update', 'find', 'compare', 'decide', 'execute', 'monitor', 'notify', 'send', 'buy', 'organize', 'automate'];
 const URGENCIES = ['now', 'soon', 'today', 'scheduled', 'background'];
 const RISKS = ['low', 'medium', 'high', 'irreversible'];
-const EXECUTORS = ['idea', 'memo', 'task', 'calendar', 'reminder', 'shopping', 'answer', 'shortcut_factory', 'open_app', 'device_setting', 'myway'];
+const EXECUTORS = ['idea', 'memo', 'task', 'calendar', 'reminder', 'shopping', 'answer', 'money', 'timer', 'alarm', 'navigate', 'call', 'message', 'email', 'focus', 'web_search', 'shortcut_factory', 'open_app', 'device_setting', 'myway'];
 const OPEN_APPS = new Set(['safari', 'shortcuts', 'files', 'notes', 'phone', 'reminders', 'mail', 'music', 'calendar', 'maps', 'contacts', 'health', 'photos', 'appstore', 'facetime', 'chatgpt', 'scriptable', 'youtube', 'spotify', 'google_sheets']);
 const TOGGLE_SETTINGS = new Set(['wifi', 'bluetooth', 'cellular_data', 'airplane_mode', 'low_power_mode', 'flashlight', 'do_not_disturb']);
 const DEVICE_SETTINGS = new Set([...TOGGLE_SETTINGS, 'brightness', 'volume', 'appearance']);
@@ -22,7 +22,9 @@ const actionProperties = {
   dependency: {anyOf: [{type: 'string'}, {type: 'null'}]},
   status: {type: 'string', enum: ['planned']},
   date_time: {type: 'string'},
-  end_date_time: {type: 'string'}
+  end_date_time: {type: 'string'},
+  amount: {type: 'number'},
+  subject: {type: 'string'}
 };
 
 export const CLARITY_RESPONSE_FORMAT = Object.freeze({
@@ -163,6 +165,45 @@ export function validateClarityModelResult(result) {
     }
     if (action.executor === 'myway') {
       if (action.domain !== 'life' || action.intent !== 'find' || action.target !== 'home') errors.push(`${prefix}.myway route is invalid`);
+    }
+    if (action.executor === 'money') {
+      if (action.domain !== 'money' || action.intent !== 'create') errors.push(`${prefix}.money route is invalid`);
+      if (!['expense', 'income'].includes(action.target)) errors.push(`${prefix}.money target is invalid`);
+      if (!Number.isFinite(action.amount) || action.amount <= 0 || action.amount > 1000000000) errors.push(`${prefix}.money amount is invalid`);
+      if (!nonEmptyText(action.content)) errors.push(`${prefix}.money label is required`);
+    }
+    if (action.executor === 'timer') {
+      if (action.domain !== 'system' || action.intent !== 'execute' || action.target !== 'minutes') errors.push(`${prefix}.timer route is invalid`);
+      if (!Number.isFinite(action.amount) || action.amount <= 0 || action.amount > 1440) errors.push(`${prefix}.timer amount is invalid`);
+    }
+    if (action.executor === 'alarm') {
+      if (action.domain !== 'system' || action.intent !== 'create' || action.target !== 'alarm') errors.push(`${prefix}.alarm route is invalid`);
+      if (!/^([01]\\d|2[0-3]):[0-5]\\d$/u.test(action.date_time)) errors.push(`${prefix}.alarm date_time must be HH:mm`);
+    }
+    if (action.executor === 'navigate') {
+      if (action.domain !== 'system' || action.intent !== 'execute' || !nonEmptyText(action.target)) errors.push(`${prefix}.navigate route is invalid`);
+      if (!['driving', 'walking', 'transit', 'default'].includes(action.content)) errors.push(`${prefix}.navigate mode is invalid`);
+    }
+    if (action.executor === 'call') {
+      if (action.domain !== 'communication' || action.intent !== 'execute' || !nonEmptyText(action.target)) errors.push(`${prefix}.call route is invalid`);
+      if (action.requires_confirmation !== true) errors.push(`${prefix}.call requires confirmation`);
+    }
+    if (action.executor === 'message') {
+      if (action.domain !== 'communication' || action.intent !== 'send' || !nonEmptyText(action.target) || !nonEmptyText(action.content)) errors.push(`${prefix}.message route is invalid`);
+      if (action.requires_confirmation !== true) errors.push(`${prefix}.message requires confirmation`);
+    }
+    if (action.executor === 'email') {
+      if (action.domain !== 'communication' || action.intent !== 'send' || !nonEmptyText(action.target) || !nonEmptyText(action.content)) errors.push(`${prefix}.email route is invalid`);
+      if (action.requires_confirmation !== true) errors.push(`${prefix}.email requires confirmation`);
+    }
+    if (action.executor === 'focus') {
+      if (action.domain !== 'system' || action.intent !== 'update') errors.push(`${prefix}.focus route is invalid`);
+      if (!['Do Not Disturb', 'Personal', 'Work', 'Sleep'].includes(action.target)) errors.push(`${prefix}.focus target is invalid`);
+      if (!['on', 'off', 'toggle'].includes(action.content)) errors.push(`${prefix}.focus value is invalid`);
+    }
+    if (action.executor === 'web_search') {
+      if (action.domain !== 'knowledge' || action.intent !== 'find' || !nonEmptyText(action.content)) errors.push(`${prefix}.web_search route is invalid`);
+      if (!['Google', 'DuckDuckGo', 'Yahoo!', 'YouTube'].includes(action.target)) errors.push(`${prefix}.web_search engine is invalid`);
     }
     if (action.needs_review !== true) {
       if ((action.executor === 'calendar' || action.executor === 'reminder') && !nonEmptyText(action.date_time)) {
