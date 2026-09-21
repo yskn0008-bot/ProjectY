@@ -91,6 +91,25 @@ test('successful update writes Japanese scripts, internal folder, transformed li
   assert.equal(japaneseBackupDirs(iCloud,'英語旧版 ').length,1);
 });
 
+test('post-write live mutation is reconciled before commit',async()=> {
+  const iCloud=makeManager('/icloud'),local=makeManager('/local');
+  put(iCloud,'リモコン.js','OLDJP');
+  let corrupted=false;
+  const globalObj={__YOS_INSTALLER_TEST_HOOKS__:{
+    afterLiveWrite({target}){
+      if(!corrupted&&target==='リモコン.js'){
+        iCloud.writeString('/icloud/リモコン.js','STALE');
+        corrupted=true;
+      }
+    }
+  }};
+  const {opened}=await run(iCloud,local,null,globalObj);
+  assert.equal(corrupted,true);
+  assert.notEqual(iCloud.readString('/icloud/リモコン.js'),'STALE');
+  assert.match(iCloud.readString('/icloud/リモコン.js'),/テレビリモコン/);
+  assert.equal(opened.length,1);
+});
+
 test('synthetic mid-commit failure restores pre-existing Japanese targets and leaves English originals',async()=>{
   const iCloud=makeManager('/icloud',{failLiveTarget:'照明リモコン.js'}),local=makeManager('/local');
   put(iCloud,'リモコン.js','OLDJP');put(iCloud,'YOS Remote Hub.js','OLDEN');
