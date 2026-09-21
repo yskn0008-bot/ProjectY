@@ -36,10 +36,10 @@ def validate(parent: Path, child: Path) -> None:
     if "child_returned" not in pblob:
         raise AssertionError("parent child-return verification marker missing")
     run_indexes = [i for i,a in enumerate(pa) if str(a.get("WFWorkflowActionIdentifier","")).endswith("runworkflow")]
-    fast_applied_index = next((i for i,a in enumerate(pa) if "fast_path" in repr(a)), -1)
+    fast_applied_index = next((i for i,a in enumerate(pa) if "child_returned" in repr(a) and "fast_path" in repr(a)), -1)
     normal_applied_index = next((i for i,a in reversed(list(enumerate(pa))) if "child_returned" in repr(a) and "fast_path" not in repr(a)), -1)
     if fast_applied_index <= run_indexes[0]:
-        raise AssertionError("fast path can claim APPLIED before YOS_OpenApp returns")
+        raise AssertionError("Safari fast path can claim APPLIED before YOS_OpenApp returns")
     if normal_applied_index <= run_indexes[-1]:
         raise AssertionError("normal path can claim APPLIED before YOS_OpenApp returns")
     opens=[i for i in cids if i.endswith("openapp")]
