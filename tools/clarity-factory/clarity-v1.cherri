@@ -8,6 +8,7 @@
 #include 'actions/device'
 #include 'actions/settings'
 #include 'actions/web'
+#include 'actions/shortcuts'
 
 
 // iOS 26 real-device compatibility: resolve the file first, then append through WFFile.
@@ -29,7 +30,7 @@ const inboxFile = getFile("Clarity Inbox.txt")
 appendResolvedFile(inboxFile, rawRecord)
 const ledgerFile = getFile("Clarity Ledger.txt")
 
-const modelPrompt = text("You are Clarity, the single natural-language gateway for MY WAY by YOS.\nPreserve original_input exactly. Never claim execution. Never invent dates, recipients, prices, accounts, destinations, device state, app availability, setting state, or automation capabilities.\nReturn only a Dictionary. Use only executors idea, memo, task, calendar, reminder, shopping, answer, shortcut_factory, open_app, device_setting, myway.\nUse only domains life, work, money, home, idea, shopping, communication, knowledge, system, other.\nUse only intents remember, answer, create, update, find, compare, decide, execute, monitor, notify, send, buy, organize, automate.\nUse only urgencies now, soon, today, scheduled, background.\nUse only risks low, medium, high, irreversible.\nCalendar, Reminders, Shopping, Idea in Box, Clarity Inbox, opening an allowlisted app, changing an allowlisted local device setting, and opening the existing MY WAY Home are local reversible destinations: set external_write=false for those. external_write=true means a write to another person, remote service, purchase, contract, destructive system, or other non-local side effect.\nIf calendar or reminder date/time is ambiguous, set needs_review=true rather than guessing. For calendar only: when the start date/time is unambiguous but the user gives no duration/end time, set end_date_time to exactly 60 minutes after date_time. Never use that default to resolve an ambiguous start.\nHigh or irreversible risk requires requires_confirmation=true. external_write=true also requires confirmation. Every action status must be planned.\nUse action.content as the human-readable item/event/idea text to save. For shopping, use only the item text in content, without commentary. For idea, preserve the idea itself in content.\nFor app opening, use executor=open_app, domain=system, intent=execute, destination=App. Put one canonical target in target and the user's app label in content. Executable app targets are: safari, shortcuts, files, notes, phone, reminders, mail, music, calendar, maps, contacts, health, photos, appstore, facetime, chatgpt, scriptable, youtube, spotify, google_sheets. Normalize obvious Japanese/English names to those keys. If the requested app is not in this allowlist, preserve its name in target/content and set needs_review=true instead of guessing a bundle id.\nFor local device settings, use executor=device_setting, domain=system, intent=update, destination=iPhone. Executable targets are wifi, bluetooth, cellular_data, airplane_mode, low_power_mode, brightness, volume, appearance, flashlight, do_not_disturb. For wifi/bluetooth/cellular_data/airplane_mode/low_power_mode/flashlight/do_not_disturb, content must be on, off, or toggle. For appearance, content must be light, dark, or toggle. For brightness and volume, content must be a decimal integer from 0 through 100 representing percent. If the desired value is unclear or a different setting is requested, set needs_review=true instead of guessing.\nWhen the user asks to see, open, summarize, or check MY WAY / MYWAY / マイウェイの current information, use executor=myway, domain=life, intent=find, target=home, destination=MY WAY Home, external_write=false, needs_review=false. This opens the existing MY WAY Home, which already combines 今ここ・ここまで・行き先・次の一歩; do not create a duplicate summary.\nWhen the user asks to remove a repeated iPhone operation, create an Apple Shortcut, or automate an iPhone workflow, use executor shortcut_factory, domain system, intent automate. The currently executable Shortcut Factory lane supports only a Shortcut whose complete behavior is opening Safari. For that exact request set target=safari, preserve the full requested outcome and constraints in content, and set needs_review=false. For every other Shortcut request preserve the requested outcome in target/content and set needs_review=true instead of guessing. Shortcut generation/validation may be planned for low-risk requests without confirmation, but never claim installed, signed, published, or usable until a downstream executor verifies it.\nIf multiple actions include open_app or myway, put display/opening actions after settings or local writes so the Shortcut can finish earlier actions before switching apps.\nrequest_id: {requestNumber}\ncurrent_time: {CurrentDate}\noriginal_input: {originalInput}\nReturn keys request_id, original_input, context, interpretation, actions, watches, feedback. context has current_time, current_priorities, relevant_state. interpretation has objective, domains, urgency, risk, confidence. Each action has id, executor, domain, intent, target, content, conditions, destination, requires_confirmation, external_write, needs_review, dependency, status, date_time, end_date_time. Each watch has condition, check_target, action_when_true. feedback has summary, next_action, whisper_line. For a pure answer request, put the answer in feedback.summary. For captures or planned actions, keep feedback.summary empty unless the user must see something now.")
+const modelPrompt = text("You are Clarity, the single natural-language gateway for MY WAY by YOS.\nPreserve original_input exactly. Never claim execution. Never invent dates, recipients, prices, accounts, destinations, device state, app availability, setting state, or automation capabilities.\nReturn only a Dictionary. Use only executors idea, memo, task, calendar, reminder, shopping, answer, open_app, device_setting, myway.\nUse only domains life, work, money, home, idea, shopping, communication, knowledge, system, other.\nUse only intents remember, answer, create, update, find, compare, decide, execute, monitor, notify, send, buy, organize, automate.\nUse only urgencies now, soon, today, scheduled, background.\nUse only risks low, medium, high, irreversible.\nCalendar, Reminders, Shopping, Idea in Box, Clarity Inbox, opening an allowlisted app, changing an allowlisted local device setting, and opening the existing MY WAY Home are local reversible destinations: set external_write=false for those. external_write=true means a write to another person, remote service, purchase, contract, destructive system, or other non-local side effect.\nIf calendar or reminder date/time is ambiguous, set needs_review=true rather than guessing. For calendar only: when the start date/time is unambiguous but the user gives no duration/end time, set end_date_time to exactly 60 minutes after date_time. Never use that default to resolve an ambiguous start.\nHigh or irreversible risk requires requires_confirmation=true. external_write=true also requires confirmation. Every action status must be planned.\nUse action.content as the human-readable item/event/idea text to save. For shopping, use only the item text in content, without commentary. For idea, preserve the idea itself in content.\nFor app opening, use executor=open_app, domain=system, intent=execute, destination=App. Put one canonical target in target and the user's app label in content. Executable app targets are: safari, shortcuts, files, notes, phone, reminders, mail, music, calendar, maps, contacts, health, photos, appstore, facetime, chatgpt, scriptable, youtube, spotify, google_sheets. Normalize obvious Japanese/English names to those keys. If the requested app is not in this allowlist, preserve its name in target/content and set needs_review=true instead of guessing a bundle id.\nFor local device settings, use executor=device_setting, domain=system, intent=update, destination=iPhone. Executable targets are wifi, bluetooth, cellular_data, airplane_mode, low_power_mode, brightness, volume, appearance, flashlight, do_not_disturb. For wifi/bluetooth/cellular_data/airplane_mode/low_power_mode/flashlight/do_not_disturb, content must be on, off, or toggle. For appearance, content must be light, dark, or toggle. For brightness and volume, content must be a decimal integer from 0 through 100 representing percent. If the desired value is unclear or a different setting is requested, set needs_review=true instead of guessing.\nWhen the user asks to see, open, summarize, or check MY WAY / MYWAY / マイウェイの current information, use executor=myway, domain=life, intent=find, target=home, destination=MY WAY Home, external_write=false, needs_review=false. This opens the existing MY WAY Home, which already combines 今ここ・ここまで・行き先・次の一歩; do not create a duplicate summary.\nIf multiple actions include open_app or myway, put display/opening actions after settings or local writes so the Shortcut can finish earlier actions before switching apps.\nrequest_id: {requestNumber}\ncurrent_time: {CurrentDate}\noriginal_input: {originalInput}\nReturn keys request_id, original_input, context, interpretation, actions, watches, feedback. context has current_time, current_priorities, relevant_state. interpretation has objective, domains, urgency, risk, confidence. Each action has id, executor, domain, intent, target, content, conditions, destination, requires_confirmation, external_write, needs_review, dependency, status, date_time, end_date_time. Each watch has condition, check_target, action_when_true. feedback has summary, next_action, whisper_line. For a pure answer request, put the answer in feedback.summary. For captures or planned actions, keep feedback.summary empty unless the user must see something now.")
 
 const modelResult = askChatGPT(modelPrompt, false, "Dictionary")
 const parsedResult = getDictionary(modelResult)
@@ -54,7 +55,6 @@ if risk == "high" || risk == "irreversible" {
 @lastExecutor = ""
 @handoffExecutor = ""
 @handoffTarget = ""
-@handoffFactoryRequest = ""
 
 // Fail-safe only for high-confidence local display requests.
 // This runs only when the model returned no actions, so it cannot override a valid model plan.
@@ -71,6 +71,12 @@ if !@actionsRaw {
             @handoffTarget = "chatgpt"
             const fallbackChatGPTRecord = text("{CurrentDate}\t{requestNumber}\tFALLBACK_ROUTE\topen_app\tchatgpt\n")
             appendResolvedFile(ledgerFile, fallbackChatGPTRecord)
+        }
+        if originalInput contains "Safari" || originalInput contains "サファリ" {
+            @handoffExecutor = "open_app"
+            @handoffTarget = "safari"
+            const fallbackSafariRecord = text("{CurrentDate}\t{requestNumber}\tFALLBACK_ROUTE\topen_app\tsafari\n")
+            appendResolvedFile(ledgerFile, fallbackSafariRecord)
         }
     }
 }
@@ -103,23 +109,10 @@ for actionItem in @actionsRaw {
         mustOutput("ここだけ確認して", "実行済み扱いの内容は受け付けません")
     }
 
-    if executor != "idea" && executor != "memo" && executor != "task" && executor != "calendar" && executor != "reminder" && executor != "shopping" && executor != "answer" && executor != "shortcut_factory" && executor != "open_app" && executor != "device_setting" && executor != "myway" {
+    if executor != "idea" && executor != "memo" && executor != "task" && executor != "calendar" && executor != "reminder" && executor != "shopping" && executor != "answer" && executor != "open_app" && executor != "device_setting" && executor != "myway" {
         const blockedExecutorRecord = text("{CurrentDate}\t{requestNumber}\t{actionId}\tBLOCKED\tunsupported_executor\n")
         appendResolvedFile(ledgerFile, blockedExecutorRecord)
         mustOutput("ここだけ確認して", "対応外の操作は実行しません")
-    }
-
-    if executor == "shortcut_factory" {
-        if domain != "system" || intent != "automate" {
-            const blockedAutomationRecord = text("{CurrentDate}\t{requestNumber}\t{actionId}\tBLOCKED\tunsafe_automation_contract\n")
-            appendResolvedFile(ledgerFile, blockedAutomationRecord)
-            mustOutput("ここだけ確認して", "自動化の内容を安全に整理できませんでした")
-        }
-        if target != "safari" {
-            const blockedFactoryTargetRecord = text("{CurrentDate}\t{requestNumber}\t{actionId}\tBLOCKED\tunsupported_shortcut_factory_target\n")
-            appendResolvedFile(ledgerFile, blockedFactoryTargetRecord)
-            mustOutput("ここだけ確認して", "現在の自動作成はSafariを開くショートカットだけ対応しています")
-        }
     }
 
     if executor == "open_app" {
@@ -368,111 +361,38 @@ for actionItem in @actionsRaw {
         appendResolvedFile(ledgerFile, myWayAppliedRecord)
     }
 
-    if executor == "shortcut_factory" {
-        @handoffExecutor = "shortcut_factory"
-        @handoffFactoryRequest = "{originalInput}"
-        const shortcutQueuedRecord = text("{CurrentDate}\t{requestNumber}\t{actionId}\tHANDOFF_READY\tshortcut_factory\n")
-        appendResolvedFile(ledgerFile, shortcutQueuedRecord)
-    }
 }
-
-const requestDone = text("{CurrentDate}\t{requestNumber}\tREQUEST_DONE\n")
-appendResolvedFile(ledgerFile, requestDone)
 
 const feedbackRaw = getValue(parsedResult, "feedback")
 const feedback = getDictionary(feedbackRaw)
 const summary = "{feedback['summary']}"
-if summary && !@handoffExecutor {
-    show("{summary}")
+
+// Fixed-child handoff. Parent verifies child completion before claiming APPLIED.
+if @handoffExecutor == "open_app" {
+    const childResult = run("YOS_OpenApp", @handoffTarget)
+    if "{childResult}" == "YOS_OPEN_APP_OK:{@handoffTarget}" {
+        const appVerifiedRecord = text("{CurrentDate}\t{requestNumber}\tAPPLIED\topen_app\t{@handoffTarget}\tYOS_OpenApp\n")
+        appendResolvedFile(ledgerFile, appVerifiedRecord)
+        const requestDoneOpenApp = text("{CurrentDate}\t{requestNumber}\tREQUEST_DONE\n")
+        appendResolvedFile(ledgerFile, requestDoneOpenApp)
+        stop()
+    }
+    const appFailedRecord = text("{CurrentDate}\t{requestNumber}\tFAILED\topen_app_child_verify\t{@handoffTarget}\n")
+    appendResolvedFile(ledgerFile, appFailedRecord)
+    mustOutput("ここだけ確認して", "YOS_OpenAppの実行結果を確認できませんでした")
 }
 
-// Terminal handoff: nothing may run after the destination is opened.
-if @handoffExecutor == "open_app" {
-    if @handoffTarget == "safari" {
-        openApp("safari")
-        stop()
-    }
-    if @handoffTarget == "shortcuts" {
-        openApp("shortcuts")
-        stop()
-    }
-    if @handoffTarget == "files" {
-        openApp("files")
-        stop()
-    }
-    if @handoffTarget == "notes" {
-        openApp("notes")
-        stop()
-    }
-    if @handoffTarget == "phone" {
-        openApp("phone")
-        stop()
-    }
-    if @handoffTarget == "reminders" {
-        openApp("reminders")
-        stop()
-    }
-    if @handoffTarget == "mail" {
-        openApp("mail")
-        stop()
-    }
-    if @handoffTarget == "music" {
-        openApp("music")
-        stop()
-    }
-    if @handoffTarget == "calendar" {
-        openApp("calendar")
-        stop()
-    }
-    if @handoffTarget == "maps" {
-        openApp("maps")
-        stop()
-    }
-    if @handoffTarget == "contacts" {
-        openApp("contacts")
-        stop()
-    }
-    if @handoffTarget == "health" {
-        openApp("health")
-        stop()
-    }
-    if @handoffTarget == "photos" {
-        openApp("photos")
-        stop()
-    }
-    if @handoffTarget == "appstore" {
-        openApp("appstore")
-        stop()
-    }
-    if @handoffTarget == "facetime" {
-        openApp("facetime")
-        stop()
-    }
-    if @handoffTarget == "chatgpt" {
-        openApp("com.openai.chat")
-        stop()
-    }
-    if @handoffTarget == "scriptable" {
-        openApp("dk.simonbs.Scriptable")
-        stop()
-    }
-    if @handoffTarget == "youtube" {
-        openApp("com.google.ios.youtube")
-        stop()
-    }
-    if @handoffTarget == "spotify" {
-        openApp("com.spotify.client")
-        stop()
-    }
-    if @handoffTarget == "google_sheets" {
-        openApp("com.google.Sheets")
-        stop()
-    }
-}
 if @handoffExecutor == "myway" {
+    const requestDoneMyWay = text("{CurrentDate}\t{requestNumber}\tREQUEST_DONE\n")
+    appendResolvedFile(ledgerFile, requestDoneMyWay)
     openURL("https://yskn0008-bot.github.io/ProjectY/yos/")
     stop()
 }
-if @handoffExecutor == "shortcut_factory" {
-    const shortcutFactoryRequest = text("{@handoffFactoryRequest}")
+
+if !@handoffExecutor {
+    const requestDone = text("{CurrentDate}\t{requestNumber}\tREQUEST_DONE\n")
+    appendResolvedFile(ledgerFile, requestDone)
+    if summary {
+        show("{summary}")
+    }
 }
