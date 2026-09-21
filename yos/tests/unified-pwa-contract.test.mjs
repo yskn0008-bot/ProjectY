@@ -26,7 +26,8 @@ test('root manifest installs one YOS app across all main domains', async () => {
   assert.match(system,/href="\.\.\/manifest\.webmanifest"/);
   assert.match(yos,/data-web-only href="shortcuts:\/\/run-shortcut\?name=Clarity"/);
   assert.match(yos,/data-web-only href="scriptable:\/\/\/run\?scriptName=YOS%20Remote%20Hub"/);
-  assert.match(yos,/class="yos-companion" href="\.\/guide\.html"/);\n  assert.match(yos,/class="guide-shortcut" href="\.\/guide\.html"/);
+  assert.match(yos,/class="yos-companion" href="\.\/guide\.html"/);
+  assert.match(yos,/class="guide-shortcut" href="\.\/guide\.html"/);
   assert.match(yos,/data-web-only href="\.\.\/system\/"/);
   assert.match(guide,/今日は、どうする？/);
   assert.match(guide,/YOSに話す/);
