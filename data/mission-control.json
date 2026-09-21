@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-21T10:47:45+09:00",
+  "updated_at": "2026-09-21T11:28:07+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -23,26 +23,6 @@
       "updated_at": "2026-09-21T01:14:46Z"
     },
     {
-      "id": "github-pr-382",
-      "title": "PR #382 試作: 生活AUTO / 起床AUTO .shortcut 自動生成",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/382",
-      "updated_at": "2026-09-19T19:24:38Z"
-    },
-    {
-      "id": "github-pr-385",
-      "title": "PR #385 試作: 帰宅AUTO.shortcut 自動生成",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/385",
-      "updated_at": "2026-09-19T21:32:22Z"
-    },
-    {
       "id": "github-pr-392",
       "title": "PR #392 Clarity: add One Enter Gmail development bridge",
       "type": "GitHub PR",
@@ -63,14 +43,24 @@
       "updated_at": "2026-09-21T01:34:57Z"
     },
     {
-      "id": "github-issue-120",
-      "title": "Issue #120 YOS AI：本番有効化・PWA接続・iPhone受入確認",
-      "type": "GitHub Issue",
-      "status": "open",
-      "priority": 3,
-      "next_action": "完成条件を確認し、次の安全な実装を1件進める",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/120",
-      "updated_at": "2026-08-25T23:41:09Z"
+      "id": "github-pr-414",
+      "title": "PR #414 YOS｜MY WAYとは別の相談・対処ページ v1",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/414",
+      "updated_at": "2026-09-21T02:18:37Z"
+    },
+    {
+      "id": "github-pr-416",
+      "title": "PR #416 Repair Clarity Shortcut Factory bridge",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/416",
+      "updated_at": "2026-09-21T02:26:35Z"
     },
     {
       "id": "github-issue-232",
@@ -80,7 +70,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-09-21T01:46:38Z"
+      "updated_at": "2026-09-21T02:27:01Z"
     },
     {
       "id": "github-issue-256",
@@ -91,16 +81,6 @@
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/256",
       "updated_at": "2026-09-12T03:34:43Z"
-    },
-    {
-      "id": "github-issue-262",
-      "title": "Issue #262 [AI収益化] Taxi MVP｜本人別「見切り時間」0円PWA商品化検証",
-      "type": "GitHub Issue",
-      "status": "open",
-      "priority": 3,
-      "next_action": "完成条件を確認し、次の安全な実装を1件進める",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/262",
-      "updated_at": "2026-08-26T09:38:37Z"
     },
     {
       "id": "github-issue-272",
@@ -153,6 +133,26 @@
       "updated_at": "2026-09-06T15:53:56Z"
     },
     {
+      "id": "github-issue-295",
+      "title": "Issue #295 MY WAY｜YOS Tasks 優先順位・進捗ダッシュボード",
+      "type": "GitHub Issue",
+      "status": "open",
+      "priority": 3,
+      "next_action": "完成条件を確認し、次の安全な実装を1件進める",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/295",
+      "updated_at": "2026-09-09T16:54:34Z"
+    },
+    {
+      "id": "github-issue-297",
+      "title": "Issue #297 MY REMOTE｜BRAVIA・エアコン・照明の個別ウィジェット統合",
+      "type": "GitHub Issue",
+      "status": "open",
+      "priority": 3,
+      "next_action": "完成条件を確認し、次の安全な実装を1件進める",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/297",
+      "updated_at": "2026-09-11T16:32:45Z"
+    },
+    {
       "id": "github-issue-51",
       "title": "Issue #51 ProjectY 4本並行開発の全体管理",
       "type": "GitHub Issue",
@@ -165,39 +165,39 @@
   ],
   "recently_completed": [
     {
-      "id": "github-commit-82ae997c70ab",
-      "title": "Merge pull request #413 from yskn0008-bot/repair/clarity-terminal-handoff",
-      "completed_at": "2026-09-21T01:47:30Z",
-      "result": "GitHub mainへ反映（82ae997）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/82ae997c70abd220fa5bd8de8d9e2bc4ef5e3dd9"
+      "id": "github-commit-53aebe2fbfbf",
+      "title": "Merge pull request #415 from yskn0008-bot/repair/clarity-stop-after-handoff",
+      "completed_at": "2026-09-21T02:27:18Z",
+      "result": "GitHub mainへ反映（53aebe2）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/53aebe2fbfbfbfd6caa9cd4661eb5e87f654dbe7"
     },
     {
-      "id": "github-commit-761450cba2b3",
-      "title": "ci: refresh terminal handoff evidence",
-      "completed_at": "2026-09-21T01:46:07Z",
-      "result": "GitHub mainへ反映（761450c）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/761450cba2b3514bd5688eedfce4c5a2d383981d"
+      "id": "github-commit-4126ae1d697a",
+      "title": "ci: refresh verified stop-handoff evidence",
+      "completed_at": "2026-09-21T02:26:33Z",
+      "result": "GitHub mainへ反映（4126ae1）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/4126ae1d697a6fa20d4e697a816b81a8a657915a"
     },
     {
-      "id": "github-commit-46fb12dc6031",
-      "title": "test(clarity): align handoff regression with terminal design",
-      "completed_at": "2026-09-21T01:45:10Z",
-      "result": "GitHub mainへ反映（46fb12d）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/46fb12dc603197729d4254827b27e87870fd2910"
+      "id": "github-commit-113c4cca0de5",
+      "title": "test(clarity): match multiline stop blocks",
+      "completed_at": "2026-09-21T02:25:25Z",
+      "result": "GitHub mainへ反映（113c4cc）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/113c4cca0de5f15b415018eecb83846886a903cc"
     },
     {
-      "id": "github-commit-50b9ff0bcb2e",
-      "title": "test(clarity): require terminal destination handoff",
-      "completed_at": "2026-09-21T01:44:27Z",
-      "result": "GitHub mainへ反映（50b9ff0）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/50b9ff0bcb2e197840316e120232876b8bb0317f"
+      "id": "github-commit-efe704bd680b",
+      "title": "fix(clarity): use Cherri-compatible terminal stop blocks",
+      "completed_at": "2026-09-21T02:25:09Z",
+      "result": "GitHub mainへ反映（efe704b）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/efe704bd680b41e01e5d9b72c5146de9bcc2e665"
     },
     {
-      "id": "github-commit-12fd0c95e7ca",
-      "title": "fix(clarity): make destination handoff terminal",
-      "completed_at": "2026-09-21T01:44:13Z",
-      "result": "GitHub mainへ反映（12fd0c9）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/12fd0c95e7ca80437f5b4f16e7ef4cd7a115298c"
+      "id": "github-commit-3a27c71d2fbd",
+      "title": "test(clarity): align terminal assertion with stop",
+      "completed_at": "2026-09-21T02:24:10Z",
+      "result": "GitHub mainへ反映（3a27c71）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/3a27c71d2fbdacd512e0bbeb867c35eb780d6014"
     },
     {
       "id": "complete-002",
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-21T10:47:45+09:00",
+      "last_update": "2026-09-21T11:28:07+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -309,13 +309,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 23件・Open PR 20件を自動同期中",
+      "next_action": "Open Issue 21件・Open PR 20件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-21T10:47:45+09:00",
+      "last_update": "2026-09-21T11:28:07+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-21T10:47:45+09:00",
+      "last_update": "2026-09-21T11:28:07+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "18ab55b8a81f0f27b2e590a0048efc1757142d8d53d6bbe2bd49fc6055744439"
+  "github_snapshot_hash": "f3d86705cdf4d14e37bdddbff5dc98d76a952af39014ad73e3e3c3ae6ef547e6"
 }
