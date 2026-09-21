@@ -68,3 +68,14 @@ test('BRAVIA power prefers the toggle command before PowerOff in both entry poin
   assert.doesNotMatch(source, /power:\["poweroff","power"\]/);
   assert.doesNotMatch(braviaRemote, /power:\["poweroff","power"\]/);
 });
+
+
+test('light and AC actions bypass dynamic child-script execution',()=>{
+  assert.match(source,/async function runLightAction\(action\)/);
+  assert.match(source,/async function runACAction\(action\)/);
+  assert.match(source,/else if\(item\.device==="light"\)\{await runLightAction\(item\.action\)/);
+  assert.match(source,/else if\(item\.device==="ac"\)\{await runACAction\(item\.action\)/);
+  assert.match(source,/await getTapoTransport\(\)/);
+  assert.match(source,/validateTapoResponse/);
+  assert.match(source,/alert\(result\.message\|\|"操作に失敗しました"\)/);
+});
