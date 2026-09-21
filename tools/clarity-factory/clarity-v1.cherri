@@ -58,6 +58,8 @@ if !@actionsRaw {
 }
 
 @lastExecutor = ""
+@handoffExecutor = ""
+@handoffTarget = ""
 
 for actionItem in @actionsRaw {
     const actionDict = getDictionary(@actionItem)
@@ -321,27 +323,8 @@ for actionItem in @actionsRaw {
             mustOutput("ここだけ確認して", "このアプリはまだ起動リストにありません")
         }
 
-        if target == "safari" { openApp("safari") }
-        if target == "shortcuts" { openApp("shortcuts") }
-        if target == "files" { openApp("files") }
-        if target == "notes" { openApp("notes") }
-        if target == "phone" { openApp("phone") }
-        if target == "reminders" { openApp("reminders") }
-        if target == "mail" { openApp("mail") }
-        if target == "music" { openApp("music") }
-        if target == "calendar" { openApp("calendar") }
-        if target == "maps" { openApp("maps") }
-        if target == "contacts" { openApp("contacts") }
-        if target == "health" { openApp("health") }
-        if target == "photos" { openApp("photos") }
-        if target == "appstore" { openApp("appstore") }
-        if target == "facetime" { openApp("facetime") }
-        if target == "chatgpt" { openApp("com.openai.chat") }
-        if target == "scriptable" { openApp("dk.simonbs.Scriptable") }
-        if target == "youtube" { openApp("com.google.ios.youtube") }
-        if target == "spotify" { openApp("com.spotify.client") }
-        if target == "google_sheets" { openApp("com.google.Sheets") }
-
+        @handoffExecutor = "open_app"
+        @handoffTarget = "{target}"
         const appAppliedRecord = text("{CurrentDate}\t{requestNumber}\t{actionId}\tHANDOFF_READY\topen_app\t{target}\n")
         appendResolvedFile(ledgerFile, appAppliedRecord)
     }
@@ -354,7 +337,8 @@ for actionItem in @actionsRaw {
         }
         const myWayExecutingRecord = text("{CurrentDate}\t{requestNumber}\t{actionId}\tEXECUTING\tmyway\thome\n")
         appendResolvedFile(ledgerFile, myWayExecutingRecord)
-        openURL("https://yskn0008-bot.github.io/ProjectY/yos/")
+        @handoffExecutor = "myway"
+        @handoffTarget = "home"
         const myWayAppliedRecord = text("{CurrentDate}\t{requestNumber}\t{actionId}\tHANDOFF_READY\tmyway\thome\n")
         appendResolvedFile(ledgerFile, myWayAppliedRecord)
     }
@@ -372,6 +356,33 @@ appendResolvedFile(ledgerFile, requestDone)
 const feedbackRaw = getValue(parsedResult, "feedback")
 const feedback = getDictionary(feedbackRaw)
 const summary = "{feedback['summary']}"
-if summary && @lastExecutor != "open_app" && @lastExecutor != "myway" {
+if summary && !@handoffExecutor {
     show("{summary}")
+}
+
+// Terminal handoff: nothing may run after the destination is opened.
+if @handoffExecutor == "open_app" {
+    if @handoffTarget == "safari" { openApp("safari") }
+    if @handoffTarget == "shortcuts" { openApp("shortcuts") }
+    if @handoffTarget == "files" { openApp("files") }
+    if @handoffTarget == "notes" { openApp("notes") }
+    if @handoffTarget == "phone" { openApp("phone") }
+    if @handoffTarget == "reminders" { openApp("reminders") }
+    if @handoffTarget == "mail" { openApp("mail") }
+    if @handoffTarget == "music" { openApp("music") }
+    if @handoffTarget == "calendar" { openApp("calendar") }
+    if @handoffTarget == "maps" { openApp("maps") }
+    if @handoffTarget == "contacts" { openApp("contacts") }
+    if @handoffTarget == "health" { openApp("health") }
+    if @handoffTarget == "photos" { openApp("photos") }
+    if @handoffTarget == "appstore" { openApp("appstore") }
+    if @handoffTarget == "facetime" { openApp("facetime") }
+    if @handoffTarget == "chatgpt" { openApp("com.openai.chat") }
+    if @handoffTarget == "scriptable" { openApp("dk.simonbs.Scriptable") }
+    if @handoffTarget == "youtube" { openApp("com.google.ios.youtube") }
+    if @handoffTarget == "spotify" { openApp("com.spotify.client") }
+    if @handoffTarget == "google_sheets" { openApp("com.google.Sheets") }
+}
+if @handoffExecutor == "myway" {
+    openURL("https://yskn0008-bot.github.io/ProjectY/yos/")
 }
