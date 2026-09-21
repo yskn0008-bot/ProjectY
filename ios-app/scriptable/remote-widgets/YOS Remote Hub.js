@@ -65,7 +65,7 @@ const STORAGE = {
   mode:"yos.bravia.scriptable.auto-mode-v1"
 }
 const ALIASES = {
-  power:["poweroff","power"], input:["input"], home:["home"],
+  power:["power","poweroff"], input:["input"], home:["home"],
   quick:["quick","options","actionmenu","settings"], menu:["actionmenu","options","androidmenu"],
   back:["return","back"], up:["up"], down:["down"], left:["left"], right:["right"], confirm:["confirm","enter"],
   volumeDown:["volumedown"], volumeUp:["volumeup"], mute:["mute"], channelDown:["channeldown"], channelUp:["channelup"],
