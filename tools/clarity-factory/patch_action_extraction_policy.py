@@ -74,6 +74,9 @@ def patch(path: Path) -> None:
     blob = repr(verify)
     required = [
         "actions MUST contain one planned action",
+        "MY WAYを開いて",
+        "ChatGPTを開いて",
+        "Wi-Fiを切って",
         "明日3時に歯医者",
         "shopping content トマト",
         "same four intents",
