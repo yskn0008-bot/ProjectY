@@ -11,7 +11,7 @@ Only ✅ counts toward device coverage.
 
 | Category | Status | Current route / evidence | First remaining acceptance |
 |---|---|---|---|
-| Open App | 🟡 | Parent `open_app` → fixed `YOS_OpenApp`; 20 current app targets preserved | `Safari開いて` from Action Button |
+| Open App | ✅ | Physical iPhone PASS: Action Button → Clarity voice → local `open_app / safari` fast route → fixed `YOS_OpenApp` → Safari. Ledger request `955913` contains `FAST_ROUTE open_app safari`, `APPLIED open_app safari YOS_OpenApp child_returned fast_path`, and `REQUEST_DONE`. | Expand physical checks to additional allowlisted apps as needed |
 | Device settings | 🟡 | Existing allowlisted local setting executor retained | Physical per-setting acceptance after Open App PASS |
 | Timer / Alarm | ⬜ | No fixed child integrated | Add after Open App PASS |
 | Navigate / Maps | ⬜ | Maps app can be opened through Open App; navigation command not integrated | Add navigation child/category |
@@ -26,7 +26,7 @@ Only ✅ counts toward device coverage.
 
 ## First completion gate
 
-`Safari開いて` remains 🟡 until the physical iPhone run proves all of:
+`Safari開いて` is ✅ on the signed fixed-child build. Physical iPhone verification proved all of:
 
 1. Action Button starts Clarity.
 2. Voice input captures the phrase.
@@ -35,5 +35,7 @@ Only ✅ counts toward device coverage.
 5. Safari actually opens.
 6. Parent resumes after `YOS_OpenApp` returns successfully.
 7. Ledger contains the success record and request completion record.
+
+Verified device evidence: the user repeated the signed current-head test successfully; the captured `Clarity Ledger.txt` tail shows request `955913` at 2026-09-22 02:48 with the Safari fast route, successful fixed-child return, and request completion.
 
 Shortcut Factory is intentionally outside this table because it is a separate development lane, not a daily Clarity operation.
