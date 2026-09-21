@@ -1,0 +1,103 @@
+name: Shortcut Factory Repair E2E
+
+on:
+  push:
+    branches:
+      - repair/shortcut-factory-20260921
+    paths:
+      - 'tools/shortcut-factory/**'
+      - '.github/workflows/shortcut-factory-repair-e2e.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-sign-verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Preserve natural-language request and compile definition
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p build
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          p = Path('tools/shortcut-factory/request.json')
+          data = json.loads(p.read_text(encoding='utf-8'))
+          raw = data.get('raw_request')
+          if raw != 'Safariを開くショートカットを自動作成して':
+              raise SystemExit(f'raw_request mismatch: {raw!r}')
+          print('PASS: natural-language request preserved')
+          PY
+          python3 tools/shortcut-factory/compiler.py \
+            --definition tools/shortcut-factory/request.json \
+            --output build/YOS-Repair-Test-20260921-unsigned.shortcut
+
+      - name: Verify unsigned shortcut structure
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import plistlib
+          p = Path('build/YOS-Repair-Test-20260921-unsigned.shortcut')
+          raw = p.read_bytes()
+          if not raw.startswith(b'bplist00'):
+              raise SystemExit('unsigned shortcut missing bplist00 header')
+          root = plistlib.loads(raw)
+          actions = root.get('WFWorkflowActions', [])
+          if len(actions) != 1:
+              raise SystemExit(f'expected 1 action, got {len(actions)}')
+          a = actions[0]
+          if a.get('WFWorkflowActionIdentifier') != 'is.workflow.actions.openapp':
+              raise SystemExit('wrong action identifier')
+          params = a.get('WFWorkflowActionParameters', {})
+          if params.get('WFAppIdentifier') != 'com.apple.mobilesafari':
+              raise SystemExit('wrong Safari bundle id')
+          print(f'PASS: unsigned structure, {len(raw)} bytes')
+          PY
+
+      - name: Sign with proven HubSign path
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/clarity-factory/sign_with_hubsign.py \
+            --input build/YOS-Repair-Test-20260921-unsigned.shortcut \
+            --output build/YOS-Repair-Test-20260921-signed.shortcut \
+            --name 'YOS Repair Test 20260921' \
+            2>&1 | tee build/hubsign.log
+
+      - name: Verify signed shortcut
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib
+          p = Path('build/YOS-Repair-Test-20260921-signed.shortcut')
+          raw = p.read_bytes()
+          if not raw.startswith(b'AEA1'):
+              raise SystemExit(f'signed shortcut missing AEA1 header: {raw[:8]!r}')
+          if len(raw) < 500:
+              raise SystemExit(f'signed shortcut unexpectedly small: {len(raw)} bytes')
+          print(f'PASS: signed AEA1 shortcut, {len(raw)} bytes')
+          print('SHA256:', hashlib.sha256(raw).hexdigest())
+          PY
+
+      - name: Upload repair evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: shortcut-factory-repair-e2e
+          path: |
+            tools/shortcut-factory/request.json
+            build/YOS-Repair-Test-20260921-unsigned.shortcut
+            build/YOS-Repair-Test-20260921-signed.shortcut
+            build/hubsign.log
+          if-no-files-found: error
+          retention-days: 30
