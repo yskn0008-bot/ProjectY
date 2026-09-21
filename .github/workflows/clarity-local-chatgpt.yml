@@ -1,14 +1,18 @@
-name: Clarity local ChatGPT artifact
+name: Clarity fixed-child local artifacts
 
 on:
   pull_request:
     paths:
       - 'tools/clarity-factory/**'
+      - 'server/yos-ai/clarity-model-contract.mjs'
+      - 'server/yos-ai/tests/clarity-model-api.test.mjs'
       - '.github/workflows/clarity-local-chatgpt.yml'
   push:
     branches: [main]
     paths:
       - 'tools/clarity-factory/**'
+      - 'server/yos-ai/clarity-model-contract.mjs'
+      - 'server/yos-ai/tests/clarity-model-api.test.mjs'
       - '.github/workflows/clarity-local-chatgpt.yml'
 
 permissions:
@@ -21,12 +25,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Validate model contract
+      - name: Validate normal Clarity model contract
         shell: bash
         run: |
           set -euo pipefail
           python3 -m json.tool tools/clarity-factory/clarity-spec.json >/dev/null
           python3 -m unittest discover -s tools/clarity-factory/tests -v
+          cd server/yos-ai
+          npm install --ignore-scripts
+          npm run build
+          node --test tests/clarity-model-api.test.mjs
+          node --check clarity-model-contract.mjs
 
       - name: Install pinned Cherri v2.3.0
         shell: bash
@@ -43,7 +52,19 @@ jobs:
           sudo install -m 0755 "$binary" /usr/local/bin/cherri
           cherri --version
 
-      - name: Compile local ChatGPT Clarity
+      - name: Compile fixed YOS_OpenApp child
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd tools/clarity-factory
+          rm -f './YOS_OpenApp_unsigned.shortcut' './YOS_OpenApp.plist'
+          cherri YOS_OpenApp.cherri --skip-sign --debug
+          child='./YOS_OpenApp_unsigned.shortcut'
+          test -f "$child"
+          mkdir -p artifacts-fixed-child
+          cp "$child" artifacts-fixed-child/YOS_OpenApp-unsigned.shortcut
+
+      - name: Compile normal Clarity parent
         shell: bash
         run: |
           set -euo pipefail
@@ -60,44 +81,35 @@ jobs:
           python3 patch_chatgpt_json_text.py "$runtime"
           python3 patch_reminder_wire_format.py "$runtime"
           python3 patch_destination_readback.py "$runtime"
-          python3 patch_local_shortcut_factory.py "$runtime"
-          python3 validate_clarity_local_factory.py "$runtime"
-          mkdir -p artifacts-local
-          cp "$runtime" artifacts-local/Clarity-local-chatgpt-unsigned.shortcut
+          python3 validate_fixed_child_architecture.py "$runtime" './YOS_OpenApp_unsigned.shortcut'
+          mkdir -p artifacts-fixed-child
+          cp "$runtime" artifacts-fixed-child/Clarity-unsigned.shortcut
 
-      - name: Inspect local artifact
+      - name: Inspect parent/child isolation
         shell: bash
         run: |
           set -euo pipefail
           python3 - <<'PY'
           import plistlib
           from pathlib import Path
-          p=Path('tools/clarity-factory/artifacts-local/Clarity-local-chatgpt-unsigned.shortcut')
-          root=plistlib.loads(p.read_bytes())
-          actions=root['WFWorkflowActions']
-          ids=[a.get('WFWorkflowActionIdentifier','') for a in actions]
-          llm=[a for a in actions if a.get('WFWorkflowActionIdentifier')=='is.workflow.actions.askllm']
-          assert len(llm)==1, len(llm)
-          params=llm[0].get('WFWorkflowActionParameters',{})
-          assert params.get('WFLLMModel')=='ChatGPT'
-          assert params.get('WFGenerativeResultType')=='Text'
-          assert 'is.workflow.actions.detect.dictionary' in ids
-          assert any(i.endswith('openapp') for i in ids)
-          for suffix in ('wifi.set','bluetooth.set','cellulardata.set','airplanemode.set','lowpowermode.set','brightness','volume','appearance','flashlight','dnd.set','openurl'):
-              assert any(i.endswith(suffix) for i in ids), suffix
-          blob=repr(root)
-          assert 'valid JSON text with no markdown fence' in blob
-          assert 'api.openai.com' not in blob
-          assert 'project-y-yos-ai.vercel.app/api/yos/intake?mode=model' not in blob
-          assert 'Clarity接続トークン' not in blob
-          assert 'OpenAI APIキー' not in blob
-          assert 'sk-' not in blob
-          nets=[a for a in actions if a.get('WFWorkflowActionIdentifier')=='is.workflow.actions.downloadurl']
-          assert len(nets)==1, len(nets)
-          assert nets[0].get('WFWorkflowActionParameters',{}).get('WFURL')=='https://hubsign.routinehub.services/sign'
-          assert 'YOS Safari Auto.shortcut' in blob
-          assert 'com.apple.shortcuts' in blob
-          print('Clarity local ChatGPT + Shortcut Factory inspection: PASS')
+          base=Path('tools/clarity-factory/artifacts-fixed-child')
+          parent=plistlib.loads((base/'Clarity-unsigned.shortcut').read_bytes())
+          child=plistlib.loads((base/'YOS_OpenApp-unsigned.shortcut').read_bytes())
+          pa=parent['WFWorkflowActions']
+          ca=child['WFWorkflowActions']
+          pids=[a.get('WFWorkflowActionIdentifier','') for a in pa]
+          cids=[a.get('WFWorkflowActionIdentifier','') for a in ca]
+          runs=[a for a in pa if a.get('WFWorkflowActionIdentifier','').endswith('runworkflow')]
+          assert len(runs)==1, len(runs)
+          assert 'YOS_OpenApp' in repr(runs[0].get('WFWorkflowActionParameters',{}))
+          assert not any(i.endswith('openapp') for i in pids)
+          assert not any(i.endswith('downloadurl') for i in pids)
+          assert sum(i.endswith('openapp') for i in cids) >= 20
+          blob=repr(parent)
+          for forbidden in ('shortcutFactoryUnsignedXml','YOS Safari Auto.shortcut','hubsign.routinehub.services/sign'):
+              assert forbidden not in blob, forbidden
+          assert 'YOS_OPEN_APP_OK:safari' in repr(child)
+          print('Clarity parent + fixed YOS_OpenApp isolation: PASS')
           PY
 
       - name: Secret scan
@@ -106,35 +118,54 @@ jobs:
           set -euo pipefail
           if grep -RIE --exclude='*.shortcut' --exclude='*.plist' \
             '(gh[pousr]_[A-Za-z0-9_]{20,}|sk-[A-Za-z0-9_-]{20,}|xox[baprs]-[A-Za-z0-9-]{10,}|BEGIN [A-Z ]*PRIVATE KEY|192\.168\.[0-9]+\.[0-9]+)' \
-            tools/clarity-factory; then
+            tools/clarity-factory server/yos-ai/clarity-model-contract.mjs; then
             echo 'Potential secret/private network value found.' >&2
             exit 1
           fi
 
-      - name: Sign local Clarity with HubSign
+      - name: Sign Clarity parent
         shell: bash
         run: |
           set -euo pipefail
           python3 tools/clarity-factory/sign_with_hubsign.py \
-            --input tools/clarity-factory/artifacts-local/Clarity-local-chatgpt-unsigned.shortcut \
-            --output tools/clarity-factory/artifacts-local/Clarity-local-chatgpt-signed.shortcut \
-            --name 'Clarity Local' \
-            2>&1 | tee tools/clarity-factory/artifacts-local/hubsign.log
+            --input tools/clarity-factory/artifacts-fixed-child/Clarity-unsigned.shortcut \
+            --output tools/clarity-factory/artifacts-fixed-child/Clarity-signed.shortcut \
+            --name 'Clarity' \
+            2>&1 | tee tools/clarity-factory/artifacts-fixed-child/clarity-hubsign.log
+
+      - name: Sign YOS_OpenApp child
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/clarity-factory/sign_with_hubsign.py \
+            --input tools/clarity-factory/artifacts-fixed-child/YOS_OpenApp-unsigned.shortcut \
+            --output tools/clarity-factory/artifacts-fixed-child/YOS_OpenApp-signed.shortcut \
+            --name 'YOS_OpenApp' \
+            2>&1 | tee tools/clarity-factory/artifacts-fixed-child/yos-openapp-hubsign.log
+
+      - name: Verify signed artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
           python3 - <<'PY'
           from pathlib import Path
-          p=Path('tools/clarity-factory/artifacts-local/Clarity-local-chatgpt-signed.shortcut')
-          data=p.read_bytes()
-          assert data.startswith(b'AEA1'), data[:8]
-          assert len(data)>500
-          print(f'Signed local Clarity: PASS ({len(data)} bytes)')
+          base=Path('tools/clarity-factory/artifacts-fixed-child')
+          for name in ('Clarity-signed.shortcut','YOS_OpenApp-signed.shortcut'):
+              data=(base/name).read_bytes()
+              assert data.startswith(b'AEA1'), (name,data[:8])
+              assert len(data)>500, (name,len(data))
+              print(f'{name}: signed AEA1 PASS ({len(data)} bytes)')
           PY
 
-      - name: Upload local Clarity
+      - name: Upload fixed-child acceptance package
         uses: actions/upload-artifact@v4
         with:
-          name: clarity-local-chatgpt
+          name: clarity-fixed-child-openapp
           path: |
-            tools/clarity-factory/artifacts-local/Clarity-local-chatgpt-unsigned.shortcut
-            tools/clarity-factory/artifacts-local/Clarity-local-chatgpt-signed.shortcut
-            tools/clarity-factory/artifacts-local/hubsign.log
+            tools/clarity-factory/artifacts-fixed-child/Clarity-unsigned.shortcut
+            tools/clarity-factory/artifacts-fixed-child/Clarity-signed.shortcut
+            tools/clarity-factory/artifacts-fixed-child/YOS_OpenApp-unsigned.shortcut
+            tools/clarity-factory/artifacts-fixed-child/YOS_OpenApp-signed.shortcut
+            tools/clarity-factory/artifacts-fixed-child/clarity-hubsign.log
+            tools/clarity-factory/artifacts-fixed-child/yos-openapp-hubsign.log
           if-no-files-found: error
