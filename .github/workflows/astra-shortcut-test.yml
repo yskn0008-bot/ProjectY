@@ -47,6 +47,20 @@ jobs:
 
         cp AstraTEST20260921_unsigned.shortcut artifacts-astra/before-patch.shortcut
 
+        python3 - <<''EVIDENCE''
+
+        import plistlib, hashlib, base64, json
+
+        from pathlib import Path
+
+        p=Path(''AstraTEST20260921_unsigned.shortcut'');d=p.read_bytes();w=plistlib.loads(d)
+
+        print(''PRE_PATCH_EVIDENCE ''+json.dumps({''bytes'':len(d),''sha256'':hashlib.sha256(d).hexdigest(),''actions'':w[''WFWorkflowActions'']},ensure_ascii=False))
+
+        print(''UNSIGNED_BYTES_BASE64 ''+base64.b64encode(d).decode())
+
+        EVIDENCE
+
         python3 patch_append_file_paths.py AstraTEST20260921_unsigned.shortcut 2>&1
         | tee artifacts-astra/patch.log
 
