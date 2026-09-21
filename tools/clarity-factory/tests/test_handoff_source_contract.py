@@ -15,7 +15,7 @@ class HandoffSourceContractTests(unittest.TestCase):
     def test_open_app_is_ready_then_verified(self):
         self.assertIn('HANDOFF_READY\\topen_app', self.source)
         self.assertIn('APPLIED\\topen_app', self.source)
-        self.assertIn('FAILED\\topen_app_child_verify', self.source)
+        self.assertIn('child_returned', self.source)
 
     def test_summary_is_suppressed_for_handoff(self):
         self.assertIn('if !@handoffExecutor {', self.source)
