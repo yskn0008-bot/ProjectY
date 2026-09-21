@@ -81,9 +81,9 @@ def validate(path: Path) -> None:
     inbox_i = inbox_gets[0]
     ledger_i = ledger_gets[0]
     idea_i = idea_gets[0]
-    raw_candidates = [i for i in append_indexes if inbox_i < i < model_i]
+    raw_candidates = [i for i in append_indexes if inbox_i < i < ledger_i]
     if len(raw_candidates) != 1:
-        raise AssertionError(f"expected exactly one Raw First append between inbox resolve and model, found {len(raw_candidates)}")
+        raise AssertionError(f"expected exactly one Raw First append between inbox and ledger resolves, found {len(raw_candidates)}")
     raw_i = raw_candidates[0]
     if not dictate_i < inbox_i < raw_i < ledger_i < model_i:
         raise AssertionError(
