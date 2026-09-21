@@ -9,6 +9,15 @@ on:
       - 'server/yos-ai/clarity-model-contract.mjs'
       - 'server/yos-ai/tests/clarity-model-api.test.mjs'
       - 'server/yos-ai/package.json'
+  push:
+    branches: [main]
+    paths:
+      - 'tools/clarity-factory/**'
+      - '.github/workflows/clarity-cherri-proof.yml'
+      - 'server/yos-ai/api/yos/intake.mjs'
+      - 'server/yos-ai/clarity-model-contract.mjs'
+      - 'server/yos-ai/tests/clarity-model-api.test.mjs'
+      - 'server/yos-ai/package.json'
   workflow_dispatch:
 
 permissions:
