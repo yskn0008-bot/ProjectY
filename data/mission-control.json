@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-21T11:29:59+09:00",
+  "updated_at": "2026-09-21T11:38:07+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -53,14 +53,14 @@
       "updated_at": "2026-09-21T01:34:57Z"
     },
     {
-      "id": "github-pr-414",
-      "title": "PR #414 YOS｜MY WAYとは別の相談・対処ページ v1",
+      "id": "github-pr-417",
+      "title": "PR #417 Repair Shortcut Factory with local Safari fallback",
       "type": "GitHub PR",
       "status": "draft",
       "priority": 2,
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/414",
-      "updated_at": "2026-09-21T02:18:37Z"
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/417",
+      "updated_at": "2026-09-21T02:34:50Z"
     },
     {
       "id": "github-issue-232",
@@ -70,7 +70,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-09-21T02:29:45Z"
+      "updated_at": "2026-09-21T02:36:46Z"
     },
     {
       "id": "github-issue-256",
@@ -165,6 +165,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-33244212bc33",
+      "title": "feat(yos): add YOS consultation and routing page",
+      "completed_at": "2026-09-21T02:37:52Z",
+      "result": "GitHub mainへ反映（3324421）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/33244212bc337aaf66460458099005856c652191"
+    },
+    {
       "id": "github-commit-b269f425e9a6",
       "title": "Merge PR #416: repair Clarity Shortcut Factory bridge",
       "completed_at": "2026-09-21T02:29:42Z",
@@ -191,13 +198,6 @@
       "completed_at": "2026-09-21T02:26:33Z",
       "result": "GitHub mainへ反映（4126ae1）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/4126ae1d697a6fa20d4e697a816b81a8a657915a"
-    },
-    {
-      "id": "github-commit-27027c4f6d09",
-      "title": "test: validate Shortcut Factory bridge in final Clarity artifact",
-      "completed_at": "2026-09-21T02:26:03Z",
-      "result": "GitHub mainへ反映（27027c4）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/27027c4f6d0982a401501b16bfde7baac4c6731a"
     },
     {
       "id": "complete-002",
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-21T11:29:59+09:00",
+      "last_update": "2026-09-21T11:38:07+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -315,7 +315,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-21T11:29:59+09:00",
+      "last_update": "2026-09-21T11:38:07+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-21T11:29:59+09:00",
+      "last_update": "2026-09-21T11:38:07+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "1bbcd8186fcbe476c161c2885b2fd0a19efae54e89b91f47a69fd746ed9a5986"
+  "github_snapshot_hash": "4a0418625c3f43c0605c9f506a67ea9617ad9294928effcc21078324d8013f67"
 }
