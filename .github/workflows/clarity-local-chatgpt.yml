@@ -60,6 +60,8 @@ jobs:
           python3 patch_chatgpt_json_text.py "$runtime"
           python3 patch_reminder_wire_format.py "$runtime"
           python3 patch_destination_readback.py "$runtime"
+          python3 patch_local_shortcut_factory.py "$runtime"
+          python3 validate_clarity_local_factory.py "$runtime"
           mkdir -p artifacts-local
           cp "$runtime" artifacts-local/Clarity-local-chatgpt-unsigned.shortcut
 
@@ -86,10 +88,16 @@ jobs:
           blob=repr(root)
           assert 'valid JSON text with no markdown fence' in blob
           assert 'api.openai.com' not in blob
+          assert 'project-y-yos-ai.vercel.app/api/yos/intake?mode=model' not in blob
           assert 'Clarity接続トークン' not in blob
           assert 'OpenAI APIキー' not in blob
           assert 'sk-' not in blob
-          print('Clarity local ChatGPT artifact inspection: PASS')
+          nets=[a for a in actions if a.get('WFWorkflowActionIdentifier')=='is.workflow.actions.downloadurl']
+          assert len(nets)==1, len(nets)
+          assert nets[0].get('WFWorkflowActionParameters',{}).get('WFURL')=='https://hubsign.routinehub.services/sign'
+          assert 'YOS Safari Auto.shortcut' in blob
+          assert 'com.apple.shortcuts' in blob
+          print('Clarity local ChatGPT + Shortcut Factory inspection: PASS')
           PY
 
       - name: Secret scan
