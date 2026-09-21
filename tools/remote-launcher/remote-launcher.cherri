@@ -1,0 +1,6 @@
+#define name 3画面リモコン
+#define color blue
+
+// One-tap launcher for the verified Scriptable 3-screen remote.
+// No credentials or personal data are embedded.
+openURL("scriptable:///run?scriptName=%E3%83%AA%E3%83%A2%E3%82%B3%E3%83%B3")
