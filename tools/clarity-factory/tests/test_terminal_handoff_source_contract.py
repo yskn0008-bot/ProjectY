@@ -1,3 +1,4 @@
+# Final evidence refresh: terminal-handoff behavior unchanged; refresh current PR evidence.
 from pathlib import Path
 import unittest
 
