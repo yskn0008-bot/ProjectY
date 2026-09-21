@@ -13,7 +13,8 @@ class EmptyActionFallbackSourceTests(unittest.TestCase):
         model = self.source.index("const modelResult = askChatGPT")
         self.assertLess(fast, model)
         fast_block = self.source[:model]
-        self.assertIn('run("YOS_OpenApp", "safari")', fast_block)
+        self.assertIn('const fastSafariTarget = text("safari")', fast_block)
+        self.assertIn('run("YOS_OpenApp", fastSafariTarget)', fast_block)
         self.assertIn('child_returned\\\\tfast_path', fast_block)
 
     def test_fallback_runs_before_no_actions_block(self):
