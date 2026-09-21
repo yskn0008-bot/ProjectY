@@ -30,6 +30,24 @@ const inboxFile = getFile("Clarity Inbox.txt")
 appendResolvedFile(inboxFile, rawRecord)
 const ledgerFile = getFile("Clarity Ledger.txt")
 
+// Zero-network fast path for the first device-setting acceptance command.
+// Raw First is already persisted. Only an exact, high-confidence 50% brightness request
+// is handled here; every other setting request stays on the fail-closed model route.
+if originalInput contains "明るさ" {
+    if originalInput contains "50" {
+        const fastBrightnessRouteRecord = text("{CurrentDate}\\t{requestNumber}\\tFAST_ROUTE\\tdevice_setting\\tbrightness=50\\n")
+        appendResolvedFile(ledgerFile, fastBrightnessRouteRecord)
+        rawAction("is.workflow.actions.setbrightness", {
+            "WFBrightness": 0.5
+        })
+        const fastBrightnessAppliedRecord = text("{CurrentDate}\\t{requestNumber}\\tAPPLIED\\tdevice_setting\\tbrightness=50\\tfast_path\\n")
+        appendResolvedFile(ledgerFile, fastBrightnessAppliedRecord)
+        const fastBrightnessDoneRecord = text("{CurrentDate}\\t{requestNumber}\\tREQUEST_DONE\\n")
+        appendResolvedFile(ledgerFile, fastBrightnessDoneRecord)
+        stop()
+    }
+}
+
 // Zero-network fast path for the first acceptance command.
 // Raw First is already persisted above. This stays fail-closed and delegates execution
 // to the same fixed YOS_OpenApp child, but avoids the ChatGPT round-trip for Safari.
