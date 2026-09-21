@@ -19,9 +19,9 @@ def validate(parent: Path, child: Path) -> None:
     pids=[str(a.get("WFWorkflowActionIdentifier","")) for a in pa]
     cids=[str(a.get("WFWorkflowActionIdentifier","")) for a in ca]
     runs=[a for a in pa if str(a.get("WFWorkflowActionIdentifier","")).endswith("runworkflow")]
-    if len(runs)!=1:
-        raise AssertionError(f"parent must contain exactly one Run Shortcut action, got {len(runs)}")
-    if "YOS_OpenApp" not in repr(runs[0].get("WFWorkflowActionParameters",{})):
+    if len(runs)!=2:
+        raise AssertionError(f"parent must contain Safari fast-path + normal Run Shortcut actions, got {len(runs)}")
+    if any("YOS_OpenApp" not in repr(r.get("WFWorkflowActionParameters",{})) for r in runs):
         raise AssertionError("parent Run Shortcut is not fixed to YOS_OpenApp")
     if any(i.endswith("openapp") for i in pids):
         raise AssertionError("parent still embeds Open App actions")
@@ -35,9 +35,11 @@ def validate(parent: Path, child: Path) -> None:
         raise AssertionError("parent open_app verify/Ledger markers missing")
     if "child_returned" not in pblob:
         raise AssertionError("parent child-return verification marker missing")
-    run_index = next(i for i,a in enumerate(pa) if str(a.get("WFWorkflowActionIdentifier","")).endswith("runworkflow"))
-    applied_index = next((i for i,a in enumerate(pa) if "APPLIED\\topen_app" in repr(a)), -1)
-    if applied_index <= run_index:
+    run_indexes = [i for i,a in enumerate(pa) if str(a.get("WFWorkflowActionIdentifier","")).endswith("runworkflow")]
+    applied_indexes = [i for i,a in enumerate(pa) if "APPLIED\\topen_app" in repr(a)]
+    if len(applied_indexes) < 2:
+        raise AssertionError("parent must record APPLIED after both fast and normal child returns")
+    if applied_indexes[0] <= run_indexes[0] or applied_indexes[-1] <= run_indexes[-1]:
         raise AssertionError("parent can claim APPLIED before YOS_OpenApp returns")
     opens=[i for i in cids if i.endswith("openapp")]
     if len(opens) < 20:
