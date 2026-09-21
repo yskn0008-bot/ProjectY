@@ -33,7 +33,7 @@ Only ✅ counts toward device coverage.
 3. Router chooses `open_app / safari`.
 4. Parent calls the installed fixed child `YOS_OpenApp`.
 5. Safari actually opens.
-6. Parent receives the expected child result.
+6. Parent resumes after `YOS_OpenApp` returns successfully.
 7. Ledger contains the success record and request completion record.
 
 Shortcut Factory is intentionally outside this table because it is a separate development lane, not a daily Clarity operation.
