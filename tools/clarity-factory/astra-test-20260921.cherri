@@ -1,0 +1,5 @@
+#define name AstraTEST20260921
+#define color blue
+
+const message = text("TEST")
+show(message)

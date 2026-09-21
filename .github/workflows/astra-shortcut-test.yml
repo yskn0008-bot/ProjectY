@@ -1,0 +1,132 @@
+name: Astra minimal shortcut audit
+'on':
+  push:
+    branches:
+    - audit/shortcut-test-20260921
+    paths:
+    - tools/clarity-factory/astra-test-20260921.cherri
+    - .github/workflows/astra-shortcut-test.yml
+permissions:
+  contents: read
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+    - uses: actions/checkout@v4
+    - name: Install pinned Cherri v2.3.0
+      shell: bash
+      run: 'set -euo pipefail
+
+        url=''https://github.com/electrikmilk/cherri/releases/download/v2.3.0/cherri_linux-x86_64.zip''
+
+        expected=''7ab2c384b7b26e7c72a30a8dfa56f89dae12c4068b7951bc1e3193f3698edbe9''
+
+        curl -fsSL "$url" -o /tmp/cherri.zip
+
+        printf ''%s  %s\n'' "$expected" /tmp/cherri.zip | sha256sum -c -
+
+        mkdir -p /tmp/cherri
+
+        unzip -q /tmp/cherri.zip -d /tmp/cherri
+
+        binary="$(find /tmp/cherri -type f -name cherri -print -quit)"
+
+        sudo install -m 0755 "$binary" /usr/local/bin/cherri
+
+        '
+    - name: Compile and inspect two-action TEST
+      shell: bash
+      run: 'set -euo pipefail
+
+        cd tools/clarity-factory
+
+        mkdir -p artifacts-astra
+
+        cherri astra-test-20260921.cherri --skip-sign --debug 2>&1 | tee artifacts-astra/compile.log
+
+        cp AstraTEST20260921_unsigned.shortcut artifacts-astra/before-patch.shortcut
+
+        python3 patch_append_file_paths.py AstraTEST20260921_unsigned.shortcut 2>&1
+        | tee artifacts-astra/patch.log
+
+        python3 - <<''CHECK''
+
+        import plistlib, hashlib, json
+
+        from pathlib import Path
+
+        p=Path(''AstraTEST20260921_unsigned.shortcut'')
+
+        w=plistlib.loads(p.read_bytes())
+
+        a=w[''WFWorkflowActions'']
+
+        print(json.dumps(a,ensure_ascii=False,indent=2))
+
+        assert len(a)==2, f''expected exactly 2 actions, got {len(a)}''
+
+        assert [x[''WFWorkflowActionIdentifier''] for x in a]==[''is.workflow.actions.gettext'',''is.workflow.actions.showresult'']
+
+        assert a[0][''WFWorkflowActionParameters''][''WFTextActionText'']==''TEST''
+
+        assert plistlib.loads(Path(''artifacts-astra/before-patch.shortcut'').read_bytes())==w
+
+        Path(''artifacts-astra/structure.json'').write_text(json.dumps(w,ensure_ascii=False,indent=2))
+
+        print(''STRUCTURE PASS: exactly Text(TEST) -> Show Result; existing patch
+        is semantic no-op'')
+
+        CHECK
+
+        cp AstraTEST20260921_unsigned.shortcut artifacts-astra/
+
+        cp astra-test-20260921.cherri artifacts-astra/
+
+        sha256sum artifacts-astra/*
+
+        '
+    - name: Sign with unchanged V11 HubSign script
+      shell: bash
+      run: 'set -euo pipefail
+
+        python3 tools/clarity-factory/sign_with_hubsign.py --input tools/clarity-factory/artifacts-astra/AstraTEST20260921_unsigned.shortcut
+        --output tools/clarity-factory/artifacts-astra/AstraTEST20260921.shortcut
+        --name AstraTEST20260921 --timeout 180 2>&1 | tee tools/clarity-factory/artifacts-astra/sign.log
+
+        '
+    - name: Inspect returned AEA1 and hash
+      shell: bash
+      run: 'set -euo pipefail
+
+        python3 - <<''CHECK''
+
+        import plistlib,struct,hashlib,json,os,datetime
+
+        from pathlib import Path
+
+        b=Path(''tools/clarity-factory/artifacts-astra'')
+
+        p=b/''AstraTEST20260921.shortcut''; d=p.read_bytes()
+
+        assert d.startswith(b''AEA1'') and len(d)>500
+
+        n=struct.unpack(''<I'',d[8:12])[0]
+
+        h=plistlib.loads(d[12:12+n]);assert h.get(''SigningCertificateChain'')
+
+        e={''utc'':datetime.datetime.now(datetime.timezone.utc).isoformat(),''run_id'':os.environ[''GITHUB_RUN_ID''],''sha'':os.environ[''GITHUB_SHA''],''signing_service'':''HubSign'',''signature_crypto_validation'':''NOT_PERFORMED;
+        iPhone acceptance pending'',''files'':{p.name:{''bytes'':p.stat().st_size,''sha256'':hashlib.sha256(p.read_bytes()).hexdigest()}
+        for p in b.iterdir() if p.is_file()}}
+
+        (b/''evidence.json'').write_text(json.dumps(e,indent=2));print(json.dumps(e,indent=2))
+
+        CHECK
+
+        '
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: astra-shortcut-test-20260921
+        path: tools/clarity-factory/artifacts-astra/
+        if-no-files-found: error
