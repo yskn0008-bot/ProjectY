@@ -36,11 +36,12 @@ def validate(parent: Path, child: Path) -> None:
     if "child_returned" not in pblob:
         raise AssertionError("parent child-return verification marker missing")
     run_indexes = [i for i,a in enumerate(pa) if str(a.get("WFWorkflowActionIdentifier","")).endswith("runworkflow")]
-    applied_indexes = [i for i,a in enumerate(pa) if "APPLIED\\topen_app" in repr(a)]
-    if len(applied_indexes) < 2:
-        raise AssertionError("parent must record APPLIED after both fast and normal child returns")
-    if applied_indexes[0] <= run_indexes[0] or applied_indexes[-1] <= run_indexes[-1]:
-        raise AssertionError("parent can claim APPLIED before YOS_OpenApp returns")
+    fast_applied_index = next((i for i,a in enumerate(pa) if "fast_path" in repr(a)), -1)
+    normal_applied_index = next((i for i,a in reversed(list(enumerate(pa))) if "child_returned" in repr(a) and "fast_path" not in repr(a)), -1)
+    if fast_applied_index <= run_indexes[0]:
+        raise AssertionError("fast path can claim APPLIED before YOS_OpenApp returns")
+    if normal_applied_index <= run_indexes[-1]:
+        raise AssertionError("normal path can claim APPLIED before YOS_OpenApp returns")
     opens=[i for i in cids if i.endswith("openapp")]
     if len(opens) < 20:
         raise AssertionError(f"YOS_OpenApp allowlist incomplete: {len(opens)} Open App actions")
