@@ -24,7 +24,7 @@ class TerminalHandoffSourceContractTests(unittest.TestCase):
         terminal = self.source.index("// Terminal handoff: nothing may run after the destination is opened.")
         suffix = self.source[terminal:]
         self.assertIn('if @handoffExecutor == "open_app" {', suffix)
-        self.assertIn('if @handoffTarget == "chatgpt" { openApp("com.openai.chat") }', suffix)
+        self.assertIn('if @handoffTarget == "chatgpt" { openApp("com.openai.chat"); stop() }', suffix)
         self.assertIn('if @handoffExecutor == "myway" {', suffix)
         self.assertTrue(suffix.rstrip().endswith('}'))
 
