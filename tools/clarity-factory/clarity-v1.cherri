@@ -367,19 +367,15 @@ const feedbackRaw = getValue(parsedResult, "feedback")
 const feedback = getDictionary(feedbackRaw)
 const summary = "{feedback['summary']}"
 
-// Fixed-child handoff. Parent verifies child completion before claiming APPLIED.
+// Fixed-child handoff. APPLIED is written only if Run Shortcut returns control.
+// If YOS_OpenApp or its Open App action errors, Shortcuts stops before this record.
 if @handoffExecutor == "open_app" {
-    const childResult = run("YOS_OpenApp", @handoffTarget)
-    if "{childResult}" == "YOS_OPEN_APP_OK:{@handoffTarget}" {
-        const appVerifiedRecord = text("{CurrentDate}\t{requestNumber}\tAPPLIED\topen_app\t{@handoffTarget}\tYOS_OpenApp\n")
-        appendResolvedFile(ledgerFile, appVerifiedRecord)
-        const requestDoneOpenApp = text("{CurrentDate}\t{requestNumber}\tREQUEST_DONE\n")
-        appendResolvedFile(ledgerFile, requestDoneOpenApp)
-        stop()
-    }
-    const appFailedRecord = text("{CurrentDate}\t{requestNumber}\tFAILED\topen_app_child_verify\t{@handoffTarget}\n")
-    appendResolvedFile(ledgerFile, appFailedRecord)
-    mustOutput("ここだけ確認して", "YOS_OpenAppの実行結果を確認できませんでした")
+    run("YOS_OpenApp", @handoffTarget)
+    const appVerifiedRecord = text("{CurrentDate}\t{requestNumber}\tAPPLIED\topen_app\t{@handoffTarget}\tYOS_OpenApp\tchild_returned\n")
+    appendResolvedFile(ledgerFile, appVerifiedRecord)
+    const requestDoneOpenApp = text("{CurrentDate}\t{requestNumber}\tREQUEST_DONE\n")
+    appendResolvedFile(ledgerFile, requestDoneOpenApp)
+    stop()
 }
 
 if @handoffExecutor == "myway" {
