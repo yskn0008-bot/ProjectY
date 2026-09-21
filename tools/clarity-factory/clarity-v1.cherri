@@ -362,26 +362,86 @@ if summary && !@handoffExecutor {
 
 // Terminal handoff: nothing may run after the destination is opened.
 if @handoffExecutor == "open_app" {
-    if @handoffTarget == "safari" { openApp("safari"); stop() }
-    if @handoffTarget == "shortcuts" { openApp("shortcuts"); stop() }
-    if @handoffTarget == "files" { openApp("files"); stop() }
-    if @handoffTarget == "notes" { openApp("notes"); stop() }
-    if @handoffTarget == "phone" { openApp("phone"); stop() }
-    if @handoffTarget == "reminders" { openApp("reminders"); stop() }
-    if @handoffTarget == "mail" { openApp("mail"); stop() }
-    if @handoffTarget == "music" { openApp("music"); stop() }
-    if @handoffTarget == "calendar" { openApp("calendar"); stop() }
-    if @handoffTarget == "maps" { openApp("maps"); stop() }
-    if @handoffTarget == "contacts" { openApp("contacts"); stop() }
-    if @handoffTarget == "health" { openApp("health"); stop() }
-    if @handoffTarget == "photos" { openApp("photos"); stop() }
-    if @handoffTarget == "appstore" { openApp("appstore"); stop() }
-    if @handoffTarget == "facetime" { openApp("facetime"); stop() }
-    if @handoffTarget == "chatgpt" { openApp("com.openai.chat"); stop() }
-    if @handoffTarget == "scriptable" { openApp("dk.simonbs.Scriptable"); stop() }
-    if @handoffTarget == "youtube" { openApp("com.google.ios.youtube"); stop() }
-    if @handoffTarget == "spotify" { openApp("com.spotify.client"); stop() }
-    if @handoffTarget == "google_sheets" { openApp("com.google.Sheets"); stop() }
+    if @handoffTarget == "safari" {
+        openApp("safari")
+        stop()
+    }
+    if @handoffTarget == "shortcuts" {
+        openApp("shortcuts")
+        stop()
+    }
+    if @handoffTarget == "files" {
+        openApp("files")
+        stop()
+    }
+    if @handoffTarget == "notes" {
+        openApp("notes")
+        stop()
+    }
+    if @handoffTarget == "phone" {
+        openApp("phone")
+        stop()
+    }
+    if @handoffTarget == "reminders" {
+        openApp("reminders")
+        stop()
+    }
+    if @handoffTarget == "mail" {
+        openApp("mail")
+        stop()
+    }
+    if @handoffTarget == "music" {
+        openApp("music")
+        stop()
+    }
+    if @handoffTarget == "calendar" {
+        openApp("calendar")
+        stop()
+    }
+    if @handoffTarget == "maps" {
+        openApp("maps")
+        stop()
+    }
+    if @handoffTarget == "contacts" {
+        openApp("contacts")
+        stop()
+    }
+    if @handoffTarget == "health" {
+        openApp("health")
+        stop()
+    }
+    if @handoffTarget == "photos" {
+        openApp("photos")
+        stop()
+    }
+    if @handoffTarget == "appstore" {
+        openApp("appstore")
+        stop()
+    }
+    if @handoffTarget == "facetime" {
+        openApp("facetime")
+        stop()
+    }
+    if @handoffTarget == "chatgpt" {
+        openApp("com.openai.chat")
+        stop()
+    }
+    if @handoffTarget == "scriptable" {
+        openApp("dk.simonbs.Scriptable")
+        stop()
+    }
+    if @handoffTarget == "youtube" {
+        openApp("com.google.ios.youtube")
+        stop()
+    }
+    if @handoffTarget == "spotify" {
+        openApp("com.spotify.client")
+        stop()
+    }
+    if @handoffTarget == "google_sheets" {
+        openApp("com.google.Sheets")
+        stop()
+    }
 }
 if @handoffExecutor == "myway" {
     openURL("https://yskn0008-bot.github.io/ProjectY/yos/")
