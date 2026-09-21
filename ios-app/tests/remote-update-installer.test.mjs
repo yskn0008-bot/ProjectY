@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
 const source = fs.readFileSync(new URL('../scriptable/remote-widgets/YOS Remote Update Installer.js', import.meta.url), 'utf8');
-const SOURCE_SHA = '319acf06bfaa265b2d9bf8b62de564ebb36ad59e';
+const SOURCE_SHA = '477b02c49d5931eae2f6d75537567cc8a78c2448';
 const TARGETS = [
   'リモコン.js','テレビリモコン.js','エアコンリモコン.js','エアコンウィジェット.js',
   '照明リモコン.js','照明ウィジェット.js','リモコン/内部/Tapo共通.js','リモコン整理.js'
