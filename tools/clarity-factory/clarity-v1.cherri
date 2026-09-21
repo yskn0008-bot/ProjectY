@@ -22,7 +22,7 @@ action 'file.append' appendResolvedFile(
 
 // Voice -> Raw First -> ChatGPT Dictionary -> fail-closed policy -> local v1 executors -> Verify/Ledger.
 // Existing Clarity Inbox.txt stays the raw fail-safe. Executor writes are local/reversible only.
-const originalInput = listen("After Pause", "jp-JP")
+const originalInput = listen("On Tap", "jp-JP")
 const requestNumber = randomNumber(100000, 999999)
 const rawRecord = text("{CurrentDate}\t{requestNumber}\tRAW\t{originalInput}\n")
 const inboxFile = getFile("Clarity Inbox.txt")
