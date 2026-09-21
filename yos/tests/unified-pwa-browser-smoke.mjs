@@ -37,6 +37,24 @@ try{
   assert.equal(shared?.idea?.text,'連携されたIdea','all five YOS domains share state');
   assert.equal(shared?.money?.balance,12345,'Money must feed shared YOS state');
 
+  await page.locator('.yos-companion[href="./consult/"]').click();
+  await page.waitForURL(/\/yos\/consult\/?$/);
+  await expectText('h1','何かあった？');
+  const routes=await page.evaluate(()=>({
+    repair:window.YOSConsultV1?.suggestRoute('エアコンの風量が変わらない'),
+    second:window.YOSConsultV1?.suggestRoute('この判断を別の視点で確認したい'),
+    daily:window.YOSConsultV1?.suggestRoute('明日の予定を整理したい'),
+    envelope:window.YOSConsultV1?.buildEnvelope('', 'build')
+  }));
+  assert.equal(routes.repair,'projecty');
+  assert.equal(routes.second,'scout');
+  assert.equal(routes.daily,'yos');
+  assert.match(routes.envelope,/最終RoutingはYOS/);
+  assert.equal(await page.locator('[data-assist]').count(),3);
+  await page.locator('.header-back').click();
+  await page.waitForURL(/\/yos\/?$/);
+  await expectText('#brandTitle','MY WAY');
+
   await page.locator('.money-nav').click();
   await expectText('#brandTitle','MY MONEY');
 
@@ -71,6 +89,8 @@ try{
 
     await page.goto(base+'/yos/',{waitUntil:'domcontentloaded'});
     await expectText('#brandTitle','MY WAY');
+    await page.goto(base+'/yos/consult/',{waitUntil:'domcontentloaded'});
+    await expectText('h1','何かあった？');
     await page.goto(base+'/life/',{waitUntil:'domcontentloaded'});
     await expectText('.brand h1','MY LIFE');
     await page.goto(base+'/yos/hj/',{waitUntil:'domcontentloaded'});
