@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-21T11:38:07+09:00",
+  "updated_at": "2026-09-21T11:54:23+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -70,7 +70,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-09-21T02:36:46Z"
+      "updated_at": "2026-09-21T02:54:17Z"
     },
     {
       "id": "github-issue-256",
@@ -165,6 +165,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-42992ab1a5d0",
+      "title": "fix(yos): match consultation page to approved UI",
+      "completed_at": "2026-09-21T02:54:12Z",
+      "result": "GitHub mainへ反映（42992ab）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/42992ab1a5d0512051b29bfc26cd84d70555676a"
+    },
+    {
       "id": "github-commit-33244212bc33",
       "title": "feat(yos): add YOS consultation and routing page",
       "completed_at": "2026-09-21T02:37:52Z",
@@ -191,13 +198,6 @@
       "completed_at": "2026-09-21T02:27:18Z",
       "result": "GitHub mainへ反映（53aebe2）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/53aebe2fbfbfbfd6caa9cd4661eb5e87f654dbe7"
-    },
-    {
-      "id": "github-commit-4126ae1d697a",
-      "title": "ci: refresh verified stop-handoff evidence",
-      "completed_at": "2026-09-21T02:26:33Z",
-      "result": "GitHub mainへ反映（4126ae1）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/4126ae1d697a6fa20d4e697a816b81a8a657915a"
     },
     {
       "id": "complete-002",
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-21T11:38:07+09:00",
+      "last_update": "2026-09-21T11:54:23+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -315,7 +315,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-21T11:38:07+09:00",
+      "last_update": "2026-09-21T11:54:23+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-21T11:38:07+09:00",
+      "last_update": "2026-09-21T11:54:23+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "4a0418625c3f43c0605c9f506a67ea9617ad9294928effcc21078324d8013f67"
+  "github_snapshot_hash": "51687c6ded5a37a760d1e18a46b33a58f536d799ab28d991169878e71da25c04"
 }
