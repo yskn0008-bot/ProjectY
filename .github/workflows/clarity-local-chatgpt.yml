@@ -100,8 +100,8 @@ jobs:
           pids=[a.get('WFWorkflowActionIdentifier','') for a in pa]
           cids=[a.get('WFWorkflowActionIdentifier','') for a in ca]
           runs=[a for a in pa if a.get('WFWorkflowActionIdentifier','').endswith('runworkflow')]
-          assert len(runs)==1, len(runs)
-          assert 'YOS_OpenApp' in repr(runs[0].get('WFWorkflowActionParameters',{}))
+          assert len(runs)==2, len(runs)
+          assert all('YOS_OpenApp' in repr(r.get('WFWorkflowActionParameters',{})) for r in runs)
           assert not any(i.endswith('openapp') for i in pids)
           assert not any(i.endswith('downloadurl') for i in pids)
           assert sum(i.endswith('openapp') for i in cids) >= 20
