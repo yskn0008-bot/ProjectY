@@ -1,4 +1,4 @@
-name: Clarity Cherri proof
+name: Clarity fixed-child proof
 
 on:
   pull_request:
@@ -30,14 +30,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Validate model contract
+      - name: Validate contracts and source tests
         shell: bash
         run: |
           set -euo pipefail
           python3 -m json.tool tools/clarity-factory/clarity-spec.json >/dev/null
           python3 -m unittest discover -s tools/clarity-factory/tests -v
 
-      - name: Test secure Clarity model gateway
+      - name: Test secure Clarity model gateway and separate Factory API
         shell: bash
         run: |
           set -euo pipefail
@@ -76,12 +76,21 @@ jobs:
           mkdir -p artifacts
           cp "$proof" artifacts/Clarity-Compiler-Proof-unsigned.shortcut
 
-      - name: Compile Clarity Raw First runtime
+      - name: Compile fixed YOS_OpenApp child
         shell: bash
         run: |
           set -euo pipefail
           cd tools/clarity-factory
-          rm -f './Clarity_unsigned.shortcut' './Clarity.plist'
+          cherri YOS_OpenApp.cherri --skip-sign --debug
+          test -f './YOS_OpenApp_unsigned.shortcut'
+          mkdir -p artifacts
+          cp './YOS_OpenApp_unsigned.shortcut' artifacts/YOS_OpenApp-unsigned.shortcut
+
+      - name: Compile normal Clarity parent
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd tools/clarity-factory
           cherri clarity-v1.cherri --skip-sign --debug
           runtime='./Clarity_unsigned.shortcut'
           test -f "$runtime"
@@ -90,10 +99,10 @@ jobs:
           python3 patch_raw_first_authority.py "$runtime"
           python3 patch_action_extraction_policy.py "$runtime"
           python3 patch_append_file_paths.py "$runtime"
-          python3 patch_server_model_gateway.py "$runtime"
+          python3 patch_chatgpt_json_text.py "$runtime"
           python3 patch_reminder_wire_format.py "$runtime"
           python3 patch_destination_readback.py "$runtime"
-          python3 validate_clarity_final.py "$runtime"
+          python3 validate_fixed_child_architecture.py "$runtime" './YOS_OpenApp_unsigned.shortcut'
           mkdir -p artifacts
           cp "$runtime" artifacts/Clarity-v1-unsigned.shortcut
 
@@ -108,46 +117,43 @@ jobs:
             exit 1
           fi
 
-      - name: Try proven HubSign fallback for secret-free runtime
-        id: hubsign
-        continue-on-error: true
+      - name: Sign fixed-child proof artifacts
         shell: bash
         run: |
-          set +e
-          set -o pipefail
+          set -euo pipefail
           python3 tools/clarity-factory/sign_with_hubsign.py \
             --input tools/clarity-factory/artifacts/Clarity-v1-unsigned.shortcut \
             --output tools/clarity-factory/artifacts/Clarity-v1-signed.shortcut \
             --name 'Clarity' \
-            2>&1 | tee tools/clarity-factory/artifacts/hubsign.log
-          status=${PIPESTATUS[0]}
-          echo "HubSign exit code: ${status}" | tee -a tools/clarity-factory/artifacts/hubsign.log
-          exit "${status}"
-
-      - name: Verify signed Clarity artifact when HubSign succeeds
-        if: steps.hubsign.outcome == 'success'
-        shell: bash
-        run: |
-          set -euo pipefail
+            2>&1 | tee tools/clarity-factory/artifacts/clarity-hubsign.log
+          python3 tools/clarity-factory/sign_with_hubsign.py \
+            --input tools/clarity-factory/artifacts/YOS_OpenApp-unsigned.shortcut \
+            --output tools/clarity-factory/artifacts/YOS_OpenApp-signed.shortcut \
+            --name 'YOS_OpenApp' \
+            2>&1 | tee tools/clarity-factory/artifacts/yos-openapp-hubsign.log
           python3 - <<'PY'
           from pathlib import Path
-          p = Path('tools/clarity-factory/artifacts/Clarity-v1-signed.shortcut')
-          data = p.read_bytes()
-          if not data.startswith(b'AEA1'):
-              raise SystemExit(f'expected signed AEA1 shortcut, got {data[:8]!r}')
-          if len(data) < 500:
-              raise SystemExit(f'artifact unexpectedly small: {len(data)} bytes')
-          print(f'OK: signed Clarity artifact, {len(data)} bytes')
+          base=Path('tools/clarity-factory/artifacts')
+          for name in ('Clarity-v1-signed.shortcut','YOS_OpenApp-signed.shortcut'):
+              data=(base/name).read_bytes()
+              if not data.startswith(b'AEA1'):
+                  raise SystemExit(f'{name}: expected AEA1, got {data[:8]!r}')
+              if len(data)<500:
+                  raise SystemExit(f'{name}: unexpectedly small: {len(data)}')
+              print(f'{name}: signed PASS ({len(data)} bytes)')
           PY
 
-      - name: Upload Clarity artifacts and signing evidence
+      - name: Upload proof artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: clarity-cherri-artifacts
+          name: clarity-fixed-child-proof
           path: |
             tools/clarity-factory/artifacts/Clarity-Compiler-Proof-unsigned.shortcut
             tools/clarity-factory/artifacts/Clarity-v1-unsigned.shortcut
             tools/clarity-factory/artifacts/Clarity-v1-signed.shortcut
-            tools/clarity-factory/artifacts/hubsign.log
+            tools/clarity-factory/artifacts/YOS_OpenApp-unsigned.shortcut
+            tools/clarity-factory/artifacts/YOS_OpenApp-signed.shortcut
+            tools/clarity-factory/artifacts/clarity-hubsign.log
+            tools/clarity-factory/artifacts/yos-openapp-hubsign.log
           if-no-files-found: error
