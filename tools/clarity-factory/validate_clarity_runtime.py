@@ -117,15 +117,20 @@ def validate(path: Path) -> None:
     if event_indexes[0] <= model_i or any(i <= model_i for i in reminder_indexes):
         raise AssertionError("external destination action appears before model/policy")
 
+    # open_app must be delegated to the fixed YOS_OpenApp child Shortcut.
     open_app_indexes = find_indexes(actions, "openapp")
-    if len(open_app_indexes) < 20:
-        raise AssertionError(f"expected allowlisted app launch actions, found {len(open_app_indexes)}")
-    if any(i <= model_i for i in open_app_indexes):
-        raise AssertionError("app launch action appears before model/policy")
+    if open_app_indexes:
+        raise AssertionError(f"parent Clarity must not embed app launch actions; found {len(open_app_indexes)}")
+    child_runs = find_indexes(actions, "runworkflow")
+    if len(child_runs) != 1:
+        raise AssertionError(f"expected exactly one fixed-child Run Shortcut action, found {len(child_runs)}")
+    if child_runs[0] <= model_i:
+        raise AssertionError("fixed child dispatch appears before model/policy")
+    if "YOS_OpenApp" not in serialized_params(actions[child_runs[0]]):
+        raise AssertionError("Run Shortcut is not fixed to YOS_OpenApp")
 
-    # Physical iPhone guard: destination opening must terminate immediately.
-    # Cherri emits Nothing/End If after conditional bodies; stop() prevents those from running.
-    handoff_indexes = open_app_indexes + find_indexes(actions, "openurl")
+    # MY WAY remains a terminal URL handoff.
+    handoff_indexes = find_indexes(actions, "openurl")
     for i in handoff_indexes:
         if i + 1 >= len(actions) or not action_id(actions[i + 1]).endswith("exit"):
             raise AssertionError(f"destination handoff at index {i} must be followed immediately by stop/exit")
