@@ -7,6 +7,7 @@ import uuid
 from pathlib import Path
 
 ENDPOINT = "https://project-y-yos-ai.vercel.app/api/yos/intake?mode=model"
+FACTORY_ENDPOINT = "https://project-y-yos-ai.vercel.app/api/yos/intake?mode=factory"
 TOKEN_PROMPT = "Clarity接続トークン"
 
 
@@ -113,6 +114,54 @@ def patch(path: Path) -> None:
     }
 
     actions[index:index + 1] = [token_action, http_action]
+
+    factory_matches = [
+        (i, action)
+        for i, action in enumerate(actions)
+        if action.get("WFWorkflowActionIdentifier") == "is.workflow.actions.gettext"
+        and action.get("WFWorkflowActionParameters", {}).get("CustomOutputName") == "shortcutFactoryRequest"
+    ]
+    if len(factory_matches) != 1:
+        raise SystemExit(f"expected exactly one shortcutFactoryRequest action, found {len(factory_matches)}")
+    factory_index, factory_request_action = factory_matches[0]
+    factory_request_params = factory_request_action.get("WFWorkflowActionParameters", {})
+    factory_request_uuid = factory_request_params.get("UUID")
+    factory_request_name = factory_request_params.get("CustomOutputName", "shortcutFactoryRequest")
+    if not isinstance(factory_request_uuid, str):
+        raise SystemExit("shortcutFactoryRequest UUID missing")
+
+    factory_uuid = str(uuid.uuid4())
+    factory_http_action = {
+        "WFWorkflowActionIdentifier": "is.workflow.actions.downloadurl",
+        "WFWorkflowActionParameters": {
+            "UUID": factory_uuid,
+            "CustomOutputName": "generatedShortcut",
+            "WFURL": FACTORY_ENDPOINT,
+            "WFHTTPMethod": "POST",
+            "WFHTTPBodyType": "JSON",
+            "WFHTTPHeaders": dictionary([
+                ("Authorization", token_string("Bearer ", token_uuid, "clarityToken")),
+                ("Content-Type", plain_token_string("application/json")),
+            ]),
+            "WFJSONValues": dictionary([
+                ("request", attachment(factory_request_uuid, factory_request_name)),
+            ]),
+        },
+    }
+    open_generated_action = {
+        "WFWorkflowActionIdentifier": "is.workflow.actions.openin",
+        "WFWorkflowActionParameters": {
+            "UUID": str(uuid.uuid4()),
+            "WFInput": attachment(factory_uuid, "generatedShortcut"),
+            "WFOpenInAskWhenRun": False,
+            "WFSelectedApp": {
+                "BundleIdentifier": "com.apple.shortcuts",
+                "Name": "Shortcuts",
+            },
+        },
+    }
+    actions[factory_index + 1:factory_index + 1] = [factory_http_action, open_generated_action]
+
     questions = root.setdefault("WFWorkflowImportQuestions", [])
     if not isinstance(questions, list):
         raise SystemExit("WFWorkflowImportQuestions is not an array")
@@ -133,10 +182,12 @@ def patch(path: Path) -> None:
     blob = repr(verify)
     if "is.workflow.actions.askllm" in blob:
         raise SystemExit("Apple model action survived server gateway patch")
-    if blob.count("is.workflow.actions.downloadurl") != 1:
-        raise SystemExit("expected exactly one network model action")
-    if ENDPOINT not in blob or TOKEN_PROMPT not in blob:
-        raise SystemExit("gateway endpoint/setup question missing")
+    if blob.count("is.workflow.actions.downloadurl") != 2:
+        raise SystemExit("expected model + Shortcut Factory network actions")
+    if ENDPOINT not in blob or FACTORY_ENDPOINT not in blob or TOKEN_PROMPT not in blob:
+        raise SystemExit("gateway/factory endpoint or setup question missing")
+    if blob.count("is.workflow.actions.openin") != 1 or "com.apple.shortcuts" not in blob:
+        raise SystemExit("Shortcut Factory terminal open-in handoff missing")
     if "api.openai.com" in blob or "OPENAI_API_KEY" in blob or "sk-" in blob:
         raise SystemExit("OpenAI secret/direct endpoint must not exist in Shortcut")
     print("Clarity secure server model gateway patch: PASS")

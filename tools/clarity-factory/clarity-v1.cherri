@@ -60,6 +60,7 @@ if !@actionsRaw {
 @lastExecutor = ""
 @handoffExecutor = ""
 @handoffTarget = ""
+@handoffFactoryRequest = ""
 
 for actionItem in @actionsRaw {
     const actionDict = getDictionary(@actionItem)
@@ -344,8 +345,9 @@ for actionItem in @actionsRaw {
     }
 
     if executor == "shortcut_factory" {
-        // Generation/install is a different execution lane. Keep the request, never claim it ran here.
-        const shortcutQueuedRecord = text("{CurrentDate}\t{requestNumber}\t{actionId}\tPLANNED\tshortcut_factory\n")
+        @handoffExecutor = "shortcut_factory"
+        @handoffFactoryRequest = "{originalInput}"
+        const shortcutQueuedRecord = text("{CurrentDate}\t{requestNumber}\t{actionId}\tHANDOFF_READY\tshortcut_factory\n")
         appendResolvedFile(ledgerFile, shortcutQueuedRecord)
     }
 }
@@ -446,4 +448,7 @@ if @handoffExecutor == "open_app" {
 if @handoffExecutor == "myway" {
     openURL("https://yskn0008-bot.github.io/ProjectY/yos/")
     stop()
+}
+if @handoffExecutor == "shortcut_factory" {
+    const shortcutFactoryRequest = text("{@handoffFactoryRequest}")
 }

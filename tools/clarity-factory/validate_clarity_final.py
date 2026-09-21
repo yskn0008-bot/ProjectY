@@ -52,17 +52,37 @@ def validate(path: Path) -> None:
         for action in actions
         if action.get("WFWorkflowActionIdentifier") == "is.workflow.actions.downloadurl"
     ]
-    if len(downloads) != 1:
-        raise AssertionError(f"expected one model gateway request, found {len(downloads)}")
-    download = params(downloads[0])
-    if download.get("WFURL") != "https://project-y-yos-ai.vercel.app/api/yos/intake?mode=model":
-        raise AssertionError("unexpected Clarity gateway URL")
-    if download.get("WFHTTPMethod") != "POST" or download.get("WFHTTPBodyType") != "JSON":
-        raise AssertionError("Clarity gateway request must be POST JSON")
-    if "Authorization" not in repr(download.get("WFHTTPHeaders")) or "Bearer" not in repr(
-        download.get("WFHTTPHeaders")
-    ):
-        raise AssertionError("Clarity gateway bearer header missing")
+    if len(downloads) != 2:
+        raise AssertionError(f"expected model + Shortcut Factory requests, found {len(downloads)}")
+    downloads_by_url = {params(action).get("WFURL"): params(action) for action in downloads}
+    model_url = "https://project-y-yos-ai.vercel.app/api/yos/intake?mode=model"
+    factory_url = "https://project-y-yos-ai.vercel.app/api/yos/intake?mode=factory"
+    if set(downloads_by_url) != {model_url, factory_url}:
+        raise AssertionError(f"unexpected Clarity network endpoints: {set(downloads_by_url)}")
+    for label, download in (("model", downloads_by_url[model_url]), ("factory", downloads_by_url[factory_url])):
+        if download.get("WFHTTPMethod") != "POST" or download.get("WFHTTPBodyType") != "JSON":
+            raise AssertionError(f"Clarity {label} request must be POST JSON")
+        headers = repr(download.get("WFHTTPHeaders"))
+        if "Authorization" not in headers or "Bearer" not in headers:
+            raise AssertionError(f"Clarity {label} bearer header missing")
+    if "request" not in repr(downloads_by_url[factory_url].get("WFJSONValues")):
+        raise AssertionError("Shortcut Factory request payload missing")
+
+    factory_open = [
+        action
+        for action in actions
+        if action.get("WFWorkflowActionIdentifier") == "is.workflow.actions.openin"
+    ]
+    if len(factory_open) != 1:
+        raise AssertionError(f"expected one Shortcut Factory open-in action, found {len(factory_open)}")
+    factory_open_params = params(factory_open[0])
+    selected = factory_open_params.get("WFSelectedApp")
+    if factory_open_params.get("WFOpenInAskWhenRun") is not False:
+        raise AssertionError("Shortcut Factory open-in must target a fixed app")
+    if not isinstance(selected, dict) or selected.get("BundleIdentifier") != "com.apple.shortcuts":
+        raise AssertionError("Shortcut Factory open-in must target Shortcuts")
+    if "generatedShortcut" not in repr(factory_open_params.get("WFInput")):
+        raise AssertionError("Shortcut Factory open-in is not wired to signed output")
 
     questions = root.get("WFWorkflowImportQuestions")
     if not isinstance(questions, list) or not any(
@@ -243,6 +263,8 @@ def validate(path: Path) -> None:
         "idea_file_readback_mismatch",
         "reminder_due_date_missing",
         "task_shopping_alert_state_mismatch",
+        "HANDOFF_READY",
+        "shortcut_factory",
     ):
         if marker not in serialized:
             raise AssertionError(f"missing final runtime marker: {marker}")
