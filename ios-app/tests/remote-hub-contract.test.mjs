@@ -4,6 +4,7 @@ import fs from 'node:fs';
 
 const source = fs.readFileSync(new URL('../scriptable/remote-widgets/YOS Remote Hub.js', import.meta.url), 'utf8');
 const lightRemote = fs.readFileSync(new URL('../scriptable/remote-widgets/YOS Light Remote.js', import.meta.url), 'utf8');
+const braviaRemote = fs.readFileSync(new URL('../scriptable/remote-widgets/YOS BRAVIA Remote.js', import.meta.url), 'utf8');
 
 test('v6.5 keeps the real center button as the gesture owner', () => {
   assert.match(source, /YOS Remote Hub v6\.5/);
@@ -59,4 +60,11 @@ test('individual light remote keeps tap single and uses two-command bursts only 
   assert.match(lightRemote, /await fire\(action,first\?1:2\)/);
   assert.match(lightRemote, /hold-heartbeat/);
   assert.match(lightRemote, /hold-stop/);
+});
+
+test('BRAVIA power prefers the toggle command before PowerOff in both entry points', () => {
+  assert.match(source, /power:\["power","poweroff"\]/);
+  assert.match(braviaRemote, /power:\["power","poweroff"\]/);
+  assert.doesNotMatch(source, /power:\["poweroff","power"\]/);
+  assert.doesNotMatch(braviaRemote, /power:\["poweroff","power"\]/);
 });
