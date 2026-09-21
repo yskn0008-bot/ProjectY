@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-21T09:59:41+09:00",
+  "updated_at": "2026-09-21T10:36:56+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -13,16 +13,6 @@
   },
   "inbox": [
     {
-      "id": "github-pr-403",
-      "title": "PR #403 fix(life): make calendar sync failures actionable",
-      "type": "GitHub PR",
-      "status": "review",
-      "priority": 1,
-      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/403",
-      "updated_at": "2026-09-19T16:17:58Z"
-    },
-    {
       "id": "github-pr-373",
       "title": "PR #373 Clarity: modular iPhone router Phase 1 contract",
       "type": "GitHub PR",
@@ -30,7 +20,7 @@
       "priority": 2,
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/373",
-      "updated_at": "2026-09-20T22:00:47Z"
+      "updated_at": "2026-09-21T01:14:46Z"
     },
     {
       "id": "github-pr-382",
@@ -63,6 +53,16 @@
       "updated_at": "2026-09-20T06:26:15Z"
     },
     {
+      "id": "github-pr-412",
+      "title": "PR #412 Fix 3-screen remote button reliability",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/412",
+      "updated_at": "2026-09-21T01:34:57Z"
+    },
+    {
       "id": "github-issue-120",
       "title": "Issue #120 YOS AI：本番有効化・PWA接続・iPhone受入確認",
       "type": "GitHub Issue",
@@ -80,17 +80,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-09-21T00:59:27Z"
-    },
-    {
-      "id": "github-issue-254",
-      "title": "Issue #254 [YOS→Codex] YOS iOS App｜BRAVIAリモコン統合",
-      "type": "GitHub Issue",
-      "status": "open",
-      "priority": 3,
-      "next_action": "完成条件を確認し、次の安全な実装を1件進める",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/254",
-      "updated_at": "2026-08-23T16:45:10Z"
+      "updated_at": "2026-09-21T01:36:46Z"
     },
     {
       "id": "github-issue-256",
@@ -153,6 +143,16 @@
       "updated_at": "2026-09-06T08:17:33Z"
     },
     {
+      "id": "github-issue-292",
+      "title": "Issue #292 BRAVIA｜Scriptable無料リモコンMVP",
+      "type": "GitHub Issue",
+      "status": "open",
+      "priority": 3,
+      "next_action": "完成条件を確認し、次の安全な実装を1件進める",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/292",
+      "updated_at": "2026-09-06T15:53:56Z"
+    },
+    {
       "id": "github-issue-51",
       "title": "Issue #51 ProjectY 4本並行開発の全体管理",
       "type": "GitHub Issue",
@@ -165,39 +165,39 @@
   ],
   "recently_completed": [
     {
-      "id": "github-commit-a9a8c9fcc8bc",
-      "title": "Update remote installer to AC fan fix (#410)",
-      "completed_at": "2026-09-21T00:59:27Z",
-      "result": "GitHub mainへ反映（a9a8c9f）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/a9a8c9fcc8bcd19d3e7de23e736636b85c756954"
+      "id": "github-commit-6bc87e6ede53",
+      "title": "Merge pull request #411 from yskn0008-bot/repair/clarity-final-handoff",
+      "completed_at": "2026-09-21T01:36:44Z",
+      "result": "GitHub mainへ反映（6bc87e6）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/6bc87e6ede5354cc33d9a843018ff2bccffc7476"
     },
     {
-      "id": "github-commit-319acf06bfaa",
-      "title": "Fix AC fan speed control in 3-screen remote (#409)",
-      "completed_at": "2026-09-21T00:58:27Z",
-      "result": "GitHub mainへ反映（319acf0）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/319acf06bfaa265b2d9bf8b62de564ebb36ad59e"
+      "id": "github-commit-a10463942520",
+      "title": "ci: refresh Clarity evidence with canonical PR fields",
+      "completed_at": "2026-09-21T01:36:01Z",
+      "result": "GitHub mainへ反映（a104639）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/a10463942520a382273bcd3dbbd11194fa382c3b"
     },
     {
-      "id": "github-commit-0ae743fb701f",
-      "title": "Merge pull request #408 from yskn0008-bot/fix/calendar-return-myway",
-      "completed_at": "2026-09-20T17:40:02Z",
-      "result": "GitHub mainへ反映（0ae743f）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/0ae743fb701ff877f8836becc2795bf4a7c67f26"
+      "id": "github-commit-4593fb312a40",
+      "title": "ci: refresh Clarity PR evidence event",
+      "completed_at": "2026-09-21T01:35:16Z",
+      "result": "GitHub mainへ反映（4593fb3）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/4593fb312a40680ea6725241c822e10e1e867bf8"
     },
     {
-      "id": "github-commit-e5b23d51aa05",
-      "title": "feat(life): open MY WAY only after requested calendar import succeeds",
-      "completed_at": "2026-09-20T17:37:19Z",
-      "result": "GitHub mainへ反映（e5b23d5）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/e5b23d51aa05b31191fac6e4d799e74df333767c"
+      "id": "github-commit-028ba171aa2e",
+      "title": "test(clarity): guard final handoff behavior",
+      "completed_at": "2026-09-21T01:32:48Z",
+      "result": "GitHub mainへ反映（028ba17）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/028ba171aa2e7315a90e2efce3a019dcfe6d0db6"
     },
     {
-      "id": "github-commit-9d56dd1795bb",
-      "title": "Merge pull request #407 from yskn0008-bot/fix/life-system-font",
-      "completed_at": "2026-09-20T16:55:34Z",
-      "result": "GitHub mainへ反映（9d56dd1）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/9d56dd1795bbc066e89eb7b989a35b53a031981b"
+      "id": "github-commit-2d56d9850c0b",
+      "title": "fix(clarity): keep final app handoff visible",
+      "completed_at": "2026-09-21T01:32:45Z",
+      "result": "GitHub mainへ反映（2d56d98）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/2d56d9850c0b3f7fdbac6d96a2d0348729fda2ab"
     },
     {
       "id": "complete-002",
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-21T09:59:41+09:00",
+      "last_update": "2026-09-21T10:36:56+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -309,13 +309,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 24件・Open PR 20件を自動同期中",
+      "next_action": "Open Issue 23件・Open PR 20件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-21T09:59:41+09:00",
+      "last_update": "2026-09-21T10:36:56+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-21T09:59:41+09:00",
+      "last_update": "2026-09-21T10:36:56+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "3086a1aa896b5c4402c99327bb6602f9eeaa0cb80faa08d04a965fc720c88d29"
+  "github_snapshot_hash": "6ec8d8d14b935e64c8193e8ddb9c83840604bc23503487ea9928de2d69899564"
 }
