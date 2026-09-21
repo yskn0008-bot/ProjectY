@@ -1,0 +1,92 @@
+#define name YOS_OpenApp
+#define color blue
+#define inputs text
+
+#include 'actions/device'
+
+// Fixed child for Clarity open_app. Input is one canonical allowlisted target.
+// It returns an explicit success token only after the Open App action is issued.
+@target = "{ShortcutInput}"
+
+if @target == "safari" {
+    openApp("safari")
+    output("YOS_OPEN_APP_OK:safari")
+}
+if @target == "shortcuts" {
+    openApp("shortcuts")
+    output("YOS_OPEN_APP_OK:shortcuts")
+}
+if @target == "files" {
+    openApp("files")
+    output("YOS_OPEN_APP_OK:files")
+}
+if @target == "notes" {
+    openApp("notes")
+    output("YOS_OPEN_APP_OK:notes")
+}
+if @target == "phone" {
+    openApp("phone")
+    output("YOS_OPEN_APP_OK:phone")
+}
+if @target == "reminders" {
+    openApp("reminders")
+    output("YOS_OPEN_APP_OK:reminders")
+}
+if @target == "mail" {
+    openApp("mail")
+    output("YOS_OPEN_APP_OK:mail")
+}
+if @target == "music" {
+    openApp("music")
+    output("YOS_OPEN_APP_OK:music")
+}
+if @target == "calendar" {
+    openApp("calendar")
+    output("YOS_OPEN_APP_OK:calendar")
+}
+if @target == "maps" {
+    openApp("maps")
+    output("YOS_OPEN_APP_OK:maps")
+}
+if @target == "contacts" {
+    openApp("contacts")
+    output("YOS_OPEN_APP_OK:contacts")
+}
+if @target == "health" {
+    openApp("health")
+    output("YOS_OPEN_APP_OK:health")
+}
+if @target == "photos" {
+    openApp("photos")
+    output("YOS_OPEN_APP_OK:photos")
+}
+if @target == "appstore" {
+    openApp("appstore")
+    output("YOS_OPEN_APP_OK:appstore")
+}
+if @target == "facetime" {
+    openApp("facetime")
+    output("YOS_OPEN_APP_OK:facetime")
+}
+if @target == "chatgpt" {
+    openApp("com.openai.chat")
+    output("YOS_OPEN_APP_OK:chatgpt")
+}
+if @target == "scriptable" {
+    openApp("dk.simonbs.Scriptable")
+    output("YOS_OPEN_APP_OK:scriptable")
+}
+if @target == "youtube" {
+    openApp("com.google.ios.youtube")
+    output("YOS_OPEN_APP_OK:youtube")
+}
+if @target == "spotify" {
+    openApp("com.spotify.client")
+    output("YOS_OPEN_APP_OK:spotify")
+}
+if @target == "google_sheets" {
+    openApp("com.google.Sheets")
+    output("YOS_OPEN_APP_OK:google_sheets")
+}
+
+output("YOS_OPEN_APP_BLOCKED:{@target}")
