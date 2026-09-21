@@ -287,7 +287,11 @@ function resetLayout(e){if(e){e.preventDefault();e.stopPropagation()}layout=DEFA
 function setACState(s){const el=document.getElementById("acTemp"),fan=document.getElementById("acFanLabel");if(!s){if(el)el.textContent="--°";if(fan)fan.textContent="風量 --";return}if(el)el.textContent=s.dry?"—":(Number.isFinite(Number(s.temp))?Math.round(Number(s.temp))+"°":"--°");if(fan)fan.textContent="風量 "+(s.fan||"--")}
 function nativeResult(result){
   const badge=document.getElementById("modeBadge")
-  if(result&&result.ok===false){if(badge)badge.textContent="エラー";return}
+  if(result&&result.ok===false){
+    if(badge)badge.textContent="エラー"
+    try{alert(result.message||"操作に失敗しました")}catch(_){}
+    return
+  }
   if(result&&result.mode)setMode(result.mode)
   if(result&&Object.prototype.hasOwnProperty.call(result,"ac"))setACState(result.ac)
 }
@@ -350,9 +354,88 @@ function hasPlaybackInfo(data){const info=data&&data.result&&data.result[0];retu
 async function inferMode(){const now=Date.now();if(modeState.mode==="navigation"&&now<Number(modeState.navigationUntil||0))return "navigation";let nav=false,playback=false;try{nav=hasNavigationStatus(await sonyJSON("appControl","getApplicationStatusList"))}catch(_){}try{playback=hasPlaybackInfo(await sonyJSON("avContent","getPlayingContentInfo"))}catch(_){}const recentMedia=["media","hybrid"].includes(modeState.mode)&&now-Number(modeState.updatedAt||0)<RECENT_MEDIA_MS;if(nav){if(playback||recentMedia)return rememberMode("hybrid","status");return rememberMode("navigation","status")}if(playback)return rememberMode("media","status");return modeState.mode}
 
 function walk(value,out=[]){if(Array.isArray(value))for(const v of value)walk(v,out);else if(value&&typeof value==="object"){out.push(value);for(const v of Object.values(value))walk(v,out)}return out}
+function validateTapoResponse(value,method){
+  if(Array.isArray(value)){for(const item of value)validateTapoResponse(item,method);return}
+  if(!value||typeof value!=="object")return
+  for(const key of ["error_code","errorCode"]){
+    if(Object.prototype.hasOwnProperty.call(value,key)){
+      const code=Number(value[key])
+      if(Number.isFinite(code)&&code!==0)throw new Error(method+" failed: "+code)
+    }
+  }
+  for(const key of [method,"multipleRequest","responses","responseData","result"]){
+    if(Object.prototype.hasOwnProperty.call(value,key))validateTapoResponse(value[key],method)
+  }
+}
+const AC_FAN_STEPS=Object.freeze([0,1,3])
 const AC_FAN_LABELS=Object.freeze({0:"自動",1:"弱",3:"強"})
+const LIGHT_ACTION_KEYS=Object.freeze({
+  on:["POWER ON","点灯"],off:["POWER OFF","消灯"],all:["全灯","All Lights"],
+  bright:["BRIGHTNESS+","明るくする","明るい"],dark:["BRIGHTNESS-","暗くする","暗い"],night:["常夜灯","Night Light"]
+})
 function acFanName(value){const n=Number(value);return Object.prototype.hasOwnProperty.call(AC_FAN_LABELS,n)?AC_FAN_LABELS[n]:(Number.isFinite(n)?String(n):"--")}
-async function readACSummary(){try{const tapo=importModule("YOS Tapo H110 Core");const remote=tapo.findRemote(r=>String(r.model||"").toUpperCase()==="AC"||/エアコン|air.?con/i.test(String(r.nickname||"")));if(!remote)return null;const client=await tapo.client();const raw=await client.query({method:"control_child",params:{device_id:remote.device_id,requestData:{method:"get_device_info",params:null}}});const info=walk(raw,[]).find(x=>typeof x.ac_status==="string")||{};const s={};if(typeof info.ac_status==="string")for(const part of info.ac_status.split("_")){const m=String(part).match(/^([PMTSD])(-?\d+)$/);if(m)s[m[1]]=Number(m[2])}if(s.M==null&&info.ac_mode!=null)s.M=Number(info.ac_mode);if(s.T==null&&info.current_temp!=null)s.T=Number(info.current_temp);if(s.S==null&&info.wind_speed!=null)s.S=Number(info.wind_speed);return{temp:Number.isFinite(s.T)?s.T:null,dry:s.M===4,fan:acFanName(s.S),fanRaw:Number.isFinite(s.S)?s.S:null}}catch(_){return null}}
+function nextAcFan(value){const n=Number(value),i=AC_FAN_STEPS.indexOf(n);return AC_FAN_STEPS[i>=0?(i+1)%AC_FAN_STEPS.length:0]}
+let tapoTransport=null
+async function getTapoTransport(){
+  if(tapoTransport)return tapoTransport
+  const tapo=importModule("YOS Tapo H110 Core")
+  const ac=tapo.findRemote(r=>String(r.model||"").toUpperCase()==="AC"||/エアコン|air.?con/i.test(String(r.nickname||"")))
+  const light=tapo.findRemote(r=>/ライト|light/i.test(String(r.nickname||""))||String(r.model||"").toLowerCase()==="light")
+  if(!ac)throw new Error("エアコン リモコンが見つかりません")
+  if(!light)throw new Error("ライト リモコンが見つかりません")
+  const lightKeys={}
+  for(const [action,candidates] of Object.entries(LIGHT_ACTION_KEYS)){
+    const key=tapo.findKey(light,candidates)
+    if(key)lightKeys[action]=key
+  }
+  const client=await tapo.client()
+  tapoTransport={tapo,ac,light,lightKeys,client}
+  return tapoTransport
+}
+function parseAcState(raw){
+  const info=walk(raw,[]).find(x=>typeof x.ac_status==="string")||{}
+  const s={}
+  if(typeof info.ac_status==="string")for(const part of info.ac_status.split("_")){const m=String(part).match(/^([PMTSD])(-?\d+)$/);if(m)s[m[1]]=Number(m[2])}
+  if(s.P==null&&info.on!=null)s.P=Number(info.on)
+  if(s.M==null&&info.ac_mode!=null)s.M=Number(info.ac_mode)
+  if(s.T==null&&info.current_temp!=null)s.T=Number(info.current_temp)
+  if(s.S==null&&info.wind_speed!=null)s.S=Number(info.wind_speed)
+  if(s.D==null&&info.wind_direct!=null)s.D=Number(info.wind_direct)
+  if(!Number.isFinite(s.P))s.P=0
+  if(!Number.isFinite(s.M))s.M=0
+  if(!Number.isFinite(s.T))s.T=26
+  if(!Number.isFinite(s.S))s.S=0
+  if(!Number.isFinite(s.D))s.D=6
+  return s
+}
+async function readAcState(){
+  const t=await getTapoTransport()
+  const raw=await t.client.query({method:"control_child",params:{device_id:t.ac.device_id,requestData:{method:"get_device_info",params:null}}})
+  validateTapoResponse(raw,"get_device_info")
+  return parseAcState(raw)
+}
+function acPayload(s){return{power:!!s.P,on:!!s.P,mode:Number(s.M),temp:Math.max(18,Math.min(30,Number(s.T)||26)),wind_speed:Math.max(0,Math.min(4,Number(s.S)||0)),wind_direct:Math.max(0,Math.min(6,Number(s.D)||0))}}
+async function readACSummary(){try{const s=await readAcState();return{temp:Number.isFinite(s.T)?s.T:null,dry:s.M===4,fan:acFanName(s.S),fanRaw:Number.isFinite(s.S)?s.S:null}}catch(_){return null}}
+async function runLightAction(action){
+  const t=await getTapoTransport(),key=t.lightKeys[action]
+  if(!key)throw new Error("照明IRキーが見つかりません: "+action)
+  const raw=await t.client.fire(t.light.device_id,key.name)
+  validateTapoResponse(raw,"sendIrCmdById")
+}
+async function runACAction(action){
+  const t=await getTapoTransport(),s=await readAcState()
+  if(action==="cool"){s.P=1;s.M=0;s.T=Math.max(18,Math.min(30,s.T||26))}
+  else if(action==="dry"){s.P=1;s.M=4;s.S=0}
+  else if(action==="heat"){s.P=1;s.M=1;s.T=Math.max(18,Math.min(30,s.T||26))}
+  else if(action==="stop"){s.P=0}
+  else if(action==="tempUp"){if(s.M===4)return;s.P=1;s.T=Math.min(30,(s.T||26)+1)}
+  else if(action==="tempDown"){if(s.M===4)return;s.P=1;s.T=Math.max(18,(s.T||26)-1)}
+  else if(action==="fan"){if(s.M===4)return;s.P=1;s.S=nextAcFan(s.S)}
+  else if(action==="wind"){s.P=1;s.D=(s.D+1)%7}
+  else throw new Error("不明なエアコン操作です")
+  const raw=await t.client.controlAc(t.ac.device_id,acPayload(s))
+  validateTapoResponse(raw,"sendIrCmdByStatus")
+}
 
 function normalizeName(value){return String(value).replace(/\.js$/i,"").replace(/\s+/g," ").trim().toLowerCase()}
 async function readScript(scriptName){for(const manager of [FileManager.iCloud(),FileManager.local()]){const directory=manager.documentsDirectory();let files=[];try{files=manager.listContents(directory)}catch(_){}for(const file of files){if(normalizeName(file)!==normalizeName(scriptName)&&normalizeName(file)!==normalizeName(scriptName+".js"))continue;const path=manager.joinPath(directory,file);try{if(manager.isFileStoredIniCloud(path))await manager.downloadFileFromiCloud(path)}catch(_){}return manager.readString(path)}}throw new Error(scriptName+" が見つかりません")}
@@ -365,13 +448,10 @@ const LIGHT_HOLD_KEYS={bright:["BRIGHTNESS+","明るくする","明るい"],dark
 let lightHoldAction=null,lightHoldToken=0,lightHoldLeaseUntil=0,lightHoldPromise=Promise.resolve(),lightHoldTransport=null
 async function getLightHoldTransport(){
   if(lightHoldTransport)return lightHoldTransport
-  const tapo=importModule("YOS Tapo H110 Core")
-  const remote=tapo.findRemote(r=>/ライト|light/i.test(String(r.nickname||""))||String(r.model||"").toLowerCase()==="light")
-  if(!remote)throw new Error("ライト リモコンが見つかりません。YOS Tapo H110 Setup を再実行してください。")
+  const t=await getTapoTransport()
   const keys={}
-  for(const [action,candidates] of Object.entries(LIGHT_HOLD_KEYS)){const key=tapo.findKey(remote,candidates);if(!key)throw new Error(action+" のIRキーが見つかりません。");keys[action]=key}
-  const client=await tapo.client()
-  lightHoldTransport={remote,keys,client}
+  for(const [action,candidates] of Object.entries(LIGHT_HOLD_KEYS)){const key=t.tapo.findKey(t.light,candidates);if(!key)throw new Error(action+" のIRキーが見つかりません。");keys[action]=key}
+  lightHoldTransport={remote:t.light,keys,client:t.client}
   return lightHoldTransport
 }
 function stopLightHold(){lightHoldAction=null;lightHoldLeaseUntil=0;lightHoldToken+=1}
@@ -383,6 +463,6 @@ function startLightHold(action){
 }
 
 const queue=[];let running=false,web=null
-async function processQueue(){if(running)return;running=true;while(queue.length){const item=queue.shift();let result;try{if(item.device==="system"&&item.action==="refreshMode")result={ok:true,mode:await inferMode()};else if(item.device==="system"&&item.action==="refreshAC")result={ok:true,ac:await readACSummary()};else if(item.device==="tvCursor"){await sonyAction(item.action,false);result={ok:true,label:item.label,action:item.action,mode:await inferMode()}}else if(item.device==="tvAdaptive"){const currentMode=await inferMode();let action=item.action;if(currentMode==="navigation"&&CROSS_NAV[item.slot])action=CROSS_NAV[item.slot];else if(currentMode==="hybrid"&&HYBRID_CURSOR_ROLES.has(item.slot))action=CROSS_NAV[item.slot];await sonyAction(action);result={ok:true,label:item.label,action,mode:await inferMode()}}else if(item.device==="tvOriginal"){await sonyAction(item.action,false);result={ok:true,label:item.label,action:item.action,mode:await inferMode()}}else if(item.device==="tv"){await sonyAction(item.action);result={ok:true,label:item.label,action:item.action,mode:await inferMode()}}else if(item.device==="light"){await runExisting(CONFIG.light.actionScript,item.action);result={ok:true,label:item.label}}else if(item.device==="ac"){await runExisting(CONFIG.ac.actionScript,item.action);result={ok:true,label:item.label,ac:await readACSummary()}}else throw new Error("不明なデバイスです")}catch(error){result={ok:false,message:error&&error.message?error.message:String(error)}}try{await web.evaluateJavaScript("nativeResult("+JSON.stringify(result)+")")}catch(_){}}running=false}
+async function processQueue(){if(running)return;running=true;while(queue.length){const item=queue.shift();let result;try{if(item.device==="system"&&item.action==="refreshMode")result={ok:true,mode:await inferMode()};else if(item.device==="system"&&item.action==="refreshAC")result={ok:true,ac:await readACSummary()};else if(item.device==="tvCursor"){await sonyAction(item.action,false);result={ok:true,label:item.label,action:item.action,mode:await inferMode()}}else if(item.device==="tvAdaptive"){const currentMode=await inferMode();let action=item.action;if(currentMode==="navigation"&&CROSS_NAV[item.slot])action=CROSS_NAV[item.slot];else if(currentMode==="hybrid"&&HYBRID_CURSOR_ROLES.has(item.slot))action=CROSS_NAV[item.slot];await sonyAction(action);result={ok:true,label:item.label,action,mode:await inferMode()}}else if(item.device==="tvOriginal"){await sonyAction(item.action,false);result={ok:true,label:item.label,action:item.action,mode:await inferMode()}}else if(item.device==="tv"){await sonyAction(item.action);result={ok:true,label:item.label,action:item.action,mode:await inferMode()}}else if(item.device==="light"){await runLightAction(item.action);result={ok:true,label:item.label}}else if(item.device==="ac"){await runACAction(item.action);result={ok:true,label:item.label,ac:await readACSummary()}}else throw new Error("不明なデバイスです")}catch(error){result={ok:false,message:error&&error.message?error.message:String(error)}}try{await web.evaluateJavaScript("nativeResult("+JSON.stringify(result)+")")}catch(_){}}running=false}
 web=new WebView();web.shouldAllowRequest=request=>{const url=String(request.url||"");if(!url.startsWith("https://yos-remote.local/__action?"))return true;const query=parseQuery(url);if(query.device==="lightHoldStart"){startLightHold(query.action);return false}if(query.device==="lightHoldHeartbeat"){renewLightHold(query.action);return false}if(query.device==="lightHoldStop"){stopLightHold();return false}queue.push({device:query.device,action:query.action,label:query.label,slot:query.slot});processQueue();return false}
-await web.loadHTML(html,"https://yos-remote.local/");try{await web.evaluateJavaScript("setMode("+JSON.stringify(await inferMode())+")")}catch(_){}try{await web.evaluateJavaScript("setACState("+JSON.stringify(await readACSummary())+")")}catch(_){}await web.present(true);stopLightHold();await Promise.allSettled([lightHoldPromise]);Script.complete()
+await web.loadHTML(html,"https://yos-remote.local/");try{await getTapoTransport()}catch(_){}try{await web.evaluateJavaScript("setMode("+JSON.stringify(await inferMode())+")")}catch(_){}try{await web.evaluateJavaScript("setACState("+JSON.stringify(await readACSummary())+")")}catch(_){}await web.present(true);stopLightHold();await Promise.allSettled([lightHoldPromise]);Script.complete()
