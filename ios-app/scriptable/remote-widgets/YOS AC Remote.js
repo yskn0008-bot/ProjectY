@@ -1,6 +1,6 @@
 // YOS AC Remote — SHARP A988JB via Tapo H110.
 // Standard AC controls use H110 sendIrCmdByStatus. Special SHARP-only buttons are intentionally not guessed.
-// Fan speed follows the SHARP remote order: Auto -> Quiet -> Soft -> Low -> High.
+// Fan speed uses the H110 AC profile values verified by current integrations: Auto(0) -> Low(1) -> High(3).
 
 const tapo = importModule('YOS Tapo H110 Core');
 const remote = tapo.findRemote(r => String(r.model||'').toUpperCase()==='AC' || /エアコン|air.?con/i.test(String(r.nickname||'')));
@@ -8,7 +8,8 @@ if(!remote) throw new Error('エアコン リモコンが見つかりません�
 
 const client = await tapo.client();
 const MODES = Object.freeze({cool:0, heat:1, dry:4});
-const FAN_LABELS = Object.freeze(['自動','静音','微','弱','強']);
+const FAN_STEPS = Object.freeze([0,1,3]);
+const FAN_LABELS = Object.freeze({0:'自動',1:'弱',3:'強'});
 
 function walk(value,out=[]){
   if(Array.isArray(value)) for(const v of value) walk(v,out);
@@ -38,14 +39,19 @@ async function readState(){
 }
 
 function fanName(s){
-  const n=Math.max(0,Math.min(4,Number(s.S)||0));
-  return FAN_LABELS[n] || '自動';
+  const n=Number(s&&s.S);
+  return Object.prototype.hasOwnProperty.call(FAN_LABELS,n) ? FAN_LABELS[n] : (Number.isFinite(n)?String(n):'自動');
+}
+function nextFanValue(value){
+  const n=Number(value);
+  const i=FAN_STEPS.indexOf(n);
+  return FAN_STEPS[i>=0?(i+1)%FAN_STEPS.length:0];
 }
 function payload(s){return {power:!!s.P,on:!!s.P,mode:Number(s.M),temp:Math.max(18,Math.min(30,Number(s.T)||26)),wind_speed:Math.max(0,Math.min(4,Number(s.S)||0)),wind_direct:Math.max(0,Math.min(6,Number(s.D)||0))};}
 let state = await readState();
 async function send(next){state={...state,...next};await client.controlAc(remote.device_id,payload(state));}
 function modeName(s){if(!s.P)return '停止';if(s.M===0)return '冷房';if(s.M===1)return '暖房';if(s.M===4)return '除湿';return '運転中';}
-function uiState(){return {power:!!state.P,mode:modeName(state),temp:state.T,dry:state.M===4,fan:fanName(state),fanRaw:Math.max(0,Math.min(4,Number(state.S)||0))};}
+function uiState(){const raw=Number(state.S);return {power:!!state.P,mode:modeName(state),temp:state.T,dry:state.M===4,fan:fanName(state),fanRaw:Number.isFinite(raw)?raw:0};}
 async function showError(error){const a=new Alert();a.title='エアコン';a.message=error&&error.message?error.message:String(error);a.addAction('OK');await a.presentAlert();}
 
 let web;
@@ -57,7 +63,7 @@ async function perform(action){
   else if(action==='dry') await send({P:1,M:MODES.dry,S:0});
   else if(action==='tempUp'){if(state.M===MODES.dry)return;await send({P:1,T:Math.min(30,(state.T||26)+1)});}
   else if(action==='tempDown'){if(state.M===MODES.dry)return;await send({P:1,T:Math.max(18,(state.T||26)-1)});}
-  else if(action==='fan'){if(state.M===MODES.dry)return;await send({P:1,S:(Math.max(0,Math.min(4,Number(state.S)||0))+1)%5});}
+  else if(action==='fan'){if(state.M===MODES.dry)return;await send({P:1,S:nextFanValue(state.S)});}
   else if(action==='wind') await send({P:1,D:(state.D+1)%7});
 }
 let queue=Promise.resolve();
