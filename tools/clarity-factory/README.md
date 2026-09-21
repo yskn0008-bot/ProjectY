@@ -27,7 +27,7 @@ Current supported canonical app targets are:
 
 `safari, shortcuts, files, notes, phone, reminders, mail, music, calendar, maps, contacts, health, photos, appstore, facetime, chatgpt, scriptable, youtube, spotify, google_sheets`
 
-The parent does not embed app-opening actions. It calls `YOS_OpenApp` with the canonical target, checks the child's explicit result token, and only then writes `APPLIED open_app` and `REQUEST_DONE` to Ledger. Unknown app targets remain fail-closed.
+The parent does not embed app-opening actions. It calls `YOS_OpenApp` with the canonical target and writes `APPLIED open_app ... child_returned` plus `REQUEST_DONE` only after Run Shortcut returns control. If the child or its Open App action errors, Shortcuts stops before the success record. Unknown app targets remain fail-closed.
 
 For the first physical acceptance, use exactly:
 
@@ -41,8 +41,8 @@ Action Button
 → open_app / safari
 → YOS_OpenApp
 → Safari opens
-→ child result verified
-→ APPLIED open_app safari YOS_OpenApp
+→ YOS_OpenApp returns after issuing Open App
+→ APPLIED open_app safari YOS_OpenApp child_returned
 → REQUEST_DONE
 ```
 
