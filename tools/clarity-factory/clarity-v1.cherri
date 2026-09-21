@@ -57,10 +57,13 @@ if !@actionsRaw {
     mustOutput("ここだけ確認して", "やることを安全に判断できませんでした")
 }
 
+@lastExecutor = ""
+
 for actionItem in @actionsRaw {
     const actionDict = getDictionary(@actionItem)
     const actionId = "{actionDict['id']}"
     const executor = "{actionDict['executor']}"
+    @lastExecutor = "{executor}"
     const domain = "{actionDict['domain']}"
     const intent = "{actionDict['intent']}"
     const status = "{actionDict['status']}"
@@ -339,7 +342,7 @@ for actionItem in @actionsRaw {
         if target == "spotify" { openApp("com.spotify.client") }
         if target == "google_sheets" { openApp("com.google.Sheets") }
 
-        const appAppliedRecord = text("{CurrentDate}\t{requestNumber}\t{actionId}\tAPPLIED\topen_app\t{target}\n")
+        const appAppliedRecord = text("{CurrentDate}\t{requestNumber}\t{actionId}\tHANDOFF_READY\topen_app\t{target}\n")
         appendResolvedFile(ledgerFile, appAppliedRecord)
     }
 
@@ -352,7 +355,7 @@ for actionItem in @actionsRaw {
         const myWayExecutingRecord = text("{CurrentDate}\t{requestNumber}\t{actionId}\tEXECUTING\tmyway\thome\n")
         appendResolvedFile(ledgerFile, myWayExecutingRecord)
         openURL("https://yskn0008-bot.github.io/ProjectY/yos/")
-        const myWayAppliedRecord = text("{CurrentDate}\t{requestNumber}\t{actionId}\tAPPLIED\tmyway\thome\n")
+        const myWayAppliedRecord = text("{CurrentDate}\t{requestNumber}\t{actionId}\tHANDOFF_READY\tmyway\thome\n")
         appendResolvedFile(ledgerFile, myWayAppliedRecord)
     }
 
@@ -369,6 +372,6 @@ appendResolvedFile(ledgerFile, requestDone)
 const feedbackRaw = getValue(parsedResult, "feedback")
 const feedback = getDictionary(feedbackRaw)
 const summary = "{feedback['summary']}"
-if summary {
+if summary && @lastExecutor != "open_app" && @lastExecutor != "myway" {
     show("{summary}")
 }
