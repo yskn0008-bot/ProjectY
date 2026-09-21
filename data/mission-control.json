@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-21T14:34:24+09:00",
+  "updated_at": "2026-09-21T14:35:49+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -70,7 +70,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-09-21T05:34:11Z"
+      "updated_at": "2026-09-21T05:35:41Z"
     },
     {
       "id": "github-issue-256",
@@ -165,6 +165,20 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-f91fa42af530",
+      "title": "Merge pull request #421 from yskn0008-bot/repair/clarity-proof-main-trigger",
+      "completed_at": "2026-09-21T05:35:39Z",
+      "result": "GitHub mainへ反映（f91fa42）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/f91fa42af5302c4ecb9e3388d926321db4b8b302"
+    },
+    {
+      "id": "github-commit-515e6ffa65fb",
+      "title": "ci(clarity): run full proof on main changes",
+      "completed_at": "2026-09-21T05:35:19Z",
+      "result": "GitHub mainへ反映（515e6ff）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/515e6ffa65fb414b8a8c5690611855769132479e"
+    },
+    {
       "id": "github-commit-e87c2bd97f0f",
       "title": "Merge pull request #420 from yskn0008-bot/repair/clarity-shortcut-factory-integrated",
       "completed_at": "2026-09-21T05:34:10Z",
@@ -184,20 +198,6 @@
       "completed_at": "2026-09-21T05:30:44Z",
       "result": "GitHub mainへ反映（f57f9c3）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/f57f9c3154503bfb2075f7d812ff4500fe5dc287"
-    },
-    {
-      "id": "github-commit-019b7aa9b929",
-      "title": "fix(clarity): integrate proven local factory fallback in validate_clarity_final.py",
-      "completed_at": "2026-09-21T05:30:33Z",
-      "result": "GitHub mainへ反映（019b7aa）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/019b7aa9b9294a47a91d55aba44924f35b927e88"
-    },
-    {
-      "id": "github-commit-ab292e5b4ad7",
-      "title": "fix(clarity): integrate proven local factory fallback in patch_server_model_gateway.py",
-      "completed_at": "2026-09-21T05:30:30Z",
-      "result": "GitHub mainへ反映（ab292e5）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/ab292e5b4ad703f45e638bfeffa416dd8245790c"
     },
     {
       "id": "complete-002",
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-21T14:34:24+09:00",
+      "last_update": "2026-09-21T14:35:49+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -315,7 +315,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-21T14:34:24+09:00",
+      "last_update": "2026-09-21T14:35:49+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-21T14:34:24+09:00",
+      "last_update": "2026-09-21T14:35:49+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "da963448ce1bdb46b94b2e845178e9b353fb41660755698820db4bc930c3cc94"
+  "github_snapshot_hash": "c978af909ef30552db5dfc4a2a5a6fdefbc4ffea7ef5a95632fe9f9935f97eae"
 }
