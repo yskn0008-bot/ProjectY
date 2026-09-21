@@ -31,5 +31,10 @@ class TerminalHandoffSourceContractTests(unittest.TestCase):
     def test_summary_is_suppressed_for_any_handoff(self):
         self.assertIn('if summary && !@handoffExecutor {', self.source)
 
+    def test_terminal_handoffs_stop_immediately(self):
+        terminal = self.source.split("// Terminal handoff: nothing may run after the destination is opened.", 1)[1]
+        self.assertEqual(terminal.count("openApp("), terminal.count("; stop() }"))
+        self.assertIn('openURL("https://yskn0008-bot.github.io/ProjectY/yos/")\n    stop()', terminal)
+
 if __name__ == "__main__":
     unittest.main()
