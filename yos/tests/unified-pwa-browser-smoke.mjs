@@ -39,7 +39,7 @@ try{
 
   await page.locator('.yos-companion[href="./guide.html"]').click();
   await page.waitForURL(/\/yos\/guide\.html$/);
-  await expectText('h1','何かあった？');
+  await expectText('h1','今日は、どうする？');
   const guidePrompt=await page.evaluate(()=>window.YOSGuideV1?.buildPrompt('エアコンの風量が変わらない','normal'));
   assert.match(guidePrompt,/original_input: エアコンの風量が変わらない/);
   assert.match(guidePrompt,/必要ならProjectY/);
@@ -84,7 +84,7 @@ try{
     await page.goto(base+'/yos/',{waitUntil:'domcontentloaded'});
     await expectText('#brandTitle','MY WAY');
     await page.goto(base+'/yos/guide.html',{waitUntil:'domcontentloaded'});
-    await expectText('h1','何かあった？');
+    await expectText('h1','今日は、どうする？');
     await page.goto(base+'/life/',{waitUntil:'domcontentloaded'});
     await expectText('.brand h1','MY LIFE');
     await page.goto(base+'/yos/hj/',{waitUntil:'domcontentloaded'});

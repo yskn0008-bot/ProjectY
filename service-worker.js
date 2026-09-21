@@ -1,9 +1,9 @@
 'use strict';
 const CACHE_PREFIX='yos-unified-';
-const CACHE_NAME=CACHE_PREFIX+'v4-yos-guide';
+const CACHE_NAME=CACHE_PREFIX+'v5-yos-guide-ui';
 const STATIC=[
   './','./index.html','./manifest.webmanifest','./assets/yos-icon-180.png','./assets/yos-icon-512.png',
-  './yos/','./yos/index.html','./yos/styles.css','./yos/readability-final.css','./yos/guide.html','./yos/guide.css','./yos/guide.js',
+  './yos/','./yos/index.html','./yos/styles.css','./yos/readability-final.css','./yos/guide.html','./yos/guide.css','./yos/guide.js','./yos/guide-v2.css','./yos/guide-v2.js',
   './yos/task-dashboard.css','./yos/task-dashboard.js','./yos/shared-state-v1.js','./yos/app.js',
   './yos/money-v2.css','./yos/money-master-v1.js','./yos/money-v2.js',
   './yos/money-reference-v1.css','./yos/money-reference-v1.js','./yos/money-polish-v2.css','./yos/money-readable-v3.css',
