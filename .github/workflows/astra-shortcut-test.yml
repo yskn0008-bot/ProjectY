@@ -61,9 +61,6 @@ jobs:
 
         EVIDENCE
 
-        python3 patch_append_file_paths.py AstraTEST20260921_unsigned.shortcut 2>&1
-        | tee artifacts-astra/patch.log
-
         python3 - <<''CHECK''
 
         import plistlib, hashlib, json
@@ -88,8 +85,7 @@ jobs:
 
         Path(''artifacts-astra/structure.json'').write_text(json.dumps(w,ensure_ascii=False,indent=2))
 
-        print(''STRUCTURE PASS: exactly Text(TEST) -> Show Result; existing patch
-        is semantic no-op'')
+        print(''STRUCTURE PASS: exactly Text(TEST) -> Show Result; no patch applied; generated structure preserved'')
 
         CHECK
 
