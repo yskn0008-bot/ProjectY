@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-22T01:56:12+09:00",
+  "updated_at": "2026-09-22T03:56:03+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -21,6 +21,16 @@
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/373",
       "updated_at": "2026-09-21T01:14:46Z"
+    },
+    {
+      "id": "github-pr-392",
+      "title": "PR #392 Clarity: add One Enter Gmail development bridge",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/392",
+      "updated_at": "2026-09-20T06:26:15Z"
     },
     {
       "id": "github-pr-412",
@@ -53,16 +63,6 @@
       "updated_at": "2026-09-21T13:12:36Z"
     },
     {
-      "id": "github-pr-425",
-      "title": "PR #425 Restore Clarity fixed-child routing with YOS_OpenApp",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/425",
-      "updated_at": "2026-09-21T16:55:45Z"
-    },
-    {
       "id": "github-issue-232",
       "title": "Issue #232 [YOS HQ] ProjectY自動司令部 v1｜毎時監視・安全な自動継続",
       "type": "GitHub Issue",
@@ -70,7 +70,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-09-21T16:55:57Z"
+      "updated_at": "2026-09-21T18:55:56Z"
     },
     {
       "id": "github-issue-256",
@@ -101,6 +101,16 @@
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/277",
       "updated_at": "2026-09-04T23:28:41Z"
+    },
+    {
+      "id": "github-issue-279",
+      "title": "Issue #279 [YOS HQ] Multi-Engine Dispatch v1｜独立AI資源の安全並列化",
+      "type": "GitHub Issue",
+      "status": "open",
+      "priority": 3,
+      "next_action": "完成条件を確認し、次の安全な実装を1件進める",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/279",
+      "updated_at": "2026-09-04T17:50:51Z"
     },
     {
       "id": "github-issue-288",
@@ -143,16 +153,6 @@
       "updated_at": "2026-09-11T16:32:45Z"
     },
     {
-      "id": "github-issue-309",
-      "title": "Issue #309 [PoC3] YOS Automation Factory｜実機Wallet Hubから場所判定を自動生成",
-      "type": "GitHub Issue",
-      "status": "open",
-      "priority": 3,
-      "next_action": "完成条件を確認し、次の安全な実装を1件進める",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/309",
-      "updated_at": "2026-09-10T06:27:07Z"
-    },
-    {
       "id": "github-issue-51",
       "title": "Issue #51 ProjectY 4本並行開発の全体管理",
       "type": "GitHub Issue",
@@ -165,39 +165,39 @@
   ],
   "recently_completed": [
     {
-      "id": "github-commit-e88ce56eab2b",
-      "title": "Merge pull request #423 from yskn0008-bot/repair/clarity-voice-on-tap",
-      "completed_at": "2026-09-21T13:06:18Z",
-      "result": "GitHub mainへ反映（e88ce56）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/e88ce56eab2b7aedf6e1117c1fcb8a2cb4ef5220"
+      "id": "github-commit-8212341e6aac",
+      "title": "Merge pull request #425 from yskn0008-bot/repair/clarity-fixed-child-openapp",
+      "completed_at": "2026-09-21T18:55:49Z",
+      "result": "GitHub mainへ反映（8212341）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/8212341e6aac0076c2f82cab8919bcd6affc8827"
     },
     {
-      "id": "github-commit-ac7cdd7ca20d",
-      "title": "test(clarity): lock manual voice stop behavior",
-      "completed_at": "2026-09-21T13:04:34Z",
-      "result": "GitHub mainへ反映（ac7cdd7）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/ac7cdd7ca20d183d380b7432dc6b30311435bdde"
+      "id": "github-commit-f953aca3b8a8",
+      "title": "Clarity: record physical Safari fixed-child PASS",
+      "completed_at": "2026-09-21T18:54:44Z",
+      "result": "GitHub mainへ反映（f953aca）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/f953aca3b8a8373b358520f1f2491a6ff8afb148"
     },
     {
-      "id": "github-commit-45d606144021",
-      "title": "fix(clarity): keep voice listening until tap",
-      "completed_at": "2026-09-21T13:04:14Z",
-      "result": "GitHub mainへ反映（45d6061）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/45d606144021be15b12038a2c3cf74311c622ac5"
+      "id": "github-commit-675698005233",
+      "title": "Clarity: document one-enter voice capture",
+      "completed_at": "2026-09-21T16:54:42Z",
+      "result": "GitHub mainへ反映（6756980）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/67569800523319bbf49f8e1af506f00b2898d99d"
     },
     {
-      "id": "github-commit-71bd108278bd",
-      "title": "Merge pull request #422 from yskn0008-bot/repair/clarity-local-factory-no-token",
-      "completed_at": "2026-09-21T11:30:06Z",
-      "result": "GitHub mainへ反映（71bd108）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/71bd108278bdc7561153e0868c482f2a6ace6ad0"
+      "id": "github-commit-bc8bb179f72b",
+      "title": "Clarity: lock one-enter automatic voice stop",
+      "completed_at": "2026-09-21T16:54:40Z",
+      "result": "GitHub mainへ反映（bc8bb17）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/bc8bb179f72bda9fdecf07cde3276a8e6fd4318d"
     },
     {
-      "id": "github-commit-f3825d996301",
-      "title": "ci(clarity): build token-free local Factory artifact",
-      "completed_at": "2026-09-21T11:26:56Z",
-      "result": "GitHub mainへ反映（f3825d9）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/f3825d996301c02406c01cf94079f7ebd5383841"
+      "id": "github-commit-d2e86bebd98b",
+      "title": "Clarity: end voice input automatically after pause",
+      "completed_at": "2026-09-21T16:54:37Z",
+      "result": "GitHub mainへ反映（d2e86be）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/d2e86bebd98b564817ba1c3d6211b1e458eded60"
     },
     {
       "id": "complete-002",
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-22T01:56:12+09:00",
+      "last_update": "2026-09-22T03:56:03+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -309,13 +309,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 20件・Open PR 20件を自動同期中",
+      "next_action": "Open Issue 21件・Open PR 20件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-22T01:56:12+09:00",
+      "last_update": "2026-09-22T03:56:03+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-22T01:56:12+09:00",
+      "last_update": "2026-09-22T03:56:03+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "49a85cdfe8cbb30d3a7b3ae19bebc0de54ae3ad387086943a273769535e71c96"
+  "github_snapshot_hash": "3b3ee28eabcb66af145d96b370562cc55ae0152e5d6b0ab546aa84137a50eb43"
 }
