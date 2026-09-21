@@ -53,20 +53,51 @@ def validate(path: Path) -> None:
         if action.get("WFWorkflowActionIdentifier") == "is.workflow.actions.downloadurl"
     ]
     if len(downloads) != 2:
-        raise AssertionError(f"expected model + Shortcut Factory requests, found {len(downloads)}")
+        raise AssertionError(f"expected model + HubSign requests, found {len(downloads)}")
     downloads_by_url = {params(action).get("WFURL"): params(action) for action in downloads}
     model_url = "https://project-y-yos-ai.vercel.app/api/yos/intake?mode=model"
-    factory_url = "https://project-y-yos-ai.vercel.app/api/yos/intake?mode=factory"
-    if set(downloads_by_url) != {model_url, factory_url}:
+    hubsign_url = "https://hubsign.routinehub.services/sign"
+    if set(downloads_by_url) != {model_url, hubsign_url}:
         raise AssertionError(f"unexpected Clarity network endpoints: {set(downloads_by_url)}")
-    for label, download in (("model", downloads_by_url[model_url]), ("factory", downloads_by_url[factory_url])):
+    model_request = downloads_by_url[model_url]
+    hubsign_request = downloads_by_url[hubsign_url]
+    for label, download in (("model", model_request), ("hubsign", hubsign_request)):
         if download.get("WFHTTPMethod") != "POST" or download.get("WFHTTPBodyType") != "JSON":
             raise AssertionError(f"Clarity {label} request must be POST JSON")
-        headers = repr(download.get("WFHTTPHeaders"))
-        if "Authorization" not in headers or "Bearer" not in headers:
-            raise AssertionError(f"Clarity {label} bearer header missing")
-    if "request" not in repr(downloads_by_url[factory_url].get("WFJSONValues")):
-        raise AssertionError("Shortcut Factory request payload missing")
+    model_headers = repr(model_request.get("WFHTTPHeaders"))
+    if "Authorization" not in model_headers or "Bearer" not in model_headers:
+        raise AssertionError("Clarity model bearer header missing")
+    hubsign_headers = repr(hubsign_request.get("WFHTTPHeaders"))
+    for required in ("Content-Type", "User-Agent", "Origin", "Referer"):
+        if required not in hubsign_headers:
+            raise AssertionError(f"HubSign header missing {required}")
+    hubsign_body = repr(hubsign_request.get("WFJSONValues"))
+    if "shortcutName" not in hubsign_body or "shortcutFactoryUnsignedXml" not in hubsign_body:
+        raise AssertionError("HubSign payload is not wired to local Shortcut XML")
+
+    xml_actions = [
+        action
+        for action in actions
+        if custom_name(action) == "shortcutFactoryUnsignedXml"
+    ]
+    if len(xml_actions) != 1:
+        raise AssertionError(f"expected one local Shortcut XML action, found {len(xml_actions)}")
+    xml_text = text_value(xml_actions[0])
+    if "is.workflow.actions.openapp" not in xml_text or "com.apple.mobilesafari" not in xml_text:
+        raise AssertionError("local Shortcut XML is not the proven Safari Open App structure")
+
+    name_actions = [
+        action
+        for action in actions
+        if action.get("WFWorkflowActionIdentifier") == "is.workflow.actions.setitemname"
+    ]
+    if len(name_actions) != 1:
+        raise AssertionError(f"expected one generated Shortcut naming action, found {len(name_actions)}")
+    name_params = params(name_actions[0])
+    if name_params.get("WFName") != "YOS Safari Auto.shortcut":
+        raise AssertionError("generated Shortcut must have a .shortcut filename")
+    if "generatedShortcut" not in repr(name_params.get("WFInput")):
+        raise AssertionError("generated Shortcut naming action is not wired to HubSign output")
 
     factory_open = [
         action
@@ -81,8 +112,8 @@ def validate(path: Path) -> None:
         raise AssertionError("Shortcut Factory open-in must target a fixed app")
     if not isinstance(selected, dict) or selected.get("BundleIdentifier") != "com.apple.shortcuts":
         raise AssertionError("Shortcut Factory open-in must target Shortcuts")
-    if "generatedShortcut" not in repr(factory_open_params.get("WFInput")):
-        raise AssertionError("Shortcut Factory open-in is not wired to signed output")
+    if "namedGeneratedShortcut" not in repr(factory_open_params.get("WFInput")):
+        raise AssertionError("Shortcut Factory open-in is not wired to named signed output")
 
     questions = root.get("WFWorkflowImportQuestions")
     if not isinstance(questions, list) or not any(

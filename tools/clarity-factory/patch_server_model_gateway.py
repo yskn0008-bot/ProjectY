@@ -7,7 +7,7 @@ import uuid
 from pathlib import Path
 
 ENDPOINT = "https://project-y-yos-ai.vercel.app/api/yos/intake?mode=model"
-FACTORY_ENDPOINT = "https://project-y-yos-ai.vercel.app/api/yos/intake?mode=factory"
+HUBSIGN_ENDPOINT = "https://hubsign.routinehub.services/sign"
 TOKEN_PROMPT = "Clarity接続トークン"
 
 
@@ -123,36 +123,86 @@ def patch(path: Path) -> None:
     ]
     if len(factory_matches) != 1:
         raise SystemExit(f"expected exactly one shortcutFactoryRequest action, found {len(factory_matches)}")
-    factory_index, factory_request_action = factory_matches[0]
-    factory_request_params = factory_request_action.get("WFWorkflowActionParameters", {})
-    factory_request_uuid = factory_request_params.get("UUID")
-    factory_request_name = factory_request_params.get("CustomOutputName", "shortcutFactoryRequest")
-    if not isinstance(factory_request_uuid, str):
-        raise SystemExit("shortcutFactoryRequest UUID missing")
+    factory_index, _factory_request_action = factory_matches[0]
+
+    child_action_uuid = str(uuid.uuid4()).upper()
+    unsigned_xml = f"""<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><dict>
+<key>WFWorkflowName</key><string>YOS Safari Auto</string>
+<key>WFWorkflowActions</key><array><dict>
+<key>WFWorkflowActionIdentifier</key><string>is.workflow.actions.openapp</string>
+<key>WFWorkflowActionParameters</key><dict>
+<key>UUID</key><string>{child_action_uuid}</string>
+<key>WFAppIdentifier</key><string>com.apple.mobilesafari</string>
+<key>WFSelectedApp</key><dict>
+<key>BundleIdentifier</key><string>com.apple.mobilesafari</string>
+<key>Name</key><string>Safari</string>
+</dict></dict></dict></array>
+<key>WFWorkflowClientVersion</key><string>2607.1.3</string>
+<key>WFWorkflowClientRelease</key><string>26.0</string>
+<key>WFWorkflowMinimumClientVersion</key><integer>900</integer>
+<key>WFWorkflowMinimumClientVersionString</key><string>900</string>
+<key>WFWorkflowIcon</key><dict>
+<key>WFWorkflowIconStartColor</key><integer>463140863</integer>
+<key>WFWorkflowIconGlyphNumber</key><integer>59511</integer>
+</dict>
+<key>WFWorkflowImportQuestions</key><array/>
+<key>WFWorkflowInputContentItemClasses</key><array><string>WFAppContentItem</string><string>WFStringContentItem</string></array>
+<key>WFWorkflowOutputContentItemClasses</key><array/>
+<key>WFWorkflowTypes</key><array/>
+<key>WFQuickActionSurfaces</key><array/>
+<key>WFWorkflowHasOutputFallback</key><false/>
+<key>WFWorkflowHasShortcutInputVariables</key><false/>
+</dict></plist>"""
+
+    xml_uuid = str(uuid.uuid4())
+    xml_action = {
+        "WFWorkflowActionIdentifier": "is.workflow.actions.gettext",
+        "WFWorkflowActionParameters": {
+            "UUID": xml_uuid,
+            "CustomOutputName": "shortcutFactoryUnsignedXml",
+            "WFTextActionText": unsigned_xml,
+        },
+    }
 
     factory_uuid = str(uuid.uuid4())
-    factory_http_action = {
+    hubsign_action = {
         "WFWorkflowActionIdentifier": "is.workflow.actions.downloadurl",
         "WFWorkflowActionParameters": {
             "UUID": factory_uuid,
             "CustomOutputName": "generatedShortcut",
-            "WFURL": FACTORY_ENDPOINT,
+            "WFURL": HUBSIGN_ENDPOINT,
             "WFHTTPMethod": "POST",
             "WFHTTPBodyType": "JSON",
             "WFHTTPHeaders": dictionary([
-                ("Authorization", token_string("Bearer ", token_uuid, "clarityToken")),
                 ("Content-Type", plain_token_string("application/json")),
+                ("User-Agent", plain_token_string("cherri/1.0")),
+                ("Origin", plain_token_string("https://routinehub.co")),
+                ("Referer", plain_token_string("https://routinehub.co/")),
             ]),
             "WFJSONValues": dictionary([
-                ("request", attachment(factory_request_uuid, factory_request_name)),
+                ("shortcutName", plain_token_string("YOS Safari Auto")),
+                ("shortcut", attachment(xml_uuid, "shortcutFactoryUnsignedXml")),
             ]),
+        },
+    }
+
+    named_uuid = str(uuid.uuid4())
+    name_action = {
+        "WFWorkflowActionIdentifier": "is.workflow.actions.setitemname",
+        "WFWorkflowActionParameters": {
+            "UUID": named_uuid,
+            "CustomOutputName": "namedGeneratedShortcut",
+            "WFInput": attachment(factory_uuid, "generatedShortcut"),
+            "WFName": "YOS Safari Auto.shortcut",
         },
     }
     open_generated_action = {
         "WFWorkflowActionIdentifier": "is.workflow.actions.openin",
         "WFWorkflowActionParameters": {
             "UUID": str(uuid.uuid4()),
-            "WFInput": attachment(factory_uuid, "generatedShortcut"),
+            "WFInput": attachment(named_uuid, "namedGeneratedShortcut"),
             "WFOpenInAskWhenRun": False,
             "WFSelectedApp": {
                 "BundleIdentifier": "com.apple.shortcuts",
@@ -160,7 +210,12 @@ def patch(path: Path) -> None:
             },
         },
     }
-    actions[factory_index + 1:factory_index + 1] = [factory_http_action, open_generated_action]
+    actions[factory_index + 1:factory_index + 1] = [
+        xml_action,
+        hubsign_action,
+        name_action,
+        open_generated_action,
+    ]
 
     questions = root.setdefault("WFWorkflowImportQuestions", [])
     if not isinstance(questions, list):
@@ -183,9 +238,13 @@ def patch(path: Path) -> None:
     if "is.workflow.actions.askllm" in blob:
         raise SystemExit("Apple model action survived server gateway patch")
     if blob.count("is.workflow.actions.downloadurl") != 2:
-        raise SystemExit("expected model + Shortcut Factory network actions")
-    if ENDPOINT not in blob or FACTORY_ENDPOINT not in blob or TOKEN_PROMPT not in blob:
-        raise SystemExit("gateway/factory endpoint or setup question missing")
+        raise SystemExit("expected model + HubSign network actions")
+    if ENDPOINT not in blob or HUBSIGN_ENDPOINT not in blob or TOKEN_PROMPT not in blob:
+        raise SystemExit("gateway/HubSign endpoint or setup question missing")
+    if "com.apple.mobilesafari" not in blob or "shortcutFactoryUnsignedXml" not in blob:
+        raise SystemExit("local Safari Shortcut template missing")
+    if blob.count("is.workflow.actions.setitemname") != 1 or "YOS Safari Auto.shortcut" not in blob:
+        raise SystemExit("generated Shortcut filename handoff missing")
     if blob.count("is.workflow.actions.openin") != 1 or "com.apple.shortcuts" not in blob:
         raise SystemExit("Shortcut Factory terminal open-in handoff missing")
     if "api.openai.com" in blob or "OPENAI_API_KEY" in blob or "sk-" in blob:
