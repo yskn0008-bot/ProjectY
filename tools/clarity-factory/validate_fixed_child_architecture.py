@@ -33,8 +33,12 @@ def validate(parent: Path, child: Path) -> None:
             raise AssertionError(f"Shortcut Factory leaked into parent: {forbidden}")
     if "HANDOFF_READY\\topen_app" not in pblob or "APPLIED\\topen_app" not in pblob:
         raise AssertionError("parent open_app verify/Ledger markers missing")
-    if "open_app_child_verify" not in pblob:
-        raise AssertionError("parent child verification failure marker missing")
+    if "child_returned" not in pblob:
+        raise AssertionError("parent child-return verification marker missing")
+    run_index = next(i for i,a in enumerate(pa) if str(a.get("WFWorkflowActionIdentifier","")).endswith("runworkflow"))
+    applied_index = next((i for i,a in enumerate(pa) if "APPLIED\\topen_app" in repr(a)), -1)
+    if applied_index <= run_index:
+        raise AssertionError("parent can claim APPLIED before YOS_OpenApp returns")
     opens=[i for i in cids if i.endswith("openapp")]
     if len(opens) < 20:
         raise AssertionError(f"YOS_OpenApp allowlist incomplete: {len(opens)} Open App actions")
