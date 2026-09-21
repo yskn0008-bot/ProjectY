@@ -16,6 +16,7 @@
   <link rel="stylesheet" href="./money-reference-v1.css?v=1">
   <link rel="stylesheet" href="./money-readable-v3.css?v=3">
   <link rel="stylesheet" href="./task-dashboard.css?v=1">
+  <link rel="stylesheet" href="./guided-home-v1.css?v=1">
   <title>MY WAY by YOS｜人生ナビ</title>
 </head>
 <body data-domain="home">
@@ -33,6 +34,50 @@
       <div><p id="homeGreeting">おはよう、ようすけ！</p><h1>今日も、自分の道を進もう。</h1></div>
       <div class="compass-seal" aria-hidden="true"><span>✦</span><i></i></div>
     </header>
+
+    <section class="yos-guide" aria-labelledby="yosGuideTitle">
+      <div class="yos-guide-orb" aria-hidden="true"><span>Y</span></div>
+      <div class="yos-guide-head">
+        <p class="yos-guide-kicker">YOS GUIDE</p>
+        <h2 id="yosGuideTitle">今日は、どうする？</h2>
+        <p>やりたいことを選ぶだけ。迷ったら「YOSに話す」でOK。</p>
+      </div>
+
+      <button class="yos-guide-primary" type="button" data-prompt="【YOS】今の状況から、次にやることを1つだけ案内して。必要ならLife / Money / Hero’s Journey / Idea / ProjectY / SCOUTへ振り分けて。">
+        <span class="yos-guide-primary-icon" aria-hidden="true">✦</span>
+        <span><small>迷ったらここ</small><b>YOSに話す</b><em>状況を整理して、次の1手まで案内</em></span>
+        <i aria-hidden="true">›</i>
+      </button>
+
+      <div class="yos-guide-choice-label"><span>または目的から選ぶ</span></div>
+
+      <div class="yos-guide-grid">
+        <button class="yos-guide-card everyday" type="button" data-prompt="【YOS｜日常】今日の生活・予定・お金・記録・やることを整理して、次にやる1つへ案内して。">
+          <span class="yos-guide-icon" aria-hidden="true">☀︎</span>
+          <span><small>日常・判断</small><b>今日を進めたい</b><em>Life / Money / MY WAY</em></span>
+          <i aria-hidden="true">›</i>
+        </button>
+
+        <button class="yos-guide-card build" type="button" data-prompt="【ProjectY】作りたい・直したい・統合したいことがある。既存資産を確認し、修理優先・新規Projectを増やさないルールで最短の次の1手へ案内して。">
+          <span class="yos-guide-icon" aria-hidden="true">◈</span>
+          <span><small>開発・修理</small><b>作る・直す</b><em>ProjectY / One Enter</em></span>
+          <i aria-hidden="true">›</i>
+        </button>
+
+        <button class="yos-guide-card scout" type="button" data-prompt="【SCOUT】今の考えや計画を、独立した別視点から確認して。前提・見落とし・別解だけを短く出して。">
+          <span class="yos-guide-icon" aria-hidden="true">◎</span>
+          <span><small>外部視点</small><b>別の角度で確認</b><em>SCOUT</em></span>
+          <i aria-hidden="true">›</i>
+        </button>
+      </div>
+
+      <div class="yos-guide-tools">
+        <a data-web-only href="shortcuts://run-shortcut?name=Clarity"><span>◉</span><b>Clarityで入力</b><i>›</i></a>
+        <a href="../system/"><span>◇</span><b>System Health</b><i>›</i></a>
+      </div>
+
+      <p class="yos-guide-rule"><span aria-hidden="true">✓</span> 機能名を覚えなくてOK。YOSが行き先を決めます。</p>
+    </section>
 
     <article class="home-scene primary-surface">
       <svg class="home-route-thread" viewBox="0 0 390 390" preserveAspectRatio="none" aria-hidden="true">
