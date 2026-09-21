@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#f5efe1">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="YOS">
+  <link rel="apple-touch-icon" sizes="180x180" href="../assets/yos-icon-180.png">
+  <link rel="manifest" href="../manifest.webmanifest">
+  <link rel="stylesheet" href="./guide.css?v=1">
+  <title>YOS｜相談・対処</title>
+</head>
+<body>
+<main class="guide-app">
+  <header class="guide-topbar">
+    <a class="back-link" href="./" aria-label="MY WAYへ戻る">‹</a>
+    <div><small>YOS</small><strong>相談・対処</strong></div>
+    <a class="home-link" href="./">MY WAY</a>
+  </header>
+
+  <section class="guide-hero">
+    <span class="hero-orb" aria-hidden="true">✦</span>
+    <p class="eyebrow">WHEN SOMETHING HAPPENS</p>
+    <h1>何かあった？</h1>
+    <p>そのまま書けばOK。どこで処理するかはYOSが決めます。</p>
+
+    <label for="guideInput">今起きていること</label>
+    <textarea id="guideInput" rows="4" maxlength="1200" placeholder="例：エアコンの風量が変わらない&#10;例：これを自動化したい&#10;例：今の判断を別の視点で確認したい"></textarea>
+    <button id="askYos" class="primary-action" type="button">
+      <span aria-hidden="true">✦</span>
+      <b>YOSに相談する</b>
+      <i aria-hidden="true">›</i>
+    </button>
+    <p id="guideStatus" class="status" role="status" aria-live="polite"></p>
+  </section>
+
+  <section class="guide-section">
+    <header><small>迷ったら選ぶだけ</small><h2>何をしたい？</h2></header>
+    <div class="route-list">
+      <button type="button" class="route-card" data-mode="normal">
+        <span class="route-icon sun" aria-hidden="true">☀︎</span>
+        <span><small>困った・迷った</small><b>状況を整理したい</b><em>YOSが次の1手へ案内</em></span>
+        <i>›</i>
+      </button>
+      <button type="button" class="route-card" data-mode="build">
+        <span class="route-icon build" aria-hidden="true">◈</span>
+        <span><small>作る・直す・自動化</small><b>仕組みを変えたい</b><em>必要ならProjectYへ</em></span>
+        <i>›</i>
+      </button>
+      <button type="button" class="route-card" data-mode="scout">
+        <span class="route-icon scout" aria-hidden="true">◎</span>
+        <span><small>見落とし確認</small><b>別の角度で考えたい</b><em>必要ならSCOUTへ</em></span>
+        <i>›</i>
+      </button>
+    </div>
+  </section>
+
+  <section class="quick-grid" aria-label="直接開く">
+    <a href="shortcuts://run-shortcut?name=Clarity"><span>◉</span><b>Clarity</b><small>記録・実行</small></a>
+    <a href="../system/"><span>◇</span><b>System Health</b><small>故障・状態確認</small></a>
+  </section>
+
+  <section class="guide-rule">
+    <b>普段はMY WAY。</b>
+    <p>何か起きた時だけこのページ。Project名を覚える必要はありません。</p>
+  </section>
+</main>
+<script src="./guide.js?v=1" defer></script>
+</body>
+</html>
