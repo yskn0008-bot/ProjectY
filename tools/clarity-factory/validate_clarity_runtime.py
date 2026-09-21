@@ -123,6 +123,13 @@ def validate(path: Path) -> None:
     if any(i <= model_i for i in open_app_indexes):
         raise AssertionError("app launch action appears before model/policy")
 
+    # Physical iPhone guard: destination opening must terminate immediately.
+    # Cherri emits Nothing/End If after conditional bodies; stop() prevents those from running.
+    handoff_indexes = open_app_indexes + find_indexes(actions, "openurl")
+    for i in handoff_indexes:
+        if i + 1 >= len(actions) or not action_id(actions[i + 1]).endswith("exit"):
+            raise AssertionError(f"destination handoff at index {i} must be followed immediately by stop/exit")
+
     required_local_action_suffixes = (
         "wifi.set",
         "bluetooth.set",
