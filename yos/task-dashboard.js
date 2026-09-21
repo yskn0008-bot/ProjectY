@@ -67,29 +67,19 @@
   }
 
   function moneySnapshot(sharedMoney,life,today){
-    const legacy=life?.moneySafety||today?.money||{};
-    const freeRaw=legacy?.freeMoney;
-    const freeNumber=amountNumber(freeRaw);
-    const usable=sharedMoney?.privacy?'非表示':freeNumber!==null?amountText(freeNumber):clean(freeRaw,40)||'未算出';
     if(sharedMoney?.connected)return {
       balance:clean(sharedMoney.balanceText,40)||'未設定',
-      usable,
       nextPayment:clean(sharedMoney.nextPaymentText,100),
       goal:clean(sharedMoney.goalText,100),
       connected:true
     };
-    const income=legacy.income??legacy.monthlyIncome;
-    const expense=legacy.expense??legacy.monthlyExpense??legacy.spentThisMonth;
-    const explicitBalance=legacy.currentBalance??legacy.balance;
+    const money=life?.moneySafety||today?.money||{};
+    const income=money.income??money.monthlyIncome;
+    const expense=money.expense??money.monthlyExpense??money.spentThisMonth;
+    const explicitBalance=money.currentBalance??money.balance;
     const incomeNumber=amountNumber(income),expenseNumber=amountNumber(expense),balanceNumber=amountNumber(explicitBalance);
     const computedBalance=balanceNumber!==null?balanceNumber:incomeNumber!==null&&expenseNumber!==null?incomeNumber-expenseNumber:null;
-    return {
-      balance:computedBalance!==null?amountText(computedBalance):amountText(explicitBalance),
-      usable,
-      nextPayment:clean(legacy.nextPayment,100),
-      goal:clean(legacy.goal,100),
-      connected:Boolean(Object.keys(legacy).length)
-    };
+    return {balance:computedBalance!==null?amountText(computedBalance):amountText(explicitBalance),nextPayment:clean(money.nextPayment,100),goal:clean(money.goal,100),connected:Boolean(Object.keys(money).length)};
   }
 
   function lifeOpenTasks(today){return (Array.isArray(today?.tasks)?today.tasks:[]).filter(task=>clean(task?.text,120)&&!task.done)}
@@ -102,76 +92,29 @@
     const money=moneySnapshot(sharedMoney,life,today);
     const lifeTasks=lifeOpenTasks(today);
     const activeTask=groups.active[0]||null;
+    const secondActive=groups.active[1]||null;
     const nextTask=groups.next[0]||null;
     const currentEvent=schedule.current;
     const firstUpcoming=schedule.upcoming[0]||null;
     const secondUpcoming=schedule.upcoming[1]||null;
 
+    const nowText=taskSummary(activeTask)||clean(today?.nextAction,160)||clean(today?.priority,160)||clean(lifeTasks[0]?.text,160)||(currentEvent?`${clean(currentEvent.title,100)||'予定'} を実行中`:'今すぐの指定なし');
+    const nextText=taskSummary(secondActive)||taskSummary(nextTask)||clean(lifeTasks[1]?.text,160)||clean(journey?.quest,160)||(firstUpcoming&&!currentEvent?`${timeLabel(firstUpcoming.start)} ${clean(firstUpcoming.title,100)||'予定'}`:secondUpcoming?`${timeLabel(secondUpcoming.start)} ${clean(secondUpcoming.title,100)||'予定'}`:'次の指定なし');
+
     const health=today?.checkin?.health?`体調 ${today.checkin.health}/5`:'';
     const mood=today?.checkin?.mood?`気分 ${today.checkin.mood}/5`:'';
     const energy={low:'体力低め',mid:'体力ふつう',high:'体力高め'}[state.energy]||'';
-    const dateText=new Intl.DateTimeFormat('ja-JP',{month:'numeric',day:'numeric',weekday:'short',timeZone:'Asia/Tokyo'}).format(new Date());
-    const currentPosition=clean(state.focus,120)||clean(journey?.stage,100)||[energy,health,mood].filter(Boolean).join('・')||'未設定';
-    const currentSub=[dateText,energy&&currentPosition!==energy?energy:'',health&&currentPosition!==health?health:'',mood&&currentPosition!==mood?mood:''].filter(Boolean).join(' ・ ');
-
-    const nextAction=taskSummary(activeTask)
-      ||clean(today?.nextAction,160)
-      ||clean(today?.priority,160)
-      ||clean(lifeTasks[0]?.text,160)
-      ||taskSummary(nextTask)
-      ||clean(journey?.quest,160)
-      ||'次の一手は未設定';
-
-    const schedulePrimary=currentEvent
-      ?`進行中 ${currentEvent.isAllDay===true?'終日':timeLabel(currentEvent.start)} ${clean(currentEvent.title,100)||'予定'}`
-      :firstUpcoming
-        ?`${firstUpcoming.isAllDay===true?'終日':timeLabel(firstUpcoming.start)} ${clean(firstUpcoming.title,100)||'予定'}`
-        :schedule.events.length?'今日の予定は終了':'予定なし';
-    const scheduleSecondary=currentEvent&&firstUpcoming&&firstUpcoming!==currentEvent
-      ?`次 ${firstUpcoming.isAllDay===true?'終日':timeLabel(firstUpcoming.start)} ${clean(firstUpcoming.title,80)||'予定'}`
-      :secondUpcoming
-        ?`次 ${secondUpcoming.isAllDay===true?'終日':timeLabel(secondUpcoming.start)} ${clean(secondUpcoming.title,80)||'予定'}`
-        :life?'Life連携済み':'Life未連携';
-
-    const tasksPrimary=lifeTasks.length?`未完了 ${lifeTasks.length}件`:'未完了なし';
-    const tasksSecondary=clean(lifeTasks[0]?.text,100)||'今日のタスクはありません';
-
-    const moneyPrimary=money.usable||'未算出';
-    const moneySecondary=money.nextPayment
-      ?`近い支払い ${money.nextPayment}`
-      :money.balance&&money.balance!=='未連携'
-        ?`残高 ${money.balance}`
-        :'Moneyで算出';
+    const todayBits=[new Intl.DateTimeFormat('ja-JP',{month:'numeric',day:'numeric',weekday:'short',timeZone:'Asia/Tokyo'}).format(new Date()),energy||health,mood,`${schedule.events.length}予定`,`${lifeTasks.length}未完了`].filter(Boolean);
 
     const manual=groups.active.find(task=>task.state==='本人操作');
     const blocked=[...groups.active,...groups.next].find(task=>clean(task.blocker,160));
-    const important=manual
-      ?`本人操作：${taskSummary(manual)}`
-      :blocked
-        ?`ブロッカー：${clean(blocked.blocker,160)}`
-        :money.nextPayment
-          ?`近い支払い：${money.nextPayment}`
-          :clean(today?.note,160)
-            ?clean(today.note,160)
-            :clean(journey?.theme,160)
-              ?`今のテーマ：${clean(journey.theme,160)}`
-              :clean(idea?.text||idea?.memo,160)
-                ?`最近のIdea：${clean(idea.text||idea.memo,160)}`
-                :'特記事項なし';
+    const important=manual?`本人操作：${taskSummary(manual)}`:blocked?`ブロッカー：${clean(blocked.blocker,160)}`:money.nextPayment?`近い支払い：${money.nextPayment}`:clean(today?.note,160)?clean(today.note,160):clean(journey?.theme,160)?`今のテーマ：${clean(journey.theme,160)}`:clean(idea?.text||idea?.memo,160)?`最近のIdea：${clean(idea.text||idea.memo,160)}`:'特記事項なし';
 
-    return {
-      groups,
-      currentPosition,
-      currentSub,
-      nextAction,
-      schedulePrimary,
-      scheduleSecondary,
-      tasksPrimary,
-      tasksSecondary,
-      moneyPrimary,
-      moneySecondary,
-      important
-    };
+    const schedulePrimary=currentEvent?`進行中 ${timeLabel(currentEvent.start)}–${timeLabel(currentEvent.end)} ${clean(currentEvent.title,100)||'予定'}`:firstUpcoming?`${timeLabel(firstUpcoming.start)} ${clean(firstUpcoming.title,100)||'予定'}`:schedule.events.length?'今日の予定は終了':'予定なし';
+    const scheduleSecondary=currentEvent&&firstUpcoming&&firstUpcoming!==currentEvent?`次 ${timeLabel(firstUpcoming.start)} ${clean(firstUpcoming.title,80)||'予定'}`:secondUpcoming?`次 ${timeLabel(secondUpcoming.start)} ${clean(secondUpcoming.title,80)||'予定'}`:life?'Life連携済み':'Life未連携';
+    const moneySecondary=money.nextPayment||money.goal||'詳細はMoneyへ';
+
+    return {groups,today:todayBits.join(' ・ '),nowText,nextText,schedulePrimary,scheduleSecondary,moneyPrimary:money.balance,moneySecondary,important};
   }
 
   function cockpitCard(label,value,sub,kind){
@@ -180,45 +123,26 @@
 
   function render(data,statusText='最新の状態'){
     latestTaskData=data&&Array.isArray(data.tasks)?data:{tasks:[]};
-    const host=document.getElementById('taskDashboardBody');if(!host)return;
-    host.replaceChildren();
-    const facts=cockpitFacts(latestTaskData);
+    const host=document.getElementById('taskDashboardBody');if(!host)return;host.replaceChildren();const facts=cockpitFacts(latestTaskData);
     const status=document.getElementById('taskDashboardStatus');if(status)status.textContent=statusText;
 
-    host.append(cockpitCard('現在地',facts.currentPosition,facts.currentSub,'current-card'));
-    host.append(cockpitCard('次の一手',facts.nextAction,'ここだけ見ればOK','now-card next-action-card'));
+    host.append(cockpitCard('今日',facts.today||'今日の状態を確認中','', 'today-card'));
+    host.append(cockpitCard('今やる',facts.nowText,'最優先はこれだけ','now-card'));
 
     const grid=el('div','cockpit-grid');
-    const scheduleCard=cockpitCard('予定',facts.schedulePrimary,facts.scheduleSecondary,'schedule-card cockpit-link');
-    scheduleCard.tabIndex=0;scheduleCard.setAttribute('role','button');
-    scheduleCard.addEventListener('click',()=>{location.href='../life/'});
-    scheduleCard.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();location.href='../life/'}});
-    grid.append(scheduleCard);
-
-    const taskCard=cockpitCard('タスク',facts.tasksPrimary,facts.tasksSecondary,'task-summary-card cockpit-link');
-    taskCard.tabIndex=0;taskCard.setAttribute('role','button');
-    taskCard.addEventListener('click',()=>{location.href='../life/'});
-    taskCard.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();location.href='../life/'}});
-    grid.append(taskCard);
-
-    const moneyCard=cockpitCard('使える金',facts.moneyPrimary,facts.moneySecondary,'money-card cockpit-link');
-    moneyCard.tabIndex=0;moneyCard.setAttribute('role','button');
-    moneyCard.addEventListener('click',()=>document.querySelector('.money-nav')?.click());
-    moneyCard.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();document.querySelector('.money-nav')?.click()}});
-    grid.append(moneyCard);
-
-    grid.append(cockpitCard('重要',facts.important,'見落とし防止','important-card'));
+    grid.append(cockpitCard('次',facts.nextText,'今が終わったら','next-card'));
+    const scheduleCard=cockpitCard('予定',facts.schedulePrimary,facts.scheduleSecondary,'schedule-card cockpit-link');scheduleCard.tabIndex=0;scheduleCard.setAttribute('role','button');scheduleCard.addEventListener('click',()=>{location.href='../life/'});scheduleCard.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();location.href='../life/'}});grid.append(scheduleCard);
+    const moneyCard=cockpitCard('お金',facts.moneyPrimary,facts.moneySecondary,'money-card cockpit-link');moneyCard.tabIndex=0;moneyCard.setAttribute('role','button');moneyCard.addEventListener('click',()=>document.querySelector('.money-nav')?.click());moneyCard.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();document.querySelector('.money-nav')?.click()}});grid.append(moneyCard);
+    grid.append(cockpitCard('重要なこと',facts.important,'見落とし防止','important-card'));
     host.append(grid);
 
     document.getElementById('taskDashboardDetails')?.remove();
-    const details=el('details','cockpit-details task-dashboard-details');details.id='taskDashboardDetails';
-    const summary=el('summary','','タスク詳細を見る');details.append(summary);
+    const details=el('details','cockpit-details task-dashboard-details');details.id='taskDashboardDetails';const summary=el('summary','','タスク詳細を見る');details.append(summary);
     const activeTitle=el('div','task-section-title');activeTitle.append(el('h3','','今やる'),el('span','',`${facts.groups.active.length}件`));details.append(activeTitle);
     const activeList=el('div','task-list');facts.groups.active.slice(0,3).forEach(t=>activeList.append(taskRow(t)));if(!activeList.childElementCount)activeList.append(el('p','task-empty','今すぐのタスクはありません'));details.append(activeList);
     const nextTitle=el('div','task-section-title');nextTitle.append(el('h3','','次'),el('span','',`${facts.groups.next.length}件`));details.append(nextTitle);
     const nextList=el('div','task-list task-next-list');facts.groups.next.slice(0,4).forEach(t=>nextList.append(taskRow(t)));if(!nextList.childElementCount)nextList.append(el('p','task-empty','次のタスクはありません'));details.append(nextList);
-    const buckets=el('div','task-buckets');[['待ち',facts.groups.waiting],['保留',facts.groups.hold],['完了',facts.groups.done]].forEach(([label,list])=>{const d=el('details');const s=el('summary');s.append(el('b','',label),el('span','',String(list.length)));d.append(s);const content=el('div','bucket-content');list.forEach(t=>content.append(taskRow(t)));if(!list.length)content.append(el('p','task-empty','ありません'));d.append(content);buckets.append(d)});details.append(buckets);
-    document.getElementById('taskDashboard')?.after(details);
+    const buckets=el('div','task-buckets');[['待ち',facts.groups.waiting],['保留',facts.groups.hold],['完了',facts.groups.done]].forEach(([label,list])=>{const d=el('details');const s=el('summary');s.append(el('b','',label),el('span','',String(list.length)));d.append(s);const content=el('div','bucket-content');list.forEach(t=>content.append(taskRow(t)));if(!list.length)content.append(el('p','task-empty','ありません'));d.append(content);buckets.append(d)});details.append(buckets);document.getElementById('taskDashboard')?.after(details);
     const auth=document.getElementById('taskDashboardAuth');if(auth)auth.hidden=true;
   }
 
@@ -249,8 +173,8 @@
   function install(){
     const home=document.getElementById('homePage');const scene=home?.querySelector('.home-scene');if(!home||!scene||document.getElementById('taskDashboard'))return;
     const dashboard=el('section','task-dashboard cockpit-dashboard');dashboard.id='taskDashboard';dashboard.setAttribute('aria-label','今日の運転席');
-    const header=el('header');const title=el('div');title.append(el('small','','MY WAY'),el('h2','','今日のダッシュボード'));const status=el('span','task-dashboard-status','端末データ');status.id='taskDashboardStatus';header.append(title,status);dashboard.append(header);
-    const body=el('div','cockpit-body');body.id='taskDashboardBody';body.append(el('p','task-empty','今日の状態を読み込んでいます'));dashboard.append(body);const guide=el('button','dashboard-yos-guide');guide.type='button';guide.append(el('span','dashboard-yos-mark','✦'),el('span','dashboard-yos-copy','迷ったらYOSに聞く'),el('i','','›'));guide.addEventListener('click',()=>document.querySelector('#homePage>.yos-companion')?.click());dashboard.append(guide);
+    const header=el('header');const title=el('div');title.append(el('small','','TODAY'),el('h2','','今日の運転席'));const status=el('span','task-dashboard-status','端末データ');status.id='taskDashboardStatus';header.append(title,status);dashboard.append(header);
+    const body=el('div','cockpit-body');body.id='taskDashboardBody';body.append(el('p','task-empty','今日の状態を読み込んでいます'));dashboard.append(body);
     const auth=el('div','task-auth');auth.id='taskDashboardAuth';auth.hidden=true;auth.append(el('p','','YOS Tasksを最新にするにはGoogle本人確認が必要です。'));const googleButton=el('div','task-google-button');googleButton.id='taskDashboardGoogleButton';auth.append(googleButton);dashboard.append(auth);scene.before(dashboard);
     const map=el('details','life-map-details');const summary=el('summary','','人生ナビ・詳細を見る');scene.before(map);map.append(summary,scene);home.classList.add('task-dashboard-ready','cockpit-ready');
     const cached=readCache();if(cached){const age=Date.now()-Number(cached.savedAt||0);render(cached.data,age<CACHE_MAX_MS?'前回のTasks':'Tasks更新待ち');if(age>=CACHE_MAX_MS){showAuth('YOS Tasksは更新待ちです。Google本人確認で最新化できます。');setupAuth()}}else{render({tasks:[]},'端末連携');showAuth('GitHub Tasksは未連携です。本人確認すると「今やる」「次」に追加統合します。');setupAuth()}
