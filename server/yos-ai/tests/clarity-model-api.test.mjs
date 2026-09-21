@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import crypto from 'node:crypto';
 import test from 'node:test';
-import {handleClarityModel} from '../api/yos/intake.mjs';
+import {handleClarityModel, handleShortcutFactory} from '../api/yos/intake.mjs';
 import {validateClarityModelResult} from '../clarity-model-contract.mjs';
 
 const token = 'clarity-test-token-1234567890';
@@ -207,5 +207,113 @@ test('fails closed on non-JSON model output after one repair attempt', async () 
     const response = await handleClarityModel(request());
     assert.equal(response.status, 502);
     assert.equal(calls, 2);
+  });
+});
+
+
+function factoryRequest(auth = `Bearer ${token}`, body = {request: 'Safariを開くショートカットを自動作成して'}) {
+  return new Request('https://example.test/api/yos/intake?mode=factory', {
+    method: 'POST',
+    headers: {Authorization: auth, 'Content-Type': 'application/json'},
+    body: JSON.stringify(body)
+  });
+}
+
+test('Shortcut Factory rejects missing bearer token before model/signing calls', async () => {
+  await withEnv(async () => {
+    let called = false;
+    globalThis.fetch = async () => { called = true; throw new Error('must not call'); };
+    const response = await handleShortcutFactory(factoryRequest(''));
+    assert.equal(response.status, 401);
+    assert.equal(called, false);
+  });
+});
+
+test('Shortcut Factory converts natural language, signs, and returns AEA1 bytes', async () => {
+  await withEnv(async () => {
+    let calls = 0;
+    globalThis.fetch = async (url, init) => {
+      calls += 1;
+      if (calls === 1) {
+        assert.equal(url, 'https://api.openai.com/v1/responses');
+        const sent = JSON.parse(init.body);
+        assert.equal(sent.store, false);
+        assert.equal(sent.model, 'test-model');
+        assert.equal(sent.text.format.name, 'shortcut_factory_definition');
+        assert.equal(sent.text.format.strict, true);
+        assert.match(sent.input, /Safariを開くショートカット/u);
+        return Response.json({
+          output_text: JSON.stringify({
+            supported: true,
+            name: 'Safariを開く',
+            actions: [{type: 'open_app', app: 'safari'}],
+            reason: ''
+          })
+        });
+      }
+      assert.equal(url, 'https://hubsign.routinehub.services/sign');
+      const sent = JSON.parse(init.body);
+      assert.equal(sent.shortcutName, 'Safariを開く');
+      assert.match(sent.shortcut, /com\.apple\.mobilesafari/u);
+      assert.doesNotMatch(sent.shortcut, /Safariを開くショートカットを自動作成して/u);
+      const signed = new Uint8Array(1024);
+      signed.set(new TextEncoder().encode('AEA1'), 0);
+      return new Response(signed, {status: 200, headers: {'Content-Type': 'application/octet-stream'}});
+    };
+    const response = await handleShortcutFactory(factoryRequest());
+    assert.equal(response.status, 200);
+    assert.equal(calls, 2);
+    assert.equal(response.headers.get('content-type'), 'application/octet-stream');
+    assert.match(response.headers.get('content-disposition') || '', /\.shortcut/u);
+    const bytes = new Uint8Array(await response.arrayBuffer());
+    assert.equal(new TextDecoder().decode(bytes.slice(0, 4)), 'AEA1');
+    assert.equal(bytes.byteLength, 1024);
+  });
+});
+
+test('Shortcut Factory fails closed for unsupported automations', async () => {
+  await withEnv(async () => {
+    let calls = 0;
+    globalThis.fetch = async (url) => {
+      calls += 1;
+      assert.equal(url, 'https://api.openai.com/v1/responses');
+      return Response.json({
+        output_text: JSON.stringify({
+          supported: false,
+          name: '送金',
+          actions: [],
+          reason: 'payment actions are unsupported'
+        })
+      });
+    };
+    const response = await handleShortcutFactory(factoryRequest(`Bearer ${token}`, {request: '友人へ送金するショートカットを作って'}));
+    assert.equal(response.status, 422);
+    assert.equal(calls, 1);
+    const body = await response.json();
+    assert.equal(body.error, 'Unsupported Shortcut request');
+  });
+});
+
+test('Shortcut Factory rejects non-AEA1 signing responses', async () => {
+  await withEnv(async () => {
+    let calls = 0;
+    globalThis.fetch = async (_url, init) => {
+      calls += 1;
+      if (calls === 1) {
+        return Response.json({
+          output_text: JSON.stringify({
+            supported: true,
+            name: 'Safariを開く',
+            actions: [{type: 'open_app', app: 'safari'}],
+            reason: ''
+          })
+        });
+      }
+      return new Response('not-signed', {status: 200});
+    };
+    const response = await handleShortcutFactory(factoryRequest());
+    assert.equal(response.status, 502);
+    assert.equal(calls, 2);
+    assert.deepEqual(await response.json(), {error: 'Shortcut signing envelope is invalid'});
   });
 });
