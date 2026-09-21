@@ -1,80 +1,83 @@
-# Clarity Factory — Cherri path
+# Clarity — parent + fixed child Shortcut architecture
 
-Issue #314 の「Clarity Universal Gateway v1」を、iPhoneからテンプレートを書き出さずコードから生成する経路。
+Clarity is the single iPhone natural-language entry point for YOS. Daily operation does **not** depend on creating, signing, importing, or generating a new Shortcut at runtime.
 
-## 現在の実装
+## Official runtime
 
-`clarity-v1.cherri` は次を1本のShortcutへコンパイルする。
+```text
+Action Button
+→ Clarity
+→ voice / natural language
+→ Raw First (Clarity Inbox.txt)
+→ intent understanding
+→ fail-closed Safety / Router
+→ fixed YOS child Shortcut when required
+→ iPhone action
+→ Verify
+→ Clarity Ledger.txt
+```
 
-1. 音声入力
-2. `Clarity Inbox.txt` へ Raw First 保存
-3. ChatGPT / Follow Up OFF / Dictionary 出力
-4. model contract / Policy の fail-closed gate
-5. Router
-6. local v1 executor
-7. Ledger / 必要時だけFeedback
+Clarity is the command layer. Fixed `YOS_*` Shortcuts are execution hands.
 
-### v1 executor
+## First fixed child: YOS_OpenApp
 
-- `idea` → `Idea in Box.txt`
-- `memo` → Raw First済みの `Clarity Inbox.txt` を保存結果として確定
-- `calendar` → Apple Calendar の Add New Event
-- `reminder` → Apple Reminders の日時付き Reminder
-- `task` → Apple Reminders の通常項目
-- `shopping` → Apple Reminders の通常項目（実機側の買い物list mappingはConfig/導入側で固定する）
-- `answer` → その場の短い回答
-- `shortcut_factory` → このLaneでは外部実行せず planned のままLedgerへ残す
-- `open_app` → 明示allowlist内のiPhoneアプリを起動
-- `device_setting` → 明示allowlist内のローカル設定を変更（Wi‑Fi / Bluetooth / モバイル通信 / 機内モード / 低電力 / 明るさ / 音量 / 外観 / ライト / おやすみモード）
-- `myway` → 既存のMY WAY Homeを開き、「今ここ・ここまで・行き先・次の一歩」を再利用して表示
+`open_app` is delegated to the fixed child `YOS_OpenApp`.
 
-Calendar / Reminder / Task / Shopping には `YOS-CLARITY-ID:<request>-<action>` markerを付与する。
+Current supported canonical app targets are:
 
-各副作用の直前に `EXECUTING`、成功して処理が戻った後だけ `APPLIED` を `Clarity Ledger.txt` へ追記する。Shortcuts側のdestination actionが中断・errorになった場合は `APPLIED` が残らないため、実行済みとは扱わない。Policyで止めた処理は `BLOCKED` を記録する。
+`safari, shortcuts, files, notes, phone, reminders, mail, music, calendar, maps, contacts, health, photos, appstore, facetime, chatgpt, scriptable, youtube, spotify, google_sheets`
 
-## 安全境界
+The parent does not embed app-opening actions. It calls `YOS_OpenApp` with the canonical target, checks the child's explicit result token, and only then writes `APPLIED open_app` and `REQUEST_DONE` to Ledger. Unknown app targets remain fail-closed.
 
-- Raw First はAIより前
-- modelは `planned` 以外を返せない
-- high / irreversible / external write は確認境界
-- Calendar / Reminders / Shopping / Idea / Inbox はlocal reversible allowlist
-- 曖昧な予定・通知日時は `needs_review`
-- Calendarは開始時刻が明確で終了指定がない時だけ、policy既定値として60分後を終了時刻にする
-- secret / personal credential / private network値を生成物へ埋め込まない
-- runtimeへHTTP / mail / message等の外部executorを追加しない
+For the first physical acceptance, use exactly:
 
-## 自動検証
+`Safari開いて`
 
-GitHub Actions `Clarity Cherri proof` で以下を固定headごとに検査する。
+Required device result:
 
-- model contract unit tests
-- pinned Cherri v2.3.0 checksum
-- compiler proof
-- Clarity runtime compile
-- Raw First ordering
-- Calendar / Reminder executor presence + marker
-- Ledger state (`EXECUTING` / `APPLIED` / `BLOCKED` / `REQUEST_DONE`)
-- secret / private network scan
-- unsigned artifact upload
+```text
+Action Button
+→ Clarity voice input
+→ open_app / safari
+→ YOS_OpenApp
+→ Safari opens
+→ child result verified
+→ APPLIED open_app safari YOS_OpenApp
+→ REQUEST_DONE
+```
 
-## 署名・iPhone導入
+Code/CI success is not device PASS.
 
-このFactoryはunsigned artifactまでを担当する。trusted signing / import / Action Button / permission / physical iPhone E2E は導入Laneの担当であり、ここでは完了扱いしない。
+## Existing Clarity behavior retained
 
-実機E2Eで最低限確認する入力例:
+The parent keeps the existing Raw First, ChatGPT intent understanding, fail-closed policy, Ledger, Calendar, Reminder, Task, Shopping, Idea, MY WAY handoff, local device-setting executor, and voice input `On Tap` behavior. Existing local destination readback/persistence patches remain in the build.
 
-`明日3時に歯医者。30分前に教えて。帰りにトマト買う。あと棚のアイデア思いついた。`
+## Shortcut Factory boundary
 
-期待結果は Calendar / Reminder / Shopping / Idea の4 actionへ分解され、実際の保存先とLedgerの `APPLIED` が一致すること。
+Shortcut Factory remains in the repository as a separate development lane, including its code, signing path, PoC, API, tests, and history.
 
+It is **not** a normal Clarity executor and is **not** injected into the user-facing Clarity artifact. Normal daily Clarity does not call HubSign, generate a child Shortcut, open Shortcuts for import, or require a Factory token.
 
-## 追加E2E（app / settings / MY WAY）
+Factory assets are retained for future requests whose purpose is explicitly to create new automation.
 
-実機では最低限次を確認する。
+## Safety
 
-- `ChatGPT開いて` → ChatGPTが開く
-- `Wi-Fi切って` → Wi-Fiがオフになる
-- `明るさ35%` → 画面の明るさが35%相当になる
-- `MYWAYまとめ見せて` → 既存MY WAY Homeが開く
+- Raw First is persisted before AI interpretation.
+- The model can only plan actions; it cannot claim execution.
+- Unknown executors and unknown app targets fail closed.
+- High / irreversible / external-write operations keep confirmation boundaries.
+- Calendar / Reminder ambiguous dates remain review-required.
+- No Factory network/sign/import path exists in the normal parent artifact.
+- `YOS_OpenApp` is local-only and fixed-name.
+- Physical iPhone behavior is the final authority for device PASS.
 
-未登録アプリ、未対応設定、値が曖昧な設定は fail closed で停止する。
+## Build / verification
+
+The fixed-child workflows compile and sign both artifacts:
+
+- `Clarity-signed.shortcut`
+- `YOS_OpenApp-signed.shortcut`
+
+Automated checks cover source contracts, model contract, Cherri compile, Raw First ordering, fixed-child dispatch, Factory isolation, local executor preservation, secret scanning, HubSign signing, and AEA1 envelope validation.
+
+See `IPHONE_OPERATION_COVERAGE.md` for device-PASS-based coverage.
