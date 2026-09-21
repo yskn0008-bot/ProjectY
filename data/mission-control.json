@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-22T03:56:03+09:00",
+  "updated_at": "2026-09-22T05:56:01+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -21,16 +21,6 @@
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/373",
       "updated_at": "2026-09-21T01:14:46Z"
-    },
-    {
-      "id": "github-pr-392",
-      "title": "PR #392 Clarity: add One Enter Gmail development bridge",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/392",
-      "updated_at": "2026-09-20T06:26:15Z"
     },
     {
       "id": "github-pr-412",
@@ -63,6 +53,16 @@
       "updated_at": "2026-09-21T13:12:36Z"
     },
     {
+      "id": "github-pr-426",
+      "title": "PR #426 Fix Clarity brightness 50 acceptance route",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/426",
+      "updated_at": "2026-09-21T19:07:49Z"
+    },
+    {
       "id": "github-issue-232",
       "title": "Issue #232 [YOS HQ] ProjectY自動司令部 v1｜毎時監視・安全な自動継続",
       "type": "GitHub Issue",
@@ -70,7 +70,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-09-21T18:55:56Z"
+      "updated_at": "2026-09-21T19:08:13Z"
     },
     {
       "id": "github-issue-256",
@@ -101,16 +101,6 @@
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/277",
       "updated_at": "2026-09-04T23:28:41Z"
-    },
-    {
-      "id": "github-issue-279",
-      "title": "Issue #279 [YOS HQ] Multi-Engine Dispatch v1｜独立AI資源の安全並列化",
-      "type": "GitHub Issue",
-      "status": "open",
-      "priority": 3,
-      "next_action": "完成条件を確認し、次の安全な実装を1件進める",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/279",
-      "updated_at": "2026-09-04T17:50:51Z"
     },
     {
       "id": "github-issue-288",
@@ -151,6 +141,16 @@
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/297",
       "updated_at": "2026-09-11T16:32:45Z"
+    },
+    {
+      "id": "github-issue-309",
+      "title": "Issue #309 [PoC3] YOS Automation Factory｜実機Wallet Hubから場所判定を自動生成",
+      "type": "GitHub Issue",
+      "status": "open",
+      "priority": 3,
+      "next_action": "完成条件を確認し、次の安全な実装を1件進める",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/309",
+      "updated_at": "2026-09-10T06:27:07Z"
     },
     {
       "id": "github-issue-51",
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-22T03:56:03+09:00",
+      "last_update": "2026-09-22T05:56:01+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -309,13 +309,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 21件・Open PR 20件を自動同期中",
+      "next_action": "Open Issue 20件・Open PR 20件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-22T03:56:03+09:00",
+      "last_update": "2026-09-22T05:56:01+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-22T03:56:03+09:00",
+      "last_update": "2026-09-22T05:56:01+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "3b3ee28eabcb66af145d96b370562cc55ae0152e5d6b0ab546aa84137a50eb43"
+  "github_snapshot_hash": "0ba9e0228c97a7e1656cef81cd2ba642bb186fc7e2b17aa6d0e47787e8536ad9"
 }
