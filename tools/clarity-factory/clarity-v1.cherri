@@ -346,7 +346,7 @@ for actionItem in @actionsRaw {
 
     if executor == "shortcut_factory" {
         @handoffExecutor = "shortcut_factory"
-        @handoffFactoryRequest = "{content}"
+        @handoffFactoryRequest = "{originalInput}"
         const shortcutQueuedRecord = text("{CurrentDate}\t{requestNumber}\t{actionId}\tHANDOFF_READY\tshortcut_factory\n")
         appendResolvedFile(ledgerFile, shortcutQueuedRecord)
     }
