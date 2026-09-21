@@ -94,6 +94,44 @@ function readManifest(dir = recoveryDir) {
 
 function removeIfExists(path) { if (fm.fileExists(path)) fm.remove(path); }
 function sameText(path, expected) { return fm.fileExists(path) && fm.readString(path) === expected; }
+async function settle(ms) {
+  if (typeof Timer === 'undefined' || !Timer || typeof Timer.schedule !== 'function') return;
+  await new Promise(resolve => Timer.schedule(ms, false, resolve));
+}
+async function writeStable(path, expected, label) {
+  let last = '';
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    ensureParent(fm, path);
+    fm.writeString(path, expected);
+    await settle(250 * attempt);
+    try { last = fm.readString(path); } catch (_) { last = ''; }
+    if (last === expected) return;
+  }
+  throw new Error(label + ' の安定書き込みに失敗しました。');
+}
+async function reconcileCommittedSet(manifest) {
+  for (let round = 1; round <= 3; round++) {
+    let repaired = false;
+    for (const entry of manifest.entries) {
+      const staged = fm.readString(stagedPath(entry.target));
+      const live = livePath(entry.target);
+      if (!sameText(live, staged)) {
+        repaired = true;
+        await writeStable(live, staged, entry.target);
+      }
+    }
+    await settle(300 * round);
+    const mismatches = [];
+    for (const entry of manifest.entries) {
+      const staged = fm.readString(stagedPath(entry.target));
+      if (!sameText(livePath(entry.target), staged)) mismatches.push(entry.target);
+    }
+    if (!mismatches.length) return;
+    if (!repaired && round === 3) break;
+    if (round === 3) throw new Error(mismatches[0] + ' の最終整合検証に失敗しました。');
+  }
+  throw new Error('更新後ファイルの最終整合検証に失敗しました。');
+}
 
 async function downloadText(name) {
   const req = new Request(rawURL(name));
@@ -280,16 +318,12 @@ async function commitTransaction(manifest) {
       const text = fm.readString(stagedPath(entry.target));
       const target = livePath(entry.target);
       ensureParent(fm, target);
-      fm.writeString(target, text);
-      if (!sameText(target, text)) throw new Error(entry.target + ' の切替検証に失敗しました。');
+      await writeStable(target, text, entry.target + ' の切替検証');
       manifest.applied.push(entry.target);
       writeJSON(manifestPath, manifest);
       hook('afterLiveWrite', { target: entry.target, applied: manifest.applied.slice() });
     }
-    for (const entry of manifest.entries) {
-      const staged = fm.readString(stagedPath(entry.target));
-      if (!sameText(livePath(entry.target), staged)) throw new Error(entry.target + ' の最終整合検証に失敗しました。');
-    }
+    await reconcileCommittedSet(manifest);
     manifest.phase = 'committed';
     manifest.committedAt = new Date().toISOString();
     writeJSON(manifestPath, manifest);
