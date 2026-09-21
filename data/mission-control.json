@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-21T10:36:56+09:00",
+  "updated_at": "2026-09-21T10:47:45+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -80,7 +80,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-09-21T01:36:46Z"
+      "updated_at": "2026-09-21T01:46:38Z"
     },
     {
       "id": "github-issue-256",
@@ -165,39 +165,39 @@
   ],
   "recently_completed": [
     {
-      "id": "github-commit-6bc87e6ede53",
-      "title": "Merge pull request #411 from yskn0008-bot/repair/clarity-final-handoff",
-      "completed_at": "2026-09-21T01:36:44Z",
-      "result": "GitHub mainへ反映（6bc87e6）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/6bc87e6ede5354cc33d9a843018ff2bccffc7476"
+      "id": "github-commit-82ae997c70ab",
+      "title": "Merge pull request #413 from yskn0008-bot/repair/clarity-terminal-handoff",
+      "completed_at": "2026-09-21T01:47:30Z",
+      "result": "GitHub mainへ反映（82ae997）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/82ae997c70abd220fa5bd8de8d9e2bc4ef5e3dd9"
     },
     {
-      "id": "github-commit-a10463942520",
-      "title": "ci: refresh Clarity evidence with canonical PR fields",
-      "completed_at": "2026-09-21T01:36:01Z",
-      "result": "GitHub mainへ反映（a104639）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/a10463942520a382273bcd3dbbd11194fa382c3b"
+      "id": "github-commit-761450cba2b3",
+      "title": "ci: refresh terminal handoff evidence",
+      "completed_at": "2026-09-21T01:46:07Z",
+      "result": "GitHub mainへ反映（761450c）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/761450cba2b3514bd5688eedfce4c5a2d383981d"
     },
     {
-      "id": "github-commit-4593fb312a40",
-      "title": "ci: refresh Clarity PR evidence event",
-      "completed_at": "2026-09-21T01:35:16Z",
-      "result": "GitHub mainへ反映（4593fb3）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/4593fb312a40680ea6725241c822e10e1e867bf8"
+      "id": "github-commit-46fb12dc6031",
+      "title": "test(clarity): align handoff regression with terminal design",
+      "completed_at": "2026-09-21T01:45:10Z",
+      "result": "GitHub mainへ反映（46fb12d）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/46fb12dc603197729d4254827b27e87870fd2910"
     },
     {
-      "id": "github-commit-028ba171aa2e",
-      "title": "test(clarity): guard final handoff behavior",
-      "completed_at": "2026-09-21T01:32:48Z",
-      "result": "GitHub mainへ反映（028ba17）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/028ba171aa2e7315a90e2efce3a019dcfe6d0db6"
+      "id": "github-commit-50b9ff0bcb2e",
+      "title": "test(clarity): require terminal destination handoff",
+      "completed_at": "2026-09-21T01:44:27Z",
+      "result": "GitHub mainへ反映（50b9ff0）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/50b9ff0bcb2e197840316e120232876b8bb0317f"
     },
     {
-      "id": "github-commit-2d56d9850c0b",
-      "title": "fix(clarity): keep final app handoff visible",
-      "completed_at": "2026-09-21T01:32:45Z",
-      "result": "GitHub mainへ反映（2d56d98）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/2d56d9850c0b3f7fdbac6d96a2d0348729fda2ab"
+      "id": "github-commit-12fd0c95e7ca",
+      "title": "fix(clarity): make destination handoff terminal",
+      "completed_at": "2026-09-21T01:44:13Z",
+      "result": "GitHub mainへ反映（12fd0c9）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/12fd0c95e7ca80437f5b4f16e7ef4cd7a115298c"
     },
     {
       "id": "complete-002",
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-21T10:36:56+09:00",
+      "last_update": "2026-09-21T10:47:45+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -315,7 +315,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-21T10:36:56+09:00",
+      "last_update": "2026-09-21T10:47:45+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-21T10:36:56+09:00",
+      "last_update": "2026-09-21T10:47:45+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "6ec8d8d14b935e64c8193e8ddb9c83840604bc23503487ea9928de2d69899564"
+  "github_snapshot_hash": "18ab55b8a81f0f27b2e590a0048efc1757142d8d53d6bbe2bd49fc6055744439"
 }
