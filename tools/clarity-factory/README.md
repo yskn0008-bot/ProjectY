@@ -50,7 +50,7 @@ Code/CI success is not device PASS.
 
 ## Existing Clarity behavior retained
 
-The parent keeps the existing Raw First, ChatGPT intent understanding, fail-closed policy, Ledger, Calendar, Reminder, Task, Shopping, Idea, MY WAY handoff, local device-setting executor, and voice input `On Tap` behavior. Existing local destination readback/persistence patches remain in the build.
+The parent keeps the existing Raw First, ChatGPT intent understanding, fail-closed policy, Ledger, Calendar, Reminder, Task, Shopping, Idea, MY WAY handoff, local device-setting executor, and voice input behavior. For one-enter use, voice capture now auto-finishes after a pause instead of waiting for a second tap. Existing local destination readback/persistence patches remain in the build.
 
 ## Shortcut Factory boundary
 
@@ -69,7 +69,7 @@ Factory assets are retained for future requests whose purpose is explicitly to c
 - Calendar / Reminder ambiguous dates remain review-required.
 - No Factory network/sign/import path exists in the normal parent artifact.
 - `YOS_OpenApp` is local-only and fixed-name.
-- Physical iPhone behavior is the final authority for device PASS.
+- Voice capture auto-finishes after a pause; no second tap is required for the first Safari acceptance command.\n- Physical iPhone behavior is the final authority for device PASS.
 
 ## Build / verification
 
