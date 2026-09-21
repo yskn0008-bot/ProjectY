@@ -37,7 +37,8 @@ if originalInput contains "開いて" {
     if originalInput contains "Safari" || originalInput contains "サファリ" {
         const fastSafariRouteRecord = text("{CurrentDate}\\t{requestNumber}\\tFAST_ROUTE\\topen_app\\tsafari\\n")
         appendResolvedFile(ledgerFile, fastSafariRouteRecord)
-        run("YOS_OpenApp", "safari")
+        const fastSafariTarget = text("safari")
+        run("YOS_OpenApp", fastSafariTarget)
         const fastSafariAppliedRecord = text("{CurrentDate}\\t{requestNumber}\\tAPPLIED\\topen_app\\tsafari\\tYOS_OpenApp\\tchild_returned\\tfast_path\\n")
         appendResolvedFile(ledgerFile, fastSafariAppliedRecord)
         const fastSafariDoneRecord = text("{CurrentDate}\\t{requestNumber}\\tREQUEST_DONE\\n")
