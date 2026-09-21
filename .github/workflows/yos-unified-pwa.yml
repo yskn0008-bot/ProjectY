@@ -41,6 +41,7 @@ jobs:
           node-version: '22'
       - run: node --check service-worker.js
       - run: node --check yos/app.js
+      - run: node --check yos/guide.js
       - run: node --check yos/hj/app.js
       - run: node --test yos/tests/unified-pwa-contract.test.mjs
 
