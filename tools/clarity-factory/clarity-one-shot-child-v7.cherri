@@ -1,0 +1,51 @@
+#define name ClarityOneShotChildV7
+#define color blue
+
+#include 'actions/device'
+#include 'actions/documents'
+#include 'actions/text'
+
+action 'is.workflow.actions.output' outputValue(variable value: 'WFOutput')
+
+@request = getDictionary(ShortcutInput)
+@originalInputValue = getValue(@request, "original_input")
+@originalInput = "{@originalInputValue}"
+@actionsRaw = getValue(@request, "actions")
+
+if !@originalInput || !@actionsRaw {
+    @out = {"status":"failed","verified":false,"stage":"input","error_code":"INPUT_PARSE_FAILED"}
+    outputValue(@out)
+}
+
+for actionItem in @actionsRaw {
+    const actionDict = getDictionary(@actionItem)
+    const module = "{actionDict['module']}"
+    @inputRaw = getValue(actionDict, "input")
+    @input = getDictionary(@inputRaw)
+    @targetValue = getValue(@input, "target")
+    @target = "{@targetValue}"
+    @valueValue = getValue(@input, "value")
+    @value = "{@valueValue}"
+
+    if module != "DeviceSetting" || @target != "brightness" {
+        @out = {"status":"failed","verified":false,"stage":"routing","error_code":"ROUTING_FAILED"}
+        outputValue(@out)
+    }
+
+    const brightnessPercent = getNumbers(@value)
+    if brightnessPercent < 0 || brightnessPercent > 100 {
+        @out = {"status":"failed","verified":false,"stage":"value","error_code":"VALUE_FAILED"}
+        outputValue(@out)
+    }
+
+    const brightnessRatio = brightnessPercent * 0.01
+    rawAction("is.workflow.actions.setbrightness", {
+        "WFBrightness": "${brightnessRatio}"
+    })
+
+    const marker = text("CLARITY_V7_LEDGER_PASS")
+    saveFile("Clarity One Shot V7.txt", marker, true)
+
+    @out = {"status":"success","verified":true,"stage":"complete","error_code":""}
+    outputValue(@out)
+}

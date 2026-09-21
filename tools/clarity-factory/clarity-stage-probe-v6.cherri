@@ -1,0 +1,31 @@
+#define name ClarityStageProbeV6
+#define color blue
+
+#include 'actions/shortcuts'
+#include 'actions/device'
+#include 'actions/text'
+
+setBrightness(0.80)
+wait(1)
+
+const payload = {
+    "original_input":"stage-probe-v6",
+    "actions":[
+        {
+            "id":"a1",
+            "module":"DeviceSetting",
+            "input":{
+                "target":"brightness",
+                "value":"35"
+            },
+            "needs_review":false,
+            "status":"planned"
+        }
+    ]
+}
+
+const childResult = run("ClarityStageChildV6", payload)
+wait(1)
+const currentBrightness = getDeviceDetail("Current Brightness")
+
+show("ClarityStageProbeV6\nBrightness: {currentBrightness}\n0.60 = stopped at ledger append\n0.70 = ledger worked but dynamic brightness failed\n0.35 = both worked")

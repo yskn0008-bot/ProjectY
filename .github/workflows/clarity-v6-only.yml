@@ -1,0 +1,87 @@
+name: Clarity V6 stage probe
+
+on:
+  pull_request:
+    paths:
+      - 'tools/clarity-factory/clarity-stage-child-v6.cherri'
+      - 'tools/clarity-factory/clarity-stage-probe-v6.cherri'
+      - '.github/workflows/clarity-v6-only.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-sign-v6:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pinned Cherri v2.3.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          url='https://github.com/electrikmilk/cherri/releases/download/v2.3.0/cherri_linux-x86_64.zip'
+          expected='7ab2c384b7b26e7c72a30a8dfa56f89dae12c4068b7951bc1e3193f3698edbe9'
+          curl -fsSL "$url" -o /tmp/cherri.zip
+          printf '%s  %s\n' "$expected" /tmp/cherri.zip | sha256sum -c -
+          mkdir -p /tmp/cherri
+          unzip -q /tmp/cherri.zip -d /tmp/cherri
+          binary="$(find /tmp/cherri -type f -name cherri -print -quit)"
+          sudo install -m 0755 "$binary" /usr/local/bin/cherri
+
+      - name: Compile V6
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd tools/clarity-factory
+          cherri clarity-stage-child-v6.cherri --skip-sign --debug
+          cherri clarity-stage-probe-v6.cherri --skip-sign --debug
+          child='./ClarityStageChildV6_unsigned.shortcut'
+          probe='./ClarityStageProbeV6_unsigned.shortcut'
+          test -f "$child"
+          test -f "$probe"
+          grep -q 'Clarity Ledger.txt' "$child"
+          grep -q 'brightnessRatio' "$child"
+          grep -q 'ClarityStageChildV6' "$probe"
+          mkdir -p artifacts-v6
+          cp "$child" artifacts-v6/ClarityStageChildV6.shortcut
+          cp "$probe" artifacts-v6/ClarityStageProbeV6.shortcut
+
+      - name: Sign V6
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/clarity-factory/sign_with_hubsign.py \
+            --input tools/clarity-factory/artifacts-v6/ClarityStageChildV6.shortcut \
+            --output tools/clarity-factory/artifacts-v6/ClarityStageChildV6-signed.shortcut \
+            --name 'ClarityStageChildV6' \
+            --timeout 180
+          python3 tools/clarity-factory/sign_with_hubsign.py \
+            --input tools/clarity-factory/artifacts-v6/ClarityStageProbeV6.shortcut \
+            --output tools/clarity-factory/artifacts-v6/ClarityStageProbeV6-signed.shortcut \
+            --name 'ClarityStageProbeV6' \
+            --timeout 180
+
+      - name: Verify AEA1
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          base=Path('tools/clarity-factory/artifacts-v6')
+          for name in ('ClarityStageChildV6-signed.shortcut','ClarityStageProbeV6-signed.shortcut'):
+              data=(base/name).read_bytes()
+              assert data.startswith(b'AEA1')
+              assert len(data)>500
+              print(name, len(data))
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: clarity-v6
+          path: |
+            tools/clarity-factory/artifacts-v6/ClarityStageChildV6-signed.shortcut
+            tools/clarity-factory/artifacts-v6/ClarityStageProbeV6-signed.shortcut
+          if-no-files-found: error

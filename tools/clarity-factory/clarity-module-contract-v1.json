@@ -1,0 +1,172 @@
+{
+  "version": "1.2",
+  "purpose": "Additive Clarity Router-to-child-Shortcut contract. Existing Clarity executors remain the fallback until physical iPhone E2E passes.",
+  "understand_layer": {
+    "preferred_runtime": "apple_shortcuts_use_model",
+    "role": "structure_intents_only",
+    "output_contract": "action",
+    "supports_multiple_actions": true,
+    "physical_device_evidence": {
+      "platform": "iphone",
+      "observed_domains": [
+        "calendar",
+        "shopping",
+        "idea"
+      ],
+      "status": "observed_on_device_2026-09-18"
+    },
+    "fallback": "existing_clarity_executor_path",
+    "cutover_rule": "Keep fallback until the Use Model -> Router -> child Shortcut path passes physical iPhone E2E."
+  },
+  "action": {
+    "required": [
+      "id",
+      "module",
+      "input",
+      "risk",
+      "external_write",
+      "needs_review",
+      "needs_confirmation",
+      "status"
+    ],
+    "status": [
+      "planned"
+    ],
+    "risk": [
+      "low",
+      "medium",
+      "high",
+      "irreversible"
+    ],
+    "input_type": "dictionary",
+    "unknown_values": "null_or_empty_never_guess"
+  },
+  "child_result": {
+    "required": [
+      "status",
+      "verified",
+      "result",
+      "error_code"
+    ],
+    "status": [
+      "success",
+      "failed",
+      "blocked"
+    ],
+    "verified_type": "boolean",
+    "result_type": "dictionary",
+    "error_code_type": "string"
+  },
+  "parent_policy": {
+    "registered_modules_only": true,
+    "unregistered_module": "blocked",
+    "invalid_action_schema": "blocked",
+    "missing_child_or_invalid_child_result": "failed",
+    "model_may_report_execution": false,
+    "success_requires_verified_true_for_applied": true,
+    "unverified_success": "unverified",
+    "no_guessing_or_substitution": true
+  },
+  "legacy_compatibility": {
+    "keep_existing_executor_path": true,
+    "keep_existing_requires_confirmation": true,
+    "normalization": "needs_confirmation is canonical for modular actions; when a legacy action is adapted, effective confirmation is needs_confirmation OR requires_confirmation.",
+    "cutover": "Do not remove or bypass the existing executor path until the preferred Use Model modular path passes physical iPhone E2E and rollback checks."
+  },
+  "ledger_mapping": {
+    "success_verified": "APPLIED",
+    "success_unverified": "UNVERIFIED",
+    "failed": "FAILED",
+    "blocked": "BLOCKED"
+  },
+  "initial_registry": {
+    "YOS_Test": {
+      "enabled": false,
+      "side_effect": false,
+      "purpose": "Phase 2 echo-only dispatcher proof"
+    },
+    "YOS_Timer": {
+      "enabled": false,
+      "side_effect": true,
+      "input_schema": {
+        "duration_seconds": "positive_integer"
+      },
+      "purpose": "Phase 3 first physical iPhone E2E"
+    }
+  },
+  "completion_scope": {
+    "goal": "Clarity is the single normal entry point for every iPhone capability that can be reached through public iOS automation surfaces or an existing registered YOS asset.",
+    "registry": "clarity-capability-registry-v1.json",
+    "protected_action_rule": "If iOS requires explicit user interaction or exposes no public automation API, route to the nearest native UI instead of pretending the action ran.",
+    "dynamic_app_rule": "Installed third-party App Intents are device-dependent and must be registered/verified before execution.",
+    "physical_acceptance": "No capability route is complete until its real iPhone path reaches Verify/Ledger successfully."
+  },
+  "formal_v2": {
+    "candidate_parent": "Clarity Formal v2",
+    "candidate_child": "Clarity Actions Formal v2",
+    "architecture": "Raw First -> Apple Shortcuts Use Model -> ACTION[] -> policy/router -> child executor -> Verify/Ledger",
+    "new_modules": {
+      "OpenApp": {
+        "mode": "direct_shortcuts",
+        "target_field": "target",
+        "allowlist": [
+          "safari",
+          "shortcuts",
+          "files",
+          "notes",
+          "phone",
+          "reminders",
+          "mail",
+          "music",
+          "calendar",
+          "maps",
+          "contacts",
+          "health",
+          "photos",
+          "appstore",
+          "facetime",
+          "chatgpt",
+          "scriptable",
+          "youtube",
+          "spotify",
+          "google_sheets"
+        ],
+        "unknown": "needs_review_then_block"
+      },
+      "DeviceSetting": {
+        "mode": "direct_shortcuts",
+        "target_field": "target",
+        "value_field": "value",
+        "supported": [
+          "wifi",
+          "bluetooth",
+          "low_power_mode",
+          "brightness",
+          "volume",
+          "appearance",
+          "flashlight",
+          "do_not_disturb"
+        ],
+        "unsupported_direct": [
+          "cellular_data",
+          "airplane_mode"
+        ],
+        "unknown": "needs_review_then_block"
+      },
+      "MyWay": {
+        "mode": "existing_asset",
+        "target": "home",
+        "url": "https://yskn0008-bot.github.io/ProjectY/yos/",
+        "write_path": "pending_not_added"
+      }
+    },
+    "ordering": "OpenApp and MyWay must be last display-switch actions after local writes/settings.",
+    "acceptance": {
+      "repository_compile_required": true,
+      "signed_pair_required": true,
+      "physical_iphone_e2e_required": true,
+      "status_before_device_test": "needs_device_verification",
+      "production_names_unchanged_until_acceptance": true
+    }
+  }
+}

@@ -1,0 +1,75 @@
+#define name ClarityOneShotTestV7
+#define color blue
+
+#include 'actions/shortcuts'
+#include 'actions/device'
+#include 'actions/documents'
+#include 'actions/text'
+
+setBrightness(0.80)
+const blank = text("")
+saveFile("Clarity One Shot V7.txt", blank, true)
+wait(1)
+
+const payload = {
+    "original_input":"one-shot-v7",
+    "actions":[
+        {
+            "id":"a1",
+            "module":"DeviceSetting",
+            "input":{
+                "target":"brightness",
+                "value":"35"
+            },
+            "needs_review":false,
+            "status":"planned"
+        }
+    ]
+}
+
+const childRaw = run("ClarityOneShotChildV7", payload)
+wait(1)
+
+const currentBrightness = getDeviceDetail("Current Brightness")
+@currentBrightnessText = "{currentBrightness}"
+const ledgerFile = getFile("Clarity One Shot V7.txt")
+
+@ledgerText = ""
+if ledgerFile {
+    @ledgerTextValue = getText(ledgerFile)
+    @ledgerText = "{@ledgerTextValue}"
+}
+
+@childStatus = ""
+@childStage = ""
+@childError = ""
+if childRaw {
+    @child = getDictionary(childRaw)
+    @childStatusValue = getValue(@child, "status")
+    @childStageValue = getValue(@child, "stage")
+    @childErrorValue = getValue(@child, "error_code")
+    @childStatus = "{@childStatusValue}"
+    @childStage = "{@childStageValue}"
+    @childError = "{@childErrorValue}"
+}
+
+@brightnessOK = false
+if @currentBrightnessText == "0.35" {
+    @brightnessOK = true
+}
+
+@ledgerOK = false
+if @ledgerText == "CLARITY_V7_LEDGER_PASS" {
+    @ledgerOK = true
+}
+
+@childOK = false
+if @childStatus == "success" {
+    @childOK = true
+}
+
+if @brightnessOK && @ledgerOK && @childOK {
+    show("CLARITY ONE SHOT V7\nPASS\nBrightness: {currentBrightness}\nLedger: PASS\nChild output: PASS")
+} else {
+    show("CLARITY ONE SHOT V7\nFAIL\nBrightness: {currentBrightness}\nLedger: {@ledgerText}\nChild status: {@childStatus}\nChild stage: {@childStage}\nChild error: {@childError}")
+}

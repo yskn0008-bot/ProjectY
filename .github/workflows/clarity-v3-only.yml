@@ -1,0 +1,106 @@
+name: Clarity V3 direct-ledger pair
+
+on:
+  pull_request:
+    paths:
+      - 'tools/clarity-factory/clarity-actions-v3.cherri'
+      - 'tools/clarity-factory/clarity-probe-v3.cherri'
+      - '.github/workflows/clarity-v3-only.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-sign-v3:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pinned Cherri v2.3.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          url='https://github.com/electrikmilk/cherri/releases/download/v2.3.0/cherri_linux-x86_64.zip'
+          expected='7ab2c384b7b26e7c72a30a8dfa56f89dae12c4068b7951bc1e3193f3698edbe9'
+          curl -fsSL "$url" -o /tmp/cherri.zip
+          printf '%s  %s\n' "$expected" /tmp/cherri.zip | sha256sum -c -
+          mkdir -p /tmp/cherri
+          unzip -q /tmp/cherri.zip -d /tmp/cherri
+          binary="$(find /tmp/cherri -type f -name cherri -print -quit)"
+          sudo install -m 0755 "$binary" /usr/local/bin/cherri
+
+      - name: Compile V3
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd tools/clarity-factory
+          cherri clarity-actions-v3.cherri --skip-sign --debug
+          cherri clarity-probe-v3.cherri --skip-sign --debug
+          child='./ClarityActionsV3_unsigned.shortcut'
+          probe='./ClarityProbeV3_unsigned.shortcut'
+          test -f "$child"
+          test -f "$probe"
+          python3 patch_append_file_paths.py "$child"
+          python3 patch_reminder_wire_format.py "$child"
+          grep -q 'Clarity Ledger.txt' "$child"
+          grep -q 'Idea in Box.txt' "$child"
+          grep -q 'UNSUPPORTED_DEVICE_SETTING' "$child"
+          grep -q 'ClarityActionsV3' "$probe"
+          python3 - "$child" <<'PY'
+          import plistlib, sys
+          with open(sys.argv[1], "rb") as fh:
+              root = plistlib.load(fh)
+          actions = root.get("WFWorkflowActions", [])
+          assert not any(str(a.get("WFWorkflowActionIdentifier","")).endswith("file.append") for a in actions)
+          opens = [
+              a.get("WFWorkflowActionParameters", {})
+              for a in actions
+              if str(a.get("WFWorkflowActionIdentifier","")).endswith("documentpicker.open")
+              and a.get("WFWorkflowActionParameters", {}).get("WFGetFilePath") in {"Clarity Ledger.txt","Idea in Box.txt"}
+          ]
+          assert opens, "no rewritten persistence reads found"
+          assert all(p.get("WFFileErrorIfNotFound") is False for p in opens), opens
+          print("V3 missing-file-safe persistence: PASS")
+          PY
+          mkdir -p artifacts-v3
+          cp "$child" artifacts-v3/ClarityActionsV3.shortcut
+          cp "$probe" artifacts-v3/ClarityProbeV3.shortcut
+
+      - name: Sign V3
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/clarity-factory/sign_with_hubsign.py \
+            --input tools/clarity-factory/artifacts-v3/ClarityActionsV3.shortcut \
+            --output tools/clarity-factory/artifacts-v3/ClarityActionsV3-signed.shortcut \
+            --name 'ClarityActionsV3' \
+            --timeout 180
+          python3 tools/clarity-factory/sign_with_hubsign.py \
+            --input tools/clarity-factory/artifacts-v3/ClarityProbeV3.shortcut \
+            --output tools/clarity-factory/artifacts-v3/ClarityProbeV3-signed.shortcut \
+            --name 'ClarityProbeV3' \
+            --timeout 180
+
+      - name: Verify AEA1
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          base=Path('tools/clarity-factory/artifacts-v3')
+          for name in ('ClarityActionsV3-signed.shortcut','ClarityProbeV3-signed.shortcut'):
+              data=(base/name).read_bytes()
+              assert data.startswith(b'AEA1')
+              assert len(data)>500
+              print(name, len(data))
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: clarity-v3
+          path: |
+            tools/clarity-factory/artifacts-v3/ClarityActionsV3-signed.shortcut
+            tools/clarity-factory/artifacts-v3/ClarityProbeV3-signed.shortcut
+          if-no-files-found: error

@@ -1,0 +1,16 @@
+#define name ClarityInputProbeV4
+#define color blue
+
+#include 'actions/shortcuts'
+#include 'actions/device'
+#include 'actions/text'
+
+setBrightness(0.80)
+wait(1)
+
+const probeInput = text("ping")
+const childResult = run("ClarityInputChildV4", probeInput)
+wait(1)
+
+const currentBrightness = getDeviceDetail("Current Brightness")
+show("ClarityInputProbeV4\nBrightness after child: {currentBrightness}\nExpected 0.35 if input arrived, 0.20 if input was empty.")

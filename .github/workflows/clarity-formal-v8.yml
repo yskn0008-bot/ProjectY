@@ -1,0 +1,117 @@
+name: Clarity Formal V8 immutable pair
+
+on:
+  pull_request:
+    paths:
+      - 'tools/clarity-factory/clarity-formal-v8.cherri'
+      - 'tools/clarity-factory/clarity-actions-v8a.cherri'
+      - 'tools/clarity-factory/patch_append_file_paths.py'
+      - '.github/workflows/clarity-formal-v8.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-sign-v8:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pinned Cherri v2.3.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          url='https://github.com/electrikmilk/cherri/releases/download/v2.3.0/cherri_linux-x86_64.zip'
+          expected='7ab2c384b7b26e7c72a30a8dfa56f89dae12c4068b7951bc1e3193f3698edbe9'
+          curl -fsSL "$url" -o /tmp/cherri.zip
+          printf '%s  %s\n' "$expected" /tmp/cherri.zip | sha256sum -c -
+          mkdir -p /tmp/cherri
+          unzip -q /tmp/cherri.zip -d /tmp/cherri
+          binary="$(find /tmp/cherri -type f -name cherri -print -quit)"
+          sudo install -m 0755 "$binary" /usr/local/bin/cherri
+
+      - name: Compile and patch immutable Formal V8 pair
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd tools/clarity-factory
+          cherri clarity-formal-v8.cherri --skip-sign --debug
+          cherri clarity-actions-v8a.cherri --skip-sign --debug
+          parent='./ClarityFormalV8_unsigned.shortcut'
+          child='./ClarityActionsV8A_unsigned.shortcut'
+          test -f "$parent"
+          test -f "$child"
+
+          python3 patch_append_file_paths.py "$parent"
+          python3 patch_append_file_paths.py "$child"
+          python3 patch_reminder_wire_format.py "$child"
+          python3 patch_execute_actions_readback.py "$child"
+          python3 validate_clarity_execute_actions.py "$child"
+
+          python3 - "$parent" "$child" <<'PY'
+          import plistlib, sys
+          pp, cp = sys.argv[1:3]
+          with open(pp,'rb') as f: parent=plistlib.load(f)
+          with open(cp,'rb') as f: child=plistlib.load(f)
+          ptxt=repr(parent); ctxt=repr(child)
+          assert 'ClarityActionsV8A' in ptxt
+          assert 'ClarityFormalV8' in ptxt
+          assert 'E2E PASS' in ptxt
+          assert 'DeviceSetting' in ptxt and 'OpenApp' in ptxt and 'MyWay' in ptxt
+          for marker in ('UNSUPPORTED_APP','UNSUPPORTED_DEVICE_SETTING','UNSUPPORTED_MYWAY_TARGET'):
+              assert marker in ctxt, marker
+          resolver_names={'inboxFile','ledgerFile','ideaFile'}
+          resolvers=[]
+          for root in (parent, child):
+              for a in root.get('WFWorkflowActions',[]):
+                  ident=str(a.get('WFWorkflowActionIdentifier',''))
+                  params=a.get('WFWorkflowActionParameters',{})
+                  if ident.endswith('documentpicker.open') and params.get('CustomOutputName') in resolver_names:
+                      resolvers.append(params)
+          assert resolvers, 'original persistence resolvers missing'
+          assert all(p.get('WFFileErrorIfNotFound') is False for p in resolvers), resolvers
+          print('Formal V8 immutable contract: PASS')
+          PY
+
+          mkdir -p artifacts-v8
+          cp "$parent" artifacts-v8/ClarityFormalV8.shortcut
+          cp "$child" artifacts-v8/ClarityActionsV8A.shortcut
+
+      - name: Sign immutable Formal V8 pair
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/clarity-factory/sign_with_hubsign.py \
+            --input tools/clarity-factory/artifacts-v8/ClarityActionsV8A.shortcut \
+            --output tools/clarity-factory/artifacts-v8/ClarityActionsV8A-signed.shortcut \
+            --name 'ClarityActionsV8A' \
+            --timeout 180
+          python3 tools/clarity-factory/sign_with_hubsign.py \
+            --input tools/clarity-factory/artifacts-v8/ClarityFormalV8.shortcut \
+            --output tools/clarity-factory/artifacts-v8/ClarityFormalV8-signed.shortcut \
+            --name 'ClarityFormalV8' \
+            --timeout 180
+
+      - name: Verify AEA1
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          base=Path('tools/clarity-factory/artifacts-v8')
+          for name in ('ClarityActionsV8A-signed.shortcut','ClarityFormalV8-signed.shortcut'):
+              data=(base/name).read_bytes()
+              assert data.startswith(b'AEA1')
+              assert len(data)>500
+              print(name, len(data))
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: clarity-formal-v8
+          path: |
+            tools/clarity-factory/artifacts-v8/ClarityActionsV8A-signed.shortcut
+            tools/clarity-factory/artifacts-v8/ClarityFormalV8-signed.shortcut
+          if-no-files-found: error

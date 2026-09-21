@@ -11,8 +11,10 @@ cross-platform Files actions:
 
     Get File -> Get Text from Input -> Text(existing + new record) -> Save File
 
-``Save File`` writes back to the same path in the Shortcuts folder with overwrite
-enabled. No Get Parent Directory action is emitted.
+``Get File`` is explicitly non-fatal when the file does not exist. The following
+Get Text step therefore yields empty text for a missing file, and ``Save File``
+creates the file with the new record. Existing files are read, merged, and
+written back with overwrite enabled. No Get Parent Directory action is emitted.
 """
 
 from __future__ import annotations
@@ -89,7 +91,7 @@ def rewrite_append(target: str, original_input: dict) -> list[dict]:
             "UUID": open_uuid,
             "CustomOutputName": f"Current {target}",
             "WFGetFilePath": target,
-            "WFFileErrorIfNotFound": True,
+            "WFFileErrorIfNotFound": False,
         },
     }
 
@@ -146,6 +148,8 @@ def patch(path: Path) -> None:
         raise SystemExit("WFWorkflowActions missing")
 
     # Map existing Cherri getFile(path) outputs to their concrete target files.
+    # These resolver actions run before any append rewrite. If the file does not
+    # exist yet, iOS would otherwise stop the shortcut before Save File can create it.
     file_outputs: dict[str, str] = {}
     for action in actions:
         ident = str(action.get("WFWorkflowActionIdentifier", ""))
@@ -153,8 +157,10 @@ def patch(path: Path) -> None:
         if ident.endswith("documentpicker.open") and isinstance(params, dict):
             file_path = params.get("WFGetFilePath")
             action_uuid = params.get("UUID")
-            if file_path in TARGETS and action_uuid:
-                file_outputs[str(action_uuid)] = str(file_path)
+            if file_path in TARGETS:
+                params["WFFileErrorIfNotFound"] = False
+                if action_uuid:
+                    file_outputs[str(action_uuid)] = str(file_path)
 
     rewritten: list[dict] = []
     append_count = 0

@@ -1,0 +1,44 @@
+#define name ClarityProbeV2Y
+#define color blue
+
+#include 'actions/text'
+#include 'actions/shortcuts'
+#include 'actions/device'
+
+setBrightness(0.80)
+wait(1)
+
+const payload = {
+    "original_input":"brightness-readback-v2y",
+    "actions":[
+        {
+            "id":"a1",
+            "module":"DeviceSetting",
+            "input":{
+                "text":"",
+                "title":"",
+                "date_time":"",
+                "end_date_time":"",
+                "alert_minutes_before":"",
+                "amount":"",
+                "merchant":"",
+                "item":"",
+                "note":"",
+                "raw_input":"brightness-readback-v2y",
+                "target":"brightness",
+                "value":"35"
+            },
+            "risk":"low",
+            "external_write":false,
+            "needs_review":false,
+            "needs_confirmation":false,
+            "status":"planned"
+        }
+    ]
+}
+
+const childRaw = run("ClarityActionsV2X", payload)
+wait(1)
+const currentBrightness = getDeviceDetail("Current Brightness")
+
+show("ClarityProbeV2Y\nBrightness after child: {currentBrightness}\nChild output: {childRaw}")

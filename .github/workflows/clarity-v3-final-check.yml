@@ -1,0 +1,73 @@
+name: Clarity V3 final one-shot check
+
+on:
+  pull_request:
+    paths:
+      - 'tools/clarity-factory/clarity-v3-final-check.cherri'
+      - '.github/workflows/clarity-v3-final-check.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-sign-final:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pinned Cherri v2.3.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          url='https://github.com/electrikmilk/cherri/releases/download/v2.3.0/cherri_linux-x86_64.zip'
+          expected='7ab2c384b7b26e7c72a30a8dfa56f89dae12c4068b7951bc1e3193f3698edbe9'
+          curl -fsSL "$url" -o /tmp/cherri.zip
+          printf '%s  %s\n' "$expected" /tmp/cherri.zip | sha256sum -c -
+          mkdir -p /tmp/cherri
+          unzip -q /tmp/cherri.zip -d /tmp/cherri
+          binary="$(find /tmp/cherri -type f -name cherri -print -quit)"
+          sudo install -m 0755 "$binary" /usr/local/bin/cherri
+
+      - name: Compile final check
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd tools/clarity-factory
+          cherri clarity-v3-final-check.cherri --skip-sign --debug
+          test='./ClarityV3FinalCheck_unsigned.shortcut'
+          test -f "$test"
+          grep -q 'ClarityActionsV3' "$test"
+          grep -q 'Current Brightness' "$test"
+          mkdir -p artifacts-v3-final
+          cp "$test" artifacts-v3-final/ClarityV3FinalCheck.shortcut
+
+      - name: Sign final check
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/clarity-factory/sign_with_hubsign.py \
+            --input tools/clarity-factory/artifacts-v3-final/ClarityV3FinalCheck.shortcut \
+            --output tools/clarity-factory/artifacts-v3-final/ClarityV3FinalCheck-signed.shortcut \
+            --name 'ClarityV3FinalCheck' \
+            --timeout 180
+
+      - name: Verify AEA1
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('tools/clarity-factory/artifacts-v3-final/ClarityV3FinalCheck-signed.shortcut')
+          data=p.read_bytes()
+          assert data.startswith(b'AEA1')
+          assert len(data)>500
+          print(len(data))
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: clarity-v3-final
+          path: tools/clarity-factory/artifacts-v3-final/ClarityV3FinalCheck-signed.shortcut
+          if-no-files-found: error

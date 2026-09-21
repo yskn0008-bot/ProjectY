@@ -1,0 +1,44 @@
+#define name ClarityProbeV2X
+#define color blue
+
+#include 'actions/text'
+#include 'actions/shortcuts'
+
+const payload = {
+    "original_input":"brightness-probe-v2x",
+    "actions":[
+        {
+            "id":"a1",
+            "module":"DeviceSetting",
+            "input":{
+                "text":"",
+                "title":"",
+                "date_time":"",
+                "end_date_time":"",
+                "alert_minutes_before":"",
+                "amount":"",
+                "merchant":"",
+                "item":"",
+                "note":"",
+                "raw_input":"brightness-probe-v2x",
+                "target":"brightness",
+                "value":"35"
+            },
+            "risk":"low",
+            "external_write":false,
+            "needs_review":false,
+            "needs_confirmation":false,
+            "status":"planned"
+        }
+    ]
+}
+
+const childRaw = run("ClarityActionsV2X", payload)
+@child = getDictionary(childRaw)
+@statusValue = getValue(@child, "status")
+@status = "{@statusValue}"
+@verified = getValue(@child, "verified")
+@errorValue = getValue(@child, "error_code")
+@error = "{@errorValue}"
+
+show("ClarityProbeV2X\nstatus: {@status}\nverified: {@verified}\nerror: {@error}")

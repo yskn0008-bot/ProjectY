@@ -1,0 +1,86 @@
+name: Clarity V4 ShortcutInput probe
+
+on:
+  pull_request:
+    paths:
+      - 'tools/clarity-factory/clarity-input-child-v4.cherri'
+      - 'tools/clarity-factory/clarity-input-probe-v4.cherri'
+      - '.github/workflows/clarity-v4-only.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-sign-v4:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pinned Cherri v2.3.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          url='https://github.com/electrikmilk/cherri/releases/download/v2.3.0/cherri_linux-x86_64.zip'
+          expected='7ab2c384b7b26e7c72a30a8dfa56f89dae12c4068b7951bc1e3193f3698edbe9'
+          curl -fsSL "$url" -o /tmp/cherri.zip
+          printf '%s  %s\n' "$expected" /tmp/cherri.zip | sha256sum -c -
+          mkdir -p /tmp/cherri
+          unzip -q /tmp/cherri.zip -d /tmp/cherri
+          binary="$(find /tmp/cherri -type f -name cherri -print -quit)"
+          sudo install -m 0755 "$binary" /usr/local/bin/cherri
+
+      - name: Compile V4
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd tools/clarity-factory
+          cherri clarity-input-child-v4.cherri --skip-sign --debug
+          cherri clarity-input-probe-v4.cherri --skip-sign --debug
+          child='./ClarityInputChildV4_unsigned.shortcut'
+          probe='./ClarityInputProbeV4_unsigned.shortcut'
+          test -f "$child"
+          test -f "$probe"
+          grep -q 'ClarityInputChildV4' "$probe"
+          grep -q 'Current Brightness' "$probe"
+          mkdir -p artifacts-v4
+          cp "$child" artifacts-v4/ClarityInputChildV4.shortcut
+          cp "$probe" artifacts-v4/ClarityInputProbeV4.shortcut
+
+      - name: Sign V4
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/clarity-factory/sign_with_hubsign.py \
+            --input tools/clarity-factory/artifacts-v4/ClarityInputChildV4.shortcut \
+            --output tools/clarity-factory/artifacts-v4/ClarityInputChildV4-signed.shortcut \
+            --name 'ClarityInputChildV4' \
+            --timeout 180
+          python3 tools/clarity-factory/sign_with_hubsign.py \
+            --input tools/clarity-factory/artifacts-v4/ClarityInputProbeV4.shortcut \
+            --output tools/clarity-factory/artifacts-v4/ClarityInputProbeV4-signed.shortcut \
+            --name 'ClarityInputProbeV4' \
+            --timeout 180
+
+      - name: Verify AEA1
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          base=Path('tools/clarity-factory/artifacts-v4')
+          for name in ('ClarityInputChildV4-signed.shortcut','ClarityInputProbeV4-signed.shortcut'):
+              data=(base/name).read_bytes()
+              assert data.startswith(b'AEA1')
+              assert len(data)>500
+              print(name, len(data))
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: clarity-v4
+          path: |
+            tools/clarity-factory/artifacts-v4/ClarityInputChildV4-signed.shortcut
+            tools/clarity-factory/artifacts-v4/ClarityInputProbeV4-signed.shortcut
+          if-no-files-found: error

@@ -1,0 +1,433 @@
+#define name ClarityActionsV11A
+#define color blue
+#define version 18
+
+#include 'actions/text'
+#include 'actions/documents'
+#include 'actions/shortcuts'
+#include 'actions/calendar'
+#include 'actions/device'
+#include 'actions/settings'
+#include 'actions/web'
+
+// Execution child for the working physical "Clarity Demo".
+// It accepts the exact structured Dictionary produced by clarity-demo-auto:
+// {
+//   "original_input": "...",
+//   "actions": [
+//     {
+//       "id": "a1",
+//       "module": "Calendar|Reminder|Money|Shopping|Idea|OpenApp|DeviceSetting|MyWay|Other",
+//       "input": {
+//         "text": "",
+//         "title": "",
+//         "date_time": "",
+//         "end_date_time": "",
+//         "alert_minutes_before": "",
+//         "amount": "",
+//         "merchant": "",
+//         "item": "",
+//         "note": "",
+//         "raw_input": "",
+//         "target": "",
+//         "value": ""
+//       },
+//       "needs_review": false,
+//       "status": "planned"
+//     }
+//   ]
+// }
+// UNDERSTAND remains in the owner-facing Clarity parent. This child never asks a model to claim execution.
+
+action 'file.append' appendResolvedFile(
+    variable file: 'WFFile',
+    variable input: 'WFInput'
+) {
+    "WFAppendFileWriteMode": "Append"
+}
+
+action 'is.workflow.actions.output' outputValue(variable value: 'WFOutput')
+
+@request = getDictionary(ShortcutInput)
+@originalInputValue = getValue(@request, "original_input")
+@originalInput = "{@originalInputValue}"
+@actionsRaw = getValue(@request, "actions")
+
+const requestNumber = randomNumber(100000, 999999)
+const ledgerFile = getFile("Clarity Ledger.txt")
+
+if !@originalInput {
+    const blockedOriginal = text("{CurrentDate}\t{requestNumber}\tBLOCKED\tmissing_original_input\n")
+    appendResolvedFile(ledgerFile, blockedOriginal)
+    @out = {"status":"blocked","verified":false,"result":{"message":"元の入力を受け取れませんでした"},"error_code":"MISSING_ORIGINAL_INPUT"}
+    outputValue(@out)
+}
+
+if !@actionsRaw {
+    const blockedActions = text("{CurrentDate}\t{requestNumber}\tBLOCKED\tmissing_actions\n")
+    appendResolvedFile(ledgerFile, blockedActions)
+    @out = {"status":"blocked","verified":false,"result":{"message":"実行するACTIONがありません"},"error_code":"MISSING_ACTIONS"}
+    outputValue(@out)
+}
+
+@handled = 0
+@handoffType = ""
+@handoffTarget = ""
+@handoffURL = ""
+
+for actionItem in @actionsRaw {
+    const actionDict = getDictionary(@actionItem)
+    const actionId = "{actionDict['id']}"
+    const module = "{actionDict['module']}"
+    const status = "{actionDict['status']}"
+    const needsReview = getValue(actionDict, "needs_review")
+    @inputRaw = getValue(actionDict, "input")
+
+    if status != "planned" {
+        const blockedStatus = text("{CurrentDate}\t{requestNumber}\t{actionId}\tBLOCKED\tmodel_claimed_execution\n")
+        appendResolvedFile(ledgerFile, blockedStatus)
+        @out = {"status":"blocked","verified":false,"result":{"message":"実行前ACTIONではありません"},"error_code":"INVALID_ACTION_STATUS"}
+        outputValue(@out)
+    }
+
+    if needsReview && module != "DeviceSetting" && module != "OpenApp" && module != "MyWay" {
+        const blockedReview = text("{CurrentDate}\t{requestNumber}\t{actionId}\tBLOCKED\tneeds_review\n")
+        appendResolvedFile(ledgerFile, blockedReview)
+        @out = {"status":"blocked","verified":false,"result":{"message":"曖昧なACTIONがあるため停止しました"},"error_code":"NEEDS_REVIEW"}
+        outputValue(@out)
+    }
+
+    if !@inputRaw {
+        const blockedInput = text("{CurrentDate}\t{requestNumber}\t{actionId}\tBLOCKED\tmissing_action_input\n")
+        appendResolvedFile(ledgerFile, blockedInput)
+        @out = {"status":"blocked","verified":false,"result":{"message":"ACTION入力がありません"},"error_code":"MISSING_ACTION_INPUT"}
+        outputValue(@out)
+    }
+
+    @input = getDictionary(@inputRaw)
+    @textValue = getValue(@input, "text")
+    @titleValue = getValue(@input, "title")
+    @dateTimeValue = getValue(@input, "date_time")
+    @endDateTimeValue = getValue(@input, "end_date_time")
+    @itemValue = getValue(@input, "item")
+    @noteValue = getValue(@input, "note")
+    @rawInputValue = getValue(@input, "raw_input")
+    @alertMinutesValue = getValue(@input, "alert_minutes_before")
+    @targetValue = getValue(@input, "target")
+    @valueValue = getValue(@input, "value")
+
+    @text = "{@textValue}"
+    @title = "{@titleValue}"
+    @dateTime = "{@dateTimeValue}"
+    @endDateTime = "{@endDateTimeValue}"
+    @item = "{@itemValue}"
+    @note = "{@noteValue}"
+    @rawInput = "{@rawInputValue}"
+    @alertMinutes = "{@alertMinutesValue}"
+    @target = "{@targetValue}"
+    @value = "{@valueValue}"
+
+    // These names intentionally mirror the full Clarity runtime so the same
+    // post-compile destination readback verifier can prove the write before APPLIED.
+    const content = "{@title}{@text}{@item}{@note}"
+
+    if module == "Other" {
+        const blockedOther = text("{CurrentDate}\t{requestNumber}\t{actionId}\tBLOCKED\tother_requires_new_capability\n")
+        appendResolvedFile(ledgerFile, blockedOther)
+        @out = {"status":"blocked","verified":false,"result":{"message":"このACTIONはまだ実行モジュール未接続です"},"error_code":"UNREGISTERED_MODULE"}
+        outputValue(@out)
+    }
+
+    if module != "Calendar" && module != "Reminder" && module != "Money" && module != "Shopping" && module != "Idea" && module != "OpenApp" && module != "DeviceSetting" && module != "MyWay" && module != "Other" {
+        const blockedModule = text("{CurrentDate}\t{requestNumber}\t{actionId}\tBLOCKED\tunregistered_module\t{module}\n")
+        appendResolvedFile(ledgerFile, blockedModule)
+        @out = {"status":"blocked","verified":false,"result":{"message":"未登録のACTIONです"},"error_code":"UNREGISTERED_MODULE"}
+        outputValue(@out)
+    }
+
+    if module == "Idea" {
+        if !@note {
+            const blockedContent = text("{CurrentDate}\t{requestNumber}\t{actionId}\tBLOCKED\tmissing_idea_content\n")
+            appendResolvedFile(ledgerFile, blockedContent)
+            @out = {"status":"blocked","verified":false,"result":{"message":"Ideaの内容がありません"},"error_code":"MISSING_CONTENT"}
+            outputValue(@out)
+        }
+        const ideaExecutingRecord = text("{CurrentDate}\t{requestNumber}\t{actionId}\tEXECUTING\tIdea\n")
+        appendResolvedFile(ledgerFile, ideaExecutingRecord)
+        const ideaPayloadRecord = text("{CurrentDate}\tYOS-CLARITY-ID:{requestNumber}-{actionId}\t{@note}\n")
+        const ideaFile = getFile("Idea in Box.txt")
+        appendResolvedFile(ideaFile, ideaPayloadRecord)
+        const ideaAppliedRecord = text("{CurrentDate}\t{requestNumber}\t{actionId}\tAPPLIED\tIdea in Box.txt\n")
+        appendResolvedFile(ledgerFile, ideaAppliedRecord)
+        @handled += 1
+    }
+
+    if module == "Calendar" {
+        if !@title || !@dateTime || !@endDateTime {
+            const blockedCalendar = text("{CurrentDate}\t{requestNumber}\t{actionId}\tBLOCKED\tmissing_calendar_fields\n")
+            appendResolvedFile(ledgerFile, blockedCalendar)
+            @out = {"status":"blocked","verified":false,"result":{"message":"Calendarの日時を確認してください"},"error_code":"MISSING_CALENDAR_FIELDS"}
+            outputValue(@out)
+        }
+
+        @calendarAlert = ""
+        if @alertMinutes == "5" {
+            @calendarAlert = "5 minutes before"
+        }
+        if @alertMinutes == "15" {
+            @calendarAlert = "15 minutes before"
+        }
+        if @alertMinutes == "30" {
+            @calendarAlert = "30 minutes before"
+        }
+        if @alertMinutes == "60" {
+            @calendarAlert = "1 hour before"
+        }
+        if @alertMinutes == "120" {
+            @calendarAlert = "2 hours before"
+        }
+        if @alertMinutes == "1440" {
+            @calendarAlert = "1 day before"
+        }
+        if @alertMinutes != "" && @calendarAlert == "" {
+            const blockedAlert = text("{CurrentDate}\t{requestNumber}\t{actionId}\tBLOCKED\tunsupported_calendar_alert\n")
+            appendResolvedFile(ledgerFile, blockedAlert)
+            @out = {"status":"blocked","verified":false,"result":{"message":"Calendar通知間隔を安全に設定できません"},"error_code":"UNSUPPORTED_CALENDAR_ALERT"}
+            outputValue(@out)
+        }
+
+        const calendarExecutingRecord = text("{CurrentDate}\t{requestNumber}\t{actionId}\tEXECUTING\tCalendar\n")
+        appendResolvedFile(ledgerFile, calendarExecutingRecord)
+        const startDate = date("{@dateTime}")
+        const endDate = date("{@endDateTime}")
+
+        if @calendarAlert != "" {
+            rawAction("is.workflow.actions.addnewevent", {
+                "WFCalendarItemTitle": "{@title}",
+                "WFCalendarItemStartDate": "${startDate}",
+                "WFCalendarItemEndDate": "${endDate}",
+                "WFAlertTime": "{@calendarAlert}",
+                "WFCalendarItemNotes": "YOS-CLARITY-ID:{requestNumber}-{actionId}"
+            })
+        } else {
+            rawAction("is.workflow.actions.addnewevent", {
+                "WFCalendarItemTitle": "{@title}",
+                "WFCalendarItemStartDate": "${startDate}",
+                "WFCalendarItemEndDate": "${endDate}",
+                "WFCalendarItemNotes": "YOS-CLARITY-ID:{requestNumber}-{actionId}"
+            })
+        }
+
+        const calendarAppliedRecord = text("{CurrentDate}\t{requestNumber}\t{actionId}\tAPPLIED\tCalendar\tYOS-CLARITY-ID:{requestNumber}-{actionId}\n")
+        appendResolvedFile(ledgerFile, calendarAppliedRecord)
+        @handled += 1
+    }
+
+    if module == "Reminder" {
+        if !@text || !@dateTime {
+            const blockedReminder = text("{CurrentDate}\t{requestNumber}\t{actionId}\tBLOCKED\tmissing_reminder_fields\n")
+            appendResolvedFile(ledgerFile, blockedReminder)
+            @out = {"status":"blocked","verified":false,"result":{"message":"Reminderの日時を確認してください"},"error_code":"MISSING_REMINDER_FIELDS"}
+            outputValue(@out)
+        }
+        const reminderExecutingRecord = text("{CurrentDate}\t{requestNumber}\t{actionId}\tEXECUTING\tReminder\n")
+        appendResolvedFile(ledgerFile, reminderExecutingRecord)
+        const alertDate = date("{@dateTime}")
+        rawAction("is.workflow.actions.addnewreminder", {
+            "WFCalendarItemTitle": "{@text}",
+            "WFCalendarItemAlert": true,
+            "WFAlertTrigger": "At Time",
+            "WFAlertCustomTime": "${alertDate}",
+            "WFCalendarItemNotes": "YOS-CLARITY-ID:{requestNumber}-{actionId}"
+        })
+        const reminderAppliedRecord = text("{CurrentDate}\t{requestNumber}\t{actionId}\tAPPLIED\tReminder\tYOS-CLARITY-ID:{requestNumber}-{actionId}\n")
+        appendResolvedFile(ledgerFile, reminderAppliedRecord)
+        @handled += 1
+    }
+
+    if module == "Shopping" {
+        if !@item {
+            const blockedShopping = text("{CurrentDate}\t{requestNumber}\t{actionId}\tBLOCKED\tmissing_shopping_content\n")
+            appendResolvedFile(ledgerFile, blockedShopping)
+            @out = {"status":"blocked","verified":false,"result":{"message":"Shoppingの内容がありません"},"error_code":"MISSING_CONTENT"}
+            outputValue(@out)
+        }
+        const shoppingExecutingRecord = text("{CurrentDate}\t{requestNumber}\t{actionId}\tEXECUTING\tShopping\n")
+        appendResolvedFile(ledgerFile, shoppingExecutingRecord)
+        rawAction("is.workflow.actions.addnewreminder", {
+            "WFCalendarItemTitle": "{@item}",
+            "WFCalendarItemAlert": false,
+            "WFCalendarItemNotes": "YOS-CLARITY-ID:{requestNumber}-{actionId}"
+        })
+        const shoppingAppliedRecord = text("{CurrentDate}\t{requestNumber}\t{actionId}\tAPPLIED\tShopping\tYOS-CLARITY-ID:{requestNumber}-{actionId}\n")
+        appendResolvedFile(ledgerFile, shoppingAppliedRecord)
+        @handled += 1
+    }
+
+    if module == "DeviceSetting" {
+        if @target != "wifi" && @target != "bluetooth" && @target != "low_power_mode" && @target != "brightness" && @target != "volume" && @target != "appearance" && @target != "flashlight" && @target != "do_not_disturb" {
+            const blockedSetting = text("{CurrentDate}\t{requestNumber}\t{actionId}\tBLOCKED\tunsupported_device_setting\t{@target}\n")
+            appendResolvedFile(ledgerFile, blockedSetting)
+            @out = {"status":"blocked","verified":false,"result":{"message":"この設定変更にはまだ対応していません"},"error_code":"UNSUPPORTED_DEVICE_SETTING"}
+            outputValue(@out)
+        }
+
+        if @target == "wifi" || @target == "bluetooth" || @target == "low_power_mode" || @target == "flashlight" || @target == "do_not_disturb" {
+            if @value != "on" && @value != "off" && @value != "toggle" {
+                const blockedSettingValue = text("{CurrentDate}\t{requestNumber}\t{actionId}\tBLOCKED\tinvalid_device_setting_value\t{@target}={@value}\n")
+                appendResolvedFile(ledgerFile, blockedSettingValue)
+                @out = {"status":"blocked","verified":false,"result":{"message":"設定値を安全に判断できません"},"error_code":"INVALID_DEVICE_SETTING_VALUE"}
+                outputValue(@out)
+            }
+        }
+
+        if @target == "appearance" {
+            if @value != "light" && @value != "dark" && @value != "toggle" {
+                const blockedAppearance = text("{CurrentDate}\t{requestNumber}\t{actionId}\tBLOCKED\tinvalid_appearance_value\n")
+                appendResolvedFile(ledgerFile, blockedAppearance)
+                @out = {"status":"blocked","verified":false,"result":{"message":"表示モードを安全に判断できません"},"error_code":"INVALID_DEVICE_SETTING_VALUE"}
+                outputValue(@out)
+            }
+        }
+
+        const settingExecuting = text("{CurrentDate}\t{requestNumber}\t{actionId}\tEXECUTING\tDeviceSetting\t{@target}={@value}\n")
+        appendResolvedFile(ledgerFile, settingExecuting)
+
+        if @target == "wifi" {
+            if @value == "on" { setWifi(true) }
+            if @value == "off" { setWifi(false) }
+            if @value == "toggle" { toggleWifi() }
+        }
+        if @target == "bluetooth" {
+            if @value == "on" { setBluetooth(true) }
+            if @value == "off" { setBluetooth(false) }
+            if @value == "toggle" { toggleBluetooth() }
+        }
+        if @target == "low_power_mode" {
+            if @value == "on" { setLowPowerMode(true) }
+            if @value == "off" { setLowPowerMode(false) }
+            if @value == "toggle" { toggleLowPowerMode() }
+        }
+        if @target == "appearance" {
+            if @value == "light" { lightMode() }
+            if @value == "dark" { darkMode() }
+            if @value == "toggle" { toggleAppearance() }
+        }
+        if @target == "flashlight" {
+            if @value == "on" { flashlightOn() }
+            if @value == "off" { flashlightOff() }
+            if @value == "toggle" { toggleFlashlight() }
+        }
+        if @target == "do_not_disturb" {
+            if @value == "on" { DNDOn() }
+            if @value == "off" { DNDOff() }
+            if @value == "toggle" { toggleDND() }
+        }
+        if @target == "brightness" {
+            const brightnessPercent = getNumbers(@value)
+            if brightnessPercent < 0 || brightnessPercent > 100 {
+                const blockedBrightness = text("{CurrentDate}\t{requestNumber}\t{actionId}\tBLOCKED\tbrightness_out_of_range\n")
+                appendResolvedFile(ledgerFile, blockedBrightness)
+                @out = {"status":"blocked","verified":false,"result":{"message":"明るさは0〜100%で指定してください"},"error_code":"INVALID_DEVICE_SETTING_VALUE"}
+                outputValue(@out)
+            }
+            const brightnessRatio = brightnessPercent * 0.01
+            rawAction("is.workflow.actions.setbrightness", {
+                "WFBrightness": "${brightnessRatio}"
+            })
+        }
+        if @target == "volume" {
+            const volumePercent = getNumbers(@value)
+            if volumePercent < 0 || volumePercent > 100 {
+                const blockedVolume = text("{CurrentDate}\t{requestNumber}\t{actionId}\tBLOCKED\tvolume_out_of_range\n")
+                appendResolvedFile(ledgerFile, blockedVolume)
+                @out = {"status":"blocked","verified":false,"result":{"message":"音量は0〜100%で指定してください"},"error_code":"INVALID_DEVICE_SETTING_VALUE"}
+                outputValue(@out)
+            }
+            const volumeRatio = volumePercent * 0.01
+            rawAction("is.workflow.actions.setvolume", {
+                "WFVolume": "${volumeRatio}"
+            })
+        }
+
+        const settingApplied = text("{CurrentDate}\t{requestNumber}\t{actionId}\tAPPLIED\tDeviceSetting\t{@target}={@value}\n")
+        appendResolvedFile(ledgerFile, settingApplied)
+        @handled += 1
+    }
+
+    if module == "OpenApp" {
+        if @target != "safari" && @target != "shortcuts" && @target != "files" && @target != "notes" && @target != "phone" && @target != "reminders" && @target != "mail" && @target != "music" && @target != "calendar" && @target != "maps" && @target != "contacts" && @target != "health" && @target != "photos" && @target != "appstore" && @target != "facetime" && @target != "chatgpt" && @target != "scriptable" && @target != "youtube" && @target != "spotify" && @target != "google_sheets" {
+            const blockedApp = text("{CurrentDate}\t{requestNumber}\t{actionId}\tBLOCKED\tunsupported_app\t{@target}\n")
+            appendResolvedFile(ledgerFile, blockedApp)
+            @out = {"status":"blocked","verified":false,"result":{"message":"このアプリはまだ起動リストにありません"},"error_code":"UNSUPPORTED_APP"}
+            outputValue(@out)
+        }
+
+        if @handoffType != "" {
+            const blockedMultipleMyWayHandoffs = text("{CurrentDate}\t{requestNumber}\t{actionId}\tBLOCKED\tmultiple_ui_handoffs\n")
+            appendResolvedFile(ledgerFile, blockedMultipleMyWayHandoffs)
+            @out = {"status":"blocked","verified":false,"result":{"message":"画面を開く操作は1回に1つだけ指定してください"},"error_code":"MULTIPLE_UI_HANDOFFS"}
+            outputValue(@out)
+        }
+        @handoffType = "app"
+        @handoffTarget = "{@target}"
+        const appReady = text("{CurrentDate}\t{requestNumber}\t{actionId}\tHANDOFF_READY\tOpenApp\t{@target}\n")
+        appendResolvedFile(ledgerFile, appReady)
+        @handled += 1
+    }
+
+    if module == "MyWay" {
+        if @target != "home" {
+            const blockedMyWay = text("{CurrentDate}\t{requestNumber}\t{actionId}\tBLOCKED\tunsupported_myway_target\t{@target}\n")
+            appendResolvedFile(ledgerFile, blockedMyWay)
+            @out = {"status":"blocked","verified":false,"result":{"message":"MY WAYの表示先を安全に判断できません"},"error_code":"UNSUPPORTED_MYWAY_TARGET"}
+            outputValue(@out)
+        }
+        if @handoffType != "" {
+            const blockedMultipleHandoffs = text("{CurrentDate}\t{requestNumber}\t{actionId}\tBLOCKED\tmultiple_ui_handoffs\n")
+            appendResolvedFile(ledgerFile, blockedMultipleHandoffs)
+            @out = {"status":"blocked","verified":false,"result":{"message":"画面を開く操作は1回に1つだけ指定してください"},"error_code":"MULTIPLE_UI_HANDOFFS"}
+            outputValue(@out)
+        }
+        @handoffType = "myway"
+        @handoffTarget = "home"
+        @handoffURL = "https://yskn0008-bot.github.io/ProjectY/yos/"
+        const myWayReady = text("{CurrentDate}\t{requestNumber}\t{actionId}\tHANDOFF_READY\tMyWay\thome\n")
+        appendResolvedFile(ledgerFile, myWayReady)
+        @handled += 1
+    }
+
+    if module == "Money" {
+        @moneyRaw = @rawInput
+        if !@moneyRaw {
+            @moneyRaw = @originalInput
+        }
+        const moneyExecutingRecord = text("{CurrentDate}\t{requestNumber}\t{actionId}\tEXECUTING\tMoney\n")
+        appendResolvedFile(ledgerFile, moneyExecutingRecord)
+        @moneyInput = {"raw_input":"{@moneyRaw}"}
+        @moneyChildRaw = run("Money", @moneyInput)
+        @moneyChild = getDictionary(@moneyChildRaw)
+        @moneyStatusValue = getValue(@moneyChild, "status")
+        @moneyStatus = "{@moneyStatusValue}"
+        @moneyVerified = getValue(@moneyChild, "verified")
+        @moneyErrorValue = getValue(@moneyChild, "error_code")
+        @moneyError = "{@moneyErrorValue}"
+
+        if @moneyStatus != "success" || !@moneyVerified {
+            const failedMoney = text("{CurrentDate}\t{requestNumber}\t{actionId}\tFAILED\tMoney\t{@moneyError}\n")
+            appendResolvedFile(ledgerFile, failedMoney)
+            @out = {"status":"failed","verified":false,"result":{"message":"Moneyの保存確認に失敗しました"},"error_code":"MONEY_UNVERIFIED"}
+            outputValue(@out)
+        }
+
+        const moneyApplied = text("{CurrentDate}\t{requestNumber}\t{actionId}\tAPPLIED\tMoney\n")
+        appendResolvedFile(ledgerFile, moneyApplied)
+        @handled += 1
+    }
+}
+
+const done = text("{CurrentDate}\t{requestNumber}\tREQUEST_DONE\t{@handled}\n")
+appendResolvedFile(ledgerFile, done)
+
+@success = {"status":"success","verified":true,"result":{"message":"CLARITY_EXECUTE_ACTIONS_PASS","handled":"{@handled}","handoff_type":"{@handoffType}","handoff_target":"{@handoffTarget}","handoff_url":"{@handoffURL}"},"error_code":""}
+outputValue(@success)
