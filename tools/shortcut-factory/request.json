@@ -1,0 +1,11 @@
+{
+  "schema_version": "1.0",
+  "raw_request": "Safariを開くショートカットを自動作成して",
+  "name": "YOS Repair Test 20260921",
+  "actions": [
+    {
+      "type": "open_app",
+      "app": "safari"
+    }
+  ]
+}
