@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-23T06:17:56+09:00",
+  "updated_at": "2026-09-23T06:53:50+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -20,27 +20,17 @@
       "priority": 1,
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/429",
-      "updated_at": "2026-09-22T17:06:23Z"
+      "updated_at": "2026-09-22T21:49:01Z"
     },
     {
-      "id": "github-pr-412",
-      "title": "PR #412 Fix 3-screen remote button reliability",
+      "id": "github-pr-433",
+      "title": "PR #433 Add standalone YOS_Clipboard fixed child",
       "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
+      "status": "review",
+      "priority": 1,
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/412",
-      "updated_at": "2026-09-21T05:31:45Z"
-    },
-    {
-      "id": "github-pr-417",
-      "title": "PR #417 Repair Shortcut Factory with local Safari fallback",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/417",
-      "updated_at": "2026-09-21T02:34:50Z"
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/433",
+      "updated_at": "2026-09-22T21:37:28Z"
     },
     {
       "id": "github-pr-424",
@@ -63,6 +53,16 @@
       "updated_at": "2026-09-22T01:15:40Z"
     },
     {
+      "id": "github-pr-432",
+      "title": "PR #432 Add standalone YOS_Clipboard fixed child",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/432",
+      "updated_at": "2026-09-22T21:33:05Z"
+    },
+    {
       "id": "github-issue-232",
       "title": "Issue #232 [YOS HQ] ProjectY自動司令部 v1｜毎時監視・安全な自動継続",
       "type": "GitHub Issue",
@@ -70,7 +70,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-09-22T21:17:40Z"
+      "updated_at": "2026-09-22T21:51:47Z"
     },
     {
       "id": "github-issue-256",
@@ -91,16 +91,6 @@
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/272",
       "updated_at": "2026-09-21T13:38:18Z"
-    },
-    {
-      "id": "github-issue-277",
-      "title": "Issue #277 Point / Event Foundation v1｜既存Raw資産を共通参照する契約",
-      "type": "GitHub Issue",
-      "status": "open",
-      "priority": 3,
-      "next_action": "完成条件を確認し、次の安全な実装を1件進める",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/277",
-      "updated_at": "2026-09-04T23:28:41Z"
     },
     {
       "id": "github-issue-288",
@@ -161,9 +151,26 @@
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/314",
       "updated_at": "2026-09-15T14:09:29Z"
+    },
+    {
+      "id": "github-issue-315",
+      "title": "Issue #315 ProjectY v3.0｜開発環境の実装・異常系の検証",
+      "type": "GitHub Issue",
+      "status": "open",
+      "priority": 3,
+      "next_action": "完成条件を確認し、次の安全な実装を1件進める",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/315",
+      "updated_at": "2026-09-18T14:42:57Z"
     }
   ],
   "recently_completed": [
+    {
+      "id": "github-commit-1abeff83c7a3",
+      "title": "Complete Money real-data path for dependent alerts and Morning Brief",
+      "completed_at": "2026-09-22T21:53:35Z",
+      "result": "GitHub mainへ反映（1abeff8）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/1abeff83c7a309a09a18c3b8f13052d3416232ed"
+    },
     {
       "id": "github-commit-3f18cf7caabd",
       "title": "Harden Morning Brief existing-SSOT read route",
@@ -191,13 +198,6 @@
       "completed_at": "2026-09-22T14:23:41Z",
       "result": "GitHub mainへ反映（9272b89）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/9272b89cc7be1e397029e0c83608c667e8601e53"
-    },
-    {
-      "id": "github-commit-8212341e6aac",
-      "title": "Merge pull request #425 from yskn0008-bot/repair/clarity-fixed-child-openapp",
-      "completed_at": "2026-09-21T18:55:49Z",
-      "result": "GitHub mainへ反映（8212341）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/8212341e6aac0076c2f82cab8919bcd6affc8827"
     },
     {
       "id": "complete-002",
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-23T06:17:56+09:00",
+      "last_update": "2026-09-23T06:53:50+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -309,13 +309,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 19件・Open PR 20件を自動同期中",
+      "next_action": "Open Issue 18件・Open PR 20件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-23T06:17:56+09:00",
+      "last_update": "2026-09-23T06:53:50+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-23T06:17:56+09:00",
+      "last_update": "2026-09-23T06:53:50+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "620267d2365b61f603198c6152bc085f34a9a99e4ebf40d8c51847e1c0765921"
+  "github_snapshot_hash": "1b8adb46321944cc9b4b6387b916c31aaf932702466718916d3e466e55519d6e"
 }
