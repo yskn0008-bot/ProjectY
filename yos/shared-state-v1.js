@@ -20,6 +20,7 @@
   const monthKey=()=>dateKey().slice(0,7);
   const moneyText=value=>value===null||value===undefined?'':Math.round(Number(value)).toLocaleString('ja-JP')+'円';
   const outgoing=tx=>['expense','debt','saving','investment'].includes(tx?.type);
+  const completeStatus=tx=>{const status=clean(tx?.status,20).toLowerCase();return tx?.completed===true||tx?.paid===true||tx?.received===true||['done','paid','completed','received'].includes(status)};
 
   function lifeSnapshot(){
     const life=read(KEYS.life,null);
@@ -54,16 +55,24 @@
     const monthly=transactions.filter(tx=>String(tx?.date||'').slice(0,7)===month);
     const income=monthly.filter(tx=>tx?.type==='income').reduce((sum,tx)=>sum+(number(tx?.amount)||0),0);
     const expense=monthly.filter(outgoing).reduce((sum,tx)=>sum+(number(tx?.amount)||0),0);
-    const future=transactions.filter(tx=>tx?.status!=='done'&&String(tx?.date||'')>=dateKey()).sort((a,b)=>String(a.date).localeCompare(String(b.date)));
+    const future=transactions.filter(tx=>!completeStatus(tx)&&String(tx?.date||'')>=dateKey()).sort((a,b)=>String(a.date).localeCompare(String(b.date))||String(a.id||'').localeCompare(String(b.id||'')));
     const nextPayment=future.find(outgoing)||null;
     const nextIncome=future.find(tx=>tx?.type==='income')||null;
     const upcomingPayments=future.filter(outgoing).slice(0,5);
+    const upcomingIncomes=future.filter(tx=>tx?.type==='income').slice(0,5);
     const todayDate=new Date(dateKey()+'T12:00:00+09:00');
     const monthEnd=new Date(Number(month.slice(0,4)),Number(month.slice(5,7)),0,12);
     const anchorDate=nextIncome?.date?new Date(nextIncome.date+'T12:00:00+09:00'):monthEnd;
     const outgoingUntilAnchor=future.filter(tx=>outgoing(tx)&&String(tx?.date||'')<=new Intl.DateTimeFormat('sv-SE',{timeZone:TZ}).format(anchorDate)).reduce((sum,tx)=>sum+(number(tx?.amount)||0),0);
     const days=Math.max(1,Math.ceil((anchorDate.getTime()-todayDate.getTime())/86400000)+1);
     const daily=balance===null?null:Math.floor(Math.max(0,balance-outgoingUntilAnchor)/days);
+    const projectedAfterNextPayment=balance===null||!nextPayment?null:balance-(number(nextPayment?.amount)||0);
+    const shortageAfterNextPayment=projectedAfterNextPayment!==null&&projectedAfterNextPayment<0;
+    const shortfallAfterNextPayment=shortageAfterNextPayment?Math.abs(projectedAfterNextPayment):0;
+    const balanceAfterRequiredPayments=balance===null?null:balance-outgoingUntilAnchor;
+    const shortagePossible=balanceAfterRequiredPayments!==null&&balanceAfterRequiredPayments<0;
+    const shortfall=shortagePossible?Math.abs(balanceAfterRequiredPayments):0;
+    const spentToday=transactions.filter(tx=>outgoing(tx)&&String(tx?.date||'')===dateKey()&&completeStatus(tx)).reduce((sum,tx)=>sum+(number(tx?.amount)||0),0);
     const goals=Array.isArray(data?.goals)?data.goals:[];
     const goal=[...goals].sort((a,b)=>(Number(b?.priority)||0)-(Number(a?.priority)||0))[0]||null;
     const hasData=Boolean(data)&&(
@@ -78,12 +87,22 @@
       income:monthly.length?income:number(legacy?.income??legacy?.monthlyIncome),
       expense:monthly.length?expense:number(legacy?.expense??legacy?.monthlyExpense??legacy?.spentThisMonth),
       daily,
+      todayBudget:daily,
       dailyText:daily===null?'':(privacy?hidden:moneyText(daily)),
+      spentToday,
       nextPayment,
       nextPaymentText:nextPayment?((nextPayment.date||'')+' '+clean(nextPayment.label,70)+(privacy?'':' '+moneyText(number(nextPayment.amount)||0))).trim():clean(legacy?.nextPayment,120),
       upcomingPayments,
       nextIncome,
+      nextIncomeText:nextIncome?((nextIncome.date||'')+' '+clean(nextIncome.label,70)+(privacy?'':' '+moneyText(number(nextIncome.amount)||0))).trim():'',
       nextIncomeDate:clean(nextIncome?.date,10)||clean(legacy?.nextIncomeDate,10),
+      upcomingIncomes,
+      projectedAfterNextPayment,
+      shortageAfterNextPayment,
+      shortfallAfterNextPayment,
+      balanceAfterRequiredPayments,
+      shortagePossible,
+      shortfall,
       goal,
       goalText:clean(goal?.name||goal?.label,100)||clean(legacy?.goal,100),
       updatedAt:clean(data?.updatedAt,40)

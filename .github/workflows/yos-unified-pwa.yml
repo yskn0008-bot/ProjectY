@@ -44,7 +44,7 @@ jobs:
       - run: node --check yos/guide.js
       - run: node --check yos/guide-v2.js
       - run: node --check yos/hj/app.js
-      - run: node --test yos/tests/unified-pwa-contract.test.mjs
+      - run: node --test yos/tests/unified-pwa-contract.test.mjs yos/tests/money-plan.test.mjs yos/tests/morning-brief-bridge.test.mjs yos/tests/money-dependency-bridges.test.mjs
 
   browser:
     name: Unified PWA 390px (${{ matrix.browser }})
