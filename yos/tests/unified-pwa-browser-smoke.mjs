@@ -79,8 +79,10 @@ try{
   assert.ok(homeGeometry.bottom<=homeGeometry.navTop+1,`Money Home must fit above navigation: ${homeGeometry.bottom}/${homeGeometry.navTop}`);
   assert.ok(homeGeometry.scrollWidth<=homeGeometry.clientWidth+1,'Money Home must not overflow horizontally');
 
+  await page.evaluate(()=>localStorage.clear());
   await page.goto(base.replace(/\/$/,'')+'/yos/morning-brief-bridge.html',{waitUntil:'networkidle'});
   const morning=await page.evaluate(()=>window.__yosMorningBriefBridgeV1?.build?.());
+  assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('yos-money-v2'))?.masterFacts?.version),'2026-09-23-v4','Morning Brief bridge must refresh current Money facts without opening MY WAY first');
   assert.equal(morning?.source?.money,'yos-money-v2','Morning Brief must read existing Money SSOT');
   assert.equal(morning?.money?.next_payment?.amount,7060,'Morning Brief must read next payment amount');
   assert.equal(morning?.money?.next_income?.date,'2026-10-13','Morning Brief must read next income date');
@@ -88,15 +90,19 @@ try{
   assert.equal(morning?.money?.shortage_possible,true,'Morning Brief must read shortage state');
   assert.equal(morning?.money?.shortfall,89952,'Morning Brief must read confirmed shortfall');
 
+  await page.evaluate(()=>localStorage.clear());
   await page.goto(base.replace(/\/$/,'')+'/yos/payment-alert-bridge.html',{waitUntil:'networkidle'});
   const paymentAlert=await page.evaluate(()=>window.__yosPaymentAlertBridgeV1?.build?.());
+  assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('yos-money-v2'))?.masterFacts?.version),'2026-09-23-v4','Payment Alert bridge must refresh current Money facts independently');
   assert.equal(paymentAlert?.source,'yos-money-v2','Payment Alert must read existing Money SSOT');
   assert.equal(paymentAlert?.payments?.length,1,'Payment Alert must include only payments due within three days');
   assert.equal(paymentAlert?.payments?.[0]?.id,'master-car-insurance-2026-09','Payment Alert must surface car insurance first');
   assert.equal(paymentAlert?.payments?.[0]?.amount,7060,'Payment Alert must surface confirmed amount');
 
+  await page.evaluate(()=>localStorage.clear());
   await page.goto(base.replace(/\/$/,'')+'/yos/money-alert-bridge.html',{waitUntil:'networkidle'});
   const moneyAlert=await page.evaluate(()=>window.__yosMoneyAlertBridgeV1?.build?.());
+  assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('yos-money-v2'))?.masterFacts?.version),'2026-09-23-v4','Money Alert bridge must refresh current Money facts independently');
   assert.equal(moneyAlert?.source,'yos-money-v2','Money Alert must read existing Money SSOT');
   assert.equal(moneyAlert?.current_balance,4588,'Money Alert must read confirmed current balance');
   assert.equal(moneyAlert?.next_payment?.amount,7060,'Money Alert must read next payment');
