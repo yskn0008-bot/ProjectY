@@ -18,7 +18,22 @@ if partCount == 2 {
     @valueText = "{valuePart}"
 
     if @command == "brightness" {
-        @numericMatches = matchText("^(100|[0-9]{1,2})$", @valueText)
+        @numericMatches = matchText('^(100|[0-9]{1,2})
+        const numericMatchCount = count(@numericMatches)
+
+        if numericMatchCount == 1 {
+            const brightnessPercent = getNumbers(@valueText)
+            const brightnessRatio = brightnessPercent * 0.01
+            rawAction("is.workflow.actions.setbrightness", {
+                "WFBrightness": "${brightnessRatio}"
+            })
+            output("YOS_DEVICE_OK:brightness={brightnessPercent}")
+        }
+    }
+}
+
+output("YOS_DEVICE_BLOCKED:{ShortcutInput}")
+, @valueText)
         const numericMatchCount = count(@numericMatches)
 
         if numericMatchCount == 1 {
