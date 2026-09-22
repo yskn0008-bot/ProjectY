@@ -1,0 +1,16 @@
+#define name YOS_Device
+#define color blue
+
+#include 'actions/text'
+#include 'actions/device'
+
+// Fixed local device child. The parent may route here but must not execute
+// the device operation itself. Start deliberately narrow: brightness=50 only.
+if ShortcutInput == "brightness|50" {
+    rawAction("is.workflow.actions.setbrightness", {
+        "WFBrightness": 0.5
+    })
+    output("YOS_DEVICE_OK:brightness=50")
+}
+
+output("YOS_DEVICE_BLOCKED:{ShortcutInput}")
