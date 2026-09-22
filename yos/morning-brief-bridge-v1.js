@@ -31,8 +31,9 @@
     const life=lifeFacts();
     const shared=window.YOSSharedStateV1?.snapshot?.()||read('yos-shared-state-v1',null)||{};
     const money=shared?.money||{};
+    const privacy=Boolean(money.privacy);
     const payments=(Array.isArray(money.upcomingPayments)?money.upcomingPayments:[]).map(tx=>({
-      date:clean(tx?.date,10),label:clean(tx?.label,80),amount:money.privacy?null:(Number.isFinite(Number(tx?.amount))?Number(tx.amount):null)
+      date:clean(tx?.date,10),label:clean(tx?.label,80),amount:privacy?null:(Number.isFinite(Number(tx?.amount))?Number(tx.amount):null)
     })).slice(0,5);
     const tasks=[...new Set([...life.tasks,...projectTasks()])].slice(0,5);
     return {
@@ -40,7 +41,12 @@
       generated_at:new Date().toISOString(),
       source:{money:'yos-money-v2',life:'yos-life-v1',my_way:'existing task projection/cache'},
       today:{tasks,carryover:life.carry,first_step:life.firstStep},
-      money:{privacy:Boolean(money.privacy),today_usable:money.daily??null,today_usable_text:clean(money.dailyText,40)||(money.daily!==null&&money.daily!==undefined?moneyText(money.daily):''),payments}
+      money:{
+        privacy,
+        today_usable:privacy?null:(money.daily??null),
+        today_usable_text:privacy?'非表示':(clean(money.dailyText,40)||(money.daily!==null&&money.daily!==undefined?moneyText(money.daily):'')),
+        payments
+      }
     };
   }
 
