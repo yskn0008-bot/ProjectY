@@ -93,7 +93,7 @@ jobs:
           python3 patch_chatgpt_json_text.py "$runtime"
           python3 patch_reminder_wire_format.py "$runtime"
           python3 patch_destination_readback.py "$runtime"
-          python3 validate_fixed_child_architecture.py "$runtime" './YOS_OpenApp_unsigned.shortcut'
+          python3 validate_fixed_child_architecture.py "$runtime" './YOS_OpenApp_unsigned.shortcut' './YOS_Device_unsigned.shortcut'
           mkdir -p artifacts-fixed-child
           cp "$runtime" artifacts-fixed-child/Clarity-unsigned.shortcut
 
