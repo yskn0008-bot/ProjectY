@@ -30,17 +30,15 @@ const inboxFile = getFile("Clarity Inbox.txt")
 appendResolvedFile(inboxFile, rawRecord)
 const ledgerFile = getFile("Clarity Ledger.txt")
 
-// Zero-network fast path for the first device-setting acceptance command.
-// Raw First is already persisted. Only an exact, high-confidence 50% brightness request
-// is handled here; every other setting request stays on the fail-closed model route.
+// Zero-network fast path may decide routing, but the parent never performs the
+// device operation itself. The fixed YOS_Device child is the hand.
 if originalInput contains "明るさ" {
     if originalInput contains "50" {
-        const fastBrightnessRouteRecord = text("{CurrentDate}\\t{requestNumber}\\tFAST_ROUTE\\tdevice_setting\\tbrightness=50\\n")
+        const fastBrightnessRouteRecord = text("{CurrentDate}\\t{requestNumber}\\tFAST_ROUTE\\tdevice_setting\\tbrightness=50\\tYOS_Device\\n")
         appendResolvedFile(ledgerFile, fastBrightnessRouteRecord)
-        rawAction("is.workflow.actions.setbrightness", {
-            "WFBrightness": 0.5
-        })
-        const fastBrightnessAppliedRecord = text("{CurrentDate}\\t{requestNumber}\\tAPPLIED\\tdevice_setting\\tbrightness=50\\tfast_path\\n")
+        const fastBrightnessPayload = text("brightness|50")
+        run("YOS_Device", fastBrightnessPayload)
+        const fastBrightnessAppliedRecord = text("{CurrentDate}\\t{requestNumber}\\tAPPLIED\\tdevice_setting\\tbrightness=50\\tYOS_Device\\tchild_returned\\tfast_path\\n")
         appendResolvedFile(ledgerFile, fastBrightnessAppliedRecord)
         const fastBrightnessDoneRecord = text("{CurrentDate}\\t{requestNumber}\\tREQUEST_DONE\\n")
         appendResolvedFile(ledgerFile, fastBrightnessDoneRecord)
