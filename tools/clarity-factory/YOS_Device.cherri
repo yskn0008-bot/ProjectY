@@ -4,13 +4,32 @@
 #include 'actions/text'
 #include 'actions/device'
 
-// Fixed local device child. The parent may route here but must not execute
-// the device operation itself. Start deliberately narrow: brightness=50 only.
-if ShortcutInput == "brightness|50" {
-    rawAction("is.workflow.actions.setbrightness", {
-        "WFBrightness": 0.5
-    })
-    output("YOS_DEVICE_OK:brightness=50")
+// Fixed local device child. The parent routes here but never performs the
+// device operation itself. Parse the existing "brightness|<percent>" contract
+// and keep unsupported/malformed input fail-closed.
+@incoming = "{ShortcutInput}"
+@parts = splitText(@incoming, "|")
+const partCount = count(@parts)
+
+if partCount == 2 {
+    const commandPart = getListItem(@parts, 1)
+    const valuePart = getListItem(@parts, 2)
+    @command = "{commandPart}"
+    @valueText = "{valuePart}"
+
+    if @command == "brightness" {
+        @numericMatches = matchText("^(100|[0-9]{1,2})$", @valueText)
+        const numericMatchCount = count(@numericMatches)
+
+        if numericMatchCount == 1 {
+            const brightnessPercent = getNumbers(@valueText)
+            const brightnessRatio = brightnessPercent * 0.01
+            rawAction("is.workflow.actions.setbrightness", {
+                "WFBrightness": "${brightnessRatio}"
+            })
+            output("YOS_DEVICE_OK:brightness={brightnessPercent}")
+        }
+    }
 }
 
 output("YOS_DEVICE_BLOCKED:{ShortcutInput}")
