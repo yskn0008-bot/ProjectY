@@ -66,6 +66,12 @@
     script.src='./daily-flow-orchestrator-v1.js?v=1';
     document.body.appendChild(script);
   }
+  if(!document.getElementById('lifeNightCheckinBridgeV1Script')){
+    const script=document.createElement('script');
+    script.id='lifeNightCheckinBridgeV1Script';
+    script.src='./night-checkin-life-bridge-v1.js?v=1';
+    document.body.appendChild(script);
+  }
   if(!document.getElementById('lifeTaskQuickAddV1Script')){
     const script=document.createElement('script');
     script.id='lifeTaskQuickAddV1Script';
