@@ -5,10 +5,18 @@ const OUTGOING_TYPES=new Set(['expense','debt','saving','investment']);
 const completed=t=>Boolean(t?.completed||t?.paid||t?.received)||['done','paid','completed','received'].includes(clean(t?.status).toLowerCase());
 const dayKey=v=>{const d=new Date(v); return Number.isNaN(d.getTime())?'':new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Tokyo'}).format(d)};
 const stableKey=e=>clean(e.sourceId||e.id)||[e.kind,clean(e.title),clean(e.dueAt||e.date),Number(e.amount||0)].join('|');
+
+export function isEmergencyCandidate(event={}){
+  const e={...event};
+  return e.requiresImmediateAwareness===true
+    && e.requiresImmediateAction===true
+    && e.delayCausesMaterialHarm===true;
+}
+
 export function classifyAlert(event, now=new Date()){
   const e={...event};
   if(e.completed||e.paid) return null;
-  if(e.emergency===true || e.requiresImmediateAction===true || e.delayCausesMaterialHarm===true) return 'emergency';
+  if(isEmergencyCandidate(e)) return 'emergency';
   if(e.kind==='payment') return 'payment';
   if(e.kind==='money_anomaly') return 'money';
   if(e.kind==='task') return e.nativeReminderNotifies ? null : 'task';
