@@ -37,7 +37,14 @@ if originalInput contains "明るさ" {
         const fastBrightnessRouteRecord = text("{CurrentDate}\\t{requestNumber}\\tFAST_ROUTE\\tdevice_setting\\tbrightness=50\\tYOS_Device\\n")
         appendResolvedFile(ledgerFile, fastBrightnessRouteRecord)
         const fastBrightnessPayload = text("brightness|50")
-        run("YOS_Device", fastBrightnessPayload)
+        rawAction("is.workflow.actions.runworkflow", {
+            "WFWorkflow": {
+                "workflowIdentifier": "YOS_Device",
+                "isSelf": false,
+                "workflowName": "YOS_Device"
+            },
+            "WFInput": "${fastBrightnessPayload}"
+        })
         const fastBrightnessAppliedRecord = text("{CurrentDate}\\t{requestNumber}\\tAPPLIED\\tdevice_setting\\tbrightness=50\\tYOS_Device\\tchild_returned\\tfast_path\\n")
         appendResolvedFile(ledgerFile, fastBrightnessAppliedRecord)
         const fastBrightnessDoneRecord = text("{CurrentDate}\\t{requestNumber}\\tREQUEST_DONE\\n")
