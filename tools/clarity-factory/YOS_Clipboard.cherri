@@ -127,7 +127,7 @@ if requestMode == "merge" {
     @mergeItems = splitText(mergeBufferText, "\n")
     @mergeText = ""
     for mergeEncodedItem in @mergeItems {
-        const mergeDecodedItem = base64Decode(mergeEncodedItem)
+        const mergeDecodedItem = base64Decode(@mergeEncodedItem)
         const mergeDecodedText = "{mergeDecodedItem}"
         if @mergeText {
             @mergeText = "{@mergeText}\n{mergeDecodedText}"
@@ -242,9 +242,9 @@ if requestMode == "screenshots" {
     @recentScreenshots = []
     @latestScreenshots = getLatestScreenshots(50)
     for recentScreenshotItem in @latestScreenshots {
-        const recentScreenshotDate = getImageDetail(recentScreenshotItem, "Date Taken")
+        const recentScreenshotDate = getImageDetail(@recentScreenshotItem, "Date Taken")
         if recentScreenshotDate > @screenCutoff {
-            @recentScreenshots += recentScreenshotItem
+            @recentScreenshots += @recentScreenshotItem
         }
     }
 
