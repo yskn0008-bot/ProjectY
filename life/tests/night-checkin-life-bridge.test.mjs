@@ -43,7 +43,7 @@ test('history returns only earlier Night records, oldest to newest, capped at 30
 
 test('bridge source keeps the existing Life SSOT and has no Money duplication',()=>{
   assert.match(source,/const DATA_KEY='yos-life-v1'/);
-  assert.match(source,/lifeFlow:\{\.\.\.flow,nightCheckin:record\}/);
+  assert.match(source,/day\.lifeFlow=\{\.\.\.flow,nightCheckin:record\}/);
   assert.doesNotMatch(source,/localStorage\.setItem\(['\"]yos-night/);
   assert.doesNotMatch(source,/spentToday|money:/);
 });
