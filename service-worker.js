@@ -1,6 +1,6 @@
 'use strict';
 const CACHE_PREFIX='yos-unified-';
-const CACHE_NAME=CACHE_PREFIX+'v7-money-critical-network-first';
+const CACHE_NAME=CACHE_PREFIX+'v8-money-latest-facts';
 const STATIC=[
   './','./index.html','./manifest.webmanifest','./assets/yos-icon-180.png','./assets/yos-icon-512.png',
   './yos/','./yos/index.html','./yos/styles.css','./yos/readability-final.css','./yos/guide.html','./yos/guide.css','./yos/guide.js','./yos/guide-v2.css','./yos/guide-v2.js',
@@ -18,6 +18,7 @@ const STATIC=[
   './system/','./system/index.html','./data/mission-control.json','./data/yos-assets.json','./data/yos-user-tasks.json'
 ];
 const CRITICAL_NETWORK_FIRST=new Set([
+  '/ProjectY/yos/money-master-v1.js',
   '/ProjectY/yos/shared-state-v1.js',
   '/ProjectY/yos/money-v2.js',
   '/ProjectY/yos/morning-brief-bridge-v1.js',
