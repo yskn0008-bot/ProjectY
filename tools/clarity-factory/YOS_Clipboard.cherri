@@ -11,6 +11,7 @@
 #include 'actions/text'
 
 // Fixed local Clipboard child for Clarity.
+action 'documentpicker.open' getOptionalFile(text path: 'WFGetFilePath', bool ?errorIfNotFound: 'WFFileErrorIfNotFound' = false)
 // Buffer is temporary implementation state only, not an SSOT.
 // Contract: add | next | merge | select|N | duplicate | clear | screenshots
 const bufferPath = "YOS Clipboard/buffer.txt"
@@ -30,7 +31,7 @@ if @command == "add" {
     const encoded = base64Encode(clip)
     @record = "{encoded}\n"
     @buffer = ""
-    @existing = getFile(bufferPath, false)
+    @existing = getOptionalFile(bufferPath, false)
     if @existing {
         @buffer = "{@existing}"
     }
@@ -41,14 +42,14 @@ if @command == "add" {
 }
 
 if @command == "next" {
-    const file = getFile(bufferPath, false)
+    const file = getOptionalFile(bufferPath, false)
     if !file {
         output("YOS_CLIPBOARD_BLOCKED:empty_buffer")
     }
     const lines = splitText("{file}", "\n")
     const total = count(lines)
     @cursor = 1
-    const cursorFile = getFile(cursorPath, false)
+    const cursorFile = getOptionalFile(cursorPath, false)
     if @cursorFile {
         @cursor = number("{cursorFile}")
     }
@@ -72,7 +73,7 @@ if @command == "next" {
 }
 
 if @command == "merge" {
-    const file = getFile(bufferPath, false)
+    const file = getOptionalFile(bufferPath, false)
     if !file {
         output("YOS_CLIPBOARD_BLOCKED:empty_buffer")
     }
@@ -103,7 +104,7 @@ if @command contains "select|" {
     if @index < 1 {
         output("YOS_CLIPBOARD_BLOCKED:bad_index")
     }
-    const file = getFile(bufferPath, false)
+    const file = getOptionalFile(bufferPath, false)
     if !file {
         output("YOS_CLIPBOARD_BLOCKED:empty_buffer")
     }
