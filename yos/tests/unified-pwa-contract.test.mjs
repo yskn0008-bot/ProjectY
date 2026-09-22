@@ -29,6 +29,8 @@ test('root manifest installs one YOS app across all main domains', async () => {
   assert.match(yos,/class="yos-companion" href="\.\/guide\.html"/);
   assert.match(yos,/class="guide-shortcut" href="\.\/guide\.html"/);
   assert.match(yos,/data-web-only href="\.\.\/system\/"/);
+  assert.match(yos,/money-v2-runtime-v4\.js/);
+  assert.ok(sw.includes("'./yos/money-v2-runtime-v4.js'"),'missing versioned Money runtime cache entry');
   assert.match(guide,/今日は、どうする？/);
   assert.match(guide,/YOSに話す/);
   assert.match(guide,/data-mode="normal"/);
