@@ -111,7 +111,7 @@
   }
   function renderDashboard(){
     const s=summary(),plan=futurePlan(),status=moneyStatus(plan),debt=totalDebt(),eGoal=emergencyGoal(),goal=primaryGoal();
-    return `<section class="money2-status ${status.tone}"><div><small>${escapeHtml(status.label)}</small><strong>${escapeHtml(status.title)}</strong><p>${escapeHtml(status.text)}</p></div><button type="button" data-money-action="yos-review">YOSと見直す</button></section>${renderCalendar()}<section class="money2-metrics"><article><small>今月の収入</small><strong>${s.hasData?privacyAmount(s.income):'未設定'}</strong></article><article><small>支出合計</small><strong>${s.hasData?privacyAmount(s.outgoing):'未設定'}</strong></article><article><small>防衛資金</small><strong>${eGoal?(data.privacy?'••••':Math.round(n(eGoal.current)/Math.max(1,n(eGoal.target))*100)+'%'):'未設定'}</strong></article><article><small>借金残高</small><strong>${debt?privacyAmount(debt):'未設定'}</strong></article><article class="wide"><small>今日から1日に使える目安</small><strong>${plan.daily===null?'未算出':privacyAmount(plan.daily)}</strong><em>${plan.nextIncome?`次の入金 ${formatMD(plan.nextIncome.date)} まで`:'月末まで'}</em></article></section>${renderNextPayment(plan.nextPayment,plan.daysToNextPayment)}${renderGoal(goal)}<section class="money2-advice"><span>YOS</span><p>${escapeHtml(buildAdvice(plan,goal))}</p></section>`;
+    return `<section class="money2-status ${status.tone}"><div><small>${escapeHtml(status.label)}</small><strong>${escapeHtml(status.title)}</strong><p>${escapeHtml(status.text)}</p></div><button type="button" data-money-action="yos-review">YOSと見直す</button></section>${renderCalendar()}<section class="money2-metrics"><article><small>今月の収入</small><strong>${s.hasData?privacyAmount(s.income):'未設定'}</strong></article><article><small>支出合計</small><strong>${s.hasData?privacyAmount(s.outgoing):'未設定'}</strong></article><article><small>防衛資金</small><strong>${eGoal?(data.privacy?'••••':Math.round(n(eGoal.current)/Math.max(1,n(eGoal.target))*100)+'%'):'未設定'}</strong></article><article><small>借金残高</small><strong>${debt?privacyAmount(debt):'未設定'}</strong></article><article class="wide"><small>今日から1日に使える目安</small><strong>${plan.daily===null?'未算出':privacyAmount(plan.daily)}</strong><em>${plan.nextIncome?`次の入金 ${formatMD(plan.nextIncome.date)} まで`:'月末まで'}</em></article></section>${renderNextPayment(plan.nextPayment,plan.daysToNextPayment)}${renderGoal(goal)}${renderDataReadiness(plan)}<section class="money2-advice"><span>YOS</span><p>${escapeHtml(buildAdvice(plan,goal))}</p></section>`;
   }
   function renderCalendar(){
     const [year,month]=calendarMonth.split('-').map(Number),first=new Date(year,month-1,1),last=new Date(year,month,0),start=(first.getDay()+6)%7,today=isoToday(),txs=monthTransactions(),cells=[];
@@ -131,6 +131,12 @@
     if(!goal)return `<section class="money2-goal-card empty"><div><small>今の目標</small><strong>まだ設定されていません</strong><p>防衛資金・返済・欲しいもの・投資などを設定できます。</p></div><button type="button" data-money-action="add-goal">目標を作る</button></section>`;
     const target=Math.max(1,n(goal.target)),current=n(goal.current),pct=Math.min(100,Math.max(0,Math.round(current/target*100)));
     return `<section class="money2-goal-card"><header><div><small>今の目標</small><strong>${escapeHtml(goal.name)}</strong></div><span>${pct}%</span></header><div class="money2-progress"><i style="width:${pct}%"></i></div><p>${data.privacy?'残額は非表示':`あと ${yen(Math.max(0,target-current))}`}${goal.deadline?` ・ 期限 ${formatMD(goal.deadline)}`:''}</p></section>`;
+  }
+  function renderDataReadiness(plan){
+    const ready=plan.daily!==null&&Boolean(plan.nextPayment)&&Boolean(plan.nextIncome)&&plan.afterNextPayment!==null;
+    const payment=plan.nextPayment?`${formatMD(plan.nextPayment.date)} ${clean(plan.nextPayment.label,24)}`:'未入力';
+    const income=plan.nextIncome?`${formatMD(plan.nextIncome.date)} ${clean(plan.nextIncome.label,24)}`:'未入力';
+    return `<section class="money2-row-card ${ready?'':'empty'}"><div><small>依存機能の実データ接続</small><strong>${ready?'準備OK':'未入力あり'}</strong><p>支払い ${escapeHtml(payment)} ／ 入金 ${escapeHtml(income)}</p></div><button type="button" data-money-action="verify-data">確認</button></section>`;
   }
   function buildAdvice(plan,goal){
     if(plan.liquid===null)return 'まず現在の口座・電子マネー残高を登録すると、赤字になる日と1日予算を計算できます。';
@@ -183,6 +189,7 @@
     if(action==='edit-rules')openRulesDialog();
     if(action==='add-asset')openAssetDialog();
     if(action==='edit-asset')openAssetDialog(data.assets.find(x=>x.id===btn.dataset.id));
+    if(action==='verify-data')openDataVerification();
     if(action==='yos-review')openYosReview();
   }
   const dialog=()=>document.getElementById('money2Dialog');
@@ -226,6 +233,20 @@
   function openAssetDialog(asset){
     const editing=!!asset,target=asset||{name:'',type:'investment',value:''};
     openDialog(editing?'資産を編集':'資産を追加',`${field('名称','name','text',target.name,'placeholder="例：NISA / その他資産" required')}${selectField('種類','type',[['investment','投資'],['other','その他資産']],target.type)}${field('現在価値','value','number',target.value,'min="0" required')}`,fd=>{const item={id:target.id||uid('asset'),name:clean(fd.get('name'),60),type:clean(fd.get('type'),20),value:Math.max(0,n(fd.get('value'))),updatedAt:new Date().toISOString()};data.assets=editing?data.assets.map(x=>x.id===item.id?item:x):[...data.assets,item];dialog().close();save()});
+  }
+  function openDataVerification(){
+    const plan=futurePlan();
+    const completedFuture=data.transactions.filter(tx=>isOutgoing(tx)&&isComplete(tx)&&String(tx.date||'')>=isoToday());
+    const paidExcluded=!plan.nextPayment||!completedFuture.some(tx=>tx.id===plan.nextPayment.id);
+    const checks=[
+      ['今日使える金額',plan.daily!==null,plan.daily===null?'残高または予定不足':privacyAmount(plan.daily)],
+      ['次の支払い',Boolean(plan.nextPayment),plan.nextPayment?`${formatMD(plan.nextPayment.date)} ${clean(plan.nextPayment.label,28)} ${data.privacy?'金額非表示':yen(plan.nextPayment.amount)}`:'未入力'],
+      ['支払済み除外',paidExcluded,paidExcluded?'除外済み':'要確認'],
+      ['次の入金',Boolean(plan.nextIncome),plan.nextIncome?`${formatMD(plan.nextIncome.date)} ${clean(plan.nextIncome.label,28)} ${data.privacy?'金額非表示':yen(plan.nextIncome.amount)}`:'未入力'],
+      ['支払い後の不足判定',plan.afterNextPayment!==null,plan.afterNextPayment===null?'残高未入力':(plan.shortageAfterNextPayment?`不足 ${data.privacy?'金額非表示':yen(Math.abs(plan.afterNextPayment))}`:`残高見込み ${data.privacy?'金額非表示':yen(plan.afterNextPayment)}`)]
+    ];
+    const passed=checks.every(([,ok])=>ok);
+    openDialog('Money 実データ確認',`<div class="money2-payment-confirm"><strong>${passed?'PASS':'未完了'}</strong>${checks.map(([name,ok,value])=>`<p>${ok?'✓':'△'} ${escapeHtml(name)}：${escapeHtml(value)}</p>`).join('')}<p>この確認はこの端末の既存 yos-money-v2 だけを読み、新しい保存先は作りません。</p></div>`,()=>dialog().close(),'閉じる');
   }
   async function openYosReview(){
     const plan=futurePlan(),debt=[...data.debts].sort((a,b)=>n(b.apr)-n(a.apr))[0],goal=primaryGoal();
