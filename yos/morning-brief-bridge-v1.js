@@ -45,7 +45,12 @@
         privacy,
         today_usable:privacy?null:(money.daily??null),
         today_usable_text:privacy?'非表示':(clean(money.dailyText,40)||(money.daily!==null&&money.daily!==undefined?moneyText(money.daily):'')),
-        payments
+        payments,
+        next_payment:money.nextPayment?{date:clean(money.nextPayment?.date,10),label:clean(money.nextPayment?.label,80),amount:privacy?null:(Number.isFinite(Number(money.nextPayment?.amount))?Number(money.nextPayment.amount):null)}:null,
+        next_income:money.nextIncome?{date:clean(money.nextIncome?.date,10),label:clean(money.nextIncome?.label,80),amount:privacy?null:(Number.isFinite(Number(money.nextIncome?.amount))?Number(money.nextIncome.amount):null)}:null,
+        projected_after_next_payment:privacy?null:(money.projectedAfterNextPayment??null),
+        shortage_possible:Boolean(money.shortagePossible),
+        shortfall:privacy?null:(money.shortfall??0)
       }
     };
   }
