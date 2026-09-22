@@ -24,7 +24,9 @@ if partCount == 2 {
         if numericMatchCount == 1 {
             const brightnessPercent = getNumbers(@valueText)
             const brightnessRatio = brightnessPercent * 0.01
-            setBrightness(brightnessRatio)
+            rawAction("is.workflow.actions.setbrightness", {
+                "WFBrightness": "${brightnessRatio}"
+            })
             output("YOS_DEVICE_OK:brightness={brightnessPercent}")
         }
     }
