@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-23T08:01:27+09:00",
+  "updated_at": "2026-09-23T08:32:32+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -23,14 +23,24 @@
       "updated_at": "2026-09-22T21:37:28Z"
     },
     {
-      "id": "github-pr-424",
-      "title": "PR #424 Build signed 3-screen remote launcher shortcut",
+      "id": "github-pr-436",
+      "title": "PR #436 fix(life): MY WAY起動でCalendar同期を1タップ化",
       "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
+      "status": "review",
+      "priority": 1,
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/424",
-      "updated_at": "2026-09-21T13:12:36Z"
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/436",
+      "updated_at": "2026-09-22T23:28:43Z"
+    },
+    {
+      "id": "github-pr-439",
+      "title": "PR #439 MY WAY: show current Money decisions on Home",
+      "type": "GitHub PR",
+      "status": "review",
+      "priority": 1,
+      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/439",
+      "updated_at": "2026-09-22T23:32:08Z"
     },
     {
       "id": "github-pr-426",
@@ -53,16 +63,6 @@
       "updated_at": "2026-09-22T21:33:05Z"
     },
     {
-      "id": "github-pr-436",
-      "title": "PR #436 fix(life): MY WAY起動でCalendar同期を1タップ化",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/436",
-      "updated_at": "2026-09-22T22:03:19Z"
-    },
-    {
       "id": "github-issue-232",
       "title": "Issue #232 [YOS HQ] ProjectY自動司令部 v1｜毎時監視・安全な自動継続",
       "type": "GitHub Issue",
@@ -70,7 +70,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-09-22T23:01:08Z"
+      "updated_at": "2026-09-22T23:32:26Z"
     },
     {
       "id": "github-issue-256",
@@ -165,6 +165,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-8b5d6a160fce",
+      "title": "Fix stale Money critical asset cache (#438)",
+      "completed_at": "2026-09-22T23:32:18Z",
+      "result": "GitHub mainへ反映（8b5d6a1）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/8b5d6a160fce40f59c46bd88213d88fd0c576458"
+    },
+    {
       "id": "github-commit-012ea99ba83b",
       "title": "Refresh PWA cache for Money real-data bridges",
       "completed_at": "2026-09-22T23:01:15Z",
@@ -193,13 +200,6 @@
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/3f18cf7caabd9e2f3ba6c6cde1ed25c8e3571186"
     },
     {
-      "id": "github-commit-13dfc94b7f3a",
-      "title": "Connect Night Check-in to MY LIFE history and save flow",
-      "completed_at": "2026-09-22T18:27:18Z",
-      "result": "GitHub mainへ反映（13dfc94）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/13dfc94b7f3a88525db540e945e213395f6b1dd8"
-    },
-    {
       "id": "complete-002",
       "title": "iPhone向けMission Control Dashboardを実装",
       "completed_at": "2026-07-17T17:55:00+09:00",
@@ -224,7 +224,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #433をレビューして公開判断する",
+      "next_action": "PR #439をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-23T08:01:27+09:00",
+      "last_update": "2026-09-23T08:32:32+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -315,7 +315,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-23T08:01:27+09:00",
+      "last_update": "2026-09-23T08:32:32+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -329,7 +329,7 @@
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #433をレビューして公開判断する",
+      "next_action": "PR #439をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-23T08:01:27+09:00",
+      "last_update": "2026-09-23T08:32:32+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "260394972b56a28174048fcb25a2f0b6af8ec26a58e9bad50d99f41504d183b8"
+  "github_snapshot_hash": "7a5bf22d4de0cd709479e000a72d227b9fea6f447dcf14e35d80c0d1ea059f83"
 }
