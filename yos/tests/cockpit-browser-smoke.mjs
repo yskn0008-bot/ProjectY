@@ -69,7 +69,7 @@ try{
   assert.ok(visual.cockpitBottom<=visual.navTop+1,`cockpit exceeds first viewport: ${visual.cockpitBottom}/${visual.navTop}`);
   assert.equal(visual.detailsOpen,false,'details must stay collapsed on first view');
   for(const label of ['今日の運転席','今日','今やる','次','予定','お金','重要なこと'])assert.match(visual.text,new RegExp(label),`missing ${label}`);
-  for(const value of ['本人確認を終える','次の作業','既存の予定','105,200円','本人操作'])assert.match(visual.text,new RegExp(value),`missing seeded value ${value}`);
+  for(const value of ['本人確認を終える','次の作業','既存の予定','4,588円','本人操作'])assert.match(visual.text,new RegExp(value),`missing seeded value ${value}`);
 
   const authVisible=await page.locator('#taskDashboardAuth').isVisible();
   assert.equal(authVisible,false,'fresh cached Tasks must not add auth friction to the first view');
@@ -77,7 +77,7 @@ try{
   await mkdir('test-results',{recursive:true});
   await page.screenshot({path:`test-results/yos-cockpit-390-${browserName}.png`,fullPage:false});
 
-  await page.locator('.money-card').click();
+  await page.locator('.money-decision-card').click();
   await page.waitForFunction(()=>document.body.dataset.domain==='money');
   assert.equal(await page.locator('#brandTitle').textContent(),'MY MONEY','Money card did not open Money');
 

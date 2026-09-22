@@ -66,20 +66,152 @@
     return {events,current,upcoming};
   }
 
+  const moneyOutgoing=tx=>['expense','debt','saving','investment'].includes(tx?.type);
+  const moneyComplete=tx=>Boolean(tx?.completed||tx?.paid||tx?.received)||['done','paid','completed','received'].includes(clean(tx?.status,20).toLowerCase());
+  function moneyDateParts(date){
+    const match=/^(\d{4})-(\d{2})-(\d{2})$/.exec(String(date||''));
+    if(!match)return null;
+    const year=Number(match[1]),month=Number(match[2]),day=Number(match[3]);
+    const value=new Date(Date.UTC(year,month-1,day));
+    if(value.getUTCFullYear()!==year||value.getUTCMonth()+1!==month||value.getUTCDate()!==day)return null;
+    return {year,month,day,weekday:value.getUTCDay(),nth:Math.floor((day-1)/7)+1};
+  }
+  function moneyAddDays(date,amount){
+    const value=new Date(`${date}T12:00:00+09:00`);
+    value.setDate(value.getDate()+amount);
+    return new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Tokyo'}).format(value);
+  }
+  function moneyMonthEnd(date=dateKey()){
+    const parts=moneyDateParts(date);if(!parts)return date;
+    return `${parts.year}-${String(parts.month).padStart(2,'0')}-${String(new Date(parts.year,parts.month,0).getDate()).padStart(2,'0')}`;
+  }
+  function moneyCalendarMatch(item,date){
+    const parts=moneyDateParts(date),rule=item?.rule||{};if(!parts)return false;
+    if(rule.type==='weekly')return Array.isArray(rule.weekdays)&&rule.weekdays.includes(parts.weekday);
+    if(rule.type==='nth-weekday')return Number(rule.weekday)===parts.weekday&&Array.isArray(rule.nth)&&rule.nth.includes(parts.nth);
+    if(rule.type==='monthly')return Number(rule.day)===parts.day;
+    if(rule.type==='monthly-next-weekday'){
+      const base=`${parts.year}-${String(parts.month).padStart(2,'0')}-${String(Number(rule.day)).padStart(2,'0')}`;
+      const bp=moneyDateParts(base);if(!bp)return false;
+      const shift=bp.weekday===6?2:bp.weekday===0?1:0;
+      return moneyAddDays(base,shift)===date;
+    }
+    if(rule.type==='interval-months'){
+      const anchor=/^(\d{4})-(\d{2})$/.exec(String(rule.anchorMonth||''));
+      if(!anchor||Number(rule.day)!==parts.day)return false;
+      const interval=Math.max(1,Number(rule.intervalMonths)||1);
+      const months=(parts.year-Number(anchor[1]))*12+parts.month-Number(anchor[2]);
+      return months>=0&&months%interval===0;
+    }
+    return false;
+  }
+  function moneyTitleKey(value){
+    return clean(value,120).toLowerCase().replace(/[（(][^）)]*[）)]/g,'').replace(/住居|支払い|料金|プレミアム/g,'').replace(/[\s　・+＋\-ー_]/g,'');
+  }
+  function sameMoneyCalendarTitle(a,b){
+    const left=moneyTitleKey(a),right=moneyTitleKey(b);
+    return Boolean(left&&right&&(left===right||left.includes(right)||right.includes(left)));
+  }
+  function moneyDateFromCalendar(tx,life){
+    const own=clean(tx?.date,10);if(moneyDateParts(own))return own;
+    const calendar=Array.isArray(life?.lifeCalendar)?life.lifeCalendar:[];
+    const item=calendar.find(entry=>entry?.enabled!==false&&sameMoneyCalendarTitle(tx?.label,entry?.title));
+    if(!item)return'';
+    for(let offset=0;offset<=62;offset++){
+      const candidate=moneyAddDays(dateKey(),offset);
+      if(moneyCalendarMatch(item,candidate))return candidate;
+    }
+    return'';
+  }
+  function moneyMD(value){
+    const parts=moneyDateParts(value);return parts?`${parts.month}/${parts.day}`:clean(value,10);
+  }
+  function moneyYen(value){
+    const number=amountNumber(value);return number===null?'':`${Math.round(number).toLocaleString('ja-JP')}円`;
+  }
+  function moneyEventText(tx,privacy=false){
+    if(!tx)return'';
+    const date=moneyMD(tx.viewDate||tx.date),label=clean(tx.label,70)||'名称未設定',number=amountNumber(tx.amount);
+    const approx=tx.type==='income'&&(tx.amountApproximate===true||clean(tx.certainty,20)==='見込み');
+    const amount=number===null?'':privacy?'非表示':`${approx?'約':''}${moneyYen(number)}`;
+    return [date,label,amount].filter(Boolean).join(' ');
+  }
+  function moneyTimeline(events,nextIncome){
+    const grouped=new Map();
+    for(const tx of events){
+      const date=tx.viewDate||tx.date;if(!date)continue;
+      if(!grouped.has(date))grouped.set(date,[]);
+      const labels=grouped.get(date),label=clean(tx.label,40)||'名称未設定';
+      if(!labels.some(item=>moneyTitleKey(item)===moneyTitleKey(label)))labels.push(label);
+    }
+    const groups=[...grouped.entries()].sort((a,b)=>a[0].localeCompare(b[0])).map(([date,labels])=>({date,text:`${moneyMD(date)} ${labels.join('・')}`}));
+    if(groups.length<=4)return groups;
+    const incomeDate=nextIncome?.viewDate||nextIncome?.date||'';
+    const incomeGroup=incomeDate?groups.find(group=>group.date===incomeDate):null;
+    const result=groups.filter(group=>!incomeGroup||group.date!==incomeGroup.date).slice(0,3);
+    if(incomeGroup)result.push(incomeGroup);else result.push(groups[3]);
+    return result.sort((a,b)=>a.date.localeCompare(b.date));
+  }
   function moneySnapshot(sharedMoney,life,today){
-    if(sharedMoney?.connected)return {
-      balance:clean(sharedMoney.balanceText,40)||'未設定',
-      nextPayment:clean(sharedMoney.nextPaymentText,100),
-      goal:clean(sharedMoney.goalText,100),
-      connected:true
-    };
+    const raw=readLocal(MONEY_KEY,null);
+    if(sharedMoney?.connected||raw){
+      const privacy=Boolean(sharedMoney?.privacy??raw?.privacy);
+      const rawTransactions=Array.isArray(raw?.transactions)?raw.transactions:[];
+      const seen=new Set();
+      const events=rawTransactions
+        .filter(tx=>tx&&['income','expense','debt','saving','investment'].includes(tx.type)&&!moneyComplete(tx))
+        .map(tx=>({...tx,viewDate:moneyDateFromCalendar(tx,life)}))
+        .filter(tx=>tx.viewDate&&tx.viewDate>=dateKey())
+        .sort((a,b)=>a.viewDate.localeCompare(b.viewDate)||String(a.id||'').localeCompare(String(b.id||'')))
+        .filter(tx=>{const key=[tx.viewDate,moneyTitleKey(tx.label),amountNumber(tx.amount),tx.type].join('|');if(seen.has(key))return false;seen.add(key);return true});
+      const nextPayment=events.find(moneyOutgoing)||sharedMoney?.nextPayment||null;
+      const nextIncome=events.find(tx=>tx.type==='income')||sharedMoney?.nextIncome||null;
+      const balanceNumber=amountNumber(sharedMoney?.balance);
+      const anchor=clean(nextIncome?.viewDate||nextIncome?.date,10)||moneyMonthEnd();
+      const outgoingUntilAnchor=events.filter(tx=>moneyOutgoing(tx)&&tx.viewDate<=anchor).reduce((sum,tx)=>sum+(amountNumber(tx.amount)||0),0);
+      const balanceAfterRequiredPayments=balanceNumber===null?null:balanceNumber-outgoingUntilAnchor;
+      const shortagePossible=balanceAfterRequiredPayments!==null&&balanceAfterRequiredPayments<0;
+      const shortfall=shortagePossible?Math.abs(balanceAfterRequiredPayments):0;
+      const latestPayment=events.filter(tx=>moneyOutgoing(tx)&&tx.viewDate<=anchor).at(-1)||null;
+      const monthEnd=moneyMonthEnd();
+      const shortageScope=latestPayment&&latestPayment.viewDate<=monthEnd&&(!nextIncome||anchor>monthEnd)?'月末まで':nextIncome?'次の入金まで':'今後の支払いで';
+      return {
+        connected:true,
+        privacy,
+        balance:privacy&&balanceNumber!==null?'非表示':balanceNumber!==null?moneyYen(balanceNumber):(clean(sharedMoney?.balanceText,40)||'未設定'),
+        balanceNumber,
+        nextPayment,
+        nextPaymentText:moneyEventText(nextPayment,privacy),
+        nextIncome,
+        nextIncomeText:moneyEventText(nextIncome,privacy),
+        shortagePossible,
+        shortfall,
+        shortageText:shortagePossible?(privacy?`${shortageScope} 不足あり`:`${shortageScope} ${moneyYen(shortfall)}不足`):'',
+        timeline:moneyTimeline(events,nextIncome),
+        goal:clean(sharedMoney?.goalText,100),
+        events
+      };
+    }
     const money=life?.moneySafety||today?.money||{};
     const income=money.income??money.monthlyIncome;
     const expense=money.expense??money.monthlyExpense??money.spentThisMonth;
     const explicitBalance=money.currentBalance??money.balance;
     const incomeNumber=amountNumber(income),expenseNumber=amountNumber(expense),balanceNumber=amountNumber(explicitBalance);
     const computedBalance=balanceNumber!==null?balanceNumber:incomeNumber!==null&&expenseNumber!==null?incomeNumber-expenseNumber:null;
-    return {balance:computedBalance!==null?amountText(computedBalance):amountText(explicitBalance),nextPayment:clean(money.nextPayment,100),goal:clean(money.goal,100),connected:Boolean(Object.keys(money).length)};
+    return {
+      balance:computedBalance!==null?amountText(computedBalance):amountText(explicitBalance),
+      balanceNumber:computedBalance,
+      nextPayment:null,
+      nextPaymentText:clean(money.nextPayment,100),
+      nextIncome:null,
+      nextIncomeText:'',
+      shortagePossible:false,
+      shortfall:0,
+      shortageText:'',
+      timeline:[],
+      goal:clean(money.goal,100),
+      connected:Boolean(Object.keys(money).length)
+    };
   }
 
   function lifeOpenTasks(today){return (Array.isArray(today?.tasks)?today.tasks:[]).filter(task=>clean(task?.text,120)&&!task.done)}
@@ -108,17 +240,52 @@
 
     const manual=groups.active.find(task=>task.state==='本人操作');
     const blocked=[...groups.active,...groups.next].find(task=>clean(task.blocker,160));
-    const important=manual?`本人操作：${taskSummary(manual)}`:blocked?`ブロッカー：${clean(blocked.blocker,160)}`:money.nextPayment?`近い支払い：${money.nextPayment}`:clean(today?.note,160)?clean(today.note,160):clean(journey?.theme,160)?`今のテーマ：${clean(journey.theme,160)}`:clean(idea?.text||idea?.memo,160)?`最近のIdea：${clean(idea.text||idea.memo,160)}`:'特記事項なし';
+    const important=manual?`本人操作：${taskSummary(manual)}`:blocked?`ブロッカー：${clean(blocked.blocker,160)}`:money.nextPaymentText?`近い支払い：${money.nextPaymentText}`:clean(today?.note,160)?clean(today.note,160):clean(journey?.theme,160)?`今のテーマ：${clean(journey.theme,160)}`:clean(idea?.text||idea?.memo,160)?`最近のIdea：${clean(idea.text||idea.memo,160)}`:'特記事項なし';
 
     const schedulePrimary=currentEvent?`進行中 ${timeLabel(currentEvent.start)}–${timeLabel(currentEvent.end)} ${clean(currentEvent.title,100)||'予定'}`:firstUpcoming?`${timeLabel(firstUpcoming.start)} ${clean(firstUpcoming.title,100)||'予定'}`:schedule.events.length?'今日の予定は終了':'予定なし';
     const scheduleSecondary=currentEvent&&firstUpcoming&&firstUpcoming!==currentEvent?`次 ${timeLabel(firstUpcoming.start)} ${clean(firstUpcoming.title,80)||'予定'}`:secondUpcoming?`次 ${timeLabel(secondUpcoming.start)} ${clean(secondUpcoming.title,80)||'予定'}`:life?'Life連携済み':'Life未連携';
-    const moneySecondary=money.nextPayment||money.goal||'詳細はMoneyへ';
-
-    return {groups,today:todayBits.join(' ・ '),nowText,nextText,schedulePrimary,scheduleSecondary,moneyPrimary:money.balance,moneySecondary,important};
+    return {groups,today:todayBits.join(' ・ '),nowText,nextText,schedulePrimary,scheduleSecondary,money,important};
   }
 
   function cockpitCard(label,value,sub,kind){
     const article=el('article',`cockpit-card ${kind||''}`.trim());article.append(el('small','cockpit-label',label),el('strong','cockpit-value',value));if(sub)article.append(el('span','cockpit-sub',sub));return article;
+  }
+
+  function moneyDecisionCard(money){
+    const article=el('article','cockpit-card money-decision-card cockpit-link');
+    article.tabIndex=0;article.setAttribute('role','button');article.setAttribute('aria-label','Money詳細を開く');
+    const open=()=>document.querySelector('.money-nav')?.click();
+    article.addEventListener('click',open);
+    article.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();open()}});
+
+    const head=el('div','money-decision-head');
+    head.append(el('small','cockpit-label','お金'),el('span','money-decision-open','Money ›'));
+    article.append(head);
+
+    const top=el('div','money-decision-top');
+    const current=el('div','money-decision-current');
+    current.append(el('small','','今使える'),el('strong','',money?.balance||'未設定'));
+    top.append(current);
+    if(money?.shortageText){
+      const warning=el('div','money-decision-warning');
+      warning.append(el('small','','不足見込み'),el('strong','',money.shortageText));
+      top.append(warning);
+    }
+    article.append(top);
+
+    const next=el('div','money-decision-next');
+    const payment=el('div');payment.append(el('small','','次の支払い'),el('strong','',money?.nextPaymentText||'予定なし'));
+    const income=el('div');income.append(el('small','','次の入金'),el('strong','',money?.nextIncomeText||'未設定'));
+    next.append(payment,income);article.append(next);
+
+    if(Array.isArray(money?.timeline)&&money.timeline.length){
+      const timeline=el('div','money-mini-timeline');
+      timeline.append(el('small','','時系列'));
+      const list=el('ol');
+      money.timeline.forEach(item=>list.append(el('li','',item.text)));
+      timeline.append(list);article.append(timeline);
+    }
+    return article;
   }
 
   function render(data,statusText='最新の状態'){
@@ -132,7 +299,7 @@
     const grid=el('div','cockpit-grid');
     grid.append(cockpitCard('次',facts.nextText,'今が終わったら','next-card'));
     const scheduleCard=cockpitCard('予定',facts.schedulePrimary,facts.scheduleSecondary,'schedule-card cockpit-link');scheduleCard.tabIndex=0;scheduleCard.setAttribute('role','button');scheduleCard.addEventListener('click',()=>{location.href='../life/'});scheduleCard.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();location.href='../life/'}});grid.append(scheduleCard);
-    const moneyCard=cockpitCard('お金',facts.moneyPrimary,facts.moneySecondary,'money-card cockpit-link');moneyCard.tabIndex=0;moneyCard.setAttribute('role','button');moneyCard.addEventListener('click',()=>document.querySelector('.money-nav')?.click());moneyCard.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();document.querySelector('.money-nav')?.click()}});grid.append(moneyCard);
+    grid.append(moneyDecisionCard(facts.money));
     grid.append(cockpitCard('重要なこと',facts.important,'見落とし防止','important-card'));
     host.append(grid);
 
