@@ -1,11 +1,12 @@
 'use strict';
 const CACHE_PREFIX='yos-unified-';
-const CACHE_NAME=CACHE_PREFIX+'v5-yos-guide-ui';
+const CACHE_NAME=CACHE_PREFIX+'v6-money-real-data';
 const STATIC=[
   './','./index.html','./manifest.webmanifest','./assets/yos-icon-180.png','./assets/yos-icon-512.png',
   './yos/','./yos/index.html','./yos/styles.css','./yos/readability-final.css','./yos/guide.html','./yos/guide.css','./yos/guide.js','./yos/guide-v2.css','./yos/guide-v2.js',
   './yos/task-dashboard.css','./yos/task-dashboard.js','./yos/shared-state-v1.js','./yos/app.js',
   './yos/money-v2.css','./yos/money-master-v1.js','./yos/money-v2.js',
+  './yos/morning-brief-bridge.html','./yos/morning-brief-bridge-v1.js','./yos/payment-alert-bridge.html','./yos/payment-alert-bridge-v1.js','./yos/money-alert-bridge.html','./yos/money-alert-bridge-v1.js',
   './yos/money-reference-v1.css','./yos/money-reference-v1.js','./yos/money-polish-v2.css','./yos/money-readable-v3.css',
   './yos/assets/home-life-path-watercolor-v1.webp','./yos/assets/journey-valley-watercolor-v1.webp',
   './yos/taxi-live-v1.js','./yos/hj-entry.js','./yos/journey.html','./yos/journey.css','./yos/journey.js',
