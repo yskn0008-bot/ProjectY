@@ -11,18 +11,26 @@ def load(path: Path) -> dict:
         raise AssertionError(f"{path}: WFWorkflowActions missing")
     return root
 
-def validate(parent: Path, child: Path) -> None:
+def validate(parent: Path, child: Path, device: Path) -> None:
     p=load(parent)
     c=load(child)
+    d=load(device)
     pa=p["WFWorkflowActions"]
     ca=c["WFWorkflowActions"]
     pids=[str(a.get("WFWorkflowActionIdentifier","")) for a in pa]
     cids=[str(a.get("WFWorkflowActionIdentifier","")) for a in ca]
+    da=d["WFWorkflowActions"]
+    dids=[str(a.get("WFWorkflowActionIdentifier","")) for a in da]
     runs=[a for a in pa if str(a.get("WFWorkflowActionIdentifier","")).endswith("runworkflow")]
-    if len(runs)!=2:
-        raise AssertionError(f"parent must contain Safari fast-path + normal Run Shortcut actions, got {len(runs)}")
-    if any("YOS_OpenApp" not in repr(r.get("WFWorkflowActionParameters",{})) for r in runs):
-        raise AssertionError("parent Run Shortcut is not fixed to YOS_OpenApp")
+    run_blobs=[repr(r.get("WFWorkflowActionParameters",{})) for r in runs]
+    if len(runs)!=3 or sum("YOS_OpenApp" in x for x in run_blobs)!=2 or sum("YOS_Device" in x for x in run_blobs)!=1:
+        raise AssertionError(f"parent fixed-child routes invalid: {run_blobs}")
+    if any(i.endswith("setbrightness") for i in pids):
+        raise AssertionError("parent must not execute brightness directly")
+    if sum(i.endswith("setbrightness") for i in dids)!=1:
+        raise AssertionError("YOS_Device must own exactly one brightness action")
+    if "YOS_DEVICE_OK:brightness=50" not in repr(d) or "YOS_DEVICE_BLOCKED:" not in repr(d):
+        raise AssertionError("YOS_Device contract missing")
     if any(i.endswith("openapp") for i in pids):
         raise AssertionError("parent still embeds Open App actions")
     if any(i.endswith("downloadurl") for i in pids):
