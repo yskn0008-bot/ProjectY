@@ -52,7 +52,7 @@ if @command == "next" {
     const total = count(lines)
     @cursor = 1
     const cursorFile = getOptionalFile(cursorPath, false)
-    if @cursorFile {
+    if cursorFile {
         @cursor = number("{cursorFile}")
     }
     if @cursor > @total {
@@ -150,7 +150,7 @@ if @command == "screenshots" {
         }
     }
     const found = count(@recent)
-    if @found == 0 {
+    if found == 0 {
         output("YOS_CLIPBOARD_BLOCKED:no_recent_screenshots")
     }
     const combined = combineImages(@recent, "Vertically", 0)
