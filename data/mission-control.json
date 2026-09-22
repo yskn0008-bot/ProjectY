@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-23T03:27:33+09:00",
+  "updated_at": "2026-09-23T06:17:56+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -70,7 +70,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-09-22T18:24:46Z"
+      "updated_at": "2026-09-22T21:17:40Z"
     },
     {
       "id": "github-issue-256",
@@ -165,6 +165,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-3f18cf7caabd",
+      "title": "Harden Morning Brief existing-SSOT read route",
+      "completed_at": "2026-09-22T21:17:39Z",
+      "result": "GitHub mainへ反映（3f18cf7）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/3f18cf7caabd9e2f3ba6c6cde1ed25c8e3571186"
+    },
+    {
       "id": "github-commit-13dfc94b7f3a",
       "title": "Connect Night Check-in to MY LIFE history and save flow",
       "completed_at": "2026-09-22T18:27:18Z",
@@ -191,13 +198,6 @@
       "completed_at": "2026-09-21T18:55:49Z",
       "result": "GitHub mainへ反映（8212341）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/8212341e6aac0076c2f82cab8919bcd6affc8827"
-    },
-    {
-      "id": "github-commit-f953aca3b8a8",
-      "title": "Clarity: record physical Safari fixed-child PASS",
-      "completed_at": "2026-09-21T18:54:44Z",
-      "result": "GitHub mainへ反映（f953aca）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/f953aca3b8a8373b358520f1f2491a6ff8afb148"
     },
     {
       "id": "complete-002",
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-23T03:27:33+09:00",
+      "last_update": "2026-09-23T06:17:56+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -315,7 +315,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-23T03:27:33+09:00",
+      "last_update": "2026-09-23T06:17:56+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-23T03:27:33+09:00",
+      "last_update": "2026-09-23T06:17:56+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "15a414ef75bd052b1f9e42fe0582639ae985522cc1600b498f744e9a5886f2f2"
+  "github_snapshot_hash": "620267d2365b61f603198c6152bc085f34a9a99e4ebf40d8c51847e1c0765921"
 }
