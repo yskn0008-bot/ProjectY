@@ -16,11 +16,7 @@
 if @incoming contains "yos-night-save-ok-v1" {
     const saved = getDictionary(@incoming)
     const savedDisplay = "{saved['display_text']}"
-    if savedDisplay {
-        show("{savedDisplay}")
-    } else {
-        show("Night Check-inをMY LIFEへ保存しました。")
-    }
+    show("{savedDisplay}")
     stop()
 }
 
