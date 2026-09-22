@@ -128,7 +128,9 @@ jobs:
           model_i=next(i for i,a in enumerate(pa) if a.get('WFWorkflowActionIdentifier','').endswith('askllm'))
           assert not any(i < model_i and a.get('WFWorkflowActionIdentifier','').endswith('setbrightness') for i,a in enumerate(pa))
           assert sum(i.endswith('setbrightness') for i in [a.get('WFWorkflowActionIdentifier','') for a in da]) == 1
-          assert 'YOS_DEVICE_OK:brightness=50' in repr(device)
+          device_blob=repr(device)
+          assert 'YOS_DEVICE_OK:brightness=' in device_blob
+          assert 'brightness|50' not in device_blob
           print('Clarity parent + fixed child isolation: PASS')
           PY
 
