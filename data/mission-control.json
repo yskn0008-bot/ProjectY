@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-23T08:53:30+09:00",
+  "updated_at": "2026-09-23T08:57:16+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -33,14 +33,14 @@
       "updated_at": "2026-09-22T23:28:43Z"
     },
     {
-      "id": "github-pr-442",
-      "title": "PR #442 Connect Emergency Alert to common alert routing",
+      "id": "github-pr-424",
+      "title": "PR #424 Build signed 3-screen remote launcher shortcut",
       "type": "GitHub PR",
-      "status": "review",
-      "priority": 1,
+      "status": "draft",
+      "priority": 2,
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/442",
-      "updated_at": "2026-09-22T23:53:28Z"
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/424",
+      "updated_at": "2026-09-21T13:12:36Z"
     },
     {
       "id": "github-pr-426",
@@ -70,7 +70,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-09-22T23:53:09Z"
+      "updated_at": "2026-09-22T23:54:11Z"
     },
     {
       "id": "github-issue-256",
@@ -165,6 +165,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-85759c7c0e19",
+      "title": "Connect Emergency Alert to common routing",
+      "completed_at": "2026-09-22T23:56:27Z",
+      "result": "GitHub mainへ反映（85759c7）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/85759c7c0e19846facf4cb293354722c7c5676c6"
+    },
+    {
       "id": "github-commit-3ec216d4ee3c",
       "title": "Money bridges self-refresh current facts",
       "completed_at": "2026-09-22T23:53:19Z",
@@ -193,13 +200,6 @@
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/8b5d6a160fce40f59c46bd88213d88fd0c576458"
     },
     {
-      "id": "github-commit-012ea99ba83b",
-      "title": "Refresh PWA cache for Money real-data bridges",
-      "completed_at": "2026-09-22T23:01:15Z",
-      "result": "GitHub mainへ反映（012ea99）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/012ea99ba83bda94693e06ce198139799cfb2710"
-    },
-    {
       "id": "complete-002",
       "title": "iPhone向けMission Control Dashboardを実装",
       "completed_at": "2026-07-17T17:55:00+09:00",
@@ -224,7 +224,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #442をレビューして公開判断する",
+      "next_action": "PR #436をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-23T08:53:30+09:00",
+      "last_update": "2026-09-23T08:57:16+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -315,7 +315,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-23T08:53:30+09:00",
+      "last_update": "2026-09-23T08:57:16+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -329,7 +329,7 @@
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #442をレビューして公開判断する",
+      "next_action": "PR #436をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-23T08:53:30+09:00",
+      "last_update": "2026-09-23T08:57:16+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "5a630490a8fa5dcbacbe8a6050e9ffc3d7787d4ec0c5e11fd384c77fc4bd97de"
+  "github_snapshot_hash": "25cb369130d9aa09d99d0d35d663c4ffe795cf20cc2aebf760341a4b56c8d698"
 }
