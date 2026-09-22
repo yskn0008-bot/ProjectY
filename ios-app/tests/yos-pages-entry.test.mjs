@@ -37,7 +37,7 @@ test('YOS iOS shell opens MY WAY natively while preserving the public system ent
   assert.match(yosIndex, /money-reference-v1\.css\?v=1/);
   assert.match(yosIndex, /money-readable-v3\.css\?v=3/);
   assert.match(yosIndex, /money-master-v1\.js\?v=20260923v4/);
-  assert.match(yosIndex, /money-v2\.js\?v=3/);
+  assert.match(yosIndex, /money-v2-runtime-v4\.js/);
   assert.match(yosIndex, /money-reference-v1\.js\?v=1/);
 
   assert.match(dashboard, /location\.hostname\.endsWith\('github\.io'\)/);
