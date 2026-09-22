@@ -53,7 +53,7 @@ if @command == "next" {
     @cursor = 1
     const cursorFile = getOptionalFile(cursorPath, false)
     if cursorFile {
-        @cursor = number("{cursorFile}")
+        @cursor = number(cursorFile)
     }
     if @cursor > @total {
         @cursor = 1
@@ -104,7 +104,7 @@ if @command == "merge" {
 if @command contains "select|" {
     const parts = splitText(@command, "|")
     const indexPart = getListItem(parts, 2)
-    @index = number("{indexPart}")
+    @index = number(indexPart)
     if @index < 1 {
         output("YOS_CLIPBOARD_BLOCKED:bad_index")
     }
