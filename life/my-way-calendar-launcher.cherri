@@ -1,6 +1,6 @@
 #define name MY WAY
 #define color green
-#define version 1
+#define version 18
 
 // Thin local launcher only.
 // Reuses the installed YOS Life Calendar Sync Scriptable script.
