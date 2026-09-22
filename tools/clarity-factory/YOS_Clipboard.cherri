@@ -242,7 +242,8 @@ if requestMode == "screenshots" {
     @recentScreenshots = []
     @latestScreenshots = getLatestScreenshots(50)
     for recentScreenshotItem in @latestScreenshots {
-        const recentScreenshotDate = getImageDetail(@recentScreenshotItem, "Date Taken")
+        const recentScreenshotDateRaw = getImageDetail(@recentScreenshotItem, "Date Taken")
+        const recentScreenshotDate = date("{recentScreenshotDateRaw}")
         if recentScreenshotDate > @screenCutoff {
             @recentScreenshots += @recentScreenshotItem
         }
