@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-23T02:05:52+09:00",
+  "updated_at": "2026-09-23T03:27:33+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -13,14 +13,14 @@
   },
   "inbox": [
     {
-      "id": "github-pr-373",
-      "title": "PR #373 Clarity: modular iPhone router Phase 1 contract",
+      "id": "github-pr-429",
+      "title": "PR #429 YOS Alerts: reuse existing data and suppress duplicate notifications",
       "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
+      "status": "review",
+      "priority": 1,
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/373",
-      "updated_at": "2026-09-21T01:14:46Z"
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/429",
+      "updated_at": "2026-09-22T17:06:23Z"
     },
     {
       "id": "github-pr-412",
@@ -70,7 +70,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-09-22T17:05:34Z"
+      "updated_at": "2026-09-22T18:24:46Z"
     },
     {
       "id": "github-issue-256",
@@ -153,17 +153,24 @@
       "updated_at": "2026-09-10T06:27:07Z"
     },
     {
-      "id": "github-issue-51",
-      "title": "Issue #51 ProjectY 4本並行開発の全体管理",
+      "id": "github-issue-314",
+      "title": "Issue #314 [Clarity] Universal Gateway v1｜拡張モデル版ショートカット自動生成",
       "type": "GitHub Issue",
       "status": "open",
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/51",
-      "updated_at": "2026-09-04T23:21:43Z"
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/314",
+      "updated_at": "2026-09-15T14:09:29Z"
     }
   ],
   "recently_completed": [
+    {
+      "id": "github-commit-13dfc94b7f3a",
+      "title": "Connect Night Check-in to MY LIFE history and save flow",
+      "completed_at": "2026-09-22T18:27:18Z",
+      "result": "GitHub mainへ反映（13dfc94）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/13dfc94b7f3a88525db540e945e213395f6b1dd8"
+    },
     {
       "id": "github-commit-127ab2e8be59",
       "title": "Connect Morning Brief to existing MY WAY / Money / Life data (#428)",
@@ -193,13 +200,6 @@
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/f953aca3b8a8373b358520f1f2491a6ff8afb148"
     },
     {
-      "id": "github-commit-675698005233",
-      "title": "Clarity: document one-enter voice capture",
-      "completed_at": "2026-09-21T16:54:42Z",
-      "result": "GitHub mainへ反映（6756980）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/67569800523319bbf49f8e1af506f00b2898d99d"
-    },
-    {
       "id": "complete-002",
       "title": "iPhone向けMission Control Dashboardを実装",
       "completed_at": "2026-07-17T17:55:00+09:00",
@@ -224,7 +224,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #403をレビューして公開判断する",
+      "next_action": "PR #429をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-23T02:05:52+09:00",
+      "last_update": "2026-09-23T03:27:33+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -309,13 +309,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 20件・Open PR 20件を自動同期中",
+      "next_action": "Open Issue 19件・Open PR 20件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-23T02:05:52+09:00",
+      "last_update": "2026-09-23T03:27:33+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -329,7 +329,7 @@
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #403をレビューして公開判断する",
+      "next_action": "PR #429をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-23T02:05:52+09:00",
+      "last_update": "2026-09-23T03:27:33+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "b37a511426d861da45ccef138474d2d69edecc745978a94e48ab0f711d7dc084"
+  "github_snapshot_hash": "15a414ef75bd052b1f9e42fe0582639ae985522cc1600b498f744e9a5886f2f2"
 }
