@@ -18,6 +18,11 @@ test('Money shared projection exposes computed daily amount and future payments'
  assert.match(shared,/upcomingPayments/);
  assert.match(shared,/outgoingUntilAnchor/);
 });
+test('privacy mode never exposes numeric usable money or payment amount through Morning Brief',()=>{
+ assert.match(bridge,/today_usable:privacy\?null/);
+ assert.match(bridge,/amount:privacy\?null/);
+ assert.match(bridge,/today_usable_text:privacy\?'非表示'/);
+});
 test('bridge excludes calendar and weather to avoid duplicating existing Morning Brief inputs',()=>{
  assert.doesNotMatch(bridge,/CalendarEvent|weather|UV|schedule/);
 });
