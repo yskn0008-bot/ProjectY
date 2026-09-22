@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-23T06:58:25+09:00",
+  "updated_at": "2026-09-23T08:01:27+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -23,16 +23,6 @@
       "updated_at": "2026-09-22T21:37:28Z"
     },
     {
-      "id": "github-pr-412",
-      "title": "PR #412 Fix 3-screen remote button reliability",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/412",
-      "updated_at": "2026-09-21T05:31:45Z"
-    },
-    {
       "id": "github-pr-424",
       "title": "PR #424 Build signed 3-screen remote launcher shortcut",
       "type": "GitHub PR",
@@ -50,7 +40,7 @@
       "priority": 2,
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/426",
-      "updated_at": "2026-09-22T01:15:40Z"
+      "updated_at": "2026-09-22T22:53:49Z"
     },
     {
       "id": "github-pr-432",
@@ -63,6 +53,16 @@
       "updated_at": "2026-09-22T21:33:05Z"
     },
     {
+      "id": "github-pr-436",
+      "title": "PR #436 fix(life): MY WAY起動でCalendar同期を1タップ化",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/436",
+      "updated_at": "2026-09-22T22:03:19Z"
+    },
+    {
       "id": "github-issue-232",
       "title": "Issue #232 [YOS HQ] ProjectY自動司令部 v1｜毎時監視・安全な自動継続",
       "type": "GitHub Issue",
@@ -70,7 +70,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-09-22T21:57:51Z"
+      "updated_at": "2026-09-22T23:01:08Z"
     },
     {
       "id": "github-issue-256",
@@ -165,6 +165,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-012ea99ba83b",
+      "title": "Refresh PWA cache for Money real-data bridges",
+      "completed_at": "2026-09-22T23:01:15Z",
+      "result": "GitHub mainへ反映（012ea99）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/012ea99ba83bda94693e06ce198139799cfb2710"
+    },
+    {
       "id": "github-commit-6e03e6e8ab7d",
       "title": "Connect YOS Alerts to current Money data semantics",
       "completed_at": "2026-09-22T21:58:07Z",
@@ -191,13 +198,6 @@
       "completed_at": "2026-09-22T18:27:18Z",
       "result": "GitHub mainへ反映（13dfc94）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/13dfc94b7f3a88525db540e945e213395f6b1dd8"
-    },
-    {
-      "id": "github-commit-127ab2e8be59",
-      "title": "Connect Morning Brief to existing MY WAY / Money / Life data (#428)",
-      "completed_at": "2026-09-22T17:05:39Z",
-      "result": "GitHub mainへ反映（127ab2e）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/127ab2e8be591ade7bef6b59d82d01aa7499475d"
     },
     {
       "id": "complete-002",
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-23T06:58:25+09:00",
+      "last_update": "2026-09-23T08:01:27+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -315,7 +315,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-23T06:58:25+09:00",
+      "last_update": "2026-09-23T08:01:27+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-23T06:58:25+09:00",
+      "last_update": "2026-09-23T08:01:27+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "8f958b9374536779d8ad7d9fee00fb145a749a208527c5c187359f6ef5c4e0e1"
+  "github_snapshot_hash": "260394972b56a28174048fcb25a2f0b6af8ec26a58e9bad50d99f41504d183b8"
 }
