@@ -34,3 +34,10 @@ test('Emergency bridge is read-only and creates no SSOT',async()=>{
   assert.match(source,/selectAlerts/);
   assert.match(source,/YOS_EMERGENCY_ALERT_V1/);
 });
+
+test('Emergency bridge page loads the module entrypoint',async()=>{
+  const html=await readFile(new URL('../emergency-alert-bridge.html',import.meta.url),'utf8');
+  assert.match(html,/type="module"/);
+  assert.match(html,/emergency-alert-bridge-v1\.mjs\?v=1/);
+  assert.match(html,/emergencyAlertBridgeStatus/);
+});
