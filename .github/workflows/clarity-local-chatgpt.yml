@@ -64,6 +64,18 @@ jobs:
           mkdir -p artifacts-fixed-child
           cp "$child" artifacts-fixed-child/YOS_OpenApp-unsigned.shortcut
 
+      - name: Compile fixed YOS_Device child
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd tools/clarity-factory
+          rm -f './YOS_Device_unsigned.shortcut' './YOS_Device.plist'
+          cherri YOS_Device.cherri --skip-sign --debug
+          child='./YOS_Device_unsigned.shortcut'
+          test -f "$child"
+          mkdir -p artifacts-fixed-child
+          cp "$child" artifacts-fixed-child/YOS_Device-unsigned.shortcut
+
       - name: Compile normal Clarity parent
         shell: bash
         run: |
@@ -95,13 +107,17 @@ jobs:
           base=Path('tools/clarity-factory/artifacts-fixed-child')
           parent=plistlib.loads((base/'Clarity-unsigned.shortcut').read_bytes())
           child=plistlib.loads((base/'YOS_OpenApp-unsigned.shortcut').read_bytes())
+          device=plistlib.loads((base/'YOS_Device-unsigned.shortcut').read_bytes())
           pa=parent['WFWorkflowActions']
           ca=child['WFWorkflowActions']
+          da=device['WFWorkflowActions']
           pids=[a.get('WFWorkflowActionIdentifier','') for a in pa]
           cids=[a.get('WFWorkflowActionIdentifier','') for a in ca]
           runs=[a for a in pa if a.get('WFWorkflowActionIdentifier','').endswith('runworkflow')]
-          assert len(runs)==2, len(runs)
-          assert all('YOS_OpenApp' in repr(r.get('WFWorkflowActionParameters',{})) for r in runs)
+          assert len(runs)==3, len(runs)
+          run_blob=[repr(r.get('WFWorkflowActionParameters',{})) for r in runs]
+          assert sum('YOS_OpenApp' in b for b in run_blob)==2, run_blob
+          assert sum('YOS_Device' in b for b in run_blob)==1, run_blob
           assert not any(i.endswith('openapp') for i in pids)
           assert not any(i.endswith('downloadurl') for i in pids)
           assert sum(i.endswith('openapp') for i in cids) >= 20
@@ -109,7 +125,10 @@ jobs:
           for forbidden in ('shortcutFactoryUnsignedXml','YOS Safari Auto.shortcut','hubsign.routinehub.services/sign'):
               assert forbidden not in blob, forbidden
           assert 'YOS_OPEN_APP_OK:safari' in repr(child)
-          print('Clarity parent + fixed YOS_OpenApp isolation: PASS')
+          assert sum(i.endswith('setbrightness') for i in [a.get('WFWorkflowActionIdentifier','') for a in pa]) == 0
+          assert sum(i.endswith('setbrightness') for i in [a.get('WFWorkflowActionIdentifier','') for a in da]) == 1
+          assert 'YOS_DEVICE_OK:brightness=50' in repr(device)
+          print('Clarity parent + fixed child isolation: PASS')
           PY
 
       - name: Secret scan
@@ -143,6 +162,16 @@ jobs:
             --name 'YOS_OpenApp' \
             2>&1 | tee tools/clarity-factory/artifacts-fixed-child/yos-openapp-hubsign.log
 
+      - name: Sign YOS_Device child
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/clarity-factory/sign_with_hubsign.py \
+            --input tools/clarity-factory/artifacts-fixed-child/YOS_Device-unsigned.shortcut \
+            --output tools/clarity-factory/artifacts-fixed-child/YOS_Device-signed.shortcut \
+            --name 'YOS_Device' \
+            2>&1 | tee tools/clarity-factory/artifacts-fixed-child/yos-device-hubsign.log
+
       - name: Verify signed artifacts
         shell: bash
         run: |
@@ -150,7 +179,7 @@ jobs:
           python3 - <<'PY'
           from pathlib import Path
           base=Path('tools/clarity-factory/artifacts-fixed-child')
-          for name in ('Clarity-signed.shortcut','YOS_OpenApp-signed.shortcut'):
+          for name in ('Clarity-signed.shortcut','YOS_OpenApp-signed.shortcut','YOS_Device-signed.shortcut'):
               data=(base/name).read_bytes()
               assert data.startswith(b'AEA1'), (name,data[:8])
               assert len(data)>500, (name,len(data))
@@ -166,6 +195,9 @@ jobs:
             tools/clarity-factory/artifacts-fixed-child/Clarity-signed.shortcut
             tools/clarity-factory/artifacts-fixed-child/YOS_OpenApp-unsigned.shortcut
             tools/clarity-factory/artifacts-fixed-child/YOS_OpenApp-signed.shortcut
+            tools/clarity-factory/artifacts-fixed-child/YOS_Device-unsigned.shortcut
+            tools/clarity-factory/artifacts-fixed-child/YOS_Device-signed.shortcut
             tools/clarity-factory/artifacts-fixed-child/clarity-hubsign.log
             tools/clarity-factory/artifacts-fixed-child/yos-openapp-hubsign.log
+            tools/clarity-factory/artifacts-fixed-child/yos-device-hubsign.log
           if-no-files-found: error
