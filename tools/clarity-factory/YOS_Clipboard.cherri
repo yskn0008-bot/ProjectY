@@ -2,7 +2,6 @@
 #define color blue
 #define inputs text
 
-#include 'actions/basic'
 #include 'actions/calendar'
 #include 'actions/crypto'
 #include 'actions/documents'
