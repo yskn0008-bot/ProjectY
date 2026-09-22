@@ -57,6 +57,13 @@
     const future=transactions.filter(tx=>tx?.status!=='done'&&String(tx?.date||'')>=dateKey()).sort((a,b)=>String(a.date).localeCompare(String(b.date)));
     const nextPayment=future.find(outgoing)||null;
     const nextIncome=future.find(tx=>tx?.type==='income')||null;
+    const upcomingPayments=future.filter(outgoing).slice(0,5);
+    const todayDate=new Date(dateKey()+'T12:00:00+09:00');
+    const monthEnd=new Date(Number(month.slice(0,4)),Number(month.slice(5,7)),0,12);
+    const anchorDate=nextIncome?.date?new Date(nextIncome.date+'T12:00:00+09:00'):monthEnd;
+    const outgoingUntilAnchor=future.filter(tx=>outgoing(tx)&&String(tx?.date||'')<=new Intl.DateTimeFormat('sv-SE',{timeZone:TZ}).format(anchorDate)).reduce((sum,tx)=>sum+(number(tx?.amount)||0),0);
+    const days=Math.max(1,Math.ceil((anchorDate.getTime()-todayDate.getTime())/86400000)+1);
+    const daily=balance===null?null:Math.floor(Math.max(0,balance-outgoingUntilAnchor)/days);
     const goals=Array.isArray(data?.goals)?data.goals:[];
     const goal=[...goals].sort((a,b)=>(Number(b?.priority)||0)-(Number(a?.priority)||0))[0]||null;
     const hasData=Boolean(data)&&(
@@ -70,8 +77,11 @@
       balanceText:privacy&&balance!==null?hidden:(balance!==null?moneyText(balance):clean(legacy?.currentBalance??legacy?.balance,40)),
       income:monthly.length?income:number(legacy?.income??legacy?.monthlyIncome),
       expense:monthly.length?expense:number(legacy?.expense??legacy?.monthlyExpense??legacy?.spentThisMonth),
+      daily,
+      dailyText:daily===null?'':(privacy?hidden:moneyText(daily)),
       nextPayment,
       nextPaymentText:nextPayment?((nextPayment.date||'')+' '+clean(nextPayment.label,70)+(privacy?'':' '+moneyText(number(nextPayment.amount)||0))).trim():clean(legacy?.nextPayment,120),
+      upcomingPayments,
       nextIncome,
       nextIncomeDate:clean(nextIncome?.date,10)||clean(legacy?.nextIncomeDate,10),
       goal,
