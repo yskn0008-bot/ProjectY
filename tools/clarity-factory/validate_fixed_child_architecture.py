@@ -31,8 +31,11 @@ def validate(parent: Path, child: Path, device: Path) -> None:
         raise AssertionError("brightness fast path must not execute in parent")
     if sum(i.endswith("setbrightness") for i in dids)!=1:
         raise AssertionError("YOS_Device must own exactly one brightness action")
-    if "YOS_DEVICE_OK:brightness=50" not in repr(d) or "YOS_DEVICE_BLOCKED:" not in repr(d):
+    dblob=repr(d)
+    if "YOS_DEVICE_OK:brightness=" not in dblob or "YOS_DEVICE_BLOCKED:" not in dblob:
         raise AssertionError("YOS_Device contract missing")
+    if "brightness|50" in dblob:
+        raise AssertionError("YOS_Device must parse brightness|<percent>; hardcoded brightness|50 remains")
     if any(i.endswith("openapp") for i in pids):
         raise AssertionError("parent still embeds Open App actions")
     if any(i.endswith("downloadurl") for i in pids):
