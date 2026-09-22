@@ -1,0 +1,67 @@
+#define name Night Check in
+#define color purple
+#define inputs text
+
+#include 'actions/crypto'
+#include 'actions/text'
+#include 'actions/intelligence'
+#include 'actions/web'
+
+// Three-stage flow:
+// 1) normal launch -> existing MY LIFE reads prior Night records and calls this Shortcut back
+// 2) history callback -> ask user, analyze today + history, then MY LIFE saves into yos-life-v1
+// 3) save callback -> show the completed Night Check-in result
+@incoming = "{ShortcutInput}"
+
+if @incoming contains "yos-night-save-ok-v1" {
+    const saved = getDictionary(@incoming)
+    const savedDisplay = "{saved['display_text']}"
+    if savedDisplay {
+        show("{savedDisplay}")
+    } else {
+        show("Night Check-inをMY LIFEへ保存しました。")
+    }
+    stop()
+}
+
+if @incoming contains "yos-night-history-v1" {
+    @historyJson = "{ShortcutInput}"
+
+    const rawInput = prompt(
+        "今日のことを自由に書く・話す。\n入れられればこの3つ\n\n①今日あったこと\n②気分・気づいたこと\n③明日やること\n\n全部埋めなくてOK。",
+        "Text",
+        "①\n②\n③"
+    )
+
+    const modelPrompt = text("あなたはYOS Night Check-inです。\n目的は、1日の終わりに本人の記録を整理し、過去のNight Check-inと比較して、本人自身では気づきにくい行動・判断・感情・習慣の変化を継続的に発見し、明日へつなげることです。\n\n本人を評価したり、性格や心理状態を診断したりしないでください。入力や記録にない事実を作らないでください。事実・観察・推論を区別してください。\n\n発見ルール:\n- 1回だけの出来事をパターン扱いしない。1回だけなら観察候補または仮説。\n- 類似する事実が別日に繰り返されている場合だけ、確認済みパターンとして扱う。\n- 過去記録との差は変化として扱う。\n- 行動の繰り返し、迷い・詰まり、進む条件、気分と行動の関係、計画と実績の差、判断の癖、先延ばし・回避、集中・疲労の条件、変化、まだ言語化されていない価値観の可能性を証拠がある範囲で見る。\n- 過去のdiscoveriesに既にある同じ内容を、変化や新しい根拠なしに毎日繰り返さない。\n- 新しい根拠が足りなければ discoveries は『新しい発見なし』。\n\n返答はDictionaryのみ。キーは summary, mood_state, tomorrow, discoveries, three_line_diary, tomorrow_message の6つだけ。\nsummary: 今日あったことを簡潔に整理。\nmood_state: 本人の入力に根拠がある気分・状態だけ。\ntomorrow: 明日やること。無ければ空文字。\ndiscoveries: 新しい発見だけ。必要に応じて【確認済みパターン】【観察候補】【変化】【推論】を付ける。根拠不足なら『新しい発見なし』。\nthree_line_diary: 事実ベースの3行日記。改行で3行。\ntomorrow_message: 明日への短い一言。\n\n過去のMY LIFE Night記録(JSON):\n{historyJson}\n\n今日の本人入力:\n{rawInput}")
+
+    const modelResult = askChatGPT(modelPrompt, false, "Dictionary")
+    const parsed = getDictionary(modelResult)
+
+    const summary = "{parsed['summary']}"
+    const mood = "{parsed['mood_state']}"
+    const tomorrow = "{parsed['tomorrow']}"
+    const discoveries = "{parsed['discoveries']}"
+    const diary = "{parsed['three_line_diary']}"
+    const message = "{parsed['tomorrow_message']}"
+
+    const displayText = text("今日あったこと\n{summary}\n\n気分 / 状態\n{mood}\n\n明日やること\n{tomorrow}\n\nYOS 自分の発見\n{discoveries}\n\n3行日記\n{diary}\n\n明日への一言\n{message}")
+
+    const rawEncoded = urlEncode(base64Encode(rawInput))
+    const summaryEncoded = urlEncode(base64Encode(summary))
+    const moodEncoded = urlEncode(base64Encode(mood))
+    const tomorrowEncoded = urlEncode(base64Encode(tomorrow))
+    const discoveriesEncoded = urlEncode(base64Encode(discoveries))
+    const diaryEncoded = urlEncode(base64Encode(diary))
+    const messageEncoded = urlEncode(base64Encode(message))
+    const displayEncoded = urlEncode(base64Encode(displayText))
+
+    const saveURL = text("https://yskn0008-bot.github.io/ProjectY/life/?night_save=1&night_raw_b64={rawEncoded}&night_summary_b64={summaryEncoded}&night_mood_b64={moodEncoded}&night_tomorrow_b64={tomorrowEncoded}&night_discoveries_b64={discoveriesEncoded}&night_diary_b64={diaryEncoded}&night_message_b64={messageEncoded}&night_display_b64={displayEncoded}&shortcut=Night%20Check%20in")
+    openURL(saveURL)
+    stop()
+}
+
+// Normal launch: fetch prior 14 days from the existing MY LIFE yos-life-v1 store.
+// The page calls this same Shortcut back with the history JSON.
+openURL("https://yskn0008-bot.github.io/ProjectY/life/?night_history=1&night_limit=14&shortcut=Night%20Check%20in")
+stop()
