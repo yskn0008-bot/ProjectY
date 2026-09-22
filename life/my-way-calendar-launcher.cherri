@@ -1,0 +1,11 @@
+#define name MY WAY
+#define color green
+#define version 1
+
+// Thin local launcher only.
+// Reuses the installed YOS Life Calendar Sync Scriptable script.
+// destination=myway is already handled by life/calendar-sync-scriptable.js,
+// which sends the existing Life import route after=myway.
+rawAction("is.workflow.actions.openurl", {
+    "WFInput": "scriptable:///run/YOS%20Life%20Calendar%20Sync?destination=myway&openEditor=false"
+})
