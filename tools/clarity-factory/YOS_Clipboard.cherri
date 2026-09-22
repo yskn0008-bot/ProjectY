@@ -15,7 +15,9 @@ action 'documentpicker.open' getOptionalFile(text path: 'WFGetFilePath', bool ?e
 // Buffer is temporary implementation state only, not an SSOT.
 // Contract: add | next | merge | select|N | duplicate | clear | screenshots
 const bufferPath = "YOS Clipboard/buffer.txt"
-const cursorPath = "YOS Clipboard/cursor.txt"\nconst cursorOne = text("1")\nconst emptyText = text("")
+const cursorPath = "YOS Clipboard/cursor.txt"
+const cursorOne = text("1")
+const emptyText = text("")
 createFolder("YOS Clipboard")
 
 @command = "{ShortcutInput}"
@@ -29,7 +31,8 @@ if @command == "add" {
         output("YOS_CLIPBOARD_BLOCKED:empty_clipboard")
     }
     const encoded = base64Encode(clip)
-    @record = "{encoded}\n"
+    @record = "{encoded}
+"
     @buffer = ""
     @existing = getOptionalFile(bufferPath, false)
     if @existing {
@@ -46,7 +49,8 @@ if @command == "next" {
     if !file {
         output("YOS_CLIPBOARD_BLOCKED:empty_buffer")
     }
-    const lines = splitText("{file}", "\n")
+    const lines = splitText("{file}", "
+")
     const total = count(lines)
     @cursor = 1
     const cursorFile = getOptionalFile(cursorPath, false)
@@ -62,13 +66,15 @@ if @command == "next" {
         const firstEncoded = getListItem(lines, 1)
         const firstDecoded = base64Decode(firstEncoded)
         setClipboard(firstDecoded)
-        const cursorTwo = text("2")\n        saveFile(cursorPath, cursorTwo, true)
+        const cursorTwo = text("2")
+        saveFile(cursorPath, cursorTwo, true)
         output("YOS_CLIPBOARD_OK:next:1")
     }
     const decodedItem = base64Decode(encodedItem)
     setClipboard(decodedItem)
     @nextCursor = @cursor + 1
-    const nextCursorText = text("{@nextCursor}")\n    saveFile(cursorPath, nextCursorText, true)
+    const nextCursorText = text("{@nextCursor}")
+    saveFile(cursorPath, nextCursorText, true)
     output("YOS_CLIPBOARD_OK:next:{@cursor}")
 }
 
@@ -77,14 +83,16 @@ if @command == "merge" {
     if !file {
         output("YOS_CLIPBOARD_BLOCKED:empty_buffer")
     }
-    const lines = splitText("{file}", "\n")
+    const lines = splitText("{file}", "
+")
     @merged = ""
     @seen = 0
     for encodedItem in lines {
         if encodedItem {
             const decodedItem = base64Decode(encodedItem)
             if @seen > 0 {
-                @merged += "\n"
+                @merged += "
+"
             }
             @merged += "{decodedItem}"
             @seen += 1
@@ -108,7 +116,8 @@ if @command contains "select|" {
     if !file {
         output("YOS_CLIPBOARD_BLOCKED:empty_buffer")
     }
-    const lines = splitText("{file}", "\n")
+    const lines = splitText("{file}", "
+")
     const encodedItem = getListItem(lines, @index)
     if !encodedItem {
         output("YOS_CLIPBOARD_BLOCKED:index_out_of_range")
