@@ -15,28 +15,28 @@ class YOSClipboardSourceContract(unittest.TestCase):
     def test_fixed_child_identity_and_modes(self):
         self.assertIn("#define name YOS_Clipboard", self.src)
         for mode in ("add", "next", "merge", "select", "duplicate", "clear", "screenshots"):
-            self.assertRegex(self.src, rf'if mode == "{re.escape(mode)}"')
+            self.assertRegex(self.src, rf'if requestMode == "{re.escape(mode)}"')
 
     def test_temp_buffer_is_explicit_and_not_ssot(self):
         self.assertIn('YOS Clipboard Temp/buffer.b64', self.src)
         self.assertIn('YOS Clipboard Temp/cursor.txt', self.src)
         self.assertIn('temporary working state, not a system of record', self.src)
-        self.assertIn('deleteFiles(bufferFile, true)', self.src)
-        self.assertIn('deleteFiles(cursorFile, true)', self.src)
+        self.assertIn('deleteFiles(clearBufferFile, true)', self.src)
+        self.assertIn('deleteFiles(clearCursorFile, true)', self.src)
 
     def test_clipboard_round_trip_contract(self):
         self.assertIn('getClipboard()', self.src)
         self.assertIn('setClipboard(', self.src)
         self.assertIn('base64Encode(', self.src)
         self.assertIn('base64Decode(', self.src)
-        self.assertIn('getListItem(@items, @cursor)', self.src)
-        self.assertIn('saveFile(cursorPath, nextCursorText, true)', self.src)
+        self.assertIn('getListItem(@nextItems, @nextCursorIndex)', self.src)
+        self.assertIn('saveFile(clipboardCursorPath, nextCursorSaveText, true)', self.src)
 
     def test_screenshot_contract(self):
         self.assertIn('getLatestScreenshots(50)', self.src)
-        self.assertIn('getImageDetail(screenshotItem, "Date Taken")', self.src)
+        self.assertIn('getImageDetail(recentScreenshotItem, "Date Taken")', self.src)
         self.assertIn('combineImages(@recentScreenshots, "Vertically", 0)', self.src)
-        self.assertIn('setClipboard(mergedImage)', self.src)
+        self.assertIn('setClipboard(screenMergedImage)', self.src)
 
     def test_child_is_deterministic_local_and_does_not_route_elsewhere(self):
         forbidden = (
