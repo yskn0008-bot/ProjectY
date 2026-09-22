@@ -9,3 +9,5 @@ test('payment window is today through three days',()=>assert.deepEqual(paymentCa
 test('money alert only on anomaly',()=>assert.equal(moneyCandidates({currentBalance:1000,todayBudget:500,spentToday:700,transactions:[{type:'expense',amount:1500}]}).length,2));
 test('unknown balance does not create a false shortage',()=>assert.equal(moneyCandidates({currentBalance:null,transactions:[{type:'expense',amount:1500}]}).length,0));
 test('completed and boolean-paid outflows are excluded from Payment Alert candidates',()=>assert.deepEqual(paymentCandidates([{id:'done',type:'expense',date:'2026-09-23',amount:1,status:'completed'},{id:'paid',type:'debt',date:'2026-09-23',amount:2,paid:true},{id:'open',type:'debt',date:'2026-09-23',amount:3}],{now:new Date('2026-09-23T02:00:00+09:00')}).map(x=>x.id),['open']));
+
+test('unknown daily budget does not create a false over-budget alert',()=>assert.equal(moneyCandidates({currentBalance:1000,todayBudget:null,spentToday:700,transactions:[]}).length,0));
