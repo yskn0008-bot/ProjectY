@@ -9,7 +9,7 @@ on:
       - 'tools/night-checkin/**'
       - '.github/workflows/night-checkin-shortcut.yml'
   push:
-    branches: [main]
+    branches: [main, 'feat/night-checkin-shortcut-e2e-v1']
     paths:
       - 'life/night-checkin-life-bridge-v1.js'
       - 'life/tests/night-checkin-life-bridge.test.mjs'
