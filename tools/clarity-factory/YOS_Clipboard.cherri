@@ -28,8 +28,8 @@
 // Empty ShortcutInput opens a small manual menu so the child can be tested standalone.
 // Buffer files are explicitly temporary working state, not a system of record.
 
-const bufferPath = "YOS Clipboard Temp/buffer.b64"
-const cursorPath = "YOS Clipboard Temp/cursor.txt"
+const clipboardBufferPath = "YOS Clipboard Temp/buffer.b64"
+const clipboardCursorPath = "YOS Clipboard Temp/cursor.txt"
 
 @request = "{ShortcutInput}"
 if !@request {
@@ -38,181 +38,181 @@ if !@request {
     @request = "{manualChoice}"
 }
 
-@parts = splitText(@request, "|")
-const modeValue = getFirstItem(@parts)
-const mode = "{modeValue}"
+@requestParts = splitText(@request, "|")
+const requestModeValue = getFirstItem(@requestParts)
+const requestMode = "{requestModeValue}"
 
-if mode == "add" {
+if requestMode == "add" {
     createFolder("YOS Clipboard Temp")
 
-    const currentClipboard = getClipboard()
-    const clipboardText = getText(currentClipboard)
-    if !clipboardText {
+    const addClipboard = getClipboard()
+    const addClipboardText = getText(addClipboard)
+    if !addClipboardText {
         output("YOS_CLIPBOARD_BLOCKED:empty_clipboard")
     }
 
-    const encoded = base64Encode(clipboardText)
-    const existingFile = getFile(bufferPath, nil, false)
-    @newBuffer = "{encoded}"
-    if existingFile {
-        const existingText = getText(existingFile)
-        if existingText {
-            @newBuffer = "{existingText}\n{encoded}"
+    const addEncoded = base64Encode(addClipboardText)
+    const addExistingFile = getFile(clipboardBufferPath, nil, false)
+    @addNewBuffer = "{addEncoded}"
+    if addExistingFile {
+        const addExistingText = getText(addExistingFile)
+        if addExistingText {
+            @addNewBuffer = "{addExistingText}\n{addEncoded}"
         }
     }
-    saveFile(bufferPath, @newBuffer, true)
+    saveFile(clipboardBufferPath, @addNewBuffer, true)
 
-    const cursorFile = getFile(cursorPath, nil, false)
-    if !cursorFile {
-        const firstCursor = text("1")
-        saveFile(cursorPath, firstCursor, true)
+    const addCursorFile = getFile(clipboardCursorPath, nil, false)
+    if !addCursorFile {
+        const addInitialCursor = text("1")
+        saveFile(clipboardCursorPath, addInitialCursor, true)
     }
 
     output("YOS_CLIPBOARD_OK:add")
 }
 
-if mode == "next" {
-    const bufferFile = getFile(bufferPath, nil, false)
-    if !bufferFile {
+if requestMode == "next" {
+    const nextBufferFile = getFile(clipboardBufferPath, nil, false)
+    if !nextBufferFile {
         output("YOS_CLIPBOARD_BLOCKED:empty_buffer")
     }
 
-    const bufferText = getText(bufferFile)
-    if !bufferText {
+    const nextBufferText = getText(nextBufferFile)
+    if !nextBufferText {
         output("YOS_CLIPBOARD_BLOCKED:empty_buffer")
     }
 
-    @items = splitText(bufferText, "\n")
-    const itemCount = count(@items)
-    @cursor = 1
+    @nextItems = splitText(nextBufferText, "\n")
+    const nextItemCount = count(@nextItems)
+    @nextCursorIndex = 1
 
-    const cursorFile = getFile(cursorPath, nil, false)
-    if cursorFile {
-        const cursorText = getText(cursorFile)
-        const parsedCursor = number(cursorText)
-        if parsedCursor > 0 {
-            @cursor = parsedCursor
+    const nextCursorFile = getFile(clipboardCursorPath, nil, false)
+    if nextCursorFile {
+        const nextCursorStoredText = getText(nextCursorFile)
+        const nextParsedCursor = number(nextCursorStoredText)
+        if nextParsedCursor > 0 {
+            @nextCursorIndex = nextParsedCursor
         }
     }
 
-    if @cursor > itemCount {
-        @cursor = 1
+    if @nextCursorIndex > nextItemCount {
+        @nextCursorIndex = 1
     }
 
-    const encodedItem = getListItem(@items, @cursor)
-    const decodedItem = base64Decode(encodedItem)
-    setClipboard(decodedItem)
+    const nextEncodedItem = getListItem(@nextItems, @nextCursorIndex)
+    const nextDecodedItem = base64Decode(nextEncodedItem)
+    setClipboard(nextDecodedItem)
 
-    @nextCursor = @cursor + 1
-    if @nextCursor > itemCount {
-        @nextCursor = 1
+    @nextCursorAfter = @nextCursorIndex + 1
+    if @nextCursorAfter > nextItemCount {
+        @nextCursorAfter = 1
     }
-    const nextCursorText = text("{@nextCursor}")
-    saveFile(cursorPath, nextCursorText, true)
+    const nextCursorSaveText = text("{@nextCursorAfter}")
+    saveFile(clipboardCursorPath, nextCursorSaveText, true)
 
-    output("YOS_CLIPBOARD_OK:next:{@cursor}/{itemCount}")
+    output("YOS_CLIPBOARD_OK:next:{@nextCursorIndex}/{nextItemCount}")
 }
 
-if mode == "merge" {
-    const bufferFile = getFile(bufferPath, nil, false)
-    if !bufferFile {
+if requestMode == "merge" {
+    const mergeBufferFile = getFile(clipboardBufferPath, nil, false)
+    if !mergeBufferFile {
         output("YOS_CLIPBOARD_BLOCKED:empty_buffer")
     }
 
-    const bufferText = getText(bufferFile)
-    if !bufferText {
+    const mergeBufferText = getText(mergeBufferFile)
+    if !mergeBufferText {
         output("YOS_CLIPBOARD_BLOCKED:empty_buffer")
     }
 
-    @items = splitText(bufferText, "\n")
-    @merged = ""
-    for encodedItem in @items {
-        const decodedItem = base64Decode(encodedItem)
-        const decodedText = "{decodedItem}"
-        if @merged {
-            @merged = "{@merged}\n{decodedText}"
+    @mergeItems = splitText(mergeBufferText, "\n")
+    @mergeText = ""
+    for mergeEncodedItem in @mergeItems {
+        const mergeDecodedItem = base64Decode(mergeEncodedItem)
+        const mergeDecodedText = "{mergeDecodedItem}"
+        if @mergeText {
+            @mergeText = "{@mergeText}\n{mergeDecodedText}"
         } else {
-            @merged = "{decodedText}"
+            @mergeText = "{mergeDecodedText}"
         }
     }
 
-    setClipboard(@merged)
-    const mergeCount = count(@items)
-    output("YOS_CLIPBOARD_OK:merge:{mergeCount}")
+    setClipboard(@mergeText)
+    const mergeItemCount = count(@mergeItems)
+    output("YOS_CLIPBOARD_OK:merge:{mergeItemCount}")
 }
 
-if mode == "select" {
-    const bufferFile = getFile(bufferPath, nil, false)
-    if !bufferFile {
+if requestMode == "select" {
+    const selectBufferFile = getFile(clipboardBufferPath, nil, false)
+    if !selectBufferFile {
         output("YOS_CLIPBOARD_BLOCKED:empty_buffer")
     }
 
-    const bufferText = getText(bufferFile)
-    if !bufferText {
+    const selectBufferText = getText(selectBufferFile)
+    if !selectBufferText {
         output("YOS_CLIPBOARD_BLOCKED:empty_buffer")
     }
 
-    @items = splitText(bufferText, "\n")
-    const itemCount = count(@items)
+    @selectItems = splitText(selectBufferText, "\n")
+    const selectItemCount = count(@selectItems)
     @selectedIndex = 0
-    const partCount = count(@parts)
-    if partCount >= 2 {
-        const rawIndex = getListItem(@parts, 2)
-        @selectedIndex = number(rawIndex)
+    const selectPartCount = count(@requestParts)
+    if selectPartCount >= 2 {
+        const selectRawIndex = getListItem(@requestParts, 2)
+        @selectedIndex = number(selectRawIndex)
     } else {
         @selectedIndex = prompt("コピーする番号を入力", "Number")
     }
 
-    if @selectedIndex < 1 || @selectedIndex > itemCount {
+    if @selectedIndex < 1 || @selectedIndex > selectItemCount {
         output("YOS_CLIPBOARD_BLOCKED:invalid_index")
     }
 
-    const encodedItem = getListItem(@items, @selectedIndex)
-    const decodedItem = base64Decode(encodedItem)
-    setClipboard(decodedItem)
-    output("YOS_CLIPBOARD_OK:select:{@selectedIndex}/{itemCount}")
+    const selectEncodedItem = getListItem(@selectItems, @selectedIndex)
+    const selectDecodedItem = base64Decode(selectEncodedItem)
+    setClipboard(selectDecodedItem)
+    output("YOS_CLIPBOARD_OK:select:{@selectedIndex}/{selectItemCount}")
 }
 
-if mode == "duplicate" {
-    const currentClipboard = getClipboard()
-    if !currentClipboard {
+if requestMode == "duplicate" {
+    const duplicateClipboard = getClipboard()
+    if !duplicateClipboard {
         output("YOS_CLIPBOARD_BLOCKED:empty_clipboard")
     }
-    setClipboard(currentClipboard)
+    setClipboard(duplicateClipboard)
     output("YOS_CLIPBOARD_OK:duplicate")
 }
 
-if mode == "clear" {
-    const bufferFile = getFile(bufferPath, nil, false)
-    if bufferFile {
-        deleteFiles(bufferFile, true)
+if requestMode == "clear" {
+    const clearBufferFile = getFile(clipboardBufferPath, nil, false)
+    if clearBufferFile {
+        deleteFiles(clearBufferFile, true)
     }
-    const cursorFile = getFile(cursorPath, nil, false)
-    if cursorFile {
-        deleteFiles(cursorFile, true)
+    const clearCursorFile = getFile(clipboardCursorPath, nil, false)
+    if clearCursorFile {
+        deleteFiles(clearCursorFile, true)
     }
     output("YOS_CLIPBOARD_OK:clear")
 }
 
-if mode == "screenshots" {
-    @minutes = 15
+if requestMode == "screenshots" {
+    @screenMinutes = 15
     @screenMode = "merge"
-    const partCount = count(@parts)
+    const screenPartCount = count(@requestParts)
 
-    if partCount >= 2 {
-        const rawMinutes = getListItem(@parts, 2)
-        @minutes = number(rawMinutes)
+    if screenPartCount >= 2 {
+        const screenRawMinutes = getListItem(@requestParts, 2)
+        @screenMinutes = number(screenRawMinutes)
     } else {
         if !ShortcutInput {
-            @minuteOptions = list("5", "15", "30", "60")
-            const minuteChoice = chooseFromList(@minuteOptions, "何分以内？")
-            @minutes = number(minuteChoice)
+            @screenMinuteOptions = list("5", "15", "30", "60")
+            const screenMinuteChoice = chooseFromList(@screenMinuteOptions, "何分以内？")
+            @screenMinutes = number(screenMinuteChoice)
         }
     }
 
-    if partCount >= 3 {
-        const rawScreenMode = getListItem(@parts, 3)
-        @screenMode = "{rawScreenMode}"
+    if screenPartCount >= 3 {
+        const screenRawMode = getListItem(@requestParts, 3)
+        @screenMode = "{screenRawMode}"
     } else {
         if !ShortcutInput {
             @screenModeOptions = list("merge", "copy", "keep")
@@ -221,47 +221,47 @@ if mode == "screenshots" {
         }
     }
 
-    if @minutes != 5 && @minutes != 15 && @minutes != 30 && @minutes != 60 {
+    if @screenMinutes != 5 && @screenMinutes != 15 && @screenMinutes != 30 && @screenMinutes != 60 {
         output("YOS_CLIPBOARD_BLOCKED:unsupported_time_window")
     }
     if @screenMode != "merge" && @screenMode != "copy" && @screenMode != "keep" {
         output("YOS_CLIPBOARD_BLOCKED:unsupported_screenshot_mode")
     }
 
-    @cutoff = adjustDate(CurrentDate, "Subtract", qty(15, "min"))
-    if @minutes == 5 {
-        @cutoff = adjustDate(CurrentDate, "Subtract", qty(5, "min"))
+    @screenCutoff = adjustDate(CurrentDate, "Subtract", qty(15, "min"))
+    if @screenMinutes == 5 {
+        @screenCutoff = adjustDate(CurrentDate, "Subtract", qty(5, "min"))
     }
-    if @minutes == 30 {
-        @cutoff = adjustDate(CurrentDate, "Subtract", qty(30, "min"))
+    if @screenMinutes == 30 {
+        @screenCutoff = adjustDate(CurrentDate, "Subtract", qty(30, "min"))
     }
-    if @minutes == 60 {
-        @cutoff = adjustDate(CurrentDate, "Subtract", qty(60, "min"))
+    if @screenMinutes == 60 {
+        @screenCutoff = adjustDate(CurrentDate, "Subtract", qty(60, "min"))
     }
 
     @recentScreenshots = []
     @latestScreenshots = getLatestScreenshots(50)
-    for screenshotItem in @latestScreenshots {
-        const screenshotDate = getImageDetail(screenshotItem, "Date Taken")
-        if screenshotDate > @cutoff {
-            @recentScreenshots += screenshotItem
+    for recentScreenshotItem in @latestScreenshots {
+        const recentScreenshotDate = getImageDetail(recentScreenshotItem, "Date Taken")
+        if recentScreenshotDate > @screenCutoff {
+            @recentScreenshots += recentScreenshotItem
         }
     }
 
-    const screenshotCount = count(@recentScreenshots)
-    if screenshotCount < 1 {
+    const recentScreenshotCount = count(@recentScreenshots)
+    if recentScreenshotCount < 1 {
         output("YOS_CLIPBOARD_BLOCKED:no_recent_screenshots")
     }
 
     if @screenMode == "merge" {
-        const mergedImage = combineImages(@recentScreenshots, "Vertically", 0)
-        setClipboard(mergedImage)
-        output("YOS_CLIPBOARD_OK:screenshots:merge:{screenshotCount}")
+        const screenMergedImage = combineImages(@recentScreenshots, "Vertically", 0)
+        setClipboard(screenMergedImage)
+        output("YOS_CLIPBOARD_OK:screenshots:merge:{recentScreenshotCount}")
     }
 
     if @screenMode == "copy" {
         setClipboard(@recentScreenshots)
-        output("YOS_CLIPBOARD_OK:screenshots:copy:{screenshotCount}")
+        output("YOS_CLIPBOARD_OK:screenshots:copy:{recentScreenshotCount}")
     }
 
     // keep = preserve the screenshots as separate items and return them to the caller.
@@ -274,4 +274,4 @@ if mode == "screenshots" {
     }
 }
 
-output("YOS_CLIPBOARD_BLOCKED:unsupported_mode:{mode}")
+output("YOS_CLIPBOARD_BLOCKED:unsupported_mode:{requestMode}")
