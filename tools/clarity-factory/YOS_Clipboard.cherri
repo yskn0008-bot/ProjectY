@@ -1,0 +1,277 @@
+#define name YOS_Clipboard
+#define color blue
+#define inputs text
+
+#include 'actions/sharing'
+#include 'actions/documents'
+#include 'actions/crypto'
+#include 'actions/photos'
+#include 'actions/images'
+#include 'actions/calendar'
+#include 'actions/text'
+
+// Deterministic fixed child for Clarity clipboard work.
+// Clarity must pass a structured payload; this child does not interpret natural language.
+// Until physical iPhone acceptance passes, Clarity itself is intentionally not modified.
+//
+// Payloads:
+//   add
+//   next
+//   merge
+//   select|2
+//   duplicate
+//   clear
+//   screenshots|15|merge
+//   screenshots|15|copy
+//   screenshots|15|keep
+//
+// Empty ShortcutInput opens a small manual menu so the child can be tested standalone.
+// Buffer files are explicitly temporary working state, not a system of record.
+
+const bufferPath = "YOS Clipboard Temp/buffer.b64"
+const cursorPath = "YOS Clipboard Temp/cursor.txt"
+
+@request = "{ShortcutInput}"
+if !@request {
+    @manualModes = list("add", "next", "merge", "select", "duplicate", "clear", "screenshots")
+    const manualChoice = chooseFromList(@manualModes, "YOS_Clipboard")
+    @request = "{manualChoice}"
+}
+
+@parts = splitText(@request, "|")
+const modeValue = getFirstItem(@parts)
+const mode = "{modeValue}"
+
+if mode == "add" {
+    createFolder("YOS Clipboard Temp")
+
+    const currentClipboard = getClipboard()
+    const clipboardText = getText(currentClipboard)
+    if !clipboardText {
+        output("YOS_CLIPBOARD_BLOCKED:empty_clipboard")
+    }
+
+    const encoded = base64Encode(clipboardText)
+    const existingFile = getFile(bufferPath, nil, false)
+    @newBuffer = "{encoded}"
+    if existingFile {
+        const existingText = getText(existingFile)
+        if existingText {
+            @newBuffer = "{existingText}\n{encoded}"
+        }
+    }
+    saveFile(bufferPath, @newBuffer, true)
+
+    const cursorFile = getFile(cursorPath, nil, false)
+    if !cursorFile {
+        const firstCursor = text("1")
+        saveFile(cursorPath, firstCursor, true)
+    }
+
+    output("YOS_CLIPBOARD_OK:add")
+}
+
+if mode == "next" {
+    const bufferFile = getFile(bufferPath, nil, false)
+    if !bufferFile {
+        output("YOS_CLIPBOARD_BLOCKED:empty_buffer")
+    }
+
+    const bufferText = getText(bufferFile)
+    if !bufferText {
+        output("YOS_CLIPBOARD_BLOCKED:empty_buffer")
+    }
+
+    @items = splitText(bufferText, "\n")
+    const itemCount = count(@items)
+    @cursor = 1
+
+    const cursorFile = getFile(cursorPath, nil, false)
+    if cursorFile {
+        const cursorText = getText(cursorFile)
+        const parsedCursor = number(cursorText)
+        if parsedCursor > 0 {
+            @cursor = parsedCursor
+        }
+    }
+
+    if @cursor > itemCount {
+        @cursor = 1
+    }
+
+    const encodedItem = getListItem(@items, @cursor)
+    const decodedItem = base64Decode(encodedItem)
+    setClipboard(decodedItem)
+
+    @nextCursor = @cursor + 1
+    if @nextCursor > itemCount {
+        @nextCursor = 1
+    }
+    const nextCursorText = text("{@nextCursor}")
+    saveFile(cursorPath, nextCursorText, true)
+
+    output("YOS_CLIPBOARD_OK:next:{@cursor}/{itemCount}")
+}
+
+if mode == "merge" {
+    const bufferFile = getFile(bufferPath, nil, false)
+    if !bufferFile {
+        output("YOS_CLIPBOARD_BLOCKED:empty_buffer")
+    }
+
+    const bufferText = getText(bufferFile)
+    if !bufferText {
+        output("YOS_CLIPBOARD_BLOCKED:empty_buffer")
+    }
+
+    @items = splitText(bufferText, "\n")
+    @merged = ""
+    for encodedItem in @items {
+        const decodedItem = base64Decode(encodedItem)
+        const decodedText = "{decodedItem}"
+        if @merged {
+            @merged = "{@merged}\n{decodedText}"
+        } else {
+            @merged = "{decodedText}"
+        }
+    }
+
+    setClipboard(@merged)
+    const mergeCount = count(@items)
+    output("YOS_CLIPBOARD_OK:merge:{mergeCount}")
+}
+
+if mode == "select" {
+    const bufferFile = getFile(bufferPath, nil, false)
+    if !bufferFile {
+        output("YOS_CLIPBOARD_BLOCKED:empty_buffer")
+    }
+
+    const bufferText = getText(bufferFile)
+    if !bufferText {
+        output("YOS_CLIPBOARD_BLOCKED:empty_buffer")
+    }
+
+    @items = splitText(bufferText, "\n")
+    const itemCount = count(@items)
+    @selectedIndex = 0
+    const partCount = count(@parts)
+    if partCount >= 2 {
+        const rawIndex = getListItem(@parts, 2)
+        @selectedIndex = number(rawIndex)
+    } else {
+        @selectedIndex = prompt("コピーする番号を入力", "Number")
+    }
+
+    if @selectedIndex < 1 || @selectedIndex > itemCount {
+        output("YOS_CLIPBOARD_BLOCKED:invalid_index")
+    }
+
+    const encodedItem = getListItem(@items, @selectedIndex)
+    const decodedItem = base64Decode(encodedItem)
+    setClipboard(decodedItem)
+    output("YOS_CLIPBOARD_OK:select:{@selectedIndex}/{itemCount}")
+}
+
+if mode == "duplicate" {
+    const currentClipboard = getClipboard()
+    if !currentClipboard {
+        output("YOS_CLIPBOARD_BLOCKED:empty_clipboard")
+    }
+    setClipboard(currentClipboard)
+    output("YOS_CLIPBOARD_OK:duplicate")
+}
+
+if mode == "clear" {
+    const bufferFile = getFile(bufferPath, nil, false)
+    if bufferFile {
+        deleteFiles(bufferFile, true)
+    }
+    const cursorFile = getFile(cursorPath, nil, false)
+    if cursorFile {
+        deleteFiles(cursorFile, true)
+    }
+    output("YOS_CLIPBOARD_OK:clear")
+}
+
+if mode == "screenshots" {
+    @minutes = 15
+    @screenMode = "merge"
+    const partCount = count(@parts)
+
+    if partCount >= 2 {
+        const rawMinutes = getListItem(@parts, 2)
+        @minutes = number(rawMinutes)
+    } else {
+        if !ShortcutInput {
+            @minuteOptions = list("5", "15", "30", "60")
+            const minuteChoice = chooseFromList(@minuteOptions, "何分以内？")
+            @minutes = number(minuteChoice)
+        }
+    }
+
+    if partCount >= 3 {
+        const rawScreenMode = getListItem(@parts, 3)
+        @screenMode = "{rawScreenMode}"
+    } else {
+        if !ShortcutInput {
+            @screenModeOptions = list("merge", "copy", "keep")
+            const screenModeChoice = chooseFromList(@screenModeOptions, "扱い方")
+            @screenMode = "{screenModeChoice}"
+        }
+    }
+
+    if @minutes != 5 && @minutes != 15 && @minutes != 30 && @minutes != 60 {
+        output("YOS_CLIPBOARD_BLOCKED:unsupported_time_window")
+    }
+    if @screenMode != "merge" && @screenMode != "copy" && @screenMode != "keep" {
+        output("YOS_CLIPBOARD_BLOCKED:unsupported_screenshot_mode")
+    }
+
+    @cutoff = adjustDate(CurrentDate, "Subtract", qty(15, "min"))
+    if @minutes == 5 {
+        @cutoff = adjustDate(CurrentDate, "Subtract", qty(5, "min"))
+    }
+    if @minutes == 30 {
+        @cutoff = adjustDate(CurrentDate, "Subtract", qty(30, "min"))
+    }
+    if @minutes == 60 {
+        @cutoff = adjustDate(CurrentDate, "Subtract", qty(60, "min"))
+    }
+
+    @recentScreenshots = []
+    @latestScreenshots = getLatestScreenshots(50)
+    for screenshotItem in @latestScreenshots {
+        const screenshotDate = getImageDetail(screenshotItem, "Date Taken")
+        if screenshotDate > @cutoff {
+            @recentScreenshots += screenshotItem
+        }
+    }
+
+    const screenshotCount = count(@recentScreenshots)
+    if screenshotCount < 1 {
+        output("YOS_CLIPBOARD_BLOCKED:no_recent_screenshots")
+    }
+
+    if @screenMode == "merge" {
+        const mergedImage = combineImages(@recentScreenshots, "Vertically", 0)
+        setClipboard(mergedImage)
+        output("YOS_CLIPBOARD_OK:screenshots:merge:{screenshotCount}")
+    }
+
+    if @screenMode == "copy" {
+        setClipboard(@recentScreenshots)
+        output("YOS_CLIPBOARD_OK:screenshots:copy:{screenshotCount}")
+    }
+
+    // keep = preserve the screenshots as separate items and return them to the caller.
+    // Shortcuts output is intentionally not converted to text so a future parent can consume the list.
+    if @screenMode == "keep" {
+        rawAction("is.workflow.actions.output", {
+            "WFOutput": "${recentScreenshots}"
+        })
+        stop()
+    }
+}
+
+output("YOS_CLIPBOARD_BLOCKED:unsupported_mode:{mode}")
