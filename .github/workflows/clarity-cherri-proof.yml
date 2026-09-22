@@ -86,6 +86,16 @@ jobs:
           mkdir -p artifacts
           cp './YOS_OpenApp_unsigned.shortcut' artifacts/YOS_OpenApp-unsigned.shortcut
 
+      - name: Compile fixed YOS_Device child
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd tools/clarity-factory
+          cherri YOS_Device.cherri --skip-sign --debug
+          test -f './YOS_Device_unsigned.shortcut'
+          mkdir -p artifacts
+          cp './YOS_Device_unsigned.shortcut' artifacts/YOS_Device-unsigned.shortcut
+
       - name: Compile normal Clarity parent
         shell: bash
         run: |
@@ -102,7 +112,7 @@ jobs:
           python3 patch_chatgpt_json_text.py "$runtime"
           python3 patch_reminder_wire_format.py "$runtime"
           python3 patch_destination_readback.py "$runtime"
-          python3 validate_fixed_child_architecture.py "$runtime" './YOS_OpenApp_unsigned.shortcut'
+          python3 validate_fixed_child_architecture.py "$runtime" './YOS_OpenApp_unsigned.shortcut' './YOS_Device_unsigned.shortcut'
           mkdir -p artifacts
           cp "$runtime" artifacts/Clarity-v1-unsigned.shortcut
 
@@ -131,10 +141,15 @@ jobs:
             --output tools/clarity-factory/artifacts/YOS_OpenApp-signed.shortcut \
             --name 'YOS_OpenApp' \
             2>&1 | tee tools/clarity-factory/artifacts/yos-openapp-hubsign.log
+          python3 tools/clarity-factory/sign_with_hubsign.py \
+            --input tools/clarity-factory/artifacts/YOS_Device-unsigned.shortcut \
+            --output tools/clarity-factory/artifacts/YOS_Device-signed.shortcut \
+            --name 'YOS_Device' \
+            2>&1 | tee tools/clarity-factory/artifacts/yos-device-hubsign.log
           python3 - <<'PY'
           from pathlib import Path
           base=Path('tools/clarity-factory/artifacts')
-          for name in ('Clarity-v1-signed.shortcut','YOS_OpenApp-signed.shortcut'):
+          for name in ('Clarity-v1-signed.shortcut','YOS_OpenApp-signed.shortcut','YOS_Device-signed.shortcut'):
               data=(base/name).read_bytes()
               if not data.startswith(b'AEA1'):
                   raise SystemExit(f'{name}: expected AEA1, got {data[:8]!r}')
@@ -154,6 +169,9 @@ jobs:
             tools/clarity-factory/artifacts/Clarity-v1-signed.shortcut
             tools/clarity-factory/artifacts/YOS_OpenApp-unsigned.shortcut
             tools/clarity-factory/artifacts/YOS_OpenApp-signed.shortcut
+            tools/clarity-factory/artifacts/YOS_Device-unsigned.shortcut
+            tools/clarity-factory/artifacts/YOS_Device-signed.shortcut
             tools/clarity-factory/artifacts/clarity-hubsign.log
             tools/clarity-factory/artifacts/yos-openapp-hubsign.log
+            tools/clarity-factory/artifacts/yos-device-hubsign.log
           if-no-files-found: error
