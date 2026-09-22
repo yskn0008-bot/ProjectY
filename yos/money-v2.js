@@ -68,7 +68,7 @@
     const futureAll=data.transactions.filter(tx=>!isComplete(tx)&&String(tx.date||'')>=today).sort((a,b)=>String(a.date).localeCompare(String(b.date))||String(a.id||'').localeCompare(String(b.id||'')));
     const future=futureAll.filter(tx=>String(tx.date||'').slice(0,7)===month);
     const nextPayment=futureAll.find(isOutgoing)||null,nextIncome=futureAll.find(tx=>tx.type==='income')||null;
-    if(liquid===null)return {liquid:null,projected:null,shortfall:null,firstBreak:null,nextPayment,nextIncome,daily:null,daysToNextPayment:nextPayment?Math.max(0,daysBetween(parseDate(today),parseDate(nextPayment.date))):null};
+    if(liquid===null)return {liquid:null,projected:null,shortfall:null,firstBreak:null,nextPayment,nextIncome,daily:null,afterNextPayment:null,shortageAfterNextPayment:null,daysToNextPayment:nextPayment?Math.max(0,daysBetween(parseDate(today),parseDate(nextPayment.date))):null};
     let running=liquid,firstBreak=null;
     for(const tx of future){running+=txSign(tx)*n(tx.amount);if(running<0&&!firstBreak)firstBreak={tx,balance:running}}
     const endDay=new Date(Number(month.slice(0,4)),Number(month.slice(5,7)),0).getDate();
@@ -118,7 +118,7 @@
     for(let i=0;i<start;i++)cells.push('<div class="money2-day empty"></div>');
     for(let day=1;day<=last.getDate();day++){
       const date=`${calendarMonth}-${String(day).padStart(2,'0')}`,all=txs.filter(tx=>tx.date===date),items=all.slice(0,2);
-      const chips=items.map(tx=>`<span class="money2-chip ${tx.type} ${tx.status==='done'?'done':''}">${tx.type==='income'?'+':'−'}${data.privacy?'••':compactAmount(tx.amount)}</span>`).join('');
+      const chips=items.map(tx=>`<span class="money2-chip ${tx.type} ${isComplete(tx)?'done':''}">${tx.type==='income'?'+':'−'}${data.privacy?'••':compactAmount(tx.amount)}</span>`).join('');
       cells.push(`<button class="money2-day ${date===today?'today':''}" data-money-date="${date}" type="button"><b>${day}</b>${chips}${all.length>items.length?`<i>+${all.length-items.length}</i>`:''}</button>`);
     }
     return `<section class="money2-calendar-card"><header><button type="button" data-money-action="prev-month">‹</button><div><small>資金カレンダー</small><strong>${year}年${month}月</strong></div><button type="button" data-money-action="next-month">›</button></header><div class="money2-week"><span>月</span><span>火</span><span>水</span><span>木</span><span>金</span><span>土</span><span>日</span></div><div class="money2-calendar">${cells.join('')}</div><footer><span><i class="income"></i>収入</span><span><i class="expense"></i>支出</span><button type="button" data-money-action="add-entry">＋ 入出金</button></footer></section>`;
