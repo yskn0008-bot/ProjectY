@@ -11,6 +11,11 @@ test('Emergency bridge passes only events that satisfy the full emergency gate',
   assert.deepEqual(payload.alerts.map(x=>x.id),['urgent']);
 });
 
+test('legacy emergency flag alone never enters Emergency Alert',()=>{
+  const payload=buildEmergencyPayload([{id:'legacy',kind:'task',title:'通常',emergency:true}]);
+  assert.equal(payload.alerts.length,0);
+});
+
 test('same-source normal alert is suppressed when Emergency wins',()=>{
   const payload=buildEmergencyPayload([
     {id:'same',kind:'payment',title:'通常支払い'},
