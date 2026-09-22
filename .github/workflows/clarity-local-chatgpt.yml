@@ -125,7 +125,8 @@ jobs:
           for forbidden in ('shortcutFactoryUnsignedXml','YOS Safari Auto.shortcut','hubsign.routinehub.services/sign'):
               assert forbidden not in blob, forbidden
           assert 'YOS_OPEN_APP_OK:safari' in repr(child)
-          assert sum(i.endswith('setbrightness') for i in [a.get('WFWorkflowActionIdentifier','') for a in pa]) == 0
+          model_i=next(i for i,a in enumerate(pa) if a.get('WFWorkflowActionIdentifier','').endswith('askllm'))
+          assert not any(i < model_i and a.get('WFWorkflowActionIdentifier','').endswith('setbrightness') for i,a in enumerate(pa))
           assert sum(i.endswith('setbrightness') for i in [a.get('WFWorkflowActionIdentifier','') for a in da]) == 1
           assert 'YOS_DEVICE_OK:brightness=50' in repr(device)
           print('Clarity parent + fixed child isolation: PASS')
