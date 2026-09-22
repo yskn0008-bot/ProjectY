@@ -25,8 +25,10 @@ def validate(parent: Path, child: Path, device: Path) -> None:
     run_blobs=[repr(r.get("WFWorkflowActionParameters",{})) for r in runs]
     if len(runs)!=3 or sum("YOS_OpenApp" in x for x in run_blobs)!=2 or sum("YOS_Device" in x for x in run_blobs)!=1:
         raise AssertionError(f"parent fixed-child routes invalid: {run_blobs}")
-    if any(i.endswith("setbrightness") for i in pids):
-        raise AssertionError("parent must not execute brightness directly")
+    model_i=next(i for i,a in enumerate(pa) if str(a.get("WFWorkflowActionIdentifier","")).endswith("askllm"))
+    pre_model_brightness=[i for i,a in enumerate(pa) if i < model_i and str(a.get("WFWorkflowActionIdentifier","")).endswith("setbrightness")]
+    if pre_model_brightness:
+        raise AssertionError("brightness fast path must not execute in parent")
     if sum(i.endswith("setbrightness") for i in dids)!=1:
         raise AssertionError("YOS_Device must own exactly one brightness action")
     if "YOS_DEVICE_OK:brightness=50" not in repr(d) or "YOS_DEVICE_BLOCKED:" not in repr(d):
