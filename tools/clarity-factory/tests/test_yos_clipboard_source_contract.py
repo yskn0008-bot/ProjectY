@@ -34,7 +34,7 @@ class YOSClipboardSourceContract(unittest.TestCase):
 
     def test_screenshot_contract(self):
         self.assertIn('getLatestScreenshots(50)', self.src)
-        self.assertIn('getImageDetail(recentScreenshotItem, "Date Taken")', self.src)
+        self.assertIn('getImageDetail(@recentScreenshotItem, "Date Taken")', self.src)
         self.assertIn('combineImages(@recentScreenshots, "Vertically", 0)', self.src)
         self.assertIn('setClipboard(screenMergedImage)', self.src)
 
