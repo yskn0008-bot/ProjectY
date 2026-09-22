@@ -82,21 +82,55 @@
 
   const readStore=()=>{try{return JSON.parse(localStorage.getItem(DATA_KEY)||'null')||{days:{}}}catch{return{days:{}}}};
   const writeStore=data=>localStorage.setItem(DATA_KEY,JSON.stringify(data));
+  const decodeParam=(params,key,max)=>{
+    const value=params.get(key);
+    if(!value)return '';
+    try{return clean(decodeBase64Url(value),max)}catch{return''}
+  };
 
   function clearBridgeParams(){
     const url=new URL(location.href);
-    ['night','night_history','night_limit','shortcut'].forEach(key=>url.searchParams.delete(key));
+    [
+      'night','night_save','night_raw_b64','night_summary_b64','night_mood_b64',
+      'night_tomorrow_b64','night_discoveries_b64','night_diary_b64',
+      'night_message_b64','night_display_b64','night_history','night_limit','shortcut'
+    ].forEach(key=>url.searchParams.delete(key));
     history.replaceState({},'',url.pathname+(url.search?'?'+url.searchParams.toString():'')+url.hash);
   }
 
   function importNight(params){
-    const encoded=params.get('night');
-    if(!encoded)return false;
-    const payload=JSON.parse(decodeBase64Url(encoded));
-    const result=saveInto(readStore(),payload,payload.date);
+    let payload=null;
+    let displayText='';
+
+    if(params.get('night_save')==='1'){
+      payload={
+        raw_input:decodeParam(params,'night_raw_b64',4000),
+        summary:decodeParam(params,'night_summary_b64',1200),
+        mood_state:decodeParam(params,'night_mood_b64',600),
+        tomorrow:decodeParam(params,'night_tomorrow_b64',1200),
+        discoveries:decodeParam(params,'night_discoveries_b64',2400),
+        three_line_diary:decodeParam(params,'night_diary_b64',1800),
+        tomorrow_message:decodeParam(params,'night_message_b64',600)
+      };
+      displayText=decodeParam(params,'night_display_b64',4000);
+    }else{
+      const encoded=params.get('night');
+      if(!encoded)return false;
+      payload=JSON.parse(decodeBase64Url(encoded));
+      displayText=clean(payload?.display_text,4000);
+    }
+
+    const callback=clean(params.get('shortcut'),120);
+    const result=saveInto(readStore(),payload,payload?.date);
     writeStore(result.data);
     clearBridgeParams();
     window.dispatchEvent(new StorageEvent('storage',{key:DATA_KEY,newValue:JSON.stringify(result.data)}));
+
+    if(callback){
+      const ack={schema:'yos-night-save-ok-v1',date:result.date,display_text:displayText};
+      const target='shortcuts://run-shortcut?name='+encodeURIComponent(callback)+'&input=text&text='+encodeURIComponent(JSON.stringify(ack));
+      location.replace(target);
+    }
     return true;
   }
 

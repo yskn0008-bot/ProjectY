@@ -41,9 +41,22 @@ test('history returns only earlier Night records, oldest to newest, capped at 30
   assert.equal(records[0].date<records.at(-1).date,true);
 });
 
+test('base64 bridge round-trips Japanese Shortcut fields',()=>{
+  const bridge=api();
+  const input='今日あったこと\n気分：落ち着いた';
+  assert.equal(bridge.decodeBase64Url(bridge.encodeBase64Url(input)),input);
+});
+
+test('Shortcut save lane writes through the same Life bridge and returns a save acknowledgement',()=>{
+  assert.match(source,/params\.get\('night_save'\)==='1'/);
+  assert.match(source,/night_raw_b64/);
+  assert.match(source,/schema:'yos-night-save-ok-v1'/);
+  assert.match(source,/shortcuts:\/\/run-shortcut\?name=/);
+});
+
 test('bridge source keeps the existing Life SSOT and has no Money duplication',()=>{
   assert.match(source,/const DATA_KEY='yos-life-v1'/);
   assert.match(source,/day\.lifeFlow=\{\.\.\.flow,nightCheckin:record\}/);
-  assert.doesNotMatch(source,/localStorage\.setItem\(['\"]yos-night/);
+  assert.doesNotMatch(source,/localStorage\.setItem\(['"]yos-night/);
   assert.doesNotMatch(source,/spentToday|money:/);
 });
