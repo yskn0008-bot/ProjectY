@@ -20,6 +20,7 @@
   const parseDate=s=>{const d=new Date(`${s}T12:00:00+09:00`);return Number.isNaN(d.getTime())?null:d};
   const daysBetween=(a,b)=>Math.ceil((b.getTime()-a.getTime())/86400000);
   const isOutgoing=tx=>['expense','debt','saving','investment'].includes(tx.type);
+  const isComplete=tx=>{const status=clean(tx?.status,20).toLowerCase();return tx?.completed===true||tx?.paid===true||tx?.received===true||['done','paid','completed','received'].includes(status)};
   const txSign=tx=>tx.type==='income'?1:-1;
 
   function defaultState(){
@@ -64,16 +65,18 @@
   }
   function futurePlan(){
     const today=isoToday(),month=monthKey(),liquid=currentLiquid();
-    const future=data.transactions.filter(tx=>tx.status!=='done'&&tx.date>=today&&String(tx.date).slice(0,7)===month).sort((a,b)=>a.date.localeCompare(b.date)||String(a.id).localeCompare(String(b.id)));
-    const nextPayment=future.find(isOutgoing)||null,nextIncome=future.find(tx=>tx.type==='income')||null;
+    const futureAll=data.transactions.filter(tx=>!isComplete(tx)&&String(tx.date||'')>=today).sort((a,b)=>String(a.date).localeCompare(String(b.date))||String(a.id||'').localeCompare(String(b.id||'')));
+    const future=futureAll.filter(tx=>String(tx.date||'').slice(0,7)===month);
+    const nextPayment=futureAll.find(isOutgoing)||null,nextIncome=futureAll.find(tx=>tx.type==='income')||null;
     if(liquid===null)return {liquid:null,projected:null,shortfall:null,firstBreak:null,nextPayment,nextIncome,daily:null,daysToNextPayment:nextPayment?Math.max(0,daysBetween(parseDate(today),parseDate(nextPayment.date))):null};
     let running=liquid,firstBreak=null;
     for(const tx of future){running+=txSign(tx)*n(tx.amount);if(running<0&&!firstBreak)firstBreak={tx,balance:running}}
     const endDay=new Date(Number(month.slice(0,4)),Number(month.slice(5,7)),0).getDate();
     const anchor=nextIncome?.date||`${month}-${String(endDay).padStart(2,'0')}`;
-    const outgoingUntilAnchor=future.filter(tx=>isOutgoing(tx)&&tx.date<=anchor).reduce((s,tx)=>s+n(tx.amount),0);
+    const outgoingUntilAnchor=futureAll.filter(tx=>isOutgoing(tx)&&tx.date<=anchor).reduce((s,tx)=>s+n(tx.amount),0);
     const days=Math.max(1,daysBetween(parseDate(today),parseDate(anchor))+1);
-    return {liquid,projected:running,shortfall:firstBreak?Math.abs(firstBreak.balance):0,firstBreak,nextPayment,nextIncome,daily:Math.floor(Math.max(0,liquid-outgoingUntilAnchor)/days),daysToNextPayment:nextPayment?Math.max(0,daysBetween(parseDate(today),parseDate(nextPayment.date))):null};
+    const afterNextPayment=nextPayment?liquid-n(nextPayment.amount):liquid;
+    return {liquid,projected:running,shortfall:firstBreak?Math.abs(firstBreak.balance):0,firstBreak,nextPayment,nextIncome,daily:Math.floor(Math.max(0,liquid-outgoingUntilAnchor)/days),afterNextPayment,shortageAfterNextPayment:nextPayment?afterNextPayment<0:false,daysToNextPayment:nextPayment?Math.max(0,daysBetween(parseDate(today),parseDate(nextPayment.date))):null};
   }
   const totalDebt=()=>data.debts.reduce((s,d)=>s+n(d.balance),0);
   const emergencyGoal=()=>data.goals.find(g=>g.type==='emergency')||null;
@@ -122,7 +125,7 @@
   }
   function renderNextPayment(tx,days){
     if(!tx)return `<section class="money2-row-card empty"><div><small>次の支払い</small><strong>予定なし</strong><p>カレンダーに支払い予定を追加できます。</p></div><button data-money-action="add-entry" type="button">追加</button></section>`;
-    return `<section class="money2-row-card"><div><small>次の支払いまで ${days}日</small><strong>${escapeHtml(tx.label||'支払い')} ${data.privacy?'••••••':yen(tx.amount)}</strong><p>${formatMD(tx.date)} ${tx.status==='done'?'支払済み':'支払い予定'}</p></div><button data-money-action="payment" data-id="${escapeHtml(tx.id)}" type="button">${tx.status==='done'?'確認':'支払う'}</button></section>`;
+    return `<section class="money2-row-card"><div><small>次の支払いまで ${days}日</small><strong>${escapeHtml(tx.label||'支払い')} ${data.privacy?'••••••':yen(tx.amount)}</strong><p>${formatMD(tx.date)} ${isComplete(tx)?'支払済み':'支払い予定'}</p></div><button data-money-action="payment" data-id="${escapeHtml(tx.id)}" type="button">${isComplete(tx)?'確認':'支払う'}</button></section>`;
   }
   function renderGoal(goal){
     if(!goal)return `<section class="money2-goal-card empty"><div><small>今の目標</small><strong>まだ設定されていません</strong><p>防衛資金・返済・欲しいもの・投資などを設定できます。</p></div><button type="button" data-money-action="add-goal">目標を作る</button></section>`;
@@ -140,7 +143,7 @@
   function renderAccounts(){
     const total=currentLiquid();
     const rows=data.accounts.length?data.accounts.map(a=>`<button class="money2-account" type="button" data-money-action="edit-account" data-id="${escapeHtml(a.id)}"><span>${accountIcon(a.type)}</span><div><strong>${escapeHtml(a.name)}</strong><small>${accountType(a.type)}${a.updatedAt?` ・ ${formatUpdated(a.updatedAt)}`:''}</small></div><b>${privacyAmount(a.balance)}</b></button>`).join(''):`<div class="money2-empty">銀行口座・現金・電子マネーを登録すると、合計残高と資金繰りに反映されます。</div>`;
-    const payments=data.transactions.filter(tx=>isOutgoing(tx)&&tx.status!=='done'&&tx.date>=isoToday()).sort((a,b)=>a.date.localeCompare(b.date)).slice(0,5);
+    const payments=data.transactions.filter(tx=>isOutgoing(tx)&&!isComplete(tx)&&tx.date>=isoToday()).sort((a,b)=>a.date.localeCompare(b.date)).slice(0,5);
     return `<section class="money2-account-total"><small>使えるお金の現在地</small><strong>${total===null?'未設定':privacyAmount(total)}</strong><div><button type="button" data-money-action="refresh-balances">↻ 残高を更新</button><button type="button" data-money-action="add-account">＋ 口座</button></div><p>現在は端末内で手動更新。金融API連携用の入口はこのまま残します。</p></section><section class="money2-list-card"><header><h2>口座・電子マネー</h2><span>${data.accounts.length}件</span></header>${rows}</section><section class="money2-list-card"><header><h2>これからの支払い</h2><button type="button" data-money-action="add-entry">＋追加</button></header>${payments.length?payments.map(tx=>`<div class="money2-payment-line"><div><strong>${formatMD(tx.date)} ${escapeHtml(tx.label)}</strong><small>${tx.type==='debt'?'返済':'支払い予定'}</small></div><b>${data.privacy?'••••':yen(tx.amount)}</b><button type="button" data-money-action="payment" data-id="${escapeHtml(tx.id)}">支払う</button></div>`).join(''):'<div class="money2-empty">未払い予定はありません。</div>'}</section>`;
   }
   const accountIcon=type=>({bank:'▣',cash:'◯',emoney:'◈'}[type]||'▣');
@@ -207,7 +210,7 @@
   }
   function openPaymentDialog(tx){
     if(!tx)return;
-    openDialog('支払い',`<div class="money2-payment-confirm"><small>${formatMD(tx.date)}</small><strong>${escapeHtml(tx.label)}</strong><b>${data.privacy?'金額非表示':yen(tx.amount)}</b><p>MY WAYから実際の銀行振込はまだ行いません。銀行・決済アプリで支払った後に「支払済み」にしてください。</p></div>`,()=>{if(tx.status!=='done')data.transactions=data.transactions.map(x=>x.id===tx.id?{...x,status:'done'}:x);dialog().close();save()},tx.status==='done'?'閉じる':'支払済みにする');
+    openDialog('支払い',`<div class="money2-payment-confirm"><small>${formatMD(tx.date)}</small><strong>${escapeHtml(tx.label)}</strong><b>${data.privacy?'金額非表示':yen(tx.amount)}</b><p>MY WAYから実際の銀行振込はまだ行いません。銀行・決済アプリで支払った後に「支払済み」にしてください。</p></div>`,()=>{if(!isComplete(tx))data.transactions=data.transactions.map(x=>x.id===tx.id?{...x,status:'done'}:x);dialog().close();save()},tx.status==='done'?'閉じる':'支払済みにする');
   }
   function openGoalDialog(goal){
     const editing=!!goal,target=goal||{name:'',type:'saving',target:'',current:'',deadline:'',priority:1};
