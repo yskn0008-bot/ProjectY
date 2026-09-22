@@ -15,7 +15,7 @@ action 'documentpicker.open' getOptionalFile(text path: 'WFGetFilePath', bool ?e
 // Buffer is temporary implementation state only, not an SSOT.
 // Contract: add | next | merge | select|N | duplicate | clear | screenshots
 const bufferPath = "YOS Clipboard/buffer.txt"
-const cursorPath = "YOS Clipboard/cursor.txt"
+const cursorPath = "YOS Clipboard/cursor.txt"\nconst cursorOne = text("1")\nconst emptyText = text("")
 createFolder("YOS Clipboard")
 
 @command = "{ShortcutInput}"
@@ -37,7 +37,7 @@ if @command == "add" {
     }
     @buffer += @record
     saveFile(bufferPath, @buffer, true)
-    saveFile(cursorPath, "1", true)
+    saveFile(cursorPath, cursorOne, true)
     output("YOS_CLIPBOARD_OK:add")
 }
 
@@ -62,13 +62,13 @@ if @command == "next" {
         const firstEncoded = getListItem(lines, 1)
         const firstDecoded = base64Decode(firstEncoded)
         setClipboard(firstDecoded)
-        saveFile(cursorPath, "2", true)
+        const cursorTwo = text("2")\n        saveFile(cursorPath, cursorTwo, true)
         output("YOS_CLIPBOARD_OK:next:1")
     }
     const decodedItem = base64Decode(encodedItem)
     setClipboard(decodedItem)
     @nextCursor = @cursor + 1
-    saveFile(cursorPath, "{@nextCursor}", true)
+    const nextCursorText = text("{@nextCursor}")\n    saveFile(cursorPath, nextCursorText, true)
     output("YOS_CLIPBOARD_OK:next:{@cursor}")
 }
 
@@ -128,8 +128,8 @@ if @command == "duplicate" {
 }
 
 if @command == "clear" {
-    saveFile(bufferPath, "", true)
-    saveFile(cursorPath, "1", true)
+    saveFile(bufferPath, emptyText, true)
+    saveFile(cursorPath, cursorOne, true)
     output("YOS_CLIPBOARD_OK:clear")
 }
 
