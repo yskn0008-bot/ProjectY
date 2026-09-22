@@ -1,0 +1,157 @@
+#define name YOS_Clipboard
+#define color blue
+#define inputs text
+
+#include 'actions/basic'
+#include 'actions/calendar'
+#include 'actions/crypto'
+#include 'actions/documents'
+#include 'actions/images'
+#include 'actions/photos'
+#include 'actions/sharing'
+#include 'actions/text'
+
+// Fixed local Clipboard child for Clarity.
+// Buffer is temporary implementation state only, not an SSOT.
+// Contract: add | next | merge | select|N | duplicate | clear | screenshots
+const bufferPath = "YOS Clipboard/buffer.txt"
+const cursorPath = "YOS Clipboard/cursor.txt"
+createFolder("YOS Clipboard")
+
+@command = "{ShortcutInput}"
+if !@command {
+    @command = prompt("YOS_Clipboard mode: add / next / merge / select|N / duplicate / clear / screenshots")
+}
+
+if @command == "add" {
+    const clip = getClipboard()
+    if !clip {
+        output("YOS_CLIPBOARD_BLOCKED:empty_clipboard")
+    }
+    const encoded = base64Encode(clip)
+    @record = "{encoded}\n"
+    @buffer = ""
+    @existing = getFile(bufferPath, false)
+    if @existing {
+        @buffer = "{@existing}"
+    }
+    @buffer += @record
+    saveFile(bufferPath, @buffer, true)
+    saveFile(cursorPath, "1", true)
+    output("YOS_CLIPBOARD_OK:add")
+}
+
+if @command == "next" {
+    const file = getFile(bufferPath, false)
+    if !file {
+        output("YOS_CLIPBOARD_BLOCKED:empty_buffer")
+    }
+    const lines = splitText("{file}", "\n")
+    const total = count(lines)
+    @cursor = 1
+    const cursorFile = getFile(cursorPath, false)
+    if @cursorFile {
+        @cursor = number("{cursorFile}")
+    }
+    if @cursor > @total {
+        @cursor = 1
+    }
+    const encodedItem = getListItem(lines, @cursor)
+    if !encodedItem {
+        @cursor = 1
+        const firstEncoded = getListItem(lines, 1)
+        const firstDecoded = base64Decode(firstEncoded)
+        setClipboard(firstDecoded)
+        saveFile(cursorPath, "2", true)
+        output("YOS_CLIPBOARD_OK:next:1")
+    }
+    const decodedItem = base64Decode(encodedItem)
+    setClipboard(decodedItem)
+    @nextCursor = @cursor + 1
+    saveFile(cursorPath, "{@nextCursor}", true)
+    output("YOS_CLIPBOARD_OK:next:{@cursor}")
+}
+
+if @command == "merge" {
+    const file = getFile(bufferPath, false)
+    if !file {
+        output("YOS_CLIPBOARD_BLOCKED:empty_buffer")
+    }
+    const lines = splitText("{file}", "\n")
+    @merged = ""
+    @seen = 0
+    for encodedItem in lines {
+        if encodedItem {
+            const decodedItem = base64Decode(encodedItem)
+            if @seen > 0 {
+                @merged += "\n"
+            }
+            @merged += "{decodedItem}"
+            @seen += 1
+        }
+    }
+    if @seen == 0 {
+        output("YOS_CLIPBOARD_BLOCKED:empty_buffer")
+    }
+    setClipboard(@merged)
+    output("YOS_CLIPBOARD_OK:merge:{@seen}")
+}
+
+if @command contains "select|" {
+    const parts = splitText(@command, "|")
+    const indexPart = getListItem(parts, 2)
+    @index = number("{indexPart}")
+    if @index < 1 {
+        output("YOS_CLIPBOARD_BLOCKED:bad_index")
+    }
+    const file = getFile(bufferPath, false)
+    if !file {
+        output("YOS_CLIPBOARD_BLOCKED:empty_buffer")
+    }
+    const lines = splitText("{file}", "\n")
+    const encodedItem = getListItem(lines, @index)
+    if !encodedItem {
+        output("YOS_CLIPBOARD_BLOCKED:index_out_of_range")
+    }
+    const decodedItem = base64Decode(encodedItem)
+    setClipboard(decodedItem)
+    output("YOS_CLIPBOARD_OK:select:{@index}")
+}
+
+if @command == "duplicate" {
+    const clip = getClipboard()
+    if !clip {
+        output("YOS_CLIPBOARD_BLOCKED:empty_clipboard")
+    }
+    setClipboard(clip)
+    output("YOS_CLIPBOARD_OK:duplicate")
+}
+
+if @command == "clear" {
+    saveFile(bufferPath, "", true)
+    saveFile(cursorPath, "1", true)
+    output("YOS_CLIPBOARD_OK:clear")
+}
+
+if @command == "screenshots" {
+    // Default window: latest screenshots taken in the last 30 minutes, max 20.
+    // No permanent screenshot store is created; Photos remains authoritative.
+    const candidates = getLatestScreenshots(20)
+    const cutoff = adjustDate(CurrentDate, "Subtract", qty(30, "minutes"))
+    @recent = []
+    for shot in candidates {
+        const taken = getImageDetail(shot, "Date Taken")
+        if taken >= cutoff {
+            @recent += shot
+        }
+    }
+    const found = count(@recent)
+    if @found == 0 {
+        output("YOS_CLIPBOARD_BLOCKED:no_recent_screenshots")
+    }
+    const combined = combineImages(@recent, "Vertically", 0)
+    setClipboard(combined)
+    output("YOS_CLIPBOARD_OK:screenshots:{@found}")
+}
+
+output("YOS_CLIPBOARD_BLOCKED:unsupported:{@command}")
