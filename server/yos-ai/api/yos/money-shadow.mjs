@@ -1,3 +1,4 @@
+// Deployment marker: 2026-09-24 silent Money Alert transport.
 const TOKEN_RE=/^[A-Za-z0-9_-]{43}$/u;
 const ORIGIN='https://yskn0008-bot.github.io';
 const SHADOW_TTL=35*24*60*60;
