@@ -5,6 +5,12 @@ import argparse
 import plistlib
 from pathlib import Path
 
+from shortcut_text_tokens import (
+    assert_required_prompt_bindings,
+    find_prompt_value,
+    replace_preserving_attachments,
+)
+
 OLD = (
     "If calendar or reminder date/time is ambiguous, set needs_review=true rather than guessing. "
     "For calendar only: when the start date/time is unambiguous but the user gives no duration/end time, "
@@ -24,42 +30,15 @@ NEW = (
 )
 
 
-def rewrite(value: object) -> tuple[object, int]:
-    if isinstance(value, str):
-        if OLD in value:
-            return value.replace(OLD, NEW), value.count(OLD)
-        return value, 0
-    if isinstance(value, list):
-        out = []
-        hits = 0
-        for item in value:
-            new_item, count = rewrite(item)
-            out.append(new_item)
-            hits += count
-        return out, hits
-    if isinstance(value, dict):
-        out = {}
-        hits = 0
-        for key, item in value.items():
-            new_item, count = rewrite(item)
-            out[key] = new_item
-            hits += count
-        return out, hits
-    return value, 0
-
-
 def patch(path: Path) -> None:
     with path.open("rb") as fh:
         root = plistlib.load(fh)
-    if not isinstance(root.get("WFWorkflowActions"), list):
-        raise SystemExit("WFWorkflowActions missing")
 
-    rewritten, hits = rewrite(root)
-    if hits != 1:
-        raise SystemExit(f"expected exactly one ambiguity policy replacement, found {hits}")
+    value = find_prompt_value(root)
+    replace_preserving_attachments(value, OLD, NEW)
 
     with path.open("wb") as fh:
-        plistlib.dump(rewritten, fh, fmt=plistlib.FMT_XML, sort_keys=False)
+        plistlib.dump(root, fh, fmt=plistlib.FMT_XML, sort_keys=False)
 
     with path.open("rb") as fh:
         verify = plistlib.load(fh)
@@ -70,6 +49,7 @@ def patch(path: Path) -> None:
             raise SystemExit(f"missing natural-language policy marker: {needle}")
     if OLD in blob:
         raise SystemExit("old over-strict ambiguity policy survived patch")
+    assert_required_prompt_bindings(verify)
     print("Clarity natural-language policy patch: PASS")
 
 
