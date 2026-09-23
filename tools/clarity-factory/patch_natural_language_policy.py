@@ -21,6 +21,8 @@ NEW = (
     "Interpret ordinary Japanese everyday time expressions from current_time before deciding they are ambiguous. "
     "Examples that are normally resolvable without review include 今日, 明日, 明後日, 今夜, 朝, 昼, 午後, 夜, "
     "明日3時, 明日の午後3時, and relative reminders such as 30分前 when they clearly refer to a scheduled event in the same input. "
+    "If the user explicitly gives both a relative date and an unambiguous start/end clock time, resolve it directly from current_time and set needs_review=false. "
+    "For example, 明日の午後3時から午後4時まで歯医者を予定に入れて means a calendar action for tomorrow from 15:00 to 16:00 and is not ambiguous. "
     "For a linked reminder like 30分前, derive date_time from the referenced calendar action and record the dependency. "
     "Do not require the user to restate a full date when current_time plus the utterance determines it. "
     "Shopping/task/idea actions do not need a date unless the user explicitly asks for one; phrases such as 帰りにトマト買う should become shopping content トマト without needs_review. "
@@ -43,7 +45,14 @@ def patch(path: Path) -> None:
     with path.open("rb") as fh:
         verify = plistlib.load(fh)
     blob = repr(verify)
-    required = ["明日3時", "30分前", "帰りにトマト買う", "multiple materially different interpretations"]
+    required = [
+        "明日3時",
+        "30分前",
+        "帰りにトマト買う",
+        "明日の午後3時から午後4時まで歯医者を予定に入れて",
+        "set needs_review=false",
+        "multiple materially different interpretations",
+    ]
     for needle in required:
         if needle not in blob:
             raise SystemExit(f"missing natural-language policy marker: {needle}")
