@@ -77,3 +77,11 @@ test('Money Alert bridge emits only Money anomalies and deduplicates delivery wi
   assert.doesNotMatch(moneyAlert,/localStorage\.setItem\([^\n]*yos-money-v2/);
   assert.doesNotMatch(moneyAlert,/indexedDB|sessionStorage/);
 });
+
+test('Money UI syncs only a derived shadow for silent Money Alert and keeps yos-money-v2 as the SSOT',()=>{
+  for(const token of ['MONEY_SHADOW_TOKEN_KEY','MONEY_SHADOW_ENDPOINT','X-YOS-Money-Token','syncMoneyShadow','moneyShadowPayload','Money Alert 接続コードをコピー']) assert.match(moneyUi,new RegExp(token));
+  assert.match(moneyUi,/project-y-yos-ai\.vercel\.app\/api\/yos\/money-shadow/);
+  assert.match(moneyUi,/window\.YOSSharedStateV1\?\.refresh\?\.\('money'\)/);
+  assert.match(moneyUi,/localStorage\.setItem\(MONEY_SHADOW_TOKEN_KEY/);
+  assert.match(moneyUi,/write\(KEY,data\)/);
+});
