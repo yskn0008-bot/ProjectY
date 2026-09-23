@@ -31,7 +31,7 @@ test('Emergency fund goal stays in yos-money-v2, separate from liquid balance, a
   assert.doesNotMatch(liquid,/goals|goal/);
   assert.match(moneyUi,/goal\.checkpoint/);
   assert.match(shared,/goalProgressPercent/);
-  assert.match(dashboard,/money-decision-goal/);
+  assert.match(dashboard,/goalProgressLabel/);
 });
 
 test('Money UI reads future data beyond current month and has live verification',()=>{
