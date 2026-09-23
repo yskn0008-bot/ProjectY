@@ -7,7 +7,7 @@
   const TAXI_KEY='yos-taxi-settings-v2';
   const TZ='Asia/Tokyo';
   const MONEY_SHADOW_TOKEN_KEY='yos-money-shadow-token-v1';
-  const MONEY_SHADOW_ENDPOINT='https://project-y-yos-ai.vercel.app/api/yos/money-shadow';
+  const MONEY_SHADOW_ENDPOINT='https://project-y-yos-ai.vercel.app/api/yos/widget?mode=money-shadow';
 
   const q=(sel,root=document)=>root.querySelector(sel);
   const qa=(sel,root=document)=>[...root.querySelectorAll(sel)];
