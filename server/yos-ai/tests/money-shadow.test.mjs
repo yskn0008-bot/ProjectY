@@ -105,3 +105,16 @@ test('OPTIONS exposes only the minimal CORS contract',async()=>{
   assert.equal(response.headers.get('access-control-allow-origin'),ORIGIN);
   assert.match(response.headers.get('access-control-allow-headers'),/X-YOS-Money-Token/);
 });
+
+test('unknown Money values stay unknown instead of becoming zero',async()=>{
+  const h=harness();
+  const value=snapshot({balance:null,today_usable:null,next_payment:{date:'2026-09-26',label:'車保険',amount:null}});
+  const response=await h.run(req('https://api.example/yos/money-shadow',{method:'POST',origin:ORIGIN,body:value}));
+  assert.equal(response.status,200);
+  const shadow=[...h.store.entries()].find(([key])=>key.startsWith('yos:money-shadow:'));
+  assert.ok(shadow);
+  const saved=JSON.parse(shadow[1]);
+  assert.equal(saved.balance,null);
+  assert.equal(saved.today_usable,null);
+  assert.equal(saved.next_payment.amount,null);
+});
