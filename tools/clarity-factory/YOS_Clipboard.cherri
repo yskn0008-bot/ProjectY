@@ -4,8 +4,6 @@
 #include 'actions/calendar'
 #include 'actions/crypto'
 #include 'actions/documents'
-#include 'actions/images'
-#include 'actions/photos'
 #include 'actions/sharing'
 #include 'actions/text'
 
@@ -145,16 +143,7 @@ if @command == "clear" {
 }
 
 if @command == "screenshots" {
-    // Use the latest screenshots from Photos, max 20. Photos remains authoritative.
-    const screenshotCandidates = getLatestScreenshots(20)
-    const screenshotCount = count(screenshotCandidates)
-    @found = "{screenshotCount}"
-    if @found == 0 {
-        output("YOS_CLIPBOARD_BLOCKED:no_recent_screenshots")
-    }
-    const combined = combineImages(screenshotCandidates, "Vertically", 0)
-    setClipboard(combined)
-    output("YOS_CLIPBOARD_OK:screenshots:{@found}")
+    output("YOS_CLIPBOARD_BLOCKED:screenshots_not_verified")
 }
 
 output("YOS_CLIPBOARD_BLOCKED:unsupported:{@command}")
