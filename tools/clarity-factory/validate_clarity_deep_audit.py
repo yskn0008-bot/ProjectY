@@ -178,6 +178,35 @@ def validate(path: Path) -> None:
 
     walk(root, visit)
 
+    # Semantic guard for the three model-prompt bindings that originally failed on-device.
+    prompt_actions = [
+        action
+        for action in actions
+        if params(action).get("CustomOutputName") == "modelPrompt"
+    ]
+    if len(prompt_actions) != 1:
+        raise AssertionError(f"expected one modelPrompt action, found {len(prompt_actions)}")
+    prompt_value = params(prompt_actions[0]).get("WFTextActionText")
+    if not isinstance(prompt_value, dict) or prompt_value.get("WFSerializationType") != "WFTextTokenString":
+        raise AssertionError("modelPrompt is not a WFTextTokenString")
+    prompt_body = prompt_value.get("Value", {})
+    prompt_text = prompt_body.get("string", "")
+    prompt_ranges = prompt_body.get("attachmentsByRange", {})
+    if not isinstance(prompt_text, str) or not isinstance(prompt_ranges, dict):
+        raise AssertionError("modelPrompt text/token map missing")
+    for label in ("request_id: ", "current_time: ", "original_input: "):
+        label_index = prompt_text.find(label)
+        if label_index < 0:
+            raise AssertionError(f"modelPrompt missing {label.strip()}")
+        placeholder_index = label_index + len(label)
+        if placeholder_index >= len(prompt_text) or prompt_text[placeholder_index] != "\ufffc":
+            raise AssertionError(f"modelPrompt placeholder missing after {label.strip()}")
+        position = utf16_units(prompt_text[:placeholder_index])
+        if f"{{{position}, 1}}" not in prompt_ranges:
+            raise AssertionError(
+                f"modelPrompt attachment range stale for {label.strip()}"
+            )
+
     # Audit every Conditional and Repeat group, not just feature paths.
     condition_groups: dict[str, list[tuple[int, int]]] = defaultdict(list)
     repeat_groups: dict[str, list[tuple[int, int]]] = defaultdict(list)
