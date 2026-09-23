@@ -167,6 +167,14 @@
       const nextPayment=events.find(moneyOutgoing)||sharedMoney?.nextPayment||null;
       const nextIncome=events.find(tx=>tx.type==='income')||sharedMoney?.nextIncome||null;
       const balanceNumber=amountNumber(sharedMoney?.balance);
+      const goalObject=sharedMoney?.goal&&typeof sharedMoney.goal==='object'?sharedMoney.goal:null;
+      const goalCurrent=amountNumber(sharedMoney?.goalCurrent??goalObject?.current);
+      const goalTarget=amountNumber(sharedMoney?.goalTarget??goalObject?.target);
+      const goalCheckpoint=amountNumber(sharedMoney?.goalCheckpoint??goalObject?.checkpoint);
+      const rawGoalProgress=Number(sharedMoney?.goalProgressPercent);
+      const rawCheckpointProgress=Number(sharedMoney?.goalCheckpointProgressPercent);
+      const goalProgressPercent=Number.isFinite(rawGoalProgress)?Math.min(100,Math.max(0,Math.round(rawGoalProgress))):(goalTarget!==null&&goalTarget>0?Math.min(100,Math.max(0,Math.round((goalCurrent||0)/goalTarget*100))):null);
+      const goalCheckpointProgressPercent=Number.isFinite(rawCheckpointProgress)?Math.min(100,Math.max(0,Math.round(rawCheckpointProgress))):(goalCheckpoint!==null&&goalCheckpoint>0?Math.min(100,Math.max(0,Math.round((goalCurrent||0)/goalCheckpoint*100))):null);
       const anchor=clean(nextIncome?.viewDate||nextIncome?.date,10)||moneyMonthEnd();
       const outgoingUntilAnchor=events.filter(tx=>moneyOutgoing(tx)&&tx.viewDate<=anchor).reduce((sum,tx)=>sum+(amountNumber(tx.amount)||0),0);
       const balanceAfterRequiredPayments=balanceNumber===null?null:balanceNumber-outgoingUntilAnchor;
@@ -189,6 +197,13 @@
         shortageText:shortagePossible?(privacy?`${shortageScope} 不足あり`:`${shortageScope} ${moneyYen(shortfall)}不足`):'',
         timeline:moneyTimeline(events,nextIncome),
         goal:clean(sharedMoney?.goalText,100),
+        goalCurrent,
+        goalTarget,
+        goalCheckpoint,
+        goalProgressPercent,
+        goalCheckpointProgressPercent,
+        goalPurpose:clean(sharedMoney?.goalPurpose||goalObject?.purpose,160),
+        goalPriorityLabel:clean(sharedMoney?.goalPriorityLabel||goalObject?.priorityLabel,20),
         events
       };
     }
@@ -210,6 +225,13 @@
       shortageText:'',
       timeline:[],
       goal:clean(money.goal,100),
+      goalCurrent:null,
+      goalTarget:null,
+      goalCheckpoint:null,
+      goalProgressPercent:null,
+      goalCheckpointProgressPercent:null,
+      goalPurpose:'',
+      goalPriorityLabel:'',
       connected:Boolean(Object.keys(money).length)
     };
   }
@@ -277,6 +299,18 @@
     const payment=el('div');payment.append(el('small','','次の支払い'),el('strong','',money?.nextPaymentText||'予定なし'));
     const income=el('div');income.append(el('small','','次の入金'),el('strong','',money?.nextIncomeText||'未設定'));
     next.append(payment,income);article.append(next);
+
+    if(money?.goal){
+      const goal=el('div','money-decision-goal');
+      const pct=Number.isFinite(Number(money.goalProgressPercent))?Math.min(100,Math.max(0,Math.round(Number(money.goalProgressPercent)))):null;
+      goal.append(el('small','','目標'),el('strong','',pct===null?money.goal:`${money.goal} ${pct}%`));
+      const meta=[];
+      if(money.goalCurrent!==null&&money.goalTarget!==null)meta.push(money.privacy?'積立額は非表示':`${moneyYen(money.goalCurrent)} / ${moneyYen(money.goalTarget)}`);
+      if(money.goalCheckpoint!==null&&money.goalCheckpoint>0)meta.push(money.privacy?'第1チェック 非表示':`第1チェック ${moneyYen(money.goalCheckpoint)}`);
+      if(meta.length)goal.append(el('span','money-decision-goal-meta',meta.join(' ・ ')));
+      if(pct!==null){const bar=el('i','money-decision-goal-bar'),fill=el('b');fill.style.width=`${pct}%`;bar.append(fill);goal.append(bar)}
+      article.append(goal);
+    }
 
     if(Array.isArray(money?.timeline)&&money.timeline.length){
       const timeline=el('div','money-mini-timeline');
