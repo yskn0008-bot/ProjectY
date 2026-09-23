@@ -103,7 +103,6 @@
       status.textContent=decision.reason==='migration'?'重複通知を停止しました':'新しいMoney Alertはありません';
       main.appendChild(status);
       document.body.appendChild(main);
-      setTimeout(()=>location.replace('./'),700);
       return decision;
     }
 

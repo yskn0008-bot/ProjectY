@@ -73,7 +73,7 @@ test('Money Alert bridge emits only Money anomalies and deduplicates delivery wi
   assert.match(moneyAlert,/deliveryDecision/);
   assert.match(moneyAlert,/renderDirect/);
   assert.match(moneyAlert,/params\.get\('format'\)==='alert-text'.*renderDirect/s);
-  assert.match(moneyAlert,/setTimeout\(\(\)=>location\.replace\('\.\/'\),700\)/);
+  assert.doesNotMatch(moneyAlert,/location\.replace\('\.\/'\)/);
   assert.doesNotMatch(moneyAlert,/localStorage\.setItem\([^\n]*yos-money-v2/);
   assert.doesNotMatch(moneyAlert,/indexedDB|sessionStorage/);
 });
