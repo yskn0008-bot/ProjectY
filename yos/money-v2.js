@@ -6,6 +6,8 @@
   const LEGACY_HOME_KEY='yos-home-settings-v1';
   const TAXI_KEY='yos-taxi-settings-v2';
   const TZ='Asia/Tokyo';
+  const MONEY_SHADOW_TOKEN_KEY='yos-money-shadow-token-v1';
+  const MONEY_SHADOW_ENDPOINT='https://project-y-yos-ai.vercel.app/api/yos/money-shadow';
 
   const q=(sel,root=document)=>root.querySelector(sel);
   const qa=(sel,root=document)=>[...root.querySelectorAll(sel)];
@@ -34,7 +36,64 @@
   let data=state();
   let activeTab='dashboard';
   let calendarMonth=monthKey();
-  function save(){data.updatedAt=new Date().toISOString();const saved=write(KEY,data);render();if(saved)window.YOSSharedStateV1?.refresh?.('money');}
+  function save(){data.updatedAt=new Date().toISOString();const saved=write(KEY,data);render();if(saved){const shared=window.YOSSharedStateV1?.refresh?.('money');void syncMoneyShadow(shared?.money)}}
+
+  function randomToken(){
+    const bytes=new Uint8Array(32);crypto.getRandomValues(bytes);let binary='';for(const byte of bytes)binary+=String.fromCharCode(byte);
+    return btoa(binary).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+  }
+  function moneyShadowToken(){
+    let token='';try{token=localStorage.getItem(MONEY_SHADOW_TOKEN_KEY)||''}catch{}
+    if(/^[A-Za-z0-9_-]{43}$/.test(token))return token;
+    token=randomToken();try{localStorage.setItem(MONEY_SHADOW_TOKEN_KEY,token)}catch{}
+    return token;
+  }
+  const shadowTx=tx=>tx?{date:clean(tx.date,10),label:clean(tx.label,80),amount:Number.isFinite(Number(tx.amount))?Number(tx.amount):null}:null;
+  function moneyShadowPayload(money){
+    const value=money||window.YOSSharedStateV1?.snapshot?.()?.money||null;
+    if(!value||value.connected===false)return null;
+    return {
+      updated_at:clean(value.updatedAt,40)||new Date().toISOString(),
+      privacy:Boolean(value.privacy),
+      balance:Number.isFinite(Number(value.balance))?Number(value.balance):null,
+      today_usable:Number.isFinite(Number(value.daily))?Number(value.daily):null,
+      spent_today:Number.isFinite(Number(value.spentToday))?Number(value.spentToday):null,
+      next_payment:shadowTx(value.nextPayment),
+      next_income:shadowTx(value.nextIncome),
+      upcoming_payments:Array.isArray(value.upcomingPayments)?value.upcomingPayments.slice(0,5).map(shadowTx).filter(Boolean):[],
+      projected_after_next_payment:Number.isFinite(Number(value.projectedAfterNextPayment))?Number(value.projectedAfterNextPayment):null,
+      shortage_after_next_payment:value.shortageAfterNextPayment===true,
+      shortfall_after_next_payment:Number.isFinite(Number(value.shortfallAfterNextPayment))?Number(value.shortfallAfterNextPayment):null,
+      shortage_possible:value.shortagePossible===true,
+      shortfall:Number.isFinite(Number(value.shortfall))?Number(value.shortfall):null
+    };
+  }
+  async function syncMoneyShadow(money){
+    if(typeof fetch!=='function'||(typeof navigator!=='undefined'&&navigator.onLine===false))return false;
+    const payload=moneyShadowPayload(money);if(!payload)return false;
+    try{
+      const response=await fetch(MONEY_SHADOW_ENDPOINT,{
+        method:'POST',
+        headers:{'Content-Type':'application/json','X-YOS-Money-Token':moneyShadowToken()},
+        body:JSON.stringify(payload),
+        cache:'no-store',
+        credentials:'omit',
+        keepalive:true
+      });
+      return response.ok;
+    }catch{return false}
+  }
+  async function copyMoneyAlertToken(button){
+    const token=moneyShadowToken();
+    try{
+      await navigator.clipboard.writeText(token);
+      if(button){button.textContent='コピー済み';button.disabled=true;setTimeout(()=>{button.textContent='Money Alert 接続コードをコピー';button.disabled=false},1200)}
+      return true;
+    }catch{
+      window.prompt('この接続コードをコピーしてください',token);
+      return false;
+    }
+  }
 
   function legacyMoney(){
     const life=read(LIFE_KEY,null);
@@ -249,7 +308,9 @@
       ['支払い後の不足判定',plan.afterNextPayment!==null,plan.afterNextPayment===null?'残高未入力':(plan.shortageAfterNextPayment?`不足 ${data.privacy?'金額非表示':yen(Math.abs(plan.afterNextPayment))}`:`残高見込み ${data.privacy?'金額非表示':yen(plan.afterNextPayment)}`)]
     ];
     const passed=checks.every(([,ok])=>ok);
-    openDialog('Money 実データ確認',`<div class="money2-payment-confirm"><strong>${passed?'PASS':'未完了'}</strong>${checks.map(([name,ok,value])=>`<p>${ok?'✓':'△'} ${escapeHtml(name)}：${escapeHtml(value)}</p>`).join('')}<p>この確認はこの端末の既存 yos-money-v2 だけを読み、新しい保存先は作りません。</p></div>`,()=>dialog().close(),'閉じる');
+    openDialog('Money 実データ確認',`<div class="money2-payment-confirm"><strong>${passed?'PASS':'未完了'}</strong>${checks.map(([name,ok,value])=>`<p>${ok?'✓':'△'} ${escapeHtml(name)}：${escapeHtml(value)}</p>`).join('')}<p>Money本体はこの端末の既存 yos-money-v2 が正本です。Money Alert用には必要最小限の読み取りキャッシュだけを同期します。</p><button type="button" class="primary" data-money-copy-alert-token>Money Alert 接続コードをコピー</button></div>`,()=>dialog().close(),'閉じる');
+    const copyButton=form()?.querySelector('[data-money-copy-alert-token]');
+    copyButton?.addEventListener('click',()=>{void copyMoneyAlertToken(copyButton)});
   }
   async function openYosReview(){
     const plan=futurePlan(),debt=[...data.debts].sort((a,b)=>n(b.apr)-n(a.apr))[0],goal=primaryGoal();
@@ -260,8 +321,9 @@
   }
   function boot(){
     if(!document.getElementById('moneyPage'))return;
-    installShell();render();
-    window.addEventListener('storage',e=>{if(e.key===KEY){data=state();render()}});
+    installShell();render();void syncMoneyShadow();
+    window.addEventListener('online',()=>{void syncMoneyShadow()});
+    window.addEventListener('storage',e=>{if(e.key===KEY){data=state();render();void syncMoneyShadow()}});
     document.addEventListener('visibilitychange',()=>{if(!document.hidden){data=state();render()}});
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
