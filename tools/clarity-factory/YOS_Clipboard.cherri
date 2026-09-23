@@ -82,7 +82,7 @@ if @command == "merge" {
     if !mergeFile {
         output("YOS_CLIPBOARD_BLOCKED:empty_buffer")
     }
-    const lines = splitText("{file}", "\n")
+    const mergeLines = splitText("{mergeFile}", "\n")
     @merged = ""
     @seen = 0
     for mergeEncodedItem in mergeLines {
