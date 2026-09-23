@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-24T05:06:14+09:00",
+  "updated_at": "2026-09-24T05:12:55+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -70,7 +70,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-09-23T19:56:42Z"
+      "updated_at": "2026-09-23T20:12:40Z"
     },
     {
       "id": "github-issue-256",
@@ -165,6 +165,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-7dccec91bc0a",
+      "title": "Fix Clarity Calendar to confirmed iCloud private calendar",
+      "completed_at": "2026-09-23T20:12:39Z",
+      "result": "GitHub mainへ反映（7dccec9）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/7dccec91bc0afd801a24590f99d799d885469c10"
+    },
+    {
       "id": "github-commit-112140233252",
       "title": "Fix Clarity Calendar destination and date normalization",
       "completed_at": "2026-09-23T19:56:02Z",
@@ -191,13 +198,6 @@
       "completed_at": "2026-09-23T19:06:11Z",
       "result": "GitHub mainへ反映（bd4cf0e）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/bd4cf0e24cb715f8776cc575935fe1f543b2d8e3"
-    },
-    {
-      "id": "github-commit-2dd65d317ce9",
-      "title": "Fit silent Money Alert into existing Vercel function",
-      "completed_at": "2026-09-23T18:58:30Z",
-      "result": "GitHub mainへ反映（2dd65d3）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/2dd65d317ce99e755fe15643858c491d8f7a72af"
     },
     {
       "id": "complete-002",
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-24T05:06:14+09:00",
+      "last_update": "2026-09-24T05:12:55+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -315,7 +315,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-24T05:06:14+09:00",
+      "last_update": "2026-09-24T05:12:55+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-24T05:06:14+09:00",
+      "last_update": "2026-09-24T05:12:55+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "cb07e41fa3a1a5a61f523ba2a9d78d22823dac93f3519749e8cca4a5457dae04"
+  "github_snapshot_hash": "b9e754014c756745d1d00190b52d8377a7a7aec38fe20f37581b62c09c6216d6"
 }
