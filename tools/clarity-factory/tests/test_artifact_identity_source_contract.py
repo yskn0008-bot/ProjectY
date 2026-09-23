@@ -20,10 +20,12 @@ class ArtifactIdentitySourceContractTests(unittest.TestCase):
         )
         self.assertIn("appendResolvedFile(ledgerFile, bootRecord)", self.source)
 
-    def test_boot_happens_before_voice_input(self):
+    def test_boot_happens_after_raw_first_and_before_model(self):
+        raw = self.source.index("appendResolvedFile(inboxFile, rawRecord)")
         boot = self.source.index("appendResolvedFile(ledgerFile, bootRecord)")
-        listen = self.source.index('listen("After Pause", "jp-JP")')
-        self.assertLess(boot, listen)
+        model = self.source.index("askChatGPT(modelPrompt")
+        self.assertLess(raw, boot)
+        self.assertLess(boot, model)
 
     def test_model_decision_trace_is_before_needs_review_block(self):
         trace = self.source.index("MODEL_DECISION")
