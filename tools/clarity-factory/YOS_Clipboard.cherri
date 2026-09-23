@@ -49,7 +49,8 @@ if @command == "next" {
         output("YOS_CLIPBOARD_BLOCKED:empty_buffer")
     }
     const lines = splitText("{file}", "\n")
-    const total = count(lines)
+    const totalCount = count(lines)
+    @total = "{totalCount}"
     @cursor = 1
     const cursorFile = getOptionalFile(cursorPath, false)
     if cursorFile {
@@ -144,13 +145,15 @@ if @command == "screenshots" {
     const cutoff = adjustDate(CurrentDate, "Subtract", qty(30, "minutes"))
     @recent = []
     for shot in candidates {
-        const taken = getImageDetail(shot, "Date Taken")
-        if taken >= cutoff {
+        const takenValue = getImageDetail(shot, "Date Taken")
+        @taken = "{takenValue}"
+        if @taken >= cutoff {
             @recent += shot
         }
     }
-    const found = count(@recent)
-    if found == 0 {
+    const foundCount = count(@recent)
+    @found = "{foundCount}"
+    if @found == 0 {
         output("YOS_CLIPBOARD_BLOCKED:no_recent_screenshots")
     }
     const combined = combineImages(@recent, "Vertically", 0)
