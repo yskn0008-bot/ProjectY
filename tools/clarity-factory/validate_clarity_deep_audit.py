@@ -117,7 +117,10 @@ def token_action_output_names(value: object) -> set[str]:
     return names
 
 
-def validate(path: Path, expected_build_id: str) -> None:\n    expected_build_id = expected_build_id.strip().lower()\n    if not SHA_RE.fullmatch(expected_build_id):\n        raise AssertionError(f"expected BUILD_ID is not a Git SHA: {expected_build_id!r}")
+def validate(path: Path, expected_build_id: str) -> None:
+    expected_build_id = expected_build_id.strip().lower()
+    if not SHA_RE.fullmatch(expected_build_id):
+        raise AssertionError(f"expected BUILD_ID is not a Git SHA: {expected_build_id!r}")
     with path.open("rb") as fh:
         root = plistlib.load(fh)
     actions = root.get("WFWorkflowActions")
