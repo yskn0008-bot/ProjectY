@@ -53,7 +53,7 @@ ALLOWED_ACTION_IDS = {
 }
 
 RANGE_RE = re.compile(r"^\{(\d+),\s*(\d+)\}$")
-
+SHA_RE = re.compile(r"^[0-9a-f]{40}$")\n
 
 def params(action: dict) -> dict:
     value = action.get("WFWorkflowActionParameters", {})
