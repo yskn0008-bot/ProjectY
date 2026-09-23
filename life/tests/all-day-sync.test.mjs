@@ -39,3 +39,19 @@ test('calendar update launches the installed script without opening JSON input o
  assert.equal(nodes.syncHelpButton.hidden,false);
  assert.doesNotMatch(nodes.syncLaunchStatus.textContent,/更新しました|取り込みました/);
 });
+
+
+test('calendar import removes only exact duplicate events',()=>{
+ const data={schedule:[],tasks:[]};let saved;
+ const payload={date:'2026-09-23',events:[
+  {id:'holiday-a',title:'秋分の日',start:'2026-09-22T15:00:00.000Z',end:'2026-09-23T15:00:00.000Z',isAllDay:true,location:''},
+  {id:'holiday-b',title:'秋分の日',start:'2026-09-22T15:00:00.000Z',end:'2026-09-23T15:00:00.000Z',isAllDay:true,location:''},
+  {id:'holiday-c',title:'秋分の日',start:'2026-09-22T15:00:00.000Z',end:'2026-09-23T15:00:00.000Z',isAllDay:true,location:''},
+  {id:'festival',title:'琉球フェスティバル2026',start:'2026-09-22T15:00:00.000Z',end:'2026-09-23T15:00:00.000Z',isAllDay:true,location:''},
+  {id:'later',title:'秋分の日',start:'2026-09-23T03:00:00.000Z',end:'2026-09-23T04:00:00.000Z',isAllDay:false,location:''}
+ ]};
+ vm.runInNewContext(importer+';importPayload(payload)',{payload,day:()=>data,today:()=>payload.date,categoryOf:()=> 'other',COLORS:{other:'#aaa'},KEY:'life',data,paint(){},localStorage:{setItem(k,v){saved=JSON.parse(v)}}});
+ assert.equal(saved.schedule.length,3);
+ assert.equal(saved.schedule.filter(e=>e.title==='秋分の日'&&e.isAllDay).length,1);
+ assert.equal(saved.schedule.some(e=>e.id==='later'),true);
+});
