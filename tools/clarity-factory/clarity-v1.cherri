@@ -23,12 +23,17 @@ action 'file.append' appendResolvedFile(
 
 // Voice -> Raw First -> ChatGPT Dictionary -> fail-closed policy -> local v1 executors -> Verify/Ledger.
 // Existing Clarity Inbox.txt stays the raw fail-safe. Executor writes are local/reversible only.
-const originalInput = listen("After Pause", "jp-JP")
+// BUILD_ID is replaced post-compile with the exact verified GitHub commit SHA.
+// Never use the Shortcut filename as runtime identity.
+const buildId = text("__CLARITY_BUILD_ID__")
 const requestNumber = randomNumber(100000, 999999)
+const ledgerFile = getFile("Clarity Ledger.txt")
+const bootRecord = text("{CurrentDate}\tBOOT\t{buildId}\t{requestNumber}\n")
+appendResolvedFile(ledgerFile, bootRecord)
+const originalInput = listen("After Pause", "jp-JP")
 const rawRecord = text("{CurrentDate}\t{requestNumber}\tRAW\t{originalInput}\n")
 const inboxFile = getFile("Clarity Inbox.txt")
 appendResolvedFile(inboxFile, rawRecord)
-const ledgerFile = getFile("Clarity Ledger.txt")
 
 // Zero-network fast path for the first acceptance command.
 // Raw First is already persisted above. This stays fail-closed and delegates execution
@@ -119,6 +124,8 @@ for actionItem in @actionsRaw {
     const requiresConfirmation = getValue(actionDict, "requires_confirmation")
     const externalWrite = getValue(actionDict, "external_write")
     const needsReview = getValue(actionDict, "needs_review")
+    const modelDecisionRecord = text("{CurrentDate}\t{requestNumber}\t{actionId}\tMODEL_DECISION\texecutor={executor}\tdate_time={dateTime}\tend_date_time={endDateTime}\tneeds_review={needsReview}\toriginal_input={originalInput}\n")
+    appendResolvedFile(ledgerFile, modelDecisionRecord)
 
     if status != "planned" {
         const blockedStatusRecord = text("{CurrentDate}\t{requestNumber}\t{actionId}\tBLOCKED\tmodel_claimed_execution\n")
