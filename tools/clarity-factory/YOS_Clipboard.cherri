@@ -20,10 +20,7 @@ const cursorOne = text("1")
 const emptyText = text("")
 createFolder("YOS Clipboard")
 
-@command = "{ShortcutInput}"
-if !@command {
-    @command = prompt("YOS_Clipboard mode: add / next / merge / select|N / duplicate / clear / screenshots")
-}
+@command = prompt("YOS_Clipboard mode: add / next / merge / select|N / duplicate / clear / screenshots")
 
 if @command == "add" {
     const clip = getClipboard()
