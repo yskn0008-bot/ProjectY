@@ -130,11 +130,10 @@
   function renderGoal(goal){
     if(!goal)return `<section class="money2-goal-card empty"><div><small>今の目標</small><strong>まだ設定されていません</strong><p>防衛資金・返済・欲しいもの・投資などを設定できます。</p></div><button type="button" data-money-action="add-goal">目標を作る</button></section>`;
     const target=Math.max(1,n(goal.target)),current=n(goal.current),pct=Math.min(100,Math.max(0,Math.round(current/target*100)));
-    const checkpoint=Math.max(0,n(goal.checkpoint)),checkpointPct=checkpoint?Math.min(100,Math.max(0,Math.round(current/checkpoint*100))):null;
-    const amountLine=data.privacy?'積立額は非表示':`${yen(current)} / ${yen(target)} ・ あと ${yen(Math.max(0,target-current))}`;
-    const checkpointLine=checkpoint?`第1チェックポイント ${data.privacy?'非表示':`${yen(Math.min(current,checkpoint))} / ${yen(checkpoint)}（${checkpointPct}%）`}`:'';
+    const checkpoint=Math.max(0,n(goal.checkpoint));
+    const amountLine=data.privacy?'積立額は非表示':`${compactAmount(current)}円 / ${compactAmount(target)}円${checkpoint?` ・ 第1 ${compactAmount(Math.min(current,checkpoint))}円 / ${compactAmount(checkpoint)}円`:''}`;
     const purpose=clean(goal.purpose,160);
-    return `<section class="money2-goal-card"><header><div><small>今の目標</small><strong>${escapeHtml(goal.name)}</strong></div><span>${pct}%</span></header><div class="money2-progress"><i style="width:${pct}%"></i></div><p>${amountLine}${goal.deadline?` ・ 期限 ${formatMD(goal.deadline)}`:''}</p>${checkpointLine?`<p>${escapeHtml(checkpointLine)}</p>`:''}${purpose?`<p>${escapeHtml(purpose)}</p>`:''}</section>`;
+    return `<section class="money2-goal-card"${purpose?` title="${escapeHtml(purpose)}"`:''}><header><div><small>今の目標</small><strong>${escapeHtml(goal.name)}</strong></div><span>${pct}%</span></header><div class="money2-progress"><i style="width:${pct}%"></i></div><p>${amountLine}${goal.deadline?` ・ 期限 ${formatMD(goal.deadline)}`:''}</p></section>`;
   }
   function renderDataReadiness(plan){
     const ready=plan.daily!==null&&Boolean(plan.nextPayment)&&Boolean(plan.nextIncome)&&plan.afterNextPayment!==null;
