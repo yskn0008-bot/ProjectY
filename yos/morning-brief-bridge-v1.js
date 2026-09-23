@@ -87,7 +87,9 @@
     const name=p.get('shortcut')||'Morning Brief';
     const text=p.get('format')==='brief-text'?briefMoneyText(payload):'YOS_MORNING_BRIDGE_V1:'+encode(payload);
     const url='shortcuts://run-shortcut?name='+encodeURIComponent(name)+'&input=text&text='+encodeURIComponent(text);
-    location.replace(url);
+    // Give the launching Morning Brief enough time to execute its Stop Shortcut
+    // action before Safari starts a second run of the same shortcut.
+    setTimeout(()=>location.replace(url),1200);
   }
 
   window.__yosMorningBriefBridgeV1=Object.freeze({build,encode,briefMoneyText});
