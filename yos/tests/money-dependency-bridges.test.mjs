@@ -55,6 +55,10 @@ test('Payment Alert bridge is read-only and returns only near-term Money payment
   assert.match(payment,/days_until/);
   assert.match(payment,/days_until<=3/);
   assert.match(payment,/YOS_PAYMENT_ALERT_V1/);
+  assert.match(payment,/alertText/);
+  assert.match(payment,/p\.get\('shortcut'\)\|\|'PaymentAlert'/);
+  assert.match(payment,/format.*alert-text/);
+  assert.match(payment,/setTimeout\(\(\)=>location\.replace\(url\),1200\)/);
   assert.doesNotMatch(payment,/localStorage\.setItem|indexedDB|sessionStorage/);
 });
 
