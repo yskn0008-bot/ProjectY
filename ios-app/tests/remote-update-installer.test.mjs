@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
 const source = fs.readFileSync(new URL('../scriptable/remote-widgets/YOS Remote Update Installer.js', import.meta.url), 'utf8');
-const SOURCE_SHA = '319acf06bfaa265b2d9bf8b62de564ebb36ad59e';
+const SOURCE_SHA = '477b02c49d5931eae2f6d75537567cc8a78c2448';
 const TARGETS = [
   'リモコン.js','テレビリモコン.js','エアコンリモコン.js','エアコンウィジェット.js',
   '照明リモコン.js','照明ウィジェット.js','リモコン/内部/Tapo共通.js','リモコン整理.js'
@@ -89,6 +89,25 @@ test('successful update writes Japanese scripts, internal folder, transformed li
   assert.equal(iCloud.fileExists('/icloud/YOS Light Widget.js'),false);
   assert.equal(japaneseBackupDirs(iCloud,'更新前 ').length,1);
   assert.equal(japaneseBackupDirs(iCloud,'英語旧版 ').length,1);
+});
+
+test('post-write live mutation is reconciled before commit',async()=> {
+  const iCloud=makeManager('/icloud'),local=makeManager('/local');
+  put(iCloud,'リモコン.js','OLDJP');
+  let corrupted=false;
+  const globalObj={__YOS_INSTALLER_TEST_HOOKS__:{
+    afterLiveWrite({target}){
+      if(!corrupted&&target==='リモコン.js'){
+        iCloud.writeString('/icloud/リモコン.js','STALE');
+        corrupted=true;
+      }
+    }
+  }};
+  const {opened}=await run(iCloud,local,null,globalObj);
+  assert.equal(corrupted,true);
+  assert.notEqual(iCloud.readString('/icloud/リモコン.js'),'STALE');
+  assert.match(iCloud.readString('/icloud/リモコン.js'),/テレビリモコン/);
+  assert.equal(opened.length,1);
 });
 
 test('synthetic mid-commit failure restores pre-existing Japanese targets and leaves English originals',async()=>{
