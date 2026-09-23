@@ -209,12 +209,15 @@ for actionItem in @actionsRaw {
     if executor == "calendar" {
         const calendarExecutingRecord = text("{CurrentDate}\t{requestNumber}\t{actionId}\tEXECUTING\tcalendar\n")
         appendResolvedFile(ledgerFile, calendarExecutingRecord)
-        const startDate = date("{dateTime}")
-        const endDate = date("{endDateTime}")
+        // Keep model-resolved date/time as a text token all the way into Add New Event.
+        // The standalone Date action with variable input is not reliable on current iOS.
         rawAction("is.workflow.actions.addnewevent", {
             "WFCalendarItemTitle": "{content}",
-            "WFCalendarItemStartDate": "${startDate}",
-            "WFCalendarItemEndDate": "${endDate}",
+            "WFCalendarItemDates": true,
+            "WFCalendarItemStartDate": "{dateTime}",
+            "WFCalendarItemEndDate": "{endDateTime}",
+            "WFCalendarItemAllDay": false,
+            "ShowWhenRun": false,
             "WFCalendarItemNotes": "YOS-CLARITY-ID:{requestNumber}-{actionId}"
         })
         const calendarAppliedRecord = text("{CurrentDate}\t{requestNumber}\t{actionId}\tAPPLIED\tcalendar\tYOS-CLARITY-ID:{requestNumber}-{actionId}\n")
@@ -224,12 +227,13 @@ for actionItem in @actionsRaw {
     if executor == "reminder" {
         const reminderExecutingRecord = text("{CurrentDate}\t{requestNumber}\t{actionId}\tEXECUTING\treminder\n")
         appendResolvedFile(ledgerFile, reminderExecutingRecord)
-        const alertDate = date("{dateTime}")
+        // Reminder date fields are also DateField parameters; preserve the resolved
+        // model string directly instead of passing through the standalone Date action.
         rawAction("is.workflow.actions.addnewreminder", {
             "WFCalendarItemTitle": "{content}",
             "WFCalendarItemAlert": true,
             "WFAlertTrigger": "At Time",
-            "WFAlertCustomTime": "${alertDate}",
+            "WFAlertCustomTime": "{dateTime}",
             "WFCalendarItemNotes": "YOS-CLARITY-ID:{requestNumber}-{actionId}"
         })
         const reminderAppliedRecord = text("{CurrentDate}\t{requestNumber}\t{actionId}\tAPPLIED\treminder\tYOS-CLARITY-ID:{requestNumber}-{actionId}\n")
