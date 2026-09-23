@@ -139,24 +139,14 @@ if @command == "clear" {
 }
 
 if @command == "screenshots" {
-    // Default window: latest screenshots taken in the last 30 minutes, max 20.
-    // No permanent screenshot store is created; Photos remains authoritative.
-    const candidates = getLatestScreenshots(20)
-    const cutoff = adjustDate(CurrentDate, "Subtract", qty(30, "minutes"))
-    @recent = []
-    for shot in candidates {
-        const takenValue = getImageDetail(@shot, "Date Taken")
-        @taken = "{takenValue}"
-        if @taken >= cutoff {
-            @recent += @shot
-        }
-    }
-    const foundCount = count(@recent)
-    @found = "{foundCount}"
+    // Use the latest screenshots from Photos, max 20. Photos remains authoritative.
+    const screenshotCandidates = getLatestScreenshots(20)
+    const screenshotCount = count(screenshotCandidates)
+    @found = "{screenshotCount}"
     if @found == 0 {
         output("YOS_CLIPBOARD_BLOCKED:no_recent_screenshots")
     }
-    const combined = combineImages(@recent, "Vertically", 0)
+    const combined = combineImages(screenshotCandidates, "Vertically", 0)
     setClipboard(combined)
     output("YOS_CLIPBOARD_OK:screenshots:{@found}")
 }
