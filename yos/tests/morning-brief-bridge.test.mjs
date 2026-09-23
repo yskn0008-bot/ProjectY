@@ -26,3 +26,10 @@ test('privacy mode never exposes numeric usable money or payment amount through 
 test('bridge excludes calendar and weather to avoid duplicating existing Morning Brief inputs',()=>{
  assert.doesNotMatch(bridge,/CalendarEvent|weather|UV|schedule/);
 });
+test('Morning Brief can return a plain Money handoff for the existing Shortcut',()=>{
+ assert.match(bridge,/briefMoneyText/);
+ assert.match(bridge,/YOS_MORNING_MONEY_V1/);
+ assert.match(bridge,/format.*brief-text/);
+ assert.match(bridge,/projected_after_next_payment/);
+ assert.match(bridge,/不足見込み/);
+});

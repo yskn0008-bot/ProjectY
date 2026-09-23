@@ -1,0 +1,90 @@
+name: Morning Brief Money shortcut
+
+on:
+  pull_request:
+    paths:
+      - 'yos/morning-brief-bridge-v1.js'
+      - 'yos/morning-brief-bridge.html'
+      - 'yos/tests/morning-brief-bridge.test.mjs'
+      - 'tools/morning-brief/**'
+      - 'tools/clarity-factory/sign_with_hubsign.py'
+      - '.github/workflows/morning-brief-money-shortcut.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-sign:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Test Morning Brief bridge
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check yos/morning-brief-bridge-v1.js
+          node --test yos/tests/morning-brief-bridge.test.mjs
+
+      - name: Validate existing Shortcut patch contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import plistlib
+          from pathlib import Path
+
+          path=Path('tools/morning-brief/Morning Brief Money Connected.plist')
+          workflow=plistlib.loads(path.read_bytes())
+          actions=workflow.get('WFWorkflowActions',[])
+          ids=[a.get('WFWorkflowActionIdentifier','') for a in actions]
+          blob=repr(workflow)
+
+          assert len(actions)==16, len(actions)
+          assert workflow.get('WFWorkflowHasShortcutInputVariables') is True
+          assert ids.count('is.workflow.actions.weather.currentconditions')==1
+          assert ids.count('is.workflow.actions.weather.forecast')==1
+          assert ids.count('is.workflow.actions.filter.calendarevents')==1
+          assert ids.count('is.workflow.actions.filter.reminders')==1
+          assert ids.count('is.workflow.actions.askllm')==1
+          assert ids.count('is.workflow.actions.notification')==1
+          assert ids.count('is.workflow.actions.alert')==1
+          assert ids.count('is.workflow.actions.openurl')==1
+          assert ids.count('is.workflow.actions.exit')==1
+          assert 'YOS_MORNING_MONEY_V1' in blob
+          assert 'morning-brief-bridge.html?return=shortcut&format=brief-text' in blob
+          assert '【お金】' in blob
+          assert '今日使える金額・次の支払い・次の入金・不足見込み' in blob
+          print(f'Morning Brief Money patch: PASS ({len(actions)} actions)')
+          PY
+
+      - name: Sign Morning Brief
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p tools/morning-brief/artifacts
+          python3 tools/clarity-factory/sign_with_hubsign.py             --input 'tools/morning-brief/Morning Brief Money Connected.plist'             --output 'tools/morning-brief/artifacts/Morning Brief.shortcut'             --name 'Morning Brief'             2>&1 | tee tools/morning-brief/artifacts/morning-brief-hubsign.log
+
+      - name: Verify signed artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('tools/morning-brief/artifacts/Morning Brief.shortcut')
+          data=p.read_bytes()
+          assert data.startswith(b'AEA1'), data[:8]
+          assert len(data)>500, len(data)
+          print(f'Morning Brief signed AEA1: PASS ({len(data)} bytes)')
+          PY
+
+      - name: Upload iPhone acceptance package
+        uses: actions/upload-artifact@v4
+        with:
+          name: morning-brief-money-connected
+          path: |
+            tools/morning-brief/artifacts/Morning Brief.shortcut
+            tools/morning-brief/artifacts/morning-brief-hubsign.log
+          if-no-files-found: error

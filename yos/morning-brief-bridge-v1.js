@@ -55,6 +55,27 @@
     };
   }
 
+  function md(value){
+    const v=clean(value,10);if(!/^\\d{4}-\\d{2}-\\d{2}$/.test(v))return v;
+    const [,m,d]=v.split('-').map(Number);return m+'/'+d;
+  }
+  function briefMoneyText(payload){
+    const money=payload?.money||{};
+    const amount=v=>money.privacy?'非表示':moneyText(v);
+    const lines=['YOS_MORNING_MONEY_V1'];
+    lines.push('今日使える金額：'+(clean(money.today_usable_text,40)||'未算出'));
+    if(money.next_payment)lines.push('次の支払い：'+md(money.next_payment.date)+' '+clean(money.next_payment.label,80)+' '+amount(money.next_payment.amount));
+    else lines.push('次の支払い：予定なし');
+    if(money.next_income)lines.push('次の入金：'+md(money.next_income.date)+' '+clean(money.next_income.label,80)+' '+amount(money.next_income.amount));
+    else lines.push('次の入金：予定なし');
+    if(money.privacy)lines.push('支払い後：非表示');
+    else if(Number.isFinite(Number(money.projected_after_next_payment))){
+      const after=Number(money.projected_after_next_payment);
+      lines.push(after<0?'支払い後：'+moneyText(Math.abs(after))+'不足見込み':'支払い後：残高見込み '+moneyText(after));
+    }
+    return lines.join('\\n');
+  }
+
   function encode(value){
     const bytes=new TextEncoder().encode(JSON.stringify(value));
     let binary=''; for(const b of bytes)binary+=String.fromCharCode(b);
@@ -64,11 +85,12 @@
   function returnToShortcut(payload){
     const p=new URLSearchParams(location.search);
     const name=p.get('shortcut')||'Morning Brief';
-    const url='shortcuts://run-shortcut?name='+encodeURIComponent(name)+'&input=text&text='+encodeURIComponent('YOS_MORNING_BRIDGE_V1:'+encode(payload));
+    const text=p.get('format')==='brief-text'?briefMoneyText(payload):'YOS_MORNING_BRIDGE_V1:'+encode(payload);
+    const url='shortcuts://run-shortcut?name='+encodeURIComponent(name)+'&input=text&text='+encodeURIComponent(text);
     location.replace(url);
   }
 
-  window.__yosMorningBriefBridgeV1=Object.freeze({build,encode});
+  window.__yosMorningBriefBridgeV1=Object.freeze({build,encode,briefMoneyText});
   const p=new URLSearchParams(location.search);
   if(p.get('return')==='shortcut')returnToShortcut(build());
 })();
