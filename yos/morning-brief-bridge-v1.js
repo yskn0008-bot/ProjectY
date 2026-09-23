@@ -84,7 +84,7 @@
 
   function returnToShortcut(payload){
     const p=new URLSearchParams(location.search);
-    const name=p.get('shortcut')||'Morning Brief';
+    const name=p.get('shortcut')||'MorningBrief';
     const text=p.get('format')==='brief-text'?briefMoneyText(payload):'YOS_MORNING_BRIDGE_V1:'+encode(payload);
     const url='shortcuts://run-shortcut?name='+encodeURIComponent(name)+'&input=text&text='+encodeURIComponent(text);
     // Give the launching Morning Brief enough time to execute its Stop Shortcut
