@@ -281,7 +281,14 @@
     article.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();open()}});
 
     const head=el('div','money-decision-head');
-    head.append(el('small','cockpit-label','お金'),el('span','money-decision-open','Money ›'));
+    const goalPct=Number.isFinite(Number(money?.goalProgressPercent))?Math.min(100,Math.max(0,Math.round(Number(money.goalProgressPercent)))):null;
+    const goalProgressLabel=money?.goal?`${money.goal}${goalPct===null?'':` ${goalPct}%`} ›`:'Money ›';
+    const goalOpen=el('span','money-decision-open',goalProgressLabel);
+    if(money?.goal&&money.goalCurrent!==null&&money.goalTarget!==null){
+      const checkpoint=money.goalCheckpoint!==null&&money.goalCheckpoint>0?` ・ 第1チェック ${moneyYen(money.goalCheckpoint)}`:'';
+      goalOpen.setAttribute('aria-label',`${money.goal} 進捗 ${moneyYen(money.goalCurrent)} / ${moneyYen(money.goalTarget)}${checkpoint}`);
+    }
+    head.append(el('small','cockpit-label','お金'),goalOpen);
     article.append(head);
 
     const top=el('div','money-decision-top');
@@ -299,18 +306,6 @@
     const payment=el('div');payment.append(el('small','','次の支払い'),el('strong','',money?.nextPaymentText||'予定なし'));
     const income=el('div');income.append(el('small','','次の入金'),el('strong','',money?.nextIncomeText||'未設定'));
     next.append(payment,income);article.append(next);
-
-    if(money?.goal){
-      const goal=el('div','money-decision-goal');
-      const pct=Number.isFinite(Number(money.goalProgressPercent))?Math.min(100,Math.max(0,Math.round(Number(money.goalProgressPercent)))):null;
-      goal.append(el('small','','目標'),el('strong','',pct===null?money.goal:`${money.goal} ${pct}%`));
-      const meta=[];
-      if(money.goalCurrent!==null&&money.goalTarget!==null)meta.push(money.privacy?'積立額は非表示':`${moneyYen(money.goalCurrent)} / ${moneyYen(money.goalTarget)}`);
-      if(money.goalCheckpoint!==null&&money.goalCheckpoint>0)meta.push(money.privacy?'第1チェック 非表示':`第1チェック ${moneyYen(money.goalCheckpoint)}`);
-      if(meta.length)goal.append(el('span','money-decision-goal-meta',meta.join(' ・ ')));
-      if(pct!==null){const bar=el('i','money-decision-goal-bar'),fill=el('b');fill.style.width=`${pct}%`;bar.append(fill);goal.append(bar)}
-      article.append(goal);
-    }
 
     if(Array.isArray(money?.timeline)&&money.timeline.length){
       const timeline=el('div','money-mini-timeline');
