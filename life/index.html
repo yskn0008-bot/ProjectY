@@ -434,7 +434,7 @@ function decodeBase64Url(value){
 function importPayload(payload){
   if(!payload||typeof payload!=='object')throw new Error('同期データが不正です');
   const date=payload.date||today(),d=day(date);
-  if(Array.isArray(payload.events))d.schedule=payload.events.map((e,i)=>({id:e.id||`sync-${Date.now()}-${i}`,title:String(e.title||'予定'),start:e.start,end:e.end,isAllDay:e.isAllDay===true||e.allDay===true,location:String(e.location||''),category:categoryOf(e)})).filter(e=>e.start&&e.end);
+  if(Array.isArray(payload.events)){const seen=new Set();d.schedule=payload.events.map((e,i)=>({id:e.id||`sync-${Date.now()}-${i}`,title:String(e.title||'予定'),start:e.start,end:e.end,isAllDay:e.isAllDay===true||e.allDay===true,location:String(e.location||''),category:categoryOf(e)})).filter(e=>e.start&&e.end).filter(e=>{const key=[e.title,e.start,e.end,e.isAllDay?'1':'0',e.location].join('\u0000');if(seen.has(key))return false;seen.add(key);return true})}
   if(Array.isArray(payload.tasks))d.tasks=payload.tasks.slice(0,3).map(t=>({text:String(t.text||''),done:Boolean(t.done),category:t.category&&COLORS[t.category]?t.category:'personal'}));
   while(d.tasks.length<3)d.tasks.push({text:'',done:false,category:'personal'});
   d.lastSync=new Date().toISOString();localStorage.setItem(KEY,JSON.stringify(data));paint();
