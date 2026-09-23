@@ -12,4 +12,7 @@ required=[
 for x in required:
     assert x in s, x
 assert 'Clarity Inbox' not in s
+assert '#define inputs text' not in s
+assert 'ShortcutInput' not in s
+assert 'prompt("YOS_Clipboard mode:' in s
 print("YOS_Clipboard source contract: PASS")
