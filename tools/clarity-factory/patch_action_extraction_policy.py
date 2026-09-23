@@ -5,6 +5,12 @@ import argparse
 import plistlib
 from pathlib import Path
 
+from shortcut_text_tokens import (
+    assert_required_prompt_bindings,
+    find_prompt_value,
+    replace_preserving_attachments,
+)
+
 MARKER = "Return keys request_id, original_input, context, interpretation, actions, watches, feedback."
 
 EXTRA = (
@@ -24,47 +30,17 @@ EXTRA = (
 )
 
 
-def prompt_string(params: dict) -> tuple[dict, str] | None:
-    text = params.get("WFTextActionText")
-    if not isinstance(text, dict):
-        return None
-    value = text.get("Value")
-    if not isinstance(value, dict):
-        return None
-    string = value.get("string")
-    if not isinstance(string, str):
-        return None
-    return value, string
-
-
 def patch(path: Path) -> None:
     with path.open("rb") as fh:
         root = plistlib.load(fh)
 
-    actions = root.get("WFWorkflowActions")
-    if not isinstance(actions, list):
-        raise SystemExit("WFWorkflowActions missing")
-
-    hits = 0
-    for action in actions:
-        params = action.get("WFWorkflowActionParameters", {})
-        if not isinstance(params, dict):
-            continue
-        found = prompt_string(params)
-        if not found:
-            continue
-        value, string = found
-        if "You are Clarity, the single natural-language gateway" not in string:
-            continue
-        if MARKER not in string:
-            raise SystemExit("Clarity model prompt found but return-contract marker missing")
-        if EXTRA in string:
-            raise SystemExit("action extraction policy already present")
-        value["string"] = string.replace(MARKER, EXTRA + MARKER)
-        hits += 1
-
-    if hits != 1:
-        raise SystemExit(f"expected exactly one Clarity model prompt, found {hits}")
+    value = find_prompt_value(root)
+    string = value.get("string")
+    if not isinstance(string, str):
+        raise SystemExit("Clarity model prompt string missing")
+    if EXTRA in string:
+        raise SystemExit("action extraction policy already present")
+    replace_preserving_attachments(value, MARKER, EXTRA + MARKER)
 
     with path.open("wb") as fh:
         plistlib.dump(root, fh, fmt=plistlib.FMT_XML, sort_keys=False)
@@ -84,6 +60,7 @@ def patch(path: Path) -> None:
     for needle in required:
         if needle not in blob:
             raise SystemExit(f"missing action-extraction policy marker: {needle}")
+    assert_required_prompt_bindings(verify)
     print("Clarity action-extraction policy patch: PASS")
 
 

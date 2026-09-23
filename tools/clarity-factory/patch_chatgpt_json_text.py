@@ -5,20 +5,11 @@ import argparse
 import plistlib
 from pathlib import Path
 
-PROMPT_MARKER = "You are Clarity, the single natural-language gateway"
-
-
-def prompt_string(params: dict) -> tuple[dict, str] | None:
-    text = params.get("WFTextActionText")
-    if not isinstance(text, dict):
-        return None
-    value = text.get("Value")
-    if not isinstance(value, dict):
-        return None
-    string = value.get("string")
-    if not isinstance(string, str):
-        return None
-    return value, string
+from shortcut_text_tokens import (
+    assert_required_prompt_bindings,
+    find_prompt_value,
+    replace_preserving_attachments,
+)
 
 
 def patch(path: Path) -> None:
@@ -30,8 +21,6 @@ def patch(path: Path) -> None:
         raise SystemExit("WFWorkflowActions missing")
 
     llm_hits = 0
-    prompt_hits = 0
-
     for action in actions:
         ident = action.get("WFWorkflowActionIdentifier")
         params = action.get("WFWorkflowActionParameters", {})
@@ -45,28 +34,23 @@ def patch(path: Path) -> None:
             params["WFGenerativeResultType"] = "Text"
             llm_hits += 1
 
-        found = prompt_string(params)
-        if not found:
-            continue
-        value, string = found
-        if PROMPT_MARKER not in string:
-            continue
-        old = "Return only a Dictionary."
-        new = (
-            "Return only valid JSON text with no markdown fence, prose, or commentary. "
-            "The JSON root must be an object and must contain the required keys."
-        )
-        if old in string:
-            string = string.replace(old, new)
-        elif new not in string:
-            raise SystemExit("Clarity prompt found but output-format contract was unexpected")
-        value["string"] = string
-        prompt_hits += 1
-
     if llm_hits != 1:
         raise SystemExit(f"expected one ChatGPT action, found {llm_hits}")
-    if prompt_hits != 1:
-        raise SystemExit(f"expected one Clarity prompt, found {prompt_hits}")
+
+    value = find_prompt_value(root)
+    string = value.get("string")
+    if not isinstance(string, str):
+        raise SystemExit("Clarity prompt string missing")
+
+    old = "Return only a Dictionary."
+    new = (
+        "Return only valid JSON text with no markdown fence, prose, or commentary. "
+        "The JSON root must be an object and must contain the required keys."
+    )
+    if old in string:
+        replace_preserving_attachments(value, old, new)
+    elif new not in string:
+        raise SystemExit("Clarity prompt found but output-format contract was unexpected")
 
     root["WFWorkflowActions"] = actions
     with path.open("wb") as fh:
@@ -84,6 +68,7 @@ def patch(path: Path) -> None:
     if "is.workflow.actions.detect.dictionary" not in blob:
         raise SystemExit("local JSON -> Dictionary parser missing")
 
+    assert_required_prompt_bindings(verify)
     print("Clarity ChatGPT JSON-text patch: PASS")
 
 

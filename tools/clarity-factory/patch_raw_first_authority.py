@@ -5,6 +5,12 @@ import argparse
 import plistlib
 from pathlib import Path
 
+from shortcut_text_tokens import (
+    assert_required_prompt_bindings,
+    find_prompt_value,
+    replace_preserving_attachments,
+)
+
 
 def text_blob(action: dict) -> str:
     try:
@@ -65,29 +71,14 @@ def patch(path: Path) -> None:
         del actions[i]
 
     # Make the contract explicit inside the model prompt as well.
-    prompt_hits = 0
     old = "Preserve original_input exactly. Never claim execution."
     new = (
         "Raw First already preserves the exact original input before this model runs. "
         "Return original_input as faithfully as possible, but it is informational only and must never gate execution. "
         "Never claim execution."
     )
-    for a in actions:
-        p = a.get("WFWorkflowActionParameters", {})
-        v = p.get("WFTextActionText")
-        if not isinstance(v, dict):
-            continue
-        value = v.get("Value")
-        if not isinstance(value, dict):
-            continue
-        s = value.get("string")
-        if isinstance(s, str) and "You are Clarity, the single natural-language gateway" in s:
-            if old not in s:
-                raise SystemExit("Clarity model prompt found but original-input contract was unexpected")
-            value["string"] = s.replace(old, new)
-            prompt_hits += 1
-    if prompt_hits != 1:
-        raise SystemExit(f"expected one Clarity model prompt, found {prompt_hits}")
+    value = find_prompt_value(root)
+    replace_preserving_attachments(value, old, new)
 
     root["WFWorkflowActions"] = actions
     with path.open("wb") as fh:
@@ -102,6 +93,7 @@ def patch(path: Path) -> None:
         raise SystemExit("original_input mismatch user block survived patch")
     if "informational only and must never gate execution" not in blob:
         raise SystemExit("Raw First authority marker missing")
+    assert_required_prompt_bindings(verify)
     print("Clarity Raw First authority patch: PASS")
 
 
