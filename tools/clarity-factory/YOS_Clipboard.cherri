@@ -109,12 +109,12 @@ if @command contains "select|" {
     if @index < 1 {
         output("YOS_CLIPBOARD_BLOCKED:bad_index")
     }
-    const file = getOptionalFile(bufferPath, false)
-    if !file {
+    const selectFile = getOptionalFile(bufferPath, false)
+    if !selectFile {
         output("YOS_CLIPBOARD_BLOCKED:empty_buffer")
     }
-    const lines = splitText("{file}", "\n")
-    const encodedItem = getListItem(lines, @index)
+    const selectLines = splitText("{selectFile}", "\n")
+    const selectEncodedItem = getListItem(selectLines, @index)
     if !selectEncodedItem {
         output("YOS_CLIPBOARD_BLOCKED:index_out_of_range")
     }
