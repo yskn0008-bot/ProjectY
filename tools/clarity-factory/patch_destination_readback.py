@@ -258,6 +258,21 @@ def patch(path: Path) -> None:
         if kind == "calendar":
             params["WFCalendarItemDates"] = True
 
+            # Current iOS Calendar date fields use WFTextTokenString slots.
+            # A bare WFTextTokenAttachment can import while leaving the date
+            # field disconnected at runtime, so normalize both start/end.
+            for key in ("WFCalendarItemStartDate", "WFCalendarItemEndDate"):
+                date_value = params.get(key)
+                if not isinstance(date_value, dict):
+                    raise SystemExit(f"calendar writer missing {key}")
+                if date_value.get("WFSerializationType") == "WFTextTokenAttachment":
+                    ref = date_value.get("Value")
+                    if not isinstance(ref, dict):
+                        raise SystemExit(f"invalid calendar date attachment: {key}")
+                    params[key] = token_string_from_ref(ref)
+                elif date_value.get("WFSerializationType") != "WFTextTokenString":
+                    raise SystemExit(f"unexpected calendar date envelope: {key}")
+
         # Current Reminder custom-time fields are text-token-string slots. A bare
         # WFTextTokenAttachment may import but render/read as disconnected.
         if kind == "reminder":
@@ -411,6 +426,9 @@ def patch(path: Path) -> None:
     ]
     if len(calendars) != 1 or calendars[0].get("WFCalendarItemDates") is not True:
         raise SystemExit("calendar date-enable flag missing")
+    for key in ("WFCalendarItemStartDate", "WFCalendarItemEndDate"):
+        if calendars[0].get(key, {}).get("WFSerializationType") != "WFTextTokenString":
+            raise SystemExit(f"calendar {key} is not a token string")
     timed = [
         action.get("WFWorkflowActionParameters", {})
         for action in final_actions
