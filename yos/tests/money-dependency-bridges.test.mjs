@@ -2,9 +2,11 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 
-const [shared,moneyUi,morning,payment,moneyAlert] = await Promise.all([
+const [shared,moneyUi,moneyMaster,dashboard,morning,payment,moneyAlert] = await Promise.all([
   readFile(new URL('../shared-state-v1.js',import.meta.url),'utf8'),
   readFile(new URL('../money-v2.js',import.meta.url),'utf8'),
+  readFile(new URL('../money-master-v1.js',import.meta.url),'utf8'),
+  readFile(new URL('../task-dashboard.js',import.meta.url),'utf8'),
   readFile(new URL('../morning-brief-bridge-v1.js',import.meta.url),'utf8'),
   readFile(new URL('../payment-alert-bridge-v1.js',import.meta.url),'utf8'),
   readFile(new URL('../money-alert-bridge-v1.js',import.meta.url),'utf8')
@@ -14,6 +16,22 @@ test('Money shared projection exposes dependency facts from yos-money-v2',()=>{
   for(const token of ['upcomingIncomes','nextIncomeText','projectedAfterNextPayment','shortagePossible','shortfall','spentToday','todayBudget']) assert.match(shared,new RegExp(token));
   assert.match(shared,/done','paid','completed','received/);
   assert.match(shared,/!completeStatus\(tx\)/);
+});
+
+test('Emergency fund goal stays in yos-money-v2, separate from liquid balance, and is projected to both UIs',()=>{
+  assert.match(moneyMaster,/name:'生活防衛費'/);
+  assert.match(moneyMaster,/target:600000/);
+  assert.match(moneyMaster,/current:0/);
+  assert.match(moneyMaster,/checkpoint:100000/);
+  assert.match(moneyMaster,/priority:5/);
+  assert.match(moneyMaster,/priorityLabel:'高'/);
+  assert.match(moneyMaster,/purpose:'収入減・急な支払い・入金遅延があっても生活を維持するため'/);
+  const liquid=moneyUi.match(/function currentLiquid\(\)\{([\s\S]*?)\n  \}/)?.[1]||'';
+  assert.match(liquid,/data\.accounts/);
+  assert.doesNotMatch(liquid,/goals|goal/);
+  assert.match(moneyUi,/goal\.checkpoint/);
+  assert.match(shared,/goalProgressPercent/);
+  assert.match(dashboard,/goalProgressLabel/);
 });
 
 test('Money UI reads future data beyond current month and has live verification',()=>{

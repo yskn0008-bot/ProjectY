@@ -82,7 +82,7 @@ try{
   await page.evaluate(()=>localStorage.clear());
   await page.goto(base.replace(/\/$/,'')+'/yos/morning-brief-bridge.html',{waitUntil:'networkidle'});
   const morning=await page.evaluate(()=>window.__yosMorningBriefBridgeV1?.build?.());
-  assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('yos-money-v2'))?.masterFacts?.version),'2026-09-23-v4','Morning Brief bridge must refresh current Money facts without opening MY WAY first');
+  assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('yos-money-v2'))?.masterFacts?.version),'2026-09-23-v5','Morning Brief bridge must refresh current Money facts without opening MY WAY first');
   assert.equal(morning?.source?.money,'yos-money-v2','Morning Brief must read existing Money SSOT');
   assert.equal(morning?.money?.next_payment?.amount,7060,'Morning Brief must read next payment amount');
   assert.equal(morning?.money?.next_income?.date,'2026-10-13','Morning Brief must read next income date');
@@ -93,7 +93,7 @@ try{
   await page.evaluate(()=>localStorage.clear());
   await page.goto(base.replace(/\/$/,'')+'/yos/payment-alert-bridge.html',{waitUntil:'networkidle'});
   const paymentAlert=await page.evaluate(()=>window.__yosPaymentAlertBridgeV1?.build?.());
-  assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('yos-money-v2'))?.masterFacts?.version),'2026-09-23-v4','Payment Alert bridge must refresh current Money facts independently');
+  assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('yos-money-v2'))?.masterFacts?.version),'2026-09-23-v5','Payment Alert bridge must refresh current Money facts independently');
   assert.equal(paymentAlert?.source,'yos-money-v2','Payment Alert must read existing Money SSOT');
   assert.equal(paymentAlert?.payments?.length,1,'Payment Alert must include only payments due within three days');
   assert.equal(paymentAlert?.payments?.[0]?.id,'master-car-insurance-2026-09','Payment Alert must surface car insurance first');
@@ -102,7 +102,7 @@ try{
   await page.evaluate(()=>localStorage.clear());
   await page.goto(base.replace(/\/$/,'')+'/yos/money-alert-bridge.html',{waitUntil:'networkidle'});
   const moneyAlert=await page.evaluate(()=>window.__yosMoneyAlertBridgeV1?.build?.());
-  assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('yos-money-v2'))?.masterFacts?.version),'2026-09-23-v4','Money Alert bridge must refresh current Money facts independently');
+  assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('yos-money-v2'))?.masterFacts?.version),'2026-09-23-v5','Money Alert bridge must refresh current Money facts independently');
   assert.equal(moneyAlert?.source,'yos-money-v2','Money Alert must read existing Money SSOT');
   assert.equal(moneyAlert?.current_balance,4588,'Money Alert must read confirmed current balance');
   assert.equal(moneyAlert?.next_payment?.amount,7060,'Money Alert must read next payment');
