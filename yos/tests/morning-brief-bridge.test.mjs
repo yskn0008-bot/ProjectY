@@ -37,3 +37,7 @@ test('Morning Brief can return a plain Money handoff for the existing Shortcut',
 test('bridge waits for the launching Morning Brief to stop before self-callback',()=>{
  assert.match(bridge,/setTimeout\(\(\)=>location\.replace\(url\),1200\)/);
 });
+
+test('Morning Brief callback defaults to a unique no-space shortcut name',()=>{
+ assert.match(bridge,/p\.get\('shortcut'\)\|\|'MorningBrief'/);
+});
