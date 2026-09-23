@@ -30,6 +30,7 @@ ALLOWED_ACTION_IDS = {
     "is.workflow.actions.getvalueforkey",
     "is.workflow.actions.setvariable",
     "is.workflow.actions.repeat.each",
+    "is.workflow.actions.detect.date",
     "is.workflow.actions.output",
     "is.workflow.actions.addnewevent",
     "is.workflow.actions.properties.calendarevents",
@@ -242,8 +243,9 @@ def validate(path: Path) -> None:
         if modes != [0, 2]:
             raise AssertionError(f"repeat group {group}: malformed {entries}")
 
-    # Dynamic model dates must stay as text tokens until the destination DateField.
-    # The standalone Date action with variable input is deliberately forbidden here.
+    # Dynamic model dates must be normalized through Detect Dates. This matches
+    # known-working current Shortcut exports and avoids the unreliable standalone
+    # Date action + variable-input path.
     date_actions = [
         (i, action)
         for i, action in enumerate(actions)
@@ -252,6 +254,15 @@ def validate(path: Path) -> None:
     if date_actions:
         names = [params(action).get("CustomOutputName") for _, action in date_actions]
         raise AssertionError(f"standalone Date action survived runtime path: {names}")
+    detected_dates = [
+        action
+        for action in actions
+        if action.get("WFWorkflowActionIdentifier") == "is.workflow.actions.detect.date"
+    ]
+    detected_names = {params(action).get("CustomOutputName") for action in detected_dates}
+    for required_name in ("startDate", "endDate", "alertDate"):
+        if required_name not in detected_names:
+            raise AssertionError(f"Detect Dates output missing: {required_name}")
 
     calendar = [
         action
@@ -268,8 +279,8 @@ def validate(path: Path) -> None:
     if cal.get("ShowWhenRun") is not False:
         raise AssertionError("calendar writer must explicitly set ShowWhenRun=false")
     for key, expected_name in (
-        ("WFCalendarItemStartDate", "dateTime"),
-        ("WFCalendarItemEndDate", "endDateTime"),
+        ("WFCalendarItemStartDate", "startDate"),
+        ("WFCalendarItemEndDate", "endDate"),
     ):
         field = cal.get(key)
         if not isinstance(field, dict) or field.get("WFSerializationType") != "WFTextTokenString":
@@ -283,6 +294,30 @@ def validate(path: Path) -> None:
         raise AssertionError("calendar title is not wired to model content")
     if "YOS-CLARITY-ID:" not in repr(cal.get("WFCalendarItemNotes")):
         raise AssertionError("calendar idempotency note missing")
+    calendar_name = cal.get("WFCalendarItemCalendar")
+    if not isinstance(calendar_name, str) or not calendar_name:
+        raise AssertionError("calendar destination parameter is missing")
+
+    calendar_indexes = [
+        i
+        for i, action in enumerate(actions)
+        if action.get("WFWorkflowActionIdentifier") == "is.workflow.actions.addnewevent"
+    ]
+    questions = root.get("WFWorkflowImportQuestions", [])
+    calendar_questions = [
+        q
+        for q in questions
+        if isinstance(q, dict)
+        and q.get("Category") == "Parameter"
+        and q.get("ParameterKey") == "WFCalendarItemCalendar"
+    ]
+    if len(calendar_questions) != 1:
+        raise AssertionError("expected one Calendar destination import question")
+    question = calendar_questions[0]
+    if question.get("ActionIndex") != calendar_indexes[0]:
+        raise AssertionError("Calendar import question ActionIndex is stale")
+    if "カレンダー" not in str(question.get("Text", "")):
+        raise AssertionError("Calendar import question text is missing")
 
     reminders = [
         action
@@ -299,9 +334,9 @@ def validate(path: Path) -> None:
     if (
         not isinstance(timed_field, dict)
         or timed_field.get("WFSerializationType") != "WFTextTokenString"
-        or token_action_output_names(timed_field) != {"dateTime"}
+        or token_action_output_names(timed_field) != {"alertDate"}
     ):
-        raise AssertionError("timed Reminder date must reference dateTime directly")
+        raise AssertionError("timed Reminder date must reference Detect Dates output alertDate")
     for reminder in (timed[0], untimed[0]):
         if token_action_output_names(reminder.get("WFCalendarItemTitle", {})) != {"content"}:
             raise AssertionError("Reminder title is not wired to model content")
@@ -355,7 +390,7 @@ def validate(path: Path) -> None:
     print(
         "Clarity deep action audit: PASS "
         f"actions={len(actions)} identifiers={len(counts)} refs={refs} "
-        f"token_strings={token_strings} prompt_bindings=3 "
+        f"token_strings={token_strings} prompt_bindings=3 calendar_picker=1 "
         f"condition_groups={len(condition_groups)} repeat_groups={len(repeat_groups)}"
     )
 

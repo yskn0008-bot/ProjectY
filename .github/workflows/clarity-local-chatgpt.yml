@@ -81,6 +81,7 @@ jobs:
           python3 patch_chatgpt_json_text.py "$runtime"
           python3 patch_reminder_wire_format.py "$runtime"
           python3 patch_destination_readback.py "$runtime"
+          python3 patch_calendar_import_question.py "$runtime"
           python3 validate_clarity_deep_audit.py "$runtime"
           python3 validate_fixed_child_architecture.py "$runtime" './YOS_OpenApp_unsigned.shortcut'
           mkdir -p artifacts-fixed-child
