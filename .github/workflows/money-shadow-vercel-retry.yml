@@ -2,7 +2,7 @@ name: One-shot Money shadow Vercel retry
 
 on:
   schedule:
-    - cron: '0 16 24 9 *'
+    - cron: '15 20 24 9 *'
   workflow_dispatch:
 
 permissions:
@@ -44,7 +44,7 @@ jobs:
         if: steps.guard.outputs.run == 'true'
         run: |
           token="$(printf 'A%.0s' {1..43})"
-          url="https://project-y-yos-ai.vercel.app/api/yos/money-shadow?mode=money-alert"
+          url="https://project-y-yos-ai.vercel.app/api/yos/widget?mode=money-alert"
           for attempt in $(seq 1 30); do
             code="$(curl --silent --show-error --output /tmp/money-shadow-body --write-out '%{http_code}' --header "X-YOS-Money-Token: $token" "$url" || true)"
             if [ "$code" = "204" ]; then
