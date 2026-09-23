@@ -1,0 +1,525 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>WFWorkflowMinimumClientVersionString</key>
+	<string>900</string>
+	<key>WFWorkflowMinimumClientVersion</key>
+	<integer>900</integer>
+	<key>WFWorkflowIcon</key>
+	<dict>
+		<key>WFWorkflowIconStartColor</key>
+		<integer>2071128575</integer>
+		<key>WFWorkflowIconGlyphNumber</key>
+		<integer>61440</integer>
+	</dict>
+	<key>WFWorkflowClientVersion</key>
+	<string>5037.109</string>
+	<key>WFWorkflowOutputContentItemClasses</key>
+	<array/>
+	<key>WFWorkflowHasOutputFallback</key>
+	<false/>
+	<key>WFWorkflowActions</key>
+	<array>
+		<dict>
+			<key>WFWorkflowActionIdentifier</key>
+			<string>is.workflow.actions.conditional</string>
+			<key>WFWorkflowActionParameters</key>
+			<dict>
+				<key>GroupingIdentifier</key>
+				<string>C3908365-5577-4ECA-A94F-09DD59DB86B0</string>
+				<key>WFControlFlowMode</key>
+				<integer>0</integer>
+				<key>WFCondition</key>
+				<integer>2</integer>
+				<key>WFInput</key>
+				<dict>
+					<key>Type</key>
+					<string>Variable</string>
+					<key>Variable</key>
+					<dict>
+						<key>Value</key>
+						<dict>
+							<key>Type</key>
+							<string>ExtensionInput</string>
+						</dict>
+						<key>WFSerializationType</key>
+						<string>WFTextTokenAttachment</string>
+					</dict>
+				</dict>
+				<key>WFConditionalActionString</key>
+				<string>YOS_MORNING_MONEY_V1</string>
+			</dict>
+		</dict>
+		<dict>
+			<key>WFWorkflowActionIdentifier</key>
+			<string>is.workflow.actions.nothing</string>
+			<key>WFWorkflowActionParameters</key>
+			<dict/>
+		</dict>
+		<dict>
+			<key>WFWorkflowActionIdentifier</key>
+			<string>is.workflow.actions.conditional</string>
+			<key>WFWorkflowActionParameters</key>
+			<dict>
+				<key>GroupingIdentifier</key>
+				<string>C3908365-5577-4ECA-A94F-09DD59DB86B0</string>
+				<key>WFControlFlowMode</key>
+				<integer>1</integer>
+			</dict>
+		</dict>
+		<dict>
+			<key>WFWorkflowActionIdentifier</key>
+			<string>is.workflow.actions.openurl</string>
+			<key>WFWorkflowActionParameters</key>
+			<dict>
+				<key>UUID</key>
+				<string>4DF79FD1-156D-498D-9685-3B42C68E9E1F</string>
+				<key>WFInput</key>
+				<string>https://yskn0008-bot.github.io/ProjectY/yos/morning-brief-bridge.html?return=shortcut&amp;format=brief-text</string>
+			</dict>
+		</dict>
+		<dict>
+			<key>WFWorkflowActionIdentifier</key>
+			<string>is.workflow.actions.exit</string>
+			<key>WFWorkflowActionParameters</key>
+			<dict/>
+		</dict>
+		<dict>
+			<key>WFWorkflowActionIdentifier</key>
+			<string>is.workflow.actions.conditional</string>
+			<key>WFWorkflowActionParameters</key>
+			<dict>
+				<key>GroupingIdentifier</key>
+				<string>C3908365-5577-4ECA-A94F-09DD59DB86B0</string>
+				<key>WFControlFlowMode</key>
+				<integer>2</integer>
+				<key>UUID</key>
+				<string>04577940-6400-4A28-B909-6CD9B93208B8</string>
+			</dict>
+		</dict>
+		<dict>
+			<key>WFWorkflowActionIdentifier</key>
+			<string>is.workflow.actions.weather.currentconditions</string>
+			<key>WFWorkflowActionParameters</key>
+			<dict>
+				<key>UUID</key>
+				<string>2FD41427-DA1C-471B-8923-6DB6C5804F63</string>
+			</dict>
+		</dict>
+		<dict>
+			<key>WFWorkflowActionIdentifier</key>
+			<string>is.workflow.actions.weather.forecast</string>
+			<key>WFWorkflowActionParameters</key>
+			<dict>
+				<key>UUID</key>
+				<string>4751D4C7-0F3A-45C8-AF9E-D5E64D910DCC</string>
+			</dict>
+		</dict>
+		<dict>
+			<key>WFWorkflowActionIdentifier</key>
+			<string>is.workflow.actions.properties.weather.conditions</string>
+			<key>WFWorkflowActionParameters</key>
+			<dict>
+				<key>WFInput</key>
+				<dict>
+					<key>Value</key>
+					<dict>
+						<key>OutputUUID</key>
+						<string>4751D4C7-0F3A-45C8-AF9E-D5E64D910DCC</string>
+						<key>Type</key>
+						<string>ActionOutput</string>
+						<key>OutputName</key>
+						<string>気象状況</string>
+					</dict>
+					<key>WFSerializationType</key>
+					<string>WFTextTokenAttachment</string>
+				</dict>
+				<key>UUID</key>
+				<string>9D3BF0E3-ABA5-4AFD-841E-AD86A325BB0D</string>
+				<key>WFContentItemPropertyName</key>
+				<string>UV Index</string>
+			</dict>
+		</dict>
+		<dict>
+			<key>WFWorkflowActionIdentifier</key>
+			<string>is.workflow.actions.properties.weather.conditions</string>
+			<key>WFWorkflowActionParameters</key>
+			<dict>
+				<key>WFInput</key>
+				<dict>
+					<key>Value</key>
+					<dict>
+						<key>OutputUUID</key>
+						<string>4751D4C7-0F3A-45C8-AF9E-D5E64D910DCC</string>
+						<key>Type</key>
+						<string>ActionOutput</string>
+						<key>OutputName</key>
+						<string>気象状況</string>
+					</dict>
+					<key>WFSerializationType</key>
+					<string>WFTextTokenAttachment</string>
+				</dict>
+				<key>UUID</key>
+				<string>86E9D093-A7A3-45E2-9307-FAD277DD04FC</string>
+				<key>WFContentItemPropertyName</key>
+				<string>Feels Like</string>
+			</dict>
+		</dict>
+		<dict>
+			<key>WFWorkflowActionIdentifier</key>
+			<string>is.workflow.actions.filter.calendarevents</string>
+			<key>WFWorkflowActionParameters</key>
+			<dict>
+				<key>WFContentItemFilter</key>
+				<dict>
+					<key>Value</key>
+					<dict>
+						<key>WFActionParameterFilterPrefix</key>
+						<integer>1</integer>
+						<key>WFContentPredicateBoundedDate</key>
+						<false/>
+						<key>WFActionParameterFilterTemplates</key>
+						<array>
+							<dict>
+								<key>Bounded</key>
+								<true/>
+								<key>Operator</key>
+								<integer>1002</integer>
+								<key>Values</key>
+								<dict>
+									<key>Unit</key>
+									<integer>16</integer>
+									<key>Number</key>
+									<string>7</string>
+								</dict>
+								<key>Removable</key>
+								<false/>
+								<key>Property</key>
+								<string>Start Date</string>
+							</dict>
+						</array>
+					</dict>
+					<key>WFSerializationType</key>
+					<string>WFContentPredicateTableTemplate</string>
+				</dict>
+				<key>WFContentItemInputParameter</key>
+				<string>Library</string>
+				<key>UUID</key>
+				<string>4DDAC4DA-D59D-48F4-BCE5-0089D10D3883</string>
+			</dict>
+		</dict>
+		<dict>
+			<key>WFWorkflowActionIdentifier</key>
+			<string>is.workflow.actions.filter.reminders</string>
+			<key>WFWorkflowActionParameters</key>
+			<dict>
+				<key>WFContentItemLimitEnabled</key>
+				<true/>
+				<key>WFContentItemSortProperty</key>
+				<string>Due Date</string>
+				<key>UUID</key>
+				<string>4F56CA1E-89FC-4ADF-80F4-EDC6DEFCF0CC</string>
+				<key>WFContentItemSortOrder</key>
+				<string>Oldest First</string>
+				<key>WFContentItemFilter</key>
+				<dict>
+					<key>Value</key>
+					<dict>
+						<key>WFActionParameterFilterPrefix</key>
+						<integer>1</integer>
+						<key>WFActionParameterFilterTemplates</key>
+						<array>
+							<dict>
+								<key>Operator</key>
+								<integer>4</integer>
+								<key>Values</key>
+								<dict>
+									<key>Bool</key>
+									<true/>
+									<key>Date</key>
+									<dict>
+										<key>Value</key>
+										<dict>
+											<key>Type</key>
+											<string>CurrentDate</string>
+										</dict>
+										<key>WFSerializationType</key>
+										<string>WFTextTokenAttachment</string>
+									</dict>
+								</dict>
+								<key>Removable</key>
+								<true/>
+								<key>Property</key>
+								<string>Due Date</string>
+							</dict>
+							<dict>
+								<key>Operator</key>
+								<integer>4</integer>
+								<key>Values</key>
+								<dict>
+									<key>Bool</key>
+									<false/>
+								</dict>
+								<key>Removable</key>
+								<true/>
+								<key>Property</key>
+								<string>Is Completed</string>
+							</dict>
+						</array>
+						<key>WFContentPredicateBoundedDate</key>
+						<false/>
+					</dict>
+					<key>WFSerializationType</key>
+					<string>WFContentPredicateTableTemplate</string>
+				</dict>
+			</dict>
+		</dict>
+		<dict>
+			<key>WFWorkflowActionIdentifier</key>
+			<string>is.workflow.actions.gettext</string>
+			<key>WFWorkflowActionParameters</key>
+			<dict>
+				<key>UUID</key>
+				<string>A3A78965-76F3-48F7-93CE-37FA547B6680</string>
+				<key>WFTextActionText</key>
+				<dict>
+					<key>Value</key>
+					<dict>
+						<key>string</key>
+						<string>【天気】
+現在の天気：￼
+今日の予報：￼
+UV指数：￼
+体感温度：￼
+【今日の予定】
+カレンダー：￼
+
+【今日のタスク】
+リマインダー：￼
+
+【お金】
+Money bridge：￼</string>
+						<key>attachmentsByRange</key>
+						<dict>
+							<key>{49, 1}</key>
+							<dict>
+								<key>OutputUUID</key>
+								<string>4DDAC4DA-D59D-48F4-BCE5-0089D10D3883</string>
+								<key>Type</key>
+								<string>ActionOutput</string>
+								<key>OutputName</key>
+								<string>カレンダーの予定</string>
+							</dict>
+							<key>{19, 1}</key>
+							<dict>
+								<key>OutputUUID</key>
+								<string>4751D4C7-0F3A-45C8-AF9E-D5E64D910DCC</string>
+								<key>Type</key>
+								<string>ActionOutput</string>
+								<key>OutputName</key>
+								<string>気象状況</string>
+							</dict>
+							<key>{11, 1}</key>
+							<dict>
+								<key>OutputUUID</key>
+								<string>4751D4C7-0F3A-45C8-AF9E-D5E64D910DCC</string>
+								<key>Type</key>
+								<string>ActionOutput</string>
+								<key>OutputName</key>
+								<string>気象状況</string>
+							</dict>
+							<key>{33, 1}</key>
+							<dict>
+								<key>OutputUUID</key>
+								<string>86E9D093-A7A3-45E2-9307-FAD277DD04FC</string>
+								<key>Type</key>
+								<string>ActionOutput</string>
+								<key>OutputName</key>
+								<string>体感温度</string>
+							</dict>
+							<key>{68, 1}</key>
+							<dict>
+								<key>OutputUUID</key>
+								<string>4F56CA1E-89FC-4ADF-80F4-EDC6DEFCF0CC</string>
+								<key>Type</key>
+								<string>ActionOutput</string>
+								<key>OutputName</key>
+								<string>リマインダー</string>
+							</dict>
+							<key>{26, 1}</key>
+							<dict>
+								<key>OutputUUID</key>
+								<string>9D3BF0E3-ABA5-4AFD-841E-AD86A325BB0D</string>
+								<key>Type</key>
+								<string>ActionOutput</string>
+								<key>OutputName</key>
+								<string>UV指数</string>
+							</dict>
+							<key>{89, 1}</key>
+							<dict>
+								<key>Type</key>
+								<string>ExtensionInput</string>
+							</dict>
+						</dict>
+					</dict>
+					<key>WFSerializationType</key>
+					<string>WFTextTokenString</string>
+				</dict>
+			</dict>
+		</dict>
+		<dict>
+			<key>WFWorkflowActionIdentifier</key>
+			<string>is.workflow.actions.askllm</string>
+			<key>WFWorkflowActionParameters</key>
+			<dict>
+				<key>WFLLMModel</key>
+				<string>ChatGPT</string>
+				<key>UUID</key>
+				<string>E8F7C429-4449-499E-B975-31A787062241</string>
+				<key>WFLLMPrompt</key>
+				<dict>
+					<key>Value</key>
+					<dict>
+						<key>string</key>
+						<string>あなたはYOS Morning Briefです。
+
+今日1日を始めるために必要な情報だけを短く整理してください。
+
+与えられた情報以外を作らないでください。
+情報がない項目は無理に埋めないでください。
+Money bridge行がある場合は、その内容だけをお金の事実として使ってください。YOS_MORNING_MONEY_V1という識別文字は表示しないでください。
+
+優先順位：
+1. 今日の天気・気温・雨
+2. UV
+3. 今日の予定
+4. 今日のタスク
+5. 時間に注意が必要な予定
+6. 今日のお金（今日使える金額・次の支払い・次の入金・不足見込み）
+7. 今日いちばん先にやると良さそうなこと
+
+【今日】
+天気：
+UV：
+
+【予定】
+：
+
+【タスク】
+：
+
+【お金】
+：
+
+【注意】
+：
+
+【YOSから今日の一言】
+：
+
+朝に10〜20秒で読める量にしてください。
+
+本文の先頭に「YOS Morning Brief」などのタイトルは付けないでください。
+
+
+今日の情報：￼</string>
+						<key>attachmentsByRange</key>
+						<dict>
+							<key>{315, 1}</key>
+							<dict>
+								<key>OutputUUID</key>
+								<string>A3A78965-76F3-48F7-93CE-37FA547B6680</string>
+								<key>Type</key>
+								<string>ActionOutput</string>
+								<key>OutputName</key>
+								<string>テキスト</string>
+							</dict>
+						</dict>
+					</dict>
+					<key>WFSerializationType</key>
+					<string>WFTextTokenString</string>
+				</dict>
+			</dict>
+		</dict>
+		<dict>
+			<key>WFWorkflowActionIdentifier</key>
+			<string>is.workflow.actions.notification</string>
+			<key>WFWorkflowActionParameters</key>
+			<dict>
+				<key>UUID</key>
+				<string>9A7F341E-22C2-4717-A216-869A89E7B433</string>
+				<key>WFNotificationActionBody</key>
+				<string></string>
+				<key>WFNotificationActionTitle</key>
+				<string></string>
+			</dict>
+		</dict>
+		<dict>
+			<key>WFWorkflowActionIdentifier</key>
+			<string>is.workflow.actions.alert</string>
+			<key>WFWorkflowActionParameters</key>
+			<dict>
+				<key>WFAlertActionMessage</key>
+				<dict>
+					<key>Value</key>
+					<dict>
+						<key>string</key>
+						<string>￼</string>
+						<key>attachmentsByRange</key>
+						<dict>
+							<key>{0, 1}</key>
+							<dict>
+								<key>OutputUUID</key>
+								<string>E8F7C429-4449-499E-B975-31A787062241</string>
+								<key>Type</key>
+								<string>ActionOutput</string>
+								<key>OutputName</key>
+								<string>応答</string>
+							</dict>
+						</dict>
+					</dict>
+					<key>WFSerializationType</key>
+					<string>WFTextTokenString</string>
+				</dict>
+				<key>WFAlertActionTitle</key>
+				<string>Morning Brief</string>
+				<key>WFAlertActionCancelButtonShown</key>
+				<false/>
+			</dict>
+		</dict>
+	</array>
+	<key>WFWorkflowInputContentItemClasses</key>
+	<array>
+		<string>WFAppContentItem</string>
+		<string>WFAppStoreAppContentItem</string>
+		<string>WFArticleContentItem</string>
+		<string>WFContactContentItem</string>
+		<string>WFDateContentItem</string>
+		<string>WFEmailAddressContentItem</string>
+		<string>WFFolderContentItem</string>
+		<string>WFGenericFileContentItem</string>
+		<string>WFImageContentItem</string>
+		<string>WFiTunesProductContentItem</string>
+		<string>WFLocationContentItem</string>
+		<string>WFDCMapsLinkContentItem</string>
+		<string>WFAVAssetContentItem</string>
+		<string>WFPDFContentItem</string>
+		<string>WFPhoneNumberContentItem</string>
+		<string>WFRichTextContentItem</string>
+		<string>WFSafariWebPageContentItem</string>
+		<string>WFStringContentItem</string>
+		<string>WFURLContentItem</string>
+	</array>
+	<key>WFWorkflowImportQuestions</key>
+	<array/>
+	<key>WFQuickActionSurfaces</key>
+	<array/>
+	<key>WFWorkflowTypes</key>
+	<array>
+		<string>WFWorkflowTypeShowInSearch</string>
+	</array>
+	<key>WFWorkflowHasShortcutInputVariables</key>
+	<true/>
+</dict>
+</plist>
