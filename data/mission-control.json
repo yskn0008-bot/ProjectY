@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-23T09:54:30+09:00",
+  "updated_at": "2026-09-23T14:16:14+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -70,7 +70,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-09-23T00:48:38Z"
+      "updated_at": "2026-09-23T05:15:58Z"
     },
     {
       "id": "github-issue-256",
@@ -165,6 +165,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-32b32cf87306",
+      "title": "Fix Morning Brief callback condition on iPhone (#446)",
+      "completed_at": "2026-09-23T05:16:02Z",
+      "result": "GitHub mainへ反映（32b32cf）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/32b32cf87306caf36e1b7310bb669ede8c442732"
+    },
+    {
       "id": "github-commit-7435637e38f3",
       "title": "fix: install BRAVIA widget with remote package",
       "completed_at": "2026-09-23T00:54:16Z",
@@ -191,13 +198,6 @@
       "completed_at": "2026-09-23T00:45:15Z",
       "result": "GitHub mainへ反映（128fd87）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/128fd877dab4723d00c525e1045e220101f88ad7"
-    },
-    {
-      "id": "github-commit-f9531acd47ee",
-      "title": "fix(life): Calendar重複予定を1件に統合",
-      "completed_at": "2026-09-23T00:37:43Z",
-      "result": "GitHub mainへ反映（f9531ac）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/f9531acd47ee04744b4400ab531952f80bbd6883"
     },
     {
       "id": "complete-002",
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-23T09:54:30+09:00",
+      "last_update": "2026-09-23T14:16:14+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -315,7 +315,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-23T09:54:30+09:00",
+      "last_update": "2026-09-23T14:16:14+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-23T09:54:30+09:00",
+      "last_update": "2026-09-23T14:16:14+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "6d059b44010fed75a3e147f742b9e55350063249e5e7fc8f554ac65a4be32210"
+  "github_snapshot_hash": "6867048ba57f5ecd2795ffafda6b02aa865a5e78ba5cbf933b4ad8bdda4c62b7"
 }
