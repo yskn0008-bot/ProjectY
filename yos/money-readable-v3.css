@@ -90,3 +90,13 @@
   .money-reference-v1 .money2-goal-card small,
   .money-reference-v1 .money-ref-calendar-summary small {font-size:12px !important}
 }
+
+
+/* Compact populated goal card so a real Money goal stays above iPhone bottom navigation. */
+@media(max-width:390px){
+  .money-reference-v1 .money2-goal-card:not(.empty){padding:8px 12px!important}
+  .money-reference-v1 .money2-goal-card:not(.empty) small{font-size:10px!important;line-height:1.2!important}
+  .money-reference-v1 .money2-goal-card:not(.empty) strong{font-size:18px!important;line-height:1.2!important;margin-top:1px!important}
+  .money-reference-v1 .money2-goal-card:not(.empty) .money2-progress{height:5px!important;margin-top:5px!important}
+  .money-reference-v1 .money2-goal-card:not(.empty) p{margin-top:4px!important;font-size:12px!important;line-height:1.3!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+}
