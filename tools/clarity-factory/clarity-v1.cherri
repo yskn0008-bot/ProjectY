@@ -1,4 +1,4 @@
-#define name Clarity Diagnostic
+#define name Clarity
 #define color blue
 
 #include 'actions/text'
