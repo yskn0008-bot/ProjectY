@@ -23,9 +23,6 @@
     },
     "api/yos/public-config.mjs": {
       "maxDuration": 10
-    },
-    "api/yos/money-shadow.mjs": {
-      "maxDuration": 10
     }
   }
 }

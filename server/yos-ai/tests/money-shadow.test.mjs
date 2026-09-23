@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {createMoneyShadowHandler} from '../api/yos/money-shadow.mjs';
+import {createMoneyShadowHandler} from '../lib/money-shadow.mjs';
+import {readFile} from 'node:fs/promises';
 
 const ORIGIN='https://yskn0008-bot.github.io';
 const TOKEN='A'.repeat(43);
@@ -117,4 +118,11 @@ test('unknown Money values stay unknown instead of becoming zero',async()=>{
   assert.equal(saved.balance,null);
   assert.equal(saved.today_usable,null);
   assert.equal(saved.next_payment.amount,null);
+});
+
+test('Money shadow reuses the existing widget Serverless Function slot',async()=>{
+  const source=await readFile(new URL('../api/yos/widget.mjs',import.meta.url),'utf8');
+  assert.match(source,/createMoneyShadowHandler/);
+  assert.match(source,/mode==='money-shadow'\|\|mode==='money-alert'/);
+  assert.doesNotMatch(source,/api\/yos\/money-shadow/);
 });

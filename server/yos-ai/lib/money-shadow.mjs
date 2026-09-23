@@ -199,5 +199,3 @@ export function createMoneyShadowHandler({environment=process.env,fetchImpl=fetc
   };
 }
 
-const handler=createMoneyShadowHandler();
-export default {fetch(request){return handler(request)}};
