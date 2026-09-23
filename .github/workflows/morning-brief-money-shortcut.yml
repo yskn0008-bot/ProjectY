@@ -44,6 +44,12 @@ jobs:
 
           assert len(actions)==16, len(actions)
           assert workflow.get('WFWorkflowHasShortcutInputVariables') is True
+          first=actions[0].get('WFWorkflowActionParameters',{})
+          assert first.get('WFCondition') == 8, first
+          assert first.get('WFConditionalActionString') == 'YOS_MORNING_MONEY_V1', first
+          value=first.get('WFInput',{}).get('Variable',{}).get('Value',{})
+          assert value.get('Type') == 'ExtensionInput', value
+          assert value.get('VariableName') == 'ShortcutInput', value
           assert ids.count('is.workflow.actions.weather.currentconditions')==1
           assert ids.count('is.workflow.actions.weather.forecast')==1
           assert ids.count('is.workflow.actions.filter.calendarevents')==1
