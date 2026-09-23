@@ -66,5 +66,8 @@ test('Money Alert bridge is read-only and emits only Money anomalies',()=>{
   assert.match(moneyAlert,/shortagePossible===true/);
   assert.match(moneyAlert,/spent>budget/);
   assert.match(moneyAlert,/YOS_MONEY_ALERT_V1/);
+  assert.match(moneyAlert,/alertText/);
+  assert.match(moneyAlert,/format.*alert-text/);
+  assert.match(moneyAlert,/setTimeout\(\(\)=>location\.replace\(url\),1200\)/);
   assert.doesNotMatch(moneyAlert,/localStorage\.setItem|indexedDB|sessionStorage/);
 });
