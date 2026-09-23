@@ -3,11 +3,12 @@
 // New Japanese scripts are staged and verified before legacy English scripts are archived.
 // Existing Keychain/settings are untouched. Any commit failure restores the previous Japanese targets.
 
-const SOURCE_SHA = '319acf06bfaa265b2d9bf8b62de564ebb36ad59e';
+const SOURCE_SHA = '622d733f8634b30d32c3657fdcbf2ae704299607';
 const BASE = 'https://raw.githubusercontent.com/yskn0008-bot/ProjectY/' + SOURCE_SHA + '/ios-app/scriptable/remote-widgets/';
 const PACKAGE = [
   { source: 'YOS Remote Hub.js', target: 'リモコン.js' },
   { source: 'YOS BRAVIA Remote.js', target: 'テレビリモコン.js' },
+  { source: 'YOS BRAVIA Widget.js', target: 'テレビウィジェット.js' },
   { source: 'YOS AC Remote.js', target: 'エアコンリモコン.js' },
   { source: 'YOS AC Widget.js', target: 'エアコンウィジェット.js' },
   { source: 'YOS Light Remote.js', target: '照明リモコン.js' },
@@ -24,6 +25,7 @@ const LEGACY_ROOT = [
   'YOS Remote Update Installer.js',
   'YOS Remote Script Organizer.js',
   'YOS BRAVIA Remote.js',
+  'YOS BRAVIA Widget.js',
   'YOS AC Remote.js',
   'YOS AC Widget.js',
   'YOS Light Remote.js',
@@ -33,6 +35,7 @@ const LEGACY_ROOT = [
 const NAME_REPLACEMENTS = [
   ['YOS Remote Hub', 'リモコン'],
   ['YOS BRAVIA Remote', 'テレビリモコン'],
+  ['YOS BRAVIA Widget', 'テレビウィジェット'],
   ['YOS AC Remote', 'エアコンリモコン'],
   ['YOS AC Widget', 'エアコンウィジェット'],
   ['YOS Light Remote', '照明リモコン'],
