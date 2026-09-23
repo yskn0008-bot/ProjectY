@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-24T04:07:00+09:00",
+  "updated_at": "2026-09-24T04:16:43+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -20,7 +20,7 @@
       "priority": 1,
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/433",
-      "updated_at": "2026-09-23T19:01:47Z"
+      "updated_at": "2026-09-23T19:16:16Z"
     },
     {
       "id": "github-pr-436",
@@ -70,7 +70,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-09-23T19:05:56Z"
+      "updated_at": "2026-09-23T19:16:28Z"
     },
     {
       "id": "github-issue-256",
@@ -165,6 +165,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-7222b1c8ca64",
+      "title": "Fix one-shot Money Alert production retry (#463)",
+      "completed_at": "2026-09-23T19:16:28Z",
+      "result": "GitHub mainへ反映（7222b1c）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/7222b1c8ca64b1b4053a1b681f5d6e6d196aad16"
+    },
+    {
       "id": "github-commit-bd4cf0e24cb7",
       "title": "Schedule one safe Money Alert production retry",
       "completed_at": "2026-09-23T19:06:11Z",
@@ -191,13 +198,6 @@
       "completed_at": "2026-09-23T15:45:05Z",
       "result": "GitHub mainへ反映（a795da5）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/a795da5e6aff2fbfa534c8f9eae07bc5bad5677d"
-    },
-    {
-      "id": "github-commit-0d2a34b52b53",
-      "title": "Schedule one-shot Money shadow deployment retry (#457)",
-      "completed_at": "2026-09-23T15:42:59Z",
-      "result": "GitHub mainへ反映（0d2a34b）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/0d2a34b52b53e699aca36170ecf217a78951a778"
     },
     {
       "id": "complete-002",
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-24T04:07:00+09:00",
+      "last_update": "2026-09-24T04:16:43+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -315,7 +315,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-24T04:07:00+09:00",
+      "last_update": "2026-09-24T04:16:43+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-24T04:07:00+09:00",
+      "last_update": "2026-09-24T04:16:43+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "5ccea4dc0a1ede76524734dddc8d9dc2b0a0c6eb63c371edeb1d532831662212"
+  "github_snapshot_hash": "afed396fd447df277b2957307bfc19e5a82c6237e70f4c268db0834d891bf9c4"
 }
