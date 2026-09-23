@@ -1,0 +1,85 @@
+name: Money Alert one-time Vercel retry
+
+on:
+  schedule:
+    - cron: '20 21 23 9 *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: money-alert-one-time-vercel-retry
+  cancel-in-progress: false
+
+jobs:
+  retry:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Date guard
+        id: guard
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if [[ "$(date -u +%Y-%m-%dT%H)" == "2026-09-23T21" ]]; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "run=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Check current production route
+        if: steps.guard.outputs.run == 'true'
+        id: probe
+        shell: bash
+        run: |
+          set -euo pipefail
+          code="$(curl -sS -o /tmp/money-probe.txt -w '%{http_code}'             -X POST             'https://project-y-yos-ai.vercel.app/api/yos/widget?mode=money-shadow' || true)"
+          echo "status=$code" >> "$GITHUB_OUTPUT"
+          if [[ "$code" == "401" ]]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@v4
+        if: steps.guard.outputs.run == 'true' && steps.probe.outputs.ready != 'true'
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Trigger one safe redeploy
+        if: steps.guard.outputs.run == 'true' && steps.probe.outputs.ready != 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git pull --rebase origin main
+          printf '%s\n' '2026-09-23T21:20Z silent Money Alert production retry' > .github/money-alert-redeploy-trigger.txt
+          git add .github/money-alert-redeploy-trigger.txt
+          if git diff --cached --quiet; then
+            echo "Redeploy marker already present; no duplicate commit."
+            exit 0
+          fi
+          git commit -m "chore: retry Money Alert production deploy"
+          git push origin HEAD:main
+
+      - name: Verify production after retry
+        if: steps.guard.outputs.run == 'true' && steps.probe.outputs.ready != 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          for attempt in {1..12}; do
+            sleep 15
+            code="$(curl -sS -o /tmp/money-probe.txt -w '%{http_code}'               -X POST               'https://project-y-yos-ai.vercel.app/api/yos/widget?mode=money-shadow' || true)"
+            echo "attempt=$attempt status=$code"
+            if [[ "$code" == "401" ]]; then
+              echo "Silent Money Alert transport is live."
+              exit 0
+            fi
+          done
+          echo "::warning::Vercel production route is not live yet; no additional commits will be created by this run."
