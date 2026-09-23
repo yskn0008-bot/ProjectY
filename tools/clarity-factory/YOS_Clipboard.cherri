@@ -78,20 +78,20 @@ if @command == "next" {
 }
 
 if @command == "merge" {
-    const file = getOptionalFile(bufferPath, false)
-    if !file {
+    const mergeFile = getOptionalFile(bufferPath, false)
+    if !mergeFile {
         output("YOS_CLIPBOARD_BLOCKED:empty_buffer")
     }
     const lines = splitText("{file}", "\n")
     @merged = ""
     @seen = 0
-    for encodedItem in lines {
-        if encodedItem {
-            const decodedItem = base64Decode(encodedItem)
+    for mergeEncodedItem in mergeLines {
+        if mergeEncodedItem {
+            const mergeDecodedItem = base64Decode(mergeEncodedItem)
             if @seen > 0 {
                 @merged += "\n"
             }
-            @merged += "{decodedItem}"
+            @merged += "{mergeDecodedItem}"
             @seen += 1
         }
     }
@@ -115,20 +115,20 @@ if @command contains "select|" {
     }
     const lines = splitText("{file}", "\n")
     const encodedItem = getListItem(lines, @index)
-    if !encodedItem {
+    if !selectEncodedItem {
         output("YOS_CLIPBOARD_BLOCKED:index_out_of_range")
     }
-    const decodedItem = base64Decode(encodedItem)
-    setClipboard(decodedItem)
+    const selectDecodedItem = base64Decode(selectEncodedItem)
+    setClipboard(selectDecodedItem)
     output("YOS_CLIPBOARD_OK:select:{@index}")
 }
 
 if @command == "duplicate" {
-    const clip = getClipboard()
-    if !clip {
+    const duplicateClip = getClipboard()
+    if !duplicateClip {
         output("YOS_CLIPBOARD_BLOCKED:empty_clipboard")
     }
-    setClipboard(clip)
+    setClipboard(duplicateClip)
     output("YOS_CLIPBOARD_OK:duplicate")
 }
 
