@@ -122,15 +122,17 @@ def validate(path: Path) -> None:
     if open_app_indexes:
         raise AssertionError(f"parent Clarity must not embed app launch actions; found {len(open_app_indexes)}")
     child_runs = find_indexes(actions, "runworkflow")
-    if len(child_runs) != 2:
-        raise AssertionError(f"expected Safari fast-path + normal fixed-child Run Shortcut actions, found {len(child_runs)}")
+    if len(child_runs) != 3:
+        raise AssertionError(f"expected Safari/brightness fast-path + normal fixed-child Run Shortcut actions, found {len(child_runs)}")
     if not any(i < model_i for i in child_runs):
         raise AssertionError("Safari fast-path child dispatch must occur before the model call")
     if not any(i > model_i for i in child_runs):
         raise AssertionError("normal fixed-child dispatch must remain after model/policy")
-    for i in child_runs:
-        if "YOS_OpenApp" not in serialized_params(actions[i]):
-            raise AssertionError("Run Shortcut is not fixed to YOS_OpenApp")
+    run_params = [serialized_params(actions[i]) for i in child_runs]
+    if sum("YOS_OpenApp" in p for p in run_params) != 2:
+        raise AssertionError("expected two fixed YOS_OpenApp child runs")
+    if sum("YOS_Device" in p for p in run_params) != 1:
+        raise AssertionError("expected one fixed YOS_Device child run")
 
     # MY WAY remains a terminal URL handoff.
     handoff_indexes = find_indexes(actions, "openurl")

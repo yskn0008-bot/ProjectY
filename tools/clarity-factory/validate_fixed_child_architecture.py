@@ -11,18 +11,31 @@ def load(path: Path) -> dict:
         raise AssertionError(f"{path}: WFWorkflowActions missing")
     return root
 
-def validate(parent: Path, child: Path) -> None:
+def validate(parent: Path, child: Path, device: Path) -> None:
     p=load(parent)
     c=load(child)
+    d=load(device)
     pa=p["WFWorkflowActions"]
     ca=c["WFWorkflowActions"]
     pids=[str(a.get("WFWorkflowActionIdentifier","")) for a in pa]
     cids=[str(a.get("WFWorkflowActionIdentifier","")) for a in ca]
+    da=d["WFWorkflowActions"]
+    dids=[str(a.get("WFWorkflowActionIdentifier","")) for a in da]
     runs=[a for a in pa if str(a.get("WFWorkflowActionIdentifier","")).endswith("runworkflow")]
-    if len(runs)!=2:
-        raise AssertionError(f"parent must contain Safari fast-path + normal Run Shortcut actions, got {len(runs)}")
-    if any("YOS_OpenApp" not in repr(r.get("WFWorkflowActionParameters",{})) for r in runs):
-        raise AssertionError("parent Run Shortcut is not fixed to YOS_OpenApp")
+    run_blobs=[repr(r.get("WFWorkflowActionParameters",{})) for r in runs]
+    if len(runs)!=3 or sum("YOS_OpenApp" in x for x in run_blobs)!=2 or sum("YOS_Device" in x for x in run_blobs)!=1:
+        raise AssertionError(f"parent fixed-child routes invalid: {run_blobs}")
+    model_i=next(i for i,a in enumerate(pa) if str(a.get("WFWorkflowActionIdentifier","")).endswith("askllm"))
+    pre_model_brightness=[i for i,a in enumerate(pa) if i < model_i and str(a.get("WFWorkflowActionIdentifier","")).endswith("setbrightness")]
+    if pre_model_brightness:
+        raise AssertionError("brightness fast path must not execute in parent")
+    if sum(i.endswith("setbrightness") for i in dids)!=1:
+        raise AssertionError("YOS_Device must own exactly one brightness action")
+    dblob=repr(d)
+    if "YOS_DEVICE_OK:brightness=" not in dblob or "YOS_DEVICE_BLOCKED:" not in dblob:
+        raise AssertionError("YOS_Device contract missing")
+    if "brightness|50" in dblob:
+        raise AssertionError("YOS_Device must parse brightness|<percent>; hardcoded brightness|50 remains")
     if any(i.endswith("openapp") for i in pids):
         raise AssertionError("parent still embeds Open App actions")
     if any(i.endswith("downloadurl") for i in pids):
@@ -36,11 +49,16 @@ def validate(parent: Path, child: Path) -> None:
     if "child_returned" not in pblob:
         raise AssertionError("parent child-return verification marker missing")
     run_indexes = [i for i,a in enumerate(pa) if str(a.get("WFWorkflowActionIdentifier","")).endswith("runworkflow")]
-    fast_applied_index = next((i for i,a in enumerate(pa) if "fast_path" in repr(a)), -1)
+    fast_applied_index = next((i for i,a in enumerate(pa) if "YOS_OpenApp" in repr(a) and "child_returned" in repr(a) and "fast_path" in repr(a)), -1)
+    device_applied_index = next((i for i,a in enumerate(pa) if "YOS_Device" in repr(a) and "child_returned" in repr(a) and "fast_path" in repr(a)), -1)
     normal_applied_index = next((i for i,a in reversed(list(enumerate(pa))) if "child_returned" in repr(a) and "fast_path" not in repr(a)), -1)
     if fast_applied_index <= run_indexes[0]:
-        raise AssertionError("fast path can claim APPLIED before YOS_OpenApp returns")
-    if normal_applied_index <= run_indexes[-1]:
+        raise AssertionError("Safari fast path can claim APPLIED before YOS_OpenApp returns")
+    device_run_index = next(i for i,a in enumerate(pa) if a.get("WFWorkflowActionIdentifier","").endswith("runworkflow") and "YOS_Device" in repr(a.get("WFWorkflowActionParameters",{})))
+    if device_applied_index <= device_run_index:
+        raise AssertionError("brightness fast path can claim APPLIED before YOS_Device returns")
+    normal_open_run_index = max(i for i,a in enumerate(pa) if a.get("WFWorkflowActionIdentifier","").endswith("runworkflow") and "YOS_OpenApp" in repr(a.get("WFWorkflowActionParameters",{})))
+    if normal_applied_index <= normal_open_run_index:
         raise AssertionError("normal path can claim APPLIED before YOS_OpenApp returns")
     opens=[i for i in cids if i.endswith("openapp")]
     if len(opens) < 20:
@@ -58,5 +76,6 @@ if __name__ == "__main__":
     ap=argparse.ArgumentParser()
     ap.add_argument("parent", type=Path)
     ap.add_argument("child", type=Path)
+    ap.add_argument("device", type=Path)
     a=ap.parse_args()
-    validate(a.parent,a.child)
+    validate(a.parent,a.child,a.device)
