@@ -53,6 +53,7 @@ ALLOWED_ACTION_IDS = {
 }
 
 RANGE_RE = re.compile(r"^\{(\d+),\s*(\d+)\}$")
+SHA_RE = re.compile(r"^[0-9a-f]{40}$")
 
 
 def params(action: dict) -> dict:
@@ -117,7 +118,10 @@ def token_action_output_names(value: object) -> set[str]:
     return names
 
 
-def validate(path: Path) -> None:
+def validate(path: Path, expected_build_id: str) -> None:
+    expected_build_id = expected_build_id.strip().lower()
+    if not SHA_RE.fullmatch(expected_build_id):
+        raise AssertionError(f"expected BUILD_ID is not a Git SHA: {expected_build_id!r}")
     with path.open("rb") as fh:
         root = plistlib.load(fh)
     actions = root.get("WFWorkflowActions")
@@ -178,6 +182,80 @@ def validate(path: Path) -> None:
             validate_token_string(node, where)
 
     walk(root, visit)
+
+    # Artifact Identity Gate: the final plist must carry exactly the Git commit
+    # that CI says it built, and BOOT must bind that BUILD_ID to request_id.
+    build_actions = [
+        action
+        for action in actions
+        if params(action).get("CustomOutputName") == "buildId"
+    ]
+    if len(build_actions) != 1:
+        raise AssertionError(f"expected one buildId action, found {len(build_actions)}")
+    build_value = params(build_actions[0]).get("WFTextActionText")
+    if isinstance(build_value, str):
+        actual_build_id = build_value
+    elif (
+        isinstance(build_value, dict)
+        and build_value.get("WFSerializationType") == "WFTextTokenString"
+        and isinstance(build_value.get("Value"), dict)
+    ):
+        actual_build_id = build_value["Value"].get("string")
+    else:
+        raise AssertionError("buildId payload has an unexpected shape")
+    if actual_build_id != expected_build_id:
+        raise AssertionError(
+            f"BUILD_ID mismatch: artifact={actual_build_id!r} expected={expected_build_id!r}"
+        )
+    if not isinstance(actual_build_id, str) or not SHA_RE.fullmatch(actual_build_id):
+        raise AssertionError(f"invalid BUILD_ID: {actual_build_id!r}")
+
+    boot_actions = [
+        action
+        for action in actions
+        if params(action).get("CustomOutputName") == "bootRecord"
+    ]
+    if len(boot_actions) != 1:
+        raise AssertionError(f"expected one bootRecord action, found {len(boot_actions)}")
+    boot_value = params(boot_actions[0]).get("WFTextActionText")
+    if not isinstance(boot_value, dict) or boot_value.get("WFSerializationType") != "WFTextTokenString":
+        raise AssertionError("bootRecord is not a WFTextTokenString")
+    boot_text = boot_value.get("Value", {}).get("string", "")
+    boot_refs = token_action_output_names(boot_value)
+    if "BOOT" not in boot_text:
+        raise AssertionError("BOOT marker missing from bootRecord")
+    if not {"buildId", "requestNumber"}.issubset(boot_refs):
+        raise AssertionError(f"BOOT record missing identity refs: {sorted(boot_refs)}")
+
+    decision_actions = [
+        action
+        for action in actions
+        if params(action).get("CustomOutputName") == "modelDecisionRecord"
+    ]
+    if len(decision_actions) != 1:
+        raise AssertionError(
+            f"expected one modelDecisionRecord action, found {len(decision_actions)}"
+        )
+    decision_value = params(decision_actions[0]).get("WFTextActionText")
+    if not isinstance(decision_value, dict) or decision_value.get("WFSerializationType") != "WFTextTokenString":
+        raise AssertionError("modelDecisionRecord is not a WFTextTokenString")
+    decision_text = decision_value.get("Value", {}).get("string", "")
+    decision_refs = token_action_output_names(decision_value)
+    if "MODEL_DECISION" not in decision_text or "needs_review=" not in decision_text:
+        raise AssertionError("MODEL_DECISION diagnostic marker missing")
+    for required in (
+        "requestNumber",
+        "actionId",
+        "executor",
+        "dateTime",
+        "endDateTime",
+        "needsReview",
+        "originalInput",
+    ):
+        if required not in decision_refs:
+            raise AssertionError(
+                f"MODEL_DECISION missing reference {required}: {sorted(decision_refs)}"
+            )
 
     # Semantic guard for the three model-prompt bindings that originally failed on-device.
     prompt_actions = [
@@ -381,7 +459,7 @@ def validate(path: Path) -> None:
     print(
         "Clarity deep action audit: PASS "
         f"actions={len(actions)} identifiers={len(counts)} refs={refs} "
-        f"token_strings={token_strings} prompt_bindings=3 calendar_destination=プライベート "
+        f"token_strings={token_strings} build_id={actual_build_id} prompt_bindings=3 model_decision_trace=1 calendar_destination=プライベート "
         f"condition_groups={len(condition_groups)} repeat_groups={len(repeat_groups)}"
     )
 
@@ -389,5 +467,6 @@ def validate(path: Path) -> None:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("shortcut", type=Path)
+    parser.add_argument("expected_build_id")
     args = parser.parse_args()
-    validate(args.shortcut)
+    validate(args.shortcut, args.expected_build_id)

@@ -47,6 +47,8 @@ jobs:
           cherri clarity-v1.cherri --skip-sign --debug
           runtime='./Clarity_unsigned.shortcut'
           test -f "$runtime"
+          BUILD_ID='${{ github.event.pull_request.head.sha || github.sha }}'
+          python3 patch_build_identity.py "$runtime" "$BUILD_ID"
           python3 validate_clarity_runtime.py "$runtime"
           python3 patch_natural_language_policy.py "$runtime"
           python3 patch_raw_first_authority.py "$runtime"
@@ -54,6 +56,7 @@ jobs:
           python3 patch_append_file_paths.py "$runtime"
           python3 patch_direct_openai_fallback.py "$runtime"
           mkdir -p artifacts-direct
+          printf '%s\n' "$BUILD_ID" > artifacts-direct/BUILD_ID.txt
           cp "$runtime" artifacts-direct/Clarity-direct-openai-unsigned.shortcut
 
       - name: Inspect direct API artifact
@@ -119,6 +122,7 @@ jobs:
         with:
           name: clarity-direct-openai-fallback
           path: |
+            tools/clarity-factory/artifacts-direct/BUILD_ID.txt
             tools/clarity-factory/artifacts-direct/Clarity-direct-openai-unsigned.shortcut
             tools/clarity-factory/artifacts-direct/Clarity-direct-openai-signed.shortcut
             tools/clarity-factory/artifacts-direct/hubsign.log

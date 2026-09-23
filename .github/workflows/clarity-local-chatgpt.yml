@@ -73,6 +73,8 @@ jobs:
           cherri clarity-v1.cherri --skip-sign --debug
           runtime='./Clarity_unsigned.shortcut'
           test -f "$runtime"
+          BUILD_ID='${{ github.event.pull_request.head.sha || github.sha }}'
+          python3 patch_build_identity.py "$runtime" "$BUILD_ID"
           python3 validate_clarity_runtime.py "$runtime"
           python3 patch_natural_language_policy.py "$runtime"
           python3 patch_raw_first_authority.py "$runtime"
@@ -81,9 +83,10 @@ jobs:
           python3 patch_chatgpt_json_text.py "$runtime"
           python3 patch_reminder_wire_format.py "$runtime"
           python3 patch_destination_readback.py "$runtime"
-          python3 validate_clarity_deep_audit.py "$runtime"
+          python3 validate_clarity_deep_audit.py "$runtime" "$BUILD_ID"
           python3 validate_fixed_child_architecture.py "$runtime" './YOS_OpenApp_unsigned.shortcut'
           mkdir -p artifacts-fixed-child
+          printf '%s\n' "$BUILD_ID" > artifacts-fixed-child/BUILD_ID.txt
           cp "$runtime" artifacts-fixed-child/Clarity-unsigned.shortcut
 
       - name: Inspect parent/child isolation
@@ -163,6 +166,7 @@ jobs:
         with:
           name: clarity-fixed-child-openapp
           path: |
+            tools/clarity-factory/artifacts-fixed-child/BUILD_ID.txt
             tools/clarity-factory/artifacts-fixed-child/Clarity-unsigned.shortcut
             tools/clarity-factory/artifacts-fixed-child/Clarity-signed.shortcut
             tools/clarity-factory/artifacts-fixed-child/YOS_OpenApp-unsigned.shortcut
