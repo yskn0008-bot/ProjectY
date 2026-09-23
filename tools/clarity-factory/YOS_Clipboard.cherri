@@ -1,6 +1,5 @@
 #define name YOS_Clipboard
 #define color blue
-#define inputs text
 
 #include 'actions/calendar'
 #include 'actions/crypto'
@@ -20,7 +19,7 @@ const cursorOne = text("1")
 const emptyText = text("")
 createFolder("YOS Clipboard")
 
-const requestedCommand = prompt("YOS_Clipboard mode: add / next / merge / select|N / duplicate / clear / screenshots")
+const requestedCommand = prompt("YOS_Clipboard mode: add / next / merge / select|N / duplicate / clear / screenshots", "Text", "")
 @command = "{requestedCommand}"
 
 if @command == "add" {
