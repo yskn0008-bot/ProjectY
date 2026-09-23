@@ -355,8 +355,8 @@ def validate(path: Path) -> None:
     print(
         "Clarity deep action audit: PASS "
         f"actions={len(actions)} identifiers={len(counts)} refs={refs} "
-        f"token_strings={token_strings} condition_groups={len(condition_groups)} "
-        f"repeat_groups={len(repeat_groups)}"
+        f"token_strings={token_strings} prompt_bindings=3 "
+        f"condition_groups={len(condition_groups)} repeat_groups={len(repeat_groups)}"
     )
 
 
