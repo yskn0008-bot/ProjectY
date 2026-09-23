@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-24T00:45:18+09:00",
+  "updated_at": "2026-09-24T03:49:46+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -33,14 +33,14 @@
       "updated_at": "2026-09-23T00:31:55Z"
     },
     {
-      "id": "github-pr-455",
-      "title": "PR #455 Diagnostic Clarity runtime/model calendar fields",
+      "id": "github-pr-459",
+      "title": "PR #459 Remove Safari from Money Alert runtime",
       "type": "GitHub PR",
       "status": "review",
       "priority": 1,
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/455",
-      "updated_at": "2026-09-23T15:15:55Z"
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/459",
+      "updated_at": "2026-09-23T18:30:00Z"
     },
     {
       "id": "github-pr-426",
@@ -70,7 +70,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-09-23T15:45:04Z"
+      "updated_at": "2026-09-23T18:48:31Z"
     },
     {
       "id": "github-issue-256",
@@ -165,6 +165,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-1d33c1b5dd69",
+      "title": "Fix Clarity Calendar date wire format",
+      "completed_at": "2026-09-23T18:49:32Z",
+      "result": "GitHub mainへ反映（1d33c1b）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/1d33c1b5dd69931bf89bb0a4b65c8d4fa64a1f40"
+    },
+    {
       "id": "github-commit-a795da5e6aff",
       "title": "Verify Money shadow after deploy retry (#458)",
       "completed_at": "2026-09-23T15:45:05Z",
@@ -193,13 +200,6 @@
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/76e3f75334c1ad159d8b154168151b0cbff4c701"
     },
     {
-      "id": "github-commit-be09a37b97ef",
-      "title": "Keep Money Alert inside Shortcuts web view (#453)",
-      "completed_at": "2026-09-23T14:34:05Z",
-      "result": "GitHub mainへ反映（be09a37）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/be09a37b97efaa7d2fdbb56c9995e540f3f63a01"
-    },
-    {
       "id": "complete-002",
       "title": "iPhone向けMission Control Dashboardを実装",
       "completed_at": "2026-07-17T17:55:00+09:00",
@@ -224,7 +224,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #455をレビューして公開判断する",
+      "next_action": "PR #459をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-24T00:45:18+09:00",
+      "last_update": "2026-09-24T03:49:46+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -315,7 +315,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-24T00:45:18+09:00",
+      "last_update": "2026-09-24T03:49:46+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -329,7 +329,7 @@
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #455をレビューして公開判断する",
+      "next_action": "PR #459をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-24T00:45:18+09:00",
+      "last_update": "2026-09-24T03:49:46+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "4b3a4eefbbea98b1122d864438f57bf94ce2137fe9868352d56d42f3b050ce57"
+  "github_snapshot_hash": "562bd92531ecbfecf27c7d2795f6dcea2c1d1b007eb7cee196b300ee1d810e47"
 }
