@@ -86,8 +86,8 @@ if @command == "merge" {
     @merged = ""
     @seen = 0
     for mergeEncodedItem in mergeLines {
-        if mergeEncodedItem {
-            const mergeDecodedItem = base64Decode(mergeEncodedItem)
+        if @mergeEncodedItem {
+            const mergeDecodedItem = base64Decode(@mergeEncodedItem)
             if @seen > 0 {
                 @merged += "\n"
             }
@@ -145,10 +145,10 @@ if @command == "screenshots" {
     const cutoff = adjustDate(CurrentDate, "Subtract", qty(30, "minutes"))
     @recent = []
     for shot in candidates {
-        const takenValue = getImageDetail(shot, "Date Taken")
+        const takenValue = getImageDetail(@shot, "Date Taken")
         @taken = "{takenValue}"
         if @taken >= cutoff {
-            @recent += shot
+            @recent += @shot
         }
     }
     const foundCount = count(@recent)
