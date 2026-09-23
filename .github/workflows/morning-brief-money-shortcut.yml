@@ -1,0 +1,32 @@
+name: Morning Brief Money Shortcut Build
+on:
+  push:
+    branches: [oel/morning-brief-money-shortcut-20260923]
+    paths: ['tools/morning-brief-money/**', '.github/workflows/morning-brief-money-shortcut.yml']
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - name: Rebuild patched plist
+        run: python tools/morning-brief-money/rebuild.py
+      - name: Sign with HubSign
+        run: python tools/clarity-factory/sign_with_hubsign.py --input 'build/Morning Brief Money Connected.plist' --output 'build/Morning Brief Money Connected.shortcut' --name 'Morning Brief'
+      - name: Verify signed envelope
+        run: python - <<'PY'
+          from pathlib import Path
+          p=Path('build/Morning Brief Money Connected.shortcut')
+          b=p.read_bytes()
+          assert b.startswith(b'AEA1'), b[:16]
+          assert len(b)>1000, len(b)
+          print('PASS',len(b))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: morning-brief-money-connected
+          path: build/Morning Brief Money Connected.shortcut
