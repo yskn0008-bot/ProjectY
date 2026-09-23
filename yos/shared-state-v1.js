@@ -75,6 +75,9 @@
     const spentToday=transactions.filter(tx=>outgoing(tx)&&String(tx?.date||'')===dateKey()&&completeStatus(tx)).reduce((sum,tx)=>sum+(number(tx?.amount)||0),0);
     const goals=Array.isArray(data?.goals)?data.goals:[];
     const goal=[...goals].sort((a,b)=>(Number(b?.priority)||0)-(Number(a?.priority)||0))[0]||null;
+    const goalCurrent=number(goal?.current),goalTarget=number(goal?.target),goalCheckpoint=number(goal?.checkpoint);
+    const goalProgressPercent=goalTarget!==null&&goalTarget>0?Math.min(100,Math.max(0,Math.round((goalCurrent||0)/goalTarget*100))):null;
+    const goalCheckpointProgressPercent=goalCheckpoint!==null&&goalCheckpoint>0?Math.min(100,Math.max(0,Math.round((goalCurrent||0)/goalCheckpoint*100))):null;
     const hasData=Boolean(data)&&(
       accounts.length>0||transactions.length>0||goals.length>0||balance!==null
     );
@@ -105,6 +108,13 @@
       shortfall,
       goal,
       goalText:clean(goal?.name||goal?.label,100)||clean(legacy?.goal,100),
+      goalCurrent,
+      goalTarget,
+      goalCheckpoint,
+      goalProgressPercent,
+      goalCheckpointProgressPercent,
+      goalPurpose:clean(goal?.purpose,160),
+      goalPriorityLabel:clean(goal?.priorityLabel,20),
       updatedAt:clean(data?.updatedAt,40)
     };
   }
