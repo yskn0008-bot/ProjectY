@@ -56,10 +56,10 @@ if @command == "next" {
     if @cursor > @total {
         @cursor = 1
     }
-    const encodedItem = getListItem(lines, @cursor)
+    const encodedItem = getListItem(@lines, @cursor)
     if !encodedItem {
         @cursor = 1
-        const firstEncoded = getListItem(lines, 1)
+        const firstEncoded = getListItem(@lines, 1)
         const firstDecoded = base64Decode(firstEncoded)
         setClipboard(firstDecoded)
         const cursorTwo = text("2")
