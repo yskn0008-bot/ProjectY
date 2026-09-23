@@ -3,7 +3,7 @@ s=Path("tools/clarity-factory/YOS_Clipboard.cherri").read_text()
 required=[
 '#define name YOS_Clipboard',
 'getClipboard()','setClipboard(','base64Encode(','base64Decode(',
-'getLatestScreenshots(20)','combineImages(screenshotCandidates, "Vertically", 0)',
+'YOS_CLIPBOARD_BLOCKED:screenshots_not_verified',
 'if @command == "add"','if @command == "next"','if @command == "merge"',
 'if @command contains "select|"','if @command == "duplicate"',
 'if @command == "clear"','if @command == "screenshots"',
