@@ -27,13 +27,13 @@ action 'file.append' appendResolvedFile(
 // Never use the Shortcut filename as runtime identity.
 const buildId = text("__CLARITY_BUILD_ID__")
 const requestNumber = randomNumber(100000, 999999)
-const ledgerFile = getFile("Clarity Ledger.txt")
-const bootRecord = text("{CurrentDate}\tBOOT\t{buildId}\t{requestNumber}\n")
-appendResolvedFile(ledgerFile, bootRecord)
 const originalInput = listen("After Pause", "jp-JP")
 const rawRecord = text("{CurrentDate}\t{requestNumber}\tRAW\t{originalInput}\n")
 const inboxFile = getFile("Clarity Inbox.txt")
 appendResolvedFile(inboxFile, rawRecord)
+const ledgerFile = getFile("Clarity Ledger.txt")
+const bootRecord = text("{CurrentDate}\tBOOT\t{buildId}\t{requestNumber}\n")
+appendResolvedFile(ledgerFile, bootRecord)
 
 // Zero-network fast path for the first acceptance command.
 // Raw First is already persisted above. This stays fail-closed and delegates execution
