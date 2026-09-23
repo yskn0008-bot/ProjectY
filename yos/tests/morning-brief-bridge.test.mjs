@@ -33,3 +33,7 @@ test('Morning Brief can return a plain Money handoff for the existing Shortcut',
  assert.match(bridge,/projected_after_next_payment/);
  assert.match(bridge,/不足見込み/);
 });
+
+test('bridge waits for the launching Morning Brief to stop before self-callback',()=>{
+ assert.match(bridge,/setTimeout\(\(\)=>location\.replace\(url\),1200\)/);
+});
