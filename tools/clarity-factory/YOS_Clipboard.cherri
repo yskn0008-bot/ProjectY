@@ -23,17 +23,19 @@ const requestedCommand = prompt("YOS_Clipboard mode: add / next / merge / select
 @command = "{requestedCommand}"
 
 if @command == "add" {
-    const rawClip = getClipboard()
-    const clip = text("{rawClip}")
+    const clip = getClipboard()
     if !clip {
         output("YOS_CLIPBOARD_BLOCKED:empty_clipboard")
     }
     const encoded = base64Encode(clip)
-    @record = "{encoded}\n"
+    @record = "{encoded}"
     @buffer = ""
     @existing = getOptionalFile(bufferPath, false)
     if @existing {
         @buffer = "{@existing}"
+        if @buffer {
+            @buffer += "\n"
+        }
     }
     @buffer += @record
     saveFile(bufferPath, @buffer, true)
@@ -46,8 +48,14 @@ if @command == "next" {
     if !file {
         output("YOS_CLIPBOARD_BLOCKED:empty_buffer")
     }
-    const lines = splitText("{file}", "\n")
-    const totalCount = count(lines)
+    const rawLines = splitText("{file}", "\n")
+    @lines = []
+    for nextLine in rawLines {
+        if @nextLine {
+            @lines += @nextLine
+        }
+    }
+    const totalCount = count(@lines)
     @total = "{totalCount}"
     @cursor = 1
     const cursorFile = getOptionalFile(cursorPath, false)
@@ -57,10 +65,10 @@ if @command == "next" {
     if @cursor > @total {
         @cursor = 1
     }
-    const encodedItem = getListItem(lines, @cursor)
+    const encodedItem = getListItem(@lines, @cursor)
     if !encodedItem {
         @cursor = 1
-        const firstEncoded = getListItem(lines, 1)
+        const firstEncoded = getListItem(@lines, 1)
         const firstDecoded = base64Decode(firstEncoded)
         setClipboard(firstDecoded)
         const cursorTwo = text("2")
@@ -122,8 +130,7 @@ if @command contains "select|" {
 }
 
 if @command == "duplicate" {
-    const rawDuplicateClip = getClipboard()
-    const duplicateClip = text("{rawDuplicateClip}")
+    const duplicateClip = getClipboard()
     if !duplicateClip {
         output("YOS_CLIPBOARD_BLOCKED:empty_clipboard")
     }
