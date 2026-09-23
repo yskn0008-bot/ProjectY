@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-23T09:50:04+09:00",
+  "updated_at": "2026-09-23T09:54:15+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -165,6 +165,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-622d733f8634",
+      "title": "fix: add BRAVIA home-screen widget",
+      "completed_at": "2026-09-23T00:54:03Z",
+      "result": "GitHub mainへ反映（622d733）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/622d733f8634b30d32c3657fdcbf2ae704299607"
+    },
+    {
       "id": "github-commit-860946d213d4",
       "title": "Connect existing Morning Brief to live Money (#445)",
       "completed_at": "2026-09-23T00:49:53Z",
@@ -191,13 +198,6 @@
       "completed_at": "2026-09-22T23:56:27Z",
       "result": "GitHub mainへ反映（85759c7）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/85759c7c0e19846facf4cb293354722c7c5676c6"
-    },
-    {
-      "id": "github-commit-3ec216d4ee3c",
-      "title": "Money bridges self-refresh current facts",
-      "completed_at": "2026-09-22T23:53:19Z",
-      "result": "GitHub mainへ反映（3ec216d）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/3ec216d4ee3ccae255d0b8715647ad129fe1f5ae"
     },
     {
       "id": "complete-002",
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-23T09:50:04+09:00",
+      "last_update": "2026-09-23T09:54:15+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -315,7 +315,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-23T09:50:04+09:00",
+      "last_update": "2026-09-23T09:54:15+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-23T09:50:04+09:00",
+      "last_update": "2026-09-23T09:54:15+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "6f216144e21c44e018b4c31a78a0ef0b9b1f9930f8b02232dc7039e6dc0728db"
+  "github_snapshot_hash": "7c742ee46af34d48ef63921b31a9359b4de8599785c3e64ff6da18c8b35cba01"
 }
