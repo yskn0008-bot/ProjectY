@@ -4,7 +4,7 @@ const SHADOW_TTL=35*24*60*60;
 const MAX_BODY_BYTES=16384;
 
 const clean=(value,max=120)=>typeof value==='string'?value.trim().slice(0,max):'';
-const finite=value=>Number.isFinite(Number(value))?Number(value):null;
+const finite=value=>value===null||value===undefined||String(value).trim()===''?null:(Number.isFinite(Number(value))?Number(value):null);
 const bool=value=>value===true;
 
 function jsonHeaders(origin=''){
