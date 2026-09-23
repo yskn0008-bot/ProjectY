@@ -215,7 +215,7 @@ for actionItem in @actionsRaw {
         const endDate = getDates(endDateTime)
         rawAction("is.workflow.actions.addnewevent", {
             "WFCalendarItemTitle": "{content}",
-            "WFCalendarItemCalendar": "Calendar",
+            "WFCalendarItemCalendar": "プライベート",
             "WFCalendarItemDates": true,
             "WFCalendarItemStartDate": "${startDate}",
             "WFCalendarItemEndDate": "${endDate}",

@@ -295,29 +295,20 @@ def validate(path: Path) -> None:
     if "YOS-CLARITY-ID:" not in repr(cal.get("WFCalendarItemNotes")):
         raise AssertionError("calendar idempotency note missing")
     calendar_name = cal.get("WFCalendarItemCalendar")
-    if not isinstance(calendar_name, str) or not calendar_name:
-        raise AssertionError("calendar destination parameter is missing")
+    if calendar_name != "プライベート":
+        raise AssertionError(
+            f"calendar destination must be confirmed iCloud プライベート, got {calendar_name!r}"
+        )
 
-    calendar_indexes = [
-        i
-        for i, action in enumerate(actions)
-        if action.get("WFWorkflowActionIdentifier") == "is.workflow.actions.addnewevent"
-    ]
     questions = root.get("WFWorkflowImportQuestions", [])
     calendar_questions = [
         q
         for q in questions
         if isinstance(q, dict)
-        and q.get("Category") == "Parameter"
         and q.get("ParameterKey") == "WFCalendarItemCalendar"
     ]
-    if len(calendar_questions) != 1:
-        raise AssertionError("expected one Calendar destination import question")
-    question = calendar_questions[0]
-    if question.get("ActionIndex") != calendar_indexes[0]:
-        raise AssertionError("Calendar import question ActionIndex is stale")
-    if "カレンダー" not in str(question.get("Text", "")):
-        raise AssertionError("Calendar import question text is missing")
+    if calendar_questions:
+        raise AssertionError("stale Calendar import question survived fixed destination build")
 
     reminders = [
         action
@@ -390,7 +381,7 @@ def validate(path: Path) -> None:
     print(
         "Clarity deep action audit: PASS "
         f"actions={len(actions)} identifiers={len(counts)} refs={refs} "
-        f"token_strings={token_strings} prompt_bindings=3 calendar_picker=1 "
+        f"token_strings={token_strings} prompt_bindings=3 calendar_destination=プライベート "
         f"condition_groups={len(condition_groups)} repeat_groups={len(repeat_groups)}"
     )
 
