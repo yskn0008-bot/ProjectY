@@ -1,7 +1,7 @@
 'use strict';
 (()=>{
   const KEY='yos-money-v2';
-  const MASTER_VERSION='2026-09-23-v4';
+  const MASTER_VERSION='2026-09-23-v5';
   const SOURCE='user-confirmed-2026-09-23';
   const read=()=>{try{return JSON.parse(localStorage.getItem(KEY)||'null')}catch{return null}};
   const current=read();
@@ -16,6 +16,24 @@
   const migrate=base?.masterFacts?.version!==MASTER_VERSION;
   if(migrate){
     const stamp=new Date().toISOString();
+    const emergencyGoalFact={
+      id:'master-goal-emergency-fund',
+      name:'生活防衛費',
+      type:'emergency',
+      target:600000,
+      current:0,
+      checkpoint:100000,
+      priority:5,
+      priorityLabel:'高',
+      purpose:'収入減・急な支払い・入金遅延があっても生活を維持するため',
+      source:SOURCE
+    };
+    const emergencyGoalIndex=base.goals.findIndex(goal=>goal?.id===emergencyGoalFact.id||String(goal?.name||'').trim()===emergencyGoalFact.name);
+    const priorEmergencyGoal=emergencyGoalIndex>=0?base.goals[emergencyGoalIndex]:null;
+    const emergencyCurrent=priorEmergencyGoal&&Number.isFinite(Number(priorEmergencyGoal.current))?Math.max(0,Number(priorEmergencyGoal.current)):0;
+    const emergencyGoal={...priorEmergencyGoal,...emergencyGoalFact,current:emergencyCurrent,updatedAt:stamp};
+    if(emergencyGoalIndex<0)base.goals.push(emergencyGoal);else base.goals[emergencyGoalIndex]=emergencyGoal;
+
     const accountFacts=[
       {id:'master-account-paypay',name:'PayPay',type:'emoney',balance:4033,source:SOURCE},
       {id:'master-account-paypay-bank',name:'PayPay銀行',type:'bank',balance:133,source:SOURCE},
