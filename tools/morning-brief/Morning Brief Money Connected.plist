@@ -31,7 +31,7 @@
 				<key>WFControlFlowMode</key>
 				<integer>0</integer>
 				<key>WFCondition</key>
-				<integer>2</integer>
+				<integer>8</integer>
 				<key>WFInput</key>
 				<dict>
 					<key>Type</key>
@@ -40,6 +40,8 @@
 					<dict>
 						<key>Value</key>
 						<dict>
+							<key>VariableName</key>
+							<string>ShortcutInput</string>
 							<key>Type</key>
 							<string>ExtensionInput</string>
 						</dict>
