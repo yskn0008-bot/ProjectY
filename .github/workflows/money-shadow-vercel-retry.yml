@@ -40,3 +40,19 @@ jobs:
           git add -A
           git commit -m "chore: retry Money shadow Vercel deployment"
           git push origin HEAD:main
+      - name: Verify Money shadow route and storage
+        if: steps.guard.outputs.run == 'true'
+        run: |
+          token="$(printf 'A%.0s' {1..43})"
+          url="https://project-y-yos-ai.vercel.app/api/yos/money-shadow?mode=money-alert"
+          for attempt in $(seq 1 30); do
+            code="$(curl --silent --show-error --output /tmp/money-shadow-body --write-out '%{http_code}' --header "X-YOS-Money-Token: $token" "$url" || true)"
+            if [ "$code" = "204" ]; then
+              echo "Money shadow route and Upstash storage are ready." >> "$GITHUB_STEP_SUMMARY"
+              exit 0
+            fi
+            sleep 20
+          done
+          echo "Money shadow production verification failed." >> "$GITHUB_STEP_SUMMARY"
+          cat /tmp/money-shadow-body || true
+          exit 1
