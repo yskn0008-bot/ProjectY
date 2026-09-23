@@ -62,12 +62,18 @@ test('Payment Alert bridge is read-only and returns only near-term Money payment
   assert.doesNotMatch(payment,/localStorage\.setItem|indexedDB|sessionStorage/);
 });
 
-test('Money Alert bridge is read-only and emits only Money anomalies',()=>{
+test('Money Alert bridge emits only Money anomalies and deduplicates delivery without mutating Money SSOT',()=>{
   assert.match(moneyAlert,/shortagePossible===true/);
   assert.match(moneyAlert,/spent>budget/);
   assert.match(moneyAlert,/YOS_MONEY_ALERT_V1/);
   assert.match(moneyAlert,/alertText/);
   assert.match(moneyAlert,/format.*alert-text/);
-  assert.match(moneyAlert,/setTimeout\(\(\)=>location\.replace\(url\),1200\)/);
-  assert.doesNotMatch(moneyAlert,/localStorage\.setItem|indexedDB|sessionStorage/);
+  assert.match(moneyAlert,/DELIVERY_KEY='yos-money-alert-delivery-v1'/);
+  assert.match(moneyAlert,/DIRECT_MIGRATION_KEY='yos-money-alert-direct-v1'/);
+  assert.match(moneyAlert,/deliveryDecision/);
+  assert.match(moneyAlert,/renderDirect/);
+  assert.match(moneyAlert,/params\.get\('format'\)==='alert-text'.*renderDirect/s);
+  assert.match(moneyAlert,/setTimeout\(\(\)=>location\.replace\('\.\/'\),700\)/);
+  assert.doesNotMatch(moneyAlert,/localStorage\.setItem\([^\n]*yos-money-v2/);
+  assert.doesNotMatch(moneyAlert,/indexedDB|sessionStorage/);
 });
