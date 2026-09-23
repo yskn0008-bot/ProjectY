@@ -23,7 +23,8 @@ const requestedCommand = prompt("YOS_Clipboard mode: add / next / merge / select
 @command = "{requestedCommand}"
 
 if @command == "add" {
-    const clip = getClipboard()
+    const rawClip = getClipboard()
+    const clip = text("{rawClip}")
     if !clip {
         output("YOS_CLIPBOARD_BLOCKED:empty_clipboard")
     }
@@ -121,7 +122,8 @@ if @command contains "select|" {
 }
 
 if @command == "duplicate" {
-    const duplicateClip = getClipboard()
+    const rawDuplicateClip = getClipboard()
+    const duplicateClip = text("{rawDuplicateClip}")
     if !duplicateClip {
         output("YOS_CLIPBOARD_BLOCKED:empty_clipboard")
     }
