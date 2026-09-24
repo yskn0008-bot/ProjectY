@@ -1,99 +1,120 @@
-/* YOS DESK readable iPhone typography v1
-   Readability now takes priority over one-screen compression.
+/* YOS DESK readable iPhone typography v2
+   Small-text boost: secondary labels are intentionally larger.
    The page remains independently scrollable above the fixed bottom navigation. */
 
 html{-webkit-text-size-adjust:100%}
-body{font-size:16px}
+body{font-size:17px}
 
 /* Header */
-.brand small{font-size:12px}
-.brand strong{font-size:28px;line-height:1.1}
-.miniBtn{font-size:14px;min-height:44px}
+.brand small{font-size:13px}
+.brand strong{font-size:29px;line-height:1.1}
+.miniBtn{font-size:16px;min-height:46px}
 
 /* DESK hero */
-#deskPage .topbar{margin-bottom:13px;min-height:48px}
-#deskPage .heroMain{padding:16px}
-#deskPage .heroSide{padding:13px}
-#deskPage .eyebrow{font-size:13px;line-height:1.35}
-#deskPage .heroTitle{font-size:23px;line-height:1.15}
-#deskPage .heroSub{margin-top:8px;font-size:15px;line-height:1.5}
-#deskPage .next{margin-top:12px;padding-top:10px;font-size:14px;line-height:1.45}
-#deskPage .heroSide .big{font-size:30px}
-#deskPage .heroSide .label{font-size:13px;line-height:1.45}
+#deskPage .topbar{margin-bottom:13px;min-height:50px}
+#deskPage .heroMain{padding:17px}
+#deskPage .heroSide{padding:14px}
+#deskPage .eyebrow{font-size:15px;line-height:1.4}
+#deskPage .heroTitle{font-size:25px;line-height:1.15}
+#deskPage .heroSub{margin-top:9px;font-size:17px;line-height:1.55}
+#deskPage .next{margin-top:13px;padding-top:11px;font-size:16px;line-height:1.5}
+#deskPage .heroSide .big{font-size:32px}
+#deskPage .heroSide .label{font-size:15px;line-height:1.5}
 
 /* Section labels */
-.section{margin-top:16px}
-.sectionHead{padding-bottom:8px}
-.sectionHead strong{font-size:17px}
-.sectionHead span{font-size:13px;line-height:1.3}
+.section{margin-top:17px}
+.sectionHead{padding-bottom:9px}
+.sectionHead strong{font-size:19px}
+.sectionHead span{font-size:15px;line-height:1.4}
 
 /* Quick entries */
 #deskPage .quick{gap:7px}
-#deskPage .quickBtn{height:66px;padding:7px 3px;gap:5px}
-#deskPage .quickIcon{width:31px;height:31px;border-radius:10px;font-size:13px}
-#deskPage .quickBtn span:last-child{font-size:12px}
+#deskPage .quickBtn{height:72px;padding:8px 3px;gap:6px}
+#deskPage .quickIcon{width:33px;height:33px;border-radius:11px;font-size:14px}
+#deskPage .quickBtn span:last-child{font-size:14px}
 
 /* Development rows */
-#deskPage .devList{gap:8px}
-#deskPage .dev{padding:11px 10px;border-radius:16px;grid-template-columns:30px 1fr auto}
-#deskPage .num{font-size:13px}
-#deskPage .devName{font-size:16px;line-height:1.25}
-#deskPage .devNext{font-size:13px;line-height:1.4;margin-top:4px}
-#deskPage .devStatus{font-size:12px}
-#deskPage .devPct{font-size:15px}
-#deskPage .grip{font-size:10px}
+#deskPage .devList{gap:9px}
+#deskPage .dev{padding:12px 11px;border-radius:17px;grid-template-columns:31px 1fr auto}
+#deskPage .num{font-size:14px}
+#deskPage .devName{font-size:18px;line-height:1.3}
+#deskPage .devNext{
+  font-size:15px;
+  line-height:1.45;
+  margin-top:5px;
+  white-space:normal;
+  display:-webkit-box;
+  -webkit-box-orient:vertical;
+  -webkit-line-clamp:2;
+  overflow:hidden;
+}
+#deskPage .devStatus{font-size:14px;line-height:1.3}
+#deskPage .devPct{font-size:17px}
+#deskPage .grip{font-size:12px}
 
 /* Suggestions */
-#deskPage .suggestions{gap:8px}
-#deskPage .suggest{min-height:104px;padding:12px;border-radius:17px}
-#deskPage .suggest small{font-size:12px}
-#deskPage .suggest b{margin-top:6px;font-size:16px;line-height:1.3}
-#deskPage .suggest p{margin-top:6px;font-size:13px;line-height:1.45}
+#deskPage .suggestions{gap:9px}
+#deskPage .suggest{min-height:118px;padding:13px;border-radius:18px}
+#deskPage .suggest small{font-size:14px}
+#deskPage .suggest b{margin-top:7px;font-size:18px;line-height:1.35}
+#deskPage .suggest p{margin-top:7px;font-size:15px;line-height:1.5}
 
 /* Progress */
 #deskPage .stats{gap:8px}
-#deskPage .stat{padding:10px;border-radius:15px}
-#deskPage .stat b{font-size:16px}
-#deskPage .stat span{font-size:12px;line-height:1.35}
+#deskPage .stat{padding:11px;border-radius:15px}
+#deskPage .stat b{font-size:18px}
+#deskPage .stat span{font-size:14px;line-height:1.4}
 
 /* Composer */
-#deskPage .composer{margin-top:12px;grid-template-columns:1fr 64px;gap:8px}
-#deskPage .composer input{height:48px;font-size:16px}
-#deskPage .send{font-size:14px}
+#deskPage .composer{margin-top:13px;grid-template-columns:1fr 66px;gap:8px}
+#deskPage .composer input{height:50px;font-size:17px}
+#deskPage .send{font-size:16px}
 
 /* CHATS */
-.search{height:56px}
-.search input{font-size:17px}
+.search{height:58px}
+.search span{font-size:20px}
+.search input{font-size:18px}
 .tabs{gap:8px}
-.tab{height:44px;font-size:15px}
-.projectPill{padding:9px 13px;font-size:13px}
-.chatList{gap:9px}
-.chat{min-height:72px;padding:11px 11px;grid-template-columns:46px minmax(0,1fr) 46px}
-.avatar{width:46px;height:46px;font-size:16px}
-.chatName{font-size:16px;line-height:1.25}
-.tag{font-size:10px;padding:3px 6px}
-.preview{font-size:13px;line-height:1.4;margin-top:5px}
-.time{font-size:12px}
-.badge{min-width:24px;height:24px;font-size:12px}
-.empty{font-size:14px}
+.tab{height:48px;font-size:17px}
+.projectPill{padding:10px 14px;font-size:15px}
+.chatList{gap:10px}
+.chat{min-height:80px;padding:12px 11px;grid-template-columns:48px minmax(0,1fr) 48px}
+.avatar{width:48px;height:48px;font-size:18px}
+.chatName{font-size:18px;line-height:1.3}
+.tag{font-size:12px;padding:3px 7px}
+.preview{
+  font-size:15px;
+  line-height:1.45;
+  margin-top:6px;
+  white-space:normal;
+  display:-webkit-box;
+  -webkit-box-orient:vertical;
+  -webkit-line-clamp:2;
+  overflow:hidden;
+}
+.time{font-size:14px}
+.badge{min-width:26px;height:26px;font-size:13px}
+.empty{font-size:16px}
 
 /* Bottom navigation */
-.nav{font-size:12px}
-.nav b{font-size:21px}
-.bulk button{font-size:14px}
+.bottom{height:72px}
+.nav{font-size:14px}
+.nav b{font-size:24px}
+.bulk{height:72px}
+.bulk button{font-size:16px}
 
 /* Sheets / dialogs */
-.sheet h3{font-size:20px}
-.sheet p{font-size:14px;line-height:1.55}
-.sheet input,.sheet textarea{font-size:16px}
-.sheet input{height:48px}
-.sheet button{height:48px;font-size:15px}
-.toast{font-size:13px}
+.sheet h3{font-size:22px}
+.sheet p{font-size:16px;line-height:1.6}
+.sheet input,.sheet textarea{font-size:17px}
+.sheet input{height:50px}
+.sheet button{height:50px;font-size:17px}
+.toast{font-size:15px}
 
-/* Keep the playful harmony dot */
+/* Keep the harmony dot */
 .brand strong:after{content:'·';color:var(--gold);margin-left:5px;text-shadow:0 0 14px rgba(237,191,98,.45)}
 
-/* Very short viewport: do not shrink text; allow scrolling instead. */
+/* Do not shrink text on short viewports; scroll instead. */
 @media(max-height:730px){
   .app{scroll-behavior:smooth}
 }
