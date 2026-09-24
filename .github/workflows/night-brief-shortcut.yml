@@ -1,0 +1,125 @@
+name: Night Brief no-Safari shortcut
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'tools/night-brief/**'
+      - 'tools/night-checkin/**'
+      - 'life/night-checkin-life-bridge-v1.js'
+      - 'life/tests/night-checkin-life-bridge.test.mjs'
+      - '.github/workflows/night-brief-shortcut.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-sign:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Test MY LIFE Night cache bridge
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check life/night-checkin-life-bridge-v1.js
+          node --test life/tests/night-checkin-life-bridge.test.mjs
+
+      - name: Install pinned Cherri v2.3.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          url='https://github.com/electrikmilk/cherri/releases/download/v2.3.0/cherri_linux-x86_64.zip'
+          expected='7ab2c384b7b26e7c72a30a8dfa56f89dae12c4068b7951bc1e3193f3698edbe9'
+          curl -fsSL "$url" -o /tmp/cherri.zip
+          printf '%s  %s\n' "$expected" /tmp/cherri.zip | sha256sum -c -
+          mkdir -p /tmp/cherri
+          unzip -q /tmp/cherri.zip -d /tmp/cherri
+          binary="$(find /tmp/cherri -type f -name cherri -print -quit)"
+          test -n "$binary"
+          sudo install -m 0755 "$binary" /usr/local/bin/cherri
+          cherri --version
+
+      - name: Compile local-first Night Brief
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd tools/night-brief
+          rm -f './Night Brief_unsigned.shortcut' './Night Brief.plist'
+          cherri 'Night Brief.cherri' --skip-sign --debug
+          test -f './Night Brief_unsigned.shortcut'
+          python3 patch_native_actions.py './Night Brief_unsigned.shortcut'
+          mkdir -p artifacts
+          cp './Night Brief_unsigned.shortcut' 'artifacts/Night Brief.plist'
+
+      - name: Validate no-Safari Night Brief contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import plistlib
+          from pathlib import Path
+
+          p=Path('tools/night-brief/artifacts/Night Brief.plist')
+          workflow=plistlib.loads(p.read_bytes())
+          actions=workflow.get('WFWorkflowActions',[])
+          ids=[a.get('WFWorkflowActionIdentifier','') for a in actions]
+          blob=repr(workflow)
+
+          assert workflow.get('WFWorkflowHasShortcutInputVariables') is False
+          assert ids.count('is.workflow.actions.documentpicker.open') == 1
+          assert ids.count('is.workflow.actions.detect.text') >= 1
+          assert ids.count('is.workflow.actions.weather.forecast') == 1
+          assert ids.count('is.workflow.actions.filter.calendarevents') == 1
+          assert ids.count('is.workflow.actions.filter.reminders') == 1
+          assert ids.count('is.workflow.actions.askllm') == 1
+          assert ids.count('is.workflow.actions.notification') == 1
+          assert ids.count('is.workflow.actions.alert') == 1
+          assert ids.count('is.workflow.actions.runworkflow') == 1
+          assert ids.count('is.workflow.actions.openurl') == 0
+          assert ids.count('is.workflow.actions.exit') == 0
+
+          assert 'YOS Night History.json' in blob
+          assert 'Night Check in' in blob
+          assert '収集区域④' in blob
+          assert 'night_history=1' not in blob
+          assert 'shortcuts://run-shortcut' not in blob
+          assert '真栄原2丁目' not in blob
+          print(f'Night Brief no-Safari contract: PASS ({len(actions)} actions)')
+          PY
+
+      - name: Sign Night Brief
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/clarity-factory/sign_with_hubsign.py \
+            --input 'tools/night-brief/artifacts/Night Brief.plist' \
+            --output 'tools/night-brief/artifacts/Night Brief.shortcut' \
+            --name 'Night Brief' \
+            2>&1 | tee 'tools/night-brief/artifacts/night-brief-hubsign.log'
+
+      - name: Verify signed artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('tools/night-brief/artifacts/Night Brief.shortcut')
+          data=p.read_bytes()
+          assert data.startswith(b'AEA1'), data[:8]
+          assert len(data)>500, len(data)
+          print(f'Night Brief signed AEA1: PASS ({len(data)} bytes)')
+          PY
+
+      - name: Upload iPhone acceptance package
+        uses: actions/upload-artifact@v4
+        with:
+          name: night-brief-no-safari
+          path: |
+            tools/night-brief/artifacts/Night Brief.shortcut
+            tools/night-brief/artifacts/Night Brief.plist
+            tools/night-brief/artifacts/night-brief-hubsign.log
+          if-no-files-found: error
