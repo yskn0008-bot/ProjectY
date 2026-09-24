@@ -1,35 +1,27 @@
 #define name Night Brief
 #define color purple
-#define inputs text
 
 #include 'actions/text'
 #include 'actions/documents'
 #include 'actions/intelligence'
 #include 'actions/calendar'
 #include 'actions/location'
-#include 'actions/crypto'
-#include 'actions/web'
 
-// Save callback: return from MY LIFE without starting the Night flow again.
-@incoming = "{ShortcutInput}"
-if @incoming contains "yos-night-save-ok-v1" {
-    const saved = getDictionary(@incoming)
-    const savedHistory = "{saved['history_text']}"
-    const savedDisplay = "{saved['display_text']}"
-    saveFile("YOS Night History.json", savedHistory, true)
-    show(savedDisplay)
-    stop()
-}
+// Native-only Night Brief.
+// No Safari, Scriptable, URL callback, or Run Shortcut.
+// Night history is a derived iCloud cache, one file per day.
+// Existing MY LIFE remains separate; this removes browser sync from the critical night flow.
 
-// Local-first Night Brief.
-// YOS Night History.json is only a derived cache; MY LIFE yos-life-v1 remains the owner store.
-const historyFile = getFile("YOS Night History.json", nil, false)
-const historyJson = getText(historyFile)
+const historyFolder = createFolder("YOS Night History")
+const historyFiles = getFolderContents(historyFolder, false)
+const recentHistoryFiles = filterFiles(historyFiles, 14, "Name", "Z to A")
+const recentHistory = getText(recentHistoryFiles)
 
 const today = currentDate()
-const todayLabel = formatDate(today, "Custom", "    yyyy/MM/dd（EEE）")
+const todayKey = formatDate(today, "Custom", "yyyy-MM-dd")
+const todayLabel = formatDate(today, "Custom", "yyyy/MM/dd（EEE）")
 const tomorrow = adjustDate(today, "Add", qty(1, "days"))
-const tomorrowLabel = formatDate(tomorrow, "Custom", "    yyyy/MM/dd（EEE）")
+const tomorrowLabel = formatDate(tomorrow, "Custom", "yyyy/MM/dd（EEE）")
 
 const todayStartText = text("{todayLabel} 00:00")
 const todayStart = date(todayStartText)
@@ -40,14 +32,18 @@ const tomorrowStart = date(tomorrowStartText)
 const tomorrowEndText = text("{tomorrowLabel} 23:59")
 const tomorrowEnd = date(tomorrowEndText)
 
-// These five placeholder actions are replaced after Cherri compilation with
-// native iPhone actions. Today signals feed the unconscious-observation layer;
-// tomorrow signals keep the existing preparation brief.
+// Replaced after compilation with native iPhone Calendar/Reminder/Weather actions.
 const todayCalendar = text("YOS_NIGHT_TODAY_CALENDAR_PLACEHOLDER")
 const todayReminders = text("YOS_NIGHT_TODAY_REMINDERS_PLACEHOLDER")
 const tomorrowWeather = text("YOS_NIGHT_WEATHER_PLACEHOLDER")
 const tomorrowCalendar = text("YOS_NIGHT_CALENDAR_PLACEHOLDER")
 const tomorrowReminders = text("YOS_NIGHT_REMINDERS_PLACEHOLDER")
+
+// Keep tomorrow's Calendar title and time as separate native fields so GPT
+// cannot silently drop the scheduled time when rendering the brief.
+const tomorrowCalendarTitles = getEventDetail(tomorrowCalendar, "Title")
+const tomorrowCalendarStarts = getEventDetail(tomorrowCalendar, "Start Date")
+const tomorrowCalendarAllDay = getEventDetail(tomorrowCalendar, "Is All Day")
 
 const nightFacts = text("今日の日付：
 {todayLabel}
@@ -67,20 +63,29 @@ const nightFacts = text("今日の日付：
 明日の予定：
 {tomorrowCalendar}
 
+明日の予定タイトル：
+{tomorrowCalendarTitles}
+
+明日の予定開始時刻：
+{tomorrowCalendarStarts}
+
+明日の予定が終日か：
+{tomorrowCalendarAllDay}
+
 明日のリマインダー：
 {tomorrowReminders}
 
-過去14日のMY LIFE Night記録：
-{historyJson}")
+直近のNight記録：
+{recentHistory}")
 
 const modelPrompt = text("あなたはYOS Night Briefです。
 
 目的：
 本人が日記を書く前に、その日ここまでの情報から、本人自身では気づきにくいことを見つける。
 
-内部分析では必ず最低10個の独立した観察候補を作る。
-ただし本人へ10個をそのまま見せない。
-似たものをまとめ、重要度と根拠で統合し、最終表示は【今日の発見】3項目だけにする。
+内部分析では根拠のある観察候補を最大10個まで作る。
+ただし本人へ候補一覧は見せない。
+似たものをまとめ、重要度と根拠で統合し、最終表示は【今日の発見】最大3項目だけにする。
 
 内部で見るもの：
 ・行動や判断の繰り返し
@@ -93,24 +98,18 @@ const modelPrompt = text("あなたはYOS Night Briefです。
 証拠として使ってよいもの：
 ・今日のCalendar
 ・今日の未完了Reminder
-・過去14日のMY LIFE Night記録
+・直近のNight記録
 ・明日のCalendar / Reminder / 天気
 ・このChatGPT実行時に実際に参照できる今日の会話文脈や記憶がある場合のみ、その内容
-参照できない情報を見たことにしてはいけない。
 
-【今日の発見】
-・3項目だけ
-・1項目は最大2行
-・各項目は「発見 — 根拠」の形
-・【確認済み】【観察候補】【推論】のどれかを短く付ける
-・同じ根拠の言い換えは禁止
-・本人の自己評価をそのまま発見にしない
-・心理診断、性格診断、動機の断定をしない
-・証拠が弱ければ断定しない
-・内部で10個未満しか根拠ある候補を作れない場合は、水増しせず3項目未満でもよい
+参照できない情報を見たことにしない。
+1回だけの出来事を確認済みパターン扱いしない。
+心理診断・性格診断・動機の断定をしない。
+新しい根拠が弱ければ項目数を減らす。
 
 前夜準備も短くまとめる。
 【明日】予定 / 天気 / ごみ / 期限・準備 を必要なものだけ1〜3行。
+
 収集区域④。2026年9月1日以降：
 月曜：かん・びん・紙・ペットボトル・有害ごみ
 火曜：燃やすごみ
@@ -124,22 +123,38 @@ const modelPrompt = text("あなたはYOS Night Briefです。
 出力順：
 【今日の発見】
 1. ...
-2. ...
-3. ...
-【明日】...
 
-タイトルや前置き、内部で作った10個の一覧は表示しない。
+2. ...
+
+3. ...
+
+【明日】
+・天気：...
+・予定：...
+・ごみ：...
+・期限・準備：...
+
+表示ルール：
+・1、2、3の各項目の間には必ず空行を1行入れる。
+・【明日】の予定はCalendarに時刻がある場合、必ず「HH:mm 予定名」の形で予定時刻を入れる。
+・終日予定は「終日 予定名」と表示する。
+・予定が複数ある場合は時間順に並べる。
+・Calendarに存在しない時刻は作らない。
+・予定がなければ「予定：なし」。
+
+タイトルや前置きは不要。
 iPhoneで10〜15秒で読み切れる長さを最優先する。
 
 入力情報：
 {nightFacts}")
 
 const response = askChatGPT(modelPrompt, false, "Text")
-showNotification("Night Brief：今日の発見を3つにまとめました")
-show(response)
+// Normalize spacing even if the model compresses the numbered discoveries.
+const spacedResponse2 = replaceText('\\n+2\\.', "\n\n2.", response, true, true)
+const spacedResponse3 = replaceText('\\n+3\\.', "\n\n3.", spacedResponse2, true, true)
+showNotification("Night Brief：今日の発見をまとめました")
+alert(spacedResponse3, "Night Brief")
 
-// Continue directly into Night Check-in instead of calling another Shortcut.
-// This avoids the fragile iOS "Run Shortcut" picker dependency.
 const rawInput = prompt(
     "テーマは決めなくてOK。今日のことを自由に書く・話す。\n\n思いつかなければ：今日あったこと／気分・気づき／明日やること",
     "Text",
@@ -147,22 +162,28 @@ const rawInput = prompt(
 )
 
 const checkinPrompt = text("あなたはYOS Night Check-inです。
-目的は、本人の今日の入力を整理し、日記前に作った外部視点と過去記録も参考にしながら、MY LIFEへ保存する記録を作ることです。
-入力や記録にない事実を作らない。性格診断・心理診断をしない。事実・観察・推論を区別する。
+本人の今日の入力を整理し、日記前に作った外部視点と直近記録も参考にしながら、今日のNight記録を作る。
 
-返答はDictionaryのみ。キーは summary, mood_state, tomorrow, discoveries, three_line_diary, tomorrow_message の6つだけ。
+入力や記録にない事実を作らない。
+性格診断・心理診断をしない。
+事実・観察・推論を区別する。
+過去と同じ発見を、新しい根拠なしに繰り返さない。
+
+返答はDictionaryのみ。
+キーは summary, mood_state, tomorrow, discoveries, three_line_diary, tomorrow_message の6つだけ。
+
 summary: 今日あったことを簡潔に整理。
 mood_state: 本人の入力に根拠がある気分・状態だけ。
 tomorrow: 明日やること。無ければ空文字。
-discoveries: 日記前の外部視点と本人入力を照合して、新しい根拠がある発見だけ。根拠不足なら『新しい発見なし』。
+discoveries: 日記前の外部視点と本人入力を照合し、新しい根拠がある発見だけ。根拠不足なら『新しい発見なし』。
 three_line_diary: 事実ベースの3行日記。改行で3行。
 tomorrow_message: 明日への短い一言。
 
 日記前の外部視点：
-{response}
+{spacedResponse3}
 
-過去14日のMY LIFE Night記録：
-{historyJson}
+直近のNight記録：
+{recentHistory}
 
 今日の本人入力：
 {rawInput}")
@@ -177,27 +198,30 @@ const discoveries = "{parsed['discoveries']}"
 const diary = "{parsed['three_line_diary']}"
 const message = "{parsed['tomorrow_message']}"
 
-const displayText = text("保存しました
-発見：{discoveries}
-明日：{tomorrowAction}")
+const recordText = text("YOS_NIGHT_RECORD_V1
+date: {todayKey}
+summary: {summary}
+mood_state: {mood}
+tomorrow: {tomorrowAction}
+discoveries: {discoveries}
+three_line_diary:
+{diary}
+tomorrow_message: {message}
+raw_input:
+{rawInput}
+")
 
-const rawBase64 = base64Encode(rawInput)
-const rawEncoded = urlEncode(rawBase64)
-const summaryBase64 = base64Encode(summary)
-const summaryEncoded = urlEncode(summaryBase64)
-const moodBase64 = base64Encode(mood)
-const moodEncoded = urlEncode(moodBase64)
-const tomorrowBase64 = base64Encode(tomorrowAction)
-const tomorrowEncoded = urlEncode(tomorrowBase64)
-const discoveriesBase64 = base64Encode(discoveries)
-const discoveriesEncoded = urlEncode(discoveriesBase64)
-const diaryBase64 = base64Encode(diary)
-const diaryEncoded = urlEncode(diaryBase64)
-const messageBase64 = base64Encode(message)
-const messageEncoded = urlEncode(messageBase64)
-const displayBase64 = base64Encode(displayText)
-const displayEncoded = urlEncode(displayBase64)
+saveFile("YOS Night History/{todayKey}.txt", recordText, true)
 
-const saveURL = text("https://yskn0008-bot.github.io/ProjectY/life/night-checkin-save-bridge.html#night_save=1&night_raw_b64={rawEncoded}&night_summary_b64={summaryEncoded}&night_mood_b64={moodEncoded}&night_tomorrow_b64={tomorrowEncoded}&night_discoveries_b64={discoveriesEncoded}&night_diary_b64={diaryEncoded}&night_message_b64={messageEncoded}&night_display_b64={displayEncoded}&shortcut=Night%20Brief")
-openURL(saveURL)
-stop()
+const finalText = text("保存しました
+
+発見：
+{discoveries}
+
+明日：
+{tomorrowAction}
+
+3行日記：
+{diary}")
+
+alert(finalText, "Night Brief")
