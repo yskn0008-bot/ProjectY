@@ -277,8 +277,8 @@ def patch(path: Path) -> None:
         fail("Night Brief must not depend on another Shortcut")
     if ids.count("is.workflow.actions.openurl") != 1:
         fail("Night Brief must contain exactly one MY LIFE save bridge")
-    if ids.count("is.workflow.actions.exit"):
-        fail("Night Brief must not contain Stop Shortcut")
+    if ids.count("is.workflow.actions.exit") != 1:
+        fail("Night Brief must end after the MY LIFE save bridge")
     if "night_history=1" in blob:
         fail("legacy browser history callback survived")
     if "真栄原2丁目" in blob:
