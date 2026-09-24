@@ -17,6 +17,8 @@ import plistlib
 import sys
 from pathlib import Path
 
+TODAY_CALENDAR_MARKER = "YOS_NIGHT_TODAY_CALENDAR_PLACEHOLDER"
+TODAY_REMINDERS_MARKER = "YOS_NIGHT_TODAY_REMINDERS_PLACEHOLDER"
 WEATHER_MARKER = "YOS_NIGHT_WEATHER_PLACEHOLDER"
 CALENDAR_MARKER = "YOS_NIGHT_CALENDAR_PLACEHOLDER"
 REMINDERS_MARKER = "YOS_NIGHT_REMINDERS_PLACEHOLDER"
@@ -105,12 +107,17 @@ def patch(path: Path) -> None:
         a for a in actions
         if a.get("WFWorkflowActionIdentifier") == "is.workflow.actions.date"
     ]
-    if len(date_actions) != 3:
-        fail(f"expected three Date actions, found {len(date_actions)}")
-    # Date #1 is Current Date; #2/#3 are tomorrow 00:00 / 23:59.
-    start_uuid = action_uuid(date_actions[1])
-    end_uuid = action_uuid(date_actions[2])
+    if len(date_actions) != 5:
+        fail(f"expected five Date actions, found {len(date_actions)}")
+    # Date #1 is Current Date; #2/#3 are today 00:00 / 23:59;
+    # #4/#5 are tomorrow 00:00 / 23:59.
+    today_start_uuid = action_uuid(date_actions[1])
+    today_end_uuid = action_uuid(date_actions[2])
+    start_uuid = action_uuid(date_actions[3])
+    end_uuid = action_uuid(date_actions[4])
 
+    tci = find_marker(actions, TODAY_CALENDAR_MARKER)
+    tri = find_marker(actions, TODAY_REMINDERS_MARKER)
     wi = find_marker(actions, WEATHER_MARKER)
     ci = find_marker(actions, CALENDAR_MARKER)
     ri = find_marker(actions, REMINDERS_MARKER)
@@ -120,6 +127,71 @@ def patch(path: Path) -> None:
     actions[wi] = {
         "WFWorkflowActionIdentifier": "is.workflow.actions.weather.forecast",
         "WFWorkflowActionParameters": weather_params,
+    }
+
+    today_calendar_params = replacement_base(actions[tci])
+    today_calendar_params.update({
+        "WFContentItemSortProperty": "Start Date",
+        "WFContentItemSortOrder": "Oldest First",
+        "WFContentItemFilter": {
+            "Value": {
+                "WFActionParameterFilterTemplates": [
+                    {
+                        "Property": "Start Date",
+                        "Operator": 1003,
+                        "Values": {
+                            "Date": output(today_start_uuid, "日付"),
+                            "AnotherDate": output(today_end_uuid, "日付"),
+                            "Unit": 16,
+                            "Number": "7",
+                        },
+                        "Removable": False,
+                        "Bounded": True,
+                    }
+                ],
+                "WFActionParameterFilterPrefix": 1,
+                "WFContentPredicateBoundedDate": False,
+            },
+            "WFSerializationType": "WFContentPredicateTableTemplate",
+        },
+    })
+    actions[tci] = {
+        "WFWorkflowActionIdentifier": "is.workflow.actions.filter.calendarevents",
+        "WFWorkflowActionParameters": today_calendar_params,
+    }
+
+    today_reminders_params = replacement_base(actions[tri])
+    today_reminders_params.update({
+        "WFContentItemSortProperty": "Title",
+        "WFContentItemSortOrder": "A to Z",
+        "WFContentItemFilter": {
+            "Value": {
+                "WFActionParameterFilterPrefix": 1,
+                "WFContentPredicateBoundedDate": False,
+                "WFActionParameterFilterTemplates": [
+                    {
+                        "Operator": 1003,
+                        "Values": {
+                            "Date": output(today_start_uuid, "日付"),
+                            "AnotherDate": output(today_end_uuid, "日付"),
+                        },
+                        "Removable": True,
+                        "Property": "Due Date",
+                    },
+                    {
+                        "Operator": 4,
+                        "Values": {"Bool": False},
+                        "Removable": True,
+                        "Property": "Is Completed",
+                    },
+                ],
+            },
+            "WFSerializationType": "WFContentPredicateTableTemplate",
+        },
+    })
+    actions[tri] = {
+        "WFWorkflowActionIdentifier": "is.workflow.actions.filter.reminders",
+        "WFWorkflowActionParameters": today_reminders_params,
     }
 
     calendar_params = replacement_base(actions[ci])
@@ -192,14 +264,14 @@ def patch(path: Path) -> None:
 
     blob = repr(workflow)
     ids = [a.get("WFWorkflowActionIdentifier", "") for a in actions]
-    for marker in (WEATHER_MARKER, CALENDAR_MARKER, REMINDERS_MARKER):
+    for marker in (TODAY_CALENDAR_MARKER, TODAY_REMINDERS_MARKER, WEATHER_MARKER, CALENDAR_MARKER, REMINDERS_MARKER):
         if marker in blob:
             fail(f"placeholder survived: {marker}")
     if ids.count("is.workflow.actions.weather.forecast") != 1:
         fail("weather forecast patch failed")
-    if ids.count("is.workflow.actions.filter.calendarevents") != 1:
+    if ids.count("is.workflow.actions.filter.calendarevents") != 2:
         fail("Calendar patch failed")
-    if ids.count("is.workflow.actions.filter.reminders") != 1:
+    if ids.count("is.workflow.actions.filter.reminders") != 2:
         fail("Reminders patch failed")
     if ids.count("is.workflow.actions.openurl"):
         fail("Night Brief must not contain Open URL")
@@ -213,7 +285,7 @@ def patch(path: Path) -> None:
     path.write_bytes(plistlib.dumps(workflow, fmt=plistlib.FMT_XML, sort_keys=False))
     print(
         "Night Brief native patch: PASS "
-        f"(actions={len(actions)}, weather=1, calendar=1, reminders=1, browser=0)"
+        f"(actions={len(actions)}, weather=1, calendar=2, reminders=2, browser=0)"
     )
 
 
