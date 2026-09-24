@@ -1,0 +1,29 @@
+#define name YOS Life Sync
+#define color green
+
+#include 'actions/text'
+#include 'actions/documents'
+#include 'actions/crypto'
+#include 'actions/web'
+
+// One-tap local sync:
+// iCloud Night record -> URL fragment -> existing MY LIFE yos-life-v1.
+// The journal payload stays in the fragment and is not sent to GitHub Pages.
+
+const lifeURL = "https://yskn0008-bot.github.io/ProjectY/life/"
+const historyFolder = createFolder("YOS Night History")
+const historyFiles = getFolderContents(historyFolder, false)
+
+if !historyFiles {
+    openURL(lifeURL)
+    stop()
+}
+
+const latestHistoryFile = filterFiles(historyFiles, 1, "Name", "Z to A")
+const nativeRecord = getText(latestHistoryFile)
+const recordBase64 = base64Encode(nativeRecord)
+const recordEncoded = urlEncode(recordBase64)
+const syncURL = text("https://yskn0008-bot.github.io/ProjectY/life/#night_native_b64={recordEncoded}")
+
+openURL(syncURL)
+stop()

@@ -82,3 +82,38 @@ test('service worker never falls Night save bridge back to MY WAY root',()=>{
   assert.match(serviceWorker,/\.\/life\/night-checkin-save-bridge\.html/);
   assert.match(serviceWorker,/path\.endsWith\('\/life\/night-checkin-save-bridge\.html'\)\)return '\.\/life\/night-checkin-save-bridge\.html'/);
 });
+
+
+test('native Night record parser preserves multiline fields and explicit date',()=>{
+  const bridge=api();
+  const record=[
+    'YOS_NIGHT_RECORD_V1',
+    'date: 2026-09-24',
+    'summary: 今日あったこと',
+    'mood_state: 落ち着き',
+    'tomorrow: 14:30 歯医者',
+    'discoveries: 1つ目',
+    'three_line_diary:',
+    '一行目',
+    '二行目',
+    '三行目',
+    'tomorrow_message: 明日も進める',
+    'raw_input:',
+    '自由入力',
+    '2行目'
+  ].join('\n');
+  const parsed=bridge.parseNativeRecord(record);
+  assert.equal(parsed.date,'2026-09-24');
+  assert.equal(parsed.payload.tomorrow,'14:30 歯医者');
+  assert.equal(parsed.payload.three_line_diary,'一行目\n二行目\n三行目');
+  assert.equal(parsed.payload.raw_input,'自由入力\n2行目');
+});
+
+test('native Night sync uses a URL fragment and writes through the existing Life SSOT',()=>{
+  assert.match(source,/night_native_b64/);
+  assert.match(source,/location\.hash/);
+  assert.match(source,/parseNativeRecord\(decodeBase64Url\(encoded\)\)/);
+  assert.match(source,/saveInto\(readStore\(\),parsed\.payload,parsed\.date\)/);
+  assert.match(source,/source:'native-night-sync'/);
+  assert.doesNotMatch(source,/localStorage\.setItem\(['"]yos-night-native/);
+});
