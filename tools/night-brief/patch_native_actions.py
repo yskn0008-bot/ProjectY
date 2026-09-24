@@ -273,13 +273,25 @@ def patch(path: Path) -> None:
         fail("Calendar patch failed")
     if ids.count("is.workflow.actions.filter.reminders") != 2:
         fail("Reminders patch failed")
-    open_urls = [
-        a.get("WFWorkflowActionParameters", {}).get("WFInput")
-        for a in actions
-        if a.get("WFWorkflowActionIdentifier") == "is.workflow.actions.openurl"
+    # Cherri writes only WFWorkflowName for Run Shortcut. iOS can render that
+    # label but treats it as an unselected shortcut. Add the native picker
+    # object so the action is a real selected shortcut by name.
+    run_actions = [
+        a for a in actions
+        if a.get("WFWorkflowActionIdentifier") == "is.workflow.actions.runworkflow"
     ]
-    if len(open_urls) != 1 or open_urls[0] != "shortcuts://run-shortcut?name=Night%20Check%20in":
-        fail(f"Night Brief must contain only the direct Night Check-in Shortcut URL, found: {open_urls!r}")
+    if len(run_actions) != 1:
+        fail(f"expected one Run Shortcut action, found {len(run_actions)}")
+    run_params = run_actions[0].setdefault("WFWorkflowActionParameters", {})
+    if run_params.get("WFWorkflowName") != "Night Check in":
+        fail(f"unexpected Run Shortcut target: {run_params.get('WFWorkflowName')!r}")
+    run_params["WFWorkflow"] = {
+        "workflowName": "Night Check in",
+        "isSelf": False,
+    }
+
+    if ids.count("is.workflow.actions.openurl"):
+        fail("Night Brief must not contain Open URL")
     if ids.count("is.workflow.actions.exit"):
         fail("Night Brief must not contain Stop Shortcut")
     if "night_history=1" in blob:
@@ -290,7 +302,7 @@ def patch(path: Path) -> None:
     path.write_bytes(plistlib.dumps(workflow, fmt=plistlib.FMT_XML, sort_keys=False))
     print(
         "Night Brief native patch: PASS "
-        f"(actions={len(actions)}, weather=1, calendar=2, reminders=2, browser=0)"
+        f"(actions={len(actions)}, weather=1, calendar=2, reminders=2, browser=0, run-shortcut=1)"
     )
 
 
