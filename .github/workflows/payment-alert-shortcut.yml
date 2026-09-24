@@ -68,6 +68,7 @@ jobs:
           assert '今日から3日以内' in blob
           assert '支払いアラートなし' in blob
           assert 'facts 配列' in blob
+          assert '相対表現は付けない' in blob
           print(f'Payment Alert native contract: PASS ({len(actions)} actions)')
           PY
 
