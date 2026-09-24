@@ -127,9 +127,21 @@
     window.dispatchEvent(new StorageEvent('storage',{key:DATA_KEY,newValue:JSON.stringify(result.data)}));
 
     if(callback){
-      const ack={schema:'yos-night-save-ok-v1',date:result.date,display_text:displayText};
+      const historyPayload={
+        schema:'yos-night-history-cache-v1',
+        as_of_date:result.date,
+        records:historyFrom(result.data,'9999-12-31',14)
+      };
+      const ack={
+        schema:'yos-night-save-ok-v1',
+        date:result.date,
+        display_text:displayText,
+        history_text:JSON.stringify(historyPayload)
+      };
       const target='shortcuts://run-shortcut?name='+encodeURIComponent(callback)+'&input=text&text='+encodeURIComponent(JSON.stringify(ack));
-      location.replace(target);
+      // Match the proven Morning Brief callback timing: let the launching
+      // Shortcut finish its Stop Shortcut action before starting the callback.
+      setTimeout(()=>location.replace(target),1200);
     }
     return true;
   }
