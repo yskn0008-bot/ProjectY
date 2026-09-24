@@ -183,9 +183,12 @@ try{
   await page.evaluate(()=>localStorage.setItem('yos-home-settings-v2',JSON.stringify({yosUrl:'https://chatgpt.com/c/yos-smoke-chat'})));
   await page.goto(base+'/yos/desk/',{waitUntil:'networkidle'});
   await page.waitForFunction(()=>document.documentElement.dataset.liveSync==='ok');
+  await page.waitForFunction(()=>document.documentElement.dataset.missionSync==='ok');
   await expectText('.heroTitle','Clarity');
   await expectText('.heroSide .big','65%');
   await expectText('#devList','Money');
+  await expectText('.stats','稼働中 · 自動同期');
+  await expectText('.stats','最近完了');
   await page.locator('[data-quick="Money"]').click();
   await expectText('#sheetBody','4,588円');
   await expectText('#sheetBody','9/26 車保険 7,060円');
