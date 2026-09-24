@@ -1,0 +1,117 @@
+name: YOS Life Sync shortcut
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'life/night-checkin-life-bridge-v1.js'
+      - 'life/tests/night-checkin-life-bridge.test.mjs'
+      - 'tools/life-sync/**'
+      - 'tools/clarity-factory/sign_with_hubsign.py'
+      - '.github/workflows/life-sync-shortcut.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-sign:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Test MY LIFE native Night bridge
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check life/night-checkin-life-bridge-v1.js
+          node --test life/tests/night-checkin-life-bridge.test.mjs
+
+      - name: Install pinned Cherri v2.3.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          url='https://github.com/electrikmilk/cherri/releases/download/v2.3.0/cherri_linux-x86_64.zip'
+          expected='7ab2c384b7b26e7c72a30a8dfa56f89dae12c4068b7951bc1e3193f3698edbe9'
+          curl -fsSL "$url" -o /tmp/cherri.zip
+          printf '%s  %s\n' "$expected" /tmp/cherri.zip | sha256sum -c -
+          mkdir -p /tmp/cherri
+          unzip -q /tmp/cherri.zip -d /tmp/cherri
+          binary="$(find /tmp/cherri -type f -name cherri -print -quit)"
+          test -n "$binary"
+          sudo install -m 0755 "$binary" /usr/local/bin/cherri
+          cherri --version
+
+      - name: Compile YOS Life Sync
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd tools/life-sync
+          rm -f './YOS Life Sync_unsigned.shortcut' './YOS Life Sync.plist'
+          cherri 'YOS Life Sync.cherri' --skip-sign --debug
+          test -f './YOS Life Sync_unsigned.shortcut'
+          mkdir -p artifacts
+          cp './YOS Life Sync_unsigned.shortcut' 'artifacts/YOS Life Sync.plist'
+
+      - name: Validate native sync contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import plistlib
+          from pathlib import Path
+
+          p=Path('tools/life-sync/artifacts/YOS Life Sync.plist')
+          workflow=plistlib.loads(p.read_bytes())
+          actions=workflow.get('WFWorkflowActions',[])
+          ids=[a.get('WFWorkflowActionIdentifier','') for a in actions]
+          blob=repr(workflow)
+
+          assert ids.count('is.workflow.actions.file.createfolder') == 1
+          assert ids.count('is.workflow.actions.file.getfoldercontents') == 1
+          assert ids.count('is.workflow.actions.filter.files') == 1
+          assert ids.count('is.workflow.actions.detect.text') >= 1
+          assert ids.count('is.workflow.actions.base64encode') == 1
+          assert ids.count('is.workflow.actions.urlencode') == 1
+          assert ids.count('is.workflow.actions.openurl') == 2
+          assert ids.count('is.workflow.actions.runworkflow') == 0
+          assert 'night_native_b64' in blob
+          assert 'YOS Night History' in blob
+          assert 'scriptable' not in blob.lower()
+          assert 'night_save=1' not in blob
+          print(f'YOS Life Sync native contract: PASS ({len(actions)} actions)')
+          PY
+
+      - name: Sign YOS Life Sync
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/clarity-factory/sign_with_hubsign.py \
+            --input 'tools/life-sync/artifacts/YOS Life Sync.plist' \
+            --output 'tools/life-sync/artifacts/YOS Life Sync.shortcut' \
+            --name 'YOS Life Sync' \
+            2>&1 | tee 'tools/life-sync/artifacts/yos-life-sync-hubsign.log'
+
+      - name: Verify signed artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('tools/life-sync/artifacts/YOS Life Sync.shortcut')
+          data=p.read_bytes()
+          assert data.startswith(b'AEA1'), data[:8]
+          assert len(data)>500, len(data)
+          print(f'YOS Life Sync signed AEA1: PASS ({len(data)} bytes)')
+          PY
+
+      - name: Upload iPhone acceptance package
+        uses: actions/upload-artifact@v4
+        with:
+          name: yos-life-sync
+          path: |
+            tools/life-sync/artifacts/YOS Life Sync.shortcut
+            tools/life-sync/artifacts/YOS Life Sync.plist
+            tools/life-sync/artifacts/yos-life-sync-hubsign.log
+          if-no-files-found: error
