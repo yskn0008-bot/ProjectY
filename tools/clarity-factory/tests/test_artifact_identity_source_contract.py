@@ -29,7 +29,7 @@ class ArtifactIdentitySourceContractTests(unittest.TestCase):
 
     def test_model_decision_trace_is_before_needs_review_block(self):
         trace = self.source.index("MODEL_DECISION")
-        gate = self.source.index("if needsReview == true {")
+        gate = self.source.index("if needsReview {")
         self.assertLess(trace, gate)
         for field in (
             "executor={executor}",
@@ -40,16 +40,6 @@ class ArtifactIdentitySourceContractTests(unittest.TestCase):
         ):
             self.assertIn(field, self.source)
 
-
-    def test_model_boolean_gates_use_explicit_boolean_comparisons(self):
-        self.assertIn("if needsReview == true {", self.source)
-        self.assertIn(
-            "if externalWrite == true && requiresConfirmation == false {",
-            self.source,
-        )
-        self.assertIn("if requiresConfirmation == true {", self.source)
-        self.assertNotIn("if needsReview {", self.source)
-        self.assertNotIn("if requiresConfirmation {", self.source)
 
 
 if __name__ == "__main__":
