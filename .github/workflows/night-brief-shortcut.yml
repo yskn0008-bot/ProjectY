@@ -75,13 +75,13 @@ jobs:
           assert ids.count('is.workflow.actions.weather.forecast') == 1
           assert ids.count('is.workflow.actions.filter.calendarevents') == 2
           assert ids.count('is.workflow.actions.filter.reminders') == 2
-          assert ids.count('is.workflow.actions.askllm') == 1
+          assert ids.count('is.workflow.actions.askllm') == 2
           assert ids.count('is.workflow.actions.notification') == 1
           assert ids.count('is.workflow.actions.showresult') == 1
-          assert ids.count('is.workflow.actions.alert') == 0
-          assert ids.count('is.workflow.actions.runworkflow') == 1
-          assert ids.count('is.workflow.actions.openurl') == 0
-          assert ids.count('is.workflow.actions.exit') == 0
+          assert ids.count('is.workflow.actions.ask') == 1
+          assert ids.count('is.workflow.actions.runworkflow') == 0
+          assert ids.count('is.workflow.actions.openurl') == 1
+          assert ids.count('is.workflow.actions.exit') == 1
 
           assert 'YOS Night History.json' in blob
           assert '収集区域④' in blob
@@ -91,8 +91,8 @@ jobs:
           assert '今日の予定' in blob
           assert '今日の未完了リマインダー' in blob
           assert 'night_history=1' not in blob
-          assert "'workflowName': 'Night Check in'" in blob
-          assert "'isSelf': False" in blob
+          assert 'night_save=1' in blob
+          assert '今日のことを自由に書く・話す。短くてOK。' in blob
           assert '真栄原2丁目' not in blob
           print(f'Night Brief no-Safari contract: PASS ({len(actions)} actions)')
           PY
