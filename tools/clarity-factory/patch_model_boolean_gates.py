@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 """Verify Clarity's compiled model-boolean safety gates.
 
-Real-device evidence showed that Dictionary booleans are rendered by a Text
-action as Japanese "はい"/"いいえ", while bare-boolean If actions degraded to
+The legacy filename is retained because all three Clarity build workflows call it.\nReal-device evidence showed that Dictionary booleans are rendered by a Text\naction as Japanese "はい"/"いいえ", while bare-boolean If actions degraded to
 existence checks. The source therefore normalizes each model boolean through a
 Text action and compares the resulting text explicitly.
 """
