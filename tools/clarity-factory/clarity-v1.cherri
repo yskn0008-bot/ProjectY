@@ -187,10 +187,14 @@ for actionItem in @actionsRaw {
         mustOutput("ここだけ確認して", "曖昧な点があるため自動では進めません")
     }
 
-    if externalWrite && !requiresConfirmation {
-        const blockedExternalRecord = text("{CurrentDate}\t{requestNumber}\t{actionId}\tBLOCKED\texternal_write_without_confirmation\n")
-        appendResolvedFile(ledgerFile, blockedExternalRecord)
-        mustOutput("ここだけ確認して", "外部への変更は確認なしでは実行しません")
+    if externalWrite {
+        if requiresConfirmation {
+            nothing()
+        } else {
+            const blockedExternalRecord = text("{CurrentDate}\t{requestNumber}\t{actionId}\tBLOCKED\texternal_write_without_confirmation\n")
+            appendResolvedFile(ledgerFile, blockedExternalRecord)
+            mustOutput("ここだけ確認して", "外部への変更は確認なしでは実行しません")
+        }
     }
 
     if requiresConfirmation {
