@@ -260,7 +260,7 @@ def patch(path: Path) -> None:
     }
 
     workflow["WFWorkflowActions"] = actions
-    workflow["WFWorkflowHasShortcutInputVariables"] = False
+    workflow["WFWorkflowHasShortcutInputVariables"] = True
 
     blob = repr(workflow)
     ids = [a.get("WFWorkflowActionIdentifier", "") for a in actions]
@@ -277,8 +277,8 @@ def patch(path: Path) -> None:
         fail("Night Brief must not depend on another Shortcut")
     if ids.count("is.workflow.actions.openurl") != 1:
         fail("Night Brief must contain exactly one MY LIFE save bridge")
-    if ids.count("is.workflow.actions.exit") != 1:
-        fail("Night Brief must end after the MY LIFE save bridge")
+    if ids.count("is.workflow.actions.exit") != 2:
+        fail("Night Brief must stop on save callback and after launching the save bridge")
     if "night_history=1" in blob:
         fail("legacy browser history callback survived")
     if "真栄原2丁目" in blob:
