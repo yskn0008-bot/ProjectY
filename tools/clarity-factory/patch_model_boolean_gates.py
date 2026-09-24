@@ -1,10 +1,16 @@
 #!/usr/bin/env python3
-"""Repair Cherri's bare-variable boolean gates in compiled Clarity.
+"""Repair Clarity's compiled model-boolean safety gates.
 
-Cherri compiles `if someVariable {` as WFCondition=100 ("has any value").
-For dictionary booleans, false is still a present value, so a false flag can
-incorrectly enter the branch. This patch rewrites only the three model safety
-boolean gates to explicit equality comparisons.
+Cherri compiles bare dictionary booleans as existence checks. The first repair
+used WFCondition=4 with WFNumberValue, but WFCondition=4 is string equality;
+on-device evidence proved that shape still lets false fall into the blocked
+branch. Apple-built Shortcuts treat JSON booleans numerically (true=1,false=0),
+so use numeric inequalities instead:
+
+- true  => value > 0
+- false => value <= 0
+
+Only the three safety gates are rewritten.
 """
 
 from __future__ import annotations
@@ -67,7 +73,7 @@ def find_start_conditional_before(actions: list[dict], record_index: int) -> dic
 def patch_single(
     condition: dict,
     output_name: str,
-    expected_value: bool,
+    expect_true: bool,
     expected_old_code: int,
 ) -> None:
     refs = output_names(condition.get("WFInput"))
@@ -75,18 +81,22 @@ def patch_single(
         raise SystemExit(
             f"{output_name} gate input mismatch: {sorted(refs)}"
         )
+
+    expected_code = 2 if expect_true else 1  # > 0 or <= 0
+    expected_number = "0"
     code = condition.get("WFCondition")
-    if code not in (expected_old_code, 4):
+    if code not in (expected_old_code, 4, expected_code):
         raise SystemExit(
             f"{output_name} gate unexpected condition code: {code!r}"
         )
-    if code == 4 and condition.get("WFNumberValue") is not expected_value:
+    if code == expected_code and str(condition.get("WFNumberValue")) != expected_number:
         raise SystemExit(
-            f"{output_name} gate already explicit but wrong value: "
+            f"{output_name} gate already numeric but wrong threshold: "
             f"{condition.get('WFNumberValue')!r}"
         )
-    condition["WFCondition"] = 4
-    condition["WFNumberValue"] = expected_value
+
+    condition["WFCondition"] = expected_code
+    condition["WFNumberValue"] = expected_number
     condition.pop("WFConditionalActionString", None)
 
 
@@ -104,8 +114,8 @@ def patch_multi(condition: dict) -> None:
         raise SystemExit("external-write gate must have exactly two rows")
 
     expected = {
-        "externalWrite": (True, 100),
-        "requiresConfirmation": (False, 101),
+        "externalWrite": (2, "0", 100),       # true  => > 0
+        "requiresConfirmation": (1, "0", 101),  # false => <= 0
     }
     seen: set[str] = set()
     for row in templates:
@@ -119,19 +129,19 @@ def patch_multi(condition: dict) -> None:
         name = next(iter(refs))
         if name not in expected:
             raise SystemExit(f"unexpected external-write gate input: {name}")
-        expected_value, old_code = expected[name]
+        expected_code, expected_number, old_code = expected[name]
         code = row.get("WFCondition")
-        if code not in (old_code, 4):
+        if code not in (old_code, 4, expected_code):
             raise SystemExit(
                 f"{name} gate unexpected condition code: {code!r}"
             )
-        if code == 4 and row.get("WFNumberValue") is not expected_value:
+        if code == expected_code and str(row.get("WFNumberValue")) != expected_number:
             raise SystemExit(
-                f"{name} gate already explicit but wrong value: "
+                f"{name} gate already numeric but wrong threshold: "
                 f"{row.get('WFNumberValue')!r}"
             )
-        row["WFCondition"] = 4
-        row["WFNumberValue"] = expected_value
+        row["WFCondition"] = expected_code
+        row["WFNumberValue"] = expected_number
         row.pop("WFConditionalActionString", None)
         seen.add(name)
 
@@ -152,34 +162,33 @@ def verify(actions: list[dict]) -> None:
         actions, find_record_index(actions, "blockedExternalRecord")
     )
 
-    for gate, name, expected in (
-        (review, "needsReview", True),
-        (confirmation, "requiresConfirmation", True),
+    for gate, name in (
+        (review, "needsReview"),
+        (confirmation, "requiresConfirmation"),
     ):
-        if gate.get("WFCondition") != 4:
-            raise SystemExit(f"{name} gate is not explicit equality")
-        if gate.get("WFNumberValue") is not expected:
-            raise SystemExit(f"{name} gate comparison value is wrong")
+        if gate.get("WFCondition") != 2 or str(gate.get("WFNumberValue")) != "0":
+            raise SystemExit(f"{name} gate must be numeric > 0")
         if output_names(gate.get("WFInput")) != {name}:
             raise SystemExit(f"{name} gate input reference is wrong")
 
     wrapper = external.get("WFConditions", {})
     value = wrapper.get("Value", {}) if isinstance(wrapper, dict) else {}
     rows = value.get("WFActionParameterFilterTemplates", [])
-    got: dict[str, bool] = {}
+    got: dict[str, tuple[int, str]] = {}
     for row in rows if isinstance(rows, list) else []:
         refs = output_names(row.get("WFInput")) if isinstance(row, dict) else set()
         if len(refs) == 1:
             name = next(iter(refs))
-            got[name] = row.get("WFNumberValue")
-            if row.get("WFCondition") != 4:
-                raise SystemExit(f"{name} multi gate is not explicit equality")
-    if got != {"externalWrite": True, "requiresConfirmation": False}:
+            got[name] = (row.get("WFCondition"), str(row.get("WFNumberValue")))
+    if got != {
+        "externalWrite": (2, "0"),
+        "requiresConfirmation": (1, "0"),
+    }:
         raise SystemExit(f"external-write gate values wrong: {got!r}")
 
     print(
         "Clarity model boolean gates: PASS "
-        "needsReview=true externalWrite=true requiresConfirmation=false/true"
+        "needsReview>0 externalWrite>0 requiresConfirmation<=0/>0"
     )
 
 
