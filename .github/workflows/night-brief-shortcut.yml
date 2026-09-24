@@ -91,8 +91,8 @@ jobs:
           assert 'YOS Night History' in blob
           assert 'YOS_NIGHT_RECORD_V1' in blob
           assert '収集区域④' in blob
-          assert '内部分析では必ず最低10個' in blob
-          assert '最終表示は【今日の発見】3項目' in blob
+          assert '観察候補を最大10個まで作る' in blob
+          assert '最終表示は【今日の発見】最大3項目' in blob
           assert 'iPhoneで10〜15秒で読み切れる長さ' in blob
           assert '今日の予定' in blob
           assert '今日の未完了リマインダー' in blob
