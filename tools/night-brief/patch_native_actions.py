@@ -273,12 +273,17 @@ def patch(path: Path) -> None:
         fail("Calendar patch failed")
     if ids.count("is.workflow.actions.filter.reminders") != 2:
         fail("Reminders patch failed")
-    if ids.count("is.workflow.actions.openurl"):
-        fail("Night Brief must not contain Open URL")
+    open_urls = [
+        a.get("WFWorkflowActionParameters", {}).get("WFInput")
+        for a in actions
+        if a.get("WFWorkflowActionIdentifier") == "is.workflow.actions.openurl"
+    ]
+    if len(open_urls) != 1 or open_urls[0] != "shortcuts://run-shortcut?name=Night%20Check%20in":
+        fail(f"Night Brief must contain only the direct Night Check-in Shortcut URL, found: {open_urls!r}")
     if ids.count("is.workflow.actions.exit"):
         fail("Night Brief must not contain Stop Shortcut")
-    if "night_history=1" in blob or "shortcuts://run-shortcut" in blob:
-        fail("legacy browser callback survived")
+    if "night_history=1" in blob:
+        fail("legacy browser history callback survived")
     if "真栄原2丁目" in blob:
         fail("private street-level text must not be embedded")
 
