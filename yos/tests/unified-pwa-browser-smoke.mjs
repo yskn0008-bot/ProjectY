@@ -186,6 +186,11 @@ try{
   await expectText('.heroTitle','Clarity');
   await expectText('.heroSide .big','65%');
   await expectText('#devList','Money');
+  await expectText('#devList','MY WAY Widget');
+  await expectText('.stats','未完了');
+  await expectText('.stats','本人確認待ち');
+  await expectText('.stats','YOS全体進捗');
+  await expectText('.suggestions','SSOTから自動更新');
   await page.locator('[data-quick="Money"]').click();
   await expectText('#sheetBody','4,588円');
   await expectText('#sheetBody','9/26 車保険 7,060円');
