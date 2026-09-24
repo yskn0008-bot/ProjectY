@@ -54,6 +54,13 @@ test('Shortcut save lane writes through the same Life bridge and returns a save 
   assert.match(source,/shortcuts:\/\/run-shortcut\?name=/);
 });
 
+test('history callback waits for the launching shortcut to stop before re-entry',()=>{
+  const start=source.indexOf('function returnHistory');
+  const end=source.indexOf('\n  try{',start);
+  const block=source.slice(start,end);
+  assert.match(block,/setTimeout\(\(\)=>location\.replace\(target\),1200\)/);
+});
+
 test('bridge source keeps the existing Life SSOT and has no Money duplication',()=>{
   assert.match(source,/const DATA_KEY='yos-life-v1'/);
   assert.match(source,/day\.lifeFlow=\{\.\.\.flow,nightCheckin:record\}/);
