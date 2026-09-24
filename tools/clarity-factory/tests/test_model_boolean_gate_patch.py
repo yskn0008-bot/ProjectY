@@ -22,9 +22,10 @@ def attachment(name: str) -> dict:
     }
 
 
-def conditional_single(name: str, code: int) -> dict:
+def conditional_single(name: str, text: str) -> dict:
     return {
-        "WFCondition": code,
+        "WFCondition": 4,
+        "WFConditionalActionString": text,
         "WFControlFlowMode": 0,
         "WFInput": {
             "Type": "Variable",
@@ -33,52 +34,21 @@ def conditional_single(name: str, code: int) -> dict:
     }
 
 
-class BooleanGatePatchTests(unittest.TestCase):
-    def test_single_boolean_presence_gate_becomes_numeric_true_check(self):
-        gate = conditional_single("needsReview", 100)
-        module.patch_single(gate, "needsReview", True, 100)
-        self.assertEqual(gate["WFCondition"], 2)
-        self.assertEqual(gate["WFNumberValue"], "0")
+class BooleanGateVerificationTests(unittest.TestCase):
+    def test_single_review_text_gate(self):
+        gate = conditional_single("needsReviewText", "はい")
+        module.verify_single(gate, "needsReviewText", "はい")
 
-    def test_external_write_rows_become_true_and_false_equalities(self):
-        gate = {
-            "WFConditions": {
-                "WFSerializationType": "WFContentPredicateTableTemplate",
-                "Value": {
-                    "WFActionParameterFilterPrefix": 1,
-                    "WFActionParameterFilterTemplates": [
-                        {
-                            "WFCondition": 100,
-                            "WFInput": {
-                                "Type": "Variable",
-                                "Variable": attachment("externalWrite"),
-                            },
-                        },
-                        {
-                            "WFCondition": 101,
-                            "WFInput": {
-                                "Type": "Variable",
-                                "Variable": attachment("requiresConfirmation"),
-                            },
-                        },
-                    ],
-                },
-            },
-            "WFControlFlowMode": 0,
-        }
-        module.patch_multi(gate)
-        rows = gate["WFConditions"]["Value"]["WFActionParameterFilterTemplates"]
-        got = {}
-        for row in rows:
-            name = next(iter(module.output_names(row["WFInput"])))
-            got[name] = (row["WFCondition"], row["WFNumberValue"])
-        self.assertEqual(
-            got,
-            {
-                "externalWrite": (2, "0"),
-                "requiresConfirmation": (1, "0"),
-            },
-        )
+    def test_single_confirmation_text_gate(self):
+        gate = conditional_single("requiresConfirmationText", "はい")
+        module.verify_single(gate, "requiresConfirmationText", "はい")
+
+    def test_numeric_regression_is_rejected(self):
+        gate = conditional_single("needsReviewText", "はい")
+        gate["WFCondition"] = 2
+        gate["WFNumberValue"] = "0"
+        with self.assertRaises(SystemExit):
+            module.verify_single(gate, "needsReviewText", "はい")
 
 
 if __name__ == "__main__":
