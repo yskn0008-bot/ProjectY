@@ -180,6 +180,32 @@ try{
   await page.goto(base+'/system/',{waitUntil:'networkidle'});
   await expectText('h1','Mission Control');
 
+  await page.evaluate(()=>localStorage.setItem('yos-home-settings-v2',JSON.stringify({yosUrl:'https://chatgpt.com/c/yos-smoke-chat'})));
+  await page.goto(base+'/yos/desk/',{waitUntil:'networkidle'});
+  await page.waitForFunction(()=>document.documentElement.dataset.liveSync==='ok');
+  await expectText('.heroTitle','Clarity');
+  await expectText('.heroSide .big','65%');
+  await expectText('#devList','Money');
+  await page.locator('[data-quick="Money"]').click();
+  await expectText('#sheetBody','4,588円');
+  await expectText('#sheetBody','9/26 車保険 7,060円');
+  await expectText('#sheetBody','89,952円');
+  await expectText('#sheetBody','10/13 家賃収入 約160,485円');
+  await page.locator('#closeSheetBtn').click();
+  await page.locator('[data-page="chats"]').click();
+  await expectText('#chatList','YOS Chat');
+  const deskGeometry=await page.evaluate(()=>({
+    appBottom:document.getElementById('app').getBoundingClientRect().bottom,
+    navTop:document.getElementById('bottom').getBoundingClientRect().top,
+    navBottom:document.getElementById('bottom').getBoundingClientRect().bottom,
+    viewport:window.innerHeight,
+    scrollHeight:document.getElementById('app').scrollHeight,
+    clientHeight:document.getElementById('app').clientHeight
+  }));
+  assert.ok(deskGeometry.appBottom<=deskGeometry.navTop+1,`YOS DESK content viewport must end above navigation: ${deskGeometry.appBottom}/${deskGeometry.navTop}`);
+  assert.ok(deskGeometry.navBottom<=deskGeometry.viewport+1,'YOS DESK navigation must stay inside viewport');
+  assert.ok(deskGeometry.scrollHeight>=deskGeometry.clientHeight,'YOS DESK content should remain independently scrollable');
+
   if(browserName==='chromium'){
     await page.goto(base+'/yos/',{waitUntil:'networkidle'});
     await page.evaluate(async()=>{await navigator.serviceWorker.ready;});
