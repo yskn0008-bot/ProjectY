@@ -38,7 +38,7 @@ jobs:
           mkdir -p tools/morning-brief/artifacts
           python3 tools/morning-brief/patch_no_safari.py \
             'tools/morning-brief/Morning Brief Money Connected.plist' \
-            'tools/morning-brief/artifacts/Morning Brief No Safari.plist'
+            'tools/morning-brief/artifacts/Morning Brief Compact.plist'
 
       - name: Validate no-Safari Shortcut contract
         shell: bash
@@ -48,7 +48,7 @@ jobs:
           import plistlib
           from pathlib import Path
 
-          path=Path('tools/morning-brief/artifacts/Morning Brief No Safari.plist')
+          path=Path('tools/morning-brief/artifacts/Morning Brief Compact.plist')
           workflow=plistlib.loads(path.read_bytes())
           actions=workflow.get('WFWorkflowActions',[])
           ids=[a.get('WFWorkflowActionIdentifier','') for a in actions]
@@ -71,6 +71,8 @@ jobs:
           assert 'shortcuts://run-shortcut' not in blob
           assert '【お金】' in blob
           assert 'base.masterFacts' in blob
+          assert '表示は次の7行以内' in blob
+          assert 'iPhoneの1画面で最後まで読める短さ' in blob
           print(f'Morning Brief no-Safari contract: PASS ({len(actions)} actions)')
           PY
 
@@ -79,9 +81,9 @@ jobs:
         run: |
           set -euo pipefail
           python3 tools/clarity-factory/sign_with_hubsign.py \
-            --input 'tools/morning-brief/artifacts/Morning Brief No Safari.plist' \
-            --output 'tools/morning-brief/artifacts/Morning Brief No Safari.shortcut' \
-            --name 'Morning Brief No Safari' \
+            --input 'tools/morning-brief/artifacts/Morning Brief Compact.plist' \
+            --output 'tools/morning-brief/artifacts/Morning Brief Compact.shortcut' \
+            --name 'Morning Brief Compact' \
             2>&1 | tee tools/morning-brief/artifacts/morning-brief-hubsign.log
 
       - name: Verify signed artifact
@@ -90,7 +92,7 @@ jobs:
           set -euo pipefail
           python3 - <<'PY'
           from pathlib import Path
-          p=Path('tools/morning-brief/artifacts/Morning Brief No Safari.shortcut')
+          p=Path('tools/morning-brief/artifacts/Morning Brief Compact.shortcut')
           data=p.read_bytes()
           assert data.startswith(b'AEA1'), data[:8]
           assert len(data)>500, len(data)
@@ -105,10 +107,10 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p tools/morning-brief/acceptance
-          cp 'tools/morning-brief/artifacts/Morning Brief No Safari.shortcut' 'tools/morning-brief/acceptance/Morning Brief No Safari.shortcut'
+          cp 'tools/morning-brief/artifacts/Morning Brief Compact.shortcut' 'tools/morning-brief/acceptance/Morning Brief Compact.shortcut'
           git config user.name 'ProjectY OEL'
           git config user.email 'actions@users.noreply.github.com'
-          git add 'tools/morning-brief/acceptance/Morning Brief No Safari.shortcut'
+          git add 'tools/morning-brief/acceptance/Morning Brief Compact.shortcut'
           if ! git diff --cached --quiet; then
             git commit -m 'build: publish Morning Brief no-Safari acceptance artifact [skip ci]'
             git push origin "HEAD:${HEAD_REF}"
@@ -117,8 +119,8 @@ jobs:
       - name: Upload iPhone acceptance package
         uses: actions/upload-artifact@v4
         with:
-          name: morning-brief-no-safari
+          name: morning-brief-compact
           path: |
-            tools/morning-brief/artifacts/Morning Brief No Safari.shortcut
+            tools/morning-brief/artifacts/Morning Brief Compact.shortcut
             tools/morning-brief/artifacts/morning-brief-hubsign.log
           if-no-files-found: error
