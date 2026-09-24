@@ -14,21 +14,38 @@ const historyFile = getFile("YOS Night History.json", nil, false)
 const historyJson = getText(historyFile)
 
 const today = currentDate()
+const todayLabel = formatDate(today, "Custom", "    yyyy/MM/dd（EEE）")
 const tomorrow = adjustDate(today, "Add", qty(1, "days"))
 const tomorrowLabel = formatDate(tomorrow, "Custom", "    yyyy/MM/dd（EEE）")
 
+const todayStartText = text("{todayLabel} 00:00")
+const todayStart = date(todayStartText)
+const todayEndText = text("{todayLabel} 23:59")
+const todayEnd = date(todayEndText)
 const tomorrowStartText = text("{tomorrowLabel} 00:00")
 const tomorrowStart = date(tomorrowStartText)
 const tomorrowEndText = text("{tomorrowLabel} 23:59")
 const tomorrowEnd = date(tomorrowEndText)
 
-// These three placeholder actions are replaced after Cherri compilation with the
-// same native Weather / Calendar / Reminders actions already proven on the iPhone.
+// These five placeholder actions are replaced after Cherri compilation with
+// native iPhone actions. Today signals feed the unconscious-observation layer;
+// tomorrow signals keep the existing preparation brief.
+const todayCalendar = text("YOS_NIGHT_TODAY_CALENDAR_PLACEHOLDER")
+const todayReminders = text("YOS_NIGHT_TODAY_REMINDERS_PLACEHOLDER")
 const tomorrowWeather = text("YOS_NIGHT_WEATHER_PLACEHOLDER")
 const tomorrowCalendar = text("YOS_NIGHT_CALENDAR_PLACEHOLDER")
 const tomorrowReminders = text("YOS_NIGHT_REMINDERS_PLACEHOLDER")
 
-const nightFacts = text("明日の日付：
+const nightFacts = text("今日の日付：
+{todayLabel}
+
+今日の予定：
+{todayCalendar}
+
+今日の未完了リマインダー：
+{todayReminders}
+
+明日の日付：
 {tomorrowLabel}
 
 天気予報：
@@ -45,28 +62,43 @@ const nightFacts = text("明日の日付：
 
 const modelPrompt = text("あなたはYOS Night Briefです。
 
-目的：
-本人が寝る前に、
-「明日になってから知ると遅いこと」と
-「本人自身では気づきにくい最近のパターン」
-だけを短く知らせる。
+最優先目的：
+本人が日記を書く前に、その日ここまでの情報から、本人自身では気づきにくい行動・判断・迷い・摩擦・反復・変化・予定と実行のズレ・進みやすい条件を10件以上提出する。
+単なる本人の自己申告の言い換えではなく、複数の情報を見比べて外部視点を作る。
 
-与えられた情報以外の事実を作らない。
-情報がない項目は無理に埋めない。
-事実・観察・推論を区別する。
+使ってよい証拠：
+・今日のCalendar
+・今日の未完了Reminder
+・過去14日のMY LIFE Night記録
+・明日のCalendar / Reminder / 天気（準備や先延ばし傾向を見る補助）
+・このChatGPT実行時に実際に参照できる今日の会話文脈や記憶がある場合のみ、その内容
+参照できない会話やデータを見たことにしてはいけない。
+
+【無意識発見 10+】
+・1番から番号を付けて最低10件
+・各項目の先頭に【確認済み事実】【観察候補】【推論】のどれかを付ける
+・各項目に短い根拠を必ず付ける
+・同じ現象の言い換えや同じ根拠の分割で水増ししない
+・本人が明示した自己評価を、そのまま発見として数えない
+・性格診断、心理診断、動機の断定をしない
+・弱い証拠は断定せず【観察候補】または【推論】にする
+・新しい根拠、頻度変化、文脈差、反例を優先する
+・過去と同じ発見は、新しい証拠や変化がある時だけ再掲する
+・根拠のない項目は作らない
+
+10件の後に、特に重要なものを最大3件だけ【深掘り候補】として番号で示す。
+
+その後、従来の前夜準備を短く続ける。
 
 【明日の予定】
-Calendarの明日の予定を時間順に整理する。
-終日予定は「終日」と表示する。
-予定がなければ「予定なし」。
+Calendarの明日の予定を時間順に整理する。終日予定は「終日」。なければ「予定なし」。
 
 【明日の天気】
-天気予報から明日の分だけを見る。
-天気、最高・最低気温、雨など、前夜に準備へ影響することだけを短く出す。
+明日の天気、最高・最低気温、雨など、前夜の準備へ影響することだけ。
 
 【明日のごみ】
 収集区域④。
-2026年9月1日以降のルール：
+2026年9月1日以降：
 月曜：かん・びん・紙・ペットボトル・有害ごみ
 火曜：燃やすごみ
 第1・第3水曜：草木
@@ -75,44 +107,27 @@ Calendarの明日の予定を時間順に整理する。
 金曜：燃やすごみ
 土曜：通常収集なし
 日曜：通常収集なし
-明日の曜日と、その月の何回目の水曜日かを正しく判定し、該当するごみだけ表示する。なければ「なし」。
+明日の曜日と、その月の何回目の水曜日かを正しく判定する。なければ「なし」。
 
 【期限・準備】
-明日期限の未完了Reminder、明日の予定や天気から見て前夜に準備する必要が明確なものだけ出す。
-根拠なく準備物を作らない。
+明日期限の未完了Reminder、明日の予定や天気から、前夜に準備する必要が明確なものだけ。根拠なく準備物を作らない。
 
-【外部視点】
-過去14日のMY LIFE Night記録から、本人自身では気づきにくいものだけ拾う。
-・繰り返している行動
-・同じ場所で詰まるパターン
-・判断の繰り返し
-・計画と実際の差
-・進みやすい条件
-・以前から変化していること
+出力順：
+【無意識発見 10+】
+1. ...
+...
+【深掘り候補】...
+【明日の予定】...
+【天気】...
+【ごみ】...
+【期限・準備】...
 
-ルール：
-・1回だけの出来事をパターン扱いしない
-・複数日の証拠があるものだけパターン候補にする
-・性格診断、心理診断をしない
-・本人を決めつけない
-・推論なら「推論」と分かるようにする
-・以前と同じ発見を、新しい根拠なしに繰り返さない
-・十分な証拠がなければ「新しい発見なし」
-
-出力：
-【明日の予定】：
-【天気】：
-【ごみ】：
-【期限・準備】：
-【外部視点】：
-
-寝る前に20〜30秒で読める長さにする。
-タイトルや前置きは不要。
+タイトルや前置きは不要。各項目は短くし、iPhoneでスクロールして読める長さにする。
 
 入力情報：
 {nightFacts}")
 
 const response = askChatGPT(modelPrompt, false, "Text")
-showNotification(response)
-alert(response, "Night Brief")
+showNotification("Night Brief：無意識発見10件以上を用意しました")
+show(response)
 run("Night Check in", response)
