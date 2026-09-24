@@ -80,6 +80,7 @@ jobs:
           assert ids.count('is.workflow.actions.weather.forecast') == 1
           assert ids.count('is.workflow.actions.filter.calendarevents') == 2
           assert ids.count('is.workflow.actions.filter.reminders') == 2
+          assert ids.count('is.workflow.actions.properties.calendarevents') >= 3
           assert ids.count('is.workflow.actions.askllm') == 2
           assert ids.count('is.workflow.actions.notification') == 1
           assert ids.count('is.workflow.actions.alert') == 2
@@ -96,6 +97,11 @@ jobs:
           assert 'iPhoneで10〜15秒で読み切れる長さ' in blob
           assert '今日の予定' in blob
           assert '今日の未完了リマインダー' in blob
+          assert '明日の予定開始時刻' in blob
+          assert 'HH:mm 予定名' in blob
+          assert '終日 予定名' in blob
+          assert '各項目の間には必ず空行を1行入れる' in blob
+          assert ids.count('is.workflow.actions.text.replace') >= 2
           assert 'night_history=1' not in blob
           assert 'night_save=1' not in blob
           assert 'night-checkin-save-bridge' not in blob
