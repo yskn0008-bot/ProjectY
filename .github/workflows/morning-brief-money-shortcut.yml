@@ -6,13 +6,14 @@ on:
       - 'yos/morning-brief-bridge-v1.js'
       - 'yos/morning-brief-bridge.html'
       - 'yos/tests/morning-brief-bridge.test.mjs'
+      - 'yos/money-master-v1.js'
       - 'tools/morning-brief/**'
       - 'tools/clarity-factory/sign_with_hubsign.py'
       - '.github/workflows/morning-brief-money-shortcut.yml'
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build-and-sign:
@@ -20,15 +21,26 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref || github.ref_name }}
 
-      - name: Test Morning Brief bridge
+      - name: Test existing Morning Brief bridge
         shell: bash
         run: |
           set -euo pipefail
           node --check yos/morning-brief-bridge-v1.js
           node --test yos/tests/morning-brief-bridge.test.mjs
 
-      - name: Validate existing Shortcut patch contract
+      - name: Build no-Safari Morning Brief plist
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p tools/morning-brief/artifacts
+          python3 tools/morning-brief/patch_no_safari.py \
+            'tools/morning-brief/Morning Brief Money Connected.plist' \
+            'tools/morning-brief/artifacts/Morning Brief No Safari.plist'
+
+      - name: Validate no-Safari Shortcut contract
         shell: bash
         run: |
           set -euo pipefail
@@ -36,42 +48,41 @@ jobs:
           import plistlib
           from pathlib import Path
 
-          path=Path('tools/morning-brief/Morning Brief Money Connected.plist')
+          path=Path('tools/morning-brief/artifacts/Morning Brief No Safari.plist')
           workflow=plistlib.loads(path.read_bytes())
           actions=workflow.get('WFWorkflowActions',[])
           ids=[a.get('WFWorkflowActionIdentifier','') for a in actions]
           blob=repr(workflow)
 
-          assert len(actions)==16, len(actions)
-          assert workflow.get('WFWorkflowHasShortcutInputVariables') is True
-          first=actions[0].get('WFWorkflowActionParameters',{})
-          assert first.get('WFCondition') == 8, first
-          assert first.get('WFConditionalActionString') == 'YOS_MORNING_MONEY_V1', first
-          value=first.get('WFInput',{}).get('Variable',{}).get('Value',{})
-          assert value.get('Type') == 'ExtensionInput', value
-          assert value.get('VariableName') == 'ShortcutInput', value
+          assert len(actions)==11, len(actions)
+          assert workflow.get('WFWorkflowHasShortcutInputVariables') is False
           assert ids.count('is.workflow.actions.weather.currentconditions')==1
           assert ids.count('is.workflow.actions.weather.forecast')==1
           assert ids.count('is.workflow.actions.filter.calendarevents')==1
           assert ids.count('is.workflow.actions.filter.reminders')==1
+          assert ids.count('is.workflow.actions.downloadurl')==1
           assert ids.count('is.workflow.actions.askllm')==1
           assert ids.count('is.workflow.actions.notification')==1
           assert ids.count('is.workflow.actions.alert')==1
-          assert ids.count('is.workflow.actions.openurl')==1
-          assert ids.count('is.workflow.actions.exit')==1
-          assert 'YOS_MORNING_MONEY_V1' in blob
-          assert 'morning-brief-bridge.html?return=shortcut&format=brief-text' in blob
+          assert ids.count('is.workflow.actions.openurl')==0
+          assert ids.count('is.workflow.actions.exit')==0
+          assert 'raw.githubusercontent.com/yskn0008-bot/ProjectY/main/yos/money-master-v1.js' in blob
+          assert 'morning-brief-bridge.html?return=shortcut' not in blob
+          assert 'shortcuts://run-shortcut' not in blob
           assert '【お金】' in blob
-          assert '今日使える金額・次の支払い・次の入金・不足見込み' in blob
-          print(f'Morning Brief Money patch: PASS ({len(actions)} actions)')
+          assert 'base.masterFacts' in blob
+          print(f'Morning Brief no-Safari contract: PASS ({len(actions)} actions)')
           PY
 
       - name: Sign Morning Brief
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p tools/morning-brief/artifacts
-          python3 tools/clarity-factory/sign_with_hubsign.py             --input 'tools/morning-brief/Morning Brief Money Connected.plist'             --output 'tools/morning-brief/artifacts/Morning Brief.shortcut'             --name 'Morning Brief'             2>&1 | tee tools/morning-brief/artifacts/morning-brief-hubsign.log
+          python3 tools/clarity-factory/sign_with_hubsign.py \
+            --input 'tools/morning-brief/artifacts/Morning Brief No Safari.plist' \
+            --output 'tools/morning-brief/artifacts/Morning Brief.shortcut' \
+            --name 'Morning Brief' \
+            2>&1 | tee tools/morning-brief/artifacts/morning-brief-hubsign.log
 
       - name: Verify signed artifact
         shell: bash
@@ -86,10 +97,27 @@ jobs:
           print(f'Morning Brief signed AEA1: PASS ({len(data)} bytes)')
           PY
 
+      - name: Publish iPhone acceptance artifact to PR branch
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+        shell: bash
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+        run: |
+          set -euo pipefail
+          mkdir -p tools/morning-brief/acceptance
+          cp 'tools/morning-brief/artifacts/Morning Brief.shortcut' 'tools/morning-brief/acceptance/Morning Brief.shortcut'
+          git config user.name 'ProjectY OEL'
+          git config user.email 'actions@users.noreply.github.com'
+          git add 'tools/morning-brief/acceptance/Morning Brief.shortcut'
+          if ! git diff --cached --quiet; then
+            git commit -m 'build: publish Morning Brief no-Safari acceptance artifact [skip ci]'
+            git push origin "HEAD:${HEAD_REF}"
+          fi
+
       - name: Upload iPhone acceptance package
         uses: actions/upload-artifact@v4
         with:
-          name: morning-brief-money-connected
+          name: morning-brief-no-safari
           path: |
             tools/morning-brief/artifacts/Morning Brief.shortcut
             tools/morning-brief/artifacts/morning-brief-hubsign.log
