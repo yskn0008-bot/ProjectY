@@ -1,7 +1,6 @@
 #define name Night Brief
 #define color purple
 
-#include 'actions/basic'
 #include 'actions/text'
 #include 'actions/documents'
 #include 'actions/intelligence'
