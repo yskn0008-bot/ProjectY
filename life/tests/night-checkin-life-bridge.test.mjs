@@ -4,6 +4,8 @@ import test from 'node:test';
 import vm from 'node:vm';
 
 const source=await readFile(new URL('../night-checkin-life-bridge-v1.js',import.meta.url),'utf8');
+const saveBridgeHtml=await readFile(new URL('../night-checkin-save-bridge.html',import.meta.url),'utf8');
+const serviceWorker=await readFile(new URL('../../service-worker.js',import.meta.url),'utf8');
 
 function api(){
   const window={};
@@ -66,4 +68,17 @@ test('bridge source keeps the existing Life SSOT and has no Money duplication',(
   assert.match(source,/day\.lifeFlow=\{\.\.\.flow,nightCheckin:record\}/);
   assert.doesNotMatch(source,/localStorage\.setItem\(['"]yos-night/);
   assert.doesNotMatch(source,/spentToday|money:/);
+});
+
+
+test('dedicated save bridge keeps the large payload in the fragment until after the short page loads',()=>{
+  assert.match(saveBridgeHtml,/location\.hash\.startsWith\('#'\)/);
+  assert.match(saveBridgeHtml,/history\.replaceState\(\{\},'',location\.pathname\+'\?'\+fragment\)/);
+  assert.match(saveBridgeHtml,/night-checkin-life-bridge-v1\.js\?v=4/);
+});
+
+test('service worker never falls Night save bridge back to MY WAY root',()=>{
+  assert.match(serviceWorker,/v14-night-save-bridge/);
+  assert.match(serviceWorker,/\.\/life\/night-checkin-save-bridge\.html/);
+  assert.match(serviceWorker,/path\.endsWith\('\/life\/night-checkin-save-bridge\.html'\)\)return '\.\/life\/night-checkin-save-bridge\.html'/);
 });
