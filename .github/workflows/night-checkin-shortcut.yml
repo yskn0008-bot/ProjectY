@@ -5,6 +5,7 @@ on:
     paths:
       - 'life/night-checkin-life-bridge-v1.js'
       - 'life/night-checkin-save-bridge.html'
+      - 'service-worker.js'
       - 'life/tests/night-checkin-life-bridge.test.mjs'
       - 'life/yos-suite-v3.js'
       - 'tools/night-checkin/**'
@@ -91,7 +92,8 @@ jobs:
           assert 'yos-night-save-ok-v1' in blob
           assert 'night_history=1' not in blob
           assert 'night_save=1' in blob
-          assert 'https://yskn0008-bot.github.io/ProjectY/life/night-checkin-save-bridge.html' in blob
+          assert 'https://yskn0008-bot.github.io/ProjectY/life/night-checkin-save-bridge.html#night_save=1' in blob
+          assert 'night-checkin-save-bridge.html?night_save=1' not in blob
           assert 'https://yskn0008-bot.github.io/ProjectY/life/?night_save=1' not in blob
           assert 'Night%20Check%20in' in blob
           assert 'Money' not in blob
