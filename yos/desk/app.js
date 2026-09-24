@@ -85,3 +85,221 @@ q("#boardBtn").onclick=function(){tap();var html='<h3>共有掲示板</h3>';html
 q("#metricsBtn").onclick=function(){tap();showSheet('<h3>操作計測</h3><p>起動 '+esc(state.metrics.opens||0)+'回<br>タップ '+esc(state.metrics.taps||0)+'回<br>並べ替え '+esc(state.metrics.reorders||0)+'回<br>投稿 '+esc(state.metrics.posts||0)+'回</p><button id="closeSheetBtn">閉じる</button>');q("#closeSheetBtn").onclick=closeSheet};
 q("#deskSend").onclick=function(){tap();var input=q("#deskInput"),text=input.value.trim();if(!text)return;var d=new Date();state.board.push({text:text,time:String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0")});state.metrics.posts=(state.metrics.posts||0)+1;input.value="";persist();showToast("共有掲示板へ投稿")};
 renderDev();renderChats();setPage(currentPage);updateClock();setInterval(updateClock,30000);window.addEventListener("beforeunload",persist);persist();
+
+
+/* YOS DESK live sync v1 */
+(function(){
+  var ASSETS_URL='../../data/yos-assets.json';
+  var MONEY_KEY='yos-money-v2';
+  var HOME_SETTINGS_KEY='yos-home-settings-v2';
+  var HOME_SETTINGS_LEGACY_KEY='yos-home-settings-v1';
+  var TAXI_SETTINGS_KEY='yos-taxi-settings-v2';
+  var liveSyncTimer=null;
+
+  function readJSON(key,fallback){
+    try{return JSON.parse(localStorage.getItem(key)||'null')??fallback}catch(e){return fallback}
+  }
+
+  function yen(value){
+    var n=Number(value);
+    return Number.isFinite(n)?Math.round(n).toLocaleString('ja-JP')+'円':'未設定';
+  }
+
+  function md(date){
+    var m=/^\d{4}-(\d{2})-(\d{2})$/.exec(String(date||''));
+    return m?(Number(m[1])+'/'+Number(m[2])):'';
+  }
+
+  function statusLabel(value){
+    return {
+      complete:'完了',
+      awaiting_device_verification:'実機確認待ち',
+      awaiting_production_verification:'本番確認待ち',
+      planned:'予定',
+      active:'進行中',
+      review:'確認中',
+      paused:'停止中',
+      backlog:'未着手'
+    }[String(value||'')]||String(value||'更新中');
+  }
+
+  function currentMoney(){
+    var money=readJSON(MONEY_KEY,null);
+    var facts=money&&money.masterFacts||{};
+    var tx=money&&Array.isArray(money.transactions)?money.transactions:[];
+    var today=new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Tokyo'}).format(new Date());
+    var future=tx.filter(function(x){
+      return x&&x.date>=today&&!['paid','received','done','completed'].includes(String(x.status||'').toLowerCase());
+    }).sort(function(a,b){return String(a.date).localeCompare(String(b.date))});
+    var payment=future.find(function(x){return ['expense','debt','saving','investment'].includes(x.type)})||null;
+    var income=future.find(function(x){return x.type==='income'})||facts.nextIncome||null;
+    return {
+      balance:Number.isFinite(Number(facts.currentBalance))?Number(facts.currentBalance):null,
+      shortfall:Number.isFinite(Number(facts.shortfallToRequiredPayments))?Number(facts.shortfallToRequiredPayments):null,
+      payment:payment,
+      income:income,
+      updatedAt:money&&money.updatedAt||''
+    };
+  }
+
+  function paymentText(item){
+    if(!item)return '未設定';
+    return [md(item.date),item.label,yen(item.amount)].filter(Boolean).join(' ');
+  }
+
+  function incomeText(item){
+    if(!item)return '未設定';
+    var approx=item.amountApproximate||item.certainty==='見込み';
+    return [md(item.date),item.label,(approx?'約':'')+yen(item.amount)].filter(Boolean).join(' ');
+  }
+
+  function updateMoneyDev(asset){
+    var m=currentMoney();
+    if(devCatalog.money){
+      devCatalog.money.name='Money';
+      devCatalog.money.status=asset?statusLabel(asset.status):'自動同期';
+      var bits=[];
+      if(m.balance!==null)bits.push('使える '+yen(m.balance));
+      if(m.payment)bits.push('次 '+paymentText(m.payment));
+      devCatalog.money.next=bits.join(' / ')||'実データを確認';
+      if(asset&&Number.isFinite(Number(asset.progress)))devCatalog.money.pct=Number(asset.progress);
+    }
+  }
+
+  function updateClarity(asset){
+    if(!asset)return;
+    if(devCatalog.clarity){
+      devCatalog.clarity.status=statusLabel(asset.status);
+      devCatalog.clarity.next=asset.next_action||asset.current||'更新待ち';
+      if(Number.isFinite(Number(asset.progress)))devCatalog.clarity.pct=Number(asset.progress);
+    }
+    var title=q('.heroTitle');
+    var eyebrow=q('.eyebrow');
+    var sub=q('.heroSub');
+    var next=q('.next');
+    var big=q('.heroSide .big');
+    var label=q('.heroSide .label');
+    var bar=q('.heroSide .bar i');
+    if(title)title.textContent='Clarity';
+    if(eyebrow)eyebrow.textContent='今やる · '+statusLabel(asset.status);
+    if(sub)sub.textContent=asset.current||'最新状態を同期中';
+    if(next)next.innerHTML='<b>次：</b>'+esc(asset.next_action||'確認待ち');
+    if(big)big.textContent=(Number.isFinite(Number(asset.progress))?Number(asset.progress):0)+'%';
+    if(label)label.innerHTML='SSOT<br>自動同期';
+    if(bar)bar.style.width=Math.max(0,Math.min(100,Number(asset.progress)||0))+'%';
+  }
+
+  function storedYosUrl(){
+    var a=readJSON(HOME_SETTINGS_KEY,{});
+    var b=readJSON(HOME_SETTINGS_LEGACY_KEY,{});
+    var c=readJSON(TAXI_SETTINGS_KEY,{});
+    var url=String(a.yosUrl||b.yosUrl||c.yosUrl||'').trim();
+    return /^https:\/\/chatgpt\.com\//.test(url)?url:'';
+  }
+
+  function harvestStoredChatLinks(){
+    var found=[];
+    for(var i=0;i<localStorage.length;i++){
+      var key=localStorage.key(i);
+      var raw=localStorage.getItem(key)||'';
+      var matches=raw.match(/https:\/\/chatgpt\.com\/(?:c|g)\/[A-Za-z0-9._~:/?#\[\]@!$&'()*+,;=%-]+/g)||[];
+      matches.forEach(function(url){
+        if(found.indexOf(url)<0)found.push(url);
+      });
+    }
+    var yos=storedYosUrl();
+    if(yos&&found.indexOf(yos)<0)found.unshift(yos);
+    found.slice(0,20).forEach(function(url,index){
+      var existing=state.chats.find(function(x){return x.url===url});
+      if(existing)return;
+      state.chats.unshift({
+        id:'stored-chat-'+Date.now()+'-'+index,
+        project:'登録済み',
+        title:index===0&&url===yos?'YOS Chat':'ChatGPT',
+        preview:'この端末に保存済みのChatGPTリンク',
+        time:'登録済み',
+        unread:0,
+        pinned:index===0,
+        avatar:index===0?'Y':'C',
+        tone:index===0?'gold':'blue',
+        alias:'',
+        url:url
+      });
+    });
+    if(found.length)persist();
+  }
+
+  function openMoneySheet(){
+    var m=currentMoney();
+    var html='<h3>Money</h3>'+
+      '<p>今使える金：<b>'+esc(m.balance!==null?yen(m.balance):'未設定')+'</b><br>'+
+      '次の支払い：'+esc(paymentText(m.payment))+'<br>'+
+      '不足見込み：'+esc(m.shortfall!==null?yen(m.shortfall):'未設定')+'<br>'+
+      '次の入金：'+esc(incomeText(m.income))+'</p>'+
+      '<button class="primary" id="openMoneyPage">MY MONEYを開く</button>'+
+      '<button id="closeSheetBtn">閉じる</button>';
+    showSheet(html);
+    q('#openMoneyPage').onclick=function(){location.href='../#money'};
+    q('#closeSheetBtn').onclick=closeSheet;
+  }
+
+  function bindRealEntrances(){
+    qa('.quickBtn').forEach(function(b){
+      var name=b.dataset.quick;
+      if(name==='Money')b.onclick=function(){tap();openMoneySheet()};
+      else if(name==='Clarity')b.onclick=function(){tap();location.href='shortcuts://run-shortcut?name=Clarity'};
+      else if(name==='MY WAY')b.onclick=function(){tap();location.href='../'};
+      else if(name==='MY LIFE')b.onclick=function(){tap();location.href='../../life/'};
+      else if(name==='YOS Chat')b.onclick=function(){
+        tap();
+        var url=storedYosUrl();
+        if(url){location.href=url;return}
+        showSheet('<h3>YOS Chat</h3><p>保存済みのYOSチャットURLがまだありません。</p><button class="primary" id="openChatGPT">ChatGPTを開く</button><button id="closeSheetBtn">閉じる</button>');
+        q('#openChatGPT').onclick=function(){location.href='https://chatgpt.com/'};
+        q('#closeSheetBtn').onclick=closeSheet;
+      };
+    });
+  }
+
+  async function syncAssets(){
+    try{
+      var res=await fetch(ASSETS_URL+'?t='+Date.now(),{cache:'no-store'});
+      if(!res.ok)throw new Error('asset fetch '+res.status);
+      var data=await res.json();
+      var assets=Array.isArray(data.assets)?data.assets:[];
+      var clarity=assets.find(function(x){return x.id==='clarity'});
+      var money=assets.find(function(x){return x.id==='money'});
+      updateClarity(clarity);
+      updateMoneyDev(money);
+      renderDev();
+      bindRealEntrances();
+      document.documentElement.dataset.liveSync='ok';
+    }catch(e){
+      updateMoneyDev(null);
+      renderDev();
+      bindRealEntrances();
+      document.documentElement.dataset.liveSync='local-only';
+    }
+  }
+
+  function syncLocal(){
+    updateMoneyDev(null);
+    harvestStoredChatLinks();
+    renderDev();
+    renderChats();
+    bindRealEntrances();
+  }
+
+  function runLiveSync(){
+    syncLocal();
+    syncAssets();
+  }
+
+  harvestStoredChatLinks();
+  bindRealEntrances();
+  runLiveSync();
+  clearInterval(liveSyncTimer);
+  liveSyncTimer=setInterval(runLiveSync,30000);
+  window.addEventListener('storage',runLiveSync);
+  document.addEventListener('visibilitychange',function(){if(!document.hidden)runLiveSync()});
+})();
