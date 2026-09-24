@@ -261,6 +261,87 @@ renderDev();renderChats();setPage(currentPage);updateClock();setInterval(updateC
     });
   }
 
+  function syncAssetDashboard(data){
+    var assets=Array.isArray(data&&data.assets)?data.assets:[];
+    var byId={};
+    assets.forEach(function(asset){byId[asset.id]=asset});
+
+    ['clarity','money','my-way-widget'].forEach(function(id){
+      var asset=byId[id];
+      if(!asset)return;
+      devCatalog[id]={
+        id:id,
+        name:asset.name||id,
+        status:statusLabel(asset.status),
+        next:asset.next_action||asset.current||'確認待ち',
+        pct:Number.isFinite(Number(asset.progress))?Number(asset.progress):0
+      };
+    });
+
+    if(state.assetDeskVersion!=='2026-09-24-live-v2'){
+      state.deskOrder=['clarity','money','my-way-widget'].filter(function(id){return Boolean(devCatalog[id])});
+      state.assetDeskVersion='2026-09-24-live-v2';
+      persist();
+    }else{
+      state.deskOrder=(Array.isArray(state.deskOrder)?state.deskOrder:[])
+        .filter(function(id){return Boolean(devCatalog[id])});
+      ['clarity','money','my-way-widget'].forEach(function(id){
+        if(devCatalog[id]&&state.deskOrder.indexOf(id)<0)state.deskOrder.push(id);
+      });
+      state.deskOrder=state.deskOrder.slice(0,3);
+    }
+
+    var incomplete=assets.filter(function(asset){return asset.status!=='complete'});
+    var needsUser=incomplete.filter(function(asset){return asset.needs_user_action});
+    var stats=qa('.stats .stat');
+    if(stats[0]){
+      var b0=stats[0].querySelector('b'),s0=stats[0].querySelector('span');
+      if(b0)b0.textContent=incomplete.length+'件';
+      if(s0)s0.textContent='未完了';
+    }
+    if(stats[1]){
+      var b1=stats[1].querySelector('b'),s1=stats[1].querySelector('span');
+      if(b1)b1.textContent=needsUser.length+'件';
+      if(s1)s1.textContent='本人確認待ち';
+    }
+    if(stats[2]){
+      var b2=stats[2].querySelector('b'),s2=stats[2].querySelector('span');
+      var overall=data&&data.summary&&Number(data.summary.overall_progress);
+      if(b2)b2.textContent=Number.isFinite(overall)?overall+'%':'--';
+      if(s2)s2.textContent='YOS全体進捗';
+    }
+
+    var candidates=needsUser.slice().sort(function(a,b){
+      return Number(a.priority||99)-Number(b.priority||99)||
+        Number(a.progress||0)-Number(b.progress||0)||
+        String(a.name||'').localeCompare(String(b.name||''));
+    }).slice(0,2);
+    var buttons=[q('#nightSuggest'),q('#mergeSuggest')];
+    buttons.forEach(function(button,index){
+      if(!button)return;
+      var asset=candidates[index];
+      if(!asset){
+        button.style.display='none';
+        return;
+      }
+      button.style.display='';
+      button.innerHTML='<small>本人確認待ち</small><b>'+esc(asset.name||asset.id)+'</b><p>'+esc(asset.next_action||asset.current||'確認待ち')+'</p>';
+      button.onclick=function(){
+        tap();
+        if(devCatalog[asset.id]){openDevDetail(asset.id);return}
+        showSheet(
+          '<h3>'+esc(asset.name||asset.id)+'</h3>'+
+          '<p>状態：'+esc(statusLabel(asset.status))+'<br>進捗：'+esc(asset.progress||0)+'%<br>次：'+esc(asset.next_action||asset.current||'確認待ち')+'</p>'+
+          '<button id="closeSheetBtn">閉じる</button>'
+        );
+        q('#closeSheetBtn').onclick=closeSheet;
+      };
+    });
+
+    var suggestionHead=q('.suggestions')&&q('.suggestions').parentElement&&q('.suggestions').parentElement.querySelector('.sectionHead span');
+    if(suggestionHead)suggestionHead.textContent='SSOTから自動更新';
+  }
+
   async function syncAssets(){
     try{
       var res=await fetch(ASSETS_URL+'?t='+Date.now(),{cache:'no-store'});
@@ -269,6 +350,7 @@ renderDev();renderChats();setPage(currentPage);updateClock();setInterval(updateC
       var assets=Array.isArray(data.assets)?data.assets:[];
       var clarity=assets.find(function(x){return x.id==='clarity'});
       var money=assets.find(function(x){return x.id==='money'});
+      syncAssetDashboard(data);
       updateClarity(clarity);
       updateMoneyDev(money);
       renderDev();
