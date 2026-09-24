@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-24T14:05:51+09:00",
+  "updated_at": "2026-09-24T14:25:02+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -40,7 +40,7 @@
       "priority": 1,
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/473",
-      "updated_at": "2026-09-24T05:02:15Z"
+      "updated_at": "2026-09-24T05:24:51Z"
     },
     {
       "id": "github-pr-426",
@@ -70,7 +70,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-09-24T05:04:41Z"
+      "updated_at": "2026-09-24T05:24:57Z"
     },
     {
       "id": "github-issue-256",
@@ -165,6 +165,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-5baa26c4c078",
+      "title": "YOS DESK: 実データ自動同期とPWA運用接続",
+      "completed_at": "2026-09-24T05:24:48Z",
+      "result": "GitHub mainへ反映（5baa26c）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/5baa26c4c0788c1c2be75a87c5a6310742602a8d"
+    },
+    {
       "id": "github-commit-2337d08a4014",
       "title": "YOS DESK: 下部ナビと本文を完全分離",
       "completed_at": "2026-09-24T05:05:36Z",
@@ -191,13 +198,6 @@
       "completed_at": "2026-09-24T04:19:32Z",
       "result": "GitHub mainへ反映（a8bf88b）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/a8bf88b7e81fb0f4576886fcf4a8d40fa5be1287"
-    },
-    {
-      "id": "github-commit-5f1bdac8d2f0",
-      "title": "Restore canonical Morning Brief shortcut name (#472)",
-      "completed_at": "2026-09-24T02:55:51Z",
-      "result": "GitHub mainへ反映（5f1bdac）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/5f1bdac8d2f0b37ac6e521fbaada0e7af456e343"
     },
     {
       "id": "complete-002",
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-24T14:05:51+09:00",
+      "last_update": "2026-09-24T14:25:02+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -315,7 +315,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-24T14:05:51+09:00",
+      "last_update": "2026-09-24T14:25:02+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-24T14:05:51+09:00",
+      "last_update": "2026-09-24T14:25:02+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "8e7baa2f2a4fd409966319137f8345735e37cc1defc2298887ddafe40615988b"
+  "github_snapshot_hash": "e58c3d70e3b1b7bff24acdee6a33737f3475e79e691298f7432e9bbbc8e044aa"
 }
