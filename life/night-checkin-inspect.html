@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Night Check-in 保存データ</title>
+<style>
+:root{color-scheme:light dark}
+body{font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",sans-serif;margin:0;background:#111;color:#f5f5f5}
+main{max-width:760px;margin:auto;padding:calc(env(safe-area-inset-top) + 18px) 16px 40px}
+h1{font-size:24px;margin:0 0 8px}
+.meta{opacity:.7;font-size:14px;margin-bottom:18px}
+.card{background:#1d1d1f;border:1px solid #333;border-radius:18px;padding:16px;margin:12px 0}
+.date{font-size:18px;font-weight:700;margin-bottom:12px}
+.row{margin:10px 0}
+.label{font-size:12px;opacity:.6;margin-bottom:3px}
+.value{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.55}
+.raw{background:#111;border-radius:12px;padding:10px}
+button{font:inherit;border:0;border-radius:12px;padding:10px 14px;background:#fff;color:#111;font-weight:700}
+.empty{padding:28px 0;opacity:.75}
+</style>
+</head>
+<body>
+<main>
+<h1>Night Check-in 保存データ</h1>
+<div class="meta">このページはこのiPhoneのSafari内に保存された <code>yos-life-v1</code> を読むだけです。データは送信しません。</div>
+<div id="summary"></div>
+<div id="list"></div>
+</main>
+<script>
+(()=>{
+  const KEY='yos-life-v1';
+  const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  let store={};
+  try{store=JSON.parse(localStorage.getItem(KEY)||'{}')||{}}catch{}
+  const days=store.days&&typeof store.days==='object'?store.days:{};
+  const records=Object.keys(days)
+    .filter(date=>days[date]?.lifeFlow?.nightCheckin)
+    .sort((a,b)=>b.localeCompare(a))
+    .map(date=>({date,n:days[date].lifeFlow.nightCheckin}));
+  document.getElementById('summary').innerHTML=
+    '<div class="card"><b>保存件数：'+records.length+'件</b></div>';
+  if(!records.length){
+    document.getElementById('list').innerHTML='<div class="empty">保存済みのNight Check-inは見つかりませんでした。</div>';
+    return;
+  }
+  const fields=[
+    ['raw_input','本人の入力'],
+    ['summary','今日あったこと'],
+    ['mood_state','気分・状態'],
+    ['tomorrow','明日やること'],
+    ['discoveries','YOS 自分の発見'],
+    ['three_line_diary','3行日記'],
+    ['tomorrow_message','明日への一言'],
+    ['generated_at','生成日時']
+  ];
+  document.getElementById('list').innerHTML=records.map(({date,n})=>
+    '<section class="card"><div class="date">'+esc(date)+'</div>'+
+    fields.map(([k,label])=>'<div class="row"><div class="label">'+label+'</div><div class="value '+(k==='raw_input'?'raw':'')+'">'+esc(n?.[k]||'—')+'</div></div>').join('')+
+    '</section>'
+  ).join('');
+})();
+</script>
+</body>
+</html>
