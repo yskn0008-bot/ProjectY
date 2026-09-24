@@ -55,6 +55,7 @@ jobs:
           python3 patch_action_extraction_policy.py "$runtime"
           python3 patch_append_file_paths.py "$runtime"
           python3 patch_direct_openai_fallback.py "$runtime"
+          python3 patch_model_boolean_gates.py "$runtime"
           mkdir -p artifacts-direct
           printf '%s\n' "$BUILD_ID" > artifacts-direct/BUILD_ID.txt
           cp "$runtime" artifacts-direct/Clarity-direct-openai-unsigned.shortcut

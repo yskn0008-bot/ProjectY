@@ -41,5 +41,6 @@ class ArtifactIdentitySourceContractTests(unittest.TestCase):
             self.assertIn(field, self.source)
 
 
+
 if __name__ == "__main__":
     unittest.main()

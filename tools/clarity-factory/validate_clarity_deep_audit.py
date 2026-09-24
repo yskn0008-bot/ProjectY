@@ -286,6 +286,74 @@ def validate(path: Path, expected_build_id: str) -> None:
                 f"modelPrompt attachment range stale for {label.strip()}"
             )
 
+    # Boolean safety gates must compare the model booleans explicitly.
+    # Bare Cherri conditions compile to WFCondition=100/101 (presence/empty),
+    # which treats false as a present value and caused the real-device failure.
+    def gate_before(record_name: str) -> dict:
+        indexes = [
+            i
+            for i, action in enumerate(actions)
+            if params(action).get("CustomOutputName") == record_name
+        ]
+        if len(indexes) != 1:
+            raise AssertionError(
+                f"expected one {record_name}, found {len(indexes)}"
+            )
+        record_index = indexes[0]
+        for i in range(record_index - 1, max(-1, record_index - 6), -1):
+            action = actions[i]
+            p = params(action)
+            if (
+                action.get("WFWorkflowActionIdentifier")
+                == "is.workflow.actions.conditional"
+                and p.get("WFControlFlowMode") == 0
+            ):
+                return p
+        raise AssertionError(f"no conditional found before {record_name}")
+
+    review_gate = gate_before("blockedReviewRecord")
+    if (
+        review_gate.get("WFCondition") != 4
+        or review_gate.get("WFNumberValue") is not True
+        or token_action_output_names(review_gate.get("WFInput")) != {"needsReview"}
+    ):
+        raise AssertionError(f"needsReview gate is not explicit true: {review_gate!r}")
+
+    confirmation_gate = gate_before("blockedConfirmationRecord")
+    if (
+        confirmation_gate.get("WFCondition") != 4
+        or confirmation_gate.get("WFNumberValue") is not True
+        or token_action_output_names(confirmation_gate.get("WFInput"))
+        != {"requiresConfirmation"}
+    ):
+        raise AssertionError(
+            f"requiresConfirmation gate is not explicit true: {confirmation_gate!r}"
+        )
+
+    external_gate = gate_before("blockedExternalRecord")
+    wrapper = external_gate.get("WFConditions")
+    if not isinstance(wrapper, dict):
+        raise AssertionError("external-write gate missing WFConditions")
+    value = wrapper.get("Value")
+    if not isinstance(value, dict) or value.get("WFActionParameterFilterPrefix") != 1:
+        raise AssertionError("external-write gate must remain AND")
+    rows = value.get("WFActionParameterFilterTemplates")
+    if not isinstance(rows, list) or len(rows) != 2:
+        raise AssertionError("external-write gate must have two rows")
+    boolean_rows = {}
+    for row in rows:
+        if not isinstance(row, dict) or row.get("WFCondition") != 4:
+            raise AssertionError(f"external-write row is not explicit equality: {row!r}")
+        refs = token_action_output_names(row.get("WFInput"))
+        if len(refs) != 1:
+            raise AssertionError(f"external-write row has wrong refs: {sorted(refs)}")
+        boolean_rows[next(iter(refs))] = row.get("WFNumberValue")
+    if boolean_rows != {
+        "externalWrite": True,
+        "requiresConfirmation": False,
+    }:
+        raise AssertionError(f"external-write boolean rows wrong: {boolean_rows!r}")
+
     # Audit every Conditional and Repeat group, not just feature paths.
     condition_groups: dict[str, list[tuple[int, int]]] = defaultdict(list)
     repeat_groups: dict[str, list[tuple[int, int]]] = defaultdict(list)
@@ -459,7 +527,7 @@ def validate(path: Path, expected_build_id: str) -> None:
     print(
         "Clarity deep action audit: PASS "
         f"actions={len(actions)} identifiers={len(counts)} refs={refs} "
-        f"token_strings={token_strings} build_id={actual_build_id} prompt_bindings=3 model_decision_trace=1 calendar_destination=プライベート "
+        f"token_strings={token_strings} build_id={actual_build_id} prompt_bindings=3 model_decision_trace=1 boolean_gates=explicit calendar_destination=プライベート "
         f"condition_groups={len(condition_groups)} repeat_groups={len(repeat_groups)}"
     )
 
