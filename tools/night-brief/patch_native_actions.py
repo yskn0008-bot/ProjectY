@@ -260,7 +260,7 @@ def patch(path: Path) -> None:
     }
 
     workflow["WFWorkflowActions"] = actions
-    workflow["WFWorkflowHasShortcutInputVariables"] = True
+    workflow["WFWorkflowHasShortcutInputVariables"] = False
 
     blob = repr(workflow)
     ids = [a.get("WFWorkflowActionIdentifier", "") for a in actions]
@@ -275,19 +275,27 @@ def patch(path: Path) -> None:
         fail("Reminders patch failed")
     if ids.count("is.workflow.actions.runworkflow"):
         fail("Night Brief must not depend on another Shortcut")
-    if ids.count("is.workflow.actions.openurl") != 1:
-        fail("Night Brief must contain exactly one MY LIFE save bridge")
-    if ids.count("is.workflow.actions.exit") != 2:
-        fail("Night Brief must stop on save callback and after launching the save bridge")
-    if "night_history=1" in blob:
-        fail("legacy browser history callback survived")
+    if ids.count("is.workflow.actions.openurl"):
+        fail("Night Brief must not open Safari")
+    if ids.count("is.workflow.actions.exit"):
+        fail("Night Brief must complete natively without callback stops")
+    if "night_history=1" in blob or "night_save=1" in blob or "shortcuts://run-shortcut" in blob:
+        fail("legacy browser/shortcut callback survived")
+    if ids.count("is.workflow.actions.file.createfolder") != 1:
+        fail("Night history folder action missing")
+    if ids.count("is.workflow.actions.file.getfoldercontents") != 1:
+        fail("Night history folder read missing")
+    if ids.count("is.workflow.actions.filter.files") != 1:
+        fail("Night history 14-day filter missing")
+    if ids.count("is.workflow.actions.documentpicker.save") != 1:
+        fail("Night history save missing")
     if "真栄原2丁目" in blob:
         fail("private street-level text must not be embedded")
 
     path.write_bytes(plistlib.dumps(workflow, fmt=plistlib.FMT_XML, sort_keys=False))
     print(
-        "Night Brief native patch: PASS "
-        f"(actions={len(actions)}, weather=1, calendar=2, reminders=2, run-shortcut=0, save-bridge=1)"
+        "Night Brief native-only patch: PASS "
+        f"(actions={len(actions)}, weather=1, calendar=2, reminders=2, safari=0, scriptable=0)"
     )
 
 
