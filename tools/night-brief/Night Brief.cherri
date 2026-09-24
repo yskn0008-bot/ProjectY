@@ -39,6 +39,12 @@ const tomorrowWeather = text("YOS_NIGHT_WEATHER_PLACEHOLDER")
 const tomorrowCalendar = text("YOS_NIGHT_CALENDAR_PLACEHOLDER")
 const tomorrowReminders = text("YOS_NIGHT_REMINDERS_PLACEHOLDER")
 
+// Keep tomorrow's Calendar title and time as separate native fields so GPT
+// cannot silently drop the scheduled time when rendering the brief.
+const tomorrowCalendarTitles = getEventDetail(tomorrowCalendar, "Title")
+const tomorrowCalendarStarts = getEventDetail(tomorrowCalendar, "Start Date")
+const tomorrowCalendarAllDay = getEventDetail(tomorrowCalendar, "Is All Day")
+
 const nightFacts = text("今日の日付：
 {todayLabel}
 
@@ -56,6 +62,15 @@ const nightFacts = text("今日の日付：
 
 明日の予定：
 {tomorrowCalendar}
+
+明日の予定タイトル：
+{tomorrowCalendarTitles}
+
+明日の予定開始時刻：
+{tomorrowCalendarStarts}
+
+明日の予定が終日か：
+{tomorrowCalendarAllDay}
 
 明日のリマインダー：
 {tomorrowReminders}
@@ -108,9 +123,24 @@ const modelPrompt = text("あなたはYOS Night Briefです。
 出力順：
 【今日の発見】
 1. ...
+
 2. ...
+
 3. ...
-【明日】...
+
+【明日】
+・天気：...
+・予定：...
+・ごみ：...
+・期限・準備：...
+
+表示ルール：
+・1、2、3の各項目の間には必ず空行を1行入れる。
+・【明日】の予定はCalendarに時刻がある場合、必ず「HH:mm 予定名」の形で予定時刻を入れる。
+・終日予定は「終日 予定名」と表示する。
+・予定が複数ある場合は時間順に並べる。
+・Calendarに存在しない時刻は作らない。
+・予定がなければ「予定：なし」。
 
 タイトルや前置きは不要。
 iPhoneで10〜15秒で読み切れる長さを最優先する。
@@ -119,8 +149,11 @@ iPhoneで10〜15秒で読み切れる長さを最優先する。
 {nightFacts}")
 
 const response = askChatGPT(modelPrompt, false, "Text")
+// Normalize spacing even if the model compresses the numbered discoveries.
+const spacedResponse2 = replaceText('\\n+2\\.', "\n\n2.", response, true, true)
+const spacedResponse3 = replaceText('\\n+3\\.', "\n\n3.", spacedResponse2, true, true)
 showNotification("Night Brief：今日の発見をまとめました")
-alert(response, "Night Brief")
+alert(spacedResponse3, "Night Brief")
 
 const rawInput = prompt(
     "テーマは決めなくてOK。今日のことを自由に書く・話す。\n\n思いつかなければ：今日あったこと／気分・気づき／明日やること",
@@ -147,7 +180,7 @@ three_line_diary: 事実ベースの3行日記。改行で3行。
 tomorrow_message: 明日への短い一言。
 
 日記前の外部視点：
-{response}
+{spacedResponse3}
 
 直近のNight記録：
 {recentHistory}
