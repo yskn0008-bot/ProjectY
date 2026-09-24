@@ -1,6 +1,6 @@
 'use strict';
 const CACHE_PREFIX='yos-unified-';
-const CACHE_NAME=CACHE_PREFIX+'v14-night-save-bridge';
+const CACHE_NAME=CACHE_PREFIX+'v15-yos-desk-readable';
 const STATIC=[
   './','./index.html','./manifest.webmanifest','./assets/yos-icon-180.png','./assets/yos-icon-512.png',
   './yos/','./yos/index.html','./yos/styles.css','./yos/readability-final.css','./yos/guide.html','./yos/guide.css','./yos/guide.js','./yos/guide-v2.css','./yos/guide-v2.js',
@@ -28,7 +28,11 @@ const CRITICAL_NETWORK_FIRST=new Set([
   '/ProjectY/yos/morning-brief-bridge-v1.js',
   '/ProjectY/yos/payment-alert-bridge-v1.js',
   '/ProjectY/yos/money-alert-bridge-v1.js',
-  '/ProjectY/life/night-checkin-life-bridge-v1.js'
+  '/ProjectY/life/night-checkin-life-bridge-v1.js',
+  '/ProjectY/yos/desk/index.html',
+  '/ProjectY/yos/desk/style.css',
+  '/ProjectY/yos/desk/compact.css',
+  '/ProjectY/yos/desk/app.js'
 ]);
 self.addEventListener('install',event=>{event.waitUntil((async()=>{const cache=await caches.open(CACHE_NAME);for(const path of STATIC){try{await cache.add(new Request(path,{cache:'reload'}));}catch(error){console.warn('YOS precache skipped',path,error);}}await self.skipWaiting();})());});
 self.addEventListener('activate',event=>{event.waitUntil((async()=>{const keys=await caches.keys();await Promise.all(keys.filter(key=>key.startsWith(CACHE_PREFIX)&&key!==CACHE_NAME).map(key=>caches.delete(key)));await self.clients.claim();})());});
