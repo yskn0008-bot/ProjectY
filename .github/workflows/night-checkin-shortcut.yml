@@ -78,12 +78,15 @@ jobs:
 
           assert ids.count('is.workflow.actions.ask') == 1, ids.count('is.workflow.actions.ask')
           assert ids.count('is.workflow.actions.askllm') == 1, ids.count('is.workflow.actions.askllm')
-          assert sum(i.endswith('openurl') for i in ids) >= 2, ids
+          assert sum(i.endswith('openurl') for i in ids) == 1, ids
+          assert ids.count('is.workflow.actions.documentpicker.open') >= 1, ids
+          assert ids.count('is.workflow.actions.documentpicker.save') >= 1, ids
+          assert ids.count('is.workflow.actions.detect.text') >= 1, ids
           assert ids.count('is.workflow.actions.base64encode') >= 8, ids.count('is.workflow.actions.base64encode')
           assert ids.count('is.workflow.actions.urlencode') >= 8, ids.count('is.workflow.actions.urlencode')
-          assert 'yos-night-history-v1' in blob
+          assert 'YOS Night History.json' in blob
           assert 'yos-night-save-ok-v1' in blob
-          assert 'night_history=1' in blob
+          assert 'night_history=1' not in blob
           assert 'night_save=1' in blob
           assert 'https://yskn0008-bot.github.io/ProjectY/life/' in blob
           assert 'Night%20Check%20in' in blob
