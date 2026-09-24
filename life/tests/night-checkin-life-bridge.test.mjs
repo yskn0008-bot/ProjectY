@@ -54,6 +54,13 @@ test('Shortcut save lane writes through the same Life bridge and returns a save 
   assert.match(source,/shortcuts:\/\/run-shortcut\?name=/);
 });
 
+test('save callback returns a 14-record local cache payload and delays Shortcut re-entry',()=>{
+  assert.match(source,/schema:'yos-night-history-cache-v1'/);
+  assert.match(source,/history_text:JSON\.stringify\(historyPayload\)/);
+  assert.match(source,/historyFrom\(result\.data,'9999-12-31',14\)/);
+  assert.match(source,/setTimeout\(\(\)=>location\.replace\(target\),1200\)/);
+});
+
 test('bridge source keeps the existing Life SSOT and has no Money duplication',()=>{
   assert.match(source,/const DATA_KEY='yos-life-v1'/);
   assert.match(source,/day\.lifeFlow=\{\.\.\.flow,nightCheckin:record\}/);
