@@ -29,7 +29,7 @@ class ArtifactIdentitySourceContractTests(unittest.TestCase):
 
     def test_model_decision_trace_is_before_needs_review_block(self):
         trace = self.source.index("MODEL_DECISION")
-        gate = self.source.index("if needsReview {")
+        gate = self.source.index('if needsReviewText == "はい" {')
         self.assertLess(trace, gate)
         for field in (
             "executor={executor}",
@@ -40,6 +40,19 @@ class ArtifactIdentitySourceContractTests(unittest.TestCase):
         ):
             self.assertIn(field, self.source)
 
+
+    def test_model_boolean_source_uses_text_normalization(self):
+        self.assertIn('const needsReviewText = text("{needsReview}")', self.source)
+        self.assertIn('const requiresConfirmationText = text("{requiresConfirmation}")', self.source)
+        self.assertIn('const externalWriteText = text("{externalWrite}")', self.source)
+        self.assertIn('if needsReviewText == "はい" {', self.source)
+        self.assertIn(
+            'if externalWriteText == "はい" && requiresConfirmationText == "いいえ" {',
+            self.source,
+        )
+        self.assertIn('if requiresConfirmationText == "はい" {', self.source)
+        self.assertNotIn("if needsReview {", self.source)
+        self.assertNotIn("if requiresConfirmation {", self.source)
 
 
 if __name__ == "__main__":
