@@ -5,6 +5,18 @@ try {
   if (savedState && typeof savedState === 'object' && Array.isArray(savedState.chats)) state = savedState;
 } catch(e) {}
 
+if(state.chatRegistryVersion!=='2026-09-24-real-links-v1'){
+  var demoIds=new Set(['desk-chat','clarity-chat','money-chat','income-chat','room-chat','widget-chat','night-chat','brief-chat']);
+  state.chats=(Array.isArray(state.chats)?state.chats:[]).filter(function(x){
+    return x&&!demoIds.has(x.id);
+  });
+  state.chats.forEach(function(x){
+    if(!Number.isFinite(Number(x.unread)))x.unread=0;
+    x.unread=Number(x.unread)||0;
+  });
+  state.chatRegistryVersion='2026-09-24-real-links-v1';
+}
+
 state.metrics = state.metrics || {opens:0,taps:0,reorders:0,posts:0};
 state.metrics.opens = (state.metrics.opens || 0) + 1;
 function persist(){ try { localStorage.setItem('yosDeskIntegratedStateV1', JSON.stringify(state)); } catch(e) {} }
@@ -56,6 +68,8 @@ function openDevDetail(id){var x=devCatalog[id];if(!x)return;showSheet('<h3>'+es
 function renderProjects(){var names=["すべて"];state.chats.forEach(function(x){if(names.indexOf(x.project)<0)names.push(x.project)});var html="";names.forEach(function(name){html+='<button class="projectPill '+(name===projectFilter?'active':'')+'" data-project="'+esc(name)+'">'+esc(name)+'</button>'});q("#projects").innerHTML=html;qa(".projectPill").forEach(function(b){b.onclick=function(){tap();projectFilter=b.dataset.project;renderChats()}})}
 function filteredChats(){var text=q("#searchInput").value.trim().toLowerCase();return state.chats.filter(function(x){if(projectFilter!=="すべて"&&x.project!==projectFilter)return false;if(chatMode==="unread"&&!x.unread)return false;if(chatMode==="pinned"&&!x.pinned)return false;if(text){var h=(titleOf(x)+" "+x.title+" "+x.project+" "+x.preview).toLowerCase();if(h.indexOf(text)<0)return false}return true}).sort(function(a,b){return Number(b.pinned)-Number(a.pinned)})}
 function renderChats(){
+  var chatHead=q("#chatList")&&q("#chatList").parentElement&&q("#chatList").parentElement.querySelector(".sectionHead span");
+  if(chatHead)chatHead.textContent="実リンクのみ / 長押しで編集";
   q("#countAll").textContent=" "+state.chats.length;
   q("#countUnread").textContent=" "+state.chats.filter(function(x){return x.unread>0}).length;
   q("#countPinned").textContent=" "+state.chats.filter(function(x){return x.pinned}).length;
@@ -63,7 +77,7 @@ function renderChats(){
   rows.forEach(function(x){html+='<div class="chat '+(x.pinned?'pinned ':'')+(selected.has(x.id)?'selected':'')+'" data-id="'+esc(x.id)+'"><div class="check">✓</div><div class="avatar '+esc(x.tone||'')+'">'+esc(x.avatar)+'</div><div class="chatText"><div class="nameLine"><div class="chatName">'+esc(titleOf(x))+'</div><span class="tag">'+esc(x.project)+'</span></div><div class="preview">'+esc(x.preview)+'</div></div><div class="chatMeta"><div class="time">'+esc(x.time)+'</div><div class="badge '+(x.unread?'':'hidden')+'">'+(x.unread?esc(x.unread):'')+'</div></div></div>'});
   q("#chatList").innerHTML=html;q("#empty").style.display=rows.length?"none":"block";q("#app").classList.toggle("selecting",selecting);q("#bottom").style.display=selecting?"none":"grid";q("#bulk").style.display=selecting?"grid":"none";q("#selectBtn").textContent=selecting?"完了":"選択";bindChats();persist();
 }
-function bindChats(){qa(".chat").forEach(function(row){var id=row.dataset.id,timer=null;row.onclick=function(){tap();if(selecting){selected.has(id)?selected.delete(id):selected.add(id);renderChats();return}var x=state.chats.find(function(c){return c.id===id});if(x&&x.unread)x.unread=0;openChatSheet(id);renderChats()};row.addEventListener("touchstart",function(){timer=setTimeout(function(){openChatSheet(id)},500)},{passive:true});row.addEventListener("touchmove",function(){clearTimeout(timer)},{passive:true});row.addEventListener("touchend",function(){clearTimeout(timer)},{passive:true})})}
+function bindChats(){qa(".chat").forEach(function(row){var id=row.dataset.id,timer=null,longPressed=false;row.onclick=function(){tap();if(longPressed){longPressed=false;return}if(selecting){selected.has(id)?selected.delete(id):selected.add(id);renderChats();return}var x=state.chats.find(function(c){return c.id===id});if(!x)return;if(x.unread)x.unread=0;persist();if(x.url){window.location.href=x.url;return}openChatSheet(id);renderChats()};row.addEventListener("touchstart",function(){longPressed=false;timer=setTimeout(function(){longPressed=true;openChatSheet(id)},500)},{passive:true});row.addEventListener("touchmove",function(){clearTimeout(timer)},{passive:true});row.addEventListener("touchend",function(){clearTimeout(timer)},{passive:true})})}
 function openChatSheet(id){
   currentChatId=id;var x=state.chats.find(function(c){return c.id===id});if(!x)return;
   var html='<h3>'+esc(titleOf(x))+'</h3><p>'+esc(x.project)+' · '+esc(x.preview)+'</p><input id="aliasInput" placeholder="固定名" value="'+esc(x.alias||'')+'"><button class="primary" id="saveAlias">固定名を保存</button><button id="toggleUnread">'+(x.unread?'既読にする':'未読にする')+'</button><button id="togglePin">'+(x.pinned?'固定を外す':'固定する')+'</button>';
@@ -71,7 +85,30 @@ function openChatSheet(id){
   html+='<button class="danger" id="deleteOne">一覧から削除</button><button id="closeSheetBtn">閉じる</button>';showSheet(html);
   q("#saveAlias").onclick=function(){x.alias=q("#aliasInput").value.trim();closeSheet();renderChats()};q("#toggleUnread").onclick=function(){x.unread=x.unread?0:1;closeSheet();renderChats()};q("#togglePin").onclick=function(){x.pinned=!x.pinned;closeSheet();renderChats()};if(x.url&&q("#openRealChat"))q("#openRealChat").onclick=function(){window.location.href=x.url};q("#deleteOne").onclick=function(){state.chats=state.chats.filter(function(c){return c.id!==id});closeSheet();renderChats()};q("#closeSheetBtn").onclick=closeSheet;
 }
-function openNew(){showSheet('<h3>NEW</h3><p>新しいチャット入口をYOS DESKへ追加します。実チャットURLは任意です。</p><input id="newTitle" placeholder="チャット名"><input id="newProject" placeholder="プロジェクト名"><input id="newUrl" placeholder="実チャットURL（任意）"><button class="primary" id="createChat">追加</button><button id="closeSheetBtn">閉じる</button>');q("#createChat").onclick=function(){var title=q("#newTitle").value.trim();if(!title){showToast("チャット名を入力");return}var project=q("#newProject").value.trim()||"その他",url=q("#newUrl").value.trim();state.chats.unshift({id:"chat-"+Date.now(),project:project,title:title,preview:"YOS DESKから追加",time:"今",unread:0,pinned:false,avatar:title.charAt(0),tone:"blue",alias:"",url:url});closeSheet();setPage("chats");renderChats();showToast("追加しました")};q("#closeSheetBtn").onclick=closeSheet}
+function validChatUrl(url){return /^https:\/\/chatgpt\.com\//.test(String(url||'').trim())}
+function addChatEntry(url,title,project){
+  url=String(url||'').trim();
+  if(!validChatUrl(url)){showToast("ChatGPTリンクを入れて");return false}
+  var exists=state.chats.find(function(x){return x.url===url});
+  if(exists){closeSheet();setPage("chats");renderChats();showToast("登録済み");return true}
+  title=String(title||'').trim()||'ChatGPT';
+  project=String(project||'').trim()||'ChatGPT';
+  state.chats.unshift({id:"chat-"+Date.now(),project:project,title:title,preview:"実チャットへ直接開く",time:"登録済み",unread:0,pinned:false,avatar:title.charAt(0)||"C",tone:"blue",alias:"",url:url});
+  persist();closeSheet();setPage("chats");renderChats();showToast("追加しました");return true
+}
+function openNew(){
+  showSheet('<h3>NEW</h3><p>ChatGPTの実リンクだけを登録します。</p><button class="primary" id="pasteChatUrl">コピーしたリンクを追加</button><input id="newTitle" placeholder="固定名（任意）"><input id="newProject" placeholder="分類（任意）"><input id="newUrl" placeholder="https://chatgpt.com/..."><button id="createChat">入力内容で追加</button><button id="closeSheetBtn">閉じる</button>');
+  q("#pasteChatUrl").onclick=async function(){
+    try{
+      var url=(await navigator.clipboard.readText()).trim();
+      addChatEntry(url,'ChatGPT','ChatGPT');
+    }catch(e){
+      showToast("リンクを下の欄へ貼り付けて");
+    }
+  };
+  q("#createChat").onclick=function(){addChatEntry(q("#newUrl").value,q("#newTitle").value,q("#newProject").value)};
+  q("#closeSheetBtn").onclick=closeSheet
+}
 q("#sheetBackdrop").onclick=function(e){if(e.target===q("#sheetBackdrop"))closeSheet()};
 qa(".nav[data-page]").forEach(function(b){b.onclick=function(){tap();setPage(b.dataset.page)}});q("#newBtn").onclick=function(){tap();openNew()};
 q("#selectBtn").onclick=function(){tap();selecting=!selecting;selected.clear();renderChats()};q("#searchInput").oninput=renderChats;
