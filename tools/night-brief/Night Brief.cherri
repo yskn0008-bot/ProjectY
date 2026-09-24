@@ -198,6 +198,6 @@ const messageEncoded = urlEncode(messageBase64)
 const displayBase64 = base64Encode(displayText)
 const displayEncoded = urlEncode(displayBase64)
 
-const saveURL = text("https://yskn0008-bot.github.io/ProjectY/life/night-checkin-save-bridge.html?night_save=1&night_raw_b64={rawEncoded}&night_summary_b64={summaryEncoded}&night_mood_b64={moodEncoded}&night_tomorrow_b64={tomorrowEncoded}&night_discoveries_b64={discoveriesEncoded}&night_diary_b64={diaryEncoded}&night_message_b64={messageEncoded}&night_display_b64={displayEncoded}&shortcut=Night%20Brief")
+const saveURL = text("https://yskn0008-bot.github.io/ProjectY/life/night-checkin-save-bridge.html#night_save=1&night_raw_b64={rawEncoded}&night_summary_b64={summaryEncoded}&night_mood_b64={moodEncoded}&night_tomorrow_b64={tomorrowEncoded}&night_discoveries_b64={discoveriesEncoded}&night_diary_b64={diaryEncoded}&night_message_b64={messageEncoded}&night_display_b64={displayEncoded}&shortcut=Night%20Brief")
 openURL(saveURL)
 stop()
