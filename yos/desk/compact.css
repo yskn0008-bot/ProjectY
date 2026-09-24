@@ -97,10 +97,8 @@ body{font-size:17px}
 .empty{font-size:16px}
 
 /* Bottom navigation */
-.bottom{height:72px}
 .nav{font-size:14px}
 .nav b{font-size:24px}
-.bulk{height:72px}
 .bulk button{font-size:16px}
 
 /* Sheets / dialogs */
