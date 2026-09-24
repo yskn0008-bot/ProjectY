@@ -77,7 +77,7 @@ jobs:
           assert ids.count('is.workflow.actions.filter.reminders') == 2
           assert ids.count('is.workflow.actions.askllm') == 2
           assert ids.count('is.workflow.actions.notification') == 1
-          assert ids.count('is.workflow.actions.showresult') == 1
+          assert ids.count('is.workflow.actions.showresult') == 2
           assert ids.count('is.workflow.actions.ask') == 1
           assert ids.count('is.workflow.actions.runworkflow') == 0
           assert ids.count('is.workflow.actions.openurl') == 1
