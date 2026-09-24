@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - 'life/night-checkin-life-bridge-v1.js'
+      - 'life/night-checkin-save-bridge.html'
       - 'life/tests/night-checkin-life-bridge.test.mjs'
       - 'life/yos-suite-v3.js'
       - 'tools/night-checkin/**'
@@ -12,6 +13,7 @@ on:
     branches: [main]
     paths:
       - 'life/night-checkin-life-bridge-v1.js'
+      - 'life/night-checkin-save-bridge.html'
       - 'life/tests/night-checkin-life-bridge.test.mjs'
       - 'life/yos-suite-v3.js'
       - 'tools/night-checkin/**'
@@ -35,6 +37,7 @@ jobs:
           node --check life/night-checkin-life-bridge-v1.js
           node --check life/yos-suite-v3.js
           node --test life/tests/night-checkin-life-bridge.test.mjs
+          grep -q 'night-checkin-life-bridge-v1.js' life/night-checkin-save-bridge.html
 
       - name: Install pinned Cherri v2.3.0
         shell: bash
@@ -78,14 +81,18 @@ jobs:
 
           assert ids.count('is.workflow.actions.ask') == 1, ids.count('is.workflow.actions.ask')
           assert ids.count('is.workflow.actions.askllm') == 1, ids.count('is.workflow.actions.askllm')
-          assert sum(i.endswith('openurl') for i in ids) >= 2, ids
+          assert sum(i.endswith('openurl') for i in ids) == 1, ids
+          assert ids.count('is.workflow.actions.documentpicker.open') >= 1, ids
+          assert ids.count('is.workflow.actions.documentpicker.save') >= 1, ids
+          assert ids.count('is.workflow.actions.detect.text') >= 1, ids
           assert ids.count('is.workflow.actions.base64encode') >= 8, ids.count('is.workflow.actions.base64encode')
           assert ids.count('is.workflow.actions.urlencode') >= 8, ids.count('is.workflow.actions.urlencode')
-          assert 'yos-night-history-v1' in blob
+          assert 'YOS Night History.json' in blob
           assert 'yos-night-save-ok-v1' in blob
-          assert 'night_history=1' in blob
+          assert 'night_history=1' not in blob
           assert 'night_save=1' in blob
-          assert 'https://yskn0008-bot.github.io/ProjectY/life/' in blob
+          assert 'https://yskn0008-bot.github.io/ProjectY/life/night-checkin-save-bridge.html' in blob
+          assert 'https://yskn0008-bot.github.io/ProjectY/life/?night_save=1' not in blob
           assert 'Night%20Check%20in' in blob
           assert 'Money' not in blob
           print(f'Night Check-in compiled contract: PASS ({len(actions)} actions)')
