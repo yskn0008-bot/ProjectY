@@ -120,7 +120,7 @@ def patch_true_gate(actions: list[dict], record: str, output_name: str) -> None:
     p.pop("WFConditions", None)
 
 
-def patch_external_gate(actions: list[dict]) -> None:
+def patch_external_gate(actions: list[dict]) -> int:
     start_i, start_action = gate_before(actions, "blockedExternalRecord")
     old_group = params(start_action).get("GroupingIdentifier")
     if not old_group:
@@ -162,6 +162,7 @@ def patch_external_gate(actions: list[dict]) -> None:
         make_nothing(),
     ]
     actions[start_i : end_i + 1] = replacement
+    return start_i
 
 
 def refs(node: object) -> list[str]:
@@ -230,7 +231,7 @@ def patch(path: Path) -> None:
         raise SystemExit("WFWorkflowActions missing")
 
     patch_true_gate(actions, "blockedReviewRecord", "needsReview")
-    patch_external_gate(actions)
+    external_start = patch_external_gate(actions)
     patch_true_gate(
         actions,
         "blockedConfirmationRecord",
@@ -244,7 +245,8 @@ def patch(path: Path) -> None:
         "requiresConfirmation",
     )
 
-    ext_i, ext = gate_before(actions, "blockedExternalRecord")
+    ext_i = external_start
+    ext = actions[ext_i]
     extp = params(ext)
     if extp.get("WFCondition") != 4:
         raise SystemExit("externalWrite outer gate is not Boolean is-true")
