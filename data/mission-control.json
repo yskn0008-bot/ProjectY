@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-24T13:41:23+09:00",
+  "updated_at": "2026-09-24T13:59:41+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -40,7 +40,7 @@
       "priority": 1,
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/473",
-      "updated_at": "2026-09-24T03:53:14Z"
+      "updated_at": "2026-09-24T04:54:06Z"
     },
     {
       "id": "github-pr-426",
@@ -70,7 +70,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-09-24T04:41:08Z"
+      "updated_at": "2026-09-24T04:59:13Z"
     },
     {
       "id": "github-issue-256",
@@ -165,6 +165,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-bc0a462725ee",
+      "title": "YOS DESK: 下部メニュー重なり修正",
+      "completed_at": "2026-09-24T04:59:29Z",
+      "result": "GitHub mainへ反映（bc0a462）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/bc0a462725ee18b1397a136255389d549921da2e"
+    },
+    {
       "id": "github-commit-05fe5c9ae51a",
       "title": "YOS DESK: DESK + CHATS 統合UI",
       "completed_at": "2026-09-24T04:41:07Z",
@@ -191,13 +198,6 @@
       "completed_at": "2026-09-24T02:52:43Z",
       "result": "GitHub mainへ反映（297b3a1）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/297b3a17f592738890621f86c3a811de5180d2aa"
-    },
-    {
-      "id": "github-commit-5050fdd5357e",
-      "title": "Fix Clarity Boolean gates using numeric JSON semantics",
-      "completed_at": "2026-09-24T02:44:16Z",
-      "result": "GitHub mainへ反映（5050fdd）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/5050fdd5357e82de9811a0ff3dbbe69471b6a151"
     },
     {
       "id": "complete-002",
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-24T13:41:23+09:00",
+      "last_update": "2026-09-24T13:59:41+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -315,7 +315,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-24T13:41:23+09:00",
+      "last_update": "2026-09-24T13:59:41+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-24T13:41:23+09:00",
+      "last_update": "2026-09-24T13:59:41+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "5db3506d29c8cac6e0d261b6d39879aa0ec2452228b6b489736555386c7fb719"
+  "github_snapshot_hash": "5a77b12735dfd5244db02ba1bfa3bb663d4f1c7b767c7cb8b78fee04f0d06fdc"
 }
