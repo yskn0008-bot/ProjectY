@@ -77,7 +77,33 @@
       });
   }
 
-  window.__yosNightCheckinLifeBridgeV1Api=Object.freeze({normalize,saveInto,historyFrom,encodeBase64Url,decodeBase64Url});
+  function parseNativeRecord(recordText){
+    const source=String(recordText||'').replace(/\r\n/g,'\n').trim();
+    if(!source.startsWith('YOS_NIGHT_RECORD_V1'))throw new Error('Unsupported native Night record');
+    const take=(start,end)=>{
+      const from=source.indexOf(start);
+      if(from<0)return '';
+      const valueStart=from+start.length;
+      const to=end?source.indexOf(end,valueStart):-1;
+      return source.slice(valueStart,to<0?source.length:to).trim();
+    };
+    const date=clean(take('date: ','\nsummary: '),10);
+    if(!/^\d{4}-\d{2}-\d{2}$/u.test(date))throw new Error('Native Night record date missing');
+    return {
+      date,
+      payload:{
+        raw_input:take('\nraw_input:\n',''),
+        summary:take('\nsummary: ','\nmood_state: '),
+        mood_state:take('\nmood_state: ','\ntomorrow: '),
+        tomorrow:take('\ntomorrow: ','\ndiscoveries: '),
+        discoveries:take('\ndiscoveries: ','\nthree_line_diary:\n'),
+        three_line_diary:take('\nthree_line_diary:\n','\ntomorrow_message: '),
+        tomorrow_message:take('\ntomorrow_message: ','\nraw_input:\n')
+      }
+    };
+  }
+
+  window.__yosNightCheckinLifeBridgeV1Api=Object.freeze({normalize,saveInto,historyFrom,encodeBase64Url,decodeBase64Url,parseNativeRecord});
   if(typeof document==='undefined'||typeof localStorage==='undefined'||typeof location==='undefined')return;
 
   const readStore=()=>{try{return JSON.parse(localStorage.getItem(DATA_KEY)||'null')||{days:{}}}catch{return{days:{}}}};
@@ -159,7 +185,23 @@
     return true;
   }
 
+  function importNativeHash(){
+    const rawHash=String(location.hash||'').replace(/^#/,'');
+    if(!rawHash)return false;
+    const params=new URLSearchParams(rawHash);
+    const encoded=params.get('night_native_b64');
+    if(!encoded)return false;
+    const parsed=parseNativeRecord(decodeBase64Url(encoded));
+    const result=saveInto(readStore(),parsed.payload,parsed.date);
+    writeStore(result.data);
+    history.replaceState({},'',location.pathname+location.search);
+    window.dispatchEvent(new StorageEvent('storage',{key:DATA_KEY,newValue:JSON.stringify(result.data)}));
+    window.dispatchEvent(new CustomEvent('yos-life-record-saved',{detail:{source:'native-night-sync',date:result.date}}));
+    return true;
+  }
+
   try{
+    if(importNativeHash())return;
     const params=new URLSearchParams(location.search);
     if(importNight(params))return;
     returnHistory(params);
