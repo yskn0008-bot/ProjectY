@@ -79,19 +79,20 @@ jobs:
           assert ids.count('is.workflow.actions.notification') == 1
           assert ids.count('is.workflow.actions.showresult') == 1
           assert ids.count('is.workflow.actions.alert') == 0
-          assert ids.count('is.workflow.actions.runworkflow') == 1
-          assert ids.count('is.workflow.actions.openurl') == 0
+          assert ids.count('is.workflow.actions.runworkflow') == 0
+          assert ids.count('is.workflow.actions.openurl') == 1
           assert ids.count('is.workflow.actions.exit') == 0
 
           assert 'YOS Night History.json' in blob
           assert 'Night Check in' in blob
           assert '収集区域④' in blob
-          assert '【無意識発見 10+】' in blob
-          assert '最低10件' in blob
+          assert '内部分析では必ず最低10個' in blob
+          assert '最終表示は【今日の発見】3項目' in blob
+          assert 'iPhoneで10〜15秒で読み切れる長さ' in blob
           assert '今日の予定' in blob
           assert '今日の未完了リマインダー' in blob
           assert 'night_history=1' not in blob
-          assert 'shortcuts://run-shortcut' not in blob
+          assert 'shortcuts://run-shortcut?name=Night%20Check%20in' in blob
           assert '真栄原2丁目' not in blob
           print(f'Night Brief no-Safari contract: PASS ({len(actions)} actions)')
           PY
