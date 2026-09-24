@@ -80,8 +80,8 @@ jobs:
           set -euo pipefail
           python3 tools/clarity-factory/sign_with_hubsign.py \
             --input 'tools/morning-brief/artifacts/Morning Brief No Safari.plist' \
-            --output 'tools/morning-brief/artifacts/Morning Brief.shortcut' \
-            --name 'Morning Brief' \
+            --output 'tools/morning-brief/artifacts/Morning Brief No Safari.shortcut' \
+            --name 'Morning Brief No Safari' \
             2>&1 | tee tools/morning-brief/artifacts/morning-brief-hubsign.log
 
       - name: Verify signed artifact
@@ -90,7 +90,7 @@ jobs:
           set -euo pipefail
           python3 - <<'PY'
           from pathlib import Path
-          p=Path('tools/morning-brief/artifacts/Morning Brief.shortcut')
+          p=Path('tools/morning-brief/artifacts/Morning Brief No Safari.shortcut')
           data=p.read_bytes()
           assert data.startswith(b'AEA1'), data[:8]
           assert len(data)>500, len(data)
@@ -105,10 +105,10 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p tools/morning-brief/acceptance
-          cp 'tools/morning-brief/artifacts/Morning Brief.shortcut' 'tools/morning-brief/acceptance/Morning Brief.shortcut'
+          cp 'tools/morning-brief/artifacts/Morning Brief No Safari.shortcut' 'tools/morning-brief/acceptance/Morning Brief No Safari.shortcut'
           git config user.name 'ProjectY OEL'
           git config user.email 'actions@users.noreply.github.com'
-          git add 'tools/morning-brief/acceptance/Morning Brief.shortcut'
+          git add 'tools/morning-brief/acceptance/Morning Brief No Safari.shortcut'
           if ! git diff --cached --quiet; then
             git commit -m 'build: publish Morning Brief no-Safari acceptance artifact [skip ci]'
             git push origin "HEAD:${HEAD_REF}"
@@ -119,6 +119,6 @@ jobs:
         with:
           name: morning-brief-no-safari
           path: |
-            tools/morning-brief/artifacts/Morning Brief.shortcut
+            tools/morning-brief/artifacts/Morning Brief No Safari.shortcut
             tools/morning-brief/artifacts/morning-brief-hubsign.log
           if-no-files-found: error
