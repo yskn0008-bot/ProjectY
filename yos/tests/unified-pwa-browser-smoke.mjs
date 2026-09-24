@@ -206,6 +206,18 @@ try{
   await expectText('#countPinned','1');
   assert.equal((await page.locator('#chatList').innerText()).includes('YOS DESK UI修正'),false,'demo chat titles must be removed');
   assert.equal((await page.locator('#chatList').innerText()).includes('収入チャンス監視'),false,'demo project chat titles must be removed');
+  const deskType=await page.evaluate(()=>({
+    heroSub:parseFloat(getComputedStyle(document.querySelector('.heroSub')).fontSize),
+    devNext:parseFloat(getComputedStyle(document.querySelector('.devNext')).fontSize),
+    chatName:parseFloat(getComputedStyle(document.querySelector('.chatName')).fontSize),
+    preview:parseFloat(getComputedStyle(document.querySelector('.preview')).fontSize),
+    nav:parseFloat(getComputedStyle(document.querySelector('.nav')).fontSize)
+  }));
+  assert.ok(deskType.heroSub>=15,'YOS DESK hero secondary text must be readable');
+  assert.ok(deskType.devNext>=13,'YOS DESK development secondary text must be readable');
+  assert.ok(deskType.chatName>=16,'YOS DESK chat titles must be readable');
+  assert.ok(deskType.preview>=13,'YOS DESK chat previews must be readable');
+  assert.ok(deskType.nav>=12,'YOS DESK navigation labels must be readable');
   const deskGeometry=await page.evaluate(()=>({
     appBottom:document.getElementById('app').getBoundingClientRect().bottom,
     navTop:document.getElementById('bottom').getBoundingClientRect().top,
