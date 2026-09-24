@@ -79,8 +79,8 @@ jobs:
           assert ids.count('is.workflow.actions.notification') == 1
           assert ids.count('is.workflow.actions.showresult') == 1
           assert ids.count('is.workflow.actions.alert') == 0
-          assert ids.count('is.workflow.actions.runworkflow') == 0
-          assert ids.count('is.workflow.actions.openurl') == 1
+          assert ids.count('is.workflow.actions.runworkflow') == 1
+          assert ids.count('is.workflow.actions.openurl') == 0
           assert ids.count('is.workflow.actions.exit') == 0
 
           assert 'YOS Night History.json' in blob
@@ -91,7 +91,8 @@ jobs:
           assert '今日の予定' in blob
           assert '今日の未完了リマインダー' in blob
           assert 'night_history=1' not in blob
-          assert 'shortcuts://run-shortcut?name=Night%20Check%20in' in blob
+          assert "'workflowName': 'Night Check in'" in blob
+          assert "'isSelf': False" in blob
           assert '真栄原2丁目' not in blob
           print(f'Night Brief no-Safari contract: PASS ({len(actions)} actions)')
           PY
