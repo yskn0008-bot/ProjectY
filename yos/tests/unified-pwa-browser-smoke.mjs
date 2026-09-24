@@ -200,6 +200,12 @@ try{
   await page.locator('#closeSheetBtn').click();
   await page.locator('[data-page="chats"]').click();
   await expectText('#chatList','YOS Chat');
+  assert.equal(await page.locator('.chat').count(),1,'YOS DESK CHATS must not ship demo conversations');
+  await expectText('#countAll','1');
+  await expectText('#countUnread','0');
+  await expectText('#countPinned','1');
+  assert.equal((await page.locator('#chatList').innerText()).includes('YOS DESK UI修正'),false,'demo chat titles must be removed');
+  assert.equal((await page.locator('#chatList').innerText()).includes('収入チャンス監視'),false,'demo project chat titles must be removed');
   const deskGeometry=await page.evaluate(()=>({
     appBottom:document.getElementById('app').getBoundingClientRect().bottom,
     navTop:document.getElementById('bottom').getBoundingClientRect().top,
