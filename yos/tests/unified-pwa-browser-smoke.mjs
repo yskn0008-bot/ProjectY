@@ -213,11 +213,11 @@ try{
     preview:parseFloat(getComputedStyle(document.querySelector('.preview')).fontSize),
     nav:parseFloat(getComputedStyle(document.querySelector('.nav')).fontSize)
   }));
-  assert.ok(deskType.heroSub>=15,'YOS DESK hero secondary text must be readable');
-  assert.ok(deskType.devNext>=13,'YOS DESK development secondary text must be readable');
-  assert.ok(deskType.chatName>=16,'YOS DESK chat titles must be readable');
-  assert.ok(deskType.preview>=13,'YOS DESK chat previews must be readable');
-  assert.ok(deskType.nav>=12,'YOS DESK navigation labels must be readable');
+  assert.ok(deskType.heroSub>=17,'YOS DESK hero secondary text must be readable');
+  assert.ok(deskType.devNext>=15,'YOS DESK development secondary text must be readable');
+  assert.ok(deskType.chatName>=18,'YOS DESK chat titles must be readable');
+  assert.ok(deskType.preview>=15,'YOS DESK chat previews must be readable');
+  assert.ok(deskType.nav>=14,'YOS DESK navigation labels must be readable');
   const deskGeometry=await page.evaluate(()=>({
     appBottom:document.getElementById('app').getBoundingClientRect().bottom,
     navTop:document.getElementById('bottom').getBoundingClientRect().top,
