@@ -8,6 +8,7 @@ on:
       - 'tools/night-checkin/**'
       - 'life/night-checkin-life-bridge-v1.js'
       - 'life/night-checkin-save-bridge.html'
+      - 'service-worker.js'
       - 'life/tests/night-checkin-life-bridge.test.mjs'
       - '.github/workflows/night-brief-shortcut.yml'
   workflow_dispatch:
@@ -93,7 +94,8 @@ jobs:
           assert '今日の未完了リマインダー' in blob
           assert 'night_history=1' not in blob
           assert 'night_save=1' in blob
-          assert 'https://yskn0008-bot.github.io/ProjectY/life/night-checkin-save-bridge.html' in blob
+          assert 'https://yskn0008-bot.github.io/ProjectY/life/night-checkin-save-bridge.html#night_save=1' in blob
+          assert 'night-checkin-save-bridge.html?night_save=1' not in blob
           assert 'https://yskn0008-bot.github.io/ProjectY/life/?night_save=1' not in blob
           assert 'shortcut=Night%20Brief' in blob
           assert 'yos-night-save-ok-v1' in blob

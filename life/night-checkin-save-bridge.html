@@ -11,6 +11,17 @@
   </style>
 </head>
 <body>
+  <script>
+    (() => {
+      // Keep the large Night payload out of the network request. Safari only
+      // fetches this short bridge URL; after load we restore the fragment as
+      // query parameters locally for the existing Night bridge.
+      const fragment=location.hash.startsWith('#')?location.hash.slice(1):'';
+      if(fragment.startsWith('night_save=1&')||fragment.startsWith('night=')){
+        history.replaceState({},'',location.pathname+'?'+fragment);
+      }
+    })();
+  </script>
   <script src="./night-checkin-life-bridge-v1.js?v=4"></script>
 </body>
 </html>
