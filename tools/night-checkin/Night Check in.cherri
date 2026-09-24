@@ -8,10 +8,10 @@
 #include 'actions/intelligence'
 #include 'actions/web'
 
-// Three-stage flow:
-// 1) normal launch -> existing MY LIFE reads prior Night records and calls this Shortcut back
-// 2) history callback -> ask user, analyze today + history, then MY LIFE saves into yos-life-v1
-// 3) save callback -> show the completed Night Check-in result
+// Local-first flow:
+// 1) read the derived iCloud Night history cache without opening Safari
+// 2) ask/analyze today + history, then save into the existing MY LIFE yos-life-v1 owner store
+// 3) save callback refreshes the derived cache and shows the completed result
 @incoming = "{ShortcutInput}"
 
 if @incoming contains "yos-night-save-ok-v1" {
