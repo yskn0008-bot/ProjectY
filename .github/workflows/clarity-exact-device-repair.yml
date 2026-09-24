@@ -1,0 +1,111 @@
+name: Clarity exact-device repair artifact
+
+on:
+  push:
+    branches:
+      - repair/clarity-exact-device-20260924-043953
+    paths:
+      - 'tools/clarity-factory/device-repair/READY'
+
+permissions:
+  contents: read
+
+jobs:
+  sign-exact-device-repair:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Reconstruct exact-device patched plist
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd tools/clarity-factory/device-repair
+          cat chunks/part*.b64 > payload.xz.b64
+          base64 -d payload.xz.b64 > payload.xz
+          xz -dc payload.xz > Clarity-exact-device-patched.plist
+          printf '%s  %s\n' 'a8bf9299222c7a53ced8ec60a379f6f28ed5795506e078e1b65726c91450f3a4' Clarity-exact-device-patched.plist | sha256sum -c -
+
+      - name: Verify exact-device gate repair
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import plistlib
+          from pathlib import Path
+
+          p=Path('tools/clarity-factory/device-repair/Clarity-exact-device-patched.plist')
+          wf=plistlib.loads(p.read_bytes())
+          actions=wf['WFWorkflowActions']
+          assert len(actions)==842, len(actions)
+
+          def params(a):
+              return a.get('WFWorkflowActionParameters',{})
+
+          def refs(obj):
+              out=set()
+              def walk(x):
+                  if isinstance(x,dict):
+                      if x.get('Type')=='ActionOutput' and isinstance(x.get('OutputName'),str):
+                          out.add(x['OutputName'])
+                      for v in x.values():
+                          walk(v)
+                  elif isinstance(x,list):
+                      for v in x:
+                          walk(v)
+              walk(obj)
+              return out
+
+          def gate_before(record_name):
+              ri=next(i for i,a in enumerate(actions) if params(a).get('CustomOutputName')==record_name)
+              return next(params(actions[i]) for i in range(ri-1,max(-1,ri-8),-1)
+                          if actions[i].get('WFWorkflowActionIdentifier')=='is.workflow.actions.conditional'
+                          and params(actions[i]).get('WFControlFlowMode')==0)
+
+          review=gate_before('blockedReviewRecord')
+          confirm=gate_before('blockedConfirmationRecord')
+          external=gate_before('blockedExternalRecord')
+
+          assert refs(review.get('WFInput'))=={'needsReview'}
+          assert review.get('WFCondition')==2 and str(review.get('WFNumberValue'))=='0'
+          assert refs(confirm.get('WFInput'))=={'requiresConfirmation'}
+          assert confirm.get('WFCondition')==2 and str(confirm.get('WFNumberValue'))=='0'
+
+          rows=external['WFConditions']['Value']['WFActionParameterFilterTemplates']
+          got={}
+          for row in rows:
+              r=refs(row.get('WFInput'))
+              assert len(r)==1, r
+              got[next(iter(r))]=(row.get('WFCondition'),str(row.get('WFNumberValue')))
+          assert got=={'externalWrite':(2,'0'),'requiresConfirmation':(1,'0')}, got
+          print('Exact-device Clarity gate repair: PASS (842 actions)')
+          PY
+
+      - name: Sign exact-device repair with HubSign
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/clarity-factory/sign_with_hubsign.py             --input tools/clarity-factory/device-repair/Clarity-exact-device-patched.plist             --output tools/clarity-factory/device-repair/Clarity-exact-device-fixed.shortcut             --name Clarity
+
+      - name: Verify signed artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib
+          p=Path('tools/clarity-factory/device-repair/Clarity-exact-device-fixed.shortcut')
+          data=p.read_bytes()
+          assert data.startswith(b'AEA1'), data[:8]
+          assert len(data)>50000, len(data)
+          print('signed_bytes=',len(data))
+          print('signed_sha256=',hashlib.sha256(data).hexdigest())
+          PY
+
+      - name: Upload exact-device repair
+        uses: actions/upload-artifact@v4
+        with:
+          name: clarity-exact-device-repair
+          path: tools/clarity-factory/device-repair/Clarity-exact-device-fixed.shortcut
+          if-no-files-found: error
