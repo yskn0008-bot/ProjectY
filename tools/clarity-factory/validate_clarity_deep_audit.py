@@ -313,21 +313,21 @@ def validate(path: Path, expected_build_id: str) -> None:
 
     review_gate = gate_before("blockedReviewRecord")
     if (
-        review_gate.get("WFCondition") != 4
-        or review_gate.get("WFNumberValue") is not True
+        review_gate.get("WFCondition") != 2
+        or str(review_gate.get("WFNumberValue")) != "0"
         or token_action_output_names(review_gate.get("WFInput")) != {"needsReview"}
     ):
-        raise AssertionError(f"needsReview gate is not explicit true: {review_gate!r}")
+        raise AssertionError(f"needsReview gate must be numeric > 0: {review_gate!r}")
 
     confirmation_gate = gate_before("blockedConfirmationRecord")
     if (
-        confirmation_gate.get("WFCondition") != 4
-        or confirmation_gate.get("WFNumberValue") is not True
+        confirmation_gate.get("WFCondition") != 2
+        or str(confirmation_gate.get("WFNumberValue")) != "0"
         or token_action_output_names(confirmation_gate.get("WFInput"))
         != {"requiresConfirmation"}
     ):
         raise AssertionError(
-            f"requiresConfirmation gate is not explicit true: {confirmation_gate!r}"
+            f"requiresConfirmation gate must be numeric > 0: {confirmation_gate!r}"
         )
 
     external_gate = gate_before("blockedExternalRecord")
@@ -342,15 +342,18 @@ def validate(path: Path, expected_build_id: str) -> None:
         raise AssertionError("external-write gate must have two rows")
     boolean_rows = {}
     for row in rows:
-        if not isinstance(row, dict) or row.get("WFCondition") != 4:
-            raise AssertionError(f"external-write row is not explicit equality: {row!r}")
+        if not isinstance(row, dict):
+            raise AssertionError(f"external-write row is not a dictionary: {row!r}")
         refs = token_action_output_names(row.get("WFInput"))
         if len(refs) != 1:
             raise AssertionError(f"external-write row has wrong refs: {sorted(refs)}")
-        boolean_rows[next(iter(refs))] = row.get("WFNumberValue")
+        boolean_rows[next(iter(refs))] = (
+            row.get("WFCondition"),
+            str(row.get("WFNumberValue")),
+        )
     if boolean_rows != {
-        "externalWrite": True,
-        "requiresConfirmation": False,
+        "externalWrite": (2, "0"),
+        "requiresConfirmation": (1, "0"),
     }:
         raise AssertionError(f"external-write boolean rows wrong: {boolean_rows!r}")
 
@@ -527,7 +530,7 @@ def validate(path: Path, expected_build_id: str) -> None:
     print(
         "Clarity deep action audit: PASS "
         f"actions={len(actions)} identifiers={len(counts)} refs={refs} "
-        f"token_strings={token_strings} build_id={actual_build_id} prompt_bindings=3 model_decision_trace=1 boolean_gates=explicit calendar_destination=プライベート "
+        f"token_strings={token_strings} build_id={actual_build_id} prompt_bindings=3 model_decision_trace=1 boolean_gates=numeric_1_0 calendar_destination=プライベート "
         f"condition_groups={len(condition_groups)} repeat_groups={len(repeat_groups)}"
     )
 

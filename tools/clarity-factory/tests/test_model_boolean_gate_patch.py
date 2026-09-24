@@ -34,11 +34,11 @@ def conditional_single(name: str, code: int) -> dict:
 
 
 class BooleanGatePatchTests(unittest.TestCase):
-    def test_single_false_boolean_presence_gate_becomes_explicit_true(self):
+    def test_single_boolean_presence_gate_becomes_numeric_true_check(self):
         gate = conditional_single("needsReview", 100)
         module.patch_single(gate, "needsReview", True, 100)
-        self.assertEqual(gate["WFCondition"], 4)
-        self.assertIs(gate["WFNumberValue"], True)
+        self.assertEqual(gate["WFCondition"], 2)
+        self.assertEqual(gate["WFNumberValue"], "0")
 
     def test_external_write_rows_become_true_and_false_equalities(self):
         gate = {
@@ -75,8 +75,8 @@ class BooleanGatePatchTests(unittest.TestCase):
         self.assertEqual(
             got,
             {
-                "externalWrite": (4, True),
-                "requiresConfirmation": (4, False),
+                "externalWrite": (2, "0"),
+                "requiresConfirmation": (1, "0"),
             },
         )
 
