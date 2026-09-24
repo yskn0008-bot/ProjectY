@@ -143,7 +143,9 @@
     const payload={schema:'yos-night-history-v1',before_date:date,records:historyFrom(data,date,limit)};
     clearBridgeParams();
     const target='shortcuts://run-shortcut?name='+encodeURIComponent(shortcut)+'&input=text&text='+encodeURIComponent(JSON.stringify(payload));
-    location.replace(target);
+    // Match Morning Brief: let the launching shortcut reach Stop Shortcut
+    // before Safari starts the callback run, avoiding a re-entry race on iOS.
+    setTimeout(()=>location.replace(target),1200);
     return true;
   }
 
