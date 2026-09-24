@@ -12,7 +12,7 @@
 // No Safari, Scriptable, URL, or remote write.
 
 @clarityText = ""
-const clarityFile = getFile("Clarity Ledger.txt", false)
+const clarityFile = getFile("Clarity Ledger.txt", nil, false)
 if clarityFile {
     const clarityRaw = getText(clarityFile)
     @clarityText = "{clarityRaw}"
