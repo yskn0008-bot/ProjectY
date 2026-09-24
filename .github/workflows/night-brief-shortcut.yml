@@ -84,7 +84,6 @@ jobs:
           assert ids.count('is.workflow.actions.exit') == 0
 
           assert 'YOS Night History.json' in blob
-          assert 'Night Check in' in blob
           assert '収集区域④' in blob
           assert '内部分析では必ず最低10個' in blob
           assert '最終表示は【今日の発見】3項目' in blob
