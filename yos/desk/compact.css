@@ -1,0 +1,31 @@
+/* iPhone one-screen DESK refinement: golden-ratio spacing + harmony */
+#deskPage .topbar{margin-bottom:8px;min-height:42px}
+#deskPage .heroMain{padding:12px}
+#deskPage .heroSide{padding:10px}
+#deskPage .heroTitle{font-size:18px}
+#deskPage .heroSub{margin-top:5px;font-size:10px;line-height:1.35}
+#deskPage .next{margin-top:8px;padding-top:7px;font-size:10px}
+#deskPage .section{margin-top:8px}
+#deskPage .sectionHead{padding-bottom:5px}
+#deskPage .sectionHead strong{font-size:12px}
+#deskPage .quick{gap:5px}
+#deskPage .quickBtn{height:52px;padding:5px 2px;gap:3px}
+#deskPage .quickIcon{width:24px;height:24px;border-radius:8px;font-size:10px}
+#deskPage .devList{gap:5px}
+#deskPage .dev{padding:6px 8px;border-radius:13px}
+#deskPage .devName{font-size:11px}
+#deskPage .devNext{font-size:8.5px;margin-top:1px}
+#deskPage .devPct{font-size:10px}
+#deskPage .grip{font-size:8px}
+#deskPage .suggestions{gap:6px}
+#deskPage .suggest{min-height:58px;padding:7px;border-radius:14px}
+#deskPage .suggest b{margin-top:3px;font-size:10px}
+#deskPage .suggest p{margin-top:3px;font-size:8.5px;line-height:1.2}
+#deskPage .stats{gap:5px}
+#deskPage .stat{padding:6px;border-radius:13px}
+#deskPage .stat b{font-size:11px}
+#deskPage .stat span{font-size:8px}
+#deskPage .composer{margin-top:7px;grid-template-columns:1fr 54px;gap:6px}
+#deskPage .composer input{height:38px;font-size:12px}
+#deskPage .send{font-size:11px}
+.brand strong:after{content:'·';color:var(--gold);margin-left:5px;text-shadow:0 0 14px rgba(237,191,98,.45)}
