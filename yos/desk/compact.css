@@ -1,31 +1,99 @@
-/* iPhone one-screen DESK refinement: golden-ratio spacing + harmony */
-#deskPage .topbar{margin-bottom:8px;min-height:42px}
-#deskPage .heroMain{padding:12px}
-#deskPage .heroSide{padding:10px}
-#deskPage .heroTitle{font-size:18px}
-#deskPage .heroSub{margin-top:5px;font-size:10px;line-height:1.35}
-#deskPage .next{margin-top:8px;padding-top:7px;font-size:10px}
-#deskPage .section{margin-top:8px}
-#deskPage .sectionHead{padding-bottom:5px}
-#deskPage .sectionHead strong{font-size:12px}
-#deskPage .quick{gap:5px}
-#deskPage .quickBtn{height:52px;padding:5px 2px;gap:3px}
-#deskPage .quickIcon{width:24px;height:24px;border-radius:8px;font-size:10px}
-#deskPage .devList{gap:5px}
-#deskPage .dev{padding:6px 8px;border-radius:13px}
-#deskPage .devName{font-size:11px}
-#deskPage .devNext{font-size:8.5px;margin-top:1px}
-#deskPage .devPct{font-size:10px}
-#deskPage .grip{font-size:8px}
-#deskPage .suggestions{gap:6px}
-#deskPage .suggest{min-height:58px;padding:7px;border-radius:14px}
-#deskPage .suggest b{margin-top:3px;font-size:10px}
-#deskPage .suggest p{margin-top:3px;font-size:8.5px;line-height:1.2}
-#deskPage .stats{gap:5px}
-#deskPage .stat{padding:6px;border-radius:13px}
-#deskPage .stat b{font-size:11px}
-#deskPage .stat span{font-size:8px}
-#deskPage .composer{margin-top:7px;grid-template-columns:1fr 54px;gap:6px}
-#deskPage .composer input{height:38px;font-size:12px}
-#deskPage .send{font-size:11px}
+/* YOS DESK readable iPhone typography v1
+   Readability now takes priority over one-screen compression.
+   The page remains independently scrollable above the fixed bottom navigation. */
+
+html{-webkit-text-size-adjust:100%}
+body{font-size:16px}
+
+/* Header */
+.brand small{font-size:12px}
+.brand strong{font-size:28px;line-height:1.1}
+.miniBtn{font-size:14px;min-height:44px}
+
+/* DESK hero */
+#deskPage .topbar{margin-bottom:13px;min-height:48px}
+#deskPage .heroMain{padding:16px}
+#deskPage .heroSide{padding:13px}
+#deskPage .eyebrow{font-size:13px;line-height:1.35}
+#deskPage .heroTitle{font-size:23px;line-height:1.15}
+#deskPage .heroSub{margin-top:8px;font-size:15px;line-height:1.5}
+#deskPage .next{margin-top:12px;padding-top:10px;font-size:14px;line-height:1.45}
+#deskPage .heroSide .big{font-size:30px}
+#deskPage .heroSide .label{font-size:13px;line-height:1.45}
+
+/* Section labels */
+.section{margin-top:16px}
+.sectionHead{padding-bottom:8px}
+.sectionHead strong{font-size:17px}
+.sectionHead span{font-size:13px;line-height:1.3}
+
+/* Quick entries */
+#deskPage .quick{gap:7px}
+#deskPage .quickBtn{height:66px;padding:7px 3px;gap:5px}
+#deskPage .quickIcon{width:31px;height:31px;border-radius:10px;font-size:13px}
+#deskPage .quickBtn span:last-child{font-size:12px}
+
+/* Development rows */
+#deskPage .devList{gap:8px}
+#deskPage .dev{padding:11px 10px;border-radius:16px;grid-template-columns:30px 1fr auto}
+#deskPage .num{font-size:13px}
+#deskPage .devName{font-size:16px;line-height:1.25}
+#deskPage .devNext{font-size:13px;line-height:1.4;margin-top:4px}
+#deskPage .devStatus{font-size:12px}
+#deskPage .devPct{font-size:15px}
+#deskPage .grip{font-size:10px}
+
+/* Suggestions */
+#deskPage .suggestions{gap:8px}
+#deskPage .suggest{min-height:104px;padding:12px;border-radius:17px}
+#deskPage .suggest small{font-size:12px}
+#deskPage .suggest b{margin-top:6px;font-size:16px;line-height:1.3}
+#deskPage .suggest p{margin-top:6px;font-size:13px;line-height:1.45}
+
+/* Progress */
+#deskPage .stats{gap:8px}
+#deskPage .stat{padding:10px;border-radius:15px}
+#deskPage .stat b{font-size:16px}
+#deskPage .stat span{font-size:12px;line-height:1.35}
+
+/* Composer */
+#deskPage .composer{margin-top:12px;grid-template-columns:1fr 64px;gap:8px}
+#deskPage .composer input{height:48px;font-size:16px}
+#deskPage .send{font-size:14px}
+
+/* CHATS */
+.search{height:56px}
+.search input{font-size:17px}
+.tabs{gap:8px}
+.tab{height:44px;font-size:15px}
+.projectPill{padding:9px 13px;font-size:13px}
+.chatList{gap:9px}
+.chat{min-height:72px;padding:11px 11px;grid-template-columns:46px minmax(0,1fr) 46px}
+.avatar{width:46px;height:46px;font-size:16px}
+.chatName{font-size:16px;line-height:1.25}
+.tag{font-size:10px;padding:3px 6px}
+.preview{font-size:13px;line-height:1.4;margin-top:5px}
+.time{font-size:12px}
+.badge{min-width:24px;height:24px;font-size:12px}
+.empty{font-size:14px}
+
+/* Bottom navigation */
+.nav{font-size:12px}
+.nav b{font-size:21px}
+.bulk button{font-size:14px}
+
+/* Sheets / dialogs */
+.sheet h3{font-size:20px}
+.sheet p{font-size:14px;line-height:1.55}
+.sheet input,.sheet textarea{font-size:16px}
+.sheet input{height:48px}
+.sheet button{height:48px;font-size:15px}
+.toast{font-size:13px}
+
+/* Keep the playful harmony dot */
 .brand strong:after{content:'·';color:var(--gold);margin-left:5px;text-shadow:0 0 14px rgba(237,191,98,.45)}
+
+/* Very short viewport: do not shrink text; allow scrolling instead. */
+@media(max-height:730px){
+  .app{scroll-behavior:smooth}
+}
