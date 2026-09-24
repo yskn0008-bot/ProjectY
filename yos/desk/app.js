@@ -90,6 +90,7 @@ renderDev();renderChats();setPage(currentPage);updateClock();setInterval(updateC
 /* YOS DESK live sync v1 */
 (function(){
   var ASSETS_URL='../../data/yos-assets.json';
+  var MISSION_URL='../../data/mission-control.json';
   var MONEY_KEY='yos-money-v2';
   var HOME_SETTINGS_KEY='yos-home-settings-v2';
   var HOME_SETTINGS_LEGACY_KEY='yos-home-settings-v1';
@@ -282,6 +283,42 @@ renderDev();renderChats();setPage(currentPage);updateClock();setInterval(updateC
     }
   }
 
+  function updateMissionStats(data){
+    var projects=Array.isArray(data&&data.projects)?data.projects:[];
+    var inbox=Array.isArray(data&&data.inbox)?data.inbox:[];
+    var recent=Array.isArray(data&&data.recently_completed)?data.recently_completed:[];
+    var active=projects.filter(function(x){return x&&x.status==='active'}).length;
+    var waiting=inbox.filter(function(x){return x&&['review','draft','waiting'].includes(String(x.status||''))}).length;
+    var latest=recent[0]||null;
+    var cards=qa('.stats .stat');
+    if(cards[0]){
+      var b0=cards[0].querySelector('b'),s0=cards[0].querySelector('span');
+      if(b0)b0.textContent=active+'件';
+      if(s0)s0.textContent='稼働中 · 自動同期';
+    }
+    if(cards[1]){
+      var b1=cards[1].querySelector('b'),s1=cards[1].querySelector('span');
+      if(b1)b1.textContent=waiting+'件';
+      if(s1)s1.textContent='確認待ち';
+    }
+    if(cards[2]&&latest){
+      var b2=cards[2].querySelector('b'),s2=cards[2].querySelector('span');
+      if(b2)b2.textContent=String(latest.title||'最近完了').replace(/^PR #\d+\s*/,'').slice(0,18);
+      if(s2)s2.textContent='最近完了 · '+String(data.updated_at||'').slice(11,16);
+    }
+  }
+
+  async function syncMission(){
+    try{
+      var res=await fetch(MISSION_URL+'?t='+Date.now(),{cache:'no-store'});
+      if(!res.ok)throw new Error('mission fetch '+res.status);
+      updateMissionStats(await res.json());
+      document.documentElement.dataset.missionSync='ok';
+    }catch(e){
+      document.documentElement.dataset.missionSync='unavailable';
+    }
+  }
+
   function syncLocal(){
     updateMoneyDev(null);
     harvestStoredChatLinks();
@@ -293,6 +330,7 @@ renderDev();renderChats();setPage(currentPage);updateClock();setInterval(updateC
   function runLiveSync(){
     syncLocal();
     syncAssets();
+    syncMission();
   }
 
   harvestStoredChatLinks();
