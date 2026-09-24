@@ -126,6 +126,13 @@ for actionItem in @actionsRaw {
     const requiresConfirmation = getValue(actionDict, "requires_confirmation")
     const externalWrite = getValue(actionDict, "external_write")
     const needsReview = getValue(actionDict, "needs_review")
+    // Shortcuts renders Dictionary booleans as localized text when inserted into Text.
+    // Real-device evidence on this Japanese iPhone: false -> "いいえ", true -> "はい".
+    // Compare those Text outputs explicitly instead of using bare-boolean If conditions,
+    // which Shortcuts compiled as existence checks and blocked even when the value was false.
+    const requiresConfirmationText = text("{requiresConfirmation}")
+    const externalWriteText = text("{externalWrite}")
+    const needsReviewText = text("{needsReview}")
     const modelDecisionRecord = text("{CurrentDate}\t{requestNumber}\t{actionId}\tMODEL_DECISION\texecutor={executor}\tdate_time={dateTime}\tend_date_time={endDateTime}\tneeds_review={needsReview}\toriginal_input={originalInput}\n")
     appendResolvedFile(ledgerFile, modelDecisionRecord)
 
@@ -181,19 +188,19 @@ for actionItem in @actionsRaw {
         }
     }
 
-    if needsReview {
+    if needsReviewText == "はい" {
         const blockedReviewRecord = text("{CurrentDate}\t{requestNumber}\t{actionId}\tBLOCKED\tneeds_review\n")
         appendResolvedFile(ledgerFile, blockedReviewRecord)
         mustOutput("ここだけ確認して", "曖昧な点があるため自動では進めません")
     }
 
-    if externalWrite && !requiresConfirmation {
+    if externalWriteText == "はい" && requiresConfirmationText == "いいえ" {
         const blockedExternalRecord = text("{CurrentDate}\t{requestNumber}\t{actionId}\tBLOCKED\texternal_write_without_confirmation\n")
         appendResolvedFile(ledgerFile, blockedExternalRecord)
         mustOutput("ここだけ確認して", "外部への変更は確認なしでは実行しません")
     }
 
-    if requiresConfirmation {
+    if requiresConfirmationText == "はい" {
         const blockedConfirmationRecord = text("{CurrentDate}\t{requestNumber}\t{actionId}\tBLOCKED\trequires_confirmation\n")
         appendResolvedFile(ledgerFile, blockedConfirmationRecord)
         mustOutput("ここだけ決めて", "実行前に確認が必要です")

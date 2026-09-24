@@ -313,21 +313,26 @@ def validate(path: Path, expected_build_id: str) -> None:
 
     review_gate = gate_before("blockedReviewRecord")
     if (
-        review_gate.get("WFCondition") != 2
-        or str(review_gate.get("WFNumberValue")) != "0"
-        or token_action_output_names(review_gate.get("WFInput")) != {"needsReview"}
+        review_gate.get("WFCondition") != 4
+        or review_gate.get("WFConditionalActionString") != "はい"
+        or token_action_output_names(review_gate.get("WFInput")) != {"needsReviewText"}
+        or "WFNumberValue" in review_gate
     ):
-        raise AssertionError(f"needsReview gate must be numeric > 0: {review_gate!r}")
+        raise AssertionError(
+            f'needsReview gate must equal localized "はい": {review_gate!r}'
+        )
 
     confirmation_gate = gate_before("blockedConfirmationRecord")
     if (
-        confirmation_gate.get("WFCondition") != 2
-        or str(confirmation_gate.get("WFNumberValue")) != "0"
+        confirmation_gate.get("WFCondition") != 4
+        or confirmation_gate.get("WFConditionalActionString") != "はい"
         or token_action_output_names(confirmation_gate.get("WFInput"))
-        != {"requiresConfirmation"}
+        != {"requiresConfirmationText"}
+        or "WFNumberValue" in confirmation_gate
     ):
         raise AssertionError(
-            f"requiresConfirmation gate must be numeric > 0: {confirmation_gate!r}"
+            f'requiresConfirmation gate must equal localized "はい": '
+            f"{confirmation_gate!r}"
         )
 
     external_gate = gate_before("blockedExternalRecord")
@@ -349,11 +354,15 @@ def validate(path: Path, expected_build_id: str) -> None:
             raise AssertionError(f"external-write row has wrong refs: {sorted(refs)}")
         boolean_rows[next(iter(refs))] = (
             row.get("WFCondition"),
-            str(row.get("WFNumberValue")),
+            row.get("WFConditionalActionString"),
         )
+        if "WFNumberValue" in row:
+            raise AssertionError(
+                f"external-write row unexpectedly contains WFNumberValue: {row!r}"
+            )
     if boolean_rows != {
-        "externalWrite": (2, "0"),
-        "requiresConfirmation": (1, "0"),
+        "externalWriteText": (4, "はい"),
+        "requiresConfirmationText": (4, "いいえ"),
     }:
         raise AssertionError(f"external-write boolean rows wrong: {boolean_rows!r}")
 
@@ -530,7 +539,7 @@ def validate(path: Path, expected_build_id: str) -> None:
     print(
         "Clarity deep action audit: PASS "
         f"actions={len(actions)} identifiers={len(counts)} refs={refs} "
-        f"token_strings={token_strings} build_id={actual_build_id} prompt_bindings=3 model_decision_trace=1 boolean_gates=numeric_1_0 calendar_destination=プライベート "
+        f"token_strings={token_strings} build_id={actual_build_id} prompt_bindings=3 model_decision_trace=1 boolean_gates=localized_text_yes_no calendar_destination=プライベート "
         f"condition_groups={len(condition_groups)} repeat_groups={len(repeat_groups)}"
     )
 
