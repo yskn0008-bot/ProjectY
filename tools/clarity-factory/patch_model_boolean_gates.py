@@ -1,17 +1,28 @@
 #!/usr/bin/env python3
-"""Repair Cherri's bare-variable boolean gates in compiled Clarity.
+"""Repair Cherri's bare-variable Boolean gates in compiled Clarity.
 
 Cherri compiles `if someVariable {` as WFCondition=100 ("has any value").
-For dictionary booleans, false is still a present value, so a false flag can
-incorrectly enter the branch. This patch rewrites only the three model safety
-boolean gates to explicit equality comparisons.
+For JSON dictionary booleans, false is still a present value, so that form
+incorrectly enters the branch.
+
+Apple-built shortcuts represent Boolean "is true" as WFCondition=4 with the
+conditional input explicitly coerced to WFBooleanContentItem and no comparison
+literal. This patch applies exactly that canonical shape to only the model
+Boolean safety gates.
 """
 
 from __future__ import annotations
 
 import argparse
 import plistlib
+from collections import Counter
 from pathlib import Path
+
+TARGET_COUNTS = {
+    "needsReview": 1,
+    "externalWrite": 1,
+    "requiresConfirmation": 2,
+}
 
 
 def params(action: dict) -> dict:
@@ -38,148 +49,117 @@ def output_names(value: object) -> set[str]:
     return names
 
 
-def find_record_index(actions: list[dict], custom_output_name: str) -> int:
-    matches = [
-        i
-        for i, action in enumerate(actions)
-        if params(action).get("CustomOutputName") == custom_output_name
+def action_output_value(condition: dict, expected_name: str) -> dict:
+    wf_input = condition.get("WFInput")
+    if not isinstance(wf_input, dict) or wf_input.get("Type") != "Variable":
+        raise SystemExit(f"{expected_name} gate missing Variable WFInput")
+    variable = wf_input.get("Variable")
+    if not isinstance(variable, dict):
+        raise SystemExit(f"{expected_name} gate missing WFInput.Variable")
+    value = variable.get("Value")
+    if not isinstance(value, dict) or value.get("Type") != "ActionOutput":
+        raise SystemExit(f"{expected_name} gate is not wired to ActionOutput")
+    if value.get("OutputName") != expected_name:
+        raise SystemExit(
+            f"{expected_name} gate points to {value.get('OutputName')!r}"
+        )
+    return value
+
+
+def ensure_boolean_coercion(value: dict) -> None:
+    aggrandizements = value.get("Aggrandizements")
+    if aggrandizements is None:
+        aggrandizements = []
+    if not isinstance(aggrandizements, list):
+        raise SystemExit("ActionOutput Aggrandizements is not a list")
+
+    cleaned = [
+        item
+        for item in aggrandizements
+        if not (
+            isinstance(item, dict)
+            and item.get("Type") == "WFCoercionVariableAggrandizement"
+        )
     ]
-    if len(matches) != 1:
-        raise SystemExit(
-            f"expected one {custom_output_name}, found {len(matches)}"
-        )
-    return matches[0]
+    cleaned.insert(
+        0,
+        {
+            "Type": "WFCoercionVariableAggrandizement",
+            "CoercionItemClass": "WFBooleanContentItem",
+        },
+    )
+    value["Aggrandizements"] = cleaned
 
 
-def find_start_conditional_before(actions: list[dict], record_index: int) -> dict:
-    for i in range(record_index - 1, max(-1, record_index - 6), -1):
-        action = actions[i]
-        p = params(action)
-        if (
-            action.get("WFWorkflowActionIdentifier")
-            == "is.workflow.actions.conditional"
-            and p.get("WFControlFlowMode") == 0
-        ):
-            return p
-    raise SystemExit(f"no start conditional found before action {record_index}")
+def is_canonical_boolean_true(condition: dict, expected_name: str) -> bool:
+    if condition.get("WFCondition") != 4:
+        return False
+    if "WFNumberValue" in condition or "WFConditionalActionString" in condition:
+        return False
+    if output_names(condition.get("WFInput")) != {expected_name}:
+        return False
+    try:
+        value = action_output_value(condition, expected_name)
+    except SystemExit:
+        return False
+    aggrandizements = value.get("Aggrandizements")
+    if not isinstance(aggrandizements, list):
+        return False
+    return any(
+        isinstance(item, dict)
+        and item.get("Type") == "WFCoercionVariableAggrandizement"
+        and item.get("CoercionItemClass") == "WFBooleanContentItem"
+        for item in aggrandizements
+    )
 
 
-def patch_single(
-    condition: dict,
-    output_name: str,
-    expected_value: bool,
-    expected_old_code: int,
-) -> None:
+def patch_gate(condition: dict, name: str) -> None:
     refs = output_names(condition.get("WFInput"))
-    if refs != {output_name}:
-        raise SystemExit(
-            f"{output_name} gate input mismatch: {sorted(refs)}"
-        )
+    if refs != {name}:
+        raise SystemExit(f"{name} gate input mismatch: {sorted(refs)}")
     code = condition.get("WFCondition")
-    if code not in (expected_old_code, 4):
-        raise SystemExit(
-            f"{output_name} gate unexpected condition code: {code!r}"
-        )
-    if code == 4 and condition.get("WFNumberValue") is not expected_value:
-        raise SystemExit(
-            f"{output_name} gate already explicit but wrong value: "
-            f"{condition.get('WFNumberValue')!r}"
-        )
+    if code not in (100, 4):
+        raise SystemExit(f"{name} gate unexpected condition code: {code!r}")
+    value = action_output_value(condition, name)
+    ensure_boolean_coercion(value)
     condition["WFCondition"] = 4
-    condition["WFNumberValue"] = expected_value
+    condition.pop("WFNumberValue", None)
     condition.pop("WFConditionalActionString", None)
 
 
-def patch_multi(condition: dict) -> None:
-    wrapper = condition.get("WFConditions")
-    if not isinstance(wrapper, dict):
-        raise SystemExit("external-write gate missing WFConditions")
-    value = wrapper.get("Value")
-    if not isinstance(value, dict):
-        raise SystemExit("external-write WFConditions.Value missing")
-    if value.get("WFActionParameterFilterPrefix") != 1:
-        raise SystemExit("external-write gate must remain AND")
-    templates = value.get("WFActionParameterFilterTemplates")
-    if not isinstance(templates, list) or len(templates) != 2:
-        raise SystemExit("external-write gate must have exactly two rows")
-
-    expected = {
-        "externalWrite": (True, 100),
-        "requiresConfirmation": (False, 101),
-    }
-    seen: set[str] = set()
-    for row in templates:
-        if not isinstance(row, dict):
-            raise SystemExit("external-write condition row is not a dictionary")
-        refs = output_names(row.get("WFInput"))
+def target_gates(actions: list[dict]) -> list[tuple[str, dict]]:
+    found: list[tuple[str, dict]] = []
+    for action in actions:
+        if action.get("WFWorkflowActionIdentifier") != "is.workflow.actions.conditional":
+            continue
+        p = params(action)
+        if p.get("WFControlFlowMode") != 0:
+            continue
+        refs = output_names(p.get("WFInput"))
         if len(refs) != 1:
-            raise SystemExit(
-                f"external-write condition row has unexpected refs: {sorted(refs)}"
-            )
+            continue
         name = next(iter(refs))
-        if name not in expected:
-            raise SystemExit(f"unexpected external-write gate input: {name}")
-        expected_value, old_code = expected[name]
-        code = row.get("WFCondition")
-        if code not in (old_code, 4):
-            raise SystemExit(
-                f"{name} gate unexpected condition code: {code!r}"
-            )
-        if code == 4 and row.get("WFNumberValue") is not expected_value:
-            raise SystemExit(
-                f"{name} gate already explicit but wrong value: "
-                f"{row.get('WFNumberValue')!r}"
-            )
-        row["WFCondition"] = 4
-        row["WFNumberValue"] = expected_value
-        row.pop("WFConditionalActionString", None)
-        seen.add(name)
-
-    if seen != set(expected):
-        raise SystemExit(
-            f"external-write gate rows incomplete: {sorted(seen)}"
-        )
+        if name in TARGET_COUNTS:
+            found.append((name, p))
+    return found
 
 
 def verify(actions: list[dict]) -> None:
-    review = find_start_conditional_before(
-        actions, find_record_index(actions, "blockedReviewRecord")
-    )
-    confirmation = find_start_conditional_before(
-        actions, find_record_index(actions, "blockedConfirmationRecord")
-    )
-    external = find_start_conditional_before(
-        actions, find_record_index(actions, "blockedExternalRecord")
-    )
-
-    for gate, name, expected in (
-        (review, "needsReview", True),
-        (confirmation, "requiresConfirmation", True),
-    ):
-        if gate.get("WFCondition") != 4:
-            raise SystemExit(f"{name} gate is not explicit equality")
-        if gate.get("WFNumberValue") is not expected:
-            raise SystemExit(f"{name} gate comparison value is wrong")
-        if output_names(gate.get("WFInput")) != {name}:
-            raise SystemExit(f"{name} gate input reference is wrong")
-
-    wrapper = external.get("WFConditions", {})
-    value = wrapper.get("Value", {}) if isinstance(wrapper, dict) else {}
-    rows = value.get("WFActionParameterFilterTemplates", [])
-    got: dict[str, bool] = {}
-    for row in rows if isinstance(rows, list) else []:
-        refs = output_names(row.get("WFInput")) if isinstance(row, dict) else set()
-        if len(refs) == 1:
-            name = next(iter(refs))
-            got[name] = row.get("WFNumberValue")
-            if row.get("WFCondition") != 4:
-                raise SystemExit(f"{name} multi gate is not explicit equality")
-    if got != {"externalWrite": True, "requiresConfirmation": False}:
-        raise SystemExit(f"external-write gate values wrong: {got!r}")
+    found = target_gates(actions)
+    counts = Counter(name for name, _ in found)
+    if dict(counts) != TARGET_COUNTS:
+        raise SystemExit(
+            f"model Boolean gate counts wrong: got={dict(counts)!r} "
+            f"expected={TARGET_COUNTS!r}"
+        )
+    for name, condition in found:
+        if not is_canonical_boolean_true(condition, name):
+            raise SystemExit(f"{name} gate is not canonical Boolean is-true")
 
     print(
         "Clarity model boolean gates: PASS "
-        "needsReview=true externalWrite=true requiresConfirmation=false/true"
+        "needsReview=true externalWrite=true requiresConfirmation=true(x2) "
+        "via WFBooleanContentItem coercion"
     )
 
 
@@ -190,19 +170,15 @@ def patch(path: Path) -> None:
     if not isinstance(actions, list):
         raise SystemExit("WFWorkflowActions missing")
 
-    review = find_start_conditional_before(
-        actions, find_record_index(actions, "blockedReviewRecord")
-    )
-    confirmation = find_start_conditional_before(
-        actions, find_record_index(actions, "blockedConfirmationRecord")
-    )
-    external = find_start_conditional_before(
-        actions, find_record_index(actions, "blockedExternalRecord")
-    )
+    found = target_gates(actions)
+    counts = Counter(name for name, _ in found)
+    if dict(counts) != TARGET_COUNTS:
+        raise SystemExit(
+            f"unexpected model Boolean gate counts before patch: {dict(counts)!r}"
+        )
 
-    patch_single(review, "needsReview", True, 100)
-    patch_multi(external)
-    patch_single(confirmation, "requiresConfirmation", True, 100)
+    for name, condition in found:
+        patch_gate(condition, name)
 
     with path.open("wb") as fh:
         plistlib.dump(root, fh, fmt=plistlib.FMT_XML, sort_keys=False)
