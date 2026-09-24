@@ -1,5 +1,6 @@
 #define name Night Brief
 #define color purple
+#define inputs text
 
 #include 'actions/text'
 #include 'actions/documents'
@@ -8,6 +9,17 @@
 #include 'actions/location'
 #include 'actions/crypto'
 #include 'actions/web'
+
+// Save callback: return from MY LIFE without starting the Night flow again.
+@incoming = "{ShortcutInput}"
+if @incoming contains "yos-night-save-ok-v1" {
+    const saved = getDictionary(@incoming)
+    const savedHistory = "{saved['history_text']}"
+    const savedDisplay = "{saved['display_text']}"
+    saveFile("YOS Night History.json", savedHistory, true)
+    show(savedDisplay)
+    stop()
+}
 
 // Local-first Night Brief.
 // YOS Night History.json is only a derived cache; MY LIFE yos-life-v1 remains the owner store.
@@ -129,7 +141,7 @@ show(response)
 // Continue directly into Night Check-in instead of calling another Shortcut.
 // This avoids the fragile iOS "Run Shortcut" picker dependency.
 const rawInput = prompt(
-    "今日のことを自由に書く・話す。短くてOK。",
+    "テーマは決めなくてOK。今日のことを自由に書く・話す。\n\n思いつかなければ：今日あったこと／気分・気づき／明日やること",
     "Text",
     ""
 )
@@ -186,6 +198,6 @@ const messageEncoded = urlEncode(messageBase64)
 const displayBase64 = base64Encode(displayText)
 const displayEncoded = urlEncode(displayBase64)
 
-const saveURL = text("https://yskn0008-bot.github.io/ProjectY/life/?night_save=1&night_raw_b64={rawEncoded}&night_summary_b64={summaryEncoded}&night_mood_b64={moodEncoded}&night_tomorrow_b64={tomorrowEncoded}&night_discoveries_b64={discoveriesEncoded}&night_diary_b64={diaryEncoded}&night_message_b64={messageEncoded}&night_display_b64={displayEncoded}")
+const saveURL = text("https://yskn0008-bot.github.io/ProjectY/life/?night_save=1&night_raw_b64={rawEncoded}&night_summary_b64={summaryEncoded}&night_mood_b64={moodEncoded}&night_tomorrow_b64={tomorrowEncoded}&night_discoveries_b64={discoveriesEncoded}&night_diary_b64={diaryEncoded}&night_message_b64={messageEncoded}&night_display_b64={displayEncoded}&shortcut=Night%20Brief")
 openURL(saveURL)
 stop()
