@@ -1,0 +1,110 @@
+#define name YOS Verify
+#define color blue
+
+#include 'actions/text'
+#include 'actions/documents'
+#include 'actions/intelligence'
+#include 'actions/sharing'
+
+// YOS Verify v0
+// Purpose: replace screenshot-based functional confirmation with local evidence.
+// Reads existing Clarity Ledger + latest Night Brief record, returns PASS/FAIL/UNKNOWN.
+// No Safari, Scriptable, URL, or remote write.
+
+@clarityText = ""
+const clarityFile = getFile("Clarity Ledger.txt", false)
+if clarityFile {
+    const clarityRaw = getText(clarityFile)
+    @clarityText = "{clarityRaw}"
+}
+
+@nightText = ""
+@nightName = ""
+const nightFolder = createFolder("YOS Night History")
+const nightFiles = getFolderContents(nightFolder, false)
+if nightFiles {
+    const latestNight = filterFiles(nightFiles, 1, "Name", "Z to A")
+    if latestNight {
+        const latestNightText = getText(latestNight)
+        const latestNightName = getName(latestNight)
+        @nightText = "{latestNightText}"
+        @nightName = "{latestNightName}"
+    }
+}
+
+const verifyPrompt = text("あなたはYOS Verifyです。
+目的は、スクリーンショットではなく実行ログだけで機能確認することです。
+
+絶対ルール：
+・証拠があることだけ判定する。
+・推測でPASSにしない。
+・見た目の良し悪しは判定しない。
+・返答はDictionaryのみ。
+・キーは clarity_status, clarity_evidence, night_status, night_evidence, screenshot_needed, summary の6つだけ。
+・statusは PASS / FAIL / UNKNOWN のいずれか。
+・screenshot_neededは YES / NO のどちらか。
+
+Clarity判定：
+・最も新しい実行リクエストを対象にする。
+・そのリクエストに REQUEST_DONE があればPASS。
+・そのリクエストに FAILED または BLOCKED があり、REQUEST_DONEがなければFAIL。
+・最新リクエストを特定できない、途中で終わっている、証拠不足ならUNKNOWN。
+・APPLIEDだけではPASSにしない。
+
+Night Brief判定：
+・最新Nightファイルだけを対象にする。
+・YOS_NIGHT_RECORD_V1 があり、date:, summary:, three_line_diary:, raw_input: が保存されていればPASS。
+・ファイルはあるが必須項目が欠ける、保存内容が壊れているならFAIL。
+・ファイルなし、内容を判断できないならUNKNOWN。
+
+screenshot_needed：
+・両方PASSならNO。
+・FAIL/UNKNOWNでも、ログだけで原因が分かるならNO。
+・画面表示そのものの確認がないと判断不能な場合だけYES。
+
+summaryは最大3行。技術用語を減らして日本語で短く。
+
+Clarity Ledger:
+{clarityText}
+
+Latest Night filename:
+{nightName}
+
+Latest Night record:
+{nightText}")
+
+const result = askChatGPT(verifyPrompt, false, "Dictionary")
+const parsed = getDictionary(result)
+const clarityStatus = "{parsed['clarity_status']}"
+const clarityEvidence = "{parsed['clarity_evidence']}"
+const nightStatus = "{parsed['night_status']}"
+const nightEvidence = "{parsed['night_evidence']}"
+const screenshotNeeded = "{parsed['screenshot_needed']}"
+const summary = "{parsed['summary']}"
+
+const report = text("YOS VERIFY
+{CurrentDate}
+
+Clarity: {clarityStatus}
+{clarityEvidence}
+
+Night Brief: {nightStatus}
+{nightEvidence}
+
+{summary}
+
+スクショ必要: {screenshotNeeded}")
+
+saveFile("YOS Verify Latest.txt", report, true)
+
+if screenshotNeeded == "YES" {
+    setClipboard(report, true)
+    alert("スクショが必要なケースです。\n診断文はコピー済みなので、まずYOSチャットに貼り付けてください。", "YOS Verify")
+} else {
+    if clarityStatus == "FAIL" || clarityStatus == "UNKNOWN" || nightStatus == "FAIL" || nightStatus == "UNKNOWN" {
+        setClipboard(report, true)
+        alert("ログだけで確認できました。\n問題の診断文をコピー済みです。YOSチャットへ貼るだけでOK。", "YOS Verify")
+    } else {
+        alert("✅ PASS\nスクショ不要\nClarity / Night Brief はログ確認済み", "YOS Verify")
+    }
+}
