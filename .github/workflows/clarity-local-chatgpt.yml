@@ -8,7 +8,7 @@ on:
       - 'server/yos-ai/tests/clarity-model-api.test.mjs'
       - '.github/workflows/clarity-local-chatgpt.yml'
   push:
-    branches: [main]
+    branches: [main, repair/clarity-device-baseline-20260924]
     paths:
       - 'tools/clarity-factory/**'
       - 'server/yos-ai/clarity-model-contract.mjs'
