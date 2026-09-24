@@ -130,6 +130,7 @@ for actionItem in @actionsRaw {
     // Real-device evidence on this Japanese iPhone: false -> "いいえ", true -> "はい".
     // Compare those Text outputs explicitly instead of using bare-boolean If conditions,
     // which Shortcuts compiled as existence checks and blocked even when the value was false.
+    // 2026-09-24 device diagnosis: Calendar reached EXECUTING/APPLIED after bypassing only these broken gates.
     const requiresConfirmationText = text("{requiresConfirmation}")
     const externalWriteText = text("{externalWrite}")
     const needsReviewText = text("{needsReview}")
