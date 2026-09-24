@@ -82,6 +82,43 @@ jobs:
           python3 patch_reminder_wire_format.py "$runtime"
           python3 patch_destination_readback.py "$runtime"
           python3 validate_clarity_deep_audit.py "$runtime"
+          python3 - "$runtime" <<'PY'
+          import plistlib, sys
+          from pathlib import Path
+          path=Path(sys.argv[1])
+          root=plistlib.loads(path.read_bytes())
+          actions=root['WFWorkflowActions']
+          idx=[i for i,a in enumerate(actions)
+               if a.get('WFWorkflowActionParameters',{}).get('CustomOutputName')=='blockedReviewRecord']
+          assert len(idx)==1, idx
+          record_i=idx[0]
+          gate=None
+          for i in range(record_i-1,max(-1,record_i-6),-1):
+              a=actions[i]
+              p=a.get('WFWorkflowActionParameters',{})
+              if a.get('WFWorkflowActionIdentifier')=='is.workflow.actions.conditional' and p.get('WFControlFlowMode')==0:
+                  gate=p; gate_i=i; break
+          assert gate is not None
+          refs=[]
+          def walk(x):
+              if isinstance(x,dict):
+                  if x.get('Type')=='ActionOutput' and x.get('OutputName'):
+                      refs.append(x.get('OutputName'))
+                  for v in x.values(): walk(v)
+              elif isinstance(x,list):
+                  for v in x: walk(v)
+          walk(gate.get('WFInput'))
+          assert refs==['needsReview'], refs
+          assert gate.get('WFCondition')==100, gate
+          gate['WFCondition']=2
+          gate['WFNumberValue']='0'
+          gate.pop('WFConditionalActionString',None)
+          path.write_bytes(plistlib.dumps(root,fmt=plistlib.FMT_XML,sort_keys=False))
+          verify=plistlib.loads(path.read_bytes())['WFWorkflowActions'][gate_i]['WFWorkflowActionParameters']
+          assert verify.get('WFCondition')==2
+          assert verify.get('WFNumberValue')=='0'
+          print(f'Exact-device needsReview gate patch: PASS action={gate_i} condition=>0')
+          PY
           python3 validate_fixed_child_architecture.py "$runtime" './YOS_OpenApp_unsigned.shortcut'
           mkdir -p artifacts-fixed-child
           cp "$runtime" artifacts-fixed-child/Clarity-unsigned.shortcut
