@@ -110,7 +110,44 @@ def patch(source, destination):
     )
     if old not in prompt:
         fail("expected Money bridge prompt text not found")
-    prompt_value["string"] = prompt.replace(old, new)
+    prompt = prompt.replace(old, new)
+
+    # Keep the alert readable on a single iPhone screen. The existing alert action
+    # clips long prose behind the OK button, so constrain the model output itself.
+    old_layout = """【今日】
+天気：
+UV：
+
+【予定】
+：
+
+【タスク】
+：
+
+【お金】
+：
+
+【注意】
+：
+
+【YOSから今日の一言】
+：
+
+朝に10〜20秒で読める量にしてください。"""
+    compact_layout = """表示は次の7行以内。空行は禁止。各行は短く、同じ情報を言い換えて繰り返さないでください。
+【今日】天気・最高気温 / UV
+【予定】今日の予定（なければ「なし」）
+【タスク】今日のタスク（なければ「なし」）
+【お金】今日使える額 / 次の支払い
+【入金】次の入金 / 不足見込み
+【注意】今日、本当に注意が必要なことだけ
+【一言】今日いちばん先にやるとよいことを一言
+
+iPhoneの1画面で最後まで読める短さを最優先してください。"""
+    if old_layout not in prompt:
+        fail("expected Morning Brief layout prompt not found")
+    prompt = prompt.replace(old_layout, compact_layout)
+    prompt_value["string"] = prompt
     reindex_single_attachment(prompt_value)
 
     workflow["WFWorkflowHasShortcutInputVariables"] = False
@@ -134,7 +171,9 @@ def patch(source, destination):
     assert ids.count("is.workflow.actions.askllm") == 1
     assert ids.count("is.workflow.actions.notification") == 1
     assert ids.count("is.workflow.actions.alert") == 1
-    print(f"Morning Brief no-Safari patch: PASS ({len(patched_actions)} actions)")
+    assert "表示は次の7行以内" in blob
+    assert "iPhoneの1画面で最後まで読める短さ" in blob
+    print(f"Morning Brief no-Safari compact patch: PASS ({len(patched_actions)} actions)")
 
 if __name__ == "__main__":
     if len(sys.argv) != 3:
