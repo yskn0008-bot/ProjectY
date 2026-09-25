@@ -103,7 +103,7 @@ jobs:
           test -f "$entry"
           BUILD_ID='${{ github.event.pull_request.head.sha || github.sha }}'
           python3 patch_build_identity.py "$entry" "$BUILD_ID"
-          python3 validate_clarity_runtime.py "$entry"
+          python3 validate_clarity_runtime.py "$entry" --input-mode text
           python3 patch_natural_language_policy.py "$entry"
           python3 patch_raw_first_authority.py "$entry"
           python3 patch_action_extraction_policy.py "$entry"
