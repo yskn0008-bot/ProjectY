@@ -206,6 +206,7 @@ try{
   await expectText('#countPinned','1');
   assert.equal((await page.locator('#chatList').innerText()).includes('YOS DESK UI修正'),false,'demo chat titles must be removed');
   assert.equal((await page.locator('#chatList').innerText()).includes('収入チャンス監視'),false,'demo project chat titles must be removed');
+  await page.locator('[data-page="desk"]').click();
   const deskType=await page.evaluate(()=>({
     heroSub:parseFloat(getComputedStyle(document.querySelector('.heroSub')).fontSize),
     devNext:parseFloat(getComputedStyle(document.querySelector('.devNext')).fontSize),
