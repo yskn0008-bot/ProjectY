@@ -140,6 +140,15 @@ def validate(path: Path, expected_build_id: str) -> None:
         # Clarity Share intentionally presents its answer in an Alert so the result
         # remains visible when invoked inside the iOS Share Sheet extension.
         allowed_action_ids.add("is.workflow.actions.alert")
+        # Share v4 accepts photos and PDFs. These actions are local, read-only intake
+        # transforms only; they do not create external side effects.
+        allowed_action_ids.update({
+            "is.workflow.actions.getitemtype",
+            "is.workflow.actions.detect.images",
+            "is.workflow.actions.extracttextfromimage",
+            "is.workflow.actions.splitpdf",
+            "is.workflow.actions.makeimagefrompdfpage",
+        })
     unknown = sorted(set(counts) - allowed_action_ids)
     if unknown:
         raise AssertionError(f"unreviewed action identifier(s): {unknown}")
