@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-25T17:41:21+09:00",
+  "updated_at": "2026-09-25T18:02:19+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -70,7 +70,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-09-25T08:40:54Z"
+      "updated_at": "2026-09-25T09:01:58Z"
     },
     {
       "id": "github-issue-256",
@@ -165,6 +165,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-8a8e6d47e8b8",
+      "title": "Clarity Share: accept photos and PDFs",
+      "completed_at": "2026-09-25T09:02:04Z",
+      "result": "GitHub mainへ反映（8a8e6d4）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/8a8e6d47e8b898e9eee133114480fe07a6cfba30"
+    },
+    {
       "id": "github-commit-5ed1d434b590",
       "title": "Clarity Share: richer spaced dictionary format",
       "completed_at": "2026-09-25T08:41:09Z",
@@ -191,13 +198,6 @@
       "completed_at": "2026-09-25T07:26:21Z",
       "result": "GitHub mainへ反映（bec818a）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/bec818acfb8d292a2c53a88a747d78935ddbd1af"
-    },
-    {
-      "id": "github-commit-804711886a1f",
-      "title": "Clarity: add Share Sheet input",
-      "completed_at": "2026-09-25T07:13:28Z",
-      "result": "GitHub mainへ反映（8047118）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/804711886a1f6c0f1987d8f74537790f1851a727"
     },
     {
       "id": "complete-002",
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-25T17:41:21+09:00",
+      "last_update": "2026-09-25T18:02:19+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -315,7 +315,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-25T17:41:21+09:00",
+      "last_update": "2026-09-25T18:02:19+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-25T17:41:21+09:00",
+      "last_update": "2026-09-25T18:02:19+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "f2a0779bed49a0f6c1b4e37d7e754362aeefb4c9c1949fa4f18bd098ca6b4698"
+  "github_snapshot_hash": "de6f690fdca0a11a58077591faf4e35eff28e74d3cc9f0a1826400ec23bbd2cd"
 }
