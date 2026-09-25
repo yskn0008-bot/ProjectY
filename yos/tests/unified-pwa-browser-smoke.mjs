@@ -237,6 +237,18 @@ try{
   assert.ok(firstFoldGeometry.bottomGap>=0&&firstFoldGeometry.bottomGap<=24,'YOS DESK must not leave a large blank area below pinned entries');
   assert.ok(firstFoldGeometry.developmentTop>=firstFoldGeometry.appBottom-1,`YOS DESK development section must not appear before scrolling: devTop=${firstFoldGeometry.developmentTop}, appBottom=${firstFoldGeometry.appBottom}, gap=${firstFoldGeometry.bottomGap}`);
 
+  await page.evaluate(()=>{document.getElementById('app').scrollTop=180});
+  await page.waitForTimeout(450);
+  const snappedTop=await page.evaluate(()=>document.getElementById('app').scrollTop);
+  const secondTop=await page.evaluate(()=>document.getElementById('deskSecondFold').offsetTop);
+  assert.ok(Math.min(Math.abs(snappedTop),Math.abs(snappedTop-secondTop))<=3,`YOS DESK must not stop between screens: scrollTop=${snappedTop}, secondTop=${secondTop}`);
+
+  await page.locator('[data-page="chats"]').click();
+  await page.locator('[data-page="desk"]').click();
+  await page.waitForTimeout(80);
+  const resetTop=await page.evaluate(()=>document.getElementById('app').scrollTop);
+  assert.ok(Math.abs(resetTop)<=2,`YOS DESK must reopen at the top screen: scrollTop=${resetTop}`);
+
   const secondFoldGeometry=await page.evaluate(async()=>{
     const app=document.getElementById('app');
     const fold=document.getElementById('deskSecondFold');
