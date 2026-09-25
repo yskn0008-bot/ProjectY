@@ -10,16 +10,17 @@ class InputSourceContractTests(unittest.TestCase):
 
     def test_text_shortcut_input_is_accepted(self):
         self.assertIn("#define inputs text", self.source)
-        self.assertIn('@originalInput = "{ShortcutInput}"', self.source)
+        self.assertIn('@resolvedInput = "{ShortcutInput}"', self.source)
 
     def test_voice_input_is_fallback_when_no_text_was_supplied(self):
-        self.assertIn("if !@originalInput {", self.source)
-        self.assertIn('@originalInput = listen("After Pause", "jp-JP")', self.source)
-        self.assertNotIn('@originalInput = listen("On Tap", "jp-JP")', self.source)
+        self.assertIn("if !@resolvedInput {", self.source)
+        self.assertIn('@resolvedInput = listen("After Pause", "jp-JP")', self.source)
+        self.assertNotIn('@resolvedInput = listen("On Tap", "jp-JP")', self.source)
 
-    def test_raw_first_uses_resolved_input(self):
-        self.assertIn(r'RAW\t{@originalInput}', self.source)
-        self.assertIn("original_input: {@originalInput}", self.source)
+    def test_existing_original_input_contract_is_preserved(self):
+        self.assertIn('const originalInput = text("{@resolvedInput}")', self.source)
+        self.assertIn(r'RAW\t{originalInput}', self.source)
+        self.assertIn("original_input: {originalInput}", self.source)
 
 if __name__ == "__main__":
     unittest.main()
