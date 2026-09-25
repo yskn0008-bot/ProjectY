@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-25T16:27:09+09:00",
+  "updated_at": "2026-09-25T16:46:32+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -70,7 +70,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-09-25T07:25:34Z"
+      "updated_at": "2026-09-25T07:46:05Z"
     },
     {
       "id": "github-issue-256",
@@ -165,6 +165,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-083b45fcb858",
+      "title": "Clarity Share: exit through read-only display path",
+      "completed_at": "2026-09-25T07:46:18Z",
+      "result": "GitHub mainへ反映（083b45f）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/083b45fcb8582b191bc5c6a210136c70c5e6d22d"
+    },
+    {
       "id": "github-commit-bec818acfb8d",
       "title": "Clarity Share: force visible result alert",
       "completed_at": "2026-09-25T07:26:21Z",
@@ -191,13 +198,6 @@
       "completed_at": "2026-09-25T04:25:09Z",
       "result": "GitHub mainへ反映（f7a9e9e）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/f7a9e9e2bc6d34b87fb1bb366aca655a9672df8c"
-    },
-    {
-      "id": "github-commit-75389ec30c42",
-      "title": "Clarity: add one-tap text entry shortcut",
-      "completed_at": "2026-09-25T03:05:22Z",
-      "result": "GitHub mainへ反映（75389ec）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/75389ec30c42aa2ae561db5f2082d4ab8bf80e4f"
     },
     {
       "id": "complete-002",
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-25T16:27:09+09:00",
+      "last_update": "2026-09-25T16:46:32+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -315,7 +315,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-25T16:27:09+09:00",
+      "last_update": "2026-09-25T16:46:32+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-25T16:27:09+09:00",
+      "last_update": "2026-09-25T16:46:32+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "26c0e966808201864a71223ef1043fb0be1133ab3c9a95228aeb8bddc95f8808"
+  "github_snapshot_hash": "9ffb808f7bfc132c6adb56248e2a75dfcc720077a82a640d13f676d80184c1fe"
 }
