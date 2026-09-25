@@ -71,6 +71,8 @@ jobs:
           assert '相対表現は付けない' in blob
           assert '2件目以降の日付は必ず「〃」に置き換える' in blob
           assert '同じ日付を2行以上繰り返して書かない' in blob
+          assert '列位置を揃えて返す' in blob
+          assert '金額の開始位置を全行で揃える' in blob
           print(f'Payment Alert native contract: PASS ({len(actions)} actions)')
           PY
 
