@@ -51,6 +51,10 @@ class ClarityShareVariantSourceContractTests(unittest.TestCase):
         self.assertIn("自然な日本語訳：", self.share)
         self.assertIn("feedback.summary MUST be non-empty", self.share)
         self.assertIn('alert(summary, "Clarity")', self.share)
+        self.assertIn("SHARE_PARSED", self.share)
+        self.assertIn("SHARE_DISPLAY_READY", self.share)
+        self.assertIn("SHARE_DISPLAYED", self.share)
+        self.assertIn('alert(shareSummary, "Clarity")', self.share)
         self.assertNotIn('show("{summary}")', self.share)
 
 
