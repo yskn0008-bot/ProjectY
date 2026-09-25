@@ -27,18 +27,18 @@ class EmptyActionFallbackSourceTests(unittest.TestCase):
 
     def test_myway_fallback_requires_open_phrase(self):
         block = self.source.split("// Fail-safe only for high-confidence local display requests.", 1)[1]
-        self.assertIn('if @originalInput contains "開いて" {', block)
-        self.assertIn('@originalInput contains "MY WAY"', block)
+        self.assertIn('if originalInput contains "開いて" {', block)
+        self.assertIn('originalInput contains "MY WAY"', block)
         self.assertIn('@handoffExecutor = "myway"', block)
 
     def test_chatgpt_fallback_requires_open_phrase(self):
         block = self.source.split("// Fail-safe only for high-confidence local display requests.", 1)[1]
-        self.assertIn('@originalInput contains "ChatGPT"', block)
+        self.assertIn('originalInput contains "ChatGPT"', block)
         self.assertIn('@handoffTarget = "chatgpt"', block)
 
     def test_safari_fallback_requires_open_phrase(self):
         block = self.source.split("// Fail-safe only for high-confidence local display requests.", 1)[1]
-        self.assertIn('@originalInput contains "Safari"', block)
+        self.assertIn('originalInput contains "Safari"', block)
         self.assertIn('@handoffTarget = "safari"', block)
 
     def test_empty_actions_are_blocked_only_without_fallback(self):
