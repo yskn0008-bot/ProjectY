@@ -90,17 +90,33 @@ jobs:
           printf '%s\n' "$BUILD_ID" > artifacts-fixed-child/BUILD_ID.txt
           cp "$runtime" artifacts-fixed-child/Clarity-unsigned.shortcut
 
-      - name: Compile Clarity text entry
+      - name: Compile self-contained Clarity text variant
         shell: bash
         run: |
           set -euo pipefail
           cd tools/clarity-factory
-          rm -f './Clarity Text_unsigned.shortcut' './Clarity Text.plist'
-          cherri 'Clarity Text.cherri' --skip-sign --debug
+          generated='./Clarity Text.generated.cherri'
+          rm -f "$generated" './Clarity Text_unsigned.shortcut' './Clarity Text.plist'
+          python3 build_text_variant.py clarity-v1.cherri "$generated"
+          cherri "$generated" --skip-sign --debug
           entry='./Clarity Text_unsigned.shortcut'
           test -f "$entry"
+          BUILD_ID='${{ github.event.pull_request.head.sha || github.sha }}'
+          python3 patch_build_identity.py "$entry" "$BUILD_ID"
+          python3 validate_clarity_runtime.py "$entry"
+          python3 patch_natural_language_policy.py "$entry"
+          python3 patch_raw_first_authority.py "$entry"
+          python3 patch_action_extraction_policy.py "$entry"
+          python3 patch_append_file_paths.py "$entry"
+          python3 patch_chatgpt_json_text.py "$entry"
+          python3 patch_reminder_wire_format.py "$entry"
+          python3 patch_destination_readback.py "$entry"
+          python3 patch_model_boolean_gates.py "$entry"
+          python3 validate_clarity_deep_audit.py "$entry" "$BUILD_ID"
+          python3 validate_fixed_child_architecture.py "$entry" './YOS_OpenApp_unsigned.shortcut'
           mkdir -p artifacts-fixed-child
           cp "$entry" artifacts-fixed-child/Clarity-Text-unsigned.shortcut
+          rm -f "$generated"
 
       - name: Inspect parent/child isolation
         shell: bash
@@ -111,22 +127,34 @@ jobs:
           from pathlib import Path
           base=Path('tools/clarity-factory/artifacts-fixed-child')
           parent=plistlib.loads((base/'Clarity-unsigned.shortcut').read_bytes())
+          text_parent=plistlib.loads((base/'Clarity-Text-unsigned.shortcut').read_bytes())
           child=plistlib.loads((base/'YOS_OpenApp-unsigned.shortcut').read_bytes())
           pa=parent['WFWorkflowActions']
+          ta=text_parent['WFWorkflowActions']
           ca=child['WFWorkflowActions']
           pids=[a.get('WFWorkflowActionIdentifier','') for a in pa]
+          tids=[a.get('WFWorkflowActionIdentifier','') for a in ta]
           cids=[a.get('WFWorkflowActionIdentifier','') for a in ca]
           runs=[a for a in pa if a.get('WFWorkflowActionIdentifier','').endswith('runworkflow')]
+          text_runs=[a for a in ta if a.get('WFWorkflowActionIdentifier','').endswith('runworkflow')]
           assert len(runs)==2, len(runs)
+          assert len(text_runs)==2, len(text_runs)
           assert all('YOS_OpenApp' in repr(r.get('WFWorkflowActionParameters',{})) for r in runs)
+          assert all('YOS_OpenApp' in repr(r.get('WFWorkflowActionParameters',{})) for r in text_runs)
           assert not any(i.endswith('openapp') for i in pids)
+          assert not any(i.endswith('openapp') for i in tids)
           assert not any(i.endswith('downloadurl') for i in pids)
+          assert not any(i.endswith('downloadurl') for i in tids)
           assert sum(i.endswith('openapp') for i in cids) >= 20
-          blob=repr(parent)
+          assert sum(i == 'is.workflow.actions.ask' for i in tids) == 1, tids
+          assert not any(i == 'is.workflow.actions.dictatetext' for i in tids), tids
+          parent_blob=repr(parent)
+          text_blob=repr(text_parent)
           for forbidden in ('shortcutFactoryUnsignedXml','YOS Safari Auto.shortcut','hubsign.routinehub.services/sign'):
-              assert forbidden not in blob, forbidden
+              assert forbidden not in parent_blob, forbidden
+              assert forbidden not in text_blob, forbidden
           assert 'YOS_OPEN_APP_OK:safari' in repr(child)
-          print('Clarity parent + fixed YOS_OpenApp isolation: PASS')
+          print('Clarity voice + self-contained text variant + fixed YOS_OpenApp isolation: PASS')
           PY
 
       - name: Secret scan
