@@ -69,6 +69,8 @@ jobs:
           assert '支払いアラートなし' in blob
           assert 'facts 配列' in blob
           assert '相対表現は付けない' in blob
+          assert '2件目以降の日付は必ず「〃」に置き換える' in blob
+          assert '同じ日付を2行以上繰り返して書かない' in blob
           print(f'Payment Alert native contract: PASS ({len(actions)} actions)')
           PY
 
