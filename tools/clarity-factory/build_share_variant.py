@@ -5,7 +5,7 @@ import argparse
 from pathlib import Path
 
 VOICE_NAME = "#define name Clarity\n"
-SHARE_HEADER = """#define name Clarity Share
+SHARE_HEADER = """#define name Clarity Share v2
 #define inputs text, richtext, webpage, url
 #define from sharesheet
 #define noinput stopwith "共有する内容がありません"
@@ -93,7 +93,7 @@ stop()
     rendered = rendered.replace(standard_output, share_output, 1)
 
     for required in (
-        "#define name Clarity Share",
+        "#define name Clarity Share v2",
         "#define from sharesheet",
         "#define inputs text, richtext, webpage, url",
         SHARE_INPUT,
