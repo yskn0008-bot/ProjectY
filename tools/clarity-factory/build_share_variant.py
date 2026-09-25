@@ -93,7 +93,7 @@ stop()
     rendered = rendered.replace(standard_output, share_output, 1)
 
     for required in (
-        "#define name Clarity Share",
+        "#define name Clarity Share v2",
         "#define from sharesheet",
         "#define inputs text, richtext, webpage, url",
         SHARE_INPUT,
