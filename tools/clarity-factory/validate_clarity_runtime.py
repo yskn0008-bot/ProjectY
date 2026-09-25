@@ -44,14 +44,26 @@ def find_get_file(actions: list[dict], path: str) -> list[int]:
     ]
 
 
-def validate(path: Path) -> None:
+def validate(path: Path, input_mode: str = "voice") -> None:
     with path.open("rb") as fh:
         root = plistlib.load(fh)
     actions = root.get("WFWorkflowActions")
     if not isinstance(actions, list):
         raise AssertionError("WFWorkflowActions missing")
 
-    dictate_i = find_index(actions, "dictatetext")
+    if input_mode == "voice":
+        input_i = find_index(actions, "dictatetext")
+        if find_indexes(actions, "ask"):
+            raise AssertionError("voice Clarity must not contain Ask for Input")
+        input_label = "dictation"
+    elif input_mode == "text":
+        input_i = find_index(actions, "ask")
+        if find_indexes(actions, "dictatetext"):
+            raise AssertionError("text Clarity must not contain dictation")
+        input_label = "text_prompt"
+    else:
+        raise AssertionError(f"unsupported input mode: {input_mode}")
+
     append_indexes = find_indexes(actions, "file.append")
     if len(append_indexes) < 5:
         raise AssertionError(f"expected Raw, Ledger, and local destination appends; found {len(append_indexes)}")
@@ -85,10 +97,10 @@ def validate(path: Path) -> None:
     if len(raw_candidates) != 1:
         raise AssertionError(f"expected exactly one Raw First append between inbox and ledger resolves, found {len(raw_candidates)}")
     raw_i = raw_candidates[0]
-    if not dictate_i < inbox_i < raw_i < ledger_i < model_i:
+    if not input_i < inbox_i < raw_i < ledger_i < model_i:
         raise AssertionError(
             "Raw First order violated: "
-            f"dictation={dictate_i}, inbox_get={inbox_i}, raw={raw_i}, ledger_get={ledger_i}, model={model_i}"
+            f"{input_label}={input_i}, inbox_get={inbox_i}, raw={raw_i}, ledger_get={ledger_i}, model={model_i}"
         )
     if idea_i <= model_i:
         raise AssertionError("Idea file must be resolved only inside the post-policy idea executor")
@@ -188,6 +200,7 @@ def validate(path: Path) -> None:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("shortcut", type=Path)
+    parser.add_argument("--input-mode", choices=("voice", "text"), default="voice")
     args = parser.parse_args()
-    validate(args.shortcut)
-    print("Clarity runtime contract: PASS")
+    validate(args.shortcut, input_mode=args.input_mode)
+    print(f"Clarity runtime contract: PASS input_mode={args.input_mode}")
