@@ -234,13 +234,30 @@ try{
     };
   });
   assert.ok(firstFoldGeometry.pinBottom<=firstFoldGeometry.appBottom+1,'YOS DESK pinned section must fit completely in the initial viewport');
-  assert.ok(firstFoldGeometry.bottomGap>=0&&firstFoldGeometry.bottomGap<=24,'YOS DESK must not leave a large blank area below pinned entries');
+  assert.ok(firstFoldGeometry.bottomGap>=-1&&firstFoldGeometry.bottomGap<=24,`YOS DESK first screen gap must be within rendering tolerance: gap=${firstFoldGeometry.bottomGap}, pinBottom=${firstFoldGeometry.pinBottom}, appBottom=${firstFoldGeometry.appBottom}`);
   assert.ok(firstFoldGeometry.developmentTop>=firstFoldGeometry.appBottom-1,`YOS DESK development section must not appear before scrolling: devTop=${firstFoldGeometry.developmentTop}, appBottom=${firstFoldGeometry.appBottom}, gap=${firstFoldGeometry.bottomGap}`);
+
+  await page.evaluate(()=>{document.getElementById('app').scrollTop=180});
+  await page.waitForTimeout(450);
+  const snappedTop=await page.evaluate(()=>document.getElementById('app').scrollTop);
+  const secondTop=await page.evaluate(()=>{
+    const first=document.getElementById('deskFold');
+    const second=document.getElementById('deskSecondFold');
+    return second.offsetTop-first.offsetTop;
+  });
+  assert.ok(Math.min(Math.abs(snappedTop),Math.abs(snappedTop-secondTop))<=3,`YOS DESK must not stop between screens: scrollTop=${snappedTop}, secondTop=${secondTop}`);
+
+  await page.locator('[data-page="chats"]').click();
+  await page.locator('[data-page="desk"]').click();
+  await page.waitForTimeout(80);
+  const resetTop=await page.evaluate(()=>document.getElementById('app').scrollTop);
+  assert.ok(Math.abs(resetTop)<=2,`YOS DESK must reopen at the top screen: scrollTop=${resetTop}`);
 
   const secondFoldGeometry=await page.evaluate(async()=>{
     const app=document.getElementById('app');
+    const first=document.getElementById('deskFold');
     const fold=document.getElementById('deskSecondFold');
-    app.scrollTop=fold.offsetTop;
+    app.scrollTop=fold.offsetTop-first.offsetTop;
     await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
     const appRect=app.getBoundingClientRect();
     const foldRect=fold.getBoundingClientRect();

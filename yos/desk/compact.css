@@ -124,7 +124,7 @@ body{font-size:17px}
    Screen 1: title + current item + pinned entries.
    Screen 2: development through composer. */
 :root{--desk-fold-height:700px}
-.app{scroll-snap-type:y proximity}
+.app{scroll-snap-type:y mandatory;scroll-padding-top:calc(env(safe-area-inset-top) + 10px)}
 
 #deskPage .deskFold,
 #deskPage .deskSecondFold{

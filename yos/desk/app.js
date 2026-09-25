@@ -42,12 +42,23 @@ function tap(){state.metrics.taps = (state.metrics.taps || 0) + 1;persist()}
 function showToast(text){var t=q("#toast");t.textContent=text;t.classList.add("show");setTimeout(function(){t.classList.remove("show")},1400)}
 function showSheet(html){q("#sheetBody").innerHTML=html;q("#sheetBackdrop").style.display="block"}
 function closeSheet(){q("#sheetBackdrop").style.display="none"}
+function resetDeskScroll(){
+  var app=q("#app");
+  if(!app)return;
+  app.scrollTo({top:0,left:0,behavior:"auto"});
+}
 function setPage(name){
   currentPage=name;state.page=name;
   qa(".page").forEach(function(p){p.classList.remove("active")});
   q(name==="desk"?"#deskPage":"#chatsPage").classList.add("active");
   qa(".nav[data-page]").forEach(function(b){b.classList.toggle("active",b.dataset.page===name)});
   if(name==="chats")renderChats();
+  if(name==="desk"){
+    requestAnimationFrame(function(){
+      resetDeskScroll();
+      requestAnimationFrame(resetDeskScroll);
+    });
+  }
   persist();
 }
 function updateClock(){var d=new Date();q("#deskClock").textContent=String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0")}
@@ -439,5 +450,69 @@ renderDev();renderChats();setPage(currentPage);updateClock();setInterval(updateC
   window.addEventListener('orientationchange',syncDeskFoldHeight);
   document.addEventListener('visibilitychange',function(){
     if(!document.hidden)syncDeskFoldHeight();
+  });
+})();
+
+
+
+/* Keep DESK aligned to exactly two full screens on iPhone PWA. */
+(function(){
+  if('scrollRestoration' in history)history.scrollRestoration='manual';
+
+  var app=document.getElementById('app');
+  var snapTimer=null;
+  var snapping=false;
+
+  function deskActive(){
+    return document.getElementById('deskPage')&&document.getElementById('deskPage').classList.contains('active');
+  }
+
+  function foldTargets(){
+    var first=document.getElementById('deskFold');
+    var second=document.getElementById('deskSecondFold');
+    if(!first)return [0];
+    var base=first.offsetTop;
+    var targets=[0];
+    if(second)targets.push(Math.max(0,second.offsetTop-base));
+    return targets;
+  }
+
+  function nearestFoldTop(){
+    var targets=foldTargets();
+    var current=app.scrollTop;
+    return targets.reduce(function(best,top){
+      return Math.abs(top-current)<Math.abs(best-current)?top:best;
+    },targets[0]);
+  }
+
+  function snapDesk(){
+    if(!app||!deskActive()||snapping)return;
+    var target=nearestFoldTop();
+    if(Math.abs(app.scrollTop-target)<=2)return;
+    snapping=true;
+    app.scrollTo({top:target,left:0,behavior:'smooth'});
+    setTimeout(function(){snapping=false},260);
+  }
+
+  if(app){
+    app.addEventListener('scroll',function(){
+      if(!deskActive()||snapping)return;
+      clearTimeout(snapTimer);
+      snapTimer=setTimeout(snapDesk,120);
+    },{passive:true});
+  }
+
+  function resetIfDesk(){
+    if(!deskActive())return;
+    requestAnimationFrame(function(){
+      resetDeskScroll();
+      requestAnimationFrame(resetDeskScroll);
+    });
+  }
+
+  window.addEventListener('pageshow',resetIfDesk);
+  window.addEventListener('load',resetIfDesk);
+  document.addEventListener('visibilitychange',function(){
+    if(!document.hidden)resetIfDesk();
   });
 })();
