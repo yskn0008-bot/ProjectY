@@ -430,7 +430,7 @@ renderDev();renderChats();setPage(currentPage);updateClock();setInterval(updateC
     var app=document.getElementById('app');
     if(!app)return;
     var cs=getComputedStyle(app);
-    var h=app.clientHeight-(parseFloat(cs.paddingTop)||0)-(parseFloat(cs.paddingBottom)||0);
+    var h=app.clientHeight-(parseFloat(cs.paddingTop)||0);
     if(!Number.isFinite(h)||h<1)return;
     document.documentElement.style.setProperty('--desk-fold-height',Math.floor(h)+'px');
   }
