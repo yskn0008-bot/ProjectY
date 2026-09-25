@@ -56,11 +56,11 @@ jobs:
         run: |
           set -euo pipefail
           cd tools/clarity-factory
-          generated='./Clarity Share v2.generated.cherri'
-          rm -f "$generated" './Clarity Share v2_unsigned.shortcut' './Clarity Share v2.plist'
+          generated='./Clarity Share v3.generated.cherri'
+          rm -f "$generated" './Clarity Share v3_unsigned.shortcut' './Clarity Share v3.plist'
           python3 build_share_variant.py clarity-v1.cherri "$generated"
           cherri "$generated" --skip-sign --debug
-          entry='./Clarity Share v2_unsigned.shortcut'
+          entry='./Clarity Share v3_unsigned.shortcut'
           test -f "$entry"
 
           BUILD_ID='${{ github.event.pull_request.head.sha || github.sha }}'
@@ -80,7 +80,7 @@ jobs:
           import plistlib
           from pathlib import Path
 
-          root=plistlib.loads(Path('Clarity Share v2_unsigned.shortcut').read_bytes())
+          root=plistlib.loads(Path('Clarity Share v3_unsigned.shortcut').read_bytes())
           types=set(root.get('WFWorkflowTypes') or [])
           inputs=set(root.get('WFWorkflowInputContentItemClasses') or [])
           ids=[a.get('WFWorkflowActionIdentifier','') for a in root.get('WFWorkflowActions',[])]
@@ -106,7 +106,7 @@ jobs:
 
           mkdir -p artifacts-share
           printf '%s\n' "$BUILD_ID" > artifacts-share/BUILD_ID.txt
-          cp "$entry" artifacts-share/Clarity-Share-v2-unsigned.shortcut
+          cp "$entry" artifacts-share/Clarity-Share-v3-unsigned.shortcut
           rm -f "$generated"
 
       - name: Sign Clarity Share
@@ -114,9 +114,9 @@ jobs:
         run: |
           set -euo pipefail
           python3 tools/clarity-factory/sign_with_hubsign.py \
-            --input tools/clarity-factory/artifacts-share/Clarity-Share-v2-unsigned.shortcut \
-            --output tools/clarity-factory/artifacts-share/Clarity-Share-v2-signed.shortcut \
-            --name 'Clarity Share v2' \
+            --input tools/clarity-factory/artifacts-share/Clarity-Share-v3-unsigned.shortcut \
+            --output tools/clarity-factory/artifacts-share/Clarity-Share-v3-signed.shortcut \
+            --name 'Clarity Share v3' \
             2>&1 | tee tools/clarity-factory/artifacts-share/clarity-share-hubsign.log
 
       - name: Verify signed artifact
@@ -125,11 +125,11 @@ jobs:
           set -euo pipefail
           python3 - <<'PY'
           from pathlib import Path
-          p=Path('tools/clarity-factory/artifacts-share/Clarity-Share-v2-signed.shortcut')
+          p=Path('tools/clarity-factory/artifacts-share/Clarity-Share-v3-signed.shortcut')
           data=p.read_bytes()
           assert data.startswith(b'AEA1'), data[:8]
           assert len(data)>500, len(data)
-          print(f'Clarity-Share-v2-signed.shortcut: signed AEA1 PASS ({len(data)} bytes)')
+          print(f'Clarity-Share-v3-signed.shortcut: signed AEA1 PASS ({len(data)} bytes)')
           PY
 
       - name: Upload Clarity Share
@@ -138,7 +138,7 @@ jobs:
           name: clarity-share
           path: |
             tools/clarity-factory/artifacts-share/BUILD_ID.txt
-            tools/clarity-factory/artifacts-share/Clarity-Share-v2-unsigned.shortcut
-            tools/clarity-factory/artifacts-share/Clarity-Share-v2-signed.shortcut
+            tools/clarity-factory/artifacts-share/Clarity-Share-v3-unsigned.shortcut
+            tools/clarity-factory/artifacts-share/Clarity-Share-v3-signed.shortcut
             tools/clarity-factory/artifacts-share/clarity-share-hubsign.log
           if-no-files-found: error
