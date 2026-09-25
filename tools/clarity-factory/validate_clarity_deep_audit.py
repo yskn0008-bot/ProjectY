@@ -130,7 +130,17 @@ def validate(path: Path, expected_build_id: str) -> None:
         raise AssertionError("WFWorkflowActions missing")
 
     counts = Counter(str(action.get("WFWorkflowActionIdentifier", "")) for action in actions)
-    unknown = sorted(set(counts) - ALLOWED_ACTION_IDS)
+    allowed_action_ids = set(ALLOWED_ACTION_IDS)
+    workflow_types = set(root.get("WFWorkflowTypes") or [])
+    is_share_sheet = (
+        "ActionExtension" in workflow_types
+        and root.get("WFWorkflowHasShortcutInputVariables") is True
+    )
+    if is_share_sheet:
+        # Clarity Share intentionally presents its answer in an Alert so the result
+        # remains visible when invoked inside the iOS Share Sheet extension.
+        allowed_action_ids.add("is.workflow.actions.alert")
+    unknown = sorted(set(counts) - allowed_action_ids)
     if unknown:
         raise AssertionError(f"unreviewed action identifier(s): {unknown}")
 
