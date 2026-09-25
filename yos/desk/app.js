@@ -467,14 +467,22 @@ renderDev();renderChats();setPage(currentPage);updateClock();setInterval(updateC
     return document.getElementById('deskPage')&&document.getElementById('deskPage').classList.contains('active');
   }
 
+  function foldTargets(){
+    var first=document.getElementById('deskFold');
+    var second=document.getElementById('deskSecondFold');
+    if(!first)return [0];
+    var base=first.offsetTop;
+    var targets=[0];
+    if(second)targets.push(Math.max(0,second.offsetTop-base));
+    return targets;
+  }
+
   function nearestFoldTop(){
-    var folds=[document.getElementById('deskFold'),document.getElementById('deskSecondFold')].filter(Boolean);
-    if(!folds.length)return 0;
+    var targets=foldTargets();
     var current=app.scrollTop;
-    return folds.reduce(function(best,fold){
-      var top=fold.offsetTop;
+    return targets.reduce(function(best,top){
       return Math.abs(top-current)<Math.abs(best-current)?top:best;
-    },folds[0].offsetTop);
+    },targets[0]);
   }
 
   function snapDesk(){
