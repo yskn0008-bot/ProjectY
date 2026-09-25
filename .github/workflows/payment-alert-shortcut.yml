@@ -1,0 +1,102 @@
+name: Payment Alert native shortcut
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'tools/payment-alert/**'
+      - 'yos/money-master-v1.js'
+      - '.github/workflows/payment-alert-shortcut.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-sign:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pinned Cherri v2.3.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          url='https://github.com/electrikmilk/cherri/releases/download/v2.3.0/cherri_linux-x86_64.zip'
+          expected='7ab2c384b7b26e7c72a30a8dfa56f89dae12c4068b7951bc1e3193f3698edbe9'
+          curl -fsSL "$url" -o /tmp/cherri.zip
+          printf '%s  %s\n' "$expected" /tmp/cherri.zip | sha256sum -c -
+          mkdir -p /tmp/cherri
+          unzip -q /tmp/cherri.zip -d /tmp/cherri
+          binary="$(find /tmp/cherri -type f -name cherri -print -quit)"
+          test -n "$binary"
+          sudo install -m 0755 "$binary" /usr/local/bin/cherri
+          cherri --version
+
+      - name: Compile Payment Alert
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd tools/payment-alert
+          rm -f './Payment Alert_unsigned.shortcut'
+          cherri 'Payment Alert.cherri' --skip-sign --debug
+          test -f './Payment Alert_unsigned.shortcut'
+          mkdir -p artifacts
+          cp './Payment Alert_unsigned.shortcut' 'artifacts/Payment Alert.plist'
+
+      - name: Validate native Payment Alert contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import plistlib
+          from pathlib import Path
+          p=Path('tools/payment-alert/artifacts/Payment Alert.plist')
+          workflow=plistlib.loads(p.read_bytes())
+          actions=workflow.get('WFWorkflowActions',[])
+          ids=[a.get('WFWorkflowActionIdentifier','') for a in actions]
+          blob=repr(workflow)
+
+          assert ids.count('is.workflow.actions.downloadurl') == 1
+          assert ids.count('is.workflow.actions.askllm') == 1
+          assert ids.count('is.workflow.actions.notification') == 1
+          assert ids.count('is.workflow.actions.alert') == 1
+          assert ids.count('is.workflow.actions.openurl') == 0
+          assert 'payment-alert-bridge' not in blob
+          assert 'raw.githubusercontent.com/yskn0008-bot/ProjectY/main/yos/money-master-v1.js' in blob
+          assert '今日から3日以内' in blob
+          assert '支払いアラートなし' in blob
+          assert 'facts 配列' in blob
+          assert '相対表現は付けない' in blob
+          print(f'Payment Alert native contract: PASS ({len(actions)} actions)')
+          PY
+
+      - name: Sign Payment Alert
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/clarity-factory/sign_with_hubsign.py             --input 'tools/payment-alert/artifacts/Payment Alert.plist'             --output 'tools/payment-alert/artifacts/Payment Alert.shortcut'             --name 'Payment Alert'             2>&1 | tee 'tools/payment-alert/artifacts/payment-alert-hubsign.log'
+
+      - name: Verify signed artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('tools/payment-alert/artifacts/Payment Alert.shortcut')
+          data=p.read_bytes()
+          assert data.startswith(b'AEA1'), data[:8]
+          assert len(data)>500, len(data)
+          print(f'Payment Alert signed AEA1: PASS ({len(data)} bytes)')
+          PY
+
+      - name: Upload iPhone acceptance package
+        uses: actions/upload-artifact@v4
+        with:
+          name: payment-alert-native
+          path: |
+            tools/payment-alert/artifacts/Payment Alert.shortcut
+            tools/payment-alert/artifacts/Payment Alert.plist
+            tools/payment-alert/artifacts/payment-alert-hubsign.log
+          if-no-files-found: error
