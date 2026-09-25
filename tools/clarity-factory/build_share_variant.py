@@ -41,6 +41,35 @@ def render(source: str) -> str:
     rendered = rendered.replace(VOICE_INPUT, SHARE_INPUT, 1)
     rendered = rendered.replace(PROMPT_PREFIX, PROMPT_PREFIX + SHARE_POLICY, 1)
 
+    # Share mode is read-only. Exit immediately after the model response instead of
+    # traversing the normal executor loop. This prevents unrelated executor plumbing
+    # from blocking a simple explanation and makes the exact stop point visible in Ledger.
+    share_model_anchor = """if echoedInput != "{originalInput}" {
+    const blockedOriginalRecord = text("{CurrentDate}\\t{requestNumber}\\tBLOCKED\\toriginal_input_mismatch\\n")
+    appendResolvedFile(ledgerFile, blockedOriginalRecord)
+    mustOutput("ここだけ確認して", "入力内容の確認が必要です")
+}
+
+"""
+    share_early_output = share_model_anchor + """const shareParsedRecord = text("{CurrentDate}\\t{requestNumber}\\tSHARE_PARSED\\n")
+appendResolvedFile(ledgerFile, shareParsedRecord)
+const shareFeedbackRaw = getValue(parsedResult, "feedback")
+const shareFeedback = getDictionary(shareFeedbackRaw)
+const shareSummary = text("{shareFeedback['summary']}")
+const shareDisplayReadyRecord = text("{CurrentDate}\\t{requestNumber}\\tSHARE_DISPLAY_READY\\n")
+appendResolvedFile(ledgerFile, shareDisplayReadyRecord)
+alert(shareSummary, "Clarity")
+const shareDisplayedRecord = text("{CurrentDate}\\t{requestNumber}\\tSHARE_DISPLAYED\\n")
+appendResolvedFile(ledgerFile, shareDisplayedRecord)
+const shareRequestDone = text("{CurrentDate}\\t{requestNumber}\\tREQUEST_DONE\\n")
+appendResolvedFile(ledgerFile, shareRequestDone)
+stop()
+
+"""
+    if rendered.count(share_model_anchor) != 1:
+        raise ValueError("expected exactly one original-input safety block")
+    rendered = rendered.replace(share_model_anchor, share_early_output, 1)
+
     standard_output = """if !@handoffExecutor {
     const requestDone = text("{CurrentDate}\\t{requestNumber}\\tREQUEST_DONE\\n")
     appendResolvedFile(ledgerFile, requestDone)
@@ -75,6 +104,10 @@ def render(source: str) -> str:
         "feedback.summary MUST be non-empty",
         'alert(summary, "Clarity")',
         'alert("回答を表示できませんでした", "Clarity")',
+        "SHARE_PARSED",
+        "SHARE_DISPLAY_READY",
+        "SHARE_DISPLAYED",
+        'alert(shareSummary, "Clarity")',
     ):
         if required not in rendered:
             raise ValueError(f"share variant missing {required!r}")
