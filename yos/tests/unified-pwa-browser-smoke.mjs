@@ -234,7 +234,7 @@ try{
     };
   });
   assert.ok(firstFoldGeometry.pinBottom<=firstFoldGeometry.appBottom+1,'YOS DESK pinned section must fit completely in the initial viewport');
-  assert.ok(firstFoldGeometry.bottomGap>=0&&firstFoldGeometry.bottomGap<=24,'YOS DESK must not leave a large blank area below pinned entries');
+  assert.ok(firstFoldGeometry.bottomGap>=0&&firstFoldGeometry.bottomGap<=24,`YOS DESK first screen gap must be 0..24px: gap=${firstFoldGeometry.bottomGap}, pinBottom=${firstFoldGeometry.pinBottom}, appBottom=${firstFoldGeometry.appBottom}`);
   assert.ok(firstFoldGeometry.developmentTop>=firstFoldGeometry.appBottom-1,`YOS DESK development section must not appear before scrolling: devTop=${firstFoldGeometry.developmentTop}, appBottom=${firstFoldGeometry.appBottom}, gap=${firstFoldGeometry.bottomGap}`);
 
   await page.evaluate(()=>{document.getElementById('app').scrollTop=180});
