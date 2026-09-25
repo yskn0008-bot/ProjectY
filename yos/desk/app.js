@@ -422,3 +422,22 @@ renderDev();renderChats();setPage(currentPage);updateClock();setInterval(updateC
   window.addEventListener('storage',runLiveSync);
   document.addEventListener('visibilitychange',function(){if(!document.hidden)runLiveSync()});
 })();
+
+
+/* Match each DESK fold to the actual scroll viewport above the fixed nav. */
+(function(){
+  function syncDeskFoldHeight(){
+    var app=document.getElementById('app');
+    if(!app)return;
+    var cs=getComputedStyle(app);
+    var h=app.clientHeight-(parseFloat(cs.paddingTop)||0)-(parseFloat(cs.paddingBottom)||0);
+    if(!Number.isFinite(h)||h<1)return;
+    document.documentElement.style.setProperty('--desk-fold-height',Math.floor(h)+'px');
+  }
+  syncDeskFoldHeight();
+  window.addEventListener('resize',syncDeskFoldHeight);
+  window.addEventListener('orientationchange',syncDeskFoldHeight);
+  document.addEventListener('visibilitychange',function(){
+    if(!document.hidden)syncDeskFoldHeight();
+  });
+})();
