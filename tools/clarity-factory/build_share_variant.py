@@ -5,7 +5,7 @@ import argparse
 from pathlib import Path
 
 VOICE_NAME = "#define name Clarity\n"
-SHARE_HEADER = """#define name Clarity Share
+SHARE_HEADER = """#define name Clarity Share v2
 #define inputs text, richtext, webpage, url
 #define from sharesheet
 #define noinput stopwith "共有する内容がありません"
