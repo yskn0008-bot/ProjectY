@@ -36,7 +36,7 @@ class ArtifactIdentitySourceContractTests(unittest.TestCase):
             "date_time={dateTime}",
             "end_date_time={endDateTime}",
             "needs_review={needsReview}",
-            "original_input={@originalInput}",
+            "original_input={originalInput}",
         ):
             self.assertIn(field, self.source)
 
