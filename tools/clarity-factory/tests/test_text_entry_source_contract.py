@@ -1,21 +1,52 @@
 from pathlib import Path
+import importlib.util
 import unittest
 
-SOURCE = Path(__file__).resolve().parents[1] / "Clarity Text.cherri"
+BASE = Path(__file__).resolve().parents[1]
+SOURCE = BASE / "clarity-v1.cherri"
+GENERATOR = BASE / "build_text_variant.py"
 
-class ClarityTextEntrySourceContractTests(unittest.TestCase):
+spec = importlib.util.spec_from_file_location("build_text_variant", GENERATOR)
+module = importlib.util.module_from_spec(spec)
+assert spec and spec.loader
+spec.loader.exec_module(module)
+
+
+class ClarityTextVariantSourceContractTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.source = SOURCE.read_text(encoding="utf-8")
+        cls.voice = SOURCE.read_text(encoding="utf-8")
+        cls.text = module.render(cls.voice)
 
-    def test_text_entry_is_thin_wrapper(self):
-        self.assertIn("#define name Clarity Text", self.source)
-        self.assertIn('const textInput = prompt("Clarityに入力", "Text", "")', self.source)
-        self.assertIn('run("Clarity", textInput)', self.source)
+    def test_text_variant_is_generated_from_same_core(self):
+        expected = self.voice.replace(
+            "#define name Clarity\n",
+            "#define name Clarity Text\n",
+            1,
+        ).replace(
+            'const originalInput = listen("After Pause", "jp-JP")',
+            'const originalInput = prompt("Clarityに入力", "Text", "")',
+            1,
+        )
+        self.assertEqual(self.text, expected)
 
-    def test_text_entry_does_not_duplicate_clarity_core(self):
-        for forbidden in ("askChatGPT(", "Clarity Ledger.txt", "Clarity Inbox.txt", "device_setting", "addnewevent"):
-            self.assertNotIn(forbidden, self.source)
+    def test_text_variant_uses_direct_text_prompt(self):
+        self.assertIn("#define name Clarity Text", self.text)
+        self.assertIn('const originalInput = prompt("Clarityに入力", "Text", "")', self.text)
+        self.assertNotIn('const originalInput = listen("After Pause", "jp-JP")', self.text)
+        self.assertNotIn("{ShortcutInput}", self.text)
+
+    def test_text_variant_contains_full_clarity_core(self):
+        for required in (
+            "Clarity Ledger.txt",
+            "askChatGPT(",
+            "device_setting",
+            "addnewevent",
+            'run("YOS_OpenApp"',
+        ):
+            self.assertIn(required, self.text)
+        self.assertNotIn('run("Clarity"', self.text)
+
 
 if __name__ == "__main__":
     unittest.main()
