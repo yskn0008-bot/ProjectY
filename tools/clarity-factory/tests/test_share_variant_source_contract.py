@@ -19,11 +19,15 @@ class ClarityShareVariantSourceContractTests(unittest.TestCase):
         cls.share = module.render(cls.voice)
 
     def test_share_variant_uses_share_sheet_directly(self):
-        self.assertIn("#define name Clarity Share v3", self.share)
+        self.assertIn("#define name Clarity Share v4", self.share)
         self.assertIn("#define from sharesheet", self.share)
-        self.assertIn("#define inputs text, richtext, webpage, url", self.share)
+        self.assertIn("#define inputs text, richtext, webpage, url, image, pdf", self.share)
         self.assertIn('#define noinput stopwith "共有する内容がありません"', self.share)
-        self.assertIn('const originalInput = text("{ShortcutInput}")', self.share)
+        self.assertIn("typeOf(ShortcutInput)", self.share)
+        self.assertIn("getTextFromImage", self.share)
+        self.assertIn("splitPDF", self.share)
+        self.assertIn("makeImageFromPDFPage", self.share)
+        self.assertIn("SHARE_INTAKE", self.share)
         self.assertNotIn('const originalInput = listen("After Pause", "jp-JP")', self.share)
 
     def test_share_variant_is_self_contained(self):
@@ -50,12 +54,15 @@ class ClarityShareVariantSourceContractTests(unittest.TestCase):
         self.assertIn("例：", self.share)
         self.assertIn("似た言葉との差：", self.share)
         self.assertIn("自然な日本語訳：", self.share)
-        self.assertIn("Do not collapse sections onto consecutive lines", self.share)
         self.assertIn("feedback.summary MUST be non-empty", self.share)
         self.assertIn('alert(summary, "Clarity")', self.share)
+        self.assertIn('alert("反映しました", "Clarity")', self.share)
         self.assertIn("SHARE_PARSED", self.share)
         self.assertIn("SHARE_DISPLAY_READY", self.share)
         self.assertIn("SHARE_DISPLAYED", self.share)
+        self.assertIn("share_source=image", self.share)
+        self.assertIn("share_source=pdf", self.share)
+        self.assertIn("executors calendar, reminder, or task", self.share)
         self.assertIn('alert(shareSummary, "Clarity")', self.share)
         self.assertNotIn('show("{summary}")', self.share)
 
