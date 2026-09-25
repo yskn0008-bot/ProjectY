@@ -206,6 +206,7 @@ try{
   await expectText('#countPinned','1');
   assert.equal((await page.locator('#chatList').innerText()).includes('YOS DESK UI修正'),false,'demo chat titles must be removed');
   assert.equal((await page.locator('#chatList').innerText()).includes('収入チャンス監視'),false,'demo project chat titles must be removed');
+  await page.locator('[data-page="desk"]').click();
   const deskType=await page.evaluate(()=>({
     heroSub:parseFloat(getComputedStyle(document.querySelector('.heroSub')).fontSize),
     devNext:parseFloat(getComputedStyle(document.querySelector('.devNext')).fontSize),
@@ -218,6 +219,15 @@ try{
   assert.ok(deskType.chatName>=18,'YOS DESK chat titles must be readable');
   assert.ok(deskType.preview>=15,'YOS DESK chat previews must be readable');
   assert.ok(deskType.nav>=14,'YOS DESK navigation labels must be readable');
+  const firstFoldGeometry=await page.evaluate(()=>({
+    appTop:document.getElementById('app').getBoundingClientRect().top,
+    appBottom:document.getElementById('app').getBoundingClientRect().bottom,
+    pinBottom:document.getElementById('pinSection').getBoundingClientRect().bottom,
+    developmentTop:document.getElementById('developmentSection').getBoundingClientRect().top
+  }));
+  assert.ok(firstFoldGeometry.pinBottom<=firstFoldGeometry.appBottom+1,'YOS DESK pinned section must fit completely in the initial viewport');
+  assert.ok(firstFoldGeometry.developmentTop>=firstFoldGeometry.appBottom-1,'YOS DESK development section must not appear before scrolling');
+
   const deskGeometry=await page.evaluate(()=>({
     appBottom:document.getElementById('app').getBoundingClientRect().bottom,
     navTop:document.getElementById('bottom').getBoundingClientRect().top,

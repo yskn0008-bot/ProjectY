@@ -116,3 +116,17 @@ body{font-size:17px}
 @media(max-height:730px){
   .app{scroll-behavior:smooth}
 }
+
+
+/* Clean first fold: initial screen ends at the pinned row.
+   Development content starts only after the user scrolls. */
+#deskPage .deskFold{
+  min-height:calc(100svh - 82px - env(safe-area-inset-bottom));
+}
+#deskPage #pinSection{
+  margin-bottom:13px;
+}
+#deskPage #developmentSection{
+  margin-top:21px;
+  scroll-margin-top:21px;
+}
