@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-25T07:10:25+09:00",
+  "updated_at": "2026-09-25T10:19:57+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -165,6 +165,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-b2fc237ae3c9",
+      "title": "chore: retry Money shadow Vercel deployment",
+      "completed_at": "2026-09-24T23:13:48Z",
+      "result": "GitHub mainへ反映（b2fc237）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/b2fc237ae3c99ec1ca537bcc2a4dca094f64418d"
+    },
+    {
       "id": "github-commit-0b176b781686",
       "title": "YOS DESK: 小さい文字をさらに拡大",
       "completed_at": "2026-09-24T17:49:31Z",
@@ -191,13 +198,6 @@
       "completed_at": "2026-09-24T09:45:07Z",
       "result": "GitHub mainへ反映（6bf6837）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/6bf68375686e146e801ce2036de1569fa03e8e43"
-    },
-    {
-      "id": "github-commit-ab63bceec3c3",
-      "title": "Sync native Night Brief records into MY LIFE",
-      "completed_at": "2026-09-24T09:44:19Z",
-      "result": "GitHub mainへ反映（ab63bce）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/ab63bceec3c3a844d8706e293d8f9d3ce7178ab1"
     },
     {
       "id": "complete-002",
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-25T07:10:25+09:00",
+      "last_update": "2026-09-25T10:19:57+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -315,7 +315,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-25T07:10:25+09:00",
+      "last_update": "2026-09-25T10:19:57+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-25T07:10:25+09:00",
+      "last_update": "2026-09-25T10:19:57+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "3de05b20177470065d9252e098ca1c2f15efdd78f98a9c4f68f1b6336dc52858"
+  "github_snapshot_hash": "5ba8c1a5eaf1164244f65f87a766d26ba9a235e83e9e72a01b4c0d60fe1ff20b"
 }
