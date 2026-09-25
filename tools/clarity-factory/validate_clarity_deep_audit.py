@@ -15,7 +15,8 @@ from collections import Counter, defaultdict
 from pathlib import Path
 
 ALLOWED_ACTION_IDS = {
-    "is.workflow.actions.dictatetext",\n    "is.workflow.actions.ask",
+    "is.workflow.actions.dictatetext",
+    "is.workflow.actions.ask",
     "is.workflow.actions.number.random",
     "is.workflow.actions.gettext",
     "is.workflow.actions.documentpicker.open",
