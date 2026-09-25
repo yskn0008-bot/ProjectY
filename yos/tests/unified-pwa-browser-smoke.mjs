@@ -240,7 +240,11 @@ try{
   await page.evaluate(()=>{document.getElementById('app').scrollTop=180});
   await page.waitForTimeout(450);
   const snappedTop=await page.evaluate(()=>document.getElementById('app').scrollTop);
-  const secondTop=await page.evaluate(()=>document.getElementById('deskSecondFold').offsetTop);
+  const secondTop=await page.evaluate(()=>{
+    const first=document.getElementById('deskFold');
+    const second=document.getElementById('deskSecondFold');
+    return second.offsetTop-first.offsetTop;
+  });
   assert.ok(Math.min(Math.abs(snappedTop),Math.abs(snappedTop-secondTop))<=3,`YOS DESK must not stop between screens: scrollTop=${snappedTop}, secondTop=${secondTop}`);
 
   await page.locator('[data-page="chats"]').click();
@@ -251,8 +255,9 @@ try{
 
   const secondFoldGeometry=await page.evaluate(async()=>{
     const app=document.getElementById('app');
+    const first=document.getElementById('deskFold');
     const fold=document.getElementById('deskSecondFold');
-    app.scrollTop=fold.offsetTop;
+    app.scrollTop=fold.offsetTop-first.offsetTop;
     await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
     const appRect=app.getBoundingClientRect();
     const foldRect=fold.getBoundingClientRect();
