@@ -1,0 +1,144 @@
+name: Clarity Share artifact
+
+on:
+  pull_request:
+    paths:
+      - 'tools/clarity-factory/**'
+      - '.github/workflows/clarity-share.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'tools/clarity-factory/**'
+      - '.github/workflows/clarity-share.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  build-share:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate source contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -s tools/clarity-factory/tests -v
+
+      - name: Install pinned Cherri v2.3.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          url='https://github.com/electrikmilk/cherri/releases/download/v2.3.0/cherri_linux-x86_64.zip'
+          expected='7ab2c384b7b26e7c72a30a8dfa56f89dae12c4068b7951bc1e3193f3698edbe9'
+          curl -fsSL "$url" -o /tmp/cherri.zip
+          printf '%s  %s\n' "$expected" /tmp/cherri.zip | sha256sum -c -
+          mkdir -p /tmp/cherri
+          unzip -q /tmp/cherri.zip -d /tmp/cherri
+          binary="$(find /tmp/cherri -type f -name cherri -print -quit)"
+          test -n "$binary"
+          sudo install -m 0755 "$binary" /usr/local/bin/cherri
+          cherri --version
+
+      - name: Compile fixed YOS_OpenApp child
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd tools/clarity-factory
+          rm -f './YOS_OpenApp_unsigned.shortcut' './YOS_OpenApp.plist'
+          cherri YOS_OpenApp.cherri --skip-sign --debug
+          test -f './YOS_OpenApp_unsigned.shortcut'
+
+      - name: Build and audit Clarity Share
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd tools/clarity-factory
+          generated='./Clarity Share.generated.cherri'
+          rm -f "$generated" './Clarity Share_unsigned.shortcut' './Clarity Share.plist'
+          python3 build_share_variant.py clarity-v1.cherri "$generated"
+          cherri "$generated" --skip-sign --debug
+          entry='./Clarity Share_unsigned.shortcut'
+          test -f "$entry"
+
+          BUILD_ID='${{ github.event.pull_request.head.sha || github.sha }}'
+          python3 patch_build_identity.py "$entry" "$BUILD_ID"
+          python3 patch_natural_language_policy.py "$entry"
+          python3 patch_raw_first_authority.py "$entry"
+          python3 patch_action_extraction_policy.py "$entry"
+          python3 patch_append_file_paths.py "$entry"
+          python3 patch_chatgpt_json_text.py "$entry"
+          python3 patch_reminder_wire_format.py "$entry"
+          python3 patch_destination_readback.py "$entry"
+          python3 patch_model_boolean_gates.py "$entry"
+          python3 validate_clarity_deep_audit.py "$entry" "$BUILD_ID"
+          python3 validate_fixed_child_architecture.py "$entry" './YOS_OpenApp_unsigned.shortcut'
+
+          python3 - <<'PY'
+          import plistlib
+          from pathlib import Path
+
+          root=plistlib.loads(Path('Clarity Share_unsigned.shortcut').read_bytes())
+          types=set(root.get('WFWorkflowTypes') or [])
+          inputs=set(root.get('WFWorkflowInputContentItemClasses') or [])
+          ids=[a.get('WFWorkflowActionIdentifier','') for a in root.get('WFWorkflowActions',[])]
+          blob=repr(root)
+
+          assert 'ActionExtension' in types, types
+          expected={
+              'WFStringContentItem',
+              'WFRichTextContentItem',
+              'WFSafariWebPageContentItem',
+              'WFURLContentItem',
+          }
+          assert expected.issubset(inputs), inputs
+          assert root.get('WFWorkflowHasShortcutInputVariables') is True
+          assert not any(i == 'is.workflow.actions.dictatetext' for i in ids), ids
+          assert not any(i == 'is.workflow.actions.ask' for i in ids), ids
+          assert 'SHARE MODE:' in blob
+          assert 'actions MUST contain exactly one planned answer action' in blob
+          assert 'ひとことで：' in blob
+          assert '自然な日本語訳：' in blob
+          print('Clarity Share Share Sheet contract: PASS')
+          PY
+
+          mkdir -p artifacts-share
+          printf '%s\n' "$BUILD_ID" > artifacts-share/BUILD_ID.txt
+          cp "$entry" artifacts-share/Clarity-Share-unsigned.shortcut
+          rm -f "$generated"
+
+      - name: Sign Clarity Share
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/clarity-factory/sign_with_hubsign.py \
+            --input tools/clarity-factory/artifacts-share/Clarity-Share-unsigned.shortcut \
+            --output tools/clarity-factory/artifacts-share/Clarity-Share-signed.shortcut \
+            --name 'Clarity Share' \
+            2>&1 | tee tools/clarity-factory/artifacts-share/clarity-share-hubsign.log
+
+      - name: Verify signed artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('tools/clarity-factory/artifacts-share/Clarity-Share-signed.shortcut')
+          data=p.read_bytes()
+          assert data.startswith(b'AEA1'), data[:8]
+          assert len(data)>500, len(data)
+          print(f'Clarity-Share-signed.shortcut: signed AEA1 PASS ({len(data)} bytes)')
+          PY
+
+      - name: Upload Clarity Share
+        uses: actions/upload-artifact@v4
+        with:
+          name: clarity-share
+          path: |
+            tools/clarity-factory/artifacts-share/BUILD_ID.txt
+            tools/clarity-factory/artifacts-share/Clarity-Share-unsigned.shortcut
+            tools/clarity-factory/artifacts-share/Clarity-Share-signed.shortcut
+            tools/clarity-factory/artifacts-share/clarity-share-hubsign.log
+          if-no-files-found: error
