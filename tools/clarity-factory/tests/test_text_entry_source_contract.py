@@ -19,13 +19,17 @@ class ClarityTextVariantSourceContractTests(unittest.TestCase):
         cls.text = module.render(cls.voice)
 
     def test_text_variant_is_generated_from_same_core(self):
+        replacement = "\n".join([
+            'const textInput = prompt("Clarityに入力", "Text", "")',
+            'const originalInput = text("{textInput}")',
+        ])
         expected = self.voice.replace(
             "#define name Clarity\n",
             "#define name Clarity Text\n",
             1,
         ).replace(
             'const originalInput = listen("After Pause", "jp-JP")',
-            'const textInput = prompt("Clarityに入力", "Text", "")\\nconst originalInput = text("{textInput}")',
+            replacement,
             1,
         )
         self.assertEqual(self.text, expected)
