@@ -219,14 +219,47 @@ try{
   assert.ok(deskType.chatName>=18,'YOS DESK chat titles must be readable');
   assert.ok(deskType.preview>=15,'YOS DESK chat previews must be readable');
   assert.ok(deskType.nav>=14,'YOS DESK navigation labels must be readable');
-  const firstFoldGeometry=await page.evaluate(()=>({
-    appTop:document.getElementById('app').getBoundingClientRect().top,
-    appBottom:document.getElementById('app').getBoundingClientRect().bottom,
-    pinBottom:document.getElementById('pinSection').getBoundingClientRect().bottom,
-    developmentTop:document.getElementById('developmentSection').getBoundingClientRect().top
-  }));
+  const firstFoldGeometry=await page.evaluate(()=>{
+    const app=document.getElementById('app');
+    app.scrollTop=0;
+    const appRect=app.getBoundingClientRect();
+    const pinRect=document.getElementById('pinSection').getBoundingClientRect();
+    const developmentRect=document.getElementById('developmentSection').getBoundingClientRect();
+    return {
+      appTop:appRect.top,
+      appBottom:appRect.bottom,
+      pinBottom:pinRect.bottom,
+      bottomGap:appRect.bottom-pinRect.bottom,
+      developmentTop:developmentRect.top
+    };
+  });
   assert.ok(firstFoldGeometry.pinBottom<=firstFoldGeometry.appBottom+1,'YOS DESK pinned section must fit completely in the initial viewport');
-  assert.ok(firstFoldGeometry.developmentTop>=firstFoldGeometry.appBottom-1,'YOS DESK development section must not appear before scrolling');
+  assert.ok(firstFoldGeometry.bottomGap>=0&&firstFoldGeometry.bottomGap<=24,'YOS DESK must not leave a large blank area below pinned entries');
+  assert.ok(firstFoldGeometry.developmentTop>=firstFoldGeometry.appBottom-1,`YOS DESK development section must not appear before scrolling: devTop=${firstFoldGeometry.developmentTop}, appBottom=${firstFoldGeometry.appBottom}, gap=${firstFoldGeometry.bottomGap}`);
+
+  const secondFoldGeometry=await page.evaluate(async()=>{
+    const app=document.getElementById('app');
+    const fold=document.getElementById('deskSecondFold');
+    app.scrollTop=fold.offsetTop;
+    await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+    const appRect=app.getBoundingClientRect();
+    const foldRect=fold.getBoundingClientRect();
+    const developmentRect=document.getElementById('developmentSection').getBoundingClientRect();
+    const composerRect=document.querySelector('#deskSecondFold .composer').getBoundingClientRect();
+    return {
+      appTop:appRect.top,
+      appBottom:appRect.bottom,
+      foldTop:foldRect.top,
+      foldBottom:foldRect.bottom,
+      developmentTop:developmentRect.top,
+      composerBottom:composerRect.bottom,
+      foldScrollHeight:fold.scrollHeight,
+      foldClientHeight:fold.clientHeight
+    };
+  });
+  assert.ok(secondFoldGeometry.developmentTop>=secondFoldGeometry.appTop-1,'YOS DESK second screen must start with development');
+  assert.ok(secondFoldGeometry.composerBottom<=secondFoldGeometry.appBottom+1,'YOS DESK second screen must show through the composer without a third screen');
+  assert.ok(secondFoldGeometry.foldScrollHeight<=secondFoldGeometry.foldClientHeight+1,'YOS DESK development-through-end must fit in one screen');
 
   const deskGeometry=await page.evaluate(()=>({
     appBottom:document.getElementById('app').getBoundingClientRect().bottom,
