@@ -218,6 +218,15 @@ try{
   assert.ok(deskType.chatName>=18,'YOS DESK chat titles must be readable');
   assert.ok(deskType.preview>=15,'YOS DESK chat previews must be readable');
   assert.ok(deskType.nav>=14,'YOS DESK navigation labels must be readable');
+  const firstFoldGeometry=await page.evaluate(()=>({
+    appTop:document.getElementById('app').getBoundingClientRect().top,
+    appBottom:document.getElementById('app').getBoundingClientRect().bottom,
+    pinBottom:document.getElementById('pinSection').getBoundingClientRect().bottom,
+    developmentTop:document.getElementById('developmentSection').getBoundingClientRect().top
+  }));
+  assert.ok(firstFoldGeometry.pinBottom<=firstFoldGeometry.appBottom+1,'YOS DESK pinned section must fit completely in the initial viewport');
+  assert.ok(firstFoldGeometry.developmentTop>=firstFoldGeometry.appBottom-1,'YOS DESK development section must not appear before scrolling');
+
   const deskGeometry=await page.evaluate(()=>({
     appBottom:document.getElementById('app').getBoundingClientRect().bottom,
     navTop:document.getElementById('bottom').getBoundingClientRect().top,
