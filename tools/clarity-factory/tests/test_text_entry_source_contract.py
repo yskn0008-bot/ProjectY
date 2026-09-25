@@ -25,14 +25,15 @@ class ClarityTextVariantSourceContractTests(unittest.TestCase):
             1,
         ).replace(
             'const originalInput = listen("After Pause", "jp-JP")',
-            'const originalInput = prompt("Clarityに入力", "Text", "")',
+            'const textInput = prompt("Clarityに入力", "Text", "")\\nconst originalInput = text("{textInput}")',
             1,
         )
         self.assertEqual(self.text, expected)
 
     def test_text_variant_uses_direct_text_prompt(self):
         self.assertIn("#define name Clarity Text", self.text)
-        self.assertIn('const originalInput = prompt("Clarityに入力", "Text", "")', self.text)
+        self.assertIn('const textInput = prompt("Clarityに入力", "Text", "")', self.text)
+        self.assertIn('const originalInput = text("{textInput}")', self.text)
         self.assertNotIn('const originalInput = listen("After Pause", "jp-JP")', self.text)
         self.assertNotIn("{ShortcutInput}", self.text)
 
