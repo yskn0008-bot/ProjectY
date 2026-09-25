@@ -90,6 +90,18 @@ jobs:
           printf '%s\n' "$BUILD_ID" > artifacts-fixed-child/BUILD_ID.txt
           cp "$runtime" artifacts-fixed-child/Clarity-unsigned.shortcut
 
+      - name: Compile Clarity text entry
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd tools/clarity-factory
+          rm -f './Clarity Text_unsigned.shortcut' './Clarity Text.plist'
+          cherri 'Clarity Text.cherri' --skip-sign --debug
+          entry='./Clarity Text_unsigned.shortcut'
+          test -f "$entry"
+          mkdir -p artifacts-fixed-child
+          cp "$entry" artifacts-fixed-child/Clarity-Text-unsigned.shortcut
+
       - name: Inspect parent/child isolation
         shell: bash
         run: |
@@ -138,6 +150,16 @@ jobs:
             --name 'Clarity' \
             2>&1 | tee tools/clarity-factory/artifacts-fixed-child/clarity-hubsign.log
 
+      - name: Sign Clarity text entry
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/clarity-factory/sign_with_hubsign.py \
+            --input tools/clarity-factory/artifacts-fixed-child/Clarity-Text-unsigned.shortcut \
+            --output tools/clarity-factory/artifacts-fixed-child/Clarity-Text-signed.shortcut \
+            --name 'Clarity Text' \
+            2>&1 | tee tools/clarity-factory/artifacts-fixed-child/clarity-text-hubsign.log
+
       - name: Sign YOS_OpenApp child
         shell: bash
         run: |
@@ -155,7 +177,7 @@ jobs:
           python3 - <<'PY'
           from pathlib import Path
           base=Path('tools/clarity-factory/artifacts-fixed-child')
-          for name in ('Clarity-signed.shortcut','YOS_OpenApp-signed.shortcut'):
+          for name in ('Clarity-signed.shortcut','Clarity-Text-signed.shortcut','YOS_OpenApp-signed.shortcut'):
               data=(base/name).read_bytes()
               assert data.startswith(b'AEA1'), (name,data[:8])
               assert len(data)>500, (name,len(data))
@@ -170,8 +192,11 @@ jobs:
             tools/clarity-factory/artifacts-fixed-child/BUILD_ID.txt
             tools/clarity-factory/artifacts-fixed-child/Clarity-unsigned.shortcut
             tools/clarity-factory/artifacts-fixed-child/Clarity-signed.shortcut
+            tools/clarity-factory/artifacts-fixed-child/Clarity-Text-unsigned.shortcut
+            tools/clarity-factory/artifacts-fixed-child/Clarity-Text-signed.shortcut
             tools/clarity-factory/artifacts-fixed-child/YOS_OpenApp-unsigned.shortcut
             tools/clarity-factory/artifacts-fixed-child/YOS_OpenApp-signed.shortcut
             tools/clarity-factory/artifacts-fixed-child/clarity-hubsign.log
+            tools/clarity-factory/artifacts-fixed-child/clarity-text-hubsign.log
             tools/clarity-factory/artifacts-fixed-child/yos-openapp-hubsign.log
           if-no-files-found: error
