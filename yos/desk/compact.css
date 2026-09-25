@@ -118,15 +118,120 @@ body{font-size:17px}
 }
 
 
-/* Clean first fold: initial screen ends at the pinned row.
-   Development content starts only after the user scrolls. */
+
+
+/* Two-screen DESK layout
+   Screen 1: title + current item + pinned entries.
+   Screen 2: development through composer. */
+:root{--desk-fold-height:700px}
+.app{scroll-snap-type:y proximity}
+
+#deskPage .deskFold,
+#deskPage .deskSecondFold{
+  height:var(--desk-fold-height);
+  min-height:var(--desk-fold-height);
+  box-sizing:border-box;
+  scroll-snap-align:start;
+  scroll-snap-stop:always;
+}
+
 #deskPage .deskFold{
-  min-height:calc(100svh - 82px - env(safe-area-inset-bottom));
+  display:flex;
+  flex-direction:column;
 }
+
 #deskPage #pinSection{
-  margin-bottom:13px;
+  margin-top:auto;
+  margin-bottom:0;
 }
-#deskPage #developmentSection{
-  margin-top:21px;
-  scroll-margin-top:21px;
+
+#deskPage .deskSecondFold{
+  display:grid;
+  grid-template-rows:auto auto auto auto;
+  align-content:space-between;
+  gap:8px;
+  padding-top:13px;
+  padding-bottom:4px;
+  overflow:hidden;
+}
+
+#deskPage .deskSecondFold .section{
+  margin-top:0;
+  min-height:0;
+}
+
+#deskPage .deskSecondFold .sectionHead{
+  padding-bottom:6px;
+}
+
+#deskPage .deskSecondFold .sectionHead strong{
+  font-size:18px;
+}
+
+#deskPage .deskSecondFold .sectionHead span{
+  font-size:14px;
+}
+
+/* Compact only the lower screen while preserving readability. */
+#deskPage .deskSecondFold .devList{gap:6px}
+#deskPage .deskSecondFold .dev{
+  padding:8px 9px;
+  border-radius:15px;
+  grid-template-columns:28px 1fr auto;
+  min-height:58px;
+}
+#deskPage .deskSecondFold .num{font-size:13px}
+#deskPage .deskSecondFold .devName{font-size:16px;line-height:1.2}
+#deskPage .deskSecondFold .devNext{
+  font-size:13px;
+  line-height:1.3;
+  margin-top:3px;
+  white-space:nowrap;
+  display:block;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+#deskPage .deskSecondFold .devStatus{font-size:12px;line-height:1.2}
+#deskPage .deskSecondFold .devPct{font-size:15px;margin-top:3px}
+#deskPage .deskSecondFold .grip{font-size:10px}
+
+#deskPage .deskSecondFold .suggestions{gap:8px}
+#deskPage .deskSecondFold .suggest{
+  min-height:0;
+  height:96px;
+  padding:10px;
+  border-radius:16px;
+  overflow:hidden;
+}
+#deskPage .deskSecondFold .suggest small{font-size:12px}
+#deskPage .deskSecondFold .suggest b{font-size:16px;line-height:1.25;margin-top:4px}
+#deskPage .deskSecondFold .suggest p{
+  font-size:13px;
+  line-height:1.35;
+  margin-top:4px;
+  display:-webkit-box;
+  -webkit-box-orient:vertical;
+  -webkit-line-clamp:3;
+  overflow:hidden;
+}
+
+#deskPage .deskSecondFold .stats{gap:7px}
+#deskPage .deskSecondFold .stat{padding:9px}
+#deskPage .deskSecondFold .stat b{font-size:17px}
+#deskPage .deskSecondFold .stat span{font-size:13px;line-height:1.25}
+
+#deskPage .deskSecondFold .composer{
+  margin-top:0;
+  grid-template-columns:1fr 62px;
+  gap:8px;
+}
+#deskPage .deskSecondFold .composer input{height:48px;font-size:16px}
+#deskPage .deskSecondFold .send{font-size:15px}
+
+@media(max-height:730px){
+  #deskPage .deskSecondFold{gap:6px;padding-top:8px}
+  #deskPage .deskSecondFold .dev{min-height:52px;padding:6px 8px}
+  #deskPage .deskSecondFold .suggest{height:86px;padding:8px}
+  #deskPage .deskSecondFold .stat{padding:7px}
+  #deskPage .deskSecondFold .composer input{height:44px}
 }
