@@ -49,6 +49,9 @@ class ClarityShareVariantSourceContractTests(unittest.TestCase):
         self.assertIn("使い方：", self.share)
         self.assertIn("似た言葉との差：", self.share)
         self.assertIn("自然な日本語訳：", self.share)
+        self.assertIn("feedback.summary MUST be non-empty", self.share)
+        self.assertIn('alert(summary, "Clarity")', self.share)
+        self.assertNotIn('show("{summary}")', self.share)
 
 
 if __name__ == "__main__":
