@@ -1,6 +1,5 @@
 #define name Clarity
 #define color blue
-#define inputs text
 
 #include 'actions/text'
 #include 'actions/documents'
@@ -22,17 +21,13 @@ action 'file.append' appendResolvedFile(
     "WFAppendFileWriteMode": "Append"
 }
 
-// Text Shortcut Input when supplied; otherwise voice -> Raw First -> ChatGPT Dictionary -> fail-closed policy -> local v1 executors -> Verify/Ledger.
+// Voice -> Raw First -> ChatGPT Dictionary -> fail-closed policy -> local v1 executors -> Verify/Ledger.
 // Existing Clarity Inbox.txt stays the raw fail-safe. Executor writes are local/reversible only.
 // BUILD_ID is replaced post-compile with the exact verified GitHub commit SHA.
 // Never use the Shortcut filename as runtime identity.
 const buildId = text("__CLARITY_BUILD_ID__")
 const requestNumber = randomNumber(100000, 999999)
-@resolvedInput = "{ShortcutInput}"
-if !@resolvedInput {
-    @resolvedInput = listen("After Pause", "jp-JP")
-}
-const originalInput = text("{@resolvedInput}")
+const originalInput = listen("After Pause", "jp-JP")
 const rawRecord = text("{CurrentDate}\t{requestNumber}\tRAW\t{originalInput}\n")
 const inboxFile = getFile("Clarity Inbox.txt")
 appendResolvedFile(inboxFile, rawRecord)
