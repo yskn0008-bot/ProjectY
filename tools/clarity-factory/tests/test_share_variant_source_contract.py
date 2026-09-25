@@ -19,7 +19,7 @@ class ClarityShareVariantSourceContractTests(unittest.TestCase):
         cls.share = module.render(cls.voice)
 
     def test_share_variant_uses_share_sheet_directly(self):
-        self.assertIn("#define name Clarity Share v2", self.share)
+        self.assertIn("#define name Clarity Share v3", self.share)
         self.assertIn("#define from sharesheet", self.share)
         self.assertIn("#define inputs text, richtext, webpage, url", self.share)
         self.assertIn('#define noinput stopwith "共有する内容がありません"', self.share)
@@ -47,8 +47,10 @@ class ClarityShareVariantSourceContractTests(unittest.TestCase):
         self.assertIn("意味：", self.share)
         self.assertIn("ニュアンス：", self.share)
         self.assertIn("使い方：", self.share)
+        self.assertIn("例：", self.share)
         self.assertIn("似た言葉との差：", self.share)
         self.assertIn("自然な日本語訳：", self.share)
+        self.assertIn("Do not collapse sections onto consecutive lines", self.share)
         self.assertIn("feedback.summary MUST be non-empty", self.share)
         self.assertIn('alert(summary, "Clarity")', self.share)
         self.assertIn("SHARE_PARSED", self.share)
