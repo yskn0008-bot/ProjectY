@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-25T13:25:23+09:00",
+  "updated_at": "2026-09-25T14:30:12+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -70,7 +70,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-09-25T04:24:53Z"
+      "updated_at": "2026-09-25T05:29:53Z"
     },
     {
       "id": "github-issue-256",
@@ -165,6 +165,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-0bb989f35c02",
+      "title": "Clarity: make text mode self-contained",
+      "completed_at": "2026-09-25T05:29:59Z",
+      "result": "GitHub mainへ反映（0bb989f）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/0bb989f35c02bc7e12b915b3f437eece4118c047"
+    },
+    {
       "id": "github-commit-f7a9e9e2bc6d",
       "title": "Clarity: isolate real user input from routing prompt",
       "completed_at": "2026-09-25T04:25:09Z",
@@ -191,13 +198,6 @@
       "completed_at": "2026-09-24T23:13:48Z",
       "result": "GitHub mainへ反映（b2fc237）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/b2fc237ae3c99ec1ca537bcc2a4dca094f64418d"
-    },
-    {
-      "id": "github-commit-0b176b781686",
-      "title": "YOS DESK: 小さい文字をさらに拡大",
-      "completed_at": "2026-09-24T17:49:31Z",
-      "result": "GitHub mainへ反映（0b176b7）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/0b176b781686dc4bc9c3edff7629e00c615b5ee4"
     },
     {
       "id": "complete-002",
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-25T13:25:23+09:00",
+      "last_update": "2026-09-25T14:30:12+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -315,7 +315,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-25T13:25:23+09:00",
+      "last_update": "2026-09-25T14:30:12+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-25T13:25:23+09:00",
+      "last_update": "2026-09-25T14:30:12+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "a010198190a5e1a87afb754becffe9fdd71650cc743c6e2cd5b2bcc584daa6d5"
+  "github_snapshot_hash": "dcea76e59b664579a5c0c92d28be30f46ae45b627800c4d7085fe316f77b390a"
 }
