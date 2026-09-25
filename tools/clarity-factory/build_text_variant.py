@@ -7,7 +7,7 @@ from pathlib import Path
 VOICE_NAME = "#define name Clarity\n"
 TEXT_NAME = "#define name Clarity Text\n"
 VOICE_INPUT = 'const originalInput = listen("After Pause", "jp-JP")'
-TEXT_INPUT = 'const originalInput = prompt("Clarityに入力", "Text", "")'
+TEXT_INPUT = 'const textInput = prompt("Clarityに入力", "Text", "")\\nconst originalInput = text("{textInput}")'
 
 
 def render(source: str) -> str:
