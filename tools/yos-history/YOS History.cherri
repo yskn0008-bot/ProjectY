@@ -1,7 +1,6 @@
 #define name YOS History
 #define color purple
 
-#include 'actions/basic'
 #include 'actions/text'
 #include 'actions/documents'
 
