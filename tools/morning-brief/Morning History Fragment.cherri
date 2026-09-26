@@ -4,6 +4,7 @@
 
 #include 'actions/text'
 #include 'actions/documents'
+#include 'actions/calendar'
 
 @incoming = "{ShortcutInput}"
 const historyNow = currentDate()
