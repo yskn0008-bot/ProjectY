@@ -61,5 +61,11 @@ Money正本：
 {moneySource}")
 
 const result = askChatGPT(promptText, false, "Text")
+
+const alertLogNow = currentDate()
+const alertLogStamp = formatDate(alertLogNow, "Custom", "yyyy-MM-dd HHmmss")
+const alertLog = text("【Payment Alert】\n{result}")
+saveFile("YOS Display History/{alertLogStamp} Payment Alert.txt", alertLog, false)
+
 showNotification("Payment Alert")
 alert(result, "支払い")
