@@ -113,6 +113,17 @@ jobs:
             --name 'Morning Brief' \
             2>&1 | tee tools/morning-brief/artifacts/morning-brief-hubsign.log
 
+      - name: Sign current-device Morning%20Brief compatibility artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/clarity-factory/sign_with_hubsign.py \
+            --input 'tools/morning-brief/artifacts/Morning Brief.plist' \
+            --output 'tools/morning-brief/artifacts/Morning%20Brief.shortcut' \
+            --name 'Morning%20Brief' \
+            2>&1 | tee tools/morning-brief/artifacts/morning-brief-compat-hubsign.log
+
+
       - name: Verify signed artifact
         shell: bash
         run: |
@@ -123,7 +134,10 @@ jobs:
           data=p.read_bytes()
           assert data.startswith(b'AEA1'), data[:8]
           assert len(data)>500, len(data)
-          print(f'Morning Brief signed AEA1: PASS ({len(data)} bytes)')
+          compat=Path('tools/morning-brief/artifacts/Morning%20Brief.shortcut').read_bytes()
+          assert compat.startswith(b'AEA1'), compat[:8]
+          assert len(compat)>500, len(compat)
+          print(f'Morning Brief signed AEA1: PASS ({len(data)} bytes; compat {len(compat)} bytes)')
           PY
 
       - name: Publish iPhone acceptance artifact to PR branch
@@ -149,5 +163,6 @@ jobs:
           name: morning-brief-final
           path: |
             tools/morning-brief/artifacts/Morning Brief.shortcut
+            tools/morning-brief/artifacts/Morning%20Brief.shortcut
             tools/morning-brief/artifacts/morning-brief-hubsign.log
           if-no-files-found: error
