@@ -287,15 +287,15 @@ def patch(path: Path) -> None:
         fail("Night history folder read missing")
     if ids.count("is.workflow.actions.filter.files") != 1:
         fail("Night history 14-day filter missing")
-    if ids.count("is.workflow.actions.documentpicker.save") != 1:
-        fail("Night history save missing")
+    if ids.count("is.workflow.actions.documentpicker.save") != 3:
+        fail("Night history/display saves missing")
     if "真栄原2丁目" in blob:
         fail("private street-level text must not be embedded")
 
     path.write_bytes(plistlib.dumps(workflow, fmt=plistlib.FMT_XML, sort_keys=False))
     print(
         "Night Brief native-only patch: PASS "
-        f"(actions={len(actions)}, weather=1, calendar=2, reminders=2, safari=0, scriptable=0)"
+        f"(actions={len(actions)}, weather=1, calendar=2, reminders=2, safari=0, scriptable=0, display-history=2)"
     )
 
 
