@@ -61,7 +61,7 @@ jobs:
           assert ids.count('is.workflow.actions.file.getfoldercontents') == 1
           assert ids.count('is.workflow.actions.filter.files') == 1
           assert ids.count('is.workflow.actions.choosefromlist') == 1
-          assert ids.count('is.workflow.actions.gettext') == 1
+          assert ids.count('is.workflow.actions.detect.text') == 1
           assert ids.count('is.workflow.actions.showresult') == 1
           assert 'YOS Display History' in blob
           assert '読み返す履歴を選ぶ' in blob
