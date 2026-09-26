@@ -1,0 +1,94 @@
+name: Remote launcher shortcut
+
+on:
+  pull_request:
+    paths:
+      - 'tools/remote-launcher/**'
+      - '.github/workflows/remote-launcher-shortcut.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pinned Cherri v2.3.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          url='https://github.com/electrikmilk/cherri/releases/download/v2.3.0/cherri_linux-x86_64.zip'
+          expected='7ab2c384b7b26e7c72a30a8dfa56f89dae12c4068b7951bc1e3193f3698edbe9'
+          curl -fsSL "$url" -o /tmp/cherri.zip
+          printf '%s  %s\n' "$expected" /tmp/cherri.zip | sha256sum -c -
+          mkdir -p /tmp/cherri
+          unzip -q /tmp/cherri.zip -d /tmp/cherri
+          binary="$(find /tmp/cherri -type f -name cherri -print -quit)"
+          test -n "$binary"
+          sudo install -m 0755 "$binary" /usr/local/bin/cherri
+          cherri --version
+
+      - name: Compile remote launcher
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd tools/remote-launcher
+          rm -f ./*_unsigned.shortcut ./*.plist
+          cherri remote-launcher.cherri --skip-sign --debug
+          built="$(find . -maxdepth 1 -type f -name '*_unsigned.shortcut' -print -quit)"
+          test -n "$built"
+          mkdir -p artifacts
+          cp "$built" artifacts/3-screen-remote-unsigned.shortcut
+          python3 - <<'PY'
+          from pathlib import Path
+          import plistlib
+          p=Path('artifacts/3-screen-remote-unsigned.shortcut')
+          obj=plistlib.loads(p.read_bytes())
+          actions=obj.get('WFWorkflowActions') or []
+          if not actions:
+              raise SystemExit('no shortcut actions')
+          raw=p.read_bytes()
+          if b'scriptable:///run?scriptName=%E3%83%AA%E3%83%A2%E3%82%B3%E3%83%B3' not in raw:
+              raise SystemExit('Scriptable remote URL missing')
+          print(f'OK unsigned: {len(raw)} bytes, actions={len(actions)}')
+          PY
+
+      - name: Sign remote launcher with HubSign
+        shell: bash
+        run: |
+          set -euo pipefail
+          log='tools/remote-launcher/artifacts/hubsign.log'
+          python3 tools/clarity-factory/sign_with_hubsign.py \
+            --input tools/remote-launcher/artifacts/3-screen-remote-unsigned.shortcut \
+            --output 'tools/remote-launcher/artifacts/3画面リモコン.shortcut' \
+            --name '3画面リモコン' \
+            2>&1 | tee "$log"
+
+      - name: Verify signed shortcut
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('tools/remote-launcher/artifacts/3画面リモコン.shortcut')
+          data=p.read_bytes()
+          if not data.startswith(b'AEA1'):
+              raise SystemExit(f'not AEA1 signed: {data[:8]!r}')
+          if len(data) < 500:
+              raise SystemExit(f'unexpectedly small: {len(data)}')
+          print(f'OK signed: {len(data)} bytes')
+          PY
+
+      - name: Upload shortcut
+        uses: actions/upload-artifact@v4
+        with:
+          name: remote-launcher-shortcut
+          path: |
+            tools/remote-launcher/artifacts/3画面リモコン.shortcut
+            tools/remote-launcher/artifacts/3-screen-remote-unsigned.shortcut
+            tools/remote-launcher/artifacts/hubsign.log
+          if-no-files-found: error
