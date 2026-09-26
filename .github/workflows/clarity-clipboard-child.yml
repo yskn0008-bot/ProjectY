@@ -1,0 +1,104 @@
+name: YOS Clipboard fixed-child proof
+
+on:
+  pull_request:
+    paths:
+      - 'tools/clarity-factory/YOS_Clipboard.cherri'
+      - 'tools/clarity-factory/tests/test_yos_clipboard_source_contract.py'
+      - 'tools/clarity-factory/validate_yos_clipboard_runtime.py'
+      - '.github/workflows/clarity-clipboard-child.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'tools/clarity-factory/YOS_Clipboard.cherri'
+      - 'tools/clarity-factory/tests/test_yos_clipboard_source_contract.py'
+      - 'tools/clarity-factory/validate_yos_clipboard_runtime.py'
+      - '.github/workflows/clarity-clipboard-child.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  compile-sign:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate YOS_Clipboard source contract
+        run: python3 tools/clarity-factory/tests/test_yos_clipboard_source_contract.py
+
+      - name: Install pinned Cherri v2.3.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          url='https://github.com/electrikmilk/cherri/releases/download/v2.3.0/cherri_linux-x86_64.zip'
+          expected='7ab2c384b7b26e7c72a30a8dfa56f89dae12c4068b7951bc1e3193f3698edbe9'
+          curl -fsSL "$url" -o /tmp/cherri.zip
+          printf '%s  %s\n' "$expected" /tmp/cherri.zip | sha256sum -c -
+          mkdir -p /tmp/cherri
+          unzip -q /tmp/cherri.zip -d /tmp/cherri
+          binary="$(find /tmp/cherri -type f -name cherri -print -quit)"
+          test -n "$binary"
+          sudo install -m 0755 "$binary" /usr/local/bin/cherri
+          cherri --version
+
+      - name: Compile standalone fixed child
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd tools/clarity-factory
+          rm -f './YOS_Clipboard_unsigned.shortcut' './YOS_Clipboard.plist'
+          cherri YOS_Clipboard.cherri --skip-sign --debug
+          test -s './YOS_Clipboard_unsigned.shortcut'
+          python3 validate_yos_clipboard_runtime.py './YOS_Clipboard_unsigned.shortcut'
+          mkdir -p artifacts-clipboard
+          cp './YOS_Clipboard_unsigned.shortcut' artifacts-clipboard/YOS_Clipboard-unsigned.shortcut
+
+      - name: Secret and isolation scan
+        shell: bash
+        run: |
+          set -euo pipefail
+          if grep -RIE --exclude='*.shortcut' --exclude='*.plist' \
+            '(gh[pousr]_[A-Za-z0-9_]{20,}|sk-[A-Za-z0-9_-]{20,}|xox[baprs]-[A-Za-z0-9-]{10,}|BEGIN [A-Z ]*PRIVATE KEY|192\.168\.[0-9]+\.[0-9]+)' \
+            tools/clarity-factory/YOS_Clipboard.cherri \
+            tools/clarity-factory/validate_yos_clipboard_runtime.py \
+            tools/clarity-factory/tests/test_yos_clipboard_source_contract.py; then
+            echo 'Potential secret/private network value found.' >&2
+            exit 1
+          fi
+
+      - name: Sign YOS_Clipboard child
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/clarity-factory/sign_with_hubsign.py \
+            --input tools/clarity-factory/artifacts-clipboard/YOS_Clipboard-unsigned.shortcut \
+            --output tools/clarity-factory/artifacts-clipboard/YOS_Clipboard-signed.shortcut \
+            --name 'YOS_Clipboard' \
+            2>&1 | tee tools/clarity-factory/artifacts-clipboard/yos-clipboard-hubsign.log
+
+      - name: Verify signed artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('tools/clarity-factory/artifacts-clipboard/YOS_Clipboard-signed.shortcut')
+          data=p.read_bytes()
+          assert data.startswith(b'AEA1'), data[:8]
+          assert len(data)>500, len(data)
+          print(f'YOS_Clipboard-signed.shortcut: signed AEA1 PASS ({len(data)} bytes)')
+          PY
+
+      - name: Upload standalone acceptance package
+        uses: actions/upload-artifact@v4
+        with:
+          name: yos-clipboard-standalone
+          path: |
+            tools/clarity-factory/artifacts-clipboard/YOS_Clipboard-unsigned.shortcut
+            tools/clarity-factory/artifacts-clipboard/YOS_Clipboard-signed.shortcut
+            tools/clarity-factory/artifacts-clipboard/yos-clipboard-hubsign.log
+          if-no-files-found: error
+          retention-days: 14
