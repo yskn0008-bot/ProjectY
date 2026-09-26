@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#fffaf0">
+<title>PROT Factory</title>
+<style>
+:root{font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans",sans-serif;color:#13233a;background:#fffaf0}*{box-sizing:border-box}body{margin:0}.wrap{max-width:620px;margin:auto;padding:calc(22px + env(safe-area-inset-top)) 18px 40px}header{display:flex;align-items:center;gap:12px;margin-bottom:28px}.sun{width:42px;height:42px;border-radius:50%;background:#f5b942;box-shadow:0 0 0 8px #f5b94222}h1{font-size:24px;margin:0}header p{margin:3px 0 0;color:#667085;font-size:13px}.card{background:#fff;border:1px solid #eadfca;border-radius:22px;padding:18px;box-shadow:0 8px 28px #23395d10}label{font-weight:700;display:block;margin-bottom:10px}textarea{width:100%;min-height:138px;border:0;background:#f7f5f0;border-radius:16px;padding:15px;font:inherit;font-size:17px;resize:vertical;outline:none}button{width:100%;border:0;border-radius:16px;padding:15px;margin-top:12px;background:#172a46;color:white;font-weight:700;font-size:17px}.examples{display:flex;gap:8px;overflow:auto;margin:14px 0 0}.chip{flex:0 0 auto;width:auto;padding:9px 12px;margin:0;background:#f2eadc;color:#26364b;font-size:13px}.result{display:none;margin-top:16px}.route{font-size:12px;font-weight:700;letter-spacing:.06em;color:#a36a00}.result h2{font-size:20px;margin:6px 0}.result p{margin:7px 0;color:#526070;line-height:1.5}.note{margin-top:18px;font-size:12px;color:#7b8490;text-align:center}
+</style></head>
+<body><main class="wrap">
+<header><div class="sun"></div><div><h1>PROT Factory</h1><p>作りたいものを、そのまま相談</p></div></header>
+<section class="card">
+<label for="idea">何を楽にしたい？</label>
+<textarea id="idea" placeholder="例：外出するときAirPodsをつないだら、予定とバッテリーを確認してほしい"></textarea>
+<div class="examples">
+<button class="chip" data-v="毎日の同じiPhone操作を自動化したい">iPhone操作</button>
+<button class="chip" data-v="小さなWebアプリを作りたい">Webアプリ</button>
+<button class="chip" data-v="今ある機能でできないか確認したい">既存資産</button>
+</div>
+<button id="go">相談する</button>
+</section>
+<section class="card result" id="result"><div class="route" id="route"></div><h2 id="title"></h2><p id="body"></p><p id="next"></p></section>
+<p class="note">v0.1 preview — 外部送信・本番変更はしません</p>
+</main>
+<script>
+const q=s=>document.querySelector(s), idea=q('#idea');
+document.querySelectorAll('.chip').forEach(b=>b.onclick=()=>{idea.value=b.dataset.v;idea.focus()});
+q('#go').onclick=()=>{
+ const s=idea.value.trim(); if(!s){idea.focus();return}
+ let route='PROT FACTORY → INVENTORY',title='まず既存資産を確認します',body='同じ目的を満たすものがあれば、新しく作りません。',next='次：既存資産の確認';
+ if(/ショートカット|iPhone|自動|AirPods|操作/.test(s)){route='PROT FACTORY → SHORTCUT',title='Shortcut Factoryへ',body='既存のShortcut / Automationを再利用して、最小構成を作る候補です。',next='次：既存Shortcut確認 → 生成 → 実機確認'}
+ else if(/web|Web|サイト|画面|アプリ/.test(s)){route='PROT FACTORY → WEB',title='Web試作へ',body='本番から隔離した小さなWeb試作で、先に使い勝手を確認します。',next='次：最小画面 → 動作確認'}
+ q('#route').textContent=route;q('#title').textContent=title;q('#body').textContent=body;q('#next').textContent=next;q('#result').style.display='block';q('#result').scrollIntoView({behavior:'smooth'});
+};
+</script></body></html>
