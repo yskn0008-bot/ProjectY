@@ -62,6 +62,7 @@ jobs:
           assert ids.count('is.workflow.actions.askllm') == 1
           assert ids.count('is.workflow.actions.notification') == 1
           assert ids.count('is.workflow.actions.alert') == 1
+          assert ids.count('is.workflow.actions.documentpicker.save') == 1
           assert ids.count('is.workflow.actions.openurl') == 0
           assert 'payment-alert-bridge' not in blob
           assert 'raw.githubusercontent.com/yskn0008-bot/ProjectY/main/yos/money-master-v1.js' in blob
@@ -73,6 +74,8 @@ jobs:
           assert '同じ日付は1回だけ表示' in blob
           assert '比例フォント' in blob
           assert '空白で列揃えをしない' in blob
+          assert 'YOS Display History' in blob
+          assert '【Payment Alert】' in blob
           print(f'Payment Alert native contract: PASS ({len(actions)} actions)')
           PY
 
