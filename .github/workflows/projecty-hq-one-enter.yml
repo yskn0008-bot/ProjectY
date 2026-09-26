@@ -1,0 +1,82 @@
+name: ProjectY One Enter
+
+on:
+  pull_request:
+    paths:
+      - '.github/scripts/projecty-hq-one-enter.cjs'
+      - '.github/scripts/projecty-hq-one-enter.test.cjs'
+      - '.github/workflows/projecty-hq-one-enter.yml'
+  workflow_dispatch:
+    inputs:
+      synthetic_request:
+        description: Small synthetic development request used to validate One Enter orchestration
+        required: false
+        type: string
+        default: 'Lane 4 synthetic development request'
+      fail_verification_once:
+        description: Intentionally fail the first synthetic QA pass and exercise bounded recovery
+        required: false
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+jobs:
+  one-enter:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout candidate read-only
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          package-manager-cache: false
+
+      - name: Check One Enter syntax
+        run: |
+          node --check .github/scripts/projecty-hq-one-enter.cjs
+          node --check .github/scripts/projecty-hq-one-enter.test.cjs
+
+      - name: Run One Enter regression tests
+        run: node --test .github/scripts/projecty-hq-one-enter.test.cjs
+
+      - name: Run synthetic request end to end
+        env:
+          REQUEST_TEXT: ${{ inputs.synthetic_request || 'Lane 4 synthetic development request' }}
+          FAIL_ONCE: ${{ inputs.fail_verification_once || 'true' }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          export ONE_ENTER_REQUEST_JSON="$(node - <<'NODE'
+          const value = {
+            id: 'lane4-actions-synthetic',
+            text: process.env.REQUEST_TEXT,
+            mode: 'synthetic',
+            baseSha: process.env.BASE_SHA,
+            synthetic: { failVerificationOnce: String(process.env.FAIL_ONCE).toLowerCase() !== 'false' },
+          };
+          process.stdout.write(JSON.stringify(value));
+          NODE
+          )"
+          result="$(node .github/scripts/projecty-hq-one-enter.cjs)"
+          printf '%s\n' "$result"
+          node - "$result" <<'NODE'
+          const result = JSON.parse(process.argv[2]);
+          const states = result.trace.map((entry) => entry.state);
+          for (const required of ['RECEIVED', 'ASSET_SEARCH', 'PLANNED', 'IMPLEMENTING', 'VERIFYING', 'USABLE', 'ENDED']) {
+            if (!states.includes(required)) throw new Error(`missing state: ${required}`);
+          }
+          if (!result.usable || result.state !== 'ENDED' || result.endReason !== 'USABLE_VERIFIED') {
+            throw new Error('synthetic One Enter request did not finish as a verified usable fixed version');
+          }
+          if (String(process.env.FAIL_ONCE).toLowerCase() !== 'false' && !states.includes('RECOVERING')) {
+            throw new Error('intentional synthetic failure did not exercise RECOVERING');
+          }
+          NODE
