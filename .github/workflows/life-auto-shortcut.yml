@@ -1,0 +1,222 @@
+name: Life AUTO shortcut
+
+on:
+  pull_request:
+    paths:
+      - 'tools/clarity-factory/life-auto-set.cherri'
+      - 'tools/clarity-factory/home-arrival-auto.cherri'
+      - 'tools/clarity-factory/wake-auto.cherri'
+      - 'tools/clarity-factory/sign_with_hubsign.py'
+      - '.github/workflows/life-auto-shortcut.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pinned Cherri v2.3.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          url='https://github.com/electrikmilk/cherri/releases/download/v2.3.0/cherri_linux-x86_64.zip'
+          expected='7ab2c384b7b26e7c72a30a8dfa56f89dae12c4068b7951bc1e3193f3698edbe9'
+          curl -fsSL "$url" -o /tmp/cherri.zip
+          printf '%s  %s\n' "$expected" /tmp/cherri.zip | sha256sum -c -
+          mkdir -p /tmp/cherri
+          unzip -q /tmp/cherri.zip -d /tmp/cherri
+          binary="$(find /tmp/cherri -type f -name cherri -print -quit)"
+          test -n "$binary"
+          sudo install -m 0755 "$binary" /usr/local/bin/cherri
+          cherri --version
+
+      - name: Compile 生活AUTOセット
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd tools/clarity-factory
+          rm -f './生活AUTOセット_unsigned.shortcut' './生活AUTOセット.plist'
+          cherri life-auto-set.cherri --skip-sign --debug
+          test -f './生活AUTOセット_unsigned.shortcut'
+          mkdir -p artifacts-life-auto
+          cp './生活AUTOセット_unsigned.shortcut' artifacts-life-auto/life-auto-set-unsigned.shortcut
+          cp './生活AUTOセット.plist' artifacts-life-auto/life-auto-set.plist
+
+      - name: Validate life bridge shape
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import plistlib
+          from pathlib import Path
+          p=Path('tools/clarity-factory/artifacts-life-auto/life-auto-set-unsigned.shortcut')
+          d=plistlib.loads(p.read_bytes())
+          actions=d.get('WFWorkflowActions',[])
+          ids=[a.get('WFWorkflowActionIdentifier') for a in actions]
+          if ids.count('is.workflow.actions.openurl') != 4:
+              raise SystemExit(f'expected 4 openurl actions, got {ids.count("is.workflow.actions.openurl")}')
+          raw=p.read_bytes()
+          for needle in [b'scene=home',b'scene=relax',b'scene=sleep',b'scene=away']:
+              if needle not in raw:
+                  raise SystemExit(f'missing {needle!r}')
+          print('OK: life AUTO bridge shape validated')
+          PY
+
+      - name: Sign 生活AUTOセット
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/clarity-factory/sign_with_hubsign.py \
+            --input tools/clarity-factory/artifacts-life-auto/life-auto-set-unsigned.shortcut \
+            --output tools/clarity-factory/artifacts-life-auto/生活AUTOセット.shortcut \
+            --name '生活AUTOセット'
+
+      - name: Verify signed 生活AUTOセット
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('tools/clarity-factory/artifacts-life-auto/生活AUTOセット.shortcut')
+          data=p.read_bytes()
+          if not data.startswith(b'AEA1'):
+              raise SystemExit(f'expected signed AEA1 shortcut, got {data[:8]!r}')
+          if len(data) < 500:
+              raise SystemExit(f'artifact unexpectedly small: {len(data)} bytes')
+          print(f'OK: signed life AUTO artifact {len(data)} bytes')
+          PY
+
+      - name: Compile 帰宅AUTO
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd tools/clarity-factory
+          rm -f './帰宅AUTO_unsigned.shortcut' './帰宅AUTO.plist'
+          cherri home-arrival-auto.cherri --skip-sign --debug
+          test -f './帰宅AUTO_unsigned.shortcut'
+          mkdir -p artifacts-home-arrival
+          cp './帰宅AUTO_unsigned.shortcut' artifacts-home-arrival/home-arrival-auto-unsigned.shortcut
+          cp './帰宅AUTO.plist' artifacts-home-arrival/home-arrival-auto.plist
+
+      - name: Validate 帰宅AUTO light-only bridge
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import plistlib
+          from pathlib import Path
+          p=Path('tools/clarity-factory/artifacts-home-arrival/home-arrival-auto-unsigned.shortcut')
+          d=plistlib.loads(p.read_bytes())
+          actions=d.get('WFWorkflowActions',[])
+          ids=[a.get('WFWorkflowActionIdentifier') for a in actions]
+          if ids.count('is.workflow.actions.openurl') != 1:
+              raise SystemExit(f'expected 1 openurl action, got {ids.count("is.workflow.actions.openurl")}')
+          def strings(x):
+              if isinstance(x, dict):
+                  for k, v in x.items():
+                      yield from strings(k)
+                      yield from strings(v)
+              elif isinstance(x, (list, tuple)):
+                  for v in x:
+                      yield from strings(v)
+              elif isinstance(x, str):
+                  yield x
+          values=list(strings(d))
+          if not any('YOS%20Light%20Widget' in v and 'action=on' in v for v in values):
+              raise SystemExit('missing light ON target')
+          if any('YOS%20AC%20Widget' in v or 'YOS%20Life%20AUTO%20Remote' in v for v in values):
+              raise SystemExit('unexpected AC/Life AUTO dependency')
+          print('OK: home arrival is light-only')
+          PY
+
+      - name: Sign 帰宅AUTO
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/clarity-factory/sign_with_hubsign.py \
+            --input tools/clarity-factory/artifacts-home-arrival/home-arrival-auto-unsigned.shortcut \
+            --output tools/clarity-factory/artifacts-home-arrival/帰宅AUTO.shortcut \
+            --name '帰宅AUTO'
+
+      - name: Verify signed 帰宅AUTO
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('tools/clarity-factory/artifacts-home-arrival/帰宅AUTO.shortcut')
+          data=p.read_bytes()
+          if not data.startswith(b'AEA1'):
+              raise SystemExit(f'expected signed AEA1 shortcut, got {data[:8]!r}')
+          if len(data) < 500:
+              raise SystemExit(f'artifact unexpectedly small: {len(data)} bytes')
+          print(f'OK: signed home arrival artifact {len(data)} bytes')
+          PY
+
+      - name: Compile 起床AUTO
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd tools/clarity-factory
+          rm -f './起床AUTO_unsigned.shortcut' './起床AUTO.plist'
+          cherri wake-auto.cherri --skip-sign --debug
+          test -f './起床AUTO_unsigned.shortcut'
+          mkdir -p artifacts-wake
+          cp './起床AUTO_unsigned.shortcut' artifacts-wake/wake-auto-unsigned.shortcut
+          cp './起床AUTO.plist' artifacts-wake/wake-auto.plist
+
+      - name: Validate 起床AUTO child order
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import plistlib
+          from pathlib import Path
+          p=Path('tools/clarity-factory/artifacts-wake/wake-auto-unsigned.shortcut')
+          d=plistlib.loads(p.read_bytes())
+          actions=d.get('WFWorkflowActions',[])
+          runs=[a for a in actions if a.get('WFWorkflowActionIdentifier') == 'is.workflow.actions.runworkflow']
+          names=[a.get('WFWorkflowActionParameters',{}).get('WFWorkflowName') for a in runs]
+          if names != ['YOS Battery Sync','Morning Flow']:
+              raise SystemExit(f'unexpected run order: {names}')
+          print('OK: wake child order validated')
+          PY
+
+      - name: Sign 起床AUTO
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/clarity-factory/sign_with_hubsign.py \
+            --input tools/clarity-factory/artifacts-wake/wake-auto-unsigned.shortcut \
+            --output tools/clarity-factory/artifacts-wake/起床AUTO.shortcut \
+            --name '起床AUTO'
+
+      - name: Verify signed 起床AUTO
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('tools/clarity-factory/artifacts-wake/起床AUTO.shortcut')
+          data=p.read_bytes()
+          if not data.startswith(b'AEA1'):
+              raise SystemExit(f'expected signed AEA1 shortcut, got {data[:8]!r}')
+          if len(data) < 500:
+              raise SystemExit(f'artifact unexpectedly small: {len(data)} bytes')
+          print(f'OK: signed wake artifact {len(data)} bytes')
+          PY
+
+      - name: Upload shortcuts
+        uses: actions/upload-artifact@v4
+        with:
+          name: life-auto-shortcuts
+          path: |
+            tools/clarity-factory/artifacts-life-auto/生活AUTOセット.shortcut
+            tools/clarity-factory/artifacts-home-arrival/帰宅AUTO.shortcut
+            tools/clarity-factory/artifacts-wake/起床AUTO.shortcut
+          if-no-files-found: error
