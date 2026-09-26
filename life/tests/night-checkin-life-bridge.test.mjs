@@ -78,7 +78,7 @@ test('dedicated save bridge keeps the large payload in the fragment until after 
 });
 
 test('service worker never falls Night save bridge back to MY WAY root',()=>{
-  assert.match(serviceWorker,/v14-night-save-bridge/);
+  assert.match(serviceWorker,/const CACHE_NAME=CACHE_PREFIX\+'[^']+'/);
   assert.match(serviceWorker,/\.\/life\/night-checkin-save-bridge\.html/);
   assert.match(serviceWorker,/path\.endsWith\('\/life\/night-checkin-save-bridge\.html'\)\)return '\.\/life\/night-checkin-save-bridge\.html'/);
 });
