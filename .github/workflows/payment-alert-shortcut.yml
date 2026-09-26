@@ -63,6 +63,7 @@ jobs:
           assert ids.count('is.workflow.actions.notification') == 1
           assert ids.count('is.workflow.actions.alert') == 1
           assert ids.count('is.workflow.actions.documentpicker.save') == 1
+          assert ids.count('is.workflow.actions.file.createfolder') == 1
           assert ids.count('is.workflow.actions.openurl') == 0
           assert 'payment-alert-bridge' not in blob
           assert 'raw.githubusercontent.com/yskn0008-bot/ProjectY/main/yos/money-master-v1.js' in blob
