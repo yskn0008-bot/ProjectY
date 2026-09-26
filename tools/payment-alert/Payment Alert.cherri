@@ -14,6 +14,7 @@
 // No Safari bridge. Reads the existing Money canonical source and checks only
 // planned outgoing payments due today through 3 days from now.
 
+const paymentDisplayHistoryFolder = createFolder("YOS Display History")
 const now = currentDate()
 const today = formatDate(now, "Custom", "yyyy-MM-dd")
 const moneySource = downloadURL("https://raw.githubusercontent.com/yskn0008-bot/ProjectY/main/yos/money-master-v1.js")
