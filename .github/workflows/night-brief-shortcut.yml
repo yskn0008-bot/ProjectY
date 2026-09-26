@@ -73,7 +73,7 @@ jobs:
 
           assert workflow.get('WFWorkflowHasShortcutInputVariables') is False
           assert ids.count('is.workflow.actions.documentpicker.open') == 0
-          assert ids.count('is.workflow.actions.file.createfolder') == 1
+          assert ids.count('is.workflow.actions.file.createfolder') == 2
           assert ids.count('is.workflow.actions.file.getfoldercontents') == 1
           assert ids.count('is.workflow.actions.filter.files') == 1
           assert ids.count('is.workflow.actions.documentpicker.save') == 3
