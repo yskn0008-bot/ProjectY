@@ -13,6 +13,7 @@
 // Existing MY LIFE remains separate; this removes browser sync from the critical night flow.
 
 const historyFolder = createFolder("YOS Night History")
+const displayHistoryFolder = createFolder("YOS Display History")
 const historyFiles = getFolderContents(historyFolder, false)
 const recentHistoryFiles = filterFiles(historyFiles, 14, "Name", "Z to A")
 const recentHistory = getText(recentHistoryFiles)
