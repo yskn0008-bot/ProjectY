@@ -224,4 +224,9 @@ const finalText = text("保存しました
 3行日記：
 {diary}")
 
+const checkinLogNow = currentDate()
+const checkinLogStamp = formatDate(checkinLogNow, "Custom", "yyyy-MM-dd HHmmss")
+const nightCheckinLog = text("【Night Check-in】\n{finalText}")
+saveFile("YOS Display History/{checkinLogStamp} Night Check-in.txt", nightCheckinLog, false)
+
 alert(finalText, "Night Brief")
