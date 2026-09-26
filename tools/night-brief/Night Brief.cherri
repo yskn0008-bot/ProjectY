@@ -152,6 +152,12 @@ const response = askChatGPT(modelPrompt, false, "Text")
 // Normalize spacing even if the model compresses the numbered discoveries.
 const spacedResponse2 = replaceText('\\n+2\\.', "\n\n2.", response, true, true)
 const spacedResponse3 = replaceText('\\n+3\\.', "\n\n3.", spacedResponse2, true, true)
+
+const nightLogNow = currentDate()
+const nightLogStamp = formatDate(nightLogNow, "Custom", "yyyy-MM-dd HHmmss")
+const nightBriefLog = text("【Night Brief】\n{spacedResponse3}")
+saveFile("YOS Display History/{nightLogStamp} Night Brief.txt", nightBriefLog, false)
+
 showNotification("Night Brief：今日の発見をまとめました")
 alert(spacedResponse3, "Night Brief")
 
