@@ -1,0 +1,44 @@
+#define name STASH
+#define color teal
+#define glyph tray
+#define from sharesheet
+#define version 26.0
+
+#include 'actions/documents'
+#include 'actions/sharing'
+#include 'actions/text'
+
+/*
+STASH
+- Share text from any app -> store it in Shortcuts/POCKET.txt.
+- ChatGPT share links are treated specially: the share URL is ignored and the
+  clipboard is stored instead, so the user can tap Copy in ChatGPT first.
+- Run STASH normally with no input -> choose one stored item and copy it back
+  to the clipboard.
+
+No secrets or personal data are embedded in the generated Shortcut. Runtime
+content stays on-device in iCloud Drive/Shortcuts/POCKET.txt.
+*/
+
+if ShortcutInput {
+    @sharedText = getText(ShortcutInput)
+    @stashItem: text
+
+    if containsText(@sharedText, "chatgpt.com/share/") {
+        @clipboardValue = getClipboard()
+        @stashItem = getText(@clipboardValue)
+    } else {
+        @stashItem = @sharedText
+    }
+
+    @entry = "{@stashItem}\n===YOS_NEXT===\n"
+    appendToFile("POCKET.txt", @entry)
+    showNotification("保存しました", "STASH", false)
+} else {
+    @stashFile = getFile("POCKET.txt")
+    @stashText = getText(@stashFile)
+    @items = splitText(@stashText, "===YOS_NEXT===")
+    @chosen = chooseFromList(@items, "STASHから取り出す")
+    setClipboard(@chosen)
+    showNotification("クリップボードへコピーしました", "STASH", false)
+}
