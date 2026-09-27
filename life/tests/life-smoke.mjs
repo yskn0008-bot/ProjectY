@@ -200,7 +200,7 @@ try {
   assert.equal(await yosPage.locator('#brandTitle').textContent(),'MY WAY','MY WAY identity is missing');
   const yosVisual = await inspectYosDomain('home','#homePage','#taskDashboard',['今日の運転席','今日','今やる','次','予定','お金','重要なこと'],'yos-home');
   assert.ok(yosVisual.contentBottom <= yosVisual.navTop + 1, `YOS home exceeds one viewport: ${yosVisual.contentBottom}/${yosVisual.navTop}`);
-  await inspectYosDomain('money','#moneyPage','#money2Body',['お金の現在地','資金カレンダー','今月の収入','支出合計','今日から1日に使える目安','次の支払い','今の目標'],'yos-money');
+  await inspectYosDomain('money','#moneyPage','#money2Body',['Money','今使える','これからのお金','最近の取引','資金カレンダー','今の目標'],'yos-money');
   await inspectYosDomain('journey','#journeyPage','.yos-companion',['MY JOURNEY','歩いてきた景色','現在のステージ','現在の景色','最近の経験','次のテーマ'],'yos-journey');
   await inspectYosDomain('idea','#ideaPage','.yos-companion',['MY IDEA','ひらめき、拾えてる','アイデアを残す','最近のアイデアの種'],'yos-idea');
   await yosPage.locator('.archive-button').click();
