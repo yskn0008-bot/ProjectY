@@ -26,16 +26,18 @@
   const txSign=tx=>tx.type==='income'?1:-1;
 
   function defaultState(){
-    return {version:2,privacy:false,accounts:[],transactions:[],debts:[],goals:[],assets:[],rules:{monthlyEssential:0,qualityBudget:0,emergencyMonths:1,note:'生活を壊さず、安全を確保した上で高金利返済を優先する。'},updatedAt:null};
+    return {version:2,privacy:false,accounts:[],transactions:[],recurring:[],debts:[],goals:[],assets:[],rules:{monthlyEssential:0,qualityBudget:0,emergencyMonths:1,note:'生活を壊さず、安全を確保した上で高金利返済を優先する。'},updatedAt:null};
   }
   function state(){
     const saved=read(KEY,null),base=defaultState();
     if(!saved||typeof saved!=='object')return base;
-    return {...base,...saved,accounts:Array.isArray(saved.accounts)?saved.accounts:[],transactions:Array.isArray(saved.transactions)?saved.transactions:[],debts:Array.isArray(saved.debts)?saved.debts:[],goals:Array.isArray(saved.goals)?saved.goals:[],assets:Array.isArray(saved.assets)?saved.assets:[],rules:{...base.rules,...(saved.rules||{})}};
+    return {...base,...saved,accounts:Array.isArray(saved.accounts)?saved.accounts:[],transactions:Array.isArray(saved.transactions)?saved.transactions:[],recurring:Array.isArray(saved.recurring)?saved.recurring:[],debts:Array.isArray(saved.debts)?saved.debts:[],goals:Array.isArray(saved.goals)?saved.goals:[],assets:Array.isArray(saved.assets)?saved.assets:[],rules:{...base.rules,...(saved.rules||{})}};
   }
   let data=state();
   let activeTab='dashboard';
   let calendarMonth=monthKey();
+  let transactionQuery='';
+  let transactionFilter='all';
   function save(){data.updatedAt=new Date().toISOString();const saved=write(KEY,data);render();if(saved){const shared=window.YOSSharedStateV1?.refresh?.('money');void syncMoneyShadow(shared?.money)}}
 
   function randomToken(){
@@ -106,7 +108,60 @@
     const normalized=value.replace(/[¥￥円,\s]/g,'');
     return /^-?\d+(?:\.\d+)?$/.test(normalized)?Number(normalized):null;
   }
-  function monthTransactions(mk=calendarMonth){return data.transactions.filter(tx=>String(tx.date||'').slice(0,7)===mk)}
+  const CATEGORIES=[
+    ['housing','住居','⌂'],['utilities','光熱・通信','◫'],['food','食費','◉'],['daily','日用品','◇'],
+    ['transport','交通','↗'],['health','健康','＋'],['entertainment','娯楽','☆'],['debt','返済','↘'],
+    ['saving','貯蓄・投資','△'],['income','収入','＋'],['other','その他','•']
+  ];
+  const categoryInfo=id=>{const found=CATEGORIES.find(([key])=>key===id)||CATEGORIES[CATEGORIES.length-1];return {id:found[0],label:found[1],icon:found[2]}};
+  function inferredCategory(tx){
+    if(tx?.type==='income')return 'income';
+    if(tx?.type==='debt')return 'debt';
+    if(['saving','investment'].includes(tx?.type))return 'saving';
+    const label=String(tx?.label||'').toLowerCase();
+    if(/家賃|住宅|管理費/.test(label))return 'housing';
+    if(/電気|ガス|水道|通信|携帯|ネット|icloud|chatgpt|youtube|moneyforward/.test(label))return 'utilities';
+    if(/食|コンビニ|スーパー|マック|スタバ/.test(label))return 'food';
+    if(/交通|電車|バス|タクシー|ガソリン|車保険/.test(label))return 'transport';
+    if(/病院|薬|健康|診療/.test(label))return 'health';
+    return 'other';
+  }
+  const transactionCategory=tx=>categoryInfo(clean(tx?.category,30)||inferredCategory(tx));
+  const categorySelectOptions=selected=>CATEGORIES.map(([id,label])=>[id,label]);
+  const monthKeysBetween=(start,end)=>{
+    const out=[];let [y,m]=String(start).slice(0,7).split('-').map(Number);const [ey,em]=String(end).slice(0,7).split('-').map(Number);
+    while(y<ey||(y===ey&&m<=em)){out.push(`${y}-${String(m).padStart(2,'0')}`);m++;if(m===13){m=1;y++}}
+    return out;
+  };
+  function recurringForMonth(mk){
+    const [year,month]=mk.split('-').map(Number),lastDay=new Date(year,month,0).getDate();
+    return data.recurring.flatMap(rule=>{
+      if(rule?.enabled===false||clean(rule.frequency,20)!=='monthly')return [];
+      const start=clean(rule.startDate,10)||`${mk}-01`,end=clean(rule.endDate,10);
+      if(mk<start.slice(0,7)||(end&&mk>end.slice(0,7)))return [];
+      const day=Math.min(lastDay,Math.max(1,Math.round(n(rule.day)||Number(start.slice(8,10))||1)));
+      const date=`${mk}-${String(day).padStart(2,'0')}`;
+      if(date<start||(end&&date>end))return [];
+      if(data.transactions.some(tx=>tx.recurringId===rule.id&&tx.date===date))return [];
+      return [{id:`rec-${rule.id}-${date}`,recurringId:rule.id,virtualRecurring:true,date,type:rule.type,label:rule.label,amount:rule.amount,category:rule.category,status:'planned'}];
+    });
+  }
+  function monthTransactions(mk=calendarMonth){
+    const explicit=data.transactions.filter(tx=>String(tx.date||'').slice(0,7)===mk&&clean(tx.status,20)!=='deleted');
+    return [...explicit,...recurringForMonth(mk)].sort((a,b)=>String(a.date).localeCompare(String(b.date))||String(a.id||'').localeCompare(String(b.id||'')));
+  }
+  function expandedTransactions(start,end){
+    const explicit=data.transactions.filter(tx=>clean(tx.status,20)!=='deleted'&&String(tx.date||'')>=start&&String(tx.date||'')<=end);
+    const virtual=monthKeysBetween(start,end).flatMap(recurringForMonth).filter(tx=>tx.date>=start&&tx.date<=end);
+    return [...explicit,...virtual].sort((a,b)=>String(a.date).localeCompare(String(b.date))||String(a.id||'').localeCompare(String(b.id||'')));
+  }
+  function dateMonthsAhead(months){
+    const d=parseDate(isoToday())||new Date();d.setMonth(d.getMonth()+months);
+    return new Intl.DateTimeFormat('sv-SE',{timeZone:TZ}).format(d);
+  }
+  function findTransactionById(id){
+    return data.transactions.find(tx=>tx.id===id)||expandedTransactions(isoToday(),dateMonthsAhead(13)).find(tx=>tx.id===id)||null;
+  }
   function currentLiquid(){
     if(data.accounts.length)return data.accounts.reduce((sum,a)=>sum+n(a.balance),0);
     const legacy=legacyMoney();
@@ -124,7 +179,7 @@
   }
   function futurePlan(){
     const today=isoToday(),month=monthKey(),liquid=currentLiquid();
-    const futureAll=data.transactions.filter(tx=>!isComplete(tx)&&String(tx.date||'')>=today).sort((a,b)=>String(a.date).localeCompare(String(b.date))||String(a.id||'').localeCompare(String(b.id||'')));
+    const futureAll=expandedTransactions(today,dateMonthsAhead(13)).filter(tx=>!isComplete(tx)).sort((a,b)=>String(a.date).localeCompare(String(b.date))||String(a.id||'').localeCompare(String(b.id||'')));
     const future=futureAll.filter(tx=>String(tx.date||'').slice(0,7)===month);
     const nextPayment=futureAll.find(isOutgoing)||null,nextIncome=futureAll.find(tx=>tx.type==='income')||null;
     if(liquid===null)return {liquid:null,projected:null,shortfall:null,firstBreak:null,nextPayment,nextIncome,daily:null,afterNextPayment:null,shortageAfterNextPayment:null,daysToNextPayment:nextPayment?Math.max(0,daysBetween(parseDate(today),parseDate(nextPayment.date))):null};
@@ -157,8 +212,9 @@
     const host=document.getElementById('moneyPage');
     if(!host||host.dataset.moneyV2==='1')return host;
     host.dataset.moneyV2='1';
-    host.innerHTML=`<header class="money2-heading"><div class="money2-title"><span>¥</span><div><small>MY MONEY</small><h1>お金の現在地</h1><p>今日から未来まで、資金繰りを見通す。</p></div></div><button id="moneyPrivacy" class="money2-icon-btn" type="button" aria-label="金額表示を切り替える">◉</button></header><nav class="money2-tabs" aria-label="Money画面"><button data-money-tab="dashboard" class="active">今月</button><button data-money-tab="accounts">口座・支払い</button><button data-money-tab="rules">目標・ルール</button><button data-money-tab="assets">資産</button></nav><div id="money2Body"></div><button id="moneyQuickAdd" class="money2-fab" type="button" aria-label="入出金を追加">＋</button><dialog id="money2Dialog" class="money2-dialog"><form method="dialog" id="money2DialogForm"></form></dialog>`;
+    host.innerHTML=`<header class="money2-heading"><div class="money2-title"><span>¥</span><div><small>MY MONEY</small><h1>Money</h1><p>記録より先に、次の判断が見える。</p></div></div><button id="moneyPrivacy" class="money2-icon-btn" type="button" aria-label="金額表示を切り替える">◉</button></header><nav class="money2-tabs" aria-label="Money画面"><button data-money-tab="dashboard" class="active">概要</button><button data-money-tab="transactions">取引</button><button data-money-tab="rules">計画</button><button data-money-tab="assets">資産</button></nav><div id="money2Body"></div><button id="moneyQuickAdd" class="money2-fab" type="button" aria-label="入出金を追加">＋</button><dialog id="money2Dialog" class="money2-dialog"><form method="dialog" id="money2DialogForm"></form></dialog>`;
     host.addEventListener('click',handleClick);
+    host.addEventListener('input',handleInput);
     return host;
   }
   function render(){
@@ -166,11 +222,40 @@
     const body=document.getElementById('money2Body');if(!body)return;
     qa('[data-money-tab]',host).forEach(btn=>btn.classList.toggle('active',btn.dataset.moneyTab===activeTab));
     const privacy=document.getElementById('moneyPrivacy');if(privacy){privacy.textContent=data.privacy?'◌':'◉';privacy.title=data.privacy?'金額を表示':'金額を隠す'}
-    body.innerHTML=activeTab==='dashboard'?renderDashboard():activeTab==='accounts'?renderAccounts():activeTab==='rules'?renderRules():renderAssets();
+    body.innerHTML=activeTab==='dashboard'?renderDashboard():activeTab==='transactions'?renderTransactions():activeTab==='rules'?renderRules():renderAssets();
+  }
+  function transactionRow(tx){
+    const cat=transactionCategory(tx),incoming=tx.type==='income',done=isComplete(tx);
+    const action=tx.virtualRecurring?'edit-recurring':'edit-entry';
+    return `<button class="money3-transaction ${done?'done':''}" type="button" data-money-action="${action}" data-id="${escapeHtml(tx.virtualRecurring?tx.recurringId:tx.id)}"><span class="money3-cat" aria-hidden="true">${escapeHtml(cat.icon)}</span><span class="money3-tx-copy"><strong>${escapeHtml(tx.label||'名称未設定')}</strong><small>${formatMD(tx.date)} ・ ${escapeHtml(cat.label)}${tx.virtualRecurring?' ・ 定期':''}${done?' ・ 完了':''}</small></span><b class="${incoming?'income':'expense'}">${incoming?'+':'−'}${data.privacy?'••••':yen(tx.amount)}</b><i>›</i></button>`;
   }
   function renderDashboard(){
-    const s=summary(),plan=futurePlan(),status=moneyStatus(plan),debt=totalDebt(),eGoal=emergencyGoal(),goal=primaryGoal();
-    return `<section class="money2-status ${status.tone}"><div><small>${escapeHtml(status.label)}</small><strong>${escapeHtml(status.title)}</strong><p>${escapeHtml(status.text)}</p></div><button type="button" data-money-action="yos-review">YOSと見直す</button></section>${renderCalendar()}<section class="money2-metrics"><article><small>今月の収入</small><strong>${s.hasData?privacyAmount(s.income):'未設定'}</strong></article><article><small>支出合計</small><strong>${s.hasData?privacyAmount(s.outgoing):'未設定'}</strong></article><article><small>防衛資金</small><strong>${eGoal?(data.privacy?'••••':Math.round(n(eGoal.current)/Math.max(1,n(eGoal.target))*100)+'%'):'未設定'}</strong></article><article><small>借金残高</small><strong>${debt?privacyAmount(debt):'未設定'}</strong></article><article class="wide"><small>今日から1日に使える目安</small><strong>${plan.daily===null?'未算出':privacyAmount(plan.daily)}</strong><em>${plan.nextIncome?`次の入金 ${formatMD(plan.nextIncome.date)} まで`:'月末まで'}</em></article></section>${renderNextPayment(plan.nextPayment,plan.daysToNextPayment)}${renderGoal(goal)}${renderDataReadiness(plan)}<section class="money2-advice"><span>YOS</span><p>${escapeHtml(buildAdvice(plan,goal))}</p></section>`;
+    const s=summary(),plan=futurePlan(),status=moneyStatus(plan),goal=primaryGoal();
+    const upcoming=expandedTransactions(isoToday(),dateMonthsAhead(2)).filter(tx=>!isComplete(tx)).slice(0,4);
+    const recent=monthTransactions(monthKey()).filter(isComplete).sort((a,b)=>String(b.date).localeCompare(String(a.date))).slice(0,3);
+    const shortage=plan.firstBreak?yen(Math.abs(plan.firstBreak.balance)):'なし';
+    return `<section class="money3-hero ${status.tone}">
+      <div class="money3-hero-head"><div><small>今使える</small><strong>${plan.liquid===null?'未設定':privacyAmount(plan.liquid)}</strong></div><span>${escapeHtml(status.label)}</span></div>
+      <div class="money3-hero-grid"><div><small>1日目安</small><b>${plan.daily===null?'—':privacyAmount(plan.daily)}</b></div><div><small>不足見込み</small><b>${data.privacy&&plan.firstBreak?'••••':shortage}</b></div><div><small>今月収支</small><b>${s.hasData?(data.privacy?'••••':signedYen(s.income-s.outgoing)):'—'}</b></div></div>
+      <p>${escapeHtml(status.text)}</p>
+    </section>
+    <section class="money3-quick-actions"><button type="button" data-money-action="add-entry"><span>＋</span>入出金</button><button type="button" data-money-tab-jump="transactions"><span>≡</span>履歴</button><button type="button" data-money-action="add-recurring"><span>↻</span>定期</button></section>
+    <section class="money3-panel"><header><div><small>UP NEXT</small><h2>これからのお金</h2></div><button type="button" data-money-tab-jump="transactions">すべて ›</button></header><div class="money3-feed">${upcoming.length?upcoming.map(transactionRow).join(''):'<p class="money3-empty">予定はありません。</p>'}</div></section>
+    <section class="money3-panel"><header><div><small>RECENT</small><h2>最近の取引</h2></div><button type="button" data-money-tab-jump="transactions">履歴 ›</button></header><div class="money3-feed">${recent.length?recent.map(transactionRow).join(''):'<p class="money3-empty">完了した取引はまだありません。</p>'}</div></section>
+    <details class="money3-calendar-disclosure"><summary><span><small>CALENDAR</small><b>資金カレンダー</b></span><i>開く</i></summary>${renderCalendar()}</details>
+    ${renderGoal(goal)}
+    <section class="money3-advice"><span>YOS</span><p>${escapeHtml(buildAdvice(plan,goal))}</p><button type="button" data-money-action="yos-review">相談</button></section>`;
+  }
+  function renderTransactions(){
+    let list=monthTransactions(calendarMonth).sort((a,b)=>String(b.date).localeCompare(String(a.date))||String(b.id||'').localeCompare(String(a.id||'')));
+    if(transactionFilter==='income')list=list.filter(tx=>tx.type==='income');
+    if(transactionFilter==='expense')list=list.filter(tx=>tx.type!=='income');
+    if(transactionFilter==='recurring')list=list.filter(tx=>tx.virtualRecurring||tx.recurringId);
+    const qv=transactionQuery.trim().toLowerCase();
+    if(qv)list=list.filter(tx=>String(tx.label||'').toLowerCase().includes(qv)||transactionCategory(tx).label.includes(transactionQuery.trim()));
+    const [year,month]=calendarMonth.split('-').map(Number);
+    return `<section class="money3-ledger-head"><div class="money3-month-nav"><button type="button" data-money-action="prev-month">‹</button><strong>${year}年${month}月</strong><button type="button" data-money-action="next-month">›</button></div><label class="money3-search"><span>⌕</span><input data-money-search type="search" value="${escapeHtml(transactionQuery)}" placeholder="取引を検索"></label><div class="money3-filters">${[['all','すべて'],['expense','支出'],['income','収入'],['recurring','定期']].map(([id,label])=>`<button type="button" data-money-filter="${id}" class="${transactionFilter===id?'active':''}">${label}</button>`).join('')}</div></section>
+    <section class="money3-panel"><header><div><small>LEDGER</small><h2>取引履歴</h2></div><button type="button" data-money-action="add-entry">＋追加</button></header><div class="money3-feed">${list.length?list.map(transactionRow).join(''):'<p class="money3-empty">条件に合う取引はありません。</p>'}</div></section>`;
   }
   function renderCalendar(){
     const [year,month]=calendarMonth.split('-').map(Number),first=new Date(year,month-1,1),last=new Date(year,month,0),start=(first.getDay()+6)%7,today=isoToday(),txs=monthTransactions(),cells=[];
@@ -219,20 +304,29 @@
   function formatUpdated(value){const d=new Date(value);return Number.isNaN(d.getTime())?'':new Intl.DateTimeFormat('ja-JP',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit',timeZone:TZ}).format(d)}
   function renderRules(){
     const debtTotal=totalDebt();
+    const recurring=data.recurring.map(rule=>`<button class="money2-rule-row" type="button" data-money-action="edit-recurring" data-id="${escapeHtml(rule.id)}"><div><strong>${escapeHtml(rule.label)}</strong><small>毎月${Math.max(1,Math.round(n(rule.day)||1))}日 ・ ${escapeHtml(transactionCategory(rule).label)}</small></div><span>${rule.type==='income'?'+':'−'}${data.privacy?'••••':yen(rule.amount)}</span></button>`).join('');
     const goals=data.goals.map(g=>{const target=Math.max(1,n(g.target)),current=n(g.current),pct=Math.min(100,Math.round(current/target*100)),checkpoint=Math.max(0,n(g.checkpoint)),priority=clean(g.priorityLabel,10)||(n(g.priority)>=4?'高':n(g.priority)>=2?'中':'低');const details=[goalType(g.type),data.privacy?'金額非表示':`${yen(current)} / ${yen(target)}`,checkpoint?`第1チェック ${data.privacy?'非表示':yen(checkpoint)}`:'',`優先度 ${priority}`,g.deadline?`${formatMD(g.deadline)}まで`:''].filter(Boolean).join(' ・ ');return `<button class="money2-rule-row" type="button" data-money-action="edit-goal" data-id="${escapeHtml(g.id)}"><div><strong>${escapeHtml(g.name)}</strong><small>${escapeHtml(details)}</small></div><span>${pct}%</span></button>`}).join('');
     const debts=data.debts.map(d=>`<button class="money2-rule-row" type="button" data-money-action="edit-debt" data-id="${escapeHtml(d.id)}"><div><strong>${escapeHtml(d.name)}</strong><small>金利 ${n(d.apr)}% ・ 最低返済 ${data.privacy?'非表示':yen(d.minPayment)}</small></div><span>${data.privacy?'••••':yen(d.balance)}</span></button>`).join('');
-    return `<section class="money2-rule-intro"><small>MONEY RULE ENGINE</small><h2>現在地に合わせて、配分を変える。</h2><ol><li>生活と確定支払いを守る</li><li>最低限の防衛資金を作る</li><li>高金利の借金を優先返済</li><li>目標と生活の満足を両立</li><li>条件が整ったら投資へ</li></ol><button type="button" data-money-action="edit-rules">基本設定を変更</button></section><section class="money2-list-card"><header><h2>目標</h2><button type="button" data-money-action="add-goal">＋追加</button></header>${goals||'<div class="money2-empty">期限・金額・優先度を持つ目標を作れます。</div>'}</section><section class="money2-list-card"><header><h2>借金・返済</h2><span>${debtTotal?privacyAmount(debtTotal):'未設定'}</span><button type="button" data-money-action="add-debt">＋追加</button></header>${debts||'<div class="money2-empty">残高・金利・最低返済額を登録すると、高金利順に返済優先度を計算できます。</div>'}</section><section class="money2-settings-summary"><div><small>最低生活費 / 月</small><strong>${data.rules.monthlyEssential?privacyAmount(data.rules.monthlyEssential):'未設定'}</strong></div><div><small>生活の質を守る予算 / 月</small><strong>${data.rules.qualityBudget?privacyAmount(data.rules.qualityBudget):'未設定'}</strong></div><div><small>防衛資金</small><strong>${n(data.rules.emergencyMonths)}か月分</strong></div></section>`;
+    return `<section class="money3-panel"><header><div><small>AUTO</small><h2>定期収支</h2></div><button type="button" data-money-action="add-recurring">＋追加</button></header>${recurring||'<p class="money3-empty">毎月の家賃・サブスク・給与などを自動で予定に反映できます。</p>'}</section>
+    <section class="money3-panel"><header><div><small>GOALS</small><h2>目標</h2></div><button type="button" data-money-action="add-goal">＋追加</button></header>${goals||'<p class="money3-empty">防衛資金・返済・欲しいものを設定できます。</p>'}</section>
+    <section class="money3-panel"><header><div><small>DEBT</small><h2>借金・返済</h2></div><span>${debtTotal?privacyAmount(debtTotal):'未設定'}</span><button type="button" data-money-action="add-debt">＋追加</button></header>${debts||'<p class="money3-empty">残高・金利・最低返済額を登録できます。</p>'}</section>
+    <section class="money2-settings-summary"><div><small>最低生活費 / 月</small><strong>${data.rules.monthlyEssential?privacyAmount(data.rules.monthlyEssential):'未設定'}</strong></div><div><small>生活の質を守る予算 / 月</small><strong>${data.rules.qualityBudget?privacyAmount(data.rules.qualityBudget):'未設定'}</strong></div><div><small>防衛資金</small><strong>${n(data.rules.emergencyMonths)}か月分</strong></div><button type="button" data-money-action="edit-rules">基本設定を変更</button></section>`;
   }
   const goalType=type=>({emergency:'生活防衛資金',purchase:'欲しいもの',saving:'貯金',investment:'投資',debt:'返済目標'}[type]||'目標');
   function renderAssets(){
-    const debt=totalDebt(),liquid=currentLiquid()??0,assets=data.assets.reduce((s,a)=>s+n(a.value),0),net=netWorth();
-    return `<section class="money2-networth"><small>純資産</small><strong>${data.privacy?'••••••':signedYen(net)}</strong><p>現金・預金＋資産−借金</p></section><section class="money2-asset-grid"><article><small>現金・預金</small><strong>${data.privacy?'••••':yen(liquid)}</strong></article><article><small>投資・その他資産</small><strong>${data.privacy?'••••':yen(assets)}</strong></article><article><small>借金・負債</small><strong>${data.privacy?'••••':yen(debt)}</strong></article></section><section class="money2-list-card"><header><h2>資産</h2><button type="button" data-money-action="add-asset">＋追加</button></header>${data.assets.length?data.assets.map(a=>`<button class="money2-rule-row" type="button" data-money-action="edit-asset" data-id="${escapeHtml(a.id)}"><div><strong>${escapeHtml(a.name)}</strong><small>${assetType(a.type)}</small></div><span>${data.privacy?'••••':yen(a.value)}</span></button>`).join(''):'<div class="money2-empty"><strong>将来の資産管理枠を準備済み。</strong><br>投資・その他資産を追加すると純資産に反映されます。</div>'}</section><section class="money2-future"><span>FUTURE</span><div><strong>資産連携</strong><p>銀行・証券・電子マネーの自動連携を後から追加できる構造にしています。</p></div></section>`;
+    const debt=totalDebt(),liquid=currentLiquid()??0,assets=data.assets.reduce((sum,a)=>sum+n(a.value),0),net=netWorth();
+    const accounts=data.accounts.length?data.accounts.map(a=>`<button class="money2-account" type="button" data-money-action="edit-account" data-id="${escapeHtml(a.id)}"><span>${accountIcon(a.type)}</span><div><strong>${escapeHtml(a.name)}</strong><small>${accountType(a.type)}${a.updatedAt?` ・ ${formatUpdated(a.updatedAt)}`:''}</small></div><b>${privacyAmount(a.balance)}</b></button>`).join(''):'<p class="money3-empty">口座・現金・電子マネーを登録できます。</p>';
+    return `<section class="money3-networth"><div><small>純資産</small><strong>${data.privacy?'••••••':signedYen(net)}</strong><p>現金・預金＋資産−借金</p></div><div class="money3-networth-mini"><span><small>現金等</small><b>${data.privacy?'••••':yen(liquid)}</b></span><span><small>資産</small><b>${data.privacy?'••••':yen(assets)}</b></span><span><small>負債</small><b>${data.privacy?'••••':yen(debt)}</b></span></div></section>
+    <section class="money3-panel"><header><div><small>ACCOUNTS</small><h2>口座・現金</h2></div><button type="button" data-money-action="refresh-balances">残高更新</button><button type="button" data-money-action="add-account">＋追加</button></header>${accounts}</section>
+    <section class="money3-panel"><header><div><small>ASSETS</small><h2>投資・その他資産</h2></div><button type="button" data-money-action="add-asset">＋追加</button></header>${data.assets.length?data.assets.map(a=>`<button class="money2-rule-row" type="button" data-money-action="edit-asset" data-id="${escapeHtml(a.id)}"><div><strong>${escapeHtml(a.name)}</strong><small>${assetType(a.type)}</small></div><span>${data.privacy?'••••':yen(a.value)}</span></button>`).join(''):'<p class="money3-empty">投資・その他資産を追加すると純資産に反映されます。</p>'}</section>`;
   }
   const assetType=type=>({investment:'投資',other:'その他資産'}[type]||'資産');
 
   function handleClick(event){
     const btn=event.target.closest('button');if(!btn)return;
     if(btn.dataset.moneyTab){activeTab=btn.dataset.moneyTab;render();return}
+    if(btn.dataset.moneyTabJump){activeTab=btn.dataset.moneyTabJump;render();return}
+    if(btn.dataset.moneyFilter){transactionFilter=btn.dataset.moneyFilter;render();return}
     const action=btn.dataset.moneyAction;
     if(btn.id==='moneyPrivacy'){data.privacy=!data.privacy;save();return}
     if(btn.id==='moneyQuickAdd'){openEntryDialog(isoToday());return}
@@ -240,10 +334,13 @@
     if(!action)return;
     if(action==='prev-month'||action==='next-month'){const [y,m]=calendarMonth.split('-').map(Number),d=new Date(y,m-1+(action==='next-month'?1:-1),1);calendarMonth=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;render();return}
     if(action==='add-entry')openEntryDialog(isoToday());
+    if(action==='edit-entry')openEntryDialog(isoToday(),data.transactions.find(x=>x.id===btn.dataset.id));
+    if(action==='add-recurring')openRecurringDialog();
+    if(action==='edit-recurring')openRecurringDialog(data.recurring.find(x=>x.id===btn.dataset.id));
     if(action==='add-account')openAccountDialog();
     if(action==='edit-account')openAccountDialog(data.accounts.find(x=>x.id===btn.dataset.id));
     if(action==='refresh-balances')openBalanceDialog();
-    if(action==='payment')openPaymentDialog(data.transactions.find(x=>x.id===btn.dataset.id));
+    if(action==='payment')openPaymentDialog(findTransactionById(btn.dataset.id));
     if(action==='add-goal')openGoalDialog();
     if(action==='edit-goal')openGoalDialog(data.goals.find(x=>x.id===btn.dataset.id));
     if(action==='add-debt')openDebtDialog();
@@ -253,6 +350,9 @@
     if(action==='edit-asset')openAssetDialog(data.assets.find(x=>x.id===btn.dataset.id));
     if(action==='verify-data')openDataVerification();
     if(action==='yos-review')openYosReview();
+  }
+  function handleInput(event){
+    if(event.target?.matches?.('[data-money-search]')){transactionQuery=event.target.value;render()}
   }
   const dialog=()=>document.getElementById('money2Dialog');
   const form=()=>document.getElementById('money2DialogForm');
@@ -265,9 +365,21 @@
   const field=(label,name,type='text',value='',attrs='')=>`<label><span>${escapeHtml(label)}</span><input name="${name}" type="${type}" value="${escapeHtml(value)}" ${attrs}></label>`;
   const selectField=(label,name,options,value)=>`<label><span>${escapeHtml(label)}</span><select name="${name}">${options.map(([v,t])=>`<option value="${v}" ${v===value?'selected':''}>${escapeHtml(t)}</option>`).join('')}</select></label>`;
 
+  function addDeleteButton(kind,onDelete){
+    const f=form(),footer=f?.querySelector('footer');if(!footer)return;
+    const button=document.createElement('button');button.type='button';button.className='danger';button.textContent='削除';
+    button.addEventListener('click',()=>{if(confirm(`${kind}を削除しますか？`))onDelete()});
+    footer.prepend(button);
+  }
   function openEntryDialog(date,tx){
-    const editing=!!tx,target=tx||{date,type:'expense',label:'',amount:'',status:'planned'};
-    openDialog(editing?'入出金を編集':'入出金を追加',`${field('日付','date','date',target.date||date,'required')}${selectField('種類','type',[['income','収入'],['expense','支出'],['debt','借金返済'],['saving','貯金・積立'],['investment','投資']],target.type)}${field('内容','label','text',target.label,'placeholder="例：家賃 / 給料" required')}${field('金額','amount','number',target.amount,'min="0" inputmode="numeric" required')}${selectField('状態','status',[['planned','予定'],['done','完了・支払済み']],target.status||'planned')}`,fd=>{const item={id:target.id||uid('tx'),date:clean(fd.get('date'),10),type:clean(fd.get('type'),20),label:clean(fd.get('label'),60),amount:Math.max(0,n(fd.get('amount'))),status:clean(fd.get('status'),20)||'planned'};data.transactions=editing?data.transactions.map(x=>x.id===item.id?item:x):[...data.transactions,item];dialog().close();save()});
+    const editing=!!tx,target=tx||{date,type:'expense',label:'',amount:'',category:'other',status:'planned'};
+    openDialog(editing?'取引を編集':'入出金を追加',`${field('日付','date','date',target.date||date,'required')}${selectField('種類','type',[['income','収入'],['expense','支出'],['debt','借金返済'],['saving','貯金・積立'],['investment','投資']],target.type)}${selectField('カテゴリー','category',categorySelectOptions(target.category),transactionCategory(target).id)}${field('内容','label','text',target.label,'placeholder="例：家賃 / 給料" required')}${field('金額','amount','number',target.amount,'min="0" inputmode="numeric" required')}${selectField('状態','status',[['planned','予定'],['done','完了・支払済み']],isComplete(target)?'done':'planned')}`,fd=>{const item={...target,id:target.id||uid('tx'),date:clean(fd.get('date'),10),type:clean(fd.get('type'),20),category:clean(fd.get('category'),30),label:clean(fd.get('label'),60),amount:Math.max(0,n(fd.get('amount'))),status:clean(fd.get('status'),20)||'planned'};delete item.virtualRecurring;data.transactions=editing?data.transactions.map(x=>x.id===item.id?item:x):[...data.transactions,item];dialog().close();save()});
+    if(editing)addDeleteButton('この取引',()=>{data.transactions=data.transactions.filter(x=>x.id!==target.id);dialog().close();save()});
+  }
+  function openRecurringDialog(rule){
+    const editing=!!rule,target=rule||{frequency:'monthly',startDate:isoToday(),day:Number(isoToday().slice(8,10)),type:'expense',category:'other',label:'',amount:'',enabled:true};
+    openDialog(editing?'定期収支を編集':'定期収支を追加',`${selectField('種類','type',[['income','収入'],['expense','支出'],['debt','借金返済'],['saving','貯金・積立'],['investment','投資']],target.type)}${selectField('カテゴリー','category',categorySelectOptions(target.category),transactionCategory(target).id)}${field('内容','label','text',target.label,'placeholder="例：家賃 / 給料 / サブスク" required')}${field('金額','amount','number',target.amount,'min="0" inputmode="numeric" required')}${field('毎月の日','day','number',target.day,'min="1" max="31" inputmode="numeric" required')}${field('開始日','startDate','date',target.startDate||isoToday(),'required')}${field('終了日（任意）','endDate','date',target.endDate||'')}`,fd=>{const item={...target,id:target.id||uid('rec'),frequency:'monthly',type:clean(fd.get('type'),20),category:clean(fd.get('category'),30),label:clean(fd.get('label'),60),amount:Math.max(0,n(fd.get('amount'))),day:Math.min(31,Math.max(1,Math.round(n(fd.get('day')))||1)),startDate:clean(fd.get('startDate'),10),endDate:clean(fd.get('endDate'),10),enabled:true};data.recurring=editing?data.recurring.map(x=>x.id===item.id?item:x):[...data.recurring,item];dialog().close();save()});
+    if(editing)addDeleteButton('この定期収支',()=>{data.recurring=data.recurring.filter(x=>x.id!==target.id);dialog().close();save()});
   }
   function openAccountDialog(account){
     const editing=!!account,target=account||{type:'bank',name:'',balance:''};
@@ -279,7 +391,7 @@
   }
   function openPaymentDialog(tx){
     if(!tx)return;
-    openDialog('支払い',`<div class="money2-payment-confirm"><small>${formatMD(tx.date)}</small><strong>${escapeHtml(tx.label)}</strong><b>${data.privacy?'金額非表示':yen(tx.amount)}</b><p>MY WAYから実際の銀行振込はまだ行いません。銀行・決済アプリで支払った後に「支払済み」にしてください。</p></div>`,()=>{if(!isComplete(tx))data.transactions=data.transactions.map(x=>x.id===tx.id?{...x,status:'done'}:x);dialog().close();save()},tx.status==='done'?'閉じる':'支払済みにする');
+    openDialog('支払い',`<div class="money2-payment-confirm"><small>${formatMD(tx.date)}</small><strong>${escapeHtml(tx.label)}</strong><b>${data.privacy?'金額非表示':yen(tx.amount)}</b><p>MY WAYから実際の銀行振込はまだ行いません。銀行・決済アプリで支払った後に「支払済み」にしてください。</p></div>`,()=>{if(!isComplete(tx)){if(tx.virtualRecurring){const concrete={...tx,id:uid('tx'),status:'done'};delete concrete.virtualRecurring;data.transactions=[...data.transactions,concrete]}else data.transactions=data.transactions.map(x=>x.id===tx.id?{...x,status:'done'}:x)}dialog().close();save()},isComplete(tx)?'閉じる':'支払済みにする');
   }
   function openGoalDialog(goal){
     const editing=!!goal,target=goal||{name:'',type:'saving',target:'',current:'',checkpoint:'',purpose:'',deadline:'',priority:1};
