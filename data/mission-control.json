@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-28T07:12:17+09:00",
+  "updated_at": "2026-09-28T07:15:28+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -165,6 +165,20 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-c4b6d244b278",
+      "title": "chore: refresh Money dashboard runtime",
+      "completed_at": "2026-09-27T22:15:14Z",
+      "result": "GitHub mainへ反映（c4b6d24）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/c4b6d244b278ea3973816998f2f40cbc3cd4d135"
+    },
+    {
+      "id": "github-commit-9656406a2a30",
+      "title": "fix: remove duplicate Money home calendar",
+      "completed_at": "2026-09-27T22:15:09Z",
+      "result": "GitHub mainへ反映（9656406）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/9656406a2a3006c512c93916a1229b920ee334b3"
+    },
+    {
       "id": "github-commit-c1c273687b2e",
       "title": "chore: refresh Money runtime asset",
       "completed_at": "2026-09-27T22:12:01Z",
@@ -184,20 +198,6 @@
       "completed_at": "2026-09-27T22:09:01Z",
       "result": "GitHub mainへ反映（a6f4115）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/a6f41155978e0c8412f75276ba0b55e894fe3a1c"
-    },
-    {
-      "id": "github-commit-e77771af8829",
-      "title": "fix(clarity-next): preserve calendar reminder titles",
-      "completed_at": "2026-09-27T22:08:59Z",
-      "result": "GitHub mainへ反映（e77771a）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/e77771af8829fb34a800cc70544ef1c0f69fbf03"
-    },
-    {
-      "id": "github-commit-1a053210095c",
-      "title": "MY MONEY: dark navy × gold iPhone UI",
-      "completed_at": "2026-09-27T21:58:25Z",
-      "result": "GitHub mainへ反映（1a05321）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/1a053210095c8a9134831486af1e82e8b6f1668b"
     },
     {
       "id": "complete-002",
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-28T07:12:17+09:00",
+      "last_update": "2026-09-28T07:15:28+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -315,7 +315,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-28T07:12:17+09:00",
+      "last_update": "2026-09-28T07:15:28+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-28T07:12:17+09:00",
+      "last_update": "2026-09-28T07:15:28+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "0a6721704e6bb4e004a34fc25daafc8821ac68725e4c837388c546dc8a037be2"
+  "github_snapshot_hash": "72c2a316768ec31e2e2600bcddcc32e807c9463647d2670903adcf4f783f4abd"
 }
