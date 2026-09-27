@@ -409,3 +409,33 @@ body[data-domain="money"] #money2DialogForm button.danger{color:var(--money5-red
   .money5-feature-grid{gap:4px}.money5-feature-grid button b{font-size:8px}
   .money5-subnav button b{font-size:7px}
 }
+
+
+/* Glanceable Money Home v6 */
+.money5-overview{
+  padding:18px 16px 14px;border:1px solid rgba(77,163,255,.26);border-radius:24px;
+  background:linear-gradient(145deg,rgba(14,29,58,.98),rgba(8,19,42,.98));
+  box-shadow:0 18px 46px rgba(0,0,0,.28);
+}
+.money5-overview-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.money5-overview-top small{display:block;margin-bottom:5px;color:var(--money5-sub);font-size:11px;font-weight:700}
+.money5-overview-top strong{display:block;font-size:42px;line-height:1;font-weight:850;letter-spacing:-.045em;font-variant-numeric:tabular-nums}
+.money5-overview-top>span{padding:6px 8px;border-radius:999px;font-size:9px;font-weight:800;white-space:nowrap}
+.money5-overview-top>span.danger{color:var(--money5-red);background:rgba(255,110,110,.1)}
+.money5-overview-top>span.safe{color:var(--money5-green);background:rgba(110,231,167,.1)}
+.money5-overview-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:16px}
+.money5-overview-metrics>div{padding:9px 7px;border-radius:12px;background:rgba(5,10,23,.42);border:1px solid rgba(77,163,255,.1)}
+.money5-overview-metrics small{display:block;color:var(--money5-sub);font-size:8px;white-space:nowrap}
+.money5-overview-metrics b{display:block;margin-top:4px;font-size:12px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.money5-overview-metrics .danger b{color:var(--money5-red)}.money5-overview-metrics .income b{color:var(--money5-green)}
+.money5-overview-flow{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:7px;margin-top:10px;padding:10px;border-radius:14px;background:rgba(5,10,23,.42)}
+.money5-overview-flow>span{color:var(--money5-gold);font-size:15px}
+.money5-overview-flow div{display:grid;gap:3px}
+.money5-overview-flow small{color:var(--money5-sub);font-size:8px}
+.money5-overview-flow b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px;color:var(--money5-text)}
+.money5-overview-flow strong{font-size:12px;font-variant-numeric:tabular-nums}
+.money5-overview-flow .payment strong{color:var(--money5-red)}.money5-overview-flow .income strong{color:var(--money5-green)}
+.money5-assets-link{width:100%;margin-top:10px;padding:7px 0 0;border:0;border-top:1px solid rgba(77,163,255,.1);background:none;color:var(--money5-blue);font-size:10px;text-align:right}
+.money5-glance-advice{display:grid;grid-template-columns:auto 1fr;align-items:start;gap:10px;padding:12px 13px;border:1px solid rgba(215,169,75,.16);border-radius:16px;background:rgba(8,18,39,.68)}
+.money5-glance-advice small{color:var(--money5-gold);font-size:9px;font-weight:800}
+.money5-glance-advice p{margin:3px 0 0;color:var(--money5-text);font-size:10px;line-height:1.45}
