@@ -51,8 +51,9 @@ try{
   await expectText('.money-decision-payment','次の支払い');
   await expectText('.money-decision-payment','9/26');
   await expectText('.money-decision-payment','車保険 7,060円');
-  await expectText('#taskDashboardBody','不足見込み');
-  await expectText('#taskDashboardBody','月末まで 89,952円不足');
+  await expectText('.money-decision-warning','不足見込み');
+  await expectText('.money-decision-warning','月末まで');
+  await expectText('.money-decision-warning','89,952円不足');
   await expectText('.money-decision-income','次の入金');
   await expectText('.money-decision-income','10/13');
   await expectText('.money-decision-income','家賃収入 約160,485円');
