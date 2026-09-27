@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-28T06:58:11+09:00",
+  "updated_at": "2026-09-28T06:58:37+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -12,6 +12,16 @@
     ]
   },
   "inbox": [
+    {
+      "id": "github-pr-479",
+      "title": "PR #479 YOS DESK: 進捗の自動同期",
+      "type": "GitHub PR",
+      "status": "review",
+      "priority": 1,
+      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/479",
+      "updated_at": "2026-09-24T05:27:11Z"
+    },
     {
       "id": "github-pr-488",
       "title": "PR #488 Add YOS Verify for screenshot-free functional checks",
@@ -51,16 +61,6 @@
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/510",
       "updated_at": "2026-09-27T19:53:06Z"
-    },
-    {
-      "id": "github-pr-516",
-      "title": "PR #516 MY MONEY: dark navy × gold iPhone UI",
-      "type": "GitHub PR",
-      "status": "review",
-      "priority": 1,
-      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/516",
-      "updated_at": "2026-09-27T21:55:52Z"
     },
     {
       "id": "github-issue-232",
@@ -165,39 +165,39 @@
   ],
   "recently_completed": [
     {
-      "id": "github-commit-5cda4e169f67",
-      "title": "Clarity Next: remove technical IDs from visible entries",
-      "completed_at": "2026-09-27T21:34:15Z",
-      "result": "GitHub mainへ反映（5cda4e1）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/5cda4e169f674934b1928d6157801799bd3e598a"
+      "id": "github-commit-1a053210095c",
+      "title": "MY MONEY: dark navy × gold iPhone UI",
+      "completed_at": "2026-09-27T21:58:25Z",
+      "result": "GitHub mainへ反映（1a05321）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/1a053210095c8a9134831486af1e82e8b6f1668b"
     },
     {
-      "id": "github-commit-7652af732349",
-      "title": "Clarity Next: fix calendar reminder iPhone wire format",
-      "completed_at": "2026-09-27T21:12:31Z",
-      "result": "GitHub mainへ反映（7652af7）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/7652af732349e5dff23b407b985b93fed779a863"
+      "id": "github-commit-e21e75b67b9e",
+      "title": "test(life): ignore WebKit cross-origin shadow fetch noise",
+      "completed_at": "2026-09-27T21:55:50Z",
+      "result": "GitHub mainへ反映（e21e75b）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/e21e75b67b9e6c53a1afb53b1bb26041a1cf7176"
     },
     {
-      "id": "github-commit-7607ca94edaa",
-      "title": "Clarity Next: normalize calendar and reminder dates",
-      "completed_at": "2026-09-27T20:59:48Z",
-      "result": "GitHub mainへ反映（7607ca9）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/7607ca94edaa794ec4940f5486852438e0f06125"
+      "id": "github-commit-e6d09e4a792c",
+      "title": "test(life): keep navigation check in Playwright context",
+      "completed_at": "2026-09-27T21:53:35Z",
+      "result": "GitHub mainへ反映（e6d09e4）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/e6d09e4a792c7f4fa45c6537e907ce749044bc23"
     },
     {
-      "id": "github-commit-f0213f381a9b",
-      "title": "Clarity Next: normalize router field swaps",
-      "completed_at": "2026-09-27T20:32:52Z",
-      "result": "GitHub mainへ反映（f0213f3）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/f0213f381a9bb8d0b1dd248d995698674da202ec"
+      "id": "github-commit-de6f4509422a",
+      "title": "test(life): support Money-specific global navigation",
+      "completed_at": "2026-09-27T21:53:25Z",
+      "result": "GitHub mainへ反映（de6f450）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/de6f4509422a386d8048086e2fe1553e41464e70"
     },
     {
-      "id": "github-commit-ae347756512b",
-      "title": "Clarity Next: fix iPhone ledger persistence",
-      "completed_at": "2026-09-27T20:15:57Z",
-      "result": "GitHub mainへ反映（ae34775）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/ae347756512b3fb6491198262325967517b70ec8"
+      "id": "github-commit-a1c20f25b45e",
+      "title": "test(life): pass domain into geometry inspection",
+      "completed_at": "2026-09-27T21:51:53Z",
+      "result": "GitHub mainへ反映（a1c20f2）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/a1c20f25b45ea0e4c1ca57437e6855e40cbc934b"
     },
     {
       "id": "complete-002",
@@ -224,7 +224,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #516をレビューして公開判断する",
+      "next_action": "PR #510をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-28T06:58:11+09:00",
+      "last_update": "2026-09-28T06:58:37+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -315,7 +315,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-28T06:58:11+09:00",
+      "last_update": "2026-09-28T06:58:37+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -329,7 +329,7 @@
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #516をレビューして公開判断する",
+      "next_action": "PR #510をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-28T06:58:11+09:00",
+      "last_update": "2026-09-28T06:58:37+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "fc3dc461182e4686d2a2a558fa23934941401079c018e9f7561e9910377e998b"
+  "github_snapshot_hash": "c49a2c1971a865d1889e0ef60c052b7473813ad1b0f161a5b6164c82b8863c8b"
 }
