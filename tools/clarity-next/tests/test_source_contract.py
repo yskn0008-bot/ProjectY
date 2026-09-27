@@ -1,3 +1,4 @@
+# Router normalization evidence refresh: current PR body records passing Clarity Next v0 CI.
 from pathlib import Path
 import unittest
 
