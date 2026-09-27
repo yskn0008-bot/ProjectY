@@ -64,7 +64,7 @@ body[data-domain="money"] textarea{font:inherit}
   backdrop-filter:blur(20px);
   -webkit-backdrop-filter:blur(20px);
 }
-.money5-brand{display:flex;align-items:center;gap:10px}
+.money5-brand{display:flex;align-items:center;gap:10px;padding:0;border:0;background:none;color:inherit;text-align:left}
 .money5-brand-mark{
   display:grid;
   place-items:center;
@@ -74,7 +74,7 @@ body[data-domain="money"] textarea{font:inherit}
   background:linear-gradient(145deg,#F0D58C,var(--money5-gold));
   box-shadow:0 0 24px rgba(215,169,75,.16);
 }
-.money5-brand div{display:grid;gap:1px}
+.money5-brand>span:last-child{display:grid;gap:1px}
 .money5-brand strong{font-size:17px;letter-spacing:.11em;line-height:1.05;color:var(--money5-text)}
 .money5-brand small{font-size:10px;letter-spacing:.16em;color:var(--money5-gold)}
 .money5-header-actions{display:flex;gap:8px}
@@ -295,7 +295,7 @@ body[data-domain="money"] textarea{font:inherit}
 }
 .money5-page-title small{color:var(--money5-gold);font-size:9px;letter-spacing:.13em;font-weight:850}
 .money5-page-title h1{margin:2px 0 0;color:var(--money5-text);font-size:25px;line-height:1.05;letter-spacing:-.02em}
-.money5-page-title p{margin:5px 0 0;color:var(--money5-sub);font-size:9px}
+.money5-page-title p{margin:5px 0 0;color:var(--money5-sub);font-size:9px}\n.money5-page-title>button{flex:0 0 auto;padding:7px 9px;border:1px solid var(--money5-line);border-radius:10px;background:rgba(10,22,48,.7);color:var(--money5-blue);font-size:9px;font-weight:750}
 .money3-ledger-head{padding:14px!important}
 .money3-month-nav{display:flex!important;align-items:center!important;justify-content:center!important;gap:10px!important}
 .money3-month-nav button{width:29px;height:29px;padding:0!important;border:1px solid var(--money5-line)!important;border-radius:9px!important;color:var(--money5-sub)!important;background:rgba(5,10,23,.38)!important}
