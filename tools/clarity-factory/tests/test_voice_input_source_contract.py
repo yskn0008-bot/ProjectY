@@ -17,5 +17,19 @@ class VoiceInputSourceContractTests(unittest.TestCase):
         self.assertNotIn("{ShortcutInput}", self.source)
         self.assertNotIn("@resolvedInput", self.source)
 
+    def test_voice_core_has_dictionary_answer_format(self):
+        for required in (
+            "pure knowledge questions about the meaning, reading, nuance, or usage of a word or short phrase",
+            "executor=answer, domain=knowledge, intent=answer",
+            "ひとことで：",
+            "意味：",
+            "ニュアンス：",
+            "使い方：",
+            "例：",
+            "似た言葉との差：",
+            "Do not add filler and do not force every optional section",
+        ):
+            self.assertIn(required, self.source)
+
 if __name__ == "__main__":
     unittest.main()
