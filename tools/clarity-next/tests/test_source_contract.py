@@ -1,3 +1,4 @@
+# User-facing display evidence refresh: current PR body records passing Clarity Next v0 CI.
 # Calendar wire-format evidence refresh: current PR body records passing Clarity Next v0 CI.
 # Date normalization evidence refresh: current PR body records passing Clarity Next v0 CI.
 # Router normalization evidence refresh: current PR body records passing Clarity Next v0 CI.
