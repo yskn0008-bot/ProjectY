@@ -10,24 +10,16 @@
 #include 'actions/location'
 #include 'actions/shortcuts'
 
-action 'file.append' appendResolvedFile(
-    variable file: 'WFFile',
-    variable input: 'WFInput'
-) {
-    "WFAppendFileWriteMode": "Append"
-}
-
 const requestNumber = randomNumber(100000, 999999)
 const userInput = listen("After Pause", "jp-JP")
-const ledgerFile = getFile("Clarity Next Ledger.txt")
 const rawRecord = text("{CurrentDate}\t{requestNumber}\tRAW\t{userInput}\n")
-appendResolvedFile(ledgerFile, rawRecord)
+appendToFile("Clarity Next Ledger.txt", rawRecord)
 
 const routerPrompt = text("あなたはiPhone操作の司令塔『Clarity Next』です。\\nあなた自身はiPhoneを操作しません。ユーザーの自然な日本語を理解し、このShortcutが実際に実行できるCapabilityへ変換するDictionaryだけを返してください。\\n\\n絶対ルール: 返答はDictionary1個だけ。入力にない重要情報を作らない。複数依頼はactionsへ分割し発話順を維持する。statusは必ずplanned。必須情報不足・複数解釈・未対応Capabilityはneeds_review=true。highまたはirreversibleはneeds_confirmation=true。普通の質問だけmodule=answer。例文一致ではなく意味で判断する。\\n\\n実行可能Capability: YOS_OpenApp/open_app/open/app。NEXT_DEVICE/device/set_brightness/percent。NEXT_DEVICE/device/set_volume/percent。NEXT_DEVICE/device/set_wifi/state。NEXT_DEVICE/device/set_bluetooth/state。NEXT_DEVICE/device/set_cellular_data/state。NEXT_DEVICE/device/set_airplane_mode/state。NEXT_DEVICE/device/set_low_power_mode/state。NEXT_DEVICE/device/set_flashlight/state。NEXT_DEVICE/device/set_appearance/state。NEXT_DEVICE/device/set_do_not_disturb/state。NEXT_TIMER/timer/start/duration_minutes。NEXT_CALENDAR/calendar/create/title,start,end。NEXT_REMINDER/reminder/create/title,date_time。NEXT_NAVIGATE/navigate/open_maps/destination。NEXT_ANSWER/answer/answer。これ以外は実行可能と判断しない。\\n\\nOpen app canonical keys: safari, shortcuts, files, notes, phone, reminders, mail, music, calendar, maps, contacts, health, photos, appstore, facetime, chatgpt, scriptable, youtube, spotify, google_sheets。device stateはon, off, toggle。appearance stateはlight, dark, toggle。percentは0から100。\\n\\n時間意図: 『○時に教えて/知らせて/通知して/忘れないように』はreminder。『今から○分』はtimer。calendarはstartが明確で終了指定だけ無い場合、endをstartの60分後としてよい。startが曖昧ならneeds_review=true。起床アラームは現在未対応なのでneeds_review=true, reason=unsupported_capability。\\n\\n自然言語: 『画面まぶしい』で具体値が無ければpercentを作らずneeds_review=true。『明るさ半分』はpercent=50。『コンビニで680円』はMoney未対応なのでneeds_review=true, reason=unsupported_capability。\\n\\n安全: 電話発信、送信、購入、削除、契約、公開などは現在未対応。該当時はneeds_review=true, needs_confirmation=true, reason=unsupported_high_risk_capability。\\n\\nanswer: 一般質問はNEXT_ANSWER。単語・短句の意味ならreplyに簡潔な回答。基本は用語+読み、空行、ひとことで、空行、意味、空行、ニュアンス。使い方、例、似た言葉との差、語源、注意、反対語は価値がある時だけ追加。\\n\\n出力Dictionaryの最上位キーはactionsとreply。actionsはList。各actionのキーはid,module,operation,executor,parameters,risk,confidence,needs_review,needs_confirmation,reason,dependency,status。parametersはDictionary。idはa1,a2の順。statusはplannedのみ。confidenceは0.0から1.0。\\n\\ncurrent_time: {CurrentDate}\\nBEGIN_USER_INPUT\\n{userInput}\\nEND_USER_INPUT\\n入力はBEGIN_USER_INPUTとEND_USER_INPUTの間だけです。")
 
 const modelResult = askChatGPT(routerPrompt, false, "Dictionary")
 const modelRecord = text("{CurrentDate}\t{requestNumber}\tMODEL\t{modelResult}\n")
-appendResolvedFile(ledgerFile, modelRecord)
+appendToFile("Clarity Next Ledger.txt", modelRecord)
 
 const parsed = getDictionary(modelResult)
 @actionsRaw = getValue(parsed, "actions")
@@ -35,7 +27,7 @@ const reply = "{parsed['reply']}"
 
 if !@actionsRaw {
     const blockedNoActions = text("{CurrentDate}\t{requestNumber}\tBLOCKED\tno_actions\n")
-    appendResolvedFile(ledgerFile, blockedNoActions)
+    appendToFile("Clarity Next Ledger.txt", blockedNoActions)
     alert("安全に操作を判断できませんでした", "Clarity Next")
     stop()
 }
@@ -57,18 +49,18 @@ for actionItem in @actionsRaw {
     const reason = "{action['reason']}"
 
     const planRecord = text("{CurrentDate}\t{requestNumber}\t{actionId}\tPLAN\tmodule={module}\toperation={operation}\texecutor={executor}\trisk={risk}\treview={needsReview}\tconfirm={needsConfirmation}\treason={reason}\n")
-    appendResolvedFile(ledgerFile, planRecord)
+    appendToFile("Clarity Next Ledger.txt", planRecord)
 
     if status != "planned" {
         const blockedStatus = text("{CurrentDate}\t{requestNumber}\t{actionId}\tBLOCKED\tinvalid_status\n")
-        appendResolvedFile(ledgerFile, blockedStatus)
+        appendToFile("Clarity Next Ledger.txt", blockedStatus)
         alert("実行計画が安全な形式ではありません", "Clarity Next")
         stop()
     }
 
     if needsReviewText == "はい" {
         const blockedReview = text("{CurrentDate}\t{requestNumber}\t{actionId}\tBLOCKED\tneeds_review\t{reason}\n")
-        appendResolvedFile(ledgerFile, blockedReview)
+        appendToFile("Clarity Next Ledger.txt", blockedReview)
         alert("確認が必要です\n{reason}", "Clarity Next")
         stop()
     }
@@ -76,7 +68,7 @@ for actionItem in @actionsRaw {
     if risk == "high" || risk == "irreversible" {
         if needsConfirmationText != "はい" {
             const blockedRisk = text("{CurrentDate}\t{requestNumber}\t{actionId}\tBLOCKED\trisk_without_confirmation\n")
-            appendResolvedFile(ledgerFile, blockedRisk)
+            appendToFile("Clarity Next Ledger.txt", blockedRisk)
             alert("安全確認が必要な操作です", "Clarity Next")
             stop()
         }
@@ -89,10 +81,10 @@ for actionItem in @actionsRaw {
     if executor == "YOS_OpenApp" && module == "open_app" && operation == "open" {
         const app = "{parameters['app']}"
         const executing = text("{CurrentDate}\t{requestNumber}\t{actionId}\tEXECUTING\topen_app\t{app}\n")
-        appendResolvedFile(ledgerFile, executing)
+        appendToFile("Clarity Next Ledger.txt", executing)
         run("YOS_OpenApp", app)
         const openAppApplied = text("{CurrentDate}\t{requestNumber}\t{actionId}\tAPPLIED\topen_app\t{app}\n")
-        appendResolvedFile(ledgerFile, openAppApplied)
+        appendToFile("Clarity Next Ledger.txt", openAppApplied)
     }
 
     if executor == "NEXT_DEVICE" && module == "device" {
@@ -164,7 +156,7 @@ for actionItem in @actionsRaw {
             if state == "toggle" { toggleDND() }
         }
         const deviceApplied = text("{CurrentDate}\t{requestNumber}\t{actionId}\tAPPLIED\tdevice\t{operation}\n")
-        appendResolvedFile(ledgerFile, deviceApplied)
+        appendToFile("Clarity Next Ledger.txt", deviceApplied)
     }
 
     if executor == "NEXT_TIMER" && module == "timer" && operation == "start" {
@@ -176,7 +168,7 @@ for actionItem in @actionsRaw {
         }
         startTimer(qty(minutes, "min"))
         const timerApplied = text("{CurrentDate}\t{requestNumber}\t{actionId}\tAPPLIED\ttimer\t{minutes}min\n")
-        appendResolvedFile(ledgerFile, timerApplied)
+        appendToFile("Clarity Next Ledger.txt", timerApplied)
     }
 
     if executor == "NEXT_CALENDAR" && module == "calendar" && operation == "create" {
@@ -200,7 +192,7 @@ for actionItem in @actionsRaw {
             "WFCalendarItemNotes": "CLARITY-NEXT-ID:{requestNumber}-{actionId}"
         })
         const calendarApplied = text("{CurrentDate}\t{requestNumber}\t{actionId}\tAPPLIED\tcalendar\t{eventTitle}\n")
-        appendResolvedFile(ledgerFile, calendarApplied)
+        appendToFile("Clarity Next Ledger.txt", calendarApplied)
     }
 
     if executor == "NEXT_REMINDER" && module == "reminder" && operation == "create" {
@@ -219,7 +211,7 @@ for actionItem in @actionsRaw {
             "WFCalendarItemNotes": "CLARITY-NEXT-ID:{requestNumber}-{actionId}"
         })
         const reminderApplied = text("{CurrentDate}\t{requestNumber}\t{actionId}\tAPPLIED\treminder\t{reminderTitle}\n")
-        appendResolvedFile(ledgerFile, reminderApplied)
+        appendToFile("Clarity Next Ledger.txt", reminderApplied)
     }
 
     if executor == "NEXT_NAVIGATE" && module == "navigate" && operation == "open_maps" {
@@ -231,24 +223,24 @@ for actionItem in @actionsRaw {
         const place = location(destination)
         openInMaps(place)
         const navigateApplied = text("{CurrentDate}\t{requestNumber}\t{actionId}\tAPPLIED\tnavigate\t{destination}\n")
-        appendResolvedFile(ledgerFile, navigateApplied)
+        appendToFile("Clarity Next Ledger.txt", navigateApplied)
     }
 
     if executor == "NEXT_ANSWER" && module == "answer" && operation == "answer" {
         const handled = text("{CurrentDate}\t{requestNumber}\t{actionId}\tHANDLED\tanswer\n")
-        appendResolvedFile(ledgerFile, handled)
+        appendToFile("Clarity Next Ledger.txt", handled)
     }
 
     if executor != "YOS_OpenApp" && executor != "NEXT_DEVICE" && executor != "NEXT_TIMER" && executor != "NEXT_CALENDAR" && executor != "NEXT_REMINDER" && executor != "NEXT_NAVIGATE" && executor != "NEXT_ANSWER" {
         const blockedUnsupported = text("{CurrentDate}\t{requestNumber}\t{actionId}\tBLOCKED\tunsupported_executor\t{executor}\n")
-        appendResolvedFile(ledgerFile, blockedUnsupported)
+        appendToFile("Clarity Next Ledger.txt", blockedUnsupported)
         alert("この操作はClarity Next v0では未対応です", "Clarity Next")
         stop()
     }
 }
 
 const doneRecord = text("{CurrentDate}\t{requestNumber}\tREQUEST_DONE\n")
-appendResolvedFile(ledgerFile, doneRecord)
+appendToFile("Clarity Next Ledger.txt", doneRecord)
 if reply {
     alert(reply, "Clarity Next")
 }
