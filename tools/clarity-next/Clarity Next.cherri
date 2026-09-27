@@ -111,7 +111,7 @@ for actionItem in @actionsRaw {
         confirm("この操作を実行しますか？", "Clarity Next")
     }
 
-    if normalizedExecutor == "YOS_OpenApp" && normalizedModule == "open_app" && operation == "open" {
+    if @normalizedExecutor == "YOS_OpenApp" && @normalizedModule == "open_app" && operation == "open" {
         const app = "{parameters['app']}"
         const executing = text("{CurrentDate}\t{requestNumber}\t{actionId}\tEXECUTING\topen_app\t{app}\n")
         appendToFile("Clarity Next Ledger.txt", executing)
@@ -120,7 +120,7 @@ for actionItem in @actionsRaw {
         appendToFile("Clarity Next Ledger.txt", openAppApplied)
     }
 
-    if normalizedExecutor == "NEXT_DEVICE" && normalizedModule == "device" {
+    if @normalizedExecutor == "NEXT_DEVICE" && @normalizedModule == "device" {
         const percent = getValue(parameters, "percent")
         const state = "{parameters['state']}"
 
@@ -192,7 +192,7 @@ for actionItem in @actionsRaw {
         appendToFile("Clarity Next Ledger.txt", deviceApplied)
     }
 
-    if normalizedExecutor == "NEXT_TIMER" && normalizedModule == "timer" && operation == "start" {
+    if @normalizedExecutor == "NEXT_TIMER" && @normalizedModule == "timer" && operation == "start" {
         const duration = getValue(parameters, "duration_minutes")
         const minutes = getNumbers(duration)
         if minutes <= 0 {
@@ -204,7 +204,7 @@ for actionItem in @actionsRaw {
         appendToFile("Clarity Next Ledger.txt", timerApplied)
     }
 
-    if normalizedExecutor == "NEXT_CALENDAR" && normalizedModule == "calendar" && operation == "create" {
+    if @normalizedExecutor == "NEXT_CALENDAR" && @normalizedModule == "calendar" && operation == "create" {
         const eventTitle = "{parameters['title']}"
         const startText = "{parameters['start']}"
         const endText = "{parameters['end']}"
@@ -228,7 +228,7 @@ for actionItem in @actionsRaw {
         appendToFile("Clarity Next Ledger.txt", calendarApplied)
     }
 
-    if normalizedExecutor == "NEXT_REMINDER" && normalizedModule == "reminder" && operation == "create" {
+    if @normalizedExecutor == "NEXT_REMINDER" && @normalizedModule == "reminder" && operation == "create" {
         const reminderTitle = "{parameters['title']}"
         const whenText = "{parameters['date_time']}"
         if !reminderTitle || !whenText {
@@ -247,7 +247,7 @@ for actionItem in @actionsRaw {
         appendToFile("Clarity Next Ledger.txt", reminderApplied)
     }
 
-    if normalizedExecutor == "NEXT_NAVIGATE" && normalizedModule == "navigate" && operation == "open_maps" {
+    if @normalizedExecutor == "NEXT_NAVIGATE" && @normalizedModule == "navigate" && operation == "open_maps" {
         const destination = "{parameters['destination']}"
         if !destination {
             alert("目的地を確認してください", "Clarity Next")
@@ -259,12 +259,12 @@ for actionItem in @actionsRaw {
         appendToFile("Clarity Next Ledger.txt", navigateApplied)
     }
 
-    if normalizedExecutor == "NEXT_ANSWER" && normalizedModule == "answer" && operation == "answer" {
+    if @normalizedExecutor == "NEXT_ANSWER" && @normalizedModule == "answer" && operation == "answer" {
         const handled = text("{CurrentDate}\t{requestNumber}\t{actionId}\tHANDLED\tanswer\n")
         appendToFile("Clarity Next Ledger.txt", handled)
     }
 
-    if normalizedExecutor != "YOS_OpenApp" && normalizedExecutor != "NEXT_DEVICE" && normalizedExecutor != "NEXT_TIMER" && normalizedExecutor != "NEXT_CALENDAR" && normalizedExecutor != "NEXT_REMINDER" && normalizedExecutor != "NEXT_NAVIGATE" && normalizedExecutor != "NEXT_ANSWER" {
+    if @normalizedExecutor != "YOS_OpenApp" && @normalizedExecutor != "NEXT_DEVICE" && @normalizedExecutor != "NEXT_TIMER" && @normalizedExecutor != "NEXT_CALENDAR" && @normalizedExecutor != "NEXT_REMINDER" && @normalizedExecutor != "NEXT_NAVIGATE" && @normalizedExecutor != "NEXT_ANSWER" {
         const blockedUnsupported = text("{CurrentDate}\t{requestNumber}\t{actionId}\tBLOCKED\tunsupported_executor\t{normalizedExecutor}\n")
         appendToFile("Clarity Next Ledger.txt", blockedUnsupported)
         alert("この操作はClarity Next v0では未対応です", "Clarity Next")
