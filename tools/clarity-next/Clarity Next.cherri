@@ -91,8 +91,8 @@ for actionItem in @actionsRaw {
         const executing = text("{CurrentDate}\t{requestNumber}\t{actionId}\tEXECUTING\topen_app\t{app}\n")
         appendResolvedFile(ledgerFile, executing)
         run("YOS_OpenApp", app)
-        const applied = text("{CurrentDate}\t{requestNumber}\t{actionId}\tAPPLIED\topen_app\t{app}\n")
-        appendResolvedFile(ledgerFile, applied)
+        const openAppApplied = text("{CurrentDate}\t{requestNumber}\t{actionId}\tAPPLIED\topen_app\t{app}\n")
+        appendResolvedFile(ledgerFile, openAppApplied)
     }
 
     if executor == "NEXT_DEVICE" && module == "device" {
@@ -163,8 +163,8 @@ for actionItem in @actionsRaw {
             if state == "off" { DNDOff() }
             if state == "toggle" { toggleDND() }
         }
-        const applied = text("{CurrentDate}\t{requestNumber}\t{actionId}\tAPPLIED\tdevice\t{operation}\n")
-        appendResolvedFile(ledgerFile, applied)
+        const deviceApplied = text("{CurrentDate}\t{requestNumber}\t{actionId}\tAPPLIED\tdevice\t{operation}\n")
+        appendResolvedFile(ledgerFile, deviceApplied)
     }
 
     if executor == "NEXT_TIMER" && module == "timer" && operation == "start" {
@@ -175,8 +175,8 @@ for actionItem in @actionsRaw {
             stop()
         }
         startTimer(qty(minutes, "min"))
-        const applied = text("{CurrentDate}\t{requestNumber}\t{actionId}\tAPPLIED\ttimer\t{minutes}min\n")
-        appendResolvedFile(ledgerFile, applied)
+        const timerApplied = text("{CurrentDate}\t{requestNumber}\t{actionId}\tAPPLIED\ttimer\t{minutes}min\n")
+        appendResolvedFile(ledgerFile, timerApplied)
     }
 
     if executor == "NEXT_CALENDAR" && module == "calendar" && operation == "create" {
@@ -199,8 +199,8 @@ for actionItem in @actionsRaw {
             "ShowWhenRun": false,
             "WFCalendarItemNotes": "CLARITY-NEXT-ID:{requestNumber}-{actionId}"
         })
-        const applied = text("{CurrentDate}\t{requestNumber}\t{actionId}\tAPPLIED\tcalendar\t{title}\n")
-        appendResolvedFile(ledgerFile, applied)
+        const calendarApplied = text("{CurrentDate}\t{requestNumber}\t{actionId}\tAPPLIED\tcalendar\t{title}\n")
+        appendResolvedFile(ledgerFile, calendarApplied)
     }
 
     if executor == "NEXT_REMINDER" && module == "reminder" && operation == "create" {
@@ -218,8 +218,8 @@ for actionItem in @actionsRaw {
             "WFAlertCustomTime": "${alertDate}",
             "WFCalendarItemNotes": "CLARITY-NEXT-ID:{requestNumber}-{actionId}"
         })
-        const applied = text("{CurrentDate}\t{requestNumber}\t{actionId}\tAPPLIED\treminder\t{title}\n")
-        appendResolvedFile(ledgerFile, applied)
+        const reminderApplied = text("{CurrentDate}\t{requestNumber}\t{actionId}\tAPPLIED\treminder\t{title}\n")
+        appendResolvedFile(ledgerFile, reminderApplied)
     }
 
     if executor == "NEXT_NAVIGATE" && module == "navigate" && operation == "open_maps" {
@@ -230,8 +230,8 @@ for actionItem in @actionsRaw {
         }
         const place = location(destination)
         openInMaps(place)
-        const applied = text("{CurrentDate}\t{requestNumber}\t{actionId}\tAPPLIED\tnavigate\t{destination}\n")
-        appendResolvedFile(ledgerFile, applied)
+        const navigateApplied = text("{CurrentDate}\t{requestNumber}\t{actionId}\tAPPLIED\tnavigate\t{destination}\n")
+        appendResolvedFile(ledgerFile, navigateApplied)
     }
 
     if executor == "NEXT_ANSWER" && module == "answer" && operation == "answer" {
