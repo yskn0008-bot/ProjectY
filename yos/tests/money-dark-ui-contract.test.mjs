@@ -1,0 +1,53 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
+
+const read = path => readFile(new URL('../../' + path, import.meta.url), 'utf8');
+
+test('MY MONEY dark UI keeps yos-money-v2 as the only Money state key', async () => {
+  const [runtime,master,css,index,sw] = await Promise.all([
+    read('yos/money-v2-runtime-v4.js'),
+    read('yos/money-master-v1.js'),
+    read('yos/money-dark-v5.css'),
+    read('yos/index.html'),
+    read('service-worker.js')
+  ]);
+  assert.match(runtime,/const KEY='yos-money-v2'/);
+  assert.match(master,/const KEY='yos-money-v2'/);
+  assert.doesNotMatch(runtime,/localStorage\.setItem\(['"]yos-money-dark/);
+  for(const collection of ['accounts','transactions','recurring','debts','goals','assets','rules']){
+    assert.match(runtime,new RegExp(collection),'Money collection missing: '+collection);
+  }
+  assert.match(index,/money-dark-v5\.css\?v=1/);
+  assert.ok(sw.includes("'./yos/money-dark-v5.css'"),'dark Money CSS must be cached by root PWA');
+  for(const color of ['#05070B','#0A1630','#0E1D3A','#F4F7FF','#AAB7D3','#D7A94B','#FF6E6E','#6EE7A7','#4DA3FF']){
+    assert.ok(css.includes(color),'missing Money color token '+color);
+  }
+});
+
+test('MY MONEY Home exposes the requested decision hierarchy and six Money destinations', async () => {
+  const runtime=await read('yos/money-v2-runtime-v4.js');
+  for(const label of ['今使えるお金','今日使える','月末不足','今月収支','次の支払い','次の入金','資金カレンダー','最近の入出金','YOSからのアドバイス','生活防衛費']){
+    assert.ok(runtime.includes(label),'missing Home label '+label);
+  }
+  for(const tab of ['dashboard','transactions','calendar','categories','rules','assets']){
+    assert.ok(runtime.includes(`data-money-tab="${tab}"`),'missing Money navigation tab '+tab);
+  }
+  for(const label of ['取引','カレンダー','カテゴリー','計画','資産']){
+    assert.ok(runtime.includes(label),'missing feature entry '+label);
+  }
+});
+
+test('Money keeps CRUD, inferred categories, recurring dedupe, and current-month shortage calculation', async () => {
+  const runtime=await read('yos/money-v2-runtime-v4.js');
+  assert.match(runtime,/function openEntryDialog/);
+  assert.match(runtime,/data\.transactions=editing\?/);
+  assert.match(runtime,/data\.transactions=data\.transactions\.filter/);
+  assert.match(runtime,/category:clean\(fd\.get\('category'\)/);
+  assert.match(runtime,/function inferredCategory/);
+  assert.match(runtime,/function renderCategories/);
+  assert.match(runtime,/function openRecurringDialog/);
+  assert.match(runtime,/tx\.recurringId===rule\.id&&tx\.date===date/);
+  assert.match(runtime,/function currentMonthShortfall/);
+  assert.match(runtime,/filter\(tx=>isOutgoing\(tx\)&&!isComplete\(tx\)\)/);
+});
