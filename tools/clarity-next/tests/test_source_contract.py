@@ -96,6 +96,11 @@ class ClarityNextSourceContractTests(unittest.TestCase):
         self.assertIn('const reminderNormalized = replaceText("-", "/", reminderNoT)', self.source)
         self.assertIn('const alertDate = getDates(reminderNormalized)', self.source)
 
+    def test_calendar_reminder_titles_preserve_user_wording(self):
+        self.assertIn("タイトル保持:", self.source)
+        self.assertIn("『明日の14時から15時にテスト予定を入れて』→ title=『テスト予定』", self.source)
+        self.assertIn("内容の一部になっている語を勝手に削除・言い換えしない", self.source)
+
     def test_v0_acceptance_routes_exist(self):
         self.assertIn('run("YOS_OpenApp", app)', self.source)
         self.assertIn('is.workflow.actions.setbrightness', self.source)
