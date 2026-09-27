@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-28T04:45:11+09:00",
+  "updated_at": "2026-09-28T05:00:34+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -12,16 +12,6 @@
     ]
   },
   "inbox": [
-    {
-      "id": "github-pr-433",
-      "title": "PR #433 Add standalone YOS_Clipboard fixed child",
-      "type": "GitHub PR",
-      "status": "review",
-      "priority": 1,
-      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/433",
-      "updated_at": "2026-09-23T20:54:19Z"
-    },
     {
       "id": "github-pr-479",
       "title": "PR #479 YOS DESK: 進捗の自動同期",
@@ -63,6 +53,16 @@
       "updated_at": "2026-09-26T22:41:53Z"
     },
     {
+      "id": "github-pr-510",
+      "title": "PR #510 Night Brief: 22:00 auto skip + Journal save",
+      "type": "GitHub PR",
+      "status": "review",
+      "priority": 1,
+      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/510",
+      "updated_at": "2026-09-27T19:53:06Z"
+    },
+    {
       "id": "github-issue-232",
       "title": "Issue #232 [YOS HQ] ProjectY自動司令部 v1｜毎時監視・安全な自動継続",
       "type": "GitHub Issue",
@@ -70,7 +70,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-09-27T19:44:44Z"
+      "updated_at": "2026-09-27T20:00:25Z"
     },
     {
       "id": "github-issue-256",
@@ -91,16 +91,6 @@
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/272",
       "updated_at": "2026-09-21T13:38:18Z"
-    },
-    {
-      "id": "github-issue-295",
-      "title": "Issue #295 MY WAY｜YOS Tasks 優先順位・進捗ダッシュボード",
-      "type": "GitHub Issue",
-      "status": "open",
-      "priority": 3,
-      "next_action": "完成条件を確認し、次の安全な実装を1件進める",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/295",
-      "updated_at": "2026-09-09T16:54:34Z"
     },
     {
       "id": "github-issue-297",
@@ -161,43 +151,53 @@
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/337",
       "updated_at": "2026-09-13T17:25:18Z"
+    },
+    {
+      "id": "github-issue-339",
+      "title": "Issue #339 MY REMOTE: Scriptableの表示名を日本語化して整理する",
+      "type": "GitHub Issue",
+      "status": "open",
+      "priority": 3,
+      "next_action": "完成条件を確認し、次の安全な実装を1件進める",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/339",
+      "updated_at": "2026-09-13T18:59:22Z"
     }
   ],
   "recently_completed": [
     {
-      "id": "github-commit-5df538bd203a",
-      "title": "Clarity Next: add separate AI router v0",
-      "completed_at": "2026-09-27T19:44:55Z",
-      "result": "GitHub mainへ反映（5df538b）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/5df538bd203abc9a1596cacadadfc92ab10f5fb6"
+      "id": "github-commit-c6693a642a86",
+      "title": "Merge pull request #511 from yskn0008-bot/feat/money-modern-ledger-20260928",
+      "completed_at": "2026-09-27T20:00:23Z",
+      "result": "GitHub mainへ反映（c6693a6）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/c6693a642a863c4ceae0c5f8669dad5a42943350"
     },
     {
-      "id": "github-commit-639622391c82",
-      "title": "MY WAY: redesign Money card for glanceability (#508)",
-      "completed_at": "2026-09-27T10:17:41Z",
-      "result": "GitHub mainへ反映（6396223）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/639622391c82d069abaa7eee7cad205ebdfa09e4"
+      "id": "github-commit-4a22533c9734",
+      "title": "Avoid duplicate recurring and existing Money events",
+      "completed_at": "2026-09-27T19:57:35Z",
+      "result": "GitHub mainへ反映（4a22533）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/4a22533c97346ddfff3df841327bfd8474772c5e"
     },
     {
-      "id": "github-commit-acf369e57262",
-      "title": "Clarity: add dictionary answers to voice core",
-      "completed_at": "2026-09-27T04:36:50Z",
-      "result": "GitHub mainへ反映（acf369e）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/acf369e57262d3a2fb8696ca6bde32fe5966b193"
+      "id": "github-commit-d89ea5fc6b71",
+      "title": "Keep modern Money UI inside the 390px viewport",
+      "completed_at": "2026-09-27T19:56:46Z",
+      "result": "GitHub mainへ反映（d89ea5f）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/d89ea5fc6b7131df296669e1df25aee212f2aade"
     },
     {
-      "id": "github-commit-52cc5996cf1a",
-      "title": "YOS DESK: 2画面境界へ強制スナップ",
-      "completed_at": "2026-09-25T11:12:52Z",
-      "result": "GitHub mainへ反映（52cc599）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/52cc5996cf1a3d10d1fe5b87d01d541d6bb905a4"
+      "id": "github-commit-91f34da85275",
+      "title": "Load refreshed Money UI CSS network-first",
+      "completed_at": "2026-09-27T19:54:48Z",
+      "result": "GitHub mainへ反映（91f34da）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/91f34da852755a4afa6eb93b787620e48f83afcd"
     },
     {
-      "id": "github-commit-bad37abba3d8",
-      "title": "YOS DESK: 2画面で美しく完結するレイアウト",
-      "completed_at": "2026-09-25T09:32:11Z",
-      "result": "GitHub mainへ反映（bad37ab）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/bad37abba3d8b6b617f1287f8f70b17bd80fab75"
+      "id": "github-commit-23d9930c85ee",
+      "title": "Exercise Money categories history delete and recurring flow",
+      "completed_at": "2026-09-27T19:53:45Z",
+      "result": "GitHub mainへ反映（23d9930）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/23d9930c85ee6d16aebc7d9a44af04f2b1df3d37"
     },
     {
       "id": "complete-002",
@@ -224,7 +224,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #506をレビューして公開判断する",
+      "next_action": "PR #510をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-28T04:45:11+09:00",
+      "last_update": "2026-09-28T05:00:34+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -309,13 +309,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 16件・Open PR 20件を自動同期中",
+      "next_action": "Open Issue 15件・Open PR 20件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-28T04:45:11+09:00",
+      "last_update": "2026-09-28T05:00:34+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -329,7 +329,7 @@
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #506をレビューして公開判断する",
+      "next_action": "PR #510をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-28T04:45:11+09:00",
+      "last_update": "2026-09-28T05:00:34+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "6585202dc971cd611e93ef9b2d1c41a6ad6ea543e0d3ecb81d19f85a6d2d590c"
+  "github_snapshot_hash": "51f49543235db11f13fbb79d5cd07f3cff03b8751b1a31e961378c13b7a871af"
 }
