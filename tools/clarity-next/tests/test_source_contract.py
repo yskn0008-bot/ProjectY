@@ -12,6 +12,11 @@ class ClarityNextSourceContractTests(unittest.TestCase):
         self.assertIn("#define name Clarity Next", self.source)
         self.assertIn("Clarity Next Ledger.txt", self.source)
 
+
+    def test_ledger_source_does_not_eagerly_open_file(self):
+        self.assertNotIn('getFile("Clarity Next Ledger.txt")', self.source)
+        self.assertIn('appendToFile("Clarity Next Ledger.txt"', self.source)
+
     def test_voice_to_json_router(self):
         self.assertIn('listen("After Pause", "jp-JP")', self.source)
         self.assertIn('askChatGPT(routerPrompt, false, "Dictionary")', self.source)
