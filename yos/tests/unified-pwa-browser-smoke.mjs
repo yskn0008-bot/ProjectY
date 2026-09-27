@@ -224,6 +224,8 @@ try{
   await page.locator('#money2DialogForm button.danger').click();
   assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('yos-money-v2')).recurring.some(rule=>rule.label==='テスト定期')),false,'deleted recurring Money rule must leave yos-money-v2');
 
+  await page.locator('.money5-brand').click();
+  await expectText('#brandTitle','MY WAY');
   await page.locator('.idea-nav').click();
   await expectText('#brandTitle','MY IDEA');
   await page.locator('#ideaMemo').fill('YOS unified PWA smoke');
