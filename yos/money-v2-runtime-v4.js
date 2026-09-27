@@ -215,7 +215,7 @@
     host.dataset.moneyV2='1';
     host.innerHTML=`<header class="money5-header">
       <button class="money5-brand" type="button" data-money-action="back-home" aria-label="MY WAYへ戻る"><span class="money5-brand-mark" aria-hidden="true">¥</span><span><strong>MY MONEY</strong><small>by YOS</small></span></button>
-      <div class="money5-header-actions"><button type="button" data-money-action="verify-data" aria-label="Moneyの通知・実データ確認">◔</button><button id="moneyMenuButton" type="button" aria-label="メニューを開く">•••</button></div>
+      <div class="money5-header-actions"><button class="money5-notify" type="button" data-money-action="verify-data" aria-label="Moneyの通知・実データ確認"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.8 9.5a5.2 5.2 0 0 1 10.4 0v3.2l1.5 2.2H5.3l1.5-2.2V9.5Zm3 7.4a2.3 2.3 0 0 0 4.4 0"/></svg><i aria-hidden="true"></i></button><button id="moneyMenuButton" type="button" aria-label="メニューを開く">•••</button></div>
     </header>
     <div id="money2Body" class="money5-body"></div>
     <button id="moneyQuickAdd" class="money2-fab" type="button" aria-label="入出金を追加">＋</button>
