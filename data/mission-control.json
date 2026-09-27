@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-28T07:27:35+09:00",
+  "updated_at": "2026-09-28T07:29:48+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -165,6 +165,27 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-cd004c98ec84",
+      "title": "chore: refresh unified Money home",
+      "completed_at": "2026-09-27T22:29:35Z",
+      "result": "GitHub mainへ反映（cd004c9）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/cd004c98ec846741e70f8d5ffa3538c0cd0d117d"
+    },
+    {
+      "id": "github-commit-b119146f70af",
+      "title": "style: unify Money home visual hierarchy",
+      "completed_at": "2026-09-27T22:29:29Z",
+      "result": "GitHub mainへ反映（b119146）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/b119146f70af7bdae3531d484068fd196cd361e3"
+    },
+    {
+      "id": "github-commit-3ccbcf3e83b5",
+      "title": "ui: unify Money home into one visual card",
+      "completed_at": "2026-09-27T22:29:15Z",
+      "result": "GitHub mainへ反映（3ccbcf3）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/3ccbcf3e83b58cafb3d6d69b6e0476a10a4b1e94"
+    },
+    {
       "id": "github-commit-6a70cd97eebd",
       "title": "chore: refresh Money overview assets",
       "completed_at": "2026-09-27T22:27:22Z",
@@ -177,27 +198,6 @@
       "completed_at": "2026-09-27T22:27:12Z",
       "result": "GitHub mainへ反映（fd8ca4a）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/fd8ca4afaed417023540aa621db874b9e7adc543"
-    },
-    {
-      "id": "github-commit-cda20281c618",
-      "title": "ui: make Money home glanceable at a glance",
-      "completed_at": "2026-09-27T22:26:58Z",
-      "result": "GitHub mainへ反映（cda2028）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/cda20281c6182d8c3112d4395c78e656aaa0bccb"
-    },
-    {
-      "id": "github-commit-c4b6d244b278",
-      "title": "chore: refresh Money dashboard runtime",
-      "completed_at": "2026-09-27T22:15:14Z",
-      "result": "GitHub mainへ反映（c4b6d24）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/c4b6d244b278ea3973816998f2f40cbc3cd4d135"
-    },
-    {
-      "id": "github-commit-9656406a2a30",
-      "title": "fix: remove duplicate Money home calendar",
-      "completed_at": "2026-09-27T22:15:09Z",
-      "result": "GitHub mainへ反映（9656406）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/9656406a2a3006c512c93916a1229b920ee334b3"
     },
     {
       "id": "complete-002",
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-28T07:27:35+09:00",
+      "last_update": "2026-09-28T07:29:48+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -315,7 +315,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-28T07:27:35+09:00",
+      "last_update": "2026-09-28T07:29:48+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-28T07:27:35+09:00",
+      "last_update": "2026-09-28T07:29:48+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "7679f878d095bd11db2acd0ca3060b229d103fecad8c3d699ecfc9bea8c17b60"
+  "github_snapshot_hash": "747fe2053ec0ca6ec7051cd667df59b6588585426115ff408f0eea3af5fd3325"
 }
