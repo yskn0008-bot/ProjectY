@@ -144,7 +144,7 @@ try{
 
   await page.locator('.money-decision-card').click();
   await expectText('#brandTitle','MY MONEY');
-  await page.locator('.home-nav').click();
+  await page.locator('.money5-brand').click();
   await expectText('#brandTitle','MY WAY');
 
   await page.locator('.yos-companion[href="./guide.html"]').click();
@@ -161,7 +161,29 @@ try{
 
   await page.locator('.money-nav').click();
   await expectText('#brandTitle','MY MONEY');
-  await expectText('#money2Body','今使える');
+  await expectText('#money2Body','今使えるお金');
+  await expectText('#money2Body','4,588');
+  await expectText('#money2Body','月末不足');
+  await expectText('#money2Body','89,952');
+  await expectText('#money2Body','今月収支');
+  await expectText('#money2Body','65,405');
+  await expectText('#money2Body','資金カレンダー');
+  await expectText('#money2Body','生活防衛費');
+  assert.equal(await page.locator('.money5-subnav [data-money-tab]').count(),6,'Money must expose six internal destinations');
+  const moneyGeometry=await page.evaluate(()=>({
+    scrollWidth:document.documentElement.scrollWidth,
+    clientWidth:document.documentElement.clientWidth,
+    balanceSize:parseFloat(getComputedStyle(document.querySelector('.money5-balance-head strong')).fontSize)
+  }));
+  assert.ok(moneyGeometry.scrollWidth<=moneyGeometry.clientWidth+1,'MY MONEY must not overflow horizontally at 390px');
+  assert.ok(moneyGeometry.balanceSize>=40,'usable balance must be the strongest numeric hierarchy');
+
+  await page.locator('[data-money-tab="categories"]').click();
+  await expectText('#money2Body','カテゴリー別支出');
+  await page.locator('[data-money-tab="calendar"]').click();
+  await expectText('#money2Body','支払い・入金・定期収支を月で確認');
+  await page.locator('[data-money-tab="dashboard"]').click();
+  await expectText('#money2Body','最近の入出金');
 
   await page.locator('[data-money-tab="transactions"]').click();
   await expectText('#money2Body','取引履歴');
