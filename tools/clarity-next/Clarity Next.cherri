@@ -212,8 +212,14 @@ for actionItem in @actionsRaw {
             alert("予定のタイトル・開始・終了を確認してください", "Clarity Next")
             stop()
         }
-        const startDate = getDates(startText)
-        const endDate = getDates(endText)
+        // iOS Japanese locale can reject ISO 8601 text with "T" in Detect Dates.
+        // Normalize model timestamps to a locale-friendly form before conversion.
+        const startNoT = replaceText("T", " ", startText)
+        const startNormalized = replaceText("-", "/", startNoT)
+        const endNoT = replaceText("T", " ", endText)
+        const endNormalized = replaceText("-", "/", endNoT)
+        const startDate = getDates(startNormalized)
+        const endDate = getDates(endNormalized)
         rawAction("is.workflow.actions.addnewevent", {
             "WFCalendarItemTitle": "{eventTitle}",
             "WFCalendarItemCalendar": "プライベート",
@@ -235,7 +241,9 @@ for actionItem in @actionsRaw {
             alert("リマインダーの内容・日時を確認してください", "Clarity Next")
             stop()
         }
-        const alertDate = getDates(whenText)
+        const reminderNoT = replaceText("T", " ", whenText)
+        const reminderNormalized = replaceText("-", "/", reminderNoT)
+        const alertDate = getDates(reminderNormalized)
         rawAction("is.workflow.actions.addnewreminder", {
             "WFCalendarItemTitle": "{reminderTitle}",
             "WFCalendarItemAlert": true,
