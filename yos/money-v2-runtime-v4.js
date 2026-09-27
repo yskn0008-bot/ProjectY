@@ -214,7 +214,7 @@
     if(!host||host.dataset.moneyV2==='1')return host;
     host.dataset.moneyV2='1';
     host.innerHTML=`<header class="money5-header">
-      <div class="money5-brand"><span class="money5-brand-mark" aria-hidden="true">¥</span><div><strong>MY MONEY</strong><small>by YOS</small></div></div>
+      <button class="money5-brand" type="button" data-money-action="back-home" aria-label="MY WAYへ戻る"><span class="money5-brand-mark" aria-hidden="true">¥</span><span><strong>MY MONEY</strong><small>by YOS</small></span></button>
       <div class="money5-header-actions"><button type="button" data-money-action="verify-data" aria-label="Moneyの通知・実データ確認">◔</button><button id="moneyMenuButton" type="button" aria-label="メニューを開く">•••</button></div>
     </header>
     <div id="money2Body" class="money5-body"></div>
@@ -389,7 +389,7 @@
   function renderAssets(){
     const debt=totalDebt(),liquid=currentLiquid()??0,assets=data.assets.reduce((sum,a)=>sum+n(a.value),0),net=netWorth();
     const accounts=data.accounts.length?data.accounts.map(a=>`<button class="money2-account" type="button" data-money-action="edit-account" data-id="${escapeHtml(a.id)}"><span>${accountIcon(a.type)}</span><div><strong>${escapeHtml(a.name)}</strong><small>${accountType(a.type)}${a.updatedAt?` ・ ${formatUpdated(a.updatedAt)}`:''}</small></div><b>${privacyAmount(a.balance)}</b></button>`).join(''):'<p class="money3-empty">口座・現金・電子マネーを登録できます。</p>';
-    return `<section class="money3-networth"><div><small>純資産</small><strong>${data.privacy?'••••••':signedYen(net)}</strong><p>現金・預金＋資産−借金</p></div><div class="money3-networth-mini"><span><small>現金等</small><b>${data.privacy?'••••':yen(liquid)}</b></span><span><small>資産</small><b>${data.privacy?'••••':yen(assets)}</b></span><span><small>負債</small><b>${data.privacy?'••••':yen(debt)}</b></span></div></section>
+    return `<section class="money5-page-title"><div><small>ASSETS</small><h1>資産</h1><p>口座・資産・負債を一つの現在地で確認。</p></div><button id="moneyPrivacy" class="money5-privacy-toggle" type="button">${data.privacy?'金額を表示':'金額を隠す'}</button></section><section class="money3-networth"><div><small>純資産</small><strong>${data.privacy?'••••••':signedYen(net)}</strong><p>現金・預金＋資産−借金</p></div><div class="money3-networth-mini"><span><small>現金等</small><b>${data.privacy?'••••':yen(liquid)}</b></span><span><small>資産</small><b>${data.privacy?'••••':yen(assets)}</b></span><span><small>負債</small><b>${data.privacy?'••••':yen(debt)}</b></span></div></section>
     <section class="money3-panel"><header><div><small>ACCOUNTS</small><h2>口座・現金</h2></div><button type="button" data-money-action="refresh-balances">残高更新</button><button type="button" data-money-action="add-account">＋追加</button></header>${accounts}</section>
     <section class="money3-panel"><header><div><small>ASSETS</small><h2>投資・その他資産</h2></div><button type="button" data-money-action="add-asset">＋追加</button></header>${data.assets.length?data.assets.map(a=>`<button class="money2-rule-row" type="button" data-money-action="edit-asset" data-id="${escapeHtml(a.id)}"><div><strong>${escapeHtml(a.name)}</strong><small>${assetType(a.type)}</small></div><span>${data.privacy?'••••':yen(a.value)}</span></button>`).join(''):'<p class="money3-empty">投資・その他資産を追加すると純資産に反映されます。</p>'}</section>`;
   }
@@ -406,6 +406,7 @@
     if(btn.id==='moneyQuickAdd'){openEntryDialog(isoToday());return}
     if(btn.dataset.moneyDate){selectedCalendarDate=btn.dataset.moneyDate;activeTab='calendar';render();return}
     if(!action)return;
+    if(action==='back-home'){document.querySelector('.home-nav')?.click();return}
     if(action==='prev-month'||action==='next-month'){const [y,m]=calendarMonth.split('-').map(Number),d=new Date(y,m-1+(action==='next-month'?1:-1),1);calendarMonth=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;selectedCalendarDate=`${calendarMonth}-01`;render();return}
     if(action==='add-entry')openEntryDialog(isoToday());
     if(action==='add-selected-date')openEntryDialog(selectedCalendarDate);
