@@ -457,3 +457,14 @@ body[data-domain="money"] #money2DialogForm button.danger{color:var(--money5-red
 .money6-safety,.money6-assets{width:100%;border:0;background:none;color:inherit}
 .money6-safety{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;text-align:left}.money6-safety div{display:grid;gap:3px}.money6-safety b{font-size:10px}.money6-safety>span{color:var(--money5-blue)}
 .money6-assets{padding:10px 18px 12px;border-top:1px solid rgba(77,163,255,.11);color:var(--money5-blue);font-size:9px;text-align:right}
+
+
+/* Calendar context v7 */
+.money7-month-summary{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;overflow:hidden;border:1px solid var(--money5-line);border-radius:18px;background:rgba(77,163,255,.12)}
+.money7-month-summary>div{padding:12px 13px;background:linear-gradient(150deg,rgba(14,29,58,.96),rgba(8,18,39,.98))}
+.money7-month-summary small,.money7-calendar-insight small{display:block;color:var(--money5-sub);font-size:8px;margin-bottom:4px}
+.money7-month-summary strong{font-size:15px;font-variant-numeric:tabular-nums}.money7-month-summary .income strong{color:var(--money5-green)}.money7-month-summary .danger strong{color:var(--money5-red)}
+.money7-calendar-insight{display:grid;grid-template-columns:1fr 1fr;gap:1px;overflow:hidden;border:1px solid rgba(215,169,75,.15);border-radius:16px;background:rgba(215,169,75,.12)}
+.money7-calendar-insight>div{padding:11px 13px;background:rgba(8,18,39,.96)}
+.money7-calendar-insight strong{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px}.money7-calendar-insight>div:first-child strong{color:var(--money5-red)}
+.money7-selected{margin-top:0}
