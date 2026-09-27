@@ -25,6 +25,7 @@ const CRITICAL_NETWORK_FIRST=new Set([
   '/ProjectY/yos/task-dashboard.css',
   '/ProjectY/yos/money-v2.js',
   '/ProjectY/yos/money-v2-runtime-v4.js',
+  '/ProjectY/yos/money-reference-v1.css',
   '/ProjectY/yos/morning-brief-bridge-v1.js',
   '/ProjectY/yos/payment-alert-bridge-v1.js',
   '/ProjectY/yos/money-alert-bridge-v1.js',
