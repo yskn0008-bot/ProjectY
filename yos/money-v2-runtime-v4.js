@@ -363,18 +363,21 @@
     const fixed=list.filter(tx=>isOutgoing(tx)&&(tx.virtualRecurring||tx.recurringId)).reduce((s,tx)=>s+n(tx.amount),0);
     const variable=Math.max(0,outgoing-fixed),net=income-outgoing;
     const remaining=list.filter(tx=>isOutgoing(tx)&&!isComplete(tx)&&String(tx.date||'')>=isoToday()).reduce((s,tx)=>s+n(tx.amount),0);
+    const liquid=currentLiquid(),spendable=liquid===null?null:Math.max(0,liquid-remaining);
+    const today=parseDate(isoToday()),[cy,cm]=calendarMonth.split('-').map(Number),monthEnd=new Date(cy,cm,0,12),daysLeft=calendarMonth===monthKey()?Math.max(1,daysBetween(today,monthEnd)+1):new Date(cy,cm,0).getDate();
+    const daily=spendable===null?null:Math.floor(spendable/daysLeft);
     const next=list.filter(tx=>!isComplete(tx)&&String(tx.date||'')>=isoToday()).sort((a,b)=>String(a.date).localeCompare(String(b.date)))[0]||null;
     return `<section class="money5-page-title"><div><small>CALENDAR</small><h1>カレンダー</h1><p>支払い・入金・定期収支を月で確認。</p></div></section>
-      <section class="money7-month-summary">
+      <section class="money5-panel money5-calendar-page">${renderCalendar()}</section>
+      <section class="money8-month-summary">
+        <div class="primary"><small>今月あと使える</small><strong>${spendable===null?'—':moneyAmount(spendable)}</strong></div>
+        <div class="primary"><small>1日あたり</small><strong>${daily===null?'—':moneyAmount(daily)}</strong></div>
         <div class="income"><small>今月の収入</small><strong>${moneyAmount(income)}</strong></div>
         <div><small>固定支出</small><strong>${moneyAmount(fixed)}</strong></div>
         <div><small>変動支出</small><strong>${moneyAmount(variable)}</strong></div>
         <div class="${net>=0?'income':'danger'}"><small>今月収支</small><strong>${moneyAmount(net,{signed:true})}</strong></div>
-      </section>
-      <section class="money5-panel money5-calendar-page">${renderCalendar()}</section>
-      <section class="money7-calendar-insight">
         <div><small>残りの支払い</small><strong>${moneyAmount(remaining)}</strong></div>
-        <div><small>次の予定</small><strong>${next?`${escapeHtml(formatMD(next.date))} ${escapeHtml(next.label||'予定')}`:'予定なし'}</strong></div>
+        <div><small>次の予定</small><strong class="text">${next?`${escapeHtml(formatMD(next.date))} ${escapeHtml(next.label||'予定')}`:'予定なし'}</strong></div>
       </section>
       <section class="money5-panel money7-selected"><header><div><small>SELECTED DAY</small><h2>${escapeHtml(formatMD(selectedCalendarDate))}</h2></div><button type="button" data-money-action="add-selected-date">＋取引</button></header><div class="money3-feed">${dayItems.length?dayItems.map(transactionRow).join(''):'<p class="money3-empty">この日の取引はありません。</p>'}</div></section>`;
   }
