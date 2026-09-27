@@ -50,6 +50,7 @@ jobs:
           rm -f './Clarity Next_unsigned.shortcut' './Clarity Next.plist'
           cherri './Clarity Next.cherri' --skip-sign --debug
           test -f './Clarity Next_unsigned.shortcut'
+          python3 patch_ledger_persistence.py './Clarity Next_unsigned.shortcut'
           mkdir -p artifacts
           cp './Clarity Next_unsigned.shortcut' artifacts/Clarity-Next-unsigned.shortcut
 
@@ -75,6 +76,15 @@ jobs:
           assert 'NEXT_REMINDER' in blob
           assert 'unsupported_executor' in blob
           assert 'Clarity Next Ledger.txt' in blob
+          assert not any(i.endswith('file.append') for i in ids), ids
+          ledger_saves=[
+              a for a in actions
+              if str(a.get('WFWorkflowActionIdentifier','')).endswith('documentpicker.save')
+              and a.get('WFWorkflowActionParameters',{}).get('WFFileDestinationPath')=='Clarity Next Ledger.txt'
+          ]
+          assert len(ledger_saves) >= 1, ledger_saves
+          assert all(a.get('WFWorkflowActionParameters',{}).get('WFAskWhereToSave') is False for a in ledger_saves)
+          assert all(a.get('WFWorkflowActionParameters',{}).get('WFSaveFileOverwrite') is True for a in ledger_saves)
           assert any(i.endswith('setbrightness') for i in ids), ids
           assert any(i.endswith('setvolume') for i in ids), ids
           assert any(i.endswith('timer.start') for i in ids), ids
