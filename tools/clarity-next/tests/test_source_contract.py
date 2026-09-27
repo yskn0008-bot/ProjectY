@@ -40,6 +40,10 @@ class ClarityNextSourceContractTests(unittest.TestCase):
         self.assertIn('WFAlertEnabled', patch)
         self.assertIn('"Alert"', patch)
 
+
+    def test_user_facing_calendar_and_reminder_have_no_technical_id(self):
+        self.assertNotIn("CLARITY-NEXT-ID:", self.source)
+
     def test_voice_to_json_router(self):
         self.assertIn('listen("After Pause", "jp-JP")', self.source)
         self.assertIn('askChatGPT(routerPrompt, false, "Dictionary")', self.source)
