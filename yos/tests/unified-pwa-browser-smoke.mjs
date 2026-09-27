@@ -161,6 +161,46 @@ try{
 
   await page.locator('.money-nav').click();
   await expectText('#brandTitle','MY MONEY');
+  await expectText('#money2Body','今使える');
+
+  await page.locator('[data-money-tab="transactions"]').click();
+  await expectText('#money2Body','取引履歴');
+  await page.locator('.money3-panel [data-money-action="add-entry"]').click();
+  await page.locator('#money2DialogForm [name="date"]').fill('2026-09-28');
+  await page.locator('#money2DialogForm [name="type"]').selectOption('expense');
+  await page.locator('#money2DialogForm [name="category"]').selectOption('food');
+  await page.locator('#money2DialogForm [name="label"]').fill('テスト食費');
+  await page.locator('#money2DialogForm [name="amount"]').fill('1234');
+  await page.locator('#money2DialogForm [name="status"]').selectOption('done');
+  await page.locator('#money2DialogForm button.primary').click();
+  await expectText('#money2Body','テスト食費');
+  const addedLedger=await page.evaluate(()=>JSON.parse(localStorage.getItem('yos-money-v2')).transactions.find(tx=>tx.label==='テスト食費'));
+  assert.equal(addedLedger?.category,'food','Money transaction category must persist in yos-money-v2');
+
+  await page.locator('.money3-transaction[data-money-action="edit-entry"]').filter({hasText:'テスト食費'}).click();
+  await expectText('#money2DialogForm','取引を編集');
+  page.once('dialog',d=>d.accept());
+  await page.locator('#money2DialogForm button.danger').click();
+  assert.equal(await page.locator('.money3-transaction').filter({hasText:'テスト食費'}).count(),0,'deleted Money transaction must leave history');
+  assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('yos-money-v2')).transactions.some(tx=>tx.label==='テスト食費')),false,'deleted Money transaction must leave yos-money-v2');
+
+  await page.locator('[data-money-tab="rules"]').click();
+  await expectText('#money2Body','定期収支');
+  await page.locator('[data-money-action="add-recurring"]').first().click();
+  await page.locator('#money2DialogForm [name="type"]').selectOption('expense');
+  await page.locator('#money2DialogForm [name="category"]').selectOption('utilities');
+  await page.locator('#money2DialogForm [name="label"]').fill('テスト定期');
+  await page.locator('#money2DialogForm [name="amount"]').fill('2000');
+  await page.locator('#money2DialogForm [name="day"]').fill('29');
+  await page.locator('#money2DialogForm [name="startDate"]').fill('2026-09-01');
+  await page.locator('#money2DialogForm button.primary').click();
+  assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('yos-money-v2')).recurring.some(rule=>rule.label==='テスト定期')),true,'Money recurring rule must persist in yos-money-v2');
+  await page.locator('[data-money-tab="transactions"]').click();
+  await expectText('#money2Body','テスト定期');
+  await page.locator('.money3-transaction[data-money-action="edit-recurring"]').filter({hasText:'テスト定期'}).click();
+  page.once('dialog',d=>d.accept());
+  await page.locator('#money2DialogForm button.danger').click();
+  assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('yos-money-v2')).recurring.some(rule=>rule.label==='テスト定期')),false,'deleted recurring Money rule must leave yos-money-v2');
 
   await page.locator('.idea-nav').click();
   await expectText('#brandTitle','MY IDEA');
