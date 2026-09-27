@@ -100,26 +100,26 @@ for actionItem in @actionsRaw {
         const state = "{parameters['state']}"
 
         if operation == "set_brightness" {
-            const n = getNumbers(percent)
-            if n < 0 || n > 100 {
+            const brightnessPercent = getNumbers(percent)
+            if brightnessPercent < 0 || brightnessPercent > 100 {
                 alert("明るさは0〜100%で指定してください", "Clarity Next")
                 stop()
             }
-            const ratio = n * 0.01
+            const brightnessRatio = brightnessPercent * 0.01
             rawAction("is.workflow.actions.setbrightness", {
-                "WFBrightness": "${ratio}"
+                "WFBrightness": "${brightnessRatio}"
             })
         }
 
         if operation == "set_volume" {
-            const n = getNumbers(percent)
-            if n < 0 || n > 100 {
+            const volumePercent = getNumbers(percent)
+            if volumePercent < 0 || volumePercent > 100 {
                 alert("音量は0〜100%で指定してください", "Clarity Next")
                 stop()
             }
-            const ratio = n * 0.01
+            const volumeRatio = volumePercent * 0.01
             rawAction("is.workflow.actions.setvolume", {
-                "WFVolume": "${ratio}"
+                "WFVolume": "${volumeRatio}"
             })
         }
 
