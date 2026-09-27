@@ -1,3 +1,4 @@
+# Calendar wire-format evidence refresh: current PR body records passing Clarity Next v0 CI.
 # Date normalization evidence refresh: current PR body records passing Clarity Next v0 CI.
 # Router normalization evidence refresh: current PR body records passing Clarity Next v0 CI.
 from pathlib import Path
@@ -6,6 +7,7 @@ import unittest
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "Clarity Next.cherri"
 PATCH = ROOT / "patch_ledger_persistence.py"
+WIRE_PATCH = ROOT / "patch_calendar_reminder_wire_format.py"
 
 class ClarityNextSourceContractTests(unittest.TestCase):
     @classmethod
@@ -28,6 +30,15 @@ class ClarityNextSourceContractTests(unittest.TestCase):
         self.assertIn('"WFAskWhereToSave": False', patch)
         self.assertIn('"WFSaveFileOverwrite": True', patch)
         self.assertIn('file.append survived rewrite', patch)
+
+
+    def test_calendar_reminder_wire_format_patch_is_locked(self):
+        patch = WIRE_PATCH.read_text(encoding="utf-8")
+        self.assertIn('WFCalendarItemStartDate', patch)
+        self.assertIn('WFCalendarItemEndDate', patch)
+        self.assertIn('WFTextTokenString', patch)
+        self.assertIn('WFAlertEnabled', patch)
+        self.assertIn('"Alert"', patch)
 
     def test_voice_to_json_router(self):
         self.assertIn('listen("After Pause", "jp-JP")', self.source)
