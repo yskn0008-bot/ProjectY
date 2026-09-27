@@ -131,7 +131,7 @@ try {
   await yosPage.goto(yosURL, { waitUntil: 'networkidle' });
   await yosPage.waitForSelector('#homePage');
   const inspectYosDomain = async (domain, panelSelector, finalSelector, labels, screenshotName) => {
-    if (domain !== 'home') { if (domain !== 'money' && await yosPage.locator('.money5-brand').count()) await yosPage.locator('.money5-brand').click(); if (domain === 'money' || document.body?.dataset?.domain !== domain) await yosPage.locator(`.bottom-nav [data-page="${domain}"]`).click(); }
+    if (domain !== 'home') { if (domain !== 'money' && await yosPage.locator('.money5-brand:visible').count()) await yosPage.locator('.money5-brand').click(); await yosPage.locator(`.bottom-nav [data-page="${domain}"]`).click(); }
     await yosPage.waitForFunction(name => document.body.dataset.domain === name, domain);
     await yosPage.evaluate(() => {
       document.activeElement?.blur();
