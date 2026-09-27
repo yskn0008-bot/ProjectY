@@ -357,10 +357,26 @@
     return '今月は登録済み予定では赤字予測なし。次に「守るお金」と目標を設定すると、余剰資金の行き先まで判断できます。';
   }
   function renderCalendarPage(){
-    const dayItems=monthTransactions(calendarMonth).filter(tx=>tx.date===selectedCalendarDate).sort((a,b)=>String(a.id||'').localeCompare(String(b.id||'')));
+    const list=monthTransactions(calendarMonth),dayItems=list.filter(tx=>tx.date===selectedCalendarDate).sort((a,b)=>String(a.id||'').localeCompare(String(b.id||'')));
+    const income=list.filter(tx=>tx.type==='income').reduce((s,tx)=>s+n(tx.amount),0);
+    const outgoing=list.filter(isOutgoing).reduce((s,tx)=>s+n(tx.amount),0);
+    const fixed=list.filter(tx=>isOutgoing(tx)&&(tx.virtualRecurring||tx.recurringId)).reduce((s,tx)=>s+n(tx.amount),0);
+    const variable=Math.max(0,outgoing-fixed),net=income-outgoing;
+    const remaining=list.filter(tx=>isOutgoing(tx)&&!isComplete(tx)&&String(tx.date||'')>=isoToday()).reduce((s,tx)=>s+n(tx.amount),0);
+    const next=list.filter(tx=>!isComplete(tx)&&String(tx.date||'')>=isoToday()).sort((a,b)=>String(a.date).localeCompare(String(b.date)))[0]||null;
     return `<section class="money5-page-title"><div><small>CALENDAR</small><h1>カレンダー</h1><p>支払い・入金・定期収支を月で確認。</p></div></section>
+      <section class="money7-month-summary">
+        <div class="income"><small>今月の収入</small><strong>${moneyAmount(income)}</strong></div>
+        <div><small>固定支出</small><strong>${moneyAmount(fixed)}</strong></div>
+        <div><small>変動支出</small><strong>${moneyAmount(variable)}</strong></div>
+        <div class="${net>=0?'income':'danger'}"><small>今月収支</small><strong>${moneyAmount(net,{signed:true})}</strong></div>
+      </section>
       <section class="money5-panel money5-calendar-page">${renderCalendar()}</section>
-      <section class="money5-panel"><header><div><small>SELECTED DAY</small><h2>${escapeHtml(formatMD(selectedCalendarDate))}</h2></div><button type="button" data-money-action="add-selected-date">＋取引</button></header><div class="money3-feed">${dayItems.length?dayItems.map(transactionRow).join(''):'<p class="money3-empty">この日の取引はありません。</p>'}</div></section>`;
+      <section class="money7-calendar-insight">
+        <div><small>残りの支払い</small><strong>${moneyAmount(remaining)}</strong></div>
+        <div><small>次の予定</small><strong>${next?`${escapeHtml(formatMD(next.date))} ${escapeHtml(next.label||'予定')}`:'予定なし'}</strong></div>
+      </section>
+      <section class="money5-panel money7-selected"><header><div><small>SELECTED DAY</small><h2>${escapeHtml(formatMD(selectedCalendarDate))}</h2></div><button type="button" data-money-action="add-selected-date">＋取引</button></header><div class="money3-feed">${dayItems.length?dayItems.map(transactionRow).join(''):'<p class="money3-empty">この日の取引はありません。</p>'}</div></section>`;
   }
   function previousMonthKey(mk){
     const [y,m]=mk.split('-').map(Number),d=new Date(y,m-2,1);
