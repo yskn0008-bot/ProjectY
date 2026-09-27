@@ -48,12 +48,14 @@ try{
   await page.waitForSelector('#taskDashboardBody',{state:'visible'});
   await expectText('#taskDashboardBody','今使える');
   await expectText('#taskDashboardBody','4,588円');
-  await expectText('#taskDashboardBody','次の支払い');
-  await expectText('#taskDashboardBody','9/26 車保険 7,060円');
+  await expectText('.money-decision-payment','次の支払い');
+  await expectText('.money-decision-payment','9/26');
+  await expectText('.money-decision-payment','車保険 7,060円');
   await expectText('#taskDashboardBody','不足見込み');
   await expectText('#taskDashboardBody','月末まで 89,952円不足');
-  await expectText('#taskDashboardBody','次の入金');
-  await expectText('#taskDashboardBody','10/13 家賃収入 約160,485円');
+  await expectText('.money-decision-income','次の入金');
+  await expectText('.money-decision-income','10/13');
+  await expectText('.money-decision-income','家賃収入 約160,485円');
   await expectText('#taskDashboardBody','時系列');
   await expectText('#taskDashboardBody','9/27 電気・家賃');
   await expectText('#taskDashboardBody','9/28 返済');
