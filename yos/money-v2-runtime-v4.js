@@ -36,6 +36,7 @@
   let data=state();
   let activeTab='dashboard';
   let calendarMonth=monthKey();
+  let selectedCalendarDate=isoToday();
   let transactionQuery='';
   let transactionFilter='all';
   function save(){data.updatedAt=new Date().toISOString();const saved=write(KEY,data);render();if(saved){const shared=window.YOSSharedStateV1?.refresh?.('money');void syncMoneyShadow(shared?.money)}}
@@ -212,7 +213,21 @@
     const host=document.getElementById('moneyPage');
     if(!host||host.dataset.moneyV2==='1')return host;
     host.dataset.moneyV2='1';
-    host.innerHTML=`<header class="money2-heading"><div class="money2-title"><span>¥</span><div><small>MY MONEY</small><h1>Money</h1><p>記録より先に、次の判断が見える。</p></div></div><button id="moneyPrivacy" class="money2-icon-btn" type="button" aria-label="金額表示を切り替える">◉</button></header><nav class="money2-tabs" aria-label="Money画面"><button data-money-tab="dashboard" class="active">概要</button><button data-money-tab="transactions">取引</button><button data-money-tab="rules">計画</button><button data-money-tab="assets">資産</button></nav><div id="money2Body"></div><button id="moneyQuickAdd" class="money2-fab" type="button" aria-label="入出金を追加">＋</button><dialog id="money2Dialog" class="money2-dialog"><form method="dialog" id="money2DialogForm"></form></dialog>`;
+    host.innerHTML=`<header class="money5-header">
+      <button class="money5-brand" type="button" data-money-action="back-home" aria-label="MY WAYへ戻る"><span class="money5-brand-mark" aria-hidden="true">¥</span><span><strong>MY MONEY</strong><small>by YOS</small></span></button>
+      <div class="money5-header-actions"><button class="money5-notify" type="button" data-money-action="verify-data" aria-label="Moneyの通知・実データ確認"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.8 9.5a5.2 5.2 0 0 1 10.4 0v3.2l1.5 2.2H5.3l1.5-2.2V9.5Zm3 7.4a2.3 2.3 0 0 0 4.4 0"/></svg><i aria-hidden="true"></i></button><button id="moneyMenuButton" type="button" aria-label="メニューを開く">•••</button></div>
+    </header>
+    <div id="money2Body" class="money5-body"></div>
+    <button id="moneyQuickAdd" class="money2-fab" type="button" aria-label="入出金を追加">＋</button>
+    <nav class="money5-subnav" aria-label="MY MONEY">
+      <button data-money-tab="dashboard" class="active"><span aria-hidden="true">⌂</span><b>ホーム</b></button>
+      <button data-money-tab="transactions"><span aria-hidden="true">≡</span><b>取引</b></button>
+      <button data-money-tab="calendar"><span aria-hidden="true">□</span><b>カレンダー</b></button>
+      <button data-money-tab="categories"><span aria-hidden="true">◫</span><b>カテゴリー</b></button>
+      <button data-money-tab="rules"><span aria-hidden="true">◇</span><b>計画</b></button>
+      <button data-money-tab="assets"><span aria-hidden="true">△</span><b>資産</b></button>
+    </nav>
+    <dialog id="money2Dialog" class="money2-dialog"><form method="dialog" id="money2DialogForm"></form></dialog>`;
     host.addEventListener('click',handleClick);
     host.addEventListener('input',handleInput);
     return host;
@@ -221,30 +236,65 @@
     const host=installShell();if(!host)return;
     const body=document.getElementById('money2Body');if(!body)return;
     qa('[data-money-tab]',host).forEach(btn=>btn.classList.toggle('active',btn.dataset.moneyTab===activeTab));
-    const privacy=document.getElementById('moneyPrivacy');if(privacy){privacy.textContent=data.privacy?'◌':'◉';privacy.title=data.privacy?'金額を表示':'金額を隠す'}
-    body.innerHTML=activeTab==='dashboard'?renderDashboard():activeTab==='transactions'?renderTransactions():activeTab==='rules'?renderRules():renderAssets();
+    body.innerHTML=activeTab==='dashboard'?renderDashboard():activeTab==='transactions'?renderTransactions():activeTab==='calendar'?renderCalendarPage():activeTab==='categories'?renderCategories():activeTab==='rules'?renderRules():renderAssets();
   }
   function transactionRow(tx){
     const cat=transactionCategory(tx),incoming=tx.type==='income',done=isComplete(tx);
     const action=tx.virtualRecurring?'edit-recurring':'edit-entry';
     return `<button class="money3-transaction ${done?'done':''}" type="button" data-money-action="${action}" data-id="${escapeHtml(tx.virtualRecurring?tx.recurringId:tx.id)}"><span class="money3-cat" aria-hidden="true">${escapeHtml(cat.icon)}</span><span class="money3-tx-copy"><strong>${escapeHtml(tx.label||'名称未設定')}</strong><small>${formatMD(tx.date)} ・ ${escapeHtml(cat.label)}${tx.virtualRecurring?' ・ 定期':''}${done?' ・ 完了':''}</small></span><b class="${incoming?'income':'expense'}">${incoming?'+':'−'}${data.privacy?'••••':yen(tx.amount)}</b><i>›</i></button>`;
   }
+  function currentMonthShortfall(){
+    const liquid=currentLiquid();if(liquid===null)return null;
+    const outstanding=monthTransactions(monthKey()).filter(tx=>isOutgoing(tx)&&!isComplete(tx)).reduce((sum,tx)=>sum+n(tx.amount),0);
+    return Math.max(0,outstanding-liquid);
+  }
+  function moneyAmount(value,{signed=false,approx=false}={}){
+    if(data.privacy)return '••••••';
+    const amount=Math.round(n(value)).toLocaleString('ja-JP');
+    return `${approx?'約':''}${signed?(n(value)>=0?'+':'−'):''}¥${amount}`;
+  }
+  function nextMoneyCard(kind,tx){
+    const payment=kind==='payment',emptyTitle=payment?'次の支払い':'次の入金';
+    if(!tx)return `<article class="money5-next-card ${payment?'payment':'income'} empty"><small>${emptyTitle}</small><strong>予定なし</strong><p>—</p></article>`;
+    const approx=!payment&&Boolean(tx.amountApproximate||tx.certainty==='見込み');
+    return `<article class="money5-next-card ${payment?'payment':'income'}"><small>${emptyTitle}</small><time>${escapeHtml(formatMD(tx.date))}</time><strong>${escapeHtml(tx.label||emptyTitle)}</strong><b>${moneyAmount(tx.amount,{approx})}</b></article>`;
+  }
+  function renderFeatureEntrances(){
+    return `<section class="money5-feature-grid" aria-label="Money機能">
+      <button type="button" data-money-tab-jump="transactions"><span>≡</span><b>取引</b></button>
+      <button type="button" data-money-tab-jump="calendar"><span>□</span><b>カレンダー</b></button>
+      <button type="button" data-money-tab-jump="categories"><span>◫</span><b>カテゴリー</b></button>
+      <button type="button" data-money-tab-jump="rules"><span>◇</span><b>計画</b></button>
+      <button type="button" data-money-tab-jump="assets"><span>△</span><b>資産</b></button>
+    </section>`;
+  }
+  function renderEmergencyFund(){
+    const goal=emergencyGoal();
+    if(!goal)return `<section class="money5-defense"><header><div><small>SAFETY FUND</small><h2>生活防衛費</h2></div><button type="button" data-money-action="add-goal">目標設定</button></header><strong>未設定</strong></section>`;
+    const target=Math.max(1,n(goal.target)),current=Math.max(0,n(goal.current)),pct=Math.min(100,Math.max(0,Math.round(current/target*100)));
+    return `<section class="money5-defense"><header><div><small>SAFETY FUND</small><h2>生活防衛費</h2></div><button type="button" data-money-action="edit-goal" data-id="${escapeHtml(goal.id)}">目標設定</button></header><div class="money5-defense-value"><strong>${pct}%</strong><span>${data.privacy?'••••••':`${yen(current)} / ${yen(target)}`}</span></div><div class="money5-defense-bar"><i style="width:${pct}%"></i></div></section>`;
+  }
   function renderDashboard(){
-    const s=summary(),plan=futurePlan(),status=moneyStatus(plan),goal=primaryGoal();
-    const upcoming=expandedTransactions(isoToday(),dateMonthsAhead(2)).filter(tx=>!isComplete(tx)).slice(0,4);
-    const recent=monthTransactions(monthKey()).filter(isComplete).sort((a,b)=>String(b.date).localeCompare(String(a.date))).slice(0,3);
-    const shortage=plan.firstBreak?yen(Math.abs(plan.firstBreak.balance)):'なし';
-    return `<section class="money3-hero ${status.tone}">
-      <div class="money3-hero-head"><div><small>今使える</small><strong>${plan.liquid===null?'未設定':privacyAmount(plan.liquid)}</strong></div><span>${escapeHtml(status.label)}</span></div>
-      <div class="money3-hero-grid"><div><small>1日目安</small><b>${plan.daily===null?'—':privacyAmount(plan.daily)}</b></div><div><small>不足見込み</small><b>${data.privacy&&plan.firstBreak?'••••':shortage}</b></div><div><small>今月収支</small><b>${s.hasData?(data.privacy?'••••':signedYen(s.income-s.outgoing)):'—'}</b></div></div>
-      <p>${escapeHtml(status.text)}</p>
+    const s=summary(monthKey()),plan=futurePlan(),monthShortfall=currentMonthShortfall(),recent=data.transactions.filter(tx=>clean(tx.status,20)!=='deleted'&&String(tx.date||'')<=isoToday()).sort((a,b)=>String(b.date).localeCompare(String(a.date))||String(b.id||'').localeCompare(String(a.id||''))).slice(0,3);
+    const monthNet=s.income-s.outgoing;
+    const advice=monthShortfall>0
+      ?`${plan.nextPayment?`${formatMD(plan.nextPayment.date)}に${clean(plan.nextPayment.label,22)} ${data.privacy?'金額非表示':yen(plan.nextPayment.amount)} の支払いがあります。\n`:''}月末までの未完了支払いに対し、${data.privacy?'資金不足の見込みです。':yen(monthShortfall)+'不足する見込みです。'}`
+      :buildAdvice(plan,emergencyGoal());
+    return `<section class="money5-balance-card">
+      <div class="money5-balance-head"><div><small>今使えるお金</small><strong>${plan.liquid===null?'未設定':moneyAmount(plan.liquid)}</strong></div><button type="button" data-money-tab-jump="assets">口座・資産を見る <span>›</span></button></div>
+      <div class="money5-balance-metrics">
+        <div><small>今日使える</small><b>${plan.daily===null?'—':moneyAmount(plan.daily)}</b></div>
+        <div class="danger"><small>月末不足</small><b>${monthShortfall===null?'—':monthShortfall>0?moneyAmount(-monthShortfall,{signed:true}):'¥0'}</b></div>
+        <div class="${monthNet>=0?'income':'danger'}"><small>今月収支</small><b>${s.hasData?moneyAmount(monthNet,{signed:true}):'—'}</b></div>
+      </div>
+      <div class="money5-balance-line" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
     </section>
-    <section class="money3-quick-actions"><button type="button" data-money-action="add-entry"><span>＋</span>入出金</button><button type="button" data-money-tab-jump="transactions"><span>≡</span>履歴</button><button type="button" data-money-action="add-recurring"><span>↻</span>定期</button></section>
-    <section class="money3-panel"><header><div><small>UP NEXT</small><h2>これからのお金</h2></div><button type="button" data-money-tab-jump="transactions">すべて ›</button></header><div class="money3-feed">${upcoming.length?upcoming.map(transactionRow).join(''):'<p class="money3-empty">予定はありません。</p>'}</div></section>
-    <section class="money3-panel"><header><div><small>RECENT</small><h2>最近の取引</h2></div><button type="button" data-money-tab-jump="transactions">履歴 ›</button></header><div class="money3-feed">${recent.length?recent.map(transactionRow).join(''):'<p class="money3-empty">完了した取引はまだありません。</p>'}</div></section>
-    <details class="money3-calendar-disclosure"><summary><span><small>CALENDAR</small><b>資金カレンダー</b></span><i>開く</i></summary>${renderCalendar()}</details>
-    ${renderGoal(goal)}
-    <section class="money3-advice"><span>YOS</span><p>${escapeHtml(buildAdvice(plan,goal))}</p><button type="button" data-money-action="yos-review">相談</button></section>`;
+    <section class="money5-next-grid">${nextMoneyCard('payment',plan.nextPayment)}${nextMoneyCard('income',plan.nextIncome)}</section>
+    ${renderFeatureEntrances()}
+    <section class="money5-panel money5-home-calendar"><header><div><small>CALENDAR</small><h2>資金カレンダー</h2></div><button type="button" data-money-tab-jump="calendar">すべて見る</button></header>${renderCalendar()}</section>
+    <section class="money5-panel"><header><div><small>RECENT</small><h2>最近の入出金</h2></div><button type="button" data-money-tab-jump="transactions">すべて見る</button></header><div class="money3-feed">${recent.length?recent.map(transactionRow).join(''):'<p class="money3-empty">最近の取引はありません。</p>'}</div></section>
+    <section class="money5-advice"><span class="money5-yos-mark">YOS</span><div><small>YOSからのアドバイス</small><p>${escapeHtml(advice).replace(/\n/g,'<br>')}</p></div><button type="button" data-money-action="yos-review">›</button></section>
+    ${renderEmergencyFund()}`;
   }
   function renderTransactions(){
     let list=monthTransactions(calendarMonth).sort((a,b)=>String(b.date).localeCompare(String(a.date))||String(b.id||'').localeCompare(String(a.id||'')));
@@ -293,6 +343,29 @@
     if(goal)return `今月は赤字予測なし。余剰は「${clean(goal.name,18)}」への配分を検討できます。目標変更時はYOSと配分を見直せます。`;
     return '今月は登録済み予定では赤字予測なし。次に「守るお金」と目標を設定すると、余剰資金の行き先まで判断できます。';
   }
+  function renderCalendarPage(){
+    const dayItems=monthTransactions(calendarMonth).filter(tx=>tx.date===selectedCalendarDate).sort((a,b)=>String(a.id||'').localeCompare(String(b.id||'')));
+    return `<section class="money5-page-title"><div><small>CALENDAR</small><h1>カレンダー</h1><p>支払い・入金・定期収支を月で確認。</p></div></section>
+      <section class="money5-panel money5-calendar-page">${renderCalendar()}</section>
+      <section class="money5-panel"><header><div><small>SELECTED DAY</small><h2>${escapeHtml(formatMD(selectedCalendarDate))}</h2></div><button type="button" data-money-action="add-selected-date">＋取引</button></header><div class="money3-feed">${dayItems.length?dayItems.map(transactionRow).join(''):'<p class="money3-empty">この日の取引はありません。</p>'}</div></section>`;
+  }
+  function previousMonthKey(mk){
+    const [y,m]=mk.split('-').map(Number),d=new Date(y,m-2,1);
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+  }
+  function renderCategories(){
+    const list=monthTransactions(calendarMonth).filter(isOutgoing),total=list.reduce((sum,tx)=>sum+n(tx.amount),0);
+    const previous=monthTransactions(previousMonthKey(calendarMonth)).filter(isOutgoing),prevTotal=previous.reduce((sum,tx)=>sum+n(tx.amount),0);
+    const delta=prevTotal>0?Math.round((total-prevTotal)/prevTotal*100):null;
+    const grouped=CATEGORIES.filter(([id])=>id!=='income').map(([id,label,icon])=>{
+      const amount=list.filter(tx=>transactionCategory(tx).id===id).reduce((sum,tx)=>sum+n(tx.amount),0);
+      return {id,label,icon,amount,pct:total>0?Math.round(amount/total*100):0};
+    }).filter(item=>item.amount>0).sort((a,b)=>b.amount-a.amount);
+    const [year,month]=calendarMonth.split('-').map(Number);
+    return `<section class="money5-page-title"><div><small>CATEGORIES</small><h1>カテゴリー</h1><p>未設定の既存取引も内容から表示分類します。</p></div><div class="money3-month-nav"><button type="button" data-money-action="prev-month">‹</button><strong>${year}年${month}月</strong><button type="button" data-money-action="next-month">›</button></div></section>
+      <section class="money5-category-summary"><div><small>月合計</small><strong>${data.privacy?'••••••':yen(total)}</strong></div><div><small>先月比</small><strong class="${delta!==null&&delta>0?'danger':delta!==null&&delta<0?'income':''}">${delta===null?'—':`${delta>0?'+':''}${delta}%`}</strong></div></section>
+      <section class="money5-panel"><header><div><small>BREAKDOWN</small><h2>カテゴリー別支出</h2></div><span>予定含む</span></header><div class="money5-category-list">${grouped.length?grouped.map(item=>`<article><span class="money5-category-icon">${escapeHtml(item.icon)}</span><div><header><strong>${escapeHtml(item.label)}</strong><b>${data.privacy?'••••':yen(item.amount)}</b></header><div class="money5-category-bar"><i style="width:${item.pct}%"></i></div><small>${item.pct}%</small></div></article>`).join(''):'<p class="money3-empty">この月の支出はありません。</p>'}</div></section>`;
+  }
   function renderAccounts(){
     const total=currentLiquid();
     const rows=data.accounts.length?data.accounts.map(a=>`<button class="money2-account" type="button" data-money-action="edit-account" data-id="${escapeHtml(a.id)}"><span>${accountIcon(a.type)}</span><div><strong>${escapeHtml(a.name)}</strong><small>${accountType(a.type)}${a.updatedAt?` ・ ${formatUpdated(a.updatedAt)}`:''}</small></div><b>${privacyAmount(a.balance)}</b></button>`).join(''):`<div class="money2-empty">銀行口座・現金・電子マネーを登録すると、合計残高と資金繰りに反映されます。</div>`;
@@ -316,7 +389,7 @@
   function renderAssets(){
     const debt=totalDebt(),liquid=currentLiquid()??0,assets=data.assets.reduce((sum,a)=>sum+n(a.value),0),net=netWorth();
     const accounts=data.accounts.length?data.accounts.map(a=>`<button class="money2-account" type="button" data-money-action="edit-account" data-id="${escapeHtml(a.id)}"><span>${accountIcon(a.type)}</span><div><strong>${escapeHtml(a.name)}</strong><small>${accountType(a.type)}${a.updatedAt?` ・ ${formatUpdated(a.updatedAt)}`:''}</small></div><b>${privacyAmount(a.balance)}</b></button>`).join(''):'<p class="money3-empty">口座・現金・電子マネーを登録できます。</p>';
-    return `<section class="money3-networth"><div><small>純資産</small><strong>${data.privacy?'••••••':signedYen(net)}</strong><p>現金・預金＋資産−借金</p></div><div class="money3-networth-mini"><span><small>現金等</small><b>${data.privacy?'••••':yen(liquid)}</b></span><span><small>資産</small><b>${data.privacy?'••••':yen(assets)}</b></span><span><small>負債</small><b>${data.privacy?'••••':yen(debt)}</b></span></div></section>
+    return `<section class="money5-page-title"><div><small>ASSETS</small><h1>資産</h1><p>口座・資産・負債を一つの現在地で確認。</p></div><button id="moneyPrivacy" class="money5-privacy-toggle" type="button">${data.privacy?'金額を表示':'金額を隠す'}</button></section><section class="money3-networth"><div><small>純資産</small><strong>${data.privacy?'••••••':signedYen(net)}</strong><p>現金・預金＋資産−借金</p></div><div class="money3-networth-mini"><span><small>現金等</small><b>${data.privacy?'••••':yen(liquid)}</b></span><span><small>資産</small><b>${data.privacy?'••••':yen(assets)}</b></span><span><small>負債</small><b>${data.privacy?'••••':yen(debt)}</b></span></div></section>
     <section class="money3-panel"><header><div><small>ACCOUNTS</small><h2>口座・現金</h2></div><button type="button" data-money-action="refresh-balances">残高更新</button><button type="button" data-money-action="add-account">＋追加</button></header>${accounts}</section>
     <section class="money3-panel"><header><div><small>ASSETS</small><h2>投資・その他資産</h2></div><button type="button" data-money-action="add-asset">＋追加</button></header>${data.assets.length?data.assets.map(a=>`<button class="money2-rule-row" type="button" data-money-action="edit-asset" data-id="${escapeHtml(a.id)}"><div><strong>${escapeHtml(a.name)}</strong><small>${assetType(a.type)}</small></div><span>${data.privacy?'••••':yen(a.value)}</span></button>`).join(''):'<p class="money3-empty">投資・その他資産を追加すると純資産に反映されます。</p>'}</section>`;
   }
@@ -328,12 +401,15 @@
     if(btn.dataset.moneyTabJump){activeTab=btn.dataset.moneyTabJump;render();return}
     if(btn.dataset.moneyFilter){transactionFilter=btn.dataset.moneyFilter;render();return}
     const action=btn.dataset.moneyAction;
+    if(btn.id==='moneyMenuButton'){document.getElementById('menuDialog')?.showModal();return}
     if(btn.id==='moneyPrivacy'){data.privacy=!data.privacy;save();return}
     if(btn.id==='moneyQuickAdd'){openEntryDialog(isoToday());return}
-    if(btn.dataset.moneyDate){openEntryDialog(btn.dataset.moneyDate);return}
+    if(btn.dataset.moneyDate){selectedCalendarDate=btn.dataset.moneyDate;activeTab='calendar';render();return}
     if(!action)return;
-    if(action==='prev-month'||action==='next-month'){const [y,m]=calendarMonth.split('-').map(Number),d=new Date(y,m-1+(action==='next-month'?1:-1),1);calendarMonth=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;render();return}
+    if(action==='back-home'){document.querySelector('.home-nav')?.click();return}
+    if(action==='prev-month'||action==='next-month'){const [y,m]=calendarMonth.split('-').map(Number),d=new Date(y,m-1+(action==='next-month'?1:-1),1);calendarMonth=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;selectedCalendarDate=`${calendarMonth}-01`;render();return}
     if(action==='add-entry')openEntryDialog(isoToday());
+    if(action==='add-selected-date')openEntryDialog(selectedCalendarDate);
     if(action==='edit-entry')openEntryDialog(isoToday(),data.transactions.find(x=>x.id===btn.dataset.id));
     if(action==='add-recurring')openRecurringDialog();
     if(action==='edit-recurring')openRecurringDialog(data.recurring.find(x=>x.id===btn.dataset.id));

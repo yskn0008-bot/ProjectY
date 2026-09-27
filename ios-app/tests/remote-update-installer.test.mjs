@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
 const source = fs.readFileSync(new URL('../scriptable/remote-widgets/YOS Remote Update Installer.js', import.meta.url), 'utf8');
-const SOURCE_SHA = '319acf06bfaa265b2d9bf8b62de564ebb36ad59e';
+const SOURCE_SHA = '622d733f8634b30d32c3657fdcbf2ae704299607';
 const TARGETS = [
   'リモコン.js','テレビリモコン.js','エアコンリモコン.js','エアコンウィジェット.js',
   '照明リモコン.js','照明ウィジェット.js','リモコン/内部/Tapo共通.js','リモコン整理.js'
@@ -83,7 +83,7 @@ test('successful update writes Japanese scripts, internal folder, transformed li
   const hub=iCloud.readString('/icloud/リモコン.js');
   assert.match(hub,/テレビリモコン/);assert.match(hub,/リモコン\/内部\/Tapo共通/);assert.doesNotMatch(hub,/YOS BRAVIA Remote/);
   assert.match(iCloud.readString('/icloud/リモコン整理.js'),/リモコン整理 v2\.0/);
-  assert.equal(requests.length,7);
+  assert.equal(requests.length,8);
   assert.equal(opened.length,1);assert.match(opened[0],/scriptName=%E3%83%AA%E3%83%A2%E3%82%B3%E3%83%B3/);
   assert.equal(iCloud.fileExists('/icloud/YOS Remote Hub.js'),false);
   assert.equal(iCloud.fileExists('/icloud/YOS Light Widget.js'),false);
