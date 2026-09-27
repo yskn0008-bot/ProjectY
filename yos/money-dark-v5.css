@@ -84,6 +84,9 @@ body[data-domain="money"] textarea{font:inherit}
   font-size:17px;font-weight:800;
 }
 .money5-header-actions button:active{transform:scale(.96);border-color:var(--money5-gold)}
+.money5-header-actions svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.money5-notify{position:relative}
+.money5-notify>i{position:absolute;right:7px;top:7px;width:5px;height:5px;border:1px solid #0A1630;border-radius:50%;background:var(--money5-red)}
 .money5-body{display:grid;gap:14px;width:100%;max-width:100%}
 
 /* Main balance */
