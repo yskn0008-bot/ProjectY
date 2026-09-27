@@ -1,0 +1,126 @@
+name: Clarity Next v0
+
+on:
+  pull_request:
+    paths:
+      - 'tools/clarity-next/**'
+      - '.github/workflows/clarity-next.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'tools/clarity-next/**'
+      - '.github/workflows/clarity-next.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Source contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -s tools/clarity-next/tests -v
+
+      - name: Install pinned Cherri v2.3.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          url='https://github.com/electrikmilk/cherri/releases/download/v2.3.0/cherri_linux-x86_64.zip'
+          expected='7ab2c384b7b26e7c72a30a8dfa56f89dae12c4068b7951bc1e3193f3698edbe9'
+          curl -fsSL "$url" -o /tmp/cherri.zip
+          printf '%s  %s\n' "$expected" /tmp/cherri.zip | sha256sum -c -
+          mkdir -p /tmp/cherri
+          unzip -q /tmp/cherri.zip -d /tmp/cherri
+          binary="$(find /tmp/cherri -type f -name cherri -print -quit)"
+          test -n "$binary"
+          sudo install -m 0755 "$binary" /usr/local/bin/cherri
+          cherri --version
+
+      - name: Compile Clarity Next
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd tools/clarity-next
+          rm -f './Clarity Next_unsigned.shortcut' './Clarity Next.plist'
+          cherri './Clarity Next.cherri' --skip-sign --debug
+          test -f './Clarity Next_unsigned.shortcut'
+          mkdir -p artifacts
+          cp './Clarity Next_unsigned.shortcut' artifacts/Clarity-Next-unsigned.shortcut
+
+      - name: Inspect runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import plistlib
+          from pathlib import Path
+          p=Path('tools/clarity-next/artifacts/Clarity-Next-unsigned.shortcut')
+          root=plistlib.loads(p.read_bytes())
+          actions=root['WFWorkflowActions']
+          ids=[a.get('WFWorkflowActionIdentifier','') for a in actions]
+          blob=repr(root)
+          assert sum(i=='is.workflow.actions.dictatetext' for i in ids)==1, ids
+          assert sum(i=='is.workflow.actions.askllm' for i in ids)==1, ids
+          assert any(i.endswith('runworkflow') for i in ids), ids
+          assert 'YOS_OpenApp' in blob
+          assert 'NEXT_DEVICE' in blob
+          assert 'NEXT_TIMER' in blob
+          assert 'NEXT_CALENDAR' in blob
+          assert 'NEXT_REMINDER' in blob
+          assert 'unsupported_executor' in blob
+          assert 'Clarity Next Ledger.txt' in blob
+          assert any(i.endswith('setbrightness') for i in ids), ids
+          assert any(i.endswith('setvolume') for i in ids), ids
+          assert any(i.endswith('timer.start') for i in ids), ids
+          assert any(i.endswith('addnewevent') for i in ids), ids
+          assert any(i.endswith('addnewreminder') for i in ids), ids
+          print('Clarity Next runtime contract: PASS')
+          PY
+
+      - name: Secret scan
+        shell: bash
+        run: |
+          set -euo pipefail
+          if grep -RIE --exclude='*.shortcut' '(gh[pousr]_[A-Za-z0-9_]{20,}|sk-[A-Za-z0-9_-]{20,}|BEGIN [A-Z ]*PRIVATE KEY|192\.168\.[0-9]+\.[0-9]+)' tools/clarity-next; then
+            echo 'Potential secret/private network value found.' >&2
+            exit 1
+          fi
+
+      - name: Sign
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/clarity-factory/sign_with_hubsign.py \
+            --input tools/clarity-next/artifacts/Clarity-Next-unsigned.shortcut \
+            --output tools/clarity-next/artifacts/Clarity-Next-signed.shortcut \
+            --name 'Clarity Next' \
+            2>&1 | tee tools/clarity-next/artifacts/hubsign.log
+
+      - name: Verify signature
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('tools/clarity-next/artifacts/Clarity-Next-signed.shortcut')
+          data=p.read_bytes()
+          assert data.startswith(b'AEA1'), data[:8]
+          assert len(data)>500, len(data)
+          print(f'Clarity-Next-signed.shortcut: AEA1 PASS ({len(data)} bytes)')
+          PY
+
+      - name: Upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: clarity-next-v0
+          path: |
+            tools/clarity-next/artifacts/Clarity-Next-unsigned.shortcut
+            tools/clarity-next/artifacts/Clarity-Next-signed.shortcut
+            tools/clarity-next/artifacts/hubsign.log
+          if-no-files-found: error
