@@ -143,7 +143,7 @@ try{
   await expectText('.money-decision-warning','89,952円不足');
 
   await page.locator('.money-decision-card').click();
-  await expectText('#brandTitle','MY MONEY');
+  await expectText('.money5-brand','MY MONEY');
   await page.locator('.money5-brand').click();
   await expectText('#brandTitle','MY WAY');
 
@@ -160,7 +160,7 @@ try{
   await expectText('#brandTitle','MY WAY');
 
   await page.locator('.money-nav').click();
-  await expectText('#brandTitle','MY MONEY');
+  await expectText('.money5-brand','MY MONEY');
   await expectText('#money2Body','今使えるお金');
   await expectText('#money2Body','4,588');
   await expectText('#money2Body','月末不足');
