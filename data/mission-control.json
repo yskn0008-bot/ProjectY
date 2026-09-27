@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-28T07:15:28+09:00",
+  "updated_at": "2026-09-28T07:27:35+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -165,6 +165,27 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-6a70cd97eebd",
+      "title": "chore: refresh Money overview assets",
+      "completed_at": "2026-09-27T22:27:22Z",
+      "result": "GitHub mainへ反映（6a70cd9）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/6a70cd97eebd80849c370d4d8ac7823b079f408d"
+    },
+    {
+      "id": "github-commit-fd8ca4afaed4",
+      "title": "style: compress Money home into one-glance overview",
+      "completed_at": "2026-09-27T22:27:12Z",
+      "result": "GitHub mainへ反映（fd8ca4a）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/fd8ca4afaed417023540aa621db874b9e7adc543"
+    },
+    {
+      "id": "github-commit-cda20281c618",
+      "title": "ui: make Money home glanceable at a glance",
+      "completed_at": "2026-09-27T22:26:58Z",
+      "result": "GitHub mainへ反映（cda2028）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/cda20281c6182d8c3112d4395c78e656aaa0bccb"
+    },
+    {
       "id": "github-commit-c4b6d244b278",
       "title": "chore: refresh Money dashboard runtime",
       "completed_at": "2026-09-27T22:15:14Z",
@@ -177,27 +198,6 @@
       "completed_at": "2026-09-27T22:15:09Z",
       "result": "GitHub mainへ反映（9656406）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/9656406a2a3006c512c93916a1229b920ee334b3"
-    },
-    {
-      "id": "github-commit-c1c273687b2e",
-      "title": "chore: refresh Money runtime asset",
-      "completed_at": "2026-09-27T22:12:01Z",
-      "result": "GitHub mainへ反映（c1c2736）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/c1c273687b2efbdefe0479e3658bb5033e31dbb2"
-    },
-    {
-      "id": "github-commit-66aa1a3b78fb",
-      "title": "fix: remove duplicate Money feature shortcuts",
-      "completed_at": "2026-09-27T22:11:49Z",
-      "result": "GitHub mainへ反映（66aa1a3）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/66aa1a3b78fb81f713e352f3159ad6afc6dfc1c2"
-    },
-    {
-      "id": "github-commit-a6f41155978e",
-      "title": "test(clarity-next): lock title preservation",
-      "completed_at": "2026-09-27T22:09:01Z",
-      "result": "GitHub mainへ反映（a6f4115）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/a6f41155978e0c8412f75276ba0b55e894fe3a1c"
     },
     {
       "id": "complete-002",
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-28T07:15:28+09:00",
+      "last_update": "2026-09-28T07:27:35+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -315,7 +315,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-28T07:15:28+09:00",
+      "last_update": "2026-09-28T07:27:35+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-28T07:15:28+09:00",
+      "last_update": "2026-09-28T07:27:35+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "72c2a316768ec31e2e2600bcddcc32e807c9463647d2670903adcf4f783f4abd"
+  "github_snapshot_hash": "7679f878d095bd11db2acd0ca3060b229d103fecad8c3d699ecfc9bea8c17b60"
 }
