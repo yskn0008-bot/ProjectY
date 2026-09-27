@@ -180,17 +180,17 @@ for actionItem in @actionsRaw {
     }
 
     if executor == "NEXT_CALENDAR" && module == "calendar" && operation == "create" {
-        const title = "{parameters['title']}"
+        const eventTitle = "{parameters['title']}"
         const startText = "{parameters['start']}"
         const endText = "{parameters['end']}"
-        if !title || !startText || !endText {
+        if !eventTitle || !startText || !endText {
             alert("予定のタイトル・開始・終了を確認してください", "Clarity Next")
             stop()
         }
         const startDate = getDates(startText)
         const endDate = getDates(endText)
         rawAction("is.workflow.actions.addnewevent", {
-            "WFCalendarItemTitle": "{title}",
+            "WFCalendarItemTitle": "{eventTitle}",
             "WFCalendarItemCalendar": "プライベート",
             "WFCalendarItemDates": true,
             "WFCalendarItemStartDate": "${startDate}",
@@ -199,26 +199,26 @@ for actionItem in @actionsRaw {
             "ShowWhenRun": false,
             "WFCalendarItemNotes": "CLARITY-NEXT-ID:{requestNumber}-{actionId}"
         })
-        const calendarApplied = text("{CurrentDate}\t{requestNumber}\t{actionId}\tAPPLIED\tcalendar\t{title}\n")
+        const calendarApplied = text("{CurrentDate}\t{requestNumber}\t{actionId}\tAPPLIED\tcalendar\t{eventTitle}\n")
         appendResolvedFile(ledgerFile, calendarApplied)
     }
 
     if executor == "NEXT_REMINDER" && module == "reminder" && operation == "create" {
-        const title = "{parameters['title']}"
+        const reminderTitle = "{parameters['title']}"
         const whenText = "{parameters['date_time']}"
-        if !title || !whenText {
+        if !reminderTitle || !whenText {
             alert("リマインダーの内容・日時を確認してください", "Clarity Next")
             stop()
         }
         const alertDate = getDates(whenText)
         rawAction("is.workflow.actions.addnewreminder", {
-            "WFCalendarItemTitle": "{title}",
+            "WFCalendarItemTitle": "{reminderTitle}",
             "WFCalendarItemAlert": true,
             "WFAlertTrigger": "At Time",
             "WFAlertCustomTime": "${alertDate}",
             "WFCalendarItemNotes": "CLARITY-NEXT-ID:{requestNumber}-{actionId}"
         })
-        const reminderApplied = text("{CurrentDate}\t{requestNumber}\t{actionId}\tAPPLIED\treminder\t{title}\n")
+        const reminderApplied = text("{CurrentDate}\t{requestNumber}\t{actionId}\tAPPLIED\treminder\t{reminderTitle}\n")
         appendResolvedFile(ledgerFile, reminderApplied)
     }
 
