@@ -275,31 +275,39 @@
     return `<section class="money5-defense"><header><div><small>SAFETY FUND</small><h2>生活防衛費</h2></div><button type="button" data-money-action="edit-goal" data-id="${escapeHtml(goal.id)}">目標設定</button></header><div class="money5-defense-value"><strong>${pct}%</strong><span>${data.privacy?'••••••':`${yen(current)} / ${yen(target)}`}</span></div><div class="money5-defense-bar"><i style="width:${pct}%"></i></div></section>`;
   }
   function renderDashboard(){
-    const s=summary(monthKey()),plan=futurePlan(),monthShortfall=currentMonthShortfall();
+    const s=summary(monthKey()),plan=futurePlan(),monthShortfall=currentMonthShortfall(),goal=emergencyGoal();
     const monthNet=s.income-s.outgoing;
     const advice=monthShortfall>0
-      ?`${plan.nextPayment?`${formatMD(plan.nextPayment.date)}に${clean(plan.nextPayment.label,22)} ${data.privacy?'金額非表示':yen(plan.nextPayment.amount)} の支払いがあります。\n`:''}月末までの未完了支払いに対し、${data.privacy?'資金不足の見込みです。':yen(monthShortfall)+'不足する見込みです。'}`
-      :buildAdvice(plan,emergencyGoal());
+      ?`${plan.nextPayment?`${formatMD(plan.nextPayment.date)}に${clean(plan.nextPayment.label,22)} ${data.privacy?'金額非表示':yen(plan.nextPayment.amount)} の支払い。\n`:''}月末まで ${data.privacy?'不足見込み':yen(monthShortfall)+'不足見込み'}。`
+      :buildAdvice(plan,goal);
     const status=monthShortfall>0?'不足見込み':monthNet>=0?'黒字見込み':'要確認';
-    return `<section class="money5-overview">
-      <div class="money5-overview-top">
+    const target=goal?Math.max(1,n(goal.target)):0,current=goal?Math.max(0,n(goal.current)):0,pct=goal?Math.min(100,Math.max(0,Math.round(current/target*100))):0;
+    return `<section class="money6-home">
+      <header class="money6-balance">
         <div><small>今使えるお金</small><strong>${plan.liquid===null?'未設定':moneyAmount(plan.liquid)}</strong></div>
         <span class="${monthShortfall>0?'danger':'safe'}">${status}</span>
-      </div>
-      <div class="money5-overview-metrics">
-        <div><small>今日使える</small><b>${plan.daily===null?'—':moneyAmount(plan.daily)}</b></div>
+      </header>
+      <div class="money6-metrics">
+        <div><small>今日</small><b>${plan.daily===null?'—':moneyAmount(plan.daily)}</b></div>
         <div class="danger"><small>月末不足</small><b>${monthShortfall===null?'—':monthShortfall>0?moneyAmount(-monthShortfall,{signed:true}):'¥0'}</b></div>
         <div class="${monthNet>=0?'income':'danger'}"><small>今月収支</small><b>${s.hasData?moneyAmount(monthNet,{signed:true}):'—'}</b></div>
       </div>
-      <div class="money5-overview-flow">
-        <div class="payment"><small>次の支払い</small>${plan.nextPayment?`<b>${escapeHtml(formatMD(plan.nextPayment.date))} ${escapeHtml(plan.nextPayment.label||'支払い')}</b><strong>${moneyAmount(plan.nextPayment.amount)}</strong>`:'<b>予定なし</b>'}</div>
-        <span aria-hidden="true">→</span>
-        <div class="income"><small>次の入金</small>${plan.nextIncome?`<b>${escapeHtml(formatMD(plan.nextIncome.date))} ${escapeHtml(plan.nextIncome.label||'入金')}</b><strong>${moneyAmount(plan.nextIncome.amount,{approx:Boolean(plan.nextIncome.amountApproximate||plan.nextIncome.certainty==='見込み')})}</strong>`:'<b>予定なし</b>'}</div>
+      <div class="money6-divider"></div>
+      <div class="money6-timeline">
+        <div><small>次の支払い</small>${plan.nextPayment?`<b>${escapeHtml(formatMD(plan.nextPayment.date))}　${escapeHtml(plan.nextPayment.label||'支払い')}</b><strong class="expense">${moneyAmount(plan.nextPayment.amount)}</strong>`:'<b>予定なし</b>'}</div>
+        <span>→</span>
+        <div><small>次の入金</small>${plan.nextIncome?`<b>${escapeHtml(formatMD(plan.nextIncome.date))}　${escapeHtml(plan.nextIncome.label||'入金')}</b><strong class="income">${moneyAmount(plan.nextIncome.amount,{approx:Boolean(plan.nextIncome.amountApproximate||plan.nextIncome.certainty==='見込み')})}</strong>`:'<b>予定なし</b>'}</div>
       </div>
-      <button class="money5-assets-link" type="button" data-money-tab-jump="assets">口座・資産の内訳を見る <span>›</span></button>
-    </section>
-    <section class="money5-glance-advice"><span class="money5-yos-mark">YOS</span><div><small>今いちばん重要</small><p>${escapeHtml(advice).replace(/\n/g,'<br>')}</p></div></section>
-    ${renderEmergencyFund()}`;
+      <div class="money6-divider"></div>
+      <div class="money6-action">
+        <span class="money5-yos-mark">YOS</span><div><small>今いちばん重要</small><p>${escapeHtml(advice).replace(/\n/g,'<br>')}</p></div>
+      </div>
+      <div class="money6-divider"></div>
+      <button class="money6-safety" type="button" data-money-action="${goal?'edit-goal':'add-goal'}" ${goal?`data-id="${escapeHtml(goal.id)}"`:''}>
+        <div><small>生活防衛費</small><b>${goal?`${pct}%　${data.privacy?'••••••':yen(current)+' / '+yen(target)}`:'未設定'}</b></div><span>›</span>
+      </button>
+      <button class="money6-assets" type="button" data-money-tab-jump="assets">口座・資産の内訳 <span>›</span></button>
+    </section>`;
   }
   function renderTransactions(){
     let list=monthTransactions(calendarMonth).sort((a,b)=>String(b.date).localeCompare(String(a.date))||String(b.id||'').localeCompare(String(a.id||'')));
