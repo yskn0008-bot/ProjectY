@@ -227,8 +227,7 @@ for actionItem in @actionsRaw {
             "WFCalendarItemStartDate": "${startDate}",
             "WFCalendarItemEndDate": "${endDate}",
             "WFCalendarItemAllDay": false,
-            "ShowWhenRun": false,
-            "WFCalendarItemNotes": "CLARITY-NEXT-ID:{requestNumber}-{actionId}"
+            "ShowWhenRun": false
         })
         const calendarApplied = text("{CurrentDate}\t{requestNumber}\t{actionId}\tAPPLIED\tcalendar\t{eventTitle}\n")
         appendToFile("Clarity Next Ledger.txt", calendarApplied)
@@ -248,8 +247,7 @@ for actionItem in @actionsRaw {
             "WFCalendarItemTitle": "{reminderTitle}",
             "WFCalendarItemAlert": true,
             "WFAlertTrigger": "At Time",
-            "WFAlertCustomTime": "${alertDate}",
-            "WFCalendarItemNotes": "CLARITY-NEXT-ID:{requestNumber}-{actionId}"
+            "WFAlertCustomTime": "${alertDate}"
         })
         const reminderApplied = text("{CurrentDate}\t{requestNumber}\t{actionId}\tAPPLIED\treminder\t{reminderTitle}\n")
         appendToFile("Clarity Next Ledger.txt", reminderApplied)

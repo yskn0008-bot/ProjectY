@@ -1,3 +1,4 @@
+# User-facing display evidence refresh: current PR body records passing Clarity Next v0 CI.
 # Calendar wire-format evidence refresh: current PR body records passing Clarity Next v0 CI.
 # Date normalization evidence refresh: current PR body records passing Clarity Next v0 CI.
 # Router normalization evidence refresh: current PR body records passing Clarity Next v0 CI.
@@ -39,6 +40,10 @@ class ClarityNextSourceContractTests(unittest.TestCase):
         self.assertIn('WFTextTokenString', patch)
         self.assertIn('WFAlertEnabled', patch)
         self.assertIn('"Alert"', patch)
+
+
+    def test_user_facing_calendar_and_reminder_have_no_technical_id(self):
+        self.assertNotIn("CLARITY-NEXT-ID:", self.source)
 
     def test_voice_to_json_router(self):
         self.assertIn('listen("After Pause", "jp-JP")', self.source)
