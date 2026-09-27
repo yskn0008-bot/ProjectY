@@ -2,9 +2,10 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 
-const [shared,moneyUi,moneyMaster,dashboard,morning,payment,moneyAlert] = await Promise.all([
+const [shared,moneyUi,moneyRuntime,moneyMaster,dashboard,morning,payment,moneyAlert] = await Promise.all([
   readFile(new URL('../shared-state-v1.js',import.meta.url),'utf8'),
   readFile(new URL('../money-v2.js',import.meta.url),'utf8'),
+  readFile(new URL('../money-v2-runtime-v4.js',import.meta.url),'utf8'),
   readFile(new URL('../money-master-v1.js',import.meta.url),'utf8'),
   readFile(new URL('../task-dashboard.js',import.meta.url),'utf8'),
   readFile(new URL('../morning-brief-bridge-v1.js',import.meta.url),'utf8'),
@@ -41,6 +42,19 @@ test('Money UI reads future data beyond current month and has live verification'
   assert.match(moneyUi,/今日使える金額/);
   assert.match(moneyUi,/次の入金/);
   assert.match(moneyUi,/支払い後の不足判定/);
+});
+
+
+test('Money modern ledger keeps categories, history and recurring rules inside yos-money-v2',()=>{
+  for(const token of ['CATEGORIES','renderTransactions','transactionQuery','transactionFilter','openRecurringDialog','recurringForMonth','expandedTransactions']) assert.match(moneyRuntime,new RegExp(token));
+  assert.match(moneyRuntime,/category:clean\(fd\.get\('category'\)/);
+  assert.match(moneyRuntime,/data\.recurring/);
+  assert.match(moneyRuntime,/取引履歴/);
+  assert.match(moneyRuntime,/定期収支/);
+  assert.match(moneyRuntime,/この取引/);
+  assert.match(moneyRuntime,/data\.transactions=data\.transactions\.filter/);
+  assert.match(moneyRuntime,/KEY='yos-money-v2'/);
+  assert.doesNotMatch(moneyRuntime,/yos-money-v3|money-ledger-v1/);
 });
 
 test('Morning Brief reads only existing Money projection',()=>{
