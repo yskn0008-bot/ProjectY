@@ -142,7 +142,7 @@
       const day=Math.min(lastDay,Math.max(1,Math.round(n(rule.day)||Number(start.slice(8,10))||1)));
       const date=`${mk}-${String(day).padStart(2,'0')}`;
       if(date<start||(end&&date>end))return [];
-      if(data.transactions.some(tx=>tx.recurringId===rule.id&&tx.date===date))return [];
+      if(data.transactions.some(tx=>(tx.recurringId===rule.id&&tx.date===date)||(tx.date===date&&tx.type===rule.type&&clean(tx.label,60)===clean(rule.label,60)&&n(tx.amount)===n(rule.amount))))return [];
       return [{id:`rec-${rule.id}-${date}`,recurringId:rule.id,virtualRecurring:true,date,type:rule.type,label:rule.label,amount:rule.amount,category:rule.category,status:'planned'}];
     });
   }
