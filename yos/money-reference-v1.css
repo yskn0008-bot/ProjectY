@@ -4,7 +4,7 @@
   --money-muted:#68766f;--money-line:rgba(29,55,43,.10);--money-accent:#176b5a;--money-accent-soft:#dcece6;
   --money-danger:#a84f3b;--money-danger-soft:#f8e7e2;--money-income:#2d7b5b;--money-expense:#a85a47;
   display:block!important;min-height:calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 116px);
-  margin:0 -12px;padding:0 12px 24px;background:var(--money-bg);color:var(--money-ink);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Helvetica Neue",sans-serif;
+  width:100%;max-width:100%;margin:0;padding:0 0 24px;background:var(--money-bg);color:var(--money-ink);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Helvetica Neue",sans-serif;
 }
 .money-world[data-money-v2="1"][hidden]{display:none!important}
 .money-reference-v1 button,.money-reference-v1 input,.money-reference-v1 select,.money-reference-v1 textarea{font:inherit}
