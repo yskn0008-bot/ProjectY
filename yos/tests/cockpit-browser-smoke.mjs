@@ -71,6 +71,28 @@ try{
   for(const label of ['今日の運転席','今日','今やる','次','予定','お金','重要なこと'])assert.match(visual.text,new RegExp(label),`missing ${label}`);
   for(const value of ['本人確認を終える','次の作業','既存の予定','4,588円','本人操作'])assert.match(visual.text,new RegExp(value),`missing seeded value ${value}`);
 
+  const moneyVisual=await page.evaluate(()=>{
+    const current=document.querySelector('.money-decision-current strong');
+    const warning=document.querySelector('.money-decision-warning strong');
+    const next=document.querySelector('.money-decision-next strong');
+    const card=document.querySelector('.money-decision-card');
+    const payment=document.querySelector('.money-decision-payment');
+    const income=document.querySelector('.money-decision-income');
+    return {
+      currentSize:current?parseFloat(getComputedStyle(current).fontSize):0,
+      warningSize:warning?parseFloat(getComputedStyle(warning).fontSize):0,
+      nextSize:next?parseFloat(getComputedStyle(next).fontSize):0,
+      cardRadius:card?parseFloat(getComputedStyle(card).borderRadius):0,
+      paymentAccent:payment?getComputedStyle(payment,'::before').backgroundColor:'',
+      incomeAccent:income?getComputedStyle(income,'::before').backgroundColor:''
+    };
+  });
+  assert.ok(moneyVisual.currentSize>=28,`Money current balance must be the visual hero: ${moneyVisual.currentSize}px`);
+  assert.ok(moneyVisual.warningSize>=12,`Money shortage warning must be readable: ${moneyVisual.warningSize}px`);
+  assert.ok(moneyVisual.nextSize>=11,`Money next payment/income must be readable: ${moneyVisual.nextSize}px`);
+  assert.ok(moneyVisual.cardRadius>=14,'Money card must keep the MY WAY rounded-surface language');
+  assert.notEqual(moneyVisual.paymentAccent,moneyVisual.incomeAccent,'payment and income need distinct non-color-text accents');
+
   const authVisible=await page.locator('#taskDashboardAuth').isVisible();
   assert.equal(authVisible,false,'fresh cached Tasks must not add auth friction to the first view');
 

@@ -281,6 +281,8 @@
     article.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();open()}});
 
     const head=el('div','money-decision-head');
+    const titleWrap=el('div','money-decision-title');
+    titleWrap.append(el('span','money-decision-mark','¥'),el('small','cockpit-label','お金'));
     const goalPct=Number.isFinite(Number(money?.goalProgressPercent))?Math.min(100,Math.max(0,Math.round(Number(money.goalProgressPercent)))):null;
     const goalProgressLabel=money?.goal?`${money.goal}${goalPct===null?'':` ${goalPct}%`} ›`:'Money ›';
     const goalOpen=el('span','money-decision-open',goalProgressLabel);
@@ -288,7 +290,7 @@
       const checkpoint=money.goalCheckpoint!==null&&money.goalCheckpoint>0?` ・ 第1チェック ${moneyYen(money.goalCheckpoint)}`:'';
       goalOpen.setAttribute('aria-label',`${money.goal} 進捗 ${moneyYen(money.goalCurrent)} / ${moneyYen(money.goalTarget)}${checkpoint}`);
     }
-    head.append(el('small','cockpit-label','お金'),goalOpen);
+    head.append(titleWrap,goalOpen);
     article.append(head);
 
     const top=el('div','money-decision-top');
@@ -297,14 +299,40 @@
     top.append(current);
     if(money?.shortageText){
       const warning=el('div','money-decision-warning');
-      warning.append(el('small','','不足見込み'),el('strong','',money.shortageText));
+      warning.append(el('span','money-decision-alert-icon','!'));
+      const warningCopy=el('div','money-decision-warning-copy');
+      const shortageMatch=String(money.shortageText).match(/^(.*?)\s+(不足あり|[\d,]+円不足)$/);
+      const shortageScope=shortageMatch?.[1]||'';
+      const shortageValue=shortageMatch?.[2]||money.shortageText;
+      warningCopy.append(
+        el('small','',`不足見込み${shortageScope?` · ${shortageScope}`:''}`),
+        el('strong','',shortageValue)
+      );
+      warning.append(warningCopy);
       top.append(warning);
     }
     article.append(top);
 
+    const eventDate=tx=>tx?moneyMD(tx.viewDate||tx.date):'';
+    const eventValue=(tx,fallback)=>{
+      if(!tx)return fallback;
+      const label=clean(tx.label,70)||'名称未設定',number=amountNumber(tx.amount);
+      const approx=tx.type==='income'&&(tx.amountApproximate===true||clean(tx.certainty,20)==='見込み');
+      const amount=number===null?'':money?.privacy?'非表示':`${approx?'約':''}${moneyYen(number)}`;
+      return [label,amount].filter(Boolean).join(' ');
+    };
+    const paymentDate=eventDate(money?.nextPayment),incomeDate=eventDate(money?.nextIncome);
     const next=el('div','money-decision-next');
-    const payment=el('div');payment.append(el('small','','次の支払い'),el('strong','',money?.nextPaymentText||'予定なし'));
-    const income=el('div');income.append(el('small','','次の入金'),el('strong','',money?.nextIncomeText||'未設定'));
+    const payment=el('div','money-decision-payment');
+    payment.append(
+      el('small','',`次の支払い${paymentDate?` · ${paymentDate}`:''}`),
+      el('strong','',eventValue(money?.nextPayment,money?.nextPaymentText||'予定なし'))
+    );
+    const income=el('div','money-decision-income');
+    income.append(
+      el('small','',`次の入金${incomeDate?` · ${incomeDate}`:''}`),
+      el('strong','',eventValue(money?.nextIncome,money?.nextIncomeText||'未設定'))
+    );
     next.append(payment,income);article.append(next);
 
     if(Array.isArray(money?.timeline)&&money.timeline.length){
