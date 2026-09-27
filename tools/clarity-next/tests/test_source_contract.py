@@ -1,7 +1,9 @@
 from pathlib import Path
 import unittest
 
-SOURCE = Path(__file__).resolve().parents[1] / "Clarity Next.cherri"
+ROOT = Path(__file__).resolve().parents[1]
+SOURCE = ROOT / "Clarity Next.cherri"
+PATCH = ROOT / "patch_ledger_persistence.py"
 
 class ClarityNextSourceContractTests(unittest.TestCase):
     @classmethod
@@ -16,6 +18,14 @@ class ClarityNextSourceContractTests(unittest.TestCase):
     def test_ledger_source_does_not_eagerly_open_file(self):
         self.assertNotIn('getFile("Clarity Next Ledger.txt")', self.source)
         self.assertIn('appendToFile("Clarity Next Ledger.txt"', self.source)
+
+    def test_post_compile_persistence_rewrite_is_locked(self):
+        patch = PATCH.read_text(encoding="utf-8")
+        self.assertIn('TARGET = "Clarity Next Ledger.txt"', patch)
+        self.assertIn('"WFFileErrorIfNotFound": False', patch)
+        self.assertIn('"WFAskWhereToSave": False', patch)
+        self.assertIn('"WFSaveFileOverwrite": True', patch)
+        self.assertIn('file.append survived rewrite', patch)
 
     def test_voice_to_json_router(self):
         self.assertIn('listen("After Pause", "jp-JP")', self.source)
