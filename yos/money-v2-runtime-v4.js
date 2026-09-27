@@ -290,7 +290,7 @@
       <div class="money5-balance-line" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
     </section>
     <section class="money5-next-grid">${nextMoneyCard('payment',plan.nextPayment)}${nextMoneyCard('income',plan.nextIncome)}</section>
-    ${renderFeatureEntrances()}
+    
     <section class="money5-panel money5-home-calendar"><header><div><small>CALENDAR</small><h2>資金カレンダー</h2></div><button type="button" data-money-tab-jump="calendar">すべて見る</button></header>${renderCalendar()}</section>
     <section class="money5-panel"><header><div><small>RECENT</small><h2>最近の入出金</h2></div><button type="button" data-money-tab-jump="transactions">すべて見る</button></header><div class="money3-feed">${recent.length?recent.map(transactionRow).join(''):'<p class="money3-empty">最近の取引はありません。</p>'}</div></section>
     <section class="money5-advice"><span class="money5-yos-mark">YOS</span><div><small>YOSからのアドバイス</small><p>${escapeHtml(advice).replace(/\n/g,'<br>')}</p></div><button type="button" data-money-action="yos-review">›</button></section>
