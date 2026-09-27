@@ -352,7 +352,10 @@
     if(action==='yos-review')openYosReview();
   }
   function handleInput(event){
-    if(event.target?.matches?.('[data-money-search]')){transactionQuery=event.target.value;render()}
+    if(!event.target?.matches?.('[data-money-search]'))return;
+    transactionQuery=event.target.value;
+    const needle=transactionQuery.trim().toLowerCase();
+    qa('.money3-feed .money3-transaction',document.getElementById('moneyPage')).forEach(row=>{row.hidden=Boolean(needle)&&!row.textContent.toLowerCase().includes(needle)});
   }
   const dialog=()=>document.getElementById('money2Dialog');
   const form=()=>document.getElementById('money2DialogForm');
