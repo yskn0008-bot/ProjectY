@@ -301,7 +301,7 @@
       const warning=el('div','money-decision-warning');
       warning.append(el('span','money-decision-alert-icon','!'));
       const warningCopy=el('div','money-decision-warning-copy');
-      const shortageMatch=String(money.shortageText).match(/^(.*?)\s+(不足あり|[\\d,]+円不足)$/);
+      const shortageMatch=String(money.shortageText).match(/^(.*?)\s+(不足あり|[\d,]+円不足)$/);
       const shortageScope=shortageMatch?.[1]||'';
       const shortageValue=shortageMatch?.[2]||money.shortageText;
       warningCopy.append(
