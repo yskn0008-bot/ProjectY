@@ -38,10 +38,31 @@ class ClarityNextSourceContractTests(unittest.TestCase):
             self.assertIn(executor, self.source)
         self.assertIn("unsupported_executor", self.source)
 
+
+    def test_swapped_router_fields_are_normalized(self):
+        pairs = (
+            ("answer", "NEXT_ANSWER", "answer", "NEXT_ANSWER"),
+            ("open_app", "YOS_OpenApp", "open_app", "YOS_OpenApp"),
+            ("device", "NEXT_DEVICE", "device", "NEXT_DEVICE"),
+            ("timer", "NEXT_TIMER", "timer", "NEXT_TIMER"),
+            ("calendar", "NEXT_CALENDAR", "calendar", "NEXT_CALENDAR"),
+            ("reminder", "NEXT_REMINDER", "reminder", "NEXT_REMINDER"),
+            ("navigate", "NEXT_NAVIGATE", "navigate", "NEXT_NAVIGATE"),
+        )
+        for raw_executor, raw_module, normalized_module, normalized_executor in pairs:
+            self.assertIn(
+                f'if executor == "{raw_executor}" && module == "{raw_module}"',
+                self.source,
+            )
+            self.assertIn(f'@normalizedModule = "{normalized_module}"', self.source)
+            self.assertIn(f'@normalizedExecutor = "{normalized_executor}"', self.source)
+        self.assertIn('module={normalizedModule}', self.source)
+        self.assertIn('executor={normalizedExecutor}', self.source)
+
     def test_safety_gates_precede_execution(self):
         review = self.source.index('if needsReviewText == "はい"')
         confirm = self.source.index('if needsConfirmationText == "はい"')
-        open_app = self.source.index('if executor == "YOS_OpenApp"')
+        open_app = self.source.index('if normalizedExecutor == "YOS_OpenApp"')
         self.assertLess(review, open_app)
         self.assertLess(confirm, open_app)
 
