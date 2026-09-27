@@ -140,7 +140,7 @@ try {
       window.scrollTo(0,0);
     });
     await yosPage.waitForTimeout(50);
-    const visual = await yosPage.evaluate(({ panel, final }) => {
+    const visual = await yosPage.evaluate(({ domain, panel, final }) => {
       const nav = (domain==='money'?document.querySelector('.money5-subnav'):document.querySelector('.bottom-nav')).getBoundingClientRect();
       const topbar = (domain==='money'?document.querySelector('.money5-header'):document.querySelector('.topbar')).getBoundingClientRect();
       const activePanel = document.querySelector(panel);
@@ -165,7 +165,7 @@ try {
         clientWidth: document.documentElement.clientWidth,
         text: activePanel.innerText
       };
-    }, { panel: panelSelector, final: finalSelector });
+    }, { domain, panel: panelSelector, final: finalSelector });
     assert.equal(visual.width, 390);
     assert.equal(visual.scrollY, 0, `${domain} screenshot is not at the top`);
     assert.ok(visual.topbarTop >= 0, `${domain} topbar is clipped: ${visual.topbarTop}`);
