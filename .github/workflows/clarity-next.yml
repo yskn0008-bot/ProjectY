@@ -51,6 +51,7 @@ jobs:
           cherri './Clarity Next.cherri' --skip-sign --debug
           test -f './Clarity Next_unsigned.shortcut'
           python3 patch_ledger_persistence.py './Clarity Next_unsigned.shortcut'
+          python3 patch_calendar_reminder_wire_format.py './Clarity Next_unsigned.shortcut'
           mkdir -p artifacts
           cp './Clarity Next_unsigned.shortcut' artifacts/Clarity-Next-unsigned.shortcut
 
@@ -90,6 +91,24 @@ jobs:
           assert any(i.endswith('timer.start') for i in ids), ids
           assert any(i.endswith('addnewevent') for i in ids), ids
           assert any(i.endswith('addnewreminder') for i in ids), ids
+          calendars=[
+              a.get('WFWorkflowActionParameters',{})
+              for a in actions
+              if a.get('WFWorkflowActionIdentifier')=='is.workflow.actions.addnewevent'
+          ]
+          assert len(calendars)==1, calendars
+          assert calendars[0].get('WFCalendarItemDates') is True
+          assert calendars[0].get('WFCalendarItemStartDate',{}).get('WFSerializationType')=='WFTextTokenString'
+          assert calendars[0].get('WFCalendarItemEndDate',{}).get('WFSerializationType')=='WFTextTokenString'
+          reminders=[
+              a.get('WFWorkflowActionParameters',{})
+              for a in actions
+              if a.get('WFWorkflowActionIdentifier')=='is.workflow.actions.addnewreminder'
+              and 'WFAlertCustomTime' in a.get('WFWorkflowActionParameters',{})
+          ]
+          assert len(reminders)==1, reminders
+          assert reminders[0].get('WFAlertEnabled')=='Alert'
+          assert reminders[0].get('WFAlertCustomTime',{}).get('WFSerializationType')=='WFTextTokenString'
           print('Clarity Next runtime contract: PASS')
           PY
 
