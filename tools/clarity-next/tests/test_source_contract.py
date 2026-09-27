@@ -67,6 +67,18 @@ class ClarityNextSourceContractTests(unittest.TestCase):
         self.assertLess(review, open_app)
         self.assertLess(confirm, open_app)
 
+
+    def test_calendar_and_reminder_dates_are_locale_normalized(self):
+        self.assertIn('const startNoT = replaceText("T", " ", startText)', self.source)
+        self.assertIn('const startNormalized = replaceText("-", "/", startNoT)', self.source)
+        self.assertIn('const endNoT = replaceText("T", " ", endText)', self.source)
+        self.assertIn('const endNormalized = replaceText("-", "/", endNoT)', self.source)
+        self.assertIn('const startDate = getDates(startNormalized)', self.source)
+        self.assertIn('const endDate = getDates(endNormalized)', self.source)
+        self.assertIn('const reminderNoT = replaceText("T", " ", whenText)', self.source)
+        self.assertIn('const reminderNormalized = replaceText("-", "/", reminderNoT)', self.source)
+        self.assertIn('const alertDate = getDates(reminderNormalized)', self.source)
+
     def test_v0_acceptance_routes_exist(self):
         self.assertIn('run("YOS_OpenApp", app)', self.source)
         self.assertIn('is.workflow.actions.setbrightness', self.source)
