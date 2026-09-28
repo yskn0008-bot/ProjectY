@@ -205,7 +205,8 @@
         payoffMonths=Math.ceil(-Math.log(1-monthlyRate*balance/plannedPayment)/Math.log(1+monthlyRate));
         if(!Number.isFinite(payoffMonths)||payoffMonths>1200)payoffMonths=null;
       }
-      return {...d,balance,apr,minPayment,plannedPayment,monthlyInterest,payoffMonths};
+      const estimatedFees=Math.max(0,n(d.estimatedFees)),estimatedTotal=balance+estimatedFees;
+      return {...d,balance,apr,minPayment,plannedPayment,monthlyInterest,payoffMonths,estimatedFees,estimatedTotal};
     }).sort((a,b)=>b.apr-a.apr||b.balance-a.balance);
     const total=debts.reduce((s,d)=>s+d.balance,0),minimum=debts.reduce((s,d)=>s+d.minPayment,0),planned=debts.reduce((s,d)=>s+d.plannedPayment,0),interest=debts.reduce((s,d)=>s+d.monthlyInterest,0);
     const focus=debts[0]||null;
@@ -445,11 +446,12 @@
     const recurring=data.recurring.map(rule=>`<button class="money2-rule-row" type="button" data-money-action="edit-recurring" data-id="${escapeHtml(rule.id)}"><div><strong>${escapeHtml(rule.label)}</strong><small>毎月${Math.max(1,Math.round(n(rule.day)||1))}日 ・ ${escapeHtml(transactionCategory(rule).label)}</small></div><span>${rule.type==='income'?'+':'−'}${data.privacy?'••••':yen(rule.amount)}</span></button>`).join('');
     const goals=data.goals.map(g=>{const target=Math.max(1,n(g.target)),current=n(g.current),pct=Math.min(100,Math.round(current/target*100)),checkpoint=Math.max(0,n(g.checkpoint)),priority=clean(g.priorityLabel,10)||(n(g.priority)>=4?'高':n(g.priority)>=2?'中':'低');const details=[goalType(g.type),data.privacy?'金額非表示':`${yen(current)} / ${yen(target)}`,checkpoint?`第1チェック ${data.privacy?'非表示':yen(checkpoint)}`:'',`優先度 ${priority}`,g.deadline?`${formatMD(g.deadline)}まで`:''].filter(Boolean).join(' ・ ');return `<button class="money2-rule-row" type="button" data-money-action="edit-goal" data-id="${escapeHtml(g.id)}"><div><strong>${escapeHtml(g.name)}</strong><small>${escapeHtml(details)}</small></div><span>${pct}%</span></button>`}).join('');
     const debts=dp.debts.map((d,index)=>{
-      const payoff=d.payoffMonths===0?'完済':d.payoffMonths?`概算 ${d.payoffMonths}か月`:(d.plannedPayment<=d.monthlyInterest&&d.apr>0?'返済額不足':'期間未算出');
+      const payoff=d.payoffMonths===0?'完済':d.payoffMonths?`${d.payoffMonthsManual?'シミュレーション':'概算'} ${d.payoffMonths}回`:(d.plannedPayment<=d.monthlyInterest&&d.apr>0?'返済額不足':'期間未算出');
       const due=d.dueDay?`毎月${Math.min(31,Math.max(1,Math.round(n(d.dueDay))))}日 ・ `:'';
+      const fees=d.estimatedFees?` ・ 手数料見込 ${data.privacy?'非表示':yen(d.estimatedFees)}`:'';
       return `<button class="money11-debt-row" type="button" data-money-action="edit-debt" data-id="${escapeHtml(d.id)}">
         <div class="money11-debt-rank">${index+1}</div>
-        <div><strong>${escapeHtml(d.name)}</strong><small>${due}年利 ${d.apr}% ・ 月 ${data.privacy?'非表示':yen(d.plannedPayment)} ・ ${payoff}</small></div>
+        <div><strong>${escapeHtml(d.name)}</strong><small>${due}${d.apr>0?'年利 '+d.apr+'% ・ ':''}月 ${data.privacy?'非表示':yen(d.plannedPayment)} ・ ${payoff}${fees}</small></div>
         <b>${data.privacy?'••••':yen(d.balance)}</b>
       </button>`;
     }).join('');
@@ -566,17 +568,19 @@
     openDialog(editing?'目標を編集':'目標を追加',`${field('目標名','name','text',target.name,'placeholder="例：生活防衛資金 / 欲しいもの" required')}${selectField('種類','type',[['emergency','生活防衛資金'],['purchase','欲しいもの'],['saving','貯金'],['investment','投資'],['debt','返済目標']],target.type)}${field('目標金額','target','number',target.target,'min="0" required')}${field('現在額','current','number',target.current,'min="0"')}${field('第1チェックポイント','checkpoint','number',target.checkpoint||'','min="0"')}${field('目的','purpose','text',target.purpose||'','maxlength="160"')}${field('期限（任意）','deadline','date',target.deadline||'')}${field('優先度 1〜5','priority','number',target.priority||1,'min="1" max="5"')}`,fd=>{const priority=Math.min(5,Math.max(1,n(fd.get('priority'))||1));const item={...target,id:target.id||uid('goal'),name:clean(fd.get('name'),60),type:clean(fd.get('type'),20),target:Math.max(0,n(fd.get('target'))),current:Math.max(0,n(fd.get('current'))),checkpoint:Math.max(0,n(fd.get('checkpoint'))),purpose:clean(fd.get('purpose'),160),deadline:clean(fd.get('deadline'),10),priority,priorityLabel:priority>=4?'高':priority>=2?'中':'低'};data.goals=editing?data.goals.map(x=>x.id===item.id?item:x):[...data.goals,item];dialog().close();save()});
   }
   function openDebtDialog(debt){
-    const editing=!!debt,target=debt||{name:'',balance:'',apr:'',minPayment:'',plannedPayment:'',dueDay:''};
+    const editing=!!debt,target=debt||{name:'',balance:'',apr:'',minPayment:'',plannedPayment:'',dueDay:'',payoffMonthsManual:'',estimatedFees:''};
     openDialog(editing?'借金を編集':'借金を追加',
       `${field('名称','name','text',target.name,'placeholder="例：カードローン / リボ / 奨学金" required')}
       ${field('残高','balance','number',target.balance,'min="0" inputmode="numeric" required')}
       ${field('年利 %','apr','number',target.apr,'min="0" step="0.01" inputmode="decimal" required')}
       ${field('最低返済額 / 月','minPayment','number',target.minPayment,'min="0" inputmode="numeric" required')}
       ${field('実際に返す予定額 / 月','plannedPayment','number',target.plannedPayment||target.minPayment,'min="0" inputmode="numeric"')}
-      ${field('毎月の支払日','dueDay','number',target.dueDay||'','min="1" max="31" inputmode="numeric"')}`,
+      ${field('毎月の支払日','dueDay','number',target.dueDay||'','min="1" max="31" inputmode="numeric"')}
+      ${field('完済までの回数（公式シミュレーションがある場合）','payoffMonthsManual','number',target.payoffMonthsManual||'','min="1" inputmode="numeric"')}
+      ${field('手数料総額見込み（公式シミュレーションがある場合）','estimatedFees','number',target.estimatedFees||'','min="0" inputmode="numeric"')}`,
       fd=>{
         const minPayment=Math.max(0,n(fd.get('minPayment')));
-        const item={...target,id:target.id||uid('debt'),name:clean(fd.get('name'),60),balance:Math.max(0,n(fd.get('balance'))),apr:Math.max(0,n(fd.get('apr'))),minPayment,plannedPayment:Math.max(minPayment,n(fd.get('plannedPayment'))||minPayment),dueDay:Math.min(31,Math.max(0,Math.round(n(fd.get('dueDay')))))};
+        const item={...target,id:target.id||uid('debt'),name:clean(fd.get('name'),60),balance:Math.max(0,n(fd.get('balance'))),apr:Math.max(0,n(fd.get('apr'))),minPayment,plannedPayment:Math.max(minPayment,n(fd.get('plannedPayment'))||minPayment),dueDay:Math.min(31,Math.max(0,Math.round(n(fd.get('dueDay'))))),payoffMonthsManual:Math.max(0,Math.round(n(fd.get('payoffMonthsManual')))),estimatedFees:Math.max(0,n(fd.get('estimatedFees')))};
         data.debts=editing?data.debts.map(x=>x.id===item.id?item:x):[...data.debts,item];
         dialog().close();save();
       });
