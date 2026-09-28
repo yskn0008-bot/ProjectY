@@ -477,3 +477,5 @@ body[data-domain="money"] #money2DialogForm button.danger{color:var(--money5-red
 .money8-month-summary strong{display:block;font-size:13px;font-variant-numeric:tabular-nums;white-space:nowrap}
 .money8-month-summary .primary strong{color:var(--money5-gold);font-size:16px}.money8-month-summary .income strong{color:var(--money5-green)}.money8-month-summary .danger strong{color:var(--money5-red)}
 .money8-month-summary strong.text{overflow:hidden;text-overflow:ellipsis;font-size:10px}
+
+.money9-public{overflow:hidden}.money9-public-row{width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 0;border:0;border-bottom:1px solid rgba(77,163,255,.09);background:none;color:inherit;text-align:left}.money9-public-row:last-child{border-bottom:0}.money9-public-row div{display:grid;gap:3px}.money9-public-row strong{font-size:12px}.money9-public-row small{color:var(--money5-sub);font-size:8px}.money9-public-row>span{color:var(--money5-blue)}
