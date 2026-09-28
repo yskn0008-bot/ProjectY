@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-28T16:24:18+09:00",
+  "updated_at": "2026-09-28T16:24:44+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -165,6 +165,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-82541ed21882",
+      "title": "chore: refresh debt evidence UI",
+      "completed_at": "2026-09-28T07:24:28Z",
+      "result": "GitHub mainへ反映（82541ed）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/82541ed21882ae224e3c6360e6d0216151c1a57b"
+    },
+    {
       "id": "github-commit-ad6f8f7f7890",
       "title": "style: distinguish debt evidence and urgency",
       "completed_at": "2026-09-28T07:24:04Z",
@@ -191,13 +198,6 @@
       "completed_at": "2026-09-28T05:17:52Z",
       "result": "GitHub mainへ反映（60f914c）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/60f914cb5b81dfe1ff74739ba554b4411b7a0486"
-    },
-    {
-      "id": "github-commit-35b48bca49ee",
-      "title": "chore: refresh debt planner assets",
-      "completed_at": "2026-09-28T04:43:53Z",
-      "result": "GitHub mainへ反映（35b48bc）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/35b48bca49eecd0b51f09efb4d0d0df84a11107a"
     },
     {
       "id": "complete-002",
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-28T16:24:18+09:00",
+      "last_update": "2026-09-28T16:24:44+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -315,7 +315,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-28T16:24:18+09:00",
+      "last_update": "2026-09-28T16:24:44+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-28T16:24:18+09:00",
+      "last_update": "2026-09-28T16:24:44+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "d6a735394b95059f7aa9e7d882e63116bd5342656dcd9d3883d81fe61fbe7c18"
+  "github_snapshot_hash": "629ea9cfeade38d1b7169fb51cec51e2e7cad3f5fd74b1c4512fc878570882fd"
 }
