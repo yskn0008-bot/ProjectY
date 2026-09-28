@@ -49,6 +49,38 @@ jobs:
       - run: node --check yos/emergency-alert-bridge-v1.mjs
       - run: node --test yos/tests/unified-pwa-contract.test.mjs yos/tests/money-dark-ui-contract.test.mjs yos/tests/money-plan.test.mjs yos/tests/morning-brief-bridge.test.mjs yos/tests/money-dependency-bridges.test.mjs yos/tests/emergency-alert-bridge.test.mjs yos/alerts/alert-engine.test.mjs
 
+
+  desk-browser:
+    name: DESK chat UI 390px (${{ matrix.browser }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, webkit]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install browser
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps ${{ matrix.browser }}
+      - name: Start static server
+        run: |
+          python3 -m http.server 4173 --directory . > /tmp/yos-desk.log 2>&1 &
+          for i in {1..30}; do
+            curl -fsS http://127.0.0.1:4173/yos/desk/ >/dev/null && exit 0
+            sleep 1
+          done
+          cat /tmp/yos-desk.log
+          exit 1
+      - name: Verify LINE-like YOS DESK chat UI
+        env:
+          YOS_BROWSER: ${{ matrix.browser }}
+        run: node yos/tests/desk-line-browser-smoke.mjs
+
   browser:
     name: Unified PWA 390px (${{ matrix.browser }})
     runs-on: ubuntu-latest

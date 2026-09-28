@@ -67,3 +67,18 @@ test('manifest icons are install-ready across YOS entry pages', async () => {
   assert.match(sw,/\.\/assets\/yos-icon-180\.png/);
   assert.match(sw,/\.\/assets\/yos-icon-512\.png/);
 });
+
+
+test('YOS DESK chats use a LINE-like flat conversation list', async () => {
+  const [desk,compact] = await Promise.all([
+    read('yos/desk/index.html'),
+    read('yos/desk/compact.css')
+  ]);
+  assert.match(desk, /<strong>チャット<\/strong>/);
+  assert.match(desk, /placeholder="チャットを検索"/);
+  assert.match(compact, /LINE-like CHATS v1/);
+  assert.match(compact, /#chatsPage \.chat\{[\s\S]*border-radius:0;/);
+  assert.match(compact, /#chatsPage \.avatar\{[\s\S]*border-radius:50%;/);
+  assert.match(compact, /#chatsPage \.preview\{[\s\S]*white-space:nowrap;/);
+  assert.match(compact, /#chatsPage \.tab\.active:after/);
+});
