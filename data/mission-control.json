@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-28T13:43:43+09:00",
+  "updated_at": "2026-09-28T13:44:06+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -165,6 +165,20 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-35b48bca49ee",
+      "title": "chore: refresh debt planner assets",
+      "completed_at": "2026-09-28T04:43:53Z",
+      "result": "GitHub mainへ反映（35b48bc）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/35b48bca49eecd0b51f09efb4d0d0df84a11107a"
+    },
+    {
+      "id": "github-commit-33bb92024d4f",
+      "title": "style: add readable debt planner",
+      "completed_at": "2026-09-28T04:43:46Z",
+      "result": "GitHub mainへ反映（33bb920）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/33bb92024d4fd9dfc3808426874c2e2559934464"
+    },
+    {
       "id": "github-commit-579fd69c5b5a",
       "title": "feat: add data-driven debt repayment planning",
       "completed_at": "2026-09-28T04:43:28Z",
@@ -184,20 +198,6 @@
       "completed_at": "2026-09-28T04:00:50Z",
       "result": "GitHub mainへ反映（6b663bd）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/6b663bd493264b4588d828f6613271fed8b410a4"
-    },
-    {
-      "id": "github-commit-b1c124da47bd",
-      "title": "chore: refresh Money readability styles",
-      "completed_at": "2026-09-28T04:00:20Z",
-      "result": "GitHub mainへ反映（b1c124d）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/b1c124da47bd9d44f26c14656ae42485667ce71a"
-    },
-    {
-      "id": "github-commit-0eb042b28996",
-      "title": "style: enlarge Money typography for iPhone readability",
-      "completed_at": "2026-09-28T04:00:15Z",
-      "result": "GitHub mainへ反映（0eb042b）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/0eb042b28996b5d6c875a8a098a1dcec5a0dfcce"
     },
     {
       "id": "complete-002",
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-28T13:43:43+09:00",
+      "last_update": "2026-09-28T13:44:06+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -315,7 +315,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-28T13:43:43+09:00",
+      "last_update": "2026-09-28T13:44:06+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-28T13:43:43+09:00",
+      "last_update": "2026-09-28T13:44:06+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "8f44cb02acf492b5d6337efc576a9af954d51e144e397be61b60f719cdc13bdb"
+  "github_snapshot_hash": "8aef910258e8397043354c9c340f3322372ead3c39a9ff41fb64fb00842db97e"
 }
