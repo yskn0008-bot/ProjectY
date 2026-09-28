@@ -55,6 +55,18 @@ jobs:
           mkdir -p artifacts
           cp './Clarity Next_unsigned.shortcut' artifacts/Clarity-Next-unsigned.shortcut
 
+      - name: Compile fixed YOS_Home child
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd tools/clarity-next
+          rm -f './YOS_Home_unsigned.shortcut'
+          cherri './YOS_Home.cherri' --skip-sign --debug
+          test -f './YOS_Home_unsigned.shortcut'
+          python3 patch_home_inline.py './YOS_Home_unsigned.shortcut' './YOS Home Bridge.js'
+          mkdir -p artifacts
+          cp './YOS_Home_unsigned.shortcut' artifacts/YOS_Home-unsigned.shortcut
+
       - name: Inspect runtime
         shell: bash
         run: |
@@ -75,6 +87,7 @@ jobs:
           assert 'NEXT_TIMER' in blob
           assert 'NEXT_CALENDAR' in blob
           assert 'NEXT_REMINDER' in blob
+          assert 'YOS_Home' in blob
           assert 'unsupported_executor' in blob
           assert 'Clarity Next Ledger.txt' in blob
           assert not any(i.endswith('file.append') for i in ids), ids
@@ -109,7 +122,21 @@ jobs:
           assert len(reminders)==1, reminders
           assert reminders[0].get('WFAlertEnabled')=='Alert'
           assert reminders[0].get('WFAlertCustomTime',{}).get('WFSerializationType')=='WFTextTokenString'
+          child=plistlib.loads(Path('tools/clarity-next/artifacts/YOS_Home-unsigned.shortcut').read_bytes())
+          child_actions=child.get('WFWorkflowActions',[])
+          inline=[a for a in child_actions if a.get('WFWorkflowActionIdentifier')=='dk.simonbs.Scriptable.RunScriptInlineIntent']
+          assert len(inline)==1, inline
+          params=inline[0].get('WFWorkflowActionParameters',{})
+          assert params.get('runInApp') is False, params
+          assert params.get('ShowWhenRun') is False, params
+          script=params.get('script',{})
+          assert script.get('WFSerializationType')=='WFTextTokenString', script
+          script_text=script.get('Value',{}).get('string','')
+          assert 'YOS Home Bridge' in script_text
+          assert 'parseHomeCommand' in script_text
+          assert '__YOS_HOME_INLINE__' not in script_text
           print('Clarity Next runtime contract: PASS')
+          print('YOS_Home child runtime contract: PASS')
           PY
 
       - name: Secret scan
@@ -130,6 +157,11 @@ jobs:
             --output tools/clarity-next/artifacts/Clarity-Next-signed.shortcut \
             --name 'Clarity Next' \
             2>&1 | tee tools/clarity-next/artifacts/hubsign.log
+          python3 tools/clarity-factory/sign_with_hubsign.py \
+            --input tools/clarity-next/artifacts/YOS_Home-unsigned.shortcut \
+            --output tools/clarity-next/artifacts/YOS_Home-signed.shortcut \
+            --name 'YOS_Home' \
+            2>&1 | tee tools/clarity-next/artifacts/yos-home-hubsign.log
 
       - name: Verify signature
         shell: bash
@@ -137,11 +169,12 @@ jobs:
           set -euo pipefail
           python3 - <<'PY'
           from pathlib import Path
-          p=Path('tools/clarity-next/artifacts/Clarity-Next-signed.shortcut')
-          data=p.read_bytes()
-          assert data.startswith(b'AEA1'), data[:8]
-          assert len(data)>500, len(data)
-          print(f'Clarity-Next-signed.shortcut: AEA1 PASS ({len(data)} bytes)')
+          base=Path('tools/clarity-next/artifacts')
+          for name in ('Clarity-Next-signed.shortcut','YOS_Home-signed.shortcut'):
+              data=(base/name).read_bytes()
+              assert data.startswith(b'AEA1'), (name,data[:8])
+              assert len(data)>500, (name,len(data))
+              print(f'{name}: AEA1 PASS ({len(data)} bytes)')
           PY
 
       - name: Upload
@@ -151,5 +184,8 @@ jobs:
           path: |
             tools/clarity-next/artifacts/Clarity-Next-unsigned.shortcut
             tools/clarity-next/artifacts/Clarity-Next-signed.shortcut
+            tools/clarity-next/artifacts/YOS_Home-unsigned.shortcut
+            tools/clarity-next/artifacts/YOS_Home-signed.shortcut
             tools/clarity-next/artifacts/hubsign.log
+            tools/clarity-next/artifacts/yos-home-hubsign.log
           if-no-files-found: error
