@@ -33,7 +33,24 @@
     if(!saved||typeof saved!=='object')return base;
     return {...base,...saved,accounts:Array.isArray(saved.accounts)?saved.accounts:[],transactions:Array.isArray(saved.transactions)?saved.transactions:[],recurring:Array.isArray(saved.recurring)?saved.recurring:[],debts:Array.isArray(saved.debts)?saved.debts:[],goals:Array.isArray(saved.goals)?saved.goals:[],assets:Array.isArray(saved.assets)?saved.assets:[],rules:{...base.rules,...(saved.rules||{})}};
   }
+  const DETECTED_DEBT_CANDIDATES=[
+    {id:'debt-detected-merpay-20260928',name:'メルペイ定額払い',balance:293113,balanceKnown:true,apr:0,minPayment:0,plannedPayment:10000,payoffMonthsManual:41,estimatedFees:100185,status:'overdue',verification:'confirmed',sourceNote:'SMSで支払期限超過を確認／メルカリアプリ定額払いシミュレーション 2026-09-28'},
+    {id:'debt-detected-np-contactlife-20260928',name:'NP後払い（コンタクトライフ）',balance:7593,balanceKnown:true,apr:0,minPayment:7593,plannedPayment:7593,dueDate:'2026-09-01',status:'legal_notice',verification:'confirmed',sourceNote:'メールで7,593円・期限2026-09-01・弁護士連絡可能性を確認／SMS再通知あり'},
+    {id:'debt-detected-bundle-20260928',name:'ポチっとチャージ',balance:5510,balanceKnown:true,apr:0,minPayment:5510,plannedPayment:5510,status:'legal_notice',verification:'confirmed',sourceNote:'メールで5,510円の期限超過・法的手続き検討通知を確認 2026-09-25'},
+    {id:'debt-detected-kddi-20260928',name:'KDDI未払い（回収連絡）',balance:0,balanceKnown:false,apr:0,minPayment:0,plannedPayment:0,status:'legal_notice',verification:'unconfirmed',sourceNote:'SMSでKDDI案件・指定最終期限超過・訴訟予告を確認。金額と元契約は未確認'}
+  ];
+  function mergeDetectedDebtCandidates(){
+    let changed=false;
+    for(const candidate of DETECTED_DEBT_CANDIDATES){
+      const existing=data.debts.find(d=>d.id===candidate.id);
+      if(existing)continue;
+      data.debts=[...data.debts,{...candidate}];
+      changed=true;
+    }
+    if(changed){data.updatedAt=new Date().toISOString();write(KEY,data)}
+  }
   let data=state();
+  mergeDetectedDebtCandidates();
   let activeTab='dashboard';
   let calendarMonth=monthKey();
   let selectedCalendarDate=isoToday();
@@ -195,29 +212,33 @@
   }
   const totalDebt=()=>data.debts.reduce((s,d)=>s+n(d.balance),0);
   function debtPlan(){
-    const debts=data.debts.filter(d=>n(d.balance)>0).map(d=>{
-      const balance=Math.max(0,n(d.balance)),apr=Math.max(0,n(d.apr)),minPayment=Math.max(0,n(d.minPayment));
-      const plannedPayment=Math.max(minPayment,n(d.plannedPayment)||minPayment),monthlyRate=apr/1200,monthlyInterest=balance*monthlyRate;
-      let payoffMonths=null;
-      if(balance<=0)payoffMonths=0;
-      else if(plannedPayment>0&&monthlyRate===0)payoffMonths=Math.ceil(balance/plannedPayment);
-      else if(plannedPayment>monthlyInterest&&monthlyRate>0){
+    const urgency=d=>clean(d.status,30)==='legal_notice'?3:clean(d.status,30)==='overdue'?2:1;
+    const debts=data.debts.filter(d=>n(d.balance)>0||d.balanceKnown===false||clean(d.status,30)).map(d=>{
+      const balanceKnown=d.balanceKnown!==false,balance=Math.max(0,n(d.balance)),apr=Math.max(0,n(d.apr)),minPayment=Math.max(0,n(d.minPayment));
+      const plannedPayment=Math.max(minPayment,n(d.plannedPayment)||minPayment),monthlyRate=apr/1200,monthlyInterest=balanceKnown?balance*monthlyRate:0;
+      let payoffMonths=Math.max(0,Math.round(n(d.payoffMonthsManual)))||null;
+      if(balanceKnown&&balance<=0)payoffMonths=0;
+      else if(balanceKnown&&!payoffMonths&&plannedPayment>0&&monthlyRate===0)payoffMonths=Math.ceil(balance/plannedPayment);
+      else if(balanceKnown&&!payoffMonths&&plannedPayment>monthlyInterest&&monthlyRate>0){
         payoffMonths=Math.ceil(-Math.log(1-monthlyRate*balance/plannedPayment)/Math.log(1+monthlyRate));
         if(!Number.isFinite(payoffMonths)||payoffMonths>1200)payoffMonths=null;
       }
-      const estimatedFees=Math.max(0,n(d.estimatedFees)),estimatedTotal=balance+estimatedFees;
-      return {...d,balance,apr,minPayment,plannedPayment,monthlyInterest,payoffMonths,estimatedFees,estimatedTotal};
-    }).sort((a,b)=>b.apr-a.apr||b.balance-a.balance);
-    const total=debts.reduce((s,d)=>s+d.balance,0),minimum=debts.reduce((s,d)=>s+d.minPayment,0),planned=debts.reduce((s,d)=>s+d.plannedPayment,0),interest=debts.reduce((s,d)=>s+d.monthlyInterest,0);
-    const focus=debts[0]||null;
+      const estimatedFees=Math.max(0,n(d.estimatedFees)),estimatedTotal=balanceKnown?balance+estimatedFees:null;
+      return {...d,balanceKnown,balance,apr,minPayment,plannedPayment,monthlyInterest,payoffMonths,estimatedFees,estimatedTotal,urgency:urgency(d)};
+    }).sort((a,b)=>b.urgency-a.urgency||Number(a.balanceKnown)-Number(b.balanceKnown)||b.apr-a.apr||b.balance-a.balance);
+    const known=debts.filter(d=>d.balanceKnown);
+    const total=known.reduce((s,d)=>s+d.balance,0),minimum=known.reduce((s,d)=>s+d.minPayment,0),planned=known.reduce((s,d)=>s+d.plannedPayment,0),interest=known.reduce((s,d)=>s+d.monthlyInterest,0),fees=known.reduce((s,d)=>s+d.estimatedFees,0);
+    const unknownCount=debts.filter(d=>!d.balanceKnown).length,focus=debts[0]||null;
     const plan=futurePlan();
     let guidance='借金を登録すると返済順を判定します。';
-    if(debts.length){
+    if(debts.some(d=>d.status==='legal_notice')){
+      guidance='回収・訴訟予告のある未払いを最優先で管理。金額未確認は未確認のまま保持し、判明後に更新する。';
+    }else if(debts.length){
       if(plan.firstBreak||currentMonthShortfall()>0)guidance='まず今月の必須支払いと最低返済を守り、延滞を避ける。追加返済は資金不足を解消してから。';
       else if(focus&&focus.apr>0)guidance=`最低返済を全件確保し、余剰は年利 ${focus.apr}% の「${clean(focus.name,20)}」から優先。`;
-      else guidance='最低返済を全件確保。金利を入力すると追加返済の優先順位を自動判定できます。';
+      else guidance='最低返済を全件確保。手数料・金利・期限を見ながら追加返済先を決める。';
     }
-    return {debts,total,minimum,planned,interest,focus,guidance};
+    return {debts,total,minimum,planned,interest,fees,unknownCount,focus,guidance};
   }
   const emergencyGoal=()=>data.goals.find(g=>g.type==='emergency')||null;
   const primaryGoal=()=>[...data.goals].sort((a,b)=>(Number(b.priority)||0)-(Number(a.priority)||0))[0]||null;
@@ -446,13 +467,15 @@
     const recurring=data.recurring.map(rule=>`<button class="money2-rule-row" type="button" data-money-action="edit-recurring" data-id="${escapeHtml(rule.id)}"><div><strong>${escapeHtml(rule.label)}</strong><small>毎月${Math.max(1,Math.round(n(rule.day)||1))}日 ・ ${escapeHtml(transactionCategory(rule).label)}</small></div><span>${rule.type==='income'?'+':'−'}${data.privacy?'••••':yen(rule.amount)}</span></button>`).join('');
     const goals=data.goals.map(g=>{const target=Math.max(1,n(g.target)),current=n(g.current),pct=Math.min(100,Math.round(current/target*100)),checkpoint=Math.max(0,n(g.checkpoint)),priority=clean(g.priorityLabel,10)||(n(g.priority)>=4?'高':n(g.priority)>=2?'中':'低');const details=[goalType(g.type),data.privacy?'金額非表示':`${yen(current)} / ${yen(target)}`,checkpoint?`第1チェック ${data.privacy?'非表示':yen(checkpoint)}`:'',`優先度 ${priority}`,g.deadline?`${formatMD(g.deadline)}まで`:''].filter(Boolean).join(' ・ ');return `<button class="money2-rule-row" type="button" data-money-action="edit-goal" data-id="${escapeHtml(g.id)}"><div><strong>${escapeHtml(g.name)}</strong><small>${escapeHtml(details)}</small></div><span>${pct}%</span></button>`}).join('');
     const debts=dp.debts.map((d,index)=>{
-      const payoff=d.payoffMonths===0?'完済':d.payoffMonths?`${d.payoffMonthsManual?'シミュレーション':'概算'} ${d.payoffMonths}回`:(d.plannedPayment<=d.monthlyInterest&&d.apr>0?'返済額不足':'期間未算出');
-      const due=d.dueDay?`毎月${Math.min(31,Math.max(1,Math.round(n(d.dueDay))))}日 ・ `:'';
+      const payoff=!d.balanceKnown?'金額未確認':d.payoffMonths===0?'完済':d.payoffMonths?`${d.payoffMonthsManual?'シミュレーション':'概算'} ${d.payoffMonths}回`:(d.plannedPayment<=d.monthlyInterest&&d.apr>0?'返済額不足':'期間未算出');
+      const due=d.dueDate?`期限 ${formatMD(d.dueDate)} ・ `:(d.dueDay?`毎月${Math.min(31,Math.max(1,Math.round(n(d.dueDay))))}日 ・ `:'');
       const fees=d.estimatedFees?` ・ 手数料見込 ${data.privacy?'非表示':yen(d.estimatedFees)}`:'';
+      const status=d.status==='legal_notice'?'回収・訴訟予告':d.status==='overdue'?'期限超過':'返済中';
+      const verified=d.verification==='unconfirmed'?'未確認':'確認済み';
       return `<button class="money11-debt-row" type="button" data-money-action="edit-debt" data-id="${escapeHtml(d.id)}">
         <div class="money11-debt-rank">${index+1}</div>
-        <div><strong>${escapeHtml(d.name)}</strong><small>${due}${d.apr>0?'年利 '+d.apr+'% ・ ':''}月 ${data.privacy?'非表示':yen(d.plannedPayment)} ・ ${payoff}${fees}</small></div>
-        <b>${data.privacy?'••••':yen(d.balance)}</b>
+        <div><strong>${escapeHtml(d.name)} <em class="money11-status ${escapeHtml(d.status||'active')}">${status}</em></strong><small>${verified} ・ ${due}${d.apr>0?'年利 '+d.apr+'% ・ ':''}${d.plannedPayment>0?'月 '+(data.privacy?'非表示':yen(d.plannedPayment))+' ・ ':''}${payoff}${fees}</small></div>
+        <b>${data.privacy?'••••':(d.balanceKnown?yen(d.balance):'未確認')}</b>
       </button>`;
     }).join('');
     return `<section class="money3-panel"><header><div><small>AUTO</small><h2>毎月決まってる収支</h2></div><button type="button" data-money-action="add-recurring">＋追加</button></header>${recurring||'<p class="money3-empty">毎月の家賃・サブスク・給与などを自動で予定に反映できます。</p>'}</section>
@@ -460,10 +483,10 @@
     <section class="money11-debt">
       <header><div><small>DEBT PLAN</small><h2>借金・返済</h2></div><button type="button" data-money-action="add-debt">＋追加</button></header>
       <div class="money11-debt-summary">
-        <div><small>借金総額</small><strong>${dp.total?privacyAmount(dp.total):'¥0'}</strong></div>
-        <div><small>最低返済 / 月</small><strong>${data.privacy?'••••':yen(dp.minimum)}</strong></div>
+        <div><small>確認済み残高</small><strong>${dp.total?privacyAmount(dp.total):'¥0'}</strong></div>
+        <div><small>金額未確認</small><strong>${dp.unknownCount}件</strong></div>
         <div><small>返済予定 / 月</small><strong>${data.privacy?'••••':yen(dp.planned)}</strong></div>
-        <div><small>利息目安 / 月</small><strong>${data.privacy?'••••':yen(Math.round(dp.interest))}</strong></div>
+        <div><small>手数料見込</small><strong>${data.privacy?'••••':yen(dp.fees)}</strong></div>
       </div>
       <div class="money11-guidance"><span class="money5-yos-mark">YOS</span><div><small>返済方針</small><p>${escapeHtml(dp.guidance)}</p></div></div>
       <div class="money11-debt-list">${debts||'<p class="money3-empty">残高・金利・最低返済・支払日を登録すると、返済優先順位と完済目安を出せます。</p>'}</div>
