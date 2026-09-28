@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-28T22:39:20+09:00",
+  "updated_at": "2026-09-28T22:39:56+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -165,6 +165,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-fbdbd64dfeaf",
+      "title": "chore: refresh Money v13 assets",
+      "completed_at": "2026-09-28T13:39:45Z",
+      "result": "GitHub mainへ反映（fbdbd64）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/fbdbd64dfeaff985fc64a8b1c137914cf64b5d49"
+    },
+    {
       "id": "github-commit-49302a6cfaaf",
       "title": "fix: repair Money runtime function boundaries",
       "completed_at": "2026-09-28T13:39:04Z",
@@ -191,13 +198,6 @@
       "completed_at": "2026-09-28T13:37:55Z",
       "result": "GitHub mainへ反映（36286a3）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/36286a323cfdc3141455880ed8b397b16b89ad10"
-    },
-    {
-      "id": "github-commit-24491b95480f",
-      "title": "Merge pull request #520 from yskn0008-bot/oel/yos-desk-line-chat-ui-20260928",
-      "completed_at": "2026-09-28T11:58:05Z",
-      "result": "GitHub mainへ反映（24491b9）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/24491b95480f6c18018516140fe2f3ce4e619e68"
     },
     {
       "id": "complete-002",
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-28T22:39:20+09:00",
+      "last_update": "2026-09-28T22:39:56+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -315,7 +315,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-28T22:39:20+09:00",
+      "last_update": "2026-09-28T22:39:56+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-28T22:39:20+09:00",
+      "last_update": "2026-09-28T22:39:56+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "8e59b17b1a0095dfc9f857362dd1e26790b039def72f24f726b0c6eae846d47e"
+  "github_snapshot_hash": "6a721224ab79d821e21e99fe242d2a4c19c2899be13091792556ec934592bfee"
 }
