@@ -72,7 +72,6 @@
           cashIndex=data.accounts.length-1;
         }
         data.accounts=data.accounts.map((a,i)=>{
-          if(!liquidTypes.has(a.type))return a;
           if(i===cashIndex)return {...a,type:'cash',name:a.name||'現金',balance:amount,updatedAt:now};
           return {...a,balance:0,updatedAt:now};
         });
@@ -95,8 +94,11 @@
         tx=expandedTransactions(date,date).find(x=>isOutgoing(x)&&x.date===date&&n(x.amount)===amount&&(!label||clean(x.label,60)===label))
           ||expandedTransactions(date,date).find(x=>isOutgoing(x)&&x.date===date&&n(x.amount)===amount);
         if(tx){
-          const concrete={...tx,id:uid('tx'),status:'done'};delete concrete.virtualRecurring;
+          const concrete={...tx,id:uid('tx'),status:'done',paid:true,completed:true};delete concrete.virtualRecurring;
           data.transactions=[...data.transactions,concrete];changed=true;
+        }else if(date&&amount){
+          data.transactions=[...data.transactions,{id:uid('tx'),date,type:'debt',category:'debt',label:label||'返済',amount,status:'done',paid:true,completed:true,imported:true}];
+          changed=true;
         }
       }
     }
@@ -404,7 +406,7 @@
       </div>
       <div class="money6-divider"></div>
       <div class="money6-metrics">
-        <div class="danger"><small>月末不足</small><b>${monthShortfall===null?'—':monthShortfall>0?moneyAmount(monthShortfall)+'不足':'¥0'}</b></div>
+        <div class="danger"><small>月末不足</small><b>${monthShortfall===null?'—':monthShortfall>0?yen(monthShortfall)+'不足':'0円'}</b></div>
         <div class="${monthNet>=0?'income':'danger'}"><small>今月収支</small><b>${s.hasData?moneyAmount(monthNet,{signed:true}):'—'}</b></div>
         <div class="${plan.firstBreak||monthShortfall>0?'danger':'income'}"><small>未来予測</small><b class="text">${escapeHtml(warning)}</b></div>
       </div>
