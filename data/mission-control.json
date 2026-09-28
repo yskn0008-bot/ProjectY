@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-28T22:54:31+09:00",
+  "updated_at": "2026-09-28T23:09:39+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -165,6 +165,27 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-d77d0b4163ee",
+      "title": "chore: refresh Money import fix",
+      "completed_at": "2026-09-28T14:04:28Z",
+      "result": "GitHub mainへ反映（d77d0b4）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/d77d0b4163eed05798500f190b3e895079fce09f"
+    },
+    {
+      "id": "github-commit-01af99d44529",
+      "title": "fix: make Money paid import resilient to label differences",
+      "completed_at": "2026-09-28T14:04:25Z",
+      "result": "GitHub mainへ反映（01af99d）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/01af99d44529c99656d09dc55b7af082095f9a45"
+    },
+    {
+      "id": "github-commit-f2d44f600652",
+      "title": "fix: preserve Money import fragment until runtime reads it",
+      "completed_at": "2026-09-28T14:04:21Z",
+      "result": "GitHub mainへ反映（f2d44f6）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/f2d44f60065223cffabce734aee2798042f50807"
+    },
+    {
       "id": "github-commit-37117c3a8459",
       "title": "chore: refresh Money local import dedupe",
       "completed_at": "2026-09-28T13:54:13Z",
@@ -177,27 +198,6 @@
       "completed_at": "2026-09-28T13:53:57Z",
       "result": "GitHub mainへ反映（27ded42）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/27ded4222c29a1ba15a2fdfa989ee9b146b88d5e"
-    },
-    {
-      "id": "github-commit-6f8b9646582a",
-      "title": "chore: refresh local Money import assets",
-      "completed_at": "2026-09-28T13:53:26Z",
-      "result": "GitHub mainへ反映（6f8b964）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/6f8b9646582a9e0873f31f5081e371af155894cb"
-    },
-    {
-      "id": "github-commit-56ac24571bab",
-      "title": "feat: add local-only Money import via URL fragment",
-      "completed_at": "2026-09-28T13:53:23Z",
-      "result": "GitHub mainへ反映（56ac245）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/56ac24571bab2245674242f2e8e519940c0db1e2"
-    },
-    {
-      "id": "github-commit-3b9f11fc5edf",
-      "title": "feat: preserve Money route for local import fragments",
-      "completed_at": "2026-09-28T13:53:19Z",
-      "result": "GitHub mainへ反映（3b9f11f）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/3b9f11fc5edf7394c83cee69f04cd18aff2dc590"
     },
     {
       "id": "complete-002",
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-28T22:54:31+09:00",
+      "last_update": "2026-09-28T23:09:39+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -315,7 +315,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-28T22:54:31+09:00",
+      "last_update": "2026-09-28T23:09:39+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-28T22:54:31+09:00",
+      "last_update": "2026-09-28T23:09:39+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "b7e2f4780322b5e13edf5e501672167ebce6894277f72762fcd866dfe4f4a296"
+  "github_snapshot_hash": "90abc9f7aa949b4c086b8cef4285170f54403a679bbb7a07b04727bfe55dde1e"
 }
