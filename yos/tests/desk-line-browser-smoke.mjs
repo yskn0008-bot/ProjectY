@@ -93,6 +93,15 @@ try{
   const clarityPreview=(await page.locator('.chat[data-id="asset-clarity"] .preview').textContent())||'';
   assert.match(clarityPreview,/テスト応答です/);
 
+  await page.reload({waitUntil:'networkidle'});
+  await page.waitForFunction(()=>document.documentElement.dataset.deskChatSync==='ok');
+  await page.locator('.chat[data-id="asset-clarity"]').click();
+  await page.waitForSelector('#threadPage.active');
+  const persisted=(await page.locator('#messageStream').textContent())||'';
+  assert.match(persisted,/YOS DESKから送信テスト/,'user message should survive reload');
+  assert.match(persisted,/テスト応答です/,'YOS answer should survive reload');
+  await page.locator('#threadBack').click();
+
   await page.locator('.tab[data-mode="pinned"]').click();
   assert.ok(await page.locator('#chatList .chat').count()>=3,'core pinned rooms remain filterable');
   await page.locator('.tab[data-mode="all"]').click();
