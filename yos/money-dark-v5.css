@@ -479,3 +479,9 @@ body[data-domain="money"] #money2DialogForm button.danger{color:var(--money5-red
 .money8-month-summary strong.text{overflow:hidden;text-overflow:ellipsis;font-size:10px}
 
 .money9-public{overflow:hidden}.money9-public-row{width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 0;border:0;border-bottom:1px solid rgba(77,163,255,.09);background:none;color:inherit;text-align:left}.money9-public-row:last-child{border-bottom:0}.money9-public-row div{display:grid;gap:3px}.money9-public-row strong{font-size:12px}.money9-public-row small{color:var(--money5-sub);font-size:8px}.money9-public-row>span{color:var(--money5-blue)}
+
+
+/* Money decision layer v10 */
+.money10-budget{display:grid;grid-template-columns:1.35fr .85fr;gap:1px;margin:0 12px 8px;overflow:hidden;border:1px solid rgba(215,169,75,.18);border-radius:14px;background:rgba(215,169,75,.12)}
+.money10-budget>div{padding:10px 11px;background:rgba(5,10,23,.42)}.money10-budget small{display:block;color:var(--money5-sub);font-size:8px}.money10-budget b{display:block;margin-top:3px;color:var(--money5-gold);font-size:15px;font-variant-numeric:tabular-nums}.money10-budget .hero b{font-size:18px}
+.money6-metrics b.text{overflow:hidden;text-overflow:ellipsis;font-size:8px}
