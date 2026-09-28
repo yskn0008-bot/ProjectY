@@ -642,3 +642,14 @@ body[data-domain="money"] #moneyPage{padding-bottom:calc(148px + env(safe-area-i
   .money13-home .money6-timeline>span{display:none}
   .money12-fixed-summary{grid-template-columns:1fr}
 }
+
+
+/* Money Home balance scale v14 */
+.money13-home .money6-balance strong{
+  font-size:44px;
+  line-height:1.02;
+  letter-spacing:-.035em;
+}
+@media (max-width:360px){
+  .money13-home .money6-balance strong{font-size:40px}
+}
