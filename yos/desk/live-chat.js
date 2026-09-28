@@ -4,6 +4,7 @@
   var ASSETS_URL='../../data/yos-assets.json';
   var YOS_AI_FALLBACK='https://project-y-yos-ai.vercel.app';
   var THREAD_LIMIT=120;
+  var PROGRESS_COPY_VERSION='friendly-v1';
   var activeThreadId='';
   var sending=false;
   var assetsById={};
@@ -86,11 +87,66 @@
     if(chat)updateChatFromThread(chat);
     persist();
   }
+  function plainText(value){
+    return clean(value,900)
+      .replace(/iPhone実機/g,'iPhone')
+      .replace(/E2E/g,'最初から最後までの確認')
+      .replace(/PASS/g,'成功')
+      .replace(/SSOT/g,'最新データ')
+      .replace(/CI/g,'自動テスト')
+      .replace(/Router/g,'振り分け')
+      .replace(/Verify/g,'結果確認')
+      .replace(/Ledger/g,'記録')
+      .replace(/destination→APPLIED→REQUEST_DONE/g,'目的地を受け取って処理完了まで');
+  }
+  function firstSentences(value,max){
+    var text=plainText(value).replace(/\s+/g,' ').trim();
+    if(!text)return'';
+    var parts=text.match(/[^。！？!?]+[。！？!?]?/g)||[text];
+    var out='';
+    for(var i=0;i<parts.length;i++){
+      var part=String(parts[i]||'').trim();
+      if(!part)continue;
+      if(out&&out.length+part.length>max)break;
+      if(!out&&part.length>max){out=part;break}
+      out+=part;
+    }
+    return out||text;
+  }
   function progressText(asset){
-    var lines=['進捗 '+Number(asset.progress||0)+'%','状態：'+statusText(asset.status)];
-    if(asset.current)lines.push('',clean(asset.current,1200));
-    if(asset.next_action)lines.push('','次：'+clean(asset.next_action,1000));
+    var progress=Number(asset.progress||0);
+    if(asset.id==='clarity'){
+      if(progress>=100){
+        return ['いま','Clarityは完成しています。普段どおり使って大丈夫です。','','次','使っていて困るところが出た時だけ直します。'].join('\n');
+      }
+      if(progress>=85){
+        return ['いま','iPhoneで一通り動くところまで確認できています。','','残っていること','普段使いで問題が出ないかの最終確認です。','','次','実際に使いながら問題がないか確認します。'].join('\n');
+      }
+      if(progress>=65){
+        return ['いま','予定の登録と、Googleマップでナビを始めるところまでは動いています。','','残っていること','まだ全部の操作をまとめて確認できていません。','','次','iPhoneで残りをまとめて確認します。全部通れば進捗は85%になります。'].join('\n');
+      }
+    }
+    var current=firstSentences(asset.current,150);
+    var next=firstSentences(asset.next_action,130);
+    var lines=['いま'];
+    lines.push(current||statusText(asset.status)+'です。');
+    if(next){
+      lines.push('','次',next);
+    }
     return lines.join('\n');
+  }
+  function migrateProgressCopy(){
+    if(state.chatProgressCopyVersion===PROGRESS_COPY_VERSION)return;
+    ROOM_DEFS.forEach(function(def){
+      if(Array.isArray(state.chatThreads[def.id])){
+        state.chatThreads[def.id]=state.chatThreads[def.id].filter(function(message){
+          return message&&message.kind!=='progress';
+        });
+      }
+      delete state.assetThreadVersions[def.assetId];
+    });
+    state.chatProgressCopyVersion=PROGRESS_COPY_VERSION;
+    persist();
   }
   function ensureRoom(def,asset){
     var chat=state.chats.find(function(x){return x.assetId===def.assetId||x.id===def.id});
@@ -216,7 +272,7 @@
     var klass=mine?'mine':ai?'ai':progress?'progress':'system';
     if(error)klass+=' error';
     var label=progress
-      ?'<div class="messageLabel">進捗更新'+(message.progress!==null?' · '+esc(message.progress)+'%':'')+'</div>'
+      ?'<div class="messageLabel">いまの状況</div>'
       :'';
     return '<div class="messageRow '+klass+'">'+
       '<div class="messageBubble">'+label+'<div class="messageText">'+esc(message.text).replace(/\n/g,'<br>')+'</div>'+
@@ -360,6 +416,7 @@
   }
 
   buildThreadPage();
+  migrateProgressCopy();
   ensureBaseRooms();
   document.documentElement.dataset.deskLiveChat='ready';
   document.documentElement.dataset.deskChatMode='live';
