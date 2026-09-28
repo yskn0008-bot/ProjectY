@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-28T19:43:05+09:00",
+  "updated_at": "2026-09-28T20:58:22+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -70,7 +70,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-09-28T07:34:57Z"
+      "updated_at": "2026-09-28T11:46:53Z"
     },
     {
       "id": "github-issue-256",
@@ -165,39 +165,39 @@
   ],
   "recently_completed": [
     {
-      "id": "github-commit-881f2389b5a7",
-      "title": "chore: refresh Money debt planner runtime",
-      "completed_at": "2026-09-28T10:42:50Z",
-      "result": "GitHub mainへ反映（881f238）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/881f2389b5a79fc0b4a53eeedd9873573d555ec9"
+      "id": "github-commit-24491b95480f",
+      "title": "Merge pull request #520 from yskn0008-bot/oel/yos-desk-line-chat-ui-20260928",
+      "completed_at": "2026-09-28T11:58:05Z",
+      "result": "GitHub mainへ反映（24491b9）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/24491b95480f6c18018516140fe2f3ce4e619e68"
     },
     {
-      "id": "github-commit-afc607915ebc",
-      "title": "fix: keep personal debt data out of public app source",
-      "completed_at": "2026-09-28T10:42:36Z",
-      "result": "GitHub mainへ反映（afc6079）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/afc607915ebc2c9f35f07de4a8ce325f5ee2f1a0"
+      "id": "github-commit-9353224127b5",
+      "title": "ci: add scoped YOS DESK browser verification",
+      "completed_at": "2026-09-28T11:40:15Z",
+      "result": "GitHub mainへ反映（9353224）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/9353224127b5b7bc8b28c90bacea5255a5a882c7"
     },
     {
-      "id": "github-commit-82541ed21882",
-      "title": "chore: refresh debt evidence UI",
-      "completed_at": "2026-09-28T07:24:28Z",
-      "result": "GitHub mainへ反映（82541ed）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/82541ed21882ae224e3c6360e6d0216151c1a57b"
+      "id": "github-commit-e1b1e9048748",
+      "title": "test: verify YOS DESK LINE-like chat UI in browser",
+      "completed_at": "2026-09-28T11:40:13Z",
+      "result": "GitHub mainへ反映（e1b1e90）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/e1b1e90487480e98331bf22bf9a5ceb631214a7f"
     },
     {
-      "id": "github-commit-ad6f8f7f7890",
-      "title": "style: distinguish debt evidence and urgency",
-      "completed_at": "2026-09-28T07:24:04Z",
-      "result": "GitHub mainへ反映（ad6f8f7）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/ad6f8f7f78904404f1c34017659fc1ab621209a8"
+      "id": "github-commit-2851a6dd1563",
+      "title": "test: lock YOS DESK chat-list interaction pattern",
+      "completed_at": "2026-09-28T11:33:48Z",
+      "result": "GitHub mainへ反映（2851a6d）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/2851a6dd1563e6de0923c0963ff9c4de0e279cc6"
     },
     {
-      "id": "github-commit-1ae0e92514ea",
-      "title": "feat: consolidate confirmed and unconfirmed debt evidence",
-      "completed_at": "2026-09-28T07:23:45Z",
-      "result": "GitHub mainへ反映（1ae0e92）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/1ae0e92514ead729e407a3b969a0ae6313f4b266"
+      "id": "github-commit-24623ebfcadc",
+      "title": "ui: flatten YOS DESK chat list for LINE-like rhythm",
+      "completed_at": "2026-09-28T11:33:46Z",
+      "result": "GitHub mainへ反映（24623eb）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/24623ebfcadc30943301b211e68e7acbd1b1ccf2"
     },
     {
       "id": "complete-002",
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-28T19:43:05+09:00",
+      "last_update": "2026-09-28T20:58:22+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -315,7 +315,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-28T19:43:05+09:00",
+      "last_update": "2026-09-28T20:58:22+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-28T19:43:05+09:00",
+      "last_update": "2026-09-28T20:58:22+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "2da4099a317611a5d4f116a5a7204692af6c796b4fe13ca3849d9a7598d234f7"
+  "github_snapshot_hash": "4b3ca6b95694303c4eb5f9ea1655e2cc807d0c5217d9155af0f8230c4b453503"
 }
