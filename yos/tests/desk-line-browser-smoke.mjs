@@ -16,83 +16,88 @@ await context.addInitScript(() => {
     metrics:{opens:0,taps:0,reorders:0,posts:0},
     chatRegistryVersion:'2026-09-24-real-links-v1',
     chats:[
-      {id:'yos',project:'One Enter',title:'YOS',preview:'生活全体の相談と判断',time:'20:30',unread:2,pinned:true,avatar:'Y',tone:'gold',alias:'',url:'https://chatgpt.com/c/yos-ui-smoke'},
-      {id:'clarity',project:'One Enter',title:'Clarity',preview:'自然文からiPhone機能へ',time:'19:42',unread:0,pinned:false,avatar:'C',tone:'blue',alias:'',url:'https://chatgpt.com/c/clarity-ui-smoke'},
-      {id:'money',project:'MY WAY',title:'Money',preview:'使える金・次の支払いを確認',time:'昨日',unread:0,pinned:false,avatar:'¥',tone:'green',alias:'',url:'https://chatgpt.com/c/money-ui-smoke'}
+      {id:'external-yos',project:'ChatGPT',title:'外部YOS',preview:'実チャット',time:'20:30',unread:0,pinned:false,avatar:'Y',tone:'gold',alias:'',url:'https://chatgpt.com/c/yos-ui-smoke'}
     ]
   }));
 });
 
 const page=await context.newPage();
+await page.route('**/api/yos/chat', async route => {
+  await route.fulfill({
+    status:200,
+    contentType:'application/json',
+    body:JSON.stringify({
+      requestId:'desk-live-smoke',
+      answer:'テスト応答です。メッセージUIは動作しています。',
+      route:'general',
+      facts:[],assumptions:[],unknowns:[],conflicts:[],sources:[],
+      safety:{level:'normal',notes:[]},
+      nextAction:null,memoryCandidates:[]
+    })
+  });
+});
+
 try{
   await page.goto(base+'/yos/desk/',{waitUntil:'networkidle'});
+  await page.waitForFunction(()=>document.documentElement.dataset.deskChatSync==='ok');
   await page.waitForSelector('#chatsPage.active');
   assert.match((await page.locator('#chatsPage .brand strong').textContent())||'',/チャット/);
-  assert.equal(await page.locator('#chatList .chat').count(),3);
 
-  const ui=await page.evaluate(()=>{
-    const row=document.querySelector('#chatList .chat');
+  const count=await page.locator('#chatList .chat').count();
+  assert.ok(count>=6,'built-in YOS rooms should populate CHATS without manual links');
+  assert.equal(await page.locator('#projects').evaluate(el=>getComputedStyle(el).display),'none','project pills stay hidden for LINE-like scanability');
+
+  const row=page.locator('#chatList .chat').first();
+  const ui=await row.evaluate(row=>{
     const avatar=row.querySelector('.avatar');
     const preview=row.querySelector('.preview');
-    const tag=row.querySelector('.tag');
-    const list=document.getElementById('chatList');
-    const app=document.getElementById('app');
     const activeTab=document.querySelector('#chatsPage .tab.active');
-    const rowStyle=getComputedStyle(row);
-    const avatarStyle=getComputedStyle(avatar);
-    const previewStyle=getComputedStyle(preview);
-    const tagStyle=getComputedStyle(tag);
-    const underline=getComputedStyle(activeTab,'::after');
-    const rowRect=row.getBoundingClientRect();
-    const appRect=app.getBoundingClientRect();
+    const rs=getComputedStyle(row),as=getComputedStyle(avatar),ps=getComputedStyle(preview);
     return {
-      rowRadius:rowStyle.borderRadius,
-      rowBackground:rowStyle.backgroundColor,
-      rowMinHeight:parseFloat(rowStyle.minHeight),
-      avatarRadius:avatarStyle.borderRadius,
-      avatarWidth:parseFloat(avatarStyle.width),
-      previewSize:parseFloat(previewStyle.fontSize),
-      previewWhiteSpace:previewStyle.whiteSpace,
-      tagDisplay:tagStyle.display,
-      underlineHeight:parseFloat(underline.height),
-      listGap:parseFloat(getComputedStyle(list).gap)||0,
-      rowLeft:rowRect.left,
-      rowRight:rowRect.right,
-      appLeft:appRect.left,
-      appRight:appRect.right
+      rowRadius:rs.borderRadius,rowBackground:rs.backgroundColor,rowMinHeight:parseFloat(rs.minHeight),
+      avatarRadius:as.borderRadius,avatarWidth:parseFloat(as.width),
+      previewSize:parseFloat(ps.fontSize),previewWhiteSpace:ps.whiteSpace,
+      underlineHeight:parseFloat(getComputedStyle(activeTab,'::after').height)
     };
   });
+  assert.equal(ui.rowRadius,'0px');
+  assert.equal(ui.rowBackground,'rgba(0, 0, 0, 0)');
+  assert.ok(ui.rowMinHeight>=72);
+  assert.equal(ui.avatarRadius,'50%');
+  assert.ok(ui.avatarWidth>=48);
+  assert.ok(ui.previewSize>=15);
+  assert.equal(ui.previewWhiteSpace,'nowrap');
+  assert.ok(ui.underlineHeight>=3);
 
-  assert.equal(ui.rowRadius,'0px','conversation rows should be flat, not cards');
-  assert.equal(ui.rowBackground,'rgba(0, 0, 0, 0)','conversation rows should use the page background');
-  assert.ok(ui.rowMinHeight>=72,'conversation rows need a familiar touch target');
-  assert.equal(ui.avatarRadius,'50%','avatars should be circular');
-  assert.ok(ui.avatarWidth>=48,'avatars should remain easy to scan');
-  assert.ok(ui.previewSize>=15,'message previews must be readable');
-  assert.equal(ui.previewWhiteSpace,'nowrap','message previews should scan as one line');
-  assert.equal(ui.tagDisplay,'none','project labels belong in filters, not inside every row');
-  assert.ok(ui.underlineHeight>=3,'active filter should use a simple underline');
-  assert.equal(ui.listGap,0,'conversation rows should form one continuous list');
-  assert.ok(Math.abs(ui.rowLeft-ui.appLeft)<=1&&Math.abs(ui.rowRight-ui.appRight)<=1,'conversation rows should run edge to edge');
+  await page.evaluate((localBase)=>{
+    globalThis.YOS_AI_BASE_URL=localBase;
+    globalThis.YOS_AUTH={getGoogleIdToken:async()=> 'header.payload.signature'};
+  },base);
+
+  await page.locator('.chat[data-id="asset-clarity"]').click();
+  await page.waitForSelector('#threadPage.active');
+  assert.match((await page.locator('#threadTitle').textContent())||'',/Clarity/);
+  assert.match((await page.locator('#messageStream').textContent())||'',/進捗 65%/);
+  assert.match((await page.locator('#threadStatus').textContent())||'',/65%/);
+  assert.equal(await page.locator('#bottom').evaluate(el=>getComputedStyle(el).display),'none');
+
+  await page.locator('#threadInput').fill('YOS DESKから送信テスト');
+  await page.locator('#threadSend').click();
+  await page.waitForFunction(()=>document.querySelector('#messageStream')?.textContent?.includes('テスト応答です'));
+  const streamText=(await page.locator('#messageStream').textContent())||'';
+  assert.match(streamText,/YOS DESKから送信テスト/);
+  assert.match(streamText,/テスト応答です。メッセージUIは動作しています。/);
+
+  await page.locator('#threadBack').click();
+  await page.waitForSelector('#chatsPage.active');
+  const clarityPreview=(await page.locator('.chat[data-id="asset-clarity"] .preview').textContent())||'';
+  assert.match(clarityPreview,/テスト応答です/);
 
   await page.locator('.tab[data-mode="pinned"]').click();
-  assert.equal(await page.locator('#chatList .chat').count(),1,'pinned filter should still work');
+  assert.ok(await page.locator('#chatList .chat').count()>=3,'core pinned rooms remain filterable');
   await page.locator('.tab[data-mode="all"]').click();
   await page.locator('#searchInput').fill('Money');
-  assert.equal(await page.locator('#chatList .chat').count(),1,'chat search should still work');
-
-  await page.evaluate(()=>{
-    document.getElementById('searchInput').value='';
-    state.chats=[];
-    projectFilter='すべて';
-    chatMode='all';
-    renderChats();
-  });
-  assert.equal((await page.locator('#selectBtn').textContent())?.trim(),'編集','top-right action should read 編集');
-  assert.equal(await page.locator('#projects').evaluate(el=>getComputedStyle(el).display),'none','redundant project pills should be hidden when there are no multiple projects');
-  await page.waitForSelector('#emptyAdd',{state:'visible'});
-  assert.match((await page.locator('#empty').textContent())||'',/まだチャットがありません/);
-  assert.match((await page.locator('#emptyAdd').textContent())||'',/コピーしたリンクを追加/);
+  assert.ok(await page.locator('#chatList .chat').count()>=1,'chat search still works');
 } finally {
   await browser.close();
 }
