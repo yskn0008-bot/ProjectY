@@ -63,6 +63,20 @@
         if(index>=0)data.accounts=data.accounts.map((a,i)=>i===index?{...a,name:a.name||name,type:a.type||type,balance,updatedAt:now}:a);
         else data.accounts=[...data.accounts,{id:uid('acct'),type,name,balance,updatedAt:now}];
         changed=true;
+      }else if(op.kind==='replace-liquid'){
+        const amount=Math.max(0,n(op.amount)),now=new Date().toISOString();
+        const liquidTypes=new Set(['bank','cash','emoney']);
+        let cashIndex=data.accounts.findIndex(a=>a.type==='cash'||clean(a.name,50)==='現金');
+        if(cashIndex<0){
+          data.accounts=[...data.accounts,{id:uid('acct'),type:'cash',name:'現金',balance:amount,updatedAt:now}];
+          cashIndex=data.accounts.length-1;
+        }
+        data.accounts=data.accounts.map((a,i)=>{
+          if(!liquidTypes.has(a.type))return a;
+          if(i===cashIndex)return {...a,type:'cash',name:a.name||'現金',balance:amount,updatedAt:now};
+          return {...a,balance:0,updatedAt:now};
+        });
+        changed=true;
       }else if(op.kind==='upsert-transaction'){
         const date=clean(op.date,10),label=clean(op.label,60),amount=Math.max(0,n(op.amount));
         if(!/^\d{4}-\d{2}-\d{2}$/.test(date)||!label||!amount)continue;
