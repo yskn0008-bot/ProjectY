@@ -68,8 +68,8 @@
         if(!/^\d{4}-\d{2}-\d{2}$/.test(date)||!label||!amount)continue;
         const id=clean(op.id,80)||`import-${date}-${amount}-${label}`;
         const item={id,date,type:['income','expense','debt','saving','investment'].includes(op.type)?op.type:'expense',category:clean(op.category,30)||'other',label,amount,status:op.status==='done'?'done':'planned',imported:true};
-        const exists=data.transactions.findIndex(tx=>tx.id===id);
-        data.transactions=exists>=0?data.transactions.map((tx,i)=>i===exists?{...tx,...item}:tx):[...data.transactions,item];
+        const exists=data.transactions.findIndex(tx=>tx.id===id||(tx.date===date&&n(tx.amount)===amount&&clean(tx.label,60)===label));
+        data.transactions=exists>=0?data.transactions.map((tx,i)=>i===exists?{...tx,...item,id:tx.id||id}:tx):[...data.transactions,item];
         changed=true;
       }else if(op.kind==='mark-paid'){
         const date=clean(op.date,10),label=clean(op.label,60),amount=Math.max(0,n(op.amount));
