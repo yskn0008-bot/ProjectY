@@ -175,11 +175,77 @@
 
 <dialog id="menuDialog"><div class="dialog-body"><header><div><small>MY WAY by YOS</small><h2>メニュー</h2></div><button class="close" aria-label="閉じる">×</button></header><nav class="menu-list"><button data-prompt="【YOS】MY WAYの現在地から話を続けたい。">YOS <span>›</span></button><a data-native-only hidden href="../capture.html">Clarity / 入力 <span>›</span></a><a data-native-only hidden href="../bravia.html">MY REMOTE / BRAVIA <span>›</span></a><a data-native-only hidden href="../system.html">System / 開発・状態 <span>›</span></a><a data-web-only href="shortcuts://run-shortcut?name=Clarity">Clarity <span>›</span></a><a data-web-only href="scriptable:///run?scriptName=YOS%20Remote%20Hub">MY REMOTE <span>›</span></a><a data-web-only href="../system/">System / 開発・状態 <span>›</span></a><button id="openSettings">設定 <span>›</span></button><button data-prompt="【YOS改善】MY WAY by YOSを、YOSの識別と既存資産を守りながら改善したい。">YOS改善 <span>›</span></button><button data-prompt="【YOS｜ヘルプ】MY WAYの使い方を案内して。">ヘルプ <span>›</span></button></nav></div></dialog>
 <dialog id="settingsDialog"><form method="dialog" class="dialog-body"><header><div><small>SETTINGS</small><h2>YOSチャット設定</h2></div><button class="close" value="cancel">×</button></header><p>現在のYOSチャットURLをこの端末だけに保存します。</p><label for="yosUrl">YOSチャットURL</label><input id="yosUrl" type="url" placeholder="https://chatgpt.com/..."><button id="saveUrl" class="save-button" value="default">保存する</button></form></dialog>
+<script>
+(()=>{
+  const KEY='yos-money-v2', hash=String(location.hash||'').replace(/^#/,'');
+  const part=hash.split('&').find(x=>x.startsWith('mi='));
+  if(!part)return;
+  try{
+    const raw=part.slice(3).replace(/-/g,'+').replace(/_/g,'/');
+    const padded=raw+'='.repeat((4-raw.length%4)%4);
+    const bytes=Uint8Array.from(atob(padded),c=>c.charCodeAt(0));
+    const payload=JSON.parse(new TextDecoder().decode(bytes));
+    if(!payload||payload.v!==1||!Array.isArray(payload.ops))return;
+    const saved=JSON.parse(localStorage.getItem(KEY)||'null')||{};
+    const data={
+      ...saved,
+      version:2,
+      accounts:Array.isArray(saved.accounts)?saved.accounts:[],
+      transactions:Array.isArray(saved.transactions)?saved.transactions:[],
+      recurring:Array.isArray(saved.recurring)?saved.recurring:[],
+      debts:Array.isArray(saved.debts)?saved.debts:[],
+      goals:Array.isArray(saved.goals)?saved.goals:[],
+      assets:Array.isArray(saved.assets)?saved.assets:[]
+    };
+    const num=v=>Number.isFinite(Number(v))?Number(v):0;
+    const txt=(v,max=80)=>String(v??'').trim().slice(0,max);
+    let changed=false;
+    for(const op of payload.ops.slice(0,20)){
+      if(!op||typeof op!=='object')continue;
+      if(op.kind==='replace-liquid'){
+        const amount=Math.max(0,num(op.amount)),now=new Date().toISOString();
+        let cash=data.accounts.findIndex(a=>a?.type==='cash'||txt(a?.name,50)==='現金');
+        if(cash<0){data.accounts.push({id:'acct-local-cash',type:'cash',name:'現金',balance:0,updatedAt:now});cash=data.accounts.length-1}
+        data.accounts=data.accounts.map((a,i)=>{
+          if(!['bank','cash','emoney'].includes(a?.type))return a;
+          return i===cash?{...a,type:'cash',name:a.name||'現金',balance:amount,updatedAt:now}:{...a,balance:0,updatedAt:now};
+        });
+        changed=true;
+      }else if(op.kind==='mark-paid'){
+        const date=txt(op.date,10),amount=Math.max(0,num(op.amount)),label=txt(op.label,60);
+        let found=-1;
+        for(let i=0;i<data.transactions.length;i++){
+          const tx=data.transactions[i];
+          if(txt(tx?.date,10)===date&&num(tx?.amount)===amount&&(!label||txt(tx?.label,60)===label)){found=i;break}
+        }
+        if(found<0){
+          for(let i=0;i<data.transactions.length;i++){
+            const tx=data.transactions[i];
+            if(txt(tx?.date,10)===date&&num(tx?.amount)===amount){found=i;break}
+          }
+        }
+        if(found>=0){data.transactions[found]={...data.transactions[found],status:'done',paid:true,completed:true};changed=true}
+      }else if(op.kind==='upsert-transaction'){
+        const date=txt(op.date,10),label=txt(op.label,60),amount=Math.max(0,num(op.amount));
+        if(!/^\d{4}-\d{2}-\d{2}$/.test(date)||!label||!amount)continue;
+        const id=txt(op.id,80)||('local-'+date+'-'+amount+'-'+label);
+        const item={id,date,type:['income','expense','debt','saving','investment'].includes(op.type)?op.type:'expense',category:txt(op.category,30)||'other',label,amount,status:op.status==='done'?'done':'planned',imported:true};
+        const at=data.transactions.findIndex(tx=>tx?.id===id||(txt(tx?.date,10)===date&&num(tx?.amount)===amount&&txt(tx?.label,60)===label));
+        if(at>=0)data.transactions[at]={...data.transactions[at],...item,id:data.transactions[at].id||id};
+        else data.transactions.push(item);
+        changed=true;
+      }
+    }
+    if(changed){data.updatedAt=new Date().toISOString();localStorage.setItem(KEY,JSON.stringify(data))}
+    history.replaceState(null,'',location.pathname+location.search+'#money');
+  }catch{}
+})();
+</script>
 <script src="./money-master-v1.js?v=20260923v5" defer></script>
 <script src="./shared-state-v1.js?v=4" defer></script>
 <script src="./hj-entry.js" defer></script>
 <script src="./app.js?v=3" defer></script>
-<script src="./money-v2-runtime-v4.js?v=26" defer></script>
+<script src="./money-v2-runtime-v4.js?v=27" defer></script>
 <script src="./money-reference-v1.js?v=1" defer></script>
 <script src="./task-dashboard.js?v=3" defer></script>
 </body>
