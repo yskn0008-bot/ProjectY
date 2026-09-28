@@ -18,7 +18,14 @@ await context.addInitScript(() => {
     chatRegistryVersion:'2026-09-24-real-links-v1',
     chats:[
       {id:'external-yos',project:'ChatGPT',title:'外部YOS',preview:'実チャット',time:'20:30',unread:0,pinned:false,avatar:'Y',tone:'gold',alias:'',url:'https://chatgpt.com/c/yos-ui-smoke'}
-    ]
+    ],
+    chatThreads:{
+      'asset-clarity':[
+        {id:'old-progress',role:'system',kind:'progress',text:'進捗 65%\\n状態：実機確認待ち\\nREQUEST_DONE Router Verify Ledger E2E',at:'2026-09-28T22:41:00+09:00',progress:65}
+      ]
+    },
+    assetThreadVersions:{clarity:'legacy-version'},
+    chatProgressCopyVersion:'legacy'
   }));
 });
 
@@ -80,7 +87,14 @@ try{
   await page.locator('.chat[data-id="asset-clarity"]').click();
   await page.waitForSelector('#threadPage.active');
   assert.match((await page.locator('#threadTitle').textContent())||'',/Clarity/);
-  assert.match((await page.locator('#messageStream').textContent())||'',/進捗 65%/);
+  const friendlyProgress=(await page.locator('#messageStream').textContent())||'';
+  assert.match(friendlyProgress,/いまの状況/);
+  assert.match(friendlyProgress,/予定の登録/);
+  assert.match(friendlyProgress,/Googleマップ/);
+  assert.match(friendlyProgress,/残っていること/);
+  assert.match(friendlyProgress,/全部通れば進捗は85%/);
+  assert.doesNotMatch(friendlyProgress,/REQUEST_DONE|Router|Verify|Ledger|E2E|destination/,'technical implementation terms should not be shown to the user');
+  assert.doesNotMatch(friendlyProgress,/進捗 65%\\s*状態/,'progress/status should not be duplicated inside the message body');
   assert.match((await page.locator('#threadStatus').textContent())||'',/65%/);
   assert.equal(await page.locator('#bottom').evaluate(el=>getComputedStyle(el).display),'none');
 
