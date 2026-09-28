@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-28T22:52:14+09:00",
+  "updated_at": "2026-09-28T22:53:41+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -165,6 +165,27 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-6f8b9646582a",
+      "title": "chore: refresh local Money import assets",
+      "completed_at": "2026-09-28T13:53:26Z",
+      "result": "GitHub mainへ反映（6f8b964）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/6f8b9646582a9e0873f31f5081e371af155894cb"
+    },
+    {
+      "id": "github-commit-56ac24571bab",
+      "title": "feat: add local-only Money import via URL fragment",
+      "completed_at": "2026-09-28T13:53:23Z",
+      "result": "GitHub mainへ反映（56ac245）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/56ac24571bab2245674242f2e8e519940c0db1e2"
+    },
+    {
+      "id": "github-commit-3b9f11fc5edf",
+      "title": "feat: preserve Money route for local import fragments",
+      "completed_at": "2026-09-28T13:53:19Z",
+      "result": "GitHub mainへ反映（3b9f11f）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/3b9f11fc5edf7394c83cee69f04cd18aff2dc590"
+    },
+    {
       "id": "github-commit-b2745bfc2a27",
       "title": "YOS DESK: Clarity進捗の鮮度を実態に合わせる (#522)",
       "completed_at": "2026-09-28T13:51:58Z",
@@ -177,27 +198,6 @@
       "completed_at": "2026-09-28T13:47:06Z",
       "result": "GitHub mainへ反映（724fa66）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/724fa66d1d30b4221cc9bb3fc2e7b641772dcf95"
-    },
-    {
-      "id": "github-commit-48b441c8dde4",
-      "title": "style: add compact paid action",
-      "completed_at": "2026-09-28T13:46:50Z",
-      "result": "GitHub mainへ反映（48b441c）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/48b441c8dde4ca5d8f996780495532992d54b07e"
-    },
-    {
-      "id": "github-commit-fd5623edd570",
-      "title": "feat: add one-tap paid action for next payment",
-      "completed_at": "2026-09-28T13:46:47Z",
-      "result": "GitHub mainへ反映（fd5623e）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/fd5623edd57021e58ce30c0ca4d25a238abbe473"
-    },
-    {
-      "id": "github-commit-a436481f8700",
-      "title": "feat: make next payment directly confirmable",
-      "completed_at": "2026-09-28T13:45:50Z",
-      "result": "GitHub mainへ反映（a436481）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/a436481f8700cd95d7296c8e4b33a221901fc4c9"
     },
     {
       "id": "complete-002",
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-28T22:52:14+09:00",
+      "last_update": "2026-09-28T22:53:41+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -315,7 +315,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-28T22:52:14+09:00",
+      "last_update": "2026-09-28T22:53:41+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-28T22:52:14+09:00",
+      "last_update": "2026-09-28T22:53:41+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "01190f5aeb28bb0f9d43b72210816bd5cb4c36a86c0a4ad326fc0ff49b10b6fc"
+  "github_snapshot_hash": "4191b9b21afe80cabaa88ab61794f506c6cbd1417b0f77d858f3a7024378286d"
 }
