@@ -544,3 +544,11 @@ body[data-domain="money"] #moneyPage{font-size:16px}
 .money11-debt-row strong{display:block;font-size:16px}
 .money11-debt-row small{display:block;margin-top:3px;color:var(--money5-sub);font-size:12px;line-height:1.35;white-space:normal}
 .money11-debt-row>b{font-size:16px;color:var(--money5-red);font-variant-numeric:tabular-nums;white-space:nowrap}
+
+
+/* Debt evidence states v12 */
+.money11-status{display:inline-block;margin-left:6px;padding:2px 6px;border-radius:999px;font-size:10px;font-style:normal;font-weight:850;vertical-align:1px}
+.money11-status.legal_notice{color:var(--money5-red);background:rgba(255,110,110,.10)}
+.money11-status.overdue{color:var(--money5-gold);background:rgba(215,169,75,.10)}
+.money11-status.active{color:var(--money5-green);background:rgba(110,231,167,.10)}
+.money11-debt-row>b{max-width:92px;overflow:hidden;text-overflow:ellipsis}
