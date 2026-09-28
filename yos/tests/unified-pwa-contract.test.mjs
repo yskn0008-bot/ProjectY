@@ -82,3 +82,19 @@ test('YOS DESK chats use a LINE-like flat conversation list', async () => {
   assert.match(compact, /#chatsPage \.preview\{[\s\S]*white-space:nowrap;/);
   assert.match(compact, /#chatsPage \.tab\.active:after/);
 });
+
+
+test('YOS DESK exposes Clarity SSOT freshness instead of a generic auto-sync label', async () => {
+  const [desk,assets] = await Promise.all([
+    read('yos/desk/app.js'),
+    read('data/yos-assets.json')
+  ]);
+  assert.match(desk, /asset\.updated_at/);
+  assert.match(desk, /SSOT<br>'\+esc\(assetStamp\)\+'取得/);
+  const data=JSON.parse(assets);
+  const clarity=data.assets.find(x=>x.id==='clarity');
+  assert.equal(clarity.progress,65);
+  assert.equal(clarity.progress_basis.device,false);
+  assert.match(clarity.updated_at,/^2026-09-28/);
+  assert.match(clarity.current,/Calendar登録/);
+});

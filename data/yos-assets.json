@@ -1,14 +1,14 @@
 {
   "schema_version": "1.0.0",
   "ssot": "YOS asset registry",
-  "updated_at": "2026-09-20T05:56:00+09:00",
+  "updated_at": "2026-09-28T22:41:00+09:00",
   "source": {
     "repository": "yskn0008-bot/ProjectY",
     "base_branch": "main",
-    "base_sha": "f5d848761bf57f155681a8efacf18a945983fdab",
+    "base_sha": "48b441c8dde4ca5d8f996780495532992d54b07e",
     "issue": "https://github.com/yskn0008-bot/ProjectY/issues/371",
     "legacy_22_asset_table_verified": false,
-    "note": "Reconciled with iPhone standalone/offline acceptance evidence on 2026-09-20."
+    "note": "Incrementally reconciled with merged Clarity/Clarity Next implementation and confirmed iPhone evidence through 2026-09-28. Progress remains stage-based; partial device passes do not count the device stage until full E2E is complete."
   },
   "progress_model": {
     "weights": {
@@ -139,9 +139,9 @@
       "area": "core",
       "status": "awaiting_device_verification",
       "priority": 1,
-      "current": "Universal Gatewayと後続修正が実装済み。最終的なiPhone実機E2Eは継続中。",
-      "next_action": "現在のClarity入力→判断→実行→確認経路をiPhoneでE2E確認し、P5でSSOT自動更新へ接続する。",
-      "blocker": "iPhone実機E2Eの確認が残る。",
+      "current": "Clarity / Clarity Next の実装とCI修正は継続更新済み。9/28 iPhone実機でCalendar登録（9/29 14:00–15:00）PASS。NavigationはClarity側でdestination→APPLIED→REQUEST_DONEまで到達し、沖縄県庁はGoogle Mapsのナビ開始を実機確認。那覇空港は具体的な行き先指定が必要。固定子全体と本番運用のE2Eは未完了。",
+      "next_action": "Clarity Nextの残る固定子とナビ例外を含む、入力→判断→Safety→Router→実行→Verify→LedgerをiPhoneで一括E2Eし、全条件PASS時だけdevice stageを65%→85%へ更新する。",
+      "blocker": "iPhone全体E2Eと本番運用確認が未完了。部分的な実機PASSは確認済みだが、device stage完了条件には未到達。",
       "needs_user_action": true,
       "device_verified": false,
       "production_verified": false,
@@ -151,7 +151,17 @@
       ],
       "evidence": [
         "PR#325",
-        "PR#366"
+        "PR#366",
+        "PR#470",
+        "PR#507",
+        "PR#509",
+        "PR#512",
+        "PR#513",
+        "PR#514",
+        "PR#515",
+        "PR#517",
+        "device:2026-09-28 Clarity Next Calendar created 2026-09-29 14:00-15:00 on iPhone",
+        "device:2026-09-28 Clarity navigation reached destination/APPLIED/REQUEST_DONE; Okinawa Prefectural Government Google Maps navigation start confirmed"
       ],
       "progress_basis": {
         "spec": true,
@@ -161,7 +171,7 @@
         "production": false
       },
       "progress": 65,
-      "updated_at": "2026-09-17T10:01:41+09:00"
+      "updated_at": "2026-09-28T22:41:00+09:00"
     },
     {
       "id": "money",
