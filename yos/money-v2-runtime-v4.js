@@ -194,6 +194,30 @@
     return {liquid,projected:running,shortfall:firstBreak?Math.abs(firstBreak.balance):0,firstBreak,nextPayment,nextIncome,daily:Math.floor(Math.max(0,liquid-outgoingUntilAnchor)/days),afterNextPayment,shortageAfterNextPayment:nextPayment?afterNextPayment<0:false,daysToNextPayment:nextPayment?Math.max(0,daysBetween(parseDate(today),parseDate(nextPayment.date))):null};
   }
   const totalDebt=()=>data.debts.reduce((s,d)=>s+n(d.balance),0);
+  function debtPlan(){
+    const debts=data.debts.filter(d=>n(d.balance)>0).map(d=>{
+      const balance=Math.max(0,n(d.balance)),apr=Math.max(0,n(d.apr)),minPayment=Math.max(0,n(d.minPayment));
+      const plannedPayment=Math.max(minPayment,n(d.plannedPayment)||minPayment),monthlyRate=apr/1200,monthlyInterest=balance*monthlyRate;
+      let payoffMonths=null;
+      if(balance<=0)payoffMonths=0;
+      else if(plannedPayment>0&&monthlyRate===0)payoffMonths=Math.ceil(balance/plannedPayment);
+      else if(plannedPayment>monthlyInterest&&monthlyRate>0){
+        payoffMonths=Math.ceil(-Math.log(1-monthlyRate*balance/plannedPayment)/Math.log(1+monthlyRate));
+        if(!Number.isFinite(payoffMonths)||payoffMonths>1200)payoffMonths=null;
+      }
+      return {...d,balance,apr,minPayment,plannedPayment,monthlyInterest,payoffMonths};
+    }).sort((a,b)=>b.apr-a.apr||b.balance-a.balance);
+    const total=debts.reduce((s,d)=>s+d.balance,0),minimum=debts.reduce((s,d)=>s+d.minPayment,0),planned=debts.reduce((s,d)=>s+d.plannedPayment,0),interest=debts.reduce((s,d)=>s+d.monthlyInterest,0);
+    const focus=debts[0]||null;
+    const plan=futurePlan();
+    let guidance='借金を登録すると返済順を判定します。';
+    if(debts.length){
+      if(plan.firstBreak||currentMonthShortfall()>0)guidance='まず今月の必須支払いと最低返済を守り、延滞を避ける。追加返済は資金不足を解消してから。';
+      else if(focus&&focus.apr>0)guidance=`最低返済を全件確保し、余剰は年利 ${focus.apr}% の「${clean(focus.name,20)}」から優先。`;
+      else guidance='最低返済を全件確保。金利を入力すると追加返済の優先順位を自動判定できます。';
+    }
+    return {debts,total,minimum,planned,interest,focus,guidance};
+  }
   const emergencyGoal=()=>data.goals.find(g=>g.type==='emergency')||null;
   const primaryGoal=()=>[...data.goals].sort((a,b)=>(Number(b.priority)||0)-(Number(a.priority)||0))[0]||null;
   const netWorth=()=> (currentLiquid()??0)+data.assets.reduce((s,a)=>s+n(a.value),0)-totalDebt();
@@ -417,13 +441,31 @@
   const accountType=type=>({bank:'銀行',cash:'現金',emoney:'電子マネー'}[type]||'その他');
   function formatUpdated(value){const d=new Date(value);return Number.isNaN(d.getTime())?'':new Intl.DateTimeFormat('ja-JP',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit',timeZone:TZ}).format(d)}
   function renderRules(){
-    const debtTotal=totalDebt();
+    const dp=debtPlan();
     const recurring=data.recurring.map(rule=>`<button class="money2-rule-row" type="button" data-money-action="edit-recurring" data-id="${escapeHtml(rule.id)}"><div><strong>${escapeHtml(rule.label)}</strong><small>毎月${Math.max(1,Math.round(n(rule.day)||1))}日 ・ ${escapeHtml(transactionCategory(rule).label)}</small></div><span>${rule.type==='income'?'+':'−'}${data.privacy?'••••':yen(rule.amount)}</span></button>`).join('');
     const goals=data.goals.map(g=>{const target=Math.max(1,n(g.target)),current=n(g.current),pct=Math.min(100,Math.round(current/target*100)),checkpoint=Math.max(0,n(g.checkpoint)),priority=clean(g.priorityLabel,10)||(n(g.priority)>=4?'高':n(g.priority)>=2?'中':'低');const details=[goalType(g.type),data.privacy?'金額非表示':`${yen(current)} / ${yen(target)}`,checkpoint?`第1チェック ${data.privacy?'非表示':yen(checkpoint)}`:'',`優先度 ${priority}`,g.deadline?`${formatMD(g.deadline)}まで`:''].filter(Boolean).join(' ・ ');return `<button class="money2-rule-row" type="button" data-money-action="edit-goal" data-id="${escapeHtml(g.id)}"><div><strong>${escapeHtml(g.name)}</strong><small>${escapeHtml(details)}</small></div><span>${pct}%</span></button>`}).join('');
-    const debts=data.debts.map(d=>`<button class="money2-rule-row" type="button" data-money-action="edit-debt" data-id="${escapeHtml(d.id)}"><div><strong>${escapeHtml(d.name)}</strong><small>金利 ${n(d.apr)}% ・ 最低返済 ${data.privacy?'非表示':yen(d.minPayment)}</small></div><span>${data.privacy?'••••':yen(d.balance)}</span></button>`).join('');
-    return `<section class="money3-panel"><header><div><small>AUTO</small><h2>定期収支</h2></div><button type="button" data-money-action="add-recurring">＋追加</button></header>${recurring||'<p class="money3-empty">毎月の家賃・サブスク・給与などを自動で予定に反映できます。</p>'}</section>
+    const debts=dp.debts.map((d,index)=>{
+      const payoff=d.payoffMonths===0?'完済':d.payoffMonths?`概算 ${d.payoffMonths}か月`:(d.plannedPayment<=d.monthlyInterest&&d.apr>0?'返済額不足':'期間未算出');
+      const due=d.dueDay?`毎月${Math.min(31,Math.max(1,Math.round(n(d.dueDay))))}日 ・ `:'';
+      return `<button class="money11-debt-row" type="button" data-money-action="edit-debt" data-id="${escapeHtml(d.id)}">
+        <div class="money11-debt-rank">${index+1}</div>
+        <div><strong>${escapeHtml(d.name)}</strong><small>${due}年利 ${d.apr}% ・ 月 ${data.privacy?'非表示':yen(d.plannedPayment)} ・ ${payoff}</small></div>
+        <b>${data.privacy?'••••':yen(d.balance)}</b>
+      </button>`;
+    }).join('');
+    return `<section class="money3-panel"><header><div><small>AUTO</small><h2>毎月決まってる収支</h2></div><button type="button" data-money-action="add-recurring">＋追加</button></header>${recurring||'<p class="money3-empty">毎月の家賃・サブスク・給与などを自動で予定に反映できます。</p>'}</section>
     <section class="money3-panel"><header><div><small>GOALS</small><h2>目標</h2></div><button type="button" data-money-action="add-goal">＋追加</button></header>${goals||'<p class="money3-empty">防衛資金・返済・欲しいものを設定できます。</p>'}</section>
-    <section class="money3-panel"><header><div><small>DEBT</small><h2>借金・返済</h2></div><span>${debtTotal?privacyAmount(debtTotal):'未設定'}</span><button type="button" data-money-action="add-debt">＋追加</button></header>${debts||'<p class="money3-empty">残高・金利・最低返済額を登録できます。</p>'}</section>
+    <section class="money11-debt">
+      <header><div><small>DEBT PLAN</small><h2>借金・返済</h2></div><button type="button" data-money-action="add-debt">＋追加</button></header>
+      <div class="money11-debt-summary">
+        <div><small>借金総額</small><strong>${dp.total?privacyAmount(dp.total):'¥0'}</strong></div>
+        <div><small>最低返済 / 月</small><strong>${data.privacy?'••••':yen(dp.minimum)}</strong></div>
+        <div><small>返済予定 / 月</small><strong>${data.privacy?'••••':yen(dp.planned)}</strong></div>
+        <div><small>利息目安 / 月</small><strong>${data.privacy?'••••':yen(Math.round(dp.interest))}</strong></div>
+      </div>
+      <div class="money11-guidance"><span class="money5-yos-mark">YOS</span><div><small>返済方針</small><p>${escapeHtml(dp.guidance)}</p></div></div>
+      <div class="money11-debt-list">${debts||'<p class="money3-empty">残高・金利・最低返済・支払日を登録すると、返済優先順位と完済目安を出せます。</p>'}</div>
+    </section>
     <section class="money2-settings-summary"><div><small>最低生活費 / 月</small><strong>${data.rules.monthlyEssential?privacyAmount(data.rules.monthlyEssential):'未設定'}</strong></div><div><small>生活の質を守る予算 / 月</small><strong>${data.rules.qualityBudget?privacyAmount(data.rules.qualityBudget):'未設定'}</strong></div><div><small>防衛資金</small><strong>${n(data.rules.emergencyMonths)}か月分</strong></div><button type="button" data-money-action="edit-rules">基本設定を変更</button></section>`;
   }
   const goalType=type=>({emergency:'生活防衛資金',purchase:'欲しいもの',saving:'貯金',investment:'投資',debt:'返済目標'}[type]||'目標');
@@ -524,8 +566,21 @@
     openDialog(editing?'目標を編集':'目標を追加',`${field('目標名','name','text',target.name,'placeholder="例：生活防衛資金 / 欲しいもの" required')}${selectField('種類','type',[['emergency','生活防衛資金'],['purchase','欲しいもの'],['saving','貯金'],['investment','投資'],['debt','返済目標']],target.type)}${field('目標金額','target','number',target.target,'min="0" required')}${field('現在額','current','number',target.current,'min="0"')}${field('第1チェックポイント','checkpoint','number',target.checkpoint||'','min="0"')}${field('目的','purpose','text',target.purpose||'','maxlength="160"')}${field('期限（任意）','deadline','date',target.deadline||'')}${field('優先度 1〜5','priority','number',target.priority||1,'min="1" max="5"')}`,fd=>{const priority=Math.min(5,Math.max(1,n(fd.get('priority'))||1));const item={...target,id:target.id||uid('goal'),name:clean(fd.get('name'),60),type:clean(fd.get('type'),20),target:Math.max(0,n(fd.get('target'))),current:Math.max(0,n(fd.get('current'))),checkpoint:Math.max(0,n(fd.get('checkpoint'))),purpose:clean(fd.get('purpose'),160),deadline:clean(fd.get('deadline'),10),priority,priorityLabel:priority>=4?'高':priority>=2?'中':'低'};data.goals=editing?data.goals.map(x=>x.id===item.id?item:x):[...data.goals,item];dialog().close();save()});
   }
   function openDebtDialog(debt){
-    const editing=!!debt,target=debt||{name:'',balance:'',apr:'',minPayment:''};
-    openDialog(editing?'借金を編集':'借金を追加',`${field('名称','name','text',target.name,'placeholder="例：カードローン" required')}${field('残高','balance','number',target.balance,'min="0" required')}${field('年利 %','apr','number',target.apr,'min="0" step="0.01" required')}${field('最低返済額 / 月','minPayment','number',target.minPayment,'min="0" required')}`,fd=>{const item={id:target.id||uid('debt'),name:clean(fd.get('name'),60),balance:Math.max(0,n(fd.get('balance'))),apr:Math.max(0,n(fd.get('apr'))),minPayment:Math.max(0,n(fd.get('minPayment')))};data.debts=editing?data.debts.map(x=>x.id===item.id?item:x):[...data.debts,item];dialog().close();save()});
+    const editing=!!debt,target=debt||{name:'',balance:'',apr:'',minPayment:'',plannedPayment:'',dueDay:''};
+    openDialog(editing?'借金を編集':'借金を追加',
+      `${field('名称','name','text',target.name,'placeholder="例：カードローン / リボ / 奨学金" required')}
+      ${field('残高','balance','number',target.balance,'min="0" inputmode="numeric" required')}
+      ${field('年利 %','apr','number',target.apr,'min="0" step="0.01" inputmode="decimal" required')}
+      ${field('最低返済額 / 月','minPayment','number',target.minPayment,'min="0" inputmode="numeric" required')}
+      ${field('実際に返す予定額 / 月','plannedPayment','number',target.plannedPayment||target.minPayment,'min="0" inputmode="numeric"')}
+      ${field('毎月の支払日','dueDay','number',target.dueDay||'','min="1" max="31" inputmode="numeric"')}`,
+      fd=>{
+        const minPayment=Math.max(0,n(fd.get('minPayment')));
+        const item={...target,id:target.id||uid('debt'),name:clean(fd.get('name'),60),balance:Math.max(0,n(fd.get('balance'))),apr:Math.max(0,n(fd.get('apr'))),minPayment,plannedPayment:Math.max(minPayment,n(fd.get('plannedPayment'))||minPayment),dueDay:Math.min(31,Math.max(0,Math.round(n(fd.get('dueDay')))))};
+        data.debts=editing?data.debts.map(x=>x.id===item.id?item:x):[...data.debts,item];
+        dialog().close();save();
+      });
+    if(editing)addDeleteButton('この借金',()=>{data.debts=data.debts.filter(x=>x.id!==target.id);dialog().close();save()});
   }
   function openRulesDialog(){
     openDialog('基本ルール',`${field('最低生活費 / 月','monthlyEssential','number',data.rules.monthlyEssential,'min="0"')}${field('生活の質を守る予算 / 月','qualityBudget','number',data.rules.qualityBudget,'min="0"')}${field('生活防衛資金の目標（月数）','emergencyMonths','number',data.rules.emergencyMonths,'min="0" max="24" step="0.5"')}<label><span>基本方針</span><textarea name="note" rows="3">${escapeHtml(data.rules.note)}</textarea></label>`,fd=>{data.rules={...data.rules,monthlyEssential:Math.max(0,n(fd.get('monthlyEssential'))),qualityBudget:Math.max(0,n(fd.get('qualityBudget'))),emergencyMonths:Math.max(0,n(fd.get('emergencyMonths'))),note:clean(fd.get('note'),240)};dialog().close();save()});
