@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-28T23:31:27+09:00",
+  "updated_at": "2026-09-29T01:09:04+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -70,7 +70,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-09-28T14:30:14Z"
+      "updated_at": "2026-09-28T15:52:17Z"
     },
     {
       "id": "github-issue-256",
@@ -165,6 +165,20 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-341d1974f7e4",
+      "title": "chore: refresh Money month balance",
+      "completed_at": "2026-09-28T16:08:46Z",
+      "result": "GitHub mainへ反映（341d197）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/341d1974f7e42afe21cbfb35b2dc9f7ac298cc00"
+    },
+    {
+      "id": "github-commit-c88e6b186431",
+      "title": "fix: restore full month remaining balance",
+      "completed_at": "2026-09-28T16:08:34Z",
+      "result": "GitHub mainへ反映（c88e6b1）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/c88e6b186431bd1d16f2951679d7bc4577a0da79"
+    },
+    {
       "id": "github-commit-0f10a3bf37be",
       "title": "YOS DESK: LINE型の実メッセージと進捗チャットを完成 (#523)",
       "completed_at": "2026-09-28T14:31:14Z",
@@ -184,20 +198,6 @@
       "completed_at": "2026-09-28T14:17:05Z",
       "result": "GitHub mainへ反映（5cc68da）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/5cc68dac7354b7724eaa98ec0bfd2fbbb9f66c13"
-    },
-    {
-      "id": "github-commit-1cad1135beff",
-      "title": "fix: force exact liquid total and natural shortage wording",
-      "completed_at": "2026-09-28T14:17:01Z",
-      "result": "GitHub mainへ反映（1cad113）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/1cad1135beff208a3f7419696c5842cef9f6d735"
-    },
-    {
-      "id": "github-commit-822b967badd0",
-      "title": "fix: apply local Money updates before cached app scripts",
-      "completed_at": "2026-09-28T14:15:52Z",
-      "result": "GitHub mainへ反映（822b967）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/822b967badd0d68102ed583316541322711284a0"
     },
     {
       "id": "complete-002",
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-28T23:31:27+09:00",
+      "last_update": "2026-09-29T01:09:04+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -315,7 +315,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-28T23:31:27+09:00",
+      "last_update": "2026-09-29T01:09:04+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-28T23:31:27+09:00",
+      "last_update": "2026-09-29T01:09:04+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "cd82eed4a52a241c71dbbc4ddb53006b8116523864d34120b6881bbfdffc74e8"
+  "github_snapshot_hash": "dfc87740eb8feff20b8599c4733851c1d48c8e2ff0af7e9a2dc6329aefe4769a"
 }
