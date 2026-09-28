@@ -234,7 +234,9 @@ renderDev();renderChats();setPage(currentPage);updateClock();setInterval(updateC
     if(sub)sub.textContent=asset.current||'最新状態を同期中';
     if(next)next.innerHTML='<b>次：</b>'+esc(asset.next_action||'確認待ち');
     if(big)big.textContent=(Number.isFinite(Number(asset.progress))?Number(asset.progress):0)+'%';
-    if(label)label.innerHTML='SSOT<br>自動同期';
+    var assetUpdated=String(asset.updated_at||'');
+    var assetStamp=assetUpdated.length>=10?assetUpdated.slice(5,10).replace('-','/'):'未更新';
+    if(label)label.innerHTML='SSOT<br>'+esc(assetStamp)+'取得';
     if(bar)bar.style.width=Math.max(0,Math.min(100,Number(asset.progress)||0))+'%';
   }
 
