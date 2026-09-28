@@ -57,6 +57,42 @@ div{text-align:center}b{display:block;font-size:22px;margin-bottom:8px}span{colo
         if(found>=0)data.transactions[found]={...data.transactions[found],status:'done',paid:true,completed:true};
         else if(date&&amount)data.transactions.push({id:'local-paid-'+date+'-'+amount,date,type:'debt',category:'debt',label:label||'返済',amount,status:'done',paid:true,completed:true,imported:true});
         changed=true;
+      }else if(op.kind==='upsert-debt'){
+        const name=txt(op.name,60);
+        if(!name)continue;
+        const id=txt(op.id,80)||('local-debt-'+name);
+        const verificationRaw=txt(op.verification,20);
+        const verification=['confirmed','estimate','unconfirmed','self_reported'].includes(verificationRaw)?verificationRaw:'confirmed';
+        const balanceKnown=op.balanceKnown===false||verification==='unconfirmed'?false:true;
+        const statusRaw=txt(op.status,30);
+        const debtStatus=['active','overdue','legal_notice'].includes(statusRaw)?statusRaw:'active';
+        const dueDateRaw=txt(op.dueDate,10),noticeDateRaw=txt(op.noticeDate,10);
+        const minPayment=Math.max(0,num(op.minPayment));
+        const item={
+          id,
+          name,
+          balance:balanceKnown?Math.max(0,num(op.balance)):0,
+          balanceKnown,
+          verification,
+          status:debtStatus,
+          apr:Math.max(0,num(op.apr)),
+          lateApr:Math.max(0,num(op.lateApr)),
+          minPayment,
+          plannedPayment:Math.max(minPayment,num(op.plannedPayment)||minPayment),
+          dueDay:Math.min(31,Math.max(0,Math.round(num(op.dueDay)))),
+          dueDate:/^\d{4}-\d{2}-\d{2}$/.test(dueDateRaw)?dueDateRaw:'',
+          noticeDate:/^\d{4}-\d{2}-\d{2}$/.test(noticeDateRaw)?noticeDateRaw:'',
+          payoffMonthsManual:Math.max(0,Math.round(num(op.payoffMonthsManual))),
+          estimatedFees:Math.max(0,num(op.estimatedFees)),
+          note:txt(op.note,500),
+          sourceType:txt(op.sourceType,40),
+          imported:true,
+          updatedAt:new Date().toISOString()
+        };
+        const at=data.debts.findIndex(d=>d?.id===id||txt(d?.name,60)===name);
+        if(at>=0)data.debts[at]={...data.debts[at],...item,id:data.debts[at].id||id};
+        else data.debts.push(item);
+        changed=true;
       }else if(op.kind==='upsert-transaction'){
         const date=txt(op.date,10),label=txt(op.label,60),amount=Math.max(0,num(op.amount));
         if(!/^\d{4}-\d{2}-\d{2}$/.test(date)||!label||!amount)continue;
