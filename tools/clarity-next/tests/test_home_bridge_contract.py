@@ -34,7 +34,7 @@ class HomeBridgeContractTests(unittest.TestCase):
             "brightness_up","brightness_down",
         ):
             self.assertIn(marker, self.bridge)
-        self.assertIn("24", self.bridge)
+        self.assertIn("(1[89]|2\\d|30)", self.bridge)
 
     def test_ambiguous_commands_fail_closed(self):
         self.assertIn("全部.*消", self.bridge)
