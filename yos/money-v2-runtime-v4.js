@@ -73,11 +73,13 @@
         changed=true;
       }else if(op.kind==='mark-paid'){
         const date=clean(op.date,10),label=clean(op.label,60),amount=Math.max(0,n(op.amount));
-        let tx=data.transactions.find(x=>x.date===date&&n(x.amount)===amount&&(!label||clean(x.label,60)===label));
+        let tx=data.transactions.find(x=>x.date===date&&n(x.amount)===amount&&(!label||clean(x.label,60)===label))
+          ||data.transactions.find(x=>x.date===date&&n(x.amount)===amount&&isOutgoing(x));
         if(tx){
           data.transactions=data.transactions.map(x=>x.id===tx.id?{...x,status:'done'}:x);changed=true;continue;
         }
-        tx=expandedTransactions(date,date).find(x=>isOutgoing(x)&&x.date===date&&n(x.amount)===amount&&(!label||clean(x.label,60)===label));
+        tx=expandedTransactions(date,date).find(x=>isOutgoing(x)&&x.date===date&&n(x.amount)===amount&&(!label||clean(x.label,60)===label))
+          ||expandedTransactions(date,date).find(x=>isOutgoing(x)&&x.date===date&&n(x.amount)===amount);
         if(tx){
           const concrete={...tx,id:uid('tx'),status:'done'};delete concrete.virtualRecurring;
           data.transactions=[...data.transactions,concrete];changed=true;
