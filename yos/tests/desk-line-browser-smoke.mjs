@@ -8,6 +8,7 @@ const browser=await browserType.launch({headless:true});
 const context=await browser.newContext({viewport:{width:390,height:844}});
 
 await context.addInitScript(() => {
+  if(localStorage.getItem('yosDeskIntegratedStateV1')) return;
   localStorage.setItem('yosDeskIntegratedStateV1',JSON.stringify({
     version:1,
     page:'chats',
