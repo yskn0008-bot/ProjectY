@@ -347,7 +347,7 @@
       <button class="money6-assets" type="button" data-money-tab-jump="assets">口座・資産の内訳 <span>›</span></button>
     </section>`;
   }
-  function renderTransactions(){function renderTransactions(){
+  function renderTransactions(){
     let list=monthTransactions(calendarMonth).sort((a,b)=>String(b.date).localeCompare(String(a.date))||String(b.id||'').localeCompare(String(a.id||'')));
     if(transactionFilter==='income')list=list.filter(tx=>tx.type==='income');
     if(transactionFilter==='expense')list=list.filter(tx=>tx.type!=='income');
@@ -518,7 +518,7 @@
     </section>
     <section class="money2-settings-summary"><div><small>最低生活費 / 月</small><strong>${data.rules.monthlyEssential?privacyAmount(data.rules.monthlyEssential):'未設定'}</strong></div><div><small>生活の質を守る予算 / 月</small><strong>${data.rules.qualityBudget?privacyAmount(data.rules.qualityBudget):'未設定'}</strong></div><div><small>防衛資金</small><strong>${n(data.rules.emergencyMonths)}か月分</strong></div><button type="button" data-money-action="edit-rules">基本設定を変更</button></section>`;
   }
-    const goalType=  const goalType=type=>({emergency:'生活防衛資金',purchase:'欲しいもの',saving:'貯金',investment:'投資',debt:'返済目標'}[type]||'目標');
+    const goalType=type=>({emergency:'生活防衛資金',purchase:'欲しいもの',saving:'貯金',investment:'投資',debt:'返済目標'}[type]||'目標');
   function renderAssets(){
     const debt=totalDebt(),liquid=currentLiquid()??0,assets=data.assets.reduce((sum,a)=>sum+n(a.value),0),net=netWorth();
     const accounts=data.accounts.length?data.accounts.map(a=>`<button class="money2-account" type="button" data-money-action="edit-account" data-id="${escapeHtml(a.id)}"><span>${accountIcon(a.type)}</span><div><strong>${escapeHtml(a.name)}</strong><small>${accountType(a.type)}${a.updatedAt?` ・ ${formatUpdated(a.updatedAt)}`:''}</small></div><b>${privacyAmount(a.balance)}</b></button>`).join(''):'<p class="money3-empty">口座・現金・電子マネーを登録できます。</p>';
@@ -602,7 +602,7 @@
     });
     if(editing)addDeleteButton('この定期収支',()=>{data.recurring=data.recurring.filter(x=>x.id!==target.id);dialog().close();save()});
   }
-  function openAccountDialog(account){function openAccountDialog(account){
+  function openAccountDialog(account){
     const editing=!!account,target=account||{type:'bank',name:'',balance:''};
     openDialog(editing?'口座を編集':'口座を追加',`${selectField('種類','type',[['bank','銀行'],['cash','現金'],['emoney','電子マネー']],target.type)}${field('名前','name','text',target.name,'placeholder="例：メイン口座 / PayPay" required')}${field('現在残高','balance','number',target.balance,'inputmode="numeric" required')}`,fd=>{const item={id:target.id||uid('acct'),type:clean(fd.get('type'),20),name:clean(fd.get('name'),50),balance:n(fd.get('balance')),updatedAt:new Date().toISOString()};data.accounts=editing?data.accounts.map(x=>x.id===item.id?item:x):[...data.accounts,item];dialog().close();save()});
   }
@@ -640,7 +640,7 @@
       });
     if(editing)addDeleteButton('この借金',()=>{data.debts=data.debts.filter(x=>x.id!==target.id);dialog().close();save()});
   }
-  function openRulesDialog(){function openRulesDialog(){
+  function openRulesDialog(){
     openDialog('基本ルール',`${field('最低生活費 / 月','monthlyEssential','number',data.rules.monthlyEssential,'min="0"')}${field('生活の質を守る予算 / 月','qualityBudget','number',data.rules.qualityBudget,'min="0"')}${field('生活防衛資金の目標（月数）','emergencyMonths','number',data.rules.emergencyMonths,'min="0" max="24" step="0.5"')}<label><span>基本方針</span><textarea name="note" rows="3">${escapeHtml(data.rules.note)}</textarea></label>`,fd=>{data.rules={...data.rules,monthlyEssential:Math.max(0,n(fd.get('monthlyEssential'))),qualityBudget:Math.max(0,n(fd.get('qualityBudget'))),emergencyMonths:Math.max(0,n(fd.get('emergencyMonths'))),note:clean(fd.get('note'),240)};dialog().close();save()});
   }
   function openAssetDialog(asset){
