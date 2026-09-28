@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-28T23:18:50+09:00",
+  "updated_at": "2026-09-28T23:31:27+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -70,7 +70,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-09-28T13:51:00Z"
+      "updated_at": "2026-09-28T14:30:14Z"
     },
     {
       "id": "github-issue-256",
@@ -165,6 +165,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-0f10a3bf37be",
+      "title": "YOS DESK: LINE型の実メッセージと進捗チャットを完成 (#523)",
+      "completed_at": "2026-09-28T14:31:14Z",
+      "result": "GitHub mainへ反映（0f10a3b）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/0f10a3bf37bef427264e29ba8fcf8e3cf95fb07d"
+    },
+    {
       "id": "github-commit-862c1391e527",
       "title": "feat: add generic local-only Money updater",
       "completed_at": "2026-09-28T14:18:34Z",
@@ -191,13 +198,6 @@
       "completed_at": "2026-09-28T14:15:52Z",
       "result": "GitHub mainへ反映（822b967）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/822b967badd0d68102ed583316541322711284a0"
-    },
-    {
-      "id": "github-commit-0a492d52e715",
-      "title": "fix: calculate and label remaining month shortage correctly",
-      "completed_at": "2026-09-28T14:15:49Z",
-      "result": "GitHub mainへ反映（0a492d5）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/0a492d52e715a6a48bef83cfe0a8d39edfa0af61"
     },
     {
       "id": "complete-002",
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-28T23:18:50+09:00",
+      "last_update": "2026-09-28T23:31:27+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -315,7 +315,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-28T23:18:50+09:00",
+      "last_update": "2026-09-28T23:31:27+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-28T23:18:50+09:00",
+      "last_update": "2026-09-28T23:31:27+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "99f9ab5bb07a3c828d84366027d86e67f996ca93002051e10ca1806907a9292e"
+  "github_snapshot_hash": "cd82eed4a52a241c71dbbc4ddb53006b8116523864d34120b6881bbfdffc74e8"
 }
