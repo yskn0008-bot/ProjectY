@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-28T22:47:21+09:00",
+  "updated_at": "2026-09-28T22:52:14+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -70,7 +70,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-09-28T13:38:21Z"
+      "updated_at": "2026-09-28T13:51:00Z"
     },
     {
       "id": "github-issue-256",
@@ -165,6 +165,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-b2745bfc2a27",
+      "title": "YOS DESK: Clarity進捗の鮮度を実態に合わせる (#522)",
+      "completed_at": "2026-09-28T13:51:58Z",
+      "result": "GitHub mainへ反映（b2745bf）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/b2745bfc2a27d7cb224d68b19d0ddcf2e4ff973d"
+    },
+    {
       "id": "github-commit-724fa66d1d30",
       "title": "chore: refresh Money balance and paid action",
       "completed_at": "2026-09-28T13:47:06Z",
@@ -191,13 +198,6 @@
       "completed_at": "2026-09-28T13:45:50Z",
       "result": "GitHub mainへ反映（a436481）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/a436481f8700cd95d7296c8e4b33a221901fc4c9"
-    },
-    {
-      "id": "github-commit-a14390de9ef6",
-      "title": "style: reduce primary Money balance size",
-      "completed_at": "2026-09-28T13:45:07Z",
-      "result": "GitHub mainへ反映（a14390d）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/a14390de9ef60503171332a1c096af480abe72dd"
     },
     {
       "id": "complete-002",
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-28T22:47:21+09:00",
+      "last_update": "2026-09-28T22:52:14+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -315,7 +315,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-28T22:47:21+09:00",
+      "last_update": "2026-09-28T22:52:14+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-28T22:47:21+09:00",
+      "last_update": "2026-09-28T22:52:14+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "3a4e34d066f948c6c5c3896d3b702861315469fb2c087e655b89e41eda92f5a1"
+  "github_snapshot_hash": "01190f5aeb28bb0f9d43b72210816bd5cb4c36a86c0a4ad326fc0ff49b10b6fc"
 }
