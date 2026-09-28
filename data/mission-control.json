@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-28T22:45:25+09:00",
+  "updated_at": "2026-09-28T22:46:03+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -165,6 +165,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-a436481f8700",
+      "title": "feat: make next payment directly confirmable",
+      "completed_at": "2026-09-28T13:45:50Z",
+      "result": "GitHub mainへ反映（a436481）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/a436481f8700cd95d7296c8e4b33a221901fc4c9"
+    },
+    {
       "id": "github-commit-a14390de9ef6",
       "title": "style: reduce primary Money balance size",
       "completed_at": "2026-09-28T13:45:07Z",
@@ -191,13 +198,6 @@
       "completed_at": "2026-09-28T13:39:04Z",
       "result": "GitHub mainへ反映（49302a6）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/49302a6cfaaf5e2b4e7e5a22b7e9d0a5aa2e2049"
-    },
-    {
-      "id": "github-commit-25837d550b33",
-      "title": "style: clarify Money hierarchy and recurring cashflow",
-      "completed_at": "2026-09-28T13:38:40Z",
-      "result": "GitHub mainへ反映（25837d5）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/25837d550b33c1a86b1ac0cdcfb6d871119bb306"
     },
     {
       "id": "complete-002",
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-28T22:45:25+09:00",
+      "last_update": "2026-09-28T22:46:03+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -315,7 +315,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-28T22:45:25+09:00",
+      "last_update": "2026-09-28T22:46:03+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-28T22:45:25+09:00",
+      "last_update": "2026-09-28T22:46:03+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "045a89b6f996ad6d47e009629d588a02a31d9dcac24feb83ce42d4c388aa658f"
+  "github_snapshot_hash": "d96f5ad907a5f604cb321beca06852a9ae13993fc4a7e9be24231edc28979e16"
 }
