@@ -67,6 +67,10 @@ jobs:
         run: |
           npm install --no-save playwright@1.55.0
           npx playwright install --with-deps ${{ matrix.browser }}
+      - name: Check DESK scripts
+        run: |
+          node --check yos/desk/app.js
+          node --check yos/desk/live-chat.js
       - name: Start static server
         run: |
           python3 -m http.server 4173 --directory . > /tmp/yos-desk.log 2>&1 &
