@@ -172,6 +172,23 @@ renderDev();renderChats();setPage(currentPage);updateClock();setInterval(updateC
     }[String(value||'')]||String(value||'更新中');
   }
 
+  function heroSummary(value,max){
+    var text=String(value||'').replace(/\s+/g,' ').trim();
+    if(!text||text.length<=max)return text;
+    var parts=text.match(/[^。！？!?]+[。！？!?]?/g)||[text];
+    var out='';
+    for(var i=0;i<parts.length;i++){
+      var part=String(parts[i]||'').trim();
+      if(!part)continue;
+      if(out&&out.length+part.length>max)break;
+      if(!out&&part.length>max){out=part;break}
+      out+=part;
+    }
+    if(out&&out.length<text.length)return out+' 詳細はCHATSで確認。';
+    return out||text;
+  }
+
+
   function currentMoney(){
     var money=readJSON(MONEY_KEY,null);
     var facts=money&&money.masterFacts||{};
@@ -231,8 +248,8 @@ renderDev();renderChats();setPage(currentPage);updateClock();setInterval(updateC
     var bar=q('.heroSide .bar i');
     if(title)title.textContent='Clarity';
     if(eyebrow)eyebrow.textContent='今やる · '+statusLabel(asset.status);
-    if(sub)sub.textContent=asset.current||'最新状態を同期中';
-    if(next)next.innerHTML='<b>次：</b>'+esc(asset.next_action||'確認待ち');
+    if(sub)sub.textContent=heroSummary(asset.current||'最新状態を同期中',118);
+    if(next)next.innerHTML='<b>次：</b>'+esc(heroSummary(asset.next_action||'確認待ち',118));
     if(big)big.textContent=(Number.isFinite(Number(asset.progress))?Number(asset.progress):0)+'%';
     var assetUpdated=String(asset.updated_at||'');
     var assetStamp=assetUpdated.length>=10?assetUpdated.slice(5,10).replace('-','/'):'未更新';
