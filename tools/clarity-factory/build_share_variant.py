@@ -6,7 +6,6 @@ from pathlib import Path
 
 VOICE_NAME = "#define name Clarity\n"
 SHARE_HEADER = """#define name Clarity Share v4
-#define inputs text, richtext, webpage, url, image, pdf
 #include 'actions/images'
 #include 'actions/pdf'
 #define from sharesheet
@@ -156,7 +155,6 @@ if !originalInput {
     for required in (
         "#define name Clarity Share v4",
         "#define from sharesheet",
-        "#define inputs text, richtext, webpage, url, image, pdf",
         "#include 'actions/images'",
         "#include 'actions/pdf'",
         "typeOf(ShortcutInput)",
