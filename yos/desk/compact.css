@@ -437,3 +437,50 @@ body{font-size:17px}
   font-size:15px;
   font-weight:900;
 }
+
+
+/* DESK viewport-fit v3: never let intrinsic text width push cards beyond iPhone. */
+html,body{
+  max-width:100%;
+  overflow-x:hidden;
+}
+.app,
+#deskPage,
+#deskPage .deskFold,
+#deskPage .deskSecondFold,
+#deskPage .hero{
+  width:100%;
+  max-width:100%;
+  min-width:0;
+  overflow-x:hidden;
+}
+#deskPage .hero{
+  grid-template-columns:minmax(0,1.618fr) minmax(0,1fr);
+}
+#deskPage .heroMain,
+#deskPage .heroSide,
+#deskPage .topbar > *,
+#deskPage .quick > *,
+#deskPage .dev > *,
+#deskPage .suggestions > *,
+#deskPage .stats > *{
+  min-width:0;
+  max-width:100%;
+}
+#deskPage .heroMain,
+#deskPage .heroSide{
+  overflow:hidden;
+}
+#deskPage .heroSub,
+#deskPage .next,
+#deskPage .heroSide .label{
+  overflow-wrap:anywhere;
+  word-break:normal;
+  line-break:strict;
+}
+#deskPage .heroSub{
+  text-wrap:pretty;
+}
+#deskPage .next{
+  text-wrap:pretty;
+}
