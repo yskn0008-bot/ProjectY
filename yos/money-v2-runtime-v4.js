@@ -282,15 +282,24 @@
       :buildAdvice(plan,goal);
     const status=monthShortfall>0?'不足見込み':monthNet>=0?'黒字見込み':'要確認';
     const target=goal?Math.max(1,n(goal.target)):0,current=goal?Math.max(0,n(goal.current)):0,pct=goal?Math.min(100,Math.max(0,Math.round(current/target*100))):0;
+    const outstanding=monthTransactions(monthKey()).filter(tx=>isOutgoing(tx)&&!isComplete(tx)).reduce((sum,tx)=>sum+n(tx.amount),0);
+    const spendable=plan.liquid===null?null:Math.max(0,plan.liquid-outstanding);
+    const today=parseDate(isoToday()),monthEnd=new Date(Number(monthKey().slice(0,4)),Number(monthKey().slice(5,7)),0,12);
+    const daysLeft=Math.max(1,daysBetween(today,monthEnd)+1),dayBudget=spendable===null?null:Math.floor(spendable/daysLeft);
+    const warning=plan.firstBreak?`${formatMD(plan.firstBreak.tx.date)}に残高不足`:monthShortfall>0?'月末までに資金不足':'登録済み予定では残高不足なし';
     return `<section class="money6-home">
       <header class="money6-balance">
         <div><small>今使えるお金</small><strong>${plan.liquid===null?'未設定':moneyAmount(plan.liquid)}</strong></div>
         <span class="${monthShortfall>0?'danger':'safe'}">${status}</span>
       </header>
+      <div class="money10-budget">
+        <div class="hero"><small>今月あと使える</small><b>${spendable===null?'—':moneyAmount(spendable)}</b></div>
+        <div><small>1日あたり</small><b>${dayBudget===null?'—':moneyAmount(dayBudget)}</b></div>
+      </div>
       <div class="money6-metrics">
-        <div><small>今日</small><b>${plan.daily===null?'—':moneyAmount(plan.daily)}</b></div>
         <div class="danger"><small>月末不足</small><b>${monthShortfall===null?'—':monthShortfall>0?moneyAmount(-monthShortfall,{signed:true}):'¥0'}</b></div>
         <div class="${monthNet>=0?'income':'danger'}"><small>今月収支</small><b>${s.hasData?moneyAmount(monthNet,{signed:true}):'—'}</b></div>
+        <div class="${plan.firstBreak||monthShortfall>0?'danger':'income'}"><small>未来予測</small><b class="text">${escapeHtml(warning)}</b></div>
       </div>
       <div class="money6-divider"></div>
       <div class="money6-timeline">
