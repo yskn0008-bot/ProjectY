@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-28T20:58:22+09:00",
+  "updated_at": "2026-09-28T22:38:11+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -12,16 +12,6 @@
     ]
   },
   "inbox": [
-    {
-      "id": "github-pr-503",
-      "title": "PR #503 Use ditto mark for repeated Payment Alert dates",
-      "type": "GitHub PR",
-      "status": "review",
-      "priority": 1,
-      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/503",
-      "updated_at": "2026-09-26T22:40:00Z"
-    },
     {
       "id": "github-pr-506",
       "title": "PR #506 Add reread history for Morning Night and Alerts",
@@ -53,6 +43,16 @@
       "updated_at": "2026-09-27T22:08:09Z"
     },
     {
+      "id": "github-pr-521",
+      "title": "PR #521 YOS DESK: 空チャット画面をLINE寄りに整理",
+      "type": "GitHub PR",
+      "status": "review",
+      "priority": 1,
+      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/521",
+      "updated_at": "2026-09-28T13:37:45Z"
+    },
+    {
       "id": "github-pr-519",
       "title": "PR #519 feat(clarity-next): connect TV, AC and light through fixed home child",
       "type": "GitHub PR",
@@ -70,7 +70,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-09-28T11:46:53Z"
+      "updated_at": "2026-09-28T13:37:58Z"
     },
     {
       "id": "github-issue-256",
@@ -91,16 +91,6 @@
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/272",
       "updated_at": "2026-09-21T13:38:18Z"
-    },
-    {
-      "id": "github-issue-297",
-      "title": "Issue #297 MY REMOTE｜BRAVIA・エアコン・照明の個別ウィジェット統合",
-      "type": "GitHub Issue",
-      "status": "open",
-      "priority": 3,
-      "next_action": "完成条件を確認し、次の安全な実装を1件進める",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/297",
-      "updated_at": "2026-09-11T16:32:45Z"
     },
     {
       "id": "github-issue-314",
@@ -161,9 +151,26 @@
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/341",
       "updated_at": "2026-09-13T21:18:05Z"
+    },
+    {
+      "id": "github-issue-344",
+      "title": "Issue #344 Scriptable全体: 必要/保管候補/確認必要を自動分類する",
+      "type": "GitHub Issue",
+      "status": "open",
+      "priority": 3,
+      "next_action": "完成条件を確認し、次の安全な実装を1件進める",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/344",
+      "updated_at": "2026-09-13T22:03:15Z"
     }
   ],
   "recently_completed": [
+    {
+      "id": "github-commit-36286a323cfd",
+      "title": "feat: finish Money hierarchy, fixed cashflow, and debt certainty",
+      "completed_at": "2026-09-28T13:37:55Z",
+      "result": "GitHub mainへ反映（36286a3）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/36286a323cfdc3141455880ed8b397b16b89ad10"
+    },
     {
       "id": "github-commit-24491b95480f",
       "title": "Merge pull request #520 from yskn0008-bot/oel/yos-desk-line-chat-ui-20260928",
@@ -193,13 +200,6 @@
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/2851a6dd1563e6de0923c0963ff9c4de0e279cc6"
     },
     {
-      "id": "github-commit-24623ebfcadc",
-      "title": "ui: flatten YOS DESK chat list for LINE-like rhythm",
-      "completed_at": "2026-09-28T11:33:46Z",
-      "result": "GitHub mainへ反映（24623eb）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/24623ebfcadc30943301b211e68e7acbd1b1ccf2"
-    },
-    {
       "id": "complete-002",
       "title": "iPhone向けMission Control Dashboardを実装",
       "completed_at": "2026-07-17T17:55:00+09:00",
@@ -224,7 +224,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #518をレビューして公開判断する",
+      "next_action": "PR #521をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-28T20:58:22+09:00",
+      "last_update": "2026-09-28T22:38:11+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -309,13 +309,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 14件・Open PR 20件を自動同期中",
+      "next_action": "Open Issue 13件・Open PR 20件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-28T20:58:22+09:00",
+      "last_update": "2026-09-28T22:38:11+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -329,7 +329,7 @@
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #518をレビューして公開判断する",
+      "next_action": "PR #521をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-28T20:58:22+09:00",
+      "last_update": "2026-09-28T22:38:11+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "4b3ca6b95694303c4eb5f9ea1655e2cc807d0c5217d9155af0f8230c4b453503"
+  "github_snapshot_hash": "b7e2671bf5911e0923cc12f37f39e63d5c4c77b1f126efa8bf346a238a538164"
 }
