@@ -653,3 +653,40 @@ body[data-domain="money"] #moneyPage{padding-bottom:calc(148px + env(safe-area-i
 @media (max-width:360px){
   .money13-home .money6-balance strong{font-size:40px}
 }
+
+
+/* One-tap payment confirmation v15 */
+.money13-next-payment-wrap{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  align-items:end;
+  gap:8px;
+}
+.money13-next-payment{
+  display:grid;
+  gap:3px;
+  padding:0;
+  border:0;
+  background:none;
+  color:inherit;
+  text-align:left;
+}
+.money13-next-payment small{color:var(--money5-sub);font-size:14px}
+.money13-next-payment b{
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-size:15px;
+}
+.money13-next-payment strong{font-size:19px;font-variant-numeric:tabular-nums}
+.money13-paid{
+  align-self:center;
+  padding:7px 9px;
+  border:1px solid rgba(110,231,167,.22);
+  border-radius:10px;
+  color:var(--money5-green);
+  background:rgba(110,231,167,.08);
+  font-size:12px;
+  font-weight:800;
+  white-space:nowrap;
+}
