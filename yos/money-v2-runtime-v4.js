@@ -33,6 +33,64 @@
     if(!saved||typeof saved!=='object')return base;
     return {...base,...saved,accounts:Array.isArray(saved.accounts)?saved.accounts:[],transactions:Array.isArray(saved.transactions)?saved.transactions:[],recurring:Array.isArray(saved.recurring)?saved.recurring:[],debts:Array.isArray(saved.debts)?saved.debts:[],goals:Array.isArray(saved.goals)?saved.goals:[],assets:Array.isArray(saved.assets)?saved.assets:[],rules:{...base.rules,...(saved.rules||{})}};
   }
+  function decodeLocalImport(raw){
+    try{
+      if(!raw||raw.length>6000)return null;
+      const normalized=raw.replace(/-/g,'+').replace(/_/g,'/');
+      const padded=normalized+'='.repeat((4-normalized.length%4)%4);
+      const bytes=Uint8Array.from(atob(padded),c=>c.charCodeAt(0));
+      const json=new TextDecoder().decode(bytes);
+      const value=JSON.parse(json);
+      return value&&typeof value==='object'?value:null;
+    }catch{return null}
+  }
+  function applyLocalImportFromHash(){
+    const fragment=String(location.hash||'').replace(/^#/,'');
+    const parts=fragment.split('&');
+    const rawPart=parts.find(part=>part.startsWith('mi='));
+    if(!rawPart)return false;
+    const payload=decodeLocalImport(rawPart.slice(3));
+    if(!payload||payload.v!==1||!Array.isArray(payload.ops))return false;
+    let changed=false;
+    for(const op of payload.ops.slice(0,20)){
+      if(!op||typeof op!=='object')continue;
+      if(op.kind==='account-balance'){
+        const name=clean(op.name,50),type=['bank','cash','emoney'].includes(op.type)?op.type:'cash',balance=n(op.balance);
+        if(!name||!Number.isFinite(balance))continue;
+        let index=data.accounts.findIndex(a=>clean(a.name,50)===name);
+        if(index<0&&type==='cash')index=data.accounts.findIndex(a=>a.type==='cash');
+        const now=new Date().toISOString();
+        if(index>=0)data.accounts=data.accounts.map((a,i)=>i===index?{...a,name:a.name||name,type:a.type||type,balance,updatedAt:now}:a);
+        else data.accounts=[...data.accounts,{id:uid('acct'),type,name,balance,updatedAt:now}];
+        changed=true;
+      }else if(op.kind==='upsert-transaction'){
+        const date=clean(op.date,10),label=clean(op.label,60),amount=Math.max(0,n(op.amount));
+        if(!/^\d{4}-\d{2}-\d{2}$/.test(date)||!label||!amount)continue;
+        const id=clean(op.id,80)||`import-${date}-${amount}-${label}`;
+        const item={id,date,type:['income','expense','debt','saving','investment'].includes(op.type)?op.type:'expense',category:clean(op.category,30)||'other',label,amount,status:op.status==='done'?'done':'planned',imported:true};
+        const exists=data.transactions.findIndex(tx=>tx.id===id);
+        data.transactions=exists>=0?data.transactions.map((tx,i)=>i===exists?{...tx,...item}:tx):[...data.transactions,item];
+        changed=true;
+      }else if(op.kind==='mark-paid'){
+        const date=clean(op.date,10),label=clean(op.label,60),amount=Math.max(0,n(op.amount));
+        let tx=data.transactions.find(x=>x.date===date&&n(x.amount)===amount&&(!label||clean(x.label,60)===label));
+        if(tx){
+          data.transactions=data.transactions.map(x=>x.id===tx.id?{...x,status:'done'}:x);changed=true;continue;
+        }
+        tx=expandedTransactions(date,date).find(x=>isOutgoing(x)&&x.date===date&&n(x.amount)===amount&&(!label||clean(x.label,60)===label));
+        if(tx){
+          const concrete={...tx,id:uid('tx'),status:'done'};delete concrete.virtualRecurring;
+          data.transactions=[...data.transactions,concrete];changed=true;
+        }
+      }
+    }
+    if(changed){
+      data.updatedAt=new Date().toISOString();
+      write(KEY,data);
+    }
+    history.replaceState(null,'',`${location.pathname}${location.search}#money`);
+    return changed;
+  }
   let data=state();
   let activeTab='dashboard';
   let calendarMonth=monthKey();
@@ -680,6 +738,7 @@
   }
   function boot(){
     if(!document.getElementById('moneyPage'))return;
+    applyLocalImportFromHash();
     installShell();render();void syncMoneyShadow();
     window.addEventListener('online',()=>{void syncMoneyShadow()});
     window.addEventListener('storage',e=>{if(e.key===KEY){data=state();render();void syncMoneyShadow()}});
