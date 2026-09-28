@@ -326,7 +326,7 @@
         <div><small>1日あたり</small><b>${dayBudget===null?'—':moneyAmount(dayBudget)}</b></div>
       </div>
       <div class="money6-timeline">
-        <div><small>次の支払い</small>${plan.nextPayment?`<b>${escapeHtml(formatMD(plan.nextPayment.date))}　${escapeHtml(plan.nextPayment.label||'支払い')}</b><strong class="expense">${moneyAmount(plan.nextPayment.amount)}</strong>`:'<b>予定なし</b>'}</div>
+        ${plan.nextPayment?`<button class="money13-next-payment" type="button" data-money-action="payment" data-id="${escapeHtml(plan.nextPayment.id)}"><small>次の支払い</small><b>${escapeHtml(formatMD(plan.nextPayment.date))}　${escapeHtml(plan.nextPayment.label||'支払い')}</b><strong class="expense">${moneyAmount(plan.nextPayment.amount)}</strong></button>`:'<div><small>次の支払い</small><b>予定なし</b></div>'}
         <span>→</span>
         <div><small>次の入金</small>${plan.nextIncome?`<b>${escapeHtml(formatMD(plan.nextIncome.date))}　${escapeHtml(plan.nextIncome.label||'入金')}</b><strong class="income">${moneyAmount(plan.nextIncome.amount,{approx:Boolean(plan.nextIncome.amountApproximate||plan.nextIncome.certainty==='見込み')})}</strong>`:'<b>予定なし</b>'}</div>
       </div>
