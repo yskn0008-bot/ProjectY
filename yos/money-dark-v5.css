@@ -485,3 +485,21 @@ body[data-domain="money"] #money2DialogForm button.danger{color:var(--money5-red
 .money10-budget{display:grid;grid-template-columns:1.35fr .85fr;gap:1px;margin:0 12px 8px;overflow:hidden;border:1px solid rgba(215,169,75,.18);border-radius:14px;background:rgba(215,169,75,.12)}
 .money10-budget>div{padding:10px 11px;background:rgba(5,10,23,.42)}.money10-budget small{display:block;color:var(--money5-sub);font-size:8px}.money10-budget b{display:block;margin-top:3px;color:var(--money5-gold);font-size:15px;font-variant-numeric:tabular-nums}.money10-budget .hero b{font-size:18px}
 .money6-metrics b.text{overflow:hidden;text-overflow:ellipsis;font-size:8px}
+
+
+/* iPhone readability v11 */
+body[data-domain="money"] #moneyPage{font-size:16px}
+.money5-brand strong{font-size:20px}.money5-brand small{font-size:13px}
+.money6-balance small{font-size:15px}.money6-balance strong{font-size:48px}.money6-balance>span{font-size:12px}
+.money10-budget small,.money6-metrics small,.money6-timeline small,.money6-action small,.money6-safety small{font-size:12px}
+.money10-budget b{font-size:20px}.money10-budget .hero b{font-size:24px}
+.money6-metrics b{font-size:16px}.money6-metrics b.text{font-size:12px;white-space:normal;line-height:1.25}
+.money6-timeline b{font-size:13px}.money6-timeline strong{font-size:16px}
+.money6-action p{font-size:13px;line-height:1.5}.money6-safety b{font-size:13px}.money6-assets{font-size:12px}
+.money5-page-title small{font-size:11px!important}.money5-page-title h1{font-size:24px!important}.money5-page-title p{font-size:13px!important}
+.money8-month-summary small,.money7-month-summary small,.money7-calendar-insight small{font-size:11px}
+.money8-month-summary strong{font-size:16px}.money8-month-summary .primary strong{font-size:20px}.money8-month-summary strong.text{font-size:13px}
+.money2-week span{font-size:11px!important}.money2-day b{font-size:12px!important}.money2-chip{font-size:9px!important}
+.money3-tx-copy strong{font-size:15px!important}.money3-tx-copy small{font-size:11px!important}.money3-transaction>b{font-size:15px!important}
+.money5-subnav button b{font-size:11px!important}
+.money9-public-row strong{font-size:15px}.money9-public-row small{font-size:11px}
