@@ -80,6 +80,19 @@ try{
   await page.locator('.tab[data-mode="all"]').click();
   await page.locator('#searchInput').fill('Money');
   assert.equal(await page.locator('#chatList .chat').count(),1,'chat search should still work');
+
+  await page.evaluate(()=>{
+    document.getElementById('searchInput').value='';
+    state.chats=[];
+    projectFilter='すべて';
+    chatMode='all';
+    renderChats();
+  });
+  assert.equal((await page.locator('#selectBtn').textContent())?.trim(),'編集','top-right action should read 編集');
+  assert.equal(await page.locator('#projects').evaluate(el=>getComputedStyle(el).display),'none','redundant project pills should be hidden when there are no multiple projects');
+  await page.waitForSelector('#emptyAdd',{state:'visible'});
+  assert.match((await page.locator('#empty').textContent())||'',/まだチャットがありません/);
+  assert.match((await page.locator('#emptyAdd').textContent())||'',/コピーしたリンクを追加/);
 } finally {
   await browser.close();
 }
