@@ -326,7 +326,7 @@
         <div><small>1日あたり</small><b>${dayBudget===null?'—':moneyAmount(dayBudget)}</b></div>
       </div>
       <div class="money6-timeline">
-        ${plan.nextPayment?`<button class="money13-next-payment" type="button" data-money-action="payment" data-id="${escapeHtml(plan.nextPayment.id)}"><small>次の支払い</small><b>${escapeHtml(formatMD(plan.nextPayment.date))}　${escapeHtml(plan.nextPayment.label||'支払い')}</b><strong class="expense">${moneyAmount(plan.nextPayment.amount)}</strong></button>`:'<div><small>次の支払い</small><b>予定なし</b></div>'}
+        ${plan.nextPayment?`<div class="money13-next-payment-wrap"><button class="money13-next-payment" type="button" data-money-action="payment" data-id="${escapeHtml(plan.nextPayment.id)}"><small>次の支払い</small><b>${escapeHtml(formatMD(plan.nextPayment.date))}　${escapeHtml(plan.nextPayment.label||'支払い')}</b><strong class="expense">${moneyAmount(plan.nextPayment.amount)}</strong></button><button class="money13-paid" type="button" data-money-action="mark-paid" data-id="${escapeHtml(plan.nextPayment.id)}">支払済み</button></div>`:'<div><small>次の支払い</small><b>予定なし</b></div>'}
         <span>→</span>
         <div><small>次の入金</small>${plan.nextIncome?`<b>${escapeHtml(formatMD(plan.nextIncome.date))}　${escapeHtml(plan.nextIncome.label||'入金')}</b><strong class="income">${moneyAmount(plan.nextIncome.amount,{approx:Boolean(plan.nextIncome.amountApproximate||plan.nextIncome.certainty==='見込み')})}</strong>`:'<b>予定なし</b>'}</div>
       </div>
@@ -554,6 +554,14 @@
     if(action==='edit-account')openAccountDialog(data.accounts.find(x=>x.id===btn.dataset.id));
     if(action==='refresh-balances')openBalanceDialog();
     if(action==='payment')openPaymentDialog(findTransactionById(btn.dataset.id));
+    if(action==='mark-paid'){
+      const tx=findTransactionById(btn.dataset.id);
+      if(tx&&!isComplete(tx)){
+        if(tx.virtualRecurring){const concrete={...tx,id:uid('tx'),status:'done'};delete concrete.virtualRecurring;data.transactions=[...data.transactions,concrete]}
+        else data.transactions=data.transactions.map(x=>x.id===tx.id?{...x,status:'done'}:x);
+        save();
+      }
+    }
     if(action==='add-goal')openGoalDialog();
     if(action==='edit-goal')openGoalDialog(data.goals.find(x=>x.id===btn.dataset.id));
     if(action==='add-debt')openDebtDialog();
