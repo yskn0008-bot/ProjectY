@@ -347,9 +347,8 @@
     return `<button class="money3-transaction ${done?'done':''}" type="button" data-money-action="${action}" data-id="${escapeHtml(tx.virtualRecurring?tx.recurringId:tx.id)}"><span class="money3-cat" aria-hidden="true">${escapeHtml(cat.icon)}</span><span class="money3-tx-copy"><strong>${escapeHtml(tx.label||'名称未設定')}</strong><small>${formatMD(tx.date)} ・ ${escapeHtml(cat.label)}${tx.virtualRecurring?' ・ 定期':''}${done?' ・ 完了':''}</small></span><b class="${incoming?'income':'expense'}">${incoming?'+':'−'}${data.privacy?'••••':yen(tx.amount)}</b><i>›</i></button>`;
   }
   function currentMonthShortfall(){
-    const liquid=currentLiquid();if(liquid===null)return null;
-    const outstanding=monthTransactions(monthKey()).filter(tx=>isOutgoing(tx)&&!isComplete(tx)).reduce((sum,tx)=>sum+n(tx.amount),0);
-    return Math.max(0,outstanding-liquid);
+    const plan=futurePlan();
+    return plan.projected===null?null:Math.max(0,-plan.projected);
   }
   function moneyAmount(value,{signed=false,approx=false}={}){
     if(data.privacy)return '••••••';
@@ -385,8 +384,7 @@
       :buildAdvice(plan,goal);
     const status=monthShortfall>0?'不足見込み':monthNet>=0?'黒字見込み':'要確認';
     const target=goal?Math.max(1,n(goal.target)):0,current=goal?Math.max(0,n(goal.current)):0,pct=goal?Math.min(100,Math.max(0,Math.round(current/target*100))):0;
-    const outstanding=monthTransactions(monthKey()).filter(tx=>isOutgoing(tx)&&!isComplete(tx)).reduce((sum,tx)=>sum+n(tx.amount),0);
-    const spendable=plan.liquid===null?null:Math.max(0,plan.liquid-outstanding);
+    const spendable=plan.projected===null?null:Math.max(0,plan.projected);
     const today=parseDate(isoToday()),monthEnd=new Date(Number(monthKey().slice(0,4)),Number(monthKey().slice(5,7)),0,12);
     const daysLeft=Math.max(1,daysBetween(today,monthEnd)+1),dayBudget=spendable===null?null:Math.floor(spendable/daysLeft);
     const warning=plan.firstBreak?`${formatMD(plan.firstBreak.tx.date)}に残高不足`:monthShortfall>0?'月末までに資金不足':'登録済み予定では残高不足なし';
@@ -406,7 +404,7 @@
       </div>
       <div class="money6-divider"></div>
       <div class="money6-metrics">
-        <div class="danger"><small>月末不足</small><b>${monthShortfall===null?'—':monthShortfall>0?moneyAmount(-monthShortfall,{signed:true}):'¥0'}</b></div>
+        <div class="danger"><small>月末不足</small><b>${monthShortfall===null?'—':monthShortfall>0?moneyAmount(monthShortfall)+'不足':'¥0'}</b></div>
         <div class="${monthNet>=0?'income':'danger'}"><small>今月収支</small><b>${s.hasData?moneyAmount(monthNet,{signed:true}):'—'}</b></div>
         <div class="${plan.firstBreak||monthShortfall>0?'danger':'income'}"><small>未来予測</small><b class="text">${escapeHtml(warning)}</b></div>
       </div>
