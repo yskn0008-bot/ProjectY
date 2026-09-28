@@ -76,7 +76,7 @@ function bindDevDrag(){
   });
 }
 function openDevDetail(id){var x=devCatalog[id];if(!x)return;showSheet('<h3>'+esc(x.name)+'</h3><p>状態：'+esc(x.status)+'<br>進捗：'+esc(x.pct)+'%<br>次：'+esc(x.next)+'</p><button class="primary" id="goChatsFromDev">関連チャットを見る</button><button id="closeSheetBtn">閉じる</button>');q("#goChatsFromDev").onclick=function(){closeSheet();setPage("chats");q("#searchInput").value=x.name;renderChats()};q("#closeSheetBtn").onclick=closeSheet}
-function renderProjects(){var names=["すべて"];state.chats.forEach(function(x){if(names.indexOf(x.project)<0)names.push(x.project)});var html="";names.forEach(function(name){html+='<button class="projectPill '+(name===projectFilter?'active':'')+'" data-project="'+esc(name)+'">'+esc(name)+'</button>'});q("#projects").innerHTML=html;qa(".projectPill").forEach(function(b){b.onclick=function(){tap();projectFilter=b.dataset.project;renderChats()}})}
+function renderProjects(){var unique=[];state.chats.forEach(function(x){var name=String(x.project||"").trim();if(name&&unique.indexOf(name)<0)unique.push(name)});var holder=q("#projects");if(unique.length<2){holder.innerHTML="";holder.style.display="none";projectFilter="すべて";return}holder.style.display="flex";var names=["すべて"].concat(unique),html="";names.forEach(function(name){html+='<button class="projectPill '+(name===projectFilter?'active':'')+'" data-project="'+esc(name)+'">'+esc(name)+'</button>'});holder.innerHTML=html;qa(".projectPill").forEach(function(b){b.onclick=function(){tap();projectFilter=b.dataset.project;renderChats()}})}
 function filteredChats(){var text=q("#searchInput").value.trim().toLowerCase();return state.chats.filter(function(x){if(projectFilter!=="すべて"&&x.project!==projectFilter)return false;if(chatMode==="unread"&&!x.unread)return false;if(chatMode==="pinned"&&!x.pinned)return false;if(text){var h=(titleOf(x)+" "+x.title+" "+x.project+" "+x.preview).toLowerCase();if(h.indexOf(text)<0)return false}return true}).sort(function(a,b){return Number(b.pinned)-Number(a.pinned)})}
 function renderChats(){
   var chatHead=q("#chatList")&&q("#chatList").parentElement&&q("#chatList").parentElement.querySelector(".sectionHead span");
@@ -86,7 +86,7 @@ function renderChats(){
   q("#countPinned").textContent=" "+state.chats.filter(function(x){return x.pinned}).length;
   renderProjects();var rows=filteredChats(),html="";
   rows.forEach(function(x){html+='<div class="chat '+(x.pinned?'pinned ':'')+(selected.has(x.id)?'selected':'')+'" data-id="'+esc(x.id)+'"><div class="check">✓</div><div class="avatar '+esc(x.tone||'')+'">'+esc(x.avatar)+'</div><div class="chatText"><div class="nameLine"><div class="chatName">'+esc(titleOf(x))+'</div><span class="tag">'+esc(x.project)+'</span></div><div class="preview">'+esc(x.preview)+'</div></div><div class="chatMeta"><div class="time">'+esc(x.time)+'</div><div class="badge '+(x.unread?'':'hidden')+'">'+(x.unread?esc(x.unread):'')+'</div></div></div>'});
-  q("#chatList").innerHTML=html;q("#empty").style.display=rows.length?"none":"block";q("#app").classList.toggle("selecting",selecting);q("#bottom").style.display=selecting?"none":"grid";q("#bulk").style.display=selecting?"grid":"none";q("#selectBtn").textContent=selecting?"完了":"選択";bindChats();persist();
+  q("#chatList").innerHTML=html;q("#empty").style.display=rows.length?"none":"flex";q("#app").classList.toggle("selecting",selecting);q("#bottom").style.display=selecting?"none":"grid";q("#bulk").style.display=selecting?"grid":"none";q("#selectBtn").textContent=selecting?"完了":"編集";var emptyAdd=q("#emptyAdd");if(emptyAdd)emptyAdd.onclick=function(){tap();addClipboardChat()};bindChats();persist();
 }
 function bindChats(){qa(".chat").forEach(function(row){var id=row.dataset.id,timer=null,longPressed=false;row.onclick=function(){tap();if(longPressed){longPressed=false;return}if(selecting){selected.has(id)?selected.delete(id):selected.add(id);renderChats();return}var x=state.chats.find(function(c){return c.id===id});if(!x)return;if(x.unread)x.unread=0;persist();if(x.url){window.location.href=x.url;return}openChatSheet(id);renderChats()};row.addEventListener("touchstart",function(){longPressed=false;timer=setTimeout(function(){longPressed=true;openChatSheet(id)},500)},{passive:true});row.addEventListener("touchmove",function(){clearTimeout(timer)},{passive:true});row.addEventListener("touchend",function(){clearTimeout(timer)},{passive:true})})}
 function openChatSheet(id){
@@ -107,16 +107,17 @@ function addChatEntry(url,title,project){
   state.chats.unshift({id:"chat-"+Date.now(),project:project,title:title,preview:"実チャットへ直接開く",time:"登録済み",unread:0,pinned:false,avatar:title.charAt(0)||"C",tone:"blue",alias:"",url:url});
   persist();closeSheet();setPage("chats");renderChats();showToast("追加しました");return true
 }
+async function addClipboardChat(){
+  try{
+    var url=(await navigator.clipboard.readText()).trim();
+    if(addChatEntry(url,'ChatGPT','ChatGPT'))return;
+  }catch(e){}
+  openNew();
+  showToast("ChatGPTリンクを貼り付けて");
+}
 function openNew(){
   showSheet('<h3>NEW</h3><p>ChatGPTの実リンクだけを登録します。</p><button class="primary" id="pasteChatUrl">コピーしたリンクを追加</button><input id="newTitle" placeholder="固定名（任意）"><input id="newProject" placeholder="分類（任意）"><input id="newUrl" placeholder="https://chatgpt.com/..."><button id="createChat">入力内容で追加</button><button id="closeSheetBtn">閉じる</button>');
-  q("#pasteChatUrl").onclick=async function(){
-    try{
-      var url=(await navigator.clipboard.readText()).trim();
-      addChatEntry(url,'ChatGPT','ChatGPT');
-    }catch(e){
-      showToast("リンクを下の欄へ貼り付けて");
-    }
-  };
+  q("#pasteChatUrl").onclick=addClipboardChat;
   q("#createChat").onclick=function(){addChatEntry(q("#newUrl").value,q("#newTitle").value,q("#newProject").value)};
   q("#closeSheetBtn").onclick=closeSheet
 }
