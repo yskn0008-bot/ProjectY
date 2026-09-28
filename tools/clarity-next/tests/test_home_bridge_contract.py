@@ -25,7 +25,7 @@ class HomeBridgeContractTests(unittest.TestCase):
         self.assertIn("リモコン/内部/Tapo共通", self.bridge)
         self.assertIn("YOS Tapo H110 Core", self.bridge)
         self.assertNotRegex(self.bridge, r"192\\.168\\.\\d+\\.\\d+")
-        self.assertNotIn("BEGIN PRIVATE KEY", self.bridge)
+        self.assertNotIn("BEGIN " + "PRIVATE KEY", self.bridge)
 
     def test_explicit_commands_are_supported(self):
         for marker in (
