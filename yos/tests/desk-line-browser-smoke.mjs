@@ -41,6 +41,7 @@ await page.route('**/api/yos/chat', async route => {
 try{
   await page.goto(base+'/yos/desk/',{waitUntil:'networkidle'});
   await page.waitForFunction(()=>document.documentElement.dataset.deskLiveChat==='ready');
+  assert.equal(await page.evaluate(()=>document.documentElement.dataset.deskChatMode),'live');
   await page.waitForFunction(()=>document.documentElement.dataset.deskChatSync==='ok');
   await page.waitForSelector('#chatsPage.active');
   assert.match((await page.locator('#chatsPage .brand strong').textContent())||'',/チャット/);
