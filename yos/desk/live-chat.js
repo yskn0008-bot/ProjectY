@@ -361,6 +361,7 @@
 
   buildThreadPage();
   ensureBaseRooms();
+  document.documentElement.dataset.deskLiveChat='ready';
   renderChats();
   syncRooms();
   setInterval(syncRooms,30000);
