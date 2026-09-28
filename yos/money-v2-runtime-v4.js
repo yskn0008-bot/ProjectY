@@ -33,24 +33,7 @@
     if(!saved||typeof saved!=='object')return base;
     return {...base,...saved,accounts:Array.isArray(saved.accounts)?saved.accounts:[],transactions:Array.isArray(saved.transactions)?saved.transactions:[],recurring:Array.isArray(saved.recurring)?saved.recurring:[],debts:Array.isArray(saved.debts)?saved.debts:[],goals:Array.isArray(saved.goals)?saved.goals:[],assets:Array.isArray(saved.assets)?saved.assets:[],rules:{...base.rules,...(saved.rules||{})}};
   }
-  const DETECTED_DEBT_CANDIDATES=[
-    {id:'debt-detected-merpay-20260928',name:'メルペイ定額払い',balance:293113,balanceKnown:true,apr:0,minPayment:0,plannedPayment:10000,payoffMonthsManual:41,estimatedFees:100185,status:'overdue',verification:'confirmed',sourceNote:'SMSで支払期限超過を確認／メルカリアプリ定額払いシミュレーション 2026-09-28'},
-    {id:'debt-detected-np-contactlife-20260928',name:'NP後払い（コンタクトライフ）',balance:7593,balanceKnown:true,apr:0,minPayment:7593,plannedPayment:7593,dueDate:'2026-09-01',status:'legal_notice',verification:'confirmed',sourceNote:'メールで7,593円・期限2026-09-01・弁護士連絡可能性を確認／SMS再通知あり'},
-    {id:'debt-detected-bundle-20260928',name:'ポチっとチャージ',balance:5510,balanceKnown:true,apr:0,minPayment:5510,plannedPayment:5510,status:'legal_notice',verification:'confirmed',sourceNote:'メールで5,510円の期限超過・法的手続き検討通知を確認 2026-09-25'},
-    {id:'debt-detected-kddi-20260928',name:'KDDI未払い（回収連絡）',balance:0,balanceKnown:false,apr:0,minPayment:0,plannedPayment:0,status:'legal_notice',verification:'unconfirmed',sourceNote:'SMSでKDDI案件・指定最終期限超過・訴訟予告を確認。金額と元契約は未確認'}
-  ];
-  function mergeDetectedDebtCandidates(){
-    let changed=false;
-    for(const candidate of DETECTED_DEBT_CANDIDATES){
-      const existing=data.debts.find(d=>d.id===candidate.id);
-      if(existing)continue;
-      data.debts=[...data.debts,{...candidate}];
-      changed=true;
-    }
-    if(changed){data.updatedAt=new Date().toISOString();write(KEY,data)}
-  }
   let data=state();
-  mergeDetectedDebtCandidates();
   let activeTab='dashboard';
   let calendarMonth=monthKey();
   let selectedCalendarDate=isoToday();
