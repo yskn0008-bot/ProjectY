@@ -110,6 +110,40 @@ try{
   await page.locator('.tab[data-mode="all"]').click();
   await page.locator('#searchInput').fill('Money');
   assert.ok(await page.locator('#chatList .chat').count()>=1,'chat search still works');
+
+  await page.evaluate(()=>setPage('desk'));
+  await page.waitForSelector('#deskPage.active');
+  await page.waitForFunction(()=>document.documentElement.dataset.liveSync==='ok'||document.documentElement.dataset.liveSync==='local-only');
+  const deskFit=await page.evaluate(()=>{
+    const app=document.getElementById('app');
+    const hero=document.querySelector('#deskPage .hero');
+    const main=document.querySelector('#deskPage .heroMain');
+    const side=document.querySelector('#deskPage .heroSide');
+    const sub=document.querySelector('#deskPage .heroSub');
+    const next=document.querySelector('#deskPage .next');
+    const ar=app.getBoundingClientRect(),hr=hero.getBoundingClientRect(),mr=main.getBoundingClientRect(),sr=side.getBoundingClientRect();
+    return {
+      viewport:innerWidth,
+      docScrollWidth:document.documentElement.scrollWidth,
+      appClientWidth:app.clientWidth,
+      appScrollWidth:app.scrollWidth,
+      heroClientWidth:hero.clientWidth,
+      heroScrollWidth:hero.scrollWidth,
+      appLeft:ar.left,appRight:ar.right,
+      heroLeft:hr.left,heroRight:hr.right,
+      mainLeft:mr.left,mainRight:mr.right,
+      sideLeft:sr.left,sideRight:sr.right,
+      subText:(sub?.textContent||'').trim(),
+      nextText:(next?.textContent||'').trim()
+    };
+  });
+  assert.ok(deskFit.docScrollWidth<=deskFit.viewport+1,'DESK must never exceed the viewport width');
+  assert.ok(deskFit.appScrollWidth<=deskFit.appClientWidth+1,'DESK app must not scroll horizontally');
+  assert.ok(deskFit.heroScrollWidth<=deskFit.heroClientWidth+1,'hero grid must not overflow horizontally');
+  assert.ok(deskFit.heroLeft>=deskFit.appLeft-1&&deskFit.heroRight<=deskFit.appRight+1,'hero must stay inside app');
+  assert.ok(deskFit.mainRight<=deskFit.appRight+1&&deskFit.sideRight<=deskFit.appRight+1,'both hero cards must stay on-screen');
+  assert.ok(deskFit.subText.endsWith('。')||deskFit.subText.endsWith('！')||deskFit.subText.endsWith('？'),'hero status should end at a sentence boundary');
+  assert.ok(deskFit.nextText.endsWith('。')||deskFit.nextText.endsWith('！')||deskFit.nextText.endsWith('？'),'hero next action should end at a sentence boundary');
 } finally {
   await browser.close();
 }
