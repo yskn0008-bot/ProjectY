@@ -519,3 +519,28 @@ body[data-domain="money"] #moneyPage{font-size:16px}
 .money2-week span{font-size:13px!important}.money2-day{height:56px!important;min-height:56px!important}.money2-day b{font-size:14px!important}.money2-chip{font-size:10px!important}
 .money3-tx-copy strong{font-size:17px!important}.money3-tx-copy small{font-size:13px!important}.money3-transaction>b{font-size:17px!important}
 .money5-subnav button b{font-size:13px!important}.money9-public-row strong{font-size:17px}.money9-public-row small{font-size:13px}
+
+
+/* Debt planner v11 */
+.money11-debt{
+  overflow:hidden;border:1px solid rgba(255,110,110,.18);border-radius:20px;
+  background:linear-gradient(150deg,rgba(14,29,58,.94),rgba(8,18,39,.98));
+}
+.money11-debt>header{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:15px 16px 10px}
+.money11-debt>header small{display:block;color:var(--money5-gold);font-size:11px;font-weight:800;letter-spacing:.12em}
+.money11-debt>header h2{margin:2px 0 0;font-size:22px}
+.money11-debt>header button{border:0;background:none;color:var(--money5-blue);font-size:14px;font-weight:800}
+.money11-debt-summary{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;margin:0 12px 12px;overflow:hidden;border:1px solid rgba(77,163,255,.11);border-radius:15px;background:rgba(77,163,255,.1)}
+.money11-debt-summary>div{padding:11px 12px;background:rgba(5,10,23,.48)}
+.money11-debt-summary small{display:block;color:var(--money5-sub);font-size:12px;margin-bottom:4px}
+.money11-debt-summary strong{display:block;font-size:18px;font-variant-numeric:tabular-nums}
+.money11-guidance{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:start;margin:0 12px 12px;padding:12px;border:1px solid rgba(215,169,75,.16);border-radius:15px;background:rgba(215,169,75,.05)}
+.money11-guidance small{color:var(--money5-gold);font-size:12px;font-weight:800}
+.money11-guidance p{margin:3px 0 0;font-size:14px;line-height:1.5}
+.money11-debt-list{padding:0 14px 8px}
+.money11-debt-row{width:100%;display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:10px;padding:12px 0;border:0;border-top:1px solid rgba(77,163,255,.09);background:none;color:inherit;text-align:left}
+.money11-debt-rank{display:grid;place-items:center;width:30px;height:30px;border-radius:10px;color:var(--money5-gold);background:rgba(215,169,75,.08);font-size:13px;font-weight:900}
+.money11-debt-row>div:nth-child(2){overflow:hidden}
+.money11-debt-row strong{display:block;font-size:16px}
+.money11-debt-row small{display:block;margin-top:3px;color:var(--money5-sub);font-size:12px;line-height:1.35;white-space:normal}
+.money11-debt-row>b{font-size:16px;color:var(--money5-red);font-variant-numeric:tabular-nums;white-space:nowrap}
