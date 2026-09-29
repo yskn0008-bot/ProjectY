@@ -21,7 +21,7 @@ class ClarityShareVariantSourceContractTests(unittest.TestCase):
     def test_share_variant_uses_share_sheet_directly(self):
         self.assertIn("#define name Clarity Share v4", self.share)
         self.assertIn("#define from sharesheet", self.share)
-        self.assertIn("#define inputs text, richtext, webpage, url, image, pdf", self.share)
+        self.assertNotIn("#define inputs ", self.share)
         self.assertIn('#define noinput stopwith "共有する内容がありません"', self.share)
         self.assertIn("typeOf(ShortcutInput)", self.share)
         self.assertIn("getTextFromImage", self.share)
