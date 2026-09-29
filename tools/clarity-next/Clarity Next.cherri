@@ -8,6 +8,7 @@
 #include 'actions/device'
 #include 'actions/settings'
 #include 'actions/location'
+#include 'actions/web'
 #include 'actions/shortcuts'
 
 const requestNumber = randomNumber(100000, 999999)
