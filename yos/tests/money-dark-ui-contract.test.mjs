@@ -133,3 +133,21 @@ test('Gas recurring uses fixed debit day 15 with unknown variable amount', async
   assert.match(master,/master-rec-gas[\s\S]*label:'ガス'[\s\S]*amount:null[\s\S]*variableAmount:true[\s\S]*day:15/);
   assert.doesNotMatch(master,/master-rec-gas[\s\S]*lastKnownAmount:/);
 });
+
+
+test('Money recovers an initialized-but-empty store and keeps a local backup', async () => {
+  const [master,runtime,index]=await Promise.all([
+    read('yos/money-master-v1.js'),
+    read('yos/money-v2-runtime-v4.js'),
+    read('yos/index.html')
+  ]);
+  assert.match(master,/RECOVERY_KEY='yos-money-recovery-v1'/);
+  assert.match(master,/unexpectedlyEmpty=initialized&&!hasCore\(current\)/);
+  assert.match(master,/restored-device-backup/);
+  assert.match(master,/restored-confirmed-seed/);
+  assert.match(master,/balance:1453/);
+  assert.match(runtime,/RECOVERY_KEY='yos-money-recovery-v1'/);
+  assert.match(runtime,/hasMoneyCore\(previous\)&&!hasMoneyCore\(value\)/);
+  assert.match(index,/money-master-v1\.js\?v=20260929v10/);
+  assert.match(index,/money-v2-runtime-v4\.js\?v=34/);
+});
