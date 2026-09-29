@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-29T16:26:09+09:00",
+  "updated_at": "2026-09-29T17:59:44+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -70,7 +70,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-09-29T07:25:06Z"
+      "updated_at": "2026-09-29T08:59:20Z"
     },
     {
       "id": "github-issue-256",
@@ -165,6 +165,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-68c2019efa1a",
+      "title": "Money: add local-first saves and JSONL journal",
+      "completed_at": "2026-09-29T08:59:24Z",
+      "result": "GitHub mainへ反映（68c2019）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/68c2019efa1a47f2314df023d596c1e578ddf69c"
+    },
+    {
       "id": "github-commit-7e31c887a5c8",
       "title": "docs: record variable electricity recurring",
       "completed_at": "2026-09-29T07:25:51Z",
@@ -191,13 +198,6 @@
       "completed_at": "2026-09-29T07:20:18Z",
       "result": "GitHub mainへ反映（f06100d）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/f06100d7f50642aade795d1d4b39b6264f613748"
-    },
-    {
-      "id": "github-commit-8f453d494f93",
-      "title": "Money: remove stale 4,588 yen balance seed",
-      "completed_at": "2026-09-29T06:55:58Z",
-      "result": "GitHub mainへ反映（8f453d4）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/8f453d494f9354f75e5406f24759cb6a3623d550"
     },
     {
       "id": "complete-002",
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-29T16:26:09+09:00",
+      "last_update": "2026-09-29T17:59:44+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -315,7 +315,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-29T16:26:09+09:00",
+      "last_update": "2026-09-29T17:59:44+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-29T16:26:09+09:00",
+      "last_update": "2026-09-29T17:59:44+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "e219aec986f2c03617b72991d39ff95a611b0c189064d3bc332e92efbf3f6103"
+  "github_snapshot_hash": "193dac1d27701cd0999dfbc7715c61c0e3eea960375d539ac69655eaeb4bf7fd"
 }
