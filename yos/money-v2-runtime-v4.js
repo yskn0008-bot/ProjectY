@@ -710,7 +710,7 @@
     const action=btn.dataset.moneyAction;
     if(btn.id==='moneyMenuButton'){document.getElementById('menuDialog')?.showModal();return}
     if(btn.id==='moneyPrivacy'){data.privacy=!data.privacy;save();return}
-    if(btn.id==='moneyQuickAdd'){openEntryDialog(isoToday());return}
+    if(btn.id==='moneyQuickAdd'){location.href='./money-capture.html';return}
     if(btn.dataset.moneyDate){selectedCalendarDate=btn.dataset.moneyDate;activeTab='calendar';render();return}
     if(!action)return;
     if(action==='back-home'){document.querySelector('.home-nav')?.click();return}
