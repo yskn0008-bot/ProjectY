@@ -70,3 +70,20 @@ test('Money master never restores the stale 4,588 yen live balance', async () =>
   assert.match(master,/amount:30000/);
   assert.match(master,/master-repayment-2026-09[\s\S]*status:'paid'/);
 });
+
+
+test('Money master seeds confirmed monthly recurring cashflow without fixed debt repayment', async () => {
+  const master=await read('yos/money-master-v1.js');
+  for(const label of ['家賃収入','家賃','車保険','電気','iCloud','MoneyForward','ChatGPT Plus','YouTube Premium']){
+    assert.ok(master.includes("label:'"+label+"'"),'missing recurring label '+label);
+  }
+  for(const amount of [160485,68500,7060,3710,540,590,3000,1680]){
+    assert.ok(master.includes('amount:'+amount),'missing recurring amount '+amount);
+  }
+  assert.match(master,/base\.recurring=Array\.isArray/);
+  assert.doesNotMatch(master,/master-rec-repayment/);
+  assert.match(master,/master-rec-rental-income[\s\S]*day:13/);
+  assert.match(master,/master-rec-rent[\s\S]*day:27/);
+  assert.match(master,/master-rec-car-insurance[\s\S]*day:26/);
+  assert.match(master,/master-rec-electricity[\s\S]*day:27/);
+});
