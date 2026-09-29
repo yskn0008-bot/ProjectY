@@ -283,14 +283,14 @@ def patch(path: Path) -> None:
         fail("Night Brief must complete natively without callback stops")
     if "night_history=1" in blob or "night_save=1" in blob or "shortcuts://run-shortcut" in blob:
         fail("legacy browser/shortcut callback survived")
-    if ids.count("is.workflow.actions.file.createfolder") != 1:
-        fail("Night history folder action missing")
+    if ids.count("is.workflow.actions.file.createfolder") != 2:
+        fail("Night history/display folder actions missing")
     if ids.count("is.workflow.actions.file.getfoldercontents") != 1:
         fail("Night history folder read missing")
     if ids.count("is.workflow.actions.filter.files") != 1:
         fail("Night history 14-day filter missing")
-    if ids.count("is.workflow.actions.documentpicker.save") != 1:
-        fail("Night history save missing")
+    if ids.count("is.workflow.actions.documentpicker.save") != 3:
+        fail("Night history/display saves missing")
     if "真栄原2丁目" in blob:
         fail("private street-level text must not be embedded")
 
