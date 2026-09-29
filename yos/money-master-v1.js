@@ -1,11 +1,28 @@
 'use strict';
 (()=>{
   const KEY='yos-money-v2';
-  const MASTER_VERSION='2026-09-29-v9';
+  const RECOVERY_KEY='yos-money-recovery-v1';
+  const MASTER_VERSION='2026-09-29-v10';
   const SOURCE='user-confirmed-2026-09-28';
-  const read=()=>{try{return JSON.parse(localStorage.getItem(KEY)||'null')}catch{return null}};
-  const current=read();
-  const base=current&&typeof current==='object'?current:{version:2,privacy:false,accounts:[],transactions:[],debts:[],goals:[],assets:[],rules:{}};
+  const readKey=key=>{try{return JSON.parse(localStorage.getItem(key)||'null')}catch{return null}};
+  const hasCore=value=>Boolean(value&&typeof value==='object'&&(
+    (Array.isArray(value.accounts)&&value.accounts.length)
+    ||(Array.isArray(value.transactions)&&value.transactions.length)
+    ||(Array.isArray(value.recurring)&&value.recurring.length)
+    ||(Array.isArray(value.debts)&&value.debts.length)
+    ||(Array.isArray(value.goals)&&value.goals.length)
+    ||(Array.isArray(value.assets)&&value.assets.length)
+  ));
+  const current=readKey(KEY);
+  const recovery=readKey(RECOVERY_KEY);
+  const initialized=Boolean(current?.masterFacts?.version||current?.updatedAt);
+  const unexpectedlyEmpty=initialized&&!hasCore(current);
+  const restored=unexpectedlyEmpty&&hasCore(recovery);
+  const source=restored?recovery:current;
+  const base=source&&typeof source==='object'?source:{version:2,privacy:false,accounts:[],transactions:[],debts:[],goals:[],assets:[],rules:{}};
+  if(hasCore(current)){
+    try{localStorage.setItem(RECOVERY_KEY,JSON.stringify(current))}catch{}
+  }
   base.accounts=Array.isArray(base.accounts)?base.accounts:[];
   base.transactions=Array.isArray(base.transactions)?base.transactions:[];
   base.recurring=Array.isArray(base.recurring)?base.recurring:[];
@@ -46,6 +63,10 @@
         {...(byName('PayPay')||{}),id:byName('PayPay')?.id||'master-account-paypay',name:'PayPay',type:'emoney',balance:0,source:SOURCE,updatedAt:stamp},
         {...(byName('PayPay銀行')||{}),id:byName('PayPay銀行')?.id||'master-account-paypay-bank',name:'PayPay銀行',type:'bank',balance:0,source:SOURCE,updatedAt:stamp},
         {...(byName('現金')||{}),id:byName('現金')?.id||'master-account-cash',name:'現金',type:'cash',balance:1453,source:SOURCE,updatedAt:stamp}
+      ];
+    }else if(unexpectedlyEmpty&&!restored&&base.accounts.length===0){
+      base.accounts=[
+        {id:'master-account-cash',name:'現金',type:'cash',balance:1453,source:'user-confirmed-recovery-2026-09-28',recovered:true,updatedAt:stamp}
       ];
     }
 
@@ -114,5 +135,9 @@
     nextIncome:nextIncomeTx?{date:nextIncomeTx.date,label:nextIncomeTx.label,amount:nextIncomeTx.amount,certainty:nextIncomeTx.certainty||'',amountApproximate:Boolean(nextIncomeTx.amountApproximate)}:null,
     priority:'最新Money実データを正本として支払い前の不足を確認する'
   };
-  try{localStorage.setItem(KEY,JSON.stringify(base))}catch{}
+  if(unexpectedlyEmpty)base.recoveryStatus=restored?'restored-device-backup':'restored-confirmed-seed';
+  try{
+    localStorage.setItem(KEY,JSON.stringify(base));
+    if(hasCore(base))localStorage.setItem(RECOVERY_KEY,JSON.stringify(base));
+  }catch{}
 })();
