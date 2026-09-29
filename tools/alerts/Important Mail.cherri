@@ -40,7 +40,8 @@ const promptText = text("あなたはYOS Important Mailです。
 {@incoming}")
 
 const result = askChatGPT(promptText, false, "Text")
-if result contains "IMPORTANT_MAIL_NONE" {
+@resultText = "{result}"
+if @resultText contains "IMPORTANT_MAIL_NONE" {
     stop()
 }
 
