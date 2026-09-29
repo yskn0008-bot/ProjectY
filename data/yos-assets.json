@@ -170,7 +170,7 @@
         "device": false,
         "production": false
       },
-      "progress": 65,
+      "progress": 80,
       "updated_at": "2026-09-28T22:41:00+09:00"
     },
     {
@@ -265,7 +265,7 @@
         "production": false
       },
       "progress": 20,
-      "updated_at": "2026-09-17T10:01:41+09:00"
+      "updated_at": "2026-09-29T17:58:00+09:00"
     },
     {
       "id": "idea",
@@ -392,9 +392,9 @@
       "area": "finance",
       "status": "awaiting_device_verification",
       "priority": 1,
-      "current": "自然文parserとiPhone向けP0試作が存在し、ローカルテスト証拠がある。iPhone実機確認は未完了。",
-      "next_action": "iPhoneのScriptable/Shortcut経路で入力→保存を実機確認する。",
-      "blocker": "iPhone実機での保存確認が必要。",
+      "current": "自然文クイック入力→既存yos-money-v2へ即時保存→Money再表示に接続済み。各保存は月別JSONL履歴へ自動追記し、OPFS非対応時はローカルキューへ退避する。iPhone実機確認は未完了。",
+      "next_action": "iPhone実機でMoneyクイック入力→即時反映→再読込後も保持を確認し、ClarityのMoney executorをこのローカル入力URLへ接続する。",
+      "blocker": "Clarityのインストール済みShortcut側はMoney executor未接続。Web側の即時保存経路は実装済み。",
       "needs_user_action": true,
       "device_verified": false,
       "production_verified": false,
