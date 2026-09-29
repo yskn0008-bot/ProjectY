@@ -84,6 +84,7 @@ jobs:
           assert w.get('WFWorkflowHasShortcutInputVariables') is True
           assert ids.count('is.workflow.actions.openurl') == 1
           assert 'money-alert-bridge.html?return=shortcut' in blob
+          assert 'dedupe=1' in blob
           assert 'YOS_MONEY_ALERT_V1' in blob
           assert '緊急Money Alertなし' in blob
           assert 'YOS Display History' in blob
