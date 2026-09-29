@@ -107,14 +107,16 @@ def patch(path: Path) -> None:
         a for a in actions
         if a.get("WFWorkflowActionIdentifier") == "is.workflow.actions.date"
     ]
-    if len(date_actions) != 5:
-        fail(f"expected five Date actions, found {len(date_actions)}")
-    # Date #1 is Current Date; #2/#3 are today 00:00 / 23:59;
-    # #4/#5 are tomorrow 00:00 / 23:59.
-    today_start_uuid = action_uuid(date_actions[1])
-    today_end_uuid = action_uuid(date_actions[2])
-    start_uuid = action_uuid(date_actions[3])
-    end_uuid = action_uuid(date_actions[4])
+    specified_dates = [
+        a for a in date_actions
+        if a.get("WFWorkflowActionParameters", {}).get("WFDateActionMode") == "Specified Date"
+    ]
+    if len(specified_dates) != 4:
+        fail(f"expected four specified boundary Date actions, found {len(specified_dates)}")
+    today_start_uuid = action_uuid(specified_dates[0])
+    today_end_uuid = action_uuid(specified_dates[1])
+    start_uuid = action_uuid(specified_dates[2])
+    end_uuid = action_uuid(specified_dates[3])
 
     tci = find_marker(actions, TODAY_CALENDAR_MARKER)
     tri = find_marker(actions, TODAY_REMINDERS_MARKER)
