@@ -52,7 +52,7 @@ class ClarityNextSourceContractTests(unittest.TestCase):
         self.assertIn('status != "planned"', self.source)
 
     def test_capability_gate_is_explicit(self):
-        for executor in ("YOS_OpenApp", "NEXT_DEVICE", "NEXT_TIMER", "NEXT_CALENDAR", "NEXT_REMINDER", "NEXT_NAVIGATE", "NEXT_ANSWER"):
+        for executor in ("YOS_OpenApp", "NEXT_DEVICE", "NEXT_TIMER", "NEXT_CALENDAR", "NEXT_REMINDER", "NEXT_NAVIGATE", "NEXT_MONEY", "NEXT_ANSWER"):
             self.assertIn(executor, self.source)
         self.assertIn("unsupported_executor", self.source)
 
@@ -66,6 +66,7 @@ class ClarityNextSourceContractTests(unittest.TestCase):
             ("calendar", "NEXT_CALENDAR", "calendar", "NEXT_CALENDAR"),
             ("reminder", "NEXT_REMINDER", "reminder", "NEXT_REMINDER"),
             ("navigate", "NEXT_NAVIGATE", "navigate", "NEXT_NAVIGATE"),
+            ("money", "NEXT_MONEY", "money", "NEXT_MONEY"),
         )
         for raw_executor, raw_module, normalized_module, normalized_executor in pairs:
             self.assertIn(
@@ -107,6 +108,8 @@ class ClarityNextSourceContractTests(unittest.TestCase):
         self.assertIn('startTimer(qty(minutes, "min"))', self.source)
         self.assertIn('is.workflow.actions.addnewevent', self.source)
         self.assertIn('is.workflow.actions.addnewreminder', self.source)
+        self.assertIn('money-capture.html?text={moneyEncoded}', self.source)
+        self.assertIn('openURL(moneyURL)', self.source)
 
 if __name__ == "__main__":
     unittest.main()
