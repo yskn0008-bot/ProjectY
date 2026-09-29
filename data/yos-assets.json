@@ -179,8 +179,8 @@
       "area": "finance",
       "status": "awaiting_production_verification",
       "priority": 1,
-      "current": "MY MONEY統合画面はiPhone実機で表示確認済み。既存Money表示をYOS内で利用できる。",
-      "next_action": "Money画面をローカル実行経路へ接続し、Money Captureとの保存先整合を確認する。",
+      "current": "MY MONEYは既存yos-money-v2を維持したまま、現在→このまま→改善したらの未来予測、借金完済目安、目標の毎月積立、改善シナリオを本体へ追加済み。",
+      "next_action": "iPhone実機で未来予測の表示と計画入力を確認し、その後Money入力のローカル即時保存・履歴ファイル化を接続する。",
       "blocker": "現在の正式画面入口はWeb配信を併用。",
       "needs_user_action": false,
       "device_verified": true,
@@ -192,6 +192,7 @@
       "evidence": [
         "PR#319",
         "PR#328",
+        "PR#529",
         "device:iPhone MY MONEY screen visually confirmed 2026-09-18"
       ],
       "progress_basis": {
@@ -202,7 +203,7 @@
         "production": false
       },
       "progress": 85,
-      "updated_at": "2026-09-18T23:19:00+09:00"
+      "updated_at": "2026-09-29T15:52:00+09:00"
     },
     {
       "id": "life",
