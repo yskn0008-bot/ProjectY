@@ -8,6 +8,7 @@
 
 @incoming = "{ShortcutInput}"
 const historyFolder = createFolder("YOS Display History")
+const alertStateFolder = createFolder("YOS Alert State")
 
 // Fail closed. An emergency must explicitly satisfy all three gates.
 // Canonical caller input:
@@ -17,6 +18,14 @@ if @incoming contains "YOS_EMERGENCY_V1" {
     if @incoming contains "AWARE=1" {
         if @incoming contains "ACTION=1" {
             if @incoming contains "HARM=1" {
+                const lastEmergencyFile = getFile("YOS Alert State/Emergency Alert Last.txt", nil, false)
+                const lastEmergencyText = getText(lastEmergencyFile)
+                @lastEmergency = "{lastEmergencyText}"
+                if @lastEmergency == @incoming {
+                    stop()
+                }
+                saveFile("YOS Alert State/Emergency Alert Last.txt", @incoming, true)
+
                 const stampNow = currentDate()
                 const stamp = formatDate(stampNow, "Custom", "yyyy-MM-dd HHmmss")
                 const log = text("【Emergency Alert】\n{@incoming}")
