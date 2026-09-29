@@ -105,6 +105,7 @@
     if(changed){
       data.updatedAt=new Date().toISOString();
       write(KEY,data);
+      window.YOSMoneyJournalV1?.record?.({source:'money-hash-import',action:'apply-ops',ops:payload.ops,state:data});
     }
     history.replaceState(null,'',`${location.pathname}${location.search}#money`);
     return changed;
@@ -115,7 +116,7 @@
   let selectedCalendarDate=isoToday();
   let transactionQuery='';
   let transactionFilter='all';
-  function save(){data.updatedAt=new Date().toISOString();const saved=write(KEY,data);render();if(saved){const shared=window.YOSSharedStateV1?.refresh?.('money');void syncMoneyShadow(shared?.money)}}
+  function save(){data.updatedAt=new Date().toISOString();const saved=write(KEY,data);render();if(saved){window.YOSMoneyJournalV1?.record?.({source:'money-ui',action:'save',state:data});const shared=window.YOSSharedStateV1?.refresh?.('money');void syncMoneyShadow(shared?.money)}}
 
   function randomToken(){
     const bytes=new Uint8Array(32);crypto.getRandomValues(bytes);let binary='';for(const byte of bytes)binary+=String.fromCharCode(byte);
