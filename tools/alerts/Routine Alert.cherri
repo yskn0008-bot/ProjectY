@@ -36,7 +36,8 @@ Routine Alertは、リスト名またはタイトルに「Routine」「ルーテ
 元候補：{candidates}")
 
 const result = askChatGPT(promptText, false, "Text")
-if result contains "ROUTINE_ALERT_NONE" {
+@resultText = "{result}"
+if @resultText contains "ROUTINE_ALERT_NONE" {
     stop()
 }
 const stampNow = currentDate()
