@@ -44,6 +44,7 @@
   }
   const DELIVERY_KEY='yos-money-alert-delivery-v1';
   const DIRECT_MIGRATION_KEY='yos-money-alert-direct-v1';
+  const RETURN_KEY='yos-money-alert-return-v1';
 
   function alertSignature(payload){
     const alerts=(Array.isArray(payload?.alerts)?payload.alerts:[]).map(a=>[
@@ -79,6 +80,20 @@
     }
     if(seen===signature) return {show:false,reason:'duplicate',signature};
     try{localStorage.setItem(DELIVERY_KEY,signature);}catch(_){}
+    return {show:true,reason:'changed',signature};
+  }
+
+  function returnDeliveryDecision(payload){
+    const alerts=Array.isArray(payload?.alerts)?payload.alerts:[];
+    if(!alerts.length){
+      try{localStorage.removeItem(RETURN_KEY);}catch(_){}
+      return {show:false,reason:'clear',signature:''};
+    }
+    const signature=alertSignature(payload);
+    let seen='';
+    try{seen=localStorage.getItem(RETURN_KEY)||'';}catch(_){}
+    if(seen===signature)return {show:false,reason:'duplicate',signature};
+    try{localStorage.setItem(RETURN_KEY,signature);}catch(_){}
     return {show:true,reason:'changed',signature};
   }
 
@@ -159,11 +174,16 @@
   function returnToShortcut(payload){
     const p=new URLSearchParams(location.search);
     const name=p.get('shortcut')||'Money Alert';
-    const text=p.get('format')==='alert-text'?alertText(payload):'YOS_MONEY_ALERT_V1:'+encode(payload);
+    let effective=payload;
+    if(p.get('dedupe')==='1'){
+      const decision=returnDeliveryDecision(payload);
+      if(!decision.show)effective={...payload,alerts:[]};
+    }
+    const text=p.get('format')==='alert-text'?alertText(effective):'YOS_MONEY_ALERT_V1:'+encode(effective);
     const url='shortcuts://run-shortcut?name='+encodeURIComponent(name)+'&input=text&text='+encodeURIComponent(text);
     setTimeout(()=>location.replace(url),1200);
   }
-  window.__yosMoneyAlertBridgeV1=Object.freeze({build,encode,alertText,alertSignature,deliveryDecision,renderDirect});
+  window.__yosMoneyAlertBridgeV1=Object.freeze({build,encode,alertText,alertSignature,deliveryDecision,returnDeliveryDecision,renderDirect});
   const params=new URLSearchParams(location.search);
   const payload=build();
   if(params.get('format')==='alert-text'&&params.get('native')!=='1')renderDirect(payload);
