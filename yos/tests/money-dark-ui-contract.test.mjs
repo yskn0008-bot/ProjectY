@@ -126,3 +126,10 @@ test('Money local-first saves immediately and keeps a file-backed JSONL history'
   assert.ok(sw.includes("'./yos/money-capture.html'"));
   assert.ok(sw.includes("'./yos/money-local-import.html'"));
 });
+
+
+test('Gas recurring uses fixed debit day 15 with unknown variable amount', async () => {
+  const master=await read('yos/money-master-v1.js');
+  assert.match(master,/master-rec-gas[\s\S]*label:'ガス'[\s\S]*amount:null[\s\S]*variableAmount:true[\s\S]*day:15/);
+  assert.doesNotMatch(master,/master-rec-gas[\s\S]*lastKnownAmount:/);
+});
