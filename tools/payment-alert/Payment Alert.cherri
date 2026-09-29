@@ -12,6 +12,7 @@
 // planned outgoing payments due today through 3 days from now.
 
 const paymentDisplayHistoryFolder = createFolder("YOS Display History")
+const paymentAlertStateFolder = createFolder("YOS Alert State")
 const now = currentDate()
 const today = formatDate(now, "Custom", "yyyy-MM-dd")
 const moneySource = downloadURL("https://raw.githubusercontent.com/yskn0008-bot/ProjectY/main/yos/money-master-v1.js")
@@ -64,6 +65,14 @@ const result = askChatGPT(promptText, false, "Text")
 if @resultText contains "支払いアラートなし" {
     stop()
 }
+
+const lastAlertFile = getFile("YOS Alert State/Payment Alert Last.txt", nil, false)
+const lastAlertText = getText(lastAlertFile)
+@lastAlert = "{lastAlertText}"
+if @lastAlert == @resultText {
+    stop()
+}
+saveFile("YOS Alert State/Payment Alert Last.txt", result, true)
 
 const alertLogNow = currentDate()
 const alertLogStamp = formatDate(alertLogNow, "Custom", "yyyy-MM-dd HHmmss")
