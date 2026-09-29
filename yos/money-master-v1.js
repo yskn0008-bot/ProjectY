@@ -31,7 +31,7 @@
   base.assets=Array.isArray(base.assets)?base.assets:[];
   base.rules={monthlyEssential:0,qualityBudget:0,emergencyMonths:1,note:'生活を壊さず、安全を確保した上で高金利返済を優先する。',...(base.rules||{})};
 
-  const migrate=base?.masterFacts?.version!==MASTER_VERSION;
+  const migrate=unexpectedlyEmpty||base?.masterFacts?.version!==MASTER_VERSION;
   if(migrate){
     const stamp=new Date().toISOString();
     const emergencyGoalFact={
