@@ -121,6 +121,7 @@ test('Money local-first saves immediately and keeps a file-backed JSONL history'
   assert.match(capture,/money-local-import\.html#mi=/);
   assert.match(capture,/コンビニ850円/);
   assert.match(capture,/replace-liquid/);
+  assert.match(runtime,/moneyQuickAdd'\)\{location\.href='\.\/money-capture\.html'/);
   assert.ok(sw.includes("'./yos/money-journal-v1.js'"));
   assert.ok(sw.includes("'./yos/money-capture.html'"));
   assert.ok(sw.includes("'./yos/money-local-import.html'"));
