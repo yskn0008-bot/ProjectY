@@ -7,6 +7,7 @@
 #include 'actions/calendar'
 
 const historyFolder = createFolder("YOS Display History")
+const alertStateFolder = createFolder("YOS Alert State")
 const now = currentDate()
 const todayLabel = formatDate(now, "Custom", "yyyy/MM/dd")
 const startText = text("{todayLabel} 00:00")
@@ -40,6 +41,17 @@ const result = askChatGPT(promptText, false, "Text")
 if @resultText contains "ROUTINE_ALERT_NONE" {
     stop()
 }
+
+const sourceKey = text("{titles}\n{lists}\n{dueDates}")
+@sourceKeyText = "{sourceKey}"
+const lastSourceFile = getFile("YOS Alert State/Routine Alert Last.txt", nil, false)
+const lastSourceText = getText(lastSourceFile)
+@lastSource = "{lastSourceText}"
+if @lastSource == @sourceKeyText {
+    stop()
+}
+saveFile("YOS Alert State/Routine Alert Last.txt", sourceKey, true)
+
 const stampNow = currentDate()
 const stamp = formatDate(stampNow, "Custom", "yyyy-MM-dd HHmmss")
 const log = text("【Routine Alert】\n{result}")
