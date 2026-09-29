@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-29T18:09:41+09:00",
+  "updated_at": "2026-09-29T19:25:22+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -13,14 +13,14 @@
   },
   "inbox": [
     {
-      "id": "github-pr-518",
-      "title": "PR #518 Clarity Next: preserve user calendar/reminder titles",
+      "id": "github-pr-510",
+      "title": "PR #510 Night Brief: 22:00 auto skip + Journal save",
       "type": "GitHub PR",
       "status": "review",
       "priority": 1,
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/518",
-      "updated_at": "2026-09-27T22:08:09Z"
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/510",
+      "updated_at": "2026-09-29T09:15:00Z"
     },
     {
       "id": "github-pr-528",
@@ -33,14 +33,14 @@
       "updated_at": "2026-09-29T01:17:10Z"
     },
     {
-      "id": "github-pr-519",
-      "title": "PR #519 feat(clarity-next): connect TV, AC and light through fixed home child",
+      "id": "github-pr-539",
+      "title": "PR #539 Finalize YOS Alerts and reread history",
       "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
+      "status": "review",
+      "priority": 1,
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/519",
-      "updated_at": "2026-09-29T09:00:38Z"
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/539",
+      "updated_at": "2026-09-29T10:24:55Z"
     },
     {
       "id": "github-pr-534",
@@ -60,7 +60,7 @@
       "priority": 2,
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/537",
-      "updated_at": "2026-09-29T09:09:40Z"
+      "updated_at": "2026-09-29T09:10:35Z"
     },
     {
       "id": "github-issue-232",
@@ -70,7 +70,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-09-29T09:09:34Z"
+      "updated_at": "2026-09-29T10:25:03Z"
     },
     {
       "id": "github-issue-272",
@@ -165,6 +165,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-0eaef35c8853",
+      "title": "Money: recover initialized empty state",
+      "completed_at": "2026-09-29T10:25:06Z",
+      "result": "GitHub mainへ反映（0eaef35）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/0eaef35c88539713ee2bc74ebf8b6d2b4530414b"
+    },
+    {
       "id": "github-commit-b19725157982",
       "title": "Clarity Next: Money追加後のコンパイル停止を修正 (#538)",
       "completed_at": "2026-09-29T09:09:21Z",
@@ -193,13 +200,6 @@
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/68c2019efa1a47f2314df023d596c1e578ddf69c"
     },
     {
-      "id": "github-commit-7e31c887a5c8",
-      "title": "docs: record variable electricity recurring",
-      "completed_at": "2026-09-29T07:25:51Z",
-      "result": "GitHub mainへ反映（7e31c88）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/7e31c887a5c865c488cfb2f3a21c51d3e9511ed8"
-    },
-    {
       "id": "complete-002",
       "title": "iPhone向けMission Control Dashboardを実装",
       "completed_at": "2026-07-17T17:55:00+09:00",
@@ -224,7 +224,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #528をレビューして公開判断する",
+      "next_action": "PR #539をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-29T18:09:41+09:00",
+      "last_update": "2026-09-29T19:25:22+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -315,7 +315,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-29T18:09:41+09:00",
+      "last_update": "2026-09-29T19:25:22+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -329,7 +329,7 @@
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #528をレビューして公開判断する",
+      "next_action": "PR #539をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-29T18:09:41+09:00",
+      "last_update": "2026-09-29T19:25:22+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "7a8c4cf26a2933f327f765db41fe6bc5ea05e9638f0c14b6d9b7bf0c795a4904"
+  "github_snapshot_hash": "16bbe0a1d7dad5e6a3f6e5acbd521ba88c008be5c5c387ffd25c6a80bd6fbe7f"
 }
