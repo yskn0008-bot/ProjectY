@@ -1,8 +1,8 @@
 'use strict';
 (()=>{
   const KEY='yos-money-v2';
-  const MASTER_VERSION='2026-09-23-v5';
-  const SOURCE='user-confirmed-2026-09-23';
+  const MASTER_VERSION='2026-09-29-v6';
+  const SOURCE='user-confirmed-2026-09-28';
   const read=()=>{try{return JSON.parse(localStorage.getItem(KEY)||'null')}catch{return null}};
   const current=read();
   const base=current&&typeof current==='object'?current:{version:2,privacy:false,accounts:[],transactions:[],debts:[],goals:[],assets:[],rules:{}};
@@ -34,15 +34,19 @@
     const emergencyGoal={...priorEmergencyGoal,...emergencyGoalFact,current:emergencyCurrent,updatedAt:stamp};
     if(emergencyGoalIndex<0)base.goals.push(emergencyGoal);else base.goals[emergencyGoalIndex]=emergencyGoal;
 
-    const accountFacts=[
-      {id:'master-account-paypay',name:'PayPay',type:'emoney',balance:4033,source:SOURCE},
-      {id:'master-account-paypay-bank',name:'PayPay銀行',type:'bank',balance:133,source:SOURCE},
-      {id:'master-account-cash',name:'現金',type:'cash',balance:422,source:SOURCE}
-    ];
-    base.accounts=accountFacts.map(fact=>{
-      const prior=base.accounts.find(item=>item?.id===fact.id||String(item?.name||'').trim()===fact.name)||{};
-      return {...prior,...fact,updatedAt:stamp};
-    });
+    // v6: live balances must never be reseeded from old 2026-09-23 constants.
+    // Correct only the exact stale seed state that was confirmed to be wrong.
+    const byName=name=>base.accounts.find(item=>String(item?.name||'').trim()===name);
+    const staleSeed=Number(byName('PayPay')?.balance)===4033
+      && Number(byName('PayPay銀行')?.balance)===133
+      && Number(byName('現金')?.balance)===422;
+    if(staleSeed){
+      base.accounts=[
+        {...(byName('PayPay')||{}),id:byName('PayPay')?.id||'master-account-paypay',name:'PayPay',type:'emoney',balance:0,source:SOURCE,updatedAt:stamp},
+        {...(byName('PayPay銀行')||{}),id:byName('PayPay銀行')?.id||'master-account-paypay-bank',name:'PayPay銀行',type:'bank',balance:0,source:SOURCE,updatedAt:stamp},
+        {...(byName('現金')||{}),id:byName('現金')?.id||'master-account-cash',name:'現金',type:'cash',balance:1453,source:SOURCE,updatedAt:stamp}
+      ];
+    }
 
     const facts=[
       {id:'master-rental-income-2026-09',type:'income',label:'家賃収入',amount:160485,date:'2026-09-10',status:'received',source:SOURCE,certainty:'確定'},
@@ -50,36 +54,44 @@
       {id:'master-car-insurance-2026-09',type:'expense',label:'車保険',amount:7060,date:'2026-09-26',status:'planned',source:SOURCE,certainty:'確定'},
       {id:'master-rent-2026-09',type:'expense',label:'家賃',amount:68500,date:'2026-09-27',status:'planned',source:SOURCE,certainty:'確定'},
       {id:'master-electricity-2026-09',type:'expense',label:'電気',amount:3710,date:'2026-09-27',status:'planned',source:SOURCE,certainty:'確定'},
-      {id:'master-repayment-2026-09',type:'debt',label:'返済',amount:10000,date:'2026-09-28',status:'planned',source:SOURCE,certainty:'確定'},
+      {id:'master-repayment-2026-09',type:'debt',label:'返済',amount:10000,date:'2026-09-28',status:'paid',paid:true,completed:true,source:SOURCE,certainty:'確定'},
       {id:'master-moneyforward-2026-09',type:'expense',label:'MoneyForward',amount:590,date:'2026-09-29',status:'planned',source:SOURCE,certainty:'確定'},
       {id:'master-chatgpt-2026-09',type:'expense',label:'ChatGPT Plus',amount:3000,date:'2026-09-30',status:'planned',source:SOURCE,certainty:'確定'},
       {id:'master-youtube-2026-09',type:'expense',label:'YouTube Premium',amount:1680,date:'2026-09-30',status:'planned',source:SOURCE,certainty:'確定'},
-      {id:'master-rental-income-2026-10',type:'income',label:'家賃収入',amount:160485,date:'2026-10-13',status:'planned',source:SOURCE,certainty:'見込み',amountApproximate:true}
+      {id:'master-rental-income-2026-10',type:'income',label:'家賃収入',amount:160485,date:'2026-10-13',status:'planned',source:SOURCE,certainty:'見込み',amountApproximate:true},
+      {id:'master-repayment-2026-10-10',type:'debt',label:'返済',amount:30000,date:'2026-10-10',status:'planned',source:SOURCE,certainty:'確定'}
     ];
     for(const fact of facts){
       const i=base.transactions.findIndex(tx=>tx?.id===fact.id);
       if(i<0)base.transactions.push(fact);
-      else base.transactions[i]={...base.transactions[i],...fact};
+      else if(fact.id==='master-repayment-2026-09')base.transactions[i]={...base.transactions[i],...fact};
+      else base.transactions[i]={...fact,...base.transactions[i]};
     }
     base.updatedAt=stamp;
   }
 
+  const liveBalance=base.accounts.length?base.accounts.reduce((sum,item)=>sum+(Number.isFinite(Number(item?.balance))?Number(item.balance):0),0):null;
+  const liveBreakdown=Object.fromEntries(base.accounts.map(item=>[String(item?.name||item?.id||'口座'),Number.isFinite(Number(item?.balance))?Number(item.balance):0]));
+  const openTransactions=base.transactions
+    .filter(tx=>['expense','debt','saving','investment'].includes(tx?.type))
+    .filter(tx=>!Boolean(tx?.completed||tx?.paid||tx?.received)&&!['done','paid','completed','received'].includes(String(tx?.status||'').toLowerCase()))
+    .sort((a,b)=>String(a?.date||'').localeCompare(String(b?.date||'')));
+  const nextIncomeTx=base.transactions
+    .filter(tx=>tx?.type==='income')
+    .filter(tx=>!Boolean(tx?.completed||tx?.paid||tx?.received)&&!['done','paid','completed','received'].includes(String(tx?.status||'').toLowerCase()))
+    .sort((a,b)=>String(a?.date||'').localeCompare(String(b?.date||'')))[0]||null;
+  const remainingPaymentsTotal=openTransactions.reduce((sum,tx)=>sum+(Number.isFinite(Number(tx?.amount))?Number(tx.amount):0),0);
+  const shortfallToRequiredPayments=liveBalance===null?null:Math.max(0,remainingPaymentsTotal-liveBalance);
   base.masterFacts={
     ...(base.masterFacts||{}),
     version:MASTER_VERSION,
-    source:SOURCE,
-    currentBalance:4588,
-    currentBalanceStatus:'本人確認済み 2026-09-23',
-    accountBreakdown:{payPay:4033,payPayBank:133,cash:422},
-    lastIncome:{date:'2026-09-10',label:'家賃収入',amount:160485,status:'received'},
-    paid:{icloud:{date:'2026-09-14',label:'iCloud',amount:540,status:'paid'}},
-    remainingPaymentsTotal:94540,
-    shortfallToRequiredPayments:89952,
-    nextIncome:{date:'2026-10-13',label:'家賃収入',amount:160485,certainty:'見込み',amountApproximate:true},
-    monthlyIncomeEstimate:160485,
-    monthlyIncomeLabel:'家賃収入・見込み',
-    electricity:{provider:'沖縄ニューパワー',amount:3710,date:'2026-09-27',status:'確定',recurringDay:27},
-    fixed:{rent:68500,carInsurance:7060,subscriptions:5810,remainingSubscriptions:5270},
+    source:'live-yos-money-v2',
+    currentBalance:liveBalance,
+    currentBalanceStatus:base.updatedAt?'yos-money-v2 live':'未更新',
+    accountBreakdown:liveBreakdown,
+    remainingPaymentsTotal,
+    shortfallToRequiredPayments,
+    nextIncome:nextIncomeTx?{date:nextIncomeTx.date,label:nextIncomeTx.label,amount:nextIncomeTx.amount,certainty:nextIncomeTx.certainty||'',amountApproximate:Boolean(nextIncomeTx.amountApproximate)}:null,
     priority:'最新Money実データを正本として支払い前の不足を確認する'
   };
   try{localStorage.setItem(KEY,JSON.stringify(base))}catch{}

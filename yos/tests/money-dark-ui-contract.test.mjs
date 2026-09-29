@@ -58,3 +58,15 @@ test('Money keeps CRUD, inferred categories, recurring dedupe, and current-month
   assert.match(runtime,/function currentMonthShortfall/);
   assert.match(runtime,/filter\(tx=>isOutgoing\(tx\)&&!isComplete\(tx\)\)/);
 });
+
+
+test('Money master never restores the stale 4,588 yen live balance', async () => {
+  const master=await read('yos/money-master-v1.js');
+  assert.doesNotMatch(master,/currentBalance:\s*4588/);
+  assert.doesNotMatch(master,/accountBreakdown:\{payPay:4033,payPayBank:133,cash:422\}/);
+  assert.match(master,/liveBalance/);
+  assert.match(master,/balance:1453/);
+  assert.match(master,/master-repayment-2026-10-10/);
+  assert.match(master,/amount:30000/);
+  assert.match(master,/master-repayment-2026-09[\s\S]*status:'paid'/);
+});
