@@ -219,8 +219,9 @@
       const day=Math.min(lastDay,Math.max(1,Math.round(n(rule.day)||Number(start.slice(8,10))||1)));
       const date=`${mk}-${String(day).padStart(2,'0')}`;
       if(date<start||(end&&date>end))return [];
-      if(data.transactions.some(tx=>(tx.recurringId===rule.id&&tx.date===date)||(tx.date===date&&tx.type===rule.type&&clean(tx.label,60)===clean(rule.label,60)&&n(tx.amount)===n(rule.amount))))return [];
-      return [{id:`rec-${rule.id}-${date}`,recurringId:rule.id,virtualRecurring:true,date,type:rule.type,label:rule.label,amount:rule.amount,category:rule.category,status:'planned'}];
+      const variable=rule.variableAmount===true;
+      if(data.transactions.some(tx=>(tx.recurringId===rule.id&&tx.date===date)||(tx.date===date&&tx.type===rule.type&&clean(tx.label,60)===clean(rule.label,60)&&(variable||n(tx.amount)===n(rule.amount)))))return [];
+      return [{id:`rec-${rule.id}-${date}`,recurringId:rule.id,virtualRecurring:true,date,type:rule.type,label:rule.label,amount:variable?null:rule.amount,amountKnown:!variable,variableAmount:variable,lastKnownAmount:variable?n(rule.lastKnownAmount):null,category:rule.category,status:'planned'}];
     });
   }
   function monthTransactions(mk=calendarMonth){
@@ -261,13 +262,18 @@
     const nextPayment=futureAll.find(isOutgoing)||null,nextIncome=futureAll.find(tx=>tx.type==='income')||null;
     if(liquid===null)return {liquid:null,projected:null,shortfall:null,firstBreak:null,nextPayment,nextIncome,daily:null,afterNextPayment:null,shortageAfterNextPayment:null,daysToNextPayment:nextPayment?Math.max(0,daysBetween(parseDate(today),parseDate(nextPayment.date))):null};
     let running=liquid,firstBreak=null;
-    for(const tx of future){running+=txSign(tx)*n(tx.amount);if(running<0&&!firstBreak)firstBreak={tx,balance:running}}
+    const unknownCurrent=future.filter(tx=>isOutgoing(tx)&&tx.variableAmount===true);
+    for(const tx of future){
+      if(tx.variableAmount===true)continue;
+      running+=txSign(tx)*n(tx.amount);if(running<0&&!firstBreak)firstBreak={tx,balance:running}
+    }
     const endDay=new Date(Number(month.slice(0,4)),Number(month.slice(5,7)),0).getDate();
     const anchor=nextIncome?.date||`${month}-${String(endDay).padStart(2,'0')}`;
-    const outgoingUntilAnchor=futureAll.filter(tx=>isOutgoing(tx)&&tx.date<=anchor).reduce((s,tx)=>s+n(tx.amount),0);
+    const unknownUntilAnchor=futureAll.filter(tx=>isOutgoing(tx)&&tx.variableAmount===true&&tx.date<=anchor);
+    const outgoingUntilAnchor=futureAll.filter(tx=>isOutgoing(tx)&&tx.variableAmount!==true&&tx.date<=anchor).reduce((s,tx)=>s+n(tx.amount),0);
     const days=Math.max(1,daysBetween(parseDate(today),parseDate(anchor))+1);
-    const afterNextPayment=nextPayment?liquid-n(nextPayment.amount):liquid;
-    return {liquid,projected:running,shortfall:firstBreak?Math.abs(firstBreak.balance):0,firstBreak,nextPayment,nextIncome,daily:Math.floor(Math.max(0,liquid-outgoingUntilAnchor)/days),afterNextPayment,shortageAfterNextPayment:nextPayment?afterNextPayment<0:false,daysToNextPayment:nextPayment?Math.max(0,daysBetween(parseDate(today),parseDate(nextPayment.date))):null};
+    const afterNextPayment=nextPayment&&nextPayment.variableAmount!==true?liquid-n(nextPayment.amount):liquid;
+    return {liquid,projected:unknownCurrent.length?null:running,projectionHasUnknown:unknownCurrent.length>0,shortfall:firstBreak?Math.abs(firstBreak.balance):0,firstBreak,nextPayment,nextIncome,daily:unknownUntilAnchor.length?null:Math.floor(Math.max(0,liquid-outgoingUntilAnchor)/days),dailyHasUnknown:unknownUntilAnchor.length>0,afterNextPayment,shortageAfterNextPayment:nextPayment&&nextPayment.variableAmount!==true?afterNextPayment<0:false,daysToNextPayment:nextPayment?Math.max(0,daysBetween(parseDate(today),parseDate(nextPayment.date))):null};
   }
   const totalDebt=()=>data.debts.reduce((s,d)=>s+n(d.balance),0);
   function debtPlan(){
@@ -423,7 +429,9 @@
   }
   function currentMonthShortfall(){
     const liquid=currentLiquid();if(liquid===null)return null;
-    const remaining=monthTransactions(monthKey()).filter(tx=>isOutgoing(tx)&&!isComplete(tx)).reduce((sum,tx)=>sum+n(tx.amount),0);
+    const remainingItems=monthTransactions(monthKey()).filter(tx=>isOutgoing(tx)&&!isComplete(tx));
+    if(remainingItems.some(tx=>tx.variableAmount===true))return null;
+    const remaining=remainingItems.reduce((sum,tx)=>sum+n(tx.amount),0);
     return Math.max(0,remaining-liquid);
   }
   function moneyAmount(value,{signed=false,approx=false}={}){
@@ -609,7 +617,8 @@
     const incomeRules=active.filter(rule=>rule.type==='income');
     const outgoingRules=active.filter(isOutgoing);
     const income=incomeRules.reduce((sum,rule)=>sum+n(rule.amount),0);
-    const outgoing=outgoingRules.reduce((sum,rule)=>sum+n(rule.amount),0);
+    const variableOutgoing=outgoingRules.filter(rule=>rule?.variableAmount===true);
+    const outgoing=outgoingRules.filter(rule=>rule?.variableAmount!==true).reduce((sum,rule)=>sum+n(rule.amount),0);
     const net=income-outgoing;
     const today=isoToday(),candidates=[];
     for(const rule of outgoingRules){
@@ -624,15 +633,16 @@
       }
     }
     candidates.sort((a,b)=>String(a.nextDate).localeCompare(String(b.nextDate))||n(b.amount)-n(a.amount));
-    return {active,incomeRules,outgoingRules,income,outgoing,net,nextOutgoing:candidates[0]||null};
+    return {active,incomeRules,outgoingRules,variableOutgoing,income,outgoing,net,nextOutgoing:candidates[0]||null};
   }
 
   function renderRules(){
     const dp=debtPlan(),fixed=recurringSummary();
     const recurringRow=rule=>{
-      const paused=rule?.enabled===false;
-      const meta=[`毎月${Math.max(1,Math.round(n(rule.day)||1))}日`,transactionCategory(rule).label,paused?'一時停止':'有効'].join(' ・ ');
-      return `<button class="money12-fixed-row ${paused?'paused':''}" type="button" data-money-action="edit-recurring" data-id="${escapeHtml(rule.id)}"><div><strong>${escapeHtml(rule.label)}</strong><small>${escapeHtml(meta)}</small></div><b class="${rule.type==='income'?'income':'expense'}">${rule.type==='income'?'+':'−'}${data.privacy?'••••':yen(rule.amount)}</b><span>›</span></button>`;
+      const paused=rule?.enabled===false,variable=rule?.variableAmount===true;
+      const meta=[`毎月${Math.max(1,Math.round(n(rule.day)||1))}日`,variable?'金額は毎月変動':transactionCategory(rule).label,paused?'一時停止':'有効'].join(' ・ ');
+      const amount=variable?'金額未確定':(data.privacy?'••••':yen(rule.amount));
+      return `<button class="money12-fixed-row ${paused?'paused':''}" type="button" data-money-action="edit-recurring" data-id="${escapeHtml(rule.id)}"><div><strong>${escapeHtml(rule.label)}</strong><small>${escapeHtml(meta)}</small></div><b class="${rule.type==='income'?'income':'expense'}">${rule.type==='income'?'+':'−'}${amount}</b><span>›</span></button>`;
     };
     const activeIncome=data.recurring.filter(rule=>rule?.enabled!==false&&rule.type==='income');
     const activeOutgoing=data.recurring.filter(rule=>rule?.enabled!==false&&isOutgoing(rule));
@@ -650,12 +660,12 @@
         <b>${data.privacy?'••••':(d.balanceKnown?yen(d.balance):'未確認')}</b>
       </button>`;
     }).join('');
-    const nextFixed=fixed.nextOutgoing?`${formatMD(fixed.nextOutgoing.nextDate)} ${clean(fixed.nextOutgoing.label,18)} ${data.privacy?'金額非表示':yen(fixed.nextOutgoing.amount)}`:'予定なし';
+    const nextFixed=fixed.nextOutgoing?`${formatMD(fixed.nextOutgoing.nextDate)} ${clean(fixed.nextOutgoing.label,18)} ${fixed.nextOutgoing.variableAmount===true?'金額未確定':(data.privacy?'金額非表示':yen(fixed.nextOutgoing.amount))}`:'予定なし';
     return `<section class="money12-fixed">
       <header><div><small>AUTO</small><h2>毎月決まってる収支</h2></div><button type="button" data-money-action="add-recurring">＋追加</button></header>
       <div class="money12-fixed-summary">
         <div class="income"><small>固定収入 / 月</small><strong>${data.privacy?'••••':yen(fixed.income)}</strong></div>
-        <div class="expense"><small>固定支出 / 月</small><strong>${data.privacy?'••••':yen(fixed.outgoing)}</strong></div>
+        <div class="expense"><small>固定支出 / 月</small><strong>${data.privacy?'••••':yen(fixed.outgoing)}${fixed.variableOutgoing.length?'＋変動':''}</strong></div>
         <div class="${fixed.net>=0?'income':'expense'}"><small>固定収支差額</small><strong>${data.privacy?'••••':signedYen(fixed.net)}</strong></div>
         <div><small>次の固定支出</small><strong class="text">${escapeHtml(nextFixed)}</strong></div>
       </div>
@@ -762,9 +772,10 @@
     if(editing)addDeleteButton('この取引',()=>{data.transactions=data.transactions.filter(x=>x.id!==target.id);dialog().close();save()});
   }
   function openRecurringDialog(rule){
-    const editing=!!rule,target=rule||{frequency:'monthly',startDate:isoToday(),day:Number(isoToday().slice(8,10)),type:'expense',category:'other',label:'',amount:'',enabled:true};
-    openDialog(editing?'定期収支を編集':'定期収支を追加',`${selectField('種類','type',[['income','収入'],['expense','支出'],['debt','借金返済'],['saving','貯金・積立'],['investment','投資']],target.type)}${selectField('カテゴリー','category',categorySelectOptions(target.category),transactionCategory(target).id)}${field('内容','label','text',target.label,'placeholder="例：家賃 / 給料 / サブスク" required')}${field('金額','amount','number',target.amount,'min="0" inputmode="numeric" required')}${field('毎月の日','day','number',target.day,'min="1" max="31" inputmode="numeric" required')}${field('開始日','startDate','date',target.startDate||isoToday(),'required')}${field('終了日（任意）','endDate','date',target.endDate||'')}${selectField('状態','enabled',[['true','有効'],['false','一時停止']],String(target.enabled!==false))}`,fd=>{
-      const item={...target,id:target.id||uid('rec'),frequency:'monthly',type:clean(fd.get('type'),20),category:clean(fd.get('category'),30),label:clean(fd.get('label'),60),amount:Math.max(0,n(fd.get('amount'))),day:Math.min(31,Math.max(1,Math.round(n(fd.get('day')))||1)),startDate:clean(fd.get('startDate'),10),endDate:clean(fd.get('endDate'),10),enabled:fd.get('enabled')!=='false'};
+    const editing=!!rule,target=rule||{frequency:'monthly',startDate:isoToday(),day:Number(isoToday().slice(8,10)),type:'expense',category:'other',label:'',amount:'',variableAmount:false,enabled:true};
+    openDialog(editing?'定期収支を編集':'定期収支を追加',`${selectField('種類','type',[['income','収入'],['expense','支出'],['debt','借金返済'],['saving','貯金・積立'],['investment','投資']],target.type)}${selectField('カテゴリー','category',categorySelectOptions(target.category),transactionCategory(target).id)}${field('内容','label','text',target.label,'placeholder="例：家賃 / 給料 / サブスク" required')}${selectField('金額','variableAmount',[['false','毎月固定'],['true','毎月変動']],String(target.variableAmount===true))}${field('金額（変動なら直近額・任意）','amount','number',target.variableAmount?target.lastKnownAmount:target.amount,'min="0" inputmode="numeric"')}${field('毎月の日','day','number',target.day,'min="1" max="31" inputmode="numeric" required')}${field('開始日','startDate','date',target.startDate||isoToday(),'required')}${field('終了日（任意）','endDate','date',target.endDate||'')}${selectField('状態','enabled',[['true','有効'],['false','一時停止']],String(target.enabled!==false))}`,fd=>{
+      const variableAmount=fd.get('variableAmount')==='true',enteredAmount=Math.max(0,n(fd.get('amount')));
+      const item={...target,id:target.id||uid('rec'),frequency:'monthly',type:clean(fd.get('type'),20),category:clean(fd.get('category'),30),label:clean(fd.get('label'),60),amount:variableAmount?null:enteredAmount,lastKnownAmount:variableAmount?enteredAmount:null,variableAmount,day:Math.min(31,Math.max(1,Math.round(n(fd.get('day')))||1)),startDate:clean(fd.get('startDate'),10),endDate:clean(fd.get('endDate'),10),enabled:fd.get('enabled')!=='false'};
       data.recurring=editing?data.recurring.map(x=>x.id===item.id?item:x):[...data.recurring,item];dialog().close();save()
     });
     if(editing)addDeleteButton('この定期収支',()=>{data.recurring=data.recurring.filter(x=>x.id!==target.id);dialog().close();save()});
