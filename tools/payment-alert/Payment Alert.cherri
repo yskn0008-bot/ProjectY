@@ -59,8 +59,9 @@ Money正本：
 {moneySource}")
 
 const result = askChatGPT(promptText, false, "Text")
+@resultText = "{result}"
 
-if result contains "支払いアラートなし" {
+if @resultText contains "支払いアラートなし" {
     stop()
 }
 
