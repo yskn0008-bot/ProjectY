@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-29T18:04:20+09:00",
+  "updated_at": "2026-09-29T18:09:41+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -12,16 +12,6 @@
     ]
   },
   "inbox": [
-    {
-      "id": "github-pr-510",
-      "title": "PR #510 Night Brief: 22:00 auto skip + Journal save",
-      "type": "GitHub PR",
-      "status": "review",
-      "priority": 1,
-      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/510",
-      "updated_at": "2026-09-27T19:53:06Z"
-    },
     {
       "id": "github-pr-518",
       "title": "PR #518 Clarity Next: preserve user calendar/reminder titles",
@@ -60,7 +50,17 @@
       "priority": 2,
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/534",
-      "updated_at": "2026-09-29T09:00:22Z"
+      "updated_at": "2026-09-29T09:09:33Z"
+    },
+    {
+      "id": "github-pr-537",
+      "title": "PR #537 Clarity Next: 最新mainへYOS_Homeを統合",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/537",
+      "updated_at": "2026-09-29T09:09:40Z"
     },
     {
       "id": "github-issue-232",
@@ -70,7 +70,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-09-29T09:04:08Z"
+      "updated_at": "2026-09-29T09:09:34Z"
     },
     {
       "id": "github-issue-272",
@@ -165,6 +165,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-b19725157982",
+      "title": "Clarity Next: Money追加後のコンパイル停止を修正 (#538)",
+      "completed_at": "2026-09-29T09:09:21Z",
+      "result": "GitHub mainへ反映（b197251）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/b197251579822db8754d63a1c3d2048c63fee7f4"
+    },
+    {
       "id": "github-commit-7107796f3adc",
       "title": "Money: add variable gas bill on day 15",
       "completed_at": "2026-09-29T09:04:08Z",
@@ -191,13 +198,6 @@
       "completed_at": "2026-09-29T07:25:51Z",
       "result": "GitHub mainへ反映（7e31c88）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/7e31c887a5c865c488cfb2f3a21c51d3e9511ed8"
-    },
-    {
-      "id": "github-commit-34c2ca3350c3",
-      "title": "Money: treat electricity as fixed-date variable amount",
-      "completed_at": "2026-09-29T07:25:40Z",
-      "result": "GitHub mainへ反映（34c2ca3）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/34c2ca3350c39160b05d02328e221e0db5eb66c2"
     },
     {
       "id": "complete-002",
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-29T18:04:20+09:00",
+      "last_update": "2026-09-29T18:09:41+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -315,7 +315,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-29T18:04:20+09:00",
+      "last_update": "2026-09-29T18:09:41+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-29T18:04:20+09:00",
+      "last_update": "2026-09-29T18:09:41+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "864f47190d4dc352f7694f8eff39daf520dc49eee53c978460b7ee55bfd9b267"
+  "github_snapshot_hash": "7a8c4cf26a2933f327f765db41fe6bc5ea05e9638f0c14b6d9b7bf0c795a4904"
 }
