@@ -1,0 +1,53 @@
+#define name Important Mail
+#define color blue
+#define inputs text
+
+#include 'actions/text'
+#include 'actions/documents'
+#include 'actions/intelligence'
+#include 'actions/calendar'
+
+@incoming = "{ShortcutInput}"
+
+if @incoming == "" {
+    stop()
+}
+
+const promptText = text("あなたはYOS Important Mailです。
+次の受信メール内容を判定してください。
+
+本人へ今知らせる対象：
+・本人の返信や操作が必要
+・支払い、請求、引落、返金、口座、カード、セキュリティの問題
+・期限、予約、予定、配送、申請などの重要な変更
+・仕事、依頼、行政、契約など本人対応が必要
+・放置すると損失・期限切れ・問題につながる
+
+知らせない：
+・広告、キャンペーン、セール
+・一般ニュース、メルマガ、SNS通知
+・本人対応が不要な通常レシートや自動完了通知
+・重要性を推測できないもの
+
+事実を作らない。メール本文にない期限・金額・相手を作らない。
+重要でなければ完全一致で IMPORTANT_MAIL_NONE とだけ返す。
+重要なら最大4行：
+差出人/件名が入力から分かれば1行目。
+次に「何が起きた」「何をすればよい」「期限」が存在するものだけ。
+前置き不要。
+
+受信メール：
+{@incoming}")
+
+const result = askChatGPT(promptText, false, "Text")
+if result contains "IMPORTANT_MAIL_NONE" {
+    stop()
+}
+
+const historyFolder = createFolder("YOS Display History")
+const stampNow = currentDate()
+const stamp = formatDate(stampNow, "Custom", "yyyy-MM-dd HHmmss")
+const log = text("【Important Mail】\n{result}")
+saveFile("YOS Display History/{stamp} Important Mail.txt", log, false)
+showNotification("重要メール")
+alert(result, "Important Mail")
