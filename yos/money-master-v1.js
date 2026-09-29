@@ -1,13 +1,14 @@
 'use strict';
 (()=>{
   const KEY='yos-money-v2';
-  const MASTER_VERSION='2026-09-29-v6';
+  const MASTER_VERSION='2026-09-29-v7';
   const SOURCE='user-confirmed-2026-09-28';
   const read=()=>{try{return JSON.parse(localStorage.getItem(KEY)||'null')}catch{return null}};
   const current=read();
   const base=current&&typeof current==='object'?current:{version:2,privacy:false,accounts:[],transactions:[],debts:[],goals:[],assets:[],rules:{}};
   base.accounts=Array.isArray(base.accounts)?base.accounts:[];
   base.transactions=Array.isArray(base.transactions)?base.transactions:[];
+  base.recurring=Array.isArray(base.recurring)?base.recurring:[];
   base.debts=Array.isArray(base.debts)?base.debts:[];
   base.goals=Array.isArray(base.goals)?base.goals:[];
   base.assets=Array.isArray(base.assets)?base.assets:[];
@@ -66,6 +67,24 @@
       if(i<0)base.transactions.push(fact);
       else if(fact.id==='master-repayment-2026-09')base.transactions[i]={...base.transactions[i],...fact};
       else base.transactions[i]={...fact,...base.transactions[i]};
+    }
+
+    const recurringFacts=[
+      {id:'master-rec-rental-income',frequency:'monthly',type:'income',category:'income',label:'家賃収入',amount:160485,day:13,startDate:'2026-10-01',enabled:true,amountApproximate:true,certainty:'見込み',source:SOURCE},
+      {id:'master-rec-rent',frequency:'monthly',type:'expense',category:'housing',label:'家賃',amount:68500,day:27,startDate:'2026-10-01',enabled:true,source:SOURCE},
+      {id:'master-rec-car-insurance',frequency:'monthly',type:'expense',category:'transport',label:'車保険',amount:7060,day:26,startDate:'2026-10-01',enabled:true,source:SOURCE},
+      {id:'master-rec-electricity',frequency:'monthly',type:'expense',category:'utilities',label:'電気',amount:3710,day:27,startDate:'2026-10-01',enabled:true,source:SOURCE},
+      {id:'master-rec-icloud',frequency:'monthly',type:'expense',category:'utilities',label:'iCloud',amount:540,day:14,startDate:'2026-10-01',enabled:true,source:SOURCE},
+      {id:'master-rec-moneyforward',frequency:'monthly',type:'expense',category:'utilities',label:'MoneyForward',amount:590,day:29,startDate:'2026-10-01',enabled:true,source:SOURCE},
+      {id:'master-rec-chatgpt',frequency:'monthly',type:'expense',category:'utilities',label:'ChatGPT Plus',amount:3000,day:30,startDate:'2026-10-01',enabled:true,source:SOURCE},
+      {id:'master-rec-youtube',frequency:'monthly',type:'expense',category:'utilities',label:'YouTube Premium',amount:1680,day:30,startDate:'2026-10-01',enabled:true,source:SOURCE}
+    ];
+    for(const fact of recurringFacts){
+      if(!base.recurring.some(rule=>rule?.id===fact.id||(
+        String(rule?.label||'').trim()===fact.label
+        && rule?.frequency==='monthly'
+        && Number(rule?.amount)===fact.amount
+      ))) base.recurring.push({...fact,createdAt:stamp});
     }
     base.updatedAt=stamp;
   }
