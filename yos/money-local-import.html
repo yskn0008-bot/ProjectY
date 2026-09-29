@@ -13,6 +13,7 @@ div{text-align:center}b{display:block;font-size:22px;margin-bottom:8px}span{colo
 </head>
 <body>
 <main><div><b id="title">MY MONEYを更新中</b><span id="status">この端末だけに反映します</span></div></main>
+<script src="./money-journal-v1.js?v=1"></script>
 <script>
 (()=>{
   const title=document.getElementById('title'),status=document.getElementById('status');
@@ -107,9 +108,10 @@ div{text-align:center}b{display:block;font-size:22px;margin-bottom:8px}span{colo
     if(!changed){fail('更新対象がありません');return}
     data.updatedAt=new Date().toISOString();
     localStorage.setItem(KEY,JSON.stringify(data));
+    window.YOSMoneyJournalV1?.record?.({source:'money-local-import',action:'apply-ops',ops:payload.ops,state:data});
     title.textContent='反映しました';
     status.textContent='MY MONEYを開きます';
-    setTimeout(()=>location.replace('./?v=local-import-1#money'),250);
+    setTimeout(()=>location.replace('./?v=local-import-2#money'),80);
   }catch(e){fail('もう一度リンクを開いてください')}
 })();
 </script>
