@@ -8,6 +8,7 @@
 #include 'actions/calendar'
 
 @incoming = "{ShortcutInput}"
+const alertStateFolder = createFolder("YOS Alert State")
 
 if @incoming == "" {
     stop()
@@ -41,6 +42,15 @@ const promptText = text("あなたはYOS Important Mailです。
 
 const result = askChatGPT(promptText, false, "Text")
 @resultText = "{result}"
+
+const lastMailFile = getFile("YOS Alert State/Important Mail Last.txt", nil, false)
+const lastMailText = getText(lastMailFile)
+@lastMail = "{lastMailText}"
+if @lastMail == @incoming {
+    stop()
+}
+saveFile("YOS Alert State/Important Mail Last.txt", @incoming, true)
+
 if @resultText contains "IMPORTANT_MAIL_NONE" {
     stop()
 }
