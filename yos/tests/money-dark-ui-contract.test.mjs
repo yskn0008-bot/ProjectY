@@ -97,3 +97,31 @@ test('Electricity recurring date is fixed but amount remains variable', async ()
   assert.match(runtime,/dailyHasUnknown/);
   assert.match(runtime,/projectionHasUnknown/);
 });
+
+
+test('Money local-first saves immediately and keeps a file-backed JSONL history', async () => {
+  const [runtime,index,importer,journal,capture,sw]=await Promise.all([
+    read('yos/money-v2-runtime-v4.js'),
+    read('yos/index.html'),
+    read('yos/money-local-import.html'),
+    read('yos/money-journal-v1.js'),
+    read('yos/money-capture.html'),
+    read('service-worker.js')
+  ]);
+  assert.match(runtime,/YOSMoneyJournalV1\?\.record/);
+  assert.match(runtime,/source:'money-ui'/);
+  assert.match(runtime,/source:'money-hash-import'/);
+  assert.match(index,/money-journal-v1\.js\?v=1/);
+  assert.match(importer,/money-journal-v1\.js\?v=1/);
+  assert.match(importer,/80\);/);
+  assert.match(journal,/navigator\.storage\?\.getDirectory/);
+  assert.match(journal,/yos-money-history-/);
+  assert.match(journal,/\.jsonl/);
+  assert.match(journal,/yos-money-journal-queue-v1/);
+  assert.match(capture,/money-local-import\.html#mi=/);
+  assert.match(capture,/コンビニ850円/);
+  assert.match(capture,/replace-liquid/);
+  assert.ok(sw.includes("'./yos/money-journal-v1.js'"));
+  assert.ok(sw.includes("'./yos/money-capture.html'"));
+  assert.ok(sw.includes("'./yos/money-local-import.html'"));
+});
