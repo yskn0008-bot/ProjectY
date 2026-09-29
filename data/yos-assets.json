@@ -179,7 +179,7 @@
       "area": "finance",
       "status": "awaiting_production_verification",
       "priority": 1,
-      "current": "MY MONEYは既存yos-money-v2を維持したまま、未来予測と毎月収支をrecurringへ追加済み。電気は毎月27日固定・金額変動として扱い、3,710円は直近確認額のみ。変動返済も固定化していない。",
+      "current": "MY MONEYは既存yos-money-v2を維持したまま、未来予測と毎月収支をrecurringへ追加済み。電気は毎月27日固定・金額変動、ガスは毎月15日固定・金額変動として扱う。変動返済も固定化していない。",
       "next_action": "iPhone実機で固定収支と未来予測の表示を確認し、その後Money入力のローカル即時保存・履歴ファイル化を接続する。",
       "blocker": "現在の正式画面入口はWeb配信を併用。",
       "needs_user_action": false,
