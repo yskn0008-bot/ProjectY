@@ -84,7 +84,10 @@ test('Money Alert bridge emits only Money anomalies and deduplicates delivery wi
   assert.match(moneyAlert,/format.*alert-text/);
   assert.match(moneyAlert,/DELIVERY_KEY='yos-money-alert-delivery-v1'/);
   assert.match(moneyAlert,/DIRECT_MIGRATION_KEY='yos-money-alert-direct-v1'/);
+  assert.match(moneyAlert,/RETURN_KEY='yos-money-alert-return-v1'/);
   assert.match(moneyAlert,/deliveryDecision/);
+  assert.match(moneyAlert,/returnDeliveryDecision/);
+  assert.match(moneyAlert,/p\.get\('dedupe'\)==='1'/);
   assert.match(moneyAlert,/renderDirect/);
   assert.match(moneyAlert,/params\.get\('format'\)==='alert-text'.*renderDirect/s);
   assert.doesNotMatch(moneyAlert,/location\.replace\('\.\/'\)/);
