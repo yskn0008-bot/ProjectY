@@ -87,3 +87,13 @@ test('Money master seeds confirmed monthly recurring cashflow without fixed debt
   assert.match(master,/master-rec-car-insurance[\s\S]*day:26/);
   assert.match(master,/master-rec-electricity[\s\S]*day:27/);
 });
+
+
+test('Electricity recurring date is fixed but amount remains variable', async () => {
+  const [master,runtime]=await Promise.all([read('yos/money-master-v1.js'),read('yos/money-v2-runtime-v4.js')]);
+  assert.match(master,/master-rec-electricity[\s\S]*amount:null[\s\S]*variableAmount:true[\s\S]*lastKnownAmount:3710[\s\S]*day:27/);
+  assert.match(runtime,/金額は毎月変動/);
+  assert.match(runtime,/金額未確定/);
+  assert.match(runtime,/dailyHasUnknown/);
+  assert.match(runtime,/projectionHasUnknown/);
+});
