@@ -36,7 +36,8 @@ Routine Alertとの重複を避けるため、リスト名またはタイトル�
 元候補：{candidates}")
 
 const result = askChatGPT(promptText, false, "Text")
-if result contains "TASK_ALERT_NONE" {
+@resultText = "{result}"
+if @resultText contains "TASK_ALERT_NONE" {
     stop()
 }
 const stampNow = currentDate()
