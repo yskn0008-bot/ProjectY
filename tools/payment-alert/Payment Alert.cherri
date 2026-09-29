@@ -48,7 +48,6 @@ iPhoneのアラートは比例フォントなので、空白で列揃えをし�
 日付は同じものを繰り返さない。
 「今日」「明日」「2日後」「3日後」などの相対表現は付けない。
 空白で見た目を揃えようとしない。
-「今日」「明日」「2日後」「3日後」などの相対表現は付けない。
 日付だけで十分なので、同じ意味の情報を重ねない。
 
 支払いが1件もない場合は、完全一致で：
@@ -60,6 +59,10 @@ Money正本：
 {moneySource}")
 
 const result = askChatGPT(promptText, false, "Text")
+
+if result contains "支払いアラートなし" {
+    stop()
+}
 
 const alertLogNow = currentDate()
 const alertLogStamp = formatDate(alertLogNow, "Custom", "yyyy-MM-dd HHmmss")
