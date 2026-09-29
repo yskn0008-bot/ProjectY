@@ -163,5 +163,7 @@ jobs:
           name: morning-brief-final
           path: |
             tools/morning-brief/artifacts/Morning Brief.shortcut
+            tools/morning-brief/artifacts/Morning%20Brief.shortcut
             tools/morning-brief/artifacts/morning-brief-hubsign.log
+            tools/morning-brief/artifacts/morning-brief-compat-hubsign.log
           if-no-files-found: error
