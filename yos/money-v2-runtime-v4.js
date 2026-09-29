@@ -1,6 +1,7 @@
 'use strict';
 (()=>{
   const KEY='yos-money-v2';
+  const RECOVERY_KEY='yos-money-recovery-v1';
   const LIFE_KEY='yos-life-v1';
   const HOME_KEY='yos-home-settings-v2';
   const LEGACY_HOME_KEY='yos-home-settings-v1';
@@ -12,7 +13,26 @@
   const q=(sel,root=document)=>root.querySelector(sel);
   const qa=(sel,root=document)=>[...root.querySelectorAll(sel)];
   const read=(key,fallback)=>{try{return JSON.parse(localStorage.getItem(key)||'null')??fallback}catch{return fallback}};
-  const write=(key,value)=>{try{localStorage.setItem(key,JSON.stringify(value));return true}catch{return false}};
+  const hasMoneyCore=value=>Boolean(value&&typeof value==='object'&&(
+    (Array.isArray(value.accounts)&&value.accounts.length)
+    ||(Array.isArray(value.transactions)&&value.transactions.length)
+    ||(Array.isArray(value.recurring)&&value.recurring.length)
+    ||(Array.isArray(value.debts)&&value.debts.length)
+    ||(Array.isArray(value.goals)&&value.goals.length)
+    ||(Array.isArray(value.assets)&&value.assets.length)
+  ));
+  const write=(key,value)=>{
+    try{
+      if(key===KEY){
+        const previous=read(KEY,null);
+        if(hasMoneyCore(previous))localStorage.setItem(RECOVERY_KEY,JSON.stringify(previous));
+        if(hasMoneyCore(previous)&&!hasMoneyCore(value))return false;
+      }
+      localStorage.setItem(key,JSON.stringify(value));
+      if(key===KEY&&hasMoneyCore(value))localStorage.setItem(RECOVERY_KEY,JSON.stringify(value));
+      return true
+    }catch{return false}
+  };
   const uid=(prefix='m')=>`${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,7)}`;
   const n=value=>Number.isFinite(Number(value))?Number(value):0;
   const clean=(value,max=100)=>String(value??'').trim().slice(0,max);
