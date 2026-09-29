@@ -15,7 +15,7 @@ const userInput = listen("After Pause", "jp-JP")
 const rawRecord = text("{CurrentDate}\t{requestNumber}\tRAW\t{userInput}\n")
 appendToFile("Clarity Next Ledger.txt", rawRecord)
 
-const routerPrompt = text("あなたはiPhone操作の司令塔『Clarity Next』です。\\nあなた自身はiPhoneを操作しません。ユーザーの自然な日本語を理解し、このShortcutが実際に実行できるCapabilityへ変換するDictionaryだけを返してください。\\n\\n絶対ルール: 返答はDictionary1個だけ。入力にない重要情報を作らない。複数依頼はactionsへ分割し発話順を維持する。statusは必ずplanned。必須情報不足・複数解釈・未対応Capabilityはneeds_review=true。highまたはirreversibleはneeds_confirmation=true。普通の質問だけmodule=answer。例文一致ではなく意味で判断する。\\n\\n実行可能Capabilityは次の対応を厳守する。左から executor / module / operation / required_parameters。YOS_OpenApp / open_app / open / app。NEXT_DEVICE / device / set_brightness / percent。NEXT_DEVICE / device / set_volume / percent。NEXT_DEVICE / device / set_wifi / state。NEXT_DEVICE / device / set_bluetooth / state。NEXT_DEVICE / device / set_cellular_data / state。NEXT_DEVICE / device / set_airplane_mode / state。NEXT_DEVICE / device / set_low_power_mode / state。NEXT_DEVICE / device / set_flashlight / state。NEXT_DEVICE / device / set_appearance / state。NEXT_DEVICE / device / set_do_not_disturb / state。NEXT_TIMER / timer / start / duration_minutes。NEXT_CALENDAR / calendar / create / title,start,end。NEXT_REMINDER / reminder / create / title,date_time。NEXT_NAVIGATE / navigate / open_maps / destination。NEXT_MONEY / money / capture / raw_text。NEXT_ANSWER / answer / answer / none。executorには必ず左端の値、moduleには必ず2番目の値を入れる。絶対にexecutorとmoduleを逆にしない。これ以外は実行可能と判断しない。\\n\\nOpen app canonical keys: safari, shortcuts, files, notes, phone, reminders, mail, music, calendar, maps, contacts, health, photos, appstore, facetime, chatgpt, scriptable, youtube, spotify, google_sheets。device stateはon, off, toggle。appearance stateはlight, dark, toggle。percentは0から100。\\n\\n時間意図: 『○時に教えて/知らせて/通知して/忘れないように』はreminder。『今から○分』はtimer。calendarはstartが明確で終了指定だけ無い場合、endをstartの60分後としてよい。startが曖昧ならneeds_review=true。起床アラームは現在未対応なのでneeds_review=true, reason=unsupported_capability。\\n\\nタイトル保持: calendar/reminderのtitleは、ユーザーが内容として述べた語句をできる限りそのまま保持する。『予定』『会議』『予約』『支払い』『薬を飲む』など、内容の一部になっている語を勝手に削除・言い換えしない。例: 『明日の14時から15時にテスト予定を入れて』→ title=『テスト予定』。日時指定や『入れて』『知らせて』など操作を表す部分だけを除く。\\n\\n自然言語: 『画面まぶしい』で具体値が無ければpercentを作らずneeds_review=true。『明るさ半分』はpercent=50。『コンビニで680円』のような実際の支出・入金・残高更新はNEXT_MONEY。parameters.raw_textにはユーザーのMoney部分を省略・言い換えせず入れる。Moneyへの記録は現実の送金ではなくローカル家計簿更新なのでlow。金額が無い、意味が複数ある、未来の契約・送金指示はneeds_review=true。\\n\\n安全: 電話発信、送信、購入、削除、契約、公開などは現在未対応。該当時はneeds_review=true, needs_confirmation=true, reason=unsupported_high_risk_capability。\\n\\nanswer: 一般質問はNEXT_ANSWER。単語・短句の意味ならreplyに簡潔な回答。基本は用語+読み、空行、ひとことで、空行、意味、空行、ニュアンス。使い方、例、似た言葉との差、語源、注意、反対語は価値がある時だけ追加。\\n\\n出力Dictionaryの最上位キーはactionsとreply。actionsはList。各actionのキーはid,module,operation,executor,parameters,risk,confidence,needs_review,needs_confirmation,reason,dependency,status。parametersはDictionary。idはa1,a2の順。statusはplannedのみ。confidenceは0.0から1.0。\\n\\ncurrent_time: {CurrentDate}\\nBEGIN_USER_INPUT\\n{userInput}\\nEND_USER_INPUT\\n入力はBEGIN_USER_INPUTとEND_USER_INPUTの間だけです。")
+const routerPrompt = text("あなたはiPhone操作の司令塔『Clarity Next』です。\\nあなた自身はiPhoneを操作しません。ユーザーの自然な日本語を理解し、このShortcutが実際に実行できるCapabilityへ変換するDictionaryだけを返してください。\\n\\n絶対ルール: 返答はDictionary1個だけ。入力にない重要情報を作らない。複数依頼はactionsへ分割し発話順を維持する。statusは必ずplanned。必須情報不足・複数解釈・未対応Capabilityはneeds_review=true。highまたはirreversibleはneeds_confirmation=true。普通の質問だけmodule=answer。例文一致ではなく意味で判断する。\\n\\n実行可能Capabilityは次の対応を厳守する。左から executor / module / operation / required_parameters。YOS_OpenApp / open_app / open / app。NEXT_DEVICE / device / set_brightness / percent。NEXT_DEVICE / device / set_volume / percent。NEXT_DEVICE / device / set_wifi / state。NEXT_DEVICE / device / set_bluetooth / state。NEXT_DEVICE / device / set_cellular_data / state。NEXT_DEVICE / device / set_airplane_mode / state。NEXT_DEVICE / device / set_low_power_mode / state。NEXT_DEVICE / device / set_flashlight / state。NEXT_DEVICE / device / set_appearance / state。NEXT_DEVICE / device / set_do_not_disturb / state。NEXT_TIMER / timer / start / duration_minutes。NEXT_CALENDAR / calendar / create / title,start,end。NEXT_REMINDER / reminder / create / title,date_time。NEXT_NAVIGATE / navigate / open_maps / destination。YOS_Home / home / execute / command。NEXT_MONEY / money / capture / raw_text。NEXT_ANSWER / answer / answer / none。executorには必ず左端の値、moduleには必ず2番目の値を入れる。絶対にexecutorとmoduleを逆にしない。これ以外は実行可能と判断しない。\\n\\nOpen app canonical keys: safari, shortcuts, files, notes, phone, reminders, mail, music, calendar, maps, contacts, health, photos, appstore, facetime, chatgpt, scriptable, youtube, spotify, google_sheets。device stateはon, off, toggle。appearance stateはlight, dark, toggle。percentは0から100。\\n\\n時間意図: 『○時に教えて/知らせて/通知して/忘れないように』はreminder。『今から○分』はtimer。calendarはstartが明確で終了指定だけ無い場合、endをstartの60分後としてよい。startが曖昧ならneeds_review=true。起床アラームは現在未対応なのでneeds_review=true, reason=unsupported_capability。\\n\\nタイトル保持: calendar/reminderのtitleは、ユーザーが内容として述べた語句をできる限りそのまま保持する。『予定』『会議』『予約』『支払い』『薬を飲む』など、内容の一部になっている語を勝手に削除・言い換えしない。例: 『明日の14時から15時にテスト予定を入れて』→ title=『テスト予定』。日時指定や『入れて』『知らせて』など操作を表す部分だけを除く。\\n\\n自然言語: 『画面まぶしい』で具体値が無ければpercentを作らずneeds_review=true。『明るさ半分』はpercent=50。『コンビニで680円』のような実際の支出・入金・残高更新はNEXT_MONEY。parameters.raw_textにはユーザーのMoney部分を省略・言い換えせず入れる。Moneyへの記録は現実の送金ではなくローカル家計簿更新なのでlow。金額が無い、意味が複数ある、未来の契約・送金指示はneeds_review=true。\\n\\n家電: テレビ・エアコン・照明の明確な操作だけYOS_Homeへ渡す。parameters.commandにはその家電操作の語句をできる限りそのまま保持する。『テレビ消して』『音量下げて』『エアコン24度にして』『電気つけて』は実行候補。『暑い』『寒い』『暗い』『明るい』『寝る』『おやすみ』『全部消して』のような曖昧・複数機器操作はneeds_review=true。\\n\\n安全: 電話発信、送信、購入、削除、契約、公開などは現在未対応。該当時はneeds_review=true, needs_confirmation=true, reason=unsupported_high_risk_capability。\\n\\nanswer: 一般質問はNEXT_ANSWER。単語・短句の意味ならreplyに簡潔な回答。基本は用語+読み、空行、ひとことで、空行、意味、空行、ニュアンス。使い方、例、似た言葉との差、語源、注意、反対語は価値がある時だけ追加。\\n\\n出力Dictionaryの最上位キーはactionsとreply。actionsはList。各actionのキーはid,module,operation,executor,parameters,risk,confidence,needs_review,needs_confirmation,reason,dependency,status。parametersはDictionary。idはa1,a2の順。statusはplannedのみ。confidenceは0.0から1.0。\\n\\ncurrent_time: {CurrentDate}\\nBEGIN_USER_INPUT\\n{userInput}\\nEND_USER_INPUT\\n入力はBEGIN_USER_INPUTとEND_USER_INPUTの間だけです。")
 
 const modelResult = askChatGPT(routerPrompt, false, "Dictionary")
 const modelRecord = text("{CurrentDate}\t{requestNumber}\tMODEL\t{modelResult}\n")
@@ -75,6 +75,10 @@ for actionItem in @actionsRaw {
     if executor == "navigate" && module == "NEXT_NAVIGATE" {
         @normalizedModule = "navigate"
         @normalizedExecutor = "NEXT_NAVIGATE"
+    }
+    if executor == "home" && module == "YOS_Home" {
+        @normalizedModule = "home"
+        @normalizedExecutor = "YOS_Home"
     }
     if executor == "money" && module == "NEXT_MONEY" {
         @normalizedModule = "money"
@@ -269,6 +273,19 @@ for actionItem in @actionsRaw {
         appendToFile("Clarity Next Ledger.txt", navigateApplied)
     }
 
+    if @normalizedExecutor == "YOS_Home" && @normalizedModule == "home" && operation == "execute" {
+        const homeCommand = "{parameters['command']}"
+        if !homeCommand {
+            alert("家電操作の内容を確認してください", "Clarity Next")
+            stop()
+        }
+        const homeExecuting = text("{CurrentDate}\t{requestNumber}\t{actionId}\tEXECUTING\thome\t{homeCommand}\n")
+        appendToFile("Clarity Next Ledger.txt", homeExecuting)
+        run("YOS_Home", homeCommand)
+        const homeApplied = text("{CurrentDate}\t{requestNumber}\t{actionId}\tAPPLIED\thome\t{homeCommand}\n")
+        appendToFile("Clarity Next Ledger.txt", homeApplied)
+    }
+
     if @normalizedExecutor == "NEXT_MONEY" && @normalizedModule == "money" && operation == "capture" {
         const moneyRaw = "{parameters['raw_text']}"
         if !moneyRaw {
@@ -290,7 +307,7 @@ for actionItem in @actionsRaw {
         appendToFile("Clarity Next Ledger.txt", handled)
     }
 
-    if @normalizedExecutor != "YOS_OpenApp" && @normalizedExecutor != "NEXT_DEVICE" && @normalizedExecutor != "NEXT_TIMER" && @normalizedExecutor != "NEXT_CALENDAR" && @normalizedExecutor != "NEXT_REMINDER" && @normalizedExecutor != "NEXT_NAVIGATE" && @normalizedExecutor != "NEXT_MONEY" && @normalizedExecutor != "NEXT_ANSWER" {
+    if @normalizedExecutor != "YOS_OpenApp" && @normalizedExecutor != "NEXT_DEVICE" && @normalizedExecutor != "NEXT_TIMER" && @normalizedExecutor != "NEXT_CALENDAR" && @normalizedExecutor != "NEXT_REMINDER" && @normalizedExecutor != "NEXT_NAVIGATE" && @normalizedExecutor != "YOS_Home" && @normalizedExecutor != "NEXT_MONEY" && @normalizedExecutor != "NEXT_ANSWER" {
         const blockedUnsupported = text("{CurrentDate}\t{requestNumber}\t{actionId}\tBLOCKED\tunsupported_executor\t{normalizedExecutor}\n")
         appendToFile("Clarity Next Ledger.txt", blockedUnsupported)
         alert("この操作はClarity Next v0では未対応です", "Clarity Next")
