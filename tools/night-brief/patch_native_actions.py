@@ -22,6 +22,7 @@ TODAY_REMINDERS_MARKER = "YOS_NIGHT_TODAY_REMINDERS_PLACEHOLDER"
 WEATHER_MARKER = "YOS_NIGHT_WEATHER_PLACEHOLDER"
 CALENDAR_MARKER = "YOS_NIGHT_CALENDAR_PLACEHOLDER"
 REMINDERS_MARKER = "YOS_NIGHT_REMINDERS_PLACEHOLDER"
+JOURNAL_MARKER = "YOS_NIGHT_JOURNAL_PLACEHOLDER"
 
 
 def fail(message: str) -> None:
@@ -88,6 +89,52 @@ def variable_attachment(name: str) -> dict:
     }
 
 
+def variable_names(value: object) -> set[str]:
+    names: set[str] = set()
+
+    def walk(node: object) -> None:
+        if isinstance(node, dict):
+            if node.get("Type") == "Variable":
+                name = node.get("VariableName")
+                if isinstance(name, str):
+                    names.add(name)
+            for child in node.values():
+                walk(child)
+        elif isinstance(node, list):
+            for child in node:
+                walk(child)
+
+    walk(value)
+    return names
+
+
+def text_token_output(uuid: str, name: str = "Text") -> dict:
+    return {
+        "Value": {
+            "attachmentsByRange": {
+                "{0, 1}": {
+                    "OutputUUID": uuid,
+                    "Type": "ActionOutput",
+                    "OutputName": name,
+                }
+            },
+            "string": "\ufffc",
+        },
+        "WFSerializationType": "WFTextTokenString",
+    }
+
+
+def find_custom_output(actions: list[dict], name: str) -> str:
+    matches = [
+        action
+        for action in actions
+        if action.get("WFWorkflowActionParameters", {}).get("CustomOutputName") == name
+    ]
+    if len(matches) != 1:
+        fail(f"expected one custom output {name}, found {len(matches)}")
+    return action_uuid(matches[0])
+
+
 def patch(path: Path) -> None:
     workflow = plistlib.loads(path.read_bytes())
     actions = workflow.get("WFWorkflowActions")
@@ -121,9 +168,12 @@ def patch(path: Path) -> None:
     wi = find_marker(actions, WEATHER_MARKER)
     ci = find_marker(actions, CALENDAR_MARKER)
     ri = find_marker(actions, REMINDERS_MARKER)
+    ji = find_marker(actions, JOURNAL_MARKER)
 
     weather_params = replacement_base(actions[wi])
-    weather_params["WFWeatherForecastType"] = output(tomorrow_uuid, "調整済みの日付")
+    # Match the proven Morning Brief native Weather action. The Forecast Type
+    # parameter is an enum; binding the tomorrow Date output to it is invalid.
+    # Default forecast output is passed to GPT together with tomorrowLabel.
     actions[wi] = {
         "WFWorkflowActionIdentifier": "is.workflow.actions.weather.forecast",
         "WFWorkflowActionParameters": weather_params,
@@ -259,43 +309,108 @@ def patch(path: Path) -> None:
         "WFWorkflowActionParameters": reminders_params,
     }
 
+    journal_title_uuid = find_custom_output(actions, "journalTitle")
+    journal_body_uuid = find_custom_output(actions, "journalBody")
+    journal_params = replacement_base(actions[ji])
+    journal_params.update({
+        "AppIntentDescriptor": {
+            "AppIntentIdentifier": "CreateEntryIntent",
+            "BundleIdentifier": "com.apple.journal",
+            "Name": "Journal",
+            "TeamIdentifier": "0000000000",
+        },
+        "OpenWhenRun": False,
+        "entryBookmark": False,
+        "title": text_token_output(journal_title_uuid),
+        "message": text_token_output(journal_body_uuid),
+    })
+    actions[ji] = {
+        "WFWorkflowActionIdentifier": "com.apple.journal.CreateEntryIntent",
+        "WFWorkflowActionParameters": journal_params,
+    }
+
+    # Cherri 2.3 can degrade a bare boolean variable condition into
+    # "has any value". Because false/0 still has a value, that makes manual
+    # Night Brief stop at the AUTO gates. Require explicit text equality.
+    auto_rows: list[dict] = []
+    for action in actions:
+        if action.get("WFWorkflowActionIdentifier") != "is.workflow.actions.conditional":
+            continue
+        params = action.get("WFWorkflowActionParameters", {})
+        if params.get("WFControlFlowMode") != 0:
+            continue
+        if "autoMode" in variable_names(params.get("WFInput")):
+            auto_rows.append(params)
+        wrapper = params.get("WFConditions")
+        if isinstance(wrapper, dict):
+            value = wrapper.get("Value", {})
+            for row in value.get("WFActionParameterFilterTemplates", []):
+                if isinstance(row, dict) and "autoMode" in variable_names(row.get("WFInput")):
+                    auto_rows.append(row)
+    if len(auto_rows) != 2:
+        fail(f"expected two autoMode gates, found {len(auto_rows)}")
+    for row in auto_rows:
+        if row.get("WFCondition") != 4 or row.get("WFConditionalActionString") != "auto":
+            fail(f"autoMode gate must compare explicitly to 'auto': {row!r}")
+
+    # Fix Cherri's literal backslash escaping so the regex matches real
+    # newlines before numbered discoveries.
+    for output_name, pattern in (
+        ("spacedResponse2", r"\n+2\."),
+        ("spacedResponse3", r"\n+3\."),
+    ):
+        matches = [
+            action for action in actions
+            if action.get("WFWorkflowActionIdentifier") == "is.workflow.actions.text.replace"
+            and action.get("WFWorkflowActionParameters", {}).get("CustomOutputName") == output_name
+        ]
+        if len(matches) != 1:
+            fail(f"expected one {output_name} replace action, found {len(matches)}")
+        matches[0]["WFWorkflowActionParameters"]["WFReplaceTextFind"] = pattern
+
     workflow["WFWorkflowActions"] = actions
-    workflow["WFWorkflowHasShortcutInputVariables"] = False
+    workflow["WFWorkflowHasShortcutInputVariables"] = True
 
     blob = repr(workflow)
     ids = [a.get("WFWorkflowActionIdentifier", "") for a in actions]
-    for marker in (TODAY_CALENDAR_MARKER, TODAY_REMINDERS_MARKER, WEATHER_MARKER, CALENDAR_MARKER, REMINDERS_MARKER):
+    for marker in (TODAY_CALENDAR_MARKER, TODAY_REMINDERS_MARKER, WEATHER_MARKER, CALENDAR_MARKER, REMINDERS_MARKER, JOURNAL_MARKER):
         if marker in blob:
             fail(f"placeholder survived: {marker}")
     if ids.count("is.workflow.actions.weather.forecast") != 1:
         fail("weather forecast patch failed")
+    if "WFWeatherForecastType" in actions[wi].get("WFWorkflowActionParameters", {}):
+        fail("weather forecast type must use the native default")
     if ids.count("is.workflow.actions.filter.calendarevents") != 2:
         fail("Calendar patch failed")
     if ids.count("is.workflow.actions.filter.reminders") != 2:
         fail("Reminders patch failed")
     if ids.count("is.workflow.actions.runworkflow"):
         fail("Night Brief must not depend on another Shortcut")
-    if ids.count("is.workflow.actions.openurl"):
-        fail("Night Brief must not open Safari")
-    if ids.count("is.workflow.actions.exit"):
-        fail("Night Brief must complete natively without callback stops")
-    if "night_history=1" in blob or "night_save=1" in blob or "shortcuts://run-shortcut" in blob:
-        fail("legacy browser/shortcut callback survived")
-    if ids.count("is.workflow.actions.file.createfolder") != 1:
-        fail("Night history folder action missing")
+    if ids.count("is.workflow.actions.openurl") != 1:
+        fail("Night Brief must open the MY LIFE save bridge exactly once")
+    if ids.count("is.workflow.actions.exit") < 1:
+        fail("Night Brief auto mode stop is missing")
+    if "night_history=1" in blob or "shortcuts://run-shortcut" in blob:
+        fail("legacy history/shortcut callback survived")
+    if "night_save=1" not in blob or "night-checkin-save-bridge.html" not in blob or "shortcut=Night%20Brief" not in blob:
+        fail("MY LIFE Night save bridge is missing")
+    if ids.count("is.workflow.actions.file.createfolder") != 3:
+        fail("expected history, auto-run, and journal-status folders")
     if ids.count("is.workflow.actions.file.getfoldercontents") != 1:
         fail("Night history folder read missing")
     if ids.count("is.workflow.actions.filter.files") != 1:
         fail("Night history 14-day filter missing")
-    if ids.count("is.workflow.actions.documentpicker.save") != 1:
-        fail("Night history save missing")
+    if ids.count("is.workflow.actions.documentpicker.save") != 3:
+        fail("expected history, auto-run marker, and journal-status saves")
+    if ids.count("com.apple.journal.CreateEntryIntent") != 1:
+        fail("Journal Create Entry patch failed")
     if "真栄原2丁目" in blob:
         fail("private street-level text must not be embedded")
 
     path.write_bytes(plistlib.dumps(workflow, fmt=plistlib.FMT_XML, sort_keys=False))
     print(
         "Night Brief native-only patch: PASS "
-        f"(actions={len(actions)}, weather=1, calendar=2, reminders=2, safari=0, scriptable=0)"
+        f"(actions={len(actions)}, weather=1, calendar=2, reminders=2, journal=1, auto_mode=1, safari=1, my_life=1, scriptable=0)"
     )
 
 

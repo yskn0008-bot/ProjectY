@@ -1,16 +1,34 @@
 #define name Night Brief
 #define color purple
+#define inputs text
 
+#include 'actions/crypto'
 #include 'actions/text'
 #include 'actions/documents'
 #include 'actions/intelligence'
 #include 'actions/calendar'
 #include 'actions/location'
+#include 'actions/web'
 
 // Native-only Night Brief.
 // No Safari, Scriptable, URL callback, or Run Shortcut.
 // Night history is a derived iCloud cache, one file per day.
 // Existing MY LIFE remains separate; this removes browser sync from the critical night flow.
+// Automation mode uses the explicit input token YOS_NIGHT_AUTO_V1.
+// A derived per-day run marker suppresses the 22:00 automation after an earlier manual launch.
+@incoming = "{ShortcutInput}"
+
+if @incoming contains "yos-night-save-ok-v1" {
+    const saved = getDictionary(@incoming)
+    const savedDisplay = "{saved['display_text']}"
+    alert(savedDisplay, "Night Brief")
+    stop()
+}
+
+@autoMode = "manual"
+if @incoming contains "YOS_NIGHT_AUTO_V1" {
+    @autoMode = "auto"
+}
 
 const historyFolder = createFolder("YOS Night History")
 const historyFiles = getFolderContents(historyFolder, false)
@@ -19,6 +37,11 @@ const recentHistory = getText(recentHistoryFiles)
 
 const today = currentDate()
 const todayKey = formatDate(today, "Custom", "yyyy-MM-dd")
+const briefRunFolder = createFolder("YOS Night Brief Run")
+const briefRunFile = getFile("YOS Night Brief Run/{todayKey}.txt", nil, false)
+if @autoMode == "auto" && briefRunFile {
+    stop()
+}
 const todayLabel = formatDate(today, "Custom", "yyyy/MM/dd（EEE）")
 const tomorrow = adjustDate(today, "Add", qty(1, "days"))
 const tomorrowLabel = formatDate(tomorrow, "Custom", "yyyy/MM/dd（EEE）")
@@ -152,7 +175,12 @@ const response = askChatGPT(modelPrompt, false, "Text")
 // Normalize spacing even if the model compresses the numbered discoveries.
 const spacedResponse2 = replaceText('\\n+2\\.', "\n\n2.", response, true, true)
 const spacedResponse3 = replaceText('\\n+3\\.', "\n\n3.", spacedResponse2, true, true)
-showNotification("Night Brief：今日の発見をまとめました")
+showNotification(spacedResponse3, "Night Brief", true)
+const briefRunMarker = text("YOS_NIGHT_BRIEF_RUN_V1\n{todayKey}")
+saveFile("YOS Night Brief Run/{todayKey}.txt", briefRunMarker, true)
+if @autoMode == "auto" {
+    stop()
+}
 alert(spacedResponse3, "Night Brief")
 
 const rawInput = prompt(
@@ -213,6 +241,33 @@ raw_input:
 
 saveFile("YOS Night History/{todayKey}.txt", recordText, true)
 
+const journalTitle = text("{todayLabel} Night")
+const journalBody = text("今日あったこと：
+{summary}
+
+気分 / 状態：
+{mood}
+
+YOS 自分の発見：
+{discoveries}
+
+3行日記：
+{diary}
+
+明日：
+{tomorrowAction}
+
+明日への一言：
+{message}")
+
+const journalStatusFolder = createFolder("YOS Night Journal Status")
+const journalStatusFile = getFile("YOS Night Journal Status/{todayKey}.txt", nil, false)
+if !journalStatusFile {
+    const journalPlaceholder = text("YOS_NIGHT_JOURNAL_PLACEHOLDER")
+    const journalSavedMarker = text("YOS_NIGHT_JOURNAL_SAVED_V1\n{todayKey}")
+    saveFile("YOS Night Journal Status/{todayKey}.txt", journalSavedMarker, true)
+}
+
 const finalText = text("保存しました
 
 発見：
@@ -224,4 +279,23 @@ const finalText = text("保存しました
 3行日記：
 {diary}")
 
-alert(finalText, "Night Brief")
+const rawBase64 = base64Encode(rawInput)
+const rawEncoded = urlEncode(rawBase64)
+const summaryBase64 = base64Encode(summary)
+const summaryEncoded = urlEncode(summaryBase64)
+const moodBase64 = base64Encode(mood)
+const moodEncoded = urlEncode(moodBase64)
+const tomorrowBase64 = base64Encode(tomorrowAction)
+const tomorrowEncoded = urlEncode(tomorrowBase64)
+const discoveriesBase64 = base64Encode(discoveries)
+const discoveriesEncoded = urlEncode(discoveriesBase64)
+const diaryBase64 = base64Encode(diary)
+const diaryEncoded = urlEncode(diaryBase64)
+const messageBase64 = base64Encode(message)
+const messageEncoded = urlEncode(messageBase64)
+const displayBase64 = base64Encode(finalText)
+const displayEncoded = urlEncode(displayBase64)
+
+const saveURL = text("https://yskn0008-bot.github.io/ProjectY/life/night-checkin-save-bridge.html#night_save=1&night_raw_b64={rawEncoded}&night_summary_b64={summaryEncoded}&night_mood_b64={moodEncoded}&night_tomorrow_b64={tomorrowEncoded}&night_discoveries_b64={discoveriesEncoded}&night_diary_b64={diaryEncoded}&night_message_b64={messageEncoded}&night_display_b64={displayEncoded}&shortcut=Night%20Brief")
+openURL(saveURL)
+stop()
