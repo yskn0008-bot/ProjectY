@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#05070B">
+<title>MY MONEY 復旧</title>
+<style>
+html,body{margin:0;min-height:100%;background:#05070B;color:#f4f6fb;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif}
+main{min-height:100dvh;display:grid;place-items:center;padding:24px;box-sizing:border-box}
+div{text-align:center;max-width:420px}b{display:block;font-size:24px;margin-bottom:10px}span{color:#93a0b8;font-size:15px;line-height:1.6}
+</style>
+</head>
+<body>
+<main><div><b id="title">MY MONEYを復旧中</b><span id="status">保存済みデータを確認しています</span></div></main>
+<script>
+(()=>{
+  const KEY='yos-money-v2',RECOVERY='yos-money-recovery-v1';
+  const title=document.getElementById('title'),status=document.getElementById('status');
+  const read=key=>{try{return JSON.parse(localStorage.getItem(key)||'null')}catch{return null}};
+  const hasCore=value=>Boolean(value&&typeof value==='object'&&(
+    (Array.isArray(value.accounts)&&value.accounts.length)||
+    (Array.isArray(value.transactions)&&value.transactions.length)||
+    (Array.isArray(value.recurring)&&value.recurring.length)||
+    (Array.isArray(value.debts)&&value.debts.length)||
+    (Array.isArray(value.goals)&&value.goals.length)||
+    (Array.isArray(value.assets)&&value.assets.length)
+  ));
+  const now=new Date().toISOString();
+  let current=read(KEY),backup=read(RECOVERY),source='';
+  if(hasCore(current)){
+    source='existing';
+  }else if(hasCore(backup)){
+    current={...backup};
+    delete current.masterFacts;
+    current.recoveryStatus='hard-recovered-device-backup';
+    source='backup';
+  }else{
+    current={
+      version:2,
+      privacy:false,
+      accounts:[{id:'master-account-cash',name:'現金',type:'cash',balance:1453,source:'user-confirmed-recovery-2026-09-28',recovered:true,updatedAt:now}],
+      transactions:[
+        {id:'master-rental-income-2026-09',type:'income',label:'家賃収入',amount:160485,date:'2026-09-10',status:'received',certainty:'確定'},
+        {id:'master-icloud-2026-09',type:'expense',label:'iCloud',amount:540,date:'2026-09-14',status:'paid',certainty:'確定'},
+        {id:'master-car-insurance-2026-09',type:'expense',label:'車保険',amount:7060,date:'2026-09-26',status:'planned',certainty:'確定'},
+        {id:'master-rent-2026-09',type:'expense',label:'家賃',amount:68500,date:'2026-09-27',status:'planned',certainty:'確定'},
+        {id:'master-electricity-2026-09',type:'expense',label:'電気',amount:3710,date:'2026-09-27',status:'planned',certainty:'確定'},
+        {id:'master-repayment-2026-09',type:'debt',label:'返済',amount:10000,date:'2026-09-28',status:'paid',paid:true,completed:true,certainty:'確定'},
+        {id:'master-moneyforward-2026-09',type:'expense',label:'MoneyForward',amount:590,date:'2026-09-29',status:'planned',certainty:'確定'},
+        {id:'master-chatgpt-2026-09',type:'expense',label:'ChatGPT Plus',amount:3000,date:'2026-09-30',status:'planned',certainty:'確定'},
+        {id:'master-youtube-2026-09',type:'expense',label:'YouTube Premium',amount:1680,date:'2026-09-30',status:'planned',certainty:'確定'},
+        {id:'master-repayment-2026-10-10',type:'debt',label:'返済',amount:30000,date:'2026-10-10',status:'planned',certainty:'確定'},
+        {id:'master-rental-income-2026-10',type:'income',label:'家賃収入',amount:160485,date:'2026-10-13',status:'planned',certainty:'見込み',amountApproximate:true}
+      ],
+      recurring:[
+        {id:'master-rec-rental-income',frequency:'monthly',type:'income',category:'income',label:'家賃収入',amount:160485,day:13,startDate:'2026-10-01',enabled:true,amountApproximate:true,certainty:'見込み'},
+        {id:'master-rec-rent',frequency:'monthly',type:'expense',category:'housing',label:'家賃',amount:68500,day:27,startDate:'2026-10-01',enabled:true},
+        {id:'master-rec-car-insurance',frequency:'monthly',type:'expense',category:'transport',label:'車保険',amount:7060,day:26,startDate:'2026-10-01',enabled:true},
+        {id:'master-rec-electricity',frequency:'monthly',type:'expense',category:'utilities',label:'電気',amount:null,variableAmount:true,lastKnownAmount:3710,day:27,startDate:'2026-10-01',enabled:true},
+        {id:'master-rec-gas',frequency:'monthly',type:'expense',category:'utilities',label:'ガス',amount:null,variableAmount:true,day:15,startDate:'2026-10-01',enabled:true},
+        {id:'master-rec-icloud',frequency:'monthly',type:'expense',category:'utilities',label:'iCloud',amount:540,day:14,startDate:'2026-10-01',enabled:true},
+        {id:'master-rec-moneyforward',frequency:'monthly',type:'expense',category:'utilities',label:'MoneyForward',amount:590,day:29,startDate:'2026-10-01',enabled:true},
+        {id:'master-rec-chatgpt',frequency:'monthly',type:'expense',category:'utilities',label:'ChatGPT Plus',amount:3000,day:30,startDate:'2026-10-01',enabled:true},
+        {id:'master-rec-youtube',frequency:'monthly',type:'expense',category:'utilities',label:'YouTube Premium',amount:1680,day:30,startDate:'2026-10-01',enabled:true}
+      ],
+      debts:[],
+      goals:[{id:'master-goal-emergency-fund',name:'生活防衛費',type:'emergency',target:600000,current:0,checkpoint:100000,priority:5,priorityLabel:'高',purpose:'収入減・急な支払い・入金遅延があっても生活を維持するため'}],
+      assets:[],
+      rules:{monthlyEssential:0,qualityBudget:0,emergencyMonths:1,scenarioMonthlyBoost:0,note:'生活を壊さず、安全を確保した上で高金利返済を優先する。'},
+      updatedAt:now,
+      recoveryStatus:'hard-recovered-confirmed-seed'
+    };
+    source='seed';
+  }
+  try{
+    current.updatedAt=now;
+    delete current.masterFacts;
+    localStorage.setItem(KEY,JSON.stringify(current));
+    localStorage.setItem(RECOVERY,JSON.stringify(current));
+    title.textContent='復旧しました';
+    status.textContent=source==='existing'?'既存データを保護しました':'Moneyデータを戻しました。MY MONEYを開きます';
+    setTimeout(()=>location.replace('./?recovered=20260930v2#money'),120);
+  }catch(e){
+    title.textContent='復旧できませんでした';
+    status.textContent='Safariのサイトデータ保存を確認してください';
+  }
+})();
+</script>
+</body>
+</html>
