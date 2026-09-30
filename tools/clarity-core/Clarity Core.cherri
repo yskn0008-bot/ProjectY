@@ -1,0 +1,305 @@
+#define name Clarity Core
+#define color purple
+
+#include 'actions/text'
+#include 'actions/documents'
+#include 'actions/intelligence'
+#include 'actions/calendar'
+#include 'actions/device'
+#include 'actions/settings'
+#include 'actions/location'
+#include 'actions/web'
+#include 'actions/shortcuts'
+
+const requestNumber = randomNumber(100000, 999999)
+const userInput = listen("After Pause", "jp-JP")
+const rawRecord = text("{CurrentDate}\t{requestNumber}\tRAW\t{userInput}\n")
+appendToFile("Clarity Next Ledger.txt", rawRecord)
+
+const routerPrompt = text("あなたはiPhone操作と通常回答を統合する「Clarity Core」です。\n\n目的:\nユーザーの自然な日本語を通常のGPTと同じように理解し、回答が必要なら回答し、実操作が必要ならこのShortcutに接続済みのCapabilityへ変換する。\n\n【最重要原則】\n自然言語理解、文脈理解、推論、相談、比較、説明、調査、文章理解、日時解釈、省略、言い換え、曖昧さ判断はモデル本来の能力を使う。\nユーザーに決まった言い方を要求しない。\n例文やキーワード一致ではなく、発話全体の意味と目的で判断する。\n通常の会話として合理的に理解できる内容を過剰に曖昧扱いしない。\n\nCapability一覧は「理解・回答できる範囲」を制限しない。「実際に外部操作できる範囲」だけを制限する。\n\n【通常回答 / 相談 / 説明 / 調査】\n外部操作が不要な依頼は必ずNEXT_ANSWERを1件作る。\n対象は質問、相談、説明、比較、判断支援、アイデア、文章理解、単語や表現の意味、調査、検索依頼、旅行、商品、価格、最新情報確認など。これらに限定しない。\n\n通常回答のaction:\nexecutor=NEXT_ANSWER\nmodule=answer\noperation=answer\nparameters={}\nrisk=low\nneeds_review=false\nneeds_confirmation=false\nreason=none\nstatus=planned\n\n回答本文はreplyへ入れる。\n通常回答でもactionsを空にしない。\n\n現在情報が必要な依頼では、このモデル環境で利用可能な検索機能を使えるなら利用する。\n取得できない現在情報を推測で事実として作らない。\n\n【確認質問】\n実操作に必要な重要情報が不足し、合理的に一意に決められない場合もNEXT_ANSWERを1件作り、replyに確認質問を1つだけ入れる。\n不完全な実操作actionを作らない。\n\n【未接続操作】\n依頼の意味を理解できても接続済みCapabilityが無い操作は、架空のexecutorやoperationを作らない。\nNEXT_ANSWERを1件作り、replyで簡潔に説明する。\n相談・説明・比較・調査は通常どおり行う。\n\n【安全】\n購入、契約、削除、公開、外部送信、電話発信など、現在接続されていない重大な操作は実行しない。\nその場合はNEXT_ANSWERで説明する。\n\n【接続済みCapability】\n左から executor / module / operation / required_parameters。\nYOS_OpenApp / open_app / open / app\nNEXT_DEVICE / device / set_brightness / percent\nNEXT_DEVICE / device / set_volume / percent\nNEXT_DEVICE / device / set_wifi / state\nNEXT_DEVICE / device / set_bluetooth / state\nNEXT_DEVICE / device / set_cellular_data / state\nNEXT_DEVICE / device / set_airplane_mode / state\nNEXT_DEVICE / device / set_low_power_mode / state\nNEXT_DEVICE / device / set_flashlight / state\nNEXT_DEVICE / device / set_appearance / state\nNEXT_DEVICE / device / set_do_not_disturb / state\nNEXT_TIMER / timer / start / duration_minutes\nNEXT_CALENDAR / calendar / create / title,start,end\nNEXT_REMINDER / reminder / create / title,date_time\nNEXT_NAVIGATE / navigate / open_maps / destination\nYOS_Home / home / execute / command\nNEXT_ANSWER / answer / answer / none\n\nexecutorとmoduleを逆にしない。上記以外の実行先を作らない。\n\n【Open App canonical keys】\nsafari, shortcuts, files, notes, phone, reminders, mail, music, calendar, maps, contacts, health, photos, appstore, facetime, chatgpt, scriptable, youtube, spotify, google_sheets\n\n【Device値】\npercent=0〜100。\nstate=on/off/toggle。\nappearance state=light/dark/toggle。\n自然な日本語から一意に判断できる値は変換してよい。\n半分=50、最大=100、ミュート/消音=0。\n\n【日時】\ncurrent_time: {CurrentDate}\n\n今日、明日、明後日、来週、来週月曜日、30分後などはcurrent_timeを基準に通常の日本語として解釈する。\nCalendarでstartが明確でendだけ無い場合はend=startの60分後としてよい。\ncalendar/reminderのtitleは日時や操作語だけを除き、ユーザーが内容として述べた表現をできるだけ保持する。\n\n【家電】\nテレビ・エアコン・照明への明確な操作はYOS_Homeを使う。\nparameters.commandには操作意図を失わない内容を入れる。\n複数機器は機器ごとに独立actionへ分け、発話順を維持する。\n\n【複数依頼】\n複数の実操作は発話順に別actionへ分ける。\n質問/相談と実操作が混在する場合、実操作はactions、回答はreplyへ入れる。\nこの場合は実操作actionがあるためNEXT_ANSWERを追加しなくてよい。\n\n【単語・短句】\n意味を尋ねられた場合は固定テンプレートを全部出さず、理解に役立つ3〜6項目程度を選ぶ。\n候補: 言葉、読み/発音、ひとことで、意味、ニュアンス、使い方、例、似た言葉との差、注意、語源/由来、原語/英語、反対語/関連語。\n\n【出力】\n返答はDictionary1個だけ。\n最上位キーはactionsとreply。\nactionsはList。replyはText。\n\n各actionのキーは id,module,operation,executor,parameters,risk,confidence,needs_review,needs_confirmation,reason,dependency,status。\nidはa1,a2,a3...。\nstatusは必ずplanned。\nconfidenceは0.0〜1.0。\ndependencyがなければ空List。\n明確な通常実行はneeds_review=false, needs_confirmation=false, reason=none。\n\n通常回答・確認質問・未接続操作の場合もactionsを空にせず、必ずNEXT_ANSWER actionを1件作る。\n\nBEGIN_USER_INPUT\n{userInput}\nEND_USER_INPUT\n\nBEGIN_USER_INPUTとEND_USER_INPUTの間だけを今回のユーザー入力として扱う。")
+
+const modelResult = askChatGPT(routerPrompt, false, "Dictionary")
+const modelRecord = text("{CurrentDate}\t{requestNumber}\tMODEL\t{modelResult}\n")
+appendToFile("Clarity Next Ledger.txt", modelRecord)
+
+const parsed = getDictionary(modelResult)
+@actionsRaw = getValue(parsed, "actions")
+const reply = "{parsed['reply']}"
+
+if !@actionsRaw {
+    const blockedNoActions = text("{CurrentDate}\t{requestNumber}\tBLOCKED\tno_actions\n")
+    appendToFile("Clarity Next Ledger.txt", blockedNoActions)
+    alert("安全に操作を判断できませんでした", "Clarity Core")
+    stop()
+}
+
+for actionItem in @actionsRaw {
+    const action = getDictionary(@actionItem)
+    const actionId = "{action['id']}"
+    const module = "{action['module']}"
+    const operation = "{action['operation']}"
+    const executor = "{action['executor']}"
+    const status = "{action['status']}"
+    const risk = "{action['risk']}"
+    const parametersRaw = getValue(action, "parameters")
+    const parameters = getDictionary(parametersRaw)
+    const needsReview = getValue(action, "needs_review")
+    const needsConfirmation = getValue(action, "needs_confirmation")
+    const needsReviewText = text("{needsReview}")
+    const needsConfirmationText = text("{needsConfirmation}")
+    const reason = "{action['reason']}"
+
+    // Defensive normalization: some model outputs can swap module and executor.
+    // Normalize only the exact known pairs; unknown pairs remain fail-closed.
+    @normalizedModule = "{module}"
+    @normalizedExecutor = "{executor}"
+    if executor == "open_app" && module == "YOS_OpenApp" {
+        @normalizedModule = "open_app"
+        @normalizedExecutor = "YOS_OpenApp"
+    }
+    if executor == "device" && module == "NEXT_DEVICE" {
+        @normalizedModule = "device"
+        @normalizedExecutor = "NEXT_DEVICE"
+    }
+    if executor == "timer" && module == "NEXT_TIMER" {
+        @normalizedModule = "timer"
+        @normalizedExecutor = "NEXT_TIMER"
+    }
+    if executor == "calendar" && module == "NEXT_CALENDAR" {
+        @normalizedModule = "calendar"
+        @normalizedExecutor = "NEXT_CALENDAR"
+    }
+    if executor == "reminder" && module == "NEXT_REMINDER" {
+        @normalizedModule = "reminder"
+        @normalizedExecutor = "NEXT_REMINDER"
+    }
+    if executor == "navigate" && module == "NEXT_NAVIGATE" {
+        @normalizedModule = "navigate"
+        @normalizedExecutor = "NEXT_NAVIGATE"
+    }
+    if executor == "home" && module == "YOS_Home" {
+        @normalizedModule = "home"
+        @normalizedExecutor = "YOS_Home"
+    }
+    if executor == "answer" && module == "NEXT_ANSWER" {
+        @normalizedModule = "answer"
+        @normalizedExecutor = "NEXT_ANSWER"
+    }
+
+    const planRecord = text("{CurrentDate}\t{requestNumber}\t{actionId}\tPLAN\tmodule={normalizedModule}\toperation={operation}\texecutor={normalizedExecutor}\trisk={risk}\treview={needsReview}\tconfirm={needsConfirmation}\treason={reason}\n")
+    appendToFile("Clarity Next Ledger.txt", planRecord)
+
+    if status != "planned" {
+        const blockedStatus = text("{CurrentDate}\t{requestNumber}\t{actionId}\tBLOCKED\tinvalid_status\n")
+        appendToFile("Clarity Next Ledger.txt", blockedStatus)
+        alert("実行計画が安全な形式ではありません", "Clarity Core")
+        stop()
+    }
+
+    if needsReviewText == "はい" {
+        const blockedReview = text("{CurrentDate}\t{requestNumber}\t{actionId}\tBLOCKED\tneeds_review\t{reason}\n")
+        appendToFile("Clarity Next Ledger.txt", blockedReview)
+        alert("確認が必要です\n{reason}", "Clarity Core")
+        stop()
+    }
+
+    if risk == "high" || risk == "irreversible" {
+        if needsConfirmationText != "はい" {
+            const blockedRisk = text("{CurrentDate}\t{requestNumber}\t{actionId}\tBLOCKED\trisk_without_confirmation\n")
+            appendToFile("Clarity Next Ledger.txt", blockedRisk)
+            alert("安全確認が必要な操作です", "Clarity Core")
+            stop()
+        }
+    }
+
+    if needsConfirmationText == "はい" {
+        confirm("この操作を実行しますか？", "Clarity Core")
+    }
+
+    if @normalizedExecutor == "YOS_OpenApp" && @normalizedModule == "open_app" && operation == "open" {
+        const app = "{parameters['app']}"
+        const executing = text("{CurrentDate}\t{requestNumber}\t{actionId}\tEXECUTING\topen_app\t{app}\n")
+        appendToFile("Clarity Next Ledger.txt", executing)
+        run("YOS_OpenApp", app)
+        const openAppApplied = text("{CurrentDate}\t{requestNumber}\t{actionId}\tAPPLIED\topen_app\t{app}\n")
+        appendToFile("Clarity Next Ledger.txt", openAppApplied)
+    }
+
+    if @normalizedExecutor == "NEXT_DEVICE" && @normalizedModule == "device" {
+        const percent = getValue(parameters, "percent")
+        const state = "{parameters['state']}"
+
+        if operation == "set_brightness" {
+            const brightnessPercent = getNumbers(percent)
+            if brightnessPercent < 0 || brightnessPercent > 100 {
+                alert("明るさは0〜100%で指定してください", "Clarity Core")
+                stop()
+            }
+            const brightnessRatio = brightnessPercent * 0.01
+            rawAction("is.workflow.actions.setbrightness", {
+                "WFBrightness": "${brightnessRatio}"
+            })
+        }
+
+        if operation == "set_volume" {
+            const volumePercent = getNumbers(percent)
+            if volumePercent < 0 || volumePercent > 100 {
+                alert("音量は0〜100%で指定してください", "Clarity Core")
+                stop()
+            }
+            const volumeRatio = volumePercent * 0.01
+            rawAction("is.workflow.actions.setvolume", {
+                "WFVolume": "${volumeRatio}"
+            })
+        }
+
+        if operation == "set_wifi" {
+            if state == "on" { setWifi(true) }
+            if state == "off" { setWifi(false) }
+            if state == "toggle" { toggleWifi() }
+        }
+        if operation == "set_bluetooth" {
+            if state == "on" { setBluetooth(true) }
+            if state == "off" { setBluetooth(false) }
+            if state == "toggle" { toggleBluetooth() }
+        }
+        if operation == "set_cellular_data" {
+            if state == "on" { setCellularData(true) }
+            if state == "off" { setCellularData(false) }
+            if state == "toggle" { toggleCellularData() }
+        }
+        if operation == "set_airplane_mode" {
+            if state == "on" { setAirplaneMode(true) }
+            if state == "off" { setAirplaneMode(false) }
+            if state == "toggle" { toggleAirplaneMode() }
+        }
+        if operation == "set_low_power_mode" {
+            if state == "on" { setLowPowerMode(true) }
+            if state == "off" { setLowPowerMode(false) }
+            if state == "toggle" { toggleLowPowerMode() }
+        }
+        if operation == "set_flashlight" {
+            if state == "on" { flashlightOn() }
+            if state == "off" { flashlightOff() }
+            if state == "toggle" { toggleFlashlight() }
+        }
+        if operation == "set_appearance" {
+            if state == "light" { lightMode() }
+            if state == "dark" { darkMode() }
+            if state == "toggle" { toggleAppearance() }
+        }
+        if operation == "set_do_not_disturb" {
+            if state == "on" { DNDOn() }
+            if state == "off" { DNDOff() }
+            if state == "toggle" { toggleDND() }
+        }
+        const deviceApplied = text("{CurrentDate}\t{requestNumber}\t{actionId}\tAPPLIED\tdevice\t{operation}\n")
+        appendToFile("Clarity Next Ledger.txt", deviceApplied)
+    }
+
+    if @normalizedExecutor == "NEXT_TIMER" && @normalizedModule == "timer" && operation == "start" {
+        const duration = getValue(parameters, "duration_minutes")
+        const minutes = getNumbers(duration)
+        if minutes <= 0 {
+            alert("タイマー時間を判断できませんでした", "Clarity Core")
+            stop()
+        }
+        startTimer(qty(minutes, "min"))
+        const timerApplied = text("{CurrentDate}\t{requestNumber}\t{actionId}\tAPPLIED\ttimer\t{minutes}min\n")
+        appendToFile("Clarity Next Ledger.txt", timerApplied)
+    }
+
+    if @normalizedExecutor == "NEXT_CALENDAR" && @normalizedModule == "calendar" && operation == "create" {
+        const eventTitle = "{parameters['title']}"
+        const startText = "{parameters['start']}"
+        const endText = "{parameters['end']}"
+        if !eventTitle || !startText || !endText {
+            alert("予定のタイトル・開始・終了を確認してください", "Clarity Core")
+            stop()
+        }
+        // iOS Japanese locale can reject ISO 8601 text with "T" in Detect Dates.
+        // Normalize model timestamps to a locale-friendly form before conversion.
+        const startNoT = replaceText("T", " ", startText)
+        const startNormalized = replaceText("-", "/", startNoT)
+        const endNoT = replaceText("T", " ", endText)
+        const endNormalized = replaceText("-", "/", endNoT)
+        const startDate = getDates(startNormalized)
+        const endDate = getDates(endNormalized)
+        rawAction("is.workflow.actions.addnewevent", {
+            "WFCalendarItemTitle": "{eventTitle}",
+            "WFCalendarItemCalendar": "プライベート",
+            "WFCalendarItemDates": true,
+            "WFCalendarItemStartDate": "${startDate}",
+            "WFCalendarItemEndDate": "${endDate}",
+            "WFCalendarItemAllDay": false,
+            "ShowWhenRun": false
+        })
+        const calendarApplied = text("{CurrentDate}\t{requestNumber}\t{actionId}\tAPPLIED\tcalendar\t{eventTitle}\n")
+        appendToFile("Clarity Next Ledger.txt", calendarApplied)
+    }
+
+    if @normalizedExecutor == "NEXT_REMINDER" && @normalizedModule == "reminder" && operation == "create" {
+        const reminderTitle = "{parameters['title']}"
+        const whenText = "{parameters['date_time']}"
+        if !reminderTitle || !whenText {
+            alert("リマインダーの内容・日時を確認してください", "Clarity Core")
+            stop()
+        }
+        const reminderNoT = replaceText("T", " ", whenText)
+        const reminderNormalized = replaceText("-", "/", reminderNoT)
+        const alertDate = getDates(reminderNormalized)
+        rawAction("is.workflow.actions.addnewreminder", {
+            "WFCalendarItemTitle": "{reminderTitle}",
+            "WFCalendarItemAlert": true,
+            "WFAlertTrigger": "At Time",
+            "WFAlertCustomTime": "${alertDate}"
+        })
+        const reminderApplied = text("{CurrentDate}\t{requestNumber}\t{actionId}\tAPPLIED\treminder\t{reminderTitle}\n")
+        appendToFile("Clarity Next Ledger.txt", reminderApplied)
+    }
+
+    if @normalizedExecutor == "NEXT_NAVIGATE" && @normalizedModule == "navigate" && operation == "open_maps" {
+        const destination = "{parameters['destination']}"
+        if !destination {
+            alert("目的地を確認してください", "Clarity Core")
+            stop()
+        }
+        const place = location(destination)
+        openInMaps(place)
+        const navigateApplied = text("{CurrentDate}\t{requestNumber}\t{actionId}\tAPPLIED\tnavigate\t{destination}\n")
+        appendToFile("Clarity Next Ledger.txt", navigateApplied)
+    }
+
+    if @normalizedExecutor == "YOS_Home" && @normalizedModule == "home" && operation == "execute" {
+        const homeCommand = "{parameters['command']}"
+        if !homeCommand {
+            const homeBlocked = text("{CurrentDate}\t{requestNumber}\t{actionId}\tBLOCKED\thome_missing_command\n")
+            appendToFile("Clarity Next Ledger.txt", homeBlocked)
+            alert("家電操作の内容を確認してください", "Clarity Core")
+            stop()
+        }
+        const homeExecuting = text("{CurrentDate}\t{requestNumber}\t{actionId}\tEXECUTING\thome\t{homeCommand}\n")
+        appendToFile("Clarity Next Ledger.txt", homeExecuting)
+        run("YOS_Home", homeCommand)
+        const homeApplied = text("{CurrentDate}\t{requestNumber}\t{actionId}\tAPPLIED\thome\t{homeCommand}\n")
+        appendToFile("Clarity Next Ledger.txt", homeApplied)
+    }
+
+    if @normalizedExecutor == "NEXT_ANSWER" && @normalizedModule == "answer" && operation == "answer" {
+        const handled = text("{CurrentDate}\t{requestNumber}\t{actionId}\tHANDLED\tanswer\n")
+        appendToFile("Clarity Next Ledger.txt", handled)
+    }
+
+    if @normalizedExecutor != "YOS_OpenApp" && @normalizedExecutor != "NEXT_DEVICE" && @normalizedExecutor != "NEXT_TIMER" && @normalizedExecutor != "NEXT_CALENDAR" && @normalizedExecutor != "NEXT_REMINDER" && @normalizedExecutor != "NEXT_NAVIGATE" && @normalizedExecutor != "YOS_Home" && @normalizedExecutor != "NEXT_ANSWER" {
+        const blockedUnsupported = text("{CurrentDate}\t{requestNumber}\t{actionId}\tBLOCKED\tunsupported_executor\t{normalizedExecutor}\n")
+        appendToFile("Clarity Next Ledger.txt", blockedUnsupported)
+        alert("この操作はClarity Coreでは未対応です", "Clarity Core")
+        stop()
+    }
+}
+
+const doneRecord = text("{CurrentDate}\t{requestNumber}\tREQUEST_DONE\n")
+appendToFile("Clarity Next Ledger.txt", doneRecord)
+if reply {
+    alert(reply, "Clarity Core")
+}
