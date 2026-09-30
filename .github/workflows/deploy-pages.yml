@@ -7,6 +7,17 @@ on:
       - 'data/mission-control.json'
   issues:
     types: [opened, edited, closed, reopened, labeled, unlabeled, assigned, unassigned]
+  pull_request:
+    types:
+      - opened
+      - edited
+      - closed
+      - reopened
+      - synchronize
+      - ready_for_review
+      - converted_to_draft
+      - labeled
+      - unlabeled
   schedule:
     - cron: '7 * * * *'
   workflow_dispatch:
@@ -24,6 +35,7 @@ concurrency:
 
 jobs:
   sync-and-deploy:
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
