@@ -318,6 +318,23 @@ test('reports allowlisted answer substages while preserving the legacy answer fa
   }
 });
 
+test('reports the bounded model request status without exposing private model errors', async () => {
+  const events = [];
+  const handler = createChatHandler(dependencies({
+    runtimeFactory: {
+      async create() {
+        return {async answer() { throw new AnswerFailure('model-request','401'); }};
+      }
+    },
+    failureReporter(event) { events.push(event); }
+  }));
+  const response = await handler(jsonRequest({userText: 'private user question'}));
+  assert.equal(response.status,503);
+  assert.deepEqual(events,[{stage:'model-request',requestId:'req-test',modelRequestStatus:'401'}]);
+  assert.deepEqual(Object.keys(events[0]).sort(),['modelRequestStatus','requestId','stage']);
+  assert.doesNotMatch(JSON.stringify(events),/private user question|OPENAI_API_KEY/);
+});
+
 test('successful answers emit no failure diagnostic', async () => {
   const events = [];
   const handler = createChatHandler(dependencies({
