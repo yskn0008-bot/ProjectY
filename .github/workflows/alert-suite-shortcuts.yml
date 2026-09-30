@@ -73,12 +73,11 @@ jobs:
               a=w.get('WFWorkflowActions',[])
               return w,a,[x.get('WFWorkflowActionIdentifier','') for x in a],repr(w)
 
-          dangerous={
-            'is.workflow.actions.sendemail',
-            'is.workflow.actions.sendmessage',
-            'is.workflow.actions.deleteemail',
-            'is.workflow.actions.file.delete'
-          }
+          forbidden_calls=('sendEmail(','sendMessage(','deleteFiles(','deleteEmails(')
+          for src in Path('tools/alerts').glob('*.cherri'):
+              text=src.read_text(encoding='utf-8')
+              hits=[token for token in forbidden_calls if token in text]
+              assert not hits, (src.name,hits)
 
           w,a,ids,blob=read('Money Alert')
           assert w.get('WFWorkflowHasShortcutInputVariables') is True
@@ -119,7 +118,6 @@ jobs:
 
           for name in ('Money Alert','Task Alert','Routine Alert','Emergency Alert','Important Mail'):
               _,a,ids,blob=read(name)
-              assert not (dangerous & set(ids)), (name,dangerous & set(ids))
               assert ids.count('is.workflow.actions.documentpicker.save') <= 1
           print('YOS Alert suite safety contract: PASS')
           PY
