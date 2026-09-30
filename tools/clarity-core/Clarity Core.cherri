@@ -27,9 +27,15 @@ const parsed = getDictionary(modelResult)
 const reply = "{parsed['reply']}"
 
 if !@actionsRaw {
-    const blockedNoActions = text("{CurrentDate}\t{requestNumber}\tBLOCKED\tno_actions\n")
+    if reply {
+        const handledNoActions = text("{CurrentDate}\t{requestNumber}\tHANDLED\tanswer_fallback\n")
+        appendToFile("Clarity Next Ledger.txt", handledNoActions)
+        alert(reply, "Clarity Core")
+        stop()
+    }
+    const blockedNoActions = text("{CurrentDate}\t{requestNumber}\tBLOCKED\tno_actions_no_reply\n")
     appendToFile("Clarity Next Ledger.txt", blockedNoActions)
-    alert("安全に操作を判断できませんでした", "Clarity Core")
+    alert("回答を生成できませんでした", "Clarity Core")
     stop()
 }
 
