@@ -46,6 +46,36 @@ python3 tools/factory-core/provider_router.py fail public_host github_pages "rat
 
 A provider failure returns the next eligible route instead of `stop` when another route exists.
 
+## YOS Loop Engine
+
+`yos_loop_engine.py` adds a bounded implementation loop inside the existing One Enter / Factory Core path.
+
+```text
+Build
+→ Verify
+→ FAILなら evidence を渡して Recover
+→ Verify
+→ 最大2回で停止
+→ Code verified / Owner boundary / Blocked
+```
+
+- 同じ失敗への自動回復は最大2回
+- scope外 / forbidden path変更は即停止
+- physical iPhone / Production確認を自動PASS扱いしない
+- 結果は機械可読JSONで返す
+- merge / 本番公開 / 課金 / 外部送信は自動化しない
+
+詳細: `docs/YOS_LOOP_ENGINE_v1.md`
+
+実行例:
+
+```bash
+python3 tools/factory-core/yos_loop_engine.py \
+  --job /path/to/job.json \
+  --repo /path/to/ProjectY \
+  --result /tmp/yos-loop-result.json
+```
+
 ## Test
 
 ```bash
