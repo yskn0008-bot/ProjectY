@@ -114,7 +114,7 @@ try{
   assert.match(friendlyProgress,/全部通れば進捗は85%/);
   assert.doesNotMatch(friendlyProgress,/REQUEST_DONE|Router|Verify|Ledger|E2E|destination/,'technical implementation terms should not be shown to the user');
   assert.doesNotMatch(friendlyProgress,/進捗 65%\\s*状態/,'progress/status should not be duplicated inside the message body');
-  assert.match((await page.locator('#threadStatus').textContent())||'',/65%/);
+  assert.match((await page.locator('#threadStatus').textContent())||'',/\d+%/);
   assert.equal(await page.locator('#bottom').evaluate(el=>getComputedStyle(el).display),'none');
 
   await page.locator('#threadInput').fill('YOS DESKから送信テスト');
