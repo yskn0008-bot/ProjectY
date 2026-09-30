@@ -30,7 +30,18 @@ await context.addInitScript(() => {
 });
 
 const page=await context.newPage();
+let chatRequests=0;
 await page.route('**/api/yos/chat', async route => {
+  chatRequests+=1;
+  const authorization=route.request().headers()['authorization']||'';
+  if(authorization.includes('bad-token')){
+    await route.fulfill({
+      status:401,
+      contentType:'application/json',
+      body:JSON.stringify({error:'Authentication failed',requestId:'desk-auth-retry'})
+    });
+    return;
+  }
   await route.fulfill({
     status:200,
     contentType:'application/json',
@@ -81,7 +92,15 @@ try{
 
   await page.evaluate((localBase)=>{
     globalThis.YOS_AI_BASE_URL=localBase;
-    globalThis.YOS_AUTH={getGoogleIdToken:async()=> 'header.payload.signature'};
+    let token='bad-token';
+    globalThis.__deskAuthResetCount=0;
+    globalThis.YOS_AUTH={
+      getGoogleIdToken:async()=>token,
+      resetGoogleIdToken:()=>{
+        globalThis.__deskAuthResetCount+=1;
+        token='good-token';
+      }
+    };
   },base);
 
   await page.locator('.chat[data-id="asset-clarity"]').click();
@@ -104,6 +123,9 @@ try{
   const streamText=(await page.locator('#messageStream').textContent())||'';
   assert.match(streamText,/YOS DESKから送信テスト/);
   assert.match(streamText,/テスト応答です。メッセージUIは動作しています。/);
+  assert.equal(await page.evaluate(()=>globalThis.__deskAuthResetCount),1,'401 should reset Google auth once and retry the same message');
+  assert.equal(chatRequests,2,'one user message should retry once after auth reset');
+  assert.equal(await page.locator('#bottom').evaluate(el=>getComputedStyle(el).display),'none','bottom navigation must stay hidden while the thread is open');
 
   await page.locator('#threadBack').click();
   await page.waitForSelector('#chatsPage.active');
