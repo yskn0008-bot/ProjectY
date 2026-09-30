@@ -13,6 +13,7 @@
 // Existing MY LIFE remains separate; this removes browser sync from the critical night flow.
 
 const historyFolder = createFolder("YOS Night History")
+const displayHistoryFolder = createFolder("YOS Display History")
 const historyFiles = getFolderContents(historyFolder, false)
 const recentHistoryFiles = filterFiles(historyFiles, 14, "Name", "Z to A")
 const recentHistory = getText(recentHistoryFiles)
@@ -152,6 +153,12 @@ const response = askChatGPT(modelPrompt, false, "Text")
 // Normalize spacing even if the model compresses the numbered discoveries.
 const spacedResponse2 = replaceText('\\n+2\\.', "\n\n2.", response, true, true)
 const spacedResponse3 = replaceText('\\n+3\\.', "\n\n3.", spacedResponse2, true, true)
+
+const nightLogNow = currentDate()
+const nightLogStamp = formatDate(nightLogNow, "Custom", "yyyy-MM-dd HHmmss")
+const nightBriefLog = text("【Night Brief】\n{spacedResponse3}")
+saveFile("YOS Display History/{nightLogStamp} Night Brief.txt", nightBriefLog, false)
+
 showNotification("Night Brief：今日の発見をまとめました")
 alert(spacedResponse3, "Night Brief")
 
@@ -223,5 +230,10 @@ const finalText = text("保存しました
 
 3行日記：
 {diary}")
+
+const checkinLogNow = currentDate()
+const checkinLogStamp = formatDate(checkinLogNow, "Custom", "yyyy-MM-dd HHmmss")
+const nightCheckinLog = text("【Night Check-in】\n{finalText}")
+saveFile("YOS Display History/{checkinLogStamp} Night Check-in.txt", nightCheckinLog, false)
 
 alert(finalText, "Night Brief")

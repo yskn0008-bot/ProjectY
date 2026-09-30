@@ -24,6 +24,21 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.ref || github.ref_name }}
 
+      - name: Install pinned Cherri v2.3.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          url='https://github.com/electrikmilk/cherri/releases/download/v2.3.0/cherri_linux-x86_64.zip'
+          expected='7ab2c384b7b26e7c72a30a8dfa56f89dae12c4068b7951bc1e3193f3698edbe9'
+          curl -fsSL "$url" -o /tmp/cherri.zip
+          printf '%s  %s\n' "$expected" /tmp/cherri.zip | sha256sum -c -
+          mkdir -p /tmp/cherri
+          unzip -q /tmp/cherri.zip -d /tmp/cherri
+          binary="$(find /tmp/cherri -type f -name cherri -print -quit)"
+          test -n "$binary"
+          sudo install -m 0755 "$binary" /usr/local/bin/cherri
+          cherri --version
+
       - name: Test existing Morning Brief bridge
         shell: bash
         run: |
@@ -36,8 +51,17 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p tools/morning-brief/artifacts
+          cd tools/morning-brief
+          rm -f './Morning History Fragment_unsigned.shortcut'
+          cherri 'Morning History Fragment.cherri' --skip-sign --debug
+          test -f './Morning History Fragment_unsigned.shortcut'
+          cd ../..
           python3 tools/morning-brief/patch_no_safari.py \
             'tools/morning-brief/Morning Brief Money Connected.plist' \
+            'tools/morning-brief/artifacts/Morning Brief.base.plist'
+          python3 tools/morning-brief/inject_display_history.py \
+            'tools/morning-brief/artifacts/Morning Brief.base.plist' \
+            'tools/morning-brief/Morning History Fragment_unsigned.shortcut' \
             'tools/morning-brief/artifacts/Morning Brief.plist'
 
       - name: Validate no-Safari Shortcut contract
@@ -54,7 +78,6 @@ jobs:
           ids=[a.get('WFWorkflowActionIdentifier','') for a in actions]
           blob=repr(workflow)
 
-          assert len(actions)==11, len(actions)
           assert workflow.get('WFWorkflowHasShortcutInputVariables') is False
           assert ids.count('is.workflow.actions.weather.currentconditions')==1
           assert ids.count('is.workflow.actions.weather.forecast')==1
@@ -64,6 +87,8 @@ jobs:
           assert ids.count('is.workflow.actions.askllm')==1
           assert ids.count('is.workflow.actions.notification')==1
           assert ids.count('is.workflow.actions.alert')==1
+          assert ids.count('is.workflow.actions.documentpicker.save')==1
+          assert ids.count('is.workflow.actions.file.createfolder')==1
           assert ids.count('is.workflow.actions.openurl')==0
           assert ids.count('is.workflow.actions.exit')==0
           assert 'raw.githubusercontent.com/yskn0008-bot/ProjectY/main/yos/money-master-v1.js' in blob
@@ -73,7 +98,9 @@ jobs:
           assert 'base.masterFacts' in blob
           assert '表示は次の7行以内' in blob
           assert 'iPhoneの1画面で最後まで読める短さ' in blob
-          print(f'Morning Brief no-Safari contract: PASS ({len(actions)} actions)')
+          assert 'YOS Display History' in blob
+          assert '【Morning Brief】' in blob
+          print(f'Morning Brief no-Safari + history contract: PASS ({len(actions)} actions)')
           PY
 
       - name: Sign Morning Brief
@@ -86,6 +113,17 @@ jobs:
             --name 'Morning Brief' \
             2>&1 | tee tools/morning-brief/artifacts/morning-brief-hubsign.log
 
+      - name: Sign current-device Morning%20Brief compatibility artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/clarity-factory/sign_with_hubsign.py \
+            --input 'tools/morning-brief/artifacts/Morning Brief.plist' \
+            --output 'tools/morning-brief/artifacts/Morning%20Brief.shortcut' \
+            --name 'Morning%20Brief' \
+            2>&1 | tee tools/morning-brief/artifacts/morning-brief-compat-hubsign.log
+
+
       - name: Verify signed artifact
         shell: bash
         run: |
@@ -96,7 +134,10 @@ jobs:
           data=p.read_bytes()
           assert data.startswith(b'AEA1'), data[:8]
           assert len(data)>500, len(data)
-          print(f'Morning Brief signed AEA1: PASS ({len(data)} bytes)')
+          compat=Path('tools/morning-brief/artifacts/Morning%20Brief.shortcut').read_bytes()
+          assert compat.startswith(b'AEA1'), compat[:8]
+          assert len(compat)>500, len(compat)
+          print(f'Morning Brief signed AEA1: PASS ({len(data)} bytes; compat {len(compat)} bytes)')
           PY
 
       - name: Publish iPhone acceptance artifact to PR branch
@@ -122,5 +163,7 @@ jobs:
           name: morning-brief-final
           path: |
             tools/morning-brief/artifacts/Morning Brief.shortcut
+            tools/morning-brief/artifacts/Morning%20Brief.shortcut
             tools/morning-brief/artifacts/morning-brief-hubsign.log
+            tools/morning-brief/artifacts/morning-brief-compat-hubsign.log
           if-no-files-found: error

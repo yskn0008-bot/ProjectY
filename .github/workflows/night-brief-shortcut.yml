@@ -73,10 +73,10 @@ jobs:
 
           assert workflow.get('WFWorkflowHasShortcutInputVariables') is False
           assert ids.count('is.workflow.actions.documentpicker.open') == 0
-          assert ids.count('is.workflow.actions.file.createfolder') == 1
+          assert ids.count('is.workflow.actions.file.createfolder') == 2
           assert ids.count('is.workflow.actions.file.getfoldercontents') == 1
           assert ids.count('is.workflow.actions.filter.files') == 1
-          assert ids.count('is.workflow.actions.documentpicker.save') == 1
+          assert ids.count('is.workflow.actions.documentpicker.save') == 3
           assert ids.count('is.workflow.actions.weather.forecast') == 1
           assert ids.count('is.workflow.actions.filter.calendarevents') == 2
           assert ids.count('is.workflow.actions.filter.reminders') == 2
@@ -90,6 +90,9 @@ jobs:
           assert ids.count('is.workflow.actions.exit') == 0
 
           assert 'YOS Night History' in blob
+          assert 'YOS Display History' in blob
+          assert '【Night Brief】' in blob
+          assert '【Night Check-in】' in blob
           assert 'YOS_NIGHT_RECORD_V1' in blob
           assert '収集区域④' in blob
           assert '観察候補を最大10個まで作る' in blob

@@ -1,0 +1,98 @@
+name: YOS History shortcut
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'tools/yos-history/**'
+      - '.github/workflows/yos-history-shortcut.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-sign:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pinned Cherri v2.3.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          url='https://github.com/electrikmilk/cherri/releases/download/v2.3.0/cherri_linux-x86_64.zip'
+          expected='7ab2c384b7b26e7c72a30a8dfa56f89dae12c4068b7951bc1e3193f3698edbe9'
+          curl -fsSL "$url" -o /tmp/cherri.zip
+          printf '%s  %s\n' "$expected" /tmp/cherri.zip | sha256sum -c -
+          mkdir -p /tmp/cherri
+          unzip -q /tmp/cherri.zip -d /tmp/cherri
+          binary="$(find /tmp/cherri -type f -name cherri -print -quit)"
+          test -n "$binary"
+          sudo install -m 0755 "$binary" /usr/local/bin/cherri
+          cherri --version
+
+      - name: Compile YOS History
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd tools/yos-history
+          rm -f './YOS History_unsigned.shortcut'
+          cherri 'YOS History.cherri' --skip-sign --debug
+          test -f './YOS History_unsigned.shortcut'
+          mkdir -p artifacts
+          cp './YOS History_unsigned.shortcut' 'artifacts/YOS History.plist'
+
+      - name: Validate history contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import plistlib
+          from pathlib import Path
+          p=Path('tools/yos-history/artifacts/YOS History.plist')
+          workflow=plistlib.loads(p.read_bytes())
+          actions=workflow.get('WFWorkflowActions',[])
+          ids=[a.get('WFWorkflowActionIdentifier','') for a in actions]
+          blob=repr(workflow)
+
+          assert ids.count('is.workflow.actions.file.createfolder') == 1
+          assert ids.count('is.workflow.actions.file.getfoldercontents') == 1
+          assert ids.count('is.workflow.actions.filter.files') == 1
+          assert ids.count('is.workflow.actions.choosefromlist') == 1
+          assert ids.count('is.workflow.actions.detect.text') == 1
+          assert ids.count('is.workflow.actions.showresult') == 1
+          assert 'YOS Display History' in blob
+          assert '読み返す履歴を選ぶ' in blob
+          print(f'YOS History contract: PASS ({len(actions)} actions)')
+          PY
+
+      - name: Sign YOS History
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/clarity-factory/sign_with_hubsign.py             --input 'tools/yos-history/artifacts/YOS History.plist'             --output 'tools/yos-history/artifacts/YOS History.shortcut'             --name 'YOS History'             2>&1 | tee 'tools/yos-history/artifacts/yos-history-hubsign.log'
+
+      - name: Verify signed artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('tools/yos-history/artifacts/YOS History.shortcut')
+          data=p.read_bytes()
+          assert data.startswith(b'AEA1'), data[:8]
+          assert len(data)>500, len(data)
+          print(f'YOS History signed AEA1: PASS ({len(data)} bytes)')
+          PY
+
+      - name: Upload iPhone acceptance package
+        uses: actions/upload-artifact@v4
+        with:
+          name: yos-history
+          path: |
+            tools/yos-history/artifacts/YOS History.shortcut
+            tools/yos-history/artifacts/YOS History.plist
+            tools/yos-history/artifacts/yos-history-hubsign.log
+          if-no-files-found: error

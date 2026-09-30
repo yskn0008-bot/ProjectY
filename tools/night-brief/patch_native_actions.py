@@ -107,14 +107,16 @@ def patch(path: Path) -> None:
         a for a in actions
         if a.get("WFWorkflowActionIdentifier") == "is.workflow.actions.date"
     ]
-    if len(date_actions) != 5:
-        fail(f"expected five Date actions, found {len(date_actions)}")
-    # Date #1 is Current Date; #2/#3 are today 00:00 / 23:59;
-    # #4/#5 are tomorrow 00:00 / 23:59.
-    today_start_uuid = action_uuid(date_actions[1])
-    today_end_uuid = action_uuid(date_actions[2])
-    start_uuid = action_uuid(date_actions[3])
-    end_uuid = action_uuid(date_actions[4])
+    specified_dates = [
+        a for a in date_actions
+        if a.get("WFWorkflowActionParameters", {}).get("WFDateActionMode") == "Specified Date"
+    ]
+    if len(specified_dates) != 4:
+        fail(f"expected four specified boundary Date actions, found {len(specified_dates)}")
+    today_start_uuid = action_uuid(specified_dates[0])
+    today_end_uuid = action_uuid(specified_dates[1])
+    start_uuid = action_uuid(specified_dates[2])
+    end_uuid = action_uuid(specified_dates[3])
 
     tci = find_marker(actions, TODAY_CALENDAR_MARKER)
     tri = find_marker(actions, TODAY_REMINDERS_MARKER)
@@ -281,14 +283,14 @@ def patch(path: Path) -> None:
         fail("Night Brief must complete natively without callback stops")
     if "night_history=1" in blob or "night_save=1" in blob or "shortcuts://run-shortcut" in blob:
         fail("legacy browser/shortcut callback survived")
-    if ids.count("is.workflow.actions.file.createfolder") != 1:
-        fail("Night history folder action missing")
+    if ids.count("is.workflow.actions.file.createfolder") != 2:
+        fail("Night history/display folder actions missing")
     if ids.count("is.workflow.actions.file.getfoldercontents") != 1:
         fail("Night history folder read missing")
     if ids.count("is.workflow.actions.filter.files") != 1:
         fail("Night history 14-day filter missing")
-    if ids.count("is.workflow.actions.documentpicker.save") != 1:
-        fail("Night history save missing")
+    if ids.count("is.workflow.actions.documentpicker.save") != 3:
+        fail("Night history/display saves missing")
     if "真栄原2丁目" in blob:
         fail("private street-level text must not be embedded")
 
