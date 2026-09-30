@@ -386,12 +386,14 @@ def patch(path: Path) -> None:
         fail("Reminders patch failed")
     if ids.count("is.workflow.actions.runworkflow"):
         fail("Night Brief must not depend on another Shortcut")
-    if ids.count("is.workflow.actions.openurl"):
-        fail("Night Brief must not open Safari")
+    if ids.count("is.workflow.actions.openurl") != 1:
+        fail("Night Brief must open the MY LIFE save bridge exactly once")
     if ids.count("is.workflow.actions.exit") < 1:
         fail("Night Brief auto mode stop is missing")
-    if "night_history=1" in blob or "night_save=1" in blob or "shortcuts://run-shortcut" in blob:
-        fail("legacy browser/shortcut callback survived")
+    if "night_history=1" in blob or "shortcuts://run-shortcut" in blob:
+        fail("legacy history/shortcut callback survived")
+    if "night_save=1" not in blob or "night-checkin-save-bridge.html" not in blob or "shortcut=Night%20Brief" not in blob:
+        fail("MY LIFE Night save bridge is missing")
     if ids.count("is.workflow.actions.file.createfolder") != 3:
         fail("expected history, auto-run, and journal-status folders")
     if ids.count("is.workflow.actions.file.getfoldercontents") != 1:
@@ -408,7 +410,7 @@ def patch(path: Path) -> None:
     path.write_bytes(plistlib.dumps(workflow, fmt=plistlib.FMT_XML, sort_keys=False))
     print(
         "Night Brief native-only patch: PASS "
-        f"(actions={len(actions)}, weather=1, calendar=2, reminders=2, journal=1, auto_mode=1, safari=0, scriptable=0)"
+        f"(actions={len(actions)}, weather=1, calendar=2, reminders=2, journal=1, auto_mode=1, safari=1, my_life=1, scriptable=0)"
     )
 
 
