@@ -1,0 +1,73 @@
+name: YOS Home fixed one-shot
+
+on:
+  push:
+    branches:
+      - yos-home-fix-20260930-one-shot
+    paths:
+      - 'tools/yos-home-fix/**'
+      - '.github/workflows/yos-home-fix-one-shot.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Parser smoke test
+        shell: bash
+        run: |
+          set -euo pipefail
+          node - <<'NODE'
+          const fs=require('fs');
+          const src=fs.readFileSync('tools/yos-home-fix/YOS_Home.js','utf8');
+          const start=src.indexOf('function normalize');
+          const end=src.indexOf('function loadTapo');
+          if(start<0||end<0) throw new Error('parser block not found');
+          eval(src.slice(start,end));
+          const c=parseHomeCommand('エアコン消して');
+          if(c.device!=='ac'||c.action!=='power_off') throw new Error(JSON.stringify(c));
+          const c2=parseHomeCommand('エアコン24度にして');
+          if(c2.device!=='ac'||c2.action!=='set_temperature'||c2.value!==24) throw new Error(JSON.stringify(c2));
+          const c3=parseHomeCommand('照明50%');
+          if(c3.device!=='light'||c3.action!=='brightness_percent'||c3.value!==50) throw new Error(JSON.stringify(c3));
+          console.log('YOS_Home parser smoke: PASS');
+          NODE
+
+      - name: Build unsigned shortcut
+        run: |
+          python3 tools/yos-home-fix/build_yos_home.py
+          python3 tools/yos-home-fix/validate_yos_home.py tools/yos-home-fix/artifacts/YOS_Home-unsigned.shortcut
+
+      - name: Sign
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/clarity-factory/sign_with_hubsign.py             --input tools/yos-home-fix/artifacts/YOS_Home-unsigned.shortcut             --output tools/yos-home-fix/artifacts/YOS_Home.shortcut             --name 'YOS_Home'             2>&1 | tee tools/yos-home-fix/artifacts/hubsign.log
+
+      - name: Verify signed output
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('tools/yos-home-fix/artifacts/YOS_Home.shortcut')
+          b=p.read_bytes()
+          assert b.startswith(b'AEA1'), b[:8]
+          assert len(b)>1000
+          print(f'YOS_Home.shortcut signed AEA1 PASS ({len(b)} bytes)')
+          PY
+
+      - name: Upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: yos-home-fixed
+          path: |
+            tools/yos-home-fix/artifacts/YOS_Home.shortcut
+            tools/yos-home-fix/artifacts/YOS_Home-unsigned.shortcut
+            tools/yos-home-fix/artifacts/hubsign.log
+          if-no-files-found: error
