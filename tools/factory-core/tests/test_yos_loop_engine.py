@@ -21,13 +21,14 @@ class YosLoopEngineTests(unittest.TestCase):
         return root
 
     def write_script(self, root: Path, name: str, body: str):
-        path = root / name
+        path = root / "allowed" / name
         path.write_text(body, encoding="utf-8")
         return path
 
     def run_engine(self, root: Path, job: dict):
-        job_path = root / "job.json"
-        result_path = root / "result.json"
+        scratch = Path(tempfile.mkdtemp())
+        job_path = scratch / "job.json"
+        result_path = scratch / "result.json"
         job_path.write_text(json.dumps(job, ensure_ascii=False), encoding="utf-8")
         proc = subprocess.run(
             [sys.executable, str(ENGINE), "--job", str(job_path), "--repo", str(root), "--result", str(result_path)],
