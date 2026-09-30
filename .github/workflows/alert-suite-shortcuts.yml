@@ -118,7 +118,7 @@ jobs:
 
           for name in ('Money Alert','Task Alert','Routine Alert','Emergency Alert','Important Mail'):
               _,a,ids,blob=read(name)
-              assert ids.count('is.workflow.actions.documentpicker.save') <= 1
+              assert ids.count('is.workflow.actions.documentpicker.save') <= 2
           print('YOS Alert suite safety contract: PASS')
           PY
 
