@@ -7,6 +7,7 @@
   var PROGRESS_COPY_VERSION='friendly-v1';
   var activeThreadId='';
   var sending=false;
+  var authRetrying=false;
   var assetsById={};
   var ROOM_DEFS=[
     {id:'asset-yos',assetId:'yos',title:'YOS',avatar:'Y',tone:'gold',pinned:true},
@@ -318,6 +319,7 @@
   renderChats=function(){
     state.chats.forEach(updateChatFromThread);
     baseRenderChats();
+    if(activeThreadId||currentPage==='thread')setThreadVisible(true);
     var head=q('#chatList')&&q('#chatList').parentElement&&q('#chatList').parentElement.querySelector('.sectionHead span');
     if(head)head.textContent='進捗とメッセージを自動更新';
   };
@@ -373,11 +375,28 @@
   }
   function aiErrorMessage(error){
     var status=Number(error&&error.status)||0;
-    if(status===401)return'Google本人確認が必要です。もう一度送信してください。';
-    if(status===403)return'このYOS DESKからYOS AIへ接続できません。';
-    if(status===429)return'少し時間を空けてから、もう一度送信してください。';
-    if(status===503)return'YOS AIへ接続できません。メッセージは端末に残しています。';
-    return'送信できませんでした。メッセージは端末に残しています。';
+    if(status===401)return'本人確認できませんでした。GoogleでYOS用のアカウントを選んでください。';
+    if(status===403)return'YOSへの接続設定を確認しています。送った内容は残っています。';
+    if(status===429)return'少し混み合っています。送った内容は残っています。';
+    if(status===503)return'YOS側で返事を作れませんでした。送った内容は残っています。';
+    return'返事を受け取れませんでした。送った内容は残っています。';
+  }
+  async function chatWithAuthRetry(client,payload){
+    try{
+      return await client.chat(payload);
+    }catch(error){
+      var status=Number(error&&error.status)||0;
+      var reset=globalThis.YOS_AUTH&&globalThis.YOS_AUTH.resetGoogleIdToken;
+      if(status!==401||authRetrying||typeof reset!=='function')throw error;
+      authRetrying=true;
+      try{
+        reset();
+        renderThread();
+        return await client.chat(payload);
+      }finally{
+        authRetrying=false;
+      }
+    }
   }
   async function sendThreadMessage(){
     if(sending||!activeThreadId)return;
@@ -400,7 +419,7 @@
       var client=new Client({baseUrl:base,getGoogleIdToken:getToken});
       var payload={userText:text,currentLocation:locationForChat(chat)};
       if(previousSummary)payload.conversationSummary=previousSummary;
-      var result=await client.chat(payload);
+      var result=await chatWithAuthRetry(client,payload);
       var answer=clean(result&&result.answer,6000)||'回答を受け取りました。';
       if(result&&result.safety&&result.safety.level&&result.safety.level!=='normal'&&Array.isArray(result.safety.notes)&&result.safety.notes.length){
         answer+='\n\n'+result.safety.notes.map(function(x){return clean(x,500)}).filter(Boolean).join(' ');

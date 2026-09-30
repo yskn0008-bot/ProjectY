@@ -50,6 +50,7 @@ function reportProductionChatFailure(event: ChatFailureEvent): void {
     event: 'yos_chat_unavailable',
     route: '/api/yos/chat',
     stage: event.stage,
+    ...(event.modelRequestStatus ? {modelRequestStatus: event.modelRequestStatus} : {}),
     requestId: event.requestId
   }));
 }
