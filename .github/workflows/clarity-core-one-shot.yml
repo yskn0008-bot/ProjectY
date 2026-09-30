@@ -1,0 +1,88 @@
+name: Clarity Core one-shot build
+
+on:
+  push:
+    branches:
+      - clarity-core-build-20260930-1212
+    paths:
+      - 'tools/clarity-core/**'
+      - '.github/workflows/clarity-core-one-shot.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pinned Cherri v2.3.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          url='https://github.com/electrikmilk/cherri/releases/download/v2.3.0/cherri_linux-x86_64.zip'
+          expected='7ab2c384b7b26e7c72a30a8dfa56f89dae12c4068b7951bc1e3193f3698edbe9'
+          curl -fsSL "$url" -o /tmp/cherri.zip
+          printf '%s  %s\n' "$expected" /tmp/cherri.zip | sha256sum -c -
+          mkdir -p /tmp/cherri
+          unzip -q /tmp/cherri.zip -d /tmp/cherri
+          binary="$(find /tmp/cherri -type f -name cherri -print -quit)"
+          test -n "$binary"
+          sudo install -m 0755 "$binary" /usr/local/bin/cherri
+          cherri --version
+
+      - name: Compile Core
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd tools/clarity-core
+          rm -f './Clarity Core_unsigned.shortcut' './Clarity Core.plist'
+          cherri './Clarity Core.cherri' --skip-sign --debug
+          test -f './Clarity Core_unsigned.shortcut'
+
+      - name: Apply proven wire-format patches
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/clarity-next/patch_ledger_persistence.py 'tools/clarity-core/Clarity Core_unsigned.shortcut'
+          python3 tools/clarity-next/patch_calendar_reminder_wire_format.py 'tools/clarity-core/Clarity Core_unsigned.shortcut'
+          python3 tools/clarity-core/patch_core_input.py 'tools/clarity-core/Clarity Core_unsigned.shortcut'
+
+      - name: Structural audit
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/clarity-core/validate_core.py 'tools/clarity-core/Clarity Core_unsigned.shortcut'
+
+      - name: Sign
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p tools/clarity-core/artifacts
+          cp 'tools/clarity-core/Clarity Core_unsigned.shortcut' 'tools/clarity-core/artifacts/Clarity-Core-unsigned.shortcut'
+          python3 tools/clarity-factory/sign_with_hubsign.py             --input 'tools/clarity-core/Clarity Core_unsigned.shortcut'             --output 'tools/clarity-core/artifacts/Clarity-Core.shortcut'             --name 'Clarity Core'             2>&1 | tee 'tools/clarity-core/artifacts/hubsign.log'
+
+      - name: Verify signed output
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('tools/clarity-core/artifacts/Clarity-Core.shortcut')
+          b=p.read_bytes()
+          assert b.startswith(b'AEA1'), b[:8]
+          assert len(b)>1000, len(b)
+          print(f'Clarity-Core.shortcut signed AEA1 PASS ({len(b)} bytes)')
+          PY
+
+      - name: Upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: clarity-core-one-shot
+          path: |
+            tools/clarity-core/artifacts/Clarity-Core.shortcut
+            tools/clarity-core/artifacts/Clarity-Core-unsigned.shortcut
+            tools/clarity-core/artifacts/hubsign.log
+          if-no-files-found: error
