@@ -15,9 +15,9 @@
 // Automation mode uses the explicit input token YOS_NIGHT_AUTO_V1.
 // A derived per-day run marker suppresses the 22:00 automation after an earlier manual launch.
 @incoming = "{ShortcutInput}"
-@autoMode = false
+@autoMode = "manual"
 if @incoming contains "YOS_NIGHT_AUTO_V1" {
-    @autoMode = true
+    @autoMode = "auto"
 }
 
 const historyFolder = createFolder("YOS Night History")
@@ -29,7 +29,7 @@ const today = currentDate()
 const todayKey = formatDate(today, "Custom", "yyyy-MM-dd")
 const briefRunFolder = createFolder("YOS Night Brief Run")
 const briefRunFile = getFile("YOS Night Brief Run/{todayKey}.txt", nil, false)
-if @autoMode && briefRunFile {
+if @autoMode == "auto" && briefRunFile {
     stop()
 }
 const todayLabel = formatDate(today, "Custom", "yyyy/MM/dd（EEE）")
@@ -168,7 +168,7 @@ const spacedResponse3 = replaceText('\\n+3\\.', "\n\n3.", spacedResponse2, true,
 showNotification(spacedResponse3, "Night Brief", true)
 const briefRunMarker = text("YOS_NIGHT_BRIEF_RUN_V1\n{todayKey}")
 saveFile("YOS Night Brief Run/{todayKey}.txt", briefRunMarker, true)
-if @autoMode {
+if @autoMode == "auto" {
     stop()
 }
 alert(spacedResponse3, "Night Brief")
