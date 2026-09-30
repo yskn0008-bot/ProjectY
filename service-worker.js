@@ -1,12 +1,12 @@
 'use strict';
 const CACHE_PREFIX='yos-unified-';
-const CACHE_NAME=CACHE_PREFIX+'v22-money-local-fast';
+const CACHE_NAME=CACHE_PREFIX+'v23-money-hard-recovery';
 const STATIC=[
   './','./index.html','./manifest.webmanifest','./assets/yos-icon-180.png','./assets/yos-icon-512.png',
   './yos/','./yos/index.html','./yos/styles.css','./yos/readability-final.css','./yos/guide.html','./yos/guide.css','./yos/guide.js','./yos/guide-v2.css','./yos/guide-v2.js',
   './yos/desk/','./yos/desk/index.html','./yos/desk/style.css','./yos/desk/compact.css','./yos/desk/live-chat.css','./yos/desk/app.js','./yos/desk/live-chat.js',
   './yos/task-dashboard.css','./yos/task-dashboard.js','./yos/shared-state-v1.js','./yos/app.js',
-  './yos/money-v2.css','./yos/money-master-v1.js','./yos/money-v2.js','./yos/money-v2-runtime-v4.js','./yos/money-journal-v1.js','./yos/money-capture.html','./yos/money-local-import.html',
+  './yos/money-v2.css','./yos/money-master-v1.js','./yos/money-v2.js','./yos/money-v2-runtime-v4.js','./yos/money-journal-v1.js','./yos/money-capture.html','./yos/money-local-import.html','./yos/money-recover-20260930.html',
   './yos/morning-brief-bridge.html','./yos/morning-brief-bridge-v1.js','./yos/payment-alert-bridge.html','./yos/payment-alert-bridge-v1.js','./yos/money-alert-bridge.html','./yos/money-alert-bridge-v1.js',
   './yos/money-reference-v1.css','./yos/money-reference-v1.js','./yos/money-dark-v5.css','./yos/money-polish-v2.css','./yos/money-readable-v3.css',
   './yos/assets/home-life-path-watercolor-v1.webp','./yos/assets/journey-valley-watercolor-v1.webp',
@@ -28,6 +28,7 @@ const CRITICAL_NETWORK_FIRST=new Set([
   '/ProjectY/yos/money-journal-v1.js',
   '/ProjectY/yos/money-capture.html',
   '/ProjectY/yos/money-local-import.html',
+  '/ProjectY/yos/money-recover-20260930.html',
   '/ProjectY/yos/money-reference-v1.css',
   '/ProjectY/yos/money-dark-v5.css',
   '/ProjectY/yos/morning-brief-bridge-v1.js',
