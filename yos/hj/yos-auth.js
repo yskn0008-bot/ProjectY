@@ -128,5 +128,16 @@
     return pendingCredential;
   }
 
-  globalThis.YOS_AUTH = Object.freeze({ getGoogleIdToken });
+  function resetGoogleIdToken() {
+    credential = '';
+    credentialExpiresAt = 0;
+    pendingCredential = null;
+    const host = document.getElementById('googleSignIn');
+    const button = document.getElementById('googleSignInButton');
+    if (host) host.hidden = true;
+    if (button) button.replaceChildren();
+    try { globalThis.google?.accounts?.id?.disableAutoSelect?.(); } catch {}
+  }
+
+  globalThis.YOS_AUTH = Object.freeze({ getGoogleIdToken, resetGoogleIdToken });
 })();
