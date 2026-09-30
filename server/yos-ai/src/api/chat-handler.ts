@@ -12,6 +12,7 @@ export type ChatFailureStage = 'rate-limit' | 'runtime-create' | 'answer' | 'aud
 export interface ChatFailureEvent {
   stage: ChatFailureStage;
   requestId: string;
+  modelRequestStatus?: 'network' | '400' | '401' | '403' | '404' | '429' | '5xx' | 'other';
 }
 
 export type ChatFailureReporter = (event: ChatFailureEvent) => void;
@@ -129,7 +130,14 @@ export function createChatHandler(options: ChatHandlerOptions): (request: Reques
       const stage = failureStage === 'answer' && error instanceof AnswerFailure
         ? error.stage
         : failureStage;
-      reportFailure(options.failureReporter, {stage, requestId});
+      const modelRequestStatus = error instanceof AnswerFailure && error.stage === 'model-request'
+        ? error.modelRequestStatus
+        : undefined;
+      reportFailure(options.failureReporter, {
+        stage,
+        requestId,
+        ...(modelRequestStatus ? {modelRequestStatus} : {})
+      });
       return secureJson({error: 'YOS is temporarily unavailable', requestId}, 503, origin);
     }
   };
