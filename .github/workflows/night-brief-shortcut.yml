@@ -1,4 +1,4 @@
-name: Night Brief 22:00 + Journal shortcut
+name: Night Brief 22:00 + Journal + MY LIFE shortcut
 
 on:
   pull_request:
@@ -23,8 +23,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Background MY LIFE bridge regression (non-blocking)
-        continue-on-error: true
+      - name: Test MY LIFE Night bridge
         shell: bash
         run: |
           set -euo pipefail
@@ -58,7 +57,7 @@ jobs:
           mkdir -p artifacts
           cp './Night Brief_unsigned.shortcut' 'artifacts/Night Brief.plist'
 
-      - name: Validate no-Safari Night Brief contract
+      - name: Validate integrated MY LIFE Night Brief contract
         shell: bash
         run: |
           set -euo pipefail
@@ -87,7 +86,7 @@ jobs:
           assert ids.count('is.workflow.actions.alert') == 2
           assert ids.count('is.workflow.actions.ask') == 1
           assert ids.count('is.workflow.actions.runworkflow') == 0
-          assert ids.count('is.workflow.actions.openurl') == 0
+          assert ids.count('is.workflow.actions.openurl') == 1
           assert ids.count('is.workflow.actions.exit') >= 1
           assert ids.count('com.apple.journal.CreateEntryIntent') == 1
 
@@ -110,9 +109,13 @@ jobs:
           assert '各項目の間には必ず空行を1行入れる' in blob
           assert ids.count('is.workflow.actions.text.replace') >= 2
           assert 'night_history=1' not in blob
-          assert 'night_save=1' not in blob
-          assert 'night-checkin-save-bridge' not in blob
+          assert 'night_save=1' in blob
+          assert 'night-checkin-save-bridge.html' in blob
           assert 'shortcuts://run-shortcut' not in blob
+          assert 'yos-night-save-ok-v1' in blob
+          assert 'shortcut=Night%20Brief' in blob
+          assert ids.count('is.workflow.actions.base64encode') >= 7
+          assert ids.count('is.workflow.actions.urlencode') >= 7
           assert 'Scriptable' not in blob
           assert 'テーマは決めなくてOK。今日のことを自由に書く・話す。' in blob
           assert '真栄原2丁目' not in blob
@@ -145,7 +148,7 @@ jobs:
       - name: Upload iPhone acceptance package
         uses: actions/upload-artifact@v4
         with:
-          name: night-brief-2200-journal
+          name: night-brief-2200-journal-mylife
           path: |
             tools/night-brief/artifacts/Night Brief.shortcut
             tools/night-brief/artifacts/Night Brief.plist
