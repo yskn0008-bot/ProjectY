@@ -6,6 +6,7 @@ on:
       - "scripts/sync_mission_control.py"
       - "scripts/tests/test_sync_mission_control.py"
       - ".github/workflows/deploy-pages.yml"
+      - ".github/workflows/mission-control-pr-sync.yml"
       - ".github/workflows/mission-control-sync-test.yml"
   workflow_dispatch:
 
