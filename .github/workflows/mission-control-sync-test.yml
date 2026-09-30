@@ -1,0 +1,35 @@
+name: Mission Control Sync Safety
+
+on:
+  pull_request:
+    paths:
+      - "scripts/sync_mission_control.py"
+      - "scripts/tests/test_sync_mission_control.py"
+      - ".github/workflows/deploy-pages.yml"
+      - ".github/workflows/mission-control-sync-test.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Syntax
+        run: python3 -m py_compile scripts/sync_mission_control.py scripts/tests/test_sync_mission_control.py
+
+      - name: Unit tests
+        run: python3 -m unittest discover -s scripts/tests -p "test_sync_mission_control.py" -v
+
+      - name: Diff check
+        run: git diff --check "origin/${{ github.base_ref }}...HEAD"
