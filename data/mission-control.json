@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-09-30T09:15:57+09:00",
+  "updated_at": "2026-09-30T12:30:14+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -13,6 +13,16 @@
   },
   "inbox": [
     {
+      "id": "github-pr-506",
+      "title": "PR #506 Add reread history for Morning Night and Alerts",
+      "type": "GitHub PR",
+      "status": "review",
+      "priority": 1,
+      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/506",
+      "updated_at": "2026-09-26T22:41:53Z"
+    },
+    {
       "id": "github-pr-510",
       "title": "PR #510 Night Brief: 22:00 auto skip + Journal save",
       "type": "GitHub PR",
@@ -21,16 +31,6 @@
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/510",
       "updated_at": "2026-09-29T09:15:00Z"
-    },
-    {
-      "id": "github-pr-528",
-      "title": "PR #528 YOS DESK: Google再認証と会話UIの送信失敗を修正",
-      "type": "GitHub PR",
-      "status": "review",
-      "priority": 1,
-      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/528",
-      "updated_at": "2026-09-29T01:17:10Z"
     },
     {
       "id": "github-pr-539",
@@ -70,7 +70,17 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-09-29T22:39:27Z"
+      "updated_at": "2026-09-30T03:28:47Z"
+    },
+    {
+      "id": "github-issue-256",
+      "title": "Issue #256 [YOS→Codex] YOS Capture｜思いつきを1秒で失わず保存・自動整理",
+      "type": "GitHub Issue",
+      "status": "open",
+      "priority": 3,
+      "next_action": "完成条件を確認し、次の安全な実装を1件進める",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/256",
+      "updated_at": "2026-09-12T03:34:43Z"
     },
     {
       "id": "github-issue-272",
@@ -151,19 +161,16 @@
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/344",
       "updated_at": "2026-09-13T22:03:15Z"
-    },
-    {
-      "id": "github-issue-353",
-      "title": "Issue #353 MY WAY｜実機レビュー修正まとめ（2026-09-15）",
-      "type": "GitHub Issue",
-      "status": "open",
-      "priority": 3,
-      "next_action": "完成条件を確認し、次の安全な実装を1件進める",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/353",
-      "updated_at": "2026-09-14T19:50:52Z"
     }
   ],
   "recently_completed": [
+    {
+      "id": "github-commit-4af20b520167",
+      "title": "YOS DESK: Google再認証と会話UIの送信失敗を修正 (#541)",
+      "completed_at": "2026-09-30T03:29:58Z",
+      "result": "GitHub mainへ反映（4af20b5）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/4af20b52016775a2110f07f109f89980d54d10ef"
+    },
     {
       "id": "github-commit-0eaef35c8853",
       "title": "Money: recover initialized empty state",
@@ -191,13 +198,6 @@
       "completed_at": "2026-09-29T09:01:22Z",
       "result": "GitHub mainへ反映（9ad1f1d）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/9ad1f1ddbfc5dcf42bb607f63907d769bd1f9caf"
-    },
-    {
-      "id": "github-commit-68c2019efa1a",
-      "title": "Money: add local-first saves and JSONL journal",
-      "completed_at": "2026-09-29T08:59:24Z",
-      "result": "GitHub mainへ反映（68c2019）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/68c2019efa1a47f2314df023d596c1e578ddf69c"
     },
     {
       "id": "complete-002",
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-09-30T09:15:57+09:00",
+      "last_update": "2026-09-30T12:30:14+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -309,13 +309,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 12件・Open PR 20件を自動同期中",
+      "next_action": "Open Issue 13件・Open PR 20件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-09-30T09:15:57+09:00",
+      "last_update": "2026-09-30T12:30:14+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-09-30T09:15:57+09:00",
+      "last_update": "2026-09-30T12:30:14+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "7c358e0966af24e25dae9b66a33790805ff7c8fc27a465fa0379f8aefbd2fabc"
+  "github_snapshot_hash": "98ceb37054c72e27c51304152ffd338c42a55b006d2d03f524c4abe1ec617be4"
 }
