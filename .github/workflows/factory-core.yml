@@ -77,10 +77,7 @@ jobs:
           }
           JSON
 
-          python3 tools/factory-core/yos_loop_engine.py \
-            --job /tmp/yos-loop-job.json \
-            --repo "$repo" \
-            --result /tmp/yos-loop-result.json
+          python3 tools/factory-core/yos_loop_engine.py             --job /tmp/yos-loop-job.json             --repo "$repo"             --result /tmp/yos-loop-result.json
 
           python3 - <<'PY'
           import json
@@ -94,8 +91,8 @@ jobs:
       - name: Diff check
         shell: bash
         run: |
-          if [ -n "\${{ github.base_ref }}" ]; then
-            git diff --check "origin/\${{ github.base_ref }}...HEAD"
+          if [ -n "${{ github.base_ref }}" ]; then
+            git diff --check "origin/${{ github.base_ref }}...HEAD"
           else
             git diff --check HEAD^..HEAD
           fi
