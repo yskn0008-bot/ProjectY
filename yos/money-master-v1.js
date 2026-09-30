@@ -64,7 +64,7 @@
         {...(byName('PayPay銀行')||{}),id:byName('PayPay銀行')?.id||'master-account-paypay-bank',name:'PayPay銀行',type:'bank',balance:0,source:SOURCE,updatedAt:stamp},
         {...(byName('現金')||{}),id:byName('現金')?.id||'master-account-cash',name:'現金',type:'cash',balance:1453,source:SOURCE,updatedAt:stamp}
       ];
-    }else if(unexpectedlyEmpty&&!restored&&base.accounts.length===0){
+    }else if((unexpectedlyEmpty||!current)&&!restored&&base.accounts.length===0){
       base.accounts=[
         {id:'master-account-cash',name:'現金',type:'cash',balance:1453,source:'user-confirmed-recovery-2026-09-28',recovered:true,updatedAt:stamp}
       ];
@@ -135,7 +135,7 @@
     nextIncome:nextIncomeTx?{date:nextIncomeTx.date,label:nextIncomeTx.label,amount:nextIncomeTx.amount,certainty:nextIncomeTx.certainty||'',amountApproximate:Boolean(nextIncomeTx.amountApproximate)}:null,
     priority:'最新Money実データを正本として支払い前の不足を確認する'
   };
-  if(unexpectedlyEmpty)base.recoveryStatus=restored?'restored-device-backup':'restored-confirmed-seed';
+  if(unexpectedlyEmpty||!current)base.recoveryStatus=restored?'restored-device-backup':'restored-confirmed-seed';
   try{
     localStorage.setItem(KEY,JSON.stringify(base));
     if(hasCore(base))localStorage.setItem(RECOVERY_KEY,JSON.stringify(base));
