@@ -151,3 +151,24 @@ test('Money recovers an initialized-but-empty store and keeps a local backup', a
   assert.match(index,/money-master-v1\.js\?v=20260929v10/);
   assert.match(index,/money-v2-runtime-v4\.js\?v=34/);
 });
+
+
+test('Money hard recovery page restores data even when external Money scripts are stale', async () => {
+  const [master,runtime,index,recovery,sw]=await Promise.all([
+    read('yos/money-master-v1.js'),
+    read('yos/money-v2-runtime-v4.js'),
+    read('yos/index.html'),
+    read('yos/money-recover-20260930.html'),
+    read('service-worker.js')
+  ]);
+  assert.match(master,/unexpectedlyEmpty\|\|!current/);
+  assert.match(runtime,/runtime-restored-device-backup/);
+  assert.match(index,/money-v2-runtime-v4\.js\?v=35/);
+  assert.match(recovery,/hard-recovered-device-backup/);
+  assert.match(recovery,/hard-recovered-confirmed-seed/);
+  assert.match(recovery,/balance:1453/);
+  assert.match(recovery,/master-rec-gas[\s\S]*day:15/);
+  assert.match(recovery,/delete current\.masterFacts/);
+  assert.match(recovery,/recovered=20260930v2/);
+  assert.match(sw,/v23-money-hard-recovery/);
+});
