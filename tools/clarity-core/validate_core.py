@@ -56,7 +56,8 @@ assert any(i.endswith("timer.start") for i in ids)
 assert any(i.endswith("addnewevent") for i in ids)
 assert any(i.endswith("addnewreminder") for i in ids)
 assert "Clarity Next Ledger.txt" in blob
-assert "安全に操作を判断できませんでした" not in blob\nassert "answer_fallback" in blob\n
+assert "安全に操作を判断できませんでした" not in blob
+assert "answer_fallback" in blob
 # No lingering reference to deleted voice input action.
 assert "WFSpeechLanguage" not in blob
 print(f"Clarity Core structural audit: PASS ({len(actions)} actions)")
