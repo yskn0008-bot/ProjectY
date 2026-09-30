@@ -89,6 +89,25 @@ def variable_attachment(name: str) -> dict:
     }
 
 
+def variable_names(value: object) -> set[str]:
+    names: set[str] = set()
+
+    def walk(node: object) -> None:
+        if isinstance(node, dict):
+            if node.get("Type") == "Variable":
+                name = node.get("VariableName")
+                if isinstance(name, str):
+                    names.add(name)
+            for child in node.values():
+                walk(child)
+        elif isinstance(node, list):
+            for child in node:
+                walk(child)
+
+    walk(value)
+    return names
+
+
 def text_token_output(uuid: str, name: str = "Text") -> dict:
     return {
         "Value": {
@@ -152,7 +171,9 @@ def patch(path: Path) -> None:
     ji = find_marker(actions, JOURNAL_MARKER)
 
     weather_params = replacement_base(actions[wi])
-    weather_params["WFWeatherForecastType"] = output(tomorrow_uuid, "調整済みの日付")
+    # Match the proven Morning Brief native Weather action. The Forecast Type
+    # parameter is an enum; binding the tomorrow Date output to it is invalid.
+    # Default forecast output is passed to GPT together with tomorrowLabel.
     actions[wi] = {
         "WFWorkflowActionIdentifier": "is.workflow.actions.weather.forecast",
         "WFWorkflowActionParameters": weather_params,
@@ -308,6 +329,45 @@ def patch(path: Path) -> None:
         "WFWorkflowActionParameters": journal_params,
     }
 
+    # Cherri 2.3 can degrade a bare boolean variable condition into
+    # "has any value". Because false/0 still has a value, that makes manual
+    # Night Brief stop at the AUTO gates. Require explicit text equality.
+    auto_rows: list[dict] = []
+    for action in actions:
+        if action.get("WFWorkflowActionIdentifier") != "is.workflow.actions.conditional":
+            continue
+        params = action.get("WFWorkflowActionParameters", {})
+        if params.get("WFControlFlowMode") != 0:
+            continue
+        if "autoMode" in variable_names(params.get("WFInput")):
+            auto_rows.append(params)
+        wrapper = params.get("WFConditions")
+        if isinstance(wrapper, dict):
+            value = wrapper.get("Value", {})
+            for row in value.get("WFActionParameterFilterTemplates", []):
+                if isinstance(row, dict) and "autoMode" in variable_names(row.get("WFInput")):
+                    auto_rows.append(row)
+    if len(auto_rows) != 2:
+        fail(f"expected two autoMode gates, found {len(auto_rows)}")
+    for row in auto_rows:
+        if row.get("WFCondition") != 4 or row.get("WFConditionalActionString") != "auto":
+            fail(f"autoMode gate must compare explicitly to 'auto': {row!r}")
+
+    # Fix Cherri's literal backslash escaping so the regex matches real
+    # newlines before numbered discoveries.
+    for output_name, pattern in (
+        ("spacedResponse2", r"\n+2\."),
+        ("spacedResponse3", r"\n+3\."),
+    ):
+        matches = [
+            action for action in actions
+            if action.get("WFWorkflowActionIdentifier") == "is.workflow.actions.text.replace"
+            and action.get("WFWorkflowActionParameters", {}).get("CustomOutputName") == output_name
+        ]
+        if len(matches) != 1:
+            fail(f"expected one {output_name} replace action, found {len(matches)}")
+        matches[0]["WFWorkflowActionParameters"]["WFReplaceTextFind"] = pattern
+
     workflow["WFWorkflowActions"] = actions
     workflow["WFWorkflowHasShortcutInputVariables"] = True
 
@@ -318,6 +378,8 @@ def patch(path: Path) -> None:
             fail(f"placeholder survived: {marker}")
     if ids.count("is.workflow.actions.weather.forecast") != 1:
         fail("weather forecast patch failed")
+    if "WFWeatherForecastType" in actions[wi].get("WFWorkflowActionParameters", {}):
+        fail("weather forecast type must use the native default")
     if ids.count("is.workflow.actions.filter.calendarevents") != 2:
         fail("Calendar patch failed")
     if ids.count("is.workflow.actions.filter.reminders") != 2:
