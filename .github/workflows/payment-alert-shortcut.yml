@@ -62,8 +62,8 @@ jobs:
           assert ids.count('is.workflow.actions.askllm') == 1
           assert ids.count('is.workflow.actions.notification') == 1
           assert ids.count('is.workflow.actions.alert') == 1
-          assert ids.count('is.workflow.actions.documentpicker.save') == 1
-          assert ids.count('is.workflow.actions.file.createfolder') == 1
+          assert ids.count('is.workflow.actions.documentpicker.save') == 2
+          assert ids.count('is.workflow.actions.file.createfolder') == 2
           assert ids.count('is.workflow.actions.openurl') == 0
           assert 'payment-alert-bridge' not in blob
           assert 'raw.githubusercontent.com/yskn0008-bot/ProjectY/main/yos/money-master-v1.js' in blob
@@ -74,6 +74,10 @@ jobs:
           assert '日付ごとにグループ化して返す' in blob
           assert '空白で列揃えをしない' in blob
           assert 'YOS Display History' in blob
+          assert 'YOS Alert State' in blob
+          assert 'Payment Alert Last.txt' in blob
+          assert ids.count('is.workflow.actions.documentpicker.open') == 1
+          assert ids.count('is.workflow.actions.detect.text') == 1
           assert '【Payment Alert】' in blob
           print(f'Payment Alert native contract: PASS ({len(actions)} actions)')
           PY
