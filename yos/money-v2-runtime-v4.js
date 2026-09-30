@@ -49,7 +49,12 @@
     return {version:2,privacy:false,accounts:[],transactions:[],recurring:[],debts:[],goals:[],assets:[],rules:{monthlyEssential:0,qualityBudget:0,emergencyMonths:1,scenarioMonthlyBoost:0,note:'生活を壊さず、安全を確保した上で高金利返済を優先する。'},updatedAt:null};
   }
   function state(){
-    const saved=read(KEY,null),base=defaultState();
+    let saved=read(KEY,null),base=defaultState();
+    const recovery=read(RECOVERY_KEY,null);
+    if(!hasMoneyCore(saved)&&hasMoneyCore(recovery)){
+      saved={...recovery,recoveryStatus:'runtime-restored-device-backup'};
+      try{localStorage.setItem(KEY,JSON.stringify(saved))}catch{}
+    }
     if(!saved||typeof saved!=='object')return base;
     return {...base,...saved,accounts:Array.isArray(saved.accounts)?saved.accounts:[],transactions:Array.isArray(saved.transactions)?saved.transactions:[],recurring:Array.isArray(saved.recurring)?saved.recurring:[],debts:Array.isArray(saved.debts)?saved.debts:[],goals:Array.isArray(saved.goals)?saved.goals:[],assets:Array.isArray(saved.assets)?saved.assets:[],rules:{...base.rules,...(saved.rules||{})}};
   }
