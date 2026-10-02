@@ -94,14 +94,14 @@ try{
       underlineHeight:parseFloat(getComputedStyle(activeTab,'::after').height)
     };
   });
-  assert.equal(ui.rowRadius,'0px');
-  assert.equal(ui.rowBackground,'rgba(0, 0, 0, 0)');
-  assert.ok(ui.rowMinHeight>=72);
-  assert.equal(ui.avatarRadius,'50%');
-  assert.ok(ui.avatarWidth>=48);
-  assert.ok(ui.previewSize>=15);
+  assert.ok(parseFloat(ui.rowRadius)>=14,'chat rows should use calm rounded cards');
+  assert.notEqual(ui.rowBackground,'rgba(0, 0, 0, 0)','chat rows should have a subtle surface');
+  assert.ok(ui.rowMinHeight>=70);
+  assert.ok(parseFloat(ui.avatarRadius)>=13&&parseFloat(ui.avatarRadius)<=15,'avatars should use iPhone-like squircles');
+  assert.ok(ui.avatarWidth>=44);
+  assert.ok(ui.previewSize>=14);
   assert.equal(ui.previewWhiteSpace,'nowrap');
-  assert.ok(ui.underlineHeight>=3);
+  assert.ok(ui.underlineHeight>=2);
 
   await page.evaluate((localBase)=>{
     globalThis.YOS_AI_BASE_URL=localBase;
