@@ -80,8 +80,8 @@ class ClarityNextSourceContractTests(unittest.TestCase):
         self.assertIn('executor={normalizedExecutor}', self.source)
 
     def test_safety_gates_precede_execution(self):
-        review = self.source.index('if needsReviewText == "はい"')
-        confirm = self.source.index('if needsConfirmationText == "はい"')
+        review = self.source.index('if @normalizedNeedsReviewText == "はい"')
+        confirm = self.source.index('if @normalizedNeedsConfirmationText == "はい"')
         open_app = self.source.index('if @normalizedExecutor == "YOS_OpenApp"')
         self.assertLess(review, open_app)
         self.assertLess(confirm, open_app)
