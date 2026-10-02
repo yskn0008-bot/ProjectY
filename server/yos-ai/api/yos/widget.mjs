@@ -1,14 +1,34 @@
+import {waitUntil} from '@vercel/functions';
 import {createProductionWidgetFeed} from '../../dist/widget/production.js';
+import {createProductionMoneyNotionMirror} from '../../dist/intake/production.js';
 import {createMoneyShadowHandler} from '../../lib/money-shadow.mjs';
 
 let handler;
 let moneyHandler;
+let moneyNotionMirror;
 function getHandler(){
   handler ??= createProductionWidgetFeed({environment:process.env});
   return handler;
 }
+function getMoneyNotionMirror(){
+  moneyNotionMirror ??= createProductionMoneyNotionMirror({environment:process.env});
+  return moneyNotionMirror;
+}
 function getMoneyHandler(){
-  moneyHandler ??= createMoneyShadowHandler({environment:process.env});
+  moneyHandler ??= createMoneyShadowHandler({
+    environment:process.env,
+    onSnapshot(snapshot){
+      try{
+        waitUntil(
+          getMoneyNotionMirror()(snapshot).catch(error=>{
+            console.error(JSON.stringify({level:'warn',event:'yos_money_notion_mirror_failed',route:'/api/yos/widget',message:String(error?.message||error)}));
+          })
+        );
+      }catch(error){
+        console.error(JSON.stringify({level:'warn',event:'yos_money_notion_mirror_unavailable',route:'/api/yos/widget',message:String(error?.message||error)}));
+      }
+    }
+  });
   return moneyHandler;
 }
 
