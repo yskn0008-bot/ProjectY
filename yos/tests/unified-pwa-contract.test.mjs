@@ -88,7 +88,7 @@ test('YOS Chat has a dedicated standalone Home Screen manifest', async () => {
   assert.match(page,/apple-mobile-web-app-title" content="YOS Chat"/);
   assert.match(page,/apple-touch-icon[^>]+\.\.\/\.\.\/assets\/yos-icon-180\.png/);
   assert.match(page,/rel="manifest" href="\.\/manifest\.webmanifest"/);
-  assert.match(page,/serviceWorker\.register\('\.\.\/\.\.\/service-worker\.js',\{scope:'\.\.\/\.\.\'/);
+  assert.ok(page.includes("serviceWorker.register('../../service-worker.js',{scope:'../../',updateViaCache:'none'})"));
   assert.match(sw,/\.\/yos\/desk\/manifest\.webmanifest/);
   assert.match(sw,/\/ProjectY\/yos\/desk\/manifest\.webmanifest/);
 });
