@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-10-02T22:36:29+09:00",
+  "updated_at": "2026-10-03T00:31:37+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -120,7 +120,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-10-02T13:35:58Z"
+      "updated_at": "2026-10-02T15:04:55Z"
     },
     {
       "id": "github-issue-234",
@@ -150,7 +150,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/314",
-      "updated_at": "2026-10-02T11:03:47Z"
+      "updated_at": "2026-10-02T13:37:23Z"
     },
     {
       "id": "github-issue-315",
@@ -161,6 +161,16 @@
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/315",
       "updated_at": "2026-09-30T07:08:32Z"
+    },
+    {
+      "id": "github-issue-575",
+      "title": "Issue #575 [YOS] BASE HOME 自動同期＋操作入口｜既存正本を変えずNotionを常時最新化",
+      "type": "GitHub Issue",
+      "status": "open",
+      "priority": 3,
+      "next_action": "完成条件を確認し、次の安全な実装を1件進める",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/575",
+      "updated_at": "2026-10-02T15:31:04Z"
     }
   ],
   "recently_completed": [
@@ -234,7 +244,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-10-02T22:36:29+09:00",
+      "last_update": "2026-10-03T00:31:37+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -309,13 +319,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 6件・Open PR 9件を自動同期中",
+      "next_action": "Open Issue 7件・Open PR 9件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-10-02T22:36:29+09:00",
+      "last_update": "2026-10-03T00:31:37+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -338,7 +348,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-10-02T22:36:29+09:00",
+      "last_update": "2026-10-03T00:31:37+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +430,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "9c253bc64cda0ff2818adaa7dadd77b9b549fbcbc11809aba4c85d40e8c2cbfc"
+  "github_snapshot_hash": "20da33da0481e8a5779101bce5ddf636ac2810c0722e55fe7676d12869a175c8"
 }
