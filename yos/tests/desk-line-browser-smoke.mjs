@@ -90,6 +90,18 @@ try{
   assert.equal(await page.locator('#selectBtn').count(),0,'management should move to long press instead of a permanent edit button');
   assert.equal(await page.locator('.tab[data-mode="pinned"]').count(),0,'pinned chats should stay at the top without a dedicated tab');
   assert.match((await page.locator('#chatsPage .brand strong').textContent())||'',/チャット/);
+  await page.waitForFunction(()=>document.documentElement.dataset.deskMotion==='ready');
+  const motionUi=await page.evaluate(()=>({
+    plusTransition:getComputedStyle(document.querySelector('#newBtn')).transitionDuration,
+    tabTransition:getComputedStyle(document.querySelector('#chatsPage .tab')).transitionDuration
+  }));
+  assert.notEqual(motionUi.plusTransition,'0s','new chat icon should have tactile motion');
+  assert.notEqual(motionUi.tabTransition,'0s','tabs should transition instead of snapping');
+  await page.locator('#newBtn').click();
+  await page.waitForFunction(()=>document.body.classList.contains('sheet-open')&&document.querySelector('#sheetBackdrop')?.classList.contains('is-open'));
+  assert.equal(await page.locator('#sheetBackdrop').evaluate(el=>getComputedStyle(el).opacity),'1');
+  await page.locator('#closeSheetBtn').click();
+  await page.waitForFunction(()=>!document.body.classList.contains('sheet-open'));
   assert.equal(await page.locator('link[rel="manifest"]').getAttribute('href'),'./manifest.webmanifest');
   assert.equal(await page.locator('meta[name="apple-mobile-web-app-title"]').getAttribute('content'),'YOS Chat');
   const chatManifest=await page.evaluate(async()=>fetch('./manifest.webmanifest',{cache:'no-store'}).then(r=>r.json()));
@@ -143,6 +155,7 @@ try{
   await stubAuth(true);
   await page.locator('.chat[data-id="asset-clarity"]').click();
   await page.waitForSelector('#threadPage.active');
+  assert.equal(await page.locator('#threadPage').evaluate(el=>getComputedStyle(el).animationName),'yosThreadIn','thread should slide in instead of snapping');
   assert.match((await page.locator('#threadTitle').textContent())||'',/Clarity/);
   const friendlyProgress=(await page.locator('#messageStream').textContent())||'';
   assert.match(friendlyProgress,/いまの状況/);
@@ -152,6 +165,7 @@ try{
   await page.locator('#threadInput').fill('チャットだけの画面から送信テスト');
   await page.locator('#threadSend').click();
   await page.waitForFunction(()=>document.querySelector('#messageStream')?.textContent?.includes('テスト応答です'));
+  assert.equal(await page.locator('#messageStream .messageRow.ai').last().evaluate(el=>el.classList.contains('message-enter')),true,'new AI message should animate into the thread');
   assert.equal(await page.evaluate(()=>globalThis.__chatAuthResetCount),1,'401 should retry once');
   assert.equal(chatRequests,2,'fixed-room message should retry once after auth reset');
 
