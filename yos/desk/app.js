@@ -36,6 +36,8 @@ var projectFilter='すべて';
 var selecting=false;
 var selected=new Set();
 var currentChatId=null;
+var lastMotionKey='';
+var sheetCloseTimer=null;
 
 function q(s){return document.querySelector(s)}
 function qa(s){return Array.prototype.slice.call(document.querySelectorAll(s))}
@@ -85,12 +87,24 @@ function showToast(text){
 function showSheet(html){
   var body=q('#sheetBody'),backdrop=q('#sheetBackdrop');
   if(!body||!backdrop)return;
+  if(sheetCloseTimer){clearTimeout(sheetCloseTimer);sheetCloseTimer=null}
   body.innerHTML=html;
-  backdrop.style.display='block';
+  backdrop.classList.add('is-visible');
+  document.body.classList.add('sheet-open');
+  requestAnimationFrame(function(){
+    requestAnimationFrame(function(){backdrop.classList.add('is-open')});
+  });
 }
 function closeSheet(){
   var backdrop=q('#sheetBackdrop');
-  if(backdrop)backdrop.style.display='none';
+  if(!backdrop)return;
+  backdrop.classList.remove('is-open');
+  document.body.classList.remove('sheet-open');
+  if(sheetCloseTimer)clearTimeout(sheetCloseTimer);
+  sheetCloseTimer=setTimeout(function(){
+    if(!backdrop.classList.contains('is-open'))backdrop.classList.remove('is-visible');
+    sheetCloseTimer=null;
+  },220);
 }
 function setPage(name){
   if(name==='thread')return;
@@ -132,9 +146,14 @@ function renderChats(){
   renderProjects();
 
   var rows=filteredChats(),html='';
-  rows.forEach(function(x){
+  var searchValue=String(q('#searchInput')&&q('#searchInput').value||'').trim().toLowerCase();
+  var motionKey=chatMode+'|'+searchValue+'|'+rows.map(function(x){return x.id}).join(',');
+  var animateRows=motionKey!==lastMotionKey;
+  rows.forEach(function(x,index){
     var unreadCount=Math.max(0,Number(x.unread)||0);
-    html+='<div class="chat '+(x.pinned?'pinned ':'')+(unreadCount>0?'unread ':'')+'" data-id="'+esc(x.id)+'">'+
+    var motionClass=animateRows?' row-enter':'';
+    var delay=animateRows?Math.min(index*28,168):0;
+    html+='<div class="chat '+(x.pinned?'pinned ':'')+(unreadCount>0?'unread ':'')+motionClass+'" style="--row-delay:'+delay+'ms" data-id="'+esc(x.id)+'">'+
       '<div class="check">✓</div>'+
       '<div class="avatar '+esc(x.tone||'')+'">'+esc(x.avatar||'Y')+'</div>'+
       '<div class="chatText"><div class="nameLine"><div class="chatName">'+esc(titleOf(x))+'</div><span class="tag">'+esc(x.project||'')+'</span></div>'+
@@ -149,6 +168,7 @@ function renderChats(){
   var emptyAdd=q('#emptyAdd');
   if(emptyAdd)emptyAdd.onclick=function(){tap();openNew()};
   bindChats();
+  lastMotionKey=motionKey;
   syncAppBadge();
   persist();
 }
@@ -349,3 +369,7 @@ window.addEventListener('focus',function(){autoImportOriginals();autoReadGranted
 document.addEventListener('visibilitychange',function(){if(!document.hidden){autoImportOriginals();autoReadGrantedClipboard()}});
 window.addEventListener('beforeunload',persist);
 persist();
+requestAnimationFrame(function(){
+  document.body.classList.add('motion-ready');
+  document.documentElement.dataset.deskMotion='ready';
+});
