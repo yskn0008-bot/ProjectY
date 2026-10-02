@@ -1,0 +1,62 @@
+#define name YOS_Floor_Lamp
+#define color purple
+#define inputs text
+
+#include 'actions/text'
+
+// Tapo L535E adapter behind YOS_Home.
+// The device entity is selected once at import time via import questions.
+// No device-specific identifier is stored in the public repository.
+
+@incoming = "{ShortcutInput}"
+
+if @incoming contains "power_on" {
+    rawAction("com.tplink.tapo.TapoDeviceToggleIntent", {
+        "devices": {
+            "identifier": "__SELECT_FLOOR_LAMP__",
+            "displayString": "フロアランプ"
+        },
+        "state": "on"
+    })
+    stop()
+}
+
+if @incoming contains "power_off" {
+    rawAction("com.tplink.tapo.TapoDeviceToggleIntent", {
+        "devices": {
+            "identifier": "__SELECT_FLOOR_LAMP__",
+            "displayString": "フロアランプ"
+        },
+        "state": "off"
+    })
+    stop()
+}
+
+if @incoming contains "set_brightness" {
+    const brightness = getNumbers(@incoming)
+    if brightness < 1 || brightness > 100 {
+        alert("フロアランプの明るさは1〜100%で指定してください", "YOS Home")
+        stop()
+    }
+    rawAction("com.tplink.tapo.TapoBulbColorSetIntent", {
+        "devices": {
+            "identifier": "__SELECT_FLOOR_LAMP__",
+            "displayString": "フロアランプ"
+        },
+        "brightness": "${brightness}"
+    })
+    stop()
+}
+
+if @incoming contains "set_warm_white" {
+    rawAction("com.tplink.tapo.TapoBulbColorSetIntent", {
+        "devices": {
+            "identifier": "__SELECT_FLOOR_LAMP__",
+            "displayString": "フロアランプ"
+        },
+        "color": "temp_warm_white"
+    })
+    stop()
+}
+
+alert("未対応のフロアランプ操作です", "YOS Home")
