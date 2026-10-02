@@ -48,12 +48,20 @@ jobs:
           set -euo pipefail
           cd tools/clarity-next
           rm -f './Clarity Next_unsigned.shortcut' './Clarity Next.plist'
+          rm -f './Clarity Text_unsigned.shortcut' './Clarity Text.plist'
+          rm -f './Clarity Share v4_unsigned.shortcut' './Clarity Share v4.plist'
           cherri './Clarity Next.cherri' --skip-sign --debug
+          cherri './Clarity Text.cherri' --skip-sign --debug
+          cherri './Clarity Share.cherri' --skip-sign --debug
           test -f './Clarity Next_unsigned.shortcut'
+          test -f './Clarity Text_unsigned.shortcut'
+          test -f './Clarity Share v4_unsigned.shortcut'
           python3 patch_ledger_persistence.py './Clarity Next_unsigned.shortcut'
           python3 patch_calendar_reminder_wire_format.py './Clarity Next_unsigned.shortcut'
           mkdir -p artifacts
           cp './Clarity Next_unsigned.shortcut' artifacts/Clarity-Next-unsigned.shortcut
+          cp './Clarity Text_unsigned.shortcut' artifacts/Clarity-Text-unsigned.shortcut
+          cp './Clarity Share v4_unsigned.shortcut' artifacts/Clarity-Share-v4-unsigned.shortcut
 
       - name: Inspect runtime
         shell: bash
@@ -69,6 +77,10 @@ jobs:
           blob=repr(root)
           assert sum(i=='is.workflow.actions.dictatetext' for i in ids)==1, ids
           assert sum(i=='is.workflow.actions.askllm' for i in ids)==1, ids
+          assert root.get('WFWorkflowHasShortcutInputVariables') is True
+          assert '__YOS_CLARITY_TEXT_V1__' in blob
+          assert '__YOS_CLARITY_SHARE_TEXT_V1__' in blob
+          assert 'input_mode=share' in blob
           assert any(i.endswith('runworkflow') for i in ids), ids
           assert 'YOS_OpenApp' in blob
           assert 'NEXT_DEVICE' in blob
@@ -114,6 +126,33 @@ jobs:
           print('Clarity Next runtime contract: PASS')
           PY
 
+      - name: Inspect thin entry wrappers
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import plistlib
+          from pathlib import Path
+          base=Path('tools/clarity-next/artifacts')
+          text_root=plistlib.loads((base/'Clarity-Text-unsigned.shortcut').read_bytes())
+          share_root=plistlib.loads((base/'Clarity-Share-v4-unsigned.shortcut').read_bytes())
+          for root in (text_root, share_root):
+              ids=[a.get('WFWorkflowActionIdentifier','') for a in root.get('WFWorkflowActions',[])]
+              blob=repr(root)
+              assert not any(i=='is.workflow.actions.askllm' for i in ids), ids
+              assert 'Clarity Next' in blob
+              assert any(i.endswith('runworkflow') for i in ids), ids
+          share_ids=[a.get('WFWorkflowActionIdentifier','') for a in share_root.get('WFWorkflowActions',[])]
+          share_blob=repr(share_root)
+          assert 'ActionExtension' in set(share_root.get('WFWorkflowTypes') or [])
+          assert share_root.get('WFWorkflowHasShortcutInputVariables') is True
+          assert any('gettextfromimage' in i for i in share_ids), share_ids
+          assert '__YOS_CLARITY_SHARE_TEXT_V1__' in share_blob
+          assert '__YOS_CLARITY_SHARE_IMAGE_V1__' in share_blob
+          assert '__YOS_CLARITY_SHARE_PDF_V1__' in share_blob
+          print('Clarity thin entry wrappers: PASS')
+          PY
+
       - name: Secret scan
         shell: bash
         run: |
@@ -132,6 +171,16 @@ jobs:
             --output tools/clarity-next/artifacts/Clarity-Next-signed.shortcut \
             --name 'Clarity Next' \
             2>&1 | tee tools/clarity-next/artifacts/hubsign.log
+          python3 tools/clarity-factory/sign_with_hubsign.py \
+            --input tools/clarity-next/artifacts/Clarity-Text-unsigned.shortcut \
+            --output tools/clarity-next/artifacts/Clarity-Text-signed.shortcut \
+            --name 'Clarity Text' \
+            2>&1 | tee tools/clarity-next/artifacts/clarity-text-hubsign.log
+          python3 tools/clarity-factory/sign_with_hubsign.py \
+            --input tools/clarity-next/artifacts/Clarity-Share-v4-unsigned.shortcut \
+            --output tools/clarity-next/artifacts/Clarity-Share-v4-signed.shortcut \
+            --name 'Clarity Share v4' \
+            2>&1 | tee tools/clarity-next/artifacts/clarity-share-hubsign.log
 
       - name: Verify signature
         shell: bash
@@ -139,11 +188,12 @@ jobs:
           set -euo pipefail
           python3 - <<'PY'
           from pathlib import Path
-          p=Path('tools/clarity-next/artifacts/Clarity-Next-signed.shortcut')
-          data=p.read_bytes()
-          assert data.startswith(b'AEA1'), data[:8]
-          assert len(data)>500, len(data)
-          print(f'Clarity-Next-signed.shortcut: AEA1 PASS ({len(data)} bytes)')
+          for name in ('Clarity-Next-signed.shortcut','Clarity-Text-signed.shortcut','Clarity-Share-v4-signed.shortcut'):
+              p=Path('tools/clarity-next/artifacts')/name
+              data=p.read_bytes()
+              assert data.startswith(b'AEA1'), (name,data[:8])
+              assert len(data)>500, (name,len(data))
+              print(f'{name}: AEA1 PASS ({len(data)} bytes)')
           PY
 
       - name: Upload
@@ -153,5 +203,11 @@ jobs:
           path: |
             tools/clarity-next/artifacts/Clarity-Next-unsigned.shortcut
             tools/clarity-next/artifacts/Clarity-Next-signed.shortcut
+            tools/clarity-next/artifacts/Clarity-Text-unsigned.shortcut
+            tools/clarity-next/artifacts/Clarity-Text-signed.shortcut
+            tools/clarity-next/artifacts/Clarity-Share-v4-unsigned.shortcut
+            tools/clarity-next/artifacts/Clarity-Share-v4-signed.shortcut
             tools/clarity-next/artifacts/hubsign.log
+            tools/clarity-next/artifacts/clarity-text-hubsign.log
+            tools/clarity-next/artifacts/clarity-share-hubsign.log
           if-no-files-found: error
