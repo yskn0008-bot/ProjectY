@@ -94,6 +94,25 @@ test('YOS Chat has a dedicated standalone Home Screen manifest', async () => {
 });
 
 
+test('YOS Chat can switch immediately to a protected ready preview without committing the bypass token', async () => {
+  const [page,auth,client,live] = await Promise.all([
+    read('yos/desk/index.html'),
+    read('yos/hj/yos-auth.js'),
+    read('yos/hj/yos-ai-client.js'),
+    read('yos/desk/live-chat.js')
+  ]);
+  assert.match(page,/yosAiEmergencyTransportV1/);
+  assert.match(page,/api_preview/);
+  assert.match(page,/vercel_share/);
+  assert.match(page,/history\.replaceState/);
+  assert.match(page,/dataset\.yosEmergencyTransport='preview'/);
+  assert.match(auth,/_vercel_share/);
+  assert.match(auth,/credentials: target\.share \? 'include' : 'omit'/);
+  assert.match(client,/vercelShareToken/);
+  assert.match(client,/searchParams\.set\('_vercel_share'/);
+  assert.match(live,/YOS_VERCEL_SHARE_TOKEN/);
+});
+
 test('YOS Chat is a chat-only surface with the new-chat icon in the header', async () => {
   const [page,app,css] = await Promise.all([
     read('yos/desk/index.html'),
