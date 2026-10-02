@@ -481,7 +481,11 @@
       var getToken=globalThis.YOS_AUTH&&globalThis.YOS_AUTH.getGoogleIdToken;
       if(typeof Client!=='function'||typeof getToken!=='function')throw Object.assign(new Error('YOS AI client unavailable'),{status:503});
       var base=clean(globalThis.YOS_AI_BASE_URL||YOS_AI_FALLBACK,500);
-      var client=new Client({baseUrl:base,getGoogleIdToken:getToken});
+      var client=new Client({
+        baseUrl:base,
+        getGoogleIdToken:getToken,
+        vercelShareToken:clean(globalThis.YOS_VERCEL_SHARE_TOKEN||'',512)
+      });
       var payload={userText:text,currentLocation:locationForChat(chat)};
       if(previousSummary)payload.conversationSummary=previousSummary;
       var result=await chatWithAuthRetry(client,payload);

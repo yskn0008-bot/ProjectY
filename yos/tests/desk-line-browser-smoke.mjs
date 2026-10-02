@@ -241,6 +241,23 @@ try{
   assert.equal(imported?.title,'共有経路GPT');
   assert.equal(imported?.source,'chatgpt');
 
+  const previewBase='https://project-y-yos-preview-project-y1.vercel.app';
+  const previewShare='PreviewShare_123';
+  const previewUntil=Date.now()+60*60*1000;
+  await page.goto(base+'/yos/desk/#api_preview='+encodeURIComponent(previewBase)+'&vercel_share='+encodeURIComponent(previewShare)+'&transport_until='+previewUntil,{waitUntil:'networkidle'});
+  await page.waitForFunction(()=>document.documentElement.dataset.yosEmergencyTransport==='preview');
+  const emergency=await page.evaluate(()=>({
+    baseUrl:globalThis.YOS_AI_BASE_URL,
+    share:globalThis.YOS_VERCEL_SHARE_TOKEN,
+    hash:location.hash,
+    saved:JSON.parse(localStorage.getItem('yosAiEmergencyTransportV1')||'null')
+  }));
+  assert.equal(emergency.baseUrl,previewBase);
+  assert.equal(emergency.share,previewShare);
+  assert.equal(emergency.hash,'','activation fragment should be removed immediately after local setup');
+  assert.equal(emergency.saved?.baseUrl,previewBase);
+  assert.equal(emergency.saved?.shareToken,previewShare);
+
   const fit=await page.evaluate(()=>{
     const app=document.getElementById('app');
     return {

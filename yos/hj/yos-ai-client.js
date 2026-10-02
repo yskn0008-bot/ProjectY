@@ -22,6 +22,7 @@
       this.fetchImpl = options.fetchImpl || globalThis.fetch.bind(globalThis);
       this.timeoutMilliseconds = boundedInteger(options.timeoutMilliseconds ?? 65000, 1000, 120000, 'timeoutMilliseconds');
       this.maxResponseBytes = boundedInteger(options.maxResponseBytes ?? 2000000, 1024, 10000000, 'maxResponseBytes');
+      this.vercelShareToken = optionalTransportToken(options?.vercelShareToken);
     }
 
     async chat(input) {
@@ -50,12 +51,14 @@
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), this.timeoutMilliseconds);
       try {
-        const response = await this.fetchImpl(new URL(path, this.baseUrl), {
+        const requestUrl = new URL(path, this.baseUrl);
+        if (this.vercelShareToken) requestUrl.searchParams.set('_vercel_share', this.vercelShareToken);
+        const response = await this.fetchImpl(requestUrl, {
           ...init,
           signal: controller.signal,
-          credentials: 'omit',
+          credentials: this.vercelShareToken ? 'include' : 'omit',
           cache: 'no-store',
-          redirect: 'error',
+          redirect: this.vercelShareToken ? 'follow' : 'error',
           referrerPolicy: 'no-referrer'
         });
         const body = await readBoundedJson(response, this.maxResponseBytes);
@@ -96,6 +99,14 @@
     }
     url.pathname = `${url.pathname.replace(/\/+$/u, '')}/`;
     return url;
+  }
+
+  function optionalTransportToken(value) {
+    if (value === undefined || value === null || value === '') return '';
+    if (typeof value !== 'string') throw new Error('vercelShareToken is invalid');
+    const token = value.trim();
+    if (!token || token.length > 512 || !/^[A-Za-z0-9_-]+$/.test(token)) throw new Error('vercelShareToken is invalid');
+    return token;
   }
 
   function validateChatInput(input) {

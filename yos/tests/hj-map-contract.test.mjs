@@ -92,7 +92,7 @@ test('active HJ saves Raw Input before YOS AI and confirms one candidate at a ti
 
   assert.match(client, /new URL\(path, this\.baseUrl\)/);
   assert.match(client, /'\/api\/yos\/chat'/);
-  assert.match(client, /credentials: 'omit'/);
+  assert.match(client, /credentials: this\.vercelShareToken \? 'include' : 'omit'/);
   assert.match(client, /cache: 'no-store'/);
   assert.match(client, /globalThis\.fetch\.bind\(globalThis\)/);
   for (const diagnostic of ['google-token', 'browser-fetch', 'request-timeout', 'http-response']) {

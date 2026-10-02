@@ -51,8 +51,58 @@ if('serviceWorker' in navigator){
   window.addEventListener('load',()=>navigator.serviceWorker.register('../../service-worker.js',{scope:'../../',updateViaCache:'none'}).catch(()=>{}));
 }
 </script>
-<script src="../hj/yos-ai-client.js?v=20260928-live1"></script>
-<script src="../hj/yos-auth.js?v=20260930-auth3"></script>
+<script>
+(()=>{
+  const KEY='yosAiEmergencyTransportV1';
+  function safeConfig(value){
+    if(!value||typeof value!=='object')return null;
+    try{
+      const url=new URL(String(value.baseUrl||''));
+      const token=String(value.shareToken||'').trim();
+      const expiresAt=Number(value.expiresAt)||0;
+      const hostOk=url.protocol==='https:'&&url.hostname.startsWith('project-y-yos-')&&url.hostname.endsWith('.vercel.app')&&!url.username&&!url.password&&!url.search&&!url.hash;
+      const tokenOk=/^[A-Za-z0-9_-]{8,512}$/.test(token);
+      if(!hostOk||!tokenOk||expiresAt<=Date.now())return null;
+      return {baseUrl:url.origin,shareToken:token,expiresAt};
+    }catch{return null}
+  }
+  function applyEmergencyTransport(){
+    const now=Date.now();
+    const params=new URLSearchParams(String(location.hash||'').replace(/^#/,''));
+    const base=params.get('api_preview');
+    const share=params.get('vercel_share');
+    if(base&&share){
+      const requestedUntil=Number(params.get('transport_until'))||now+12*60*60*1000;
+      const expiresAt=Math.min(requestedUntil,now+24*60*60*1000);
+      const next=safeConfig({baseUrl:base,shareToken:share,expiresAt});
+      if(next){
+        try{localStorage.setItem(KEY,JSON.stringify(next))}catch{}
+        try{history.replaceState(null,'',location.pathname+location.search)}catch{}
+      }
+    }
+    let active=null;
+    try{active=safeConfig(JSON.parse(localStorage.getItem(KEY)||'null'))}catch{}
+    if(!active){
+      try{localStorage.removeItem(KEY)}catch{}
+      globalThis.YOS_VERCEL_SHARE_TOKEN='';
+      delete globalThis.YOS_AI_EMERGENCY_EXPIRES_AT;
+      document.documentElement.dataset.yosEmergencyTransport='production';
+      globalThis.dispatchEvent(new CustomEvent('yos-ai-transport-change',{detail:{mode:'production'}}));
+      return;
+    }
+    globalThis.YOS_AI_BASE_URL=active.baseUrl;
+    globalThis.YOS_VERCEL_SHARE_TOKEN=active.shareToken;
+    globalThis.YOS_AI_EMERGENCY_EXPIRES_AT=active.expiresAt;
+    document.documentElement.dataset.yosEmergencyTransport='preview';
+    globalThis.dispatchEvent(new CustomEvent('yos-ai-transport-change',{detail:{mode:'preview'}}));
+  }
+  globalThis.YOS_APPLY_EMERGENCY_TRANSPORT=applyEmergencyTransport;
+  applyEmergencyTransport();
+  globalThis.addEventListener('hashchange',applyEmergencyTransport);
+})();
+</script>
+<script src="../hj/yos-ai-client.js?v=20261003-preview1"></script>
+<script src="../hj/yos-auth.js?v=20261003-preview1"></script>
 <script src="./app.js?v=20261003-motion1"></script>
 <script src="./live-chat.js?v=20261003-motion1"></script>
 <script src="./unified-inbox.js?v=20261002-chatonly2"></script>

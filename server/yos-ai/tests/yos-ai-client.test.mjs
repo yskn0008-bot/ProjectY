@@ -45,6 +45,28 @@ test('chat requests a fresh Google ID token and never enables cookies', async ()
   assert.deepEqual(JSON.parse(calls[0].init.body), {userText: '質問1'});
 });
 
+test('protected preview transport appends the share token without changing auth headers', async () => {
+  let captured;
+  const client = new YosAiClient({
+    baseUrl: 'https://project-y-yos-preview-project-y1.vercel.app',
+    vercelShareToken: 'PreviewShare_123',
+    getGoogleIdToken: async () => 'google-token',
+    fetchImpl: async (input, init) => {
+      captured = {url: String(input), init};
+      return json({answer: 'ok'});
+    }
+  });
+
+  await client.chat({userText: '今すぐ使う'});
+  const url = new URL(captured.url);
+  assert.equal(url.origin, 'https://project-y-yos-preview-project-y1.vercel.app');
+  assert.equal(url.pathname, '/api/yos/chat');
+  assert.equal(url.searchParams.get('_vercel_share'), 'PreviewShare_123');
+  assert.equal(captured.init.credentials, 'include');
+  assert.equal(captured.init.redirect, 'follow');
+  assert.equal(captured.init.headers.Authorization, 'Bearer google-token');
+});
+
 test('chat maps rate limits to a typed error with retry metadata', async () => {
   const client = new YosAiClient({
     baseUrl: 'https://api.example',
