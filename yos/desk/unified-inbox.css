@@ -392,13 +392,13 @@ body.sheet-open .chatIconBtn{transform:rotate(45deg) scale(.94)}
   opacity:1;
 }
 .sheet{
-  transform:translateY(calc(100% + 24px)) scale(.985);
+  transform:translateX(-50%) translateY(calc(100% + 24px)) scale(.985);
   opacity:.96;
   transition:transform 320ms cubic-bezier(.22,.9,.24,1),opacity 180ms ease;
   will-change:transform,opacity;
 }
 .sheetBackdrop.is-open .sheet{
-  transform:translateY(0) scale(1);
+  transform:translateX(-50%) translateY(0) scale(1);
   opacity:1;
 }
 .sheet button{
