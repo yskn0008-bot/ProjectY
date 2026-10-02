@@ -33,10 +33,10 @@ test("reads Calendar and Money locally without creating another SSOT", () => {
 });
 
 test("uses larger dashboard typography for iPhone readability", () => {
-  assert.match(source, /name\.font = font\(18, "bold"\)/);
-  assert.match(source, /font\(prominent \? 21 : 14/);
-  assert.match(source, /title\.font = font\(compact \? 12 : 15/);
-  assert.match(source, /amount\.font = font\(18, "bold"\)/);
+  assert.match(source, /name\.font = font\(22, "bold"\)/);
+  assert.match(source, /font\(prominent \? 25 : 17/);
+  assert.match(source, /title\.font = font\(compact \? 14 : 17/);
+  assert.match(source, /amount\.font = font\(22, "bold"\)/);
 });
 
 test("routine controls launch existing Morning and Night shortcuts without inventing completion state", () => {
