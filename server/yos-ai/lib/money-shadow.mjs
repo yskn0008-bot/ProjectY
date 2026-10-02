@@ -142,7 +142,7 @@ async function readJsonBody(request){
   return sanitizeSnapshot(parsed);
 }
 
-export function createMoneyShadowHandler({environment=process.env,fetchImpl=fetch}={}){
+export function createMoneyShadowHandler({environment=process.env,fetchImpl=fetch,onSnapshot}={}){
   return async request=>{
     const method=request.method.toUpperCase();
     const origin=clean(request.headers.get('origin'),300);
@@ -168,6 +168,9 @@ export function createMoneyShadowHandler({environment=process.env,fetchImpl=fetc
         }else{
           const claimed=await command(['SET',k.initialized,'1','NX','EX',SHADOW_TTL]);
           if(claimed==='OK')await command(['SETEX',k.delivered,SHADOW_TTL,alertSignature(snapshot)]);
+        }
+        if(typeof onSnapshot==='function'){
+          try{onSnapshot(snapshot)}catch{}
         }
         return Response.json({ok:true},{status:200,headers:jsonHeaders(origin)});
       }catch{
