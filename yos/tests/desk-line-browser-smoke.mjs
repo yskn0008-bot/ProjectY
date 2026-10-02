@@ -162,7 +162,7 @@ try{
   await page.locator('#searchInput').fill('Money');
   assert.ok(await page.locator('#chatList .chat').count()>=1,'chat search still works');
 
-  const importedUrl='https://chatgpt.com/g/g-p-smoke/c/6abef86b-b82c-83e8-b522-bd434407606d';
+  const importedUrl='https://chatgpt.com/g/g-p-smoke/c/11111111-2222-3333-4444-555555555555';
   const importHash='#url='+encodeURIComponent(importedUrl)+'&title='+encodeURIComponent('YOS DESK GPT')+'&project='+encodeURIComponent('One Enter');
   await page.goto(base+'/yos/desk/import-gpt.html'+importHash,{waitUntil:'networkidle'});
   await page.waitForURL(base+'/yos/desk/');
