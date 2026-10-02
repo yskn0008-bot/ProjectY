@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-10-02T16:24:44+09:00",
+  "updated_at": "2026-10-02T16:39:42+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -110,7 +110,7 @@
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/555",
-      "updated_at": "2026-10-02T07:24:21Z"
+      "updated_at": "2026-10-02T07:27:17Z"
     },
     {
       "id": "github-issue-10",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-10-02T07:23:56Z"
+      "updated_at": "2026-10-02T07:25:04Z"
     },
     {
       "id": "github-issue-234",
@@ -175,6 +175,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-41b9e345a93e",
+      "title": "chore: trigger YOS AI production redeploy once",
+      "completed_at": "2026-10-02T07:39:13Z",
+      "result": "GitHub mainへ反映（41b9e34）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/41b9e345a93eff8e9fcd4594468ee929cb7072b2"
+    },
+    {
       "id": "github-commit-a479acd39602",
       "title": "YOS AI: fix 400 from retired OpenAI model (#554)",
       "completed_at": "2026-10-02T01:36:08Z",
@@ -201,13 +208,6 @@
       "completed_at": "2026-10-02T01:06:59Z",
       "result": "GitHub mainへ反映（beef952）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/beef952635e845372f85c1fb68173c900d2bc725"
-    },
-    {
-      "id": "github-commit-aa99a51a549e",
-      "title": "Merge PR #549: One Enter Loop Engineering integration",
-      "completed_at": "2026-10-02T01:04:26Z",
-      "result": "GitHub mainへ反映（aa99a51）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/aa99a51a549ef09705bde4d87ac2ca381619c6d1"
     },
     {
       "id": "complete-002",
@@ -244,7 +244,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-10-02T16:24:44+09:00",
+      "last_update": "2026-10-02T16:39:42+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -325,7 +325,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-10-02T16:24:44+09:00",
+      "last_update": "2026-10-02T16:39:42+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -348,7 +348,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-10-02T16:24:44+09:00",
+      "last_update": "2026-10-02T16:39:42+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -430,5 +430,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "d40e118c8f86a306acbd7ba1d572eb585f439e9996dae66072a17d85380d8d90"
+  "github_snapshot_hash": "e5f2dfd35a0a391f39fb9829a16ff08888357d72f5fb5d719f3c59d07d641327"
 }
