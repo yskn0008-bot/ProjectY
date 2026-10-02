@@ -39,8 +39,10 @@ const CRITICAL_NETWORK_FIRST=new Set([
   '/ProjectY/yos/desk/style.css',
   '/ProjectY/yos/desk/compact.css',
   '/ProjectY/yos/desk/live-chat.css',
+  '/ProjectY/yos/desk/unified-inbox.css',
   '/ProjectY/yos/desk/app.js',
   '/ProjectY/yos/desk/live-chat.js',
+  '/ProjectY/yos/desk/unified-inbox.js',
   '/ProjectY/data/yos-assets.json'
 ]);
 self.addEventListener('install',event=>{event.waitUntil((async()=>{const cache=await caches.open(CACHE_NAME);for(const path of STATIC){try{await cache.add(new Request(path,{cache:'reload'}));}catch(error){console.warn('YOS precache skipped',path,error);}}await self.skipWaiting();})());});
