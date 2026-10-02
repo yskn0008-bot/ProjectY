@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-10-02T20:29:53+09:00",
+  "updated_at": "2026-10-02T20:30:39+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -21,16 +21,6 @@
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/553",
       "updated_at": "2026-10-02T01:11:02Z"
-    },
-    {
-      "id": "github-pr-566",
-      "title": "PR #566 feat(widget): YOS Dashboard for iPhone Home Screen",
-      "type": "GitHub PR",
-      "status": "review",
-      "priority": 1,
-      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/566",
-      "updated_at": "2026-10-02T11:29:19Z"
     },
     {
       "id": "github-pr-403",
@@ -130,7 +120,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-10-02T11:29:18Z"
+      "updated_at": "2026-10-02T11:30:18Z"
     },
     {
       "id": "github-issue-234",
@@ -175,6 +165,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-e1deb8d0ea74",
+      "title": "feat(widget): YOS Dashboard for iPhone Home Screen",
+      "completed_at": "2026-10-02T11:30:08Z",
+      "result": "GitHub mainへ反映（e1deb8d）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/e1deb8d0ea74befe0b38d540a3d32bdb9f74d7e5"
+    },
+    {
       "id": "github-commit-2611c2d15ca4",
       "title": "YOS Chat: DESK廃止・チャット専用化とGPT原文自動取込 (#567)",
       "completed_at": "2026-10-02T11:29:29Z",
@@ -203,13 +200,6 @@
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/029ebd4c275115b642a22cd42364633d0fe8211b"
     },
     {
-      "id": "github-commit-c89b3b6cd2c1",
-      "title": "fix(clarity): deterministically recover BASE HOME voice misroutes",
-      "completed_at": "2026-10-02T10:25:40Z",
-      "result": "GitHub mainへ反映（c89b3b6）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/c89b3b6cd2c165933009e6d6e1671169b9bf7910"
-    },
-    {
       "id": "complete-002",
       "title": "iPhone向けMission Control Dashboardを実装",
       "completed_at": "2026-07-17T17:55:00+09:00",
@@ -234,7 +224,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #566をレビューして公開判断する",
+      "next_action": "PR #553をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -244,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-10-02T20:29:53+09:00",
+      "last_update": "2026-10-02T20:30:39+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -319,13 +309,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 6件・Open PR 10件を自動同期中",
+      "next_action": "Open Issue 6件・Open PR 9件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-10-02T20:29:53+09:00",
+      "last_update": "2026-10-02T20:30:39+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -339,7 +329,7 @@
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #566をレビューして公開判断する",
+      "next_action": "PR #553をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -348,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-10-02T20:29:53+09:00",
+      "last_update": "2026-10-02T20:30:39+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -430,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "9937d3197ff74aabc7e0eb5dad2d33a530b000a92d63f75b66cc54d726e79f1e"
+  "github_snapshot_hash": "98fca7aece56160ff5f2181d1afd94a43e057007f344eeb55e8d73ba31a5537e"
 }
