@@ -79,6 +79,8 @@ test('YOS Chat is a chat-only surface with the new-chat icon in the header', asy
   assert.doesNotMatch(page, /id="deskPage"/);
   assert.doesNotMatch(page, /<nav class="bottom"/);
   assert.match(page, /id="newBtn"[^>]+aria-label="新規チャット"/);
+  assert.doesNotMatch(page, /id="selectBtn"/);
+  assert.doesNotMatch(page, /data-mode="pinned"/);
   assert.match(page, /<strong>チャット<\/strong>/);
   assert.match(page, /placeholder="チャットを検索"/);
   assert.match(css, /YOS Chat — chat-only iPhone surface/);
@@ -87,6 +89,26 @@ test('YOS Chat is a chat-only surface with the new-chat icon in the header', asy
   assert.match(css, /#chatsPage \.avatar,[\s\S]*display:none !important/);
   assert.match(app, /state\.page='chats'/);
   assert.doesNotMatch(app, /renderDev\(|deskClock|deskInput|boardBtn|metricsBtn/);
+});
+
+
+test('YOS Chat uses unread-only emphasis and the Home Screen Badging API', async () => {
+  const [app,live,css] = await Promise.all([
+    read('yos/desk/app.js'),
+    read('yos/desk/live-chat.js'),
+    read('yos/desk/unified-inbox.css')
+  ]);
+  assert.match(app,/function unreadTotal\(\)/);
+  assert.match(app,/navigator\.setAppBadge/);
+  assert.match(app,/navigator\.clearAppBadge/);
+  assert.match(app,/Notification\.requestPermission/);
+  assert.match(app,/未読バッジを有効にする/);
+  assert.match(live,/function latestConversation\(chatId\)/);
+  assert.match(live,/return'あなた：'/);
+  assert.match(live,/return'YOS：'/);
+  assert.match(css,/#chatsPage \.chat\.currentChat\{background:transparent\}/);
+  assert.match(css,/#chatsPage \.chat\.unread \.chatName\{font-weight:760\}/);
+  assert.match(css,/background:#0a84ff/);
 });
 
 

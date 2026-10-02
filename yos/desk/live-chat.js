@@ -48,6 +48,13 @@
     var items=thread(chatId);
     return items.length?items[items.length-1]:null;
   }
+  function latestConversation(chatId){
+    var items=thread(chatId);
+    for(var i=items.length-1;i>=0;i--){
+      if(items[i]&&(items[i].role==='user'||items[i].role==='assistant'))return items[i];
+    }
+    return null;
+  }
   function japanTime(value){
     var d=value?new Date(value):new Date();
     if(Number.isNaN(d.getTime()))d=new Date();
@@ -64,10 +71,13 @@
   }
   function messagePreview(message){
     if(!message)return'';
-    return clean(message.text,90).replace(/\s+/g,' ');
+    var text=clean(message.text,90).replace(/\s+/g,' ');
+    if(message.role==='user')return'あなた：'+text;
+    if(message.role==='assistant')return'YOS：'+text;
+    return text;
   }
   function updateChatFromThread(chat){
-    var item=latest(chat.id);
+    var item=latestConversation(chat.id)||latest(chat.id);
     if(!item)return;
     chat.preview=messagePreview(item);
     chat.time=listTime(item.at);

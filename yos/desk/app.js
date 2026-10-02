@@ -26,6 +26,7 @@ function persist(){
     if(temporaryIds.indexOf(snapshot.activeChatId)>=0)snapshot.activeChatId='';
     snapshot.page='chats';
     localStorage.setItem(STORAGE_KEY,JSON.stringify(snapshot));
+    syncAppBadge();
   }catch(e){}
 }
 
@@ -40,6 +41,39 @@ function q(s){return document.querySelector(s)}
 function qa(s){return Array.prototype.slice.call(document.querySelectorAll(s))}
 function esc(v){return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;')}
 function titleOf(x){return x&&x.alias&&x.alias.trim()?x.alias.trim():String(x&&x.title||'チャット')}
+function unreadTotal(){
+  return state.chats.reduce(function(total,chat){
+    if(!chat||chat.temporary)return total;
+    return total+Math.max(0,Number(chat.unread)||0);
+  },0);
+}
+async function syncAppBadge(){
+  var total=unreadTotal();
+  try{
+    if(total>0&&'setAppBadge' in navigator)await navigator.setAppBadge(total);
+    else if(total===0&&'clearAppBadge' in navigator)await navigator.clearAppBadge();
+  }catch(e){}
+  document.documentElement.dataset.deskBadgeCount=String(total);
+}
+function badgePermissionMarkup(){
+  if(!('setAppBadge' in navigator)||!('Notification' in globalThis))return'';
+  if(Notification.permission==='granted')return'';
+  if(Notification.permission==='denied')return'<p class="badgeHint">未読バッジはiPhoneの設定 → 通知 → YOS で許可できます。</p>';
+  return'<button id="enableBadge">未読バッジを有効にする</button>';
+}
+async function requestBadgePermission(){
+  if(!('Notification' in globalThis)||typeof Notification.requestPermission!=='function')return;
+  try{
+    var permission=await Notification.requestPermission();
+    if(permission==='granted'){
+      await syncAppBadge();
+      showToast('未読バッジを有効にしました');
+      openNew();
+      return;
+    }
+    showToast('通知の許可が必要です');
+  }catch(e){showToast('iPhoneの通知設定を確認してください')}
+}
 function tap(){state.metrics.taps=(Number(state.metrics.taps)||0)+1;persist()}
 function showToast(text){
   var t=q('#toast');
@@ -79,7 +113,6 @@ function filteredChats(){
   return state.chats.filter(function(x){
     if(!x||x.temporary)return false;
     if(chatMode==='unread'&&!Number(x.unread))return false;
-    if(chatMode==='pinned'&&!x.pinned)return false;
     if(text){
       var hay=[titleOf(x),x.title,x.project,x.preview].join(' ').toLowerCase();
       if(hay.indexOf(text)<0)return false;
@@ -93,15 +126,15 @@ function filteredChats(){
 }
 function renderChats(){
   var listed=state.chats.filter(function(x){return x&&!x.temporary});
-  var all=q('#countAll'),unread=q('#countUnread'),pinned=q('#countPinned');
+  var all=q('#countAll'),unread=q('#countUnread');
   if(all)all.textContent=' '+listed.length;
   if(unread)unread.textContent=' '+listed.filter(function(x){return Number(x.unread)>0}).length;
-  if(pinned)pinned.textContent=' '+listed.filter(function(x){return x.pinned}).length;
   renderProjects();
 
   var rows=filteredChats(),html='';
   rows.forEach(function(x){
-    html+='<div class="chat '+(x.pinned?'pinned ':'')+(selected.has(x.id)?'selected ':'')+'" data-id="'+esc(x.id)+'">'+
+    var unreadCount=Math.max(0,Number(x.unread)||0);
+    html+='<div class="chat '+(x.pinned?'pinned ':'')+(unreadCount>0?'unread ':'')+'" data-id="'+esc(x.id)+'">'+
       '<div class="check">✓</div>'+
       '<div class="avatar '+esc(x.tone||'')+'">'+esc(x.avatar||'Y')+'</div>'+
       '<div class="chatText"><div class="nameLine"><div class="chatName">'+esc(titleOf(x))+'</div><span class="tag">'+esc(x.project||'')+'</span></div>'+
@@ -110,16 +143,13 @@ function renderChats(){
       '</div>';
   });
 
-  var list=q('#chatList'),empty=q('#empty'),bulk=q('#bulk');
+  var list=q('#chatList'),empty=q('#empty');
   if(list)list.innerHTML=html;
   if(empty)empty.style.display=rows.length?'none':'flex';
-  q('#app')&&q('#app').classList.toggle('selecting',selecting);
-  if(bulk)bulk.style.display=selecting?'grid':'none';
-  var select=q('#selectBtn');
-  if(select)select.textContent=selecting?'完了':'編集';
   var emptyAdd=q('#emptyAdd');
   if(emptyAdd)emptyAdd.onclick=function(){tap();openNew()};
   bindChats();
+  syncAppBadge();
   persist();
 }
 function bindChats(){
@@ -128,11 +158,6 @@ function bindChats(){
     row.onclick=function(){
       tap();
       if(longPressed){longPressed=false;return}
-      if(selecting){
-        selected.has(id)?selected.delete(id):selected.add(id);
-        renderChats();
-        return;
-      }
       var chat=state.chats.find(function(x){return x.id===id});
       if(!chat)return;
       if(Number(chat.unread))chat.unread=0;
@@ -290,10 +315,12 @@ function openNew(){
     '<button class="primary" id="createYosChat">新規チャット</button>'+
     '<button id="createTemporaryChat">一時チャット <small>履歴に残さない</small></button>'+
     '<button id="addGptOriginal">GPT原文</button>'+
+    badgePermissionMarkup()+
     '<button id="closeSheetBtn">閉じる</button>');
   q('#createYosChat').onclick=function(){createYosChat(false)};
   q('#createTemporaryChat').onclick=function(){createYosChat(true)};
   q('#addGptOriginal').onclick=openGptEntry;
+  if(q('#enableBadge'))q('#enableBadge').onclick=requestBadgePermission;
   q('#closeSheetBtn').onclick=closeSheet;
 }
 
@@ -301,8 +328,6 @@ var backdrop=q('#sheetBackdrop');
 if(backdrop)backdrop.onclick=function(e){if(e.target===backdrop)closeSheet()};
 var newBtn=q('#newBtn');
 if(newBtn)newBtn.onclick=function(){tap();openNew()};
-var selectBtn=q('#selectBtn');
-if(selectBtn)selectBtn.onclick=function(){tap();selecting=!selecting;selected.clear();renderChats()};
 var searchInput=q('#searchInput');
 if(searchInput)searchInput.oninput=renderChats;
 qa('.tab').forEach(function(b){
@@ -314,19 +339,6 @@ qa('.tab').forEach(function(b){
     renderChats();
   };
 });
-var bulkRead=q('#bulkRead');
-if(bulkRead)bulkRead.onclick=function(){state.chats.forEach(function(x){if(selected.has(x.id))x.unread=0});selected.clear();renderChats()};
-var bulkPin=q('#bulkPin');
-if(bulkPin)bulkPin.onclick=function(){state.chats.forEach(function(x){if(selected.has(x.id))x.pinned=true});selected.clear();renderChats()};
-var bulkDelete=q('#bulkDelete');
-if(bulkDelete)bulkDelete.onclick=function(){
-  if(!selected.size)return;
-  state.chats=state.chats.filter(function(x){return !selected.has(x.id)});
-  selected.forEach(function(id){if(state.chatThreads)delete state.chatThreads[id]});
-  selected.clear();
-  renderChats();
-};
-
 autoImportOriginals();
 autoReadGrantedClipboard();
 renderChats();

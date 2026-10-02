@@ -34,22 +34,6 @@
   if(state[ACTIVE_FIELD]&&!(state.chats||[]).some(function(chat){return chat.id===state[ACTIVE_FIELD]}))state[ACTIVE_FIELD]='';
   persist();
 
-  if(typeof filteredChats==='function'){
-    var baseFilteredChats=filteredChats;
-    filteredChats=function(){
-      var rows=baseFilteredChats();
-      var activeId=state[ACTIVE_FIELD]||'';
-      return rows
-        .map(function(chat,index){return {chat:chat,index:index}})
-        .sort(function(a,b){
-          var aa=a.chat.id===activeId?1:0,bb=b.chat.id===activeId?1:0;
-          if(aa!==bb)return bb-aa;
-          return a.index-b.index;
-        })
-        .map(function(item){return item.chat});
-    };
-  }
-
   function decorateRows(){
     qa('#chatList .chat').forEach(function(row){
       var chat=(state.chats||[]).find(function(item){return item.id===row.dataset.id});
