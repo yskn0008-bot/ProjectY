@@ -16,6 +16,7 @@ await context.addInitScript(() => {
     board:[],
     metrics:{opens:0,taps:0,reorders:0,posts:0},
     chatRegistryVersion:'2026-09-24-real-links-v1',
+    activeChatId:'external-yos',
     chats:[
       {id:'external-yos',project:'ChatGPT',title:'外部YOS',preview:'実チャット',time:'20:30',unread:0,pinned:false,avatar:'Y',tone:'gold',alias:'',url:'https://chatgpt.com/c/yos-ui-smoke'}
     ],
@@ -67,8 +68,16 @@ try{
   const count=await page.locator('#chatList .chat').count();
   assert.ok(count>=6,'built-in YOS rooms should populate CHATS without manual links');
   assert.equal(await page.locator('#projects').evaluate(el=>getComputedStyle(el).display),'none','project pills stay hidden for LINE-like scanability');
+  assert.equal(await page.locator('#currentChatBanner').isVisible(),true,'active chat banner should stay visible across projects');
+  assert.match((await page.locator('#currentChatBanner').textContent())||'',/会話中/);
+  assert.match((await page.locator('#currentChatBanner').textContent())||'',/外部YOS/);
+  const externalRow=page.locator('.chat[data-id="external-yos"]');
+  assert.equal(await externalRow.evaluate(el=>el.classList.contains('currentChat')),true,'last active GPT chat should be marked as current');
+  assert.match((await externalRow.locator('.sourceBadge').textContent())||'',/GPT原文/);
+  assert.match((await externalRow.locator('.readState').textContent())||'',/既読/);
+  assert.match((await externalRow.locator('.preview').textContent())||'',/ChatGPTの元チャットを開く/,'GPT rows must not show a divergent copied transcript');
 
-  const row=page.locator('#chatList .chat').first();
+  const row=page.locator('#chatList .chat:not(.currentChat)').first();
   const ui=await row.evaluate(row=>{
     const avatar=row.querySelector('.avatar');
     const preview=row.querySelector('.preview');
@@ -129,6 +138,8 @@ try{
 
   await page.locator('#threadBack').click();
   await page.waitForSelector('#chatsPage.active');
+  assert.equal(await page.locator('.chat[data-id="asset-clarity"]').evaluate(el=>el.classList.contains('currentChat')),true,'opened room should become current');
+  assert.match((await page.locator('#currentChatBanner').textContent())||'',/Clarity/);
   const clarityPreview=(await page.locator('.chat[data-id="asset-clarity"] .preview').textContent())||'';
   assert.match(clarityPreview,/テスト応答です/);
 
