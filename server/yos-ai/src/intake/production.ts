@@ -42,7 +42,7 @@ export function createProductionNotionMirrorHandler(options: {environment: Envir
   return createNotionMirrorHandler({
     tokenSha256: requiredHash(options.environment, 'YOS_CLARITY_INTAKE_TOKEN_SHA256'),
     notionToken: required(options.environment, 'YOS_NOTION_API_TOKEN'),
-    notionDataSourceId: required(options.environment, 'YOS_NOTION_TASKS_DATA_SOURCE_ID'),
+    notionDataSourceId: options.environment.YOS_NOTION_TASKS_DATA_SOURCE_ID?.trim() || null,
     redis
   });
 }

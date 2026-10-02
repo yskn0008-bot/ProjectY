@@ -186,3 +186,82 @@ test('Notion mirror rejects invalid auth and invalid enum values before writes',
   assert.equal((await handler(request(invalid))).status, 400);
   assert.equal(calls, 0);
 });
+
+
+test('Notion mirror auto-discovers the exact YOS Tasks data source and caches it', async () => {
+  const redis = makeRedis();
+  const calls = [];
+  const handler = createNotionMirrorHandler({
+    tokenSha256,
+    notionToken: 'secret-notion-token',
+    redis: redis.client,
+    fetchImpl: async (input, init) => {
+      calls.push({input: String(input), init});
+      if (String(input) === 'https://api.notion.com/v1/search') {
+        return Response.json({
+          results: [{
+            object: 'data_source',
+            id: notionDataSourceId,
+            title: [{type: 'text', plain_text: 'YOS Tasks', text: {content: 'YOS Tasks'}}]
+          }]
+        });
+      }
+      if (String(input).includes('/data_sources/')) return Response.json({results: []});
+      if (String(input) === 'https://api.notion.com/v1/pages') return Response.json({id: 'notion-page-discovered'});
+      throw new Error('Unexpected Notion request');
+    }
+  });
+
+  const response = await handler(request(body('clarity-op-20261003-discover')));
+  assert.equal(response.status, 201);
+  assert.equal(calls[0].input, 'https://api.notion.com/v1/search');
+  assert.match(calls[0].init.body, /"value":"data_source"/u);
+  assert.match(calls[1].input, /data_sources\/01234567-89ab-cdef-0123-456789abcdef\/query/u);
+  assert.equal(redis.state.get('yos:notion:mirror:v1:data-source'), notionDataSourceId);
+});
+
+test('Notion mirror reuses the cached auto-discovered data source without search', async () => {
+  const redis = makeRedis();
+  redis.state.set('yos:notion:mirror:v1:data-source', notionDataSourceId);
+  const calls = [];
+  const handler = createNotionMirrorHandler({
+    tokenSha256,
+    notionToken: 'secret-notion-token',
+    redis: redis.client,
+    fetchImpl: async (input, init) => {
+      calls.push({input: String(input), init});
+      if (String(input).includes('/data_sources/')) return Response.json({results: []});
+      if (String(input) === 'https://api.notion.com/v1/pages') return Response.json({id: 'notion-page-cached'});
+      throw new Error('Unexpected Notion request');
+    }
+  });
+
+  const response = await handler(request(body('clarity-op-20261003-cache')));
+  assert.equal(response.status, 201);
+  assert.equal(calls.some((call) => call.input === 'https://api.notion.com/v1/search'), false);
+});
+
+test('Notion mirror fails closed when YOS Tasks discovery is missing or ambiguous', async () => {
+  for (const results of [
+    [],
+    [
+      {object: 'data_source', id: notionDataSourceId, title: [{plain_text: 'YOS Tasks'}]},
+      {object: 'data_source', id: 'fedcba98-7654-3210-fedc-ba9876543210', title: [{plain_text: 'YOS Tasks'}]}
+    ]
+  ]) {
+    const redis = makeRedis();
+    const handler = createNotionMirrorHandler({
+      tokenSha256,
+      notionToken: 'secret-notion-token',
+      redis: redis.client,
+      fetchImpl: async (input) => {
+        assert.equal(String(input), 'https://api.notion.com/v1/search');
+        return Response.json({results});
+      }
+    });
+
+    const response = await handler(request(body(`clarity-op-discovery-${results.length}`)));
+    assert.equal(response.status, 503);
+    assert.equal(redis.state.has('yos:notion:mirror:v1:data-source'), false);
+  }
+});

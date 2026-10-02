@@ -5,6 +5,9 @@ const DEFAULT_MAX_BODY_BYTES = 64_000;
 const MAX_ITEMS = 50;
 const PROCESSING_TTL_SECONDS = 120;
 const DONE_TTL_SECONDS = 30 * 24 * 60 * 60;
+const DATA_SOURCE_CACHE_TTL_SECONDS = 24 * 60 * 60;
+const DATA_SOURCE_CACHE_KEY = 'yos:notion:mirror:v1:data-source';
+const DATA_SOURCE_TITLE = 'YOS Tasks';
 const NOTION_VERSION = '2026-03-11';
 
 const AREAS = new Set(['Money', 'Work', 'ProjectY', 'Life', 'Home', 'Idea', 'Admin', 'Shopping']);
@@ -40,14 +43,16 @@ export class MirrorInProgressError extends Error {}
 export function createNotionMirrorHandler(options: {
   tokenSha256: string;
   notionToken: string;
-  notionDataSourceId: string;
+  notionDataSourceId?: string | null;
   redis: RedisCommandClient;
   fetchImpl?: FetchLike;
   maxBodyBytes?: number;
 }): (request: Request) => Promise<Response> {
   const tokenSha256 = normalizeHash(options.tokenSha256);
   const notionToken = required(options.notionToken, 'Notion token');
-  const notionDataSourceId = normalizeId(options.notionDataSourceId, 'Notion data source ID');
+  const configuredDataSourceId = options.notionDataSourceId
+    ? normalizeId(options.notionDataSourceId, 'Notion data source ID')
+    : null;
   const fetchImpl = options.fetchImpl ?? fetch;
   const maxBodyBytes = options.maxBodyBytes ?? DEFAULT_MAX_BODY_BYTES;
 
@@ -85,6 +90,11 @@ export function createNotionMirrorHandler(options: {
     if (!parsed.ok) return json({error: parsed.error}, 400);
 
     try {
+      const notionDataSourceId = configuredDataSourceId ?? await resolveNotionDataSourceId({
+        notionToken,
+        redis: options.redis,
+        fetchImpl
+      });
       const result = await processMirror({
         input: parsed.value,
         notionToken,
@@ -103,6 +113,54 @@ export function createNotionMirrorHandler(options: {
       return json({error: 'Notion mirror is temporarily unavailable'}, 503);
     }
   };
+}
+
+
+async function resolveNotionDataSourceId(options: {
+  notionToken: string;
+  redis: RedisCommandClient;
+  fetchImpl: FetchLike;
+}): Promise<string> {
+  const cached = await options.redis.command<string | null>(['GET', DATA_SOURCE_CACHE_KEY]);
+  if (cached) return normalizeId(cached, 'cached Notion data source ID');
+
+  const payload = await notionRequest(
+    options.fetchImpl,
+    options.notionToken,
+    'https://api.notion.com/v1/search',
+    {
+      method: 'POST',
+      body: JSON.stringify({
+        query: DATA_SOURCE_TITLE,
+        filter: {property: 'object', value: 'data_source'},
+        page_size: 100
+      })
+    }
+  );
+
+  const results = Array.isArray(payload.results) ? payload.results : [];
+  const matches = results.filter((entry) => {
+    if (!isRecord(entry) || entry.object !== 'data_source') return false;
+    return notionTitle(entry.title) === DATA_SOURCE_TITLE;
+  });
+
+  if (matches.length !== 1) {
+    throw new Error(`Expected exactly one accessible Notion data source titled "${DATA_SOURCE_TITLE}", found ${matches.length}`);
+  }
+
+  const id = normalizeId(String((matches[0] as Record<string, unknown>).id ?? ''), 'discovered Notion data source ID');
+  await options.redis.command<string>(['SET', DATA_SOURCE_CACHE_KEY, id, 'EX', DATA_SOURCE_CACHE_TTL_SECONDS]);
+  return id;
+}
+
+function notionTitle(value: unknown): string {
+  if (!Array.isArray(value)) return '';
+  return value.map((part) => {
+    if (!isRecord(part)) return '';
+    if (typeof part.plain_text === 'string') return part.plain_text;
+    if (isRecord(part.text) && typeof part.text.content === 'string') return part.text.content;
+    return '';
+  }).join('').trim();
 }
 
 async function processMirror(options: {
