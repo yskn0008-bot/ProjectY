@@ -162,6 +162,24 @@ try{
   await page.locator('#searchInput').fill('Money');
   assert.ok(await page.locator('#chatList .chat').count()>=1,'chat search still works');
 
+  const importedUrl='https://chatgpt.com/g/g-p-smoke/c/11111111-2222-3333-4444-555555555555';
+  const importHash='#url='+encodeURIComponent(importedUrl)+'&title='+encodeURIComponent('YOS DESK GPT')+'&project='+encodeURIComponent('One Enter');
+  await page.goto(base+'/yos/desk/import-gpt.html'+importHash,{waitUntil:'networkidle'});
+  await page.waitForURL(base+'/yos/desk/');
+  await page.waitForFunction(()=>document.documentElement.dataset.deskUnifiedInbox==='ready');
+  await page.waitForSelector('#chatsPage.active');
+  assert.equal(await page.evaluate(()=>location.hash),'','GPT import fragment should not remain after redirect');
+  assert.match((await page.locator('#sourceSummary').textContent())||'',/GPT原文 2/);
+  const imported=await page.evaluate((url)=>{
+    const s=JSON.parse(localStorage.getItem('yosDeskIntegratedStateV1')||'{}');
+    const chat=(s.chats||[]).find(x=>x.url===url);
+    return {chat,active:s.activeChatId};
+  },importedUrl);
+  assert.equal(imported.chat?.title,'YOS DESK GPT');
+  assert.equal(imported.chat?.project,'One Enter');
+  assert.equal(imported.chat?.source,'chatgpt');
+  assert.equal(imported.active,imported.chat?.id);
+
   await page.evaluate(()=>setPage('desk'));
   await page.waitForSelector('#deskPage.active');
   await page.waitForFunction(()=>document.documentElement.dataset.liveSync==='ok'||document.documentElement.dataset.liveSync==='local-only');
