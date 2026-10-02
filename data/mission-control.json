@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-10-03T02:32:10+09:00",
+  "updated_at": "2026-10-03T02:35:25+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -120,7 +120,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-10-02T17:31:29Z"
+      "updated_at": "2026-10-02T17:34:41Z"
     },
     {
       "id": "github-issue-234",
@@ -175,6 +175,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-dac084a2d2c9",
+      "title": "fix(widget): make task wrapping reliable in YOS Dashboard",
+      "completed_at": "2026-10-02T17:34:53Z",
+      "result": "GitHub mainへ反映（dac084a）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/dac084a2d2c9e46a819b89c5fce82a065f04e41a"
+    },
+    {
       "id": "github-commit-20243fafa89d",
       "title": "fix(widget): wrap YOS Dashboard tasks without shrinking text",
       "completed_at": "2026-10-02T17:31:49Z",
@@ -201,13 +208,6 @@
       "completed_at": "2026-10-02T16:02:00Z",
       "result": "GitHub mainへ反映（ba1862c）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/ba1862c66b05590c6962a257a6415a41fcd3f469"
-    },
-    {
-      "id": "github-commit-2ed8457d822c",
-      "title": "test(yos-ai): cover Money to Notion mirror mapping",
-      "completed_at": "2026-10-02T16:01:44Z",
-      "result": "GitHub mainへ反映（2ed8457）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/2ed8457d822c1d8964990b9efdba65fa7929a50a"
     },
     {
       "id": "complete-002",
@@ -244,7 +244,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-10-03T02:32:10+09:00",
+      "last_update": "2026-10-03T02:35:25+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -325,7 +325,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-10-03T02:32:10+09:00",
+      "last_update": "2026-10-03T02:35:25+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -348,7 +348,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-10-03T02:32:10+09:00",
+      "last_update": "2026-10-03T02:35:25+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -430,5 +430,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "02fde2c21e8200a6d43dd10a807ee5192ff62a6ed4bd43f5efbb60a638926664"
+  "github_snapshot_hash": "4aaa3342b9ee5139f5907d1e8530cea975c742efa4e5f4652697c8214ee01234"
 }
