@@ -80,10 +80,10 @@ function addSectionLabel(parent, symbol, label, tint = COLORS.gold) {
   const row = parent.addStack();
   row.layoutHorizontally();
   row.centerAlignContent();
-  addSymbol(row, symbol, 13, tint);
+  addSymbol(row, symbol, 15, tint);
   row.addSpacer(7);
   const text = row.addText(label);
-  text.font = font(12, "bold");
+  text.font = font(14, "bold");
   text.textColor = color(tint);
   text.letterSpacing = 0.5;
   return row;
@@ -198,24 +198,24 @@ function addHeader(widget, title) {
   row.layoutHorizontally();
   row.centerAlignContent();
   const mark = row.addStack();
-  mark.size = new Size(34, 34);
+  mark.size = new Size(40, 40);
   mark.backgroundColor = color(COLORS.goldSoft, 0.95);
-  mark.cornerRadius = 17;
+  mark.cornerRadius = 20;
   mark.centerAlignContent();
-  addSymbol(mark, "sun.max.fill", 16, COLORS.gold);
+  addSymbol(mark, "sun.max.fill", 19, COLORS.gold);
   row.addSpacer(10);
   const copy = row.addStack();
   copy.layoutVertically();
   const brand = copy.addText("YOS");
-  brand.font = font(11, "bold");
+  brand.font = font(12, "bold");
   brand.textColor = color(COLORS.gold);
   brand.letterSpacing = 0.8;
   const name = copy.addText(title);
-  name.font = font(18, "bold");
+  name.font = font(22, "bold");
   name.textColor = color(COLORS.text);
   row.addSpacer();
   const date = row.addText(formatDateHeader());
-  date.font = font(13, "semibold");
+  date.font = font(15, "semibold");
   date.textColor = color(COLORS.muted);
 }
 
@@ -224,12 +224,12 @@ function addTaskLine(parent, task, prominent = false) {
   row.layoutHorizontally();
   row.centerAlignContent();
   const dot = row.addStack();
-  dot.size = new Size(prominent ? 9 : 8, prominent ? 9 : 8);
-  dot.cornerRadius = prominent ? 4.5 : 4;
+  dot.size = new Size(prominent ? 10 : 9, prominent ? 10 : 9);
+  dot.cornerRadius = prominent ? 5 : 4.5;
   dot.backgroundColor = color(task.state === "本人操作" ? COLORS.coral : COLORS.green);
   row.addSpacer(9);
   const text = row.addText(task.title || "今すぐやることなし");
-  text.font = font(prominent ? 21 : 14, prominent ? "bold" : "semibold");
+  text.font = font(prominent ? 25 : 17, prominent ? "bold" : "semibold");
   text.textColor = color(COLORS.text);
   text.lineLimit = prominent ? 2 : 1;
   text.minimumScaleFactor = 0.78;
@@ -240,12 +240,12 @@ function addEventLine(parent, event, compact = false) {
   row.layoutHorizontally();
   row.centerAlignContent();
   const time = row.addText(event?.time || "—");
-  time.font = font(compact ? 11 : 14, "bold");
+  time.font = font(compact ? 13 : 16, "bold");
   time.textColor = color(COLORS.blue);
   time.lineLimit = 1;
   row.addSpacer(9);
   const title = row.addText(event?.title || "予定なし");
-  title.font = font(compact ? 12 : 15, "semibold");
+  title.font = font(compact ? 14 : 17, "semibold");
   title.textColor = color(COLORS.text);
   title.lineLimit = 1;
   title.minimumScaleFactor = 0.72;
@@ -255,14 +255,14 @@ function addRoutineButton(parent, label, symbol, url, tint, fill) {
   const button = parent.addStack();
   button.layoutHorizontally();
   button.centerAlignContent();
-  button.setPadding(9, 12, 9, 12);
+  button.setPadding(11, 14, 11, 14);
   button.backgroundColor = color(fill, 0.94);
-  button.cornerRadius = 14;
+  button.cornerRadius = 16;
   button.url = url;
-  addSymbol(button, symbol, 14, tint);
+  addSymbol(button, symbol, 16, tint);
   button.addSpacer(7);
   const text = button.addText(label);
-  text.font = font(13, "bold");
+  text.font = font(15, "bold");
   text.textColor = color(tint);
   return button;
 }
@@ -285,21 +285,21 @@ function makeNow(taskResult, calendarResult, money) {
 
   if (taskResult?.needsSetup && !current) {
     const setup = widget.addText("タスク接続設定が必要");
-    setup.font = font(16, "bold");
+    setup.font = font(19, "bold");
     setup.textColor = color(COLORS.text);
   } else if (current) {
     addTaskLine(widget, current, true);
     if (current.nextAction) {
       widget.addSpacer(4);
       const next = widget.addText("次 → " + current.nextAction);
-      next.font = font(12, "medium");
+      next.font = font(13, "medium");
       next.textColor = color(COLORS.muted);
       next.lineLimit = 1;
-      next.minimumScaleFactor = 0.7;
+      next.minimumScaleFactor = 0.85;
     }
   } else {
     const quiet = widget.addText("今すぐやることなし");
-    quiet.font = font(16, "bold");
+    quiet.font = font(19, "bold");
     quiet.textColor = color(COLORS.text);
   }
 
@@ -315,14 +315,14 @@ function makeNow(taskResult, calendarResult, money) {
     calendarResult?.ok === false ? "カレンダーを確認" :
     nextEvent ? `${nextEvent.time} ${nextEvent.title}` : "予定なし"
   );
-  calendar.font = font(12, "semibold");
+  calendar.font = font(14, "semibold");
   calendar.textColor = color(COLORS.muted);
   calendar.lineLimit = 1;
   calendar.minimumScaleFactor = 0.68;
 
   footer.addSpacer();
   const moneyText = footer.addText(yen(money.amount));
-  moneyText.font = font(15, "bold");
+  moneyText.font = font(18, "bold");
   moneyText.textColor = color(COLORS.blue);
   return widget;
 }
@@ -336,13 +336,13 @@ function makeToday(taskResult, calendarResult, money) {
   widget.refreshAfterDate = new Date(Date.now() + CONFIG.refreshMinutes * 60 * 1000);
 
   addHeader(widget, "TODAY");
-  widget.addSpacer(8);
+  widget.addSpacer(10);
 
   addSectionLabel(widget, "calendar", "CALENDAR", COLORS.blue);
   widget.addSpacer(6);
   if (calendarResult?.ok === false) {
     const error = widget.addText("カレンダーを確認");
-    error.font = font(15, "semibold");
+    error.font = font(17, "semibold");
     error.textColor = color(COLORS.coral);
   } else if (events.length) {
     for (const event of events.slice(0, 2)) {
@@ -351,18 +351,18 @@ function makeToday(taskResult, calendarResult, money) {
     }
   } else {
     const none = widget.addText("今日の予定なし");
-    none.font = font(14, "semibold");
+    none.font = font(16, "semibold");
     none.textColor = color(COLORS.faint);
   }
 
   addDivider(widget);
 
   addSectionLabel(widget, "checkmark.circle", taskResult?.stale ? "TASKS · 前回" : "TASKS", COLORS.green);
-  widget.addSpacer(4);
+  widget.addSpacer(6);
   const tasks = tasksFromFeed(taskResult);
   if (taskResult?.needsSetup && !tasks.length) {
     const setup = widget.addText("Scriptableで1回だけタスク接続設定");
-    setup.font = font(14, "semibold");
+    setup.font = font(16, "semibold");
     setup.textColor = color(COLORS.coral);
   } else if (tasks.length) {
     for (const task of tasks.slice(0, 3)) {
@@ -383,10 +383,10 @@ function makeToday(taskResult, calendarResult, money) {
   addSectionLabel(routineHead, "arrow.triangle.2.circlepath", "ROUTINES", COLORS.gold);
   routineHead.addSpacer();
   const hint = routineHead.addText("タップで起動");
-  hint.font = font(10, "medium");
+  hint.font = font(12, "medium");
   hint.textColor = color(COLORS.faint);
 
-  widget.addSpacer(5);
+  widget.addSpacer(7);
   const routines = widget.addStack();
   routines.layoutHorizontally();
   routines.spacing = 7;
@@ -398,14 +398,14 @@ function makeToday(taskResult, calendarResult, money) {
   const moneyRow = widget.addStack();
   moneyRow.layoutHorizontally();
   moneyRow.centerAlignContent();
-  addSymbol(moneyRow, "yensign.circle.fill", 14, COLORS.blue);
+  addSymbol(moneyRow, "yensign.circle.fill", 17, COLORS.blue);
   moneyRow.addSpacer(7);
   const label = moneyRow.addText("使えるお金");
-  label.font = font(12, "semibold");
+  label.font = font(15, "semibold");
   label.textColor = color(COLORS.muted);
   moneyRow.addSpacer();
   const amount = moneyRow.addText(yen(money.amount));
-  amount.font = font(18, "bold");
+  amount.font = font(22, "bold");
   amount.textColor = color(COLORS.blue);
 
   return widget;
