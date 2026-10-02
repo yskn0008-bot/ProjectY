@@ -90,6 +90,13 @@ try{
   assert.equal(await page.locator('#selectBtn').count(),0,'management should move to long press instead of a permanent edit button');
   assert.equal(await page.locator('.tab[data-mode="pinned"]').count(),0,'pinned chats should stay at the top without a dedicated tab');
   assert.match((await page.locator('#chatsPage .brand strong').textContent())||'',/チャット/);
+  assert.equal(await page.locator('link[rel="manifest"]').getAttribute('href'),'./manifest.webmanifest');
+  assert.equal(await page.locator('meta[name="apple-mobile-web-app-title"]').getAttribute('content'),'YOS Chat');
+  const chatManifest=await page.evaluate(async()=>fetch('./manifest.webmanifest',{cache:'no-store'}).then(r=>r.json()));
+  assert.equal(chatManifest.name,'YOS Chat');
+  assert.equal(chatManifest.start_url,'./');
+  assert.equal(chatManifest.scope,'./');
+  assert.equal(chatManifest.display,'standalone');
   await page.waitForFunction(()=>document.documentElement.dataset.deskBadgeCount==='2');
   assert.equal(await page.evaluate(()=>globalThis.__badgeCalls.some(x=>x[0]==='set'&&x[1]===2)),true,'unread total should be sent to the app badge API');
 
