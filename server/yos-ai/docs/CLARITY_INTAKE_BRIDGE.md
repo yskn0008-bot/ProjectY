@@ -172,11 +172,11 @@ The source remains authoritative. A Notion failure returns a retryable error but
 
 ## Production configuration
 
-The existing server-side `YOS_NOTION_API_TOKEN` is reused. The live mirror additionally requires:
+The existing server-side `YOS_NOTION_API_TOKEN` is reused. No new Notion resource ID is required in normal production setup.
 
-`YOS_NOTION_TASKS_DATA_SOURCE_ID`
+The mirror first checks its Upstash cache and otherwise searches the connected Notion workspace for exactly one accessible data source titled `YOS Tasks`. The discovered data source ID is cached for 24 hours. If zero or multiple exact matches are visible, the mirror fails closed instead of guessing.
 
-The integration behind `YOS_NOTION_API_TOKEN` must have access to YOS Tasks. This ID and permission are server-side configuration and do not belong in the iPhone Shortcut.
+`YOS_NOTION_TASKS_DATA_SOURCE_ID` remains an optional server-side override only. The integration behind `YOS_NOTION_API_TOKEN` must have access to YOS Tasks. No Notion resource ID or integration secret belongs in the iPhone Shortcut.
 
 ## Planned iPhone behavior
 
