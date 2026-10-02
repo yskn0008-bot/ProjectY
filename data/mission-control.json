@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-10-02T22:25:58+09:00",
+  "updated_at": "2026-10-02T22:27:38+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -21,6 +21,16 @@
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/553",
       "updated_at": "2026-10-02T01:11:02Z"
+    },
+    {
+      "id": "github-pr-573",
+      "title": "PR #573 refactor(clarity): Text/ShareをClarity Next共通Coreへ統合",
+      "type": "GitHub PR",
+      "status": "review",
+      "priority": 1,
+      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/573",
+      "updated_at": "2026-10-02T13:27:01Z"
     },
     {
       "id": "github-pr-403",
@@ -103,16 +113,6 @@
       "updated_at": "2026-09-30T14:36:53Z"
     },
     {
-      "id": "github-pr-573",
-      "title": "PR #573 refactor(clarity): Text/ShareをClarity Next共通Coreへ統合",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/573",
-      "updated_at": "2026-10-02T13:25:33Z"
-    },
-    {
       "id": "github-issue-10",
       "title": "Issue #10 Mission Control v2：GitHubのIssue・PR・Commitを自動集約する",
       "type": "GitHub Issue",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-10-02T13:25:18Z"
+      "updated_at": "2026-10-02T13:25:51Z"
     },
     {
       "id": "github-issue-234",
@@ -234,7 +234,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #553をレビューして公開判断する",
+      "next_action": "PR #573をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -244,7 +244,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-10-02T22:25:58+09:00",
+      "last_update": "2026-10-02T22:27:38+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -325,7 +325,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-10-02T22:25:58+09:00",
+      "last_update": "2026-10-02T22:27:38+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -339,7 +339,7 @@
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #553をレビューして公開判断する",
+      "next_action": "PR #573をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -348,7 +348,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-10-02T22:25:58+09:00",
+      "last_update": "2026-10-02T22:27:38+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -430,5 +430,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "7f9b88e9f196184bf58ee64ce642d2949a61d4569b7e2cf9241e2b2d438350b7"
+  "github_snapshot_hash": "4acaf4e8b8519d7ed9ff1540662e75dfac4d14d4f7b2ea94d30059e6d35f58cc"
 }
