@@ -26,7 +26,7 @@ def patch(path: Path) -> None:
         if not isinstance(params, dict):
             raise SystemExit(f"Tapo action {index} parameters missing")
         device = params.get(PARAMETER_KEY)
-        if not isinstance(device, dict) or device.get("identifier") != PLACEHOLDER:
+        if PLACEHOLDER not in repr(device):
             raise SystemExit(f"Tapo action {index} device placeholder missing")
         targets.append(index)
 
