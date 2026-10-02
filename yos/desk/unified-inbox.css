@@ -324,3 +324,118 @@ body.chat-only .app{
 @media(max-height:730px){
   #chatsPage .chat{min-height:64px;padding-top:8px;padding-bottom:8px}
 }
+
+
+/* YOS Chat motion v1 — subtle, iOS-like movement instead of rigid state jumps. */
+:root{
+  --motion-fast:160ms;
+  --motion-base:240ms;
+  --motion-spring:cubic-bezier(.22,.88,.36,1);
+}
+.chatOnlyTopbar,
+#chatsPage .search,
+#chatsPage .tabs,
+#chatsPage .chatList{
+  will-change:transform,opacity;
+}
+body.chat-only.motion-ready .chatOnlyTopbar{
+  animation:yosFadeDown var(--motion-base) var(--motion-spring) both;
+}
+body.chat-only.motion-ready #chatsPage .search{
+  animation:yosFadeUp var(--motion-base) 35ms var(--motion-spring) both;
+}
+body.chat-only.motion-ready #chatsPage .tabs{
+  animation:yosFadeUp var(--motion-base) 70ms var(--motion-spring) both;
+}
+.chatIconBtn{
+  transition:transform var(--motion-fast) var(--motion-spring),background-color var(--motion-fast) ease,opacity var(--motion-fast) ease;
+}
+.chatIconBtn:active{transform:scale(.86)}
+body.sheet-open .chatIconBtn{transform:rotate(45deg) scale(.94)}
+#chatsPage .search{
+  transition:background-color var(--motion-fast) ease,box-shadow var(--motion-base) ease,transform var(--motion-fast) var(--motion-spring);
+}
+#chatsPage .search:focus-within{
+  background:#242426;
+  box-shadow:0 0 0 1px rgba(255,255,255,.08),0 8px 24px rgba(0,0,0,.28);
+  transform:scale(1.01);
+}
+#chatsPage .tab{
+  transition:color var(--motion-fast) ease,background-color var(--motion-base) var(--motion-spring),transform var(--motion-fast) var(--motion-spring);
+}
+#chatsPage .tab:active{transform:scale(.93)}
+#chatsPage .tab.active{transform:scale(1)}
+#chatsPage .chat{
+  transform-origin:50% 50%;
+  transition:background-color var(--motion-fast) ease,transform var(--motion-fast) var(--motion-spring),opacity var(--motion-fast) ease;
+}
+#chatsPage .chat:active{
+  transform:scale(.982);
+  background:#171719;
+}
+#chatsPage .chat.row-enter{
+  animation:yosRowIn 300ms var(--motion-spring) both;
+  animation-delay:var(--row-delay,0ms);
+}
+#chatsPage .chat.unread:after{
+  animation:yosUnreadPulse 1.8s ease-in-out 1;
+}
+.sheetBackdrop{
+  opacity:0;
+  display:none;
+  transition:opacity 180ms ease;
+}
+.sheetBackdrop.is-visible{
+  display:block;
+}
+.sheetBackdrop.is-open{
+  opacity:1;
+}
+.sheet{
+  transform:translateX(-50%) translateY(calc(100% + 24px)) scale(.985);
+  opacity:.96;
+  transition:transform 320ms cubic-bezier(.22,.9,.24,1),opacity 180ms ease;
+  will-change:transform,opacity;
+}
+.sheetBackdrop.is-open .sheet{
+  transform:translateX(-50%) translateY(0) scale(1);
+  opacity:1;
+}
+.sheet button{
+  transition:transform var(--motion-fast) var(--motion-spring),background-color var(--motion-fast) ease,opacity var(--motion-fast) ease;
+}
+.sheet button:active{transform:scale(.975);opacity:.88}
+.toast{
+  transform:translate(-50%,14px) scale(.98);
+  opacity:0;
+  transition:transform 220ms var(--motion-spring),opacity 160ms ease;
+}
+.toast.show{
+  transform:translate(-50%,0) scale(1);
+  opacity:1;
+}
+@keyframes yosFadeDown{
+  from{opacity:0;transform:translateY(-8px)}
+  to{opacity:1;transform:translateY(0)}
+}
+@keyframes yosFadeUp{
+  from{opacity:0;transform:translateY(8px)}
+  to{opacity:1;transform:translateY(0)}
+}
+@keyframes yosRowIn{
+  from{opacity:0;transform:translateY(10px) scale(.992)}
+  to{opacity:1;transform:translateY(0) scale(1)}
+}
+@keyframes yosUnreadPulse{
+  0%,100%{transform:scale(1);opacity:1}
+  35%{transform:scale(1.65);opacity:.65}
+  60%{transform:scale(.92);opacity:1}
+}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{
+    animation-duration:.001ms !important;
+    animation-iteration-count:1 !important;
+    transition-duration:.001ms !important;
+    scroll-behavior:auto !important;
+  }
+}

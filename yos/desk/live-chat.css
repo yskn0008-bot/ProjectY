@@ -203,3 +203,63 @@ body.thread-open .app{
   .threadTop{min-height:calc(env(safe-area-inset-top) + 54px)}
   .messageStream{padding-top:12px}
 }
+
+
+/* Thread motion — preserve calm ChatGPT-like layout while removing rigid jumps. */
+#threadPage{
+  transform:translateX(16px);
+  opacity:0;
+  pointer-events:none;
+}
+#threadPage.active{
+  pointer-events:auto;
+  animation:yosThreadIn 280ms cubic-bezier(.22,.88,.36,1) both;
+}
+body.thread-closing #threadPage.active{
+  animation:yosThreadOut 180ms ease both;
+}
+.threadTop{
+  transition:background-color 180ms ease,border-color 180ms ease;
+}
+.threadBack,.threadExternal{
+  transition:transform 150ms cubic-bezier(.22,.88,.36,1),background-color 150ms ease,opacity 150ms ease;
+}
+.threadBack:active,.threadExternal:active{transform:scale(.86)}
+.messageRow.message-enter .messageBubble{
+  animation:yosMessageIn 260ms cubic-bezier(.22,.88,.36,1) both;
+}
+.messageRow.mine.message-enter .messageBubble{transform-origin:100% 100%}
+.messageRow.ai.message-enter .messageBubble,
+.messageRow.system.message-enter .messageBubble,
+.messageRow.progress.message-enter .messageBubble{transform-origin:0 100%}
+.threadComposer{
+  transition:transform 220ms cubic-bezier(.22,.88,.36,1),background-color 180ms ease;
+}
+.threadComposer:focus-within{transform:translateY(-2px)}
+.threadComposer textarea{
+  transition:border-color 160ms ease,background-color 160ms ease,box-shadow 180ms ease;
+}
+.threadComposer textarea:focus{
+  border-color:rgba(255,255,255,.22);
+  background:#222224;
+  box-shadow:0 0 0 1px rgba(255,255,255,.04);
+}
+.threadComposer button{
+  transition:transform 150ms cubic-bezier(.22,.88,.36,1),opacity 150ms ease,background-color 150ms ease;
+}
+.threadComposer button:active{transform:scale(.9);opacity:.84}
+@keyframes yosThreadIn{
+  from{opacity:0;transform:translateX(18px)}
+  to{opacity:1;transform:translateX(0)}
+}
+@keyframes yosThreadOut{
+  from{opacity:1;transform:translateX(0)}
+  to{opacity:0;transform:translateX(12px)}
+}
+@keyframes yosMessageIn{
+  from{opacity:0;transform:translateY(8px) scale(.985)}
+  to{opacity:1;transform:translateY(0) scale(1)}
+}
+@media(prefers-reduced-motion:reduce){
+  #threadPage,.messageRow.message-enter .messageBubble{animation:none !important;transition:none !important}
+}

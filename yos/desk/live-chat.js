@@ -7,6 +7,7 @@
   var PROGRESS_COPY_VERSION='friendly-v1';
   var activeThreadId='';
   var sending=false;
+  var lastAnimatedMessageId='';
   var authRetrying=false;
   var assetsById={};
   var ROOM_DEFS=[
@@ -84,7 +85,7 @@
   }
   function pushMessage(chatId,message){
     var items=thread(chatId);
-    items.push({
+    var entry={
       id:message.id||uid('msg'),
       role:message.role||'system',
       kind:message.kind||'message',
@@ -92,7 +93,9 @@
       at:message.at||new Date().toISOString(),
       requestId:clean(message.requestId,180),
       progress:Number.isFinite(Number(message.progress))?Number(message.progress):null
-    });
+    };
+    items.push(entry);
+    lastAnimatedMessageId=entry.id;
     if(items.length>THREAD_LIMIT)state.chatThreads[chatId]=items.slice(-THREAD_LIMIT);
     var chat=state.chats.find(function(x){return x.id===chatId});
     if(chat)updateChatFromThread(chat);
@@ -250,7 +253,13 @@
         if(state.activeChatId===id)state.activeChatId='';
         persist();
       }
-      setPage('chats');
+      var reduced=globalThis.matchMedia&&globalThis.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if(reduced){setPage('chats');return}
+      document.body.classList.add('thread-closing');
+      setTimeout(function(){
+        document.body.classList.remove('thread-closing');
+        setPage('chats');
+      },170);
     };
     q('#threadExternal').onclick=function(){
       var chat=state.chats.find(function(x){return x.id===activeThreadId});
@@ -292,6 +301,7 @@
     var error=message.kind==='error';
     var klass=mine?'mine':ai?'ai':progress?'progress':'system';
     if(error)klass+=' error';
+    if(message.id===lastAnimatedMessageId)klass+=' message-enter';
     var label=progress
       ?'<div class="messageLabel">いまの状況</div>'
       :'';
@@ -314,10 +324,11 @@
     q('#threadExternal').title=chat.url?'ChatGPTを開く':'';
     var items=thread(chat.id);
     q('#messageStream').innerHTML=items.map(messageHtml).join('')+
-      (sending?'<div class="messageRow ai"><div class="messageBubble typing"><span></span><span></span><span></span></div></div>':'');
+      (sending?'<div class="messageRow ai message-enter"><div class="messageBubble typing"><span></span><span></span><span></span></div></div>':'');
+    lastAnimatedMessageId='';
     requestAnimationFrame(function(){
       var stream=q('#messageStream');
-      stream.scrollTop=stream.scrollHeight;
+      stream.scrollTo({top:stream.scrollHeight,behavior:'smooth'});
     });
   }
   function openThread(id){
