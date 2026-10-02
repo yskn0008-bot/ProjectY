@@ -1,0 +1,121 @@
+/* YOS DESK unified cross-project inbox v1 */
+
+#chatsPage .brand strong{font-size:25px;letter-spacing:-.02em}
+
+.currentChatBanner{
+  width:calc(100% - 28px);
+  margin:9px 14px 2px;
+  padding:11px 13px;
+  display:grid;
+  grid-template-columns:auto minmax(0,1fr);
+  grid-template-areas:"kicker title" "kicker meta";
+  gap:1px 9px;
+  align-items:center;
+  text-align:left;
+  border:1px solid rgba(237,191,98,.28);
+  border-radius:14px;
+  background:rgba(237,191,98,.08);
+  color:var(--text);
+}
+.currentChatBanner[hidden]{display:none}
+.currentChatKicker{
+  grid-area:kicker;
+  align-self:stretch;
+  display:grid;
+  place-items:center;
+  padding:0 9px;
+  border-radius:10px;
+  background:var(--gold);
+  color:#21180a;
+  font-size:12px;
+  font-weight:950;
+}
+.currentChatBanner strong{
+  grid-area:title;
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-size:16px;
+}
+.currentChatBanner small{
+  grid-area:meta;
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  color:var(--muted);
+  font-size:13px;
+}
+
+#chatsPage .chat.currentChat{
+  background:rgba(237,191,98,.055);
+}
+#chatsPage .chat.currentChat:before{
+  content:"";
+  position:absolute;
+  left:0;
+  top:12px;
+  bottom:12px;
+  width:3px;
+  border-radius:0 3px 3px 0;
+  background:var(--gold);
+}
+#chatsPage .chat{position:relative}
+
+#chatsPage .nameLine{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  min-width:0;
+}
+#chatsPage .chatName{
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+#chatsPage .tag,
+#chatsPage .sourceBadge,
+#chatsPage .currentBadge{
+  flex:0 0 auto;
+  border-radius:999px;
+  padding:2px 6px;
+  font-size:11px;
+  line-height:1.25;
+  font-weight:900;
+}
+#chatsPage .tag{
+  max-width:92px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+#chatsPage .sourceBadge{
+  border:1px solid rgba(255,255,255,.11);
+  color:var(--muted);
+  background:rgba(255,255,255,.04);
+}
+#chatsPage .sourceBadge.gpt{
+  color:#d9f7ee;
+  background:rgba(73,214,160,.10);
+  border-color:rgba(73,214,160,.22);
+}
+#chatsPage .sourceBadge.yos{
+  color:#f6df9c;
+  background:rgba(237,191,98,.09);
+  border-color:rgba(237,191,98,.22);
+}
+#chatsPage .currentBadge{
+  color:#20180a;
+  background:var(--gold);
+}
+#chatsPage .readState{
+  min-width:34px;
+  margin-top:3px;
+  text-align:right;
+  color:var(--muted);
+  font-size:11px;
+  font-weight:800;
+}
+#chatsPage .readState.isUnread{color:var(--gold)}
