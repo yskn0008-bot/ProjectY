@@ -69,18 +69,21 @@ test('manifest icons are install-ready across YOS entry pages', async () => {
 });
 
 
-test('YOS DESK chats use a LINE-like flat conversation list', async () => {
-  const [desk,compact] = await Promise.all([
+test('YOS DESK chats use a calm iPhone-native conversation list', async () => {
+  const [desk,compact,inbox] = await Promise.all([
     read('yos/desk/index.html'),
-    read('yos/desk/compact.css')
+    read('yos/desk/compact.css'),
+    read('yos/desk/unified-inbox.css')
   ]);
   assert.match(desk, /<strong>チャット<\/strong>/);
   assert.match(desk, /placeholder="チャットを検索"/);
-  assert.match(compact, /LINE-like CHATS v1/);
-  assert.match(compact, /#chatsPage \.chat\{[\s\S]*border-radius:0;/);
-  assert.match(compact, /#chatsPage \.avatar\{[\s\S]*border-radius:50%;/);
   assert.match(compact, /#chatsPage \.preview\{[\s\S]*white-space:nowrap;/);
-  assert.match(compact, /#chatsPage \.tab\.active:after/);
+  assert.match(inbox, /YOS DESK CHATS visual polish v3/);
+  assert.match(inbox, /#chatsPage \.chat\{[\s\S]*border-radius:15px;/);
+  assert.match(inbox, /#chatsPage \.avatar\{[\s\S]*border-radius:14px;/);
+  assert.match(inbox, /#chatsPage \.projects\{[\s\S]*display:none !important;/);
+  assert.match(inbox, /#chatsPage \.readState:not\(\.isUnread\)/);
+  assert.match(inbox, /#chatsPage \.tab\.active:after/);
 });
 
 

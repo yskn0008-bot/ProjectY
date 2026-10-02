@@ -195,7 +195,7 @@
       (state.chats||[]).forEach(normalize);
       baseRenderChats();
       var brand=q('#chatsPage .brand strong');
-      if(brand)brand.textContent='すべてのチャット';
+      if(brand)brand.textContent='チャット';
       var head=q('#chatList')&&q('#chatList').parentElement&&q('#chatList').parentElement.querySelector('.sectionHead span');
       if(head)head.textContent='プロジェクト横断';
       decorateSourceSummary();
