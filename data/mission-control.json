@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-10-02T20:02:48+09:00",
+  "updated_at": "2026-10-02T20:03:20+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -21,16 +21,6 @@
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/553",
       "updated_at": "2026-10-02T01:11:02Z"
-    },
-    {
-      "id": "github-pr-564",
-      "title": "PR #564 refactor(clarity): 拡張モデル向けSemantic Plannerへ再設計",
-      "type": "GitHub PR",
-      "status": "review",
-      "priority": 1,
-      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/564",
-      "updated_at": "2026-10-02T11:02:23Z"
     },
     {
       "id": "github-pr-403",
@@ -130,7 +120,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-10-02T11:01:24Z"
+      "updated_at": "2026-10-02T11:02:51Z"
     },
     {
       "id": "github-issue-234",
@@ -175,6 +165,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-12ffa18fc1f2",
+      "title": "refactor(clarity): make router a goal-first semantic planner",
+      "completed_at": "2026-10-02T11:03:00Z",
+      "result": "GitHub mainへ反映（12ffa18）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/12ffa18fc1f2de7c6fa774ae3e35d3e6166e400f"
+    },
+    {
       "id": "github-commit-029ebd4c2751",
       "title": "YOS DESK: GPT風チャット一覧と新規・一時チャット (#562)",
       "completed_at": "2026-10-02T11:01:30Z",
@@ -203,13 +200,6 @@
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/f26c2b8cc36735ae10e94df6049aa868e194d7ff"
     },
     {
-      "id": "github-commit-d9d110b40850",
-      "title": "data: sync Clarity Notion verification and repair stale asset contracts",
-      "completed_at": "2026-10-02T08:01:02Z",
-      "result": "GitHub mainへ反映（d9d110b）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/d9d110b40850f40b632a699cc2dfc6fffc552757"
-    },
-    {
       "id": "complete-002",
       "title": "iPhone向けMission Control Dashboardを実装",
       "completed_at": "2026-07-17T17:55:00+09:00",
@@ -234,7 +224,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #564をレビューして公開判断する",
+      "next_action": "PR #553をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -244,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-10-02T20:02:48+09:00",
+      "last_update": "2026-10-02T20:03:20+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -319,13 +309,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 6件・Open PR 10件を自動同期中",
+      "next_action": "Open Issue 6件・Open PR 9件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-10-02T20:02:48+09:00",
+      "last_update": "2026-10-02T20:03:20+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -339,7 +329,7 @@
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #564をレビューして公開判断する",
+      "next_action": "PR #553をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -348,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-10-02T20:02:48+09:00",
+      "last_update": "2026-10-02T20:03:20+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -430,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "47d86cd3c407fb6e9111aec95e48b6ad3f3324a836fc560261c9b98548da360f"
+  "github_snapshot_hash": "1db00a478b5f0e02fd41f451cd3c378c91f571d57c2bd9854a13d30598699111"
 }
