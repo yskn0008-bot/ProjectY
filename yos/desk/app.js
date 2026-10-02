@@ -19,7 +19,18 @@ if(state.chatRegistryVersion!=='2026-09-24-real-links-v1'){
 
 state.metrics = state.metrics || {opens:0,taps:0,reorders:0,posts:0};
 state.metrics.opens = (state.metrics.opens || 0) + 1;
-function persist(){ try { localStorage.setItem('yosDeskIntegratedStateV1', JSON.stringify(state)); } catch(e) {} }
+function persist(){
+  try {
+    var snapshot=JSON.parse(JSON.stringify(state));
+    var temporaryIds=(snapshot.chats||[]).filter(function(x){return x&&x.temporary}).map(function(x){return x.id});
+    snapshot.chats=(snapshot.chats||[]).filter(function(x){return !x.temporary});
+    if(snapshot.chatThreads&&typeof snapshot.chatThreads==='object'){
+      temporaryIds.forEach(function(id){delete snapshot.chatThreads[id]});
+    }
+    if(temporaryIds.indexOf(snapshot.activeChatId)>=0)snapshot.activeChatId='';
+    localStorage.setItem('yosDeskIntegratedStateV1', JSON.stringify(snapshot));
+  } catch(e) {}
+}
 
 var currentPage = state.page || "desk";
 var chatMode = "all";
@@ -77,13 +88,14 @@ function bindDevDrag(){
 }
 function openDevDetail(id){var x=devCatalog[id];if(!x)return;showSheet('<h3>'+esc(x.name)+'</h3><p>状態：'+esc(x.status)+'<br>進捗：'+esc(x.pct)+'%<br>次：'+esc(x.next)+'</p><button class="primary" id="goChatsFromDev">関連チャットを見る</button><button id="closeSheetBtn">閉じる</button>');q("#goChatsFromDev").onclick=function(){closeSheet();setPage("chats");q("#searchInput").value=x.name;renderChats()};q("#closeSheetBtn").onclick=closeSheet}
 function renderProjects(){var unique=[];state.chats.forEach(function(x){var name=String(x.project||"").trim();if(name&&unique.indexOf(name)<0)unique.push(name)});var holder=q("#projects");if(unique.length<2){holder.innerHTML="";holder.style.display="none";projectFilter="すべて";return}holder.style.display="flex";var names=["すべて"].concat(unique),html="";names.forEach(function(name){html+='<button class="projectPill '+(name===projectFilter?'active':'')+'" data-project="'+esc(name)+'">'+esc(name)+'</button>'});holder.innerHTML=html;qa(".projectPill").forEach(function(b){b.onclick=function(){tap();projectFilter=b.dataset.project;renderChats()}})}
-function filteredChats(){var text=q("#searchInput").value.trim().toLowerCase();return state.chats.filter(function(x){if(projectFilter!=="すべて"&&x.project!==projectFilter)return false;if(chatMode==="unread"&&!x.unread)return false;if(chatMode==="pinned"&&!x.pinned)return false;if(text){var h=(titleOf(x)+" "+x.title+" "+x.project+" "+x.preview).toLowerCase();if(h.indexOf(text)<0)return false}return true}).sort(function(a,b){return Number(b.pinned)-Number(a.pinned)})}
+function filteredChats(){var text=q("#searchInput").value.trim().toLowerCase();return state.chats.filter(function(x){if(x.temporary)return false;if(projectFilter!=="すべて"&&x.project!==projectFilter)return false;if(chatMode==="unread"&&!x.unread)return false;if(chatMode==="pinned"&&!x.pinned)return false;if(text){var h=(titleOf(x)+" "+x.title+" "+x.project+" "+x.preview).toLowerCase();if(h.indexOf(text)<0)return false}return true}).sort(function(a,b){return Number(b.pinned)-Number(a.pinned)})}
 function renderChats(){
   var chatHead=q("#chatList")&&q("#chatList").parentElement&&q("#chatList").parentElement.querySelector(".sectionHead span");
   if(chatHead)chatHead.textContent="実リンクのみ / 長押しで編集";
-  q("#countAll").textContent=" "+state.chats.length;
-  q("#countUnread").textContent=" "+state.chats.filter(function(x){return x.unread>0}).length;
-  q("#countPinned").textContent=" "+state.chats.filter(function(x){return x.pinned}).length;
+  var listedChats=state.chats.filter(function(x){return !x.temporary});
+  q("#countAll").textContent=" "+listedChats.length;
+  q("#countUnread").textContent=" "+listedChats.filter(function(x){return x.unread>0}).length;
+  q("#countPinned").textContent=" "+listedChats.filter(function(x){return x.pinned}).length;
   renderProjects();var rows=filteredChats(),html="";
   rows.forEach(function(x){html+='<div class="chat '+(x.pinned?'pinned ':'')+(selected.has(x.id)?'selected':'')+'" data-id="'+esc(x.id)+'"><div class="check">✓</div><div class="avatar '+esc(x.tone||'')+'">'+esc(x.avatar)+'</div><div class="chatText"><div class="nameLine"><div class="chatName">'+esc(titleOf(x))+'</div><span class="tag">'+esc(x.project)+'</span></div><div class="preview">'+esc(x.preview)+'</div></div><div class="chatMeta"><div class="time">'+esc(x.time)+'</div><div class="badge '+(x.unread?'':'hidden')+'">'+(x.unread?esc(x.unread):'')+'</div></div></div>'});
   q("#chatList").innerHTML=html;q("#empty").style.display=rows.length?"none":"flex";q("#app").classList.toggle("selecting",selecting);q("#bottom").style.display=selecting?"none":"grid";q("#bulk").style.display=selecting?"grid":"none";q("#selectBtn").textContent=selecting?"完了":"編集";var emptyAdd=q("#emptyAdd");if(emptyAdd)emptyAdd.onclick=function(){tap();addClipboardChat()};bindChats();persist();
@@ -112,13 +124,26 @@ async function addClipboardChat(){
     var url=(await navigator.clipboard.readText()).trim();
     if(addChatEntry(url,'ChatGPT','ChatGPT'))return;
   }catch(e){}
-  openNew();
+  openGptEntry();
   showToast("ChatGPTリンクを貼り付けて");
 }
-function openNew(){
-  showSheet('<h3>NEW</h3><p>ChatGPTの実リンクだけを登録します。</p><button class="primary" id="pasteChatUrl">コピーしたリンクを追加</button><input id="newTitle" placeholder="固定名（任意）"><input id="newProject" placeholder="分類（任意）"><input id="newUrl" placeholder="https://chatgpt.com/..."><button id="createChat">入力内容で追加</button><button id="closeSheetBtn">閉じる</button>');
+function openGptEntry(){
+  showSheet('<h3>GPT原文を追加</h3><p>ChatGPTの元チャットURLを登録します。</p><button class="primary" id="pasteChatUrl">コピーしたリンクを追加</button><input id="newTitle" placeholder="名前（任意）"><input id="newProject" placeholder="分類（任意）"><input id="newUrl" placeholder="https://chatgpt.com/..."><button id="createChat">URLを追加</button><button id="backToNew">戻る</button>');
   q("#pasteChatUrl").onclick=addClipboardChat;
   q("#createChat").onclick=function(){addChatEntry(q("#newUrl").value,q("#newTitle").value,q("#newProject").value)};
+  q("#backToNew").onclick=openNew;
+}
+function createYosChat(temporary){
+  var create=globalThis.yosDeskCreateChat;
+  if(typeof create!=="function"){showToast("チャットを準備しています");return}
+  closeSheet();
+  create({temporary:Boolean(temporary)});
+}
+function openNew(){
+  showSheet('<h3>新規チャット</h3><p>固定チャット以外にも、自由な会話をここから始められます。</p><button class="primary" id="createYosChat">新規チャット</button><button id="createTemporaryChat">一時チャット <small>履歴に残さない</small></button><button id="addGptOriginal">GPT原文を追加</button><button id="closeSheetBtn">閉じる</button>');
+  q("#createYosChat").onclick=function(){createYosChat(false)};
+  q("#createTemporaryChat").onclick=function(){createYosChat(true)};
+  q("#addGptOriginal").onclick=addClipboardChat;
   q("#closeSheetBtn").onclick=closeSheet
 }
 q("#sheetBackdrop").onclick=function(e){if(e.target===q("#sheetBackdrop"))closeSheet()};
