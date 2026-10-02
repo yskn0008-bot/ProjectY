@@ -8,6 +8,7 @@ export interface YosAiClientOptions {
   fetchImpl?: FetchLike;
   timeoutMilliseconds?: number;
   maxResponseBytes?: number;
+  vercelShareToken?: string;
 }
 
 export interface YosChatInput {
@@ -91,6 +92,7 @@ export class YosAiClient {
   readonly #fetch: FetchLike;
   readonly #timeoutMilliseconds: number;
   readonly #maxResponseBytes: number;
+  readonly #vercelShareToken: string;
 
   constructor(options: YosAiClientOptions) {
     this.#baseUrl = normalizeBaseUrl(options.baseUrl);
@@ -98,6 +100,7 @@ export class YosAiClient {
     this.#fetch = options.fetchImpl ?? fetch;
     this.#timeoutMilliseconds = boundedInteger(options.timeoutMilliseconds ?? 65_000, 1_000, 120_000, 'timeoutMilliseconds');
     this.#maxResponseBytes = boundedInteger(options.maxResponseBytes ?? 2_000_000, 1_024, 10_000_000, 'maxResponseBytes');
+    this.#vercelShareToken = optionalTransportToken(options.vercelShareToken);
   }
 
   async health(): Promise<YosHealthResponse> {
@@ -143,7 +146,9 @@ export class YosAiClient {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), this.#timeoutMilliseconds);
     try {
-      const response = await this.#fetch(new URL(path, this.#baseUrl), {
+      const requestUrl = new URL(path, this.#baseUrl);
+      if (this.#vercelShareToken) requestUrl.searchParams.set('_vercel_share', this.#vercelShareToken);
+      const response = await this.#fetch(requestUrl, {
         ...init,
         signal: controller.signal,
         credentials: 'omit',
@@ -192,6 +197,14 @@ function normalizeBaseUrl(value: string): URL {
   }
   url.pathname = `${url.pathname.replace(/\/+$/u, '')}/`;
   return url;
+}
+
+function optionalTransportToken(value: unknown): string {
+  if (value === undefined || value === null || value === '') return '';
+  if (typeof value !== 'string') throw new Error('vercelShareToken is invalid');
+  const token = value.trim();
+  if (!token || token.length > 512 || !/^[A-Za-z0-9_-]+$/u.test(token)) throw new Error('vercelShareToken is invalid');
+  return token;
 }
 
 function validateChatInput(input: YosChatInput): void {
