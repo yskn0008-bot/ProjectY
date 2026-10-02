@@ -1,5 +1,5 @@
 import crypto from 'node:crypto';
-import {createProductionClarityIntakeHandler, createProductionNotionMirrorHandler} from '../../dist/intake/production.js';
+import {createProductionClarityIntakeHandler, createProductionIosSnapshotHandler, createProductionNotionMirrorHandler} from '../../dist/intake/production.js';
 import {CLARITY_RESPONSE_FORMAT, repairPrompt, validateClarityModelResult} from '../../clarity-model-contract.mjs';
 
 const MAX_MODEL_BODY_BYTES = 24_000;
@@ -64,6 +64,7 @@ const SHORTCUT_FACTORY_RESPONSE_FORMAT = Object.freeze({
 const CLARITY_BOOTSTRAP_TOKEN_SHA256 = '4227fb9887f3018d5f0bbc7dc98e1c672a2954c444133a402d83d1de09875b7c';
 let handler;
 let mirrorHandler;
+let iosSnapshotHandler;
 
 function getHandler() {
   handler ??= createProductionClarityIntakeHandler({environment: process.env});
@@ -73,6 +74,11 @@ function getHandler() {
 function getMirrorHandler() {
   mirrorHandler ??= createProductionNotionMirrorHandler({environment: process.env});
   return mirrorHandler;
+}
+
+function getIosSnapshotHandler() {
+  iosSnapshotHandler ??= createProductionIosSnapshotHandler({environment: process.env});
+  return iosSnapshotHandler;
 }
 
 function json(body, status = 200) {
@@ -401,6 +407,7 @@ export default {
       const url = new URL(request.url);
       if (url.searchParams.get('mode') === 'model') return await handleClarityModel(request);
       if (url.searchParams.get('mode') === 'mirror') return await getMirrorHandler()(request);
+      if (url.searchParams.get('mode') === 'ios-snapshot') return await getIosSnapshotHandler()(request);
       if (url.searchParams.get('mode') === 'factory') return await handleShortcutFactory(request);
       return await getHandler()(request);
     } catch {
