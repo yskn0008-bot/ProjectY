@@ -53,6 +53,11 @@ for actionItem in @actionsRaw {
     // Normalize only the exact known pairs; unknown pairs remain fail-closed.
     @normalizedModule = "{module}"
     @normalizedExecutor = "{executor}"
+    @normalizedOperation = "{operation}"
+    @normalizedRisk = "{risk}"
+    @normalizedNeedsReviewText = "{needsReviewText}"
+    @normalizedNeedsConfirmationText = "{needsConfirmationText}"
+    @baseHomeAlias = false
     if executor == "open_app" && module == "YOS_OpenApp" {
         @normalizedModule = "open_app"
         @normalizedExecutor = "YOS_OpenApp"
@@ -90,7 +95,22 @@ for actionItem in @actionsRaw {
         @normalizedExecutor = "NEXT_ANSWER"
     }
 
-    const planRecord = text("{CurrentDate}\t{requestNumber}\t{actionId}\tPLAN\tmodule={normalizedModule}\toperation={operation}\texecutor={normalizedExecutor}\trisk={risk}\treview={needsReview}\tconfirm={needsConfirmation}\treason={reason}\n")
+    // Deterministic recovery for the canonical BASE HOME voice entry.
+    // The model is still called first; this only corrects a known misroute where
+    // "ベースホーム開いて" is interpreted as an app name and sent to YOS_OpenApp.
+    if userInput contains "ベースホーム" || userInput contains "ベース ホーム" || userInput contains "BASE HOME" || userInput contains "Notionホーム" || userInput contains "Notionのホーム" {
+        if userInput contains "開いて" || userInput contains "見せて" {
+            @baseHomeAlias = true
+            @normalizedModule = "notion"
+            @normalizedExecutor = "NEXT_NOTION"
+            @normalizedOperation = "open_yos_home"
+            @normalizedRisk = "low"
+            @normalizedNeedsReviewText = "いいえ"
+            @normalizedNeedsConfirmationText = "いいえ"
+        }
+    }
+
+    const planRecord = text("{CurrentDate}\t{requestNumber}\t{actionId}\tPLAN\tmodule={normalizedModule}\toperation={normalizedOperation}\texecutor={normalizedExecutor}\trisk={normalizedRisk}\treview={normalizedNeedsReviewText}\tconfirm={normalizedNeedsConfirmationText}\treason={reason}\n")
     appendToFile("Clarity Next Ledger.txt", planRecord)
 
     if status != "planned" {
@@ -100,15 +120,15 @@ for actionItem in @actionsRaw {
         stop()
     }
 
-    if needsReviewText == "はい" {
+    if @normalizedNeedsReviewText == "はい" {
         const blockedReview = text("{CurrentDate}\t{requestNumber}\t{actionId}\tBLOCKED\tneeds_review\t{reason}\n")
         appendToFile("Clarity Next Ledger.txt", blockedReview)
         alert("確認が必要です\n{reason}", "Clarity Next")
         stop()
     }
 
-    if risk == "high" || risk == "irreversible" {
-        if needsConfirmationText != "はい" {
+    if @normalizedRisk == "high" || @normalizedRisk == "irreversible" {
+        if @normalizedNeedsConfirmationText != "はい" {
             const blockedRisk = text("{CurrentDate}\t{requestNumber}\t{actionId}\tBLOCKED\trisk_without_confirmation\n")
             appendToFile("Clarity Next Ledger.txt", blockedRisk)
             alert("安全確認が必要な操作です", "Clarity Next")
@@ -116,7 +136,7 @@ for actionItem in @actionsRaw {
         }
     }
 
-    if needsConfirmationText == "はい" {
+    if @normalizedNeedsConfirmationText == "はい" {
         confirm("この操作を実行しますか？", "Clarity Next")
     }
 
@@ -274,7 +294,7 @@ for actionItem in @actionsRaw {
         appendToFile("Clarity Next Ledger.txt", navigateApplied)
     }
 
-    if @normalizedExecutor == "NEXT_NOTION" && @normalizedModule == "notion" && operation == "open_yos_home" {
+    if @normalizedExecutor == "NEXT_NOTION" && @normalizedModule == "notion" && @normalizedOperation == "open_yos_home" {
         const notionHomeURL = text("https://www.notion.so/3ed5ca882895819aaa57c139ea36fe2b")
         const notionHandoff = text("{CurrentDate}\t{requestNumber}\t{actionId}\tHANDOFF\tnotion_yos_home\n")
         appendToFile("Clarity Next Ledger.txt", notionHandoff)
