@@ -55,6 +55,7 @@ function cleanTaskTitle(value) {
   return clean(value).replace(/^\d{1,3}\s*[｜|]\s*/u, "").trim();
 }
 function yen(value) {
+  if (value === null || value === undefined || String(value).trim() === "") return "—";
   const number = Number(value);
   if (!Number.isFinite(number)) return "—";
   return "¥" + Math.round(number).toLocaleString("ja-JP");
