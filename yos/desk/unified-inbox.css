@@ -119,3 +119,42 @@
   font-weight:800;
 }
 #chatsPage .readState.isUnread{color:var(--gold)}
+
+
+.sourceSummary{
+  margin:9px 0 0;
+  min-height:42px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  padding:8px 10px;
+  border:1px solid var(--line);
+  border-radius:13px;
+  background:rgba(255,255,255,.035);
+}
+.sourceSummaryText{
+  min-width:0;
+  display:flex;
+  align-items:center;
+  gap:9px;
+}
+.sourceSummaryText strong{
+  font-size:13px;
+  color:#d9f7ee;
+}
+.sourceSummaryText span{
+  font-size:12px;
+  color:var(--muted);
+}
+.sourceSummary button{
+  flex:0 0 auto;
+  min-height:32px;
+  padding:0 10px;
+  border:0;
+  border-radius:10px;
+  background:var(--gold);
+  color:#21180a;
+  font-size:12px;
+  font-weight:950;
+}

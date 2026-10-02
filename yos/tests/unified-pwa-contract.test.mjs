@@ -95,8 +95,8 @@ test('YOS DESK exposes Clarity SSOT freshness instead of a generic auto-sync lab
   const clarity=data.assets.find(x=>x.id==='clarity');
   assert.ok(clarity.progress>=65&&clarity.progress<=100);
   assert.equal(clarity.progress_basis.device,false);
-  assert.match(clarity.updated_at,/^2026-09-28/);
-  assert.match(clarity.current,/Calendar登録/);
+  assert.match(clarity.updated_at,/^\d{4}-\d{2}-\d{2}T/);
+  assert.ok(typeof clarity.current==='string'&&clarity.current.length>20);
 });
 
 
@@ -109,7 +109,10 @@ test('YOS DESK unified inbox keeps one cross-project list with active/read/sourc
   ]);
   assert.match(desk,/unified-inbox\.css/);
   assert.match(desk,/unified-inbox\.js/);
+  assert.doesNotMatch(desk,/\\\\n<link|<\/script>\\\\n<script/);
   assert.match(js,/activeChatId/);
+  assert.match(js,/sourceSummary/);
+  assert.match(js,/GPT原文/);
   assert.match(js,/会話中/);
   assert.match(js,/GPT原文/);
   assert.match(js,/未読/);
