@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-10-02T16:42:34+09:00",
+  "updated_at": "2026-10-02T16:43:46+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -103,6 +103,16 @@
       "updated_at": "2026-09-30T14:36:53Z"
     },
     {
+      "id": "github-pr-557",
+      "title": "PR #557 data: ClarityのNotion YOS HOME実機確認を反映",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/557",
+      "updated_at": "2026-10-02T07:43:32Z"
+    },
+    {
       "id": "github-issue-10",
       "title": "Issue #10 Mission Control v2：GitHubのIssue・PR・Commitを自動集約する",
       "type": "GitHub Issue",
@@ -120,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-10-02T07:42:06Z"
+      "updated_at": "2026-10-02T07:43:07Z"
     },
     {
       "id": "github-issue-234",
@@ -234,7 +244,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-10-02T16:42:34+09:00",
+      "last_update": "2026-10-02T16:43:46+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -309,13 +319,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 6件・Open PR 9件を自動同期中",
+      "next_action": "Open Issue 6件・Open PR 10件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-10-02T16:42:34+09:00",
+      "last_update": "2026-10-02T16:43:46+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -338,7 +348,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-10-02T16:42:34+09:00",
+      "last_update": "2026-10-02T16:43:46+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +430,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "fd8e8539c6b3818fa588daae7e41b3727e5cc0e933334db0f5751bc0c58b388d"
+  "github_snapshot_hash": "8283455ab5cc0de8a7a7758ed8d88da1cb7bd7e1b5b0796d65aa2a281e9a3bb3"
 }
