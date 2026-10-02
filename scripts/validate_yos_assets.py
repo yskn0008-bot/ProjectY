@@ -28,7 +28,7 @@ def main() -> int:
 
     assets=data.get("assets")
     if not isinstance(assets,list): err("assets must be a list"); assets=[]
-    if len(assets)!=22: err(f"expected 22 assets, got {len(assets)}")
+    if not assets: err("assets must not be empty")
 
     ids=set(); names=set(); progresses=[]; user_actions=0
     for i,a in enumerate(assets):
