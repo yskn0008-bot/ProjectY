@@ -27,6 +27,7 @@ test('widget prefers the first active task by execution order', () => {
   assert.equal(feed.sourceState, 'active');
   assert.equal(feed.task?.title, '02｜you');
   assert.equal(feed.task?.nextAction, 'tap once');
+  assert.deepEqual(feed.tasks.map((item) => item.title), ['02｜you', '03｜third', '01｜next']);
 });
 
 test('widget falls back to the first next task when nothing is active', () => {
@@ -38,6 +39,20 @@ test('widget falls back to the first next task when nothing is active', () => {
 
   assert.equal(feed.sourceState, 'next');
   assert.equal(feed.task?.title, '02｜next');
+  assert.deepEqual(feed.tasks.map((item) => item.title), ['02｜next', '07｜later']);
+});
+
+test('widget caps the dashboard task list at three actionable tasks', () => {
+  const feed = selectWidgetFeed([
+    task(1, '実行中', '01｜active'),
+    task(2, '本人操作', '02｜you'),
+    task(3, '次にやる', '03｜next'),
+    task(4, '次にやる', '04｜later')
+  ], null);
+
+  assert.equal(feed.tasks.length, 3);
+  assert.deepEqual(feed.tasks.map((item) => item.title), ['01｜active', '02｜you', '03｜next']);
+  assert.equal(feed.task, feed.tasks[0]);
 });
 
 test('widget returns an empty state when no actionable task exists', () => {
@@ -49,4 +64,5 @@ test('widget returns an empty state when no actionable task exists', () => {
 
   assert.equal(feed.sourceState, 'empty');
   assert.equal(feed.task, null);
+  assert.deepEqual(feed.tasks, []);
 });
