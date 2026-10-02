@@ -19,12 +19,21 @@
     if (target) target.textContent = message;
   }
 
+  function apiUrl(path) {
+    const url = new URL(path, globalThis.YOS_AI_BASE_URL);
+    const share = typeof globalThis.YOS_VERCEL_SHARE_TOKEN === 'string' ? globalThis.YOS_VERCEL_SHARE_TOKEN.trim() : '';
+    if (share) url.searchParams.set('_vercel_share', share);
+    return { url, share };
+  }
+
   async function loadPublicConfig() {
-    publicConfigPromise ||= fetch(new URL('/api/yos/public-config', globalThis.YOS_AI_BASE_URL), {
+    publicConfigPromise ||= (() => {
+      const target = apiUrl('/api/yos/public-config');
+      return fetch(target.url, {
       method: 'GET',
-      credentials: 'omit',
+      credentials: target.share ? 'include' : 'omit',
       cache: 'no-store',
-      redirect: 'error',
+      redirect: target.share ? 'follow' : 'error',
       referrerPolicy: 'no-referrer'
     }).then(async (response) => {
       const body = await response.json().catch(() => ({}));
@@ -35,6 +44,7 @@
       }
       return { googleClientId: clientId };
     });
+    })();
     return publicConfigPromise;
   }
 
