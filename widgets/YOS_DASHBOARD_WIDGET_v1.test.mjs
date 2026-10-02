@@ -39,6 +39,15 @@ test("uses larger dashboard typography for iPhone readability", () => {
   assert.match(source, /amount\.font = font\(22, "bold"\)/);
 });
 
+
+test("task layout keeps large type while allowing two-line titles and adaptive next action", () => {
+  assert.match(source, /copy\.layoutVertically\(\)/);
+  assert.match(source, /text\.lineLimit = 2/);
+  assert.match(source, /visibleTasks\.length === 1 && task\.nextAction/);
+  assert.match(source, /action\.lineLimit = 2/);
+  assert.match(source, /next\.lineLimit = 2/);
+});
+
 test("routine controls launch existing Morning and Night shortcuts without inventing completion state", () => {
   assert.match(source, /shortcuts:\/\/run-shortcut\?name=/);
   assert.match(source, /encodeURIComponent\("Morning"\)/);
