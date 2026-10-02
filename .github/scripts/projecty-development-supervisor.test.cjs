@@ -44,6 +44,18 @@ test('true conflict and explicit physical boundary return WAIT_USER', () => {
   assert.equal(deterministicDecision({ targetState: { phase: 'NEEDS_YOS', next: 'physical iPhone verification required' } }).decision, 'WAIT_USER');
 });
 
+test('bounded recovery exhaustion becomes FAILED_SAFE when no safe route remains', () => {
+  const decision = deterministicDecision({
+    target: 'PR#9',
+    targetState: { phase: 'NEEDS_YOS', next: 'bounded recovery exhausted', failures: {} },
+  });
+  assert.equal(decision.decision, 'FAILED_SAFE');
+  assert.equal(decision.allowedAction, null);
+  assert.equal(shouldNotify(decision), true);
+  const mapped = toLegacyDecision(decision, 'a'.repeat(40));
+  assert.equal(mapped.decision, 'HOLD');
+});
+
 test('same unresolved problem gets one deterministic supervisor attempt only', () => {
   const first = deterministicDecision({ targetState: { phase: 'NEEDS_YOS', failures: { a: { failureClass: 'TASK_STALLED' } } } });
   const second = deterministicDecision({ targetState: { phase: 'NEEDS_YOS', failures: { a: { failureClass: 'TASK_STALLED' } } }, alreadyAttempted: true });
