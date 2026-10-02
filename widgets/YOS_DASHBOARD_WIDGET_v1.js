@@ -220,26 +220,14 @@ function addHeader(widget, title) {
 }
 
 function addTaskLine(parent, task, prominent = false) {
-  const row = parent.addStack();
-  row.layoutHorizontally();
-  row.centerAlignContent();
-  const dot = row.addStack();
-  dot.size = new Size(prominent ? 10 : 9, prominent ? 10 : 9);
-  dot.cornerRadius = prominent ? 5 : 4.5;
-  dot.backgroundColor = color(task.state === "本人操作" ? COLORS.coral : COLORS.green);
-  row.addSpacer(9);
-
-  // Keep the title readable instead of shrinking it back down.
-  // A vertical copy stack gives Scriptable room to wrap inside the remaining width.
-  const copy = row.addStack();
-  copy.layoutVertically();
-  const text = copy.addText(task.title || "今すぐやることなし");
+  // Scriptable truncates wrapped text when it shares a horizontal row with the status dot.
+  // Render the title as its own full-width block so two-line wrapping is reliable.
+  const text = parent.addText(task.title || "今すぐやることなし");
   text.font = font(prominent ? 25 : 17, prominent ? "bold" : "semibold");
   text.textColor = color(COLORS.text);
   text.lineLimit = 2;
-  text.minimumScaleFactor = prominent ? 0.82 : 0.86;
-  row.addSpacer();
-  return row;
+  text.minimumScaleFactor = prominent ? 0.84 : 0.88;
+  return text;
 }
 function addEventLine(parent, event, compact = false) {
   const row = parent.addStack();
@@ -287,7 +275,7 @@ function makeNow(taskResult, calendarResult, money) {
   const tasks = tasksFromFeed(taskResult);
   const current = tasks[0] || null;
   addSectionLabel(widget, "scope", taskResult?.stale ? "今やる · 前回" : "今やる", taskResult?.stale ? COLORS.muted : COLORS.gold);
-  widget.addSpacer(5);
+  widget.addSpacer(6);
 
   if (taskResult?.needsSetup && !current) {
     const setup = widget.addText("タスク接続設定が必要");
@@ -364,7 +352,7 @@ function makeToday(taskResult, calendarResult, money) {
   addDivider(widget);
 
   addSectionLabel(widget, "checkmark.circle", taskResult?.stale ? "TASKS · 前回" : "TASKS", COLORS.green);
-  widget.addSpacer(6);
+  widget.addSpacer(7);
   const tasks = tasksFromFeed(taskResult);
   if (taskResult?.needsSetup && !tasks.length) {
     const setup = widget.addText("Scriptableで1回だけタスク接続設定");
@@ -381,10 +369,10 @@ function makeToday(taskResult, calendarResult, money) {
       if (visibleTasks.length === 1 && task.nextAction) {
         widget.addSpacer(4);
         const action = widget.addText("次 → " + task.nextAction);
-        action.font = font(13, "medium");
+        action.font = font(14, "medium");
         action.textColor = color(COLORS.muted);
         action.lineLimit = 2;
-        action.minimumScaleFactor = 0.86;
+        action.minimumScaleFactor = 0.9;
       }
 
       if (i < visibleTasks.length - 1) widget.addSpacer(8);
