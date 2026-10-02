@@ -196,7 +196,7 @@ try{
   assert.equal(automatic?.source,'chatgpt');
   assert.equal(await page.evaluate(()=>location.search),'','handoff URL should be cleaned after automatic capture');
 
-  const importerUrl='https://chatgpt.com/c/ffffffff-1111-2222-3333-444444444444';
+  const importerUrl='https://chatgpt.com/g/g-p-import-smoke/c/ffffffff-1111-2222-3333-444444444444';
   await page.goto(base+'/yos/desk/import-gpt.html?text='+encodeURIComponent('元チャット '+importerUrl)+'&title='+encodeURIComponent('共有経路GPT'),{waitUntil:'networkidle'});
   await page.waitForURL(base+'/yos/desk/');
   await page.waitForFunction(()=>document.documentElement.dataset.deskUnifiedInbox==='ready');
