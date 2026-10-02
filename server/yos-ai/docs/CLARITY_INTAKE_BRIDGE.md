@@ -140,3 +140,47 @@ Vercelへ次の値をOwnerが設定するまでtransport readyではない。値
 Slack App側ではEvent SubscriptionsのRequest URLをこのendpointへ向け、`#yos-inbox`を読めるbot event scopeと投稿scopeを設定する。Production deploy、Slack URL verification、physical iPhone 17のClarity text/voice E2EはOwner確認が終わるまで未完了である。
 
 Slack経路ではRawをNotionへ保存した後、capture ID単位で分類結果をUpstashへ永続化する。Shoppingは分類候補とするが、Calendar / Remindersと曖昧なMemoは`needs_review`に留め、サーバーから外部予定へ書き込まない。`YOS processed`は分類結果の保存成功後だけ投稿する。既存Rawがdedupe済みでもmarkerが欠けている再送では分類完了を確認してmarkerを修復し、分類保存失敗時はclaimを解放してretry可能にする。
+
+
+# BASE HOME live mirror
+
+Issue #575 extends the existing intake transport without replacing any SSOT.
+
+```text
+existing source of truth
+  ├─ Clarity operation result
+  ├─ Money save result
+  ├─ Calendar / Reminders snapshot
+  └─ Mission Control / GitHub state
+          ↓
+POST /api/yos/intake?mode=mirror
+          ↓
+Upstash event dedupe + sync-key mapping
+          ↓
+Notion YOS Tasks (display mirror)
+          ↓
+BASE HOME
+```
+
+## Contract
+
+The mirror endpoint reuses the existing Clarity bearer credential. It accepts a stable `eventId`, one `syncedAt` timestamp, a source label, and 1–50 full mirror items.
+
+Each item must provide a stable `syncKey`. The server uses that key to update the same Notion row on later snapshots instead of creating duplicates. The YOS Tasks data source has mirror-only properties `同期キー`, `最終同期`, and `操作URL`.
+
+The source remains authoritative. A Notion failure returns a retryable error but must never roll back a successful Calendar, Reminder, Money, Home, or other local operation.
+
+## Production configuration
+
+The existing server-side `YOS_NOTION_API_TOKEN` is reused. The live mirror additionally requires:
+
+`YOS_NOTION_TASKS_DATA_SOURCE_ID`
+
+The integration behind `YOS_NOTION_API_TOKEN` must have access to YOS Tasks. This ID and permission are server-side configuration and do not belong in the iPhone Shortcut.
+
+## Planned iPhone behavior
+
+- When Clarity completes a supported operation, it posts the resulting state to `mode=mirror`.
+- Before `ベースホーム開いて` opens BASE HOME, Clarity refreshes the current Calendar / Reminders / Money snapshot and posts it to the same endpoint.
+- `操作URL` points back to an existing source app or Shortcut. Notion is an operation entry, not a second source of truth.
+- If mirror transport fails, the source operation remains complete and the same stable event can be retried later.
