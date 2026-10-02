@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-10-03T01:02:59+09:00",
+  "updated_at": "2026-10-03T01:04:02+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -103,16 +103,6 @@
       "updated_at": "2026-09-30T14:36:53Z"
     },
     {
-      "id": "github-pr-578",
-      "title": "PR #578 BASE HOME: mirror Money state immediately after save",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/578",
-      "updated_at": "2026-10-02T16:02:30Z"
-    },
-    {
       "id": "github-issue-10",
       "title": "Issue #10 Mission Control v2：GitHubのIssue・PR・Commitを自動集約する",
       "type": "GitHub Issue",
@@ -130,7 +120,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-10-02T15:58:07Z"
+      "updated_at": "2026-10-02T16:03:02Z"
     },
     {
       "id": "github-issue-234",
@@ -185,39 +175,39 @@
   ],
   "recently_completed": [
     {
-      "id": "github-commit-b0d9d0289e11",
-      "title": "Merge PR #577: auto-discover YOS Tasks data source",
-      "completed_at": "2026-10-02T15:57:59Z",
-      "result": "GitHub mainへ反映（b0d9d02）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/b0d9d0289e11f3d0f10d35eeab4c4cf2cd869ff0"
+      "id": "github-commit-cc07c26dd918",
+      "title": "Merge PR #578: mirror Money state after save",
+      "completed_at": "2026-10-02T16:03:45Z",
+      "result": "GitHub mainへ反映（cc07c26）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/cc07c26dd9187fc4a6df96183909d750efcbc7ca"
     },
     {
-      "id": "github-commit-ce431528fba2",
-      "title": "docs(yos-ai): document automatic YOS Tasks discovery",
-      "completed_at": "2026-10-02T15:52:44Z",
-      "result": "GitHub mainへ反映（ce43152）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/ce431528fba2d22b1e1782a5a2415edae40d14d2"
+      "id": "github-commit-ba1862c66b05",
+      "title": "test(yos-ai): keep Money save independent from Notion mirror",
+      "completed_at": "2026-10-02T16:02:00Z",
+      "result": "GitHub mainへ反映（ba1862c）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/ba1862c66b05590c6962a257a6415a41fcd3f469"
     },
     {
-      "id": "github-commit-d93754d6a2af",
-      "title": "test(yos-ai): cover Notion data source discovery",
-      "completed_at": "2026-10-02T15:52:24Z",
-      "result": "GitHub mainへ反映（d93754d）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/d93754d6a2af2a58dd6533f518c22779a36a001d"
+      "id": "github-commit-2ed8457d822c",
+      "title": "test(yos-ai): cover Money to Notion mirror mapping",
+      "completed_at": "2026-10-02T16:01:44Z",
+      "result": "GitHub mainへ反映（2ed8457）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/2ed8457d822c1d8964990b9efdba65fa7929a50a"
     },
     {
-      "id": "github-commit-93300ad5a1dd",
-      "title": "feat(yos-ai): make Notion tasks ID optional",
-      "completed_at": "2026-10-02T15:51:58Z",
-      "result": "GitHub mainへ反映（93300ad）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/93300ad5a1ddac2d5b72efa0ef3566df0aaba460"
+      "id": "github-commit-567450ff3b88",
+      "title": "feat(yos-ai): mirror Money shadow to Notion in background",
+      "completed_at": "2026-10-02T16:01:12Z",
+      "result": "GitHub mainへ反映（567450f）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/567450ff3b8807efc9e6c752c01263d203887a94"
     },
     {
-      "id": "github-commit-3b0d867ec47d",
-      "title": "feat(yos-ai): auto-discover YOS Tasks data source",
-      "completed_at": "2026-10-02T15:51:47Z",
-      "result": "GitHub mainへ反映（3b0d867）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/3b0d867ec47dab638ea9f03f0ac307dcf4448c7f"
+      "id": "github-commit-22a51f005ed5",
+      "title": "feat(yos-ai): emit Money snapshot after successful shadow save",
+      "completed_at": "2026-10-02T16:00:55Z",
+      "result": "GitHub mainへ反映（22a51f0）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/22a51f005ed57971a9971705a0cdca4d702603eb"
     },
     {
       "id": "complete-002",
@@ -254,7 +244,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-10-03T01:02:59+09:00",
+      "last_update": "2026-10-03T01:04:02+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -329,13 +319,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 7件・Open PR 10件を自動同期中",
+      "next_action": "Open Issue 7件・Open PR 9件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-10-03T01:02:59+09:00",
+      "last_update": "2026-10-03T01:04:02+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -358,7 +348,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-10-03T01:02:59+09:00",
+      "last_update": "2026-10-03T01:04:02+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -440,5 +430,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "e057b503a4f1b0af62b1c727cd2ab9276b9ed3bbd58bd9b7cff4bdc662985d17"
+  "github_snapshot_hash": "cbd20131bd592eea0f281fae7aebcf8a17a7307c95a7e7c3179c98284ed6d489"
 }
