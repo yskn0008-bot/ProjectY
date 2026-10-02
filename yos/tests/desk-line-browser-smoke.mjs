@@ -72,9 +72,7 @@ try{
   assert.match((await page.locator('#sourceSummary').textContent())||'',/GPT原文 1/);
   assert.match((await page.locator('#sourceSummary').textContent())||'',/YOS内 5/);
   assert.equal(await page.locator('#addGptChatBtn').isVisible(),true,'one-tap GPT original add should be visible');
-  assert.equal(await page.locator('#currentChatBanner').isVisible(),true,'active chat banner should stay visible across projects');
-  assert.match((await page.locator('#currentChatBanner').textContent())||'',/会話中/);
-  assert.match((await page.locator('#currentChatBanner').textContent())||'',/外部YOS/);
+  assert.equal(await page.locator('#currentChatBanner').isVisible(),false,'GPT-style list should not duplicate the active chat in a banner');
   const externalRow=page.locator('.chat[data-id="external-yos"]');
   assert.equal(await externalRow.evaluate(el=>el.classList.contains('currentChat')),true,'last active GPT chat should be marked as current');
   assert.match((await externalRow.locator('.sourceBadge').textContent())||'',/GPT原文/);
@@ -84,24 +82,32 @@ try{
   const row=page.locator('#chatList .chat:not(.currentChat)').first();
   const ui=await row.evaluate(row=>{
     const avatar=row.querySelector('.avatar');
+    const meta=row.querySelector('.chatMeta');
+    const source=row.querySelector('.sourceBadge');
     const preview=row.querySelector('.preview');
     const activeTab=document.querySelector('#chatsPage .tab.active');
-    const rs=getComputedStyle(row),as=getComputedStyle(avatar),ps=getComputedStyle(preview);
+    const rs=getComputedStyle(row),ps=getComputedStyle(preview),ts=getComputedStyle(activeTab);
     return {
       rowRadius:rs.borderRadius,rowBackground:rs.backgroundColor,rowMinHeight:parseFloat(rs.minHeight),
-      avatarRadius:as.borderRadius,avatarWidth:parseFloat(as.width),
+      avatarDisplay:getComputedStyle(avatar).display,
+      metaDisplay:getComputedStyle(meta).display,
+      sourceDisplay:getComputedStyle(source).display,
       previewSize:parseFloat(ps.fontSize),previewWhiteSpace:ps.whiteSpace,
-      underlineHeight:parseFloat(getComputedStyle(activeTab,'::after').height)
+      tabRadius:ts.borderRadius,tabBackground:ts.backgroundColor,
+      pageBackground:getComputedStyle(document.querySelector('#chatsPage')).backgroundColor
     };
   });
-  assert.ok(parseFloat(ui.rowRadius)>=14,'chat rows should use calm rounded cards');
-  assert.notEqual(ui.rowBackground,'rgba(0, 0, 0, 0)','chat rows should have a subtle surface');
-  assert.ok(ui.rowMinHeight>=70);
-  assert.ok(parseFloat(ui.avatarRadius)>=13&&parseFloat(ui.avatarRadius)<=15,'avatars should use iPhone-like squircles');
-  assert.ok(ui.avatarWidth>=44);
-  assert.ok(ui.previewSize>=14);
+  assert.ok(parseFloat(ui.rowRadius)>=11,'GPT-style rows keep only a soft touch target radius');
+  assert.equal(ui.rowBackground,'rgba(0, 0, 0, 0)','normal GPT-style rows should stay flat');
+  assert.ok(ui.rowMinHeight>=64);
+  assert.equal(ui.avatarDisplay,'none','GPT-style history list should be text-first');
+  assert.equal(ui.metaDisplay,'none','timestamps and duplicate read metadata should stay out of the GPT-style list');
+  assert.equal(ui.sourceDisplay,'none','source badges should not clutter every GPT-style row');
+  assert.ok(ui.previewSize>=15);
   assert.equal(ui.previewWhiteSpace,'nowrap');
-  assert.ok(ui.underlineHeight>=2);
+  assert.ok(parseFloat(ui.tabRadius)>=20,'chat filters should use the same pill rhythm as the reference UI');
+  assert.notEqual(ui.tabBackground,'rgba(0, 0, 0, 0)');
+  assert.equal(ui.pageBackground,'rgb(0, 0, 0)');
 
   await page.evaluate((localBase)=>{
     globalThis.YOS_AI_BASE_URL=localBase;
@@ -143,7 +149,7 @@ try{
   await page.locator('#threadBack').click();
   await page.waitForSelector('#chatsPage.active');
   assert.equal(await page.locator('.chat[data-id="asset-clarity"]').evaluate(el=>el.classList.contains('currentChat')),true,'opened room should become current');
-  assert.match((await page.locator('#currentChatBanner').textContent())||'',/Clarity/);
+  assert.equal(await page.locator('.chat[data-id="asset-clarity"]').evaluate(el=>getComputedStyle(el).backgroundColor!=='rgba(0, 0, 0, 0)'),true,'current room should be indicated by the selected row itself');
   const clarityPreview=(await page.locator('.chat[data-id="asset-clarity"] .preview').textContent())||'';
   assert.match(clarityPreview,/テスト応答です/);
 
@@ -161,6 +167,45 @@ try{
   await page.locator('.tab[data-mode="all"]').click();
   await page.locator('#searchInput').fill('Money');
   assert.ok(await page.locator('#chatList .chat').count()>=1,'chat search still works');
+  await page.locator('#searchInput').fill('');
+
+  await page.locator('#newBtn').click();
+  await page.waitForSelector('#createYosChat');
+  assert.equal(await page.locator('#createTemporaryChat').isVisible(),true,'NEW should offer a temporary chat');
+  await page.locator('#createYosChat').click();
+  await page.waitForSelector('#threadPage.active');
+  assert.match((await page.locator('#threadTitle').textContent())||'',/新しいチャット/);
+  const createdChatId=await page.evaluate(()=>state.chats.find(x=>x.liveAi&&!x.assetId&&!x.temporary)?.id||'');
+  assert.ok(createdChatId,'NEW should create a non-fixed YOS chat');
+  assert.equal(await page.evaluate(id=>{
+    const saved=JSON.parse(localStorage.getItem('yosDeskIntegratedStateV1')||'{}');
+    return (saved.chats||[]).some(x=>x.id===id);
+  },createdChatId),true,'normal new chat should persist');
+
+  await page.locator('#threadInput').fill('自由に相談する新しい会話');
+  await page.locator('#threadSend').click();
+  await page.waitForFunction(()=>document.querySelector('#messageStream')?.textContent?.includes('テスト応答です'));
+  assert.match((await page.locator('#threadTitle').textContent())||'',/自由に相談する新しい会話/,'first message should become the chat title');
+  assert.equal(chatRequests,3,'new YOS chat should use the same live AI transport');
+  await page.locator('#threadBack').click();
+  await page.waitForSelector('#chatsPage.active');
+  assert.equal(await page.locator('.chat[data-id="'+createdChatId+'"]').count(),1,'normal new chat should appear in history');
+
+  await page.locator('#newBtn').click();
+  await page.waitForSelector('#createTemporaryChat');
+  await page.locator('#createTemporaryChat').click();
+  await page.waitForSelector('#threadPage.active');
+  assert.match((await page.locator('#threadStatus').textContent())||'',/履歴に残しません/);
+  const tempId=await page.evaluate(()=>state.chats.find(x=>x.temporary)?.id||'');
+  assert.ok(tempId,'temporary chat should exist only in the active runtime');
+  assert.equal(await page.evaluate(id=>{
+    const saved=JSON.parse(localStorage.getItem('yosDeskIntegratedStateV1')||'{}');
+    return (saved.chats||[]).some(x=>x.id===id)||Boolean(saved.chatThreads&&saved.chatThreads[id]);
+  },tempId),false,'temporary chat must never be written to localStorage');
+  await page.locator('#threadBack').click();
+  await page.waitForSelector('#chatsPage.active');
+  assert.equal(await page.evaluate(id=>state.chats.some(x=>x.id===id),tempId),false,'leaving a temporary chat should discard it');
+  assert.equal(await page.locator('.chat[data-id="'+tempId+'"]').count(),0,'temporary chat should never appear in history');
 
   const importedUrl='https://chatgpt.com/g/g-p-smoke/c/11111111-2222-3333-4444-555555555555';
   const importHash='#url='+encodeURIComponent(importedUrl)+'&title='+encodeURIComponent('YOS DESK GPT')+'&project='+encodeURIComponent('One Enter');
