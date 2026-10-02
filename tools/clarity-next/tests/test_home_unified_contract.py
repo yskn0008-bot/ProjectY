@@ -35,7 +35,7 @@ class UnifiedHomeRouterContractTests(unittest.TestCase):
 
     def test_floor_lamp_is_not_misrouted_to_ir(self):
         self.assertNotIn("'floor_lamp'", self.bridge.split("const DEVICES",1)[1].split(";",1)[0])
-        self.assertIn("Apple Home/Matter", self.home)
+        self.assertIn("Tapo AppIntent child", self.home)
 
     def test_inline_patch_is_fail_closed(self):
         self.assertIn('expected exactly one Scriptable inline action', self.patch)
