@@ -1,10 +1,10 @@
 'use strict';
 const CACHE_PREFIX='yos-unified-';
-const CACHE_NAME=CACHE_PREFIX+'v25-desk-unified-inbox-v2';
+const CACHE_NAME=CACHE_PREFIX+'v29-desk-gpt-import-page';
 const STATIC=[
   './','./index.html','./manifest.webmanifest','./assets/yos-icon-180.png','./assets/yos-icon-512.png',
   './yos/','./yos/index.html','./yos/styles.css','./yos/readability-final.css','./yos/guide.html','./yos/guide.css','./yos/guide.js','./yos/guide-v2.css','./yos/guide-v2.js',
-  './yos/desk/','./yos/desk/index.html','./yos/desk/style.css','./yos/desk/compact.css','./yos/desk/live-chat.css','./yos/desk/unified-inbox.css','./yos/desk/app.js','./yos/desk/live-chat.js','./yos/desk/unified-inbox.js',
+  './yos/desk/','./yos/desk/index.html','./yos/desk/import-gpt.html','./yos/desk/style.css','./yos/desk/compact.css','./yos/desk/live-chat.css','./yos/desk/unified-inbox.css','./yos/desk/app.js','./yos/desk/live-chat.js','./yos/desk/unified-inbox.js',
   './yos/task-dashboard.css','./yos/task-dashboard.js','./yos/shared-state-v1.js','./yos/app.js',
   './yos/money-v2.css','./yos/money-master-v1.js','./yos/money-v2.js','./yos/money-v2-runtime-v4.js','./yos/money-journal-v1.js','./yos/money-capture.html','./yos/money-local-import.html',
   './yos/morning-brief-bridge.html','./yos/morning-brief-bridge-v1.js','./yos/payment-alert-bridge.html','./yos/payment-alert-bridge-v1.js','./yos/money-alert-bridge.html','./yos/money-alert-bridge-v1.js',
@@ -35,6 +35,7 @@ const CRITICAL_NETWORK_FIRST=new Set([
   '/ProjectY/yos/money-alert-bridge-v1.js',
   '/ProjectY/life/night-checkin-life-bridge-v1.js',
   '/ProjectY/yos/desk/index.html',
+  '/ProjectY/yos/desk/import-gpt.html',
   '/ProjectY/yos/desk/style.css',
   '/ProjectY/yos/desk/compact.css',
   '/ProjectY/yos/desk/live-chat.css',
