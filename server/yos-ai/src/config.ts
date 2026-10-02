@@ -40,7 +40,7 @@ export function loadYosRuntimeConfig(environment: Environment): YosRuntimeConfig
   const nodeEnvironment = environment.NODE_ENV ?? 'production';
   return {
     openAiApiKey: required(environment, 'OPENAI_API_KEY'),
-    openAiModel: environment.OPENAI_MODEL?.trim() || 'gpt-5.6-terra',
+    openAiModel: normalizeOpenAiModel(environment.OPENAI_MODEL),
     googleClientId: required(environment, 'GOOGLE_CLIENT_ID'),
     allowedOrigins: parseOrigins(required(environment, 'YOS_ALLOWED_ORIGINS'), nodeEnvironment),
     allowedSubjectHash: required(environment, 'GOOGLE_ALLOWED_SUBJECT_HASH'),
@@ -126,4 +126,11 @@ function positiveInteger(environment: Environment, name: string, fallback: numbe
     throw new Error(`Invalid positive integer environment variable: ${name}`);
   }
   return value;
+}
+
+
+export function normalizeOpenAiModel(value: string | undefined): string {
+  const model = value?.trim() || '';
+  if (!model || model === 'gpt-5.6-terra') return 'gpt-5.6-sol';
+  return model;
 }

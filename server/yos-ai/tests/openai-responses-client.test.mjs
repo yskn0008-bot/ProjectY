@@ -71,6 +71,23 @@ test('Responses client forces safe options and captures usage', async () => {
   });
 });
 
+test('Responses client defaults to current Sol model', async () => {
+  let requestBody;
+  const client = new OpenAIResponsesClient({
+    apiKey: 'test-key',
+    safetyIdentifier: 'hashed-user',
+    responseSchema: {type: 'object'},
+    fetchImpl: async (_input, init) => {
+      requestBody = JSON.parse(init.body);
+      return new Response(JSON.stringify({
+        output: [{type: 'message', content: [{type: 'output_text', text: JSON.stringify(modelOutput)}]}]
+      }), {status: 200, headers: {'content-type': 'application/json'}});
+    }
+  });
+  await client.generate(modelInput());
+  assert.equal(requestBody.model, 'gpt-5.6-sol');
+});
+
 test('Responses client allows missing usage without inventing values', async () => {
   const client = new OpenAIResponsesClient({
     apiKey: 'test-key',

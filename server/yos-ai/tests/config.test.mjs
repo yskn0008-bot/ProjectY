@@ -25,6 +25,7 @@ test('loads strict production configuration with keyless Google auth', () => {
   assert.deepEqual(config.allowedOrigins, ['https://yos.example', 'https://app.example']);
   assert.equal(config.googleWorkloadAuth.mode, 'vercel_oidc');
   assert.equal(config.limits.requestsPerHour, 30);
+  assert.equal(config.openAiModel, 'gpt-5.6-sol');
 });
 
 test('rejects insecure production origins and missing values', () => {
@@ -43,4 +44,15 @@ test('allows localhost and application default credentials only outside producti
   assert.equal(config.googleWorkloadAuth.mode, 'application_default');
 
   assert.throws(() => loadYosRuntimeConfig({ ...base, GOOGLE_AUTH_MODE: 'application_default' }), /not allowed/);
+});
+
+
+test('maps retired gpt-5.6-terra env value to current Sol model', () => {
+  const config = loadYosRuntimeConfig({...base, OPENAI_MODEL: 'gpt-5.6-terra'});
+  assert.equal(config.openAiModel, 'gpt-5.6-sol');
+});
+
+test('keeps an explicitly supported model override', () => {
+  const config = loadYosRuntimeConfig({...base, OPENAI_MODEL: 'gpt-6-luna'});
+  assert.equal(config.openAiModel, 'gpt-6-luna');
 });

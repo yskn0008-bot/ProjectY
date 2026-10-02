@@ -3,7 +3,7 @@ import {createProductionClarityIntakeHandler} from '../../dist/intake/production
 import {CLARITY_RESPONSE_FORMAT, repairPrompt, validateClarityModelResult} from '../../clarity-model-contract.mjs';
 
 const MAX_MODEL_BODY_BYTES = 24_000;
-const DEFAULT_MODEL = 'gpt-5.6-terra';
+const DEFAULT_MODEL = 'gpt-5.6-sol';
 const MAX_MODEL_ATTEMPTS = 2;
 const MAX_FACTORY_BODY_BYTES = 24_000;
 const MAX_FACTORY_REQUEST_CHARS = 4_000;
@@ -321,7 +321,7 @@ export async function handleShortcutFactory(request) {
 
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) return json({error: 'Shortcut Factory is not configured'}, 503);
-  const model = process.env.OPENAI_MODEL || DEFAULT_MODEL;
+  const model = process.env.OPENAI_MODEL === 'gpt-5.6-terra' ? DEFAULT_MODEL : (process.env.OPENAI_MODEL || DEFAULT_MODEL);
 
   let outcome = await requestShortcutDefinition(apiKey, model, requestText);
   if (outcome.response) return outcome.response;
@@ -369,7 +369,7 @@ export async function handleClarityModel(request) {
 
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) return json({error: 'Clarity model gateway is not configured'}, 503);
-  const model = process.env.OPENAI_MODEL || DEFAULT_MODEL;
+  const model = process.env.OPENAI_MODEL === 'gpt-5.6-terra' ? DEFAULT_MODEL : (process.env.OPENAI_MODEL || DEFAULT_MODEL);
 
   let currentPrompt = prompt;
   let lastErrors = [];
