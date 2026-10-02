@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-10-02T09:46:45+09:00",
+  "updated_at": "2026-10-02T09:47:21+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -13,14 +13,14 @@
   },
   "inbox": [
     {
-      "id": "github-pr-547",
-      "title": "PR #547 data: YOS資産一覧を全件再監査して現在地へ更新",
+      "id": "github-pr-548",
+      "title": "PR #548 YOS DESK: GPT原文導線と表示崩れ修正",
       "type": "GitHub PR",
       "status": "review",
       "priority": 1,
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/547",
-      "updated_at": "2026-10-02T00:46:31Z"
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/548",
+      "updated_at": "2026-10-02T00:47:02Z"
     },
     {
       "id": "github-pr-403",
@@ -120,7 +120,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-10-02T00:35:15Z"
+      "updated_at": "2026-10-02T00:46:37Z"
     },
     {
       "id": "github-issue-234",
@@ -165,6 +165,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-b7c49edd709c",
+      "title": "data: YOS資産一覧を全件再監査して現在地へ更新 (#547)",
+      "completed_at": "2026-10-02T00:46:50Z",
+      "result": "GitHub mainへ反映（b7c49ed）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/b7c49edd709c5c827d17418fdeeadc7746684ece"
+    },
+    {
       "id": "github-commit-4ffad26e541f",
       "title": "YOS DESK: プロジェクト横断のチャット受信箱 (#546)",
       "completed_at": "2026-10-02T00:34:41Z",
@@ -193,13 +200,6 @@
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/5fc71d779424c8b137982eae54d0b3709713642a"
     },
     {
-      "id": "github-commit-e8b866140fb3",
-      "title": "One Enter: YOS Loop Engine v1 (#542)",
-      "completed_at": "2026-09-30T07:08:18Z",
-      "result": "GitHub mainへ反映（e8b8661）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/e8b866140fb34f351722e062a4509ca7b02b8053"
-    },
-    {
       "id": "complete-002",
       "title": "iPhone向けMission Control Dashboardを実装",
       "completed_at": "2026-07-17T17:55:00+09:00",
@@ -224,7 +224,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #547をレビューして公開判断する",
+      "next_action": "PR #548をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -234,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-10-02T09:46:45+09:00",
+      "last_update": "2026-10-02T09:47:21+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -315,7 +315,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-10-02T09:46:45+09:00",
+      "last_update": "2026-10-02T09:47:21+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -329,7 +329,7 @@
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #547をレビューして公開判断する",
+      "next_action": "PR #548をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -338,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-10-02T09:46:45+09:00",
+      "last_update": "2026-10-02T09:47:21+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "735a09a4b9860e329ca6f7fed1c86450c38aa3c42a53e238e9a002d8d4e330b9"
+  "github_snapshot_hash": "70874cf8dc90c664fc27ccb397801248a756c184a87be9ad75f2c9bb417da3bf"
 }
