@@ -12,9 +12,10 @@ test("one Scriptable source drives NOW and TODAY dashboard widgets", () => {
   assert.match(source, /presentLarge\(\)/);
 });
 
-test("reuses the existing private YOS Tasks feed and Keychain token", () => {
+test("reuses the existing private YOS Tasks feed and cache", () => {
   assert.match(source, /https:\/\/project-y-yos-ai\.vercel\.app\/api\/yos\/widget/);
-  assert.match(source, /MY_WAY_WIDGET_TOKEN/);\n  assert.match(source, /my-way-now-widget-cache-v1\\.json/);
+  assert.match(source, /MY_WAY_WIDGET_TOKEN/);
+  assert.match(source, /my-way-now-widget-cache-v1\.json/);
   assert.match(source, /Authorization:\s*`Bearer \$\{token\}`/);
   assert.match(source, /Array\.isArray\(data\.tasks\)/);
   assert.match(source, /data\.task \? \[data\.task\]/);
@@ -22,10 +23,20 @@ test("reuses the existing private YOS Tasks feed and Keychain token", () => {
 
 test("reads Calendar and Money locally without creating another SSOT", () => {
   assert.match(source, /CalendarEvent\.today\(\)/);
+  assert.match(source, /return \{ok: true, items\}/);
+  assert.match(source, /return \{ok: false, items: \[\], error:/);
+  assert.match(source, /カレンダーを確認/);
   assert.match(source, /YOS\/Money\/money\.json/);
   assert.match(source, /data\?\.balance\?\.amount/);
   assert.match(source, /value === null \|\| value === undefined/);
   assert.doesNotMatch(source, /writeString\([^\n]*money/i);
+});
+
+test("uses larger dashboard typography for iPhone readability", () => {
+  assert.match(source, /name\.font = font\(18, "bold"\)/);
+  assert.match(source, /font\(prominent \? 21 : 14/);
+  assert.match(source, /title\.font = font\(compact \? 12 : 15/);
+  assert.match(source, /amount\.font = font\(18, "bold"\)/);
 });
 
 test("routine controls launch existing Morning and Night shortcuts without inventing completion state", () => {
