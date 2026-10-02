@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-10-03T02:50:24+09:00",
+  "updated_at": "2026-10-03T03:14:37+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -21,6 +21,16 @@
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/553",
       "updated_at": "2026-10-02T01:11:02Z"
+    },
+    {
+      "id": "github-pr-584",
+      "title": "PR #584 fix(widget): prioritize NOW task title",
+      "type": "GitHub PR",
+      "status": "review",
+      "priority": 1,
+      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/584",
+      "updated_at": "2026-10-02T18:14:19Z"
     },
     {
       "id": "github-pr-403",
@@ -61,16 +71,6 @@
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/488",
       "updated_at": "2026-09-30T10:40:22Z"
-    },
-    {
-      "id": "github-pr-534",
-      "title": "PR #534 Clarity Share: 共有シートの入力型制限を解除",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/534",
-      "updated_at": "2026-09-29T09:09:33Z"
     },
     {
       "id": "github-pr-537",
@@ -244,7 +244,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #553をレビューして公開判断する",
+      "next_action": "PR #584をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -254,7 +254,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-10-03T02:50:24+09:00",
+      "last_update": "2026-10-03T03:14:37+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -329,13 +329,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 7件・Open PR 10件を自動同期中",
+      "next_action": "Open Issue 7件・Open PR 11件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-10-03T02:50:24+09:00",
+      "last_update": "2026-10-03T03:14:37+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -349,7 +349,7 @@
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #553をレビューして公開判断する",
+      "next_action": "PR #584をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -358,7 +358,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-10-03T02:50:24+09:00",
+      "last_update": "2026-10-03T03:14:37+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -440,5 +440,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "50e4c23ff03ed6a79c2dced129ae493615b616d847a105b6a8ace073a76d2088"
+  "github_snapshot_hash": "086a0329225c486c7043a9f305e86669096eec51a2a5aced79654f420f252064"
 }
