@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-10-02T20:00:07+09:00",
+  "updated_at": "2026-10-02T20:01:54+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -21,26 +21,6 @@
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/553",
       "updated_at": "2026-10-02T01:11:02Z"
-    },
-    {
-      "id": "github-pr-562",
-      "title": "PR #562 YOS DESK: GPT風チャット一覧と新規・一時チャット",
-      "type": "GitHub PR",
-      "status": "review",
-      "priority": 1,
-      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/562",
-      "updated_at": "2026-10-02T10:58:59Z"
-    },
-    {
-      "id": "github-pr-563",
-      "title": "PR #563 refactor(clarity): 拡張モデル向けSemantic Plannerへ再設計",
-      "type": "GitHub PR",
-      "status": "review",
-      "priority": 1,
-      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/563",
-      "updated_at": "2026-10-02T10:59:38Z"
     },
     {
       "id": "github-pr-403",
@@ -83,6 +63,16 @@
       "updated_at": "2026-09-30T10:40:22Z"
     },
     {
+      "id": "github-pr-534",
+      "title": "PR #534 Clarity Share: 共有シートの入力型制限を解除",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/534",
+      "updated_at": "2026-09-29T09:09:33Z"
+    },
+    {
       "id": "github-pr-537",
       "title": "PR #537 Clarity Next: 最新mainへYOS_Homeを統合",
       "type": "GitHub PR",
@@ -113,6 +103,16 @@
       "updated_at": "2026-09-30T14:36:53Z"
     },
     {
+      "id": "github-pr-564",
+      "title": "PR #564 refactor(clarity): 拡張モデル向けSemantic Plannerへ再設計",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/564",
+      "updated_at": "2026-10-02T11:01:40Z"
+    },
+    {
       "id": "github-issue-10",
       "title": "Issue #10 Mission Control v2：GitHubのIssue・PR・Commitを自動集約する",
       "type": "GitHub Issue",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-10-02T10:59:21Z"
+      "updated_at": "2026-10-02T11:01:24Z"
     },
     {
       "id": "github-issue-234",
@@ -175,6 +175,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-029ebd4c2751",
+      "title": "YOS DESK: GPT風チャット一覧と新規・一時チャット (#562)",
+      "completed_at": "2026-10-02T11:01:30Z",
+      "result": "GitHub mainへ反映（029ebd4）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/029ebd4c275115b642a22cd42364633d0fe8211b"
+    },
+    {
       "id": "github-commit-c89b3b6cd2c1",
       "title": "fix(clarity): deterministically recover BASE HOME voice misroutes",
       "completed_at": "2026-10-02T10:25:40Z",
@@ -203,13 +210,6 @@
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/d9d110b40850f40b632a699cc2dfc6fffc552757"
     },
     {
-      "id": "github-commit-7a1f2185069e",
-      "title": "feat(clarity): YOS HOMEを自然言語で開く",
-      "completed_at": "2026-10-02T07:42:19Z",
-      "result": "GitHub mainへ反映（7a1f218）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/7a1f2185069ec27ced5df0bec554c56524e31ddd"
-    },
-    {
       "id": "complete-002",
       "title": "iPhone向けMission Control Dashboardを実装",
       "completed_at": "2026-07-17T17:55:00+09:00",
@@ -234,7 +234,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #563をレビューして公開判断する",
+      "next_action": "PR #553をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -244,7 +244,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-10-02T20:00:07+09:00",
+      "last_update": "2026-10-02T20:01:54+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -319,13 +319,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 6件・Open PR 11件を自動同期中",
+      "next_action": "Open Issue 6件・Open PR 10件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-10-02T20:00:07+09:00",
+      "last_update": "2026-10-02T20:01:54+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -339,7 +339,7 @@
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #563をレビューして公開判断する",
+      "next_action": "PR #553をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -348,7 +348,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-10-02T20:00:07+09:00",
+      "last_update": "2026-10-02T20:01:54+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -430,5 +430,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "da0e6d8152783c296730c5ad8f8476545d6ffdf9932452b4b8e838f7a5f44863"
+  "github_snapshot_hash": "1a4a09f681709de54e8a3d69f65ede63c1bdd3a0ab1e3399d7981b01a6352776"
 }
