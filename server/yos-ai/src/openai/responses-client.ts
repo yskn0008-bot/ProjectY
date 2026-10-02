@@ -65,7 +65,7 @@ export class OpenAIResponsesClient implements ModelClient {
     if (!options.safetyIdentifier.trim()) throw new Error('safetyIdentifier is required');
     this.fetchImpl = options.fetchImpl ?? fetch;
     this.endpoint = options.endpoint ?? 'https://api.openai.com/v1/responses';
-    this.model = options.model ?? 'gpt-5.6-terra';
+    this.model = options.model ?? 'gpt-5.6-sol';
     this.maxOutputTokens = positiveTokenLimit(options.maxOutputTokens ?? 5_000, 'maxOutputTokens');
     this.liveMaxOutputTokens = positiveTokenLimit(options.liveMaxOutputTokens ?? 1_500, 'liveMaxOutputTokens');
   }
