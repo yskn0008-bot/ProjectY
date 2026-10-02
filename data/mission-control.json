@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-10-02T16:41:59+09:00",
+  "updated_at": "2026-10-02T16:42:34+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -103,16 +103,6 @@
       "updated_at": "2026-09-30T14:36:53Z"
     },
     {
-      "id": "github-pr-556",
-      "title": "PR #556 feat(clarity): YOS HOMEを自然言語で開く",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/556",
-      "updated_at": "2026-10-02T07:41:31Z"
-    },
-    {
       "id": "github-issue-10",
       "title": "Issue #10 Mission Control v2：GitHubのIssue・PR・Commitを自動集約する",
       "type": "GitHub Issue",
@@ -130,7 +120,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-10-02T07:25:04Z"
+      "updated_at": "2026-10-02T07:42:06Z"
     },
     {
       "id": "github-issue-234",
@@ -175,6 +165,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-7a1f2185069e",
+      "title": "feat(clarity): YOS HOMEを自然言語で開く",
+      "completed_at": "2026-10-02T07:42:19Z",
+      "result": "GitHub mainへ反映（7a1f218）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/7a1f2185069ec27ced5df0bec554c56524e31ddd"
+    },
+    {
       "id": "github-commit-41b9e345a93e",
       "title": "chore: trigger YOS AI production redeploy once",
       "completed_at": "2026-10-02T07:39:13Z",
@@ -201,13 +198,6 @@
       "completed_at": "2026-10-02T01:09:08Z",
       "result": "GitHub mainへ反映（ef6a310）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/ef6a31052ce9c3188a28ca1e05a939d9465258f2"
-    },
-    {
-      "id": "github-commit-beef952635e8",
-      "title": "Sync One Enter asset state after Loop Engineering integration",
-      "completed_at": "2026-10-02T01:06:59Z",
-      "result": "GitHub mainへ反映（beef952）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/beef952635e845372f85c1fb68173c900d2bc725"
     },
     {
       "id": "complete-002",
@@ -244,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-10-02T16:41:59+09:00",
+      "last_update": "2026-10-02T16:42:34+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -319,13 +309,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 6件・Open PR 10件を自動同期中",
+      "next_action": "Open Issue 6件・Open PR 9件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-10-02T16:41:59+09:00",
+      "last_update": "2026-10-02T16:42:34+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -348,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-10-02T16:41:59+09:00",
+      "last_update": "2026-10-02T16:42:34+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -430,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "62bece34b0617067bbb042ae19515a7d5262b824d6bbdf0dcb27eb9ceb8b95c9"
+  "github_snapshot_hash": "fd8e8539c6b3818fa588daae7e41b3727e5cc0e933334db0f5751bc0c58b388d"
 }
