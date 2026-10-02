@@ -40,6 +40,34 @@ export interface NotionMirrorInput {
 
 export class MirrorInProgressError extends Error {}
 
+export async function mirrorNotionInput(options: {
+  input: NotionMirrorInput;
+  notionToken: string;
+  notionDataSourceId?: string | null;
+  redis: RedisCommandClient;
+  fetchImpl?: FetchLike;
+}): Promise<{duplicate: boolean; updated: number}> {
+  const parsed = parseInput(options.input);
+  if (!parsed.ok) throw new Error(`Invalid mirror input: ${parsed.error}`);
+  const notionToken = required(options.notionToken, 'Notion token');
+  const fetchImpl = options.fetchImpl ?? fetch;
+  const configuredDataSourceId = options.notionDataSourceId
+    ? normalizeId(options.notionDataSourceId, 'Notion data source ID')
+    : null;
+  const notionDataSourceId = configuredDataSourceId ?? await resolveNotionDataSourceId({
+    notionToken,
+    redis: options.redis,
+    fetchImpl
+  });
+  return processMirror({
+    input: parsed.value,
+    notionToken,
+    notionDataSourceId,
+    redis: options.redis,
+    fetchImpl
+  });
+}
+
 export function createNotionMirrorHandler(options: {
   tokenSha256: string;
   notionToken: string;
@@ -90,15 +118,10 @@ export function createNotionMirrorHandler(options: {
     if (!parsed.ok) return json({error: parsed.error}, 400);
 
     try {
-      const notionDataSourceId = configuredDataSourceId ?? await resolveNotionDataSourceId({
-        notionToken,
-        redis: options.redis,
-        fetchImpl
-      });
-      const result = await processMirror({
+      const result = await mirrorNotionInput({
         input: parsed.value,
         notionToken,
-        notionDataSourceId,
+        notionDataSourceId: configuredDataSourceId,
         redis: options.redis,
         fetchImpl
       });
