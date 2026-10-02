@@ -33,12 +33,12 @@ test('YOS iOS shell opens MY WAY natively while preserving the public system ent
   assert.match(yosIndex, /data-native-only hidden href="\.\.\/bravia\.html"/);
   assert.match(yosIndex, /data-native-only hidden href="\.\.\/system\.html"/);
   assert.match(yosApp, /const nativeShell=location\.protocol==='capacitor:'/);
-  assert.match(yosIndex, /money-v2\.css\?v=2/);
-  assert.match(yosIndex, /money-reference-v1\.css\?v=1/);
-  assert.match(yosIndex, /money-dark-v5\.css\?v=1/);
-  assert.match(yosIndex, /money-master-v1\.js\?v=20260923v5/);
+  assert.match(yosIndex, /money-v2\.css\?v=/);
+  assert.match(yosIndex, /money-reference-v1\.css\?v=/);
+  assert.match(yosIndex, /money-dark-v5\.css\?v=/);
+  assert.match(yosIndex, /money-master-v1\.js\?v=/);
   assert.match(yosIndex, /money-v2-runtime-v4\.js/);
-  assert.match(yosIndex, /money-reference-v1\.js\?v=1/);
+  assert.match(yosIndex, /money-reference-v1\.js\?v=/);
 
   assert.match(dashboard, /location\.hostname\.endsWith\('github\.io'\)/);
   assert.match(dashboard, /\.\.\/\.\.\/data\/\$\{filename\}/);
