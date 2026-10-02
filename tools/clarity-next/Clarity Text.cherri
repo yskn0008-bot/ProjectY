@@ -10,3 +10,4 @@ if !textInput {
 }
 
 const payload = text("__YOS_CLARITY_TEXT_V1__\n{textInput}")
+run("Clarity Next", payload)
