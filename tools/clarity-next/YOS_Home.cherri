@@ -1,0 +1,26 @@
+#define name YOS_Home
+#define color purple
+#define inputs text
+
+#include 'actions/text'
+#include 'actions/shortcuts'
+
+// Unified Home Router child for Clarity Next.
+// The user never selects a hub. This child chooses the adapter by canonical device identity.
+// floor_lamp uses the verified Tapo AppIntent child; the hub/vendor choice remains hidden from the user.
+
+@incoming = "{ShortcutInput}"
+
+if @incoming beginsWith "floor_lamp|" {
+    const floorPayload = text("{@incoming}")
+    run("YOS_Floor_Lamp", floorPayload)
+    stop()
+}
+
+// TV / AC / ceiling light reuse the reviewed local MY REMOTE bridge.
+// The JavaScript placeholder is replaced at build time.
+rawAction("dk.simonbs.Scriptable.RunScriptInlineIntent", {
+    "ShowWhenRun": false,
+    "runInApp": false,
+    "script": "__YOS_HOME_INLINE__"
+})
