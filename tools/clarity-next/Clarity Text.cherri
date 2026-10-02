@@ -8,3 +8,5 @@ const textInput = prompt("Clarityに入力", "Text", "")
 if !textInput {
     stop()
 }
+
+const payload = text("__YOS_CLARITY_TEXT_V1__\n{textInput}")
