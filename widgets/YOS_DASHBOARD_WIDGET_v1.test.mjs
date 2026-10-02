@@ -24,6 +24,7 @@ test("reads Calendar and Money locally without creating another SSOT", () => {
   assert.match(source, /CalendarEvent\.today\(\)/);
   assert.match(source, /YOS\/Money\/money\.json/);
   assert.match(source, /data\?\.balance\?\.amount/);
+  assert.match(source, /value === null \|\| value === undefined/);
   assert.doesNotMatch(source, /writeString\([^\n]*money/i);
 });
 
