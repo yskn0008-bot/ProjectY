@@ -1,386 +1,42 @@
-/* YOS DESK unified cross-project inbox v1 */
+/* YOS Chat — chat-only iPhone surface */
+:root{
+  --bg:#000;
+  --panel:#1c1c1e;
+  --panel2:#2c2c2e;
+  --line:rgba(255,255,255,.10);
+  --text:#f5f5f7;
+  --muted:#8e8e93;
+  --gold:#edbf62;
+}
 
-#chatsPage .brand strong{font-size:25px;letter-spacing:-.02em}
-
-.currentChatBanner{
-  width:calc(100% - 28px);
-  margin:9px 14px 2px;
-  padding:11px 13px;
-  display:grid;
-  grid-template-columns:auto minmax(0,1fr);
-  grid-template-areas:"kicker title" "kicker meta";
-  gap:1px 9px;
-  align-items:center;
-  text-align:left;
-  border:1px solid rgba(237,191,98,.28);
-  border-radius:14px;
-  background:rgba(237,191,98,.08);
+html,body{
+  width:100%;
+  height:100%;
+  margin:0;
+  overflow:hidden;
+  background:#000 !important;
   color:var(--text);
 }
-.currentChatBanner[hidden]{display:none}
-.currentChatKicker{
-  grid-area:kicker;
-  align-self:stretch;
-  display:grid;
-  place-items:center;
-  padding:0 9px;
-  border-radius:10px;
-  background:var(--gold);
-  color:#21180a;
-  font-size:12px;
-  font-weight:950;
+body.chat-only{
+  background:#000 !important;
 }
-.currentChatBanner strong{
-  grid-area:title;
-  min-width:0;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  white-space:nowrap;
-  font-size:16px;
-}
-.currentChatBanner small{
-  grid-area:meta;
-  min-width:0;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  white-space:nowrap;
-  color:var(--muted);
-  font-size:13px;
-}
-
-#chatsPage .chat.currentChat{
-  background:rgba(237,191,98,.055);
-}
-#chatsPage .chat.currentChat:before{
-  content:"";
-  position:absolute;
-  left:0;
-  top:12px;
-  bottom:12px;
-  width:3px;
-  border-radius:0 3px 3px 0;
-  background:var(--gold);
-}
-#chatsPage .chat{position:relative}
-
-#chatsPage .nameLine{
-  display:flex;
-  align-items:center;
-  gap:6px;
-  min-width:0;
-}
-#chatsPage .chatName{
-  min-width:0;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  white-space:nowrap;
-}
-#chatsPage .tag,
-#chatsPage .sourceBadge,
-#chatsPage .currentBadge{
-  flex:0 0 auto;
-  border-radius:999px;
-  padding:2px 6px;
-  font-size:11px;
-  line-height:1.25;
-  font-weight:900;
-}
-#chatsPage .tag{
-  max-width:92px;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  white-space:nowrap;
-}
-#chatsPage .sourceBadge{
-  border:1px solid rgba(255,255,255,.11);
-  color:var(--muted);
-  background:rgba(255,255,255,.04);
-}
-#chatsPage .sourceBadge.gpt{
-  color:#d9f7ee;
-  background:rgba(73,214,160,.10);
-  border-color:rgba(73,214,160,.22);
-}
-#chatsPage .sourceBadge.yos{
-  color:#f6df9c;
-  background:rgba(237,191,98,.09);
-  border-color:rgba(237,191,98,.22);
-}
-#chatsPage .currentBadge{
-  color:#20180a;
-  background:var(--gold);
-}
-#chatsPage .readState{
-  min-width:34px;
-  margin-top:3px;
-  text-align:right;
-  color:var(--muted);
-  font-size:11px;
-  font-weight:800;
-}
-#chatsPage .readState.isUnread{color:var(--gold)}
-
-
-.sourceSummary{
-  margin:9px 0 0;
-  min-height:42px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:10px;
-  padding:8px 10px;
-  border:1px solid var(--line);
-  border-radius:13px;
-  background:rgba(255,255,255,.035);
-}
-.sourceSummaryText{
-  min-width:0;
-  display:flex;
-  align-items:center;
-  gap:9px;
-}
-.sourceSummaryText strong{
-  font-size:13px;
-  color:#d9f7ee;
-}
-.sourceSummaryText span{
-  font-size:12px;
-  color:var(--muted);
-}
-.sourceSummary button{
-  flex:0 0 auto;
-  min-height:32px;
-  padding:0 10px;
-  border:0;
-  border-radius:10px;
-  background:var(--gold);
-  color:#21180a;
-  font-size:12px;
-  font-weight:950;
-}
-
-
-/* YOS DESK CHATS visual polish v3
-   Calm iPhone-native inbox: fewer badges, no horizontal browsing, warmer hierarchy. */
-#chatsPage{
-  --chat-surface:rgba(255,255,255,.035);
-  --chat-surface-active:rgba(237,191,98,.075);
-  --chat-line:rgba(255,255,255,.075);
-}
-#chatsPage .topbar{
-  min-height:48px;
-  margin-bottom:10px;
-}
-#chatsPage .brand small{display:none}
-#chatsPage .brand strong{
-  font-size:29px;
-  line-height:1.08;
-  letter-spacing:-.035em;
-}
-#chatsPage .brand strong:after{display:none}
-#chatsPage .miniBtn{
-  min-height:40px;
-  padding:0 2px 0 12px;
-  color:var(--gold);
-  font-size:15px;
-  font-weight:800;
-}
-#chatsPage .search{
-  height:46px;
-  border:1px solid rgba(255,255,255,.055);
-  border-radius:15px;
-  background:rgba(255,255,255,.045);
-  padding:0 13px;
-}
-#chatsPage .search input{font-size:16px}
-#chatsPage .tabs{
-  margin-top:10px;
-  border-bottom:1px solid var(--chat-line);
-}
-#chatsPage .tab{
-  height:40px;
-  font-size:14px;
-  color:#80939d;
-}
-#chatsPage .tab.active{color:var(--text)}
-#chatsPage .tab.active:after{
-  left:31%;
-  right:31%;
-  height:2px;
-  background:var(--gold);
-}
-#chatsPage .projects{
-  display:none !important;
-  overflow:visible;
-  flex-wrap:wrap;
-}
-.sourceSummary{
-  min-height:36px;
-  margin:8px 0 0;
-  padding:3px 1px 2px;
-  border:0;
-  border-radius:0;
-  background:transparent;
-}
-.sourceSummaryText{gap:10px}
-.sourceSummaryText strong{
-  font-size:12px;
-  color:#e8eee9;
-  font-weight:850;
-}
-.sourceSummaryText span{
-  font-size:12px;
-  color:#7f929d;
-}
-.sourceSummary button{
-  min-height:34px;
-  padding:0 10px;
-  border:1px solid rgba(237,191,98,.35);
-  border-radius:11px;
-  background:rgba(237,191,98,.07);
-  color:var(--gold);
-  font-size:12px;
-  font-weight:900;
-}
-.currentChatBanner{
+body.chat-only .app{
   width:100%;
-  margin:7px 0 8px;
-  padding:10px 12px;
-  grid-template-columns:auto minmax(0,1fr);
-  gap:1px 10px;
-  border:1px solid rgba(237,191,98,.17);
-  border-radius:15px;
-  background:linear-gradient(135deg,rgba(237,191,98,.065),rgba(255,255,255,.02));
-  box-shadow:none;
-}
-.currentChatKicker{
-  align-self:center;
-  padding:5px 7px;
-  border-radius:9px;
-  background:rgba(237,191,98,.14);
-  color:var(--gold);
-  font-size:10px;
-  letter-spacing:.03em;
-}
-.currentChatBanner strong{
-  font-size:15px;
-  line-height:1.25;
-}
-.currentChatBanner small{
-  font-size:12px;
-  color:#8498a3;
-}
-#chatsPage .section{margin-top:3px}
-#chatsPage .chatList{
-  gap:7px;
-  margin:0;
-  border-top:0;
-}
-#chatsPage .chat{
-  min-height:74px;
-  padding:10px 11px;
-  grid-template-columns:46px minmax(0,1fr) 42px;
-  gap:11px;
-  border:1px solid var(--chat-line);
-  border-radius:15px;
-  background:var(--chat-surface);
-  box-shadow:none;
-}
-#chatsPage .chat:active{
-  transform:scale(.992);
-  background:rgba(255,255,255,.055);
-}
-#chatsPage .chat.currentChat{
-  border-color:rgba(237,191,98,.23);
-  background:var(--chat-surface-active);
-}
-#chatsPage .chat.currentChat:before{display:none}
-#chatsPage .avatar{
-  width:46px;
-  height:46px;
-  border-radius:14px;
-  font-size:16px;
-  color:#07151f;
-  box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);
-}
-#chatsPage .chatName{
-  font-size:17px;
-  line-height:1.25;
-  letter-spacing:-.01em;
-}
-#chatsPage .sourceBadge{
-  padding:2px 5px;
-  border:0;
-  background:rgba(255,255,255,.045);
-  color:#8fa2ac;
-  font-size:10px;
-  font-weight:800;
-}
-#chatsPage .sourceBadge.gpt{
-  color:#b9ded2;
-  background:rgba(73,214,160,.075);
-}
-#chatsPage .sourceBadge.yos{
-  color:#dbc789;
-  background:rgba(237,191,98,.07);
-}
-#chatsPage .currentBadge{display:none}
-#chatsPage .preview{
-  margin-top:5px;
-  color:#899da7;
-  font-size:14px;
-  line-height:1.35;
-}
-#chatsPage .time{
-  font-size:11px;
-  color:#72858f;
-}
-#chatsPage .readState{
-  min-width:0;
-  font-size:10px;
-  color:#72858f;
-}
-#chatsPage .readState:not(.isUnread){
-  visibility:hidden;
-}
-#chatsPage .readState.isUnread{color:var(--gold)}
-#chatsPage .badge{
-  min-width:22px;
-  height:22px;
-  font-size:11px;
-}
-#chatsPage .empty{
-  min-height:230px;
-  padding-top:54px;
-}
-#chatsPage .empty strong{font-size:18px}
-#chatsPage .empty span{font-size:14px}
-#chatsPage .empty button{
-  border-radius:12px;
-  background:rgba(237,191,98,.10);
-  color:var(--gold);
-  border:1px solid rgba(237,191,98,.28);
-}
-@media(max-height:730px){
-  #chatsPage .chat{min-height:70px;padding-top:8px;padding-bottom:8px}
-  #chatsPage .avatar{width:44px;height:44px}
-}
-
-
-/* YOS DESK CHATS v4 — align the conversation list with the user's ChatGPT iPhone view. */
-body:has(#chatsPage.active){
+  max-width:430px;
+  height:100svh;
+  margin:0 auto;
+  overflow-y:auto;
+  padding:calc(env(safe-area-inset-top) + 10px) 22px calc(env(safe-area-inset-bottom) + 20px);
   background:#000;
-}
-body:has(#chatsPage.active) .app{
-  background:#000;
-  padding-left:22px;
-  padding-right:22px;
+  scroll-snap-type:none;
 }
 #chatsPage{
+  display:block;
+  min-height:100%;
+  padding:0;
   background:#000;
-  color:#f5f5f7;
 }
-#chatsPage .topbar{
+.chatOnlyTopbar{
   position:relative;
   display:flex;
   align-items:center;
@@ -392,26 +48,47 @@ body:has(#chatsPage.active) .app{
   min-width:0;
   text-align:center;
 }
-#chatsPage .brand small{display:none}
 #chatsPage .brand strong{
   font-size:22px;
   line-height:1.15;
   font-weight:730;
   letter-spacing:-.02em;
 }
+#chatsPage .brand strong:after{display:none}
 #chatsPage .topActions{
   position:absolute;
   right:0;
   top:50%;
   transform:translateY(-50%);
+  display:flex;
+  align-items:center;
+  gap:6px;
 }
+.chatIconBtn,
 #chatsPage .miniBtn{
-  min-height:40px;
-  padding:0 4px 0 10px;
+  min-width:40px;
+  height:40px;
+  border:0;
+  background:transparent;
   color:#d8d8dd;
+}
+.chatIconBtn{
+  display:grid;
+  place-items:center;
+  padding:0;
+  border-radius:50%;
+  font-size:31px;
+  font-weight:350;
+  line-height:1;
+}
+.chatIconBtn:active,
+#chatsPage .miniBtn:active{background:#1c1c1e}
+#chatsPage .miniBtn{
+  padding:0 4px 0 8px;
   font-size:14px;
   font-weight:650;
 }
+
 #chatsPage .search{
   height:42px;
   border:0;
@@ -425,6 +102,7 @@ body:has(#chatsPage.active) .app{
   font-size:16px;
 }
 #chatsPage .search input::placeholder{color:#77777c}
+
 #chatsPage .tabs{
   display:flex;
   justify-content:flex-start;
@@ -452,61 +130,39 @@ body:has(#chatsPage.active) .app{
 }
 #chatsPage .tab.active:after{display:none}
 #chatsPage .projects{display:none !important}
-.sourceSummary{
-  min-height:34px;
-  margin:12px 0 6px;
-  padding:0 2px;
-  border:0;
-  background:transparent;
+
+.chatOnlySection{
+  margin-top:10px !important;
+  padding:0 !important;
 }
-.sourceSummaryText{gap:10px}
-.sourceSummaryText strong,
-.sourceSummaryText span{
-  color:#8e8e93;
-  font-size:12px;
-  font-weight:600;
-}
-.sourceSummary button{
-  min-height:32px;
-  padding:0 8px;
-  border:0;
-  background:transparent;
-  color:#a1a1a6;
-  font-size:12px;
-  font-weight:650;
-}
-.currentChatBanner{display:none !important}
-#chatsPage .section{margin-top:3px}
 #chatsPage .chatList{
+  display:flex;
+  flex-direction:column;
   gap:2px;
   margin:0;
   border:0;
 }
 #chatsPage .chat{
-  min-height:68px;
-  padding:9px 6px;
+  position:relative;
   display:grid;
   grid-template-columns:minmax(0,1fr);
   gap:0;
+  min-height:68px;
+  padding:9px 6px;
   border:0;
   border-radius:12px;
   background:transparent;
   box-shadow:none;
 }
-#chatsPage .chat:active{
-  transform:none;
-  background:#171719;
-}
-#chatsPage .chat.currentChat{
-  border:0;
-  background:#111113;
-}
+#chatsPage .chat:active{background:#171719}
+#chatsPage .chat.currentChat{background:#111113}
 #chatsPage .chat.currentChat:before{display:none}
+#chatsPage .chat.pinned:before{display:none}
 #chatsPage .avatar,
 #chatsPage .chatMeta,
+#chatsPage .tag,
 #chatsPage .sourceBadge,
-#chatsPage .currentBadge,
-#chatsPage .tag{
+#chatsPage .currentBadge{
   display:none !important;
 }
 #chatsPage .chatText{
@@ -520,6 +176,9 @@ body:has(#chatsPage.active) .app{
 #chatsPage .chatName{
   display:block;
   width:100%;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
   color:#f5f5f7;
   font-size:17px;
   line-height:1.35;
@@ -530,12 +189,12 @@ body:has(#chatsPage.active) .app{
   display:block;
   width:100%;
   margin-top:3px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
   color:#77777d;
   font-size:15px;
   line-height:1.35;
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
 }
 .selecting #chatsPage .chat{
   grid-template-columns:28px minmax(0,1fr);
@@ -543,13 +202,21 @@ body:has(#chatsPage.active) .app{
   align-items:center;
 }
 .selecting #chatsPage .check{
+  display:grid;
   width:26px;
   height:26px;
   border-radius:50%;
 }
+#chatsPage .check{display:none}
+
 #chatsPage .empty{
+  display:none;
   min-height:250px;
-  padding:56px 10px 24px;
+  padding:58px 10px 24px;
+  flex-direction:column;
+  align-items:center;
+  gap:10px;
+  text-align:center;
   color:#8e8e93;
 }
 #chatsPage .empty strong{
@@ -557,23 +224,69 @@ body:has(#chatsPage.active) .app{
   font-size:18px;
   font-weight:650;
 }
-#chatsPage .empty span{font-size:14px}
+#chatsPage .empty span{
+  max-width:290px;
+  font-size:14px;
+  line-height:1.5;
+}
 #chatsPage .empty button{
+  min-height:44px;
+  margin-top:8px;
+  padding:0 16px;
   border:0;
+  border-radius:13px;
+  background:#2c2c2e;
+  color:#fff;
+  font-size:15px;
+  font-weight:700;
+}
+
+.bulk{
+  display:none;
+  position:fixed;
+  left:50%;
+  bottom:calc(env(safe-area-inset-bottom) + 10px);
+  transform:translateX(-50%);
+  width:min(calc(100% - 32px),398px);
+  height:62px;
+  padding:6px;
+  grid-template-columns:repeat(3,1fr);
+  gap:6px;
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:22px;
+  background:rgba(28,28,30,.97);
+  z-index:35;
+}
+.bulk button{
+  border:0;
+  border-radius:16px;
+  background:#2c2c2e;
+  color:#fff;
+  font-size:14px;
+  font-weight:650;
+}
+.bulk .danger{background:#3a2222;color:#ffb5ad}
+
+.sheetBackdrop{background:rgba(0,0,0,.62)}
+.sheet{
+  border-color:rgba(255,255,255,.10);
+  background:#1c1c1e;
+  color:#f5f5f7;
+}
+.sheet .handle{background:#5a5a5f}
+.sheet p{color:#9a9aa0}
+.sheet input,.sheet textarea{
+  border-color:rgba(255,255,255,.10);
+  background:#111113;
+  color:#fff;
+}
+.sheet button{
   background:#2c2c2e;
   color:#fff;
 }
-body:has(#chatsPage.active) .bottom{
-  border-color:rgba(255,255,255,.10);
-  background:rgba(28,28,30,.96);
-  box-shadow:0 -8px 28px rgba(0,0,0,.6);
-}
-body:has(#chatsPage.active) .nav{
-  color:#8e8e93;
-}
-body:has(#chatsPage.active) .nav.active{
-  background:#3a3a3c;
-  color:#fff;
+.sheet .primary{
+  background:#f2f2f7;
+  color:#111113;
 }
 #sheetBody #createTemporaryChat small{
   margin-left:6px;
@@ -581,7 +294,15 @@ body:has(#chatsPage.active) .nav.active{
   font-size:11px;
   font-weight:600;
 }
+.toast{
+  bottom:calc(env(safe-area-inset-bottom) + 28px);
+  background:#f2f2f7;
+  color:#111113;
+}
+
+@media(max-width:380px){
+  body.chat-only .app{padding-left:18px;padding-right:18px}
+}
 @media(max-height:730px){
-  body:has(#chatsPage.active) .app{padding-left:18px;padding-right:18px}
   #chatsPage .chat{min-height:64px;padding-top:8px;padding-bottom:8px}
 }

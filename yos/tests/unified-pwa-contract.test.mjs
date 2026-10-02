@@ -69,26 +69,28 @@ test('manifest icons are install-ready across YOS entry pages', async () => {
 });
 
 
-test('YOS DESK chats follow the supplied ChatGPT iPhone history rhythm', async () => {
-  const [desk,compact,inbox] = await Promise.all([
+test('YOS Chat is a chat-only surface with the new-chat icon in the header', async () => {
+  const [page,app,css] = await Promise.all([
     read('yos/desk/index.html'),
-    read('yos/desk/compact.css'),
+    read('yos/desk/app.js'),
     read('yos/desk/unified-inbox.css')
   ]);
-  assert.match(desk, /<strong>チャット<\/strong>/);
-  assert.match(desk, /data-mode="all">チャット/);
-  assert.match(desk, /placeholder="チャットを検索"/);
-  assert.match(compact, /#chatsPage \.preview\{[\s\S]*white-space:nowrap;/);
-  assert.match(inbox, /YOS DESK CHATS v4/);
-  assert.match(inbox, /background:#000/);
-  assert.match(inbox, /#chatsPage \.avatar,[\s\S]*display:none !important;/);
-  assert.match(inbox, /#chatsPage \.chat\{[\s\S]*grid-template-columns:minmax\(0,1fr\)/);
-  assert.match(inbox, /#chatsPage \.tab\.active\{[\s\S]*background:#363638/);
-  assert.match(inbox, /\.currentChatBanner\{\s*display:none !important;?\s*\}/);
+  assert.match(page, /<body class="chat-only">/);
+  assert.doesNotMatch(page, /id="deskPage"/);
+  assert.doesNotMatch(page, /<nav class="bottom"/);
+  assert.match(page, /id="newBtn"[^>]+aria-label="新規チャット"/);
+  assert.match(page, /<strong>チャット<\/strong>/);
+  assert.match(page, /placeholder="チャットを検索"/);
+  assert.match(css, /YOS Chat — chat-only iPhone surface/);
+  assert.match(css, /body\.chat-only \.app[\s\S]*height:100svh/);
+  assert.match(css, /\.chatIconBtn/);
+  assert.match(css, /#chatsPage \.avatar,[\s\S]*display:none !important/);
+  assert.match(app, /state\.page='chats'/);
+  assert.doesNotMatch(app, /renderDev\(|deskClock|deskInput|boardBtn|metricsBtn/);
 });
 
 
-test('YOS DESK NEW supports persistent and temporary live chats', async () => {
+test('YOS Chat NEW supports persistent and temporary live chats', async () => {
   const [app,live] = await Promise.all([
     read('yos/desk/app.js'),
     read('yos/desk/live-chat.js')
@@ -104,47 +106,44 @@ test('YOS DESK NEW supports persistent and temporary live chats', async () => {
   assert.match(live,/chat\.autoTitle/);
 });
 
-test('YOS DESK exposes Clarity SSOT freshness instead of a generic auto-sync label', async () => {
-  const [desk,assets] = await Promise.all([
+
+test('YOS Chat automatically accepts canonical GPT original handoffs', async () => {
+  const [app,importer] = await Promise.all([
     read('yos/desk/app.js'),
-    read('data/yos-assets.json')
+    read('yos/desk/import-gpt.html')
   ]);
-  assert.match(desk, /asset\.updated_at/);
-  assert.match(desk, /SSOT<br>'\+esc\(assetStamp\)\+'取得/);
-  const data=JSON.parse(assets);
-  const clarity=data.assets.find(x=>x.id==='clarity');
-  assert.ok(clarity.progress>=65&&clarity.progress<=100);
-  assert.equal(clarity.progress_basis.device,false);
-  assert.match(clarity.updated_at,/^\d{4}-\d{2}-\d{2}T/);
-  assert.ok(typeof clarity.current==='string'&&clarity.current.length>20);
+  assert.match(app,/function canonicalChatUrl\(value\)/);
+  assert.match(app,/function autoImportOriginals\(\)/);
+  assert.match(app,/document\.referrer/);
+  assert.match(app,/\['url','chat','gpt','source','text'\]/);
+  assert.match(app,/globalThis\.yosDeskReceiveOriginal/);
+  assert.match(app,/autoReadGrantedClipboard/);
+  assert.match(importer,/function canonical\(value\)/);
+  assert.match(importer,/location\.search/);
+  assert.match(importer,/location\.hash/);
+  assert.match(importer,/pick\('text'\)/);
+  assert.match(importer,/location\.replace\('\.\/'\)/);
 });
 
 
-test('YOS DESK unified inbox keeps one cross-project list with active/read/source badges', async () => {
-  const [desk,js,css,sw,importer] = await Promise.all([
+test('YOS Chat keeps one cross-project chat history without DESK chrome', async () => {
+  const [page,js,css,sw] = await Promise.all([
     read('yos/desk/index.html'),
     read('yos/desk/unified-inbox.js'),
     read('yos/desk/unified-inbox.css'),
-    read('service-worker.js'),
-    read('yos/desk/import-gpt.html')
+    read('service-worker.js')
   ]);
-  assert.match(desk,/unified-inbox\.css/);
-  assert.match(desk,/unified-inbox\.js/);
-  assert.doesNotMatch(desk,/\\\\n<link|<\/script>\\\\n<script/);
+  assert.match(page,/unified-inbox\.css/);
+  assert.match(page,/unified-inbox\.js/);
+  assert.doesNotMatch(page,/id="deskPage"|>DESK<|data-page="desk"/);
   assert.match(js,/activeChatId/);
-  assert.match(js,/sourceSummary/);
   assert.match(js,/GPT原文/);
-  assert.match(js,/会話中/);
-  assert.match(js,/GPT原文/);
-  assert.match(js,/未読/);
-  assert.match(js,/既読/);
-  assert.match(js,/プロジェクト横断/);
-  assert.match(css,/\.currentChatBanner/);
-  assert.match(css,/\.currentBadge/);
-  assert.match(css,/\.readState/);
+  assert.match(js,/decorateRows/);
+  assert.doesNotMatch(js,/sourceSummary|currentChatBanner/);
+  assert.match(css,/background:#000/);
+  assert.match(css,/#chatsPage \.chat[\s\S]*grid-template-columns:minmax\(0,1fr\)/);
   assert.match(sw,/unified-inbox\.css/);
   assert.match(sw,/unified-inbox\.js/);
   assert.match(sw,/import-gpt\.html/);
-  assert.match(importer,/yosDeskIntegratedStateV1/);
-  assert.match(importer,/location\.replace/);
 });
+

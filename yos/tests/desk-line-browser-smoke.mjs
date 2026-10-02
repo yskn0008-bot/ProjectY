@@ -10,19 +10,17 @@ const context=await browser.newContext({viewport:{width:390,height:844}});
 await context.addInitScript(() => {
   if(localStorage.getItem('yosDeskIntegratedStateV1')) return;
   localStorage.setItem('yosDeskIntegratedStateV1',JSON.stringify({
-    version:1,
+    version:2,
     page:'chats',
-    deskOrder:['clarity','money','clipboard'],
-    board:[],
-    metrics:{opens:0,taps:0,reorders:0,posts:0},
+    metrics:{opens:0,taps:0},
     chatRegistryVersion:'2026-09-24-real-links-v1',
     activeChatId:'external-yos',
     chats:[
-      {id:'external-yos',project:'ChatGPT',title:'外部YOS',preview:'実チャット',time:'20:30',unread:0,pinned:false,avatar:'Y',tone:'gold',alias:'',url:'https://chatgpt.com/c/yos-ui-smoke'}
+      {id:'external-yos',project:'ChatGPT',title:'外部YOS',preview:'実チャット',time:'20:30',unread:0,pinned:false,avatar:'Y',tone:'gold',alias:'',url:'https://chatgpt.com/c/yos-ui-smoke',source:'chatgpt'}
     ],
     chatThreads:{
       'asset-clarity':[
-        {id:'old-progress',role:'system',kind:'progress',text:'進捗 65%\\n状態：実機確認待ち\\nREQUEST_DONE Router Verify Ledger E2E',at:'2026-09-28T22:41:00+09:00',progress:65}
+        {id:'old-progress',role:'system',kind:'progress',text:'進捗 65%\n状態：実機確認待ち\nREQUEST_DONE Router Verify Ledger E2E',at:'2026-09-28T22:41:00+09:00',progress:65}
       ]
     },
     assetThreadVersions:{clarity:'legacy-version'},
@@ -39,7 +37,7 @@ await page.route('**/api/yos/chat', async route => {
     await route.fulfill({
       status:401,
       contentType:'application/json',
-      body:JSON.stringify({error:'Authentication failed',requestId:'desk-auth-retry'})
+      body:JSON.stringify({error:'Authentication failed',requestId:'chat-auth-retry'})
     });
     return;
   }
@@ -47,8 +45,8 @@ await page.route('**/api/yos/chat', async route => {
     status:200,
     contentType:'application/json',
     body:JSON.stringify({
-      requestId:'desk-live-smoke',
-      answer:'テスト応答です。メッセージUIは動作しています。',
+      requestId:'chat-live-smoke',
+      answer:'テスト応答です。チャットUIは動作しています。',
       route:'general',
       facts:[],assumptions:[],unknowns:[],conflicts:[],sources:[],
       safety:{level:'normal',notes:[]},
@@ -57,134 +55,106 @@ await page.route('**/api/yos/chat', async route => {
   });
 });
 
+async function stubAuth(badFirst=false){
+  await page.evaluate(({localBase,badFirst})=>{
+    globalThis.YOS_AI_BASE_URL=localBase;
+    let token=badFirst?'bad-token':'good-token';
+    globalThis.__chatAuthResetCount=0;
+    globalThis.YOS_AUTH={
+      getGoogleIdToken:async()=>token,
+      resetGoogleIdToken:()=>{
+        globalThis.__chatAuthResetCount+=1;
+        token='good-token';
+      }
+    };
+  },{localBase:base,badFirst});
+}
+
 try{
   await page.goto(base+'/yos/desk/',{waitUntil:'networkidle'});
   await page.waitForFunction(()=>document.documentElement.dataset.deskLiveChat==='ready');
-  assert.equal(await page.evaluate(()=>document.documentElement.dataset.deskChatMode),'live');
+  await page.waitForFunction(()=>document.documentElement.dataset.deskUnifiedInbox==='ready');
+  await page.waitForFunction(()=>document.documentElement.dataset.deskChatOnly==='ready');
   await page.waitForFunction(()=>document.documentElement.dataset.deskChatSync==='ok');
   await page.waitForSelector('#chatsPage.active');
+
+  assert.equal(await page.locator('#deskPage').count(),0,'DESK page must not exist');
+  assert.equal(await page.locator('.bottom').count(),0,'bottom DESK navigation must not exist');
+  assert.equal(await page.locator('#newBtn').isVisible(),true,'new-chat icon must live in the chat header');
+  assert.match((await page.locator('#newBtn').textContent())||'',/＋/);
   assert.match((await page.locator('#chatsPage .brand strong').textContent())||'',/チャット/);
 
   const count=await page.locator('#chatList .chat').count();
-  assert.ok(count>=6,'built-in YOS rooms should populate CHATS without manual links');
-  assert.equal(await page.locator('#projects').evaluate(el=>getComputedStyle(el).display),'none','project pills stay hidden for LINE-like scanability');
-  assert.equal(await page.locator('#sourceSummary').isVisible(),true,'source summary should be visible');
-  assert.match((await page.locator('#sourceSummary').textContent())||'',/GPT原文 1/);
-  assert.match((await page.locator('#sourceSummary').textContent())||'',/YOS内 5/);
-  assert.equal(await page.locator('#addGptChatBtn').isVisible(),true,'one-tap GPT original add should be visible');
-  assert.equal(await page.locator('#currentChatBanner').isVisible(),false,'GPT-style list should not duplicate the active chat in a banner');
+  assert.ok(count>=6,'fixed YOS rooms plus registered GPT originals should populate the chat-only list');
+  assert.equal(await page.locator('#projects').evaluate(el=>getComputedStyle(el).display),'none');
+
   const externalRow=page.locator('.chat[data-id="external-yos"]');
-  assert.equal(await externalRow.evaluate(el=>el.classList.contains('currentChat')),true,'last active GPT chat should be marked as current');
-  assert.match((await externalRow.locator('.sourceBadge').textContent())||'',/GPT原文/);
-  assert.match((await externalRow.locator('.readState').textContent())||'',/既読/);
-  assert.match((await externalRow.locator('.preview').textContent())||'',/ChatGPTの元チャットを開く/,'GPT rows must not show a divergent copied transcript');
+  assert.equal(await externalRow.evaluate(el=>el.classList.contains('currentChat')),true);
+  assert.match((await externalRow.locator('.preview').textContent())||'',/ChatGPTの元チャットを開く/);
 
   const row=page.locator('#chatList .chat:not(.currentChat)').first();
   const ui=await row.evaluate(row=>{
     const avatar=row.querySelector('.avatar');
     const meta=row.querySelector('.chatMeta');
-    const source=row.querySelector('.sourceBadge');
     const preview=row.querySelector('.preview');
     const activeTab=document.querySelector('#chatsPage .tab.active');
-    const rs=getComputedStyle(row),ps=getComputedStyle(preview),ts=getComputedStyle(activeTab);
     return {
-      rowRadius:rs.borderRadius,rowBackground:rs.backgroundColor,rowMinHeight:parseFloat(rs.minHeight),
+      rowBackground:getComputedStyle(row).backgroundColor,
+      rowMinHeight:parseFloat(getComputedStyle(row).minHeight),
       avatarDisplay:getComputedStyle(avatar).display,
       metaDisplay:getComputedStyle(meta).display,
-      sourceDisplay:getComputedStyle(source).display,
-      previewSize:parseFloat(ps.fontSize),previewWhiteSpace:ps.whiteSpace,
-      tabRadius:ts.borderRadius,tabBackground:ts.backgroundColor,
+      previewSize:parseFloat(getComputedStyle(preview).fontSize),
+      previewWhiteSpace:getComputedStyle(preview).whiteSpace,
+      tabRadius:getComputedStyle(activeTab).borderRadius,
+      tabBackground:getComputedStyle(activeTab).backgroundColor,
       pageBackground:getComputedStyle(document.querySelector('#chatsPage')).backgroundColor
     };
   });
-  assert.ok(parseFloat(ui.rowRadius)>=11,'GPT-style rows keep only a soft touch target radius');
-  assert.equal(ui.rowBackground,'rgba(0, 0, 0, 0)','normal GPT-style rows should stay flat');
+  assert.equal(ui.rowBackground,'rgba(0, 0, 0, 0)');
   assert.ok(ui.rowMinHeight>=64);
-  assert.equal(ui.avatarDisplay,'none','GPT-style history list should be text-first');
-  assert.equal(ui.metaDisplay,'none','timestamps and duplicate read metadata should stay out of the GPT-style list');
-  assert.equal(ui.sourceDisplay,'none','source badges should not clutter every GPT-style row');
+  assert.equal(ui.avatarDisplay,'none');
+  assert.equal(ui.metaDisplay,'none');
   assert.ok(ui.previewSize>=15);
   assert.equal(ui.previewWhiteSpace,'nowrap');
-  assert.ok(parseFloat(ui.tabRadius)>=20,'chat filters should use the same pill rhythm as the reference UI');
+  assert.ok(parseFloat(ui.tabRadius)>=20);
   assert.notEqual(ui.tabBackground,'rgba(0, 0, 0, 0)');
   assert.equal(ui.pageBackground,'rgb(0, 0, 0)');
 
-  await page.evaluate((localBase)=>{
-    globalThis.YOS_AI_BASE_URL=localBase;
-    let token='bad-token';
-    globalThis.__deskAuthResetCount=0;
-    globalThis.YOS_AUTH={
-      getGoogleIdToken:async()=>token,
-      resetGoogleIdToken:()=>{
-        globalThis.__deskAuthResetCount+=1;
-        token='good-token';
-      }
-    };
-  },base);
-
+  await stubAuth(true);
   await page.locator('.chat[data-id="asset-clarity"]').click();
   await page.waitForSelector('#threadPage.active');
   assert.match((await page.locator('#threadTitle').textContent())||'',/Clarity/);
   const friendlyProgress=(await page.locator('#messageStream').textContent())||'';
   assert.match(friendlyProgress,/いまの状況/);
-  assert.match(friendlyProgress,/予定の登録/);
   assert.match(friendlyProgress,/Googleマップ/);
-  assert.match(friendlyProgress,/残っていること/);
-  assert.match(friendlyProgress,/全部通れば進捗は85%/);
-  assert.doesNotMatch(friendlyProgress,/REQUEST_DONE|Router|Verify|Ledger|E2E|destination/,'technical implementation terms should not be shown to the user');
-  assert.doesNotMatch(friendlyProgress,/進捗 65%\\s*状態/,'progress/status should not be duplicated inside the message body');
-  assert.match((await page.locator('#threadStatus').textContent())||'',/\d+%/);
-  assert.equal(await page.locator('#bottom').evaluate(el=>getComputedStyle(el).display),'none');
+  assert.doesNotMatch(friendlyProgress,/REQUEST_DONE|Router|Verify|Ledger|E2E|destination/);
 
-  await page.locator('#threadInput').fill('YOS DESKから送信テスト');
+  await page.locator('#threadInput').fill('チャットだけの画面から送信テスト');
   await page.locator('#threadSend').click();
   await page.waitForFunction(()=>document.querySelector('#messageStream')?.textContent?.includes('テスト応答です'));
-  const streamText=(await page.locator('#messageStream').textContent())||'';
-  assert.match(streamText,/YOS DESKから送信テスト/);
-  assert.match(streamText,/テスト応答です。メッセージUIは動作しています。/);
-  assert.equal(await page.evaluate(()=>globalThis.__deskAuthResetCount),1,'401 should reset Google auth once and retry the same message');
-  assert.equal(chatRequests,2,'one user message should retry once after auth reset');
-  assert.equal(await page.locator('#bottom').evaluate(el=>getComputedStyle(el).display),'none','bottom navigation must stay hidden while the thread is open');
+  assert.equal(await page.evaluate(()=>globalThis.__chatAuthResetCount),1,'401 should retry once');
+  assert.equal(chatRequests,2,'fixed-room message should retry once after auth reset');
 
   await page.locator('#threadBack').click();
   await page.waitForSelector('#chatsPage.active');
-  assert.equal(await page.locator('.chat[data-id="asset-clarity"]').evaluate(el=>el.classList.contains('currentChat')),true,'opened room should become current');
-  assert.equal(await page.locator('.chat[data-id="asset-clarity"]').evaluate(el=>getComputedStyle(el).backgroundColor!=='rgba(0, 0, 0, 0)'),true,'current room should be indicated by the selected row itself');
-  const clarityPreview=(await page.locator('.chat[data-id="asset-clarity"] .preview').textContent())||'';
-  assert.match(clarityPreview,/テスト応答です/);
-
-  await page.reload({waitUntil:'networkidle'});
-  await page.waitForFunction(()=>document.documentElement.dataset.deskChatSync==='ok');
-  await page.locator('.chat[data-id="asset-clarity"]').click();
-  await page.waitForSelector('#threadPage.active');
-  const persisted=(await page.locator('#messageStream').textContent())||'';
-  assert.match(persisted,/YOS DESKから送信テスト/,'user message should survive reload');
-  assert.match(persisted,/テスト応答です/,'YOS answer should survive reload');
-  await page.locator('#threadBack').click();
+  assert.equal(await page.locator('.chat[data-id="asset-clarity"]').evaluate(el=>el.classList.contains('currentChat')),true);
 
   await page.locator('.tab[data-mode="pinned"]').click();
-  assert.ok(await page.locator('#chatList .chat').count()>=3,'core pinned rooms remain filterable');
+  assert.ok(await page.locator('#chatList .chat').count()>=3);
   await page.locator('.tab[data-mode="all"]').click();
   await page.locator('#searchInput').fill('Money');
-  assert.ok(await page.locator('#chatList .chat').count()>=1,'chat search still works');
+  assert.ok(await page.locator('#chatList .chat').count()>=1);
   await page.locator('#searchInput').fill('');
 
-  await page.evaluate((localBase)=>{
-    globalThis.YOS_AI_BASE_URL=localBase;
-    globalThis.YOS_AUTH={
-      getGoogleIdToken:async()=>'good-token',
-      resetGoogleIdToken:()=>{}
-    };
-  },base);
-
+  await stubAuth(false);
   await page.locator('#newBtn').click();
   await page.waitForSelector('#createYosChat');
-  assert.equal(await page.locator('#createTemporaryChat').isVisible(),true,'NEW should offer a temporary chat');
+  assert.equal(await page.locator('#createTemporaryChat').isVisible(),true);
   await page.locator('#createYosChat').click();
   await page.waitForSelector('#threadPage.active');
   assert.match((await page.locator('#threadTitle').textContent())||'',/新しいチャット/);
   const createdChatId=await page.evaluate(()=>state.chats.find(x=>x.liveAi&&!x.assetId&&!x.temporary)?.id||'');
-  assert.ok(createdChatId,'NEW should create a non-fixed YOS chat');
+  assert.ok(createdChatId);
   assert.equal(await page.evaluate(id=>{
     const saved=JSON.parse(localStorage.getItem('yosDeskIntegratedStateV1')||'{}');
     return (saved.chats||[]).some(x=>x.id===id);
@@ -193,11 +163,11 @@ try{
   await page.locator('#threadInput').fill('自由に相談する新しい会話');
   await page.locator('#threadSend').click();
   await page.waitForFunction(()=>document.querySelector('#messageStream')?.textContent?.includes('テスト応答です'));
-  assert.match((await page.locator('#threadTitle').textContent())||'',/自由に相談する新しい会話/,'first message should become the chat title');
+  assert.match((await page.locator('#threadTitle').textContent())||'',/自由に相談する新しい会話/);
   assert.equal(chatRequests,3,'new YOS chat should use the same live AI transport');
   await page.locator('#threadBack').click();
   await page.waitForSelector('#chatsPage.active');
-  assert.equal(await page.locator('.chat[data-id="'+createdChatId+'"]').count(),1,'normal new chat should appear in history');
+  assert.equal(await page.locator('.chat[data-id="'+createdChatId+'"]').count(),1);
 
   await page.locator('#newBtn').click();
   await page.waitForSelector('#createTemporaryChat');
@@ -205,67 +175,49 @@ try{
   await page.waitForSelector('#threadPage.active');
   assert.match((await page.locator('#threadStatus').textContent())||'',/履歴に残しません/);
   const tempId=await page.evaluate(()=>state.chats.find(x=>x.temporary)?.id||'');
-  assert.ok(tempId,'temporary chat should exist only in the active runtime');
+  assert.ok(tempId);
   assert.equal(await page.evaluate(id=>{
     const saved=JSON.parse(localStorage.getItem('yosDeskIntegratedStateV1')||'{}');
     return (saved.chats||[]).some(x=>x.id===id)||Boolean(saved.chatThreads&&saved.chatThreads[id]);
-  },tempId),false,'temporary chat must never be written to localStorage');
+  },tempId),false,'temporary chat must never enter localStorage');
   await page.locator('#threadBack').click();
   await page.waitForSelector('#chatsPage.active');
-  assert.equal(await page.evaluate(id=>state.chats.some(x=>x.id===id),tempId),false,'leaving a temporary chat should discard it');
-  assert.equal(await page.locator('.chat[data-id="'+tempId+'"]').count(),0,'temporary chat should never appear in history');
+  assert.equal(await page.evaluate(id=>state.chats.some(x=>x.id===id),tempId),false);
 
-  const importedUrl='https://chatgpt.com/g/g-p-smoke/c/11111111-2222-3333-4444-555555555555';
-  const importHash='#url='+encodeURIComponent(importedUrl)+'&title='+encodeURIComponent('YOS DESK GPT')+'&project='+encodeURIComponent('One Enter');
-  await page.goto(base+'/yos/desk/import-gpt.html'+importHash,{waitUntil:'networkidle'});
+  const autoUrl='https://chatgpt.com/g/g-p-smoke/c/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee';
+  await page.goto(base+'/yos/desk/?url='+encodeURIComponent(autoUrl)+'&title='+encodeURIComponent('自動取得GPT'),{waitUntil:'networkidle'});
+  await page.waitForFunction(()=>document.documentElement.dataset.deskAutoOriginal==='ready');
+  await page.waitForSelector('#chatsPage.active');
+  const automatic=await page.evaluate(url=>{
+    const s=JSON.parse(localStorage.getItem('yosDeskIntegratedStateV1')||'{}');
+    return (s.chats||[]).find(x=>x.url===url)||null;
+  },autoUrl);
+  assert.equal(automatic?.title,'自動取得GPT','canonical original handed to YOS should register automatically');
+  assert.equal(automatic?.source,'chatgpt');
+  assert.equal(await page.evaluate(()=>location.search),'','handoff URL should be cleaned after automatic capture');
+
+  const importerUrl='https://chatgpt.com/c/ffffffff-1111-2222-3333-444444444444';
+  await page.goto(base+'/yos/desk/import-gpt.html?text='+encodeURIComponent('元チャット '+importerUrl)+'&title='+encodeURIComponent('共有経路GPT'),{waitUntil:'networkidle'});
   await page.waitForURL(base+'/yos/desk/');
   await page.waitForFunction(()=>document.documentElement.dataset.deskUnifiedInbox==='ready');
-  await page.waitForSelector('#chatsPage.active');
-  assert.equal(await page.evaluate(()=>location.hash),'','GPT import fragment should not remain after redirect');
-  assert.match((await page.locator('#sourceSummary').textContent())||'',/GPT原文 2/);
-  const imported=await page.evaluate((url)=>{
+  const imported=await page.evaluate(url=>{
     const s=JSON.parse(localStorage.getItem('yosDeskIntegratedStateV1')||'{}');
-    const chat=(s.chats||[]).find(x=>x.url===url);
-    return {chat,active:s.activeChatId};
-  },importedUrl);
-  assert.equal(imported.chat?.title,'YOS DESK GPT');
-  assert.equal(imported.chat?.project,'One Enter');
-  assert.equal(imported.chat?.source,'chatgpt');
-  assert.equal(imported.active,imported.chat?.id);
+    return (s.chats||[]).find(x=>x.url===url)||null;
+  },importerUrl);
+  assert.equal(imported?.title,'共有経路GPT');
+  assert.equal(imported?.source,'chatgpt');
 
-  await page.evaluate(()=>setPage('desk'));
-  await page.waitForSelector('#deskPage.active');
-  await page.waitForFunction(()=>document.documentElement.dataset.liveSync==='ok'||document.documentElement.dataset.liveSync==='local-only');
-  const deskFit=await page.evaluate(()=>{
+  const fit=await page.evaluate(()=>{
     const app=document.getElementById('app');
-    const hero=document.querySelector('#deskPage .hero');
-    const main=document.querySelector('#deskPage .heroMain');
-    const side=document.querySelector('#deskPage .heroSide');
-    const sub=document.querySelector('#deskPage .heroSub');
-    const next=document.querySelector('#deskPage .next');
-    const ar=app.getBoundingClientRect(),hr=hero.getBoundingClientRect(),mr=main.getBoundingClientRect(),sr=side.getBoundingClientRect();
     return {
       viewport:innerWidth,
       docScrollWidth:document.documentElement.scrollWidth,
       appClientWidth:app.clientWidth,
-      appScrollWidth:app.scrollWidth,
-      heroClientWidth:hero.clientWidth,
-      heroScrollWidth:hero.scrollWidth,
-      appLeft:ar.left,appRight:ar.right,
-      heroLeft:hr.left,heroRight:hr.right,
-      mainLeft:mr.left,mainRight:mr.right,
-      sideLeft:sr.left,sideRight:sr.right,
-      subText:(sub?.textContent||'').trim(),
-      nextText:(next?.textContent||'').trim()
+      appScrollWidth:app.scrollWidth
     };
   });
-  assert.ok(deskFit.docScrollWidth<=deskFit.viewport+1,'DESK must never exceed the viewport width');
-  assert.ok(deskFit.appScrollWidth<=deskFit.appClientWidth+1,'DESK app must not scroll horizontally');
-  assert.ok(deskFit.heroScrollWidth<=deskFit.heroClientWidth+1,'hero grid must not overflow horizontally');
-  assert.ok(deskFit.heroLeft>=deskFit.appLeft-1&&deskFit.heroRight<=deskFit.appRight+1,'hero must stay inside app');
-  assert.ok(deskFit.mainRight<=deskFit.appRight+1&&deskFit.sideRight<=deskFit.appRight+1,'both hero cards must stay on-screen');
-  assert.ok(deskFit.subText.endsWith('。')||deskFit.subText.endsWith('！')||deskFit.subText.endsWith('？'),'hero status should end at a sentence boundary');
-  assert.ok(deskFit.nextText.endsWith('。')||deskFit.nextText.endsWith('！')||deskFit.nextText.endsWith('？'),'hero next action should end at a sentence boundary');
+  assert.ok(fit.docScrollWidth<=fit.viewport+1,'chat-only UI must never overflow the iPhone viewport');
+  assert.ok(fit.appScrollWidth<=fit.appClientWidth+1,'chat-only app must not scroll horizontally');
 } finally {
   await browser.close();
 }

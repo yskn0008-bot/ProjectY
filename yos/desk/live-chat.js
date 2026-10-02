@@ -257,8 +257,8 @@
   }
   function setThreadVisible(on){
     document.body.classList.toggle('thread-open',Boolean(on));
-    q('#bottom').style.display=on?'none':(selecting?'none':'grid');
-    q('#bulk').style.display=on?'none':(selecting?'grid':'none');
+    var bulk=q('#bulk');
+    if(bulk)bulk.style.display=on?'none':(selecting?'grid':'none');
   }
   var baseSetPage=setPage;
   setPage=function(name){
@@ -407,7 +407,7 @@
   }
   function locationForChat(chat){
     var asset=chat&&chat.assetId?assetsById[chat.assetId]:null;
-    var parts=['YOS DESK',chat?titleOf(chat):''];
+    var parts=['YOS Chat',chat?titleOf(chat):''];
     if(asset&&asset.current)parts.push(clean(asset.current,180));
     return clean(parts.filter(Boolean).join('｜'),300);
   }
