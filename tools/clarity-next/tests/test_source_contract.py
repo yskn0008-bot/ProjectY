@@ -132,7 +132,9 @@ class ClarityNextSourceContractTests(unittest.TestCase):
         self.assertIn("beginsWith", self.source)
         self.assertIn("input_mode=share", self.source)
         self.assertIn("NEXT_ANSWER以外の副作用を起こしません", self.source)
-        self.assertIn("shareモードではYOS_OpenApp、NEXT_DEVICE、NEXT_TIMER、NEXT_NAVIGATE、NEXT_NOTION、NEXT_MONEYを選びません", self.source)
+        self.assertIn("shareモードではYOS_OpenApp、NEXT_DEVICE、NEXT_TIMER、NEXT_CALENDAR、NEXT_REMINDER、NEXT_NAVIGATE、NEXT_NOTION、NEXT_MONEYを選びません", self.source)
+        self.assertIn('if @inputMode == "share" && @normalizedExecutor != "NEXT_ANSWER"', self.source)
+        self.assertIn("share_side_effect_forbidden", self.source)
 
     def test_base_home_alias_recovers_from_open_app_misroute(self):
         self.assertIn('@baseHomeAlias = false', self.source)
