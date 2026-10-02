@@ -4,6 +4,7 @@ import {UpstashRestClient} from '../storage/upstash-rest.js';
 import {createClarityIntakeHandler} from './handler.js';
 import {createNotionMirrorHandler, mirrorNotionInput} from './mirror-handler.js';
 import {moneyShadowToMirrorInput, type MoneyShadowSnapshot} from './money-mirror.js';
+import {createIosSnapshotHandler} from './ios-snapshot.js';
 
 export function createProductionClarityIntakeHandler(options: {environment: Environment}): (request: Request) => Promise<Response> {
   const storage = loadYosStorageConfig(options.environment);
@@ -66,4 +67,20 @@ export function createProductionMoneyNotionMirror(options: {environment: Environ
       redis
     });
   };
+}
+
+
+export function createProductionIosSnapshotHandler(options: {environment: Environment}): (request: Request) => Promise<Response> {
+  const storage = loadYosStorageConfig(options.environment);
+  const redis = new UpstashRestClient({
+    url: storage.upstashUrl,
+    token: storage.upstashToken
+  });
+
+  return createIosSnapshotHandler({
+    tokenSha256: requiredHash(options.environment, 'YOS_CLARITY_INTAKE_TOKEN_SHA256'),
+    notionToken: required(options.environment, 'YOS_NOTION_API_TOKEN'),
+    notionDataSourceId: options.environment.YOS_NOTION_TASKS_DATA_SOURCE_ID?.trim() || null,
+    redis
+  });
 }
