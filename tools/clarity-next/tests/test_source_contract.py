@@ -47,6 +47,10 @@ class ClarityNextSourceContractTests(unittest.TestCase):
 
     def test_voice_to_json_router(self):
         self.assertIn('listen("After Pause", "jp-JP")', self.source)
+        self.assertIn('#define inputs text', self.source)
+        self.assertIn('@inputMode = "voice"', self.source)
+        self.assertIn('input_mode: {@inputMode}', self.source)
+        self.assertIn('share_source: {@shareSource}', self.source)
         self.assertIn('askChatGPT(routerPrompt, false, "Dictionary")', self.source)
         self.assertIn('getValue(parsed, "actions")', self.source)
         self.assertIn('status != "planned"', self.source)
@@ -117,8 +121,22 @@ class ClarityNextSourceContractTests(unittest.TestCase):
         self.assertIn("同じ対象を指すことが意味上明確ならNEXT_NOTION", self.source)
         self.assertIn("generic open_appより優先", self.source)
 
+    def test_shared_intake_uses_one_core(self):
+        for marker in (
+            "__YOS_CLARITY_TEXT_V1__",
+            "__YOS_CLARITY_SHARE_TEXT_V1__",
+            "__YOS_CLARITY_SHARE_IMAGE_V1__",
+            "__YOS_CLARITY_SHARE_PDF_V1__",
+        ):
+            self.assertIn(marker, self.source)
+        self.assertIn("beginsWith", self.source)
+        self.assertIn("input_mode=share", self.source)
+        self.assertIn("NEXT_ANSWER以外の副作用を起こしません", self.source)
+        self.assertIn("shareモードではYOS_OpenApp、NEXT_DEVICE、NEXT_TIMER、NEXT_NAVIGATE、NEXT_NOTION、NEXT_MONEYを選びません", self.source)
+
     def test_base_home_alias_recovers_from_open_app_misroute(self):
         self.assertIn('@baseHomeAlias = false', self.source)
+        self.assertIn('if @inputMode != "share"', self.source)
         self.assertIn('userInput contains "ベースホーム"', self.source)
         self.assertIn('@normalizedExecutor = "NEXT_NOTION"', self.source)
         self.assertIn('@normalizedModule = "notion"', self.source)
