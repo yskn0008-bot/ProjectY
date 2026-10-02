@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-10-02T19:25:03+09:00",
+  "updated_at": "2026-10-02T19:25:34+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -21,6 +21,16 @@
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/553",
       "updated_at": "2026-10-02T01:11:02Z"
+    },
+    {
+      "id": "github-pr-561",
+      "title": "PR #561 fix(clarity): BASE HOME誤ルーティングを確定補正",
+      "type": "GitHub PR",
+      "status": "review",
+      "priority": 1,
+      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/561",
+      "updated_at": "2026-10-02T10:24:54Z"
     },
     {
       "id": "github-pr-403",
@@ -101,16 +111,6 @@
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/544",
       "updated_at": "2026-09-30T14:36:53Z"
-    },
-    {
-      "id": "github-pr-561",
-      "title": "PR #561 fix(clarity): BASE HOME誤ルーティングを確定補正",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/561",
-      "updated_at": "2026-10-02T10:24:45Z"
     },
     {
       "id": "github-issue-10",
@@ -234,7 +234,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #553をレビューして公開判断する",
+      "next_action": "PR #561をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -244,7 +244,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-10-02T19:25:03+09:00",
+      "last_update": "2026-10-02T19:25:34+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -325,7 +325,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-10-02T19:25:03+09:00",
+      "last_update": "2026-10-02T19:25:34+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -339,7 +339,7 @@
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #553をレビューして公開判断する",
+      "next_action": "PR #561をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -348,7 +348,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-10-02T19:25:03+09:00",
+      "last_update": "2026-10-02T19:25:34+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -430,5 +430,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "014b6dac7d401e7fc72be6429b2502d0155c4c17d301a1f4722cfcd76eae6593"
+  "github_snapshot_hash": "7990f988bab851456fee8fafb0cc0d9ed5fc47023f1f0715f4e4b3824c50b16a"
 }
