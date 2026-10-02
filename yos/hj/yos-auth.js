@@ -138,6 +138,10 @@
     return pendingCredential;
   }
 
+  globalThis.addEventListener?.('yos-ai-transport-change', () => {
+    publicConfigPromise = undefined;
+  });
+
   function resetGoogleIdToken() {
     credential = '';
     credentialExpiresAt = 0;
