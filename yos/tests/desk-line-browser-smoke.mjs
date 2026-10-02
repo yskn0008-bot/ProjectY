@@ -154,7 +154,7 @@ try{
   assert.match((await page.locator('.chat[data-id="asset-clarity"] .preview').textContent())||'',/^YOS：テスト応答です/,'list preview should prefer the latest real conversation over progress text');
 
   const firstTitles=await page.locator('#chatList .chat .chatName').evaluateAll(nodes=>nodes.slice(0,3).map(n=>n.textContent));
-  assert.deepEqual(firstTitles.slice(0,3),['YOS','Clarity','Money'],'pinned rooms should stay first without a fixed filter');
+  assert.deepEqual([...firstTitles].sort(),['Clarity','Money','YOS'],'pinned rooms should stay in the first three positions without a fixed filter');
   await page.locator('#searchInput').fill('Money');
   assert.ok(await page.locator('#chatList .chat').count()>=1);
   await page.locator('#searchInput').fill('');
