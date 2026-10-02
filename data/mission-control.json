@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-10-02T16:48:12+09:00",
+  "updated_at": "2026-10-02T17:01:23+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -103,16 +103,6 @@
       "updated_at": "2026-09-30T14:36:53Z"
     },
     {
-      "id": "github-pr-557",
-      "title": "PR #557 data: ClarityのNotion YOS HOME実機確認を反映",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/557",
-      "updated_at": "2026-10-02T07:47:37Z"
-    },
-    {
       "id": "github-issue-10",
       "title": "Issue #10 Mission Control v2：GitHubのIssue・PR・Commitを自動集約する",
       "type": "GitHub Issue",
@@ -130,7 +120,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-10-02T07:47:32Z"
+      "updated_at": "2026-10-02T08:01:07Z"
     },
     {
       "id": "github-issue-234",
@@ -175,6 +165,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-d9d110b40850",
+      "title": "data: sync Clarity Notion verification and repair stale asset contracts",
+      "completed_at": "2026-10-02T08:01:02Z",
+      "result": "GitHub mainへ反映（d9d110b）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/d9d110b40850f40b632a699cc2dfc6fffc552757"
+    },
+    {
       "id": "github-commit-7a1f2185069e",
       "title": "feat(clarity): YOS HOMEを自然言語で開く",
       "completed_at": "2026-10-02T07:42:19Z",
@@ -201,13 +198,6 @@
       "completed_at": "2026-10-02T01:22:37Z",
       "result": "GitHub mainへ反映（2301d59）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/2301d59fd0c0c70d114f21ae8658951bb361b673"
-    },
-    {
-      "id": "github-commit-ef6a31052ce9",
-      "title": "Merge PR #550: sync One Enter Loop Engineering asset state",
-      "completed_at": "2026-10-02T01:09:08Z",
-      "result": "GitHub mainへ反映（ef6a310）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/ef6a31052ce9c3188a28ca1e05a939d9465258f2"
     },
     {
       "id": "complete-002",
@@ -244,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-10-02T16:48:12+09:00",
+      "last_update": "2026-10-02T17:01:23+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -319,13 +309,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 6件・Open PR 10件を自動同期中",
+      "next_action": "Open Issue 6件・Open PR 9件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-10-02T16:48:12+09:00",
+      "last_update": "2026-10-02T17:01:23+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -348,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-10-02T16:48:12+09:00",
+      "last_update": "2026-10-02T17:01:23+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -430,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "7b6e077d34d1a054dffdccdfd47cee7785c445343bd2762a85848815fb724456"
+  "github_snapshot_hash": "e3958dca3b715fd34e79f0e2fcaf9cd7361e1011ace50680b6f8a48d8b8cca49"
 }
