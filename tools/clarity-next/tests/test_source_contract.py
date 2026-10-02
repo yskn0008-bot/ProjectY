@@ -104,10 +104,13 @@ class ClarityNextSourceContractTests(unittest.TestCase):
         self.assertIn("内容の一部になっている語を勝手に削除・言い換えしない", self.source)
 
     def test_notion_home_voice_aliases_do_not_require_yos_token(self):
+        self.assertIn("『ベースホーム開いて』", self.source)
+        self.assertIn("『BASE HOME開いて』", self.source)
+        self.assertIn("『HOME開いて』", self.source)
         self.assertIn("『Notionホーム開いて』", self.source)
         self.assertIn("『Notionのホーム開いて』", self.source)
         self.assertIn("『作戦室開いて』", self.source)
-        self.assertIn("YOSという語が無くてもNotion+ホーム", self.source)
+        self.assertIn("通常の音声入口は『ベースホーム開いて』を推奨", self.source)
 
     def test_v0_acceptance_routes_exist(self):
         self.assertIn('run("YOS_OpenApp", app)', self.source)
