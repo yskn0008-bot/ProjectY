@@ -80,8 +80,8 @@ class ClarityNextSourceContractTests(unittest.TestCase):
         self.assertIn('executor={normalizedExecutor}', self.source)
 
     def test_safety_gates_precede_execution(self):
-        review = self.source.index('if needsReviewText == "はい"')
-        confirm = self.source.index('if needsConfirmationText == "はい"')
+        review = self.source.index('if @normalizedNeedsReviewText == "はい"')
+        confirm = self.source.index('if @normalizedNeedsConfirmationText == "はい"')
         open_app = self.source.index('if @normalizedExecutor == "YOS_OpenApp"')
         self.assertLess(review, open_app)
         self.assertLess(confirm, open_app)
@@ -111,6 +111,17 @@ class ClarityNextSourceContractTests(unittest.TestCase):
         self.assertIn("『Notionのホーム開いて』", self.source)
         self.assertIn("『作戦室開いて』", self.source)
         self.assertIn("通常の音声入口は『ベースホーム開いて』を推奨", self.source)
+
+    def test_base_home_alias_recovers_from_open_app_misroute(self):
+        self.assertIn('@baseHomeAlias = false', self.source)
+        self.assertIn('userInput contains "ベースホーム"', self.source)
+        self.assertIn('@normalizedExecutor = "NEXT_NOTION"', self.source)
+        self.assertIn('@normalizedModule = "notion"', self.source)
+        self.assertIn('@normalizedOperation = "open_yos_home"', self.source)
+        self.assertIn('@normalizedNeedsReviewText = "いいえ"', self.source)
+        self.assertIn('@normalizedNeedsConfirmationText = "いいえ"', self.source)
+        self.assertIn('operation={normalizedOperation}', self.source)
+        self.assertIn('@normalizedOperation == "open_yos_home"', self.source)
 
     def test_v0_acceptance_routes_exist(self):
         self.assertIn('run("YOS_OpenApp", app)', self.source)
