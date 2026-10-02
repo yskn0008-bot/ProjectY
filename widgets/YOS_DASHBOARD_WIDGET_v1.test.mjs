@@ -46,7 +46,12 @@ test("task layout uses full-width blocks so large titles can wrap to two lines",
   assert.doesNotMatch(source, /copy\.layoutVertically\(\)/);
   assert.match(source, /visibleTasks\.length === 1 && task\.nextAction/);
   assert.match(source, /action\.lineLimit = 2/);
-  assert.match(source, /next\.lineLimit = 2/);
+});
+
+test("NOW protects long task titles before showing the next action", () => {
+  assert.match(source, /const titleNeedsTwoLines = current\.title\.length > 18/);
+  assert.match(source, /current\.nextAction && !titleNeedsTwoLines/);
+  assert.match(source, /next\.lineLimit = 1/);
 });
 
 test("routine controls launch existing Morning and Night shortcuts without inventing completion state", () => {
