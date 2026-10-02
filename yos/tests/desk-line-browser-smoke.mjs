@@ -68,6 +68,10 @@ try{
   const count=await page.locator('#chatList .chat').count();
   assert.ok(count>=6,'built-in YOS rooms should populate CHATS without manual links');
   assert.equal(await page.locator('#projects').evaluate(el=>getComputedStyle(el).display),'none','project pills stay hidden for LINE-like scanability');
+  assert.equal(await page.locator('#sourceSummary').isVisible(),true,'source summary should be visible');
+  assert.match((await page.locator('#sourceSummary').textContent())||'',/GPT原文 1/);
+  assert.match((await page.locator('#sourceSummary').textContent())||'',/YOS内 5/);
+  assert.equal(await page.locator('#addGptChatBtn').isVisible(),true,'one-tap GPT original add should be visible');
   assert.equal(await page.locator('#currentChatBanner').isVisible(),true,'active chat banner should stay visible across projects');
   assert.match((await page.locator('#currentChatBanner').textContent())||'',/会話中/);
   assert.match((await page.locator('#currentChatBanner').textContent())||'',/外部YOS/);
