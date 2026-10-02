@@ -228,11 +228,17 @@ function addTaskLine(parent, task, prominent = false) {
   dot.cornerRadius = prominent ? 5 : 4.5;
   dot.backgroundColor = color(task.state === "本人操作" ? COLORS.coral : COLORS.green);
   row.addSpacer(9);
-  const text = row.addText(task.title || "今すぐやることなし");
+
+  // Keep the title readable instead of shrinking it back down.
+  // A vertical copy stack gives Scriptable room to wrap inside the remaining width.
+  const copy = row.addStack();
+  copy.layoutVertically();
+  const text = copy.addText(task.title || "今すぐやることなし");
   text.font = font(prominent ? 25 : 17, prominent ? "bold" : "semibold");
   text.textColor = color(COLORS.text);
-  text.lineLimit = prominent ? 2 : 1;
-  text.minimumScaleFactor = 0.78;
+  text.lineLimit = 2;
+  text.minimumScaleFactor = prominent ? 0.82 : 0.86;
+  row.addSpacer();
   return row;
 }
 function addEventLine(parent, event, compact = false) {
@@ -294,8 +300,8 @@ function makeNow(taskResult, calendarResult, money) {
       const next = widget.addText("次 → " + current.nextAction);
       next.font = font(13, "medium");
       next.textColor = color(COLORS.muted);
-      next.lineLimit = 1;
-      next.minimumScaleFactor = 0.85;
+      next.lineLimit = 2;
+      next.minimumScaleFactor = 0.88;
     }
   } else {
     const quiet = widget.addText("今すぐやることなし");
@@ -365,9 +371,23 @@ function makeToday(taskResult, calendarResult, money) {
     setup.font = font(16, "semibold");
     setup.textColor = color(COLORS.coral);
   } else if (tasks.length) {
-    for (const task of tasks.slice(0, 3)) {
+    const visibleTasks = tasks.slice(0, 3);
+    for (let i = 0; i < visibleTasks.length; i++) {
+      const task = visibleTasks[i];
       addTaskLine(widget, task, false);
-      widget.addSpacer(3);
+
+      // When there is only one task, use otherwise-empty space for its concrete next step.
+      // With multiple tasks, keep the layout compact so all actionable items remain visible.
+      if (visibleTasks.length === 1 && task.nextAction) {
+        widget.addSpacer(4);
+        const action = widget.addText("次 → " + task.nextAction);
+        action.font = font(13, "medium");
+        action.textColor = color(COLORS.muted);
+        action.lineLimit = 2;
+        action.minimumScaleFactor = 0.86;
+      }
+
+      if (i < visibleTasks.length - 1) widget.addSpacer(8);
     }
   } else {
     const none = widget.addText("今やるタスクなし");
