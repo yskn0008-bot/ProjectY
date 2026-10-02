@@ -56,9 +56,9 @@
         const response = await this.fetchImpl(requestUrl, {
           ...init,
           signal: controller.signal,
-          credentials: 'omit',
+          credentials: this.vercelShareToken ? 'include' : 'omit',
           cache: 'no-store',
-          redirect: 'error',
+          redirect: this.vercelShareToken ? 'follow' : 'error',
           referrerPolicy: 'no-referrer'
         });
         const body = await readBoundedJson(response, this.maxResponseBytes);
