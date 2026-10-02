@@ -283,13 +283,17 @@ function makeNow(taskResult, calendarResult, money) {
     setup.textColor = color(COLORS.text);
   } else if (current) {
     addTaskLine(widget, current, true);
-    if (current.nextAction) {
+
+    // Medium widgets have limited vertical space. Protect the task title first:
+    // long titles keep their second line, while "次 →" appears only when the title is short enough.
+    const titleNeedsTwoLines = current.title.length > 18;
+    if (current.nextAction && !titleNeedsTwoLines) {
       widget.addSpacer(4);
       const next = widget.addText("次 → " + current.nextAction);
       next.font = font(13, "medium");
       next.textColor = color(COLORS.muted);
-      next.lineLimit = 2;
-      next.minimumScaleFactor = 0.88;
+      next.lineLimit = 1;
+      next.minimumScaleFactor = 0.9;
     }
   } else {
     const quiet = widget.addText("今すぐやることなし");
