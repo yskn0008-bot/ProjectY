@@ -101,11 +101,12 @@ test('YOS DESK exposes Clarity SSOT freshness instead of a generic auto-sync lab
 
 
 test('YOS DESK unified inbox keeps one cross-project list with active/read/source badges', async () => {
-  const [desk,js,css,sw] = await Promise.all([
+  const [desk,js,css,sw,importer] = await Promise.all([
     read('yos/desk/index.html'),
     read('yos/desk/unified-inbox.js'),
     read('yos/desk/unified-inbox.css'),
-    read('service-worker.js')
+    read('service-worker.js'),
+    read('yos/desk/import-gpt.html')
   ]);
   assert.match(desk,/unified-inbox\.css/);
   assert.match(desk,/unified-inbox\.js/);
@@ -123,4 +124,7 @@ test('YOS DESK unified inbox keeps one cross-project list with active/read/sourc
   assert.match(css,/\.readState/);
   assert.match(sw,/unified-inbox\.css/);
   assert.match(sw,/unified-inbox\.js/);
+  assert.match(sw,/import-gpt\.html/);
+  assert.match(importer,/yosDeskIntegratedStateV1/);
+  assert.match(importer,/location\.replace/);
 });
