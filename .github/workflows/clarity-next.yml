@@ -50,18 +50,23 @@ jobs:
           rm -f './Clarity Next_unsigned.shortcut' './Clarity Next.plist'
           rm -f './Clarity Text_unsigned.shortcut' './Clarity Text.plist'
           rm -f './Clarity Share v4_unsigned.shortcut' './Clarity Share v4.plist'
+          rm -f './YOS_Home_unsigned.shortcut' './YOS_Home.plist'
           cherri './Clarity Next.cherri' --skip-sign --debug
           cherri './Clarity Text.cherri' --skip-sign --debug
           cherri './Clarity Share.cherri' --skip-sign --debug
+          cherri './YOS_Home.cherri' --skip-sign --debug
           test -f './Clarity Next_unsigned.shortcut'
           test -f './Clarity Text_unsigned.shortcut'
           test -f './Clarity Share v4_unsigned.shortcut'
+          test -f './YOS_Home_unsigned.shortcut'
           python3 patch_ledger_persistence.py './Clarity Next_unsigned.shortcut'
           python3 patch_calendar_reminder_wire_format.py './Clarity Next_unsigned.shortcut'
+          python3 patch_home_inline.py './YOS_Home_unsigned.shortcut' './YOS Home Bridge.js'
           mkdir -p artifacts
           cp './Clarity Next_unsigned.shortcut' artifacts/Clarity-Next-unsigned.shortcut
           cp './Clarity Text_unsigned.shortcut' artifacts/Clarity-Text-unsigned.shortcut
           cp './Clarity Share v4_unsigned.shortcut' artifacts/Clarity-Share-v4-unsigned.shortcut
+          cp './YOS_Home_unsigned.shortcut' artifacts/YOS-Home-unsigned.shortcut
 
       - name: Inspect runtime
         shell: bash
@@ -87,6 +92,8 @@ jobs:
           assert 'NEXT_TIMER' in blob
           assert 'NEXT_CALENDAR' in blob
           assert 'NEXT_REMINDER' in blob
+          assert 'NEXT_HOME' in blob
+          assert 'YOS_Home' in blob
           assert 'NEXT_NOTION' in blob
           assert 'https://www.notion.so/3ed5ca882895819aaa57c139ea36fe2b' in blob
           assert 'unsupported_executor' in blob
@@ -124,6 +131,15 @@ jobs:
           assert reminders[0].get('WFAlertEnabled')=='Alert'
           assert reminders[0].get('WFAlertCustomTime',{}).get('WFSerializationType')=='WFTextTokenString'
           print('Clarity Next runtime contract: PASS')
+          home=plistlib.loads(Path('tools/clarity-next/artifacts/YOS-Home-unsigned.shortcut').read_bytes())
+          home_blob=repr(home)
+          home_ids=[a.get('WFWorkflowActionIdentifier','') for a in home.get('WFWorkflowActions',[])]
+          assert 'YOS_Floor_Lamp' in home_blob
+          assert 'YOS Home Bridge' in home_blob
+          assert 'parseHomePayload' in home_blob
+          assert any(i.endswith('runworkflow') for i in home_ids), home_ids
+          assert any(i=='dk.simonbs.Scriptable.RunScriptInlineIntent' for i in home_ids), home_ids
+          print('YOS Home unified router runtime contract: PASS')
           PY
 
       - name: Inspect thin entry wrappers
@@ -181,6 +197,11 @@ jobs:
             --output tools/clarity-next/artifacts/Clarity-Share-v4-signed.shortcut \
             --name 'Clarity Share v4' \
             2>&1 | tee tools/clarity-next/artifacts/clarity-share-hubsign.log
+          python3 tools/clarity-factory/sign_with_hubsign.py \
+            --input tools/clarity-next/artifacts/YOS-Home-unsigned.shortcut \
+            --output tools/clarity-next/artifacts/YOS-Home-signed.shortcut \
+            --name 'YOS_Home' \
+            2>&1 | tee tools/clarity-next/artifacts/yos-home-hubsign.log
 
       - name: Verify signature
         shell: bash
@@ -188,7 +209,7 @@ jobs:
           set -euo pipefail
           python3 - <<'PY'
           from pathlib import Path
-          for name in ('Clarity-Next-signed.shortcut','Clarity-Text-signed.shortcut','Clarity-Share-v4-signed.shortcut'):
+          for name in ('Clarity-Next-signed.shortcut','Clarity-Text-signed.shortcut','Clarity-Share-v4-signed.shortcut','YOS-Home-signed.shortcut'):
               p=Path('tools/clarity-next/artifacts')/name
               data=p.read_bytes()
               assert data.startswith(b'AEA1'), (name,data[:8])
@@ -207,7 +228,10 @@ jobs:
             tools/clarity-next/artifacts/Clarity-Text-signed.shortcut
             tools/clarity-next/artifacts/Clarity-Share-v4-unsigned.shortcut
             tools/clarity-next/artifacts/Clarity-Share-v4-signed.shortcut
+            tools/clarity-next/artifacts/YOS-Home-unsigned.shortcut
+            tools/clarity-next/artifacts/YOS-Home-signed.shortcut
             tools/clarity-next/artifacts/hubsign.log
             tools/clarity-next/artifacts/clarity-text-hubsign.log
             tools/clarity-next/artifacts/clarity-share-hubsign.log
+            tools/clarity-next/artifacts/yos-home-hubsign.log
           if-no-files-found: error
