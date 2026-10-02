@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-10-02T20:32:34+09:00",
+  "updated_at": "2026-10-02T20:34:35+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -21,16 +21,6 @@
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/553",
       "updated_at": "2026-10-02T01:11:02Z"
-    },
-    {
-      "id": "github-pr-568",
-      "title": "PR #568 YOS Chat: GPTプロジェクト原文の自動取込を修正",
-      "type": "GitHub PR",
-      "status": "review",
-      "priority": 1,
-      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/568",
-      "updated_at": "2026-10-02T11:32:21Z"
     },
     {
       "id": "github-pr-403",
@@ -130,7 +120,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-10-02T11:30:18Z"
+      "updated_at": "2026-10-02T11:34:12Z"
     },
     {
       "id": "github-issue-234",
@@ -175,6 +165,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-0f46f25b147a",
+      "title": "YOS Chat: GPTプロジェクト原文の自動取込を修正 (#568)",
+      "completed_at": "2026-10-02T11:34:11Z",
+      "result": "GitHub mainへ反映（0f46f25）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/0f46f25b147a8a2efb9831234eff4602400e8025"
+    },
+    {
       "id": "github-commit-e1deb8d0ea74",
       "title": "feat(widget): YOS Dashboard for iPhone Home Screen",
       "completed_at": "2026-10-02T11:30:08Z",
@@ -203,13 +200,6 @@
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/12ffa18fc1f2de7c6fa774ae3e35d3e6166e400f"
     },
     {
-      "id": "github-commit-029ebd4c2751",
-      "title": "YOS DESK: GPT風チャット一覧と新規・一時チャット (#562)",
-      "completed_at": "2026-10-02T11:01:30Z",
-      "result": "GitHub mainへ反映（029ebd4）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/029ebd4c275115b642a22cd42364633d0fe8211b"
-    },
-    {
       "id": "complete-002",
       "title": "iPhone向けMission Control Dashboardを実装",
       "completed_at": "2026-07-17T17:55:00+09:00",
@@ -234,7 +224,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #568をレビューして公開判断する",
+      "next_action": "PR #553をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -244,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-10-02T20:32:34+09:00",
+      "last_update": "2026-10-02T20:34:35+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -319,13 +309,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 6件・Open PR 10件を自動同期中",
+      "next_action": "Open Issue 6件・Open PR 9件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-10-02T20:32:34+09:00",
+      "last_update": "2026-10-02T20:34:35+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -339,7 +329,7 @@
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #568をレビューして公開判断する",
+      "next_action": "PR #553をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -348,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-10-02T20:32:34+09:00",
+      "last_update": "2026-10-02T20:34:35+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -430,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "216d1c87a83b796fdacc7fdfb5fb263576dad3c01e835d41ec94980029d3d10e"
+  "github_snapshot_hash": "4eca54a19c4954933e5513778193b05f0c8e292c448fa0055d2f35af1c8d2154"
 }
