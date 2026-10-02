@@ -51,22 +51,27 @@ jobs:
           rm -f './Clarity Text_unsigned.shortcut' './Clarity Text.plist'
           rm -f './Clarity Share v4_unsigned.shortcut' './Clarity Share v4.plist'
           rm -f './YOS_Home_unsigned.shortcut' './YOS_Home.plist'
+          rm -f './YOS_Floor_Lamp_unsigned.shortcut' './YOS_Floor_Lamp.plist'
           cherri './Clarity Next.cherri' --skip-sign --debug
           cherri './Clarity Text.cherri' --skip-sign --debug
           cherri './Clarity Share.cherri' --skip-sign --debug
           cherri './YOS_Home.cherri' --skip-sign --debug
+          cherri './YOS_Floor_Lamp.cherri' --skip-sign --debug
           test -f './Clarity Next_unsigned.shortcut'
           test -f './Clarity Text_unsigned.shortcut'
           test -f './Clarity Share v4_unsigned.shortcut'
           test -f './YOS_Home_unsigned.shortcut'
+          test -f './YOS_Floor_Lamp_unsigned.shortcut'
           python3 patch_ledger_persistence.py './Clarity Next_unsigned.shortcut'
           python3 patch_calendar_reminder_wire_format.py './Clarity Next_unsigned.shortcut'
           python3 patch_home_inline.py './YOS_Home_unsigned.shortcut' './YOS Home Bridge.js'
+          python3 patch_floor_lamp_import_questions.py './YOS_Floor_Lamp_unsigned.shortcut'
           mkdir -p artifacts
           cp './Clarity Next_unsigned.shortcut' artifacts/Clarity-Next-unsigned.shortcut
           cp './Clarity Text_unsigned.shortcut' artifacts/Clarity-Text-unsigned.shortcut
           cp './Clarity Share v4_unsigned.shortcut' artifacts/Clarity-Share-v4-unsigned.shortcut
           cp './YOS_Home_unsigned.shortcut' artifacts/YOS-Home-unsigned.shortcut
+          cp './YOS_Floor_Lamp_unsigned.shortcut' artifacts/YOS-Floor-Lamp-unsigned.shortcut
 
       - name: Inspect runtime
         shell: bash
@@ -140,6 +145,16 @@ jobs:
           assert any(i.endswith('runworkflow') for i in home_ids), home_ids
           assert any(i=='dk.simonbs.Scriptable.RunScriptInlineIntent' for i in home_ids), home_ids
           print('YOS Home unified router runtime contract: PASS')
+          floor=plistlib.loads(Path('tools/clarity-next/artifacts/YOS-Floor-Lamp-unsigned.shortcut').read_bytes())
+          floor_blob=repr(floor)
+          floor_ids=[a.get('WFWorkflowActionIdentifier','') for a in floor.get('WFWorkflowActions',[])]
+          assert floor_ids.count('com.tplink.tapo.TapoDeviceToggleIntent')==2, floor_ids
+          assert floor_ids.count('com.tplink.tapo.TapoBulbColorSetIntent')==2, floor_ids
+          assert '__SELECT_FLOOR_LAMP__' in floor_blob
+          questions=[q for q in floor.get('WFWorkflowImportQuestions',[]) if q.get('ParameterKey')=='devices']
+          assert len(questions)==4, questions
+          assert 'temp_warm_white' in floor_blob
+          print('YOS Floor Lamp runtime contract: PASS')
           PY
 
       - name: Inspect thin entry wrappers
@@ -202,6 +217,11 @@ jobs:
             --output tools/clarity-next/artifacts/YOS-Home-signed.shortcut \
             --name 'YOS_Home' \
             2>&1 | tee tools/clarity-next/artifacts/yos-home-hubsign.log
+          python3 tools/clarity-factory/sign_with_hubsign.py \
+            --input tools/clarity-next/artifacts/YOS-Floor-Lamp-unsigned.shortcut \
+            --output tools/clarity-next/artifacts/YOS-Floor-Lamp-signed.shortcut \
+            --name 'YOS_Floor_Lamp' \
+            2>&1 | tee tools/clarity-next/artifacts/yos-floor-lamp-hubsign.log
 
       - name: Verify signature
         shell: bash
@@ -209,7 +229,7 @@ jobs:
           set -euo pipefail
           python3 - <<'PY'
           from pathlib import Path
-          for name in ('Clarity-Next-signed.shortcut','Clarity-Text-signed.shortcut','Clarity-Share-v4-signed.shortcut','YOS-Home-signed.shortcut'):
+          for name in ('Clarity-Next-signed.shortcut','Clarity-Text-signed.shortcut','Clarity-Share-v4-signed.shortcut','YOS-Home-signed.shortcut','YOS-Floor-Lamp-signed.shortcut'):
               p=Path('tools/clarity-next/artifacts')/name
               data=p.read_bytes()
               assert data.startswith(b'AEA1'), (name,data[:8])
@@ -230,8 +250,11 @@ jobs:
             tools/clarity-next/artifacts/Clarity-Share-v4-signed.shortcut
             tools/clarity-next/artifacts/YOS-Home-unsigned.shortcut
             tools/clarity-next/artifacts/YOS-Home-signed.shortcut
+            tools/clarity-next/artifacts/YOS-Floor-Lamp-unsigned.shortcut
+            tools/clarity-next/artifacts/YOS-Floor-Lamp-signed.shortcut
             tools/clarity-next/artifacts/hubsign.log
             tools/clarity-next/artifacts/clarity-text-hubsign.log
             tools/clarity-next/artifacts/clarity-share-hubsign.log
             tools/clarity-next/artifacts/yos-home-hubsign.log
+            tools/clarity-next/artifacts/yos-floor-lamp-hubsign.log
           if-no-files-found: error
