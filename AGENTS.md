@@ -82,6 +82,26 @@ UIは既存Visual SSOTと実機事実を基準に、対象画面・操作を確�
 利用可能になったら今回の開発を終える。追加要望で受入条件を無限に拡張しない。状態変化なしに再依頼・再通知・再起動しない。
 実在する継続runnerがない時は監視中と報告せず、保持した成果と再開条件を記録する。
 
+## One Enter実行ループ
+
+One Enterは「回答すること」ではなく、受入条件を満たすところまで安全に実行することを目的とする。新しい人格・Project・SSOTは作らず、既存のFactory Core、Issue #232 recovery state、対象Issue/PR、tests、runtime evidenceを再利用する。
+
+標準順序は **REQUEST → DISCOVER EXISTING ASSETS → RESTORE STATE → DEFINE GOAL + DONE CONDITIONS → PLAN → EXECUTE → VERIFY → AUDIT**。VerifyまたはAuditが失敗した場合は、本人へ返す前に **DIAGNOSE → FIX / RETRY / ALTERNATIVE / ROLLBACK → VERIFY** を行う。
+
+- jobの状態は、目的、完成条件、現在phase、実行済み作業、Verify/Audit結果、failure reason/fingerprint、次の一手、試行回数、未確認、runtime evidence、terminal stateを機械可読で保持し、再開時はjob contract・head・workspaceを照合する。
+- 完成条件は可能な限りtest、build、type/lint、schema、期待値比較、GitHub current-head状態、artifact、runtime evidence等の機械判定へ変換する。実機・本番等を推測でPASSにしない。
+- MakerとChecker/Auditを分離する。実装担当の説明だけを完成証拠にせず、Checkerと独立Auditは実物、diff、test、log、runtime evidenceを優先する。
+- 同一failureはfingerprintで追跡し、同じ失敗を理由なく繰り返さない。同一路線が改善しない場合は別の安全なstrategyへ切り替える。
+- 案件全体にtotal recovery、same failure、active execution、変更path数のhard budgetを持つ。scope違反またはbudget超過はfail closedとし、clean startからの変更は安全な開始点へrollbackしてから停止する。
+- 最終状態は **COMPLETE / WAIT_USER / FAILED_SAFE** のいずれかだけとする。途中状態を完成扱いしない。
+- **COMPLETE** はmachine-checkable done conditionsと独立AuditがPASSし、human gateが残っていない場合だけ。
+- **WAIT_USER** はAI側で可能な実装・Verify・Auditを終えたうえで、不可逆変更、本番公開、外部送信、購入・課金、削除、資格情報、重大データ変更、本人の価値判断、physical iPhone、本番実測等の本人専用gateだけが残る場合。
+- **FAILED_SAFE** は安全な回復経路またはbudgetを使い切り、既存の正常状態を保持またはrollback確認して停止した場合。
+- failure → 原因 → 対応 → 再検証結果は既存state / Issue / PR evidenceへ残し、新しいfailure DBを増やさない。
+- ユーザーへ途中の細かい処理を返すために停止しない。本人へ戻すのはCOMPLETE、真のWAIT_USER、またはFAILED_SAFEだけとする。
+
+Runtime実装の正本は `tools/factory-core/yos_loop_engine.py`、契約説明は `docs/YOS_LOOP_ENGINE_v1.md`。文書だけが先行してruntimeに存在しない機能を「実装済み」と扱わず、runtimeだけ変更してこの実行原則を古いまま残さない。
+
 ## 完成と証拠
 コード完成、GitHub着地、試作完了、実利用可能、Keep、本番・実機の確認を分ける。未確認を完成にしない。価値がないものの終了も正常な結果とする。
 PRへ記録する最小証拠：
