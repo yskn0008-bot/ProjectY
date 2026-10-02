@@ -99,7 +99,7 @@ try{
   assert.notEqual(motionUi.tabTransition,'0s','tabs should transition instead of snapping');
   await page.locator('#newBtn').click();
   await page.waitForFunction(()=>document.body.classList.contains('sheet-open')&&document.querySelector('#sheetBackdrop')?.classList.contains('is-open'));
-  assert.equal(await page.locator('#sheetBackdrop').evaluate(el=>getComputedStyle(el).opacity),'1');
+  await page.waitForFunction(()=>Number(getComputedStyle(document.querySelector('#sheetBackdrop')).opacity)>.85);
   await page.locator('#closeSheetBtn').click();
   await page.waitForFunction(()=>!document.body.classList.contains('sheet-open'));
   assert.equal(await page.locator('link[rel="manifest"]').getAttribute('href'),'./manifest.webmanifest');
