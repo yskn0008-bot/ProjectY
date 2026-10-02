@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-10-02T09:50:27+09:00",
+  "updated_at": "2026-10-02T09:51:45+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -12,16 +12,6 @@
     ]
   },
   "inbox": [
-    {
-      "id": "github-pr-548",
-      "title": "PR #548 YOS DESK: GPT原文導線と表示崩れ修正",
-      "type": "GitHub PR",
-      "status": "review",
-      "priority": 1,
-      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/548",
-      "updated_at": "2026-10-02T00:49:56Z"
-    },
     {
       "id": "github-pr-403",
       "title": "PR #403 fix(life): make calendar sync failures actionable",
@@ -120,7 +110,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-10-02T00:50:02Z"
+      "updated_at": "2026-10-02T00:50:25Z"
     },
     {
       "id": "github-issue-234",
@@ -165,6 +155,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-d8a8a176a720",
+      "title": "YOS DESK: GPT原文導線と表示崩れ修正 (#548)",
+      "completed_at": "2026-10-02T00:51:18Z",
+      "result": "GitHub mainへ反映（d8a8a17）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/d8a8a176a720e7417d1308a204ef7a63d2f0a635"
+    },
+    {
       "id": "github-commit-b7c49edd709c",
       "title": "data: YOS資産一覧を全件再監査して現在地へ更新 (#547)",
       "completed_at": "2026-10-02T00:46:50Z",
@@ -193,13 +190,6 @@
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/9d1e03fe9960097a75d6affe3b992069424d9acb"
     },
     {
-      "id": "github-commit-5fc71d779424",
-      "title": "Mission Control: GitHub状態同期の件数・Draft判定を復旧 (#543)",
-      "completed_at": "2026-09-30T10:49:11Z",
-      "result": "GitHub mainへ反映（5fc71d7）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/5fc71d779424c8b137982eae54d0b3709713642a"
-    },
-    {
       "id": "complete-002",
       "title": "iPhone向けMission Control Dashboardを実装",
       "completed_at": "2026-07-17T17:55:00+09:00",
@@ -224,7 +214,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #548をレビューして公開判断する",
+      "next_action": "Issue #10を進める：Mission Control v2：GitHubのIssue・PR・Commitを自動集約する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -234,7 +224,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-10-02T09:50:27+09:00",
+      "last_update": "2026-10-02T09:51:45+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -309,13 +299,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 6件・Open PR 9件を自動同期中",
+      "next_action": "Open Issue 6件・Open PR 8件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-10-02T09:50:27+09:00",
+      "last_update": "2026-10-02T09:51:45+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -324,12 +314,12 @@
       "domain": "Infrastructure",
       "type": "development",
       "purpose": "YOSと各Labの設計に基づいて実装、修正、テストを行う",
-      "status": "review",
+      "status": "active",
       "health": "attention",
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #548をレビューして公開判断する",
+      "next_action": "Issue #10を進める：Mission Control v2：GitHubのIssue・PR・Commitを自動集約する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -338,7 +328,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-10-02T09:50:27+09:00",
+      "last_update": "2026-10-02T09:51:45+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +410,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "776185abe0e58fab3a81bbaad793454293a594f8c0ce2a0ef3622f88340113da"
+  "github_snapshot_hash": "e10d2d2bfe4978b79ec3c6455550e0ca1f7b087e28d1994c78d1d1c6a1a528c1"
 }
