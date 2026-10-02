@@ -9,8 +9,8 @@
 <title>YOS Chat</title>
 <link rel="stylesheet" href="./style.css">
 <link rel="stylesheet" href="./compact.css?v=20260929-fit2">
-<link rel="stylesheet" href="./live-chat.css?v=20261002-chatonly1">
-<link rel="stylesheet" href="./unified-inbox.css?v=20261002-chatonly1">
+<link rel="stylesheet" href="./live-chat.css?v=20261002-chatonly2">
+<link rel="stylesheet" href="./unified-inbox.css?v=20261002-chatonly2">
 </head>
 <body class="chat-only">
 <div class="app" id="app">
@@ -19,7 +19,6 @@
       <div class="brand"><strong>チャット</strong></div>
       <div class="topActions">
         <button class="chatIconBtn" id="newBtn" type="button" aria-label="新規チャット">＋</button>
-        <button class="miniBtn" id="selectBtn" type="button">編集</button>
       </div>
     </div>
 
@@ -27,7 +26,6 @@
     <div class="tabs">
       <button class="tab active" data-mode="all">チャット <span id="countAll"></span></button>
       <button class="tab" data-mode="unread">未読 <span id="countUnread"></span></button>
-      <button class="tab" data-mode="pinned">固定 <span id="countPinned"></span></button>
     </div>
     <div class="projects" id="projects"></div>
 
@@ -42,14 +40,13 @@
   </section>
 </div>
 
-<div class="bulk" id="bulk"><button id="bulkRead">既読</button><button id="bulkPin">固定</button><button class="danger" id="bulkDelete">削除</button></div>
 <div class="sheetBackdrop" id="sheetBackdrop"><div class="sheet" id="sheet"><div class="handle"></div><div id="sheetBody"></div></div></div>
 <div class="toast" id="toast"></div>
 
 <script src="../hj/yos-ai-client.js?v=20260928-live1"></script>
 <script src="../hj/yos-auth.js?v=20260930-auth3"></script>
-<script src="./app.js?v=20261002-chatonly1"></script>
-<script src="./live-chat.js?v=20261002-chatonly1"></script>
-<script src="./unified-inbox.js?v=20261002-chatonly1"></script>
+<script src="./app.js?v=20261002-chatonly2"></script>
+<script src="./live-chat.js?v=20261002-chatonly2"></script>
+<script src="./unified-inbox.js?v=20261002-chatonly2"></script>
 </body>
 </html>
