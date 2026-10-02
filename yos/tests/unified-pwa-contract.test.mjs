@@ -117,6 +117,30 @@ test('YOS Chat is a chat-only surface with the new-chat icon in the header', asy
 });
 
 
+test('YOS Chat motion stays subtle, interactive and reduced-motion safe', async () => {
+  const [app,live,css,threadCss] = await Promise.all([
+    read('yos/desk/app.js'),
+    read('yos/desk/live-chat.js'),
+    read('yos/desk/unified-inbox.css'),
+    read('yos/desk/live-chat.css')
+  ]);
+  assert.match(app,/classList\.add\('is-visible'\)/);
+  assert.match(app,/classList\.add\('is-open'\)/);
+  assert.match(app,/document\.body\.classList\.add\('sheet-open'\)/);
+  assert.match(app,/row-enter/);
+  assert.match(app,/dataset\.deskMotion='ready'/);
+  assert.match(css,/YOS Chat motion v1/);
+  assert.match(css,/@keyframes yosRowIn/);
+  assert.match(css,/@keyframes yosUnreadPulse/);
+  assert.match(css,/body\.sheet-open \.chatIconBtn/);
+  assert.match(css,/@media\(prefers-reduced-motion:reduce\)/);
+  assert.match(live,/lastAnimatedMessageId/);
+  assert.match(live,/thread-closing/);
+  assert.match(threadCss,/@keyframes yosThreadIn/);
+  assert.match(threadCss,/@keyframes yosMessageIn/);
+});
+
+
 test('YOS Chat uses unread-only emphasis and the Home Screen Badging API', async () => {
   const [app,live,css] = await Promise.all([
     read('yos/desk/app.js'),
