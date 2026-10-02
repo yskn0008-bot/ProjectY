@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-10-02T10:11:04+09:00",
+  "updated_at": "2026-10-02T10:12:01+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -20,7 +20,17 @@
       "priority": 1,
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/552",
-      "updated_at": "2026-10-02T01:10:11Z"
+      "updated_at": "2026-10-02T01:11:40Z"
+    },
+    {
+      "id": "github-pr-553",
+      "title": "PR #553 fix: YOS資産CIとiOS entry testの契約ずれを解消",
+      "type": "GitHub PR",
+      "status": "review",
+      "priority": 1,
+      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/553",
+      "updated_at": "2026-10-02T01:11:02Z"
     },
     {
       "id": "github-pr-403",
@@ -120,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-10-02T01:10:39Z"
+      "updated_at": "2026-10-02T01:11:34Z"
     },
     {
       "id": "github-issue-234",
@@ -234,7 +244,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-10-02T10:11:04+09:00",
+      "last_update": "2026-10-02T10:12:01+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -309,13 +319,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 6件・Open PR 9件を自動同期中",
+      "next_action": "Open Issue 6件・Open PR 10件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-10-02T10:11:04+09:00",
+      "last_update": "2026-10-02T10:12:01+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -338,7 +348,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-10-02T10:11:04+09:00",
+      "last_update": "2026-10-02T10:12:01+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -420,5 +430,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "ae07d06f4e333eff85c4ebf9197246a3b7e188fd3b7b4864307b8e91dbbef0be"
+  "github_snapshot_hash": "f0465e5d1de71365a84fd1757985321be0222b794c37cad2c9f0c5a25e759d94"
 }
