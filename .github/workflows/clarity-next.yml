@@ -75,6 +75,8 @@ jobs:
           assert 'NEXT_TIMER' in blob
           assert 'NEXT_CALENDAR' in blob
           assert 'NEXT_REMINDER' in blob
+          assert 'NEXT_NOTION' in blob
+          assert 'https://www.notion.so/3ed5ca882895819aaa57c139ea36fe2b' in blob
           assert 'unsupported_executor' in blob
           assert 'Clarity Next Ledger.txt' in blob
           assert not any(i.endswith('file.append') for i in ids), ids
