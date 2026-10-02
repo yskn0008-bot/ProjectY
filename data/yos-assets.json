@@ -284,7 +284,8 @@
         "commit:37078c8b70cd16eaa1aeb5f6abca8d608c2bacbf multi-journey UX",
         "commit:a86c73f4ac7c0306d1ba3fbfee611d305cabb20e shared state",
         "path:yos/hj/index.html",
-        "path:tests/hj-smoke.mjs"
+        "path:tests/hj-smoke.mjs",
+        "production:GitHub Pages full-site deploy run 36948074343 succeeded with yos/hj included 2026-10-02"
       ],
       "progress_basis": {
         "spec": true,
@@ -316,7 +317,8 @@
         "commit:a86c73f4ac7c0306d1ba3fbfee611d305cabb20e shared state",
         "commit:f755619adcec8d95dcea5a414010d9657eb46b42 PWA relaunch persistence",
         "commit:6aaefec4f3cf2d629579da15703c409ee65707c6 Clarity Idea persistence",
-        "path:yos/shared-state-v1.js"
+        "path:yos/shared-state-v1.js",
+        "production:GitHub Pages full-site deploy run 36948074343 succeeded with current yos Idea assets included 2026-10-02"
       ],
       "progress_basis": {
         "spec": true,
@@ -356,7 +358,8 @@
         "state:Open Issue 6 / Open PR 8 matched after recovery",
         "state:Mission Control updated 2026-10-02T09:35:07+09:00",
         "state:Open Issue 6 / Open PR 8",
-        "recent:YOS DESK #546 reflected"
+        "recent:YOS DESK #546 reflected",
+        "production:Sync and deploy YOS Mission Control run 36948074343 succeeded 2026-10-02"
       ],
       "progress_basis": {
         "spec": true,
@@ -480,8 +483,9 @@
       "evidence": [
         "commit:297b3a17f592738890621f86c3a811de5180d2aa Morning Brief no-Safari",
         "commit:5f1bdac8d2f0b37ac6e521fbaada0e7af456e343 canonical Morning Brief",
-        "user:iPhone Morning restored after settings diagnosis 2026-10-02",
-        "state:parent Morning -> Morning Brief + Morning Flow -> YOS Today Note"
+        "device:user confirmed Morning restored on iPhone after settings diagnosis 2026-10-02",
+        "state:parent Morning -> Morning Brief + Morning Flow -> YOS Today Note",
+        "production:user confirmed normal Morning launch restored on iPhone 2026-10-02"
       ],
       "progress_basis": {
         "spec": true,
@@ -876,7 +880,8 @@
         "notion:linked views 今やる / 本人操作 / 待ち / 買い物",
         "notion:YOS Assets display mirror 25-row target",
         "device:user viewed YOS HOME in iPhone Notion 2026-10-02",
-        "verification:Notion page re-fetched after edits"
+        "verification:Notion page re-fetched after edits",
+        "production:Notion YOS HOME live workspace page re-fetched after edits 2026-10-02"
       ],
       "progress_basis": {
         "spec": true,
