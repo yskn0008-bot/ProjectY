@@ -14,7 +14,7 @@ test("one Scriptable source drives NOW and TODAY dashboard widgets", () => {
 
 test("reuses the existing private YOS Tasks feed and Keychain token", () => {
   assert.match(source, /https:\/\/project-y-yos-ai\.vercel\.app\/api\/yos\/widget/);
-  assert.match(source, /MY_WAY_WIDGET_TOKEN/);
+  assert.match(source, /MY_WAY_WIDGET_TOKEN/);\n  assert.match(source, /my-way-now-widget-cache-v1\\.json/);
   assert.match(source, /Authorization:\s*`Bearer \$\{token\}`/);
   assert.match(source, /Array\.isArray\(data\.tasks\)/);
   assert.match(source, /data\.task \? \[data\.task\]/);
