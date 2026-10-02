@@ -2,7 +2,7 @@
 
 const crypto = require('node:crypto');
 
-const DECISIONS = Object.freeze(['CONTINUE', 'REVISE', 'WAIT_USER', 'COMPLETE']);
+const DECISIONS = Object.freeze(['CONTINUE', 'REVISE', 'WAIT_USER', 'FAILED_SAFE', 'COMPLETE']);
 const SAFE_ACTIONS = new Set(['RERUN_FAILED', 'REQUEST_CODE_FIX', 'REQUEST_TRANSPORT', 'REQUEST_STATUS', 'UPDATE_BRANCH']);
 const USER_ONLY_RE = /(?:login|log in|2fa|two[- ]factor|本人確認|本人操作|secret|credential|資格情報|physical|実機|iphone|現物|支払|payment|契約|contract|公開|publish|deploy|削除|delete|不可逆|destructive|value judgment|価値判断)/i;
 const CONFLICT_RE = /(?:branch conflict|真正な競合|conflict requires|unsafe scope|scope mismatch)/i;
@@ -103,7 +103,11 @@ function deterministicDecision({ target, targetState = {}, alreadyAttempted = fa
   }
 
   if (phase === 'NEEDS_YOS' && /bounded recovery exhausted/i.test(next)) {
-    return null;
+    return {
+      decision: 'FAILED_SAFE',
+      reason: 'bounded recovery exhausted and no safe deterministic route remains',
+      allowedAction: null,
+    };
   }
 
   if (['RUNNING', 'AWAITING_QA', 'RECOVERING', 'BRANCH_SYNCING', 'TRANSPORTING', 'QA_BOOTSTRAP_BLOCKED'].includes(phase)) {
@@ -123,6 +127,7 @@ function toLegacyDecision(decision, targetHead) {
     CONTINUE: 'CONTINUE',
     REVISE: 'REVISE',
     WAIT_USER: 'NEEDS_YOUSUKE',
+    FAILED_SAFE: 'HOLD',
     COMPLETE: 'HOLD',
   };
   return {
@@ -137,7 +142,7 @@ function toLegacyDecision(decision, targetHead) {
 }
 
 function shouldNotify(decision) {
-  return Boolean(decision && (decision.decision === 'WAIT_USER' || decision.decision === 'COMPLETE'));
+  return Boolean(decision && (decision.decision === 'WAIT_USER' || decision.decision === 'FAILED_SAFE' || decision.decision === 'COMPLETE'));
 }
 
 module.exports = {
