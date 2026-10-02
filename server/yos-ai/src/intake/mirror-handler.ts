@@ -68,6 +68,57 @@ export async function mirrorNotionInput(options: {
   });
 }
 
+export async function completeNotionMirrorKeys(options: {
+  syncKeys: string[];
+  syncedAt: string;
+  notionToken: string;
+  notionDataSourceId?: string | null;
+  redis: RedisCommandClient;
+  fetchImpl?: FetchLike;
+}): Promise<number> {
+  const syncedAt = validDateTime(options.syncedAt);
+  if (!syncedAt) throw new Error('Invalid completion sync time');
+  if (!Array.isArray(options.syncKeys) || options.syncKeys.length > MAX_ITEMS) throw new Error('Invalid completion key list');
+  const uniqueKeys = [...new Set(options.syncKeys)];
+  for (const key of uniqueKeys) {
+    if (!validIdentifier(key, 4, 200)) throw new Error('Invalid completion sync key');
+  }
+
+  const notionToken = required(options.notionToken, 'Notion token');
+  const fetchImpl = options.fetchImpl ?? fetch;
+  const configuredDataSourceId = options.notionDataSourceId
+    ? normalizeId(options.notionDataSourceId, 'Notion data source ID')
+    : null;
+  const notionDataSourceId = configuredDataSourceId ?? await resolveNotionDataSourceId({
+    notionToken,
+    redis: options.redis,
+    fetchImpl
+  });
+
+  let updated = 0;
+  for (const syncKey of uniqueKeys) {
+    const mapKey = `yos:notion:mirror:v1:item:${syncKey}`;
+    let pageId = await options.redis.command<string | null>(['GET', mapKey]);
+    if (!pageId) {
+      pageId = await findPageIdBySyncKey({syncKey, notionToken, notionDataSourceId, fetchImpl});
+    }
+    if (!pageId) continue;
+    await notionRequest(fetchImpl, notionToken, `https://api.notion.com/v1/pages/${pageId}`, {
+      method: 'PATCH',
+      body: JSON.stringify({
+        properties: {
+          '状態': select('完了'),
+          '最終同期': {date: {start: syncedAt}},
+          'ブロッカー': richText('')
+        }
+      })
+    });
+    await options.redis.command<string>(['SET', mapKey, pageId]);
+    updated += 1;
+  }
+  return updated;
+}
+
 export function createNotionMirrorHandler(options: {
   tokenSha256: string;
   notionToken: string;
@@ -232,7 +283,7 @@ async function upsertItem(options: {
   let pageId = await options.redis.command<string | null>(['GET', mapKey]);
 
   if (!pageId) {
-    pageId = await findPageIdBySyncKey(options);
+    pageId = await findPageIdBySyncKey({...options, syncKey: options.item.syncKey});
   }
 
   const properties = notionProperties(options.item, options.input.syncedAt);
@@ -257,7 +308,7 @@ async function upsertItem(options: {
 }
 
 async function findPageIdBySyncKey(options: {
-  item: NotionMirrorItem;
+  syncKey: string;
   notionToken: string;
   notionDataSourceId: string;
   fetchImpl: FetchLike;
@@ -272,7 +323,7 @@ async function findPageIdBySyncKey(options: {
         page_size: 2,
         filter: {
           property: '同期キー',
-          rich_text: {equals: options.item.syncKey}
+          rich_text: {equals: options.syncKey}
         }
       })
     }
