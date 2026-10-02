@@ -8,6 +8,11 @@ const browser=await browserType.launch({headless:true});
 const context=await browser.newContext({viewport:{width:390,height:844}});
 
 await context.addInitScript(() => {
+  globalThis.__badgeCalls=[];
+  try{
+    Object.defineProperty(navigator,'setAppBadge',{configurable:true,value:async count=>{globalThis.__badgeCalls.push(['set',count])}});
+    Object.defineProperty(navigator,'clearAppBadge',{configurable:true,value:async()=>{globalThis.__badgeCalls.push(['clear',0])}});
+  }catch(e){}
   if(localStorage.getItem('yosDeskIntegratedStateV1')) return;
   localStorage.setItem('yosDeskIntegratedStateV1',JSON.stringify({
     version:2,
@@ -16,7 +21,7 @@ await context.addInitScript(() => {
     chatRegistryVersion:'2026-09-24-real-links-v1',
     activeChatId:'external-yos',
     chats:[
-      {id:'external-yos',project:'ChatGPT',title:'外部YOS',preview:'実チャット',time:'20:30',unread:0,pinned:false,avatar:'Y',tone:'gold',alias:'',url:'https://chatgpt.com/c/yos-ui-smoke',source:'chatgpt'}
+      {id:'external-yos',project:'ChatGPT',title:'外部YOS',preview:'実チャット',time:'20:30',unread:2,pinned:false,avatar:'Y',tone:'gold',alias:'',url:'https://chatgpt.com/c/yos-ui-smoke',source:'chatgpt'}
     ],
     chatThreads:{
       'asset-clarity':[
@@ -82,7 +87,11 @@ try{
   assert.equal(await page.locator('.bottom').count(),0,'bottom DESK navigation must not exist');
   assert.equal(await page.locator('#newBtn').isVisible(),true,'new-chat icon must live in the chat header');
   assert.match((await page.locator('#newBtn').textContent())||'',/＋/);
+  assert.equal(await page.locator('#selectBtn').count(),0,'management should move to long press instead of a permanent edit button');
+  assert.equal(await page.locator('.tab[data-mode="pinned"]').count(),0,'pinned chats should stay at the top without a dedicated tab');
   assert.match((await page.locator('#chatsPage .brand strong').textContent())||'',/チャット/);
+  await page.waitForFunction(()=>document.documentElement.dataset.deskBadgeCount==='2');
+  assert.equal(await page.evaluate(()=>globalThis.__badgeCalls.some(x=>x[0]==='set'&&x[1]===2)),true,'unread total should be sent to the app badge API');
 
   const count=await page.locator('#chatList .chat').count();
   assert.ok(count>=6,'fixed YOS rooms plus registered GPT originals should populate the chat-only list');
@@ -90,6 +99,10 @@ try{
 
   const externalRow=page.locator('.chat[data-id="external-yos"]');
   assert.equal(await externalRow.evaluate(el=>el.classList.contains('currentChat')),true);
+  assert.equal(await externalRow.evaluate(el=>el.classList.contains('unread')),true);
+  assert.equal(await externalRow.evaluate(el=>getComputedStyle(el).backgroundColor),'rgba(0, 0, 0, 0)','active chat must stay flat');
+  assert.equal(await externalRow.evaluate(el=>parseFloat(getComputedStyle(el.querySelector('.chatName')).fontWeight)>=700),true,'unread chat title should be emphasized');
+  assert.equal(await externalRow.evaluate(el=>getComputedStyle(el,'::after').backgroundColor),'rgb(10, 132, 255)','unread row should use a small iOS-blue dot');
   assert.match((await externalRow.locator('.preview').textContent())||'',/ChatGPTの元チャットを開く/);
 
   const row=page.locator('#chatList .chat:not(.currentChat)').first();
@@ -138,10 +151,10 @@ try{
   await page.locator('#threadBack').click();
   await page.waitForSelector('#chatsPage.active');
   assert.equal(await page.locator('.chat[data-id="asset-clarity"]').evaluate(el=>el.classList.contains('currentChat')),true);
+  assert.match((await page.locator('.chat[data-id="asset-clarity"] .preview').textContent())||'',/^YOS：テスト応答です/,'list preview should prefer the latest real conversation over progress text');
 
-  await page.locator('.tab[data-mode="pinned"]').click();
-  assert.ok(await page.locator('#chatList .chat').count()>=3);
-  await page.locator('.tab[data-mode="all"]').click();
+  const firstTitles=await page.locator('#chatList .chat .chatName').evaluateAll(nodes=>nodes.slice(0,3).map(n=>n.textContent));
+  assert.deepEqual(firstTitles.slice(0,3),['YOS','Clarity','Money'],'pinned rooms should stay first without a fixed filter');
   await page.locator('#searchInput').fill('Money');
   assert.ok(await page.locator('#chatList .chat').count()>=1);
   await page.locator('#searchInput').fill('');
