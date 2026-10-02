@@ -231,7 +231,17 @@
         '<button id="threadSend" type="submit">送信</button>'+
       '</form>';
     q('#app').appendChild(page);
-    q('#threadBack').onclick=function(){setPage('chats')};
+    q('#threadBack').onclick=function(){
+      var chat=state.chats.find(function(x){return x.id===activeThreadId});
+      if(chat&&chat.temporary){
+        var id=chat.id;
+        state.chats=state.chats.filter(function(x){return x.id!==id});
+        delete state.chatThreads[id];
+        if(state.activeChatId===id)state.activeChatId='';
+        persist();
+      }
+      setPage('chats');
+    };
     q('#threadExternal').onclick=function(){
       var chat=state.chats.find(function(x){return x.id===activeThreadId});
       if(chat&&chat.url)location.href=chat.url;
@@ -289,7 +299,7 @@
     q('#threadAvatar').className='threadAvatar '+(chat.tone||'');
     q('#threadStatus').textContent=asset
       ?statusText(asset.status)+' · '+Number(asset.progress||0)+'%'
-      :(chat.url?'ChatGPT実チャット':'YOS AI');
+      :(chat.temporary?'一時チャット · 履歴に残しません':(chat.url?'ChatGPT実チャット':'YOS AI'));
     q('#threadExternal').hidden=!chat.url;
     q('#threadExternal').title=chat.url?'ChatGPTを開く':'';
     var items=thread(chat.id);
@@ -305,9 +315,37 @@
     if(!chat)return;
     activeThreadId=id;
     chat.unread=0;
+    state.activeChatId=id;
     persist();
     setPage('thread');
   }
+  function createLiveChat(options){
+    options=options||{};
+    var temporary=Boolean(options.temporary);
+    var id=uid(temporary?'temp-chat':'yos-chat');
+    var chat={
+      id:id,
+      project:'YOS',
+      title:temporary?'一時チャット':'新しいチャット',
+      preview:temporary?'この会話は履歴に残りません':'メッセージを送って会話を始める',
+      time:'',
+      unread:0,
+      pinned:false,
+      avatar:'Y',
+      tone:'gold',
+      alias:'',
+      url:'',
+      liveAi:true,
+      temporary:temporary,
+      autoTitle:!temporary
+    };
+    state.chats.unshift(chat);
+    state.chatThreads[id]=[];
+    openThread(id);
+    return id;
+  }
+  globalThis.yosDeskCreateChat=createLiveChat;
+  globalThis.yosDeskOpenThread=openThread;
 
   var baseRenderChats=renderChats;
   renderProjects=function(){
@@ -406,6 +444,12 @@
     var chat=state.chats.find(function(x){return x.id===activeThreadId});
     if(!chat)return;
     var previousSummary=summaryBeforeSend(chat.id);
+    if(chat.autoTitle){
+      var inferredTitle=text.replace(/\s+/g,' ').trim();
+      if(inferredTitle.length>28)inferredTitle=inferredTitle.slice(0,28)+'…';
+      if(inferredTitle)chat.title=inferredTitle;
+      chat.autoTitle=false;
+    }
     input.value='';
     input.style.height='44px';
     pushMessage(chat.id,{role:'user',text:text,at:new Date().toISOString()});
