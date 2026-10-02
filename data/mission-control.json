@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-10-03T02:30:24+09:00",
+  "updated_at": "2026-10-03T02:31:36+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -21,6 +21,16 @@
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/553",
       "updated_at": "2026-10-02T01:11:02Z"
+    },
+    {
+      "id": "github-pr-580",
+      "title": "PR #580 fix(widget): wrap YOS Dashboard tasks without shrinking text",
+      "type": "GitHub PR",
+      "status": "review",
+      "priority": 1,
+      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/580",
+      "updated_at": "2026-10-02T17:31:21Z"
     },
     {
       "id": "github-pr-403",
@@ -234,7 +244,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #553をレビューして公開判断する",
+      "next_action": "PR #580をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -244,7 +254,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-10-03T02:30:24+09:00",
+      "last_update": "2026-10-03T02:31:36+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -319,13 +329,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 7件・Open PR 9件を自動同期中",
+      "next_action": "Open Issue 7件・Open PR 10件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-10-03T02:30:24+09:00",
+      "last_update": "2026-10-03T02:31:36+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -339,7 +349,7 @@
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #553をレビューして公開判断する",
+      "next_action": "PR #580をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -348,7 +358,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-10-03T02:30:24+09:00",
+      "last_update": "2026-10-03T02:31:36+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -430,5 +440,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "a7f87c134a76514d8615ebd6a70086d8f55549bdc0a02312ef385f199e356b19"
+  "github_snapshot_hash": "7ea443e6694f0ed4310481272da23bfd1559c9eb7f5991d2daa3a2db73e7f06d"
 }
