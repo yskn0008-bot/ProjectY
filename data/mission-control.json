@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-10-02T09:51:45+09:00",
+  "updated_at": "2026-10-02T10:02:21+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -12,6 +12,16 @@
     ]
   },
   "inbox": [
+    {
+      "id": "github-pr-549",
+      "title": "PR #549 One Enter: Loop Engineeringを既存実行系へ統合",
+      "type": "GitHub PR",
+      "status": "review",
+      "priority": 1,
+      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/549",
+      "updated_at": "2026-10-02T01:01:51Z"
+    },
     {
       "id": "github-pr-403",
       "title": "PR #403 fix(life): make calendar sync failures actionable",
@@ -214,7 +224,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "Issue #10を進める：Mission Control v2：GitHubのIssue・PR・Commitを自動集約する",
+      "next_action": "PR #549をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -224,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-10-02T09:51:45+09:00",
+      "last_update": "2026-10-02T10:02:21+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -299,13 +309,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 6件・Open PR 8件を自動同期中",
+      "next_action": "Open Issue 6件・Open PR 9件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-10-02T09:51:45+09:00",
+      "last_update": "2026-10-02T10:02:21+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -314,12 +324,12 @@
       "domain": "Infrastructure",
       "type": "development",
       "purpose": "YOSと各Labの設計に基づいて実装、修正、テストを行う",
-      "status": "active",
+      "status": "review",
       "health": "attention",
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "Issue #10を進める：Mission Control v2：GitHubのIssue・PR・Commitを自動集約する",
+      "next_action": "PR #549をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -328,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-10-02T09:51:45+09:00",
+      "last_update": "2026-10-02T10:02:21+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -410,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "e10d2d2bfe4978b79ec3c6455550e0ca1f7b087e28d1994c78d1d1c6a1a528c1"
+  "github_snapshot_hash": "005a44bc5ba4618d9cfc8c5940a33eb709fdba3391d094de51796faba68a9778"
 }
