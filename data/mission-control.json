@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-10-03T00:55:33+09:00",
+  "updated_at": "2026-10-03T00:58:30+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -21,16 +21,6 @@
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/553",
       "updated_at": "2026-10-02T01:11:02Z"
-    },
-    {
-      "id": "github-pr-577",
-      "title": "PR #577 BASE HOME: auto-discover YOS Tasks data source",
-      "type": "GitHub PR",
-      "status": "review",
-      "priority": 1,
-      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/577",
-      "updated_at": "2026-10-02T15:55:13Z"
     },
     {
       "id": "github-pr-403",
@@ -130,7 +120,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-10-02T15:54:31Z"
+      "updated_at": "2026-10-02T15:55:58Z"
     },
     {
       "id": "github-issue-234",
@@ -185,39 +175,39 @@
   ],
   "recently_completed": [
     {
-      "id": "github-commit-3aaa23dceacc",
-      "title": "Merge PR #576: BASE HOME Notion live mirror foundation",
-      "completed_at": "2026-10-02T15:43:36Z",
-      "result": "GitHub mainへ反映（3aaa23d）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/3aaa23dceacc7d60f64434a69ceb2e89aeaa2346"
+      "id": "github-commit-b0d9d0289e11",
+      "title": "Merge PR #577: auto-discover YOS Tasks data source",
+      "completed_at": "2026-10-02T15:57:59Z",
+      "result": "GitHub mainへ反映（b0d9d02）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/b0d9d0289e11f3d0f10d35eeab4c4cf2cd869ff0"
     },
     {
-      "id": "github-commit-bacf606edf8c",
-      "title": "docs(yos-ai): define BASE HOME live mirror contract",
-      "completed_at": "2026-10-02T15:36:30Z",
-      "result": "GitHub mainへ反映（bacf606）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/bacf606edf8c07bf8bdca6da35b995468a5fc445"
+      "id": "github-commit-ce431528fba2",
+      "title": "docs(yos-ai): document automatic YOS Tasks discovery",
+      "completed_at": "2026-10-02T15:52:44Z",
+      "result": "GitHub mainへ反映（ce43152）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/ce431528fba2d22b1e1782a5a2415edae40d14d2"
     },
     {
-      "id": "github-commit-873bab71d7ab",
-      "title": "test(yos-ai): cover Notion live mirror idempotency",
-      "completed_at": "2026-10-02T15:36:01Z",
-      "result": "GitHub mainへ反映（873bab7）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/873bab71d7abfc68275b621c8271aea0783cd36c"
+      "id": "github-commit-d93754d6a2af",
+      "title": "test(yos-ai): cover Notion data source discovery",
+      "completed_at": "2026-10-02T15:52:24Z",
+      "result": "GitHub mainへ反映（d93754d）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/d93754d6a2af2a58dd6533f518c22779a36a001d"
     },
     {
-      "id": "github-commit-1c46c1a0ac2d",
-      "title": "feat(yos-ai): expose Notion mirror through intake endpoint",
-      "completed_at": "2026-10-02T15:35:14Z",
-      "result": "GitHub mainへ反映（1c46c1a）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/1c46c1a0ac2d530305f65aefecf533028da7b009"
+      "id": "github-commit-93300ad5a1dd",
+      "title": "feat(yos-ai): make Notion tasks ID optional",
+      "completed_at": "2026-10-02T15:51:58Z",
+      "result": "GitHub mainへ反映（93300ad）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/93300ad5a1ddac2d5b72efa0ef3566df0aaba460"
     },
     {
-      "id": "github-commit-178f31aa45d2",
-      "title": "feat(yos-ai): wire Notion mirror production handler",
-      "completed_at": "2026-10-02T15:35:11Z",
-      "result": "GitHub mainへ反映（178f31a）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/178f31aa45d2c4025a56632f7d9c96444ea74eec"
+      "id": "github-commit-3b0d867ec47d",
+      "title": "feat(yos-ai): auto-discover YOS Tasks data source",
+      "completed_at": "2026-10-02T15:51:47Z",
+      "result": "GitHub mainへ反映（3b0d867）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/3b0d867ec47dab638ea9f03f0ac307dcf4448c7f"
     },
     {
       "id": "complete-002",
@@ -244,7 +234,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #577をレビューして公開判断する",
+      "next_action": "PR #553をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -254,7 +244,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-10-03T00:55:33+09:00",
+      "last_update": "2026-10-03T00:58:30+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -329,13 +319,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 7件・Open PR 10件を自動同期中",
+      "next_action": "Open Issue 7件・Open PR 9件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-10-03T00:55:33+09:00",
+      "last_update": "2026-10-03T00:58:30+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -349,7 +339,7 @@
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #577をレビューして公開判断する",
+      "next_action": "PR #553をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -358,7 +348,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-10-03T00:55:33+09:00",
+      "last_update": "2026-10-03T00:58:30+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -440,5 +430,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "e1bef5a1330f31c677e54174c034f36d25eb2c0d2241518a07bc18fd2aa1d599"
+  "github_snapshot_hash": "6ab033779acfbf888c40180884d7659c2a7132fc279ae9f2485178a53bbd8813"
 }
