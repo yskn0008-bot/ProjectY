@@ -54,7 +54,9 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add data/mission-control.json
           git commit -m "data: sync GitHub state"
-          git push origin HEAD:main
+          if ! git push origin HEAD:main; then
+            echo "::warning::main advanced during Mission Control sync; continuing Pages deploy with this synchronized snapshot."
+          fi
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
