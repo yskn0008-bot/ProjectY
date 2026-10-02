@@ -20,7 +20,7 @@ Only ✅ counts toward device coverage.
 | Media | ⬜ | Music/YouTube/Spotify app opening is covered by Open App; media control is not integrated | Add media child/category |
 | Files / Clipboard / Share | ⬜ | Files app opening is covered by Open App; file/clipboard/share commands are not integrated | Add category |
 | Camera / Photos | ⬜ | Photos app opening is covered by Open App; camera/photo actions are not integrated | Add category |
-| Home / appliances | ⬜ | Existing YOS/MY REMOTE assets are separate; not integrated into this Clarity fixed-child route | Add Home child/category |
+| Home / appliances | 🟡 | Unified `NEXT_HOME` route + fixed `YOS_Home` child implemented on current integration branch. BRAVIA + Tapo H110 TV/AC/ceiling-light adapters are reused; `floor_lamp` is reserved for the Apple Home/Matter child `YOS_Floor_Lamp`. Hub/vendor selection is hidden behind the Home Router. | Install signed current-head Clarity Next + YOS_Home, configure L535E in Apple Home, then physical E2E for TV / AC / ceiling light / floor lamp |
 | Money / YOS functions | ⬜ | Existing Money/MY WAY assets remain separate; MY WAY display handoff remains in parent | Add fixed child/category after Open App |
 | Other iOS operations | ⬜ | Not yet classified/integrated | Add only after supported iOS action is confirmed |
 
