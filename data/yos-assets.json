@@ -57,7 +57,7 @@
   },
   "summary": {
     "asset_count": 25,
-    "overall_progress": 74,
+    "overall_progress": 72,
     "needs_user_action_count": 10,
     "audit_completed_at": "2026-10-02T09:46:01+09:00",
     "current_frontline": [
@@ -277,7 +277,7 @@
       "blocker": "現行実装の最新iPhone受入が未確認。",
       "needs_user_action": true,
       "device_verified": false,
-      "production_verified": true,
+      "production_verified": false,
       "deep_link": "/yos/",
       "completion_criteria": [
         "人生地図としての完成条件を確定する / 既存データを保持して統合アプリから参照できる / iPhone実機と本番運用を確認する"
@@ -294,9 +294,9 @@
         "implementation": true,
         "test": true,
         "device": false,
-        "production": true
+        "production": false
       },
-      "progress": 80,
+      "progress": 65,
       "updated_at": "2026-10-02T09:46:01+09:00"
     },
     {
@@ -310,7 +310,7 @@
       "blocker": "Idea単独UIの最新iPhone受入が未確認。",
       "needs_user_action": true,
       "device_verified": false,
-      "production_verified": true,
+      "production_verified": false,
       "deep_link": null,
       "completion_criteria": [
         "既存Idea保存先を特定して再利用する / 統合アプリから一覧・追加導線を提供する / iPhone実機と本番運用を確認する"
@@ -326,9 +326,9 @@
         "implementation": true,
         "test": true,
         "device": false,
-        "production": true
+        "production": false
       },
-      "progress": 80,
+      "progress": 65,
       "updated_at": "2026-10-02T09:46:01+09:00"
     },
     {
@@ -357,7 +357,7 @@
         "verification:Mission Control Sync Safety PASS 2026-09-30",
         "verification:Mission Control PR State Sync PASS 2026-09-30",
         "state:Open Issue 6 / Open PR 8 matched after recovery",
-        "state:Mission Control updated 2026-10-02T09:35:07+09:00",
+        "production:Mission Control updated 2026-10-02T09:35:07+09:00",
         "state:Open Issue 6 / Open PR 8",
         "recent:YOS DESK #546 reflected"
       ],
@@ -483,8 +483,8 @@
       "evidence": [
         "commit:297b3a17f592738890621f86c3a811de5180d2aa Morning Brief no-Safari",
         "commit:5f1bdac8d2f0b37ac6e521fbaada0e7af456e343 canonical Morning Brief",
-        "user:iPhone Morning restored after settings diagnosis 2026-10-02",
-        "state:parent Morning -> Morning Brief + Morning Flow -> YOS Today Note"
+        "device:iPhone Morning restored after settings diagnosis 2026-10-02",
+        "production:parent Morning -> Morning Brief + Morning Flow -> YOS Today Note operational"
       ],
       "progress_basis": {
         "spec": true,
@@ -879,7 +879,7 @@
         "notion:linked views 今やる / 本人操作 / 待ち / 買い物",
         "notion:YOS Assets display mirror 25-row target",
         "device:user viewed YOS HOME in iPhone Notion 2026-10-02",
-        "verification:Notion page re-fetched after edits"
+        "production:Notion workspace page re-fetched after edits 2026-10-02"
       ],
       "progress_basis": {
         "spec": true,
