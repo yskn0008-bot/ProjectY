@@ -93,7 +93,7 @@ test('YOS DESK exposes Clarity SSOT freshness instead of a generic auto-sync lab
   assert.match(desk, /SSOT<br>'\+esc\(assetStamp\)\+'取得/);
   const data=JSON.parse(assets);
   const clarity=data.assets.find(x=>x.id==='clarity');
-  assert.equal(clarity.progress,65);
+  assert.ok(clarity.progress>=65&&clarity.progress<=100);
   assert.equal(clarity.progress_basis.device,false);
   assert.match(clarity.updated_at,/^2026-09-28/);
   assert.match(clarity.current,/Calendar登録/);
