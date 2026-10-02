@@ -84,7 +84,7 @@ test('YOS DESK chats follow the supplied ChatGPT iPhone history rhythm', async (
   assert.match(inbox, /#chatsPage \.avatar,[\s\S]*display:none !important;/);
   assert.match(inbox, /#chatsPage \.chat\{[\s\S]*grid-template-columns:minmax\(0,1fr\)/);
   assert.match(inbox, /#chatsPage \.tab\.active\{[\s\S]*background:#363638/);
-  assert.match(inbox, /\.currentChatBanner\{display:none !important;/);
+  assert.match(inbox, /\.currentChatBanner\{\s*display:none !important;/);
 });
 
 
