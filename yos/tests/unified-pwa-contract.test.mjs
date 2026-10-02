@@ -98,3 +98,26 @@ test('YOS DESK exposes Clarity SSOT freshness instead of a generic auto-sync lab
   assert.match(clarity.updated_at,/^2026-09-28/);
   assert.match(clarity.current,/Calendar登録/);
 });
+
+
+test('YOS DESK unified inbox keeps one cross-project list with active/read/source badges', async () => {
+  const [desk,js,css,sw] = await Promise.all([
+    read('yos/desk/index.html'),
+    read('yos/desk/unified-inbox.js'),
+    read('yos/desk/unified-inbox.css'),
+    read('service-worker.js')
+  ]);
+  assert.match(desk,/unified-inbox\.css/);
+  assert.match(desk,/unified-inbox\.js/);
+  assert.match(js,/activeChatId/);
+  assert.match(js,/会話中/);
+  assert.match(js,/GPT原文/);
+  assert.match(js,/未読/);
+  assert.match(js,/既読/);
+  assert.match(js,/プロジェクト横断/);
+  assert.match(css,/\.currentChatBanner/);
+  assert.match(css,/\.currentBadge/);
+  assert.match(css,/\.readState/);
+  assert.match(sw,/unified-inbox\.css/);
+  assert.match(sw,/unified-inbox\.js/);
+});
