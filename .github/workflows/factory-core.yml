@@ -5,6 +5,9 @@ on:
     paths:
       - "tools/factory-core/**"
       - "docs/YOS_LOOP_ENGINE_v1.md"
+      - "AGENTS.md"
+      - ".github/scripts/projecty-development-supervisor.cjs"
+      - ".github/scripts/projecty-development-supervisor.test.cjs"
       - ".github/workflows/factory-core.yml"
   workflow_dispatch:
 
@@ -30,8 +33,11 @@ jobs:
       - name: Syntax
         run: python3 -m py_compile tools/factory-core/yos_loop_engine.py tools/factory-core/tests/test_yos_loop_engine.py
 
-      - name: Unit tests
+      - name: Loop Engine unit and A-F self-tests
         run: python3 -m unittest discover -s tools/factory-core/tests -v
+
+      - name: ProjectY development supervisor contract
+        run: node --test .github/scripts/projecty-development-supervisor.test.cjs
 
       - name: Bounded recovery synthetic E2E
         shell: bash
@@ -56,6 +62,12 @@ jobs:
           raise SystemExit(0 if Path("allowed/state.txt").read_text(encoding="utf-8") == "good" else 1)
           PY
 
+          cat > /tmp/yos-loop-audit.py <<'PY'
+          from pathlib import Path
+          value = Path("allowed/state.txt").read_text(encoding="utf-8")
+          raise SystemExit(0 if value == "good" and len(value) == 4 else 1)
+          PY
+
           cat > /tmp/yos-loop-repair.py <<'PY'
           from pathlib import Path
           Path("allowed/state.txt").write_text("good", encoding="utf-8")
@@ -64,28 +76,50 @@ jobs:
           cat > /tmp/yos-loop-job.json <<JSON
           {
             "job_id": "ci-bounded-recovery",
-            "goal": "prove one failed verify is recovered without owner intervention",
-            "acceptance": ["verification passes after bounded recovery"],
+            "goal": "prove one failed verify is recovered without owner intervention and independently audited",
+            "acceptance": [
+              "verification passes after bounded recovery",
+              "independent audit passes"
+            ],
             "scope": ["allowed/**"],
             "forbidden_paths": ["forbidden/**"],
             "implementation_command": ["python3", "/tmp/yos-loop-impl.py"],
             "verification_commands": [["python3", "/tmp/yos-loop-check.py"]],
-            "recovery_command": ["python3", "/tmp/yos-loop-repair.py"],
-            "max_recovery_attempts": 2,
+            "audit_commands": [["python3", "/tmp/yos-loop-audit.py"]],
+            "recovery_strategies": [
+              {
+                "name": "repair",
+                "kind": "fix",
+                "command": ["python3", "/tmp/yos-loop-repair.py"],
+                "failure_classes": ["verification_failed"],
+                "max_attempts": 1
+              }
+            ],
+            "max_total_recovery_attempts": 4,
+            "max_same_failure": 2,
+            "max_duration_seconds": 60,
+            "max_changed_paths": 10,
             "requires_device_verification": false,
-            "requires_production_verification": false
+            "requires_production_verification": false,
+            "rollback_on_failed_safe": true
           }
           JSON
 
-          python3 tools/factory-core/yos_loop_engine.py             --job /tmp/yos-loop-job.json             --repo "$repo"             --result /tmp/yos-loop-result.json
+          python3 tools/factory-core/yos_loop_engine.py \
+            --job /tmp/yos-loop-job.json \
+            --repo "$repo" \
+            --result /tmp/yos-loop-result.json
 
           python3 - <<'PY'
           import json
           data = json.load(open("/tmp/yos-loop-result.json", encoding="utf-8"))
-          assert data["status"] == "code_verified", data
+          assert data["status"] == "COMPLETE", data
           assert data["code_verified"] is True, data
+          assert data["audit_verified"] is True, data
           assert len(data["recovery_attempts"]) == 1, data
-          assert len(data["verification_rounds"]) == 2, data
+          assert len(data["verification_results"]) == 2, data
+          assert data["terminal_state"] == "COMPLETE", data
+          assert all(x["verified"] for x in data["done_conditions"]), data
           PY
 
       - name: Diff check
