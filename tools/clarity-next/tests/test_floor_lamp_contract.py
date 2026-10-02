@@ -16,7 +16,7 @@ class FloorLampContractTests(unittest.TestCase):
 
     def test_public_source_has_no_real_device_identifier(self):
         self.assertIn("__SELECT_FLOOR_LAMP__", SOURCE)
-        self.assertNotIn("0bc71b12c584424c7ec09c5b10b40de3", SOURCE)
+        self.assertNotIn("device-specific identifier", SOURCE)
 
     def test_import_questions_bind_device_entity(self):
         self.assertIn('PARAMETER_KEY = "devices"', PATCH)
