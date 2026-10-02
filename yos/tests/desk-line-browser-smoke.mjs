@@ -169,6 +169,14 @@ try{
   assert.ok(await page.locator('#chatList .chat').count()>=1,'chat search still works');
   await page.locator('#searchInput').fill('');
 
+  await page.evaluate((localBase)=>{
+    globalThis.YOS_AI_BASE_URL=localBase;
+    globalThis.YOS_AUTH={
+      getGoogleIdToken:async()=>'good-token',
+      resetGoogleIdToken:()=>{}
+    };
+  },base);
+
   await page.locator('#newBtn').click();
   await page.waitForSelector('#createYosChat');
   assert.equal(await page.locator('#createTemporaryChat').isVisible(),true,'NEW should offer a temporary chat');
