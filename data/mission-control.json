@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-10-03T02:31:36+09:00",
+  "updated_at": "2026-10-03T02:32:10+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -21,16 +21,6 @@
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/553",
       "updated_at": "2026-10-02T01:11:02Z"
-    },
-    {
-      "id": "github-pr-580",
-      "title": "PR #580 fix(widget): wrap YOS Dashboard tasks without shrinking text",
-      "type": "GitHub PR",
-      "status": "review",
-      "priority": 1,
-      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/580",
-      "updated_at": "2026-10-02T17:31:21Z"
     },
     {
       "id": "github-pr-403",
@@ -130,7 +120,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-10-02T17:28:28Z"
+      "updated_at": "2026-10-02T17:31:29Z"
     },
     {
       "id": "github-issue-234",
@@ -185,6 +175,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-20243fafa89d",
+      "title": "fix(widget): wrap YOS Dashboard tasks without shrinking text",
+      "completed_at": "2026-10-02T17:31:49Z",
+      "result": "GitHub mainへ反映（20243fa）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/20243fafa89ddce67c9d79ab2a88558bf9c27be5"
+    },
+    {
       "id": "github-commit-ff270ffa16fc",
       "title": "YOS Chat: ホーム画面から独立Webアプリとして起動 (#579)",
       "completed_at": "2026-10-02T17:30:01Z",
@@ -213,13 +210,6 @@
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/2ed8457d822c1d8964990b9efdba65fa7929a50a"
     },
     {
-      "id": "github-commit-567450ff3b88",
-      "title": "feat(yos-ai): mirror Money shadow to Notion in background",
-      "completed_at": "2026-10-02T16:01:12Z",
-      "result": "GitHub mainへ反映（567450f）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/567450ff3b8807efc9e6c752c01263d203887a94"
-    },
-    {
       "id": "complete-002",
       "title": "iPhone向けMission Control Dashboardを実装",
       "completed_at": "2026-07-17T17:55:00+09:00",
@@ -244,7 +234,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #580をレビューして公開判断する",
+      "next_action": "PR #553をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -254,7 +244,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-10-03T02:31:36+09:00",
+      "last_update": "2026-10-03T02:32:10+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -329,13 +319,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 7件・Open PR 10件を自動同期中",
+      "next_action": "Open Issue 7件・Open PR 9件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-10-03T02:31:36+09:00",
+      "last_update": "2026-10-03T02:32:10+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -349,7 +339,7 @@
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #580をレビューして公開判断する",
+      "next_action": "PR #553をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -358,7 +348,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-10-03T02:31:36+09:00",
+      "last_update": "2026-10-03T02:32:10+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -440,5 +430,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "7ea443e6694f0ed4310481272da23bfd1559c9eb7f5991d2daa3a2db73e7f06d"
+  "github_snapshot_hash": "02fde2c21e8200a6d43dd10a807ee5192ff62a6ed4bd43f5efbb60a638926664"
 }
