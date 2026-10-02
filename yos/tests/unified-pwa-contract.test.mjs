@@ -69,6 +69,31 @@ test('manifest icons are install-ready across YOS entry pages', async () => {
 });
 
 
+test('YOS Chat has a dedicated standalone Home Screen manifest', async () => {
+  const [manifest,page,sw] = await Promise.all([
+    read('yos/desk/manifest.webmanifest'),
+    read('yos/desk/index.html'),
+    read('service-worker.js')
+  ]);
+  const parsed=JSON.parse(manifest);
+  assert.equal(parsed.name,'YOS Chat');
+  assert.equal(parsed.short_name,'YOS Chat');
+  assert.equal(parsed.id,'./');
+  assert.equal(parsed.start_url,'./');
+  assert.equal(parsed.scope,'./');
+  assert.equal(parsed.display,'standalone');
+  assert.equal(parsed.background_color,'#000000');
+  assert.equal(parsed.theme_color,'#000000');
+  assert.deepEqual(parsed.icons?.map(icon=>icon.sizes),['180x180','512x512']);
+  assert.match(page,/apple-mobile-web-app-title" content="YOS Chat"/);
+  assert.match(page,/apple-touch-icon[^>]+\.\.\/\.\.\/assets\/yos-icon-180\.png/);
+  assert.match(page,/rel="manifest" href="\.\/manifest\.webmanifest"/);
+  assert.ok(page.includes("serviceWorker.register('../../service-worker.js',{scope:'../../',updateViaCache:'none'})"));
+  assert.match(sw,/\.\/yos\/desk\/manifest\.webmanifest/);
+  assert.match(sw,/\/ProjectY\/yos\/desk\/manifest\.webmanifest/);
+});
+
+
 test('YOS Chat is a chat-only surface with the new-chat icon in the header', async () => {
   const [page,app,css] = await Promise.all([
     read('yos/desk/index.html'),

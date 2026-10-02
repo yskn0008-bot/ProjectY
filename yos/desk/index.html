@@ -6,6 +6,9 @@
 <meta name="theme-color" content="#000000">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="YOS Chat">
+<link rel="apple-touch-icon" sizes="180x180" href="../../assets/yos-icon-180.png">
+<link rel="manifest" href="./manifest.webmanifest">
 <title>YOS Chat</title>
 <link rel="stylesheet" href="./style.css">
 <link rel="stylesheet" href="./compact.css?v=20260929-fit2">
@@ -43,6 +46,11 @@
 <div class="sheetBackdrop" id="sheetBackdrop"><div class="sheet" id="sheet"><div class="handle"></div><div id="sheetBody"></div></div></div>
 <div class="toast" id="toast"></div>
 
+<script>
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>navigator.serviceWorker.register('../../service-worker.js',{scope:'../../',updateViaCache:'none'}).catch(()=>{}));
+}
+</script>
 <script src="../hj/yos-ai-client.js?v=20260928-live1"></script>
 <script src="../hj/yos-auth.js?v=20260930-auth3"></script>
 <script src="./app.js?v=20261002-chatonly2"></script>
