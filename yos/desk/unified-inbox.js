@@ -55,6 +55,37 @@
     };
   }
 
+  function ensureSourceSummary(){
+    var page=q('#chatsPage');
+    if(!page)return null;
+    var box=q('#sourceSummary');
+    if(box)return box;
+    box=document.createElement('div');
+    box.id='sourceSummary';
+    box.className='sourceSummary';
+    var tabs=q('#chatsPage .tabs');
+    if(tabs&&tabs.parentNode)tabs.parentNode.insertBefore(box,tabs.nextSibling);
+    return box;
+  }
+
+  function decorateSourceSummary(){
+    var box=ensureSourceSummary();
+    if(!box)return;
+    var gpt=(state.chats||[]).filter(isChatGpt).length;
+    var yos=(state.chats||[]).length-gpt;
+    box.innerHTML=
+      '<div class="sourceSummaryText">'+
+        '<strong>GPT原文 '+gpt+'</strong><span>YOS内 '+yos+'</span>'+
+      '</div>'+
+      '<button type="button" id="addGptChatBtn">＋ GPT原文</button>';
+    var add=q('#addGptChatBtn');
+    if(add)add.onclick=function(){
+      tap();
+      if(typeof addClipboardChat==='function')addClipboardChat();
+      else if(typeof openNew==='function')openNew();
+    };
+  }
+
   function ensureCurrentBanner(){
     var page=q('#chatsPage');
     if(!page)return null;
@@ -167,6 +198,7 @@
       if(brand)brand.textContent='すべてのチャット';
       var head=q('#chatList')&&q('#chatList').parentElement&&q('#chatList').parentElement.querySelector('.sectionHead span');
       if(head)head.textContent='プロジェクト横断';
+      decorateSourceSummary();
       decorateCurrentBanner();
       decorateRows();
       persist();
