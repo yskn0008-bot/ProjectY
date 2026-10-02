@@ -1,0 +1,5 @@
+#define name Clarity Text
+#define color purple
+
+#include 'actions/text'
+#include 'actions/shortcuts'
