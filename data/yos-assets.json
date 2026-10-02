@@ -159,8 +159,8 @@
       "area": "core",
       "status": "awaiting_device_verification",
       "priority": 1,
-      "current": "Clarity NextはCalendar/Navigationの部分実機PASSに加え、2026-09-29にMoney入力をlocal-first Moneyへ渡すNEXT_MONEYとそのビルド修正がmainへ統合済み。共有入力のPR #534と最新mainへのYOS_Home統合PR #537はDraftのまま。固定子全体・Home家電・Shareを含む総合E2Eは未完了。",
-      "next_action": "既存Clarity Nextで固定子全体のiPhone E2Eを1回通し、Draft #534/#537を残すか統合するかをその結果だけで判断する。",
+      "current": "Clarity NextはCalendar/Navigation/Moneyの部分実機PASSに加え、2026-10-02にNotion YOS HOMEを自然言語で直接開くNEXT_NOTIONがPR #556でmainへ統合され、本人実機確認も完了。共有入力のPR #534とYOS_Home統合PR #537はDraftのまま。固定子全体・Home家電・Shareを含む総合E2Eは未完了。",
+      "next_action": "既存Clarity Nextで固定子全体・Home家電・Shareを含むiPhone総合E2Eを1回通し、Draft #534/#537を残すか統合するかをその結果だけで判断する。",
       "blocker": "部分E2EはPASSだが、全固定子・Home家電・Shareを含む総合実機E2Eが未完了。",
       "needs_user_action": true,
       "device_verified": false,
@@ -185,7 +185,10 @@
         "commit:9ad1f1ddbfc5dcf42bb607f63907d769bd1f9caf NEXT_MONEY",
         "commit:b197251579822db8754d63a1c3d2048c63fee7f4 Clarity Next build fix",
         "Draft PR#534",
-        "Draft PR#537"
+        "Draft PR#537",
+        "PR#556",
+        "merge:7a1f2185069ec27ced5df0bec554c56524e31ddd NEXT_NOTION",
+        "device:2026-10-02 Clarity Next -> Notion YOS HOME open confirmed by user"
       ],
       "progress_basis": {
         "spec": true,
@@ -195,7 +198,7 @@
         "production": false
       },
       "progress": 65,
-      "updated_at": "2026-10-02T09:46:01+09:00"
+      "updated_at": "2026-10-02T16:39:00+09:00"
     },
     {
       "id": "money",
