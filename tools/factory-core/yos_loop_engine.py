@@ -281,7 +281,6 @@ def _record_command(
         "stderr_tail": result.get("stderr_tail", ""),
     }
     state["runtime_evidence"].append(evidence)
-    state["last_known_head"] = state.get("last_known_head")
     checkpoint()
 
 
