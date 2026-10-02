@@ -7,7 +7,7 @@
 
 // Unified Home Router child for Clarity Next.
 // The user never selects a hub. This child chooses the adapter by canonical device identity.
-// floor_lamp is a native Apple Home/Matter lane so its vendor/hub stays replaceable.
+// floor_lamp uses the verified Tapo AppIntent child; the hub/vendor choice remains hidden from the user.
 
 @incoming = "{ShortcutInput}"
 
