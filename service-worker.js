@@ -1,6 +1,6 @@
 'use strict';
 const CACHE_PREFIX='yos-unified-';
-const CACHE_NAME=CACHE_PREFIX+'v30-desk-chats-polish';
+const CACHE_NAME=CACHE_PREFIX+'v31-desk-gpt-style-newchat';
 const STATIC=[
   './','./index.html','./manifest.webmanifest','./assets/yos-icon-180.png','./assets/yos-icon-512.png',
   './yos/','./yos/index.html','./yos/styles.css','./yos/readability-final.css','./yos/guide.html','./yos/guide.css','./yos/guide.js','./yos/guide-v2.css','./yos/guide-v2.js',
@@ -39,8 +39,10 @@ const CRITICAL_NETWORK_FIRST=new Set([
   '/ProjectY/yos/desk/style.css',
   '/ProjectY/yos/desk/compact.css',
   '/ProjectY/yos/desk/live-chat.css',
+  '/ProjectY/yos/desk/unified-inbox.css',
   '/ProjectY/yos/desk/app.js',
   '/ProjectY/yos/desk/live-chat.js',
+  '/ProjectY/yos/desk/unified-inbox.js',
   '/ProjectY/data/yos-assets.json'
 ]);
 self.addEventListener('install',event=>{event.waitUntil((async()=>{const cache=await caches.open(CACHE_NAME);for(const path of STATIC){try{await cache.add(new Request(path,{cache:'reload'}));}catch(error){console.warn('YOS precache skipped',path,error);}}await self.skipWaiting();})());});

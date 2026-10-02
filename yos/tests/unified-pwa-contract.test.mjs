@@ -69,23 +69,40 @@ test('manifest icons are install-ready across YOS entry pages', async () => {
 });
 
 
-test('YOS DESK chats use a calm iPhone-native conversation list', async () => {
+test('YOS DESK chats follow the supplied ChatGPT iPhone history rhythm', async () => {
   const [desk,compact,inbox] = await Promise.all([
     read('yos/desk/index.html'),
     read('yos/desk/compact.css'),
     read('yos/desk/unified-inbox.css')
   ]);
   assert.match(desk, /<strong>チャット<\/strong>/);
+  assert.match(desk, /data-mode="all">チャット/);
   assert.match(desk, /placeholder="チャットを検索"/);
   assert.match(compact, /#chatsPage \.preview\{[\s\S]*white-space:nowrap;/);
-  assert.match(inbox, /YOS DESK CHATS visual polish v3/);
-  assert.match(inbox, /#chatsPage \.chat\{[\s\S]*border-radius:15px;/);
-  assert.match(inbox, /#chatsPage \.avatar\{[\s\S]*border-radius:14px;/);
-  assert.match(inbox, /#chatsPage \.projects\{[\s\S]*display:none !important;/);
-  assert.match(inbox, /#chatsPage \.readState:not\(\.isUnread\)/);
-  assert.match(inbox, /#chatsPage \.tab\.active:after/);
+  assert.match(inbox, /YOS DESK CHATS v4/);
+  assert.match(inbox, /background:#000/);
+  assert.match(inbox, /#chatsPage \.avatar,[\s\S]*display:none !important;/);
+  assert.match(inbox, /#chatsPage \.chat\{[\s\S]*grid-template-columns:minmax\(0,1fr\)/);
+  assert.match(inbox, /#chatsPage \.tab\.active\{[\s\S]*background:#363638/);
+  assert.match(inbox, /\.currentChatBanner\{\s*display:none !important;?\s*\}/);
 });
 
+
+test('YOS DESK NEW supports persistent and temporary live chats', async () => {
+  const [app,live] = await Promise.all([
+    read('yos/desk/app.js'),
+    read('yos/desk/live-chat.js')
+  ]);
+  assert.match(app,/id="createYosChat"/);
+  assert.match(app,/id="createTemporaryChat"/);
+  assert.match(app,/履歴に残さない/);
+  assert.match(app,/snapshot\.chats=.*filter\(function\(x\)\{return !x\.temporary\}\)/);
+  assert.match(live,/function createLiveChat\(options\)/);
+  assert.match(live,/temporary:temporary/);
+  assert.match(live,/globalThis\.yosDeskCreateChat=createLiveChat/);
+  assert.match(live,/delete state\.chatThreads\[id\]/);
+  assert.match(live,/chat\.autoTitle/);
+});
 
 test('YOS DESK exposes Clarity SSOT freshness instead of a generic auto-sync label', async () => {
   const [desk,assets] = await Promise.all([
