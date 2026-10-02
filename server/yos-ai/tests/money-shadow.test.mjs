@@ -126,3 +126,32 @@ test('Money shadow reuses the existing widget Serverless Function slot',async()=
   assert.match(source,/mode==='money-shadow'\|\|mode==='money-alert'/);
   assert.doesNotMatch(source,/api\/yos\/money-shadow/);
 });
+
+
+test('successful Money shadow save emits sanitized snapshot without making mirror part of save success',async()=>{
+  const fake=fakeStorage();
+  const seen=[];
+  const run=createMoneyShadowHandler({
+    environment:{UPSTASH_REDIS_REST_URL:'https://example.upstash.io',UPSTASH_REDIS_REST_TOKEN:'secret'},
+    fetchImpl:fake.fetchImpl,
+    onSnapshot(value){seen.push(value)}
+  });
+  const response=await run(req('https://api.example/yos/money-shadow',{method:'POST',origin:ORIGIN,body:snapshot()}));
+  assert.equal(response.status,200);
+  assert.equal(seen.length,1);
+  assert.equal(seen[0].schema,'yos-money-shadow-v1');
+  assert.equal(seen[0].balance,4588);
+});
+
+test('synchronous Notion scheduling failure never rolls back Money shadow save',async()=>{
+  const fake=fakeStorage();
+  const run=createMoneyShadowHandler({
+    environment:{UPSTASH_REDIS_REST_URL:'https://example.upstash.io',UPSTASH_REDIS_REST_TOKEN:'secret'},
+    fetchImpl:fake.fetchImpl,
+    onSnapshot(){throw new Error('notion unavailable')}
+  });
+  const response=await run(req('https://api.example/yos/money-shadow',{method:'POST',origin:ORIGIN,body:snapshot()}));
+  assert.equal(response.status,200);
+  const saved=[...fake.store.entries()].find(([key])=>key.startsWith('yos:money-shadow:'));
+  assert.ok(saved);
+});

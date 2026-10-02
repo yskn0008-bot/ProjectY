@@ -2,7 +2,8 @@ import type {Environment} from '../config.js';
 import {loadYosStorageConfig} from '../storage/config.js';
 import {UpstashRestClient} from '../storage/upstash-rest.js';
 import {createClarityIntakeHandler} from './handler.js';
-import {createNotionMirrorHandler} from './mirror-handler.js';
+import {createNotionMirrorHandler, mirrorNotionInput} from './mirror-handler.js';
+import {moneyShadowToMirrorInput, type MoneyShadowSnapshot} from './money-mirror.js';
 
 export function createProductionClarityIntakeHandler(options: {environment: Environment}): (request: Request) => Promise<Response> {
   const storage = loadYosStorageConfig(options.environment);
@@ -45,4 +46,24 @@ export function createProductionNotionMirrorHandler(options: {environment: Envir
     notionDataSourceId: options.environment.YOS_NOTION_TASKS_DATA_SOURCE_ID?.trim() || null,
     redis
   });
+}
+
+
+export function createProductionMoneyNotionMirror(options: {environment: Environment}): (snapshot: MoneyShadowSnapshot) => Promise<void> {
+  const storage = loadYosStorageConfig(options.environment);
+  const redis = new UpstashRestClient({
+    url: storage.upstashUrl,
+    token: storage.upstashToken
+  });
+  const notionToken = required(options.environment, 'YOS_NOTION_API_TOKEN');
+  const notionDataSourceId = options.environment.YOS_NOTION_TASKS_DATA_SOURCE_ID?.trim() || null;
+
+  return async (snapshot: MoneyShadowSnapshot): Promise<void> => {
+    await mirrorNotionInput({
+      input: moneyShadowToMirrorInput(snapshot),
+      notionToken,
+      notionDataSourceId,
+      redis
+    });
+  };
 }
