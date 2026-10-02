@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-10-02T10:08:02+09:00",
+  "updated_at": "2026-10-02T10:09:34+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -12,16 +12,6 @@
     ]
   },
   "inbox": [
-    {
-      "id": "github-pr-550",
-      "title": "PR #550 One Enter: Loop Engineering統合後の資産状態を同期",
-      "type": "GitHub PR",
-      "status": "review",
-      "priority": 1,
-      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/550",
-      "updated_at": "2026-10-02T01:07:17Z"
-    },
     {
       "id": "github-pr-551",
       "title": "PR #551 fix: YOS資産CIとiOS entry testの契約ずれを解消",
@@ -130,7 +120,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-10-02T01:07:41Z"
+      "updated_at": "2026-10-02T01:08:12Z"
     },
     {
       "id": "github-issue-234",
@@ -175,6 +165,20 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-ef6a31052ce9",
+      "title": "Merge PR #550: sync One Enter Loop Engineering asset state",
+      "completed_at": "2026-10-02T01:09:08Z",
+      "result": "GitHub mainへ反映（ef6a310）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/ef6a31052ce9c3188a28ca1e05a939d9465258f2"
+    },
+    {
+      "id": "github-commit-beef952635e8",
+      "title": "Sync One Enter asset state after Loop Engineering integration",
+      "completed_at": "2026-10-02T01:06:59Z",
+      "result": "GitHub mainへ反映（beef952）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/beef952635e845372f85c1fb68173c900d2bc725"
+    },
+    {
       "id": "github-commit-aa99a51a549e",
       "title": "Merge PR #549: One Enter Loop Engineering integration",
       "completed_at": "2026-10-02T01:04:26Z",
@@ -194,20 +198,6 @@
       "completed_at": "2026-10-02T01:01:32Z",
       "result": "GitHub mainへ反映（83e7c30）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/83e7c304fcb5c88f0dff9ef842f21a9161d4c2ed"
-    },
-    {
-      "id": "github-commit-edbfdfd3d9db",
-      "title": "Synchronize Loop Engine contract with true One Enter execution",
-      "completed_at": "2026-10-02T01:00:40Z",
-      "result": "GitHub mainへ反映（edbfdfd）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/edbfdfd3d9dbc0fb475479dec180d780f443bbd3"
-    },
-    {
-      "id": "github-commit-d284434faa89",
-      "title": "Document durable audited One Enter execution loop",
-      "completed_at": "2026-10-02T01:00:00Z",
-      "result": "GitHub mainへ反映（d284434）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/d284434faa89e854a4370db6b6d4f144339f8efa"
     },
     {
       "id": "complete-002",
@@ -244,7 +234,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-10-02T10:08:02+09:00",
+      "last_update": "2026-10-02T10:09:34+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -319,13 +309,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 6件・Open PR 10件を自動同期中",
+      "next_action": "Open Issue 6件・Open PR 9件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-10-02T10:08:02+09:00",
+      "last_update": "2026-10-02T10:09:34+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -348,7 +338,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-10-02T10:08:02+09:00",
+      "last_update": "2026-10-02T10:09:34+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -430,5 +420,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "6ce353776d4e5d4f76a0b1d5894c7467ddfcda4947f6c2758962adf036315e5d"
+  "github_snapshot_hash": "b7ed97af0694fe649ad1e0494a7ed212650d60b5ba4b926e4dbdd23c6b1cf225"
 }
