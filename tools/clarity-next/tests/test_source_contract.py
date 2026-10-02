@@ -50,6 +50,9 @@ class ClarityNextSourceContractTests(unittest.TestCase):
         self.assertIn('askChatGPT(routerPrompt, false, "Dictionary")', self.source)
         self.assertIn('getValue(parsed, "actions")', self.source)
         self.assertIn('status != "planned"', self.source)
+        self.assertIn("発話の表面形を越えて「最終的に何を実現したいか」を理解", self.source)
+        self.assertIn("複数依頼を1actionへ無理に潰しません", self.source)
+        self.assertIn("confidenceだけを理由に確認を増やしません", self.source)
 
     def test_capability_gate_is_explicit(self):
         for executor in ("YOS_OpenApp", "NEXT_DEVICE", "NEXT_TIMER", "NEXT_CALENDAR", "NEXT_REMINDER", "NEXT_NAVIGATE", "NEXT_NOTION", "NEXT_MONEY", "NEXT_ANSWER"):
@@ -99,18 +102,20 @@ class ClarityNextSourceContractTests(unittest.TestCase):
         self.assertIn('const alertDate = getDates(reminderNormalized)', self.source)
 
     def test_calendar_reminder_titles_preserve_user_wording(self):
-        self.assertIn("タイトル保持:", self.source)
-        self.assertIn("『明日の14時から15時にテスト予定を入れて』→ title=『テスト予定』", self.source)
-        self.assertIn("内容の一部になっている語を勝手に削除・言い換えしない", self.source)
+        self.assertIn("calendar/reminderのtitleはユーザーが述べた内容語をできるだけそのまま保持", self.source)
+        self.assertIn("日時や操作語だけを除きます", self.source)
 
-    def test_notion_home_voice_aliases_do_not_require_yos_token(self):
-        self.assertIn("『ベースホーム開いて』", self.source)
-        self.assertIn("『BASE HOME開いて』", self.source)
-        self.assertIn("『HOME開いて』", self.source)
-        self.assertIn("『Notionホーム開いて』", self.source)
-        self.assertIn("『Notionのホーム開いて』", self.source)
-        self.assertIn("『作戦室開いて』", self.source)
-        self.assertIn("通常の音声入口は『ベースホーム開いて』を推奨", self.source)
+    def test_semantic_planner_is_goal_first_not_example_first(self):
+        self.assertIn("Capability一覧は言語理解を縛る例文集ではなく、実行できる手段の登録簿", self.source)
+        self.assertIn("理解は柔軟に、実行は許可されたCapabilityだけ", self.source)
+        self.assertIn("キーワードや例文の一致だけで分類せず", self.source)
+        self.assertIn("needs_reviewを過剰に使いません", self.source)
+        self.assertIn("専用Capabilityをgenericなopen_appより優先", self.source)
+
+    def test_base_home_is_modeled_as_semantic_entity(self):
+        self.assertIn("BASE HOMEはYOSの既存作戦室", self.source)
+        self.assertIn("同じ対象を指すことが意味上明確ならNEXT_NOTION", self.source)
+        self.assertIn("generic open_appより優先", self.source)
 
     def test_base_home_alias_recovers_from_open_app_misroute(self):
         self.assertIn('@baseHomeAlias = false', self.source)
