@@ -2,6 +2,7 @@ import type {Environment} from '../config.js';
 import {loadYosStorageConfig} from '../storage/config.js';
 import {UpstashRestClient} from '../storage/upstash-rest.js';
 import {createClarityIntakeHandler} from './handler.js';
+import {createNotionMirrorHandler} from './mirror-handler.js';
 
 export function createProductionClarityIntakeHandler(options: {environment: Environment}): (request: Request) => Promise<Response> {
   const storage = loadYosStorageConfig(options.environment);
@@ -28,4 +29,20 @@ function requiredHash(environment: Environment, name: string): string {
   const value = required(environment, name);
   if (!/^[a-f0-9]{64}$/iu.test(value)) throw new Error(`Missing or invalid environment variable: ${name}`);
   return value.toLowerCase();
+}
+
+
+export function createProductionNotionMirrorHandler(options: {environment: Environment}): (request: Request) => Promise<Response> {
+  const storage = loadYosStorageConfig(options.environment);
+  const redis = new UpstashRestClient({
+    url: storage.upstashUrl,
+    token: storage.upstashToken
+  });
+
+  return createNotionMirrorHandler({
+    tokenSha256: requiredHash(options.environment, 'YOS_CLARITY_INTAKE_TOKEN_SHA256'),
+    notionToken: required(options.environment, 'YOS_NOTION_API_TOKEN'),
+    notionDataSourceId: required(options.environment, 'YOS_NOTION_TASKS_DATA_SOURCE_ID'),
+    redis
+  });
 }
