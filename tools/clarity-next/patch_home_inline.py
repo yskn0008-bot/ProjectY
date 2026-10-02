@@ -34,6 +34,6 @@ check = plistlib.loads(shortcut.read_bytes())
 blob = repr(check)
 if PLACEHOLDER in blob:
     fail("home inline placeholder survived patch")
-if "YOS Home Bridge" not in blob or "parseHomeCommand" not in blob:
+if "YOS Home Bridge" not in blob or "parseHomePayload" not in blob:
     fail("home bridge content missing after patch")
 print("YOS_Home inline bridge patch: PASS")
