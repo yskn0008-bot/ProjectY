@@ -46,3 +46,14 @@ if !@shareExtracted {
     alert("文字情報を読み取れませんでした", "Clarity Share")
     stop()
 }
+
+@transportTag = "__YOS_CLARITY_SHARE_TEXT_V1__\n"
+if @shareSource == "image" {
+    @transportTag = "__YOS_CLARITY_SHARE_IMAGE_V1__\n"
+}
+if @shareSource == "pdf" {
+    @transportTag = "__YOS_CLARITY_SHARE_PDF_V1__\n"
+}
+
+const payload = text("{@transportTag}{@shareExtracted}")
+run("Clarity Next", payload)
