@@ -40,9 +40,10 @@ test("uses larger dashboard typography for iPhone readability", () => {
 });
 
 
-test("task layout keeps large type while allowing two-line titles and adaptive next action", () => {
-  assert.match(source, /copy\.layoutVertically\(\)/);
+test("task layout uses full-width blocks so large titles can wrap to two lines", () => {
+  assert.match(source, /const text = parent\.addText\(task\.title/);
   assert.match(source, /text\.lineLimit = 2/);
+  assert.doesNotMatch(source, /copy\.layoutVertically\(\)/);
   assert.match(source, /visibleTasks\.length === 1 && task\.nextAction/);
   assert.match(source, /action\.lineLimit = 2/);
   assert.match(source, /next\.lineLimit = 2/);
