@@ -155,9 +155,21 @@ body.chat-only .app{
   box-shadow:none;
 }
 #chatsPage .chat:active{background:#171719}
-#chatsPage .chat.currentChat{background:#111113}
+#chatsPage .chat.currentChat{background:transparent}
 #chatsPage .chat.currentChat:before{display:none}
 #chatsPage .chat.pinned:before{display:none}
+#chatsPage .chat.unread .chatName{font-weight:760}
+#chatsPage .chat.unread .preview{color:#a0a0a6}
+#chatsPage .chat.unread:after{
+  content:'';
+  position:absolute;
+  right:6px;
+  top:22px;
+  width:7px;
+  height:7px;
+  border-radius:50%;
+  background:#0a84ff;
+}
 #chatsPage .avatar,
 #chatsPage .chatMeta,
 #chatsPage .tag,
@@ -293,6 +305,12 @@ body.chat-only .app{
   color:#9b9ba0;
   font-size:11px;
   font-weight:600;
+}
+.badgeHint{
+  margin:8px 4px 0 !important;
+  color:#8e8e93 !important;
+  font-size:12px !important;
+  line-height:1.45 !important;
 }
 .toast{
   bottom:calc(env(safe-area-inset-bottom) + 28px);
