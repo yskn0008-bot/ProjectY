@@ -1,14 +1,21 @@
 {
   "schema_version": "1.0.0",
   "ssot": "YOS asset registry",
-  "updated_at": "2026-10-02T09:24:45+09:00",
+  "updated_at": "2026-10-02T09:46:01+09:00",
   "source": {
     "repository": "yskn0008-bot/ProjectY",
     "base_branch": "main",
-    "base_sha": "821bffd9e8473878d733b35e7a24dd0e96d5fcf6",
+    "base_sha": "aaea012cd316cd23efabebabaa0b44aa76be8078",
     "issue": "https://github.com/yskn0008-bot/ProjectY/issues/371",
     "legacy_22_asset_table_verified": false,
-    "note": "Incrementally reconciled with verified GitHub main, current Mission Control recovery, Night Brief iPhone evidence, and the workspace-private Notion YOS HOME prototype through 2026-10-02. The legacy asset table is still not a full exhaustive audit; progress remains stage-based and unverified device/production stages are not counted."
+    "note": "Full asset audit completed 2026-10-02 against current GitHub main/open PRs/issues, current Mission Control, recent confirmed iPhone/user evidence, current Notion workspace state, and the current private YOS Money Local v1.5.1 Scriptable artifact. Older docs are retained only as historical evidence and are no longer treated as current state.",
+    "audit_scope": [
+      "GitHub main/open PRs/open Issues through 2026-10-02",
+      "Mission Control current state",
+      "recent confirmed iPhone/user runtime evidence",
+      "Notion YOS HOME live workspace state",
+      "current private YOS Money Local v1.5.1 Scriptable artifact"
+    ]
   },
   "progress_model": {
     "weights": {
@@ -49,9 +56,19 @@
     ]
   },
   "summary": {
-    "asset_count": 24,
-    "overall_progress": 62,
-    "needs_user_action_count": 7
+    "asset_count": 25,
+    "overall_progress": 74,
+    "needs_user_action_count": 10,
+    "audit_completed_at": "2026-10-02T09:46:01+09:00",
+    "current_frontline": [
+      "YOS Money Local v1.5.1",
+      "Clarity Next",
+      "Morning",
+      "Night Brief",
+      "YOS DESK",
+      "Notion YOS HOME",
+      "YOS Mission Control"
+    ]
   },
   "assets": [
     {
@@ -60,8 +77,8 @@
       "area": "core",
       "status": "complete",
       "priority": 1,
-      "current": "無料版YOS PWAは実用完成。iPhoneホーム画面からスタンドアロン起動し、機内モード状態でもMY WAYが再起動表示されることを実機確認。Life/Money/Hero’s Journey/Idea/System、Clarity/MY REMOTE導線、保存・再起動・オフライン回帰は自動検査済み。",
-      "next_action": "通常利用へ移行。Apple Developer有料署名/TestFlightは必要性が出た時だけ再開する。",
+      "current": "YOS本体のPWA/統合入口は既存実機・Production証拠を維持しており、現時点で回帰証拠なし。2026-10-02時点では利用者向けの入口としてMY WAYに加え、YOS DESKとNotion YOS HOMEも別資産として運用・試用中。",
+      "next_action": "通常利用を継続し、Notion YOS HOMEとYOS DESKの実使用結果を見て入口の重複だけ整理する。新しいYOS本体を作り直さない。",
       "blocker": null,
       "needs_user_action": false,
       "device_verified": true,
@@ -88,7 +105,9 @@
         "production:GitHub Pages deploy workflow run 35468087159 success",
         "implementation:YOS 180x180 and 512x512 install icons bundled and cached",
         "device:iPhone standalone YOS launched from Home Screen in airplane mode and displayed MY WAY 2026-09-20 05:56 JST",
-        "production:offline standalone relaunch acceptance passed on iPhone 2026-09-20"
+        "production:offline standalone relaunch acceptance passed on iPhone 2026-09-20",
+        "audit:2026-10-02 current main checked; no regression evidence",
+        "state:YOS DESK and Notion YOS HOME tracked as separate assets"
       ],
       "progress_basis": {
         "spec": true,
@@ -98,7 +117,7 @@
         "production": true
       },
       "progress": 100,
-      "updated_at": "2026-09-20T05:56:00+09:00"
+      "updated_at": "2026-10-02T09:46:01+09:00"
     },
     {
       "id": "my-way",
@@ -106,8 +125,8 @@
       "area": "core",
       "status": "complete",
       "priority": 1,
-      "current": "MY WAYはYOSの正式HOMEとして、iPhoneホーム画面からスタンドアロン起動・機内モード再起動まで実機確認済み。",
-      "next_action": "Notion YOS HOMEをiPhoneで試用し、日常の入口として代替できるか比較する。代替成立が確認できるまでは現行MY WAYを維持する。",
+      "current": "MY WAYは既存PWAとして実機・Production確認済みで現在も利用可能。ただし2026-10-02にNotion YOS HOMEを実際に作成し、日常の1画面入口として役割が重複するか試用中。",
+      "next_action": "Notion YOS HOMEを実際に使い、MY WAYにしかない価値が残るか確認する。重複だけならMY WAYを縮小または終了候補にする。",
       "blocker": null,
       "needs_user_action": false,
       "device_verified": true,
@@ -121,7 +140,8 @@
         "YOS Cockpit Safety: Chromium/WebKit PASS 2026-09-18",
         "device:iPhone MY WAY screen visually confirmed 2026-09-18",
         "device:iPhone Home Screen standalone MY WAY in airplane mode 2026-09-20 05:56 JST",
-        "production:YOS PWA offline relaunch accepted 2026-09-20"
+        "production:YOS PWA offline relaunch accepted 2026-09-20",
+        "decision:2026-10-02 Notion YOS HOMEとの役割比較を開始"
       ],
       "progress_basis": {
         "spec": true,
@@ -131,7 +151,7 @@
         "production": true
       },
       "progress": 100,
-      "updated_at": "2026-10-02T09:24:45+09:00"
+      "updated_at": "2026-10-02T09:46:01+09:00"
     },
     {
       "id": "clarity",
@@ -139,9 +159,9 @@
       "area": "core",
       "status": "awaiting_device_verification",
       "priority": 1,
-      "current": "Clarity / Clarity Next の実装とCI修正は継続更新済み。9/28 iPhone実機でCalendar登録（9/29 14:00–15:00）PASS。NavigationはClarity側でdestination→APPLIED→REQUEST_DONEまで到達し、沖縄県庁はGoogle Mapsのナビ開始を実機確認。那覇空港は具体的な行き先指定が必要。固定子全体と本番運用のE2Eは未完了。",
-      "next_action": "Clarity Nextの残る固定子とナビ例外を含む、入力→判断→Safety→Router→実行→Verify→LedgerをiPhoneで一括E2Eし、全条件PASS時だけdevice stageを65%→85%へ更新する。",
-      "blocker": "iPhone全体E2Eと本番運用確認が未完了。部分的な実機PASSは確認済みだが、device stage完了条件には未到達。",
+      "current": "Clarity NextはCalendar/Navigationの部分実機PASSに加え、2026-09-29にMoney入力をlocal-first Moneyへ渡すNEXT_MONEYとそのビルド修正がmainへ統合済み。共有入力のPR #534と最新mainへのYOS_Home統合PR #537はDraftのまま。固定子全体・Home家電・Shareを含む総合E2Eは未完了。",
+      "next_action": "既存Clarity Nextで固定子全体のiPhone E2Eを1回通し、Draft #534/#537を残すか統合するかをその結果だけで判断する。",
+      "blocker": "部分E2EはPASSだが、全固定子・Home家電・Shareを含む総合実機E2Eが未完了。",
       "needs_user_action": true,
       "device_verified": false,
       "production_verified": false,
@@ -161,7 +181,11 @@
         "PR#515",
         "PR#517",
         "device:2026-09-28 Clarity Next Calendar created 2026-09-29 14:00-15:00 on iPhone",
-        "device:2026-09-28 Clarity navigation reached destination/APPLIED/REQUEST_DONE; Okinawa Prefectural Government Google Maps navigation start confirmed"
+        "device:2026-09-28 Clarity navigation reached destination/APPLIED/REQUEST_DONE; Okinawa Prefectural Government Google Maps navigation start confirmed",
+        "commit:9ad1f1ddbfc5dcf42bb607f63907d769bd1f9caf NEXT_MONEY",
+        "commit:b197251579822db8754d63a1c3d2048c63fee7f4 Clarity Next build fix",
+        "Draft PR#534",
+        "Draft PR#537"
       ],
       "progress_basis": {
         "spec": true,
@@ -170,42 +194,41 @@
         "device": false,
         "production": false
       },
-      "progress": 80,
-      "updated_at": "2026-09-28T22:41:00+09:00"
+      "progress": 65,
+      "updated_at": "2026-10-02T09:46:01+09:00"
     },
     {
       "id": "money",
       "name": "Money",
       "area": "finance",
-      "status": "awaiting_production_verification",
+      "status": "building",
       "priority": 1,
-      "current": "MY MONEYは既存yos-money-v2を維持したまま、未来予測と毎月収支をrecurringへ追加済み。電気は毎月27日固定・金額変動、ガスは毎月15日固定・金額変動として扱う。変動返済も固定化していない。",
-      "next_action": "iPhone実機で固定収支と未来予測の表示を確認し、その後Money入力のローカル即時保存・履歴ファイル化を接続する。",
-      "blocker": "現在の正式画面入口はWeb配信を併用。",
-      "needs_user_action": false,
-      "device_verified": true,
+      "current": "現在の前線はWeb版yos-money-v2ではなく、iPhone / ScriptableのYOS Money Local v1.5.1。正本はiCloud Drive / Scriptable / YOS / Money / money.json、履歴はMoney History.jsonl、保存前バックアップも保持する構成。2026-10-02の現行Scriptableファイルがv1.5.1であることは確認できたが、直近の起動・表示エラー調査が継続中で、安定起動はまだ再確認できていない。",
+      "next_action": "v1.5.1の現在の起動エラーを直し、iPhoneで起動→表示→保存→履歴追記→再起動後保持までを確認する。",
+      "blocker": "YOS Money Local v1.5.1のiPhone安定起動が未確認。旧Web版の状態を現在のMoneyとして扱わない。",
+      "needs_user_action": true,
+      "device_verified": false,
       "production_verified": false,
-      "deep_link": "/yos/",
+      "deep_link": null,
       "completion_criteria": [
-        "既存Moneyデータを再利用する / 収支状態を統合アプリから確認できる / iPhone実機と本番運用を確認する"
+        "YOS Money Local v1.5.1がiPhone Scriptableで安定起動する / money.jsonを唯一の現行ローカル正本として読書きする / Money History.jsonlへ履歴を残す / 再起動後もデータを保持する"
       ],
       "evidence": [
-        "PR#319",
-        "PR#328",
-        "PR#529",
-        "PR#531",
-        "PR#532",
-        "device:iPhone MY MONEY screen visually confirmed 2026-09-18"
+        "private-artifact:YOS Money Local v1.5.1 current Scriptable package confirmed 2026-10-02",
+        "private-runtime:iCloud Money/money.json + Money History.jsonl",
+        "user:iPhone runtime troubleshooting active 2026-10-02",
+        "commit:68c2019efa1a47f2314df023d596c1e578ddf69c web local-first history implementation (historical/related)",
+        "commit:0eaef35c88539713ee2bc74ebf8b6d2b4530414b web empty-state recovery (historical/related)"
       ],
       "progress_basis": {
         "spec": true,
         "implementation": true,
-        "test": true,
-        "device": true,
+        "test": false,
+        "device": false,
         "production": false
       },
-      "progress": 85,
-      "updated_at": "2026-09-29T15:52:00+09:00"
+      "progress": 50,
+      "updated_at": "2026-10-02T09:46:01+09:00"
     },
     {
       "id": "life",
@@ -213,9 +236,9 @@
       "area": "life",
       "status": "awaiting_production_verification",
       "priority": 2,
-      "current": "MY LIFE統合画面はiPhone実機で表示確認済み。MY WAYと共通のタイトル構造・位置へ統一し、Morning/Night handoffの自動検査も通過。",
-      "next_action": "Life画面をローカル実行経路へ接続し、最新タイトル位置をiPhone実機で再確認する。",
-      "blocker": "現在の正式画面入口はWeb配信を併用。",
+      "current": "MY LIFE本体は既存Web/PWA実装と実機表示証拠あり。Night Check-in/MY LIFE保存経路、Calendar重複除去、Night native record同期の実装がmainに存在する。現在の夜の表側はNight Briefで、MY LIFEへの直接保存統合はDraft PR #544が未統合。",
+      "next_action": "Night Briefの実運用結果を優先し、PR #544のMY LIFE直接保存が本当に必要か確認してから統合判断する。",
+      "blocker": "Night Brief→MY LIFE直接保存はDraft #544で未統合。現行Life画面の最新実機再確認は未実施。",
       "needs_user_action": false,
       "device_verified": true,
       "production_verified": false,
@@ -226,7 +249,9 @@
       "evidence": [
         "PR#329",
         "Morning/Night handoff: Chromium/WebKit PASS 2026-09-18",
-        "device:iPhone MY LIFE screen visually confirmed 2026-09-18"
+        "device:iPhone MY LIFE screen visually confirmed 2026-09-18",
+        "commit:ab63bceec3c3a844d8706e293d8f9d3ce7178ab1 Night record sync",
+        "Draft PR#544"
       ],
       "progress_basis": {
         "spec": true,
@@ -236,66 +261,72 @@
         "production": false
       },
       "progress": 85,
-      "updated_at": "2026-09-18T23:19:00+09:00"
+      "updated_at": "2026-10-02T09:46:01+09:00"
     },
     {
       "id": "heros-journey",
       "name": "Hero’s Journey",
       "area": "journey",
-      "status": "planned",
+      "status": "awaiting_device_verification",
       "priority": 2,
-      "current": "人生地図＋12 archetypesへの再設計Issueが存在する。完成実装・テストは未確認。",
-      "next_action": "Issue #230の完成条件を確定し、既存データを壊さずP2の入口だけ接続できる状態にする。",
-      "blocker": "再設計の完成条件と現行実装の差分が残る。",
-      "needs_user_action": false,
+      "current": "Hero's Journeyは計画だけではなく、MVP、複数Journey UX Amendment、専用yos/hj画面、端末内保存、共有state接続までmainに実装済み。HJ smoke testも存在する。最近のiPhone実機受入だけ未確認。",
+      "next_action": "現行yos/hjをiPhoneで1回開き、既存データ保持・主要導線・保存を確認する。再設計を新規に起こす前に現行実装を採否判定する。",
+      "blocker": "現行実装の最新iPhone受入が未確認。",
+      "needs_user_action": true,
       "device_verified": false,
-      "production_verified": false,
+      "production_verified": true,
       "deep_link": "/yos/",
       "completion_criteria": [
         "人生地図としての完成条件を確定する / 既存データを保持して統合アプリから参照できる / iPhone実機と本番運用を確認する"
       ],
       "evidence": [
-        "Issue#230"
+        "commit:d8730df2366180b8d562aeefffb6eedf0f20a8e4 Hero's Journey MVP",
+        "commit:37078c8b70cd16eaa1aeb5f6abca8d608c2bacbf multi-journey UX",
+        "commit:a86c73f4ac7c0306d1ba3fbfee611d305cabb20e shared state",
+        "path:yos/hj/index.html",
+        "path:tests/hj-smoke.mjs"
       ],
       "progress_basis": {
         "spec": true,
-        "implementation": false,
-        "test": false,
+        "implementation": true,
+        "test": true,
         "device": false,
-        "production": false
+        "production": true
       },
-      "progress": 20,
-      "updated_at": "2026-09-29T17:58:00+09:00"
+      "progress": 80,
+      "updated_at": "2026-10-02T09:46:01+09:00"
     },
     {
       "id": "idea",
       "name": "Idea",
       "area": "ideas",
-      "status": "planned",
+      "status": "awaiting_device_verification",
       "priority": 2,
-      "current": "ClarityのIdea保存先とMY WAY Widget上のIdea表示は存在するが、Idea領域単体の正式実装・テストは未確認。",
-      "next_action": "既存Idea保存先を正本として特定し、P2で参照専用入口を接続する。",
-      "blocker": "Idea単体の正式なデータ契約が未確認。",
-      "needs_user_action": false,
+      "current": "Ideaは計画だけではなく、yos-my-way-ideas-v1 / legacy Idea store、YOS shared-state接続、PWA再起動保持テスト、ClarityからのIdea保存経路まで実装済み。単独Idea画面の最新iPhone受入は未確認。",
+      "next_action": "現行Idea表示・追加・再起動保持をiPhoneで1回確認し、別アプリ化せず既存storeを正本として維持する。",
+      "blocker": "Idea単独UIの最新iPhone受入が未確認。",
+      "needs_user_action": true,
       "device_verified": false,
-      "production_verified": false,
+      "production_verified": true,
       "deep_link": null,
       "completion_criteria": [
         "既存Idea保存先を特定して再利用する / 統合アプリから一覧・追加導線を提供する / iPhone実機と本番運用を確認する"
       ],
       "evidence": [
-        "PR#340",
-        "PR#325"
+        "commit:a86c73f4ac7c0306d1ba3fbfee611d305cabb20e shared state",
+        "commit:f755619adcec8d95dcea5a414010d9657eb46b42 PWA relaunch persistence",
+        "commit:6aaefec4f3cf2d629579da15703c409ee65707c6 Clarity Idea persistence",
+        "path:yos/shared-state-v1.js"
       ],
       "progress_basis": {
         "spec": true,
-        "implementation": false,
-        "test": false,
+        "implementation": true,
+        "test": true,
         "device": false,
-        "production": false
+        "production": true
       },
-      "progress": 20,
-      "updated_at": "2026-09-17T10:01:41+09:00"
+      "progress": 80,
+      "updated_at": "2026-10-02T09:46:01+09:00"
     },
     {
       "id": "yos-mission-control",
@@ -303,12 +334,12 @@
       "area": "operations",
       "status": "awaiting_device_verification",
       "priority": 1,
-      "current": "2026-09-30の復旧監査でGitHub実数とMission Controlの不一致を確認し、PR #543で全ページ取得・Draft判定・PR状態同期を修正してmainへ統合。整理後はOpen Issue 6件 / Open PR 8件まで縮小し、Mission Control表示とGitHub実数が一致したことを確認済み。",
-      "next_action": "iPhone上のMission Control表示で最新同期結果を1回確認し、Issue #10の残条件を判定する。",
-      "blocker": "最新同期ロジックのiPhone表示確認が未完了。",
-      "needs_user_action": false,
+      "current": "PR #543でGitHub Issues/PRの全ページ取得、Draft判定、PR状態変化同期を修復済み。2026-10-02 09:35 JSTのMission ControlはOpen Issue 6件 / Open PR 8件を自動同期し、直近完了にYOS DESK #546も反映している。最新iPhone画面だけ未確認。",
+      "next_action": "iPhoneでMission Controlを1回開き、6 Issue / 8 PRと直近完了が表示されることを確認する。",
+      "blocker": "最新Mission Control表示のiPhone確認が未完了。",
+      "needs_user_action": true,
       "device_verified": false,
-      "production_verified": false,
+      "production_verified": true,
       "deep_link": "/",
       "completion_criteria": [
         "既存Mission Controlの自動同期を壊さない / 資産SSOTと役割を分離する / 統合画面で必要な運用状態を参照できる"
@@ -322,17 +353,20 @@
         "commit:5fc71d779424c8b137982eae54d0b3709713642a",
         "verification:Mission Control Sync Safety PASS 2026-09-30",
         "verification:Mission Control PR State Sync PASS 2026-09-30",
-        "state:Open Issue 6 / Open PR 8 matched after recovery"
+        "state:Open Issue 6 / Open PR 8 matched after recovery",
+        "state:Mission Control updated 2026-10-02T09:35:07+09:00",
+        "state:Open Issue 6 / Open PR 8",
+        "recent:YOS DESK #546 reflected"
       ],
       "progress_basis": {
         "spec": true,
         "implementation": true,
         "test": true,
         "device": false,
-        "production": false
+        "production": true
       },
-      "progress": 65,
-      "updated_at": "2026-10-02T09:24:45+09:00"
+      "progress": 80,
+      "updated_at": "2026-10-02T09:46:01+09:00"
     },
     {
       "id": "my-way-widget",
@@ -340,9 +374,9 @@
       "area": "widget",
       "status": "awaiting_device_verification",
       "priority": 1,
-      "current": "MY_WAY_5_WIDGETS_v1がmainへ統合済み。統合アプリと共通SSOTを読む改修はP3。",
-      "next_action": "iPhoneで現行Widgetを確認し、P3でyos-assets SSOT参照へ切り替える。",
-      "blocker": "現行WidgetのiPhone実機確認とP3接続が必要。",
+      "current": "MY WAY 5 WidgetsとNOW feedはmainに実装・テスト済み。HOME medium widgetは既存private YOS Tasks feedを再利用する。Notion YOS HOME試用開始により、ホーム画面Widgetの役割を維持する価値があるかは未判定。最近のiPhone受入は未確認。",
+      "next_action": "現行WidgetをiPhoneで確認し、Notion YOS HOME導入後も必要な『一目で見る価値』だけ残す。",
+      "blocker": "最新iPhone表示・タップ動作が未確認。",
       "needs_user_action": true,
       "device_verified": false,
       "production_verified": false,
@@ -351,7 +385,8 @@
         "既存Widgetを再利用する / 小・中・大Widgetが同じ資産SSOTを読む / タップで対象画面へ遷移しiPhone実機で確認する"
       ],
       "evidence": [
-        "PR#340"
+        "PR#340",
+        "commit:ffa8f5fccb0ae8e878c1e9b6baeacba3c1e7d2e1 live NOW feed"
       ],
       "progress_basis": {
         "spec": true,
@@ -361,18 +396,18 @@
         "production": false
       },
       "progress": 65,
-      "updated_at": "2026-09-17T10:01:41+09:00"
+      "updated_at": "2026-10-02T09:46:01+09:00"
     },
     {
       "id": "notifications",
       "name": "Notifications",
       "area": "notification",
-      "status": "planned",
+      "status": "awaiting_device_verification",
       "priority": 2,
-      "current": "通知条件は今回のYOS統合アプリ仕様として確定。統合実装はP4。",
-      "next_action": "P4でSSOT差分から通知対象だけを判定する。",
-      "blocker": "P2アプリ本体とP3 Widgetの共通SSOT接続が前提。",
-      "needs_user_action": false,
+      "current": "通知は未実装ではない。Draft PR #539でPayment / Money / Task / Routine / Emergency / Important Mail / YOS HistoryとMorning/Night履歴再読込までコード・署名済みartifactが揃い、Payment Alertは2026-09-30にiPhone実機PASS。残りの実機受入と統合が未完了。",
+      "next_action": "PR #539の残りartifactを実機確認し、YOS History・Morning/Night再読込・各Alert・Important Mail AutomationまでPASSした時だけmergeする。",
+      "blocker": "Payment Alert以外の残り実機acceptanceとImportant Mail Automation接続が未完了。",
+      "needs_user_action": true,
       "device_verified": false,
       "production_verified": false,
       "deep_link": null,
@@ -380,17 +415,20 @@
         "完成・本人操作必要・重大停止・進捗後退・統合アプリ実利用可能だけ通知する / 変化なし・内部処理・途中経過を通知しない / iPhone実機で通知とdeep linkを確認する"
       ],
       "evidence": [
-        "Issue#371"
+        "Draft PR#539",
+        "PR#539 code/contract/sign PASS",
+        "device:Payment Alert iPhone PASS 2026-09-30",
+        "signed artifacts: Payment/Money/Task/Routine/Emergency/Important Mail/YOS History/Morning/Night"
       ],
       "progress_basis": {
         "spec": true,
-        "implementation": false,
-        "test": false,
+        "implementation": true,
+        "test": true,
         "device": false,
         "production": false
       },
-      "progress": 20,
-      "updated_at": "2026-09-17T10:01:41+09:00"
+      "progress": 65,
+      "updated_at": "2026-10-02T09:46:01+09:00"
     },
     {
       "id": "money-capture",
@@ -398,10 +436,10 @@
       "area": "finance",
       "status": "awaiting_device_verification",
       "priority": 1,
-      "current": "自然文クイック入力→既存yos-money-v2へ即時保存→Money再表示に接続済み。各保存は月別JSONL履歴へ自動追記し、OPFS非対応時はローカルキューへ退避する。iPhone実機確認は未完了。",
-      "next_action": "iPhone実機でMoneyを再読込し、空状態からの自動復元とクイック入力→即時反映→再読込後も保持を確認する。",
-      "blocker": "2026-09-29にiPhoneでMoney空表示が発生。initialized-but-empty自動復元と更新前バックアップを追加し、実機再読込確認待ち。",
-      "needs_user_action": true,
+      "current": "旧Money CaptureのWeb/local-first実装とClarity NEXT_MONEY接続は存在するが、現在のMoney前線はScriptableのYOS Money Local v1.5.1へ移っている。独立したMoney Captureとして別管理・別SSOTを増やす対象ではない。",
+      "next_action": "独立機能として進めず、自然文入力が必要ならClarity→現行YOS Money Localへ一本化して受入する。",
+      "blocker": "現行Scriptable Moneyへの最終接続契約が未確定。旧Web経路を現行と混同しないこと。",
+      "needs_user_action": false,
       "device_verified": false,
       "production_verified": false,
       "deep_link": null,
@@ -409,8 +447,9 @@
         "自然文から金額・カテゴリ・日付・収支種別を解釈する / 既存Money保存先へ重複なく保存する / iPhone実機と運用環境で確認する"
       ],
       "evidence": [
-        "PR#328",
-        "PR#370"
+        "commit:68c2019efa1a47f2314df023d596c1e578ddf69c local-first web saves/history",
+        "commit:9ad1f1ddbfc5dcf42bb607f63907d769bd1f9caf Clarity NEXT_MONEY",
+        "decision:2026-10-02 current frontline is Scriptable YOS Money Local v1.5.1"
       ],
       "progress_basis": {
         "spec": true,
@@ -420,46 +459,49 @@
         "production": false
       },
       "progress": 65,
-      "updated_at": "2026-09-17T10:01:41+09:00"
+      "updated_at": "2026-10-02T09:46:01+09:00"
     },
     {
       "id": "morning-flow",
       "name": "Morning Flow",
       "area": "routine",
-      "status": "awaiting_device_verification",
+      "status": "complete",
       "priority": 2,
-      "current": "Lifeとの接続実装・テストが進行中。統合後のiPhone実機確認は未完了。",
-      "next_action": "Life接続の未解決smoke項目を切り分けてからiPhone実機確認へ進む。",
-      "blocker": "Life系の既存smoke失敗の切り分けが必要。",
+      "current": "Morningは親ShortcutからMorning Brief + Morning Flowを実行し、最終表示をScriptable YOS Today Noteへ渡す構成。Morning BriefはSafari往復を外したnative-only版がmainにあり、2026-10-02に設定起因のエラーを切り分けて修正後、iPhoneで『直った』ことを確認。現在は再開不要の完成扱い。",
+      "next_action": "通常利用。新しい不具合が出た時だけ再開する。",
+      "blocker": null,
       "needs_user_action": false,
-      "device_verified": false,
-      "production_verified": false,
+      "device_verified": true,
+      "production_verified": true,
       "deep_link": null,
       "completion_criteria": [
-        "既存Morning Flowを再利用する / Lifeと二重実装せず接続する / iPhone実機と本番運用を確認する"
+        "Morning起動でBriefとFlowが取得できる / 最終表示はYOS Today Note / GPT入力画面を出さない / iPhoneで通常起動できる"
       ],
       "evidence": [
-        "PR#329"
+        "commit:297b3a17f592738890621f86c3a811de5180d2aa Morning Brief no-Safari",
+        "commit:5f1bdac8d2f0b37ac6e521fbaada0e7af456e343 canonical Morning Brief",
+        "user:iPhone Morning restored after settings diagnosis 2026-10-02",
+        "state:parent Morning -> Morning Brief + Morning Flow -> YOS Today Note"
       ],
       "progress_basis": {
         "spec": true,
         "implementation": true,
         "test": true,
-        "device": false,
-        "production": false
+        "device": true,
+        "production": true
       },
-      "progress": 65,
-      "updated_at": "2026-09-17T10:01:41+09:00"
+      "progress": 100,
+      "updated_at": "2026-10-02T09:46:01+09:00"
     },
     {
       "id": "night-reset",
       "name": "Night Reset",
       "area": "routine",
-      "status": "awaiting_device_verification",
-      "priority": 2,
-      "current": "Lifeとの接続実装・テストが進行中。統合後のiPhone実機確認は未完了。",
-      "next_action": "Life接続の未解決smoke項目を切り分けてからiPhone実機確認へ進む。",
-      "blocker": "Life系の既存smoke失敗の切り分けが必要。",
+      "status": "building",
+      "priority": 3,
+      "current": "旧Morning/Night handoffとしてのNight Reset実装・テストはmainに残っているが、毎晩の表側は現在Night Briefへ移行している。Night Resetは週次レビュー等の補助役割だけ残す候補で、単独の最新iPhone受入は確認できていない。",
+      "next_action": "Night Briefと役割が重なる毎夜処理は増やさず、日曜の週次レビューに必要な部分だけWeekly Review資産へ整理する。",
+      "blocker": "Night Briefとの役割境界が古い設計のまま。単独Night Resetの最新実機証拠なし。",
       "needs_user_action": false,
       "device_verified": false,
       "production_verified": false,
@@ -468,7 +510,8 @@
         "既存Night Resetを再利用する / Lifeと二重実装せず接続する / iPhone実機と本番運用を確認する"
       ],
       "evidence": [
-        "PR#329"
+        "commit:33b4dbadae50e495972af96ccb940a9ba32df98a Morning/Night handoff",
+        "decision:current nightly front door is Night Brief 2026-10-02"
       ],
       "progress_basis": {
         "spec": true,
@@ -478,7 +521,7 @@
         "production": false
       },
       "progress": 65,
-      "updated_at": "2026-09-17T10:01:41+09:00"
+      "updated_at": "2026-10-02T09:46:01+09:00"
     },
     {
       "id": "my-remote",
@@ -486,9 +529,9 @@
       "area": "remote",
       "status": "awaiting_device_verification",
       "priority": 2,
-      "current": "v2実装と後続の照明長押し速度調整がmainへ統合済み。最新変更後のiPhone実機確認は未完了。",
-      "next_action": "iPhoneで3画面・照明長押し速度・BRAVIA操作を最新main相当で確認する。",
-      "blocker": "最新変更後の物理iPhone/機器確認が必要。",
+      "current": "MY REMOTE v6.4系の3画面・BRAVIA・照明・AC・Widget実装と安全なinstaller/testはmainに存在する。ClarityのHome家電経路とはまだ別系統。最新変更後の物理iPhone/実機器受入は確認できていない。",
+      "next_action": "MY REMOTE単体をiPhoneで1回確認し、その後Clarity Home子へ既存機能を呼ぶだけの接続にする。再実装しない。",
+      "blocker": "最新main相当のiPhone・BRAVIA・照明・AC受入が未確認。",
       "needs_user_action": true,
       "device_verified": false,
       "production_verified": false,
@@ -498,7 +541,9 @@
       ],
       "evidence": [
         "PR#311",
-        "PR#338"
+        "PR#338",
+        "commit:43923e66b44ce56e87168aae65afb91d660359e2 MY REMOTE v2/v6.4 line",
+        "commit:319acf06bfaa265b2d9bf8b62de564ebb36ad59e AC fan fix"
       ],
       "progress_basis": {
         "spec": true,
@@ -508,7 +553,7 @@
         "production": false
       },
       "progress": 65,
-      "updated_at": "2026-09-17T10:01:41+09:00"
+      "updated_at": "2026-10-02T09:46:01+09:00"
     },
     {
       "id": "yos-home-voice",
@@ -516,10 +561,10 @@
       "area": "automation",
       "status": "awaiting_device_verification",
       "priority": 2,
-      "current": "MY REMOTE向けHome Voice adapter実装とコード検証がある。物理iPhone確認は未完了。",
-      "next_action": "iPhone音声入力からMY REMOTE操作まで実機確認する。",
-      "blocker": "物理iPhoneでの音声→操作確認が必要。",
-      "needs_user_action": true,
+      "current": "YOS Home Voiceは既存MY REMOTE v6.4を再利用するScriptable音声入口として実装済み。曖昧入力はfail-closed。Clarity固定子のHome家電とはまだ統合されておらず、最新iPhone音声→家電E2Eは未確認。",
+      "next_action": "Home Voiceを別物として拡張せず、Clarity Home統合時に既存adapterとして再利用する。必要ならその時にiPhone E2Eを1回行う。",
+      "blocker": "最新iPhone音声→MY REMOTE実機確認とClarity Home統合が未完了。",
+      "needs_user_action": false,
       "device_verified": false,
       "production_verified": false,
       "deep_link": null,
@@ -527,7 +572,8 @@
         "既存MY REMOTEをadapter経由で呼ぶ / 音声入力の失敗時に安全に停止する / iPhone実機で操作を確認する"
       ],
       "evidence": [
-        "Issue#318"
+        "trial/README: YOS Home Voice reuses MY REMOTE v6.4",
+        "path:ios-app/scriptable/remote-voice/YOS Home Voice.js"
       ],
       "progress_basis": {
         "spec": true,
@@ -537,7 +583,7 @@
         "production": false
       },
       "progress": 65,
-      "updated_at": "2026-09-17T10:01:41+09:00"
+      "updated_at": "2026-10-02T09:46:01+09:00"
     },
     {
       "id": "yos-departure-guard",
@@ -545,8 +591,8 @@
       "area": "automation",
       "status": "building",
       "priority": 2,
-      "current": "YOS Departure Guard2 / v0.2 の物理acceptanceはPASS。署名済み Mother Shadow v1 はmain統合済み。iPhoneでは既存の 起床時 → Run Script → YOS Battery Sync → YOS Battery Widget 経路を再利用し、Battery Widget側のMother Shadow hook自己試験でEvent Store記録を確認済み。専用AirPodsトリガーを新設せずShadow観測を開始できる状態。",
-      "next_action": "本人操作を増やさず既存の自動経路でShadow観測を継続し、7日分のEvent Storeで decision_pack_prepared / baseline_would_notify / presentation_level を比較する。専用AirPodsトリガーは観測で不足が出た場合だけ追加検討する。",
+      "current": "YOS Departure Guard2 v0.2はlocal-only Shadow experimentとしてmain実装済みで、iPhone physical acceptance・Event Store・既存起床ルートhookまで確認済み。現在は『新機能開発』より、既存自動経路でのShadow観測結果を集める段階。",
+      "next_action": "本人操作を増やさずShadow観測を続け、十分な実データが出た時だけ通知ルールやAirPods triggerの必要性を判断する。",
       "blocker": null,
       "needs_user_action": false,
       "device_verified": true,
@@ -561,7 +607,8 @@
         "PR#387 merged: 86323fd890a87b6274692f7a0dd1cddd833ab2a3",
         "GitHub Actions 35359214945: compile/validate/HubSign/AEA1/package PASS",
         "device:iPhone 2026-09-19: existing 起床時 → Run Script → YOS Battery Sync → YOS Battery Widget route visually confirmed",
-        "device:iPhone 2026-09-19: Mother Battery Widget hook self-test created local Event Store record (baseline 1)"
+        "device:iPhone 2026-09-19: Mother Battery Widget hook self-test created local Event Store record (baseline 1)",
+        "path:tools/departure-guard/README.md physically accepted on iPhone"
       ],
       "progress_basis": {
         "spec": true,
@@ -571,7 +618,7 @@
         "production": false
       },
       "progress": 85,
-      "updated_at": "2026-09-19T05:40:00+09:00"
+      "updated_at": "2026-10-02T09:46:01+09:00"
     },
     {
       "id": "yos-screenshot-router",
@@ -579,9 +626,9 @@
       "area": "automation",
       "status": "awaiting_device_verification",
       "priority": 3,
-      "current": "コード・compile・テスト証拠がある。署名済み実機artifactがなくiPhone確認は未完了。",
-      "next_action": "実機検証可能なartifact経路を用意してからiPhone acceptanceを実施する。",
-      "blocker": "実機検証用artifact/署名経路が未完了。",
+      "current": "Screenshot Routerはコード・compile・test資産がmainに存在するが、署名済みimportable artifactと物理iPhone acceptanceが未完了。2026-10-02監査でこれ以降の新しい実機証拠は見つからなかった。",
+      "next_action": "使う必要が出た時だけ、署名済みartifactを作ってiPhoneで1回acceptanceする。優先度は低い。",
+      "blocker": "署名/import可能artifactとiPhone acceptanceが未完了。",
       "needs_user_action": false,
       "device_verified": false,
       "production_verified": false,
@@ -590,7 +637,8 @@
         "スクリーンショットを安全に分類・振分する / 失敗時に原本を失わない / 署名済みartifactをiPhone実機で確認する"
       ],
       "evidence": [
-        "Issue#330"
+        "historical:Screenshot Router PR #330 code/compile/test exists",
+        "audit:2026-10-02 no newer device evidence found"
       ],
       "progress_basis": {
         "spec": true,
@@ -600,17 +648,17 @@
         "production": false
       },
       "progress": 65,
-      "updated_at": "2026-09-17T10:01:41+09:00"
+      "updated_at": "2026-10-02T09:46:01+09:00"
     },
     {
       "id": "weekly-review",
       "name": "Weekly Review",
       "area": "review",
-      "status": "planned",
+      "status": "building",
       "priority": 3,
-      "current": "候補抽出engineのコード/テストはあるが、live adapterとscheduler接続が未完了。",
-      "next_action": "既存engineを再利用し、live data adapterとAutomation接続を実装する。",
-      "blocker": "live adapter / scheduler未接続。",
+      "current": "Weekly Reviewは『未実装の計画』ではなく、候補抽出pure engineとtestが存在する。現行仕様は日曜Night Resetで直近7日から『続ける・やめる・自動化する』を各最大1件出す。ただしlive data adapterと実行スケジュールは未接続。",
+      "next_action": "既存engineを再利用し、実データの読み取りadapterと日曜実行だけ接続する。新しいレビューDBは作らない。",
+      "blocker": "live data adapter / schedulerが未接続。",
       "needs_user_action": false,
       "device_verified": false,
       "production_verified": false,
@@ -619,27 +667,29 @@
         "1週間から続ける・やめる・自動化候補を抽出する / live dataから自動生成する / 必要な候補だけをiPhoneで確認できる"
       ],
       "evidence": [
-        "Issue#326"
+        "historical:PR #326 pure engine green",
+        "spec:Sunday Night Reset / last 7 days / continue-stop-automate max 1 each",
+        "audit:2026-10-02 live adapter/scheduler still absent"
       ],
       "progress_basis": {
         "spec": true,
-        "implementation": false,
-        "test": false,
+        "implementation": true,
+        "test": true,
         "device": false,
         "production": false
       },
-      "progress": 20,
-      "updated_at": "2026-09-17T10:01:41+09:00"
+      "progress": 65,
+      "updated_at": "2026-10-02T09:46:01+09:00"
     },
     {
       "id": "friction-discovery",
       "name": "Friction Discovery",
       "area": "review",
-      "status": "planned",
+      "status": "building",
       "priority": 3,
-      "current": "候補抽出engineのコード/テストはあるが、live adapterとAutomation接続が未完了。",
-      "next_action": "既存engineを再利用し、実生活ログから候補を抽出するadapterを接続する。",
-      "blocker": "live adapter / Automation未接続。",
+      "current": "Friction Discoveryも『未実装の計画』ではなく、候補抽出pure engineとtestが存在する。実生活ログから繰り返し操作・迷いを拾うlive adapterとAutomation接続が未実装。",
+      "next_action": "既存engineへ実生活ログadapterだけ接続し、効果が確認できる候補だけWeekly Reviewへ渡す。",
+      "blocker": "live adapter / Automation接続が未完了。",
       "needs_user_action": false,
       "device_verified": false,
       "production_verified": false,
@@ -648,17 +698,18 @@
         "繰り返し操作・迷いを候補化する / 効果がある候補だけ残す / 必要時だけプロト君へ接続する"
       ],
       "evidence": [
-        "Issue#327"
+        "historical:PR #327 pure engine green",
+        "audit:2026-10-02 live adapter/Automation still absent"
       ],
       "progress_basis": {
         "spec": true,
-        "implementation": false,
-        "test": false,
+        "implementation": true,
+        "test": true,
         "device": false,
         "production": false
       },
-      "progress": 20,
-      "updated_at": "2026-09-17T10:01:41+09:00"
+      "progress": 65,
+      "updated_at": "2026-10-02T09:46:01+09:00"
     },
     {
       "id": "one-enter",
@@ -666,9 +717,9 @@
       "area": "development",
       "status": "building",
       "priority": 2,
-      "current": "One Enter / Factory CoreへYOS Loop Engine v1を追加し、Build → Verify → bounded Recover → Verifyを最大2回で回す実装をmainへ統合済み。scope違反はfail-closed、device/productionはowner boundaryとして明示する。",
-      "next_action": "実案件1件をjob contractへ接続し、Loop Engineを実運用でE2E確認する。",
-      "blocker": "Loop Engine自体は検証済みだが、既存YOS機能への自動接続は未実装。",
+      "current": "One Enter / Factory CoreにはYOS Loop Engine v1がmainへ統合済み。Build → Verify → Recover → Verifyを最大2回、scope違反fail-closedで実行でき、15 testsとsynthetic recoveryがPASS。まだ各YOS案件が自動でこのLoopへ接続される状態ではない。",
+      "next_action": "次の適切な実案件1件でjob contractを使い、Loop Engineを実運用E2Eする。接続されていない案件を『自動化済み』と扱わない。",
+      "blocker": "Loop Engineと実案件の標準接続が未完成。",
       "needs_user_action": false,
       "device_verified": false,
       "production_verified": false,
@@ -682,7 +733,9 @@
         "PR#542",
         "commit:e8b866140fb34f351722e062a4509ca7b02b8053",
         "CI:Factory Core 15 tests PASS",
-        "CI:bounded recovery synthetic FAIL -> recovery -> PASS"
+        "CI:bounded recovery synthetic FAIL -> recovery -> PASS",
+        "PR#542 merged",
+        "CI:15 tests + synthetic recovery PASS"
       ],
       "progress_basis": {
         "spec": true,
@@ -692,7 +745,7 @@
         "production": false
       },
       "progress": 65,
-      "updated_at": "2026-10-02T09:24:45+09:00"
+      "updated_at": "2026-10-02T09:46:01+09:00"
     },
     {
       "id": "shortcut-factory-stash",
@@ -700,9 +753,9 @@
       "area": "development",
       "status": "building",
       "priority": 3,
-      "current": "Factory v3とSTASH自動構築の実装資産があるが、import/acceptance完了は未確認。",
-      "next_action": "既存artifactのimport経路とacceptanceを完成させる。",
-      "blocker": "import可能artifactのacceptanceが未完了。",
+      "current": "Shortcut Factory / STASHの生成・保管資産は存在するが、2026-10-02監査でも『生成→署名/import→iPhone実行』の一続きacceptanceは確認できていない。Clarity用Factory資産は複数あるが、STASH全体の完成証拠とは分ける。",
+      "next_action": "実際に必要なShortcut 1本でFactory→import→実行を通し、成立しなければこの資産の範囲を縮小する。",
+      "blocker": "import可能artifactの一続きacceptanceが未完了。",
       "needs_user_action": false,
       "device_verified": false,
       "production_verified": false,
@@ -711,7 +764,9 @@
         "iPhoneで取り込めるShortcut artifactを生成する / STASH既存運用を壊さない / importから実行まで確認する"
       ],
       "evidence": [
-        "Issue#324"
+        "path:tools/factory-core",
+        "historical:Clarity Shortcut Factory assets exist",
+        "audit:2026-10-02 no full Factory→import→iPhone acceptance found"
       ],
       "progress_basis": {
         "spec": true,
@@ -721,7 +776,7 @@
         "production": false
       },
       "progress": 50,
-      "updated_at": "2026-09-17T10:01:41+09:00"
+      "updated_at": "2026-10-02T09:46:01+09:00"
     },
     {
       "id": "projecty-hq",
@@ -729,9 +784,9 @@
       "area": "development",
       "status": "building",
       "priority": 2,
-      "current": "ProjectY v3.0の開発環境・自動司令部に、YOS Loop Engine v1とMission Control状態同期復旧がmainへ統合済み。bounded recoveryと状態集約の基盤は実在するが、Issue #315の異常系全体は継続中。",
-      "next_action": "Issue #315の残る異常系・実案件E2Eだけに絞って検証し、既存基盤の完成条件を確定する。",
-      "blocker": "v3.0全体の異常系・実案件E2Eが未完了。",
+      "current": "ProjectY HQの基盤として、YOS Loop Engine v1 (#542)とMission Control同期修復 (#543)がmainに存在し、どちらも自動テスト証拠あり。Issue #315の異常系全体・実案件E2Eはまだopen。",
+      "next_action": "Issue #315を『残る異常系と実案件E2E』だけに絞り、すでに完成したLoop/Mission Controlを作り直さない。",
+      "blocker": "v3.0全体の異常系と実案件E2Eが未完了。",
       "needs_user_action": false,
       "device_verified": false,
       "production_verified": false,
@@ -745,17 +800,18 @@
         "PR#542",
         "PR#543",
         "commit:e8b866140fb34f351722e062a4509ca7b02b8053",
-        "commit:5fc71d779424c8b137982eae54d0b3709713642a"
+        "commit:5fc71d779424c8b137982eae54d0b3709713642a",
+        "Issue#315 still open 2026-10-02"
       ],
       "progress_basis": {
         "spec": true,
         "implementation": true,
-        "test": false,
+        "test": true,
         "device": false,
         "production": false
       },
-      "progress": 50,
-      "updated_at": "2026-10-02T09:24:45+09:00"
+      "progress": 65,
+      "updated_at": "2026-10-02T09:46:01+09:00"
     },
     {
       "id": "night-brief",
@@ -763,9 +819,9 @@
       "area": "routine",
       "status": "awaiting_production_verification",
       "priority": 1,
-      "current": "22:00自動実行、同日手動済みスキップ、Journal保存を含むNight Brief修正版をPR #510でmainへ統合。2026-10-02に署名済みShortcutをiPhoneへ取り込み、手動Night Briefの実機E2E PASSを確認済み。",
-      "next_action": "次回22:00の自動実行で、手動済みスキップとJournal 1日1回保存を実運用確認する。MY LIFE直接保存の統合案はDraft PR #544のまま未統合。",
-      "blocker": "22:00自動実行とJournal保存の実運用確認、Draft PR #544の扱いが未確定。",
+      "current": "Night BriefはPR #510がmainへ統合され、手動起動のiPhone E2Eは2026-10-02にPASS。22:00自動モード、同日手動済みスキップ、Journal 1日1回保存のコード/署名も確認済み。実際の22:00自動運用結果はまだ未確認。MY LIFE直接保存はDraft #544。",
+      "next_action": "次回22:00の実運用を1回見る。重複スキップとJournal保存が正常なら現行Night Briefを固定し、Draft #544は必要性を見て判断する。",
+      "blocker": "22:00自動実運用の実測とDraft #544の要否が未確定。",
       "needs_user_action": true,
       "device_verified": true,
       "production_verified": false,
@@ -779,7 +835,8 @@
         "CI:Night Brief 22:00 + Journal run 36728398145 PASS",
         "artifact:night-brief-2200-journal AEA1 signed",
         "device:2026-10-02 manual Night Brief iPhone E2E PASS",
-        "Draft PR#544: MY LIFE direct save integration not merged"
+        "Draft PR#544: MY LIFE direct save integration not merged",
+        "user:iPhone manual E2E PASS 2026-10-02"
       ],
       "progress_basis": {
         "spec": true,
@@ -789,41 +846,73 @@
         "production": false
       },
       "progress": 85,
-      "updated_at": "2026-10-02T09:24:45+09:00"
+      "updated_at": "2026-10-02T09:46:01+09:00"
     },
     {
       "id": "notion-yos-home",
       "name": "Notion YOS HOME",
       "area": "operations",
-      "status": "awaiting_device_verification",
+      "status": "complete",
       "priority": 1,
-      "current": "既存Notion YOS Tasksを正本のまま再利用し、workspace-privateのYOS HOME試作を作成。『今やる』『本人操作』『待ち』『買い物』の4つのlinked list viewを1ページへ配置し、Notion自体を新しいSSOTにしない構成。",
-      "next_action": "iPhoneのNotionで1画面として使いやすいか確認し、MY WAYの代替・縮小・併存のどれが最小構成か判断する。",
-      "blocker": "Money / Calendar / Reminders / GitHubの自動サマリー連携は未接続。現在の動的連携はYOS Tasksのみ。",
-      "needs_user_action": true,
-      "device_verified": false,
+      "current": "2026-10-02にworkspace-privateのYOS HOME v0.1を実作成。既存YOS Tasksを複製せず『今やる・本人操作・待ち・買い物』のlinked viewと、GitHub資産SSOTの表示用Asset一覧を配置。ユーザーがiPhone Notion上で実際に開いて表示を確認済み。",
+      "next_action": "この画面を数日使い、MY WAYの代替になれるかを見る。Money / Calendar / Reminders / GitHubのlive要約は、必要性が確認できたものだけ追加する。",
+      "blocker": null,
+      "needs_user_action": false,
+      "device_verified": true,
       "production_verified": true,
       "deep_link": null,
       "completion_criteria": [
-        "既存YOS Tasksを複製せず使う / 今やる・本人操作・待ち・買い物が1ページで分かる / iPhoneで実用確認する / MY WAYとの重複を実使用で判定する"
+        "既存YOS Tasksを複製しない / 今やる・本人操作・待ち・買い物が1ページで見える / 資産一覧を人間向けに見られる / iPhoneで実表示できる"
       ],
       "evidence": [
-        "notion:YOS HOME workspace-private page created 2026-10-02",
-        "notion:linked view 今やる",
-        "notion:linked view 本人操作",
-        "notion:linked view 待ち",
-        "notion:linked view 買い物",
-        "verification:Notion page re-fetched after creation"
+        "notion:YOS HOME v0.1 created 2026-10-02",
+        "notion:linked views 今やる / 本人操作 / 待ち / 買い物",
+        "notion:YOS Assets display mirror 25-row target",
+        "device:user viewed YOS HOME in iPhone Notion 2026-10-02",
+        "verification:Notion page re-fetched after edits"
+      ],
+      "progress_basis": {
+        "spec": true,
+        "implementation": true,
+        "test": true,
+        "device": true,
+        "production": true
+      },
+      "progress": 100,
+      "updated_at": "2026-10-02T09:46:01+09:00"
+    },
+    {
+      "id": "yos-desk",
+      "name": "YOS DESK",
+      "area": "operations",
+      "status": "awaiting_device_verification",
+      "priority": 1,
+      "current": "2026-10-02にPR #546をmainへ統合し、プロジェクト横断チャット受信箱、会話中/未読/既読、GPT原文/YOSバッジを追加。PR #541ではGoogle再認証401と送信失敗も修正済み。最新#546反映後のiPhone使い勝手はまだ未確認。",
+      "next_action": "iPhoneで最新YOS DESKを開き、横はみ出し・未読/既読・バッジ・チャット文章一致を1回確認する。",
+      "blocker": "PR #546反映後のiPhone実機acceptanceが未完了。",
+      "needs_user_action": true,
+      "device_verified": false,
+      "production_verified": false,
+      "deep_link": "/yos/desk/",
+      "completion_criteria": [
+        "プロジェクトを跨いだチャットを一か所で見る / 会話中・未読・既読が分かる / GPTの実メッセージと表示文章を一致させる / iPhoneで使いやすい"
+      ],
+      "evidence": [
+        "PR#546 merged",
+        "commit:4ffad26e541fd3890c6aed9362f545ec4312cdd9",
+        "PR#541 merged",
+        "path:yos/desk/",
+        "test:desk LINE-like/browser smoke exists"
       ],
       "progress_basis": {
         "spec": true,
         "implementation": true,
         "test": true,
         "device": false,
-        "production": true
+        "production": false
       },
-      "progress": 80,
-      "updated_at": "2026-10-02T09:24:45+09:00"
+      "progress": 65,
+      "updated_at": "2026-10-02T09:46:01+09:00"
     }
   ]
 }
