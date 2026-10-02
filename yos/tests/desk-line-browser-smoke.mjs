@@ -77,7 +77,7 @@ try{
   assert.match((await externalRow.locator('.readState').textContent())||'',/既読/);
   assert.match((await externalRow.locator('.preview').textContent())||'',/ChatGPTの元チャットを開く/,'GPT rows must not show a divergent copied transcript');
 
-  const row=page.locator('#chatList .chat').first();
+  const row=page.locator('#chatList .chat:not(.currentChat)').first();
   const ui=await row.evaluate(row=>{
     const avatar=row.querySelector('.avatar');
     const preview=row.querySelector('.preview');
