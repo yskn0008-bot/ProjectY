@@ -5,7 +5,7 @@ const browserName=process.env.YOS_BROWSER||'chromium';
 const browserType={chromium,webkit}[browserName];
 const base=process.env.YOS_BASE_URL||'http://127.0.0.1:4173';
 const browser=await browserType.launch({headless:true});
-const context=await browser.newContext({viewport:{width:390,height:844}});
+const context=await browser.newContext({viewport:{width:390,height:844},serviceWorkers:'block'});
 
 await context.addInitScript(() => {
   globalThis.__badgeCalls=[];
