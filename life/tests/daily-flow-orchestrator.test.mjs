@@ -126,3 +126,11 @@ test('Life loads Weekly Review engine and adapter before the existing suite', as
   const suite=html.indexOf('./yos-suite-v3.js?v=10');
   assert.ok(engine>=0&&live>engine&&suite>live);
 });
+
+
+test('existing Night close owns the Sunday Weekly Review write', async () => {
+  const home = await read('home-v1.js');
+  assert.match(home, /__yosWeeklyReviewLiveV1Api\?\.runIfSunday\?\.\(data,key,new Date\(\)\.toISOString\(\)\)/);
+  const live = await read('weekly-review-live-v1.js');
+  assert.doesNotMatch(live, /weeklyReviewHook|installNightResetHook/);
+});
