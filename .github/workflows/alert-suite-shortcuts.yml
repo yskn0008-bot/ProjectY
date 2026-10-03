@@ -1,0 +1,205 @@
+name: YOS Alert suite shortcuts
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'tools/alerts/**'
+      - 'yos/alerts/**'
+      - 'yos/money-alert-bridge*'
+      - 'yos/shared-state-v1.js'
+      - '.github/workflows/alert-suite-shortcuts.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-sign:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Test shared alert engine
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --test yos/alerts/alert-engine.test.mjs
+          node --check yos/money-alert-bridge-v1.js
+          node --test yos/money-alert-bridge.test.mjs
+
+      - name: Install pinned Cherri v2.3.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          url='https://github.com/electrikmilk/cherri/releases/download/v2.3.0/cherri_linux-x86_64.zip'
+          expected='7ab2c384b7b26e7c72a30a8dfa56f89dae12c4068b7951bc1e3193f3698edbe9'
+          curl -fsSL "$url" -o /tmp/cherri.zip
+          printf '%s  %s\n' "$expected" /tmp/cherri.zip | sha256sum -c -
+          mkdir -p /tmp/cherri
+          unzip -q /tmp/cherri.zip -d /tmp/cherri
+          binary="$(find /tmp/cherri -type f -name cherri -print -quit)"
+          test -n "$binary"
+          sudo install -m 0755 "$binary" /usr/local/bin/cherri
+          cherri --version
+
+      - name: Compile alert shortcuts
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd tools/alerts
+          mkdir -p artifacts
+          for name in 'Money Alert' 'Task Alert' 'Routine Alert' 'Emergency Alert' 'Important Mail'; do
+            rm -f "./${name}_unsigned.shortcut"
+            cherri "${name}.cherri" --skip-sign --debug
+            test -f "./${name}_unsigned.shortcut"
+            cp "./${name}_unsigned.shortcut" "artifacts/${name}.plist"
+          done
+          python3 patch_reminder_alert.py 'artifacts/Task Alert.plist' TASK
+          python3 patch_reminder_alert.py 'artifacts/Routine Alert.plist' ROUTINE
+          for name in 'Money Alert' 'Task Alert' 'Routine Alert' 'Emergency Alert' 'Important Mail'; do
+            python3 patch_notification_deeplink.py "artifacts/${name}.plist" "${name}"
+          done
+
+      - name: Validate alert safety contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import plistlib
+          from pathlib import Path
+
+          root=Path('tools/alerts/artifacts')
+          def read(name):
+              p=root/f'{name}.plist'
+              w=plistlib.loads(p.read_bytes())
+              a=w.get('WFWorkflowActions',[])
+              return w,a,[x.get('WFWorkflowActionIdentifier','') for x in a],repr(w)
+
+          forbidden_calls=('sendEmail(','sendMessage(','deleteFiles(','deleteEmails(')
+          for src in Path('tools/alerts').glob('*.cherri'):
+              text=src.read_text(encoding='utf-8')
+              hits=[token for token in forbidden_calls if token in text]
+              assert not hits, (src.name,hits)
+
+          w,a,ids,blob=read('Money Alert')
+          assert w.get('WFWorkflowHasShortcutInputVariables') is True
+          assert ids.count('is.workflow.actions.openurl') == 1
+          assert 'money-alert-bridge.html?return=shortcut' in blob
+          assert 'dedupe=1' in blob
+          assert 'YOS_MONEY_ALERT_V1' in blob
+          assert '緊急Money Alertなし' in blob
+          assert 'YOS Display History' in blob
+          assert 'YOS Alert State' in blob
+          assert 'Money Alert Last.txt' in blob
+
+          for name,marker,none_token in (
+              ('Task Alert','YOS_TASK_','TASK_ALERT_NONE'),
+              ('Routine Alert','YOS_ROUTINE_','ROUTINE_ALERT_NONE'),
+          ):
+              w,a,ids,blob=read(name)
+              assert ids.count('is.workflow.actions.filter.reminders') == 1
+              assert ids.count('is.workflow.actions.properties.reminders') == 3
+              assert "'Property': 'Has Alarms'" in blob
+              assert "'Bool': False" in blob
+              assert marker+'REMINDERS_PLACEHOLDER' not in blob
+              assert none_token in blob
+              assert 'YOS Display History' in blob
+
+          w,a,ids,blob=read('Emergency Alert')
+          assert w.get('WFWorkflowHasShortcutInputVariables') is True
+          for gate in ('AWARE=1','ACTION=1','HARM=1'):
+              assert gate in blob
+          assert ids.count('is.workflow.actions.askllm') == 0
+          assert 'YOS_EMERGENCY_V1' in blob
+          assert 'YOS Display History' in blob
+
+          w,a,ids,blob=read('Important Mail')
+          assert w.get('WFWorkflowHasShortcutInputVariables') is True
+          assert ids.count('is.workflow.actions.askllm') == 1
+          assert 'IMPORTANT_MAIL_NONE' in blob
+          assert 'YOS Display History' in blob
+          assert '広告、キャンペーン、セール' in blob
+
+          routes={
+              'Money Alert':'https://yskn0008-bot.github.io/ProjectY/yos/#money',
+              'Task Alert':'x-apple-reminderkit://',
+              'Routine Alert':'x-apple-reminderkit://',
+              'Emergency Alert':'https://yskn0008-bot.github.io/ProjectY/system/',
+              'Important Mail':'message://',
+          }
+          for name in ('Money Alert','Task Alert','Routine Alert','Emergency Alert','Important Mail'):
+              _,a,ids,blob=read(name)
+              assert ids.count('is.workflow.actions.documentpicker.save') <= 2
+              assert ids.count('is.workflow.actions.notification') == 0
+              assert ids.count('is.workflow.actions.alert') == 0
+              assert ids.count('dk.simonbs.Scriptable.RunScriptInlineIntent') == 1
+              assert routes[name] in blob
+              assert "'runInApp': False" in blob
+              assert "'ShowWhenRun': False" in blob
+          print('YOS Alert suite safety contract: PASS')
+          PY
+
+      - name: Sign alert shortcuts
+        shell: bash
+        run: |
+          set -euo pipefail
+          for name in 'Money Alert' 'Task Alert' 'Routine Alert' 'Emergency Alert' 'Important Mail'; do
+            python3 tools/clarity-factory/sign_with_hubsign.py \
+              --input "tools/alerts/artifacts/${name}.plist" \
+              --output "tools/alerts/artifacts/${name}.shortcut" \
+              --name "${name}" \
+              2>&1 | tee "tools/alerts/artifacts/${name// /-}-hubsign.log"
+          done
+
+      - name: Verify signed artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          for name in ('Money Alert','Task Alert','Routine Alert','Emergency Alert','Important Mail'):
+              p=Path('tools/alerts/artifacts')/f'{name}.shortcut'
+              data=p.read_bytes()
+              assert data.startswith(b'AEA1'), (name,data[:8])
+              assert len(data)>500, (name,len(data))
+              print(name,'AEA1 PASS',len(data))
+          PY
+
+      - name: Publish iPhone acceptance shortcuts to PR branch
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+        shell: bash
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+        run: |
+          set -euo pipefail
+          tmp="$(mktemp -d)"
+          for name in 'Money Alert' 'Task Alert' 'Routine Alert' 'Emergency Alert' 'Important Mail'; do
+            cp "tools/alerts/artifacts/${name}.shortcut" "${tmp}/${name}.shortcut"
+          done
+          git config user.name 'ProjectY OEL'
+          git config user.email 'actions@users.noreply.github.com'
+          for attempt in 1 2 3; do
+            git fetch origin "${HEAD_REF}"
+            git checkout -B publish "origin/${HEAD_REF}"
+            mkdir -p tools/alerts/acceptance
+            for name in 'Money Alert' 'Task Alert' 'Routine Alert' 'Emergency Alert' 'Important Mail'; do
+              cp "${tmp}/${name}.shortcut" "tools/alerts/acceptance/${name}.shortcut"
+            done
+            git add tools/alerts/acceptance
+            if git diff --cached --quiet; then exit 0; fi
+            git commit -m 'build: publish YOS alert acceptance shortcuts [skip ci]'
+            if git push origin "HEAD:${HEAD_REF}"; then exit 0; fi
+          done
+          exit 1
+
+      - name: Upload iPhone acceptance package
+        uses: actions/upload-artifact@v4
+        with:
+          name: yos-alert-suite
+          path: |
+            tools/alerts/artifacts/*.shortcut
+            tools/alerts/artifacts/*.plist
+            tools/alerts/artifacts/*-hubsign.log
+          if-no-files-found: error

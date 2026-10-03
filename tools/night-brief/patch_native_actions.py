@@ -392,14 +392,14 @@ def patch(path: Path) -> None:
         fail("Night Brief auto mode stop is missing")
     if "night_history=1" in blob or "night_save=1" in blob or "shortcuts://run-shortcut" in blob:
         fail("legacy browser/shortcut callback survived")
-    if ids.count("is.workflow.actions.file.createfolder") != 3:
-        fail("expected history, auto-run, and journal-status folders")
+    if ids.count("is.workflow.actions.file.createfolder") != 4:
+        fail("expected Night history, display history, auto-run, and journal-status folders")
     if ids.count("is.workflow.actions.file.getfoldercontents") != 1:
         fail("Night history folder read missing")
     if ids.count("is.workflow.actions.filter.files") != 1:
         fail("Night history 14-day filter missing")
-    if ids.count("is.workflow.actions.documentpicker.save") != 3:
-        fail("expected history, auto-run marker, and journal-status saves")
+    if ids.count("is.workflow.actions.documentpicker.save") != 5:
+        fail("expected Night history, display-history rereads, auto-run marker, and journal-status saves")
     if ids.count("com.apple.journal.CreateEntryIntent") != 1:
         fail("Journal Create Entry patch failed")
     if "真栄原2丁目" in blob:

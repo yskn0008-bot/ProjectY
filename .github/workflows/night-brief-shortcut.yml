@@ -14,7 +14,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build-and-sign:
@@ -74,10 +74,10 @@ jobs:
 
           assert workflow.get('WFWorkflowHasShortcutInputVariables') is True
           assert ids.count('is.workflow.actions.documentpicker.open') >= 2
-          assert ids.count('is.workflow.actions.file.createfolder') == 3
+          assert ids.count('is.workflow.actions.file.createfolder') == 4
           assert ids.count('is.workflow.actions.file.getfoldercontents') == 1
           assert ids.count('is.workflow.actions.filter.files') == 1
-          assert ids.count('is.workflow.actions.documentpicker.save') == 3
+          assert ids.count('is.workflow.actions.documentpicker.save') == 5
           assert ids.count('is.workflow.actions.weather.forecast') == 1
           assert ids.count('is.workflow.actions.filter.calendarevents') == 2
           assert ids.count('is.workflow.actions.filter.reminders') == 2
@@ -92,6 +92,9 @@ jobs:
           assert ids.count('com.apple.journal.CreateEntryIntent') == 1
 
           assert 'YOS Night History' in blob
+          assert 'YOS Display History' in blob
+          assert '【Night Brief】' in blob
+          assert '【Night Check-in】' in blob
           assert 'YOS Night Brief Run' in blob
           assert 'YOS_NIGHT_AUTO_V1' in blob
           assert 'YOS_NIGHT_BRIEF_RUN_V1' in blob
@@ -141,6 +144,29 @@ jobs:
           assert len(data)>500, len(data)
           print(f'Night Brief signed AEA1: PASS ({len(data)} bytes)')
           PY
+
+      - name: Publish iPhone acceptance shortcut to PR branch
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+        shell: bash
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+        run: |
+          set -euo pipefail
+          tmp="$(mktemp -d)"
+          cp 'tools/night-brief/artifacts/Night Brief.shortcut' "${tmp}/Night Brief.shortcut"
+          git config user.name 'ProjectY OEL'
+          git config user.email 'actions@users.noreply.github.com'
+          for attempt in 1 2 3; do
+            git fetch origin "${HEAD_REF}"
+            git checkout -B publish "origin/${HEAD_REF}"
+            mkdir -p tools/night-brief/acceptance
+            cp "${tmp}/Night Brief.shortcut" 'tools/night-brief/acceptance/Night Brief.shortcut'
+            git add 'tools/night-brief/acceptance/Night Brief.shortcut'
+            if git diff --cached --quiet; then exit 0; fi
+            git commit -m 'build: publish Night Brief notification-history acceptance artifact [skip ci]'
+            if git push origin "HEAD:${HEAD_REF}"; then exit 0; fi
+          done
+          exit 1
 
       - name: Upload iPhone acceptance package
         uses: actions/upload-artifact@v4
