@@ -21,7 +21,9 @@ class ClarityEntryWrapperTests(unittest.TestCase):
     def test_share_is_thin_wrapper_over_clarity_next(self):
         self.assertIn("#define name Clarity Share v4", self.share)
         self.assertIn("#define from sharesheet", self.share)
-        self.assertIn("#define inputs text, richtext, webpage, url, image, pdf", self.share)
+        self.assertNotIn("#define inputs ", self.share)
+        self.assertIn('typeOf(ShortcutInput)', self.share)
+        self.assertIn('const sharedText = getText(ShortcutInput)', self.share)
         self.assertIn("getTextFromImage", self.share)
         self.assertIn("splitPDF", self.share)
         self.assertIn("__YOS_CLARITY_SHARE_TEXT_V1__", self.share)
