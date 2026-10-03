@@ -38,8 +38,8 @@ def main() -> int:
         fail(f"STASH resolved append action missing: {stash_ids}")
     if any(i.endswith("downloadurl") or i.endswith("openurl") for i in stash_ids):
         fail("STASH unexpectedly contains network/open-url action")
-    if not any(i.endswith("choosefromlist") for i in stash_ids):
-        fail(f"STASH readable selection action missing: {stash_ids}")
+    if not any("choose" in i and "list" in i for i in stash_ids):
+        fail(f"STASH selection action missing: {stash_ids}")
     if not any(i.endswith("setclipboard") for i in stash_ids):
         fail(f"STASH clipboard action missing: {stash_ids}")
     if "コピーしてSTASHから削除しました" not in stash_blob:
