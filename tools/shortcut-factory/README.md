@@ -23,7 +23,8 @@ DB, SSOT, cloud service, or persistence file is introduced.
 
 - Input text -> append to `POCKET.txt`.
 - Entry separator -> `===YOS_NEXT===`.
-- No input -> choose a stored entry and copy it to the clipboard.
+- No input -> show a readable numbered list, choose a stored entry, copy the exact text to the clipboard, and remove that chosen entry from `POCKET.txt`.
+- List formatting is display-only; the stored text and existing `===YOS_NEXT===` contract are not rewritten just to make the list readable.
 - The generated source resolves `POCKET.txt` before append, reusing the
   already-proven iOS 26 file persistence pattern from current Clarity.
 
