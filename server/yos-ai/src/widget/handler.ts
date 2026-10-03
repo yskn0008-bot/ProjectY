@@ -6,6 +6,7 @@ import {GoogleSheetsClient} from '../sources/google-sheets-client.js';
 import {bearerToken, secureJson} from '../api/shared.js';
 import {parseProjection} from '../tasks/handler.js';
 import {selectWidgetFeed} from './selection.js';
+import {loadNotionTaskDashboard} from './notion-source.js';
 
 const PROJECTION_NAME = 'YOS Tasks｜MY WAY Read Projection';
 const SHEET_MIME = 'application/vnd.google-apps.spreadsheet';
@@ -14,6 +15,8 @@ const TASK_RANGE = "'Tasks'!A1:J200";
 export interface CreateWidgetFeedHandlerOptions {
   widgetToken: string;
   googleWorkloadAuth: GoogleWorkloadAuthConfig;
+  notionToken?: string;
+  notionDataSourceId?: string;
   fetchImpl?: FetchLike;
 }
 
@@ -29,6 +32,19 @@ export function createWidgetFeedHandler(options: CreateWidgetFeedHandlerOptions)
       if (!safeEqual(bearerToken(request), options.widgetToken)) throw new Error('Authorization failed');
     } catch {
       return secureJson({error: 'Authentication failed'}, 401, null);
+    }
+
+    if (options.notionToken?.trim()) {
+      try {
+        const direct = await loadNotionTaskDashboard({
+          notionToken: options.notionToken,
+          ...(options.notionDataSourceId?.trim() ? {notionDataSourceId: options.notionDataSourceId.trim()} : {}),
+          fetchImpl
+        });
+        return secureJson(selectWidgetFeed(direct.tasks, direct.generatedAt), 200, null);
+      } catch {
+        // Keep the existing Google projection as a fail-safe if Notion is temporarily unavailable.
+      }
     }
 
     try {
