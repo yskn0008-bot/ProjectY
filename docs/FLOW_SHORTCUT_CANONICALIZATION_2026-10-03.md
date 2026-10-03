@@ -15,11 +15,12 @@ The device implementation is authoritative when GitHub does not contain an exact
 
 ## One Enter contract
 
-- Start base: `main` at branch creation (exact parent SHA is recorded after the first branch commit)
+- Start base: `d2bdf3d895b4f44b0117c5002b714b647164c919` (`main` at branch creation)
 - Working branch: `one-enter/flow-shortcuts-canonicalize-20261003`
 - Main direct changes: prohibited
 - Existing systems to reuse: Shortcut Factory / Cherri / HubSign, Morning / Night, Focus, MY REMOTE, Clarity, Life
 - Forbidden: inventing Flow behavior, creating a second Flow router/system, copying shared behavior into multiple Flows, replacing the existing Morning Flow from a guessed reconstruction
+- Current main advanced by two unrelated `data/mission-control.json` commits after branch creation; no Flow/Factory overlap, so no rebase-only churn is required.
 - Terminal state for this pass: `WAIT_USER` if physical iPhone Shortcut export is the only remaining source of truth
 
 ## Evidence restored from current main
