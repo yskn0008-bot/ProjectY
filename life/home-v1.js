@@ -133,6 +133,11 @@
                 ['doneToday','lifeFlow','money','hjSnapshot'].forEach(field=>{
                   if(Object.prototype.hasOwnProperty.call(currentDay,field)&&!Object.prototype.hasOwnProperty.call(incomingDay,field))incomingDay[field]=currentDay[field];
                 });
+                if(currentDay.lifeFlow&&incomingDay.lifeFlow&&typeof currentDay.lifeFlow==='object'&&typeof incomingDay.lifeFlow==='object'){
+                  ['nightReset','preparedFromNight','nightCheckin','weeklyReview'].forEach(field=>{
+                    if(Object.prototype.hasOwnProperty.call(currentDay.lifeFlow,field)&&!Object.prototype.hasOwnProperty.call(incomingDay.lifeFlow,field))incomingDay.lifeFlow[field]=currentDay.lifeFlow[field];
+                  });
+                }
               });
             }
             ['activeLifeDate','lastClosedLifeDate','moneySafety','lifeCalendar'].forEach(field=>{
@@ -385,6 +390,18 @@
     day.hjSnapshot=buildSnapshot(key,day);
     data.activeLifeDate=key;
     data.lastClosedLifeDate=key;
+    try{
+      const weeklyReviewApi=window.__yosWeeklyReviewLiveV1Api;
+      if(weeklyReviewApi&&typeof weeklyReviewApi.runIfSunday==='function'){
+        const weeklyResult=weeklyReviewApi.runIfSunday(data,key,new Date().toISOString());
+        if(weeklyResult?.review){
+          day.lifeFlow={...(day.lifeFlow||{}),weeklyReview:weeklyResult.review};
+          data.days[key]=day;
+        }
+      }
+    }catch(error){
+      console.warn('Weekly Review skipped',error);
+    }
     localStorage.setItem(DATA_KEY,JSON.stringify(data));
     localStorage.setItem(PAGE_KEY,'home');
     location.reload();

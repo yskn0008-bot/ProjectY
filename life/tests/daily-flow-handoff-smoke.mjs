@@ -79,7 +79,73 @@ try{
   await page.waitForSelector('#lifeMorningPreparedV1',{state:'visible'});
   assert.match(await page.locator('#lifeMorningPreparedV1').textContent(),/朝いち既存/,'Morning Flow must surface the prepared first step');
   assert.deepEqual(pageErrors,[],`page errors: ${pageErrors.join(' | ')}`);
-  console.log(`Daily flow + quick add handoff smoke passed: ${browserName}`);
+
+  const weeklyContext=await browser.newContext({viewport:{width:390,height:844},deviceScaleFactor:3,isMobile:true,hasTouch:true,locale:'ja-JP',timezoneId:'Asia/Tokyo'});
+  await weeklyContext.addInitScript(()=>{
+    const fixedNow='2026-10-04T22:00:00+09:00';
+    const NativeDate=Date,fixedTime=NativeDate.parse(fixedNow);
+    globalThis.Date=class extends NativeDate{constructor(...args){super(...(args.length?args:[fixedTime]))}static now(){return fixedTime}};
+    const dates=['2026-09-28','2026-09-29','2026-09-30','2026-10-01','2026-10-02','2026-10-03','2026-10-04'];
+    const days={};
+    dates.forEach((date,i)=>{
+      days[date]={
+        tasks:[
+          {text:'水分補給',done:i<6},
+          ...(i<4?[{text:'支払い確認',done:true}]:[]),
+          ...(i<5?[{text:'不要な一覧更新',done:false,...(i>0?{carriedFrom:dates[i-1]}:{})}]:[])
+        ],
+        routines:{wake:i<5?[0,1,2,3,4,5]:[0,1,2],before:[],home:[]},
+        lifeFlow:{startedAt:`${date}T08:00:00+09:00`}
+      };
+    });
+    if(!localStorage.getItem('yos-life-v1')){
+      localStorage.setItem('yos-life-v1',JSON.stringify({activeLifeDate:'2026-10-04',days}));
+    }
+  });
+  const weeklyPage=await weeklyContext.newPage();
+  const weeklyErrors=[];
+  weeklyPage.on('pageerror',error=>weeklyErrors.push(error.message));
+  await weeklyPage.goto(baseURL,{waitUntil:'networkidle'});
+  await weeklyPage.waitForSelector('#lifeDailyFlowV1',{state:'attached'});
+  await weeklyPage.waitForFunction(()=>Boolean(globalThis.__yosWeeklyReviewLiveV1Api&&document.querySelector('#lifeEndDayV1')));
+  const weeklyProbe=await weeklyPage.evaluate(async()=>{
+    const data=JSON.parse(localStorage.getItem('yos-life-v1'));
+    const clone=JSON.parse(JSON.stringify(data));
+    const result=globalThis.__yosWeeklyReviewLiveV1Api.runIfSunday(clone,data.activeLifeDate,'2026-10-04T22:00:00+09:00');
+    const homeSource=await fetch('./home-v1.js?v=8',{cache:'no-store'}).then(response=>response.text());
+    return{
+      activeLifeDate:data.activeLifeDate,
+      hasEngine:Boolean(globalThis.YOSWeeklyReviewEngineV1),
+      reason:result.reason,
+      reviewSchema:result.review?.schema||null,
+      homeWired:homeSource.includes('weeklyReviewApi.runIfSunday(data,key,new Date().toISOString())')
+    };
+  });
+  assert.equal(weeklyProbe.hasEngine,true,`Weekly Review browser engine missing: ${JSON.stringify(weeklyProbe)}`);
+  assert.equal(weeklyProbe.reason,'sunday',`Weekly Review Sunday gate failed: ${JSON.stringify(weeklyProbe)}`);
+  assert.equal(weeklyProbe.reviewSchema,'yos-weekly-review-v1',`Weekly Review build failed: ${JSON.stringify(weeklyProbe)}`);
+  assert.equal(weeklyProbe.homeWired,true,`Night close did not load the Weekly Review integration: ${JSON.stringify(weeklyProbe)}`);
+  await weeklyPage.locator('#lifeBottomNavV1 [data-page="record"]').click();
+  await weeklyPage.locator('[data-life-flow-tab="night"]').click();
+  await Promise.all([
+    weeklyPage.waitForNavigation({waitUntil:'domcontentloaded'}),
+    weeklyPage.locator('#lifeEndDayV1').click()
+  ]);
+  await weeklyPage.waitForSelector('#lifeDailyFlowV1',{state:'attached'});
+  const weeklyState=await weeklyPage.evaluate(()=>JSON.parse(localStorage.getItem('yos-life-v1')));
+  const review=weeklyState.days['2026-10-04']?.lifeFlow?.weeklyReview;
+  assert.equal(review?.schema,'yos-weekly-review-v1','Sunday Night Reset must persist Weekly Review in yos-life-v1');
+  assert.equal(review?.windowStart,'2026-09-28');
+  assert.equal(review?.windowEnd,'2026-10-04');
+  assert.ok((review?.continue?.length||0)<=1);
+  assert.ok((review?.stop?.length||0)<=1);
+  assert.ok((review?.automate?.length||0)<=1);
+  assert.equal(review?.stop?.[0]?.label,'不要な一覧更新');
+  assert.equal(review?.automate?.[0]?.label,'支払い確認');
+  assert.deepEqual(weeklyErrors,[],`weekly page errors: ${weeklyErrors.join(' | ')}`);
+  await weeklyContext.close();
+
+  console.log(`Daily flow + Weekly Review Sunday handoff smoke passed: ${browserName}`);
 }finally{
   await browser.close();
 }

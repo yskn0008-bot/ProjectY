@@ -87,3 +87,23 @@ Live weekly automationは未接続。実利用化では既存各領域adapterと
 ## Rollback
 
 このbranch / Draft PRを閉じれば本番への影響はゼロ。既存保存データのmigrationはない。
+
+
+## Live connection v1 — 2026-10-03
+
+The existing pure engine remains the single decision engine. The iPhone runtime uses a generated browser projection of `src/review/weekly-review.ts`; `tests/weekly-review-browser-build.test.mjs` fails if that runtime drifts from the engine source.
+
+Live input reuses the existing `yos-life-v1` MY LIFE store. No review DB, new SSOT, or parallel diary is created. The adapter reads the seven calendar days ending on the active Sunday and projects only evidence-backed signals:
+- repeated completed MY LIFE tasks and sufficiently completed routine groups -> continue;
+- a task carried/left unfinished repeatedly with no completion -> stop;
+- repeated completed task labels describing a mechanical check/input/copy/update-style action -> automate, using recorded occurrences as the conservative manual-step measure.
+
+The live call sets `maxPerCategory: 1`. Empty categories stay empty; no fallback suggestion is invented.
+
+### Sunday execution and Night roles
+
+Weekly Review is attached only to the existing Sunday Night Reset / MY LIFE “おやすみ” close action. The result is stored at `days[YYYY-MM-DD].lifeFlow.weeklyReview` inside `yos-life-v1`.
+
+Night Brief remains the daily brief / observation surface and does not execute Weekly Review. Night Reset remains the day-close owner, carries unfinished work forward, and on Sunday also triggers the weekly review. This separates the roles without rebuilding either flow.
+
+“続ける / やめる / 自動化する” are each at most one candidate and keep `requiresUserDecision: true`; no candidate is automatically executed.
