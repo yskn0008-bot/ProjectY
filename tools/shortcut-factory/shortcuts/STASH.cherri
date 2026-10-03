@@ -53,9 +53,9 @@ for item in @rawItems {
     if cleanItem {
         @visibleCount += 1
         const firstLines = splitText(cleanItem, "\n")
-        const firstLine = getText(getFirstItem(firstLines))
+        const firstLineItem = getFirstItem(firstLines)\n        const firstLine = getText(firstLineItem)
         const previewMatches = matchText('^.{1,28}', firstLine)
-        const preview = getText(getFirstItem(previewMatches))
+        const previewItem = getFirstItem(previewMatches)\n        const preview = getText(previewItem)
         @displayItems += "{@rawIndex}｜{preview}"
     }
 }
@@ -68,8 +68,8 @@ const chosenLabel = chooseFromList(@displayItems, "STASH｜使うものを選択
 
 if chosenLabel {
     // Parse only the numeric prefix. Preview text may itself contain numbers.
-    const chosenParts = splitText(getText(chosenLabel), "｜")
-    const chosenIndexText = getText(getFirstItem(chosenParts))
+    const chosenLabelText = getText(chosenLabel)\n    const chosenParts = splitText(chosenLabelText, "｜")
+    const chosenIndexItem = getFirstItem(chosenParts)\n    const chosenIndexText = getText(chosenIndexItem)
     const chosenIndex = number(chosenIndexText)
     const chosenText = getListItem(@rawItems, chosenIndex)
 
