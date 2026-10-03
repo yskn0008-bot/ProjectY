@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-10-03T18:20:42+09:00",
+  "updated_at": "2026-10-03T18:25:06+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -21,16 +21,6 @@
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/539",
       "updated_at": "2026-10-03T05:42:51Z"
-    },
-    {
-      "id": "github-pr-544",
-      "title": "PR #544 Night Brief: integrate MY LIFE save into 22:00 + Journal build",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/544",
-      "updated_at": "2026-09-30T14:36:53Z"
     },
     {
       "id": "github-pr-582",
@@ -111,6 +101,16 @@
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/610",
       "updated_at": "2026-10-03T09:08:40Z"
+    },
+    {
+      "id": "github-pr-613",
+      "title": "PR #613 feat(review): complete Friction Discovery runtime handoff",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/613",
+      "updated_at": "2026-10-03T09:24:45Z"
     },
     {
       "id": "github-issue-10",
@@ -264,7 +264,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-10-03T18:20:42+09:00",
+      "last_update": "2026-10-03T18:25:06+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -339,13 +339,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 8件・Open PR 15件を自動同期中",
+      "next_action": "Open Issue 8件・Open PR 16件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-10-03T18:20:42+09:00",
+      "last_update": "2026-10-03T18:25:06+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -368,7 +368,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-10-03T18:20:42+09:00",
+      "last_update": "2026-10-03T18:25:06+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -450,5 +450,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "7f9f14a40d0b5f902cced96a0723081c46e4c0e0d0926c2db22ade235b5e313b"
+  "github_snapshot_hash": "9a64c71ef559115fffb1529f471992210abe823ca59cda56ea4de9c664cce1b2"
 }
