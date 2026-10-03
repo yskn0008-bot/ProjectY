@@ -91,7 +91,7 @@ try{
       days[date]={
         tasks:[
           {text:'水分補給',done:i<6},
-          ...(i<4?[{text:'支払い確認',done:true}]:[]),
+          ...(i<4?[{text:'天気確認',done:true}]:[]),
           ...(i<5?[{text:'不要な一覧更新',done:false,...(i>0?{carriedFrom:dates[i-1]}:{})}]:[])
         ],
         routines:{wake:i<5?[0,1,2,3,4,5]:[0,1,2],before:[],home:[]},
@@ -141,7 +141,7 @@ try{
   assert.ok((review?.stop?.length||0)<=1);
   assert.ok((review?.automate?.length||0)<=1);
   assert.equal(review?.stop?.[0]?.label,'不要な一覧更新');
-  assert.equal(review?.automate?.[0]?.label,'支払い確認');
+  assert.equal(review?.automate?.[0]?.label,'天気確認');
   assert.deepEqual(weeklyErrors,[],`weekly page errors: ${weeklyErrors.join(' | ')}`);
   await weeklyContext.close();
 

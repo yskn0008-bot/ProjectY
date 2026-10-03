@@ -58,7 +58,7 @@
   "summary": {
     "asset_count": 25,
     "overall_progress": 72,
-    "needs_user_action_count": 10,
+    "needs_user_action_count": 11,
     "audit_completed_at": "2026-10-02T09:46:01+09:00",
     "current_frontline": [
       "YOS Money Local v1.5.1",
@@ -688,17 +688,21 @@
       "id": "friction-discovery",
       "name": "Friction Discovery",
       "area": "review",
-      "status": "building",
+      "status": "awaiting_device_verification",
       "priority": 3,
-      "current": "Pure Friction Discovery engineに加え、既存MY LIFE `yos-life-v1` の実行済みread-only taskを新しい保存先なしで投影するlive adapterをPR #604で実装。current-head YOS AI Coreと既存Loop Engine実案件E2EはPASS。定期実行・他source adapter・自動Prototype実行は未接続。",
-      "next_action": "必要性が確認できた場合だけ、既存の定期実行経路へread-only discoveryを接続する。他source adapterは実データ価値が確認できたものだけ追加し、自動Prototype実行は行わない。",
-      "blocker": "定期実行とClarity / YOS / MY WAY / Idea / Automationの追加adapterは未接続。",
-      "needs_user_action": false,
+      "current": "Friction Discoveryは既存pure engine + MY LIFE read-only adapterに加え、MY LIFEブラウザruntimeへ接続。既存の日曜Night Reset→Weekly Review経路で14日分の反復・低リスク・効果測定可能な不便だけを自動抽出し、『自動化する』候補へ渡す。新SSOT・新scheduler・自動Prototype実行は追加していない。",
+      "next_action": "本番反映後、iPhoneのMY LIFEで日曜Night Reset→週次レビューを1回実機確認する。候補が無い週は『候補なし』で正常。",
+      "blocker": "コード/自動テスト完了後の本番反映確認と、iPhone実機での日曜Night Reset→週次レビュー表示確認が必要。",
+      "needs_user_action": true,
       "device_verified": false,
       "production_verified": false,
       "deep_link": null,
       "completion_criteria": [
-        "繰り返し操作・迷いを候補化する / 効果がある候補だけ残す / 必要時だけプロト君へ接続する"
+        "既存MY LIFE実データから繰り返し操作・迷いを候補化する",
+        "支払い等の状態変更・高リスク操作を自動化候補から除外する",
+        "効果がある候補だけ既存Weekly Reviewの『自動化する』へ渡す",
+        "新しいSSOTやschedulerを作らず既存Sunday Night Reset経路で自動実行する",
+        "iPhone実機と本番で既存MY LIFEを壊さず表示できる"
       ],
       "evidence": [
         "historical:PR #327 pure engine green",
@@ -707,7 +711,12 @@
         "loop-e2e:verification [FAIL,PASS] -> fix restore-safe-read-only-filter -> independent audit PASS -> COMPLETE",
         "CI:YOS AI Core current-head PASS",
         "CI:One Enter Factory Core current-head PASS",
-        "evidence:One Enter / Loop Engineering実案件E2E PASS"
+        "evidence:One Enter / Loop Engineering実案件E2E PASS",
+        "PR#604 merged: 1977db7b2c8b4db74b16c04a4c576014000d840b",
+        "path:life/friction-discovery-engine-v1.js",
+        "path:life/friction-discovery-live-v1.js",
+        "integration:existing Sunday Night Reset -> Weekly Review -> Friction Discovery",
+        "safety:unsafe state-changing labels fail closed"
       ],
       "progress_basis": {
         "spec": true,
@@ -717,7 +726,7 @@
         "production": false
       },
       "progress": 65,
-      "updated_at": "2026-10-03T17:50:48+09:00"
+      "updated_at": "2026-10-03T18:25:00+09:00"
     },
     {
       "id": "one-enter",

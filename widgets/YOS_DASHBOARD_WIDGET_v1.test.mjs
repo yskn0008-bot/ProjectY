@@ -34,7 +34,8 @@ test("reads Calendar and Money locally without creating another SSOT", () => {
 
 test("uses larger dashboard typography for iPhone readability", () => {
   assert.match(source, /name\.font = font\(22, "bold"\)/);
-  assert.match(source, /font\(prominent \? 25 : 17/);
+  assert.match(source, /first\.font = font\(25, "bold"\)/);
+  assert.match(source, /text\.font = font\(17, "semibold"\)/);
   assert.match(source, /title\.font = font\(compact \? 14 : 17/);
   assert.match(source, /amount\.font = font\(22, "bold"\)/);
 });
@@ -77,3 +78,12 @@ test("routine controls launch existing Morning and Night shortcuts without inven
 });
 
 // Explicit NOW two-row rendering is intentionally covered by source-contract tests.
+
+
+test("NOW and TODAY request near-instant fresh widget data", () => {
+  assert.match(source, /refreshSeconds:\s*60/);
+  assert.doesNotMatch(source, /refreshMinutes/);
+  assert.match(source, /"Cache-Control": "no-cache"/);
+  const refreshMatches = source.match(/Date\.now\(\) \+ CONFIG\.refreshSeconds \* 1000/g) ?? [];
+  assert.equal(refreshMatches.length, 2);
+});
