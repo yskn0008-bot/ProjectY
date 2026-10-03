@@ -41,25 +41,9 @@ if !stashFile {
 
 const stashText = getText(stashFile)
 const rawItems = splitText(stashText, "===YOS_NEXT===")
-@displayItems = []
-@index = 0
+const chosenText = chooseFromList(rawItems, "STASH｜使うものを選択")
 
-repeat with item in rawItems {
-    const cleanItem = getText(item)
-    if cleanItem {
-        @index += 1
-        const preview = text("{@index}. {cleanItem}")
-        @displayItems += preview
-    }
-}
-
-if @index == 0 {
-    showNotification("STASHはまだ空です", "STASH", false)
-    stop()
-}
-
-const chosenDisplay = chooseFromList(@displayItems, "STASH｜使うものを選択")
-if chosenDisplay {
+if chosenText {
     const chosenText = replaceText("^\\d+\\.\\s*", "", chosenDisplay, true, true)
     setClipboard(chosenText)
 
