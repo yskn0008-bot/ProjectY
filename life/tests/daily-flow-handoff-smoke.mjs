@@ -106,6 +106,23 @@ try{
   await weeklyPage.goto(baseURL,{waitUntil:'networkidle'});
   await weeklyPage.waitForSelector('#lifeDailyFlowV1',{state:'attached'});
   await weeklyPage.waitForFunction(()=>Boolean(globalThis.__yosWeeklyReviewLiveV1Api&&document.querySelector('#lifeEndDayV1')));
+  const weeklyProbe=await weeklyPage.evaluate(async()=>{
+    const data=JSON.parse(localStorage.getItem('yos-life-v1'));
+    const clone=JSON.parse(JSON.stringify(data));
+    const result=globalThis.__yosWeeklyReviewLiveV1Api.runIfSunday(clone,data.activeLifeDate,'2026-10-04T22:00:00+09:00');
+    const homeSource=await fetch('./home-v1.js?v=8',{cache:'no-store'}).then(response=>response.text());
+    return{
+      activeLifeDate:data.activeLifeDate,
+      hasEngine:Boolean(globalThis.YOSWeeklyReviewEngineV1),
+      reason:result.reason,
+      reviewSchema:result.review?.schema||null,
+      homeWired:homeSource.includes('__yosWeeklyReviewLiveV1Api?.runIfSunday')
+    };
+  });
+  assert.equal(weeklyProbe.hasEngine,true,`Weekly Review browser engine missing: ${JSON.stringify(weeklyProbe)}`);
+  assert.equal(weeklyProbe.reason,'sunday',`Weekly Review Sunday gate failed: ${JSON.stringify(weeklyProbe)}`);
+  assert.equal(weeklyProbe.reviewSchema,'yos-weekly-review-v1',`Weekly Review build failed: ${JSON.stringify(weeklyProbe)}`);
+  assert.equal(weeklyProbe.homeWired,true,`Night close did not load the Weekly Review integration: ${JSON.stringify(weeklyProbe)}`);
   await weeklyPage.locator('#lifeBottomNavV1 [data-page="record"]').click();
   await weeklyPage.locator('[data-life-flow-tab="night"]').click();
   await Promise.all([
