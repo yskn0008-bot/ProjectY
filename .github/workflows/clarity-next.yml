@@ -146,6 +146,9 @@ jobs:
           share_blob=repr(share_root)
           assert 'ActionExtension' in set(share_root.get('WFWorkflowTypes') or [])
           assert share_root.get('WFWorkflowHasShortcutInputVariables') is True
+          # Keep Share Sheet intake broad. Explicit content classes would reintroduce
+          # the restriction removed after PR #534 and hide supported share sources.
+          assert not share_root.get('WFWorkflowInputContentItemClasses'), share_root.get('WFWorkflowInputContentItemClasses')
           assert any('extracttextfromimage' in i for i in share_ids), share_ids
           assert '__YOS_CLARITY_SHARE_TEXT_V1__' in share_blob
           assert '__YOS_CLARITY_SHARE_IMAGE_V1__' in share_blob
