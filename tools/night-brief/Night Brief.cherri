@@ -21,6 +21,7 @@ if @incoming contains "YOS_NIGHT_AUTO_V1" {
 }
 
 const historyFolder = createFolder("YOS Night History")
+const displayHistoryFolder = createFolder("YOS Display History")
 const historyFiles = getFolderContents(historyFolder, false)
 const recentHistoryFiles = filterFiles(historyFiles, 14, "Name", "Z to A")
 const recentHistory = getText(recentHistoryFiles)
@@ -165,6 +166,9 @@ const response = askChatGPT(modelPrompt, false, "Text")
 // Normalize spacing even if the model compresses the numbered discoveries.
 const spacedResponse2 = replaceText('\\n+2\\.', "\n\n2.", response, true, true)
 const spacedResponse3 = replaceText('\\n+3\\.', "\n\n3.", spacedResponse2, true, true)
+const nightBriefLog = text("【Night Brief】\n{spacedResponse3}")
+saveFile("YOS Display History/{todayKey} Night Brief.txt", nightBriefLog, false)
+
 showNotification(spacedResponse3, "Night Brief", true)
 const briefRunMarker = text("YOS_NIGHT_BRIEF_RUN_V1\n{todayKey}")
 saveFile("YOS Night Brief Run/{todayKey}.txt", briefRunMarker, true)
@@ -268,5 +272,8 @@ const finalText = text("保存しました
 
 3行日記：
 {diary}")
+
+const nightCheckinLog = text("【Night Check-in】\n{finalText}")
+saveFile("YOS Display History/{todayKey} Night Check-in.txt", nightCheckinLog, false)
 
 alert(finalText, "Night Brief")
