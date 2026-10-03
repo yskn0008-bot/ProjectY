@@ -65,7 +65,7 @@ iPhoneのアラートは比例フォントなので、空白で列揃えをし�
 
 前置き・説明・見出しは不要です。
 
-Money正本：
+Money正本JSON：
 {moneySource}")
 
 const result = askChatGPT(promptText, false, "Text")
