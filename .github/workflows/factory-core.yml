@@ -139,6 +139,8 @@ jobs:
           import json
           import plistlib
           import re
+          import time
+          import urllib.error
           import urllib.request
           from pathlib import Path
 
@@ -154,15 +156,46 @@ jobs:
           summary = []
 
           def get(url):
-              req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
-              with urllib.request.urlopen(req, timeout=30) as response:
-                  return response.read()
+              last = None
+              for attempt in range(6):
+                  try:
+                      req = urllib.request.Request(
+                          url,
+                          headers={
+                              "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 Safari/605.1.15",
+                              "Accept": "*/*",
+                              "Connection": "close",
+                          },
+                      )
+                      with urllib.request.urlopen(req, timeout=45) as response:
+                          return response.read()
+                  except Exception as exc:
+                      last = exc
+                      if attempt == 5:
+                          break
+                      time.sleep(min(2 ** attempt, 8))
+              raise last
+
+          def metadata(shortcut_id):
+              urls = [
+                  f"https://www.icloud.com/shortcuts/api/records/{shortcut_id}",
+                  f"https://www.icloud.com/shortcuts/api/records/{shortcut_id}/",
+                  f"https://www.icloud.com/shortcuts/api/v1/records/{shortcut_id}",
+                  f"https://www.icloud.com/shortcuts/api/v1/records/{shortcut_id}/",
+              ]
+              errors = []
+              for url in urls:
+                  try:
+                      return json.loads(get(url))
+                  except Exception as exc:
+                      errors.append(f"{url}: {exc}")
+              raise RuntimeError("metadata fetch failed: " + " | ".join(errors))
 
           def resolve_asset(value, filename):
               return value["downloadURL"].replace("${f}", filename)
 
           for shortcut_id in ids:
-              meta = json.loads(get(f"https://www.icloud.com/shortcuts/api/records/{shortcut_id}"))
+              meta = metadata(shortcut_id)
               if "records" in meta:
                   meta = meta["records"][0]
               fields = meta["fields"]
