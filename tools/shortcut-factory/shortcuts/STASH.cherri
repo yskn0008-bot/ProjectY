@@ -1,0 +1,52 @@
+#define name STASH
+#define color teal
+#define inputs text
+#define from sharesheet
+
+#include 'actions/documents'
+#include 'actions/sharing'
+#include 'actions/text'
+
+/*
+Existing STASH contract from PR #324:
+- Input text -> append to iCloud Drive/Shortcuts/POCKET.txt.
+- Separator stays ===YOS_NEXT===.
+- No input -> choose an existing item and copy it back to the clipboard.
+
+The append action resolves POCKET.txt first because the current iPhone/iOS 26
+evidence in ProjectY showed that Cherri's path-only append can complete without
+persisting. This keeps the existing POCKET.txt store and does not create a new
+storage location.
+*/
+
+action 'file.append' appendResolvedFile(
+    variable file: 'WFFile',
+    variable input: 'WFInput'
+) {
+    "WFAppendFileWriteMode": "Append"
+}
+
+if ShortcutInput {
+    const sharedText = getText(ShortcutInput)
+    if sharedText {
+        const entry = text("{sharedText}\n===YOS_NEXT===\n")
+        const pocketFile = getFile("POCKET.txt")
+        appendResolvedFile(pocketFile, entry)
+        showNotification("保存しました", "STASH", false)
+        stop()
+    }
+}
+
+const stashFile = getFile("POCKET.txt", nil, false)
+if !stashFile {
+    showNotification("STASHはまだ空です", "STASH", false)
+    stop()
+}
+
+const stashText = getText(stashFile)
+const items = splitText(stashText, "===YOS_NEXT===")
+const chosen = chooseFromList(items, "STASHから取り出す")
+if chosen {
+    setClipboard(chosen)
+    showNotification("クリップボードへコピーしました", "STASH", false)
+}
