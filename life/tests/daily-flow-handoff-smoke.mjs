@@ -116,7 +116,7 @@ try{
       hasEngine:Boolean(globalThis.YOSWeeklyReviewEngineV1),
       reason:result.reason,
       reviewSchema:result.review?.schema||null,
-      homeWired:homeSource.includes('__yosWeeklyReviewLiveV1Api?.runIfSunday')
+      homeWired:homeSource.includes('weeklyReviewApi.runIfSunday(data,key,new Date().toISOString())')
     };
   });
   assert.equal(weeklyProbe.hasEngine,true,`Weekly Review browser engine missing: ${JSON.stringify(weeklyProbe)}`);
