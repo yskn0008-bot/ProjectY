@@ -40,25 +40,27 @@ test("uses larger dashboard typography for iPhone readability", () => {
 });
 
 
-test("task layout uses full-width blocks so large titles can wrap to two lines", () => {
+test("TODAY task layout keeps full-width wrapped task titles", () => {
   assert.match(source, /const text = parent\.addText\(task\.title/);
   assert.match(source, /text\.lineLimit = 2/);
-  assert.doesNotMatch(source, /copy\.layoutVertically\(\)/);
   assert.match(source, /visibleTasks\.length === 1 && task\.nextAction/);
   assert.match(source, /action\.lineLimit = 2/);
 });
 
 test("NOW strips the technical ProjectY prefix before rendering the task title", () => {
-  assert.match(source, /function nowDisplayTitle\(value\)/);
+  assert.match(source, /function nowDisplayLines\(value\)/);
   assert.match(source, /ProjectY\\s\*\[｜\|\]/);
-  assert.match(source, /prominent \? nowDisplayTitle\(task\.title\) : task\.title/);
 });
 
-
-test("NOW inserts an explicit balanced line break for long titles", () => {
-  assert.match(source, /if \(title\.length <= 18 \|\| title\.includes\("\\n"\)\) return title/);
+test("NOW splits long titles into two balanced explicit text rows", () => {
+  assert.match(source, /if \(title\.length <= 18\) return \[title\]/);
   assert.match(source, /candidates\.push\(\{i, score: longest \+ balance \* 0\.2\}\)/);
-  assert.match(source, /return title\.slice\(0, split\)\.trim\(\) \+ "\\n" \+ title\.slice\(split \+ 1\)\.trim\(\)/);
+  assert.match(source, /return \[\s*title\.slice\(0, split\)\.trim\(\),\s*title\.slice\(split \+ 1\)\.trim\(\),\s*\]/s);
+  assert.match(source, /const lines = nowDisplayLines\(task\.title\)/);
+  assert.match(source, /const first = parent\.addText\(lines\[0\]/);
+  assert.match(source, /const second = parent\.addText\(lines\[1\]\)/);
+  assert.match(source, /first\.lineLimit = 1/);
+  assert.match(source, /second\.lineLimit = 1/);
 });
 
 test("NOW protects long task titles before showing the next action", () => {
@@ -74,4 +76,4 @@ test("routine controls launch existing Morning and Night shortcuts without inven
   assert.match(source, /completion is not inferred/);
 });
 
-// Explicit NOW wrap is intentionally covered by source-contract tests.
+// Explicit NOW two-row rendering is intentionally covered by source-contract tests.
