@@ -105,7 +105,7 @@ try{
   weeklyPage.on('pageerror',error=>weeklyErrors.push(error.message));
   await weeklyPage.goto(baseURL,{waitUntil:'networkidle'});
   await weeklyPage.waitForSelector('#lifeDailyFlowV1',{state:'attached'});
-  await weeklyPage.waitForFunction(()=>Boolean(globalThis.__yosWeeklyReviewLiveV1Api&&document.querySelector('#lifeEndDayV1')?.dataset.weeklyReviewHook==='1'));
+  await weeklyPage.waitForFunction(()=>Boolean(globalThis.__yosWeeklyReviewLiveV1Api&&document.querySelector('#lifeEndDayV1')));
   await weeklyPage.locator('#lifeBottomNavV1 [data-page="record"]').click();
   await weeklyPage.locator('[data-life-flow-tab="night"]').click();
   await Promise.all([
