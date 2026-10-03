@@ -22,19 +22,24 @@ async function loadText(url) {
 }
 
 function validateSource(source) {
+  if (typeof source !== "string" || source.length < 5000) {
+    throw new Error("Dashboardコードが短すぎるため停止しました。");
+  }
+
+  // Validate the stable Dashboard contract, not fragile UI implementation details.
+  // This keeps the updater compatible with future typography/layout refinements.
   const required = [
+    "// YOS Dashboard Widget v1",
+    "args.widgetParameter",
     "function makeNow(",
     "function makeToday(",
-    "const text = parent.addText(task.title",
-    "const titleNeedsTwoLines = current.title.length > 18",
+    "loadTaskFeed()",
     "CalendarEvent.today()",
     "YOS/Money/money.json",
+    "shortcuts://run-shortcut?name=",
   ];
   for (const marker of required) {
-    if (!source.includes(marker)) throw new Error("最新版コードの検証に失敗: " + marker);
-  }
-  if (source.includes("const dot = row.addStack()")) {
-    throw new Error("旧タスク表示コードを検出したため停止しました。");
+    if (!source.includes(marker)) throw new Error("Dashboard基本機能の検証に失敗: " + marker);
   }
 }
 
