@@ -12,7 +12,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   contract:
@@ -132,7 +132,15 @@ jobs:
           fi
 
 
+      - name: Switch to PR head for Flow recovery (temporary)
+        if: github.event_name == 'pull_request' && github.actor != 'github-actions[bot]'
+        shell: bash
+        run: |
+          git fetch origin "$GITHUB_HEAD_REF:$GITHUB_HEAD_REF"
+          git checkout "$GITHUB_HEAD_REF"
+
       - name: Recover shared iCloud Flow artifacts (temporary)
+        if: github.actor != 'github-actions[bot]'
         shell: python
         run: |
           import hashlib
@@ -234,7 +242,23 @@ jobs:
               encoding="utf-8",
           )
 
+      - name: Persist recovered Flow artifacts on PR branch (temporary)
+        if: github.actor != 'github-actions[bot]'
+        shell: bash
+        run: |
+          set -euo pipefail
+          target="tools/factory-core/flow-artifacts/shared-recovered"
+          rm -rf "$target"
+          mkdir -p "$target"
+          cp -R shared-flows/. "$target/"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$target"
+          git commit -m "chore(flow): persist supplied iCloud Flow artifacts"
+          git push origin HEAD:"$GITHUB_HEAD_REF"
+
       - name: Upload recovered shared flows (temporary)
+        if: github.actor != 'github-actions[bot]'
         uses: actions/upload-artifact@v4
         with:
           name: shared-flows-recovered
