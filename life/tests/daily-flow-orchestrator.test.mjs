@@ -134,3 +134,11 @@ test('existing Night close owns the Sunday Weekly Review write', async () => {
   const live = await read('weekly-review-live-v1.js');
   assert.doesNotMatch(live, /weeklyReviewHook|installNightResetHook/);
 });
+
+
+test('legacy store writes cannot erase Weekly Review extension fields', async () => {
+  const home = await read('home-v1.js');
+  assert.match(home, /\['nightReset','preparedFromNight','nightCheckin','weeklyReview'\]/);
+  assert.match(home, /currentDay\.lifeFlow/);
+  assert.match(home, /incomingDay\.lifeFlow\[field\]=currentDay\.lifeFlow\[field\]/);
+});
