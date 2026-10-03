@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-10-04T02:52:45+09:00",
+  "updated_at": "2026-10-04T02:55:48+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -195,6 +195,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-6890ba4a3b41",
+      "title": "chore(yos-ai): deploy merged YOS Chat fix to production",
+      "completed_at": "2026-10-03T17:55:12Z",
+      "result": "GitHub mainへ反映（6890ba4）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/6890ba4a3b41e3ed65fb3e30d9084d5ea3ea87a4"
+    },
+    {
       "id": "github-commit-222fde0d8567",
       "title": "Merge pull request #616 from yskn0008-bot/hotfix/yos-chat-production-redeploy-20261004",
       "completed_at": "2026-10-03T17:52:25Z",
@@ -221,13 +228,6 @@
       "completed_at": "2026-10-03T09:29:26Z",
       "result": "GitHub mainへ反映（17083ed）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/17083ed580dca1817e4c1e2ebcaba695b038a309"
-    },
-    {
-      "id": "github-commit-3ddc80c37c8a",
-      "title": "NOW / TODAY widgets: request near-instant refresh",
-      "completed_at": "2026-10-03T09:20:18Z",
-      "result": "GitHub mainへ反映（3ddc80c）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/3ddc80c37c8ac25fd8e50acb504bf8e276cfd2be"
     },
     {
       "id": "complete-002",
@@ -264,7 +264,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-10-04T02:52:45+09:00",
+      "last_update": "2026-10-04T02:55:48+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -345,7 +345,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-10-04T02:52:45+09:00",
+      "last_update": "2026-10-04T02:55:48+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -368,7 +368,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-10-04T02:52:45+09:00",
+      "last_update": "2026-10-04T02:55:48+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -450,5 +450,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "f877441b0f769b541cf38af25e77a48a80388940cd3bc442e2ae6c824dc0ac9d"
+  "github_snapshot_hash": "a33bb4628e1ed8c391e5650472a93d85d852865d016f80f1b5701ae339e4bd36"
 }
