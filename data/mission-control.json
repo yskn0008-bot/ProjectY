@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-10-03T14:37:58+09:00",
+  "updated_at": "2026-10-03T14:40:37+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -20,7 +20,7 @@
       "priority": 1,
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/600",
-      "updated_at": "2026-10-03T05:37:43Z"
+      "updated_at": "2026-10-03T05:38:15Z"
     },
     {
       "id": "github-pr-403",
@@ -63,16 +63,6 @@
       "updated_at": "2026-09-30T10:40:22Z"
     },
     {
-      "id": "github-pr-534",
-      "title": "PR #534 Clarity Share: 共有シートの入力型制限を解除",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/534",
-      "updated_at": "2026-09-29T09:09:33Z"
-    },
-    {
       "id": "github-pr-537",
       "title": "PR #537 Clarity Next: 最新mainへYOS_Homeを統合",
       "type": "GitHub PR",
@@ -113,6 +103,16 @@
       "updated_at": "2026-10-02T18:27:37Z"
     },
     {
+      "id": "github-pr-601",
+      "title": "PR #601 Fix Payment Alert to read YOS Money Local canonical data",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/601",
+      "updated_at": "2026-10-03T05:40:22Z"
+    },
+    {
       "id": "github-issue-10",
       "title": "Issue #10 Mission Control v2：GitHubのIssue・PR・Commitを自動集約する",
       "type": "GitHub Issue",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-10-03T05:37:39Z"
+      "updated_at": "2026-10-03T05:38:17Z"
     },
     {
       "id": "github-issue-234",
@@ -254,7 +254,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-10-03T14:37:58+09:00",
+      "last_update": "2026-10-03T14:40:37+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -329,13 +329,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 7件・Open PR 10件を自動同期中",
+      "next_action": "Open Issue 7件・Open PR 11件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-10-03T14:37:58+09:00",
+      "last_update": "2026-10-03T14:40:37+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -358,7 +358,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-10-03T14:37:58+09:00",
+      "last_update": "2026-10-03T14:40:37+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -440,5 +440,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "cc05aa68de8ad9dad855bbfd56f6099074acc8542c1f356898670cb64c2b68bf"
+  "github_snapshot_hash": "7ceec8b4215e2d23af591db57a5a0dffb1459a4d603c414a4e98f4787d02d92c"
 }
