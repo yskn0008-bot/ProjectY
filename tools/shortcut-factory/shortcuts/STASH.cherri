@@ -10,9 +10,10 @@
 /*
 Existing STASH contract:
 - Input text -> append to iCloud Drive/Shortcuts/POCKET.txt.
-- No input -> show a readable numbered vCard list without changing stored text.
-- Selecting an item copies the exact stored text to the clipboard AND removes
-  that item from POCKET.txt, so STASH behaves as a take-and-use pocket.
+- No input -> show a compact numbered list without changing stored text.
+- Selecting an item copies the exact stored text to the clipboard and removes
+  that exact item from POCKET.txt.
+- Routine save/copy operations stay silent.
 */
 
 action 'file.append' appendResolvedFile(
@@ -28,21 +29,19 @@ if ShortcutInput {
         const entry = text("{sharedText}\n===YOS_NEXT===\n")
         const pocketFile = getFile("POCKET.txt")
         appendResolvedFile(pocketFile, entry)
-        showNotification("保存しました", "STASH", false)
         stop()
     }
 }
 
 const stashFile = getFile("POCKET.txt", nil, false)
 if !stashFile {
-    showNotification("STASHはまだ空です", "STASH", false)
     stop()
 }
 
 const stashText = getText(stashFile)
 
-// Split on the complete storage delimiter so list items do not inherit the
-// separator newlines. Build a display-only vCard list; POCKET text stays exact.
+// Storage stays exact. The list is display-only:
+// number + first trimmed line + max 28 visible characters.
 @rawItems = splitText(stashText, "\n===YOS_NEXT===\n")
 @displayItems: array
 @rawIndex = 0
@@ -50,33 +49,38 @@ const stashText = getText(stashFile)
 
 for item in @rawItems {
     @rawIndex += 1
-    const cleanItem = getText(@item)
+    const cleanItem = trimWhitespace(getText(@item))
     if cleanItem {
         @visibleCount += 1
-        @displayItems += makeVCard("{@rawIndex}｜{cleanItem}", "タップでコピーして削除")
+        const firstLines = splitText(cleanItem, "\n")
+        const firstLine = getText(getFirstItem(firstLines))
+        const previewMatches = matchText('^.{1,28}', firstLine)
+        const preview = getText(getFirstItem(previewMatches))
+        @displayItems += "{@rawIndex}｜{preview}"
     }
 }
 
 if @visibleCount == 0 {
-    showNotification("STASHはまだ空です", "STASH", false)
     stop()
 }
 
-// vCard gives each row a short numbered title and the saved text as a subtitle.
-@menuText = "{@displayItems}"
-@menuFile = setName(@menuText, "STASH Menu.vcf")
-@menuContacts = @menuFile.contact
-const chosenTitle = chooseFromList(@menuContacts, "STASH｜使うものを選択")
+const chosenLabel = chooseFromList(@displayItems, "STASH｜使うものを選択")
 
-if chosenTitle {
-    const chosenIndex = getNumbers(chosenTitle)
+if chosenLabel {
+    // Parse only the numeric prefix. Preview text may itself contain numbers.
+    const chosenParts = splitText(getText(chosenLabel), "｜")
+    const chosenIndexText = getText(getFirstItem(chosenParts))
+    const chosenIndex = number(chosenIndexText)
     const chosenText = getListItem(@rawItems, chosenIndex)
+
+    // Copy first so the exact text remains available even after its STASH row
+    // is consumed.
     setClipboard(chosenText)
 
-    // Consume the exact stored entry after copying it.
     const consumedEntry = text("{chosenText}\n===YOS_NEXT===\n")
     const remaining = replaceText(consumedEntry, "", stashText)
-    saveFile("POCKET.txt", remaining, true)
 
-    showNotification("コピーしてSTASHから削除しました", "STASH", false)
+    // saveFile compiles with Ask Where to Save = false and overwrite = true.
+    // It rewrites the existing Shortcuts/POCKET.txt without a destination prompt.
+    saveFile("POCKET.txt", remaining, true)
 }
