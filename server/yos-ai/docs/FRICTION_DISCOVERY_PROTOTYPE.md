@@ -81,20 +81,40 @@ v1 coreは自動でアプリ・Shortcut・Automationを作成したり、本番�
 
 将来、⑨の候補を⑧の`automate`判断材料として参照しても、実装・保存・Lifecycleは別に保つ。
 
+## Live MY LIFE adapter
+
+`friction-live-adapter.ts` は既存 `yos-life-v1` の task 記録を read-only で投影し、既存 `discoverFrictionCandidates` へ渡す最初の live signal adapter。
+
+安全側に倒すため、現段階で自動候補へ投影するのは次のみ。
+
+- `done === true` の実行済みtask
+- 「確認 / チェック / 照合 / 開く / 起動 / 検索」のような read-only 操作
+- 支払、振込、送信、削除、購入、契約、決済、投稿、公開、登録、予約、注文、入出金、変更、更新、保存、入力、転記、同期を含まないtask
+
+adapterは新しい保存先を作らず、`localStorage`、network write、外部送信を行わない。入力storeも変更しない。
+
+各実行済みtaskは、既存Lifeの `date + task index` からstable evidence idを作り、manual step 1件として扱う。候補化の閾値は既存coreの初期値を変更しないため、十分に繰り返されていない場合は候補ゼロになる。
+
 ## Completion boundary
 
-Prototype core:
-- pure TypeScript
+確認済み:
+- pure Friction Discovery core
 - rolling-window detection
 - measurable-impact gate
 - low-risk / reversible gate
+- MY LIFE read-only live adapter
 - no storage
 - no external write
 - no new SSOT
-- unit tests
+- adapter + core regression tests
 
-Live discoveryは未接続。実利用化では既存Clarity/YOS/MY WAY等からsignalを作るadapterと、既存Automationによる定期実行だけを追加する。
+未接続:
+- 定期実行
+- Clarity / YOS / MY WAY / Idea / Automationの追加adapter
+- 候補を自動でPrototypeへ送る実行系
+
+候補生成だけでは自動化を開始しない。候補は引き続き `requiresUserDecision: true`。
 
 ## Rollback
 
-このbranch / Draft PRを閉じれば本番への影響はゼロ。既存データmigrationはない。
+このadapter差分をrevertすれば元のpure coreへ戻る。既存データmigration、保存形式変更、外部作用はない。

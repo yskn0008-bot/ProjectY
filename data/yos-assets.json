@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0.0",
   "ssot": "YOS asset registry",
-  "updated_at": "2026-10-02T09:46:01+09:00",
+  "updated_at": "2026-10-03T17:50:48+09:00",
   "source": {
     "repository": "yskn0008-bot/ProjectY",
     "base_branch": "main",
@@ -690,9 +690,9 @@
       "area": "review",
       "status": "building",
       "priority": 3,
-      "current": "Friction Discoveryも『未実装の計画』ではなく、候補抽出pure engineとtestが存在する。実生活ログから繰り返し操作・迷いを拾うlive adapterとAutomation接続が未実装。",
-      "next_action": "既存engineへ実生活ログadapterだけ接続し、効果が確認できる候補だけWeekly Reviewへ渡す。",
-      "blocker": "live adapter / Automation接続が未完了。",
+      "current": "Pure Friction Discovery engineに加え、既存MY LIFE `yos-life-v1` の実行済みread-only taskを新しい保存先なしで投影するlive adapterをPR #604で実装。current-head YOS AI Coreと既存Loop Engine実案件E2EはPASS。定期実行・他source adapter・自動Prototype実行は未接続。",
+      "next_action": "必要性が確認できた場合だけ、既存の定期実行経路へread-only discoveryを接続する。他source adapterは実データ価値が確認できたものだけ追加し、自動Prototype実行は行わない。",
+      "blocker": "定期実行とClarity / YOS / MY WAY / Idea / Automationの追加adapterは未接続。",
       "needs_user_action": false,
       "device_verified": false,
       "production_verified": false,
@@ -702,7 +702,12 @@
       ],
       "evidence": [
         "historical:PR #327 pure engine green",
-        "audit:2026-10-02 live adapter/Automation still absent"
+        "audit:2026-10-02 live adapter/Automation still absent",
+        "PR#604",
+        "loop-e2e:verification [FAIL,PASS] -> fix restore-safe-read-only-filter -> independent audit PASS -> COMPLETE",
+        "CI:YOS AI Core current-head PASS",
+        "CI:One Enter Factory Core current-head PASS",
+        "evidence:One Enter / Loop Engineering実案件E2E PASS"
       ],
       "progress_basis": {
         "spec": true,
@@ -712,7 +717,7 @@
         "production": false
       },
       "progress": 65,
-      "updated_at": "2026-10-02T09:46:01+09:00"
+      "updated_at": "2026-10-03T17:50:48+09:00"
     },
     {
       "id": "one-enter",
@@ -720,8 +725,8 @@
       "area": "development",
       "status": "building",
       "priority": 2,
-      "current": "Loop Engineering統合版がmainへ着地済み。既存One Enter / Factory CoreでDurable State、machine-checkable Verify、独立Audit、Maker/Checker分離、failure fingerprint、Fix/Retry/Alternative/Rollback、hard budget、COMPLETE/WAIT_USER/FAILED_SAFE、human gate、runtime evidenceを実装。AGENTS.mdとDriveのProjectY開発指示もruntime contractへ同期済み。A-F self-test、session-resume、scope fail-safe、Checker/Audit分離、synthetic recovery E2EがPASS。",
-      "next_action": "次の適用案件ではこの既存ループを標準経路として使い、対象案件固有の実機・本番確認が必要な場合だけWAIT_USERで本人へ返す。Loop基盤自体の追加新設はしない。",
+      "current": "Loop Engineering統合版はmainの既存Factory Coreに維持。PR #604の実案件Friction Discovery live adapterで、既存資産発見→専用branch→実装→current-head Verify→失敗検出→Fix→再Verify→独立Audit→COMPLETEまでを既存Loop EngineでE2E実証した。Loop/Verifyの新設なし。",
+      "next_action": "今後のコード案件でも既存Loop Engineを標準経路として再利用する。Loop基盤自体は作り直さず、案件固有のphysical iPhone / Production /重大human gateだけWAIT_USERへ返す。",
       "blocker": null,
       "needs_user_action": false,
       "device_verified": false,
@@ -745,7 +750,12 @@
         "CI:Loop Engineering A-F + durable-state restore + synthetic recovery/audit PASS",
         "CI:Codex governance + ProjectY HQ Safety + Mission Control PR State Sync PASS",
         "Drive:01_ProjectY 開発共通起動ルール section 16 readback PASS",
-        "Drive:00_Change Log Loop Engineering entry readback PASS"
+        "Drive:00_Change Log Loop Engineering entry readback PASS",
+        "PR#604",
+        "evidence:One Enter / Loop Engineering実案件E2E PASS",
+        "runtime:projecty-friction-live-adapter-e2e terminal_state=COMPLETE verification_rounds=[false,true] recovery=restore-safe-read-only-filter audit_verified=true",
+        "CI:PR#604 current-head required GitHub Actions PASS",
+        "evidence:PR#604 real ProjectY E2E machine-checkable COMPLETE"
       ],
       "progress_basis": {
         "spec": true,
@@ -755,7 +765,7 @@
         "production": false
       },
       "progress": 65,
-      "updated_at": "2026-10-02T10:04:45+09:00"
+      "updated_at": "2026-10-03T17:50:48+09:00"
     },
     {
       "id": "shortcut-factory-stash",
@@ -794,9 +804,9 @@
       "area": "development",
       "status": "building",
       "priority": 2,
-      "current": "ProjectY HQの基盤として、YOS Loop Engine v1 (#542)とMission Control同期修復 (#543)がmainに存在し、どちらも自動テスト証拠あり。Issue #315の異常系全体・実案件E2Eはまだopen。",
-      "next_action": "Issue #315を『残る異常系と実案件E2E』だけに絞り、すでに完成したLoop/Mission Controlを作り直さない。",
-      "blocker": "v3.0全体の異常系と実案件E2Eが未完了。",
+      "current": "ProjectY HQの既存基盤（YOS Loop Engine v1 #542 / Mission Control同期 #543）を維持。Issue #315の実案件E2EとしてPR #604 Friction Discovery live adapterでVerify失敗→Fix→再Verify→独立Audit→COMPLETEをmachine-checkableに実証。",
+      "next_action": "Issue #315は残る異常系regressionだけを確認する。完成済みLoop/Mission Controlと今回E2E基盤は作り直さない。",
+      "blocker": null,
       "needs_user_action": false,
       "device_verified": false,
       "production_verified": false,
@@ -811,7 +821,10 @@
         "PR#543",
         "commit:e8b866140fb34f351722e062a4509ca7b02b8053",
         "commit:5fc71d779424c8b137982eae54d0b3709713642a",
-        "Issue#315 still open 2026-10-02"
+        "Issue#315 still open 2026-10-02",
+        "PR#604",
+        "PR#604",
+        "evidence:One Enter / Loop Engineering実案件E2E PASS"
       ],
       "progress_basis": {
         "spec": true,
@@ -821,7 +834,7 @@
         "production": false
       },
       "progress": 65,
-      "updated_at": "2026-10-02T09:46:01+09:00"
+      "updated_at": "2026-10-03T17:50:48+09:00"
     },
     {
       "id": "night-brief",
