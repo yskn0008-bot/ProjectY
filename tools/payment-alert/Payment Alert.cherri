@@ -14,7 +14,8 @@ const paymentDisplayHistoryFolder = createFolder("YOS Display History")
 const paymentAlertStateFolder = createFolder("YOS Alert State")
 const now = currentDate()
 const today = formatDate(now, "Custom", "yyyy-MM-dd")
-const moneyFile = getFile("Scriptable/YOS/Money/money.json", nil, true)\nconst moneySource = getText(moneyFile)
+const moneyFile = getFile("Scriptable/YOS/Money/money.json", nil, true)
+const moneySource = getText(moneyFile)
 
 const promptText = text("あなたはYOS Payment Alertです。
 
