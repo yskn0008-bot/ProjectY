@@ -10,9 +10,9 @@
 /*
 Existing STASH contract:
 - Input text -> append to iCloud Drive/Shortcuts/POCKET.txt.
-- No input -> show a readable numbered list.
-- Selecting an item copies it to the clipboard AND removes it from POCKET.txt,
-  so STASH behaves as a take-and-use pocket rather than an ever-growing archive.
+- No input -> show a readable numbered vCard list without changing stored text.
+- Selecting an item copies the exact stored text to the clipboard AND removes
+  that item from POCKET.txt, so STASH behaves as a take-and-use pocket.
 */
 
 action 'file.append' appendResolvedFile(
@@ -40,10 +40,37 @@ if !stashFile {
 }
 
 const stashText = getText(stashFile)
-const rawItems = splitText(stashText, "===YOS_NEXT===")
-const chosenText = chooseFromList(rawItems, "STASH｜使うものを選択")
 
-if chosenText {
+// Split on the complete storage delimiter so list items do not inherit the
+// separator newlines. Build a display-only vCard list; POCKET text stays exact.
+@rawItems = splitText(stashText, "\n===YOS_NEXT===\n")
+@displayItems: array
+@rawIndex = 0
+@visibleCount = 0
+
+for item in @rawItems {
+    @rawIndex += 1
+    const cleanItem = getText(@item)
+    if cleanItem {
+        @visibleCount += 1
+        @displayItems += makeVCard("{@rawIndex}｜STASH", "{cleanItem}")
+    }
+}
+
+if @visibleCount == 0 {
+    showNotification("STASHはまだ空です", "STASH", false)
+    stop()
+}
+
+// vCard gives each row a short numbered title and the saved text as a subtitle.
+@menuText = "{@displayItems}"
+@menuFile = setName(@menuText, "STASH Menu.vcf")
+@menuContacts = @menuFile.contact
+const chosenTitle = chooseFromList(@menuContacts, "STASH｜使うものを選択")
+
+if chosenTitle {
+    const chosenIndex = getNumbers(chosenTitle)
+    const chosenText = getListItem(@rawItems, chosenIndex)
     setClipboard(chosenText)
 
     // Consume the exact stored entry after copying it.
