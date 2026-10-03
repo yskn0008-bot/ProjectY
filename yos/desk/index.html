@@ -68,7 +68,10 @@ if('serviceWorker' in navigator){
   }
   function applyEmergencyTransport(){
     const now=Date.now();
-    const params=new URLSearchParams(String(location.hash||'').replace(/^#/,''));
+    const hashParams=new URLSearchParams(String(location.hash||'').replace(/^#/,''));
+    const queryParams=new URLSearchParams(location.search);
+    const hashHasActivation=hashParams.get('api_preview')&&hashParams.get('vercel_share');
+    const params=hashHasActivation?hashParams:queryParams;
     const base=params.get('api_preview');
     const share=params.get('vercel_share');
     if(base&&share){
@@ -77,7 +80,12 @@ if('serviceWorker' in navigator){
       const next=safeConfig({baseUrl:base,shareToken:share,expiresAt});
       if(next){
         try{localStorage.setItem(KEY,JSON.stringify(next))}catch{}
-        try{history.replaceState(null,'',location.pathname+location.search)}catch{}
+        try{
+          const cleanSearch=new URLSearchParams(location.search);
+          ['api_preview','vercel_share','transport_until'].forEach((key)=>cleanSearch.delete(key));
+          const suffix=cleanSearch.toString();
+          history.replaceState(null,'',location.pathname+(suffix?'?'+suffix:''));
+        }catch{}
       }
     }
     let active=null;
