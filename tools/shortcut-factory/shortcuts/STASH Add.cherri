@@ -13,6 +13,7 @@ STASH Add is only an entry point to the existing STASH.
 - With no input (Control Center), save the current clipboard text.
 - Read existing POCKET.txt only to suppress accidental duplicate writes.
 - The actual write remains owned by STASH.
+- Routine operation is silent.
 */
 
 @stashItem = ""
@@ -27,7 +28,6 @@ if ShortcutInput {
 }
 
 if !@stashItem {
-    showNotification("保存する文章がありません", "STASH Add", false)
     stop()
 }
 
@@ -37,7 +37,6 @@ const pocketFile = getFile("POCKET.txt", nil, false)
 if pocketFile {
     const pocketText = getText(pocketFile)
     if pocketText contains expectedEntry {
-        showNotification("すでに保存済みです", "STASH Add", false)
         stop()
     }
 }
