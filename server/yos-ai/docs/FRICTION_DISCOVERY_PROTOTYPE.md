@@ -118,3 +118,13 @@ adapterは新しい保存先を作らず、`localStorage`、network write、外�
 ## Rollback
 
 このadapter差分をrevertすれば元のpure coreへ戻る。既存データmigration、保存形式変更、外部作用はない。
+
+
+## Runtime completion (2026-10-03)
+
+- Existing MY LIFE `yos-life-v1` remains the only Life store; Friction Discovery creates no new SSOT or storage key.
+- The browser runtime loads a generated artifact of the existing Friction Discovery engine plus a read-only MY LIFE adapter.
+- Repeated completed read-only tasks are discovered over the existing 14-day window. Payment, transfer, send, delete, purchase, contract, settlement, publish, registration, reservation, order, deposit/withdrawal and state-changing labels fail closed.
+- No separate scheduler is added. The existing Sunday Night Reset -> Weekly Review path invokes Friction Discovery and hands only qualified low-risk candidates to the existing `自動化する` slot.
+- The result still requires user decision; discovery never performs the proposed automation or Prototype automatically.
+- Rollback is removal of the two browser artifacts and their loader/handoff wiring. There is no migration or data rewrite.

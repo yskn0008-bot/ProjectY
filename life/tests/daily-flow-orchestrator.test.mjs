@@ -70,9 +70,16 @@ test('the orchestrator extends the existing Life store and is loaded by the curr
 
 
 async function loadWeeklyReviewApi(extra = {}) {
-  const [engine, live] = await Promise.all([read('weekly-review-engine-v1.js'), read('weekly-review-live-v1.js')]);
+  const [frictionEngine, frictionLive, engine, live] = await Promise.all([
+    read('friction-discovery-engine-v1.js'),
+    read('friction-discovery-live-v1.js'),
+    read('weekly-review-engine-v1.js'),
+    read('weekly-review-live-v1.js')
+  ]);
   const context = {globalThis:{}, Date, Intl, Set, Map, Number, String, Object, Array, Math, RegExp, ...extra};
   context.globalThis = context;
+  vm.runInNewContext(frictionEngine, context, {filename:'friction-discovery-engine-v1.js'});
+  vm.runInNewContext(frictionLive, context, {filename:'friction-discovery-live-v1.js'});
   vm.runInNewContext(engine, context, {filename:'weekly-review-engine-v1.js'});
   vm.runInNewContext(live, context, {filename:'weekly-review-live-v1.js'});
   return context.__yosWeeklyReviewLiveV1Api;
@@ -83,7 +90,7 @@ function weeklyReviewFixture() {
   for (const [i,date] of dates.entries()) days[date] = {
     tasks:[
       {text:'水分補給',done:i<6},
-      ...(i<4?[{text:'支払い確認',done:true}]:[]),
+      ...(i<4?[{text:'天気確認',done:true}]:[]),
       ...(i<5?[{text:'不要な一覧更新',done:false,...(i>0?{carriedFrom:dates[i-1]}:{})}]:[])
     ],
     routines:{wake:i<5?[0,1,2,3,4,5]:[0,1,2],before:[],home:[]},
@@ -98,7 +105,7 @@ test('Weekly Review uses seven MY LIFE days and caps each decision at one', asyn
   assert.equal(review.source,'yos-life-v1');
   assert.equal(review.windowStart,'2026-09-28');
   assert.equal(review.continue.length,1); assert.equal(review.stop.length,1); assert.equal(review.automate.length,1);
-  assert.equal(review.stop[0].label,'不要な一覧更新'); assert.equal(review.automate[0].label,'支払い確認');
+  assert.equal(review.stop[0].label,'不要な一覧更新'); assert.equal(review.automate[0].label,'天気確認');
   assert.equal(review.continue[0].evidenceIds.some(id=>id.includes('2026-09-27')),false);
 });
 test('Weekly Review runs only on Sunday and is idempotent inside yos-life-v1', async () => {
@@ -119,12 +126,14 @@ test('Night Reset bridge persists Sunday review without another storage key', as
   assert.equal(JSON.parse(storage.get('yos-life-v1')).days['2026-10-04'].lifeFlow.weeklyReview.windowEnd,'2026-10-04');
   assert.equal(storage.size,1);
 });
-test('Life loads Weekly Review engine and adapter before the existing suite', async () => {
+test('Life loads Friction Discovery and Weekly Review before the existing suite', async () => {
   const html=await read('index.html');
+  const frictionEngine=html.indexOf('./friction-discovery-engine-v1.js?v=1');
+  const frictionLive=html.indexOf('./friction-discovery-live-v1.js?v=1');
   const engine=html.indexOf('./weekly-review-engine-v1.js?v=1');
   const live=html.indexOf('./weekly-review-live-v1.js?v=1');
   const suite=html.indexOf('./yos-suite-v3.js?v=10');
-  assert.ok(engine>=0&&live>engine&&suite>live);
+  assert.ok(frictionEngine>=0&&frictionLive>frictionEngine&&engine>frictionLive&&live>engine&&suite>live);
 });
 
 
@@ -141,4 +150,35 @@ test('legacy store writes cannot erase Weekly Review extension fields', async ()
   assert.match(home, /\['nightReset','preparedFromNight','nightCheckin','weeklyReview'\]/);
   assert.match(home, /currentDay\.lifeFlow/);
   assert.match(home, /incomingDay\.lifeFlow\[field\]=currentDay\.lifeFlow\[field\]/);
+});
+
+
+test('Friction Discovery feeds repeated safe MY LIFE friction into Sunday Weekly Review', async () => {
+  const api=await loadWeeklyReviewApi();
+  const dates=['2026-09-27','2026-09-28','2026-09-29','2026-09-30','2026-10-01','2026-10-02','2026-10-03','2026-10-04'];
+  const days={};
+  for(const date of dates){
+    days[date]={tasks:[
+      {text:'天気を確認',done:true},{text:'天気を確認',done:true},
+      {text:'支払いを確認',done:true},{text:'支払いを確認',done:true}
+    ],routines:{wake:[],before:[],home:[]},lifeFlow:{}};
+  }
+  const review=api.buildReview({activeLifeDate:'2026-10-04',days},'2026-10-04','2026-10-04T22:00:00+09:00');
+  assert.equal(review.frictionCandidateCount,1);
+  assert.equal(review.automate.length,1);
+  assert.equal(review.automate[0].label,'天気を確認');
+  assert.match(review.automate[0].id,/^friction:life-task:/);
+  assert.equal(review.automate[0].evidenceIds.some(id=>id.includes('支払い')),false);
+});
+
+test('unsafe repeated actions never become an automation candidate', async () => {
+  const api=await loadWeeklyReviewApi();
+  const dates=['2026-09-27','2026-09-28','2026-09-29','2026-09-30','2026-10-01','2026-10-02','2026-10-03','2026-10-04'];
+  const days={};
+  for(const date of dates){
+    days[date]={tasks:[{text:'支払いを確認',done:true},{text:'支払いを確認',done:true}],routines:{wake:[],before:[],home:[]},lifeFlow:{}};
+  }
+  const review=api.buildReview({activeLifeDate:'2026-10-04',days},'2026-10-04');
+  assert.equal(review.frictionCandidateCount,0);
+  assert.equal(review.automate.length,0);
 });
