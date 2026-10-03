@@ -66,10 +66,15 @@ jobs:
           assert ids.count('is.workflow.actions.file.createfolder') == 2
           assert ids.count('is.workflow.actions.openurl') == 0
           assert 'payment-alert-bridge' not in blob
-          assert 'Scriptable/YOS/Money/money.json' in blob\n          assert 'raw.githubusercontent.com' not in blob\n          assert 'money-master-v1.js' not in blob
+          assert 'Scriptable/YOS/Money/money.json' in blob
+          assert 'raw.githubusercontent.com' not in blob
+          assert 'money-master-v1.js' not in blob
           assert '今日から3日以内' in blob
           assert '支払いアラートなし' in blob
-          assert 'transactions と recurring' in blob\n          assert 'yos-money-local-v1' in blob\n          assert 'intervalMonths' in blob\n          assert 'businessDayRule' in blob
+          assert 'transactions と recurring' in blob
+          assert 'yos-money-local-v1' in blob
+          assert 'intervalMonths' in blob
+          assert 'businessDayRule' in blob
           assert '相対表現は付けない' in blob
           assert '日付ごとにグループ化して返す' in blob
           assert '空白で列揃えをしない' in blob
