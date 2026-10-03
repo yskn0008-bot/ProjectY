@@ -106,7 +106,7 @@ P4ではGit履歴または保存済み前回値との差分で判定する。
 | `yos-departure-guard` | YOS Departure Guard | 65% | 要 |
 | `yos-screenshot-router` | YOS Screenshot Router | 65% | 不要 |
 | `weekly-review` | Weekly Review | 20% | 不要 |
-| `friction-discovery` | Friction Discovery | 20% | 不要 |
+| `friction-discovery` | Friction Discovery | 65% | 要 |
 | `one-enter` | One Enter | 65% | 不要 |
 | `shortcut-factory-stash` | Shortcut Factory + STASH | 50% | 不要 |
 | `projecty-hq` | ProjectY HQ | 50% | 不要 |
