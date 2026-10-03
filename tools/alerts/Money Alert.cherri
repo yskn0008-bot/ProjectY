@@ -1,0 +1,26 @@
+#define name Money Alert
+#define color green
+#define inputs text
+
+#include 'actions/text'
+#include 'actions/documents'
+#include 'actions/calendar'
+#include 'actions/web'
+
+@incoming = "{ShortcutInput}"
+const historyFolder = createFolder("YOS Display History")
+
+if @incoming contains "YOS_MONEY_ALERT_V1" {
+    if @incoming contains "緊急Money Alertなし" {
+        stop()
+    }
+    const stampNow = currentDate()
+    const stamp = formatDate(stampNow, "Custom", "yyyy-MM-dd HHmmss")
+    const log = text("【Money Alert】\n{@incoming}")
+    saveFile("YOS Display History/{stamp} Money Alert.txt", log, false)
+    showNotification(@incoming, "Money Alert", true)
+    stop()
+}
+
+openURL("https://yskn0008-bot.github.io/ProjectY/yos/money-alert-bridge.html?return=shortcut&format=alert-text&native=1&dedupe=1&shortcut=Money%20Alert")
+stop()
