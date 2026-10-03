@@ -53,7 +53,7 @@ for item in @rawItems {
     const cleanItem = getText(@item)
     if cleanItem {
         @visibleCount += 1
-        @displayItems += makeVCard("{@rawIndex}｜STASH", "{cleanItem}")
+        @displayItems += makeVCard("{@rawIndex}｜{cleanItem}", "タップでコピーして削除")
     }
 }
 
