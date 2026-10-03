@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-10-03T11:30:47+09:00",
+  "updated_at": "2026-10-03T11:31:25+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -12,26 +12,6 @@
     ]
   },
   "inbox": [
-    {
-      "id": "github-pr-553",
-      "title": "PR #553 fix: YOS資産CIとiOS entry testの契約ずれを解消",
-      "type": "GitHub PR",
-      "status": "review",
-      "priority": 1,
-      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/553",
-      "updated_at": "2026-10-02T01:11:02Z"
-    },
-    {
-      "id": "github-pr-592",
-      "title": "PR #592 fix(yos-ai): make YOS Chat schema Structured Outputs compatible",
-      "type": "GitHub PR",
-      "status": "review",
-      "priority": 1,
-      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/592",
-      "updated_at": "2026-10-03T02:29:17Z"
-    },
     {
       "id": "github-pr-403",
       "title": "PR #403 fix(life): make calendar sync failures actionable",
@@ -73,6 +53,26 @@
       "updated_at": "2026-09-30T10:40:22Z"
     },
     {
+      "id": "github-pr-534",
+      "title": "PR #534 Clarity Share: 共有シートの入力型制限を解除",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/534",
+      "updated_at": "2026-09-29T09:09:33Z"
+    },
+    {
+      "id": "github-pr-537",
+      "title": "PR #537 Clarity Next: 最新mainへYOS_Homeを統合",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/537",
+      "updated_at": "2026-09-29T09:10:35Z"
+    },
+    {
       "id": "github-pr-539",
       "title": "PR #539 Finalize YOS Alerts and reread history",
       "type": "GitHub PR",
@@ -103,16 +103,6 @@
       "updated_at": "2026-10-02T18:27:37Z"
     },
     {
-      "id": "github-pr-593",
-      "title": "PR #593 fix: keep YOS asset validation current without stale registry evidence",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/593",
-      "updated_at": "2026-10-03T02:30:22Z"
-    },
-    {
       "id": "github-issue-10",
       "title": "Issue #10 Mission Control v2：GitHubのIssue・PR・Commitを自動集約する",
       "type": "GitHub Issue",
@@ -130,7 +120,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-10-03T02:29:52Z"
+      "updated_at": "2026-10-03T02:30:33Z"
     },
     {
       "id": "github-issue-234",
@@ -185,6 +175,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-5efbaf8540da",
+      "title": "fix: keep YOS asset validation current without stale registry evidence (#593)",
+      "completed_at": "2026-10-03T02:30:52Z",
+      "result": "GitHub mainへ反映（5efbaf8）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/5efbaf8540da93e33e1e1e91a714bf5898d9ca21"
+    },
+    {
       "id": "github-commit-c96e1ae79431",
       "title": "fix(widget): make YOS Dashboard updater validation future-safe",
       "completed_at": "2026-10-03T02:28:08Z",
@@ -213,13 +210,6 @@
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/04c2ab70563fdce0d40720e8334a25132d0ab4d5"
     },
     {
-      "id": "github-commit-2f44c8bd3d21",
-      "title": "restore(review): Friction Discovery core on current main (#588)",
-      "completed_at": "2026-10-03T02:18:14Z",
-      "result": "GitHub mainへ反映（2f44c8b）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/2f44c8bd3d2190260c91f66ecc264bd4a6ec7169"
-    },
-    {
       "id": "complete-002",
       "title": "iPhone向けMission Control Dashboardを実装",
       "completed_at": "2026-07-17T17:55:00+09:00",
@@ -244,7 +234,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #592をレビューして公開判断する",
+      "next_action": "Issue #10を進める：Mission Control v2：GitHubのIssue・PR・Commitを自動集約する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -254,7 +244,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-10-03T11:30:47+09:00",
+      "last_update": "2026-10-03T11:31:25+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -329,13 +319,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 7件・Open PR 12件を自動同期中",
+      "next_action": "Open Issue 7件・Open PR 9件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-10-03T11:30:47+09:00",
+      "last_update": "2026-10-03T11:31:25+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -344,12 +334,12 @@
       "domain": "Infrastructure",
       "type": "development",
       "purpose": "YOSと各Labの設計に基づいて実装、修正、テストを行う",
-      "status": "review",
+      "status": "active",
       "health": "attention",
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #592をレビューして公開判断する",
+      "next_action": "Issue #10を進める：Mission Control v2：GitHubのIssue・PR・Commitを自動集約する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -358,7 +348,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-10-03T11:30:47+09:00",
+      "last_update": "2026-10-03T11:31:25+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -440,5 +430,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "c127d339ce2db14aa1223c0c15d5681516bb47442e6c067e84811da110d82845"
+  "github_snapshot_hash": "ebdec9f97264a7a7659224afdcd36a2293cdf6b264d24cd838e80256964963b1"
 }
