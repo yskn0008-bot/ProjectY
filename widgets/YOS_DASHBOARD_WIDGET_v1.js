@@ -55,7 +55,24 @@ function cleanTaskTitle(value) {
   return clean(value).replace(/^\d{1,3}\s*[｜|]\s*/u, "").trim();
 }
 function nowDisplayTitle(value) {
-  return cleanTaskTitle(value).replace(/^ProjectY\s*[｜|]\s*/iu, "").trim();
+  const title = cleanTaskTitle(value).replace(/^ProjectY\s*[｜|]\s*/iu, "").trim();
+  if (title.length <= 18 || title.includes("\n")) return title;
+
+  const candidates = [];
+  for (let i = 0; i < title.length; i++) {
+    if (title[i] !== " ") continue;
+    const left = title.slice(0, i).trim();
+    const right = title.slice(i + 1).trim();
+    if (left.length < 6 || right.length < 6) continue;
+    const longest = Math.max(left.length, right.length);
+    const balance = Math.abs(left.length - right.length);
+    candidates.push({i, score: longest + balance * 0.2});
+  }
+  if (!candidates.length) return title;
+
+  candidates.sort((a, b) => a.score - b.score);
+  const split = candidates[0].i;
+  return title.slice(0, split).trim() + "\n" + title.slice(split + 1).trim();
 }
 function yen(value) {
   if (value === null || value === undefined || String(value).trim() === "") return "—";

@@ -54,6 +54,13 @@ test("NOW strips the technical ProjectY prefix before rendering the task title",
   assert.match(source, /prominent \? nowDisplayTitle\(task\.title\) : task\.title/);
 });
 
+
+test("NOW inserts an explicit balanced line break for long titles", () => {
+  assert.match(source, /if \(title\.length <= 18 \|\| title\.includes\("\\n"\)\) return title/);
+  assert.match(source, /candidates\.push\(\{i, score: longest \+ balance \* 0\.2\}\)/);
+  assert.match(source, /return title\.slice\(0, split\)\.trim\(\) \+ "\\n" \+ title\.slice\(split \+ 1\)\.trim\(\)/);
+});
+
 test("NOW protects long task titles before showing the next action", () => {
   assert.match(source, /const titleNeedsTwoLines = current\.title\.length > 18/);
   assert.match(source, /current\.nextAction && !titleNeedsTwoLines/);
@@ -66,3 +73,5 @@ test("routine controls launch existing Morning and Night shortcuts without inven
   assert.match(source, /encodeURIComponent\("Night Brief"\)/);
   assert.match(source, /completion is not inferred/);
 });
+
+// Explicit NOW wrap is intentionally covered by source-contract tests.
