@@ -23,10 +23,18 @@ DB, SSOT, cloud service, or persistence file is introduced.
 
 - Input text -> append to `POCKET.txt`.
 - Entry separator -> `===YOS_NEXT===`.
-- No input -> show a readable numbered list, choose a stored entry, copy the exact text to the clipboard, and remove that chosen entry from `POCKET.txt`.
-- List formatting is display-only; the stored text and existing `===YOS_NEXT===` contract are not rewritten just to make the list readable.
+- No input -> show a compact numbered plain-text list.
+- Each row shows the first trimmed line, capped at 28 characters.
+- Selecting a row maps its numeric prefix back to the exact raw stored item.
+- The exact stored item is copied to the clipboard and then consumed from
+  `POCKET.txt`.
+- The consume rewrite is fixed to `POCKET.txt` with Ask Where to Save disabled
+  and overwrite enabled.
+- Routine save/copy use is silent; no success/duplicate/empty notifications.
+- List formatting is display-only; stored text and the existing delimiter are
+  not rewritten merely to make the menu readable.
 - The generated source resolves `POCKET.txt` before append, reusing the
-  already-proven iOS 26 file persistence pattern from current Clarity.
+  already-proven iOS file persistence pattern from current Clarity.
 
 ## STASH Add
 
@@ -44,14 +52,15 @@ create a separate Clarity-only storage function.
 ### Duplicate protection
 
 `STASH Add` reads the existing `POCKET.txt` only to check for the exact
-`text + separator` entry. If already present, it exits without calling STASH.
-It never writes to POCKET directly. The only write remains in STASH.
+`text + separator` entry. If already present, it silently exits without calling
+STASH. Empty input also silently exits. It never writes to POCKET directly. The
+only write remains in STASH.
 
 ## Completion states
 
 - Factory build/sign/package PASS: machine verified.
-- STASH Add importable artifact: machine verified.
-- iPhone import + Control Center placement + copy -> STASH Add -> POCKET save:
-  physical-device verification.
+- Signed STASH / STASH Add artifacts: machine verified.
+- Physical iPhone acceptance must confirm exact clipboard copy, no destination
+  prompt, no routine notification, and consume-after-use.
 - Only after that physical E2E should the existing ProjectY asset/status record
   be updated as completed evidence.
