@@ -1,6 +1,6 @@
 {
   "schema_version": "1.1.0",
-  "base_main_sha": "8702795aa4732d69e0f170f2b78af30dd92c86e0",
+  "base_main_sha": "6b2c0cd90d40bad5110916366e6a88f20645efda",
   "purpose": "Canonicalize the existing iPhone Flow shortcuts from recovered current artifacts without inventing replacements.",
   "policy": {
     "do_not_rebuild_morning_flow": true,
@@ -59,7 +59,10 @@
           "When no event exists, return ○予定なし."
         ],
         "calls_existing_yos_assets": [],
-        "parent_siblings": ["Morning Brief", "YOS Today Note"],
+        "parent_siblings": [
+          "Morning Brief",
+          "YOS Today Note"
+        ],
         "focus_relation": "Focus gating belongs to the existing parent Morning path. The canonical Morning Flow itself intentionally has no embedded Focus trigger.",
         "duplicate_prevention": "Use this triggerless canonical Morning Flow only through the existing parent Morning path. The older supplied Morning variant with an embedded Morning Focus-enable trigger is historical/non-canonical and must not also run.",
         "failure_safe": "Calendar/travel/date reads, output text, variables, and vibration only. No persistent write, deletion, message send, payment, purchase, or data migration exists in this Flow. Missing event/location follows explicit safe branches."
