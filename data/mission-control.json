@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-10-03T16:20:02+09:00",
+  "updated_at": "2026-10-03T16:51:23+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -185,6 +185,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-e54a11714f16",
+      "title": "chore(yos-ai): retry production after build capacity returned",
+      "completed_at": "2026-10-03T07:51:01Z",
+      "result": "GitHub mainへ反映（e54a117）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/e54a11714f1623ba59212827d137c241172f5e23"
+    },
+    {
       "id": "github-commit-c36c92d01456",
       "title": "feat: complete Weekly Review live Sunday path",
       "completed_at": "2026-10-03T07:19:44Z",
@@ -211,13 +218,6 @@
       "completed_at": "2026-10-03T04:23:12Z",
       "result": "GitHub mainへ反映（1914e48）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/1914e48e7a2f4649fbc31c4ae6cb63a7035c58b7"
-    },
-    {
-      "id": "github-commit-ce2e302ad35d",
-      "title": "chore(yos-ai): trigger BASE HOME mirror deployment",
-      "completed_at": "2026-10-03T04:18:19Z",
-      "result": "GitHub mainへ反映（ce2e302）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/ce2e302ad35df26c8b724cebf9283acf815b8445"
     },
     {
       "id": "complete-002",
@@ -254,7 +254,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-10-03T16:20:02+09:00",
+      "last_update": "2026-10-03T16:51:23+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -335,7 +335,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-10-03T16:20:02+09:00",
+      "last_update": "2026-10-03T16:51:23+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -358,7 +358,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-10-03T16:20:02+09:00",
+      "last_update": "2026-10-03T16:51:23+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -440,5 +440,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "1b803e257eef8fe1f6e11a93a70f9d9affba790f7b8123c3eb8cc7f508924cf1"
+  "github_snapshot_hash": "c70933978165bfb9d816f48f7b91cdc96f544a920e23337402a7e2fbe998819d"
 }
