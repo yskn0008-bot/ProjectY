@@ -31,7 +31,7 @@
       ["yos-departure-guard","Departure Guard","automation",65,"外出前チェック","Calendar/Battery/通知を実機確認する"],
       ["yos-screenshot-router","Screenshot Router","automation",65,"スクショ整理","実機検証経路を完成する"],
       ["weekly-review","Weekly Review","review",20,"週次レビュー","live dataへ接続する"],
-      ["friction-discovery","Friction Discovery","review",20,"不便の自動発見","実生活ログへ接続する"],
+      ["friction-discovery","Friction Discovery","review",65,"不便の自動発見","iPhoneで週次候補を1回確認する"],
       ["one-enter","One Enter","development",65,"ChatGPT側の開発司令塔","Factory Core経由で実案件をE2E完遂する"],
       ["projecty-hq","ProjectY HQ","development",50,"開発基盤・監査","異常系検証を完成する"],
       ["shortcut-factory-stash","Shortcut Factory + STASH","development",50,"ショートカット製造・保管","import→実行を確認する"],
