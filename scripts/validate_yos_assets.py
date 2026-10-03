@@ -28,6 +28,7 @@ def main() -> int:
 
     assets=data.get("assets")
     if not isinstance(assets,list): err("assets must be a list"); assets=[]
+    if not assets: err("assets must not be empty")
 
 
     ids=set(); names=set(); progresses=[]; user_actions=0
