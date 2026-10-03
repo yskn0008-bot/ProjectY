@@ -1,0 +1,121 @@
+name: MY WAY calendar launcher
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'life/index.html'
+      - 'life/calendar-sync-scriptable.js'
+      - 'life/my-way-calendar-launcher.cherri'
+      - 'life/tests/all-day-sync.test.mjs'
+      - 'life/tests/calendar-return.test.mjs'
+      - 'life/tests/my-way-calendar-launcher.test.mjs'
+      - 'tools/clarity-factory/sign_with_hubsign.py'
+      - '.github/workflows/my-way-calendar-launcher.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify existing Calendar sync and MY WAY return contracts
+        run: |
+          set -euo pipefail
+          node --test             life/tests/all-day-sync.test.mjs             life/tests/calendar-return.test.mjs             life/tests/my-way-calendar-launcher.test.mjs
+          node --check life/calendar-sync-scriptable.js
+          sed -n '/^<script>$/,/^<\/script>$/p' life/index.html | sed '1d;$d' | node --check
+
+      - name: Install pinned Cherri v2.3.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          url='https://github.com/electrikmilk/cherri/releases/download/v2.3.0/cherri_linux-x86_64.zip'
+          expected='7ab2c384b7b26e7c72a30a8dfa56f89dae12c4068b7951bc1e3193f3698edbe9'
+          curl -fsSL "$url" -o /tmp/cherri.zip
+          printf '%s  %s\n' "$expected" /tmp/cherri.zip | sha256sum -c -
+          mkdir -p /tmp/cherri
+          unzip -q /tmp/cherri.zip -d /tmp/cherri
+          binary="$(find /tmp/cherri -type f -name cherri -print -quit)"
+          test -n "$binary"
+          sudo install -m 0755 "$binary" /usr/local/bin/cherri
+          cherri --version
+
+      - name: Compile one-tap MY WAY launcher
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd life
+          rm -f './MY WAY_unsigned.shortcut' './MY WAY.plist'
+          cherri my-way-calendar-launcher.cherri --skip-sign --debug
+          test -f './MY WAY_unsigned.shortcut'
+          mkdir -p artifacts-my-way-calendar
+          cp './MY WAY_unsigned.shortcut' artifacts-my-way-calendar/my-way-unsigned.shortcut
+          cp './MY WAY.plist' artifacts-my-way-calendar/my-way.plist
+
+      - name: Validate launcher contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import plistlib
+          from pathlib import Path
+          p=Path('life/artifacts-my-way-calendar/my-way-unsigned.shortcut')
+          d=plistlib.loads(p.read_bytes())
+          actions=d.get('WFWorkflowActions',[])
+          ids=[a.get('WFWorkflowActionIdentifier') for a in actions]
+          if ids != ['is.workflow.actions.openurl']:
+              raise SystemExit(f'expected one openurl action only, got {ids}')
+          def strings(x):
+              if isinstance(x, dict):
+                  for k,v in x.items():
+                      yield from strings(k); yield from strings(v)
+              elif isinstance(x, (list,tuple)):
+                  for v in x: yield from strings(v)
+              elif isinstance(x, str):
+                  yield x
+          vals=list(strings(d))
+          target='scriptable:///run/YOS%20Life%20Calendar%20Sync?destination=myway&openEditor=false'
+          if target not in vals:
+              raise SystemExit('missing exact direct-run Calendar target')
+          forbidden='scriptable:///run?scriptName=YOS%20Life%20Calendar%20Sync'
+          if any(forbidden in v for v in vals):
+              raise SystemExit('legacy Scriptable list-opening target remains')
+          print('OK: MY WAY one-tap launcher contract validated')
+          PY
+
+      - name: Sign MY WAY launcher
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/clarity-factory/sign_with_hubsign.py \
+            --input 'life/artifacts-my-way-calendar/my-way-unsigned.shortcut' \
+            --output 'life/artifacts-my-way-calendar/MY WAY.shortcut' \
+            --name 'MY WAY'
+
+      - name: Verify signed artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('life/artifacts-my-way-calendar/MY WAY.shortcut')
+          data=p.read_bytes()
+          if not data.startswith(b'AEA1'):
+              raise SystemExit(f'expected signed AEA1 shortcut, got {data[:8]!r}')
+          if len(data) < 500:
+              raise SystemExit(f'artifact unexpectedly small: {len(data)} bytes')
+          print(f'OK: signed MY WAY artifact {len(data)} bytes')
+          PY
+
+      - name: Upload signed launcher
+        uses: actions/upload-artifact@v4
+        with:
+          name: my-way-calendar-launcher
+          path: life/artifacts-my-way-calendar/MY WAY.shortcut
+          if-no-files-found: error

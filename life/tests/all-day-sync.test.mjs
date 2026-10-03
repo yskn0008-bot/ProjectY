@@ -34,8 +34,8 @@ test('calendar update launches the installed script without opening JSON input o
  vm.runInNewContext(fn+';launchCalendarSync()',{el:id=>nodes[id],location,localStorage:{setItem(){}}});
  const url=new URL(location.href);
  assert.equal(url.protocol,'scriptable:');
- assert.equal(url.pathname,'/run');
- assert.equal(url.searchParams.get('scriptName'),'YOS Life Calendar Sync');
+ assert.equal(url.pathname,'/run/YOS%20Life%20Calendar%20Sync');
+ assert.equal(url.searchParams.get('openEditor'),'false');
  assert.equal(nodes.syncHelpButton.hidden,false);
  assert.doesNotMatch(nodes.syncLaunchStatus.textContent,/更新しました|取り込みました/);
 });
