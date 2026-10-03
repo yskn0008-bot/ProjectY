@@ -89,3 +89,5 @@ test('live Notion source discovers exactly one YOS Tasks data source when id is 
   assert.match(calls[1], /\/v1\/data_sources\/965c608632c1463d93b487a9cb69b3ad\/query$/);
   assert.deepEqual(result.tasks, []);
 });
+
+// Direct Notion widget source is covered end-to-end at the parser boundary.
