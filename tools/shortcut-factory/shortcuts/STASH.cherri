@@ -8,15 +8,11 @@
 #include 'actions/text'
 
 /*
-Existing STASH contract from PR #324:
+Existing STASH contract:
 - Input text -> append to iCloud Drive/Shortcuts/POCKET.txt.
-- Separator stays ===YOS_NEXT===.
-- No input -> choose an existing item and copy it back to the clipboard.
-
-The append action resolves POCKET.txt first because the current iPhone/iOS 26
-evidence in ProjectY showed that Cherri's path-only append can complete without
-persisting. This keeps the existing POCKET.txt store and does not create a new
-storage location.
+- No input -> show a readable numbered list.
+- Selecting an item copies it to the clipboard AND removes it from POCKET.txt,
+  so STASH behaves as a take-and-use pocket rather than an ever-growing archive.
 */
 
 action 'file.append' appendResolvedFile(
@@ -44,9 +40,33 @@ if !stashFile {
 }
 
 const stashText = getText(stashFile)
-const items = splitText(stashText, "===YOS_NEXT===")
-const chosen = chooseFromList(items, "STASHから取り出す")
-if chosen {
-    setClipboard(chosen)
-    showNotification("クリップボードへコピーしました", "STASH", false)
+const rawItems = splitText(stashText, "===YOS_NEXT===")
+@displayItems = []
+@index = 0
+
+repeat with item in rawItems {
+    const cleanItem = getText(item)
+    if cleanItem {
+        @index += 1
+        const preview = text("{@index}. {cleanItem}")
+        @displayItems += preview
+    }
+}
+
+if @index == 0 {
+    showNotification("STASHはまだ空です", "STASH", false)
+    stop()
+}
+
+const chosenDisplay = chooseFromList(@displayItems, "STASH｜使うものを選択")
+if chosenDisplay {
+    const chosenText = replaceText("^\\d+\\.\\s*", "", chosenDisplay, true, true)
+    setClipboard(chosenText)
+
+    // Consume the exact stored entry after copying it.
+    const consumedEntry = text("{chosenText}\n===YOS_NEXT===\n")
+    const remaining = replaceText(consumedEntry, "", stashText)
+    saveFile("POCKET.txt", remaining, true)
+
+    showNotification("コピーしてSTASHから削除しました", "STASH", false)
 }
