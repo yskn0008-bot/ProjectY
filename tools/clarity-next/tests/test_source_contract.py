@@ -59,7 +59,7 @@ class ClarityNextSourceContractTests(unittest.TestCase):
         self.assertIn("confidenceだけを理由に確認を増やしません", self.source)
 
     def test_capability_gate_is_explicit(self):
-        for executor in ("YOS_OpenApp", "NEXT_DEVICE", "NEXT_TIMER", "NEXT_CALENDAR", "NEXT_REMINDER", "NEXT_NAVIGATE", "NEXT_NOTION", "NEXT_MONEY", "NEXT_ANSWER"):
+        for executor in ("YOS_OpenApp", "NEXT_DEVICE", "NEXT_TIMER", "NEXT_CALENDAR", "NEXT_REMINDER", "NEXT_NAVIGATE", "NEXT_HOME", "NEXT_NOTION", "NEXT_MONEY", "NEXT_ANSWER"):
             self.assertIn(executor, self.source)
         self.assertIn("unsupported_executor", self.source)
 
@@ -73,6 +73,7 @@ class ClarityNextSourceContractTests(unittest.TestCase):
             ("calendar", "NEXT_CALENDAR", "calendar", "NEXT_CALENDAR"),
             ("reminder", "NEXT_REMINDER", "reminder", "NEXT_REMINDER"),
             ("navigate", "NEXT_NAVIGATE", "navigate", "NEXT_NAVIGATE"),
+            ("home", "NEXT_HOME", "home", "NEXT_HOME"),
             ("notion", "NEXT_NOTION", "notion", "NEXT_NOTION"),
             ("money", "NEXT_MONEY", "money", "NEXT_MONEY"),
         )
@@ -132,9 +133,19 @@ class ClarityNextSourceContractTests(unittest.TestCase):
         self.assertIn("beginsWith", self.source)
         self.assertIn("input_mode=share", self.source)
         self.assertIn("NEXT_ANSWER以外の副作用を起こしません", self.source)
-        self.assertIn("shareモードではYOS_OpenApp、NEXT_DEVICE、NEXT_TIMER、NEXT_CALENDAR、NEXT_REMINDER、NEXT_NAVIGATE、NEXT_NOTION、NEXT_MONEYを選びません", self.source)
+        self.assertIn("shareモードではYOS_OpenApp、NEXT_DEVICE、NEXT_TIMER、NEXT_CALENDAR、NEXT_REMINDER、NEXT_NAVIGATE、NEXT_HOME、NEXT_NOTION、NEXT_MONEYを選びません", self.source)
         self.assertIn('if @inputMode == "share" && @normalizedExecutor != "NEXT_ANSWER"', self.source)
         self.assertIn("share_side_effect_forbidden", self.source)
+
+
+    def test_home_capability_is_hub_agnostic(self):
+        self.assertIn("NEXT_HOME / home / control / required: device,action,value", self.source)
+        self.assertIn("deviceは tv, ac, ceiling_light, floor_lamp", self.source)
+        self.assertIn("モデルはadapter名やハブ名をparametersへ出しません", self.source)
+        self.assertIn('run("YOS_Home", homePayload)', self.source)
+        self.assertIn('if executor == "home" && module == "NEXT_HOME"', self.source)
+        self.assertIn('@normalizedExecutor = "NEXT_HOME"', self.source)
+        self.assertIn('「電気」「照明」だけでceiling_lightとfloor_lampの両方が安全に候補になる場合は推測せずneeds_review=true', self.source)
 
     def test_base_home_alias_recovers_from_open_app_misroute(self):
         self.assertIn('@baseHomeAlias = false', self.source)
@@ -155,6 +166,8 @@ class ClarityNextSourceContractTests(unittest.TestCase):
         self.assertIn('is.workflow.actions.addnewevent', self.source)
         self.assertIn('is.workflow.actions.addnewreminder', self.source)
         self.assertIn('https://www.notion.so/3ed5ca882895819aaa57c139ea36fe2b', self.source)
+        self.assertIn('run("YOS_Home", homePayload)', self.source)
+        self.assertIn('APPLIED\\thome', self.source)
         self.assertIn('openURL(notionHomeURL)', self.source)
         self.assertIn('notion_yos_home', self.source)
         self.assertIn('money-capture.html?text={moneyEncoded}', self.source)
