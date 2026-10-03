@@ -35,6 +35,8 @@ function validateSource(source) {
     "function makeToday(",
     "loadTaskFeed()",
     "CalendarEvent.today()",
+    "Reminder.allIncomplete()",
+    "base-home-refresh",
     "YOS/Money/money.json",
     "shortcuts://run-shortcut?name=",
   ];
