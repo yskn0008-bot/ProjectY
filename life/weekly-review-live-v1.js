@@ -155,15 +155,6 @@
     }
   }
 
-  function installNightResetHook(){
-    if(!globalThis.document)return false;
-    const button=document.getElementById('lifeEndDayV1');
-    if(!button||button.dataset.weeklyReviewHook==='1')return Boolean(button);
-    button.dataset.weeklyReviewHook='1';
-    button.addEventListener('click',runSundayFromNightReset,{capture:true});
-    return true;
-  }
-
   function renderCard(){
     if(!globalThis.document)return false;
     const page=document.querySelector('.life-page-v1[data-page="improve"]');
@@ -197,9 +188,7 @@
   function installUi(){
     if(!globalThis.document)return;
     const timer=setInterval(()=>{
-      const hook=installNightResetHook();
-      const card=renderCard();
-      if(hook&&card)clearInterval(timer);
+      if(renderCard())clearInterval(timer);
     },50);
     setTimeout(()=>clearInterval(timer),10000);
     globalThis.addEventListener?.('storage',renderCard);
