@@ -48,6 +48,12 @@ test("task layout uses full-width blocks so large titles can wrap to two lines",
   assert.match(source, /action\.lineLimit = 2/);
 });
 
+test("NOW strips the technical ProjectY prefix before rendering the task title", () => {
+  assert.match(source, /function nowDisplayTitle\(value\)/);
+  assert.match(source, /ProjectY\\s\*\[｜\|\]/);
+  assert.match(source, /prominent \? nowDisplayTitle\(task\.title\) : task\.title/);
+});
+
 test("NOW protects long task titles before showing the next action", () => {
   assert.match(source, /const titleNeedsTwoLines = current\.title\.length > 18/);
   assert.match(source, /current\.nextAction && !titleNeedsTwoLines/);

@@ -54,6 +54,9 @@ function clean(value, max = 160) {
 function cleanTaskTitle(value) {
   return clean(value).replace(/^\d{1,3}\s*[｜|]\s*/u, "").trim();
 }
+function nowDisplayTitle(value) {
+  return cleanTaskTitle(value).replace(/^ProjectY\s*[｜|]\s*/iu, "").trim();
+}
 function yen(value) {
   if (value === null || value === undefined || String(value).trim() === "") return "—";
   const number = Number(value);
@@ -222,7 +225,8 @@ function addHeader(widget, title) {
 function addTaskLine(parent, task, prominent = false) {
   // Scriptable truncates wrapped text when it shares a horizontal row with the status dot.
   // Render the title as its own full-width block so two-line wrapping is reliable.
-  const text = parent.addText(task.title || "今すぐやることなし");
+  const displayTitle = prominent ? nowDisplayTitle(task.title) : task.title;
+  const text = parent.addText(displayTitle || "今すぐやることなし");
   text.font = font(prominent ? 25 : 17, prominent ? "bold" : "semibold");
   text.textColor = color(COLORS.text);
   text.lineLimit = 2;
