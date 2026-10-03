@@ -2,6 +2,9 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "buildCommand": "npm run vercel-build",
   "outputDirectory": "public",
+  "github": {
+    "autoJobCancelation": false
+  },
   "functions": {
     "api/yos/chat.mjs": {
       "maxDuration": 60,
