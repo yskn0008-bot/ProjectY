@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-10-03T18:14:36+09:00",
+  "updated_at": "2026-10-03T18:15:31+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -23,6 +23,16 @@
       "updated_at": "2026-10-03T09:06:19Z"
     },
     {
+      "id": "github-pr-612",
+      "title": "PR #612 NOW / TODAY widgets: request near-instant refresh",
+      "type": "GitHub PR",
+      "status": "review",
+      "priority": 1,
+      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/612",
+      "updated_at": "2026-10-03T09:15:12Z"
+    },
+    {
       "id": "github-pr-539",
       "title": "PR #539 Finalize YOS Alerts and reread history",
       "type": "GitHub PR",
@@ -31,16 +41,6 @@
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/539",
       "updated_at": "2026-10-03T05:42:51Z"
-    },
-    {
-      "id": "github-pr-582",
-      "title": "PR #582 Clarity Home: ハブ差を隠す統合Home Router",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/582",
-      "updated_at": "2026-10-02T18:27:37Z"
     },
     {
       "id": "github-pr-601",
@@ -60,7 +60,7 @@
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/602",
-      "updated_at": "2026-10-03T09:14:19Z"
+      "updated_at": "2026-10-03T09:15:13Z"
     },
     {
       "id": "github-pr-603",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-10-03T09:09:21Z"
+      "updated_at": "2026-10-03T09:14:27Z"
     },
     {
       "id": "github-issue-234",
@@ -254,7 +254,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #604をレビューして公開判断する",
+      "next_action": "PR #612をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -264,7 +264,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-10-03T18:14:36+09:00",
+      "last_update": "2026-10-03T18:15:31+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -339,13 +339,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 8件・Open PR 16件を自動同期中",
+      "next_action": "Open Issue 8件・Open PR 17件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-10-03T18:14:36+09:00",
+      "last_update": "2026-10-03T18:15:31+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -359,7 +359,7 @@
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #604をレビューして公開判断する",
+      "next_action": "PR #612をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -368,7 +368,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-10-03T18:14:36+09:00",
+      "last_update": "2026-10-03T18:15:31+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -450,5 +450,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "f53c43638ab76e8953844d1acf3b8af3a12cc072194194e9c6ea57c61eaf8028"
+  "github_snapshot_hash": "bb5b1beaceac59468b84c81c68fc55d879ff0f259dea7d08bfcb741053c43382"
 }
