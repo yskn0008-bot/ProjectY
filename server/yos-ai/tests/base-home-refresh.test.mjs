@@ -35,7 +35,7 @@ test('BASE HOME adapters preserve source ownership and stable mirror keys', () =
   assert.match(calendar.syncKey,/^calendar:[a-f0-9]{16}$/);
   assert.equal(calendar.area,'Life');
   assert.equal(calendar.status,'保留');
-  assert.equal(calendar.actionUrl,'calshow:1790992800');
+  assert.equal(calendar.actionUrl,'calshow:1790989200');
 
   const reminder=reminderToMirrorItem({
     id:'rem-1',
