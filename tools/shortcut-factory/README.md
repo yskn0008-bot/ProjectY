@@ -62,5 +62,6 @@ only write remains in STASH.
 - Signed STASH / STASH Add artifacts: machine verified.
 - Physical iPhone acceptance must confirm exact clipboard copy, no destination
   prompt, no routine notification, and consume-after-use.
+- The physical runtime target is native iPhone Shortcuts; Safari/PWA readiness is not applicable.
 - Only after that physical E2E should the existing ProjectY asset/status record
   be updated as completed evidence.
