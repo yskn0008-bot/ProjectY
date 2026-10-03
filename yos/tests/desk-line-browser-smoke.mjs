@@ -258,6 +258,21 @@ try{
   assert.equal(emergency.saved?.baseUrl,previewBase);
   assert.equal(emergency.saved?.shareToken,previewShare);
 
+  await page.evaluate(()=>localStorage.removeItem('yosAiEmergencyTransportV1'));
+  await page.goto(base+'/yos/desk/?api_preview='+encodeURIComponent(previewBase)+'&vercel_share='+encodeURIComponent(previewShare)+'&transport_until='+previewUntil,{waitUntil:'networkidle'});
+  await page.waitForFunction(()=>document.documentElement.dataset.yosEmergencyTransport==='preview');
+  const queryEmergency=await page.evaluate(()=>({
+    baseUrl:globalThis.YOS_AI_BASE_URL,
+    share:globalThis.YOS_VERCEL_SHARE_TOKEN,
+    search:location.search,
+    saved:JSON.parse(localStorage.getItem('yosAiEmergencyTransportV1')||'null')
+  }));
+  assert.equal(queryEmergency.baseUrl,previewBase);
+  assert.equal(queryEmergency.share,previewShare);
+  assert.equal(queryEmergency.search,'','query activation fallback should be removed immediately after local setup');
+  assert.equal(queryEmergency.saved?.baseUrl,previewBase);
+  assert.equal(queryEmergency.saved?.shareToken,previewShare);
+
   const fit=await page.evaluate(()=>{
     const app=document.getElementById('app');
     return {
