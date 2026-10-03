@@ -1,0 +1,45 @@
+#define name STASH Add
+#define color teal
+#define inputs text
+
+#include 'actions/documents'
+#include 'actions/sharing'
+#include 'actions/text'
+#include 'actions/shortcuts'
+
+/*
+STASH Add is only an entry point to the existing STASH.
+- With Shortcut Input (future Clarity call), save that text.
+- With no input (Control Center), save the current clipboard text.
+- Read existing POCKET.txt only to suppress accidental duplicate writes.
+- The actual write remains owned by STASH.
+*/
+
+@stashItem = ""
+
+if ShortcutInput {
+    const directText = getText(ShortcutInput)
+    @stashItem = "{directText}"
+} else {
+    const clipboardValue = getClipboard()
+    const clipboardText = getText(clipboardValue)
+    @stashItem = "{clipboardText}"
+}
+
+if !@stashItem {
+    showNotification("保存する文章がありません", "STASH Add", false)
+    stop()
+}
+
+const expectedEntry = text("{@stashItem}\n===YOS_NEXT===\n")
+const pocketFile = getFile("POCKET.txt", nil, false)
+
+if pocketFile {
+    const pocketText = getText(pocketFile)
+    if pocketText contains expectedEntry {
+        showNotification("すでに保存済みです", "STASH Add", false)
+        stop()
+    }
+}
+
+run("STASH", @stashItem)
