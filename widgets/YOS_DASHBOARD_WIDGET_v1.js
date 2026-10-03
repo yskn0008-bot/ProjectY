@@ -14,7 +14,8 @@ const CONFIG = {
   taskCacheFile: "my-way-now-widget-cache-v1.json",
   baseHomeRetryFile: "yos-base-home-refresh-pending-v1.json",
   moneyRelativePath: "YOS/Money/money.json",
-  refreshMinutes: 15,
+  // Ask iOS for the earliest practical Home Screen refresh. iOS may still defer widget reloads.
+  refreshSeconds: 60,
 };
 
 const URLS = {
@@ -153,7 +154,7 @@ function writeTaskCache(data) {
 async function fetchTaskFeed(token) {
   const request = new Request(CONFIG.feedUrl);
   request.method = "GET";
-  request.headers = {Authorization: `Bearer ${token}`, Accept: "application/json"};
+  request.headers = {Authorization: `Bearer ${token}`, Accept: "application/json", "Cache-Control": "no-cache"};
   request.timeoutInterval = 10;
   const data = await request.loadJSON();
   const status = Number(request.response?.statusCode || 0);
@@ -456,7 +457,7 @@ function makeNow(taskResult, calendarResult, money) {
   setBackground(widget);
   widget.setPadding(14, 16, 14, 16);
   widget.url = URLS.HOME;
-  widget.refreshAfterDate = new Date(Date.now() + CONFIG.refreshMinutes * 60 * 1000);
+  widget.refreshAfterDate = new Date(Date.now() + CONFIG.refreshSeconds * 1000);
 
   addHeader(widget, "NOW");
   widget.addSpacer(9);
@@ -520,7 +521,7 @@ function makeToday(taskResult, calendarResult, money) {
   setBackground(widget);
   widget.setPadding(16, 17, 16, 17);
   widget.url = URLS.HOME;
-  widget.refreshAfterDate = new Date(Date.now() + CONFIG.refreshMinutes * 60 * 1000);
+  widget.refreshAfterDate = new Date(Date.now() + CONFIG.refreshSeconds * 1000);
 
   addHeader(widget, "TODAY");
   widget.addSpacer(10);
