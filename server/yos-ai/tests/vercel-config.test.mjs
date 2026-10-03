@@ -9,3 +9,8 @@ test('Vercel compares YOS AI changes from the last successful deployment', async
   assert.match(config.ignoreCommand,/HEAD \.\//);
   assert.match(config.ignoreCommand,/HEAD\^ HEAD \.\//);
 });
+
+test('Vercel does not cancel an active YOS AI build when a later data-sync commit arrives', async () => {
+  const config=JSON.parse(await readFile(new URL('../vercel.json',import.meta.url),'utf8'));
+  assert.equal(config.github?.autoJobCancelation,false);
+});
