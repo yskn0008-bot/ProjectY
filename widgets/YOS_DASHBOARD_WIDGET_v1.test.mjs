@@ -73,3 +73,5 @@ test("routine controls launch existing Morning and Night shortcuts without inven
   assert.match(source, /encodeURIComponent\("Night Brief"\)/);
   assert.match(source, /completion is not inferred/);
 });
+
+// Explicit NOW wrap is intentionally covered by source-contract tests.
