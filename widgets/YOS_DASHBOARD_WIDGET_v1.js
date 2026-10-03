@@ -54,9 +54,9 @@ function clean(value, max = 160) {
 function cleanTaskTitle(value) {
   return clean(value).replace(/^\d{1,3}\s*[｜|]\s*/u, "").trim();
 }
-function nowDisplayTitle(value) {
+function nowDisplayLines(value) {
   const title = cleanTaskTitle(value).replace(/^ProjectY\s*[｜|]\s*/iu, "").trim();
-  if (title.length <= 18 || title.includes("\n")) return title;
+  if (title.length <= 18) return [title];
 
   const candidates = [];
   for (let i = 0; i < title.length; i++) {
@@ -68,11 +68,14 @@ function nowDisplayTitle(value) {
     const balance = Math.abs(left.length - right.length);
     candidates.push({i, score: longest + balance * 0.2});
   }
-  if (!candidates.length) return title;
+  if (!candidates.length) return [title];
 
   candidates.sort((a, b) => a.score - b.score);
   const split = candidates[0].i;
-  return title.slice(0, split).trim() + "\n" + title.slice(split + 1).trim();
+  return [
+    title.slice(0, split).trim(),
+    title.slice(split + 1).trim(),
+  ];
 }
 function yen(value) {
   if (value === null || value === undefined || String(value).trim() === "") return "—";
@@ -240,14 +243,30 @@ function addHeader(widget, title) {
 }
 
 function addTaskLine(parent, task, prominent = false) {
-  // Scriptable truncates wrapped text when it shares a horizontal row with the status dot.
-  // Render the title as its own full-width block so two-line wrapping is reliable.
-  const displayTitle = prominent ? nowDisplayTitle(task.title) : task.title;
-  const text = parent.addText(displayTitle || "今すぐやることなし");
-  text.font = font(prominent ? 25 : 17, prominent ? "bold" : "semibold");
+  if (prominent) {
+    const lines = nowDisplayLines(task.title);
+    const first = parent.addText(lines[0] || "今すぐやることなし");
+    first.font = font(25, "bold");
+    first.textColor = color(COLORS.text);
+    first.lineLimit = 1;
+    first.minimumScaleFactor = 0.84;
+
+    if (lines[1]) {
+      parent.addSpacer(1);
+      const second = parent.addText(lines[1]);
+      second.font = font(25, "bold");
+      second.textColor = color(COLORS.text);
+      second.lineLimit = 1;
+      second.minimumScaleFactor = 0.84;
+    }
+    return first;
+  }
+
+  const text = parent.addText(task.title || "今すぐやることなし");
+  text.font = font(17, "semibold");
   text.textColor = color(COLORS.text);
   text.lineLimit = 2;
-  text.minimumScaleFactor = prominent ? 0.84 : 0.88;
+  text.minimumScaleFactor = 0.88;
   return text;
 }
 function addEventLine(parent, event, compact = false) {
