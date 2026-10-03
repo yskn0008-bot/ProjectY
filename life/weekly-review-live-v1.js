@@ -11,6 +11,7 @@
     home:{label:'帰宅後ルーティン',total:4}
   };
   const MECHANICAL=/(確認|チェック|記録|入力|転記|集計|更新|コピー|保存|登録|照合|同期|ログ|開く|起動)/u;
+  const UNSAFE_AUTOMATION=/(支払|振込|送信|削除|購入|契約|決済|投稿|公開|登録|予約|注文|入金|出金|変更|更新|保存|入力|転記|同期)/u;
   const clean=(value,max=160)=>String(value??'').trim().replace(/\s+/g,' ').slice(0,max);
   const taskKey=value=>clean(value,100).toLocaleLowerCase('ja-JP');
   const addDays=(date,amount)=>{
@@ -68,7 +69,7 @@
         });
         continue;
       }
-      if(distinctDays>=3&&group.doneCount>=2&&MECHANICAL.test(group.label)){
+      if(distinctDays>=3&&group.doneCount>=2&&MECHANICAL.test(group.label)&&!UNSAFE_AUTOMATION.test(group.label)){
         signals.push({
           id:`life-task-auto:${key}`,domain:'life',label:group.label,occurrences:distinctDays,
           outcome:'neutral',value:'medium',friction:'medium',automatable:true,reversible:true,
@@ -102,11 +103,21 @@
   function buildReview(data,endDate,generatedAt=new Date().toISOString()){
     const engine=globalThis.YOSWeeklyReviewEngineV1;
     if(!engine||typeof engine.buildWeeklyReview!=='function')throw new Error('Weekly Review engine is unavailable');
-    const signals=collectSignals(data,endDate);
+    const baseSignals=collectSignals(data,endDate);
+    let frictionSignals=[];
+    try{
+      const frictionApi=globalThis.__yosFrictionDiscoveryLiveV1Api;
+      if(frictionApi&&typeof frictionApi.toWeeklySignals==='function')frictionSignals=frictionApi.toWeeklySignals(data,endDate);
+    }catch(error){
+      globalThis.console?.warn?.('Friction Discovery skipped',error);
+    }
+    const frictionLabels=new Set(frictionSignals.map(signal=>taskKey(signal.label)));
+    const signals=baseSignals.filter(signal=>!(signal.automatable&&frictionLabels.has(taskKey(signal.label)))).concat(frictionSignals);
     const result=engine.buildWeeklyReview(signals,{maxPerCategory:1,automateMinOccurrences:3,automateMinManualStepsPerWeek:3});
     return{
       schema:SCHEMA,source:SOURCE,generatedAt,windowStart:addDays(endDate,-6),windowEnd:endDate,
-      sourceSignalCount:result.sourceSignalCount,continue:result.continue,stop:result.stop,automate:result.automate
+      sourceSignalCount:result.sourceSignalCount,frictionCandidateCount:frictionSignals.length,
+      continue:result.continue,stop:result.stop,automate:result.automate
     };
   }
 
