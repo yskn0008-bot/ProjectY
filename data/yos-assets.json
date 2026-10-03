@@ -57,7 +57,7 @@
   },
   "summary": {
     "asset_count": 25,
-    "overall_progress": 72,
+    "overall_progress": 73,
     "needs_user_action_count": 11,
     "audit_completed_at": "2026-10-02T09:46:01+09:00",
     "current_frontline": [
@@ -691,11 +691,11 @@
       "status": "awaiting_device_verification",
       "priority": 3,
       "current": "Friction Discoveryは既存pure engine + MY LIFE read-only adapterに加え、MY LIFEブラウザruntimeへ接続。既存の日曜Night Reset→Weekly Review経路で14日分の反復・低リスク・効果測定可能な不便だけを自動抽出し、『自動化する』候補へ渡す。新SSOT・新scheduler・自動Prototype実行は追加していない。",
-      "next_action": "本番反映後、iPhoneのMY LIFEで日曜Night Reset→週次レビューを1回実機確認する。候補が無い週は『候補なし』で正常。",
-      "blocker": "コード/自動テスト完了後の本番反映確認と、iPhone実機での日曜Night Reset→週次レビュー表示確認が必要。",
+      "next_action": "iPhoneのMY LIFEで日曜Night Resetを実行し、改善ページの週次レビューに『続ける・やめる・自動化する』が各最大1件（候補なし可）で表示されることを1回確認する。",
+      "blocker": "本番GitHub Pages反映は確認済み。残りはiPhone実機で日曜Night Reset→週次レビュー表示を1回確認するだけ。",
       "needs_user_action": true,
       "device_verified": false,
-      "production_verified": false,
+      "production_verified": true,
       "deep_link": null,
       "completion_criteria": [
         "既存MY LIFE実データから繰り返し操作・迷いを候補化する",
@@ -716,17 +716,21 @@
         "path:life/friction-discovery-engine-v1.js",
         "path:life/friction-discovery-live-v1.js",
         "integration:existing Sunday Night Reset -> Weekly Review -> Friction Discovery",
-        "safety:unsafe state-changing labels fail closed"
+        "safety:unsafe state-changing labels fail closed",
+        "PR#613 merged: 17083ed580dca1817e4c1e2ebcaba695b038a309",
+        "CI:PR#613 Life Node regression PASS",
+        "CI:PR#613 Morning/Night handoff Chromium/WebKit PASS",
+        "production:GitHub Pages deploy run 37113219254 success"
       ],
       "progress_basis": {
         "spec": true,
         "implementation": true,
         "test": true,
         "device": false,
-        "production": false
+        "production": true
       },
-      "progress": 65,
-      "updated_at": "2026-10-03T18:25:00+09:00"
+      "progress": 80,
+      "updated_at": "2026-10-03T18:31:00+09:00"
     },
     {
       "id": "one-enter",
