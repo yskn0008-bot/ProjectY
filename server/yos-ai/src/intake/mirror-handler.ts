@@ -424,7 +424,7 @@ function nullableUrl(value: unknown): string | null | undefined {
   if (typeof value !== 'string' || value.length > 2_000) return undefined;
   try {
     const parsed = new URL(value);
-    if (!['https:', 'http:', 'shortcuts:', 'calshow:'].includes(parsed.protocol)) return undefined;
+    if (!['https:', 'http:', 'shortcuts:', 'scriptable:', 'calshow:'].includes(parsed.protocol)) return undefined;
     return value;
   } catch {
     return undefined;

@@ -349,7 +349,9 @@ for actionItem in @actionsRaw {
     }
 
     if @normalizedExecutor == "NEXT_NOTION" && @normalizedModule == "notion" && @normalizedOperation == "open_yos_home" {
-        const notionHomeURL = text("https://www.notion.so/3ed5ca882895819aaa57c139ea36fe2b")
+        // Reuse the existing YOS Dashboard Scriptable asset as the BASE HOME refresh bridge.
+        // The bridge refreshes Calendar / Reminders / ProjectY best-effort, then always opens Notion.
+        const notionHomeURL = text("scriptable:///run?scriptName=YOS%20Dashboard%20v2&action=baseHome")
         const notionHandoff = text("{CurrentDate}\t{requestNumber}\t{actionId}\tHANDOFF\tnotion_yos_home\n")
         appendToFile("Clarity Next Ledger.txt", notionHandoff)
         openURL(notionHomeURL)

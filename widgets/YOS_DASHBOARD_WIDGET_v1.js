@@ -5,17 +5,21 @@
 // Routines are launch buttons only; completion is not inferred without a confirmed shared routine state.
 
 const PARAM = (args.widgetParameter || "NOW").trim().toUpperCase();
+const ACTION = cleanAction(args.queryParameters?.action || "");
 
 const CONFIG = {
   feedUrl: "https://project-y-yos-ai.vercel.app/api/yos/widget",
+  baseHomeRefreshUrl: "https://project-y-yos-ai.vercel.app/api/yos/widget?mode=base-home-refresh",
   keychainKey: "MY_WAY_WIDGET_TOKEN",
   taskCacheFile: "my-way-now-widget-cache-v1.json",
+  baseHomeRetryFile: "yos-base-home-refresh-pending-v1.json",
   moneyRelativePath: "YOS/Money/money.json",
   refreshMinutes: 15,
 };
 
 const URLS = {
   HOME: "https://yskn0008-bot.github.io/ProjectY/yos/",
+  BASE_HOME: "https://www.notion.so/3ed5ca882895819aaa57c139ea36fe2b",
   MORNING: "shortcuts://run-shortcut?name=" + encodeURIComponent("Morning"),
   NIGHT: "shortcuts://run-shortcut?name=" + encodeURIComponent("Night Brief"),
 };
@@ -40,7 +44,12 @@ const COLORS = {
 const localFM = FileManager.local();
 const iCloudFM = FileManager.iCloud();
 const taskCachePath = localFM.joinPath(localFM.documentsDirectory(), CONFIG.taskCacheFile);
+const baseHomeRetryPath = localFM.joinPath(localFM.documentsDirectory(), CONFIG.baseHomeRetryFile);
 
+function cleanAction(value) {
+  const normalized = String(value || "").trim();
+  return /^[A-Za-z0-9_-]{0,40}$/u.test(normalized) ? normalized : "";
+}
 function color(hex, alpha = 1) { return new Color(hex, alpha); }
 function font(size, weight = "regular") {
   if (weight === "bold") return Font.boldSystemFont(size);
@@ -214,6 +223,146 @@ async function loadMoney() {
   } catch {
     return {amount: null, available: false};
   }
+}
+
+function stableLocalId(parts) {
+  const source = parts.map(value => String(value ?? "")).join("\u001f");
+  let a = 0x811c9dc5;
+  let b = 0x9e3779b9;
+  for (let i = 0; i < source.length; i++) {
+    const code = source.charCodeAt(i);
+    a ^= code;
+    a = Math.imul(a, 0x01000193) >>> 0;
+    b ^= code + i;
+    b = Math.imul(b, 0x85ebca6b) >>> 0;
+  }
+  return a.toString(16).padStart(8, "0") + b.toString(16).padStart(8, "0");
+}
+
+async function loadCalendarSnapshot() {
+  const events = await CalendarEvent.today();
+  return events
+    .filter(event => event && event.title)
+    .sort((a, b) => new Date(a.startDate || 0) - new Date(b.startDate || 0))
+    .slice(0, 30)
+    .map(event => ({
+      id: clean(event.identifier || stableLocalId([
+        event.title,
+        event.startDate ? new Date(event.startDate).toISOString() : "",
+        event.endDate ? new Date(event.endDate).toISOString() : "",
+        event.calendar?.identifier || event.calendar?.title || ""
+      ]), 240),
+      title: clean(event.title || "予定", 180),
+      start: new Date(event.startDate).toISOString(),
+      end: event.endDate ? new Date(event.endDate).toISOString() : null,
+      location: clean(event.location || "", 240) || null,
+      allDay: event.isAllDay === true,
+    }));
+}
+
+async function loadReminderSnapshot() {
+  const reminders = await Reminder.allIncomplete();
+  const now = Date.now();
+  return reminders
+    .filter(reminder => reminder && reminder.title)
+    .sort((a, b) => {
+      const aOverdue = a.isOverdue === true ? 0 : 1;
+      const bOverdue = b.isOverdue === true ? 0 : 1;
+      if (aOverdue !== bOverdue) return aOverdue - bOverdue;
+      const ad = a.dueDate ? new Date(a.dueDate).getTime() : Number.MAX_SAFE_INTEGER;
+      const bd = b.dueDate ? new Date(b.dueDate).getTime() : Number.MAX_SAFE_INTEGER;
+      if (ad !== bd) return ad - bd;
+      return Number(a.priority || 0) - Number(b.priority || 0);
+    })
+    .slice(0, 30)
+    .map(reminder => ({
+      id: clean(reminder.identifier || stableLocalId([
+        reminder.title,
+        reminder.dueDate ? new Date(reminder.dueDate).toISOString() : "",
+        reminder.calendar?.identifier || reminder.calendar?.title || ""
+      ]), 240),
+      title: clean(reminder.title || "Reminder", 180),
+      dueAt: reminder.dueDate ? new Date(reminder.dueDate).toISOString() : null,
+      priority: Number.isInteger(Number(reminder.priority)) ? Number(reminder.priority) : null,
+      overdue: reminder.isOverdue === true || Boolean(reminder.dueDate && new Date(reminder.dueDate).getTime() < now),
+    }));
+}
+
+function readPendingBaseHomeRefresh() {
+  try {
+    if (!localFM.fileExists(baseHomeRetryPath)) return null;
+    const parsed = JSON.parse(localFM.readString(baseHomeRetryPath));
+    return parsed && parsed.schema === "yos-base-home-refresh-v1" ? parsed : null;
+  } catch {
+    return null;
+  }
+}
+
+function storePendingBaseHomeRefresh(payload) {
+  try { localFM.writeString(baseHomeRetryPath, JSON.stringify(payload)); } catch {}
+}
+
+function clearPendingBaseHomeRefresh() {
+  try {
+    if (localFM.fileExists(baseHomeRetryPath)) localFM.remove(baseHomeRetryPath);
+  } catch {}
+}
+
+async function postBaseHomeRefresh(payload, token) {
+  const request = new Request(CONFIG.baseHomeRefreshUrl);
+  request.method = "POST";
+  request.headers = {
+    Authorization: `Bearer ${token}`,
+    Accept: "application/json",
+    "Content-Type": "application/json",
+  };
+  request.body = JSON.stringify(payload);
+  request.timeoutInterval = 12;
+  const result = await request.loadJSON();
+  const status = Number(request.response?.statusCode || 0);
+  if (status !== 200 || result?.ok !== true) throw new Error("BASE HOME refresh " + status);
+  return result;
+}
+
+async function refreshAndOpenBaseHome() {
+  try {
+    const configured = await configureIfNeeded();
+    if (configured !== false && Keychain.contains(CONFIG.keychainKey)) {
+      const token = clean(Keychain.get(CONFIG.keychainKey), 512);
+      if (token) {
+        const pending = readPendingBaseHomeRefresh();
+        if (pending) {
+          try {
+            await postBaseHomeRefresh(pending, token);
+            clearPendingBaseHomeRefresh();
+          } catch {}
+        }
+
+        const [calendar, reminders] = await Promise.all([
+          loadCalendarSnapshot(),
+          loadReminderSnapshot(),
+        ]);
+        const payload = {
+          schema: "yos-base-home-refresh-v1",
+          eventId: "base-home:" + Date.now(),
+          syncedAt: new Date().toISOString(),
+          calendar,
+          reminders,
+          refreshProjectY: true,
+        };
+        try {
+          await postBaseHomeRefresh(payload, token);
+          clearPendingBaseHomeRefresh();
+        } catch {
+          storePendingBaseHomeRefresh(payload);
+        }
+      }
+    }
+  } catch {
+    // BASE HOME is a mirror. A refresh failure must never block the existing source systems or page.
+  }
+  Safari.open(URLS.BASE_HOME);
+  Script.complete();
 }
 
 function addHeader(widget, title) {
@@ -492,20 +641,24 @@ async function configureIfNeeded() {
   return await promptToken();
 }
 
-const shouldContinue = await configureIfNeeded();
-if (shouldContinue === false) {
-  Script.complete();
+if (ACTION === "baseHome" && !config.runsInWidget) {
+  await refreshAndOpenBaseHome();
 } else {
-  const [taskResult, calendarResult, money] = await Promise.all([
-    loadTaskFeed(),
-    loadTodayEvents(),
-    loadMoney(),
-  ]);
-  const key = PARAM === "TODAY" ? "TODAY" : "NOW";
-  const widget = key === "TODAY" ? makeToday(taskResult, calendarResult, money) : makeNow(taskResult, calendarResult, money);
+  const shouldContinue = await configureIfNeeded();
+  if (shouldContinue === false) {
+    Script.complete();
+  } else {
+    const [taskResult, calendarResult, money] = await Promise.all([
+      loadTaskFeed(),
+      loadTodayEvents(),
+      loadMoney(),
+    ]);
+    const key = PARAM === "TODAY" ? "TODAY" : "NOW";
+    const widget = key === "TODAY" ? makeToday(taskResult, calendarResult, money) : makeNow(taskResult, calendarResult, money);
 
-  if (config.runsInWidget) Script.setWidget(widget);
-  else if (key === "TODAY") await widget.presentLarge();
-  else await widget.presentMedium();
-  Script.complete();
+    if (config.runsInWidget) Script.setWidget(widget);
+    else if (key === "TODAY") await widget.presentLarge();
+    else await widget.presentMedium();
+    Script.complete();
+  }
 }
