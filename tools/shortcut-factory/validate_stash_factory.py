@@ -52,58 +52,85 @@ def main() -> int:
     if any(i.endswith("downloadurl") or i.endswith("openurl") for i in stash_ids):
         fail("STASH unexpectedly contains network/open-url action")
 
-    # Read mode must split the complete delimiter, build a readable vCard menu,
-    # map the chosen numbered title back to the exact raw item, copy it, then
-    # consume that exact item from the existing POCKET.txt.
-    split_actions = actions_with(stash, "is.workflow.actions.text.split")
-    if len(split_actions) != 1:
-        fail(f"STASH expected one split action, found {len(split_actions)}")
-    split = params(split_actions[0])
-    if split.get("WFTextSeparator") != "Custom" or split.get("WFTextCustomSeparator") != "\n===YOS_NEXT===\n":
-        fail(f"STASH must split the full storage delimiter: {split}")
+    # Routine save/copy/add operations must stay silent.
+    if actions_with(stash, "is.workflow.actions.notification"):
+        fail("STASH must not emit routine notifications")
+    if actions_with(add, "is.workflow.actions.notification"):
+        fail("STASH Add must not emit routine notifications")
 
-    if len(actions_with(stash, "is.workflow.actions.repeat.each")) != 2:
-        fail("STASH readable menu repeat block missing")
+    # Read mode must split the exact storage delimiter, build a compact
+    # display-only list, map the selected short label back to the exact raw
+    # item, copy it, and consume that exact item.
+    split_actions = actions_with(stash, "is.workflow.actions.text.split")
+    storage_splits = [
+        a for a in split_actions
+        if params(a).get("WFTextSeparator") == "Custom"
+        and params(a).get("WFTextCustomSeparator") == "\n===YOS_NEXT===\n"
+    ]
+    if len(storage_splits) != 1:
+        fail(f"STASH expected one full-delimiter split, found {len(storage_splits)}")
+
+    if len(actions_with(stash, "is.workflow.actions.repeat.each")) < 1:
+        fail("STASH readable-menu repeat block missing")
     append_menu = actions_with(stash, "is.workflow.actions.appendvariable")
     if not any(params(a).get("WFVariableName") == "displayItems" for a in append_menu):
-        fail("STASH readable vCard menu assembly missing")
+        fail("STASH compact menu assembly missing")
 
-    named_items = actions_with(stash, "is.workflow.actions.setitemname")
-    if not any(params(a).get("WFName") == "STASH Menu.vcf" for a in named_items):
-        fail("STASH vCard menu file missing")
+    # The old vCard/contact menu caused selected items not to map reliably back
+    # to clipboard text. It must not return.
+    if actions_with(stash, "is.workflow.actions.setitemname"):
+        fail("STASH must not rebuild the old vCard menu")
+    if ".contact" in stash_blob or "STASH Menu.vcf" in stash_blob:
+        fail("STASH old contact/vCard menu still present")
 
     choose = actions_with(stash, "is.workflow.actions.choosefromlist")
-    if len(choose) != 1 or params(choose[0]).get("WFChooseFromListActionPrompt") != "STASH｜使うものを選択":
-        fail("STASH readable choose-list prompt missing")
-    if len(actions_with(stash, "is.workflow.actions.detect.number")) != 1:
-        fail("STASH chosen numbered title -> item index mapping missing")
+    if len(choose) != 1:
+        fail(f"STASH expected one choose-list action, found {len(choose)}")
+    choose_params = params(choose[0])
+    if choose_params.get("WFChooseFromListActionPrompt") != "STASH｜使うものを選択":
+        fail("STASH choose-list prompt missing")
+    if "displayItems" not in repr(choose_params.get("WFInput")):
+        fail("STASH choose-list must use the compact displayItems list")
+
+    # A 28-character preview cap must exist in the compiled shortcut.
+    if "^.{1,28}" not in stash_blob:
+        fail("STASH compact 28-character preview cap missing")
 
     list_items = actions_with(stash, "is.workflow.actions.getitemfromlist")
-    if len(list_items) != 1:
-        fail("STASH exact raw-item lookup missing")
-    item_params = params(list_items[0])
-    if "rawItems" not in repr(item_params.get("WFInput")) or "chosenIndex" not in repr(item_params.get("WFItemIndex")):
-        fail(f"STASH selection is not mapped back to exact raw item: {item_params}")
+    exact_raw_lookups = [
+        a for a in list_items
+        if "rawItems" in repr(params(a).get("WFInput"))
+        and "chosenIndex" in repr(params(a).get("WFItemIndex"))
+    ]
+    if len(exact_raw_lookups) != 1:
+        fail("STASH selected compact label is not mapped back to exact raw item")
 
     if len(actions_with(stash, "is.workflow.actions.setclipboard")) != 1:
-        fail("STASH clipboard action missing")
+        fail("STASH exact clipboard action missing")
+
     replacements = actions_with(stash, "is.workflow.actions.text.replace")
-    if len(replacements) != 1 or "consumedEntry" not in repr(params(replacements[0]).get("WFReplaceTextFind")):
+    consume_replacements = [
+        a for a in replacements
+        if "consumedEntry" in repr(params(a).get("WFReplaceTextFind"))
+    ]
+    if len(consume_replacements) != 1:
         fail("STASH exact consume-after-copy replacement missing")
 
     saves = actions_with(stash, "is.workflow.actions.documentpicker.save")
     if len(saves) != 1:
         fail(f"STASH expected one POCKET rewrite after consume, found {len(saves)}")
     save = params(saves[0])
-    if save.get("WFFileDestinationPath") != "POCKET.txt" or save.get("WFSaveFileOverwrite") is not True:
-        fail(f"STASH consume save must rewrite existing POCKET.txt: {save}")
+    if save.get("WFFileDestinationPath") != "POCKET.txt":
+        fail(f"STASH consume save path is wrong: {save}")
+    if save.get("WFAskWhereToSave") is not False:
+        fail(f"STASH must never ask for a save destination: {save}")
+    if save.get("WFSaveFileOverwrite") is not True:
+        fail(f"STASH consume save must overwrite existing POCKET.txt: {save}")
     if "remaining" not in repr(save.get("WFInput")):
         fail("STASH consume save is not wired to remaining content")
-    if "コピーしてSTASHから削除しました" not in stash_blob:
-        fail("STASH consume-after-copy user feedback missing")
 
-    # STASH Add must stay a thin wrapper: Shortcut Input/clipboard -> exact
-    # duplicate read -> existing STASH. It must never own persistence.
+    # STASH Add must stay a thin silent wrapper:
+    # Shortcut Input/clipboard -> exact duplicate read -> existing STASH.
     if "POCKET.txt" not in add_blob or "===YOS_NEXT===" not in add_blob:
         fail("STASH Add duplicate guard contract missing")
     if len(actions_with(add, "is.workflow.actions.getclipboard")) != 1:
@@ -136,8 +163,9 @@ def main() -> int:
         fail("STASH Add unexpectedly contains network/open-url action")
 
     print(f"STASH factory structure: PASS ({len(stash_ids)} actions)")
-    print("STASH readable consume-after-copy contract: PASS")
-    print(f"STASH Add thin-wrapper + dedupe structure: PASS ({len(add_ids)} actions)")
+    print("STASH compact exact-copy consume contract: PASS")
+    print("STASH no-save-prompt + silent routine contract: PASS")
+    print(f"STASH Add thin silent wrapper + dedupe structure: PASS ({len(add_ids)} actions)")
     return 0
 
 
