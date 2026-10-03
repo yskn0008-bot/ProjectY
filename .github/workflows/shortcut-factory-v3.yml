@@ -1,0 +1,113 @@
+name: Shortcut Factory v3
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'tools/shortcut-factory/**'
+      - 'tools/clarity-factory/sign_with_hubsign.py'
+      - '.github/workflows/shortcut-factory-v3.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-stash:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Secret-free source guard
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/shortcut-factory/validate_secret_free.py             'tools/shortcut-factory/shortcuts/STASH.cherri'             'tools/shortcut-factory/shortcuts/STASH Add.cherri'
+
+      - name: Validate source ownership boundaries
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          stash=Path('tools/shortcut-factory/shortcuts/STASH.cherri').read_text()
+          add=Path('tools/shortcut-factory/shortcuts/STASH Add.cherri').read_text()
+          assert 'POCKET.txt' in stash and '===YOS_NEXT===' in stash
+          assert 'appendResolvedFile' in stash
+          assert 'run("STASH", @stashItem)' in add
+          assert 'getClipboard()' in add
+          assert 'appendResolvedFile' not in add
+          assert 'appendToFile' not in add
+          print('Shortcut Factory source boundary: PASS')
+          PY
+
+      - name: Install pinned Cherri v2.3.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          url='https://github.com/electrikmilk/cherri/releases/download/v2.3.0/cherri_linux-x86_64.zip'
+          expected='7ab2c384b7b26e7c72a30a8dfa56f89dae12c4068b7951bc1e3193f3698edbe9'
+          curl -fsSL "$url" -o /tmp/cherri.zip
+          printf '%s  %s\n' "$expected" /tmp/cherri.zip | sha256sum -c -
+          mkdir -p /tmp/cherri
+          unzip -q /tmp/cherri.zip -d /tmp/cherri
+          binary="$(find /tmp/cherri -type f -name cherri -print -quit)"
+          test -n "$binary"
+          sudo install -m 0755 "$binary" /usr/local/bin/cherri
+          cherri --version
+
+      - name: Compile STASH and STASH Add
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd tools/shortcut-factory/shortcuts
+          rm -f             'STASH_unsigned.shortcut' 'STASH.plist'             'STASH Add_unsigned.shortcut' 'STASH Add.plist'
+          cherri 'STASH.cherri' --skip-sign --debug
+          cherri 'STASH Add.cherri' --skip-sign --debug
+          test -f 'STASH_unsigned.shortcut'
+          test -f 'STASH Add_unsigned.shortcut'
+          mkdir -p ../artifacts
+          cp 'STASH_unsigned.shortcut' '../artifacts/STASH-unsigned.shortcut'
+          cp 'STASH Add_unsigned.shortcut' '../artifacts/STASH-Add-unsigned.shortcut'
+
+      - name: Validate compiled structure
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/shortcut-factory/validate_stash_factory.py             'tools/shortcut-factory/artifacts/STASH-unsigned.shortcut'             'tools/shortcut-factory/artifacts/STASH-Add-unsigned.shortcut'
+
+      - name: Sign with existing HubSign adapter
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/clarity-factory/sign_with_hubsign.py             --input 'tools/shortcut-factory/artifacts/STASH-unsigned.shortcut'             --output 'tools/shortcut-factory/artifacts/STASH.shortcut'             --name 'STASH'             2>&1 | tee 'tools/shortcut-factory/artifacts/stash-hubsign.log'
+          python3 tools/clarity-factory/sign_with_hubsign.py             --input 'tools/shortcut-factory/artifacts/STASH-Add-unsigned.shortcut'             --output 'tools/shortcut-factory/artifacts/STASH Add.shortcut'             --name 'STASH Add'             2>&1 | tee 'tools/shortcut-factory/artifacts/stash-add-hubsign.log'
+
+      - name: Verify signed artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          for name in ('STASH.shortcut','STASH Add.shortcut'):
+              p=Path('tools/shortcut-factory/artifacts')/name
+              data=p.read_bytes()
+              assert data.startswith(b'AEA1'), (name,data[:8])
+              assert len(data)>500, (name,len(data))
+              print(f'{name}: signed AEA1 PASS ({len(data)} bytes)')
+          PY
+
+      - name: Upload iPhone acceptance package
+        uses: actions/upload-artifact@v4
+        with:
+          name: stash-add-iphone
+          path: |
+            tools/shortcut-factory/artifacts/STASH Add.shortcut
+            tools/shortcut-factory/artifacts/STASH-Add-unsigned.shortcut
+            tools/shortcut-factory/artifacts/STASH.shortcut
+            tools/shortcut-factory/artifacts/STASH-unsigned.shortcut
+            tools/shortcut-factory/artifacts/stash-add-hubsign.log
+            tools/shortcut-factory/artifacts/stash-hubsign.log
+          if-no-files-found: error
+          retention-days: 14
