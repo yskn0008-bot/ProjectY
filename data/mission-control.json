@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-10-03T13:38:28+09:00",
+  "updated_at": "2026-10-03T13:39:50+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -175,6 +175,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-6967c627d94b",
+      "title": "chore(yos-ai): trigger direct Notion dashboard production deploy",
+      "completed_at": "2026-10-03T04:39:24Z",
+      "result": "GitHub mainへ反映（6967c62）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/6967c627d94be6cd192ab9daef92a2177887d0b0"
+    },
+    {
       "id": "github-commit-bf072502a0d1",
       "title": "feat(widget): read YOS Dashboard tasks directly from Notion",
       "completed_at": "2026-10-03T04:38:07Z",
@@ -201,13 +208,6 @@
       "completed_at": "2026-10-03T03:02:00Z",
       "result": "GitHub mainへ反映（b3a90bb）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/b3a90bbb7aa853f260a4edce6d93277c26d2cb8d"
-    },
-    {
-      "id": "github-commit-06d3d1c6d8d3",
-      "title": "fix(widget): force balanced two-line NOW title",
-      "completed_at": "2026-10-03T02:55:05Z",
-      "result": "GitHub mainへ反映（06d3d1c）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/06d3d1c6d8d3d45cbeaf83529aacce820c2cbe21"
     },
     {
       "id": "complete-002",
@@ -244,7 +244,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-10-03T13:38:28+09:00",
+      "last_update": "2026-10-03T13:39:50+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -325,7 +325,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-10-03T13:38:28+09:00",
+      "last_update": "2026-10-03T13:39:50+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -348,7 +348,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-10-03T13:38:28+09:00",
+      "last_update": "2026-10-03T13:39:50+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -430,5 +430,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "7899ec04806b87bfef311ef2fbcdd671c8f81c600793804c6802f38a71b6a7b9"
+  "github_snapshot_hash": "87a514d97148cee9b6b991c5941c1d02d6d9b645f54087a8927e718a8f0992e0"
 }
