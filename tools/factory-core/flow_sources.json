@@ -1,0 +1,70 @@
+{
+  "schema_version": "1.0.0",
+  "base_main_sha": "600ec85de371eaf456162dbe63ca9c08a8493eb0",
+  "purpose": "Recover and canonicalize existing iPhone Flow shortcuts without inventing replacements.",
+  "policy": {
+    "do_not_rebuild_morning_flow": true,
+    "do_not_infer_missing_flows_from_names": true,
+    "main_direct_changes_forbidden": true,
+    "shared_logic_rule": "Reuse existing child Shortcuts/adapters; do not copy common processing between Flows."
+  },
+  "flows": {
+    "Morning Flow": {
+      "status": "recovered_current_artifact",
+      "canonical_mode": "adopt_existing_signed_iphone_artifact",
+      "artifact_recipe": "tools/factory-core/flow-artifacts/morning-flow/zlib-base64.parts",
+      "sha256": "c5eea8d5dd144733e14c3d3ca12f5f16f259316c64b7f1039f8eb3559004a9c0",
+      "size_bytes": 26444,
+      "aea": {
+        "magic": "AEA1",
+        "profile": 0,
+        "auth_data_size": 2204,
+        "original_shortcut_plist_size": 9971,
+        "archive_size": 26444,
+        "segment_size": 1048576,
+        "segments_per_cluster": 256,
+        "compression": "e",
+        "checksum": 2
+      },
+      "runtime_contract": {
+        "trigger": "Existing parent Shortcut Morning calls Morning Flow in the confirmed Morning path; the parent uses the Morning Focus gate.",
+        "actions": [
+          "Find the next Calendar event whose start date is within the next 1 day, sorted by start date ascending, limited to 1 result.",
+          "If an event exists, get the current date and calculate minutes until the event start.",
+          "If remaining minutes > 90, show the existing '余裕あり' notification.",
+          "Else if remaining minutes > 45, show the existing '少し急ぐ' notification.",
+          "Else show the existing '急ぐ' notification.",
+          "If no event exists, show the existing '今のところ急ぐ予定はありません' notification."
+        ],
+        "calls_existing_yos_assets": [],
+        "parent_siblings": ["Morning Brief", "YOS Today Note"],
+        "focus_relation": "Focus handling belongs to the existing parent Morning path; Morning Flow itself is not replaced with a new Focus router.",
+        "duplicate_prevention": "No second automation or duplicate Flow is introduced. The only confirmed call path remains the existing parent Morning path. Intrinsic run-id/idempotency state is not added to the recovered Morning Flow.",
+        "failure_safe": "The recovered Flow is read-only against Calendar and only emits notifications. No external write, purchase, delete, or data migration is added. Missing Calendar result follows the existing no-urgent-plan branch."
+      },
+      "evidence": [
+        "Current iPhone-exported Morning Flow.shortcut recovered from Project file surface on 2026-10-03.",
+        "Existing Morning Flow visual action layout recovered from the saved Morning Flow screenshot.",
+        "ProjectY main asset registry states parent Morning -> Morning Brief + Morning Flow -> YOS Today Note is operational."
+      ]
+    },
+    "Home Flow": {
+      "status": "WAIT_USER_RECOVERY",
+      "reason": "No current iPhone-matching canonical Shortcut/source was found in ProjectY main, current Project/Library shortcut files, or Drive search.",
+      "required_input": "Exact current iPhone Home Flow.shortcut export",
+      "must_not_infer": true
+    },
+    "Work Flow": {
+      "status": "WAIT_USER_RECOVERY",
+      "reason": "No current iPhone-matching canonical Shortcut/source was found in ProjectY main, current Project/Library shortcut files, or Drive search.",
+      "required_input": "Exact current iPhone Work Flow.shortcut export",
+      "must_not_infer": true
+    },
+    "Out Flow": {
+      "status": "WAIT_USER_RECOVERY",
+      "reason": "No current iPhone-matching canonical Shortcut/source was found in ProjectY main, current Project/Library shortcut files, or Drive search.",
+      "required_input": "Exact current iPhone Out Flow.shortcut export",
+      "must_not_infer": true
+    }
+  }
+}
