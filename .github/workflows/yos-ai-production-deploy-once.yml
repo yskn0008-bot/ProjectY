@@ -1,0 +1,112 @@
+name: YOS AI production deploy once
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/yos-ai-production-deploy-once.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/yos-ai-production-deploy-once.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: yos-ai-production-deploy-once
+  cancel-in-progress: false
+
+jobs:
+  auth-probe:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+    steps:
+      - name: Check deploy credential without exposing it
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -n "${VERCEL_TOKEN:-}" ]]; then
+            echo "VERCEL_TOKEN_PRESENT=true"
+            echo "Vercel deploy credential is available." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "VERCEL_TOKEN_PRESENT=false"
+            echo "Vercel deploy credential is missing." >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
+
+  deploy-production:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: team_BDFh0ux7QMJIwIFXv1C5ZlbA
+      VERCEL_PROJECT_ID: prj_HDGdCr7cSoW5vOQKMH9FUHHu1qO2
+      YOS_PROD_ORIGIN: https://yskn0008-bot.github.io
+    steps:
+      - name: Require Vercel credential
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "${VERCEL_TOKEN:-}"
+
+      - name: Checkout main
+        uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-depth: 1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          package-manager-cache: false
+
+      - name: Link exact Vercel project
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p server/yos-ai/.vercel
+          printf '{"orgId":"%s","projectId":"%s"}\n' "$VERCEL_ORG_ID" "$VERCEL_PROJECT_ID" > server/yos-ai/.vercel/project.json
+
+      - name: Pull production settings
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx --yes vercel@latest pull --yes --environment=production --token="$VERCEL_TOKEN" --cwd server/yos-ai
+
+      - name: Build current main for production
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx --yes vercel@latest build --prod --token="$VERCEL_TOKEN" --cwd server/yos-ai
+
+      - name: Deploy prebuilt artifact to production
+        id: deploy
+        shell: bash
+        run: |
+          set -euo pipefail
+          url="$(npx --yes vercel@latest deploy --prebuilt --prod --yes --token="$VERCEL_TOKEN" --cwd server/yos-ai | tail -n 1)"
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+          echo "Production deployment: $url" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Verify production endpoint reached current service
+        shell: bash
+        run: |
+          set -euo pipefail
+          url='https://project-y-yos-ai.vercel.app/api/yos/health'
+          for attempt in {1..18}; do
+            code="$(curl -sS -o /tmp/yos-health.json -w '%{http_code}' -H "Origin: $YOS_PROD_ORIGIN" "$url" || true)"
+            echo "attempt=$attempt status=$code"
+            if [[ "$code" == "200" ]]; then
+              cat /tmp/yos-health.json
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "::error::Production health verification failed"
+          cat /tmp/yos-health.json || true
+          exit 1
