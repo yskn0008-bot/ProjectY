@@ -391,7 +391,14 @@
     data.activeLifeDate=key;
     data.lastClosedLifeDate=key;
     try{
-      window.__yosWeeklyReviewLiveV1Api?.runIfSunday?.(data,key,new Date().toISOString());
+      const weeklyReviewApi=window.__yosWeeklyReviewLiveV1Api;
+      if(weeklyReviewApi&&typeof weeklyReviewApi.runIfSunday==='function'){
+        const weeklyResult=weeklyReviewApi.runIfSunday(data,key,new Date().toISOString());
+        if(weeklyResult?.review){
+          day.lifeFlow={...(day.lifeFlow||{}),weeklyReview:weeklyResult.review};
+          data.days[key]=day;
+        }
+      }
     }catch(error){
       console.warn('Weekly Review skipped',error);
     }
