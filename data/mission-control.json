@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-10-04T02:51:55+09:00",
+  "updated_at": "2026-10-04T02:52:45+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -13,16 +13,6 @@
   },
   "inbox": [
     {
-      "id": "github-pr-616",
-      "title": "PR #616 chore(yos-ai): publish verified YOS Chat fix",
-      "type": "GitHub PR",
-      "status": "review",
-      "priority": 1,
-      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/616",
-      "updated_at": "2026-10-03T17:51:36Z"
-    },
-    {
       "id": "github-pr-539",
       "title": "PR #539 Finalize YOS Alerts and reread history",
       "type": "GitHub PR",
@@ -31,6 +21,16 @@
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/539",
       "updated_at": "2026-10-03T05:42:51Z"
+    },
+    {
+      "id": "github-pr-582",
+      "title": "PR #582 Clarity Home: ハブ差を隠す統合Home Router",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/582",
+      "updated_at": "2026-10-02T18:27:37Z"
     },
     {
       "id": "github-pr-601",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-10-03T17:50:52Z"
+      "updated_at": "2026-10-03T17:51:47Z"
     },
     {
       "id": "github-issue-234",
@@ -195,6 +195,20 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-222fde0d8567",
+      "title": "Merge pull request #616 from yskn0008-bot/hotfix/yos-chat-production-redeploy-20261004",
+      "completed_at": "2026-10-03T17:52:25Z",
+      "result": "GitHub mainへ反映（222fde0）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/222fde0d8567a1bad68b77f787319d57e14c2c52"
+    },
+    {
+      "id": "github-commit-c76bd7ccbbc6",
+      "title": "chore(yos-ai): redeploy verified YOS Chat fix",
+      "completed_at": "2026-10-03T17:48:36Z",
+      "result": "GitHub mainへ反映（c76bd7c）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/c76bd7ccbbc6bd1f38be8f94f34faa813de33587"
+    },
+    {
       "id": "github-commit-83bba3e3b358",
       "title": "data: record Friction Discovery production verification (#615)",
       "completed_at": "2026-10-03T09:32:03Z",
@@ -214,20 +228,6 @@
       "completed_at": "2026-10-03T09:20:18Z",
       "result": "GitHub mainへ反映（3ddc80c）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/3ddc80c37c8ac25fd8e50acb504bf8e276cfd2be"
-    },
-    {
-      "id": "github-commit-1977db7b2c8b",
-      "title": "feat(review): prove One Enter E2E with Friction Discovery live adapter (#604)",
-      "completed_at": "2026-10-03T09:17:29Z",
-      "result": "GitHub mainへ反映（1977db7）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/1977db7b2c8b4db74b16c04a4c576014000d840b"
-    },
-    {
-      "id": "github-commit-32fe753ee925",
-      "title": "feat(base-home): live mirror refresh (#605)",
-      "completed_at": "2026-10-03T09:03:29Z",
-      "result": "GitHub mainへ反映（32fe753）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/32fe753ee925b1e566e769976a7d95f6e69a62ec"
     },
     {
       "id": "complete-002",
@@ -254,7 +254,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #616をレビューして公開判断する",
+      "next_action": "Issue #10を進める：Mission Control v2：GitHubのIssue・PR・Commitを自動集約する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -264,7 +264,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-10-04T02:51:55+09:00",
+      "last_update": "2026-10-04T02:52:45+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -339,13 +339,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 8件・Open PR 17件を自動同期中",
+      "next_action": "Open Issue 8件・Open PR 16件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-10-04T02:51:55+09:00",
+      "last_update": "2026-10-04T02:52:45+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -354,12 +354,12 @@
       "domain": "Infrastructure",
       "type": "development",
       "purpose": "YOSと各Labの設計に基づいて実装、修正、テストを行う",
-      "status": "review",
+      "status": "active",
       "health": "attention",
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #616をレビューして公開判断する",
+      "next_action": "Issue #10を進める：Mission Control v2：GitHubのIssue・PR・Commitを自動集約する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -368,7 +368,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-10-04T02:51:55+09:00",
+      "last_update": "2026-10-04T02:52:45+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -450,5 +450,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "6646f6ef010324bfbab75252dbc631c562dbb95504cffd0923843c6218e9326e"
+  "github_snapshot_hash": "f877441b0f769b541cf38af25e77a48a80388940cd3bc442e2ae6c824dc0ac9d"
 }
