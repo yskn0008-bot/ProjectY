@@ -1,6 +1,6 @@
 import importlib.util
-import json
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -15,45 +15,79 @@ SPEC.loader.exec_module(module)
 
 
 class FlowSourceContractTests(unittest.TestCase):
+    def setUp(self):
+        self.manifest = module.load_manifest()
+
     def test_manifest_has_exact_four_existing_flow_names(self):
-        manifest = module.load_manifest()
         self.assertEqual(
-            list(manifest["flows"].keys()),
+            list(self.manifest["flows"].keys()),
             ["Morning Flow", "Home Flow", "Work Flow", "Out Flow"],
         )
-        self.assertTrue(manifest["policy"]["do_not_rebuild_morning_flow"])
-        self.assertTrue(manifest["policy"]["do_not_infer_missing_flows_from_names"])
-        self.assertTrue(manifest["policy"]["main_direct_changes_forbidden"])
+        policy = self.manifest["policy"]
+        self.assertTrue(policy["do_not_rebuild_morning_flow"])
+        self.assertTrue(policy["do_not_infer_flow_actions_from_names"])
+        self.assertTrue(policy["main_direct_changes_forbidden"])
 
-    def test_recovered_morning_flow_is_byte_identical_and_signed_aea(self):
-        manifest = module.load_manifest()
-        result = module.validate_flow("Morning Flow", manifest["flows"]["Morning Flow"])
-        self.assertEqual(result["sha256"], "c5eea8d5dd144733e14c3d3ca12f5f16f259316c64b7f1039f8eb3559004a9c0")
-        self.assertEqual(result["aea"]["magic"], "AEA1")
+    def test_all_four_current_flows_are_recovered(self):
+        results = module.validate_all()
+        self.assertEqual(len(results), 4)
+        self.assertTrue(all(r["status"] == "recovered_current_artifact" for r in results))
+
+    def test_current_morning_is_triggerless_and_preserves_full_action_sequence(self):
+        result = module.validate_flow(
+            "Morning Flow", self.manifest["flows"]["Morning Flow"]
+        )
+        self.assertEqual(result["action_count"], 45)
+        self.assertEqual(result["triggers"], [])
+        self.assertEqual(
+            result["signed_sha256"],
+            "b68edca63d2476a1ca3660bbbb342c843a294be4b496c2cb8aaed91ec88c20f2",
+        )
         self.assertEqual(result["aea"]["profile"], 0)
-        self.assertEqual(result["aea"]["archive_size"], 26444)
-        self.assertEqual(result["aea"]["original_shortcut_plist_size"], 9971)
-        self.assertGreaterEqual(result["aea"]["certificate_count"], 1)
+        self.assertEqual(result["aea"]["archive_size"], 26278)
 
-    def test_missing_flows_remain_wait_user_and_are_not_fabricated(self):
-        manifest = module.load_manifest()
-        for name in ("Home Flow", "Work Flow", "Out Flow"):
-            entry = manifest["flows"][name]
-            self.assertEqual(entry["status"], "WAIT_USER_RECOVERY")
-            self.assertTrue(entry["must_not_infer"])
-            result = module.validate_flow(name, entry)
-            self.assertEqual(result["status"], "WAIT_USER_RECOVERY")
+    def test_home_work_out_are_exact_recovered_safe_noops(self):
+        expected = {
+            "Home Flow": ("Home", "com.apple.donotdisturb.mode.bookmarkfill"),
+            "Work Flow": ("Work", "com.apple.donotdisturb.mode.mappin"),
+            "Out Flow": ("Out", "com.apple.donotdisturb.mode.booksverticalfill"),
+        }
+        for name, (focus_name, identifier) in expected.items():
+            result = module.validate_flow(name, self.manifest["flows"][name])
+            self.assertEqual(result["action_count"], 0)
+            self.assertEqual(len(result["triggers"]), 1)
+            self.assertEqual(result["triggers"][0]["event"], "enable")
+            self.assertEqual(result["triggers"][0]["focus_name"], focus_name)
+            self.assertEqual(result["triggers"][0]["focus_identifier"], identifier)
 
-    def test_morning_runtime_contract_preserves_existing_scope(self):
-        manifest = module.load_manifest()
-        runtime = manifest["flows"]["Morning Flow"]["runtime_contract"]
-        self.assertEqual(runtime["calls_existing_yos_assets"], [])
-        self.assertIn("Morning Brief", runtime["parent_siblings"])
-        self.assertIn("YOS Today Note", runtime["parent_siblings"])
-        self.assertIn("Calendar", " ".join(runtime["actions"]))
-        self.assertNotIn("Home Flow", " ".join(runtime["actions"]))
-        self.assertNotIn("Work Flow", " ".join(runtime["actions"]))
-        self.assertNotIn("Out Flow", " ".join(runtime["actions"]))
+    def test_older_supplied_morning_variant_is_noncanonical_duplicate_risk(self):
+        variants = self.manifest["supplied_variants"]
+        self.assertEqual(len(variants), 1)
+        result = module.validate_variant(variants[0])
+        self.assertFalse(result["canonical"])
+        self.assertEqual(result["name"], "Morning Flow")
+        self.assertEqual(result["action_count"], 26)
+        self.assertEqual(variants[0]["embedded_trigger"]["focus_name"], "Morning")
+
+    def test_runtime_contract_does_not_invent_child_shortcuts(self):
+        for entry in self.manifest["flows"].values():
+            self.assertEqual(entry["runtime_contract"]["calls_existing_yos_assets"], [])
+
+    def test_factory_packages_exact_existing_signed_artifacts(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            output = Path(tmp)
+            written = module.package_artifacts(output)
+            self.assertEqual({p.name for p in written}, {
+                "Morning Flow.shortcut",
+                "Home Flow.shortcut",
+                "Work Flow.shortcut",
+                "Out Flow.shortcut",
+            })
+            for name, entry in self.manifest["flows"].items():
+                data = (output / f"{name}.shortcut").read_bytes()
+                self.assertEqual(module.sha256(data), entry["signed_sha256"])
+                self.assertEqual(len(data), entry["signed_size"])
+            self.assertTrue((output / "manifest.json").is_file())
 
 
 if __name__ == "__main__":
