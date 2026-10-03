@@ -91,6 +91,8 @@ jobs:
           assert 'YOS_MONEY_ALERT_V1' in blob
           assert '緊急Money Alertなし' in blob
           assert 'YOS Display History' in blob
+          assert 'YOS Alert State' in blob
+          assert 'Money Alert Last.txt' in blob
 
           for name,marker,none_token in (
               ('Task Alert','YOS_TASK_','TASK_ALERT_NONE'),
