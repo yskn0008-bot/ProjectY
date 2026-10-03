@@ -98,7 +98,9 @@ try{
         lifeFlow:{startedAt:`${date}T08:00:00+09:00`}
       };
     });
-    localStorage.setItem('yos-life-v1',JSON.stringify({activeLifeDate:'2026-10-04',days}));
+    if(!localStorage.getItem('yos-life-v1')){
+      localStorage.setItem('yos-life-v1',JSON.stringify({activeLifeDate:'2026-10-04',days}));
+    }
   });
   const weeklyPage=await weeklyContext.newPage();
   const weeklyErrors=[];
