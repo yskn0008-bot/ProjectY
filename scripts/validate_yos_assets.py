@@ -27,7 +27,8 @@ def main() -> int:
     if sum(weights.get(x,0) for x in STAGES)!=100: err("weights must total 100")
 
     assets=data.get("assets")
-    if not isinstance(assets,list): err("assets must be a list"); assets=[]\n    if not assets: err("assets must not be empty")
+    if not isinstance(assets,list): err("assets must be a list"); assets=[]
+    if not assets: err("assets must not be empty")
 
 
     ids=set(); names=set(); progresses=[]; user_actions=0
