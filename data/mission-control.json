@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-10-04T07:57:21+09:00",
+  "updated_at": "2026-10-04T07:58:19+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -13,16 +13,6 @@
   },
   "inbox": [
     {
-      "id": "github-pr-617",
-      "title": "PR #617 fix(yos-ai): stop data-sync commits masking production deploys",
-      "type": "GitHub PR",
-      "status": "review",
-      "priority": 1,
-      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/617",
-      "updated_at": "2026-10-03T22:56:59Z"
-    },
-    {
       "id": "github-pr-539",
       "title": "PR #539 Finalize YOS Alerts and reread history",
       "type": "GitHub PR",
@@ -31,6 +21,16 @@
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/539",
       "updated_at": "2026-10-03T05:42:51Z"
+    },
+    {
+      "id": "github-pr-582",
+      "title": "PR #582 Clarity Home: ハブ差を隠す統合Home Router",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/582",
+      "updated_at": "2026-10-02T18:27:37Z"
     },
     {
       "id": "github-pr-601",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-10-03T22:28:52Z"
+      "updated_at": "2026-10-03T22:57:41Z"
     },
     {
       "id": "github-issue-234",
@@ -195,6 +195,27 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-c1aa95b74949",
+      "title": "Merge pull request #617 from yskn0008-bot/fix/yos-ai-ignore-last-successful-deploy",
+      "completed_at": "2026-10-03T22:57:52Z",
+      "result": "GitHub mainへ反映（c1aa95b）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/c1aa95b74949b83c0f3baba78723535b314355c5"
+    },
+    {
+      "id": "github-commit-dc5cacd7a06f",
+      "title": "test(yos-ai): cover last successful deployment diff",
+      "completed_at": "2026-10-03T22:56:38Z",
+      "result": "GitHub mainへ反映（dc5cacd）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/dc5cacd7a06f5b081140304524a6073f7fd227f7"
+    },
+    {
+      "id": "github-commit-f3f85e9b9944",
+      "title": "fix(yos-ai): compare builds from last successful deploy",
+      "completed_at": "2026-10-03T22:56:35Z",
+      "result": "GitHub mainへ反映（f3f85e9）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/f3f85e9b9944666688899a32aeb3f241deccb821"
+    },
+    {
       "id": "github-commit-823766cd8e86",
       "title": "chore(yos-ai): trigger verified production deploy",
       "completed_at": "2026-10-03T17:57:35Z",
@@ -207,27 +228,6 @@
       "completed_at": "2026-10-03T17:55:12Z",
       "result": "GitHub mainへ反映（6890ba4）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/6890ba4a3b41e3ed65fb3e30d9084d5ea3ea87a4"
-    },
-    {
-      "id": "github-commit-222fde0d8567",
-      "title": "Merge pull request #616 from yskn0008-bot/hotfix/yos-chat-production-redeploy-20261004",
-      "completed_at": "2026-10-03T17:52:25Z",
-      "result": "GitHub mainへ反映（222fde0）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/222fde0d8567a1bad68b77f787319d57e14c2c52"
-    },
-    {
-      "id": "github-commit-c76bd7ccbbc6",
-      "title": "chore(yos-ai): redeploy verified YOS Chat fix",
-      "completed_at": "2026-10-03T17:48:36Z",
-      "result": "GitHub mainへ反映（c76bd7c）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/c76bd7ccbbc6bd1f38be8f94f34faa813de33587"
-    },
-    {
-      "id": "github-commit-83bba3e3b358",
-      "title": "data: record Friction Discovery production verification (#615)",
-      "completed_at": "2026-10-03T09:32:03Z",
-      "result": "GitHub mainへ反映（83bba3e）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/83bba3e3b358cc6c8186677c0bb6b4046f06b4d5"
     },
     {
       "id": "complete-002",
@@ -254,7 +254,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #617をレビューして公開判断する",
+      "next_action": "Issue #10を進める：Mission Control v2：GitHubのIssue・PR・Commitを自動集約する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -264,7 +264,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-10-04T07:57:21+09:00",
+      "last_update": "2026-10-04T07:58:19+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -339,13 +339,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 8件・Open PR 17件を自動同期中",
+      "next_action": "Open Issue 8件・Open PR 16件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-10-04T07:57:21+09:00",
+      "last_update": "2026-10-04T07:58:19+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -354,12 +354,12 @@
       "domain": "Infrastructure",
       "type": "development",
       "purpose": "YOSと各Labの設計に基づいて実装、修正、テストを行う",
-      "status": "review",
+      "status": "active",
       "health": "attention",
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #617をレビューして公開判断する",
+      "next_action": "Issue #10を進める：Mission Control v2：GitHubのIssue・PR・Commitを自動集約する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -368,7 +368,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-10-04T07:57:21+09:00",
+      "last_update": "2026-10-04T07:58:19+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -450,5 +450,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "5acf2fb75c16bfde9a8e0fe7b32b20916204231974e43d796aa64214c60ad11d"
+  "github_snapshot_hash": "f3ca4099d9b909c333ec6efcc6f04ff2cc0ce69b8c58fe2ccdf9af0126949a8c"
 }
