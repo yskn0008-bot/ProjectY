@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-10-03T18:10:01+09:00",
+  "updated_at": "2026-10-03T18:11:31+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -181,6 +181,16 @@
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/575",
       "updated_at": "2026-10-03T09:04:10Z"
+    },
+    {
+      "id": "github-issue-611",
+      "title": "Issue #611 Flow系Shortcut正本化｜Morning回収済み・Home/Work/Out実物回収待ち",
+      "type": "GitHub Issue",
+      "status": "open",
+      "priority": 3,
+      "next_action": "完成条件を確認し、次の安全な実装を1件進める",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/611",
+      "updated_at": "2026-10-03T09:11:10Z"
     }
   ],
   "recently_completed": [
@@ -254,7 +264,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-10-03T18:10:01+09:00",
+      "last_update": "2026-10-03T18:11:31+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -329,13 +339,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 7件・Open PR 16件を自動同期中",
+      "next_action": "Open Issue 8件・Open PR 16件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-10-03T18:10:01+09:00",
+      "last_update": "2026-10-03T18:11:31+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -358,7 +368,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-10-03T18:10:01+09:00",
+      "last_update": "2026-10-03T18:11:31+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -440,5 +450,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "506a22cf00bafe6aa413d116bd15334dea8320a2da4601c7966ac63be23900e8"
+  "github_snapshot_hash": "6ccc5cd26801d94a3adcceb0626f1f020a3374d46423e13a0c6d52b77913f153"
 }
