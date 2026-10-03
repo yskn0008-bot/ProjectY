@@ -385,6 +385,11 @@
     day.hjSnapshot=buildSnapshot(key,day);
     data.activeLifeDate=key;
     data.lastClosedLifeDate=key;
+    try{
+      window.__yosWeeklyReviewLiveV1Api?.runIfSunday?.(data,key,new Date().toISOString());
+    }catch(error){
+      console.warn('Weekly Review skipped',error);
+    }
     localStorage.setItem(DATA_KEY,JSON.stringify(data));
     localStorage.setItem(PAGE_KEY,'home');
     location.reload();
