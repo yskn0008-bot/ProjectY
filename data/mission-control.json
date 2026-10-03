@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-10-03T17:44:09+09:00",
+  "updated_at": "2026-10-03T17:45:35+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -41,16 +41,6 @@
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/436",
       "updated_at": "2026-09-30T10:40:25Z"
-    },
-    {
-      "id": "github-pr-488",
-      "title": "PR #488 Add YOS Verify for screenshot-free functional checks",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/488",
-      "updated_at": "2026-09-30T10:40:22Z"
     },
     {
       "id": "github-pr-539",
@@ -110,7 +100,17 @@
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/603",
-      "updated_at": "2026-10-03T08:43:43Z"
+      "updated_at": "2026-10-03T08:44:47Z"
+    },
+    {
+      "id": "github-pr-604",
+      "title": "PR #604 feat(review): prove One Enter E2E with Friction Discovery live adapter",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/604",
+      "updated_at": "2026-10-03T08:45:09Z"
     },
     {
       "id": "github-issue-10",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-10-03T08:42:22Z"
+      "updated_at": "2026-10-03T08:44:30Z"
     },
     {
       "id": "github-issue-234",
@@ -254,7 +254,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-10-03T17:44:09+09:00",
+      "last_update": "2026-10-03T17:45:35+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -329,13 +329,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 7件・Open PR 12件を自動同期中",
+      "next_action": "Open Issue 7件・Open PR 13件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-10-03T17:44:09+09:00",
+      "last_update": "2026-10-03T17:45:35+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -358,7 +358,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-10-03T17:44:09+09:00",
+      "last_update": "2026-10-03T17:45:35+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -440,5 +440,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "20b7762e88c8c63bad77422fe26c42319383bf60f1d3039eb6362c9a78d7bdb0"
+  "github_snapshot_hash": "cbfa61d5059ff7f960654d15f54a40a4b6128d6dc18c0ef3ffeae83635fb60cc"
 }
