@@ -44,7 +44,6 @@ const rawItems = splitText(stashText, "===YOS_NEXT===")
 const chosenText = chooseFromList(rawItems, "STASH｜使うものを選択")
 
 if chosenText {
-    const chosenText = replaceText("^\\d+\\.\\s*", "", chosenDisplay, true, true)
     setClipboard(chosenText)
 
     // Consume the exact stored entry after copying it.
