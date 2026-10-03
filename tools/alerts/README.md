@@ -20,3 +20,5 @@ Real-device acceptance is required before the integrated alert lane is considere
 The already-running ChatGPT Automation named `重要メールRouter` remains the production fallback until the iPhone Email → `Important Mail` E2E acceptance passes. Do not run both permanently. The local Shortcut reuses the same actionability policy, writes accepted alerts to `YOS Display History`, and opens Mail from the notification. After device acceptance, the existing cloud Router can be paused rather than maintaining two notification paths.
 
 Because an Email Automation contains user-local account/filter picker state, this repository does not invent or commit that trigger state. The final device gate is to connect the signed `Important Mail` Shortcut to the existing iPhone Email automation for the intended mail account and verify one real test message.
+
+Acceptance artifacts are published under `tools/alerts/acceptance/` only after compile, contract validation, HubSign signing, and signed-artifact verification pass. Device acceptance remains the final gate before merge.
