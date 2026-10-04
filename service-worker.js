@@ -14,6 +14,7 @@ const STATIC=[
   './life/','./life/index.html','./life/home-v1.css','./life/home-priority-v1.css','./life/readability-final.css',
   './life/yos-suite-v3.js','./life/home-v1.js','./life/daily-flow-orchestrator-v1.js','./life/task-quick-add-v1.js','./life/night-checkin-save-bridge.html','./life/night-checkin-life-bridge-v1.js',
   './yos/hj/','./yos/hj/index.html','./yos/hj/styles.css','./yos/hj/onboarding.css','./yos/hj/scenes.css','./yos/hj/completion.css',
+  './yos/runtime-provider-router.js','./data/yos-runtime-providers.json',
   './yos/hj/archetypes.js','./yos/hj/bootstrap.js','./yos/hj/app.js','./yos/hj/profile.js','./yos/hj/yos-ai-client.js','./yos/hj/yos-auth.js',
   './yos/hj/scenes.js','./yos/hj/history.js','./yos/hj/editor.js','./yos/hj/story-image.js','./yos/hj/data-complete.js','./yos/hj/current-location.js',
   './system/','./system/index.html','./data/mission-control.json','./data/yos-assets.json','./data/yos-user-tasks.json'
