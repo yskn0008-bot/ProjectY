@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-10-04T11:38:02+09:00",
+  "updated_at": "2026-10-04T11:38:48+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -21,6 +21,16 @@
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/539",
       "updated_at": "2026-10-03T05:42:51Z"
+    },
+    {
+      "id": "github-pr-582",
+      "title": "PR #582 Clarity Home: ハブ差を隠す統合Home Router",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/582",
+      "updated_at": "2026-10-02T18:27:37Z"
     },
     {
       "id": "github-pr-601",
@@ -83,16 +93,6 @@
       "updated_at": "2026-10-03T09:04:19Z"
     },
     {
-      "id": "github-pr-610",
-      "title": "PR #610 Clarity: finalize Text / Share iPhone entry wrappers",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/610",
-      "updated_at": "2026-10-03T09:08:40Z"
-    },
-    {
       "id": "github-pr-614",
       "title": "PR #614 Canonicalize existing iPhone Flow shortcuts without rebuilding",
       "type": "GitHub PR",
@@ -110,7 +110,7 @@
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/619",
-      "updated_at": "2026-10-04T02:37:48Z"
+      "updated_at": "2026-10-04T02:38:23Z"
     },
     {
       "id": "github-issue-10",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-10-04T02:37:15Z"
+      "updated_at": "2026-10-04T02:38:23Z"
     },
     {
       "id": "github-issue-234",
@@ -264,7 +264,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-10-04T11:38:02+09:00",
+      "last_update": "2026-10-04T11:38:48+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -339,13 +339,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 8件・Open PR 17件を自動同期中",
+      "next_action": "Open Issue 8件・Open PR 16件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-10-04T11:38:02+09:00",
+      "last_update": "2026-10-04T11:38:48+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -368,7 +368,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-10-04T11:38:02+09:00",
+      "last_update": "2026-10-04T11:38:48+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -450,5 +450,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "b503998953f9ab2d7a6924943cf18763db7c4881ea80568c2307f32da098e7c2"
+  "github_snapshot_hash": "0faf11bdcf7c5a214bb0c95a70c24134163e6a3d58e9e6a407bc7cf929761c8e"
 }
