@@ -66,8 +66,9 @@ export function loadYosRuntimeConfig(environment: Environment): YosRuntimeConfig
 function parseGoogleWorkloadAuth(environment: Environment, nodeEnvironment: string): GoogleWorkloadAuthConfig {
   const mode = environment.GOOGLE_AUTH_MODE?.trim() || (nodeEnvironment === 'production' ? 'vercel_oidc' : 'application_default');
   if (mode === 'application_default') {
-    if (nodeEnvironment === 'production') {
-      throw new Error('GOOGLE_AUTH_MODE=application_default is not allowed in production by default');
+    const provider = environment.YOS_RUNTIME_PROVIDER?.trim() || '';
+    if (nodeEnvironment === 'production' && provider !== 'google_cloud_run') {
+      throw new Error('GOOGLE_AUTH_MODE=application_default is allowed in production only on google_cloud_run');
     }
     return { mode };
   }
