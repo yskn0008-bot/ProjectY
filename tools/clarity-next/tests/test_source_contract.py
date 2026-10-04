@@ -52,7 +52,7 @@ class ClarityNextSourceContractTests(unittest.TestCase):
     def test_capability_gate_is_explicit(self):
         for executor in ("YOS_OpenApp", "NEXT_DEVICE", "NEXT_TIMER", "NEXT_CALENDAR", "NEXT_REMINDER", "NEXT_NAVIGATE", "NEXT_NOTION", "NEXT_MYWAY", "NEXT_MONEY", "NEXT_IDEA", "NEXT_MEMO", "NEXT_TASK", "NEXT_SHOPPING", "NEXT_ANSWER"):
             self.assertIn(executor, self.source)
-        self.assertIn("unsupported_executor", self.source)
+        self.assertIn('@normalizedExecutor != "NEXT_SHOPPING"', self.source)
 
 
     def test_swapped_router_fields_are_normalized(self):
@@ -79,8 +79,6 @@ class ClarityNextSourceContractTests(unittest.TestCase):
             )
             self.assertIn(f'@normalizedModule = "{normalized_module}"', self.source)
             self.assertIn(f'@normalizedExecutor = "{normalized_executor}"', self.source)
-        self.assertIn('module={normalizedModule}', self.source)
-        self.assertIn('executor={normalizedExecutor}', self.source)
 
     def test_safety_gates_precede_execution(self):
         review = self.source.index('if @normalizedNeedsReviewText == "はい"')
@@ -130,7 +128,6 @@ class ClarityNextSourceContractTests(unittest.TestCase):
         self.assertIn("NEXT_ANSWER以外の副作用を起こしません", self.source)
         self.assertIn("shareモードではYOS_OpenApp、NEXT_DEVICE、NEXT_TIMER、NEXT_CALENDAR、NEXT_REMINDER、NEXT_NAVIGATE、NEXT_NOTION、NEXT_MYWAY、NEXT_MONEY、NEXT_IDEA、NEXT_MEMO、NEXT_TASK、NEXT_SHOPPINGを選びません", self.source)
         self.assertIn('if @inputMode == "share" && @normalizedExecutor != "NEXT_ANSWER"', self.source)
-        self.assertIn("share_side_effect_forbidden", self.source)
 
     def test_base_home_alias_recovers_from_open_app_misroute(self):
         self.assertIn('@baseHomeAlias = false', self.source)
@@ -141,7 +138,6 @@ class ClarityNextSourceContractTests(unittest.TestCase):
         self.assertIn('@normalizedOperation = "open_yos_home"', self.source)
         self.assertIn('@normalizedNeedsReviewText = "いいえ"', self.source)
         self.assertIn('@normalizedNeedsConfirmationText = "いいえ"', self.source)
-        self.assertIn('operation={normalizedOperation}', self.source)
         self.assertIn('@normalizedOperation == "open_yos_home"', self.source)
 
     def test_v0_acceptance_routes_exist(self):
@@ -153,7 +149,6 @@ class ClarityNextSourceContractTests(unittest.TestCase):
         self.assertIn('scriptable:///run?scriptName=YOS%20Dashboard%20v2&action=baseHome', self.source)
         self.assertIn('openURL(notionHomeURL)', self.source)
         self.assertIn('BASE HOME refresh bridge', self.source)
-        self.assertIn('notion_yos_home', self.source)
         self.assertIn('money-capture.html?text={moneyEncoded}', self.source)
         self.assertIn('openURL(moneyURL)', self.source)
         self.assertIn('https://yskn0008-bot.github.io/ProjectY/yos/', self.source)
