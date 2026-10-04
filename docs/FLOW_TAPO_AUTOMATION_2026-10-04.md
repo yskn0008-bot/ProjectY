@@ -49,9 +49,10 @@ Do not automate a TV power-toggle as an OFF action. IR is one-way; a toggle can 
 
 ### Home / arriving home
 Default safe actions:
-1. Light: ON
-2. Air conditioner: no unconditional ON in v1.
-3. TV: no automatic ON.
+1. Floor lamp: ON.
+2. Main white ceiling light: manual on arrival; do not auto-ON.
+3. Air conditioner: no unconditional ON in v1.
+4. TV: no automatic ON.
 
 Reason: arrival should improve comfort without creating unnecessary energy use or surprise playback. AC arrival automation can be added later when there is a reliable condition (for example temperature sensor) or an explicitly approved fixed rule.
 
@@ -87,7 +88,7 @@ Tapo physical iPhone verification:
 3. AC turns OFF.
 4. TV is included only if Tapo exposes a discrete OFF action and it is verified not to toggle ON from an already-off state.
 5. Arrive geofence fires with iPhone locked.
-6. Light turns ON.
+6. Floor lamp turns ON; main white ceiling light remains manual on arrival.
 7. No Scriptable screen opens for either automation.
 8. Existing MY REMOTE manual control still works when used normally.
 
