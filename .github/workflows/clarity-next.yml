@@ -110,6 +110,37 @@ jobs:
           assert 'NEXT_MEMO' in blob
           assert 'NEXT_TASK' in blob
           assert 'NEXT_SHOPPING' in blob
+          for marker in (
+              'NEXT_ALARM','NEXT_COMMUNICATION','NEXT_MEDIA','NEXT_CLIPBOARD',
+              'NEXT_SHARE','NEXT_CAMERA','NEXT_WEBSEARCH','NEXT_REMOTE',
+              'YOS_SHORTCUT','YOS_SCRIPTABLE'
+          ):
+              assert marker in blob, marker
+          assert ids.count('com.apple.mobiletimer-framework.MobileTimerIntents.MTCreateAlarmIntent') == 1, ids
+          assert ids.count('com.apple.mobilephone.call') == 1, ids
+          assert ids.count('is.workflow.actions.sendmessage') == 1, ids
+          assert ids.count('is.workflow.actions.sendemail') == 1, ids
+          assert ids.count('is.workflow.actions.setclipboard') == 1, ids
+          assert ids.count('is.workflow.actions.getclipboard') == 1, ids
+          assert ids.count('is.workflow.actions.share') == 1, ids
+          assert ids.count('is.workflow.actions.takephoto') == 1, ids
+          assert ids.count('is.workflow.actions.takescreenshot') == 1, ids
+          assert ids.count('is.workflow.actions.searchweb') == 1, ids
+          assert ids.count('is.workflow.actions.pausemusic') == 3, ids
+          assert ids.count('is.workflow.actions.skipforward') == 1, ids
+          assert ids.count('is.workflow.actions.skipback') == 1, ids
+          assert ids.count('is.workflow.actions.runworkflow') == 2, ids
+          message=next(a for a in actions if a.get('WFWorkflowActionIdentifier')=='is.workflow.actions.sendmessage')
+          assert message.get('WFWorkflowActionParameters',{}).get('ShowWhenRun') is False, message
+          email=next(a for a in actions if a.get('WFWorkflowActionIdentifier')=='is.workflow.actions.sendemail')
+          assert email.get('WFWorkflowActionParameters',{}).get('WFSendEmailActionShowComposeSheet') is False, email
+          assert 'scriptable:///run?scriptName=YOS%20BRAVIA%20Widget&action=' in blob
+          assert 'scriptable:///run?scriptName=YOS%20Light%20Widget&action=' in blob
+          assert 'scriptable:///run?scriptName=YOS%20AC%20Widget&action=' in blob
+          assert 'Morning Flow' in blob
+          assert 'STASH Add' in blob
+          assert 'YOS Remote Hub' in blob
+          assert 'YOS Departure Guard2' in blob
           assert 'scriptable:///run?scriptName=YOS%20Dashboard%20v2&action=baseHome' in blob
           assert 'この操作はClarity Next v0では未対応です' in blob
           # Normal voice/text/share requests must not touch the old debug Ledger.
