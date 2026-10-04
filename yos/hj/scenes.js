@@ -427,9 +427,12 @@
     $('rawSavedTitle').textContent = '話した内容を、そのまま残しました。';
     $('rawSavedMessage').textContent = 'YOSへ接続しています。';
 
-    const baseUrl = typeof globalThis.YOS_AI_BASE_URL === 'string' && globalThis.YOS_AI_BASE_URL.trim()
-      ? globalThis.YOS_AI_BASE_URL.trim()
-      : YOS_AI_PRODUCTION_URL;
+    const router = globalThis.YOS_RUNTIME_PROVIDERS;
+    const baseUrls = router && typeof router.getBaseUrls === 'function'
+      ? await router.getBaseUrls('chat')
+      : [typeof globalThis.YOS_AI_BASE_URL === 'string' && globalThis.YOS_AI_BASE_URL.trim()
+        ? globalThis.YOS_AI_BASE_URL.trim()
+        : YOS_AI_PRODUCTION_URL];
     const getToken = globalThis.YOS_AUTH?.getGoogleIdToken;
     const Client = globalThis.YosAiClient;
     if (typeof getToken !== 'function' || typeof Client !== 'function') {
@@ -441,7 +444,7 @@
     }
 
     try {
-      const client = new Client({ baseUrl, getGoogleIdToken: getToken });
+      const client = new Client({ baseUrls, getGoogleIdToken: getToken });
       const result = await client.chat({ userText: rawInput, currentLocation: currentLocationForAi() });
       const index = scenes.findIndex((scene) => scene.id === sceneId);
       if (index < 0 || scenes[index].rawInput !== rawInput || scenes[index].conversationStatus !== 'sending') return;
