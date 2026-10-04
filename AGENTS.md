@@ -49,6 +49,8 @@ PRには実際に使った実装経路を正確に記録する。Codexを使っ�
 - 第2providerを本番failoverへ入れる前に、同じruntime、同じOpenAI model、同じresponse schema、同じGoogle source IDs、同じrate-limit/audit store、同じOrigin/本人確認契約のparityを自動試験とlive smokeで確認する。
 - parity未確認のproviderへ自動failoverしない。品質低下を「可用性向上」として受け入れない。
 - provider障害時のfailoverはnetwork/429/502/503/504等のprovider系失敗に限定し、401/403/400/contract errorを別providerへ逃がして隠さない。
+- provider・runner・host・APIの都合で処理がPARTIAL／外部待ちになりそうな場合は、同じ目的・品質・権限境界を満たす**有効化済み代替経路を先に実行**する。代替経路が無い場合だけ `EXTERNAL_WAIT` へparkする。
+- provider待ちを `WAIT_USER` に変換しない。`WAIT_USER` は資格情報・課金・公開範囲変更・物理端末・不可逆操作・本人の価値判断など、本人にしか解消できないgateだけに使う。
 - side effectを持つrouteはidempotencyが証明されるまで自動再送しない。
 - provider固有機能はadapterへ閉じ込め、Vercel/Cloud Run等の差でYOSの回答品質・保存先・正本が変わらないようにする。
 
