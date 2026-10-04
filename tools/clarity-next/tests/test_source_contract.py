@@ -50,9 +50,11 @@ class ClarityNextSourceContractTests(unittest.TestCase):
         self.assertIn("confidenceだけを理由に確認を増やしません", self.source)
 
     def test_capability_gate_is_explicit(self):
-        for executor in ("YOS_OpenApp", "NEXT_DEVICE", "NEXT_TIMER", "NEXT_CALENDAR", "NEXT_REMINDER", "NEXT_NAVIGATE", "NEXT_NOTION", "NEXT_MYWAY", "NEXT_MONEY", "NEXT_IDEA", "NEXT_MEMO", "NEXT_TASK", "NEXT_SHOPPING", "NEXT_ANSWER"):
+        for executor in ("YOS_OpenApp", "NEXT_DEVICE", "NEXT_TIMER", "NEXT_ALARM", "NEXT_CALENDAR", "NEXT_REMINDER", "NEXT_NAVIGATE", "NEXT_NOTION", "NEXT_MYWAY", "NEXT_MONEY", "NEXT_IDEA", "NEXT_MEMO", "NEXT_TASK", "NEXT_SHOPPING", "NEXT_COMMUNICATION", "NEXT_MEDIA", "NEXT_CLIPBOARD", "NEXT_SHARE", "NEXT_CAMERA", "NEXT_WEBSEARCH", "NEXT_REMOTE", "YOS_SHORTCUT", "YOS_SCRIPTABLE", "NEXT_ANSWER"):
             self.assertIn(executor, self.source)
-        self.assertIn('@normalizedExecutor != "NEXT_SHOPPING"', self.source)
+        self.assertIn('@normalizedExecutor != "NEXT_REMOTE"', self.source)
+        self.assertIn('@normalizedExecutor != "YOS_SHORTCUT"', self.source)
+        self.assertIn('@normalizedExecutor != "YOS_SCRIPTABLE"', self.source)
 
 
     def test_swapped_router_fields_are_normalized(self):
@@ -71,6 +73,16 @@ class ClarityNextSourceContractTests(unittest.TestCase):
             ("memo", "NEXT_MEMO", "memo", "NEXT_MEMO"),
             ("task", "NEXT_TASK", "task", "NEXT_TASK"),
             ("shopping", "NEXT_SHOPPING", "shopping", "NEXT_SHOPPING"),
+            ("alarm", "NEXT_ALARM", "alarm", "NEXT_ALARM"),
+            ("communication", "NEXT_COMMUNICATION", "communication", "NEXT_COMMUNICATION"),
+            ("media", "NEXT_MEDIA", "media", "NEXT_MEDIA"),
+            ("clipboard", "NEXT_CLIPBOARD", "clipboard", "NEXT_CLIPBOARD"),
+            ("share", "NEXT_SHARE", "share", "NEXT_SHARE"),
+            ("camera", "NEXT_CAMERA", "camera", "NEXT_CAMERA"),
+            ("web", "NEXT_WEBSEARCH", "web", "NEXT_WEBSEARCH"),
+            ("remote", "NEXT_REMOTE", "remote", "NEXT_REMOTE"),
+            ("shortcut", "YOS_SHORTCUT", "shortcut", "YOS_SHORTCUT"),
+            ("scriptable", "YOS_SCRIPTABLE", "scriptable", "YOS_SCRIPTABLE"),
         )
         for raw_executor, raw_module, normalized_module, normalized_executor in pairs:
             self.assertIn(
@@ -126,7 +138,7 @@ class ClarityNextSourceContractTests(unittest.TestCase):
         self.assertIn("beginsWith", self.source)
         self.assertIn("input_mode=share", self.source)
         self.assertIn("NEXT_ANSWER以外の副作用を起こしません", self.source)
-        self.assertIn("shareモードではYOS_OpenApp、NEXT_DEVICE、NEXT_TIMER、NEXT_CALENDAR、NEXT_REMINDER、NEXT_NAVIGATE、NEXT_NOTION、NEXT_MYWAY、NEXT_MONEY、NEXT_IDEA、NEXT_MEMO、NEXT_TASK、NEXT_SHOPPINGを選びません", self.source)
+        self.assertIn("shareモードではYOS_OpenApp、NEXT_DEVICE、NEXT_TIMER、NEXT_ALARM、NEXT_CALENDAR、NEXT_REMINDER、NEXT_NAVIGATE、NEXT_NOTION、NEXT_MYWAY、NEXT_MONEY、NEXT_IDEA、NEXT_MEMO、NEXT_TASK、NEXT_SHOPPING、NEXT_COMMUNICATION、NEXT_MEDIA、NEXT_CLIPBOARD、NEXT_SHARE、NEXT_CAMERA、NEXT_WEBSEARCH、NEXT_REMOTE、YOS_SHORTCUT、YOS_SCRIPTABLEを選びません", self.source)
         self.assertIn('if @inputMode == "share" && @normalizedExecutor != "NEXT_ANSWER"', self.source)
 
     def test_base_home_alias_recovers_from_open_app_misroute(self):
@@ -139,6 +151,40 @@ class ClarityNextSourceContractTests(unittest.TestCase):
         self.assertIn('@normalizedNeedsReviewText = "いいえ"', self.source)
         self.assertIn('@normalizedNeedsConfirmationText = "いいえ"', self.source)
         self.assertIn('@normalizedOperation == "open_yos_home"', self.source)
+
+    def test_communication_is_hard_gated_by_confirmation(self):
+        gate = self.source.index('if @normalizedExecutor == "NEXT_COMMUNICATION" {')
+        confirm = self.source.index('if @normalizedNeedsConfirmationText == "はい"')
+        call = self.source.index('operation == "call" {')
+        self.assertLess(gate, confirm)
+        self.assertLess(confirm, call)
+        self.assertIn('@normalizedRisk != "high"', self.source)
+        self.assertIn('@normalizedNeedsConfirmationText != "はい"', self.source)
+        self.assertIn("phone_numberまたはemailが明示されている場合だけ", self.source)
+
+    def test_native_capabilities_and_existing_yos_assets_are_reused(self):
+        for required in (
+            "createAlarm(alarmName, alarmTime, true)",
+            "call(phoneTarget)",
+            "sendMessage(messageTarget, messageBody, false)",
+            'sendEmail(emailTarget, "", emailSubject, emailBody, false, false)',
+            "togglePlayPause()",
+            "setClipboard(clipboardValue)",
+            "getClipboard()",
+            "share(shareValue)",
+            "takePhoto(1, true)",
+            "takeScreenshot(false)",
+            'searchWeb("Google", webQuery)',
+            "YOS%20BRAVIA%20Widget",
+            "YOS%20Light%20Widget",
+            "YOS%20AC%20Widget",
+            'shortcutName == "Morning"',
+            'shortcutName == "STASH Add"',
+            'scriptName == "YOS Remote Hub"',
+            'scriptName == "YOS Departure Guard2"',
+            "run(shortcutName, shortcutPayload)",
+        ):
+            self.assertIn(required, self.source)
 
     def test_v0_acceptance_routes_exist(self):
         self.assertIn('run("YOS_OpenApp", app)', self.source)
@@ -156,6 +202,14 @@ class ClarityNextSourceContractTests(unittest.TestCase):
         self.assertIn('appendToFile("Clarity Inbox.txt"', self.source)
         self.assertIn('@normalizedExecutor == "NEXT_TASK"', self.source)
         self.assertIn('@normalizedExecutor == "NEXT_SHOPPING"', self.source)
+        self.assertIn('@normalizedExecutor == "NEXT_ALARM"', self.source)
+        self.assertIn('@normalizedExecutor == "NEXT_COMMUNICATION"', self.source)
+        self.assertIn('@normalizedExecutor == "NEXT_MEDIA"', self.source)
+        self.assertIn('@normalizedExecutor == "NEXT_CLIPBOARD"', self.source)
+        self.assertIn('@normalizedExecutor == "NEXT_CAMERA"', self.source)
+        self.assertIn('@normalizedExecutor == "NEXT_REMOTE"', self.source)
+        self.assertIn('@normalizedExecutor == "YOS_SHORTCUT"', self.source)
+        self.assertIn('@normalizedExecutor == "YOS_SCRIPTABLE"', self.source)
         self.assertTrue(self.source.rstrip().endswith("stop()"))
 
 if __name__ == "__main__":
