@@ -5,6 +5,7 @@
 #include 'actions/text'
 #include 'actions/documents'
 #include 'actions/calendar'
+#include 'actions/sharing'
 
 @incoming = "{ShortcutInput}"
 const historyFolder = createFolder("YOS Display History")
