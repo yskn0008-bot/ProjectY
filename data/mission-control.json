@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-10-04T14:14:38+09:00",
+  "updated_at": "2026-10-04T14:14:53+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -100,7 +100,7 @@
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/614",
-      "updated_at": "2026-10-04T05:14:09Z"
+      "updated_at": "2026-10-04T05:14:35Z"
     },
     {
       "id": "github-pr-619",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-10-04T05:14:05Z"
+      "updated_at": "2026-10-04T05:14:36Z"
     },
     {
       "id": "github-issue-234",
@@ -184,13 +184,13 @@
     },
     {
       "id": "github-issue-611",
-      "title": "Issue #611 Flow系Shortcut完成｜Morning確定・Home/Work/Out実処理を現役資産から再設計",
+      "title": "Issue #611 Flow系Shortcut完成｜Morning確定・Home/OutはTapo Geofencingへ",
       "type": "GitHub Issue",
       "status": "open",
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/611",
-      "updated_at": "2026-10-04T03:36:17Z"
+      "updated_at": "2026-10-04T05:14:32Z"
     }
   ],
   "recently_completed": [
@@ -264,7 +264,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-10-04T14:14:38+09:00",
+      "last_update": "2026-10-04T14:14:53+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -345,7 +345,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-10-04T14:14:38+09:00",
+      "last_update": "2026-10-04T14:14:53+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -368,7 +368,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-10-04T14:14:38+09:00",
+      "last_update": "2026-10-04T14:14:53+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -450,5 +450,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "1611c1bc0771118b7143665c66ec415867f888a0d5e9552ae1383eff2a0668fa"
+  "github_snapshot_hash": "7d3b3184d992aff466cd8071b02548866a6ecdcf930351e1aff222a15390f5c3"
 }
