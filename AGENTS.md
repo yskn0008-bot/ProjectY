@@ -43,6 +43,15 @@ PRには実際に使った実装経路を正確に記録する。Codexを使っ�
 - **自動回復やGitHub Actionから `@codex` を自動送信しない。** transport／status／code-fixを含め、CodexはアクティブなOne Enter / ChatGPTが直接経路では成立しないと確認した場合にだけ明示選択する。
 - 他チャットでもこの順序を共通既定とする：**既存資産 → ChatGPT/接続ツール直実行 → Factory/Actions → 必要時のみCodex**。
 
+## Runtime provider冗長化と品質
+
+- YOSのサーバー実行先は交換可能なhostとして扱い、製品ロジック・正本・モデル設定をproviderごとに複製しない。
+- 第2providerを本番failoverへ入れる前に、同じruntime、同じOpenAI model、同じresponse schema、同じGoogle source IDs、同じrate-limit/audit store、同じOrigin/本人確認契約のparityを自動試験とlive smokeで確認する。
+- parity未確認のproviderへ自動failoverしない。品質低下を「可用性向上」として受け入れない。
+- provider障害時のfailoverはnetwork/429/502/503/504等のprovider系失敗に限定し、401/403/400/contract errorを別providerへ逃がして隠さない。
+- side effectを持つrouteはidempotencyが証明されるまで自動再送しない。
+- provider固有機能はadapterへ閉じ込め、Vercel/Cloud Run等の差でYOSの回答品質・保存先・正本が変わらないようにする。
+
 ## ローカル優先・クラウド最小化
 iPhone上で完結できる処理は、iPhone標準機能・既存アプリ・Shortcuts・Scriptable・iCloud保存を最優先する。Calendar、Reminders、Files、買い物リスト、メモ、ローカル設定など、クラウド不要の処理にVercelや外部APIを挟まない。
 Vercel等のクラウド実行基盤は、端末外での常時処理、外部Webhook、共有API、端末単体では成立しない認証・連携など、クラウドが必要な理由を明示できる場合だけ使う。無料枠・待機・再配布・課金・障害点を増やすだけの利用は禁止する。
