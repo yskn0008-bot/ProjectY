@@ -16,7 +16,7 @@
 
   class YosAiClient {
     constructor(options) {
-      this.baseUrl = normalizeBaseUrl(options?.baseUrl);
+      this.baseUrls = normalizeBaseUrls(options?.baseUrls, options?.baseUrl);
       if (typeof options?.getGoogleIdToken !== 'function') throw new Error('getGoogleIdToken is required');
       this.getGoogleIdToken = options.getGoogleIdToken;
       this.fetchImpl = options.fetchImpl || globalThis.fetch.bind(globalThis);
@@ -48,39 +48,50 @@
     }
 
     async requestJson(path, init) {
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), this.timeoutMilliseconds);
-      try {
-        const requestUrl = new URL(path, this.baseUrl);
-        if (this.vercelShareToken) requestUrl.searchParams.set('_vercel_share', this.vercelShareToken);
-        const response = await this.fetchImpl(requestUrl, {
-          ...init,
-          signal: controller.signal,
-          credentials: this.vercelShareToken ? 'include' : 'omit',
-          cache: 'no-store',
-          redirect: this.vercelShareToken ? 'follow' : 'error',
-          referrerPolicy: 'no-referrer'
-        });
-        const body = await readBoundedJson(response, this.maxResponseBytes);
-        if (!response.ok) throw toHttpError(response, body);
-        return body;
-      } catch (error) {
-        if (error instanceof YosAiHttpError) {
-          if (!error.diagnosticCode) error.diagnosticCode = 'http-response';
-          throw error;
+      let lastError;
+      for (let index = 0; index < this.baseUrls.length; index += 1) {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), this.timeoutMilliseconds);
+        try {
+          const requestUrl = new URL(path, this.baseUrls[index]);
+          const useVercelShare = Boolean(this.vercelShareToken) && requestUrl.hostname.endsWith('.vercel.app');
+          if (useVercelShare) requestUrl.searchParams.set('_vercel_share', this.vercelShareToken);
+          const response = await this.fetchImpl(requestUrl, {
+            ...init,
+            signal: controller.signal,
+            credentials: useVercelShare ? 'include' : 'omit',
+            cache: 'no-store',
+            redirect: useVercelShare ? 'follow' : 'error',
+            referrerPolicy: 'no-referrer'
+          });
+          const body = await readBoundedJson(response, this.maxResponseBytes);
+          if (!response.ok) throw toHttpError(response, body);
+          return body;
+        } catch (error) {
+          lastError = normalizeRequestError(error);
+          const hasNext = index + 1 < this.baseUrls.length;
+          if (!hasNext || !failoverAllowed(path, init?.method, lastError)) throw lastError;
+        } finally {
+          clearTimeout(timeout);
         }
-        if (error instanceof Error && error.name === 'AbortError') {
-          throw new YosAiHttpError({ message: 'YOS request timed out', status: 0, diagnosticCode: 'request-timeout' });
-        }
-        throw new YosAiHttpError({
-          message: 'YOS is temporarily unavailable',
-          status: 0,
-          diagnosticCode: 'browser-fetch'
-        });
-      } finally {
-        clearTimeout(timeout);
       }
+      throw lastError || new YosAiHttpError({
+        message: 'YOS is temporarily unavailable',
+        status: 0,
+        diagnosticCode: 'browser-fetch'
+      });
     }
+  }
+
+  function normalizeBaseUrls(values, fallback) {
+    const raw = Array.isArray(values) && values.length ? values : fallback ? [fallback] : [];
+    if (!raw.length) throw new Error('baseUrl or baseUrls is required');
+    const map = new Map();
+    raw.forEach((value) => {
+      const url = normalizeBaseUrl(value);
+      map.set(url.origin + url.pathname, url);
+    });
+    return [...map.values()];
   }
 
   function normalizeBaseUrl(value) {
@@ -139,6 +150,30 @@
     } catch {
       throw new YosAiHttpError({ message: 'YOS returned invalid JSON', status: response.status });
     }
+  }
+
+  function normalizeRequestError(error) {
+    if (error instanceof YosAiHttpError) {
+      if (!error.diagnosticCode) error.diagnosticCode = 'http-response';
+      return error;
+    }
+    if (error instanceof Error && error.name === 'AbortError') {
+      return new YosAiHttpError({ message: 'YOS request timed out', status: 0, diagnosticCode: 'request-timeout' });
+    }
+    return new YosAiHttpError({
+      message: 'YOS is temporarily unavailable',
+      status: 0,
+      diagnosticCode: 'browser-fetch'
+    });
+  }
+
+  function failoverAllowed(path, method, error) {
+    const pathname = new URL(path, 'https://yos.invalid').pathname;
+    const safeRoutes = new Set(['/api/yos/chat', '/api/yos/health', '/api/yos/nav-model', '/api/yos/taxi-event']);
+    if (!safeRoutes.has(pathname)) return false;
+    const verb = String(method || 'GET').toUpperCase();
+    if (verb !== 'GET' && pathname !== '/api/yos/chat' && pathname !== '/api/yos/taxi-event') return false;
+    return error.status === 0 || error.status === 429 || error.status === 502 || error.status === 503 || error.status === 504;
   }
 
   function toHttpError(response, body) {
