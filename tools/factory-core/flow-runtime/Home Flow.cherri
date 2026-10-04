@@ -1,9 +1,0 @@
-#define name Home Flow
-#define color green
-
-#include 'actions/shortcuts'
-
-// Home Focus itself is the life-state signal.
-// Reuse the existing local Battery/Mother observation path without opening apps,
-// showing routine notifications, or duplicating device-control logic.
-run("YOS Battery Sync", ShortcutInput)
