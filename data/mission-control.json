@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-10-05T05:37:09+09:00",
+  "updated_at": "2026-10-05T05:37:38+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -94,13 +94,13 @@
     },
     {
       "id": "github-pr-614",
-      "title": "PR #614 Recover current iPhone Flow shortcuts and move Home/Out automation to Tapo",
+      "title": "PR #614 Canonicalize Flow shortcuts and verify Home/Out Tapo automation",
       "type": "GitHub PR",
       "status": "draft",
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/614",
-      "updated_at": "2026-10-04T20:36:47Z"
+      "updated_at": "2026-10-04T20:37:16Z"
     },
     {
       "id": "github-pr-619",
@@ -184,13 +184,13 @@
     },
     {
       "id": "github-issue-611",
-      "title": "Issue #611 Flow系Shortcut完成｜Morning確定・Home/OutはTapo Geofencingへ",
+      "title": "Issue #611 Flow系Shortcut完成｜Morning + Home/Out確認済み・Work残り",
       "type": "GitHub Issue",
       "status": "open",
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/611",
-      "updated_at": "2026-10-04T12:22:17Z"
+      "updated_at": "2026-10-04T20:36:51Z"
     }
   ],
   "recently_completed": [
@@ -264,7 +264,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-10-05T05:37:09+09:00",
+      "last_update": "2026-10-05T05:37:38+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -345,7 +345,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-10-05T05:37:09+09:00",
+      "last_update": "2026-10-05T05:37:38+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -368,7 +368,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-10-05T05:37:09+09:00",
+      "last_update": "2026-10-05T05:37:38+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -450,5 +450,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "621920b0342cb74b15b9e60240134671709441803aad7f4ac09c0e9a6fe36698"
+  "github_snapshot_hash": "e5487c6a85536f8d0bd3e6ec921fff89ff93ed4379da23196a47461c22e6d04f"
 }
