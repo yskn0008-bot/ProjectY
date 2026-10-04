@@ -90,9 +90,11 @@ test('active HJ saves Raw Input before YOS AI and confirms one candidate at a ti
   assert.doesNotMatch(scenes, /candidateText'\)\.innerHTML/);
   for (const status of [401, 403, 429, 503]) assert.match(scenes, new RegExp(`${status}:`));
 
-  assert.match(client, /new URL\(path, this\.baseUrl\)/);
+  assert.match(client, /new URL\(path, this\.baseUrls\[index\]\)/);
   assert.match(client, /'\/api\/yos\/chat'/);
-  assert.match(client, /credentials: this\.vercelShareToken \? 'include' : 'omit'/);
+  assert.match(client, /const useVercelShare = Boolean\(this\.vercelShareToken\).*hostname\.endsWith\('\.vercel\.app'\)/);
+  assert.match(client, /credentials: useVercelShare \? 'include' : 'omit'/);
+  assert.match(client, /failoverAllowed/);
   assert.match(client, /cache: 'no-store'/);
   assert.match(client, /globalThis\.fetch\.bind\(globalThis\)/);
   for (const diagnostic of ['google-token', 'browser-fetch', 'request-timeout', 'http-response']) {
