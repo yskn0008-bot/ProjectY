@@ -152,6 +152,46 @@ for actionItem in @actionsRaw {
         @normalizedModule = "shopping"
         @normalizedExecutor = "NEXT_SHOPPING"
     }
+    if executor == "alarm" && module == "NEXT_ALARM" {
+        @normalizedModule = "alarm"
+        @normalizedExecutor = "NEXT_ALARM"
+    }
+    if executor == "communication" && module == "NEXT_COMMUNICATION" {
+        @normalizedModule = "communication"
+        @normalizedExecutor = "NEXT_COMMUNICATION"
+    }
+    if executor == "media" && module == "NEXT_MEDIA" {
+        @normalizedModule = "media"
+        @normalizedExecutor = "NEXT_MEDIA"
+    }
+    if executor == "clipboard" && module == "NEXT_CLIPBOARD" {
+        @normalizedModule = "clipboard"
+        @normalizedExecutor = "NEXT_CLIPBOARD"
+    }
+    if executor == "share" && module == "NEXT_SHARE" {
+        @normalizedModule = "share"
+        @normalizedExecutor = "NEXT_SHARE"
+    }
+    if executor == "camera" && module == "NEXT_CAMERA" {
+        @normalizedModule = "camera"
+        @normalizedExecutor = "NEXT_CAMERA"
+    }
+    if executor == "web" && module == "NEXT_WEBSEARCH" {
+        @normalizedModule = "web"
+        @normalizedExecutor = "NEXT_WEBSEARCH"
+    }
+    if executor == "remote" && module == "NEXT_REMOTE" {
+        @normalizedModule = "remote"
+        @normalizedExecutor = "NEXT_REMOTE"
+    }
+    if executor == "shortcut" && module == "YOS_SHORTCUT" {
+        @normalizedModule = "shortcut"
+        @normalizedExecutor = "YOS_SHORTCUT"
+    }
+    if executor == "scriptable" && module == "YOS_SCRIPTABLE" {
+        @normalizedModule = "scriptable"
+        @normalizedExecutor = "YOS_SCRIPTABLE"
+    }
     if executor == "answer" && module == "NEXT_ANSWER" {
         @normalizedModule = "answer"
         @normalizedExecutor = "NEXT_ANSWER"
@@ -188,6 +228,15 @@ for actionItem in @actionsRaw {
     if @normalizedNeedsReviewText == "はい" {
         alert("確認が必要です\n{reason}", "Clarity Next")
         stop()
+    }
+
+    // Communication is never silently downgraded to low-risk execution.
+    // The model must explicitly request confirmation; this runtime gate verifies it.
+    if @normalizedExecutor == "NEXT_COMMUNICATION" {
+        if @normalizedRisk != "high" || @normalizedNeedsConfirmationText != "はい" {
+            alert("連絡操作には実行前の確認が必要です", "Clarity Next")
+            stop()
+        }
     }
 
     if @normalizedRisk == "high" || @normalizedRisk == "irreversible" {
@@ -397,6 +446,168 @@ for actionItem in @actionsRaw {
         })
     }
 
+    if @normalizedExecutor == "NEXT_ALARM" && @normalizedModule == "alarm" && operation == "create" {
+        const alarmName = "{parameters['name']}"
+        const alarmTime = "{parameters['time']}"
+        if !alarmName || !alarmTime {
+            alert("アラーム名と時刻を確認してください", "Clarity Next")
+            stop()
+        }
+        createAlarm(alarmName, alarmTime, true)
+    }
+
+    if @normalizedExecutor == "NEXT_COMMUNICATION" && @normalizedModule == "communication" && operation == "call" {
+        const phoneText = "{parameters['phone_number']}"
+        if !phoneText {
+            alert("電話番号を確認してください", "Clarity Next")
+            stop()
+        }
+        const phoneTarget = phoneNumber(phoneText)
+        call(phoneTarget)
+    }
+
+    if @normalizedExecutor == "NEXT_COMMUNICATION" && @normalizedModule == "communication" && operation == "message" {
+        const messagePhone = "{parameters['phone_number']}"
+        const messageBody = "{parameters['message']}"
+        if !messagePhone || !messageBody {
+            alert("送信先とメッセージを確認してください", "Clarity Next")
+            stop()
+        }
+        const messageTarget = phoneNumber(messagePhone)
+        sendMessage(messageTarget, messageBody, false)
+    }
+
+    if @normalizedExecutor == "NEXT_COMMUNICATION" && @normalizedModule == "communication" && operation == "email" {
+        const emailText = "{parameters['email']}"
+        const emailSubject = "{parameters['subject']}"
+        const emailBody = "{parameters['body']}"
+        if !emailText || !emailBody {
+            alert("メールアドレスと本文を確認してください", "Clarity Next")
+            stop()
+        }
+        const emailTarget = emailAddress(emailText)
+        sendEmail(emailTarget, "", emailSubject, emailBody, false, false)
+    }
+
+    if @normalizedExecutor == "NEXT_MEDIA" && @normalizedModule == "media" {
+        if operation == "play" { play() }
+        if operation == "pause" { pause() }
+        if operation == "toggle" { togglePlayPause() }
+        if operation == "next" { skipFwd() }
+        if operation == "previous" { skipBack() }
+    }
+
+    if @normalizedExecutor == "NEXT_CLIPBOARD" && @normalizedModule == "clipboard" && operation == "set" {
+        const clipboardContent = "{parameters['content']}"
+        if !clipboardContent {
+            alert("コピーする内容を確認してください", "Clarity Next")
+            stop()
+        }
+        const clipboardValue = text("{clipboardContent}")
+        setClipboard(clipboardValue)
+    }
+
+    if @normalizedExecutor == "NEXT_CLIPBOARD" && @normalizedModule == "clipboard" && operation == "show" {
+        const clipboardValue = getClipboard()
+        alert("{clipboardValue}", "クリップボード")
+    }
+
+    if @normalizedExecutor == "NEXT_SHARE" && @normalizedModule == "share" && operation == "present" {
+        const shareContent = "{parameters['content']}"
+        if !shareContent {
+            alert("共有する内容を確認してください", "Clarity Next")
+            stop()
+        }
+        const shareValue = text("{shareContent}")
+        share(shareValue)
+    }
+
+    if @normalizedExecutor == "NEXT_CAMERA" && @normalizedModule == "camera" && operation == "photo" {
+        takePhoto(1, true)
+    }
+
+    if @normalizedExecutor == "NEXT_CAMERA" && @normalizedModule == "camera" && operation == "screenshot" {
+        takeScreenshot(false)
+    }
+
+    if @normalizedExecutor == "NEXT_WEBSEARCH" && @normalizedModule == "web" && operation == "search" {
+        const webQuery = "{parameters['query']}"
+        if !webQuery {
+            alert("検索する内容を確認してください", "Clarity Next")
+            stop()
+        }
+        searchWeb("Google", webQuery)
+    }
+
+    if @normalizedExecutor == "NEXT_REMOTE" && @normalizedModule == "remote" && operation == "tv_action" {
+        const remoteAction = "{parameters['action']}"
+        @remoteAllowed = false
+        if remoteAction == "power" || remoteAction == "input" || remoteAction == "home" || remoteAction == "quick" || remoteAction == "menu" || remoteAction == "back" || remoteAction == "up" || remoteAction == "down" || remoteAction == "left" || remoteAction == "right" || remoteAction == "confirm" || remoteAction == "volumeDown" || remoteAction == "mute" || remoteAction == "volumeUp" || remoteAction == "channelDown" || remoteAction == "channelUp" || remoteAction == "rewind" || remoteAction == "play" || remoteAction == "fastForward" || remoteAction == "pause" || remoteAction == "stop" || remoteAction == "prev" || remoteAction == "next" {
+            @remoteAllowed = true
+        }
+        if !@remoteAllowed {
+            alert("未対応のテレビ操作です", "Clarity Next")
+            stop()
+        }
+        const encodedTVAction = urlEncode(remoteAction)
+        const tvURL = text("scriptable:///run?scriptName=YOS%20BRAVIA%20Widget&action={encodedTVAction}")
+        openURL(tvURL)
+    }
+
+    if @normalizedExecutor == "NEXT_REMOTE" && @normalizedModule == "remote" && operation == "light_action" {
+        const lightAction = "{parameters['action']}"
+        if lightAction != "on" && lightAction != "off" && lightAction != "all" && lightAction != "bright" && lightAction != "dark" && lightAction != "night" {
+            alert("未対応の照明操作です", "Clarity Next")
+            stop()
+        }
+        const encodedLightAction = urlEncode(lightAction)
+        const lightURL = text("scriptable:///run?scriptName=YOS%20Light%20Widget&action={encodedLightAction}")
+        openURL(lightURL)
+    }
+
+    if @normalizedExecutor == "NEXT_REMOTE" && @normalizedModule == "remote" && operation == "ac_action" {
+        const acAction = "{parameters['action']}"
+        if acAction != "cool" && acAction != "dry" && acAction != "heat" && acAction != "stop" && acAction != "tempUp" && acAction != "tempDown" && acAction != "fan" && acAction != "wind" {
+            alert("未対応のエアコン操作です", "Clarity Next")
+            stop()
+        }
+        const encodedACAction = urlEncode(acAction)
+        const acURL = text("scriptable:///run?scriptName=YOS%20AC%20Widget&action={encodedACAction}")
+        openURL(acURL)
+    }
+
+    if @normalizedExecutor == "YOS_SHORTCUT" && @normalizedModule == "shortcut" && operation == "run" {
+        const shortcutName = "{parameters['name']}"
+        const shortcutInput = "{parameters['input']}"
+        @shortcutAllowed = false
+        if shortcutName == "Morning" || shortcutName == "Morning Flow" || shortcutName == "Home Flow" || shortcutName == "Work Flow" || shortcutName == "Out Flow" || shortcutName == "Night Brief" || shortcutName == "Night Check in" || shortcutName == "Payment Alert" || shortcutName == "STASH" || shortcutName == "STASH Add" || shortcutName == "Mother Shadow v1" || shortcutName == "YOS Life Sync" {
+            @shortcutAllowed = true
+        }
+        if !@shortcutAllowed {
+            alert("未承認のYOS Shortcutです", "Clarity Next")
+            stop()
+        }
+        const shortcutPayload = text("{shortcutInput}")
+        run(shortcutName, shortcutPayload)
+    }
+
+    if @normalizedExecutor == "YOS_SCRIPTABLE" && @normalizedModule == "scriptable" && operation == "run" {
+        const scriptName = "{parameters['script']}"
+        const scriptAction = "{parameters['action']}"
+        @scriptAllowed = false
+        if scriptName == "YOS Remote Hub" || scriptName == "YOS Departure Guard2" || scriptName == "YOS Dashboard v2" || scriptName == "YOS Life Calendar Sync" {
+            @scriptAllowed = true
+        }
+        if !@scriptAllowed {
+            alert("未承認のYOS Scriptableです", "Clarity Next")
+            stop()
+        }
+        const encodedScript = urlEncode(scriptName)
+        const encodedScriptAction = urlEncode(scriptAction)
+        const scriptableURL = text("scriptable:///run?scriptName={encodedScript}&openEditor=false&action={encodedScriptAction}")
+        openURL(scriptableURL)
+    }
+
     if @normalizedExecutor == "NEXT_MONEY" && @normalizedModule == "money" && operation == "capture" {
         const moneyRaw = "{parameters['raw_text']}"
         if !moneyRaw {
@@ -412,7 +623,7 @@ for actionItem in @actionsRaw {
     if @normalizedExecutor == "NEXT_ANSWER" && @normalizedModule == "answer" && operation == "answer" {
     }
 
-    if @normalizedExecutor != "YOS_OpenApp" && @normalizedExecutor != "NEXT_DEVICE" && @normalizedExecutor != "NEXT_TIMER" && @normalizedExecutor != "NEXT_CALENDAR" && @normalizedExecutor != "NEXT_REMINDER" && @normalizedExecutor != "NEXT_NAVIGATE" && @normalizedExecutor != "NEXT_NOTION" && @normalizedExecutor != "NEXT_MYWAY" && @normalizedExecutor != "NEXT_MONEY" && @normalizedExecutor != "NEXT_IDEA" && @normalizedExecutor != "NEXT_MEMO" && @normalizedExecutor != "NEXT_TASK" && @normalizedExecutor != "NEXT_SHOPPING" && @normalizedExecutor != "NEXT_ANSWER" {
+    if @normalizedExecutor != "YOS_OpenApp" && @normalizedExecutor != "NEXT_DEVICE" && @normalizedExecutor != "NEXT_TIMER" && @normalizedExecutor != "NEXT_ALARM" && @normalizedExecutor != "NEXT_CALENDAR" && @normalizedExecutor != "NEXT_REMINDER" && @normalizedExecutor != "NEXT_NAVIGATE" && @normalizedExecutor != "NEXT_NOTION" && @normalizedExecutor != "NEXT_MYWAY" && @normalizedExecutor != "NEXT_MONEY" && @normalizedExecutor != "NEXT_IDEA" && @normalizedExecutor != "NEXT_MEMO" && @normalizedExecutor != "NEXT_TASK" && @normalizedExecutor != "NEXT_SHOPPING" && @normalizedExecutor != "NEXT_COMMUNICATION" && @normalizedExecutor != "NEXT_MEDIA" && @normalizedExecutor != "NEXT_CLIPBOARD" && @normalizedExecutor != "NEXT_SHARE" && @normalizedExecutor != "NEXT_CAMERA" && @normalizedExecutor != "NEXT_WEBSEARCH" && @normalizedExecutor != "NEXT_REMOTE" && @normalizedExecutor != "YOS_SHORTCUT" && @normalizedExecutor != "YOS_SCRIPTABLE" && @normalizedExecutor != "NEXT_ANSWER" {
         alert("この操作はClarity Next v0では未対応です", "Clarity Next")
         stop()
     }
