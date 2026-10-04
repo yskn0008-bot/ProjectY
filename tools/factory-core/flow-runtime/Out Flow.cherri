@@ -1,0 +1,9 @@
+#define name Out Flow
+#define color orange
+
+#include 'actions/shortcuts'
+
+// Out Focus itself is the life-state signal.
+// Refresh the existing YOS Battery Sync path; the already-installed Mother hook
+// can observe departure context without a second Departure Guard automation.
+run("YOS Battery Sync", ShortcutInput)
