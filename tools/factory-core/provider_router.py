@@ -116,6 +116,31 @@ def record_failure(config: dict[str, Any], health: dict[str, Any], role: str, pr
     }
 
 
+def route_wait(config: dict[str, Any], health: dict[str, Any], role: str, provider_id: str, reason: str) -> dict[str, Any]:
+    """Resolve an optional-provider wait without turning it into a user wait.
+
+    A usable alternative is selected immediately. EXTERNAL_WAIT is returned only
+    when no eligible alternative route remains.
+    """
+    failed = record_failure(config, health, role, provider_id, reason)
+    fallback = failed.get("fallback", {})
+    if fallback.get("ok"):
+        return {
+            **failed,
+            "status": "alternative_routed",
+            "action": "execute_alternative",
+            "selected_provider": fallback.get("provider"),
+            "external_wait": False,
+        }
+    return {
+        **failed,
+        "status": "external_wait",
+        "action": "park_and_recheck",
+        "selected_provider": None,
+        "external_wait": True,
+    }
+
+
 def record_success(config: dict[str, Any], health: dict[str, Any], provider_id: str) -> dict[str, Any]:
     known = {p["id"] for p in config["providers"]}
     if provider_id not in known:
@@ -137,6 +162,10 @@ def main() -> int:
     p.add_argument("role")
     p.add_argument("provider")
     p.add_argument("reason")
+    p = sub.add_parser("wait")
+    p.add_argument("role")
+    p.add_argument("provider")
+    p.add_argument("reason")
     p = sub.add_parser("success")
     p.add_argument("provider")
 
@@ -149,6 +178,9 @@ def main() -> int:
             out = select_provider(config, health, args.role)
         elif args.command == "fail":
             out = record_failure(config, health, args.role, args.provider, args.reason)
+            save_health(health_path, health)
+        elif args.command == "wait":
+            out = route_wait(config, health, args.role, args.provider, args.reason)
             save_health(health_path, health)
         else:
             out = record_success(config, health, args.provider)

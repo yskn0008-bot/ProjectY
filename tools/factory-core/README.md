@@ -42,6 +42,15 @@ Secrets (`.env`, signing keys, certificates, provisioning profiles) and build ca
 python3 tools/factory-core/provider_router.py select source_store
 python3 tools/factory-core/provider_router.py select qa_runner
 python3 tools/factory-core/provider_router.py fail public_host github_pages "rate limit"
+python3 tools/factory-core/provider_router.py wait api_host vercel "rate limit"
+
+`wait` is the One Enter PARTIAL/external-wait path. It does **not** create `WAIT_USER`.
+If another enabled provider can satisfy the same role, the router returns
+`status=alternative_routed` and `action=execute_alternative` immediately.
+Only when no eligible alternative remains does it return `status=external_wait`
+so the current route can be parked and rechecked later. Human-only gates remain
+separate from provider waiting.
+
 ```
 
 A provider failure returns the next eligible route instead of `stop` when another route exists.
