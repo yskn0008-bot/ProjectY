@@ -1,0 +1,46 @@
+#define name STASH Add
+#define color teal
+#define inputs text
+
+#include 'actions/documents'
+#include 'actions/sharing'
+#include 'actions/text'
+
+/*
+STASH Add is the one-tap Control Center entry to the existing POCKET.txt.
+- With Shortcut Input (future Clarity call), save that text.
+- With no input, save the current clipboard text.
+- If POCKET.txt exists, suppress exact duplicates and append with an explicit path.
+- If POCKET.txt was deleted or does not exist yet, recreate it automatically
+  with the first entry at the same existing iCloud/Shortcuts path.
+- No nested Shortcut, no new storage path, DB, or SSOT.
+- Routine operation is silent.
+*/
+
+@stashItem = ""
+
+if ShortcutInput {
+    const directText = getText(ShortcutInput)
+    @stashItem = "{directText}"
+} else {
+    const clipboardValue = getClipboard()
+    const clipboardText = getText(clipboardValue)
+    @stashItem = "{clipboardText}"
+}
+
+if !@stashItem {
+    stop()
+}
+
+const expectedEntry = text("{@stashItem}\n===YOS_NEXT===\n")
+const pocketFile = getFile("POCKET.txt", nil, false)
+
+if pocketFile {
+    const pocketText = getText(pocketFile)
+    if pocketText contains expectedEntry {
+        stop()
+    }
+    appendToFile("POCKET.txt", expectedEntry)
+} else {
+    saveFile("POCKET.txt", expectedEntry, true)
+}
