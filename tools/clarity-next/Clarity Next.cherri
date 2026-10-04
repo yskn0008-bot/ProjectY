@@ -508,8 +508,8 @@ for actionItem in @actionsRaw {
     }
 
     if @normalizedExecutor == "NEXT_CLIPBOARD" && @normalizedModule == "clipboard" && operation == "show" {
-        const clipboardValue = getClipboard()
-        alert("{clipboardValue}", "クリップボード")
+        const currentClipboard = getClipboard()
+        alert("{currentClipboard}", "クリップボード")
     }
 
     if @normalizedExecutor == "NEXT_SHARE" && @normalizedModule == "share" && operation == "present" {
