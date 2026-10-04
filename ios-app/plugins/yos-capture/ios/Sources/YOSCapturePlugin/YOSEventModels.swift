@@ -89,10 +89,13 @@ public struct YOSEvent: Codable, Equatable, Identifiable, Sendable {
 }
 
 public enum YOSEventFacts {
+    public static let maxUTF8Bytes = 100_000
+
     public static func decode(_ raw: String) throws -> [String: YOSEventValue] {
         let text = raw.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !text.isEmpty else { return [:] }
         guard let data = text.data(using: .utf8) else { throw YOSEventError.invalidFacts }
+        guard data.count <= maxUTF8Bytes else { throw YOSEventError.factsTooLarge }
         do {
             return try JSONDecoder().decode([String: YOSEventValue].self, from: data)
         } catch {
@@ -108,6 +111,8 @@ enum YOSEventError: LocalizedError {
     case typeTooLong
     case invalidConfidence
     case invalidFacts
+    case factsTooLarge
+    case invalidOccurredAt
     case duplicateEvent
     case eventNotFound
     case targetContainerUnavailable
@@ -120,6 +125,8 @@ enum YOSEventError: LocalizedError {
         case .typeTooLong: return "イベント種別が長すぎます。"
         case .invalidConfidence: return "イベントの信頼度を確認してください。"
         case .invalidFacts: return "イベント詳細のJSONを確認してください。"
+        case .factsTooLarge: return "イベント詳細が大きすぎます。"
+        case .invalidOccurredAt: return "イベント発生日時を確認してください。"
         case .duplicateEvent: return "同じイベントはすでに保存されています。"
         case .eventNotFound: return "イベントが見つかりません。"
         case .targetContainerUnavailable: return "端末内のイベント保存先を利用できません。"
