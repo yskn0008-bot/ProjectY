@@ -38,6 +38,51 @@ class ProviderRouterTests(unittest.TestCase):
         out = router.select_provider(self.config, self.health, "qa_runner", {"github"})
         self.assertEqual(out["provider"], "local_runner")
 
+    def test_partial_wait_routes_to_alternative_before_external_wait(self):
+        out = router.route_wait(self.config, self.health, "public_host", "github_pages", "rate limit")
+        self.assertTrue(out["ok"])
+        self.assertEqual(out["status"], "alternative_routed")
+        self.assertEqual(out["action"], "execute_alternative")
+        self.assertEqual(out["selected_provider"], "vercel")
+        self.assertFalse(out["external_wait"])
+
+    def test_external_wait_is_used_only_when_no_alternative_exists(self):
+        config = {
+            "providers": [
+                {
+                    "id": "only",
+                    "roles": ["api_host"],
+                    "priority": 0,
+                    "external": True,
+                    "mode": "host",
+                    "enabled": True,
+                }
+            ]
+        }
+        out = router.route_wait(config, self.health, "api_host", "only", "rate limit")
+        self.assertFalse(out["ok"])
+        self.assertEqual(out["status"], "external_wait")
+        self.assertEqual(out["action"], "park_and_recheck")
+        self.assertIsNone(out["selected_provider"])
+        self.assertTrue(out["external_wait"])
+
+    def test_cloud_run_is_not_selected_before_quality_gate(self):
+        out = router.select_provider(self.config, self.health, "api_host", {"vercel"})
+        self.assertFalse(out["ok"])
+        cloud_run = next(row for row in self.config["providers"] if row["id"] == "google_cloud_run")
+        self.assertFalse(cloud_run["enabled"])
+
+    def test_cloud_run_becomes_immediate_api_alternative_once_explicitly_enabled(self):
+        config = {
+            **self.config,
+            "providers": [dict(row) for row in self.config["providers"]],
+        }
+        next(row for row in config["providers"] if row["id"] == "google_cloud_run")["enabled"] = True
+        out = router.route_wait(config, self.health, "api_host", "vercel", "503 service unavailable")
+        self.assertTrue(out["ok"])
+        self.assertEqual(out["status"], "alternative_routed")
+        self.assertEqual(out["selected_provider"], "google_cloud_run")
+
 
 if __name__ == "__main__":
     unittest.main()
