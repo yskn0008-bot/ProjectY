@@ -2,11 +2,11 @@
 
 目的は **GitHub / Vercel が止まっても開発そのものを止めないこと**。
 
-## 正本
+## 正本と停止しない作業領域
 
-開発の正本は `local_store`。GitHub は正本ではなく任意の mirror、Vercel は任意の host として扱う。
+正式なコード・Issue・PR・試験・配布版の正本はGitHub。Factory Coreの `local_store` は、GitHub/Vercelが一時停止しても実装・検証・rollback準備を続けるための既存の作業snapshot / resume領域であり、第二の正式SSOTにはしない。Vercelは必要なserver機能のhostであって開発の進行条件にはしない。
 
-`main` に相当する概念は `state/current.json` の **current snapshot**。各 snapshot は全ファイルの SHA-256 manifest を持つため、履歴、差分、検証、rollback を GitHub なしで実行できる。
+`state/current.json` の **current snapshot** は作業中の復元点を表す。各 snapshot は全ファイルの SHA-256 manifest を持つため、外部待ちの間も履歴、差分、検証、rollback準備を継続できる。外部が復旧したら、検証済み成果だけをGitHub正本へ着地する。
 
 ## 自前化した機能
 
@@ -78,7 +78,8 @@ The durable state records the goal, done conditions, current phase, executed wor
 - `verification_commands` are machine-checkable Checker conditions.
 - `audit_commands` are mandatory and must be distinct from verification commands.
 - `COMPLETE` is possible only when both Verify and independent Audit pass and no human gate remains.
-- Physical iPhone or production evidence is never invented. Those jobs end at `WAIT_USER`.
+- Physical iPhone or本人承認が必要なproduction evidenceはnever inventedし、真のhuman gateだけ `WAIT_USER` にする。
+- GitHub Actions / Vercel / provider rate limitなど本人操作で解決しない待ちは `EXTERNAL_WAIT` としてIssue #232側へparkし、別の独立作業を続ける。`EXTERNAL_WAIT` はLoop Engineの第4terminal stateではない。
 - Runtime evidence contains the exact argv, exit code, duration and bounded stdout/stderr tail for executed checks.
 
 ### Automatic recovery and hard stops
