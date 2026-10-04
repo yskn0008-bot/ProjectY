@@ -51,7 +51,7 @@ class ClarityNextSourceContractTests(unittest.TestCase):
         self.assertIn('@inputMode = "voice"', self.source)
         self.assertIn('input_mode: {@inputMode}', self.source)
         self.assertIn('share_source: {@shareSource}', self.source)
-        self.assertIn('askChatGPT(routerPrompt, false, "Dictionary")', self.source)
+        self.assertIn('askChatGPT(routerPrompt, true, "Dictionary")', self.source)
         self.assertIn('getValue(parsed, "actions")', self.source)
         self.assertIn('status != "planned"', self.source)
         self.assertIn("発話の表面形を越えて「最終的に何を実現したいか」を理解", self.source)
@@ -59,7 +59,7 @@ class ClarityNextSourceContractTests(unittest.TestCase):
         self.assertIn("confidenceだけを理由に確認を増やしません", self.source)
 
     def test_capability_gate_is_explicit(self):
-        for executor in ("YOS_OpenApp", "NEXT_DEVICE", "NEXT_TIMER", "NEXT_CALENDAR", "NEXT_REMINDER", "NEXT_NAVIGATE", "NEXT_NOTION", "NEXT_MONEY", "NEXT_ANSWER"):
+        for executor in ("YOS_OpenApp", "NEXT_DEVICE", "NEXT_TIMER", "NEXT_CALENDAR", "NEXT_REMINDER", "NEXT_NAVIGATE", "NEXT_NOTION", "NEXT_MYWAY", "NEXT_MONEY", "NEXT_IDEA", "NEXT_MEMO", "NEXT_TASK", "NEXT_SHOPPING", "NEXT_ANSWER"):
             self.assertIn(executor, self.source)
         self.assertIn("unsupported_executor", self.source)
 
@@ -75,6 +75,11 @@ class ClarityNextSourceContractTests(unittest.TestCase):
             ("navigate", "NEXT_NAVIGATE", "navigate", "NEXT_NAVIGATE"),
             ("notion", "NEXT_NOTION", "notion", "NEXT_NOTION"),
             ("money", "NEXT_MONEY", "money", "NEXT_MONEY"),
+            ("myway", "NEXT_MYWAY", "myway", "NEXT_MYWAY"),
+            ("idea", "NEXT_IDEA", "idea", "NEXT_IDEA"),
+            ("memo", "NEXT_MEMO", "memo", "NEXT_MEMO"),
+            ("task", "NEXT_TASK", "task", "NEXT_TASK"),
+            ("shopping", "NEXT_SHOPPING", "shopping", "NEXT_SHOPPING"),
         )
         for raw_executor, raw_module, normalized_module, normalized_executor in pairs:
             self.assertIn(
@@ -132,7 +137,7 @@ class ClarityNextSourceContractTests(unittest.TestCase):
         self.assertIn("beginsWith", self.source)
         self.assertIn("input_mode=share", self.source)
         self.assertIn("NEXT_ANSWER以外の副作用を起こしません", self.source)
-        self.assertIn("shareモードではYOS_OpenApp、NEXT_DEVICE、NEXT_TIMER、NEXT_CALENDAR、NEXT_REMINDER、NEXT_NAVIGATE、NEXT_NOTION、NEXT_MONEYを選びません", self.source)
+        self.assertIn("shareモードではYOS_OpenApp、NEXT_DEVICE、NEXT_TIMER、NEXT_CALENDAR、NEXT_REMINDER、NEXT_NAVIGATE、NEXT_NOTION、NEXT_MYWAY、NEXT_MONEY、NEXT_IDEA、NEXT_MEMO、NEXT_TASK、NEXT_SHOPPINGを選びません", self.source)
         self.assertIn('if @inputMode == "share" && @normalizedExecutor != "NEXT_ANSWER"', self.source)
         self.assertIn("share_side_effect_forbidden", self.source)
 
@@ -160,6 +165,12 @@ class ClarityNextSourceContractTests(unittest.TestCase):
         self.assertIn('notion_yos_home', self.source)
         self.assertIn('money-capture.html?text={moneyEncoded}', self.source)
         self.assertIn('openURL(moneyURL)', self.source)
+        self.assertIn('https://yskn0008-bot.github.io/ProjectY/yos/', self.source)
+        self.assertIn('appendToFile("Idea in Box.txt"', self.source)
+        self.assertIn('appendToFile("Clarity Inbox.txt"', self.source)
+        self.assertIn('@normalizedExecutor == "NEXT_TASK"', self.source)
+        self.assertIn('@normalizedExecutor == "NEXT_SHOPPING"', self.source)
+        self.assertTrue(self.source.rstrip().endswith("stop()"))
 
 if __name__ == "__main__":
     unittest.main()
