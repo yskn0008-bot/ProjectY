@@ -9,6 +9,8 @@ const RECOVERY_MARKER = 'projecty-hq-recovery:';
 const SCOPE_RE = /<!-- projecty-autopilot-scope:([A-Za-z0-9_-]+) -->/;
 const CODEX_ACTOR = 'chatgpt-codex-connector[bot]';
 const STALL_MS = 45 * 60 * 1000;
+const EXTERNAL_WAIT_MS = 30 * 60 * 1000;
+const EXTERNAL_RATE_LIMIT_WAIT_MS = 6 * 60 * 60 * 1000;
 const MAX_SEEN = 12;
 const QA_NAMES = new Set(['Codex governance', 'Taxi iPhone17 Smoke', 'Taxi Demand Calendar', 'YOS AI Core', 'YOSナビ Safety', 'YOS Service Worker']);
 const UI_FILE = /^(taxi|life|yos|nav)\/(?:[^/]+\/)*(?:[^/]+\.(?:css|html)|final-app-v\d+\.js|[^/]*(?:style|theme|view|screen|component)[^/]*\.(?:js|cjs|mjs|ts|tsx|jsx))$/i;
@@ -166,6 +168,12 @@ function failureId(kind, evidence = {}) {
   return crypto.createHash('sha256').update(`${evidence.target || ''}:${evidence.head || ''}:${kind}:${root}`).digest('hex').slice(0, 18);
 }
 
+function externalWaitMs(evidence = {}) {
+  return /(?:rate.?limit|api-deployments-free-per-day|build-rate-limit)/i.test(String(evidence.text || ''))
+    ? EXTERNAL_RATE_LIMIT_WAIT_MS
+    : EXTERNAL_WAIT_MS;
+}
+
 function decide(target, kind, evidence) {
   const id = failureId(kind, evidence);
   const old = target.failures[id] || { attempts: 0, seen: [] };
@@ -173,13 +181,16 @@ function decide(target, kind, evidence) {
   if (delivery && old.seen.includes(delivery)) return { action: 'NONE', id, record: old };
   const record = { ...old, failureClass: kind, seen: [...old.seen, delivery].filter(Boolean).slice(-MAX_SEEN) };
   const ladders = {
-    ACTION_TRANSIENT_FAILURE: ['RERUN_FAILED', 'REQUEST_CODE_FIX'],
+    ACTION_TRANSIENT_FAILURE: ['RERUN_FAILED', 'EXTERNAL_WAIT', 'RERUN_FAILED', 'EXTERNAL_WAIT'],
     ACTION_CODE_FAILURE: ['REQUEST_CODE_FIX'], TASK_STALLED: ['REQUEST_STATUS'],
     CODEX_PUSH_BLOCKED: ['REQUEST_TRANSPORT'], CODEX_GH_UNAUTHENTICATED: ['REQUEST_TRANSPORT'], CODEX_RESULT_NO_GITHUB_ARTIFACT: ['REQUEST_TRANSPORT'],
     HEAD_MOVED: ['REQUEST_TRANSPORT'], QA_BOOTSTRAP_BLOCKED: ['REQUEST_STATUS'], BRANCH_BEHIND: ['UPDATE_BRANCH'],
   };
   const ladder = ladders[kind] || [];
-  if (record.attempts >= ladder.length) return { action: 'NEEDS_YOS', id, record: { ...record, phase: 'NEEDS_YOS' } };
+  if (record.attempts >= ladder.length) {
+    if (kind === 'ACTION_TRANSIENT_FAILURE') return { action: 'EXTERNAL_WAIT', id, record: { ...record, phase: 'EXTERNAL_WAIT' } };
+    return { action: 'NEEDS_YOS', id, record: { ...record, phase: 'NEEDS_YOS' } };
+  }
   return { action: ladder[record.attempts], id, record: { ...record, attempts: record.attempts + 1 } };
 }
 
@@ -219,6 +230,19 @@ async function applyDecision(api, target, decision, pr, evidence, dryRun, now) {
   target.lastAction = decision.action;
   if (decision.action === 'NONE') return;
   if (decision.action === 'NEEDS_YOS') { target.phase = 'NEEDS_YOS'; target.next = 'bounded recovery exhausted'; return; }
+  if (decision.action === 'EXTERNAL_WAIT') {
+    const retryAt = new Date(now + externalWaitMs(evidence)).toISOString();
+    target.phase = 'EXTERNAL_WAIT';
+    target.next = `external service auto-recheck after ${retryAt}`;
+    target.externalWait = {
+      workflowId: evidence.workflowId || null,
+      runId: evidence.runId || null,
+      retryAt,
+      reason: String(evidence.text || '').slice(0, 500),
+    };
+    target.progressAt = nowIso(now);
+    return;
+  }
   if (decision.action === 'REQUEST_CODE_FIX' || decision.action === 'REQUEST_TRANSPORT' || decision.action === 'REQUEST_STATUS') {
     target.phase = 'AWAITING_DIRECT_TOOL';
     target.next = decision.action === 'REQUEST_CODE_FIX'
@@ -344,6 +368,30 @@ async function processEvent({ api, eventName, payload = {}, dryRun = false, now 
         const evidence = { target: key, head: pr.head.sha, delivery: `branch:${pr.head.sha}` };
         const decision = decide(target, branch, evidence); selected = { key, target, action: decision.action };
         await applyDecision(api, target, decision, pr, evidence, dryRun, now);
+      } else if (!selected && target.phase === 'EXTERNAL_WAIT' && now >= Date.parse(target.externalWait?.retryAt || target.progressAt || 0)) {
+        const runs = newestQaRuns(await paginate(api, `/actions/runs?head_sha=${encodeURIComponent(target.head)}`, 'workflow_runs'), target.head);
+        const waited = target.externalWait || {};
+        const failed = runs.find((run) =>
+          (run.conclusion === 'failure' || run.conclusion === 'cancelled' || run.conclusion === 'timed_out')
+          && (!waited.workflowId || String(run.workflow_id || run.name) === String(waited.workflowId))
+        ) || runs.find((run) => run.conclusion === 'failure' || run.conclusion === 'cancelled' || run.conclusion === 'timed_out');
+        if (failed) {
+          const evidence = {
+            target: key,
+            head: pr.head.sha,
+            workflowId: failed.workflow_id || failed.name,
+            runId: failed.id,
+            delivery: `external-wait:${failed.id}:${waited.retryAt || target.progressAt}`,
+            text: waited.reason || `${failed.name}: deferred external retry`,
+          };
+          const decision = decide(target, 'ACTION_TRANSIENT_FAILURE', evidence); selected = { key, target, action: decision.action };
+          await applyDecision(api, target, decision, pr, evidence, dryRun, now);
+        } else {
+          const current = qaState(runs);
+          target.phase = current.next;
+          target.next = current.nextStep;
+          delete target.externalWait;
+        }
       } else if (!selected && target.phase === 'RUNNING' && now - Date.parse(target.runningSince || target.progressAt) >= STALL_MS) {
         const evidence = { target: key, head: pr.head.sha, delivery: `stall:${target.failures?.[failureId('TASK_STALLED', { target: key, head: pr.head.sha })]?.attempts || 0}` };
         const decision = decide(target, 'TASK_STALLED', evidence); selected = { key, target, action: decision.action };
@@ -395,5 +443,5 @@ async function main() {
   console.log(JSON.stringify(result));
 }
 
-module.exports = { CODEX_ACTOR, MARKER, STALL_MS, atomicTransport, branchCondition, buildTransportPlan, chooseCommentMutation, classifyQaLevel, compactTarget, decide, failureId, isAck, isTarget, isTrustedFinal, newestQaRuns, paginate, parseArtifact, parseRecovery, parseScope, processEvent, qaState, renderState, requestText, syntheticEvent, transientEvidence, validPath };
+module.exports = { CODEX_ACTOR, EXTERNAL_RATE_LIMIT_WAIT_MS, EXTERNAL_WAIT_MS, MARKER, STALL_MS, atomicTransport, branchCondition, buildTransportPlan, chooseCommentMutation, classifyQaLevel, compactTarget, decide, externalWaitMs, failureId, isAck, isTarget, isTrustedFinal, newestQaRuns, paginate, parseArtifact, parseRecovery, parseScope, processEvent, qaState, renderState, requestText, syntheticEvent, transientEvidence, validPath };
 if (require.main === module) main().catch((error) => { console.error(error); process.exitCode = 1; });
