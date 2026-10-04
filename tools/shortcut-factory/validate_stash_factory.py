@@ -129,19 +129,28 @@ def main() -> int:
     if "remaining" not in repr(save.get("WFInput")):
         fail("STASH consume save is not wired to remaining content")
 
-    # STASH Add must stay a thin silent wrapper:
-    # Shortcut Input/clipboard -> exact duplicate read -> existing STASH.
+    # STASH Add must stay a silent one-tap writer to the existing POCKET.txt.
+    # Direct append intentionally removes the iOS "run another Shortcut" gate.
     if "POCKET.txt" not in add_blob or "===YOS_NEXT===" not in add_blob:
-        fail("STASH Add duplicate guard contract missing")
+        fail("STASH Add duplicate/storage contract missing")
     if len(actions_with(add, "is.workflow.actions.getclipboard")) != 1:
         fail("STASH Add clipboard action missing")
 
     pocket_reads = actions_with(add, "is.workflow.actions.documentpicker.open")
-    if len(pocket_reads) != 1:
-        fail("STASH Add expected one optional POCKET read for dedupe")
-    pocket_read = params(pocket_reads[0])
-    if pocket_read.get("WFGetFilePath") != "POCKET.txt" or pocket_read.get("WFFileErrorIfNotFound") is not False:
-        fail(f"STASH Add POCKET dedupe read is incorrect: {pocket_read}")
+    if len(pocket_reads) != 2:
+        fail(f"STASH Add expected optional dedupe read + resolved write target, found {len(pocket_reads)}")
+    optional_reads = [
+        a for a in pocket_reads
+        if params(a).get("WFGetFilePath") == "POCKET.txt"
+        and params(a).get("WFFileErrorIfNotFound") is False
+    ]
+    strict_reads = [
+        a for a in pocket_reads
+        if params(a).get("WFGetFilePath") == "POCKET.txt"
+        and params(a).get("WFFileErrorIfNotFound") is not False
+    ]
+    if len(optional_reads) != 1 or len(strict_reads) != 1:
+        fail("STASH Add POCKET read/write targets are incorrect")
 
     contains_checks = [
         a for a in actions_with(add, "is.workflow.actions.conditional")
@@ -150,22 +159,28 @@ def main() -> int:
     if len(contains_checks) != 1 or "expectedEntry" not in repr(params(contains_checks[0])):
         fail("STASH Add exact-entry duplicate guard missing")
 
-    run_actions = actions_with(add, "is.workflow.actions.runworkflow")
-    if len(run_actions) != 1:
-        fail(f"STASH Add must call existing STASH exactly once: {run_actions}")
-    run = params(run_actions[0])
-    if run.get("WFWorkflowName") != "STASH" or "stashItem" not in repr(run.get("WFInput")):
-        fail(f"STASH Add handoff is not wired to existing STASH input: {run}")
+    if actions_with(add, "is.workflow.actions.runworkflow"):
+        fail("STASH Add must not invoke another Shortcut")
 
-    if any(i.endswith("file.append") or i.endswith("documentpicker.save") for i in add_ids):
-        fail("STASH Add must not write POCKET.txt directly")
+    append_actions = [a for a in add.get("WFWorkflowActions", [])
+                      if str(a.get("WFWorkflowActionIdentifier", "")).endswith("file.append")]
+    if len(append_actions) != 1:
+        fail(f"STASH Add must append to existing POCKET exactly once: {len(append_actions)}")
+    append_params = params(append_actions[0])
+    if "targetFile" not in repr(append_params.get("WFFile")):
+        fail("STASH Add append is not wired to resolved POCKET target")
+    if "expectedEntry" not in repr(append_params.get("WFInput")):
+        fail("STASH Add append is not wired to exact delimited entry")
+
+    if any(i.endswith("documentpicker.save") for i in add_ids):
+        fail("STASH Add must not own a save-as rewrite")
     if any(i.endswith("downloadurl") or i.endswith("openurl") for i in add_ids):
         fail("STASH Add unexpectedly contains network/open-url action")
 
     print(f"STASH factory structure: PASS ({len(stash_ids)} actions)")
     print("STASH compact exact-copy consume contract: PASS")
     print("STASH no-save-prompt + silent routine contract: PASS")
-    print(f"STASH Add thin silent wrapper + dedupe structure: PASS ({len(add_ids)} actions)")
+    print(f"STASH Add direct existing-POCKET append + dedupe structure: PASS ({len(add_ids)} actions)")
     return 0
 
 
