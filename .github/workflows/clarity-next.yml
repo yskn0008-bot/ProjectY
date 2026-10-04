@@ -112,21 +112,12 @@ jobs:
           assert 'NEXT_SHOPPING' in blob
           assert 'scriptable:///run?scriptName=YOS%20Dashboard%20v2&action=baseHome' in blob
           assert 'unsupported_executor' in blob
-          assert 'Clarity Next Ledger.txt' in blob
-          # User-facing runtime must not open/read/save the Ledger on every request.
-          # Keep logging best-effort via append actions so iPhone does not surface the
-          # Ledger UI or repeat file-access confirmation in the normal input path.
+          # Normal voice/text/share requests must not touch the old debug Ledger.
+          # File access remains only for explicit capture destinations such as Idea/Memo.
+          assert 'Clarity Next Ledger.txt' not in blob
           assert any(i.endswith('file.append') for i in ids), ids
-          assert not any(
-              i.endswith('documentpicker.open') and
-              a.get('WFWorkflowActionParameters',{}).get('WFGetFilePath')=='Clarity Next Ledger.txt'
-              for i,a in zip(ids,actions)
-          )
-          assert not any(
-              i.endswith('documentpicker.save') and
-              a.get('WFWorkflowActionParameters',{}).get('WFFileDestinationPath')=='Clarity Next Ledger.txt'
-              for i,a in zip(ids,actions)
-          )
+          assert 'Idea in Box.txt' in blob
+          assert 'Clarity Inbox.txt' in blob
           assert any(i.endswith('setbrightness') for i in ids), ids
           assert any(i.endswith('setvolume') for i in ids), ids
           assert any(i.endswith('timer.start') for i in ids), ids
