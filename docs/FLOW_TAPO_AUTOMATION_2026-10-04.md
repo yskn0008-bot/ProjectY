@@ -80,6 +80,20 @@ Tapo app:
 - Arrival AC remains disabled until a reliable condition or explicit fixed rule exists.
 - No new DB, SSOT, router, or state ledger is created.
 
+## Physical iPhone acceptance — PASS 2026-10-05
+
+Owner verified one real leave/return cycle with no problems.
+
+Confirmed:
+- Leave automation executed after leaving home.
+- Floor lamp OFF.
+- Main light OFF.
+- Air conditioner OFF.
+- Arrive automation executed on return.
+- Floor lamp ON.
+- Main white ceiling light remained manual.
+- No Scriptable-dependent automation path was required.
+
 ## Acceptance criteria
 
 Tapo physical iPhone verification:
@@ -92,4 +106,4 @@ Tapo physical iPhone verification:
 7. No Scriptable screen opens for either automation.
 8. Existing MY REMOTE manual control still works when used normally.
 
-ProjectY status remains incomplete until those physical checks pass.
+Home / Out Tapo appliance automation is physically accepted. Work Flow remains a separate unfinished Flow concern.
