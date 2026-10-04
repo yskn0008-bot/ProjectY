@@ -88,3 +88,26 @@ GitHub Actions、Vercel、runner、network、provider rate limitなど、本人�
 - branch conflict、unsafe scope、資格情報、課金、公開承認、物理端末など本当に本人判断が必要なものだけYOS/本人へ返す。
 
 YOS AIのVercel Git Integrationはcurrent commitの `server/yos-ai/**` 差分だけを見る。過去の未配布server差分を理由に、後続の `data: sync GitHub state` commitが新しいbuildを起こさない。これによりMission Controlの状態同期とProduction deployを分離する。
+
+
+## Approved Vercel release retry
+
+YOS AIのsource revisionがすでにmainへ統合され、Vercel Git IntegrationによるProduction公開が一度開始された後に、Vercelのbuild rate limitだけで失敗した場合は、同じrevisionの公開判断を本人へ繰り返し求めない。
+
+既存ProjectY HQの5分watchdog内で、`Vercel – project-y-yos-ai` のGitHub commit statusを確認し、rate-limit URLだけを対象に次の有界backoffを使う。
+
+- 初回再試行: source mergeから1時間後
+- 2回目: 6時間後
+- 3回目: 12時間後
+- 4回目: 24時間後
+- 4回を超えたら `EXTERNAL_WAIT_BOUNDED` でparkし、追加commitを作らない
+
+再試行は既存 `server/yos-ai/.redeploy-trigger` だけを更新する。新しいrelease queue、DB、SSOT、Vercel tokenは作らない。GitHub `GITHUB_TOKEN` と既存Vercel Git Integrationだけを使う。
+
+自動再試行しないもの:
+- rate limit以外のbuild/code failure
+- main未統合revision
+- credential変更
+- plan/課金変更
+- 新しい公開範囲
+- rollback
