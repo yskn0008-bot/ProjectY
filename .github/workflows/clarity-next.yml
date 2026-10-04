@@ -112,7 +112,7 @@ jobs:
           assert 'NEXT_SHOPPING' in blob
           for marker in (
               'NEXT_ALARM','NEXT_COMMUNICATION','NEXT_MEDIA','NEXT_CLIPBOARD',
-              'NEXT_SHARE','NEXT_CAMERA','NEXT_WEBSEARCH','NEXT_REMOTE',
+              'NEXT_SHARE','NEXT_CAMERA','NEXT_WEBSEARCH','NEXT_YOS_VIEW','NEXT_REMOTE',
               'YOS_SHORTCUT','YOS_SCRIPTABLE'
           ):
               assert marker in blob, marker
@@ -141,6 +141,14 @@ jobs:
           assert 'STASH Add' in blob
           assert 'YOS Remote Hub' in blob
           assert 'YOS Departure Guard2' in blob
+          assert 'YOS_Money_Local' in blob
+          for url in (
+              'https://yskn0008-bot.github.io/ProjectY/life/',
+              'https://yskn0008-bot.github.io/ProjectY/yos/hj/',
+              'https://yskn0008-bot.github.io/ProjectY/yos/desk/',
+              'https://yskn0008-bot.github.io/ProjectY/system/',
+          ):
+              assert url in blob, url
           assert 'scriptable:///run?scriptName=YOS%20Dashboard%20v2&action=baseHome' in blob
           assert 'この操作はClarity Next v0では未対応です' in blob
           # Normal voice/text/share requests must not touch the old debug Ledger.
