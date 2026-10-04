@@ -1,4 +1,5 @@
 import http from 'node:http';
+import {pathToFileURL} from 'node:url';
 
 import chat from '../api/yos/chat.mjs';
 import health from '../api/yos/health.mjs';
@@ -93,10 +94,16 @@ async function handle(request, response) {
 
 if (!Number.isInteger(PORT) || PORT < 1 || PORT > 65535) throw new Error('PORT is invalid');
 
-http.createServer((request, response) => {
-  void handle(request, response);
-}).listen(PORT, '0.0.0.0', () => {
-  console.log(JSON.stringify({level: 'info', event: 'yos_provider_ready', provider: 'google-cloud-run', port: PORT}));
-});
+function createNodeServer() {
+  return http.createServer((request, response) => {
+    void handle(request, response);
+  });
+}
 
-export {MAX_GATEWAY_BODY_BYTES, ROUTES, handle, requestUrl};
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  createNodeServer().listen(PORT, '0.0.0.0', () => {
+    console.log(JSON.stringify({level: 'info', event: 'yos_provider_ready', provider: 'google-cloud-run', port: PORT}));
+  });
+}
+
+export {MAX_GATEWAY_BODY_BYTES, ROUTES, createNodeServer, handle, requestUrl};
