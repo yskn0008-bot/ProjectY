@@ -1,13 +1,14 @@
 {
-  "schema_version": "1.1.0",
+  "schema_version": "1.2.0",
   "base_main_sha": "6b2c0cd90d40bad5110916366e6a88f20645efda",
-  "purpose": "Canonicalize the existing iPhone Flow shortcuts from recovered current artifacts without inventing replacements.",
+  "purpose": "Recover the exact current iPhone Flow artifacts, preserve Morning Flow, then complete Home/Work/Out through the smallest evidenced existing child path without creating a replacement Flow system.",
   "policy": {
     "do_not_rebuild_morning_flow": true,
     "do_not_infer_flow_actions_from_names": true,
     "main_direct_changes_forbidden": true,
     "shared_logic_rule": "Reuse existing child Shortcuts/adapters; do not copy common processing between Flows.",
-    "empty_flow_rule": "A recovered Flow with zero actions remains a safe no-op until an evidenced implementation exists."
+    "recovered_empty_flow_rule": "A recovered zero-action Home/Work/Out artifact is baseline evidence, not a finished behavior contract. Completion must be explicit in flow_runtime_plan.json and must reuse evidenced existing assets.",
+    "completion_plan": "tools/factory-core/flow_runtime_plan.json"
   },
   "flows": {
     "Morning Flow": {
@@ -46,7 +47,7 @@
         "compile_mode": "preserve_recovered_unsigned_plist",
         "signing_mode": "preserve_existing_apple_signed_artifact",
         "artifact_mode": "copy_verified_signed_artifact",
-        "reason": "Recompiling or re-signing would replace the recovered iPhone implementation instead of canonicalizing it."
+        "reason": "Morning is already a working 45-action implementation and remains byte-for-byte preserved."
       },
       "runtime_contract": {
         "trigger": "Existing parent Shortcut Morning is the canonical caller; the parent Morning path is already verified in ProjectY production evidence.",
@@ -70,7 +71,7 @@
     },
     "Home Flow": {
       "status": "recovered_current_artifact",
-      "canonical_mode": "adopt_existing_signed_iphone_artifact",
+      "canonical_mode": "recovered_baseline_plus_completed_runtime",
       "canonical_share_id": "904f29b9bf5d475dbd32646e458d4249",
       "source_path": "tools/factory-core/flow-artifacts/shared-recovered/904f29b9bf5d475dbd32646e458d4249__Home Flow.plist",
       "signed_path": "tools/factory-core/flow-artifacts/shared-recovered/904f29b9bf5d475dbd32646e458d4249__Home Flow.shortcut",
@@ -103,22 +104,28 @@
         "checksum": 2
       },
       "factory": {
-        "compile_mode": "preserve_recovered_unsigned_plist",
-        "signing_mode": "preserve_existing_apple_signed_artifact",
-        "artifact_mode": "copy_verified_signed_artifact"
+        "baseline_mode": "preserve_recovered_artifact_as_evidence",
+        "compile_mode": "cherri_compile_actions_then_preserve_recovered_focus_trigger",
+        "signing_mode": "hubsign_completed_artifact",
+        "artifact_mode": "completed_signed_artifact",
+        "completion_plan": "tools/factory-core/flow_runtime_plan.json"
       },
       "runtime_contract": {
         "trigger": "Embedded Focus-enable trigger for Home.",
-        "actions": [],
-        "calls_existing_yos_assets": [],
+        "actions": [
+          "Run the existing child Shortcut YOS Battery Sync once when this recovered Focus-enable trigger fires."
+        ],
+        "calls_existing_yos_assets": [
+          "YOS Battery Sync"
+        ],
         "focus_relation": "Runs when the Home Focus is enabled.",
-        "duplicate_prevention": "Only this recovered canonical artifact is adopted; no second Home automation is added. Because there are zero actions, repeated execution has no runtime side effects.",
-        "failure_safe": "Zero actions. The current evidenced implementation is a safe no-op and is not filled with guessed behavior."
+        "duplicate_prevention": "Preserve the single recovered embedded Focus trigger and call only the existing YOS Battery Sync child. Do not add a second Personal Automation, router, notification path, or duplicated device-control logic.",
+        "failure_safe": "Exactly one existing child Shortcut call. No automatic home-device control, message send, deletion, payment, purchase, alert, notification, app opening, or new persistent store is added by this Flow."
       }
     },
     "Work Flow": {
       "status": "recovered_current_artifact",
-      "canonical_mode": "adopt_existing_signed_iphone_artifact",
+      "canonical_mode": "recovered_baseline_plus_completed_runtime",
       "canonical_share_id": "3b75f6e2f3d547ddbb48e366ede0f0b9",
       "source_path": "tools/factory-core/flow-artifacts/shared-recovered/3b75f6e2f3d547ddbb48e366ede0f0b9__Work Flow.plist",
       "signed_path": "tools/factory-core/flow-artifacts/shared-recovered/3b75f6e2f3d547ddbb48e366ede0f0b9__Work Flow.shortcut",
@@ -151,22 +158,28 @@
         "checksum": 2
       },
       "factory": {
-        "compile_mode": "preserve_recovered_unsigned_plist",
-        "signing_mode": "preserve_existing_apple_signed_artifact",
-        "artifact_mode": "copy_verified_signed_artifact"
+        "baseline_mode": "preserve_recovered_artifact_as_evidence",
+        "compile_mode": "cherri_compile_actions_then_preserve_recovered_focus_trigger",
+        "signing_mode": "hubsign_completed_artifact",
+        "artifact_mode": "completed_signed_artifact",
+        "completion_plan": "tools/factory-core/flow_runtime_plan.json"
       },
       "runtime_contract": {
         "trigger": "Embedded Focus-enable trigger for Work.",
-        "actions": [],
-        "calls_existing_yos_assets": [],
+        "actions": [
+          "Run the existing child Shortcut YOS Battery Sync once when this recovered Focus-enable trigger fires."
+        ],
+        "calls_existing_yos_assets": [
+          "YOS Battery Sync"
+        ],
         "focus_relation": "Runs when the Work Focus is enabled.",
-        "duplicate_prevention": "Only this recovered canonical artifact is adopted; no second Work automation is added. Because there are zero actions, repeated execution has no runtime side effects.",
-        "failure_safe": "Zero actions. The current evidenced implementation is a safe no-op and is not filled with guessed behavior."
+        "duplicate_prevention": "Preserve the single recovered embedded Focus trigger and call only the existing YOS Battery Sync child. Do not add a second Personal Automation, router, notification path, or duplicated device-control logic.",
+        "failure_safe": "Exactly one existing child Shortcut call. No automatic home-device control, message send, deletion, payment, purchase, alert, notification, app opening, or new persistent store is added by this Flow."
       }
     },
     "Out Flow": {
       "status": "recovered_current_artifact",
-      "canonical_mode": "adopt_existing_signed_iphone_artifact",
+      "canonical_mode": "recovered_baseline_plus_completed_runtime",
       "canonical_share_id": "38dcc0c037294f419d24d4bdac2567a8",
       "source_path": "tools/factory-core/flow-artifacts/shared-recovered/38dcc0c037294f419d24d4bdac2567a8__Out Flow.plist",
       "signed_path": "tools/factory-core/flow-artifacts/shared-recovered/38dcc0c037294f419d24d4bdac2567a8__Out Flow.shortcut",
@@ -199,17 +212,23 @@
         "checksum": 2
       },
       "factory": {
-        "compile_mode": "preserve_recovered_unsigned_plist",
-        "signing_mode": "preserve_existing_apple_signed_artifact",
-        "artifact_mode": "copy_verified_signed_artifact"
+        "baseline_mode": "preserve_recovered_artifact_as_evidence",
+        "compile_mode": "cherri_compile_actions_then_preserve_recovered_focus_trigger",
+        "signing_mode": "hubsign_completed_artifact",
+        "artifact_mode": "completed_signed_artifact",
+        "completion_plan": "tools/factory-core/flow_runtime_plan.json"
       },
       "runtime_contract": {
         "trigger": "Embedded Focus-enable trigger for Out.",
-        "actions": [],
-        "calls_existing_yos_assets": [],
+        "actions": [
+          "Run the existing child Shortcut YOS Battery Sync once when this recovered Focus-enable trigger fires."
+        ],
+        "calls_existing_yos_assets": [
+          "YOS Battery Sync"
+        ],
         "focus_relation": "Runs when the Out Focus is enabled.",
-        "duplicate_prevention": "Only this recovered canonical artifact is adopted; no second Out automation is added. Because there are zero actions, repeated execution has no runtime side effects.",
-        "failure_safe": "Zero actions. The current evidenced implementation is a safe no-op and is not filled with guessed behavior."
+        "duplicate_prevention": "Preserve the single recovered embedded Focus trigger and call only the existing YOS Battery Sync child. Do not add a second Personal Automation, router, notification path, or duplicated device-control logic.",
+        "failure_safe": "Exactly one existing child Shortcut call. No automatic home-device control, message send, deletion, payment, purchase, alert, notification, app opening, or new persistent store is added by this Flow."
       }
     }
   },
