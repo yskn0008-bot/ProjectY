@@ -53,3 +53,55 @@ Those two currently use Vercel-specific background `waitUntil` behavior and rema
 ## Deployment gate
 
 The repository is container-ready through `cloud-run/Dockerfile`, but account/project/service-identity/secret configuration and the first public deployment are real external gates. Do not enable the secondary provider before the live smoke suite passes.
+
+
+## GitHub Actions activation path
+
+Use `.github/workflows/yos-ai-cloud-run.yml`.
+
+It has two explicit modes:
+
+- `check`: runs the YOS AI test suite and reports which Cloud Run activation values are still missing. It never deploys.
+- `deploy`: reruns the same quality gate, authenticates to Google Cloud with GitHub OIDC Workload Identity Federation, deploys from `server/yos-ai`, attaches the runtime service account, and health-smokes the returned URL.
+
+The workflow intentionally uses `google-github-actions/auth@v3` with Workload Identity Federation. Do not add a long-lived Google service-account key JSON.
+
+### One-time GitHub repository variables
+
+- `GCP_CLOUD_RUN_PROJECT_ID`
+- `GCP_CLOUD_RUN_REGION`
+- `GCP_CLOUD_RUN_SERVICE`
+- `GCP_GITHUB_WIF_PROVIDER`
+- `GCP_GITHUB_DEPLOY_SERVICE_ACCOUNT`
+- `GCP_CLOUD_RUN_RUNTIME_SERVICE_ACCOUNT`
+
+### One-time GitHub repository secrets
+
+These are deployment copies of the current runtime secrets, not a new product SSOT:
+
+- `OPENAI_API_KEY`
+- `GOOGLE_CLIENT_ID`
+- `GOOGLE_ALLOWED_SUBJECT_HASH`
+- `YOS_ALLOWED_ORIGINS`
+- `YOS_LAW_DOCUMENT_ID`
+- `YOS_MASTER_DOCUMENT_ID`
+- `YOS_CHANGE_LOG_DOCUMENT_ID`
+- `YOS_SYSTEM_MASTER_DOCUMENT_ID`
+- `YOS_TAXI_MASTER_DOCUMENT_ID`
+- `PROJECT75_SPREADSHEET_ID`
+- `UPSTASH_REDIS_REST_URL`
+- `UPSTASH_REDIS_REST_TOKEN`
+
+Optional route secrets may also be supplied for Taxi, Clarity, and Notion when those routes are intended to be parity-certified.
+
+## Activation sequence
+
+1. Complete the one-time Google Cloud account/project/IAM setup.
+2. Add the GitHub variables/secrets above.
+3. Run the workflow in `check` mode. It must report ready.
+4. Run `deploy` mode.
+5. Verify `/api/yos/health` succeeds.
+6. Run live parity against Vercel for the certified route set.
+7. Only after parity PASS, write the Cloud Run URL to `data/yos-runtime-providers.json` and set that provider `enabled=true`.
+
+This means a Cloud Run setup or quota problem cannot silently lower YOS quality. Until step 7 the production router continues to use Vercel only.

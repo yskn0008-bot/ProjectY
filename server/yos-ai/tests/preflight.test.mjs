@@ -77,3 +77,31 @@ test('subject hash format matches the runtime SHA-256 Base64URL digest', () => {
   assert.ok(report.checks.some((check) => check.id === 'subject_hash_format' && check.status === 'pass'));
   assert.equal(report.checks.some((check) => check.id === 'subject_hash_format' && check.status === 'warning'), false);
 });
+
+test('production preflight accepts Cloud Run attached identity without Vercel WIF variables', () => {
+  const cloudRun = {
+    ...valid,
+    GOOGLE_AUTH_MODE: 'application_default',
+    YOS_RUNTIME_PROVIDER: 'google_cloud_run'
+  };
+  delete cloudRun.GCP_PROJECT_NUMBER;
+  delete cloudRun.GCP_WORKLOAD_IDENTITY_POOL_ID;
+  delete cloudRun.GCP_WORKLOAD_IDENTITY_POOL_PROVIDER_ID;
+  delete cloudRun.GCP_SERVICE_ACCOUNT_EMAIL;
+
+  const report = runProductionPreflight(cloudRun);
+  assert.equal(report.status, 'ready');
+  assert.equal(report.failed, 0);
+  assert.ok(report.checks.some((check) => check.id === 'keyless_auth' && check.status === 'pass'));
+  assert.equal(report.checks.some((check) => check.id === 'GCP_WORKLOAD_IDENTITY_POOL_ID'), false);
+});
+
+test('production preflight rejects application_default outside the Cloud Run provider marker', () => {
+  const report = runProductionPreflight({
+    ...valid,
+    GOOGLE_AUTH_MODE: 'application_default',
+    YOS_RUNTIME_PROVIDER: 'other_host'
+  });
+  assert.equal(report.status, 'blocked');
+  assert.ok(report.checks.some((check) => check.id === 'keyless_auth' && check.status === 'fail'));
+});
