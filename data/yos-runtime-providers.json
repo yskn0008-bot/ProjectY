@@ -1,0 +1,18 @@
+{
+  "schema_version": "1.0.0",
+  "providers": [
+    {
+      "id": "vercel",
+      "base_url": "https://project-y-yos-ai.vercel.app",
+      "enabled": true,
+      "certified_routes": ["chat", "health", "public-config", "nav-model", "taxi-event", "taxi-health", "tasks", "tasks-health", "intake", "projecty-decision", "widget"]
+    },
+    {
+      "id": "google-cloud-run",
+      "base_url": "",
+      "enabled": false,
+      "certified_routes": ["chat", "health", "public-config", "nav-model", "taxi-event", "taxi-health", "tasks", "tasks-health", "intake", "projecty-decision"],
+      "activation_gate": "Do not enable until live parity smoke passes."
+    }
+  ]
+}
