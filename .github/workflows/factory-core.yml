@@ -36,19 +36,95 @@ jobs:
       - name: Loop Engine unit and A-F self-tests
         run: python3 -m unittest discover -s tools/factory-core/tests -v
 
-      - name: Canonical Flow validation and artifact packaging
-        run: python3 tools/factory-core/recover_flow_artifact.py --output-dir /tmp/canonical-flows
+      - name: Validate recovered Flow baselines
+        run: python3 tools/factory-core/recover_flow_artifact.py --output-dir /tmp/recovered-flows
 
-      - name: Independent Flow canonicalization audit
-        run: python3 tools/factory-core/audit_flow_canonicalization.py
+      - name: Install pinned Cherri v2.3.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          url='https://github.com/electrikmilk/cherri/releases/download/v2.3.0/cherri_linux-x86_64.zip'
+          expected='7ab2c384b7b26e7c72a30a8dfa56f89dae12c4068b7951bc1e3193f3698edbe9'
+          curl -fsSL "$url" -o /tmp/cherri.zip
+          printf '%s  %s\n' "$expected" /tmp/cherri.zip | sha256sum -c -
+          mkdir -p /tmp/cherri
+          unzip -q /tmp/cherri.zip -d /tmp/cherri
+          binary="$(find /tmp/cherri -type f -name cherri -print -quit)"
+          test -n "$binary"
+          sudo install -m 0755 "$binary" /usr/local/bin/cherri
+          cherri --version
 
-      - name: Upload canonical signed Flow artifacts
+      - name: Compile Home Work Out Flow actions
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/flow-compiled
+          cd tools/factory-core/flow-runtime
+          for name in 'Home Flow' 'Work Flow' 'Out Flow'; do
+            rm -f "$name"_unsigned.shortcut "$name".plist
+            cherri "$name.cherri" --skip-sign --debug
+            test -f "$name"_unsigned.shortcut
+            cp "$name"_unsigned.shortcut /tmp/flow-compiled/
+          done
+
+      - name: Compose completed Flows with recovered Focus triggers
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/completed-flows
+          python3 tools/factory-core/build_flow_runtime.py \
+            --compiled-dir /tmp/flow-compiled \
+            --output-dir /tmp/completed-flows
+          cp 'tools/factory-core/flow-artifacts/shared-recovered/08b110bd699a4ee9ab7b1a1bd4bb67f3__Morning Flow.shortcut' \
+            '/tmp/completed-flows/Morning Flow.shortcut'
+
+      - name: Sign completed Home Work Out Flows
+        shell: bash
+        run: |
+          set -euo pipefail
+          for name in 'Home Flow' 'Work Flow' 'Out Flow'; do
+            python3 tools/clarity-factory/sign_with_hubsign.py \
+              --input "/tmp/completed-flows/$name.plist" \
+              --output "/tmp/completed-flows/$name.shortcut" \
+              --name "$name" \
+              2>&1 | tee "/tmp/completed-flows/$name.hubsign.log"
+          done
+
+      - name: Independent Flow completion audit
+        run: python3 tools/factory-core/audit_flow_canonicalization.py --runtime-dir /tmp/completed-flows
+
+      - name: Verify signed completed Flow artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+
+          root=Path('/tmp/completed-flows')
+          manifest={'schema':'yos.flow.completed.v1','artifacts':{}}
+          for name in ('Morning Flow','Home Flow','Work Flow','Out Flow'):
+              p=root/f'{name}.shortcut'
+              data=p.read_bytes()
+              assert data.startswith(b'AEA1'), (name,data[:8])
+              assert len(data)>500, (name,len(data))
+              manifest['artifacts'][name]={
+                  'sha256':hashlib.sha256(data).hexdigest(),
+                  'size':len(data),
+              }
+          (root/'manifest.json').write_text(json.dumps(manifest,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+          print(json.dumps(manifest,ensure_ascii=False,indent=2))
+          PY
+
+      - name: Upload completed signed Flow artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: canonical-flow-shortcuts
+          name: completed-flow-shortcuts
           path: |
-            /tmp/canonical-flows/*.shortcut
-            /tmp/canonical-flows/manifest.json
+            /tmp/completed-flows/*.shortcut
+            /tmp/completed-flows/*.plist
+            /tmp/completed-flows/*.hubsign.log
+            /tmp/completed-flows/manifest.json
           if-no-files-found: error
 
       - name: ProjectY development supervisor contract
