@@ -17,21 +17,12 @@ class ClarityNextSourceContractTests(unittest.TestCase):
 
     def test_is_separate_from_canonical_clarity(self):
         self.assertIn("#define name Clarity Next", self.source)
-        self.assertIn("Clarity Next Ledger.txt", self.source)
 
-
-    def test_ledger_source_does_not_eagerly_open_file(self):
+    def test_normal_runtime_does_not_touch_debug_ledger(self):
         self.assertNotIn('getFile("Clarity Next Ledger.txt")', self.source)
-        self.assertIn('appendToFile("Clarity Next Ledger.txt"', self.source)
-
-    def test_post_compile_persistence_rewrite_is_locked(self):
-        patch = PATCH.read_text(encoding="utf-8")
-        self.assertIn('TARGET = "Clarity Next Ledger.txt"', patch)
-        self.assertIn('"WFFileErrorIfNotFound": False', patch)
-        self.assertIn('"WFAskWhereToSave": False', patch)
-        self.assertIn('"WFSaveFileOverwrite": True', patch)
-        self.assertIn('file.append survived rewrite', patch)
-
+        self.assertNotIn('appendToFile("Clarity Next Ledger.txt"', self.source)
+        self.assertIn('appendToFile("Idea in Box.txt"', self.source)
+        self.assertIn('appendToFile("Clarity Inbox.txt"', self.source)
 
     def test_calendar_reminder_wire_format_patch_is_locked(self):
         patch = WIRE_PATCH.read_text(encoding="utf-8")
