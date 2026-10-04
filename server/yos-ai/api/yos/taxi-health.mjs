@@ -1,20 +1,25 @@
-const REQUIRED = [
+const COMMON_REQUIRED = [
   'GOOGLE_AUTH_MODE',
-  'GCP_PROJECT_NUMBER',
-  'GCP_WORKLOAD_IDENTITY_POOL_ID',
-  'GCP_WORKLOAD_IDENTITY_POOL_PROVIDER_ID',
-  'GCP_SERVICE_ACCOUNT_EMAIL',
   'YOS_ALLOWED_ORIGINS',
   'PROJECT75_SPREADSHEET_ID',
   'YOS_TAXI_SYNC_TOKEN_SHA256'
 ];
+const VERCEL_WIF_REQUIRED = [
+  'GCP_PROJECT_NUMBER',
+  'GCP_WORKLOAD_IDENTITY_POOL_ID',
+  'GCP_WORKLOAD_IDENTITY_POOL_PROVIDER_ID',
+  'GCP_SERVICE_ACCOUNT_EMAIL'
+];
 
 function validate(environment) {
-  const missing = REQUIRED.filter((name) => !String(environment[name] ?? '').trim());
   const invalid = [];
-
   const mode = String(environment.GOOGLE_AUTH_MODE ?? '').trim();
-  if (mode && mode !== 'vercel_oidc') invalid.push('GOOGLE_AUTH_MODE');
+  const provider = String(environment.YOS_RUNTIME_PROVIDER ?? '').trim();
+  const required = [...COMMON_REQUIRED];
+  if (mode === 'vercel_oidc') required.push(...VERCEL_WIF_REQUIRED);
+  if (mode === 'application_default' && provider !== 'google_cloud_run') invalid.push('GOOGLE_AUTH_MODE');
+  if (mode && mode !== 'vercel_oidc' && mode !== 'application_default') invalid.push('GOOGLE_AUTH_MODE');
+  const missing = required.filter((name) => !String(environment[name] ?? '').trim());
 
   const projectNumber = String(environment.GCP_PROJECT_NUMBER ?? '').trim();
   if (projectNumber && !/^\d{6,30}$/u.test(projectNumber)) invalid.push('GCP_PROJECT_NUMBER');
