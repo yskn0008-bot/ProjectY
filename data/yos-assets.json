@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0.0",
   "ssot": "YOS asset registry",
-  "updated_at": "2026-10-04T13:45:00+09:00",
+  "updated_at": "2026-10-04T14:02:00+09:00",
   "source": {
     "repository": "yskn0008-bot/ProjectY",
     "base_branch": "main",
@@ -59,7 +59,7 @@
     "asset_count": 25,
     "overall_progress": 75,
     "needs_user_action_count": 11,
-    "audit_completed_at": "2026-10-04T13:45:00+09:00",
+    "audit_completed_at": "2026-10-04T14:02:00+09:00",
     "current_frontline": [
       "YOS Money Local v1.5.1",
       "Clarity Next",
@@ -804,7 +804,8 @@
         "artifact:stash-add-iphone id 11293074414 digest sha256:c012239186f44d3096c73b6bea62f3623b27c5de36c42d0b154e5bfc86b4e9ca",
         "runtime:existing iCloud Drive/Shortcuts/POCKET.txt preserved as storage contract",
         "device:2026-10-04 STASH Add manual final adjustment executed successfully on iPhone; user confirmed complete",
-        "device:STASH list reset and current one-tap Control Center route restored"
+        "device:STASH list reset and current one-tap Control Center route restored",
+        "production:2026-10-04 iPhone Control Center STASH Add runtime executed successfully; user confirmed complete"
       ],
       "progress_basis": {
         "spec": true,
@@ -814,7 +815,7 @@
         "production": true
       },
       "progress": 100,
-      "updated_at": "2026-10-04T13:45:00+09:00"
+      "updated_at": "2026-10-04T14:02:00+09:00"
     },
     {
       "id": "projecty-hq",
