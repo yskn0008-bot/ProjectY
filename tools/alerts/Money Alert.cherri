@@ -5,16 +5,28 @@
 #include 'actions/text'
 #include 'actions/documents'
 #include 'actions/calendar'
-#include 'actions/web'
 
 @incoming = "{ShortcutInput}"
 const historyFolder = createFolder("YOS Display History")
 const alertStateFolder = createFolder("YOS Alert State")
 
+// No-input launches must stay local. Postcompile replaces the first/last marker
+// with invisible Scriptable inline actions that read the existing Money SSOT
+// (iCloud Drive/Scriptable/YOS/Money/money.json), bridge the derived result through
+// the clipboard for only a few actions, then restore the user's previous clipboard.
+if @incoming == "" {
+    const localBridgeStart = text("YOS_MONEY_LOCAL_BRIDGE_START")
+    const localClipboard = getClipboard()
+    const localClipboardText = getText(localClipboard)
+    @incoming = "{localClipboardText}"
+    const localBridgeRestore = text("YOS_MONEY_LOCAL_BRIDGE_RESTORE")
+}
+
 if @incoming contains "YOS_MONEY_ALERT_V1" {
     if @incoming contains "緊急Money Alertなし" {
         stop()
     }
+
     const lastMoneyFile = getFile("YOS Alert State/Money Alert Last.txt", nil, false)
     const lastMoneyText = getText(lastMoneyFile)
     @lastMoney = "{lastMoneyText}"
@@ -28,8 +40,5 @@ if @incoming contains "YOS_MONEY_ALERT_V1" {
     const log = text("【Money Alert】\n{@incoming}")
     saveFile("YOS Display History/{stamp} Money Alert.txt", log, false)
     showNotification(@incoming, "Money Alert", true)
-    stop()
 }
-
-openURL("https://yskn0008-bot.github.io/ProjectY/yos/money-alert-bridge.html?return=shortcut&format=alert-text&native=1&dedupe=1&shortcut=Money%20Alert")
 stop()
