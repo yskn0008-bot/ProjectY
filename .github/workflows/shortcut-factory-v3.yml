@@ -37,8 +37,8 @@ jobs:
           assert 'appendResolvedFile' in stash
           assert 'run("STASH", @stashItem)' not in add
           assert 'getClipboard()' in add
-          assert 'appendResolvedFile' in add
-          assert 'appendToFile' not in add
+          assert 'appendResolvedFile' not in add
+          assert 'appendToFile("POCKET.txt", expectedEntry)' in add
           print('Shortcut Factory source boundary: PASS')
           PY
 
@@ -131,6 +131,11 @@ jobs:
           assert 'is.workflow.actions.runworkflow' not in add_ids, add_ids
           assert add_ids.count('is.workflow.actions.file.append') == 1, add_ids
           assert 'is.workflow.actions.getclipboard' in add_ids, add_ids
+          appends=[a for a in add.get('WFWorkflowActions',[]) if a.get('WFWorkflowActionIdentifier')=='is.workflow.actions.file.append']
+          assert len(appends)==1
+          ap=appends[0].get('WFWorkflowActionParameters',{})
+          assert ap.get('WFFilePath') == 'POCKET.txt', ap
+          assert 'expectedEntry' in repr(ap.get('WFInput')), ap
           assert 'is.workflow.actions.notification' not in add_ids, add_ids
 
           assert 'is.workflow.actions.setclipboard' in stash_ids, stash_ids
