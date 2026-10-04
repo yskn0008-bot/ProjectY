@@ -38,11 +38,11 @@ DB, SSOT, cloud service, or persistence file is introduced.
 
 ## STASH Add
 
-`STASH Add` is deliberately thin.
+`STASH Add` is deliberately small and writes only to the existing `POCKET.txt`.
 
 ### Control Center
 
-`copy text -> Control Center -> STASH Add -> clipboard -> existing STASH -> POCKET.txt`
+`copy text -> Control Center -> STASH Add -> clipboard -> existing POCKET.txt`
 
 ### Future Clarity
 
@@ -52,9 +52,10 @@ create a separate Clarity-only storage function.
 ### Duplicate protection
 
 `STASH Add` reads the existing `POCKET.txt` only to check for the exact
-`text + separator` entry. If already present, it silently exits without calling
-STASH. Empty input also silently exits. It never writes to POCKET directly. The
-only write remains in STASH.
+`text + separator` entry. If already present, it silently exits. Empty input also
+silently exits. Otherwise it appends that exact entry directly to the existing
+`POCKET.txt`. This deliberately removes the iOS permission gate for running
+another Shortcut; it does not create any new storage path or SSOT.
 
 ## Completion states
 
