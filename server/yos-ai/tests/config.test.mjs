@@ -43,7 +43,20 @@ test('allows localhost and application default credentials only outside producti
   assert.deepEqual(config.allowedOrigins, ['http://localhost:3000']);
   assert.equal(config.googleWorkloadAuth.mode, 'application_default');
 
-  assert.throws(() => loadYosRuntimeConfig({ ...base, GOOGLE_AUTH_MODE: 'application_default' }), /not allowed/);
+  assert.throws(() => loadYosRuntimeConfig({ ...base, GOOGLE_AUTH_MODE: 'application_default' }), /google_cloud_run/);
+
+  const cloudRun = loadYosRuntimeConfig({
+    ...base,
+    GOOGLE_AUTH_MODE: 'application_default',
+    YOS_RUNTIME_PROVIDER: 'google_cloud_run'
+  });
+  assert.equal(cloudRun.googleWorkloadAuth.mode, 'application_default');
+
+  assert.throws(() => loadYosRuntimeConfig({
+    ...base,
+    GOOGLE_AUTH_MODE: 'application_default',
+    YOS_RUNTIME_PROVIDER: 'cloudflare'
+  }), /google_cloud_run/);
 });
 
 
