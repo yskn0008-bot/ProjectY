@@ -82,3 +82,39 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPOSITORY: ${{ github.repository }}
         run: node .github/scripts/projecty-hq-yos-replay.cjs
+
+  retry-approved-yos-ai-release:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out trusted default branch for release history
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          fetch-depth: 100
+          persist-credentials: false
+
+      - name: Resolve current approved YOS AI source revision
+        id: release
+        shell: bash
+        run: |
+          set -euo pipefail
+          latest_server_sha="$(git log -1 --format=%H -- server/yos-ai)"
+          source_sha="$(git log -1 --format=%H -- server/yos-ai ':(exclude)server/yos-ai/.redeploy-trigger')"
+          source_commit_s="$(git show -s --format=%ct "$source_sha")"
+          {
+            echo "latest_server_sha=$latest_server_sha"
+            echo "source_sha=$source_sha"
+            echo "source_commit_ms=$((source_commit_s * 1000))"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Retry only an already-approved rate-limited release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPOSITORY: ${{ github.repository }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+          LATEST_SERVER_SHA: ${{ steps.release.outputs.latest_server_sha }}
+          SOURCE_SHA: ${{ steps.release.outputs.source_sha }}
+          SOURCE_COMMIT_MS: ${{ steps.release.outputs.source_commit_ms }}
+          DRY_RUN: ${{ inputs.dry_run || 'false' }}
+        run: node .github/scripts/projecty-hq-vercel-retry.cjs
