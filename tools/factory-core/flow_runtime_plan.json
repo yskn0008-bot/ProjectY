@@ -1,0 +1,65 @@
+{
+  "schema_version": "1.0.0",
+  "purpose": "Complete the recovered Home/Work/Out Focus Flows with the smallest evidenced useful behavior while preserving Morning Flow and avoiding a new router/SSOT.",
+  "policy": {
+    "morning_flow_unchanged": true,
+    "main_direct_changes_forbidden": true,
+    "no_new_flow_router": true,
+    "no_new_ssot": true,
+    "no_automatic_home_device_control": true,
+    "no_routine_notifications": true,
+    "shared_child": "YOS Battery Sync",
+    "rationale": "Focus already represents the current life context. Each non-Morning Flow refreshes the existing local Battery/Mother observation path instead of duplicating state, remote-control, notification, or departure logic."
+  },
+  "flows": {
+    "Morning Flow": {
+      "mode": "preserve_existing_signed_artifact",
+      "source": "tools/factory-core/flow-artifacts/shared-recovered/08b110bd699a4ee9ab7b1a1bd4bb67f3__Morning Flow.plist",
+      "signed": "tools/factory-core/flow-artifacts/shared-recovered/08b110bd699a4ee9ab7b1a1bd4bb67f3__Morning Flow.shortcut",
+      "trigger": "existing parent Morning",
+      "actions": "existing 45-action calendar/travel/urgency implementation"
+    },
+    "Home Flow": {
+      "mode": "compile_actions_and_preserve_recovered_focus_trigger",
+      "source": "tools/factory-core/flow-runtime/Home Flow.cherri",
+      "baseline": "tools/factory-core/flow-artifacts/shared-recovered/904f29b9bf5d475dbd32646e458d4249__Home Flow.plist",
+      "focus": {
+        "name": "Home",
+        "identifier": "com.apple.donotdisturb.mode.bookmarkfill",
+        "event": "enable"
+      },
+      "children": [
+        "YOS Battery Sync"
+      ],
+      "behavior": "When Home Focus enables, silently refresh the existing local Battery/Mother observation path."
+    },
+    "Work Flow": {
+      "mode": "compile_actions_and_preserve_recovered_focus_trigger",
+      "source": "tools/factory-core/flow-runtime/Work Flow.cherri",
+      "baseline": "tools/factory-core/flow-artifacts/shared-recovered/3b75f6e2f3d547ddbb48e366ede0f0b9__Work Flow.plist",
+      "focus": {
+        "name": "Work",
+        "identifier": "com.apple.donotdisturb.mode.mappin",
+        "event": "enable"
+      },
+      "children": [
+        "YOS Battery Sync"
+      ],
+      "behavior": "When Work Focus enables, silently refresh the existing local Battery/Mother observation path."
+    },
+    "Out Flow": {
+      "mode": "compile_actions_and_preserve_recovered_focus_trigger",
+      "source": "tools/factory-core/flow-runtime/Out Flow.cherri",
+      "baseline": "tools/factory-core/flow-artifacts/shared-recovered/38dcc0c037294f419d24d4bdac2567a8__Out Flow.plist",
+      "focus": {
+        "name": "Out",
+        "identifier": "com.apple.donotdisturb.mode.booksverticalfill",
+        "event": "enable"
+      },
+      "children": [
+        "YOS Battery Sync"
+      ],
+      "behavior": "When Out Focus enables, silently refresh the existing Battery/Mother path. Existing Mother/Departure Guard duplicate suppression remains authoritative."
+    }
+  }
+}
