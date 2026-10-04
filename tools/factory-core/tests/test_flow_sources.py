@@ -60,6 +60,18 @@ class FlowSourceContractTests(unittest.TestCase):
             self.assertEqual(result["triggers"][0]["focus_name"], focus_name)
             self.assertEqual(result["triggers"][0]["focus_identifier"], identifier)
 
+
+    def test_home_out_appliance_automation_is_owned_by_tapo(self):
+        policy = self.manifest["policy"]
+        self.assertIn("Tapo H110", policy["appliance_automation_rule"])
+        home = self.manifest["flows"]["Home Flow"]["runtime_contract"]["external_automation"]
+        out = self.manifest["flows"]["Out Flow"]["runtime_contract"]["external_automation"]
+        self.assertEqual(home["owner"], "Tapo H110 Smart Actions / Geofencing")
+        self.assertEqual(home["selected_actions"], ["Light ON"])
+        self.assertEqual(out["owner"], "Tapo H110 Smart Actions / Geofencing")
+        self.assertEqual(out["selected_actions"], ["Light OFF", "Air conditioner OFF"])
+        self.assertTrue(any("power toggle" in item for item in out["conditional_actions"]))
+
     def test_older_supplied_morning_variant_is_noncanonical_duplicate_risk(self):
         variants = self.manifest["supplied_variants"]
         self.assertEqual(len(variants), 1)
