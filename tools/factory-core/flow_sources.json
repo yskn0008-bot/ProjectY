@@ -114,18 +114,19 @@
         "calls_existing_yos_assets": [],
         "focus_relation": "Runs when the Home Focus is enabled.",
         "duplicate_prevention": "Only this recovered canonical artifact is adopted; no second Home automation is added. Because there are zero actions, repeated execution has no runtime side effects.",
-        "failure_safe": "The recovered Shortcut itself remains a zero-action safe baseline. Appliance automation is externalized to Tapo. Arrival turns on only the light in v1; AC and TV auto-ON are excluded.",
+        "failure_safe": "The recovered Shortcut itself remains a zero-action safe baseline. Appliance automation is externalized to Tapo. Arrival turns on only the floor lamp in v1; the main white ceiling light, AC, and TV remain manual/excluded.",
         "external_automation": {
           "owner": "Tapo H110 Smart Actions / Geofencing",
           "trigger": "Arrive home geofence",
           "selected_actions": [
-            "Light ON"
+            "Floor lamp ON"
           ],
           "excluded_actions": [
+            "Main white ceiling light auto-ON",
             "Unconditional AC ON",
             "TV auto-ON"
           ],
-          "reason": "Arrival automation must work while the iPhone is locked and must not depend on Scriptable or home-LAN reachability."
+          "reason": "Arrival should create a comfortable atmosphere without forcing the white ceiling light on. Floor lamp is automatic; the main white light remains manual."
         }
       }
     },
