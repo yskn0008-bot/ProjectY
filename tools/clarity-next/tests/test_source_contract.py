@@ -50,7 +50,7 @@ class ClarityNextSourceContractTests(unittest.TestCase):
         self.assertIn("confidenceだけを理由に確認を増やしません", self.source)
 
     def test_capability_gate_is_explicit(self):
-        for executor in ("YOS_OpenApp", "NEXT_DEVICE", "NEXT_TIMER", "NEXT_ALARM", "NEXT_CALENDAR", "NEXT_REMINDER", "NEXT_NAVIGATE", "NEXT_NOTION", "NEXT_MYWAY", "NEXT_MONEY", "NEXT_IDEA", "NEXT_MEMO", "NEXT_TASK", "NEXT_SHOPPING", "NEXT_COMMUNICATION", "NEXT_MEDIA", "NEXT_CLIPBOARD", "NEXT_SHARE", "NEXT_CAMERA", "NEXT_WEBSEARCH", "NEXT_REMOTE", "YOS_SHORTCUT", "YOS_SCRIPTABLE", "NEXT_ANSWER"):
+        for executor in ("YOS_OpenApp", "NEXT_DEVICE", "NEXT_TIMER", "NEXT_ALARM", "NEXT_CALENDAR", "NEXT_REMINDER", "NEXT_NAVIGATE", "NEXT_NOTION", "NEXT_MYWAY", "NEXT_MONEY", "NEXT_IDEA", "NEXT_MEMO", "NEXT_TASK", "NEXT_SHOPPING", "NEXT_COMMUNICATION", "NEXT_MEDIA", "NEXT_CLIPBOARD", "NEXT_SHARE", "NEXT_CAMERA", "NEXT_WEBSEARCH", "NEXT_YOS_VIEW", "NEXT_REMOTE", "YOS_SHORTCUT", "YOS_SCRIPTABLE", "NEXT_ANSWER"):
             self.assertIn(executor, self.source)
         self.assertIn('@normalizedExecutor != "NEXT_REMOTE"', self.source)
         self.assertIn('@normalizedExecutor != "YOS_SHORTCUT"', self.source)
@@ -80,6 +80,7 @@ class ClarityNextSourceContractTests(unittest.TestCase):
             ("share", "NEXT_SHARE", "share", "NEXT_SHARE"),
             ("camera", "NEXT_CAMERA", "camera", "NEXT_CAMERA"),
             ("web", "NEXT_WEBSEARCH", "web", "NEXT_WEBSEARCH"),
+            ("yos", "NEXT_YOS_VIEW", "yos", "NEXT_YOS_VIEW"),
             ("remote", "NEXT_REMOTE", "remote", "NEXT_REMOTE"),
             ("shortcut", "YOS_SHORTCUT", "shortcut", "YOS_SHORTCUT"),
             ("scriptable", "YOS_SCRIPTABLE", "scriptable", "YOS_SCRIPTABLE"),
@@ -138,7 +139,7 @@ class ClarityNextSourceContractTests(unittest.TestCase):
         self.assertIn("beginsWith", self.source)
         self.assertIn("input_mode=share", self.source)
         self.assertIn("NEXT_ANSWER以外の副作用を起こしません", self.source)
-        self.assertIn("shareモードではYOS_OpenApp、NEXT_DEVICE、NEXT_TIMER、NEXT_ALARM、NEXT_CALENDAR、NEXT_REMINDER、NEXT_NAVIGATE、NEXT_NOTION、NEXT_MYWAY、NEXT_MONEY、NEXT_IDEA、NEXT_MEMO、NEXT_TASK、NEXT_SHOPPING、NEXT_COMMUNICATION、NEXT_MEDIA、NEXT_CLIPBOARD、NEXT_SHARE、NEXT_CAMERA、NEXT_WEBSEARCH、NEXT_REMOTE、YOS_SHORTCUT、YOS_SCRIPTABLEを選びません", self.source)
+        self.assertIn("shareモードではYOS_OpenApp、NEXT_DEVICE、NEXT_TIMER、NEXT_ALARM、NEXT_CALENDAR、NEXT_REMINDER、NEXT_NAVIGATE、NEXT_NOTION、NEXT_MYWAY、NEXT_MONEY、NEXT_IDEA、NEXT_MEMO、NEXT_TASK、NEXT_SHOPPING、NEXT_COMMUNICATION、NEXT_MEDIA、NEXT_CLIPBOARD、NEXT_SHARE、NEXT_CAMERA、NEXT_WEBSEARCH、NEXT_YOS_VIEW、NEXT_REMOTE、YOS_SHORTCUT、YOS_SCRIPTABLEを選びません", self.source)
         self.assertIn('if @inputMode == "share" && @normalizedExecutor != "NEXT_ANSWER"', self.source)
 
     def test_base_home_alias_recovers_from_open_app_misroute(self):
@@ -175,6 +176,10 @@ class ClarityNextSourceContractTests(unittest.TestCase):
             "takePhoto(1, true)",
             "takeScreenshot(false)",
             'searchWeb("Google", webQuery)',
+            "https://yskn0008-bot.github.io/ProjectY/life/",
+            "https://yskn0008-bot.github.io/ProjectY/yos/hj/",
+            "https://yskn0008-bot.github.io/ProjectY/yos/desk/",
+            "https://yskn0008-bot.github.io/ProjectY/system/",
             "YOS%20BRAVIA%20Widget",
             "YOS%20Light%20Widget",
             "YOS%20AC%20Widget",
@@ -182,6 +187,9 @@ class ClarityNextSourceContractTests(unittest.TestCase):
             'shortcutName == "STASH Add"',
             'scriptName == "YOS Remote Hub"',
             'scriptName == "YOS Departure Guard2"',
+            'scriptName == "YOS_Money_Local"',
+            'shortcutName != "STASH Add" && shortcutInput',
+            "@scriptActionAllowed = false",
             "run(shortcutName, shortcutPayload)",
         ):
             self.assertIn(required, self.source)
@@ -207,6 +215,7 @@ class ClarityNextSourceContractTests(unittest.TestCase):
         self.assertIn('@normalizedExecutor == "NEXT_MEDIA"', self.source)
         self.assertIn('@normalizedExecutor == "NEXT_CLIPBOARD"', self.source)
         self.assertIn('@normalizedExecutor == "NEXT_CAMERA"', self.source)
+        self.assertIn('@normalizedExecutor == "NEXT_YOS_VIEW"', self.source)
         self.assertIn('@normalizedExecutor == "NEXT_REMOTE"', self.source)
         self.assertIn('@normalizedExecutor == "YOS_SHORTCUT"', self.source)
         self.assertIn('@normalizedExecutor == "YOS_SCRIPTABLE"', self.source)
