@@ -1,0 +1,56 @@
+{
+  "schema_version": "1.0.0",
+  "quality_contract": {
+    "same_runtime": true,
+    "same_openai_model": true,
+    "same_response_schema": true,
+    "same_source_ids": true,
+    "same_origin_policy": true,
+    "same_rate_limit_store": true,
+    "same_audit_store": true,
+    "failover_only_after_parity": true
+  },
+  "providers": [
+    {
+      "id": "vercel",
+      "status": "production",
+      "auth_mode": "vercel_oidc",
+      "certified_routes": [
+        "chat",
+        "health",
+        "public-config",
+        "nav-model",
+        "taxi-event",
+        "taxi-health",
+        "tasks",
+        "tasks-health",
+        "intake",
+        "projecty-decision",
+        "widget",
+        "slack-events"
+      ]
+    },
+    {
+      "id": "google-cloud-run",
+      "status": "candidate",
+      "auth_mode": "application_default",
+      "certified_routes": [
+        "chat",
+        "health",
+        "public-config",
+        "nav-model",
+        "taxi-event",
+        "taxi-health",
+        "tasks",
+        "tasks-health",
+        "intake",
+        "projecty-decision"
+      ],
+      "not_certified_routes": [
+        "widget",
+        "slack-events"
+      ],
+      "activation_gate": "live parity smoke + exact runtime configuration + same model/source/storage contract"
+    }
+  ]
+}

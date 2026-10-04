@@ -19,31 +19,51 @@
     if (target) target.textContent = message;
   }
 
-  function apiUrl(path) {
-    const url = new URL(path, globalThis.YOS_AI_BASE_URL);
+  function apiUrl(baseUrl, path) {
+    const url = new URL(path, baseUrl);
     const share = typeof globalThis.YOS_VERCEL_SHARE_TOKEN === 'string' ? globalThis.YOS_VERCEL_SHARE_TOKEN.trim() : '';
-    if (share) url.searchParams.set('_vercel_share', share);
-    return { url, share };
+    const useShare = share && url.hostname.endsWith('.vercel.app');
+    if (useShare) url.searchParams.set('_vercel_share', share);
+    return { url, share: useShare ? share : '' };
+  }
+
+  async function providerBases(route) {
+    const router = globalThis.YOS_RUNTIME_PROVIDERS;
+    if (router && typeof router.getBaseUrls === 'function') {
+      const values = await router.getBaseUrls(route);
+      if (Array.isArray(values) && values.length) return values;
+    }
+    return [globalThis.YOS_AI_BASE_URL || DEFAULT_BASE_URL];
   }
 
   async function loadPublicConfig() {
-    publicConfigPromise ||= (() => {
-      const target = apiUrl('/api/yos/public-config');
-      return fetch(target.url, {
-      method: 'GET',
-      credentials: target.share ? 'include' : 'omit',
-      cache: 'no-store',
-      redirect: target.share ? 'follow' : 'error',
-      referrerPolicy: 'no-referrer'
-    }).then(async (response) => {
-      const body = await response.json().catch(() => ({}));
-      if (!response.ok) throw Object.assign(new Error('YOS public config is unavailable'), { status: response.status });
-      const clientId = typeof body.googleClientId === 'string' ? body.googleClientId.trim() : '';
-      if (!clientId.endsWith('.apps.googleusercontent.com')) {
-        throw Object.assign(new Error('Google client is unavailable'), { status: 503 });
+    publicConfigPromise ||= (async () => {
+      let lastError;
+      for (const baseUrl of await providerBases('public-config')) {
+        const target = apiUrl(baseUrl, '/api/yos/public-config');
+        try {
+          const response = await fetch(target.url, {
+            method: 'GET',
+            credentials: target.share ? 'include' : 'omit',
+            cache: 'no-store',
+            redirect: target.share ? 'follow' : 'error',
+            referrerPolicy: 'no-referrer'
+          });
+          const body = await response.json().catch(() => ({}));
+          if (!response.ok) throw Object.assign(new Error('YOS public config is unavailable'), { status: response.status });
+          const clientId = typeof body.googleClientId === 'string' ? body.googleClientId.trim() : '';
+          if (!clientId.endsWith('.apps.googleusercontent.com')) {
+            throw Object.assign(new Error('Google client is unavailable'), { status: 503 });
+          }
+          globalThis.YOS_RUNTIME_PROVIDERS?.reportSuccess?.(baseUrl);
+          return { googleClientId: clientId };
+        } catch (error) {
+          lastError = error;
+          const status = Number(error?.status) || 0;
+          if (![0, 429, 502, 503, 504].includes(status)) throw error;
+        }
       }
-      return { googleClientId: clientId };
-    });
+      throw lastError || Object.assign(new Error('YOS public config is unavailable'), { status: 503 });
     })();
     return publicConfigPromise;
   }
