@@ -67,7 +67,7 @@ class FlowSourceContractTests(unittest.TestCase):
         home = self.manifest["flows"]["Home Flow"]["runtime_contract"]["external_automation"]
         out = self.manifest["flows"]["Out Flow"]["runtime_contract"]["external_automation"]
         self.assertEqual(home["owner"], "Tapo H110 Smart Actions / Geofencing")
-        self.assertEqual(home["selected_actions"], ["Light ON"])
+        self.assertEqual(home["selected_actions"], ["Floor lamp ON"])
         self.assertEqual(out["owner"], "Tapo H110 Smart Actions / Geofencing")
         self.assertEqual(out["selected_actions"], ["Light OFF", "Air conditioner OFF"])
         self.assertTrue(any("power toggle" in item for item in out["conditional_actions"]))
