@@ -1,6 +1,5 @@
 #define name Clarity Next
 #define color purple
-#define inputs text
 
 #include 'actions/text'
 #include 'actions/documents'
