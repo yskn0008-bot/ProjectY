@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.1.0",
+  "schema_version": "1.2.0",
   "base_main_sha": "6b2c0cd90d40bad5110916366e6a88f20645efda",
   "purpose": "Canonicalize the existing iPhone Flow shortcuts from recovered current artifacts without inventing replacements.",
   "policy": {
@@ -7,7 +7,8 @@
     "do_not_infer_flow_actions_from_names": true,
     "main_direct_changes_forbidden": true,
     "shared_logic_rule": "Reuse existing child Shortcuts/adapters; do not copy common processing between Flows.",
-    "empty_flow_rule": "A recovered Flow with zero actions remains a safe no-op until an evidenced implementation exists."
+    "empty_flow_rule": "A recovered Flow with zero actions remains a safe no-op until an evidenced implementation exists.",
+    "appliance_automation_rule": "Home / Out appliance automation is owned by Tapo H110 Geofencing; Scriptable MY REMOTE remains manual/fallback and must not be auto-opened."
   },
   "flows": {
     "Morning Flow": {
@@ -113,7 +114,19 @@
         "calls_existing_yos_assets": [],
         "focus_relation": "Runs when the Home Focus is enabled.",
         "duplicate_prevention": "Only this recovered canonical artifact is adopted; no second Home automation is added. Because there are zero actions, repeated execution has no runtime side effects.",
-        "failure_safe": "Zero actions. The current evidenced implementation is a safe no-op and is not filled with guessed behavior."
+        "failure_safe": "The recovered Shortcut itself remains a zero-action safe baseline. Appliance automation is externalized to Tapo. Arrival turns on only the light in v1; AC and TV auto-ON are excluded.",
+        "external_automation": {
+          "owner": "Tapo H110 Smart Actions / Geofencing",
+          "trigger": "Arrive home geofence",
+          "selected_actions": [
+            "Light ON"
+          ],
+          "excluded_actions": [
+            "Unconditional AC ON",
+            "TV auto-ON"
+          ],
+          "reason": "Arrival automation must work while the iPhone is locked and must not depend on Scriptable or home-LAN reachability."
+        }
       }
     },
     "Work Flow": {
@@ -209,7 +222,19 @@
         "calls_existing_yos_assets": [],
         "focus_relation": "Runs when the Out Focus is enabled.",
         "duplicate_prevention": "Only this recovered canonical artifact is adopted; no second Out automation is added. Because there are zero actions, repeated execution has no runtime side effects.",
-        "failure_safe": "Zero actions. The current evidenced implementation is a safe no-op and is not filled with guessed behavior."
+        "failure_safe": "The recovered Shortcut itself remains a zero-action safe baseline. Tapo owns appliance shutdown. Any ambiguous TV power-toggle is excluded because it could turn an already-off TV on.",
+        "external_automation": {
+          "owner": "Tapo H110 Smart Actions / Geofencing",
+          "trigger": "Leave home geofence",
+          "selected_actions": [
+            "Light OFF",
+            "Air conditioner OFF"
+          ],
+          "conditional_actions": [
+            "TV OFF only when the actual Tapo action is a discrete OFF command, never a power toggle"
+          ],
+          "reason": "Departure automation must still execute after the iPhone disconnects from home Wi-Fi and must not depend on Scriptable."
+        }
       }
     }
   },
