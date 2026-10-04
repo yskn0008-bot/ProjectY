@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-10-04T12:36:18+09:00",
+  "updated_at": "2026-10-04T12:36:50+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -94,13 +94,13 @@
     },
     {
       "id": "github-pr-614",
-      "title": "PR #614 Complete existing iPhone Flow shortcuts without rebuilding Morning",
+      "title": "PR #614 Recover current iPhone Flow shortcuts and finish runtime behavior",
       "type": "GitHub PR",
       "status": "draft",
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/614",
-      "updated_at": "2026-10-04T03:35:34Z"
+      "updated_at": "2026-10-04T03:36:19Z"
     },
     {
       "id": "github-pr-619",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-10-04T03:35:04Z"
+      "updated_at": "2026-10-04T03:36:11Z"
     },
     {
       "id": "github-issue-234",
@@ -184,13 +184,13 @@
     },
     {
       "id": "github-issue-611",
-      "title": "Issue #611 Flow系Shortcut完成｜Home/Work/Out実処理実装・Factory/Audit PASS・実機導入待ち",
+      "title": "Issue #611 Flow系Shortcut完成｜Morning確定・Home/Work/Out実処理を現役資産から再設計",
       "type": "GitHub Issue",
       "status": "open",
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/611",
-      "updated_at": "2026-10-04T02:48:01Z"
+      "updated_at": "2026-10-04T03:36:17Z"
     }
   ],
   "recently_completed": [
@@ -264,7 +264,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-10-04T12:36:18+09:00",
+      "last_update": "2026-10-04T12:36:50+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -345,7 +345,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-10-04T12:36:18+09:00",
+      "last_update": "2026-10-04T12:36:50+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -368,7 +368,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-10-04T12:36:18+09:00",
+      "last_update": "2026-10-04T12:36:50+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -450,5 +450,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "5e199120abb9b86417850a4abb3b1ff2a3295f5ff21a798b765989136604463b"
+  "github_snapshot_hash": "31591edc59c586386de6a913e90ebc0e44ba5e03e181ccaac17a7fe25af01337"
 }
