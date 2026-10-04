@@ -5,16 +5,24 @@
 #include 'actions/documents'
 #include 'actions/sharing'
 #include 'actions/text'
-#include 'actions/shortcuts'
 
 /*
-STASH Add is only an entry point to the existing STASH.
+STASH Add is the one-tap Control Center entry to the existing POCKET.txt.
 - With Shortcut Input (future Clarity call), save that text.
-- With no input (Control Center), save the current clipboard text.
-- Read existing POCKET.txt only to suppress accidental duplicate writes.
-- The actual write remains owned by STASH.
+- With no input, save the current clipboard text.
+- Read POCKET.txt only to suppress exact duplicates.
+- Write to the existing POCKET.txt directly so iOS does not need permission
+  to run another Shortcut.
+- No new storage path, DB, or SSOT.
 - Routine operation is silent.
 */
+
+action 'file.append' appendResolvedFile(
+    variable file: 'WFFile',
+    variable input: 'WFInput'
+) {
+    "WFAppendFileWriteMode": "Append"
+}
 
 @stashItem = ""
 
@@ -41,4 +49,5 @@ if pocketFile {
     }
 }
 
-run("STASH", @stashItem)
+const targetFile = getFile("POCKET.txt")
+appendResolvedFile(targetFile, expectedEntry)
