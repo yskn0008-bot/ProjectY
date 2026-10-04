@@ -1,0 +1,91 @@
+#define name STASH
+#define color teal
+#define inputs text
+#define from sharesheet
+
+#include 'actions/documents'
+#include 'actions/sharing'
+#include 'actions/text'
+
+/*
+Existing STASH contract:
+- Input text -> append to iCloud Drive/Shortcuts/POCKET.txt.
+- No input -> show a compact numbered list without changing stored text.
+- Selecting an item copies the exact stored text to the clipboard and removes
+  that exact item from POCKET.txt.
+- Routine save/copy operations stay silent.
+*/
+
+action 'file.append' appendResolvedFile(
+    variable file: 'WFFile',
+    variable input: 'WFInput'
+) {
+    "WFAppendFileWriteMode": "Append"
+}
+
+if ShortcutInput {
+    const sharedText = getText(ShortcutInput)
+    if sharedText {
+        const entry = text("{sharedText}\n===YOS_NEXT===\n")
+        const pocketFile = getFile("POCKET.txt")
+        appendResolvedFile(pocketFile, entry)
+        stop()
+    }
+}
+
+const stashFile = getFile("POCKET.txt", nil, false)
+if !stashFile {
+    stop()
+}
+
+const stashText = getText(stashFile)
+
+// Storage stays exact. The list is display-only:
+// number + first trimmed line + max 28 visible characters.
+@rawItems = splitText(stashText, "\n===YOS_NEXT===\n")
+@displayItems: array
+@rawIndex = 0
+@visibleCount = 0
+
+for item in @rawItems {
+    @rawIndex += 1
+    const itemText = getText(@item)
+    const cleanItem = trimWhitespace(itemText)
+    if cleanItem {
+        @visibleCount += 1
+        const firstLines = splitText(cleanItem, "\n")
+        const firstLineItem = getFirstItem(firstLines)
+        const firstLine = getText(firstLineItem)
+        const previewMatches = matchText('^.{1,28}', firstLine)
+        const previewItem = getFirstItem(previewMatches)
+        const preview = getText(previewItem)
+        @displayItems += "{@rawIndex}｜{preview}"
+    }
+}
+
+if @visibleCount == 0 {
+    stop()
+}
+
+const chosenLabel = chooseFromList(@displayItems, "STASH｜使うものを選択")
+
+if chosenLabel {
+    // Parse only the numeric prefix. Preview text may itself contain numbers.
+    const chosenLabelText = getText(chosenLabel)
+    const chosenParts = splitText(chosenLabelText, "｜")
+    const chosenIndexItem = getFirstItem(chosenParts)
+    const chosenIndexText = getText(chosenIndexItem)
+    const chosenIndex = number(chosenIndexText)
+    const chosenText = getListItem(@rawItems, chosenIndex)
+
+    // Copy first so the exact text remains available even after its STASH row
+    // is consumed.
+    setClipboard(chosenText)
+
+    const consumedEntry = text("{chosenText}\n===YOS_NEXT===\n")
+    const remaining = replaceText(consumedEntry, "", stashText)
+
+    // saveFile compiles with Ask Where to Save = false and overwrite = true.
+    // It rewrites the existing Shortcuts/POCKET.txt without a destination prompt.
+    saveFile("POCKET.txt", remaining, true)
+}

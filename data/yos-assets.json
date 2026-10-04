@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0.0",
   "ssot": "YOS asset registry",
-  "updated_at": "2026-10-03T17:50:48+09:00",
+  "updated_at": "2026-10-04T14:02:00+09:00",
   "source": {
     "repository": "yskn0008-bot/ProjectY",
     "base_branch": "main",
@@ -57,9 +57,9 @@
   },
   "summary": {
     "asset_count": 25,
-    "overall_progress": 73,
+    "overall_progress": 75,
     "needs_user_action_count": 11,
-    "audit_completed_at": "2026-10-02T09:46:01+09:00",
+    "audit_completed_at": "2026-10-04T14:02:00+09:00",
     "current_frontline": [
       "YOS Money Local v1.5.1",
       "Clarity Next",
@@ -784,32 +784,38 @@
       "id": "shortcut-factory-stash",
       "name": "Shortcut Factory + STASH",
       "area": "development",
-      "status": "building",
+      "status": "complete",
       "priority": 3,
-      "current": "Shortcut Factory / STASHの生成・保管資産は存在するが、2026-10-02監査でも『生成→署名/import→iPhone実行』の一続きacceptanceは確認できていない。Clarity用Factory資産は複数あるが、STASH全体の完成証拠とは分ける。",
-      "next_action": "実際に必要なShortcut 1本でFactory→import→実行を通し、成立しなければこの資産の範囲を縮小する。",
-      "blocker": "import可能artifactの一続きacceptanceが未完了。",
+      "current": "Shortcut Factory + STASHは2026-10-04に完成。既存POCKET.txtを維持したまま、STASH Addのクリップボード保存、重複抑止、POCKET.txt欠損時の自動再作成、STASHの短縮リスト表示、選択項目の正確なコピーと使用後削除まで実装。Shortcut Factory v3でCherri compile→構造検査→HubSign署名→署名済みAEA1の意味検査までPASSし、iPhone実機では本人が手動反映後に実行成功を確認した。",
+      "next_action": "通常利用を継続する。POCKET.txtは既存のiCloud Drive/Shortcuts/POCKET.txtを正本として維持し、新しいSTASHや保存先は作らない。",
+      "blocker": null,
       "needs_user_action": false,
-      "device_verified": false,
-      "production_verified": false,
+      "device_verified": true,
+      "production_verified": true,
       "deep_link": null,
       "completion_criteria": [
         "iPhoneで取り込めるShortcut artifactを生成する / STASH既存運用を壊さない / importから実行まで確認する"
       ],
       "evidence": [
-        "path:tools/factory-core",
-        "historical:Clarity Shortcut Factory assets exist",
-        "audit:2026-10-02 no full Factory→import→iPhone acceptance found"
+        "path:tools/shortcut-factory",
+        "PR#603",
+        "CI:Shortcut Factory v3 run 37177889037 PASS",
+        "CI:Cherri v2.3.0 compile + validate + HubSign + signed AEA1 semantic verification PASS",
+        "artifact:stash-add-iphone id 11293074414 digest sha256:c012239186f44d3096c73b6bea62f3623b27c5de36c42d0b154e5bfc86b4e9ca",
+        "runtime:existing iCloud Drive/Shortcuts/POCKET.txt preserved as storage contract",
+        "device:2026-10-04 STASH Add manual final adjustment executed successfully on iPhone; user confirmed complete",
+        "device:STASH list reset and current one-tap Control Center route restored",
+        "production:2026-10-04 iPhone Control Center STASH Add runtime executed successfully; user confirmed complete"
       ],
       "progress_basis": {
         "spec": true,
         "implementation": true,
-        "test": false,
-        "device": false,
-        "production": false
+        "test": true,
+        "device": true,
+        "production": true
       },
-      "progress": 50,
-      "updated_at": "2026-10-02T09:46:01+09:00"
+      "progress": 100,
+      "updated_at": "2026-10-04T14:02:00+09:00"
     },
     {
       "id": "projecty-hq",
