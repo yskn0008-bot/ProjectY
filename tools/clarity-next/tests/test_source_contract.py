@@ -163,6 +163,13 @@ class ClarityNextSourceContractTests(unittest.TestCase):
         self.assertIn('@normalizedNeedsConfirmationText != "はい"', self.source)
         self.assertIn("phone_numberまたはemailが明示されている場合だけ", self.source)
 
+    def test_tv_power_state_request_is_not_blind_toggle(self):
+        self.assertIn("power_toggleはユーザーが", self.source)
+        self.assertIn("テレビをつけて/消して", self.source)
+        self.assertIn('if remoteAction == "power_toggle"', self.source)
+        self.assertIn('@tvWidgetAction = "power"', self.source)
+        self.assertNotIn('remoteAction == "power" ||', self.source)
+
     def test_native_capabilities_and_existing_yos_assets_are_reused(self):
         for required in (
             "createAlarm(alarmName, alarmTime, true)",
