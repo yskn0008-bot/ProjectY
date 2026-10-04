@@ -71,6 +71,8 @@ class FlowSourceContractTests(unittest.TestCase):
         self.assertEqual(out["owner"], "Tapo H110 Smart Actions / Geofencing")
         self.assertEqual(out["selected_actions"], ["Light OFF", "Air conditioner OFF"])
         self.assertTrue(any("power toggle" in item for item in out["conditional_actions"]))
+        self.assertEqual(home["physical_verification"]["status"], "PASS")
+        self.assertEqual(out["physical_verification"]["status"], "PASS")
 
     def test_older_supplied_morning_variant_is_noncanonical_duplicate_risk(self):
         variants = self.manifest["supplied_variants"]
