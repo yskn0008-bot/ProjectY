@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-10-04T11:41:22+09:00",
+  "updated_at": "2026-10-04T11:44:47+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -100,7 +100,7 @@
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/614",
-      "updated_at": "2026-10-04T02:40:22Z"
+      "updated_at": "2026-10-04T02:44:31Z"
     },
     {
       "id": "github-pr-619",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-10-04T02:40:43Z"
+      "updated_at": "2026-10-04T02:41:22Z"
     },
     {
       "id": "github-issue-234",
@@ -184,13 +184,13 @@
     },
     {
       "id": "github-issue-611",
-      "title": "Issue #611 Flow系Shortcut正本化｜4本回収・Factory/Audit PASS・実機最終確認待ち",
+      "title": "Issue #611 Flow系Shortcut完成｜Home/Work/Out実処理実装・Factory/Audit PASS・実機導入待ち",
       "type": "GitHub Issue",
       "status": "open",
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/611",
-      "updated_at": "2026-10-03T22:15:08Z"
+      "updated_at": "2026-10-04T02:44:34Z"
     }
   ],
   "recently_completed": [
@@ -264,7 +264,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-10-04T11:41:22+09:00",
+      "last_update": "2026-10-04T11:44:47+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -345,7 +345,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-10-04T11:41:22+09:00",
+      "last_update": "2026-10-04T11:44:47+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -368,7 +368,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-10-04T11:41:22+09:00",
+      "last_update": "2026-10-04T11:44:47+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -450,5 +450,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "7867790b0d8cc0bfa3b7194aa8b5a60ac977273feccade6df83d19d4fe3cd7a3"
+  "github_snapshot_hash": "53599425bbd46cf6a3d5647bffeb6c56189c1dc2c1e7d408818b76c958be3728"
 }
