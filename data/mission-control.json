@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-10-04T14:51:09+09:00",
+  "updated_at": "2026-10-04T20:04:36+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -13,6 +13,16 @@
   },
   "inbox": [
     {
+      "id": "github-pr-626",
+      "title": "PR #626 Add privacy-first local YOS Event Ledger",
+      "type": "GitHub PR",
+      "status": "review",
+      "priority": 1,
+      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/626",
+      "updated_at": "2026-10-04T11:04:09Z"
+    },
+    {
       "id": "github-pr-539",
       "title": "PR #539 Finalize YOS Alerts and reread history",
       "type": "GitHub PR",
@@ -21,16 +31,6 @@
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/539",
       "updated_at": "2026-10-03T05:42:51Z"
-    },
-    {
-      "id": "github-pr-544",
-      "title": "PR #544 Night Brief: integrate MY LIFE save into 22:00 + Journal build",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/544",
-      "updated_at": "2026-09-30T14:36:53Z"
     },
     {
       "id": "github-pr-582",
@@ -60,7 +60,7 @@
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/602",
-      "updated_at": "2026-10-04T05:50:46Z"
+      "updated_at": "2026-10-04T05:51:17Z"
     },
     {
       "id": "github-pr-606",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-10-04T05:50:45Z"
+      "updated_at": "2026-10-04T07:27:48Z"
     },
     {
       "id": "github-issue-234",
@@ -195,6 +195,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-7fb84a11d6ab",
+      "title": "chore(yos-ai): retry deferred approved release (1/4)",
+      "completed_at": "2026-10-04T07:26:38Z",
+      "result": "GitHub mainへ反映（7fb84a1）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/7fb84a11d6ab25d81c8e14967471137562af2a79"
+    },
+    {
       "id": "github-commit-2cb1ec22090a",
       "title": "fix: block Cloud Run model drift and use canonical container entrypoint (#625)",
       "completed_at": "2026-10-04T05:37:53Z",
@@ -223,13 +230,6 @@
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/45cc531d189b73c46e8c7add11bd4ee05fca6314"
     },
     {
-      "id": "github-commit-538e796bd39d",
-      "title": "YOS runtime: provider冗長化を品質維持で追加 (#622)",
-      "completed_at": "2026-10-04T04:24:59Z",
-      "result": "GitHub mainへ反映（538e796）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/538e796bd39d99ac825ce7d2a9215448001756a2"
-    },
-    {
       "id": "complete-002",
       "title": "iPhone向けMission Control Dashboardを実装",
       "completed_at": "2026-07-17T17:55:00+09:00",
@@ -254,7 +254,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "Issue #10を進める：Mission Control v2：GitHubのIssue・PR・Commitを自動集約する",
+      "next_action": "PR #626をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -264,7 +264,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-10-04T14:51:09+09:00",
+      "last_update": "2026-10-04T20:04:36+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -339,13 +339,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 8件・Open PR 15件を自動同期中",
+      "next_action": "Open Issue 8件・Open PR 16件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-10-04T14:51:09+09:00",
+      "last_update": "2026-10-04T20:04:36+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -354,12 +354,12 @@
       "domain": "Infrastructure",
       "type": "development",
       "purpose": "YOSと各Labの設計に基づいて実装、修正、テストを行う",
-      "status": "active",
+      "status": "review",
       "health": "attention",
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "Issue #10を進める：Mission Control v2：GitHubのIssue・PR・Commitを自動集約する",
+      "next_action": "PR #626をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -368,7 +368,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-10-04T14:51:09+09:00",
+      "last_update": "2026-10-04T20:04:36+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -450,5 +450,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "84e7af6c82e745dde6ebcad61123e990eba17043309daf2a4b9187ca22eefcb0"
+  "github_snapshot_hash": "969ee70678b241f9e1af0e15030b02dcd8d7dcae017dc038cf81bd9e8bfea23d"
 }
