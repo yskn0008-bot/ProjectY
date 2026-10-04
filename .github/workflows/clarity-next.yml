@@ -111,7 +111,7 @@ jobs:
           assert 'NEXT_TASK' in blob
           assert 'NEXT_SHOPPING' in blob
           assert 'scriptable:///run?scriptName=YOS%20Dashboard%20v2&action=baseHome' in blob
-          assert 'unsupported_executor' in blob
+          assert 'この操作はClarity Next v0では未対応です' in blob
           # Normal voice/text/share requests must not touch the old debug Ledger.
           # File access remains only for explicit capture destinations such as Idea/Memo.
           assert 'Clarity Next Ledger.txt' not in blob
