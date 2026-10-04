@@ -1,206 +1,150 @@
-# Flow canonicalization audit — 2026-10-04
+# Flow completion audit — 2026-10-04
 
 ## Result
 
-The existing iPhone Flow family has been recovered from the five iCloud Shortcut shares supplied by the owner and canonicalized without creating a replacement Flow system.
+The existing iPhone Flow family was recovered from the five owner-supplied iCloud Shortcut shares first, then completed without creating a replacement Flow system.
 
-Canonical set:
+Final behavior:
 
-- Morning Flow → share `08b110bd699a4ee9ab7b1a1bd4bb67f3`
-- Home Flow → share `904f29b9bf5d475dbd32646e458d4249`
-- Work Flow → share `3b75f6e2f3d547ddbb48e366ede0f0b9`
-- Out Flow → share `38dcc0c037294f419d24d4bdac2567a8`
+- **Morning Flow** — preserve the existing 45-action Calendar / travel / urgency implementation unchanged.
+- **Home Flow** — preserve the recovered Home Focus-enable trigger, then run existing child **YOS Battery Sync** once.
+- **Work Flow** — preserve the recovered Work Focus-enable trigger, then run existing child **YOS Battery Sync** once.
+- **Out Flow** — preserve the recovered Out Focus-enable trigger, then run existing child **YOS Battery Sync** once.
 
-A second supplied Morning Flow share, `ba12343727064dde851140c6715b80db`, is retained as evidence but is explicitly non-canonical because it embeds a Morning Focus-enable trigger and creates a duplicate-trigger risk against the already-verified parent Morning path.
+The recovered Home / Work / Out shares contained zero actions. Those zero-action artifacts are retained as exact baseline evidence, but after the owner explicitly required useful Shortcut contents on 2026-10-04 they are no longer treated as the finished behavior contract.
 
-No new Flow router, DB, SSOT, Focus system, or duplicated child processing was added.
+No new Flow router, DB, SSOT, Focus system, notification layer, or automatic home-device control was added.
 
-## Source recovery
+## Why YOS Battery Sync
 
-Each supplied iCloud share was recovered into three exact representations on the feature branch:
+Existing ProjectY evidence already shows the local device path:
 
-- binary unsigned Shortcut plist
-- readable XML plist
-- Apple-signed `.shortcut` artifact
+`起床時 → Run Script → YOS Battery Sync → YOS Battery Widget`
 
-The signed artifacts are not re-signed. Re-signing or recompiling recovered current iPhone artifacts would replace the implementation being canonicalized. Factory therefore verifies the source and the existing Apple signature container, then packages the exact signed artifact.
+The existing Mother observation hook is already installed in that path. Reusing **YOS Battery Sync** therefore gives Home / Work / Out a real, low-risk action while avoiding duplicated departure logic, a second Personal Automation, new state storage, or guessed appliance behavior.
+
+The older Life AUTO prototype also used YOS Battery Sync for life-state routing. Its router is **not** revived or made authoritative here.
 
 ## Morning Flow
 
-### Trigger
+Canonical share: `08b110bd699a4ee9ab7b1a1bd4bb67f3`
 
-Canonical Morning Flow has **no embedded trigger**.
+- 45 actions
+- no embedded Focus trigger
+- parent remains `Morning -> Morning Brief + Morning Flow -> YOS Today Note`
+- next Calendar event lookup
+- time-to-event calculation
+- optional travel time and 10-minute arrival buffer
+- departure estimate
+- `○余裕あり / △準備開始 / ●急ぐ / ○予定なし`
+- vibration on the urgent branches
+- no persistent writes or destructive actions
 
-The canonical caller remains the existing parent `Morning` Shortcut. ProjectY production evidence already records:
+Signed SHA-256 remains:
 
-`Morning -> Morning Brief + Morning Flow -> YOS Today Note`
+`b68edca63d2476a1ca3660bbbb342c843a294be4b496c2cb8aaed91ec88c20f2`
 
-This keeps Focus gating and orchestration in the existing parent path.
+Owner-reported physical iPhone result on 2026-10-04: **working**.
 
-### Actions
-
-The recovered canonical Morning Flow contains 45 actions.
-
-It:
-
-1. Finds the next Calendar event within the next day.
-2. Reads event title, start time, and location.
-3. Calculates time until the event starts.
-4. If a location exists, calculates travel time.
-5. Applies a 10-minute arrival buffer.
-6. Derives arrival and departure targets and time until departure.
-7. Returns `○余裕あり`, `△準備開始`, or `●急ぐ`.
-8. The latter two urgency branches also vibrate.
-9. If there is no location, parallel urgency branches return the simpler schedule-only output.
-10. If no event exists, returns `○予定なし`.
-
-### Existing YOS assets called
-
-Morning Flow itself calls no child Shortcut.
-
-It remains a child of the existing parent Morning path, next to:
-
-- Morning Brief
-- YOS Today Note
-
-### Focus relation
-
-Focus handling belongs to the existing parent Morning path.
-
-The canonical child intentionally has no embedded Focus trigger.
-
-### Duplicate prevention
-
-The older supplied Morning variant has 26 actions and an embedded Morning Focus-enable trigger. It is excluded from the canonical set.
-
-The final iPhone acceptance must confirm that this older Focus-triggered Morning variant is not active alongside the parent Morning path.
-
-### Failure safety
-
-The canonical Morning Flow is limited to:
-
-- Calendar reads
-- travel-time/date calculations
-- variables/formatting
-- output
-- vibration
-
-It contains no persistent writes, deletion, message send, purchase, payment, or data migration. Missing event and missing location are explicit safe branches.
+The older supplied Morning share `ba12343727064dde851140c6715b80db` remains non-canonical because it embeds a Morning Focus-enable trigger and would create duplicate execution risk beside the existing parent Morning route.
 
 ## Home Flow
 
-### Trigger
+Recovered baseline:
 
-Embedded Focus-enable trigger for `Home`.
+- share `904f29b9bf5d475dbd32646e458d4249`
+- exact Home Focus-enable trigger retained
+- baseline action count: 0
 
-### Actions
+Completed runtime:
 
-**0 actions.**
+1. Home Focus enables.
+2. Run existing Shortcut `YOS Battery Sync` once.
+3. Return normally.
 
-The current recovered iPhone implementation is an empty no-op Flow. This is preserved rather than filled with guessed behavior.
+No app is opened and no notification, message, appliance action, delete, payment, purchase, or new state store is added.
 
-### Existing YOS assets called
+Completed signed artifact SHA-256:
 
-None.
-
-### Focus relation
-
-Runs when Home Focus is enabled.
-
-### Duplicate prevention
-
-Only the recovered canonical artifact is adopted. No second Home automation is added. Repeated execution has no side effects because the action list is empty.
-
-### Failure safety
-
-Zero actions; safe no-op.
+`31cfa79e985156f2a314389600cbc36e45fd1fc732c9073c82cc691f0e997052`
 
 ## Work Flow
 
-### Trigger
+Recovered baseline:
 
-Embedded Focus-enable trigger for `Work`.
+- share `3b75f6e2f3d547ddbb48e366ede0f0b9`
+- exact Work Focus-enable trigger retained
+- baseline action count: 0
 
-### Actions
+Completed runtime:
 
-**0 actions.**
+1. Work Focus enables.
+2. Run existing Shortcut `YOS Battery Sync` once.
+3. Return normally.
 
-The current recovered iPhone implementation is an empty no-op Flow.
+Completed signed artifact SHA-256:
 
-### Existing YOS assets called
-
-None.
-
-### Focus relation
-
-Runs when Work Focus is enabled.
-
-### Duplicate prevention
-
-Only the recovered canonical artifact is adopted. No second Work automation is added. Repeated execution has no side effects because the action list is empty.
-
-### Failure safety
-
-Zero actions; safe no-op.
+`2370a2a79efcd443474ab93253f8bcf497fd62a02455d63d1fb66da3f2ad0ed1`
 
 ## Out Flow
 
-### Trigger
+Recovered baseline:
 
-Embedded Focus-enable trigger for `Out`.
+- share `38dcc0c037294f419d24d4bdac2567a8`
+- exact Out Focus-enable trigger retained
+- baseline action count: 0
 
-### Actions
+Completed runtime:
 
-**0 actions.**
+1. Out Focus enables.
+2. Run existing Shortcut `YOS Battery Sync` once.
+3. Existing Battery/Mother observation path can see the refreshed local state without adding a second Departure Guard automation.
 
-The current recovered iPhone implementation is an empty no-op Flow.
+Completed signed artifact SHA-256:
 
-### Existing YOS assets called
+`313a8691fe21902a399983610abc56376a0a7b0939f9d22b3fb9a42582e66055`
 
-None.
+## Factory / Verify / independent Audit
 
-### Focus relation
+Factory Core run **#33**, run id `37171775177`, completed successfully on head `c93f8ddfba7156c7860a3a2f74cc3de8d450f3b4`.
 
-Runs when Out Focus is enabled.
+Passed:
 
-### Duplicate prevention
+- recovered source identity validation
+- Flow unit and contract tests
+- pinned Cherri v2.3.0 installation
+- Home / Work / Out compilation
+- exact recovered Focus-trigger preservation
+- HubSign signing for completed Home / Work / Out artifacts
+- AEA1 signed-artifact validation
+- independent Flow completion audit
+- ProjectY development supervisor contract
+- bounded recovery E2E
+- diff check
 
-Only the recovered canonical artifact is adopted. No second Out automation is added. Repeated execution has no side effects because the action list is empty.
+Codex governance run **#1816**, run id `37171775093`, also passed.
 
-### Failure safety
+Build artifact:
 
-Zero actions; safe no-op.
+`completed-flow-shortcuts` — artifact id `11291528165`
 
-## Factory / Verify / Audit
+Signed results:
 
-Existing Factory Core is reused.
-
-Permanent Flow pipeline:
-
-1. exact source identity validation
-2. exact action sequence validation
-3. exact Focus-trigger validation
-4. Apple signed AEA container validation
-5. exact signed-artifact packaging
-6. unit tests
-7. independent Flow audit
-8. Git diff check
-9. GitHub Actions evidence
-
-Signing mode for all four canonical Flows is:
-
-`preserve_existing_apple_signed_artifact`
-
-Artifact generation copies the verified signed artifact byte-for-byte into the canonical build package.
+- Morning Flow — `b68edca63d2476a1ca3660bbbb342c843a294be4b496c2cb8aaed91ec88c20f2`
+- Home Flow — `31cfa79e985156f2a314389600cbc36e45fd1fc732c9073c82cc691f0e997052`
+- Work Flow — `2370a2a79efcd443474ab93253f8bcf497fd62a02455d63d1fb66da3f2ad0ed1`
+- Out Flow — `313a8691fe21902a399983610abc56376a0a7b0939f9d22b3fb9a42582e66055`
 
 ## Completion boundary
 
-Source recovery, canonical selection, code-level validation, artifact packaging, and independent Audit can be completed without owner intervention.
+Code, Factory, signing, Verify, and independent Audit are complete.
 
-The only remaining human gate is a single native iPhone acceptance batch:
+The remaining authority is the physical iPhone because the three newly signed Home / Work / Out artifacts must replace the zero-action copies before the new behavior can be observed.
 
-- confirm parent `Morning` is the active Morning path
-- confirm the older Focus-triggered Morning variant is not also active
-- enable Home / Work / Out Focus once each and confirm the current no-op behavior causes no unexpected action
+Final device acceptance:
 
-No Home / Work / Out behavior should be added unless a later evidenced requirement explicitly defines it.
+1. replace/import the signed Home / Work / Out artifacts;
+2. enable each corresponding Focus once;
+3. confirm each path completes once with no unexpected visible side effect.
+
+Morning does not need to be replaced or re-tested unless the installation process changes it.
