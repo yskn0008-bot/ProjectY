@@ -173,3 +173,61 @@ test('client rejects non-JSON and oversized responses', async () => {
   });
   await assert.rejects(largeClient.health(), /too large/u);
 });
+
+
+test('chat fails over from a provider 503 to the next certified provider without changing auth', async () => {
+  const calls = [];
+  const client = new YosAiClient({
+    baseUrls: ['https://primary.example', 'https://secondary.example'],
+    getGoogleIdToken: async () => 'google-token',
+    fetchImpl: async (input, init) => {
+      calls.push({url: String(input), init});
+      if (String(input).startsWith('https://primary.example/')) return json({error: 'provider unavailable'}, 503);
+      return json({answer: 'secondary-ok'});
+    }
+  });
+
+  const result = await client.chat({userText: '質問'});
+  assert.equal(result.answer, 'secondary-ok');
+  assert.deepEqual(calls.map((call) => new URL(call.url).origin), ['https://primary.example', 'https://secondary.example']);
+  assert.equal(calls[0].init.headers.Authorization, 'Bearer google-token');
+  assert.equal(calls[1].init.headers.Authorization, 'Bearer google-token');
+});
+
+test('authentication and contract failures never fail over to another provider', async () => {
+  for (const status of [400, 401, 403, 415]) {
+    const calls = [];
+    const client = new YosAiClient({
+      baseUrls: ['https://primary.example', 'https://secondary.example'],
+      getGoogleIdToken: async () => 'google-token',
+      fetchImpl: async (input) => {
+        calls.push(String(input));
+        return json({error: 'request rejected'}, status);
+      }
+    });
+    await assert.rejects(client.chat({userText: '質問'}), (error) => error instanceof YosAiHttpError && error.status === status);
+    assert.equal(calls.length, 1);
+  }
+});
+
+test('Vercel preview share token is never forwarded to a non-Vercel fallback', async () => {
+  const calls = [];
+  const client = new YosAiClient({
+    baseUrls: ['https://project-y-yos-preview.vercel.app', 'https://secondary.example'],
+    vercelShareToken: 'PreviewShare_123',
+    getGoogleIdToken: async () => 'google-token',
+    fetchImpl: async (input, init) => {
+      calls.push({url: String(input), init});
+      if (calls.length === 1) return json({error: 'provider unavailable'}, 503);
+      return json({answer: 'ok'});
+    }
+  });
+
+  await client.chat({userText: '質問'});
+  const first = new URL(calls[0].url);
+  const second = new URL(calls[1].url);
+  assert.equal(first.searchParams.get('_vercel_share'), 'PreviewShare_123');
+  assert.equal(calls[0].init.credentials, 'include');
+  assert.equal(second.searchParams.has('_vercel_share'), false);
+  assert.equal(calls[1].init.credentials, 'omit');
+});
