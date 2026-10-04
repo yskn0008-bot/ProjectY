@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-10-04T11:24:42+09:00",
+  "updated_at": "2026-10-04T11:30:31+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-10-04T02:22:25Z"
+      "updated_at": "2026-10-04T02:25:00Z"
     },
     {
       "id": "github-issue-234",
@@ -195,6 +195,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-ca69989ebb48",
+      "title": "Update .redeploy-trigger",
+      "completed_at": "2026-10-04T02:30:02Z",
+      "result": "GitHub mainへ反映（ca69989）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/ca69989ebb48638a1a6207bcb2354b064d8cbc6f"
+    },
+    {
       "id": "github-commit-916e68ae4dd2",
       "title": "chore(yos-ai): trigger production after deploy-race fix",
       "completed_at": "2026-10-03T23:04:27Z",
@@ -221,13 +228,6 @@
       "completed_at": "2026-10-03T23:01:51Z",
       "result": "GitHub mainへ反映（1d2e24c）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/1d2e24c13158855b3a617122ce5f6404bd2a2c3d"
-    },
-    {
-      "id": "github-commit-c1aa95b74949",
-      "title": "Merge pull request #617 from yskn0008-bot/fix/yos-ai-ignore-last-successful-deploy",
-      "completed_at": "2026-10-03T22:57:52Z",
-      "result": "GitHub mainへ反映（c1aa95b）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/c1aa95b74949b83c0f3baba78723535b314355c5"
     },
     {
       "id": "complete-002",
@@ -264,7 +264,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-10-04T11:24:42+09:00",
+      "last_update": "2026-10-04T11:30:31+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -345,7 +345,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-10-04T11:24:42+09:00",
+      "last_update": "2026-10-04T11:30:31+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -368,7 +368,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-10-04T11:24:42+09:00",
+      "last_update": "2026-10-04T11:30:31+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -450,5 +450,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "c67d1b886f4a3e7c0e1a83d430e3f88ce019722891d02cc6ee6688308407e856"
+  "github_snapshot_hash": "425e913a6bb959de9fe26799f9dde7c541d7ce0a1e0833564f79d49c550e7325"
 }
