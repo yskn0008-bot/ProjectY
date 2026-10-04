@@ -43,11 +43,14 @@ jobs:
       - run: node --check yos/app.js
       - run: node --check yos/money-v2-runtime-v4.js
       - run: node --check yos/desk/app.js
+      - run: node --check yos/runtime-provider-router.js
+      - run: node --check yos/hj/yos-ai-client.js
+      - run: node --check yos/hj/yos-auth.js
       - run: node --check yos/guide.js
       - run: node --check yos/guide-v2.js
       - run: node --check yos/hj/app.js
       - run: node --check yos/emergency-alert-bridge-v1.mjs
-      - run: node --test yos/tests/unified-pwa-contract.test.mjs yos/tests/money-dark-ui-contract.test.mjs yos/tests/money-plan.test.mjs yos/tests/morning-brief-bridge.test.mjs yos/tests/money-dependency-bridges.test.mjs yos/tests/emergency-alert-bridge.test.mjs yos/alerts/alert-engine.test.mjs
+      - run: node --test yos/tests/unified-pwa-contract.test.mjs yos/tests/runtime-provider-router.test.mjs yos/tests/money-dark-ui-contract.test.mjs yos/tests/money-plan.test.mjs yos/tests/morning-brief-bridge.test.mjs yos/tests/money-dependency-bridges.test.mjs yos/tests/emergency-alert-bridge.test.mjs yos/alerts/alert-engine.test.mjs
 
 
   desk-browser:
@@ -71,6 +74,9 @@ jobs:
         run: |
           node --check yos/desk/app.js
           node --check yos/desk/live-chat.js
+          node --check yos/runtime-provider-router.js
+          node --check yos/hj/yos-ai-client.js
+          node --check yos/hj/yos-auth.js
       - name: Start static server
         run: |
           python3 -m http.server 4173 --directory . > /tmp/yos-desk.log 2>&1 &
