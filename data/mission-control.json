@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-10-04T14:09:23+09:00",
+  "updated_at": "2026-10-04T14:09:47+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -12,6 +12,16 @@
     ]
   },
   "inbox": [
+    {
+      "id": "github-pr-624",
+      "title": "PR #624 YOS AI: Cloud Run activationを1回設定で運用可能にする",
+      "type": "GitHub PR",
+      "status": "review",
+      "priority": 1,
+      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/624",
+      "updated_at": "2026-10-04T05:09:26Z"
+    },
     {
       "id": "github-pr-539",
       "title": "PR #539 Finalize YOS Alerts and reread history",
@@ -103,16 +113,6 @@
       "updated_at": "2026-10-04T05:04:01Z"
     },
     {
-      "id": "github-pr-624",
-      "title": "PR #624 YOS AI: Cloud Run activationを1回設定で運用可能にする",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/624",
-      "updated_at": "2026-10-04T05:08:57Z"
-    },
-    {
       "id": "github-issue-10",
       "title": "Issue #10 Mission Control v2：GitHubのIssue・PR・Commitを自動集約する",
       "type": "GitHub Issue",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-10-04T05:08:48Z"
+      "updated_at": "2026-10-04T05:09:21Z"
     },
     {
       "id": "github-issue-234",
@@ -254,7 +254,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "Issue #10を進める：Mission Control v2：GitHubのIssue・PR・Commitを自動集約する",
+      "next_action": "PR #624をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -264,7 +264,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-10-04T14:09:23+09:00",
+      "last_update": "2026-10-04T14:09:47+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -345,7 +345,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-10-04T14:09:23+09:00",
+      "last_update": "2026-10-04T14:09:47+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -354,12 +354,12 @@
       "domain": "Infrastructure",
       "type": "development",
       "purpose": "YOSと各Labの設計に基づいて実装、修正、テストを行う",
-      "status": "active",
+      "status": "review",
       "health": "attention",
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "Issue #10を進める：Mission Control v2：GitHubのIssue・PR・Commitを自動集約する",
+      "next_action": "PR #624をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -368,7 +368,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-10-04T14:09:23+09:00",
+      "last_update": "2026-10-04T14:09:47+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -450,5 +450,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "295d11b57c1ebb6d64fb3407e6dcee503b5feb6ae74ddeddcfc9995d8374da91"
+  "github_snapshot_hash": "b0628e1aca562b2788576c1226aeaef0632003616efe6787498aa8f71d6aae1a"
 }
