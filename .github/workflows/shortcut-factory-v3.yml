@@ -98,6 +98,56 @@ jobs:
               print(f'{name}: signed AEA1 PASS ({len(data)} bytes)')
           PY
 
+      - name: Verify signed shortcut semantics
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m pip install --disable-pip-version-check --quiet lzfse
+          python3 - <<'PY'
+          import plistlib
+          import lzfse
+          from pathlib import Path
+
+          def decode_signed(path):
+              data = Path(path).read_bytes()
+              assert data.startswith(b'AEA1'), path
+              cert_len = int.from_bytes(data[8:12], 'little')
+              payload_start = 12 + cert_len
+              magic = data.find(b'bvx', payload_start)
+              assert magic >= 0, (path, 'LZFSE payload not found')
+              raw = lzfse.decompress(data[magic:])
+              idx = raw.find(b'bplist00')
+              assert idx >= 0, (path, 'workflow bplist not found')
+              return plistlib.loads(raw[idx:])
+
+          def ids(workflow):
+              return [a.get('WFWorkflowActionIdentifier','') for a in workflow.get('WFWorkflowActions',[])]
+
+          add = decode_signed('tools/shortcut-factory/artifacts/STASH Add.shortcut')
+          stash = decode_signed('tools/shortcut-factory/artifacts/STASH.shortcut')
+          add_ids = ids(add)
+          stash_ids = ids(stash)
+
+          assert 'is.workflow.actions.runworkflow' not in add_ids, add_ids
+          assert add_ids.count('is.workflow.actions.file.append') == 1, add_ids
+          assert 'is.workflow.actions.getclipboard' in add_ids, add_ids
+          assert 'is.workflow.actions.notification' not in add_ids, add_ids
+
+          assert 'is.workflow.actions.setclipboard' in stash_ids, stash_ids
+          assert 'is.workflow.actions.documentpicker.save' in stash_ids, stash_ids
+          assert 'is.workflow.actions.notification' not in stash_ids, stash_ids
+
+          saves=[a for a in stash.get('WFWorkflowActions',[]) if a.get('WFWorkflowActionIdentifier')=='is.workflow.actions.documentpicker.save']
+          assert len(saves)==1
+          p=saves[0].get('WFWorkflowActionParameters',{})
+          assert p.get('WFAskWhereToSave') is False, p
+          assert p.get('WFSaveFileOverwrite') is True, p
+          assert p.get('WFFileDestinationPath') == 'POCKET.txt', p
+
+          print('SIGNED STASH Add semantics: PASS (no Run Shortcut action)')
+          print('SIGNED STASH semantics: PASS (fixed POCKET rewrite, silent)')
+          PY
+
       - name: Upload iPhone acceptance package
         uses: actions/upload-artifact@v4
         with:
