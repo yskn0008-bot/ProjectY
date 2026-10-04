@@ -46,7 +46,7 @@ class FlowSourceContractTests(unittest.TestCase):
         self.assertEqual(result["aea"]["profile"], 0)
         self.assertEqual(result["aea"]["archive_size"], 26278)
 
-    def test_home_work_out_recovered_baselines_are_exact_zero_action_artifacts(self):
+    def test_home_work_out_are_exact_recovered_safe_noops(self):
         expected = {
             "Home Flow": ("Home", "com.apple.donotdisturb.mode.bookmarkfill"),
             "Work Flow": ("Work", "com.apple.donotdisturb.mode.mappin"),
@@ -69,20 +69,9 @@ class FlowSourceContractTests(unittest.TestCase):
         self.assertEqual(result["action_count"], 26)
         self.assertEqual(variants[0]["embedded_trigger"]["focus_name"], "Morning")
 
-    def test_runtime_contract_reuses_only_evidenced_existing_child(self):
-        self.assertEqual(
-            self.manifest["flows"]["Morning Flow"]["runtime_contract"]["calls_existing_yos_assets"],
-            [],
-        )
-        for name in ("Home Flow", "Work Flow", "Out Flow"):
-            self.assertEqual(
-                self.manifest["flows"][name]["runtime_contract"]["calls_existing_yos_assets"],
-                ["YOS Battery Sync"],
-            )
-            self.assertEqual(
-                self.manifest["flows"][name]["factory"]["signing_mode"],
-                "hubsign_completed_artifact",
-            )
+    def test_runtime_contract_does_not_invent_child_shortcuts(self):
+        for entry in self.manifest["flows"].values():
+            self.assertEqual(entry["runtime_contract"]["calls_existing_yos_assets"], [])
 
     def test_factory_packages_exact_existing_signed_artifacts(self):
         with tempfile.TemporaryDirectory() as tmp:
