@@ -1,0 +1,246 @@
+{
+  "schema_version": "1.1.0",
+  "base_main_sha": "6b2c0cd90d40bad5110916366e6a88f20645efda",
+  "purpose": "Canonicalize the existing iPhone Flow shortcuts from recovered current artifacts without inventing replacements.",
+  "policy": {
+    "do_not_rebuild_morning_flow": true,
+    "do_not_infer_flow_actions_from_names": true,
+    "main_direct_changes_forbidden": true,
+    "shared_logic_rule": "Reuse existing child Shortcuts/adapters; do not copy common processing between Flows.",
+    "empty_flow_rule": "A recovered Flow with zero actions remains a safe no-op until an evidenced implementation exists."
+  },
+  "flows": {
+    "Morning Flow": {
+      "status": "recovered_current_artifact",
+      "canonical_mode": "adopt_existing_signed_iphone_artifact",
+      "canonical_share_id": "08b110bd699a4ee9ab7b1a1bd4bb67f3",
+      "selection_basis": [
+        "This supplied artifact was authored by the newer Shortcuts client 5037.109 with minimum client 5001.",
+        "It has no embedded Focus trigger, which matches the already-verified ProjectY parent Morning orchestration path.",
+        "It extends the evidenced Morning behavior with destination/travel/departure calculations while preserving the same urgency output model."
+      ],
+      "source_path": "tools/factory-core/flow-artifacts/shared-recovered/08b110bd699a4ee9ab7b1a1bd4bb67f3__Morning Flow.plist",
+      "signed_path": "tools/factory-core/flow-artifacts/shared-recovered/08b110bd699a4ee9ab7b1a1bd4bb67f3__Morning Flow.shortcut",
+      "xml_path": "tools/factory-core/flow-artifacts/shared-recovered/08b110bd699a4ee9ab7b1a1bd4bb67f3__Morning Flow.xml",
+      "unsigned_sha256": "f1ef281457e84c4189e48f4d2a1962f9e76a598dbbb78a4190ec136270b030e2",
+      "unsigned_size": 9588,
+      "signed_sha256": "b68edca63d2476a1ca3660bbbb342c843a294be4b496c2cb8aaed91ec88c20f2",
+      "signed_size": 26278,
+      "action_count": 45,
+      "action_identifier_sha256": "f4f7b9580f088148b6c02a589d238787f83f137a2b0d11339ede3dc2c6ee74d1",
+      "client_version": "5037.109",
+      "minimum_client_version": 5001,
+      "embedded_triggers": [],
+      "aea": {
+        "magic": "AEA1",
+        "profile": 0,
+        "auth_data_size": 2203,
+        "original_shortcut_plist_size": 9686,
+        "archive_size": 26278,
+        "segment_size": 1048576,
+        "segments_per_cluster": 256,
+        "compression": "e",
+        "checksum": 2
+      },
+      "factory": {
+        "compile_mode": "preserve_recovered_unsigned_plist",
+        "signing_mode": "preserve_existing_apple_signed_artifact",
+        "artifact_mode": "copy_verified_signed_artifact",
+        "reason": "Recompiling or re-signing would replace the recovered iPhone implementation instead of canonicalizing it."
+      },
+      "runtime_contract": {
+        "trigger": "Existing parent Shortcut Morning is the canonical caller; the parent Morning path is already verified in ProjectY production evidence.",
+        "actions": [
+          "Find the next Calendar event beginning within the next 1 day and read title, start date, and location.",
+          "Calculate the remaining time from now until the event starts.",
+          "When a location exists, calculate travel time, apply a 10-minute arrival buffer, derive arrival and departure targets, and calculate time until departure.",
+          "Return one of the existing urgency outputs: ○余裕あり, △準備開始, or ●急ぐ; the latter two also vibrate.",
+          "When location is absent, use the parallel urgency branches without travel fields.",
+          "When no event exists, return ○予定なし."
+        ],
+        "calls_existing_yos_assets": [],
+        "parent_siblings": [
+          "Morning Brief",
+          "YOS Today Note"
+        ],
+        "focus_relation": "Focus gating belongs to the existing parent Morning path. The canonical Morning Flow itself intentionally has no embedded Focus trigger.",
+        "duplicate_prevention": "Use this triggerless canonical Morning Flow only through the existing parent Morning path. The older supplied Morning variant with an embedded Morning Focus-enable trigger is historical/non-canonical and must not also run.",
+        "failure_safe": "Calendar/travel/date reads, output text, variables, and vibration only. No persistent write, deletion, message send, payment, purchase, or data migration exists in this Flow. Missing event/location follows explicit safe branches."
+      }
+    },
+    "Home Flow": {
+      "status": "recovered_current_artifact",
+      "canonical_mode": "adopt_existing_signed_iphone_artifact",
+      "canonical_share_id": "904f29b9bf5d475dbd32646e458d4249",
+      "source_path": "tools/factory-core/flow-artifacts/shared-recovered/904f29b9bf5d475dbd32646e458d4249__Home Flow.plist",
+      "signed_path": "tools/factory-core/flow-artifacts/shared-recovered/904f29b9bf5d475dbd32646e458d4249__Home Flow.shortcut",
+      "xml_path": "tools/factory-core/flow-artifacts/shared-recovered/904f29b9bf5d475dbd32646e458d4249__Home Flow.xml",
+      "unsigned_sha256": "7903e1cf9ed0c3b52ee55e379c3945a9cbd607031b2ee1665b888d44c971b3bc",
+      "unsigned_size": 1428,
+      "signed_sha256": "81ef355d915de5bc08dcb567d0a5fe5811532ac687670c868018c61093ef45ed",
+      "signed_size": 22032,
+      "action_count": 0,
+      "action_identifier_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "client_version": "4711",
+      "minimum_client_version": 900,
+      "embedded_triggers": [
+        {
+          "type": "WFUserFocusActivityTrigger",
+          "event": "enable",
+          "focus_name": "Home",
+          "focus_identifier": "com.apple.donotdisturb.mode.bookmarkfill"
+        }
+      ],
+      "aea": {
+        "magic": "AEA1",
+        "profile": 0,
+        "auth_data_size": 2204,
+        "original_shortcut_plist_size": 1526,
+        "archive_size": 22032,
+        "segment_size": 1048576,
+        "segments_per_cluster": 256,
+        "compression": "e",
+        "checksum": 2
+      },
+      "factory": {
+        "compile_mode": "preserve_recovered_unsigned_plist",
+        "signing_mode": "preserve_existing_apple_signed_artifact",
+        "artifact_mode": "copy_verified_signed_artifact"
+      },
+      "runtime_contract": {
+        "trigger": "Embedded Focus-enable trigger for Home.",
+        "actions": [],
+        "calls_existing_yos_assets": [],
+        "focus_relation": "Runs when the Home Focus is enabled.",
+        "duplicate_prevention": "Only this recovered canonical artifact is adopted; no second Home automation is added. Because there are zero actions, repeated execution has no runtime side effects.",
+        "failure_safe": "Zero actions. The current evidenced implementation is a safe no-op and is not filled with guessed behavior."
+      }
+    },
+    "Work Flow": {
+      "status": "recovered_current_artifact",
+      "canonical_mode": "adopt_existing_signed_iphone_artifact",
+      "canonical_share_id": "3b75f6e2f3d547ddbb48e366ede0f0b9",
+      "source_path": "tools/factory-core/flow-artifacts/shared-recovered/3b75f6e2f3d547ddbb48e366ede0f0b9__Work Flow.plist",
+      "signed_path": "tools/factory-core/flow-artifacts/shared-recovered/3b75f6e2f3d547ddbb48e366ede0f0b9__Work Flow.shortcut",
+      "xml_path": "tools/factory-core/flow-artifacts/shared-recovered/3b75f6e2f3d547ddbb48e366ede0f0b9__Work Flow.xml",
+      "unsigned_sha256": "bc1a09eb33c6d95799033f1166ac8e37c89a00153b33d5c9a5790a0b89718e00",
+      "unsigned_size": 1415,
+      "signed_sha256": "8df09c3644c9142bcb187cd318df12bddede5f2312d5c745504347bb670f9339",
+      "signed_size": 22016,
+      "action_count": 0,
+      "action_identifier_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "client_version": "4711",
+      "minimum_client_version": 900,
+      "embedded_triggers": [
+        {
+          "type": "WFUserFocusActivityTrigger",
+          "event": "enable",
+          "focus_name": "Work",
+          "focus_identifier": "com.apple.donotdisturb.mode.mappin"
+        }
+      ],
+      "aea": {
+        "magic": "AEA1",
+        "profile": 0,
+        "auth_data_size": 2204,
+        "original_shortcut_plist_size": 1513,
+        "archive_size": 22016,
+        "segment_size": 1048576,
+        "segments_per_cluster": 256,
+        "compression": "e",
+        "checksum": 2
+      },
+      "factory": {
+        "compile_mode": "preserve_recovered_unsigned_plist",
+        "signing_mode": "preserve_existing_apple_signed_artifact",
+        "artifact_mode": "copy_verified_signed_artifact"
+      },
+      "runtime_contract": {
+        "trigger": "Embedded Focus-enable trigger for Work.",
+        "actions": [],
+        "calls_existing_yos_assets": [],
+        "focus_relation": "Runs when the Work Focus is enabled.",
+        "duplicate_prevention": "Only this recovered canonical artifact is adopted; no second Work automation is added. Because there are zero actions, repeated execution has no runtime side effects.",
+        "failure_safe": "Zero actions. The current evidenced implementation is a safe no-op and is not filled with guessed behavior."
+      }
+    },
+    "Out Flow": {
+      "status": "recovered_current_artifact",
+      "canonical_mode": "adopt_existing_signed_iphone_artifact",
+      "canonical_share_id": "38dcc0c037294f419d24d4bdac2567a8",
+      "source_path": "tools/factory-core/flow-artifacts/shared-recovered/38dcc0c037294f419d24d4bdac2567a8__Out Flow.plist",
+      "signed_path": "tools/factory-core/flow-artifacts/shared-recovered/38dcc0c037294f419d24d4bdac2567a8__Out Flow.shortcut",
+      "xml_path": "tools/factory-core/flow-artifacts/shared-recovered/38dcc0c037294f419d24d4bdac2567a8__Out Flow.xml",
+      "unsigned_sha256": "4162e454e26c4d0b9bcf7d5e81f5ac5847d587708f2984fa68b0822d45e4b482",
+      "unsigned_size": 1432,
+      "signed_sha256": "e8627b4a78f4f9c4f53ec50cff8a10c5a8d51981b7ec1c4903bb921c770795e5",
+      "signed_size": 22035,
+      "action_count": 0,
+      "action_identifier_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "client_version": "4711",
+      "minimum_client_version": 900,
+      "embedded_triggers": [
+        {
+          "type": "WFUserFocusActivityTrigger",
+          "event": "enable",
+          "focus_name": "Out",
+          "focus_identifier": "com.apple.donotdisturb.mode.booksverticalfill"
+        }
+      ],
+      "aea": {
+        "magic": "AEA1",
+        "profile": 0,
+        "auth_data_size": 2205,
+        "original_shortcut_plist_size": 1530,
+        "archive_size": 22035,
+        "segment_size": 1048576,
+        "segments_per_cluster": 256,
+        "compression": "e",
+        "checksum": 2
+      },
+      "factory": {
+        "compile_mode": "preserve_recovered_unsigned_plist",
+        "signing_mode": "preserve_existing_apple_signed_artifact",
+        "artifact_mode": "copy_verified_signed_artifact"
+      },
+      "runtime_contract": {
+        "trigger": "Embedded Focus-enable trigger for Out.",
+        "actions": [],
+        "calls_existing_yos_assets": [],
+        "focus_relation": "Runs when the Out Focus is enabled.",
+        "duplicate_prevention": "Only this recovered canonical artifact is adopted; no second Out automation is added. Because there are zero actions, repeated execution has no runtime side effects.",
+        "failure_safe": "Zero actions. The current evidenced implementation is a safe no-op and is not filled with guessed behavior."
+      }
+    }
+  },
+  "supplied_variants": [
+    {
+      "share_id": "ba12343727064dde851140c6715b80db",
+      "name": "Morning Flow",
+      "canonical": false,
+      "source_path": "tools/factory-core/flow-artifacts/shared-recovered/ba12343727064dde851140c6715b80db__Morning Flow.plist",
+      "signed_path": "tools/factory-core/flow-artifacts/shared-recovered/ba12343727064dde851140c6715b80db__Morning Flow.shortcut",
+      "unsigned_sha256": "980ec38b1e8441b0ba62b19798d5e3ca5d9c10d9346f7349f05a7813a0301076",
+      "signed_sha256": "745d8cbe31b3566159ebcf0b765df6da8e4f90c3027ff609c5c7b6fc28f05bd8",
+      "action_count": 26,
+      "action_identifier_sha256": "daf051ab5eb2614d6b80a5af82ba01fe322458e4fefbaefb4840e1aaa612bfed",
+      "client_version": "4711",
+      "minimum_client_version": 900,
+      "embedded_trigger": {
+        "type": "WFUserFocusActivityTrigger",
+        "event": "enable",
+        "focus_name": "Morning",
+        "focus_identifier": "com.apple.donotdisturb.mode.listbullet"
+      },
+      "reason_not_canonical": "It embeds a Morning Focus-enable trigger and is from an older Shortcuts client. Running it alongside the already-verified parent Morning path would create a duplicate-trigger risk."
+    }
+  ],
+  "historical_project_artifacts": [
+    {
+      "name": "Morning Flow",
+      "sha256": "c5eea8d5dd144733e14c3d3ca12f5f16f259316c64b7f1039f8eb3559004a9c0",
+      "size_bytes": 26444,
+      "status": "superseded_by_current_user_supplied_share_evidence"
+    }
+  ]
+}
