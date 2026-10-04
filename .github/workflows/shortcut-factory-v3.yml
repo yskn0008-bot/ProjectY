@@ -35,9 +35,9 @@ jobs:
           add=Path('tools/shortcut-factory/shortcuts/STASH Add.cherri').read_text()
           assert 'POCKET.txt' in stash and '===YOS_NEXT===' in stash
           assert 'appendResolvedFile' in stash
-          assert 'run("STASH", @stashItem)' in add
+          assert 'run("STASH", @stashItem)' not in add
           assert 'getClipboard()' in add
-          assert 'appendResolvedFile' not in add
+          assert 'appendResolvedFile' in add
           assert 'appendToFile' not in add
           print('Shortcut Factory source boundary: PASS')
           PY
