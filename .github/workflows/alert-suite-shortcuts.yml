@@ -58,6 +58,7 @@ jobs:
           done
           python3 patch_reminder_alert.py 'artifacts/Task Alert.plist' TASK
           python3 patch_reminder_alert.py 'artifacts/Routine Alert.plist' ROUTINE
+          python3 patch_money_alert_local.py 'artifacts/Money Alert.plist'
           for name in 'Money Alert' 'Task Alert' 'Routine Alert' 'Emergency Alert' 'Important Mail'; do
             python3 patch_notification_deeplink.py "artifacts/${name}.plist" "${name}"
           done
@@ -85,9 +86,12 @@ jobs:
 
           w,a,ids,blob=read('Money Alert')
           assert w.get('WFWorkflowHasShortcutInputVariables') is True
-          assert ids.count('is.workflow.actions.openurl') == 1
-          assert 'money-alert-bridge.html?return=shortcut' in blob
-          assert 'dedupe=1' in blob
+          assert ids.count('is.workflow.actions.openurl') == 0
+          assert ids.count('is.workflow.actions.getclipboard') == 1
+          assert ids.count('dk.simonbs.Scriptable.RunScriptInlineIntent') == 3
+          assert 'YOS/Money/money.json' in blob
+          assert 'yos-money-local-v1' in blob
+          assert 'Pasteboard.copyString' in blob
           assert 'YOS_MONEY_ALERT_V1' in blob
           assert '緊急Money Alertなし' in blob
           assert 'YOS Display History' in blob
@@ -134,7 +138,8 @@ jobs:
               assert ids.count('is.workflow.actions.documentpicker.save') <= 2
               assert ids.count('is.workflow.actions.notification') == 0
               assert ids.count('is.workflow.actions.alert') == 0
-              assert ids.count('dk.simonbs.Scriptable.RunScriptInlineIntent') == 1
+              expected_scriptable = 3 if name == 'Money Alert' else 1
+              assert ids.count('dk.simonbs.Scriptable.RunScriptInlineIntent') == expected_scriptable
               assert routes[name] in blob
               assert "'runInApp': False" in blob
               assert "'ShowWhenRun': False" in blob
