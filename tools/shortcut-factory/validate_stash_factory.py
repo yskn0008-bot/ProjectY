@@ -130,27 +130,20 @@ def main() -> int:
         fail("STASH consume save is not wired to remaining content")
 
     # STASH Add must stay a silent one-tap writer to the existing POCKET.txt.
-    # Direct append intentionally removes the iOS "run another Shortcut" gate.
+    # Use Shortcuts' native path-based append so the generated action carries
+    # an explicit file path. The previous custom resolved-file append compiled
+    # without WFFilePath and failed on-device.
     if "POCKET.txt" not in add_blob or "===YOS_NEXT===" not in add_blob:
         fail("STASH Add duplicate/storage contract missing")
     if len(actions_with(add, "is.workflow.actions.getclipboard")) != 1:
         fail("STASH Add clipboard action missing")
 
     pocket_reads = actions_with(add, "is.workflow.actions.documentpicker.open")
-    if len(pocket_reads) != 2:
-        fail(f"STASH Add expected optional dedupe read + resolved write target, found {len(pocket_reads)}")
-    optional_reads = [
-        a for a in pocket_reads
-        if params(a).get("WFGetFilePath") == "POCKET.txt"
-        and params(a).get("WFFileErrorIfNotFound") is False
-    ]
-    strict_reads = [
-        a for a in pocket_reads
-        if params(a).get("WFGetFilePath") == "POCKET.txt"
-        and params(a).get("WFFileErrorIfNotFound") is not False
-    ]
-    if len(optional_reads) != 1 or len(strict_reads) != 1:
-        fail("STASH Add POCKET read/write targets are incorrect")
+    if len(pocket_reads) != 1:
+        fail(f"STASH Add expected one optional POCKET dedupe read, found {len(pocket_reads)}")
+    pocket_read = params(pocket_reads[0])
+    if pocket_read.get("WFGetFilePath") != "POCKET.txt" or pocket_read.get("WFFileErrorIfNotFound") is not False:
+        fail(f"STASH Add POCKET dedupe read is incorrect: {pocket_read}")
 
     contains_checks = [
         a for a in actions_with(add, "is.workflow.actions.conditional")
@@ -167,8 +160,8 @@ def main() -> int:
     if len(append_actions) != 1:
         fail(f"STASH Add must append to existing POCKET exactly once: {len(append_actions)}")
     append_params = params(append_actions[0])
-    if "targetFile" not in repr(append_params.get("WFFile")):
-        fail("STASH Add append is not wired to resolved POCKET target")
+    if append_params.get("WFFilePath") != "POCKET.txt":
+        fail(f"STASH Add append must carry explicit POCKET.txt path: {append_params}")
     if "expectedEntry" not in repr(append_params.get("WFInput")):
         fail("STASH Add append is not wired to exact delimited entry")
 
@@ -180,7 +173,7 @@ def main() -> int:
     print(f"STASH factory structure: PASS ({len(stash_ids)} actions)")
     print("STASH compact exact-copy consume contract: PASS")
     print("STASH no-save-prompt + silent routine contract: PASS")
-    print(f"STASH Add direct existing-POCKET append + dedupe structure: PASS ({len(add_ids)} actions)")
+    print(f"STASH Add explicit-path POCKET append + dedupe structure: PASS ({len(add_ids)} actions)")
     return 0
 
 
