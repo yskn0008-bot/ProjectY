@@ -16,15 +16,11 @@ export interface ProductionPreflightReport {
   warnings: number;
 }
 
-const REQUIRED_VARIABLES = [
+const COMMON_REQUIRED_VARIABLES = [
   'OPENAI_API_KEY',
   'GOOGLE_CLIENT_ID',
   'YOS_ALLOWED_ORIGINS',
   'GOOGLE_ALLOWED_SUBJECT_HASH',
-  'GCP_PROJECT_NUMBER',
-  'GCP_WORKLOAD_IDENTITY_POOL_ID',
-  'GCP_WORKLOAD_IDENTITY_POOL_PROVIDER_ID',
-  'GCP_SERVICE_ACCOUNT_EMAIL',
   'YOS_LAW_DOCUMENT_ID',
   'YOS_MASTER_DOCUMENT_ID',
   'YOS_CHANGE_LOG_DOCUMENT_ID',
@@ -35,12 +31,28 @@ const REQUIRED_VARIABLES = [
   'UPSTASH_REDIS_REST_TOKEN'
 ] as const;
 
+const VERCEL_WIF_REQUIRED_VARIABLES = [
+  'GCP_PROJECT_NUMBER',
+  'GCP_WORKLOAD_IDENTITY_POOL_ID',
+  'GCP_WORKLOAD_IDENTITY_POOL_PROVIDER_ID',
+  'GCP_SERVICE_ACCOUNT_EMAIL'
+] as const;
+
+function requiredVariables(environment: Environment): readonly string[] {
+  const mode = environment.GOOGLE_AUTH_MODE?.trim() || 'vercel_oidc';
+  const provider = environment.YOS_RUNTIME_PROVIDER?.trim() || '';
+  if (mode === 'application_default' && provider === 'google_cloud_run') {
+    return COMMON_REQUIRED_VARIABLES;
+  }
+  return [...COMMON_REQUIRED_VARIABLES, ...VERCEL_WIF_REQUIRED_VARIABLES];
+}
+
 const PLACEHOLDER_PATTERN = /^(?:changeme|example|placeholder|secret|todo|your[_-]|<.+>)$/iu;
 
 export function runProductionPreflight(environment: Environment): ProductionPreflightReport {
   const checks: PreflightCheck[] = [];
 
-  for (const name of REQUIRED_VARIABLES) {
+  for (const name of requiredVariables(environment)) {
     const value = environment[name]?.trim();
     if (!value) {
       checks.push({id: name, status: 'fail', message: `${name} is missing`});
@@ -89,14 +101,18 @@ export function runProductionPreflight(environment: Environment): ProductionPref
     checks.push({id: 'service_account_format', status: 'pass', message: 'Service account email format is valid'});
   }
 
-  if ((environment.GOOGLE_AUTH_MODE?.trim() || 'vercel_oidc') !== 'vercel_oidc') {
+  const authMode = environment.GOOGLE_AUTH_MODE?.trim() || 'vercel_oidc';
+  const runtimeProvider = environment.YOS_RUNTIME_PROVIDER?.trim() || '';
+  if (authMode === 'vercel_oidc') {
+    checks.push({id: 'keyless_auth', status: 'pass', message: 'Vercel OIDC keyless Google authentication is selected'});
+  } else if (authMode === 'application_default' && runtimeProvider === 'google_cloud_run') {
+    checks.push({id: 'keyless_auth', status: 'pass', message: 'Cloud Run attached service identity is selected'});
+  } else {
     checks.push({
       id: 'keyless_auth',
       status: 'fail',
-      message: 'Production requires GOOGLE_AUTH_MODE=vercel_oidc'
+      message: 'Production keyless auth requires vercel_oidc or google_cloud_run application_default'
     });
-  } else {
-    checks.push({id: 'keyless_auth', status: 'pass', message: 'Keyless Google authentication is selected'});
   }
 
   const failed = checks.filter((check) => check.status === 'fail').length;
