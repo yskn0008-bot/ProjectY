@@ -139,7 +139,7 @@ public final class YOSCapturePlugin: CAPPlugin, CAPBridgedPlugin {
         if let date = standard.date(from: value) { return date }
         standard.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
         if let date = standard.date(from: value) { return date }
-        throw YOSEventError.invalidFacts
+        throw YOSEventError.invalidOccurredAt
     }
 
     private func dictionary<T: Encodable>(_ value: T) throws -> JSObject {
