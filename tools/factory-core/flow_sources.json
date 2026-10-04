@@ -126,7 +126,12 @@
             "Unconditional AC ON",
             "TV auto-ON"
           ],
-          "reason": "Arrival should create a comfortable atmosphere without forcing the white ceiling light on. Floor lamp is automatic; the main white light remains manual."
+          "reason": "Arrival should create a comfortable atmosphere without forcing the white ceiling light on. Floor lamp is automatic; the main white light remains manual.",
+          "physical_verification": {
+            "status": "PASS",
+            "date": "2026-10-05",
+            "evidence": "Owner verified a real arrival after leaving home; floor lamp automation worked with no reported problem."
+          }
         }
       }
     },
@@ -234,7 +239,12 @@
           "conditional_actions": [
             "TV OFF only when the actual Tapo action is a discrete OFF command, never a power toggle"
           ],
-          "reason": "Departure automation must still execute after the iPhone disconnects from home Wi-Fi and must not depend on Scriptable."
+          "reason": "Departure automation must still execute after the iPhone disconnects from home Wi-Fi and must not depend on Scriptable.",
+          "physical_verification": {
+            "status": "PASS",
+            "date": "2026-10-05",
+            "evidence": "Owner verified a real departure; floor lamp, main light, and air conditioner shutdown worked with no reported problem."
+          }
         }
       }
     }
