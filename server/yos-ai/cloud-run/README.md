@@ -68,6 +68,7 @@ The workflow intentionally uses `google-github-actions/auth@v3` with Workload Id
 
 ### One-time GitHub repository variables
 
+- `OPENAI_MODEL` — copy the current Vercel production model exactly; do not use a provider-specific default
 - `GCP_CLOUD_RUN_PROJECT_ID`
 - `GCP_CLOUD_RUN_REGION`
 - `GCP_CLOUD_RUN_SERVICE`
@@ -105,3 +106,11 @@ Optional route secrets may also be supplied for Taxi, Clarity, and Notion when t
 7. Only after parity PASS, write the Cloud Run URL to `data/yos-runtime-providers.json` and set that provider `enabled=true`.
 
 This means a Cloud Run setup or quota problem cannot silently lower YOS quality. Until step 7 the production router continues to use Vercel only.
+
+### Container entrypoint
+
+Before source deployment, the workflow copies the existing `cloud-run/Dockerfile` into the source root. This keeps one canonical Dockerfile and ensures Cloud Run uses its `cloud-run/server.mjs` entrypoint instead of inferring a buildpack start command.
+
+### 2026-10-04 activation audit
+
+Vercel production environment configuration was observed with `OPENAI_MODEL=gpt-5.6-terra`; the previous workflow hard-coded `gpt-5.6-sol`. Repository variable `OPENAI_MODEL` must be copied from the production setting and checked again during live parity. This observation alone does not certify either deployed runtime. Cloud Run remains disabled until live parity passes. No credentials are recorded here.

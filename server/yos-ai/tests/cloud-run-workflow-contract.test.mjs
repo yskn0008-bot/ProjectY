@@ -23,7 +23,7 @@ test('Cloud Run deploy is explicit and quality-gated', () => {
 test('Cloud Run runtime receives same model and attached service identity contract', () => {
   assert.match(workflow, /YOS_RUNTIME_PROVIDER=google_cloud_run/);
   assert.match(workflow, /GOOGLE_AUTH_MODE=application_default/);
-  assert.match(workflow, /OPENAI_MODEL=gpt-5\.6-sol/);
+  assert.match(workflow, /OPENAI_MODEL=\$\{\{ vars\.OPENAI_MODEL \}\}/);
   assert.match(workflow, /--service-account=\$\{\{ vars\.GCP_CLOUD_RUN_RUNTIME_SERVICE_ACCOUNT \}\}/);
   assert.match(workflow, /OPENAI_API_KEY=\$\{\{ secrets\.OPENAI_API_KEY \}\}/);
   assert.match(workflow, /UPSTASH_REDIS_REST_TOKEN=\$\{\{ secrets\.UPSTASH_REDIS_REST_TOKEN \}\}/);
@@ -32,4 +32,16 @@ test('Cloud Run runtime receives same model and attached service identity contra
 test('deployment never enables failover before live parity', () => {
   assert.doesNotMatch(workflow, /yos-runtime-providers\.json.*enabled=true/);
   assert.match(workflow, /Run live parity before enabling failover/);
+});
+
+test('Cloud Run source deployment stages the canonical container entrypoint', () => {
+  const stage = workflow.indexOf('cp server/yos-ai/cloud-run/Dockerfile server/yos-ai/Dockerfile');
+  const deploy = workflow.indexOf('uses: google-github-actions/deploy-cloudrun@v3');
+  assert.ok(stage >= 0 && stage < deploy);
+});
+
+test('readiness requires an explicit production model with no provider-specific default', () => {
+  assert.match(workflow, /OPENAI_MODEL: \$\{\{ vars\.OPENAI_MODEL \}\}/);
+  assert.match(workflow, /required=\([\s\S]*\n\s+OPENAI_MODEL\n/);
+  assert.doesNotMatch(workflow, /OPENAI_MODEL=gpt-/);
 });

@@ -46,6 +46,7 @@ jobs:
       GCP_WIF_PROVIDER: ${{ vars.GCP_GITHUB_WIF_PROVIDER }}
       GCP_DEPLOY_SERVICE_ACCOUNT: ${{ vars.GCP_GITHUB_DEPLOY_SERVICE_ACCOUNT }}
       GCP_RUNTIME_SERVICE_ACCOUNT: ${{ vars.GCP_CLOUD_RUN_RUNTIME_SERVICE_ACCOUNT }}
+      OPENAI_MODEL: ${{ vars.OPENAI_MODEL }}
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
       GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
       GOOGLE_ALLOWED_SUBJECT_HASH: ${{ secrets.GOOGLE_ALLOWED_SUBJECT_HASH }}
@@ -75,6 +76,7 @@ jobs:
             GCP_WIF_PROVIDER
             GCP_DEPLOY_SERVICE_ACCOUNT
             GCP_RUNTIME_SERVICE_ACCOUNT
+            OPENAI_MODEL
             OPENAI_API_KEY
             GOOGLE_CLIENT_ID
             GOOGLE_ALLOWED_SUBJECT_HASH
@@ -118,6 +120,9 @@ jobs:
           workload_identity_provider: ${{ vars.GCP_GITHUB_WIF_PROVIDER }}
           service_account: ${{ vars.GCP_GITHUB_DEPLOY_SERVICE_ACCOUNT }}
 
+      - name: Stage existing Cloud Run Dockerfile
+        run: cp server/yos-ai/cloud-run/Dockerfile server/yos-ai/Dockerfile
+
       - id: deploy
         uses: google-github-actions/deploy-cloudrun@v3
         with:
@@ -138,7 +143,7 @@ jobs:
             NODE_ENV=production
             YOS_RUNTIME_PROVIDER=google_cloud_run
             GOOGLE_AUTH_MODE=application_default
-            OPENAI_MODEL=gpt-5.6-sol
+            OPENAI_MODEL=${{ vars.OPENAI_MODEL }}
             YOS_NAV_MODEL_CACHE_SECONDS=900
             YOS_AUDIT_RETENTION_DAYS=30
             YOS_REQUESTS_PER_HOUR=30
