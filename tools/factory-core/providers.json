@@ -4,12 +4,20 @@
     "development_must_not_stop_on_optional_provider_failure": true,
     "canonical_source": "local_store",
     "github_is_optional_mirror": true,
-    "vercel_is_optional_public_host": true
+    "vercel_is_optional_public_host": true,
+    "partial_wait_prefers_alternative": true,
+    "external_wait_only_when_no_eligible_alternative": true,
+    "wait_user_only_for_human_gate": true
   },
   "providers": [
     {
       "id": "local_store",
-      "roles": ["source_store", "change_history", "rollback", "artifact_store"],
+      "roles": [
+        "source_store",
+        "change_history",
+        "rollback",
+        "artifact_store"
+      ],
       "priority": 0,
       "external": false,
       "mode": "filesystem",
@@ -17,7 +25,9 @@
     },
     {
       "id": "local_runner",
-      "roles": ["qa_runner"],
+      "roles": [
+        "qa_runner"
+      ],
       "priority": 0,
       "external": false,
       "mode": "process",
@@ -25,7 +35,9 @@
     },
     {
       "id": "iphone_bundle",
-      "roles": ["distribution"],
+      "roles": [
+        "distribution"
+      ],
       "priority": 0,
       "external": false,
       "mode": "offline_bundle",
@@ -33,7 +45,11 @@
     },
     {
       "id": "google_drive",
-      "roles": ["source_mirror", "artifact_mirror", "backup"],
+      "roles": [
+        "source_mirror",
+        "artifact_mirror",
+        "backup"
+      ],
       "priority": 10,
       "external": true,
       "mode": "mirror",
@@ -41,7 +57,12 @@
     },
     {
       "id": "github",
-      "roles": ["source_mirror", "change_history_mirror", "qa_runner", "backup"],
+      "roles": [
+        "source_mirror",
+        "change_history_mirror",
+        "qa_runner",
+        "backup"
+      ],
       "priority": 20,
       "external": true,
       "mode": "mirror",
@@ -49,7 +70,10 @@
     },
     {
       "id": "github_pages",
-      "roles": ["public_host", "distribution"],
+      "roles": [
+        "public_host",
+        "distribution"
+      ],
       "priority": 20,
       "external": true,
       "mode": "static_host",
@@ -57,11 +81,25 @@
     },
     {
       "id": "vercel",
-      "roles": ["public_host", "api_host"],
+      "roles": [
+        "public_host",
+        "api_host"
+      ],
       "priority": 30,
       "external": true,
       "mode": "host",
       "enabled": true
+    },
+    {
+      "id": "google_cloud_run",
+      "roles": [
+        "api_host"
+      ],
+      "priority": 31,
+      "external": true,
+      "mode": "host",
+      "enabled": false,
+      "activation_gate": "live parity smoke must pass before enabling"
     }
   ]
 }
