@@ -369,14 +369,26 @@ for actionItem in @actionsRaw {
         appendToFile("Clarity Inbox.txt", memoRecord)
     }
 
-    if (@normalizedExecutor == "NEXT_TASK" && @normalizedModule == "task" && operation == "create") || (@normalizedExecutor == "NEXT_SHOPPING" && @normalizedModule == "shopping" && operation == "create") {
-        const itemContent = "{parameters['content']}"
-        if !itemContent {
+    if @normalizedExecutor == "NEXT_TASK" && @normalizedModule == "task" && operation == "create" {
+        const taskContent = "{parameters['content']}"
+        if !taskContent {
             alert("追加する内容を確認してください", "Clarity Next")
             stop()
         }
         rawAction("is.workflow.actions.addnewreminder", {
-            "WFCalendarItemTitle": "{itemContent}",
+            "WFCalendarItemTitle": "{taskContent}",
+            "WFCalendarItemAlert": false
+        })
+    }
+
+    if @normalizedExecutor == "NEXT_SHOPPING" && @normalizedModule == "shopping" && operation == "create" {
+        const shoppingContent = "{parameters['content']}"
+        if !shoppingContent {
+            alert("追加する内容を確認してください", "Clarity Next")
+            stop()
+        }
+        rawAction("is.workflow.actions.addnewreminder", {
+            "WFCalendarItemTitle": "{shoppingContent}",
             "WFCalendarItemAlert": false
         })
     }
