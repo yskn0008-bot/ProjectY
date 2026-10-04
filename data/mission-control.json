@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-10-04T14:01:20+09:00",
+  "updated_at": "2026-10-04T14:01:47+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -12,6 +12,16 @@
     ]
   },
   "inbox": [
+    {
+      "id": "github-pr-603",
+      "title": "PR #603 Complete existing Shortcut Factory + STASH with STASH Add",
+      "type": "GitHub PR",
+      "status": "review",
+      "priority": 1,
+      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/603",
+      "updated_at": "2026-10-04T05:01:12Z"
+    },
     {
       "id": "github-pr-539",
       "title": "PR #539 Finalize YOS Alerts and reread history",
@@ -51,16 +61,6 @@
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/602",
       "updated_at": "2026-10-03T09:33:10Z"
-    },
-    {
-      "id": "github-pr-603",
-      "title": "PR #603 Complete existing Shortcut Factory + STASH with STASH Add",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/603",
-      "updated_at": "2026-10-04T05:00:46Z"
     },
     {
       "id": "github-pr-606",
@@ -110,7 +110,7 @@
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/619",
-      "updated_at": "2026-10-04T05:00:12Z"
+      "updated_at": "2026-10-04T05:01:13Z"
     },
     {
       "id": "github-issue-10",
@@ -254,7 +254,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "Issue #10を進める：Mission Control v2：GitHubのIssue・PR・Commitを自動集約する",
+      "next_action": "PR #603をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -264,7 +264,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-10-04T14:01:20+09:00",
+      "last_update": "2026-10-04T14:01:47+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -345,7 +345,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-10-04T14:01:20+09:00",
+      "last_update": "2026-10-04T14:01:47+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -354,12 +354,12 @@
       "domain": "Infrastructure",
       "type": "development",
       "purpose": "YOSと各Labの設計に基づいて実装、修正、テストを行う",
-      "status": "active",
+      "status": "review",
       "health": "attention",
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "Issue #10を進める：Mission Control v2：GitHubのIssue・PR・Commitを自動集約する",
+      "next_action": "PR #603をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -368,7 +368,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-10-04T14:01:20+09:00",
+      "last_update": "2026-10-04T14:01:47+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -450,5 +450,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "7f093642548d81486a4b368b27a782fb8cc5ebbfb0ede59aee6fc95cc78f0385"
+  "github_snapshot_hash": "d770fbc3757cae44c4d93d550bacfda6658edee9cf003c4c6c701e8fe3bd49bc"
 }
