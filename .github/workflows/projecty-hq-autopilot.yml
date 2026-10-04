@@ -64,6 +64,7 @@ jobs:
           const result = JSON.parse(process.argv[2]);
           const recovery = result?.recovery || null;
           fs.appendFileSync(process.argv[3], `needs_yos=${recovery?.action === 'NEEDS_YOS' ? 'true' : 'false'}\n`);
+          fs.appendFileSync(process.argv[3], `external_wait=${recovery?.action === 'EXTERNAL_WAIT' ? 'true' : 'false'}\n`);
           fs.appendFileSync(process.argv[3], `target=${recovery?.target || ''}\n`);
           NODE
 

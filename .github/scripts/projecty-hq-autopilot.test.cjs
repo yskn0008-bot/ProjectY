@@ -6,6 +6,8 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const {
   CODEX_ACTOR,
+  EXTERNAL_RATE_LIMIT_WAIT_MS,
+  EXTERNAL_WAIT_MS,
   MARKER,
   STALL_MS,
   atomicTransport,
@@ -14,6 +16,7 @@ const {
   chooseCommentMutation,
   classifyQaLevel,
   decide,
+  externalWaitMs,
   isAck,
   isTarget,
   isTrustedFinal,
@@ -271,7 +274,7 @@ test('automatic recovery never invokes Codex for code, transport, or status', ()
   assert.match(codeFix, /Do not auto-start Codex/);
 });
 
-test('bounded transient ladder is idempotent and cannot repeat forever', () => {
+test('bounded transient ladder parks external failures without escalating them to the user', () => {
   const target = { failures: {} };
   const base = { target: 'PR#4', head: HEAD, workflowId: 8, runId: 9 };
   const first = decide(target, 'ACTION_TRANSIENT_FAILURE', { ...base, delivery: 'one' });
@@ -283,10 +286,24 @@ test('bounded transient ladder is idempotent and cannot repeat forever', () => {
 
   const second = decide(target, 'ACTION_TRANSIENT_FAILURE', { ...base, delivery: 'two' });
   target.failures[second.id] = second.record;
-  assert.equal(second.action, 'REQUEST_CODE_FIX');
+  assert.equal(second.action, 'EXTERNAL_WAIT');
 
-  const final = decide(target, 'ACTION_TRANSIENT_FAILURE', { ...base, delivery: 'three' });
-  assert.equal(final.action, 'NEEDS_YOS');
+  const third = decide(target, 'ACTION_TRANSIENT_FAILURE', { ...base, delivery: 'three' });
+  target.failures[third.id] = third.record;
+  assert.equal(third.action, 'RERUN_FAILED');
+
+  const fourth = decide(target, 'ACTION_TRANSIENT_FAILURE', { ...base, delivery: 'four' });
+  target.failures[fourth.id] = fourth.record;
+  assert.equal(fourth.action, 'EXTERNAL_WAIT');
+
+  const bounded = decide(target, 'ACTION_TRANSIENT_FAILURE', { ...base, delivery: 'five' });
+  assert.equal(bounded.action, 'EXTERNAL_WAIT');
+  assert.notEqual(bounded.action, 'NEEDS_YOS');
+});
+
+test('external wait uses longer backoff for rate limits', () => {
+  assert.equal(externalWaitMs({ text: 'HTTP 503 Service Unavailable' }), EXTERNAL_WAIT_MS);
+  assert.equal(externalWaitMs({ text: 'api-deployments-free-per-day build-rate-limit' }), EXTERNAL_RATE_LIMIT_WAIT_MS);
 });
 
 test('transient evidence must come from failed job or step details', () => {
@@ -583,4 +600,53 @@ test('write-capable implementation never shells out or touches product paths', (
   const docs = fs.readFileSync(path.join(__dirname, '../../docs/ISSUE_232_AUTOCONTINUE.md'), 'utf8');
   assert.match(docs, /main上の本稼働確認/);
   assert.match(docs, /自動マージ、本番公開/);
+});
+
+
+test('expired EXTERNAL_WAIT reruns only the deferred failed workflow and does not ask YOS', async () => {
+  const retryAt = '2026-08-21T19:00:00Z';
+  const run = {
+    id: 501,
+    workflow_id: 77,
+    name: 'YOS AI Core',
+    head_sha: HEAD,
+    status: 'completed',
+    conclusion: 'failure',
+    created_at: '2026-08-21T18:30:00Z',
+    pull_requests: [{ number: 4 }],
+  };
+  const state = {
+    version: 4,
+    targets: {
+      'PR#4': {
+        head: HEAD,
+        phase: 'EXTERNAL_WAIT',
+        failures: {},
+        seen: [],
+        progressAt: retryAt,
+        externalWait: { workflowId: 77, runId: 501, retryAt, reason: 'rate limit' },
+      },
+    },
+  };
+  const pr = ownerPr();
+  const api = recordingApi((requestPath, options) => {
+    if (requestPath.startsWith('/issues/232/comments') && !options.method) return [managedComment(state, 42)];
+    if (requestPath === '/pulls/4') return pr;
+    if (requestPath.startsWith('/pulls/4/files')) return [{ filename: 'server/yos-ai/vercel.json' }];
+    if (requestPath.startsWith('/actions/runs?')) return { workflow_runs: [run] };
+    if (requestPath === '/actions/runs/501/rerun-failed-jobs' && options.method === 'POST') return {};
+    if (requestPath === '/issues/comments/42' && options.method === 'PATCH') return {};
+    throw new Error('unexpected request ' + requestPath);
+  });
+  const result = await processEvent({
+    api,
+    eventName: 'schedule',
+    payload: {},
+    now: Date.parse('2026-08-21T20:00:00Z'),
+    repository: REPOSITORY,
+    owner: OWNER,
+  });
+  assert.equal(result.recovery.action, 'RERUN_FAILED');
+  assert.equal(api.calls.filter((call) => call.path === '/actions/runs/501/rerun-failed-jobs').length, 1);
+  assert.equal(api.calls.filter((call) => call.path === '/issues/4/comments').length, 0);
 });

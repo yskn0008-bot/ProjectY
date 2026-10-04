@@ -73,3 +73,18 @@ branch testだけでは完成にしない。YOSの通常の統合判断後にmai
 このlive確認、自動試験、final diff、Actionsが揃うまではProjectY自動司令部を本番完成と呼ばない。
 
 Refs #232
+
+
+## External wait / stopless continuation
+
+GitHub Actions、Vercel、runner、network、provider rate limitなど、本人操作で解決しない一時障害は `NEEDS_YOS` / `WAIT_USER` へ送らない。
+
+- transient failureはcurrent-headの失敗証拠がある場合だけ1回rerunする。
+- 同じ外部障害が続く場合は `EXTERNAL_WAIT` へparkする。
+- 通常の一時障害は30分、rate limit系は6時間を既定の再確認間隔とする。
+- 再確認時刻までは同じPRを再試行せず、watchdogは他の安全な対象を進められる。
+- 再確認時刻後は同じcurrent-head workflowを有界に再試行する。
+- `EXTERNAL_WAIT` はIssue #232 managed state内のphaseであり、新DB・新SSOT・第4terminal stateではない。
+- branch conflict、unsafe scope、資格情報、課金、公開承認、物理端末など本当に本人判断が必要なものだけYOS/本人へ返す。
+
+YOS AIのVercel Git Integrationはcurrent commitの `server/yos-ai/**` 差分だけを見る。過去の未配布server差分を理由に、後続の `data: sync GitHub state` commitが新しいbuildを起こさない。これによりMission Controlの状態同期とProduction deployを分離する。
