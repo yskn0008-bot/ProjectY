@@ -1,0 +1,9 @@
+#define name Work Flow
+#define color blue
+
+#include 'actions/shortcuts'
+
+// Work Focus itself is the life-state signal.
+// Refresh the existing local Battery/Mother observation path silently.
+// No new work router, notification layer, or device-control rule is created here.
+run("YOS Battery Sync", ShortcutInput)
