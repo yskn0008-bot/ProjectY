@@ -56,7 +56,9 @@ def patch(path: Path, shortcut_name: str):
     ids=[a.get("WFWorkflowActionIdentifier","") for a in parsed["WFWorkflowActions"]]
     blob=repr(parsed)
     if ids.count("is.workflow.actions.notification")!=0: fail("native notification survived")
-    if ids.count("dk.simonbs.Scriptable.RunScriptInlineIntent")!=1: fail("Scriptable dispatcher missing")
+    expected_scriptable=3 if shortcut_name=="Money Alert" else 1
+    if ids.count("dk.simonbs.Scriptable.RunScriptInlineIntent")!=expected_scriptable:
+        fail(f"Scriptable dispatcher count mismatch: {ids.count('dk.simonbs.Scriptable.RunScriptInlineIntent')} != {expected_scriptable}")
     if default_url not in blob: fail("deep link missing")
     if "YOS Display History" not in blob: fail("history contract missing")
     print(f"{shortcut_name} deep-link notification patch: PASS")
