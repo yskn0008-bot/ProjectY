@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-10-04T13:45:50+09:00",
+  "updated_at": "2026-10-04T13:57:30+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -60,7 +60,7 @@
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/603",
-      "updated_at": "2026-10-04T04:44:52Z"
+      "updated_at": "2026-10-04T04:56:50Z"
     },
     {
       "id": "github-pr-606",
@@ -110,7 +110,7 @@
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/619",
-      "updated_at": "2026-10-04T03:49:46Z"
+      "updated_at": "2026-10-04T04:57:02Z"
     },
     {
       "id": "github-issue-10",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-10-04T04:45:20Z"
+      "updated_at": "2026-10-04T04:57:09Z"
     },
     {
       "id": "github-issue-234",
@@ -264,7 +264,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-10-04T13:45:50+09:00",
+      "last_update": "2026-10-04T13:57:30+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -345,7 +345,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-10-04T13:45:50+09:00",
+      "last_update": "2026-10-04T13:57:30+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -368,7 +368,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-10-04T13:45:50+09:00",
+      "last_update": "2026-10-04T13:57:30+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -450,5 +450,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "8a4acf48a05c5432b8957328a2ddd433b69ecf322e37df43ea3a7e21f09c185e"
+  "github_snapshot_hash": "4af6f08883173327c25ab60e17e18df0974ca34d9ed9c3d1821ad566de7d42b6"
 }
