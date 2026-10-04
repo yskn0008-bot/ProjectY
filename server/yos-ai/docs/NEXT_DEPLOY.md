@@ -18,3 +18,8 @@ After deploying, open `/api/yos/taxi-health` and require `status: ready` before 
 ## External wait
 
 If Vercel reports a build-rate-limit or another proven transient provider failure, record the release as external wait rather than asking the user to keep retrying. Do not create repeated redeploy commits merely to probe the limit. Production publication/credential/plan changes remain explicit human gates.
+
+
+## Bounded approved retry
+
+After a YOS AI revision has already been merged to main and Vercel has attempted that production release, ProjectY HQ may retry the same approved revision when the GitHub Vercel status proves a rate-limit failure. It waits 1h, then 6h, 12h, and 24h, and updates only the existing `.redeploy-trigger`. No retry is performed for code/build failures, credentials, billing, or a new revision.
