@@ -47,7 +47,7 @@ class ClarityNextSourceContractTests(unittest.TestCase):
 
     def test_voice_to_json_router(self):
         self.assertIn('listen("After Pause", "jp-JP")', self.source)
-        self.assertIn('#define inputs text', self.source)
+        self.assertNotIn('#define inputs text', self.source)
         self.assertIn('@inputMode = "voice"', self.source)
         self.assertIn('input_mode: {@inputMode}', self.source)
         self.assertIn('share_source: {@shareSource}', self.source)
