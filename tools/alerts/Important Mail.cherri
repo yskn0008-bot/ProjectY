@@ -60,4 +60,11 @@ const stampNow = currentDate()
 const stamp = formatDate(stampNow, "Custom", "yyyy-MM-dd HHmmss")
 const log = text("【Important Mail】\n{result}")
 saveFile("YOS Display History/{stamp} Important Mail.txt", log, false)
-showNotification(result, "重要メール", true)
+
+const notifyPayload = {
+    "title": "重要メール",
+    "body": "{result}",
+    "url": "message://",
+    "thread": "yos-notifications-mail"
+}
+run("YOS Notify", notifyPayload)
