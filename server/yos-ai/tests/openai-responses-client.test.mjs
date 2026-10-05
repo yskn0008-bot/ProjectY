@@ -31,6 +31,7 @@ test('YOS answer Structured Outputs schema stays inside the strict supported sub
     'minLength',
     'maxLength',
     'uniqueItems',
+    'const',
     'allOf',
     'not',
     'dependentRequired',
@@ -67,6 +68,8 @@ test('YOS answer Structured Outputs schema stays inside the strict supported sub
   assert.equal(responseSchema.properties.facts.maxItems, 30);
   assert.equal(responseSchema.properties.facts.items.properties.sourceIds.minItems, 1);
   assert.equal(responseSchema.properties.facts.items.properties.sourceIds.maxItems, 8);
+  assert.deepEqual(responseSchema.properties.memoryCandidates.items.properties.status.enum, ['candidate']);
+  assert.equal('const' in responseSchema.properties.memoryCandidates.items.properties.status, false);
 });
 
 test('Responses client forces safe options and captures usage', async () => {
