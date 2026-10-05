@@ -40,6 +40,14 @@ if @incoming contains "YOS_MONEY_ALERT_V1" {
     const stamp = formatDate(stampNow, "Custom", "yyyy-MM-dd HHmmss")
     const log = text("【Money Alert】\n{@incoming}")
     saveFile("YOS Display History/{stamp} Money Alert.txt", log, false)
-    showNotification(@incoming, "Money Alert", true)
+
+    const notifyBody = replaceText('^YOS_[A-Z0-9_]+_V1[^\\n]*\\n?', "", @incoming, true, true)
+    const notifyPayload = {
+        "title": "Money Alert",
+        "body": "{notifyBody}",
+        "url": "https://yskn0008-bot.github.io/ProjectY/yos/#money",
+        "thread": "yos-notifications-money"
+    }
+    run("YOS Notify", notifyPayload)
 }
 stop()
