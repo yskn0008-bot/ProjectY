@@ -5,6 +5,7 @@
 #include 'actions/documents'
 #include 'actions/intelligence'
 #include 'actions/calendar'
+#include 'actions/shortcuts'
 
 const historyFolder = createFolder("YOS Display History")
 const alertStateFolder = createFolder("YOS Alert State")
