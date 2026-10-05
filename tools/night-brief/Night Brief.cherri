@@ -7,9 +7,11 @@
 #include 'actions/intelligence'
 #include 'actions/calendar'
 #include 'actions/location'
+#include 'actions/shortcuts'
 
-// Native-only Night Brief.
-// No Safari, Scriptable, URL callback, or Run Shortcut.
+// Native-first Night Brief.
+// No Safari, Scriptable, or browser callback.
+// The only child Shortcut is YOS Notify for lock-screen-safe presentation.
 // Night history is a derived iCloud cache, one file per day.
 // Existing MY LIFE remains separate; this removes browser sync from the critical night flow.
 // Automation mode uses the explicit input token YOS_NIGHT_AUTO_V1.
@@ -169,7 +171,13 @@ const spacedResponse3 = replaceText('\\n+3\\.', "\n\n3.", spacedResponse2, true,
 const nightBriefLog = text("【Night Brief】\n{spacedResponse3}")
 saveFile("YOS Display History/{todayKey} Night Brief.txt", nightBriefLog, false)
 
-showNotification(spacedResponse3, "Night Brief", true)
+const nightNotifyPayload = {
+    "title": "Night Brief",
+    "body": "{spacedResponse3}",
+    "url": "shortcuts://run-shortcut?name=Night%20Brief",
+    "thread": "yos-notifications-night"
+}
+run("YOS Notify", nightNotifyPayload)
 const briefRunMarker = text("YOS_NIGHT_BRIEF_RUN_V1\n{todayKey}")
 saveFile("YOS Night Brief Run/{todayKey}.txt", briefRunMarker, true)
 if @autoMode == "auto" {
