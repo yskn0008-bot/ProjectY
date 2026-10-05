@@ -56,4 +56,11 @@ const stampNow = currentDate()
 const stamp = formatDate(stampNow, "Custom", "yyyy-MM-dd HHmmss")
 const log = text("【Task Alert】\n{result}")
 saveFile("YOS Display History/{stamp} Task Alert.txt", log, false)
-showNotification(result, "Task Alert", true)
+
+const notifyPayload = {
+    "title": "Task Alert",
+    "body": "{result}",
+    "url": "x-apple-reminderkit://",
+    "thread": "yos-notifications-task"
+}
+run("YOS Notify", notifyPayload)
