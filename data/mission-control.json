@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-10-05T15:26:30+09:00",
+  "updated_at": "2026-10-05T15:28:24+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -23,16 +23,6 @@
       "updated_at": "2026-10-04T11:11:04Z"
     },
     {
-      "id": "github-pr-627",
-      "title": "PR #627 fix(yos-ai): remove unsupported const from strict answer schema",
-      "type": "GitHub PR",
-      "status": "review",
-      "priority": 1,
-      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/627",
-      "updated_at": "2026-10-05T06:26:03Z"
-    },
-    {
       "id": "github-pr-539",
       "title": "PR #539 Finalize YOS Alerts and reread history",
       "type": "GitHub PR",
@@ -41,6 +31,16 @@
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/539",
       "updated_at": "2026-10-03T05:42:51Z"
+    },
+    {
+      "id": "github-pr-582",
+      "title": "PR #582 Clarity Home: ハブ差を隠す統合Home Router",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/582",
+      "updated_at": "2026-10-02T18:27:37Z"
     },
     {
       "id": "github-pr-601",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-10-04T23:24:14Z"
+      "updated_at": "2026-10-05T06:27:45Z"
     },
     {
       "id": "github-issue-234",
@@ -195,6 +195,27 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-85a5e6149c59",
+      "title": "Merge pull request #627 from yskn0008-bot/fix/yos-chat-structured-output-const-20261005",
+      "completed_at": "2026-10-05T06:27:44Z",
+      "result": "GitHub mainへ反映（85a5e61）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/85a5e6149c59444fed0a1d8e88e8acd498fa0c4a"
+    },
+    {
+      "id": "github-commit-a05f7765b67a",
+      "title": "test(yos-ai): reject const in strict response schema",
+      "completed_at": "2026-10-05T06:25:37Z",
+      "result": "GitHub mainへ反映（a05f776）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/a05f7765b67a29b572c41b9d7e1b9d8e0f468bdb"
+    },
+    {
+      "id": "github-commit-6611abba5006",
+      "title": "fix(yos-ai): replace unsupported const in answer schema",
+      "completed_at": "2026-10-05T06:25:22Z",
+      "result": "GitHub mainへ反映（6611abb）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/6611abba50060d6382c1bbae6b94b6fcd25e5f2e"
+    },
+    {
       "id": "github-commit-e301557483b6",
       "title": "chore(yos-ai): retry deferred approved release (2/4)",
       "completed_at": "2026-10-04T17:40:41Z",
@@ -207,27 +228,6 @@
       "completed_at": "2026-10-04T07:26:38Z",
       "result": "GitHub mainへ反映（7fb84a1）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/7fb84a11d6ab25d81c8e14967471137562af2a79"
-    },
-    {
-      "id": "github-commit-2cb1ec22090a",
-      "title": "fix: block Cloud Run model drift and use canonical container entrypoint (#625)",
-      "completed_at": "2026-10-04T05:37:53Z",
-      "result": "GitHub mainへ反映（2cb1ec2）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/2cb1ec22090ae1288de79f3734da296d7ef93aca"
-    },
-    {
-      "id": "github-commit-ea5e38831fb6",
-      "title": "YOS AI: Cloud Run activationを1回設定で運用可能にする (#624)",
-      "completed_at": "2026-10-04T05:11:25Z",
-      "result": "GitHub mainへ反映（ea5e388）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/ea5e38831fb60d70b844a9243c4b09b2eda29a4f"
-    },
-    {
-      "id": "github-commit-ffb1db3fcb55",
-      "title": "Complete Shortcut Factory + STASH with STASH Add",
-      "completed_at": "2026-10-04T05:04:13Z",
-      "result": "GitHub mainへ反映（ffb1db3）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/ffb1db3fcb55b61a24982799a8c468f4eca2448b"
     },
     {
       "id": "complete-002",
@@ -254,7 +254,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #627をレビューして公開判断する",
+      "next_action": "PR #626をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -264,7 +264,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-10-05T15:26:30+09:00",
+      "last_update": "2026-10-05T15:28:24+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -339,13 +339,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 8件・Open PR 17件を自動同期中",
+      "next_action": "Open Issue 8件・Open PR 16件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-10-05T15:26:30+09:00",
+      "last_update": "2026-10-05T15:28:24+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -359,7 +359,7 @@
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #627をレビューして公開判断する",
+      "next_action": "PR #626をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -368,7 +368,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-10-05T15:26:30+09:00",
+      "last_update": "2026-10-05T15:28:24+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -450,5 +450,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "aa9d6f92dce2cbb7914c521e846093fd76ea8bc9f9fa7fc1abefdeb4f3623d71"
+  "github_snapshot_hash": "b18464fd7f8c7d8bd7bd3cf3133ad999232fa6c632d4166f8c68f3a67053724e"
 }
