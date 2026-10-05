@@ -83,10 +83,11 @@ jobs:
           assert ids.count('is.workflow.actions.filter.reminders') == 2
           assert ids.count('is.workflow.actions.properties.calendarevents') >= 3
           assert ids.count('is.workflow.actions.askllm') == 2
-          assert ids.count('is.workflow.actions.notification') == 1
+          assert ids.count('is.workflow.actions.notification') == 0
           assert ids.count('is.workflow.actions.alert') == 2
           assert ids.count('is.workflow.actions.ask') == 1
-          assert ids.count('is.workflow.actions.runworkflow') == 0
+          assert ids.count('is.workflow.actions.runworkflow') == 1
+          assert 'YOS Notify' in blob
           assert ids.count('is.workflow.actions.openurl') == 0
           assert ids.count('is.workflow.actions.exit') >= 1
           assert ids.count('com.apple.journal.CreateEntryIntent') == 1
@@ -115,7 +116,7 @@ jobs:
           assert 'night_history=1' not in blob
           assert 'night_save=1' not in blob
           assert 'night-checkin-save-bridge' not in blob
-          assert 'shortcuts://run-shortcut' not in blob
+          assert 'shortcuts://run-shortcut?name=Night%20Brief' in blob
           assert 'Scriptable' not in blob
           assert 'テーマは決めなくてOK。今日のことを自由に書く・話す。' in blob
           assert '真栄原2丁目' not in blob
