@@ -6,6 +6,7 @@
 #include 'actions/documents'
 #include 'actions/calendar'
 
+// Input must carry all emergency gates explicitly.
 @incoming = "{ShortcutInput}"
 const historyFolder = createFolder("YOS Display History")
 const alertStateFolder = createFolder("YOS Alert State")
@@ -30,7 +31,15 @@ if @incoming contains "YOS_EMERGENCY_V1" {
                 const stamp = formatDate(stampNow, "Custom", "yyyy-MM-dd HHmmss")
                 const log = text("【Emergency Alert】\n{@incoming}")
                 saveFile("YOS Display History/{stamp} Emergency Alert.txt", log, false)
-                showNotification(@incoming, "Emergency Alert", true)
+
+                const notifyBody = replaceText('^YOS_[A-Z0-9_]+_V1[^\\n]*\\n?', "", @incoming, true, true)
+                const notifyPayload = {
+                    "title": "Emergency Alert",
+                    "body": "{notifyBody}",
+                    "url": "https://yskn0008-bot.github.io/ProjectY/system/",
+                    "thread": "yos-notifications-emergency"
+                }
+                run("YOS Notify", notifyPayload)
                 stop()
             }
         }
