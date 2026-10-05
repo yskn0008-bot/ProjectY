@@ -56,4 +56,33 @@ const stampNow = currentDate()
 const stamp = formatDate(stampNow, "Custom", "yyyy-MM-dd HHmmss")
 const log = text("【Routine Alert】\n{result}")
 saveFile("YOS Display History/{stamp} Routine Alert.txt", log, false)
-showNotification(result, "Routine Alert", true)
+
+@notifyURL = "x-apple-reminderkit://"
+if @resultText contains "Morning" {
+    @notifyURL = "shortcuts://run-shortcut?name=Morning"
+}
+if @resultText contains "morning" {
+    @notifyURL = "shortcuts://run-shortcut?name=Morning"
+}
+if @resultText contains "朝" {
+    @notifyURL = "shortcuts://run-shortcut?name=Morning"
+}
+if @notifyURL == "x-apple-reminderkit://" {
+    if @resultText contains "Night" {
+        @notifyURL = "shortcuts://run-shortcut?name=Night%20Brief"
+    }
+    if @resultText contains "night" {
+        @notifyURL = "shortcuts://run-shortcut?name=Night%20Brief"
+    }
+    if @resultText contains "夜" {
+        @notifyURL = "shortcuts://run-shortcut?name=Night%20Brief"
+    }
+}
+
+const notifyPayload = {
+    "title": "Routine Alert",
+    "body": "{result}",
+    "url": "{@notifyURL}",
+    "thread": "yos-notifications-routine"
+}
+run("YOS Notify", notifyPayload)
