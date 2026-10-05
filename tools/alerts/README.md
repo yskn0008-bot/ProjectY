@@ -10,9 +10,13 @@ This directory contains the fallback alert lane for iPhone.
 
 Displayed alerts are copied to `YOS Display History` as a derived reread cache. Original owner stores remain unchanged.
 
-For the non-Payment alert suite, the compiled Shortcut replaces the generic Shortcuts notification action with Scriptable's existing inline `Run Script` app action (`runInApp=false`). This keeps notification delivery background-safe while attaching a tap target: Money → YOS Money, Task/Routine → Reminders (Morning/Night names route to their existing Shortcuts), Emergency → YOS System, Important Mail → Mail. Payment Alert is intentionally left untouched because its current iPhone implementation already passed acceptance.
+For the non-Payment alert suite, presentation is delegated to the existing shared iPhone Shortcut `YOS Notify`. Each alert passes a Dictionary containing `title`, `body`, `url`, and `thread`; `YOS Notify` uses Actions → Show Notification. This keeps the global iPhone notification-preview setting off while allowing the Actions app alone to use per-app preview = Always. Physical iPhone testing on 2026-10-05 passed the full locked path: time automation → parent Shortcut → Run Shortcut `YOS Notify` → Actions notification → visible title/body on the lock screen without unlock.
 
-Real-device acceptance is required before the integrated alert lane is considered complete.
+Tap targets remain: Money → YOS Money, Task/Routine → Reminders (Morning/Night names route to their existing Shortcuts), Emergency → YOS System, Important Mail → Mail. Money's local SSOT bridge still uses its existing two inline Scriptable actions; Scriptable is no longer used as the alert presentation dispatcher.
+
+**Boundary:** the locked PASS proves the common notification presentation route. It does not prove every upstream Shortcut action is safe while locked. Payment Alert and Morning are intentionally left untouched because their current iPhone behavior is already accepted separately.
+
+Real-device acceptance is still required for each integrated alert lane before the whole PR is considered complete.
 
 
 ## Important Mail migration
