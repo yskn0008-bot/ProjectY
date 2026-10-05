@@ -5,6 +5,7 @@
 #include 'actions/text'
 #include 'actions/documents'
 #include 'actions/calendar'
+#include 'actions/shortcuts'
 #include 'actions/sharing'
 
 @incoming = "{ShortcutInput}"
