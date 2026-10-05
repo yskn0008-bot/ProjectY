@@ -6,6 +6,7 @@
 #include 'actions/documents'
 #include 'actions/intelligence'
 #include 'actions/calendar'
+#include 'actions/shortcuts'
 
 @incoming = "{ShortcutInput}"
 const alertStateFolder = createFolder("YOS Alert State")
