@@ -5,6 +5,7 @@
 #include 'actions/text'
 #include 'actions/documents'
 #include 'actions/calendar'
+#include 'actions/shortcuts'
 
 // Input must carry all emergency gates explicitly.
 @incoming = "{ShortcutInput}"
