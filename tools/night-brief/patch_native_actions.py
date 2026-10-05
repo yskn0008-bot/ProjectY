@@ -384,14 +384,18 @@ def patch(path: Path) -> None:
         fail("Calendar patch failed")
     if ids.count("is.workflow.actions.filter.reminders") != 2:
         fail("Reminders patch failed")
-    if ids.count("is.workflow.actions.runworkflow"):
-        fail("Night Brief must not depend on another Shortcut")
+    if ids.count("is.workflow.actions.runworkflow") != 1:
+        fail("Night Brief must call YOS Notify exactly once")
+    if "YOS Notify" not in blob:
+        fail("Night Brief YOS Notify child missing")
     if ids.count("is.workflow.actions.openurl"):
         fail("Night Brief must not open Safari")
     if ids.count("is.workflow.actions.exit") < 1:
         fail("Night Brief auto mode stop is missing")
-    if "night_history=1" in blob or "night_save=1" in blob or "shortcuts://run-shortcut" in blob:
-        fail("legacy browser/shortcut callback survived")
+    if "night_history=1" in blob or "night_save=1" in blob:
+        fail("legacy browser callback survived")
+    if "shortcuts://run-shortcut?name=Night%20Brief" not in blob:
+        fail("Night Brief notification tap route missing")
     if ids.count("is.workflow.actions.file.createfolder") != 4:
         fail("expected Night history, display history, auto-run, and journal-status folders")
     if ids.count("is.workflow.actions.file.getfoldercontents") != 1:
@@ -408,7 +412,7 @@ def patch(path: Path) -> None:
     path.write_bytes(plistlib.dumps(workflow, fmt=plistlib.FMT_XML, sort_keys=False))
     print(
         "Night Brief native-only patch: PASS "
-        f"(actions={len(actions)}, weather=1, calendar=2, reminders=2, journal=1, auto_mode=1, safari=0, scriptable=0)"
+        f"(actions={len(actions)}, weather=1, calendar=2, reminders=2, journal=1, auto_mode=1, notify=YOS, safari=0, scriptable=0)"
     )
 
 
