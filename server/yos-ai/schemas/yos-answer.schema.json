@@ -78,7 +78,10 @@
             "type": "string"
           },
           "status": {
-            "const": "candidate"
+            "type": "string",
+            "enum": [
+              "candidate"
+            ]
           },
           "evidenceSourceIds": {
             "type": "array",
