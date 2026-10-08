@@ -38,6 +38,14 @@ function parseHomeCommand(raw) {
   if (/^(1度|一度)(下げて|さげて)$/.test(s)) return command('ac', 'temperature_down');
 
   if (/(電気|照明|ライト)/.test(s)) {
+    const pctMatch = s.match(/(?:明るさ)?(\d{1,3})(?:%|パーセント|パー)/);
+    if (pctMatch) {
+      const pct = Number(pctMatch[1]);
+      if (!Number.isFinite(pct) || pct < 0 || pct > 100) throw new Error('照明の明るさは0〜100%で指定してください。');
+      if (pct === 0) return command('light', 'power_off');
+      return command('light', 'brightness_percent', pct);
+    }
+    if (/(?:明るさ)?半分/.test(s)) return command('light', 'brightness_percent', 50);
     if (/(消して|切って|オフ)/.test(s)) return command('light', 'power_off');
     if (/(つけて|付けて|オン|点けて|点灯)/.test(s)) return command('light', 'power_on');
     if (/(明るく|明るめ)/.test(s)) return command('light', 'brightness_up');
@@ -207,6 +215,30 @@ async function performAC(c) {
 }
 async function performLight(c) {
   const predicate = r => /ライト|light/i.test(String(r.nickname || '')) || String(r.model || '').toLowerCase()==='light';
+
+  // HK9494 has relative 明るい/暗い IR commands, not a readable absolute % state.
+  // For percentage requests, reset to 全灯 (100%) and step down from that known baseline.
+  // Calibration constant: 20 IR steps across the usable dimming range (about 5% per step).
+  // If the room looks systematically too bright/dark, change only LIGHT_BRIGHTNESS_STEPS after one real-world calibration.
+  if (c.action === 'brightness_percent') {
+    const pct = Math.max(1, Math.min(100, Number(c.value) || 100));
+    const remote = tapo.findRemote(predicate);
+    if (!remote) throw new Error('照明リモコンが見つかりません。');
+    const allKey = tapo.findKey(remote, ['全灯','All Lights']);
+    const darkKey = tapo.findKey(remote, ['BRIGHTNESS-','暗くする','暗い']);
+    if (!allKey || !darkKey) throw new Error('照明の全灯または暗くするIRキーが見つかりません。');
+    const client = await tapo.client();
+    await client.fire(remote.device_id, allKey.name);
+    const LIGHT_BRIGHTNESS_STEPS = 20;
+    let remaining = Math.round((100 - pct) * LIGHT_BRIGHTNESS_STEPS / 100);
+    while (remaining > 0) {
+      const chunk = Math.min(6, remaining);
+      await client.fireBurst(remote.device_id, darkKey.name, chunk);
+      remaining -= chunk;
+    }
+    return pct === 100 ? '電気を全灯にしました' : `電気を約${pct}%の明るさにしました`;
+  }
+
   const candidates = {
     power_on:['POWER ON','点灯'], power_off:['POWER OFF','消灯'],
     brightness_up:['BRIGHTNESS+','明るくする','明るい'], brightness_down:['BRIGHTNESS-','暗くする','暗い']
