@@ -63,6 +63,17 @@ jobs:
           cp './Clarity Text_unsigned.shortcut' artifacts/Clarity-Text-unsigned.shortcut
           cp './Clarity Share v4_unsigned.shortcut' artifacts/Clarity-Share-v4-unsigned.shortcut
 
+      - name: Compile existing fixed YOS_Home child
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd tools/clarity-next
+          rm -f './YOS_Home_unsigned.shortcut'
+          cherri './YOS_Home.cherri' --skip-sign --debug
+          test -f './YOS_Home_unsigned.shortcut'
+          python3 patch_home_inline.py './YOS_Home_unsigned.shortcut' './YOS Home Bridge.js'
+          cp './YOS_Home_unsigned.shortcut' artifacts/YOS_Home-unsigned.shortcut
+
       - name: Inspect runtime
         shell: bash
         run: |
@@ -129,7 +140,7 @@ jobs:
           assert ids.count('is.workflow.actions.pausemusic') == 3, ids
           assert ids.count('is.workflow.actions.skipforward') == 1, ids
           assert ids.count('is.workflow.actions.skipback') == 1, ids
-          assert ids.count('is.workflow.actions.runworkflow') == 2, ids
+          assert ids.count('is.workflow.actions.runworkflow') == 3, ids
           message=next(a for a in actions if a.get('WFWorkflowActionIdentifier')=='is.workflow.actions.sendmessage')
           assert message.get('WFWorkflowActionParameters',{}).get('ShowWhenRun') is False, message
           email=next(a for a in actions if a.get('WFWorkflowActionIdentifier')=='is.workflow.actions.sendemail')
@@ -139,6 +150,7 @@ jobs:
           assert 'scriptable:///run?scriptName=YOS%20AC%20Widget&action=' in blob
           assert 'Morning Flow' in blob
           assert 'STASH Add' in blob
+          assert 'YOS_Home' in blob
           assert 'YOS Remote Hub' in blob
           assert 'YOS Departure Guard2' in blob
           assert 'YOS_Money_Local' in blob
@@ -180,6 +192,17 @@ jobs:
           assert len(reminders)==1, reminders
           assert reminders[0].get('WFAlertEnabled')=='Alert'
           assert reminders[0].get('WFAlertCustomTime',{}).get('WFSerializationType')=='WFTextTokenString'
+          child=plistlib.loads(Path('tools/clarity-next/artifacts/YOS_Home-unsigned.shortcut').read_bytes())
+          inline=[a for a in child.get('WFWorkflowActions',[]) if a.get('WFWorkflowActionIdentifier')=='dk.simonbs.Scriptable.RunScriptInlineIntent']
+          assert len(inline)==1, inline
+          params=inline[0].get('WFWorkflowActionParameters',{})
+          assert params.get('runInApp') is False, params
+          script=params.get('script',{})
+          assert script.get('WFSerializationType')=='WFTextTokenString', script
+          bridge=script.get('Value',{}).get('string','')
+          assert 'parseHomeCommand' in bridge and 'YOS Home Bridge' in bridge
+          assert '__YOS_HOME_INLINE__' not in bridge
+          print('YOS_Home child runtime contract: PASS')
           print('Clarity Next runtime contract: PASS')
           PY
 
@@ -251,13 +274,19 @@ jobs:
             --name 'Clarity Share v4' \
             2>&1 | tee tools/clarity-next/artifacts/clarity-share-hubsign.log
 
+          python3 tools/clarity-factory/sign_with_hubsign.py \
+            --input tools/clarity-next/artifacts/YOS_Home-unsigned.shortcut \
+            --output tools/clarity-next/artifacts/YOS_Home-signed.shortcut \
+            --name 'YOS_Home' \
+            2>&1 | tee tools/clarity-next/artifacts/yos-home-hubsign.log
+
       - name: Verify signature
         shell: bash
         run: |
           set -euo pipefail
           python3 - <<'PY'
           from pathlib import Path
-          for name in ('Clarity-Next-signed.shortcut','Clarity-Text-signed.shortcut','Clarity-Share-v4-signed.shortcut'):
+          for name in ('Clarity-Next-signed.shortcut','Clarity-Text-signed.shortcut','Clarity-Share-v4-signed.shortcut','YOS_Home-signed.shortcut'):
               p=Path('tools/clarity-next/artifacts')/name
               data=p.read_bytes()
               assert data.startswith(b'AEA1'), (name,data[:8])
@@ -270,6 +299,9 @@ jobs:
         with:
           name: clarity-next-v0
           path: |
+            tools/clarity-next/artifacts/YOS_Home-unsigned.shortcut
+            tools/clarity-next/artifacts/YOS_Home-signed.shortcut
+            tools/clarity-next/artifacts/yos-home-hubsign.log
             tools/clarity-next/artifacts/Clarity-Next-unsigned.shortcut
             tools/clarity-next/artifacts/Clarity-Next-signed.shortcut
             tools/clarity-next/artifacts/Clarity-Text-unsigned.shortcut
