@@ -93,6 +93,23 @@ class ClarityNextSourceContractTests(unittest.TestCase):
             self.assertIn(f'@normalizedModule = "{normalized_module}"', self.source)
             self.assertIn(f'@normalizedExecutor = "{normalized_executor}"', self.source)
 
+    def test_home_executor_uses_verified_child(self):
+        self.assertIn("YOS_Home / home / execute / required: command", self.source)
+        self.assertIn('if executor == "home" && module == "YOS_Home"', self.source)
+        self.assertIn('@normalizedModule = "home"', self.source)
+        self.assertIn('@normalizedExecutor = "YOS_Home"', self.source)
+        self.assertIn('if @normalizedExecutor == "YOS_Home" && @normalizedModule == "home" && operation == "execute"', self.source)
+        self.assertIn('run("YOS_Home", homeCommand)', self.source)
+        self.assertIn('@normalizedExecutor != "YOS_Home"', self.source)
+        self.assertIn("YOS_HomeをNEXT_REMOTEより優先", self.source)
+        self.assertIn("YOS_Home、YOS_SHORTCUT、YOS_SCRIPTABLEを選びません", self.source)
+        # Physical on/off is not implemented by BRAVIA widget's toggle: dedicated state-aware child is required.
+        self.assertIn("テレビつけて", self.source)
+        self.assertIn("テレビ消して", self.source)
+        self.assertIn("エアコン24度にして", self.source)
+        self.assertIn("電気消して", self.source)
+        self.assertLess(self.source.index('if @normalizedNeedsReviewText == "はい"'), self.source.index('run("YOS_Home", homeCommand)'))
+
     def test_safety_gates_precede_execution(self):
         review = self.source.index('if @normalizedNeedsReviewText == "はい"')
         confirm = self.source.index('if @normalizedNeedsConfirmationText == "はい"')
