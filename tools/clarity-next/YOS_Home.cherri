@@ -1,0 +1,12 @@
+#define name YOS_Home
+#define color purple
+#define inputs text
+
+// Fixed child for Clarity Next home/appliance execution.
+// The JavaScript placeholder is replaced at build time with the reviewed local bridge.
+// Scriptable runs as a Shortcuts extension (runInApp=false), so no Scriptable UI handoff is required.
+rawAction("dk.simonbs.Scriptable.RunScriptInlineIntent", {
+    "ShowWhenRun": false,
+    "runInApp": false,
+    "script": "__YOS_HOME_INLINE__"
+})
