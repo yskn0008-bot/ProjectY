@@ -41,6 +41,17 @@ class HomeBridgeContractTests(unittest.TestCase):
         self.assertIn("家電操作が曖昧なので実行しませんでした", self.bridge)
         self.assertIn("throw new Error", self.bridge)
 
+    def test_percentage_brightness_uses_existing_calibration(self):
+        self.assertIn("brightness_percent", self.bridge)
+        self.assertIn("LIGHT_BRIGHTNESS_STEPS = 20", self.bridge)
+        self.assertIn("fireBurst", self.bridge)
+        self.assertIn("pct === 0", self.bridge)
+
+    def test_scriptable_receives_shortcut_input_without_manual_parameter_edit(self):
+        self.assertIn('"parameter"', self.patch)
+        self.assertIn('"WFTextTokenAttachment"', self.patch)
+        self.assertIn('"Type": "ExtensionInput"', self.patch)
+
     def test_patch_injects_reviewed_bridge(self):
         self.assertIn("WFTextTokenString", self.patch)
         self.assertIn("YOS Home Bridge", self.patch)
