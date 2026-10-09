@@ -97,6 +97,16 @@ class ClarityNextSourceContractTests(unittest.TestCase):
             self.assertIn(f'@normalizedModule = "{normalized_module}"', self.source)
             self.assertIn(f'@normalizedExecutor = "{normalized_executor}"', self.source)
 
+    def test_home_runtime_has_no_missing_child_shortcut_dependency(self):
+        patch = (ROOT / "patch_home_direct_inline.py").read_text(encoding="utf-8")
+        self.assertIn('CHILD_NAME = "YOS_Home"', patch)
+        self.assertIn('INLINE = "dk.simonbs.Scriptable.RunScriptInlineIntent"', patch)
+        self.assertIn('"WFInput"', patch)
+        self.assertIn('homeCommand', patch)
+        self.assertIn('"parameter": copy.deepcopy(wf_input)', patch)
+        self.assertIn('"runInApp": False', patch)
+        self.assertIn('home child dependency survived', patch)
+
     def test_home_executor_uses_verified_child(self):
         self.assertIn("YOS_Home / home / execute / required: command", self.source)
         self.assertIn('if executor == "home" && module == "YOS_Home"', self.source)
