@@ -89,7 +89,7 @@ jobs:
           assert sum(i=='is.workflow.actions.dictatetext' for i in ids)==1, ids
           assert sum(i=='is.workflow.actions.askllm' for i in ids)==1, ids
           ask=next(a for a in actions if a.get('WFWorkflowActionIdentifier')=='is.workflow.actions.askllm')
-          assert ask.get('WFWorkflowActionParameters',{}).get('FollowUp') is True, ask
+          assert ask.get('WFWorkflowActionParameters',{}).get('FollowUp') is False, ask
           assert root.get('WFWorkflowHasShortcutInputVariables') is True
           direct_shortcut_input_conditions=[]
           for a in actions:
