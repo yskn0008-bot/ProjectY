@@ -1,6 +1,5 @@
 #define name Clarity Share v4
 #define color purple
-#define inputs text, richtext, webpage, url, image, pdf
 #define from sharesheet
 #define noinput stopwith "共有する内容がありません"
 
