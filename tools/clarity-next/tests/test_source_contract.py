@@ -42,12 +42,16 @@ class ClarityNextSourceContractTests(unittest.TestCase):
         self.assertIn('@inputMode = "voice"', self.source)
         self.assertIn('input_mode: {@inputMode}', self.source)
         self.assertIn('share_source: {@shareSource}', self.source)
-        self.assertIn('askChatGPT(routerPrompt, true, "Dictionary")', self.source)
+        self.assertIn('askChatGPT(routerPrompt, false, "Dictionary")', self.source)
         self.assertIn('getValue(parsed, "actions")', self.source)
         self.assertIn('status != "planned"', self.source)
         self.assertIn("発話の表面形を越えて「最終的に何を実現したいか」を理解", self.source)
         self.assertIn("複数依頼を1actionへ無理に潰しません", self.source)
         self.assertIn("confidenceだけを理由に確認を増やしません", self.source)
+
+    def test_no_interactive_followup_traps_execution(self):
+        self.assertIn('askChatGPT(routerPrompt, false, "Dictionary")', self.source)
+        self.assertNotIn('askChatGPT(routerPrompt, true, "Dictionary")', self.source)
 
     def test_capability_gate_is_explicit(self):
         for executor in ("YOS_OpenApp", "NEXT_DEVICE", "NEXT_TIMER", "NEXT_ALARM", "NEXT_CALENDAR", "NEXT_REMINDER", "NEXT_NAVIGATE", "NEXT_NOTION", "NEXT_MYWAY", "NEXT_MONEY", "NEXT_IDEA", "NEXT_MEMO", "NEXT_TASK", "NEXT_SHOPPING", "NEXT_COMMUNICATION", "NEXT_MEDIA", "NEXT_CLIPBOARD", "NEXT_SHARE", "NEXT_CAMERA", "NEXT_WEBSEARCH", "NEXT_YOS_VIEW", "NEXT_REMOTE", "YOS_SHORTCUT", "YOS_SCRIPTABLE", "NEXT_ANSWER"):
