@@ -146,7 +146,12 @@ jobs:
           assert ids.count('is.workflow.actions.skipforward') == 1, ids
           assert ids.count('is.workflow.actions.skipback') == 1, ids
           # Home must execute inline, not depend on a user-installed shortcut name.
-          assert ids.count('is.workflow.actions.runworkflow') == 2, ids
+          assert ids.count('is.workflow.actions.runworkflow') == 3, ids
+          assert any(
+              a.get('WFWorkflowActionIdentifier')=='is.workflow.actions.runworkflow'
+              and a.get('WFWorkflowActionParameters',{}).get('WFWorkflowName')=='YOS_Floor_Lamp'
+              for a in actions
+          ), 'YOS_Floor_Lamp helper route missing'
           home_inline=[a for a in actions if a.get('WFWorkflowActionIdentifier')=='dk.simonbs.Scriptable.RunScriptInlineIntent']
           assert len(home_inline)==1, home_inline
           home_params=home_inline[0]['WFWorkflowActionParameters']
