@@ -17,21 +17,12 @@ class ClarityNextSourceContractTests(unittest.TestCase):
 
     def test_is_separate_from_canonical_clarity(self):
         self.assertIn("#define name Clarity Next", self.source)
-        self.assertIn("Clarity Next Ledger.txt", self.source)
 
-
-    def test_ledger_source_does_not_eagerly_open_file(self):
+    def test_normal_runtime_does_not_touch_debug_ledger(self):
         self.assertNotIn('getFile("Clarity Next Ledger.txt")', self.source)
-        self.assertIn('appendToFile("Clarity Next Ledger.txt"', self.source)
-
-    def test_post_compile_persistence_rewrite_is_locked(self):
-        patch = PATCH.read_text(encoding="utf-8")
-        self.assertIn('TARGET = "Clarity Next Ledger.txt"', patch)
-        self.assertIn('"WFFileErrorIfNotFound": False', patch)
-        self.assertIn('"WFAskWhereToSave": False', patch)
-        self.assertIn('"WFSaveFileOverwrite": True', patch)
-        self.assertIn('file.append survived rewrite', patch)
-
+        self.assertNotIn('appendToFile("Clarity Next Ledger.txt"', self.source)
+        self.assertIn('appendToFile("Idea in Box.txt"', self.source)
+        self.assertIn('appendToFile("Clarity Inbox.txt"', self.source)
 
     def test_calendar_reminder_wire_format_patch_is_locked(self):
         patch = WIRE_PATCH.read_text(encoding="utf-8")
@@ -47,7 +38,7 @@ class ClarityNextSourceContractTests(unittest.TestCase):
 
     def test_voice_to_json_router(self):
         self.assertIn('listen("After Pause", "jp-JP")', self.source)
-        self.assertIn('#define inputs text', self.source)
+        self.assertNotIn('#define inputs text', self.source)
         self.assertIn('@inputMode = "voice"', self.source)
         self.assertIn('input_mode: {@inputMode}', self.source)
         self.assertIn('share_source: {@shareSource}', self.source)
@@ -58,10 +49,16 @@ class ClarityNextSourceContractTests(unittest.TestCase):
         self.assertIn("複数依頼を1actionへ無理に潰しません", self.source)
         self.assertIn("confidenceだけを理由に確認を増やしません", self.source)
 
+    def test_no_interactive_followup_traps_execution(self):
+        self.assertIn('askChatGPT(routerPrompt, false, "Dictionary")', self.source)
+        self.assertNotIn('askChatGPT(routerPrompt, true, "Dictionary")', self.source)
+
     def test_capability_gate_is_explicit(self):
-        for executor in ("YOS_OpenApp", "NEXT_DEVICE", "NEXT_TIMER", "NEXT_CALENDAR", "NEXT_REMINDER", "NEXT_NAVIGATE", "NEXT_NOTION", "NEXT_MONEY", "NEXT_ANSWER"):
+        for executor in ("YOS_OpenApp", "NEXT_DEVICE", "NEXT_TIMER", "NEXT_ALARM", "NEXT_CALENDAR", "NEXT_REMINDER", "NEXT_NAVIGATE", "NEXT_NOTION", "NEXT_MYWAY", "NEXT_MONEY", "NEXT_IDEA", "NEXT_MEMO", "NEXT_TASK", "NEXT_SHOPPING", "NEXT_COMMUNICATION", "NEXT_MEDIA", "NEXT_CLIPBOARD", "NEXT_SHARE", "NEXT_CAMERA", "NEXT_WEBSEARCH", "NEXT_YOS_VIEW", "NEXT_REMOTE", "YOS_SHORTCUT", "YOS_SCRIPTABLE", "NEXT_ANSWER"):
             self.assertIn(executor, self.source)
-        self.assertIn("unsupported_executor", self.source)
+        self.assertIn('@normalizedExecutor != "NEXT_REMOTE"', self.source)
+        self.assertIn('@normalizedExecutor != "YOS_SHORTCUT"', self.source)
+        self.assertIn('@normalizedExecutor != "YOS_SCRIPTABLE"', self.source)
 
 
     def test_swapped_router_fields_are_normalized(self):
@@ -75,6 +72,22 @@ class ClarityNextSourceContractTests(unittest.TestCase):
             ("navigate", "NEXT_NAVIGATE", "navigate", "NEXT_NAVIGATE"),
             ("notion", "NEXT_NOTION", "notion", "NEXT_NOTION"),
             ("money", "NEXT_MONEY", "money", "NEXT_MONEY"),
+            ("myway", "NEXT_MYWAY", "myway", "NEXT_MYWAY"),
+            ("idea", "NEXT_IDEA", "idea", "NEXT_IDEA"),
+            ("memo", "NEXT_MEMO", "memo", "NEXT_MEMO"),
+            ("task", "NEXT_TASK", "task", "NEXT_TASK"),
+            ("shopping", "NEXT_SHOPPING", "shopping", "NEXT_SHOPPING"),
+            ("alarm", "NEXT_ALARM", "alarm", "NEXT_ALARM"),
+            ("communication", "NEXT_COMMUNICATION", "communication", "NEXT_COMMUNICATION"),
+            ("media", "NEXT_MEDIA", "media", "NEXT_MEDIA"),
+            ("clipboard", "NEXT_CLIPBOARD", "clipboard", "NEXT_CLIPBOARD"),
+            ("share", "NEXT_SHARE", "share", "NEXT_SHARE"),
+            ("camera", "NEXT_CAMERA", "camera", "NEXT_CAMERA"),
+            ("web", "NEXT_WEBSEARCH", "web", "NEXT_WEBSEARCH"),
+            ("yos", "NEXT_YOS_VIEW", "yos", "NEXT_YOS_VIEW"),
+            ("remote", "NEXT_REMOTE", "remote", "NEXT_REMOTE"),
+            ("shortcut", "YOS_SHORTCUT", "shortcut", "YOS_SHORTCUT"),
+            ("scriptable", "YOS_SCRIPTABLE", "scriptable", "YOS_SCRIPTABLE"),
         )
         for raw_executor, raw_module, normalized_module, normalized_executor in pairs:
             self.assertIn(
@@ -83,8 +96,42 @@ class ClarityNextSourceContractTests(unittest.TestCase):
             )
             self.assertIn(f'@normalizedModule = "{normalized_module}"', self.source)
             self.assertIn(f'@normalizedExecutor = "{normalized_executor}"', self.source)
-        self.assertIn('module={normalizedModule}', self.source)
-        self.assertIn('executor={normalizedExecutor}', self.source)
+
+    def test_home_runtime_has_no_missing_child_shortcut_dependency(self):
+        patch = (ROOT / "patch_home_direct_inline.py").read_text(encoding="utf-8")
+        self.assertIn('CHILD_NAME = "YOS_Home"', patch)
+        self.assertIn('INLINE = "dk.simonbs.Scriptable.RunScriptInlineIntent"', patch)
+        self.assertIn('"WFInput"', patch)
+        self.assertIn('homeCommand', patch)
+        self.assertIn('"parameter": copy.deepcopy(wf_input)', patch)
+        self.assertIn('"runInApp": False', patch)
+        self.assertIn('home child dependency survived', patch)
+
+    def test_home_executor_uses_verified_child(self):
+        self.assertIn("YOS_Home / home / execute / required: command", self.source)
+        self.assertIn('if executor == "home" && module == "YOS_Home"', self.source)
+        self.assertIn('@normalizedModule = "home"', self.source)
+        self.assertIn('@normalizedExecutor = "YOS_Home"', self.source)
+        self.assertIn('if @normalizedExecutor == "YOS_Home" && @normalizedModule == "home" && operation == "execute"', self.source)
+        self.assertIn('run("YOS_Home", homeCommand)', self.source)
+        self.assertIn('@normalizedExecutor != "YOS_Home"', self.source)
+        self.assertIn("YOS_HomeをNEXT_REMOTEより優先", self.source)
+        self.assertIn("YOS_Home、YOS_SHORTCUT、YOS_SCRIPTABLEを選びません", self.source)
+        # Physical on/off is not implemented by BRAVIA widget's toggle: dedicated state-aware child is required.
+        self.assertIn("テレビつけて", self.source)
+        self.assertIn("テレビ消して", self.source)
+        self.assertIn("エアコン24度にして", self.source)
+        self.assertIn("電気消して", self.source)
+        self.assertLess(self.source.index('if @normalizedNeedsReviewText == "はい"'), self.source.index('run("YOS_Home", homeCommand)'))
+
+    def test_floor_lamp_uses_dedicated_l535e_adapter(self):
+        self.assertIn("フロアランプ、フロアライト、スタンドライト", self.source)
+        self.assertIn('homeCommand contains "フロアランプ"', self.source)
+        self.assertIn('homeCommand contains "フロアライト"', self.source)
+        self.assertIn('homeCommand contains "スタンドライト"', self.source)
+        self.assertIn('run("YOS_Floor_Lamp", homeCommand)', self.source)
+        self.assertLess(self.source.index('run("YOS_Floor_Lamp", homeCommand)'), self.source.index('run("YOS_Home", homeCommand)'))
+        self.assertNotIn('@floorPayload', self.source)
 
     def test_safety_gates_precede_execution(self):
         review = self.source.index('if @normalizedNeedsReviewText == "はい"')
@@ -132,9 +179,8 @@ class ClarityNextSourceContractTests(unittest.TestCase):
         self.assertIn("beginsWith", self.source)
         self.assertIn("input_mode=share", self.source)
         self.assertIn("NEXT_ANSWER以外の副作用を起こしません", self.source)
-        self.assertIn("shareモードではYOS_OpenApp、NEXT_DEVICE、NEXT_TIMER、NEXT_CALENDAR、NEXT_REMINDER、NEXT_NAVIGATE、NEXT_NOTION、NEXT_MONEYを選びません", self.source)
+        self.assertIn("shareモードではYOS_OpenApp、NEXT_DEVICE、NEXT_TIMER、NEXT_ALARM、NEXT_CALENDAR、NEXT_REMINDER、NEXT_NAVIGATE、NEXT_NOTION、NEXT_MYWAY、NEXT_MONEY、NEXT_IDEA、NEXT_MEMO、NEXT_TASK、NEXT_SHOPPING、NEXT_COMMUNICATION、NEXT_MEDIA、NEXT_CLIPBOARD、NEXT_SHARE、NEXT_CAMERA、NEXT_WEBSEARCH、NEXT_YOS_VIEW、NEXT_REMOTE、YOS_Home、YOS_SHORTCUT、YOS_SCRIPTABLEを選びません", self.source)
         self.assertIn('if @inputMode == "share" && @normalizedExecutor != "NEXT_ANSWER"', self.source)
-        self.assertIn("share_side_effect_forbidden", self.source)
 
     def test_base_home_alias_recovers_from_open_app_misroute(self):
         self.assertIn('@baseHomeAlias = false', self.source)
@@ -145,8 +191,55 @@ class ClarityNextSourceContractTests(unittest.TestCase):
         self.assertIn('@normalizedOperation = "open_yos_home"', self.source)
         self.assertIn('@normalizedNeedsReviewText = "いいえ"', self.source)
         self.assertIn('@normalizedNeedsConfirmationText = "いいえ"', self.source)
-        self.assertIn('operation={normalizedOperation}', self.source)
         self.assertIn('@normalizedOperation == "open_yos_home"', self.source)
+
+    def test_communication_is_hard_gated_by_confirmation(self):
+        gate = self.source.index('if @normalizedExecutor == "NEXT_COMMUNICATION" {')
+        confirm = self.source.index('if @normalizedNeedsConfirmationText == "はい"')
+        call = self.source.index('operation == "call" {')
+        self.assertLess(gate, confirm)
+        self.assertLess(confirm, call)
+        self.assertIn('@normalizedRisk != "high"', self.source)
+        self.assertIn('@normalizedNeedsConfirmationText != "はい"', self.source)
+        self.assertIn("phone_numberまたはemailが明示されている場合だけ", self.source)
+
+    def test_tv_power_state_request_is_not_blind_toggle(self):
+        self.assertIn("power_toggleはユーザーが", self.source)
+        self.assertIn("テレビをつけて/消して", self.source)
+        self.assertIn('if remoteAction == "power_toggle"', self.source)
+        self.assertIn('@tvWidgetAction = "power"', self.source)
+        self.assertNotIn('remoteAction == "power" ||', self.source)
+
+    def test_native_capabilities_and_existing_yos_assets_are_reused(self):
+        for required in (
+            "createAlarm(alarmName, alarmTime, true)",
+            "call(phoneTarget)",
+            "sendMessage(messageTarget, messageBody, false)",
+            'sendEmail(emailTarget, "", emailSubject, emailBody, false, false)',
+            "togglePlayPause()",
+            "setClipboard(clipboardValue)",
+            "getClipboard()",
+            "share(shareValue)",
+            "takePhoto(1, true)",
+            "takeScreenshot(false)",
+            'searchWeb("Google", webQuery)',
+            "https://yskn0008-bot.github.io/ProjectY/life/",
+            "https://yskn0008-bot.github.io/ProjectY/yos/hj/",
+            "https://yskn0008-bot.github.io/ProjectY/yos/desk/",
+            "https://yskn0008-bot.github.io/ProjectY/system/",
+            "YOS%20BRAVIA%20Widget",
+            "YOS%20Light%20Widget",
+            "YOS%20AC%20Widget",
+            'shortcutName == "Morning"',
+            'shortcutName == "STASH Add"',
+            'scriptName == "YOS Remote Hub"',
+            'scriptName == "YOS Departure Guard2"',
+            'scriptName == "YOS_Money_Local"',
+            'shortcutName != "STASH Add" && shortcutInput',
+            "@scriptActionAllowed = false",
+            "run(shortcutName, shortcutPayload)",
+        ):
+            self.assertIn(required, self.source)
 
     def test_v0_acceptance_routes_exist(self):
         self.assertIn('run("YOS_OpenApp", app)', self.source)
@@ -157,9 +250,23 @@ class ClarityNextSourceContractTests(unittest.TestCase):
         self.assertIn('scriptable:///run?scriptName=YOS%20Dashboard%20v2&action=baseHome', self.source)
         self.assertIn('openURL(notionHomeURL)', self.source)
         self.assertIn('BASE HOME refresh bridge', self.source)
-        self.assertIn('notion_yos_home', self.source)
         self.assertIn('money-capture.html?text={moneyEncoded}', self.source)
         self.assertIn('openURL(moneyURL)', self.source)
+        self.assertIn('https://yskn0008-bot.github.io/ProjectY/yos/', self.source)
+        self.assertIn('appendToFile("Idea in Box.txt"', self.source)
+        self.assertIn('appendToFile("Clarity Inbox.txt"', self.source)
+        self.assertIn('@normalizedExecutor == "NEXT_TASK"', self.source)
+        self.assertIn('@normalizedExecutor == "NEXT_SHOPPING"', self.source)
+        self.assertIn('@normalizedExecutor == "NEXT_ALARM"', self.source)
+        self.assertIn('@normalizedExecutor == "NEXT_COMMUNICATION"', self.source)
+        self.assertIn('@normalizedExecutor == "NEXT_MEDIA"', self.source)
+        self.assertIn('@normalizedExecutor == "NEXT_CLIPBOARD"', self.source)
+        self.assertIn('@normalizedExecutor == "NEXT_CAMERA"', self.source)
+        self.assertIn('@normalizedExecutor == "NEXT_YOS_VIEW"', self.source)
+        self.assertIn('@normalizedExecutor == "NEXT_REMOTE"', self.source)
+        self.assertIn('@normalizedExecutor == "YOS_SHORTCUT"', self.source)
+        self.assertIn('@normalizedExecutor == "YOS_SCRIPTABLE"', self.source)
+        self.assertTrue(self.source.rstrip().endswith("stop()"))
 
 if __name__ == "__main__":
     unittest.main()
