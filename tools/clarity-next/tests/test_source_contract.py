@@ -124,6 +124,18 @@ class ClarityNextSourceContractTests(unittest.TestCase):
         self.assertIn("電気消して", self.source)
         self.assertLess(self.source.index('if @normalizedNeedsReviewText == "はい"'), self.source.index('run("YOS_Home", homeCommand)'))
 
+    def test_floor_lamp_uses_dedicated_l535e_adapter(self):
+        self.assertIn("フロアランプ、フロアライト、スタンドライト", self.source)
+        self.assertIn('homeCommand contains "フロアランプ"', self.source)
+        self.assertIn('homeCommand contains "フロアライト"', self.source)
+        self.assertIn('homeCommand contains "スタンドライト"', self.source)
+        self.assertIn('"floor_lamp|power_on|"', self.source)
+        self.assertIn('"floor_lamp|power_off|"', self.source)
+        self.assertIn('"floor_lamp|set_brightness|{floorBrightness}"', self.source)
+        self.assertIn('"floor_lamp|set_warm_white|"', self.source)
+        self.assertIn('run("YOS_Floor_Lamp", @floorPayload)', self.source)
+        self.assertLess(self.source.index('run("YOS_Floor_Lamp", @floorPayload)'), self.source.index('run("YOS_Home", homeCommand)'))
+
     def test_safety_gates_precede_execution(self):
         review = self.source.index('if @normalizedNeedsReviewText == "はい"')
         confirm = self.source.index('if @normalizedNeedsConfirmationText == "はい"')
