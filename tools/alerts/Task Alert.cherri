@@ -1,0 +1,67 @@
+#define name Task Alert
+#define color blue
+
+#include 'actions/text'
+#include 'actions/documents'
+#include 'actions/intelligence'
+#include 'actions/calendar'
+#include 'actions/shortcuts'
+
+const historyFolder = createFolder("YOS Display History")
+const alertStateFolder = createFolder("YOS Alert State")
+const now = currentDate()
+const todayLabel = formatDate(now, "Custom", "yyyy/MM/dd")
+const startText = text("{todayLabel} 00:00")
+const endText = text("{todayLabel} 23:59")
+const start = date(startText)
+const end = date(endText)
+
+// Postcompile replaces these with one native Reminder filter and properties.
+const candidates = text("YOS_TASK_REMINDERS_PLACEHOLDER")
+const titles = text("YOS_TASK_TITLES_PLACEHOLDER")
+const lists = text("YOS_TASK_LISTS_PLACEHOLDER")
+const dueDates = text("YOS_TASK_DATES_PLACEHOLDER")
+
+const promptText = text("あなたはYOS Task Alertです。
+入力はiPhoneのReminderから、今日が期限・未完了・Reminder自身の通知がない項目だけを事前抽出したものです。
+
+Task Alertは『今日本人が対応しないと忘れやすい具体的タスク』だけを出します。
+Routine Alertとの重複を避けるため、リスト名またはタイトルに「Routine」「ルーティン」「習慣」が含まれる項目は除外してください。
+情報を作らない。入力にない時刻を作らない。
+該当なしなら完全一致で TASK_ALERT_NONE とだけ返す。
+該当ありなら最大5件、1件1行。短く「・タイトル（必要なら時刻）」だけ。前置き不要。
+
+日付：{todayLabel}
+タイトル：{titles}
+リスト：{lists}
+期限：{dueDates}
+元候補：{candidates}")
+
+const result = askChatGPT(promptText, false, "Text")
+@resultText = "{result}"
+if @resultText contains "TASK_ALERT_NONE" {
+    stop()
+}
+
+const sourceKey = text("{titles}\n{lists}\n{dueDates}")
+@sourceKeyText = "{sourceKey}"
+const lastSourceFile = getFile("YOS Alert State/Task Alert Last.txt", nil, false)
+const lastSourceText = getText(lastSourceFile)
+@lastSource = "{lastSourceText}"
+if @lastSource == @sourceKeyText {
+    stop()
+}
+saveFile("YOS Alert State/Task Alert Last.txt", sourceKey, true)
+
+const stampNow = currentDate()
+const stamp = formatDate(stampNow, "Custom", "yyyy-MM-dd HHmmss")
+const log = text("【Task Alert】\n{result}")
+saveFile("YOS Display History/{stamp} Task Alert.txt", log, false)
+
+const notifyPayload = {
+    "title": "Task Alert",
+    "body": "{result}",
+    "url": "x-apple-reminderkit://",
+    "thread": "yos-notifications-task"
+}
+run("YOS Notify", notifyPayload)

@@ -1,0 +1,14 @@
+#define name Morning History Fragment
+#define color purple
+#define inputs text
+
+#include 'actions/text'
+#include 'actions/documents'
+#include 'actions/calendar'
+
+@incoming = "{ShortcutInput}"
+const displayHistoryFolder = createFolder("YOS Display History")
+const historyNow = currentDate()
+const historyStamp = formatDate(historyNow, "Custom", "yyyy-MM-dd HHmmss")
+const historyText = text("【Morning Brief】\n{@incoming}")
+saveFile("YOS Display History/{historyStamp} Morning Brief.txt", historyText, false)

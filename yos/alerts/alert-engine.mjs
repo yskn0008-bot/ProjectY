@@ -21,7 +21,9 @@ export function classifyAlert(event, now=new Date()){
   if(e.kind==='money_anomaly') return 'money';
   if(e.kind==='task') return e.nativeReminderNotifies ? null : 'task';
   if(e.kind==='routine') return e.existingAutomationNotifies ? null : 'routine';
-  return e.deferToNight ? 'night' : 'morning';
+  if(e.kind==='morning') return e.requiresUserAttention===true ? 'morning' : null;
+  if(e.kind==='night') return e.requiresUserAttention===true ? 'night' : null;
+  return null;
 }
 export function selectAlerts(events,{now=new Date(),notifiedKeys=[]}={}){
   const sent=new Set(notifiedKeys.map(clean)); const winners=new Map();
