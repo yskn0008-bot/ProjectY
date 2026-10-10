@@ -27,6 +27,9 @@ class FloorLampContractTests(unittest.TestCase):
     def test_floor_lamp_accepts_only_verified_controls(self):
         for action in ("power_on", "power_off", "set_brightness", "set_warm_white"):
             self.assertIn(action, SOURCE)
+        for phrase in ("つけて", "消して", "暖色", "パーセント"):
+            self.assertIn(phrase, SOURCE)
+        self.assertIn("このショートカットはClarityから使います", SOURCE)
         self.assertNotIn("set_color_temperature", SOURCE)
 
 if __name__ == "__main__":
