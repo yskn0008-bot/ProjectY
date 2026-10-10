@@ -129,12 +129,9 @@ class ClarityNextSourceContractTests(unittest.TestCase):
         self.assertIn('homeCommand contains "フロアランプ"', self.source)
         self.assertIn('homeCommand contains "フロアライト"', self.source)
         self.assertIn('homeCommand contains "スタンドライト"', self.source)
-        self.assertIn('"floor_lamp|power_on|"', self.source)
-        self.assertIn('"floor_lamp|power_off|"', self.source)
-        self.assertIn('"floor_lamp|set_brightness|{floorBrightness}"', self.source)
-        self.assertIn('"floor_lamp|set_warm_white|"', self.source)
-        self.assertIn('run("YOS_Floor_Lamp", @floorPayload)', self.source)
-        self.assertLess(self.source.index('run("YOS_Floor_Lamp", @floorPayload)'), self.source.index('run("YOS_Home", homeCommand)'))
+        self.assertIn('run("YOS_Floor_Lamp", homeCommand)', self.source)
+        self.assertLess(self.source.index('run("YOS_Floor_Lamp", homeCommand)'), self.source.index('run("YOS_Home", homeCommand)'))
+        self.assertNotIn('@floorPayload', self.source)
 
     def test_safety_gates_precede_execution(self):
         review = self.source.index('if @normalizedNeedsReviewText == "はい"')
