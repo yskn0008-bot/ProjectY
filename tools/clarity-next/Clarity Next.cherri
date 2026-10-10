@@ -562,7 +562,7 @@ for actionItem in @actionsRaw {
         openURL(@yosURL)
     }
 
-    // Home stays one user-facing route. Floor lamp uses the verified Tapo AppIntent adapter;
+    // Home stays one user-facing route. Floor lamp uses the dedicated Tapo adapter;
     // TV / AC / ceiling light continue through the inline local YOS_Home bridge.
     if @normalizedExecutor == "YOS_Home" && @normalizedModule == "home" && operation == "execute" {
         const homeCommand = "{parameters['command']}"
@@ -571,32 +571,7 @@ for actionItem in @actionsRaw {
             stop()
         }
         if homeCommand contains "フロアランプ" || homeCommand contains "フロアライト" || homeCommand contains "スタンドライト" {
-            @floorPayload = ""
-            if homeCommand contains "消して" || homeCommand contains "切って" || homeCommand contains "オフ" {
-                @floorPayload = "floor_lamp|power_off|"
-            } else {
-                if homeCommand contains "つけて" || homeCommand contains "付けて" || homeCommand contains "点けて" || homeCommand contains "オン" {
-                    @floorPayload = "floor_lamp|power_on|"
-                } else {
-                    if homeCommand contains "暖色" || homeCommand contains "電球色" || homeCommand contains "暖かい色" {
-                        @floorPayload = "floor_lamp|set_warm_white|"
-                    } else {
-                        const floorBrightness = getNumbers(homeCommand)
-                        if floorBrightness {
-                            if floorBrightness < 1 || floorBrightness > 100 {
-                                alert("フロアランプの明るさは1〜100%で指定してください", "Clarity Next")
-                                stop()
-                            }
-                            @floorPayload = "floor_lamp|set_brightness|{floorBrightness}"
-                        }
-                    }
-                }
-            }
-            if !@floorPayload {
-                alert("そのフロアランプ操作にはまだ対応していません", "Clarity Next")
-                stop()
-            }
-            run("YOS_Floor_Lamp", @floorPayload)
+            run("YOS_Floor_Lamp", homeCommand)
         } else {
             run("YOS_Home", homeCommand)
         }
