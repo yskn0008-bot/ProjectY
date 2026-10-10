@@ -4,24 +4,18 @@
 
 #include 'actions/text'
 
-// Tapo L535E adapter behind YOS_Home.
-// The device entity is selected once at import time via import questions.
-// No device-specific identifier is stored in the public repository.
+// Tapo L535E adapter behind Clarity Home.
+// It accepts either the canonical floor_lamp|... payload or the original Japanese command.
+// The device entity is selected once at import time via the Tapo "devices" parameter.
 
 @incoming = "{ShortcutInput}"
 
-if @incoming contains "power_on" {
-    rawAction("com.tplink.tapo.TapoDeviceToggleIntent", {
-        "devices": {
-            "identifier": "__SELECT_FLOOR_LAMP__",
-            "displayString": "フロアランプ"
-        },
-        "state": "on"
-    })
+if !@incoming {
+    alert("このショートカットはClarityから使います", "YOS Home")
     stop()
 }
 
-if @incoming contains "power_off" {
+if @incoming contains "power_off" || @incoming contains "消して" || @incoming contains "切って" || @incoming contains "オフ" {
     rawAction("com.tplink.tapo.TapoDeviceToggleIntent", {
         "devices": {
             "identifier": "__SELECT_FLOOR_LAMP__",
@@ -32,7 +26,18 @@ if @incoming contains "power_off" {
     stop()
 }
 
-if @incoming contains "set_brightness" {
+if @incoming contains "set_warm_white" || @incoming contains "暖色" || @incoming contains "電球色" || @incoming contains "暖かい色" {
+    rawAction("com.tplink.tapo.TapoBulbColorSetIntent", {
+        "devices": {
+            "identifier": "__SELECT_FLOOR_LAMP__",
+            "displayString": "フロアランプ"
+        },
+        "color": "temp_warm_white"
+    })
+    stop()
+}
+
+if @incoming contains "set_brightness" || @incoming contains "%" || @incoming contains "パーセント" || @incoming contains "パー" {
     const brightness = getNumbers(@incoming)
     if brightness < 1 || brightness > 100 {
         alert("フロアランプの明るさは1〜100%で指定してください", "YOS Home")
@@ -48,13 +53,13 @@ if @incoming contains "set_brightness" {
     stop()
 }
 
-if @incoming contains "set_warm_white" {
-    rawAction("com.tplink.tapo.TapoBulbColorSetIntent", {
+if @incoming contains "power_on" || @incoming contains "つけて" || @incoming contains "付けて" || @incoming contains "点けて" || @incoming contains "オン" {
+    rawAction("com.tplink.tapo.TapoDeviceToggleIntent", {
         "devices": {
             "identifier": "__SELECT_FLOOR_LAMP__",
             "displayString": "フロアランプ"
         },
-        "color": "temp_warm_white"
+        "state": "on"
     })
     stop()
 }
