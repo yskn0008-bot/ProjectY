@@ -8,12 +8,12 @@ const path = require("node:path");
 
 const source = fs.readFileSync(path.join(__dirname, "../YOS_DASHBOARD_WIDGET_v1.js"), "utf8");
 const start = source.indexOf("// YOS Money widget:");
-const end = source.indexOf('if (PARAM === "MONEY" && !ACTION)');
+const end = source.indexOf('if ((PARAM === "MONEY" || PARAM === "MONEY_ASSETS" || PARAM === "MONEY_FP") && !ACTION)');
 assert.ok(start >= 0 && end > start, "MONEY mode must exist");
 const ctx = {yen:n=>"¥"+Math.round(n).toLocaleString("ja-JP")};
 vm.createContext(ctx);
-vm.runInContext(source.slice(start, end)+"\nthis.logic={mwAnalyze,mwPayoff};",ctx);
-const {mwAnalyze,mwPayoff} = ctx.logic;
+vm.runInContext(source.slice(start, end)+"\nthis.logic={mwAnalyze,mwComprehensive,mwPayoff};",ctx);
+const {mwAnalyze,mwComprehensive,mwPayoff} = ctx.logic;
 const day="2026-10-15";
 const copy=x=>structuredClone(x);
 const fixture=()=>({
@@ -92,4 +92,70 @@ test("income cannot be spent before it arrives",()=>{
 test("holiday-adjusted recurring date must not be called exact",()=>{
   const d=fixture();d.transactions=[];d.recurring[0].businessDayRule="next_jp_business_day";
   assert.equal(mwAnalyze(d,day).projected,null);
+});
+
+test("monthly receipt, planned bills and savings are divided across three MONEY modes",()=>{
+  assert.ok(source.includes('PARAM === "MONEY_ASSETS"'));
+  assert.ok(source.includes('PARAM === "MONEY_FP"'));
+  assert.ok(source.includes("function mwNowWidget("));
+  assert.ok(source.includes("function mwAssetsWidget("));
+  assert.ok(source.includes("function mwFpWidget("));
+});
+test("net worth is labelled registered-only and requires populated assets and debts",()=>{
+  const d=fixture();d.assets=[{name:"投資",value:25000}];
+  let r=mwComprehensive(d,day);
+  assert.equal(r.assetsRegistered,125000);
+  assert.equal(r.netRegistered,25000);
+  d.debts=[];
+  assert.equal(mwComprehensive(d,day).netRegistered,null);
+  d.debts=fixture().debts;
+  d.assets=[];
+  assert.equal(mwComprehensive(d,day).netRegistered,null);
+});
+test("past recurring charges without transaction reconciliation do not inflate daily budget",()=>{
+  const d=fixture();
+  d.recurring.push({type:"expense",label:"iCloud",day:14,amount:540,enabled:true});
+  const r=mwComprehensive(d,day);
+  assert.equal(r.projected,null);
+  assert.equal(r.daily,null);
+  assert.equal(r.recurringPastUnreconciled,1);
+  assert.match(r.advice,/照合/);
+});
+test("unknown future utility blocks all projections, not only current month",()=>{
+  const d=fixture();
+  d.recurring.push({type:"expense",label:"ガス",day:15,amount:null,variableAmount:true,enabled:true});
+  const r=mwComprehensive(d,day);
+  assert.equal(r.future[30],null);
+  assert.equal(r.future[90],null);
+  assert.equal(r.future[365],null);
+});
+test("realistic debt burden ratio requires repayment data and recurring known income",()=>{
+  const d=fixture();
+  let r=mwComprehensive(d,day);
+  assert.equal(r.monthlyDebtPay,10000);
+  assert.equal(r.debtRatio,6);
+  delete d.debts[0].plannedPayment;
+  assert.equal(mwComprehensive(d,day).monthlyDebtPay,null);
+  assert.equal(mwComprehensive(d,day).debtRatio,null);
+});
+test("long-horizon estimates are labelled as registered-plans-only",()=>{
+  const d=fixture();d.assets=[{name:"投資",value:25000}];
+  let r=mwComprehensive(d,day);
+  assert.equal(r.future[30],31500);
+  assert.equal(r.future[90],31500-68500*2+160485*2);
+  assert.ok(source.includes("登録予定のみ"));
+});
+test("stale current balance blocks all current spending and registered net worth",()=>{
+  const d=fixture();d.assets=[{name:"投資",value:25000}];d.balance.asOf="2026-10-01";
+  const r=mwComprehensive(d,day);
+  assert.equal(r.projected,null);
+  assert.equal(r.daily,null);
+  assert.equal(r.assetsRegistered,null);
+  assert.equal(r.netRegistered,null);
+});
+test("danger day is not shown as confirmed when the projection itself is unknown",()=>{
+  const d=fixture();d.recurring.push({type:"expense",label:"光熱費",day:16,amount:null,enabled:true});
+  const r=mwComprehensive(d,day);
+  assert.equal(r.projected,null);
+  assert.equal(r.status,"データ要照合");
 });
