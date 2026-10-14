@@ -751,6 +751,198 @@ async function mwLoad(){
     return {data};
   }catch{return {error:"iCloudのMoneyデータを確認してください"}}
 }
+
+function mwComprehensive(data,today){
+  const base=mwAnalyze(data,today);
+  const month=today.slice(0,7), end=mwEnd(today);
+  const tx=Array.isArray(data.transactions)?data.transactions:[];
+  const recur=Array.isArray(data.recurring)?data.recurring.filter(x=>x&&x.enabled!==false):[];
+  const debts=Array.isArray(data.debts)?data.debts:[];
+  const assets=Array.isArray(data.assets)?data.assets:[];
+  const done=x=>x.status==="done"||x.paid===true||x.completed===true||x.received===true||
+    ["paid","received","completed"].includes(String(x.status||""));
+  const amount=x=>mwNum(x?.amount);
+  const known=x=>amount(x)!==null&&amount(x)>=0;
+  const same=x=>String(x.type)+"|"+String(x.label||"").trim()+"|"+String(x.date||"").slice(0,7);
+  const covered=new Set(tx.map(same));
+  const paid=tx.filter(x=>x&&done(x)&&String(x.date||"").slice(0,7)===month);
+  const actualIncome=paid.filter(x=>x.type==="income"&&known(x)).reduce((s,x)=>s+x.amount,0);
+  const actualExpense=paid.filter(x=>x.type!=="income"&&known(x)).reduce((s,x)=>s+x.amount,0);
+  const registeredExpenseCount=paid.filter(x=>x.type!=="income").length;
+  const recent=tx.filter(x=>x&&!done(x)&&mwDay(x.date)!==null&&x.date<=end)
+    .map(x=>({...x,from:"transaction"}));
+  let recurringPastUnreconciled=0;
+  let incomeUncertain=false,unknownFixed=0,fixed=0,regularIncome=0;
+  for(const r of recur){
+    if(!["income","expense","debt"].includes(r.type))continue;
+    if(!known(r)){if(r.type!=="income")unknownFixed++;else incomeUncertain=true}
+    if(r.amountApproximate===true||r.businessDayRule)if(r.type==="income")incomeUncertain=true;
+    if(known(r)&&!r.variableAmount){
+      if(r.type==="income")regularIncome+=r.amount;
+      else fixed+=r.amount;
+    }
+    const d=month+"-"+String(Math.min(Number(end.slice(-2)),Math.max(1,Math.trunc(Number(r.day)||1)))).padStart(2,"0");
+    if(d<today&&(!r.startDate||r.startDate<=d)&&!covered.has(String(r.type)+"|"+String(r.label||"").trim()+"|"+month))
+      recurringPastUnreconciled++;
+  }
+  const balanceReliable=base.confirmed&&recurringPastUnreconciled===0;
+  const projected=balanceReliable?base.projected:null;
+  const daily=balanceReliable?base.daily:null;
+  const assetsValid=assets.length>0&&assets.every(x=>mwNum(x.value)!==null&&x.value>=0);
+  const assetsExtra=assetsValid?assets.reduce((s,x)=>s+x.value,0):null;
+  // assets are non-cash holdings registered separately; "registered net worth" is not guaranteed comprehensive.
+  const assetsRegistered=balanceReliable&&assetsExtra!==null?base.balance+assetsExtra:null;
+  const netRegistered=assetsRegistered!==null&&base.debtTotal!==null?assetsRegistered-base.debtTotal:null;
+  const reserveMonths=balanceReliable&&fixed>0&&unknownFixed===0?Math.floor(base.balance/fixed*10)/10:null;
+  const fixedRatio=regularIncome>0&&!incomeUncertain&&unknownFixed===0?Math.round(100*fixed/regularIncome):null;
+  const minDebtPayments=debts.length>0&&debts.every(x=>mwNum(x.plannedPayment)??mwNum(x.minPayment)!==null);
+  const monthlyDebtPay=minDebtPayments?debts.reduce((s,x)=>s+(mwNum(x.plannedPayment)??mwNum(x.minPayment)??0),0):null;
+  const debtRatio=regularIncome>0&&!incomeUncertain&&monthlyDebtPay!==null?
+    Math.round(100*monthlyDebtPay/regularIncome):null;
+  const dueEvents=[...recent];
+  for(const r of recur){
+    if(!["income","expense","debt"].includes(r.type))continue;
+    const day=Math.min(Number(end.slice(-2)),Math.max(1,Math.trunc(Number(r.day)||1)));
+    const date=month+"-"+String(day).padStart(2,"0");
+    if(r.startDate&&r.startDate>date)continue;
+    if(covered.has(r.type+"|"+String(r.label||"").trim()+"|"+month))continue;
+    dueEvents.push({...r,date,from:"recurring"});
+  }
+  dueEvents.sort((a,b)=>a.date.localeCompare(b.date)||(a.type==="income"?1:-1));
+  const nextPay=dueEvents.find(x=>x.type!=="income")||null;
+  const nextIn=dueEvents.find(x=>x.type==="income")||null;
+  const remainingPayments=dueEvents.filter(x=>x.type!=="income"&&known(x)).reduce((s,x)=>s+x.amount,0);
+  const paymentsUnknown=dueEvents.filter(x=>x.type!=="income"&&!known(x)).length;
+  const future={};
+  for(const span of [30,90,365]){
+    const last=new Date((mwDay(today)+span)*86400000).toISOString().slice(0,10);
+    const pending=tx.filter(x=>x&&!done(x)&&mwDay(x.date)!==null&&x.date<=last).map(x=>({...x}));
+    let missing=0,changedDate=false;
+    const yy=Number(today.slice(0,4)),mm=Number(today.slice(5,7));
+    const period=Number(last.slice(0,4))*12+Number(last.slice(5,7))-(yy*12+mm);
+    for(let step=0;step<=period;step++){
+      const first=new Date(Date.UTC(yy,mm-1+step,1));
+      const ym=first.toISOString().slice(0,7);
+      const maxDay=new Date(Date.UTC(first.getUTCFullYear(),first.getUTCMonth()+1,0)).getUTCDate();
+      for(const r of recur){
+        if(!["income","expense","debt"].includes(r.type))continue;
+        const date=ym+"-"+String(Math.min(maxDay,Math.max(1,Math.trunc(Number(r.day)||1)))).padStart(2,"0");
+        if(date>last||(r.startDate&&r.startDate>date))continue;
+        if(covered.has(r.type+"|"+String(r.label||"").trim()+"|"+ym))continue;
+        if(r.businessDayRule)changedDate=true;
+        pending.push({...r,date});
+      }
+    }
+    // Missing expense categories and irregular spending can cause projections to overstate available cash.
+    let running=base.balance;
+    for(const e of pending){
+      if(!known(e)||e.amountApproximate===true){missing++;continue}
+      running+=e.type==="income"?e.amount:-e.amount;
+    }
+    future[span]=balanceReliable&&missing===0&&!changedDate&&!incomeUncertain?running:null;
+  }
+  let status="要確認";
+  if(projected!==null&&projected<0)status="月末不足";
+  else if(base.risk&&balanceReliable)status="途中資金不足";
+  else if(!balanceReliable||paymentsUnknown||incomeUncertain)status="データ要照合";
+  else if(projected!==null)status="登録予定では余剰";
+  let advice=base.advice;
+  let effect=null;
+  if(!balanceReliable&&recurringPastUnreconciled){
+    advice="支払済み未記録の定期費用が"+recurringPastUnreconciled+"件ある可能性。まず入出金を照合。";
+  }else if(projected!==null&&projected<0){
+    effect="支出を"+yen(-projected)+"減らせば登録予定上の月末不足を解消。";
+  }else if(projected!==null&&projected>=0&&base.debtTotal>0&&monthlyDebtPay!==null){
+    advice="最低生活費を先に確保し、余剰が確定してから返済配分を検討。";
+  }
+  return {...base,projected,daily,balanceReliable,recurringPastUnreconciled,actualIncome,actualExpense,
+    registeredExpenseCount,fixed,fixedRatio,unknownFixed,regularIncome,incomeUncertain,
+    assetsExtra,assetsRegistered,netRegistered,reserveMonths,monthlyDebtPay,debtRatio,
+    nextPay,nextIn,remainingPayments,paymentsUnknown,future,status,advice,effect,
+    asOf:data.balance?.asOf||null,goalTarget:(Array.isArray(data.goals)?data.goals:[])
+      .find(x=>x?.name===base.goalName)?.target??null};
+}
+function mwAmount(v){return v===null||v===undefined?"未確定":yen(v)}
+function mwDate(date){return date?String(date).slice(5).replace("-","/"):"—"}
+function mwEvent(event){
+  return event?mwDate(event.date)+" "+String(event.label||"予定")+(mwNum(event.amount)===null?" 金額未定":" "+yen(event.amount)):"登録なし";
+}
+function mwShell(title){
+  const w=new ListWidget();setBackground(w);w.setPadding(13,17,13,17);
+  w.url=MONEY_APP_URL;w.refreshAfterDate=new Date(Date.now()+15*60*1000);
+  addHeader(w,title);w.addSpacer(9);return w;
+}
+function mwErr(w,error){mwLine(w,error,18,COLORS.coral);w.addSpacer(8);mwLine(w,"YOS Money本体や保存データには変更を加えていません。",13)}
+function mwFooter(w,s){w.addSpacer();mwLine(w,"YOS Money Local / 残高 "+(s.asOf||"未更新")+(s.balanceReliable?"":" 要照合")+" / マネフォ自動同期なし",10,COLORS.muted)}
+function mwRow(w,label,value,tint=COLORS.text){
+  const line=w.addStack();line.layoutHorizontally();line.centerAlignContent();
+  const l=line.addText(label);l.font=font(13,"medium");l.textColor=color(COLORS.muted);l.lineLimit=1;
+  line.addSpacer(5);
+  const v=line.addText(value);v.font=font(14,"semibold");v.textColor=color(tint);v.lineLimit=1;v.minimumScaleFactor=0.65;
+}
+function mwNowWidget(result){
+  const w=mwShell("MONEY / NOW");
+  if(result.error){mwErr(w,result.error);return w}
+  const s=result.analysis;
+  const h=w.addStack();h.layoutHorizontally();
+  mwPair(h,"今月の余剰・不足",s.projected===null?"算定待ち":yen(s.projected),
+    s.projected!==null&&s.projected<0?COLORS.coral:COLORS.blue,23);
+  h.addSpacer();
+  mwPair(h,"1日予算・固定費控除",s.daily===null?"算定待ち":yen(s.daily),COLORS.gold,21);
+  w.addSpacer(10);
+  mwRow(w,"今使える残高",s.balanceReliable?yen(s.balance):"要照合");
+  mwRow(w,"残りの支払い",s.paymentsUnknown?"金額未定 "+s.paymentsUnknown+"件":yen(s.remainingPayments));
+  addDivider(w);
+  addSectionLabel(w,"calendar","次の入金と支払い",COLORS.blue);w.addSpacer(5);
+  mwLine(w,"入金　"+mwEvent(s.nextIn),13);
+  w.addSpacer(3);mwLine(w,"支払　"+mwEvent(s.nextPay),13);
+  w.addSpacer(7);
+  mwRow(w,"最初の危険日",s.risk&&s.balanceReliable?mwDate(s.risk):"要確認",
+    s.risk?COLORS.coral:COLORS.muted);
+  mwFooter(w,s);return w;
+}
+function mwAssetsWidget(result){
+  const w=mwShell("MONEY / ASSETS");
+  if(result.error){mwErr(w,result.error);return w}
+  const s=result.analysis;
+  const h=w.addStack();h.layoutHorizontally();
+  mwPair(h,"登録資産※",mwAmount(s.assetsRegistered),COLORS.green,22);
+  h.addSpacer();mwPair(h,"登録借金",mwAmount(s.debtTotal),COLORS.coral,22);
+  w.addSpacer(9);
+  mwRow(w,"登録分の純資産",mwAmount(s.netRegistered),s.netRegistered!==null&&s.netRegistered<0?COLORS.coral:COLORS.text);
+  addDivider(w);
+  addSectionLabel(w,"target","貯金目標",COLORS.gold);w.addSpacer(7);
+  mwRow(w,s.goalName,s.saved===null?"未登録":yen(s.saved)+" / "+mwAmount(mwNum(s.goalTarget)));
+  mwRow(w,"目標達成まで",s.goalDays===null?"算定待ち":"約"+s.goalDays+"日");
+  addDivider(w);
+  addSectionLabel(w,"creditcard","返済計画",COLORS.coral);w.addSpacer(7);
+  mwRow(w,"毎月返済",mwAmount(s.monthlyDebtPay));
+  mwRow(w,"完済まで",s.debtDays===null?"算定待ち":"約"+s.debtDays+"日");
+  w.addSpacer(5);
+  mwLine(w,"※登録された資産・借金のみ。未登録口座や重複資産は含みません。",11,COLORS.muted);
+  mwFooter(w,s);return w;
+}
+function mwFpWidget(result){
+  const w=mwShell("MONEY / FP");
+  if(result.error){mwErr(w,result.error);return w}
+  const s=result.analysis;
+  mwPair(w,"財政チェック",s.status,s.status.includes("不足")?COLORS.coral:COLORS.gold,23);
+  w.addSpacer(9);
+  mwRow(w,"固定費 / 定期収入",s.fixedRatio===null?"算定待ち":s.fixedRatio+"%");
+  mwRow(w,"返済額 / 定期収入",s.debtRatio===null?"算定待ち":s.debtRatio+"%");
+  mwRow(w,"手元資金 / 定期固定費",s.reserveMonths===null?"算定待ち":s.reserveMonths+"か月");
+  addDivider(w);
+  addSectionLabel(w,"chart.line.uptrend.xyaxis","将来の資金予測（登録予定のみ）",COLORS.blue);w.addSpacer(6);
+  mwRow(w,"30日後",mwAmount(s.future[30]));
+  mwRow(w,"90日後",mwAmount(s.future[90]));
+  mwRow(w,"1年後",mwAmount(s.future[365]));
+  addDivider(w);
+  addSectionLabel(w,"lightbulb","今優先する1件",COLORS.green);w.addSpacer(6);
+  mwLine(w,s.advice,13);
+  if(s.effect){w.addSpacer(3);mwLine(w,s.effect,12,COLORS.coral)}
+  mwFooter(w,s);return w;
+}
+
 function mwPair(root,label,value,tint=COLORS.text,size=22){
   const c=root.addStack();c.layoutVertically();
   const t=c.addText(label);t.font=font(12,"semibold");t.textColor=color(COLORS.muted);
@@ -790,9 +982,10 @@ function mwWidget(result){
   return w;
 }
 
-if (PARAM === "MONEY" && !ACTION) {
+if ((PARAM === "MONEY" || PARAM === "MONEY_ASSETS" || PARAM === "MONEY_FP") && !ACTION) {
   const local = await mwLoad();
-  const view = mwWidget(local.error ? local : {analysis:mwAnalyze(local.data,mwToday())});
+  const result = local.error ? local : {analysis:mwComprehensive(local.data,mwToday())};
+  const view = PARAM === "MONEY_ASSETS" ? mwAssetsWidget(result) : PARAM === "MONEY_FP" ? mwFpWidget(result) : mwNowWidget(result);
   if (config.runsInWidget) Script.setWidget(view);
   else await view.presentLarge();
   Script.complete();
