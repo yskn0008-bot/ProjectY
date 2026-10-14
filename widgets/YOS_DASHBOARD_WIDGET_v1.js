@@ -786,8 +786,8 @@ function mwComprehensive(data,today){
       recurringPastUnreconciled++;
   }
   const balanceReliable=base.confirmed&&recurringPastUnreconciled===0;
-  const projected=balanceReliable?base.projected:null;
-  const daily=balanceReliable?base.daily:null;
+  let projected=balanceReliable?base.projected:null;
+  let daily=balanceReliable?base.daily:null;
   const assetsValid=assets.length>0&&assets.every(x=>mwNum(x.value)!==null&&x.value>=0);
   const assetsExtra=assetsValid?assets.reduce((s,x)=>s+x.value,0):null;
   // assets are non-cash holdings registered separately; "registered net worth" is not guaranteed comprehensive.
@@ -797,6 +797,16 @@ function mwComprehensive(data,today){
   const fixedRatio=regularIncome>0&&!incomeUncertain&&unknownFixed===0?Math.round(100*fixed/regularIncome):null;
   const minDebtPayments=debts.length>0&&debts.every(x=>(mwNum(x.plannedPayment)??mwNum(x.minPayment))!==null);
   const monthlyDebtPay=minDebtPayments?debts.reduce((s,x)=>s+(mwNum(x.plannedPayment)??mwNum(x.minPayment)??0),0):null;
+  // A loan balance alone is not a payment schedule. Do not declare spendable surplus
+  // until required monthly repayments are represented in the current-month cash flow.
+  const recordedRepayment=tx.filter(x=>x&&x.type==="debt"&&String(x.date||"").slice(0,7)===month&&known(x))
+    .reduce((sum,x)=>sum+x.amount,0);
+  const scheduledRepayment=recur.filter(x=>x.type==="debt"&&known(x)&&
+    !covered.has(x.type+"|"+String(x.label||"").trim()+"|"+month))
+    .reduce((sum,x)=>sum+x.amount,0);
+  const debtCovered=base.debtTotal!==null&&(base.debtTotal===0||
+    (monthlyDebtPay!==null&&recordedRepayment+scheduledRepayment>=monthlyDebtPay));
+  if(!debtCovered){projected=null;daily=null;}
   const debtRatio=regularIncome>0&&!incomeUncertain&&monthlyDebtPay!==null?
     Math.round(100*monthlyDebtPay/regularIncome):null;
   const dueEvents=[...recent];
@@ -839,17 +849,20 @@ function mwComprehensive(data,today){
       if(!known(e)||e.amountApproximate===true){missing++;continue}
       running+=e.type==="income"?e.amount:-e.amount;
     }
-    future[span]=balanceReliable&&missing===0&&!changedDate&&!incomeUncertain?running:null;
+    future[span]=debtCovered&&balanceReliable&&missing===0&&!changedDate&&!incomeUncertain?running:null;
   }
   let status="要確認";
   if(projected!==null&&projected<0)status="月末不足";
   else if(base.risk&&balanceReliable)status="途中資金不足";
+  else if(!debtCovered)status="返済予定要確認";
   else if(!balanceReliable||paymentsUnknown||incomeUncertain)status="データ要照合";
   else if(projected!==null)status="登録予定では余剰";
   let advice=base.advice;
   let effect=null;
   if(!balanceReliable&&recurringPastUnreconciled){
     advice="支払済み未記録の定期費用が"+recurringPastUnreconciled+"件ある可能性。まず入出金を照合。";
+  }else if(!debtCovered){
+    advice="借金・返済予定の記録が不足。必要な返済額を確認してから日額を算定。";
   }else if(projected!==null&&projected<0){
     effect="支出を"+yen(-projected)+"減らせば登録予定上の月末不足を解消。";
   }else if(projected!==null&&projected>=0&&base.debtTotal>0&&monthlyDebtPay!==null){
@@ -858,7 +871,7 @@ function mwComprehensive(data,today){
   return {...base,projected,daily,balanceReliable,recurringPastUnreconciled,actualIncome,actualExpense,
     registeredExpenseCount,fixed,fixedRatio,unknownFixed,regularIncome,incomeUncertain,
     assetsExtra,assetsRegistered,netRegistered,reserveMonths,monthlyDebtPay,debtRatio,
-    nextPay,nextIn,remainingPayments,paymentsUnknown,future,status,advice,effect,
+    nextPay,nextIn,remainingPayments,paymentsUnknown,debtCovered,future,status,advice,effect,
     asOf:data.balance?.asOf||null,goalTarget:(Array.isArray(data.goals)?data.goals:[])
       .find(x=>x?.name===base.goalName)?.target??null};
 }
@@ -888,8 +901,9 @@ function mwNowWidget(result){
   mwPair(h,"今月の余剰・不足",s.projected===null?"算定待ち":yen(s.projected),
     s.projected!==null&&s.projected<0?COLORS.coral:COLORS.blue,23);
   h.addSpacer();
-  mwPair(h,"1日予算・固定費控除",s.daily===null?"算定待ち":yen(s.daily),COLORS.gold,21);
-  w.addSpacer(10);
+  mwPair(h,"1日予算※予定控除",s.daily===null?"算定待ち":yen(s.daily),COLORS.gold,21);
+  w.addSpacer(9);
+  mwRow(w,"今月の入金・支出",yen(s.actualIncome)+" / "+yen(s.actualExpense));
   mwRow(w,"今使える残高",s.balanceReliable?yen(s.balance):"要照合");
   mwRow(w,"残りの支払い",s.paymentsUnknown?"金額未定 "+s.paymentsUnknown+"件":yen(s.remainingPayments));
   addDivider(w);
