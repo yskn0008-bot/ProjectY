@@ -795,7 +795,7 @@ function mwComprehensive(data,today){
   const netRegistered=assetsRegistered!==null&&base.debtTotal!==null?assetsRegistered-base.debtTotal:null;
   const reserveMonths=balanceReliable&&fixed>0&&unknownFixed===0?Math.floor(base.balance/fixed*10)/10:null;
   const fixedRatio=regularIncome>0&&!incomeUncertain&&unknownFixed===0?Math.round(100*fixed/regularIncome):null;
-  const minDebtPayments=debts.length>0&&debts.every(x=>mwNum(x.plannedPayment)??mwNum(x.minPayment)!==null);
+  const minDebtPayments=debts.length>0&&debts.every(x=>(mwNum(x.plannedPayment)??mwNum(x.minPayment))!==null);
   const monthlyDebtPay=minDebtPayments?debts.reduce((s,x)=>s+(mwNum(x.plannedPayment)??mwNum(x.minPayment)??0),0):null;
   const debtRatio=regularIncome>0&&!incomeUncertain&&monthlyDebtPay!==null?
     Math.round(100*monthlyDebtPay/regularIncome):null;
@@ -897,7 +897,7 @@ function mwNowWidget(result){
   mwLine(w,"入金　"+mwEvent(s.nextIn),13);
   w.addSpacer(3);mwLine(w,"支払　"+mwEvent(s.nextPay),13);
   w.addSpacer(7);
-  mwRow(w,"最初の危険日",s.risk&&s.balanceReliable?mwDate(s.risk):"要確認",
+  mwRow(w,"最初の危険日",s.risk&&s.projected!==null?mwDate(s.risk):"要確認",
     s.risk?COLORS.coral:COLORS.muted);
   mwFooter(w,s);return w;
 }
