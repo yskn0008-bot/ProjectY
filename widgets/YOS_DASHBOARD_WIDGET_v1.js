@@ -903,7 +903,7 @@ function mwNowWidget(result){
   h.addSpacer();
   mwPair(h,"1日予算※予定控除",s.daily===null?"算定待ち":yen(s.daily),COLORS.gold,21);
   w.addSpacer(9);
-  mwRow(w,"今月の入金・支出",yen(s.actualIncome)+" / "+yen(s.actualExpense));
+  mwRow(w,"記録済み入金 / 支出",yen(s.actualIncome)+" / "+yen(s.actualExpense));
   mwRow(w,"今使える残高",s.balanceReliable?yen(s.balance):"要照合");
   mwRow(w,"残りの支払い",s.paymentsUnknown?"金額未定 "+s.paymentsUnknown+"件":yen(s.remainingPayments));
   addDivider(w);
@@ -927,6 +927,8 @@ function mwAssetsWidget(result){
   addDivider(w);
   addSectionLabel(w,"target","貯金目標",COLORS.gold);w.addSpacer(7);
   mwRow(w,s.goalName,s.saved===null?"未登録":yen(s.saved)+" / "+mwAmount(mwNum(s.goalTarget)));
+  mwRow(w,"貯金目標の達成率",s.saved!==null&&mwNum(s.goalTarget)>0?
+    Math.min(100,Math.round(100*s.saved/s.goalTarget))+"%":"算定待ち");
   mwRow(w,"目標達成まで",s.goalDays===null?"算定待ち":"約"+s.goalDays+"日");
   addDivider(w);
   addSectionLabel(w,"creditcard","返済計画",COLORS.coral);w.addSpacer(7);
@@ -946,10 +948,11 @@ function mwFpWidget(result){
   mwRow(w,"返済額 / 定期収入",s.debtRatio===null?"算定待ち":s.debtRatio+"%");
   mwRow(w,"手元資金 / 定期固定費",s.reserveMonths===null?"算定待ち":s.reserveMonths+"か月");
   addDivider(w);
-  addSectionLabel(w,"chart.line.uptrend.xyaxis","将来の資金予測（登録予定のみ）",COLORS.blue);w.addSpacer(6);
+  addSectionLabel(w,"chart.line.uptrend.xyaxis","将来予測 ※登録予定のみ",COLORS.blue);w.addSpacer(6);
   mwRow(w,"30日後",mwAmount(s.future[30]));
   mwRow(w,"90日後",mwAmount(s.future[90]));
   mwRow(w,"1年後",mwAmount(s.future[365]));
+  mwLine(w,"食費など未記録の変動支出は計算外",11,COLORS.muted);
   addDivider(w);
   addSectionLabel(w,"lightbulb","今優先する1件",COLORS.green);w.addSpacer(6);
   mwLine(w,s.advice,13);
