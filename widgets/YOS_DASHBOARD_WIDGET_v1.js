@@ -642,7 +642,161 @@ async function configureIfNeeded() {
   return await promptToken();
 }
 
-if (ACTION === "baseHome" && !config.runsInWidget) {
+
+// YOS Money widget: read-only view over existing local iCloud money.json.
+// Does not call external services, update files, or claim Money Forward sync.
+const MONEY_APP_URL = "scriptable:///run?scriptName=Untitled%20Script%2062";
+function mwNum(v) { return typeof v==="number" && Number.isFinite(v) ? v : null; }
+function mwDay(s) {
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(String(s||"")))return null;
+  const [y,m,d]=s.split("-").map(Number), v=Date.UTC(y,m-1,d), z=new Date(v);
+  return z.getUTCFullYear()===y&&z.getUTCMonth()===m-1&&z.getUTCDate()===d?v/86400000:null;
+}
+function mwToday() {
+  return new Intl.DateTimeFormat("sv-SE",{timeZone:"Asia/Tokyo",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date());
+}
+function mwEnd(s) { const [y,m]=s.slice(0,7).split("-").map(Number);return new Date(Date.UTC(y,m,0)).toISOString().slice(0,10); }
+function mwDaysMonths(today,n) {
+  if(n===null||!Number.isFinite(n)||n<0)return null;
+  const [y,m,d]=today.split("-").map(Number),next=new Date(Date.UTC(y,m-1+n,1));
+  const yy=next.getUTCFullYear(),mm=next.getUTCMonth(),dd=Math.min(d,new Date(Date.UTC(yy,mm+1,0)).getUTCDate());
+  return (Date.UTC(yy,mm,dd)-Date.UTC(y,m-1,d))/86400000;
+}
+function mwPayoff(balance,payment,apr) {
+  if(balance===0)return 0;
+  if(!(balance>0&&payment>0&&apr>=0))return null;
+  const r=apr/1200;
+  if(r===0)return Math.ceil(balance/payment);
+  if(payment<=balance*r)return null;
+  const n=Math.ceil(-Math.log(1-r*balance/payment)/Math.log(1+r));
+  return Number.isFinite(n)&&n<=1200?n:null;
+}
+function mwAnalyze(data,today) {
+  const end=mwEnd(today),month=today.slice(0,7),remainingDays=mwDay(end)-mwDay(today)+1;
+  const balance=mwNum(data?.balance?.amount),asOf=data?.balance?.asOf||"";
+  const age=mwDay(asOf)===null?null:mwDay(today)-mwDay(asOf);
+  const confirmed=balance!==null&&age!==null&&age>=0&&age<=2&&
+    !["estimated","unconfirmed"].includes(String(data?.balance?.source||""));
+  const explicit=(Array.isArray(data?.transactions)?data.transactions:[])
+    .filter(x=>x&&String(x.date||"").slice(0,7)===month);
+  const covered=new Set(explicit.map(x=>String(x.type)+"|"+String(x.label||"").trim()));
+  const done=x=>x.status==="done"||x.paid===true||x.completed===true||x.received===true||
+    ["paid","received","completed"].includes(String(x.status||""));
+  const pending=explicit.filter(x=>!done(x)).map(x=>({...x}));
+  let dateApprox=false;
+  for(const r of (Array.isArray(data?.recurring)?data.recurring:[])){
+    if(!r||r.enabled===false||!["income","expense","debt"].includes(r.type))continue;
+    if(covered.has(r.type+"|"+String(r.label||"").trim()))continue;
+    const dd=Math.min(Number(end.slice(-2)),Math.max(1,Math.trunc(Number(r.day)||1)));
+    const date=month+"-"+String(dd).padStart(2,"0");
+    if(r.startDate&&String(r.startDate)>date)continue;
+    if(r.businessDayRule==="next_jp_business_day")dateApprox=true;
+    pending.push({date,type:r.type,label:r.label,amount:r.variableAmount?null:r.amount,amountApproximate:r.amountApproximate===true});
+  }
+  pending.sort((a,b)=>String(a.date).localeCompare(String(b.date))||(a.type==="income"?1:-1));
+  const known=x=>mwNum(x.amount)!==null&&x.amount>=0;
+  const unknown=pending.filter(x=>!known(x));
+  const uncertain=pending.filter(x=>x.amountApproximate===true);
+  const oldIncome=pending.some(x=>x.type==="income"&&x.date<today);
+  let running=balance,risk=balance!==null&&balance<0?today:null;
+  for(const x of pending){
+    if(running===null||!known(x))continue;
+    running+=x.type==="income"?x.amount:-x.amount;
+    if(running<0&&risk===null)risk=x.date;
+  }
+  const exact=confirmed&&!unknown.length&&!uncertain.length&&!oldIncome&&!dateApprox;
+  const projected=exact?running:null;
+  const incomeFuture=pending.filter(x=>x.type==="income"&&x.date>today);
+  const anchor=incomeFuture.length?incomeFuture[0].date:end;
+  const outgoingBefore=pending.filter(x=>x.type!=="income"&&x.date<=anchor)
+    .reduce((sum,x)=>sum+(known(x)?x.amount:0),0);
+  const cashUntil=balance===null?null:balance-outgoingBefore;
+  const days=Math.max(1,mwDay(anchor)-mwDay(today)+(incomeFuture.length?0:1));
+  const daily=exact&&cashUntil!==null?Math.floor(Math.max(0,Math.min(projected,cashUntil))/days):null;
+  const debts=Array.isArray(data?.debts)?data.debts:[];
+  const debtsValid=debts.length>0&&debts.every(x=>mwNum(x.balance)!==null&&x.balance>=0);
+  const debtTotal=debtsValid?debts.reduce((sum,x)=>sum+x.balance,0):null;
+  let debtDays=null;
+  if(debtsValid&&debtTotal===0)debtDays=0;
+  else if(debtsValid){
+    const times=debts.filter(x=>x.balance>0).map(x=>mwPayoff(x.balance,mwNum(x.plannedPayment)??mwNum(x.minPayment),mwNum(x.apr)));
+    if(times.every(x=>x!==null))debtDays=mwDaysMonths(today,Math.max(...times));
+  }
+  const goals=Array.isArray(data?.goals)?data.goals:[];
+  const goal=goals.find(x=>x?.name==="生活防衛費")||goals.find(x=>mwNum(x?.target)>0)||null;
+  const saved=goal?mwNum(goal.current):null,target=goal?mwNum(goal.target):null;
+  const remain=saved!==null&&target!==null?Math.max(0,target-saved):null;
+  const savingRate=goal?mwNum(goal.monthlyContribution):null;
+  const goalDays=remain===0?0:remain!==null&&savingRate>0?mwDaysMonths(today,Math.ceil(remain/savingRate)):null;
+  let advice="Moneyの記録を照合すると助言が表示されます。";
+  if(!confirmed)advice="残高の確認日が古いか未登録。まず使える残高を照合。";
+  else if(unknown.length)advice="未確定の支払金額を確認。月末余剰はまだ確定できません。";
+  else if(oldIncome||uncertain.length||dateApprox)advice="入金予定額・支払日を確認後、使える金額を確定。";
+  else if(projected<0)advice="今月"+yen(-projected)+"不足見込み。支払日と資金を優先確認。";
+  else if(risk)advice=risk.slice(5).replace("-","/")+"に資金不足の可能性。入金前支払いを確認。";
+  else if(!debtsValid)advice="借入残高・年利・月返済額が未登録。完済予測は保留。";
+  else if(debts.some(x=>x.balance>0&&(x.apr||0)>=12))advice="必要生活費を確保した後、高金利の返済を優先。";
+  else advice="余剰を確認し、生活防衛費への積立額を検討。";
+  return {balance,asOf,confirmed,remainingDays,projected,daily,risk,unknown:unknown.length,
+    debtTotal,debtDays,goalName:goal?.name||"貯金目標",saved,goalDays,advice};
+}
+async function mwLoad(){
+  try{
+    const path=iCloudFM.joinPath(iCloudFM.documentsDirectory(),CONFIG.moneyRelativePath);
+    if(!iCloudFM.fileExists(path))return {error:"Moneyデータが見つかりません"};
+    if(iCloudFM.isFileStoredIniCloud(path))await iCloudFM.downloadFileFromiCloud(path);
+    const data=JSON.parse(iCloudFM.readString(path));
+    if(data?.schema!=="yos-money-local-v1"||!data.balance||!Array.isArray(data.transactions)||!Array.isArray(data.recurring))
+      return {error:"Moneyデータ形式を確認してください"};
+    return {data};
+  }catch{return {error:"iCloudのMoneyデータを確認してください"}}
+}
+function mwPair(root,label,value,tint=COLORS.text,size=22){
+  const c=root.addStack();c.layoutVertically();
+  const t=c.addText(label);t.font=font(12,"semibold");t.textColor=color(COLORS.muted);
+  c.addSpacer(3);
+  const v=c.addText(value);v.font=font(size,"bold");v.textColor=color(tint);v.lineLimit=1;v.minimumScaleFactor=0.7;
+}
+function mwLine(root,value,size=13,tint=COLORS.text){
+  const t=root.addText(value);t.font=font(size,"medium");t.textColor=color(tint);t.lineLimit=2;t.minimumScaleFactor=0.7;
+}
+function mwWidget(result){
+  const w=new ListWidget();setBackground(w);w.setPadding(13,17,13,17);
+  w.url=MONEY_APP_URL;w.refreshAfterDate=new Date(Date.now()+15*60*1000);
+  addHeader(w,"MONEY");w.addSpacer(9);
+  if(result.error){
+    mwLine(w,result.error,18,COLORS.coral);w.addSpacer(8);
+    mwLine(w,"元データは変更していません。YOS Moneyを確認してください。");return w;
+  }
+  const s=result.analysis,h=w.addStack();h.layoutHorizontally();
+  mwPair(h,s.projected===null?"月末の余剰・不足":s.projected<0?"月末不足":"月末余剰",
+    s.projected===null?"算定待ち":yen(Math.abs(s.projected)),s.projected<0?COLORS.coral:COLORS.blue,23);
+  h.addSpacer();
+  mwPair(h,"1日使える額",s.daily===null?"算定待ち":yen(s.daily),COLORS.gold,22);
+  w.addSpacer(9);
+  mwLine(w,s.risk?"資金不足の可能性："+s.risk.slice(5).replace("-","/"):"支払予定控除 / 月末まで"+s.remainingDays+"日",
+    12,s.risk?COLORS.coral:COLORS.muted);
+  addDivider(w);addSectionLabel(w,"target","貯金と借金",COLORS.gold);w.addSpacer(7);
+  const r=w.addStack();r.layoutHorizontally();
+  mwPair(r,s.goalName,s.saved===null?"未登録":yen(s.saved),COLORS.green,19);
+  r.addSpacer();
+  mwPair(r,"借金残高",s.debtTotal===null?"未登録":yen(s.debtTotal),COLORS.coral,19);
+  w.addSpacer(6);
+  mwLine(w,"目標まで "+(s.goalDays===null?"算定待ち":"約"+s.goalDays+"日")+
+    " / 完済まで "+(s.debtDays===null?"算定待ち":"約"+s.debtDays+"日"),12,COLORS.muted);
+  addDivider(w);addSectionLabel(w,"lightbulb","FP視点のアドバイス",COLORS.green);w.addSpacer(6);
+  mwLine(w,s.advice,13);w.addSpacer();
+  mwLine(w,"残高確認日："+(s.asOf||"未登録")+(s.confirmed?"":" · 要更新")+" / iCloud読取",11,COLORS.muted);
+  return w;
+}
+
+if (PARAM === "MONEY" && !ACTION) {
+  const local = await mwLoad();
+  const view = mwWidget(local.error ? local : {analysis:mwAnalyze(local.data,mwToday())});
+  if (config.runsInWidget) Script.setWidget(view);
+  else await view.presentLarge();
+  Script.complete();
+} else if (ACTION === "baseHome" && !config.runsInWidget) {
   await refreshAndOpenBaseHome();
 } else {
   const shouldContinue = await configureIfNeeded();
