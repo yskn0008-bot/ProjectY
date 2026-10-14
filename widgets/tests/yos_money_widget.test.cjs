@@ -140,9 +140,11 @@ test("realistic debt burden ratio requires repayment data and recurring known in
 });
 test("long-horizon estimates are labelled as registered-plans-only",()=>{
   const d=fixture();d.assets=[{name:"投資",value:25000}];
-  let r=mwComprehensive(d,day);
-  assert.equal(r.future[30],31500);
-  assert.equal(r.future[90],31500-68500*2+160485*2);
+  d.recurring.push({type:"debt",label:"返済",day:26,amount:10000,enabled:true});
+  const r=mwComprehensive(d,day);
+  assert.equal(r.projected,21500);
+  assert.equal(r.future[30],181985);
+  assert.equal(r.future[90],345955);
   assert.ok(source.includes("登録予定のみ"));
 });
 test("stale current balance blocks all current spending and registered net worth",()=>{
@@ -157,5 +159,28 @@ test("danger day is not shown as confirmed when the projection itself is unknown
   const d=fixture();d.recurring.push({type:"expense",label:"光熱費",day:16,amount:null,enabled:true});
   const r=mwComprehensive(d,day);
   assert.equal(r.projected,null);
-  assert.equal(r.status,"データ要照合");
+  assert.equal(r.status,"返済予定要確認");
+});
+
+test("missing debt repayment schedule blocks false financial surplus",()=>{
+  const d=fixture();const r=mwComprehensive(d,day);
+  assert.equal(r.debtCovered,false);
+  assert.equal(r.projected,null);
+  assert.equal(r.daily,null);
+  assert.equal(r.future[30],null);
+  assert.equal(r.status,"返済予定要確認");
+});
+test("a recorded debt payment is not scheduled twice",()=>{
+  const d=fixture();
+  d.transactions.push({date:"2026-10-12",type:"debt",label:"返済",amount:10000,status:"done"});
+  d.recurring.push({type:"debt",label:"返済",day:26,amount:10000,enabled:true});
+  const r=mwComprehensive(d,day);
+  assert.equal(r.debtCovered,true);
+  assert.equal(r.projected,31500);
+});
+test("unregistered debt list never means debt-free",()=>{
+  const d=fixture();d.debts=[];
+  const r=mwComprehensive(d,day);
+  assert.equal(r.debtCovered,false);
+  assert.equal(r.projected,null);
 });
