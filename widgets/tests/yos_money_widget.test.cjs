@@ -34,10 +34,12 @@ test("does not count recorded income twice; projects actual remaining expenses",
   assert.equal(r.debtTotal,100000);
   assert.ok(r.debtDays>0 && r.goalDays>0);
 });
-test("overdue unprocessed bills reduce monthly balance",()=>{
+test("overdue unprocessed bills are not charged twice against today's balance",()=>{
   const d=fixture();d.transactions.push({date:"2026-10-02",type:"expense",label:"返済",amount:20000,status:"planned"});
   const r=mwAnalyze(d,day);
-  assert.equal(r.projected,11500);
+  assert.equal(r.projected,null);
+  assert.equal(r.daily,null);
+  assert.match(r.advice,/照合/);
 });
 test("an exact same-month planned row overrides recurring even when date differs",()=>{
   const d=fixture();d.transactions.push({date:"2026-10-28",type:"expense",label:"家賃",amount:70000,status:"planned"});
@@ -94,6 +96,35 @@ test("holiday-adjusted recurring date must not be called exact",()=>{
   assert.equal(mwAnalyze(d,day).projected,null);
 });
 
+test("a September unpaid bill is flagged overdue, not called the next bill",()=>{
+  const d=fixture();
+  d.transactions.push({date:"2026-09-26",type:"expense",label:"車保険",amount:7060,status:"planned"});
+  const r=mwComprehensive(d,day);
+  assert.equal(r.nextPay.date,"2026-10-27");
+  assert.equal(r.pastPay,1);
+  assert.equal(r.pastIn,0);
+  assert.equal(r.remainingPayments,68500);
+  assert.equal(r.projected,null);
+  assert.equal(r.future[30],null);
+  assert.equal(r.status,"過去予定要照合");
+});
+test("past unconfirmed rent receipt does not masquerade as the next income",()=>{
+  const d=fixture();
+  d.transactions=[{date:"2026-10-13",type:"income",label:"家賃収入",amount:160485,status:"planned"}];
+  const r=mwComprehensive(d,day);
+  assert.equal(r.nextIn,null);
+  assert.equal(r.pastIn,1);
+  assert.equal(r.overdueCount,1);
+  assert.equal(r.projected,null);
+});
+test("only today's and later planned events appear as next",()=>{
+  const d=fixture();
+  d.transactions.push({date:"2026-10-19",type:"income",label:"臨時収入",amount:10000,status:"planned"});
+  const r=mwComprehensive(d,day);
+  assert.equal(r.nextIn.date,"2026-10-19");
+  assert.equal(r.nextPay.date,"2026-10-27");
+  assert.equal(r.overdueCount,0);
+});
 test("monthly receipt, planned bills and savings are divided across three MONEY modes",()=>{
   assert.ok(source.includes('PARAM === "MONEY_ASSETS"'));
   assert.ok(source.includes('PARAM === "MONEY_FP"'));
