@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-10-15T11:29:15+09:00",
+  "updated_at": "2026-10-15T13:37:16+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -21,16 +21,6 @@
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/626",
       "updated_at": "2026-10-04T11:11:04Z"
-    },
-    {
-      "id": "github-pr-539",
-      "title": "PR #539 Finalize YOS Alerts and reread history",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/539",
-      "updated_at": "2026-10-03T05:42:51Z"
     },
     {
       "id": "github-pr-601",
@@ -110,7 +100,17 @@
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/628",
-      "updated_at": "2026-10-15T02:28:36Z"
+      "updated_at": "2026-10-15T03:06:16Z"
+    },
+    {
+      "id": "github-pr-629",
+      "title": "PR #629 YOS lock widget: privacy-only entry to Notifications page",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/629",
+      "updated_at": "2026-10-15T04:36:52Z"
     },
     {
       "id": "github-issue-10",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-10-15T02:28:14Z"
+      "updated_at": "2026-10-15T04:26:22Z"
     },
     {
       "id": "github-issue-234",
@@ -264,7 +264,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-10-15T11:29:15+09:00",
+      "last_update": "2026-10-15T13:37:16+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -339,13 +339,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 8件・Open PR 17件を自動同期中",
+      "next_action": "Open Issue 8件・Open PR 18件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-10-15T11:29:15+09:00",
+      "last_update": "2026-10-15T13:37:16+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -368,7 +368,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-10-15T11:29:15+09:00",
+      "last_update": "2026-10-15T13:37:16+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -450,5 +450,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "552c70f1f0410404f4d3d3e45fb32fafec2efde7148a5685f93b3f186775a7d9"
+  "github_snapshot_hash": "87de136886d40a334d3b69403d4147fe34d783c9f633870b04560862e5132937"
 }
