@@ -697,18 +697,20 @@ function mwAnalyze(data,today) {
   const known=x=>mwNum(x.amount)!==null&&x.amount>=0;
   const unknown=pending.filter(x=>!known(x));
   const uncertain=pending.filter(x=>x.amountApproximate===true);
-  const oldIncome=pending.some(x=>x.type==="income"&&x.date<today);
+  const stalePending=pending.filter(x=>x.date<today);
+  const oldIncome=stalePending.some(x=>x.type==="income");
   let running=balance,risk=balance!==null&&balance<0?today:null;
   for(const x of pending){
-    if(running===null||!known(x))continue;
+    // A present-day balance must not charge old, unconfirmed entries again.
+    if(x.date<today||running===null||!known(x))continue;
     running+=x.type==="income"?x.amount:-x.amount;
     if(running<0&&risk===null)risk=x.date;
   }
-  const exact=confirmed&&!unknown.length&&!uncertain.length&&!oldIncome&&!dateApprox;
+  const exact=confirmed&&!unknown.length&&!uncertain.length&&!stalePending.length&&!dateApprox;
   const projected=exact?running:null;
   const incomeFuture=pending.filter(x=>x.type==="income"&&x.date>today);
   const anchor=incomeFuture.length?incomeFuture[0].date:end;
-  const outgoingBefore=pending.filter(x=>x.type!=="income"&&x.date<=anchor)
+  const outgoingBefore=pending.filter(x=>x.type!=="income"&&x.date>=today&&x.date<=anchor)
     .reduce((sum,x)=>sum+(known(x)?x.amount:0),0);
   const cashUntil=balance===null?null:balance-outgoingBefore;
   const days=Math.max(1,mwDay(anchor)-mwDay(today)+(incomeFuture.length?0:1));
@@ -731,7 +733,8 @@ function mwAnalyze(data,today) {
   let advice="Moneyの記録を照合すると助言が表示されます。";
   if(!confirmed)advice="残高の確認日が古いか未登録。まず使える残高を照合。";
   else if(unknown.length)advice="未確定の支払金額を確認。月末余剰はまだ確定できません。";
-  else if(oldIncome||uncertain.length||dateApprox)advice="入金予定額・支払日を確認後、使える金額を確定。";
+  else if(stalePending.length)advice="過去の未確認予定が"+stalePending.length+"件。入出金を照合。";
+  else if(uncertain.length||dateApprox)advice="入金予定額・支払日を確認後、使える金額を確定。";
   else if(projected<0)advice="今月"+yen(-projected)+"不足見込み。支払日と資金を優先確認。";
   else if(risk)advice=risk.slice(5).replace("-","/")+"に資金不足の可能性。入金前支払いを確認。";
   else if(!debtsValid)advice="借入残高・年利・月返済額が未登録。完済予測は保留。";
@@ -819,10 +822,17 @@ function mwComprehensive(data,today){
     dueEvents.push({...r,date,from:"recurring"});
   }
   dueEvents.sort((a,b)=>a.date.localeCompare(b.date)||(a.type==="income"?1:-1));
-  const nextPay=dueEvents.find(x=>x.type!=="income")||null;
-  const nextIn=dueEvents.find(x=>x.type==="income")||null;
-  const remainingPayments=dueEvents.filter(x=>x.type!=="income"&&known(x)).reduce((s,x)=>s+x.amount,0);
-  const paymentsUnknown=dueEvents.filter(x=>x.type!=="income"&&!known(x)).length;
+  // Keep overdue entries visible as warnings, never as the next scheduled event.
+  const overdue=dueEvents.filter(x=>x.date<today);
+  const upcoming=dueEvents.filter(x=>x.date>=today);
+  const pastIn=overdue.filter(x=>x.type==="income").length;
+  const pastPay=overdue.length-pastIn;
+  const overdueCount=overdue.length;
+  const nextPay=upcoming.find(x=>x.type!=="income")||null;
+  const nextIn=upcoming.find(x=>x.type==="income")||null;
+  const remainingPayments=upcoming.filter(x=>x.type!=="income"&&known(x)).reduce((s,x)=>s+x.amount,0);
+  const paymentsUnknown=upcoming.filter(x=>x.type!=="income"&&!known(x)).length;
+  if(overdueCount){projected=null;daily=null;}
   const future={};
   for(const span of [30,90,365]){
     const last=new Date((mwDay(today)+span)*86400000).toISOString().slice(0,10);
@@ -849,18 +859,21 @@ function mwComprehensive(data,today){
       if(!known(e)||e.amountApproximate===true){missing++;continue}
       running+=e.type==="income"?e.amount:-e.amount;
     }
-    future[span]=debtCovered&&balanceReliable&&missing===0&&!changedDate&&!incomeUncertain?running:null;
+    future[span]=debtCovered&&balanceReliable&&!overdueCount&&missing===0&&!changedDate&&!incomeUncertain?running:null;
   }
   let status="要確認";
-  if(projected!==null&&projected<0)status="月末不足";
+  if(overdueCount)status="過去予定要照合";
+  else if(projected!==null&&projected<0)status="月末不足";
   else if(base.risk&&balanceReliable)status="途中資金不足";
   else if(!debtCovered)status="返済予定要確認";
   else if(!balanceReliable||paymentsUnknown||incomeUncertain)status="データ要照合";
   else if(projected!==null)status="登録予定では余剰";
   let advice=base.advice;
   let effect=null;
-  if(!balanceReliable&&recurringPastUnreconciled){
-    advice="支払済み未記録の定期費用が"+recurringPastUnreconciled+"件ある可能性。まず入出金を照合。";
+  if(overdueCount){
+    advice="期限を過ぎた未確認予定"+overdueCount+"件の入出金状況を確認。";
+  }else if(!balanceReliable&&recurringPastUnreconciled){
+    advice="未照合の過去の定期予定が"+recurringPastUnreconciled+"件。入出金を確認。";
   }else if(!debtCovered){
     advice="借金・返済予定の記録が不足。必要な返済額を確認してから日額を算定。";
   }else if(projected!==null&&projected<0){
@@ -871,7 +884,7 @@ function mwComprehensive(data,today){
   return {...base,projected,daily,balanceReliable,recurringPastUnreconciled,actualIncome,actualExpense,
     registeredExpenseCount,fixed,fixedRatio,unknownFixed,regularIncome,incomeUncertain,
     assetsExtra,assetsRegistered,netRegistered,reserveMonths,monthlyDebtPay,debtRatio,
-    nextPay,nextIn,remainingPayments,paymentsUnknown,debtCovered,future,status,advice,effect,
+    nextPay,nextIn,pastIn,pastPay,overdueCount,remainingPayments,paymentsUnknown,debtCovered,future,status,advice,effect,
     asOf:data.balance?.asOf||null,goalTarget:(Array.isArray(data.goals)?data.goals:[])
       .find(x=>x?.name===base.goalName)?.target??null};
 }
@@ -906,6 +919,7 @@ function mwNowWidget(result){
   mwRow(w,"記録済み入金 / 支出",yen(s.actualIncome)+" / "+yen(s.actualExpense));
   mwRow(w,"今使える残高",s.balanceReliable?yen(s.balance):"要照合");
   mwRow(w,"残りの支払い",s.paymentsUnknown?"金額未定 "+s.paymentsUnknown+"件":yen(s.remainingPayments));
+  if(s.overdueCount)mwRow(w,"期限超過・未確認","入金"+s.pastIn+"件 / 支払"+s.pastPay+"件",COLORS.coral);
   addDivider(w);
   addSectionLabel(w,"calendar","次の入金と支払い",COLORS.blue);w.addSpacer(5);
   mwLine(w,"入金　"+mwEvent(s.nextIn),13);
