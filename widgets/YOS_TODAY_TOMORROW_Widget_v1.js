@@ -172,6 +172,7 @@
       (result.items.length>1 ? " ほか"+(result.items.length-1)+"件" : "");
   }
   function routineLabel(reminders) {
+    if(night) return "MY LIFEで明朝の習慣を確認";
     if(!reminders.ok) return "記録を確認できません";
     const routine = reminders.items.filter(r => {
       const listName = clean(r.calendar && r.calendar.title,60);
@@ -180,8 +181,18 @@
     if(routine.length) return "未完了 "+routine.length+"件（リマインダー）";
     return "MY LIFEの実施記録を確認";
   }
+  function preparationLabel(events,reminders) {
+    const first = events.items.length ? events.items[0] : null;
+    if(first) return "「"+clean(first.title,24)+"」に必要なものを確認";
+    if(reminders.ok) {
+      const due = relevantReminder(reminders,targetKey,true);
+      if(due.length) return "「"+clean(due[0].title,25)+"」の対応を準備";
+    }
+    if(!events.ok || !reminders.ok) return "明日の予定・期限を取得できません";
+    return "明日に必要な予定・期限は未登録";
+  }
   const [events,reminders,feed,health] = await Promise.all([
-    readCalendar(target),readReminders(),readYosFeed(),readHealth()
+    readCalendar(target),readReminders(),night?Promise.resolve({data:null,stale:true}):readYosFeed(),readHealth()
   ]);
   const widget = new ListWidget();
   widget.url = URL.home;
@@ -214,8 +225,8 @@
   section(widget,"checkmark.circle",night?"期限・持ち越し":"今日のリマインダー",reminderLabel(reminders),
     URL.home,C.green);
   separator(widget);
-  section(widget,"list.bullet.rectangle",night?"明日に向けた優先事項":"YOSの優先タスク",yosTask(feed),
-    URL.tasks,C.gold);
+  section(widget,"list.bullet.rectangle",night?"今夜の準備":"YOSの優先タスク",
+    night?preparationLabel(events,reminders):yosTask(feed),night?URL.home:URL.tasks,C.gold);
   separator(widget);
   section(widget,"arrow.triangle.2.circlepath",night?"明朝のルーティン":"ルーティン",routineLabel(reminders),
     URL.life,C.green);
