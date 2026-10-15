@@ -871,7 +871,7 @@ function mwComprehensive(data,today){
   let advice=base.advice;
   let effect=null;
   if(overdueCount){
-    advice="期限を過ぎた未確認予定"+overdueCount+"件の入出金状況を確認。";
+    advice="期限を過ぎた未確認予定"+overdueCount+"件。入出金を照合。";
   }else if(!balanceReliable&&recurringPastUnreconciled){
     advice="未照合の過去の定期予定が"+recurringPastUnreconciled+"件。入出金を確認。";
   }else if(!debtCovered){
