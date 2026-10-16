@@ -112,6 +112,7 @@ body{padding:0 8px}
 .device-tab.active{background:#24384f;border-color:#548deb;color:white}
 .remote-panel{display:none;min-height:0}
 .remote-panel.active{display:block}
+.tv-card:before{display:none}.tv-card .top-shortcuts{position:relative;top:auto;left:auto;right:auto;height:32px;margin-bottom:8px}
 .floor-card{padding:13px}
 .floor-power{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}
 .floor-power button,.floor-temp button{border:1px solid #373d48;border-radius:14px;background:#1b1f24;color:white;min-height:49px;font-weight:750;font-size:13px}
