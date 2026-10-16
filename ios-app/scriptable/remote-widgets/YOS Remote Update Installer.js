@@ -1,9 +1,9 @@
-// YOS Remote Update Installer v0.7
+// YOS Remote Update Installer v0.5
 // Safe Japanese-name installer for MY REMOTE.
 // New Japanese scripts are staged and verified before legacy English scripts are archived.
 // Existing Keychain/settings are untouched. Any commit failure restores the previous Japanese targets.
 
-const SOURCE_SHA = '5f44869b908eaa362627ca0c81b090f5ea08708e';
+const SOURCE_SHA = '622d733f8634b30d32c3657fdcbf2ae704299607';
 const BASE = 'https://raw.githubusercontent.com/yskn0008-bot/ProjectY/' + SOURCE_SHA + '/ios-app/scriptable/remote-widgets/';
 const PACKAGE = [
   { source: 'YOS Remote Hub.js', target: 'リモコン.js' },
@@ -97,34 +97,6 @@ function readManifest(dir = recoveryDir) {
 
 function removeIfExists(path) { if (fm.fileExists(path)) fm.remove(path); }
 function sameText(path, expected) { return fm.fileExists(path) && fm.readString(path) === expected; }
-
-// iCloud/Scriptable may rewrite an already-verified file while later targets
-// are being installed. Repair a transient mismatch once, then verify the
-// whole package again. Persistent modifications still trigger full rollback.
-async function verifyCommittedFiles(manifest) {
-  const repaired = [];
-  for (const entry of manifest.entries) {
-    const expected = fm.readString(stagedPath(entry.target));
-    const target = livePath(entry.target);
-    if (sameText(target, expected)) continue;
-    await ensureLocal(fm, target);
-    if (sameText(target, expected)) continue;
-    fm.writeString(target, expected);
-    if (!sameText(target, expected)) {
-      throw new Error(entry.target + ' の再保存検証に失敗しました。');
-    }
-    repaired.push(entry.target);
-  }
-  // A concurrent writer can race against the repair loop: never mark a
-  // partially updated set committed.
-  for (const entry of manifest.entries) {
-    const expected = fm.readString(stagedPath(entry.target));
-    if (!sameText(livePath(entry.target), expected)) {
-      throw new Error(entry.target + ' の最終整合検証に失敗しました。');
-    }
-  }
-  hook('afterFinalVerification', { repaired });
-}
 
 async function downloadText(name) {
   const req = new Request(rawURL(name));
@@ -317,7 +289,10 @@ async function commitTransaction(manifest) {
       writeJSON(manifestPath, manifest);
       hook('afterLiveWrite', { target: entry.target, applied: manifest.applied.slice() });
     }
-    await verifyCommittedFiles(manifest);
+    for (const entry of manifest.entries) {
+      const staged = fm.readString(stagedPath(entry.target));
+      if (!sameText(livePath(entry.target), staged)) throw new Error(entry.target + ' の最終整合検証に失敗しました。');
+    }
     manifest.phase = 'committed';
     manifest.committedAt = new Date().toISOString();
     writeJSON(manifestPath, manifest);
