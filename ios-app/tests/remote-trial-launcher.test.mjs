@@ -21,7 +21,8 @@ if(CONFIG.tv!=="テレビリモコン"||CONFIG.light!=="照明ウィジェット
 const tapo=importModule("YOS Tapo H110 Core");
 if(typeof tapo.clientForHost!=="function")throw Error("missing preview core");
 Script.complete();`;
-  const fixtureRepair = `// YOS Widget Link Repair v1.0\nmodule.exports={repairWidgets: async ()=>({updated:[],missing:[],unchanged:['light','ac']})};`;\n  const fixtureCore = `// Shared Tapo H110 KLAP v2 core for Scriptable
+  const fixtureRepair = `// YOS Widget Link Repair v1.0\nmodule.exports={repairWidgets: async ()=>({updated:[],missing:[],unchanged:['light','ac']})};`;
+  const fixtureCore = `// Shared Tapo H110 KLAP v2 core for Scriptable
 function clientForHost(){}
 module.exports={clientForHost};`;
   const fm={
