@@ -10,17 +10,26 @@ const TARGETS = [
 ];
 
 function parent(path){ const i=path.lastIndexOf('/'); return i<=0?'/':path.slice(0,i); }
-function makeManager(root,{failLiveTarget=null}={}){
+function makeManager(root,{failLiveTarget=null,lateTvMutation=false,persistentTvMutation=false}={}){
   const files=new Map();
   const dirs=new Set(['/',root]);
-  const fault={failLiveTarget,failedOnce:false};
+  const fault={failLiveTarget,failedOnce:false,lateTvMutation,persistentTvMutation,lateTriggered:false,tvWriteCount:0};
   const manager={
     files,dirs,fault,
     documentsDirectory(){return root;},
     joinPath(a,b){return a.replace(/\/$/,'')+'/'+b;},
     fileExists(p){return files.has(p)||dirs.has(p);},
     createDirectory(p){const parts=p.split('/').filter(Boolean);let cur='';for(const part of parts){cur+='/'+part;dirs.add(cur);}},
-    writeString(p,v){if(fault.failLiveTarget&&!fault.failedOnce&&p===`${root}/${fault.failLiveTarget}`){fault.failedOnce=true;throw new Error('synthetic live write failure');}if(!dirs.has(parent(p)))throw new Error('parent missing '+parent(p));files.set(p,String(v));},
+    writeString(p,v){if(fault.failLiveTarget&&!fault.failedOnce&&p===`${root}/${fault.failLiveTarget}`){fault.failedOnce=true;throw new Error('synthetic live write failure');}if(!dirs.has(parent(p)))throw new Error('parent missing '+parent(p));files.set(p,String(v));
+      if(p===root+'/テレビリモコン.js' && String(v).includes("const hub=")){
+        fault.tvWriteCount++;
+        if(fault.persistentTvMutation && fault.tvWriteCount>1)files.set(p,'SIMULATED_REPEAT_MUTATION');
+      }
+      if(p===root+'/エアコンリモコン.js' && fault.lateTvMutation && !fault.lateTriggered){
+        fault.lateTriggered=true;
+        files.set(root+'/テレビリモコン.js','SIMULATED_LATE_MUTATION');
+      }
+    },
     readString(p){if(!files.has(p))throw new Error('missing '+p);return files.get(p);},
     remove(p){files.delete(p);dirs.delete(p);for(const k of [...files.keys()])if(k.startsWith(p+'/'))files.delete(k);for(const k of [...dirs])if(k.startsWith(p+'/'))dirs.delete(k);},
     move(src,dst){
@@ -123,4 +132,21 @@ test('manual rollback restores latest Japanese snapshot',async()=>{
   await run(iCloud,local);
   await run(iCloud,local,'rollback');
   for(const target of TARGETS)assert.equal(iCloud.readString(`/icloud/${target}`),`OLD:${target}`);
+});
+
+test('late change to a previously validated TV script is repaired once before commit',async()=>{
+  const iCloud=makeManager('/icloud',{lateTvMutation:true}),local=makeManager('/local');
+  put(iCloud,'テレビリモコン.js','OLD TV');
+  const {opened}=await run(iCloud,local);
+  assert.equal(opened.length,1);
+  assert.match(iCloud.readString('/icloud/テレビリモコン.js'),/const hub=/);
+  assert.equal(japaneseBackupDirs(iCloud,'更新前 ').length,1);
+});
+test('persistent conflict during TV-script repair rolls the installation back',async()=>{
+  const iCloud=makeManager('/icloud',{lateTvMutation:true,persistentTvMutation:true}),local=makeManager('/local');
+  put(iCloud,'テレビリモコン.js','OLD TV');
+  const {opened}=await run(iCloud,local);
+  assert.equal(opened.length,0);
+  assert.equal(iCloud.readString('/icloud/テレビリモコン.js'),'OLD TV');
+  assert.equal(japaneseBackupDirs(iCloud,'更新失敗 ').length,1);
 });
