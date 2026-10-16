@@ -459,7 +459,7 @@ function startTVHold(action){
     while(tvHoldAction===action&&token===tvHoldToken&&Date.now()<tvHoldLeaseUntil){
       await sonyAction(action,false)
       if(tvHoldAction!==action||token!==tvHoldToken)break
-      await new Promise(resolve=>Timer.schedule(0.15,false,resolve))
+      await new Promise(resolve=>Timer.schedule(150,false,resolve))
     }
   }catch(error){if(token===tvHoldToken)stopTVHold();try{await web.evaluateJavaScript("nativeResult("+JSON.stringify({ok:false,message:String(error&&error.message||error)})+")")}catch(_){}}finally{if(token===tvHoldToken)stopTVHold()}})()
 }
