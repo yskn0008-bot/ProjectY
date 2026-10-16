@@ -1,4 +1,4 @@
-// YOS Remote Update Installer v0.6
+// YOS Remote Update Installer v0.7
 // Safe Japanese-name installer for MY REMOTE.
 // New Japanese scripts are staged and verified before legacy English scripts are archived.
 // Existing Keychain/settings are untouched. Any commit failure restores the previous Japanese targets.
@@ -97,6 +97,34 @@ function readManifest(dir = recoveryDir) {
 
 function removeIfExists(path) { if (fm.fileExists(path)) fm.remove(path); }
 function sameText(path, expected) { return fm.fileExists(path) && fm.readString(path) === expected; }
+
+// iCloud/Scriptable may rewrite an already-verified file while later targets
+// are being installed. Repair a transient mismatch once, then verify the
+// whole package again. Persistent modifications still trigger full rollback.
+async function verifyCommittedFiles(manifest) {
+  const repaired = [];
+  for (const entry of manifest.entries) {
+    const expected = fm.readString(stagedPath(entry.target));
+    const target = livePath(entry.target);
+    if (sameText(target, expected)) continue;
+    await ensureLocal(fm, target);
+    if (sameText(target, expected)) continue;
+    fm.writeString(target, expected);
+    if (!sameText(target, expected)) {
+      throw new Error(entry.target + ' の再保存検証に失敗しました。');
+    }
+    repaired.push(entry.target);
+  }
+  // A concurrent writer can race against the repair loop: never mark a
+  // partially updated set committed.
+  for (const entry of manifest.entries) {
+    const expected = fm.readString(stagedPath(entry.target));
+    if (!sameText(livePath(entry.target), expected)) {
+      throw new Error(entry.target + ' の最終整合検証に失敗しました。');
+    }
+  }
+  hook('afterFinalVerification', { repaired });
+}
 
 async function downloadText(name) {
   const req = new Request(rawURL(name));
@@ -289,10 +317,7 @@ async function commitTransaction(manifest) {
       writeJSON(manifestPath, manifest);
       hook('afterLiveWrite', { target: entry.target, applied: manifest.applied.slice() });
     }
-    for (const entry of manifest.entries) {
-      const staged = fm.readString(stagedPath(entry.target));
-      if (!sameText(livePath(entry.target), staged)) throw new Error(entry.target + ' の最終整合検証に失敗しました。');
-    }
+    await verifyCommittedFiles(manifest);
     manifest.phase = 'committed';
     manifest.committedAt = new Date().toISOString();
     writeJSON(manifestPath, manifest);
