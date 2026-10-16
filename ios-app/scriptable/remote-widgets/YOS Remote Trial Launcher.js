@@ -76,14 +76,14 @@ async function runPreview() {
   // A failed repair does not prevent use of the existing working remote.
   try {
     const repairModule = { exports: {} };
-    const widgetDoctor = new Function('module', b.repair + '\\nreturn module.exports;')(repairModule);
+    const widgetDoctor = new Function('module', b.repair + '\nreturn module.exports;')(repairModule);
     const result = await widgetDoctor.repairWidgets();
     if (result.updated.length || result.missing.length) {
       const a = new Alert();
       a.title = '照明・エアコン ウィジェット確認';
       a.message = '操作リンク修正: ' + (result.updated.join('、') || 'なし') +
         (result.missing.length?' / 見つからない: '+result.missing.join('、'):'')+
-        '\\n変更前のコードは端末に保存しています。';
+        '\n変更前のコードは端末に保存しています。';
       a.addAction('OK');
       await a.presentAlert();
     }
