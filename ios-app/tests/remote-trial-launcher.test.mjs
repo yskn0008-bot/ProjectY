@@ -38,7 +38,8 @@ module.exports={clientForHost};`;
     async loadString(){
       if(offline)throw Error('Network intentionally disabled');
       this.response={statusCode:200};
-      return this.url.endsWith('YOS%20Remote%20Hub.js')?fixtureHub:\n        this.url.endsWith('YOS%20Widget%20Link%20Repair.js')?fixtureRepair:fixtureCore;
+      return this.url.endsWith('YOS%20Remote%20Hub.js')?fixtureHub:
+        this.url.endsWith('YOS%20Widget%20Link%20Repair.js')?fixtureRepair:fixtureCore;
     }
   }
   const Script={name(){return 'Untitled Script 90';},complete(){completed++;}};
