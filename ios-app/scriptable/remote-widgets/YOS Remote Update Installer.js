@@ -1,9 +1,9 @@
-// YOS Remote Update Installer v0.5
+// YOS Remote Update Installer v0.6
 // Safe Japanese-name installer for MY REMOTE.
 // New Japanese scripts are staged and verified before legacy English scripts are archived.
 // Existing Keychain/settings are untouched. Any commit failure restores the previous Japanese targets.
 
-const SOURCE_SHA = '622d733f8634b30d32c3657fdcbf2ae704299607';
+const SOURCE_SHA = 'dd520e1e5de2311ed400fde96a76e86539c553fb';
 const BASE = 'https://raw.githubusercontent.com/yskn0008-bot/ProjectY/' + SOURCE_SHA + '/ios-app/scriptable/remote-widgets/';
 const PACKAGE = [
   { source: 'YOS Remote Hub.js', target: 'リモコン.js' },
