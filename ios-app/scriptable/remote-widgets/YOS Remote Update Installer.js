@@ -3,7 +3,7 @@
 // New Japanese scripts are staged and verified before legacy English scripts are archived.
 // Existing Keychain/settings are untouched. Any commit failure restores the previous Japanese targets.
 
-const SOURCE_SHA = '957c1eb2a2601b1b1730ccbef0311010d42d797b';
+const SOURCE_SHA = '5f44869b908eaa362627ca0c81b090f5ea08708e';
 const BASE = 'https://raw.githubusercontent.com/yskn0008-bot/ProjectY/' + SOURCE_SHA + '/ios-app/scriptable/remote-widgets/';
 const PACKAGE = [
   { source: 'YOS Remote Hub.js', target: 'リモコン.js' },
