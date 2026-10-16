@@ -21,7 +21,7 @@ if(CONFIG.tv!=="テレビリモコン"||CONFIG.light!=="照明ウィジェット
 const tapo=importModule("YOS Tapo H110 Core");
 if(typeof tapo.clientForHost!=="function")throw Error("missing preview core");
 Script.complete();`;
-  const fixtureCore = `// Shared Tapo H110 KLAP v2 core for Scriptable
+  const fixtureRepair = `// YOS Widget Link Repair v1.0\nmodule.exports={repairWidgets: async ()=>({updated:[],missing:[],unchanged:['light','ac']})};`;\n  const fixtureCore = `// Shared Tapo H110 KLAP v2 core for Scriptable
 function clientForHost(){}
 module.exports={clientForHost};`;
   const fm={
@@ -37,11 +37,11 @@ module.exports={clientForHost};`;
     async loadString(){
       if(offline)throw Error('Network intentionally disabled');
       this.response={statusCode:200};
-      return this.url.endsWith('YOS%20Remote%20Hub.js')?fixtureHub:fixtureCore;
+      return this.url.endsWith('YOS%20Remote%20Hub.js')?fixtureHub:\n        this.url.endsWith('YOS%20Widget%20Link%20Repair.js')?fixtureRepair:fixtureCore;
     }
   }
   const Script={name(){return 'Untitled Script 90';},complete(){completed++;}};
-  const FileManager={local(){return fm;},iCloud(){throw Error('Must not access iCloud manager inside trial launcher');}};
+  const FileManager={local(){return fm;},iCloud(){return fm;}};
   const importModule=()=>{throw Error('Should use the in-memory Tapo module');};
   async function run(){
     await new AsyncFunction('FileManager','Request','Script','config','args','importModule',launcher)(
@@ -54,7 +54,7 @@ test('trial launcher never writes, moves or removes installed Scriptable scripts
   assert.match(launcher,/FileManager\.local\(\)/);
   assert.doesNotMatch(launcher,/FileManager\.iCloud\(\)/);
   assert.doesNotMatch(launcher,/\.move\(/);
-  assert.match(launcher,/YOS_Remote_Trial_v1_cache\.json/);
+  assert.match(launcher,/YOS_Remote_Trial_v1_1_cache\.json/);
   assert.match(launcher,/function previewImport\(name\)/);
   assert.match(launcher,/new Function\('module', b\.core/);
 });
@@ -64,22 +64,29 @@ test('preview sources retain existing Sony and Tapo capabilities',()=>{
   assert.match(hub,/async function controlFloor\(action,value\)/);
   assert.match(core,/clientForHost/);
 });
-test('trial first run downloads two programs, caches only data and translates existing names',async()=>{
+test('trial first run downloads three verified programs, caches only data and translates existing names',async()=>{
   const h=fakeHarness();
   await h.run();
   assert.equal(h.completed,1);
-  assert.equal(h.requests.length,2);
+  assert.equal(h.requests.length,3);
   assert.equal(h.writes.length,1);
   assert.match(h.writes[0],/cache\.json$/);
   assert.ok([...h.files.keys()].every(x=>!x.endsWith('.js')));
   h.setOffline(true);
   await h.run();
   assert.equal(h.completed,2);
-  assert.equal(h.requests.length,2,'offline replay must use verified local cache');
+  assert.equal(h.requests.length,3,'offline replay must use verified local cache');
 });
 test('network failure leaves installed scripts untouched',async()=>{
   const h=fakeHarness({offline:true});
   await assert.rejects(h.run(),/Network intentionally disabled/);
   assert.equal(h.files.size,0);
   assert.equal(h.writes.length,0);
+});
+
+test('new preview pin includes the fixed widget links and fast seek loop',()=>{
+  assert.match(launcher,/YOS Widget Link Repair v1\\.0/);
+  assert.match(launcher,/b\\.repair/);
+  assert.doesNotMatch(hub,/Timer\\.schedule\\(150/);
+  assert.match(hub,/stopTVHold/);
 });
