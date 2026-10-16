@@ -1,13 +1,13 @@
-// YOS Remote Trial Launcher v1.0 — read-only isolated MY REMOTE v6.6 preview.
+// YOS Remote Trial Launcher v1.1 — read-only isolated MY REMOTE v6.6 preview.
 // Does not overwrite, rename, archive, or execute the multi-file installer.
 // All current Scriptable .js files and existing Keychain credentials are retained.
 // The two verified program sources are cached only as LOCAL non-.js data.
-const RELEASE = '5f44869b908eaa362627ca0c81b090f5ea08708e';
+const RELEASE = 'fb1316a915ed8b0194a14fc40db5e2736f18c009';
 const BASE = 'https://raw.githubusercontent.com/yskn0008-bot/ProjectY/' +
   RELEASE + '/ios-app/scriptable/remote-widgets/';
 const DOCUMENTS = FileManager.local();
 const CACHE_PATH = DOCUMENTS.joinPath(
-  DOCUMENTS.documentsDirectory(), 'YOS_Remote_Trial_v1_cache.json'
+  DOCUMENTS.documentsDirectory(), 'YOS_Remote_Trial_v1_1_cache.json'
 );
 const REPLACEMENTS = [
   ['YOS Remote Hub','リモコン'],
@@ -26,7 +26,8 @@ function checkBundle(b) {
     b.hub.includes('function bindTVSeekHold(') &&
     b.hub.includes('async function controlFloor(action,value)') &&
     typeof b.core === 'string' && b.core.includes('clientForHost') &&
-    b.core.includes('module.exports=');
+    b.core.includes('module.exports=') &&
+    typeof b.repair === 'string' && b.repair.includes('YOS Widget Link Repair v1.0');
 }
 async function downloadSource(name) {
   const r = new Request(BASE + encodeURIComponent(name));
@@ -50,7 +51,8 @@ async function readBundle() {
   const b = {
     release: RELEASE,
     hub: await downloadSource('YOS Remote Hub.js'),
-    core: await downloadSource('YOS Tapo H110 Core.js')
+    core: await downloadSource('YOS Tapo H110 Core.js'),
+    repair: await downloadSource('YOS Widget Link Repair.js')
   };
   if (!checkBundle(b)) throw new Error('取得した試用版コードの検証に失敗しました。');
   try {
@@ -69,6 +71,29 @@ function localized(source) {
 }
 async function runPreview() {
   const b = await readBundle();
+
+  // Apply a narrow, backup-protected repair only to the two widget URL links.
+  // A failed repair does not prevent use of the existing working remote.
+  try {
+    const repairModule = { exports: {} };
+    const widgetDoctor = new Function('module', b.repair + '\\nreturn module.exports;')(repairModule);
+    const result = await widgetDoctor.repairWidgets();
+    if (result.updated.length || result.missing.length) {
+      const a = new Alert();
+      a.title = '照明・エアコン ウィジェット確認';
+      a.message = '操作リンク修正: ' + (result.updated.join('、') || 'なし') +
+        (result.missing.length?' / 見つからない: '+result.missing.join('、'):'')+
+        '\\n変更前のコードは端末に保存しています。';
+      a.addAction('OK');
+      await a.presentAlert();
+    }
+  } catch (error) {
+    const a = new Alert();
+    a.title = 'ウィジェット修復は未完了';
+    a.message = String(error&&error.message||error);
+    a.addAction('リモコンを開く');
+    await a.presentAlert();
+  }
 
   // Evaluate the new Tapo core in memory. It reuses existing Keychain
   // credentials, never writes them and never alters the installed module.
