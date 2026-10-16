@@ -87,8 +87,8 @@ test('network failure leaves installed scripts untouched',async()=>{
 });
 
 test('new preview pin includes the fixed widget links and fast seek loop',()=>{
-  assert.match(launcher,/YOS Widget Link Repair v1\\.0/);
-  assert.match(launcher,/b\\.repair/);
-  assert.doesNotMatch(hub,/Timer\\.schedule\\(150/);
-  assert.match(hub,/stopTVHold/);
+  assert.ok(launcher.includes('YOS Widget Link Repair v1.0'));
+  assert.ok(launcher.includes('b.repair'));
+  assert.ok(!hub.includes('Timer.schedule(150'));
+  assert.ok(hub.includes('stopTVHold'));
 });
