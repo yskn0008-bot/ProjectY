@@ -22,7 +22,9 @@ async function runAction(name){
 }
 
 function runURL(action){
-  return `scriptable:///run?scriptName=${encodeURIComponent('YOS Light Widget')}&action=${encodeURIComponent(action)}`;
+  // Always target the actually installed script name (including Japanese renames).
+  return "scriptable:///run?scriptName="+encodeURIComponent(Script.name())+
+    "&action="+encodeURIComponent(action);
 }
 function remoteURL(){
   return `scriptable:///run?scriptName=${encodeURIComponent('YOS Light Remote')}`;
