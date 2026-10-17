@@ -8,7 +8,7 @@ const NOTION_VERSION = '2022-06-28';
 export interface RawCapture {
   rawText: string;
   capturedAt: string;
-  inputMode: 'text' | 'voice';
+  inputMode: 'text' | 'voice' | 'notification';
   source: 'clarity';
   captureId: string;
 }
