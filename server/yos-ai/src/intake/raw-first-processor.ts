@@ -8,8 +8,8 @@ const NOTION_VERSION = '2022-06-28';
 export interface RawCapture {
   rawText: string;
   capturedAt: string;
-  inputMode: 'text' | 'voice' | 'notification';
-  source: 'clarity';
+  inputMode: 'text' | 'voice' | 'notification' | 'email';
+  source: 'clarity' | 'gmail';
   captureId: string;
 }
 
@@ -62,7 +62,7 @@ async function appendToNotion(options: {
   notionPageId: string;
   input: RawCapture;
 }): Promise<void> {
-  const metadata = `${options.input.capturedAt} · clarity/${options.input.inputMode} · ${options.input.captureId}`;
+  const metadata = `${options.input.capturedAt} · ${options.input.source}/${options.input.inputMode} · ${options.input.captureId}`;
   const response = await options.fetchImpl(`https://api.notion.com/v1/blocks/${options.notionPageId}/children`, {
     method: 'PATCH',
     headers: {
