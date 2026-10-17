@@ -276,6 +276,18 @@ jobs:
           mkdir -p tools/clarity-next/distribution
           for name in Clarity-Notification Clarity-Email; do
             from="${{ runner.temp }}/clarity-next-v0/${name}-signed.shortcut"
+            if [ "$name" = 'Clarity-Email' ]; then
+              source='tools/clarity-next/Clarity Email.cherri'
+            else
+              source='tools/clarity-next/Clarity Notification.cherri'
+            fi
+            destination="tools/clarity-next/distribution/${name}-signed.shortcut"
+            manifest="${destination}.source.sha256"
+            source_sha="$(sha256sum "$source" | cut -d ' ' -f 1)"
+            if [ -s "$destination" ] && [ -s "$manifest" ] && [ "$(cat "$manifest")" = "$source_sha" ]; then
+              echo "${name}: source unchanged; keep previously verified signature."
+              continue
+            fi
             test -s "$from"
             python3 - "$from" <<'PY'
           from pathlib import Path
@@ -283,9 +295,11 @@ jobs:
           data=Path(sys.argv[1]).read_bytes()
           assert data.startswith(b'AEA1') and len(data)>500
           PY
-            install -m 0644 "$from" "tools/clarity-next/distribution/${name}-signed.shortcut"
+            install -m 0644 "$from" "$destination"
+            printf '%s\\n' "$source_sha" > "$manifest"
           done
           git add tools/clarity-next/distribution/Clarity-Notification-signed.shortcut tools/clarity-next/distribution/Clarity-Email-signed.shortcut
+          git add tools/clarity-next/distribution/*.source.sha256
           if git diff --cached --quiet; then
             echo "Distribution artifact already current."
             exit 0
