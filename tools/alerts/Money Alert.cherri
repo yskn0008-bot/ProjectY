@@ -1,0 +1,54 @@
+#define name Money Alert
+#define color green
+#define inputs text
+
+#include 'actions/text'
+#include 'actions/documents'
+#include 'actions/calendar'
+#include 'actions/shortcuts'
+#include 'actions/sharing'
+
+@incoming = "{ShortcutInput}"
+const historyFolder = createFolder("YOS Display History")
+const alertStateFolder = createFolder("YOS Alert State")
+
+// No-input launches must stay local. Postcompile replaces the first/last marker
+// with invisible Scriptable inline actions that read the existing Money SSOT
+// (iCloud Drive/Scriptable/YOS/Money/money.json), bridge the derived result through
+// the clipboard for only a few actions, then restore the user's previous clipboard.
+if @incoming == "" {
+    const localBridgeStart = text("YOS_MONEY_LOCAL_BRIDGE_START")
+    const localClipboard = getClipboard()
+    const localClipboardText = getText(localClipboard)
+    @incoming = "{localClipboardText}"
+    const localBridgeRestore = text("YOS_MONEY_LOCAL_BRIDGE_RESTORE")
+}
+
+if @incoming contains "YOS_MONEY_ALERT_V1" {
+    if @incoming contains "緊急Money Alertなし" {
+        stop()
+    }
+
+    const lastMoneyFile = getFile("YOS Alert State/Money Alert Last.txt", nil, false)
+    const lastMoneyText = getText(lastMoneyFile)
+    @lastMoney = "{lastMoneyText}"
+    if @lastMoney == @incoming {
+        stop()
+    }
+    saveFile("YOS Alert State/Money Alert Last.txt", @incoming, true)
+
+    const stampNow = currentDate()
+    const stamp = formatDate(stampNow, "Custom", "yyyy-MM-dd HHmmss")
+    const log = text("【Money Alert】\n{@incoming}")
+    saveFile("YOS Display History/{stamp} Money Alert.txt", log, false)
+
+    const notifyBody = replaceText('^YOS_[A-Z0-9_]+_V1[^\\n]*\\n?', "", @incoming, true, true)
+    const notifyPayload = {
+        "title": "Money Alert",
+        "body": "{notifyBody}",
+        "url": "https://yskn0008-bot.github.io/ProjectY/yos/#money",
+        "thread": "yos-notifications-money"
+    }
+    run("YOS Notify", notifyPayload)
+}
+stop()

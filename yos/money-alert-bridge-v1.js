@@ -9,8 +9,9 @@
     if(money.shortagePossible===true){
       alerts.push({kind:'projected_shortage',title:'支払い前に資金不足の可能性',amount:privacy?null:(Number.isFinite(Number(money.shortfall))?Number(money.shortfall):null)});
     }
-    const budget=Number(money.todayBudget),spent=Number(money.spentToday);
-    if(Number.isFinite(budget)&&Number.isFinite(spent)&&spent>budget){
+    const knownNumber=v=>(v===null||v===undefined||v==='')?null:(Number.isFinite(Number(v))?Number(v):null);
+    const budget=knownNumber(money.todayBudget),spent=knownNumber(money.spentToday);
+    if(budget!==null&&spent!==null&&spent>budget){
       alerts.push({kind:'daily_budget_over',title:'今日使える金額を超過',amount:privacy?null:spent-budget});
     }
     return {

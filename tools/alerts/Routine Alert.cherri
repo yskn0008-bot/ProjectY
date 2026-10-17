@@ -1,0 +1,89 @@
+#define name Routine Alert
+#define color orange
+
+#include 'actions/text'
+#include 'actions/documents'
+#include 'actions/intelligence'
+#include 'actions/calendar'
+#include 'actions/shortcuts'
+
+const historyFolder = createFolder("YOS Display History")
+const alertStateFolder = createFolder("YOS Alert State")
+const now = currentDate()
+const todayLabel = formatDate(now, "Custom", "yyyy/MM/dd")
+const startText = text("{todayLabel} 00:00")
+const endText = text("{todayLabel} 23:59")
+const start = date(startText)
+const end = date(endText)
+
+// Postcompile replaces these with one native Reminder filter and properties.
+const candidates = text("YOS_ROUTINE_REMINDERS_PLACEHOLDER")
+const titles = text("YOS_ROUTINE_TITLES_PLACEHOLDER")
+const lists = text("YOS_ROUTINE_LISTS_PLACEHOLDER")
+const dueDates = text("YOS_ROUTINE_DATES_PLACEHOLDER")
+
+const promptText = text("あなたはYOS Routine Alertです。
+入力はiPhoneのReminderから、今日が期限・未完了・Reminder自身の通知がない項目だけを事前抽出したものです。
+
+Routine Alertは、リスト名またはタイトルに「Routine」「ルーティン」「習慣」と明示された項目だけを対象にします。
+既存Automationが担当するMorning/Night等を推測して追加しない。
+情報を作らない。入力にない時刻を作らない。
+該当なしなら完全一致で ROUTINE_ALERT_NONE とだけ返す。
+該当ありなら最大5件、1件1行。短く「・タイトル（必要なら時刻）」だけ。前置き不要。
+
+日付：{todayLabel}
+タイトル：{titles}
+リスト：{lists}
+期限：{dueDates}
+元候補：{candidates}")
+
+const result = askChatGPT(promptText, false, "Text")
+@resultText = "{result}"
+if @resultText contains "ROUTINE_ALERT_NONE" {
+    stop()
+}
+
+const sourceKey = text("{titles}\n{lists}\n{dueDates}")
+@sourceKeyText = "{sourceKey}"
+const lastSourceFile = getFile("YOS Alert State/Routine Alert Last.txt", nil, false)
+const lastSourceText = getText(lastSourceFile)
+@lastSource = "{lastSourceText}"
+if @lastSource == @sourceKeyText {
+    stop()
+}
+saveFile("YOS Alert State/Routine Alert Last.txt", sourceKey, true)
+
+const stampNow = currentDate()
+const stamp = formatDate(stampNow, "Custom", "yyyy-MM-dd HHmmss")
+const log = text("【Routine Alert】\n{result}")
+saveFile("YOS Display History/{stamp} Routine Alert.txt", log, false)
+
+@notifyURL = "x-apple-reminderkit://"
+if @resultText contains "Morning" {
+    @notifyURL = "shortcuts://run-shortcut?name=Morning"
+}
+if @resultText contains "morning" {
+    @notifyURL = "shortcuts://run-shortcut?name=Morning"
+}
+if @resultText contains "朝" {
+    @notifyURL = "shortcuts://run-shortcut?name=Morning"
+}
+if @notifyURL == "x-apple-reminderkit://" {
+    if @resultText contains "Night" {
+        @notifyURL = "shortcuts://run-shortcut?name=Night%20Brief"
+    }
+    if @resultText contains "night" {
+        @notifyURL = "shortcuts://run-shortcut?name=Night%20Brief"
+    }
+    if @resultText contains "夜" {
+        @notifyURL = "shortcuts://run-shortcut?name=Night%20Brief"
+    }
+}
+
+const notifyPayload = {
+    "title": "Routine Alert",
+    "body": "{result}",
+    "url": "{@notifyURL}",
+    "thread": "yos-notifications-routine"
+}
+run("YOS Notify", notifyPayload)
