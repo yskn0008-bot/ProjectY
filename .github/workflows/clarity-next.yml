@@ -230,3 +230,45 @@ jobs:
             tools/clarity-next/artifacts/clarity-share-hubsign.log
             tools/clarity-next/artifacts/clarity-notification-hubsign.log
           if-no-files-found: error
+
+  direct-install:
+    name: Publish signed notification shortcut to PR branch
+    needs: build
+    if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == 'yskn0008-bot/ProjectY' && github.event.pull_request.head.ref == 'feat/clarity-notification-intake-20261018' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout exact delivery branch
+        uses: actions/checkout@v4
+        with:
+          ref: feat/clarity-notification-intake-20261018
+          persist-credentials: true
+      - name: Fetch signed artifact from successful build
+        uses: actions/download-artifact@v4
+        with:
+          name: clarity-next-v0
+          path: ${{ runner.temp }}/clarity-next-v0
+      - name: Publish only the signed, verified notification adapter
+        shell: bash
+        run: |
+          set -euo pipefail
+          from="${{ runner.temp }}/clarity-next-v0/Clarity-Notification-signed.shortcut"
+          test -s "$from"
+          python3 - "$from" <<'PY'
+          from pathlib import Path
+          import sys
+          data=Path(sys.argv[1]).read_bytes()
+          assert data.startswith(b'AEA1') and len(data)>500
+          PY
+          install -D -m 0644 "$from" tools/clarity-next/distribution/Clarity-Notification-signed.shortcut
+          git add tools/clarity-next/distribution/Clarity-Notification-signed.shortcut
+          if git diff --cached --quiet; then
+            echo "Distribution artifact already current."
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m "build(clarity): publish signed notification direct-import artifact [skip ci]"
+          git push origin HEAD:refs/heads/feat/clarity-notification-intake-20261018
