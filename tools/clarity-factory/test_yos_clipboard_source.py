@@ -1,0 +1,18 @@
+from pathlib import Path
+s=Path("tools/clarity-factory/YOS_Clipboard.cherri").read_text()
+required=[
+'#define name YOS_Clipboard',
+'getClipboard()','setClipboard(','base64Encode(','base64Decode(',
+'YOS_CLIPBOARD_BLOCKED:screenshots_not_verified',
+'if @command == "add"','if @command == "next"','if @command == "merge"',
+'if @command contains "select|"','if @command == "duplicate"',
+'if @command == "clear"','if @command == "screenshots"',
+'YOS Clipboard/buffer.txt','YOS Clipboard/cursor.txt'
+]
+for x in required:
+    assert x in s, x
+assert 'Clarity Inbox' not in s
+assert '#define inputs text' not in s
+assert 'ShortcutInput' not in s
+assert 'prompt("YOS_Clipboard mode:' in s
+print("YOS_Clipboard source contract: PASS")
