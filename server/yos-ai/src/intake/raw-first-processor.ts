@@ -11,6 +11,7 @@ export interface RawCapture {
   inputMode: 'text' | 'voice' | 'notification' | 'email';
   source: 'clarity' | 'gmail';
   captureId: string;
+  triage?: {category: string; priority: string; needsReview: true};
 }
 
 export interface RawFirstProcessor {
@@ -62,7 +63,8 @@ async function appendToNotion(options: {
   notionPageId: string;
   input: RawCapture;
 }): Promise<void> {
-  const metadata = `${options.input.capturedAt} · ${options.input.source}/${options.input.inputMode} · ${options.input.captureId}`;
+  const triageMetadata = options.input.triage ? ` · triage:${options.input.triage.category}/${options.input.triage.priority}/needs_review` : '';
+  const metadata = `${options.input.capturedAt} · ${options.input.source}/${options.input.inputMode} · ${options.input.captureId}${triageMetadata}`;
   const response = await options.fetchImpl(`https://api.notion.com/v1/blocks/${options.notionPageId}/children`, {
     method: 'PATCH',
     headers: {
