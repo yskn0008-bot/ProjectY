@@ -17,7 +17,7 @@ export interface ClarityIntakeHandlerOptions {
 interface ClarityIntakeInput {
   rawText: string;
   capturedAt: string;
-  inputMode: 'text' | 'voice';
+  inputMode: 'text' | 'voice' | 'notification';
   source: 'clarity';
   captureId: string;
 }
@@ -109,8 +109,8 @@ function parseInput(value: unknown): {ok: true; value: ClarityIntakeInput} | {ok
   }
 
   const inputMode = value.inputMode;
-  if (inputMode !== 'text' && inputMode !== 'voice') {
-    return {ok: false, error: 'inputMode must be text or voice'};
+  if (inputMode !== 'text' && inputMode !== 'voice' && inputMode !== 'notification') {
+    return {ok: false, error: 'inputMode must be text, voice or notification'};
   }
 
   if (value.source !== 'clarity') {
