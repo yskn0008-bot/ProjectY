@@ -81,6 +81,54 @@ test('Clarity intake appends raw text to Notion and marks idempotency complete',
   assert.equal(redis.state.get(`yos:intake:clarity:v1:${validBody.captureId}`), 'done');
 });
 
+test('notification raw input is recorded unchanged without executing a money operation', async () => {
+  const redis = makeRedis();
+  let saved;
+  const handler = createClarityIntakeHandler({
+    tokenSha256,
+    notionToken: 'secret-notion-token',
+    notionPageId,
+    redis: redis.client,
+    fetchImpl: async (_input, init) => {
+      saved = JSON.parse(init.body);
+      return new Response('{}', {status: 200});
+    }
+  });
+  const body = {
+    ...validBody,
+    inputMode: 'notification',
+    captureId: 'paypay-notification-test-20261018-0001',
+    rawText: 'source_app=PayPay\\ntitle=出金通知\\nmessage=5,000円を出金しました'
+  };
+  const response = await handler(request(body));
+  assert.equal(response.status, 201);
+  const blocks = saved.children;
+  assert.match(JSON.stringify(blocks[0]), /clarity\\/notification/u);
+  assert.match(JSON.stringify(blocks[1]), /source_app=PayPay/u);
+  assert.match(JSON.stringify(blocks[1]), /5,000円を出金しました/u);
+  assert.equal(blocks.length, 3);
+  assert.equal(redis.state.get(`yos:intake:clarity:v1:${body.captureId}`), 'done');
+});
+
+test('unknown notification mode and empty notification content fail closed', async () => {
+  const redis = makeRedis();
+  let calls = 0;
+  const handler = createClarityIntakeHandler({
+    tokenSha256,
+    notionToken: 'secret-notion-token',
+    notionPageId,
+    redis: redis.client,
+    fetchImpl: async () => {
+      calls += 1;
+      return new Response('{}', {status: 200});
+    }
+  });
+  assert.equal((await handler(request({...validBody, inputMode: 'push'}))).status, 400);
+  assert.equal((await handler(request({...validBody, inputMode: 'notification', rawText: '   '}))).status, 400);
+  assert.equal(calls, 0);
+  assert.equal(redis.commands.length, 0);
+});
+
 test('Clarity intake rejects an invalid bearer token before Notion or Redis writes', async () => {
   const redis = makeRedis();
   let notionCalls = 0;
