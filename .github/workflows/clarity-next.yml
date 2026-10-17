@@ -296,7 +296,7 @@ jobs:
           assert data.startswith(b'AEA1') and len(data)>500
           PY
             install -m 0644 "$from" "$destination"
-            printf '%s\\n' "$source_sha" > "$manifest"
+            printf '%s' "$source_sha" > "$manifest"
           done
           git add tools/clarity-next/distribution/Clarity-Notification-signed.shortcut tools/clarity-next/distribution/Clarity-Email-signed.shortcut
           git add tools/clarity-next/distribution/*.source.sha256
