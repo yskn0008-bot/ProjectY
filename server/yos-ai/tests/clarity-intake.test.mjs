@@ -147,7 +147,7 @@ test('Gmail important payment notices are stored once with verified source label
   assert.equal(data.triage.category,'payment');
   assert.equal(data.triage.needsReview,true);
   assert.equal(data.triage.externalWrite,false);
-  assert.match(JSON.stringify(saved.children),/gmail\\/email/u);
+  assert.match(JSON.stringify(saved.children),new RegExp('gmail/email', 'u'));
   assert.equal((await handler(request(body))).status,200);
   assert.equal(calls,1);
 });
