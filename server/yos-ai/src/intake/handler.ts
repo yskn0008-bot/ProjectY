@@ -83,11 +83,12 @@ export function createClarityIntakeHandler(options: ClarityIntakeHandlerOptions)
     const triage = input.source === 'gmail'
       ? triageInbound('gmail', input.rawText)
       : input.inputMode === 'notification' ? triageInbound('notification', input.rawText) : null;
-    // Only Gmail metadata/previews are retained, not entire email bodies.
-    // Clarity raw-first semantics are preserved unchanged.
+    // Third-party Gmail previews and notification text may contain OTPs.
+    // Scrub them before Notion persistence; local Clarity Raw First remains intact.
     const safeInput = {
       ...input,
-      ...(input.source === 'gmail' ? {rawText: redactMailPreview(input.rawText)} : {}),
+      ...((input.source === 'gmail' || input.inputMode === 'notification')
+        ? {rawText: redactMailPreview(input.rawText)} : {}),
       ...(triage ? {triage: {category: triage.category, priority: triage.priority, needsReview: true as const}} : {})
     };
     if (triage?.disposition === 'ignore') {
