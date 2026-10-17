@@ -269,20 +269,23 @@ jobs:
         with:
           name: clarity-next-v0
           path: ${{ runner.temp }}/clarity-next-v0
-      - name: Publish only the signed, verified notification adapter
+      - name: Publish only signed, verified Email and Notification adapters
         shell: bash
         run: |
           set -euo pipefail
-          from="${{ runner.temp }}/clarity-next-v0/Clarity-Notification-signed.shortcut"
-          test -s "$from"
-          python3 - "$from" <<'PY'
+          mkdir -p tools/clarity-next/distribution
+          for name in Clarity-Notification Clarity-Email; do
+            from="${{ runner.temp }}/clarity-next-v0/${name}-signed.shortcut"
+            test -s "$from"
+            python3 - "$from" <<'PY'
           from pathlib import Path
           import sys
           data=Path(sys.argv[1]).read_bytes()
           assert data.startswith(b'AEA1') and len(data)>500
           PY
-          install -D -m 0644 "$from" tools/clarity-next/distribution/Clarity-Notification-signed.shortcut
-          git add tools/clarity-next/distribution/Clarity-Notification-signed.shortcut
+            install -m 0644 "$from" "tools/clarity-next/distribution/${name}-signed.shortcut"
+          done
+          git add tools/clarity-next/distribution/Clarity-Notification-signed.shortcut tools/clarity-next/distribution/Clarity-Email-signed.shortcut
           if git diff --cached --quiet; then
             echo "Distribution artifact already current."
             exit 0
