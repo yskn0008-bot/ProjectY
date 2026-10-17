@@ -67,3 +67,22 @@ Production bridge status requires separate owner approval, deployed endpoint/cre
 - [ ] No duplicate when the same event is reprocessed
 - [ ] Notion remote delivery only after bridge config/deploy authorization
 - [ ] No unrequested device, email, calendar or money side effects
+
+## Clarity Email — Mail automation entry
+
+A separate signed `Clarity-Email-signed.shortcut` is produced from `Clarity Email.cherri` and published beside the Notification entry (once signer CI succeeds). No extra database, Clarity AI, or outbound network action is added.
+
+**On-device acceptance gate (iOS 27):**
+
+1. Ensure the desired Gmail account is configured in **Apple Mail**, not only the Gmail app. Apple's native Email automation listens to incoming mail in a selected account.
+2. Import the signed `Clarity Email` shortcut from the direct GitHub distribution URL. Enable Email automation on that shortcut for the intended Mail account. For a trial, filter **Subject Contains** to a safe expected phrase rather than immediately ingesting all mail.
+3. Have the Email trigger pass a **Text** string containing Sender, Subject, and a short **preview** as `Shortcut Input`. Apple documents the trigger and filters, but the delivery of full body/content under lock must be validated on the physical device.
+4. Verify that the existing `Clarity Inbox.txt` contains timestamp, `EMAIL`, and the real original input. Reject an empty placeholder or constant `1` result.
+5. Only after authenticated Notion delivery and collision-free stable Gmail message identifiers are verified should the inbox adapter be connected to remote `POST /api/yos/intake` using `source:gmail` and `inputMode:email`. The new shortcut does **not** send the request itself. Do not include bearer tokens in public source files.
+
+**Important:** importing an Apple Shortcut is not the same as activating a personal automation. Apple requires an on-device enable action, and no GitHub/Notion/Gmail connector can silently change that iPhone setting.
+
+iOS 27 trigger reference:
+- https://support.apple.com/guide/shortcuts/event-triggers-apd932ff833f/ios (Notification)
+- https://support.apple.com/guide/shortcuts/communication-triggers-apdd711f9dff/ios (Email)
+- https://support.apple.com/guide/shortcuts/apdfbdbd7123/ios (automations)
