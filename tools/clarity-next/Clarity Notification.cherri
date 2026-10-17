@@ -1,0 +1,29 @@
+#define name Clarity Notification
+#define color purple
+#define inputs text
+
+#include 'actions/text'
+#include 'actions/documents'
+
+// Reuse the proven Clarity raw-first persistence primitive.
+// Do not ask ChatGPT to interpret a notification as a user command.
+action 'file.append' appendResolvedFile(
+    variable file: 'WFFile',
+    variable input: 'WFInput'
+) {
+    "WFAppendFileWriteMode": "Append"
+}
+
+const notificationText = getText(ShortcutInput)
+if !notificationText {
+    stop()
+}
+
+// The automation supplies source_app/title/message through Shortcut Input.
+// Preserve the unmodified received text for later interpretation by YOS.
+const record = text("{CurrentDate}\tNOTIFICATION\t{notificationText}\n")
+const inboxFile = getFile("Clarity Inbox.txt")
+appendResolvedFile(inboxFile, record)
+
+// Deliberately no device action, money write, ChatGPT call, network call, or user alert.
+// Remote Notion delivery is a separate opt-in bridge once production access is verified.

@@ -81,6 +81,124 @@ test('Clarity intake appends raw text to Notion and marks idempotency complete',
   assert.equal(redis.state.get(`yos:intake:clarity:v1:${validBody.captureId}`), 'done');
 });
 
+test('notification raw input is recorded unchanged without executing a money operation', async () => {
+  const redis = makeRedis();
+  let saved;
+  const handler = createClarityIntakeHandler({
+    tokenSha256,
+    notionToken: 'secret-notion-token',
+    notionPageId,
+    redis: redis.client,
+    fetchImpl: async (_input, init) => {
+      saved = JSON.parse(init.body);
+      return new Response('{}', {status: 200});
+    }
+  });
+  const body = {
+    ...validBody,
+    inputMode: 'notification',
+    captureId: 'paypay-notification-test-20261018-0001',
+    rawText: 'source_app=PayPay\ntitle=出金通知\nmessage=5,000円を出金しました'
+  };
+  const response = await handler(request(body));
+  assert.equal(response.status, 201);
+  const blocks = saved.children;
+  assert.match(JSON.stringify(blocks[0]), /clarity\/notification/u);
+  assert.match(JSON.stringify(blocks[1]), /source_app=PayPay/u);
+  assert.match(JSON.stringify(blocks[1]), /5,000円を出金しました/u);
+  assert.equal(blocks.length, 3);
+  assert.equal(redis.state.get(`yos:intake:clarity:v1:${body.captureId}`), 'done');
+});
+
+test('unknown notification mode and empty notification content fail closed', async () => {
+  const redis = makeRedis();
+  let calls = 0;
+  const handler = createClarityIntakeHandler({
+    tokenSha256,
+    notionToken: 'secret-notion-token',
+    notionPageId,
+    redis: redis.client,
+    fetchImpl: async () => {
+      calls += 1;
+      return new Response('{}', {status: 200});
+    }
+  });
+  assert.equal((await handler(request({...validBody, inputMode: 'push'}))).status, 400);
+  assert.equal((await handler(request({...validBody, inputMode: 'notification', rawText: '   '}))).status, 400);
+  assert.equal(calls, 0);
+  assert.equal(redis.commands.length, 0);
+});
+
+test('Gmail important payment notices are stored once with verified source label and no side effects', async () => {
+  const redis=makeRedis();
+  let calls=0;
+  let saved;
+  const handler=createClarityIntakeHandler({
+    tokenSha256, notionToken: 'secret-notion-token', notionPageId, redis:redis.client,
+    fetchImpl: async (_u,init) => {calls++;saved=JSON.parse(init.body);return new Response('{}',{status:200});}
+  });
+  const body={
+    rawText:'subject: 【三井住友銀行】口座出金のお知らせ\\nsnippet: 5000円の出金がありました',
+    capturedAt:'2026-10-18T00:00:00Z',inputMode:'email',source:'gmail',captureId:'gmail-test-message-001'
+  };
+  const first=await handler(request(body));
+  assert.equal(first.status,201);
+  const data=await first.json();
+  assert.equal(data.triage.category,'payment');
+  assert.equal(data.triage.needsReview,true);
+  assert.equal(data.triage.externalWrite,false);
+  assert.match(JSON.stringify(saved.children),new RegExp('gmail/email', 'u'));
+  assert.match(JSON.stringify(saved.children[0]),new RegExp('triage:payment/high/needs_review','u'));
+  assert.equal((await handler(request(body))).status,200);
+  assert.equal(calls,1);
+});
+
+test('Gmail promotional mail skips Notion write but legitimate deadlines override promotion words', async () => {
+  const redis=makeRedis();
+  let calls=0;
+  const handler=createClarityIntakeHandler({
+    tokenSha256, notionToken:'secret-notion-token',notionPageId,redis:redis.client,
+    fetchImpl:async()=>{calls++;return new Response('{}',{status:200});}
+  });
+  const base={...validBody,inputMode:'email',source:'gmail',captureId:'gmail-promotional-test'};
+  let result=await handler(request({...base,rawText:'subject: セールとクーポンのご案内'}));
+  assert.equal(result.status,200);
+  assert.equal((await result.json()).ignored,true);
+  assert.equal(calls,0);
+  result=await handler(request({...base,captureId:'gmail-legal-test',
+    rawText:'subject: 重要な請求書：キャンペーン期間にもご注意'}));
+  assert.equal(result.status,201);
+  assert.equal(calls,1);
+});
+
+test('Gmail preview redacts one-time codes before Notion persistence',async()=>{
+  const redis=makeRedis();
+  let saved;
+  const handler=createClarityIntakeHandler({
+    tokenSha256,notionToken:'secret-notion-token',notionPageId,redis:redis.client,
+    fetchImpl:async(_u,init)=>{saved=JSON.parse(init.body);return new Response('{}',{status:200});}
+  });
+  const body={...validBody,inputMode:'email',source:'gmail',captureId:'gmail-code-test',
+    rawText:'subject: セキュリティ通知\\nsnippet: 認証コード: 123456'};
+  const result=await handler(request(body));
+  assert.equal(result.status,201);
+  assert.doesNotMatch(JSON.stringify(saved),/123456/u);
+  assert.match(JSON.stringify(saved),/CODE REDACTED/u);
+});
+
+test('Gmail mode/source mismatch and missing namespaced ID fail validation',async()=>{
+  const redis=makeRedis();
+  const handler=createClarityIntakeHandler({
+    tokenSha256,notionToken:'secret-notion-token',notionPageId,redis:redis.client,
+    fetchImpl:async()=>{throw Error('should not write');}
+  });
+  const mismatch=await handler(request({...validBody,inputMode:'email'}));
+  assert.equal(mismatch.status,400);
+  const badId=await handler(request({...validBody,inputMode:'email',source:'gmail'}));
+  assert.equal(badId.status,400);
+  assert.equal(redis.commands.length,0);
+});
+
 test('Clarity intake rejects an invalid bearer token before Notion or Redis writes', async () => {
   const redis = makeRedis();
   let notionCalls = 0;

@@ -1,6 +1,7 @@
 import type {FetchLike} from '../http.js';
 import type {RedisCommandClient} from '../storage/upstash-rest.js';
 import {CaptureInProgressError, createRawFirstProcessor} from './raw-first-processor.js';
+import {redactMailPreview, triageInbound} from './inbound-triage.js';
 
 const DEFAULT_MAX_BODY_BYTES = 16_384;
 const MAX_RAW_TEXT_CHARACTERS = 6_000;
@@ -17,8 +18,8 @@ export interface ClarityIntakeHandlerOptions {
 interface ClarityIntakeInput {
   rawText: string;
   capturedAt: string;
-  inputMode: 'text' | 'voice';
-  source: 'clarity';
+  inputMode: 'text' | 'voice' | 'notification' | 'email';
+  source: 'clarity' | 'gmail';
   captureId: string;
 }
 
@@ -79,10 +80,25 @@ export function createClarityIntakeHandler(options: ClarityIntakeHandlerOptions)
     const parsed = parseInput(body);
     if (!parsed.ok) return json({error: parsed.error}, 400);
     const input = parsed.value;
+    const triage = input.source === 'gmail'
+      ? triageInbound('gmail', input.rawText)
+      : input.inputMode === 'notification' ? triageInbound('notification', input.rawText) : null;
+    // Only Gmail metadata/previews are retained, not entire email bodies.
+    // Clarity raw-first semantics are preserved unchanged.
+    const safeInput = {
+      ...input,
+      ...(input.source === 'gmail' ? {rawText: redactMailPreview(input.rawText)} : {}),
+      ...(triage ? {triage: {category: triage.category, priority: triage.priority, needsReview: true as const}} : {})
+    };
+    if (triage?.disposition === 'ignore') {
+      return json({ok: true, captureId: input.captureId, ignored: true}, 200);
+    }
 
     try {
-      const result = await processor.process(input);
-      return json({ok: true, captureId: input.captureId, duplicate: result.duplicate}, result.duplicate ? 200 : 201);
+      const result = await processor.process(safeInput);
+      const response = {ok: true, captureId: input.captureId, duplicate: result.duplicate,
+        ...(triage ? {triage} : {})};
+      return json(response, result.duplicate ? 200 : 201);
     } catch (error) {
       if (error instanceof CaptureInProgressError) {
         return json({error: 'Capture is already being processed'}, 409);
@@ -109,12 +125,15 @@ function parseInput(value: unknown): {ok: true; value: ClarityIntakeInput} | {ok
   }
 
   const inputMode = value.inputMode;
-  if (inputMode !== 'text' && inputMode !== 'voice') {
-    return {ok: false, error: 'inputMode must be text or voice'};
+  if (inputMode !== 'text' && inputMode !== 'voice' && inputMode !== 'notification' && inputMode !== 'email') {
+    return {ok: false, error: 'inputMode must be text, voice, notification or email'};
   }
 
-  if (value.source !== 'clarity') {
-    return {ok: false, error: 'source must be clarity'};
+  if (value.source !== 'clarity' && value.source !== 'gmail') {
+    return {ok: false, error: 'source must be clarity or gmail'};
+  }
+  if ((value.source === 'gmail') !== (inputMode === 'email')) {
+    return {ok: false, error: 'gmail source requires email mode and vice versa'};
   }
 
   const captureId = value.captureId;
@@ -122,9 +141,12 @@ function parseInput(value: unknown): {ok: true; value: ClarityIntakeInput} | {ok
     return {ok: false, error: 'captureId is required and must be a stable identifier'};
   }
 
+  if (value.source === 'gmail' && !captureId.startsWith('gmail-')) {
+    return {ok: false, error: 'gmail captureId must start with gmail-'};
+  }
   return {
     ok: true,
-    value: {rawText, capturedAt, inputMode, source: 'clarity', captureId}
+    value: {rawText, capturedAt, inputMode, source: value.source, captureId}
   };
 }
 
