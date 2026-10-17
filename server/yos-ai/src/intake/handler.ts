@@ -85,7 +85,11 @@ export function createClarityIntakeHandler(options: ClarityIntakeHandlerOptions)
       : input.inputMode === 'notification' ? triageInbound('notification', input.rawText) : null;
     // Only Gmail metadata/previews are retained, not entire email bodies.
     // Clarity raw-first semantics are preserved unchanged.
-    const safeInput = input.source === 'gmail' ? {...input, rawText: redactMailPreview(input.rawText)} : input;
+    const safeInput = {
+      ...input,
+      ...(input.source === 'gmail' ? {rawText: redactMailPreview(input.rawText)} : {}),
+      ...(triage ? {triage: {category: triage.category, priority: triage.priority, needsReview: true as const}} : {})
+    };
     if (triage?.disposition === 'ignore') {
       return json({ok: true, captureId: input.captureId, ignored: true}, 200);
     }
