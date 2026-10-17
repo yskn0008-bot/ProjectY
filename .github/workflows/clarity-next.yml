@@ -50,18 +50,22 @@ jobs:
           rm -f './Clarity Next_unsigned.shortcut' './Clarity Next.plist'
           rm -f './Clarity Text_unsigned.shortcut' './Clarity Text.plist'
           rm -f './Clarity Share v4_unsigned.shortcut' './Clarity Share v4.plist'
+          rm -f './Clarity Notification_unsigned.shortcut' './Clarity Notification.plist'
           cherri './Clarity Next.cherri' --skip-sign --debug
           cherri './Clarity Text.cherri' --skip-sign --debug
           cherri './Clarity Share.cherri' --skip-sign --debug
+          cherri './Clarity Notification.cherri' --skip-sign --debug
           test -f './Clarity Next_unsigned.shortcut'
           test -f './Clarity Text_unsigned.shortcut'
           test -f './Clarity Share v4_unsigned.shortcut'
+          test -f './Clarity Notification_unsigned.shortcut'
           python3 patch_ledger_persistence.py './Clarity Next_unsigned.shortcut'
           python3 patch_calendar_reminder_wire_format.py './Clarity Next_unsigned.shortcut'
           mkdir -p artifacts
           cp './Clarity Next_unsigned.shortcut' artifacts/Clarity-Next-unsigned.shortcut
           cp './Clarity Text_unsigned.shortcut' artifacts/Clarity-Text-unsigned.shortcut
           cp './Clarity Share v4_unsigned.shortcut' artifacts/Clarity-Share-v4-unsigned.shortcut
+          cp './Clarity Notification_unsigned.shortcut' artifacts/Clarity-Notification-unsigned.shortcut
 
       - name: Inspect runtime
         shell: bash
@@ -150,7 +154,14 @@ jobs:
           assert '__YOS_CLARITY_SHARE_TEXT_V1__' in share_blob
           assert '__YOS_CLARITY_SHARE_IMAGE_V1__' in share_blob
           assert '__YOS_CLARITY_SHARE_PDF_V1__' in share_blob
-          print('Clarity thin entry wrappers: PASS')
+          notification_root=plistlib.loads((base/'Clarity-Notification-unsigned.shortcut').read_bytes())
+          notification_ids=[a.get('WFWorkflowActionIdentifier','') for a in notification_root.get('WFWorkflowActions',[])]
+          notification_blob=repr(notification_root)
+          assert notification_root.get('WFWorkflowHasShortcutInputVariables') is True
+          assert 'Clarity Inbox.txt' in notification_blob
+          assert 'NOTIFICATION' in notification_blob
+          assert not any(i in ('is.workflow.actions.askllm','is.workflow.actions.getcontentsofurl','is.workflow.actions.runworkflow') for i in notification_ids)
+          print('Clarity thin entry wrappers and notification raw-first adapter: PASS')
           PY
 
       - name: Secret scan
@@ -181,6 +192,11 @@ jobs:
             --output tools/clarity-next/artifacts/Clarity-Share-v4-signed.shortcut \
             --name 'Clarity Share v4' \
             2>&1 | tee tools/clarity-next/artifacts/clarity-share-hubsign.log
+          python3 tools/clarity-factory/sign_with_hubsign.py \
+            --input tools/clarity-next/artifacts/Clarity-Notification-unsigned.shortcut \
+            --output tools/clarity-next/artifacts/Clarity-Notification-signed.shortcut \
+            --name 'Clarity Notification' \
+            2>&1 | tee tools/clarity-next/artifacts/clarity-notification-hubsign.log
 
       - name: Verify signature
         shell: bash
@@ -188,7 +204,7 @@ jobs:
           set -euo pipefail
           python3 - <<'PY'
           from pathlib import Path
-          for name in ('Clarity-Next-signed.shortcut','Clarity-Text-signed.shortcut','Clarity-Share-v4-signed.shortcut'):
+          for name in ('Clarity-Next-signed.shortcut','Clarity-Text-signed.shortcut','Clarity-Share-v4-signed.shortcut','Clarity-Notification-signed.shortcut'):
               p=Path('tools/clarity-next/artifacts')/name
               data=p.read_bytes()
               assert data.startswith(b'AEA1'), (name,data[:8])
@@ -207,7 +223,10 @@ jobs:
             tools/clarity-next/artifacts/Clarity-Text-signed.shortcut
             tools/clarity-next/artifacts/Clarity-Share-v4-unsigned.shortcut
             tools/clarity-next/artifacts/Clarity-Share-v4-signed.shortcut
+            tools/clarity-next/artifacts/Clarity-Notification-unsigned.shortcut
+            tools/clarity-next/artifacts/Clarity-Notification-signed.shortcut
             tools/clarity-next/artifacts/hubsign.log
             tools/clarity-next/artifacts/clarity-text-hubsign.log
             tools/clarity-next/artifacts/clarity-share-hubsign.log
+            tools/clarity-next/artifacts/clarity-notification-hubsign.log
           if-no-files-found: error
