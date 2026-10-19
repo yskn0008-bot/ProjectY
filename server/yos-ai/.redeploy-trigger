@@ -2,9 +2,9 @@
   "schema_version": "1.0.0",
   "kind": "yos-ai-approved-release-retry",
   "approval_basis": "source already merged to main",
-  "source_sha": "41d452842a5703923227241db113449a7fa3f8fa",
+  "source_sha": "11671db2746a19972f3bcd188d7e778929cbb6c1",
   "attempt": 1,
-  "requested_at": "2026-10-19T19:43:32.120Z",
-  "previous_failed_sha": "41d452842a5703923227241db113449a7fa3f8fa",
+  "requested_at": "2026-10-19T23:05:44.061Z",
+  "previous_failed_sha": "11671db2746a19972f3bcd188d7e778929cbb6c1",
   "reason": "vercel-rate-limit"
 }
