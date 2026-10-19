@@ -58,23 +58,23 @@ if route == "app_open" {
 
 if route == "device" {
     if operation == "brightness" {
-        const p = getNumbers(percentRaw)
-        if p < 0 || p > 100 {
+        const brightnessPercent = getNumbers(percentRaw)
+        if brightnessPercent < 0 || brightnessPercent > 100 {
             alert("明るさは0〜100%で指定してください", "Clarity")
             stop()
         }
-        const ratio = p * 0.01
-        rawAction("is.workflow.actions.setbrightness", {"WFBrightness":"${ratio}"})
+        const brightnessRatio = brightnessPercent * 0.01
+        rawAction("is.workflow.actions.setbrightness", {"WFBrightness":"${brightnessRatio}"})
         stop()
     }
     if operation == "volume" {
-        const p = getNumbers(percentRaw)
-        if p < 0 || p > 100 {
+        const volumePercent = getNumbers(percentRaw)
+        if volumePercent < 0 || volumePercent > 100 {
             alert("音量は0〜100%で指定してください", "Clarity")
             stop()
         }
-        const ratio = p * 0.01
-        rawAction("is.workflow.actions.setvolume", {"WFVolume":"${ratio}"})
+        const volumeRatio = volumePercent * 0.01
+        rawAction("is.workflow.actions.setvolume", {"WFVolume":"${volumeRatio}"})
         stop()
     }
     if operation == "wifi" {
