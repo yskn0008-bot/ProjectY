@@ -1,0 +1,15 @@
+#define name YOS History
+#define color purple
+
+#include 'actions/text'
+#include 'actions/documents'
+
+// Read-only viewer for derived display history.
+// The displayed Morning / Night / Alert texts remain owned by their original systems;
+// this folder is only a reread cache.
+const historyFolder = createFolder("YOS Display History")
+const historyFiles = getFolderContents(historyFolder, false)
+const recentFiles = filterFiles(historyFiles, 60, "Name", "Z to A")
+const selected = chooseFromList(recentFiles, "読み返す履歴を選ぶ", false, false)
+const selectedText = getText(selected)
+show(selectedText)
