@@ -207,15 +207,8 @@ async function syncSnapshot(options: {
     updated = result.updated;
   }
 
-  const keep = new Set(options.items.map(item => item.syncKey));
-  const archived = await reconcilePrefix({
-    prefix: options.prefix,
-    keep,
-    notionToken: options.notionToken,
-    notionDataSourceId: options.notionDataSourceId,
-    redis: options.redis,
-    fetchImpl: options.fetchImpl
-  });
+  // Partial iPhone snapshots cannot establish deletion. Preserve unmatched Notion rows.
+  const archived = 0;
 
   return {updated, archived, duplicate};
 }
