@@ -4,6 +4,7 @@
 
 #include 'actions/text'
 #include 'actions/intelligence'
+#include 'actions/calendar'
 #include 'actions/device'
 #include 'actions/settings'
 #include 'actions/web'
