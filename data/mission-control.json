@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-10-20T06:13:44+09:00",
+  "updated_at": "2026-10-20T08:30:18+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-10-19T21:13:12Z"
+      "updated_at": "2026-10-19T23:07:06Z"
     },
     {
       "id": "github-issue-234",
@@ -195,6 +195,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-cf41b2e475c1",
+      "title": "chore(yos-ai): retry deferred approved release (1/4)",
+      "completed_at": "2026-10-19T23:05:45Z",
+      "result": "GitHub mainへ反映（cf41b2e）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/cf41b2e475c1b5d047fee262758ad8c224979959"
+    },
+    {
       "id": "github-commit-11671db2746a",
       "title": "Prevent partial Apple snapshots from archiving Notion mirror entries (#637)",
       "completed_at": "2026-10-19T21:13:17Z",
@@ -221,13 +228,6 @@
       "completed_at": "2026-10-05T06:28:32Z",
       "result": "GitHub mainへ反映（293b63d）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/293b63d455c5848193998bb1b2f1029b518dc57d"
-    },
-    {
-      "id": "github-commit-85a5e6149c59",
-      "title": "Merge pull request #627 from yskn0008-bot/fix/yos-chat-structured-output-const-20261005",
-      "completed_at": "2026-10-05T06:27:44Z",
-      "result": "GitHub mainへ反映（85a5e61）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/85a5e6149c59444fed0a1d8e88e8acd498fa0c4a"
     },
     {
       "id": "complete-002",
@@ -264,7 +264,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-10-20T06:13:44+09:00",
+      "last_update": "2026-10-20T08:30:18+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -345,7 +345,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-10-20T06:13:44+09:00",
+      "last_update": "2026-10-20T08:30:18+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -368,7 +368,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-10-20T06:13:44+09:00",
+      "last_update": "2026-10-20T08:30:18+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -450,5 +450,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "6e71b4fd0c565ce82382b96790d823cb3db9179498c5f9cb96399fabe0101cc1"
+  "github_snapshot_hash": "f92edb244d1c7a828e9197b6ddf8a5f55729624f9386558e6dea498fc4f57b48"
 }
