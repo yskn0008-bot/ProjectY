@@ -43,8 +43,11 @@ const reply = "{parsed['reply']}"
 const needsReview = "{parsed['needs_review']}"
 
 if needsReview == "true" || needsReview == "1" {
-    if reply { alert(reply, "Clarity") }
-    else { alert("このままでは安全に1つの操作へ決められません", "Clarity") }
+    if reply {
+        alert(reply, "Clarity")
+        stop()
+    }
+    alert("このままでは安全に1つの操作へ決められません", "Clarity")
     stop()
 }
 
@@ -161,6 +164,6 @@ if route == "notion_capture" {
 
 if reply {
     alert(reply, "Clarity")
-} else {
-    alert("この操作はまだ対応していません", "Clarity")
+    stop()
 }
+alert("この操作はまだ対応していません", "Clarity")
