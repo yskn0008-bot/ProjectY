@@ -9,7 +9,7 @@
 #include 'actions/web'
 #include 'actions/shortcuts'
 
-@incoming = "{ShortcutInput}"
+const requestNumber = randomNumber(100000, 999999)\n@incoming = "{ShortcutInput}"
 @resolvedInput = ""
 @inputMode = "voice"
 
@@ -152,9 +152,9 @@ if route == "notion_capture" {
     const captureText = text("{content}")
     const captureAt = formatDate(currentDate(), "Custom", "yyyy-MM-dd'T'HH:mm:ssZZZZZ")
     const captureMode = text("{@inputMode}")
-    const captureId = text("clarity-{captureAt}-{userInput}")
+    const captureKey = formatDate(currentDate(), "Custom", "yyyyMMddHHmmss")\n    const captureId = text("clarity-{captureKey}-{requestNumber}")
     const notionCapturePlaceholder = text("__YOS_NOTION_CAPTURE__")
-    alert("Notionに保存しました", "Clarity")
+    alert("Notionへの保存要求を送信しました", "Clarity")
     stop()
 }
 
