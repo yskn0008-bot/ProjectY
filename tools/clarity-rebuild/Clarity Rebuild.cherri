@@ -59,14 +59,20 @@ if route == "app_open" {
 if route == "device" {
     if operation == "brightness" {
         const p = getNumbers(percentRaw)
-        if p < 0 || p > 100 { alert("明るさは0〜100%で指定してください", "Clarity"); stop() }
+        if p < 0 || p > 100 {
+            alert("明るさは0〜100%で指定してください", "Clarity")
+            stop()
+        }
         const ratio = p * 0.01
         rawAction("is.workflow.actions.setbrightness", {"WFBrightness":"${ratio}"})
         stop()
     }
     if operation == "volume" {
         const p = getNumbers(percentRaw)
-        if p < 0 || p > 100 { alert("音量は0〜100%で指定してください", "Clarity"); stop() }
+        if p < 0 || p > 100 {
+            alert("音量は0〜100%で指定してください", "Clarity")
+            stop()
+        }
         const ratio = p * 0.01
         rawAction("is.workflow.actions.setvolume", {"WFVolume":"${ratio}"})
         stop()
@@ -142,7 +148,10 @@ if route == "home" {
     if operation == "tv_volume_up" { @homeURL = "scriptable:///run?scriptName=%E3%83%86%E3%83%AC%E3%83%93%E3%82%A6%E3%82%A3%E3%82%B8%E3%82%A7%E3%83%83%E3%83%88&action=volumeUp" }
     if operation == "tv_volume_down" { @homeURL = "scriptable:///run?scriptName=%E3%83%86%E3%83%AC%E3%83%93%E3%82%A6%E3%82%A3%E3%82%B8%E3%82%A7%E3%83%83%E3%83%88&action=volumeDown" }
     if operation == "tv_mute" { @homeURL = "scriptable:///run?scriptName=%E3%83%86%E3%83%AC%E3%83%93%E3%82%A6%E3%82%A3%E3%82%B8%E3%82%A7%E3%83%83%E3%83%88&action=mute" }
-    if @homeURL { openURL(@homeURL); stop() }
+    if @homeURL {
+        openURL(@homeURL)
+        stop()
+    }
     alert("この家電操作はまだ安全な固定経路がありません", "Clarity")
     stop()
 }
