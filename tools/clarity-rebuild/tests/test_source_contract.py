@@ -21,7 +21,7 @@ class ClarityRebuildContractTests(unittest.TestCase):
 
     def test_home_is_allowlisted(self):
         self.assertIn("NEXT_HOME", SOURCE)
-        for name in ("YOS BRAVIA Widget", "YOS Light Widget", "YOS AC Widget", "YOS Remote Hub"):
+        for name in ("YOS BRAVIA Widget", "YOS Light Widget", "YOS AC Widget", "YOS%20Remote%20Hub"):
             self.assertIn(name, SOURCE)
         for action in ("power","volumeUp","on","night","cool","tempUp","wind"):
             self.assertIn(action, SOURCE)
