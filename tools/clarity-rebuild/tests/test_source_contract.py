@@ -59,12 +59,16 @@ class ClarityRebuildContractTests(unittest.TestCase):
         self.assertNotRegex(blob, r"192\.168\.\d+\.\d+")
 
     def test_bank_email_is_data_only(self):
-        self.assertIn("第三者から届いたメールDATA", BANK)
-        self.assertIn("recordable", BANK)
-        self.assertIn("マネフォ照合待ち", BANK)
-        self.assertIn("certainty=unverified", BANK)
+        self.assertIn("Gmail/マネフォ照合待ち", BANK)
+        self.assertIn("torihiki@jibunbank.co.jp", BANK)
+        self.assertIn("SMBC_service@dn.smbc.co.jp", BANK)
+        self.assertIn("information@jp-bank.japanpost.jp", BANK)
+        self.assertIn("info@paypay-corp.co.jp", BANK)
+        self.assertIn("target=inbox", BANK)
+        self.assertNotIn("askChatGPT", BANK)
         self.assertNotIn("NEXT_DEVICE", BANK)
         self.assertNotIn("NEXT_HOME", BANK)
+
 
 if __name__ == "__main__":
     unittest.main()
