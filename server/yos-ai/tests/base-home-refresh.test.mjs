@@ -133,7 +133,7 @@ test('BASE HOME endpoint rejects bad auth before external writes', async () => {
   assert.equal(calls,0);
 });
 
-test('BASE HOME endpoint accepts empty snapshots so stale rows can be reconciled away', async () => {
+test('BASE HOME endpoint preserves existing Notion rows when an Apple snapshot is empty', async () => {
   const redis=new MemoryRedis();
   const calls=[];
   const fetchImpl=async (url,init={})=>{
@@ -167,5 +167,6 @@ test('BASE HOME endpoint accepts empty snapshots so stale rows can be reconciled
   assert.equal(response.status,200);
   const body=await response.json();
   assert.equal(body.ok,true);
-  assert.equal(body.results.calendar.archived,1);
+  assert.equal(body.results.calendar.archived,0);
+  assert.equal(calls.length,0);
 });
