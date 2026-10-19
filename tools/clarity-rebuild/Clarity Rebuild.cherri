@@ -1,0 +1,165 @@
+#define name Clarity Rebuild
+#define color purple
+#define inputs text
+
+#include 'actions/text'
+#include 'actions/intelligence'
+#include 'actions/device'
+#include 'actions/settings'
+#include 'actions/web'
+#include 'actions/shortcuts'
+
+@incoming = "{ShortcutInput}"
+@resolvedInput = ""
+@inputMode = "voice"
+
+if @incoming {
+    @resolvedInput = "{@incoming}"
+    @inputMode = "text"
+}
+
+if !@resolvedInput {
+    const dictated = listen("After Pause", "jp-JP")
+    @resolvedInput = "{dictated}"
+    @inputMode = "voice"
+}
+
+const userInput = text("{@resolvedInput}")
+if !userInput {
+    stop()
+}
+
+const routerPrompt = text("あなたはようすけ専用のiPhone実機操作司令塔Clarityです。ユーザーの自然な日本語を、現在実行可能な操作1件へ分類してください。推測で対象や値を作らないでください。\n\n返すDictionaryのキーは route, operation, target, state, percent, content, reply, needs_review。\nrouteは app_open / device / home / notion_open / notion_capture / answer のどれか。\n\napp_open: targetは safari, shortcuts, files, notes, phone, reminders, mail, music, calendar, maps, contacts, health, photos, appstore, facetime, chatgpt, scriptable, youtube, spotify, google_sheets のどれか。\ndevice: operationは brightness / volume / wifi / bluetooth / cellular / airplane / low_power / flashlight / appearance / dnd。brightness/volumeはpercent 0〜100。その他stateは on/off/toggle、appearanceだけ light/dark/toggle。相対値を現在値なしで絶対値に変換しない。\nhome: targetは light / ac / tv。operationは light_on / light_off / light_bright / light_dark / light_all / light_night / ac_cool / ac_dry / ac_heat / ac_stop / ac_temp_up / ac_temp_down / ac_fan / ac_wind / tv_input / tv_home / tv_volume_up / tv_volume_down / tv_mute のどれか。テレビの電源ON/OFFやエアコンの温度を数値指定する依頼は、現在の安全な固定経路では未対応なので実行せずanswerにする。\nnotion_open: BASE HOME、Notionホーム、家計管理ページ等を開く依頼。\nnotion_capture: ユーザーがメモ・記録・保存・Notionへ入れることを明確に依頼した場合。contentには保存対象の原文を保持する。金融情報もYOS Moneyには送らずNotionへ保存する。銀行入出金の自動確定はこのショートカットでは行わない。\nanswer: 操作不要の質問、未対応、安全に一意に決められない場合。replyに短く理由を書く。\n送信、購入、契約、削除、公開、電話発信など重大な外部作用は実行しない。needs_review=trueにしてanswerへ。\nユーザー入力: {userInput}")
+const modelResult = askChatGPT(routerPrompt, false, "Dictionary")
+const parsed = getDictionary(modelResult)
+const route = "{parsed['route']}"
+const operation = "{parsed['operation']}"
+const target = "{parsed['target']}"
+const state = "{parsed['state']}"
+const percentRaw = getValue(parsed, "percent")
+const content = "{parsed['content']}"
+const reply = "{parsed['reply']}"
+const needsReview = "{parsed['needs_review']}"
+
+if needsReview == "true" || needsReview == "1" {
+    if reply { alert(reply, "Clarity") }
+    else { alert("このままでは安全に1つの操作へ決められません", "Clarity") }
+    stop()
+}
+
+if route == "app_open" {
+    run("YOS_OpenApp", target)
+    stop()
+}
+
+if route == "device" {
+    if operation == "brightness" {
+        const p = getNumbers(percentRaw)
+        if p < 0 || p > 100 { alert("明るさは0〜100%で指定してください", "Clarity"); stop() }
+        const ratio = p * 0.01
+        rawAction("is.workflow.actions.setbrightness", {"WFBrightness":"${ratio}"})
+        stop()
+    }
+    if operation == "volume" {
+        const p = getNumbers(percentRaw)
+        if p < 0 || p > 100 { alert("音量は0〜100%で指定してください", "Clarity"); stop() }
+        const ratio = p * 0.01
+        rawAction("is.workflow.actions.setvolume", {"WFVolume":"${ratio}"})
+        stop()
+    }
+    if operation == "wifi" {
+        if state == "on" { setWifi(true) }
+        if state == "off" { setWifi(false) }
+        if state == "toggle" { toggleWifi() }
+        stop()
+    }
+    if operation == "bluetooth" {
+        if state == "on" { setBluetooth(true) }
+        if state == "off" { setBluetooth(false) }
+        if state == "toggle" { toggleBluetooth() }
+        stop()
+    }
+    if operation == "cellular" {
+        if state == "on" { setCellularData(true) }
+        if state == "off" { setCellularData(false) }
+        if state == "toggle" { toggleCellularData() }
+        stop()
+    }
+    if operation == "airplane" {
+        if state == "on" { setAirplaneMode(true) }
+        if state == "off" { setAirplaneMode(false) }
+        if state == "toggle" { toggleAirplaneMode() }
+        stop()
+    }
+    if operation == "low_power" {
+        if state == "on" { setLowPowerMode(true) }
+        if state == "off" { setLowPowerMode(false) }
+        if state == "toggle" { toggleLowPowerMode() }
+        stop()
+    }
+    if operation == "flashlight" {
+        if state == "on" { flashlightOn() }
+        if state == "off" { flashlightOff() }
+        if state == "toggle" { toggleFlashlight() }
+        stop()
+    }
+    if operation == "appearance" {
+        if state == "light" { lightMode() }
+        if state == "dark" { darkMode() }
+        if state == "toggle" { toggleAppearance() }
+        stop()
+    }
+    if operation == "dnd" {
+        if state == "on" { DNDOn() }
+        if state == "off" { DNDOff() }
+        if state == "toggle" { toggleDND() }
+        stop()
+    }
+}
+
+if route == "home" {
+    @homeURL = ""
+    if operation == "light_on" { @homeURL = "scriptable:///run?scriptName=%E7%85%A7%E6%98%8E%E3%82%A6%E3%82%A3%E3%82%B8%E3%82%A7%E3%83%83%E3%83%88&action=on" }
+    if operation == "light_off" { @homeURL = "scriptable:///run?scriptName=%E7%85%A7%E6%98%8E%E3%82%A6%E3%82%A3%E3%82%B8%E3%82%A7%E3%83%83%E3%83%88&action=off" }
+    if operation == "light_bright" { @homeURL = "scriptable:///run?scriptName=%E7%85%A7%E6%98%8E%E3%82%A6%E3%82%A3%E3%82%B8%E3%82%A7%E3%83%83%E3%83%88&action=bright" }
+    if operation == "light_dark" { @homeURL = "scriptable:///run?scriptName=%E7%85%A7%E6%98%8E%E3%82%A6%E3%82%A3%E3%82%B8%E3%82%A7%E3%83%83%E3%83%88&action=dark" }
+    if operation == "light_all" { @homeURL = "scriptable:///run?scriptName=%E7%85%A7%E6%98%8E%E3%82%A6%E3%82%A3%E3%82%B8%E3%82%A7%E3%83%83%E3%83%88&action=all" }
+    if operation == "light_night" { @homeURL = "scriptable:///run?scriptName=%E7%85%A7%E6%98%8E%E3%82%A6%E3%82%A3%E3%82%B8%E3%82%A7%E3%83%83%E3%83%88&action=night" }
+    if operation == "ac_cool" { @homeURL = "scriptable:///run?scriptName=%E3%82%A8%E3%82%A2%E3%82%B3%E3%83%B3%E3%82%A6%E3%82%A3%E3%82%B8%E3%82%A7%E3%83%83%E3%83%88&action=cool" }
+    if operation == "ac_dry" { @homeURL = "scriptable:///run?scriptName=%E3%82%A8%E3%82%A2%E3%82%B3%E3%83%B3%E3%82%A6%E3%82%A3%E3%82%B8%E3%82%A7%E3%83%83%E3%83%88&action=dry" }
+    if operation == "ac_heat" { @homeURL = "scriptable:///run?scriptName=%E3%82%A8%E3%82%A2%E3%82%B3%E3%83%B3%E3%82%A6%E3%82%A3%E3%82%B8%E3%82%A7%E3%83%83%E3%83%88&action=heat" }
+    if operation == "ac_stop" { @homeURL = "scriptable:///run?scriptName=%E3%82%A8%E3%82%A2%E3%82%B3%E3%83%B3%E3%82%A6%E3%82%A3%E3%82%B8%E3%82%A7%E3%83%83%E3%83%88&action=stop" }
+    if operation == "ac_temp_up" { @homeURL = "scriptable:///run?scriptName=%E3%82%A8%E3%82%A2%E3%82%B3%E3%83%B3%E3%82%A6%E3%82%A3%E3%82%B8%E3%82%A7%E3%83%83%E3%83%88&action=tempUp" }
+    if operation == "ac_temp_down" { @homeURL = "scriptable:///run?scriptName=%E3%82%A8%E3%82%A2%E3%82%B3%E3%83%B3%E3%82%A6%E3%82%A3%E3%82%B8%E3%82%A7%E3%83%83%E3%83%88&action=tempDown" }
+    if operation == "ac_fan" { @homeURL = "scriptable:///run?scriptName=%E3%82%A8%E3%82%A2%E3%82%B3%E3%83%B3%E3%82%A6%E3%82%A3%E3%82%B8%E3%82%A7%E3%83%83%E3%83%88&action=fan" }
+    if operation == "ac_wind" { @homeURL = "scriptable:///run?scriptName=%E3%82%A8%E3%82%A2%E3%82%B3%E3%83%B3%E3%82%A6%E3%82%A3%E3%82%B8%E3%82%A7%E3%83%83%E3%83%88&action=wind" }
+    if operation == "tv_input" { @homeURL = "scriptable:///run?scriptName=%E3%83%86%E3%83%AC%E3%83%93%E3%82%A6%E3%82%A3%E3%82%B8%E3%82%A7%E3%83%83%E3%83%88&action=input" }
+    if operation == "tv_home" { @homeURL = "scriptable:///run?scriptName=%E3%83%86%E3%83%AC%E3%83%93%E3%82%A6%E3%82%A3%E3%82%B8%E3%82%A7%E3%83%83%E3%83%88&action=home" }
+    if operation == "tv_volume_up" { @homeURL = "scriptable:///run?scriptName=%E3%83%86%E3%83%AC%E3%83%93%E3%82%A6%E3%82%A3%E3%82%B8%E3%82%A7%E3%83%83%E3%83%88&action=volumeUp" }
+    if operation == "tv_volume_down" { @homeURL = "scriptable:///run?scriptName=%E3%83%86%E3%83%AC%E3%83%93%E3%82%A6%E3%82%A3%E3%82%B8%E3%82%A7%E3%83%83%E3%83%88&action=volumeDown" }
+    if operation == "tv_mute" { @homeURL = "scriptable:///run?scriptName=%E3%83%86%E3%83%AC%E3%83%93%E3%82%A6%E3%82%A3%E3%82%B8%E3%82%A7%E3%83%83%E3%83%88&action=mute" }
+    if @homeURL { openURL(@homeURL); stop() }
+    alert("この家電操作はまだ安全な固定経路がありません", "Clarity")
+    stop()
+}
+
+if route == "notion_open" {
+    openURL("scriptable:///run?scriptName=YOS%20Dashboard%20v2&action=baseHome")
+    stop()
+}
+
+if route == "notion_capture" {
+    const captureText = text("{content}")
+    const captureAt = formatDate(currentDate(), "Custom", "yyyy-MM-dd'T'HH:mm:ssZZZZZ")
+    const captureMode = text("{@inputMode}")
+    const captureId = text("clarity-{captureAt}-{userInput}")
+    const notionCapturePlaceholder = text("__YOS_NOTION_CAPTURE__")
+    alert("Notionに保存しました", "Clarity")
+    stop()
+}
+
+if reply {
+    alert(reply, "Clarity")
+} else {
+    alert("この操作はまだ対応していません", "Clarity")
+}
