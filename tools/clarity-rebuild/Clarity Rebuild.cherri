@@ -9,7 +9,8 @@
 #include 'actions/web'
 #include 'actions/shortcuts'
 
-const requestNumber = randomNumber(100000, 999999)\n@incoming = "{ShortcutInput}"
+const requestNumber = randomNumber(100000, 999999)
+@incoming = "{ShortcutInput}"
 @resolvedInput = ""
 @inputMode = "voice"
 
