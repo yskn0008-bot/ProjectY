@@ -31,6 +31,10 @@ export function normalizeNotification(input = {}) {
 // Only explicit triage facts can qualify as emergency.
 export function triageNotifications(inputs, {notifiedKeys = [], now = new Date()} = {}) {
   const records = inputs.map(normalizeNotification);
-  // Unreviewed external classifications must never trigger immediate delivery.\n  const deliveryCandidates = records.map(record => record.needsReview\n    ? {...record, kind: 'information', requiresImmediateAwareness: false, requiresImmediateAction: false, delayCausesMaterialHarm: false}\n    : record);\n  const alerts = selectAlerts(deliveryCandidates, {notifiedKeys, now});
+  // Unreviewed external classifications must never trigger immediate delivery.
+  const deliveryCandidates = records.map(record => record.needsReview
+    ? {...record, kind: 'information', requiresImmediateAwareness: false, requiresImmediateAction: false, delayCausesMaterialHarm: false}
+    : record);
+  const alerts = selectAlerts(deliveryCandidates, {notifiedKeys, now});
   return {records, alerts};
 }
