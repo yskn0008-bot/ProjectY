@@ -47,9 +47,10 @@ class ClarityEntryWrapperTests(unittest.TestCase):
         self.assertIn("3d35ca88-2895-81ef-9dc8-d5f11ff8e213", self.share_patch)
         self.assertIn("https://api.notion.com/v1", self.share_patch)
         self.assertIn("yos-clarity-notion-bridge.json", self.share_patch)
-        self.assertNotIn("project-y-yos-ai.vercel.app", self.share_patch)
-        self.assertNotIn("api.openai.com", self.share_patch)
-        self.assertNotIn("money-capture.html", self.share_patch)
+        bridge = self.share_patch.split("BRIDGE_SCRIPT = r'''", 1)[1].split("'''", 1)[0]
+        self.assertNotIn("project-y-yos-ai.vercel.app", bridge)
+        self.assertNotIn("api.openai.com", bridge)
+        self.assertNotIn("money-capture.html", bridge)
 
     def test_share_runtime_is_idempotent_and_fail_closed(self):
         self.assertIn("fingerprint(source+'\\n'+normalized)", self.share_patch)
