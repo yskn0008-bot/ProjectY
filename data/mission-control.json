@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-10-20T16:57:32+09:00",
+  "updated_at": "2026-10-20T19:20:16+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -31,16 +31,6 @@
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/630",
       "updated_at": "2026-10-19T18:29:17Z"
-    },
-    {
-      "id": "github-pr-634",
-      "title": "PR #634 Build isolated Clarity Rebuild shortcut",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/634",
-      "updated_at": "2026-10-19T17:21:59Z"
     },
     {
       "id": "github-pr-638",
@@ -111,6 +101,16 @@
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/648",
       "updated_at": "2026-10-20T07:37:33Z"
+    },
+    {
+      "id": "github-pr-650",
+      "title": "PR #650 Fix Clarity Share direct save to existing YOS Inbox",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/650",
+      "updated_at": "2026-10-20T10:20:00Z"
     },
     {
       "id": "github-issue-10",
@@ -264,7 +264,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-10-20T16:57:32+09:00",
+      "last_update": "2026-10-20T19:20:16+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -339,13 +339,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 8件・Open PR 32件を自動同期中",
+      "next_action": "Open Issue 8件・Open PR 33件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-10-20T16:57:32+09:00",
+      "last_update": "2026-10-20T19:20:16+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -368,7 +368,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-10-20T16:57:32+09:00",
+      "last_update": "2026-10-20T19:20:16+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -450,5 +450,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "60c46103decafe5897933a1d78337461ab3d6facc88d48177cdf6a714063f9d9"
+  "github_snapshot_hash": "eb3415f684bde73a022c9af14a08d050e544056fa6882648e01545b0b2c1d271"
 }
