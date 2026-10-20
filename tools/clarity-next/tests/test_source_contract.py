@@ -46,6 +46,57 @@ class ClarityNextSourceContractTests(unittest.TestCase):
         self.assertIn("+09:00", patch)
         self.assertIn("padStart(2,'0')", patch)
 
+    def test_expert_routing_is_automatic_and_integrated(self):
+        for token in (
+            "専門視点を自動選択",
+            "Money（FP・家計・資金繰り）",
+            "Work / Income",
+            "Health（健康情報整理・受診判断支援）",
+            "Appearance",
+            "Home（住宅・家具・家電・スマートホーム）",
+            "Tech（iPhone・Shortcuts・Notion・YOS・自動化）",
+            "Decision（複数要素の統合判断）",
+            "YOSとして1つの結論",
+        ):
+            self.assertIn(token, self.source)
+        self.assertIn("専門領域の選択を本人へ求めません", self.source)
+
+    def test_money_actual_planned_and_simulation_are_separate(self):
+        self.assertIn("NEXT_MONEY / money / capture", self.source)
+        self.assertIn("NEXT_MONEY / money / plan", self.source)
+        self.assertIn("仮シミュレーションであり、Moneyへ保存しません", self.source)
+        self.assertIn("本人が「払うことにした」「買う」「確定」", self.source)
+        self.assertIn('@notionState = "実績"', self.source)
+        self.assertIn('@notionState = "予定"', self.source)
+        self.assertIn('operation == "plan"', self.source)
+        self.assertIn('&state={notionStateEncoded}', self.source)
+
+    def test_life_log_reuses_existing_notion_assets(self):
+        self.assertIn("Life Logは新DBを作りません", self.source)
+        self.assertIn("既存YOS 判断・学習", self.source)
+        self.assertIn("既存YOS 生活イベント", self.source)
+        self.assertIn("save_mode=final", self.source)
+        self.assertIn("save_mode=candidate", self.source)
+        self.assertIn("軽微な雑談", self.source)
+        self.assertIn("同じ発話の同じ事実を複数DBへ重複保存しません", self.source)
+        for field in ("decision","reason","learning","domain","save_mode"):
+            self.assertIn(field, self.source)
+
+    def test_notion_bridge_maps_plan_and_life_log_to_existing_schema(self):
+        patch = NOTION_PATCH.read_text(encoding="utf-8")
+        self.assertIn("const txState=['予定','実績'].includes(p.state)", patch)
+        self.assertIn("'状態':{select:{name:txState}}", patch)
+        self.assertIn("p.save_mode", patch)
+        self.assertIn("'本人決定待ち'", patch)
+        self.assertIn("'本人の決定'", patch)
+        self.assertIn("'採用理由・制約'", patch)
+        self.assertIn("'学び・次回ルール'", patch)
+        self.assertIn("'分野'", patch)
+        self.assertIn("'Money':'お金'", patch)
+        self.assertIn("'Health':'健康'", patch)
+        self.assertIn("'Tech':'開発'", patch)
+        self.assertIn("'判断日'", patch)
+
     def test_calendar_reminder_wire_format_patch_is_locked(self):
         patch = WIRE_PATCH.read_text(encoding="utf-8")
         self.assertIn('WFCalendarItemStartDate', patch)
