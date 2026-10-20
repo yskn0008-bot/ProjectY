@@ -57,8 +57,11 @@ function num(v){
   return Number.isFinite(n)?Math.abs(n):null;
 }
 function iso(v){
-  const s=String(v||'').trim();
-  if(!s) return '';
+  const raw=String(v||'').trim();
+  if(!raw) return '';
+  let s=raw
+    .replace(/^(\\d{4})\\/(\\d{1,2})\\/(\\d{1,2})\\s+(\\d{1,2}):(\\d{2})(?::(\\d{2}))?$/,(_,y,m,d,h,mi,se)=>`${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}T${String(h).padStart(2,'0')}:${mi}:${se||'00'}+09:00`)
+    .replace(/^(\\d{4})-(\\d{1,2})-(\\d{1,2})\\s+(\\d{1,2}):(\\d{2})(?::(\\d{2}))?$/,(_,y,m,d,h,mi,se)=>`${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}T${String(h).padStart(2,'0')}:${mi}:${se||'00'}+09:00`);
   const d=new Date(s);
   return Number.isNaN(d.getTime())?'':s;
 }
