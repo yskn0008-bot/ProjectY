@@ -23,6 +23,7 @@ export interface TaskDashboardItem {
   completion: string;
   blocker: string;
   evidence: string;
+  actionUrl?: string | null;
 }
 
 export interface TaskDashboardResponse {
