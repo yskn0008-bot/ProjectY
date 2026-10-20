@@ -372,7 +372,17 @@ for actionItem in @actionsRaw {
         @notionRaw = "{parameters['content']}"
     }
 
-    if @normalizedExecutor == "NEXT_MONEY" && @normalizedModule == "money" && operation == "capture" {
+    // Side-effect guard: even if the planner misroutes a hypothetical Money
+    // consultation, never persist it as an actual or planned transaction.
+    @moneyHypothetical = "no"
+    if @normalizedExecutor == "NEXT_MONEY" {
+        const moneyGuardRaw = "{parameters['raw_text']}"
+        if moneyGuardRaw contains "使ったら" || moneyGuardRaw contains "買ったら" || moneyGuardRaw contains "払ったら" || moneyGuardRaw contains "使っても" || moneyGuardRaw contains "買っても" || moneyGuardRaw contains "払っても" || moneyGuardRaw contains "使って大丈夫" || moneyGuardRaw contains "買って大丈夫" || moneyGuardRaw contains "払って大丈夫" || moneyGuardRaw contains "使える" || moneyGuardRaw contains "いけそう" || moneyGuardRaw contains "どうなる" || moneyGuardRaw contains "シミュレーション" || moneyGuardRaw contains "もし" || moneyGuardRaw contains "契約して大丈夫" {
+            @moneyHypothetical = "yes"
+        }
+    }
+
+    if @normalizedExecutor == "NEXT_MONEY" && @normalizedModule == "money" && operation == "capture" && @moneyHypothetical == "no" {
         @notionPending = "yes"
         @notionTarget = "money"
         @notionTitle = "{parameters['title']}"
@@ -386,7 +396,7 @@ for actionItem in @actionsRaw {
         @notionState = "実績"
     }
 
-    if @normalizedExecutor == "NEXT_MONEY" && @normalizedModule == "money" && operation == "plan" {
+    if @normalizedExecutor == "NEXT_MONEY" && @normalizedModule == "money" && operation == "plan" && @moneyHypothetical == "no" {
         @notionPending = "yes"
         @notionTarget = "money"
         @notionTitle = "{parameters['title']}"
