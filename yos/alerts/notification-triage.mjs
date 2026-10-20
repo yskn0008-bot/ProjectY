@@ -16,7 +16,7 @@ export function normalizeNotification(input = {}) {
   const category = ['payment', 'money_anomaly', 'task', 'routine', 'information'].includes(input.category)
     ? input.category : 'information';
   return {
-    sourceId, title: title.slice(0, 160), receivedAt, summary,
+    sourceId, title: title.replace(forbidden, '[redacted]').slice(0, 160), receivedAt, summary,
     kind: category,
     requiresImmediateAwareness: input.requiresImmediateAwareness === true,
     requiresImmediateAction: input.requiresImmediateAction === true,
