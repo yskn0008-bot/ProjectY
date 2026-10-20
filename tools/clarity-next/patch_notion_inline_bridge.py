@@ -29,6 +29,10 @@ const DS={
   balance:'94fc7e9f-fd20-4073-bbcf-02efe8e95c5c'
 };
 const MONEY_CATEGORIES=new Set(['住居','光熱','食費','日用品','車・交通','通信・サブスク','保険','税金・社会保険','貯金','返済','給与・事業収入','家賃収入','その他']);
+const LEARNING_DOMAIN={
+  'Money':'お金','Work':'生活','Work / Income':'生活','Work/Income':'生活',
+  'Health':'健康','Appearance':'その他','Home':'生活','Tech':'開発','Decision':'その他'
+};
 
 function inputText(){
   const v=args.shortcutParameter;
@@ -136,9 +140,10 @@ if(p.target==='inbox'){
   }else{
     const kind=['収入','支出','資金移動'].includes(p.kind)?p.kind:'支出';
     const certainty=['確認済','見込み','未確認'].includes(p.certainty)?p.certainty:'未確認';
+    const txState=['予定','実績'].includes(p.state)?p.state:(certainty==='見込み'?'予定':'実績');
     const props={
       '項目':t(title),'金額':{number:amount},'日付':{date:{start:date}},
-      '区分':{select:{name:kind}},'状態':{select:{name:certainty==='見込み'?'予定':'実績'}},
+      '区分':{select:{name:kind}},'状態':{select:{name:txState}},
       '確度':{select:{name:certainty}},'原本ID':x(key),'確認元':x('Clarity'),'メモ':x(raw)
     };
     if(p.category&&MONEY_CATEGORIES.has(p.category)) props['分類']={select:{name:p.category}};
@@ -162,7 +167,17 @@ if(p.target==='inbox'){
 }else if(p.target==='person'){
   result=await create(DS.person,{'人物・イベント':t(title),'元データ・根拠':x(raw),'事実の確度':{select:{name:'未確認'}}});
 }else if(p.target==='learning'){
-  const props={'判断・経験':t(title),'本人の決定':x(raw),'根拠・参照':x('Clarity'),'状態':{select:{name:'実行中'}}};
+  const mode=['candidate','final'].includes(p.save_mode)?p.save_mode:'';
+  const learningState=mode==='candidate'?'本人決定待ち':(mode==='final'||p.decision?'実行中':'提案中');
+  const props={
+    '判断・経験':t(title),
+    '根拠・参照':x('Clarity: '+raw),
+    '状態':{select:{name:learningState}}
+  };
+  if(p.decision) props['本人の決定']=x(p.decision);
+  if(p.reason) props['採用理由・制約']=x(p.reason);
+  if(p.learning) props['学び・次回ルール']=x(p.learning);
+  if(p.domain&&LEARNING_DOMAIN[p.domain]) props['分野']={select:{name:LEARNING_DOMAIN[p.domain]}};
   if(date) props['判断日']={date:{start:date}};
   result=await create(DS.learning,props);
 }else{
