@@ -1,0 +1,12 @@
+#define name Focus
+#define color blue
+#define version 18
+
+// One-tap bridge: current YOS NOW task -> existing action URL.
+// Runtime logic is injected after Cherri compilation so no token is embedded here.
+rawAction("dk.simonbs.Scriptable.RunScriptInlineIntent", {
+    "script": "__YOS_FOCUS_INLINE__",
+    "parameter": "",
+    "runInApp": false,
+    "ShowWhenRun": false
+})
