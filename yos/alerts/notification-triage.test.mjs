@@ -22,3 +22,8 @@ test('sensitive code is redacted and unsafe URLs discarded', () => {
  assert.equal(n.sourceUrl,'');
 });
 test('invalid identity fails closed',()=>assert.throws(()=>normalizeNotification({...base,sourceId:''})));
+
+test('sensitive numeric tokens in notification titles are redacted', () => {
+ const n=normalizeNotification({...base,title:'Security code 123456'});
+ assert.equal(n.title,'Security code [redacted]');
+});
