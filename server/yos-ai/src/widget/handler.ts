@@ -7,6 +7,7 @@ import {bearerToken, secureJson} from '../api/shared.js';
 import {parseProjection} from '../tasks/handler.js';
 import {selectWidgetFeed} from './selection.js';
 import {loadNotionTaskDashboard} from './notion-source.js';
+import {loadNotionMorningBrief, unavailableMorningBrief} from './morning.js';
 
 const PROJECTION_NAME = 'YOS Tasks｜MY WAY Read Projection';
 const SHEET_MIME = 'application/vnd.google-apps.spreadsheet';
@@ -32,6 +33,23 @@ export function createWidgetFeedHandler(options: CreateWidgetFeedHandlerOptions)
       if (!safeEqual(bearerToken(request), options.widgetToken)) throw new Error('Authorization failed');
     } catch {
       return secureJson({error: 'Authentication failed'}, 401, null);
+    }
+
+    const mode = new URL(request.url).searchParams.get('mode');
+    if (mode === 'morning-brief') {
+      if (!options.notionToken?.trim()) {
+        return secureJson(unavailableMorningBrief('notion-token-unavailable'), 200, null, {'Cache-Control':'private, no-store'});
+      }
+      try {
+        const brief = await loadNotionMorningBrief({
+          notionToken: options.notionToken,
+          ...(options.notionDataSourceId?.trim() ? {notionTasksDataSourceId: options.notionDataSourceId.trim()} : {}),
+          fetchImpl
+        });
+        return secureJson(brief, 200, null, {'Cache-Control':'private, no-store'});
+      } catch {
+        return secureJson(unavailableMorningBrief(), 200, null, {'Cache-Control':'private, no-store'});
+      }
     }
 
     if (options.notionToken?.trim()) {
