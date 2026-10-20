@@ -196,8 +196,10 @@ class ClarityNextSourceContractTests(unittest.TestCase):
         self.assertIn('fastBaseHomeURL', self.source)
         self.assertIn('@normalizedOperation == "open_yos_home"', self.source)
         self.assertIn('dk.simonbs.Scriptable.RunScriptInlineIntent', self.source)
-        self.assertIn('YOS_NOTION_INTEGRATION_TOKEN', self.source)
-        self.assertIn('95b30d16-7530-40c6-a320-dab99acad55d', self.source)
+        self.assertIn('__YOS_NOTION_BRIDGE_INLINE__', self.source)
+        patch = NOTION_PATCH.read_text(encoding="utf-8")
+        self.assertIn('YOS_NOTION_INTEGRATION_TOKEN', patch)
+        self.assertIn('95b30d16-7530-40c6-a320-dab99acad55d', patch)
         self.assertNotIn('money-capture.html', self.source)
 
 if __name__ == "__main__":
