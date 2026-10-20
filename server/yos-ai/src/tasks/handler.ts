@@ -24,6 +24,7 @@ export interface TaskDashboardItem {
   blocker: string;
   evidence: string;
   actionUrl?: string | null;
+  lastSynced?: string | null;
 }
 
 export interface TaskDashboardResponse {
