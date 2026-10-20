@@ -1,0 +1,121 @@
+name: Focus shortcut
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'tools/shortcut-factory/shortcuts/Focus.cherri'
+      - 'tools/shortcut-factory/patch_focus_inline.py'
+      - 'tools/clarity-factory/sign_with_hubsign.py'
+      - '.github/workflows/focus-shortcut.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pinned Cherri v2.3.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          url='https://github.com/electrikmilk/cherri/releases/download/v2.3.0/cherri_linux-x86_64.zip'
+          expected='7ab2c384b7b26e7c72a30a8dfa56f89dae12c4068b7951bc1e3193f3698edbe9'
+          curl -fsSL "$url" -o /tmp/cherri.zip
+          printf '%s  %s\n' "$expected" /tmp/cherri.zip | sha256sum -c -
+          mkdir -p /tmp/cherri
+          unzip -q /tmp/cherri.zip -d /tmp/cherri
+          binary="$(find /tmp/cherri -type f -name cherri -print -quit)"
+          test -n "$binary"
+          sudo install -m 0755 "$binary" /usr/local/bin/cherri
+          cherri --version
+
+      - name: Compile Focus
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd tools/shortcut-factory/shortcuts
+          rm -f 'Focus_unsigned.shortcut' 'Focus.plist'
+          cherri 'Focus.cherri' --skip-sign --debug
+          test -f 'Focus_unsigned.shortcut'
+          python3 ../patch_focus_inline.py 'Focus_unsigned.shortcut'
+          mkdir -p ../artifacts-focus
+          cp 'Focus_unsigned.shortcut' '../artifacts-focus/Focus-unsigned.shortcut'
+
+      - name: Validate Focus runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import plistlib
+          from pathlib import Path
+          p=Path('tools/shortcut-factory/artifacts-focus/Focus-unsigned.shortcut')
+          root=plistlib.loads(p.read_bytes())
+          actions=root.get('WFWorkflowActions',[])
+          inline=[a for a in actions if a.get('WFWorkflowActionIdentifier')=='dk.simonbs.Scriptable.RunScriptInlineIntent']
+          assert len(actions)==1, len(actions)
+          assert len(inline)==1, len(inline)
+          params=inline[0].get('WFWorkflowActionParameters',{})
+          raw=params.get('script',{})
+          script=raw.get('Value',{}).get('string','') if isinstance(raw,dict) else str(raw)
+          assert 'MY_WAY_WIDGET_TOKEN' in script
+          assert 'https://project-y-yos-ai.vercel.app/api/yos/widget' in script
+          assert 'data.task?.actionUrl' in script
+          assert 'YOS%20Dashboard%20v2&action=baseHome' in script
+          assert 'Alert' not in script
+          assert 'present' not in script
+          print('Focus unsigned semantics: PASS')
+          PY
+
+      - name: Check Scriptable JavaScript
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import plistlib
+          from pathlib import Path
+          p=Path('tools/shortcut-factory/artifacts-focus/Focus-unsigned.shortcut')
+          root=plistlib.loads(p.read_bytes())
+          action=root['WFWorkflowActions'][0]
+          raw=action['WFWorkflowActionParameters']['script']
+          script=raw['Value']['string']
+          Path('/tmp/focus-inline.js').write_text('(async()=>{\n'+script+'\n})()\n',encoding='utf-8')
+          PY
+          node --check /tmp/focus-inline.js
+
+      - name: Sign Focus
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/clarity-factory/sign_with_hubsign.py \
+            --input 'tools/shortcut-factory/artifacts-focus/Focus-unsigned.shortcut' \
+            --output 'tools/shortcut-factory/artifacts-focus/Focus.shortcut' \
+            --name 'Focus'
+
+      - name: Verify signed artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('tools/shortcut-factory/artifacts-focus/Focus.shortcut')
+          data=p.read_bytes()
+          assert data.startswith(b'AEA1'), data[:8]
+          assert len(data)>500, len(data)
+          print(f'Focus signed AEA1 PASS ({len(data)} bytes)')
+          PY
+
+      - name: Upload Focus
+        uses: actions/upload-artifact@v4
+        with:
+          name: focus-shortcut
+          path: |
+            tools/shortcut-factory/artifacts-focus/Focus.shortcut
+            tools/shortcut-factory/artifacts-focus/Focus-unsigned.shortcut
+          if-no-files-found: error
+          retention-days: 14
