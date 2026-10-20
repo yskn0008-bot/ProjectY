@@ -51,12 +51,13 @@ def patch(path: Path) -> None:
 
     matches = []
     for action in root.get("WFWorkflowActions", []):
-        if action.get("WFWorkflowActionIdentifier") != ACTION_ID:
+        if action.get("WFWorkflowActionIdentifier") not in (ACTION_ID, "is.workflow.actions.rawaction"):
             continue
         params = action.get("WFWorkflowActionParameters", {})
         raw = params.get("script")
         value = raw.get("Value", {}).get("string", "") if isinstance(raw, dict) else raw
         if value == PLACEHOLDER:
+            action["WFWorkflowActionIdentifier"] = ACTION_ID
             matches.append(params)
 
     if len(matches) != 1:
