@@ -178,9 +178,8 @@ async function loadMorningMoney(options: {
   const balances = balancePages.map(parseBalanceRow).filter((value): value is BalanceRow => value !== null);
   const relevantBalances = balances.filter((row) => row.assetClass !== '借入');
   const usableRows = relevantBalances.filter((row) => row.usable);
-  const balancesFresh = relevantBalances.length > 0
-    && usableRows.length > 0
-    && relevantBalances.every((row) =>
+  const balancesFresh = usableRows.length > 0
+    && usableRows.every((row) =>
       row.verification !== '未確認'
       && row.amount !== null
       && row.confirmedDate === today
@@ -227,7 +226,7 @@ async function loadMorningMoney(options: {
   if (safetyToNextIncome === 'unconfirmed') reasons.push('cash-gap-unconfirmed');
 
   return {
-    status: currentUsable !== null && nextIncome !== null ? 'confirmed' : 'unconfirmed',
+    status: currentUsable !== null ? 'confirmed' : 'unconfirmed',
     asOf,
     currentUsable,
     nextIncome,
