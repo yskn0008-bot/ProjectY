@@ -144,7 +144,17 @@ jobs:
               assert any(i.endswith('runworkflow') for i in ids), ids
           share_ids=[a.get('WFWorkflowActionIdentifier','') for a in share_root.get('WFWorkflowActions',[])]
           share_blob=repr(share_root)
+          share_inputs=set(share_root.get('WFWorkflowInputContentItemClasses') or [])
+          expected_share_inputs={
+              'WFStringContentItem',
+              'WFRichTextContentItem',
+              'WFSafariWebPageContentItem',
+              'WFURLContentItem',
+              'WFImageContentItem',
+              'WFPDFContentItem',
+          }
           assert 'ActionExtension' in set(share_root.get('WFWorkflowTypes') or [])
+          assert expected_share_inputs.issubset(share_inputs), share_inputs
           assert share_root.get('WFWorkflowHasShortcutInputVariables') is True
           assert any('extracttextfromimage' in i for i in share_ids), share_ids
           assert '__YOS_CLARITY_SHARE_TEXT_V1__' in share_blob
