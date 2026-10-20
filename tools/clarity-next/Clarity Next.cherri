@@ -97,6 +97,8 @@ if !@actionsRaw {
     stop()
 }
 
+@lifeLearningSaved = "no"
+
 for actionItem in @actionsRaw {
     const action = getDictionary(@actionItem)
     const actionId = "{action['id']}"
@@ -411,6 +413,9 @@ for actionItem in @actionsRaw {
     }
 
     if @notionPending == "yes" {
+        if @notionTarget == "learning" {
+            @lifeLearningSaved = "yes"
+        }
         if !@notionRaw {
             alert("Notionに保存する内容を確認してください", "Clarity Next")
             stop()
@@ -658,6 +663,30 @@ for actionItem in @actionsRaw {
     if @normalizedExecutor != "YOS_OpenApp" && @normalizedExecutor != "NEXT_DEVICE" && @normalizedExecutor != "NEXT_TIMER" && @normalizedExecutor != "NEXT_ALARM" && @normalizedExecutor != "NEXT_CALENDAR" && @normalizedExecutor != "NEXT_REMINDER" && @normalizedExecutor != "NEXT_NAVIGATE" && @normalizedExecutor != "NEXT_NOTION" && @normalizedExecutor != "NEXT_MYWAY" && @normalizedExecutor != "NEXT_MONEY" && @normalizedExecutor != "NEXT_IDEA" && @normalizedExecutor != "NEXT_MEMO" && @normalizedExecutor != "NEXT_TASK" && @normalizedExecutor != "NEXT_SHOPPING" && @normalizedExecutor != "NEXT_COMMUNICATION" && @normalizedExecutor != "NEXT_MEDIA" && @normalizedExecutor != "NEXT_CLIPBOARD" && @normalizedExecutor != "NEXT_SHARE" && @normalizedExecutor != "NEXT_CAMERA" && @normalizedExecutor != "NEXT_WEBSEARCH" && @normalizedExecutor != "NEXT_YOS_VIEW" && @normalizedExecutor != "NEXT_REMOTE" && @normalizedExecutor != "YOS_Home" && @normalizedExecutor != "YOS_SHORTCUT" && @normalizedExecutor != "YOS_SCRIPTABLE" && @normalizedExecutor != "NEXT_ANSWER" {
         alert("この操作はClarity Next v0では未対応です", "Clarity Next")
         stop()
+    }
+}
+
+// Explicit-decision fallback: the semantic planner owns normal Life Log routing.
+// This only covers a strong, structured decision cue that should not be lost.
+if @inputMode != "share" && @lifeLearningSaved == "no" {
+    @explicitDecision = "no"
+    if userInput contains "決めた" || userInput contains "決定した" || userInput contains "方針にした" {
+        if userInput contains "理由は" || userInput contains "なぜなら" || userInput contains "理由：" || userInput contains "理由:" {
+            @explicitDecision = "yes"
+        }
+    }
+    if @explicitDecision == "yes" {
+        const lifeRawEncoded = urlEncode(userInput)
+        const lifeDateEncoded = urlEncode(CurrentDate)
+        const lifeRequest = text("{requestNumber}-life-fallback")
+        const lifeRequestEncoded = urlEncode(lifeRequest)
+        const lifePayload = text("request_id={lifeRequestEncoded}&raw={lifeRawEncoded}&date_time={lifeDateEncoded}")
+        rawAction("dk.simonbs.Scriptable.RunScriptInlineIntent", {
+            "script": "__YOS_LIFELOG_FALLBACK_INLINE__",
+            "parameter": "${lifePayload}",
+            "runInApp": false,
+            "ShowWhenRun": false
+        })
     }
 }
 
