@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {selectWidgetFeed} from '../dist/widget/selection.js';
 
-function task(order, state, title, nextAction = '') {
+function task(order, state, title, nextAction = '', actionUrl = null) {
   return {
     order,
     title,
@@ -13,7 +13,8 @@ function task(order, state, title, nextAction = '') {
     nextAction,
     completion: '',
     blocker: '',
-    evidence: ''
+    evidence: '',
+    actionUrl
   };
 }
 
@@ -21,12 +22,14 @@ test('widget prefers the first active task by execution order', () => {
   const feed = selectWidgetFeed([
     task(3, '実行中', '03｜third'),
     task(1, '次にやる', '01｜next'),
-    task(2, '本人操作', '02｜you', 'tap once')
+    task(2, '本人操作', '02｜you', 'tap once', 'shortcuts://run-shortcut?name=Clarity')
   ], '2026-09-13T00:00:00Z');
 
   assert.equal(feed.sourceState, 'active');
   assert.equal(feed.task?.title, '02｜you');
   assert.equal(feed.task?.nextAction, 'tap once');
+  assert.equal(feed.task?.actionUrl, 'shortcuts://run-shortcut?name=Clarity');
+  assert.equal(feed.tasks[1].actionUrl, null);
   assert.deepEqual(feed.tasks.map((item) => item.title), ['02｜you', '03｜third', '01｜next']);
 });
 
