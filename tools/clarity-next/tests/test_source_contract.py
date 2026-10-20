@@ -90,6 +90,21 @@ class ClarityNextSourceContractTests(unittest.TestCase):
         for field in ("decision","reason","learning","domain","save_mode"):
             self.assertIn(field, self.source)
 
+    def test_explicit_decision_has_runtime_life_log_fallback(self):
+        self.assertIn('@lifeLearningSaved = "no"', self.source)
+        self.assertIn('@lifeLearningSaved = "yes"', self.source)
+        self.assertIn('@explicitDecision = "yes"', self.source)
+        self.assertIn('userInput contains "決めた"', self.source)
+        self.assertIn('userInput contains "理由は"', self.source)
+        self.assertIn('__YOS_LIFELOG_FALLBACK_INLINE__', self.source)
+        patch = NOTION_PATCH.read_text(encoding="utf-8")
+        self.assertIn('LIFE_PLACEHOLDER', patch)
+        self.assertIn('LIFE_FALLBACK_SCRIPT', patch)
+        self.assertIn("DS='28bcd894-b709-4b23-9fdc-c9dc43043bfc'", patch)
+        self.assertIn("'本人の決定'", patch)
+        self.assertIn("'採用理由・制約'", patch)
+        self.assertIn("'状態':{select:{name:'実行中'}}", patch)
+
     def test_notion_bridge_maps_plan_and_life_log_to_existing_schema(self):
         patch = NOTION_PATCH.read_text(encoding="utf-8")
         self.assertIn("const txState=['予定','実績'].includes(p.state)", patch)
