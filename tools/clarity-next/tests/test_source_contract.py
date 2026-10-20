@@ -9,6 +9,7 @@ ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "Clarity Next.cherri"
 PATCH = ROOT / "patch_ledger_persistence.py"
 WIRE_PATCH = ROOT / "patch_calendar_reminder_wire_format.py"
+NOTION_PATCH = ROOT / "patch_notion_inline_bridge.py"
 
 class ClarityNextSourceContractTests(unittest.TestCase):
     @classmethod
@@ -32,6 +33,14 @@ class ClarityNextSourceContractTests(unittest.TestCase):
         self.assertIn('"WFSaveFileOverwrite": True', patch)
         self.assertIn('file.append survived rewrite', patch)
 
+
+    def test_notion_inline_bridge_patch_is_locked(self):
+        patch = NOTION_PATCH.read_text(encoding="utf-8")
+        self.assertIn('dk.simonbs.Scriptable.RunScriptInlineIntent', patch)
+        self.assertIn('__YOS_NOTION_BRIDGE_INLINE__', patch)
+        self.assertIn('YOS_NOTION_INTEGRATION_TOKEN', patch)
+        self.assertIn('965c6086-32c1-463d-93b4-87a9cb69b3ad', patch)
+        self.assertIn('95b30d16-7530-40c6-a320-dab99acad55d', patch)
 
     def test_calendar_reminder_wire_format_patch_is_locked(self):
         patch = WIRE_PATCH.read_text(encoding="utf-8")
@@ -168,10 +177,12 @@ class ClarityNextSourceContractTests(unittest.TestCase):
         for target in ('inbox', 'task', 'shopping', 'project', 'life_event', 'person', 'learning', 'balance'):
             self.assertIn(target, self.source)
         self.assertIn('dk.simonbs.Scriptable.RunScriptInlineIntent', self.source)
-        self.assertIn('YOS_NOTION_INTEGRATION_TOKEN', self.source)
-        self.assertIn('3d35ca88-2895-81ef-9dc8-d5f11ff8e213', self.source)
-        self.assertIn('965c6086-32c1-463d-93b4-87a9cb69b3ad', self.source)
-        self.assertIn('95b30d16-7530-40c6-a320-dab99acad55d', self.source)
+        self.assertIn('__YOS_NOTION_BRIDGE_INLINE__', self.source)
+        patch = NOTION_PATCH.read_text(encoding="utf-8")
+        self.assertIn('YOS_NOTION_INTEGRATION_TOKEN', patch)
+        self.assertIn('3d35ca88-2895-81ef-9dc8-d5f11ff8e213', patch)
+        self.assertIn('965c6086-32c1-463d-93b4-87a9cb69b3ad', patch)
+        self.assertIn('95b30d16-7530-40c6-a320-dab99acad55d', patch)
         self.assertNotIn('money-capture.html', self.source)
 
     def test_v0_acceptance_routes_exist(self):
