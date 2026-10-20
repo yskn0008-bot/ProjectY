@@ -12,7 +12,7 @@ function select(name) {
   return {select: name ? {name} : null};
 }
 
-function page({order, title, state, owner = 'YOS', due = null, priority = 'P1', nextAction = '', actionUrl = null}) {
+function page({order, title, state, owner = 'YOS', due = null, priority = 'P1', nextAction = '', actionUrl = null, lastSynced = null}) {
   return {
     object: 'page',
     properties: {
@@ -26,7 +26,8 @@ function page({order, title, state, owner = 'YOS', due = null, priority = 'P1', 
       '完了条件': rich('rich_text', ''),
       'ブロッカー': rich('rich_text', ''),
       '正本・根拠': rich('rich_text', 'Notion YOS Tasks'),
-      '操作URL': {url: actionUrl}
+      '操作URL': {url: actionUrl},
+      '最終同期': {date: lastSynced ? {start: lastSynced} : null}
     }
   };
 }
@@ -38,7 +39,7 @@ test('live Notion source returns current YOS Tasks in execution order', async ()
     return Response.json({
       results: [
         page({order: 2, title: '19｜PR #553を修正', state: '次にやる'}),
-        page({order: 1, title: '18｜YOS Money Local v1.5.1を安定起動まで直す', state: '実行中', nextAction: '実機確認', actionUrl: 'scriptable:///run?scriptName=YOS%20Money%20v1.6'}),
+        page({order: 1, title: '18｜YOS Money Local v1.5.1を安定起動まで直す', state: '実行中', nextAction: '実機確認', actionUrl: 'scriptable:///run?scriptName=YOS%20Money%20v1.6', lastSynced: '2026-10-20'}),
         page({order: null, title: '24｜orderなし', state: '実行中'})
       ],
       has_more: false,
@@ -59,6 +60,7 @@ test('live Notion source returns current YOS Tasks in execution order', async ()
   assert.equal(result.tasks[0].title, '18｜YOS Money Local v1.5.1を安定起動まで直す');
   assert.equal(result.tasks[0].nextAction, '実機確認');
   assert.equal(result.tasks[0].actionUrl, 'scriptable:///run?scriptName=YOS%20Money%20v1.6');
+  assert.equal(result.tasks[0].lastSynced, '2026-10-20');
   assert.equal(result.tasks[1].actionUrl, null);
   assert.ok(result.generatedAt);
 });
