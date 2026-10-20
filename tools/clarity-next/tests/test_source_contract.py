@@ -28,6 +28,12 @@ class ClarityNextSourceContractTests(unittest.TestCase):
         self.assertNotIn('YOS_Money_Local', self.source)
         self.assertNotIn('money-capture.html', self.source)
 
+    def test_notion_bridge_only_runs_when_capture_is_pending(self):
+        self.assertIn('@notionPending = "no"', self.source)
+        self.assertIn('@notionPending = "yes"', self.source)
+        self.assertIn('if @notionPending == "yes"', self.source)
+        self.assertNotIn('if @notionTarget {', self.source)
+
     def test_notion_inline_bridge_patch_is_locked(self):
         patch = NOTION_PATCH.read_text(encoding="utf-8")
         self.assertIn('dk.simonbs.Scriptable.RunScriptInlineIntent', patch)
@@ -37,6 +43,8 @@ class ClarityNextSourceContractTests(unittest.TestCase):
         self.assertIn('d0ed2cf0-c84e-4770-b77c-3a1a9e11bcfc', patch)
         self.assertIn('95b30d16-7530-40c6-a320-dab99acad55d', patch)
         self.assertIn('94fc7e9f-fd20-4073-bbcf-02efe8e95c5c', patch)
+        self.assertIn("+09:00", patch)
+        self.assertIn("padStart(2,'0')", patch)
 
     def test_calendar_reminder_wire_format_patch_is_locked(self):
         patch = WIRE_PATCH.read_text(encoding="utf-8")
