@@ -58,7 +58,7 @@ jobs:
           root=plistlib.loads(p.read_bytes())
           actions=root.get('WFWorkflowActions',[])
           inline=[a for a in actions if a.get('WFWorkflowActionIdentifier')=='dk.simonbs.Scriptable.RunScriptInlineIntent']
-          assert len(actions)==1, len(actions)
+          assert len(actions)==2, len(actions)\n          assert any(a.get('WFWorkflowActionIdentifier')=='is.workflow.actions.openurl' for a in actions), [a.get('WFWorkflowActionIdentifier') for a in actions]
           assert len(inline)==1, len(inline)
           params=inline[0].get('WFWorkflowActionParameters',{})
           raw=params.get('script',{})
