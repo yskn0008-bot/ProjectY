@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-10-20T12:25:42+09:00",
+  "updated_at": "2026-10-20T12:27:51+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -13,14 +13,14 @@
   },
   "inbox": [
     {
-      "id": "github-pr-641",
-      "title": "PR #641 YOS NOW: expose task action URL and add Focus shortcut",
+      "id": "github-pr-642",
+      "title": "PR #642 YOS NOW: expose task action URL and add Focus shortcut",
       "type": "GitHub PR",
       "status": "review",
       "priority": 1,
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/641",
-      "updated_at": "2026-10-20T03:25:16Z"
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/642",
+      "updated_at": "2026-10-20T03:27:27Z"
     },
     {
       "id": "github-pr-630",
@@ -254,7 +254,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #641をレビューして公開判断する",
+      "next_action": "PR #642をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -264,7 +264,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-10-20T12:25:42+09:00",
+      "last_update": "2026-10-20T12:27:51+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -345,7 +345,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-10-20T12:25:42+09:00",
+      "last_update": "2026-10-20T12:27:51+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -359,7 +359,7 @@
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #641をレビューして公開判断する",
+      "next_action": "PR #642をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -368,7 +368,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-10-20T12:25:42+09:00",
+      "last_update": "2026-10-20T12:27:51+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -450,5 +450,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "0c09949347d20a26f7f5f2f7976f234d72e7ea6fec10d1d36e7136be4f9969f9"
+  "github_snapshot_hash": "acb248f126048db524c71386c5a230e37c7174f4611f16622b4827addf81b10e"
 }
