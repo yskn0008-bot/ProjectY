@@ -356,31 +356,31 @@ for actionItem in @actionsRaw {
             openURL(notionHomeURL)
         }
         if @normalizedOperation == "save" {
-            const notionTarget = "{parameters['target']}"
-            const notionTitle = "{parameters['title']}"
-            const notionRaw = "{parameters['raw_text']}"
-            const notionDateTime = "{parameters['date_time']}"
-            const notionAmount = "{parameters['amount']}"
-            const notionKind = "{parameters['kind']}"
-            if !notionTarget {
+            const saveTarget = "{parameters['target']}"
+            const saveTitle = "{parameters['title']}"
+            const saveRaw = "{parameters['raw_text']}"
+            const saveDateTime = "{parameters['date_time']}"
+            const saveAmount = "{parameters['amount']}"
+            const saveKind = "{parameters['kind']}"
+            if !saveTarget {
                 alert("Notionの保存先を確認してください", "Clarity Next")
                 stop()
             }
-            if !notionTitle {
+            if !saveTitle {
                 alert("Notionに保存するタイトルを確認してください", "Clarity Next")
                 stop()
             }
-            if !notionRaw {
+            if !saveRaw {
                 alert("Notionに保存する内容を確認してください", "Clarity Next")
                 stop()
             }
             @notionPending = true
-            @notionTarget = "{notionTarget}"
-            @notionTitle = "{notionTitle}"
-            @notionRaw = "{notionRaw}"
-            @notionDateTime = "{notionDateTime}"
-            @notionAmount = "{notionAmount}"
-            @notionKind = "{notionKind}"
+            @notionTarget = "{saveTarget}"
+            @notionTitle = "{saveTitle}"
+            @notionRaw = "{saveRaw}"
+            @notionDateTime = "{saveDateTime}"
+            @notionAmount = "{saveAmount}"
+            @notionKind = "{saveKind}"
         }
         if @normalizedOperation != "open_yos_home" && @normalizedOperation != "save" {
             alert("このNotion操作にはまだ対応していません", "Clarity Next")
