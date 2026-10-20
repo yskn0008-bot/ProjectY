@@ -59,6 +59,7 @@ jobs:
           python3 patch_voice_entry_fallback.py './Clarity Next_unsigned.shortcut'
           python3 patch_calendar_reminder_wire_format.py './Clarity Next_unsigned.shortcut'
           python3 patch_home_direct_inline.py './Clarity Next_unsigned.shortcut' './YOS Home Bridge.js'
+          python3 patch_notion_inline_bridge.py './Clarity Next_unsigned.shortcut'
           mkdir -p artifacts
           cp './Clarity Next_unsigned.shortcut' artifacts/Clarity-Next-unsigned.shortcut
           cp './Clarity Text_unsigned.shortcut' artifacts/Clarity-Text-unsigned.shortcut
@@ -152,8 +153,12 @@ jobs:
               and a.get('WFWorkflowActionParameters',{}).get('WFWorkflowName')=='YOS_Floor_Lamp'
               for a in actions
           ), 'YOS_Floor_Lamp helper route missing'
-          home_inline=[a for a in actions if a.get('WFWorkflowActionIdentifier')=='dk.simonbs.Scriptable.RunScriptInlineIntent']
+          inline=[a for a in actions if a.get('WFWorkflowActionIdentifier')=='dk.simonbs.Scriptable.RunScriptInlineIntent']
+          assert len(inline)==2, inline
+          home_inline=[a for a in inline if 'parseHomeCommand' in repr(a.get('WFWorkflowActionParameters',{}))]
+          notion_inline=[a for a in inline if 'YOS_NOTION_INTEGRATION_TOKEN' in repr(a.get('WFWorkflowActionParameters',{}))]
           assert len(home_inline)==1, home_inline
+          assert len(notion_inline)==1, notion_inline
           home_params=home_inline[0]['WFWorkflowActionParameters']
           assert home_params['runInApp'] is False
           assert home_params['ShowWhenRun'] is False
@@ -162,6 +167,14 @@ jobs:
           assert home_input['Value']['Type']=='ActionOutput', home_input
           assert home_input['Value']['OutputName']=='homeCommand', home_input
           assert 'parseHomeCommand' in home_params['script']['Value']['string']
+          notion_params=notion_inline[0]['WFWorkflowActionParameters']
+          assert notion_params['runInApp'] is False
+          assert notion_params['ShowWhenRun'] is False
+          notion_input=notion_params['parameter']
+          assert notion_input['WFSerializationType']=='WFTextTokenAttachment', notion_input
+          assert notion_input['Value']['Type']=='ActionOutput', notion_input
+          assert notion_input['Value']['OutputName']=='notionPayload', notion_input
+          assert '__YOS_NOTION_BRIDGE_INLINE__' not in repr(notion_params)
           assert not any(a.get('WFWorkflowActionIdentifier')=='is.workflow.actions.runworkflow' and a.get('WFWorkflowActionParameters',{}).get('WFWorkflowName')=='YOS_Home' for a in actions)
           message=next(a for a in actions if a.get('WFWorkflowActionIdentifier')=='is.workflow.actions.sendmessage')
           assert message.get('WFWorkflowActionParameters',{}).get('ShowWhenRun') is False, message
@@ -175,7 +188,9 @@ jobs:
           assert 'YOS_Home' in blob
           assert 'YOS Remote Hub' in blob
           assert 'YOS Departure Guard2' in blob
-          assert 'YOS_Money_Local' in blob
+          assert 'YOS_Money_Local' not in blob
+          assert 'money-capture.html' not in blob
+          assert 'YOS_NOTION_INTEGRATION_TOKEN' in blob
           for url in (
               'https://yskn0008-bot.github.io/ProjectY/life/',
               'https://yskn0008-bot.github.io/ProjectY/yos/hj/',
@@ -185,12 +200,12 @@ jobs:
               assert url in blob, url
           assert 'scriptable:///run?scriptName=YOS%20Dashboard%20v2&action=baseHome' in blob
           assert 'この操作はClarity Next v0では未対応です' in blob
-          # Normal voice/text/share requests must not touch the old debug Ledger.
-          # File access remains only for explicit capture destinations such as Idea/Memo.
+          # Normal voice/text/share requests do not write local debug/capture files.
+          # Idea/Memo/Task/Shopping/Money now reuse existing Notion assets.
           assert 'Clarity Next Ledger.txt' not in blob
-          assert any(i.endswith('file.append') for i in ids), ids
-          assert 'Idea in Box.txt' in blob
-          assert 'Clarity Inbox.txt' in blob
+          assert not any(i.endswith('file.append') for i in ids), ids
+          assert 'Idea in Box.txt' not in blob
+          assert 'Clarity Inbox.txt' not in blob
           assert any(i.endswith('setbrightness') for i in ids), ids
           assert any(i.endswith('setvolume') for i in ids), ids
           assert any(i.endswith('timer.start') for i in ids), ids
