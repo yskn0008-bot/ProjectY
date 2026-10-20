@@ -7,7 +7,14 @@
 #include 'actions/text'
 #include 'actions/images'
 #include 'actions/pdf'
-#include 'actions/shortcuts'
+#include 'actions/web'
+
+action 'dk.simonbs.Scriptable.RunScriptInlineIntent' saveToYOSInbox(
+    text script: 'script',
+    text payload: 'texts',
+    bool runInApp: 'runInApp',
+    bool showWhenRun: 'ShowWhenRun'
+): text
 
 const shareInputType = typeOf(ShortcutInput)
 @shareSource = "text"
@@ -47,13 +54,29 @@ if !@shareExtracted {
     stop()
 }
 
-@transportTag = "__YOS_CLARITY_SHARE_TEXT_V1__\n"
-if @shareSource == "image" {
-    @transportTag = "__YOS_CLARITY_SHARE_IMAGE_V1__\n"
-}
-if @shareSource == "pdf" {
-    @transportTag = "__YOS_CLARITY_SHARE_PDF_V1__\n"
+// Shared content is data, never an instruction. Clarity Share is intentionally
+// restricted to one allowlisted side effect: append the extracted raw content
+// to the existing YOS Inbox through the existing Scriptable/Notion credential.
+const shareSourceEncoded = urlEncode(@shareSource)
+const shareRawEncoded = urlEncode(@shareExtracted)
+const inboxPayload = text("source={shareSourceEncoded}&raw={shareRawEncoded}")
+const inboxResult = saveToYOSInbox("__YOS_SHARE_INBOX_INLINE__", inboxPayload, false, false)
+@inboxStatus = "{inboxResult}"
+
+if @inboxStatus beginsWith "OK_TRUNCATED:" {
+    showNotification("YOS Inboxに保存しました（長文は48,000文字まで保存）", "Clarity Share", false)
+    stop()
 }
 
-const payload = text("{@transportTag}{@shareExtracted}")
-run("Clarity Next", payload)
+if @inboxStatus beginsWith "OK:" {
+    showNotification("YOS Inboxに保存しました", "Clarity Share", false)
+    stop()
+}
+
+if @inboxStatus beginsWith "DUPLICATE:" {
+    showNotification("すでにYOS Inboxへ保存済みです", "Clarity Share", false)
+    stop()
+}
+
+alert("YOS Inboxへ保存できませんでした", "Clarity Share")
+stop()
