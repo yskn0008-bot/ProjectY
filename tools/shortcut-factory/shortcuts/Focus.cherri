@@ -1,7 +1,7 @@
 #define name Focus
 #define color blue
 #define version 18
-#include actions/safari
+#include 'actions/web'
 
 // One-tap bridge: current YOS NOW task -> existing action URL.
 // Runtime logic is injected after Cherri compilation so no token is embedded here.
