@@ -98,7 +98,8 @@ function parseTask(value: unknown): TaskDashboardItem | null {
     nextAction: textProperty(properties['次の一手'], 'rich_text', 500),
     completion: textProperty(properties['完了条件'], 'rich_text', 700),
     blocker: textProperty(properties['ブロッカー'], 'rich_text', 500),
-    evidence: textProperty(properties['正本・根拠'], 'rich_text', 500)
+    evidence: textProperty(properties['正本・根拠'], 'rich_text', 500),
+    actionUrl: urlProperty(properties['操作URL'])
   };
 }
 
@@ -115,6 +116,18 @@ function selectProperty(value: unknown, max: number): string {
 function dateProperty(value: unknown): string | null {
   if (!isRecord(value) || !isRecord(value.date) || typeof value.date.start !== 'string') return null;
   return clean(value.date.start, 80) || null;
+}
+
+function urlProperty(value: unknown): string | null {
+  if (!isRecord(value) || typeof value.url !== 'string') return null;
+  const raw = value.url.trim();
+  if (!raw || raw.length > 2_000) return null;
+  try {
+    const parsed = new URL(raw);
+    return ['https:', 'http:', 'shortcuts:', 'scriptable:', 'calshow:'].includes(parsed.protocol) ? raw : null;
+  } catch {
+    return null;
+  }
 }
 
 function textProperty(value: unknown, key: 'title' | 'rich_text', max: number): string {
