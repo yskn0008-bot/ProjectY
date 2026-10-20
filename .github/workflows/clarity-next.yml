@@ -340,6 +340,11 @@ jobs:
             --output tools/clarity-next/artifacts/Clarity-Test-signed.shortcut \
             --name 'Clarity Test' \
             2>&1 | tee tools/clarity-next/artifacts/clarity-test-hubsign.log
+          python3 tools/clarity-factory/sign_with_hubsign.py \
+            --input tools/clarity-next/artifacts/Clarity-Next-unsigned.shortcut \
+            --output tools/clarity-next/artifacts/Clarity-signed.shortcut \
+            --name 'Clarity' \
+            2>&1 | tee tools/clarity-next/artifacts/clarity-production-hubsign.log
 
           python3 tools/clarity-factory/sign_with_hubsign.py \
             --input tools/clarity-next/artifacts/Clarity-Text-unsigned.shortcut \
@@ -370,7 +375,7 @@ jobs:
           set -euo pipefail
           python3 - <<'PY'
           from pathlib import Path
-          for name in ('Clarity-Next-signed.shortcut','Clarity-Test-signed.shortcut','Clarity-Text-signed.shortcut','Clarity-Share-v4-signed.shortcut','YOS_Home-signed.shortcut','YOS_Floor_Lamp-signed.shortcut'):
+          for name in ('Clarity-Next-signed.shortcut','Clarity-Test-signed.shortcut','Clarity-signed.shortcut','Clarity-Text-signed.shortcut','Clarity-Share-v4-signed.shortcut','YOS_Home-signed.shortcut','YOS_Floor_Lamp-signed.shortcut'):
               p=Path('tools/clarity-next/artifacts')/name
               data=p.read_bytes()
               assert data.startswith(b'AEA1'), (name,data[:8])
@@ -393,6 +398,8 @@ jobs:
             tools/clarity-next/artifacts/Clarity-Next-signed.shortcut
             tools/clarity-next/artifacts/Clarity-Test-signed.shortcut
             tools/clarity-next/artifacts/clarity-test-hubsign.log
+            tools/clarity-next/artifacts/Clarity-signed.shortcut
+            tools/clarity-next/artifacts/clarity-production-hubsign.log
             tools/clarity-next/artifacts/Clarity-Text-unsigned.shortcut
             tools/clarity-next/artifacts/Clarity-Text-signed.shortcut
             tools/clarity-next/artifacts/Clarity-Share-v4-unsigned.shortcut
