@@ -60,7 +60,8 @@ def patch(path: Path) -> None:
             matches.append(params)
 
     if len(matches) != 1:
-        raise SystemExit(f"expected one Focus inline placeholder, found {len(matches)}")
+        action_summary = [(a.get("WFWorkflowActionIdentifier"), repr(a.get("WFWorkflowActionParameters", {}))[:1200]) for a in root.get("WFWorkflowActions", [])]
+        raise SystemExit(f"expected one Focus inline placeholder, found {len(matches)}; actions={action_summary}")
 
     matches[0]["script"] = {
         "Value": {"string": SCRIPT},
