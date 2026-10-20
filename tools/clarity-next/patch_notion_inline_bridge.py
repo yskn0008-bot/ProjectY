@@ -13,7 +13,6 @@ from pathlib import Path
 
 ACTION_ID = "dk.simonbs.Scriptable.RunScriptInlineIntent"
 PLACEHOLDER = "__YOS_NOTION_BRIDGE_INLINE__"
-LIFE_PLACEHOLDER = "__YOS_LIFELOG_FALLBACK_INLINE__"
 
 BRIDGE_SCRIPT = r'''const K='YOS_NOTION_INTEGRATION_TOKEN';
 const API='https://api.notion.com/v1';
@@ -193,137 +192,30 @@ Script.setShortcutOutput(result&&result.id?'OK:'+p.target:'OK:'+p.target);
 Script.complete();'''
 
 
-
-LIFE_FALLBACK_SCRIPT = r'''const K='YOS_NOTION_INTEGRATION_TOKEN';
-const API='https://api.notion.com/v1';
-const VER='2026-03-11';
-const DS='28bcd894-b709-4b23-9fdc-c9dc43043bfc';
-
-function inputText(){
-  const v=args.shortcutParameter;
-  if(typeof v==='string') return v;
-  if(Array.isArray(args.plainTexts)&&args.plainTexts.length) return String(args.plainTexts[0]||'');
-  return v==null?'':String(v);
-}
-function parse(q){
-  const out={};
-  for(const part of String(q||'').split('&')){
-    if(!part) continue;
-    const i=part.indexOf('=');
-    const k=i<0?part:part.slice(0,i);
-    const v=i<0?'':part.slice(i+1);
-    out[decodeURIComponent(k)]=decodeURIComponent(v.replace(/\+/g,' '));
-  }
-  return out;
-}
-function rt(v){return [{type:'text',text:{content:String(v||'').slice(0,1900)}}];}
-function t(v){return {title:rt(v)};}
-function x(v){return {rich_text:rt(v)};}
-function iso(v){
-  const raw=String(v||'').trim();
-  if(!raw) return '';
-  let s=raw;
-  const parts=raw.split(' ');
-  if(parts.length===2){
-    const datePart=parts[0].replaceAll('/','-');
-    const dBits=datePart.split('-');
-    const tBits=parts[1].split(':');
-    if(dBits.length===3 && tBits.length>=2){
-      const y=dBits[0],m=String(dBits[1]).padStart(2,'0'),d=String(dBits[2]).padStart(2,'0');
-      const h=String(tBits[0]).padStart(2,'0'),mi=String(tBits[1]).padStart(2,'0'),se=String(tBits[2]||'00').padStart(2,'0');
-      s=y+'-'+m+'-'+d+'T'+h+':'+mi+':'+se+'+09:00';
-    }
-  }
-  const parsed=new Date(s);
-  return Number.isNaN(parsed.getTime())?'':s;
-}
-async function api(path,method='GET',body){
-  if(!Keychain.contains(K)) throw new Error('Notion token missing. Run YOS_Notion_Sync once.');
-  const r=new Request(API+path);
-  r.method=method;
-  r.headers={'Authorization':'Bearer '+Keychain.get(K),'Notion-Version':VER,'Content-Type':'application/json'};
-  if(body!==undefined) r.body=JSON.stringify(body);
-  const text=await r.loadString();
-  let j={}; try{j=text?JSON.parse(text):{};}catch{j={raw:text};}
-  const status=r.response?r.response.statusCode:0;
-  if(status<200||status>=300) throw new Error('Notion '+status+': '+String(j.message||text).slice(0,220));
-  return j;
-}
-
-const p=parse(inputText());
-if(!p.request_id||!p.raw) throw new Error('Clarity Life Log payload is incomplete');
-const fm=FileManager.local();
-const statePath=fm.joinPath(fm.documentsDirectory(),'yos-clarity-lifelog-fallback.json');
-let state={};
-try{if(fm.fileExists(statePath)) state=JSON.parse(fm.readString(statePath)||'{}');}catch{state={};}
-if(state[p.request_id]){Script.setShortcutOutput('DUPLICATE:learning');Script.complete();return;}
-
-const raw=String(p.raw||'').trim();
-let decision=raw, reason='';
-for(const marker of ['理由は','なぜなら','理由：','理由:']){
-  const i=raw.indexOf(marker);
-  if(i>=0){
-    decision=raw.slice(0,i).replace(/[。．\s]+$/u,'').trim();
-    reason=raw.slice(i+marker.length).replace(/^[、,\s]+/u,'').trim();
-    break;
-  }
-}
-const date=iso(p.date_time);
-const domain=/(Clarity|Shortcut|ショートカット|Notion|YOS|iPhone|Scriptable)/iu.test(raw)?'開発':'その他';
-const title=(decision||raw||'重要な判断').slice(0,180);
-const props={
-  '判断・経験':t(title),
-  '本人の決定':x(decision||raw),
-  '採用理由・制約':x(reason),
-  '根拠・参照':x('Clarity: '+raw),
-  '状態':{select:{name:'実行中'}},
-  '分野':{select:{name:domain}}
-};
-if(date) props['判断日']={date:{start:date}};
-const result=await api('/pages','POST',{parent:{type:'data_source_id',data_source_id:DS},properties:props});
-
-state[p.request_id]={at:new Date().toISOString(),target:'learning'};
-const keys=Object.keys(state);
-if(keys.length>200) for(const k of keys.slice(0,keys.length-200)) delete state[k];
-fm.writeString(statePath,JSON.stringify(state));
-Script.setShortcutOutput(result&&result.id?'OK:learning':'OK:learning');
-Script.complete();'''
-
-
 def patch(path: Path) -> None:
     with path.open("rb") as fh:
         root = plistlib.load(fh)
 
     matches = []
-    life_matches = []
     for action in root.get("WFWorkflowActions", []):
         if action.get("WFWorkflowActionIdentifier") != ACTION_ID:
             continue
         params = action.get("WFWorkflowActionParameters", {})
         if params.get("script") == PLACEHOLDER:
             matches.append(params)
-        if params.get("script") == LIFE_PLACEHOLDER:
-            life_matches.append(params)
 
     if len(matches) != 1:
         raise SystemExit(f"expected one Notion bridge placeholder, found {len(matches)}")
-    if len(life_matches) != 1:
-        raise SystemExit(f"expected one Life Log fallback placeholder, found {len(life_matches)}")
 
-    matches[0]["script"] = {
+    params = matches[0]
+    params["script"] = {
         "Value": {"string": BRIDGE_SCRIPT},
-        "WFSerializationType": "WFTextTokenString",
-    }
-    life_matches[0]["script"] = {
-        "Value": {"string": LIFE_FALLBACK_SCRIPT},
         "WFSerializationType": "WFTextTokenString",
     }
 
     blob = repr(root)
     if PLACEHOLDER in blob:
         raise SystemExit("Notion bridge placeholder survived injection")
-    if LIFE_PLACEHOLDER in blob:
-        raise SystemExit("Life Log fallback placeholder survived injection")
     if "YOS_NOTION_INTEGRATION_TOKEN" not in blob:
         raise SystemExit("Notion Keychain key missing")
     if "YOS_Money_Local" in blob:
