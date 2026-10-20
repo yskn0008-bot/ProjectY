@@ -157,6 +157,7 @@ for actionItem in @actionsRaw {
         confirm("この操作を実行しますか？", "Clarity Next")
     }
 
+    @notionPending = "no"
     @notionTarget = ""
     @notionTitle = ""
     @notionRaw = ""
@@ -313,6 +314,7 @@ for actionItem in @actionsRaw {
     }
 
     if @normalizedExecutor == "NEXT_NOTION" && @normalizedModule == "notion" && @normalizedOperation == "save" {
+        @notionPending = "yes"
         @notionTarget = "{parameters['target']}"
         @notionTitle = "{parameters['title']}"
         @notionRaw = "{parameters['raw_text']}"
@@ -330,6 +332,7 @@ for actionItem in @actionsRaw {
     }
 
     if @normalizedExecutor == "NEXT_IDEA" && @normalizedModule == "idea" && operation == "capture" {
+        @notionPending = "yes"
         @notionTarget = "inbox"
         @notionTitle = "Idea"
         @notionRaw = "{parameters['content']}"
@@ -337,6 +340,7 @@ for actionItem in @actionsRaw {
     }
 
     if @normalizedExecutor == "NEXT_MEMO" && @normalizedModule == "memo" && operation == "capture" {
+        @notionPending = "yes"
         @notionTarget = "inbox"
         @notionTitle = "Memo"
         @notionRaw = "{parameters['content']}"
@@ -344,18 +348,21 @@ for actionItem in @actionsRaw {
     }
 
     if @normalizedExecutor == "NEXT_TASK" && @normalizedModule == "task" && operation == "create" {
+        @notionPending = "yes"
         @notionTarget = "task"
         @notionTitle = "{parameters['content']}"
         @notionRaw = "{parameters['content']}"
     }
 
     if @normalizedExecutor == "NEXT_SHOPPING" && @normalizedModule == "shopping" && operation == "create" {
+        @notionPending = "yes"
         @notionTarget = "shopping"
         @notionTitle = "{parameters['content']}"
         @notionRaw = "{parameters['content']}"
     }
 
     if @normalizedExecutor == "NEXT_MONEY" && @normalizedModule == "money" && operation == "capture" {
+        @notionPending = "yes"
         @notionTarget = "money"
         @notionTitle = "{parameters['title']}"
         @notionRaw = "{parameters['raw_text']}"
@@ -367,7 +374,7 @@ for actionItem in @actionsRaw {
         @notionCertainty = "{parameters['certainty']}"
     }
 
-    if @notionTarget {
+    if @notionPending == "yes" {
         if !@notionRaw {
             alert("Notionに保存する内容を確認してください", "Clarity Next")
             stop()
