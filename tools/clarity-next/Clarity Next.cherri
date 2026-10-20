@@ -362,7 +362,15 @@ for actionItem in @actionsRaw {
             const notionDateTime = "{parameters['date_time']}"
             const notionAmount = "{parameters['amount']}"
             const notionKind = "{parameters['kind']}"
-            if !notionTarget || !notionTitle || !notionRaw {
+            if !notionTarget {
+                alert("Notionの保存先を確認してください", "Clarity Next")
+                stop()
+            }
+            if !notionTitle {
+                alert("Notionに保存するタイトルを確認してください", "Clarity Next")
+                stop()
+            }
+            if !notionRaw {
                 alert("Notionに保存する内容を確認してください", "Clarity Next")
                 stop()
             }
