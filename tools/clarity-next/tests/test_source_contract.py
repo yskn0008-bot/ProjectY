@@ -148,6 +148,34 @@ class ClarityNextSourceContractTests(unittest.TestCase):
         self.assertIn('operation={normalizedOperation}', self.source)
         self.assertIn('@normalizedOperation == "open_yos_home"', self.source)
 
+    def test_fast_paths_precede_model_round_trip(self):
+        model_i = self.source.index('const modelResult = askChatGPT')
+        for needle in (
+            'fastBaseHomeURL',
+            'fastSafariTarget',
+            'fastChatGPTTarget',
+        ):
+            self.assertIn(needle, self.source[:model_i])
+
+    def test_ledger_is_minimal_on_normal_path(self):
+        self.assertEqual(
+            self.source.count('appendToFile("Clarity Next Ledger.txt"'),
+            2,
+        )
+        self.assertIn('rawRecord', self.source)
+        self.assertIn('doneRecord', self.source)
+
+    def test_notion_capture_uses_existing_assets(self):
+        self.assertIn('NEXT_NOTION / notion / save', self.source)
+        for target in ('inbox', 'task', 'shopping', 'project', 'life_event', 'person', 'learning', 'balance'):
+            self.assertIn(target, self.source)
+        self.assertIn('dk.simonbs.Scriptable.RunScriptInlineIntent', self.source)
+        self.assertIn('YOS_NOTION_INTEGRATION_TOKEN', self.source)
+        self.assertIn('3d35ca88-2895-81ef-9dc8-d5f11ff8e213', self.source)
+        self.assertIn('965c6086-32c1-463d-93b4-87a9cb69b3ad', self.source)
+        self.assertIn('95b30d16-7530-40c6-a320-dab99acad55d', self.source)
+        self.assertNotIn('money-capture.html', self.source)
+
     def test_v0_acceptance_routes_exist(self):
         self.assertIn('run("YOS_OpenApp", app)', self.source)
         self.assertIn('is.workflow.actions.setbrightness', self.source)
@@ -158,8 +186,10 @@ class ClarityNextSourceContractTests(unittest.TestCase):
         self.assertIn('openURL(notionHomeURL)', self.source)
         self.assertIn('BASE HOME refresh bridge', self.source)
         self.assertIn('notion_yos_home', self.source)
-        self.assertIn('money-capture.html?text={moneyEncoded}', self.source)
-        self.assertIn('openURL(moneyURL)', self.source)
+        self.assertIn('dk.simonbs.Scriptable.RunScriptInlineIntent', self.source)
+        self.assertIn('YOS_NOTION_INTEGRATION_TOKEN', self.source)
+        self.assertIn('95b30d16-7530-40c6-a320-dab99acad55d', self.source)
+        self.assertNotIn('money-capture.html', self.source)
 
 if __name__ == "__main__":
     unittest.main()
