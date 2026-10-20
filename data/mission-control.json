@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-10-20T15:58:28+09:00",
+  "updated_at": "2026-10-20T16:08:39+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -21,26 +21,6 @@
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/630",
       "updated_at": "2026-10-19T18:29:17Z"
-    },
-    {
-      "id": "github-pr-632",
-      "title": "PR #632 YOS Chat｜チャット一覧を高密度表示に改善",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/632",
-      "updated_at": "2026-10-17T14:44:23Z"
-    },
-    {
-      "id": "github-pr-633",
-      "title": "PR #633 Clarity・Gmail共通INBOX：通知取り込みと安全な優先度仕分け",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/633",
-      "updated_at": "2026-10-17T22:57:12Z"
     },
     {
       "id": "github-pr-634",
@@ -110,7 +90,27 @@
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/646",
-      "updated_at": "2026-10-20T06:57:56Z"
+      "updated_at": "2026-10-20T06:58:41Z"
+    },
+    {
+      "id": "github-pr-647",
+      "title": "PR #647 Draft: YOS proactive one-action suggestion using existing widget feed",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/647",
+      "updated_at": "2026-10-20T07:08:09Z"
+    },
+    {
+      "id": "github-pr-648",
+      "title": "PR #648 Draft: YOS proactive one-action recommendation core",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/648",
+      "updated_at": "2026-10-20T07:08:12Z"
     },
     {
       "id": "github-issue-10",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-10-20T06:56:29Z"
+      "updated_at": "2026-10-20T06:58:42Z"
     },
     {
       "id": "github-issue-234",
@@ -264,7 +264,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-10-20T15:58:28+09:00",
+      "last_update": "2026-10-20T16:08:39+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -339,13 +339,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 8件・Open PR 29件を自動同期中",
+      "next_action": "Open Issue 8件・Open PR 31件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-10-20T15:58:28+09:00",
+      "last_update": "2026-10-20T16:08:39+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -368,7 +368,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-10-20T15:58:28+09:00",
+      "last_update": "2026-10-20T16:08:39+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -450,5 +450,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "dc29c2072e6508e011c3a53f67e5ebe40033a8ca5397008ed573597a33ba03a8"
+  "github_snapshot_hash": "1dbaac904a088388f78e1058738df3f3934a5ccd4aefeb0a3de17a953f67d95d"
 }
