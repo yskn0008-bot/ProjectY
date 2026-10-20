@@ -59,11 +59,24 @@ function num(v){
 function iso(v){
   const raw=String(v||'').trim();
   if(!raw) return '';
-  let s=raw
-    .replace(/^(\\d{4})\\/(\\d{1,2})\\/(\\d{1,2})\\s+(\\d{1,2}):(\\d{2})(?::(\\d{2}))?$/,(_,y,m,d,h,mi,se)=>`${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}T${String(h).padStart(2,'0')}:${mi}:${se||'00'}+09:00`)
-    .replace(/^(\\d{4})-(\\d{1,2})-(\\d{1,2})\\s+(\\d{1,2}):(\\d{2})(?::(\\d{2}))?$/,(_,y,m,d,h,mi,se)=>`${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}T${String(h).padStart(2,'0')}:${mi}:${se||'00'}+09:00`);
-  const d=new Date(s);
-  return Number.isNaN(d.getTime())?'':s;
+  let s=raw;
+  const parts=raw.split(' ');
+  if(parts.length===2){
+    const datePart=parts[0].replaceAll('/','-');
+    const dBits=datePart.split('-');
+    const tBits=parts[1].split(':');
+    if(dBits.length===3 && tBits.length>=2){
+      const y=dBits[0];
+      const m=String(dBits[1]).padStart(2,'0');
+      const d=String(dBits[2]).padStart(2,'0');
+      const h=String(tBits[0]).padStart(2,'0');
+      const mi=String(tBits[1]).padStart(2,'0');
+      const se=String(tBits[2]||'00').padStart(2,'0');
+      s=y+'-'+m+'-'+d+'T'+h+':'+mi+':'+se+'+09:00';
+    }
+  }
+  const parsed=new Date(s);
+  return Number.isNaN(parsed.getTime())?'':s;
 }
 async function api(path,method='GET',body){
   if(!Keychain.contains(K)) throw new Error('Notion token missing. Run YOS_Notion_Sync once.');
