@@ -99,7 +99,8 @@ function parseTask(value: unknown): TaskDashboardItem | null {
     completion: textProperty(properties['完了条件'], 'rich_text', 700),
     blocker: textProperty(properties['ブロッカー'], 'rich_text', 500),
     evidence: textProperty(properties['正本・根拠'], 'rich_text', 500),
-    actionUrl: urlProperty(properties['操作URL'])
+    actionUrl: urlProperty(properties['操作URL']),
+    lastSynced: dateProperty(properties['最終同期'])
   };
 }
 

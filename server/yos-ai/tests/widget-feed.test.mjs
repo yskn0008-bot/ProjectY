@@ -27,6 +27,8 @@ test('widget prefers the first active task by execution order', () => {
 
   assert.equal(feed.sourceState, 'active');
   assert.equal(feed.task?.title, '02｜you');
+  assert.equal(feed.task?.order, 2);
+  assert.equal(feed.task?.priority, '');
   assert.equal(feed.task?.nextAction, 'tap once');
   assert.equal(feed.task?.actionUrl, 'shortcuts://run-shortcut?name=Clarity');
   assert.equal(feed.tasks[1].actionUrl, null);

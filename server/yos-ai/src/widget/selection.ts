@@ -5,8 +5,10 @@ const NEXT_STATE = '次にやる';
 const MAX_WIDGET_TASKS = 3;
 
 export interface WidgetTask {
+  order: number;
   title: string;
   state: string;
+  priority: string;
   due: string | null;
   nextAction: string;
   actionUrl: string | null;
@@ -38,8 +40,10 @@ export function selectWidgetFeed(tasks: TaskDashboardItem[], generatedAt: string
 
 function toWidgetTask(task: TaskDashboardItem): WidgetTask {
   return {
+    order: task.order,
     title: task.title,
     state: task.state,
+    priority: task.priority,
     due: task.due,
     nextAction: task.nextAction,
     actionUrl: task.actionUrl ?? null
