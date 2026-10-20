@@ -60,6 +60,28 @@ jobs:
           python3 patch_calendar_reminder_wire_format.py './Clarity Next_unsigned.shortcut'
           python3 patch_home_direct_inline.py './Clarity Next_unsigned.shortcut' './YOS Home Bridge.js'
           python3 patch_notion_inline_bridge.py './Clarity Next_unsigned.shortcut'
+          python3 - <<'PY'
+          import plistlib
+          from pathlib import Path
+          p=Path('./Clarity Next_unsigned.shortcut')
+          root=plistlib.loads(p.read_bytes())
+          scripts=[]
+          for a in root.get('WFWorkflowActions',[]):
+              if a.get('WFWorkflowActionIdentifier')!='dk.simonbs.Scriptable.RunScriptInlineIntent':
+                  continue
+              params=a.get('WFWorkflowActionParameters',{})
+              raw=params.get('script')
+              text=''
+              if isinstance(raw,dict):
+                  text=raw.get('Value',{}).get('string','')
+              elif isinstance(raw,str):
+                  text=raw
+              if 'YOS_NOTION_INTEGRATION_TOKEN' in text:
+                  scripts.append(text)
+          assert len(scripts)==1, len(scripts)
+          Path('/tmp/clarity-notion-bridge.js').write_text(scripts[0],encoding='utf-8')
+          PY
+          node --check /tmp/clarity-notion-bridge.js
           mkdir -p artifacts
           cp './Clarity Next_unsigned.shortcut' artifacts/Clarity-Next-unsigned.shortcut
           cp './Clarity Text_unsigned.shortcut' artifacts/Clarity-Text-unsigned.shortcut
