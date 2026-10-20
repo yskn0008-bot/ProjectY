@@ -9,6 +9,7 @@ export interface WidgetTask {
   state: string;
   due: string | null;
   nextAction: string;
+  actionUrl: string | null;
 }
 
 export interface WidgetFeed {
@@ -40,6 +41,7 @@ function toWidgetTask(task: TaskDashboardItem): WidgetTask {
     title: task.title,
     state: task.state,
     due: task.due,
-    nextAction: task.nextAction
+    nextAction: task.nextAction,
+    actionUrl: task.actionUrl ?? null
   };
 }
