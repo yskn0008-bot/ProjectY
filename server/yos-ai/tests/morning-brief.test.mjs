@@ -65,7 +65,7 @@ function moneyEvent({title, section, amount, date, verification, lastEdited}) {
   };
 }
 
-function createFetch({moneyAvailable = true} = {}) {
+function createFetch({moneyAvailable = true, freshUsableBalance = false} = {}) {
   return async (url, init = {}) => {
     const value = String(url);
     if (value.endsWith('/v1/search')) {
@@ -121,9 +121,9 @@ function createFetch({moneyAvailable = true} = {}) {
             name: 'ソニー銀行',
             assetClass: '銀行',
             amount: 5,
-            usable: false,
+            usable: freshUsableBalance,
             verification: '連携サービス記録',
-            date: '2026-10-16'
+            date: freshUsableBalance ? '2026-10-20' : '2026-10-16'
           }),
           balancePage({
             name: '陽介wallet',
@@ -201,6 +201,22 @@ test('Morning Brief reuses exact NOW selection but refuses stale Money as curren
   assert.equal(result.alerts.count, 1);
   assert.equal(result.alerts.item?.title, '沖縄ガス 2026年9月分（未払い）');
   assert.equal(result.alerts.item?.source, '家計イベント・入出金予定');
+});
+
+test('Morning Brief can confirm fresh usable balance even when non-usable assets remain unconfirmed', async () => {
+  const result = await loadNotionMorningBrief({
+    notionToken: 'secret-token',
+    notionTasksDataSourceId: TASKS_ID,
+    fetchImpl: createFetch({freshUsableBalance: true}),
+    now: new Date('2026-10-20T04:45:00Z')
+  });
+
+  assert.equal(result.money.status, 'confirmed');
+  assert.equal(result.money.currentUsable, 5);
+  assert.equal(result.money.nextIncome, null);
+  assert.equal(result.money.nextPayment?.title, '沖縄ガス 2026年9月分（未払い）');
+  assert.equal(result.money.safetyToNextIncome, 'unconfirmed');
+  assert.match(result.money.reason, /next-income-unconfirmed/);
 });
 
 test('Morning Brief marks dependent sections unconfirmed when Money Notion sources cannot be read', async () => {
