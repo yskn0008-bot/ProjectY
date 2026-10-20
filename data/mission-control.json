@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-10-20T15:07:20+09:00",
+  "updated_at": "2026-10-20T15:09:38+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -13,16 +13,6 @@
   },
   "inbox": [
     {
-      "id": "github-pr-645",
-      "title": "PR #645 Morning Money: use fresh confirmed liquid balances without stale non-usable blockers",
-      "type": "GitHub PR",
-      "status": "review",
-      "priority": 1,
-      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/645",
-      "updated_at": "2026-10-20T06:06:47Z"
-    },
-    {
       "id": "github-pr-630",
       "title": "PR #630 YOS TODAY/TOMORROW: large read-only iPhone dashboard",
       "type": "GitHub PR",
@@ -31,6 +21,16 @@
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/630",
       "updated_at": "2026-10-19T18:29:17Z"
+    },
+    {
+      "id": "github-pr-631",
+      "title": "PR #631 MY REMOTE: 4台タブ切替・TVシーク長押し・Tapoフロアランプ",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/631",
+      "updated_at": "2026-10-16T19:14:30Z"
     },
     {
       "id": "github-pr-632",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-10-20T05:01:44Z"
+      "updated_at": "2026-10-20T06:07:51Z"
     },
     {
       "id": "github-issue-234",
@@ -195,39 +195,39 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-a34516130414",
+      "title": "Merge pull request #645 from yskn0008-bot/fix/morning-money-partial-confirmed-20261020",
+      "completed_at": "2026-10-20T06:09:12Z",
+      "result": "GitHub mainへ反映（a345161）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/a34516130414448ebf6aacf3efacd21acab40580"
+    },
+    {
+      "id": "github-commit-059ff1072c72",
+      "title": "build: publish Morning Brief no-Safari acceptance artifact [skip ci]",
+      "completed_at": "2026-10-20T06:06:57Z",
+      "result": "GitHub mainへ反映（059ff10）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/059ff1072c72c6977698a0b23676f9bc55d72979"
+    },
+    {
+      "id": "github-commit-fec7510b22da",
+      "title": "test(morning): cover partial confirmed Money balance",
+      "completed_at": "2026-10-20T06:06:34Z",
+      "result": "GitHub mainへ反映（fec7510）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/fec7510b22dac3df7fc2ae1d01eadbb3f374094b"
+    },
+    {
+      "id": "github-commit-a1e7cb41c991",
+      "title": "fix(morning): allow confirmed usable balance with unknown non-usable assets",
+      "completed_at": "2026-10-20T06:06:22Z",
+      "result": "GitHub mainへ反映（a1e7cb4）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/a1e7cb41c991f82bde13be502776afeca1cda051"
+    },
+    {
       "id": "github-commit-66b6961ecf4a",
       "title": "Fix Morning Brief to use live YOS / Notion data (#644)",
       "completed_at": "2026-10-20T05:02:18Z",
       "result": "GitHub mainへ反映（66b6961）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/66b6961ecf4a9ad6382ab1c1e2fe747e2e0ca3c0"
-    },
-    {
-      "id": "github-commit-cb77d287d873",
-      "title": "YOS NOW: expose task action URL and add Focus shortcut",
-      "completed_at": "2026-10-20T03:29:17Z",
-      "result": "GitHub mainへ反映（cb77d28）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/cb77d287d873fb89bb92eeab969d8f0beaea75a5"
-    },
-    {
-      "id": "github-commit-cf41b2e475c1",
-      "title": "chore(yos-ai): retry deferred approved release (1/4)",
-      "completed_at": "2026-10-19T23:05:45Z",
-      "result": "GitHub mainへ反映（cf41b2e）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/cf41b2e475c1b5d047fee262758ad8c224979959"
-    },
-    {
-      "id": "github-commit-11671db2746a",
-      "title": "Prevent partial Apple snapshots from archiving Notion mirror entries (#637)",
-      "completed_at": "2026-10-19T21:13:17Z",
-      "result": "GitHub mainへ反映（11671db）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/11671db2746a19972f3bcd188d7e778929cbb6c1"
-    },
-    {
-      "id": "github-commit-ddcc142b3dcc",
-      "title": "chore(yos-ai): retry deferred approved release (1/4)",
-      "completed_at": "2026-10-19T19:43:33Z",
-      "result": "GitHub mainへ反映（ddcc142）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/ddcc142b3dcc56a39d6509796e856e9799fd3056"
     },
     {
       "id": "complete-002",
@@ -254,7 +254,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #645をレビューして公開判断する",
+      "next_action": "PR #626をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -264,7 +264,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-10-20T15:07:20+09:00",
+      "last_update": "2026-10-20T15:09:38+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -339,13 +339,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 8件・Open PR 29件を自動同期中",
+      "next_action": "Open Issue 8件・Open PR 28件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-10-20T15:07:20+09:00",
+      "last_update": "2026-10-20T15:09:38+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -359,7 +359,7 @@
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #645をレビューして公開判断する",
+      "next_action": "PR #626をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -368,7 +368,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-10-20T15:07:20+09:00",
+      "last_update": "2026-10-20T15:09:38+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -450,5 +450,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "b221032243ebc190d1fbf5ca104af95f2de3a2dba1e3dafc9ec65ecced0a8c4e"
+  "github_snapshot_hash": "5b8b01e4a9af63228f701628fdbd17cd0783f1bdbaeafe21f5e515d4bb7a1272"
 }
