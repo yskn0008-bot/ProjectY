@@ -78,11 +78,13 @@ jobs:
                   text=raw
               if 'YOS_NOTION_INTEGRATION_TOKEN' in text:
                   scripts.append(text)
-          assert len(scripts)==1, len(scripts)
-          wrapped="async function __scriptable_syntax_check__(){\n"+scripts[0]+"\n}\n"
-          Path('/tmp/clarity-notion-bridge.js').write_text(wrapped,encoding='utf-8')
+          assert len(scripts)==2, len(scripts)
+          for index,script in enumerate(scripts):
+              wrapped="async function __scriptable_syntax_check__(){\n"+script+"\n}\n"
+              Path(f'/tmp/clarity-scriptable-{index}.js').write_text(wrapped,encoding='utf-8')
           PY
-          node --check /tmp/clarity-notion-bridge.js
+          node --check /tmp/clarity-scriptable-0.js
+          node --check /tmp/clarity-scriptable-1.js
           mkdir -p artifacts
           cp './Clarity Next_unsigned.shortcut' artifacts/Clarity-Next-unsigned.shortcut
           cp './Clarity Text_unsigned.shortcut' artifacts/Clarity-Text-unsigned.shortcut
