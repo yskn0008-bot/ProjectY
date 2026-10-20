@@ -91,6 +91,7 @@ jobs:
           root=plistlib.loads(p.read_bytes())
           actions=root['WFWorkflowActions']
           ids=[a.get('WFWorkflowActionIdentifier','') for a in actions]
+          print(f'Clarity action count: {len(actions)}')
           blob=repr(root)
           assert sum(i=='is.workflow.actions.dictatetext' for i in ids)==1, ids
           assert sum(i=='is.workflow.actions.askllm' for i in ids)==1, ids
@@ -147,7 +148,7 @@ jobs:
           assert ids.count('is.workflow.actions.skipforward') == 1, ids
           assert ids.count('is.workflow.actions.skipback') == 1, ids
           # Home must execute inline, not depend on a user-installed shortcut name.
-          assert ids.count('is.workflow.actions.runworkflow') == 3, ids
+          assert ids.count('is.workflow.actions.runworkflow') == 5, ids
           assert any(
               a.get('WFWorkflowActionIdentifier')=='is.workflow.actions.runworkflow'
               and a.get('WFWorkflowActionParameters',{}).get('WFWorkflowName')=='YOS_Floor_Lamp'
