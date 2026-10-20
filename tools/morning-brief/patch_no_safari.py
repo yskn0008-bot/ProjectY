@@ -167,6 +167,7 @@ def patch(source, destination):
     yos_attachment = {
         "OutputUUID": script_uuid,
         "Type": "ActionOutput",
+        "OutputName": "Result",
     }
     set_text_with_attachments(text_value, [
         "【天気】\n現在の天気：", old_attachments[0],
