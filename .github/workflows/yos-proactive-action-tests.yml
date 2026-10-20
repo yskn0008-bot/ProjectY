@@ -3,7 +3,7 @@ name: YOS proactive action tests
 on:
   pull_request:
     paths:
-      - 'yos/alerts/proactive-action*'
+      - 'yos/alerts/proactive-*'
       - '.github/workflows/yos-proactive-action-tests.yml'
 
 permissions:
@@ -18,5 +18,5 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Test proactive action selector
-        run: node --test yos/alerts/proactive-action.test.mjs
+      - name: Test proactive action and widget preview
+        run: node --test yos/alerts/proactive-*.test.mjs
