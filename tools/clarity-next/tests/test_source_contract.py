@@ -71,6 +71,14 @@ class ClarityNextSourceContractTests(unittest.TestCase):
         self.assertIn('operation == "plan"', self.source)
         self.assertIn('&state={notionStateEncoded}', self.source)
 
+    def test_hypothetical_money_has_runtime_no_write_guard(self):
+        self.assertIn('@moneyHypothetical = "no"', self.source)
+        self.assertIn('@moneyHypothetical = "yes"', self.source)
+        for phrase in ("使ったら","買っても","使って大丈夫","使える","いけそう","どうなる","シミュレーション"):
+            self.assertIn(phrase, self.source)
+        self.assertIn('operation == "capture" && @moneyHypothetical == "no"', self.source)
+        self.assertIn('operation == "plan" && @moneyHypothetical == "no"', self.source)
+
     def test_life_log_reuses_existing_notion_assets(self):
         self.assertIn("Life Logは新DBを作りません", self.source)
         self.assertIn("既存YOS 判断・学習", self.source)
