@@ -8,7 +8,7 @@ test('ordinary notice goes to morning, not emergency', () => {
  assert.equal(alerts[0].channel,'morning');
 });
 test('emergency requires all three explicit flags', () => {
- const input={...base, requiresImmediateAwareness:true, requiresImmediateAction:true, delayCausesMaterialHarm:true};
+ const input={...base, needsReview:false, requiresImmediateAwareness:true, requiresImmediateAction:true, delayCausesMaterialHarm:true};
  assert.equal(triageNotifications([input]).alerts[0].channel,'emergency');
  assert.equal(triageNotifications([{...input, delayCausesMaterialHarm:false}]).alerts[0].channel,'morning');
 });
@@ -26,4 +26,12 @@ test('invalid identity fails closed',()=>assert.throws(()=>normalizeNotification
 test('sensitive numeric tokens in notification titles are redacted', () => {
  const n=normalizeNotification({...base,title:'Security code 123456'});
  assert.equal(n.title,'Security code [redacted]');
+});
+
+test('unreviewed payment and emergency candidates do not trigger immediate channels', () => {
+ const payment=triageNotifications([{...base, category:'payment'}]).alerts[0];
+ assert.equal(payment.channel,'morning');
+ const emergency=triageNotifications([{...base,category:'payment',requiresImmediateAwareness:true,requiresImmediateAction:true,delayCausesMaterialHarm:true}]).alerts[0];
+ assert.equal(emergency.channel,'morning');
+ assert.equal(triageNotifications([{...base,category:'payment',needsReview:false}]).alerts[0].channel,'payment');
 });
