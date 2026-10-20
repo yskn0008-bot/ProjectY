@@ -79,9 +79,9 @@ jobs:
               if 'YOS_NOTION_INTEGRATION_TOKEN' in text:
                   scripts.append(text)
           assert len(scripts)==1, len(scripts)
-          Path('/tmp/clarity-notion-bridge.js').write_text(scripts[0],encoding='utf-8')
+          Path('/tmp/clarity-notion-bridge.mjs').write_text(scripts[0],encoding='utf-8')
           PY
-          node --check /tmp/clarity-notion-bridge.js
+          node --check /tmp/clarity-notion-bridge.mjs
           mkdir -p artifacts
           cp './Clarity Next_unsigned.shortcut' artifacts/Clarity-Next-unsigned.shortcut
           cp './Clarity Text_unsigned.shortcut' artifacts/Clarity-Text-unsigned.shortcut
