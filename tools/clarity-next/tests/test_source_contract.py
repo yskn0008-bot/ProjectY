@@ -9,6 +9,7 @@ ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "Clarity Next.cherri"
 PATCH = ROOT / "patch_ledger_persistence.py"
 WIRE_PATCH = ROOT / "patch_calendar_reminder_wire_format.py"
+NOTION_PATCH = ROOT / "patch_notion_inline_bridge.py"
 
 class ClarityNextSourceContractTests(unittest.TestCase):
     @classmethod
@@ -18,11 +19,32 @@ class ClarityNextSourceContractTests(unittest.TestCase):
     def test_is_separate_from_canonical_clarity(self):
         self.assertIn("#define name Clarity Next", self.source)
 
-    def test_normal_runtime_does_not_touch_debug_ledger(self):
+    def test_normal_runtime_uses_notion_not_local_capture_files(self):
         self.assertNotIn('getFile("Clarity Next Ledger.txt")', self.source)
         self.assertNotIn('appendToFile("Clarity Next Ledger.txt"', self.source)
-        self.assertIn('appendToFile("Idea in Box.txt"', self.source)
-        self.assertIn('appendToFile("Clarity Inbox.txt"', self.source)
+        self.assertNotIn('appendToFile("Idea in Box.txt"', self.source)
+        self.assertNotIn('appendToFile("Clarity Inbox.txt"', self.source)
+        self.assertIn('__YOS_NOTION_BRIDGE_INLINE__', self.source)
+        self.assertNotIn('YOS_Money_Local', self.source)
+        self.assertNotIn('money-capture.html', self.source)
+
+    def test_notion_bridge_only_runs_when_capture_is_pending(self):
+        self.assertIn('@notionPending = "no"', self.source)
+        self.assertIn('@notionPending = "yes"', self.source)
+        self.assertIn('if @notionPending == "yes"', self.source)
+        self.assertNotIn('if @notionTarget {', self.source)
+
+    def test_notion_inline_bridge_patch_is_locked(self):
+        patch = NOTION_PATCH.read_text(encoding="utf-8")
+        self.assertIn('dk.simonbs.Scriptable.RunScriptInlineIntent', patch)
+        self.assertIn('__YOS_NOTION_BRIDGE_INLINE__', patch)
+        self.assertIn('YOS_NOTION_INTEGRATION_TOKEN', patch)
+        self.assertIn('965c6086-32c1-463d-93b4-87a9cb69b3ad', patch)
+        self.assertIn('d0ed2cf0-c84e-4770-b77c-3a1a9e11bcfc', patch)
+        self.assertIn('95b30d16-7530-40c6-a320-dab99acad55d', patch)
+        self.assertIn('94fc7e9f-fd20-4073-bbcf-02efe8e95c5c', patch)
+        self.assertIn("+09:00", patch)
+        self.assertIn("padStart(2,'0')", patch)
 
     def test_calendar_reminder_wire_format_patch_is_locked(self):
         patch = WIRE_PATCH.read_text(encoding="utf-8")
@@ -61,41 +83,15 @@ class ClarityNextSourceContractTests(unittest.TestCase):
         self.assertIn('@normalizedExecutor != "YOS_SCRIPTABLE"', self.source)
 
 
-    def test_swapped_router_fields_are_normalized(self):
-        pairs = (
-            ("answer", "NEXT_ANSWER", "answer", "NEXT_ANSWER"),
-            ("open_app", "YOS_OpenApp", "open_app", "YOS_OpenApp"),
-            ("device", "NEXT_DEVICE", "device", "NEXT_DEVICE"),
-            ("timer", "NEXT_TIMER", "timer", "NEXT_TIMER"),
-            ("calendar", "NEXT_CALENDAR", "calendar", "NEXT_CALENDAR"),
-            ("reminder", "NEXT_REMINDER", "reminder", "NEXT_REMINDER"),
-            ("navigate", "NEXT_NAVIGATE", "navigate", "NEXT_NAVIGATE"),
-            ("notion", "NEXT_NOTION", "notion", "NEXT_NOTION"),
-            ("money", "NEXT_MONEY", "money", "NEXT_MONEY"),
-            ("myway", "NEXT_MYWAY", "myway", "NEXT_MYWAY"),
-            ("idea", "NEXT_IDEA", "idea", "NEXT_IDEA"),
-            ("memo", "NEXT_MEMO", "memo", "NEXT_MEMO"),
-            ("task", "NEXT_TASK", "task", "NEXT_TASK"),
-            ("shopping", "NEXT_SHOPPING", "shopping", "NEXT_SHOPPING"),
-            ("alarm", "NEXT_ALARM", "alarm", "NEXT_ALARM"),
-            ("communication", "NEXT_COMMUNICATION", "communication", "NEXT_COMMUNICATION"),
-            ("media", "NEXT_MEDIA", "media", "NEXT_MEDIA"),
-            ("clipboard", "NEXT_CLIPBOARD", "clipboard", "NEXT_CLIPBOARD"),
-            ("share", "NEXT_SHARE", "share", "NEXT_SHARE"),
-            ("camera", "NEXT_CAMERA", "camera", "NEXT_CAMERA"),
-            ("web", "NEXT_WEBSEARCH", "web", "NEXT_WEBSEARCH"),
-            ("yos", "NEXT_YOS_VIEW", "yos", "NEXT_YOS_VIEW"),
-            ("remote", "NEXT_REMOTE", "remote", "NEXT_REMOTE"),
-            ("shortcut", "YOS_SHORTCUT", "shortcut", "YOS_SHORTCUT"),
-            ("scriptable", "YOS_SCRIPTABLE", "scriptable", "YOS_SCRIPTABLE"),
-        )
-        for raw_executor, raw_module, normalized_module, normalized_executor in pairs:
-            self.assertIn(
-                f'if executor == "{raw_executor}" && module == "{raw_module}"',
-                self.source,
-            )
-            self.assertIn(f'@normalizedModule = "{normalized_module}"', self.source)
-            self.assertIn(f'@normalizedExecutor = "{normalized_executor}"', self.source)
+    def test_router_contract_is_direct_and_fail_closed(self):
+        self.assertIn('@normalizedModule = "{module}"', self.source)
+        self.assertIn('@normalizedExecutor = "{executor}"', self.source)
+        self.assertIn('@normalizedOperation = "{operation}"', self.source)
+        self.assertNotIn('if executor == "device" && module == "NEXT_DEVICE"', self.source)
+        self.assertNotIn('if executor == "remote" && module == "NEXT_REMOTE"', self.source)
+        self.assertNotIn('if executor == "scriptable" && module == "YOS_SCRIPTABLE"', self.source)
+        self.assertIn('@normalizedExecutor != "NEXT_REMOTE"', self.source)
+        self.assertIn('@normalizedExecutor != "YOS_SCRIPTABLE"', self.source)
 
     def test_home_runtime_has_no_missing_child_shortcut_dependency(self):
         patch = (ROOT / "patch_home_direct_inline.py").read_text(encoding="utf-8")
@@ -109,9 +105,8 @@ class ClarityNextSourceContractTests(unittest.TestCase):
 
     def test_home_executor_uses_verified_child(self):
         self.assertIn("YOS_Home / home / execute / required: command", self.source)
-        self.assertIn('if executor == "home" && module == "YOS_Home"', self.source)
-        self.assertIn('@normalizedModule = "home"', self.source)
-        self.assertIn('@normalizedExecutor = "YOS_Home"', self.source)
+        self.assertIn('@normalizedModule = "{module}"', self.source)
+        self.assertIn('@normalizedExecutor = "{executor}"', self.source)
         self.assertIn('if @normalizedExecutor == "YOS_Home" && @normalizedModule == "home" && operation == "execute"', self.source)
         self.assertIn('run("YOS_Home", homeCommand)', self.source)
         self.assertIn('@normalizedExecutor != "YOS_Home"', self.source)
@@ -165,8 +160,8 @@ class ClarityNextSourceContractTests(unittest.TestCase):
 
     def test_base_home_is_modeled_as_semantic_entity(self):
         self.assertIn("BASE HOMEはYOSの既存作戦室", self.source)
-        self.assertIn("同じ対象を指すことが意味上明確ならNEXT_NOTION", self.source)
-        self.assertIn("generic open_appより優先", self.source)
+        self.assertIn("開く意図はNEXT_NOTION/open_yos_home", self.source)
+        self.assertIn("情報を残す依頼で専用Capabilityがない場合はNEXT_NOTION/save", self.source)
 
     def test_shared_intake_uses_one_core(self):
         for marker in (
@@ -182,16 +177,11 @@ class ClarityNextSourceContractTests(unittest.TestCase):
         self.assertIn("shareモードではYOS_OpenApp、NEXT_DEVICE、NEXT_TIMER、NEXT_ALARM、NEXT_CALENDAR、NEXT_REMINDER、NEXT_NAVIGATE、NEXT_NOTION、NEXT_MYWAY、NEXT_MONEY、NEXT_IDEA、NEXT_MEMO、NEXT_TASK、NEXT_SHOPPING、NEXT_COMMUNICATION、NEXT_MEDIA、NEXT_CLIPBOARD、NEXT_SHARE、NEXT_CAMERA、NEXT_WEBSEARCH、NEXT_YOS_VIEW、NEXT_REMOTE、YOS_Home、YOS_SHORTCUT、YOS_SCRIPTABLEを選びません", self.source)
         self.assertIn('if @inputMode == "share" && @normalizedExecutor != "NEXT_ANSWER"', self.source)
 
-    def test_base_home_alias_recovers_from_open_app_misroute(self):
-        self.assertIn('@baseHomeAlias = false', self.source)
-        self.assertIn('if @inputMode != "share"', self.source)
-        self.assertIn('userInput contains "ベースホーム"', self.source)
-        self.assertIn('@normalizedExecutor = "NEXT_NOTION"', self.source)
-        self.assertIn('@normalizedModule = "notion"', self.source)
-        self.assertIn('@normalizedOperation = "open_yos_home"', self.source)
-        self.assertIn('@normalizedNeedsReviewText = "いいえ"', self.source)
-        self.assertIn('@normalizedNeedsConfirmationText = "いいえ"', self.source)
-        self.assertIn('@normalizedOperation == "open_yos_home"', self.source)
+    def test_common_explicit_open_commands_skip_model(self):
+        model_i = self.source.index('const modelResult = askChatGPT')
+        for marker in ('fastBaseHomeURL', 'fastSafariTarget', 'fastChatGPTTarget'):
+            self.assertIn(marker, self.source[:model_i])
+        self.assertIn('if @inputMode != "share"', self.source[:model_i])
 
     def test_communication_is_hard_gated_by_confirmation(self):
         gate = self.source.index('if @normalizedExecutor == "NEXT_COMMUNICATION" {')
@@ -234,7 +224,7 @@ class ClarityNextSourceContractTests(unittest.TestCase):
             'shortcutName == "STASH Add"',
             'scriptName == "YOS Remote Hub"',
             'scriptName == "YOS Departure Guard2"',
-            'scriptName == "YOS_Money_Local"',
+            '__YOS_NOTION_BRIDGE_INLINE__',
             'shortcutName != "STASH Add" && shortcutInput',
             "@scriptActionAllowed = false",
             "run(shortcutName, shortcutPayload)",
@@ -249,12 +239,15 @@ class ClarityNextSourceContractTests(unittest.TestCase):
         self.assertIn('is.workflow.actions.addnewreminder', self.source)
         self.assertIn('scriptable:///run?scriptName=YOS%20Dashboard%20v2&action=baseHome', self.source)
         self.assertIn('openURL(notionHomeURL)', self.source)
-        self.assertIn('BASE HOME refresh bridge', self.source)
-        self.assertIn('money-capture.html?text={moneyEncoded}', self.source)
-        self.assertIn('openURL(moneyURL)', self.source)
+        self.assertIn('fastBaseHomeURL', self.source)
+        self.assertIn('__YOS_NOTION_BRIDGE_INLINE__', self.source)
+        self.assertNotIn('money-capture.html', self.source)
+        self.assertNotIn('YOS_Money_Local', self.source)
         self.assertIn('https://yskn0008-bot.github.io/ProjectY/yos/', self.source)
-        self.assertIn('appendToFile("Idea in Box.txt"', self.source)
-        self.assertIn('appendToFile("Clarity Inbox.txt"', self.source)
+        self.assertIn('@notionTarget = "inbox"', self.source)
+        self.assertIn('@notionTarget = "task"', self.source)
+        self.assertIn('@notionTarget = "shopping"', self.source)
+        self.assertIn('@notionTarget = "money"', self.source)
         self.assertIn('@normalizedExecutor == "NEXT_TASK"', self.source)
         self.assertIn('@normalizedExecutor == "NEXT_SHOPPING"', self.source)
         self.assertIn('@normalizedExecutor == "NEXT_ALARM"', self.source)
