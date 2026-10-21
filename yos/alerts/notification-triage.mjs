@@ -3,6 +3,11 @@ import {selectAlerts} from './alert-engine.mjs';
 
 const clean = value => String(value ?? '').trim();
 const forbidden = /\b(?:\d{4}[ -]?\d{4}[ -]?\d{4}[ -]?\d{4}|\d{6})\b/g;
+const authText = /認証|確認コード|ワンタイム|暗証番号|パスコード|ログインコード|verification|one[- ]?time|passcode|security code|\bOTP\b|\bPIN\b/i;
+const selfApps = /^(?:shortcuts?|ショートカット|actions|scriptable|chatgpt|yos(?: alerts)?|clarity notification)$/i;
+const redact = (value, sensitive, limit) => sensitive
+  ? '認証・セキュリティ通知。内容は元アプリで確認'
+  : clean(value).replace(forbidden, '[redacted]').slice(0, limit);
 
 export function normalizeNotification(input = {}) {
   if (!input || typeof input !== 'object' || Array.isArray(input)) throw new TypeError('notification must be an object');
@@ -12,11 +17,16 @@ export function normalizeNotification(input = {}) {
   if (!sourceId || !title || !receivedAt || Number.isNaN(Date.parse(receivedAt))) {
     throw new TypeError('sourceId, title and valid receivedAt are required');
   }
-  const summary = clean(input.summary).replace(forbidden, '[redacted]').slice(0, 280);
+  const sourceApp = clean(input.sourceApp);
+  const sensitive = authText.test(title + ' ' + clean(input.summary));
+  const summary = redact(input.summary, sensitive, 280);
   const category = ['payment', 'money_anomaly', 'task', 'routine', 'information'].includes(input.category)
     ? input.category : 'information';
   return {
-    sourceId, title: title.replace(forbidden, '[redacted]').slice(0, 160), receivedAt, summary,
+    sourceId, sourceApp, title: redact(title, sensitive, 160), receivedAt, summary,
+    ignored: selfApps.test(sourceApp),
+    // This flag must be set by trusted YOS code, never parsed from notification text.
+    confirmedByYOS: input.confirmedByYOS === true,
     kind: category,
     requiresImmediateAwareness: input.requiresImmediateAwareness === true,
     requiresImmediateAction: input.requiresImmediateAction === true,
@@ -31,10 +41,10 @@ export function normalizeNotification(input = {}) {
 // Only explicit triage facts can qualify as emergency.
 export function triageNotifications(inputs, {notifiedKeys = [], now = new Date()} = {}) {
   const records = inputs.map(normalizeNotification);
-  // Unreviewed external classifications must never trigger immediate delivery.
-  const deliveryCandidates = records.map(record => record.needsReview
-    ? {...record, kind: 'information', requiresImmediateAwareness: false, requiresImmediateAction: false, delayCausesMaterialHarm: false}
-    : record);
+  // Raw third-party notifications never create another notification.
+  // Require an explicit, trusted YOS review before any re-delivery.
+  const deliveryCandidates = records.filter(record =>
+    !record.ignored && !record.needsReview && record.confirmedByYOS);
   const alerts = selectAlerts(deliveryCandidates, {notifiedKeys, now});
   return {records, alerts};
 }
