@@ -125,3 +125,12 @@ test('iPhone model result first-line gate recognizes only exact notification res
   assert.equal(parseYosModelResponse(lines.join('\n').replace('P1','P3')).valid,false);
   assert.equal(parseYosModelResponse('YOS_ALERT').valid,false);
 });
+
+test('20-digit transaction reference is hidden before any notification detail is presented', () => {
+  const ref='98765432100123456789';
+  const n=normalizeNotification({...base,summary:'取引番号：'+ref});
+  const d=formatYosNotification({...base,summary:'取引番号：'+ref});
+  assert.doesNotMatch(n.summary,/98765432100123456789/);
+  assert.doesNotMatch(d.detail,/98765432100123456789/);
+  assert.match(d.detail,/redacted/);
+});
