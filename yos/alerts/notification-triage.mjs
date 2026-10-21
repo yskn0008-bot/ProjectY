@@ -23,11 +23,13 @@ export function normalizeNotification(input = {}) {
   const proposal = input.analysis && typeof input.analysis === 'object' && !Array.isArray(input.analysis)
     ? input.analysis : null;
   const sensitive = authText.test(title + ' ' + clean(input.summary) + ' ' +
-    (proposal ? [proposal.what,proposal.impact,proposal.deadline,proposal.nextAction].map(clean).join(' ') : ''));
+    (proposal ? [proposal.what,proposal.impact,proposal.risk,proposal.evidence,proposal.deadline,proposal.nextAction].map(clean).join(' ') : ''));
   const summary = redact(input.summary, sensitive, 280);
   const analysis = proposal ? {
     what: redact(proposal.what, sensitive, 120),
     impact: redact(proposal.impact, sensitive, 140),
+    risk: redact(proposal.risk, sensitive, 180),
+    evidence: redact(proposal.evidence, sensitive, 180),
     deadline: proposal.deadlineConfirmedBySource === true
       ? redact(proposal.deadline, sensitive, 70) : '',
     deadlineConfirmedBySource: proposal.deadlineConfirmedBySource === true,
@@ -81,8 +83,10 @@ export function formatYosNotification(input) {
     detail: [
       '何が起きた：' + (facts.what || n.summary || '未確認'),
       '影響：' + (facts.impact || '未確認'),
+      '将来リスク：' + (facts.risk || '未確認'),
       '期限：' + (facts.deadline || '未確認'),
       '次の行動：' + (facts.nextAction || '元アプリを開いて原本を確認'),
+      '根拠：' + (facts.evidence || '未取得'),
       '原本：' + (n.sourceApp ? n.sourceApp + 'アプリで確認' : '元通知で確認')
     ].join('\n'),
     sourceUrl: n.sourceUrl,
