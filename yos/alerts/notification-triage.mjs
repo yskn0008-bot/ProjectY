@@ -4,10 +4,10 @@ import {selectAlerts} from './alert-engine.mjs';
 const clean = value => String(value ?? '').trim();
 const forbidden = /\b(?:\d[ -]?){11,27}\d\b|\b\d{6}\b/g;
 const authText = /認証|確認コード|ワンタイム|暗証番号|パスコード|ログインコード|verification|one[- ]?time|passcode|security code|sign[- ]?in code|\bOTP\b|\bPIN\b/i;
-const selfApps = /^(?:shortcuts?|ショートカット|actions|scriptable|chatgpt|yos(?: alerts)?|clarity notification)$/i;
+const selfApps = /^(?:shortcuts?|ショートカット|actions|scriptable|chatgpt|yos(?: alerts)?|clarity notification)(?:[\\s:–—-].*)?$/i;
 const redact = (value, sensitive, limit) => sensitive
   ? '認証・セキュリティ通知。内容は元アプリで確認'
-  : clean(value).replace(forbidden, '[redacted]').slice(0, limit);
+  : clean(value).replace(/[\\r\\n\\t]+/g, ' ').replace(forbidden, '[redacted]').slice(0, limit);
 
 export function normalizeNotification(input = {}) {
   if (!input || typeof input !== 'object' || Array.isArray(input)) throw new TypeError('notification must be an object');
@@ -17,12 +17,12 @@ export function normalizeNotification(input = {}) {
   if (!sourceId || !title || !receivedAt || Number.isNaN(Date.parse(receivedAt))) {
     throw new TypeError('sourceId, title and valid receivedAt are required');
   }
-  const sourceApp = clean(input.sourceApp);
+  const sourceApp = clean(input.sourceApp).replace(/[\\r\\n\\t]+/g, ' ').slice(0, 64);
   // The analysis object is a proposal from a trusted YOS model step, not
   // instructions read out of the third-party notification.
   const proposal = input.analysis && typeof input.analysis === 'object' && !Array.isArray(input.analysis)
     ? input.analysis : null;
-  const sensitive = authText.test(title + ' ' + clean(input.summary) + ' ' +
+  const sensitive = authText.test(sourceApp + ' ' + title + ' ' + clean(input.summary) + ' ' +
     (proposal ? [proposal.what,proposal.impact,proposal.risk,proposal.evidence,proposal.deadline,proposal.nextAction].map(clean).join(' ') : ''));
   const summary = redact(input.summary, sensitive, 280);
   const analysis = proposal ? {
@@ -38,7 +38,7 @@ export function normalizeNotification(input = {}) {
   const category = ['payment', 'money_anomaly', 'task', 'routine', 'information'].includes(input.category)
     ? input.category : 'information';
   return {
-    sourceId, sourceApp, title: redact(title, sensitive, 160), receivedAt, summary, analysis,
+    sourceId, sourceApp: redact(sourceApp, sensitive, 64), title: redact(title, sensitive, 160), receivedAt, summary, analysis,
     sensitive, ignored: selfApps.test(sourceApp),
     nativeReminderNotifies: input.nativeReminderNotifies === true,
     existingAutomationNotifies: input.existingAutomationNotifies === true,
