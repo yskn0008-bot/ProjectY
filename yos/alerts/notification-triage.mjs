@@ -97,8 +97,11 @@ export function planYosDeliveries(inputs, options = {}) {
   const send = [], held = [];
   for (const alert of result.alerts) {
     const entry = {...formatYosNotification(alert), channel: alert.channel, key: alert.key};
-    if (alert.deliveryApproved && alert.materiallyMoreUseful && alert.originalNoticeDisabled &&
-        !['morning', 'night', 'routine'].includes(alert.channel)) send.push(entry);
+    // OTPs stay in the originating app only, never YOS re-notification.
+    if (!alert.sensitive && alert.deliveryApproved && alert.materiallyMoreUseful &&
+        alert.originalNoticeDisabled && !['morning', 'night', 'routine'].includes(alert.channel)) {
+      send.push(entry);
+    }
     else held.push(entry);
   }
   return {records: result.records, send, held};
