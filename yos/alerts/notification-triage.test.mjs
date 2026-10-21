@@ -153,3 +153,17 @@ test('v0.3 malformed output stays silent',()=>{
  const x=['YOS_ALERT','事実: 案内','本人への影響: 要確認','将来のリスク: 未確認','推奨する次の一手: 確認'].join('\n');
  assert.equal(parseYosModelResponse(x).valid,false);
 });
+
+test('AI future risk and source freshness survive into YOS detail', () => {
+ const n={...reviewed,analysis:{what:'請求案内',impact:'支払い状況の確認が必要',risk:'放置すると期限を逃す可能性',evidence:'通知受信2026-10-21 19時',nextAction:'元アプリを確認'}};
+ const p=formatYosNotification(n);
+ assert.match(p.detail,/将来リスク：放置すると期限を逃す可能性/);
+ assert.match(p.detail,/根拠：通知受信2026-10-21 19時/);
+});
+test('authentication secret in model risk or evidence never reaches detail or delivery', () => {
+ const n={...reviewed,category:'payment',deliveryApproved:true,materiallyMoreUseful:true,analysis:{what:'要確認',risk:'OTP 1234',evidence:'Verification code 1234',nextAction:'確認'}};
+ const p=planYosDeliveries([n]);
+ assert.equal(p.send.length,0);
+ assert.equal(p.held.length,1);
+ assert.doesNotMatch(p.held[0].detail,/1234/);
+});
