@@ -40,7 +40,8 @@ export function normalizeNotification(input = {}) {
     sensitive, ignored: selfApps.test(sourceApp),
     nativeReminderNotifies: input.nativeReminderNotifies === true,
     existingAutomationNotifies: input.existingAutomationNotifies === true,
-    // Double notification is opt-in only after the original app notice is no longer active.
+    // Delivery is separately authorized and must add meaningful value.
+    // Keep the original app's notification on until on-device acceptance passes.
     deliveryApproved: input.deliveryApproved === true,
     materiallyMoreUseful: input.materiallyMoreUseful === true,
     originalNoticeDisabled: input.originalNoticeDisabled === true,
@@ -90,24 +91,55 @@ export function formatYosNotification(input) {
 }
 
 // Classification is not delivery. No sender is included in this module.
-// A caller may request delivery only after confirming that the replacement
-// is more useful and the original app notification has intentionally been disabled.
+// Only trusted, reviewed P0/P1 information that provides additional value can
+// be scheduled; an upstream app's original notification stays enabled.
 export function planYosDeliveries(inputs, options = {}) {
   const result = triageNotifications(inputs, options);
   const send = [], held = [];
   for (const alert of result.alerts) {
     const entry = {...formatYosNotification(alert), channel: alert.channel, key: alert.key};
-    // OTPs stay in the originating app only, never YOS re-notification.
-    // Confirmed P0 can run in parallel with the original safety notification.
-    const confirmedEmergency = alert.channel === 'emergency' &&
-      alert.requiresImmediateAwareness && alert.requiresImmediateAction &&
-      alert.delayCausesMaterialHarm;
-    const replacementReady = alert.originalNoticeDisabled || confirmedEmergency;
-    if (!alert.sensitive && alert.deliveryApproved && alert.materiallyMoreUseful &&
-        replacementReady && !['morning', 'night', 'routine'].includes(alert.channel)) {
+    // Never suppress upstream alerts. P0 and explicitly reviewed valuable
+    // P1 guidance may coexist until the complete iPhone flow is verified.
+    // Low priority, duplicates, OTPs and AI-only guesses stay held.
+    const actionable = ['emergency', 'payment', 'money', 'task'].includes(alert.channel);
+    if (!alert.sensitive && alert.deliveryApproved && alert.materiallyMoreUseful && actionable) {
       send.push(entry);
+    } else {
+      held.push(entry);
     }
-    else held.push(entry);
   }
   return {records: result.records, send, held};
+}
+
+
+// Parse the exact seven-line response format used by the existing iPhone
+// ChatGPT notification shortcut. This is a *proposal*, not permission to send.
+// A notification body that happens to contain YOS_ALERT never passes this gate.
+export function parseYosModelResponse(value) {
+  const invalid = {valid: false, status: 'YOS_SILENT', priority: 'P3', analysis: null};
+  if (typeof value !== 'string' || value.length > 5000) return invalid;
+  const lines = value.replace(/^\uFEFF/, '').replace(/\r\n/g, '\n')
+    .split('\n').map(line => line.trim()).filter(Boolean);
+  const status = lines[0];
+  if (!['YOS_ALERT', 'YOS_SILENT'].includes(status) || lines.length !== 7) return invalid;
+  const labels = ['優先度', '事実', '自分への影響', '将来リスク', '推奨', '根拠'];
+  const values = [];
+  for (let i = 0; i < labels.length; i++) {
+    const prefix = labels[i] + ':';
+    const line = lines[i + 1].replace(/：/, ':');
+    if (!line.startsWith(prefix)) return invalid;
+    values.push(line.slice(prefix.length).trim());
+  }
+  const [priority, what, impact, risk, nextAction, evidence] = values;
+  if (!['P0', 'P1', 'P2', 'P3'].includes(priority)) return invalid;
+  if ((status === 'YOS_ALERT') !== ['P0', 'P1'].includes(priority)) return invalid;
+  if (!what || !impact || !risk || !nextAction || !evidence) return invalid;
+  // Secrets are removed *before* any delivery/persistence, including AI output.
+  if (authText.test(value)) return invalid;
+  return {
+    valid: true, status, priority,
+    analysis: {what: redact(what, false, 120), impact: redact(impact, false, 140),
+      risk: redact(risk, false, 180), nextAction: redact(nextAction, false, 120),
+      evidence: redact(evidence, false, 180)}
+  };
 }
