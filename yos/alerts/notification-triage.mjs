@@ -30,6 +30,7 @@ export function normalizeNotification(input = {}) {
     impact: redact(proposal.impact, sensitive, 140),
     deadline: proposal.deadlineConfirmedBySource === true
       ? redact(proposal.deadline, sensitive, 70) : '',
+    deadlineConfirmedBySource: proposal.deadlineConfirmedBySource === true,
     nextAction: redact(proposal.nextAction, sensitive, 120)
   } : null;
   const category = ['payment', 'money_anomaly', 'task', 'routine', 'information'].includes(input.category)
@@ -70,8 +71,8 @@ export function triageNotifications(inputs, {notifiedKeys = [], now = new Date()
 // Convert an AI proposal to a readable detail view without asserting missing facts.
 // The lock-screen payload deliberately excludes names, amounts and OTPs.
 export function formatYosNotification(input) {
-  const n = input && typeof input === 'object' && 'ignored' in input
-    ? input : normalizeNotification(input);
+  // Revalidate even if input already resembles a normalized record.
+  const n = normalizeNotification(input);
   const facts = n.analysis || {};
   return {
     title: 'YOS Alerts',
