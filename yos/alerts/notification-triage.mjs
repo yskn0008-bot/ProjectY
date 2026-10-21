@@ -112,34 +112,46 @@ export function planYosDeliveries(inputs, options = {}) {
 }
 
 
-// Parse the exact seven-line response format used by the existing iPhone
-// ChatGPT notification shortcut. This is a *proposal*, not permission to send.
-// A notification body that happens to contain YOS_ALERT never passes this gate.
+// Parse the two *existing* iPhone output contracts. This merely validates an
+// AI proposal; the caller must independently approve and receipt any delivery.
+// Strict first-line matching prevents third-party notification text from faking
+// a YOS_ALERT by mentioning that word inside the body.
 export function parseYosModelResponse(value) {
   const invalid = {valid: false, status: 'YOS_SILENT', priority: 'P3', analysis: null};
   if (typeof value !== 'string' || value.length > 5000) return invalid;
   const lines = value.replace(/^\uFEFF/, '').replace(/\r\n/g, '\n')
     .split('\n').map(line => line.trim()).filter(Boolean);
   const status = lines[0];
-  if (!['YOS_ALERT', 'YOS_SILENT'].includes(status) || lines.length !== 7) return invalid;
-  const labels = ['優先度', '事実', '自分への影響', '将来リスク', '推奨', '根拠'];
+  if (!['YOS_ALERT', 'YOS_SILENT'].includes(status)) return invalid;
+  // Legacy: status + priority + five facts + evidence (7 lines).
+  // Notification Context v0.3: status + exactly five facts (6 lines).
+  const latest = lines.length === 6;
+  const labels = latest
+    ? ['事実','本人への影響','将来のリスク','推奨する次の一手','根拠と鮮度']
+    : ['優先度','事実','自分への影響','将来リスク','推奨','根拠'];
+  if (lines.length !== labels.length + 1) return invalid;
   const values = [];
   for (let i = 0; i < labels.length; i++) {
     const prefix = labels[i] + ':';
-    const line = lines[i + 1].replace(/：/, ':');
+    const line = lines[i+1].replace(/：/, ':');
     if (!line.startsWith(prefix)) return invalid;
     values.push(line.slice(prefix.length).trim());
   }
-  const [priority, what, impact, risk, nextAction, evidence] = values;
-  if (!['P0', 'P1', 'P2', 'P3'].includes(priority)) return invalid;
-  if ((status === 'YOS_ALERT') !== ['P0', 'P1'].includes(priority)) return invalid;
-  if (!what || !impact || !risk || !nextAction || !evidence) return invalid;
-  // Secrets are removed *before* any delivery/persistence, including AI output.
+  if (values.some(x => !x)) return invalid;
+  const priority = latest ? (status === 'YOS_ALERT' ? 'P1' : 'P3') : values[0];
+  if (!['P0','P1','P2','P3'].includes(priority) ||
+      ((status === 'YOS_ALERT') !== ['P0','P1'].includes(priority))) return invalid;
+  const [what, impact, risk, nextAction, evidence] = latest ? values : values.slice(1);
+  // AI replies with authentication codes do not leave this adapter.
   if (authText.test(value)) return invalid;
   return {
     valid: true, status, priority,
-    analysis: {what: redact(what, false, 120), impact: redact(impact, false, 140),
-      risk: redact(risk, false, 180), nextAction: redact(nextAction, false, 120),
-      evidence: redact(evidence, false, 180)}
+    // Legacy and v0.3 carry the same five useful fields once normalized.
+    // 'P1' for v0.3 means candidate only, not verified impact/severity.
+    analysis: {
+      what: redact(what,false,120), impact: redact(impact,false,140),
+      risk: redact(risk,false,180), nextAction: redact(nextAction,false,120),
+      evidence: redact(evidence,false,180)
+    }
   };
 }
