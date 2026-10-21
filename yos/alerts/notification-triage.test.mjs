@@ -74,10 +74,10 @@ test('non-actionable raw notification never reaches delivery', () => {
   assert.equal(planYosDeliveries([base]).send.length,0);
   assert.equal(planYosDeliveries([reviewed]).send.length,0);
 });
-test('classified payment held while original app notification is active', () => {
+test('approved valuable payment may add guidance without silencing the original app', () => {
   const item={...reviewed,category:'payment',deliveryApproved:true,materiallyMoreUseful:true};
-  assert.equal(planYosDeliveries([item]).send.length,0);
-  assert.equal(planYosDeliveries([item]).held.length,1);
+  assert.equal(planYosDeliveries([item]).send.length,1);
+  assert.equal(planYosDeliveries([item]).held.length,0);
 });
 test('only explicitly approved useful nonduplicate payment qualifies for delivery', () => {
   const item={...reviewed,category:'payment',deliveryApproved:true,materiallyMoreUseful:true,originalNoticeDisabled:true};
