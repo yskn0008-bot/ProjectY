@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {triageNotifications, normalizeNotification, formatYosNotification, planYosDeliveries} from './notification-triage.mjs';
+import {triageNotifications, normalizeNotification, formatYosNotification, planYosDeliveries, parseYosModelResponse} from './notification-triage.mjs';
 
 const base = {sourceId:'mail:123', sourceApp:'Mail', title:'Payment reminder', receivedAt:'2026-10-20T09:00:00+09:00', summary:'Due tomorrow'};
 const reviewed = {...base, needsReview:false, confirmedByYOS:true};
@@ -116,4 +116,12 @@ test('verified P0 can notify alongside original native safety alert',()=>{
  const plan=planYosDeliveries([item]);
  assert.equal(plan.send.length,1);
  assert.equal(plan.send[0].channel,'emergency');
+});
+
+test('iPhone model result first-line gate recognizes only exact notification response',()=>{
+  const lines=['YOS_ALERT','優先度: P1','事実: 予定の変更','自分への影響: 要確認','将来リスク: 未確認','推奨: 元アプリを確認','根拠: 受信通知'];
+  assert.equal(parseYosModelResponse(lines.join('\n')).valid,true);
+  assert.equal(parseYosModelResponse('bad\n'+lines.join('\n')).valid,false);
+  assert.equal(parseYosModelResponse(lines.join('\n').replace('P1','P3')).valid,false);
+  assert.equal(parseYosModelResponse('YOS_ALERT').valid,false);
 });
