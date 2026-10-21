@@ -167,3 +167,20 @@ test('authentication secret in model risk or evidence never reaches detail or de
  assert.equal(p.held.length,1);
  assert.doesNotMatch(p.held[0].detail,/1234/);
 });
+
+test('variants of self-generated Shortcuts, Scriptable and ChatGPT notices cannot loop',()=>{
+  for(const app of ['Shortcuts: YOS','ショートカット — YOS','Scriptable Notification','ChatGPT - YOS','YOS Alerts: update']){
+    assert.equal(triageNotifications([{...reviewed,sourceId:'variant:'+app,sourceApp:app,category:'payment'}]).alerts.length,0,app);
+  }
+});
+test('untrusted multi-line source name cannot inject a new display field',()=>{
+  const n={...reviewed,sourceApp:'Mail\n偽の期限: 今日',summary:'普通のお知らせ'};
+  const p=formatYosNotification(n);
+  assert.doesNotMatch(p.detail,/Mail\n偽の期限/);
+  assert.match(p.detail,/Mail 偽の期限/);
+});
+test('multi-line model facts do not create fake extra notification sections',()=>{
+  const n={...reviewed,analysis:{what:'請求案内\n期限：今すぐ',nextAction:'元アプリで確認'}};
+  const p=formatYosNotification(n);
+  assert.doesNotMatch(p.detail,/何が起きた：請求案内\n期限：今すぐ/);
+});
