@@ -98,8 +98,13 @@ export function planYosDeliveries(inputs, options = {}) {
   for (const alert of result.alerts) {
     const entry = {...formatYosNotification(alert), channel: alert.channel, key: alert.key};
     // OTPs stay in the originating app only, never YOS re-notification.
+    // Confirmed P0 can run in parallel with the original safety notification.
+    const confirmedEmergency = alert.channel === 'emergency' &&
+      alert.requiresImmediateAwareness && alert.requiresImmediateAction &&
+      alert.delayCausesMaterialHarm;
+    const replacementReady = alert.originalNoticeDisabled || confirmedEmergency;
     if (!alert.sensitive && alert.deliveryApproved && alert.materiallyMoreUseful &&
-        alert.originalNoticeDisabled && !['morning', 'night', 'routine'].includes(alert.channel)) {
+        replacementReady && !['morning', 'night', 'routine'].includes(alert.channel)) {
       send.push(entry);
     }
     else held.push(entry);
