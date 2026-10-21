@@ -100,9 +100,10 @@ test('security code in AI explanation is never reflected in rendered details', (
     what:'Your sign-in code 9876',impact:'ログインの検証',nextAction:'OTP 9876 を入力'
   },category:'payment',deliveryApproved:true,materiallyMoreUseful:true,originalNoticeDisabled:true};
   const plan=planYosDeliveries([item]);
-  assert.equal(plan.send.length,1);
-  assert.doesNotMatch(plan.send[0].detail,/9876/);
-  assert.doesNotMatch(plan.send[0].lockScreenBody,/9876/);
+  assert.equal(plan.send.length,0);
+  assert.equal(plan.held.length,1);
+  assert.doesNotMatch(plan.held[0].detail,/9876/);
+  assert.doesNotMatch(plan.held[0].lockScreenBody,/9876/);
 });
 test('an untrusted object with ignored field cannot bypass presentation redaction', () => {
   const p=formatYosNotification({...base,ignored:true,title:'Security code 1234',summary:'PIN 1234'});
