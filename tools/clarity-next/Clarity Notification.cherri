@@ -19,6 +19,23 @@ if !notificationText {
     stop()
 }
 
+// Fail closed for self-generated alerts and authentication secrets.
+// The original app notification remains available. Never persist OTP text.
+if notificationText contains "source_app=Shortcuts" { stop() }
+if notificationText contains "source_app=ショートカット" { stop() }
+if notificationText contains "source_app=Actions" { stop() }
+if notificationText contains "source_app=Scriptable" { stop() }
+if notificationText contains "source_app=ChatGPT" { stop() }
+if notificationText contains "source_app=YOS Alerts" { stop() }
+if notificationText contains "認証コード" { stop() }
+if notificationText contains "確認コード" { stop() }
+if notificationText contains "ワンタイム" { stop() }
+if notificationText contains "暗証番号" { stop() }
+if notificationText contains "パスコード" { stop() }
+if notificationText contains "OTP" { stop() }
+if notificationText contains "verification code" { stop() }
+if notificationText contains "security code" { stop() }
+
 // The automation supplies source_app/title/message through Shortcut Input.
 // Preserve the unmodified received text for later interpretation by YOS.
 const record = text("{CurrentDate}\tNOTIFICATION\t{notificationText}\n")
