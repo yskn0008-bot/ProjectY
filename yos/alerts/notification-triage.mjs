@@ -2,7 +2,7 @@
 import {selectAlerts} from './alert-engine.mjs';
 
 const clean = value => String(value ?? '').trim();
-const forbidden = /\b(?:\d{4}[ -]?\d{4}[ -]?\d{4}[ -]?\d{4}|\d{6})\b/g;
+const forbidden = /\b(?:\d[ -]?){11,27}\d\b|\b\d{6}\b/g;
 const authText = /認証|確認コード|ワンタイム|暗証番号|パスコード|ログインコード|verification|one[- ]?time|passcode|security code|sign[- ]?in code|\bOTP\b|\bPIN\b/i;
 const selfApps = /^(?:shortcuts?|ショートカット|actions|scriptable|chatgpt|yos(?: alerts)?|clarity notification)$/i;
 const redact = (value, sensitive, limit) => sensitive
