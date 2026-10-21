@@ -134,3 +134,22 @@ test('20-digit transaction reference is hidden before any notification detail is
   assert.doesNotMatch(d.detail,/98765432100123456789/);
   assert.match(d.detail,/redacted/);
 });
+
+test('v0.3 five-field alert response is parsed',()=>{
+ const x=['YOS_ALERT','事実: 支払案内','本人への影響: 期限確認が必要','将来のリスク: 期限未確認','推奨する次の一手: 元アプリを確認','根拠と鮮度: 受信通知'].join('\n');
+ const r=parseYosModelResponse(x);
+ assert.equal(r.valid,true);
+ assert.equal(r.status,'YOS_ALERT');
+ assert.equal(r.priority,'P1');
+ assert.equal(r.analysis.nextAction,'元アプリを確認');
+});
+test('v0.3 five-field digest response is silent',()=>{
+ const x=['YOS_SILENT','事実: 通常のリマインダー','本人への影響: 追加なし','将来のリスク: 未確認','推奨する次の一手: なし','根拠と鮮度: 受信通知'].join('\n');
+ const r=parseYosModelResponse(x);
+ assert.equal(r.valid,true);
+ assert.equal(r.status,'YOS_SILENT');
+});
+test('v0.3 malformed output stays silent',()=>{
+ const x=['YOS_ALERT','事実: 案内','本人への影響: 要確認','将来のリスク: 未確認','推奨する次の一手: 確認'].join('\n');
+ assert.equal(parseYosModelResponse(x).valid,false);
+});
