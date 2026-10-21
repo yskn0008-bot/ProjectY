@@ -109,3 +109,11 @@ test('an untrusted object with ignored field cannot bypass presentation redactio
   const p=formatYosNotification({...base,ignored:true,title:'Security code 1234',summary:'PIN 1234'});
   assert.doesNotMatch(p.detail,/1234/);
 });
+
+test('verified P0 can notify alongside original native safety alert',()=>{
+ const item={...reviewed,category:'information',deliveryApproved:true,materiallyMoreUseful:true,
+  requiresImmediateAwareness:true,requiresImmediateAction:true,delayCausesMaterialHarm:true};
+ const plan=planYosDeliveries([item]);
+ assert.equal(plan.send.length,1);
+ assert.equal(plan.send[0].channel,'emergency');
+});
