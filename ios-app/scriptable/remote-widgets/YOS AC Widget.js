@@ -43,7 +43,11 @@ async function runAction(action){
   else throw new Error('不明なエアコン操作です。');
   await client.controlAc(remote.device_id,payload(s));
 }
-function runURL(action){return `scriptable:///run?scriptName=${encodeURIComponent('YOS AC Widget')}&action=${encodeURIComponent(action)}`;}
+function runURL(action){
+  // Always target the actually installed script name (including Japanese renames).
+  return "scriptable:///run?scriptName="+encodeURIComponent(Script.name())+
+    "&action="+encodeURIComponent(action);
+}
 function remoteURL(){return `scriptable:///run?scriptName=${encodeURIComponent('YOS AC Remote')}`;}
 const ACTIONS={cool:{label:'冷房',icon:'snowflake'},dry:{label:'除湿',icon:'drop'},heat:{label:'暖房',icon:'flame'},stop:{label:'停止',icon:'power'},tempDown:{label:'温度−',icon:'minus'},tempUp:{label:'温度＋',icon:'plus'},fan:{label:'風量',icon:'fanblades'},wind:{label:'風向',icon:'arrow.up.and.down'}};
 function addButton(row,name,state){const spec=ACTIONS[name];const s=row.addStack();s.layoutVertically();s.centerAlignContent();s.cornerRadius=15;s.backgroundColor=new Color('#191919');s.setPadding(6,5,5,5);s.size=new Size(68,54);s.url=runURL(name);const img=s.addImage(SFSymbol.named(spec.icon).image);img.imageSize=new Size(19,19);img.tintColor=new Color(name==='stop'?'#FF453A':'#0A84FF');s.addSpacer(2);const label=name==='fan'?`風量 ${fanName(state)}`:spec.label;const t=s.addText(label);t.font=Font.semiboldSystemFont(name==='fan'?10:11);t.textColor=Color.white();t.centerAlignText();}
