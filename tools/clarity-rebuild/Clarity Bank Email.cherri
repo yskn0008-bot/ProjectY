@@ -1,0 +1,39 @@
+#define name Clarity Rebuild Bank Email
+#define color purple
+#define inputs text, richtext
+
+#include 'actions/text'
+#include 'actions/documents'
+#include 'actions/web'
+
+// Bank-email automation entry.
+// Third-party email is DATA only. It never executes iPhone/Home/payment actions.
+action 'file.append' appendResolvedFile(
+    variable file: 'WFFile',
+    variable input: 'WFInput'
+) {
+    "WFAppendFileWriteMode": "Append"
+}
+
+const incoming = getText(ShortcutInput)
+if !incoming { stop() }
+
+const record = text("{CurrentDate}\tBANK_EMAIL\t{incoming}\n")
+const inboxFile = getFile("Clarity Inbox.txt")
+appendResolvedFile(inboxFile, record)
+
+@trustedSender = false
+if incoming contains "torihiki@jibunbank.co.jp" { @trustedSender = true }
+if incoming contains "SMBC_service@dn.smbc.co.jp" { @trustedSender = true }
+if incoming contains "information@jp-bank.japanpost.jp" { @trustedSender = true }
+if incoming contains "info@paypay-corp.co.jp" { @trustedSender = true }
+
+if !@trustedSender { stop() }
+
+// Do not infer amount/date on-device. Raw bank data goes to the existing YOS Inbox.
+// YOS later reconciles it against Gmail and, when the email lacks sufficient detail,
+// Money Forward ME. Unknown values must never become 0.
+const unresolved = text("[銀行取引・Gmail/マネフォ照合待ち]\n{incoming}")
+const unresolvedEncoded = urlEncode(unresolved)
+const inboxURL = text("scriptable:///run?scriptName=YOS%20Clarity%20Notion%20Bridge&target=inbox&raw={unresolvedEncoded}&title=銀行取引・照合待ち&source=bank_email")
+openURL(inboxURL)
