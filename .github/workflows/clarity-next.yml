@@ -50,18 +50,26 @@ jobs:
           rm -f './Clarity Next_unsigned.shortcut' './Clarity Next.plist'
           rm -f './Clarity Text_unsigned.shortcut' './Clarity Text.plist'
           rm -f './Clarity Share v4_unsigned.shortcut' './Clarity Share v4.plist'
+          rm -f './Clarity Notification_unsigned.shortcut' './Clarity Notification.plist'
+          rm -f './Clarity Email_unsigned.shortcut' './Clarity Email.plist'
           cherri './Clarity Next.cherri' --skip-sign --debug
           cherri './Clarity Text.cherri' --skip-sign --debug
           cherri './Clarity Share.cherri' --skip-sign --debug
+          cherri './Clarity Notification.cherri' --skip-sign --debug
+          cherri './Clarity Email.cherri' --skip-sign --debug
           test -f './Clarity Next_unsigned.shortcut'
           test -f './Clarity Text_unsigned.shortcut'
           test -f './Clarity Share v4_unsigned.shortcut'
+          test -f './Clarity Notification_unsigned.shortcut'
+          test -f './Clarity Email_unsigned.shortcut'
           python3 patch_ledger_persistence.py './Clarity Next_unsigned.shortcut'
           python3 patch_calendar_reminder_wire_format.py './Clarity Next_unsigned.shortcut'
           mkdir -p artifacts
           cp './Clarity Next_unsigned.shortcut' artifacts/Clarity-Next-unsigned.shortcut
           cp './Clarity Text_unsigned.shortcut' artifacts/Clarity-Text-unsigned.shortcut
           cp './Clarity Share v4_unsigned.shortcut' artifacts/Clarity-Share-v4-unsigned.shortcut
+          cp './Clarity Notification_unsigned.shortcut' artifacts/Clarity-Notification-unsigned.shortcut
+          cp './Clarity Email_unsigned.shortcut' artifacts/Clarity-Email-unsigned.shortcut
 
       - name: Inspect runtime
         shell: bash
@@ -150,7 +158,21 @@ jobs:
           assert '__YOS_CLARITY_SHARE_TEXT_V1__' in share_blob
           assert '__YOS_CLARITY_SHARE_IMAGE_V1__' in share_blob
           assert '__YOS_CLARITY_SHARE_PDF_V1__' in share_blob
-          print('Clarity thin entry wrappers: PASS')
+          notification_root=plistlib.loads((base/'Clarity-Notification-unsigned.shortcut').read_bytes())
+          notification_ids=[a.get('WFWorkflowActionIdentifier','') for a in notification_root.get('WFWorkflowActions',[])]
+          notification_blob=repr(notification_root)
+          assert notification_root.get('WFWorkflowHasShortcutInputVariables') is True
+          assert 'Clarity Inbox.txt' in notification_blob
+          assert 'NOTIFICATION' in notification_blob
+          assert not any(i in ('is.workflow.actions.askllm','is.workflow.actions.getcontentsofurl','is.workflow.actions.runworkflow') for i in notification_ids)
+          email_root=plistlib.loads((base/'Clarity-Email-unsigned.shortcut').read_bytes())
+          email_ids=[a.get('WFWorkflowActionIdentifier','') for a in email_root.get('WFWorkflowActions',[])]
+          email_blob=repr(email_root)
+          assert email_root.get('WFWorkflowHasShortcutInputVariables') is True
+          assert 'Clarity Inbox.txt' in email_blob
+          assert 'EMAIL' in email_blob
+          assert not any(i in ('is.workflow.actions.askllm','is.workflow.actions.getcontentsofurl','is.workflow.actions.runworkflow') for i in email_ids)
+          print('Clarity thin entry wrappers and raw-first email/notification adapters: PASS')
           PY
 
       - name: Secret scan
@@ -181,6 +203,16 @@ jobs:
             --output tools/clarity-next/artifacts/Clarity-Share-v4-signed.shortcut \
             --name 'Clarity Share v4' \
             2>&1 | tee tools/clarity-next/artifacts/clarity-share-hubsign.log
+          python3 tools/clarity-factory/sign_with_hubsign.py \
+            --input tools/clarity-next/artifacts/Clarity-Notification-unsigned.shortcut \
+            --output tools/clarity-next/artifacts/Clarity-Notification-signed.shortcut \
+            --name 'Clarity Notification' \
+            2>&1 | tee tools/clarity-next/artifacts/clarity-notification-hubsign.log
+          python3 tools/clarity-factory/sign_with_hubsign.py \
+            --input tools/clarity-next/artifacts/Clarity-Email-unsigned.shortcut \
+            --output tools/clarity-next/artifacts/Clarity-Email-signed.shortcut \
+            --name 'Clarity Email' \
+            2>&1 | tee tools/clarity-next/artifacts/clarity-email-hubsign.log
 
       - name: Verify signature
         shell: bash
@@ -188,7 +220,7 @@ jobs:
           set -euo pipefail
           python3 - <<'PY'
           from pathlib import Path
-          for name in ('Clarity-Next-signed.shortcut','Clarity-Text-signed.shortcut','Clarity-Share-v4-signed.shortcut'):
+          for name in ('Clarity-Next-signed.shortcut','Clarity-Text-signed.shortcut','Clarity-Share-v4-signed.shortcut','Clarity-Notification-signed.shortcut','Clarity-Email-signed.shortcut'):
               p=Path('tools/clarity-next/artifacts')/name
               data=p.read_bytes()
               assert data.startswith(b'AEA1'), (name,data[:8])
@@ -207,7 +239,72 @@ jobs:
             tools/clarity-next/artifacts/Clarity-Text-signed.shortcut
             tools/clarity-next/artifacts/Clarity-Share-v4-unsigned.shortcut
             tools/clarity-next/artifacts/Clarity-Share-v4-signed.shortcut
+            tools/clarity-next/artifacts/Clarity-Notification-unsigned.shortcut
+            tools/clarity-next/artifacts/Clarity-Notification-signed.shortcut
+            tools/clarity-next/artifacts/Clarity-Email-unsigned.shortcut
+            tools/clarity-next/artifacts/Clarity-Email-signed.shortcut
             tools/clarity-next/artifacts/hubsign.log
             tools/clarity-next/artifacts/clarity-text-hubsign.log
             tools/clarity-next/artifacts/clarity-share-hubsign.log
+            tools/clarity-next/artifacts/clarity-notification-hubsign.log
+            tools/clarity-next/artifacts/clarity-email-hubsign.log
           if-no-files-found: error
+
+  direct-install:
+    name: Publish signed notification shortcut to PR branch
+    needs: build
+    if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == 'yskn0008-bot/ProjectY' && github.event.pull_request.head.ref == 'feat/clarity-notification-intake-20261018' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout exact delivery branch
+        uses: actions/checkout@v4
+        with:
+          ref: feat/clarity-notification-intake-20261018
+          persist-credentials: true
+      - name: Fetch signed artifact from successful build
+        uses: actions/download-artifact@v4
+        with:
+          name: clarity-next-v0
+          path: ${{ runner.temp }}/clarity-next-v0
+      - name: Publish only signed, verified Email and Notification adapters
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p tools/clarity-next/distribution
+          for name in Clarity-Notification Clarity-Email; do
+            from="${{ runner.temp }}/clarity-next-v0/${name}-signed.shortcut"
+            if [ "$name" = 'Clarity-Email' ]; then
+              source='tools/clarity-next/Clarity Email.cherri'
+            else
+              source='tools/clarity-next/Clarity Notification.cherri'
+            fi
+            destination="tools/clarity-next/distribution/${name}-signed.shortcut"
+            manifest="${destination}.source.sha256"
+            source_sha="$(sha256sum "$source" | cut -d ' ' -f 1)"
+            if [ -s "$destination" ] && [ -s "$manifest" ] && [ "$(cat "$manifest")" = "$source_sha" ]; then
+              echo "${name}: source unchanged; keep previously verified signature."
+              continue
+            fi
+            test -s "$from"
+            python3 - "$from" <<'PY'
+          from pathlib import Path
+          import sys
+          data=Path(sys.argv[1]).read_bytes()
+          assert data.startswith(b'AEA1') and len(data)>500
+          PY
+            install -m 0644 "$from" "$destination"
+            printf '%s' "$source_sha" > "$manifest"
+          done
+          git add tools/clarity-next/distribution/Clarity-Notification-signed.shortcut tools/clarity-next/distribution/Clarity-Email-signed.shortcut
+          git add tools/clarity-next/distribution/*.source.sha256
+          if git diff --cached --quiet; then
+            echo "Distribution artifact already current."
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m "build(clarity): publish signed notification direct-import artifact [skip ci]"
+          git push origin HEAD:refs/heads/feat/clarity-notification-intake-20261018
