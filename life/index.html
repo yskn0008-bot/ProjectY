@@ -460,7 +460,7 @@ function launchCalendarSync(){
   el('syncLaunchStatus').textContent='Scriptableで予定を取得します。戻っても更新されない場合は「更新できないとき」を開いてください。';
   el('syncHelpButton').hidden=false;
   if(el('syncDialog').open)el('syncDialog').close();
-  location.href='scriptable:///run?scriptName=YOS%20Life%20Calendar%20Sync&openEditor=false';
+  location.href='scriptable:///run/YOS%20Life%20Calendar%20Sync?openEditor=false';
 }
 el('syncButton').onclick=launchCalendarSync;
 el('syncRetryButton').onclick=launchCalendarSync;
