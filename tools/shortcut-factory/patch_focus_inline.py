@@ -51,14 +51,18 @@ def patch(path: Path) -> None:
 
     matches = []
     for action in root.get("WFWorkflowActions", []):
-        if action.get("WFWorkflowActionIdentifier") != ACTION_ID:
+        if action.get("WFWorkflowActionIdentifier") not in (ACTION_ID, "is.workflow.actions.rawaction"):
             continue
         params = action.get("WFWorkflowActionParameters", {})
-        if params.get("script") == PLACEHOLDER:
+        raw = params.get("script")
+        value = raw.get("Value", {}).get("string", "") if isinstance(raw, dict) else raw
+        if value == PLACEHOLDER:
+            action["WFWorkflowActionIdentifier"] = ACTION_ID
             matches.append(params)
 
     if len(matches) != 1:
-        raise SystemExit(f"expected one Focus inline placeholder, found {len(matches)}")
+        action_summary = [(a.get("WFWorkflowActionIdentifier"), repr(a.get("WFWorkflowActionParameters", {}))[:1200]) for a in root.get("WFWorkflowActions", [])]
+        raise SystemExit(f"expected one Focus inline placeholder, found {len(matches)}; actions={action_summary}")
 
     matches[0]["script"] = {
         "Value": {"string": SCRIPT},
