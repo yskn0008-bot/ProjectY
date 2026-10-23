@@ -9,6 +9,7 @@ ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "Clarity Next.cherri"
 PATCH = ROOT / "patch_ledger_persistence.py"
 WIRE_PATCH = ROOT / "patch_calendar_reminder_wire_format.py"
+NOTION_PATCH = ROOT / "patch_notion_inline_bridge.py"
 
 class ClarityNextSourceContractTests(unittest.TestCase):
     @classmethod
@@ -32,6 +33,14 @@ class ClarityNextSourceContractTests(unittest.TestCase):
         self.assertIn('"WFSaveFileOverwrite": True', patch)
         self.assertIn('file.append survived rewrite', patch)
 
+
+    def test_notion_inline_bridge_patch_is_locked(self):
+        patch = NOTION_PATCH.read_text(encoding="utf-8")
+        self.assertIn('dk.simonbs.Scriptable.RunScriptInlineIntent', patch)
+        self.assertIn('__YOS_NOTION_BRIDGE_INLINE__', patch)
+        self.assertIn('YOS_NOTION_INTEGRATION_TOKEN', patch)
+        self.assertIn('965c6086-32c1-463d-93b4-87a9cb69b3ad', patch)
+        self.assertIn('95b30d16-7530-40c6-a320-dab99acad55d', patch)
 
     def test_calendar_reminder_wire_format_patch_is_locked(self):
         patch = WIRE_PATCH.read_text(encoding="utf-8")
@@ -61,7 +70,8 @@ class ClarityNextSourceContractTests(unittest.TestCase):
     def test_capability_gate_is_explicit(self):
         for executor in ("YOS_OpenApp", "NEXT_DEVICE", "NEXT_TIMER", "NEXT_CALENDAR", "NEXT_REMINDER", "NEXT_NAVIGATE", "NEXT_NOTION", "NEXT_MONEY", "NEXT_ANSWER"):
             self.assertIn(executor, self.source)
-        self.assertIn("unsupported_executor", self.source)
+        self.assertIn('@normalizedExecutor != "YOS_OpenApp"', self.source)
+        self.assertIn("この操作はClarity Next v0では未対応です", self.source)
 
 
     def test_swapped_router_fields_are_normalized(self):
@@ -83,8 +93,6 @@ class ClarityNextSourceContractTests(unittest.TestCase):
             )
             self.assertIn(f'@normalizedModule = "{normalized_module}"', self.source)
             self.assertIn(f'@normalizedExecutor = "{normalized_executor}"', self.source)
-        self.assertIn('module={normalizedModule}', self.source)
-        self.assertIn('executor={normalizedExecutor}', self.source)
 
     def test_safety_gates_precede_execution(self):
         review = self.source.index('if @normalizedNeedsReviewText == "はい"')
@@ -134,7 +142,7 @@ class ClarityNextSourceContractTests(unittest.TestCase):
         self.assertIn("NEXT_ANSWER以外の副作用を起こしません", self.source)
         self.assertIn("shareモードではYOS_OpenApp、NEXT_DEVICE、NEXT_TIMER、NEXT_CALENDAR、NEXT_REMINDER、NEXT_NAVIGATE、NEXT_NOTION、NEXT_MONEYを選びません", self.source)
         self.assertIn('if @inputMode == "share" && @normalizedExecutor != "NEXT_ANSWER"', self.source)
-        self.assertIn("share_side_effect_forbidden", self.source)
+        self.assertIn("共有内容は確認だけに使います", self.source)
 
     def test_base_home_alias_recovers_from_open_app_misroute(self):
         self.assertIn('@baseHomeAlias = false', self.source)
@@ -145,8 +153,37 @@ class ClarityNextSourceContractTests(unittest.TestCase):
         self.assertIn('@normalizedOperation = "open_yos_home"', self.source)
         self.assertIn('@normalizedNeedsReviewText = "いいえ"', self.source)
         self.assertIn('@normalizedNeedsConfirmationText = "いいえ"', self.source)
-        self.assertIn('operation={normalizedOperation}', self.source)
         self.assertIn('@normalizedOperation == "open_yos_home"', self.source)
+
+    def test_fast_paths_precede_model_round_trip(self):
+        model_i = self.source.index('const modelResult = askChatGPT')
+        for needle in (
+            'fastBaseHomeURL',
+            'fastSafariTarget',
+            'fastChatGPTTarget',
+        ):
+            self.assertIn(needle, self.source[:model_i])
+
+    def test_ledger_is_minimal_on_normal_path(self):
+        self.assertEqual(
+            self.source.count('appendToFile("Clarity Next Ledger.txt"'),
+            2,
+        )
+        self.assertIn('rawRecord', self.source)
+        self.assertIn('doneRecord', self.source)
+
+    def test_notion_capture_uses_existing_assets(self):
+        self.assertIn('NEXT_NOTION / notion / save', self.source)
+        for target in ('inbox', 'task', 'shopping', 'project', 'life_event', 'person', 'learning', 'balance'):
+            self.assertIn(target, self.source)
+        self.assertIn('dk.simonbs.Scriptable.RunScriptInlineIntent', self.source)
+        self.assertIn('__YOS_NOTION_BRIDGE_INLINE__', self.source)
+        patch = NOTION_PATCH.read_text(encoding="utf-8")
+        self.assertIn('YOS_NOTION_INTEGRATION_TOKEN', patch)
+        self.assertIn('3d35ca88-2895-81ef-9dc8-d5f11ff8e213', patch)
+        self.assertIn('965c6086-32c1-463d-93b4-87a9cb69b3ad', patch)
+        self.assertIn('95b30d16-7530-40c6-a320-dab99acad55d', patch)
+        self.assertNotIn('money-capture.html', self.source)
 
     def test_v0_acceptance_routes_exist(self):
         self.assertIn('run("YOS_OpenApp", app)', self.source)
@@ -156,10 +193,14 @@ class ClarityNextSourceContractTests(unittest.TestCase):
         self.assertIn('is.workflow.actions.addnewreminder', self.source)
         self.assertIn('scriptable:///run?scriptName=YOS%20Dashboard%20v2&action=baseHome', self.source)
         self.assertIn('openURL(notionHomeURL)', self.source)
-        self.assertIn('BASE HOME refresh bridge', self.source)
-        self.assertIn('notion_yos_home', self.source)
-        self.assertIn('money-capture.html?text={moneyEncoded}', self.source)
-        self.assertIn('openURL(moneyURL)', self.source)
+        self.assertIn('fastBaseHomeURL', self.source)
+        self.assertIn('@normalizedOperation == "open_yos_home"', self.source)
+        self.assertIn('dk.simonbs.Scriptable.RunScriptInlineIntent', self.source)
+        self.assertIn('__YOS_NOTION_BRIDGE_INLINE__', self.source)
+        patch = NOTION_PATCH.read_text(encoding="utf-8")
+        self.assertIn('YOS_NOTION_INTEGRATION_TOKEN', patch)
+        self.assertIn('95b30d16-7530-40c6-a320-dab99acad55d', patch)
+        self.assertNotIn('money-capture.html', self.source)
 
 if __name__ == "__main__":
     unittest.main()
