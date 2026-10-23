@@ -95,9 +95,9 @@ export async function loadNotionMorningBrief(
       fetchImpl,
       now
     });
-  } catch {
+  } catch (error) {
     moneySourceAvailable = false;
-    money = unconfirmedMoney('money-source-unavailable');
+    money = unconfirmedMoney(classifyMoneySourceFailure(error));
   }
 
   const alertItems: Array<MorningAlertItem & {rank: number}> = [];
@@ -287,6 +287,18 @@ function parseMoneyEvent(value: unknown): MoneyEventRow | null {
 
 function toPublicMoneyEvent(value: MoneyEventRow | null): MorningMoneyEvent | null {
   return value ? {title: value.title, date: value.date, amount: value.amount} : null;
+}
+
+// Only expose fixed diagnostic codes. Never return tokens, request bodies, or Notion URLs.
+function classifyMoneySourceFailure(error: unknown): string {
+  const message = error instanceof Error ? error.message : '';
+  const status = /^Notion request failed: (\\d{3})$/.exec(message)?.[1];
+  if (status === '401' || status === '403') return 'notion-money-auth-or-access-denied';
+  if (status === '404') return 'notion-money-resource-not-found';
+  if (status === '429') return 'notion-money-rate-limited';
+  if (status && Number(status) >= 500) return 'notion-money-service-unavailable';
+  if (message.startsWith('Expected exactly one Notion data source')) return 'notion-money-source-resolution-failed';
+  return 'notion-money-fetch-failed';
 }
 
 function unconfirmedMoney(reason: string): MorningMoneyProjection {

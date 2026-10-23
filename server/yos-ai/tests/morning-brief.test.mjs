@@ -230,7 +230,7 @@ test('Morning Brief marks dependent sections unconfirmed when Money Notion sourc
   assert.equal(result.nowStatus, 'confirmed');
   assert.ok(result.now);
   assert.equal(result.money.status, 'unconfirmed');
-  assert.equal(result.money.reason, 'money-source-unavailable');
+  assert.equal(result.money.reason, 'notion-money-source-resolution-failed');
   assert.equal(result.alerts.status, 'unconfirmed');
   assert.equal(result.alerts.count, null);
 });
