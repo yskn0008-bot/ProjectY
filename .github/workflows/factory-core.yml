@@ -36,6 +36,21 @@ jobs:
       - name: Loop Engine unit and A-F self-tests
         run: python3 -m unittest discover -s tools/factory-core/tests -v
 
+      - name: Canonical Flow validation and artifact packaging
+        run: python3 tools/factory-core/recover_flow_artifact.py --output-dir /tmp/canonical-flows
+
+      - name: Independent Flow canonicalization audit
+        run: python3 tools/factory-core/audit_flow_canonicalization.py
+
+      - name: Upload canonical signed Flow artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: canonical-flow-shortcuts
+          path: |
+            /tmp/canonical-flows/*.shortcut
+            /tmp/canonical-flows/manifest.json
+          if-no-files-found: error
+
       - name: ProjectY development supervisor contract
         run: node --test .github/scripts/projecty-development-supervisor.test.cjs
 
