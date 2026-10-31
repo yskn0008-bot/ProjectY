@@ -5,7 +5,7 @@ import {readFileSync} from 'node:fs';
 const source = readFileSync(new URL('./YOS_TODAY_TOMORROW_Widget_v1.js', import.meta.url), 'utf8');
 const body = source.slice(source.indexOf('(async function ()'));
 
-function runtime(runsInWidget, denyPermissions, widgetMode = 'DAY', withTaskFeed = false, tasksOverride = null) {
+function runtime(runsInWidget, denyPermissions, widgetMode = 'DAY', withTaskFeed = false, tasksOverride = null, calendarOverride = null) {
   let html = '';
   let widgetSet = false;
   let presented = 0;
@@ -39,7 +39,7 @@ function runtime(runsInWidget, denyPermissions, widgetMode = 'DAY', withTaskFeed
     CalendarEvent: {async between(start){
       if (!firstCalendarDate) firstCalendarDate = new Date(start).toISOString().slice(0,10);
       if (denyPermissions) throw new Error('Access denied');
-      return [{title:'TEST_CAL_EVENT',startDate:new Date(start.getTime()+7200000),endDate:new Date(start.getTime()+10800000),isAllDay:false}];
+      return calendarOverride || [{title:'TEST_CAL_EVENT',startDate:new Date(start.getTime()+7200000),endDate:new Date(start.getTime()+10800000),isAllDay:false}];
     }},
     Reminder: {async allIncomplete(){
       if (denyPermissions) throw new Error('Access denied');
@@ -107,7 +107,9 @@ test('overdue task is not silently promoted as todays top priority', async () =>
   await new Function(...Object.keys(mock.globals),'return '+body)(...Object.values(mock.globals));
   const page = mock.snapshot().html;
   const firstHero = page.slice(page.indexOf('<section class="hero">'),page.indexOf('</section>',page.indexOf('<section class="hero">')));
-  assert.match(firstHero,/Relevant current task/);
+  assert.match(firstHero,/今日の見通し/);
+  assert.doesNotMatch(firstHero,/Relevant current task/);
+  assert.match(page,/Relevant current task/);
   assert.doesNotMatch(firstHero,/Old Night Brief task/);
   assert.match(page,/期限を過ぎた登録タスク 1件/);
   assert.match(page,/Old Night Brief task/);
@@ -122,9 +124,40 @@ test('a feed with only expired tasks is presented as needing verification', asyn
   const mock = runtime(false,false,'DAY',true,[{title:'Night Brief',due}]);
   await new Function(...Object.keys(mock.globals),'return '+body)(...Object.values(mock.globals));
   const page = mock.snapshot().html;
-  assert.match(page,/期限切れの登録内容を確認/);
-  assert.match(page,/完了済みか未完了かは未確認/);
+  assert.match(page,/期限を過ぎた登録タスク 1件/);
+  assert.match(page,/期限が過ぎたタスクの状態を確認/);
   assert.match(page,/Notionで状態を確認/);
+});
+
+test('explicit taxi-demand reference calendar entries are not reported as appointments', async () => {
+  const d=new Date();
+  const eventStart = new Date(d.getFullYear(),d.getMonth(),d.getDate(),9,0);
+  const eventEnd = new Date(d.getFullYear(),d.getMonth(),d.getDate(),10,0);
+  const calendar=[
+    {title:'［タクシー需要］首里城復興祭',startDate:eventStart,endDate:eventEnd,isAllDay:false},
+    {title:'My actual visit',startDate:new Date(eventStart.getTime()+7200000),endDate:new Date(eventEnd.getTime()+7200000),isAllDay:false}
+  ];
+  const mock=runtime(false,false,'DAY',false,null,calendar);
+  await new Function(...Object.keys(mock.globals),'return '+body)(...Object.values(mock.globals));
+  const page=mock.snapshot().html;
+  assert.match(page,/今日の見通し/);
+  assert.match(page,/登録された予定 1件/);
+  assert.match(page,/参考イベント 1件（予定とは別）/);
+  assert.match(page,/My actual visit/);
+  assert.match(page,/［タクシー需要］首里城復興祭/);
+  const upcoming = page.slice(page.indexOf('これからの予定'),page.indexOf('<details class="refcalendar"'));
+  assert.doesNotMatch(upcoming,/首里城復興祭/);
+  assert.match(page,/class="weekref"/);
+});
+
+test('reference events alone do not count as personal appointment', async () => {
+  const d=new Date();
+  const calendar=[{title:'[タクシー需要] Local Event',startDate:new Date(d.getFullYear(),d.getMonth(),d.getDate(),9),endDate:new Date(d.getFullYear(),d.getMonth(),d.getDate(),10),isAllDay:false}];
+  const mock=runtime(false,false,'DAY',false,null,calendar);
+  await new Function(...Object.keys(mock.globals),'return '+body)(...Object.values(mock.globals));
+  const page=mock.snapshot().html;
+  assert.match(page,/参考以外の予定は未登録/);
+  assert.match(page,/参考イベント 1件（予定とは別）/);
 });
 
 test('the fullscreen header is offset below native WebView controls', () => {
