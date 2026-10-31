@@ -215,8 +215,10 @@
   }
   async function readMovementInbox() {
     const notKey='YOS_NOTION_INTEGRATION_TOKEN';
-    if(config.runsInWidget || !Keychain.contains(notKey)) return {candidate:false};
-    const token=Keychain.get(notKey);
+    if(config.runsInWidget) return {candidate:false};
+    let token='';
+    try { if(Keychain.contains(notKey)) token=Keychain.get(notKey); }
+    catch(e) { return {candidate:false}; }
     if(!token) return {candidate:false};
     const inboxId='3d35ca88-2895-81ef-9dc8-d5f11ff8e213';
     let cursor='',meta=null;
@@ -226,11 +228,13 @@
       return Array.isArray(chunks)?chunks.map(x=>clean(x && (x.plain_text || x.text && x.text.content),1900)).join(''):'';
     };
     try {
-      for(let page=0;page<4;page++) {
+      // Keep first-screen response bounded. If older Inbox blocks exceed this window,
+      // show "未確認", never claim that the user did not exercise.
+      for(let page=0;page<2;page++) {
         const base='https://api.notion.com/v1/blocks/'+inboxId+'/children?page_size=100';
         const req=new Request(base+(cursor?'&start_cursor='+encodeURIComponent(cursor):''));
         req.headers={Authorization:'Bearer '+token,'Notion-Version':'2026-03-11',Accept:'application/json'};
-        req.timeoutInterval=3;
+        req.timeoutInterval=2;
         const data=await req.loadJSON();
         if(Number(req.response && req.response.statusCode)!==200 ||
           !data || !Array.isArray(data.results)) return {candidate:false};
