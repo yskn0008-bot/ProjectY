@@ -27,12 +27,12 @@ function readState(){try{return fm.fileExists(statePath)?JSON.parse(fm.readStrin
 function rt(s){return [{type:'text',text:{content:String(s||'').slice(0,1900)}}];}
 function t(s){return {title:rt(s)};} function x(s){return {rich_text:rt(s)};}
 // Day-bounded semantic retry key: a repeat of the same task text on a later day may be intentional.
-function taskSyncKey(raw){const d=new Date(),day=[d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-');const norm=String(raw||'').normalize('NFKC').trim().replace(/\s+/g,' ');let h=2166136261;for(let i=0;i<norm.length;i++){h^=norm.charCodeAt(i);h=Math.imul(h,16777619);}return 'clarity:task:'+day+':'+(h>>>0).toString(16).padStart(8,'0');}
+function taskSyncKey(raw,when){const d=new Date(),day=[d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-');const norm=String(raw||'').normalize('NFKC').trim().replace(/\s+/g,' ')+'|'+String(when||'').trim();let h=2166136261;for(let i=0;i<norm.length;i++){h^=norm.charCodeAt(i);h=Math.imul(h,16777619);}return 'clarity:task:'+day+':'+(h>>>0).toString(16).padStart(8,'0');}
 async function findTaskByKey(ds,key){const r=await api('/data_sources/'+ds+'/query','POST',{filter:{property:'同期キー',rich_text:{equals:key}},page_size:2});const pages=r.results||[];if(pages.length>1)throw new Error('Multiple Notion tasks have the same sync key');return pages[0]?.id||null;}
 async function verifyTask(id,key){const page=await api('/pages/'+id);const text=(page.properties?.['同期キー']?.rich_text||[]).map(v=>v.plain_text||v.text?.content||'').join('');if(text!==key)throw new Error('Notion task readback did not match sync key');}
 async function main(){
  const state=readState();if(state[p.request_id])return 'DUPLICATE:'+p.target;
- const title=p.title||p.raw||'Clarity',raw=p.raw||title,key=p.target==='task'?taskSyncKey(raw):'clarity:'+p.request_id;let duplicateTask=false;
+ const title=p.title||p.raw||'Clarity',raw=p.raw||title,key=p.target==='task'?taskSyncKey(raw,p.date_time):'clarity:'+p.request_id;let duplicateTask=false;
  if(p.target==='inbox'){await api('/blocks/'+INBOX+'/children','PATCH',{children:[{object:'block',type:'paragraph',paragraph:{rich_text:rt(new Date().toISOString()+' '+key+' '+raw)}}]});}
  else{
   const ds=DS[p.target];if(!ds)throw new Error('Unsupported Notion target: '+p.target);
