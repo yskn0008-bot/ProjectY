@@ -51,5 +51,13 @@ class VoiceInputSourceContractTests(unittest.TestCase):
         ):
             self.assertIn(required, self.source)
 
+    def test_dry_run_capture_shows_that_notion_was_not_written(self):
+        self.assertIn('if @notionPending == "yes" {', SOURCE)
+        self.assertIn(
+            'show("テスト確認：入力はClarity Inboxに記録しました。Notion保存はテストのため実行していません。")',
+            SOURCE,
+        )
+
+
 if __name__ == "__main__":
     unittest.main()
