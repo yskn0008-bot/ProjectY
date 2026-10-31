@@ -89,10 +89,13 @@
     const end = new Date(start.getFullYear(),start.getMonth(),start.getDate()+1);
     try {
       const list = await CalendarEvent.between(start,end);
-      const items = list.filter(e => e && e.title && (e.isAllDay || (validDate(e.endDate || e.startDate) || end) >= (night ? start : now)))
-        .sort((a,b) => (a.isAllDay ? -1 : b.isAllDay ? 1 : (+new Date(a.startDate)-+new Date(b.startDate))))
-        .slice(0,10);
-      return {ok:true, items};
+      const ordered = list.filter(e => e && e.title && (e.isAllDay || (validDate(e.endDate || e.startDate) || end) >= (night ? start : now)))
+        .sort((a,b) => (a.isAllDay ? -1 : b.isAllDay ? 1 : (+new Date(a.startDate)-+new Date(b.startDate))));
+      // Keep imported reference events from displacing the user's other calendar events.
+      const selected = ordered.filter(e => !isReferenceEvent(e)).slice(0,10)
+        .concat(ordered.filter(isReferenceEvent).slice(0,4))
+        .sort((a,b) => (a.isAllDay ? -1 : b.isAllDay ? 1 : (+new Date(a.startDate)-+new Date(b.startDate))));
+      return {ok:true, items:selected};
     } catch(e) { return {ok:false,items:[]}; }
   }
   async function readReminders() {
@@ -314,6 +317,54 @@
       '<p>'+safe(focusNote)+'</p></section>';
     const taskSection = '<section class="section"><div class="sectionhead"><h3>大切なこと</h3>'+
       '<span class="tag">優先最大3件</span></div>'+cards+overdueNotice+'</section>';
+    // A suggestion is not a calendar booking or an assertion that the time is genuinely free.
+    const datedEvents = personalEvents.filter(e=>!e.isAllDay && validDate(e.startDate));
+    const ongoingEvent = datedEvents.find(e => {
+      const start=validDate(e.startDate),end=validDate(e.endDate);
+      return start && end && start<=now && end>now;
+    });
+    const nextEvent = datedEvents.find(e => validDate(e.startDate)>now);
+    const allDay = personalEvents.find(e=>e.isAllDay);
+    const nextAction = upcomingTasks[0] && !feed.stale ?
+      clean(upcomingTasks[0].nextAction || taskTitle(upcomingTasks[0]),90) : '';
+    let adviceTitle = '今日の確認';
+    let adviceDetail = '予定・タスクを確認し、余白を残して過ごそう。';
+    if(!events.ok) {
+      adviceTitle = 'まず予定を確認';
+      adviceDetail = 'カレンダーが取得できていないため、空き時間を推定しません。';
+    } else if(allDay) {
+      adviceTitle = '終日予定を確認';
+      adviceDetail = '終日予定が登録されています。行動を組む前に内容を確認しよう。';
+    } else if(ongoingEvent) {
+      adviceTitle = '登録済みの予定を優先';
+      adviceDetail = '現在の時間帯に予定が登録されています。タスクは予定のあとに検討しよう。';
+    } else if(nextEvent) {
+      const until = Math.max(0,Math.floor((validDate(nextEvent.startDate)-now)/60000));
+      if(until<=30) {
+        adviceTitle = '次の予定の準備を優先';
+        adviceDetail = '次の予定まで約'+until+'分。移動・準備時間は未計算です。';
+      } else if(nextAction && until<=90) {
+        adviceTitle = '短い作業に着手する候補';
+        adviceDetail = '次の予定まで約'+until+'分。移動・準備の時間を除いて、'+nextAction;
+      } else if(nextAction) {
+        adviceTitle = '優先タスクの次の一手';
+        adviceDetail = '次の登録予定まで約'+Math.floor(until/60)+'時間。所要時間は未確認：'+nextAction;
+      } else {
+        adviceTitle = '次の予定に向けた準備';
+        adviceDetail = '次の登録予定まで約'+until+'分。移動・準備時間は未計算です。';
+      }
+    } else if(feed.stale) {
+      adviceTitle = 'タスクの最新状態を確認';
+      adviceDetail = '予定は未登録ですが、タスクは未取得または前回の情報です。';
+    } else if(nextAction) {
+      adviceTitle = '優先タスクの次の一手';
+      adviceDetail = '予定の登録はありません。実際の空き時間を確認して着手する候補：'+nextAction;
+    } else if(overdueTasks.length) {
+      adviceTitle = '期限切れ登録の状態を確認';
+      adviceDetail = '完了済みか未完了かを確認してから、今日の行動を決めよう。';
+    }
+    const adviceSection = '<div class="suggestion"><span>YOSの提案 · 画面を開いた時点</span>'+
+      '<b>'+safe(adviceTitle)+'</b><p>'+safe(adviceDetail)+'</p></div>';
     const calendarSection = events.ok && !personalEvents.length && !referenceEvents.length ? '' :
       '<section class="section"><div class="sectionhead"><h3>これからの予定</h3>'+
       '<span class="tag">Appleカレンダー</span></div>'+eventRows+referenceRows+'</section>';
@@ -367,7 +418,7 @@
       '.tabs button{width:50%;min-height:48px;border:0;border-radius:10px;padding:13px;font-size:18px;font-weight:750;background:transparent;color:#46554C}',
       'body[data-tab=today] #tabToday,body[data-tab=week] #tabWeek{background:#fff;color:#253A33;box-shadow:0 2px 10px #18221C12}',
       'body[data-tab=today] .week,body[data-tab=week] .today{display:none}',
-      '.hero{background:linear-gradient(130deg,#FCE6C6,#E5F1E8);color:#263B33;border:1px solid #E9DDD0;border-radius:20px;padding:20px 19px;margin-bottom:14px}.quick{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:7px 12px;background:#EEF2EB;border:1px solid #DBE6DB;border-radius:14px;padding:15px 17px;margin-bottom:13px}.quick b{font-size:17px;color:#2F5244}.quick span{font-size:17px;color:#344E42;font-weight:700}.quick small{font-size:15px;color:#65756B}',
+      '.hero{background:linear-gradient(130deg,#FCE6C6,#E5F1E8);color:#263B33;border:1px solid #E9DDD0;border-radius:20px;padding:20px 19px;margin-bottom:14px}.quick{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:7px 12px;background:#EEF2EB;border:1px solid #DBE6DB;border-radius:14px;padding:15px 17px;margin-bottom:13px}.quick b{font-size:17px;color:#2F5244}.quick span{font-size:17px;color:#344E42;font-weight:700}.quick small{font-size:15px;color:#65756B}.suggestion{padding:15px 17px;border-radius:16px;background:#EAF1F8;border:1px solid #D4E3EF;margin:12px 0}.suggestion span{display:block;font-size:14px;color:#426780;font-weight:750}.suggestion b{display:block;font-size:19px;color:#264B64;margin-top:6px}.suggestion p{font-size:16px;line-height:1.5;margin:7px 0 0;color:#3D5263;overflow-wrap:anywhere}',
       '.hero span{font-size:16px;font-weight:700;color:#566A5C}.hero h2{font-size:23px;line-height:1.37;margin:9px 0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}.hero p{font-size:16px;color:#566258;line-height:1.45;margin:0}',
       '.section{background:white;border:1px solid #DFE5DD;border-radius:18px;padding:17px 17px;margin:12px 0;box-shadow:0 2px 7px #18221C08}.today .section:nth-of-type(2){border-left:5px solid #609BB7}.today .section:nth-of-type(3){border-left:5px solid #C79A54}.today .section:nth-of-type(4){border-left:5px solid #6F9E80}.today .section:nth-of-type(5){border-left:5px solid #B5A0C7}',
       'h3{margin:0 0 15px;font-size:22px;letter-spacing:-.02em}.sectionhead{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}',
@@ -390,7 +441,7 @@
       '<div class="tabs"><button id="tabToday" onclick="document.body.dataset.tab=\'today\'">今日</button>'+
       '<button id="tabWeek" onclick="document.body.dataset.tab=\'week\'">今週</button></div>'+
       '<div class="today">'+overviewHTML+
-      (quietDay?taskSection+habitSection+calendarSection:calendarSection+taskSection+habitSection)+
+      (quietDay?taskSection+adviceSection+habitSection+calendarSection:calendarSection+adviceSection+taskSection+habitSection)+
       '<section class="section"><h3>余白と暮らし</h3>'+
       '<p class="muted">休息・食事・楽しみの時間も大切に。空き時間の自動計算は未対応です。</p></section></div>'+
       '<div class="week"><section class="hero"><span>今週の予定</span><h2>無理なく進める一週間</h2>'+
