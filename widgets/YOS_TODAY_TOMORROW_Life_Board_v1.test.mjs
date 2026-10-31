@@ -5,7 +5,7 @@ import {readFileSync} from 'node:fs';
 const source = readFileSync(new URL('./YOS_TODAY_TOMORROW_Widget_v1.js', import.meta.url), 'utf8');
 const body = source.slice(source.indexOf('(async function ()'));
 
-function runtime(runsInWidget, denyPermissions, widgetMode = 'DAY', withTaskFeed = false, tasksOverride = null, calendarOverride = null) {
+function runtime(runsInWidget, denyPermissions, widgetMode = 'DAY', withTaskFeed = false, tasksOverride = null, calendarOverride = null, feedTimestamp = undefined) {
   let html = '';
   let widgetSet = false;
   let presented = 0;
@@ -34,7 +34,7 @@ function runtime(runsInWidget, denyPermissions, widgetMode = 'DAY', withTaskFeed
       iCloud(){return {documentsDirectory(){return '/icloud';},joinPath(...parts){return parts.join('/');},fileExists(){return false;}};}
     },
     Keychain: {contains(){return withTaskFeed;},get(){return 'mockToken';}},
-    Request: class {constructor(){this.response={statusCode:200};} async loadJSON(){return {tasks:tasksOverride || [{title:'TEST_DUE<&',due:new Date().toISOString().slice(0,10)}]};}},
+    Request: class {constructor(){this.response={statusCode:200};} async loadJSON(){return {generatedAt: feedTimestamp === undefined ? new Date().toISOString() : feedTimestamp, tasks:tasksOverride || [{title:'TEST_DUE<&',due:new Date().toISOString().slice(0,10)}]};}},
     URLScheme: {forRunningScript(){return 'scriptable:///run?scriptName=YOS%20TODAY';}},
     CalendarEvent: {async between(start){
       if (!firstCalendarDate) firstCalendarDate = new Date(start).toISOString().slice(0,10);
@@ -222,6 +222,67 @@ test('normal appointment days keep the calendar visible ahead of habits', async 
   const page=mock.snapshot().html;
   assert.ok(page.indexOf('<h3>これからの予定</h3>') < page.indexOf('<h3>大切なこと</h3>'));
   assert.ok(page.indexOf('<h3>大切なこと</h3>') < page.indexOf('<h3>習慣・身体</h3>'));
+});
+
+test('fresh calendar and task feed yield a cautious actionable next step', async () => {
+  const mock=runtime(false,false,'DAY',true,[{
+    title:'Current action',nextAction:'Check source records before submitting'
+  }],[]);
+  await new Function(...Object.keys(mock.globals),'return '+body)(...Object.values(mock.globals));
+  const page=mock.snapshot().html;
+  assert.match(page,/YOSの提案 · 画面を開いた時点/);
+  assert.match(page,/優先タスクの次の一手/);
+  assert.match(page,/Check source records before submitting/);
+  assert.match(page,/実際の空き時間を確認/);
+});
+
+test('calendar denied means do not suggest the time is free', async () => {
+  const mock=runtime(false,true,'DAY',true,[{
+    title:'Current action',nextAction:'Check source records'
+  }]);
+  await new Function(...Object.keys(mock.globals),'return '+body)(...Object.values(mock.globals));
+  const page=mock.snapshot().html;
+  assert.match(page,/まず予定を確認/);
+  assert.match(page,/カレンダーが取得できていないため、空き時間を推定しません/);
+});
+
+test('all-day calendar event blocks free-time suggestion', async () => {
+  const d=new Date();
+  const calendar=[{
+    title:'Actual registered all-day calendar entry',
+    isAllDay:true,
+    startDate:new Date(d.getFullYear(),d.getMonth(),d.getDate()),
+    endDate:new Date(d.getFullYear(),d.getMonth(),d.getDate()+1)
+  }];
+  const mock=runtime(false,false,'DAY',true,[{
+    title:'Current task',nextAction:'Work on new task'
+  }],calendar);
+  await new Function(...Object.keys(mock.globals),'return '+body)(...Object.values(mock.globals));
+  const page=mock.snapshot().html;
+  assert.match(page,/終日予定を確認/);
+  assert.match(page,/終日予定が登録されています/);
+  assert.doesNotMatch(page,/実際の空き時間を確認して着手する候補/);
+});
+
+test('old upstream task timestamp keeps tasks visible but prohibits confident action suggestions', async () => {
+  const lastMonth=new Date(Date.now()-40*24*3600000).toISOString();
+  const mock=runtime(false,false,'DAY',true,[{
+    title:'Old task',nextAction:'Perform stale task'
+  }],[],lastMonth);
+  await new Function(...Object.keys(mock.globals),'return '+body)(...Object.values(mock.globals));
+  const page=mock.snapshot().html;
+  assert.match(page,/タスク未確認/);
+  assert.match(page,/タスクの最新状態を確認/);
+  assert.match(page,/タスクの鮮度は未確認/);
+  assert.doesNotMatch(page,/着手する候補：Perform stale task/);
+});
+
+test('missing upstream timestamp is never silently treated as fresh', async () => {
+  const mock=runtime(false,false,'DAY',true,[{
+    title:'Undated feed task',nextAction:'Do it now'
+  }],[],null);
+  await new Function(...Object.keys(mock.globals),'return '+body)(...Object.values(mock.globals));
+  assert.match(mock.snapshot().html,/タスク未確認/);
 });
 
 test('the fullscreen header is offset below native WebView controls', () => {
