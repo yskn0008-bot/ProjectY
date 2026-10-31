@@ -5,13 +5,14 @@ import {readFileSync} from 'node:fs';
 const source = readFileSync(new URL('./YOS_TODAY_TOMORROW_Widget_v1.js', import.meta.url), 'utf8');
 const body = source.slice(source.indexOf('(async function ()'));
 
-function runtime(runsInWidget, denyPermissions, widgetMode = 'DAY', withTaskFeed = false, tasksOverride = null, calendarOverride = null, feedTimestamp = undefined, fixedNow = null, calendarData = null) {
+function runtime(runsInWidget, denyPermissions, widgetMode = 'DAY', withTaskFeed = false, tasksOverride = null, calendarOverride = null, feedTimestamp = undefined, fixedNow = null, calendarData = null, inboxData = null) {
   let html = '';
   let widgetSet = false;
   let presented = 0;
   let completed = false;
   let widgetUrl = null;
   let firstCalendarDate = null;
+  const requestedURLs=[];
   class Stack {
     addStack() { return new Stack(); }
     addText() { return {}; }
@@ -38,8 +39,8 @@ function runtime(runsInWidget, denyPermissions, widgetMode = 'DAY', withTaskFeed
       local(){return {documentsDirectory(){return '/tmp';},joinPath(...parts){return parts.join('/');},fileExists(){return false;}};},
       iCloud(){return {documentsDirectory(){return '/icloud';},joinPath(...parts){return parts.join('/');},fileExists(){return false;}};}
     },
-    Keychain: {contains(){return withTaskFeed;},get(){return 'mockToken';}},
-    Request: class {constructor(url){this.url=String(url);this.response={statusCode:200};} async loadJSON(){if(this.url.includes('mode=calendar')) {if(calendarData) return calendarData;this.response.statusCode=404;return {error:'Not deployed'};}return {generatedAt: feedTimestamp === undefined ? new Date().toISOString() : feedTimestamp, tasks:tasksOverride || [{title:'TEST_DUE<&',due:new Date().toISOString().slice(0,10)}]};}},
+    Keychain: {contains(key){return key==='YOS_NOTION_INTEGRATION_TOKEN'?Boolean(inboxData):withTaskFeed;},get(){return 'mockToken';}},
+    Request: class {constructor(url){this.url=String(url);requestedURLs.push(this.url);this.response={statusCode:200};} async loadJSON(){if(this.url.includes('api.notion.com/v1/blocks/'))return inboxData||{results:[],has_more:false};if(this.url.includes('mode=calendar')) {if(calendarData) return calendarData;this.response.statusCode=404;return {error:'Not deployed'};}return {generatedAt: feedTimestamp === undefined ? new Date().toISOString() : feedTimestamp, tasks:tasksOverride || [{title:'TEST_DUE<&',due:new Date().toISOString().slice(0,10)}]};}},
     URLScheme: {forRunningScript(){return 'scriptable:///run?scriptName=YOS%20TODAY';}},
     CalendarEvent: {async between(start){
       if (!firstCalendarDate) firstCalendarDate = new Date(start).toISOString().slice(0,10);
@@ -55,7 +56,7 @@ function runtime(runsInWidget, denyPermissions, widgetMode = 'DAY', withTaskFeed
     WebView: class {async loadHTML(value){html=value;} async present(){presented++;}},
     Script: {setWidget(){widgetSet=true;},complete(){completed=true;}}
   };
-  return {globals, snapshot:()=>({html,widgetSet,presented,completed,widgetUrl,firstCalendarDate})};
+  return {globals, snapshot:()=>({html,widgetSet,presented,completed,widgetUrl,firstCalendarDate,requestedURLs})};
 }
 
 for (const runsInWidget of [true,false]) {
@@ -463,6 +464,44 @@ test('YOS Today displays movement goal while exercise completion stays unconfirm
   assert.match(html,/歩数だけでは実施済みと判定しません/);
   assert.doesNotMatch(html,/運動実施済み/);
 });
+
+test('a concrete same-day Clarity walk report is shown as an Inbox candidate, not confirmed diary completion', async () => {
+  const meta=new Date().toISOString()+' · Clarity · clarity:test-1';
+  const paragraph=text=>({type:'paragraph',paragraph:{rich_text:[{plain_text:text}]}});
+  const inbox={results:[paragraph(meta),paragraph('今日は5分歩いた'),{type:'divider'}],has_more:false};
+  const mock=runtime(false,false,'DAY',false,null,[],undefined,null,null,inbox);
+  await new Function(...Object.keys(mock.globals),'return '+body)(...Object.values(mock.globals));
+  const page=mock.snapshot().html;
+  assert.match(page,/Clarityの運動報告候補あり（YOS日記への反映は未確認）/);
+  assert.doesNotMatch(page,/運動実施済み|日記に保存済み/);
+  assert.equal(mock.snapshot().requestedURLs.filter(x=>x.includes('api.notion.com/v1/blocks/')).length,1);
+});
+test('negated or hypothetical exercise text never proves an activity report', async () => {
+  const paragraph=text=>({type:'paragraph',paragraph:{rich_text:[{plain_text:text}]}});
+  const examples=['今日は5分歩かなかった','5分歩こうと思う','明日は5分歩く予定','5分歩いたら良いかな'];
+  for(const raw of examples){
+    const inbox={results:[paragraph(new Date().toISOString()+' · Clarity · clarity:test-2'),paragraph(raw)],has_more:false};
+    const mock=runtime(false,false,'DAY',false,null,[],undefined,null,null,inbox);
+    await new Function(...Object.keys(mock.globals),'return '+body)(...Object.values(mock.globals));
+    assert.match(mock.snapshot().html,/運動の実施記録：未確認/);
+    assert.doesNotMatch(mock.snapshot().html,/Clarityの運動報告候補あり/);
+  }
+});
+test('old Clarity report cannot be promoted as today exercise', async () => {
+  const yesterday=new Date(Date.now()-86400000).toISOString();
+  const paragraph=text=>({type:'paragraph',paragraph:{rich_text:[{plain_text:text}]}});
+  const inbox={results:[paragraph(yesterday+' · Clarity · clarity:old'),paragraph('5分歩いた')],has_more:false};
+  const mock=runtime(false,false,'DAY',false,null,[],undefined,null,null,inbox);
+  await new Function(...Object.keys(mock.globals),'return '+body)(...Object.values(mock.globals));
+  assert.match(mock.snapshot().html,/運動の実施記録：未確認/);
+});
+test('widget mode never opens private Clarity Inbox',async()=>{
+  const inbox={results:[],has_more:false};
+  const mock=runtime(true,false,'DAY',false,null,[],undefined,null,null,inbox);
+  await new Function(...Object.keys(mock.globals),'return '+body)(...Object.values(mock.globals));
+  assert.equal(mock.snapshot().requestedURLs.filter(x=>x.includes('api.notion.com/v1/blocks/')).length,0);
+});
+
 test('the fullscreen header is offset below native WebView controls', () => {
   assert.match(source,/\.wrap\{max-width:640px;margin:auto;padding:112px 18px 72px/);
   assert.match(source,/\.task b\{display:-webkit-box;-webkit-line-clamp:2/);
