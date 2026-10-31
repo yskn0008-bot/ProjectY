@@ -235,7 +235,7 @@ test('fresh calendar and task feed yield a cautious actionable next step', async
   }],[]);
   await new Function(...Object.keys(mock.globals),'return '+body)(...Object.values(mock.globals));
   const page=mock.snapshot().html;
-  assert.match(page,/YOSの提案 · 画面を開いた時点/);
+  assert.match(page,/YOSの提案 · 今の候補/);
   assert.match(page,/優先タスクの次の一手/);
   assert.match(page,/Check source records before submitting/);
   assert.match(page,/実際の空き時間を確認/);
@@ -383,6 +383,37 @@ test('unsafe scheme and HTML-breaking action URL are not rendered', async () => 
     assert.doesNotMatch(page,/class="tasklink"/);
     assert.doesNotMatch(page,/<script>evil<\/script>/);
   }
+});
+
+test('first-screen YOS advice presents one short action and the long reasoning stays closed', async () => {
+  const detailed='スクショ整理と背面タップとホーム画面の最適化を、本人の操作を減らすために一つの作業として確認し、必要なボタンだけを編集する';
+  const mock=runtime(false,false,'DAY',true,[{
+    title:'iPhone work',nextAction:detailed
+  }],[]);
+  await new Function(...Object.keys(mock.globals),'return '+body)(...Object.values(mock.globals));
+  const page=mock.snapshot().html;
+  const start=page.indexOf('<div class="suggestion">');
+  const end=page.indexOf('</div>',start);
+  const card=page.slice(start,end);
+  const headline=card.match(/<b>(.*?)<\/b>/)?.[1]||'';
+  assert.ok(headline.length<=59, 'the lead line must stay short');
+  assert.match(card,/判断理由を確認/);
+  assert.match(card,/<details class="reason">/);
+  assert.doesNotMatch(card,/<details class="reason" open/);
+  assert.match(card,/空き時間は未確認/);
+  assert.match(card,/スクショ整理と背面タップとホーム画面/);
+});
+
+test('when Calendar cannot be read, no confident free-time proposal is given', async () => {
+  const mock=runtime(false,true,'DAY',true,[{
+    title:'Important task',nextAction:'Work on task'
+  }]);
+  await new Function(...Object.keys(mock.globals),'return '+body)(...Object.values(mock.globals));
+  const page=mock.snapshot().html;
+  const summary=page.slice(page.indexOf('<div class="suggestion">'),page.indexOf('</div>',page.indexOf('<div class="suggestion">')));
+  assert.match(summary,/まず予定を確認/);
+  assert.match(summary,/カレンダー未取得/);
+  assert.doesNotMatch(summary,/<b>Work on task<\/b>/);
 });
 
 test('the fullscreen header is offset below native WebView controls', () => {
