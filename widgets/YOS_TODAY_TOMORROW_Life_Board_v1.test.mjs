@@ -134,8 +134,8 @@ test('explicit taxi-demand reference calendar entries are not reported as appoin
   const eventStart = new Date(d.getFullYear(),d.getMonth(),d.getDate(),9,0);
   const eventEnd = new Date(d.getFullYear(),d.getMonth(),d.getDate(),10,0);
   const calendar=[
-    {title:'［タクシー需要］首里城復興祭',startDate:eventStart,endDate:eventEnd,isAllDay:false},
-    {title:'My actual visit',startDate:new Date(eventStart.getTime()+7200000),endDate:new Date(eventEnd.getTime()+7200000),isAllDay:false}
+    {title:'［タクシー需要］首里城復興祭',startDate:eventStart,endDate:eventEnd,isAllDay:true},
+    {title:'My actual visit',startDate:new Date(eventStart.getTime()+7200000),endDate:new Date(eventEnd.getTime()+7200000),isAllDay:true}
   ];
   const mock=runtime(false,false,'DAY',false,null,calendar);
   await new Function(...Object.keys(mock.globals),'return '+body)(...Object.values(mock.globals));
@@ -152,7 +152,7 @@ test('explicit taxi-demand reference calendar entries are not reported as appoin
 
 test('reference events alone do not count as personal appointment', async () => {
   const d=new Date();
-  const calendar=[{title:'[タクシー需要] Local Event',startDate:new Date(d.getFullYear(),d.getMonth(),d.getDate(),9),endDate:new Date(d.getFullYear(),d.getMonth(),d.getDate(),10),isAllDay:false}];
+  const calendar=[{title:'[タクシー需要] Local Event',startDate:new Date(d.getFullYear(),d.getMonth(),d.getDate(),9),endDate:new Date(d.getFullYear(),d.getMonth(),d.getDate(),10),isAllDay:true}];
   const mock=runtime(false,false,'DAY',false,null,calendar);
   await new Function(...Object.keys(mock.globals),'return '+body)(...Object.values(mock.globals));
   const page=mock.snapshot().html;
