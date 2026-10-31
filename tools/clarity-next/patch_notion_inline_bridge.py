@@ -13,7 +13,11 @@ from pathlib import Path
 
 ACTION_ID = "dk.simonbs.Scriptable.RunScriptInlineIntent"
 PLACEHOLDER = "__YOS_NOTION_BRIDGE_INLINE__"
-BRIDGE_SCRIPT = Path(__file__).with_name("clarity_notion_bridge.js").read_text(encoding="utf-8").rstrip("\n")
+BRIDGE_SOURCE = Path(__file__).with_name("clarity_notion_bridge.js").read_text(encoding="utf-8").rstrip("\n")
+DRY_RUN_FLAG = "const YOS_BRIDGE_DRY_RUN=true;"
+if BRIDGE_SOURCE.count(DRY_RUN_FLAG) != 1:
+    raise SystemExit("expected one standalone dry-run guard in Scriptable bridge")
+BRIDGE_SCRIPT = BRIDGE_SOURCE.replace(DRY_RUN_FLAG, "const YOS_BRIDGE_DRY_RUN=false;", 1)
 
 
 def patch(path: Path) -> None:
