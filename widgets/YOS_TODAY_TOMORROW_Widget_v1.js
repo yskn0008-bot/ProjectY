@@ -268,6 +268,13 @@
       .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
       .replace(/"/g,"&quot;").replace(/'/g,"&#39;");
     const safe = value => escapeHtml(clean(value,240));
+    // Only links that the user intentionally opens are exposed; never auto-run task URLs.
+    const actionLink = value => {
+      const raw=String(value||"").trim();
+      return /^(https?:|shortcuts:|scriptable:|calshow:)/i.test(raw) &&
+        !/[\u0000-\u0020\u007f<>"']/u.test(raw) && raw.length<=2000 ?
+        '<a class="tasklink" href="'+escapeHtml(raw)+'">操作先を開く</a>' : '';
+    };
     const feedItems = feed.data && Array.isArray(feed.data.tasks) ? feed.data.tasks :
       (feed.data && feed.data.task ? [feed.data.task] : []);
     // Only confirmed, non-overdue tasks can become the today's focus.
@@ -292,7 +299,8 @@
     const cards = upcomingTasks.length ? upcomingTasks.map((t,i) =>
       '<div class="task"><div class="num">'+(i+1)+'</div><div class="grow"><b>'+safe(taskTitle(t))+'</b>'+
       (validDue(t) ? '<small>期限 '+safe(String(t.due).slice(0,10))+'</small>' : '')+
-      (t.nextAction ? '<details><summary>対応内容を見る</summary><p>'+safe(t.nextAction)+'</p></details>' : '')+'</div></div>'
+      (t.nextAction ? '<details><summary>対応内容を見る</summary><p>'+safe(t.nextAction)+'</p></details>' : '')+
+      actionLink(t.actionUrl)+'</div></div>'
     ).join("") : '<p class="muted">いま取り組むタスクの登録は確認できません。</p>';
     // Expired rows can already be done. Keep the warning visible, not a large task card.
     const overdueNotice = overdueTasks.length ?
@@ -430,7 +438,7 @@
       '.tag{color:#516B5C;font-size:15px;font-weight:700}.muted{color:#5D6961;font-size:17px;line-height:1.65;margin:7px 0}',
       '.event,.task,.weekrow{display:flex;gap:14px;padding:15px 0;border-top:1px solid #EAEEE8}.event:first-of-type,.task:first-of-type{border-top:0}',
       '.event time{width:58px;flex-shrink:0;font-size:18px;color:#206D90;font-weight:800}.event b,.task b{display:block;font-size:19px;line-height:1.5}',
-      '.event small,.task small{display:block;color:#5D6B61;margin-top:5px;line-height:1.45;font-size:16px}.task b{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.task details{margin-top:8px}.task summary{color:#206D90;font-size:16px;font-weight:700;cursor:pointer;min-height:34px}.task details p{margin:6px 0;font-size:16px;line-height:1.55;white-space:normal;overflow-wrap:anywhere}',
+      '.event small,.task small{display:block;color:#5D6B61;margin-top:5px;line-height:1.45;font-size:16px}.task b{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.task details{margin-top:8px}.task summary{color:#206D90;font-size:16px;font-weight:700;cursor:pointer;min-height:34px}.task details p{margin:6px 0;font-size:16px;line-height:1.55;white-space:normal;overflow-wrap:anywhere}.tasklink{display:inline-block;color:#1C6477;font-size:16px;font-weight:750;padding:11px 0;text-decoration:underline;min-height:44px}',
       '.grow{flex:1;min-width:0;overflow-wrap:anywhere}.num{background:#F3E9DB;color:#87571F;border-radius:10px;width:33px;height:33px;display:grid;place-items:center;flex-shrink:0;font-weight:800}',
       '.habit{padding:12px 0;font-size:19px;line-height:1.5}.dot{display:inline-block;width:11px;height:11px;border:2px solid #6D9A85;border-radius:50%;margin-right:12px}',
       '.weekrow{align-items:start}.weekday{width:80px;font-size:17px;font-weight:800;flex-shrink:0}.weekevent{font-size:17px;margin-bottom:9px;line-height:1.5}.weekref{font-size:15px;color:#65746A;line-height:1.4;padding:6px 0}.weekdue{font-size:16px;font-weight:700;color:#825A2B;background:#F9F2E8;padding:8px;border-radius:9px;margin:7px 0}',
