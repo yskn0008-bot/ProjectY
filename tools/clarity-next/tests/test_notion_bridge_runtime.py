@@ -29,7 +29,7 @@ const DS={
   balance:'94fc7e9f-fd20-4073-bbcf-02efe8e95c5c'
 };
 const KEY_FIELD={task:'同期キー',shopping:'メモ',project:'同期キー',life_event:'記録キー',person:'元データ・根拠',learning:'根拠・参照',money:'原本ID',balance:'原本'};
-let pages=[], inboxBlocks=[], local='', serial=0, events=[], failReadback=false;
+let pages=[], inboxBlocks=[], local='', serial=0, events=[], failReadback=false, requestCount=0;
 function propText(property){return (property?.rich_text||property?.title||[]).map(v=>v.plain_text||v.text?.content||'').join('');}
 function blockText(block){return (block.paragraph?.rich_text||[]).map(v=>v.plain_text||v.text?.content||'').join('');}
 async function capture(id,target,raw,dateTime='',amount='',kind='',transport='plainTexts'){
@@ -42,7 +42,7 @@ async function capture(id,target,raw,dateTime='',amount='',kind='',transport='pl
     writeString:(p,v)=>{local=v;}
   };
   class Request{
-    constructor(url){this.url=url;this.method='GET';this.response={statusCode:200};}
+    constructor(url){requestCount++;this.url=url;this.method='GET';this.response={statusCode:200};}
     async loadJSON(){
       if(this.url.includes('/blocks/'+INBOX+'/children')){
         if(this.method==='PATCH'){
@@ -91,7 +91,8 @@ async function capture(id,target,raw,dateTime='',amount='',kind='',transport='pl
   const plannerInput={actions:[{id,executor:'notion',module:'NEXT_NOTION',operation:'save',parameters:{target,title:raw.slice(0,70),raw_text:raw,date_time:dateTime,amount,kind},risk:'low',status:'planned',needs_review:false,needs_confirmation:false}]};
   const nonNotionPlan={actions:[{id,executor:'device',module:'NEXT_DEVICE',operation:'set_wifi',parameters:{state:'off'},risk:'low',status:'planned',needs_review:false,needs_confirmation:false}]};
   const reviewPlan={actions:[{id,executor:'notion',module:'NEXT_NOTION',operation:'save',parameters:{target,title:raw.slice(0,70),raw_text:raw,date_time:dateTime,amount,kind},risk:'low',status:'planned',needs_review:true,needs_confirmation:false}]};
-  const shortcutParameter=transport==='shortcutParameter'?payload:transport==='shortcutDictionary'?voiceInput:transport==='inactiveShortcutDictionary'?inactiveVoiceInput:transport==='planner'?plannerInput:transport==='plannerNoNotion'?nonNotionPlan:transport==='plannerNeedsReview'?reviewPlan:undefined;
+  const dryRunPlan={yosTestMode:true,plan:plannerInput.actions};
+  const shortcutParameter=transport==='shortcutParameter'?payload:transport==='shortcutDictionary'?voiceInput:transport==='inactiveShortcutDictionary'?inactiveVoiceInput:transport==='planner'?plannerInput:transport==='plannerNoNotion'?nonNotionPlan:transport==='plannerNeedsReview'?reviewPlan:transport==='dryRunPlanner'?dryRunPlan:undefined;
   const context={args:{plainTexts:transport==='plainTexts'?[payload]:[],shortcutParameter},Keychain:{contains:()=>true,get:()=> 'simulated-token'},Request,FileManager:{local:()=>fm},Script:{setShortcutOutput:v=>{output=v;},complete:()=>{}},Date,Number,String,JSON,Math,Error,decodeURIComponent,encodeURIComponent};
   await vm.runInNewContext('(async()=>{'+script+'})()',context);
   return output;
@@ -150,6 +151,9 @@ function allInboxText(){return inboxBlocks.map(blockText).join('\n');}
   assert.equal(await capture('voice-planner-skip','task','Notion保存なしの端末操作','','','','plannerNoNotion'),'SKIP:no_notion_save');
   assert.equal(await capture('voice-planner-review','task','確認が必要なNotion保存','','','','plannerNeedsReview'),'SKIP:no_notion_save');
   assert.equal(targetCount('task'),11,'only planned, safe, single Notion save actions may route; repeated planner IDs must not collide');
+  const beforeDryRun={inbox:inboxBlocks.length,tasks:targetCount('task'),requests:requestCount};
+  assert.equal(await capture('voice-test-copy','task','実機テスト用プラン','2026-11-04T12:00:00+09:00','','','dryRunPlanner'),'DRYRUN:task');
+  assert.deepEqual({inbox:inboxBlocks.length,tasks:targetCount('task'),requests:requestCount},beforeDryRun,'iPhone test mode must make zero Notion API requests and zero writes');
 
   for(const target of ['shopping','project','life_event','person','learning','money','balance']){
     const amount=['money','balance'].includes(target)?'682':'';
