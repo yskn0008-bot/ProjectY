@@ -44,6 +44,8 @@ class ClarityNextSourceContractTests(unittest.TestCase):
         self.assertIn('95b30d16-7530-40c6-a320-dab99acad55d', bridge)
         self.assertIn('notionPending', bridge)
         self.assertIn('notionTarget', bridge)
+        self.assertIn('const YOS_BRIDGE_DRY_RUN=true;', bridge)
+        self.assertIn('DRY_RUN_FLAG', patch)
 
     def test_calendar_reminder_wire_format_patch_is_locked(self):
         patch = WIRE_PATCH.read_text(encoding="utf-8")
