@@ -111,7 +111,7 @@ test('overdue task is not silently promoted as todays top priority', async () =>
   assert.doesNotMatch(overview,/Relevant current task/);
   assert.match(page,/Relevant current task/);
   assert.doesNotMatch(overview,/Old Night Brief task/);
-  assert.match(page,/期限を過ぎた登録タスク 1件/);
+  assert.match(page,/要確認｜期限が過ぎた登録 1件/);
   assert.match(page,/Old Night Brief task/);
   assert.match(page,/<details><summary>対応内容を見る/);
   assert.doesNotMatch(page,/21 \| Old Night Brief task/);
@@ -124,8 +124,11 @@ test('a feed with only expired tasks is presented as needing verification', asyn
   const mock = runtime(false,false,'DAY',true,[{title:'Night Brief',due}]);
   await new Function(...Object.keys(mock.globals),'return '+body)(...Object.values(mock.globals));
   const page = mock.snapshot().html;
-  assert.match(page,/期限を過ぎた登録タスク 1件/);
+  assert.match(page,/要確認｜期限が過ぎた登録 1件/);
   assert.match(page,/完了状態が古い可能性があります/);
+  assert.match(page,/<details class="overdue"><summary>要確認｜期限が過ぎた登録 1件<\/summary>/);
+  assert.doesNotMatch(page,/<details class="overdue" open/);
+  assert.match(page,/未完了とは判定していません/);
   assert.match(page,/Notionで状態を確認/);
 });
 
@@ -187,6 +190,38 @@ test('when no events exist at all, hide the empty calendar panel but preserve ta
   assert.match(page,/Do this today/);
   assert.doesNotMatch(page,/<h3>これからの予定<\/h3>/);
   assert.match(page,/<h3>習慣・身体<\/h3>/);
+});
+
+test('habits come before reference-only events on a quiet day', async () => {
+  const d=new Date();
+  const calendar=[{
+    title:'［タクシー需要］参考のみ',
+    startDate:new Date(d.getFullYear(),d.getMonth(),d.getDate(),9),
+    endDate:new Date(d.getFullYear(),d.getMonth(),d.getDate(),10),
+    isAllDay:true
+  }];
+  const mock=runtime(false,false,'DAY',true,[{title:'Task today'}],calendar);
+  await new Function(...Object.keys(mock.globals),'return '+body)(...Object.values(mock.globals));
+  const page=mock.snapshot().html;
+  assert.ok(page.indexOf('<h3>大切なこと</h3>') < page.indexOf('<h3>習慣・身体</h3>'));
+  assert.ok(page.indexOf('<h3>習慣・身体</h3>') < page.indexOf('<h3>これからの予定</h3>'));
+  assert.match(page,/習慣の実施記録と健康の実測情報は未連携です/);
+  assert.match(page,/MY LIFEで記録を見る/);
+});
+
+test('normal appointment days keep the calendar visible ahead of habits', async () => {
+  const d=new Date();
+  const calendar=[{
+    title:'Confirmed regular calendar entry',
+    startDate:new Date(d.getFullYear(),d.getMonth(),d.getDate(),9),
+    endDate:new Date(d.getFullYear(),d.getMonth(),d.getDate(),10),
+    isAllDay:true
+  }];
+  const mock=runtime(false,false,'DAY',true,[{title:'Task today'}],calendar);
+  await new Function(...Object.keys(mock.globals),'return '+body)(...Object.values(mock.globals));
+  const page=mock.snapshot().html;
+  assert.ok(page.indexOf('<h3>これからの予定</h3>') < page.indexOf('<h3>大切なこと</h3>'));
+  assert.ok(page.indexOf('<h3>大切なこと</h3>') < page.indexOf('<h3>習慣・身体</h3>'));
 });
 
 test('the fullscreen header is offset below native WebView controls', () => {
