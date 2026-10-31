@@ -137,7 +137,8 @@ if !originalInput {
     appendResolvedFile(ledgerFile, requestDone)
     if @notionPending == "yes" {
         show("テスト確認：入力はClarity Inboxに記録しました。Notion保存はテストのため実行していません。")
-    } else if summary {
+    }
+    if summary {
         show("{summary}")
     }
 }
