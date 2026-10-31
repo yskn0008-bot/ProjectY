@@ -9,12 +9,13 @@ const PAGE_SIZE = 100;
 export interface LoadNotionTaskDashboardOptions {
   notionToken: string;
   notionDataSourceId?: string;
+  calendarMode?: boolean;
   fetchImpl?: FetchLike;
 }
 
 export async function loadNotionTaskDashboard(
   options: LoadNotionTaskDashboardOptions
-): Promise<TaskDashboardResponse> {
+): Promise<TaskDashboardResponse & {sourceComplete:boolean}> {
   const token = required(options.notionToken, 'Notion token');
   const fetchImpl = options.fetchImpl ?? fetch;
   const dataSourceId = options.notionDataSourceId
@@ -38,7 +39,7 @@ export async function loadNotionTaskDashboard(
 
     const results = Array.isArray(payload.results) ? payload.results : [];
     for (const entry of results) {
-      const item = parseTask(entry);
+      const item = parseTask(entry,options.calendarMode === true);
       if (item) tasks.push(item);
     }
 
@@ -49,7 +50,7 @@ export async function loadNotionTaskDashboard(
   } while (cursor && page < MAX_PAGES);
 
   tasks.sort((a, b) => a.order - b.order);
-  return {generatedAt: new Date().toISOString(), tasks};
+  return {generatedAt: new Date().toISOString(), tasks, sourceComplete: !cursor};
 }
 
 async function resolveDataSourceId(notionToken: string, fetchImpl: FetchLike): Promise<string> {
@@ -80,13 +81,15 @@ async function resolveDataSourceId(notionToken: string, fetchImpl: FetchLike): P
   return normalizeId(String(matches[0]?.id ?? ''), 'discovered Notion data source ID');
 }
 
-function parseTask(value: unknown): TaskDashboardItem | null {
+function parseTask(value: unknown, calendarMode=false): TaskDashboardItem | null {
   if (!isRecord(value) || !isRecord(value.properties)) return null;
   const properties = value.properties;
 
-  const order = numberProperty(properties['実行順']);
+  const rawOrder = numberProperty(properties['実行順']);
+  const hasOrder = Number.isSafeInteger(rawOrder) && rawOrder>=1 && rawOrder<=999;
+  const order = hasOrder ? rawOrder : 999;
   const title = textProperty(properties['やること'], 'title', 160);
-  if (!Number.isSafeInteger(order) || order < 1 || order > 999 || !title) return null;
+  if ((!hasOrder && !calendarMode) || !title) return null;
 
   return {
     order,
