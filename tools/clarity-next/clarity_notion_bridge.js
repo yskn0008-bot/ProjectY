@@ -8,7 +8,7 @@ function payload(v){
  }
  if(!v||typeof v!=='object'||Array.isArray(v))return {};
  if(Object.prototype.hasOwnProperty.call(v,'notionPending')&&!pending(v.notionPending))return {};
- return {request_id:v.request_id||v.requestId||v.notionRequestId||'',target:v.target||v.notionTarget||'',title:v.title||v.notionTitle||'',raw:v.raw||v.raw_text||v.notionRaw||'',date_time:v.date_time||v.dateTime||v.notionDateTime||'',amount:v.amount||v.notionAmount||'',kind:v.kind||v.notionKind||''};
+ return {request_id:v.request_id||v.requestId||v.notionRequestId||'',target:String(v.target||v.notionTarget||'').trim().toLowerCase(),title:v.title||v.notionTitle||'',raw:v.raw||v.raw_text||v.notionRaw||'',date_time:v.date_time||v.dateTime||v.notionDateTime||'',amount:v.amount??v.notionAmount??'',kind:v.kind||v.notionKind||''};
 }
 const shortcutPayload=args.shortcutParameter;
 const p=payload((args.plainTexts||[])[0]||shortcutPayload);
