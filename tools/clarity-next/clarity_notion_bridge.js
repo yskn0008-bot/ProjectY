@@ -7,14 +7,23 @@ function payload(v){
   else return parse(s);
  }
  if(!v||typeof v!=='object'||Array.isArray(v))return {};
+ const actions=Array.isArray(v)?v:(Array.isArray(v.actions)?v.actions:null);
+ if(actions){
+  const saves=actions.filter(a=>a&&((a.executor==='notion'&&a.module==='NEXT_NOTION'&&a.operation==='save')||(a.executor==='money'&&a.module==='NEXT_MONEY'&&a.operation==='capture')));
+  if(!saves.length)return {};
+  if(saves.length>1)throw new Error('Multiple Notion saves in one Shortcut Input; review required');
+  const a=saves[0],params=a.parameters||{};
+  if(a.status!=='planned'||pending(a.needs_review)||pending(a.needs_confirmation)||!['low','medium'].includes(String(a.risk||'').toLowerCase()))return {};
+  const target=a.module==='NEXT_MONEY'?'money':String(params.target||'').trim().toLowerCase();
+  return {request_id:'',target,title:params.title||'',raw:params.raw_text||params.raw||'',date_time:params.date_time||'',amount:params.amount??'',kind:params.kind||''};
+ }
  if(Object.prototype.hasOwnProperty.call(v,'notionPending')&&!pending(v.notionPending))return {};
  return {request_id:v.request_id||v.requestId||v.notionRequestId||'',target:String(v.target||v.notionTarget||'').trim().toLowerCase(),title:v.title||v.notionTitle||'',raw:v.raw||v.raw_text||v.notionRaw||'',date_time:v.date_time||v.dateTime||v.notionDateTime||'',amount:v.amount??v.notionAmount??'',kind:v.kind||v.notionKind||''};
 }
 const shortcutPayload=args.shortcutParameter;
 const p=payload((args.plainTexts||[])[0]||shortcutPayload);
 if(!p.request_id&&p.target&&p.raw){const day=new Date().toISOString().slice(0,10),seed=[p.target,p.raw,p.date_time,p.amount].join('|');let h=2166136261;for(let i=0;i<seed.length;i++){h^=seed.charCodeAt(i);h=Math.imul(h,16777619);}p.request_id='clarity-shortcut:'+day+':'+(h>>>0).toString(16).padStart(8,'0');}
-if(!p.request_id||!p.target)throw new Error('Clarity Notion payload is incomplete');
-if(!Keychain.contains(K))throw new Error('Notion token missing. Run YOS_Notion_Sync once.');
+if(p.target&&!p.request_id)throw new Error('Clarity Notion payload is incomplete');
 const API='https://api.notion.com/v1',VER='2025-09-03';
 async function api(path,method='GET',body){const r=new Request(API+path);r.method=method;r.headers={'Authorization':'Bearer '+Keychain.get(K),'Notion-Version':VER,'Content-Type':'application/json'};if(body!==undefined)r.body=JSON.stringify(body);const j=await r.loadJSON();if(r.response.statusCode>=300)throw new Error('Notion '+r.response.statusCode+': '+JSON.stringify(j).slice(0,220));return j;}
 const DS={task:'965c6086-32c1-463d-93b4-87a9cb69b3ad',shopping:'d0ed2cf0-c84e-4770-b77c-3a1a9e11bcfc',project:'9205e5b7-f8b9-4497-9d6f-4727d67e4866',life_event:'30df9a73-2ea7-4ff7-8187-2b62dc8f9da4',person:'829c91b0-08dc-4ab0-b8fd-b9725dd0d9d2',learning:'28bcd894-b709-4b23-9fdc-c9dc43043bfc',money:'95b30d16-7530-40c6-a320-dab99acad55d',balance:'94fc7e9f-fd20-4073-bbcf-02efe8e95c5c'};
@@ -36,6 +45,8 @@ function blockText(block){const data=block?.[block.type]||{};return (data.rich_t
 async function inboxContains(key){let cursor=null;do{const query='?page_size=100'+(cursor?'&start_cursor='+encodeURIComponent(cursor):'');const page=await api('/blocks/'+INBOX+'/children'+query);for(const block of page.results||[])if(blockText(block).includes('[ClarityCapture:'+key+']'))return true;cursor=page.has_more?page.next_cursor:null;if(page.has_more&&!cursor)throw new Error('Notion Inbox pagination cursor missing');}while(cursor);return false;}
 async function ensureInboxCapture(target,key,raw){if(await inboxContains(key))return false;const line=new Date().toISOString()+' [ClarityCapture:'+key+'] ['+target+'] '+raw;await api('/blocks/'+INBOX+'/children','PATCH',{children:[{object:'block',type:'paragraph',paragraph:{rich_text:rt(line)}}]});return true;}
 async function main(){
+ if(!p.target)return 'SKIP:no_notion_save';
+ if(!Keychain.contains(K))throw new Error('Notion token missing. Run YOS_Notion_Sync once.');
  const state=readState();if(state[p.request_id])return 'DUPLICATE:'+p.target;
  const title=p.title||p.raw||'Clarity',raw=p.raw||title,key=captureSyncKey(p.target,raw,p.date_time,p.amount);
  if(p.target==='inbox'){const added=await ensureInboxCapture(p.target,key,raw);state[p.request_id]={target:p.target,key,at:new Date().toISOString()};fm.writeString(statePath,JSON.stringify(state));return (added?'OK:':'DUPLICATE:')+'inbox';}
