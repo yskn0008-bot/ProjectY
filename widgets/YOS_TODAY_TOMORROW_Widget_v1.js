@@ -271,9 +271,11 @@
     // Only links that the user intentionally opens are exposed; never auto-run task URLs.
     const actionLink = value => {
       const raw=String(value||"").trim();
-      return /^(https?:|shortcuts:|scriptable:|calshow:)/i.test(raw) &&
-        !/[\u0000-\u0020\u007f<>"']/u.test(raw) && raw.length<=2000 ?
-        '<a class="tasklink" href="'+escapeHtml(raw)+'">操作先を開く</a>' : '';
+      if (!/^(https?:|shortcuts:|scriptable:|calshow:)/i.test(raw) ||
+        /[\u0000-\u0020\u007f<>"']/u.test(raw) || raw.length>2000) return '';
+      const label=/^shortcuts:/i.test(raw) ? 'ショートカットを起動' :
+        /^scriptable:/i.test(raw) ? 'Scriptableを起動' : '操作先を開く';
+      return '<a class="tasklink" href="'+escapeHtml(raw)+'">'+label+'</a>';
     };
     const feedItems = feed.data && Array.isArray(feed.data.tasks) ? feed.data.tasks :
       (feed.data && feed.data.task ? [feed.data.task] : []);
