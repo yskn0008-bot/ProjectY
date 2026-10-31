@@ -43,9 +43,13 @@ export async function loadNotionTaskDashboard(
       if (item) tasks.push(item);
     }
 
-    cursor = payload.has_more === true && typeof payload.next_cursor === 'string'
-      ? payload.next_cursor
-      : null;
+    // Do not claim a complete task set if Notion reports further pages
+    // but does not provide a usable cursor.
+    if (payload.has_more === true &&
+        (typeof payload.next_cursor !== 'string' || !payload.next_cursor.trim())) {
+      throw new Error('Notion indicated more pages without a valid cursor');
+    }
+    cursor = payload.has_more === true ? payload.next_cursor : null;
     page += 1;
   } while (cursor && page < MAX_PAGES);
 
