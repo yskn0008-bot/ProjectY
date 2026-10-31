@@ -178,12 +178,32 @@ function allInboxText(){return inboxBlocks.map(blockText).join('\n');}
 })().catch(e=>{console.error(e);process.exitCode=1;});
 """
 
+NODE_DRY_RUN_TEST = r"""
+const assert=require('node:assert/strict');
+const vm=require('node:vm');
+const script=process.argv[1];
+let output='',writes=0,requests=0;
+class Request{constructor(){requests++;throw new Error('dry-run must not make a request');}}
+const context={args:{shortcutParameter:{actions:[{id:'a1',executor:'notion',module:'NEXT_NOTION',operation:'save',parameters:{target:'task',title:'実機dry-run',raw_text:'実機dry-run本文'},risk:'low',status:'planned',needs_review:false,needs_confirmation:false}]}},Keychain:{contains:()=>false,get:()=>''},Request,FileManager:{local:()=>({documentsDirectory:()=>'/tmp',joinPath:()=>'/tmp/state',fileExists:()=>false,readString:()=>'',writeString:()=>{writes++;}})},Script:{setShortcutOutput:v=>{output=v;},complete:()=>{}},Date,Number,String,JSON,Math,Error,decodeURIComponent,encodeURIComponent};
+vm.runInNewContext('(async()=>{'+script+'})()',context).then(()=>{assert.equal(output,'DRYRUN:task');assert.equal(requests,0);assert.equal(writes,0);console.log('Standalone dry-run performs zero external or local writes: PASS');}).catch(e=>{console.error(e);process.exitCode=1;});
+"""
+
 class NotionBridgeRuntimeTests(unittest.TestCase):
     def test_raw_first_idempotency_and_readback(self):
         if not shutil.which("node"):
             self.skipTest("Node.js is not installed in this environment")
         result=subprocess.run(
             ["node","-e",NODE_TEST,module.BRIDGE_SCRIPT],
+            capture_output=True,text=True,timeout=25,check=False
+        )
+        self.assertEqual(result.returncode,0,result.stderr)
+        self.assertIn("PASS",result.stdout)
+
+    def test_standalone_script_defaults_to_no_write(self):
+        if not shutil.which("node"):
+            self.skipTest("Node.js is not installed in this environment")
+        result=subprocess.run(
+            ["node","-e",NODE_DRY_RUN_TEST,module.BRIDGE_SOURCE],
             capture_output=True,text=True,timeout=25,check=False
         )
         self.assertEqual(result.returncode,0,result.stderr)
