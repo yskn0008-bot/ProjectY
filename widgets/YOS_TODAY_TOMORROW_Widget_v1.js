@@ -428,12 +428,15 @@
       /ルーティン|習慣|routine/i.test(clean(r.calendar && r.calendar.title,60))
     ).slice(0,4) : [];
     const habitRows = routine.length ? routine.map(r =>
-      '<div class="habit"><span class="dot"></span>'+safe(r.title)+'</div>').join("") :
-      '<p class="muted">習慣の実施記録は未連携。完了状態は未確認です。</p>';
+      '<div class="habit"><span class="dot"></span>'+safe(r.title)+'</div>').join("") : '';
+    // An intention is not evidence of completion. The user-confirmed exercise log
+    // is intended to remain in the existing YOS diary via Clarity/Night.
+    const movementGoal = '<div class="movementgoal"><b>食後5分歩く · 難しい日は1分</b>'+
+      '<small>運動の実施記録：未確認</small></div>';
     const habitSection = '<section class="section"><h3>習慣・身体</h3>'+
-      (routine.length || health ?
-        habitRows+(health?'<p class="muted">健康：'+safe(health)+'</p>':'') :
-        '<p class="muted">習慣の実施記録と健康の実測情報は未連携です。</p>')+
+      movementGoal+habitRows+
+      (health?'<p class="muted">健康：'+safe(health)+'</p>':'')+
+      '<p class="muted">週2日の軽い筋トレも目標。歩数だけでは実施済みと判定しません。</p>'+
       '<div class="links"><a href="'+URL.life+'">MY LIFEで記録を見る</a></div></section>';
     const monday = new Date(now.getFullYear(),now.getMonth(),now.getDate()-((now.getDay()+6)%7));
     const nextMonday = new Date(monday.getFullYear(),monday.getMonth(),monday.getDate()+7);
@@ -493,7 +496,7 @@
       '.event time{width:58px;flex-shrink:0;font-size:18px;color:#206D90;font-weight:800}.event b,.task b{display:block;font-size:19px;line-height:1.5}',
       '.event small,.task small{display:block;color:#5D6B61;margin-top:5px;line-height:1.45;font-size:16px}.task b{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.task details{margin-top:8px}.task summary{color:#206D90;font-size:16px;font-weight:700;cursor:pointer;min-height:34px}.task details p{margin:6px 0;font-size:16px;line-height:1.55;white-space:normal;overflow-wrap:anywhere}.tasklink{display:inline-block;color:#1C6477;font-size:16px;font-weight:750;padding:11px 0;text-decoration:underline;min-height:44px}',
       '.grow{flex:1;min-width:0;overflow-wrap:anywhere}.num{background:#F3E9DB;color:#87571F;border-radius:10px;width:33px;height:33px;display:grid;place-items:center;flex-shrink:0;font-weight:800}',
-      '.habit{padding:12px 0;font-size:19px;line-height:1.5}.dot{display:inline-block;width:11px;height:11px;border:2px solid #6D9A85;border-radius:50%;margin-right:12px}',
+      '.habit{padding:12px 0;font-size:19px;line-height:1.5}.movementgoal{background:#F1F6ED;border:1px solid #E1EAE0;padding:14px;border-radius:12px;margin:9px 0 13px}.movementgoal b{display:block;font-size:18px;color:#2F6349;line-height:1.45}.movementgoal small{display:block;font-size:15px;color:#66766D;margin-top:6px}.dot{display:inline-block;width:11px;height:11px;border:2px solid #6D9A85;border-radius:50%;margin-right:12px}',
       '.weekrow{align-items:start}.weekday{width:80px;font-size:17px;font-weight:800;flex-shrink:0}.weekevent{font-size:17px;margin-bottom:9px;line-height:1.5}.weekref{font-size:15px;color:#65746A;line-height:1.4;padding:6px 0}.weekdue{font-size:16px;font-weight:700;color:#825A2B;background:#F9F2E8;padding:8px;border-radius:9px;margin:7px 0}.more-due summary{color:#7A5928;font-size:16px;font-weight:700;padding:11px 0;min-height:44px}',
       '.foot{color:#58665D;font-size:14px;line-height:1.7;padding:12px 3px}.refcalendar{margin-top:8px;border-top:1px dashed #DCE3DB;padding:12px 0 0}.refcalendar summary{font-size:16px;color:#336E84;font-weight:700;cursor:pointer;min-height:40px}.refcalendar .event b{font-size:16px;color:#56645B}.overdue{border-radius:12px;background:#FFF4E8;border:1px solid #E8C79E;padding:0;margin-top:12px}.overdue summary{font-size:16px;color:#81572A;font-weight:700;min-height:48px;padding:14px;cursor:pointer}.overduebody{padding:0 14px 15px}.overdue p{font-size:15px;line-height:1.4;color:#674F36;margin:7px 0}.overduerow{font-size:15px;color:#674F36;padding:8px 0;border-top:1px solid #EAD8C4;overflow-wrap:anywhere}.overdue a{font-size:16px;font-weight:700;color:#1A6378;display:inline-block;margin-top:9px;min-height:34px}',
       '.links{display:flex;gap:8px;flex-wrap:wrap}.links a{color:#175E6D;background:#EFF5F1;border-radius:9px;padding:12px 13px;text-decoration:none;font-weight:750;font-size:17px;min-height:44px}',
