@@ -44,14 +44,14 @@
     item.font = bold ? Font.semiboldSystemFont(size) : Font.systemFont(size);
     item.textColor = colour(hex);
     item.lineLimit = lines;
-    item.minimumScaleFactor = 0.83;
+    item.minimumScaleFactor = 0.90;
     return item;
   }
   function section(widget, icon, title, value, link, accent) {
     const row = widget.addStack();
     row.layoutHorizontally();
     row.centerAlignContent();
-    row.setPadding(3,0,3,0);
+    row.setPadding(4,0,4,0);
     if(link) row.url = link;
     const sym = SFSymbol.named(icon);
     sym.applyFont(Font.systemFont(14));
@@ -61,9 +61,9 @@
     row.addSpacer(8);
     const content = row.addStack();
     content.layoutVertically();
-    label(content,title,11,C.soft,true);
+    label(content,title,13,C.soft,true);
     content.addSpacer(2);
-    label(content,value,14,C.ink,true,2);
+    label(content,value,16,C.ink,true,2);
     row.addSpacer();
     const chevron = SFSymbol.named("chevron.right");
     chevron.applyFont(Font.systemFont(9));
@@ -73,7 +73,7 @@
     return row;
   }
   function separator(widget) {
-    widget.addSpacer(4);
+    widget.addSpacer(3);
     const bar = widget.addStack();
     bar.size = new Size(0,1);
     bar.backgroundColor = colour(C.line);
@@ -197,7 +197,7 @@
   const widget = new ListWidget();
   widget.url = URL.home;
   widget.refreshAfterDate = new Date(Date.now()+SETTINGS.refreshMinutes*60000);
-  widget.setPadding(16,17,15,17);
+  widget.setPadding(15,17,14,17);
   const gradient = new LinearGradient();
   gradient.colors=[colour(C.paper),colour(C.white)];
   gradient.locations=[0,1];
@@ -213,11 +213,11 @@
   sunImage.tintColor=colour(C.gold);
   sunImage.imageSize=new Size(20,20);
   header.addSpacer(8);
-  label(header,night?"YOS TOMORROW":"YOS TODAY",18,C.ink,true);
+  label(header,night?"YOS TOMORROW":"YOS TODAY",19,C.ink,true);
   header.addSpacer();
-  label(header,dateText(target),11,C.soft,false);
+  label(header,dateText(target),13,C.soft,false);
   widget.addSpacer(6);
-  label(widget,night?"明日のために、今夜できること":"今日、必要なことだけ",12,C.gold,true);
+  label(widget,night?"明日のために、今夜できること":"今日、必要なことだけ",13,C.gold,true);
   separator(widget);
   section(widget,"calendar",night?"明日の予定":"次の予定",calendarLabel(events),
     events.items.length ? urlForCalendar(new Date(events.items[0].startDate)):URL.home,C.blue);
@@ -236,9 +236,9 @@
   widget.addSpacer();
   const footer=widget.addStack();
   footer.layoutHorizontally();
-  label(footer,night?"夜の準備モード":"今日の情報モード",10,C.soft,false);
+  label(footer,night?"夜の準備モード":"今日の情報モード",12,C.soft,false);
   footer.addSpacer();
-  const alert=label(footer,"要対応を見る  ›",11,C.gold,true);
+  const alert=label(footer,"要対応を見る  ›",12,C.gold,true);
   footer.url=URL.alerts;
 
   // Full-screen life board reuses the SAME read-only sources as the large widget.
