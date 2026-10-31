@@ -1,4 +1,5 @@
-// Shared YOS Notion adapter reused by the official Clarity voice entry.\nconst K='YOS_NOTION_INTEGRATION_TOKEN';
+// Shared YOS Notion adapter reused by the official Clarity voice entry.
+const K='YOS_NOTION_INTEGRATION_TOKEN';
 function parse(q){const o={};for(const part of String(q||'').split('&')){if(!part)continue;const i=part.indexOf('=');const k=i<0?part:part.slice(0,i);const v=i<0?'':part.slice(i+1);o[decodeURIComponent(k)]=decodeURIComponent(v.replace(/\+/g,' '));}return o;}
 function pending(v){return v===true||v===1||/^(yes|true|1|はい)$/i.test(String(v||''));}
 function payload(v){
