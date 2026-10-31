@@ -51,6 +51,8 @@ ALLOWED_ACTION_IDS = {
     "is.workflow.actions.setvolume",
     "is.workflow.actions.openurl",
     "is.workflow.actions.showresult",
+    "is.workflow.actions.urlencode",
+    "dk.simonbs.Scriptable.RunScriptInlineIntent",
 }
 
 RANGE_RE = re.compile(r"^\{(\d+),\s*(\d+)\}$")
@@ -152,6 +154,19 @@ def validate(path: Path, expected_build_id: str) -> None:
     unknown = sorted(set(counts) - allowed_action_ids)
     if unknown:
         raise AssertionError(f"unreviewed action identifier(s): {unknown}")
+
+    inline_scripts = [
+        action for action in actions
+        if action.get("WFWorkflowActionIdentifier")
+        == "dk.simonbs.Scriptable.RunScriptInlineIntent"
+    ]
+    if len(inline_scripts) != 1:
+        raise AssertionError(f"expected one inline Notion bridge, found {len(inline_scripts)}")
+    inline_script = params(inline_scripts[0]).get("script")
+    if not isinstance(inline_script, str) or "const YOS_BRIDGE_DRY_RUN=true;" not in inline_script:
+        raise AssertionError("Clarity Voice Notion bridge must remain dry-run in test artifacts")
+    if "const YOS_BRIDGE_DRY_RUN=false;" in inline_script:
+        raise AssertionError("live Notion writes are forbidden in test artifacts")
 
     # Index every addressable action and every named variable before resolving refs.
     uuid_index: dict[str, tuple[int, dict]] = {}
