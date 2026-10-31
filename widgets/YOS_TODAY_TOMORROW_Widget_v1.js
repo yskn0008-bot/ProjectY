@@ -304,7 +304,7 @@
       '</time><div><b>'+safe(e.title)+'</b></div></div>').join('')+'</details>' : '';
     // Quiet days should show actionable tasks first, not two oversized "no plans" notices.
     const quietDay = events.ok && personalEvents.length === 0;
-    const quickStatus = '優先 '+upcomingTasks.length+'件'+
+    const quickStatus = (feed.stale ? 'タスク未確認' : '優先 '+upcomingTasks.length+'件')+
       (referenceEvents.length ? ' · 参考 '+referenceEvents.length+'件' : '');
     const overviewHTML = quietDay ?
       '<div class="quick"><b>今日の見通し</b><span>予定の登録なし · '+quickStatus+'</span></div>' :
