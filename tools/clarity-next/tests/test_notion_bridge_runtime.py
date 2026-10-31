@@ -86,7 +86,10 @@ async function capture(id,target,raw,dateTime='',amount='',kind='',transport='pl
     }
   }
   const payload=new URLSearchParams({request_id:id,target,title:raw.slice(0,70),raw,date_time:dateTime,amount,kind}).toString();
-  const context={args:{plainTexts:transport==='plainTexts'?[payload]:[],shortcutParameter:transport==='shortcutParameter'?payload:undefined},Keychain:{contains:()=>true,get:()=> 'simulated-token'},Request,FileManager:{local:()=>fm},Script:{setShortcutOutput:v=>{output=v;},complete:()=>{}},Date,Number,String,JSON,Math,Error,decodeURIComponent,encodeURIComponent};
+  const voiceInput={notionPending:true,notionTarget:target,notionTitle:raw.slice(0,70),notionRaw:raw,notionDateTime:dateTime,notionAmount:amount,notionKind:kind};
+  const inactiveVoiceInput={...voiceInput,notionPending:false};
+  const shortcutParameter=transport==='shortcutParameter'?payload:transport==='shortcutDictionary'?voiceInput:transport==='inactiveShortcutDictionary'?inactiveVoiceInput:undefined;
+  const context={args:{plainTexts:transport==='plainTexts'?[payload]:[],shortcutParameter},Keychain:{contains:()=>true,get:()=> 'simulated-token'},Request,FileManager:{local:()=>fm},Script:{setShortcutOutput:v=>{output=v;},complete:()=>{}},Date,Number,String,JSON,Math,Error,decodeURIComponent,encodeURIComponent};
   await vm.runInNewContext('(async()=>{'+script+'})()',context);
   return output;
 }
@@ -132,6 +135,12 @@ function allInboxText(){return inboxBlocks.map(blockText).join('\n');}
   assert.equal(await capture('voice-bridge-001','task','Voice経由のテスト保存','2026-11-02T09:00:00+09:00','','','shortcutParameter'),'OK:task');
   assert.equal(await capture('voice-bridge-002','task','Voice経由のテスト保存','2026-11-02T09:00:00+09:00'),'DUPLICATE:task');
   assert.equal(targetCount('task'),8,'Scriptable Shortcut Input entry must share the same dedupe path');
+  assert.equal(await capture('voice-dictionary-001','task','Clarity.Voice辞書入力','2026-11-02T10:00:00+09:00','','','shortcutDictionary'),'OK:task');
+  assert.equal(await capture('voice-dictionary-002','task','Clarity.Voice辞書入力','2026-11-02T10:00:00+09:00'),'DUPLICATE:task');
+  assert.equal(targetCount('task'),9,'Clarity.Voice notion* dictionary fields must normalize into the shared route');
+  const beforeInactive={inbox:inboxBlocks.length,tasks:targetCount('task')};
+  await assert.rejects(capture('voice-dictionary-inactive','task','無効化されたNotion項目','','','','inactiveShortcutDictionary'),/incomplete/);
+  assert.deepEqual({inbox:inboxBlocks.length,tasks:targetCount('task')},beforeInactive,'notionPending=false must not write to Inbox or Tasks');
 
   for(const target of ['shopping','project','life_event','person','learning','money','balance']){
     const amount=['money','balance'].includes(target)?'682':'';
@@ -152,7 +161,7 @@ function allInboxText(){return inboxBlocks.map(blockText).join('\n');}
   assert.equal(await capture('long-a','task',longRaw),'OK:task');
   assert.ok(allInboxText().includes(longRaw),'Inbox must preserve raw text longer than one Notion text object');
   assert.ok(inboxBlocks.at(-1).paragraph.rich_text.every(x=>x.text.content.length<=2000));
-  console.log('Inbox-first, target idempotency, readback retry, legacy duplicate guards, Shortcut Input bridge, distinct-due-time, and long-raw simulation: PASS');
+  console.log('Inbox-first, target idempotency, readback retry, legacy duplicate guards, Shortcut Input query/dictionary bridges, distinct-due-time, and long-raw simulation: PASS');
 })().catch(e=>{console.error(e);process.exitCode=1;});
 """
 
