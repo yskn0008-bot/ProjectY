@@ -70,6 +70,31 @@ test('Notion calendar mode retains unnumbered due tasks without changing normal 
   assert.equal(calendar.tasks.length,2);
   assert.equal(calendar.sourceComplete,true);
 });
+
+test('Notion cursor missing when has_more is true fails closed',async()=>{
+  const fetchImpl=async()=>Response.json({results:[item('partial','2026-11-03','次にやる',1)],has_more:true,next_cursor:null});
+  await assert.rejects(
+    loadNotionTaskDashboard({notionToken:'fake',notionDataSourceId:DATA_SOURCE_ID,calendarMode:true,fetchImpl}),
+    /without a valid cursor/
+  );
+});
+test('Notion scan stops at five full pages and explicitly marks incomplete coverage',async()=>{
+  let calls=0;
+  const fetchImpl=async()=>{
+    calls++;
+    return Response.json({
+      results:[item('Task '+calls,'2026-11-03','次にやる',calls)],
+      has_more:true,next_cursor:'cursor-'+calls
+    });
+  };
+  const feed=await loadNotionTaskDashboard({
+    notionToken:'fake',notionDataSourceId:DATA_SOURCE_ID,calendarMode:true,fetchImpl
+  });
+  assert.equal(calls,5);
+  assert.equal(feed.tasks.length,5);
+  assert.equal(feed.sourceComplete,false);
+});
+
 test('unauthenticated calendar request must not query private tasks',async()=>{
   const h=makeHandler([item('private','2026-11-03','次にやる')]);
   const r=await h.get('?mode=calendar&start=2026-11-01&end=2026-11-07','wrong');
