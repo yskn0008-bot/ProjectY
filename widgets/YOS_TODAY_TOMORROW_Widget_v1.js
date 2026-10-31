@@ -35,6 +35,10 @@
   const targetKey = dateKey(target);
   const todayKey = dateKey(now);
   const clean = (value, limit=80) => String(value == null ? "" : value).replace(/[\u0000-\u001F\u007F]/g, " ").trim().slice(0,limit);
+  // Explicit taxi-demand markers are reference events, not proven appointments.
+  const isReferenceEvent = e =>
+    /^[\s　]*[［\[【]\s*タクシー需要\s*[］\]】]/.test(clean(e && e.title,120)) ||
+    /タクシー需要/.test(clean(e && e.calendar && e.calendar.title,80));
   const validDate = value => { const d = new Date(value); return isNaN(d.getTime()) ? null : d; };
   const time = d => String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0");
   const dateText = d => (d.getMonth()+1)+"/"+d.getDate()+"（"+"日月火水木金土"[d.getDay()]+"）";
@@ -167,10 +171,13 @@
   }
   function calendarLabel(result) {
     if(!result.ok) return "カレンダー未取得";
-    if(!result.items.length) return night ? "明日の予定なし" : "残りの予定なし";
-    const e=result.items[0];
+    const appointments=result.items.filter(e=>!isReferenceEvent(e));
+    if(!appointments.length) return result.items.length ?
+      "予定の登録なし（参考イベント"+result.items.length+"件）" :
+      (night?"明日の予定なし":"残りの予定なし");
+    const e=appointments[0];
     return (e.isAllDay ? "終日 " : time(new Date(e.startDate))+" ") + clean(e.title,38) +
-      (result.items.length>1 ? " ほか"+(result.items.length-1)+"件" : "");
+      (appointments.length>1 ? " ほか"+(appointments.length-1)+"件" : "");
   }
   function routineLabel(reminders) {
     if(night) return "MY LIFEで明朝の習慣を確認";
@@ -223,8 +230,9 @@
   widget.addSpacer(6);
   label(widget,night?"明日のために、今夜できること":"今日、必要なことだけ",13,C.gold,true);
   separator(widget);
+  const firstAppointment=events.items.find(e=>!isReferenceEvent(e));
   section(widget,"calendar",night?"明日の予定":"次の予定",calendarLabel(events),
-    events.items.length ? urlForCalendar(new Date(events.items[0].startDate)):URL.home,C.blue);
+    firstAppointment ? urlForCalendar(new Date(firstAppointment.startDate)):widget.url,C.blue);
   separator(widget);
   section(widget,"checkmark.circle",night?"期限・持ち越し":"今日のリマインダー",reminderLabel(reminders),
     URL.home,C.green);
@@ -263,12 +271,11 @@
     const upcomingTasks = tasks.filter(t => !(validDue(t) && String(t.due).slice(0,10) < todayKey));
     // The top card describes the day's *overview* instead of repeating the first task.
     // Reference-calendar events must never be counted as personal appointments.
-    const isReferenceEvent = e => /^[\s　]*[［\[【]\s*タクシー需要\s*[］\]】]/.test(clean(e && e.title,120));
     const personalEvents = events.items.filter(e => !isReferenceEvent(e));
     const referenceEvents = events.items.filter(isReferenceEvent);
     const focus = !events.ok ? "今日の予定は未取得" :
-      personalEvents.length ? "このあとの予定 "+personalEvents.length+"件" :
-      "このあとの予定は未登録";
+      personalEvents.length ? "登録された予定 "+personalEvents.length+"件" :
+      "参考以外の予定は未登録";
     const focusNote = feed.stale ? "タスクの最新状態は未確認。" :
       upcomingTasks.length ? "優先タスク "+upcomingTasks.length+"件を確認。無理なく進めよう。" :
       overdueTasks.length ? "期限が過ぎたタスクの状態を確認。" :
@@ -289,7 +296,7 @@
         (e.isAllDay ? '終日' : escapeHtml(time(new Date(e.startDate))))+
         '</time><div><b>'+safe(e.title)+'</b>'+
         (e.location ? '<small>'+safe(e.location)+'</small>' : '')+'</div></div>').join("") :
-        '<p class="muted">このあとの個人予定は未登録です。空き時間が確定したわけではありません。</p>') :
+        '<p class="muted">参考情報を除く、このあとの予定は未登録です。空き時間が確定したわけではありません。</p>') :
         '<p class="muted">Appleカレンダー未取得。予定は確認できていません。</p>';
     const referenceRows = referenceEvents.length ?
       '<details class="refcalendar"><summary>参考イベント '+referenceEvents.length+'件（予定とは別）</summary>'+
@@ -327,7 +334,7 @@
           (appointments.length ? appointments.slice(0,3).map(e =>
             '<div class="weekevent">'+(e.isAllDay?'終日':escapeHtml(time(new Date(e.startDate))))+' '+safe(e.title)+'</div>'
           ).join("")+(appointments.length>3?'<small>ほか'+(appointments.length-3)+'件</small>':'') :
-          '<span class="muted">'+(weekEvents===null?'予定未取得':'個人予定の登録なし')+'</span>')+
+          '<span class="muted">'+(weekEvents===null?'予定未取得':'参考以外の予定なし')+'</span>')+
           references.slice(0,2).map(e=>'<div class="weekref">参考｜'+safe(e.title)+'</div>').join('')+
           (references.length>2?'<small>参考イベント ほか'+(references.length-2)+'件</small>':'')+
           dueTasks.map(title => '<div class="weekdue">期限｜'+safe(title)+'</div>').join('')+'</div></div>';
