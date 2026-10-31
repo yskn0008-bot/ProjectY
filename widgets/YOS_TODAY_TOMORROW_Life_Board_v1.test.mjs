@@ -5,7 +5,7 @@ import {readFileSync} from 'node:fs';
 const source = readFileSync(new URL('./YOS_TODAY_TOMORROW_Widget_v1.js', import.meta.url), 'utf8');
 const body = source.slice(source.indexOf('(async function ()'));
 
-function runtime(runsInWidget, denyPermissions, widgetMode = 'DAY', withTaskFeed = false) {
+function runtime(runsInWidget, denyPermissions, widgetMode = 'DAY', withTaskFeed = false, tasksOverride = null) {
   let html = '';
   let widgetSet = false;
   let presented = 0;
@@ -34,7 +34,7 @@ function runtime(runsInWidget, denyPermissions, widgetMode = 'DAY', withTaskFeed
       iCloud(){return {documentsDirectory(){return '/icloud';},joinPath(...parts){return parts.join('/');},fileExists(){return false;}};}
     },
     Keychain: {contains(){return withTaskFeed;},get(){return 'mockToken';}},
-    Request: class {constructor(){this.response={statusCode:200};} async loadJSON(){return {tasks:[{title:'TEST_DUE<&',due:new Date().toISOString().slice(0,10)}]};}},
+    Request: class {constructor(){this.response={statusCode:200};} async loadJSON(){return {tasks:tasksOverride || [{title:'TEST_DUE<&',due:new Date().toISOString().slice(0,10)}]};}},
     URLScheme: {forRunningScript(){return 'scriptable:///run?scriptName=YOS%20TODAY';}},
     CalendarEvent: {async between(start){
       if (!firstCalendarDate) firstCalendarDate = new Date(start).toISOString().slice(0,10);
@@ -91,6 +91,45 @@ test('when Calendar access is denied, available due tasks remain visible', async
   const view=mock.snapshot();
   assert.match(view.html,/予定未取得/);
   assert.match(view.html,/期限｜TEST_DUE&lt;&amp;/);
+});
+
+test('overdue task is not silently promoted as todays top priority', async () => {
+  const localDate = offset => {
+    const now = new Date();
+    const d = new Date(now.getFullYear(),now.getMonth(),now.getDate()+offset);
+    return [d.getFullYear(), String(d.getMonth()+1).padStart(2,'0'), String(d.getDate()).padStart(2,'0')].join('-');
+  };
+  const tasks = [
+    {title:'21 | Old Night Brief task',due:localDate(-20),nextAction:'Long historical detail should be folded away'},
+    {title:'22 | Relevant current task',due:localDate(+1),nextAction:'Current action'},
+  ];
+  const mock = runtime(false,false,'DAY',true,tasks);
+  await new Function(...Object.keys(mock.globals),'return '+body)(...Object.values(mock.globals));
+  const page = mock.snapshot().html;
+  const firstHero = page.slice(page.indexOf('<section class="hero">'),page.indexOf('</section>',page.indexOf('<section class="hero">')));
+  assert.match(firstHero,/Relevant current task/);
+  assert.doesNotMatch(firstHero,/Old Night Brief task/);
+  assert.match(page,/期限を過ぎた登録タスク 1件/);
+  assert.match(page,/Old Night Brief task/);
+  assert.match(page,/<details><summary>対応内容を見る/);
+  assert.doesNotMatch(page,/21 \| Old Night Brief task/);
+});
+
+test('a feed with only expired tasks is presented as needing verification', async () => {
+  const before = new Date();
+  const old = new Date(before.getFullYear(),before.getMonth(),before.getDate()-20);
+  const due = [old.getFullYear(),String(old.getMonth()+1).padStart(2,'0'),String(old.getDate()).padStart(2,'0')].join('-');
+  const mock = runtime(false,false,'DAY',true,[{title:'Night Brief',due}]);
+  await new Function(...Object.keys(mock.globals),'return '+body)(...Object.values(mock.globals));
+  const page = mock.snapshot().html;
+  assert.match(page,/期限切れの登録内容を確認/);
+  assert.match(page,/完了済みか未完了かは未確認/);
+  assert.match(page,/Notionで状態を確認/);
+});
+
+test('the fullscreen header is offset below native WebView controls', () => {
+  assert.match(source,/\.wrap\{max-width:640px;margin:auto;padding:112px 18px 72px/);
+  assert.match(source,/\.task b\{display:-webkit-box;-webkit-line-clamp:2/);
 });
 
 test('readable typography is preserved in both views', () => {
