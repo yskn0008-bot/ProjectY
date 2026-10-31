@@ -27,7 +27,8 @@
   const now = new Date();
   const dayMode = SETTINGS.mode === "DAY" || SETTINGS.mode === "TODAY";
   const nightMode = SETTINGS.mode === "NIGHT" || SETTINGS.mode === "TOMORROW";
-  const night = nightMode || (!dayMode && now.getHours() >= SETTINGS.eveningHour);
+  // The full-screen board always reflects the current day; NIGHT is a widget-only mode.
+  const night = config.runsInWidget && (nightMode || (!dayMode && now.getHours() >= SETTINGS.eveningHour));
   const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
   const target = night ? tomorrow : now;
   const dateKey = d => [d.getFullYear(), String(d.getMonth()+1).padStart(2,"0"), String(d.getDate()).padStart(2,"0")].join("-");
@@ -248,7 +249,8 @@
       .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
       .replace(/"/g,"&quot;").replace(/'/g,"&#39;");
     const safe = value => escapeHtml(clean(value,240));
-    const feedItems = feed.data && Array.isArray(feed.data.tasks) ? feed.data.tasks : [];
+    const feedItems = feed.data && Array.isArray(feed.data.tasks) ? feed.data.tasks :
+      (feed.data && feed.data.task ? [feed.data.task] : []);
     const priorities = feedItems.filter(t => t && clean(t.title)).slice(0,3);
     const focus = priorities[0] ? clean(priorities[0].title,110).replace(/^\d{1,3}\s*[｜|]\s*/,"") :
       (feed.data ? "重要なタスクは未登録" : "YOS Tasksは未取得");
@@ -262,7 +264,7 @@
         (e.isAllDay ? '終日' : escapeHtml(time(new Date(e.startDate))))+
         '</time><div><b>'+safe(e.title)+'</b>'+
         (e.location ? '<small>'+safe(e.location)+'</small>' : '')+'</div></div>').join("") :
-        '<p class="muted">登録された予定はありません。空き時間が確定したわけではありません。</p>') :
+        '<p class="muted">このあと登録された予定はありません。過去の予定や未取得の情報は含みません。</p>') :
         '<p class="muted">Appleカレンダー未取得。予定は確認できていません。</p>';
     const routine = reminders.ok ? reminders.items.filter(r => 
       /ルーティン|習慣|routine/i.test(clean(r.calendar && r.calendar.title,60))
@@ -270,6 +272,14 @@
     const habitRows = routine.length ? routine.map(r =>
       '<div class="habit"><span class="dot"></span>'+safe(r.title)+'</div>').join("") :
       '<p class="muted">習慣の実施状況は未連携です。未記録を未実施とは判定しません。</p>';
+    // Show due dates from the existing prioritized feed, not an invented complete task calendar.
+    const taskDueMap = new Map();
+    for (const task of feedItems.slice(0,3)) {
+      if (!task || !/^\d{4}-\d{2}-\d{2}/.test(String(task.due || ""))) continue;
+      const key = String(task.due).slice(0,10);
+      if (!taskDueMap.has(key)) taskDueMap.set(key,[]);
+      taskDueMap.get(key).push(clean(task.title,80));
+    }
     const monday = new Date(now.getFullYear(),now.getMonth(),now.getDate()-((now.getDay()+6)%7));
     const nextMonday = new Date(monday.getFullYear(),monday.getMonth(),monday.getDate()+7);
     let weekEvents = null;
@@ -281,13 +291,15 @@
         const d=new Date(monday.getFullYear(),monday.getMonth(),monday.getDate()+i);
         const start=new Date(d.getFullYear(),d.getMonth(),d.getDate());
         const end=new Date(d.getFullYear(),d.getMonth(),d.getDate()+1);
+        const dueTasks = taskDueMap.get(dateKey(d)) || [];
         const dayEvents=weekEvents.filter(e => e && e.title && new Date(e.startDate)<end &&
           new Date(e.endDate || e.startDate)>start).sort((a,b)=>new Date(a.startDate)-new Date(b.startDate));
         return '<div class="weekrow"><div class="weekday">'+escapeHtml(dateText(d))+'</div><div class="grow">'+
           (dayEvents.length ? dayEvents.slice(0,3).map(e =>
             '<div class="weekevent">'+(e.isAllDay?'終日':escapeHtml(time(new Date(e.startDate))))+' '+safe(e.title)+'</div>'
           ).join("")+(dayEvents.length>3?'<small>ほか'+(dayEvents.length-3)+'件</small>':'') :
-          '<span class="muted">予定の登録なし</span>')+'</div></div>';
+          '<span class="muted">予定の登録なし</span>')+
+          dueTasks.map(title => '<div class="weekdue">期限｜'+safe(title)+'</div>').join('')+'</div></div>';
       }).join("");
     const styles = [
       '*{box-sizing:border-box}body{margin:0;background:#F5F5F2;color:#252C2A;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans",sans-serif;font-size:16px}',
@@ -307,7 +319,7 @@
       '.event small,.task small{display:block;color:#5D6B61;margin-top:6px;line-height:1.55;font-size:16px}',
       '.grow{flex:1;min-width:0;overflow-wrap:anywhere}.num{background:#F3E9DB;color:#87571F;border-radius:10px;width:33px;height:33px;display:grid;place-items:center;flex-shrink:0;font-weight:800}',
       '.habit{padding:12px 0;font-size:19px;line-height:1.5}.dot{display:inline-block;width:11px;height:11px;border:2px solid #6D9A85;border-radius:50%;margin-right:12px}',
-      '.weekrow{align-items:start}.weekday{width:80px;font-size:17px;font-weight:800;flex-shrink:0}.weekevent{font-size:17px;margin-bottom:9px;line-height:1.5}',
+      '.weekrow{align-items:start}.weekday{width:80px;font-size:17px;font-weight:800;flex-shrink:0}.weekevent{font-size:17px;margin-bottom:9px;line-height:1.5}.weekdue{font-size:16px;font-weight:700;color:#825A2B;background:#F9F2E8;padding:8px;border-radius:9px;margin:7px 0}',
       '.foot{color:#58665D;font-size:14px;line-height:1.7;padding:12px 3px}',
       '.links{display:flex;gap:8px;flex-wrap:wrap}.links a{color:#175E6D;background:#EFF5F1;border-radius:9px;padding:12px 13px;text-decoration:none;font-weight:750;font-size:17px;min-height:44px}',
       '@media(min-width:600px){.wrap{padding:35px 28px 80px}}'
@@ -329,7 +341,8 @@
       '<p class="muted">予定を詰めすぎず、食事・休息・楽しむ時間も確保する。空き時間の計算と提案は今後の連携対象。</p></section></div>'+
       '<div class="week"><section class="hero"><span>今週の予定</span><h2>無理なく進める一週間</h2>'+
       '<p>固定予定を確認してから、やることを組み立てる。</p></section>'+
-      '<section class="section"><h3>今週のカレンダー</h3>'+weekRows+'</section></div>'+
+      '<section class="section"><h3>今週のカレンダー</h3>'+weekRows+
+      '<p class="muted">タスク期限はYOSの優先最大3件のみ。全タスクの期限一覧ではありません。</p></section></div>'+
       '<section class="section"><h3>元データを開く</h3><div class="links">'+
       '<a href="'+URL.tasks+'">YOS Tasks</a><a href="'+URL.home+'">Notion HOME</a>'+
       '<a href="'+URL.life+'">MY LIFE</a></div></section>'+
