@@ -203,6 +203,58 @@
       return parts.slice(0,2).join(" · ") || null;
     } catch(e) { return null; }
   }
+  // Optional, read-only bridge for the already working Clarity.Voice -> YOS Inbox flow.
+  // A found report is evidence of an inbox message, NOT proof that YOS Diary was updated
+  // or that exercise was clinically measured.
+  function movementReportCandidate(value) {
+    const raw=clean(value,350).replace(/[\\s　]+/g,'');
+    if(raw.length>220 ||
+      /(?:歩いてない|歩かなかった|歩けなかった|していない|してない|運動しなかった|歩きたい|歩く予定|歩こう|歩いたら|歩いた？|仮に|たとえば|例えば|と言った|って言って|歩いたことに)/.test(raw))
+      return false;
+    return /(?:^|[。！!、])(?:(?:今日|さっき|今朝|昼|夜|食後|夕食後|朝食後|昼食後|今)は?)?(?:(?:[1-9][0-9]?分(?:間|だけ)?歩いた)|(?:[1-9][0-9]?分(?:間)?ウォーキング(?:した|しました))|(?:スクワット(?:を)?[1-9][0-9]?回(?:した|やった|しました)))(?:[。！!]|$)/.test(raw);
+  }
+  async function readMovementInbox() {
+    const notKey='YOS_NOTION_INTEGRATION_TOKEN';
+    if(config.runsInWidget || !Keychain.contains(notKey)) return {candidate:false};
+    const token=Keychain.get(notKey);
+    if(!token) return {candidate:false};
+    const inboxId='3d35ca88-2895-81ef-9dc8-d5f11ff8e213';
+    let cursor='',meta=null;
+    const paragraph=block => {
+      if(!block || block.type!=='paragraph') return '';
+      const chunks=block.paragraph && block.paragraph.rich_text;
+      return Array.isArray(chunks)?chunks.map(x=>clean(x && (x.plain_text || x.text && x.text.content),1900)).join(''):'';
+    };
+    try {
+      for(let page=0;page<4;page++) {
+        const base='https://api.notion.com/v1/blocks/'+inboxId+'/children?page_size=100';
+        const req=new Request(base+(cursor?'&start_cursor='+encodeURIComponent(cursor):''));
+        req.headers={Authorization:'Bearer '+token,'Notion-Version':'2026-03-11',Accept:'application/json'};
+        req.timeoutInterval=3;
+        const data=await req.loadJSON();
+        if(Number(req.response && req.response.statusCode)!==200 ||
+          !data || !Array.isArray(data.results)) return {candidate:false};
+        for(const block of data.results) {
+          const content=paragraph(block);
+          const found=content.match(/^(\\d{4}-\\d{2}-\\d{2}T[^ ]+) · (?:Clarity|Idea|Memo) · clarity:[A-Za-z0-9_-]+$/);
+          if(found) {
+            const timestamp=validDate(found[1]);
+            meta=timestamp && dateKey(timestamp)===todayKey;
+          } else if(meta!==null && block.type==='paragraph') {
+            if(meta && movementReportCandidate(content))
+              return {candidate:true};
+            meta=null;
+          } else if(block.type==='divider') {
+            meta=null;
+          }
+        }
+        if(data.has_more!==true) return {candidate:false};
+        if(typeof data.next_cursor!=='string'||!data.next_cursor) return {candidate:false};
+        cursor=data.next_cursor;
+      }
+    } catch(e) {}
+    return {candidate:false};
+  }
   function calendarLabel(result) {
     if(!result.ok) return "カレンダー未取得";
     const appointments=result.items.filter(e=>!isReferenceEvent(e));
@@ -238,8 +290,9 @@
   const weekEnd = new Date(weekStart.getFullYear(),weekStart.getMonth(),weekStart.getDate()+6);
   const weekTaskPromise = config.runsInWidget ? Promise.resolve(null) :
     readCalendarTaskWindow(dateKey(weekStart),dateKey(weekEnd));
-  const [events,reminders,feed,health] = await Promise.all([
-    readCalendar(target),readReminders(),night?Promise.resolve({data:null,stale:true}):readYosFeed(),readHealth()
+  const [events,reminders,feed,health,movement] = await Promise.all([
+    readCalendar(target),readReminders(),night?Promise.resolve({data:null,stale:true}):readYosFeed(),
+    readHealth(),readMovementInbox()
   ]);
   const widget = new ListWidget();
   // The widget's unused background area opens this same script's full-screen board.
@@ -432,7 +485,7 @@
     // An intention is not evidence of completion. The user-confirmed exercise log
     // is intended to remain in the existing YOS diary via Clarity/Night.
     const movementGoal = '<div class="movementgoal"><b>食後5分歩く · 難しい日は1分</b>'+
-      '<small>運動の実施記録：未確認</small></div>';
+      '<small>'+(movement.candidate?'Clarityの運動報告候補あり（YOS日記への反映は未確認）':'運動の実施記録：未確認')+'</small></div>';
     const habitSection = '<section class="section"><h3>習慣・身体</h3>'+
       movementGoal+habitRows+
       (health?'<p class="muted">健康：'+safe(health)+'</p>':'')+
