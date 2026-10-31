@@ -378,8 +378,8 @@ def validate(path: Path, expected_build_id: str) -> None:
     if not isinstance(value, dict) or value.get("WFActionParameterFilterPrefix") != 1:
         raise AssertionError("external-write gate must remain AND")
     rows = value.get("WFActionParameterFilterTemplates")
-    if not isinstance(rows, list) or len(rows) != 2:
-        raise AssertionError("external-write gate must have two rows")
+    if not isinstance(rows, list) or len(rows) != 3:
+        raise AssertionError("external-write gate must have three rows")
     boolean_rows = {}
     for row in rows:
         if not isinstance(row, dict):
@@ -398,8 +398,9 @@ def validate(path: Path, expected_build_id: str) -> None:
     if boolean_rows != {
         "externalWriteText": (4, "はい"),
         "requiresConfirmationText": (4, "いいえ"),
+        "executor": (5, "notion"),
     }:
-        raise AssertionError(f"external-write boolean rows wrong: {boolean_rows!r}")
+        raise AssertionError(f"external-write gate rows wrong: {boolean_rows!r}")
 
     # Audit every Conditional and Repeat group, not just feature paths.
     condition_groups: dict[str, list[tuple[int, int]]] = defaultdict(list)
