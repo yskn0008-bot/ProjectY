@@ -7,6 +7,7 @@ function payload(v){
   else return parse(s);
  }
  if(!v||typeof v!=='object'||Array.isArray(v))return {};
+ if(Array.isArray(v.plan))v={actions:v.plan};else if(v.plan&&typeof v.plan==='object')v=v.plan;
  const actions=Array.isArray(v)?v:(Array.isArray(v.actions)?v.actions:null);
  if(actions){
   const saves=actions.filter(a=>a&&((a.executor==='notion'&&a.module==='NEXT_NOTION'&&a.operation==='save')||(a.executor==='money'&&a.module==='NEXT_MONEY'&&a.operation==='capture')));
@@ -21,7 +22,9 @@ function payload(v){
  return {request_id:v.request_id||v.requestId||v.notionRequestId||'',target:String(v.target||v.notionTarget||'').trim().toLowerCase(),title:v.title||v.notionTitle||'',raw:v.raw||v.raw_text||v.notionRaw||'',date_time:v.date_time||v.dateTime||v.notionDateTime||'',amount:v.amount??v.notionAmount??'',kind:v.kind||v.notionKind||''};
 }
 const shortcutPayload=args.shortcutParameter;
-const p=payload((args.plainTexts||[])[0]||shortcutPayload);
+const inputPayload=(args.plainTexts||[])[0]||shortcutPayload;
+const testMode=Boolean(inputPayload&&typeof inputPayload==='object'&&(inputPayload.yosTestMode===true||inputPayload.testMode===true));
+const p=payload(inputPayload);
 if(!p.request_id&&p.target&&p.raw){const day=new Date().toISOString().slice(0,10),seed=[p.target,p.raw,p.date_time,p.amount].join('|');let h=2166136261;for(let i=0;i<seed.length;i++){h^=seed.charCodeAt(i);h=Math.imul(h,16777619);}p.request_id='clarity-shortcut:'+day+':'+(h>>>0).toString(16).padStart(8,'0');}
 if(p.target&&!p.request_id)throw new Error('Clarity Notion payload is incomplete');
 const API='https://api.notion.com/v1',VER='2025-09-03';
@@ -46,6 +49,7 @@ async function inboxContains(key){let cursor=null;do{const query='?page_size=100
 async function ensureInboxCapture(target,key,raw){if(await inboxContains(key))return false;const line=new Date().toISOString()+' [ClarityCapture:'+key+'] ['+target+'] '+raw;await api('/blocks/'+INBOX+'/children','PATCH',{children:[{object:'block',type:'paragraph',paragraph:{rich_text:rt(line)}}]});return true;}
 async function main(){
  if(!p.target)return 'SKIP:no_notion_save';
+ if(testMode)return 'DRYRUN:'+p.target;
  if(!Keychain.contains(K))throw new Error('Notion token missing. Run YOS_Notion_Sync once.');
  const state=readState();if(state[p.request_id])return 'DUPLICATE:'+p.target;
  const title=p.title||p.raw||'Clarity',raw=p.raw||title,key=captureSyncKey(p.target,raw,p.date_time,p.amount);
