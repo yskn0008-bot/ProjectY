@@ -285,20 +285,18 @@
     let weekEvents = null;
     try { weekEvents = await CalendarEvent.between(monday,nextMonday); }
     catch(e) { weekEvents = null; }
-    const weekRows = weekEvents === null ?
-      '<p class="muted">カレンダー未取得。今週の予定は確認できません。</p>' :
-      Array.from({length:7},(_,i) => {
+    const weekRows = Array.from({length:7},(_,i) => {
         const d=new Date(monday.getFullYear(),monday.getMonth(),monday.getDate()+i);
         const start=new Date(d.getFullYear(),d.getMonth(),d.getDate());
         const end=new Date(d.getFullYear(),d.getMonth(),d.getDate()+1);
         const dueTasks = taskDueMap.get(dateKey(d)) || [];
-        const dayEvents=weekEvents.filter(e => e && e.title && new Date(e.startDate)<end &&
+        const dayEvents=(weekEvents || []).filter(e => e && e.title && new Date(e.startDate)<end &&
           new Date(e.endDate || e.startDate)>start).sort((a,b)=>new Date(a.startDate)-new Date(b.startDate));
         return '<div class="weekrow"><div class="weekday">'+escapeHtml(dateText(d))+'</div><div class="grow">'+
           (dayEvents.length ? dayEvents.slice(0,3).map(e =>
             '<div class="weekevent">'+(e.isAllDay?'終日':escapeHtml(time(new Date(e.startDate))))+' '+safe(e.title)+'</div>'
           ).join("")+(dayEvents.length>3?'<small>ほか'+(dayEvents.length-3)+'件</small>':'') :
-          '<span class="muted">予定の登録なし</span>')+
+          '<span class="muted">'+(weekEvents===null?'予定未取得':'予定の登録なし')+'</span>')+
           dueTasks.map(title => '<div class="weekdue">期限｜'+safe(title)+'</div>').join('')+'</div></div>';
       }).join("");
     const styles = [
