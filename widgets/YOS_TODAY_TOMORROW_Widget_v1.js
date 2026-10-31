@@ -254,14 +254,31 @@
     const safe = value => escapeHtml(clean(value,240));
     const feedItems = feed.data && Array.isArray(feed.data.tasks) ? feed.data.tasks :
       (feed.data && feed.data.task ? [feed.data.task] : []);
-    const priorities = feedItems.filter(t => t && clean(t.title)).slice(0,3);
-    const focus = priorities[0] ? clean(priorities[0].title,110).replace(/^\d{1,3}\s*[｜|]\s*/,"") :
-      (feed.data ? "重要なタスクは未登録" : "YOS Tasksは未取得");
-    const cards = priorities.length ? priorities.map((t,i) => 
-      '<div class="task"><div class="num">'+(i+1)+'</div><div class="grow"><b>'+safe(t.title)+'</b>'+
-      (t.due ? '<small>期限 '+safe(t.due.slice(0,10))+'</small>' : '')+
-      (t.nextAction ? '<small>'+safe(t.nextAction)+'</small>' : '')+'</div></div>'
-    ).join("") : '<p class="muted">タスクの確認が必要です。取得できていない情報は表示しません。</p>';
+    // Only confirmed, non-overdue tasks can become the today's focus.
+    // An old task may already be completed on the user's device; don't imply it is definitely undone.
+    const taskTitle = (t, limit=100) => clean(t && t.title,limit).replace(/^\d{1,3}\s*[｜|]\s*/,"");
+    const tasks = feedItems.filter(t => t && taskTitle(t)).slice(0,3);
+    const validDue = t => /^\d{4}-\d{2}-\d{2}$/.test(String(t && t.due || "").slice(0,10));
+    const overdueTasks = tasks.filter(t => validDue(t) && String(t.due).slice(0,10) < todayKey);
+    const upcomingTasks = tasks.filter(t => !(validDue(t) && String(t.due).slice(0,10) < todayKey));
+    const focus = feed.stale ? "YOS Tasksの最新状態を確認" :
+      upcomingTasks[0] ? taskTitle(upcomingTasks[0],96) :
+      overdueTasks.length ? "期限切れの登録内容を確認" :
+      (feed.data ? "今日の優先事項はまだ未設定" : "YOS Tasksを取得できません");
+    const focusNote = feed.stale ? "以前の情報の可能性があります。最新データを確認してください。" :
+      upcomingTasks[0] ? "確定した予定の合間に、無理なく進めよう。" :
+      overdueTasks.length ? "完了済みか未完了かは未確認です。Notionの状態を確認してください。" :
+      "予定・習慣・余白を大切に。優先事項を決めるとここに表示します。";
+    const cards = upcomingTasks.length ? upcomingTasks.map((t,i) =>
+      '<div class="task"><div class="num">'+(i+1)+'</div><div class="grow"><b>'+safe(taskTitle(t))+'</b>'+
+      (validDue(t) ? '<small>期限 '+safe(String(t.due).slice(0,10))+'</small>' : '')+
+      (t.nextAction ? '<details><summary>対応内容を見る</summary><p>'+safe(t.nextAction)+'</p></details>' : '')+'</div></div>'
+    ).join("") : '<p class="muted">いま取り組むタスクの登録は確認できません。</p>';
+    const overdueNotice = overdueTasks.length ?
+      '<div class="overdue"><b>期限を過ぎた登録タスク '+overdueTasks.length+'件</b>'+
+      '<p>完了状態が古い可能性があります。今日の優先事項には自動採用していません。</p>'+
+      overdueTasks.map(t => '<div class="overduerow">'+safe(taskTitle(t,110))+' · 期限 '+safe(String(t.due).slice(0,10))+'</div>').join('')+
+      '<a href="'+URL.tasks+'">Notionで状態を確認</a></div>' : '';
     const eventRows = events.ok ?
       (events.items.length ? events.items.map(e => '<div class="event"><time>'+
         (e.isAllDay ? '終日' : escapeHtml(time(new Date(e.startDate))))+
@@ -277,11 +294,11 @@
       '<p class="muted">習慣の実施状況は未連携です。未記録を未実施とは判定しません。</p>';
     // Show due dates from the existing prioritized feed, not an invented complete task calendar.
     const taskDueMap = new Map();
-    for (const task of feedItems.slice(0,3)) {
+    for (const task of tasks) {
       if (!task || !/^\d{4}-\d{2}-\d{2}/.test(String(task.due || ""))) continue;
       const key = String(task.due).slice(0,10);
       if (!taskDueMap.has(key)) taskDueMap.set(key,[]);
-      taskDueMap.get(key).push(clean(task.title,80));
+      taskDueMap.get(key).push(taskTitle(task,80));
     }
     const monday = new Date(now.getFullYear(),now.getMonth(),now.getDate()-((now.getDay()+6)%7));
     const nextMonday = new Date(monday.getFullYear(),monday.getMonth(),monday.getDate()+7);
@@ -304,26 +321,26 @@
       }).join("");
     const styles = [
       '*{box-sizing:border-box}body{margin:0;background:#F5F5F2;color:#252C2A;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans",sans-serif;font-size:16px}',
-      '.wrap{max-width:640px;margin:auto;padding:24px 18px 80px}.eyebrow{font-size:15px;letter-spacing:.10em;font-weight:800;color:#53665C}',
-      'h1{font-size:35px;letter-spacing:-.04em;margin:6px 0 8px}.sub{font-size:17px;color:#515C56}',
+      '.wrap{max-width:640px;margin:auto;padding:112px 18px 72px}.eyebrow{font-size:15px;letter-spacing:.10em;font-weight:800;color:#53665C}',
+      'h1{font-size:31px;letter-spacing:-.04em;margin:6px 0 8px}.sub{font-size:17px;color:#515C56}header{padding-bottom:2px}',
       '.tabs{display:flex;gap:6px;border-radius:14px;background:#E7EAE6;padding:5px;margin:22px 0 18px}',
       '.tabs button{width:50%;min-height:48px;border:0;border-radius:10px;padding:13px;font-size:18px;font-weight:750;background:transparent;color:#46554C}',
       'body[data-tab=today] #tabToday,body[data-tab=week] #tabWeek{background:#fff;color:#253A33;box-shadow:0 2px 10px #18221C12}',
       'body[data-tab=today] .week,body[data-tab=week] .today{display:none}',
-      '.hero{background:linear-gradient(130deg,#FCE6C6,#E5F1E8);color:#263B33;border:1px solid #E9DDD0;border-radius:20px;padding:24px 21px;margin-bottom:18px}',
-      '.hero span{font-size:16px;font-weight:700;color:#566A5C}.hero h2{font-size:27px;line-height:1.45;margin:11px 0}.hero p{font-size:16px;color:#566258;line-height:1.55;margin:0}',
-      '.section{background:white;border:1px solid #DFE5DD;border-radius:18px;padding:21px 18px;margin:14px 0;box-shadow:0 2px 7px #18221C08}.today .section:nth-of-type(2){border-left:5px solid #609BB7}.today .section:nth-of-type(3){border-left:5px solid #C79A54}.today .section:nth-of-type(4){border-left:5px solid #6F9E80}.today .section:nth-of-type(5){border-left:5px solid #B5A0C7}',
+      '.hero{background:linear-gradient(130deg,#FCE6C6,#E5F1E8);color:#263B33;border:1px solid #E9DDD0;border-radius:20px;padding:20px 19px;margin-bottom:14px}',
+      '.hero span{font-size:16px;font-weight:700;color:#566A5C}.hero h2{font-size:23px;line-height:1.37;margin:9px 0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}.hero p{font-size:16px;color:#566258;line-height:1.45;margin:0}',
+      '.section{background:white;border:1px solid #DFE5DD;border-radius:18px;padding:17px 17px;margin:12px 0;box-shadow:0 2px 7px #18221C08}.today .section:nth-of-type(2){border-left:5px solid #609BB7}.today .section:nth-of-type(3){border-left:5px solid #C79A54}.today .section:nth-of-type(4){border-left:5px solid #6F9E80}.today .section:nth-of-type(5){border-left:5px solid #B5A0C7}',
       'h3{margin:0 0 15px;font-size:22px;letter-spacing:-.02em}.sectionhead{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}',
       '.tag{color:#516B5C;font-size:15px;font-weight:700}.muted{color:#5D6961;font-size:17px;line-height:1.65;margin:7px 0}',
       '.event,.task,.weekrow{display:flex;gap:14px;padding:15px 0;border-top:1px solid #EAEEE8}.event:first-of-type,.task:first-of-type{border-top:0}',
       '.event time{width:58px;flex-shrink:0;font-size:18px;color:#206D90;font-weight:800}.event b,.task b{display:block;font-size:19px;line-height:1.5}',
-      '.event small,.task small{display:block;color:#5D6B61;margin-top:6px;line-height:1.55;font-size:16px}',
+      '.event small,.task small{display:block;color:#5D6B61;margin-top:5px;line-height:1.45;font-size:16px}.task b{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.task details{margin-top:8px}.task summary{color:#206D90;font-size:16px;font-weight:700;cursor:pointer;min-height:34px}.task details p{margin:6px 0;font-size:16px;line-height:1.55;white-space:normal;overflow-wrap:anywhere}',
       '.grow{flex:1;min-width:0;overflow-wrap:anywhere}.num{background:#F3E9DB;color:#87571F;border-radius:10px;width:33px;height:33px;display:grid;place-items:center;flex-shrink:0;font-weight:800}',
       '.habit{padding:12px 0;font-size:19px;line-height:1.5}.dot{display:inline-block;width:11px;height:11px;border:2px solid #6D9A85;border-radius:50%;margin-right:12px}',
       '.weekrow{align-items:start}.weekday{width:80px;font-size:17px;font-weight:800;flex-shrink:0}.weekevent{font-size:17px;margin-bottom:9px;line-height:1.5}.weekdue{font-size:16px;font-weight:700;color:#825A2B;background:#F9F2E8;padding:8px;border-radius:9px;margin:7px 0}',
-      '.foot{color:#58665D;font-size:14px;line-height:1.7;padding:12px 3px}',
+      '.foot{color:#58665D;font-size:14px;line-height:1.7;padding:12px 3px}.overdue{border-radius:12px;background:#FFF4E8;border:1px solid #E8C79E;padding:14px;margin-top:12px}.overdue b{font-size:17px;color:#81572A}.overdue p{font-size:15px;line-height:1.4;color:#674F36;margin:7px 0}.overduerow{font-size:15px;color:#674F36;padding:6px 0;border-top:1px solid #EAD8C4;overflow-wrap:anywhere}.overdue a{font-size:16px;font-weight:700;color:#1A6378;display:inline-block;margin-top:9px;min-height:34px}',
       '.links{display:flex;gap:8px;flex-wrap:wrap}.links a{color:#175E6D;background:#EFF5F1;border-radius:9px;padding:12px 13px;text-decoration:none;font-weight:750;font-size:17px;min-height:44px}',
-      '@media(min-width:600px){.wrap{padding:35px 28px 80px}}'
+      '@media(min-width:600px){.wrap{padding:112px 28px 72px}}'
     ].join("");
     const html = '<!doctype html><html lang="ja"><head><meta charset="UTF-8">'+
       '<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">'+
@@ -333,9 +350,9 @@
       '<div class="tabs"><button id="tabToday" onclick="document.body.dataset.tab=\'today\'">今日</button>'+
       '<button id="tabWeek" onclick="document.body.dataset.tab=\'week\'">今週</button></div>'+
       '<div class="today"><section class="hero"><span>今日の優先事項</span><h2>'+safe(focus)+'</h2>'+
-      '<p>確定した予定を優先し、空き時間に無理なく取り組む。</p></section>'+
+      '<p>'+safe(focusNote)+'</p></section>'+
       '<section class="section"><div class="sectionhead"><h3>これからの予定</h3><span class="tag">Appleカレンダー</span></div>'+eventRows+'</section>'+
-      '<section class="section"><div class="sectionhead"><h3>大切なこと</h3><span class="tag">最大3件</span></div>'+cards+'</section>'+
+      '<section class="section"><div class="sectionhead"><h3>大切なこと</h3><span class="tag">優先最大3件</span></div>'+cards+overdueNotice+'</section>'+
       '<section class="section"><h3>習慣・身体</h3>'+habitRows+
       '<p class="muted">健康：'+safe(health || "実測データ未取得")+'</p></section>'+
       '<section class="section"><h3>余白と暮らし</h3>'+
