@@ -296,18 +296,31 @@
         (e.isAllDay ? '終日' : escapeHtml(time(new Date(e.startDate))))+
         '</time><div><b>'+safe(e.title)+'</b>'+
         (e.location ? '<small>'+safe(e.location)+'</small>' : '')+'</div></div>').join("") :
-        '<p class="muted">参考情報を除く、このあとの予定は未登録です。空き時間が確定したわけではありません。</p>') :
+        '') :
         '<p class="muted">Appleカレンダー未取得。予定は確認できていません。</p>';
     const referenceRows = referenceEvents.length ?
       '<details class="refcalendar"><summary>参考イベント '+referenceEvents.length+'件（予定とは別）</summary>'+
       referenceEvents.map(e => '<div class="event"><time>'+(e.isAllDay?'終日':escapeHtml(time(new Date(e.startDate))))+
       '</time><div><b>'+safe(e.title)+'</b></div></div>').join('')+'</details>' : '';
+    // Quiet days should show actionable tasks first, not two oversized "no plans" notices.
+    const quietDay = events.ok && personalEvents.length === 0;
+    const quickStatus = '優先 '+upcomingTasks.length+'件'+
+      (referenceEvents.length ? ' · 参考 '+referenceEvents.length+'件' : '');
+    const overviewHTML = quietDay ?
+      '<div class="quick"><b>今日の見通し</b><span>予定の登録なし · '+quickStatus+'</span></div>' :
+      '<section class="hero"><span>今日の見通し</span><h2>'+safe(focus)+'</h2>'+
+      '<p>'+safe(focusNote)+'</p></section>';
+    const taskSection = '<section class="section"><div class="sectionhead"><h3>大切なこと</h3>'+
+      '<span class="tag">優先最大3件</span></div>'+cards+overdueNotice+'</section>';
+    const calendarSection = events.ok && !personalEvents.length && !referenceEvents.length ? '' :
+      '<section class="section"><div class="sectionhead"><h3>これからの予定</h3>'+
+      '<span class="tag">Appleカレンダー</span></div>'+eventRows+referenceRows+'</section>';
     const routine = reminders.ok ? reminders.items.filter(r => 
       /ルーティン|習慣|routine/i.test(clean(r.calendar && r.calendar.title,60))
     ).slice(0,4) : [];
     const habitRows = routine.length ? routine.map(r =>
       '<div class="habit"><span class="dot"></span>'+safe(r.title)+'</div>').join("") :
-      '<p class="muted">習慣の実施状況は未連携です。未記録を未実施とは判定しません。</p>';
+      '<p class="muted">習慣の実施記録は未連携。完了状態は未確認です。</p>';
     // Show due dates from the existing prioritized feed, not an invented complete task calendar.
     const taskDueMap = new Map();
     for (const task of tasks) {
@@ -347,7 +360,7 @@
       '.tabs button{width:50%;min-height:48px;border:0;border-radius:10px;padding:13px;font-size:18px;font-weight:750;background:transparent;color:#46554C}',
       'body[data-tab=today] #tabToday,body[data-tab=week] #tabWeek{background:#fff;color:#253A33;box-shadow:0 2px 10px #18221C12}',
       'body[data-tab=today] .week,body[data-tab=week] .today{display:none}',
-      '.hero{background:linear-gradient(130deg,#FCE6C6,#E5F1E8);color:#263B33;border:1px solid #E9DDD0;border-radius:20px;padding:20px 19px;margin-bottom:14px}',
+      '.hero{background:linear-gradient(130deg,#FCE6C6,#E5F1E8);color:#263B33;border:1px solid #E9DDD0;border-radius:20px;padding:20px 19px;margin-bottom:14px}.quick{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:7px 12px;background:#EEF2EB;border:1px solid #DBE6DB;border-radius:14px;padding:15px 17px;margin-bottom:13px}.quick b{font-size:17px;color:#2F5244}.quick span{font-size:17px;color:#344E42;font-weight:700}.quick small{font-size:15px;color:#65756B}',
       '.hero span{font-size:16px;font-weight:700;color:#566A5C}.hero h2{font-size:23px;line-height:1.37;margin:9px 0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}.hero p{font-size:16px;color:#566258;line-height:1.45;margin:0}',
       '.section{background:white;border:1px solid #DFE5DD;border-radius:18px;padding:17px 17px;margin:12px 0;box-shadow:0 2px 7px #18221C08}.today .section:nth-of-type(2){border-left:5px solid #609BB7}.today .section:nth-of-type(3){border-left:5px solid #C79A54}.today .section:nth-of-type(4){border-left:5px solid #6F9E80}.today .section:nth-of-type(5){border-left:5px solid #B5A0C7}',
       'h3{margin:0 0 15px;font-size:22px;letter-spacing:-.02em}.sectionhead{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}',
@@ -369,14 +382,11 @@
       '<div class="sub">'+safe(dateText(now))+' · 自分の一日をデザインする</div></header>'+
       '<div class="tabs"><button id="tabToday" onclick="document.body.dataset.tab=\'today\'">今日</button>'+
       '<button id="tabWeek" onclick="document.body.dataset.tab=\'week\'">今週</button></div>'+
-      '<div class="today"><section class="hero"><span>今日の見通し</span><h2>'+safe(focus)+'</h2>'+
-      '<p>'+safe(focusNote)+'</p></section>'+
-      '<section class="section"><div class="sectionhead"><h3>これからの予定</h3><span class="tag">Appleカレンダー</span></div>'+eventRows+referenceRows+'</section>'+
-      '<section class="section"><div class="sectionhead"><h3>大切なこと</h3><span class="tag">優先最大3件</span></div>'+cards+overdueNotice+'</section>'+
+      '<div class="today">'+overviewHTML+(quietDay?taskSection+calendarSection:calendarSection+taskSection)+
       '<section class="section"><h3>習慣・身体</h3>'+habitRows+
       '<p class="muted">健康：'+safe(health || "実測データ未取得")+'</p></section>'+
       '<section class="section"><h3>余白と暮らし</h3>'+
-      '<p class="muted">予定を詰めすぎず、食事・休息・楽しむ時間も確保する。空き時間の計算と提案は今後の連携対象。</p></section></div>'+
+      '<p class="muted">休息・食事・楽しみの時間も大切に。空き時間の自動計算は未対応です。</p></section></div>'+
       '<div class="week"><section class="hero"><span>今週の予定</span><h2>無理なく進める一週間</h2>'+
       '<p>固定予定を確認してから、やることを組み立てる。</p></section>'+
       '<section class="section"><h3>今週のカレンダー</h3>'+weekRows+
