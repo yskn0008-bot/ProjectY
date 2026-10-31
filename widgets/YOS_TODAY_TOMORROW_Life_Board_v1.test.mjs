@@ -75,7 +75,7 @@ for (const runsInWidget of [true,false]) {
         assert.match(actual.html,/id="tabToday"/);
         assert.match(actual.html,/id="tabWeek"/);
         assert.match(actual.html,denyPermissions?/Appleカレンダー未取得/:/TEST_CAL_EVENT/);
-        assert.match(actual.html,denyPermissions?/未連携/:/TEST_ROUTINE/);
+        assert.match(actual.html,denyPermissions?/運動の実施記録：未確認/:/TEST_ROUTINE/);
       }
     });
   }
@@ -453,6 +453,16 @@ test('unreleased calendar API falls back to previous three tasks without inventi
   assert.match(mock.snapshot().html,/期限タスクは優先最大3件のみ/);
 });
 
+test('YOS Today displays movement goal while exercise completion stays unconfirmed', async () => {
+  const mock=runtime(false,false,'DAY',false,null,[]);
+  await new Function(...Object.keys(mock.globals),'return '+body)(...Object.values(mock.globals));
+  const html=mock.snapshot().html;
+  assert.match(html,/食後5分歩く · 難しい日は1分/);
+  assert.match(html,/運動の実施記録：未確認/);
+  assert.match(html,/週2日の軽い筋トレも目標/);
+  assert.match(html,/歩数だけでは実施済みと判定しません/);
+  assert.doesNotMatch(html,/運動実施済み/);
+});
 test('the fullscreen header is offset below native WebView controls', () => {
   assert.match(source,/\.wrap\{max-width:640px;margin:auto;padding:112px 18px 72px/);
   assert.match(source,/\.task b\{display:-webkit-box;-webkit-line-clamp:2/);
