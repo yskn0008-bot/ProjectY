@@ -378,8 +378,18 @@
       adviceTitle = '期限切れ登録の状態を確認';
       adviceDetail = '完了済みか未完了かを確認してから、今日の行動を決めよう。';
     }
-    const adviceSection = '<div class="suggestion"><span>YOSの提案 · 画面を開いた時点</span>'+
-      '<b>'+safe(adviceTitle)+'</b><p>'+safe(adviceDetail)+'</p></div>';
+    // Lead with one action. Put long background and the unverified time assumptions behind a tap.
+    const actionFirst = nextAction && !feed.stale &&
+      (adviceTitle === '優先タスクの次の一手' || adviceTitle === '短い作業に着手する候補');
+    const mainAction = actionFirst ? clean(nextAction,58)+(nextAction.length>58?'…':'') : adviceTitle;
+    const briefContext = !events.ok ? 'カレンダー未取得' :
+      ongoingEvent ? '登録された予定が進行中' :
+      allDay ? '終日予定あり' :
+      nextEvent ? '次の予定 '+time(new Date(nextEvent.startDate))+'（移動・準備時間は未計算）' :
+      '参考以外の予定は未登録・空き時間は未確認';
+    const adviceSection = '<div class="suggestion"><span>YOSの提案 · 今の候補</span>'+
+      '<b>'+safe(mainAction)+'</b><p>'+safe(briefContext)+'</p>'+
+      '<details class="reason"><summary>判断理由を確認</summary><p>'+safe(adviceTitle+'：'+adviceDetail)+'</p></details></div>';
     const calendarSection = events.ok && !personalEvents.length && !referenceEvents.length ? '' :
       '<section class="section"><div class="sectionhead"><h3>これからの予定</h3>'+
       '<span class="tag">Appleカレンダー</span></div>'+eventRows+referenceRows+'</section>';
@@ -433,7 +443,7 @@
       '.tabs button{width:50%;min-height:48px;border:0;border-radius:10px;padding:13px;font-size:18px;font-weight:750;background:transparent;color:#46554C}',
       'body[data-tab=today] #tabToday,body[data-tab=week] #tabWeek{background:#fff;color:#253A33;box-shadow:0 2px 10px #18221C12}',
       'body[data-tab=today] .week,body[data-tab=week] .today{display:none}',
-      '.hero{background:linear-gradient(130deg,#FCE6C6,#E5F1E8);color:#263B33;border:1px solid #E9DDD0;border-radius:20px;padding:20px 19px;margin-bottom:14px}.quick{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:7px 12px;background:#EEF2EB;border:1px solid #DBE6DB;border-radius:14px;padding:15px 17px;margin-bottom:13px}.quick b{font-size:17px;color:#2F5244}.quick span{font-size:17px;color:#344E42;font-weight:700}.quick small{font-size:15px;color:#65756B}.suggestion{padding:15px 17px;border-radius:16px;background:#EAF1F8;border:1px solid #D4E3EF;margin:12px 0}.suggestion span{display:block;font-size:14px;color:#426780;font-weight:750}.suggestion b{display:block;font-size:19px;color:#264B64;margin-top:6px}.suggestion p{font-size:16px;line-height:1.5;margin:7px 0 0;color:#3D5263;overflow-wrap:anywhere}',
+      '.hero{background:linear-gradient(130deg,#FCE6C6,#E5F1E8);color:#263B33;border:1px solid #E9DDD0;border-radius:20px;padding:20px 19px;margin-bottom:14px}.quick{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:7px 12px;background:#EEF2EB;border:1px solid #DBE6DB;border-radius:14px;padding:15px 17px;margin-bottom:13px}.quick b{font-size:17px;color:#2F5244}.quick span{font-size:17px;color:#344E42;font-weight:700}.quick small{font-size:15px;color:#65756B}.suggestion{padding:15px 17px;border-radius:16px;background:#EAF1F8;border:1px solid #D4E3EF;margin:12px 0}.suggestion span{display:block;font-size:14px;color:#426780;font-weight:750}.suggestion b{display:block;font-size:19px;color:#264B64;margin-top:6px}.suggestion p{font-size:16px;line-height:1.5;margin:7px 0 0;color:#3D5263;overflow-wrap:anywhere}.reason{margin-top:9px}.reason summary{font-size:16px;font-weight:700;color:#24637B;min-height:44px;padding:10px 0;cursor:pointer}.reason p{font-size:16px;color:#45586A;line-height:1.55;margin:0;padding-bottom:6px}',
       '.hero span{font-size:16px;font-weight:700;color:#566A5C}.hero h2{font-size:23px;line-height:1.37;margin:9px 0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}.hero p{font-size:16px;color:#566258;line-height:1.45;margin:0}',
       '.section{background:white;border:1px solid #DFE5DD;border-radius:18px;padding:17px 17px;margin:12px 0;box-shadow:0 2px 7px #18221C08}.today .section:nth-of-type(2){border-left:5px solid #609BB7}.today .section:nth-of-type(3){border-left:5px solid #C79A54}.today .section:nth-of-type(4){border-left:5px solid #6F9E80}.today .section:nth-of-type(5){border-left:5px solid #B5A0C7}',
       'h3{margin:0 0 15px;font-size:22px;letter-spacing:-.02em}.sectionhead{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}',
