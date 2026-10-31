@@ -106,11 +106,11 @@ test('overdue task is not silently promoted as todays top priority', async () =>
   const mock = runtime(false,false,'DAY',true,tasks);
   await new Function(...Object.keys(mock.globals),'return '+body)(...Object.values(mock.globals));
   const page = mock.snapshot().html;
-  const firstHero = page.slice(page.indexOf('<section class="hero">'),page.indexOf('</section>',page.indexOf('<section class="hero">')));
-  assert.match(firstHero,/今日の見通し/);
-  assert.doesNotMatch(firstHero,/Relevant current task/);
+  const overview = page.slice(page.indexOf('<div class="quick">'),page.indexOf('</div>',page.indexOf('<div class="quick">')));
+  assert.match(overview,/今日の見通し/);
+  assert.doesNotMatch(overview,/Relevant current task/);
   assert.match(page,/Relevant current task/);
-  assert.doesNotMatch(firstHero,/Old Night Brief task/);
+  assert.doesNotMatch(overview,/Old Night Brief task/);
   assert.match(page,/期限を過ぎた登録タスク 1件/);
   assert.match(page,/Old Night Brief task/);
   assert.match(page,/<details><summary>対応内容を見る/);
@@ -125,7 +125,7 @@ test('a feed with only expired tasks is presented as needing verification', asyn
   await new Function(...Object.keys(mock.globals),'return '+body)(...Object.values(mock.globals));
   const page = mock.snapshot().html;
   assert.match(page,/期限を過ぎた登録タスク 1件/);
-  assert.match(page,/期限が過ぎたタスクの状態を確認/);
+  assert.match(page,/完了状態が古い可能性があります/);
   assert.match(page,/Notionで状態を確認/);
 });
 
@@ -156,8 +156,37 @@ test('reference events alone do not count as personal appointment', async () => 
   const mock=runtime(false,false,'DAY',false,null,calendar);
   await new Function(...Object.keys(mock.globals),'return '+body)(...Object.values(mock.globals));
   const page=mock.snapshot().html;
-  assert.match(page,/参考以外の予定は未登録/);
+  assert.match(page,/予定の登録なし/);
   assert.match(page,/参考イベント 1件（予定とは別）/);
+});
+
+test('a quiet day shows actionable tasks before only-reference calendar and no duplicate empty-state paragraphs', async () => {
+  const d=new Date();
+  const start=new Date(d.getFullYear(),d.getMonth(),d.getDate(),9);
+  const end=new Date(d.getFullYear(),d.getMonth(),d.getDate(),10);
+  const date=[d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-');
+  const calendar=[{title:'［タクシー需要］参考イベント',startDate:start,endDate:end,isAllDay:true}];
+  const tasks=[{title:'Current task',due:date,nextAction:'Open this when needed'}];
+  const mock=runtime(false,false,'DAY',true,tasks,calendar);
+  await new Function(...Object.keys(mock.globals),'return '+body)(...Object.values(mock.globals));
+  const page=mock.snapshot().html;
+  assert.match(page,/<div class="quick">/);
+  assert.match(page,/予定の登録なし · 優先 1件 · 参考 1件/);
+  assert.ok(page.indexOf('大切なこと') < page.indexOf('これからの予定'),'tasks should come before reference-only schedule');
+  assert.match(page,/参考イベント 1件（予定とは別）/);
+  assert.doesNotMatch(page,/空き時間が確定したわけではありません。/);
+  assert.equal((page.match(/予定の登録なし/g)||[]).length,1);
+});
+
+test('when no events exist at all, hide the empty calendar panel but preserve tasks and habits', async () => {
+  const d=new Date();
+  const due=[d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-');
+  const mock=runtime(false,false,'DAY',true,[{title:'Do this today',due}],[]);
+  await new Function(...Object.keys(mock.globals),'return '+body)(...Object.values(mock.globals));
+  const page=mock.snapshot().html;
+  assert.match(page,/Do this today/);
+  assert.doesNotMatch(page,/<h3>これからの予定<\/h3>/);
+  assert.match(page,/<h3>習慣・身体<\/h3>/);
 });
 
 test('the fullscreen header is offset below native WebView controls', () => {
