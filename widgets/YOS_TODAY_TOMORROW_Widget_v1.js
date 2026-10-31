@@ -286,11 +286,13 @@
       (validDue(t) ? '<small>期限 '+safe(String(t.due).slice(0,10))+'</small>' : '')+
       (t.nextAction ? '<details><summary>対応内容を見る</summary><p>'+safe(t.nextAction)+'</p></details>' : '')+'</div></div>'
     ).join("") : '<p class="muted">いま取り組むタスクの登録は確認できません。</p>';
+    // Expired rows can already be done. Keep the warning visible, not a large task card.
     const overdueNotice = overdueTasks.length ?
-      '<div class="overdue"><b>期限を過ぎた登録タスク '+overdueTasks.length+'件</b>'+
-      '<p>完了状態が古い可能性があります。今日の優先事項には自動採用していません。</p>'+
-      overdueTasks.map(t => '<div class="overduerow">'+safe(taskTitle(t,110))+' · 期限 '+safe(String(t.due).slice(0,10))+'</div>').join('')+
-      '<a href="'+URL.tasks+'">Notionで状態を確認</a></div>' : '';
+      '<details class="overdue"><summary>要確認｜期限が過ぎた登録 '+overdueTasks.length+'件</summary>'+
+      '<div class="overduebody"><p>完了済みの可能性があります。未完了とは判定していません。</p>'+
+      overdueTasks.map(t => '<div class="overduerow">'+safe(taskTitle(t,110))+
+      ' · 期限 '+safe(String(t.due).slice(0,10))+'</div>').join('')+
+      '<a href="'+URL.tasks+'">Notionで状態を確認</a></div></details>' : '';
     const eventRows = events.ok ?
       (personalEvents.length ? personalEvents.map(e => '<div class="event"><time>'+
         (e.isAllDay ? '終日' : escapeHtml(time(new Date(e.startDate))))+
@@ -312,6 +314,11 @@
       '<p>'+safe(focusNote)+'</p></section>';
     const taskSection = '<section class="section"><div class="sectionhead"><h3>大切なこと</h3>'+
       '<span class="tag">優先最大3件</span></div>'+cards+overdueNotice+'</section>';
+    const habitSection = '<section class="section"><h3>習慣・身体</h3>'+
+      (routine.length || health ?
+        habitRows+(health?'<p class="muted">健康：'+safe(health)+'</p>':'') :
+        '<p class="muted">習慣の実施記録と健康の実測情報は未連携です。</p>')+
+      '<div class="links"><a href="'+URL.life+'">MY LIFEで記録を見る</a></div></section>';
     const calendarSection = events.ok && !personalEvents.length && !referenceEvents.length ? '' :
       '<section class="section"><div class="sectionhead"><h3>これからの予定</h3>'+
       '<span class="tag">Appleカレンダー</span></div>'+eventRows+referenceRows+'</section>';
@@ -371,7 +378,7 @@
       '.grow{flex:1;min-width:0;overflow-wrap:anywhere}.num{background:#F3E9DB;color:#87571F;border-radius:10px;width:33px;height:33px;display:grid;place-items:center;flex-shrink:0;font-weight:800}',
       '.habit{padding:12px 0;font-size:19px;line-height:1.5}.dot{display:inline-block;width:11px;height:11px;border:2px solid #6D9A85;border-radius:50%;margin-right:12px}',
       '.weekrow{align-items:start}.weekday{width:80px;font-size:17px;font-weight:800;flex-shrink:0}.weekevent{font-size:17px;margin-bottom:9px;line-height:1.5}.weekref{font-size:15px;color:#65746A;line-height:1.4;padding:6px 0}.weekdue{font-size:16px;font-weight:700;color:#825A2B;background:#F9F2E8;padding:8px;border-radius:9px;margin:7px 0}',
-      '.foot{color:#58665D;font-size:14px;line-height:1.7;padding:12px 3px}.refcalendar{margin-top:8px;border-top:1px dashed #DCE3DB;padding:12px 0 0}.refcalendar summary{font-size:16px;color:#336E84;font-weight:700;cursor:pointer;min-height:40px}.refcalendar .event b{font-size:16px;color:#56645B}.overdue{border-radius:12px;background:#FFF4E8;border:1px solid #E8C79E;padding:14px;margin-top:12px}.overdue b{font-size:17px;color:#81572A}.overdue p{font-size:15px;line-height:1.4;color:#674F36;margin:7px 0}.overduerow{font-size:15px;color:#674F36;padding:6px 0;border-top:1px solid #EAD8C4;overflow-wrap:anywhere}.overdue a{font-size:16px;font-weight:700;color:#1A6378;display:inline-block;margin-top:9px;min-height:34px}',
+      '.foot{color:#58665D;font-size:14px;line-height:1.7;padding:12px 3px}.refcalendar{margin-top:8px;border-top:1px dashed #DCE3DB;padding:12px 0 0}.refcalendar summary{font-size:16px;color:#336E84;font-weight:700;cursor:pointer;min-height:40px}.refcalendar .event b{font-size:16px;color:#56645B}.overdue{border-radius:12px;background:#FFF4E8;border:1px solid #E8C79E;padding:0;margin-top:12px}.overdue summary{font-size:16px;color:#81572A;font-weight:700;min-height:48px;padding:14px;cursor:pointer}.overduebody{padding:0 14px 15px}.overdue p{font-size:15px;line-height:1.4;color:#674F36;margin:7px 0}.overduerow{font-size:15px;color:#674F36;padding:8px 0;border-top:1px solid #EAD8C4;overflow-wrap:anywhere}.overdue a{font-size:16px;font-weight:700;color:#1A6378;display:inline-block;margin-top:9px;min-height:34px}',
       '.links{display:flex;gap:8px;flex-wrap:wrap}.links a{color:#175E6D;background:#EFF5F1;border-radius:9px;padding:12px 13px;text-decoration:none;font-weight:750;font-size:17px;min-height:44px}',
       '@media(min-width:600px){.wrap{padding:112px 28px 72px}}'
     ].join("");
@@ -382,9 +389,8 @@
       '<div class="sub">'+safe(dateText(now))+' · 自分の一日をデザインする</div></header>'+
       '<div class="tabs"><button id="tabToday" onclick="document.body.dataset.tab=\'today\'">今日</button>'+
       '<button id="tabWeek" onclick="document.body.dataset.tab=\'week\'">今週</button></div>'+
-      '<div class="today">'+overviewHTML+(quietDay?taskSection+calendarSection:calendarSection+taskSection)+
-      '<section class="section"><h3>習慣・身体</h3>'+habitRows+
-      '<p class="muted">健康：'+safe(health || "実測データ未取得")+'</p></section>'+
+      '<div class="today">'+overviewHTML+
+      (quietDay?taskSection+habitSection+calendarSection:calendarSection+taskSection+habitSection)+
       '<section class="section"><h3>余白と暮らし</h3>'+
       '<p class="muted">休息・食事・楽しみの時間も大切に。空き時間の自動計算は未対応です。</p></section></div>'+
       '<div class="week"><section class="hero"><span>今週の予定</span><h2>無理なく進める一週間</h2>'+
