@@ -19,7 +19,7 @@ const vm = require('node:vm');
 const script = process.argv[1];
 let pages = [], local = '', serial = 0, createdCount = 0, failReadback = false;
 const DS = '965c6086-32c1-463d-93b4-87a9cb69b3ad';
-async function capture(id, raw) {
+async function capture(id, raw, dateTime='') {
   let output;
   const fm = {
     documentsDirectory: () => '/tmp',
@@ -52,7 +52,7 @@ async function capture(id, raw) {
     }
   }
   const context={
-    args:{plainTexts:[new URLSearchParams({request_id:id,target:'task',title:'YOS動作テスト',raw}).toString()]},
+    args:{plainTexts:[new URLSearchParams({request_id:id,target:'task',title:'YOS動作テスト',raw,date_time:dateTime}).toString()]},
     Keychain:{contains:()=>true,get:()=> 'simulated-token'},
     Request, FileManager:{local:()=>fm},
     Script:{setShortcutOutput:v=>{output=v;},complete:()=>{}},
@@ -76,7 +76,11 @@ async function capture(id, raw) {
   local='';
   assert.equal(await capture('test-005','再試行するタスクを登録'),'DUPLICATE:task');
   assert.equal(createdCount,3);
-  console.log('Notion task dedupe/readback/retry simulation: PASS');
+  const before=createdCount;
+  assert.equal(await capture('test-006','時刻違いタスク','2026-11-01T09:00:00+09:00'),'OK:task');
+  assert.equal(await capture('test-007','時刻違いタスク','2026-11-01T10:00:00+09:00'),'OK:task');
+  assert.equal(createdCount,before+2);
+  console.log('Notion task dedupe/readback/retry/different-due-times simulation: PASS');
 })().catch(e => {console.error(e); process.exitCode=1;});
 """
 
