@@ -15,8 +15,19 @@ ACTION_ID = "dk.simonbs.Scriptable.RunScriptInlineIntent"
 PLACEHOLDER = "__YOS_NOTION_BRIDGE_INLINE__"
 BRIDGE_SCRIPT = r'''const K='YOS_NOTION_INTEGRATION_TOKEN';
 function parse(q){const o={};for(const part of String(q||'').split('&')){if(!part)continue;const i=part.indexOf('=');const k=i<0?part:part.slice(0,i);const v=i<0?'':part.slice(i+1);o[decodeURIComponent(k)]=decodeURIComponent(v.replace(/\+/g,' '));}return o;}
-const shortcutPayload=typeof args.shortcutParameter==='string'?args.shortcutParameter:'';
-const p=parse((args.plainTexts||[])[0]||shortcutPayload);
+function pending(v){return v===true||v===1||/^(yes|true|1|はい)$/i.test(String(v||''));}
+function payload(v){
+ if(typeof v==='string'){
+  const s=v.trim();if(s.startsWith('{')){try{v=JSON.parse(s);}catch(_){throw new Error('Clarity Notion JSON payload is invalid');}}
+  else return parse(s);
+ }
+ if(!v||typeof v!=='object'||Array.isArray(v))return {};
+ if(Object.prototype.hasOwnProperty.call(v,'notionPending')&&!pending(v.notionPending))return {};
+ return {request_id:v.request_id||v.requestId||v.notionRequestId||'',target:v.target||v.notionTarget||'',title:v.title||v.notionTitle||'',raw:v.raw||v.raw_text||v.notionRaw||'',date_time:v.date_time||v.dateTime||v.notionDateTime||'',amount:v.amount||v.notionAmount||'',kind:v.kind||v.notionKind||''};
+}
+const shortcutPayload=args.shortcutParameter;
+const p=payload((args.plainTexts||[])[0]||shortcutPayload);
+if(!p.request_id&&p.target&&p.raw){const day=new Date().toISOString().slice(0,10),seed=[p.target,p.raw,p.date_time,p.amount].join('|');let h=2166136261;for(let i=0;i<seed.length;i++){h^=seed.charCodeAt(i);h=Math.imul(h,16777619);}p.request_id='clarity-shortcut:'+day+':'+(h>>>0).toString(16).padStart(8,'0');}
 if(!p.request_id||!p.target)throw new Error('Clarity Notion payload is incomplete');
 if(!Keychain.contains(K))throw new Error('Notion token missing. Run YOS_Notion_Sync once.');
 const API='https://api.notion.com/v1',VER='2025-09-03';
