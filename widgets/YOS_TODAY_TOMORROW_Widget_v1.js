@@ -240,10 +240,111 @@
   footer.addSpacer();
   const alert=label(footer,"要対応を見る  ›",11,C.gold,true);
   footer.url=URL.alerts;
+
+  // Full-screen life board reuses the SAME read-only sources as the large widget.
+  // It only appears when this Scriptable entry is opened in the app, not from a widget refresh.
+  async function presentLifeBoard(){
+    const escapeHtml = value => String(value == null ? "" : value)
+      .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
+      .replace(/"/g,"&quot;").replace(/'/g,"&#39;");
+    const safe = value => escapeHtml(clean(value,240));
+    const feedItems = feed.data && Array.isArray(feed.data.tasks) ? feed.data.tasks : [];
+    const priorities = feedItems.filter(t => t && clean(t.title)).slice(0,3);
+    const focus = priorities[0] ? clean(priorities[0].title,110).replace(/^\d{1,3}\s*[｜|]\s*/,"") :
+      (feed.data ? "重要なタスクは未登録" : "YOS Tasksは未取得");
+    const cards = priorities.length ? priorities.map((t,i) => 
+      '<div class="task"><div class="num">'+(i+1)+'</div><div class="grow"><b>'+safe(t.title)+'</b>'+
+      (t.due ? '<small>期限 '+safe(t.due.slice(0,10))+'</small>' : '')+
+      (t.nextAction ? '<small>'+safe(t.nextAction)+'</small>' : '')+'</div></div>'
+    ).join("") : '<p class="muted">タスクの確認が必要です。取得できていない情報は表示しません。</p>';
+    const eventRows = events.ok ?
+      (events.items.length ? events.items.map(e => '<div class="event"><time>'+
+        (e.isAllDay ? '終日' : escapeHtml(time(new Date(e.startDate))))+
+        '</time><div><b>'+safe(e.title)+'</b>'+
+        (e.location ? '<small>'+safe(e.location)+'</small>' : '')+'</div></div>').join("") :
+        '<p class="muted">登録された予定はありません。空き時間が確定したわけではありません。</p>') :
+        '<p class="muted">Appleカレンダー未取得。予定は確認できていません。</p>';
+    const routine = reminders.ok ? reminders.items.filter(r => 
+      /ルーティン|習慣|routine/i.test(clean(r.calendar && r.calendar.title,60))
+    ).slice(0,4) : [];
+    const habitRows = routine.length ? routine.map(r =>
+      '<div class="habit"><span class="dot"></span>'+safe(r.title)+'</div>').join("") :
+      '<p class="muted">習慣の実施状況は未連携です。未記録を未実施とは判定しません。</p>';
+    const monday = new Date(now.getFullYear(),now.getMonth(),now.getDate()-((now.getDay()+6)%7));
+    const nextMonday = new Date(monday.getFullYear(),monday.getMonth(),monday.getDate()+7);
+    let weekEvents = null;
+    try { weekEvents = await CalendarEvent.between(monday,nextMonday); }
+    catch(e) { weekEvents = null; }
+    const weekRows = weekEvents === null ?
+      '<p class="muted">カレンダー未取得。今週の予定は確認できません。</p>' :
+      Array.from({length:7},(_,i) => {
+        const d=new Date(monday.getFullYear(),monday.getMonth(),monday.getDate()+i);
+        const start=new Date(d.getFullYear(),d.getMonth(),d.getDate());
+        const end=new Date(d.getFullYear(),d.getMonth(),d.getDate()+1);
+        const dayEvents=weekEvents.filter(e => e && e.title && new Date(e.startDate)<end &&
+          new Date(e.endDate || e.startDate)>start).sort((a,b)=>new Date(a.startDate)-new Date(b.startDate));
+        return '<div class="weekrow"><div class="weekday">'+escapeHtml(dateText(d))+'</div><div class="grow">'+
+          (dayEvents.length ? dayEvents.slice(0,3).map(e =>
+            '<div class="weekevent">'+(e.isAllDay?'終日':escapeHtml(time(new Date(e.startDate))))+' '+safe(e.title)+'</div>'
+          ).join("")+(dayEvents.length>3?'<small>ほか'+(dayEvents.length-3)+'件</small>':'') :
+          '<span class="muted">予定の登録なし</span>')+'</div></div>';
+      }).join("");
+    const styles = [
+      '*{box-sizing:border-box}body{margin:0;background:#F5F5F2;color:#252C2A;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans",sans-serif;font-size:16px}',
+      '.wrap{max-width:640px;margin:auto;padding:24px 18px 80px}.eyebrow{font-size:12px;letter-spacing:.16em;font-weight:800;color:#60716C}',
+      'h1{font-size:32px;letter-spacing:-.04em;margin:6px 0 8px}.sub{font-size:15px;color:#6F7873}',
+      '.tabs{display:flex;gap:6px;border-radius:14px;background:#E7EAE6;padding:5px;margin:22px 0 18px}',
+      '.tabs button{width:50%;border:0;border-radius:10px;padding:13px;font-size:16px;font-weight:700;background:transparent;color:#5F6863}',
+      'body[data-tab=today] #tabToday,body[data-tab=week] #tabWeek{background:#fff;color:#253A33;box-shadow:0 2px 10px #18221C12}',
+      'body[data-tab=today] .week,body[data-tab=week] .today{display:none}',
+      '.hero{background:#263D36;color:#fff;border-radius:20px;padding:23px 21px;margin-bottom:18px}',
+      '.hero span{font-size:13px;color:#C8D7CE}.hero h2{font-size:23px;line-height:1.4;margin:10px 0}.hero p{font-size:14px;color:#DFE8E0;margin:0}',
+      '.section{background:white;border:1px solid #E4E8E3;border-radius:18px;padding:20px 18px;margin:14px 0}',
+      'h3{margin:0 0 15px;font-size:20px;letter-spacing:-.02em}.sectionhead{display:flex;justify-content:space-between;align-items:baseline;gap:8px}',
+      '.tag{color:#65766F;font-size:12px;font-weight:650}.muted{color:#79827C;font-size:15px;line-height:1.55;margin:6px 0}',
+      '.event,.task,.weekrow{display:flex;gap:14px;padding:13px 0;border-top:1px solid #EFF0ED}.event:first-of-type,.task:first-of-type{border-top:0}',
+      '.event time{width:54px;flex-shrink:0;font-size:15px;color:#267BA2;font-weight:750}.event b,.task b{display:block;font-size:17px;line-height:1.45}',
+      '.event small,.task small{display:block;color:#758078;margin-top:5px;line-height:1.4;font-size:13px}',
+      '.grow{flex:1;min-width:0;overflow-wrap:anywhere}.num{background:#F3E9DB;color:#926238;border-radius:10px;width:28px;height:28px;display:grid;place-items:center;flex-shrink:0;font-weight:800}',
+      '.habit{padding:10px 0;font-size:16px}.dot{display:inline-block;width:9px;height:9px;border:2px solid #6D9A85;border-radius:50%;margin-right:12px}',
+      '.weekrow{align-items:start}.weekday{width:76px;font-weight:800;flex-shrink:0}.weekevent{margin-bottom:8px;line-height:1.4}',
+      '.foot{color:#738079;font-size:12px;line-height:1.6;padding:12px 3px}',
+      '.links{display:flex;gap:12px;flex-wrap:wrap}.links a{color:#226B75;text-decoration:none;font-weight:700;font-size:15px}',
+      '@media(min-width:600px){.wrap{padding:35px 28px 80px}}'
+    ].join("");
+    const html = '<!doctype html><html lang="ja"><head><meta charset="UTF-8">'+
+      '<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">'+
+      '<style>'+styles+'</style></head><body data-tab="today"><main class="wrap">'+
+      '<header><div class="eyebrow">MY LIFE · YOS</div><h1>YOS Today</h1>'+
+      '<div class="sub">'+safe(dateText(now))+' · 自分の一日をデザインする</div></header>'+
+      '<div class="tabs"><button id="tabToday" onclick="document.body.dataset.tab=\'today\'">今日</button>'+
+      '<button id="tabWeek" onclick="document.body.dataset.tab=\'week\'">今週</button></div>'+
+      '<div class="today"><section class="hero"><span>今日の優先事項</span><h2>'+safe(focus)+'</h2>'+
+      '<p>確定した予定を優先し、空き時間に無理なく取り組む。</p></section>'+
+      '<section class="section"><div class="sectionhead"><h3>今日の予定</h3><span class="tag">Appleカレンダー</span></div>'+eventRows+'</section>'+
+      '<section class="section"><div class="sectionhead"><h3>大切なこと</h3><span class="tag">最大3件</span></div>'+cards+'</section>'+
+      '<section class="section"><h3>習慣・身体</h3>'+habitRows+
+      '<p class="muted">健康：'+safe(health || "実測データ未取得")+'</p></section>'+
+      '<section class="section"><h3>余白と暮らし</h3>'+
+      '<p class="muted">予定を詰めすぎず、食事・休息・楽しむ時間も確保する。空き時間の計算と提案は今後の連携対象。</p></section></div>'+
+      '<div class="week"><section class="hero"><span>今週の予定</span><h2>無理なく進める一週間</h2>'+
+      '<p>固定予定を確認してから、やることを組み立てる。</p></section>'+
+      '<section class="section"><h3>今週のカレンダー</h3>'+weekRows+'</section></div>'+
+      '<section class="section"><h3>元データを開く</h3><div class="links">'+
+      '<a href="'+URL.tasks+'">YOS Tasks</a><a href="'+URL.home+'">Notion HOME</a>'+
+      '<a href="'+URL.life+'">MY LIFE</a></div></section>'+
+      '<div class="foot">読み取り専用の初期版。カレンダー・Notion・リマインダーは接続できた範囲のみ表示。'+
+      'この画面からの予定変更・タスク完了・習慣記録・Money同期は未対応。'+
+      (feed.stale ? 'YOS Tasksは前回データまたは未取得です。' : '')+'</div></main></body></html>';
+    const web = new WebView();
+    await web.loadHTML(html);
+    await web.present(true);
+  }
+
   if(config.runsInWidget){
     Script.setWidget(widget);
   } else {
-    await widget.presentLarge();
+    await presentLifeBoard();
   }
   Script.complete();
 })();
