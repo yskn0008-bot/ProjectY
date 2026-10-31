@@ -261,14 +261,19 @@
     const validDue = t => /^\d{4}-\d{2}-\d{2}$/.test(String(t && t.due || "").slice(0,10));
     const overdueTasks = tasks.filter(t => validDue(t) && String(t.due).slice(0,10) < todayKey);
     const upcomingTasks = tasks.filter(t => !(validDue(t) && String(t.due).slice(0,10) < todayKey));
-    const focus = feed.stale ? "YOS Tasksの最新状態を確認" :
-      upcomingTasks[0] ? taskTitle(upcomingTasks[0],96) :
-      overdueTasks.length ? "期限切れの登録内容を確認" :
-      (feed.data ? "今日の優先事項はまだ未設定" : "YOS Tasksを取得できません");
-    const focusNote = feed.stale ? "以前の情報の可能性があります。最新データを確認してください。" :
-      upcomingTasks[0] ? "確定した予定の合間に、無理なく進めよう。" :
-      overdueTasks.length ? "完了済みか未完了かは未確認です。Notionの状態を確認してください。" :
-      "予定・習慣・余白を大切に。優先事項を決めるとここに表示します。";
+    // The top card describes the day's *overview* instead of repeating the first task.
+    // Reference-calendar events must never be counted as personal appointments.
+    const isReferenceEvent = e => /^[\s　]*[［\[【]\s*タクシー需要\s*[］\]】]/.test(clean(e && e.title,120));
+    const personalEvents = events.items.filter(e => !isReferenceEvent(e));
+    const referenceEvents = events.items.filter(isReferenceEvent);
+    const focus = !events.ok ? "今日の予定は未取得" :
+      personalEvents.length ? "このあとの予定 "+personalEvents.length+"件" :
+      "このあとの予定は未登録";
+    const focusNote = feed.stale ? "タスクの最新状態は未確認。" :
+      upcomingTasks.length ? "優先タスク "+upcomingTasks.length+"件を確認。無理なく進めよう。" :
+      overdueTasks.length ? "期限が過ぎたタスクの状態を確認。" :
+      "タスクは未登録または取得範囲外。";
+
     const cards = upcomingTasks.length ? upcomingTasks.map((t,i) =>
       '<div class="task"><div class="num">'+(i+1)+'</div><div class="grow"><b>'+safe(taskTitle(t))+'</b>'+
       (validDue(t) ? '<small>期限 '+safe(String(t.due).slice(0,10))+'</small>' : '')+
@@ -280,12 +285,16 @@
       overdueTasks.map(t => '<div class="overduerow">'+safe(taskTitle(t,110))+' · 期限 '+safe(String(t.due).slice(0,10))+'</div>').join('')+
       '<a href="'+URL.tasks+'">Notionで状態を確認</a></div>' : '';
     const eventRows = events.ok ?
-      (events.items.length ? events.items.map(e => '<div class="event"><time>'+
+      (personalEvents.length ? personalEvents.map(e => '<div class="event"><time>'+
         (e.isAllDay ? '終日' : escapeHtml(time(new Date(e.startDate))))+
         '</time><div><b>'+safe(e.title)+'</b>'+
         (e.location ? '<small>'+safe(e.location)+'</small>' : '')+'</div></div>').join("") :
-        '<p class="muted">このあと登録された予定はありません。過去の予定や未取得の情報は含みません。</p>') :
+        '<p class="muted">このあとの個人予定は未登録です。空き時間が確定したわけではありません。</p>') :
         '<p class="muted">Appleカレンダー未取得。予定は確認できていません。</p>';
+    const referenceRows = referenceEvents.length ?
+      '<details class="refcalendar"><summary>参考イベント '+referenceEvents.length+'件（予定とは別）</summary>'+
+      referenceEvents.map(e => '<div class="event"><time>'+(e.isAllDay?'終日':escapeHtml(time(new Date(e.startDate))))+
+      '</time><div><b>'+safe(e.title)+'</b></div></div>').join('')+'</details>' : '';
     const routine = reminders.ok ? reminders.items.filter(r => 
       /ルーティン|習慣|routine/i.test(clean(r.calendar && r.calendar.title,60))
     ).slice(0,4) : [];
@@ -312,11 +321,15 @@
         const dueTasks = taskDueMap.get(dateKey(d)) || [];
         const dayEvents=(weekEvents || []).filter(e => e && e.title && new Date(e.startDate)<end &&
           new Date(e.endDate || e.startDate)>start).sort((a,b)=>new Date(a.startDate)-new Date(b.startDate));
+        const appointments = dayEvents.filter(e => !isReferenceEvent(e));
+        const references = dayEvents.filter(isReferenceEvent);
         return '<div class="weekrow"><div class="weekday">'+escapeHtml(dateText(d))+'</div><div class="grow">'+
-          (dayEvents.length ? dayEvents.slice(0,3).map(e =>
+          (appointments.length ? appointments.slice(0,3).map(e =>
             '<div class="weekevent">'+(e.isAllDay?'終日':escapeHtml(time(new Date(e.startDate))))+' '+safe(e.title)+'</div>'
-          ).join("")+(dayEvents.length>3?'<small>ほか'+(dayEvents.length-3)+'件</small>':'') :
-          '<span class="muted">'+(weekEvents===null?'予定未取得':'予定の登録なし')+'</span>')+
+          ).join("")+(appointments.length>3?'<small>ほか'+(appointments.length-3)+'件</small>':'') :
+          '<span class="muted">'+(weekEvents===null?'予定未取得':'個人予定の登録なし')+'</span>')+
+          references.slice(0,2).map(e=>'<div class="weekref">参考｜'+safe(e.title)+'</div>').join('')+
+          (references.length>2?'<small>参考イベント ほか'+(references.length-2)+'件</small>':'')+
           dueTasks.map(title => '<div class="weekdue">期限｜'+safe(title)+'</div>').join('')+'</div></div>';
       }).join("");
     const styles = [
@@ -337,8 +350,8 @@
       '.event small,.task small{display:block;color:#5D6B61;margin-top:5px;line-height:1.45;font-size:16px}.task b{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.task details{margin-top:8px}.task summary{color:#206D90;font-size:16px;font-weight:700;cursor:pointer;min-height:34px}.task details p{margin:6px 0;font-size:16px;line-height:1.55;white-space:normal;overflow-wrap:anywhere}',
       '.grow{flex:1;min-width:0;overflow-wrap:anywhere}.num{background:#F3E9DB;color:#87571F;border-radius:10px;width:33px;height:33px;display:grid;place-items:center;flex-shrink:0;font-weight:800}',
       '.habit{padding:12px 0;font-size:19px;line-height:1.5}.dot{display:inline-block;width:11px;height:11px;border:2px solid #6D9A85;border-radius:50%;margin-right:12px}',
-      '.weekrow{align-items:start}.weekday{width:80px;font-size:17px;font-weight:800;flex-shrink:0}.weekevent{font-size:17px;margin-bottom:9px;line-height:1.5}.weekdue{font-size:16px;font-weight:700;color:#825A2B;background:#F9F2E8;padding:8px;border-radius:9px;margin:7px 0}',
-      '.foot{color:#58665D;font-size:14px;line-height:1.7;padding:12px 3px}.overdue{border-radius:12px;background:#FFF4E8;border:1px solid #E8C79E;padding:14px;margin-top:12px}.overdue b{font-size:17px;color:#81572A}.overdue p{font-size:15px;line-height:1.4;color:#674F36;margin:7px 0}.overduerow{font-size:15px;color:#674F36;padding:6px 0;border-top:1px solid #EAD8C4;overflow-wrap:anywhere}.overdue a{font-size:16px;font-weight:700;color:#1A6378;display:inline-block;margin-top:9px;min-height:34px}',
+      '.weekrow{align-items:start}.weekday{width:80px;font-size:17px;font-weight:800;flex-shrink:0}.weekevent{font-size:17px;margin-bottom:9px;line-height:1.5}.weekref{font-size:15px;color:#65746A;line-height:1.4;padding:6px 0}.weekdue{font-size:16px;font-weight:700;color:#825A2B;background:#F9F2E8;padding:8px;border-radius:9px;margin:7px 0}',
+      '.foot{color:#58665D;font-size:14px;line-height:1.7;padding:12px 3px}.refcalendar{margin-top:8px;border-top:1px dashed #DCE3DB;padding:12px 0 0}.refcalendar summary{font-size:16px;color:#336E84;font-weight:700;cursor:pointer;min-height:40px}.refcalendar .event b{font-size:16px;color:#56645B}.overdue{border-radius:12px;background:#FFF4E8;border:1px solid #E8C79E;padding:14px;margin-top:12px}.overdue b{font-size:17px;color:#81572A}.overdue p{font-size:15px;line-height:1.4;color:#674F36;margin:7px 0}.overduerow{font-size:15px;color:#674F36;padding:6px 0;border-top:1px solid #EAD8C4;overflow-wrap:anywhere}.overdue a{font-size:16px;font-weight:700;color:#1A6378;display:inline-block;margin-top:9px;min-height:34px}',
       '.links{display:flex;gap:8px;flex-wrap:wrap}.links a{color:#175E6D;background:#EFF5F1;border-radius:9px;padding:12px 13px;text-decoration:none;font-weight:750;font-size:17px;min-height:44px}',
       '@media(min-width:600px){.wrap{padding:112px 28px 72px}}'
     ].join("");
@@ -349,9 +362,9 @@
       '<div class="sub">'+safe(dateText(now))+' · 自分の一日をデザインする</div></header>'+
       '<div class="tabs"><button id="tabToday" onclick="document.body.dataset.tab=\'today\'">今日</button>'+
       '<button id="tabWeek" onclick="document.body.dataset.tab=\'week\'">今週</button></div>'+
-      '<div class="today"><section class="hero"><span>今日の優先事項</span><h2>'+safe(focus)+'</h2>'+
+      '<div class="today"><section class="hero"><span>今日の見通し</span><h2>'+safe(focus)+'</h2>'+
       '<p>'+safe(focusNote)+'</p></section>'+
-      '<section class="section"><div class="sectionhead"><h3>これからの予定</h3><span class="tag">Appleカレンダー</span></div>'+eventRows+'</section>'+
+      '<section class="section"><div class="sectionhead"><h3>これからの予定</h3><span class="tag">Appleカレンダー</span></div>'+eventRows+referenceRows+'</section>'+
       '<section class="section"><div class="sectionhead"><h3>大切なこと</h3><span class="tag">優先最大3件</span></div>'+cards+overdueNotice+'</section>'+
       '<section class="section"><h3>習慣・身体</h3>'+habitRows+
       '<p class="muted">健康：'+safe(health || "実測データ未取得")+'</p></section>'+
