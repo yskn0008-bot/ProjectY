@@ -88,7 +88,10 @@ async function capture(id,target,raw,dateTime='',amount='',kind='',transport='pl
   const payload=new URLSearchParams({request_id:id,target,title:raw.slice(0,70),raw,date_time:dateTime,amount,kind}).toString();
   const voiceInput={notionPending:true,notionTarget:target,notionTitle:raw.slice(0,70),notionRaw:raw,notionDateTime:dateTime,notionAmount:amount,notionKind:kind};
   const inactiveVoiceInput={...voiceInput,notionPending:false};
-  const shortcutParameter=transport==='shortcutParameter'?payload:transport==='shortcutDictionary'?voiceInput:transport==='inactiveShortcutDictionary'?inactiveVoiceInput:undefined;
+  const plannerInput={actions:[{id,executor:'notion',module:'NEXT_NOTION',operation:'save',parameters:{target,title:raw.slice(0,70),raw_text:raw,date_time:dateTime,amount,kind},risk:'low',status:'planned',needs_review:false,needs_confirmation:false}]};
+  const nonNotionPlan={actions:[{id,executor:'device',module:'NEXT_DEVICE',operation:'set_wifi',parameters:{state:'off'},risk:'low',status:'planned',needs_review:false,needs_confirmation:false}]};
+  const reviewPlan={actions:[{id,executor:'notion',module:'NEXT_NOTION',operation:'save',parameters:{target,title:raw.slice(0,70),raw_text:raw,date_time:dateTime,amount,kind},risk:'low',status:'planned',needs_review:true,needs_confirmation:false}]};
+  const shortcutParameter=transport==='shortcutParameter'?payload:transport==='shortcutDictionary'?voiceInput:transport==='inactiveShortcutDictionary'?inactiveVoiceInput:transport==='planner'?plannerInput:transport==='plannerNoNotion'?nonNotionPlan:transport==='plannerNeedsReview'?reviewPlan:undefined;
   const context={args:{plainTexts:transport==='plainTexts'?[payload]:[],shortcutParameter},Keychain:{contains:()=>true,get:()=> 'simulated-token'},Request,FileManager:{local:()=>fm},Script:{setShortcutOutput:v=>{output=v;},complete:()=>{}},Date,Number,String,JSON,Math,Error,decodeURIComponent,encodeURIComponent};
   await vm.runInNewContext('(async()=>{'+script+'})()',context);
   return output;
@@ -139,8 +142,14 @@ function allInboxText(){return inboxBlocks.map(blockText).join('\n');}
   assert.equal(await capture('voice-dictionary-002','task','Clarity.Voice辞書入力','2026-11-02T10:00:00+09:00'),'DUPLICATE:task');
   assert.equal(targetCount('task'),9,'Clarity.Voice notion* dictionary fields must normalize into the shared route');
   const beforeInactive={inbox:inboxBlocks.length,tasks:targetCount('task')};
-  await assert.rejects(capture('voice-dictionary-inactive','task','無効化されたNotion項目','','','','inactiveShortcutDictionary'),/incomplete/);
+  assert.equal(await capture('voice-dictionary-inactive','task','無効化されたNotion項目','','','','inactiveShortcutDictionary'),'SKIP:no_notion_save');
   assert.deepEqual({inbox:inboxBlocks.length,tasks:targetCount('task')},beforeInactive,'notionPending=false must not write to Inbox or Tasks');
+  assert.equal(await capture('voice-planner-001','task','GPTプランからのClarity.Voice保存','2026-11-03T11:00:00+09:00','','','planner'),'OK:task');
+  assert.equal(await capture('voice-planner-002','task','GPTプランからのClarity.Voice保存','2026-11-03T11:00:00+09:00'),'DUPLICATE:task');
+  assert.equal(await capture('voice-planner-003','task','次の別の指示を保存','2026-11-03T11:00:00+09:00','','','planner'),'OK:task');
+  assert.equal(await capture('voice-planner-skip','task','Notion保存なしの端末操作','','','','plannerNoNotion'),'SKIP:no_notion_save');
+  assert.equal(await capture('voice-planner-review','task','確認が必要なNotion保存','','','','plannerNeedsReview'),'SKIP:no_notion_save');
+  assert.equal(targetCount('task'),11,'only planned, safe, single Notion save actions may route; repeated planner IDs must not collide');
 
   for(const target of ['shopping','project','life_event','person','learning','money','balance']){
     const amount=['money','balance'].includes(target)?'682':'';
@@ -161,7 +170,7 @@ function allInboxText(){return inboxBlocks.map(blockText).join('\n');}
   assert.equal(await capture('long-a','task',longRaw),'OK:task');
   assert.ok(allInboxText().includes(longRaw),'Inbox must preserve raw text longer than one Notion text object');
   assert.ok(inboxBlocks.at(-1).paragraph.rich_text.every(x=>x.text.content.length<=2000));
-  console.log('Inbox-first, target idempotency, readback retry, legacy duplicate guards, Shortcut Input query/dictionary bridges, distinct-due-time, and long-raw simulation: PASS');
+  console.log('Inbox-first, target idempotency, readback retry, legacy duplicate guards, Shortcut Input query/dictionary/planner bridges, safe skip, distinct-due-time, and long-raw simulation: PASS');
 })().catch(e=>{console.error(e);process.exitCode=1;});
 """
 
