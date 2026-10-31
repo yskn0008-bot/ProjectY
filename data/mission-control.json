@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-01T07:52:44+09:00",
+  "updated_at": "2026-11-01T08:25:35+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -12,16 +12,6 @@
     ]
   },
   "inbox": [
-    {
-      "id": "github-pr-649",
-      "title": "PR #649 fix: identify Morning Money fetch failures safely",
-      "type": "GitHub PR",
-      "status": "review",
-      "priority": 1,
-      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/649",
-      "updated_at": "2026-10-20T07:56:59Z"
-    },
     {
       "id": "github-pr-609",
       "title": "PR #609 Clarity: Voice / Text / Share user entryを完成",
@@ -111,6 +101,16 @@
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/653",
       "updated_at": "2026-10-31T22:08:10Z"
+    },
+    {
+      "id": "github-pr-654",
+      "title": "PR #654 YOS Calendar: mobile-first unified calendar preview (read-only)",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/654",
+      "updated_at": "2026-10-31T23:25:19Z"
     },
     {
       "id": "github-issue-10",
@@ -264,7 +264,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-01T07:52:44+09:00",
+      "last_update": "2026-11-01T08:25:35+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -339,13 +339,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 8件・Open PR 36件を自動同期中",
+      "next_action": "Open Issue 8件・Open PR 37件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-01T07:52:44+09:00",
+      "last_update": "2026-11-01T08:25:35+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -368,7 +368,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-01T07:52:44+09:00",
+      "last_update": "2026-11-01T08:25:35+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -450,5 +450,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "ecd221d7a8c066854e5b368352395290f638f9758daef3d877740fcf61050b6c"
+  "github_snapshot_hash": "9b39c6e75bed9e86e61bdf0ac10f6c1de2a64a4437987a716d31ad5134df9105"
 }
