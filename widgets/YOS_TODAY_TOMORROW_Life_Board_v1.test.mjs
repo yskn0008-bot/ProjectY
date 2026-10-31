@@ -396,7 +396,7 @@ test('first-screen YOS advice presents one short action and the long reasoning s
   const end=page.indexOf('</div>',start);
   const card=page.slice(start,end);
   const headline=card.match(/<b>(.*?)<\/b>/)?.[1]||'';
-  assert.ok(headline.length<=59, 'the lead line must stay short');
+  assert.ok(headline.length<=35, 'the lead line must fit in roughly two phone lines');
   assert.match(card,/判断理由を確認/);
   assert.match(card,/<details class="reason">/);
   assert.doesNotMatch(card,/<details class="reason" open/);
