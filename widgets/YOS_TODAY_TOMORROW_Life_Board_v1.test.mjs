@@ -70,6 +70,17 @@ for (const runsInWidget of [true,false]) {
   }
 }
 
+test('readable typography is preserved in both views', () => {
+  const styles = source.slice(source.indexOf('const styles = ['), source.indexOf('].join("");', source.indexOf('const styles = [')));
+  const sizes = [...styles.matchAll(/font-size:(\d+)px/g)].map((match) => Number(match[1]));
+  assert.ok(sizes.length > 10, 'expected full-screen typography definitions');
+  assert.ok(sizes.every((px) => px >= 14), 'full-screen text must not become tiny');
+  assert.match(source, /label\(content,title,13,C\.soft,true\)/);
+  assert.match(source, /label\(content,value,16,C\.ink,true,2\)/);
+  assert.match(styles, /\.tabs button\{[^']*min-height:48px/);
+  assert.match(source, /これからの予定/);
+});
+
 test('new view is read only and discloses unavailable sources', () => {
   assert.match(source,/読み取り専用の初期版/);
   assert.match(source,/健康：/);
