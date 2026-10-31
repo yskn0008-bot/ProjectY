@@ -26,10 +26,10 @@ class VoiceInputSourceContractTests(unittest.TestCase):
             "multiple_notion_writes",
             'externalWriteText == "はい" && requiresConfirmationText == "いいえ" && executor != "notion"',
             '@notionRaw = "{originalInput}"',
-            '"target", "content", "date_time"',
+            "Each action has id, executor, domain, intent, target, content, conditions, destination",
         ):
             self.assertIn(required, self.source)
-        self.assertIn('"inbox", "task", "shopping", "project", "life_event", "person", "learning", "money", "balance"', self.source)
+        self.assertIn("target from this existing set only: inbox, task, shopping, project, life_event, person, learning, money, balance", self.source)
         self.assertIn("const YOS_BRIDGE_DRY_RUN=true;", (SOURCE.parent / "clarity_voice_notion_bridge.js").read_text(encoding="utf-8"))
 
     def test_voice_core_has_dictionary_answer_format(self):
