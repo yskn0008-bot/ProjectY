@@ -150,6 +150,32 @@
     if(age>=0 && age<6*3600000 && cached.data) return {data:cached.data,stale:true};
     return {data:null,stale:true};
   }
+  // Optional bounded read-only calendar feed. A missing server feature never blocks Today.
+  async function readCalendarTaskWindow(start,end) {
+    if (!Keychain.contains(SETTINGS.tokenKey)) return null;
+    try {
+      const token=Keychain.get(SETTINGS.tokenKey);
+      if(!token) return null;
+      const req=new Request(SETTINGS.feedUrl+'?mode=calendar&start='+start+'&end='+end);
+      req.headers={Authorization:'Bearer '+token,Accept:'application/json'};
+      req.timeoutInterval=8;
+      const data=await req.loadJSON();
+      if(Number(req.response && req.response.statusCode)!==200 ||
+        !data || !Array.isArray(data.tasks) ||
+        (data.source!=='notion' && data.source!=='projection') ||
+        typeof data.sourceComplete!=='boolean' || typeof data.truncated!=='boolean') return null;
+      const dated=data.tasks.filter(t=>t && typeof t.title==='string' &&
+        typeof t.due==='string' && /^\d{4}-\d{2}-\d{2}$/.test(t.due) &&
+        t.due>=start && t.due<=end).slice(0,100);
+      const generated=validDate(data.generatedAt);
+      const age=generated ? Date.now()-generated.getTime() : Infinity;
+      return {
+        tasks:dated,
+        partial:data.truncated || !data.sourceComplete || data.source!=='notion' ||
+          !Number.isFinite(age) || age<(-5*60000) || age>24*3600000
+      };
+    } catch { return null; }
+  }
   function yosTask(feed) {
     const data = feed.data || {};
     const tasks = Array.isArray(data.tasks) ? data.tasks : (data.task ? [data.task] : []);
@@ -404,16 +430,24 @@
         habitRows+(health?'<p class="muted">健康：'+safe(health)+'</p>':'') :
         '<p class="muted">習慣の実施記録と健康の実測情報は未連携です。</p>')+
       '<div class="links"><a href="'+URL.life+'">MY LIFEで記録を見る</a></div></section>';
-    // Show due dates from the existing prioritized feed, not an invented complete task calendar.
-    const taskDueMap = new Map();
-    for (const task of tasks) {
-      if (!task || !/^\d{4}-\d{2}-\d{2}/.test(String(task.due || ""))) continue;
-      const key = String(task.due).slice(0,10);
-      if (!taskDueMap.has(key)) taskDueMap.set(key,[]);
-      taskDueMap.get(key).push(taskTitle(task,80));
-    }
     const monday = new Date(now.getFullYear(),now.getMonth(),now.getDate()-((now.getDay()+6)%7));
     const nextMonday = new Date(monday.getFullYear(),monday.getMonth(),monday.getDate()+7);
+    const sunday = new Date(nextMonday.getFullYear(),nextMonday.getMonth(),nextMonday.getDate()-1);
+    const fullWeekTasks=await readCalendarTaskWindow(dateKey(monday),dateKey(sunday));
+    const taskDueMap = new Map();
+    // When the new server mode is not deployed yet, use only the existing three-task feed.
+    const weekDueSource=fullWeekTasks?fullWeekTasks.tasks:tasks;
+    for (const task of weekDueSource) {
+      if (!task || !/^\d{4}-\d{2}-\d{2}$/.test(String(task.due || '').slice(0,10))) continue;
+      const key=String(task.due).slice(0,10);
+      if (!taskDueMap.has(key)) taskDueMap.set(key,[]);
+      taskDueMap.get(key).push(fullWeekTasks?clean(task.title,100):taskTitle(task,80));
+    }
+    const dueCoverage=fullWeekTasks ?
+      (fullWeekTasks.partial ?
+        '期限タスクは取得できた範囲だけ表示。元データの欠落や更新遅延の可能性があります。' :
+        '期限タスクは既存YOS Tasksから読み取り表示。個別タスクの更新状態は元データを確認してください。') :
+      '期限タスクは優先最大3件のみ。全タスク取得機能は未接続です。';
     let weekEvents = null;
     try { weekEvents = await CalendarEvent.between(monday,nextMonday); }
     catch(e) { weekEvents = null; }
@@ -433,7 +467,9 @@
           '<span class="muted">'+(weekEvents===null?'予定未取得':'参考以外の予定なし')+'</span>')+
           references.slice(0,2).map(e=>'<div class="weekref">参考｜'+safe(e.title)+'</div>').join('')+
           (references.length>2?'<small>参考イベント ほか'+(references.length-2)+'件</small>':'')+
-          dueTasks.map(title => '<div class="weekdue">期限｜'+safe(title)+'</div>').join('')+'</div></div>';
+          dueTasks.slice(0,3).map(title => '<div class="weekdue">期限｜'+safe(title)+'</div>').join('')+
+          (dueTasks.length>3?'<details class="more-due"><summary>ほかの期限 '+(dueTasks.length-3)+'件</summary>'+
+           dueTasks.slice(3).map(title=>'<div class="weekdue">期限｜'+safe(title)+'</div>').join('')+'</details>':'')+'</div></div>';
       }).join("");
     const styles = [
       '*{box-sizing:border-box}body{margin:0;background:#F5F5F2;color:#252C2A;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans",sans-serif;font-size:16px}',
@@ -453,7 +489,7 @@
       '.event small,.task small{display:block;color:#5D6B61;margin-top:5px;line-height:1.45;font-size:16px}.task b{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.task details{margin-top:8px}.task summary{color:#206D90;font-size:16px;font-weight:700;cursor:pointer;min-height:34px}.task details p{margin:6px 0;font-size:16px;line-height:1.55;white-space:normal;overflow-wrap:anywhere}.tasklink{display:inline-block;color:#1C6477;font-size:16px;font-weight:750;padding:11px 0;text-decoration:underline;min-height:44px}',
       '.grow{flex:1;min-width:0;overflow-wrap:anywhere}.num{background:#F3E9DB;color:#87571F;border-radius:10px;width:33px;height:33px;display:grid;place-items:center;flex-shrink:0;font-weight:800}',
       '.habit{padding:12px 0;font-size:19px;line-height:1.5}.dot{display:inline-block;width:11px;height:11px;border:2px solid #6D9A85;border-radius:50%;margin-right:12px}',
-      '.weekrow{align-items:start}.weekday{width:80px;font-size:17px;font-weight:800;flex-shrink:0}.weekevent{font-size:17px;margin-bottom:9px;line-height:1.5}.weekref{font-size:15px;color:#65746A;line-height:1.4;padding:6px 0}.weekdue{font-size:16px;font-weight:700;color:#825A2B;background:#F9F2E8;padding:8px;border-radius:9px;margin:7px 0}',
+      '.weekrow{align-items:start}.weekday{width:80px;font-size:17px;font-weight:800;flex-shrink:0}.weekevent{font-size:17px;margin-bottom:9px;line-height:1.5}.weekref{font-size:15px;color:#65746A;line-height:1.4;padding:6px 0}.weekdue{font-size:16px;font-weight:700;color:#825A2B;background:#F9F2E8;padding:8px;border-radius:9px;margin:7px 0}.more-due summary{color:#7A5928;font-size:16px;font-weight:700;padding:11px 0;min-height:44px}',
       '.foot{color:#58665D;font-size:14px;line-height:1.7;padding:12px 3px}.refcalendar{margin-top:8px;border-top:1px dashed #DCE3DB;padding:12px 0 0}.refcalendar summary{font-size:16px;color:#336E84;font-weight:700;cursor:pointer;min-height:40px}.refcalendar .event b{font-size:16px;color:#56645B}.overdue{border-radius:12px;background:#FFF4E8;border:1px solid #E8C79E;padding:0;margin-top:12px}.overdue summary{font-size:16px;color:#81572A;font-weight:700;min-height:48px;padding:14px;cursor:pointer}.overduebody{padding:0 14px 15px}.overdue p{font-size:15px;line-height:1.4;color:#674F36;margin:7px 0}.overduerow{font-size:15px;color:#674F36;padding:8px 0;border-top:1px solid #EAD8C4;overflow-wrap:anywhere}.overdue a{font-size:16px;font-weight:700;color:#1A6378;display:inline-block;margin-top:9px;min-height:34px}',
       '.links{display:flex;gap:8px;flex-wrap:wrap}.links a{color:#175E6D;background:#EFF5F1;border-radius:9px;padding:12px 13px;text-decoration:none;font-weight:750;font-size:17px;min-height:44px}',
       '@media(min-width:600px){.wrap{padding:112px 28px 72px}}'
@@ -472,7 +508,7 @@
       '<div class="week"><section class="hero"><span>今週の予定</span><h2>無理なく進める一週間</h2>'+
       '<p>固定予定を確認してから、やることを組み立てる。</p></section>'+
       '<section class="section"><h3>今週のカレンダー</h3>'+weekRows+
-      '<p class="muted">タスク期限はYOSの優先最大3件のみ。全タスクの期限一覧ではありません。</p></section></div>'+
+      '<p class="muted">'+safe(dueCoverage)+'</p></section></div>'+
       '<section class="section"><h3>元データを開く</h3><div class="links">'+
       '<a href="'+URL.tasks+'">YOS Tasks</a><a href="'+URL.home+'">Notion HOME</a>'+
       '<a href="'+URL.life+'">MY LIFE</a></div></section>'+
