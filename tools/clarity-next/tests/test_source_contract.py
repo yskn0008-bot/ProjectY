@@ -36,11 +36,14 @@ class ClarityNextSourceContractTests(unittest.TestCase):
 
     def test_notion_inline_bridge_patch_is_locked(self):
         patch = NOTION_PATCH.read_text(encoding="utf-8")
+        bridge = (ROOT / "clarity_notion_bridge.js").read_text(encoding="utf-8")
         self.assertIn('dk.simonbs.Scriptable.RunScriptInlineIntent', patch)
         self.assertIn('__YOS_NOTION_BRIDGE_INLINE__', patch)
-        self.assertIn('YOS_NOTION_INTEGRATION_TOKEN', patch)
-        self.assertIn('965c6086-32c1-463d-93b4-87a9cb69b3ad', patch)
-        self.assertIn('95b30d16-7530-40c6-a320-dab99acad55d', patch)
+        self.assertIn('YOS_NOTION_INTEGRATION_TOKEN', bridge)
+        self.assertIn('965c6086-32c1-463d-93b4-87a9cb69b3ad', bridge)
+        self.assertIn('95b30d16-7530-40c6-a320-dab99acad55d', bridge)
+        self.assertIn('notionPending', bridge)
+        self.assertIn('notionTarget', bridge)
 
     def test_calendar_reminder_wire_format_patch_is_locked(self):
         patch = WIRE_PATCH.read_text(encoding="utf-8")
@@ -179,10 +182,11 @@ class ClarityNextSourceContractTests(unittest.TestCase):
         self.assertIn('dk.simonbs.Scriptable.RunScriptInlineIntent', self.source)
         self.assertIn('__YOS_NOTION_BRIDGE_INLINE__', self.source)
         patch = NOTION_PATCH.read_text(encoding="utf-8")
-        self.assertIn('YOS_NOTION_INTEGRATION_TOKEN', patch)
-        self.assertIn('3d35ca88-2895-81ef-9dc8-d5f11ff8e213', patch)
-        self.assertIn('965c6086-32c1-463d-93b4-87a9cb69b3ad', patch)
-        self.assertIn('95b30d16-7530-40c6-a320-dab99acad55d', patch)
+        bridge = (ROOT / "clarity_notion_bridge.js").read_text(encoding="utf-8")
+        self.assertIn('YOS_NOTION_INTEGRATION_TOKEN', bridge)
+        self.assertIn('3d35ca88-2895-81ef-9dc8-d5f11ff8e213', bridge)
+        self.assertIn('965c6086-32c1-463d-93b4-87a9cb69b3ad', bridge)
+        self.assertIn('95b30d16-7530-40c6-a320-dab99acad55d', bridge)
         self.assertNotIn('money-capture.html', self.source)
 
     def test_v0_acceptance_routes_exist(self):
@@ -198,8 +202,9 @@ class ClarityNextSourceContractTests(unittest.TestCase):
         self.assertIn('dk.simonbs.Scriptable.RunScriptInlineIntent', self.source)
         self.assertIn('__YOS_NOTION_BRIDGE_INLINE__', self.source)
         patch = NOTION_PATCH.read_text(encoding="utf-8")
-        self.assertIn('YOS_NOTION_INTEGRATION_TOKEN', patch)
-        self.assertIn('95b30d16-7530-40c6-a320-dab99acad55d', patch)
+        bridge = (ROOT / "clarity_notion_bridge.js").read_text(encoding="utf-8")
+        self.assertIn('YOS_NOTION_INTEGRATION_TOKEN', bridge)
+        self.assertIn('95b30d16-7530-40c6-a320-dab99acad55d', bridge)
         self.assertNotIn('money-capture.html', self.source)
 
 if __name__ == "__main__":
