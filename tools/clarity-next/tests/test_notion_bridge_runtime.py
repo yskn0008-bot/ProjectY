@@ -89,10 +89,12 @@ async function capture(id,target,raw,dateTime='',amount='',kind='',transport='pl
   const voiceInput={notionPending:true,notionTarget:target,notionTitle:raw.slice(0,70),notionRaw:raw,notionDateTime:dateTime,notionAmount:amount,notionKind:kind};
   const inactiveVoiceInput={...voiceInput,notionPending:false};
   const plannerInput={actions:[{id,executor:'notion',module:'NEXT_NOTION',operation:'save',parameters:{target,title:raw.slice(0,70),raw_text:raw,date_time:dateTime,amount,kind},risk:'low',status:'planned',needs_review:false,needs_confirmation:false}]};
+  const inactivePlannerInput={...plannerInput,notionPending:false};
+  const inactivePlanArray={notionPending:false,plan:plannerInput.actions};
   const nonNotionPlan={actions:[{id,executor:'device',module:'NEXT_DEVICE',operation:'set_wifi',parameters:{state:'off'},risk:'low',status:'planned',needs_review:false,needs_confirmation:false}]};
   const reviewPlan={actions:[{id,executor:'notion',module:'NEXT_NOTION',operation:'save',parameters:{target,title:raw.slice(0,70),raw_text:raw,date_time:dateTime,amount,kind},risk:'low',status:'planned',needs_review:true,needs_confirmation:false}]};
   const dryRunPlan={yosTestMode:true,plan:plannerInput.actions};
-  const shortcutParameter=transport==='shortcutParameter'?payload:transport==='shortcutDictionary'?voiceInput:transport==='inactiveShortcutDictionary'?inactiveVoiceInput:transport==='planner'?plannerInput:transport==='plannerNoNotion'?nonNotionPlan:transport==='plannerNeedsReview'?reviewPlan:transport==='dryRunPlanner'?dryRunPlan:undefined;
+  const shortcutParameter=transport==='shortcutParameter'?payload:transport==='shortcutDictionary'?voiceInput:transport==='inactiveShortcutDictionary'?inactiveVoiceInput:transport==='inactivePlanner'?inactivePlannerInput:transport==='inactivePlanArray'?inactivePlanArray:transport==='planner'?plannerInput:transport==='plannerNoNotion'?nonNotionPlan:transport==='plannerNeedsReview'?reviewPlan:transport==='dryRunPlanner'?dryRunPlan:undefined;
   const context={args:{plainTexts:transport==='plainTexts'?[payload]:[],shortcutParameter},Keychain:{contains:()=>true,get:()=> 'simulated-token'},Request,FileManager:{local:()=>fm},Script:{setShortcutOutput:v=>{output=v;},complete:()=>{}},Date,Number,String,JSON,Math,Error,decodeURIComponent,encodeURIComponent};
   await vm.runInNewContext('(async()=>{'+script+'})()',context);
   return output;
@@ -145,6 +147,9 @@ function allInboxText(){return inboxBlocks.map(blockText).join('\n');}
   const beforeInactive={inbox:inboxBlocks.length,tasks:targetCount('task')};
   assert.equal(await capture('voice-dictionary-inactive','task','無効化されたNotion項目','','','','inactiveShortcutDictionary'),'SKIP:no_notion_save');
   assert.deepEqual({inbox:inboxBlocks.length,tasks:targetCount('task')},beforeInactive,'notionPending=false must not write to Inbox or Tasks');
+  assert.equal(await capture('planner-inactive','task','無効化されたNotion計画','','','','inactivePlanner'),'SKIP:no_notion_save');
+  assert.equal(await capture('planner-array-inactive','task','無効化されたplan配列','','','','inactivePlanArray'),'SKIP:no_notion_save');
+  assert.deepEqual({inbox:inboxBlocks.length,tasks:targetCount('task')},beforeInactive,'notionPending=false must override actions and plan arrays');
   assert.equal(await capture('voice-planner-001','task','GPTプランからのClarity.Voice保存','2026-11-03T11:00:00+09:00','','','planner'),'OK:task');
   assert.equal(await capture('voice-planner-002','task','GPTプランからのClarity.Voice保存','2026-11-03T11:00:00+09:00'),'DUPLICATE:task');
   assert.equal(await capture('voice-planner-003','task','次の別の指示を保存','2026-11-03T11:00:00+09:00','','','planner'),'OK:task');
