@@ -196,7 +196,10 @@
     readCalendar(target),readReminders(),night?Promise.resolve({data:null,stale:true}):readYosFeed(),readHealth()
   ]);
   const widget = new ListWidget();
-  widget.url = URL.home;
+  // The widget's unused background area opens this same script's full-screen board.
+  // Scriptable generates its own run URL, so no script name is assumed.
+  widget.url = typeof URLScheme !== "undefined" && typeof URLScheme.forRunningScript === "function"
+    ? URLScheme.forRunningScript() : URL.home;
   widget.refreshAfterDate = new Date(Date.now()+SETTINGS.refreshMinutes*60000);
   widget.setPadding(15,17,14,17);
   const gradient = new LinearGradient();
