@@ -27,6 +27,7 @@ action 'file.append' appendResolvedFile(
 // Never use the Shortcut filename as runtime identity.
 const buildId = text("__CLARITY_BUILD_ID__")
 const requestNumber = randomNumber(100000, 999999)
+@inputMode = "voice"
 const originalInput = listen("After Pause", "jp-JP")
 const rawRecord = text("{CurrentDate}\t{requestNumber}\tRAW\t{originalInput}\n")
 const inboxFile = getFile("Clarity Inbox.txt")
@@ -217,6 +218,11 @@ for actionItem in @actionsRaw {
     }
 
     if executor == "notion" {
+        if @inputMode != "voice" {
+            const blockedNotionModeRecord = text("{CurrentDate}\\t{requestNumber}\\t{actionId}\\tBLOCKED\\tnotion_not_allowed_for_share\\n")
+            appendResolvedFile(ledgerFile, blockedNotionModeRecord)
+            mustOutput("ここだけ確認して", "共有情報は既存の共有ルートで処理してください")
+        }
         if externalWriteText != "はい" || requiresConfirmationText != "いいえ" {
             const blockedNotionPolicyRecord = text("{CurrentDate}\t{requestNumber}\t{actionId}\tBLOCKED\tnotion_policy_mismatch\n")
             appendResolvedFile(ledgerFile, blockedNotionPolicyRecord)
