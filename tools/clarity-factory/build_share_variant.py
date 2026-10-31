@@ -135,7 +135,9 @@ if !originalInput {
     standard_output = """if !@handoffExecutor {
     const requestDone = text("{CurrentDate}\\t{requestNumber}\\tREQUEST_DONE\\n")
     appendResolvedFile(ledgerFile, requestDone)
-    if summary {
+    if @notionPending == "yes" {
+        show("テスト確認：入力はClarity Inboxに記録しました。Notion保存はテストのため実行していません。")
+    } else if summary {
         show("{summary}")
     }
 }
