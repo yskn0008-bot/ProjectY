@@ -364,6 +364,16 @@ test('task action URL is visible only on deliberate tap and HTML-safe', async ()
   assert.doesNotMatch(page,/window\.location\s*=|location\.href\s*=/);
 });
 
+test('a tap that can launch iPhone automation is explicitly labelled', async () => {
+  const mock=runtime(false,false,'DAY',true,[
+    {title:'Shortcut action',actionUrl:'shortcuts://run-shortcut?name=MyTest'}
+  ],[]);
+  await new Function(...Object.keys(mock.globals),'return '+body)(...Object.values(mock.globals));
+  const html=mock.snapshot().html;
+  assert.match(html,/href="shortcuts:\/\/run-shortcut\?name=MyTest">ショートカットを起動<\/a>/);
+  assert.doesNotMatch(html,/javascript:/);
+});
+
 test('unsafe scheme and HTML-breaking action URL are not rendered', async () => {
   const bad=['javascript:alert(1)','https://site.example/"><script>evil</script>'];
   for(const raw of bad){
