@@ -314,11 +314,6 @@
       '<p>'+safe(focusNote)+'</p></section>';
     const taskSection = '<section class="section"><div class="sectionhead"><h3>大切なこと</h3>'+
       '<span class="tag">優先最大3件</span></div>'+cards+overdueNotice+'</section>';
-    const habitSection = '<section class="section"><h3>習慣・身体</h3>'+
-      (routine.length || health ?
-        habitRows+(health?'<p class="muted">健康：'+safe(health)+'</p>':'') :
-        '<p class="muted">習慣の実施記録と健康の実測情報は未連携です。</p>')+
-      '<div class="links"><a href="'+URL.life+'">MY LIFEで記録を見る</a></div></section>';
     const calendarSection = events.ok && !personalEvents.length && !referenceEvents.length ? '' :
       '<section class="section"><div class="sectionhead"><h3>これからの予定</h3>'+
       '<span class="tag">Appleカレンダー</span></div>'+eventRows+referenceRows+'</section>';
@@ -328,6 +323,11 @@
     const habitRows = routine.length ? routine.map(r =>
       '<div class="habit"><span class="dot"></span>'+safe(r.title)+'</div>').join("") :
       '<p class="muted">習慣の実施記録は未連携。完了状態は未確認です。</p>';
+    const habitSection = '<section class="section"><h3>習慣・身体</h3>'+
+      (routine.length || health ?
+        habitRows+(health?'<p class="muted">健康：'+safe(health)+'</p>':'') :
+        '<p class="muted">習慣の実施記録と健康の実測情報は未連携です。</p>')+
+      '<div class="links"><a href="'+URL.life+'">MY LIFEで記録を見る</a></div></section>';
     // Show due dates from the existing prioritized feed, not an invented complete task calendar.
     const taskDueMap = new Map();
     for (const task of tasks) {
