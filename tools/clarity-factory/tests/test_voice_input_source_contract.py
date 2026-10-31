@@ -17,6 +17,11 @@ class VoiceInputSourceContractTests(unittest.TestCase):
         self.assertNotIn("{ShortcutInput}", self.source)
         self.assertNotIn("@resolvedInput", self.source)
 
+    def test_notion_route_is_voice_only(self):
+        self.assertIn('@inputMode = "voice"', self.source)
+        self.assertIn('if @inputMode != "voice" {', self.source)
+        self.assertIn("notion_not_allowed_for_share", self.source)
+
     def test_voice_core_routes_notion_through_safe_existing_bridge(self):
         for required in (
             "executor=notion",
