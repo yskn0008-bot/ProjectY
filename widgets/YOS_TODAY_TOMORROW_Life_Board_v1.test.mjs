@@ -5,7 +5,7 @@ import {readFileSync} from 'node:fs';
 const source = readFileSync(new URL('./YOS_TODAY_TOMORROW_Widget_v1.js', import.meta.url), 'utf8');
 const body = source.slice(source.indexOf('(async function ()'));
 
-function runtime(runsInWidget, denyPermissions, widgetMode = 'DAY', withTaskFeed = false, tasksOverride = null, calendarOverride = null, feedTimestamp = undefined) {
+function runtime(runsInWidget, denyPermissions, widgetMode = 'DAY', withTaskFeed = false, tasksOverride = null, calendarOverride = null, feedTimestamp = undefined, fixedNow = null) {
   let html = '';
   let widgetSet = false;
   let presented = 0;
@@ -23,8 +23,13 @@ function runtime(runsInWidget, denyPermissions, widgetMode = 'DAY', withTaskFeed
     centerAlignContent() {}
   }
   class Widget extends Stack {set url(value){widgetUrl=value;}get url(){return widgetUrl;}}
+  class DateForTest extends Date {
+    constructor(...parts) {super(...(parts.length?parts:fixedNow?[fixedNow]:[]));}
+    static now(){return fixedNow ? new Date(fixedNow).getTime() : Date.now();}
+  }
   const globals = {
     args: {widgetParameter: widgetMode},
+    Date: DateForTest,
     config: {runsInWidget},
     Color: class {constructor(value) {this.value = value;}},
     Font: {semiboldSystemFont(){return {};},systemFont(){return {};}},
@@ -283,6 +288,68 @@ test('missing upstream timestamp is never silently treated as fresh', async () =
   }],[],null);
   await new Function(...Object.keys(mock.globals),'return '+body)(...Object.values(mock.globals));
   assert.match(mock.snapshot().html,/タスク未確認/);
+});
+
+test('a nearby scheduled start calls for preparation instead of task planning', async () => {
+  const fixed = new Date(2026,10,1,10,0).toISOString();
+  const calendar=[{
+    title:'A timed appointment',isAllDay:false,
+    startDate:new Date(2026,10,1,10,20),endDate:new Date(2026,10,1,11,0)
+  }];
+  const mock=runtime(false,false,'DAY',true,[{title:'Current task',nextAction:'Focus task'}],
+    calendar,fixed,fixed);
+  await new Function(...Object.keys(mock.globals),'return '+body)(...Object.values(mock.globals));
+  const page=mock.snapshot().html;
+  assert.match(page,/次の予定の準備を優先/);
+  assert.match(page,/次の予定まで約20分/);
+  assert.match(page,/移動・準備時間は未計算です/);
+  assert.doesNotMatch(page,/実際の空き時間を確認して着手する候補/);
+});
+
+test('an ongoing appointment wins over task suggestion', async () => {
+  const fixed = new Date(2026,10,1,10,0).toISOString();
+  const calendar=[{
+    title:'Already started',isAllDay:false,
+    startDate:new Date(2026,10,1,9,30),endDate:new Date(2026,10,1,10,30)
+  }];
+  const mock=runtime(false,false,'DAY',true,[{title:'Current task',nextAction:'Focus task'}],
+    calendar,fixed,fixed);
+  await new Function(...Object.keys(mock.globals),'return '+body)(...Object.values(mock.globals));
+  assert.match(mock.snapshot().html,/登録済みの予定を優先/);
+});
+
+test('longer gap only suggests a task candidate and discloses that duration is unknown', async () => {
+  const fixed = new Date(2026,10,1,10,0).toISOString();
+  const calendar=[{
+    title:'Later appointment',isAllDay:false,
+    startDate:new Date(2026,10,1,13,0),endDate:new Date(2026,10,1,14,0)
+  }];
+  const mock=runtime(false,false,'DAY',true,[{title:'Current task',nextAction:'Check own work'}],
+    calendar,fixed,fixed);
+  await new Function(...Object.keys(mock.globals),'return '+body)(...Object.values(mock.globals));
+  const page=mock.snapshot().html;
+  assert.match(page,/優先タスクの次の一手/);
+  assert.match(page,/次の登録予定まで約3時間/);
+  assert.match(page,/所要時間は未確認/);
+});
+
+test('many taxi-demand references never crowd out the one real calendar item', async () => {
+  const d=new Date();
+  const refs=Array.from({length:18},(_,i)=>({
+    title:'［タクシー需要］ Reference '+i,isAllDay:true,
+    startDate:new Date(d.getFullYear(),d.getMonth(),d.getDate()),
+    endDate:new Date(d.getFullYear(),d.getMonth(),d.getDate()+1)
+  }));
+  const calendar=refs.concat([{
+    title:'Actual event remains',isAllDay:true,
+    startDate:new Date(d.getFullYear(),d.getMonth(),d.getDate()),
+    endDate:new Date(d.getFullYear(),d.getMonth(),d.getDate()+1)
+  }]);
+  const mock=runtime(false,false,'DAY',false,null,calendar);
+  await new Function(...Object.keys(mock.globals),'return '+body)(...Object.values(mock.globals));
+  const page=mock.snapshot().html;
+  assert.match(page,/Actual event remains/);
+  assert.match(page,/登録された予定 1件/);
 });
 
 test('the fullscreen header is offset below native WebView controls', () => {
