@@ -26,9 +26,13 @@ const fm=FileManager.local(),statePath=fm.joinPath(fm.documentsDirectory(),'yos-
 function readState(){try{return fm.fileExists(statePath)?JSON.parse(fm.readString(statePath)||'{}'):{};}catch{return {};}}
 function rt(s){return [{type:'text',text:{content:String(s||'').slice(0,1900)}}];}
 function t(s){return {title:rt(s)};} function x(s){return {rich_text:rt(s)};}
+// Day-bounded semantic retry key: a repeat of the same task text on a later day may be intentional.
+function taskSyncKey(raw){const d=new Date(),day=[d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-');const norm=String(raw||'').normalize('NFKC').trim().replace(/\s+/g,' ');let h=2166136261;for(let i=0;i<norm.length;i++){h^=norm.charCodeAt(i);h=Math.imul(h,16777619);}return 'clarity:task:'+day+':'+(h>>>0).toString(16).padStart(8,'0');}
+async function findTaskByKey(ds,key){const r=await api('/data_sources/'+ds+'/query','POST',{filter:{property:'同期キー',rich_text:{equals:key}},page_size:2});const pages=r.results||[];if(pages.length>1)throw new Error('Multiple Notion tasks have the same sync key');return pages[0]?.id||null;}
+async function verifyTask(id,key){const page=await api('/pages/'+id);const text=(page.properties?.['同期キー']?.rich_text||[]).map(v=>v.plain_text||v.text?.content||'').join('');if(text!==key)throw new Error('Notion task readback did not match sync key');}
 async function main(){
  const state=readState();if(state[p.request_id])return 'DUPLICATE:'+p.target;
- const key='clarity:'+p.request_id,title=p.title||p.raw||'Clarity',raw=p.raw||title;
+ const title=p.title||p.raw||'Clarity',raw=p.raw||title,key=p.target==='task'?taskSyncKey(raw):'clarity:'+p.request_id;let duplicateTask=false;
  if(p.target==='inbox'){await api('/blocks/'+INBOX+'/children','PATCH',{children:[{object:'block',type:'paragraph',paragraph:{rich_text:rt(new Date().toISOString()+' '+key+' '+raw)}}]});}
  else{
   const ds=DS[p.target];if(!ds)throw new Error('Unsupported Notion target: '+p.target);
@@ -41,9 +45,18 @@ async function main(){
   if(p.target==='learning')props={'判断・経験':t(title),'根拠・参照':x(raw)};
   if(p.target==='money'){props={'項目':t(title),'原本ID':x(key),'メモ':x(raw),'確認元':x('Clarity')};const n=Number(String(p.amount||'').replace(/[^0-9.-]/g,''));if(Number.isFinite(n)&&String(p.amount||'').trim())props['金額']={number:n};if(['収入','支出','資金移動'].includes(p.kind))props['区分']={select:{name:p.kind}};if(p.date_time)props['日付']={date:{start:p.date_time}};}
   if(p.target==='balance'){props={'口座・資産':t(title),'原本':x('Clarity '+p.request_id),'注記':x(raw),'確認状況':{select:{name:'未確認'}}};const n=Number(String(p.amount||'').replace(/[^0-9.-]/g,''));if(Number.isFinite(n)&&String(p.amount||'').trim())props['金額']={number:n};}
-  await api('/pages','POST',{parent:{type:'data_source_id',data_source_id:ds},properties:props});
+  if(p.target==='task'){
+    // Query the existing Notion DB before writing. A local cache loss or a retry after
+    // successful POST but failed readback must not create another task.
+    let pageId=await findTaskByKey(ds,key);
+    if(pageId){duplicateTask=true;}
+    else {const created=await api('/pages','POST',{parent:{type:'data_source_id',data_source_id:ds},properties:props});pageId=created.id;if(!pageId)throw new Error('Notion returned no task page id');}
+    await verifyTask(pageId,key);
+  }else{
+    await api('/pages','POST',{parent:{type:'data_source_id',data_source_id:ds},properties:props});
+  }
  }
- state[p.request_id]={target:p.target,at:new Date().toISOString()};const keys=Object.keys(state);if(keys.length>200)for(const k of keys.slice(0,keys.length-200))delete state[k];fm.writeString(statePath,JSON.stringify(state));return 'OK:'+p.target;
+ state[p.request_id]={target:p.target,at:new Date().toISOString()};const keys=Object.keys(state);if(keys.length>200)for(const k of keys.slice(0,keys.length-200))delete state[k];fm.writeString(statePath,JSON.stringify(state));return (duplicateTask?'DUPLICATE:':'OK:')+p.target;
 }
 const out=await main();Script.setShortcutOutput(out);Script.complete();'''
 
