@@ -32,7 +32,7 @@ const KEY_FIELD={task:'同期キー',shopping:'メモ',project:'同期キー',li
 let pages=[], inboxBlocks=[], local='', serial=0, events=[], failReadback=false;
 function propText(property){return (property?.rich_text||property?.title||[]).map(v=>v.plain_text||v.text?.content||'').join('');}
 function blockText(block){return (block.paragraph?.rich_text||[]).map(v=>v.plain_text||v.text?.content||'').join('');}
-async function capture(id,target,raw,dateTime='',amount='',kind=''){
+async function capture(id,target,raw,dateTime='',amount='',kind='',transport='plainTexts'){
   let output;
   const fm={
     documentsDirectory:()=>'/tmp',
@@ -86,7 +86,7 @@ async function capture(id,target,raw,dateTime='',amount='',kind=''){
     }
   }
   const payload=new URLSearchParams({request_id:id,target,title:raw.slice(0,70),raw,date_time:dateTime,amount,kind}).toString();
-  const context={args:{plainTexts:[payload]},Keychain:{contains:()=>true,get:()=> 'simulated-token'},Request,FileManager:{local:()=>fm},Script:{setShortcutOutput:v=>{output=v;},complete:()=>{}},Date,Number,String,JSON,Math,Error,decodeURIComponent,encodeURIComponent};
+  const context={args:{plainTexts:transport==='plainTexts'?[payload]:[],shortcutParameter:transport==='shortcutParameter'?payload:undefined},Keychain:{contains:()=>true,get:()=> 'simulated-token'},Request,FileManager:{local:()=>fm},Script:{setShortcutOutput:v=>{output=v;},complete:()=>{}},Date,Number,String,JSON,Math,Error,decodeURIComponent,encodeURIComponent};
   await vm.runInNewContext('(async()=>{'+script+'})()',context);
   return output;
 }
@@ -129,6 +129,10 @@ function allInboxText(){return inboxBlocks.map(blockText).join('\n');}
   assert.equal(inboxBlocks.length,beforeDate+2,'different due times are different captures');
   assert.equal(targetCount('task'),7);
 
+  assert.equal(await capture('voice-bridge-001','task','Voice経由のテスト保存','2026-11-02T09:00:00+09:00','','','shortcutParameter'),'OK:task');
+  assert.equal(await capture('voice-bridge-002','task','Voice経由のテスト保存','2026-11-02T09:00:00+09:00'),'DUPLICATE:task');
+  assert.equal(targetCount('task'),8,'Scriptable Shortcut Input entry must share the same dedupe path');
+
   for(const target of ['shopping','project','life_event','person','learning','money','balance']){
     const amount=['money','balance'].includes(target)?'682':'';
     const raw='一度だけ保存する '+target;
@@ -148,7 +152,7 @@ function allInboxText(){return inboxBlocks.map(blockText).join('\n');}
   assert.equal(await capture('long-a','task',longRaw),'OK:task');
   assert.ok(allInboxText().includes(longRaw),'Inbox must preserve raw text longer than one Notion text object');
   assert.ok(inboxBlocks.at(-1).paragraph.rich_text.every(x=>x.text.content.length<=2000));
-  console.log('Inbox-first, target idempotency, readback retry, legacy duplicate guards, distinct-due-time, and long-raw simulation: PASS');
+  console.log('Inbox-first, target idempotency, readback retry, legacy duplicate guards, Shortcut Input bridge, distinct-due-time, and long-raw simulation: PASS');
 })().catch(e=>{console.error(e);process.exitCode=1;});
 """
 
