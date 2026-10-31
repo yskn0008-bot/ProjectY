@@ -49,3 +49,53 @@ function toWidgetTask(task: TaskDashboardItem): WidgetTask {
     actionUrl: task.actionUrl ?? null
   };
 }
+
+
+// Narrow calendar projection; never expose task notes, blockers or evidence.
+// Unlike the 3-item widget card, this is for due dates in a bounded calendar window.
+export interface CalendarDueTask {
+  title: string;
+  due: string;
+  state: string;
+  priority: string;
+}
+
+export interface CalendarWindowFeed {
+  generatedAt: string | null;
+  tasks: CalendarDueTask[];
+  matchingCount: number;
+  truncated: boolean;
+  sourceComplete: boolean;
+}
+
+const CLOSED_TASK_STATES = new Set(['完了', '中止', '取り消し', 'キャンセル']);
+const MAX_CALENDAR_TASKS = 100;
+
+export function selectCalendarWindow(
+  tasks: TaskDashboardItem[],
+  generatedAt: string | null,
+  start: string,
+  end: string,
+  sourceComplete = false
+): CalendarWindowFeed {
+  const matching = tasks
+    .filter((task) => {
+      if (!task.title?.trim() || CLOSED_TASK_STATES.has(task.state)) return false;
+      const date=String(task.due || '').slice(0,10);
+      return /^\d{4}-\d{2}-\d{2}$/.test(date) && date>=start && date<=end;
+    })
+    .sort((a,b) => String(a.due).localeCompare(String(b.due)) || a.order-b.order);
+  const selected=matching.slice(0,MAX_CALENDAR_TASKS).map(task => ({
+    title:task.title.slice(0,160),
+    due:String(task.due).slice(0,10),
+    state:task.state.slice(0,30),
+    priority:task.priority.slice(0,12)
+  }));
+  return {
+    generatedAt,
+    tasks:selected,
+    matchingCount:matching.length,
+    truncated:matching.length>MAX_CALENDAR_TASKS || !sourceComplete,
+    sourceComplete
+  };
+}
