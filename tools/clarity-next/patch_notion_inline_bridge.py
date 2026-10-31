@@ -15,7 +15,8 @@ ACTION_ID = "dk.simonbs.Scriptable.RunScriptInlineIntent"
 PLACEHOLDER = "__YOS_NOTION_BRIDGE_INLINE__"
 BRIDGE_SCRIPT = r'''const K='YOS_NOTION_INTEGRATION_TOKEN';
 function parse(q){const o={};for(const part of String(q||'').split('&')){if(!part)continue;const i=part.indexOf('=');const k=i<0?part:part.slice(0,i);const v=i<0?'':part.slice(i+1);o[decodeURIComponent(k)]=decodeURIComponent(v.replace(/\+/g,' '));}return o;}
-const p=parse((args.plainTexts||[])[0]||'');
+const shortcutPayload=typeof args.shortcutParameter==='string'?args.shortcutParameter:'';
+const p=parse((args.plainTexts||[])[0]||shortcutPayload);
 if(!p.request_id||!p.target)throw new Error('Clarity Notion payload is incomplete');
 if(!Keychain.contains(K))throw new Error('Notion token missing. Run YOS_Notion_Sync once.');
 const API='https://api.notion.com/v1',VER='2025-09-03';
