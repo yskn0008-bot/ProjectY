@@ -5,7 +5,7 @@ function pending(v){return v===true||v===1||/^(yes|true|1|はい)$/i.test(String
 function payload(v){
  if(typeof v==='string'){
   const s=v.trim();if(s.startsWith('{')){try{v=JSON.parse(s);}catch(_){throw new Error('Clarity Notion JSON payload is invalid');}}
-  else return parse(s);
+  else v=parse(s);
  }
  if(!v||typeof v!=='object'||Array.isArray(v))return {};
  if(Object.prototype.hasOwnProperty.call(v,'notionPending')&&!pending(v.notionPending))return {};
