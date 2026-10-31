@@ -273,7 +273,7 @@ test('old upstream task timestamp keeps tasks visible but prohibits confident ac
   const page=mock.snapshot().html;
   assert.match(page,/タスク未確認/);
   assert.match(page,/タスクの最新状態を確認/);
-  assert.match(page,/タスクの鮮度は未確認/);
+  assert.match(page,/YOS Tasksの鮮度は未確認/);
   assert.doesNotMatch(page,/着手する候補：Perform stale task/);
 });
 
@@ -302,7 +302,7 @@ test('readable typography is preserved in both views', () => {
 });
 
 test('new view is read only and discloses unavailable sources', () => {
-  assert.match(source,/読み取り専用の初期版/);
+  assert.match(source,/読み取り専用。/);
   assert.match(source,/健康：/);
   assert.doesNotMatch(source,/CalendarEvent\.create|Reminder\.create|\.writeString\(/);
 });
