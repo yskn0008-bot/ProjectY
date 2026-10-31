@@ -1,18 +1,13 @@
 # Clarity.Voice test-copy bridge
 
-This is an iPhone-only dry run for a duplicate of the existing Clarity.Voice shortcut. It does not alter the installed original and does not write to Notion.
+This is a dry run for a duplicate of the existing Clarity.Voice shortcut. It does not alter the installed original and does not write to Notion. No separate Scriptable script or token setup is needed.
 
-## Prepare Scriptable
+## Add one action to the duplicate only
 
-1. Open `clarity_notion_bridge.js` from this Draft branch on the iPhone and copy its full contents.
-2. In Scriptable, create a new script named `YOS Clarity Notion Bridge TEST` and paste the contents.
-3. Do not enter a Notion token for this test. `yosTestMode` exits before any Notion request.
-
-## Add the test action to the duplicate only
-
-1. Open the duplicate `Clarity.Voice` in Shortcuts and edit it.
-2. After the GPT planner result has passed the shortcut's existing safety checks, add Scriptable's `Run Script` action. Select `YOS Clarity Notion Bridge TEST` and set its `Parameter` to the GPT planner's parsed result (the dictionary containing `actions`).
-3. Keep the action after the safety checks. Do not change `notionPending` in the shortcut.
+1. Open `clarity_notion_bridge.js` from this Draft branch on the iPhone and copy all of its contents.
+2. In Shortcuts, open the duplicate `Clarity.Voice` and edit it.
+3. After the GPT planner result has passed the shortcut's existing safety checks, add Scriptable's `Run Inline Script` action. Paste the copied code into it, set `Parameter` to the GPT planner's parsed result (the dictionary containing `actions`), and leave `Run In App` off.
+4. Do not change `notionPending` in the shortcut.
 
 ## Dry-run result
 
@@ -21,4 +16,4 @@ This is an iPhone-only dry run for a duplicate of the existing Clarity.Voice sho
 - More than one Notion save in one plan stops for review.
 - Dry run makes zero Notion API requests and zero local receipt writes.
 
-This verifies only the Shortcut Input → Scriptable path. A live Notion acceptance test requires separate approval and is intentionally not part of this dry run. The standalone script's dry-run guard is switched off only inside the compiled Clarity Next build; the copy pasted into Scriptable stays dry-run. The current Clarity.Voice prompt must also emit the documented `NEXT_NOTION/save` or `NEXT_MONEY/capture` action for a save to be routed.
+This verifies only the Shortcut Input → Scriptable path. A live Notion acceptance test requires separate approval and is intentionally not part of this dry run. The dry-run guard is switched off only inside the compiled Clarity Next build; code pasted into the test copy stays dry-run. The current Clarity.Voice prompt must also emit the documented `NEXT_NOTION/save` or `NEXT_MONEY/capture` action for a save to be routed.
