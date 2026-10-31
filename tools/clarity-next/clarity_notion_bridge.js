@@ -7,6 +7,7 @@ function payload(v){
   else return parse(s);
  }
  if(!v||typeof v!=='object'||Array.isArray(v))return {};
+ if(Object.prototype.hasOwnProperty.call(v,'notionPending')&&!pending(v.notionPending))return {};
  if(Array.isArray(v.plan))v={actions:v.plan};else if(v.plan&&typeof v.plan==='object')v=v.plan;
  const actions=Array.isArray(v)?v:(Array.isArray(v.actions)?v.actions:null);
  if(actions){
@@ -18,7 +19,6 @@ function payload(v){
   const target=a.module==='NEXT_MONEY'?'money':String(params.target||'').trim().toLowerCase();
   return {request_id:'',target,title:params.title||'',raw:params.raw_text||params.raw||'',date_time:params.date_time||'',amount:params.amount??'',kind:params.kind||''};
  }
- if(Object.prototype.hasOwnProperty.call(v,'notionPending')&&!pending(v.notionPending))return {};
  return {request_id:v.request_id||v.requestId||v.notionRequestId||'',target:String(v.target||v.notionTarget||'').trim().toLowerCase(),title:v.title||v.notionTitle||'',raw:v.raw||v.raw_text||v.notionRaw||'',date_time:v.date_time||v.dateTime||v.notionDateTime||'',amount:v.amount??v.notionAmount??'',kind:v.kind||v.notionKind||''};
 }
 const shortcutPayload=args.shortcutParameter;
