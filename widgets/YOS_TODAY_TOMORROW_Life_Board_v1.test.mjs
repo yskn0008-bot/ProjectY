@@ -5,7 +5,7 @@ import {readFileSync} from 'node:fs';
 const source = readFileSync(new URL('./YOS_TODAY_TOMORROW_Widget_v1.js', import.meta.url), 'utf8');
 const body = source.slice(source.indexOf('(async function ()'));
 
-function runtime(runsInWidget, denyPermissions, widgetMode = 'DAY', withTaskFeed = false, tasksOverride = null, calendarOverride = null, feedTimestamp = undefined, fixedNow = null) {
+function runtime(runsInWidget, denyPermissions, widgetMode = 'DAY', withTaskFeed = false, tasksOverride = null, calendarOverride = null, feedTimestamp = undefined, fixedNow = null, calendarData = null) {
   let html = '';
   let widgetSet = false;
   let presented = 0;
@@ -39,7 +39,7 @@ function runtime(runsInWidget, denyPermissions, widgetMode = 'DAY', withTaskFeed
       iCloud(){return {documentsDirectory(){return '/icloud';},joinPath(...parts){return parts.join('/');},fileExists(){return false;}};}
     },
     Keychain: {contains(){return withTaskFeed;},get(){return 'mockToken';}},
-    Request: class {constructor(){this.response={statusCode:200};} async loadJSON(){return {generatedAt: feedTimestamp === undefined ? new Date().toISOString() : feedTimestamp, tasks:tasksOverride || [{title:'TEST_DUE<&',due:new Date().toISOString().slice(0,10)}]};}},
+    Request: class {constructor(url){this.url=String(url);this.response={statusCode:200};} async loadJSON(){if(this.url.includes('mode=calendar')) {if(calendarData) return calendarData;this.response.statusCode=404;return {error:'Not deployed'};}return {generatedAt: feedTimestamp === undefined ? new Date().toISOString() : feedTimestamp, tasks:tasksOverride || [{title:'TEST_DUE<&',due:new Date().toISOString().slice(0,10)}]};}},
     URLScheme: {forRunningScript(){return 'scriptable:///run?scriptName=YOS%20TODAY';}},
     CalendarEvent: {async between(start){
       if (!firstCalendarDate) firstCalendarDate = new Date(start).toISOString().slice(0,10);
@@ -87,7 +87,7 @@ test('NIGHT parameter never turns app-mode Today into tomorrow', async () => {
   const view=mock.snapshot();
   assert.equal(view.firstCalendarDate,new Date(new Date().getFullYear(),new Date().getMonth(),new Date().getDate()).toISOString().slice(0,10));
   assert.match(view.html,/期限｜TEST_DUE&lt;&amp;/);
-  assert.match(view.html,/タスク期限はYOSの優先最大3件のみ/);
+  assert.match(view.html,/期限タスクは優先最大3件のみ/);
 });
 
 test('when Calendar access is denied, available due tasks remain visible', async () => {
@@ -414,6 +414,43 @@ test('when Calendar cannot be read, no confident free-time proposal is given', a
   assert.match(summary,/まず予定を確認/);
   assert.match(summary,/カレンダー未取得/);
   assert.doesNotMatch(summary,/<b>Work on task<\/b>/);
+});
+
+test('full calendar mode displays dated tasks beyond the default three',async()=>{
+  const d=new Date();
+  const monday=new Date(d.getFullYear(),d.getMonth(),d.getDate()-((d.getDay()+6)%7));
+  const t=new Date(monday.getFullYear(),monday.getMonth(),monday.getDate()+2);
+  const due=[t.getFullYear(),String(t.getMonth()+1).padStart(2,'0'),String(t.getDate()).padStart(2,'0')].join('-');
+  const data={
+    source:'notion',sourceComplete:true,truncated:false,
+    generatedAt:new Date().toISOString(),
+    tasks:Array.from({length:6},(_,i)=>({title:'DUE_'+i,due,state:'次にやる',priority:'P1'}))
+  };
+  const mock=runtime(false,false,'DAY',true,[{title:'Original widget task',due}],[],undefined,null,data);
+  await new Function(...Object.keys(mock.globals),'return '+body)(...Object.values(mock.globals));
+  const page=mock.snapshot().html;
+  assert.match(page,/DUE_0/);
+  assert.match(page,/DUE_5/);
+  assert.match(page,/ほかの期限 3件/);
+  assert.match(page,/期限タスクは既存YOS Tasksから読み取り表示/);
+  assert.doesNotMatch(page,/全タスク取得機能は未接続/);
+});
+
+test('partial calendar API response discloses incomplete tasks',async()=>{
+  const d=new Date();
+  const now=[d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-');
+  const data={source:'projection',sourceComplete:false,truncated:true,generatedAt:new Date().toISOString(),tasks:[{title:'Partial_due',due:now}]};
+  const mock=runtime(false,false,'DAY',true,null,[],undefined,null,data);
+  await new Function(...Object.keys(mock.globals),'return '+body)(...Object.values(mock.globals));
+  const html=mock.snapshot().html;
+  assert.match(html,/Partial_due/);
+  assert.match(html,/期限タスクは取得できた範囲だけ表示/);
+});
+
+test('unreleased calendar API falls back to previous three tasks without inventing completeness',async()=>{
+  const mock=runtime(false,false,'DAY',true);
+  await new Function(...Object.keys(mock.globals),'return '+body)(...Object.values(mock.globals));
+  assert.match(mock.snapshot().html,/期限タスクは優先最大3件のみ/);
 });
 
 test('the fullscreen header is offset below native WebView controls', () => {
