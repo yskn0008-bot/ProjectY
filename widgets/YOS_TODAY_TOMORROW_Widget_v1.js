@@ -158,7 +158,7 @@
       if(!token) return null;
       const req=new Request(SETTINGS.feedUrl+'?mode=calendar&start='+start+'&end='+end);
       req.headers={Authorization:'Bearer '+token,Accept:'application/json'};
-      req.timeoutInterval=8;
+      req.timeoutInterval=6;
       const data=await req.loadJSON();
       if(Number(req.response && req.response.statusCode)!==200 ||
         !data || !Array.isArray(data.tasks) ||
@@ -233,6 +233,11 @@
     if(!events.ok || !reminders.ok) return "明日の予定・期限を取得できません";
     return "明日に必要な予定・期限は未登録";
   }
+  // Week task fetch starts in parallel with the existing read sources, never blocks widget refresh.
+  const weekStart = new Date(now.getFullYear(),now.getMonth(),now.getDate()-((now.getDay()+6)%7));
+  const weekEnd = new Date(weekStart.getFullYear(),weekStart.getMonth(),weekStart.getDate()+6);
+  const weekTaskPromise = config.runsInWidget ? Promise.resolve(null) :
+    readCalendarTaskWindow(dateKey(weekStart),dateKey(weekEnd));
   const [events,reminders,feed,health] = await Promise.all([
     readCalendar(target),readReminders(),night?Promise.resolve({data:null,stale:true}):readYosFeed(),readHealth()
   ]);
@@ -433,7 +438,7 @@
     const monday = new Date(now.getFullYear(),now.getMonth(),now.getDate()-((now.getDay()+6)%7));
     const nextMonday = new Date(monday.getFullYear(),monday.getMonth(),monday.getDate()+7);
     const sunday = new Date(nextMonday.getFullYear(),nextMonday.getMonth(),nextMonday.getDate()-1);
-    const fullWeekTasks=await readCalendarTaskWindow(dateKey(monday),dateKey(sunday));
+    const fullWeekTasks=await weekTaskPromise;
     const taskDueMap = new Map();
     // When the new server mode is not deployed yet, use only the existing three-task feed.
     const weekDueSource=fullWeekTasks?fullWeekTasks.tasks:tasks;
