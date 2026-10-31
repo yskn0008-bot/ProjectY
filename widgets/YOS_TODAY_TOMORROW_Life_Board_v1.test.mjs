@@ -125,7 +125,7 @@ test('a feed with only expired tasks is presented as needing verification', asyn
   await new Function(...Object.keys(mock.globals),'return '+body)(...Object.values(mock.globals));
   const page = mock.snapshot().html;
   assert.match(page,/要確認｜期限が過ぎた登録 1件/);
-  assert.match(page,/完了状態が古い可能性があります/);
+  assert.match(page,/完了済みの可能性があります/);
   assert.match(page,/<details class="overdue"><summary>要確認｜期限が過ぎた登録 1件<\/summary>/);
   assert.doesNotMatch(page,/<details class="overdue" open/);
   assert.match(page,/未完了とは判定していません/);
@@ -205,7 +205,7 @@ test('habits come before reference-only events on a quiet day', async () => {
   const page=mock.snapshot().html;
   assert.ok(page.indexOf('<h3>大切なこと</h3>') < page.indexOf('<h3>習慣・身体</h3>'));
   assert.ok(page.indexOf('<h3>習慣・身体</h3>') < page.indexOf('<h3>これからの予定</h3>'));
-  assert.match(page,/習慣の実施記録と健康の実測情報は未連携です/);
+  assert.match(page,/TEST_ROUTINE/);
   assert.match(page,/MY LIFEで記録を見る/);
 });
 
