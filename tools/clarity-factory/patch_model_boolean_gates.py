@@ -110,8 +110,8 @@ def verify(actions: list[dict]) -> None:
     if value.get("WFActionParameterFilterPrefix") != 1:
         raise SystemExit("external-write gate must remain AND")
     rows = value.get("WFActionParameterFilterTemplates")
-    if not isinstance(rows, list) or len(rows) != 2:
-        raise SystemExit("external-write gate must have exactly two rows")
+    if not isinstance(rows, list) or len(rows) != 3:
+        raise SystemExit("external-write gate must have exactly three rows")
 
     got: dict[str, tuple[int, str]] = {}
     for row in rows:
@@ -133,6 +133,7 @@ def verify(actions: list[dict]) -> None:
     expected = {
         "externalWriteText": (4, "はい"),
         "requiresConfirmationText": (4, "いいえ"),
+        "executor": (5, "notion"),
     }
     if got != expected:
         raise SystemExit(f"external-write text rows wrong: {got!r}")
