@@ -56,10 +56,15 @@ async function capture(id,target,raw,dateTime='',amount='',kind=''){
       const dsId=Object.keys(DS).find(k=>this.url.endsWith('/data_sources/'+DS[k]+'/query'));
       if(dsId){
         const filter=JSON.parse(this.body).filter;
-        const field=filter.property, rule=filter.rich_text;
         const matches=pages.filter(p=>p.target===dsId).filter(p=>{
-          const value=propText(p.properties[field]);
-          return rule.equals!==undefined?value===rule.equals:value.includes(rule.contains);
+          const check=f=>{
+            if(f.and)return f.and.every(check);
+            const field=f.property, rule=f.rich_text||f.title||f.date;
+            if(f.date){const value=p.properties[field]?.date?.start||'';return value===f.date.equals;}
+            const value=propText(p.properties[field]);
+            return rule.equals!==undefined?value===rule.equals:value.includes(rule.contains);
+          };
+          return check(filter);
         });
         return {results:matches.slice(0,2).map(p=>({id:p.id}))};
       }
@@ -80,12 +85,13 @@ async function capture(id,target,raw,dateTime='',amount='',kind=''){
       throw new Error('Unexpected Notion request '+this.method+' '+this.url);
     }
   }
-  const payload=new URLSearchParams({request_id:id,target,title:'テスト '+target,raw,date_time:dateTime,amount,kind}).toString();
+  const payload=new URLSearchParams({request_id:id,target,title:raw.slice(0,70),raw,date_time:dateTime,amount,kind}).toString();
   const context={args:{plainTexts:[payload]},Keychain:{contains:()=>true,get:()=> 'simulated-token'},Request,FileManager:{local:()=>fm},Script:{setShortcutOutput:v=>{output=v;},complete:()=>{}},Date,Number,String,JSON,Math,Error,decodeURIComponent,encodeURIComponent};
   await vm.runInNewContext('(async()=>{'+script+'})()',context);
   return output;
 }
 function targetCount(target){return pages.filter(p=>p.target===target).length;}
+function seedLegacy(target,title,dateTime=''){const titleField={task:'やること',shopping:'商品名',project:'案件名',life_event:'イベント名',person:'人物・イベント',learning:'判断・経験',money:'項目',balance:'口座・資産'}[target];const properties={[titleField]:{title:[{plain_text:title}]}};const dateField={task:'期限',money:'日付',balance:'確認日'}[target];if(dateField&&dateTime)properties[dateField]={date:{start:dateTime}};pages.push({id:'legacy-'+(++serial),target,properties});}
 function allInboxText(){return inboxBlocks.map(blockText).join('\n');}
 (async()=>{
   assert.equal(await capture('task-001','task','テストタスクを登録'),'OK:task');
@@ -108,11 +114,20 @@ function allInboxText(){return inboxBlocks.map(blockText).join('\n');}
   assert.equal(inboxBlocks.length,3,'failed readback and retry must keep one Inbox capture');
   assert.equal(targetCount('task'),3,'failed readback and retry must keep one task');
 
+  seedLegacy('task','旧タスク','2026-11-01T09:00:00+09:00');
+  await assert.rejects(capture('legacy-task-001','task','旧タスク','2026-11-01T09:00:00+09:00'),/same title/);
+  assert.equal(targetCount('task'),4,'an unkeyed legacy task with the same title and due time must not be duplicated');
+  assert.equal(await capture('legacy-task-002','task','旧タスク','2026-11-01T10:00:00+09:00'),'OK:task');
+  assert.equal(targetCount('task'),5,'the same task title at a different due time remains a separate task');
+  seedLegacy('shopping','旧商品');
+  await assert.rejects(capture('legacy-shopping-001','shopping','旧商品'),/same title/);
+  assert.equal(targetCount('shopping'),1,'an unkeyed legacy shopping item must not be duplicated');
+
   const beforeDate=inboxBlocks.length;
   assert.equal(await capture('task-006','task','時刻違いタスク','2026-11-01T09:00:00+09:00'),'OK:task');
   assert.equal(await capture('task-007','task','時刻違いタスク','2026-11-01T10:00:00+09:00'),'OK:task');
   assert.equal(inboxBlocks.length,beforeDate+2,'different due times are different captures');
-  assert.equal(targetCount('task'),5);
+  assert.equal(targetCount('task'),7);
 
   for(const target of ['shopping','project','life_event','person','learning','money','balance']){
     const amount=['money','balance'].includes(target)?'682':'';
@@ -120,7 +135,7 @@ function allInboxText(){return inboxBlocks.map(blockText).join('\n');}
     assert.equal(await capture(target+'-a',target,raw,'',amount), 'OK:'+target);
     local='';
     assert.equal(await capture(target+'-b',target,raw,'',amount), 'DUPLICATE:'+target);
-    assert.equal(targetCount(target),1,'destination must be idempotent for '+target);
+    assert.equal(targetCount(target),target==='shopping'?2:1,'destination must be idempotent for '+target);
   }
 
   const inboxBefore=inboxBlocks.length;
@@ -133,7 +148,7 @@ function allInboxText(){return inboxBlocks.map(blockText).join('\n');}
   assert.equal(await capture('long-a','task',longRaw),'OK:task');
   assert.ok(allInboxText().includes(longRaw),'Inbox must preserve raw text longer than one Notion text object');
   assert.ok(inboxBlocks.at(-1).paragraph.rich_text.every(x=>x.text.content.length<=2000));
-  console.log('Inbox-first, target idempotency, readback retry, distinct-due-time, and long-raw simulation: PASS');
+  console.log('Inbox-first, target idempotency, readback retry, legacy duplicate guards, distinct-due-time, and long-raw simulation: PASS');
 })().catch(e=>{console.error(e);process.exitCode=1;});
 """
 
