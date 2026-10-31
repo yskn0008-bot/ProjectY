@@ -23,7 +23,8 @@ function payload(v){
 }
 const shortcutPayload=args.shortcutParameter;
 const inputPayload=(args.plainTexts||[])[0]||shortcutPayload;
-const testMode=Boolean(inputPayload&&typeof inputPayload==='object'&&(inputPayload.yosTestMode===true||inputPayload.testMode===true));
+const YOS_BRIDGE_DRY_RUN=true;
+const testMode=YOS_BRIDGE_DRY_RUN||Boolean(inputPayload&&typeof inputPayload==='object'&&(inputPayload.yosTestMode===true||inputPayload.testMode===true));
 const p=payload(inputPayload);
 if(!p.request_id&&p.target&&p.raw){const day=new Date().toISOString().slice(0,10),seed=[p.target,p.raw,p.date_time,p.amount].join('|');let h=2166136261;for(let i=0;i<seed.length;i++){h^=seed.charCodeAt(i);h=Math.imul(h,16777619);}p.request_id='clarity-shortcut:'+day+':'+(h>>>0).toString(16).padStart(8,'0');}
 if(p.target&&!p.request_id)throw new Error('Clarity Notion payload is incomplete');
