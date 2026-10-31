@@ -381,7 +381,7 @@
     // Lead with one action. Put long background and the unverified time assumptions behind a tap.
     const actionFirst = nextAction && !feed.stale &&
       (adviceTitle === '優先タスクの次の一手' || adviceTitle === '短い作業に着手する候補');
-    const mainAction = actionFirst ? clean(nextAction,58)+(nextAction.length>58?'…':'') : adviceTitle;
+    const mainAction = actionFirst ? clean(nextAction,34)+(nextAction.length>34?'…':'') : adviceTitle;
     const briefContext = !events.ok ? 'カレンダー未取得' :
       ongoingEvent ? '登録された予定が進行中' :
       allDay ? '終日予定あり' :
