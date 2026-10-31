@@ -291,25 +291,25 @@
       }).join("");
     const styles = [
       '*{box-sizing:border-box}body{margin:0;background:#F5F5F2;color:#252C2A;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans",sans-serif;font-size:16px}',
-      '.wrap{max-width:640px;margin:auto;padding:24px 18px 80px}.eyebrow{font-size:12px;letter-spacing:.16em;font-weight:800;color:#60716C}',
-      'h1{font-size:32px;letter-spacing:-.04em;margin:6px 0 8px}.sub{font-size:15px;color:#6F7873}',
+      '.wrap{max-width:640px;margin:auto;padding:24px 18px 80px}.eyebrow{font-size:15px;letter-spacing:.10em;font-weight:800;color:#53665C}',
+      'h1{font-size:35px;letter-spacing:-.04em;margin:6px 0 8px}.sub{font-size:17px;color:#515C56}',
       '.tabs{display:flex;gap:6px;border-radius:14px;background:#E7EAE6;padding:5px;margin:22px 0 18px}',
-      '.tabs button{width:50%;border:0;border-radius:10px;padding:13px;font-size:16px;font-weight:700;background:transparent;color:#5F6863}',
+      '.tabs button{width:50%;min-height:48px;border:0;border-radius:10px;padding:13px;font-size:18px;font-weight:750;background:transparent;color:#46554C}',
       'body[data-tab=today] #tabToday,body[data-tab=week] #tabWeek{background:#fff;color:#253A33;box-shadow:0 2px 10px #18221C12}',
       'body[data-tab=today] .week,body[data-tab=week] .today{display:none}',
-      '.hero{background:#263D36;color:#fff;border-radius:20px;padding:23px 21px;margin-bottom:18px}',
-      '.hero span{font-size:13px;color:#C8D7CE}.hero h2{font-size:23px;line-height:1.4;margin:10px 0}.hero p{font-size:14px;color:#DFE8E0;margin:0}',
-      '.section{background:white;border:1px solid #E4E8E3;border-radius:18px;padding:20px 18px;margin:14px 0}',
-      'h3{margin:0 0 15px;font-size:20px;letter-spacing:-.02em}.sectionhead{display:flex;justify-content:space-between;align-items:baseline;gap:8px}',
-      '.tag{color:#65766F;font-size:12px;font-weight:650}.muted{color:#79827C;font-size:15px;line-height:1.55;margin:6px 0}',
-      '.event,.task,.weekrow{display:flex;gap:14px;padding:13px 0;border-top:1px solid #EFF0ED}.event:first-of-type,.task:first-of-type{border-top:0}',
-      '.event time{width:54px;flex-shrink:0;font-size:15px;color:#267BA2;font-weight:750}.event b,.task b{display:block;font-size:17px;line-height:1.45}',
-      '.event small,.task small{display:block;color:#758078;margin-top:5px;line-height:1.4;font-size:13px}',
-      '.grow{flex:1;min-width:0;overflow-wrap:anywhere}.num{background:#F3E9DB;color:#926238;border-radius:10px;width:28px;height:28px;display:grid;place-items:center;flex-shrink:0;font-weight:800}',
-      '.habit{padding:10px 0;font-size:16px}.dot{display:inline-block;width:9px;height:9px;border:2px solid #6D9A85;border-radius:50%;margin-right:12px}',
-      '.weekrow{align-items:start}.weekday{width:76px;font-weight:800;flex-shrink:0}.weekevent{margin-bottom:8px;line-height:1.4}',
-      '.foot{color:#738079;font-size:12px;line-height:1.6;padding:12px 3px}',
-      '.links{display:flex;gap:12px;flex-wrap:wrap}.links a{color:#226B75;text-decoration:none;font-weight:700;font-size:15px}',
+      '.hero{background:linear-gradient(130deg,#FCE6C6,#E5F1E8);color:#263B33;border:1px solid #E9DDD0;border-radius:20px;padding:24px 21px;margin-bottom:18px}',
+      '.hero span{font-size:16px;font-weight:700;color:#566A5C}.hero h2{font-size:27px;line-height:1.45;margin:11px 0}.hero p{font-size:16px;color:#566258;line-height:1.55;margin:0}',
+      '.section{background:white;border:1px solid #DFE5DD;border-radius:18px;padding:21px 18px;margin:14px 0;box-shadow:0 2px 7px #18221C08}.today .section:nth-of-type(2){border-left:5px solid #609BB7}.today .section:nth-of-type(3){border-left:5px solid #C79A54}.today .section:nth-of-type(4){border-left:5px solid #6F9E80}.today .section:nth-of-type(5){border-left:5px solid #B5A0C7}',
+      'h3{margin:0 0 15px;font-size:22px;letter-spacing:-.02em}.sectionhead{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}',
+      '.tag{color:#516B5C;font-size:15px;font-weight:700}.muted{color:#5D6961;font-size:17px;line-height:1.65;margin:7px 0}',
+      '.event,.task,.weekrow{display:flex;gap:14px;padding:15px 0;border-top:1px solid #EAEEE8}.event:first-of-type,.task:first-of-type{border-top:0}',
+      '.event time{width:58px;flex-shrink:0;font-size:18px;color:#206D90;font-weight:800}.event b,.task b{display:block;font-size:19px;line-height:1.5}',
+      '.event small,.task small{display:block;color:#5D6B61;margin-top:6px;line-height:1.55;font-size:16px}',
+      '.grow{flex:1;min-width:0;overflow-wrap:anywhere}.num{background:#F3E9DB;color:#87571F;border-radius:10px;width:33px;height:33px;display:grid;place-items:center;flex-shrink:0;font-weight:800}',
+      '.habit{padding:12px 0;font-size:19px;line-height:1.5}.dot{display:inline-block;width:11px;height:11px;border:2px solid #6D9A85;border-radius:50%;margin-right:12px}',
+      '.weekrow{align-items:start}.weekday{width:80px;font-size:17px;font-weight:800;flex-shrink:0}.weekevent{font-size:17px;margin-bottom:9px;line-height:1.5}',
+      '.foot{color:#58665D;font-size:14px;line-height:1.7;padding:12px 3px}',
+      '.links{display:flex;gap:8px;flex-wrap:wrap}.links a{color:#175E6D;background:#EFF5F1;border-radius:9px;padding:12px 13px;text-decoration:none;font-weight:750;font-size:17px;min-height:44px}',
       '@media(min-width:600px){.wrap{padding:35px 28px 80px}}'
     ].join("");
     const html = '<!doctype html><html lang="ja"><head><meta charset="UTF-8">'+
@@ -321,7 +321,7 @@
       '<button id="tabWeek" onclick="document.body.dataset.tab=\'week\'">今週</button></div>'+
       '<div class="today"><section class="hero"><span>今日の優先事項</span><h2>'+safe(focus)+'</h2>'+
       '<p>確定した予定を優先し、空き時間に無理なく取り組む。</p></section>'+
-      '<section class="section"><div class="sectionhead"><h3>今日の予定</h3><span class="tag">Appleカレンダー</span></div>'+eventRows+'</section>'+
+      '<section class="section"><div class="sectionhead"><h3>これからの予定</h3><span class="tag">Appleカレンダー</span></div>'+eventRows+'</section>'+
       '<section class="section"><div class="sectionhead"><h3>大切なこと</h3><span class="tag">最大3件</span></div>'+cards+'</section>'+
       '<section class="section"><h3>習慣・身体</h3>'+habitRows+
       '<p class="muted">健康：'+safe(health || "実測データ未取得")+'</p></section>'+
