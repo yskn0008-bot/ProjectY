@@ -207,7 +207,7 @@
   // A found report is evidence of an inbox message, NOT proof that YOS Diary was updated
   // or that exercise was clinically measured.
   function movementReportCandidate(value) {
-    const raw=clean(value,350).replace(/[\\s　]+/g,'');
+    const raw=clean(value,350).replace(/[\s　]+/g,'');
     if(raw.length>220 ||
       /(?:歩いてない|歩かなかった|歩けなかった|していない|してない|運動しなかった|歩きたい|歩く予定|歩こう|歩いたら|歩いた？|仮に|たとえば|例えば|と言った|って言って|歩いたことに)/.test(raw))
       return false;
@@ -236,7 +236,7 @@
           !data || !Array.isArray(data.results)) return {candidate:false};
         for(const block of data.results) {
           const content=paragraph(block);
-          const found=content.match(/^(\\d{4}-\\d{2}-\\d{2}T[^ ]+) · (?:Clarity|Idea|Memo) · clarity:[A-Za-z0-9_-]+$/);
+          const found=content.match(/^(\d{4}-\d{2}-\d{2}T[^ ]+) · (?:Clarity|Idea|Memo) · clarity:[A-Za-z0-9_-]+$/);
           if(found) {
             const timestamp=validDate(found[1]);
             meta=timestamp && dateKey(timestamp)===todayKey;
