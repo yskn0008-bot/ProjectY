@@ -352,6 +352,29 @@ test('many taxi-demand references never crowd out the one real calendar item', a
   assert.match(page,/登録された予定 1件/);
 });
 
+test('task action URL is visible only on deliberate tap and HTML-safe', async () => {
+  const mock=runtime(false,false,'DAY',true,[{
+    title:'Task with action URL',
+    actionUrl:'https://example.com/do?a=1&b=2',
+    nextAction:'Open details'
+  }],[]);
+  await new Function(...Object.keys(mock.globals),'return '+body)(...Object.values(mock.globals));
+  const page=mock.snapshot().html;
+  assert.match(page,/href="https:\/\/example.com\/do\?a=1&amp;b=2">操作先を開く<\/a>/);
+  assert.doesNotMatch(page,/window\.location\s*=|location\.href\s*=/);
+});
+
+test('unsafe scheme and HTML-breaking action URL are not rendered', async () => {
+  const bad=['javascript:alert(1)','https://site.example/"><script>evil</script>'];
+  for(const raw of bad){
+    const mock=runtime(false,false,'DAY',true,[{title:'Unsafe URL',actionUrl:raw}],[]);
+    await new Function(...Object.keys(mock.globals),'return '+body)(...Object.values(mock.globals));
+    const page=mock.snapshot().html;
+    assert.doesNotMatch(page,/class="tasklink"/);
+    assert.doesNotMatch(page,/<script>evil<\/script>/);
+  }
+});
+
 test('the fullscreen header is offset below native WebView controls', () => {
   assert.match(source,/\.wrap\{max-width:640px;margin:auto;padding:112px 18px 72px/);
   assert.match(source,/\.task b\{display:-webkit-box;-webkit-line-clamp:2/);
