@@ -136,8 +136,13 @@
           req.headers = {Authorization:"Bearer "+token,Accept:"application/json"};
           req.timeoutInterval = 7;
           const data = await req.loadJSON();
-          if(Number(req.response && req.response.statusCode)===200 && data && typeof data==="object")
-            return {data, stale:false};
+          if(Number(req.response && req.response.statusCode)===200 && data && typeof data==="object"){
+            // HTTP success alone does not prove the originating Notion/Google projection is current.
+            const generated=validDate(data.generatedAt);
+            const age=generated ? Date.now()-generated.getTime() : Number.NaN;
+            const fresh=generated && Number.isFinite(age) && age>=-5*60000 && age<=24*3600000;
+            return {data,stale:!fresh};
+          }
         }
       } catch(e) {}
     }
@@ -451,9 +456,9 @@
       '<section class="section"><h3>元データを開く</h3><div class="links">'+
       '<a href="'+URL.tasks+'">YOS Tasks</a><a href="'+URL.home+'">Notion HOME</a>'+
       '<a href="'+URL.life+'">MY LIFE</a></div></section>'+
-      '<div class="foot">読み取り専用の初期版。カレンダー・Notion・リマインダーは接続できた範囲のみ表示。'+
+      '<div class="foot">読み取り専用。カレンダー・Notion・リマインダーは取得できた範囲のみ表示。'+
       'この画面からの予定変更・タスク完了・習慣記録・Money同期は未対応。'+
-      (feed.stale ? 'YOS Tasksは前回データまたは未取得です。' : '')+'</div></main></body></html>';
+      (feed.stale ? 'YOS Tasksの鮮度は未確認（前回データ・更新時刻不明・取得失敗など）。' : '')+'</div></main></body></html>';
     const web = new WebView();
     await web.loadHTML(html);
     await web.present(true);
