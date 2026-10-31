@@ -1,7 +1,7 @@
 // Run this once in Scriptable. Installs a pinned, reviewed YOS large widget.
 // Does not modify your existing NOW / TODAY scripts.
 const name="YOS TODAY・TOMORROW.js";
-const url="https://raw.githubusercontent.com/yskn0008-bot/ProjectY/ac7b48374a81c77f1dcdaca2982a6339ee165317/widgets/YOS_TODAY_TOMORROW_Widget_v1.js";
+const url="https://raw.githubusercontent.com/yskn0008-bot/ProjectY/26f5cf8e19f81626a2aa016e9b733a7863fd5566/widgets/YOS_TODAY_TOMORROW_Widget_v1.js";
 const req=new Request(url);
 req.timeoutInterval=20;
 const source=await req.loadString();
