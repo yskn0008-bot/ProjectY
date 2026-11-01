@@ -1,4 +1,5 @@
 import {waitUntil} from '@vercel/functions';
+import {synchronizeHealthInbox} from './health-sync.mjs';
 import {createProductionWidgetFeed} from '../../dist/widget/production.js';
 import {createProductionBaseHomeRefreshHandler} from '../../dist/base-home/production.js';
 import {createProductionMoneyNotionMirror} from '../../dist/intake/production.js';
@@ -53,7 +54,23 @@ export default {
         return Response.json({error:'Money shadow is temporarily unavailable'},{status:503,headers:{'Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}});
       }
     }
-    try{return await getHandler()(request)}catch{
+    try{
+      const response = await getHandler()(request);
+      // The existing authenticated Widget/Morning read is also a safe wake-up
+      // trigger for the existing Inbox → YOS 日記 health sync. Keep it off the
+      // critical response path; failed reads never trigger a write.
+      if(request.method==='GET' && response.status===200 && (mode===null || mode==='' || mode==='morning-brief')){
+        try{
+          waitUntil(synchronizeHealthInbox({environment:process.env}).catch(()=>{
+            // Never expose health reports, raw captures, or credentials in logs.
+            console.warn(JSON.stringify({level:'warn',event:'yos_health_inbox_sync_failed',route:'/api/yos/widget'}));
+          }));
+        }catch{
+          console.warn(JSON.stringify({level:'warn',event:'yos_health_inbox_sync_unavailable',route:'/api/yos/widget'}));
+        }
+      }
+      return response;
+    }catch{
       console.error(JSON.stringify({level:'error',event:'yos_widget_unavailable',route:'/api/yos/widget',stage:'app-init'}));
       return Response.json({error:'Widget feed is temporarily unavailable'},{status:503,headers:{'Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}});
     }
