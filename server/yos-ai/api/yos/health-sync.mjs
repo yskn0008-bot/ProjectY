@@ -41,20 +41,40 @@ function ageDays(now,iso){
 
 export function classifyHealthReport(raw){
   const s=text(raw).slice(0,1600);
-  if(!s||s.length>1000||/[?？]\s*$/u.test(s))return [];
-  if(NEGATION.test(s)||FUTURE.test(s)||OTHER_ACTOR.test(s))return [];
-  // Relative day references without explicit correction cannot safely be dated.
-  // Spoken self-correction: "昨日の夜、昨日じゃない、今日の午前1時".
-  // Only discard the discarded prefix if the speaker explicitly corrects
-  // "yesterday" to "today" and then gives a today time reference.
-  const corrected = /昨日(?:じゃない|ではない|じゃなく|ではなく)今日(?:の)?(?:今日の)?(?:午前|午後|[0-9０-９]|の午前|の午後)/u.test(s)
+  if(!s||s.length>1000)return [];
+
+  // Honor explicit voice self-correction before considering yesterday references.
+  // Without an explicit correction, the timestamp of a spoken report is not
+  // evidence that an event described as "yesterday" happened today.
+  const correction=/昨日(?:じゃない|ではない|じゃなく|ではなく)今日(?:の)?(?:今日の)?(?:午前|午後|[0-9０-９]|の午前|の午後)/u;
+  const corrected=correction.test(s)
     ? s.slice(s.search(/昨日(?:じゃない|ではない|じゃなく|ではなく)今日/u)).replace(/^昨日(?:じゃない|ではない|じゃなく|ではなく)/u,'')
     : s;
-  if(/(?:昨日|一昨日|先週|先月)/u.test(corrected))return [];
-  const kinds=[];
-  if(MEAL_ACTION.test(s)&&MEAL_ITEM.test(s))kinds.push('meal');
-  if(ACTIVITY_ACTION.test(s))kinds.push('activity');
-  return kinds;
+
+  // A capture can contain both a completed action and a future plan/question.
+  // Judge each utterance, not the entire capture, so that "食べた。明日は..."
+  // doesn't discard the real meal. Preserve exact original text for storage.
+  const clauses=corrected.split(/(?<=[。！？!?\n;；])|、(?=(?:明日|来週|来月|今から|これから|もし|今日は|今日も))/u)
+    .map(x=>x.trim()).filter(Boolean);
+  const kinds=new Set();
+  for(const clause of clauses){
+    if(/[?？]\s*$/u.test(clause))continue;
+    if(NEGATION.test(clause)||FUTURE.test(clause)||OTHER_ACTOR.test(clause))continue;
+    if(/(?:昨日|一昨日|先週|先月)/u.test(clause))continue;
+    if(MEAL_ACTION.test(clause)&&MEAL_ITEM.test(clause))kinds.add('meal');
+    if(ACTIVITY_ACTION.test(clause))kinds.add('activity');
+  }
+
+  // Typical spoken fragments: "昼はパン。食べた". Combine fragments only when
+  // every clause is unambiguously about completed actions.
+  if(!kinds.size && clauses.length>1 &&
+    !NEGATION.test(corrected)&&!FUTURE.test(corrected)&&
+    !OTHER_ACTOR.test(corrected)&&!/[?？]/u.test(corrected)&&
+    !/(?:昨日|一昨日|先週|先月)/u.test(corrected)){
+    if(MEAL_ACTION.test(corrected)&&MEAL_ITEM.test(corrected))kinds.add('meal');
+    if(ACTIVITY_ACTION.test(corrected))kinds.add('activity');
+  }
+  return ['meal','activity'].filter(kind=>kinds.has(kind));
 }
 
 export function extractHealthCaptures(blocks, now=new Date()){
