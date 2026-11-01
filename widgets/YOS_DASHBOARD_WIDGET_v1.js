@@ -209,21 +209,28 @@ async function loadTodayEvents() {
   }
 }
 
+// A saved iCloud money.json amount is historical until explicitly confirmed.
+function yosMoneyVerifiedAmount(data, now=Date.now()) {
+  const v=data?.balance;
+  if(v?.confirmed!==true || typeof v.amount!=="number" ||
+     !Number.isFinite(v.amount) || v.amount<0)return null;
+  const stamp=v.confirmedAt;
+  if(typeof stamp!=="string" || !/(?:Z|[+-]\d{2}:\d{2})$/u.test(stamp))return null;
+  const time=Date.parse(stamp);
+  if(!Number.isFinite(time) || time>now || now-time>300000)return null;
+  return v.amount;
+}
 async function loadMoney() {
   try {
-    const path = iCloudFM.joinPath(iCloudFM.documentsDirectory(), CONFIG.moneyRelativePath);
-    if (!iCloudFM.fileExists(path)) return {amount: null, available: false};
-    try {
-      if (typeof iCloudFM.isFileStoredIniCloud === "function" && iCloudFM.isFileStoredIniCloud(path)) {
-        await iCloudFM.downloadFileFromiCloud(path);
-      }
-    } catch {}
-    const data = JSON.parse(iCloudFM.readString(path));
-    const amount = Number(data?.balance?.amount);
-    return {amount: Number.isFinite(amount) ? amount : null, available: Number.isFinite(amount)};
-  } catch {
-    return {amount: null, available: false};
-  }
+    const path=iCloudFM.joinPath(iCloudFM.documentsDirectory(),CONFIG.moneyRelativePath);
+    if(!iCloudFM.fileExists(path))return {amount:null,available:false};
+    try{
+      if(typeof iCloudFM.isFileStoredIniCloud==="function" && iCloudFM.isFileStoredIniCloud(path))await iCloudFM.downloadFileFromiCloud(path);
+    }catch{}
+    const data=JSON.parse(iCloudFM.readString(path));
+    const amount=yosMoneyVerifiedAmount(data);
+    return {amount,available:amount!==null};
+  }catch{return {amount:null,available:false};}
 }
 
 function stableLocalId(parts) {
@@ -509,8 +516,8 @@ function makeNow(taskResult, calendarResult, money) {
   calendar.minimumScaleFactor = 0.68;
 
   footer.addSpacer();
-  const moneyText = footer.addText(yen(money.amount));
-  moneyText.font = font(18, "bold");
+  const moneyText = footer.addText(money.available ? yen(money.amount) : "残高未確認");
+  moneyText.font = font(money.available ? 18 : 14, "bold");
   moneyText.textColor = color(COLORS.blue);
   return widget;
 }
@@ -526,6 +533,37 @@ function yosHealthSnapshot(state, now) {
   if(!Number.isInteger(today.activities) || today.activities<0 || today.activities>40)return null;
   return {day,meals:today.meals,activities:today.activities,verifiedAt:state.lastVerified};
 }
+// Existing confirmed YOS 日記 is a read-only fallback for a missing device cache.
+function yosHealthSnapshotFromJournal(body, day, now=Date.now()) {
+  if(typeof body!=="string" || !body.trim() || body.length>35000 ||
+     day!==yosHealthDay(new Date(now)))return null;
+  const seen={meal:new Set(),activity:new Set()};
+  const marker=/\[YOS-health:(clarity[:\-][A-Za-z0-9._:-]{3,128}):(meal|activity)\]/gu;
+  for(const match of body.matchAll(marker))seen[match[2]].add(match[1]);
+  const legacy=/Clarity報告ID:\s*(clarity[:\-][A-Za-z0-9._:-]{3,128})/gu;
+  for(const match of body.matchAll(legacy)){
+    const preceding=body.slice(Math.max(0,match.index-350),match.index).split("\n").slice(-1)[0];
+    for(const kind of yosHealthClassify(preceding))seen[kind].add(match[1]);
+  }
+  const meals=seen.meal.size,activities=seen.activity.size;
+  if(!meals && !activities)return {day,meals:null,activities:null,verifiedAt:now,noteOnly:true};
+  return {day,meals,activities,verifiedAt:now};
+}
+async function yosHealthLatestSnapshot() {
+  const cached=yosHealthReadTodaySnapshot();
+  if(cached && (cached.meals>0 || cached.activities>0))return cached;
+  if(!Keychain.contains(YOS_HEALTH_TOKEN_KEY))return null;
+  try{
+    const token=Keychain.get(YOS_HEALTH_TOKEN_KEY);
+    if(!token)return null;
+    const day=yosHealthDay(new Date());
+    const entry=await yosHealthExisting(token,day);
+    if(!entry)return cached;
+    const body=yosHealthValue(entry.properties?.['本文']?.rich_text);
+    return yosHealthSnapshotFromJournal(body,day) || cached;
+  }catch(_){return cached;}
+}
+
 function yosHealthReadTodaySnapshot() {
   try {
     if(!Keychain.contains(YOS_HEALTH_TOKEN_KEY))return null;
@@ -537,7 +575,7 @@ function yosHealthReadTodaySnapshot() {
     return yosHealthSnapshot(JSON.parse(raw),Date.now());
   }catch(_){return null;}
 }
-function addYosHealthStatus(widget) {
+function addYosHealthStatus(widget, verifiedHealth) {
   const row=widget.addStack();
   row.layoutHorizontally();
   row.centerAlignContent();
@@ -547,10 +585,11 @@ function addYosHealthStatus(widget) {
   heading.font=font(14,'semibold');
   heading.textColor=color(COLORS.muted);
   row.addSpacer();
-  const state=yosHealthReadTodaySnapshot();
-  const meal=state ? (state.meals ? state.meals+'件' : '未報告') : null;
-  const activity=state ? (state.activities ? state.activities+'件' : '未報告') : null;
-  const status=row.addText(state ? '食事 '+meal+' · 運動 '+activity : '同期の確認待ち');
+  const state=verifiedHealth===undefined ? yosHealthReadTodaySnapshot() : verifiedHealth;
+  const meal=state && !state.noteOnly ? (state.meals ? state.meals+'件' : '未報告') : null;
+  const activity=state && !state.noteOnly ? (state.activities ? state.activities+'件' : '未報告') : null;
+  const status=row.addText(!state ? '同期の確認待ち' : state.noteOnly
+    ? '記録あり · 件数未確認' : '食事 '+meal+' · 運動 '+activity);
   status.font=font(14,'semibold');
   status.textColor=color(state ? COLORS.text : COLORS.faint);
   status.lineLimit=1;
@@ -558,7 +597,7 @@ function addYosHealthStatus(widget) {
 
   // Suggested next action, not a statement about what the user did not do.
   // Only confirmed same-day capture metadata can trigger a suggestion.
-  if(state){
+  if(state && !state.noteOnly){
     widget.addSpacer(4);
     const next=widget.addText(state.activities>0
       ? '次 → 水分補給と休息も意識'
@@ -570,7 +609,7 @@ function addYosHealthStatus(widget) {
   }
 }
 
-function makeToday(taskResult, calendarResult, money) {
+function makeToday(taskResult, calendarResult, money, health) {
   const events = calendarResult?.items || [];
   const widget = new ListWidget();
   setBackground(widget);
@@ -652,7 +691,7 @@ function makeToday(taskResult, calendarResult, money) {
   routines.addSpacer();
 
   widget.addSpacer(8);
-  addYosHealthStatus(widget);
+  addYosHealthStatus(widget, health);
   widget.addSpacer(7);
   const moneyRow = widget.addStack();
   moneyRow.layoutHorizontally();
@@ -663,8 +702,8 @@ function makeToday(taskResult, calendarResult, money) {
   label.font = font(15, "semibold");
   label.textColor = color(COLORS.muted);
   moneyRow.addSpacer();
-  const amount = moneyRow.addText(yen(money.amount));
-  amount.font = font(22, "bold");
+  const amount = moneyRow.addText(money.available ? yen(money.amount) : "要確認");
+  amount.font = font(money.available ? 22 : 18, "bold");
   amount.textColor = color(COLORS.blue);
 
   return widget;
@@ -864,13 +903,15 @@ if (ACTION === "baseHome" && !config.runsInWidget) {
   if (shouldContinue === false) {
     Script.complete();
   } else {
-    const [taskResult, calendarResult, money] = await Promise.all([
+    // The read-only journal fallback runs alongside existing local feeds.
+    const [taskResult, calendarResult, money, health] = await Promise.all([
       loadTaskFeed(),
       loadTodayEvents(),
       loadMoney(),
+      PARAM==="TODAY" ? yosHealthLatestSnapshot() : Promise.resolve(null),
     ]);
     const key = PARAM === "TODAY" ? "TODAY" : "NOW";
-    const widget = key === "TODAY" ? makeToday(taskResult, calendarResult, money) : makeNow(taskResult, calendarResult, money);
+    const widget = key === "TODAY" ? makeToday(taskResult, calendarResult, money, health) : makeNow(taskResult, calendarResult, money);
 
     if (config.runsInWidget) Script.setWidget(widget);
     else if (key === "TODAY") await widget.presentLarge();
