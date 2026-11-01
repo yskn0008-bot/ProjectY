@@ -116,8 +116,9 @@ body.glance-mode .demo-alert button{font-size:11px;min-height:30px}
 .glance-finbox span{display:block;color:#556676;font-size:10.5px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .glance-note{font-size:10.5px;color:#5A6977;margin:7px 0 0}
 .glance-habit-row{display:flex;align-items:center;gap:7px;justify-content:space-between}
-.glance-habit-meter{height:7px;background:#E4E8E8;border-radius:99px;overflow:hidden;flex:0 0 44px}
-.glance-habit-meter span{display:block;height:100%;background:var(--habit);border-radius:99px}
+.glance-habit-meter{height:13px;width:13px;background:#E4E8E8;border:2px solid #A5B5AD;border-radius:50%;flex:0 0 13px;position:relative}
+.glance-habit-meter.has-report{background:var(--habit);border-color:var(--habit)}
+.glance-habit-meter span{display:none}
 .glance-habit-label{font-weight:700;font-size:12px;color:var(--habit);white-space:nowrap}
 .glance-habit-copy{margin-top:7px;font-size:12px;color:#536575;line-height:1.35}
 .glance-advice{background:#F1F4F8;border:1px solid #D8E0EB;border-left:4px solid var(--schedule);border-radius:13px;padding:10px 12px;display:flex;gap:9px}
@@ -269,7 +270,7 @@ state.items=state.demo?createDemo():[...life,...money];state.loadedAt=new Date()
     $('glanceNextPayment').style.color=overdue?'var(--danger)':'#5A6977';
     const habitRecords=habits.length;
     $('glanceHabitCount').textContent=habitRecords?`${habitRecords}件の実施報告`:'実施記録：未確認';
-    $('glanceHabitBar').style.width='100%';$('glanceHabitBar').style.opacity=habitRecords?'1':'0';
+    $('glanceHabitBar').style.width='0%';$('glanceHabitBar').parentElement.classList.toggle('has-report',Boolean(habitRecords));
     $('glanceHabitLabel').textContent=habitRecords?'記録あり':'未確認';
     $('glanceHabitText').textContent=habitRecords?habits.map(x=>x.title+'（'+x.subtitle+'）').slice(0,2).join('・'):'記録なし＝未実施ではありません。';
     const openTasks=tasks.filter(x=>!x.done),planned=money.some(x=>x.moneyKind==='expense'&&!x.complete);
