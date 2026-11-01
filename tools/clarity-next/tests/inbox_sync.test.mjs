@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import vm from 'node:vm';
 
 const source=fs.readFileSync(new URL('../YOS_Inbox_Classifier.js',import.meta.url),'utf8');
-function setup(initialBlocks=[]){
+function setup(initialBlocks=[],mode='run'){
   let blocks=initialBlocks,rows=[],calls=[],serial=0,fail=null,output=null;
   class Request{
     constructor(url){this.url=url;this.method='GET';this.response={statusCode:200};}
@@ -33,7 +33,7 @@ function setup(initialBlocks=[]){
     }
   }
   let state='';
-  const ctx={Request,Keychain:{contains:()=>true,get:()=> 'test'},FileManager:{local:()=>({documentsDirectory:()=>'/tmp',joinPath:()=>'/tmp/state',readString:()=>state,writeString:(_,s)=>{state=s;}})},args:{},Alert:class{addAction(){} async present(){output=this.title+' '+this.message;}},Script:{complete(){}},Date,Intl,Array,Set,Math,JSON,Error,Number,String,encodeURIComponent};
+  const ctx={Request,Keychain:{contains:()=>true,get:()=> 'test'},FileManager:{local:()=>({documentsDirectory:()=>'/tmp',joinPath:()=>'/tmp/state',readString:()=>state,writeString:(_,s)=>{state=s;}})},args:{queryParameters:{mode}},Alert:class{addAction(){} async present(){output=this.title+' '+this.message;}},Script:{complete(){}},Date,Intl,Array,Set,Math,JSON,Error,Number,String,encodeURIComponent};
   vm.createContext(ctx);
   const usable=source.replace(/try\{await inboxSync\(\)\}[\s\S]*$/,'globalThis.__test={captureFromBlocks,classifyCapture,saveCapture,inboxSync,allInboxBlocks};');
   vm.runInContext(usable,ctx);
@@ -73,4 +73,14 @@ test('unbounded or malformed Inbox pagination cannot authorize a write',async()=
   const s=setup([]);const c={id:'a',raw:'タスク: 散歩',at:'invalid',source:'Memo'};
   assert.equal(s.api.classifyCapture(c).status,'hold');
   assert.equal(s.api.captureFromBlocks([para('2026-11-01T00:00:00Z · Memo · clarity:a','m')]).length,0);
+});
+
+test('device acceptance defaults to the one approved fixture, never historical backlog',async()=>{
+  const blocks=[...capture('older','タスク: 以前の入力'),...capture('yos-test-20261101-0649','タスク: YOS Inbox仕分けテスト（動作確認後に完了）')];
+  const s=setup(blocks,'test');await s.api.inboxSync();assert.equal(s.rows.length,1);
+  assert.equal(s.rows[0].properties['やること'].title[0].text.content,'YOS Inbox仕分けテスト(動作確認後に完了)');
+  await s.api.inboxSync();assert.equal(s.rows.length,1);
+  const missing=setup(capture('older','タスク: 以前の入力'),'test');
+  await assert.rejects(missing.api.inboxSync(),/安全なテスト入力をInboxで確認できません/);
+  assert.equal(missing.rows.length,0);
 });
