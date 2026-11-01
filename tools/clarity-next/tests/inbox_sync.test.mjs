@@ -75,6 +75,25 @@ test('unbounded or malformed Inbox pagination cannot authorize a write',async()=
   assert.equal(s.api.captureFromBlocks([para('2026-11-01T00:00:00Z · Memo · clarity:a','m')]).length,0);
 });
 
+test('empty Notion paragraphs are skipped without absorbing the next capture',()=>{
+ const s=setup();
+ const blocks=[para('2026-11-01T01:00:00Z · Memo · clarity:a','meta-a'),para('','blank'),para('タスク: 郵便を受け取る','raw-a'),
+  para('2026-11-01T01:01:00Z · Memo · clarity:b','meta-b'),para('','blank-b'),para('2026-11-01T01:02:00Z · Memo · clarity:c','meta-c'),para('タスク: 電話する','raw-c')];
+ const captures=s.api.captureFromBlocks(blocks);
+ assert.deepEqual(Array.from(captures,x=>x.id),['clarity:a','clarity:c']);
+ assert.equal(captures[0].raw,'タスク: 郵便を受け取る');
+});
+
+test('the remotely registered acceptance row is recognized after local state loss',async()=>{
+ const s=setup(capture('yos-test-20261101-0649','タスク: YOS Inbox仕分けテスト（動作確認後に完了）'),'test');
+ const key='inbox:clarity:yos-test-20261101-0649';
+ s.rows.push({id:'remote-test-row',ds:'965c6086-32c1-463d-93b4-87a9cb69b3ad',properties:{'同期キー':{rich_text:[{text:{content:key}}]}}});
+ await s.api.inboxSync();
+ assert.equal(s.rows.length,1);
+ assert.match(s.getOutput(),/既存 1件/);
+ assert.equal(s.calls.filter(([method,path])=>method==='POST'&&path==='/pages').length,0);
+});
+
 test('device acceptance defaults to the one approved fixture, never historical backlog',async()=>{
   const blocks=[...capture('older','タスク: 以前の入力'),...capture('yos-test-20261101-0649','タスク: YOS Inbox仕分けテスト（動作確認後に完了）')];
   const s=setup(blocks,'test');await s.api.inboxSync();assert.equal(s.rows.length,1);
