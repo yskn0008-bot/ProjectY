@@ -21,3 +21,12 @@ test('changed download and unknown device path never write',async()=>{
  const changed=await install(candidate+' ');assert.equal(changed.writes,0);assert.equal(changed.alertTitle,'導入できませんでした');
  const path=await install(candidate,'/other/unsafe.js');assert.equal(path.writes,0);
 });
+test('installer accepts pasted code even when its leading comment was omitted',async()=>{
+ const withoutComment=installer.split('\n').slice(2).join('\n');
+ let file=withoutComment,writes=0,alertTitle='';
+ class Request{async loadString(){return candidate;}}
+ class Alert{addAction(){} async present(){alertTitle=this.title;}}
+ const fm={documentsDirectory:()=>'/scriptable',readString:()=>file,writeString:(_,s)=>{writes++;file=s;}};
+ await vm.runInNewContext('(async()=>{'+withoutComment+'})()',{Request,Alert,FileManager:{iCloud:()=>({documentsDirectory:()=>'/icloud'}),local:()=>fm},module:{filename:'/scriptable/Untitled Script 22.js'},Script:{complete(){}},Math,Error,String});
+ assert.equal(writes,1);assert.equal(file,candidate);assert.equal(alertTitle,'YOS Inbox｜準備完了');
+});
