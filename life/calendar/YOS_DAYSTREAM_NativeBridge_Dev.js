@@ -138,7 +138,15 @@ async function main(){
     readNotion(MONEY_SOURCE,'日付',parseMoney,start,end,token),
     readPreview()
   ]);
-  const entries=[...apple.rows,...tasks.rows,...money.rows].slice(0,500);
+  const allEntries=[...apple.rows,...tasks.rows,...money.rows];
+  const entries=allEntries.slice(0,500);
+  // The UI accepts at most 500 items. Never report a complete source when
+  // the combined cap silently excludes records from the visible calendar.
+  if(allEntries.length>500){
+    if(apple.status==='ok')apple.status='partial';
+    if(tasks.status==='ok')tasks.status='partial';
+    if(money.status==='ok')money.status='partial';
+  }
   const snapshot={schema:'yos-daystream-native-v1',generatedAt:new Date().toISOString(),
     range:{start,end},sources:{apple:{status:apple.status},tasks:{status:tasks.status},money:{status:money.status}},items:entries};
   const web=new WebView();
