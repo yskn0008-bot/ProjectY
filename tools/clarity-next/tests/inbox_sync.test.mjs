@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import vm from 'node:vm';
 
-const source=fs.readFileSync(new URL('../YOS_Notion_Sync.js',import.meta.url),'utf8');
+const source=fs.readFileSync(new URL('../YOS_Inbox_Classifier.js',import.meta.url),'utf8');
 function setup(initialBlocks=[]){
   let blocks=initialBlocks,rows=[],calls=[],serial=0,fail=null,output=null;
   class Request{
@@ -33,9 +33,9 @@ function setup(initialBlocks=[]){
     }
   }
   let state='';
-  const ctx={Request,Keychain:{contains:()=>true,get:()=> 'test'},FileManager:{iCloud:()=>({documentsDirectory:()=>'/tmp',joinPath:()=>'/tmp/state',readString:()=>state,writeString:(_,s)=>{state=s;}})},args:{queryParameters:{mode:'inbox'}},Alert:class{addAction(){} async present(){output=this.title+' '+this.message;}},Script:{complete(){}},Date,Intl,Array,Set,Math,JSON,Error,Number,String,encodeURIComponent};
+  const ctx={Request,Keychain:{contains:()=>true,get:()=> 'test'},FileManager:{local:()=>({documentsDirectory:()=>'/tmp',joinPath:()=>'/tmp/state',readString:()=>state,writeString:(_,s)=>{state=s;}})},args:{},Alert:class{addAction(){} async present(){output=this.title+' '+this.message;}},Script:{complete(){}},Date,Intl,Array,Set,Math,JSON,Error,Number,String,encodeURIComponent};
   vm.createContext(ctx);
-  const usable=source.replace(/const MODE=String\(typeof args[\s\S]*$/,'globalThis.__test={captureFromBlocks,classifyCapture,saveCapture,inboxSync,allInboxBlocks};');
+  const usable=source.replace(/try\{await inboxSync\(\)\}[\s\S]*$/,'globalThis.__test={captureFromBlocks,classifyCapture,saveCapture,inboxSync,allInboxBlocks};');
   vm.runInContext(usable,ctx);
   return {api:ctx.__test,rows,calls,setFailure:x=>fail=x,setBlocks:x=>blocks=x,getOutput:()=>output};
 }
