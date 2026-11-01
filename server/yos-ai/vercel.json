@@ -6,9 +6,6 @@
     "autoJobCancelation": false
   },
   "functions": {
-    "api/yos/inbox-sort.mjs": {
-      "maxDuration": 60
-    },
     "api/yos/chat.mjs": {
       "maxDuration": 60,
       "supportsCancellation": true
@@ -31,8 +28,5 @@
       "maxDuration": 10
     }
   },
-  "crons": [
-    {"path": "/api/yos/inbox-sort", "schedule": "0 0 * * *"}
-  ],
   "ignoreCommand": "if git rev-parse HEAD^ >/dev/null 2>&1; then git diff --quiet HEAD^ HEAD ./; else exit 1; fi"
 }
