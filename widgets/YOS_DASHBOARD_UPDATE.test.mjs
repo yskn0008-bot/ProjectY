@@ -117,3 +117,35 @@ test("health counts cache only verified same-day Inbox reports, without storing 
   assert.doesNotMatch(run,/JSON\.stringify\(\{[^}]*raw:/);
   assert.match(widgetSource,/if\(!Keychain\.contains\(YOS_HEALTH_TOKEN_KEY\)\)return null/);
 });
+
+test("health status reads only the existing local verified metadata, not new network data", () => {
+  const snapshotCode=widgetSource.match(/function yosHealthSnapshot\(state, now\) \{[\s\S]*?\n\}/u)?.[0];
+  const readerCode=widgetSource.match(/function yosHealthReadTodaySnapshot\(\) \{[\s\S]*?\n\}/u)?.[0];
+  assert.ok(snapshotCode&&readerCode);
+  const day=value=>new Intl.DateTimeFormat('sv-SE',{
+    timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit'
+  }).format(new Date(value));
+  const snapshot=new Function('yosHealthDay',snapshotCode+';return yosHealthSnapshot;')(day);
+  let reads=0;
+  const fm={
+    documentsDirectory:()=>'/docs',
+    joinPath:(root,name)=>root+'/'+name,
+    fileExists:()=>true,
+    readString:()=>{reads++;return JSON.stringify({
+      lastVerified:Date.now(),today:{day:day(Date.now()),meals:1,activities:0}
+    });}
+  };
+  const keychain={contains:()=>true};
+  const reader=new Function('Keychain','FileManager','YOS_HEALTH_TOKEN_KEY',
+    'yosHealthSnapshot',readerCode+';return yosHealthReadTodaySnapshot;')(
+      keychain,{local:()=>fm},'YOS_NOTION_INTEGRATION_TOKEN',snapshot);
+  const value=reader();
+  assert.equal(value.meals,1);
+  assert.equal(value.activities,0);
+  assert.equal(reads,1);
+  const denied=new Function('Keychain','FileManager','YOS_HEALTH_TOKEN_KEY',
+    'yosHealthSnapshot',readerCode+';return yosHealthReadTodaySnapshot;')(
+      {contains:()=>false},{local:()=>fm},'YOS_NOTION_INTEGRATION_TOKEN',snapshot);
+  assert.equal(denied(),null);
+  assert.equal(reads,1,'no file is read without the existing token');
+});
