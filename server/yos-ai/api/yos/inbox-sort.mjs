@@ -19,6 +19,7 @@ async function handle(request) {
     const run = createInboxSorter({
       notionToken: process.env.YOS_NOTION_API_TOKEN ?? '',
       inboxPageId: process.env.YOS_NOTION_INBOX_PAGE_ID ?? '',
+      mode: process.env.YOS_INBOX_SORT_MODE ?? 'test',
       redis: new UpstashRestClient({url: storage.upstashUrl, token: storage.upstashToken})
     });
     return Response.json({ok: true, ...await run()}, {headers: {'Cache-Control': 'no-store'}});
