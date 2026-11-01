@@ -3,8 +3,8 @@
   "kind": "yos-ai-approved-release-retry",
   "approval_basis": "source already merged to main",
   "source_sha": "115b445109efe982de1e5514076297348c8f3233",
-  "attempt": 1,
-  "requested_at": "2026-11-01T09:39:44.111Z",
-  "previous_failed_sha": "115b445109efe982de1e5514076297348c8f3233",
+  "attempt": 2,
+  "requested_at": "2026-11-01T16:21:40.761Z",
+  "previous_failed_sha": "5273fa9c19e5bc33a8f76068f0dbc43ea536ff9c",
   "reason": "vercel-rate-limit"
 }
