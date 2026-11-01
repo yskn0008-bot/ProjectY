@@ -166,7 +166,15 @@ async function main(){
     readNotion(MONEY_SOURCE,'日付',parseMoney,start,end,token),
     readPreview()
   ]);
-  const allEntries=[...apple.rows,...tasks.rows,...money.rows];
+  const seenAllDay=new Set();
+  const uniqueApple=apple.rows.filter(x=>{
+    if(x.type!=='schedule'||x.subtitle!=='終日')return true;
+    const key=x.date+'|'+String(x.title||'').normalize('NFKC').replace(/[\\s　]+/g,'').trim();
+    if(seenAllDay.has(key))return false;
+    seenAllDay.add(key);
+    return true;
+  });
+  const allEntries=[...uniqueApple,...tasks.rows,...money.rows];
   const entries=allEntries.slice(0,500);
   // The UI accepts at most 500 items. Never report a complete source when
   // the combined cap silently excludes records from the visible calendar.
