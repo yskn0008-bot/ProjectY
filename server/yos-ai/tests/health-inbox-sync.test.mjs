@@ -119,3 +119,23 @@ test('fail closed on a non-unique health journal key and release locks for later
  assert.equal(m.store.has('yos:health-inbox-sync:v1:lock'),false);
  assert.equal(m.store.has('yos:health-inbox-sync:v1:cooldown'),false);
 });
+test('preserves actual food and exercise even when other clauses contain future plans or questions',()=>{
+ assert.deepEqual(classifyHealthReport('今日はチャーハンを食べた。明日は野菜をもっと食べたい'),['meal']);
+ assert.deepEqual(classifyHealthReport('今日は5分歩いた。明日も歩きたい'),['activity']);
+ assert.deepEqual(classifyHealthReport('今日は豚汁を食べた。これはどう？'),['meal']);
+ assert.deepEqual(classifyHealthReport('今日は弁当を食べた、明日はカレーを食べたい'),['meal']);
+ assert.deepEqual(classifyHealthReport('昨日の夜に歩いた。今日はチャーハンを食べた'),['meal']);
+ assert.deepEqual(classifyHealthReport('家族が弁当を食べた。今日は5分歩いた'),['activity']);
+ assert.deepEqual(classifyHealthReport('昼はパン。食べた'),['meal']);
+ assert.deepEqual(classifyHealthReport('今日はチャーハンを食べた？'),[]);
+ assert.deepEqual(classifyHealthReport('朝はチャーハン？食べた'),[]);
+});
+
+test('mixed capture saves only explicit completed categories, not future activity',()=>{
+ const blocks=[paragraph(`${timestamp} · Memo · clarity:health-mixed-1`),
+   paragraph('今日は豚汁を食べた。明日から5分歩く予定。')];
+ const result=extractHealthCaptures(blocks,now);
+ assert.equal(result.length,1);
+ assert.equal(result[0].kind,'meal');
+ assert.equal(result[0].captureId,'clarity:health-mixed-1');
+});
