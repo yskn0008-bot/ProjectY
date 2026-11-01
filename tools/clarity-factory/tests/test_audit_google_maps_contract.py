@@ -11,6 +11,15 @@ from audit_google_maps_contract import audit_navigation, BASE, SUFFIX
 
 def fixture():
     return {"WFWorkflowActions": [
+        {"WFWorkflowActionIdentifier": "is.workflow.actions.detect.dictionary",
+         "WFWorkflowActionParameters": {"UUID": "SYNTH-PARAM", "CustomOutputName": "parameters"}},
+        {"WFWorkflowActionIdentifier": "is.workflow.actions.gettext",
+         "WFWorkflowActionParameters": {"UUID": "SYNTH-DEST", "CustomOutputName": "destination",
+           "WFTextActionText": {"WFSerializationType": "WFTextTokenString",
+             "Value": {"string": "\ufffc", "attachmentsByRange": {"{0, 1}": {
+               "Type": "ActionOutput", "OutputName": "parameters", "OutputUUID": "SYNTH-PARAM",
+               "Aggrandizements": [{"Type": "WFDictionaryValueVariableAggrandizement",
+                                   "DictionaryKey": "destination"}]}}}}}},
         {"WFWorkflowActionIdentifier":"is.workflow.actions.urlencode",
          "WFWorkflowActionParameters":{"UUID":"SYNTH-ENC",
             "WFEncodeMode":"Encode","CustomOutputName":"yosNavDestinationEncoded",
@@ -42,29 +51,29 @@ class NavigationSafetyTests(unittest.TestCase):
 
     def test_normal(self):
         self.assertEqual(audit_navigation(encode(fixture()["WFWorkflowActions"]))[
-            "navigation_actions_1based"],[1,2,3])
+            "navigation_actions_1based"],[3,4,5])
 
     def test_wrong_source(self):
-        self.rejects(lambda a:a[0]["WFWorkflowActionParameters"]["WFInput"]["Value"].update(OutputName="other"))
+        self.rejects(lambda a:a[2]["WFWorkflowActionParameters"]["WFInput"]["Value"].update(OutputName="other"))
 
     def test_bad_encoding(self):
-        self.rejects(lambda a:a[0]["WFWorkflowActionParameters"].update(WFEncodeMode="Decode"))
+        self.rejects(lambda a:a[2]["WFWorkflowActionParameters"].update(WFEncodeMode="Decode"))
 
     def test_bad_domain(self):
-        self.rejects(lambda a:a[1]["WFWorkflowActionParameters"]["WFTextActionText"]["Value"].update(string="https://evil.example/?q=\ufffc"))
+        self.rejects(lambda a:a[3]["WFWorkflowActionParameters"]["WFTextActionText"]["Value"].update(string="https://evil.example/?q=\ufffc"))
 
     def test_missing_navigate(self):
-        self.rejects(lambda a:a[1]["WFWorkflowActionParameters"]["WFTextActionText"]["Value"].update(string=BASE+"\ufffc"))
+        self.rejects(lambda a:a[3]["WFWorkflowActionParameters"]["WFTextActionText"]["Value"].update(string=BASE+"\ufffc"))
 
     def test_wrong_destination_reference(self):
-        self.rejects(lambda a:a[1]["WFWorkflowActionParameters"]["WFTextActionText"]["Value"][
+        self.rejects(lambda a:a[3]["WFWorkflowActionParameters"]["WFTextActionText"]["Value"][
             "attachmentsByRange"][f"{{{len(BASE)}, 1}}"].update(OutputUUID="BAD"))
 
     def test_wrong_open_reference(self):
-        self.rejects(lambda a:a[2]["WFWorkflowActionParameters"]["WFInput"]["Value"].update(OutputUUID="BAD"))
+        self.rejects(lambda a:a[4]["WFWorkflowActionParameters"]["WFInput"]["Value"].update(OutputUUID="BAD"))
 
     def test_wrong_open_action(self):
-        self.rejects(lambda a:a[2].update(WFWorkflowActionIdentifier="is.workflow.actions.searchmaps"))
+        self.rejects(lambda a:a[4].update(WFWorkflowActionIdentifier="is.workflow.actions.searchmaps"))
 
     def test_ambiguous_multiple(self):
         self.rejects(lambda a:a.extend(copy.deepcopy(a)))
