@@ -54,10 +54,11 @@ export function classifyHealthReport(raw){
   // A capture can contain both a completed action and a future plan/question.
   // Judge each utterance, not the entire capture, so that "食べた。明日は..."
   // doesn't discard the real meal. Preserve exact original text for storage.
-  const clauses=corrected.split(/(?:[。！？!?\n;；]|、(?=(?:明日|来週|来月|今から|これから|もし|今日は|今日も)))/u)
+  const clauses=corrected.split(/(?<=[。！？!?\n;；])|、(?=(?:明日|来週|来月|今から|これから|もし|今日は|今日も))/u)
     .map(x=>x.trim()).filter(Boolean);
   const kinds=new Set();
   for(const clause of clauses){
+    if(/[?？]\s*$/u.test(clause))continue;
     if(NEGATION.test(clause)||FUTURE.test(clause)||OTHER_ACTOR.test(clause))continue;
     if(/(?:昨日|一昨日|先週|先月)/u.test(clause))continue;
     if(MEAL_ACTION.test(clause)&&MEAL_ITEM.test(clause))kinds.add('meal');
@@ -68,7 +69,7 @@ export function classifyHealthReport(raw){
   // every clause is unambiguously about completed actions.
   if(!kinds.size && clauses.length>1 &&
     !NEGATION.test(corrected)&&!FUTURE.test(corrected)&&
-    !OTHER_ACTOR.test(corrected)&&
+    !OTHER_ACTOR.test(corrected)&&!/[?？]/u.test(corrected)&&
     !/(?:昨日|一昨日|先週|先月)/u.test(corrected)){
     if(MEAL_ACTION.test(corrected)&&MEAL_ITEM.test(corrected))kinds.add('meal');
     if(ACTIVITY_ACTION.test(corrected))kinds.add('activity');
