@@ -515,6 +515,48 @@ function makeNow(taskResult, calendarResult, money) {
   return widget;
 }
 
+// Display only counts from the most recent successful Notion readback.
+// "Unreported" never means that a meal or an exercise did not happen.
+function yosHealthSnapshot(state, now) {
+  if(!state || !Number.isFinite(now) || !Number.isFinite(state.lastVerified))return null;
+  const day=yosHealthDay(new Date(now)), today=state.today;
+  if(!today || today.day!==day)return null;
+  if(state.lastVerified>now+60000 || now-state.lastVerified>12*60*60*1000)return null;
+  if(!Number.isInteger(today.meals) || today.meals<0 || today.meals>40)return null;
+  if(!Number.isInteger(today.activities) || today.activities<0 || today.activities>40)return null;
+  return {day,meals:today.meals,activities:today.activities,verifiedAt:state.lastVerified};
+}
+function yosHealthReadTodaySnapshot() {
+  try {
+    if(!Keychain.contains(YOS_HEALTH_TOKEN_KEY))return null;
+    const fm=FileManager.local();
+    const path=fm.joinPath(fm.documentsDirectory(),'yos-health-local-sync-v1.json');
+    if(!fm.fileExists(path))return null;
+    const raw=fm.readString(path);
+    if(!raw || raw.length>4096)return null;
+    return yosHealthSnapshot(JSON.parse(raw),Date.now());
+  }catch(_){return null;}
+}
+function addYosHealthStatus(widget) {
+  const row=widget.addStack();
+  row.layoutHorizontally();
+  row.centerAlignContent();
+  addSymbol(row,'heart.fill',15,COLORS.coral);
+  row.addSpacer(7);
+  const heading=row.addText('健康記録');
+  heading.font=font(14,'semibold');
+  heading.textColor=color(COLORS.muted);
+  row.addSpacer();
+  const state=yosHealthReadTodaySnapshot();
+  const meal=state ? (state.meals ? state.meals+'件' : '未報告') : null;
+  const activity=state ? (state.activities ? state.activities+'件' : '未報告') : null;
+  const status=row.addText(state ? '食事 '+meal+' · 運動 '+activity : '同期の確認待ち');
+  status.font=font(14,'semibold');
+  status.textColor=color(state ? COLORS.text : COLORS.faint);
+  status.lineLimit=1;
+  status.minimumScaleFactor=0.8;
+}
+
 function makeToday(taskResult, calendarResult, money) {
   const events = calendarResult?.items || [];
   const widget = new ListWidget();
@@ -596,7 +638,9 @@ function makeToday(taskResult, calendarResult, money) {
   addRoutineButton(routines, "Night", "moon.stars.fill", URLS.NIGHT, "#7E7596", "#EAE6F0");
   routines.addSpacer();
 
-  widget.addSpacer();
+  widget.addSpacer(8);
+  addYosHealthStatus(widget);
+  widget.addSpacer(7);
   const moneyRow = widget.addStack();
   moneyRow.layoutHorizontally();
   moneyRow.centerAlignContent();
@@ -778,7 +822,19 @@ async function yosHealthRunOnce(){
     const hits=yosHealthExtract(blocks,new Date(now));
     const map=new Map();for(const hit of hits){const prev=map.get(hit.day)||[];prev.push(hit);map.set(hit.day,prev);}
     for(const [day,events] of map)await yosHealthWrite(token,day,events);
-    try{fm.writeString(file,JSON.stringify({lastAttempt:now,lastVerified:Date.now(),scanned:blocks.length,candidates:hits.length}));}catch{}
+    // Snapshot is written only after all Notion writes have been read back.
+    // Counts refer to confirmed reports, not inferred meals or workouts.
+    const todayDay=yosHealthDay(new Date(now));
+    const confirmedToday=hits.filter(hit=>hit.day===todayDay);
+    const snapshot={
+      day:todayDay,
+      meals:confirmedToday.filter(hit=>hit.kind==='meal').length,
+      activities:confirmedToday.filter(hit=>hit.kind==='activity').length
+    };
+    try{fm.writeString(file,JSON.stringify({
+      lastAttempt:now,lastVerified:Date.now(),scanned:blocks.length,
+      candidates:hits.length,today:snapshot
+    }));}catch{}
     return {status:'verified',scanned:blocks.length,candidates:hits.length};
   }catch(_){
     // Failures should not get a 30-minute cooldown. Retry automatically after
