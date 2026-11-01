@@ -81,7 +81,7 @@ function parseTask(row){
   const p=row?.properties;if(!p)return null;
   const title=rich(p['やること'],'title'),date=dateVal(p['期限']),status=select(p['状態']);
   if(!title||!validDay(date)||['中止','完了','キャンセル','取り消し'].includes(status))return null;
-  return {type:'task',date,title,subtitle:status||'状態未確認',done:false,source:'Notion Tasks',id:clean(row.id||title,70)};
+  return {type:'task',date,title,subtitle:status||'状態未確認',nextAction:rich(p['次の一手'],'rich_text'),completion:rich(p['完了条件'],'rich_text'),blocker:rich(p['ブロッカー'],'rich_text'),done:false,source:'Notion Tasks',id:clean(row.id||title,70)};
 }
 function parseMoney(row){
   const p=row?.properties;if(!p)return null;
