@@ -29,7 +29,19 @@ function captureFromBlocks(blocks){
   const m=line.match(/^(\d{4}-\d\d-\d\dT\S+)\s*·\s*([^·\n]+)\s*·\s*(clarity:[a-z\d_-]+)/i);
   if(!m||/Notification|Email/i.test(m[2])||seen.has(m[3]))continue;
   let raw=line.slice(m[0].length).trim();
-  if(!raw){const next=blocks[i+1];if(next?.type!=='paragraph')continue;raw=blockText(next).trim();}
+  if(!raw){
+   // Notion may retain an empty paragraph between the metadata and the raw text.
+   // Never cross another capture header or a nonempty separator while looking ahead.
+   for(let j=i+1;j<Math.min(blocks.length,i+5);j++){
+    const next=blocks[j];
+    if(next.type==='divider')break;
+    if(next.type!=='paragraph')break;
+    const candidate=blockText(next).trim();
+    if(!candidate)continue;
+    if(candidate==='---'||/^\d{4}-\d\d-\d\dT\S+\s*·/.test(candidate))break;
+    raw=candidate;break;
+   }
+  }
   if(!raw||raw==='---'||raw.length>12000)continue;
   seen.add(m[3]);out.push({id:m[3],raw,at:m[1],source:m[2].trim(),blockId:b.id});
  }
