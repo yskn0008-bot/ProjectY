@@ -109,7 +109,9 @@ async function readApple(start,end){
       const time=x.isAllDay?'終日':new Intl.DateTimeFormat('ja-JP',{timeZone:TZ,hour:'2-digit',minute:'2-digit',hour12:false}).format(begin);
       return [{type:'schedule',date,title:clean(x.title,100),subtitle:time,source:'Appleカレンダー',id:clean(x.identifier||i,70)}];
     });
-    return {status:events?.length>250?'partial':'ok',rows};
+    // Exactly 250 events is not necessarily complete: the calendar API may
+    // return more than the displayed cap, and the final snapshot is capped too.
+    return {status:events?.length>=250?'partial':'ok',rows};
   }catch{return {status:'error',rows:[]}};
 }
 async function readNotion(source,field,parse,start,end,token){
