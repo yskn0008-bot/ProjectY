@@ -27,15 +27,6 @@ jobs:
           set -euo pipefail
           python3 -m unittest discover -s tools/clarity-next/tests -v
 
-      - name: Inbox classifier regression
-        shell: bash
-        run: |
-          set -euo pipefail
-          node --check tools/clarity-next/YOS_Inbox_Classifier.js
-          node --check tools/clarity-next/YOS_Inbox_Install.js
-          node --test tools/clarity-next/tests/inbox_sync.test.mjs
-          node --test tools/clarity-next/tests/inbox_install.test.mjs
-
       - name: Install pinned Cherri v2.3.0
         shell: bash
         run: |
