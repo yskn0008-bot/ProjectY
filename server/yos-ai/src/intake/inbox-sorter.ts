@@ -39,7 +39,7 @@ export function parseInbox(blocks: Block[]): Capture[] {
     if (block?.type !== 'paragraph') continue;
     const line = plain(block.paragraph?.rich_text);
     const match = /^(\d{4}-\d\d-\d\dT\S+)\s*·\s*([^·\n]+)\s*·\s*(clarity:[a-z\d_-]+)/iu.exec(line);
-    if (!match || !match[1] || !match[2] || !match[3] || seen.has(match[3]) || /Notification|Email/iu.test(match[2])) continue;
+    if (!match || !match[1] || !match[2] || !match[3] || seen.has(match[3]) || !/^(?:Memo|Clarity Voice|Clarity Text)$/iu.test(match[2].trim())) continue;
     let raw = line.slice(match[0].length).trim();
     if (!raw) for (let j = i + 1; j < Math.min(blocks.length, i + 5); j++) {
       const next = blocks[j];
@@ -105,7 +105,7 @@ export function createInboxSorter(options: {notionToken: string; inboxPageId: st
     const byKey = await unique(spec.id, {property: spec.key, rich_text: decision.target === 'shopping' ? {contains: key} : {equals: key}});
     if (byKey.length) {
       const existing = await api('/pages/' + byKey[0].id);
-      if (plain(existing.properties?.[spec.key]?.rich_text).includes(key)) return 'duplicate';
+      if ((decision.target === 'shopping' ? plain(existing.properties?.[spec.key]?.rich_text).split(/\r?\n/u).includes(key) : plain(existing.properties?.[spec.key]?.rich_text) === key)) return 'duplicate';
       throw new Error('Existing key readback mismatch');
     }
     if ((await unique(spec.id, {property: spec.title, title: {equals: decision.title}})).length) throw new HoldCapture('Existing title; held');
@@ -121,7 +121,7 @@ export function createInboxSorter(options: {notionToken: string; inboxPageId: st
     const created = await api('/pages', 'POST', {parent: {type: 'data_source_id', data_source_id: spec.id}, properties});
     if (!created.id) throw new Error('Notion page ID missing; do not retry blindly');
     const saved = await api('/pages/' + created.id);
-    if (!plain(saved.properties?.[spec.key]?.rich_text).includes(key)) throw new Error('Created key readback mismatch; do not retry blindly');
+    if (!(decision.target === 'shopping' ? plain(saved.properties?.[spec.key]?.rich_text).split(/\r?\n/u).includes(key) : plain(saved.properties?.[spec.key]?.rich_text) === key)) throw new Error('Created key readback mismatch; do not retry blindly');
     return 'created';
   }
   return async function run(): Promise<{created: number; duplicates: number; held: number}> {
