@@ -92,9 +92,9 @@ test("TODAY retains existing calendars, tasks, routines and money beside one com
     widgetSource.indexOf('\nasync function promptToken('));
   const now=widgetSource.slice(widgetSource.indexOf('function makeNow('),
     widgetSource.indexOf('\n// Display only counts'));
-  assert.match(today,/addYosHealthStatus\(widget\)/);
-  assert.equal((today.match(/addYosHealthStatus\(widget\)/g)||[]).length,1);
-  assert.doesNotMatch(now,/addYosHealthStatus\(widget\)/);
+  assert.match(today,/addYosHealthStatus\(widget, health\)/);
+  assert.equal((today.match(/addYosHealthStatus\(widget, health\)/g)||[]).length,1);
+  assert.doesNotMatch(now,/addYosHealthStatus\(widget, health\)/);
   for(const phrase of ['addEventLine(widget, event)','addTaskLine(widget, task, false)',
     'addRoutineButton(routines, "Morning"','addRoutineButton(routines, "Night"',
     'const moneyRow = widget.addStack()']){
@@ -151,7 +151,7 @@ test("health status reads only the existing local verified metadata, not new net
 });
 
 test("TODAY health line renders verified counts and unknown state using existing layout",()=>{
-  const displayCode=widgetSource.match(/function addYosHealthStatus\(widget\) \{[\s\S]*?\n\}/u)?.[0];
+  const displayCode=widgetSource.match(/function addYosHealthStatus\(widget, verifiedHealth\) \{[\s\S]*?\n\}/u)?.[0];
   assert.ok(displayCode);
   const render=(value)=>{
     const texts=[];
@@ -182,4 +182,82 @@ test("TODAY health line renders verified counts and unknown state using existing
     '健康記録','食事 未報告 · 運動 未報告','次 → 体調がよければ5分歩く'
   ]);
   assert.deepEqual(render(null),['健康記録','同期の確認待ち']);
+  assert.deepEqual(render({noteOnly:true,meals:null,activities:null}),['健康記録','記録あり · 件数未確認']);
+});
+
+test("money.json amount is hidden until explicitly confirmed with a five-minute timestamp",()=>{
+  const code=widgetSource.slice(widgetSource.indexOf("function yosMoneyVerifiedAmount("),
+    widgetSource.indexOf("\nasync function loadMoney()"));
+  assert.ok(code.includes('function yosMoneyVerifiedAmount('));
+  const validate=new Function(code+';return yosMoneyVerifiedAmount;')();
+  const now=Date.parse('2026-11-01T12:00:00.000Z');
+  const record=(amount,confirmed,confirmedAt)=>({balance:{amount,confirmed,confirmedAt}});
+  assert.equal(validate({balance:{amount:128}},now),null);
+  assert.equal(validate(record(128,false,'2026-11-01T11:59:00.000Z'),now),null);
+  assert.equal(validate(record(128,true,'2026-10-31T12:00:00.000Z'),now),null);
+  assert.equal(validate(record(128,true,'2026-11-01T12:01:00.000Z'),now),null);
+  assert.equal(validate(record(128,true,'2026-11-01T11:59:00'),now),null);
+  assert.equal(validate(record('128',true,'2026-11-01T11:59:00.000Z'),now),null);
+  assert.equal(validate(record(-1,true,'2026-11-01T11:59:00.000Z'),now),null);
+  assert.equal(validate(record(0,true,'2026-11-01T11:59:00.000Z'),now),0);
+  assert.equal(validate(record(128,true,'2026-11-01T11:59:00.000Z'),now),128);
+  assert.match(widgetSource,/money\.available \? yen\(money\.amount\) : "要確認"/);
+  assert.match(widgetSource,/money\.available \? yen\(money\.amount\) : "残高未確認"/);
+});
+
+test("existing verified Notion journal yields accurate count even when local cache lacks today",()=>{
+  const start=widgetSource.indexOf('function yosHealthSnapshotFromJournal(');
+  const end=widgetSource.indexOf('\nasync function yosHealthLatestSnapshot()',start);
+  const helper=widgetSource.slice(start,end);
+  assert.ok(start>0 && end>start);
+  const classifiers=widgetSource.slice(widgetSource.indexOf('const YOS_HEALTH_EAT = '),
+    widgetSource.indexOf('function yosHealthDay('));
+  assert.ok(classifiers.includes('function yosHealthClassify('));
+  const classify=new Function(classifiers+';return yosHealthClassify;')();
+  const tokyoDay=value=>new Intl.DateTimeFormat('sv-SE',{
+    timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit'
+  }).format(new Date(value));
+  const parse=new Function('yosHealthClassify','yosHealthDay',
+    helper+';return yosHealthSnapshotFromJournal;')(classify,tokyoDay);
+  const now=Date.parse('2026-11-01T11:30:00Z');
+  const manual='【本人申告】午前1時ごろ、豚汁とチキン南蛮弁当をほっともっとで買って食べた。Clarity報告ID: clarity:324672-a1';
+  assert.deepEqual(parse(manual,'2026-11-01',now),{
+    day:'2026-11-01',meals:1,activities:0,verifiedAt:now
+  });
+  const both='[YOS-health:clarity:123456-a1:meal]\n'+
+             '[YOS-health:clarity:123456-a1:meal]\n'+
+             '[YOS-health:clarity:234567-b2:activity]';
+  const result=parse(both,'2026-11-01',now);
+  assert.equal(result.meals,1);
+  assert.equal(result.activities,1);
+  assert.equal(parse(manual,'2026-10-31',now),null);
+  assert.equal(parse('今後は野菜を食べたい','2026-11-01',now).noteOnly,true);
+  assert.equal(parse('','2026-11-01',now),null);
+});
+
+test("TODAY read-only fallback queries only the existing verified daily journal",async()=>{
+  const match=widgetSource.match(/async function yosHealthLatestSnapshot\(\) \{[\s\S]*?\n\}/u);
+  assert.ok(match);
+  let queried=0;
+  const mockJournal={
+    properties:{'本文':{rich_text:[{plain_text:'【本人申告】豚汁を食べた。Clarity報告ID: clarity:324672-a1'}]}}
+  };
+  const loader=new (Object.getPrototypeOf(async function(){}).constructor)(
+    'yosHealthReadTodaySnapshot','Keychain','YOS_HEALTH_TOKEN_KEY','yosHealthDay',
+    'yosHealthExisting','yosHealthValue','yosHealthSnapshotFromJournal',
+    match[0]+';return yosHealthLatestSnapshot;'
+  )(
+    ()=>null,{contains:()=>true,get:()=> 'private-token'},'YOS_NOTION_INTEGRATION_TOKEN',
+    ()=> '2026-11-01',
+    async()=>{queried++;return mockJournal;},
+    xs=>xs.map(x=>x.plain_text).join(''),
+    (body,day)=>({day,meals:1,activities:0,verifiedAt:1})
+  );
+  const run=await loader;
+  assert.equal((await run()).meals,1);
+  assert.equal(queried,1);
+  assert.match(widgetSource,/PARAM==="TODAY" \? yosHealthLatestSnapshot\(\) : Promise.resolve\(null\)/);
+  assert.match(widgetSource,/if\(!entry\)return cached/);
+  assert.match(widgetSource,/yosHealthExisting\(token,day\)/);
+  assert.doesNotMatch(match[0],/POST|'\/pages'/);
 });
