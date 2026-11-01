@@ -9,7 +9,7 @@ try{
  const fm=path.startsWith(ic.documentsDirectory()+'/')?ic:path.startsWith(lc.documentsDirectory()+'/')?lc:null;
  if(!fm)throw Error('Scriptableの保存場所を確認できません');
  const before=fm.readString(path);
- if(!before.includes('YOS_INBOX_INSTALL_20261101'))throw Error('更新対象を確認できません');
+ if(!before.includes('d43ba422')||!before.includes('raw.githubusercontent.com/yskn0008-bot/ProjectY/3516be80a8ef4f256e156992905c012719fde970'))throw Error('更新対象を確認できません');
  fm.writeString(path,code);
  if(fm.readString(path)!==code){fm.writeString(path,before);throw Error('保存の照合に失敗しました。元に戻しました');}
  const a=new Alert();a.title='YOS Inbox｜準備完了';a.message='同じスクリプトをもう一度▶︎で実行してください。承認済みテスト1件だけを処理します。';a.addAction('閉じる');await a.present();
