@@ -36,6 +36,29 @@ def audit_navigation(raw: bytes):
     from_ = _output(enc.get("WFInput"))
     if from_.get("OutputName") != "destination" or not from_.get("OutputUUID"):
         raise ValueError("Unexpected source for destination")
+    # Prove destination came from parameters.destination rather than an arbitrary action.
+    upstream = [(j,a["WFWorkflowActionParameters"]) for j,a in enumerate(actions[:i])
+                if a["WFWorkflowActionIdentifier"] == "is.workflow.actions.gettext"
+                and a["WFWorkflowActionParameters"].get("UUID") == from_["OutputUUID"]
+                and a["WFWorkflowActionParameters"].get("CustomOutputName") == "destination"]
+    if len(upstream) != 1:
+        raise ValueError("Destination text action not found")
+    source_index, source_action = upstream[0]
+    source_text = source_action.get("WFTextActionText", {})
+    source_val = source_text.get("Value", {})
+    source_token = source_val.get("attachmentsByRange", {}).get("{0, 1}", {})
+    if source_text.get("WFSerializationType") != "WFTextTokenString" or source_val.get("string") != "\ufffc":
+        raise ValueError("Destination text is not a token")
+    if (source_token.get("Type") != "ActionOutput" or source_token.get("OutputName") != "parameters"
+        or source_token.get("Aggrandizements") != [
+            {"Type": "WFDictionaryValueVariableAggrandizement", "DictionaryKey": "destination"}]):
+        raise ValueError("Destination not extracted from parameters.destination")
+    model_dict = [a for a in actions[:source_index]
+                  if a["WFWorkflowActionIdentifier"] == "is.workflow.actions.detect.dictionary"
+                  and a["WFWorkflowActionParameters"].get("UUID") == source_token.get("OutputUUID")
+                  and a["WFWorkflowActionParameters"].get("CustomOutputName") == "parameters"]
+    if len(model_dict) != 1:
+        raise ValueError("Upstream parameters dictionary not found")
     enc_id, url_id = enc.get("UUID"), url.get("UUID")
     if not enc_id or not url_id:
         raise ValueError("Missing output UUID")
