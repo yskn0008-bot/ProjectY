@@ -4,6 +4,7 @@ const DB='965c6086-32c1-463d-93b4-87a9cb69b3ad';
 const SHOPPING='d0ed2cf0-c84e-4770-b77c-3a1a9e11bcfc';
 const DIARY='fe0e0973-d1cc-4bde-b138-1cb1da64ac68';
 const INBOX='3d35ca88-2895-81ef-9dc8-d5f11ff8e213';
+const TEST_CAPTURE_ID='clarity:yos-test-20261101-0649';
 const API='https://api.notion.com/v1',VERSION='2025-09-03';
 const fm=FileManager.local();
 const stateFile=fm.joinPath(fm.documentsDirectory(),'yos-inbox-classifier-state.json');
@@ -90,9 +91,13 @@ async function saveCapture(c,p){
 async function inboxSync(){
  if(!Keychain.contains(K))throw Error('既存Notion認証情報がありません');
  const captures=captureFromBlocks(await allInboxBlocks());
+ const mode=String(args.queryParameters?.mode||'test');
+ if(!['test','run'].includes(mode))throw Error('不明な実行モード');
+ const selected=mode==='test'?captures.filter(c=>c.id===TEST_CAPTURE_ID):captures;
+ if(mode==='test'&&selected.length!==1)throw Error('安全なテスト入力をInboxで確認できません');
  const state=readState(),receipts=state.inboxReceipts||{};
  let created=0,duplicates=0,held=0;const errors=[];
- for(const c of captures){
+ for(const c of selected){
   if(receipts[c.id])continue;
   const p=classifyCapture(c);
   if(p.status!=='write'){held++;continue;}
@@ -103,7 +108,7 @@ async function inboxSync(){
    state.inboxReceipts=receipts;saveState(state);
   }
   catch(e){errors.push(c.id+': '+String(e.message||e));break;}
-  if(created>=10)break;
+  if(created>=(mode==='test'?1:10))break;
  }
  const a=new Alert();a.title=errors.length?'Inbox仕分け：保留あり':'Inbox仕分け完了';
  a.message=`登録 ${created}件／既存 ${duplicates}件／保留 ${held}件`+(errors.length?'\n'+errors[0].slice(0,250):'');a.addAction('閉じる');await a.present();
