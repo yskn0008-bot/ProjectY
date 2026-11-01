@@ -149,3 +149,30 @@ test("health status reads only the existing local verified metadata, not new net
   assert.equal(denied(),null);
   assert.equal(reads,1,'no file is read without the existing token');
 });
+
+test("TODAY health line renders verified counts and unknown state using existing layout",()=>{
+  const displayCode=widgetSource.match(/function addYosHealthStatus\(widget\) \{[\s\S]*?\n\}/u)?.[0];
+  assert.ok(displayCode);
+  const render=(value)=>{
+    const texts=[];
+    const row={
+      layoutHorizontally:()=>{},centerAlignContent:()=>{},addSpacer:()=>{},
+      addText:(s)=>{texts.push(s);return {font:null,textColor:null,lineLimit:0,minimumScaleFactor:0};}
+    };
+    const widget={addStack:()=>row};
+    const f=new Function('yosHealthReadTodaySnapshot','addSymbol','font','color','COLORS',
+      displayCode+';return addYosHealthStatus;')(
+        ()=>value,()=>{},(size)=>({size}),(name)=>name,
+        {coral:'#A00',muted:'#777',text:'#111',faint:'#999'}
+      );
+    f(widget);
+    return texts;
+  };
+  assert.deepEqual(render({day:'2026-11-01',meals:1,activities:0}),[
+    '健康記録','食事 1件 · 運動 未報告'
+  ]);
+  assert.deepEqual(render({day:'2026-11-01',meals:0,activities:1}),[
+    '健康記録','食事 未報告 · 運動 1件'
+  ]);
+  assert.deepEqual(render(null),['健康記録','同期の確認待ち']);
+});
