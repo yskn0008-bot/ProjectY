@@ -3,6 +3,7 @@ const K='YOS_NOTION_INTEGRATION_TOKEN';
 const DB='965c6086-32c1-463d-93b4-87a9cb69b3ad';
 const SHOPPING='d0ed2cf0-c84e-4770-b77c-3a1a9e11bcfc';
 const DIARY='fe0e0973-d1cc-4bde-b138-1cb1da64ac68';
+const LIFE='30df9a73-2ea7-4ff7-8187-2b62dc8f9da4';
 const INBOX='3d35ca88-2895-81ef-9dc8-d5f11ff8e213';
 const TEST_CAPTURE_ID='clarity:yos-test-20261101-0649';
 const API='https://api.notion.com/v1',VERSION='2025-09-03';
@@ -53,8 +54,10 @@ function classifyCapture(c){
  // Shared web text, OCR and forwarded material cannot authorize a write by themselves.
  if(/Share/i.test(c.source))return {status:'hold',reason:'共有内容は指示とみなさない'};
  if(/(?:残高|支払|入金|出金|返済|円|PayPay|銀行)/i.test(s))return {status:'hold',reason:'Money照合待ち'};
- if(/^(?:生活記録|Life Log|通知)に/.test(s))return {status:'hold',reason:'接続先の確認待ち'};
- let m=s.match(/^(?:タスク|やること)(?:に)?[：:]\s*(.+)$/) || s.match(/^(.+?)を(?:タスク|やること)に(?:登録|追加|入れて)(?:して)?[。！!]?$/);
+ if(/^(?:Life Log|通知)に/.test(s))return {status:'hold',reason:'接続先の確認待ち'};
+ let m=s.match(/^生活記録に[：:\s]*(.+?)を(?:記録|保存)して[。！!]?$/);
+ if(m&&m[1].trim()&&!/(?:明日|来週|予定|つもり)/.test(m[1]))return {status:'write',target:'life_event',title:m[1].trim()};
+ m=s.match(/^(?:タスク|やること)(?:に)?[：:]\s*(.+)$/) || s.match(/^(.+?)を(?:タスク|やること)に(?:登録|追加|入れて)(?:して)?[。！!]?$/);
  if(m){const name=m[1].trim();if(!name||/(?:明日|来週|今日|\d{1,2}時|\d{1,2}日)/.test(name))return {status:'hold',reason:'期限の解釈待ち'};return {status:'write',target:'task',title:name};}
  m=s.match(/^(.+?)を(?:欲しいもの|買い物リスト)に(?:登録|追加|入れて)(?:して)?[。！!]?$/);
  if(m&&m[1].trim())return {status:'write',target:'shopping',title:m[1].trim()};
@@ -76,13 +79,13 @@ async function allInboxBlocks(){
 }
 async function matches(ds,filter){const r=await api('/data_sources/'+ds+'/query','POST',{filter,page_size:2});if(r.has_more||r.results?.length>1)throw Error('既存データが複数一致。登録を保留');return r.results||[];}
 async function saveCapture(c,p){
- const ds={task:DB,shopping:SHOPPING,diary:DIARY}[p.target];
+ const ds={task:DB,shopping:SHOPPING,diary:DIARY,life_event:LIFE}[p.target];
  const key='inbox:'+c.id;
- const keyField={task:'同期キー',shopping:'メモ',diary:'記録キー'}[p.target];
+ const keyField={task:'同期キー',shopping:'メモ',diary:'記録キー',life_event:'記録キー'}[p.target];
  const contains=p.target==='shopping';
  const byKey=await matches(ds,{property:keyField,rich_text:contains?{contains:key}:{equals:key}});
  if(byKey.length){const page=await api('/pages/'+byKey[0].id);if(plain(page.properties?.[keyField]?.rich_text).includes(key))return 'duplicate';throw Error('同期キーの読戻し不一致');}
- const titleField={task:'やること',shopping:'商品名',diary:'日記'}[p.target];
+ const titleField={task:'やること',shopping:'商品名',diary:'日記',life_event:'イベント名'}[p.target];
  const sameTitle=await matches(ds,{property:titleField,title:{equals:p.title}});
  if(sameTitle.length)throw Error('同名の既存項目あり。原文を保持して保留');
  if(p.target==='diary'){
@@ -94,6 +97,7 @@ async function saveCapture(c,p){
  if(p.target==='task')props={'やること':t,'同期キー':ref,'正本・根拠':{rich_text:rich('YOS Inbox '+c.id)},'種類':{select:{name:'Task'}},'状態':{select:{name:'次にやる'}}};
  if(p.target==='shopping')props={'商品名':t,'メモ':{rich_text:rich(c.raw+'\n'+key)},'区分':{select:{name:'欲しいもの'}},'買い物状態':{select:{name:'検討中'}}};
  if(p.target==='diary')props={'日記':t,'本文':{rich_text:rich(p.body)},'日付':{date:{start:localDay(c.at)}},'記録元':{select:{name:'Clarity'}},'記録キー':ref};
+ if(p.target==='life_event')props={'イベント名':t,'備考':{rich_text:rich(c.raw)},'記録キー':ref,'取得元':{select:{name:'Clarity'}},'種類':{select:{name:'その他'}}};
  const created=await api('/pages','POST',{parent:{type:'data_source_id',data_source_id:ds},properties:props});
  if(!created.id)throw Error('Notionが作成IDを返しませんでした');
  const page=await api('/pages/'+created.id);
