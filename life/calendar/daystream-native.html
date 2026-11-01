@@ -111,9 +111,9 @@ button:disabled{opacity:.4;cursor:default} .frame{max-width:900px;margin:0 auto;
       const key=[x.source,x.type,x.id].join('|');
       // Collapse visually identical tasks on the same day without deleting
       // or merging their underlying Notion records. Never dedupe money.
-      const visualKey=(x.type==='task'||(x.type==='schedule'&&x.subtitle==='終日'))?[x.type,x.date,String(x.title||'').trim().normalize('NFKC'),x.type==='task'?Boolean(x.done):'終日'].join('|'):null;
-      if(seen.has(key)||(visualKey&&seen.has('display:'+visualKey)))continue;
-      seen.add(key);if(visualKey)seen.add('display:'+visualKey);deduped.push(x);
+      const visualTaskKey=x.type==='task'?[x.type,x.date,String(x.title||'').trim().normalize('NFKC'),Boolean(x.done)].join('|'):null;
+      if(seen.has(key)||(visualTaskKey&&seen.has('display:'+visualTaskKey)))continue;
+      seen.add(key);if(visualTaskKey)seen.add('display:'+visualTaskKey);deduped.push(x);
     }
     return deduped;
   }
