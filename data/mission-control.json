@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-01T21:17:49+09:00",
+  "updated_at": "2026-11-02T05:24:13+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-01T12:16:53Z"
+      "updated_at": "2026-11-01T16:23:20Z"
     },
     {
       "id": "github-issue-234",
@@ -195,6 +195,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-efc283abf334",
+      "title": "chore(yos-ai): retry deferred approved release (2/4)",
+      "completed_at": "2026-11-01T16:21:41Z",
+      "result": "GitHub mainへ反映（efc283a）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/efc283abf334e86ef6bf41cf65550fff82a11132"
+    },
+    {
       "id": "github-commit-9d1838674610",
       "title": "fix(yos-today): show only verified journal reports and confirmed cash snapshots",
       "completed_at": "2026-11-01T12:17:25Z",
@@ -221,13 +228,6 @@
       "completed_at": "2026-11-01T08:01:56Z",
       "result": "GitHub mainへ反映（28934bf）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/28934bfe88e8c09cd3c845a31c6fc9334b9ea5a1"
-    },
-    {
-      "id": "github-commit-115b445109ef",
-      "title": "YOS Inbox: stage guarded sorting on existing YOS AI service (#658)",
-      "completed_at": "2026-11-01T07:59:21Z",
-      "result": "GitHub mainへ反映（115b445）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/115b445109efe982de1e5514076297348c8f3233"
     },
     {
       "id": "complete-002",
@@ -264,7 +264,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-01T21:17:49+09:00",
+      "last_update": "2026-11-02T05:24:13+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -345,7 +345,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-01T21:17:49+09:00",
+      "last_update": "2026-11-02T05:24:13+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -368,7 +368,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-01T21:17:49+09:00",
+      "last_update": "2026-11-02T05:24:13+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -450,5 +450,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "72f88928be7d9fb1bb07d63fd6ea8d91a34b82126424fb9efcc66c7508270577"
+  "github_snapshot_hash": "e0665bd6b662fbb82059fd35ca038aeae9f5f635c0de7fed1ea2d8653b534c2f"
 }
