@@ -2,6 +2,9 @@
 import copy
 import plistlib
 import unittest
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from audit_google_maps_contract import audit_navigation, BASE, SUFFIX
 
