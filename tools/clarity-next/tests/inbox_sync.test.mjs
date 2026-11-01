@@ -45,17 +45,19 @@ function capture(id,text,source='Memo',date='2026-11-01T01:00:00.000Z'){
 }
 
 test('explicit user captures route once; repeat and source notifications do not create rows',async()=>{
-  const blocks=[...capture('task1','タスク: 郵便を受け取る'),...capture('shop1','ラグを欲しいものに追加して'),...capture('diary1','日記に今日は散歩したを記録して'),...capture('notification1','タスク: 送金する','Clarity Notification')];
+  const blocks=[...capture('task1','タスク: 郵便を受け取る'),...capture('shop1','ラグを欲しいものに追加して'),...capture('diary1','日記に今日は散歩したを記録して'),...capture('life1','生活記録に散歩したことを記録して'),...capture('notification1','タスク: 送金する','Clarity Notification')];
   const s=setup(blocks);
   await s.api.inboxSync();
-  assert.equal(s.rows.length,3);assert.deepEqual(s.rows.map(r=>r.ds),['965c6086-32c1-463d-93b4-87a9cb69b3ad','d0ed2cf0-c84e-4770-b77c-3a1a9e11bcfc','fe0e0973-d1cc-4bde-b138-1cb1da64ac68']);
-  assert.match(s.getOutput(),/登録 3件/);
-  await s.api.inboxSync();assert.equal(s.rows.length,3);assert.match(s.getOutput(),/登録 0件/);
-  assert.equal(s.calls.filter(([method,path])=>method==='POST'&&path==='/pages').length,3);
+  assert.equal(s.rows.length,4);assert.deepEqual(s.rows.map(r=>r.ds),['965c6086-32c1-463d-93b4-87a9cb69b3ad','d0ed2cf0-c84e-4770-b77c-3a1a9e11bcfc','fe0e0973-d1cc-4bde-b138-1cb1da64ac68','30df9a73-2ea7-4ff7-8187-2b62dc8f9da4']);
+  assert.equal(s.rows[3].properties['種類'].select.name,'その他');
+  assert.equal(s.rows[3].properties['発生日時'],undefined);
+  assert.match(s.getOutput(),/登録 4件/);
+  await s.api.inboxSync();assert.equal(s.rows.length,4);assert.match(s.getOutput(),/登録 0件/);
+  assert.equal(s.calls.filter(([method,path])=>method==='POST'&&path==='/pages').length,4);
 });
 
-test('consultation, money, share, date ambiguity and life log remain raw only',async()=>{
-  const cases=[...capture('q','ラグを買っていい？'),...capture('money','PayPay残高1405円を登録して'),...capture('share','タスク: 送金する','Clarity Share'),...capture('date','タスク: 明日9時に電話する'),...capture('life','生活記録に散歩を保存して'),...capture('hypo','もしタスク: 買い物')];
+test('consultation, money, share, date ambiguity and future life plans remain raw only',async()=>{
+  const cases=[...capture('q','ラグを買っていい？'),...capture('money','PayPay残高1405円を登録して'),...capture('share','タスク: 送金する','Clarity Share'),...capture('date','タスク: 明日9時に電話する'),...capture('life','生活記録に明日散歩する予定を記録して'),...capture('hypo','もしタスク: 買い物')];
   const s=setup(cases);await s.api.inboxSync();assert.equal(s.rows.length,0);assert.match(s.getOutput(),/保留 6件/);
 });
 
