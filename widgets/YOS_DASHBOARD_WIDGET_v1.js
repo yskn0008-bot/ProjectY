@@ -555,6 +555,19 @@ function addYosHealthStatus(widget) {
   status.textColor=color(state ? COLORS.text : COLORS.faint);
   status.lineLimit=1;
   status.minimumScaleFactor=0.8;
+
+  // Suggested next action, not a statement about what the user did not do.
+  // Only confirmed same-day capture metadata can trigger a suggestion.
+  if(state){
+    widget.addSpacer(4);
+    const next=widget.addText(state.activities>0
+      ? '次 → 水分補給と休息も意識'
+      : '次 → 体調がよければ5分歩く');
+    next.font=font(15,'medium');
+    next.textColor=color(COLORS.muted);
+    next.lineLimit=1;
+    next.minimumScaleFactor=0.85;
+  }
 }
 
 function makeToday(taskResult, calendarResult, money) {

@@ -159,7 +159,11 @@ test("TODAY health line renders verified counts and unknown state using existing
       layoutHorizontally:()=>{},centerAlignContent:()=>{},addSpacer:()=>{},
       addText:(s)=>{texts.push(s);return {font:null,textColor:null,lineLimit:0,minimumScaleFactor:0};}
     };
-    const widget={addStack:()=>row};
+    const widget={
+      addStack:()=>row,
+      addSpacer:()=>{},
+      addText:(s)=>{texts.push(s);return {font:null,textColor:null,lineLimit:0,minimumScaleFactor:0};}
+    };
     const f=new Function('yosHealthReadTodaySnapshot','addSymbol','font','color','COLORS',
       displayCode+';return addYosHealthStatus;')(
         ()=>value,()=>{},(size)=>({size}),(name)=>name,
@@ -169,10 +173,13 @@ test("TODAY health line renders verified counts and unknown state using existing
     return texts;
   };
   assert.deepEqual(render({day:'2026-11-01',meals:1,activities:0}),[
-    '健康記録','食事 1件 · 運動 未報告'
+    '健康記録','食事 1件 · 運動 未報告','次 → 体調がよければ5分歩く'
   ]);
   assert.deepEqual(render({day:'2026-11-01',meals:0,activities:1}),[
-    '健康記録','食事 未報告 · 運動 1件'
+    '健康記録','食事 未報告 · 運動 1件','次 → 水分補給と休息も意識'
+  ]);
+  assert.deepEqual(render({day:'2026-11-01',meals:0,activities:0}),[
+    '健康記録','食事 未報告 · 運動 未報告','次 → 体調がよければ5分歩く'
   ]);
   assert.deepEqual(render(null),['健康記録','同期の確認待ち']);
 });
