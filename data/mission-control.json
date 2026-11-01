@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-01T16:44:46+09:00",
+  "updated_at": "2026-11-01T16:45:10+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -110,7 +110,7 @@
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/657",
-      "updated_at": "2026-11-01T07:43:42Z"
+      "updated_at": "2026-11-01T07:44:42Z"
     },
     {
       "id": "github-issue-10",
@@ -264,7 +264,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-01T16:44:46+09:00",
+      "last_update": "2026-11-01T16:45:10+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -345,7 +345,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-01T16:44:46+09:00",
+      "last_update": "2026-11-01T16:45:10+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -368,7 +368,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-01T16:44:46+09:00",
+      "last_update": "2026-11-01T16:45:10+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -450,5 +450,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "59f9775171f103e1104840af4b9c67aa34f168fefd342e0d415f2b35f9ebcd77"
+  "github_snapshot_hash": "28a58ee2bf33c2fdf351ae6bd91035c71b8e295106ee1d1d031600eda9ddf77c"
 }
