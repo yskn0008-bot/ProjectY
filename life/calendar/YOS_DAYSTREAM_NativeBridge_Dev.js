@@ -3,7 +3,7 @@
 // Requires the unchanged production Clarity / Notion Inbox setup only for credentials.
 'use strict';
 const PREVIEW_URL = 'https://raw.githubusercontent.com/yskn0008-bot/ProjectY/refs/heads/feat/yos-calendar-web-preview-20261101/life/calendar/daystream-native.html';
-const HTML_SHA256 = '0434fc30fe30913c7f17b027593edc4e6572a25e5ccc59edc7cb54f6abbe66d7';
+const HTML_SHA256 = 'b31ebae6e68de7f8d718cb28bd849e808efb147aedaa78b7e7b0c1b491655e90';
 function sha256Hex(input){
   const K=[
     0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5,0x3956c25b,0x59f111f1,0x923f82a4,0xab1c5ed5,
