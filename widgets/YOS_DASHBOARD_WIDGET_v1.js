@@ -642,7 +642,153 @@ async function configureIfNeeded() {
   return await promptToken();
 }
 
+
+// YOS Health Local Bridge v1 — Scriptable runtime; Notion/iPhone only.
+// Imported into the existing YOS Dashboard v2 script as an isolated tail hook.
+const YOS_HEALTH_BRIDGE_MARKER_V1 = 'YOS_HEALTH_LOCAL_BRIDGE_V1';
+const YOS_HEALTH_EXISTING_INBOX_ID = '3d35ca88-2895-81ef-9dc8-d5f11ff8e213';
+const YOS_HEALTH_EXISTING_DIARY_ID = 'fe0e0973-d1cc-4bde-b138-1cb1da64ac68';
+const YOS_HEALTH_TOKEN_KEY = 'YOS_NOTION_INTEGRATION_TOKEN';
+const YOS_HEALTH_NOTION_VERSION = '2025-09-03';
+const YOS_HEALTH_TOKYO_DAY = new Intl.DateTimeFormat('sv-SE', {timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit'});
+const YOS_HEALTH_HEADER = /^(\d{4}-\d{2}-\d{2}T[^\s·]+)\s*·\s*(?:Memo|Clarity(?:\.Voice|\.Text)?|clarity\/(?:voice|text))\s*·\s*(clarity[:\-][A-Za-z0-9._:-]{3,128})/u;
+const YOS_HEALTH_EAT = /(?:食べ(?:た|ました|てきた|たよ)|飲んだ|食事(?:した|済ませた)|(?:朝|昼|夕|夜)(?:ごはん|飯|食)(?:は|を|に|：|:))/u;
+const YOS_HEALTH_ITEM = /(?:豚汁|弁当|チャーハン|炒飯|そぼろ|ご飯|ごはん|食事|朝食|昼食|夕食|夜食|丼|うどん|そば|サラダ|スープ|ラーメン|パスタ|パン|カレー|おにぎり|米|肉|魚|卵|豆腐|野菜|ほっともっと|チキン|果物|納豆|ヨーグルト|昼飯|夕飯|朝飯)/u;
+const YOS_HEALTH_MOVE = /(?:歩い(?:た|てきた)|歩きました|散歩(?:した|してきた)|ウォーキング(?:を)?(?:した|してきた)|スクワット[^。\n]{0,20}(?:した|やった)|筋トレ[^。\n]{0,20}(?:した|やった)|かかと上げ[^。\n]{0,20}(?:した|やった)|運動(?:を)?した)/u;
+const YOS_HEALTH_NO = /(?:食べ(?:てない|ていない|なかった|ない|ず)|飲まなかった|歩(?:いてない|いていない|かなかった|かない)|運動(?:してない|していない|しなかった)|スクワット(?:してない|しなかった)|散歩(?:してない|しなかった)|まだ(?:食べ|歩い)てない)/u;
+const YOS_HEALTH_PLAN = /(?:明日|来週|来月|これから|今から|予定|つもり|したい|食べたい|歩きたい|食べよう|歩こう|食べたら|歩いたら|したらどう|仮に|もし|場合|ほうがいい|方がいい)/u;
+const YOS_HEALTH_OTHER = /(?:友達|家族|父|母|彼|彼女|妻|夫|子供|息子|娘|同僚)が[^。\n]{0,60}(?:食べ|飲ん|歩い|散歩|スクワット|運動)/u;
+
+function yosHealthClassify(raw) {
+  const s=String(raw||'').trim();
+  if(!s||s.length>1000)return [];
+  const correct=/昨日(?:じゃない|ではない|じゃなく|ではなく)今日(?:の)?(?:今日の)?(?:午前|午後|[0-9０-９]|の午前|の午後)/u;
+  const fixed=correct.test(s)?s.slice(s.search(/昨日(?:じゃない|ではない|じゃなく|ではなく)今日/u)).replace(/^昨日(?:じゃない|ではない|じゃなく|ではなく)/u,''):s;
+  const clauses=fixed.split(/(?<=[。！？!?\n;；])|、(?=(?:明日|来週|来月|今から|これから|もし|今日は|今日も))/u).map(x=>x.trim()).filter(Boolean);
+  const found=new Set();
+  for(const piece of clauses){
+    if(/[?？]\s*$/u.test(piece)||YOS_HEALTH_NO.test(piece)||YOS_HEALTH_PLAN.test(piece)||YOS_HEALTH_OTHER.test(piece)||/(?:昨日|一昨日|先週|先月)/u.test(piece))continue;
+    if(YOS_HEALTH_EAT.test(piece)&&YOS_HEALTH_ITEM.test(piece))found.add('meal');
+    if(YOS_HEALTH_MOVE.test(piece))found.add('activity');
+  }
+  if(!found.size&&clauses.length>1&&!YOS_HEALTH_NO.test(fixed)&&!YOS_HEALTH_PLAN.test(fixed)&&!YOS_HEALTH_OTHER.test(fixed)&&!/[?？]/u.test(fixed)&&!/(?:昨日|一昨日|先週|先月)/u.test(fixed)){
+    if(YOS_HEALTH_EAT.test(fixed)&&YOS_HEALTH_ITEM.test(fixed))found.add('meal');
+    if(YOS_HEALTH_MOVE.test(fixed))found.add('activity');
+  }
+  return ['meal','activity'].filter(x=>found.has(x));
+}
+function yosHealthDay(iso){const d=new Date(iso);return Number.isFinite(d.getTime())?YOS_HEALTH_TOKYO_DAY.format(d):null;}
+function yosHealthValue(parts){return Array.isArray(parts)?parts.map(x=>x?.plain_text||x?.text?.content||'').join(''):'';}
+function yosHealthRich(s){const a=[];s=String(s||'');for(let i=0;i<s.length;i+=1700)a.push({type:'text',text:{content:s.slice(i,i+1700)}});return a;}
+function yosHealthRecent(now,iso){const a=yosHealthDay(now),b=yosHealthDay(iso);if(!a||!b)return false;const delta=(Date.parse(a+'T00:00:00+09:00')-Date.parse(b+'T00:00:00+09:00'))/86400000;return delta>=0&&delta<=2;}
+function yosHealthExtract(blocks,now){
+  const hits=[],seen=new Set();
+  for(let i=0;i<blocks.length;i++){
+    const blk=blocks[i];if(blk?.type!=='paragraph')continue;
+    const line=yosHealthValue(blk.paragraph?.rich_text).trim();const m=YOS_HEALTH_HEADER.exec(line);if(!m||!yosHealthRecent(now,m[1]))continue;
+    let raw=line.slice(m[0].length).trim().replace(/^[-–—]+\s*/u,'');
+    if(!raw&&blocks[i+1]?.type==='paragraph'){
+      const candidate=yosHealthValue(blocks[i+1].paragraph?.rich_text).trim();
+      if(candidate&&!YOS_HEALTH_HEADER.test(candidate))raw=candidate;
+    }
+    raw=raw.replace(/\n\s*---\s*$/u,'').trim();
+    for(const kind of yosHealthClassify(raw)){
+      const marker=m[2]+':'+kind;if(seen.has(marker))continue;seen.add(marker);
+      hits.push({id:m[2],kind,raw,at:m[1],day:yosHealthDay(m[1])});
+    }
+  }
+  if(hits.length>40)throw Error('health inbox event limit');
+  return hits;
+}
+function yosHealthMerge(existing,events){
+  let updated=String(existing||''),added=0;
+  for(const e of events){
+    const id='[YOS-health:'+e.id+':'+e.kind+']';
+    if(updated.includes(id)||(e.kind==='meal'&&updated.includes('Clarity報告ID: '+e.id)))continue;
+    const date=new Intl.DateTimeFormat('ja-JP',{timeZone:'Asia/Tokyo',hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date(e.at));
+    const advice=e.kind==='meal' ? (/豚汁|スープ|汁物/u.test(e.raw)?'汁物は摂取済み。具材・野菜量は未確認。':'食事全体の量と栄養は未確認。'): '運動の実施報告。時間や負荷は本人の発言で確認できる範囲のみ。';
+    const line='\n【Clarity健康記録｜'+(e.kind==='meal'?'食事':'運動')+'｜報告 '+date+'】\n'+e.raw+'\n'+advice+'\n'+id+'\n';
+    if(updated.length+line.length>35000)throw Error('health day journal too large');
+    updated+=line;added++;
+  }
+  return {updated,added};
+}
+async function yosHealthApi(token,path,method,body){
+  const req=new Request('https://api.notion.com/v1'+path);
+  req.method=method||'GET';req.timeoutInterval=7;
+  req.headers={Authorization:'Bearer '+token,'Notion-Version':YOS_HEALTH_NOTION_VERSION,'Content-Type':'application/json'};
+  if(body!==undefined)req.body=JSON.stringify(body);
+  const data=await req.loadJSON();
+  if(!req.response||req.response.statusCode>=300||!data||typeof data!=='object')throw Error('health notion unavailable');
+  return data;
+}
+async function yosHealthInbox(token){
+  let cursor=null,all=[];
+  for(let page=0;page<8;page++){
+    const path='/blocks/'+YOS_HEALTH_EXISTING_INBOX_ID+'/children?page_size=100'+(cursor?'&start_cursor='+encodeURIComponent(cursor):'');
+    const x=await yosHealthApi(token,path,'GET');
+    if(!Array.isArray(x.results))throw Error('health inbox invalid');
+    all.push(...x.results);
+    if(!x.has_more)return all;
+    if(!x.next_cursor||x.next_cursor===cursor)throw Error('health cursor invalid');
+    cursor=x.next_cursor;
+  }
+  throw Error('health inbox too many pages; no partial write');
+}
+async function yosHealthExisting(token,day){
+  const x=await yosHealthApi(token,'/data_sources/'+YOS_HEALTH_EXISTING_DIARY_ID+'/query','POST',{filter:{property:'記録キー',rich_text:{equals:'health:'+day}},page_size:5});
+  if(!Array.isArray(x.results)||x.results.length>1)throw Error('health journal duplicate');
+  const p=x.results[0]||null;
+  if(p&&(yosHealthValue(p.properties?.['記録キー']?.rich_text)!=='health:'+day||p.properties?.['記録元']?.select?.name!=='Clarity'||p.properties?.['日付']?.date?.start?.slice(0,10)!==day))throw Error('health journal mismatch');
+  return p;
+}
+async function yosHealthWrite(token,day,events){
+  let p=await yosHealthExisting(token,day);
+  if(!p){
+    const body=yosHealthMerge('',events).updated;
+    const props={'日記':{title:yosHealthRich(day+'｜健康・食事・運動記録（Clarity）')},'日付':{date:{start:day}},'記録元':{select:{name:'Clarity'}},'記録キー':{rich_text:yosHealthRich('health:'+day)},'本文':{rich_text:yosHealthRich(body)},'YOS要約':{rich_text:yosHealthRich('Clarityで本人が実施を報告した食事・運動のみを記録。未報告は未確認。')}};
+    try{await yosHealthApi(token,'/pages','POST',{parent:{type:'data_source_id',data_source_id:YOS_HEALTH_EXISTING_DIARY_ID},properties:props});}catch(e){const found=await yosHealthExisting(token,day);if(!found)throw e;}
+    p=await yosHealthExisting(token,day);if(!p)throw Error('health create unverified');
+  }else{
+    const existing=yosHealthValue(p.properties?.['本文']?.rich_text),merged=yosHealthMerge(existing,events);
+    if(merged.added){
+      try{await yosHealthApi(token,'/pages/'+p.id,'PATCH',{properties:{'本文':{rich_text:yosHealthRich(merged.updated)}}});}
+      catch(e){const checked=await yosHealthApi(token,'/pages/'+p.id);if(events.some(ev=>yosHealthMerge(yosHealthValue(checked.properties?.['本文']?.rich_text),[ev]).added!==0))throw e;}
+    }
+  }
+  const checked=await yosHealthApi(token,'/pages/'+p.id);
+  const current=yosHealthValue(checked.properties?.['本文']?.rich_text);
+  if(events.some(ev=>yosHealthMerge(current,[ev]).added!==0))throw Error('health journal readback mismatch');
+}
+async function yosHealthRunOnce(){
+  // Widget/background refreshes are scheduled by iOS; no timer, daemon or new service.
+  if(!Keychain.contains(YOS_HEALTH_TOKEN_KEY))return {status:'missing-keychain'};
+  const fm=FileManager.local();
+  const file=fm.joinPath(fm.documentsDirectory(),'yos-health-local-sync-v1.json');
+  const now=Date.now();let state={};
+  try{if(fm.fileExists(file))state=JSON.parse(fm.readString(file));}catch{}
+  if(Number.isFinite(state.lastAttempt)&&now-state.lastAttempt<30*60*1000)return {status:'cooldown'};
+  // This marker is a cooldown, not authoritative data. Any write must still
+  // check Notion, and failed writes will be retried on a later refresh.
+  try{fm.writeString(file,JSON.stringify({lastAttempt:now}));}catch{}
+  try{
+    const token=Keychain.get(YOS_HEALTH_TOKEN_KEY);
+    if(!token)return {status:'missing-keychain'};
+    const blocks=await yosHealthInbox(token);
+    const hits=yosHealthExtract(blocks,new Date(now));
+    const map=new Map();for(const hit of hits){const prev=map.get(hit.day)||[];prev.push(hit);map.set(hit.day,prev);}
+    for(const [day,events] of map)await yosHealthWrite(token,day,events);
+    try{fm.writeString(file,JSON.stringify({lastAttempt:now,lastVerified:Date.now(),scanned:blocks.length,candidates:hits.length}));}catch{}
+    return {status:'verified',scanned:blocks.length,candidates:hits.length};
+  }catch(_){
+    // Failures should not get a 30-minute cooldown. Retry automatically after
+    // a short gap; preserve only safe metadata and never store raw health text.
+    try{fm.writeString(file,JSON.stringify({lastAttempt:now-25*60*1000,lastErrorAt:now}));}catch{}
+    return {status:'unverified'};
+  }
+}
 if (ACTION === "baseHome" && !config.runsInWidget) {
+  try { await yosHealthRunOnce(); } catch (_) {}
   await refreshAndOpenBaseHome();
 } else {
   const shouldContinue = await configureIfNeeded();
@@ -660,6 +806,7 @@ if (ACTION === "baseHome" && !config.runsInWidget) {
     if (config.runsInWidget) Script.setWidget(widget);
     else if (key === "TODAY") await widget.presentLarge();
     else await widget.presentMedium();
+    try { await yosHealthRunOnce(); } catch (_) {}
     Script.complete();
   }
 }
