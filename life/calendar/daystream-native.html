@@ -109,8 +109,11 @@ button:disabled{opacity:.4;cursor:default} .frame{max-width:900px;margin:0 auto;
       // IDs represent distinct records even when title/date/amount match. Do not
       // collapse two real purchases based on similar display text.
       const key=[x.source,x.type,x.id].join('|');
-      if(seen.has(key))continue;
-      seen.add(key);deduped.push(x);
+      // Collapse visually identical tasks on the same day without deleting
+      // or merging their underlying Notion records. Never dedupe money.
+      const visualTaskKey=x.type==='task'?[x.type,x.date,String(x.title||'').trim().normalize('NFKC'),Boolean(x.done)].join('|'):null;
+      if(seen.has(key)||(visualTaskKey&&seen.has('display:'+visualTaskKey)))continue;
+      seen.add(key);if(visualTaskKey)seen.add('display:'+visualTaskKey);deduped.push(x);
     }
     return deduped;
   }
