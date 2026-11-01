@@ -12,12 +12,12 @@ function fixture() {return [
   block('m2', '2026-11-01T07:10:00Z · Memo · clarity:consult'), block('r2', 'これを買っていい？'),
   block('m3', '2026-11-01T07:20:00Z · Clarity Notification · clarity:untrusted'), block('r3', 'タスク: 送金する')
 ];}
-function setup(extraBlocks = []) {
+function setup(extraBlocks = [], replaceFixture = false) {
   let rows = [], writes = 0, lock = false;
   const redis = {async command([method]) {if (method !== 'SET') throw Error('Unexpected Redis command'); if (lock) return null; lock = true; return 'OK';}};
   async function notion(input, init) {
     const url = new URL(input), path = url.pathname.replace('/v1','');
-    if (path === `/blocks/${inbox}/children`) return Response.json({results: [...fixture(), ...extraBlocks], has_more: false});
+    if (path === `/blocks/${inbox}/children`) return Response.json({results: [...(replaceFixture ? [] : fixture()), ...extraBlocks], has_more: false});
     if (path.startsWith('/data_sources/') && path.endsWith('/query')) {
       const id = path.split('/')[2], filter = JSON.parse(init.body).filter;
       const matches = rows.filter(row => row.ds === id).filter(row => {
@@ -42,7 +42,7 @@ test('existing remote test row is detected without another write', async () => {
   const s = setup(), key = 'inbox:clarity:yos-test-20261101-0649';
   s.rows.push({id: 'remote-row', ds: taskId, properties: {'同期キー': {rich_text: [{text: {content: key}}]}}});
   const run = createInboxSorter({notionToken: 'test-token', inboxPageId: inbox, redis: s.redis, fetchImpl: s.notion});
-  assert.deepEqual(await run(), {created: 0, duplicates: 1, held: 1});
+  assert.deepEqual(await run(), {created: 0, duplicates: 1, held: 0});
   assert.equal(s.writes, 0);
   await assert.rejects(run(), /already running/);
   s.resetLock();
@@ -52,7 +52,7 @@ test('existing remote test row is detected without another write', async () => {
 
 test('one explicit capture creates once and retry after lost lock reads the same key', async () => {
   const s = setup();
-  const run = createInboxSorter({notionToken: 'test-token', inboxPageId: inbox, redis: s.redis, fetchImpl: s.notion});
+  const run = createInboxSorter({notionToken: 'test-token', inboxPageId: inbox, redis: s.redis, mode: 'run', fetchImpl: s.notion});
   assert.deepEqual(await run(), {created: 1, duplicates: 0, held: 1});
   assert.equal(s.rows[0].ds, taskId);
   s.resetLock();
@@ -63,9 +63,16 @@ test('one explicit capture creates once and retry after lost lock reads the same
 test('a legacy title is held without blocking later safe captures', async () => {
   const s = setup([block('m4', '2026-11-01T08:00:00Z · Memo · clarity:life-001'), block('r4', '生活記録に散歩したことを記録して')]);
   s.rows.push({id: 'legacy-row', ds: taskId, properties: {'やること': {title: [{text: {content: 'YOS Inbox仕分けテスト(動作確認後に完了)'}}]}}});
-  const run = createInboxSorter({notionToken: 'test-token', inboxPageId: inbox, redis: s.redis, fetchImpl: s.notion});
+  const run = createInboxSorter({notionToken: 'test-token', inboxPageId: inbox, redis: s.redis, mode: 'run', fetchImpl: s.notion});
   assert.deepEqual(await run(), {created: 1, duplicates: 0, held: 2});
   assert.equal(s.rows.at(-1).ds, '30df9a73-2ea7-4ff7-8187-2b62dc8f9da4');
+});
+
+test('missing acceptance input cannot process other historical captures', async () => {
+  const s = setup([block('old-meta', '2026-11-01T00:00:00Z · Memo · clarity:older'), block('old-raw', 'タスク: 郵便を受け取る')], true);
+  const run = createInboxSorter({notionToken: 'test-token', inboxPageId: inbox, redis: s.redis, fetchImpl: s.notion});
+  await assert.rejects(run(), /Acceptance capture missing/);
+  assert.equal(s.writes, 0);
 });
 
 test('cron route is inert without a configured secret and enable switch', async () => {
