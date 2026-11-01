@@ -87,6 +87,15 @@ body.glance-mode .demo-alert button{font-size:11px;min-height:30px}
 .glance-card{border:1px solid #DAE1E8;border-radius:17px;background:#fff;min-width:0;padding:12px 12px 11px;position:relative;overflow:hidden}
 .glance-card:before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:var(--accent)}
 .glance-schedule{--accent:var(--schedule)}.glance-task{--accent:var(--task)}.glance-money{--accent:var(--money)}.glance-habit{--accent:var(--habit)}
+/* Category banner color carries category, not importance. Action/completion remains textual. */
+.glance-stack .glance-card:before{display:none}
+.glance-stack .glance-card-head{background:var(--accent);border-radius:11px;padding:8px 9px;margin:-4px -4px 10px;color:#fff}
+.glance-stack .glance-card-title,.glance-stack .glance-card-count{color:#fff}
+.glance-stack .glance-card-title .glyph{background:rgba(255,255,255,.20);border:1px solid rgba(255,255,255,.28)}
+.glance-task .line-mark{color:var(--task)}
+.glance-money .glance-finbox.accent{background:#FBF4E8}
+.glance-habit .glance-habit-label{color:var(--habit)}
+
 .glance-card-head{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:9px}
 .glance-card-title{display:flex;align-items:center;gap:6px;font-weight:850;font-size:15px;color:var(--accent)}
 .glance-card-title .glyph{display:grid;place-items:center;width:23px;height:23px;border-radius:7px;background:var(--accent);color:#fff;font-size:13px;line-height:1}
