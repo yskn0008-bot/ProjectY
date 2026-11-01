@@ -64,3 +64,115 @@ test("health sync uses only existing Notion resources and never persists unverif
   assert.match(widgetSource, /Keychain\.contains\(YOS_HEALTH_TOKEN_KEY\)/);
   assert.doesNotMatch(widgetSource, /\bScriptable\.open\(/);
 });
+
+test("TODAY shows only recent, verified reports and does not infer missing exercise", () => {
+  const match=widgetSource.match(/function yosHealthSnapshot\(state, now\) \{[\s\S]*?\n\}/u);
+  assert.ok(match, "snapshot function exists");
+  const day=(value)=>new Intl.DateTimeFormat('sv-SE',{
+    timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit'
+  }).format(new Date(value));
+  const snapshot=new Function('yosHealthDay',match[0]+';return yosHealthSnapshot;')(day);
+  const now=Date.parse('2026-11-01T07:00:00.000Z');
+  const record={lastVerified:now-120000,today:{day:'2026-11-01',meals:1,activities:0}};
+  assert.deepEqual(snapshot(record,now),{
+    day:'2026-11-01',meals:1,activities:0,verifiedAt:now-120000
+  });
+  assert.equal(snapshot({},now),null);
+  assert.equal(snapshot({today:record.today},now),null);
+  assert.equal(snapshot({...record,today:{...record.today,day:'2026-10-31'}},now),null);
+  assert.equal(snapshot({...record,lastVerified:now-13*60*60*1000},now),null);
+  assert.equal(snapshot({...record,lastVerified:now+120000},now),null);
+  assert.equal(snapshot({...record,today:{...record.today,meals:-1}},now),null);
+  assert.equal(snapshot({...record,today:{...record.today,activities:1.5}},now),null);
+  assert.equal(snapshot({...record,today:{...record.today,meals:41}},now),null);
+});
+
+test("TODAY retains existing calendars, tasks, routines and money beside one compact health row", () => {
+  const today=widgetSource.slice(widgetSource.indexOf('function makeToday('),
+    widgetSource.indexOf('\nasync function promptToken('));
+  const now=widgetSource.slice(widgetSource.indexOf('function makeNow('),
+    widgetSource.indexOf('\n// Display only counts'));
+  assert.match(today,/addYosHealthStatus\(widget\)/);
+  assert.equal((today.match(/addYosHealthStatus\(widget\)/g)||[]).length,1);
+  assert.doesNotMatch(now,/addYosHealthStatus\(widget\)/);
+  for(const phrase of ['addEventLine(widget, event)','addTaskLine(widget, task, false)',
+    'addRoutineButton(routines, "Morning"','addRoutineButton(routines, "Night"',
+    'const moneyRow = widget.addStack()']){
+    assert.ok(today.includes(phrase),'existing TODAY section retained: '+phrase);
+  }
+  assert.match(widgetSource,/state\.activities \? state\.activities\+'件' : '未報告'/);
+  assert.match(widgetSource,/同期の確認待ち/);
+});
+
+test("health counts cache only verified same-day Inbox reports, without storing raw meal content", () => {
+  const run=widgetSource.slice(widgetSource.indexOf('async function yosHealthRunOnce()'),
+    widgetSource.indexOf('\nif (ACTION === "baseHome"'));
+  const loop=run.indexOf('await yosHealthWrite(token,day,events)');
+  const verified=run.indexOf('const confirmedToday=hits.filter');
+  const write=run.indexOf('lastVerified:Date.now()');
+  assert.ok(loop>=0 && verified>loop && write>verified);
+  assert.match(run,/hit\.kind==='meal'/);
+  assert.match(run,/hit\.kind==='activity'/);
+  assert.match(run,/today:snapshot/);
+  assert.doesNotMatch(run,/JSON\.stringify\(\{[^}]*raw:/);
+  assert.match(widgetSource,/if\(!Keychain\.contains\(YOS_HEALTH_TOKEN_KEY\)\)return null/);
+});
+
+test("health status reads only the existing local verified metadata, not new network data", () => {
+  const snapshotCode=widgetSource.match(/function yosHealthSnapshot\(state, now\) \{[\s\S]*?\n\}/u)?.[0];
+  const readerCode=widgetSource.match(/function yosHealthReadTodaySnapshot\(\) \{[\s\S]*?\n\}/u)?.[0];
+  assert.ok(snapshotCode&&readerCode);
+  const day=value=>new Intl.DateTimeFormat('sv-SE',{
+    timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit'
+  }).format(new Date(value));
+  const snapshot=new Function('yosHealthDay',snapshotCode+';return yosHealthSnapshot;')(day);
+  let reads=0;
+  const fm={
+    documentsDirectory:()=>'/docs',
+    joinPath:(root,name)=>root+'/'+name,
+    fileExists:()=>true,
+    readString:()=>{reads++;return JSON.stringify({
+      lastVerified:Date.now(),today:{day:day(Date.now()),meals:1,activities:0}
+    });}
+  };
+  const keychain={contains:()=>true};
+  const reader=new Function('Keychain','FileManager','YOS_HEALTH_TOKEN_KEY',
+    'yosHealthSnapshot',readerCode+';return yosHealthReadTodaySnapshot;')(
+      keychain,{local:()=>fm},'YOS_NOTION_INTEGRATION_TOKEN',snapshot);
+  const value=reader();
+  assert.equal(value.meals,1);
+  assert.equal(value.activities,0);
+  assert.equal(reads,1);
+  const denied=new Function('Keychain','FileManager','YOS_HEALTH_TOKEN_KEY',
+    'yosHealthSnapshot',readerCode+';return yosHealthReadTodaySnapshot;')(
+      {contains:()=>false},{local:()=>fm},'YOS_NOTION_INTEGRATION_TOKEN',snapshot);
+  assert.equal(denied(),null);
+  assert.equal(reads,1,'no file is read without the existing token');
+});
+
+test("TODAY health line renders verified counts and unknown state using existing layout",()=>{
+  const displayCode=widgetSource.match(/function addYosHealthStatus\(widget\) \{[\s\S]*?\n\}/u)?.[0];
+  assert.ok(displayCode);
+  const render=(value)=>{
+    const texts=[];
+    const row={
+      layoutHorizontally:()=>{},centerAlignContent:()=>{},addSpacer:()=>{},
+      addText:(s)=>{texts.push(s);return {font:null,textColor:null,lineLimit:0,minimumScaleFactor:0};}
+    };
+    const widget={addStack:()=>row};
+    const f=new Function('yosHealthReadTodaySnapshot','addSymbol','font','color','COLORS',
+      displayCode+';return addYosHealthStatus;')(
+        ()=>value,()=>{},(size)=>({size}),(name)=>name,
+        {coral:'#A00',muted:'#777',text:'#111',faint:'#999'}
+      );
+    f(widget);
+    return texts;
+  };
+  assert.deepEqual(render({day:'2026-11-01',meals:1,activities:0}),[
+    '健康記録','食事 1件 · 運動 未報告'
+  ]);
+  assert.deepEqual(render({day:'2026-11-01',meals:0,activities:1}),[
+    '健康記録','食事 未報告 · 運動 1件'
+  ]);
+  assert.deepEqual(render(null),['健康記録','同期の確認待ち']);
+});
