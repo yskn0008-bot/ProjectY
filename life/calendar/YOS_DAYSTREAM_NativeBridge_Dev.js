@@ -106,14 +106,25 @@ async function readApple(start,end){
       x?.title&&!/^[\s　]*[［\[【]\s*タクシー需要/.test(x.title)&&
       !/タクシー需要/.test(x.calendar?.title||'')
     );
-    const rows=eligible.slice(0,250).flatMap((x,i)=>{
+    // Deduplicate visually identical all-day events (e.g. holidays imported
+    // from multiple calendars). Timed appointments and source data stay intact.
+    const seenAllDay=new Set();
+    const unique=eligible.filter(x=>{
+      if(!x.isAllDay)return true;
+      const begin=new Date(x.startDate);
+      if(!Number.isFinite(begin.getTime()))return true;
+      const key=dateKey(begin)+'|'+clean(x.title,100).normalize('NFKC').trim();
+      if(seenAllDay.has(key))return false;
+      seenAllDay.add(key);return true;
+    });
+    const rows=unique.slice(0,250).flatMap((x,i)=>{
       const begin=new Date(x.startDate);if(!Number.isFinite(begin.getTime()))return [];
       const date=dateKey(begin);
       if(date<start||date>end)return [];
       const time=x.isAllDay?'終日':new Intl.DateTimeFormat('ja-JP',{timeZone:TZ,hour:'2-digit',minute:'2-digit',hour12:false}).format(begin);
       return [{type:'schedule',date,title:clean(x.title,100),subtitle:time,source:'Appleカレンダー',id:clean(x.identifier||i,70)}];
     });
-    return {status:eligible.length>=250?'partial':'ok',rows};
+    return {status:unique.length>=250?'partial':'ok',rows};
   }catch{return {status:'error',rows:[]}};
 }
 async function readNotion(source,field,parse,start,end,token){
