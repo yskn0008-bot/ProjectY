@@ -260,7 +260,7 @@ state.items=state.demo?createDemo():[...life,...money];state.loadedAt=new Date()
     $('glanceNextPayment').style.color=overdue?'var(--danger)':'#5A6977';
     const habitRecords=habits.length;
     $('glanceHabitCount').textContent=habitRecords?`${habitRecords}件の実施報告`:'実施記録：未確認';
-    $('glanceHabitBar').style.width=habitRecords?'100%':'0%';
+    $('glanceHabitBar').style.width='100%';$('glanceHabitBar').style.opacity=habitRecords?'1':'0';
     $('glanceHabitLabel').textContent=habitRecords?'記録あり':'未確認';
     $('glanceHabitText').textContent=habitRecords?habits.map(x=>x.title+'（'+x.subtitle+'）').slice(0,2).join('・'):'記録なし＝未実施ではありません。';
     const openTasks=tasks.filter(x=>!x.done),planned=money.some(x=>x.moneyKind==='expense'&&!x.complete);
