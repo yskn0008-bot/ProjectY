@@ -51,7 +51,7 @@ const addDays=(date,n)=>{const d=new Date(date.getFullYear(),date.getMonth(),dat
 const clean=(value,limit=120)=>String(value??'').replace(/[\u0000-\u001F\u007F]/g,' ').trim().slice(0,limit);
 const rich=(value,type)=>Array.isArray(value?.[type])?clean(value[type].map(x=>x.plain_text||x.text?.content||'').join(''),120):'';
 const select=x=>clean(x?.select?.name,30);
-const dateVal=x=>typeof x?.date?.start==='string'?x.date.start.slice(0,10):'';
+const dateVal=x=>{const raw=x?.date?.start;if(typeof raw!=='string')return '';if(/^\d{4}-\d{2}-\d{2}$/.test(raw))return raw;const d=new Date(raw);return Number.isFinite(d.getTime())?dateKey(d):'';};
 const validDay=k=>/^\d{4}-\d{2}-\d{2}$/.test(k);
 
 async function queryNotion(source,field,start,end,token){
