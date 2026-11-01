@@ -4,6 +4,7 @@ import type {RedisCommandClient} from '../storage/upstash-rest.js';
 // Read-only with respect to Inbox. This runs separately from the installed Clarity capture path.
 const NOTION = 'https://api.notion.com/v1';
 const VERSION = '2025-09-03';
+const ACCEPTANCE_ID = 'clarity:yos-test-20261101-0649';
 const SOURCES = {
   task: {id: '965c6086-32c1-463d-93b4-87a9cb69b3ad', title: 'やること', key: '同期キー'},
   shopping: {id: 'd0ed2cf0-c84e-4770-b77c-3a1a9e11bcfc', title: '商品名', key: 'メモ'},
@@ -71,8 +72,10 @@ export function decide(capture: Capture): Decision {
   return null;
 }
 
-export function createInboxSorter(options: {notionToken: string; inboxPageId: string; redis: RedisCommandClient; fetchImpl?: FetchLike}) {
+export function createInboxSorter(options: {notionToken: string; inboxPageId: string; redis: RedisCommandClient; mode?: 'test' | 'run'; fetchImpl?: FetchLike}) {
   if (!options.notionToken || !/^[a-f0-9-]{32,36}$/iu.test(options.inboxPageId)) throw new Error('Inbox sorter configuration missing');
+  const mode = options.mode ?? 'test';
+  if (mode !== 'test' && mode !== 'run') throw new Error('Invalid Inbox sorter mode');
   const fetchImpl = options.fetchImpl ?? fetch;
   async function api(path: string, method = 'GET', body?: unknown): Promise<Record<string, any>> {
     const response = await fetchImpl(NOTION + path, {method, headers: {
@@ -126,7 +129,10 @@ export function createInboxSorter(options: {notionToken: string; inboxPageId: st
     if (await options.redis.command<string | null>(['SET', lock, 'processing', 'NX', 'EX', 120]) !== 'OK') throw new Error('Inbox sorter already running');
     let created = 0, duplicates = 0, held = 0;
     // The lock expires automatically. Destination keys, not the lock, protect retries.
-    for (const capture of parseInbox(await blocks())) {
+    const all = parseInbox(await blocks());
+    const selected = mode === 'test' ? all.filter(capture => capture.id === ACCEPTANCE_ID) : all;
+    if (mode === 'test' && selected.length !== 1) throw new Error('Acceptance capture missing; no writes');
+    for (const capture of selected) {
       const decision = decide(capture);
       if (!decision) {held++; continue;}
       try {
