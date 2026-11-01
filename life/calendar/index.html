@@ -32,18 +32,122 @@
 .tool-links{display:flex;gap:7px;flex-wrap:wrap;margin:12px 0 2px}.tool-links a{display:inline-flex;align-items:center;min-height:43px;color:#3f6655;font-size:13px;font-weight:740;text-decoration:none;background:#fff;border:1px solid #e5eae4;padding:10px 13px;border-radius:11px}
 .tool-links a:focus-visible{outline:3px solid #6aa892;outline-offset:2px}
 @media(max-width:360px){.source-tile{padding:10px 9px}.source-title{font-size:12px}.source-state{font-size:10px}.source-sub{font-size:10px}}
+
+/* V3 semantic palette: category colors stay distinct from status; navy=dates,
+   violet=tasks, emerald=habits, gold=money, red=warning only. */
+:root{--bg:#F2F3F5;--white:#FFFFFF;--ink:#17212B;--muted:#586575;--line:#DFE4E9;
+ --deep:#123A59;--schedule:#123A59;--task:#5E43A4;--habit:#146B4C;--money:#916200;
+ --danger:#B42318;--coral:#B42318;--shadow:0 6px 23px rgba(20,36,53,.045)}
+html,body{background:var(--bg)}body{background:linear-gradient(180deg,#F8F9FA 0%,#F2F3F5 56%)}
+button:focus-visible,a:focus-visible{outline:3px solid #1B66A6;outline-offset:2px}
+.mark{background:var(--schedule)}.overline{color:var(--schedule)}.seal{border-color:#CAD6E1;background:#EDF3F8;color:var(--schedule)}
+.status{color:#334C60}.status i{background:var(--schedule)}.status[data-connection="demo"]{color:#8B501F}.status[data-connection="demo"] i{background:#916200}
+.segment{background:#E4E9F0}.segment button.active{color:var(--schedule)}.today-btn{color:var(--schedule);border-color:#CCD5DE}
+.board,.panel{border-color:var(--line)}.cell.selected{background:#E9F0F6;border-color:#658DA9}.cell.is-today .number{background:var(--schedule)}
+.cell.selected .day-chip{background:var(--schedule)}.hint{background:#EDF2F8;border-color:#CFDCEB}.hint small,.hint p{color:var(--schedule)}
+.habit-state,.habit-bubble{background:#E8F3EE;color:var(--habit)}.habit-bubble.unconfirmed{background:#F0F2F5;color:#566170}
+.count-pill{background:#E7EBF6;color:var(--task)}.mini.income strong{color:var(--habit)}.mini.outcome strong{color:var(--money)}
+.source-state.ok{background:#E8F3EE;color:var(--habit)}.source-state.stale{background:#FBE9E7;color:var(--danger)}
+.tool-links a,.linkish{color:var(--schedule)}.refresh{background:var(--schedule)}
+.glance-only{display:none}
+body.glance-mode .app{max-width:520px;padding:calc(env(safe-area-inset-top) + 10px) 13px calc(env(safe-area-inset-bottom) + 18px)}
+body.glance-mode .top{padding:0 3px 7px}
+body.glance-mode .mark{width:35px;height:35px;border-radius:11px}
+body.glance-mode .brand-copy strong{font-size:18px;letter-spacing:0}
+body.glance-mode .brand-copy small{font-size:9px;letter-spacing:.1em}
+body.glance-mode .hero{padding:5px 2px 8px;align-items:center}
+body.glance-mode .hero .overline,body.glance-mode .hero p,body.glance-mode .hero .seal{display:none}
+body.glance-mode .hero h1{font-size:25px;line-height:1.13;letter-spacing:-.035em}
+body.glance-mode .hero h1:after{content:'  ·  今日をひと目で';font-size:12px;letter-spacing:0;font-weight:650;color:#556678}
+body.glance-mode .mode{margin-bottom:8px}
+body.glance-mode .segment{padding:3px;border-radius:12px;gap:3px}
+body.glance-mode .segment button{min-height:36px;padding:7px 13px;font-size:13px}
+body.glance-mode .today-btn{min-height:38px;padding:8px 13px}
+body.glance-mode #board,body.glance-mode .day-section,body.glance-mode .source-overview,body.glance-mode .tool-links{display:none!important}
+body.glance-mode .glance-only{display:block}
+body.glance-mode .demo-alert{padding:7px 11px;margin-bottom:8px;font-size:11px;min-height:35px}
+body.glance-mode .demo-alert button{font-size:11px;min-height:30px}
+.glance-board{display:grid;gap:9px}
+.glance-week{background:#fff;border:1px solid #DCE4EB;border-radius:16px;padding:9px 9px 8px}
+.glance-week-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:5px}
+.glance-week-head strong{font-size:15px;letter-spacing:-.02em}
+.glance-week-head span{font-size:11px;color:#576B7B}
+.glance-week-nav{display:flex;align-items:center;gap:6px}
+.glance-week-nav button{width:29px;height:29px;font-size:19px;border:1px solid #D5DDE5;border-radius:9px;background:#fff;color:var(--schedule)}
+.glance-days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px}
+.glance-day{border:1px solid transparent;border-radius:11px;background:transparent;min-width:0;min-height:51px;padding:4px 1px;display:flex;align-items:center;flex-direction:column;gap:4px;color:#233240}
+.glance-day .wd{font-size:10px;color:#617384;font-weight:700}
+.glance-day .dn{font-size:15px;font-weight:800;line-height:18px;font-variant-numeric:tabular-nums}
+.glance-day.selected{background:var(--schedule);color:#fff}
+.glance-day.selected .wd{color:#fff}
+.glance-day .marks{display:flex;gap:2px;min-height:4px}
+.glance-day .marks i{display:block;width:4px;height:4px;border-radius:50%}
+.glance-day.today:not(.selected){border-color:#7A9BB5}
+.glance-stack{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.glance-card{border:1px solid #DAE1E8;border-radius:17px;background:#fff;min-width:0;padding:12px 12px 11px;position:relative;overflow:hidden}
+.glance-card:before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:var(--accent)}
+.glance-schedule{--accent:var(--schedule)}.glance-task{--accent:var(--task)}.glance-money{--accent:var(--money)}.glance-habit{--accent:var(--habit)}
+.glance-card-head{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:9px}
+.glance-card-title{display:flex;align-items:center;gap:6px;font-weight:850;font-size:15px;color:var(--accent)}
+.glance-card-title .glyph{display:grid;place-items:center;width:23px;height:23px;border-radius:7px;background:var(--accent);color:#fff;font-size:13px;line-height:1}
+.glance-card-count{color:#536375;font-size:11px;font-weight:650;white-space:nowrap}
+.glance-lines{display:grid;gap:7px;min-height:48px}
+.glance-line{font-size:13.5px;line-height:1.35;min-width:0;display:flex;align-items:flex-start;gap:5px;color:#1D2935}
+.glance-line .line-time{font-size:12px;font-weight:800;color:var(--schedule);flex:0 0 40px;font-variant-numeric:tabular-nums}
+.glance-line .line-mark{flex:0 0 12px;color:var(--task);font-weight:900}
+.glance-line .line-copy{min-width:0;overflow:hidden;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow-wrap:anywhere;font-weight:630}
+.glance-line .line-copy.done{color:#637286;text-decoration:line-through}
+.glance-empty{font-size:12px;line-height:1.5;color:#627181;padding:5px 0}
+.glance-money-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px}
+.glance-finbox{background:#F5F6F8;border-radius:11px;padding:8px 10px;min-width:0}
+.glance-finbox.accent{border-left:3px solid var(--money)}
+.glance-finbox small{display:block;color:#5B6876;font-size:11px;font-weight:700;margin-bottom:4px}
+.glance-finbox strong{display:block;color:#192733;font-size:16px;font-weight:850;letter-spacing:-.03em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums}
+.glance-finbox strong.gold{color:var(--money)}
+.glance-finbox span{display:block;color:#556676;font-size:10.5px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.glance-note{font-size:10.5px;color:#5A6977;margin:7px 0 0}
+.glance-habit-row{display:flex;align-items:center;gap:7px;justify-content:space-between}
+.glance-habit-meter{height:7px;background:#E4E8E8;border-radius:99px;overflow:hidden;flex:0 0 44px}
+.glance-habit-meter span{display:block;height:100%;background:var(--habit);border-radius:99px}
+.glance-habit-label{font-weight:700;font-size:12px;color:var(--habit);white-space:nowrap}
+.glance-habit-copy{margin-top:7px;font-size:12px;color:#536575;line-height:1.35}
+.glance-advice{background:#F1F4F8;border:1px solid #D8E0EB;border-left:4px solid var(--schedule);border-radius:13px;padding:10px 12px;display:flex;gap:9px}
+.glance-advice .adv-label{font-size:11px;color:var(--schedule);font-weight:850;flex:0 0 74px}
+.glance-advice .adv-copy{font-size:12.5px;line-height:1.45;color:#223342;font-weight:620}
+.glance-source{display:flex;gap:6px;justify-content:space-between;align-items:center;font-size:10.5px;color:#54687B;padding:0 2px}
+.glance-source strong{font-weight:800;color:#425A6B}
+.glance-source .offline{color:var(--danger);font-weight:750}
+body.glance-mode .disclosure{margin-top:8px;border-radius:11px;padding:9px 11px;background:#fff}
+body.glance-mode .disclosure summary{font-size:11px}
+body.glance-mode .disclosure p{font-size:11px}
+body.glance-mode .bottom{margin-top:7px;font-size:10px}
+body.glance-mode .bottom .linkish{display:none}
+body.glance-mode .bottom .refresh{min-height:36px;padding:7px 11px;font-size:11px;border-radius:10px}
+@media(max-width:355px){body.glance-mode .app{padding-left:9px;padding-right:9px}.glance-card{padding:11px 9px}.glance-card-title{font-size:14px}.glance-line{font-size:12.5px}.glance-line .line-time{flex-basis:35px;font-size:11px}.glance-finbox{padding:7px}.glance-finbox strong{font-size:14px}.glance-advice .adv-label{flex-basis:62px}}
+
 </style>
 </head>
 <body>
 <main class="app">
-  <header class="top"><div class="brand"><div class="mark" aria-hidden="true">Y</div><div class="brand-copy"><strong>YOS</strong><small>YOUR LIFE, IN VIEW</small></div></div><div class="status" id="connection" data-connection="demo"><i></i><span>プレビュー</span></div></header>
+  <header class="top"><div class="brand"><div class="mark" aria-hidden="true">Y</div><div class="brand-copy"><strong>YOS Calendar</strong><small>MY LIFE · YOS</small></div></div><div class="status" id="connection" data-connection="demo"><i></i><span>プレビュー</span></div></header>
   <div class="hero"><div><p class="overline">YOUR LIFE, ONE CALENDAR</p><h1>毎日を、ひと目で。</h1><p>予定も、お金も、やることも。今日をもっと自由に。</p></div><div class="seal" aria-hidden="true">Y</div></div>
   <div class="demo-alert" id="demoAlert" role="status"><span>これは<strong>架空の表示例</strong>。実際の予定・金額ではありません。</span><button id="toggleDemo" type="button">実データを見る</button></div>
   <section class="source-overview" id="sourceOverview" aria-label="元データの接続状況" hidden>
     <div class="source-tile"><div><div class="source-title">MY LIFE</div><div class="source-sub" id="lifeFreshness">保存済み情報</div></div><span class="source-state" id="lifeConnection">未確認</span></div>
     <div class="source-tile"><div><div class="source-title">Money</div><div class="source-sub" id="moneyFreshness">保存済み情報</div></div><span class="source-state" id="moneyConnection">未確認</span></div>
   </section>
-  <div class="mode"><div class="segment" role="group" aria-label="表示切替"><button type="button" data-mode="month" class="active" aria-pressed="true">月</button><button type="button" data-mode="week" aria-pressed="false">週</button><button type="button" data-mode="day" aria-pressed="false">日</button></div><button class="today-btn" type="button" id="goToday">今日へ</button></div>
+  <div class="mode"><div class="segment" role="group" aria-label="表示切替"><button type="button" data-mode="glance" class="active" aria-pressed="true">概要</button><button type="button" data-mode="month" aria-pressed="false">月</button><button type="button" data-mode="week" aria-pressed="false">週</button><button type="button" data-mode="day" aria-pressed="false">日</button></div><button class="today-btn" type="button" id="goToday">今日へ</button></div>
+  <section class="glance-only glance-board" id="glanceBoard" aria-label="1画面の今日の概要">
+    <div class="glance-week"><div class="glance-week-head"><div><strong id="glanceWeekTitle">今週</strong> <span>日付を選ぶ</span></div><div class="glance-week-nav"><button id="glancePrev" aria-label="前の週">‹</button><button id="glanceNext" aria-label="次の週">›</button></div></div><div class="glance-days" id="glanceWeekDays"></div></div>
+    <div class="glance-stack">
+      <section class="glance-card glance-schedule"><div class="glance-card-head"><div class="glance-card-title"><span class="glyph" aria-hidden="true">▦</span>予定</div><span class="glance-card-count" id="glanceScheduleCount">—</span></div><div id="glanceScheduleItems" class="glance-lines"></div></section>
+      <section class="glance-card glance-task"><div class="glance-card-head"><div class="glance-card-title"><span class="glyph" aria-hidden="true">✓</span>タスク</div><span class="glance-card-count" id="glanceTaskCount">—</span></div><div id="glanceTaskItems" class="glance-lines"></div></section>
+    </div>
+    <section class="glance-card glance-money"><div class="glance-card-head"><div class="glance-card-title"><span class="glyph" aria-hidden="true">¥</span>お金</div><span class="glance-card-count" id="glanceMoneyCount">予定と実績を区別</span></div><div class="glance-money-row"><div class="glance-finbox"><small>当日の入金</small><strong id="glanceIncome">—</strong><span id="glanceIncomeNote">未確認</span></div><div class="glance-finbox accent"><small>当日の支出</small><strong class="gold" id="glanceExpense">—</strong><span id="glanceExpenseNote">未確認</span></div></div><p class="glance-note" id="glanceNextPayment">金融機関の残高とは異なります</p></section>
+    <section class="glance-card glance-habit"><div class="glance-card-head"><div class="glance-card-title"><span class="glyph" aria-hidden="true">♡</span>習慣</div><span class="glance-card-count" id="glanceHabitCount">未確認</span></div><div class="glance-habit-row"><div class="glance-habit-meter" aria-label="習慣の実施報告の有無"><span id="glanceHabitBar" style="width:0"></span></div><span class="glance-habit-label" id="glanceHabitLabel">記録未確認</span></div><div class="glance-habit-copy" id="glanceHabitText">未記録でも未実施とは判断しません。</div></section>
+    <div class="glance-advice"><span class="adv-label">YOSの提案</span><span class="adv-copy" id="glanceAdvice">取得できた情報に基づいて整理します。</span></div>
+    <div class="glance-source"><span id="glanceFreshness">MY LIFE・Money：読み取り中</span><span class="offline">Notion・Apple：未接続</span></div>
+  </section>
   <section class="board" id="board" aria-label="統合カレンダー"><div class="month-bar"><div class="month-name"><strong id="monthTitle">—</strong><small id="monthSub">—</small></div><div class="month-controls"><button class="nav-arrow" id="prev" aria-label="前の期間">‹</button><button class="nav-arrow" id="next" aria-label="次の期間">›</button></div></div><div class="weekday-grid" id="weekdayHeader"><span class="weekday">日</span><span class="weekday">月</span><span class="weekday">火</span><span class="weekday">水</span><span class="weekday">木</span><span class="weekday">金</span><span class="weekday">土</span></div><div class="date-grid" id="dates"></div><div class="legend" id="filters" aria-label="表示カテゴリ"><button data-filter="schedule" aria-pressed="true"><i class="swatch" style="background:var(--schedule)"></i>予定</button><button data-filter="task" aria-pressed="true"><i class="swatch" style="background:var(--task)"></i>タスク</button><button data-filter="money" aria-pressed="true"><i class="swatch" style="background:var(--money)"></i>お金</button><button data-filter="habit" aria-pressed="true"><i class="swatch" style="background:var(--habit)"></i>習慣</button><span class="guide">日付をタップして詳細を見る</span></div></section>
   <div class="day-section"><section class="panel"><div class="section-top"><div><div class="eyebrow">DAY DETAIL</div><h2 id="dayHeading">—</h2></div><span class="count-pill" id="dayCount">—</span></div><div id="dayItems" class="timeline" aria-live="polite"></div><div id="habitIndicator" class="habit-state"></div></section><section class="panel"><div class="section-top"><div><div class="eyebrow">MONEY & INSIGHT</div><h2>その日の収支</h2></div></div><div class="money-overview"><div class="mini income"><div class="lbl">入金</div><strong id="income">—</strong><div class="sub" id="incomeSub">記録を確認</div></div><div class="mini outcome"><div class="lbl">出金</div><strong id="expense">—</strong><div class="sub" id="expenseSub">記録を確認</div></div></div><p class="sync-note" id="moneyNote">Moneyの保存済みデータを読み取ります。銀行との直接同期ではありません。</p><div class="hint"><small>YOS / TODAY'S NOTE</small><p id="insight">利用できる記録を確認して、その日の優先事項を整理します。</p></div></section></div>
   <div class="tool-links" id="sourceLinks"><a href="../">MY LIFEを開く ↗</a><a href="../../yos/#money">Moneyを開く ↗</a></div>
@@ -55,7 +159,7 @@
 (()=>{
   const $=id=>document.getElementById(id),tz='Asia/Tokyo',now=new Date(),dateFmt=new Intl.DateTimeFormat('sv-SE',{timeZone:tz,year:'numeric',month:'2-digit',day:'2-digit'});
   const dateKey=d=>dateFmt.format(d);const parseDate=k=>new Date(k+'T12:00:00+09:00');const addDays=(key,n)=>{const d=parseDate(key);d.setUTCDate(d.getUTCDate()+n);return dateKey(d)};
-  const today=dateKey(now),state={selected:today,anchor:today,mode:'month',filters:new Set(['schedule','task','money','habit']),demo:false,items:[],lifeRead:false,moneyRead:false,moneyPrivate:false,loadedAt:null,lifeSynced:null,moneySynced:null};
+  const today=dateKey(now),state={selected:today,anchor:today,mode:'glance',filters:new Set(['schedule','task','money','habit']),demo:false,items:[],lifeRead:false,moneyRead:false,moneyPrivate:false,loadedAt:null,lifeSynced:null,moneySynced:null};
   const sampleDay=key=>dateKey(parseDate(key)),cash=n=>'¥'+Math.abs(n).toLocaleString('ja-JP');const types={schedule:'予定',task:'タスク',money:'お金',habit:'習慣'};
   const dayName=k=>'日月火水木金土'[parseDate(k).getDay()],displayDay=k=>{const d=parseDate(k);return `${d.getMonth()+1}月${d.getDate()}日（${dayName(k)}）`};
   const isValidKey=k=>/^\d{4}-\d{2}-\d{2}$/.test(String(k||''))&&dateKey(parseDate(k))===k;
@@ -89,7 +193,7 @@
   function load(useDemo){const life=normalizeLife(),money=normalizeMoney();
     // Installed Web app / GitHub Pages must NEVER imply illustrative financial data is real.
     // Local file previews may start in design mode for visual review.
-    state.demo=useDemo??(location.protocol==='file:'&&!life.length&&!money.length);
+    state.demo=(useDemo??(location.protocol==='file:'&&!life.length&&!money.length))&&!state.moneyPrivate;
     $('sourceOverview').hidden=state.demo;
     setSourceBadge('lifeConnection',state.lifeRead?'保存済み':'未接続',state.lifeRead?freshnessLabel(state.lifeSynced):'このWeb領域に記録なし',state.lifeRead&&state.lifeSynced&&Date.now()-state.lifeSynced.getTime()<=86400000?'ok':state.lifeRead?'stale':'');
     setSourceBadge('moneyConnection',state.moneyPrivate?'非表示':state.moneyRead?'保存済み':'未接続',state.moneyPrivate?'Moneyのプライバシー設定を尊重':state.moneyRead?freshnessLabel(state.moneySynced):'このWeb領域に記録なし',state.moneyRead&&state.moneySynced&&Date.now()-state.moneySynced.getTime()<=86400000?'ok':state.moneyRead?'stale':'');
@@ -118,10 +222,68 @@ state.items=state.demo?createDemo():[...life,...money];state.loadedAt=new Date()
     const todo=nonMoney.filter(x=>x.type==='task'&&!x.done),appointments=nonMoney.filter(x=>x.type==='schedule'),scheduledPayments=raw.filter(x=>x.moneyKind==='expense'&&!x.complete);
     let advice='予定を詰めすぎず、今日いちばん大切なことをひとつ選ぼう。';if(scheduledPayments.length)advice='支払い予定があります。残高は別途Moneyで確認してから判断しよう。';else if(appointments.length&&todo.length)advice='固定予定を優先して、その前後にやることを1件だけ進めよう。';else if(todo.length)advice='未完了タスクがあります。最初に取りかかる1件を決めよう。';else if(appointments.length)advice='予約・予定の時間を先に確保して、空き時間は余白として残そう。';$('insight').textContent=state.demo?'デザイン見本：'+advice:advice;
   }
-  function render(){renderCalendar();renderDetails()}
+  function renderGlance(){
+    const sel=state.selected,day=parseDate(sel),first=addDays(sel,-day.getDay());
+    $('glanceWeekTitle').textContent=`${day.getFullYear()}年 ${day.getMonth()+1}月`;
+    const week=$('glanceWeekDays');week.replaceChildren();
+    for(let i=0;i<7;i++){
+      const key=addDays(first,i),d=parseDate(key), b=document.createElement('button');
+      b.type='button';b.className='glance-day'+(key===sel?' selected':'')+(key===today?' today':'');
+      b.setAttribute('aria-pressed',String(key===sel));b.setAttribute('aria-label',displayDay(key)+'を表示');
+      const wd=document.createElement('span');wd.className='wd';wd.textContent='日月火水木金土'[d.getDay()];
+      const dn=document.createElement('span');dn.className='dn';dn.textContent=String(d.getDate());
+      const marks=document.createElement('span');marks.className='marks';
+      const colors=[...new Set(state.items.filter(x=>x.date===key).map(x=>x.type))].slice(0,4);
+      colors.forEach(t=>{const dot=document.createElement('i');dot.style.background=key===sel?'#fff':`var(--${t})`;marks.append(dot)});
+      b.append(wd,dn,marks);b.addEventListener('click',()=>{state.selected=key;state.anchor=key;render()});week.append(b);
+    }
+    const raw=state.items.filter(x=>x.date===sel),schedule=raw.filter(x=>x.type==='schedule'),tasks=raw.filter(x=>x.type==='task'),money=raw.filter(x=>x.type==='money'),habits=raw.filter(x=>x.type==='habit');
+    const txt=(tag,value,classname)=>{const el=document.createElement(tag);if(classname)el.className=classname;el.textContent=value;return el};
+    const listings=(target,rows,kind)=>{const root=$(target);root.replaceChildren();if(!rows.length){root.append(txt('div',state.demo?'この日の表示例なし':'登録・取得を確認できません','glance-empty'));return;}
+      for(const e of rows.slice(0,3)){const line=document.createElement('div');line.className='glance-line';
+        if(kind==='schedule'){line.append(txt('span',e.subtitle?.match(/^\d{2}:\d{2}/)?.[0]||'終日','line-time'));}
+        else{line.append(txt('span',e.done?'✓':'□','line-mark'));}
+        line.append(txt('span',e.title,'line-copy'+(e.done?' done':'')));root.append(line)}
+    };
+    listings('glanceScheduleItems',schedule,'schedule');listings('glanceTaskItems',tasks,'task');
+    $('glanceScheduleCount').textContent=schedule.length+'件';$('glanceTaskCount').textContent=tasks.length+'件';$('glanceMoneyCount').textContent=state.demo?'金額は架空の例':'予定と実績を区別';
+    const available=state.demo||state.moneyRead;
+    const hasDayMoney=money.length>0;
+    const amount=(kind,complete)=>money.filter(x=>x.moneyKind===kind && x.complete===complete).reduce((sum,x)=>sum+x.amount,0);
+    $('glanceIncome').textContent=available&&hasDayMoney?cash(amount('income',true)):'—';
+    $('glanceExpense').textContent=available&&hasDayMoney?cash(amount('expense',true)):'—';
+    $('glanceIncomeNote').textContent=available&&hasDayMoney?'予定 '+cash(amount('income',false)):available?'当日の記録なし':'未接続・非表示';
+    $('glanceExpenseNote').textContent=available&&hasDayMoney?'予定 '+cash(amount('expense',false)):available?'当日の記録なし':'未接続・非表示';
+    const next=state.items.filter(x=>x.type==='money'&&x.moneyKind==='expense'&&!x.complete&&x.date>=sel).sort((a,b)=>a.date.localeCompare(b.date))[0];
+    $('glanceNextPayment').textContent=!available?'Moneyの確定した収支は未確認':next?`次の支払い予定　${next.date.slice(5).replace('-','/')} · ${cash(next.amount)}${state.demo?'（見本）':''}`:'次の支払い予定：保存済み記録では未確認';
+    const overdue=Boolean(next&&next.date<=today&&state.selected===today);
+    $('glanceNextPayment').style.color=overdue?'var(--danger)':'#5A6977';
+    const habitRecords=habits.length;
+    $('glanceHabitCount').textContent=habitRecords?`${habitRecords}件の実施報告`:'実施記録：未確認';
+    $('glanceHabitBar').style.width=habitRecords?'100%':'0%';
+    $('glanceHabitLabel').textContent=habitRecords?'記録あり':'未確認';
+    $('glanceHabitText').textContent=habitRecords?habits.map(x=>x.title+'（'+x.subtitle+'）').slice(0,2).join('・'):'記録なし＝未実施ではありません。';
+    const openTasks=tasks.filter(x=>!x.done),planned=money.some(x=>x.moneyKind==='expense'&&!x.complete);
+    let advice='予定・タスク・お金の情報が揃うほど、優先順位を具体的に提案できます。';
+    if(overdue) advice='支払い期限が今日以前の予定があります。Moneyで支払状況を確認しよう。';
+    else if(planned)advice='支払い予定あり。残高はMoneyで確認し、無理のない予定にしよう。';
+    else if(schedule.length&&openTasks.length)advice='予定の時間を確保し、その前後にタスクを1件進めよう。';
+    else if(openTasks.length)advice='未完了タスクから、最初に取りかかる1件を選ぼう。';
+    else if(schedule.length)advice='予定を優先し、空き時間には余白を残そう。';
+    $('glanceAdvice').textContent=state.demo?'デザイン見本：'+advice:advice;
+    const life=state.lifeRead?(state.lifeSynced?freshnessLabel(state.lifeSynced):'時刻未確認'):'未接続';
+    const fin=state.moneyPrivate?'非表示':state.moneyRead?(state.moneySynced?freshnessLabel(state.moneySynced):'時刻未確認'):'未接続';
+    $('glanceFreshness').textContent=state.demo?'すべて架空の表示例':`MY LIFE ${life} / Money ${fin}`;
+    const appTitle=displayDay(state.selected);
+    document.querySelector('.hero h1').textContent=state.mode==='glance'?appTitle:'毎日を、ひと目で。';
+  }
+  function render(){document.body.classList.toggle('glance-mode',state.mode==='glance');renderCalendar();renderDetails();renderGlance()}
+
   document.querySelectorAll('[data-mode]').forEach(b=>b.addEventListener('click',()=>{state.mode=b.dataset.mode;state.anchor=state.selected;render();}));document.querySelectorAll('[data-filter]').forEach(b=>b.addEventListener('click',()=>{const f=b.dataset.filter;state.filters.has(f)?state.filters.delete(f):state.filters.add(f);render();}));
   $('prev').addEventListener('click',()=>{const d=parseDate(state.anchor);if(state.mode==='month'){d.setMonth(d.getMonth()-1);state.anchor=dateKey(new Date(d.getFullYear(),d.getMonth(),1,12));state.selected=state.anchor;}else{state.selected=addDays(state.selected,state.mode==='week'?-7:-1);state.anchor=state.selected;}render();});
   $('next').addEventListener('click',()=>{const d=parseDate(state.anchor);if(state.mode==='month'){d.setMonth(d.getMonth()+1);state.anchor=dateKey(new Date(d.getFullYear(),d.getMonth(),1,12));state.selected=state.anchor;}else{state.selected=addDays(state.selected,state.mode==='week'?7:1);state.anchor=state.selected;}render();});
+  $('glancePrev').addEventListener('click',()=>{state.selected=addDays(state.selected,-7);state.anchor=state.selected;render()});
+  $('glanceNext').addEventListener('click',()=>{state.selected=addDays(state.selected,7);state.anchor=state.selected;render()});
   $('goToday').addEventListener('click',()=>{state.selected=today;state.anchor=today;render();});$('reload').addEventListener('click',()=>load(state.demo));$('toggleDemo').addEventListener('click',()=>load(false));
   window.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&!state.demo)load(false)});
   // Cross-tab source changes and Safari back-forward cache restores refresh the read-only projection.
