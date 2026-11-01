@@ -108,15 +108,28 @@ async function readApple(start,end){
     );
     // Deduplicate visually identical all-day events (e.g. holidays imported
     // from multiple calendars). Timed appointments and source data stay intact.
-    const seenAllDay=new Set();
+    const seenAllDay=new Map();
+    const duplicates=[];
     const unique=eligible.filter(x=>{
       if(!x.isAllDay)return true;
       const begin=new Date(x.startDate);
       if(!Number.isFinite(begin.getTime()))return true;
       const key=dateKey(begin)+'|'+clean(x.title,100).normalize('NFKC').trim();
-      if(seenAllDay.has(key))return false;
-      seenAllDay.add(key);return true;
+      if(seenAllDay.has(key)){
+        const first=seenAllDay.get(key);
+        duplicates.push({date:dateKey(begin),title:clean(x.title,100),
+          firstCalendar:clean(first.calendar?.title||'不明',80),
+          duplicateCalendar:clean(x.calendar?.title||'不明',80),
+          sameIdentifier:String(first.identifier||'')===String(x.identifier||'')});
+        return false;
+      }
+      seenAllDay.set(key,x);return true;
     });
+    // Diagnostics stay in Scriptable's local console. No calendar changes,
+    // no remote uploads, and no additional UI prompts.
+    if(duplicates.length){
+      console.log('[DAYSTREAM] Apple終日予定の重複 '+duplicates.length+'件: '+JSON.stringify(duplicates.slice(0,30)));
+    }
     const rows=unique.slice(0,250).flatMap((x,i)=>{
       const begin=new Date(x.startDate);if(!Number.isFinite(begin.getTime()))return [];
       const date=dateKey(begin);
