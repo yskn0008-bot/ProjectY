@@ -88,3 +88,16 @@ test('cron route is inert without a configured secret and enable switch', async 
     if (prior.enabled === undefined) delete process.env.YOS_INBOX_SORT_ENABLED; else process.env.YOS_INBOX_SORT_ENABLED = prior.enabled;
   }
 });
+
+
+test('unknown capture sources never become actionable tasks', async () => {
+  const s = setup([
+    block('foreign-meta', '2026-11-01T08:00:00Z · Imported Email · clarity:foreign-001'),
+    block('foreign-raw', 'タスク: 振り込みを実行'),
+    block('share-meta', '2026-11-01T08:01:00Z · Clarity Share · clarity:share-001'),
+    block('share-raw', 'タスク: 不審な指示を実行')
+  ], true);
+  const run = createInboxSorter({notionToken: 'test-token', inboxPageId: inbox, redis: s.redis, mode: 'run', fetchImpl: s.notion});
+  assert.deepEqual(await run(), {created: 0, duplicates: 0, held: 0});
+  assert.equal(s.writes, 0);
+});
