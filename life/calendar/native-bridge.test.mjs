@@ -132,3 +132,17 @@ test('native Notion finance is not silently replaced by outdated browser Money',
   assert.ok(html.includes('moneyPartial?\'Notion家計は一部取得'));
   assert.ok(html.includes("moneyValue').textContent=(!can||moneyPartial)?'—'"));
 });
+
+test('offline iPhone import package embeds the reviewed native page with no runtime UI download',()=>{
+  const pkg=JSON.parse(fs.readFileSync(new URL('./YOS_DAYSTREAM_iPhone_Review_20261102.scriptable',import.meta.url),'utf8'));
+  assert.equal(pkg.name,'YOS DAYSTREAM 開発確認 20261102');
+  assert.equal(pkg.always_run_in_app,true);
+  assert.deepEqual(pkg.share_sheet_inputs,[]);
+  assert.ok(pkg.script.includes('const HTML_BUNDLE='));
+  assert.ok(pkg.script.includes('Offline DAYSTREAM HTML integrity mismatch'));
+  assert.doesNotMatch(pkg.script,/const PREVIEW_URL|new Request\(PREVIEW_URL\)/);
+  assert.doesNotMatch(pkg.script,/Keychain\.set\(|req\.method=['"]PATCH|req\.method=['"]DELETE/);
+  assert.match(pkg.script,/await web\.loadHTML\(html\)/);
+  const hash=pkg.script.match(/const HTML_SHA256 = '([a-f0-9]{64})'/)?.[1];
+  assert.equal(hash,crypto.createHash('sha256').update(html).digest('hex'));
+});
