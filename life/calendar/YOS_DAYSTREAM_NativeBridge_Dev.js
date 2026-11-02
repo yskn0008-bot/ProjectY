@@ -171,6 +171,114 @@ async function readPreview(){
     !html.split('localStorage.'+'setItem(')[1].startsWith('PLAN_KEY,encoded)'))throw Error('Preview HTML is not compatible');
   return html;
 }
+// Native-only status transition for user-confirmed, already-loaded Notion Tasks.
+// No access token, page mutation, or FileManager state ever crosses to WebView.
+const PLAN_FILE='YOS_DAYSTREAM_PLAN_STATE_v1.json';
+const TASK_ID=/^[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}$/i;
+const EDITABLE_STATES=new Set(['次にやる','実行中','本人操作']);
+function normalizePlanFile(value){
+  if(!value||value.schema!=='yos-daystream-plan-v1'||!value.days||
+    typeof value.days!=='object'||Array.isArray(value.days))return null;
+  if(Object.keys(value.days).length>30)return null;
+  const days={};
+  for(const [day,d] of Object.entries(value.days)){
+    if(!validDay(day)||!d||typeof d!=='object'||Array.isArray(d))return null;
+    if(!Array.isArray(d.order)||d.order.length>300||!d.done||typeof d.done!=='object'||Array.isArray(d.done))return null;
+    const order=[];
+    for(const key of d.order){if(typeof key!=='string'||key.length>180)return null;order.push(key)}
+    const done={},entries=Object.entries(d.done);
+    if(entries.length>300)return null;
+    for(const [key,val] of entries){if(key.length>180||val!==true)return null;done[key]=true}
+    days[day]={order,done};
+  }
+  return {schema:'yos-daystream-plan-v1',days};
+}
+function planStore(){
+  if(typeof FileManager==='undefined'||typeof FileManager.local!=='function')return null;
+  const fm=FileManager.local();return {fm,path:fm.joinPath(fm.documentsDirectory(),PLAN_FILE)};
+}
+function readLocalPlan(store){
+  if(!store||!store.fm.fileExists(store.path))return {value:null,blocked:false};
+  try{
+    const raw=store.fm.readString(store.path);
+    if(typeof raw!=='string'||raw.length>100000)return {value:null,blocked:true};
+    const parsed=normalizePlanFile(JSON.parse(raw));
+    return parsed?{value:parsed,blocked:false}:{value:null,blocked:true};
+  }catch{return {value:null,blocked:true}}
+}
+function saveLocalPlan(store,data){
+  if(!store)return false;
+  const cleanData=normalizePlanFile(data);if(!cleanData)return false;
+  const payload=JSON.stringify(cleanData);
+  if(payload.length>100000)return false;
+  try{
+    store.fm.writeString(store.path,payload);
+    return store.fm.readString(store.path)===payload;
+  }catch{return false}
+}
+async function notionPage(id,token){
+  const req=new Request('https://api.notion.com/v1/pages/'+id);
+  req.method='GET';req.timeoutInterval=8;
+  req.headers={Authorization:'Bearer '+token,'Notion-Version':'2026-03-11','Accept':'application/json'};
+  const page=await req.loadJSON();
+  if(Number(req.response?.statusCode)!==200||page?.object!=='page')throw Error('Notion page read failed');
+  return page;
+}
+async function completeTaskOnce(task,token){
+  if(!token||!task||task.source!=='Notion Tasks'||task.type!=='task'||task.calendarMirror||
+    !TASK_ID.test(task.id)||!EDITABLE_STATES.has(task.subtitle))return 'skipped';
+  const before=await notionPage(task.id,token);
+  if(before.archived===true||before.in_trash===true||
+    (before.parent?.type==='data_source_id'&&before.parent.data_source_id!==TASK_SOURCE))return 'skipped';
+  const p=before.properties||{},status=select(p['状態']),title=rich(p['やること'],'title'),date=dateVal(p['期限']);
+  if(status==='完了')return 'already';
+  if(!EDITABLE_STATES.has(status)||title!==task.title||date!==task.date)return 'conflict';
+  const req=new Request('https://api.notion.com/v1/pages/'+task.id);
+  req.method='PATCH';req.timeoutInterval=8;
+  req.headers={Authorization:'Bearer '+token,'Notion-Version':'2026-03-11','Content-Type':'application/json'};
+  req.body=JSON.stringify({properties:{'状態':{select:{name:'完了'}}}});
+  const updated=await req.loadJSON();
+  if(Number(req.response?.statusCode)!==200||select(updated?.properties?.['状態'])!=='完了')return 'uncertain';
+  const after=await notionPage(task.id,token);
+  return select(after.properties?.['状態'])==='完了'?'verified':'uncertain';
+}
+async function handlePlanAfterDismiss(web,stored,priorFileBlocked,availableTasks,token){
+  if(!stored||priorFileBlocked)return;
+  let returned;
+  try{returned=await web.evaluateJavaScript('window.YOS_DAYSTREAM_PLAN_EXPORT()',false)}catch{return}
+  const plan=normalizePlanFile(returned);if(!plan)return;
+  const saved=saveLocalPlan(stored,plan);
+  if(!saved){
+    const a=new Alert();a.title='実行リストは保存未確認';a.message='画面の仮チェックを端末ファイルに保存できませんでした。Notionは更新していません。';a.addAction('閉じる');await a.presentAlert();return;
+  }
+  const touched=Array.isArray(returned.completedKeys)?returned.completedKeys:[];
+  if(!touched.length||!token)return;
+  if(touched.length>5)return; // Large submissions require a smaller reviewed batch.
+  const eligible=availableTasks.filter(t=>
+    t.type==='task'&&t.source==='Notion Tasks'&&!t.calendarMirror&&TASK_ID.test(t.id)&&
+    EDITABLE_STATES.has(t.subtitle)&&t.date===dateKey(new Date())&&
+    touched.includes('task:Notion Tasks:native:'+t.id)
+  );
+  const ids=new Set();const unique=eligible.filter(t=>{if(ids.has(t.id))return false;ids.add(t.id);return true});
+  if(!unique.length)return;
+  const approval=new Alert();approval.title='Notion Tasksへ完了を反映';
+  approval.message='次の'+unique.length+'件について、既存Notionの「状態」だけを「完了」に変更します。\n\n'+
+    unique.map(t=>'・'+clean(t.title,55)).join('\n')+
+    '\n\n元の予定・家計・日記は変更しません。';
+  approval.addAction('確認して反映');approval.addCancelAction('反映しない');
+  if(await approval.presentAlert()!==0)return;
+  const results=[];
+  for(const t of unique){
+    try{results.push({title:t.title,status:await completeTaskOnce(t,token)})}
+    catch{results.push({title:t.title,status:'uncertain'})}
+  }
+  const count=results.filter(x=>x.status==='verified'||x.status==='already').length;
+  const a=new Alert();a.title='Notionへの反映結果';
+  a.message=count+'/'+results.length+'件を完了と確認しました。'+
+    (count<results.length?' 未反映または不確定の項目があります。元のNotionを確認してください。':'')+
+    '\n画面に戻る場合はDAYSTREAMを再起動して最新状態を取得してください。';
+  a.addAction('閉じる');await a.presentAlert();
+}
 async function main(){
   const now=new Date(),start=dateKey(addDays(now,-14)),end=dateKey(addDays(now,46));
   let token='';try{if(Keychain.contains(NOTION_KEY))token=Keychain.get(NOTION_KEY)||''}catch{}
@@ -215,7 +323,12 @@ async function main(){
   // Never include Notion API tokens, credentials or internal notes in this payload.
   const ok=await web.evaluateJavaScript('window.YOS_DAYSTREAM_NATIVE_V1('+JSON.stringify(snapshot)+')',false);
   if(ok!==true)throw Error('Native bridge was not accepted by calendar');
+  const store=planStore(),prior=readLocalPlan(store);
+  if(prior.value){
+    try{await web.evaluateJavaScript('window.YOS_DAYSTREAM_PLAN_IMPORT('+JSON.stringify(prior.value)+')',false)}catch{}
+  }
   await web.present(true);
+  await handlePlanAfterDismiss(web,store,prior.blocked,taskEntries,token);
 }
 try {await main();} catch(error){
   const alert=new Alert();alert.title='DAYSTREAMプレビューを表示できません';
