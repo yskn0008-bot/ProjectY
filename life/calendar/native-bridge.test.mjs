@@ -272,3 +272,39 @@ test('draft-only checks and reordering never write to original Notion or Apple d
  assert.doesNotMatch(html,/https:\/\/api\.notion\.com\/v1\/pages\/.*PATCH|CalendarEvent\.create\(/);
  assert.ok(code.includes("!html.split('localStorage.'+'setItem(')[1].startsWith('PLAN_KEY,encoded)')"));
 });
+
+test('local dayplan check and ordering survive a re-open without Notion writes',()=>{
+ const start=html.indexOf('// DAYPLAN-BEGIN'),end=html.indexOf(' function renderStream(){',start);
+ assert.ok(start>=0&&end>start);
+ const codePart=html.slice(start,end),storage=new Map();
+ const localStorage={
+  getItem(key){return storage.has(key)?storage.get(key):null},
+  setItem(key,val){if(key!=='yos-daystream-plan-v1')throw Error('unsafe key');storage.set(key,val)}
+ };
+ class Element{
+  constructor(){this.children=[];this.attrs={};this.events={};this.textContent=''}
+  append(...xs){this.children.push(...xs)}
+  replaceChildren(){this.children=[]}
+  setAttribute(k,v){this.attrs[k]=v}
+  addEventListener(k,fn){this.events[k]=fn}
+ }
+ const create=()=>{
+  const nodes=new Map(),document={createElement:()=>new Element()};
+  const $=id=>{if(!nodes.has(id))nodes.set(id,new Element());return nodes.get(id)};
+  const state={selected:today,items:[{date:today,type:'task',title:'契約書確認',
+    subtitle:'未完了',priority:'P1',id:'native:9:contract',source:'Notion Tasks'}],demo:false};
+  const factory=new Function('state','localStorage','document','$','isValidKey','names',
+    codePart+'\nreturn {renderPlan,changeCheck,changeOrder,orderedPlan};');
+  return factory(state,localStorage,document,$,x=>/^\d{4}-\d{2}-\d{2}$/.test(x),
+    {schedule:'予定',task:'タスク',money:'お金',habit:'習慣'});
+ };
+ const first=create();first.renderPlan();const before=first.orderedPlan().filter(x=>x.movable);
+ first.changeCheck('habit:water');first.changeOrder('habit:water',1);
+ const saved=JSON.parse(storage.get('yos-daystream-plan-v1'))[today];
+ assert.equal(saved.done['habit:water'],true);
+ assert.notDeepEqual(saved.order,before.map(x=>x.id));
+ const again=create();again.renderPlan();
+ assert.equal(again.orderedPlan().filter(x=>x.movable)[0].id,'habit:stretch-am');
+ assert.equal(saved.done['habit:water'],true);
+ assert.equal(Object.keys(JSON.parse(storage.get('yos-daystream-plan-v1'))).length,1);
+});
