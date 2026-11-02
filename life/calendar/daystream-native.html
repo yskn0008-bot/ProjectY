@@ -54,6 +54,22 @@ button:disabled{opacity:.4;cursor:default} .frame{max-width:900px;margin:0 auto;
 .insight{margin-top:11px;padding:11px 0;background:#f4f7fa;border-top:0;border-radius:12px;padding-inline:12px}
 .stream{max-height:clamp(180px,38dvh,430px)}
 @media(max-width:360px){.frame{padding-inline:15px}.identity em{letter-spacing:0}.header{height:auto;min-height:44px}.week-nav{gap:0}.day-meta strong{font-size:15px}}
+
+/* YOS one-column dayplan; all state is local-only and never a Notion completion */
+.dayplan{background:white;border:1px solid #dce6df;border-radius:18px;margin:14px 0 10px;padding:15px 12px}
+.dayplan h2{margin:0;font-size:22px}.planhead{display:flex;align-items:center;justify-content:space-between;gap:9px}
+.planhead span,.planintro,.planfooter{font-size:14px;color:#5b6c61;line-height:1.5}
+.planintro{margin:8px 0 12px}.planfooter{padding-top:10px;border-top:1px solid #e7ebe7}
+.planrow{display:grid;grid-template-columns:46px 44px minmax(0,1fr) 40px;gap:6px;min-height:64px;align-items:center;padding:8px 0;border-top:1px solid #edf0ed}
+.planclock{font-size:13px;color:#5d6e63}.plancheck{height:44px;width:44px;border:1px solid #c0d2c7;background:white;border-radius:12px;font-size:24px}
+.plancheck[disabled]{border:0;color:#a0afa4;background:#f0f2f0}.plancheck.checked{background:#dcf0e4;color:#146b43}
+.plancopy{min-width:0;display:flex;flex-direction:column;gap:3px}.plancopy strong{font-size:16px;overflow-wrap:anywhere;line-height:1.4}
+.plancopy small{font-size:14px;line-height:1.4;color:#596a60}.planrow.checked .plancopy strong{text-decoration:line-through;color:#8a978e}
+.planmove{display:flex;flex-direction:column;gap:2px}.planmove button{border:0;background:#edf3ef;width:40px;min-height:28px;border-radius:8px;font-size:16px}.planmove button:disabled{opacity:.25}
+.planlocked{font-size:12px;color:#7b8a80;text-align:center}
+.sourcelist summary{min-height:44px;padding:12px 0;font-size:15px;font-weight:750;color:#47687d}
+.sourcelist .stream{min-height:130px;max-height:260px}
+@media(max-width:360px){.dayplan{padding:12px 8px}.planrow{grid-template-columns:36px 40px minmax(0,1fr) 36px;gap:4px}.plancheck{width:40px}.planmove button{width:36px}.planclock{font-size:12px}}
 </style>
 </head>
 <body>
@@ -64,9 +80,16 @@ button:disabled{opacity:.4;cursor:default} .frame{max-width:900px;margin:0 auto;
   <div class="week-title"><span id="weekLabel">WEEK 44</span><div class="week-nav"><button id="weekBack" aria-label="前の週">‹</button><button id="weekNext" aria-label="次の週">›</button></div></div>
   <nav class="week" aria-label="日付を選択" id="week"></nav>
   <aside class="insight"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2761d8" stroke-width="1.6" stroke-linecap="round"><path d="M12 2.5v3M4.6 5l2.1 2.1M2.6 12h3M19.4 12h2M17.3 7.1l2.1-2.1M9 17h6M10 20h4"/><path d="M8.2 14.5C6.5 12 7 8.6 9.7 7c2-1.2 5-.7 6.5 1.1 1.7 2 1.7 4.6.2 6.4-.7.9-1.3 1.5-1.4 2.5h-6c0-1-.2-1.7-.8-2.5z"/></svg><p><b>YOS</b> <span id="advice">確認できた情報をもとに、次の行動を整理します。</span></p></aside>
+  <section class="dayplan" aria-label="起床から就寝までの一日">
+<div class="planhead"><h2>起床から就寝まで</h2><span id="planProgress">—</span></div>
+<p class="planintro" id="planIntro">固定予定と未指定タスクをYOSが仮配置します。</p>
+<div id="planList" role="list"></div>
+<p class="planfooter" id="planFooter">チェック・順番は端末内の仮記録。NotionやAppleには未反映です。</p>
+</section>
+<details class="sourcelist"><summary>元データを確認（予定・タスク・家計）</summary>
   <section class="streamhead"><h2><span id="flowHeading">今日の流れ</span><span id="selectedSuffix" style="font-weight:500;color:#8c9197;font-size:12px;margin-left:7px"></span></h2><small id="eventCount">—</small></section>
   <nav class="filter-row" aria-label="情報の種類を絞り込む" id="filterRow"><button class="filter" data-filter="all" aria-pressed="true"><span>すべて</span></button><button class="filter" data-filter="schedule" style="--c:var(--schedule)" aria-pressed="true"><i></i><span>予定</span></button><button class="filter" data-filter="task" style="--c:var(--task)" aria-pressed="true"><i></i><span>タスク</span></button><button class="filter" data-filter="money" style="--c:var(--money)" aria-pressed="true"><i></i><span>お金</span></button><button class="filter" data-filter="habit" style="--c:var(--habit)" aria-pressed="true"><i></i><span>習慣</span></button></nav>
-  <div class="stream" id="stream" tabindex="0" aria-live="polite"></div>
+  <div class="stream" id="stream" tabindex="0" aria-live="polite"></div></details>
   <aside class="brief" aria-label="当日サマリー"><div><small>DAY MONEY / 当日の入出金</small><strong class="money-num" id="moneyValue">—</strong><p id="moneyCaption">未接続</p></div><div class="separator" aria-hidden="true"></div><div><small>HABIT / 習慣の記録</small><strong class="hab-num" id="habitValue">未確認</strong><p id="habitCaption">未記録＝未実施ではありません</p></div></aside>
   <footer class="meta-footer"><span id="freshness">MY LIFE / Money 読み取り中</span><button id="infoButton">接続状況 · 詳細 ↗</button></footer>
 </div>
