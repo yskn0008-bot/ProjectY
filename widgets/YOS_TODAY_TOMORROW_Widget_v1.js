@@ -259,6 +259,28 @@
     } catch(e) {}
     return {candidate:false};
   }
+  // Only positive reports in the existing Diary; missing days are unknown.
+  async function readHabitDiary(){
+    if(config.runsInWidget)return {status:'widget',days:[]};
+    let token='';try{if(Keychain.contains('YOS_NOTION_INTEGRATION_TOKEN'))token=Keychain.get('YOS_NOTION_INTEGRATION_TOKEN')}catch(e){}
+    if(!token)return {status:'未接続',days:[]};
+    const start=dateKey(new Date(now.getFullYear(),now.getMonth(),now.getDate()-6));
+    try{
+      const req=new Request('https://api.notion.com/v1/data_sources/fe0e0973d1cc4bdeb1381cb1da64ac68/query');
+      req.method='POST';req.timeoutInterval=4;
+      req.headers={Authorization:'Bearer '+token,'Notion-Version':'2025-09-03','Content-Type':'application/json'};
+      req.body=JSON.stringify({page_size:100,filter:{and:[{property:'日付',date:{on_or_after:start}},{property:'日付',date:{on_or_before:todayKey}}]}});
+      const data=await req.loadJSON();
+      if(Number(req.response?.statusCode)!==200||!Array.isArray(data?.results))return {status:'取得失敗',days:[]};
+      const dates=new Set();
+      for(const row of data.results){
+        const p=row?.properties||{},origin=p['記録元']?.select?.name,day=String(p['日付']?.date?.start||'').slice(0,10);
+        const body=Array.isArray(p['本文']?.rich_text)?p['本文'].rich_text.map(x=>x?.plain_text||x?.text?.content||'').join(''):'';
+        if((origin==='Clarity'||origin==='Night Brief')&&day>=start&&day<=todayKey&&movementReportCandidate(body))dates.add(day);
+      }
+      return {status:data.has_more===true?'一部取得':'取得済',days:[...dates]};
+    }catch(e){return {status:'取得失敗',days:[]}}
+  }
   function calendarLabel(result) {
     if(!result.ok) return "カレンダー未取得";
     const appointments=result.items.filter(e=>!isReferenceEvent(e));
@@ -294,9 +316,9 @@
   const weekEnd = new Date(weekStart.getFullYear(),weekStart.getMonth(),weekStart.getDate()+6);
   const weekTaskPromise = config.runsInWidget ? Promise.resolve(null) :
     readCalendarTaskWindow(dateKey(weekStart),dateKey(weekEnd));
-  const [events,reminders,feed,health,movement] = await Promise.all([
+  const [events,reminders,feed,health,movement,diary] = await Promise.all([
     readCalendar(target),readReminders(),night?Promise.resolve({data:null,stale:true}):readYosFeed(),
-    readHealth(),readMovementInbox()
+    readHealth(),readMovementInbox(),readHabitDiary()
   ]);
   const widget = new ListWidget();
   // The widget's unused background area opens this same script's full-screen board.
@@ -490,8 +512,17 @@
     // is intended to remain in the existing YOS diary via Clarity/Night.
     const movementGoal = '<div class="movementgoal"><b>食後5分歩く · 難しい日は1分</b>'+
       '<small>'+(movement.candidate?'Clarityの運動報告候補あり（YOS日記への反映は未確認）':'運動の実施記録：未確認')+'</small></div>';
+    const last7=Array.from({length:7},(_,i)=>{const d=new Date(now.getFullYear(),now.getMonth(),now.getDate()-6+i);return{day:dateKey(d),label:(d.getMonth()+1)+'/'+d.getDate()}});
+    const reported=new Set(diary.days||[]);
+    const reportedCount=last7.filter(d=>reported.has(d.day)).length;
+    const habitHistory='<div class="habit-history" aria-label="過去7日の運動報告">'+last7.map(d=>
+      '<div class="habit-day '+(reported.has(d.day)?'reported':'unknown')+'"><span>'+safe(d.label)+'</span><b>'+
+      (reported.has(d.day)?'報告あり':'未確認')+'</b></div>').join('')+'</div>'+
+      '<p class="habit-summary">日記に確認できた運動報告：'+reportedCount+'日'+
+      (diary.status==='取得済'?'（7日間）':'（'+safe(diary.status)+'／取得範囲のみ）')+
+      '。未確認は未実施を意味しません。</p>';
     const habitSection = '<section class="section"><h3>習慣・身体</h3>'+
-      movementGoal+habitRows+
+      movementGoal+habitHistory+habitRows+
       (health?'<p class="muted">健康：'+safe(health)+'</p>':'')+
       '<p class="muted">週2日の軽い筋トレも目標。歩数だけでは実施済みと判定しません。</p>'+
       '<div class="links"><a href="'+URL.life+'">MY LIFEで記録を見る</a></div></section>';
@@ -553,7 +584,7 @@
       '.event time{width:58px;flex-shrink:0;font-size:18px;color:#206D90;font-weight:800}.event b,.task b{display:block;font-size:19px;line-height:1.5}',
       '.event small,.task small{display:block;color:#5D6B61;margin-top:5px;line-height:1.45;font-size:16px}.task b{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.task details{margin-top:8px}.task summary{color:#206D90;font-size:16px;font-weight:700;cursor:pointer;min-height:34px}.task details p{margin:6px 0;font-size:16px;line-height:1.55;white-space:normal;overflow-wrap:anywhere}.tasklink{display:inline-block;color:#1C6477;font-size:16px;font-weight:750;padding:11px 0;text-decoration:underline;min-height:44px}',
       '.grow{flex:1;min-width:0;overflow-wrap:anywhere}.num{background:#F3E9DB;color:#87571F;border-radius:10px;width:33px;height:33px;display:grid;place-items:center;flex-shrink:0;font-weight:800}',
-      '.habit{padding:12px 0;font-size:19px;line-height:1.5}.movementgoal{background:#F1F6ED;border:1px solid #E1EAE0;padding:14px;border-radius:12px;margin:9px 0 13px}.movementgoal b{display:block;font-size:18px;color:#2F6349;line-height:1.45}.movementgoal small{display:block;font-size:15px;color:#66766D;margin-top:6px}.dot{display:inline-block;width:11px;height:11px;border:2px solid #6D9A85;border-radius:50%;margin-right:12px}',
+      '.habit-history{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;margin:12px 0 6px}.habit-day{border:1px solid #DFE5DD;border-radius:9px;text-align:center;padding:9px 2px;background:#F7F8F5;min-width:0}.habit-day span{display:block;font-size:12px;color:#64726B}.habit-day b{display:block;font-size:12px;line-height:1.4;margin-top:5px;overflow-wrap:anywhere}.habit-day.reported{background:#E0F2E8;border-color:#B8DEC9;color:#1E5C40}.habit-day.unknown{color:#5C6C62}.habit-summary{font-size:15px;line-height:1.5;color:#5B695F}.habit{padding:12px 0;font-size:19px;line-height:1.5}.movementgoal{background:#F1F6ED;border:1px solid #E1EAE0;padding:14px;border-radius:12px;margin:9px 0 13px}.movementgoal b{display:block;font-size:18px;color:#2F6349;line-height:1.45}.movementgoal small{display:block;font-size:15px;color:#66766D;margin-top:6px}.dot{display:inline-block;width:11px;height:11px;border:2px solid #6D9A85;border-radius:50%;margin-right:12px}',
       '.weekrow{align-items:start}.weekday{width:80px;font-size:17px;font-weight:800;flex-shrink:0}.weekevent{font-size:17px;margin-bottom:9px;line-height:1.5}.weekref{font-size:15px;color:#65746A;line-height:1.4;padding:6px 0}.weekdue{font-size:16px;font-weight:700;color:#825A2B;background:#F9F2E8;padding:8px;border-radius:9px;margin:7px 0}.more-due summary{color:#7A5928;font-size:16px;font-weight:700;padding:11px 0;min-height:44px}',
       '.foot{color:#58665D;font-size:14px;line-height:1.7;padding:12px 3px}.refcalendar{margin-top:8px;border-top:1px dashed #DCE3DB;padding:12px 0 0}.refcalendar summary{font-size:16px;color:#336E84;font-weight:700;cursor:pointer;min-height:40px}.refcalendar .event b{font-size:16px;color:#56645B}.overdue{border-radius:12px;background:#FFF4E8;border:1px solid #E8C79E;padding:0;margin-top:12px}.overdue summary{font-size:16px;color:#81572A;font-weight:700;min-height:48px;padding:14px;cursor:pointer}.overduebody{padding:0 14px 15px}.overdue p{font-size:15px;line-height:1.4;color:#674F36;margin:7px 0}.overduerow{font-size:15px;color:#674F36;padding:8px 0;border-top:1px solid #EAD8C4;overflow-wrap:anywhere}.overdue a{font-size:16px;font-weight:700;color:#1A6378;display:inline-block;margin-top:9px;min-height:34px}',
       '.links{display:flex;gap:8px;flex-wrap:wrap}.links a{color:#175E6D;background:#EFF5F1;border-radius:9px;padding:12px 13px;text-decoration:none;font-weight:750;font-size:17px;min-height:44px}',
