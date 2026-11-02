@@ -80,3 +80,14 @@ test('a forged or contradictory decision label never triggers a YOS notification
     base+'\nYOS_SILENT'
   ]) assert.equal(evaluate(input),'',input);
 });
+
+
+test('long GPT prose cannot push the actionable next step and source outside notification text',()=>{
+  const oversized=good('P0','重要事項'.repeat(300))
+    .replace('本人への影響: 支払い可否の確認が必要','本人への影響: '+'大きな影響'.repeat(120))
+    .replace('将来のリスク: 放置すると期限を過ぎる','将来のリスク: '+'損失リスク'.repeat(120));
+  const output=evaluate(oversized);
+  assert.match(output,/次の一手：原本で期限と手続を確認/);
+  assert.match(output,/根拠：本日の元通知/);
+  assert.equal(output.length<=550,true);
+});
