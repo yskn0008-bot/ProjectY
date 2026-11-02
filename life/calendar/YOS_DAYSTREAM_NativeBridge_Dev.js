@@ -328,7 +328,7 @@ async function main(){
     try{await web.evaluateJavaScript('window.YOS_DAYSTREAM_PLAN_IMPORT('+JSON.stringify(prior.value)+')',false)}catch{}
   }
   await web.present(true);
-  await handlePlanAfterDismiss(web,store,prior.blocked,taskEntries,token);
+  await handlePlanAfterDismiss(web,store,prior.blocked,uniqueTasks,token);
 }
 try {await main();} catch(error){
   const alert=new Alert();alert.title='DAYSTREAMプレビューを表示できません';
