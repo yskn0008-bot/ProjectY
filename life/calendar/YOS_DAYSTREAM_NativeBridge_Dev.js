@@ -228,9 +228,13 @@ async function completeTaskOnce(task,token){
   if(!token||!task||task.source!=='Notion Tasks'||task.type!=='task'||task.calendarMirror||
     !TASK_ID.test(task.id)||!EDITABLE_STATES.has(task.subtitle))return 'skipped';
   const before=await notionPage(task.id,token);
+  // Fail closed: only rows with an independently verified YOS Tasks parent may be updated.
   if(before.archived===true||before.in_trash===true||
-    (before.parent?.type==='data_source_id'&&before.parent.data_source_id!==TASK_SOURCE))return 'skipped';
+    before.parent?.type!=='data_source_id'||before.parent.data_source_id!==TASK_SOURCE)return 'skipped';
   const p=before.properties||{},status=select(p['状態']),title=rich(p['やること'],'title'),date=dateVal(p['期限']);
+  const provenance=rich(p['正本・根拠'],'rich_text'),syncKey=rich(p['同期キー'],'rich_text');
+  // Provenance must still be safe at write time, not merely when the list was loaded.
+  if(provenance==='Apple Calendar'||syncKey.startsWith('calendar:'))return 'conflict';
   if(status==='完了')return 'already';
   if(!EDITABLE_STATES.has(status)||title!==task.title||date!==task.date)return 'conflict';
   const req=new Request('https://api.notion.com/v1/pages/'+task.id);
@@ -243,9 +247,18 @@ async function completeTaskOnce(task,token){
   return select(after.properties?.['状態'])==='完了'?'verified':'uncertain';
 }
 async function handlePlanAfterDismiss(web,stored,priorFileBlocked,availableTasks,token){
-  if(!stored||priorFileBlocked)return;
+  if(priorFileBlocked){
+    const a=new Alert();a.title='既存の実行リストを保護';
+    a.message='端末内の実行リストを確認できず、元データを上書きせず停止しました。Notionは変更していません。';
+    a.addAction('閉じる');await a.presentAlert();return;
+  }
+  if(!stored)return;
   let returned;
-  try{returned=await web.evaluateJavaScript('window.YOS_DAYSTREAM_PLAN_EXPORT()',false)}catch{return}
+  try{returned=await web.evaluateJavaScript('window.YOS_DAYSTREAM_PLAN_EXPORT()',false)}catch{
+    const a=new Alert();a.title='実行リストの保存を確認できず';
+    a.message='画面を閉じた後の状態を取得できませんでした。Notionは変更していません。';
+    a.addAction('閉じる');await a.presentAlert();return;
+  }
   const plan=normalizePlanFile(returned);if(!plan)return;
   const saved=saveLocalPlan(stored,plan);
   if(!saved){
@@ -257,7 +270,8 @@ async function handlePlanAfterDismiss(web,stored,priorFileBlocked,availableTasks
   const eligible=availableTasks.filter(t=>
     t.type==='task'&&t.source==='Notion Tasks'&&!t.calendarMirror&&TASK_ID.test(t.id)&&
     EDITABLE_STATES.has(t.subtitle)&&t.date===dateKey(new Date())&&
-    touched.includes('task:Notion Tasks:native:'+t.id)
+    touched.includes('task:Notion Tasks:native:'+t.id)&&
+    plan.days[t.date]?.done?.['task:Notion Tasks:native:'+t.id]===true
   );
   const ids=new Set();const unique=eligible.filter(t=>{if(ids.has(t.id))return false;ids.add(t.id);return true});
   if(!unique.length)return;
