@@ -38,7 +38,7 @@ function notificationText(modelResponse) {
   }
   const fact = field('事実');
   const impact = field('本人への影響');
-  const next = field('推奨する次の一手');
+  const next = field('推奨する次の一手') || field('次の一手');
   const risk = field('将来のリスク');
   const basis = field('根拠と鮮度');
   if (!fact || !next || !basis) return '';
