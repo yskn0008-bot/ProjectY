@@ -3,7 +3,7 @@
 // Requires the unchanged production Clarity / Notion Inbox setup only for credentials.
 'use strict';
 const PREVIEW_URL = 'https://raw.githubusercontent.com/yskn0008-bot/ProjectY/refs/heads/feat/yos-calendar-web-preview-20261101/life/calendar/daystream-native.html';
-const HTML_SHA256 = '678887d7d8a3285ca6b631edde5efd7dfaed8d09b8496bba8f8b850b2d11a19d';
+const HTML_SHA256 = '811f81250d58958c11f8558861a853bb601e7cf9f94575e6bde6a3d581d0a8e0';
 // Compatibility marker for the already-installed iPhone launcher; actual HTML integrity is checked against HTML_SHA256.
 const INSTALLED_LAUNCHER_MARKER = 'b31ebae6e68de7f8d718cb28bd849e808efb147aedaa78b7e7b0c1b491655e90';
 function sha256Hex(input){
@@ -246,19 +246,15 @@ async function completeTaskOnce(task,token){
   const after=await notionPage(task.id,token);
   return select(after.properties?.['状態'])==='完了'?'verified':'uncertain';
 }
-async function handlePlanAfterDismiss(web,stored,priorFileBlocked,availableTasks,token){
+async function handlePlanAfterDismiss(returned,stored,priorFileBlocked,availableTasks,token){
   if(priorFileBlocked){
     const a=new Alert();a.title='既存の実行リストを保護';
     a.message='端末内の実行リストを確認できず、元データを上書きせず停止しました。Notionは変更していません。';
     a.addAction('閉じる');await a.presentAlert();return;
   }
   if(!stored)return;
-  let returned;
-  try{returned=await web.evaluateJavaScript('window.YOS_DAYSTREAM_PLAN_EXPORT()',false)}catch{
-    const a=new Alert();a.title='実行リストの保存を確認できず';
-    a.message='画面を閉じた後の状態を取得できませんでした。Notionは変更していません。';
-    a.addAction('閉じる');await a.presentAlert();return;
-  }
+  // Returned via a deliberate Save click while WebView is still presented.
+  // Closing the view without Save never authorizes a Notion write.
   const plan=normalizePlanFile(returned);if(!plan)return;
   const saved=saveLocalPlan(stored,plan);
   if(!saved){
@@ -341,8 +337,15 @@ async function main(){
   if(prior.value){
     try{await web.evaluateJavaScript('window.YOS_DAYSTREAM_PLAN_IMPORT('+JSON.stringify(prior.value)+')',false)}catch{}
   }
-  await web.present(true);
-  await handlePlanAfterDismiss(web,store,prior.blocked,uniqueTasks,token);
+  // Scriptable's completion callback captures the state *while the view is open*.
+  // Never rely on evaluateJavaScript after WebView dismissal.
+  const capture=web.evaluateJavaScript(
+    "(function(){window.YOS_DAYSTREAM_ATTACH_SAVE(function(value){completion(value);});})()",true
+  ).then(value=>({kind:'saved',value}),()=>({kind:'unavailable'}));
+  const closed=web.present(true);
+  const first=await Promise.race([capture,closed.then(()=>({kind:'closed'}))]);
+  await closed;
+  if(first.kind==='saved')await handlePlanAfterDismiss(first.value,store,prior.blocked,uniqueTasks,token);
 }
 try {await main();} catch(error){
   const alert=new Alert();alert.title='DAYSTREAMプレビューを表示できません';
