@@ -185,7 +185,7 @@ async function main(){
   // Each source has a reserved quota (170/165/165): one full calendar must not displace money or Tasks.
   // Apple/Notion sometimes hold the same calendar event under separate IDs.
   // Collapse only a proven calendar mirror with matching day+title. Notion rows remain intact.
-  const visibleKey=item=>item.date+'|'+clean(item.title,100).normalize('NFKC').replace(/[\\s　]+/g,' ').trim().toLocaleLowerCase('ja-JP');
+  const visibleKey=item=>item.date+'|'+clean(item.title,100).normalize('NFKC').split(/\s+/).join(' ').trim().toLocaleLowerCase('ja-JP');
   const appleTitles=new Set(uniqueApple.map(visibleKey));
   const uniqueTasks=tasks.rows.filter(item=>!(
     item.calendarMirror===true && item.explicitAction!==true &&
