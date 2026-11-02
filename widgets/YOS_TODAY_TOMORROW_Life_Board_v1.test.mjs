@@ -5,7 +5,7 @@ import {readFileSync} from 'node:fs';
 const source = readFileSync(new URL('./YOS_TODAY_TOMORROW_Widget_v1.js', import.meta.url), 'utf8');
 const body = source.slice(source.indexOf('(async function ()'));
 
-function runtime(runsInWidget, denyPermissions, widgetMode = 'DAY', withTaskFeed = false, tasksOverride = null, calendarOverride = null, feedTimestamp = undefined, fixedNow = null, calendarData = null, inboxData = null) {
+function runtime(runsInWidget, denyPermissions, widgetMode = 'DAY', withTaskFeed = false, tasksOverride = null, calendarOverride = null, feedTimestamp = undefined, fixedNow = null, calendarData = null, inboxData = null, diaryData = null) {
   let html = '';
   let widgetSet = false;
   let presented = 0;
@@ -40,7 +40,7 @@ function runtime(runsInWidget, denyPermissions, widgetMode = 'DAY', withTaskFeed
       iCloud(){return {documentsDirectory(){return '/icloud';},joinPath(...parts){return parts.join('/');},fileExists(){return false;}};}
     },
     Keychain: {contains(key){return key==='YOS_NOTION_INTEGRATION_TOKEN'?Boolean(inboxData):withTaskFeed;},get(){return 'mockToken';}},
-    Request: class {constructor(url){this.url=String(url);requestedURLs.push(this.url);this.response={statusCode:200};} async loadJSON(){if(this.url.includes('api.notion.com/v1/blocks/'))return inboxData||{results:[],has_more:false};if(this.url.includes('mode=calendar')) {if(calendarData) return calendarData;this.response.statusCode=404;return {error:'Not deployed'};}return {generatedAt: feedTimestamp === undefined ? new Date().toISOString() : feedTimestamp, tasks:tasksOverride || [{title:'TEST_DUE<&',due:new Date().toISOString().slice(0,10)}]};}},
+    Request: class {constructor(url){this.url=String(url);requestedURLs.push(this.url);this.response={statusCode:200};} async loadJSON(){if(this.url.includes('api.notion.com/v1/blocks/'))return inboxData||{results:[],has_more:false};if(this.url.includes('fe0e0973d1cc4bdeb1381cb1da64ac68/query')){if(diaryData)return diaryData;this.response.statusCode=403;return {error:'not connected'};}if(this.url.includes('mode=calendar')) {if(calendarData) return calendarData;this.response.statusCode=404;return {error:'Not deployed'};}return {generatedAt: feedTimestamp === undefined ? new Date().toISOString() : feedTimestamp, tasks:tasksOverride || [{title:'TEST_DUE<&',due:new Date().toISOString().slice(0,10)}]};}},
     URLScheme: {forRunningScript(){return 'scriptable:///run?scriptName=YOS%20TODAY';}},
     CalendarEvent: {async between(start){
       if (!firstCalendarDate) firstCalendarDate = new Date(start).toISOString().slice(0,10);
@@ -544,4 +544,59 @@ test('plans, past actions and third-party exercise do not count as current habit
     await new Function(...Object.keys(mock.globals),'return '+body)(...Object.values(mock.globals));
     assert.match(mock.snapshot().html,/運動の実施記録：未確認/,raw);
   }
+});
+
+const diaryRow=(date,body,origin='Clarity')=>({properties:{
+  '日付':{date:{start:date}},'記録元':{select:{name:origin}},
+  '本文':{rich_text:[{plain_text:body}]}
+}});
+test('seven-day tracker recognizes explicit diary movement reports without marking unreported days failed',async()=>{
+  const now=new Date();
+  const today=now.toLocaleDateString('sv-SE',{timeZone:'Asia/Tokyo'});
+  const yesterday=new Date(now.getTime()-86400000).toLocaleDateString('sv-SE',{timeZone:'Asia/Tokyo'});
+  const diary={results:[diaryRow(today,'今日は5分歩いた'),diaryRow(yesterday,'スクワット10回やった')],has_more:false};
+  const mock=runtime(false,false,'DAY',false,null,[],undefined,null,null,{results:[],has_more:false},diary);
+  await new Function(...Object.keys(mock.globals),'return '+body)(...Object.values(mock.globals));
+  const html=mock.snapshot().html;
+  assert.match(html,/日記に確認できた運動報告：2日（7日間）/);
+  assert.match(html,/報告あり/);
+  assert.match(html,/未確認は未実施を意味しません/);
+  assert.doesNotMatch(html,/運動実施済み|7日連続達成/);
+});
+test('plan, negation, wrong source and old diary entries do not count as exercise report',async()=>{
+  const now=new Date();
+  const today=now.toLocaleDateString('sv-SE',{timeZone:'Asia/Tokyo'});
+  const old=new Date(now.getTime()-10*86400000).toLocaleDateString('sv-SE',{timeZone:'Asia/Tokyo'});
+  const diary={results:[
+    diaryRow(today,'今日は5分歩く予定'),
+    diaryRow(today,'今日は5分歩かなかった'),
+    diaryRow(today,'今日は5分歩いた','手動'),
+    diaryRow(old,'5分歩いた')
+  ],has_more:false};
+  const mock=runtime(false,false,'DAY',false,null,[],undefined,null,null,{results:[],has_more:false},diary);
+  await new Function(...Object.keys(mock.globals),'return '+body)(...Object.values(mock.globals));
+  assert.match(mock.snapshot().html,/日記に確認できた運動報告：0日（7日間）/);
+  assert.doesNotMatch(mock.snapshot().html,/>報告あり</);
+});
+test('partially fetched diary does not imply full coverage',async()=>{
+  const today=new Date().toLocaleDateString('sv-SE',{timeZone:'Asia/Tokyo'});
+  const diary={results:[diaryRow(today,'今日は5分歩いた')],has_more:true,next_cursor:'next'};
+  const mock=runtime(false,false,'DAY',false,null,[],undefined,null,null,{results:[],has_more:false},diary);
+  await new Function(...Object.keys(mock.globals),'return '+body)(...Object.values(mock.globals));
+  assert.match(mock.snapshot().html,/日記に確認できた運動報告：1日（一部取得／取得範囲のみ）/);
+});
+test('no Keychain or blocked Notion displays unknown rather than inventing completion',async()=>{
+  const noKey=runtime(false,false,'DAY',false,null,[]);
+  await new Function(...Object.keys(noKey.globals),'return '+body)(...Object.values(noKey.globals));
+  assert.match(noKey.snapshot().html,/0日（未接続／取得範囲のみ）/);
+  const blocked=runtime(false,false,'DAY',false,null,[],undefined,null,null,{results:[],has_more:false});
+  await new Function(...Object.keys(blocked.globals),'return '+body)(...Object.values(blocked.globals));
+  assert.match(blocked.snapshot().html,/0日（取得失敗／取得範囲のみ）/);
+});
+test('widget refresh never reads private diary or increases network access',async()=>{
+  const today=new Date().toLocaleDateString('sv-SE',{timeZone:'Asia/Tokyo'});
+  const diary={results:[diaryRow(today,'今日は5分歩いた')],has_more:false};
+  const mock=runtime(true,false,'DAY',false,null,[],undefined,null,null,{results:[],has_more:false},diary);
+  await new Function(...Object.keys(mock.globals),'return '+body)(...Object.values(mock.globals));
+  assert.equal(mock.snapshot().requestedURLs.some(u=>u.includes('fe0e0973d1cc4bdeb1381cb1da64ac68')),false);
 });
