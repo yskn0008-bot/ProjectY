@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import crypto from 'node:crypto';
 const code=fs.readFileSync(new URL('./YOS_DAYSTREAM_NativeBridge_Dev.js',import.meta.url),'utf8');
 const html=fs.readFileSync(new URL('./daystream-native.html',import.meta.url),'utf8');
 const today=new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Tokyo'}).format(new Date());
@@ -79,4 +80,49 @@ test('Native bridge cannot modify Notion, account storage or original Clarity',(
  assert.doesNotMatch(code.replace("html.includes('localStorage.setItem(')",''),/Keychain\.set\(|localStorage\.setItem\(|req\.method=['"]PATCH|req\.method=['"]DELETE/);
  assert.match(code,/await web\.loadHTML\(html\)/);
  assert.match(code,/await web\.evaluateJavaScript\(/);
+});
+
+test('reviewed DAYSTREAM HTML checksum stays pinned to native bridge',()=>{
+  const pinned=code.match(/const HTML_SHA256 = '([a-f0-9]{64})'/)?.[1];
+  assert.equal(pinned,crypto.createHash('sha256').update(html).digest('hex'));
+});
+test('large Apple and Notion sources keep separate capacities and truthful partial status',async()=>{
+  let snapshot;
+  class ManyRequest {
+    constructor(url){this.url=url;this.response={statusCode:200}}
+    async loadString(){return html}
+    async loadJSON(){
+      const task=this.url.includes('965c6086');
+      const rows=Array.from({length:180},(_,i)=>task?
+        {id:'t'+i,properties:{'やること':{title:rich('タスク'+i)},'期限':{date:{start:today}},'状態':{select:{name:'実行中'}}}}:
+        {id:'m'+i,properties:{'項目':{title:rich('支払'+i)},'日付':{date:{start:today}},'金額':{number:i+1},'区分':{select:{name:'支出'}},'状態':{select:{name:'実績'}},'確度':{select:{name:'確認済'}}}});
+      return {results:rows,has_more:false};
+    }
+  }
+  class ManyWeb {
+    async loadHTML(src){assert.equal(src,html)}
+    async evaluateJavaScript(js){snapshot=JSON.parse(js.slice(js.indexOf('(')+1,-1));return true}
+    async present(){return}
+  }
+  const source={
+    Request:ManyRequest,WebView:ManyWeb,
+    CalendarEvent:{async between(){return Array.from({length:180},(_,i)=>({title:'予定'+i,startDate:new Date(today+'T10:30:00+09:00'),isAllDay:false,identifier:'e'+i}))}},
+    Keychain:{contains(){return true},get(){return 'LOCAL_TEST_TOKEN'}},
+    Alert:class{addAction(){}async presentAlert(){assert.fail('unexpected alert')}},
+    Script:{complete(){}}
+  };
+  await new Function(...Object.keys(source),'return (async()=>{'+code+'})()')(...Object.values(source));
+  assert.equal(snapshot.items.length,500);
+  assert.equal(snapshot.items.filter(x=>x.type==='schedule').length,170);
+  assert.equal(snapshot.items.filter(x=>x.type==='task').length,165);
+  assert.equal(snapshot.items.filter(x=>x.type==='money').length,165);
+  assert.deepEqual(Object.values(snapshot.sources).map(x=>x.status),['partial','partial','partial']);
+  assert.doesNotMatch(JSON.stringify(snapshot),/LOCAL_TEST_TOKEN/);
+});
+test('DAYSTREAM prioritizes action and distinguishes full, partial and stale native snapshots',()=>{
+  assert.ok(html.indexOf('<aside class="insight">')<html.indexOf('<section class="streamhead">'));
+  assert.match(html,/function nativeSourceLabel\(\)/);
+  assert.match(html,/complete===3\?'3種類取得済み'/);
+  assert.match(html,/age>30\*60\*1000/);
+  assert.match(html,/\.filter\{padding:9px 11px\}/);
 });
