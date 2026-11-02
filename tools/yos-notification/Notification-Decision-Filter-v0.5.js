@@ -27,10 +27,10 @@ function notificationText(modelResponse) {
   const lines = message.split('\n').map(line => line.trim()).filter(Boolean);
   // DO NOT use substring tests: untrusted original notifications may mention YOS_ALERT.
   if (lines[0] !== 'YOS_ALERT') return '';
-  const priorityLine = lines.find(line => /^優先度\s*[:：]\s*P[0-3]\s*$/u.test(line));
-  if (!priorityLine) return '';
-  const priority = /P[0-3]/.exec(priorityLine)[0];
-  if (priority !== 'P0' && priority !== 'P1') return '';
+  // Exact second-line priority and a single tag: text that merely mentions ALERT is not a command.
+  if (!/^優先度\s*[:：]\s*P[01]\s*$/u.test(lines[1] || '')) return '';
+  if (lines.slice(2).some(line => /^(?:優先度\s*[:：]|YOS_(?:ALERT|SILENT)(?:\b|$))/u.test(line))) return '';
+  const priority = /P[01]/.exec(lines[1])[0];
   function field(name) {
     const prefix = new RegExp('^' + name + '\\s*[:：]\\s*', 'u');
     const line = lines.find(line => prefix.test(line));
