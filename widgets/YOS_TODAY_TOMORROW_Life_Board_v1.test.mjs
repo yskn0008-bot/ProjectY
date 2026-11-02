@@ -558,9 +558,9 @@ test('seven-day tracker recognizes explicit diary movement reports without marki
   const mock=runtime(false,false,'DAY',false,null,[],undefined,null,null,{results:[],has_more:false},diary);
   await new Function(...Object.keys(mock.globals),'return '+body)(...Object.values(mock.globals));
   const html=mock.snapshot().html;
-  assert.match(html,/日記に確認できた運動報告：2日（7日間）/);
+  assert.match(html,/日記で確認できた運動報告：2日（過去7日）/);
   assert.match(html,/報告あり/);
-  assert.match(html,/未確認は未実施を意味しません/);
+  assert.match(html,/報告のない日は未実施と判定しません/);
   assert.doesNotMatch(html,/運動実施済み|7日連続達成/);
 });
 test('plan, negation, wrong source and old diary entries do not count as exercise report',async()=>{
@@ -575,7 +575,7 @@ test('plan, negation, wrong source and old diary entries do not count as exercis
   ],has_more:false};
   const mock=runtime(false,false,'DAY',false,null,[],undefined,null,null,{results:[],has_more:false},diary);
   await new Function(...Object.keys(mock.globals),'return '+body)(...Object.values(mock.globals));
-  assert.match(mock.snapshot().html,/日記に確認できた運動報告：0日（7日間）/);
+  assert.match(mock.snapshot().html,/日記で確認できた運動報告：0日（過去7日）/);
   assert.doesNotMatch(mock.snapshot().html,/>報告あり</);
 });
 test('partially fetched diary does not imply full coverage',async()=>{
@@ -583,15 +583,15 @@ test('partially fetched diary does not imply full coverage',async()=>{
   const diary={results:[diaryRow(today,'今日は5分歩いた')],has_more:true,next_cursor:'next'};
   const mock=runtime(false,false,'DAY',false,null,[],undefined,null,null,{results:[],has_more:false},diary);
   await new Function(...Object.keys(mock.globals),'return '+body)(...Object.values(mock.globals));
-  assert.match(mock.snapshot().html,/日記に確認できた運動報告：1日（一部取得／取得範囲のみ）/);
+  assert.match(mock.snapshot().html,/日記から少なくとも1日の運動報告を確認（一部取得）/);
 });
 test('no Keychain or blocked Notion displays unknown rather than inventing completion',async()=>{
   const noKey=runtime(false,false,'DAY',false,null,[]);
   await new Function(...Object.keys(noKey.globals),'return '+body)(...Object.values(noKey.globals));
-  assert.match(noKey.snapshot().html,/0日（未接続／取得範囲のみ）/);
+  assert.match(noKey.snapshot().html,/日記未接続：過去7日の運動実績は未確認/);
   const blocked=runtime(false,false,'DAY',false,null,[],undefined,null,null,{results:[],has_more:false});
   await new Function(...Object.keys(blocked.globals),'return '+body)(...Object.values(blocked.globals));
-  assert.match(blocked.snapshot().html,/0日（取得失敗／取得範囲のみ）/);
+  assert.match(blocked.snapshot().html,/日記取得失敗：過去7日の運動実績は未確認/);
 });
 test('widget refresh never reads private diary or increases network access',async()=>{
   const today=new Date().toLocaleDateString('sv-SE',{timeZone:'Asia/Tokyo'});
