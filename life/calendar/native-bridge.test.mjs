@@ -222,3 +222,53 @@ test('a calendar-origin task for another day remains independent',async()=>{
  const entries=await runCalendarMirrorFixture({taskDate:next});
  assert.equal(entries.some(x=>x.id==='mirror-001'),true);
 });
+
+function planLogic(){
+ const from=html.indexOf('// DAYPLAN-BEGIN'),to=html.indexOf('// DAYPLAN-END',from);
+ assert.ok(from>0&&to>from);
+ return new Function(html.slice(from,to)+'\nreturn {planForDay,applyPlanOrder};')();
+}
+test('wake-to-sleep planner keeps anchors, habits, priority and fixed appointments',()=>{
+ const {planForDay}=planLogic();
+ const day=today;
+ const rows=[
+  {date:day,type:'schedule',title:'午前の予約',subtitle:'09:30',source:'Appleカレンダー',id:'cal1'},
+  {date:day,type:'schedule',title:'夜の予定',subtitle:'19:00',source:'Appleカレンダー',id:'cal2'},
+  {date:day,type:'task',title:'低優先',subtitle:'未完了',priority:'P3',source:'Notion Tasks',id:'native:8:low'},
+  {date:day,type:'task',title:'高優先',subtitle:'未完了',priority:'P0',source:'Notion Tasks',id:'native:4:high'},
+  {date:day,type:'money',title:'支払い予定',subtitle:'予定・未確認',source:'Notion家計',id:'m1'}
+ ];
+ const plan=planForDay(day,rows);
+ assert.equal(plan[0].title,'起床');assert.equal(plan.at(-1).title,'就寝');
+ assert.ok(plan.find(x=>x.title==='水を飲む'));
+ assert.ok(plan.find(x=>x.title==='朝食・食事を記録'));
+ assert.ok(plan.find(x=>x.title==='日記・振り返り'));
+ assert.ok(plan.findIndex(x=>x.title==='午前の予約')<plan.findIndex(x=>x.title==='夜の予定'));
+ assert.ok(plan.findIndex(x=>x.title==='高優先')<plan.findIndex(x=>x.title==='低優先'));
+ assert.equal(plan.find(x=>x.title==='午前の予約').movable,false);
+ assert.equal(plan.find(x=>x.title==='支払い予定').checkable,false);
+ assert.equal(plan.find(x=>x.title==='高優先').checkable,true);
+});
+test('manual order moves flexible items while fixed appointments remain in place',()=>{
+ const {planForDay,applyPlanOrder}=planLogic();
+ const base=planForDay(today,[{date:today,type:'schedule',title:'病院',subtitle:'14:00',source:'Appleカレンダー',id:'c1'}]);
+ const movable=base.filter(x=>x.movable);
+ const order=[movable.at(-1).id,movable[0].id];const moved=applyPlanOrder(base,order);
+ assert.equal(moved[0].title,'起床');assert.equal(moved.at(-1).title,'就寝');
+ assert.equal(moved.findIndex(x=>x.title==='病院'),base.findIndex(x=>x.title==='病院'));
+ assert.equal(moved.filter(x=>x.movable)[0].id,movable.at(-1).id);
+ assert.equal(applyPlanOrder(base,['bogus',movable[0].id,movable[0].id]).filter(x=>x.movable).length,movable.length);
+});
+test('timestamped Notion task retains a fixed hour and P0 priority',()=>{
+ assert.match(code,/const priority=select\(p\['優先度'\]\)/);
+ assert.match(code,/const fixedTime=ts&&Number\.isFinite/);
+ assert.match(html,/item\.fixedTime=/);
+ assert.match(html,/x\.type==='task'&&x\.fixedTime/);
+});
+test('draft-only checks and reordering never write to original Notion or Apple data',()=>{
+ assert.match(html,/const PLAN_KEY='yos-daystream-plan-v1'/);
+ assert.match(html,/localStorage\.setItem\(PLAN_KEY,encoded\)/);
+ assert.match(html,/Notion／Appleの完了状態は変わりません/);
+ assert.doesNotMatch(html,/https:\/\/api\.notion\.com\/v1\/pages\/.*PATCH|CalendarEvent\.create\(/);
+ assert.ok(code.includes("!html.split('localStorage.'+'setItem(')[1].startsWith('PLAN_KEY,encoded)')"));
+});
