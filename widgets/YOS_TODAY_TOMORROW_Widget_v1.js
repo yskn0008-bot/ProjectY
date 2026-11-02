@@ -518,9 +518,11 @@
     const habitHistory='<div class="habit-history" aria-label="過去7日の運動報告">'+last7.map(d=>
       '<div class="habit-day '+(reported.has(d.day)?'reported':'unknown')+'"><span>'+safe(d.label)+'</span><b>'+
       (reported.has(d.day)?'報告あり':'未確認')+'</b></div>').join('')+'</div>'+
-      '<p class="habit-summary">日記に確認できた運動報告：'+reportedCount+'日'+
-      (diary.status==='取得済'?'（7日間）':'（'+safe(diary.status)+'／取得範囲のみ）')+
-      '。未確認は未実施を意味しません。</p>';
+      '<p class="habit-summary">'+(
+        diary.status==='取得済'?'日記で確認できた運動報告：'+reportedCount+'日（過去7日）':
+        diary.status==='一部取得'?'日記から少なくとも'+reportedCount+'日の運動報告を確認（一部取得）':
+        '日記'+safe(diary.status)+'：過去7日の運動実績は未確認'
+      )+'。報告のない日は未実施と判定しません。</p>';
     const habitSection = '<section class="section"><h3>習慣・身体</h3>'+
       movementGoal+habitHistory+habitRows+
       (health?'<p class="muted">健康：'+safe(health)+'</p>':'')+
