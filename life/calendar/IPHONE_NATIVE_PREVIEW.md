@@ -29,3 +29,14 @@ Delete only **YOS DAYSTREAM 開発確認** from Scriptable if no longer wanted. 
 - Regression checks cover HTML checksum, 500-row fair source allocation, partial status, and action-first UI structure; actual iPhone readability and connection status still require on-device confirmation.
 
 - Native finance never falls back to stale browser Money when Notion errors or is unavailable. Partially loaded Notion finance rows remain viewable but the daily total is withheld and labeled incomplete.
+
+## 2026-11-02 — Prepared offline one-file review package
+
+The same Draft PR now includes [YOS_DAYSTREAM_iPhone_Review_20261102.scriptable](./YOS_DAYSTREAM_iPhone_Review_20261102.scriptable). This is a **development-only** standalone Scriptable import with the corrected 2026-11-02 DAYSTREAM UI and read-only bridge embedded together. Its JSON script name is `YOS DAYSTREAM 開発確認 20261102` so older preview scripts remain separate and unchanged.
+
+- Import the `.scriptable` file using iOS Share → Scriptable (if the file has been obtained through the user's authenticated GitHub access).
+- Run only the new `YOS DAYSTREAM 開発確認 20261102` script. Approve Calendar permission if needed. Open `接続状況 · 詳細` and record Apple / Notion Tasks / Notion家計 status independently.
+- The UI is bundled **offline**; no executable HTML is fetched from GitHub when the script runs. The only network requests are read-only Notion API queries; Calendar reads occur on device. No bank live balance is claimed.
+- Device import, iOS WebView, Keychain compatibility, permissions, Notion real queries, visual accessibility and final UX are **not yet verified**. Never mark the whole STREAM screen production ready from mocked tests alone.
+- Mock Scriptable checks confirmed success / no Keychain / HTTP denied paths, HTML integrity pin, no credential in WebView and no writes to Notion. The package is not deployed to the current iPhone; older `.scriptable` imports are not overwritten.
+- Rollback: remove only the distinctly named `YOS DAYSTREAM 開発確認 20261102` development script after review. Do not remove any existing YOS, Money, Clarity or widget scripts.
