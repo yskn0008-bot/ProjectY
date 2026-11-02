@@ -276,7 +276,13 @@
       for(const row of data.results){
         const p=row?.properties||{},origin=p['記録元']?.select?.name,day=String(p['日付']?.date?.start||'').slice(0,10);
         const body=Array.isArray(p['本文']?.rich_text)?p['本文'].rich_text.map(x=>x?.plain_text||x?.text?.content||'').join(''):'';
-        if((origin==='Clarity'||origin==='Night Brief')&&day>=start&&day<=todayKey&&movementReportCandidate(body))dates.add(day);
+        // Health sync stores actual confirmed reports inside journal sections; raw-line regex alone misses them.
+        // Only a trusted journal source can establish a reported day; missing/other rows remain unknown.
+        const recordKey=Array.isArray(p['記録キー']?.rich_text)?p['記録キー'].rich_text.map(x=>x?.plain_text||x?.text?.content||'').join(''):'';
+        const journalKey=(origin==='Clarity'&&recordKey==='health:'+day)||(origin==='Night Brief'&&recordKey==='night:'+day);
+        const verifiedMarker=/\[YOS-health:clarity:[A-Za-z0-9._:-]{3,128}:activity\]/u.test(body);
+        if((origin==='Clarity'||origin==='Night Brief')&&day>=start&&day<=todayKey&&
+          (movementReportCandidate(body)||(journalKey&&verifiedMarker)))dates.add(day);
       }
       return {status:data.has_more===true?'一部取得':'取得済',days:[...dates]};
     }catch(e){return {status:'取得失敗',days:[]}}
