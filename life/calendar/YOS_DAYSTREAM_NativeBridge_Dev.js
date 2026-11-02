@@ -83,7 +83,13 @@ function parseTask(row){
   const p=row?.properties;if(!p)return null;
   const title=rich(p['やること'],'title'),date=dateVal(p['期限']),status=select(p['状態']);
   if(!title||!validDay(date)||['中止','完了','キャンセル','取り消し'].includes(status))return null;
-  return {type:'task',date,title,subtitle:status||'状態未確認',nextAction:rich(p['次の一手'],'rich_text'),completion:rich(p['完了条件'],'rich_text'),blocker:rich(p['ブロッカー'],'rich_text'),done:false,source:'Notion Tasks',id:clean(row.id||title,70)};
+  const nextAction=rich(p['次の一手'],'rich_text'),completion=rich(p['完了条件'],'rich_text'),blocker=rich(p['ブロッカー'],'rich_text');
+  const provenance=rich(p['正本・根拠'],'rich_text'),syncKey=rich(p['同期キー'],'rich_text');
+  // Only calendar-origin copies may be hidden. Never infer a mirror from title alone.
+  const calendarMirror=provenance==='Apple Calendar'||syncKey.startsWith('calendar:');
+  // A human-added action or blocker remains independently actionable, even with a matching event.
+  const explicitAction=Boolean(nextAction.trim()||completion.trim()||blocker.trim());
+  return {type:'task',date,title,subtitle:status||'状態未確認',nextAction,completion,blocker,done:false,source:'Notion Tasks',id:clean(row.id||title,70),calendarMirror,explicitAction};
 }
 function parseMoney(row){
   const p=row?.properties;if(!p)return null;
@@ -177,7 +183,17 @@ async function main(){
     return true;
   });
   // Each source has a reserved quota (170/165/165): one full calendar must not displace money or Tasks.
-  const allEntries=[...uniqueApple,...tasks.rows,...money.rows];
+  // Apple/Notion sometimes hold the same calendar event under separate IDs.
+  // Collapse only a proven calendar mirror with matching day+title. Notion rows remain intact.
+  const visibleKey=item=>item.date+'|'+clean(item.title,100).normalize('NFKC').replace(/[\\s　]+/g,' ').trim().toLocaleLowerCase('ja-JP');
+  const appleTitles=new Set(uniqueApple.map(visibleKey));
+  const uniqueTasks=tasks.rows.filter(item=>!(
+    item.calendarMirror===true && item.explicitAction!==true &&
+    appleTitles.has(visibleKey(item))
+  ));
+  // Don't send mirror metadata to WebView, only fields needed for the view.
+  const taskEntries=uniqueTasks.map(({calendarMirror,explicitAction,...viewItem})=>viewItem);
+  const allEntries=[...uniqueApple,...taskEntries,...money.rows];
   const entries=allEntries.slice(0,500);
   // The UI accepts at most 500 items. Never report a complete source when
   // the combined cap silently excludes records from the visible calendar.
