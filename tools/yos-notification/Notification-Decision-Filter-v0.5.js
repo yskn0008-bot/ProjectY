@@ -31,16 +31,17 @@ function notificationText(modelResponse) {
   if (!/^優先度\s*[:：]\s*P[01]\s*$/u.test(lines[1] || '')) return '';
   if (lines.slice(2).some(line => /^(?:優先度\s*[:：]|YOS_(?:ALERT|SILENT)(?:\b|$))/u.test(line))) return '';
   const priority = /P[01]/.exec(lines[1])[0];
-  function field(name) {
+  function field(name, maxLength) {
     const prefix = new RegExp('^' + name + '\\s*[:：]\\s*', 'u');
     const line = lines.find(line => prefix.test(line));
-    return line ? safeText(line.replace(prefix, '')) : '';
+    return line ? safeText(line.replace(prefix, '')).slice(0, maxLength) : '';
   }
-  const fact = field('事実');
-  const impact = field('本人への影響');
-  const next = field('推奨する次の一手') || field('次の一手');
-  const risk = field('将来のリスク');
-  const basis = field('根拠と鮮度');
+  // Bound each field rather than cutting the whole message after the next action disappears.
+  const fact = field('事実', 115);
+  const impact = field('本人への影響', 75);
+  const next = field('推奨する次の一手', 115) || field('次の一手', 115);
+  const risk = field('将来のリスク', 75);
+  const basis = field('根拠と鮮度', 90);
   if (!fact || !next || !basis) return '';
   // Never repeat authentication codes in a lock-screen notification.
   if (/認証コード|確認コード|ワンタイム|OTP|2FA|verification\s*code|security\s*code/iu.test(message)) return '';
