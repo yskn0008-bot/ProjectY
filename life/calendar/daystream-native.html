@@ -192,10 +192,103 @@ button:disabled{opacity:.4;cursor:default} .frame{max-width:900px;margin:0 auto;
  function renderWeek(){const root=$('week');root.replaceChildren();const first=addDays(state.selected,-dayDate(state.selected).weekday);for(let i=0;i<7;i++){const k=addDays(first,i),d=dayDate(k),b=document.createElement('button');b.type='button';b.className='daybtn'+(state.selected===k?' selected':'')+(today===k?' today':'');b.setAttribute('aria-pressed',String(state.selected===k));b.setAttribute('aria-label',`${d.month}月${d.day}日を表示`);const w=document.createElement('span');w.className='wd';w.textContent='日月火水木金土'[d.weekday];const num=document.createElement('span');num.className='num';num.textContent=d.day;const dots=document.createElement('span');dots.className='dots';for(const t of countsFor(k)){const dot=document.createElement('i');dot.style.background=color(t);dots.append(dot)}b.append(w,num,dots);b.addEventListener('click',()=>setDay(k));root.append(b)}}
  function eventTime(e){if(e.type!=='schedule')return '';const t=String(e.subtitle||'').match(/\b(\d{2}):(\d{2})\b/);return t?t[0]:'終日'}
  function sortedEntries(){return listDay().sort((a,b)=>{const rank=x=>x.type==='schedule'?(eventTime(x)==='終日'?-1:0):x.type==='money'?2:x.type==='task'?3:4;let r=rank(a)-rank(b);return r||((a.type==='schedule'&&b.type==='schedule')?eventTime(a).localeCompare(eventTime(b)):0)})}
+ // DAYPLAN-BEGIN: the YOS draft plan is separate from source-of-truth records.
+ const PLAN_KEY='yos-daystream-plan-v1';
+ const routine=(id,title,subtitle)=>({id:'habit:'+id,type:'habit',title,subtitle,movable:true,checkable:true,planned:true});
+ const anchor=(id,title,subtitle)=>({id:'anchor:'+id,type:'schedule',title,subtitle,movable:false,checkable:false,planned:true});
+ function planForDay(date,records){
+   const rows=records.filter(x=>x.date===date),scheduled=rows.filter(x=>x.type==='schedule');
+   const sortTime=x=>/^\d{2}:\d{2}$/.test(x.subtitle||'')?Number(x.subtitle.slice(0,2)):12;
+   scheduled.sort((a,b)=>sortTime(a)-sortTime(b));
+   const priorities={P0:0,P1:1,P2:2,P3:3};
+   const tasks=rows.filter(x=>x.type==='task'&&!x.done).sort((a,b)=>
+     (priorities[a.priority]??4)-(priorities[b.priority]??4)||
+     (Number.isFinite(a.order)?a.order:9999)-(Number.isFinite(b.order)?b.order:9999)||
+     a.title.localeCompare(b.title,'ja')).map((x,i)=>({...x,id:'task:'+x.source+':'+String(x.id).replace(/^native:\d+:/,'native:'),
+       subtitle:'YOS仮配置 · '+(i<2?'優先候補':'空き時間候補')+(x.priority?' · '+x.priority:''),
+       movable:true,checkable:true}));
+   const appointments=scheduled.map(x=>({...x,id:'event:'+x.source+':'+String(x.id).replace(/^native:\d+:/,'native:'),movable:false,checkable:false}));
+   const bills=rows.filter(x=>x.type==='money').map(x=>({...x,id:'money:'+x.source+':'+x.id,movable:false,checkable:false}));
+   const morning=appointments.filter(x=>sortTime(x)<11),afternoon=appointments.filter(x=>sortTime(x)>=11&&sortTime(x)<18),night=appointments.filter(x=>sortTime(x)>=18);
+   const split=Math.ceil(tasks.length/2);
+   return [
+     anchor('wake','起床','時刻未取得'),
+     routine('water','水を飲む','起床後'),
+     routine('stretch-am','朝のストレッチ','短時間'),
+     routine('ready','身支度','起床後'),
+     ...morning,
+     routine('breakfast','朝食・食事を記録','献立分析は食事・体調データ接続後'),
+     routine('walk','食後のウォーキング','5分／難しい日は1分'),
+     ...tasks.slice(0,split),...afternoon,...bills,...tasks.slice(split),...night,
+     routine('diary','日記・振り返り','夜／既存YOS日記'),
+     routine('stretch-pm','夜のストレッチ','短時間'),
+     anchor('sleep','就寝','睡眠記録と翌日の予定からの提案は未接続')
+   ];
+ }
+ function applyPlanOrder(rows,requested) {
+   if(!Array.isArray(requested)||requested.length>300)return rows;
+   const mov=rows.filter(x=>x.movable),known=new Map(mov.map(x=>[x.id,x])),used=new Set(),sorted=[];
+   for(const id of requested){if(typeof id==='string'&&known.has(id)&&!used.has(id)){sorted.push(known.get(id));used.add(id)}}
+   for(const x of mov)if(!used.has(x.id))sorted.push(x);
+   let i=0;return rows.map(x=>x.movable?sorted[i++]:x);
+ }
+ // DAYPLAN-END
+ let planSaved={};let planWriteStatus='端末内保存は未確認';
+ try{const raw=localStorage.getItem(PLAN_KEY),parsed=raw&&JSON.parse(raw);if(parsed&&typeof parsed==='object'&&!Array.isArray(parsed))planSaved=parsed}catch{}
+ const dayDraft=()=>{const d=planSaved[state.selected];return d&&typeof d==='object'?d:{order:[],done:{}}};
+ function writePlan(entry){
+   planSaved[state.selected]={order:Array.isArray(entry.order)?entry.order.slice(0,300):[],done:entry.done||{}};
+   const keys=Object.keys(planSaved).filter(isValidKey).sort().slice(-30),data={};for(const k of keys)data[k]=planSaved[k];
+   planSaved=data;
+   try{const encoded=JSON.stringify(data);localStorage.setItem(PLAN_KEY,encoded);
+     planWriteStatus=localStorage.getItem(PLAN_KEY)===encoded?'端末内の仮記録を保存':'保存を確認できず';
+   }catch{planWriteStatus='保存不可（開いている間だけ）'}
+ }
+ const orderedPlan=()=>applyPlanOrder(planForDay(state.selected,state.items),dayDraft().order);
+ function changeCheck(id){
+   if(state.demo)return;const row=orderedPlan().find(x=>x.id===id);if(!row?.checkable)return;
+   const d=dayDraft(),done={...(d.done||{})};if(done[id])delete done[id];else done[id]=true;
+   writePlan({order:d.order,done});renderPlan();
+ }
+ function changeOrder(id,delta){
+   if(state.demo)return;const current=orderedPlan(),flex=current.filter(x=>x.movable),idx=flex.findIndex(x=>x.id===id),other=idx+delta;
+   if(idx<0||other<0||other>=flex.length)return;
+   [flex[idx],flex[other]]=[flex[other],flex[idx]];
+   writePlan({order:flex.map(x=>x.id),done:dayDraft().done});renderPlan();
+ }
+ function renderPlan(){
+   const rows=orderedPlan(),done=dayDraft().done||{},root=$('planList');root.replaceChildren();
+   const total=rows.filter(x=>x.checkable).length,completed=rows.filter(x=>x.checkable&&done[x.id]).length;
+   $('planProgress').textContent=completed+' / '+total+' 仮チェック';
+   $('planIntro').textContent='時刻確定の予定は動かしません。時間未指定のタスクは優先度から仮配置します。';
+   $('planFooter').textContent=(state.demo?'デザイン見本':planWriteStatus)+
+     ' · チェックと並び順は端末内の仮記録。Notion／Appleの完了状態は変わりません。';
+   const flex=rows.filter(x=>x.movable);
+   for(const item of rows){
+     const line=document.createElement('div');line.className='planrow'+(done[item.id]?' checked':'');line.setAttribute('role','listitem');
+     const clock=document.createElement('span');clock.className='planclock';
+     clock.textContent=item.type==='schedule'&&item.subtitle==='終日'?'終日':
+       /^\d{2}:\d{2}$/.test(item.subtitle||'')?item.subtitle:'順番';
+     const tick=document.createElement('button');tick.className='plancheck'+(done[item.id]?' checked':'');tick.type='button';
+     tick.disabled=!item.checkable||state.demo;tick.textContent=item.checkable?(done[item.id]?'✓':'○'):'•';
+     tick.setAttribute('aria-label',item.title+'の仮チェック');if(item.checkable)tick.addEventListener('click',()=>changeCheck(item.id));
+     const copy=document.createElement('span');copy.className='plancopy';const name=document.createElement('strong');name.textContent=item.title;
+     const hint=document.createElement('small');hint.textContent=(item.planned?'朝夜の習慣候補':names[item.type]||'予定')+' · '+String(item.subtitle||'');
+     copy.append(name,hint);
+     const controls=document.createElement('span');controls.className='planmove';
+     if(item.movable){for(const [delta,symbol] of [[-1,'↑'],[1,'↓']]){
+       const btn=document.createElement('button');btn.type='button';btn.textContent=symbol;btn.disabled=state.demo||
+       (delta<0?flex[0].id===item.id:flex[flex.length-1].id===item.id);
+       btn.setAttribute('aria-label',item.title+'を'+(delta<0?'上':'下')+'へ');
+       btn.addEventListener('click',()=>changeOrder(item.id,delta));controls.append(btn);
+     }}else{controls.className='planlocked';controls.textContent='固定'}
+     line.append(clock,tick,copy,controls);root.append(line);
+   }
+ }
  function renderStream(){const entries=sortedEntries(),root=$('stream');root.replaceChildren();$('eventCount').textContent=entries.length+'件の記録';if(!entries.length){const node=document.createElement('div');node.className='nothing';const b=document.createElement('b');b.textContent=state.demo?'この日のサンプルはありません':'この日の記録は未確認';const t=document.createElement('span');t.textContent=state.native&&(state.selected<state.native.range.start||state.selected>state.native.range.end)?'この日付はiPhoneで取得した期間の外です。再起動しても取得範囲外の場合は未確認です。':'未接続の情報は含まれません。記録なし＝予定や習慣がない、ではありません。';node.append(b,t);root.append(node);return}for(const e of entries){const row=document.createElement('button');row.type='button';row.className='stream-item '+e.type;row.style.setProperty('--color',color(e.type));const time=document.createElement('span');time.className='time'+(e.type==='schedule'?'':' unset');time.textContent=e.type==='schedule'?eventTime(e):e.type==='money'?'¥':e.type==='task'?'TODO':'LOG';const spine=document.createElement('span');spine.className='stream-spine';spine.append(document.createElement('i'));const copy=document.createElement('span');copy.className='content';const strong=document.createElement('strong');strong.textContent=e.title;const small=document.createElement('small');small.textContent=`${names[e.type]} · ${e.subtitle}${state.demo?' · サンプル':''}`;copy.append(strong,small);const end=document.createElement('span');end.className=e.type==='money'?'amount':'stream-arrow';end.textContent=e.type==='money'?(e.moneyKind==='income'?'+':'−')+cash(e.amount):'›';row.append(time,spine,copy,end);row.addEventListener('click',()=>showRecord(e));root.append(row)}}
  function renderBrief(){const day=state.items.filter(x=>x.date===state.selected),money=day.filter(x=>x.type==='money'),hab=day.filter(x=>x.type==='habit'),can=!state.moneyPrivate&&(state.demo||(state.native?['ok','partial'].includes(state.native.sources.money.status):state.moneyRead)),moneyPartial=state.native?.sources?.money?.status==='partial';const actual=money.filter(x=>x.complete);const incoming=actual.filter(x=>x.moneyKind==='income').reduce((a,x)=>a+x.amount,0);const outgoing=actual.filter(x=>x.moneyKind==='expense').reduce((a,x)=>a+x.amount,0);const plan=money.filter(x=>!x.complete&&!x.reviewRequired),review=money.filter(x=>x.reviewRequired);$('moneyValue').textContent=(!can||moneyPartial)?'—':!money.length?'記録なし':(incoming-outgoing<0?'−':'+')+cash(incoming-outgoing);$('moneyCaption').textContent=!can?(state.moneyPrivate?'Money：非表示':'Notion家計：未接続'):moneyPartial?'Notion家計は一部取得。日別合計は未確定（明細は参考）':!money.length?'表示範囲内の入出金記録なし（取得漏れは未確認）':`確認済み実績：入金${cash(incoming)} / 支出${cash(outgoing)} · 予定${plan.length}件${review.length?' · 要照合'+review.length+'件':''}`;$('habitValue').textContent=hab.length?hab.length+'件の報告':'未確認';$('habitCaption').textContent=hab.length?'MY LIFEの保存済み実施報告':'未記録＝未実施ではありません';const next=state.items.filter(x=>x.type==='money'&&x.moneyKind==='expense'&&!x.complete&&!x.reviewRequired&&x.date>=state.selected).sort((a,b)=>a.date.localeCompare(b.date))[0];const current=day.filter(x=>x.type==='schedule'),open=day.filter(x=>x.type==='task'&&!x.done);let advice='確認できた情報から、今日の一手を整理します。';if(next&&next.date<=today&&state.selected===today)advice='支払い予定の期限を確認。完了・残高はMoneyで照合。';else if(current.length&&open.length)advice='まず時間が決まった予定を確保。その前後でタスクを1件。';else if(open.length)advice='未完了のタスクから、取りかかる1件を決めよう。';else if(next)advice='今後の支払い予定がある。残高はMoneyで確認。';else if(current.length)advice='予定を先に確保し、空いた時間は余白として残そう。';$('advice').textContent=(state.demo?'サンプル：':'')+advice;const life=state.lifeRead?'MY LIFE 保存あり':'MY LIFE 未接続',fin=state.moneyPrivate?'Money 非表示':state.moneyRead?'Money 保存あり':'Money 未接続',na=state.native,ns=na?' · Apple '+na.sources.apple.status+' / Notion Tasks '+na.sources.tasks.status+' / 家計 '+na.sources.money.status:'';const old=s=>!s||(Date.now()-s.getTime()>86400000);$('freshness').textContent=state.demo?'すべて架空の表示例':`${life}${state.lifeRead&&old(state.lifeSynced)?'（時刻未確認・古い可能性）':''} · ${fin}${state.moneyRead&&old(state.moneySynced)?'（時刻未確認・古い可能性）':''}${ns}${na?' · iPhone起動時 '+new Date(na.generatedAt).toLocaleTimeString('ja-JP')+'取得（再起動で更新）':''}`;}
  function renderFilters(){for(const b of document.querySelectorAll('.filter')){const t=b.dataset.filter,active=t==='all'?state.filters.size===4:state.filters.has(t);b.classList.toggle('off',!active);b.setAttribute('aria-pressed',String(active))}}
- function render(){renderHeader();renderWeek();renderFilters();renderStream();renderBrief()}
+ function render(){renderHeader();renderWeek();renderFilters();renderPlan();renderStream();renderBrief()}
  function setDay(k){if(!isValidKey(k))return;state.selected=k;state.month=k.slice(0,7);render();$('stream').scrollTop=0}
  function openDialog(id){$(id).showModal()}function closeDialog(id){$(id).close()}
  function renderMonth(){const [yr,mon]=state.month.split('-').map(Number),first=dateKey(new Date(yr,mon-1,1,12)),firstDay=parseDate(first).getDay(),days=new Date(yr,mon,0).getDate(),total=Math.ceil((firstDay+days)/7)*7;const root=$('monthGrid');root.replaceChildren();$('monthTitle').textContent=`${yr}年${mon}月`;for(const w of '日月火水木金土'){const sp=document.createElement('span');sp.className='mwd';sp.textContent=w;root.append(sp)}for(let i=0;i<total;i++){const k=addDays(first,i-firstDay),d=dayDate(k),b=document.createElement('button');b.className='mday'+(k===state.selected?' sel':'')+(d.month!==mon?' out':'');b.textContent=String(d.day);const dots=document.createElement('span');dots.className='mdots';for(const t of countsFor(k).slice(0,4)){const x=document.createElement('i');x.style.background=color(t);dots.append(x)}b.append(dots);b.setAttribute('aria-label',`${d.month}月${d.day}日を表示`);b.addEventListener('click',()=>{setDay(k);closeDialog('monthDialog')});root.append(b)}}
