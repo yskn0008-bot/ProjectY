@@ -600,3 +600,27 @@ test('widget refresh never reads private diary or increases network access',asyn
   await new Function(...Object.keys(mock.globals),'return '+body)(...Object.values(mock.globals));
   assert.equal(mock.snapshot().requestedURLs.some(u=>u.includes('fe0e0973d1cc4bdeb1381cb1da64ac68')),false);
 });
+
+
+test('actual health-sync journal marker counts a day even when the raw report is inside a titled block',async()=>{
+  const today=new Date().toLocaleDateString('sv-SE',{timeZone:'Asia/Tokyo'});
+  const body='\n【Clarity健康記録｜運動｜報告 18:00】\n今日は5分歩いたよ\n本人の運動実施報告。時間未確認。\n[YOS-health:clarity:habit-abc:activity]\n';
+  const row=diaryRow(today,body);
+  row.properties['記録キー']={rich_text:[{plain_text:'health:'+today}]};
+  const diary={results:[row],has_more:false};
+  const mock=runtime(false,false,'DAY',false,null,[],undefined,null,null,{results:[],has_more:false},diary);
+  await new Function(...Object.keys(mock.globals),'return '+body)(...Object.values(mock.globals));
+  assert.match(mock.snapshot().html,/日記で確認できた運動報告：1日（過去7日）/);
+});
+test('health marker with wrong journal key or untrusted source does not establish movement',async()=>{
+  const today=new Date().toLocaleDateString('sv-SE',{timeZone:'Asia/Tokyo'});
+  const content='【Clarity健康記録｜運動｜報告 18:00】\n今日は5分歩いた\n[YOS-health:clarity:habit-abc:activity]';
+  const wrong=diaryRow(today,content,'Clarity');
+  wrong.properties['記録キー']={rich_text:[{plain_text:'health:1900-01-01'}]};
+  const manual=diaryRow(today,content,'手動');
+  manual.properties['記録キー']={rich_text:[{plain_text:'health:'+today}]};
+  const diary={results:[wrong,manual],has_more:false};
+  const mock=runtime(false,false,'DAY',false,null,[],undefined,null,null,{results:[],has_more:false},diary);
+  await new Function(...Object.keys(mock.globals),'return '+body)(...Object.values(mock.globals));
+  assert.match(mock.snapshot().html,/日記で確認できた運動報告：0日（過去7日）/);
+});
