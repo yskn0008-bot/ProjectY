@@ -27,3 +27,5 @@ Delete only **YOS DAYSTREAM 開発確認** from Scriptable if no longer wanted. 
 - DAYSTREAM puts the existing YOS next-action insight above the timeline, enlarges text and major tap targets, and labels partial/stale native source snapshots instead of calling any single successful source a complete sync.
 - HTML SHA-256 integrity pin updated in the **development bridge** to match the changed preview. Any previously built standalone Scriptable package remains pinned to its prior embedded HTML; this commit does not silently update/install/overwrite that package. This work remains a Draft; no current iPhone install, live permissions, merge or production release is verified.
 - Regression checks cover HTML checksum, 500-row fair source allocation, partial status, and action-first UI structure; actual iPhone readability and connection status still require on-device confirmation.
+
+- Native finance never falls back to stale browser Money when Notion errors or is unavailable. Partially loaded Notion finance rows remain viewable but the daily total is withheld and labeled incomplete.
