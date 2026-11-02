@@ -233,7 +233,7 @@ button:disabled{opacity:.4;cursor:default} .frame{max-width:900px;margin:0 auto;
    let i=0;return rows.map(x=>x.movable?sorted[i++]:x);
  }
  // DAYPLAN-END
- let planSaved={};let planWriteStatus='端末内保存は未確認';
+ let planSaved={};let planWriteStatus='端末内保存は未確認';const planTouched=new Set();
  try{const raw=localStorage.getItem(PLAN_KEY),parsed=raw&&JSON.parse(raw);if(parsed&&typeof parsed==='object'&&!Array.isArray(parsed))planSaved=parsed}catch{}
  const dayDraft=()=>{const d=planSaved[state.selected];return d&&typeof d==='object'?d:{order:[],done:{}}};
  function writePlan(entry){
@@ -248,6 +248,7 @@ button:disabled{opacity:.4;cursor:default} .frame{max-width:900px;margin:0 auto;
  function changeCheck(id){
    if(state.demo)return;const row=orderedPlan().find(x=>x.id===id);if(!row?.checkable)return;
    const d=dayDraft(),done={...(d.done||{})};if(done[id])delete done[id];else done[id]=true;
+   if(row.type==='task'){if(done[id])planTouched.add(id);else planTouched.delete(id)}
    writePlan({order:d.order,done});renderPlan();
  }
  function changeOrder(id,delta){
@@ -285,6 +286,33 @@ button:disabled{opacity:.4;cursor:default} .frame{max-width:900px;margin:0 auto;
      line.append(clock,tick,copy,controls);root.append(line);
    }
  }
+ // Native Scriptable is the sole owner of a persistable file and Notion credentials.
+ // These methods expose a bounded plan snapshot; they never send tokens or auto-write Notion.
+ window.YOS_DAYSTREAM_PLAN_IMPORT=function(value){
+   if(!value||value.schema!=='yos-daystream-plan-v1'||!value.days||
+     typeof value.days!=='object'||Array.isArray(value.days))return false;
+   const valid={};
+   for(const [day,d] of Object.entries(value.days).slice(-30)){
+     if(!isValidKey(day)||!d||typeof d!=='object')continue;
+     const order=Array.isArray(d.order)?d.order.filter(k=>typeof k==='string'&&k.length<180).slice(0,300):[];
+     const done={};for(const [k,v] of Object.entries(d.done||{}).slice(0,300))
+       if(typeof k==='string'&&k.length<180&&v===true)done[k]=true;
+     valid[day]={order,done};
+   }
+   planSaved=valid;planWriteStatus='Scriptable端末内ファイルから復元';
+   renderPlan();return true;
+ };
+ window.YOS_DAYSTREAM_PLAN_EXPORT=function(){
+   const days={};
+   for(const [day,d] of Object.entries(planSaved).slice(-30)){
+     if(!isValidKey(day)||!d||typeof d!=='object')continue;
+     const order=Array.isArray(d.order)?d.order.filter(x=>typeof x==='string'&&x.length<180).slice(0,300):[];
+     const done={};for(const [k,v] of Object.entries(d.done||{}).slice(0,300))
+       if(typeof k==='string'&&k.length<180&&v===true)done[k]=true;
+     days[day]={order,done};
+   }
+   return {schema:'yos-daystream-plan-v1',days,completedKeys:[...planTouched].slice(0,30)};
+ };
  function renderStream(){const entries=sortedEntries(),root=$('stream');root.replaceChildren();$('eventCount').textContent=entries.length+'件の記録';if(!entries.length){const node=document.createElement('div');node.className='nothing';const b=document.createElement('b');b.textContent=state.demo?'この日のサンプルはありません':'この日の記録は未確認';const t=document.createElement('span');t.textContent=state.native&&(state.selected<state.native.range.start||state.selected>state.native.range.end)?'この日付はiPhoneで取得した期間の外です。再起動しても取得範囲外の場合は未確認です。':'未接続の情報は含まれません。記録なし＝予定や習慣がない、ではありません。';node.append(b,t);root.append(node);return}for(const e of entries){const row=document.createElement('button');row.type='button';row.className='stream-item '+e.type;row.style.setProperty('--color',color(e.type));const time=document.createElement('span');time.className='time'+(e.type==='schedule'?'':' unset');time.textContent=e.type==='schedule'?eventTime(e):e.type==='money'?'¥':e.type==='task'?'TODO':'LOG';const spine=document.createElement('span');spine.className='stream-spine';spine.append(document.createElement('i'));const copy=document.createElement('span');copy.className='content';const strong=document.createElement('strong');strong.textContent=e.title;const small=document.createElement('small');small.textContent=`${names[e.type]} · ${e.subtitle}${state.demo?' · サンプル':''}`;copy.append(strong,small);const end=document.createElement('span');end.className=e.type==='money'?'amount':'stream-arrow';end.textContent=e.type==='money'?(e.moneyKind==='income'?'+':'−')+cash(e.amount):'›';row.append(time,spine,copy,end);row.addEventListener('click',()=>showRecord(e));root.append(row)}}
  function renderBrief(){const day=state.items.filter(x=>x.date===state.selected),money=day.filter(x=>x.type==='money'),hab=day.filter(x=>x.type==='habit'),can=!state.moneyPrivate&&(state.demo||(state.native?['ok','partial'].includes(state.native.sources.money.status):state.moneyRead)),moneyPartial=state.native?.sources?.money?.status==='partial';const actual=money.filter(x=>x.complete);const incoming=actual.filter(x=>x.moneyKind==='income').reduce((a,x)=>a+x.amount,0);const outgoing=actual.filter(x=>x.moneyKind==='expense').reduce((a,x)=>a+x.amount,0);const plan=money.filter(x=>!x.complete&&!x.reviewRequired),review=money.filter(x=>x.reviewRequired);$('moneyValue').textContent=(!can||moneyPartial)?'—':!money.length?'記録なし':(incoming-outgoing<0?'−':'+')+cash(incoming-outgoing);$('moneyCaption').textContent=!can?(state.moneyPrivate?'Money：非表示':'Notion家計：未接続'):moneyPartial?'Notion家計は一部取得。日別合計は未確定（明細は参考）':!money.length?'表示範囲内の入出金記録なし（取得漏れは未確認）':`確認済み実績：入金${cash(incoming)} / 支出${cash(outgoing)} · 予定${plan.length}件${review.length?' · 要照合'+review.length+'件':''}`;$('habitValue').textContent=hab.length?hab.length+'件の報告':'未確認';$('habitCaption').textContent=hab.length?'MY LIFEの保存済み実施報告':'未記録＝未実施ではありません';const next=state.items.filter(x=>x.type==='money'&&x.moneyKind==='expense'&&!x.complete&&!x.reviewRequired&&x.date>=state.selected).sort((a,b)=>a.date.localeCompare(b.date))[0];const current=day.filter(x=>x.type==='schedule'),open=day.filter(x=>x.type==='task'&&!x.done);let advice='確認できた情報から、今日の一手を整理します。';if(next&&next.date<=today&&state.selected===today)advice='支払い予定の期限を確認。完了・残高はMoneyで照合。';else if(current.length&&open.length)advice='まず時間が決まった予定を確保。その前後でタスクを1件。';else if(open.length)advice='未完了のタスクから、取りかかる1件を決めよう。';else if(next)advice='今後の支払い予定がある。残高はMoneyで確認。';else if(current.length)advice='予定を先に確保し、空いた時間は余白として残そう。';$('advice').textContent=(state.demo?'サンプル：':'')+advice;const life=state.lifeRead?'MY LIFE 保存あり':'MY LIFE 未接続',fin=state.moneyPrivate?'Money 非表示':state.moneyRead?'Money 保存あり':'Money 未接続',na=state.native,ns=na?' · Apple '+na.sources.apple.status+' / Notion Tasks '+na.sources.tasks.status+' / 家計 '+na.sources.money.status:'';const old=s=>!s||(Date.now()-s.getTime()>86400000);$('freshness').textContent=state.demo?'すべて架空の表示例':`${life}${state.lifeRead&&old(state.lifeSynced)?'（時刻未確認・古い可能性）':''} · ${fin}${state.moneyRead&&old(state.moneySynced)?'（時刻未確認・古い可能性）':''}${ns}${na?' · iPhone起動時 '+new Date(na.generatedAt).toLocaleTimeString('ja-JP')+'取得（再起動で更新）':''}`;}
  function renderFilters(){for(const b of document.querySelectorAll('.filter')){const t=b.dataset.filter,active=t==='all'?state.filters.size===4:state.filters.has(t);b.classList.toggle('off',!active);b.setAttribute('aria-pressed',String(active))}}
