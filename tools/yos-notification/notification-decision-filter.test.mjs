@@ -63,3 +63,8 @@ test('Scriptable executes output+complete without network/notification effects',
   assert.equal(completed,1);
   assert.match(output,/【YOS重要｜P1】/);
 });
+
+test('accept the already used five-field iPhone GPT contract without an extra risk field',()=>{
+  const old=good().replace('推奨する次の一手','次の一手').replace('将来のリスク: 放置すると期限を過ぎる\n','');
+  assert.match(evaluate(old),/次の一手：原本で期限/);
+});
