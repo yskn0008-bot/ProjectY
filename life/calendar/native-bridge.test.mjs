@@ -126,3 +126,9 @@ test('DAYSTREAM prioritizes action and distinguishes full, partial and stale nat
   assert.match(html,/age>30\*60\*1000/);
   assert.match(html,/\.filter\{padding:9px 11px\}/);
 });
+
+test('native Notion finance is not silently replaced by outdated browser Money',()=>{
+  assert.ok(html.includes('const joined=state.native?[...native,...life]:[...life,...money]'));
+  assert.ok(html.includes('moneyPartial?\'Notion家計は一部取得'));
+  assert.ok(html.includes("moneyValue').textContent=(!can||moneyPartial)?'—'"));
+});
