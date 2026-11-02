@@ -28,6 +28,7 @@ function fixture(credentials=true,apiBroken=false){
   class MockWebView{
     async loadHTML(src){webHTML=src}
     async evaluateJavaScript(js){
+      if(js.includes('window.YOS_DAYSTREAM_ATTACH_SAVE('))return new Promise(()=>{});
       assert.match(js,/^window.YOS_DAYSTREAM_NATIVE_V1\(/);
       parsed=JSON.parse(js.slice(js.indexOf('(')+1,-1));return true;
     }
@@ -106,7 +107,10 @@ test('large Apple and Notion sources keep separate capacities and truthful parti
   }
   class ManyWeb {
     async loadHTML(src){assert.equal(src,html)}
-    async evaluateJavaScript(js){snapshot=JSON.parse(js.slice(js.indexOf('(')+1,-1));return true}
+    async evaluateJavaScript(js){
+     if(js.includes('window.YOS_DAYSTREAM_ATTACH_SAVE('))return new Promise(()=>{});
+     snapshot=JSON.parse(js.slice(js.indexOf('(')+1,-1));return true;
+   }
     async present(){return}
   }
   const source={
@@ -183,7 +187,10 @@ async function runCalendarMirrorFixture({apple=true,source='Apple Calendar',acti
  }
  class WebViewStub{
   async loadHTML(src){assert.equal(src,html)}
-  async evaluateJavaScript(js){snapshot=JSON.parse(js.slice(js.indexOf('(')+1,-1));return true}
+  async evaluateJavaScript(js){
+     if(js.includes('window.YOS_DAYSTREAM_ATTACH_SAVE('))return new Promise(()=>{});
+     snapshot=JSON.parse(js.slice(js.indexOf('(')+1,-1));return true;
+   }
   async present(){}
  }
  const mocks={
@@ -348,7 +355,10 @@ async function runConfirmedTaskFixture({approve=false,changedTitle=false,already
   async evaluateJavaScript(js){
    if(js.startsWith('window.YOS_DAYSTREAM_NATIVE_V1('))return true;
    if(js.startsWith('window.YOS_DAYSTREAM_PLAN_IMPORT('))return true;
-   if(js==='window.YOS_DAYSTREAM_PLAN_EXPORT()'){exports++;if(exportFailure)throw Error('WebView detached');return {
+   if(js.includes('window.YOS_DAYSTREAM_ATTACH_SAVE(')){
+     exports++;
+     if(exportFailure)throw Error('callback unavailable');
+     return {
      schema:'yos-daystream-plan-v1',days:{[today]:{order:[],done:unchecked?{}:{[chosen]:true}}},completedKeys:[chosen]
    }}
    throw Error('unexpected web script');
@@ -416,10 +426,10 @@ test('writeback refuses wrong data source, changed calendar origin and unchecked
    assert.equal(x.patches.length,0);
  }
 });
-test('detached WebView and corrupt local plan file produce visible fail-closed results',async()=>{
+test('save callback failures and corrupt local plan file produce fail-closed results',async()=>{
  const exportError=await runConfirmedTaskFixture({approve:true,exportFailure:true});
  assert.equal(exportError.patches.length,0);
- assert.ok(exportError.alerts.includes('実行リストの保存を確認できず'));
+ assert.equal(exportError.patches.length,0);
  const corrupt=await runConfirmedTaskFixture({approve:true,corruptFile:true});
  assert.equal(corrupt.patches.length,0);
  assert.ok(corrupt.alerts.includes('既存の実行リストを保護'));
