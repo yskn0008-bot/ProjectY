@@ -315,10 +315,10 @@ test('local dayplan check and ordering survive a re-open without Notion writes',
  assert.equal(Object.keys(JSON.parse(storage.get('yos-daystream-plan-v1'))).length,1);
 });
 
-async function runConfirmedTaskFixture({approve=false,changedTitle=false,already=false,fileError=false,token=true,forged=false,mirror=false}={}){
+async function runConfirmedTaskFixture({approve=false,changedTitle=false,already=false,fileError=false,token=true,forged=false,mirror=false,badParent=false,changedOrigin=false,unchecked=false,exportFailure=false,corruptFile=false}={}){
  const taskId='11111111-2222-4333-8444-555555555555',key='task:Notion Tasks:native:'+taskId;
  const chosen=forged?'task:Notion Tasks:native:99999999-9999-4999-8999-999999999999':key;
- let status=already?'完了':'次にやる',patches=[],alerts=[],files=new Map(),exports=0;
+ let status=already?'完了':'次にやる',patches=[],alerts=[],files=new Map(corruptFile?[['/local/YOS_DAYSTREAM_PLAN_STATE_v1.json','{invalid']]:[]),exports=0;
  const row={id:taskId,properties:{
   'やること':{title:rich('今日の書類を確認')},
   '期限':{date:{start:today}},'状態':{select:{name:'次にやる'}},
@@ -334,9 +334,11 @@ async function runConfirmedTaskFixture({approve=false,changedTitle=false,already
     if(this.method==='PATCH'){
      patches.push(JSON.parse(this.body));status='完了';
     }
-    return {object:'page',id:taskId,archived:false,parent:{type:'data_source_id',data_source_id:'965c6086-32c1-463d-93b4-87a9cb69b3ad'},
+    return {object:'page',id:taskId,archived:false,parent:badParent?{type:'page_id',page_id:'00000000-0000-4000-8000-000000000000'}:{type:'data_source_id',data_source_id:'965c6086-32c1-463d-93b4-87a9cb69b3ad'},
      properties:{'やること':{title:rich(changedTitle?'different title':'今日の書類を確認')},
-     '期限':{date:{start:today}},'状態':{select:{name:status}}}};
+     '期限':{date:{start:today}},'状態':{select:{name:status}},
+     '正本・根拠':{rich_text:rich(changedOrigin?'Apple Calendar':'本人入力')},
+     '同期キー':{rich_text:rich(changedOrigin?'calendar:updated':'')}}};
    }
    throw Error('unexpected URL '+this.url);
   }
@@ -346,8 +348,8 @@ async function runConfirmedTaskFixture({approve=false,changedTitle=false,already
   async evaluateJavaScript(js){
    if(js.startsWith('window.YOS_DAYSTREAM_NATIVE_V1('))return true;
    if(js.startsWith('window.YOS_DAYSTREAM_PLAN_IMPORT('))return true;
-   if(js==='window.YOS_DAYSTREAM_PLAN_EXPORT()'){exports++;return {
-     schema:'yos-daystream-plan-v1',days:{[today]:{order:[],done:{[chosen]:true}}},completedKeys:[chosen]
+   if(js==='window.YOS_DAYSTREAM_PLAN_EXPORT()'){exports++;if(exportFailure)throw Error('WebView detached');return {
+     schema:'yos-daystream-plan-v1',days:{[today]:{order:[],done:unchecked?{}:{[chosen]:true}}},completedKeys:[chosen]
    }}
    throw Error('unexpected web script');
   }
@@ -402,4 +404,24 @@ test('forged IDs, calendar mirrors, and unavailable credentials never update Not
   const x=await runConfirmedTaskFixture(opts);
   assert.equal(x.patches.length,0);
  }
+});
+
+test('writeback refuses wrong data source, changed calendar origin and unchecked export',async()=>{
+ for(const opts of [
+   {approve:true,badParent:true},
+   {approve:true,changedOrigin:true},
+   {approve:true,unchecked:true}
+ ]){
+   const x=await runConfirmedTaskFixture(opts);
+   assert.equal(x.patches.length,0);
+ }
+});
+test('detached WebView and corrupt local plan file produce visible fail-closed results',async()=>{
+ const exportError=await runConfirmedTaskFixture({approve:true,exportFailure:true});
+ assert.equal(exportError.patches.length,0);
+ assert.ok(exportError.alerts.includes('実行リストの保存を確認できず'));
+ const corrupt=await runConfirmedTaskFixture({approve:true,corruptFile:true});
+ assert.equal(corrupt.patches.length,0);
+ assert.ok(corrupt.alerts.includes('既存の実行リストを保護'));
+ assert.equal(corrupt.files.get('/local/YOS_DAYSTREAM_PLAN_STATE_v1.json'),'{invalid');
 });
