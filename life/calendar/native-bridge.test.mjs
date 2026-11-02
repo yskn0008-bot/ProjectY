@@ -314,3 +314,92 @@ test('local dayplan check and ordering survive a re-open without Notion writes',
  assert.equal(saved.done['habit:water'],true);
  assert.equal(Object.keys(JSON.parse(storage.get('yos-daystream-plan-v1'))).length,1);
 });
+
+async function runConfirmedTaskFixture({approve=false,changedTitle=false,already=false,fileError=false,token=true,forged=false,mirror=false}={}){
+ const taskId='11111111-2222-4333-8444-555555555555',key='task:Notion Tasks:native:'+taskId;
+ const chosen=forged?'task:Notion Tasks:native:99999999-9999-4999-8999-999999999999':key;
+ let status=already?'完了':'次にやる',patches=[],alerts=[],files=new Map(),exports=0;
+ const row={id:taskId,properties:{
+  'やること':{title:rich('今日の書類を確認')},
+  '期限':{date:{start:today}},'状態':{select:{name:'次にやる'}},
+  '正本・根拠':{rich_text:rich(mirror?'Apple Calendar':'本人入力')},
+  '同期キー':{rich_text:rich(mirror?'calendar:uuid':'')}
+ }};
+ class MockRequest{
+  constructor(url){this.url=url;this.response={statusCode:200};this.method='GET'}
+  async loadString(){return html}
+  async loadJSON(){
+   if(this.url.includes('/data_sources/'))return {results:this.url.includes('965c6086')?[row]:[],has_more:false};
+   if(this.url.includes('/pages/'+taskId)){
+    if(this.method==='PATCH'){
+     patches.push(JSON.parse(this.body));status='完了';
+    }
+    return {object:'page',id:taskId,archived:false,parent:{type:'data_source_id',data_source_id:'965c6086-32c1-463d-93b4-87a9cb69b3ad'},
+     properties:{'やること':{title:rich(changedTitle?'different title':'今日の書類を確認')},
+     '期限':{date:{start:today}},'状態':{select:{name:status}}}};
+   }
+   throw Error('unexpected URL '+this.url);
+  }
+ }
+ class MockWeb{
+  async loadHTML(src){assert.equal(src,html)}
+  async evaluateJavaScript(js){
+   if(js.startsWith('window.YOS_DAYSTREAM_NATIVE_V1('))return true;
+   if(js.startsWith('window.YOS_DAYSTREAM_PLAN_IMPORT('))return true;
+   if(js==='window.YOS_DAYSTREAM_PLAN_EXPORT()'){exports++;return {
+     schema:'yos-daystream-plan-v1',days:{[today]:{order:[],done:{[chosen]:true}}},completedKeys:[chosen]
+   }}
+   throw Error('unexpected web script');
+  }
+  async present(){}
+ }
+ class MockAlert{
+  constructor(){this.title=''}
+  addAction(){}
+  addCancelAction(){}
+  async presentAlert(){alerts.push(this.title);return this.title==='Notion Tasksへ完了を反映'?(approve?0:1):0}
+ }
+ const mock={
+  Request:MockRequest,WebView:MockWeb,Alert:MockAlert,
+  CalendarEvent:{async between(){return []}},
+  Keychain:{contains(){return token},get(){return 'FIXTURE_NOTION_TOKEN'}},
+  FileManager:{local(){return{
+   documentsDirectory(){return'/local'},joinPath(a,b){return a+'/'+b},
+   fileExists(p){return files.has(p)},readString(p){return files.get(p)},
+   writeString(p,v){if(fileError)throw Error('write denied');files.set(p,v)}
+  }}},Script:{complete(){}}
+ };
+ await new Function(...Object.keys(mock),'return (async()=>{'+code+'})()')(...Object.values(mock));
+ return {patches,alerts,exports,files,status};
+}
+test('explicit cancellation keeps Notion unchanged while saving local checkbox draft',async()=>{
+ const x=await runConfirmedTaskFixture();
+ assert.equal(x.patches.length,0);
+ assert.ok(x.alerts.includes('Notion Tasksへ完了を反映'));
+ assert.equal(x.files.size,1);
+ assert.equal(x.exports,1);
+});
+test('explicit approval performs one guarded status-only PATCH and verifies readback',async()=>{
+ const x=await runConfirmedTaskFixture({approve:true});
+ assert.equal(x.patches.length,1);
+ assert.deepEqual(x.patches[0],{properties:{'状態':{select:{name:'完了'}}}});
+ assert.equal(x.status,'完了');
+ assert.ok(x.alerts.includes('Notionへの反映結果'));
+});
+test('conflicting title or already completed source cannot be changed again',async()=>{
+ for(const opts of [{approve:true,changedTitle:true},{approve:true,already:true}]){
+  const x=await runConfirmedTaskFixture(opts);
+  assert.equal(x.patches.length,0);
+ }
+});
+test('failed local save prevents Notion completion submission',async()=>{
+ const x=await runConfirmedTaskFixture({approve:true,fileError:true});
+ assert.equal(x.patches.length,0);
+ assert.ok(x.alerts.includes('実行リストは保存未確認'));
+});
+test('forged IDs, calendar mirrors, and unavailable credentials never update Notion',async()=>{
+ for(const opts of [{approve:true,forged:true},{approve:true,mirror:true},{approve:true,token:false}]){
+  const x=await runConfirmedTaskFixture(opts);
+  assert.equal(x.patches.length,0);
+ }
+});
