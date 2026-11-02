@@ -35,6 +35,25 @@ button:disabled{opacity:.4;cursor:default} .frame{max-width:900px;margin:0 auto;
 @media(max-width:360px){.frame{padding-left:15px;padding-right:15px}.big-date{font-size:72px}.day-meta strong{font-size:15px}.filter{padding:7px 8px}.stream-item{grid-template-columns:42px 13px minmax(0,1fr) auto;gap:6px}.content strong{font-size:13px}}
 @media(max-height:700px){.hero{padding-top:0;padding-bottom:9px}.big-date{font-size:64px}.week-title{margin-top:9px}.week{padding-bottom:5px}.daybtn{height:48px}.streamhead{padding:8px 0}.stream{max-height:calc(100dvh - 449px)}.brief{margin-top:6px}}
 @media(prefers-reduced-motion:no-preference){.daybtn,.filter,.stream-item{transition:background .14s ease,opacity .14s ease}.dialog{animation:rise .22s cubic-bezier(.2,.7,.2,1)}@keyframes rise{from{transform:translateY(12px);opacity:.8}to{transform:translateY(0);opacity:1}}}
+/* System UI audit 2026-11-02: readable labels, reliable tap targets, and actionable-first hierarchy. */
+.identity em,.eyebrow,.week-title span,.weeknav-hint,.daybtn .wd,
+.streamhead small,.filter,.content small,.time.unset,.brief small,.brief p,
+.insight p,.meta-footer,.meta-footer button,.status-pill,.sheet-sub,
+.mwd,.month-actions button,.detail-line,.demo-banner{font-size:12px;}
+.identity em,.eyebrow,.week-title span,.weeknav-hint,.daybtn .wd,
+.streamhead small,.filter,.content small,.time.unset,.brief small,.brief p,
+.insight p,.meta-footer,.meta-footer button,.status-pill,.sheet-sub,
+.mwd,.month-actions button,.detail-line,.demo-banner{line-height:1.4;}
+.filter,.insight p,.detail-line{font-size:14px;line-height:1.45}
+.meta-footer{flex-wrap:wrap}
+.iconbutton,.hero-right button,.week-nav button,.filter,.sheet-close,
+.month-actions button,.meta-footer button,.demo-banner button{min-height:44px;}
+.iconbutton,.week-nav button,.sheet-close{min-width:44px;}
+.daybtn{min-height:58px}.filter{padding:9px 11px}.stream-item{min-height:62px}
+.brief strong{white-space:normal;overflow-wrap:anywhere}
+.insight{margin-top:11px;padding:11px 0;background:#f4f7fa;border-top:0;border-radius:12px;padding-inline:12px}
+.stream{max-height:clamp(180px,38dvh,430px)}
+@media(max-width:360px){.frame{padding-inline:15px}.identity em{letter-spacing:0}.header{height:auto;min-height:44px}.week-nav{gap:0}.day-meta strong{font-size:15px}}
 </style>
 </head>
 <body>
@@ -44,11 +63,11 @@ button:disabled{opacity:.4;cursor:default} .frame{max-width:900px;margin:0 auto;
   <section class="hero"><div><div class="eyebrow" id="heroEyebrow">NOVEMBER · 2026</div><div class="date-line"><span class="big-date" id="bigDate">01</span><div class="day-meta"><strong id="heroDay">SUNDAY</strong><span id="heroShort">11月1日</span></div></div></div><div class="hero-right"><div class="status-pill"><b id="stateDot"></b><span id="stateLabel">接続状態</span></div><button id="openMonth">月カレンダー <span aria-hidden="true">↗</span></button></div></section>
   <div class="week-title"><span id="weekLabel">WEEK 44</span><div class="week-nav"><button id="weekBack" aria-label="前の週">‹</button><button id="weekNext" aria-label="次の週">›</button></div></div>
   <nav class="week" aria-label="日付を選択" id="week"></nav>
+  <aside class="insight"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2761d8" stroke-width="1.6" stroke-linecap="round"><path d="M12 2.5v3M4.6 5l2.1 2.1M2.6 12h3M19.4 12h2M17.3 7.1l2.1-2.1M9 17h6M10 20h4"/><path d="M8.2 14.5C6.5 12 7 8.6 9.7 7c2-1.2 5-.7 6.5 1.1 1.7 2 1.7 4.6.2 6.4-.7.9-1.3 1.5-1.4 2.5h-6c0-1-.2-1.7-.8-2.5z"/></svg><p><b>YOS</b> <span id="advice">確認できた情報をもとに、次の行動を整理します。</span></p></aside>
   <section class="streamhead"><h2><span id="flowHeading">今日の流れ</span><span id="selectedSuffix" style="font-weight:500;color:#8c9197;font-size:12px;margin-left:7px"></span></h2><small id="eventCount">—</small></section>
   <nav class="filter-row" aria-label="情報の種類を絞り込む" id="filterRow"><button class="filter" data-filter="all" aria-pressed="true"><span>すべて</span></button><button class="filter" data-filter="schedule" style="--c:var(--schedule)" aria-pressed="true"><i></i><span>予定</span></button><button class="filter" data-filter="task" style="--c:var(--task)" aria-pressed="true"><i></i><span>タスク</span></button><button class="filter" data-filter="money" style="--c:var(--money)" aria-pressed="true"><i></i><span>お金</span></button><button class="filter" data-filter="habit" style="--c:var(--habit)" aria-pressed="true"><i></i><span>習慣</span></button></nav>
   <div class="stream" id="stream" tabindex="0" aria-live="polite"></div>
   <aside class="brief" aria-label="当日サマリー"><div><small>DAY MONEY / 当日の入出金</small><strong class="money-num" id="moneyValue">—</strong><p id="moneyCaption">未接続</p></div><div class="separator" aria-hidden="true"></div><div><small>HABIT / 習慣の記録</small><strong class="hab-num" id="habitValue">未確認</strong><p id="habitCaption">未記録＝未実施ではありません</p></div></aside>
-  <aside class="insight"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2761d8" stroke-width="1.6" stroke-linecap="round"><path d="M12 2.5v3M4.6 5l2.1 2.1M2.6 12h3M19.4 12h2M17.3 7.1l2.1-2.1M9 17h6M10 20h4"/><path d="M8.2 14.5C6.5 12 7 8.6 9.7 7c2-1.2 5-.7 6.5 1.1 1.7 2 1.7 4.6.2 6.4-.7.9-1.3 1.5-1.4 2.5h-6c0-1-.2-1.7-.8-2.5z"/></svg><p><b>YOS</b> <span id="advice">確認できた情報をもとに、次の行動を整理します。</span></p></aside>
   <footer class="meta-footer"><span id="freshness">MY LIFE / Money 読み取り中</span><button id="infoButton">接続状況 · 詳細 ↗</button></footer>
 </div>
 <dialog class="dialog" id="monthDialog"><div class="sheet-head"><h2 id="monthTitle">2026年11月</h2><button class="sheet-close" id="closeMonth" aria-label="閉じる">×</button></div><p class="sheet-sub">日付を選ぶと、生活タイムラインが切り替わります。</p><div class="month-grid" id="monthGrid"></div><div class="month-actions"><button id="previousMonth">← 前の月</button><button id="monthToday">今日</button><button id="followingMonth">次の月 →</button></div></dialog>
@@ -144,7 +163,8 @@ button:disabled{opacity:.4;cursor:default} .frame{max-width:900px;margin:0 auto;
   };
  function listDay(key=state.selected){return state.items.filter(x=>x.date===key&&state.filters.has(x.type))}
  const dayDate=k=>{const d=parseDate(k);return {day:d.getDate(),weekday:d.getDay(),month:d.getMonth()+1,year:d.getFullYear()}};
- function renderHeader(){const d=dayDate(state.selected);$('heroEyebrow').textContent=new Intl.DateTimeFormat('en-US',{timeZone:tz,month:'long',year:'numeric'}).format(parseDate(state.selected)).toUpperCase();$('bigDate').textContent=String(d.day).padStart(2,'0');$('heroDay').textContent=weekEn[d.weekday];$('heroShort').textContent=d.month+'月'+d.day+'日';$('stateLabel').textContent=state.demo?'デザイン見本':state.native?(Object.values(state.native.sources).some(x=>x.status==='ok')?'iPhone取得済み':Object.values(state.native.sources).some(x=>x.status==='partial')?'一部取得':'取得を確認できず'):(state.lifeRead||state.moneyRead)?'保存済み記録':'未接続';$('stateDot').style.background=state.demo?'#b47d13':state.native?'#235BEB':state.lifeRead||state.moneyRead?'#137c5b':'#98a0a7';$('weekLabel').textContent=d.year+' / '+d.month+'月 · 日付を選ぶ';$('selectedSuffix').textContent=state.selected===today?'TODAY':'';$('flowHeading').textContent=state.selected===today?'今日の流れ':'この日の流れ';}
+ function nativeSourceLabel(){const statuses=Object.values(state.native.sources).map(s=>s.status);const age=Date.now()-new Date(state.native.generatedAt).getTime();if(age>30*60*1000)return '再取得が必要';const complete=statuses.filter(s=>s==='ok').length;return complete===3?'3種類取得済み':complete||statuses.includes('partial')?'一部取得':'取得を確認できず';}
+  function renderHeader(){const d=dayDate(state.selected);$('heroEyebrow').textContent=new Intl.DateTimeFormat('en-US',{timeZone:tz,month:'long',year:'numeric'}).format(parseDate(state.selected)).toUpperCase();$('bigDate').textContent=String(d.day).padStart(2,'0');$('heroDay').textContent=weekEn[d.weekday];$('heroShort').textContent=d.month+'月'+d.day+'日';$('stateLabel').textContent=state.demo?'デザイン見本':state.native?nativeSourceLabel():(state.lifeRead||state.moneyRead)?'保存済み記録':'未接続';$('stateDot').style.background=state.demo?'#b47d13':state.native?(nativeSourceLabel()==='3種類取得済み'?'#137c5b':'#b47d13'):state.lifeRead||state.moneyRead?'#137c5b':'#98a0a7';$('weekLabel').textContent=d.year+' / '+d.month+'月 · 日付を選ぶ';$('selectedSuffix').textContent=state.selected===today?'TODAY':'';$('flowHeading').textContent=state.selected===today?'今日の流れ':'この日の流れ';}
  function color(t){return `var(--${t})`}
  function countsFor(date){return [...new Set(state.items.filter(x=>x.date===date).map(x=>x.type))]}
  function renderWeek(){const root=$('week');root.replaceChildren();const first=addDays(state.selected,-dayDate(state.selected).weekday);for(let i=0;i<7;i++){const k=addDays(first,i),d=dayDate(k),b=document.createElement('button');b.type='button';b.className='daybtn'+(state.selected===k?' selected':'')+(today===k?' today':'');b.setAttribute('aria-pressed',String(state.selected===k));b.setAttribute('aria-label',`${d.month}月${d.day}日を表示`);const w=document.createElement('span');w.className='wd';w.textContent='日月火水木金土'[d.weekday];const num=document.createElement('span');num.className='num';num.textContent=d.day;const dots=document.createElement('span');dots.className='dots';for(const t of countsFor(k)){const dot=document.createElement('i');dot.style.background=color(t);dots.append(dot)}b.append(w,num,dots);b.addEventListener('click',()=>setDay(k));root.append(b)}}
