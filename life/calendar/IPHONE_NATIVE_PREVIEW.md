@@ -21,3 +21,9 @@ This is an **isolated, read-only** Scriptable preview, not a replacement for exi
 
 ## Rollback
 Delete only **YOS DAYSTREAM 開発確認** from Scriptable if no longer wanted. Existing scripts, Notion records, Apple events, MY LIFE, and Money have not been modified.
+
+## 2026-11-02 System continuation (existing Draft PR #654)
+- Reused the same Draft PR and existing Scriptable-to-WebView read-only bridge. The Apple cap is 170, Notion Tasks 165, and Notion Money 165 so one full source cannot displace another; an over-cap source is labeled partial.
+- DAYSTREAM puts the existing YOS next-action insight above the timeline, enlarges text and major tap targets, and labels partial/stale native source snapshots instead of calling any single successful source a complete sync.
+- HTML SHA-256 integrity pin updated in the **development bridge** to match the changed preview. Any previously built standalone Scriptable package remains pinned to its prior embedded HTML; this commit does not silently update/install/overwrite that package. This work remains a Draft; no current iPhone install, live permissions, merge or production release is verified.
+- Regression checks cover HTML checksum, 500-row fair source allocation, partial status, and action-first UI structure; actual iPhone readability and connection status still require on-device confirmation.
