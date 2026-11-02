@@ -3,7 +3,7 @@
 // Requires the unchanged production Clarity / Notion Inbox setup only for credentials.
 'use strict';
 const PREVIEW_URL = 'https://raw.githubusercontent.com/yskn0008-bot/ProjectY/refs/heads/feat/yos-calendar-web-preview-20261101/life/calendar/daystream-native.html';
-const HTML_SHA256 = '55fc669fd0c7ba65490db693516f128d163dea43c3888b58f146c1c36f617ffc';
+const HTML_SHA256 = '081bb7e4dba4271c256ac60dacdbc732362f98cee451c627f2901a1b836f695a';
 // Compatibility marker for the already-installed iPhone launcher; actual HTML integrity is checked against HTML_SHA256.
 const INSTALLED_LAUNCHER_MARKER = 'b31ebae6e68de7f8d718cb28bd849e808efb147aedaa78b7e7b0c1b491655e90';
 function sha256Hex(input){
@@ -132,14 +132,14 @@ async function readApple(start,end){
     if(duplicates.length){
       console.log('[DAYSTREAM] Apple終日予定の重複 '+duplicates.length+'件: '+JSON.stringify(duplicates.slice(0,30)));
     }
-    const rows=unique.slice(0,250).flatMap((x,i)=>{
+    const rows=unique.slice(0,170).flatMap((x,i)=>{
       const begin=new Date(x.startDate);if(!Number.isFinite(begin.getTime()))return [];
       const date=dateKey(begin);
       if(date<start||date>end)return [];
       const time=x.isAllDay?'終日':new Intl.DateTimeFormat('ja-JP',{timeZone:TZ,hour:'2-digit',minute:'2-digit',hour12:false}).format(begin);
       return [{type:'schedule',date,title:clean(x.title,100),subtitle:time,source:'Appleカレンダー',id:clean(x.identifier||i,70)}];
     });
-    return {status:unique.length>=250?'partial':'ok',rows};
+    return {status:unique.length>170?'partial':'ok',rows};
   }catch{return {status:'error',rows:[]}};
 }
 async function readNotion(source,field,parse,start,end,token){
@@ -147,7 +147,7 @@ async function readNotion(source,field,parse,start,end,token){
   try{
     const result=await queryNotion(source,field,start,end,token);
     const parsed=result.rows.map(parse).filter(Boolean);
-    return {status:result.complete&&parsed.length<=220?'ok':'partial',rows:parsed.slice(0,220)};
+    return {status:result.complete&&parsed.length<=165?'ok':'partial',rows:parsed.slice(0,165)};
   }catch{return {status:'error',rows:[]}};
 }
 async function readPreview(){
@@ -176,6 +176,7 @@ async function main(){
     seenAllDay.add(key);
     return true;
   });
+  // Each source has a reserved quota (170/165/165): one full calendar must not displace money or Tasks.
   const allEntries=[...uniqueApple,...tasks.rows,...money.rows];
   const entries=allEntries.slice(0,500);
   // The UI accepts at most 500 items. Never report a complete source when
