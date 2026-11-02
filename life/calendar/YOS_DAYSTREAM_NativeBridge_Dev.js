@@ -3,7 +3,7 @@
 // Requires the unchanged production Clarity / Notion Inbox setup only for credentials.
 'use strict';
 const PREVIEW_URL = 'https://raw.githubusercontent.com/yskn0008-bot/ProjectY/refs/heads/feat/yos-calendar-web-preview-20261101/life/calendar/daystream-native.html';
-const HTML_SHA256 = '0778dbdd0a165394be9eaa88db66a2655aae8c279e21c9d2f5bb387afef574c9';
+const HTML_SHA256 = 'eb4f404fad19b0b1b1ede7910931e2382ca887cbdbe44f304182a9fd867b4898';
 // Compatibility marker for the already-installed iPhone launcher; actual HTML integrity is checked against HTML_SHA256.
 const INSTALLED_LAUNCHER_MARKER = 'b31ebae6e68de7f8d718cb28bd849e808efb147aedaa78b7e7b0c1b491655e90';
 function sha256Hex(input){
@@ -89,7 +89,11 @@ function parseTask(row){
   const calendarMirror=provenance==='Apple Calendar'||syncKey.startsWith('calendar:');
   // A human-added action or blocker remains independently actionable, even with a matching event.
   const explicitAction=Boolean(nextAction.trim()||completion.trim()||blocker.trim());
-  return {type:'task',date,title,subtitle:status||'状態未確認',nextAction,completion,blocker,done:false,source:'Notion Tasks',id:clean(row.id||title,70),calendarMirror,explicitAction};
+  const priority=select(p['優先度']),order=p['実行順']?.number;
+  const rawStart=p['期限']?.date?.start,ts=typeof rawStart==='string'&&rawStart.includes('T')?new Date(rawStart):null;
+  const fixedTime=ts&&Number.isFinite(ts.getTime())?new Intl.DateTimeFormat('ja-JP',{timeZone:TZ,hour:'2-digit',minute:'2-digit',hour12:false}).format(ts):'';
+  return {type:'task',date,title,subtitle:status||'状態未確認',nextAction,completion,blocker,done:false,source:'Notion Tasks',id:clean(row.id||title,70),calendarMirror,explicitAction,
+    priority:['P0','P1','P2','P3'].includes(priority)?priority:'',order:Number.isFinite(order)?order:null,fixedTime};
 }
 function parseMoney(row){
   const p=row?.properties;if(!p)return null;
@@ -162,7 +166,9 @@ async function readPreview(){
   if(req.response?.statusCode!==200 || sha256Hex(html)!==HTML_SHA256 || !html.startsWith('<!doctype html>') ||
     !html.includes('window.YOS_DAYSTREAM_NATIVE_V1=') ||
     html.includes('<script src=') || html.includes('fetch(') || html.includes('XMLHttpRequest') ||
-    html.includes('localStorage.setItem('))throw Error('Preview HTML is not compatible');
+    !html.includes("const PLAN_KEY='yos-daystream-plan-v1'") ||
+    html.split('localStorage.'+'setItem(').length!==2 ||
+    !html.split('localStorage.'+'setItem(')[1].startsWith('PLAN_KEY,encoded)'))throw Error('Preview HTML is not compatible');
   return html;
 }
 async function main(){
