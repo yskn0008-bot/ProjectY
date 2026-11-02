@@ -76,10 +76,15 @@ test('Notion auth failure does not invent tasks or money while Apple still rende
  assert.equal(alertCount,0);assert.equal(parsed.sources.apple.status,'ok');assert.equal(parsed.sources.tasks.status,'error');assert.equal(parsed.sources.money.status,'error');
  assert.equal(parsed.items.length,1);
 });
-test('Native bridge cannot modify Notion, account storage or original Clarity',()=>{
- assert.doesNotMatch(code.replace("html.includes('localStorage.setItem(')",''),/Keychain\.set\(|localStorage\.setItem\(|req\.method=['"]PATCH|req\.method=['"]DELETE/);
- assert.match(code,/await web\.loadHTML\(html\)/);
- assert.match(code,/await web\.evaluateJavaScript\(/);
+test('Native status update permits only approved Notion Task completion',()=>{
+ assert.doesNotMatch(code,/Keychain\.set\(|req\.method=['"]DELETE|CalendarEvent\.create/);
+ assert.equal([...code.matchAll(/req\.method='PATCH'/g)].length,1);
+ assert.match(code,/approval\.addCancelAction\('反映しない'\)/);
+ assert.match(code,/if\(await approval\.presentAlert\(\)!==0\)return/);
+ assert.match(code,/TASK_ID\.test\(task\.id\)/);
+ assert.match(code,/if\(status==='完了'\)return 'already'/);
+ assert.match(code,/properties:\{'状態':\{select:\{name:'完了'\}\}\}/);
+ assert.match(code,/const after=await notionPage\(task\.id,token\)/);
 });
 
 test('reviewed DAYSTREAM HTML checksum stays pinned to native bridge',()=>{
@@ -141,7 +146,8 @@ test('offline iPhone import package embeds the reviewed native page with no runt
   assert.ok(pkg.script.includes('const HTML_BUNDLE='));
   assert.ok(pkg.script.includes('Offline DAYSTREAM HTML integrity mismatch'));
   assert.doesNotMatch(pkg.script,/const PREVIEW_URL|new Request\(PREVIEW_URL\)/);
-  assert.doesNotMatch(pkg.script,/Keychain\.set\(|req\.method=['"]PATCH|req\.method=['"]DELETE/);
+  assert.doesNotMatch(pkg.script,/Keychain\.set\(|req\.method=['"]DELETE/);
+  assert.equal([...pkg.script.matchAll(/req\.method='PATCH'/g)].length,1);
   assert.match(pkg.script,/await web\.loadHTML\(html\)/);
   const hash=pkg.script.match(/const HTML_SHA256 = '([a-f0-9]{64})'/)?.[1];
   assert.equal(hash,crypto.createHash('sha256').update(html).digest('hex'));
@@ -268,7 +274,7 @@ test('timestamped Notion task retains a fixed hour and P0 priority',()=>{
 test('draft-only checks and reordering never write to original Notion or Apple data',()=>{
  assert.match(html,/const PLAN_KEY='yos-daystream-plan-v1'/);
  assert.match(html,/localStorage\.setItem\(PLAN_KEY,encoded\)/);
- assert.match(html,/Notion／Appleの完了状態は変わりません/);
+ assert.match(html,/タスクの完了反映は画面を閉じた後の本人確認が必要です/);
  assert.doesNotMatch(html,/https:\/\/api\.notion\.com\/v1\/pages\/.*PATCH|CalendarEvent\.create\(/);
  assert.ok(code.includes("!html.split('localStorage.'+'setItem(')[1].startsWith('PLAN_KEY,encoded)')"));
 });
@@ -293,10 +299,10 @@ test('local dayplan check and ordering survive a re-open without Notion writes',
   const $=id=>{if(!nodes.has(id))nodes.set(id,new Element());return nodes.get(id)};
   const state={selected:today,items:[{date:today,type:'task',title:'契約書確認',
     subtitle:'未完了',priority:'P1',id:'native:9:contract',source:'Notion Tasks'}],demo:false};
-  const factory=new Function('state','localStorage','document','$','isValidKey','names',
+  const factory=new Function('state','localStorage','document','$','isValidKey','names','window',
     codePart+'\nreturn {renderPlan,changeCheck,changeOrder,orderedPlan};');
   return factory(state,localStorage,document,$,x=>/^\d{4}-\d{2}-\d{2}$/.test(x),
-    {schedule:'予定',task:'タスク',money:'お金',habit:'習慣'});
+    {schedule:'予定',task:'タスク',money:'お金',habit:'習慣'},{});
  };
  const first=create();first.renderPlan();const before=first.orderedPlan().filter(x=>x.movable);
  first.changeCheck('habit:water');first.changeOrder('habit:water',1);
