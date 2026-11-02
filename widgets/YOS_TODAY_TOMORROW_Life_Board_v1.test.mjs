@@ -604,8 +604,8 @@ test('widget refresh never reads private diary or increases network access',asyn
 
 test('actual health-sync journal marker counts a day even when the raw report is inside a titled block',async()=>{
   const today=new Date().toLocaleDateString('sv-SE',{timeZone:'Asia/Tokyo'});
-  const body='\n【Clarity健康記録｜運動｜報告 18:00】\n今日は5分歩いたよ\n本人の運動実施報告。時間未確認。\n[YOS-health:clarity:habit-abc:activity]\n';
-  const row=diaryRow(today,body);
+  const journalText='\n【Clarity健康記録｜運動｜報告 18:00】\n今日は5分歩いたよ\n本人の運動実施報告。時間未確認。\n[YOS-health:clarity:habit-abc:activity]\n';
+  const row=diaryRow(today,journalText);
   row.properties['記録キー']={rich_text:[{plain_text:'health:'+today}]};
   const diary={results:[row],has_more:false};
   const mock=runtime(false,false,'DAY',false,null,[],undefined,null,null,{results:[],has_more:false},diary);
