@@ -27,32 +27,40 @@ try{
  if(!original.includes('YOS Notification Context'))throw Error('既存Contextの識別に失敗。未更新');
  const current=hash(original);
  if(current!==PREV&&current!==NEXT)throw Error('既存Contextが別の版です。未更新（識別値'+current+'）');
- let updated=false;
+ // Preflight and verify both immutable downloads BEFORE changing existing files.
+ let contextCode=null,filterCode=null,updated=false,filterInstalled=false;
  if(current===PREV){
    const req=new Request(BASE+'Notification-Context-v0.4.js');req.timeoutInterval=15;
-   const newCode=await req.loadString();
-   if(req.response?.statusCode!==200||hash(newCode)!==NEXT||!newCode.includes('YOS Notification Context v0.4'))throw Error('配布コードの検証失敗。未更新');
+   contextCode=await req.loadString();
+   if(req.response?.statusCode!==200||hash(contextCode)!==NEXT||
+      !contextCode.includes('YOS Notification Context v0.4'))throw Error('Context配布コードの検証失敗。未更新');
+ }
+ if(!installedFilter.length){
+   const req=new Request(BASE+'Notification-Decision-Filter-v0.5.js');req.timeoutInterval=15;
+   filterCode=await req.loadString();
+   if(req.response?.statusCode!==200||hash(filterCode)!==FILTER_HASH||
+      !filterCode.includes('YOS Notification Decision Filter v0.5'))throw Error('Filter配布コードの検証失敗。未作成');
+ }
+ if(contextCode!==null){
    const backup=item.path+'.YOS-v03-'+Date.now()+'.backup';
    item.fm.writeString(backup,original);
    if(item.fm.readString(backup)!==original)throw Error('バックアップ失敗。未更新');
-   try{item.fm.writeString(item.path,newCode);if(item.fm.readString(item.path)!==newCode)throw Error('書込み後の照合失敗');updated=true}
+   try{item.fm.writeString(item.path,contextCode);if(item.fm.readString(item.path)!==contextCode)throw Error('書込み後の照合失敗');updated=true}
    catch(e){try{item.fm.writeString(item.path,original)}catch(_){}throw Error('更新失敗・復旧試行済：'+String(e.message||e))}
  }
- // An inert, verified filter is installed only once. The existing iPhone Shortcut still
- // needs an explicit wiring update before any notification behavior can change.
- let filterInstalled=false;
- if(!installedFilter.length){
-   const req=new Request(BASE+'Notification-Decision-Filter-v0.5.js');req.timeoutInterval=15;
-   const filterCode=await req.loadString();
-   if(req.response?.statusCode!==200||hash(filterCode)!==FILTER_HASH||
-      !filterCode.includes('YOS Notification Decision Filter v0.5'))throw Error('Filter配布コードの検証失敗。未作成');
+ // Inert staging only: no Shortcut wiring or notification changes on installation.
+ if(filterCode!==null){
    const path=item.fm.joinPath(item.fm.documentsDirectory(),FILTER_NAME);
    if(item.fm.fileExists(path))throw Error('Filter保存先に別ファイルあり。未作成');
    try{
      item.fm.writeString(path,filterCode);
      if(item.fm.readString(path)!==filterCode)throw Error('Filter書込み後の照合失敗');
      filterInstalled=true;
-   }catch(e){try{if(item.fm.fileExists(path))item.fm.remove(path)}catch(_){}throw Error('Filter導入失敗：'+String(e.message||e))}
+   }catch(e){
+     try{if(item.fm.fileExists(path))item.fm.remove(path)}catch(_){}
+     if(updated)try{item.fm.writeString(item.path,original)}catch(_){}
+     throw Error('Filter導入失敗。既存Contextの復旧試行済：'+String(e.message||e));
+   }
  }
  // Probe Notion credentials without reading or displaying account data.
  const base='https://api.notion.com/v1/';
