@@ -322,7 +322,7 @@ test('local dayplan check and ordering survive a re-open without Notion writes',
  assert.equal(Object.keys(JSON.parse(storage.get('yos-daystream-plan-v1'))).length,1);
 });
 
-async function runConfirmedTaskFixture({approve=false,changedTitle=false,already=false,fileError=false,token=true,forged=false,mirror=false,badParent=false,changedOrigin=false,unchecked=false,exportFailure=false,corruptFile=false}={}){
+async function runConfirmedTaskFixture({approve=false,changedTitle=false,already=false,fileError=false,token=true,forged=false,mirror=false,badParent=false,changedOrigin=false,unchecked=false,exportFailure=false,corruptFile=false,noSave=false}={}){
  const taskId='11111111-2222-4333-8444-555555555555',key='task:Notion Tasks:native:'+taskId;
  const chosen=forged?'task:Notion Tasks:native:99999999-9999-4999-8999-999999999999':key;
  let status=already?'完了':'次にやる',patches=[],alerts=[],files=new Map(corruptFile?[['/local/YOS_DAYSTREAM_PLAN_STATE_v1.json','{invalid']]:[]),exports=0;
@@ -356,6 +356,7 @@ async function runConfirmedTaskFixture({approve=false,changedTitle=false,already
    if(js.startsWith('window.YOS_DAYSTREAM_NATIVE_V1('))return true;
    if(js.startsWith('window.YOS_DAYSTREAM_PLAN_IMPORT('))return true;
    if(js.includes('window.YOS_DAYSTREAM_ATTACH_SAVE(')){
+     if(noSave)return new Promise(()=>{});
      exports++;
      if(exportFailure)throw Error('callback unavailable');
      return {
@@ -434,4 +435,21 @@ test('save callback failures and corrupt local plan file produce fail-closed res
  assert.equal(corrupt.patches.length,0);
  assert.ok(corrupt.alerts.includes('既存の実行リストを保護'));
  assert.equal(corrupt.files.get('/local/YOS_DAYSTREAM_PLAN_STATE_v1.json'),'{invalid');
+});
+
+test('closing preview without pressing Save cannot write local file or Notion',async()=>{
+ const x=await runConfirmedTaskFixture({approve:true,noSave:true});
+ assert.equal(x.exports,0);
+ assert.equal(x.files.size,0);
+ assert.equal(x.patches.length,0);
+ assert.equal(x.alerts.length,0);
+});
+test('only user Save click can activate a native completion callback',()=>{
+ assert.match(html,/id="planCommit" disabled/);
+ assert.match(html,/window\.YOS_DAYSTREAM_ATTACH_SAVE=function\(callback\)/);
+ assert.match(html,/button\.addEventListener\('click'/);
+ assert.match(html,/callback\(plan\)/);
+ assert.match(code,/web\.evaluateJavaScript\([\s\S]*?\),true/);
+ assert.match(code,/const first=await Promise\.race\(\[capture,closed\.then/);
+ assert.doesNotMatch(code,/await web\.present\(true\);[\s\S]*?web\.evaluateJavaScript\('window\.YOS_DAYSTREAM_PLAN_EXPORT/);
 });
