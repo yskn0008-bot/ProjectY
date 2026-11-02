@@ -84,7 +84,7 @@ button:disabled{opacity:.4;cursor:default} .frame{max-width:900px;margin:0 auto;
 <div class="planhead"><h2>起床から就寝まで</h2><span id="planProgress">—</span></div>
 <p class="planintro" id="planIntro">固定予定と未指定タスクをYOSが仮配置します。</p>
 <div id="planList" role="list"></div>
-<p class="planfooter" id="planFooter">チェック・順番は端末内の仮記録。NotionやAppleには未反映です。</p>
+<p class="planfooter" id="planFooter">チェック・順番は端末内の仮記録。画面を閉じた後、本人が承認したタスクだけNotionへ完了反映できます。</p>
 </section>
 <details class="sourcelist"><summary>元データを確認（予定・タスク・家計）</summary>
   <section class="streamhead"><h2><span id="flowHeading">今日の流れ</span><span id="selectedSuffix" style="font-weight:500;color:#8c9197;font-size:12px;margin-left:7px"></span></h2><small id="eventCount">—</small></section>
@@ -263,7 +263,7 @@ button:disabled{opacity:.4;cursor:default} .frame{max-width:900px;margin:0 auto;
    $('planProgress').textContent=completed+' / '+total+' 仮チェック';
    $('planIntro').textContent='時刻確定の予定は動かしません。時間未指定のタスクは優先度から仮配置します。';
    $('planFooter').textContent=(state.demo?'デザイン見本':planWriteStatus)+
-     ' · チェックと並び順は端末内の仮記録。Notion／Appleの完了状態は変わりません。';
+     ' · チェックだけではNotion／Appleは変わりません。タスクの完了反映は画面を閉じた後の本人確認が必要です。';
    const flex=rows.filter(x=>x.movable);
    for(const item of rows){
      const line=document.createElement('div');line.className='planrow'+(done[item.id]?' checked':'');line.setAttribute('role','listitem');
