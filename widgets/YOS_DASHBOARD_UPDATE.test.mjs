@@ -257,7 +257,56 @@ test("TODAY read-only fallback queries only the existing verified daily journal"
   assert.equal((await run()).meals,1);
   assert.equal(queried,1);
   assert.match(widgetSource,/PARAM==="TODAY" \? yosHealthLatestSnapshot\(\) : Promise.resolve\(null\)/);
-  assert.match(widgetSource,/if\(!entry\)return cached/);
+  assert.match(widgetSource,/if\(!entry\)return fallback/);
   assert.match(widgetSource,/yosHealthExisting\(token,day\)/);
   assert.doesNotMatch(match[0],/POST|'\/pages'/);
+});
+
+
+test("TODAY refreshes a stale positive cache against real YOS Diary without writing",async()=>{
+  const fn=widgetSource.match(/async function yosHealthLatestSnapshot\(\) \{[\s\S]*?\n\}/u)?.[0];
+  assert.ok(fn);
+  let queries=0;
+  const cached={day:'2026-11-02',meals:1,activities:0,verifiedAt:Date.now()-20*60*1000};
+  const run=new (Object.getPrototypeOf(async function(){}).constructor)(
+    'yosHealthReadTodaySnapshot','Keychain','YOS_HEALTH_TOKEN_KEY','yosHealthDay',
+    'yosHealthExisting','yosHealthValue','yosHealthSnapshotFromJournal',
+    fn+';return yosHealthLatestSnapshot;'
+  )(()=>cached,{contains:()=>true,get:()=> 'local-token'},'YOS_NOTION_INTEGRATION_TOKEN',
+     ()=> '2026-11-02',
+     async()=>{queries++;return {properties:{'本文':{rich_text:[{plain_text:'[YOS-health:clarity:walk-1:activity]'}]}}};},
+     xs=>xs.map(x=>x.plain_text).join(''),
+     ()=>({day:'2026-11-02',meals:1,activities:1,verifiedAt:Date.now()}));
+  const value=await (await run)();
+  assert.equal(queries,1);
+  assert.equal(value.activities,1);
+  assert.doesNotMatch(fn,/\/pages\/|\.method\s*=\s*['"]PATCH/);
+});
+test("TODAY avoids extra Notion reads for a verified recent cache",async()=>{
+  const fn=widgetSource.match(/async function yosHealthLatestSnapshot\(\) \{[\s\S]*?\n\}/u)?.[0];
+  let queries=0;
+  const cached={day:'2026-11-02',meals:1,activities:0,verifiedAt:Date.now()-2*60*1000};
+  const run=new (Object.getPrototypeOf(async function(){}).constructor)(
+    'yosHealthReadTodaySnapshot','Keychain','YOS_HEALTH_TOKEN_KEY','yosHealthDay',
+    'yosHealthExisting','yosHealthValue','yosHealthSnapshotFromJournal',
+    fn+';return yosHealthLatestSnapshot;'
+  )(()=>cached,{contains:()=>true,get:()=> 'local-token'},'YOS_NOTION_INTEGRATION_TOKEN',
+     ()=> '2026-11-02',async()=>{queries++;throw Error('unexpected query')},
+     ()=>'',()=>null);
+  assert.deepEqual(await (await run)(),cached);
+  assert.equal(queries,0);
+});
+test("TODAY never treats an hours-old cache as confirmed if Notion is unavailable",async()=>{
+  const fn=widgetSource.match(/async function yosHealthLatestSnapshot\(\) \{[\s\S]*?\n\}/u)?.[0];
+  const reader=new (Object.getPrototypeOf(async function(){}).constructor)(
+    'yosHealthReadTodaySnapshot','Keychain','YOS_HEALTH_TOKEN_KEY','yosHealthDay',
+    'yosHealthExisting','yosHealthValue','yosHealthSnapshotFromJournal',
+    fn+';return yosHealthLatestSnapshot;'
+  );
+  const run=await reader(
+    ()=>({day:'2026-11-02',meals:1,activities:0,verifiedAt:Date.now()-2*60*60*1000}),
+    {contains:()=>true,get:()=> 'local-token'},'YOS_NOTION_INTEGRATION_TOKEN',
+    ()=> '2026-11-02',async()=>{throw Error('offline');},()=>'',()=>null
+  );
+  assert.equal(await run(),null);
 });
