@@ -449,7 +449,8 @@ test('only user Save click can activate a native completion callback',()=>{
  assert.match(html,/window\.YOS_DAYSTREAM_ATTACH_SAVE=function\(callback\)/);
  assert.match(html,/button\.addEventListener\('click'/);
  assert.match(html,/callback\(plan\)/);
- assert.match(code,/web\.evaluateJavaScript\([\s\S]*?\),true/);
+ assert.match(code,/window\.YOS_DAYSTREAM_ATTACH_SAVE\(function\(value\)\{completion\(value\);\}\);/);
+ assert.match(code,/\}\)\(\)\",true/);
  assert.match(code,/const first=await Promise\.race\(\[capture,closed\.then/);
  assert.doesNotMatch(code,/await web\.present\(true\);[\s\S]*?web\.evaluateJavaScript\('window\.YOS_DAYSTREAM_PLAN_EXPORT/);
 });
