@@ -3,7 +3,7 @@
 // Requires the unchanged production Clarity / Notion Inbox setup only for credentials.
 'use strict';
 const PREVIEW_URL = 'https://raw.githubusercontent.com/yskn0008-bot/ProjectY/refs/heads/feat/yos-calendar-web-preview-20261101/life/calendar/daystream-native.html';
-const HTML_SHA256 = '081bb7e4dba4271c256ac60dacdbc732362f98cee451c627f2901a1b836f695a';
+const HTML_SHA256 = '0778dbdd0a165394be9eaa88db66a2655aae8c279e21c9d2f5bb387afef574c9';
 // Compatibility marker for the already-installed iPhone launcher; actual HTML integrity is checked against HTML_SHA256.
 const INSTALLED_LAUNCHER_MARKER = 'b31ebae6e68de7f8d718cb28bd849e808efb147aedaa78b7e7b0c1b491655e90';
 function sha256Hex(input){
