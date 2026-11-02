@@ -523,3 +523,25 @@ test('new view is read only and discloses unavailable sources', () => {
   assert.match(source,/健康：/);
   assert.doesNotMatch(source,/CalendarEvent\.create|Reminder\.create|\.writeString\(/);
 });
+
+test('natural informal Clarity exercise reports are candidates only, not completed diary records', async()=>{
+  const paragraph=text=>({type:'paragraph',paragraph:{rich_text:[{plain_text:text}]}});
+  const meta=new Date().toISOString()+' · Clarity · clarity:habit-natural-1';
+  for(const raw of ['食後に1分歩いたよ','今日は5分歩いたよ','スクワット5回やったよ','今朝は散歩したよ']){
+    const inbox={results:[paragraph(meta),paragraph(raw)],has_more:false};
+    const mock=runtime(false,false,'DAY',false,null,[],undefined,null,null,inbox);
+    await new Function(...Object.keys(mock.globals),'return '+body)(...Object.values(mock.globals));
+    const html=mock.snapshot().html;
+    assert.match(html,/Clarityの運動報告候補あり（YOS日記への反映は未確認）/,raw);
+    assert.doesNotMatch(html,/運動実施済み|日記に保存済み/,raw);
+  }
+});
+test('plans, past actions and third-party exercise do not count as current habit reports', async()=>{
+  const paragraph=text=>({type:'paragraph',paragraph:{rich_text:[{plain_text:text}]}});
+  for(const raw of ['昨日は5分歩いたよ','母が散歩したよ','5分歩かなかった','スクワット5回やる予定','今から散歩する']){
+    const inbox={results:[paragraph(new Date().toISOString()+' · Clarity · clarity:habit-negative-1'),paragraph(raw)],has_more:false};
+    const mock=runtime(false,false,'DAY',false,null,[],undefined,null,null,inbox);
+    await new Function(...Object.keys(mock.globals),'return '+body)(...Object.values(mock.globals));
+    assert.match(mock.snapshot().html,/運動の実施記録：未確認/,raw);
+  }
+});
