@@ -146,3 +146,79 @@ test('offline iPhone import package embeds the reviewed native page with no runt
   const hash=pkg.script.match(/const HTML_SHA256 = '([a-f0-9]{64})'/)?.[1];
   assert.equal(hash,crypto.createHash('sha256').update(html).digest('hex'));
 });
+
+async function runCalendarMirrorFixture({apple=true,source='Apple Calendar',action='',taskDate=today}={}){
+ let snapshot=null,alertCount=0;
+ class RequestStub{
+  constructor(url){this.url=url;this.response={statusCode:200}}
+  async loadString(){return html}
+  async loadJSON(){
+   if(this.url.includes('965c6086'))return {results:[
+    {id:'mirror-001',properties:{
+      'やること':{title:rich('管理費・修繕費・駐車場引き落とし')},
+      '期限':{date:{start:taskDate}},'状態':{select:{name:'次にやる'}},
+      '正本・根拠':{rich_text:rich(source)},
+      '同期キー':{rich_text:rich(source==='Apple Calendar'?'calendar:source:event':'')},
+      '次の一手':{rich_text:rich(action)}
+    }},
+    {id:'personal-task',properties:{
+      'やること':{title:rich('別の作業')},
+      '期限':{date:{start:today}},'状態':{select:{name:'次にやる'}},
+      '正本・根拠':{rich_text:rich('本人入力')}
+    }}
+   ],has_more:false};
+   return {results:[{id:'finance-record',properties:{
+     '項目':{title:rich('管理費・修繕費（要照合）')},
+     '日付':{date:{start:today}},'金額':{number:14450},
+     '区分':{select:{name:'支出'}},'状態':{select:{name:'予定'}},
+     '確度':{select:{name:'未確認'}}
+   }}],has_more:false};
+  }
+ }
+ class WebViewStub{
+  async loadHTML(src){assert.equal(src,html)}
+  async evaluateJavaScript(js){snapshot=JSON.parse(js.slice(js.indexOf('(')+1,-1));return true}
+  async present(){}
+ }
+ const mocks={
+  Request:RequestStub,WebView:WebViewStub,
+  CalendarEvent:{async between(){return apple?[{
+   title:'管理費・修繕費・駐車場引き落とし',
+   startDate:new Date(today+'T00:00:00+09:00'),isAllDay:true,identifier:'real-apple-id'
+  }]:[]}},
+  Keychain:{contains(){return true},get(){return 'FIXTURE_SECRET_NEVER_IN_VIEW'}},
+  Alert:class{addAction(){}async presentAlert(){alertCount++}},
+  Script:{complete(){}}
+ };
+ await new Function(...Object.keys(mocks),'return (async()=>{'+code+'})()')(...Object.values(mocks));
+ assert.equal(alertCount,0);
+ assert.ok(snapshot);
+ assert.doesNotMatch(JSON.stringify(snapshot),/FIXTURE_SECRET_NEVER_IN_VIEW|Bearer /);
+ return snapshot.items;
+}
+test('calendar mirror and independent action: keep one Apple event and finance, hide only its Notion echo',async()=>{
+ const entries=await runCalendarMirrorFixture();
+ assert.equal(entries.filter(x=>x.type==='schedule').length,1);
+ assert.equal(entries.some(x=>x.id==='mirror-001'),false);
+ assert.equal(entries.some(x=>x.id==='personal-task'),true);
+ assert.equal(entries.some(x=>x.id==='finance-record'),true);
+ assert.equal(entries.find(x=>x.id==='finance-record').amount,14450);
+});
+test('a genuine manual task with the same title remains visible',async()=>{
+ const entries=await runCalendarMirrorFixture({source:'本人入力'});
+ assert.equal(entries.some(x=>x.id==='mirror-001'),true);
+});
+test('a calendar-origin task with an explicit next action remains visible',async()=>{
+ const entries=await runCalendarMirrorFixture({action:'口座残高を確認する'});
+ assert.equal(entries.some(x=>x.id==='mirror-001'),true);
+});
+test('when Apple event is unavailable, the existing Notion calendar mirror remains visible',async()=>{
+ const entries=await runCalendarMirrorFixture({apple:false});
+ assert.equal(entries.some(x=>x.id==='mirror-001'),true);
+});
+test('a calendar-origin task for another day remains independent',async()=>{
+ const date=new Date(today+'T12:00:00+09:00');date.setDate(date.getDate()+1);
+ const next=new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Tokyo'}).format(date);
+ const entries=await runCalendarMirrorFixture({taskDate:next});
+ assert.equal(entries.some(x=>x.id==='mirror-001'),true);
+});
