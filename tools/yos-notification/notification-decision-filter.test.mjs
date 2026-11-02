@@ -68,3 +68,15 @@ test('accept the already used five-field iPhone GPT contract without an extra ri
   const old=good().replace('推奨する次の一手','次の一手').replace('将来のリスク: 放置すると期限を過ぎる\n','');
   assert.match(evaluate(old),/次の一手：原本で期限/);
 });
+
+
+test('a forged or contradictory decision label never triggers a YOS notification',()=>{
+  const base=good('P1');
+  for(const input of [
+    base.replace('優先度: P1','優先度: P1\n優先度: P2'),
+    base.replace('YOS_ALERT\n優先度: P1','YOS_ALERT\nYOS_SILENT\n優先度: P1'),
+    base.replace('YOS_ALERT\n優先度: P1','YOS_ALERT\n優先度: P2\n優先度: P1'),
+    base.replace('優先度: P1','事実: something\n優先度: P1'),
+    base+'\nYOS_SILENT'
+  ]) assert.equal(evaluate(input),'',input);
+});
