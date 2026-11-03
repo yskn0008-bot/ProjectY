@@ -21,7 +21,7 @@ const diary = prompt(
     "Text",
     ""
 )
-if diary == "" {
+if !diary {
     stop()
 }
 
@@ -44,7 +44,7 @@ Night Briefからの入力（ある場合のみ使用）：
 const question = askChatGPT(coachPrompt, false, "Text")
 alert(question, "今日の問い")
 const answer = prompt("この問いに対する自分の答えを、そのまま書いてね。", "Text", "")
-if answer == "" {
+if !answer {
     stop()
 }
 
