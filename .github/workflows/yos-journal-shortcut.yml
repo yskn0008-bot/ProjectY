@@ -75,12 +75,15 @@ jobs:
           data=plistlib.loads(src.read_bytes())
           ids=[a.get('WFWorkflowActionIdentifier','') for a in data.get('WFWorkflowActions',[])]
           blob=repr(data)
-          assert ids.count('is.workflow.actions.askllm') == 1, ids
-          assert ids.count('is.workflow.actions.ask') == 4, ids
+          assert ids.count('is.workflow.actions.askllm') == 3, ids
+          assert ids.count('is.workflow.actions.ask') == 5, ids
+          assert 'YOSの分析とアドバイス' in blob
+          assert '目的別の問い' in blob
+          assert '直近のローカル日記控え' in blob
           assert '1/3 今日いちばん話したい出来事' in blob
           assert '2/3 今日一日の中で、心が動いた瞬間' in blob
           assert '3/3 自分の言葉で答えてね' in blob
-          assert '空欄ならこれで保存するよ' in blob
+          assert '空欄ならここで終わり' in blob
           assert ids.count('is.workflow.actions.openurl') == 1, ids
           assert ids.count('com.apple.journal.CreateEntryIntent') == 0
           assert 'scriptable:///run?scriptName=YOS%20Journal%20Notion%20Bridge' in blob
