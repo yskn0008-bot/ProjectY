@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build-sign:
@@ -79,7 +79,7 @@ jobs:
           assert ids.count('is.workflow.actions.ask') == 2, ids
           assert ids.count('is.workflow.actions.openurl') == 1, ids
           assert ids.count('com.apple.journal.CreateEntryIntent') == 0
-          assert 'scriptable:///run/YOS%20Journal%20Notion%20Bridge' in blob
+          assert 'scriptable:///run?scriptName=YOS%20Journal%20Notion%20Bridge' in blob
           assert 'YOS_NOTION_INTEGRATION_TOKEN' not in blob
           assert 'YOS Journal Pending' in blob
           print('YOS 日記 independent shortcut contract: PASS',len(ids),'actions')
@@ -115,3 +115,35 @@ jobs:
             tools/yos-journal/artifacts/YOS 日記.shortcut
             tools/yos-journal/artifacts/YOS 日記.plist
           if-no-files-found: error
+
+      - name: Publish signed install file on the isolated draft branch
+        if: github.event_name == 'pull_request'
+        shell: bash
+        env:
+          TARGET_BRANCH: ${{ github.event.pull_request.head.ref }}
+          TARGET_REPO: ${{ github.event.pull_request.head.repo.full_name }}
+        run: |
+          set -euo pipefail
+          test "$TARGET_REPO" = "$GITHUB_REPOSITORY"
+          test "$TARGET_BRANCH" = "feat/yos-journal-standalone-20261103"
+          cp 'tools/yos-journal/artifacts/YOS 日記.shortcut' /tmp/YOS_Journal_signed.shortcut
+          git fetch origin "$TARGET_BRANCH"
+          git checkout -B "$TARGET_BRANCH" "origin/$TARGET_BRANCH"
+          mkdir -p downloads/yos-journal
+          cp /tmp/YOS_Journal_signed.shortcut downloads/yos-journal/YOS_Journal_signed.shortcut
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('downloads/yos-journal/YOS_Journal_signed.shortcut')
+          data=p.read_bytes()
+          assert data.startswith(b'AEA1')
+          assert len(data)>500
+          print('Signed iPhone Shortcut ready for direct GitHub raw link:',len(data))
+          PY
+          git add downloads/yos-journal/YOS_Journal_signed.shortcut
+          if git diff --cached --quiet; then
+            echo 'No binary change to publish'
+          else
+            git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' \
+              commit -m 'build(journal): publish signed shortcut to draft branch [skip ci]'
+            git push origin HEAD:"$TARGET_BRANCH"
+          fi
