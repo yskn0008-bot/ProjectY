@@ -3,6 +3,7 @@
 #define inputs text
 
 #include 'actions/text'
+#include 'actions/calendar'
 #include 'actions/intelligence'
 #include 'actions/documents'
 #include 'actions/crypto'
