@@ -87,7 +87,7 @@ jobs:
           assert '直近のローカル日記控え' in blob
           assert '1/3 今日いちばん話したい出来事' in blob
           assert '2/3 今日一日の中で、心が動いた瞬間' in blob
-          assert '3/3 自分の言葉で答えてね' in blob
+          assert '3/3 自分の言葉で。刺さらなければ' in blob
           assert '空欄ならここで終わり' in blob
           assert ids.count('is.workflow.actions.openurl') == 1, ids
           assert ids.count('com.apple.journal.CreateEntryIntent') == 0
