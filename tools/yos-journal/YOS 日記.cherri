@@ -64,15 +64,67 @@ if !answer {
     stop()
 }
 
-// Q1-Q3 are the only required questions. The next field is always skippable.
-const extra = prompt(
-    "ここからは自由。もう少し話したいことがあれば書いてね。空欄ならこれで保存するよ。",
+// The source of long-term truth is Notion. This existing iCloud folder
+// is used as a limited local cache so today's coach can compare prior answers.
+const pendingFolder = createFolder("YOS Journal Pending")
+const pendingFiles = getFolderContents(pendingFolder, false)
+const recentPendingFiles = filterFiles(pendingFiles, 14, "Name", "Z to A")
+const recentAnswers = getText(recentPendingFiles)
+
+// Q1-Q3 are the only required questions. A purpose-specific follow-up is optional.
+const purpose = prompt(
+    "ここからは自由。深掘りしたい目的があれば1つ入力してね。\n例：自己理解・仕事・お金・人間関係・健康・これからの人生\n空欄ならここで終わり。",
     "Text",
     ""
 )
-const diary = text("【今日の出来事】\n{event}\n\n【心が動いた瞬間】\n{feeling}\n\n【任意の続き】\n{extra}")
+@purposeQuestion = ""
+@purposeAnswer = ""
+if purpose {
+    const purposePrompt = text("あなたはYOSの日記コーチ。本人の希望テーマに沿った目的別の問いを1問だけ作ってください。本人の価値観や答えを決めつけず、今夜の回答に基づく具体的な問いを短い1文で。前置き・結論・番号は不要。\n\n希望するテーマ：{purpose}\n今日の出来事：{event}\n心が動いたこと：{feeling}\n3問目：{question}\n3問目の回答：{answer}")
+    @purposeQuestion = askChatGPT(purposePrompt, false, "Text")
+    alert(@purposeQuestion, "目的別の問い")
+    @purposeAnswer = prompt(
+        "答えたい範囲で自由に。答えが浮かばなければ空欄でも大丈夫。",
+        "Text",
+        ""
+    )
+}
 
-const pendingFolder = createFolder("YOS Journal Pending")
+// Answer-derived YOS advice is part of the diary, not a substitute for it.
+// Only the recent local backup is available to this Shortcut. It cannot read
+// the entire Notion diary here, so trends need explicit supporting evidence.
+const analysisPrompt = text("あなたはYOS。今日の問いの回答と直近の記録から本人を理解し、役に立つアドバイスをしてください。
+
+目的：本人が自分らしく生きながら人生全体の期待値を高める。答えの要約だけで終わらず、具体的な示唆を返す。
+必須ルール：
+・本人が実際に語った事実、そこからの仮説、未確認を分ける。
+・直近記録がない、または比較不能なら『継続的な傾向はまだ未確認』と明記。
+・同じテーマが複数日に繰り返されたときのみ傾向の候補とする。反例・変化を無視しない。
+・心理診断、人格ラベル、因果関係の断定、無理なポジティブ解釈は禁止。
+・今すぐ行動が必要と決めつけず、本人が選べる小さな提案を最大2つ。
+・助言は今日の回答の具体的な一節を根拠にする。発見がなければ無理に作らない。
+・金融・健康・法律の重大な判断は、個別の専門確認が必要だと明示する。
+
+出力形式：短く読みやすい日本語。
+【YOSの分析】本人の回答の根拠→考えられること（事実／仮説／未確認）。
+【過去との比較】直近の記録と比較できる場合だけ。なければ未確認。
+【YOSのアドバイス】具体的で押し付けない提案を1〜2つ。
+
+今日の出来事：{event}
+心が動いた瞬間：{feeling}
+3問目：{question}
+本人の回答：{answer}
+任意の目的：{purpose}
+目的別の問い：{@purposeQuestion}
+目的別の答え：{@purposeAnswer}
+
+直近のローカル日記控え（Notionの全履歴ではなく、保存成功が未確認の控えも含む）：
+{recentAnswers}")
+const yosAdvice = askChatGPT(analysisPrompt, false, "Text")
+alert(yosAdvice, "YOSの分析とアドバイス")
+
+const diary = text("【今日の出来事】\n{event}\n\n【心が動いた瞬間】\n{feeling}\n\n【目的別・自由選択】\nテーマ：{purpose}\n問い：{@purposeQuestion}\n本人の答え：{@purposeAnswer}\n\n【YOSの分析とアドバイス（本人の発言とは別）】\n{yosAdvice}")
+
 const backup = text("YOS_JOURNAL_LOCAL_BACKUP_V1
 日付：{day}
 今日の日記：
