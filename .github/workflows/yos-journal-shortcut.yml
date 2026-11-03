@@ -28,7 +28,7 @@ jobs:
           source=Path('tools/yos-journal/YOS 日記.cherri').read_text()
           bridge=Path('tools/yos-journal/YOS Journal Notion Bridge.js').read_text()
           assert '#define name YOS 日記' in source
-          assert 'scriptable:///run/' in source
+          assert 'scriptable:///run?scriptName=YOS%20Journal%20Notion%20Bridge' in source
           assert 'YOS_NOTION_INTEGRATION_TOKEN' not in source
           assert 'Bearer ' not in source
           assert 'Bearer '+'' not in source
