@@ -16,31 +16,54 @@ const day = formatDate(now, "Custom", "yyyy-MM-dd")
 const timeKey = formatDate(now, "Custom", "HH-mm-ss")
 const context = "{ShortcutInput}"
 
-// Three required starter questions; additional reflection is always optional.
-// Never require a positive outcome, insight, or action plan.
-const event = prompt(
-    "1/3 今日いちばん話したい出来事は何？ 何もなかった日も、そのまま話してね。",
-    "Text",
-    ""
-)
-if !event {
-    stop()
-}
-
-const feeling = prompt(
-    "2/3 今日一日の中で、心が動いた瞬間はあった？ 楽しさ・違和感・好奇心・退屈など何でもOK。",
-    "Text",
-    ""
-)
-if !feeling {
-    stop()
-}
-
-// Questions are logged when SHOWN, even if the user restarts before answering.
+// The three questions remain mandatory; all wording is responsive, not fixed.
+// Already presented prompts are saved BEFORE asking for answers. This prevents
+// three consecutive runs from repeating the same opener.
 const questionFolder = createFolder("YOS Journal Questions")
 const questionFiles = getFolderContents(questionFolder, false)
 const recentQuestionFiles = filterFiles(questionFiles, 24, "Name", "Z to A")
 const recentQuestions = getText(recentQuestionFiles)
+
+const openingPrompt = text("あなたはYOSの日記コーチ。本人が思わず話し始めたくなる、最初の一問を一文だけ作ってください。
+
+求めるもの：『今日あったことは？』のような事務的でありふれた質問ではなく、本人がその日のひと場面、自分らしい瞬間、違和感、好奇心、言えなかったことを自然に思い出せる、具体的で少し意外な切り口。
+・優しくても鋭い問い。無理に感動や深刻な話を引き出さない。
+・まだ今日の出来事は知らないので、あったことを勝手に仮定しない。
+・過去の質問の内容や言い換えにせず、連続実行なら別軸を使う。
+・本人の回答で後から自己理解・YOS分析につながる問いにする。
+・一問のみ。前置き・説明・番号は不要。
+
+直近の質問（すべて既出扱い）：
+{recentQuestions}
+Night Briefからの情報（ある場合だけ）：
+{context}")
+const openingQuestion = askChatGPT(openingPrompt, false, "Text")
+const openingLog = text("YOS_JOURNAL_QUESTION_V1\n日時：{day} {timeKey}（導入1）\n提示した問い：{openingQuestion}")
+saveFile("YOS Journal Questions/{day}-{timeKey}-q1.txt", openingLog, false)
+const event = prompt("1/3 {openingQuestion}", "Text", "")
+if !event {
+    stop()
+}
+
+const secondPrompt = text("あなたはYOSの日記コーチ。1問目への本人の言葉を正確に受け取って、次の会話を深く進める2問目を一つだけ作る。
+
+・相手が実際に使った具体的な表現や出来事を含む。
+・今日の気持ち、何を求めたか、心が揺れた理由、満たされなかったもの、選択の背景など、1問目と異なる焦点を一つ選ぶ。
+・『どう感じた？』『なぜ？』のみの一般論を禁止する。
+・感情が動いたと勝手に前提にしない。本人に問題があると決めつけない。
+・二重質問を禁止。前置き・説明・番号なし。
+
+最初の問い：{openingQuestion}
+本人の回答：{event}
+直近の過去質問：{recentQuestions}")
+const secondQuestion = askChatGPT(secondPrompt, false, "Text")
+const secondLog = text("YOS_JOURNAL_QUESTION_V1\n日時：{day} {timeKey}（導入2）\n提示した問い：{secondQuestion}")
+saveFile("YOS Journal Questions/{day}-{timeKey}-q2.txt", secondLog, false)
+const feeling = prompt("2/3 {secondQuestion}", "Text", "")
+if !feeling {
+    stop()
+}
+
 const starterNotes = text("【今日の出来事】\n{event}\n\n【今日の気持ち・心が動いた瞬間】\n{feeling}")
 const coachPrompt = text("あなたはYOSの優れた質問コーチ。本人の表面的な説明を超えて、本人にとって意味のある本音や価値観、選択の代償、満たされなかった期待、好奇心に触れる『今日の本人だからこそ答えたくなる』問いを1つだけ作る。
 
@@ -52,6 +75,10 @@ const coachPrompt = text("あなたはYOSの優れた質問コーチ。本人の
 
 今日の本人の言葉：
 {starterNotes}
+
+この実行ですでに聞いた2問（切り口を重ねない）：
+1. {openingQuestion}
+2. {secondQuestion}
 
 すでに提示済みの問い（今日の途中終了も含む）。文言だけでなくテーマが重複しないように：
 {recentQuestions}
