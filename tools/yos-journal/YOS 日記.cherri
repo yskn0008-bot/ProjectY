@@ -67,7 +67,8 @@ if recentQuestions contains @question {
 const questionLog = text("YOS_JOURNAL_QUESTION_V1\n日時：{day} {timeKey}\n提示した問い：{@question}")
 saveFile("YOS Journal Questions/{day}-{timeKey}.txt", questionLog, false)
 alert(@question, "3/3 今日の問い")
-@answer = prompt("3/3 自分の言葉で。刺さらなければ『別の問い』と入力すると、一度だけ問いを変えられるよ。", "Text", "")
+const firstAnswer = prompt("3/3 自分の言葉で。刺さらなければ『別の問い』と入力すると、一度だけ問いを変えられるよ。", "Text", "")
+@answer = "{firstAnswer}"
 if @answer contains "別の問い" {
     const alternatePrompt = text("この問いは本人に響かなかった。元の問いや過去の問いと別軸に切り替え、今日の本人の具体的な発言に基づく、鋭くても押し付けない問いを1つだけ。一般論や『どう感じた？』は避ける。前置き不要。\n\n本人の言葉：{starterNotes}\n却下：{@question}\n最近の問い：{recentQuestions}")
     @question = askChatGPT(alternatePrompt, false, "Text")
