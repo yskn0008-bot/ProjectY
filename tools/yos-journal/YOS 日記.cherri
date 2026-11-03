@@ -80,8 +80,8 @@ if @answer contains "別の問い" {
 if !@answer {
     stop()
 }
-const question = "{@question}"
-const answer = "{@answer}"
+const question = text("{@question}")
+const answer = text("{@answer}")
 
 // The source of long-term truth is Notion. This existing iCloud folder
 // is used as a limited local cache so today's coach can compare prior answers.
