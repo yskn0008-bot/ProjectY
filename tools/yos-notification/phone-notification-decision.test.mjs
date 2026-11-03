@@ -1,0 +1,14 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { createRequire } from 'node:module';
+const require = createRequire(import.meta.url);
+const { decidePhoneNotification: decide } = require('./Phone-Notification-Decision-v0.1.js');
+const base = {kind:'missed_call',voicemail:{present:false},isSavedContact:false};
+test('identified unknown caller',()=>assert.equal(decide({...base,lookup:{exactNumberMatch:true,name:'Example Shop',sourceType:'official'}}).notify,true));
+test('unknown caller no search hit',()=>assert.equal(decide({...base,lookup:{status:'not_found'}}).notify,false));
+test('unknown caller with voicemail',()=>assert.equal(decide({...base,voicemail:{present:true,transcript:'折り返してください'}}).reason,'voicemail'));
+test('saved contact no voicemail',()=>assert.equal(decide({...base,isSavedContact:true}).notify,false));
+test('saved contact with voicemail',()=>assert.equal(decide({...base,isSavedContact:true,voicemail:{present:true}}).notify,true));
+test('unknown voicemail state is pending',()=>assert.equal(decide({...base,voicemail:{}}).pending,true));
+test('spam report only does not identify caller',()=>assert.equal(decide({...base,lookup:{exactNumberMatch:true,name:'spam',sourceType:'spam_report'}}).notify,false));
+test('other notification is ignored',()=>assert.equal(decide({kind:'message'}).notify,false));
