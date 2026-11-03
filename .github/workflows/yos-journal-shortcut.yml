@@ -75,8 +75,13 @@ jobs:
           data=plistlib.loads(src.read_bytes())
           ids=[a.get('WFWorkflowActionIdentifier','') for a in data.get('WFWorkflowActions',[])]
           blob=repr(data)
-          assert ids.count('is.workflow.actions.askllm') == 3, ids
-          assert ids.count('is.workflow.actions.ask') == 5, ids
+          assert ids.count('is.workflow.actions.askllm') == 5, ids
+          assert ids.count('is.workflow.actions.ask') == 6, ids
+          assert 'YOS Journal Questions' in blob
+          assert 'すでに提示済みの問い' in blob
+          assert '別の問い' in blob
+          assert ids.count('is.workflow.actions.file.getfoldercontents') == 2, ids
+          assert ids.count('is.workflow.actions.documentpicker.save') == 3, ids
           assert 'YOSの分析とアドバイス' in blob
           assert '目的別の問い' in blob
           assert '直近のローカル日記控え' in blob
