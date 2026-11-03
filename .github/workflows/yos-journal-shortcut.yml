@@ -1,0 +1,117 @@
+name: YOS 日記 standalone shortcut
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'tools/yos-journal/**'
+      - '.github/workflows/yos-journal-shortcut.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-sign:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify Scriptable source syntax and privacy boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check 'tools/yos-journal/YOS Journal Notion Bridge.js'
+          python3 - <<'PY'
+          from pathlib import Path
+          source=Path('tools/yos-journal/YOS 日記.cherri').read_text()
+          bridge=Path('tools/yos-journal/YOS Journal Notion Bridge.js').read_text()
+          assert '#define name YOS 日記' in source
+          assert 'scriptable:///run/' in source
+          assert 'YOS_NOTION_INTEGRATION_TOKEN' not in source
+          assert 'Bearer ' not in source
+          assert 'Bearer '+'' not in source
+          assert 'api.notion.com' not in source
+          assert "const TOKEN_KEY = 'YOS_NOTION_INTEGRATION_TOKEN'" in bridge
+          assert 'https://api.notion.com/v1' in bridge
+          assert not any(s in source+bridge for s in ['sk-proj-', 'secret_', 'ntn_', 'Bearer sk-'])
+          print('YOS journal static secret-free source contract: PASS')
+          PY
+
+      - name: Install pinned Cherri v2.3.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          url='https://github.com/electrikmilk/cherri/releases/download/v2.3.0/cherri_linux-x86_64.zip'
+          expected='7ab2c384b7b26e7c72a30a8dfa56f89dae12c4068b7951bc1e3193f3698edbe9'
+          curl -fsSL "$url" -o /tmp/cherri.zip
+          printf '%s  %s\n' "$expected" /tmp/cherri.zip | sha256sum -c -
+          mkdir -p /tmp/cherri
+          unzip -q /tmp/cherri.zip -d /tmp/cherri
+          binary="$(find /tmp/cherri -type f -name cherri -print -quit)"
+          test -n "$binary"
+          sudo install -m 0755 "$binary" /usr/local/bin/cherri
+          cherri --version
+
+      - name: Compile standalone YOS 日記 without changing Night Brief
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd tools/yos-journal
+          cherri 'YOS 日記.cherri' --skip-sign --debug
+          test -f './YOS 日記_unsigned.shortcut'
+          mkdir -p artifacts
+          cp './YOS 日記_unsigned.shortcut' './artifacts/YOS 日記.plist'
+
+      - name: Validate compiled shortcut
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import plistlib
+          from pathlib import Path
+          src=Path('tools/yos-journal/artifacts/YOS 日記.plist')
+          data=plistlib.loads(src.read_bytes())
+          ids=[a.get('WFWorkflowActionIdentifier','') for a in data.get('WFWorkflowActions',[])]
+          blob=repr(data)
+          assert ids.count('is.workflow.actions.askllm') == 1, ids
+          assert ids.count('is.workflow.actions.ask') == 2, ids
+          assert ids.count('is.workflow.actions.openurl') == 1, ids
+          assert ids.count('com.apple.journal.CreateEntryIntent') == 0
+          assert 'scriptable:///run/YOS%20Journal%20Notion%20Bridge' in blob
+          assert 'YOS_NOTION_INTEGRATION_TOKEN' not in blob
+          assert 'YOS Journal Pending' in blob
+          print('YOS 日記 independent shortcut contract: PASS',len(ids),'actions')
+          PY
+
+      - name: Sign using existing HubSign workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/clarity-factory/sign_with_hubsign.py \
+            --input 'tools/yos-journal/artifacts/YOS 日記.plist' \
+            --output 'tools/yos-journal/artifacts/YOS 日記.shortcut' \
+            --name 'YOS 日記'
+
+      - name: Validate signed iPhone shortcut
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('tools/yos-journal/artifacts/YOS 日記.shortcut')
+          raw=p.read_bytes()
+          assert raw.startswith(b'AEA1'), raw[:8]
+          assert len(raw)>500
+          print('HubSign AEA1 signed YOS 日記: PASS',len(raw),'bytes')
+          PY
+
+      - name: Upload the signed shortcut, no private journal data
+        uses: actions/upload-artifact@v4
+        with:
+          name: yos-journal-standalone-signed
+          path: |
+            tools/yos-journal/artifacts/YOS 日記.shortcut
+            tools/yos-journal/artifacts/YOS 日記.plist
+          if-no-files-found: error
