@@ -62,5 +62,5 @@ test('user text is escaped and reopening preserves the saved sequence',()=>{
 test('malformed local draft does not overwrite previous live records',()=>{
  const x=boot('{broken');
  assert.equal(x.nodes.count.textContent,'12項目');
- assert.equal(x.nodes.storageStatus.textContent,'端末内に仮保存');
+ assert.equal(x.memory.get('yos-habit-flow-draft-v1'),'{broken');
 });
