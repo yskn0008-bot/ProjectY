@@ -16,37 +16,61 @@ const day = formatDate(now, "Custom", "yyyy-MM-dd")
 const timeKey = formatDate(now, "Custom", "HH-mm-ss")
 const context = "{ShortcutInput}"
 
-const diary = prompt(
-    "今日一日の出来事を自由に書いてね。印象に残ったこと、気分、好奇心、違和感。何でもOK。",
+// Three required starter questions; additional reflection is always optional.
+// Never require a positive outcome, insight, or action plan.
+const event = prompt(
+    "1/3 今日いちばん話したい出来事は何？ 何もなかった日も、そのまま話してね。",
     "Text",
     ""
 )
-if !diary {
+if !event {
     stop()
 }
 
-const coachPrompt = text("あなたはYOSの日記コーチです。本人を誘導しない、深い自己理解の問いを毎晩1つだけ選んでください。
+const feeling = prompt(
+    "2/3 今日一日の中で、心が動いた瞬間はあった？ 楽しさ・違和感・好奇心・退屈など何でもOK。",
+    "Text",
+    ""
+)
+if !feeling {
+    stop()
+}
 
-ルール：
-・『今日一日の中で〜？』を基本形に、今日の経験に根拠がある問いだけを選ぶ。
-・感情、好奇心、価値観、繰り返す行動、思い込みのうち、その日に最も関連する焦点を1つ選ぶ。
-・問いを1文で、二つの質問を繋げず、回答を前提にしない。
-・無理にポジティブにしない。変化、成長、成果を義務化しない。
-・心理診断、本人の動機の断定、架空の出来事は禁止。
-・今日の記録だけでは答えが見つからなくても自然な問いにする。
-・背景説明、見出し、番号、余計な文は一切出さない。
+const starterNotes = text("【今日の出来事】\n{event}\n\n【今日の気持ち・心が動いた瞬間】\n{feeling}")
+const coachPrompt = text("あなたはYOSの日記コーチです。3つ目の必須質問を、その日だけの具体的な文脈から一つ作ってください。
 
-今日の日記（本人の言葉）：
-{diary}
+以下の問い方を状況に応じて使い分ける。ただし、誰かの診療や心理療法を模倣したと称さない。
+・ロジャーズ：本人の感覚の意味を丁寧に確かめる。評価や誘導をしない。
+・ベック：根拠と解釈が混ざっていそうなら、別の見方を自由に探る。
+・ミラー：望みと迷いが現れたら、本人の大切にしたいことを探索する。
+・ダン・コー：好奇心、違和感、未知の経験、望む／望まない人生を探る。
 
-Night Briefからの入力（ある場合のみ使用）：
+厳守すること：
+・質問は1つだけ、1文で短く。前置きや見出し、番号は付けない。
+・可能なら『今日一日の中で〜？』と具体的に尋ねる。
+・本人が話していない出来事・気持ち・性格・過去を作らない。
+・成果、成長、前向きな発見、明日の計画を強要しない。
+・回答でわからない場合は『わからない』も自然に選べる問いにする。
+
+今日の本人の回答：
+{starterNotes}
+
+Night Briefからの情報（空なら使わない）：
 {context}")
 const question = askChatGPT(coachPrompt, false, "Text")
-alert(question, "今日の問い")
-const answer = prompt("この問いに対する自分の答えを、そのまま書いてね。", "Text", "")
+alert(question, "3/3 今日の問い")
+const answer = prompt("3/3 自分の言葉で答えてね。わからなければ『わからない』でも大丈夫。", "Text", "")
 if !answer {
     stop()
 }
+
+// Q1-Q3 are the only required questions. The next field is always skippable.
+const extra = prompt(
+    "ここからは自由。もう少し話したいことがあれば書いてね。空欄ならこれで保存するよ。",
+    "Text",
+    ""
+)
+const diary = text("【今日の出来事】\n{event}\n\n【心が動いた瞬間】\n{feeling}\n\n【任意の続き】\n{extra}")
 
 const pendingFolder = createFolder("YOS Journal Pending")
 const backup = text("YOS_JOURNAL_LOCAL_BACKUP_V1
