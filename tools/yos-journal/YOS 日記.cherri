@@ -80,8 +80,8 @@ if @answer contains "別の問い" {
 if !@answer {
     stop()
 }
-const question = text("{@question}")
-const answer = text("{@answer}")
+const finalQuestion = text("{@question}")
+const finalAnswer = text("{@answer}")
 
 // The source of long-term truth is Notion. This existing iCloud folder
 // is used as a limited local cache so today's coach can compare prior answers.
@@ -99,7 +99,7 @@ const purpose = prompt(
 @purposeQuestion = ""
 @purposeAnswer = ""
 if purpose {
-    const purposePrompt = text("あなたはYOSの日記コーチ。本人の希望テーマに沿った目的別の問いを1問だけ作ってください。本人の価値観や答えを決めつけず、今夜の回答に基づく具体的な問いを短い1文で。前置き・結論・番号は不要。\n\n希望するテーマ：{purpose}\n今日の出来事：{event}\n心が動いたこと：{feeling}\n3問目：{question}\n3問目の回答：{answer}")
+    const purposePrompt = text("あなたはYOSの日記コーチ。本人の希望テーマに沿った目的別の問いを1問だけ作ってください。本人の価値観や答えを決めつけず、今夜の回答に基づく具体的な問いを短い1文で。前置き・結論・番号は不要。\n\n希望するテーマ：{purpose}\n今日の出来事：{event}\n心が動いたこと：{feeling}\n3問目：{finalQuestion}\n3問目の回答：{finalAnswer}")
     @purposeQuestion = askChatGPT(purposePrompt, false, "Text")
     alert(@purposeQuestion, "目的別の問い")
     @purposeAnswer = prompt(
@@ -131,8 +131,8 @@ const analysisPrompt = text("あなたはYOS。今日の問いの回答と直近
 
 今日の出来事：{event}
 心が動いた瞬間：{feeling}
-3問目：{question}
-本人の回答：{answer}
+3問目：{finalQuestion}
+本人の回答：{finalAnswer}
 任意の目的：{purpose}
 目的別の問い：{@purposeQuestion}
 目的別の答え：{@purposeAnswer}
@@ -149,15 +149,15 @@ const backup = text("YOS_JOURNAL_LOCAL_BACKUP_V1
 今日の日記：
 {diary}
 今日の問い：
-{question}
+{finalQuestion}
 本人の回答：
-{answer}")
+{finalAnswer}")
 saveFile("YOS Journal Pending/{day}-{timeKey}.txt", backup, false)
 
 // Scriptable reads the existing Keychain token locally; the URL never goes to a web server.
 const diaryBase64 = base64Encode(diary)
-const questionBase64 = base64Encode(question)
-const answerBase64 = base64Encode(answer)
+const questionBase64 = base64Encode(finalQuestion)
+const answerBase64 = base64Encode(finalAnswer)
 const d64 = urlEncode(diaryBase64)
 const q64 = urlEncode(questionBase64)
 const a64 = urlEncode(answerBase64)
