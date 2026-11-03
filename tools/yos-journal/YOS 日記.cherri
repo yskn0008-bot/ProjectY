@@ -36,33 +36,51 @@ if !feeling {
     stop()
 }
 
+// Questions are logged when SHOWN, even if the user restarts before answering.
+const questionFolder = createFolder("YOS Journal Questions")
+const questionFiles = getFolderContents(questionFolder, false)
+const recentQuestionFiles = filterFiles(questionFiles, 24, "Name", "Z to A")
+const recentQuestions = getText(recentQuestionFiles)
 const starterNotes = text("【今日の出来事】\n{event}\n\n【今日の気持ち・心が動いた瞬間】\n{feeling}")
-const coachPrompt = text("あなたはYOSの日記コーチです。3つ目の必須質問を、その日だけの具体的な文脈から一つ作ってください。
+const coachPrompt = text("あなたはYOSの優れた質問コーチ。本人の表面的な説明を超えて、本人にとって意味のある本音や価値観、選択の代償、満たされなかった期待、好奇心に触れる『今日の本人だからこそ答えたくなる』問いを1つだけ作る。
 
-以下の問い方を状況に応じて使い分ける。ただし、誰かの診療や心理療法を模倣したと称さない。
-・ロジャーズ：本人の感覚の意味を丁寧に確かめる。評価や誘導をしない。
-・ベック：根拠と解釈が混ざっていそうなら、別の見方を自由に探る。
-・ミラー：望みと迷いが現れたら、本人の大切にしたいことを探索する。
-・ダン・コー：好奇心、違和感、未知の経験、望む／望まない人生を探る。
+【必須】今日の本人の言葉から具体的な出来事・表現を拾い、その単語を問いに含める。誰にでも当てはまる問い、たとえば『どう感じた？』『何が大切？』『何に気づいた？』だけの無難な聞き方は禁止。会話に根拠のない心理診断や、必ず隠れた悩みがあるという決めつけもしない。
 
-厳守すること：
-・質問は1つだけ、1文で短く。前置きや見出し、番号は付けない。
-・可能なら『今日一日の中で〜？』と具体的に尋ねる。
-・本人が話していない出来事・気持ち・性格・過去を作らない。
-・成果、成長、前向きな発見、明日の計画を強要しない。
-・回答でわからない場合は『わからない』も自然に選べる問いにする。
+【切り口】本人の意思と周囲の期待のずれ／まだ言葉にならない欲求／実際に選ばなかった可能性／心が動いた場面の核心／自由なら選んだこと／失いたくないもの／矛盾の中にある価値。今日の発言に根拠がある角度だけを採用。前回と同じ軸の言い換えはしない。気分や目標を無理にポジティブに誘導しない。
 
-今日の本人の回答：
+【品質検査】本人の答えを後で分析して現実の助言に結びつけられるか？ 読んだ瞬間少し考え込むくらい具体的か？ 過去に提示した問いと意味が重ならないか？ 自問してから、短い一文の問いだけ出力。二重質問・解説は禁止。
+
+今日の本人の言葉：
 {starterNotes}
 
-Night Briefからの情報（空なら使わない）：
+すでに提示済みの問い（今日の途中終了も含む）。文言だけでなくテーマが重複しないように：
+{recentQuestions}
+
+Night Brief参考情報（実際に与えられた場合だけ）：
 {context}")
-const question = askChatGPT(coachPrompt, false, "Text")
-alert(question, "3/3 今日の問い")
-const answer = prompt("3/3 自分の言葉で答えてね。わからなければ『わからない』でも大丈夫。", "Text", "")
-if !answer {
+@question = askChatGPT(coachPrompt, false, "Text")
+// If the literal question already exists, retry once with a different lens.
+if recentQuestions contains @question {
+    const retryPrompt = text("この問いは既出。却下した問いと過去の問いの言い換えではなく、本人の別の選択・欲求・価値観に迫る切り口の、今日の出来事に固有な質問を1つだけ作って。悩みや過去を捏造せず、前置きなし。\n\n本人の言葉：{starterNotes}\n既出：{recentQuestions}\n却下：{@question}")
+    @question = askChatGPT(retryPrompt, false, "Text")
+}
+const questionLog = text("YOS_JOURNAL_QUESTION_V1\n日時：{day} {timeKey}\n提示した問い：{@question}")
+saveFile("YOS Journal Questions/{day}-{timeKey}.txt", questionLog, false)
+alert(@question, "3/3 今日の問い")
+@answer = prompt("3/3 自分の言葉で。刺さらなければ『別の問い』と入力すると、一度だけ問いを変えられるよ。", "Text", "")
+if @answer == "別の問い" {
+    const alternatePrompt = text("この問いは本人に響かなかった。元の問いや過去の問いと別軸に切り替え、今日の本人の具体的な発言に基づく、鋭くても押し付けない問いを1つだけ。一般論や『どう感じた？』は避ける。前置き不要。\n\n本人の言葉：{starterNotes}\n却下：{@question}\n最近の問い：{recentQuestions}")
+    @question = askChatGPT(alternatePrompt, false, "Text")
+    const otherLog = text("YOS_JOURNAL_QUESTION_V1\n日時：{day} {timeKey}（再質問）\n提示した問い：{@question}")
+    saveFile("YOS Journal Questions/{day}-{timeKey}-2.txt", otherLog, false)
+    alert(@question, "3/3 別の問い")
+    @answer = prompt("自由に答えてね。『わからない』でも大丈夫。", "Text", "")
+}
+if !@answer {
     stop()
 }
+const question = "{@question}"
+const answer = "{@answer}"
 
 // The source of long-term truth is Notion. This existing iCloud folder
 // is used as a limited local cache so today's coach can compare prior answers.
