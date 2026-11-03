@@ -60,9 +60,12 @@ const backup = text("YOS_JOURNAL_LOCAL_BACKUP_V1
 saveFile("YOS Journal Pending/{day}-{timeKey}.txt", backup, false)
 
 // Scriptable reads the existing Keychain token locally; the URL never goes to a web server.
-const d64 = urlEncode(base64Encode(diary))
-const q64 = urlEncode(base64Encode(question))
-const a64 = urlEncode(base64Encode(answer))
+const diaryBase64 = base64Encode(diary)
+const questionBase64 = base64Encode(question)
+const answerBase64 = base64Encode(answer)
+const d64 = urlEncode(diaryBase64)
+const q64 = urlEncode(questionBase64)
+const a64 = urlEncode(answerBase64)
 const saveURL = text("scriptable:///run/YOS%20Journal%20Notion%20Bridge?date={day}&diary={d64}&question={q64}&answer={a64}")
 openURL(saveURL)
 stop()
