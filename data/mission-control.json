@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-04T09:21:50+09:00",
+  "updated_at": "2026-11-04T09:33:30+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -195,6 +195,27 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-f75a27c0815e",
+      "title": "feat: load daily journal edition automatically from GitHub with offline cache",
+      "completed_at": "2026-11-04T00:31:47Z",
+      "result": "GitHub mainへ反映（f75a27c）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/f75a27c0815e944172cf51cb50f0bc969f3736fe"
+    },
+    {
+      "id": "github-commit-c9b27cd05f32",
+      "title": "content: point journal latest edition at November 4 pilot",
+      "completed_at": "2026-11-04T00:31:39Z",
+      "result": "GitHub mainへ反映（c9b27cd）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/c9b27cd05f32088b165d921e7d0539d7a638c085"
+    },
+    {
+      "id": "github-commit-b4f6966d1eea",
+      "title": "content: publish verified YOS JOURNAL pilot issue for Nov 4",
+      "completed_at": "2026-11-04T00:31:33Z",
+      "result": "GitHub mainへ反映（b4f6966）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/b4f6966d1eeaa89fd8a6414153f9b8f302381ea6"
+    },
+    {
       "id": "github-commit-cb4ec1791ddc",
       "title": "feat: give journal each edition a timely content-derived cover headline",
       "completed_at": "2026-11-04T00:21:08Z",
@@ -207,27 +228,6 @@
       "completed_at": "2026-11-04T00:14:12Z",
       "result": "GitHub mainへ反映（88ed088）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/88ed08845723eb59d28096a7d246851d47bb006d"
-    },
-    {
-      "id": "github-commit-bb1ea158175f",
-      "title": "feat: add non-destructive Scriptable YOS JOURNAL magazine viewer",
-      "completed_at": "2026-11-04T00:13:50Z",
-      "result": "GitHub mainへ反映（bb1ea15）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/bb1ea158175ff3f555150d1c2f53dc91298d4aff"
-    },
-    {
-      "id": "github-commit-efc283abf334",
-      "title": "chore(yos-ai): retry deferred approved release (2/4)",
-      "completed_at": "2026-11-01T16:21:41Z",
-      "result": "GitHub mainへ反映（efc283a）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/efc283abf334e86ef6bf41cf65550fff82a11132"
-    },
-    {
-      "id": "github-commit-9d1838674610",
-      "title": "fix(yos-today): show only verified journal reports and confirmed cash snapshots",
-      "completed_at": "2026-11-01T12:17:25Z",
-      "result": "GitHub mainへ反映（9d18386）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/9d1838674610fc15e42ddc52667da04048775981"
     },
     {
       "id": "complete-002",
@@ -264,7 +264,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-04T09:21:50+09:00",
+      "last_update": "2026-11-04T09:33:30+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -345,7 +345,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-04T09:21:50+09:00",
+      "last_update": "2026-11-04T09:33:30+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -368,7 +368,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-04T09:21:50+09:00",
+      "last_update": "2026-11-04T09:33:30+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -450,5 +450,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "d105d5dd68429bd55139211cd99ae5797a0a208a874005039e724509dddba864"
+  "github_snapshot_hash": "43e161beaef16e8b11503672f49a833de40d31212f76d74c92ef62a208b31637"
 }
