@@ -1,58 +1,58 @@
 [
   {
     "name": "light fg",
-    "foreground": "#202222",
-    "background": "#f3f3f0",
+    "foreground": "#242724",
+    "background": "#f7f6f2",
     "minimum": 4.5,
-    "ratio": 14.383,
+    "ratio": 13.964,
     "pass": true
   },
   {
     "name": "light sub",
-    "foreground": "#535959",
-    "background": "#f3f3f0",
+    "foreground": "#62665f",
+    "background": "#f7f6f2",
     "minimum": 4.5,
-    "ratio": 6.423,
+    "ratio": 5.417,
     "pass": true
   },
   {
     "name": "light green",
     "foreground": "#167044",
-    "background": "#f3f3f0",
+    "background": "#f7f6f2",
     "minimum": 4.5,
-    "ratio": 5.499,
+    "ratio": 5.653,
     "pass": true
   },
   {
     "name": "light amber",
     "foreground": "#955300",
-    "background": "#f3f3f0",
+    "background": "#f7f6f2",
     "minimum": 4.5,
-    "ratio": 5.374,
+    "ratio": 5.524,
     "pass": true
   },
   {
     "name": "light red",
     "foreground": "#bf302e",
-    "background": "#f3f3f0",
+    "background": "#f7f6f2",
     "minimum": 4.5,
-    "ratio": 5.136,
+    "ratio": 5.281,
     "pass": true
   },
   {
     "name": "light control boundary",
-    "foreground": "#707872",
-    "background": "#f3f3f0",
+    "foreground": "#858a80",
+    "background": "#f7f6f2",
     "minimum": 3,
-    "ratio": 4.09,
+    "ratio": 3.267,
     "pass": true
   },
   {
     "name": "light focus",
-    "foreground": "#202222",
-    "background": "#f3f3f0",
+    "foreground": "#242724",
+    "background": "#f7f6f2",
     "minimum": 3,
-    "ratio": 14.383,
+    "ratio": 13.964,
     "pass": true
   },
   {

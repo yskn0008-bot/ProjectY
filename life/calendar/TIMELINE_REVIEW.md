@@ -1,3 +1,5 @@
+> 最新UI修正：`TIMELINE_VISUAL_REVISION.md` を参照。初期画面は説明・設定フォームを外した全画面タイムラインへ変更。22件の模擬検査PASS、修正版の実機表示は未確認。
+
 # YOS DAYSTREAM Timeline 開発確認 20261105
 
 既存DAYSTREAMに追加した端末内24時間エディターの独立候補。正式版への統合・iPhone実機確認は未完了です。20261102のHTML・bridge・Scriptableファイルは変更していません。
