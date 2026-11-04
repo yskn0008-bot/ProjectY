@@ -1,0 +1,25 @@
+✔ full page executes, geometry renders, no implicit demo; form/keyboard/undo/save state work (31.137752ms)
+✔ native fixed appointments stay immutable and unplaced habits source is reused (5.935777ms)
+✔ long press computes candidate conflicts before commit and restores on pointer cancel (5.473009ms)
+✔ drag separating an existing pair shows amber operational change on both related cards (3.694448ms)
+✔ one-off source placement remains unplaced next day; daily recurrence stays placed without duplication (6.986821ms)
+✔ exact 24-hour scale and clipped sleep carries to next day (1.916869ms)
+✔ recurrence clamps month end and leap day without drifting (0.236867ms)
+✔ source stable IDs retain same title independent schedules, exact duplicate ID dedup (0.487795ms)
+✔ date-only tasks remain unplaced, unknown event end is null (0.207824ms)
+✔ local rules distinguish actual overlap, insufficient transfer and optional pair (0.560706ms)
+✔ fixed schedule arrival buffer stays local metadata (0.166681ms)
+✔ malformed dates, duplicated IDs, huge durations fail closed (0.619414ms)
+✔ offline package integrity, fixed range, no Notion writes, original asset preserved (28.843083ms)
+✔ native explicit save verifies readback without any source mutations (231.83366ms)
+✔ native dismiss and corrupt file never authorize a write; failed readback is unsaved (354.869341ms)
+✔ native save preserves prior candidate on failed readback and rejects malformed timeline (8.681185ms)
+✔ actual timeline CSS has sufficient text, control boundary, and focus contrast (5.24095ms)
+ℹ tests 17
+ℹ suites 0
+ℹ pass 17
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 776.988749
