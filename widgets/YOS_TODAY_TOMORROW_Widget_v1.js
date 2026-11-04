@@ -15,7 +15,8 @@
     home: "https://www.notion.so/3ed5ca882895819aaa57c139ea36fe2b",
     tasks: "https://www.notion.so/06e62efb9a3c45e2bec77a53332c925a",
     life: "https://yskn0008-bot.github.io/ProjectY/life/",
-    alerts: "https://www.notion.so/3fa5ca88289581d399cece2fb6e87c2d"
+    alerts: "https://www.notion.so/3fa5ca88289581d399cece2fb6e87c2d",
+    cases: "https://www.notion.so/df0c1f840cdd4cc791f5a6769bd41721"
   };
   const C = {
     paper: "#FAF7F0", ink: "#263C38", soft: "#64756D", gold: "#9B7335",
@@ -605,6 +606,7 @@
       '<div class="sub">'+safe(dateText(now))+' · 自分の一日をデザインする</div></header>'+
       '<div class="tabs"><button id="tabToday" onclick="document.body.dataset.tab=\'today\'">今日</button>'+
       '<button id="tabWeek" onclick="document.body.dataset.tab=\'week\'">今週</button></div>'+
+      '<nav class="links" aria-label="通知と追跡"><a href="'+URL.cases+'">通知・追跡を見る</a></nav>'+
       '<div class="today">'+overviewHTML+
       (quietDay?taskSection+adviceSection+habitSection+calendarSection:calendarSection+adviceSection+taskSection+habitSection)+
       '<section class="section"><h3>余白と暮らし</h3>'+
