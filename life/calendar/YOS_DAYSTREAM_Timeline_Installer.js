@@ -1,9 +1,11 @@
 // Variables used by Scriptable.
 // icon-color: gray; icon-glyph: clock;
-// YOS DAYSTREAM 24h review installer. New distinct script only; no existing overwrite.
-const SOURCE='https://raw.githubusercontent.com/yskn0008-bot/ProjectY/82d23c3e64c5fa67bf6d61599ae34809ab481a1b/life/calendar/YOS_DAYSTREAM_Timeline_Review_20261105.scriptable';
+// YOS DAYSTREAM: pinned UI update with known-version backup and readback.
+const SOURCE='https://raw.githubusercontent.com/yskn0008-bot/ProjectY/c05d1eafac5fa8acceff4f5b80eef00e30f27bdc/life/calendar/YOS_DAYSTREAM_Timeline_Review_20261105.scriptable';
 const TARGET='YOS DAYSTREAM Timeline 開発確認 20261105';
-const SCRIPT_SHA='b117fcd0c29c1227ef2205866dd19a0dea2564fc9f736806a5c54bdd49d5d1ca';
+const SCRIPT_SHA='380b5fad7a68027e46bcca31608101e9f94924372ed1df7b5d0d7fad6c10d809';
+const PREVIOUS_SCRIPT_SHA='b117fcd0c29c1227ef2205866dd19a0dea2564fc9f736806a5c54bdd49d5d1ca';
+const SCRIPT_LENGTH=1097830;
 function sha256Hex(input){
   const K=[
     0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5,0x3956c25b,0x59f111f1,0x923f82a4,0xab1c5ed5,
@@ -46,15 +48,22 @@ async function install(){
  const req=new Request(SOURCE);req.timeoutInterval=30;
  const raw=await req.loadString();if(req.response?.statusCode!==200)throw Error('固定版を取得できません');
  const pkg=JSON.parse(raw);
- if(pkg.name!==TARGET||typeof pkg.script!=='string'||pkg.script.length!==1089068||sha256Hex(pkg.script)!==SCRIPT_SHA)throw Error('固定版の内容が一致しません。変更せず停止しました');
- const stores=[FileManager.iCloud(),FileManager.local()];let selected=stores[0];
- for(const fm of stores){const p=fm.joinPath(fm.documentsDirectory(),TARGET+'.js');if(fm.fileExists(p)){
-  if(fm.isFileStoredIniCloud&&fm.isFileStoredIniCloud(p)&&fm.downloadFileFromiCloud)await fm.downloadFileFromiCloud(p);
-  if(fm.readString(p)!==pkg.script)throw Error('同名の別コードがあります。上書きせず停止しました');selected=fm;
+ if(pkg.name!==TARGET||typeof pkg.script!=='string'||pkg.script.length!==SCRIPT_LENGTH||sha256Hex(pkg.script)!==SCRIPT_SHA)throw Error('固定版の内容が一致しません。変更せず停止しました');
+ const stores=[FileManager.iCloud(),FileManager.local()],found=[];
+ for(const fm of stores){const path=fm.joinPath(fm.documentsDirectory(),TARGET+'.js');if(fm.fileExists(path)){
+  if(fm.isFileStoredIniCloud&&fm.isFileStoredIniCloud(path)&&fm.downloadFileFromiCloud)await fm.downloadFileFromiCloud(path);
+  found.push({fm,path,before:fm.readString(path)});
  }}
- const path=selected.joinPath(selected.documentsDirectory(),TARGET+'.js');let created=false;
- try{if(!selected.fileExists(path)){created=true;selected.writeString(path,pkg.script);}if(selected.readString(path)!==pkg.script)throw Error('保存後の読戻しが一致しません');}
- catch(e){if(created&&selected.fileExists(path))selected.remove(path);throw e;}
+ if(found.length>1)throw Error('同名の候補が2か所にあるため、どちらも変更せず停止しました');
+ const chosen=found[0]||{fm:stores[0],path:stores[0].joinPath(stores[0].documentsDirectory(),TARGET+'.js'),before:null};
+ const {fm,path,before}=chosen;
+ if(before!==null&&before!==pkg.script&&sha256Hex(before)!==PREVIOUS_SCRIPT_SHA)throw Error('同名の別コードがあります。上書きせず停止しました');
+ if(before!==pkg.script){
+  if((fm.fileExists(path)?fm.readString(path):null)!==before)throw Error('導入中にコードが変わりました。変更せず停止しました');
+  if(before!==null){const backup=path+'.previous.txt';if(fm.fileExists(backup)&&fm.readString(backup)!==before)throw Error('別のバックアップがあるため保護して停止しました');fm.writeString(backup,before);if(fm.readString(backup)!==before)throw Error('旧版のバックアップを確認できません。元のコードは変更していません');}
+  try{fm.writeString(path,pkg.script);if(fm.readString(path)!==pkg.script)throw Error('保存後の読戻しが一致しません');}
+  catch(e){let restored=false;try{if(before===null){if(fm.fileExists(path))fm.remove(path);restored=!fm.fileExists(path);}else{fm.writeString(path,before);restored=fm.readString(path)===before;}}catch(_){}throw Error(restored?'新UIの保存を確認できず、更新前の状態へ戻しました':'新UIの保存・復元を確認できません。バックアップを保持しています');}
+ }
  Safari.open('scriptable:///run/'+encodeURIComponent(TARGET));
 }
-try{await install();}catch(e){const a=new Alert();a.title='DAYSTREAM導入未完了';a.message=String(e.message||e);a.addAction('閉じる');await a.presentAlert();}finally{Script.complete();}
+try{await install();}catch(e){const a=new Alert();a.title='DAYSTREAM更新未完了';a.message=String(e.message||e);a.addAction('閉じる');await a.presentAlert();}finally{Script.complete();}

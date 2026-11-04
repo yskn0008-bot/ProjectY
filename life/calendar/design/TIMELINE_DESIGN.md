@@ -1,3 +1,5 @@
+> 2026-11-05追加：旧候補は実機でデザイン不採用。現在の構成は `../TIMELINE_VISUAL_REVISION.md` と `../daystream-timeline-ui.css` を参照。以下のSVG9状態は過去の比較参考であり、現在UIの実画面・本人承認済みデザインではありません。
+
 # YOS 24時間生活タイムライン — design and evidence contract
 
 Date: 2026-11-05 JST. Additive candidate for existing Draft PR #654, baseline `6ffdc056138301e3a1a70eac2f635a761277da64`. Not deployed or device verified.

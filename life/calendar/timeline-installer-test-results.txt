@@ -1,13 +1,17 @@
-✔ new distinct script writes and reads back before launching (137.533442ms)
-✔ existing exact version is a no-op and unknown code is preserved (229.223015ms)
-✔ existing local exact script does not create an iCloud duplicate (105.357633ms)
-✔ tampered download and HTTP failure never install or launch (5.981079ms)
-✔ failed new-file readback removes only newly created candidate (93.803881ms)
-ℹ tests 5
+✔ production pins match new bundle and retain only reviewed previous version (4.909385ms)
+✔ fresh install reads back code before launch and leaves plan untouched (241.443127ms)
+✔ known prior version backs up first and updates same candidate name (161.014518ms)
+✔ exact version is no-op, including local storage without cloud duplicate (357.524165ms)
+✔ unknown code and ambiguous double installation remain unchanged (226.970647ms)
+✔ tampered download and HTTP failure never write or launch (7.844157ms)
+✔ unknown backup and failed backup preserve previous candidate (231.301147ms)
+✔ failed readback restores prior version or removes only new candidate (223.495442ms)
+✔ concurrent external edit is preserved and refuses own write (99.547566ms)
+ℹ tests 9
 ℹ suites 0
-ℹ pass 5
+ℹ pass 9
 ℹ fail 0
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 704.080925
+ℹ duration_ms 1705.216792

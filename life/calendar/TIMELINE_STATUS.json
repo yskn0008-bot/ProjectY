@@ -6,9 +6,9 @@
   "repository": "yskn0008-bot/ProjectY",
   "pullRequest": 654,
   "baselineHead": "6ffdc056138301e3a1a70eac2f635a761277da64",
-  "candidateCodeCommit": "82d23c3e64c5fa67bf6d61599ae34809ab481a1b",
-  "packageSHA256": "2956374660af54e266b6ac74331a41fb97ce98a7165d903555e195b5008861b9",
-  "scriptSHA256": "b117fcd0c29c1227ef2205866dd19a0dea2564fc9f736806a5c54bdd49d5d1ca",
+  "candidateCodeCommit": "c05d1eafac5fa8acceff4f5b80eef00e30f27bdc",
+  "packageSHA256": "b82770424278e3ed5849dbefb6a7af16982843d53cfc9065a279b3ddbd5f954a",
+  "scriptSHA256": "380b5fad7a68027e46bcca31608101e9f94924372ed1df7b5d0d7fad6c10d809",
   "codeImplemented": [
     "24h exact geometry",
     "fixed source event protection",
@@ -25,7 +25,7 @@
   ],
   "automatedVerification": {
     "candidateNodeAndDOM": {
-      "pass": 17,
+      "pass": 22,
       "fail": 0
     },
     "unchangedBaselineNode": {
@@ -33,7 +33,7 @@
       "fail": 0
     },
     "installerNodeMocks": {
-      "pass": 5,
+      "pass": 9,
       "fail": 0
     },
     "actualCSSContrastPairs": {
@@ -72,7 +72,7 @@
     "url": "https://canva.link/349p0erltl7mr2c",
     "status": "three editable text-free wallpaper pages created; preview exports bundled"
   },
-  "userNextAction": "Copy YOS_DAYSTREAM_Timeline_Installer.js into a new Scriptable script and run it, then inspect the separately named development candidate",
+  "userNextAction": "Run the revised pinned installer. It updates only the known prior candidate with backup/readback; unchanged 20261102 scripts and plan data are protected.",
   "deviceChecks": [
     "Apple fixed event time matches Calendar and cannot move",
     "one flexible item long-press handle moves with live feedback and cancellation",
@@ -80,7 +80,7 @@
     "close and rerun candidate preserves placement",
     "old installed DAYSTREAM remains intact"
   ],
-  "resume": "Read this record, TIMELINE_REVIEW.md and current PR head; compare unchanged candidate package SHA; continue from the first unmet device gate. Do not regenerate the implementation or replace the 20261102 package.",
+  "resume": "Read TIMELINE_VISUAL_REVISION.md and current PR head. Revised code commit c05d1eafac5fa8acceff4f5b80eef00e30f27bdc; verify package/script hashes above; collect the revised first-screen iPhone display and continue without regenerating the implementation.",
   "rollback": "Close this candidate and use the unchanged existing DAYSTREAM. No production merge or source-data mutation was made.",
   "backgroundRunner": false,
   "externalChecks": {
@@ -88,10 +88,11 @@
     "vercelCommitStatuses": "7 failure statuses; target URLs indicate build-rate-limit. No deploy retry, upgrade, or configuration change attempted. This offline Scriptable candidate does not require Vercel.",
     "githubActions": "Not independently verified"
   },
-  "finalDiff": {
-    "filesAdded": 24,
-    "filesModified": 0,
-    "filesDeleted": 0,
-    "scope": "life/calendar/ only"
+  "visualRevision": {
+    "reason": "User rejected real iPhone screenshot: oversized hero, hidden time axis, mixed white shell and dark settings panel",
+    "implemented": "Full-height timeline-first warm canvas; compact 160 CSSpx header/week/legend; closed settings and source sheets; coordinated themes; visible drag feedback",
+    "confirmedOnDevice": "Prior candidate opened and displayed source-status badge only; revised UI not yet device checked",
+    "sourceRecordsChanged": false,
+    "priorCandidateScriptSHA256": "b117fcd0c29c1227ef2205866dd19a0dea2564fc9f736806a5c54bdd49d5d1ca"
   }
 }
