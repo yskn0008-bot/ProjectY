@@ -10,7 +10,7 @@ if(!name||name.length>50||/[\\/:*?"<>|]/.test(name)||name==="."||name==="..")thr
 const target=fm.joinPath(dir,name+".js");
 if(fm.fileExists(target))throw Error("「"+name+"」は既にあります。別名にするか既存を保持してください。");
 const req=new Request(raw);const code=await req.loadString();
-if(req.response?.statusCode!==200||!code.includes("YOS JOURNAL v1.1")||!code.includes("WebView"))throw Error("GitHub取得検証に失敗しました。保存は行っていません。");
+if(req.response?.statusCode!==200||!/YOS JOURNAL v1\\.[3-9]/.test(code)||!code.includes("WebView"))throw Error("GitHub取得検証に失敗しました。保存は行っていません。");
 fm.writeString(target,code);
 if(fm.readString(target)!==code)throw Error("保存後の読戻しに失敗しました");
 const done=new Alert();done.title="Scriptable登録完了";done.message="「"+name+"」を登録しました。Scriptable一覧に表示されます。\n※ショートカットと通知の設定は別途必要です。";done.addAction("OK");await done.presentAlert();
