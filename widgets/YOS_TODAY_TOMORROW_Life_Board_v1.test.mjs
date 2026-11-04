@@ -75,6 +75,7 @@ for (const runsInWidget of [true,false]) {
         assert.equal(actual.presented,1);
         assert.match(actual.html,/id="tabToday"/);
         assert.match(actual.html,/id="tabWeek"/);
+        assert.match(actual.html,/href="https:\/\/www\.notion\.so\/df0c1f840cdd4cc791f5a6769bd41721">通知・追跡を見る<\/a>/);
         assert.match(actual.html,denyPermissions?/Appleカレンダー未取得/:/TEST_CAL_EVENT/);
         assert.match(actual.html,denyPermissions?/運動の実施記録：未確認/:/TEST_ROUTINE/);
       }
