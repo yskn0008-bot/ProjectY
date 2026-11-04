@@ -9,15 +9,89 @@
   "candidateCodeCommit": "82d23c3e64c5fa67bf6d61599ae34809ab481a1b",
   "packageSHA256": "2956374660af54e266b6ac74331a41fb97ce98a7165d903555e195b5008861b9",
   "scriptSHA256": "b117fcd0c29c1227ef2205866dd19a0dea2564fc9f736806a5c54bdd49d5d1ca",
-  "codeImplemented": ["24h exact geometry", "fixed source event protection", "midnight continuation", "daily-weekly-monthly-yearly recurrence", "long-press handle and time-input alternatives", "live local before-after impact", "linked card colors and symbols", "undo", "explicit save and readback", "source habit read adapter", "offline DAYSTREAM candidate bundle", "pinned no-overwrite installer"],
-  "automatedVerification": {"candidateNodeAndDOM": {"pass":17,"fail":0}, "unchangedBaselineNode": {"pass":28,"fail":0}, "installerNodeMocks": {"pass":5,"fail":0}, "actualCSSContrastPairs": {"pass":14,"fail":0}, "designTokenContrastPairs": {"pass":10,"fail":0}, "rawGitHubDownload": "HTTP 200, JSON parse and both SHA256 hashes matched"},
-  "notVerified": ["browser rendered UI and visual regression", "physical iPhone touch and VoiceOver", "Scriptable callback and actual FileManager persistence", "Apple and Notion live permissions and values", "current installed DAYSTREAM integration", "current-head GitHub CI", "full WCAG 2.2 AA"],
-  "notImplemented": ["personal learning from sleep/fatigue/action history", "scientific effect quantification", "general-purpose optimal placement across all domains", "deployment into current installed DAYSTREAM", "Figma tokens/components and canvas placement"],
-  "figma": {"url":"https://www.figma.com/design/uM6BA4k1ZUcE5YXVBkba6f", "status":"empty file created; first canvas inspection blocked by Starter MCP call limit", "fallback":"design/timeline-directions-editable.svg plus TIMELINE_DESIGN.md", "retry":"after existing access limit resets or an already-authorized design route is available; no paid upgrade requested"},
-  "canva": {"url":"https://canva.link/349p0erltl7mr2c", "status":"three editable text-free wallpaper pages created; preview exports bundled"},
+  "codeImplemented": [
+    "24h exact geometry",
+    "fixed source event protection",
+    "midnight continuation",
+    "daily-weekly-monthly-yearly recurrence",
+    "long-press handle and time-input alternatives",
+    "live local before-after impact",
+    "linked card colors and symbols",
+    "undo",
+    "explicit save and readback",
+    "source habit read adapter",
+    "offline DAYSTREAM candidate bundle",
+    "pinned no-overwrite installer"
+  ],
+  "automatedVerification": {
+    "candidateNodeAndDOM": {
+      "pass": 17,
+      "fail": 0
+    },
+    "unchangedBaselineNode": {
+      "pass": 28,
+      "fail": 0
+    },
+    "installerNodeMocks": {
+      "pass": 5,
+      "fail": 0
+    },
+    "actualCSSContrastPairs": {
+      "pass": 14,
+      "fail": 0
+    },
+    "designTokenContrastPairs": {
+      "pass": 10,
+      "fail": 0
+    },
+    "rawGitHubDownload": "HTTP 200, JSON parse and both SHA256 hashes matched"
+  },
+  "notVerified": [
+    "browser rendered UI and visual regression",
+    "physical iPhone touch and VoiceOver",
+    "Scriptable callback and actual FileManager persistence",
+    "Apple and Notion live permissions and values",
+    "current installed DAYSTREAM integration",
+    "current-head GitHub CI",
+    "full WCAG 2.2 AA"
+  ],
+  "notImplemented": [
+    "personal learning from sleep/fatigue/action history",
+    "scientific effect quantification",
+    "general-purpose optimal placement across all domains",
+    "deployment into current installed DAYSTREAM",
+    "Figma tokens/components and canvas placement"
+  ],
+  "figma": {
+    "url": "https://www.figma.com/design/uM6BA4k1ZUcE5YXVBkba6f",
+    "status": "empty file created; first canvas inspection blocked by Starter MCP call limit",
+    "fallback": "design/timeline-directions-editable.svg plus TIMELINE_DESIGN.md",
+    "retry": "after existing access limit resets or an already-authorized design route is available; no paid upgrade requested"
+  },
+  "canva": {
+    "url": "https://canva.link/349p0erltl7mr2c",
+    "status": "three editable text-free wallpaper pages created; preview exports bundled"
+  },
   "userNextAction": "Copy YOS_DAYSTREAM_Timeline_Installer.js into a new Scriptable script and run it, then inspect the separately named development candidate",
-  "deviceChecks": ["Apple fixed event time matches Calendar and cannot move", "one flexible item long-press handle moves with live feedback and cancellation", "confirm save shows readback success", "close and rerun candidate preserves placement", "old installed DAYSTREAM remains intact"],
+  "deviceChecks": [
+    "Apple fixed event time matches Calendar and cannot move",
+    "one flexible item long-press handle moves with live feedback and cancellation",
+    "confirm save shows readback success",
+    "close and rerun candidate preserves placement",
+    "old installed DAYSTREAM remains intact"
+  ],
   "resume": "Read this record, TIMELINE_REVIEW.md and current PR head; compare unchanged candidate package SHA; continue from the first unmet device gate. Do not regenerate the implementation or replace the 20261102 package.",
   "rollback": "Close this candidate and use the unchanged existing DAYSTREAM. No production merge or source-data mutation was made.",
-  "backgroundRunner": false
+  "backgroundRunner": false,
+  "externalChecks": {
+    "checkedCommit": "d751046fab2bda6b99b6622f21f56d13044dc897",
+    "vercelCommitStatuses": "7 failure statuses; target URLs indicate build-rate-limit. No deploy retry, upgrade, or configuration change attempted. This offline Scriptable candidate does not require Vercel.",
+    "githubActions": "Not independently verified"
+  },
+  "finalDiff": {
+    "filesAdded": 24,
+    "filesModified": 0,
+    "filesDeleted": 0,
+    "scope": "life/calendar/ only"
+  }
 }

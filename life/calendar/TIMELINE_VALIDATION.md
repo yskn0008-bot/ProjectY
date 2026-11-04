@@ -35,3 +35,7 @@ Figmaはファイル作成後にStarter MCPの操作上限へ到達。空のフ�
 `YOS_DAYSTREAM_Timeline_Installer.js` を開く → 内容をコピー → Scriptableの「＋」で新規スクリプトへ貼る → ▶。固定コミットとSHA256を確認し、別名「YOS DAYSTREAM Timeline 開発確認 20261105」を保存・読戻しして起動する。同名の別コードは上書きしない。元の実機確認版を削除・改名しない。
 
 起動後、予定が元と合うかを確認 → 試しの行動1件を移動 → 保存 → 一度閉じて同じ候補を再起動。実機の表示・保存結果から同じ案件を再開する。背景監視・継続runnerは動いていない。
+
+## Draftの外部チェック
+
+固定コード＋導入器のcommit `d751046fab2bda6b99b6622f21f56d13044dc897` を照合。今回の差分はlife/calendar内24ファイル追加のみ、既存変更・削除なし。PRの既存Vercelチェック7件はbuild-rate-limitを示す失敗。再配布・課金・設定変更は行わない。今回のオフラインScriptable実行にはVercelを使わない。GitHub Actions全体の成功は未確認。
