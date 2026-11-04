@@ -1,6 +1,6 @@
 // Variables used by Scriptable.
 // icon-color: deep-blue; icon-glyph: book-open;
-// YOS JOURNAL v1.2 — GitHub distributed magazine viewer
+// YOS JOURNAL v1.3 — GitHub distributed magazine viewer
 // Launch with Shortcuts "Run Script" or Scriptable.
 const fm=FileManager.local(),dir=fm.joinPath(fm.documentsDirectory(),"YOS-JOURNAL"),file=fm.joinPath(dir,"latest.json");
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -11,6 +11,7 @@ try{
  let incoming=args.shortcutParameter;
  if(incoming&&typeof incoming==="object"&&incoming.json)incoming=incoming.json;
  if(typeof incoming==="string"&&incoming.trim().startsWith("{")){issue=valid(JSON.parse(incoming));if(!fm.fileExists(dir))fm.createDirectory(dir,true);fm.writeString(file,JSON.stringify(issue))}
+ if(!issue){try{const req=new Request("https://raw.githubusercontent.com/yskn0008-bot/ProjectY/main/ios-app/scriptable/journal/latest.json");req.timeoutInterval=12;const response=await req.loadString();if(req.response?.statusCode!==200)throw Error("HTTP "+req.response?.statusCode);issue=valid(JSON.parse(response));if(!fm.fileExists(dir))fm.createDirectory(dir,true);fm.writeString(file,JSON.stringify(issue))}catch(e){warning="最新版取得不可："+String(e.message||e)}}
  if(!issue&&fm.fileExists(file))issue=valid(JSON.parse(fm.readString(file)));
 }catch(e){warning=String(e.message||e)}
 const issueHeadline=issue?.headline||issue?.articles?.[0]?.title||"今日の視点を、明日の力に。";
