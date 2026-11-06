@@ -1,30 +1,36 @@
-✔ full page executes, geometry renders, no implicit demo; form/keyboard/undo/save state work (28.307695ms)
-✔ native fixed appointments stay immutable and unplaced habits source is reused (5.403133ms)
-✔ long press computes candidate conflicts before commit and restores on pointer cancel (7.158492ms)
-✔ drag separating an existing pair shows amber operational change on both related cards (5.623626ms)
-✔ one-off source placement remains unplaced next day; daily recurrence stays placed without duplication (7.360186ms)
-✔ composition is one full-height canvas, unique preserved IDs, and records are behind a sheet (0.876172ms)
-✔ empty native-free canvas has no invented routines; theme and tray controls work (3.381793ms)
-✔ today gets an exact now line once; rerenders preserve scroll and other dates start at midnight (2.980237ms)
-✔ drag feedback stays on canvas with time, neighbors and priority reason until release or cancel (4.81776ms)
-✔ offline wallpaper choices map real embedded assets and remain separate from time geometry (3.609316ms)
-✔ exact 24-hour scale and clipped sleep carries to next day (1.945245ms)
-✔ recurrence clamps month end and leap day without drifting (0.440825ms)
-✔ source stable IDs retain same title independent schedules, exact duplicate ID dedup (0.37771ms)
-✔ date-only tasks remain unplaced, unknown event end is null (0.155584ms)
-✔ local rules distinguish actual overlap, insufficient transfer and optional pair (0.495868ms)
-✔ fixed schedule arrival buffer stays local metadata (0.13937ms)
-✔ malformed dates, duplicated IDs, huge durations fail closed (0.541877ms)
-✔ offline package integrity, fixed range, no Notion writes, original asset preserved (21.923361ms)
-✔ native explicit save verifies readback without any source mutations (147.000737ms)
-✔ native dismiss and corrupt file never authorize a write; failed readback is unsaved (315.59598ms)
-✔ native save preserves prior candidate on failed readback and rejects malformed timeline (9.06568ms)
-✔ actual timeline CSS has sufficient text, control boundary, and focus contrast (3.623898ms)
-ℹ tests 22
+✔ full page executes, geometry renders, no implicit demo; form/keyboard/undo/save state work (34.64272ms)
+✔ native fixed appointments stay immutable and unplaced habits source is reused (6.354421ms)
+✔ long press computes candidate conflicts before commit and restores on pointer cancel (6.239017ms)
+✔ drag separating an existing pair shows amber operational change on both related cards (4.50816ms)
+✔ one-off source placement remains unplaced next day; daily recurrence stays placed without duplication (6.775987ms)
+✔ composition is one full-height canvas, unique preserved IDs, and records are behind a sheet (1.00961ms)
+✔ empty native-free canvas has no invented routines; theme and tray controls work (3.262364ms)
+✔ today gets an exact now line once; rerenders preserve scroll and other dates start at midnight (3.79111ms)
+✔ drag feedback stays on canvas with time, neighbors and priority reason until release or cancel (5.535928ms)
+✔ offline wallpaper choices map real embedded assets and remain separate from time geometry (3.623597ms)
+✔ task actions complete only one occurrence, survive explicit save/reopen, removal confirms and undo restores (11.731712ms)
+✔ real tabs expose source habits, factual review toggles, week navigation and year month picker (5.872565ms)
+✔ cancelled placement removal leaves plan unchanged; save failure retains local check and undo (5.080192ms)
+✔ partial native sources remain explicitly unconfirmed in day and week views (4.059615ms)
+✔ series edits retain valid local checks and prune dates removed from recurrence (6.410005ms)
+✔ exact 24-hour scale and clipped sleep carries to next day (1.916998ms)
+✔ recurrence clamps month end and leap day without drifting (0.204999ms)
+✔ source stable IDs retain same title independent schedules, exact duplicate ID dedup (0.413383ms)
+✔ date-only tasks remain unplaced, unknown event end is null (0.183487ms)
+✔ local rules distinguish actual overlap, insufficient transfer and optional pair (0.508336ms)
+✔ fixed schedule arrival buffer stays local metadata (0.152099ms)
+✔ malformed dates, duplicated IDs, huge durations fail closed (0.540884ms)
+✔ offline package integrity, fixed range, no Notion writes, original asset preserved (27.527583ms)
+✔ native explicit save verifies readback without any source mutations (151.676593ms)
+✔ native dismiss and corrupt file never authorize a write; failed readback is unsaved (324.822732ms)
+✔ native save preserves prior candidate on failed readback and rejects malformed timeline (7.937736ms)
+✔ actual timeline CSS has sufficient text, control boundary, and focus contrast (2.938425ms)
+✔ completion extension rejects malformed payloads, dates and foreign occurrence IDs without throwing (0.478441ms)
+ℹ tests 28
 ℹ suites 0
-ℹ pass 22
+ℹ pass 28
 ℹ fail 0
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 612.20544
+ℹ duration_ms 638.745949

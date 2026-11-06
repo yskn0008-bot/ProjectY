@@ -1,114 +1,114 @@
 [
   {
     "name": "light fg",
-    "foreground": "#242724",
-    "background": "#f7f6f2",
+    "foreground": "#102441",
+    "background": "#f5f7ff",
     "minimum": 4.5,
-    "ratio": 13.964,
+    "ratio": 14.534,
     "pass": true
   },
   {
     "name": "light sub",
-    "foreground": "#62665f",
-    "background": "#f7f6f2",
+    "foreground": "#4c607a",
+    "background": "#f5f7ff",
     "minimum": 4.5,
-    "ratio": 5.417,
+    "ratio": 6.019,
     "pass": true
   },
   {
     "name": "light green",
-    "foreground": "#167044",
-    "background": "#f7f6f2",
+    "foreground": "#126842",
+    "background": "#f5f7ff",
     "minimum": 4.5,
-    "ratio": 5.653,
+    "ratio": 6.364,
     "pass": true
   },
   {
     "name": "light amber",
-    "foreground": "#955300",
-    "background": "#f7f6f2",
+    "foreground": "#895000",
+    "background": "#f5f7ff",
     "minimum": 4.5,
-    "ratio": 5.524,
+    "ratio": 6.113,
     "pass": true
   },
   {
     "name": "light red",
-    "foreground": "#bf302e",
-    "background": "#f7f6f2",
+    "foreground": "#b13237",
+    "background": "#f5f7ff",
     "minimum": 4.5,
-    "ratio": 5.281,
+    "ratio": 5.807,
     "pass": true
   },
   {
     "name": "light control boundary",
-    "foreground": "#858a80",
-    "background": "#f7f6f2",
+    "foreground": "#71839e",
+    "background": "#f5f7ff",
     "minimum": 3,
-    "ratio": 3.267,
+    "ratio": 3.607,
     "pass": true
   },
   {
     "name": "light focus",
-    "foreground": "#242724",
-    "background": "#f7f6f2",
+    "foreground": "#102441",
+    "background": "#f5f7ff",
     "minimum": 3,
-    "ratio": 13.964,
+    "ratio": 14.534,
     "pass": true
   },
   {
     "name": "dark fg",
-    "foreground": "#f3f5f0",
-    "background": "#202323",
+    "foreground": "#f1f5ff",
+    "background": "#17283e",
     "minimum": 4.5,
-    "ratio": 14.426,
+    "ratio": 13.654,
     "pass": true
   },
   {
     "name": "dark sub",
-    "foreground": "#c4cbc6",
-    "background": "#202323",
+    "foreground": "#c3d2e7",
+    "background": "#17283e",
     "minimum": 4.5,
-    "ratio": 9.581,
+    "ratio": 9.715,
     "pass": true
   },
   {
     "name": "dark green",
     "foreground": "#7fdeb0",
-    "background": "#202323",
+    "background": "#17283e",
     "minimum": 4.5,
-    "ratio": 9.786,
+    "ratio": 9.207,
     "pass": true
   },
   {
     "name": "dark amber",
     "foreground": "#ffc476",
-    "background": "#202323",
+    "background": "#17283e",
     "minimum": 4.5,
-    "ratio": 10.112,
+    "ratio": 9.514,
     "pass": true
   },
   {
     "name": "dark red",
     "foreground": "#ffa7a1",
-    "background": "#202323",
+    "background": "#17283e",
     "minimum": 4.5,
-    "ratio": 8.517,
+    "ratio": 8.013,
     "pass": true
   },
   {
     "name": "dark control boundary",
-    "foreground": "#7a847e",
-    "background": "#202323",
+    "foreground": "#8297b5",
+    "background": "#17283e",
     "minimum": 3,
-    "ratio": 4.094,
+    "ratio": 4.997,
     "pass": true
   },
   {
     "name": "dark focus",
-    "foreground": "#f3f5f0",
-    "background": "#202323",
+    "foreground": "#f1f5ff",
+    "background": "#17283e",
     "minimum": 3,
-    "ratio": 14.426,
+    "ratio": 13.654,
     "pass": true
   }
 ]
