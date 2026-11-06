@@ -74,7 +74,7 @@ try{
   if(input&&!/^(1|true|\[object Object\]|ショートカットの入力)$/i.test(input)){
     const id=idOf(input);
     if(!q.some(x=>x.id===id)&&!(receipts[id]&&now-receipts[id]>=0&&now-receipts[id]<60000)){
-      if(q.length>=MAX_QUEUE){done('YOS: 保留100件。追加の保存はできません');}
+      if(q.length>=MAX_QUEUE)throw Error('保留100件。追加の保存ができないため本人確認が必要');
       else{const safe=scrub(input);q.push({id,date:new Date(now).toISOString(),category:safe.category,body:safe.body,possiblySent:false});queueWrite(q)}
     }
   }
