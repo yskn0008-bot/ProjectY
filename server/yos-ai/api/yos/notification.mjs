@@ -18,8 +18,23 @@ function getHandler() {
   }
   return handler;
 }
+function allowedOrigin(origin) {
+  if(!origin)return false;
+  const approved=(process.env.YOS_ALLOWED_ORIGINS??'').split(',').map(s=>s.trim());
+  return approved.includes(origin);
+}
 export default {fetch:async function(request){
-  try{return await getHandler()(request)}
-  catch{return Response.json({error:'YOS notification service is unavailable'},
+  const origin=request.headers.get('origin')??'';
+  const cors=allowedOrigin(origin)
+    ? {'Access-Control-Allow-Origin':origin,'Vary':'Origin','Access-Control-Allow-Headers':'authorization,content-type',
+       'Access-Control-Allow-Methods':'GET,POST,OPTIONS','Access-Control-Max-Age':'600'}
+    : {};
+  if(request.method==='OPTIONS')return new Response(null,{status:origin&&allowedOrigin(origin)?204:403,headers:cors});
+  let response;
+  try{response=await getHandler()(request)}
+  catch{response=Response.json({error:'YOS notification service is unavailable'},
     {status:503,headers:{'Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}})}
+  const headers=new Headers(response.headers);
+  for(const [key,value]of Object.entries(cors))headers.set(key,value);
+  return new Response(response.body,{status:response.status,headers});
 }};
