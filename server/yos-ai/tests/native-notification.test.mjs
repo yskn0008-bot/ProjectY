@@ -128,7 +128,8 @@ test('high risk text produces grounded action',async()=>{
   const h=harness(),r=await h.handler(h.req({text:'銀行：口座凍結が発生しました',eventId:'native-unique-0008'}));
   const obj=await r.json();
   assert.equal(obj.decision,'YOS_ALERT');
-  assert.match(obj.alertText,/元アプリで事実と期限を確認/);
+  assert.match(obj.alertText,/元アプリを開き、事実と期限を確認/);
+  assert.match(obj.alertText,/【YOS重要｜P0】/);
 });
 
 test('Inbox exposes an authenticated history with statuses',async()=>{
@@ -175,4 +176,22 @@ test('unverified viewer cannot read Inbox',async()=>{
   const r=await h.handler(h.req(null,'Bearer sample-unauthorized-credential-001','GET'));
   assert.equal(r.status,401);
   assert.equal(h.calls.length,0);
+});
+
+test('genuine urgency extracts the claimed amount and deadline without inventing current balance',async()=>{
+  const h=harness();
+  const r=await h.handler(h.req({text:'銀行からのお知らせ：引落失敗 8,200円。支払期限: 11月7日',eventId:'native-unique-0091'}));
+  const obj=await r.json();
+  assert.equal(obj.decision,'YOS_ALERT');
+  assert.match(obj.alertText,/記載金額: 8,200円/);
+  assert.match(obj.alertText,/記載期限: 支払期限: 11月7日/);
+  assert.doesNotMatch(obj.alertText,/現在の残高は\d+/);
+});
+
+test('test text with dangerous words is still silent and does not repeat a fabricated alert',async()=>{
+  const h=harness();
+  const r=await h.handler(h.req({text:'これは架空の通知テスト：口座凍結',eventId:'native-unique-0092'}));
+  const obj=await r.json();
+  assert.equal(obj.decision,'YOS_SILENT');
+  assert.equal(obj.alertText,'');
 });
