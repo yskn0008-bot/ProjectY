@@ -9,7 +9,7 @@ const page='3d35ca88-2895-81ef-9dc8-d5f11ff8e213';
 const API='https://example.test/api/yos/notification';
 const NOW=new Date('2026-11-07T01:00:00.000Z');
 
-function harness(){
+function harness(viewerAuth){
   const memory=new Map(),blocks=[],calls=[];
   const state={failPatch:false,ambiguous:false,failGet:false,failRedis:false};
   const redis={async command(args){
@@ -41,7 +41,8 @@ function harness(){
   }
   const handler=createNotificationHandler({
     tokenSha256,notionToken:'notion-test-secret',notionPageId:page,redis,
-    fetchImpl,now:()=>NOW
+    fetchImpl,now:()=>NOW,
+    ...(viewerAuth?{viewerAuth}:{})
   });
   const req=(body,auth='Bearer '+token,method='POST')=>new Request(API,{
     method,headers:{Authorization:auth,'Content-Type':'application/json'},
