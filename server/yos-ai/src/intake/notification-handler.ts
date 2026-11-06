@@ -97,7 +97,7 @@ function parseRows(rows:NotionBlock[]):Event[] {
 }
 export function createNotificationHandler(options:{
   tokenSha256:string;notionToken:string;notionPageId:string;redis:RedisCommandClient;
-  fetchImpl?:FetchLike;now?:()=>Date
+  fetchImpl?:FetchLike;now?:()=>Date;viewerAuth?:(token:string)=>Promise<boolean>
 }):(request:Request)=>Promise<Response> {
   const expected=options.tokenSha256.trim().toLowerCase();
   if(!/^[a-f0-9]{64}$/u.test(expected)||!options.notionToken)throw new Error('Notification API credentials missing');
@@ -132,17 +132,22 @@ export function createNotificationHandler(options:{
     });
     if(!Array.isArray(response.results)||response.results.length!==1)throw new Error('Notion append not confirmed');
   }
-  async function authorized(request:Request):Promise<boolean> {
+  async function authorized(request:Request):Promise<'capture'|'viewer'|null> {
     const token=/^Bearer ([^\s]{16,512})$/u.exec(request.headers.get('authorization')??'')?.[1];
-    if(!token)return false;
+    if(!token)return null;
     const digest=await sha256Hex(token);
     let difference=0;
     for(let i=0;i<expected.length;i++)difference|=digest.charCodeAt(i)^expected.charCodeAt(i);
-    return digest.length===expected.length&&difference===0;
+    if(digest.length===expected.length&&difference===0)return 'capture';
+    if(options.viewerAuth){
+      try{if(await options.viewerAuth(token))return 'viewer'}catch{}
+    }
+    return null;
   }
   return async(request:Request):Promise<Response>=>{
     if(!['GET','POST'].includes(request.method))return result({error:'Method not allowed'},405);
-    if(!(await authorized(request)))return result({error:'Unauthorized'},401);
+    const role=await authorized(request);
+    if(!role)return result({error:'Unauthorized'},401);
     if(request.method==='GET'){
       try{
         const {blocks,complete}=await listBlocks();
@@ -171,6 +176,7 @@ export function createNotificationHandler(options:{
         return result({ok:true,id,status,duplicate:false});
       }catch{return result({error:'Status update not confirmed'},503)}
     }
+    if(role!=='capture')return result({error:'Notification capture requires device authorization'},403);
     const parsed=parseCapture(body,now());
     if(!parsed.ok)return result({error:parsed.reason},400);
     const event=parsed.value;
