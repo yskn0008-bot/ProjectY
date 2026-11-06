@@ -13,7 +13,13 @@ type Category = 'missed-call'|'money-review'|'legal'|'security'|'information';
 type Status = 'unread'|'read'|'pending'|'done';
 type Event = {id:string; at:string; category:Category; text:string; status:Status; source:string; blockId:string};
 type Capture = {text:string; sourceApp:string; occurredAt:string; eventId:string};
-type NotionBlock = {id?:string; type?:string; paragraph?:{rich_text?:Array<{plain_text?:string;text?:{content?:string}}>}}};
+type NotionBlock = {
+  id?:string;
+  type?:string;
+  paragraph?:{
+    rich_text?:Array<{plain_text?:string; text?:{content?:string}}>;
+  };
+};
 
 function result(body:Record<string,unknown>,status=200):Response {
   return Response.json(body,{status,headers:{'Cache-Control':'no-store','X-Content-Type-Options':'nosniff','Referrer-Policy':'no-referrer'}});
