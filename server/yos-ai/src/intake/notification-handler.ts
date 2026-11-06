@@ -70,8 +70,8 @@ function parseCapture(body:unknown,now:Date):{ok:true;value:Capture}|{ok:false;r
   if(eventId&&!/^[a-zA-Z0-9._:-]{8,128}$/u.test(eventId))return {ok:false,reason:'Invalid eventId'};
   return {ok:true,value:{text:text.trim(),sourceApp,occurredAt,eventId}};
 }
-function eventBlock(event:{id:string;at:string;category:Category;text:string}):string {
-  return event.at+' · Native Notification · notification:'+event.id+' · '+event.category+'\n'+event.text+'\n---';
+function eventBlock(event:{id:string;at:string;category:Category;text:string;sourceApp:string}):string {
+  return event.at+' · Native Notification · notification:'+event.id+' · '+event.category+'\n発信元: '+safeText(event.sourceApp).slice(0,90)+'\n'+event.text+'\n---';
 }
 const RECORD=/^(\S+)\s*·\s*(Native Notification|Clarity Notification)\s*·\s*notification:([0-9a-f]{8,64})\s*·\s*(missed-call|money-review|legal|security|information)/iu;
 const STATE=/^(\S+)\s*·\s*Notification State\s*·\s*notification:([0-9a-f]{8,64})\s*·\s*(read|pending|done)/iu;
@@ -192,7 +192,7 @@ export function createNotificationHandler(options:{
         await options.redis.command<string>(['SET',key,'pending','EX',2592000]);
       }
       // Classification is metadata, not an instruction to record a payment or create a task.
-      await append(eventBlock({id,at:event.occurredAt,category,text:safe}));
+      await append(eventBlock({id,at:event.occurredAt,category,text:safe,sourceApp:event.sourceApp}));
       await options.redis.command<string>(['SET',key,'done','EX',2592000]);
       return result({ok:true,id,duplicate:false,category,decision:decision.decision,alertText:decision.alertText},201);
     }catch{
