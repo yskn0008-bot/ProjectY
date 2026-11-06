@@ -8,7 +8,7 @@ const PAGE_LIMIT = 30;
 const MAX_EVENTS = 120;
 const STATE_SET = new Set(['read','pending','done']);
 const OTP = /認証コード|確認コード|ワンタイム|二段階認証|ログインコード|パスワードリセット|verification\s*code|one.?time|\bOTP\b|\b2FA\b|security\s*code|reset\s*password/iu;
-const TEST = /(?:^|[\s【｜|])(テスト|動作確認|架空|simulation|test)(?=$|[\s】｜|])/iu;
+const TEST = /テスト|動作確認|架空|simulation|\btest\b/iu;
 type Category = 'missed-call'|'money-review'|'legal'|'security'|'information';
 type Status = 'unread'|'read'|'pending'|'done';
 type Event = {id:string; at:string; category:Category; text:string; status:Status; source:string; blockId:string};
