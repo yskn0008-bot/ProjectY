@@ -158,3 +158,21 @@ test('Redis failure does not append untracked notifications',async()=>{
   const r=await h.handler(h.req({text:'PayPay銀行通知',eventId:'native-unique-0010'}));
   assert.equal(r.status,503);assert.equal(h.blocks.length,0);
 });
+
+test('verified viewer can read and mark Inbox, but cannot submit device notifications',async()=>{
+  const valid='sample-viewer-credential-0001';
+  const h=harness(async value=>value===valid);
+  const created=await (await h.handler(h.req({text:'不在着信',eventId:'native-unique-0020'}))).json();
+  const auth='Bearer '+valid;
+  assert.equal((await h.handler(h.req(null,auth,'GET'))).status,200);
+  assert.equal((await h.handler(h.req({action:'mark',id:created.id,status:'read'},auth))).status,200);
+  assert.equal((await h.handler(h.req({text:'ordinary message',eventId:'native-unique-0021'},auth))).status,403);
+  assert.equal(h.blocks.length,2);
+});
+
+test('unverified viewer cannot read Inbox',async()=>{
+  const h=harness(async()=>false);
+  const r=await h.handler(h.req(null,'Bearer sample-unauthorized-credential-001','GET'));
+  assert.equal(r.status,401);
+  assert.equal(h.calls.length,0);
+});
