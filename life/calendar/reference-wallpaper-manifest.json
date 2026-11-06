@@ -1,0 +1,28 @@
+{
+  "glass": {
+    "file": "design/reference-glass-original.jpeg",
+    "sourceWidth": 1199,
+    "sourceHeight": 1312,
+    "crop": {
+      "x": 45,
+      "y": 87,
+      "width": 557,
+      "height": 1135
+    },
+    "sha256": "666692a535a28ac283be8feec193b5495ce40e19b955a65d5001af03ad4ef1c9",
+    "bytes": 405642
+  },
+  "compact": {
+    "file": "design/reference-compact-original.jpeg",
+    "sourceWidth": 1214,
+    "sourceHeight": 1295,
+    "crop": {
+      "x": 28,
+      "y": 68,
+      "width": 338,
+      "height": 797
+    },
+    "sha256": "89ab70c02ebe7ce7ff406f29ad1d57ffe85ee9bc703d04ec7ad93d11cc796a69",
+    "bytes": 480879
+  }
+}

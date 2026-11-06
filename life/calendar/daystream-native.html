@@ -1,0 +1,363 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#fbfbf9">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="YOS Calendar">
+<title>YOS Calendar — DAYSTREAM concept</title>
+<style>
+:root{color-scheme:light;--paper:#fbfbf9;--ink:#151718;--muted:#74787e;--line:#e9e9e6;--schedule:#279BFA;--task:#A77BFA;--habit:#42CDA3;--money:#F5B942;--danger:#FF7485;--accent:#279BFA}
+[hidden]{display:none!important}*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:var(--paper);font-family:-apple-system,BlinkMacSystemFont,'Hiragino Kaku Gothic ProN','Hiragino Sans',sans-serif;-webkit-font-smoothing:antialiased;color:var(--ink)}
+button{font:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}button:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+button:disabled{opacity:.4;cursor:default} .frame{max-width:900px;margin:0 auto;padding:calc(env(safe-area-inset-top) + 15px) 23px calc(env(safe-area-inset-bottom) + 20px);min-height:100dvh;display:flex;flex-direction:column;gap:0}
+.header{height:44px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px}.identity{display:flex;gap:10px;align-items:baseline}.identity strong{font-size:18px;letter-spacing:-.095em;font-weight:950}.identity em{font-style:normal;font-weight:600;letter-spacing:.16em;color:#92969b;font-size:9px}.header-tools{display:flex;gap:10px;align-items:center}.iconbutton{border:0;background:transparent;color:#151718;width:37px;height:36px;display:grid;place-items:center;font-size:22px;border-radius:50%}.iconbutton:hover{background:#eceff6}.tiny-circ{height:25px;width:25px;border-radius:50%;background:#151718;color:white;display:grid;place-items:center;font-size:15px;font-weight:650}
+.hero{display:grid;grid-template-columns:1fr auto;align-items:end;padding:10px 0 19px;border-bottom:1px solid var(--line);gap:8px}.eyebrow{font-size:10px;font-weight:800;letter-spacing:.17em;color:#8a9095}.date-line{display:flex;align-items:baseline;gap:12px;margin:0}.big-date{font-family:-apple-system,BlinkMacSystemFont,sans-serif;font-size:clamp(75px,17vw,94px);font-weight:250;letter-spacing:-.095em;line-height:1.03;font-variant-numeric:tabular-nums}.day-meta{display:flex;flex-direction:column;gap:7px}.day-meta strong{font-size:17px;font-weight:800;letter-spacing:-.025em}.day-meta span{font-size:13px;color:#646b75}.hero-right{align-self:center;text-align:right;display:flex;flex-direction:column;gap:8px;align-items:end}.status-pill{display:flex;align-items:center;gap:6px;color:#62676e;font-size:10px;font-weight:700}.status-pill b{display:inline-block;width:7px;height:7px;border-radius:100%;background:#8d9497}.hero-right button{border:0;background:none;padding:5px;color:#235BEB;font-size:12px;font-weight:800}
+.week-title{display:flex;justify-content:space-between;align-items:center;margin:18px 0 7px}.week-title span{font-size:11px;font-weight:800;letter-spacing:.09em;color:#646c75}.week-nav{display:flex;align-items:center;gap:7px}.week-nav button{width:30px;height:28px;border:0;background:transparent;color:#6c7178;font-size:21px}.weeknav-hint{font-size:10px;color:#8d9195}
+.week{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:1px;align-items:center;padding-bottom:16px;border-bottom:1px solid var(--line)}.daybtn{border:0;background:transparent;min-width:0;height:64px;border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;color:#646973}.daybtn .wd{font-size:10px;font-weight:700}.daybtn .num{font-size:22px;font-weight:470;font-variant-numeric:tabular-nums;letter-spacing:-.06em}.daybtn .dots{height:4px;display:flex;gap:2px}.dots i{height:4px;width:4px;border-radius:50%}.daybtn.selected{background:var(--ink);color:#fff}.daybtn.selected .dots i{background:#fff!important}.daybtn.today:not(.selected) .num{text-decoration:underline;text-decoration-color:#235BEB;text-decoration-thickness:2px;text-underline-offset:6px}
+.streamhead{display:flex;align-items:baseline;justify-content:space-between;gap:8px;padding:18px 0 12px}.streamhead h2{font-size:25px;letter-spacing:-.06em;font-weight:830;margin:0}.streamhead small{font-size:11px;color:#84888e}.filter-row{display:flex;gap:8px;overflow:auto;scrollbar-width:none;margin-bottom:11px}.filter-row::-webkit-scrollbar{display:none}.filter{flex:none;background:transparent;border:1px solid #d9dbe0;border-radius:999px;padding:7px 10px;font-size:11px;font-weight:720;color:#555d68;min-height:33px;display:flex;align-items:center;gap:6px}.filter i{width:7px;height:7px;border-radius:50%;background:var(--c)}.filter.off{opacity:.38}.filter:first-child{border-color:#151718;color:#151718}
+.stream{min-height:180px;flex:1;max-height:calc(100dvh - 547px);overflow:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#ced2d7 transparent}.stream:focus-visible{outline:2px solid var(--accent)}.stream-item{display:grid;grid-template-columns:48px 15px minmax(0,1fr) auto;align-items:center;gap:8px;min-height:62px;padding:3px 0 3px 0;border-bottom:1px solid #efefed;text-align:left;width:100%;background:transparent;border-left:0;border-top:0;border-right:0;color:inherit}.stream-item:last-child{border-bottom:0}.stream-item:active{background:#f3f5fb}.time{font-size:12px;font-variant-numeric:tabular-nums;color:#606773;letter-spacing:-.04em;text-align:left}.time.unset{font-size:10px;color:#a1a5a8}.stream-spine{position:relative;align-self:stretch;display:flex;justify-content:center;align-items:center}.stream-spine::before{content:"";position:absolute;top:0;bottom:0;width:1px;background:#e5e8ea;left:7px}.stream-spine i{height:10px;width:10px;position:relative;border-radius:3px;background:var(--color);display:block;transform:rotate(45deg);box-shadow:0 0 0 4px var(--paper)}.stream-item.money .stream-spine i{border-radius:50%;transform:none}.stream-item.habit .stream-spine i{border-radius:50%;height:8px;width:8px;transform:none}.content{min-width:0}.content strong{font-size:14px;line-height:1.35;font-weight:720;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;letter-spacing:-.018em}.content small{font-size:11px;line-height:1.4;color:#82868d;display:block;margin-top:4px;white-space:nowrap;text-overflow:ellipsis;overflow:hidden}.amount{font-size:13px;font-weight:800;color:var(--money);white-space:nowrap;font-variant-numeric:tabular-nums}.stream-arrow{font-size:18px;color:#b6b8ba}.nothing{padding:28px 3px 30px;font-size:13px;color:#7d838b;line-height:1.8}.nothing b{font-size:17px;display:block;color:var(--ink);margin-bottom:2px}.empty-sample{display:flex;align-items:center;gap:6px;font-size:11px}
+.brief{margin-top:9px;border-top:1px solid #1e2226;padding:13px 0 5px;display:grid;grid-template-columns:minmax(0,1.05fr) 1px minmax(0,.95fr);gap:11px;align-items:start}.brief .separator{height:63px;background:#e1e3e4}.brief small{display:block;color:#8d9094;font-size:9px;letter-spacing:.13em;font-weight:800;margin-bottom:6px}.brief strong{display:block;font-size:18px;letter-spacing:-.045em;font-variant-numeric:tabular-nums;white-space:nowrap}.brief p{margin:5px 0 0;color:#848990;font-size:10px;line-height:1.45}.brief .money-num{color:var(--money)}.brief .hab-num{color:var(--habit)}
+.insight{display:flex;align-items:center;gap:10px;margin-top:11px;padding:11px 0 3px;border-top:1px solid var(--line)}.insight svg{flex:none}.insight p{margin:0;font-size:12px;line-height:1.45;color:#51575f}.insight b{font-weight:850;color:#151718}.meta-footer{padding-top:9px;font-size:10px;color:#a0a4aa;display:flex;gap:8px;justify-content:space-between}.meta-footer button{background:none;border:0;color:#69737f;padding:0;font-size:10px;font-weight:700}.demo-banner{padding:8px 12px;background:#fff3d3;border-left:3px solid #b17a10;font-size:11px;line-height:1.4;color:#5c4208;display:flex;justify-content:space-between;align-items:center;gap:10px}.demo-banner button{background:none;border:0;color:#604507;text-decoration:underline;padding:3px;font-weight:700;flex-shrink:0;white-space:nowrap}.demo-banner span{flex:1;min-width:0}
+.dialog{border:0;border-radius:23px 23px 0 0;padding:21px 20px 30px;box-shadow:0 -16px 60px #16191b21;background:#fff;width:min(100%,600px);max-height:min(76dvh,680px);min-height:0;overflow-y:auto;overscroll-behavior:contain;position:fixed;inset:auto 0 0 0;margin:auto;color:var(--ink)}.dialog#infoDialog{padding-bottom:max(20px,env(safe-area-inset-bottom));}.dialog::backdrop{background:#15171840;backdrop-filter:blur(1px)}.sheet-head{display:flex;justify-content:space-between;align-items:center;gap:20px}.sheet-head h2{margin:0;font-size:clamp(19px,5.5vw,24px);letter-spacing:-.04em;line-height:1.35;overflow-wrap:anywhere}.sheet-close{border:0;background:#f0f1f2;border-radius:50%;height:36px;width:36px;font-size:23px}.sheet-sub{margin:8px 0 16px;color:#767c85;font-size:12px;line-height:1.5}.month-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px}.mwd{text-align:center;color:#8a9097;font-size:11px;padding:6px 0}.mday{height:48px;border:0;background:transparent;border-radius:11px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-weight:700;color:#40454d}.mday.sel{background:var(--ink);color:white}.mday.out{opacity:.28}.mdots{height:4px;display:flex;gap:2px}.mdots i{height:4px;width:4px;border-radius:50%}.mday.sel .mdots i{background:white!important}.month-actions{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:12px}.month-actions button{border:1px solid #e3e4e5;background:#fff;border-radius:11px;padding:9px 13px;font-size:12px;font-weight:700}.detail-line{padding:12px 0;border-bottom:1px solid var(--line);font-size:13px;line-height:1.5}.detail-line b{display:block;margin-bottom:4px}.detail-line span{color:#72777f}.sheet-link{font-size:12px;color:#2660CF;word-break:break-all}
+@media(max-width:520px) and (min-height:750px){
+ .frame{padding-top:calc(env(safe-area-inset-top) + 9px);padding-bottom:calc(env(safe-area-inset-bottom) + 10px)}
+ .header{height:33px}.demo-banner{padding:5px 9px;font-size:10px}
+ .hero{padding-top:4px;padding-bottom:9px}.eyebrow{font-size:9px}.big-date{font-size:76px}.day-meta{gap:5px}
+ .week-title{margin:8px 0 3px}.week{padding-bottom:7px}.daybtn{height:51px;gap:3px}.daybtn .num{font-size:19px}
+ .streamhead{padding:10px 0 7px}.streamhead h2{font-size:23px}.filter-row{margin-bottom:5px}
+ .stream-item{min-height:54px}.stream{min-height:140px;max-height:calc(100dvh - 450px)}
+ .brief{margin-top:6px;padding-top:9px}.brief .separator{height:48px}.brief small{margin-bottom:4px}.brief p{margin:3px 0 0}
+ .insight{margin-top:5px;padding:7px 0 0}.meta-footer{padding-top:5px}
+}
+@media(min-width:650px){.frame{padding-left:40px;padding-right:40px}.stream{max-height:440px}.brief{gap:22px}.hero{padding-top:30px}.daybtn{height:72px}}
+@media(max-width:360px){.frame{padding-left:15px;padding-right:15px}.big-date{font-size:72px}.day-meta strong{font-size:15px}.filter{padding:7px 8px}.stream-item{grid-template-columns:42px 13px minmax(0,1fr) auto;gap:6px}.content strong{font-size:13px}}
+@media(max-height:700px){.hero{padding-top:0;padding-bottom:9px}.big-date{font-size:64px}.week-title{margin-top:9px}.week{padding-bottom:5px}.daybtn{height:48px}.streamhead{padding:8px 0}.stream{max-height:calc(100dvh - 449px)}.brief{margin-top:6px}}
+@media(prefers-reduced-motion:no-preference){.daybtn,.filter,.stream-item{transition:background .14s ease,opacity .14s ease}.dialog{animation:rise .22s cubic-bezier(.2,.7,.2,1)}@keyframes rise{from{transform:translateY(12px);opacity:.8}to{transform:translateY(0);opacity:1}}}
+/* System UI audit 2026-11-02: readable labels, reliable tap targets, and actionable-first hierarchy. */
+.identity em,.eyebrow,.week-title span,.weeknav-hint,.daybtn .wd,
+.streamhead small,.filter,.content small,.time.unset,.brief small,.brief p,
+.insight p,.meta-footer,.meta-footer button,.status-pill,.sheet-sub,
+.mwd,.month-actions button,.detail-line,.demo-banner{font-size:12px;}
+.identity em,.eyebrow,.week-title span,.weeknav-hint,.daybtn .wd,
+.streamhead small,.filter,.content small,.time.unset,.brief small,.brief p,
+.insight p,.meta-footer,.meta-footer button,.status-pill,.sheet-sub,
+.mwd,.month-actions button,.detail-line,.demo-banner{line-height:1.4;}
+.filter,.insight p,.detail-line{font-size:14px;line-height:1.45}
+.meta-footer{flex-wrap:wrap}
+.iconbutton,.hero-right button,.week-nav button,.filter,.sheet-close,
+.month-actions button,.meta-footer button,.demo-banner button{min-height:44px;}
+.iconbutton,.week-nav button,.sheet-close{min-width:44px;}
+.daybtn{min-height:58px}.filter{padding:9px 11px}.stream-item{min-height:62px}
+.brief strong{white-space:normal;overflow-wrap:anywhere}
+.insight{margin-top:11px;padding:11px 0;background:#f4f7fa;border-top:0;border-radius:12px;padding-inline:12px}
+.stream{max-height:clamp(180px,38dvh,430px)}
+@media(max-width:360px){.frame{padding-inline:15px}.identity em{letter-spacing:0}.header{height:auto;min-height:44px}.week-nav{gap:0}.day-meta strong{font-size:15px}}
+
+/* YOS one-column dayplan; all state is local-only and never a Notion completion */
+.dayplan{background:white;border:1px solid #dce6df;border-radius:18px;margin:14px 0 10px;padding:15px 12px}
+.dayplan h2{margin:0;font-size:22px}.planhead{display:flex;align-items:center;justify-content:space-between;gap:9px}
+.planhead span,.planintro,.planfooter{font-size:14px;color:#5b6c61;line-height:1.5}
+.planintro{margin:8px 0 12px}.planfooter{padding-top:10px;border-top:1px solid #e7ebe7}
+.planrow{display:grid;grid-template-columns:46px 44px minmax(0,1fr) 40px;gap:6px;min-height:64px;align-items:center;padding:8px 0;border-top:1px solid #edf0ed}
+.planclock{font-size:13px;color:#5d6e63}.plancheck{height:44px;width:44px;border:1px solid #c0d2c7;background:white;border-radius:12px;font-size:24px}
+.plancheck[disabled]{border:0;color:#a0afa4;background:#f0f2f0}.plancheck.checked{background:#dcf0e4;color:#146b43}
+.plancopy{min-width:0;display:flex;flex-direction:column;gap:3px}.plancopy strong{font-size:16px;overflow-wrap:anywhere;line-height:1.4}
+.plancopy small{font-size:14px;line-height:1.4;color:#596a60}.planrow.checked .plancopy strong{text-decoration:line-through;color:#8a978e}
+.planmove{display:flex;flex-direction:column;gap:2px}.planmove button{border:0;background:#edf3ef;width:40px;min-height:28px;border-radius:8px;font-size:16px}.planmove button:disabled{opacity:.25}
+.planlocked{font-size:12px;color:#7b8a80;text-align:center}
+.sourcelist summary{min-height:44px;padding:12px 0;font-size:15px;font-weight:750;color:#47687d}
+.sourcelist .stream{min-height:130px;max-height:260px}
+@media(max-width:360px){.dayplan{padding:12px 8px}.planrow{grid-template-columns:36px 40px minmax(0,1fr) 36px;gap:4px}.plancheck{width:40px}.planmove button{width:36px}.planclock{font-size:12px}}
+.plan-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:12px 0}
+.plan-actions button{min-height:46px;border:0;background:#216f4c;color:white;padding:10px 18px;border-radius:12px;font-size:16px;font-weight:770}
+.plan-actions button:disabled{opacity:.55}
+.plan-actions span{font-size:14px;color:#516a5b;line-height:1.45;flex:1;min-width:160px}
+</style>
+</head>
+<body>
+<div class="frame">
+  <header class="header"><div class="identity"><strong>YOS</strong><em>CALENDAR / DAYSTREAM</em></div><div class="header-tools"><button class="iconbutton" id="refresh" aria-label="この画面の保存済み記録を再表示。Apple・Notionの最新取得は画面を閉じて再起動" title="Apple・Notionは再起動で再取得">↻</button><span class="tiny-circ" aria-hidden="true">Y</span></div></header>
+  <div class="demo-banner" id="demoBanner" hidden><span>DESIGN PREVIEW · 表示内容と金額は架空です</span><button id="useReal">保存済みデータ</button></div>
+  <section class="hero"><div><div class="eyebrow" id="heroEyebrow">NOVEMBER · 2026</div><div class="date-line"><span class="big-date" id="bigDate">01</span><div class="day-meta"><strong id="heroDay">SUNDAY</strong><span id="heroShort">11月1日</span></div></div></div><div class="hero-right"><div class="status-pill"><b id="stateDot"></b><span id="stateLabel">接続状態</span></div><button id="openMonth">月カレンダー <span aria-hidden="true">↗</span></button></div></section>
+  <div class="week-title"><span id="weekLabel">WEEK 44</span><div class="week-nav"><button id="weekBack" aria-label="前の週">‹</button><button id="weekNext" aria-label="次の週">›</button></div></div>
+  <nav class="week" aria-label="日付を選択" id="week"></nav>
+  <aside class="insight"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2761d8" stroke-width="1.6" stroke-linecap="round"><path d="M12 2.5v3M4.6 5l2.1 2.1M2.6 12h3M19.4 12h2M17.3 7.1l2.1-2.1M9 17h6M10 20h4"/><path d="M8.2 14.5C6.5 12 7 8.6 9.7 7c2-1.2 5-.7 6.5 1.1 1.7 2 1.7 4.6.2 6.4-.7.9-1.3 1.5-1.4 2.5h-6c0-1-.2-1.7-.8-2.5z"/></svg><p><b>YOS</b> <span id="advice">確認できた情報をもとに、次の行動を整理します。</span></p></aside>
+  <section class="dayplan" aria-label="起床から就寝までの一日">
+<div class="planhead"><h2>起床から就寝まで</h2><span id="planProgress">—</span></div>
+<div class="plan-actions"><button type="button" id="planCommit" disabled aria-label="実行リストを端末へ保存し、Notionへの反映確認へ進む">保存して反映へ</button><span id="planCommitHint">開発確認版：保存機能の接続待ち</span></div>
+<p class="planintro" id="planIntro">固定予定と未指定タスクをYOSが仮配置します。</p>
+<div id="planList" role="list"></div>
+<p class="planfooter" id="planFooter">チェック・順番は端末内の仮記録。画面を閉じた後、本人が承認したタスクだけNotionへ完了反映できます。</p>
+</section>
+<details class="sourcelist"><summary>元データを確認（予定・タスク・家計）</summary>
+  <section class="streamhead"><h2><span id="flowHeading">今日の流れ</span><span id="selectedSuffix" style="font-weight:500;color:#8c9197;font-size:12px;margin-left:7px"></span></h2><small id="eventCount">—</small></section>
+  <nav class="filter-row" aria-label="情報の種類を絞り込む" id="filterRow"><button class="filter" data-filter="all" aria-pressed="true"><span>すべて</span></button><button class="filter" data-filter="schedule" style="--c:var(--schedule)" aria-pressed="true"><i></i><span>予定</span></button><button class="filter" data-filter="task" style="--c:var(--task)" aria-pressed="true"><i></i><span>タスク</span></button><button class="filter" data-filter="money" style="--c:var(--money)" aria-pressed="true"><i></i><span>お金</span></button><button class="filter" data-filter="habit" style="--c:var(--habit)" aria-pressed="true"><i></i><span>習慣</span></button></nav>
+  <div class="stream" id="stream" tabindex="0" aria-live="polite"></div></details>
+  <aside class="brief" aria-label="当日サマリー"><div><small>DAY MONEY / 当日の入出金</small><strong class="money-num" id="moneyValue">—</strong><p id="moneyCaption">未接続</p></div><div class="separator" aria-hidden="true"></div><div><small>HABIT / 習慣の記録</small><strong class="hab-num" id="habitValue">未確認</strong><p id="habitCaption">未記録＝未実施ではありません</p></div></aside>
+  <footer class="meta-footer"><span id="freshness">MY LIFE / Money 読み取り中</span><button id="infoButton">接続状況 · 詳細 ↗</button></footer>
+</div>
+<dialog class="dialog" id="monthDialog"><div class="sheet-head"><h2 id="monthTitle">2026年11月</h2><button class="sheet-close" id="closeMonth" aria-label="閉じる">×</button></div><p class="sheet-sub">日付を選ぶと、生活タイムラインが切り替わります。</p><div class="month-grid" id="monthGrid"></div><div class="month-actions"><button id="previousMonth">← 前の月</button><button id="monthToday">今日</button><button id="followingMonth">次の月 →</button></div></dialog>
+<dialog class="dialog" id="infoDialog"><div class="sheet-head"><h2 id="infoTitle">接続状況</h2><button class="sheet-close" id="closeInfo" aria-label="閉じる">×</button></div><p class="sheet-sub" id="infoSub">この画面で実際に読めたデータの範囲を表示します。</p><div id="infoBody"></div></dialog>
+<script>
+'use strict';
+(()=>{
+ const $=id=>document.getElementById(id),tz='Asia/Tokyo',fmt=new Intl.DateTimeFormat('sv-SE',{timeZone:tz,year:'numeric',month:'2-digit',day:'2-digit'}),today=fmt.format(new Date());
+ const dateKey=d=>fmt.format(d),parseDate=k=>new Date(k+'T12:00:00+09:00'),addDays=(key,n)=>{let d=parseDate(key);d.setUTCDate(d.getUTCDate()+n);return dateKey(d)};
+ const state={selected:today,month:today.slice(0,7),demo:false,items:[],native:null,lifeRead:false,lifeSynced:null,moneyRead:false,moneyPrivate:false,moneySynced:null,loadedAt:null,filters:new Set(['schedule','task','money','habit'])};
+ const str=(x,max=140)=>String(x??'').replace(/[\u0000-\u001F]/g,' ').trim().slice(0,max),title=(x,fallback)=>str(x,100)||fallback;
+ const isValidKey=k=>/^\d{4}-\d{2}-\d{2}$/.test(String(k||''))&&dateKey(parseDate(k))===k;
+ const cash=n=>'¥'+Math.abs(n).toLocaleString('ja-JP');
+ const safeSynced=value=>{const d=typeof value==='string'?new Date(value):null;return d&&Number.isFinite(d.getTime())&&d.getTime()<=Date.now()+300000?d:null};
+ const readLocal=key=>{try{const raw=localStorage.getItem(key);return raw?JSON.parse(raw):null}catch{return null}};
+ const names={schedule:'予定',task:'タスク',money:'お金',habit:'習慣'},weekEn=['SUN','MON','TUE','WED','THU','FRI','SAT'];
+   function normalizeLife(){const data=readLocal('yos-life-v1');const out=[];state.lifeRead=Boolean(data&&data.days&&typeof data.days==='object');state.lifeSynced=null;if(!state.lifeRead)return out;
+    state.lifeSynced=Object.values(data.days).map(day=>safeSynced(day?.lastSync)).filter(Boolean).sort((a,b)=>b-a)[0]||null;
+    for(const [day,source] of Object.entries(data.days)){if(!isValidKey(day)||!source||typeof source!=='object')continue;
+      for(const e of Array.isArray(source.schedule)?source.schedule:[]){if(!e||typeof e!=='object'||!title(e.title,''))continue;const eday=isValidKey(e.date)?e.date:day;out.push({type:'schedule',date:eday,title:title(e.title,''),subtitle:e.isAllDay?'終日':e.start?String(e.start).slice(11,16):'日時未確認',source:'MY LIFE',id:'life:event:'+day+':'+str(e.id||e.title,95)});}
+      for(const [i,t] of (Array.isArray(source.tasks)?source.tasks:[]).entries()){if(!t?.text||!str(t.text))continue;out.push({type:'task',date:day,title:title(t.text,''),subtitle:t.done===true?'完了':'未完了',done:t.done===true,source:'MY LIFE',id:'life:task:'+day+':'+str(t.id||i,80)});}
+      if(source.routines&&typeof source.routines==='object'){
+        const rows=Object.values(source.routines).flatMap(x=>Array.isArray(x)?x:[]).filter(x=>x&&typeof x==='object');
+        const done=rows.filter(x=>x.done===true).length;
+        if(done)out.push({type:'habit',date:day,title:'生活ルーティン',subtitle:`記録済み ${done}件`,source:'MY LIFE',id:'life:habit:'+day});
+      }
+    }
+    return out;
+  }
+  function normalizeMoney(){const data=readLocal('yos-money-v2');state.moneySynced=safeSynced(data?.updatedAt);state.moneyPrivate=Boolean(data?.privacy);state.moneyRead=Boolean(data&&Array.isArray(data.transactions)&&!state.moneyPrivate);if(!state.moneyRead)return [];
+    return data.transactions.flatMap((tx,i)=>{if(!tx||!isValidKey(str(tx.date,10)))return[];const amount=Number(tx.amount),kind=tx.type==='income'?'income':(['expense','debt','saving','investment'].includes(tx.type)?'expense':null);if(!kind||!Number.isFinite(amount)||amount<0)return[];const complete=tx.completed===true||tx.paid===true||tx.received===true||['done','paid','completed','received'].includes(str(tx.status,24).toLowerCase());return[{type:'money',date:tx.date,title:title(tx.label,'入出金'),subtitle:complete?'実績':'予定',amount:Math.round(amount),moneyKind:kind,complete,source:'Money',id:'money:tx:'+str(tx.id||i,80)}]});
+  }
+  function createDemo(){const base=parseDate(today),month=base.getMonth();const d=n=>{const x=new Date(base.getFullYear(),month,n,12);return dateKey(x)},current=base.getDate();
+    const at=(offset)=>addDays(today,offset);
+    const pairs=[{type:'schedule',date:at(0),title:'カフェで打ち合わせ',subtitle:'10:30 – 11:30'},{type:'task',date:at(0),title:'見積もりの確認',subtitle:'未完了'},{type:'habit',date:at(0),title:'食後の散歩',subtitle:'記録済み（サンプル）'},{type:'money',date:at(0),title:'日用品の購入',subtitle:'実績',amount:1680,moneyKind:'expense',complete:true},{type:'schedule',date:at(2),title:'美容室の予約',subtitle:'14:00 – 15:00'},{type:'task',date:at(2),title:'応募書類を送る',subtitle:'未完了'},{type:'money',date:at(4),title:'固定費の支払い',subtitle:'予定',amount:15800,moneyKind:'expense',complete:false},{type:'money',date:at(6),title:'入金予定',subtitle:'予定',amount:48500,moneyKind:'income',complete:false},{type:'schedule',date:at(-3),title:'友人との約束',subtitle:'18:00'},{type:'habit',date:at(-3),title:'ストレッチ',subtitle:'記録済み（サンプル）'},{type:'task',date:d(15),title:'部屋の整頓',subtitle:'未完了'},{type:'money',date:d(19),title:'予定支出',subtitle:'予定',amount:3400,moneyKind:'expense',complete:false}];
+    return pairs.map((x,i)=>({...x,id:'demo:'+i,source:'表示例'}));
+  }
+
+  const nativeTypes=new Set(['schedule','task','money','habit']);
+  const allowedNativeSources={schedule:'Appleカレンダー',task:'Notion Tasks',money:'Notion家計',habit:'YOS 日記'};
+  function nativeItems(snapshot){
+    if(!snapshot||snapshot.schema!=='yos-daystream-native-v1'||!Array.isArray(snapshot.items))return [];
+    return snapshot.items.slice(0,500).flatMap((it,i)=>{
+      if(!it||!nativeTypes.has(it.type)||!isValidKey(it.date)||it.source!==allowedNativeSources[it.type])return [];
+      const item={type:it.type,date:it.date,title:str(it.title,100),subtitle:str(it.subtitle,100),source:it.source,id:'native:'+i+':'+str(it.id,70)};
+      if(!item.title)return [];
+      if(it.type==='task'){item.done=it.done===true;item.priority=['P0','P1','P2','P3'].includes(it.priority)?it.priority:'';item.order=Number.isFinite(it.order)?it.order:null;item.fixedTime=/^\d{2}:\d{2}$/.test(it.fixedTime||'')?it.fixedTime:'';}
+      if(it.type==='money'){
+        if(state.moneyPrivate || !Number.isFinite(it.amount) || it.amount<0 || it.amount>1000000000 || !['income','expense'].includes(it.moneyKind))return [];
+        item.amount=Math.round(it.amount);item.moneyKind=it.moneyKind;item.complete=it.complete===true;item.reviewRequired=it.reviewRequired===true;
+      }
+      return [item];
+    });
+  }
+  function mergeRecords(records){
+    const seen=new Set();const deduped=[];
+    for(const x of records){
+      // IDs represent distinct records even when title/date/amount match. Do not
+      // collapse two real purchases based on similar display text.
+      const key=[x.source,x.type,x.id].join('|');
+      // Collapse visually identical tasks on the same day without deleting
+      // or merging their underlying Notion records. Never dedupe money.
+      const visualTaskKey=x.type==='task'?[x.type,x.date,String(x.title||'').trim().normalize('NFKC'),Boolean(x.done)].join('|'):null;
+      if(seen.has(key)||(visualTaskKey&&seen.has('display:'+visualTaskKey)))continue;
+      seen.add(key);if(visualTaskKey)seen.add('display:'+visualTaskKey);deduped.push(x);
+    }
+    return deduped;
+  }
+  function load(preferDemo){const life=normalizeLife(),money=normalizeMoney(),native=nativeItems(state.native);
+    state.demo=Boolean(preferDemo??(location.protocol==='file:'&&!life.length&&!money.length&&!native.length));
+    if(state.moneyPrivate || state.native)state.demo=false;
+    // Notion 家計 is authoritative in native mode. If it fails, show unavailable:
+    // never silently replace it with outdated browser Money transactions.
+    const joined=state.native?[...native,...life]:[...life,...money];
+    state.items=state.demo?createDemo():mergeRecords(joined);state.loadedAt=new Date();$('demoBanner').hidden=!state.demo;render();
+  }
+  // Scriptable invokes this after loading the existing DAYSTREAM design. Only minimum
+  // display fields cross the native-to-WebView boundary. Never accept an API token.
+  window.YOS_DAYSTREAM_NATIVE_V1=function(payload){
+    if(!payload||payload.schema!=='yos-daystream-native-v1'||!Array.isArray(payload.items)||payload.items.length>500||
+      !payload.range||!isValidKey(payload.range.start)||!isValidKey(payload.range.end)||payload.range.start>payload.range.end||
+      (parseDate(payload.range.end)-parseDate(payload.range.start))>93*86400000||
+      !payload.sources||typeof payload.sources!=='object'||
+      typeof payload.generatedAt!=='string'||!safeSynced(payload.generatedAt))return false;
+    const statuses=['ok','partial','unavailable','error'];
+    const sources={};for(const name of ['apple','tasks','money']){
+      const value=payload.sources[name];
+      sources[name]={status:statuses.includes(value?.status)?value.status:'unavailable'};
+    }
+    state.native={schema:payload.schema,generatedAt:payload.generatedAt,range:{start:payload.range.start,end:payload.range.end},sources,items:payload.items};
+    load(false);return true;
+  };
+ function listDay(key=state.selected){return state.items.filter(x=>x.date===key&&state.filters.has(x.type))}
+ const dayDate=k=>{const d=parseDate(k);return {day:d.getDate(),weekday:d.getDay(),month:d.getMonth()+1,year:d.getFullYear()}};
+ function nativeSourceLabel(){const statuses=Object.values(state.native.sources).map(s=>s.status);const age=Date.now()-new Date(state.native.generatedAt).getTime();if(age>30*60*1000)return '再取得が必要';const complete=statuses.filter(s=>s==='ok').length;return complete===3?'3種類取得済み':complete||statuses.includes('partial')?'一部取得':'取得を確認できず';}
+  function renderHeader(){const d=dayDate(state.selected);$('heroEyebrow').textContent=new Intl.DateTimeFormat('en-US',{timeZone:tz,month:'long',year:'numeric'}).format(parseDate(state.selected)).toUpperCase();$('bigDate').textContent=String(d.day).padStart(2,'0');$('heroDay').textContent=weekEn[d.weekday];$('heroShort').textContent=d.month+'月'+d.day+'日';$('stateLabel').textContent=state.demo?'デザイン見本':state.native?nativeSourceLabel():(state.lifeRead||state.moneyRead)?'保存済み記録':'未接続';$('stateDot').style.background=state.demo?'#b47d13':state.native?(nativeSourceLabel()==='3種類取得済み'?'#137c5b':'#b47d13'):state.lifeRead||state.moneyRead?'#137c5b':'#98a0a7';$('weekLabel').textContent=d.year+' / '+d.month+'月 · 日付を選ぶ';$('selectedSuffix').textContent=state.selected===today?'TODAY':'';$('flowHeading').textContent=state.selected===today?'今日の流れ':'この日の流れ';}
+ function color(t){return `var(--${t})`}
+ function countsFor(date){return [...new Set(state.items.filter(x=>x.date===date).map(x=>x.type))]}
+ function renderWeek(){const root=$('week');root.replaceChildren();const first=addDays(state.selected,-dayDate(state.selected).weekday);for(let i=0;i<7;i++){const k=addDays(first,i),d=dayDate(k),b=document.createElement('button');b.type='button';b.className='daybtn'+(state.selected===k?' selected':'')+(today===k?' today':'');b.setAttribute('aria-pressed',String(state.selected===k));b.setAttribute('aria-label',`${d.month}月${d.day}日を表示`);const w=document.createElement('span');w.className='wd';w.textContent='日月火水木金土'[d.weekday];const num=document.createElement('span');num.className='num';num.textContent=d.day;const dots=document.createElement('span');dots.className='dots';for(const t of countsFor(k)){const dot=document.createElement('i');dot.style.background=color(t);dots.append(dot)}b.append(w,num,dots);b.addEventListener('click',()=>setDay(k));root.append(b)}}
+ function eventTime(e){if(e.type!=='schedule')return '';const t=String(e.subtitle||'').match(/\b(\d{2}):(\d{2})\b/);return t?t[0]:'終日'}
+ function sortedEntries(){return listDay().sort((a,b)=>{const rank=x=>x.type==='schedule'?(eventTime(x)==='終日'?-1:0):x.type==='money'?2:x.type==='task'?3:4;let r=rank(a)-rank(b);return r||((a.type==='schedule'&&b.type==='schedule')?eventTime(a).localeCompare(eventTime(b)):0)})}
+ // DAYPLAN-BEGIN: the YOS draft plan is separate from source-of-truth records.
+ const PLAN_KEY='yos-daystream-plan-v1';
+ const routine=(id,title,subtitle)=>({id:'habit:'+id,type:'habit',title,subtitle,movable:true,checkable:true,planned:true});
+ const anchor=(id,title,subtitle)=>({id:'anchor:'+id,type:'schedule',title,subtitle,movable:false,checkable:false,planned:true});
+ function planForDay(date,records){
+   const rows=records.filter(x=>x.date===date),scheduled=rows.filter(x=>x.type==='schedule'||(x.type==='task'&&x.fixedTime));
+   const sortTime=x=>/^\d{2}:\d{2}$/.test(x.fixedTime||x.subtitle||'')?Number((x.fixedTime||x.subtitle).slice(0,2)):12;
+   scheduled.sort((a,b)=>sortTime(a)-sortTime(b));
+   const priorities={P0:0,P1:1,P2:2,P3:3};
+   const tasks=rows.filter(x=>x.type==='task'&&!x.done&&!x.fixedTime).sort((a,b)=>
+     (priorities[a.priority]??4)-(priorities[b.priority]??4)||
+     (Number.isFinite(a.order)?a.order:9999)-(Number.isFinite(b.order)?b.order:9999)||
+     a.title.localeCompare(b.title,'ja')).map((x,i)=>({...x,id:'task:'+x.source+':'+String(x.id).replace(/^native:\d+:/,'native:'),
+       subtitle:'YOS仮配置 · '+(i<2?'優先候補':'空き時間候補')+(x.priority?' · '+x.priority:''),
+       movable:true,checkable:true}));
+   const appointments=scheduled.map(x=>({...x,id:'event:'+x.source+':'+String(x.id).replace(/^native:\d+:/,'native:'),movable:false,checkable:x.type==='task'}));
+   const bills=rows.filter(x=>x.type==='money').map(x=>({...x,id:'money:'+x.source+':'+x.id,movable:false,checkable:false}));
+   const morning=appointments.filter(x=>sortTime(x)<11),afternoon=appointments.filter(x=>sortTime(x)>=11&&sortTime(x)<18),night=appointments.filter(x=>sortTime(x)>=18);
+   const split=Math.ceil(tasks.length/2);
+   return [
+     anchor('wake','起床','時刻未取得'),
+     routine('water','水を飲む','起床後'),
+     routine('stretch-am','朝のストレッチ','短時間'),
+     routine('ready','身支度','起床後'),
+     ...morning,
+     routine('breakfast','朝食・食事を記録','Clarityで記録／献立分析はデータ接続後'),
+     routine('walk','食後のウォーキング','5分／難しい日は1分'),
+     ...tasks.slice(0,split),...afternoon,...bills,...tasks.slice(split),...night,
+     routine('diary','日記・振り返り','夜／既存YOS日記'),
+     routine('stretch-pm','夜のストレッチ','短時間'),
+     anchor('sleep','就寝','睡眠記録と翌日の予定からの提案は未接続')
+   ];
+ }
+ function applyPlanOrder(rows,requested) {
+   if(!Array.isArray(requested)||requested.length>300)return rows;
+   const mov=rows.filter(x=>x.movable),known=new Map(mov.map(x=>[x.id,x])),used=new Set(),sorted=[];
+   for(const id of requested){if(typeof id==='string'&&known.has(id)&&!used.has(id)){sorted.push(known.get(id));used.add(id)}}
+   for(const x of mov)if(!used.has(x.id))sorted.push(x);
+   let i=0;return rows.map(x=>x.movable?sorted[i++]:x);
+ }
+ // DAYPLAN-END
+ let planSaved={};let planWriteStatus='端末内保存は未確認';const planTouched=new Set();
+ try{const raw=localStorage.getItem(PLAN_KEY),parsed=raw&&JSON.parse(raw);if(parsed&&typeof parsed==='object'&&!Array.isArray(parsed))planSaved=parsed}catch{}
+ const dayDraft=()=>{const d=planSaved[state.selected];return d&&typeof d==='object'?d:{order:[],done:{}}};
+ function writePlan(entry){
+   planSaved[state.selected]={order:Array.isArray(entry.order)?entry.order.slice(0,300):[],done:entry.done||{}};
+   const keys=Object.keys(planSaved).filter(isValidKey).sort().slice(-30),data={};for(const k of keys)data[k]=planSaved[k];
+   planSaved=data;
+   try{const encoded=JSON.stringify(data);localStorage.setItem(PLAN_KEY,encoded);
+     planWriteStatus=localStorage.getItem(PLAN_KEY)===encoded?'端末内の仮記録を保存':'保存を確認できず';
+   }catch{planWriteStatus='保存不可（開いている間だけ）'}
+ }
+ const orderedPlan=()=>applyPlanOrder(planForDay(state.selected,state.items),dayDraft().order);
+ function changeCheck(id){
+   if(state.demo)return;const row=orderedPlan().find(x=>x.id===id);if(!row?.checkable)return;
+   const d=dayDraft(),done={...(d.done||{})};if(done[id])delete done[id];else done[id]=true;
+   if(row.type==='task'){if(done[id])planTouched.add(id);else planTouched.delete(id)}
+   writePlan({order:d.order,done});renderPlan();
+ }
+ function changeOrder(id,delta){
+   if(state.demo)return;const current=orderedPlan(),flex=current.filter(x=>x.movable),idx=flex.findIndex(x=>x.id===id),other=idx+delta;
+   if(idx<0||other<0||other>=flex.length)return;
+   [flex[idx],flex[other]]=[flex[other],flex[idx]];
+   writePlan({order:flex.map(x=>x.id),done:dayDraft().done});renderPlan();
+ }
+ function renderPlan(){
+   const rows=orderedPlan(),done=dayDraft().done||{},root=$('planList');root.replaceChildren();
+   const total=rows.filter(x=>x.checkable).length,completed=rows.filter(x=>x.checkable&&done[x.id]).length;
+   $('planProgress').textContent=completed+' / '+total+' 仮チェック';
+   $('planIntro').textContent='時刻確定の予定は動かしません。時間未指定のタスクは優先度から仮配置します。';
+   $('planFooter').textContent=(state.demo?'デザイン見本':planWriteStatus)+
+     ' · チェックだけではNotion／Appleは変わりません。タスクの完了反映は画面を閉じた後の本人確認が必要です。';
+   const flex=rows.filter(x=>x.movable);
+   for(const item of rows){
+     const line=document.createElement('div');line.className='planrow'+(done[item.id]?' checked':'');line.setAttribute('role','listitem');
+     const clock=document.createElement('span');clock.className='planclock';
+     clock.textContent=item.type==='schedule'&&item.subtitle==='終日'?'終日':
+       /^\d{2}:\d{2}$/.test(item.fixedTime||item.subtitle||'')?(item.fixedTime||item.subtitle):'順番';
+     const tick=document.createElement('button');tick.className='plancheck'+(done[item.id]?' checked':'');tick.type='button';
+     tick.disabled=!item.checkable||state.demo;tick.textContent=item.checkable?(done[item.id]?'✓':'○'):'•';
+     tick.setAttribute('aria-label',item.title+'の仮チェック');if(item.checkable)tick.addEventListener('click',()=>changeCheck(item.id));
+     const copy=document.createElement('span');copy.className='plancopy';const name=document.createElement('strong');name.textContent=item.title;
+     const hint=document.createElement('small');hint.textContent=(item.planned?'朝夜の習慣候補':names[item.type]||'予定')+' · '+String(item.subtitle||'');
+     copy.append(name,hint);
+     const controls=document.createElement('span');controls.className='planmove';
+     if(item.movable){for(const [delta,symbol] of [[-1,'↑'],[1,'↓']]){
+       const btn=document.createElement('button');btn.type='button';btn.textContent=symbol;btn.disabled=state.demo||
+       (delta<0?flex[0].id===item.id:flex[flex.length-1].id===item.id);
+       btn.setAttribute('aria-label',item.title+'を'+(delta<0?'上':'下')+'へ');
+       btn.addEventListener('click',()=>changeOrder(item.id,delta));controls.append(btn);
+     }}else{controls.className='planlocked';controls.textContent='固定'}
+     line.append(clock,tick,copy,controls);root.append(line);
+   }
+ }
+ // Native Scriptable is the sole owner of a persistable file and Notion credentials.
+ // These methods expose a bounded plan snapshot; they never send tokens or auto-write Notion.
+ window.YOS_DAYSTREAM_PLAN_IMPORT=function(value){
+   if(!value||value.schema!=='yos-daystream-plan-v1'||!value.days||
+     typeof value.days!=='object'||Array.isArray(value.days))return false;
+   const valid={};
+   for(const [day,d] of Object.entries(value.days).slice(-30)){
+     if(!isValidKey(day)||!d||typeof d!=='object')continue;
+     const order=Array.isArray(d.order)?d.order.filter(k=>typeof k==='string'&&k.length<180).slice(0,300):[];
+     const done={};for(const [k,v] of Object.entries(d.done||{}).slice(0,300))
+       if(typeof k==='string'&&k.length<180&&v===true)done[k]=true;
+     valid[day]={order,done};
+   }
+   planSaved=valid;planWriteStatus='Scriptable端末内ファイルから復元';
+   renderPlan();return true;
+ };
+ window.YOS_DAYSTREAM_PLAN_EXPORT=function(){
+   const days={};
+   for(const [day,d] of Object.entries(planSaved).slice(-30)){
+     if(!isValidKey(day)||!d||typeof d!=='object')continue;
+     const order=Array.isArray(d.order)?d.order.filter(x=>typeof x==='string'&&x.length<180).slice(0,300):[];
+     const done={};for(const [k,v] of Object.entries(d.done||{}).slice(0,300))
+       if(typeof k==='string'&&k.length<180&&v===true)done[k]=true;
+     days[day]={order,done};
+   }
+   return {schema:'yos-daystream-plan-v1',days,completedKeys:[...planTouched].slice(0,30)};
+ };
+ // Signal to native Scriptable only when the user explicitly presses Save.
+ // Native evaluateJavaScript(useCallback=true) registers this handler before presenting.
+ window.YOS_DAYSTREAM_ATTACH_SAVE=function(callback){
+   const button=$('planCommit'),hint=$('planCommitHint');
+   if(typeof callback!=='function'||!button||!hint)return false;
+   button.disabled=state.demo;
+   hint.textContent='チェック・順番を保存するには押してください。押した後、この画面を閉じると確認へ進みます。';
+   button.addEventListener('click',()=>{
+     if(button.disabled||state.demo)return;
+     const plan=window.YOS_DAYSTREAM_PLAN_EXPORT();
+     button.disabled=true;button.textContent='保存データを送信済み';
+     hint.textContent='画面を閉じて保存結果を確認してください。Notionの更新には別途承認が必要です。';
+     callback(plan);
+   },{once:true});
+   return true;
+ };
+ function renderStream(){const entries=sortedEntries(),root=$('stream');root.replaceChildren();$('eventCount').textContent=entries.length+'件の記録';if(!entries.length){const node=document.createElement('div');node.className='nothing';const b=document.createElement('b');b.textContent=state.demo?'この日のサンプルはありません':'この日の記録は未確認';const t=document.createElement('span');t.textContent=state.native&&(state.selected<state.native.range.start||state.selected>state.native.range.end)?'この日付はiPhoneで取得した期間の外です。再起動しても取得範囲外の場合は未確認です。':'未接続の情報は含まれません。記録なし＝予定や習慣がない、ではありません。';node.append(b,t);root.append(node);return}for(const e of entries){const row=document.createElement('button');row.type='button';row.className='stream-item '+e.type;row.style.setProperty('--color',color(e.type));const time=document.createElement('span');time.className='time'+(e.type==='schedule'?'':' unset');time.textContent=e.type==='schedule'?eventTime(e):e.type==='money'?'¥':e.type==='task'?'TODO':'LOG';const spine=document.createElement('span');spine.className='stream-spine';spine.append(document.createElement('i'));const copy=document.createElement('span');copy.className='content';const strong=document.createElement('strong');strong.textContent=e.title;const small=document.createElement('small');small.textContent=`${names[e.type]} · ${e.subtitle}${state.demo?' · サンプル':''}`;copy.append(strong,small);const end=document.createElement('span');end.className=e.type==='money'?'amount':'stream-arrow';end.textContent=e.type==='money'?(e.moneyKind==='income'?'+':'−')+cash(e.amount):'›';row.append(time,spine,copy,end);row.addEventListener('click',()=>showRecord(e));root.append(row)}}
+ function renderBrief(){const day=state.items.filter(x=>x.date===state.selected),money=day.filter(x=>x.type==='money'),hab=day.filter(x=>x.type==='habit'),can=!state.moneyPrivate&&(state.demo||(state.native?['ok','partial'].includes(state.native.sources.money.status):state.moneyRead)),moneyPartial=state.native?.sources?.money?.status==='partial';const actual=money.filter(x=>x.complete);const incoming=actual.filter(x=>x.moneyKind==='income').reduce((a,x)=>a+x.amount,0);const outgoing=actual.filter(x=>x.moneyKind==='expense').reduce((a,x)=>a+x.amount,0);const plan=money.filter(x=>!x.complete&&!x.reviewRequired),review=money.filter(x=>x.reviewRequired);$('moneyValue').textContent=(!can||moneyPartial)?'—':!money.length?'記録なし':(incoming-outgoing<0?'−':'+')+cash(incoming-outgoing);$('moneyCaption').textContent=!can?(state.moneyPrivate?'Money：非表示':'Notion家計：未接続'):moneyPartial?'Notion家計は一部取得。日別合計は未確定（明細は参考）':!money.length?'表示範囲内の入出金記録なし（取得漏れは未確認）':`確認済み実績：入金${cash(incoming)} / 支出${cash(outgoing)} · 予定${plan.length}件${review.length?' · 要照合'+review.length+'件':''}`;$('habitValue').textContent=hab.length?hab.length+'件の報告':'未確認';$('habitCaption').textContent=hab.length?'MY LIFEの保存済み実施報告':'未記録＝未実施ではありません';const next=state.items.filter(x=>x.type==='money'&&x.moneyKind==='expense'&&!x.complete&&!x.reviewRequired&&x.date>=state.selected).sort((a,b)=>a.date.localeCompare(b.date))[0];const current=day.filter(x=>x.type==='schedule'),open=day.filter(x=>x.type==='task'&&!x.done);let advice='確認できた情報から、今日の一手を整理します。';if(next&&next.date<=today&&state.selected===today)advice='支払い予定の期限を確認。完了・残高はMoneyで照合。';else if(current.length&&open.length)advice='まず時間が決まった予定を確保。その前後でタスクを1件。';else if(open.length)advice='未完了のタスクから、取りかかる1件を決めよう。';else if(next)advice='今後の支払い予定がある。残高はMoneyで確認。';else if(current.length)advice='予定を先に確保し、空いた時間は余白として残そう。';$('advice').textContent=(state.demo?'サンプル：':'')+advice;const life=state.lifeRead?'MY LIFE 保存あり':'MY LIFE 未接続',fin=state.moneyPrivate?'Money 非表示':state.moneyRead?'Money 保存あり':'Money 未接続',na=state.native,ns=na?' · Apple '+na.sources.apple.status+' / Notion Tasks '+na.sources.tasks.status+' / 家計 '+na.sources.money.status:'';const old=s=>!s||(Date.now()-s.getTime()>86400000);$('freshness').textContent=state.demo?'すべて架空の表示例':`${life}${state.lifeRead&&old(state.lifeSynced)?'（時刻未確認・古い可能性）':''} · ${fin}${state.moneyRead&&old(state.moneySynced)?'（時刻未確認・古い可能性）':''}${ns}${na?' · iPhone起動時 '+new Date(na.generatedAt).toLocaleTimeString('ja-JP')+'取得（再起動で更新）':''}`;}
+ function renderFilters(){for(const b of document.querySelectorAll('.filter')){const t=b.dataset.filter,active=t==='all'?state.filters.size===4:state.filters.has(t);b.classList.toggle('off',!active);b.setAttribute('aria-pressed',String(active))}}
+ function render(){renderHeader();renderWeek();renderFilters();renderPlan();renderStream();renderBrief()}
+ function setDay(k){if(!isValidKey(k))return;state.selected=k;state.month=k.slice(0,7);render();$('stream').scrollTop=0}
+ function openDialog(id){$(id).showModal()}function closeDialog(id){$(id).close()}
+ function renderMonth(){const [yr,mon]=state.month.split('-').map(Number),first=dateKey(new Date(yr,mon-1,1,12)),firstDay=parseDate(first).getDay(),days=new Date(yr,mon,0).getDate(),total=Math.ceil((firstDay+days)/7)*7;const root=$('monthGrid');root.replaceChildren();$('monthTitle').textContent=`${yr}年${mon}月`;for(const w of '日月火水木金土'){const sp=document.createElement('span');sp.className='mwd';sp.textContent=w;root.append(sp)}for(let i=0;i<total;i++){const k=addDays(first,i-firstDay),d=dayDate(k),b=document.createElement('button');b.className='mday'+(k===state.selected?' sel':'')+(d.month!==mon?' out':'');b.textContent=String(d.day);const dots=document.createElement('span');dots.className='mdots';for(const t of countsFor(k).slice(0,4)){const x=document.createElement('i');x.style.background=color(t);dots.append(x)}b.append(dots);b.setAttribute('aria-label',`${d.month}月${d.day}日を表示`);b.addEventListener('click',()=>{setDay(k);closeDialog('monthDialog')});root.append(b)}}
+ function showRecord(e){$('infoTitle').textContent=e.title;$('infoSub').textContent=`${e.date} · ${names[e.type]}${state.demo?' · 架空サンプル':''}`;const body=$('infoBody');body.replaceChildren();const div=document.createElement('div');div.className='detail-line';const name=document.createElement('b');name.textContent='記録の状態';const stateSpan=document.createElement('span');stateSpan.textContent=e.subtitle;div.append(name,stateSpan);body.append(div);if(e.type==='money'){const b=document.createElement('div');b.className='detail-line';const st=document.createElement('b');st.textContent='金額（'+(e.complete?'確認済み実績':e.subtitle)+'）';const v=document.createElement('span');v.textContent=cash(e.amount);b.append(st,v);body.append(b)}const origin=document.createElement('div');origin.className='detail-line';const o=document.createElement('b');o.textContent='情報源';const v=document.createElement('span');v.textContent=e.source||'表示例';origin.append(o,v);body.append(origin);if(e.type==='task'){for(const [label,value] of [['次の一手',e.nextAction],['完了条件',e.completion],['ブロッカー',e.blocker]]){if(typeof value!=='string'||!value.trim())continue;const line=document.createElement('div');line.className='detail-line';const key=document.createElement('b');key.textContent=label;const content=document.createElement('span');content.textContent=value;content.style.whiteSpace='pre-wrap';content.style.overflowWrap='anywhere';line.append(key,content);body.append(line)}}if(e.type==='task'&&!e.nextAction&&!e.completion&&!e.blocker){const hint=document.createElement('p');hint.className='sheet-sub';hint.textContent='詳しい作業内容は、この画面に取得されていません。';body.append(hint)}openDialog('infoDialog')}
+ function showSources(){$('infoTitle').textContent='データの接続状態';$('infoSub').textContent=state.native?'iPhoneのApple予定・Notionは起動時に取得。Web画面の更新だけでは再取得されません。最新情報が必要なら閉じて再起動してください。':'開いた時点で保存済み情報を再取得します。銀行・Notion・Appleのリアルタイム同期は未接続です。';const root=$('infoBody');root.replaceChildren();for(const [name,read,stamp] of [['MY LIFE',state.lifeRead,state.lifeSynced],['Money',state.moneyPrivate?'非表示':state.moneyRead,state.moneySynced],['Notion / Apple',state.native?'起動時の取得結果を下に表示':'未接続',null]]){const div=document.createElement('div');div.className='detail-line';const t=document.createElement('b');t.textContent=name;const text=document.createElement('span');text.textContent=typeof read==='string'?read:read?'このブラウザの保存済みデータを読み取り':'未接続';if(stamp)text.textContent+=' · 元データ更新 '+stamp.toLocaleString('ja-JP');div.append(t,text);root.append(div)}if(state.native){
+    for(const [name,code] of [['Appleカレンダー','apple'],['Notion Tasks','tasks'],['Notion家計','money']]){
+      const div=document.createElement('div');div.className='detail-line';
+      const bold=document.createElement('b');bold.textContent=name;
+      const span=document.createElement('span');span.textContent=({ok:'取得済み',partial:'一部取得',unavailable:'未接続',error:'取得失敗'}[state.native.sources[code].status]||'未確認')+' · '+state.native.range.start+'〜'+state.native.range.end+' / 起動時取得 '+new Date(state.native.generatedAt).toLocaleTimeString('ja-JP');
+      div.append(bold,span);root.append(div);
+    }
+  }
+  const last=document.createElement('div');last.className='detail-line';const t=document.createElement('b');t.textContent='この画面の最終読み取り';const sp=document.createElement('span');sp.textContent=state.loadedAt?state.loadedAt.toLocaleTimeString('ja-JP'):'未確認';last.append(t,sp);root.append(last);openDialog('infoDialog')}
+ $('filterRow').addEventListener('click',e=>{const b=e.target.closest('button[data-filter]');if(!b)return;if(b.dataset.filter==='all'){state.filters=new Set(['schedule','task','money','habit'])}else{const t=b.dataset.filter;if(state.filters.has(t))state.filters.delete(t);else state.filters.add(t)}render()});
+ $('weekBack').addEventListener('click',()=>setDay(addDays(state.selected,-7)));$('weekNext').addEventListener('click',()=>setDay(addDays(state.selected,7)));
+ $('openMonth').addEventListener('click',()=>{renderMonth();openDialog('monthDialog')});$('closeMonth').addEventListener('click',()=>closeDialog('monthDialog'));
+ for(const [id,delta] of [['previousMonth',-1],['followingMonth',1]]){$(id).addEventListener('click',()=>{let [y,m]=state.month.split('-').map(Number);const d=new Date(y,m-1+delta,1,12);state.month=dateKey(d).slice(0,7);renderMonth()})}
+ $('monthToday').addEventListener('click',()=>{setDay(today);closeDialog('monthDialog')});$('infoButton').addEventListener('click',showSources);$('closeInfo').addEventListener('click',()=>closeDialog('infoDialog'));$('refresh').addEventListener('click',()=>load(false));$('useReal').addEventListener('click',()=>load(false));
+ window.addEventListener('pageshow',e=>{if(e.persisted&&!state.demo)load(false)});window.addEventListener('storage',e=>{if(!state.demo&&['yos-life-v1','yos-money-v2'].includes(e.key))load(false)});window.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&!state.demo)load(false)});window.addEventListener('focus',()=>{if(!state.demo&&state.loadedAt&&Date.now()-state.loadedAt.getTime()>10000)load(false)});
+ load(undefined);
+})();
+</script>
+</body></html>
