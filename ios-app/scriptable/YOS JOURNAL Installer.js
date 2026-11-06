@@ -1,4 +1,4 @@
-// YOS GitHub Scriptable Installer v1.1
+// YOS GitHub Scriptable Installer v1.2
 // Installs YOS JOURNAL from GitHub; prompts for its Scriptable name.
 // Never overwrites an existing script.
 const raw="https://raw.githubusercontent.com/yskn0008-bot/ProjectY/main/ios-app/scriptable/YOS%20JOURNAL.js";
@@ -10,7 +10,7 @@ if(!name||name.length>50||/[\\/:*?"<>|]/.test(name)||name==="."||name==="..")thr
 const target=fm.joinPath(dir,name+".js");
 if(fm.fileExists(target))throw Error("「"+name+"」は既にあります。別名にするか既存を保持してください。");
 const req=new Request(raw);const code=await req.loadString();
-if(req.response?.statusCode!==200||!code.includes("YOS JOURNAL v1.4")||!code.includes("WebView"))throw Error("GitHub取得検証に失敗しました。保存は行っていません。");
+if(req.response?.statusCode!==200||!code.includes("YOS JOURNAL v1.5")||!code.includes("WebView"))throw Error("GitHub取得検証に失敗しました。保存は行っていません。");
 fm.writeString(target,code);
 if(fm.readString(target)!==code)throw Error("保存後の読戻しに失敗しました");
 const done=new Alert();done.title="Scriptable登録完了";done.message="「"+name+"」を登録しました。Scriptable一覧に表示されます。\n今後は開くたびに最新号を自動取得します。朝刊通知からの起動には既定名『YOS JOURNAL』を使ってください。";done.addAction("OK");await done.presentAlert();
