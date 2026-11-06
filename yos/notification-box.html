@@ -55,6 +55,9 @@ footer a{color:#a8d8e0}.utility{display:flex;align-items:center;gap:8px}
 <section class="panel" id="connect">
   <h2>既存YOSに接続する</h2>
   <p>通知原文は既存NotionのYOS Inboxに保存。ここでは本人の認証情報を端末の保存領域に記録しません。</p>
+  <button type="button" id="googleConnect" class="primary">既存のGoogleアカウントで接続</button>
+  <div id="googleSignIn" hidden><div id="googleSignInButton"></div></div>
+  <p class="subtle" style="margin-top:12px">または、既存YOSの接続トークンを使う</p>
   <form id="connectForm">
    <label class="field"><span>既存YOS APIのHTTPSアドレス</span>
      <input id="api" type="url" inputmode="url" autocomplete="url" placeholder="https://（確認済みのYOS APIホスト）" required></label>
@@ -83,6 +86,7 @@ footer a{color:#a8d8e0}.utility{display:flex;align-items:center;gap:8px}
 </section>
 <footer>元アプリの通知は停止しません。表示対象はYOS Inboxに保存できた通知だけです。未取得の通知や全件履歴を保証しません。<br>通知の「既読」と「対応完了」は別に管理します。</footer>
 </main>
+<script src="./hj/yos-auth.js"></script>
 <script>
 (() => {
   'use strict';
@@ -162,6 +166,21 @@ footer a{color:#a8d8e0}.utility{display:flex;align-items:center;gap:8px}
     }
     if(!complete)announce('actionStatus','Inboxの全件を読み切れていないため、表示は一部です。',true);
   }
+  $('googleConnect').addEventListener('click',async()=>{
+    if(loading)return;
+    loading=true;$('googleConnect').disabled=true;
+    announce('connectStatus','本人認証を確認しています');
+    try{
+      base=safeBase($('api').value||globalThis.YOS_AI_BASE_URL||'');
+      if(typeof globalThis.YOS_AUTH?.getGoogleIdToken!=='function')throw Error('既存のYOS本人認証が使えません');
+      token=await globalThis.YOS_AUTH.getGoogleIdToken();
+      await sync();
+      try{localStorage.setItem('yos-notification-api-origin',base)}catch{}
+      $('connect').hidden=true;$('timeline').hidden=false;
+      announce('actionStatus','Google本人認証でNotionの通知履歴を取得しました');
+    }catch(error){token='';announce('connectStatus',String(error.message||error),true)}
+    finally{loading=false;$('googleConnect').disabled=false}
+  });
   $('connectForm').addEventListener('submit',async e=>{
     e.preventDefault();if(loading)return;loading=true;$('connectBtn').disabled=true;
     announce('connectStatus','接続を確認しています');
@@ -180,7 +199,7 @@ footer a{color:#a8d8e0}.utility{display:flex;align-items:center;gap:8px}
     finally{loading=false}
   });
   $('disconnect').addEventListener('click',()=>{
-    token='';events=[];$('timeline').hidden=true;$('connect').hidden=false;
+    token='';events=[];globalThis.YOS_AUTH?.resetGoogleIdToken?.();$('timeline').hidden=true;$('connect').hidden=false;
     $('total').textContent=$('unread').textContent=$('pending').textContent='—';
     announce('connectStatus','接続情報を破棄しました');
   });
