@@ -33,7 +33,7 @@
       "fail": 0
     },
     "installerNodeMocks": {
-      "pass": 11,
+      "pass": 14,
       "fail": 0
     },
     "actualCSSContrastPairs": {
@@ -72,7 +72,7 @@
     "url": "https://canva.link/349p0erltl7mr2c",
     "status": "three editable text-free wallpaper pages created; preview exports bundled"
   },
-  "userNextAction": "Scriptable +, paste pinned updater bootstrap, Run; send one screenshot of the opened candidate for reference comparison.",
+  "userNextAction": "Dismiss error; replace bootstrap in current updater script (Untitled Script40 shown in screenshot) and run; send opened candidate screenshot.",
   "deviceChecks": [
     "Apple fixed event time matches Calendar and cannot move",
     "one flexible item long-press handle moves with live feedback and cancellation",
@@ -80,7 +80,7 @@
     "close and rerun candidate preserves placement",
     "old installed DAYSTREAM remains intact"
   ],
-  "resume": "Read design-qa.md and reference-fidelity-revision.md. Fixed code802af090cb7cbcbc81be56f38bdaceee1b825eea. Do not rebuild approved source features. Continue actual iPhone render comparison, fix discrepancies and perform native save/reopen checks. No background runner.",
+  "resume": "App package remains802af090 unchanged. Read installerDeviceFinding and current updater code. Unknown target is never overwritten; new verified package runs directly for capture. Actual Scriptable direct launch and visual comparison remain unverified.",
   "rollback": "Close this candidate and use the unchanged existing DAYSTREAM. No production merge or source-data mutation was made.",
   "backgroundRunner": false,
   "externalChecks": {
@@ -121,5 +121,13 @@
     "visualQA": "blocked pending actual iPhone capture",
     "requiredNext": "Run pinned device-check candidate, obtain one screenshot, compare reference at matching viewport, fix visible mismatches, then verify actual touch/save/reopen.",
     "priorHeldCheckpoint": "0accc5e4c5005692357ef7e5c5b3e066af849af6"
+  },
+  "installerDeviceFinding": {
+    "evidence": "IMG_5922.png user device screenshot",
+    "confirmed": "Updater refused unknown same-name existing code; no visual acceptance of new candidate",
+    "causeOfCodeDifference": "Unconfirmed; not inferred from screenshot",
+    "fix": "Preserve unknown code and run only integrity-checked pinned package directly in memory, without changing script files",
+    "tests": "14 installer tests pass, including no target writes/unknown code execution, tampered payload rejection, and direct async entry primitive",
+    "physicalResult": "Awaiting iPhone execution"
   }
 }

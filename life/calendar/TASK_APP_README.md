@@ -11,3 +11,7 @@ Build: python3 build-timeline-review.py. Verify: node --test timeline.test.mjs t
 Code commit802af090cb7cbcbc81be56f38bdaceee1b825eea. Pinned updater replaces only known prior candidate code, after verified per-version backup and concurrent-edit check; unknown/ambiguous installations are refused. It never writes user plan data. Same target: YOS DAYSTREAM Timeline 開発確認20261105 (actual stored name retains the existing spaces).
 
 Next: open candidate on iPhone, capture screen, compare to exact reference and resolve visible discrepancies. Then verify fixed appointments, drag/cancel, save/readback and reopening. Until then design-qa.md remains blocked. Roll back by closing candidate and opening the untouched original app; versioned code backup is also preserved. No background runner, merge or deployment.
+
+## Actual-device installer finding
+
+User screenshot IMG_5922 confirms the prior updater refused same-name code with an unknown hash. The reason for the byte difference is not established. The new fallback preserves that file exactly and runs only the downloaded, pinned, name/length/SHA256-verified package in an isolated async function. No script file is created or replaced in this fallback; normal app plan saving still requires its explicit Save. Rerun the updater as the entry for this mode, since opening the preserved old script still opens its old UI.14/14 updater tests pass; actual iPhone execution remains unverified.

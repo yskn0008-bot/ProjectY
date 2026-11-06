@@ -9,3 +9,5 @@ Automated:33/33 Node/native/VM DOM tests pass; task-app-reference-skins-test-res
 Distribution phase: a pinned candidate updater is prepared only for physical capture/acceptance. Known existing candidate code is backed up before replacement; unknown scripts are refused. Previous source checkpoint’s “do not reinstall” instruction applies to that historical checkpoint, not this explicit device-check package. No merge, deploy, new server/database or source record mutation.
 
 Resume: read TIMELINE_STATUS.json, verify the fixed candidate hashes, obtain actual iPhone screenshot, compare the selected glass/compact viewport with its exact reference, fix all visible major discrepancies, test native save/reopen and then record acceptance. Background runner is not active.
+
+Actual-device update rejection: existing same-name code did not match the reviewed byte hashes. Screenshot does not establish why. Corrected updater has a direct verified preview fallback with zero script-file writes; it does not weaken the overwrite allowlist.14/14 tests pass, including unknown-target preservation and rejection of tampered package. App source/payload remains unchanged.

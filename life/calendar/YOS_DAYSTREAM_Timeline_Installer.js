@@ -45,6 +45,12 @@ function sha256Hex(input){
   return H.map(v=>v.toString(16).padStart(8,'0')).join('');
 }
 
+// Open the already integrity-checked package without replacing any script file.
+// Used when existing same-name code is unrecognized: preserve it exactly.
+async function runVerifiedPreview(script){
+ const AsyncFunction=Object.getPrototypeOf(async function(){}).constructor;
+ await new AsyncFunction(script)();
+}
 async function install(){
  const req=new Request(SOURCE);req.timeoutInterval=30;
  const raw=await req.loadString();if(req.response?.statusCode!==200)throw Error('固定版を取得できません');
@@ -58,7 +64,7 @@ async function install(){
  if(found.length>1)throw Error('同名の候補が2か所にあるため、どちらも変更せず停止しました');
  const chosen=found[0]||{fm:stores[0],path:stores[0].joinPath(stores[0].documentsDirectory(),TARGET+'.js'),before:null};
  const {fm,path,before}=chosen;
- if(before!==null&&before!==pkg.script&&!PREVIOUS_SCRIPT_SHAS.includes(sha256Hex(before)))throw Error('同名の別コードがあります。上書きせず停止しました');
+ if(before!==null&&before!==pkg.script&&!PREVIOUS_SCRIPT_SHAS.includes(sha256Hex(before))){await runVerifiedPreview(pkg.script);return;}
  if(before!==pkg.script){
   if((fm.fileExists(path)?fm.readString(path):null)!==before)throw Error('導入中にコードが変わりました。変更せず停止しました');
   if(before!==null){const backup=path+'.'+sha256Hex(before).slice(0,12)+'.previous.txt';if(fm.fileExists(backup)&&fm.readString(backup)!==before)throw Error('別のバックアップがあるため保護して停止しました');fm.writeString(backup,before);if(fm.readString(backup)!==before)throw Error('旧版のバックアップを確認できません。元のコードは変更していません');}
