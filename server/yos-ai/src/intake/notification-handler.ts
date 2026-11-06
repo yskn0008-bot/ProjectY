@@ -172,28 +172,35 @@ export function createNotificationHandler(options:{
     const digest=await sha256Hex(event.eventId?'id:'+event.sourceApp+':'+event.eventId:
       'fallback:'+event.sourceApp+':'+event.text+':'+coarseTime);
     const id=digest.slice(0,24),category=categoryOf(event.text),safe=safeText(event.text),decision=triage(event.text,category);
-    const key='yos:notification:inbox:v1:'+id;
+    const key='yos:notification:inbox:v1:'+id,lock=key+':lock';
     try{
-      const claimed=await options.redis.command<string|null>(['SET',key,'processing','NX','EX',120]);
-      if(claimed!=='OK'){
-        const prior=await options.redis.command<string|null>(['GET',key]);
-        if(prior==='done')return result({ok:true,id,duplicate:true,category,decision:decision.decision,alertText:''});
-        return result({error:'Notification is already being saved'},409);
+      const claimed=await options.redis.command<string|null>(['SET',lock,'processing','NX','EX',120]);
+      if(claimed!=='OK')return result({error:'Notification is already being saved'},409);
+      const prior=await options.redis.command<string|null>(['GET',key]);
+      if(prior==='done')return result({ok:true,id,duplicate:true,category,decision:decision.decision,alertText:''});
+      // A previously ambiguous PATCH must be checked against Notion before any retry.
+      if(prior==='pending'){
+        const {blocks,complete}=await listBlocks();
+        if(!complete)throw new Error('Inbox reconciliation incomplete');
+        if(parseRows(blocks).some(x=>x.id===id)){
+          await options.redis.command<string>(['SET',key,'done','EX',2592000]);
+          return result({ok:true,id,duplicate:true,category,decision:decision.decision,alertText:''});
+        }
+      } else {
+        // The durable pending receipt is written BEFORE Notion; normal fresh input
+        // therefore avoids expensive Inbox scans on a locked iPhone.
+        await options.redis.command<string>(['SET',key,'pending','EX',2592000]);
       }
-      // A timed-out Notion append may actually have succeeded. Reconcile before writing.
-      const {blocks,complete}=await listBlocks();
-      if(!complete)throw new Error('Inbox reconciliation incomplete');
-      if(parseRows(blocks).some(x=>x.id===id)){
-        await options.redis.command<string>(['SET',key,'done','EX',2592000]);
-        return result({ok:true,id,duplicate:true,category,decision:decision.decision,alertText:''});
-      }
-      // Classification is stored with the original; no Money/Tasks write is inferred.
+      // Classification is metadata, not an instruction to record a payment or create a task.
       await append(eventBlock({id,at:event.occurredAt,category,text:safe}));
       await options.redis.command<string>(['SET',key,'done','EX',2592000]);
       return result({ok:true,id,duplicate:false,category,decision:decision.decision,alertText:decision.alertText},201);
     }catch{
-      // Preserve the claim for its TTL to prevent immediate duplicate writes.
+      // Keep the pending receipt: a timed-out PATCH may have actually succeeded.
       return result({error:'Inbox saving unconfirmed; original notification remains'},503);
+    }finally{
+      // Failure to release a lock is harmless; it expires within 120 seconds.
+      try{await options.redis.command<number>(['DEL',lock])}catch{}
     }
   };
 }
