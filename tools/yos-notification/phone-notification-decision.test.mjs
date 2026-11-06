@@ -12,3 +12,23 @@ test('saved contact with voicemail',()=>assert.equal(decide({...base,isSavedCont
 test('unknown voicemail state is pending',()=>assert.equal(decide({...base,voicemail:{}}).pending,true));
 test('spam report only does not identify caller',()=>assert.equal(decide({...base,lookup:{exactNumberMatch:true,name:'spam',sourceType:'spam_report'}}).notify,false));
 test('other notification is ignored',()=>assert.equal(decide({kind:'message'}).notify,false));
+
+const { missedCallArchive } = require('./Phone-Notification-Decision-v0.1.js');
+test('every missed call has an archive candidate even when silent',()=>{
+ const event={kind:'missed_call',voicemail:{present:false},isSavedContact:true};
+ assert.equal(decide(event).notify,false);
+ const archive=missedCallArchive(event);
+ assert.equal(archive?.kind,'missed-call');
+ assert.equal(archive?.reviewStatus,'未確認');
+ assert.equal(archive?.handled,false);
+});
+test('unknown caller is not identified by guessing a number',()=>{
+ const a=missedCallArchive({kind:'missed_call',displayNumber:'01234567890'});
+ assert.equal(a.displayName,'発信者未確認');
+ assert.equal(a.time,null);
+});
+test('voicemail presence is not inferred from missing data',()=>{
+ const a=missedCallArchive({kind:'missed_call',contactName:'テスト'});
+ assert.equal(a.voicemailStatus,'未確認');
+});
+test('a non-call event is not archived as a missed call',()=>assert.equal(missedCallArchive({kind:'message'}),null));
