@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-07T06:20:18+09:00",
+  "updated_at": "2026-11-07T08:11:14+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-06T20:58:01Z"
+      "updated_at": "2026-11-06T22:20:59Z"
     },
     {
       "id": "github-issue-234",
@@ -195,6 +195,20 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-5320ca0639c2",
+      "title": "Align named installer verification with Timeline v0.2",
+      "completed_at": "2026-11-06T23:10:39Z",
+      "result": "GitHub mainへ反映（5320ca0）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/5320ca0639c22e44b6cbbee7cf66c4b5e7305056"
+    },
+    {
+      "id": "github-commit-71e7a84a6e57",
+      "title": "Polish YOS Timeline Scriptable with vivid native-style task cards and stronger typography",
+      "completed_at": "2026-11-06T23:10:33Z",
+      "result": "GitHub mainへ反映（71e7a84）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/71e7a84a6e575308f4b5f39c93c6d5cebb9f827f"
+    },
+    {
       "id": "github-commit-79b096c35f35",
       "title": "Add named GitHub installer for YOS Timeline",
       "completed_at": "2026-11-06T21:19:40Z",
@@ -214,20 +228,6 @@
       "completed_at": "2026-11-04T16:28:53Z",
       "result": "GitHub mainへ反映（3d07558）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/3d07558250cfe99232746fc2d880526eb8e5485b"
-    },
-    {
-      "id": "github-commit-3787a3bf7df9",
-      "title": "data(journal): add edition date for stale issue detection",
-      "completed_at": "2026-11-04T16:28:47Z",
-      "result": "GitHub mainへ反映（3787a3b）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/3787a3bf7df94b4c6b111e0a098fc9613a307006"
-    },
-    {
-      "id": "github-commit-37ff27e82e83",
-      "title": "feat(journal): align installer with v1.4 and fixed launch name",
-      "completed_at": "2026-11-04T16:28:29Z",
-      "result": "GitHub mainへ反映（37ff27e）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/37ff27e82e830048d3e5fc7ca89b6f368779641b"
     },
     {
       "id": "complete-002",
@@ -264,7 +264,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-07T06:20:18+09:00",
+      "last_update": "2026-11-07T08:11:14+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -345,7 +345,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-07T06:20:18+09:00",
+      "last_update": "2026-11-07T08:11:14+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -368,7 +368,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-07T06:20:18+09:00",
+      "last_update": "2026-11-07T08:11:14+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -450,5 +450,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "8b3578b64d6acf0c9356b39fcaf5a4ebc4530c27eed3bd7388623cdf7e7c63e3"
+  "github_snapshot_hash": "cb264d41d08c5ee36c355fa9e858c0b730194e2cbe2411b1af544c50a66bfd2f"
 }
