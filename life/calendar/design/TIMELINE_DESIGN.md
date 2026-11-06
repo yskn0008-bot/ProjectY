@@ -1,3 +1,5 @@
+> 2026-11-07最新：本人が承認したYOS LIFE FLOWの白いガラス調・青／緑／紫カードを現在の実装基準とする。TASK_APP_README.mdとdaystream-timeline-ui.css参照。以前のモノクロ案と比較SVGは履歴。実機表示の承認済みという意味ではない。
+
 > 2026-11-05追加：旧候補は実機でデザイン不採用。現在の構成は `../TIMELINE_VISUAL_REVISION.md` と `../daystream-timeline-ui.css` を参照。以下のSVG9状態は過去の比較参考であり、現在UIの実画面・本人承認済みデザインではありません。
 
 # YOS 24時間生活タイムライン — design and evidence contract

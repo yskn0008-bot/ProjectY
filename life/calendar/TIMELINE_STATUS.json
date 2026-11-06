@@ -1,14 +1,14 @@
 {
   "schema": "yos-timeline-delivery-status-v1",
-  "recordedDateJST": "2026-11-05",
+  "recordedDateJST": "2026-11-07",
   "state": "WAIT_USER",
   "reason": "iPhone-only touch, native source permissions and persistence checks remain; Figma canvas work is separately EXTERNAL_WAIT due to Starter MCP limit",
   "repository": "yskn0008-bot/ProjectY",
   "pullRequest": 654,
   "baselineHead": "6ffdc056138301e3a1a70eac2f635a761277da64",
-  "candidateCodeCommit": "c05d1eafac5fa8acceff4f5b80eef00e30f27bdc",
-  "packageSHA256": "b82770424278e3ed5849dbefb6a7af16982843d53cfc9065a279b3ddbd5f954a",
-  "scriptSHA256": "380b5fad7a68027e46bcca31608101e9f94924372ed1df7b5d0d7fad6c10d809",
+  "candidateCodeCommit": "7119bc4e8a25418e01c36fc75a98271711119afa",
+  "packageSHA256": "43d481bc67b9382fe62ba6cdc9190eaa5f2fbc90f639f2106bd2775affa1f381",
+  "scriptSHA256": "47d78c6fe61eaa5ad8b3f695250559f6e2686dafd8ff16a94eb40647e8469727",
   "codeImplemented": [
     "24h exact geometry",
     "fixed source event protection",
@@ -25,7 +25,7 @@
   ],
   "automatedVerification": {
     "candidateNodeAndDOM": {
-      "pass": 22,
+      "pass": 28,
       "fail": 0
     },
     "unchangedBaselineNode": {
@@ -33,7 +33,7 @@
       "fail": 0
     },
     "installerNodeMocks": {
-      "pass": 9,
+      "pass": 10,
       "fail": 0
     },
     "actualCSSContrastPairs": {
@@ -72,7 +72,7 @@
     "url": "https://canva.link/349p0erltl7mr2c",
     "status": "three editable text-free wallpaper pages created; preview exports bundled"
   },
-  "userNextAction": "Run the revised pinned installer. It updates only the known prior candidate with backup/readback; unchanged 20261102 scripts and plan data are protected.",
+  "userNextAction": "Run revised pinned installer in Scriptable, then verify pastel glass UI, one task add/check/save/reopen on iPhone.",
   "deviceChecks": [
     "Apple fixed event time matches Calendar and cannot move",
     "one flexible item long-press handle moves with live feedback and cancellation",
@@ -80,7 +80,7 @@
     "close and rerun candidate preserves placement",
     "old installed DAYSTREAM remains intact"
   ],
-  "resume": "Read TIMELINE_VISUAL_REVISION.md and current PR head. Revised code commit c05d1eafac5fa8acceff4f5b80eef00e30f27bdc; verify package/script hashes above; collect the revised first-screen iPhone display and continue without regenerating the implementation.",
+  "resume": "Read TASK_APP_README.md and current PR head. Executable app commit7119bc4e8a25418e01c36fc75a98271711119afa; compare package/script SHA256 above. Continue physical-device acceptance without rebuilding already verified features.",
   "rollback": "Close this candidate and use the unchanged existing DAYSTREAM. No production merge or source-data mutation was made.",
   "backgroundRunner": false,
   "externalChecks": {
@@ -94,5 +94,19 @@
     "confirmedOnDevice": "Prior candidate opened and displayed source-status badge only; revised UI not yet device checked",
     "sourceRecordsChanged": false,
     "priorCandidateScriptSHA256": "b117fcd0c29c1227ef2205866dd19a0dea2564fc9f736806a5c54bdd49d5d1ca"
+  },
+  "taskAppRevision": {
+    "design": "User approved generated YOS LIFE FLOW pastel glass reference; implemented as real HTML/CSS/SVG UI, not a flattened screenshot",
+    "workingFeatures": [
+      "add/edit placement",
+      "local per-occurrence completion",
+      "confirmed local placement removal and undo",
+      "explicit save/readback/reopen contract",
+      "habits/review/settings views",
+      "week/month/year date navigation"
+    ],
+    "completionScope": "device-local planned occurrences only; no Notion or Calendar mutations",
+    "compatibility": "optional bounded timeline.completed extension; existing saved placements retained",
+    "installer": "known previous b117 and 380 script hashes only; per-version backup filenames preserve legacy .previous.txt"
   }
 }

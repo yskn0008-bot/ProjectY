@@ -22,3 +22,9 @@ Native logic tests mock FileManager and WebView; DOM tests execute the actual ge
 ## Unverified physical gate
 
 Real Scriptable WebView rendering, iPhone touch/long-press scrolling, Apple permission responses, actual local file read/write/reopen, and visual match on-device remain unverified. Browser execution is blocked by the current environment; no screenshot is claimed as live UI. Installation/updater and remote transport are managed separately. Keep this candidate and original app separate until that gate passes.
+
+## Delivery and rollback boundary
+
+Executable app commit: `7119bc4e8a25418e01c36fc75a98271711119afa`. The pinned installer updates the same known candidate name and verifies package/script identity. It accepts only the two reviewed prior code hashes, keeps a per-version code backup, checks concurrent edits, verifies writeback, and attempts restoration on failure. Existing legacy `.previous.txt` backups are retained. Never overwrite unknown scripts or the20261102 package. Local occurrence completion is a new optional extension; an older candidate writer may drop that extension, so restoring old code does not imply saved completion-data compatibility. The original20261102 app uses its separate unchanged store.
+
+Current native/DOM tests:28/28. Installer mock tests:10/10. Actual iPhone rendering/touch/permissions/persistence still require user-device verification.
