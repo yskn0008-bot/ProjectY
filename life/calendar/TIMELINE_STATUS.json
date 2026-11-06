@@ -1,14 +1,14 @@
 {
   "schema": "yos-timeline-delivery-status-v1",
   "recordedDateJST": "2026-11-07",
-  "state": "FAILED_SAFE",
-  "reason": "User rejected visual fidelity. Source correction in progress; rendered comparison blocked by environment. Existing installer remains pinned to prior code and is not a verified visual release.",
+  "state": "WAIT_USER",
+  "reason": "Actual iPhone rendered capture is needed to compare the supplied visual reference; local automated checks do not establish visual match.",
   "repository": "yskn0008-bot/ProjectY",
   "pullRequest": 654,
   "baselineHead": "6ffdc056138301e3a1a70eac2f635a761277da64",
-  "candidateCodeCommit": "7119bc4e8a25418e01c36fc75a98271711119afa",
-  "packageSHA256": "43d481bc67b9382fe62ba6cdc9190eaa5f2fbc90f639f2106bd2775affa1f381",
-  "scriptSHA256": "47d78c6fe61eaa5ad8b3f695250559f6e2686dafd8ff16a94eb40647e8469727",
+  "candidateCodeCommit": "802af090cb7cbcbc81be56f38bdaceee1b825eea",
+  "packageSHA256": "67e1abaeee5d3f7251bd1fdbd2c556d03d31aa329fc9d2108a6887dcd037a5c5",
+  "scriptSHA256": "8ce8cb121b21063d4b287f0cef256f05203ee63a27f49217a292b07d9375407e",
   "codeImplemented": [
     "24h exact geometry",
     "fixed source event protection",
@@ -25,7 +25,7 @@
   ],
   "automatedVerification": {
     "candidateNodeAndDOM": {
-      "pass": 28,
+      "pass": 33,
       "fail": 0
     },
     "unchangedBaselineNode": {
@@ -33,7 +33,7 @@
       "fail": 0
     },
     "installerNodeMocks": {
-      "pass": 10,
+      "pass": 11,
       "fail": 0
     },
     "actualCSSContrastPairs": {
@@ -72,7 +72,7 @@
     "url": "https://canva.link/349p0erltl7mr2c",
     "status": "three editable text-free wallpaper pages created; preview exports bundled"
   },
-  "userNextAction": "No reinstall requested: corrected code must pass rendered visual comparison before distribution.",
+  "userNextAction": "Scriptable +, paste pinned updater bootstrap, Run; send one screenshot of the opened candidate for reference comparison.",
   "deviceChecks": [
     "Apple fixed event time matches Calendar and cannot move",
     "one flexible item long-press handle moves with live feedback and cancellation",
@@ -80,7 +80,7 @@
     "close and rerun candidate preserves placement",
     "old installed DAYSTREAM remains intact"
   ],
-  "resume": "Read reference-fidelity-revision.md and design-qa.md. Existing installer still pins previous distributed code. Corrected source is a checkpoint, not an accepted visual release. Preserve original app and plan data.",
+  "resume": "Read design-qa.md and reference-fidelity-revision.md. Fixed code802af090cb7cbcbc81be56f38bdaceee1b825eea. Do not rebuild approved source features. Continue actual iPhone render comparison, fix discrepancies and perform native save/reopen checks. No background runner.",
   "rollback": "Close this candidate and use the unchanged existing DAYSTREAM. No production merge or source-data mutation was made.",
   "backgroundRunner": false,
   "externalChecks": {
@@ -96,7 +96,7 @@
     "priorCandidateScriptSHA256": "b117fcd0c29c1227ef2205866dd19a0dea2564fc9f736806a5c54bdd49d5d1ca"
   },
   "taskAppRevision": {
-    "design": "User approved generated YOS LIFE FLOW pastel glass reference; implemented as real HTML/CSS/SVG UI, not a flattened screenshot",
+    "design": "Glass reference2 is default; compact reference1 selectable. Real generated text-free pearl wallpaper and official offline Phosphor icons embedded. Actual render not yet accepted.",
     "workingFeatures": [
       "add/edit placement",
       "local per-occurrence completion",
@@ -107,20 +107,19 @@
     ],
     "completionScope": "device-local planned occurrences only; no Notion or Calendar mutations",
     "compatibility": "optional bounded timeline.completed extension; existing saved placements retained",
-    "installer": "known previous b117 and 380 script hashes only; per-version backup filenames preserve legacy .previous.txt"
+    "installer": "Known b117,380 and47d78 script hashes accepted with per-version backup/readback/conflict guards; same candidate name."
   },
   "referenceFidelityRevision": {
-    "request": "Match supplied compact daily agenda and separate edit screen; glass finish reference",
-    "releaseStatus": "HELD_FOR_RENDERED_QA",
-    "previousDistributedCode": "7119bc4e8a25418e01c36fc75a98271711119afa",
-    "distributionChanged": false,
-    "visualQA": "blocked: no permissible rendered implementation screenshot available",
-    "requiredNext": "Capture actual app at matching viewport; compare with reference, fix visible discrepancies, then build pinned updater and test on iPhone.",
+    "status": "DEVICE_CAPTURE_CANDIDATE_NOT_VISUALLY_ACCEPTED",
+    "default": "second reference glass screen, pearl background",
+    "alternate": "first reference compact agenda",
     "sourceTests": {
-      "pass": 30,
+      "pass": 33,
       "fail": 0,
-      "evidence": "task-app-home-edit-test-results.txt",
-      "scope": "Node/native and VM DOM tests only; no rendered visual pass"
-    }
+      "evidence": "task-app-reference-skins-test-results.txt"
+    },
+    "visualQA": "blocked pending actual iPhone capture",
+    "requiredNext": "Run pinned device-check candidate, obtain one screenshot, compare reference at matching viewport, fix visible mismatches, then verify actual touch/save/reopen.",
+    "priorHeldCheckpoint": "0accc5e4c5005692357ef7e5c5b3e066af849af6"
   }
 }

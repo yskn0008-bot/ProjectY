@@ -1,32 +1,13 @@
-> Status correction: the user rejected visual fidelity. The prior description “Approved pastel glass design, implemented” is not evidence of acceptance. See reference-fidelity-revision.md and design-qa.md. Corrected source is unpublished; existing installer still points to the previous candidate.
+# YOS / LIFE FLOW — reference device-check candidate
 
-# YOS / LIFE FLOW — DAYSTREAM task app
+This candidate is for obtaining the actual iPhone screen needed for visual comparison. It is not visually accepted or final. The source-only held checkpoint0accc5 is superseded by this explicit capture candidate.
 
-Approved pastel glass design, implemented as real offline HTML controls and CSS gradients. Reference screenshot content is never imported as personal routines. Existing DAYSTREAM records and native bridge are reused; no new server, account, database, or runtime request is added.
+Default HOME follows reference2 glass composition: inline identity, title, date pill/calendar, semantic legend, large translucent cards with actual times, text-free pearl wallpaper. Settings offers reference1 compact composition. Both share the same real schedule and local plan. Reference screenshots, sample schedules and ungrounded health effects are not imported.
 
-## Current behavior
+EDIT retains exact2px/min0–24h geometry, protected Apple/timed Notion rows, local drag impact, undo, recurrence and explicit native save/readback. Existing plan schema/name and original20261102 app remain unchanged. Local occurrence checks never update source task completion. No new server/database or runtime CDN.
 
-- Day: exact 2px/min axis, 00:00–24:00, ongoing across-midnight clipping, date arrows and preserved month calendar.
-- Week: seven date summaries from selected day, each opens that day; unavailable source window explicitly says 未確認. Month opens the existing month picker; year opens twelve month buttons, each opens its month picker. These are date-navigation views, not invented analytics.
-- Add/edit a local placement, one-off/daily/weekly/monthly/yearly recurrence, individual time exceptions and move undo. Saved and unsaved placements can be removed from this local plan after confirmation; recurring removal affects the local series. Undo restores the removed plan and its local checks. Source tasks are never deleted.
-- Check an individual occurrence in its editor or the review tab. The check is a bounded, optional `timeline.completed[id@date]` boolean extension. It describes this device only. Recurring instances remain independent. Apple and Notion completion are never written; `completedKeys` remains empty.
-- Habits tab reads the existing habit file for the selected day and offers placement or edit. Source failures and empty loaded lists are distinguished. Unplaced source tasks are only the dated rows actually retrieved by the existing native feed, not every Notion task.
-- Review reports only selected-day local plan counts and local checks. It does not invent success percentages, health effects or source task completion.
-- Settings shows existing source/connection information, day selection, offline background options and light/dark/device appearance. Appearance settings last until close.
-- Explicit Save uses the existing native callback and FileManager write/readback with conflict detection and previous-state recovery. The candidate uses `YOS_DAYSTREAM_TIMELINE_REVIEW_v1.json`; original stores are unchanged.
+Build: python3 build-timeline-review.py. Verify: node --test timeline.test.mjs timeline.dom.test.mjs; node --test timeline-installer.test.mjs. Current33/33 source/native/VM DOM and11/11 installer mocks pass. Raw download and code hashes are checked separately. These are not browser rendering, iPhone touch, real permissions or persistence results.
 
-## Files and verification
+Code commit802af090cb7cbcbc81be56f38bdaceee1b825eea. Pinned updater replaces only known prior candidate code, after verified per-version backup and concurrent-edit check; unknown/ambiguous installations are refused. It never writes user plan data. Same target: YOS DAYSTREAM Timeline 開発確認20261105 (actual stored name retains the existing spaces).
 
-`build-timeline-review.py` composes the existing baseline with additive core/UI/CSS and produces `daystream-timeline.html`, `YOS_DAYSTREAM_TimelineBridge_Dev.js`, and `YOS_DAYSTREAM_Timeline_Review_20261105.scriptable`. Run `python build-timeline-review.py` then `node --test timeline.test.mjs timeline.dom.test.mjs`.
-
-Native logic tests mock FileManager and WebView; DOM tests execute the actual generated page in a minimal VM DOM. They verify callback/readback, source immutability, 24-hour geometry, recurrence, drag feedback, add/edit/undo, occurrence checks, explicit save/reopen, removal cancellation and restore, source habits, tabs, week/year navigation and configured text contrast. They are not a real browser rendering or iPhone result.
-
-## Unverified physical gate
-
-Real Scriptable WebView rendering, iPhone touch/long-press scrolling, Apple permission responses, actual local file read/write/reopen, and visual match on-device remain unverified. Browser execution is blocked by the current environment; no screenshot is claimed as live UI. Installation/updater and remote transport are managed separately. Keep this candidate and original app separate until that gate passes.
-
-## Delivery and rollback boundary
-
-Executable app commit: `7119bc4e8a25418e01c36fc75a98271711119afa`. The pinned installer updates the same known candidate name and verifies package/script identity. It accepts only the two reviewed prior code hashes, keeps a per-version code backup, checks concurrent edits, verifies writeback, and attempts restoration on failure. Existing legacy `.previous.txt` backups are retained. Never overwrite unknown scripts or the20261102 package. Local occurrence completion is a new optional extension; an older candidate writer may drop that extension, so restoring old code does not imply saved completion-data compatibility. The original20261102 app uses its separate unchanged store.
-
-Current native/DOM tests:28/28. Installer mock tests:10/10. Actual iPhone rendering/touch/permissions/persistence still require user-device verification.
+Next: open candidate on iPhone, capture screen, compare to exact reference and resolve visible discrepancies. Then verify fixed appointments, drag/cancel, save/readback and reopening. Until then design-qa.md remains blocked. Roll back by closing candidate and opening the untouched original app; versioned code backup is also preserved. No background runner, merge or deployment.

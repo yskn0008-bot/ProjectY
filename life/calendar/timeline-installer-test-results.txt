@@ -1,18 +1,19 @@
-✔ production pins match new bundle and retain only reviewed previous version (3.050755ms)
-✔ fresh install reads back code before launch and leaves plan untouched (124.459417ms)
-✔ known prior version backs up first and updates same candidate name (102.209139ms)
-✔ exact version is no-op, including local storage without cloud duplicate (225.617749ms)
-✔ unknown code and ambiguous double installation remain unchanged (186.12853ms)
-✔ tampered download and HTTP failure never write or launch (6.608373ms)
-✔ unknown backup and failed backup preserve previous candidate (184.165001ms)
-✔ failed readback restores prior version or removes only new candidate (200.262668ms)
-✔ concurrent external edit is preserved and refuses own write (93.689907ms)
-✔ newer reviewed version uses own backup while legacy backup remains intact (101.073348ms)
-ℹ tests 10
+✔ production pins match new bundle and retain only reviewed previous version (1.563756ms)
+✔ fresh install reads back code before launch and leaves plan untouched (30.511478ms)
+✔ known prior version backs up first and updates same candidate name (28.676391ms)
+✔ exact version is no-op, including local storage without cloud duplicate (66.971636ms)
+✔ unknown code and ambiguous double installation remain unchanged (63.093694ms)
+✔ tampered download and HTTP failure never write or launch (1.5928ms)
+✔ unknown backup and failed backup preserve previous candidate (37.586533ms)
+✔ failed readback restores prior version or removes only new candidate (40.834127ms)
+✔ concurrent external edit is preserved and refuses own write (23.101175ms)
+✔ newer reviewed version uses own backup while legacy backup remains intact (19.28483ms)
+✔ last distributed glass candidate updates with its own verified backup (18.250655ms)
+ℹ tests 11
 ℹ suites 0
-ℹ pass 10
+ℹ pass 11
 ℹ fail 0
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 1344.629859
+ℹ duration_ms 424.355565
