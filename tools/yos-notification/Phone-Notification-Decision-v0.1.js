@@ -28,4 +28,24 @@ function decidePhoneNotification(event) {
   if (match.status === "pending") return {notify:false,reason:"lookup_pending",pending:true};
   return {notify:false,reason:"unknown_number_not_identified"};
 }
-if (typeof module !== "undefined") module.exports = {decidePhoneNotification};
+// Use the original Phone notification as the archive source. This does not query iOS Call History.
+// "Needs review" is not the same as "urgent" or "call back immediately".
+function missedCallArchive(event) {
+  if (!event || event.kind !== "missed_call") return null;
+  const display = typeof event.contactName==="string" && event.contactName.trim()
+    ? event.contactName.trim().slice(0,80) : "発信者未確認";
+  const when = typeof event.time==="string" && !Number.isNaN(Date.parse(event.time)) ? event.time : null;
+  const voicemail = event.voicemail?.present===true ? "あり" :
+    event.voicemail?.present===false ? "なし" : "未確認";
+  return {
+    kind:"missed-call",
+    source:"iPhone通知（着信履歴を直接取得していない）",
+    displayName:display,
+    time:when,
+    voicemailStatus:voicemail,
+    reviewStatus:"未確認",
+    handled:false,
+    note:"折り返しが必要か電話アプリと本人の状況で確認。電話番号・折り返し済み・通話内容は推測しない。"
+  };
+}
+if (typeof module !== "undefined") module.exports = {decidePhoneNotification,missedCallArchive};
