@@ -57,12 +57,23 @@ function categoryOf(s:string):Category {
   return 'information';
 }
 function triage(raw:string,category:Category):{decision:'YOS_SILENT'|'YOS_ALERT';alertText:string} {
-  if(TEST.test(raw)||OTP.test(raw)||/不正利用(?:は|が)(?:確認|検出)されません/iu.test(raw))return {decision:'YOS_SILENT',alertText:''};
-  if(category==='missed-call')return {decision:'YOS_SILENT',alertText:''};
-  const risk=/口座凍結|差押|差し押さえ|不正利用|不正送金|訴状|引き落としに失敗|引落失敗|支払期限.{0,12}(?:本日|今日|明日)|期限切れ/iu.test(raw);
-  if(!risk)return {decision:'YOS_SILENT',alertText:''};
-  const safe=safeText(raw).replace(/\s+/gu,' ').slice(0,150);
-  return {decision:'YOS_ALERT',alertText:'YOS｜要確認\n'+safe+'\n元アプリで事実と期限を確認してください。'};
+  const silent={decision:'YOS_SILENT' as const,alertText:''};
+  if(TEST.test(raw)||OTP.test(raw)||/不正利用(?:は|が)(?:確認|検出)されません/iu.test(raw))return silent;
+  if(category==='missed-call')return silent;
+  const p0=/口座凍結|差押|差し押さえ|不正送金|不正利用|訴状/iu.test(raw);
+  const p1=/引き落としに失敗|引落失敗|振込失敗|支払期限.{0,12}(?:本日|今日|明日)|期限切れ/iu.test(raw);
+  if(!p0&&!p1)return silent;
+  const priority=p0?'P0':'P1',facts=safeText(raw).replace(/\s+/gu,' ').slice(0,180);
+  const amount=/(?:[￥¥]\s*[\d,]+|[\d,]+\s*円)/u.exec(raw)?.[0]??'';
+  const due=/(?:支払期限|引落日|期限|締切|締め切り)[：:\s]*(?:20\d{2}年)?\s*\d{1,2}月\d{1,2}日|(?:支払期限|期限)[：:\s]*(?:本日|今日|明日)/u.exec(raw)?.[0]??'';
+  const caution=category==='legal'?'法的な対応期限や財産への影響があり得ます（未確認）。'
+    :category==='money-review'?'支払い・利用停止などの影響があり得ます（未確認）。'
+    :'安全・金融への影響があり得ます（未確認）。';
+  const lines=['【YOS重要｜'+priority+'】','事実: '+facts];
+  if(amount)lines.push('記載金額: '+amount);
+  if(due)lines.push('記載期限: '+due);
+  lines.push('影響: '+caution,'次の一手: 通知のリンクではなく元アプリを開き、事実と期限を確認する。','根拠: 受信通知の本文。真偽と現在の状況は未照合。');
+  return {decision:'YOS_ALERT',alertText:lines.join('\n')};
 }
 function parseCapture(body:unknown,now:Date):{ok:true;value:Capture}|{ok:false;reason:string} {
   if(!asRecord(body))return {ok:false,reason:'JSON object required'};
