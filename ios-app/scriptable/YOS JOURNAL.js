@@ -21,7 +21,7 @@ const valid=x=>{
   imageCaption:String(a.imageCaption||"").trim(),
   imageKind:a.imageKind==="illustrative"?"illustrative":"",
   keyPoints:Array.isArray(a.keyPoints)?a.keyPoints.slice(0,3).map(s=>String(s||"").trim()).filter(Boolean):[]
- })).filter(a=>a.title&&a.link);
+ })).filter(a=>a.title&&a.link&&a.summary&&a.reason&&a.source);
  if(!articles.length)throw Error("表示できる記事がありません");
  return {date:String(x.date||"発行日未確認"),issuedOn:/^\d{4}-\d{2}-\d{2}$/.test(x.issuedOn||"")?x.issuedOn:"",lead:String(x.lead||""),headline:String(x.headline||""),articles};
 };
