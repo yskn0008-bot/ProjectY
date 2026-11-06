@@ -1,6 +1,8 @@
 import {createNotificationHandler} from '../../dist/intake/notification-handler.js';
 import {loadYosStorageConfig} from '../../dist/storage/config.js';
 import {UpstashRestClient} from '../../dist/storage/upstash-rest.js';
+import {createGoogleIdentityVerifier} from '../../dist/auth/google-runtime.js';
+import {IdentityGate} from '../../dist/auth/identity-gate.js';
 
 let handler;
 function getHandler() {
@@ -11,9 +13,21 @@ function getHandler() {
     const inbox=environment.YOS_NOTION_INBOX_PAGE_ID?.trim();
     if (!hash||!notionToken||!inbox) throw new Error('Notification intake is not configured');
     const storage=loadYosStorageConfig(environment);
+    const clientId=environment.GOOGLE_CLIENT_ID?.trim();
+    const subjectHash=environment.GOOGLE_ALLOWED_SUBJECT_HASH?.trim();
+    let viewerAuth;
+    if(clientId&&subjectHash){
+      const verifier=createGoogleIdentityVerifier(clientId);
+      const gate=new IdentityGate({expectedAudience:clientId,allowedSubjectHash:subjectHash,requireEmailVerified:true});
+      viewerAuth=async token=>{
+        await gate.authorize(await verifier.verify(token));
+        return true;
+      };
+    }
     handler=createNotificationHandler({
       tokenSha256:hash,notionToken,notionPageId:inbox,
-      redis:new UpstashRestClient({url:storage.upstashUrl,token:storage.upstashToken})
+      redis:new UpstashRestClient({url:storage.upstashUrl,token:storage.upstashToken}),
+      ...(viewerAuth?{viewerAuth}:{})
     });
   }
   return handler;
