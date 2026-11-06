@@ -20,7 +20,7 @@ function scrub(raw){
     .replace(/\b0\d{9,10}\b/g,'[電話番号非表示]')
     .replace(/((?:password|パスワード|secret|token|APIキー)\s*[:：=]\s*)\S+/gi,'$1[秘密非表示]')
     .replace(/https?:\/\/\S+/gi,'[リンク非表示]');
-  const category=/差押|差し押さえ|督促|裁判所|訴訟/.test(v)?'legal':/支払|決済|請求|返済|振込|入金|出金|残高|引落|PayPay/.test(v)?'money-review':/不正アクセス|ログイン/.test(v)?'security':'information';
+  const category=/不在着信|応答なしの着信|missed[ -]?call/i.test(v)?'missed-call':/差押|差し押さえ|督促|裁判所|訴訟/.test(v)?'legal':/支払|決済|請求|返済|振込|入金|出金|残高|引落|PayPay/.test(v)?'money-review':/不正アクセス|ログイン/.test(v)?'security':'information';
   return {category,body:v.slice(0,850)};
 }
 function idOf(v){let h=2166136261;for(let i=0;i<v.length;i++){h^=v.charCodeAt(i);h=Math.imul(h,16777619)}return (h>>>0).toString(16).padStart(8,'0')}
