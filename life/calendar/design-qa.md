@@ -1,11 +1,7 @@
-# Reference fidelity QA
+# Current design acceptance gate
 
 final result: blocked
 
-Target: supplied second reference (38B0552D), left screen, as the default glass HOME; first reference (15F7C4CD), compact HOME and separate EDIT as alternate presentation. Both references were opened. No arbitrary hybrid is designated as matching both.
+User now explicitly asks for an exact static wallpaper copy and defers task functionality. The current renderer uses the original supplied JPEG bytes, clipped to the left content viewport and scaled uniformly. It does not redraw or approximate the source. Original hash equality and viewport math are verified; actual iPhone placement/crop and Scriptable chrome remain unverified. Prior generated/HTML skins are historical, not the current target.
 
-Implemented: explicit glass/compact modes; glass identity/title/date pill/legend and larger translucent cards with actual time text; generated text-free pearl background; official offline Phosphor icons; separate precise edit grid. Source screenshots are not baked into the UI and reference example routines are never imported as user data.
-
-Verification: 33 Node/native/VM DOM tests pass after embedding the final assets. These test source behavior and packaging, not actual visual fidelity.
-
-Blocker: no permissible rendered implementation screenshot in this environment. Prior browser restrictions are not bypassed. A device-check candidate is prepared specifically to obtain an actual iPhone screenshot; it is not a visually accepted release. After the user supplies a capture, compare matching viewport/state to the reference and correct discrepancies before accepting the design. Required: typography, spacing, card clipping, actual wallpaper, touch and native save/reopen. Physical device and Figma canvas remain unverified/incomplete.
+Source: second supplied JPEG (glass) default; first supplied JPEG (compact) optional. Both original images remain unchanged. See REFERENCE_WALLPAPER.md and reference-wallpaper-manifest.json.5 source/native mock checks pass. No claim of a browser or physical-device visual pass. Next: obtain actual iPhone output and compare the exact chosen viewport with the source.

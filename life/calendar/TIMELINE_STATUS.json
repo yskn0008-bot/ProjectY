@@ -2,7 +2,7 @@
   "schema": "yos-timeline-delivery-status-v1",
   "recordedDateJST": "2026-11-07",
   "state": "WAIT_USER",
-  "reason": "Actual iPhone rendered capture is needed to compare the supplied visual reference; local automated checks do not establish visual match.",
+  "reason": "User changed immediate scope to a literal static reference timeline wallpaper; prepared original-image viewer, awaiting iPhone display check.",
   "repository": "yskn0008-bot/ProjectY",
   "pullRequest": 654,
   "baselineHead": "6ffdc056138301e3a1a70eac2f635a761277da64",
@@ -72,7 +72,7 @@
     "url": "https://canva.link/349p0erltl7mr2c",
     "status": "three editable text-free wallpaper pages created; preview exports bundled"
   },
-  "userNextAction": "Dismiss error; replace bootstrap in current updater script (Untitled Script40 shown in screenshot) and run; send opened candidate screenshot.",
+  "userNextAction": "Replace the current short Scriptable bootstrap with the pinned static viewer URL and run.",
   "deviceChecks": [
     "Apple fixed event time matches Calendar and cannot move",
     "one flexible item long-press handle moves with live feedback and cancellation",
@@ -80,7 +80,7 @@
     "close and rerun candidate preserves placement",
     "old installed DAYSTREAM remains intact"
   ],
-  "resume": "App package remains802af090 unchanged. Read installerDeviceFinding and current updater code. Unknown target is never overwritten; new verified package runs directly for capture. Actual Scriptable direct launch and visual comparison remain unverified.",
+  "resume": "Current priority is static literal reference canvas, not more task features or CSS approximations. Read REFERENCE_WALLPAPER.md and reference-wallpaper-manifest.json; original JPEGs preserved byte-for-byte. App802af090 and installer479c1619 retained as prior candidates. Await physical screenshot and adjust only viewport bounds if necessary.",
   "rollback": "Close this candidate and use the unchanged existing DAYSTREAM. No production merge or source-data mutation was made.",
   "backgroundRunner": false,
   "externalChecks": {
@@ -129,5 +129,16 @@
     "fix": "Preserve unknown code and run only integrity-checked pinned package directly in memory, without changing script files",
     "tests": "14 installer tests pass, including no target writes/unknown code execution, tampered payload rejection, and direct async entry primitive",
     "physicalResult": "Awaiting iPhone execution"
+  },
+  "currentFocus": {
+    "scope": "Literal static image foundation; interactive task work deferred by explicit user request",
+    "source": "Original attached JPEG bytes unchanged; no regeneration, retyping or restyling",
+    "defaultReference": "glass, second supplied image; left content viewport",
+    "alternateReference": "compact, first supplied image; shortcutParameter=compact",
+    "renderMethod": "Original JPEG displayed with a bounded viewport and one uniform scale; device frame/status/home chrome and unrelated panels outside the selected viewport",
+    "assetCommit": "bd67b996c0da7e54e99b7a3528c2a3233e329c6b",
+    "writes": "None; no executable/plan/source-data writes",
+    "testEvidence": "reference-wallpaper-test-results.txt:5/5 pass; no physical iPhone render claimed",
+    "next": "Open static viewer via pinned short bootstrap; review original-image viewport on iPhone before restarting task functionality"
   }
 }
