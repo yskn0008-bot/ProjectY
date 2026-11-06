@@ -1,8 +1,8 @@
 {
   "schema": "yos-timeline-delivery-status-v1",
   "recordedDateJST": "2026-11-07",
-  "state": "WAIT_USER",
-  "reason": "iPhone-only touch, native source permissions and persistence checks remain; Figma canvas work is separately EXTERNAL_WAIT due to Starter MCP limit",
+  "state": "FAILED_SAFE",
+  "reason": "User rejected visual fidelity. Source correction in progress; rendered comparison blocked by environment. Existing installer remains pinned to prior code and is not a verified visual release.",
   "repository": "yskn0008-bot/ProjectY",
   "pullRequest": 654,
   "baselineHead": "6ffdc056138301e3a1a70eac2f635a761277da64",
@@ -72,7 +72,7 @@
     "url": "https://canva.link/349p0erltl7mr2c",
     "status": "three editable text-free wallpaper pages created; preview exports bundled"
   },
-  "userNextAction": "Run revised pinned installer in Scriptable, then verify pastel glass UI, one task add/check/save/reopen on iPhone.",
+  "userNextAction": "No reinstall requested: corrected code must pass rendered visual comparison before distribution.",
   "deviceChecks": [
     "Apple fixed event time matches Calendar and cannot move",
     "one flexible item long-press handle moves with live feedback and cancellation",
@@ -80,7 +80,7 @@
     "close and rerun candidate preserves placement",
     "old installed DAYSTREAM remains intact"
   ],
-  "resume": "Read TASK_APP_README.md and current PR head. Executable app commit7119bc4e8a25418e01c36fc75a98271711119afa; compare package/script SHA256 above. Continue physical-device acceptance without rebuilding already verified features.",
+  "resume": "Read reference-fidelity-revision.md and design-qa.md. Existing installer still pins previous distributed code. Corrected source is a checkpoint, not an accepted visual release. Preserve original app and plan data.",
   "rollback": "Close this candidate and use the unchanged existing DAYSTREAM. No production merge or source-data mutation was made.",
   "backgroundRunner": false,
   "externalChecks": {
@@ -108,5 +108,19 @@
     "completionScope": "device-local planned occurrences only; no Notion or Calendar mutations",
     "compatibility": "optional bounded timeline.completed extension; existing saved placements retained",
     "installer": "known previous b117 and 380 script hashes only; per-version backup filenames preserve legacy .previous.txt"
+  },
+  "referenceFidelityRevision": {
+    "request": "Match supplied compact daily agenda and separate edit screen; glass finish reference",
+    "releaseStatus": "HELD_FOR_RENDERED_QA",
+    "previousDistributedCode": "7119bc4e8a25418e01c36fc75a98271711119afa",
+    "distributionChanged": false,
+    "visualQA": "blocked: no permissible rendered implementation screenshot available",
+    "requiredNext": "Capture actual app at matching viewport; compare with reference, fix visible discrepancies, then build pinned updater and test on iPhone.",
+    "sourceTests": {
+      "pass": 30,
+      "fail": 0,
+      "evidence": "task-app-home-edit-test-results.txt",
+      "scope": "Node/native and VM DOM tests only; no rendered visual pass"
+    }
   }
 }

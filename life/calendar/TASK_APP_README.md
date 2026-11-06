@@ -1,3 +1,5 @@
+> Status correction: the user rejected visual fidelity. The prior description “Approved pastel glass design, implemented” is not evidence of acceptance. See reference-fidelity-revision.md and design-qa.md. Corrected source is unpublished; existing installer still points to the previous candidate.
+
 # YOS / LIFE FLOW — DAYSTREAM task app
 
 Approved pastel glass design, implemented as real offline HTML controls and CSS gradients. Reference screenshot content is never imported as personal routines. Existing DAYSTREAM records and native bridge are reused; no new server, account, database, or runtime request is added.
