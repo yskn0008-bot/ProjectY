@@ -86,9 +86,9 @@ function parseRows(rows:NotionBlock[]):Event[] {
   for(const row of rows){
     if(row.type!=='paragraph')continue;
     const value=textOf(row),state=STATE.exec(value);
-    if(state){statuses.set(state[2],state[3] as Status);continue}
+    if(state&&state[2]&&state[3]){statuses.set(state[2],state[3] as Status);continue}
     const match=RECORD.exec(value);
-    if(!match||!row.id)continue;
+    if(!match||!row.id||!match[1]||!match[2]||!match[3]||!match[4])continue;
     const body=value.slice(match[0].length).replace(/^\s*/u,'').replace(/\s*---\s*$/u,'').slice(0,1500);
     events.set(match[3],{id:match[3],at:match[1],category:match[4] as Category,
       text:body,status:'unread',source:match[2],blockId:row.id});
