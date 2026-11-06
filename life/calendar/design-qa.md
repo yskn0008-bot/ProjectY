@@ -2,10 +2,10 @@
 
 final result: blocked
 
-Target: supplied 15F7C4CD reference sheet, left HOME and center EDIT screen; 38B0552D reference for surface finish. Source images were opened.
+Target: supplied second reference (38B0552D), left screen, as the default glass HOME; first reference (15F7C4CD), compact HOME and separate EDIT as alternate presentation. Both references were opened. No arbitrary hybrid is designated as matching both.
 
-No current rendered implementation screenshot is available. Earlier Chromium launch was blocked by environment socket restrictions; cloud file access was blocked with an explicit no-workaround instruction. No alternate render route is used to bypass that restriction. No browser visual pass or iPhone pass is claimed.
+Implemented: explicit glass/compact modes; glass identity/title/date pill/legend and larger translucent cards with actual time text; generated text-free pearl background; official offline Phosphor icons; separate precise edit grid. Source screenshots are not baked into the UI and reference example routines are never imported as user data.
 
-Code/DOM tests cannot establish visual fidelity. Source correction separates compact chronological HOME rows from the precise proportional EDIT grid. Its actual spacing, clipping, type, wallpaper, contrast, touch targets and interaction states still require a permissible capture at a matched viewport.
+Verification: 33 Node/native/VM DOM tests pass after embedding the final assets. These test source behavior and packaging, not actual visual fidelity.
 
-Distribution remains pinned to previous candidate. Do not call this revision finished or ask for a reinstall until comparison succeeds.
+Blocker: no permissible rendered implementation screenshot in this environment. Prior browser restrictions are not bypassed. A device-check candidate is prepared specifically to obtain an actual iPhone screenshot; it is not a visually accepted release. After the user supplies a capture, compare matching viewport/state to the reference and correct discrepancies before accepting the design. Required: typography, spacing, card clipping, actual wallpaper, touch and native save/reopen. Physical device and Figma canvas remain unverified/incomplete.

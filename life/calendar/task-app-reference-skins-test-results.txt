@@ -1,0 +1,41 @@
+✔ full page executes, geometry renders, no implicit demo; form/keyboard/undo/save state work (35.483883ms)
+✔ native fixed appointments stay immutable and unplaced habits source is reused (7.441068ms)
+✔ long press computes candidate conflicts before commit and restores on pointer cancel (5.895047ms)
+✔ drag separating an existing pair shows amber operational change on both related cards (4.289977ms)
+✔ one-off source placement remains unplaced next day; daily recurrence stays placed without duplication (5.522766ms)
+✔ composition is one full-height canvas, unique preserved IDs, and records are behind a sheet (0.622488ms)
+✔ empty native-free canvas has no invented routines; theme and tray controls work (2.670726ms)
+✔ today gets an exact now line once; rerenders preserve scroll and other dates start at midnight (3.29028ms)
+✔ drag feedback stays on canvas with time, neighbors and priority reason until release or cancel (8.430269ms)
+✔ offline wallpaper choices map real embedded assets and remain separate from time geometry (4.021473ms)
+✔ task actions complete only one occurrence, survive explicit save/reopen, removal confirms and undo restores (11.444302ms)
+✔ real tabs expose source habits, factual review toggles, week navigation and year month picker (11.411469ms)
+✔ cancelled placement removal leaves plan unchanged; save failure retains local check and undo (5.879764ms)
+✔ partial native sources remain explicitly unconfirmed in day and week views (3.101065ms)
+✔ series edits retain valid local checks and prune dates removed from recurrence (3.326995ms)
+✔ home is a compact chronological agenda and edit alone exposes the minute-accurate grid (6.280368ms)
+✔ home editor switching does not lose newly added actions or saved local completion state (7.656542ms)
+✔ default glass reference and explicit compact skin share data and keep edit geometry intact (4.346913ms)
+✔ glass shows recommendations only for an actual deterministic pair, without health claims (5.381994ms)
+✔ pearl wallpaper and official icons are bundled offline and plain clears the wallpaper (3.258672ms)
+✔ exact 24-hour scale and clipped sleep carries to next day (1.765191ms)
+✔ recurrence clamps month end and leap day without drifting (0.216887ms)
+✔ source stable IDs retain same title independent schedules, exact duplicate ID dedup (0.400824ms)
+✔ date-only tasks remain unplaced, unknown event end is null (0.180852ms)
+✔ local rules distinguish actual overlap, insufficient transfer and optional pair (0.527135ms)
+✔ fixed schedule arrival buffer stays local metadata (0.15959ms)
+✔ malformed dates, duplicated IDs, huge durations fail closed (0.570881ms)
+✔ offline package integrity, fixed range, no Notion writes, original asset preserved (9.404247ms)
+✔ native explicit save verifies readback without any source mutations (45.976591ms)
+✔ native dismiss and corrupt file never authorize a write; failed readback is unsaved (112.462739ms)
+✔ native save preserves prior candidate on failed readback and rejects malformed timeline (2.517935ms)
+✔ actual timeline CSS has sufficient text, control boundary, and focus contrast (4.735043ms)
+✔ completion extension rejects malformed payloads, dates and foreign occurrence IDs without throwing (1.053118ms)
+ℹ tests 33
+ℹ suites 0
+ℹ pass 33
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 299.714237
