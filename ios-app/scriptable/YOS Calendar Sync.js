@@ -52,6 +52,29 @@ if(notionRows.length&&calendarEvents.length){
  report.push('日時確定・未連携候補：'+exportCandidates.length+'件（作成は未実行）');
  report.push('照合はIDのみ。名前の一致では自動結合しません。');
 }
+// Unified 14-day display preview: Calendar wins for linked IDs; Notion contributes only unlinked timed tasks.
+// This is a read-only reconciliation report, not an automatic synchronization.
+if(fetchComplete&&calendarOK){
+ const idCounts={};for(const e of calendarEvents){const id=taskIdFromNotes(e.notes);if(id)idCounts[id]=(idCounts[id]||0)+1;}
+ const calendarIds=new Set(calendarEvents.map(e=>taskIdFromNotes(e.notes)).filter(Boolean));
+ const notionTimed=notionRows.filter(x=>!inactive(x)&&validRange(x.properties?.['期限']?.date)&&inWindow(x.properties['期限'].date));
+ const unlinked=notionTimed.filter(x=>!calendarIds.has(x.id.toLowerCase()));
+ const conflictIds=new Set(Object.keys(idCounts).filter(id=>idCounts[id]>1));
+ const linkedChanged=calendarEvents.filter(e=>{
+  const id=taskIdFromNotes(e.notes);if(!id||conflictIds.has(id))return false;
+  const task=notionRows.find(x=>x.id.toLowerCase()===id);
+  if(!task||!validRange(task.properties?.['期限']?.date)||e.isAllDay)return false;
+  const d=task.properties['期限'].date;
+  return Math.abs(new Date(d.start)-e.startDate)>60000||Math.abs(new Date(d.end)-e.endDate)>60000;
+ });
+ report.push('--- 共通表示プレビュー（読み取り専用） ---');
+ report.push('Apple予定：'+calendarEvents.length+'件（終日含む）');
+ report.push('Notion日時付き・未連携：'+unlinked.length+'件');
+ report.push('ID連携済みはApple側を表示し、Notion側の二重表示を抑止');
+ report.push('日時不一致：'+linkedChanged.length+'件／重複ID：'+conflictIds.size+'組');
+ if(conflictIds.size)report.push('重複IDは自動更新せず確認待ち');
+ report.push('日付のみ・範囲外・取得失敗は統合表示対象外');
+}
 const a=new Alert();a.title='YOS 双方向同期｜接続診断';a.message=report.join('\n')+'\n\n既定は読み取り専用。同期対象は1件ずつ明示確認します。';a.addAction('閉じる');
 if(fetchComplete&&calendarOK){a.addAction('日時付きタスクを1件だけ予定に追加');a.addAction('連携済み予定の変更をNotionに反映');a.addAction('一括同期の安全プレビュー（書き込みなし）');}
 const choice=await a.presentAlert();
