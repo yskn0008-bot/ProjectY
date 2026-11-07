@@ -13,7 +13,8 @@ SHARE_HEADER = """#define name Clarity Share v4
 #define noinput stopwith "共有する内容がありません"
 """
 VOICE_INPUT = 'const originalInput = listen("After Pause", "jp-JP")'
-SHARE_INPUT = """const shareInputType = typeOf(ShortcutInput)
+SHARE_INPUT = """@inputMode = "share"
+const shareInputType = typeOf(ShortcutInput)
 @shareSource = "text"
 @shareExtracted = ""
 
