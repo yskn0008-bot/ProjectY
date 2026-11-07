@@ -199,7 +199,7 @@ try{
   const moneyGeometry=await page.evaluate(()=>({
     scrollWidth:document.documentElement.scrollWidth,
     clientWidth:document.documentElement.clientWidth,
-    balanceSize:parseFloat(getComputedStyle(document.querySelector('.money5-balance-head strong')).fontSize)
+    balanceSize:parseFloat(getComputedStyle(document.querySelector('.money6-balance strong')).fontSize)
   }));
   assert.ok(moneyGeometry.scrollWidth<=moneyGeometry.clientWidth+1,'MY MONEY must not overflow horizontally at 390px');
   assert.ok(moneyGeometry.balanceSize>=40,'usable balance must be the strongest numeric hierarchy');
