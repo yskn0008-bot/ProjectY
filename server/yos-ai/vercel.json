@@ -31,5 +31,5 @@
       "maxDuration": 10
     }
   },
-  "ignoreCommand": "if git rev-parse HEAD^ >/dev/null 2>&1; then git diff --quiet HEAD^ HEAD ./; else exit 1; fi"
+  "ignoreCommand": "if [ \"${VERCEL_GIT_COMMIT_REF:-}\" = \"release/yos-native-notification-ready-base-20261107\" ]; then exit 1; fi; if git rev-parse HEAD^ >/dev/null 2>&1; then git diff --quiet HEAD^ HEAD ./; else exit 1; fi"
 }
