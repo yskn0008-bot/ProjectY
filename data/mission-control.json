@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-07T16:06:02+09:00",
+  "updated_at": "2026-11-07T16:07:24+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -100,7 +100,7 @@
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/665",
-      "updated_at": "2026-11-07T07:05:31Z"
+      "updated_at": "2026-11-07T07:05:36Z"
     },
     {
       "id": "github-pr-666",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-07T06:09:43Z"
+      "updated_at": "2026-11-07T07:05:59Z"
     },
     {
       "id": "github-issue-234",
@@ -195,6 +195,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-391c317e212b",
+      "title": "Improve timeline legibility, vivid light theme and local task persistence",
+      "completed_at": "2026-11-07T07:06:50Z",
+      "result": "GitHub mainへ反映（391c317）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/391c317e212bfa83aef42ddb58ba1526af4e1cf4"
+    },
+    {
       "id": "github-commit-373a6fee7a3d",
       "title": "Read today's Apple Calendar events without modifying calendar and inject into timeline",
       "completed_at": "2026-11-07T05:40:41Z",
@@ -221,13 +228,6 @@
       "completed_at": "2026-11-07T05:24:26Z",
       "result": "GitHub mainへ反映（0e50b30）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/0e50b3029a954ca931652999f5c62284388702b6"
-    },
-    {
-      "id": "github-commit-6bcb88ec838f",
-      "title": "Allow adding multiple tasks at the same start time in single-column timeline",
-      "completed_at": "2026-11-07T05:14:07Z",
-      "result": "GitHub mainへ反映（6bcb88e）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/6bcb88ec838ffc2e62c2008672e40688b493ce0f"
     },
     {
       "id": "complete-002",
@@ -264,7 +264,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-07T16:06:02+09:00",
+      "last_update": "2026-11-07T16:07:24+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -345,7 +345,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-07T16:06:02+09:00",
+      "last_update": "2026-11-07T16:07:24+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -368,7 +368,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-07T16:06:02+09:00",
+      "last_update": "2026-11-07T16:07:24+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -450,5 +450,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "07a6d834fa2d6209780837f40211dc388f969dd6530bf27b9119a3a76473699f"
+  "github_snapshot_hash": "966f2f6058f867457671cb4f234cd5ac658c12802f69a6fe31e90eb56ea4e184"
 }
