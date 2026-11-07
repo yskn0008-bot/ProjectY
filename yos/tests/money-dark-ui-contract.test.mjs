@@ -27,7 +27,7 @@ test('MY MONEY dark UI keeps yos-money-v2 as the only Money state key', async ()
 
 test('MY MONEY Home exposes the requested decision hierarchy and six Money destinations', async () => {
   const runtime=await read('yos/money-v2-runtime-v4.js');
-  for(const label of ['今使えるお金','今日使える','月末不足','今月収支','次の支払い','次の入金','資金カレンダー','YOSからのアドバイス','生活防衛費']){
+  for(const label of ['今使えるお金','今日使える','月末不足','今月収支','次の支払い','次の入金','資金カレンダー','今いちばん重要','生活防衛費']){
     assert.ok(runtime.includes(label),'missing Home label '+label);
   }
   for(const label of ['現在 → このまま → 改善したら','改善プランを設定','毎月積み立てる額','改善したら増やす額 / 月']){
