@@ -22,6 +22,7 @@ function harness(viewerAuth){
     if(op==='SET'){memory.set(key,value);return 'OK'}
     if(op==='GET')return memory.get(key)??null;
     if(op==='DEL')return memory.delete(key)?1:0;
+    if(op==='EVAL'){const lock=args[3],owner=args[4];if(memory.get(lock)!==owner)return 0;return memory.delete(lock)?1:0;}
     throw Error('Unexpected redis operation: '+op);
   }};
   async function fetchImpl(url,init={}){
