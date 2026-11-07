@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-07T08:17:22+09:00",
+  "updated_at": "2026-11-07T09:32:08+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -195,6 +195,20 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-0cb10b8469be",
+      "title": "Install auto-refresh launcher with customizable name without overwriting existing scripts",
+      "completed_at": "2026-11-07T00:31:27Z",
+      "result": "GitHub mainへ反映（0cb10b8）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/0cb10b8469be99bad9de92f2872157d15209981f"
+    },
+    {
+      "id": "github-commit-26d9eac8bc02",
+      "title": "Add safe stable YOS Timeline auto-refresh launcher with cached fallback",
+      "completed_at": "2026-11-07T00:31:18Z",
+      "result": "GitHub mainへ反映（26d9eac）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/26d9eac8bc023e264ef972da228cb75078a810e9"
+    },
+    {
       "id": "github-commit-6c63d8c2d5c9",
       "title": "Update Timeline installer to v0.3",
       "completed_at": "2026-11-06T23:16:48Z",
@@ -214,20 +228,6 @@
       "completed_at": "2026-11-06T23:10:39Z",
       "result": "GitHub mainへ反映（5320ca0）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/5320ca0639c22e44b6cbbee7cf66c4b5e7305056"
-    },
-    {
-      "id": "github-commit-71e7a84a6e57",
-      "title": "Polish YOS Timeline Scriptable with vivid native-style task cards and stronger typography",
-      "completed_at": "2026-11-06T23:10:33Z",
-      "result": "GitHub mainへ反映（71e7a84）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/71e7a84a6e575308f4b5f39c93c6d5cebb9f827f"
-    },
-    {
-      "id": "github-commit-79b096c35f35",
-      "title": "Add named GitHub installer for YOS Timeline",
-      "completed_at": "2026-11-06T21:19:40Z",
-      "result": "GitHub mainへ反映（79b096c）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/79b096c35f356b820f285c2e7989f11cc4e5f11e"
     },
     {
       "id": "complete-002",
@@ -264,7 +264,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-07T08:17:22+09:00",
+      "last_update": "2026-11-07T09:32:08+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -345,7 +345,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-07T08:17:22+09:00",
+      "last_update": "2026-11-07T09:32:08+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -368,7 +368,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-07T08:17:22+09:00",
+      "last_update": "2026-11-07T09:32:08+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -450,5 +450,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "0293fbb01728ead3fe2cb16eceeab808208d54878f0f0a7492f6e001f09362bc"
+  "github_snapshot_hash": "ef434c3b9b3cb664bb37aea88c33700f68ec9eff68b9a0ec860140d4d82eb0c9"
 }
