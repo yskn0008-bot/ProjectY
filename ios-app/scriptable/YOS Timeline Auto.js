@@ -1,6 +1,6 @@
 // Variables used by Scriptable.
 // icon-color: blue; icon-glyph: calendar;
-// YOS Timeline Auto v1.3 — stable launcher, GitHub refresh, last-known-good fallback.
+// YOS Timeline Auto v1.4 — stable launcher, GitHub refresh, last-known-good fallback.
 // Only the Timeline presentation is downloaded; never overwrites other Scriptable scripts.
 const SOURCE="https://raw.githubusercontent.com/yskn0008-bot/ProjectY/main/ios-app/scriptable/YOS%20Timeline.js";
 const fm=FileManager.local();
@@ -52,6 +52,8 @@ if(!candidate){
   const inject=html=>html.replace('<script>', '<script>window.YOS_CALENDAR_ERROR='+JSON.stringify(calendarError)+';window.YOS_CALENDAR_EVENTS='+JSON.stringify(events).replace(/</g,'\\u003c')+';'+'</scr'+'ipt><script>');
   try{
     await view.loadHTML(inject(candidate));
+    const check=await view.evaluateJavaScript("({nav:document.getElementById('dayNav')?.children.length||0,hours:document.querySelectorAll('.hour').length,scriptCount:document.scripts.length,notice:document.getElementById('notice')?.textContent||''})");
+    if(check.nav<1||check.hours<24){const a=new Alert();a.title='タイムラインの表示診断';a.message='日付ボタン：'+check.nav+'、時間目盛り：'+check.hours+'、script：'+check.scriptCount+'。画面の初期化に失敗しています。予定の変更はしていません。';a.addAction('確認');await a.presentAlert();}
     if(latest&&(!fm.fileExists(current)||fm.readString(current)!==latest.html)){
       if(fm.fileExists(current)){
         fm.writeString(previous,fm.readString(current));
