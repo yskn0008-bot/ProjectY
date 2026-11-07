@@ -1,6 +1,6 @@
 // Variables used by Scriptable.
 // icon-color: blue; icon-glyph: calendar;
-// YOS Timeline v2.0 — approved charcoal UI; local-only operations, Notion read/write not connected.
+// YOS Timeline v2.1 — compact charcoal overview and exact detail mode; local-only operations, Notion read/write not connected.
 const view=new WebView();
 const html=`<!doctype html><html lang="ja"><head><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no"><style>
 :root{--bg:#353a44;--bg2:#3c414b;--text:#f5f7fb;--muted:#ccd3dd;--line:#a4aeba;--blue:#2b7db9;--green:#24966d;--violet:#833baf}
@@ -8,20 +8,20 @@ const html=`<!doctype html><html lang="ja"><head><meta name="viewport" content="
 html,body{margin:0;min-height:100%;background:radial-gradient(ellipse at 66% 6%,#464b56 0%,#353a44 50%,#30353f 100%);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif;font-size:14px;-webkit-font-smoothing:antialiased}
 button,input,select{font:inherit}button{cursor:pointer}button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid #85ccff;outline-offset:2px}
 .app{padding-top:env(safe-area-inset-top);padding-bottom:calc(89px + env(safe-area-inset-bottom));max-width:640px;margin:auto;min-height:100vh}
-.top{padding:16px 18px 0}.headrow{display:flex;align-items:center;justify-content:space-between;gap:8px}.datehead{font-size:27px;letter-spacing:-.7px;font-weight:680;line-height:1.13;font-variant-numeric:tabular-nums}.subtitle{font-size:12px;color:#e0e4eb;margin-top:2px;font-weight:450}
+.top{padding:11px 18px 0}.headrow{display:flex;align-items:center;justify-content:space-between;gap:8px}.datehead{font-size:27px;letter-spacing:-.7px;font-weight:680;line-height:1.13;font-variant-numeric:tabular-nums}.subtitle{font-size:12px;color:#e0e4eb;margin-top:2px;font-weight:450}
 .actions{display:flex;gap:12px;align-items:center}.iconbtn{width:31px;height:36px;display:grid;place-items:center;background:none;color:#f5f7fb;border:none;padding:0}.iconbtn svg{width:23px;height:23px;stroke-width:1.9}
-.week{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;margin:17px 0 9px}.day{border:0;border-radius:10px;padding:5px 0 6px;color:#ebedf2;background:transparent;min-height:53px;display:grid;place-content:center;gap:3px}.day small{font-size:11px;font-weight:600}.day strong{font-size:21px;font-weight:590;line-height:1;font-variant-numeric:tabular-nums}.day.active{background:#2077b7;color:white}.day.today:not(.active) strong{text-decoration:underline;text-underline-offset:4px}
-.summary{margin:0 13px 0;background:#ffffff12;border:1px solid #ffffff15;border-radius:14px;padding:12px 10px;display:grid;grid-template-columns:1.16fr .78fr .86fr 1.06fr;min-height:67px;box-shadow:0 5px 18px #11151b18}
+.week{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;margin:11px 0 7px}.day{border:0;border-radius:10px;padding:5px 0 6px;color:#ebedf2;background:transparent;min-height:48px;display:grid;place-content:center;gap:2px}.day small{font-size:11px;font-weight:600}.day strong{font-size:21px;font-weight:590;line-height:1;font-variant-numeric:tabular-nums}.day.active{background:#2077b7;color:white}.day.today:not(.active) strong{text-decoration:underline;text-underline-offset:4px}
+.summary{margin:0 13px 0;background:#ffffff12;border:1px solid #ffffff15;border-radius:14px;padding:9px 10px;display:grid;grid-template-columns:1.16fr .78fr .86fr 1.06fr;min-height:62px;box-shadow:0 5px 18px #11151b18}
 .metric{display:flex;align-items:center;justify-content:center;flex-direction:column;gap:3px;border-right:1px solid #ffffff35;min-width:0}.metric:last-child{border:0}.metric label{font-size:10px;font-weight:560;white-space:nowrap;color:#e7eaf0}.metric strong{font-size:13px;font-weight:630;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;font-variant-numeric:tabular-nums}.metric:first-child{flex-direction:row;gap:7px}.metric:first-child strong{font-size:19px}.ring{width:37px;height:37px;flex:none;border-radius:50%;background:conic-gradient(#35bbf4 0 var(--pct),#7d8793 var(--pct) 100%);position:relative}.ring:after{content:"";position:absolute;inset:8px;background:#434852;border-radius:50%}.metric .stack{display:grid;gap:3px}
-.notice{margin:8px 15px 4px;padding:4px 5px;color:#d7dce4;font-size:10px;line-height:1.35;min-height:19px}.notice[hidden]{display:none}.searchrow{margin:9px 16px 0}.searchrow[hidden]{display:none}.searchrow input{width:100%;border:1px solid #7b8799;border-radius:10px;background:#252b35;color:white;padding:10px 12px;font-size:14px}
+.notice{margin:0;padding:3px 0;color:#d7dce4;font-size:10px;line-height:1.25;flex:1;min-width:0}.microtools{display:flex;align-items:center;gap:8px;margin:3px 15px 0;min-height:23px}.zoomBtn{border:1px solid #ffffff40;background:#ffffff0d;color:#edf1f6;border-radius:7px;padding:4px 7px;font-size:10px;font-weight:600;white-space:nowrap}.notice[hidden]{display:none}.searchrow{margin:9px 16px 0}.searchrow[hidden]{display:none}.searchrow input{width:100%;border:1px solid #7b8799;border-radius:10px;background:#252b35;color:white;padding:10px 12px;font-size:14px}
 .editor{display:none;margin:9px 14px;padding:13px;background:#484e59;border:1px solid #6b7583;border-radius:13px;box-shadow:0 10px 25px #15191e55}.editor.show{display:block}.editor b{font-size:15px}.editor .fields{display:flex;gap:7px;flex-wrap:wrap;margin:12px 0}.editor input,.editor select{padding:9px;background:#303742;color:white;border:1px solid #7b8594;border-radius:8px;min-width:0}.editor input[type=time]{max-width:130px}.editor button,.focus button,.review button,.mutedbutton{padding:10px 13px;background:#277dbb;color:#fff;border:0;border-radius:9px;font-weight:670}.editor .danger{background:#754751;margin-left:6px}.editor .light{background:#647184}
-.timeline-wrap{position:relative;margin:10px 13px 20px 11px;overflow:visible}.timeline{position:relative;touch-action:pan-y}.hour{position:absolute;left:0;right:0;border-top:1px solid #ffffff0f;height:1px;pointer-events:none}.hour span{position:absolute;top:-9px;left:6px;color:#dce2eb;font-size:12px;font-weight:480;font-variant-numeric:tabular-nums}.axis{position:absolute;left:58px;top:0;bottom:0;width:1.5px;background:#c2cad2b8;pointer-events:none}.tick{position:absolute;left:54.5px;width:9px;height:9px;border-radius:50%;background:#dce2ec;z-index:2;border:2px solid #56616e;box-shadow:0 0 0 2px #d7dee755;pointer-events:none}
-.card{position:absolute;left:73px;right:0;min-height:20px;border:0;border-radius:10px;padding:3px 9px;display:flex;align-items:center;gap:8px;touch-action:none;user-select:none;-webkit-user-select:none;color:#f8faff;background:#307ec2;box-shadow:0 2px 8px #101b2927;transition:filter .18s ease,box-shadow .18s ease;will-change:transform;overflow:hidden}
+.timeline-wrap{position:relative;margin:8px 13px 20px 11px;overflow:visible}.timeline{position:relative;touch-action:pan-y}.hour{position:absolute;left:0;right:0;border-top:1px solid #ffffff0f;height:1px;pointer-events:none}.hour span{position:absolute;top:-9px;left:6px;color:#dce2eb;font-size:12px;font-weight:480;font-variant-numeric:tabular-nums}.axis{position:absolute;left:58px;top:0;bottom:0;width:1.5px;background:#c2cad2b8;pointer-events:none}.tick{position:absolute;left:54.5px;width:9px;height:9px;border-radius:50%;background:#dce2ec;z-index:2;border:2px solid #56616e;box-shadow:0 0 0 2px #d7dee755;pointer-events:none}
+.card{position:absolute;left:73px;right:0;min-height:16px;border:0;border-radius:9px;padding:1px 9px;display:flex;align-items:center;gap:8px;touch-action:none;user-select:none;-webkit-user-select:none;color:#f8faff;background:#307ec2;box-shadow:0 2px 8px #101b2927;transition:filter .18s ease,box-shadow .18s ease;will-change:transform;overflow:hidden}
 .card:before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:#46b9fb;opacity:.9;pointer-events:none}.card.habit{background:#24976e}.card.habit:before{background:#4bd9a1}.card.task{background:#823db0}.card.task:before{background:#d079f8}.card.schedule{background:#2e77b3}
 .card.neutral{background:#636b76}.card.neutral:before{background:#97a6b9}.card.sleep{background:#325477}.card.sleep:before{background:#48bdf5}
 .card.done{opacity:.62;filter:saturate(.55)}.card.selected{outline:1.5px solid #e5efff}.card.warning{outline:2px solid #e6a35a}.card.moving{z-index:6;filter:brightness(1.14);box-shadow:0 10px 26px #10131a6c}
-.card svg{width:18px;height:18px;flex:none;stroke:#f7f9fc;fill:none;stroke-width:1.8;stroke-linejoin:round;stroke-linecap:round;position:relative}.card b{font-size:13px;font-weight:630;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:.08px;position:relative}.card small{margin-left:auto;font-size:10.5px;font-weight:500;white-space:nowrap;font-variant-numeric:tabular-nums;flex-shrink:0;position:relative}
-.card.lane{gap:5px;padding-right:5px}.card.lane small{display:none}.card.lane b{font-size:12px}.card.tiny svg{width:14px;height:14px}.card.tiny{gap:5px;padding-left:8px}.card.tiny b{font-size:11.5px}.card.tiny small{font-size:9.5px}
+.card svg{width:16px;height:16px;flex:none;stroke:#f7f9fc;fill:none;stroke-width:1.8;stroke-linejoin:round;stroke-linecap:round;position:relative}.card b{font-size:12.5px;line-height:1.1;font-weight:630;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:.08px;position:relative}.card small{margin-left:auto;font-size:10px;line-height:1.1;font-weight:500;white-space:nowrap;font-variant-numeric:tabular-nums;flex-shrink:0;position:relative}
+.card.compact{border-radius:7px}.card.compact b{font-size:11.5px}.card.compact small{font-size:9px}.card.lane{gap:5px;padding-right:5px}.card.lane small{display:none}.card.lane b{font-size:12px}.card.tiny svg{width:13px;height:13px}.card.tiny{gap:5px;padding-left:7px}.card.tiny b{font-size:11px}.card.tiny small{font-size:9px}
 .nowline{position:absolute;left:5px;right:0;height:1.5px;background:#48baff;z-index:8;pointer-events:none;box-shadow:0 0 8px #38b6fa66}.nowline:before{content:"";position:absolute;left:48px;top:-5px;width:10px;height:10px;background:#43b9fc;border:2px solid #eff9ff;border-radius:50%}.nowbadge{position:absolute;right:calc(100% - 55px);top:-11px;background:#218fcf;border-radius:12px;font-size:11px;padding:3px 7px;font-weight:650;font-variant-numeric:tabular-nums}
 .review,.tabbox{display:none;margin:12px 14px;padding:17px;border:1px solid #ffffff22;border-radius:13px;background:#484e58}.review.show,.tabbox.show{display:block}.review h3,.tabbox h3{font-size:16px;margin:0 0 10px}.review p,.tabbox p{line-height:1.6;color:#eff2f6;margin:10px 0}.review .muted,.tabbox .muted{font-size:12px;color:#c5cbd5}.listitem{padding:12px 0;border-bottom:1px solid #ffffff25;display:flex;justify-content:space-between;gap:14px}.listitem:last-child{border-bottom:0}.listitem button{border:0;background:#2d7eb9;color:white;padding:5px 10px;border-radius:8px}.focus{position:fixed;bottom:calc(87px + env(safe-area-inset-bottom));left:14px;right:14px;max-width:600px;margin:auto;padding:12px 14px;border-radius:14px;background:#505864;border:1px solid #a6b8cd;box-shadow:0 10px 35px #0008;z-index:20;display:none}.focus.show{display:block}.focus b{font-size:16px}.focus p{font-size:12px;margin:6px 0 9px}.focus .secondary{background:#6c7785}.focus .danger{background:#794852}
 .dock{position:fixed;bottom:0;left:0;right:0;padding:9px 7px calc(11px + env(safe-area-inset-bottom));background:#30353eea;border-top:1px solid #ffffff28;backdrop-filter:blur(15px);-webkit-backdrop-filter:blur(15px);z-index:15}.dock-inner{max-width:610px;margin:auto;display:grid;grid-template-columns:repeat(5,1fr)}.tab{display:grid;justify-items:center;align-content:center;gap:5px;background:none;border:0;color:#eef1f6;font-size:10px;padding:3px 0;min-height:52px}.tab svg{height:24px;width:24px;stroke-width:1.8}.tab.active{color:#30baff}
@@ -48,7 +48,7 @@ button:active{opacity:.8}@media(min-width:640px){.dock{left:calc((100vw - 640px)
     <div class="metric"><label>睡眠予定</label><strong id="sleepInfo">—</strong></div>
   </section>
   <div class="searchrow" id="searchRow" hidden><input id="searchInput" type="search" placeholder="予定・タスクを検索" aria-label="検索"></div>
-  <div class="notice" id="notice" aria-live="polite">端末内の予定を表示します</div>
+  <div class="microtools"><div class="notice" id="notice" aria-live="polite">端末内の予定を表示します</div><button class="zoomBtn" id="zoomBtn" type="button" aria-label="タイムラインの表示倍率を切り替え">詳細に拡大</button></div>
   <div class="editor" id="editor"><b id="editorTitle">予定を追加</b><div class="fields"><input id="newTitle" placeholder="名前" style="flex:1 1 160px" aria-label="名前"><input id="newTime" type="time" value="10:00" aria-label="開始時刻"><input id="newDuration" type="number" min="5" max="1440" step="5" value="30" style="width:76px" aria-label="所要時間（分）"><select id="newKind" aria-label="種類"><option value="task">タスク</option><option value="habit">習慣</option><option value="schedule">予定</option></select></div><button id="saveBtn">追加する</button><button id="cancelEditor" class="light" type="button">閉じる</button></div>
   <div class="timeline-wrap" id="timelinePanel"><div class="timeline" id="tl"><div class="axis"></div><div class="nowline" id="nowLine" hidden><span class="nowbadge" id="nowBadge"></span></div></div></div>
   <section class="tabbox" id="taskPanel"><h3>タスク</h3><div id="taskList"></div></section>
@@ -86,7 +86,7 @@ const glyphs={
  bath:'<path d="M3 13h18l-2 7H5zM7 10c-3-3 3-4 0-7m6 7c-3-3 3-4 0-7m6 7c-3-3 3-4 0-7"/>',
  clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l4 2"/>'};
 function eventIcon(item){const t=item.t||'';const type=/睡眠|就寝/.test(t)?'sleep':/歩|ウォーキング/.test(t)?'walk':/朝食|昼食|夕食|ご飯/.test(t)?'meal':/入浴|お風呂/.test(t)?'bath':/運動|筋トレ/.test(t)?'fitness':/会議/.test(t)?'meeting':/集中|作業/.test(t)?'laptop':/仕事/.test(t)?'work':'clock';return '<svg viewBox="0 0 24 24" aria-hidden="true">'+glyphs[type]+'</svg>'}
-const scale=56;
+let density='overview',scale=27;
 let zoom=null,selectedId=null;
 const yFor=m=>m/60*scale;
 const editor=document.getElementById('editor');let editingId=null;
@@ -119,8 +119,9 @@ function renderWeek(){
  document.getElementById('dateTitle').textContent=(d.getMonth()+1)+'/'+d.getDate()+'（'+label[d.getDay()]+'）';
  document.getElementById('dayCaption').textContent=selectedDay===todayISO?'Today':'';
  const strip=document.getElementById('weekStrip');strip.textContent='';
- for(let offset=-4;offset<=2;offset++){
-  const x=new Date(d);x.setDate(x.getDate()+offset);const iso=localISO(x);
+ const monday=new Date(d);monday.setDate(d.getDate()-((d.getDay()+6)%7));
+ for(let offset=0;offset<7;offset++){
+  const x=new Date(monday);x.setDate(monday.getDate()+offset);const iso=localISO(x);
   const b=document.createElement('button');b.type='button';b.className='day'+(iso===selectedDay?' active':'')+(iso===todayISO?' today':'');
   const s=document.createElement('small'),n=document.createElement('strong');s.textContent=label[x.getDay()];n.textContent=String(x.getDate());
   b.append(s,n);b.setAttribute('aria-label',iso);b.onclick=()=>showDay(iso);strip.append(b);
@@ -146,6 +147,7 @@ function renderLists(){
 for(const b of document.querySelectorAll('[data-tab]'))b.onclick=()=>setTab(b.dataset.tab);
 document.getElementById('dateBtn').onclick=()=>{const picker=document.getElementById('datePicker');if(typeof picker.showPicker==='function')picker.showPicker();else picker.click()};
 document.getElementById('datePicker').onchange=e=>showDay(e.target.value);
+document.getElementById('zoomBtn').onclick=()=>{density=density==='overview'?'detail':'overview';scale=density==='overview'?27:56;document.getElementById('zoomBtn').textContent=density==='overview'?'詳細に拡大':'全体表示';render();};
 document.getElementById('searchBtn').onclick=()=>{const row=document.getElementById('searchRow');row.hidden=!row.hidden;if(!row.hidden){setTab('timeline');document.getElementById('searchInput').focus()}else{searchText='';document.getElementById('searchInput').value='';render()}};
 document.getElementById('searchInput').oninput=e=>{searchText=e.target.value.trim().toLocaleLowerCase();render()};
 document.getElementById('moreBtn').onclick=()=>{if(!isSample){note.textContent='この日の端末内データは保持しています · 同期先は未接続';return;}if(confirm('見本の予定だけを消しますか？')){items=[];persist();note.textContent='見本を消去しました · 新規追加できます';smoothRender();updateReview();}};
@@ -169,8 +171,15 @@ function render(){
  if(group.length)groups.push(group);
  for(const g of groups){const ends=[];for(const item of g){let lane=ends.findIndex(end=>end<=item.s);if(lane<0){lane=ends.length;ends.push(0)}ends[lane]=item.s+item.d;lanes.set(item,{lane,count:0})}for(const item of g)lanes.get(item).count=ends.length}
  let lastBottom=-2;let pushed=0;
+ let priorVisualBottom=-2;
+ for(const group of groups){
+   const start=yFor(group[0].s);
+   const offset=density==='overview'?Math.max(0,priorVisualBottom+3-start):0;
+   for(const item of group)lanes.get(item).offset=offset;
+   priorVisualBottom=Math.max(priorVisualBottom,...group.map(item=>yFor(item.s)+offset+Math.max(density==='overview'?17:22,yFor(item.s+item.d)-yFor(item.s)-2)));
+ }
  sorted.forEach(item=>{
-   const natural=yFor(item.s);const height=Math.max(22,yFor(item.s+item.d)-natural-2);const top=natural;
+   const natural=yFor(item.s);const height=Math.max(density==='overview'?17:22,yFor(item.s+item.d)-natural-2);const top=natural+(lanes.get(item)?.offset||0);
    if(top>natural+2)pushed++;
    lastBottom=top+height;
    const el=document.createElement('div');el.className='card '+(item.kind==='habit'?'habit':item.kind==='task'?'task':'schedule');
@@ -182,9 +191,10 @@ function render(){
    if(item.t==='睡眠'||item.t==='就寝')el.classList.add('sleep');
    if(['朝の準備','朝食','昼食','夕食','入浴'].includes(item.t))el.classList.add('neutral');
    if(height<30)el.classList.add('tiny');
+   if(density==='overview')el.classList.add('compact');
    if(searchText&&!item.t.toLocaleLowerCase().includes(searchText))el.style.display='none';
    el.dataset.id=String(item.id);if(item.done)el.classList.add('done');tl.append(el);
-   const tick=document.createElement('div');tick.className='tick';tick.style.top=(natural-4)+'px';tl.append(tick);
+   const tick=document.createElement('div');tick.className='tick';tick.style.top=(top-4)+'px';tl.append(tick);
    let downY=0,downS=0,moved=false,holding=false,activePointer=null,frame=0,latestY=0,previewS=item.s,lastHaptic=0,startedAt=0;
    const timeLabel=el.querySelector('small');
    const paint=()=>{frame=0;if(!holding)return;const offset=latestY-downY;el.style.transform='translate3d(0,'+offset+'px,0) scale(1.015)';const next=Math.max(0,Math.min(1440-item.d,Math.round((downS+offset/scale*60)/5)*5));if(next!==previewS){previewS=next;timeLabel.textContent=fmt(next)+'–'+fmt(next+item.d);const now=performance.now();if(now-lastHaptic>75){lastHaptic=now;vibrate()}}};
