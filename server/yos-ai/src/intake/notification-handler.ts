@@ -6,6 +6,8 @@ const NOTION_BASE = 'https://api.notion.com/v1';
 const MAX_BODY_BYTES = 8192;
 const PAGE_LIMIT = 30;
 const MAX_EVENTS = 120;
+// Release a lease only when its unique owner still holds it (Redis atomic compare-and-delete).
+const RELEASE_OWNED_LOCK = "if redis.call('GET', KEYS[1]) == ARGV[1] then return redis.call('DEL', KEYS[1]) else return 0 end";
 const STATE_SET = new Set(['read','pending','done']);
 const OTP = /認証コード|確認コード|ワンタイム|二段階認証|ログインコード|パスワードリセット|verification\s*code|one.?time|\bOTP\b|\b2FA\b|security\s*code|reset\s*password/iu;
 const TEST = /テスト|動作確認|架空|simulation|\btest\b/iu;
@@ -196,9 +198,12 @@ export function createNotificationHandler(options:{
       'fallback:'+event.sourceApp+':'+event.text+':'+coarseTime);
     const id=digest.slice(0,24),category=categoryOf(event.text),safe=safeText(event.text),decision=triage(event.text,category);
     const key='yos:notification:inbox:v1:'+id,lock=key+':lock';
+    const lockOwner=crypto.randomUUID();
+    let ownsLock=false;
     try{
-      const claimed=await options.redis.command<string|null>(['SET',lock,'processing','NX','EX',120]);
+      const claimed=await options.redis.command<string|null>(['SET',lock,lockOwner,'NX','EX',120]);
       if(claimed!=='OK')return result({error:'Notification is already being saved'},409);
+      ownsLock=true;
       const prior=await options.redis.command<string|null>(['GET',key]);
       if(prior==='done')return result({ok:true,id,duplicate:true,category,decision:decision.decision,alertText:''});
       // A previously ambiguous PATCH must be checked against Notion before any retry.
@@ -222,8 +227,11 @@ export function createNotificationHandler(options:{
       // Keep the pending receipt: a timed-out PATCH may have actually succeeded.
       return result({error:'Inbox saving unconfirmed; original notification remains'},503);
     }finally{
-      // Failure to release a lock is harmless; it expires within 120 seconds.
-      try{await options.redis.command<number>(['DEL',lock])}catch{}
+      // Never delete another request's active lock, including a lock reacquired after expiry.
+      // If Redis is unavailable the owned lock expires naturally after 120 seconds.
+      if(ownsLock){
+        try{await options.redis.command<number>(['EVAL',RELEASE_OWNED_LOCK,1,lock,lockOwner])}catch{}
+      }
     }
   };
 }
