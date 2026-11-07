@@ -1,10 +1,12 @@
 // Variables used by Scriptable.
 // icon-color: blue; icon-glyph: calendar;
-// YOS Calendar Sync v0.4 — guarded one-event export and reverse date sync. No writes or deletes.
+// YOS Calendar Sync v0.5 — guarded one-event export and reverse date sync. No writes or deletes.
 // Uses the existing Notion integration token from Scriptable Keychain.
 const DB='06e62efb-9a3c-45e2-bec7-7a53332c925a';
 const KEY='YOS_NOTION_INTEGRATION_TOKEN';
 const report=[];let calendarEvents=[];let notionRows=[];let fetchComplete=false;let calendarOK=false;
+const stateOf=x=>x.properties?.['状態']?.status?.name||x.properties?.['状態']?.select?.name||'';
+const inactive=x=>['完了','保留','キャンセル','中止','Done','Completed'].includes(stateOf(x));
 const taskIdFromNotes=notes=>{const m=String(notes||'').match(/(?:^|\n)YOS_TASK_ID:([0-9a-f-]{36})(?:\n|$)/i);return m?m[1].toLowerCase():null};
 const eventKey=e=>String(e.calendar?.identifier||'')+'|'+String(e.identifier||'');
 try{
@@ -36,7 +38,7 @@ if(notionRows.length&&calendarEvents.length){
  const orphans=linked.filter(e=>!ids.has(taskIdFromNotes(e.notes)));
  const countById={};for(const e of linked){const id=taskIdFromNotes(e.notes);countById[id]=(countById[id]||0)+1;}
  const duplicates=Object.values(countById).filter(n=>n>1).length;
- const scheduled=notionRows.filter(x=>x.properties?.['期限']?.date?.start&&x.properties?.['状態']?.select?.name!=='完了');
+ const scheduled=notionRows.filter(x=>x.properties?.['期限']?.date?.start&&!inactive(x));
  const noTime=scheduled.filter(x=>!x.properties?.['期限']?.date?.start?.includes('T'));
  report.push('--- 照合プレビュー ---');
  report.push('紐づき不明の予定：'+orphans.length+'件');
@@ -52,8 +54,8 @@ const choice=await a.presentAlert();
 if(choice===1){
  const linkedIds=new Set(calendarEvents.map(e=>taskIdFromNotes(e.notes)).filter(Boolean));
  const candidates=notionRows.filter(x=>{
-  const date=x.properties?.['期限']?.date, state=x.properties?.['状態']?.select?.name;
-  return date?.start?.includes('T')&&date?.end?.includes('T')&&!linkedIds.has(x.id.toLowerCase())&&state!=='完了'&&state!=='保留';
+  const date=x.properties?.['期限']?.date, state=stateOf(x);
+  return date?.start?.includes('T')&&date?.end?.includes('T')&&!linkedIds.has(x.id.toLowerCase())&&!inactive(x);
  }).filter(x=>{const d=x.properties['期限'].date;const start=new Date(d.start),end=new Date(d.end);return Number.isFinite(start.getTime())&&Number.isFinite(end.getTime())&&end>start&&end-start<=86400000&&start>=new Date()&&start<=new Date(Date.now()+14*86400000)});
  if(!candidates.length){const n=new Alert();n.title='追加候補なし';n.message='今後14日間で開始・終了時刻が両方設定された未完了タスクはありません。日付のみのタスクには勝手に時刻を設定しません。';n.addAction('OK');await n.presentAlert();}
  else{
@@ -83,7 +85,7 @@ if(choice===1){
       const event=new CalendarEvent();event.title=title;event.startDate=new Date(d.start);event.endDate=new Date(d.end);event.calendar=cal;
       event.notes='YOS_TASK_ID:'+x.id.toLowerCase()+'\nYOS_SYNC_SOURCE:NOTION\nNotion: https://www.notion.so/'+x.id.replace(/-/g,'');
       await event.save();
-      const done=new Alert();done.title='1件作成しました';done.message='Appleカレンダーに追加済み。Notionへの逆方向同期は未実装です。';done.addAction('OK');await done.presentAlert();
+      const done=new Alert();done.title='1件作成しました';done.message='Appleカレンダーに追加済み。逆方向の反映は別操作で1件ずつ確認できます。';done.addAction('OK');await done.presentAlert();
      }catch(e){const err=new Alert();err.title='作成できませんでした';err.message=String(e.message||e);err.addAction('OK');await err.presentAlert();}
     }
    }
@@ -97,7 +99,7 @@ if(choice===2){
  const localISO=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())+'T'+pad(d.getHours())+':'+pad(d.getMinutes())+':00'+(d.getTimezoneOffset()<=0?'+':'-')+pad(Math.floor(Math.abs(d.getTimezoneOffset())/60))+':'+pad(Math.abs(d.getTimezoneOffset())%60);
  const candidates=calendarEvents.filter(e=>{
   const id=taskIdFromNotes(e.notes),task=id&&ids.get(id);
-  return task&&counts[id]===1&&!e.isAllDay&&e.startDate instanceof Date&&e.endDate instanceof Date&&e.endDate>e.startDate&&e.endDate-e.startDate<=86400000&&task.properties?.['状態']?.select?.name!=='完了'&&task.properties?.['状態']?.select?.name!=='保留'&&task.properties?.['期限']?.date?.start?.includes('T')&&task.properties?.['期限']?.date?.end?.includes('T');
+  return task&&counts[id]===1&&!e.isAllDay&&e.startDate instanceof Date&&e.endDate instanceof Date&&e.endDate>e.startDate&&e.endDate-e.startDate<=86400000&&!inactive(task)&&task.properties?.['期限']?.date?.start?.includes('T')&&task.properties?.['期限']?.date?.end?.includes('T');
  }).filter(e=>{const d=ids.get(taskIdFromNotes(e.notes)).properties['期限'].date;return Math.abs(new Date(d.start)-e.startDate)>60000||Math.abs(new Date(d.end)-e.endDate)>60000;});
  if(!candidates.length){const n=new Alert();n.title='反映候補なし';n.message='連携ID付きで、開始・終了時刻が変わった予定は見つかりません。既存の一般予定は対象外です。';n.addAction('閉じる');await n.presentAlert();}
  else{
@@ -112,7 +114,11 @@ if(choice===2){
      const get=new Request('https://api.notion.com/v1/pages/'+id);get.method='GET';get.headers={'Authorization':'Bearer '+Keychain.get(KEY),'Notion-Version':'2022-06-28'};
      const latest=await get.loadJSON();if(get.response?.statusCode!==200)throw Error('Notion再取得 HTTP '+get.response?.statusCode);
      const current=latest.properties?.['期限']?.date;
+     if(inactive(latest))throw Error('タスクが完了・保留に変更されたため中止しました');
      if(current?.start!==old.start||current?.end!==old.end)throw Error('Notion側も変更されています。競合のため中止しました');
+     const nowEvents=await CalendarEvent.between(e.startDate,e.endDate);
+     const matches=nowEvents.filter(z=>taskIdFromNotes(z.notes)===id);
+     if(matches.length!==1||matches[0].startDate.getTime()!==e.startDate.getTime()||matches[0].endDate.getTime()!==e.endDate.getTime())throw Error('カレンダー側の予定が変更・重複したため中止しました');
      const patch=new Request('https://api.notion.com/v1/pages/'+id);patch.method='PATCH';patch.headers={'Authorization':'Bearer '+Keychain.get(KEY),'Notion-Version':'2022-06-28','Content-Type':'application/json'};
      patch.body=JSON.stringify({properties:{'期限':{date:{start:localISO(e.startDate),end:localISO(e.endDate)}}}});
      const result=await patch.loadJSON();if(patch.response?.statusCode!==200)throw Error('Notion更新 HTTP '+patch.response?.statusCode+' '+JSON.stringify(result).slice(0,140));
