@@ -1,6 +1,6 @@
 // Variables used by Scriptable.
 // icon-color: blue; icon-glyph: calendar;
-// YOS Calendar Sync v0.5 — guarded one-event export and reverse date sync. No writes or deletes.
+// YOS Calendar Sync v0.6 — one-event confirmed writes; batch reconciliation preview is read-only.
 // Uses the existing Notion integration token from Scriptable Keychain.
 const DB='06e62efb-9a3c-45e2-bec7-7a53332c925a';
 const KEY='YOS_NOTION_INTEGRATION_TOKEN';
@@ -9,6 +9,8 @@ const stateOf=x=>x.properties?.['状態']?.status?.name||x.properties?.['状態'
 const inactive=x=>['完了','保留','キャンセル','中止','Done','Completed'].includes(stateOf(x));
 const taskIdFromNotes=notes=>{const m=String(notes||'').match(/(?:^|\n)YOS_TASK_ID:([0-9a-f-]{36})(?:\n|$)/i);return m?m[1].toLowerCase():null};
 const eventKey=e=>String(e.calendar?.identifier||'')+'|'+String(e.identifier||'');
+const validRange=d=>{if(!d?.start?.includes('T')||!d?.end?.includes('T'))return false;const a=new Date(d.start),b=new Date(d.end);return Number.isFinite(+a)&&Number.isFinite(+b)&&b>a&&b-a<=86400000};
+const inWindow=d=>{const a=new Date(d.start),now=new Date();return a>=now&&a<=new Date(now.getTime()+14*86400000)};
 try{
  const now=new Date(),start=new Date(now.getFullYear(),now.getMonth(),now.getDate()),end=new Date(start);end.setDate(end.getDate()+14);
  const events=await CalendarEvent.between(start,end);calendarEvents=events;calendarOK=true;
@@ -45,11 +47,13 @@ if(notionRows.length&&calendarEvents.length){
  report.push('同一タスクの重複予定：'+duplicates+'組');
  report.push('未完了・期限あり：'+scheduled.length+'件');
  report.push('開始時刻なし（日付のみ）：'+noTime.length+'件');
- report.push('自動作成候補：0件（時刻未確定は作成禁止）');
+ const linkedIds=new Set(linked.map(e=>taskIdFromNotes(e.notes)));const eligible=notionRows.filter(x=>!inactive(x)&&validRange(x.properties?.['期限']?.date)&&inWindow(x.properties['期限'].date));
+ const exportCandidates=eligible.filter(x=>!linkedIds.has(x.id.toLowerCase()));
+ report.push('日時確定・未連携候補：'+exportCandidates.length+'件（作成は未実行）');
  report.push('照合はIDのみ。名前の一致では自動結合しません。');
 }
 const a=new Alert();a.title='YOS 双方向同期｜接続診断';a.message=report.join('\n')+'\n\n既定は読み取り専用。同期対象は1件ずつ明示確認します。';a.addAction('閉じる');
-if(fetchComplete&&calendarOK){a.addAction('日時付きタスクを1件だけ予定に追加');a.addAction('連携済み予定の変更をNotionに反映');}
+if(fetchComplete&&calendarOK){a.addAction('日時付きタスクを1件だけ予定に追加');a.addAction('連携済み予定の変更をNotionに反映');a.addAction('一括同期の安全プレビュー（書き込みなし）');}
 const choice=await a.presentAlert();
 if(choice===1){
  const linkedIds=new Set(calendarEvents.map(e=>taskIdFromNotes(e.notes)).filter(Boolean));
@@ -127,5 +131,15 @@ if(choice===2){
    }
   }
  }
+}
+if(choice===3){
+ const byId=new Map(notionRows.map(x=>[x.id.toLowerCase(),x]));
+ const linked=calendarEvents.filter(e=>taskIdFromNotes(e.notes));
+ const counts={};for(const e of linked){const id=taskIdFromNotes(e.notes);counts[id]=(counts[id]||0)+1;}
+ const dupIds=new Set(Object.keys(counts).filter(id=>counts[id]>1));
+ const missing=linked.filter(e=>!byId.has(taskIdFromNotes(e.notes)));
+ const pending=notionRows.filter(x=>!inactive(x)&&validRange(x.properties?.['期限']?.date)&&inWindow(x.properties['期限'].date)&&!counts[x.id.toLowerCase()]);
+ const changed=linked.filter(e=>{const id=taskIdFromNotes(e.notes),x=byId.get(id);if(!x||dupIds.has(id)||e.isAllDay||!validRange(x.properties?.['期限']?.date))return false;const d=x.properties['期限'].date;return Math.abs(new Date(d.start)-e.startDate)>60000||Math.abs(new Date(d.end)-e.endDate)>60000;});
+ const p=new Alert();p.title='一括同期｜安全プレビュー';p.message='新規作成候補：'+pending.length+'件\nカレンダー側の日時変更：'+changed.length+'件\n重複リンク：'+dupIds.size+'組\n紐づき先不明：'+missing.length+'件\n\n現在は一覧確認のみ。日時が異なる場合、どちらが新しい変更かは判定できないため一括上書きしません。\n予定・タスクの変更は0件です。';p.addAction('閉じる');await p.presentAlert();
 }
 Script.complete();
