@@ -88,6 +88,7 @@ try {
   await page.locator('[data-filter="missed-call"]').click();
   assert.equal(await page.locator('.event').count(),1);
   await page.locator('.event').getByRole('button',{name:'既読',exact:true}).click();
+  await page.waitForFunction(()=>document.querySelector('#unread')?.textContent?.trim()==='0');
   assert.equal((await page.locator('#unread').textContent()).trim(),'0');
   assert.match(await page.locator('.event .state').textContent(),/既読/);
 
@@ -95,6 +96,7 @@ try {
   await page.locator('#search').fill('引落の案内');
   assert.equal(await page.locator('.event').count(),1);
   await page.locator('.event').getByRole('button',{name:'完了',exact:true}).click();
+  await page.waitForFunction(()=>document.querySelector('.event .state')?.textContent?.trim()==='完了');
   assert.match(await page.locator('.event .state').textContent(),/完了/);
   await page.locator('#search').fill('');
   await page.locator('[data-filter="done"]').click();
