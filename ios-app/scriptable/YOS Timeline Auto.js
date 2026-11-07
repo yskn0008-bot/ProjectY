@@ -1,6 +1,6 @@
 // Variables used by Scriptable.
 // icon-color: blue; icon-glyph: calendar;
-// YOS Timeline Auto v1.2 — stable launcher, GitHub refresh, last-known-good fallback.
+// YOS Timeline Auto v1.3 — stable launcher, GitHub refresh, last-known-good fallback.
 // Only the Timeline presentation is downloaded; never overwrites other Scriptable scripts.
 const SOURCE="https://raw.githubusercontent.com/yskn0008-bot/ProjectY/main/ios-app/scriptable/YOS%20Timeline.js";
 const fm=FileManager.local();
@@ -32,18 +32,24 @@ if(!candidate){
   const a=new Alert();a.title="YOS Timelineを起動できません";a.message="GitHub取得失敗・保存済み版なし。通信状態を確認してください。\n"+problem;a.addAction("OK");await a.presentAlert();Script.complete();
 }else{
   const view=new WebView();
-  // Read-only Apple Calendar bridge. A denied permission leaves the demo untouched.
-  let events=[];
+  // Read-only 7-day calendar bridge; midnight no longer hides tomorrow's scheduled tasks.
+  let events=[],calendarError='';
   try{
-    const now=new Date(),start=new Date(now.getFullYear(),now.getMonth(),now.getDate());
-    const end=new Date(start.getTime()+86400000);
-    const records=await CalendarEvent.between(start,end);
-    events=records.filter(e=>!e.isAllDay).map(e=>{
-      const a=Math.max(start.getTime(),e.startDate.getTime()),b=Math.min(end.getTime(),e.endDate.getTime());
-      return {id:String(e.identifier||''),title:String(e.title||'予定').slice(0,100),start:Math.round((a-start.getTime())/60000),duration:Math.round((b-a)/60000)};
-    }).filter(e=>e.duration>0);
-  }catch(e){console.warn('Calendar read unavailable: '+String(e));}
-  const inject=html=>html.replace('<script>', '<script>window.YOS_CALENDAR_EVENTS='+JSON.stringify(events).replace(/</g,'\\u003c')+';<\\/script><script>');
+    const now=new Date(),today=new Date(now.getFullYear(),now.getMonth(),now.getDate());
+    const last=new Date(today);last.setDate(last.getDate()+7);
+    const records=await CalendarEvent.between(today,last);
+    const dayKey=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+    for(let day=0;day<7;day++){
+      const start=new Date(today);start.setDate(start.getDate()+day);
+      const end=new Date(today);end.setDate(end.getDate()+day+1);
+      for(const e of records){
+        if(e.isAllDay||e.endDate<=start||e.startDate>=end)continue;
+        const a=Math.max(start.getTime(),e.startDate.getTime()),b=Math.min(end.getTime(),e.endDate.getTime());
+        if(b>a)events.push({id:String(e.identifier||'')+':'+dayKey(start),date:dayKey(start),title:String(e.title||'予定').slice(0,100),start:Math.round((a-start.getTime())/60000),duration:Math.round((b-a)/60000)});
+      }
+    }
+  }catch(e){calendarError=String(e.message||e);console.warn('Calendar read unavailable: '+calendarError);}
+  const inject=html=>html.replace('<script>', '<script>window.YOS_CALENDAR_ERROR='+JSON.stringify(calendarError)+';window.YOS_CALENDAR_EVENTS='+JSON.stringify(events).replace(/</g,'\\u003c')+';<\\/script><script>');
   try{
     await view.loadHTML(inject(candidate));
     if(latest&&(!fm.fileExists(current)||fm.readString(current)!==latest.html)){
