@@ -114,6 +114,9 @@ try {
   await page.locator('#key').fill(manualBearer);
   await page.locator('#connectBtn').click();
   await page.locator('#timeline').waitFor({state:'visible'});
+  // A reconnect preserves the user's current filter; switch to All to inspect the full list.
+  assert.equal(await page.locator('.event').count(),1);
+  await page.locator('[data-filter="all"]').click();
   assert.equal(await page.locator('.event').count(),2);
   assert.equal(await page.locator('#key').inputValue(),'');
   assert.ok(!(await page.evaluate(()=>JSON.stringify(localStorage))).includes(manualBearer));
