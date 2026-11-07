@@ -56,12 +56,28 @@ jobs:
           test -f './Clarity Next_unsigned.shortcut'
           test -f './Clarity Text_unsigned.shortcut'
           test -f './Clarity Share v4_unsigned.shortcut'
-          python3 patch_ledger_persistence.py './Clarity Next_unsigned.shortcut'
+          python3 patch_voice_entry_fallback.py './Clarity Next_unsigned.shortcut'
           python3 patch_calendar_reminder_wire_format.py './Clarity Next_unsigned.shortcut'
+          python3 patch_home_direct_inline.py './Clarity Next_unsigned.shortcut' './YOS Home Bridge.js'
           mkdir -p artifacts
           cp './Clarity Next_unsigned.shortcut' artifacts/Clarity-Next-unsigned.shortcut
           cp './Clarity Text_unsigned.shortcut' artifacts/Clarity-Text-unsigned.shortcut
           cp './Clarity Share v4_unsigned.shortcut' artifacts/Clarity-Share-v4-unsigned.shortcut
+
+      - name: Compile existing Home helpers
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd tools/clarity-next
+          rm -f './YOS_Home_unsigned.shortcut' './YOS_Floor_Lamp_unsigned.shortcut'
+          cherri './YOS_Home.cherri' --skip-sign --debug
+          cherri './YOS_Floor_Lamp.cherri' --skip-sign --debug
+          test -f './YOS_Home_unsigned.shortcut'
+          test -f './YOS_Floor_Lamp_unsigned.shortcut'
+          python3 patch_home_inline.py './YOS_Home_unsigned.shortcut' './YOS Home Bridge.js'
+          python3 patch_floor_lamp_import_questions.py './YOS_Floor_Lamp_unsigned.shortcut'
+          cp './YOS_Home_unsigned.shortcut' artifacts/YOS_Home-unsigned.shortcut
+          cp './YOS_Floor_Lamp_unsigned.shortcut' artifacts/YOS_Floor_Lamp-unsigned.shortcut
 
       - name: Inspect runtime
         shell: bash
@@ -77,7 +93,24 @@ jobs:
           blob=repr(root)
           assert sum(i=='is.workflow.actions.dictatetext' for i in ids)==1, ids
           assert sum(i=='is.workflow.actions.askllm' for i in ids)==1, ids
+          ask=next(a for a in actions if a.get('WFWorkflowActionIdentifier')=='is.workflow.actions.askllm')
+          assert ask.get('WFWorkflowActionParameters',{}).get('FollowUp') is False, ask
           assert root.get('WFWorkflowHasShortcutInputVariables') is True
+          direct_shortcut_input_conditions=[]
+          for a in actions:
+              if a.get('WFWorkflowActionIdentifier')!='is.workflow.actions.conditional':
+                  continue
+              p=a.get('WFWorkflowActionParameters',{})
+              if p.get('WFControlFlowMode')!=0:
+                  continue
+              inp=repr(p.get('WFInput'))
+              if 'ExtensionInput' in inp and 'ShortcutInput' in inp:
+                  direct_shortcut_input_conditions.append(p.get('WFCondition'))
+          assert 100 in direct_shortcut_input_conditions, direct_shortcut_input_conditions
+          assert 101 in direct_shortcut_input_conditions, direct_shortcut_input_conditions
+          core_inputs=set(root.get('WFWorkflowInputContentItemClasses') or [])
+          assert 'WFStringContentItem' in core_inputs, core_inputs
+          assert len(core_inputs) >= 20, core_inputs
           assert '__YOS_CLARITY_TEXT_V1__' in blob
           assert '__YOS_CLARITY_SHARE_TEXT_V1__' in blob
           assert 'input_mode=share' in blob
@@ -88,18 +121,76 @@ jobs:
           assert 'NEXT_CALENDAR' in blob
           assert 'NEXT_REMINDER' in blob
           assert 'NEXT_NOTION' in blob
+          assert 'NEXT_MYWAY' in blob
+          assert 'NEXT_IDEA' in blob
+          assert 'NEXT_MEMO' in blob
+          assert 'NEXT_TASK' in blob
+          assert 'NEXT_SHOPPING' in blob
+          for marker in (
+              'NEXT_ALARM','NEXT_COMMUNICATION','NEXT_MEDIA','NEXT_CLIPBOARD',
+              'NEXT_SHARE','NEXT_CAMERA','NEXT_WEBSEARCH','NEXT_YOS_VIEW','NEXT_REMOTE',
+              'YOS_SHORTCUT','YOS_SCRIPTABLE'
+          ):
+              assert marker in blob, marker
+          assert ids.count('com.apple.mobiletimer-framework.MobileTimerIntents.MTCreateAlarmIntent') == 1, ids
+          assert ids.count('com.apple.mobilephone.call') == 1, ids
+          assert ids.count('is.workflow.actions.sendmessage') == 1, ids
+          assert ids.count('is.workflow.actions.sendemail') == 1, ids
+          assert ids.count('is.workflow.actions.setclipboard') == 1, ids
+          assert ids.count('is.workflow.actions.getclipboard') == 1, ids
+          assert ids.count('is.workflow.actions.share') == 1, ids
+          assert ids.count('is.workflow.actions.takephoto') == 1, ids
+          assert ids.count('is.workflow.actions.takescreenshot') == 1, ids
+          assert ids.count('is.workflow.actions.searchweb') == 1, ids
+          assert ids.count('is.workflow.actions.pausemusic') == 3, ids
+          assert ids.count('is.workflow.actions.skipforward') == 1, ids
+          assert ids.count('is.workflow.actions.skipback') == 1, ids
+          # Home must execute inline, not depend on a user-installed shortcut name.
+          assert ids.count('is.workflow.actions.runworkflow') == 3, ids
+          assert any(
+              a.get('WFWorkflowActionIdentifier')=='is.workflow.actions.runworkflow'
+              and a.get('WFWorkflowActionParameters',{}).get('WFWorkflowName')=='YOS_Floor_Lamp'
+              for a in actions
+          ), 'YOS_Floor_Lamp helper route missing'
+          home_inline=[a for a in actions if a.get('WFWorkflowActionIdentifier')=='dk.simonbs.Scriptable.RunScriptInlineIntent']
+          assert len(home_inline)==1, home_inline
+          home_params=home_inline[0]['WFWorkflowActionParameters']
+          assert home_params['runInApp'] is False
+          assert home_params['ShowWhenRun'] is False
+          home_input=home_params['parameter']
+          assert home_input['WFSerializationType']=='WFTextTokenAttachment', home_input
+          assert home_input['Value']['Type']=='ActionOutput', home_input
+          assert home_input['Value']['OutputName']=='homeCommand', home_input
+          assert 'parseHomeCommand' in home_params['script']['Value']['string']
+          assert not any(a.get('WFWorkflowActionIdentifier')=='is.workflow.actions.runworkflow' and a.get('WFWorkflowActionParameters',{}).get('WFWorkflowName')=='YOS_Home' for a in actions)
+          message=next(a for a in actions if a.get('WFWorkflowActionIdentifier')=='is.workflow.actions.sendmessage')
+          assert message.get('WFWorkflowActionParameters',{}).get('ShowWhenRun') is False, message
+          email=next(a for a in actions if a.get('WFWorkflowActionIdentifier')=='is.workflow.actions.sendemail')
+          assert email.get('WFWorkflowActionParameters',{}).get('WFSendEmailActionShowComposeSheet') is False, email
+          assert 'scriptable:///run?scriptName=YOS%20BRAVIA%20Widget&action=' in blob
+          assert 'scriptable:///run?scriptName=YOS%20Light%20Widget&action=' in blob
+          assert 'scriptable:///run?scriptName=YOS%20AC%20Widget&action=' in blob
+          assert 'Morning Flow' in blob
+          assert 'STASH Add' in blob
+          assert 'YOS_Home' in blob
+          assert 'YOS Remote Hub' in blob
+          assert 'YOS Departure Guard2' in blob
+          assert 'YOS_Money_Local' in blob
+          for url in (
+              'https://yskn0008-bot.github.io/ProjectY/life/',
+              'https://yskn0008-bot.github.io/ProjectY/yos/hj/',
+              'https://yskn0008-bot.github.io/ProjectY/yos/desk/',
+              'https://yskn0008-bot.github.io/ProjectY/system/',
+          ):
+              assert url in blob, url
           assert 'scriptable:///run?scriptName=YOS%20Dashboard%20v2&action=baseHome' in blob
-          assert 'unsupported_executor' in blob
-          assert 'Clarity Next Ledger.txt' in blob
-          assert not any(i.endswith('file.append') for i in ids), ids
-          ledger_saves=[
-              a for a in actions
-              if str(a.get('WFWorkflowActionIdentifier','')).endswith('documentpicker.save')
-              and a.get('WFWorkflowActionParameters',{}).get('WFFileDestinationPath')=='Clarity Next Ledger.txt'
-          ]
-          assert len(ledger_saves) >= 1, ledger_saves
-          assert all(a.get('WFWorkflowActionParameters',{}).get('WFAskWhereToSave') is False for a in ledger_saves)
-          assert all(a.get('WFWorkflowActionParameters',{}).get('WFSaveFileOverwrite') is True for a in ledger_saves)
+          assert 'この操作はClarity Next v0では未対応です' in blob
+          # Normal voice/text/share requests must not touch the old debug Ledger.
+          # File access remains only for explicit capture destinations such as Idea/Memo.
+          assert 'Clarity Next Ledger.txt' not in blob
+          assert any(i.endswith('file.append') for i in ids), ids
+          assert 'Idea in Box.txt' in blob
+          assert 'Clarity Inbox.txt' in blob
           assert any(i.endswith('setbrightness') for i in ids), ids
           assert any(i.endswith('setvolume') for i in ids), ids
           assert any(i.endswith('timer.start') for i in ids), ids
@@ -123,6 +214,28 @@ jobs:
           assert len(reminders)==1, reminders
           assert reminders[0].get('WFAlertEnabled')=='Alert'
           assert reminders[0].get('WFAlertCustomTime',{}).get('WFSerializationType')=='WFTextTokenString'
+          child=plistlib.loads(Path('tools/clarity-next/artifacts/YOS_Home-unsigned.shortcut').read_bytes())
+          inline=[a for a in child.get('WFWorkflowActions',[]) if a.get('WFWorkflowActionIdentifier')=='dk.simonbs.Scriptable.RunScriptInlineIntent']
+          assert len(inline)==1, inline
+          params=inline[0].get('WFWorkflowActionParameters',{})
+          assert params.get('runInApp') is False, params
+          script=params.get('script',{})
+          assert script.get('WFSerializationType')=='WFTextTokenString', script
+          bridge=script.get('Value',{}).get('string','')
+          assert 'parseHomeCommand' in bridge and 'YOS Home Bridge' in bridge
+          assert '__YOS_HOME_INLINE__' not in bridge
+          print('YOS_Home child runtime contract: PASS')
+          floor=plistlib.loads(Path('tools/clarity-next/artifacts/YOS_Floor_Lamp-unsigned.shortcut').read_bytes())
+          floor_blob=repr(floor)
+          floor_ids=[a.get('WFWorkflowActionIdentifier','') for a in floor.get('WFWorkflowActions',[])]
+          assert floor_ids.count('com.tplink.tapo.TapoDeviceToggleIntent')==2, floor_ids
+          assert floor_ids.count('com.tplink.tapo.TapoBulbColorSetIntent')==2, floor_ids
+          assert '__SELECT_FLOOR_LAMP__' in floor_blob
+          floor_questions=[q for q in floor.get('WFWorkflowImportQuestions',[]) if q.get('ParameterKey')=='devices']
+          assert len(floor_questions)==4, floor_questions
+          assert 'YOS_Floor_Lamp' in blob
+          assert 'フロアライト' in blob
+          print('YOS Floor Lamp runtime contract: PASS')
           print('Clarity Next runtime contract: PASS')
           PY
 
@@ -146,6 +259,18 @@ jobs:
           share_blob=repr(share_root)
           assert 'ActionExtension' in set(share_root.get('WFWorkflowTypes') or [])
           assert share_root.get('WFWorkflowHasShortcutInputVariables') is True
+          share_inputs=set(share_root.get('WFWorkflowInputContentItemClasses') or [])
+          required_share_inputs={
+              'WFStringContentItem',
+              'WFRichTextContentItem',
+              'WFSafariWebPageContentItem',
+              'WFURLContentItem',
+              'WFImageContentItem',
+              'WFPDFContentItem',
+              'WFGenericFileContentItem',
+          }
+          assert required_share_inputs.issubset(share_inputs), share_inputs
+          assert len(share_inputs) >= 20, share_inputs
           assert any('extracttextfromimage' in i for i in share_ids), share_ids
           assert '__YOS_CLARITY_SHARE_TEXT_V1__' in share_blob
           assert '__YOS_CLARITY_SHARE_IMAGE_V1__' in share_blob
@@ -182,13 +307,25 @@ jobs:
             --name 'Clarity Share v4' \
             2>&1 | tee tools/clarity-next/artifacts/clarity-share-hubsign.log
 
+          python3 tools/clarity-factory/sign_with_hubsign.py \
+            --input tools/clarity-next/artifacts/YOS_Home-unsigned.shortcut \
+            --output tools/clarity-next/artifacts/YOS_Home-signed.shortcut \
+            --name 'YOS_Home' \
+            2>&1 | tee tools/clarity-next/artifacts/yos-home-hubsign.log
+
+          python3 tools/clarity-factory/sign_with_hubsign.py \
+            --input tools/clarity-next/artifacts/YOS_Floor_Lamp-unsigned.shortcut \
+            --output tools/clarity-next/artifacts/YOS_Floor_Lamp-signed.shortcut \
+            --name 'YOS_Floor_Lamp' \
+            2>&1 | tee tools/clarity-next/artifacts/yos-floor-lamp-hubsign.log
+
       - name: Verify signature
         shell: bash
         run: |
           set -euo pipefail
           python3 - <<'PY'
           from pathlib import Path
-          for name in ('Clarity-Next-signed.shortcut','Clarity-Text-signed.shortcut','Clarity-Share-v4-signed.shortcut'):
+          for name in ('Clarity-Next-signed.shortcut','Clarity-Text-signed.shortcut','Clarity-Share-v4-signed.shortcut','YOS_Home-signed.shortcut','YOS_Floor_Lamp-signed.shortcut'):
               p=Path('tools/clarity-next/artifacts')/name
               data=p.read_bytes()
               assert data.startswith(b'AEA1'), (name,data[:8])
@@ -201,6 +338,12 @@ jobs:
         with:
           name: clarity-next-v0
           path: |
+            tools/clarity-next/artifacts/YOS_Home-unsigned.shortcut
+            tools/clarity-next/artifacts/YOS_Home-signed.shortcut
+            tools/clarity-next/artifacts/yos-home-hubsign.log
+            tools/clarity-next/artifacts/YOS_Floor_Lamp-unsigned.shortcut
+            tools/clarity-next/artifacts/YOS_Floor_Lamp-signed.shortcut
+            tools/clarity-next/artifacts/yos-floor-lamp-hubsign.log
             tools/clarity-next/artifacts/Clarity-Next-unsigned.shortcut
             tools/clarity-next/artifacts/Clarity-Next-signed.shortcut
             tools/clarity-next/artifacts/Clarity-Text-unsigned.shortcut
