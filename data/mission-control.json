@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-08T01:12:01+09:00",
+  "updated_at": "2026-11-08T01:13:49+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -195,6 +195,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-0e6fa3bfc0f8",
+      "title": "Fix HTML script injection delimiter preventing calendar data from reaching timeline",
+      "completed_at": "2026-11-07T16:13:24Z",
+      "result": "GitHub mainへ反映（0e6fa3b）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/0e6fa3bfc0f8f731edf342c742366a68b87f8a8c"
+    },
+    {
       "id": "github-commit-6c4ea027c5ad",
       "title": "Add seven-day navigation and date-scoped calendar timeline without writing external events",
       "completed_at": "2026-11-07T16:11:20Z",
@@ -221,13 +228,6 @@
       "completed_at": "2026-11-07T14:25:31Z",
       "result": "GitHub mainへ反映（956cc31）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/956cc314e9789e6c4e98e7724aef76468825766a"
-    },
-    {
-      "id": "github-commit-2d0357ddecd1",
-      "title": "Use live Apple Calendar entries in timeline without stale cache or demo fallback",
-      "completed_at": "2026-11-07T14:25:26Z",
-      "result": "GitHub mainへ反映（2d0357d）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/2d0357ddecd1ac8352b1763afc82d9d623ad981c"
     },
     {
       "id": "complete-002",
@@ -264,7 +264,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-08T01:12:01+09:00",
+      "last_update": "2026-11-08T01:13:49+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -345,7 +345,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-08T01:12:01+09:00",
+      "last_update": "2026-11-08T01:13:49+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -368,7 +368,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-08T01:12:01+09:00",
+      "last_update": "2026-11-08T01:13:49+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -450,5 +450,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "d7db25bad20ca78cd56b42fd627a0f41bc36a394a5821ab3137db302888838e6"
+  "github_snapshot_hash": "24313171541c716353f2493b4ec0f61be0fda366810c87e2b02819efe12070f8"
 }
