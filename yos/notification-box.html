@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0d1420">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>通知ボックス｜YOS</title>
+<style>
+:root{color-scheme:dark;--bg:#0d1420;--panel:#182638;--panel-2:#1f3146;--text:#f8fafc;--muted:#b8c7d9;--edge:#35455b;--accent:#27b9aa;--warn:#e9b866;--danger:#ee7788}
+*{box-sizing:border-box}html{min-height:100%}body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN",sans-serif;font-size:15px;line-height:1.5}
+button,input{font:inherit}button{cursor:pointer}button:disabled{cursor:not-allowed;opacity:.45}
+.shell{max-width:650px;margin:auto;padding:0 16px 48px}.mast{padding:calc(env(safe-area-inset-top) + 24px) 0 22px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.home{font-size:13px;color:var(--muted);text-decoration:none;padding:9px 0}.brand{letter-spacing:.18em;color:var(--accent);font-weight:800;font-size:12px}
+.title h1{font-size:29px;font-weight:750;letter-spacing:-.04em;line-height:1.25;margin:0 0 8px}.title p{color:var(--muted);font-size:14px;margin:0 0 22px}
+.kpi{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin-bottom:22px}
+.metric{background:var(--panel);border:1px solid var(--edge);padding:14px 12px;border-radius:15px;min-width:0}
+.metric .number{font-size:24px;font-weight:730;font-variant-numeric:tabular-nums;line-height:1.15}.metric small{color:var(--muted);font-size:12px;display:block;margin-top:8px}
+.panel{background:var(--panel);border:1px solid var(--edge);border-radius:17px;padding:17px;margin-bottom:18px}
+.panel h2{font-size:17px;margin:0 0 6px}.panel p{color:var(--muted);font-size:13px;margin:0 0 15px}
+.field{display:block;margin-bottom:14px}.field span{display:block;color:var(--muted);font-size:12px;margin-bottom:6px}
+.field input,.search{background:#101c2b;border:1px solid var(--edge);border-radius:11px;padding:13px 12px;color:var(--text);outline:none;width:100%;font-size:15px;min-height:46px}
+.field input:focus,.search:focus{border-color:var(--accent);box-shadow:0 0 0 2px #27b9aa24}
+.primary{background:var(--accent);border:0;color:#071a1b;font-weight:730;padding:12px 18px;border-radius:11px;min-height:45px}
+.small{border:1px solid var(--edge);border-radius:10px;background:var(--panel-2);color:var(--text);padding:9px 12px;min-height:40px;font-size:13px}
+.ghost{background:transparent;border:0;color:var(--muted);padding:7px 0;font-size:13px}
+.subtle{color:var(--muted);font-size:12px}.status{font-size:13px;min-height:20px;color:var(--muted);margin:8px 0}
+.status[data-error="true"]{color:var(--danger)}
+.toolbar{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:20px 0 10px}
+.toolbar strong{font-size:16px}.tabs{display:flex;gap:7px;overflow-x:auto;padding:8px 0 12px;margin:0 -16px 10px;padding-left:16px;padding-right:16px;scrollbar-width:none}
+.chip{border:1px solid var(--edge);border-radius:24px;padding:9px 13px;background:var(--panel);color:var(--muted);white-space:nowrap;font-size:13px;font-weight:600}
+.chip[aria-pressed="true"]{color:#08191a;background:var(--accent);border-color:var(--accent)}
+.event{padding:17px 16px;border:1px solid var(--edge);background:var(--panel);border-radius:16px;margin-bottom:11px}
+.head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
+.category{font-size:12px;font-weight:700;color:var(--accent)}.date{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.excerpt{white-space:pre-wrap;overflow-wrap:anywhere;font-size:14px;color:var(--text);line-height:1.6;margin:0 0 14px}
+.actions{display:flex;gap:7px;align-items:center;flex-wrap:wrap}.state{border:1px solid var(--edge);border-radius:8px;padding:5px 8px;font-size:11px;color:var(--muted);margin-right:auto}
+.state.pending{border-color:#936d3e;color:var(--warn)}.state.unread{border-color:#227b70;color:#78d4c8}
+.tip{border-left:2px solid var(--warn);padding-left:10px;color:var(--muted);font-size:12px;margin:12px 0 0}
+.empty{padding:28px 12px;text-align:center;color:var(--muted);border:1px dashed var(--edge);border-radius:16px}
+footer{padding-top:24px;color:var(--muted);font-size:12px;line-height:1.7}
+footer a{color:#a8d8e0}.utility{display:flex;align-items:center;gap:8px}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<main class="shell">
+<header class="mast"><div class="brand">YOS / ALERTS</div><a class="home" href="./">STREAMに戻る ↗</a></header>
+<section class="title"><h1>通知ボックス</h1><p>見逃しても、後から確認できる。<br>重要なことは、対応が終わるまで残す。</p></section>
+<section class="kpi" aria-label="通知件数">
+ <div class="metric"><div class="number" id="total">—</div><small>保存履歴</small></div>
+ <div class="metric"><div class="number" id="unread">—</div><small>未読</small></div>
+ <div class="metric"><div class="number" id="pending">—</div><small>対応待ち</small></div>
+</section>
+<section class="panel" id="connect">
+  <h2>既存YOSに接続する</h2>
+  <p>通知原文は既存NotionのYOS Inboxに保存。ここでは本人の認証情報を端末の保存領域に記録しません。</p>
+  <button type="button" id="googleConnect" class="primary">既存のGoogleアカウントで接続</button>
+  <div id="googleSignIn" hidden><div id="googleSignInButton"></div></div>
+  <p class="subtle" style="margin-top:12px">または、既存YOSの接続トークンを使う</p>
+  <form id="connectForm">
+   <label class="field"><span>既存YOS APIのHTTPSアドレス</span>
+     <input id="api" type="url" inputmode="url" autocomplete="url" placeholder="https://（確認済みのYOS APIホスト）" required></label>
+   <label class="field"><span>既存の接続トークン（本人のみ）</span>
+     <input id="key" type="password" autocomplete="current-password" spellcheck="false" placeholder="接続トークン" required></label>
+   <button class="primary" id="connectBtn" type="submit">通知を読み込む</button>
+  </form>
+  <p class="status" id="connectStatus" aria-live="polite"></p>
+  <a class="subtle" href="https://app.notion.com/p/3d35ca88289581ef9dc8d5f11ff8e213" rel="noreferrer">Notionの保存済みInboxを開く ↗</a>
+</section>
+<section id="timeline" hidden>
+ <div class="toolbar">
+  <strong>保存された通知</strong>
+  <div class="utility"><button class="ghost" id="refresh">更新</button><button class="ghost" id="disconnect">切断</button></div>
+ </div>
+ <input id="search" class="search" type="search" placeholder="内容・発信元を検索" aria-label="通知を検索">
+ <nav class="tabs" aria-label="通知絞り込み">
+  <button type="button" class="chip" data-filter="all" aria-pressed="true">すべて</button>
+  <button type="button" class="chip" data-filter="unread" aria-pressed="false">未読</button>
+  <button type="button" class="chip" data-filter="pending" aria-pressed="false">対応待ち</button>
+  <button type="button" class="chip" data-filter="missed-call" aria-pressed="false">不在着信</button>
+  <button type="button" class="chip" data-filter="done" aria-pressed="false">完了</button>
+ </nav>
+ <p class="status" id="actionStatus" aria-live="polite"></p>
+ <div id="events"></div>
+</section>
+<footer>元アプリの通知は停止しません。表示対象はYOS Inboxに保存できた通知だけです。未取得の通知や全件履歴を保証しません。<br>通知の「既読」と「対応完了」は別に管理します。</footer>
+</main>
+<script src="./hj/yos-auth.js"></script>
+<script>
+(() => {
+  'use strict';
+  const $=id=>document.getElementById(id);
+  const LABELS={'missed-call':'不在着信','money-review':'お金・支払','legal':'法務・督促','security':'安全確認',information:'一般通知'};
+  const STATES={unread:'未読',read:'既読',pending:'対応待ち',done:'完了'};
+  let token='',base='',events=[],active='all',complete=true,loading=false;
+  try{$('api').value=localStorage.getItem('yos-notification-api-origin')||''}catch{}
+  const announce=(id,message,error=false)=>{const el=$(id);el.textContent=message;el.dataset.error=String(error)};
+  const formatDate=value=>{const d=new Date(value);return Number.isNaN(+d)?'日時未確認':new Intl.DateTimeFormat('ja-JP',{timeZone:'Asia/Tokyo',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(d)};
+  const safeBase=value=>{
+    const url=new URL(value.trim());
+    if(url.protocol!=='https:'||url.username||url.password||url.search||url.hash||url.pathname!=='/')throw Error('APIのルートURL（HTTPS）を指定してください');
+    return url.origin;
+  };
+  async function request(method,payload){
+    if(!base||!token)throw Error('未接続');
+    const response=await fetch(base+'/api/yos/notification',{
+      method,headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},
+      ...(payload?{body:JSON.stringify(payload)}:{})
+    });
+    const data=await response.json().catch(()=>({}));
+    if(!response.ok||!data.ok)throw Error(response.status===401?'認証情報を確認してください':data.error||('通信エラー '+response.status));
+    return data;
+  }
+  async function sync(){
+    const data=await request('GET');
+    if(!Array.isArray(data.events))throw Error('通知データの形式を確認できません');
+    events=data.events.filter(e=>e&&typeof e.id==='string'&&typeof e.text==='string');
+    complete=data.complete===true;
+    render();
+  }
+  function render(){
+    $('total').textContent=events.length.toLocaleString('ja-JP')+(complete?'':'+');
+    $('unread').textContent=events.filter(e=>e.status==='unread').length.toLocaleString('ja-JP');
+    $('pending').textContent=events.filter(e=>e.status==='pending').length.toLocaleString('ja-JP');
+    const q=$('search').value.trim().toLowerCase(),holder=$('events');
+    holder.replaceChildren();
+    const rows=events.filter(e=>(active==='all'||(active==='missed-call'?e.category===active:e.status===active))&&
+      ((e.text+' '+(LABELS[e.category]||'')).toLowerCase().includes(q)));
+    if(!rows.length){const empty=document.createElement('p');empty.className='empty';empty.textContent='該当する通知はありません';holder.append(empty)}
+    for(const event of rows){
+      const card=document.createElement('article');card.className='event';
+      const head=document.createElement('div');head.className='head';
+      const cat=document.createElement('strong');cat.className='category';cat.textContent=LABELS[event.category]||'通知';
+      const date=document.createElement('time');date.className='date';date.textContent=formatDate(event.at);
+      head.append(cat,date);card.append(head);
+      const body=document.createElement('p');body.className='excerpt';body.textContent=event.text;card.append(body);
+      const buttons=document.createElement('div');buttons.className='actions';
+      const state=document.createElement('span');state.className='state '+event.status;state.textContent=STATES[event.status]||'未確認';
+      buttons.append(state);
+      for(const [value,label] of [['read','既読'],['pending','対応待ち'],['done','完了']]){
+        if(event.status===value)continue;
+        const action=document.createElement('button');action.type='button';action.className='small';
+        action.textContent=label;
+        action.addEventListener('click',async()=>{
+          if(loading)return;loading=true;action.disabled=true;
+          announce('actionStatus','Notionの状態を更新しています');
+          try{
+            await request('POST',{action:'mark',id:event.id,status:value});
+            await sync();
+            const current=events.find(e=>e.id===event.id);
+            if(current?.status!==value)throw Error('保存後の確認ができませんでした');
+            announce('actionStatus','Notionへの反映を確認しました');
+          }catch(error){announce('actionStatus',String(error.message||error),true)}
+          finally{loading=false;action.disabled=false}
+        });
+        buttons.append(action);
+      }
+      card.append(buttons);
+      if(event.category==='missed-call'&&event.status!=='done'){
+        const tip=document.createElement('p');tip.className='tip';
+        tip.textContent='折り返しが必要かは電話アプリで確認してください。発信者や通話内容は推測しません。';
+        card.append(tip);
+      }
+      holder.append(card);
+    }
+    if(!complete)announce('actionStatus','Inboxの全件を読み切れていないため、表示は一部です。',true);
+  }
+  $('googleConnect').addEventListener('click',async()=>{
+    if(loading)return;
+    loading=true;$('googleConnect').disabled=true;
+    announce('connectStatus','本人認証を確認しています');
+    try{
+      base=safeBase($('api').value||globalThis.YOS_AI_BASE_URL||'');
+      if(typeof globalThis.YOS_AUTH?.getGoogleIdToken!=='function')throw Error('既存のYOS本人認証が使えません');
+      token=await globalThis.YOS_AUTH.getGoogleIdToken();
+      await sync();
+      try{localStorage.setItem('yos-notification-api-origin',base)}catch{}
+      $('connect').hidden=true;$('timeline').hidden=false;
+      announce('actionStatus','Google本人認証でNotionの通知履歴を取得しました');
+    }catch(error){token='';announce('connectStatus',String(error.message||error),true)}
+    finally{loading=false;$('googleConnect').disabled=false}
+  });
+  $('connectForm').addEventListener('submit',async e=>{
+    e.preventDefault();if(loading)return;loading=true;$('connectBtn').disabled=true;
+    announce('connectStatus','接続を確認しています');
+    try{
+      base=safeBase($('api').value);token=$('key').value.trim();
+      await sync();
+      try{localStorage.setItem('yos-notification-api-origin',base)}catch{}
+      $('key').value='';$('connect').hidden=true;$('timeline').hidden=false;
+      announce('actionStatus','Notionから取得しました');
+    }catch(error){token='';announce('connectStatus',String(error.message||error),true)}
+    finally{loading=false;$('connectBtn').disabled=false}
+  });
+  $('refresh').addEventListener('click',async()=>{
+    if(loading)return;loading=true;announce('actionStatus','更新しています');
+    try{await sync();announce('actionStatus','読み直しました')}catch(e){announce('actionStatus',String(e.message||e),true)}
+    finally{loading=false}
+  });
+  $('disconnect').addEventListener('click',()=>{
+    token='';events=[];globalThis.YOS_AUTH?.resetGoogleIdToken?.();$('timeline').hidden=true;$('connect').hidden=false;
+    $('total').textContent=$('unread').textContent=$('pending').textContent='—';
+    announce('connectStatus','接続情報を破棄しました');
+  });
+  $('search').addEventListener('input',render);
+  document.querySelectorAll('.chip').forEach(button=>button.addEventListener('click',()=>{
+    active=button.dataset.filter||'all';
+    document.querySelectorAll('.chip').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));
+    render();
+  }));
+})();
+</script>
+</body>
+</html>
