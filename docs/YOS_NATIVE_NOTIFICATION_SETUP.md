@@ -12,7 +12,7 @@ iOS 27の純正通知トリガー → Apple標準「URLの内容を取得」（H
 
 ## 実行条件
 
-既存YOS API（server/yos-ai）に認証情報・Notion Inbox ID・Upstashが本当に設定され、本人がアクセスできること。現在のVercelは最新DeploymentがCANCELEDでlive=falseのため、稼働しているとみなさない。
+既存YOS API（server/yos-ai）に認証情報・Notion Inbox ID・Upstashが本当に設定され、本人がアクセスできること。Vercelの直近CANCELEDは変更のないビルドを省略する既存設定によるもので、本番停止を意味しない。既存URLは認証なしでHTTP403を返すが、Origin制限等により期待どおりの可能性がある。認証付きの実稼働確認は未完了。通知PRブランチのプレビュー配備は未確認で、通知用Notionトークン・Inbox ID・入力トークンの環境変数はproductionのみでpreviewに未設定。プレビューに本番の秘密情報を無断コピーしない。
 
 APIへの送信は既存Clarity接続用Bearerトークンを再利用。値はチャット/GitHubへ送らない。ショートカットのHTTP Authorizationヘッダーにだけ設定する（ショートカット編集権限から見えることはある）。NotionのAPIトークンをiPhoneへ置かない。
 
