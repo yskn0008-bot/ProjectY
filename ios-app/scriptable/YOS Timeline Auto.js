@@ -49,7 +49,7 @@ if(!candidate){
       }
     }
   }catch(e){calendarError=String(e.message||e);console.warn('Calendar read unavailable: '+calendarError);}
-  const inject=html=>html.replace('<script>', '<script>window.YOS_CALENDAR_ERROR='+JSON.stringify(calendarError)+';window.YOS_CALENDAR_EVENTS='+JSON.stringify(events).replace(/</g,'\\u003c')+';<\\/script><script>');
+  const inject=html=>html.replace('<script>', '<script>window.YOS_CALENDAR_ERROR='+JSON.stringify(calendarError)+';window.YOS_CALENDAR_EVENTS='+JSON.stringify(events).replace(/</g,'\\u003c')+';'+'</scr'+'ipt><script>');
   try{
     await view.loadHTML(inject(candidate));
     if(latest&&(!fm.fileExists(current)||fm.readString(current)!==latest.html)){
