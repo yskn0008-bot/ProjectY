@@ -36,7 +36,8 @@ test('five tabs, date selector, timeline and editing actions exist', () => {
     assert.ok(bodyScript.includes('function '+fn+'('),fn+' missing');
 });
 test('elapsed-time position and overlap lanes are implemented', () => {
-  assert.match(bodyScript,/const scale=56/);
+  assert.match(bodyScript,/let density='overview',scale=27/);
+  assert.match(bodyScript,/scale=density==='overview'\?27:56/);
   assert.match(bodyScript,/const yFor=m=>m\/60\*scale/);
   assert.match(bodyScript,/lanes\.set\(item,\{lane,count:0\}\)/);
   assert.match(bodyScript,/el\.classList\.add\('lane'\)/);
@@ -65,6 +66,16 @@ test('Safari preview exists as a separate sample-only HTML without deployment', 
   assert.match(preview,/本番データには反映しません/);
   assert.doesNotMatch(preview,/window\.YOS_CALENDAR_EVENTS\s*=/);
   assert.doesNotMatch(preview,/api\.notion\.com/);
+});
+
+
+test('compact overview exposes an accurate hour scale and zoom action',()=>{
+ assert.match(html,/id="zoomBtn"/);
+ assert.match(bodyScript,/density==='overview'\?'detail':'overview'/);
+ assert.match(bodyScript,/const monday=new Date\(d\)/);
+ assert.match(bodyScript,/priorVisualBottom/);
+ const hours=24*27;
+ assert.ok(hours<=700,'overview must not repeat the previous 1344px day height');
 });
 
 test('isolated WebView runtime draws schedule and saves real items without mixing examples',()=>{
