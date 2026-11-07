@@ -1,6 +1,6 @@
 // Variables used by Scriptable.
 // icon-color: blue; icon-glyph: calendar;
-// YOS Timeline Auto v1.1 — stable launcher, GitHub refresh, last-known-good fallback.
+// YOS Timeline Auto v1.2 — stable launcher, GitHub refresh, last-known-good fallback.
 // Only the Timeline presentation is downloaded; never overwrites other Scriptable scripts.
 const SOURCE="https://raw.githubusercontent.com/yskn0008-bot/ProjectY/main/ios-app/scriptable/YOS%20Timeline.js";
 const fm=FileManager.local();
@@ -40,7 +40,7 @@ if(!candidate){
     const records=await CalendarEvent.between(start,end);
     events=records.filter(e=>!e.isAllDay).map(e=>{
       const a=Math.max(start.getTime(),e.startDate.getTime()),b=Math.min(end.getTime(),e.endDate.getTime());
-      return {title:String(e.title||'予定').slice(0,100),start:Math.round((a-start.getTime())/60000),duration:Math.round((b-a)/60000)};
+      return {id:String(e.identifier||''),title:String(e.title||'予定').slice(0,100),start:Math.round((a-start.getTime())/60000),duration:Math.round((b-a)/60000)};
     }).filter(e=>e.duration>0);
   }catch(e){console.warn('Calendar read unavailable: '+String(e));}
   const inject=html=>html.replace('<script>', '<script>window.YOS_CALENDAR_EVENTS='+JSON.stringify(events).replace(/</g,'\\u003c')+';<\\/script><script>');
