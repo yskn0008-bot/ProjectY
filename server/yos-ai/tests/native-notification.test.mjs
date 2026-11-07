@@ -245,3 +245,58 @@ test('test text with dangerous words is still silent and does not repeat a fabri
   assert.equal(obj.decision,'YOS_SILENT');
   assert.equal(obj.alertText,'');
 });
+
+
+test('critical alert is replayed after a lost response until device acknowledges its display',async()=>{
+  const h=harness(),input={text:'銀行からのお知らせ：口座凍結が発生しました',sourceApp:'銀行',eventId:'native-alert-recovery-0001'};
+  const first=await (await h.handler(h.req(input))).json();
+  assert.equal(first.decision,'YOS_ALERT');
+  assert.equal(first.alertRequiresAck,true);
+  assert.equal(h.blocks.length,1);
+  // Simulate iPhone losing the first HTTP reply before it can show the alert.
+  const replay=await (await h.handler(h.req(input))).json();
+  assert.equal(replay.duplicate,true);
+  assert.equal(replay.decision,'YOS_ALERT');
+  assert.equal(replay.alertRequiresAck,true);
+  assert.equal(replay.alertText,first.alertText);
+  assert.equal(h.blocks.length,1,'replay must not duplicate Inbox records');
+  // The device acknowledges only after the Shortcuts notification-display action.
+  const ack=await h.handler(h.req({action:'ack-alert',id:first.id}));
+  assert.equal(ack.status,200);
+  assert.equal((await ack.json()).alertAcknowledged,true);
+  const after=await (await h.handler(h.req(input))).json();
+  assert.equal(after.decision,'YOS_SILENT');
+  assert.equal(after.alertText,'');
+  assert.equal(after.alertRequiresAck,false);
+  assert.equal(h.blocks.length,1);
+});
+
+test('ambiguous Notion PATCH is reconciled before replaying a critical alert',async()=>{
+  const h=harness(),input={text:'銀行：不正送金が検出されました',eventId:'native-alert-recovery-0002'};
+  h.state.failPatch=true;h.state.ambiguous=true;
+  const first=await h.handler(h.req(input));
+  assert.equal(first.status,503);
+  assert.equal(h.blocks.length,1);
+  h.state.failPatch=false;h.state.ambiguous=false;
+  const reply=await (await h.handler(h.req(input))).json();
+  assert.equal(reply.duplicate,true);
+  assert.equal(reply.decision,'YOS_ALERT');
+  assert.equal(reply.alertRequiresAck,true);
+  assert.match(reply.alertText,/不正送金/);
+  assert.equal(h.blocks.length,1);
+});
+
+test('acknowledgement must come from device and only after Inbox save is confirmed',async()=>{
+  const valid='sample-viewer-credential-0002';
+  const h=harness(async value=>value===valid);
+  const input={text:'口座凍結',eventId:'native-alert-recovery-0003'};
+  const id=createHash('sha256').update('id:iPhone通知:'+input.eventId).digest('hex').slice(0,24);
+  const before=h.handler(h.req({action:'ack-alert',id}));
+  assert.equal((await before).status,409);
+  await h.handler(h.req(input));
+  assert.equal((await h.handler(h.req({action:'ack-alert',id},'Bearer '+valid))).status,403);
+  const confirmed=await h.handler(h.req({action:'ack-alert',id}));
+  assert.equal(confirmed.status,200);
+  const twice=await h.handler(h.req({action:'ack-alert',id}));
+  assert.equal(twice.status,200);
+});
