@@ -276,7 +276,11 @@ try{
   // DESK is now chat-only; its detailed mobile rendering is covered by dedicated DESK CI.
   await page.goto(base+'/yos/desk/',{waitUntil:'networkidle'});
   await expectText('.chatOnlyTopbar','チャット');
-  assert.equal(await page.locator('.chat').count(),0,'new DESK storage must contain no fabricated conversations');
+  const savedDeskCount=await page.evaluate(()=>{
+    const saved=JSON.parse(localStorage.getItem('yosDeskIntegratedStateV1')||'{}');
+    return Array.isArray(saved.chats)?saved.chats.filter(chat=>chat&&!chat.temporary).length:0;
+  });
+  assert.equal(await page.locator('.chat').count(),savedDeskCount,'DESK must render stored non-temporary chats without inventing or dropping rows');
   await page.locator('#searchInput').fill('存在しない会話');
   assert.equal(await page.locator('.chat').count(),0,'search must not fabricate matching conversations');
   const deskGeometry=await page.evaluate(()=>({
