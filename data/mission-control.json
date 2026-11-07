@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-08T02:44:39+09:00",
+  "updated_at": "2026-11-08T05:05:14+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-07T17:42:37Z"
+      "updated_at": "2026-11-07T19:23:02Z"
     },
     {
       "id": "github-issue-234",
@@ -195,6 +195,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-5cb9ced82ce8",
+      "title": "chore(yos-ai): retry deferred approved release (1/4)",
+      "completed_at": "2026-11-07T19:21:43Z",
+      "result": "GitHub mainへ反映（5cb9ced）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/5cb9ced82ce898bcacec4d3709845ceb1f15cac0"
+    },
+    {
       "id": "github-commit-a4ede94cec2f",
       "title": "Diagnose Apple Calendar event fetch and filtering counts on iPhone",
       "completed_at": "2026-11-07T16:47:39Z",
@@ -221,13 +228,6 @@
       "completed_at": "2026-11-07T16:11:20Z",
       "result": "GitHub mainへ反映（6c4ea02）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/6c4ea027c5ad5d3b4af59fd89f2dafc0d087a887"
-    },
-    {
-      "id": "github-commit-adedfebea1e3",
-      "title": "Read seven days of Apple Calendar with day-scoped IDs and explicit errors",
-      "completed_at": "2026-11-07T16:11:06Z",
-      "result": "GitHub mainへ反映（adedfeb）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/adedfebea1e395489e34eafb0798f11a27c4b1f1"
     },
     {
       "id": "complete-002",
@@ -264,7 +264,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-08T02:44:39+09:00",
+      "last_update": "2026-11-08T05:05:14+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -345,7 +345,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-08T02:44:39+09:00",
+      "last_update": "2026-11-08T05:05:14+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -368,7 +368,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-08T02:44:39+09:00",
+      "last_update": "2026-11-08T05:05:14+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -450,5 +450,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "929c41f57603074c9d42b4f8ed1d042950c2639de266543dcb3d9382c0907810"
+  "github_snapshot_hash": "73de18e5b3d7f69fb3ae044f127dab2d77040c24cdf34df7eff9bb2cc6bde9c3"
 }
