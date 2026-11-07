@@ -10,7 +10,7 @@ const html = match[1].replace(/<\\\/script>/g, '</script>');
 const bodyScript = html.match(/<script>([\s\S]*?)<\/script>/)?.[1];
 
 test('approved charcoal template remains compatible with auto-loader', () => {
-  assert.match(source, /YOS Timeline v2\.0/);
+  assert.match(source, /YOS Timeline v2\.1/);
   assert.ok(html.startsWith('<!doctype html>'));
   assert.ok(html.includes('id="tl"') && html.includes('id="notice"'));
   assert.ok(html.includes('</html>') && html.length > 2000);
