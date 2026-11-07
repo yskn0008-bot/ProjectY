@@ -77,6 +77,27 @@ test('same eventId is idempotent with no second Notion fetch',async()=>{
   assert.equal(h.blocks.length,1);assert.equal(h.calls.length,before);
 });
 
+test('duplicate intake does not remove a lock owned by a concurrent request',async()=>{
+  const h=harness(),eventId='native-concurrent-locked-1';
+  const id=createHash('sha256').update('id:iPhone通知:'+eventId).digest('hex').slice(0,24);
+  const key='yos:notification:inbox:v1:'+id+':lock';
+  h.memory.set(key,'existing-worker');
+  const response=await h.handler(h.req({text:'重複受信の模擬',eventId}));
+  assert.equal(response.status,409);
+  assert.equal(h.memory.get(key),'existing-worker');
+  assert.equal(h.blocks.length,0);
+});
+
+test('expired lock replaced by another owner is not deleted',async()=>{
+  const h=harness(),eventId='native-expired-locked-2';
+  h.state.replaceLockDuringPatch=true;
+  const response=await h.handler(h.req({text:'保存処理の模擬',eventId}));
+  assert.equal(response.status,201);
+  const id=createHash('sha256').update('id:iPhone通知:'+eventId).digest('hex').slice(0,24);
+  assert.equal(h.memory.get('yos:notification:inbox:v1:'+id+':lock'),'new-owner-after-expiry');
+  assert.equal(h.blocks.length,1);
+});
+
 test('lost PATCH acknowledgement reconciles before retry',async()=>{
   const h=harness(),input={text:'引落失敗 800円',eventId:'native-unique-0003'};
   h.state.failPatch=true;h.state.ambiguous=true;
