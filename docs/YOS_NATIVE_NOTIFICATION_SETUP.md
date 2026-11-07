@@ -1,6 +1,6 @@
 # YOS 通知受信｜iOS標準のみの導入・検証
 
-状態：開発PRのみ。iPhone未導入・本番API未公開・ロック中未検証。
+状態：開発PRのみ。iPhone未導入・本番API未公開・ロック中未検証。重大通知の再取得・表示後ACKは隔離検証用PR #668に追加された機能で、当PR #665のAPIには未統合。互換性確認と本番承認前に端末へ接続しない。
 
 ## 方針
 
@@ -27,8 +27,10 @@ APIへの送信は既存Clarity接続用Bearerトークンを再利用。値は�
 5. 「URL」に検証済みYOS APIホストの https://API-HOST/api/yos/notification を設定。
 6. 「URLの内容を取得」→POST→要求本文 JSON。キー text に手順4のテキスト変数。キー sourceApp は任意で、対象アプリが分かるときだけ指定する。
 7. 同アクションのヘッダー Authorization に「Bearer （既存Clarity接続トークン）」を設定。Notionトークンを設定してはいけない。
-8. 戻り値を「辞書の値を取得」で decision を読み、値がYOS_ALERTと**完全一致した場合のみ** alertText を取得して標準「通知を表示」。その他（YOS_SILENTなど）は何も表示しない。
-9. ⓘ →プライバシー→「ロック中の実行を許可」。解除中/ロック中の各1件について、Notion Inboxへの保存とYOS分岐を実機で確認してから本番切替。テスト中の二重トリガーは禁止。
+8. 戻り値を「辞書の値を取得」で ok と decision を読み、ok=trueかつYOS_ALERTと**完全一致した場合のみ** alertText を取得して標準「通知を表示」。その他（YOS_SILENT、保存未確認など）は追加通知せず、保存成功・配信成功と扱わない。
+9. **隔離PR #668のACK対応APIが安全な環境で配備・検証された場合に限り**、手順8の表示アクションが成功した後、同じ通知IDを使い標準「URLの内容を取得」で `POST {"action":"ack-alert","id":"（API応答のid）"}` を送る。元のPOSTと同じURL・Authorizationを用い、応答の `alertAcknowledged=true` を確認する。表示前・エラー時・YOS_SILENTの場合はACKしない。ACKは「iOSの表示アクションが成功した」証跡であり、本人が読んだ・解決した意味ではない。
+10. 同一通知の再送時は最初と同じ `eventId`（および元本文・sourceApp）を使う。`eventId`は1件につき1度生成して再送に使い回し、新しいIDを発行しない。元通知が失われた後のShortcuts再起動やロック中の自動再実行は保証されず、別途実機検証が必要。
+11. ⓘ →プライバシー→「ロック中の実行を許可」。解除中/ロック中の各1件について、Notion Inboxへの保存とYOS分岐、同一IDの再送・ACK成功・ACK後の追加通知抑止を実機で確認してから本番切替。テスト中の二重トリガーは禁止。
 
 Apple公式：
 https://support.apple.com/en-mo/guide/shortcuts/apdfbdbd7123/10.0/ios/27
@@ -41,14 +43,15 @@ POST /api/yos/notification のリクエスト（Authorization: Bearer <existing-
 { "text": "電話：不在着信", "sourceApp": "電話", "eventId": "optional-stable-unique-id", "occurredAt": "2026-11-07T01:00:00+09:00" }
 
 - text 必須、2000文字まで。他の3フィールドは任意。eventIdを省略するとアプリ名+本文+5分単位の時刻で代替IDを作るため、時間をまたぐ再送の完全重複防止は保証できない。
-- 成功レスポンス：ok、id、duplicate、category、decision（YOS_ALERT/YOS_SILENT）、alertText。
-- HTTP503は保存未確認。誤って保存済みとみなさない。次回同一IDではNotionの既存行を照合する。
+- 成功レスポンス：ok、id、duplicate、category、decision（YOS_ALERT/YOS_SILENT）、alertText。隔離PR #668の版のみ `alertRequiresAck` が加わる。
+- 隔離PR #668では重要通知の保存後にHTTP応答が失われても、同一IDの再送でACK前なら `YOS_ALERT` を再取得し、ACK後は `YOS_SILENT` とする。`ack-alert` の送信失敗時は再送によって追加通知が重なることがある。
+- HTTP503は保存未確認、409は競合等で保存未確定。誤って保存済みとみなさない。再送時は同じIDでNotionの既存行を照合する。Shortcuts自身の停止・アクション失敗時の自動再実行は未確認。
 - GET /api/yos/notification（同じBearer）で保存済みの通知・未読/対応待ち/完了の状態を取得。最大120件。
 - POST { "action": "mark", "id": "通知ID", "status": "read" } 等で既存Inboxに状態を追記。statusはread/pending/doneのみ。
 - 分類はInboxへのカテゴリ保存まで。Moneyの確定支出やTasksへの自動記帳は誤判断を防ぐため未接続。
 
 ## 合格条件・戻し方
 
-通常/テストは元アプリ通知のみ+Inbox保存、重大な実通知は原文保存とYOSの具体的な確認案内、同一イベントIDの再送は重複なし、不在着信は受信できたときだけ履歴化、通知ボックスは検索と本人が明示した状態更新が可能。これらをロック中・解除中で確認する。
+通常/テストは元アプリ通知のみ+Inbox保存、重大な実通知は原文保存とYOSの具体的な確認案内、同一イベントIDの再送はInboxへの重複保存なし、不在着信は受信できたときだけ履歴化、通知ボックスは検索と本人が明示した状態更新が可能。隔離PR #668に限り、重大通知は表示前ACKしないこと、保存後の応答喪失時に再送で復元できること、表示後ACKを受けてから通知再送が止まることを確認する。これらをロック中・解除中で確認する。
 
 不具合があれば、複製版のトリガーのみオフにし、既存「通知受信」を保持する。原文、現在のNotion、元アプリ通知は削除しない。既存の本番バックエンドはPRをマージしない限り変更しない。
