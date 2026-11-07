@@ -170,6 +170,33 @@ test('Inbox exposes an authenticated history with statuses',async()=>{
   assert.match(after.events[0].text,/不在着信/);
 });
 
+test('legacy Clarity Notification records are readable without rewriting existing Inbox blocks',async()=>{
+  const h=harness();
+  const legacyId='cc82f767';
+  const legacyText='2026-10-21T10:32:45.803Z · Clarity Notification · notification:'+legacyId+' · money-review\n発信元: テスト用銀行\n支払予定の案内\n---';
+  h.blocks.push({
+    id:'legacy-original-block',
+    type:'paragraph',
+    paragraph:{rich_text:[{type:'text',text:{content:legacyText}}]}
+  });
+  const before=h.blocks.length;
+  const response=await h.handler(h.req(null,undefined,'GET'));
+  assert.equal(response.status,200);
+  const data=await response.json();
+  assert.equal(data.events.length,1);
+  assert.equal(data.events[0].id,legacyId);
+  assert.equal(data.events[0].category,'money-review');
+  assert.equal(data.events[0].status,'unread');
+  assert.match(data.events[0].text,/支払予定の案内/);
+  assert.equal(h.blocks.length,before,'reading legacy history must not write or rewrite original blocks');
+  const result=await h.handler(h.req({action:'mark',id:legacyId,status:'pending'}));
+  assert.equal(result.status,200);
+  assert.equal(h.blocks.length,before+1,'state update must append without replacing the original block');
+  assert.equal(h.blocks[0].id,'legacy-original-block');
+  const after=await (await h.handler(h.req(null,undefined,'GET'))).json();
+  assert.equal(after.events[0].status,'pending');
+});
+
 test('cannot mark absent event or invalid state',async()=>{
   const h=harness();
   assert.equal((await h.handler(h.req({action:'mark',id:'a'.repeat(24),status:'done'}))).status,404);
