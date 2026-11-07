@@ -193,7 +193,7 @@ try{
   await expectText('#money2Body',EXPECTED_MONTH_SHORTFALL.toLocaleString('ja-JP'));
   await expectText('#money2Body','今月収支');
   await expectText('#money2Body','65,405');
-  await expectText('#money2Body','資金カレンダー');
+  assert.equal(await page.locator('[data-money-tab-jump="calendar"]').count(),1,'Home must link to the shared money calendar');
   await expectText('#money2Body','生活防衛費');
   assert.equal(await page.locator('.money5-subnav [data-money-tab]').count(),6,'Money must expose six internal destinations');
   const moneyGeometry=await page.evaluate(()=>({
@@ -233,7 +233,7 @@ try{
   assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('yos-money-v2')).transactions.some(tx=>tx.label==='テスト食費')),false,'deleted Money transaction must leave yos-money-v2');
 
   await page.locator('[data-money-tab="rules"]').click();
-  await expectText('#money2Body','定期収支');
+  await expectText('#money2Body','毎月決まってる収支');
   await page.locator('[data-money-action="add-recurring"]').first().click();
   await page.locator('#money2DialogForm [name="type"]').selectOption('expense');
   await page.locator('#money2DialogForm [name="category"]').selectOption('utilities');
