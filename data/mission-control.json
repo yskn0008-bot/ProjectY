@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-07T19:30:06+09:00",
+  "updated_at": "2026-11-07T19:37:00+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -195,6 +195,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-f52b7acc0677",
+      "title": "Paginate read-only YOS Tasks connection diagnostic",
+      "completed_at": "2026-11-07T10:36:29Z",
+      "result": "GitHub mainへ反映（f52b7ac）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/f52b7acc0677a7f7954761a13e8aae09862b337b"
+    },
+    {
       "id": "github-commit-b933a8af02da",
       "title": "Fix Notion database ID in read-only calendar sync diagnostic",
       "completed_at": "2026-11-07T10:29:33Z",
@@ -221,13 +228,6 @@
       "completed_at": "2026-11-07T07:06:50Z",
       "result": "GitHub mainへ反映（391c317）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/391c317e212bfa83aef42ddb58ba1526af4e1cf4"
-    },
-    {
-      "id": "github-commit-373a6fee7a3d",
-      "title": "Read today's Apple Calendar events without modifying calendar and inject into timeline",
-      "completed_at": "2026-11-07T05:40:41Z",
-      "result": "GitHub mainへ反映（373a6fe）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/373a6fee7a3d187b64c75195f60ef2a5e9cd64a0"
     },
     {
       "id": "complete-002",
@@ -264,7 +264,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-07T19:30:06+09:00",
+      "last_update": "2026-11-07T19:37:00+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -345,7 +345,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-07T19:30:06+09:00",
+      "last_update": "2026-11-07T19:37:00+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -368,7 +368,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-07T19:30:06+09:00",
+      "last_update": "2026-11-07T19:37:00+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -450,5 +450,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "527308b105101242ce646c7d5f023266dc12f2bf99576f33998fd6d4e07bd211"
+  "github_snapshot_hash": "b65948b93f7ed967ca8c29bb00d4cb52c7521f534bdb63d5d056a43c3560f1b9"
 }
