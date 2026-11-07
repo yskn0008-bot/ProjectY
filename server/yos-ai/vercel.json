@@ -6,6 +6,9 @@
     "autoJobCancelation": false
   },
   "functions": {
+    "api/yos/notification.mjs": {
+      "maxDuration": 30
+    },
     "api/yos/chat.mjs": {
       "maxDuration": 60,
       "supportsCancellation": true
