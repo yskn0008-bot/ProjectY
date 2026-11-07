@@ -11,7 +11,7 @@ const NOW=new Date('2026-11-07T01:00:00.000Z');
 
 function harness(viewerAuth){
   const memory=new Map(),blocks=[],calls=[];
-  const state={failPatch:false,ambiguous:false,failGet:false,failRedis:false};
+  const state={failPatch:false,ambiguous:false,failGet:false,failRedis:false,replaceLockDuringPatch:false};
   const redis={async command(args){
     if(state.failRedis)throw new Error('Redis unavailable');
     const [op,key,value]=args;
@@ -31,6 +31,7 @@ function harness(viewerAuth){
     if(init.method==='GET')
       return new Response(JSON.stringify({results:blocks,has_more:false,next_cursor:null}),{status:200});
     if(init.method==='PATCH'){
+      if(state.replaceLockDuringPatch){const lock=[...memory.keys()].find(k=>k.endsWith(':lock'));if(lock)memory.set(lock,'new-owner-after-expiry')}
       const list=JSON.parse(init.body).children;
       if(!state.failPatch||state.ambiguous){
         for(const item of list)blocks.push({...item,id:'block-'+blocks.length});
