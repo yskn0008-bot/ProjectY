@@ -27,12 +27,16 @@ test('MY MONEY dark UI keeps yos-money-v2 as the only Money state key', async ()
 
 test('MY MONEY Home exposes the requested decision hierarchy and six Money destinations', async () => {
   const runtime=await read('yos/money-v2-runtime-v4.js');
-  for(const label of ['今使えるお金','今日使える','月末不足','今月収支','次の支払い','次の入金','資金カレンダー','最近の入出金','YOSからのアドバイス','生活防衛費']){
+  for(const label of ['今使えるお金','今日使える','月末不足','今月収支','次の支払い','次の入金','資金カレンダー','YOSからのアドバイス','生活防衛費']){
     assert.ok(runtime.includes(label),'missing Home label '+label);
   }
   for(const label of ['現在 → このまま → 改善したら','改善プランを設定','毎月積み立てる額','改善したら増やす額 / 月']){
     assert.ok(runtime.includes(label),'missing future roadmap label '+label);
   }
+  // The Home dashboard links to the ledger; the actual history is in the Transactions tab.
+  assert.match(runtime,/function renderFeatureEntrances\(\)/);
+  assert.match(runtime,/data-money-tab-jump="transactions"/);
+  assert.match(runtime,/<h2>取引履歴<\/h2>/);
   assert.match(runtime,/function futureRoadmap\(\)/);
   assert.match(runtime,/function payoffMonthsAtPayment\(/);
   assert.match(runtime,/scenarioMonthlyBoost/);
