@@ -8,7 +8,7 @@ const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor;
 
 async function install(options = {}) {
   const files = options.files ?? new Map();
-  const calls = { fetched: 0, completed: 0 };
+  const calls = { fetched: 0, completed: 0, opened: [] };
   const name = options.name ?? 'YOS Timeline Auto';
   const downloaded = options.downloaded ?? launcher;
   class Alert {
@@ -16,7 +16,7 @@ async function install(options = {}) {
     addAction() {}
     addCancelAction() {}
     textFieldValue() { return name; }
-    async presentAlert() { return options.cancel ? -1 : 0; }
+    async presentAlert() { return options.cancel || (this.title === "同じ名前のスクリプトがあります" && options.closeDuplicate) ? -1 : 0; }
   }
   class Request {
     constructor(url) {
@@ -32,14 +32,14 @@ async function install(options = {}) {
     readString: path => store.get(path),
     writeString: (path, value) => store.set(path, value),
   });
-  const execute = new AsyncFunction('Alert', 'Request', 'FileManager', 'Script', source);
+  const execute = new AsyncFunction('Alert', 'Request', 'FileManager', 'Script', 'Safari', source);
   await execute(Alert, Request, {
     local: () => makeManager('/scripts', files),
     iCloud: () => {
       if (!options.cloudFiles) throw new Error('iCloud disabled');
       return makeManager('/iCloud', options.cloudFiles);
     },
-  }, { complete: () => { calls.completed++; } });
+  }, { complete: () => { calls.completed++; } }, { open: url => calls.opened.push(url) });
   return { files, cloudFiles: options.cloudFiles, calls };
 }
 
@@ -77,8 +77,10 @@ test('unrelated source and HTTP errors are rejected without writing', async () =
 
 test('an existing name must never be overwritten', async () => {
   const files = new Map([['/scripts/YOS Timeline Auto.js', 'KEEP ORIGINAL']]);
-  await assert.rejects(install({ files }), /上書きしません/);
+  const result = await install({ files });
   assert.equal(files.get('/scripts/YOS Timeline Auto.js'), 'KEEP ORIGINAL');
+  assert.equal(result.calls.fetched, 0);
+  assert.deepEqual(result.calls.opened, ['scriptable:///open/YOS%20Timeline%20Auto']);
 });
 
 test('cancel and invalid names never download or create scripts', async () => {
@@ -103,8 +105,26 @@ test('both local and iCloud script names are protected from overwriting', async 
     const cloudFiles = new Map();
     if (existing === 'local') files.set('/scripts/YOS Timeline Auto.js', 'KEEP LOCAL');
     else cloudFiles.set('/iCloud/YOS Timeline Auto.js', 'KEEP CLOUD');
-    await assert.rejects(install({ files, cloudFiles }), /上書きしません/);
+    const result = await install({ files, cloudFiles });
+    assert.equal(result.calls.fetched, 0);
+    assert.deepEqual(result.calls.opened, ['scriptable:///open/YOS%20Timeline%20Auto']);
     assert.equal(files.get('/scripts/YOS Timeline Auto.js'), existing === 'local' ? 'KEEP LOCAL' : undefined);
     assert.equal(cloudFiles.get('/iCloud/YOS Timeline Auto.js'), existing === 'cloud' ? 'KEEP CLOUD' : undefined);
   }
+});
+
+test('duplicate dismissal does not open a script or change files', async () => {
+  const files = new Map([['/scripts/YOS Timeline Auto.js', 'KEEP ORIGINAL']]);
+  const result = await install({ files, closeDuplicate: true });
+  assert.equal(result.calls.fetched, 0);
+  assert.deepEqual(result.calls.opened, []);
+  assert.equal(files.get('/scripts/YOS Timeline Auto.js'), 'KEEP ORIGINAL');
+});
+
+test('duplicate with Japanese script name opens the correctly encoded existing name', async () => {
+  const files = new Map([['/scripts/YOS Timeline Auto テスト.js', 'KEEP ORIGINAL']]);
+  const result = await install({ files, name: 'YOS Timeline Auto テスト' });
+  assert.equal(result.calls.fetched, 0);
+  assert.deepEqual(result.calls.opened, ['scriptable:///open/YOS%20Timeline%20Auto%20%E3%83%86%E3%82%B9%E3%83%88']);
+  assert.equal(files.get('/scripts/YOS Timeline Auto テスト.js'), 'KEEP ORIGINAL');
 });
