@@ -2,7 +2,7 @@
 // icon-color: blue; icon-glyph: calendar;
 // YOS Calendar Sync v0.1 — safe read-only diagnostic. No writes or deletes.
 // Uses the existing Notion integration token from Scriptable Keychain.
-const DB='965c6086-32c1-463d-93b4-87a9cb69b3ad';
+const DB='06e62efb-9a3c-45e2-bec7-7a53332c925a';
 const KEY='YOS_NOTION_INTEGRATION_TOKEN';
 const report=[];
 try{
