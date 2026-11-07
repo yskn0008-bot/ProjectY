@@ -18,7 +18,7 @@ globalThis.fetch=async function fakeNetwork(url,init={}){
   const address=String(url);
   const method=init.method??'GET';
   remoteCalls.push({address,method});
-  if(address==='https://redis-route.test/'){
+  if(address==='https://redis-route.test'){
     const [command,key,value,...extra]=JSON.parse(init.body);
     let result;
     if(command==='SET'&&extra.includes('NX')){
@@ -106,5 +106,5 @@ test('route connects auth, Redis receipt, Notion append, history and state trans
   const after=await (await route.fetch(request('GET',undefined,auth))).json();
   assert.equal(after.events[0].status,'done');
   assert.ok(remoteCalls.some(x=>x.address.startsWith('https://api.notion.com/v1/blocks/')));
-  assert.ok(remoteCalls.some(x=>x.address==='https://redis-route.test/'));
+  assert.ok(remoteCalls.some(x=>x.address==='https://redis-route.test'));
 });
