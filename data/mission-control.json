@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-07T09:58:22+09:00",
+  "updated_at": "2026-11-07T14:14:54+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -195,6 +195,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-6bcb88ec838f",
+      "title": "Allow adding multiple tasks at the same start time in single-column timeline",
+      "completed_at": "2026-11-07T05:14:07Z",
+      "result": "GitHub mainへ反映（6bcb88e）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/6bcb88ec838ffc2e62c2008672e40688b493ce0f"
+    },
+    {
       "id": "github-commit-bc60615c2f97",
       "title": "Refine compact one-line Timeline with vibrant gloss, fine borders and category colors",
       "completed_at": "2026-11-07T00:57:50Z",
@@ -221,13 +228,6 @@
       "completed_at": "2026-11-07T00:42:39Z",
       "result": "GitHub mainへ反映（8c18df9）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/8c18df9d9476371ef53514b5c662ecdd55fe6596"
-    },
-    {
-      "id": "github-commit-fd7ffb34a4b9",
-      "title": "Smooth Timeline drag with pointer capture, GPU transforms and animation frames",
-      "completed_at": "2026-11-07T00:41:08Z",
-      "result": "GitHub mainへ反映（fd7ffb3）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/fd7ffb34a4b96adfb0cb1b02e0e3cdab3036cbab"
     },
     {
       "id": "complete-002",
@@ -264,7 +264,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-07T09:58:22+09:00",
+      "last_update": "2026-11-07T14:14:54+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -345,7 +345,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-07T09:58:22+09:00",
+      "last_update": "2026-11-07T14:14:54+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -368,7 +368,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-07T09:58:22+09:00",
+      "last_update": "2026-11-07T14:14:54+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -450,5 +450,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "be19dcee2d1492241c65433307a9c299d0eb881d3e605b3fc8bcd52667b87735"
+  "github_snapshot_hash": "756887995f30523b1f005f4cb40a09558e660a6b4890dd259a157ef773707023"
 }
