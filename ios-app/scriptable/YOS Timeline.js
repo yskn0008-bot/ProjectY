@@ -1,21 +1,159 @@
 // Variables used by Scriptable.
 // icon-color: blue; icon-glyph: calendar;
-// YOS Timeline v1.3 — light gray compact non-overlap timeline; Notion read/write not connected.
+// YOS Timeline v2.1 — compact charcoal overview and exact detail mode; local-only operations, Notion read/write not connected.
 const view=new WebView();
 const html=`<!doctype html><html lang="ja"><head><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no"><style>
-*{box-sizing:border-box}html,body{margin:0;background:#faf9f7;color:#22263b;font:13px -apple-system,BlinkMacSystemFont,sans-serif;-webkit-font-smoothing:antialiased}header{padding:16px 18px 12px;background:#fffdfb;border-bottom:1px solid #dbe1e9}header:before{content:'YOS / LIFE FLOW';display:block;color:#0a8a80;letter-spacing:2px;font-size:10px;font-weight:800;margin-bottom:6px}h2{font-size:21px;margin:0 0 6px;font-weight:800}header small{color:#607188;font-size:11px}.notice{margin:10px 14px 0;background:white;border:1px solid #dce3ed;border-radius:11px;padding:8px 11px;font-size:11px;color:#52657d}.legend{display:flex;gap:12px;margin:10px 16px 0;color:#52647a;font-size:10px}.legend b{font-weight:600}.legend i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:4px}.addbar{display:flex;justify-content:flex-end;margin:8px 14px 0}.addbar button{background:#167be8;color:white;border:1px solid #0b5cb7;border-radius:9px;font-weight:700;padding:8px 14px;box-shadow:inset 0 1px 0 #ffffff65}.editor{display:none;margin:8px 14px;padding:12px;background:white;border:1px solid #d5dce7;border-radius:12px;box-shadow:0 5px 20px #253b5818}.editor.show{display:block}.editor input,.editor select{font:14px -apple-system,sans-serif;padding:9px;border:1px solid #cbd5e1;border-radius:8px;min-width:0}.editor .fields{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}.editor button{padding:8px 14px;border:0;border-radius:8px;background:#187ce7;color:white;font-weight:700}.timeline{position:relative;margin:17px 13px 30px 11px;touch-action:pan-y}.hour{position:absolute;left:0;right:0;border-top:1px solid #dfe4eb}.hour span{position:absolute;top:-8px;color:#64748b;font-size:14px;font-weight:850;font-variant-numeric:tabular-nums}.axis{position:absolute;left:66px;top:0;bottom:0;width:5px;border-radius:5px;background:#8262e9}.tick{position:absolute;left:63px;width:11px;height:11px;border-radius:50%;background:#4b91de;z-index:1}.card{position:absolute;left:83px;right:0;min-height:22px;border-radius:7px;padding:2px 9px;display:flex;align-items:center;gap:7px;touch-action:none;user-select:none;-webkit-user-select:none;color:#fff;background:linear-gradient(135deg,#2e92f6,#1c63dd);border:1px solid #0c58ae;box-shadow:inset 0 1px 0 #ffffff70,0 2px 5px #1c478a29;will-change:transform;transition:box-shadow .16s ease,filter .16s ease}.card:before{content:'';position:absolute;left:7px;right:7px;top:2px;height:3px;border-radius:8px;background:linear-gradient(90deg,#ffffff14,#ffffff65,#ffffff10);pointer-events:none}.card.habit{background:linear-gradient(135deg,#20c990,#069f73);border-color:#07885a;box-shadow:inset 0 1px 0 #ffffff70,0 2px 5px #0b74512a}.card.task{background:linear-gradient(135deg,#b96bf1,#8154dc);border-color:#6524b6;box-shadow:inset 0 1px 0 #ffffff70,0 2px 5px #6226a12c}.card.done{filter:saturate(.52);opacity:.72}.card.selected{filter:brightness(1.08);box-shadow:inset 0 1px 0 #ffffffa0,0 4px 12px #263d5740}.card.warning{outline:2px solid #ed963c;outline-offset:1px}.card.moving{transition:none;z-index:5;filter:brightness(1.06);box-shadow:inset 0 1px 0 #ffffff90,0 8px 20px #203c6c55}.card b{position:relative;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:700;text-shadow:0 1px 1px #00000024}.card small{position:relative;margin-left:auto;flex-shrink:0;font-size:10px;color:#fffffff0;font-variant-numeric:tabular-nums;font-weight:600}.review{margin:12px 14px;padding:14px;border:1px solid #d5dfea;border-radius:13px;background:#fff;box-shadow:0 3px 15px #223c5b12}.review h3{margin:0 0 7px;font-size:16px}.review p{margin:7px 0;line-height:1.65;color:#34455d}.review .muted{font-size:11px;color:#6b7c90}.review button{background:#176fd1;color:white;border:0;border-radius:8px;padding:8px 12px;font-weight:700}.focus{position:sticky;bottom:10px;margin:0 14px 12px;padding:11px 12px;border:1px solid #b9cfe9;border-radius:12px;background:#ffffffed;box-shadow:0 5px 20px #223c5b24;display:none}.focus.show{display:block}.focus button{border:0;border-radius:8px;background:#146fc6;color:white;font-weight:700;padding:8px 12px;margin-top:7px}.focus p{margin:5px 0;color:#5c6e83;font-size:11px}
-</style></head><body><header><h2>YOS タイムライン</h2><small>枠の高さ＝所要時間　ドラッグで移動</small></header><div class="notice" id="notice">Notion未接続。変更はこの端末内に保存します。</div><div class="legend"><span><i style="background:#187ce7"></i><b>予定</b></span><span><i style="background:#0dbb7b"></i><b>習慣</b></span><span><i style="background:#914af0"></i><b>タスク</b></span></div><div class="addbar"><button id="addBtn">＋ タスク追加</button></div><div class="editor" id="editor"><b>新しく追加</b><div class="fields"><input id="newTitle" placeholder="名前" style="flex:1 1 140px"><input id="newTime" type="time" value="10:00"><input id="newDuration" type="number" min="5" max="1440" step="5" value="30" style="width:70px" aria-label="所要時間（分）"><select id="newKind"><option value="task">タスク</option><option value="habit">習慣</option><option value="schedule">予定</option></select></div><button id="saveBtn">追加する</button></div><div class="timeline" id="tl"><div class="axis"></div></div><section class="review" id="review"><h3>今日の総括</h3><p id="reviewText">記録から1日の振り返りを作成します。</p><p id="reviewTip"></p><p class="muted">予定時間は実績ではありません。完了操作は端末内に保存。Notion未接続。</p><button id="reviewBtn">評価を更新</button></section><div class="focus" id="focus"><b id="focusTitle"></b><p id="focusInfo"></p><button id="doneBtn">完了にする</button> <button id="closeFocus">全体表示に戻す</button></div><script>
+:root{--bg:#353a44;--bg2:#3c414b;--text:#f5f7fb;--muted:#ccd3dd;--line:#a4aeba;--blue:#2b7db9;--green:#24966d;--violet:#833baf}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:radial-gradient(ellipse at 66% 6%,#464b56 0%,#353a44 50%,#30353f 100%);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif;font-size:14px;-webkit-font-smoothing:antialiased}
+button,input,select{font:inherit}button{cursor:pointer}button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid #85ccff;outline-offset:2px}
+.app{padding-top:env(safe-area-inset-top);padding-bottom:calc(89px + env(safe-area-inset-bottom));max-width:640px;margin:auto;min-height:100vh}
+.top{padding:11px 18px 0}.headrow{display:flex;align-items:center;justify-content:space-between;gap:8px}.datehead{font-size:27px;letter-spacing:-.7px;font-weight:680;line-height:1.13;font-variant-numeric:tabular-nums}.subtitle{font-size:12px;color:#e0e4eb;margin-top:2px;font-weight:450}
+.actions{display:flex;gap:12px;align-items:center}.iconbtn{width:31px;height:36px;display:grid;place-items:center;background:none;color:#f5f7fb;border:none;padding:0}.iconbtn svg{width:23px;height:23px;stroke-width:1.9}
+.week{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;margin:11px 0 7px}.day{border:0;border-radius:10px;padding:5px 0 6px;color:#ebedf2;background:transparent;min-height:48px;display:grid;place-content:center;gap:2px}.day small{font-size:11px;font-weight:600}.day strong{font-size:21px;font-weight:590;line-height:1;font-variant-numeric:tabular-nums}.day.active{background:#2077b7;color:white}.day.today:not(.active) strong{text-decoration:underline;text-underline-offset:4px}
+.summary{margin:0 13px 0;background:#ffffff12;border:1px solid #ffffff15;border-radius:14px;padding:9px 10px;display:grid;grid-template-columns:1.16fr .78fr .86fr 1.06fr;min-height:62px;box-shadow:0 5px 18px #11151b18}
+.metric{display:flex;align-items:center;justify-content:center;flex-direction:column;gap:3px;border-right:1px solid #ffffff35;min-width:0}.metric:last-child{border:0}.metric label{font-size:10px;font-weight:560;white-space:nowrap;color:#e7eaf0;display:flex;align-items:center;justify-content:center;gap:4px}.metric label svg{width:13px;height:13px;stroke-width:1.7;flex:none}.metric strong{font-size:13px;font-weight:630;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;font-variant-numeric:tabular-nums}.metric:first-child{flex-direction:row;gap:7px}.metric:first-child strong{font-size:19px}.ring{width:37px;height:37px;flex:none;border-radius:50%;background:conic-gradient(#35bbf4 0 var(--pct),#7d8793 var(--pct) 100%);position:relative}.ring:after{content:"";position:absolute;inset:8px;background:#434852;border-radius:50%}.metric .stack{display:grid;gap:3px}
+.notice{margin:0;padding:3px 0;color:#d7dce4;font-size:10px;line-height:1.25;flex:1;min-width:0}.microtools{display:flex;align-items:center;gap:8px;margin:3px 15px 0;min-height:23px}.zoomBtn{border:1px solid #ffffff40;background:#ffffff0d;color:#edf1f6;border-radius:7px;padding:4px 7px;font-size:10px;font-weight:600;white-space:nowrap}.notice[hidden]{display:none}.searchrow{margin:9px 16px 0}.searchrow[hidden]{display:none}.searchrow input{width:100%;border:1px solid #7b8799;border-radius:10px;background:#252b35;color:white;padding:10px 12px;font-size:14px}
+.editor{display:none;margin:9px 14px;padding:13px;background:#484e59;border:1px solid #6b7583;border-radius:13px;box-shadow:0 10px 25px #15191e55}.editor.show{display:block}.editor b{font-size:15px}.editor .fields{display:flex;gap:7px;flex-wrap:wrap;margin:12px 0}.editor input,.editor select{padding:9px;background:#303742;color:white;border:1px solid #7b8594;border-radius:8px;min-width:0}.editor input[type=time]{max-width:130px}.editor button,.focus button,.review button,.mutedbutton{padding:10px 13px;background:#277dbb;color:#fff;border:0;border-radius:9px;font-weight:670}.editor .danger{background:#754751;margin-left:6px}.editor .light{background:#647184}
+.timeline-wrap{position:relative;margin:8px 13px 20px 11px;overflow:visible}.timeline{position:relative;touch-action:pan-y}.hour{position:absolute;left:0;right:0;border-top:1px solid #ffffff0f;height:1px;pointer-events:none}.hour span{position:absolute;top:-9px;left:6px;color:#dce2eb;font-size:12px;font-weight:480;font-variant-numeric:tabular-nums}.axis{position:absolute;left:58px;top:0;bottom:0;width:1.5px;background:#c2cad2b8;pointer-events:none}.tick{position:absolute;left:54.5px;width:9px;height:9px;border-radius:50%;background:#dce2ec;z-index:2;border:2px solid #56616e;box-shadow:0 0 0 2px #d7dee755;pointer-events:none}
+.card{position:absolute;left:73px;right:0;min-height:16px;border:0;border-radius:9px;padding:1px 9px;display:flex;align-items:center;gap:8px;touch-action:none;user-select:none;-webkit-user-select:none;color:#f8faff;background:#307ec2;box-shadow:0 2px 8px #101b2927;transition:filter .18s ease,box-shadow .18s ease;will-change:transform;overflow:hidden}
+.card:before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:#46b9fb;opacity:.9;pointer-events:none}.card.habit{background:#24976e}.card.habit:before{background:#4bd9a1}.card.task{background:#823db0}.card.task:before{background:#d079f8}.card.schedule{background:#2e77b3}
+.card.neutral{background:#636b76}.card.neutral:before{background:#97a6b9}.card.sleep{background:#325477}.card.sleep:before{background:#48bdf5}.card.sleep:not(.tiny) b,.card.sleep:not(.tiny) svg{transform:translateY(-9px)}.card.sleep:not(.tiny) small{position:absolute;top:calc(50% + 4px);left:38px;margin:0;font-size:11px;transform:translateY(0)}
+.card.done{opacity:.62;filter:saturate(.55)}.card.selected{outline:1.5px solid #e5efff}.card.warning{outline:2px solid #e6a35a}.card.moving{z-index:6;filter:brightness(1.14);box-shadow:0 10px 26px #10131a6c}
+.card svg{width:16px;height:16px;flex:none;stroke:#f7f9fc;fill:none;stroke-width:1.8;stroke-linejoin:round;stroke-linecap:round;position:relative}.card b{font-size:12.5px;line-height:1.1;font-weight:630;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:.08px;position:relative}.card small{margin-left:auto;font-size:10px;line-height:1.1;font-weight:500;white-space:nowrap;font-variant-numeric:tabular-nums;flex-shrink:0;position:relative}
+.card.compact{border-radius:7px}.card.compact b{font-size:12px}.card.compact small{font-size:9px}.card.lane{gap:5px;padding-right:5px}.card.lane small{display:none}.card.lane b{font-size:12px}.card.tiny svg{width:13px;height:13px}.card.tiny{gap:5px;padding-left:7px}.card.tiny b{font-size:11px}.card.tiny small{font-size:9px}
+.nowline{position:absolute;left:5px;right:0;height:1.5px;background:#48baff;z-index:8;pointer-events:none;box-shadow:0 0 8px #38b6fa66}.nowline:before{content:"";position:absolute;left:48px;top:-5px;width:10px;height:10px;background:#43b9fc;border:2px solid #eff9ff;border-radius:50%}.nowbadge{position:absolute;right:calc(100% - 55px);top:-11px;background:#218fcf;border-radius:12px;font-size:11px;padding:3px 7px;font-weight:650;font-variant-numeric:tabular-nums}
+.review,.tabbox{display:none;margin:12px 14px;padding:17px;border:1px solid #ffffff22;border-radius:13px;background:#484e58}.review.show,.tabbox.show{display:block}.review h3,.tabbox h3{font-size:16px;margin:0 0 10px}.review p,.tabbox p{line-height:1.6;color:#eff2f6;margin:10px 0}.review .muted,.tabbox .muted{font-size:12px;color:#c5cbd5}.listitem{padding:12px 0;border-bottom:1px solid #ffffff25;display:flex;justify-content:space-between;gap:14px}.listitem:last-child{border-bottom:0}.listitem button{border:0;background:#2d7eb9;color:white;padding:5px 10px;border-radius:8px}.focus{position:fixed;bottom:calc(87px + env(safe-area-inset-bottom));left:14px;right:14px;max-width:600px;margin:auto;padding:12px 14px;border-radius:14px;background:#505864;border:1px solid #a6b8cd;box-shadow:0 10px 35px #0008;z-index:20;display:none}.focus.show{display:block}.focus b{font-size:16px}.focus p{font-size:12px;margin:6px 0 9px}.focus .secondary{background:#6c7785}.focus .danger{background:#794852}
+.dock{position:fixed;bottom:0;left:0;right:0;padding:9px 7px calc(11px + env(safe-area-inset-bottom));background:#30353eea;border-top:1px solid #ffffff28;backdrop-filter:blur(15px);-webkit-backdrop-filter:blur(15px);z-index:15}.dock-inner{max-width:610px;margin:auto;display:grid;grid-template-columns:repeat(5,1fr)}.tab{display:grid;justify-items:center;align-content:center;gap:5px;background:none;border:0;color:#eef1f6;font-size:10px;padding:3px 0;min-height:52px}.tab svg{height:24px;width:24px;stroke-width:1.8}.tab.active{color:#30baff}
+button:active{opacity:.8}@media(min-width:640px){.dock{left:calc((100vw - 640px)/2);right:calc((100vw - 640px)/2);border-radius:14px 14px 0 0}.focus{left:calc((100vw - 610px)/2);right:calc((100vw - 610px)/2)}}
+@media(max-width:350px){.metric label{font-size:9px}.metric strong{font-size:11px}.metric:first-child strong{font-size:17px}.card{left:69px;padding-right:6px}.card small{font-size:9px}.axis{left:55px}.tick{left:51.5px}.nowline:before{left:45px}}
+</style></head><body>
+<div class="app">
+  <div class="top">
+    <div class="headrow"><div><div class="datehead" id="dateTitle">今日</div><div class="subtitle" id="dayCaption">Today</div></div>
+      <div class="actions">
+        <button class="iconbtn" id="dateBtn" aria-label="日付を選択"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4m10-4v4M3 10h18"/></svg></button>
+        <button class="iconbtn" id="searchBtn" aria-label="検索"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m16 16 5 5"/></svg></button>
+        <button class="iconbtn" id="addBtn" aria-label="予定を追加"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v16M4 12h16"/></svg></button>
+        <button class="iconbtn" id="moreBtn" aria-label="メニュー"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg></button>
+      </div>
+    </div>
+    <div class="week" id="weekStrip" aria-label="日付切り替え"></div>
+    <input type="date" id="datePicker" hidden aria-label="表示日付">
+  </div>
+  <section class="summary" aria-label="今日の概要">
+    <div class="metric"><span class="ring" id="progressRing" style="--pct:0%"></span><span class="stack"><label>今日の進捗</label><strong id="todayProgress">—</strong></span></div>
+    <div class="metric"><label><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="m8 11 2 2 5-5m-7 8h8"/></svg>タスク</label><strong id="taskCount">—</strong></div>
+    <div class="metric"><label><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h4l3-6 4 12 3-6h6"/></svg>体調</label><strong id="healthInfo">未記録</strong></div>
+    <div class="metric"><label><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M20 16A8 8 0 0 1 8 4 8 8 0 1 0 20 16Z"/></svg>睡眠予定</label><strong id="sleepInfo">—</strong></div>
+  </section>
+  <div class="searchrow" id="searchRow" hidden><input id="searchInput" type="search" placeholder="予定・タスクを検索" aria-label="検索"></div>
+  <div class="microtools"><div class="notice" id="notice" aria-live="polite">端末内の予定を表示します</div><button class="zoomBtn" id="zoomBtn" type="button" aria-label="タイムラインの表示倍率を切り替え">詳細に拡大</button></div>
+  <div class="editor" id="editor"><b id="editorTitle">予定を追加</b><div class="fields"><input id="newTitle" placeholder="名前" style="flex:1 1 160px" aria-label="名前"><input id="newTime" type="time" value="10:00" aria-label="開始時刻"><input id="newDuration" type="number" min="5" max="1440" step="5" value="30" style="width:76px" aria-label="所要時間（分）"><select id="newKind" aria-label="種類"><option value="task">タスク</option><option value="habit">習慣</option><option value="schedule">予定</option></select></div><button id="saveBtn">追加する</button><button id="cancelEditor" class="light" type="button">閉じる</button></div>
+  <div class="timeline-wrap" id="timelinePanel"><div class="timeline" id="tl"><div class="axis"></div><div class="nowline" id="nowLine" hidden><span class="nowbadge" id="nowBadge"></span></div></div></div>
+  <section class="tabbox" id="taskPanel"><h3>タスク</h3><div id="taskList"></div></section>
+  <section class="review" id="review"><h3>一日の振り返り</h3><p id="reviewText">端末内の完了記録を集計します。</p><p id="reviewTip"></p><p class="muted">予定時間と実績時間は異なります。Notionの完了状態には反映しません。</p><button id="reviewBtn">再集計</button></section>
+  <section class="tabbox" id="recordsPanel"><h3>記録</h3><p>このタイムライン内で完了にした項目のみを表示します。</p><div id="recordsList"></div></section>
+  <section class="tabbox" id="aiPanel"><h3>AIプラン</h3><p>AIとの連携は未実装です。実行状況を確認せずに予定の自動変更はしません。</p><p class="muted">追加や時間変更はタイムラインで手動操作できます。</p></section>
+  <div class="focus" id="focus"><b id="focusTitle"></b><p id="focusInfo"></p><button id="doneBtn">完了にする</button><button id="editSelected" class="secondary">編集</button><button id="deleteSelected" class="danger">削除</button><button id="closeFocus" class="secondary">閉じる</button></div>
+</div>
+<nav class="dock" aria-label="画面切り替え"><div class="dock-inner">
+  <button class="tab active" data-tab="timeline"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4m10-4v4M3 10h18"/></svg><span>タイムライン</span></button>
+  <button class="tab" data-tab="task"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></svg><span>タスク</span></button>
+  <button class="tab" data-tab="analysis"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20v-7h4v7m4 0V4h4v16m4-9v9"/></svg><span>分析</span></button>
+  <button class="tab" data-tab="records"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg><span>記録</span></button>
+  <button class="tab" data-tab="ai"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m12 2 2.6 7.4L22 12l-7.4 2.6L12 22l-2.6-7.4L2 12l7.4-2.6z"/></svg><span>AIプラン</span></button>
+</div></nav><script>
 const tl=document.getElementById('tl'),note=document.getElementById('notice'),focus=document.getElementById('focus'),ft=document.getElementById('focusTitle'),fi=document.getElementById('focusInfo');
 const demoItems=[{id:1,t:'睡眠',s:0,d:390,f:1,kind:'habit'},{id:2,t:'朝の準備',s:390,d:30,kind:'habit'},{id:3,t:'朝食',s:420,d:30,kind:'habit'},{id:4,t:'ウォーキング',s:510,d:30,kind:'habit'},{id:5,t:'集中作業',s:600,d:90,kind:'task'},{id:6,t:'昼食',s:720,d:45,kind:'habit'},{id:7,t:'会議',s:840,d:60,f:1,kind:'schedule'},{id:8,t:'仕事',s:930,d:90,kind:'schedule'},{id:9,t:'運動',s:1050,d:60,kind:'habit'},{id:10,t:'夕食',s:1140,d:45,kind:'habit'},{id:11,t:'入浴',s:1200,d:45,kind:'habit'},{id:12,t:'読書',s:1260,d:45,kind:'task'},{id:13,t:'就寝準備',s:1320,d:60,kind:'habit'}];
+const localISO=d=>[d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-');
 const calendarRows=Array.isArray(window.YOS_CALENDAR_EVENTS)?window.YOS_CALENDAR_EVENTS:[];
 const initialItems=calendarRows.length?calendarRows.map((x,i)=>({id:10000+i,t:String(x.title||'予定'),s:Number(x.start),d:Number(x.duration),f:1,kind:'schedule',source:'Apple Calendar'})).filter(x=>Number.isFinite(x.s)&&Number.isFinite(x.d)&&x.s>=0&&x.d>0&&x.s+x.d<=1440):demoItems;
-const savedKey='YOS_TIMELINE_LOCAL_V2';let stored=null;try{stored=JSON.parse(localStorage.getItem(savedKey)||'null')}catch(e){}const items=Array.isArray(stored)&&stored.length?stored:initialItems.map(x=>({...x}));const persist=()=>{try{localStorage.setItem(savedKey,JSON.stringify(items));return true}catch(e){return false}};
+const savedKey='YOS_TIMELINE_LOCAL_V2';let stored=null;try{stored=JSON.parse(localStorage.getItem(savedKey)||'null')}catch(e){}const todayISO=localISO(new Date());let selectedDay=todayISO;let isSample=!Array.isArray(stored)&&!calendarRows.length;
+let items=Array.isArray(stored)?stored:initialItems.map(x=>({...x}));
+const keyFor=day=>day===todayISO?savedKey:savedKey+':'+day;
+const persist=()=>{try{localStorage.setItem(keyFor(selectedDay),JSON.stringify(items));isSample=false;return true}catch(e){return false}};
 const fmt=m=>String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0');
-const scale=Math.max(35,Math.min(49,(window.innerHeight-165)/18));
+let searchText='';
+const glyphs={
+ sleep:'<path d="M3 19V6m0 10h18m-16 0V8h11a4 4 0 0 1 4 4v4"/>',
+ walk:'<circle cx="13" cy="4" r="2"/><path d="m7 21 4-6-2-3-4 2m4-2 3-5 4 2 2 3m-6 3 5 6"/>',
+ meal:'<path d="M4 3v7m3-7v7m3-7v7M7 10v11M17 3v18m0-18c-4 2-4 9 0 10"/>',
+ work:'<rect x="3" y="7" width="18" height="14" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 13h18"/>',
+ laptop:'<rect x="5" y="4" width="14" height="12" rx="1"/><path d="M2 20h20l-2-4H4z"/>',
+ meeting:'<circle cx="12" cy="6" r="3"/><path d="M6 20v-3a6 6 0 0 1 12 0v3M4 9H2m20 0h-2"/>',
+ fitness:'<path d="M3 9v6m3-9v12m12-12v12m3-9v6M6 12h12"/>',
+ bath:'<path d="M3 13h18l-2 7H5zM7 10c-3-3 3-4 0-7m6 7c-3-3 3-4 0-7m6 7c-3-3 3-4 0-7"/>',
+ clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l4 2"/>'};
+function eventIcon(item){const t=item.t||'';const type=/睡眠|就寝/.test(t)?'sleep':/歩|ウォーキング/.test(t)?'walk':/朝食|昼食|夕食|ご飯/.test(t)?'meal':/入浴|お風呂/.test(t)?'bath':/運動|筋トレ/.test(t)?'fitness':/会議/.test(t)?'meeting':/集中|作業/.test(t)?'laptop':/仕事/.test(t)?'work':'clock';return '<svg viewBox="0 0 24 24" aria-hidden="true">'+glyphs[type]+'</svg>'}
+let density='overview',scale=27;
 let zoom=null,selectedId=null;
-const yFor=m=>m/60*scale+(zoom!==null&&m>zoom?Math.min(100,(m-zoom)/60*50):0);
-const editor=document.getElementById('editor');document.getElementById('addBtn').onclick=()=>{editor.classList.toggle('show');if(editor.classList.contains('show'))document.getElementById('newTitle').focus()};document.getElementById('saveBtn').onclick=()=>{const title=document.getElementById('newTitle').value.trim(),parts=document.getElementById('newTime').value.split(':').map(Number),duration=Number(document.getElementById('newDuration').value),kind=document.getElementById('newKind').value;if(!title||parts.length!==2||!Number.isFinite(duration)||duration<5||duration>1440){note.textContent='名前・時刻・所要時間を確認してください';return}const start=parts[0]*60+parts[1];if(start+duration>1440){note.textContent='終了時刻は24:00以内にしてください';return}items.push({id:Math.max(...items.map(x=>x.id))+1,t:title,s:start,d:duration,kind});editor.classList.remove('show');document.getElementById('newTitle').value='';note.textContent=fmt(start)+' に「'+title+'」を追加'+(persist()?'（端末内保存）':'（保存失敗）');smoothRender()};
-function updateReview(){const done=items.filter(x=>x.done),pending=items.filter(x=>!x.done),movable=items.filter(x=>!x.f),completed=movable.filter(x=>x.done);const pct=movable.length?Math.round(completed.length/movable.length*100):0;const used=done.reduce((n,x)=>n+x.d,0);let summary=done.length?'完了記録は'+done.length+'件（合計'+Math.round(used/60*10)/10+'時間）。可動タスクの達成率は'+pct+'%。':'完了記録がまだありません。予定の配置だけでは実行できたか判断できません。';const overlaps=[];const sorted=[...items].sort((a,b)=>a.s-b.s);for(let i=0;i<sorted.length;i++)for(let j=i+1;j<sorted.length&&sorted[j].s<sorted[i].s+sorted[i].d;j++)if(sorted[i].kind===sorted[j].kind&&sorted[i].kind!=='schedule')overlaps.push([sorted[i],sorted[j]]);const pair=overlaps[0];const tip=pair?'改善候補：「'+pair[0].t+'」と「'+pair[1].t+'」は時間が重なっています。同じ種類の作業としてまとめられるか確認すると、切り替えの手間を減らせる可能性があります。':'改善候補：タスクの統合を提案する根拠がまだ不足しています。完了状況と実際の所要時間を記録すると、翌日の改善案を具体化できます。';document.getElementById('reviewText').textContent=summary+' '+(pending.length?'未完了・未確認は'+pending.length+'件。予定の変更と完了は区別して評価します。':'全項目に完了記録があります。');document.getElementById('reviewTip').textContent=tip;}document.getElementById('reviewBtn').onclick=updateReview;document.getElementById('doneBtn').onclick=()=>{const x=items.find(x=>x.id===selectedId);if(!x)return;x.done=!x.done;document.getElementById('doneBtn').textContent=x.done?'未完了に戻す':'完了にする';note.textContent=x.t+(x.done?'を完了':'の完了を解除')+(persist()?'（端末内保存）':'（保存失敗）');smoothRender();updateReview()};
+const yFor=m=>m/60*scale;
+const editor=document.getElementById('editor');let editingId=null;
+document.getElementById('addBtn').onclick=()=>{editingId=null;document.getElementById('editorTitle').textContent='予定を追加';document.getElementById('saveBtn').textContent='追加する';editor.classList.add('show');document.getElementById('newTitle').focus();};
+document.getElementById('cancelEditor').onclick=()=>editor.classList.remove('show');
+document.getElementById('saveBtn').onclick=()=>{const title=document.getElementById('newTitle').value.trim(),parts=document.getElementById('newTime').value.split(':').map(Number),duration=Number(document.getElementById('newDuration').value),kind=document.getElementById('newKind').value;if(!title||parts.length!==2||!Number.isFinite(duration)||duration<5||duration>1440){note.textContent='名前・時刻・所要時間を確認してください';return}const start=parts[0]*60+parts[1];if(start+duration>1440){note.textContent='終了時刻は24:00以内にしてください';return}if(editingId!==null){const item=items.find(x=>x.id===editingId);if(item){if(item.f){note.textContent='固定予定は編集できません';return;}Object.assign(item,{t:title,s:start,d:duration,kind});}}else{if(isSample){items=[];isSample=false;}items.push({id:Math.max(0,...items.map(x=>Number(x.id)||0))+1,t:title,s:start,d:duration,kind});}editingId=null;editor.classList.remove('show');document.getElementById('newTitle').value='';note.textContent=fmt(start)+' に「'+title+'」を'+(editingId===null?'保存':'更新')+(persist()?'（端末内保存）':'（保存失敗）');smoothRender();updateReview()};
+function updateReview(){const done=items.filter(x=>x.done),pending=items.filter(x=>!x.done),movable=items.filter(x=>!x.f),completed=movable.filter(x=>x.done);const pct=movable.length?Math.round(completed.length/movable.length*100):0;const used=done.reduce((n,x)=>n+x.d,0);let summary=done.length?'完了記録は'+done.length+'件（合計'+Math.round(used/60*10)/10+'時間）。可動タスクの達成率は'+pct+'%。':'完了記録がまだありません。予定の配置だけでは実行できたか判断できません。';const overlaps=[];const sorted=[...items].sort((a,b)=>a.s-b.s);for(let i=0;i<sorted.length;i++)for(let j=i+1;j<sorted.length&&sorted[j].s<sorted[i].s+sorted[i].d;j++)if(sorted[i].kind===sorted[j].kind&&sorted[i].kind!=='schedule')overlaps.push([sorted[i],sorted[j]]);const pair=overlaps[0];const tip=pair?'改善候補：「'+pair[0].t+'」と「'+pair[1].t+'」は時間が重なっています。同じ種類の作業としてまとめられるか確認すると、切り替えの手間を減らせる可能性があります。':'改善候補：タスクの統合を提案する根拠がまだ不足しています。完了状況と実際の所要時間を記録すると、翌日の改善案を具体化できます。';document.getElementById('reviewText').textContent=summary+' '+(pending.length?'未完了・未確認は'+pending.length+'件。予定の変更と完了は区別して評価します。':'全項目に完了記録があります。');document.getElementById('reviewTip').textContent=tip;updateOverview();renderLists();}document.getElementById('reviewBtn').onclick=updateReview;document.getElementById('doneBtn').onclick=()=>{const x=items.find(x=>x.id===selectedId);if(!x)return;x.done=!x.done;document.getElementById('doneBtn').textContent=x.done?'未完了に戻す':'完了にする';note.textContent=x.t+(x.done?'を完了':'の完了を解除')+(persist()?'（端末内保存）':'（保存失敗）');smoothRender();updateReview()};
+
+function updateOverview(){
+ const movable=items.filter(x=>!x.f),done=movable.filter(x=>x.done),pct=movable.length?Math.round(done.length/movable.length*100):0;
+ document.getElementById('progressRing').style.setProperty('--pct',pct+'%');
+ document.getElementById('todayProgress').textContent=pct+'%';
+ const ts=items.filter(x=>x.kind==='task');document.getElementById('taskCount').textContent=ts.filter(x=>x.done).length+'/'+ts.length;
+ const sleep=items.find(x=>/睡眠|就寝/.test(x.t));document.getElementById('sleepInfo').textContent=sleep?Math.floor(sleep.d/60)+'時間'+(sleep.d%60?String(sleep.d%60)+'分':''):'—';
+ document.getElementById('healthInfo').textContent='未記録';
+}
+function parseDay(iso){const p=iso.split('-').map(Number);return new Date(p[0],p[1]-1,p[2],12);}
+function showDay(iso){
+ if(!/^\d{4}-\d\d-\d\d$/.test(iso)||Number.isNaN(parseDay(iso).getTime()))return;
+ if(iso===selectedDay)return;
+ selectedDay=iso;const raw=localStorage.getItem(keyFor(iso));let data=null;try{data=raw===null?null:JSON.parse(raw)}catch(e){}
+ items=Array.isArray(data)?data:(iso===todayISO?initialItems.map(x=>({...x})):[]);
+ isSample=!Array.isArray(data)&&iso===todayISO&&!calendarRows.length;
+ selectedId=null;zoom=null;focus.classList.remove('show');editor.classList.remove('show');
+ note.textContent=isSample?'見本の予定です（実際の予定ではありません）':raw===null&&iso!==todayISO?'この日の端末内予定はまだありません':'端末内の記録を表示 · Notion未接続';
+ renderWeek();render();updateReview();window.scrollTo({top:0,behavior:'smooth'});
+}
+function renderWeek(){
+ const d=parseDay(selectedDay), label=['日','月','火','水','木','金','土'];
+ document.getElementById('dateTitle').textContent=(d.getMonth()+1)+'/'+d.getDate()+'（'+label[d.getDay()]+'）';
+ document.getElementById('dayCaption').textContent=selectedDay===todayISO?'Today':'';
+ const strip=document.getElementById('weekStrip');strip.textContent='';
+ const monday=new Date(d);monday.setDate(d.getDate()-((d.getDay()+6)%7));
+ for(let offset=0;offset<7;offset++){
+  const x=new Date(monday);x.setDate(monday.getDate()+offset);const iso=localISO(x);
+  const b=document.createElement('button');b.type='button';b.className='day'+(iso===selectedDay?' active':'')+(iso===todayISO?' today':'');
+  const s=document.createElement('small'),n=document.createElement('strong');s.textContent=label[x.getDay()];n.textContent=String(x.getDate());
+  b.append(s,n);b.setAttribute('aria-label',iso);b.onclick=()=>showDay(iso);strip.append(b);
+ }
+ document.getElementById('datePicker').value=selectedDay;
+}
+function updateNow(){
+ const el=document.getElementById('nowLine');if(selectedDay!==localISO(new Date())){el.hidden=true;return;}
+ const d=new Date(),m=d.getHours()*60+d.getMinutes();el.hidden=false;el.style.top=yFor(m)+'px';document.getElementById('nowBadge').textContent=fmt(m);
+}
+function setTab(name){
+ for(const b of document.querySelectorAll('[data-tab]')){b.classList.toggle('active',b.dataset.tab===name);b.setAttribute('aria-current',b.dataset.tab===name?'page':'false');}
+ document.getElementById('timelinePanel').style.display=name==='timeline'?'block':'none';
+ for(const [tab,id] of [['task','taskPanel'],['analysis','review'],['records','recordsPanel'],['ai','aiPanel']])document.getElementById(id).classList.toggle('show',name===tab);
+ renderLists();if(name!=='timeline')window.scrollTo({top:0,behavior:'smooth'});
+}
+function renderLists(){
+ for(const [id,subset] of [['taskList',items.filter(x=>x.kind==='task')],['recordsList',items.filter(x=>x.done)]]){
+  const container=document.getElementById(id);container.textContent='';if(!subset.length){const p=document.createElement('p');p.className='muted';p.textContent=id==='taskList'?'登録されたタスクはありません':'完了記録はありません';container.append(p);continue;}
+  for(const item of subset){const row=document.createElement('div'),span=document.createElement('span'),button=document.createElement('button');row.className='listitem';span.textContent=(item.done?'✓ ':'')+item.t+'　'+fmt(item.s)+'–'+fmt(item.s+item.d);button.textContent='表示';button.onclick=()=>{setTab('timeline');const node=[...tl.querySelectorAll('.card')].find(n=>n.dataset.id===String(item.id));if(node){node.scrollIntoView({behavior:'smooth',block:'center'});node.classList.add('selected');setTimeout(()=>node.classList.remove('selected'),1500)}};row.append(span,button);container.append(row);}
+ }
+}
+for(const b of document.querySelectorAll('[data-tab]'))b.onclick=()=>setTab(b.dataset.tab);
+document.getElementById('dateBtn').onclick=()=>{const picker=document.getElementById('datePicker');if(typeof picker.showPicker==='function')picker.showPicker();else picker.click()};
+document.getElementById('datePicker').onchange=e=>showDay(e.target.value);
+document.getElementById('zoomBtn').onclick=()=>{density=density==='overview'?'detail':'overview';scale=density==='overview'?27:56;document.getElementById('zoomBtn').textContent=density==='overview'?'詳細に拡大':'全体表示';render();};
+document.getElementById('searchBtn').onclick=()=>{const row=document.getElementById('searchRow');row.hidden=!row.hidden;if(!row.hidden){setTab('timeline');document.getElementById('searchInput').focus()}else{searchText='';document.getElementById('searchInput').value='';render()}};
+document.getElementById('searchInput').oninput=e=>{searchText=e.target.value.trim().toLocaleLowerCase();render()};
+document.getElementById('moreBtn').onclick=()=>{if(!isSample){note.textContent='この日の端末内データは保持しています · 同期先は未接続';return;}if(confirm('見本の予定だけを消しますか？')){items=[];persist();note.textContent='見本を消去しました · 新規追加できます';smoothRender();updateReview();}};
+document.getElementById('editSelected').onclick=()=>{const item=items.find(x=>x.id===selectedId);if(!item)return;if(item.f){note.textContent='固定予定は編集できません';return;}editingId=item.id;document.getElementById('editorTitle').textContent='予定を編集';document.getElementById('saveBtn').textContent='変更を保存';document.getElementById('newTitle').value=item.t;document.getElementById('newTime').value=fmt(item.s);document.getElementById('newDuration').value=item.d;document.getElementById('newKind').value=item.kind;editor.classList.add('show');focus.classList.remove('show');setTab('timeline');editor.scrollIntoView({behavior:'smooth',block:'start'})};
+document.getElementById('deleteSelected').onclick=()=>{const item=items.find(x=>x.id===selectedId);if(!item||item.f){note.textContent='固定予定は削除できません';return;}if(!confirm('「'+item.t+'」をこの端末の表示から削除しますか？'))return;items=items.filter(x=>x.id!==selectedId);selectedId=null;focus.classList.remove('show');const saved=persist();note.textContent=saved?'端末内の予定を削除しました':'保存に失敗しました';smoothRender();updateReview()};
+
 const vibrate=()=>{try{navigator.vibrate?.(8)}catch(e){}};
 function smoothRender(activeId,oldActiveRect){
  const before=new Map([...tl.querySelectorAll('.card')].map(n=>[n.dataset.id,n.getBoundingClientRect()]));
@@ -27,22 +165,42 @@ function render(){
  tl.querySelectorAll('.hour,.card,.tick').forEach(n=>n.remove());
  const bottom=yFor(1440);
  for(let h=0;h<=24;h++){const el=document.createElement('div');el.className='hour';el.style.top=yFor(h*60)+'px';el.innerHTML='<span>'+fmt(h*60)+'</span>';tl.append(el)}
- const sorted=[...items].sort((a,b)=>a.s-b.s||a.id-b.id);
+ const sorted=[...items].filter(x=>Number.isFinite(x.s)&&Number.isFinite(x.d)&&x.d>0&&x.s>=0&&x.s+x.d<=1440).sort((a,b)=>a.s-b.s||a.id-b.id);
+ const lanes=new Map();let group=[],groupEnd=-1;const groups=[];
+ for(const item of sorted){if(group.length&&item.s>=groupEnd){groups.push(group);group=[]}group.push(item);groupEnd=Math.max(groupEnd,item.s+item.d)}
+ if(group.length)groups.push(group);
+ for(const g of groups){const ends=[];for(const item of g){let lane=ends.findIndex(end=>end<=item.s);if(lane<0){lane=ends.length;ends.push(0)}ends[lane]=item.s+item.d;lanes.set(item,{lane,count:0})}for(const item of g)lanes.get(item).count=ends.length}
  let lastBottom=-2;let pushed=0;
+ let priorVisualBottom=-2;
+ for(const group of groups){
+   const start=yFor(group[0].s);
+   const offset=density==='overview'?Math.max(0,priorVisualBottom+3-start):0;
+   for(const item of group)lanes.get(item).offset=offset;
+   priorVisualBottom=Math.max(priorVisualBottom,...group.map(item=>yFor(item.s)+offset+Math.max(density==='overview'?17:22,yFor(item.s+item.d)-yFor(item.s)-2)));
+ }
  sorted.forEach(item=>{
-   const natural=yFor(item.s);const height=Math.max(22,yFor(item.s+item.d)-natural-2);const top=natural;
+   const natural=yFor(item.s);const height=Math.max(density==='overview'?17:22,yFor(item.s+item.d)-natural-2);const top=natural+(lanes.get(item)?.offset||0);
    if(top>natural+2)pushed++;
    lastBottom=top+height;
    const el=document.createElement('div');el.className='card '+(item.kind==='habit'?'habit':item.kind==='task'?'task':'schedule');
-   el.style.top=top+'px';el.style.height=height+'px';el.innerHTML='<b></b><small>'+fmt(item.s)+'–'+fmt(item.s+item.d)+'</small>';el.querySelector('b').textContent=item.t;
+   el.style.top=top+'px';el.style.height=height+'px';
+   const lane=lanes.get(item);if(lane&&lane.count>1){el.style.left='calc(73px + (100% - 73px) * '+(lane.lane/lane.count)+')';el.style.width='calc((100% - 73px) / '+lane.count+' - 3px)';el.style.right='auto';el.classList.add('lane')}
+   const iconEl=document.createElement('span');iconEl.innerHTML=eventIcon(item);el.append(iconEl.firstChild);
+   const titleEl=document.createElement('b');titleEl.textContent=item.t;el.append(titleEl);
+   const timeEl=document.createElement('small');timeEl.textContent=fmt(item.s)+'–'+fmt(item.s+item.d);el.append(timeEl);
+   if(item.t==='睡眠'||item.t==='就寝')el.classList.add('sleep');
+   if(['朝の準備','朝食','昼食','夕食','入浴'].includes(item.t))el.classList.add('neutral');
+   if(height<30)el.classList.add('tiny');
+   if(density==='overview')el.classList.add('compact');
+   if(searchText&&!item.t.toLocaleLowerCase().includes(searchText))el.style.display='none';
    el.dataset.id=String(item.id);if(item.done)el.classList.add('done');tl.append(el);
-   const tick=document.createElement('div');tick.className='tick';tick.style.top=(natural-4)+'px';tl.append(tick);
+   const tick=document.createElement('div');tick.className='tick';tick.style.top=(top-4)+'px';tl.append(tick);
    let downY=0,downS=0,moved=false,holding=false,activePointer=null,frame=0,latestY=0,previewS=item.s,lastHaptic=0,startedAt=0;
    const timeLabel=el.querySelector('small');
    const paint=()=>{frame=0;if(!holding)return;const offset=latestY-downY;el.style.transform='translate3d(0,'+offset+'px,0) scale(1.015)';const next=Math.max(0,Math.min(1440-item.d,Math.round((downS+offset/scale*60)/5)*5));if(next!==previewS){previewS=next;timeLabel.textContent=fmt(next)+'–'+fmt(next+item.d);const now=performance.now();if(now-lastHaptic>75){lastHaptic=now;vibrate()}}};
    const startDrag=(y,id)=>{downY=latestY=y;downS=previewS=item.s;startedAt=performance.now();moved=false;holding=false;activePointer=id};
    const moveDrag=y=>{if(activePointer===null)return;latestY=y;const distance=Math.abs(latestY-downY);if(distance>3&&!item.f){holding=true;moved=true;el.classList.add('moving');if(!frame)frame=requestAnimationFrame(paint)}};
-   const endDrag=cancelled=>{if(activePointer===null)return;activePointer=null;if(frame){cancelAnimationFrame(frame);frame=0}const releasedRect=el.getBoundingClientRect();el.classList.remove('moving');el.style.transform='';if(holding&&moved&&!cancelled){const offset=latestY-downY;previewS=Math.max(0,Math.min(1440-item.d,Math.round((downS+offset/scale*60)/5)*5));item.s=previewS;const clashes=items.filter(x=>x!==item&&item.s<x.s+x.d&&x.s<item.s+item.d);note.textContent=(clashes.length?'時間が重複：'+clashes.map(x=>x.t).join('、'):'移動しました')+(persist()?'（端末内保存）':'（保存失敗）');smoothRender(item.id,releasedRect)}else if(!moved&&!cancelled){zoom=zoom===item.s?null:item.s;selectedId=item.id;document.getElementById('doneBtn').textContent=item.done?'未完了に戻す':'完了にする';ft.textContent=item.t;fi.textContent=fmt(item.s)+'–'+fmt(item.s+item.d)+(item.f?'　固定予定':'　ドラッグで移動');focus.classList.toggle('show',zoom!==null);smoothRender()}holding=false};
+   const endDrag=cancelled=>{if(activePointer===null)return;activePointer=null;if(frame){cancelAnimationFrame(frame);frame=0}const releasedRect=el.getBoundingClientRect();el.classList.remove('moving');el.style.transform='';if(holding&&moved&&!cancelled){const offset=latestY-downY;previewS=Math.max(0,Math.min(1440-item.d,Math.round((downS+offset/scale*60)/5)*5));item.s=previewS;const clashes=items.filter(x=>x!==item&&item.s<x.s+x.d&&x.s<item.s+item.d);note.textContent=(clashes.length?'時間が重複：'+clashes.map(x=>x.t).join('、'):'移動しました')+(persist()?'（端末内保存）':'（保存失敗）');smoothRender(item.id,releasedRect)}else if(!moved&&!cancelled){zoom=item.s;selectedId=item.id;document.getElementById('doneBtn').textContent=item.done?'未完了に戻す':'完了にする';ft.textContent=item.t;fi.textContent=fmt(item.s)+'–'+fmt(item.s+item.d)+(item.f?'　固定予定':'　ドラッグで移動');focus.classList.toggle('show',zoom!==null);smoothRender()}holding=false};
    // Touch events are used on iOS WebView to avoid pointer capture cancelling a vertical drag.
    el.addEventListener('touchstart',e=>{if(e.touches.length!==1)return;startDrag(e.touches[0].clientY,'touch')},{passive:true});
    el.addEventListener('touchmove',e=>{if(activePointer!=='touch'||!e.touches.length)return;if(!item.f){e.preventDefault();moveDrag(e.touches[0].clientY)}},{passive:false});
@@ -53,10 +211,13 @@ function render(){
    el.addEventListener('pointerup',e=>{if(activePointer===e.pointerId)endDrag(false)});
    el.addEventListener('pointercancel',e=>{if(activePointer===e.pointerId)endDrag(true)});
  });
- tl.style.height=(Math.max(bottom,lastBottom)+12)+'px';
+ tl.style.height=(Math.max(bottom,lastBottom)+12)+'px';updateNow();
  if(pushed&&note.textContent.includes('仮データ'))note.textContent='枠の高さは所要時間に対応。重複時は縦にずらして表示（未保存）';
 }
 document.getElementById('closeFocus').onclick=()=>{zoom=null;focus.classList.remove('show');smoothRender()};
-if(stored&&stored.length){note.textContent='端末内の保存データを復元しました。Notion未接続。'}else if(calendarRows.length){note.textContent='Appleカレンダーの予定 '+items.length+'件を読込（端末内編集）。Notion未接続。';}render();updateReview();
+if(Array.isArray(stored)){note.textContent='保存済みデータを表示中 · Notion未接続';}
+else if(calendarRows.length){note.textContent='Appleカレンダー '+items.length+'件を読み取り · 端末内編集';}
+else{note.textContent='見本の予定です（実際の予定ではありません） · 右上の追加から登録';}
+renderWeek();render();updateReview();setInterval(updateNow,60000);
 <\/script></body></html>`;
 await view.loadHTML(html);await view.present(true);Script.complete();
