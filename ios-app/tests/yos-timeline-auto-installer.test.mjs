@@ -25,16 +25,22 @@ async function install(options = {}) {
     }
     async loadString() { calls.fetched++; return downloaded; }
   }
-  const fm = {
-    documentsDirectory: () => '/scripts',
+  const makeManager = (root, store) => ({
+    documentsDirectory: () => root,
     joinPath: (folder, file) => folder + '/' + file,
-    fileExists: path => files.has(path),
-    readString: path => files.get(path),
-    writeString: (path, value) => files.set(path, value),
-  };
+    fileExists: path => store.has(path),
+    readString: path => store.get(path),
+    writeString: (path, value) => store.set(path, value),
+  });
   const execute = new AsyncFunction('Alert', 'Request', 'FileManager', 'Script', source);
-  await execute(Alert, Request, { local: () => fm }, { complete: () => { calls.completed++; } });
-  return { files, calls };
+  await execute(Alert, Request, {
+    local: () => makeManager('/scripts', files),
+    iCloud: () => {
+      if (!options.cloudFiles) throw new Error('iCloud disabled');
+      return makeManager('/iCloud', options.cloudFiles);
+    },
+  }, { complete: () => { calls.completed++; } });
+  return { files, cloudFiles: options.cloudFiles, calls };
 }
 
 test('current auto launcher registers with chosen name and verified bytes', async () => {
@@ -82,4 +88,23 @@ test('cancel and invalid names never download or create scripts', async () => {
   const files = new Map();
   await assert.rejects(install({ name: '../bad', files }), /使用できない名前/);
   assert.equal(files.size, 0);
+});
+
+test('iCloud-enabled devices install into their active scripts directory', async () => {
+  const cloudFiles = new Map();
+  const result = await install({ cloudFiles });
+  assert.equal(result.files.size, 0, 'local folder remains unchanged');
+  assert.equal(cloudFiles.get('/iCloud/YOS Timeline Auto.js'), launcher);
+});
+
+test('both local and iCloud script names are protected from overwriting', async () => {
+  for (const existing of ['local', 'cloud']) {
+    const files = new Map();
+    const cloudFiles = new Map();
+    if (existing === 'local') files.set('/scripts/YOS Timeline Auto.js', 'KEEP LOCAL');
+    else cloudFiles.set('/iCloud/YOS Timeline Auto.js', 'KEEP CLOUD');
+    await assert.rejects(install({ files, cloudFiles }), /上書きしません/);
+    assert.equal(files.get('/scripts/YOS Timeline Auto.js'), existing === 'local' ? 'KEEP LOCAL' : undefined);
+    assert.equal(cloudFiles.get('/iCloud/YOS Timeline Auto.js'), existing === 'cloud' ? 'KEEP CLOUD' : undefined);
+  }
 });
