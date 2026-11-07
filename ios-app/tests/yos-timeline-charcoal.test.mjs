@@ -66,3 +66,44 @@ test('Safari preview exists as a separate sample-only HTML without deployment', 
   assert.doesNotMatch(preview,/window\.YOS_CALENDAR_EVENTS\s*=/);
   assert.doesNotMatch(preview,/api\.notion\.com/);
 });
+
+test('isolated WebView runtime draws schedule and saves real items without mixing examples',()=>{
+ class Element{
+  constructor(tag='div'){
+   this.tagName=tag;this.children=[];this.className='';this.dataset={};this.value='';this.hidden=false;this.textContent='';
+   this.style={setProperty(k,v){this[k]=v}};
+   this.classList={
+    add:(...a)=>{for(const x of a)if(!this.className.split(' ').includes(x))this.className+=(this.className?' ':'')+x},
+    remove:(...a)=>{this.className=this.className.split(' ').filter(x=>!a.includes(x)).join(' ')},
+    toggle:(x,v)=>{if(v===undefined)v=!this.className.split(' ').includes(x);v?this.classList.add(x):this.classList.remove(x)}
+   };
+  }
+  set innerHTML(s){this._html=s;if(s.startsWith('<svg'))this.children=[new Element('svg')]}
+  get innerHTML(){return this._html||''}
+  get firstChild(){return this.children[0]}
+  append(...nodes){for(const n of nodes.filter(Boolean)){n.parent=this;this.children.push(n)}}
+  remove(){if(this.parent)this.parent.children=this.parent.children.filter(x=>x!==this)}
+  focus(){}setAttribute(k,v){this[k]=v}
+  querySelector(q){return this.children.find(x=>x.tagName===q)||null}
+  querySelectorAll(q){return this.children.filter(x=>q.split(',').some(y=>x.className.split(' ').includes(y.trim().replace('.',''))))}
+  getBoundingClientRect(){const top=parseFloat(this.style.top)||0,height=parseFloat(this.style.height)||0;return {top,bottom:top+height}}
+  animate(){return {}}addEventListener(){}scrollIntoView(){}
+ }
+ const elements=new Map(),get=id=>{if(!elements.has(id))elements.set(id,new Element());return elements.get(id)};
+ const document={getElementById:get,createElement:tag=>new Element(tag),querySelectorAll:()=>[]};
+ const data=new Map(),storage={getItem:k=>data.has(k)?data.get(k):null,setItem:(k,v)=>data.set(k,v)};
+ const script=new Function('document','window','localStorage','setInterval','confirm','performance','requestAnimationFrame','cancelAnimationFrame','navigator','setTimeout',bodyScript);
+ script(document,{YOS_CALENDAR_EVENTS:[],scrollTo(){}},storage,()=>{},()=>true,{now:()=>1},()=>1,()=>{}, {vibrate(){}},()=>{});
+ const count=type=>get('tl').children.filter(el=>el.className.split(' ').includes(type)).length;
+ assert.equal(count('hour'),25);
+ assert.equal(count('card'),13);
+ assert.match(get('notice').textContent,/見本の予定/);
+ get('addBtn').onclick();
+ get('newTitle').value='テスト予定';get('newTime').value='09:00';get('newDuration').value='30';get('newKind').value='task';
+ get('saveBtn').onclick();
+ const saved=JSON.parse(storage.getItem('YOS_TIMELINE_LOCAL_V2'));
+ assert.equal(saved.length,1,'demo rows must not be saved as personal data');
+ assert.equal(saved[0].t,'テスト予定');
+ assert.equal(count('card'),1);
+ assert.equal(get('taskCount').textContent,'0/1');
+});
