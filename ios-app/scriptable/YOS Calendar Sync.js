@@ -1,6 +1,6 @@
 // Variables used by Scriptable.
 // icon-color: blue; icon-glyph: calendar;
-// YOS Calendar Sync v0.3 — guarded one-event calendar export. No writes or deletes.
+// YOS Calendar Sync v0.4 — guarded one-event export and reverse date sync. No writes or deletes.
 // Uses the existing Notion integration token from Scriptable Keychain.
 const DB='06e62efb-9a3c-45e2-bec7-7a53332c925a';
 const KEY='YOS_NOTION_INTEGRATION_TOKEN';
@@ -47,7 +47,7 @@ if(notionRows.length&&calendarEvents.length){
  report.push('照合はIDのみ。名前の一致では自動結合しません。');
 }
 const a=new Alert();a.title='YOS 双方向同期｜接続診断';a.message=report.join('\n')+'\n\n既定は読み取り専用。同期対象は1件ずつ明示確認します。';a.addAction('閉じる');
-if(fetchComplete&&calendarOK)a.addAction('日時付きタスクを1件だけ予定に追加');
+if(fetchComplete&&calendarOK){a.addAction('日時付きタスクを1件だけ予定に追加');a.addAction('連携済み予定の変更をNotionに反映');}
 const choice=await a.presentAlert();
 if(choice===1){
  const linkedIds=new Set(calendarEvents.map(e=>taskIdFromNotes(e.notes)).filter(Boolean));
@@ -86,6 +86,38 @@ if(choice===1){
       const done=new Alert();done.title='1件作成しました';done.message='Appleカレンダーに追加済み。Notionへの逆方向同期は未実装です。';done.addAction('OK');await done.presentAlert();
      }catch(e){const err=new Alert();err.title='作成できませんでした';err.message=String(e.message||e);err.addAction('OK');await err.presentAlert();}
     }
+   }
+  }
+ }
+}
+if(choice===2){
+ const ids=new Map(notionRows.map(x=>[x.id.toLowerCase(),x]));
+ const counts={};for(const e of calendarEvents){const id=taskIdFromNotes(e.notes);if(id)counts[id]=(counts[id]||0)+1;}
+ const pad=n=>String(n).padStart(2,'0');
+ const localISO=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())+'T'+pad(d.getHours())+':'+pad(d.getMinutes())+':00'+(d.getTimezoneOffset()<=0?'+':'-')+pad(Math.floor(Math.abs(d.getTimezoneOffset())/60))+':'+pad(Math.abs(d.getTimezoneOffset())%60);
+ const candidates=calendarEvents.filter(e=>{
+  const id=taskIdFromNotes(e.notes),task=id&&ids.get(id);
+  return task&&counts[id]===1&&!e.isAllDay&&e.startDate instanceof Date&&e.endDate instanceof Date&&e.endDate>e.startDate&&e.endDate-e.startDate<=86400000&&task.properties?.['状態']?.select?.name!=='完了'&&task.properties?.['状態']?.select?.name!=='保留'&&task.properties?.['期限']?.date?.start?.includes('T')&&task.properties?.['期限']?.date?.end?.includes('T');
+ }).filter(e=>{const d=ids.get(taskIdFromNotes(e.notes)).properties['期限'].date;return Math.abs(new Date(d.start)-e.startDate)>60000||Math.abs(new Date(d.end)-e.endDate)>60000;});
+ if(!candidates.length){const n=new Alert();n.title='反映候補なし';n.message='連携ID付きで、開始・終了時刻が変わった予定は見つかりません。既存の一般予定は対象外です。';n.addAction('閉じる');await n.presentAlert();}
+ else{
+  const p=new Alert();p.title='変更を反映する予定';p.message='変更候補 '+candidates.length+'件。1件ずつ選択して確認します。';for(const e of candidates.slice(0,10))p.addAction(String(e.title).slice(0,45));p.addCancelAction('キャンセル');
+  const i=await p.presentAlert();
+  if(i>=0&&i<Math.min(candidates.length,10)){
+   const e=candidates[i],id=taskIdFromNotes(e.notes),task=ids.get(id),old=task.properties['期限'].date;
+   const c=new Alert();c.title='Notionの期限を変更しますか？';c.message='タスク：'+(task.properties['やること']?.title?.map(z=>z.plain_text).join('')||id)+'\n現在：'+old.start+' ～ '+old.end+'\n変更：'+localISO(e.startDate)+' ～ '+localISO(e.endDate)+'\n\nこの1件の期限のみ変更。削除はしません。';c.addAction('変更する');c.addCancelAction('キャンセル');
+   if(await c.presentAlert()===0){
+    try{
+     // Re-read Notion to reject edits made since the snapshot.
+     const get=new Request('https://api.notion.com/v1/pages/'+id);get.method='GET';get.headers={'Authorization':'Bearer '+Keychain.get(KEY),'Notion-Version':'2022-06-28'};
+     const latest=await get.loadJSON();if(get.response?.statusCode!==200)throw Error('Notion再取得 HTTP '+get.response?.statusCode);
+     const current=latest.properties?.['期限']?.date;
+     if(current?.start!==old.start||current?.end!==old.end)throw Error('Notion側も変更されています。競合のため中止しました');
+     const patch=new Request('https://api.notion.com/v1/pages/'+id);patch.method='PATCH';patch.headers={'Authorization':'Bearer '+Keychain.get(KEY),'Notion-Version':'2022-06-28','Content-Type':'application/json'};
+     patch.body=JSON.stringify({properties:{'期限':{date:{start:localISO(e.startDate),end:localISO(e.endDate)}}}});
+     const result=await patch.loadJSON();if(patch.response?.statusCode!==200)throw Error('Notion更新 HTTP '+patch.response?.statusCode+' '+JSON.stringify(result).slice(0,140));
+     const done=new Alert();done.title='Notionに反映しました';done.message='1件の期限を更新しました。カレンダー側の予定は変更していません。';done.addAction('閉じる');await done.presentAlert();
+    }catch(err){const fail=new Alert();fail.title='反映を中止しました';fail.message=String(err.message||err);fail.addAction('閉じる');await fail.presentAlert();}
    }
   }
  }
