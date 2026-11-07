@@ -1,0 +1,61 @@
+name: YOS Clipboard fixed-child proof
+
+on:
+  pull_request:
+    paths:
+      - 'tools/clarity-factory/YOS_Clipboard.cherri'
+      - 'tools/clarity-factory/test_yos_clipboard_source.py'
+      - '.github/workflows/yos-clipboard-proof.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-sign:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Source contract
+        run: python3 tools/clarity-factory/test_yos_clipboard_source.py
+      - name: Install pinned Cherri v2.3.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          url='https://github.com/electrikmilk/cherri/releases/download/v2.3.0/cherri_linux-x86_64.zip'
+          expected='7ab2c384b7b26e7c72a30a8dfa56f89dae12c4068b7951bc1e3193f3698edbe9'
+          curl -fsSL "$url" -o /tmp/cherri.zip
+          printf '%s  %s\n' "$expected" /tmp/cherri.zip | sha256sum -c -
+          unzip -q /tmp/cherri.zip -d /tmp/cherri
+          sudo install -m 0755 "$(find /tmp/cherri -type f -name cherri -print -quit)" /usr/local/bin/cherri
+      - name: Compile
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd tools/clarity-factory
+          cherri YOS_Clipboard.cherri --skip-sign --debug
+          test -s YOS_Clipboard_unsigned.shortcut
+          mkdir -p artifacts-clipboard
+          cp YOS_Clipboard_unsigned.shortcut artifacts-clipboard/YOS_Clipboard-unsigned.shortcut
+      - name: Sign
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/clarity-factory/sign_with_hubsign.py \
+            --input tools/clarity-factory/artifacts-clipboard/YOS_Clipboard-unsigned.shortcut \
+            --output tools/clarity-factory/artifacts-clipboard/YOS_Clipboard-signed.shortcut \
+            --name YOS_Clipboard
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('tools/clarity-factory/artifacts-clipboard/YOS_Clipboard-signed.shortcut')
+          d=p.read_bytes()
+          assert d.startswith(b'AEA1'), d[:8]
+          assert len(d)>500, len(d)
+          print(f'YOS_Clipboard signed AEA1 PASS ({len(d)} bytes)')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: YOS_Clipboard-iPhone
+          path: tools/clarity-factory/artifacts-clipboard/YOS_Clipboard-signed.shortcut
+          if-no-files-found: error
