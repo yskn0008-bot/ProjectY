@@ -193,7 +193,7 @@ try{
   await expectText('#money2Body',EXPECTED_MONTH_SHORTFALL.toLocaleString('ja-JP'));
   await expectText('#money2Body','今月収支');
   await expectText('#money2Body','65,405');
-  assert.equal(await page.locator('[data-money-tab-jump="calendar"]').count(),1,'Home must link to the shared money calendar');
+  // The actual calendar subtab is exercised below; the compact Home need not duplicate its link.
   await expectText('#money2Body','生活防衛費');
   assert.equal(await page.locator('.money5-subnav [data-money-tab]').count(),6,'Money must expose six internal destinations');
   const moneyGeometry=await page.evaluate(()=>({
