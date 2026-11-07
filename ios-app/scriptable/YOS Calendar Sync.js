@@ -20,11 +20,12 @@ if(!Keychain.contains(KEY)){
   req.body=JSON.stringify({page_size:100});
   const data=await req.loadJSON();
   if(!req.response||req.response.statusCode!==200)throw Error('HTTP '+req.response?.statusCode+' '+JSON.stringify(data).slice(0,150));
-  const rows=data.results||[];
-  report.push('YOS Tasks：先頭 '+rows.length+'件取得');
+  let rows=data.results||[];let cursor=data.next_cursor;let pages=1;
+  while(data.has_more&&cursor&&pages<30){req.body=JSON.stringify({page_size:100,start_cursor:cursor});const next=await req.loadJSON();if(req.response?.statusCode!==200)throw Error('追加ページ取得 HTTP '+req.response?.statusCode);rows.push(...(next.results||[]));cursor=next.next_cursor;data.has_more=next.has_more;pages++;}
+  report.push('YOS Tasks：'+rows.length+'件取得（'+pages+'ページ）');
   report.push('期限設定済：'+rows.filter(x=>x.properties?.['期限']?.date?.start).length+'件');
   report.push('同期リンク設定済：'+rows.filter(x=>String(x.properties?.['連結先']?.rich_text?.map(z=>z.plain_text).join('')||'').startsWith('YOSCAL|')).length+'件');
-  if(data.has_more)report.push('続きのページあり：全件取得は未対応');
+  if(data.has_more)report.push('続きのページあり：安全上30ページで停止');
  }catch(e){report.push('Notion取得不可：'+String(e.message||e))}
 }
 const a=new Alert();a.title='YOS 双方向同期｜接続診断';a.message=report.join('\n')+'\n\n診断専用です。予定・タスクは変更していません。';a.addAction('閉じる');await a.presentAlert();Script.complete();
