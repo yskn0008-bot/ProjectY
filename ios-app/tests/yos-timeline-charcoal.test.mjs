@@ -48,7 +48,7 @@ test('local-only storage respects empty arrays and labels sample data', () => {
   assert.match(bodyScript,/keyFor\(selectedDay\)/);
   assert.match(bodyScript,/見本の予定です（実際の予定ではありません）/);
   assert.match(bodyScript,/未記録/);
-  assert.match(bodyScript,/AIとの連携は未実装/);
+  assert.match(html,/AIとの連携は未実装/);
   assert.doesNotMatch(html, /api\.notion\.com|Authorization: Bearer/);
 });
 test('fixed calendar appointments are protected from destructive changes', () => {
