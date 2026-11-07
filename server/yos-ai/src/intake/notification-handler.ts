@@ -145,6 +145,16 @@ export function createNotificationHandler(options:{
     });
     if(!Array.isArray(response.results)||response.results.length!==1)throw new Error('Notion append not confirmed');
   }
+  // A successful Inbox save is not proof that the iPhone displayed the alert.
+  // Replays remain available until the device confirms presentation separately.
+  async function replayUnacknowledgedAlert(id:string,decision:{decision:'YOS_SILENT'|'YOS_ALERT';alertText:string}):
+    Promise<{decision:'YOS_SILENT'|'YOS_ALERT';alertText:string;alertRequiresAck:boolean}> {
+    if(decision.decision!=='YOS_ALERT')return {...decision,alertRequiresAck:false};
+    const acknowledged=await options.redis.command<string|null>(['GET','yos:notification:inbox:v1:'+id+':alert-ack']);
+    return acknowledged==='done'
+      ? {decision:'YOS_SILENT',alertText:'',alertRequiresAck:false}
+      : {...decision,alertRequiresAck:true};
+  }
   async function authorized(request:Request):Promise<'capture'|'viewer'|null> {
     const token=/^Bearer ([^\s]{16,512})$/u.exec(request.headers.get('authorization')??'')?.[1];
     if(!token)return null;
@@ -175,6 +185,19 @@ export function createNotificationHandler(options:{
     if(new TextEncoder().encode(raw).length>MAX_BODY_BYTES)return result({error:'Payload too large'},413);
     let body:unknown;
     try{body=JSON.parse(raw)}catch{return result({error:'Invalid JSON'},400)}
+    if(asRecord(body)&&body.action==='ack-alert'){
+      if(role!=='capture')return result({error:'Device authorization required'},403);
+      const id=body.id;
+      if(typeof id!=='string'||!/^[0-9a-f]{8,64}$/u.test(id))
+        return result({error:'Invalid notification ID'},400);
+      try{
+        const receipt='yos:notification:inbox:v1:'+id;
+        if(await options.redis.command<string|null>(['GET',receipt])!=='done')
+          return result({error:'Notification save not yet confirmed'},409);
+        await options.redis.command<string>(['SET',receipt+':alert-ack','done','EX',2592000]);
+        return result({ok:true,id,alertAcknowledged:true});
+      }catch{return result({error:'Alert acknowledgement not confirmed'},503)}
+    }
     if(asRecord(body)&&body.action==='mark'){
       const id=body.id,status=body.status;
       if(typeof id!=='string'||!/^[0-9a-f]{8,64}$/u.test(id)||typeof status!=='string'||!STATE_SET.has(status))
@@ -205,14 +228,18 @@ export function createNotificationHandler(options:{
       if(claimed!=='OK')return result({error:'Notification is already being saved'},409);
       ownsLock=true;
       const prior=await options.redis.command<string|null>(['GET',key]);
-      if(prior==='done')return result({ok:true,id,duplicate:true,category,decision:decision.decision,alertText:''});
+      if(prior==='done'){
+        const alert=await replayUnacknowledgedAlert(id,decision);
+        return result({ok:true,id,duplicate:true,category,...alert});
+      }
       // A previously ambiguous PATCH must be checked against Notion before any retry.
       if(prior==='pending'){
         const {blocks,complete}=await listBlocks();
         if(!complete)throw new Error('Inbox reconciliation incomplete');
         if(parseRows(blocks).some(x=>x.id===id)){
           await options.redis.command<string>(['SET',key,'done','EX',2592000]);
-          return result({ok:true,id,duplicate:true,category,decision:decision.decision,alertText:''});
+          const alert=await replayUnacknowledgedAlert(id,decision);
+          return result({ok:true,id,duplicate:true,category,...alert});
         }
       } else {
         // The durable pending receipt is written BEFORE Notion; normal fresh input
@@ -222,7 +249,7 @@ export function createNotificationHandler(options:{
       // Classification is metadata, not an instruction to record a payment or create a task.
       await append(eventBlock({id,at:event.occurredAt,category,text:safe,sourceApp:event.sourceApp}));
       await options.redis.command<string>(['SET',key,'done','EX',2592000]);
-      return result({ok:true,id,duplicate:false,category,decision:decision.decision,alertText:decision.alertText},201);
+      return result({ok:true,id,duplicate:false,category,...decision,alertRequiresAck:decision.decision==='YOS_ALERT'},201);
     }catch{
       // Keep the pending receipt: a timed-out PATCH may have actually succeeded.
       return result({error:'Inbox saving unconfirmed; original notification remains'},503);
