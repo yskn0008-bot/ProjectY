@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-07T19:56:52+09:00",
+  "updated_at": "2026-11-07T19:58:08+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -110,7 +110,7 @@
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/668",
-      "updated_at": "2026-11-07T10:56:33Z"
+      "updated_at": "2026-11-07T10:56:56Z"
     },
     {
       "id": "github-issue-10",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-07T10:49:12Z"
+      "updated_at": "2026-11-07T10:57:19Z"
     },
     {
       "id": "github-issue-234",
@@ -195,6 +195,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-83d90242134b",
+      "title": "Add explicitly confirmed calendar-to-Notion single-event date update with conflict check",
+      "completed_at": "2026-11-07T10:57:35Z",
+      "result": "GitHub mainへ反映（83d9024）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/83d90242134b76d86893d2984773e1f130ae7a66"
+    },
+    {
       "id": "github-commit-ad176886f54b",
       "title": "Add guarded single-task calendar export with explicit consent and duplicate check",
       "completed_at": "2026-11-07T10:56:21Z",
@@ -221,13 +228,6 @@
       "completed_at": "2026-11-07T10:29:33Z",
       "result": "GitHub mainへ反映（b933a8a）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/b933a8af02da3841a5ca556791698aa4b38556b3"
-    },
-    {
-      "id": "github-commit-edcad4d2921b",
-      "title": "Add non-destructive Notion and Apple Calendar sync connection diagnostic",
-      "completed_at": "2026-11-07T10:27:51Z",
-      "result": "GitHub mainへ反映（edcad4d）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/edcad4d2921b698bbf04971ad87fd5ec524f76d3"
     },
     {
       "id": "complete-002",
@@ -264,7 +264,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-07T19:56:52+09:00",
+      "last_update": "2026-11-07T19:58:08+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -345,7 +345,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-07T19:56:52+09:00",
+      "last_update": "2026-11-07T19:58:08+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -368,7 +368,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-07T19:56:52+09:00",
+      "last_update": "2026-11-07T19:58:08+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -450,5 +450,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "d25d33add863a687e7f18bbb99f268fdb0187d18ce5daa1c0e8e539c7d822b9b"
+  "github_snapshot_hash": "ae2dfdc757862f9dd2046967803917498df9b918330e5978ab31e9c117026f23"
 }
