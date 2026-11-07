@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-07T09:43:04+09:00",
+  "updated_at": "2026-11-07T09:44:59+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -195,6 +195,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-94ae9acfb25d",
+      "title": "Fix iPhone WebView touch drag by using non-passive touchmove and preventing scroll cancellation",
+      "completed_at": "2026-11-07T00:44:25Z",
+      "result": "GitHub mainへ反映（94ae9ac）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/94ae9acfb25da94fda3beb0f104180b66570e159"
+    },
+    {
       "id": "github-commit-8c18df9d9476",
       "title": "Animate Timeline reflow with FLIP instead of snapping on release",
       "completed_at": "2026-11-07T00:42:39Z",
@@ -221,13 +228,6 @@
       "completed_at": "2026-11-07T00:31:27Z",
       "result": "GitHub mainへ反映（0cb10b8）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/0cb10b8469be99bad9de92f2872157d15209981f"
-    },
-    {
-      "id": "github-commit-26d9eac8bc02",
-      "title": "Add safe stable YOS Timeline auto-refresh launcher with cached fallback",
-      "completed_at": "2026-11-07T00:31:18Z",
-      "result": "GitHub mainへ反映（26d9eac）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/26d9eac8bc023e264ef972da228cb75078a810e9"
     },
     {
       "id": "complete-002",
@@ -264,7 +264,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-07T09:43:04+09:00",
+      "last_update": "2026-11-07T09:44:59+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -345,7 +345,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-07T09:43:04+09:00",
+      "last_update": "2026-11-07T09:44:59+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -368,7 +368,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-07T09:43:04+09:00",
+      "last_update": "2026-11-07T09:44:59+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -450,5 +450,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "c5afae49f068278b00832e4e933587168d86127ea2015b326ec83b4f1796dc56"
+  "github_snapshot_hash": "812a49a1dfed66bc45e0f4ca5cb81adda02989271befd3dbb600dd9bf76bba12"
 }
