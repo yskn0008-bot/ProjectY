@@ -56,3 +56,13 @@ test('fixed calendar appointments are protected from destructive changes', () =>
   assert.match(bodyScript,/if\(item\.f\)\{note\.textContent='固定予定は編集できません'/);
   assert.match(bodyScript,/if\(!item\|\|item\.f\)/);
 });
+
+test('Safari preview exists as a separate sample-only HTML without deployment', () => {
+  const preview=readFileSync(new URL('../scriptable/yos-timeline-charcoal-preview.html', import.meta.url),'utf8');
+  assert.ok(preview.startsWith('<!doctype html>'));
+  assert.match(preview,/PREVIEW ONLY/);
+  assert.match(preview,/id="tl"/);
+  assert.match(preview,/本番データには反映しません/);
+  assert.doesNotMatch(preview,/window\.YOS_CALENDAR_EVENTS\s*=/);
+  assert.doesNotMatch(preview,/api\.notion\.com/);
+});
