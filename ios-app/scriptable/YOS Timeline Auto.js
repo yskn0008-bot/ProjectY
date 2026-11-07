@@ -1,6 +1,6 @@
 // Variables used by Scriptable.
 // icon-color: blue; icon-glyph: calendar;
-// YOS Timeline Auto v1.0 — stable launcher, GitHub refresh, last-known-good fallback.
+// YOS Timeline Auto v1.1 — stable launcher, GitHub refresh, last-known-good fallback.
 // Only the Timeline presentation is downloaded; never overwrites other Scriptable scripts.
 const SOURCE="https://raw.githubusercontent.com/yskn0008-bot/ProjectY/main/ios-app/scriptable/YOS%20Timeline.js";
 const fm=FileManager.local();
@@ -32,8 +32,20 @@ if(!candidate){
   const a=new Alert();a.title="YOS Timelineを起動できません";a.message="GitHub取得失敗・保存済み版なし。通信状態を確認してください。\n"+problem;a.addAction("OK");await a.presentAlert();Script.complete();
 }else{
   const view=new WebView();
+  // Read-only Apple Calendar bridge. A denied permission leaves the demo untouched.
+  let events=[];
   try{
-    await view.loadHTML(candidate);
+    const now=new Date(),start=new Date(now.getFullYear(),now.getMonth(),now.getDate());
+    const end=new Date(start.getTime()+86400000);
+    const records=await CalendarEvent.between(start,end);
+    events=records.filter(e=>!e.isAllDay).map(e=>{
+      const a=Math.max(start.getTime(),e.startDate.getTime()),b=Math.min(end.getTime(),e.endDate.getTime());
+      return {title:String(e.title||'予定').slice(0,100),start:Math.round((a-start.getTime())/60000),duration:Math.round((b-a)/60000)};
+    }).filter(e=>e.duration>0);
+  }catch(e){console.warn('Calendar read unavailable: '+String(e));}
+  const inject=html=>html.replace('<script>', '<script>window.YOS_CALENDAR_EVENTS='+JSON.stringify(events).replace(/</g,'\\u003c')+';<\\/script><script>');
+  try{
+    await view.loadHTML(inject(candidate));
     if(latest&&(!fm.fileExists(current)||fm.readString(current)!==latest.html)){
       if(fm.fileExists(current)){
         fm.writeString(previous,fm.readString(current));
@@ -45,7 +57,7 @@ if(!candidate){
   }catch(e){
     const fallback=fm.fileExists(current)?fm.readString(current):(fm.fileExists(previous)?fm.readString(previous):null);
     if(!fallback||fallback===candidate)throw e;
-    await view.loadHTML(fallback);
+    await view.loadHTML(inject(fallback));
     problem="更新版を読み込めず、保存済み版で起動";
   }
   if(problem)console.warn("YOS Timeline: "+problem);
