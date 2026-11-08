@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';
-import {createNotificationHandler} from '../dist/intake/notification-handler.js';
+import {createNotificationHandler,notificationInternals} from '../dist/intake/notification-handler.js';
 
 const token='existing-clarity-test-token-123456';
 const tokenSha256=createHash('sha256').update(token).digest('hex');
@@ -299,4 +299,13 @@ test('acknowledgement must come from device and only after Inbox save is confirm
   assert.equal(confirmed.status,200);
   const twice=await h.handler(h.req({action:'ack-alert',id}));
   assert.equal(twice.status,200);
+});
+
+test('bank debit wording regression',()=>{
+  for(const content of ['引き落としができませんでした','口座振替ができませんでした','引落しできず']){
+    const category=notificationInternals.categoryOf(content);
+    assert.equal(notificationInternals.triage(content,category).decision,'YOS_ALERT');
+  }
+  const success='口座振替が正常に完了しました';
+  assert.equal(notificationInternals.triage(success,notificationInternals.categoryOf(success)).decision,'YOS_SILENT');
 });
