@@ -114,3 +114,19 @@ test('interrupted first install is cleaned only when bytes match the known pendi
  assert.equal(cloud.files.has(marker),true);
  assert.match(r.alerts.at(-1).message,/不明です/);
 });
+
+test('explicit YOS_SCRIPT_NAME header wins over filename and requires exact manifest agreement',async()=>{
+ const custom='// Variables used by Scriptable.\n// YOS_SCRIPT_NAME: YOS 正式表示名\nconst answer=42;\n';
+ const catalog=clone(shipped);
+ catalog.targets[0].name='YOS 正式表示名';
+ catalog.targets[0].sha256=hash(custom);
+ catalog.targets[0].commit='f'.repeat(40);
+ const r=await run({catalog,sources:{...fixtures,'timeline-auto':custom}});
+ assert.equal(r.cloud.files.get('/icloud/YOS 正式表示名.js'),custom);
+ assert.equal(r.cloud.files.has(target),false);
+ const wrong=custom.replace('YOS 正式表示名','YOS 誤った名前');
+ const changed=clone(catalog);changed.targets[0].sha256=hash(wrong);
+ const r2=await run({catalog:changed,sources:{...fixtures,'timeline-auto':wrong}});
+ assert.equal(r2.cloud.files.has('/icloud/YOS 誤った名前.js'),false);
+ assert.match(r2.alerts.at(-1).message,/正式名称が一致/);
+});
