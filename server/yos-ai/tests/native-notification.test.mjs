@@ -304,6 +304,7 @@ test('acknowledgement must come from device and only after Inbox save is confirm
 test('bank debit wording regression',()=>{
   for(const content of ['引き落としができませんでした','口座振替ができませんでした','引落しできず']){
     const category=notificationInternals.categoryOf(content);
+    assert.equal(category,'money-review');
     assert.equal(notificationInternals.triage(content,category).decision,'YOS_ALERT');
   }
   const success='口座振替が正常に完了しました';
