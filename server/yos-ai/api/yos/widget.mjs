@@ -1,5 +1,5 @@
 import {waitUntil} from '@vercel/functions';
-import {synchronizeHealthInbox} from '../../src/widget/health-sync.mjs';
+import {synchronizeHealthInbox} from '../../src/health/health-inbox-sync.mjs';
 import {createProductionWidgetFeed} from '../../dist/widget/production.js';
 import {createProductionBaseHomeRefreshHandler} from '../../dist/base-home/production.js';
 import {createProductionMoneyNotionMirror} from '../../dist/intake/production.js';
