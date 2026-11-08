@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-08T22:07:00+09:00",
+  "updated_at": "2026-11-08T22:53:46+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -41,16 +41,6 @@
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/654",
       "updated_at": "2026-11-06T20:57:26Z"
-    },
-    {
-      "id": "github-pr-662",
-      "title": "PR #662 YOS TODAY: reflect newly confirmed movement after cached meal report",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/662",
-      "updated_at": "2026-11-02T11:03:16Z"
     },
     {
       "id": "github-pr-663",
@@ -100,7 +90,7 @@
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/668",
-      "updated_at": "2026-11-08T07:48:20Z"
+      "updated_at": "2026-11-08T13:37:42Z"
     },
     {
       "id": "github-pr-669",
@@ -111,6 +101,16 @@
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/669",
       "updated_at": "2026-11-08T05:41:47Z"
+    },
+    {
+      "id": "github-pr-670",
+      "title": "PR #670 feat(scriptable): centralize safe GitHub installs and automatic script naming",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/670",
+      "updated_at": "2026-11-08T13:53:22Z"
     },
     {
       "id": "github-issue-10",
@@ -264,7 +264,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-08T22:07:00+09:00",
+      "last_update": "2026-11-08T22:53:46+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -339,13 +339,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 8件・Open PR 44件を自動同期中",
+      "next_action": "Open Issue 8件・Open PR 45件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-08T22:07:00+09:00",
+      "last_update": "2026-11-08T22:53:46+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -368,7 +368,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-08T22:07:00+09:00",
+      "last_update": "2026-11-08T22:53:46+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -450,5 +450,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "4228d3c5cd2baeff0b7215e25ebc6083b32ba9893246c6b7a702ba26cd3781b8"
+  "github_snapshot_hash": "5bf913189e6d093e07cb8d6800fd3b91d4119520686bbb6c027f4c5ab1344deb"
 }
