@@ -60,10 +60,15 @@ function categoryOf(s:string):Category {
 }
 function triage(raw:string,category:Category):{decision:'YOS_SILENT'|'YOS_ALERT';alertText:string} {
   const silent={decision:'YOS_SILENT' as const,alertText:''};
-  if(TEST.test(raw)||OTP.test(raw)||/不正利用(?:は|が)(?:確認|検出)されません/iu.test(raw))return silent;
+  if(TEST.test(raw)||OTP.test(raw))return silent;
   if(category==='missed-call')return silent;
-  const p0=/口座凍結|差押|差し押さえ|不正送金|不正利用|訴状/iu.test(raw);
-  const p1=/引き落としに失敗|引落失敗|振込失敗|(?:引き落とし|引落とし|引落し|口座振替)(?:が|を)?(?:できませんでした|できなかった|できません|できず)|支払期限.{0,12}(?:本日|今日|明日)|期限切れ/iu.test(raw);
+  // Remove only resolved/negated risk phrases. Other active risks in the same message still count.
+  const actionable=raw.replace(
+    /(?:不正(?:利用|送金|アクセス)|口座凍結|差押|差し押さえ|振込失敗|引落失敗)(?:(?:は|が|を)?(?:確認|検知|検出|発生)(?:されませんでした|されていません|されなかった|されていない|しなかった|していません|しませんでした)|(?:は|が)?(?:ありませんでした|ありません|ない)|(?:は|が)?解除(?:されました|済み|しました)|(?:の|する)?予定は(?:ありません|ない))/giu,
+    ''
+  );
+  const p0=/口座凍結|差押|差し押さえ|不正送金|不正利用|不正アクセス|不審なログイン.{0,12}(?:検知|確認)|訴状/iu.test(actionable);
+  const p1=/引き落としに失敗|引落失敗|振込失敗|(?:引き落とし|引落とし|引落し|口座振替)(?:が|を)?(?:できませんでした|できなかった|できません|できず)|支払期限.{0,12}(?:本日|今日|明日)|期限切れ|督促状(?:が|を)?(?:届きました|受領しました|発行されました)|督促を受けました/iu.test(actionable);
   if(!p0&&!p1)return silent;
   const priority=p0?'P0':'P1',facts=safeText(raw).replace(/\s+/gu,' ').slice(0,180);
   const amount=/(?:[￥¥]\s*[\d,]+|[\d,]+\s*円)/u.exec(raw)?.[0]??'';
