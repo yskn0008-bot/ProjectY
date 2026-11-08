@@ -1,4 +1,5 @@
 import crypto from 'node:crypto';
+import inboxSortRoute from '../../src/routes/inbox-sort.mjs';
 import {createProductionClarityIntakeHandler, createProductionNotionMirrorHandler} from '../../dist/intake/production.js';
 import {CLARITY_RESPONSE_FORMAT, repairPrompt, validateClarityModelResult} from '../../clarity-model-contract.mjs';
 
@@ -399,6 +400,7 @@ export default {
   async fetch(request) {
     try {
       const url = new URL(request.url);
+      if (url.searchParams.get('mode') === 'inbox-sort') return await inboxSortRoute.fetch(request);
       if (url.searchParams.get('mode') === 'model') return await handleClarityModel(request);
       if (url.searchParams.get('mode') === 'mirror') return await getMirrorHandler()(request);
       if (url.searchParams.get('mode') === 'factory') return await handleShortcutFactory(request);

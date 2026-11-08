@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {classifyHealthReport,extractHealthCaptures,mergeHealthJournal,synchronizeHealthInbox,japanDay} from '../api/yos/health-sync.mjs';
+import {classifyHealthReport,extractHealthCaptures,mergeHealthJournal,synchronizeHealthInbox,japanDay} from '../src/widget/health-sync.mjs';
 
 const now=new Date('2026-11-01T05:00:00.000Z');
 const timestamp='2026-11-01T01:41:23.215Z';
