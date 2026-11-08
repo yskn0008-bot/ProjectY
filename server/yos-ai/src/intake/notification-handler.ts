@@ -55,7 +55,7 @@ function categoryOf(s:string):Category {
   if(/不在着信|missed[ -]?call|応答なしの着信/iu.test(s))return 'missed-call';
   if(/差押|差し押さえ|督促|裁判所|訴状|訴訟/iu.test(s))return 'legal';
   if(/認証|不正アクセス|不審なログイン|不正利用|口座凍結/iu.test(s))return 'security';
-  if(/支払|請求|返済|決済|入金|出金|振込|引落|PayPay|銀行|残高|チャージ/iu.test(s))return 'money-review';
+  if(/支払|請求|返済|決済|入金|出金|振込|引落|引き落とし|口座振替|PayPay|銀行|残高|チャージ/iu.test(s))return 'money-review';
   return 'information';
 }
 function triage(raw:string,category:Category):{decision:'YOS_SILENT'|'YOS_ALERT';alertText:string} {
