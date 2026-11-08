@@ -36,6 +36,11 @@ Apple公式：
 https://support.apple.com/en-mo/guide/shortcuts/apdfbdbd7123/10.0/ios/27
 https://support.apple.com/en-euro/guide/shortcuts/apd58d46713f/ios
 
+## Vercel Hobby関数数の保護
+
+- 最後のREADY版は `api/yos` に12個の関数があり、通知を別ファイルで追加すると13個となり、確認済みのHobby上限（12個）を超える。隔離版では通知ロジックを `src/intake/notification-api.mjs` に移し、既存 `api/yos/intake.mjs` 関数が `mode=notification` で呼び分ける。Vercelの内部rewriteで公開URL `/api/yos/notification` を維持する。課金・新サーバー・本番設定変更は行わない。
+- GitHubのコード/契約テストとVercelの実際のrewrite・配備は別の受入条件。12個以下でもpreviewの成功、認証、iPhone端末動作を保証しない。
+
 ## API契約
 
 POST /api/yos/notification のリクエスト（Authorization: Bearer <existing-token>）。

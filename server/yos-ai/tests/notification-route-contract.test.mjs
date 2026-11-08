@@ -1,10 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';
+import {readFileSync,readdirSync} from 'node:fs';
 
 const captureCredential='synthetic-route-test-credential-2026';
 const notionPage='aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee';
-const api='https://local-route.test/api/yos/notification';
+const api='https://local-route.test/api/yos/intake?mode=notification';
 for (const name of [
   'YOS_CLARITY_INTAKE_TOKEN_SHA256','YOS_NOTION_API_TOKEN','YOS_NOTION_INBOX_PAGE_ID',
   'UPSTASH_REDIS_REST_URL','UPSTASH_REDIS_REST_TOKEN','GOOGLE_CLIENT_ID',
@@ -45,7 +46,7 @@ globalThis.fetch=async function fakeNetwork(url,init={}){
   throw new Error('Blocked unexpected external network call: '+address);
 };
 
-const route=(await import('../api/yos/notification.mjs')).default;
+const route=(await import('../api/yos/intake.mjs')).default;
 const request=(method,body,authorization,origin='')=>new Request(api,{
   method,headers:{
     ...(authorization?{Authorization:authorization}:{}),
@@ -53,6 +54,14 @@ const request=(method,body,authorization,origin='')=>new Request(api,{
     ...(origin?{Origin:origin}:{})
   },
   ...(body===undefined?{}:{body:JSON.stringify(body)})
+});
+
+test('notification URL is rewritten to the existing intake function within the 12-function Hobby limit',()=>{
+  const config=JSON.parse(readFileSync(new URL('../vercel.json',import.meta.url),'utf8'));
+  assert.ok(config.rewrites.some(rule=>rule.source==='/api/yos/notification'&&rule.destination==='/api/yos/intake?mode=notification'));
+  const functions=readdirSync(new URL('../api/yos/',import.meta.url)).filter(name=>name.endsWith('.mjs'));
+  assert.equal(functions.length,12);
+  assert.equal(functions.includes('notification.mjs'),false);
 });
 
 test('route rejects requests when service configuration is absent (503, no outbound I/O)',async()=>{

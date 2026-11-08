@@ -1,4 +1,5 @@
 import crypto from 'node:crypto';
+import notificationApi from '../../src/intake/notification-api.mjs';
 import {createProductionClarityIntakeHandler, createProductionNotionMirrorHandler} from '../../dist/intake/production.js';
 import {CLARITY_RESPONSE_FORMAT, repairPrompt, validateClarityModelResult} from '../../clarity-model-contract.mjs';
 
@@ -399,6 +400,7 @@ export default {
   async fetch(request) {
     try {
       const url = new URL(request.url);
+      if (url.searchParams.get('mode') === 'notification') return await notificationApi.fetch(request);
       if (url.searchParams.get('mode') === 'model') return await handleClarityModel(request);
       if (url.searchParams.get('mode') === 'mirror') return await getMirrorHandler()(request);
       if (url.searchParams.get('mode') === 'factory') return await handleShortcutFactory(request);
