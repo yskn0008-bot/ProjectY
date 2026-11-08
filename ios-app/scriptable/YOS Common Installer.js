@@ -98,6 +98,30 @@ async function inform(title,message,name){
   const click=await a.presentAlert();
   if(name&&click===0)Safari.open('scriptable:///open/'+encodeURIComponent(name));
 }
+async function recoverPending(fm,target,markerFile,receiptFile,name){
+  const p=await readJSON(fm,markerFile);
+  if(!p||p.schema!==1||p.name!==name||p.receiptFile!==receiptFile||typeof p.newHash!=='string'||!/^[0-9a-f]{64}$/.test(p.newHash))throw Error('中断記録の内容が不明です。元のコードを保護して停止しました');
+  const live=fm.fileExists(target)?await readable(fm,target):null;
+  const liveHash=live===null?null:digest(live);
+  const actualReceipt=await readJSON(fm,receiptFile);
+  const receiptHash=actualReceipt?.sha256||null;
+  if(p.oldHash){
+    if(!/^[0-9a-f]{64}$/.test(p.oldHash)||typeof p.backup!=='string'||p.backup!==fm.joinPath(fm.joinPath(basePath(fm),'backups'),encodeURIComponent(name)+'-'+p.oldHash+'.txt')||!fm.fileExists(p.backup)||typeof p.oldReceipt!=='string')throw Error('復旧用バックアップを特定できません');
+    const before=await readable(fm,p.backup),previous=JSON.parse(p.oldReceipt);
+    if(digest(before)!==p.oldHash||previous.sha256!==p.oldHash||previous.name!==name||![p.oldHash,p.newHash].includes(liveHash)||![p.oldHash,p.newHash].includes(receiptHash))throw Error('復旧記録とファイルに矛盾があります。変更しません');
+    if(liveHash!==p.oldHash)writeChecked(fm,target,before);
+    if(receiptHash!==p.oldHash)writeChecked(fm,receiptFile,p.oldReceipt);
+    if(digest(await readable(fm,target))!==p.oldHash||JSON.parse(await readable(fm,receiptFile)).sha256!==p.oldHash)throw Error('復旧の確認に失敗しました');
+  }else{
+    if(p.oldHash!==null||p.backup!==null||p.oldReceipt!==null||![null,p.newHash].includes(liveHash)||![null,p.newHash].includes(receiptHash))throw Error('初回登録の中断状態が不明です。変更しません');
+    if(liveHash===p.newHash)fm.remove(target);
+    if(receiptHash===p.newHash)fm.remove(receiptFile);
+    if(fm.fileExists(target)||fm.fileExists(receiptFile))throw Error('新規登録の復旧確認に失敗しました');
+  }
+  fm.remove(markerFile);
+  if(fm.fileExists(markerFile))throw Error('中断記録を消去できませんでした');
+}
+
 async function install(entry){
   const path=entry.path.split('/').map(encodeURIComponent).join('/');
   const url=ROOT+entry.commit+'/'+path;
@@ -115,7 +139,7 @@ async function install(entry){
   const receiptFile=metadataPath(fm,name,'.receipt.json');
   const markerFile=metadataPath(fm,name,'.pending.json');
   const dataDir=basePath(fm);
-  if(fm.fileExists(markerFile))throw Error('前回の更新が中断されています。自動上書きせず停止しました');
+  if(fm.fileExists(markerFile)){await recoverPending(fm,target,markerFile,receiptFile,name);throw Error('前回の中断状態を復旧しました。安全のため再度選択してください');}
   const current=existing.length?await readable(fm,target):null;
   const currentHash=current===null?null:digest(current);
   const previous=await readJSON(fm,receiptFile);
@@ -145,7 +169,7 @@ async function install(entry){
   }
   const oldReceipt=previous?JSON.stringify(previous):null;
   const receipt=JSON.stringify(receiptFor(entry,entry.sha256,chosen.kind));
-  const marker=JSON.stringify({schema:1,name,oldHash:currentHash,newHash:entry.sha256,backup,receiptFile});
+  const marker=JSON.stringify({schema:1,name,oldHash:currentHash,newHash:entry.sha256,backup,receiptFile,oldReceipt});
   writeChecked(fm,markerFile,marker);
   try{
     if(fm.fileExists(target)&&digest(await readable(fm,target))!==currentHash)throw Error('更新直前に内容が変わりました');
