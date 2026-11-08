@@ -103,7 +103,10 @@ function parseRows(rows:NotionBlock[]):Event[] {
     const match=RECORD.exec(value);
     if(!match||!row.id||!match[1]||!match[2]||!match[3]||!match[4])continue;
     const body=value.slice(match[0].length).replace(/^\s*/u,'').replace(/\s*---\s*$/u,'').slice(0,1500);
-    events.set(match[3],{id:match[3],at:match[1],category:match[4] as Category,
+    // Preserve old Inbox records while exposing legacy missed calls in the dedicated filter.
+    const legacyMissedCall=match[2]==='Clarity Notification'&&match[4]==='information'&&
+      body.split(/\r?\n/u).some(line=>line.trim()==='不在着信');
+    events.set(match[3],{id:match[3],at:match[1],category:legacyMissedCall?'missed-call':match[4] as Category,
       text:body,status:'unread',source:match[2],blockId:row.id});
   }
   return [...events.values()].map(x=>({...x,status:statuses.get(x.id)??'unread'})).sort((a,b)=>b.at.localeCompare(a.at));
