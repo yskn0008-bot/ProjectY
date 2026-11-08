@@ -197,6 +197,32 @@ test('legacy Clarity Notification records are readable without rewriting existin
   assert.equal(after.events[0].status,'pending');
 });
 
+test('old Clarity missed calls appear under the missed-call filter without rewriting Inbox',async()=>{
+  const h=harness();
+  const rows=[
+    {id:'aabbccdd', category:'information', text:'電話\\n東京都\\n不在着信'},
+    {id:'eeff0011', category:'information', text:'不在着信の設定方法を説明します'}
+  ];
+  for(const [index,row] of rows.entries()){
+    const record='2026-10-26T08:00:0'+index+'.000Z · Clarity Notification · notification:'+
+      row.id+' · '+row.category+'\\n'+row.text+'\\n---';
+    h.blocks.push({id:'legacy-block-'+index,type:'paragraph',
+      paragraph:{rich_text:[{type:'text',text:{content:record.replaceAll('\\n','\n')}}]}});
+  }
+  const before=JSON.stringify(h.blocks);
+  const response=await h.handler(h.req(null,undefined,'GET'));
+  assert.equal(response.status,200);
+  const data=await response.json();
+  assert.equal(data.events.length,2);
+  const missed=data.events.find(x=>x.id==='aabbccdd');
+  const ordinary=data.events.find(x=>x.id==='eeff0011');
+  assert.equal(missed.category,'missed-call');
+  assert.equal(missed.source,'Clarity Notification');
+  assert.equal(ordinary.category,'information','ordinary informational content must not become a missed call');
+  assert.equal(JSON.stringify(h.blocks),before,'legacy classification must never rewrite original Inbox blocks');
+  assert.equal(h.calls.filter(x=>x.method==='PATCH').length,0);
+});
+
 test('cannot mark absent event or invalid state',async()=>{
   const h=harness();
   assert.equal((await h.handler(h.req({action:'mark',id:'a'.repeat(24),status:'done'}))).status,404);
