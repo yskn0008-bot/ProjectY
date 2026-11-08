@@ -80,3 +80,37 @@ test('shortcut parameter selects without manual name, and iCloud unavailable saf
  const r=await run({id:'journal',choices:[-1]});assert.equal(r.cloud.files.get('/icloud/YOS JOURNAL.js'),fixtures.journal);
  const l=fm('/local');const r2=await run({cloud:{documentsDirectory(){throw Error('not available')}},local:l});
  assert.equal(r2.local.files.get('/local/YOS Timeline Auto.js'),fixtures['timeline-auto'])});
+
+test('interrupted managed update restores exact previous code and receipt',async()=>{
+ const cloud=fm('/icloud'),local=fm('/local');await run({cloud,local});
+ const old=cloud.files.get(target),oldReceipt=cloud.files.get(receipt);
+ const changed=old+'\n// AFTER INTERRUPT\n';
+ const catalog=clone(shipped);catalog.targets[0].sha256=hash(changed);catalog.targets[0].commit='f'.repeat(40);
+ const folder='/icloud/YOS Common Installer Data/backups';cloud.createDirectory(folder);
+ const backup=folder+'/YOS%20Timeline%20Auto-'+hash(old)+'.txt';
+ cloud.files.set(backup,old);cloud.files.set(target,changed);
+ cloud.files.set(receipt,JSON.stringify({...JSON.parse(oldReceipt),sha256:hash(changed),commit:'f'.repeat(40)}));
+ cloud.files.set(marker,JSON.stringify({schema:1,name:'YOS Timeline Auto',oldHash:hash(old),newHash:hash(changed),backup,receiptFile:receipt,oldReceipt}));
+ const r=await run({cloud,local,catalog,sources:{...fixtures,'timeline-auto':changed}});
+ assert.equal(cloud.files.get(target),old);
+ assert.equal(cloud.files.get(receipt),oldReceipt);
+ assert.equal(cloud.files.has(marker),false);
+ assert.match(r.alerts.at(-1).message,/復旧しました/);
+});
+test('interrupted first install is cleaned only when bytes match the known pending hash',async()=>{
+ const cloud=fm('/icloud'),local=fm('/local');
+ const base='/icloud/YOS Common Installer Data';cloud.createDirectory(base);
+ cloud.files.set(target,fixtures['timeline-auto']);
+ cloud.files.set(marker,JSON.stringify({schema:1,name:'YOS Timeline Auto',oldHash:null,newHash:hash(fixtures['timeline-auto']),backup:null,receiptFile:receipt,oldReceipt:null}));
+ let r=await run({cloud,local});
+ assert.equal(cloud.files.has(target),false);
+ assert.equal(cloud.files.has(receipt),false);
+ assert.equal(cloud.files.has(marker),false);
+ assert.match(r.alerts.at(-1).message,/復旧しました/);
+ cloud.files.set(target,'UNKNOWN USER CONTENT');
+ cloud.files.set(marker,JSON.stringify({schema:1,name:'YOS Timeline Auto',oldHash:null,newHash:hash(fixtures['timeline-auto']),backup:null,receiptFile:receipt,oldReceipt:null}));
+ r=await run({cloud,local});
+ assert.equal(cloud.files.get(target),'UNKNOWN USER CONTENT');
+ assert.equal(cloud.files.has(marker),true);
+ assert.match(r.alerts.at(-1).message,/不明です/);
+});
