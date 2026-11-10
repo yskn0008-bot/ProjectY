@@ -13,8 +13,9 @@ const OTP = /認証コード|確認コード|ワンタイム|二段階認証|ロ
 const TEST_NOTICE = /^\s*(?:【(?:通知テスト|テスト通知|動作確認|架空)[^】]*】|(?:これは|この通知は|本通知は)?\s*(?:架空の通知テスト|架空のテスト|テスト通知|架空の通知|模擬通知|動作確認(?:用|通知)|test\s+(?:message|notification)|simulation\b))/iu;
 type Category = 'missed-call'|'money-review'|'legal'|'security'|'information';
 type Status = 'unread'|'read'|'pending'|'done';
-type Event = {id:string; at:string; category:Category; text:string; status:Status; source:string; blockId:string};
-type Capture = {text:string; sourceApp:string; occurredAt:string; eventId:string};
+type AiState = 'pending'|'failed'|'complete';
+type Event = {id:string; at:string; category:Category; text:string; status:Status; source:string; blockId:string; aiState?:AiState; aiDecision?:'YOS_ALERT'|'YOS_SILENT'; aiSummary?:string};
+type Capture = {text:string; sourceApp:string; occurredAt:string; eventId:string; decisionEngine:'rules'|'chatgpt'};
 type NotionBlock = {
   id?:string;
   type?:string;
@@ -98,19 +99,29 @@ function parseCapture(body:unknown,now:Date):{ok:true;value:Capture}|{ok:false;r
   if(Math.abs(now.getTime()-Date.parse(occurredAt))>32*86400000)return {ok:false,reason:'occurredAt outside accepted range'};
   const eventId=typeof body.eventId==='string'?body.eventId.trim():'';
   if(eventId&&!/^[a-zA-Z0-9._:-]{8,128}$/u.test(eventId))return {ok:false,reason:'Invalid eventId'};
-  return {ok:true,value:{text:text.trim(),sourceApp,occurredAt,eventId}};
+  if(body.decisionEngine!==undefined&&body.decisionEngine!=='rules'&&body.decisionEngine!=='chatgpt')
+    return {ok:false,reason:'Invalid decisionEngine'};
+  return {ok:true,value:{text:text.trim(),sourceApp,occurredAt,eventId,decisionEngine:body.decisionEngine==='chatgpt'?'chatgpt':'rules'}};
 }
-function eventBlock(event:{id:string;at:string;category:Category;text:string;sourceApp:string}):string {
-  return event.at+' · Native Notification · notification:'+event.id+' · '+event.category+'\n発信元: '+safeText(event.sourceApp).slice(0,90)+'\n'+event.text+'\n---';
+function eventBlock(event:{id:string;at:string;category:Category;text:string;sourceApp:string;decisionEngine:'rules'|'chatgpt'}):string {
+  return event.at+' · Native Notification · notification:'+event.id+' · '+event.category+
+    (event.decisionEngine==='chatgpt'?' · ai-pending':'')+'\n発信元: '+safeText(event.sourceApp).slice(0,90)+'\n'+event.text+'\n---';
 }
-const RECORD=/^(\S+)\s*·\s*(Native Notification|Clarity Notification)\s*·\s*notification:([0-9a-f]{8,64})\s*·\s*(missed-call|money-review|legal|security|information)/iu;
+const RECORD=/^(\S+)\s*·\s*(Native Notification|Clarity Notification)\s*·\s*notification:([0-9a-f]{8,64})\s*·\s*(missed-call|money-review|legal|security|information)(?:\s*·\s*ai-pending)?/iu;
 const STATE=/^(\S+)\s*·\s*Notification State\s*·\s*notification:([0-9a-f]{8,64})\s*·\s*(read|pending|done)/iu;
+const AI_RESULT=/^(\S+)\s*·\s*Notification AI Result\s*·\s*notification:([0-9a-f]{8,64})\s*·\s*(failed|YOS_ALERT|YOS_SILENT)(?:\n([^]*))?$/iu;
 function parseRows(rows:NotionBlock[]):Event[] {
-  const statuses=new Map<string,Status>(),events=new Map<string,Event>();
+  const statuses=new Map<string,Status>(),aiResults=new Map<string,{aiState:AiState;aiDecision?:'YOS_ALERT'|'YOS_SILENT';aiSummary?:string}>(),events=new Map<string,Event>();
   for(const row of rows){
     if(row.type!=='paragraph')continue;
     const value=textOf(row),state=STATE.exec(value);
     if(state&&state[2]&&state[3]){statuses.set(state[2],state[3] as Status);continue}
+    const ai=AI_RESULT.exec(value);
+    if(ai?.[2]&&ai[3]){
+      const decision=ai[3]==='failed'?undefined:ai[3] as 'YOS_ALERT'|'YOS_SILENT';
+      aiResults.set(ai[2],{aiState:decision?'complete':'failed',...(decision?{aiDecision:decision}:{}),...(ai[4]?{aiSummary:ai[4]}:{})});
+      continue;
+    }
     const match=RECORD.exec(value);
     if(!match||!row.id||!match[1]||!match[2]||!match[3]||!match[4])continue;
     const body=value.slice(match[0].length).replace(/^\s*/u,'').replace(/\s*---\s*$/u,'').slice(0,1500);
@@ -118,9 +129,10 @@ function parseRows(rows:NotionBlock[]):Event[] {
     const legacyMissedCall=match[2]==='Clarity Notification'&&match[4]==='information'&&
       body.split(/\r?\n/u).some(line=>line.trim()==='不在着信');
     events.set(match[3],{id:match[3],at:match[1],category:legacyMissedCall?'missed-call':match[4] as Category,
-      text:body,status:'unread',source:match[2],blockId:row.id});
+      text:body,status:'unread',source:match[2],blockId:row.id,
+      ...(match[0].endsWith('ai-pending')?{aiState:'pending' as const}:{})});
   }
-  return [...events.values()].map(x=>({...x,status:statuses.get(x.id)??'unread'})).sort((a,b)=>b.at.localeCompare(a.at));
+  return [...events.values()].map(x=>({...x,status:statuses.get(x.id)??'unread',...((x.aiState&&aiResults.get(x.id))||{})})).sort((a,b)=>b.at.localeCompare(a.at));
 }
 export function createNotificationHandler(options:{
   tokenSha256:string;notionToken:string;notionPageId:string;redis:RedisCommandClient;
@@ -212,6 +224,42 @@ export function createNotificationHandler(options:{
         return result({ok:true,id,alertAcknowledged:true});
       }catch{return result({error:'Alert acknowledgement not confirmed'},503)}
     }
+    if(asRecord(body)&&body.action==='ai-result'){
+      if(role!=='capture')return result({error:'Device authorization required'},403);
+      const id=body.id,decision=body.decision,summary=body.summary;
+      if(typeof id!=='string'||!/^[0-9a-f]{24}$/u.test(id)||
+        !['YOS_ALERT','YOS_SILENT','failed'].includes(String(decision))||
+        (summary!==undefined&&(typeof summary!=='string'||summary.length>800)))
+        return result({error:'Invalid AI result'},400);
+      if(decision==='YOS_ALERT'&&(!summary||!String(summary).trim()))return result({error:'Alert summary required'},400);
+      const safeSummary=decision==='YOS_ALERT'?safeText(String(summary)):'';
+      const lock='yos:notification:inbox:v1:'+id+':ai-lock',owner=crypto.randomUUID();
+      let ownsLock=false;
+      try{
+        if(await options.redis.command<string|null>(['SET',lock,owner,'NX','EX',120])!=='OK')
+          return result({error:'AI result is already being saved'},409);
+        ownsLock=true;
+        if(await options.redis.command<string|null>(['GET','yos:notification:inbox:v1:'+id])!=='done')
+          return result({error:'Notification save not yet confirmed'},409);
+        const {blocks,complete}=await listBlocks();
+        if(!complete)return result({error:'Inbox reconciliation incomplete'},503);
+        const found=parseRows(blocks).find(e=>e.id===id);
+        if(!found||!found.aiState)return result({error:'AI notification not found'},404);
+        if(found.aiState==='complete'&&found.aiDecision){
+          if(found.aiDecision!==decision||found.aiSummary!==safeSummary)
+            return result({error:'AI result already recorded'},409);
+          const alert=await replayUnacknowledgedAlert(id,{decision:found.aiDecision,alertText:found.aiSummary||''});
+          return result({ok:true,id,aiState:'complete',duplicate:true,...alert});
+        }
+        if(found.aiState==='failed'&&decision==='failed')return result({ok:true,id,aiState:'failed',duplicate:true});
+        await append(now().toISOString()+' · Notification AI Result · notification:'+id+' · '+decision+
+          (safeSummary?'\n'+safeSummary:''));
+        if(decision==='failed')return result({ok:true,id,aiState:'failed'},201);
+        return result({ok:true,id,aiState:'complete',decision,alertText:safeSummary,
+          alertRequiresAck:decision==='YOS_ALERT'},201);
+      }catch{return result({error:'AI result saving unconfirmed; retry with the same ID'},503)}
+      finally{if(ownsLock){try{await options.redis.command<number>(['EVAL',RELEASE_OWNED_LOCK,1,lock,owner])}catch{}}}
+    }
     if(asRecord(body)&&body.action==='mark'){
       const id=body.id,status=body.status;
       if(typeof id!=='string'||!/^[0-9a-f]{8,64}$/u.test(id)||typeof status!=='string'||!STATE_SET.has(status))
@@ -234,6 +282,7 @@ export function createNotificationHandler(options:{
     const digest=await sha256Hex(event.eventId?'id:'+event.sourceApp+':'+event.eventId:
       'fallback:'+event.sourceApp+':'+event.text+':'+coarseTime);
     const id=digest.slice(0,24),category=categoryOf(event.text),safe=safeText(event.text),decision=triage(event.text,category);
+    const aiMode=event.decisionEngine==='chatgpt';
     const key='yos:notification:inbox:v1:'+id,lock=key+':lock';
     const lockOwner=crypto.randomUUID();
     let ownsLock=false;
@@ -243,6 +292,7 @@ export function createNotificationHandler(options:{
       ownsLock=true;
       const prior=await options.redis.command<string|null>(['GET',key]);
       if(prior==='done'){
+        if(aiMode)return result({ok:true,id,duplicate:true,category,aiState:'pending',decision:'YOS_SILENT',alertText:''});
         const alert=await replayUnacknowledgedAlert(id,decision);
         return result({ok:true,id,duplicate:true,category,...alert});
       }
@@ -252,6 +302,7 @@ export function createNotificationHandler(options:{
         if(!complete)throw new Error('Inbox reconciliation incomplete');
         if(parseRows(blocks).some(x=>x.id===id)){
           await options.redis.command<string>(['SET',key,'done','EX',2592000]);
+          if(aiMode)return result({ok:true,id,duplicate:true,category,aiState:'pending',decision:'YOS_SILENT',alertText:''});
           const alert=await replayUnacknowledgedAlert(id,decision);
           return result({ok:true,id,duplicate:true,category,...alert});
         }
@@ -261,8 +312,9 @@ export function createNotificationHandler(options:{
         await options.redis.command<string>(['SET',key,'pending','EX',2592000]);
       }
       // Classification is metadata, not an instruction to record a payment or create a task.
-      await append(eventBlock({id,at:event.occurredAt,category,text:safe,sourceApp:event.sourceApp}));
+      await append(eventBlock({id,at:event.occurredAt,category,text:safe,sourceApp:event.sourceApp,decisionEngine:event.decisionEngine}));
       await options.redis.command<string>(['SET',key,'done','EX',2592000]);
+      if(aiMode)return result({ok:true,id,duplicate:false,category,aiState:'pending',decision:'YOS_SILENT',alertText:''},201);
       return result({ok:true,id,duplicate:false,category,...decision,alertRequiresAck:decision.decision==='YOS_ALERT'},201);
     }catch{
       // Keep the pending receipt: a timed-out PATCH may have actually succeeded.

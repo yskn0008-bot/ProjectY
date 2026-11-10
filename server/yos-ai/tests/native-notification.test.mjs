@@ -77,6 +77,59 @@ test('same eventId is idempotent with no second Notion fetch',async()=>{
   assert.equal(h.blocks.length,1);assert.equal(h.calls.length,before);
 });
 
+test('ChatGPT mode saves before analysis and exposes pending state without a second notification',async()=>{
+  const h=harness(),input={text:'銀行：引落失敗 800円',eventId:'ai-mode-00000001',decisionEngine:'chatgpt'};
+  const first=await (await h.handler(h.req(input))).json();
+  assert.equal(first.aiState,'pending');
+  assert.equal(first.decision,'YOS_SILENT');
+  assert.equal(h.blocks.length,1);
+  const history=await (await h.handler(h.req(null,undefined,'GET'))).json();
+  assert.equal(history.events[0].aiState,'pending');
+  assert.match(history.events[0].text,/引落失敗/);
+  assert.doesNotMatch(history.events[0].text,/ai-pending/);
+  assert.equal((await (await h.handler(h.req(input))).json()).duplicate,true);
+  assert.equal(h.blocks.length,1);
+});
+
+test('failed AI result can be safely retried with the same ID and acknowledged',async()=>{
+  const h=harness();
+  const capture=await (await h.handler(h.req({text:'不正送金を検知',eventId:'ai-mode-00000002',decisionEngine:'chatgpt'}))).json();
+  assert.equal((await h.handler(h.req({action:'ai-result',id:capture.id,decision:'failed'}))).status,201);
+  assert.equal((await (await h.handler(h.req(null,undefined,'GET'))).json()).events[0].aiState,'failed');
+  assert.equal((await (await h.handler(h.req({action:'ai-result',id:capture.id,decision:'failed'}))).json()).duplicate,true);
+  const outcome={action:'ai-result',id:capture.id,decision:'YOS_ALERT',summary:'不正送金を検知しました'};
+  const saved=await (await h.handler(h.req(outcome))).json();
+  assert.equal(saved.aiState,'complete');assert.equal(saved.alertRequiresAck,true);
+  const repeated=await (await h.handler(h.req(outcome))).json();
+  assert.equal(repeated.duplicate,true);assert.equal(repeated.decision,'YOS_ALERT');
+  assert.equal(h.blocks.length,3,'capture, failed and final result only');
+  assert.equal((await (await h.handler(h.req(null,undefined,'GET'))).json()).events[0].aiDecision,'YOS_ALERT');
+  await h.handler(h.req({action:'ack-alert',id:capture.id}));
+  assert.equal((await (await h.handler(h.req(outcome))).json()).decision,'YOS_SILENT');
+  assert.equal((await h.handler(h.req({...outcome,decision:'YOS_SILENT'}))).status,409);
+});
+
+test('ambiguous AI result append is reconciled before retry; secrets are redacted',async()=>{
+  const h=harness();
+  const capture=await (await h.handler(h.req({text:'銀行：不正送金、認証コード: 123456',eventId:'ai-mode-00000003',decisionEngine:'chatgpt'}))).json();
+  const outcome={action:'ai-result',id:capture.id,decision:'YOS_ALERT',summary:'不正送金を検知。認証コード: 123456'};
+  h.state.failPatch=true;h.state.ambiguous=true;
+  assert.equal((await h.handler(h.req(outcome))).status,503);
+  h.state.failPatch=false;h.state.ambiguous=false;
+  const retry=await (await h.handler(h.req(outcome))).json();
+  assert.equal(retry.duplicate,true);assert.equal(retry.decision,'YOS_ALERT');
+  assert.equal(h.blocks.length,2);
+  assert.doesNotMatch(JSON.stringify(h.blocks)+JSON.stringify(retry),/123456/);
+});
+
+test('viewer and unconfirmed ID cannot register AI results',async()=>{
+  const h=harness(async value=>value==='sample-viewer-credential-0003');
+  const input={action:'ai-result',id:'a'.repeat(24),decision:'YOS_SILENT'};
+  assert.equal((await h.handler(h.req(input,'Bearer sample-viewer-credential-0003'))).status,403);
+  assert.equal((await h.handler(h.req(input))).status,409);
+  assert.equal(h.blocks.length,0);
+});
+
 test('duplicate intake does not remove a lock owned by a concurrent request',async()=>{
   const h=harness(),eventId='native-concurrent-locked-1';
   const id=createHash('sha256').update('id:iPhone通知:'+eventId).digest('hex').slice(0,24);
