@@ -10,7 +10,7 @@ const MAX_EVENTS = 120;
 const RELEASE_OWNED_LOCK = "if redis.call('GET', KEYS[1]) == ARGV[1] then return redis.call('DEL', KEYS[1]) else return 0 end";
 const STATE_SET = new Set(['read','pending','done']);
 const OTP = /認証コード|確認コード|ワンタイム|二段階認証|ログインコード|パスワードリセット|verification\s*code|one.?time|\bOTP\b|\b2FA\b|security\s*code|reset\s*password/iu;
-const TEST = /テスト|動作確認|架空|simulation|\btest\b/iu;
+const TEST_NOTICE = /^\s*(?:【(?:通知テスト|テスト通知|動作確認|架空)[^】]*】|(?:これは|この通知は|本通知は)?\s*(?:架空の通知テスト|架空のテスト|テスト通知|架空の通知|模擬通知|動作確認(?:用|通知)|test\s+(?:message|notification)|simulation\b))/iu;
 type Category = 'missed-call'|'money-review'|'legal'|'security'|'information';
 type Status = 'unread'|'read'|'pending'|'done';
 type Event = {id:string; at:string; category:Category; text:string; status:Status; source:string; blockId:string};
@@ -44,8 +44,14 @@ function sha256Hex(s:string):Promise<string> {
   return crypto.subtle.digest('SHA-256',new TextEncoder().encode(s)).then(d=>[...new Uint8Array(d)].map(n=>n.toString(16).padStart(2,'0')).join(''));
 }
 function safeText(raw:string):string {
-  if(OTP.test(raw))return '認証・ログイン関連の通知（秘密の本文は保存していません）';
-  return raw.replace(/(?:password|パスワード|token|APIキー|secret)\s*[:：=]\s*\S+/giu,'[秘密非表示]')
+  // Keep a non-secret incident description even if the same notice includes an OTP.
+  if(OTP.test(raw)&&!/(?:口座凍結|差押|差し押さえ|不正(?:送金|利用|アクセス)|訴状|督促|引落失敗|振込失敗)/iu.test(raw))
+    return '認証・ログイン関連の通知（秘密の本文は保存していません）';
+  const redacted=OTP.test(raw)
+    ? raw.replace(/(?<![A-Za-z0-9])(?:\d[ \t-]?){3,11}\d(?![A-Za-z0-9])/gu,'[認証値非表示]')
+      .replace(/((?:認証コード|確認コード|本人確認コード|ログインコード|ワンタイム(?:認証)?コード|verification\s*code|security\s*code|OTP)\s*[:：=]?\s*)[A-Za-z0-9_-]{4,20}/giu,'$1[認証値非表示]')
+    : raw;
+  return redacted.replace(/(?:password|パスワード|token|APIキー|secret)\s*[:：=]\s*\S+/giu,'[秘密非表示]')
     .replace(/((?:口座番号|カード番号|取引番号)\s*[:：=#]?\s*)[\w*-]{4,}/giu,'$1[番号非表示]')
     .replace(/(^|[^\d])(?:\d[\s-]?){12,27}\d(?=[^\d]|$)/gu,'$1[長い番号非表示]')
     .replace(/\b0\d{9,10}\b/gu,'[電話番号非表示]')
@@ -60,7 +66,7 @@ function categoryOf(s:string):Category {
 }
 function triage(raw:string,category:Category):{decision:'YOS_SILENT'|'YOS_ALERT';alertText:string} {
   const silent={decision:'YOS_SILENT' as const,alertText:''};
-  if(TEST.test(raw)||OTP.test(raw))return silent;
+  if(TEST_NOTICE.test(raw))return silent;
   if(category==='missed-call')return silent;
   // Remove only resolved/negated risk phrases. Other active risks in the same message still count.
   const actionable=raw.replace(
