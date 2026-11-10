@@ -7,3 +7,32 @@ test('static image HTML has no recreated cards, task actions or remote runtime',
 async function run(kind='glass',{tamper=false,failed=false}={}){const loaded=[],presented=[],alerts=[],requested=[];const ctx={args:{shortcutParameter:kind},Request:class{constructor(url){requested.push(url);this.response={statusCode:failed?503:200}}async load(){return{toBase64String:()=>tamper?'aW52YWxpZA==':bytes(kind).toString('base64')}}},WebView:class{async loadHTML(s){loaded.push(s)}async present(v){presented.push(v)}},Alert:class{addAction(){}async presentAlert(){alerts.push(this.message)}},Script:{complete(){}},console};vm.createContext(ctx);await vm.runInContext('(async()=>{'+code+'})()',ctx);return{loaded,presented,alerts,requested}}
 test('default and explicit compact load exact pinned image and present only static canvas',async()=>{for(const kind of ['glass','compact']){const r=await run(kind);assert.equal(r.alerts.length,0);assert.equal(r.presented.length,1);assert.ok(r.loaded[0].includes(bytes(kind).toString('base64')));assert.match(r.requested[0],/\/bd67b996c0da7e54e99b7a3528c2a3233e329c6b\//)}});
 test('failed or altered image is never presented',async()=>{for(const opts of [{tamper:true},{failed:true}]){const r=await run('glass',opts);assert.equal(r.loaded.length,0);assert.equal(r.presented.length,0);assert.equal(r.alerts.length,1)}});
+
+test('accepted static appearance and live 24h timeline are explicitly separate',()=>{
+ const status=JSON.parse(fs.readFileSync(new URL('TIMELINE_STATUS.json',p),'utf8'));
+ const a=status.visualApproval;
+ assert.equal(status.state,'DESIGN_APPROVED_IMPLEMENTATION');
+ assert.equal(a.status,'STATIC_CROP_APPROVED');
+ assert.equal(a.reference,'glass');
+ assert.deepEqual(a.approvedCrop,refs.glass.crop);
+ assert.equal(a.approvedCrop.width,557);
+ assert.equal(a.approvedCrop.height,1135);
+ assert.equal(a.approvedScope,'static appearance only');
+ assert.equal(a.dynamicAppearanceApproved,false);
+ assert.equal(a.physicalIPhoneApproved,false);
+ assert.equal(a.sampleScheduleIsNotUserData,true);
+});
+
+test('functional prototype retains original glass default and an independent live-data editor',()=>{
+ const live=fs.readFileSync(new URL('daystream-timeline.html',p),'utf8');
+ assert.match(live,/id="tlSkin"/);
+ assert.match(live,/<option value="glass" selected>/);
+ assert.match(live,/id="tlAgenda"/);
+ assert.match(live,/id="tlGrid"/);
+ assert.match(live,/id="tlEnterEdit"/);
+ assert.match(live,/YOS_DAYSTREAM_PLAN_IMPORT/);
+ assert.match(live,/const PX=2;/);
+ assert.match(live,/const MIN='2026-10-16',MAX='2027-01-13'/);
+ assert.doesNotMatch(code,/YOS_DAYSTREAM_PLAN_IMPORT/);
+ assert.doesNotMatch(code,/\bCalendarEvent\b/);
+});
