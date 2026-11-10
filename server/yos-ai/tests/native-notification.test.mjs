@@ -345,3 +345,24 @@ test('risk triage handles 24 shared cases, negation and simultaneous genuine inc
     assert.equal(actual,expected?'YOS_ALERT':'YOS_SILENT',id+': '+content);
   }
 });
+
+test('mixed incident and OTP/test wording: 10-case triage and confidential Inbox redaction',async()=>{
+  const cases=[["M01","銀行：不正送金を検知しました。認証コード 123456",1],["M02","銀行：口座凍結が発生しました。ワンタイム認証コードは別途ご確認ください",1],["M03","セキュリティ：不正アクセスを検知しました。本人確認コードを確認してください",1],["M04","銀行：口座凍結が発生しました。テストではありません",1],["M05","銀行：不正送金は確認されませんでした。認証コード 123456",0],["M06","ログインの認証コード：123456",0],["M07","テスト通知です：口座凍結が発生しました",0],["M08","銀行：口座凍結は解除されました。ただし不正アクセスを検知しました",1],["M09","銀行：未確認の口座凍結について相談がありました。テスト版は無関係です",1],["M10","銀行：振込失敗はありませんでした。ただし不正送金が発生しました。確認コードは別途通知します",1]];
+  for(const [id,text,alert] of cases){
+    const triage=notificationInternals.triage(text,notificationInternals.categoryOf(text));
+    assert.equal(triage.decision,alert?'YOS_ALERT':'YOS_SILENT',id);
+  }
+  const h=harness();
+  const r=await h.handler(h.req({text:'銀行：不正送金を検知しました。認証コード 123456',sourceApp:'銀行',eventId:'mixed-secret-case-0001'}));
+  assert.equal(r.status,201);
+  const obj=await r.json();
+  assert.equal(obj.decision,'YOS_ALERT');
+  assert.match(obj.alertText,/不正送金/);
+  assert.doesNotMatch(obj.alertText,/123456/);
+  assert.match(JSON.stringify(h.blocks),/不正送金/);
+  assert.doesNotMatch(JSON.stringify(h.blocks),/123456/);
+  const h2=harness();
+  const r2=await h2.handler(h2.req({text:'ログインの認証コード：123456',eventId:'mixed-secret-case-0002'}));
+  assert.equal((await r2.json()).decision,'YOS_SILENT');
+  assert.doesNotMatch(JSON.stringify(h2.blocks),/123456/);
+});
