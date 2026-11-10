@@ -1,10 +1,10 @@
-# YOS Scriptable 共通インストーラー（隔離Draft）
+# YOS Scriptable 共通インストーラー（GitHub mainに配布コード登録済み）
 
 ## 目的
 既存 `yskn0008-bot/ProjectY` のコードをGitHubから取得し、ユーザーによる手動命名・毎回のコードコピペを不要にする。配布ロジックを案件ごとに作り直さず、`YOS Common Installer.js` を1つの共通入口とする。
 
 ## 現在の状態
-- 現時点は **GitHub隔離ブランチの実装・自動テスト用**。既存iPhone端末、main、各Scriptableスクリプト、Notionデータは変更していない。
+- 共通インストーラー本体と検証済み配布カタログは **PR #670でGitHub mainへ登録済み**。既存iPhone内への登録・実機起動は未確認。既存ScriptableスクリプトとNotionデータは変更していない。
 - 対象は `yos-common-installer-catalog.json` に登録した **YOS Timeline Auto / YOS JOURNAL** の2つ。新規対象追加やコード更新は、共通インストーラーを書き直すのではなく、GitHubでカタログの正本とその固定コミット・SHA256を更新する。
 - 初回はScriptableで `YOS Common Installer` を登録する必要があり、現段階では一度の手動導入を完全ゼロにはできない。旧インストーラーは維持。
 
@@ -21,10 +21,20 @@
 - GitHub取得失敗、オフライン、ハッシュ不一致、iCloud認識失敗、同名競合、旧版の意図しない変更は保護・中止。アプリが強制終了した場合、管理された中断記録/旧版バックアップが一致するケースのみ復旧し、矛盾は停止。
 - 通知のiOS標準オートメーションなど、本人がScriptable不使用を指定したものには適用しない。
 - **iPhone実機**：共通インストーラー初回導入、Scriptable一覧認識、iCloud/local選択、深いリンク、アプリ実行、ネットワーク途絶・再起動は未検証。
-- **mainにマージされるまでは、カタログURLは実用段階ではない**。Draft URLから無理に導入しない。
+- 共通インストーラーとカタログの配布URLはGitHub mainから取得可能。端末の実機検証が未完了のため、本番での動作保証はしない。
 - GitHub mainマージ・既存Scriptableの更新は事前承認が必要。旧導入器・既存スクリプトの削除や名前変更はしない。
 
 ## 確認
 `cd ios-app && node --test tests/common-scriptable-installer.test.mjs`
 
 全件テストが通っても、iPhone実機動作・Notion接続・初回導入成功は保証しない。PRのCI、差分、実機確認後に本番候補とする。
+
+## iPhone 初回登録（端末で1回だけ必要）
+
+- `YOS Common Installer.scriptable` は既存 `YOS Common Installer.js` を名前・アイコンなどのメタデータ付きでそのまま封入した **Scriptable標準の共有ファイル**。初回登録のための別個のインストーラーではない。既存コードの動作・名前を変更しない。
+- GitHubからその `.scriptable` ファイルをダウンロードし、iPhoneの「ファイル」アプリ内で開く → 共有 → Scriptable を選んでインポートする。現行OSで選択肢が表示されない場合はそこで停止して画面を確認。ファイル名の編集、コード全文のコピー、既存スクリプトの削除は不要。
+- **名前:** `YOS Common Installer`。インポート後にScriptableアプリの一覧に同名で表示されるか確認。すでに同名の別コードがある場合は、インポートで上書きせず中止。
+- 初回登録後、Scriptableの `YOS Common Installer` を起動し、対象の `YOS Timeline Auto` か `YOS JOURNAL` を選ぶ。配布コードが一致しない場合や同名の別コードがある場合、登録・更新せずに停止する。
+- GitHubの配布用Raw URLは、パッケージがmainに統合されるまで **開発ブランチ限定**。iPhoneでの初回取込/メニュー画面検証後、本人承認に基づきmain統合を判断する。
+- Scriptable公式の `scriptable:///add` は空のスクリプトを作るリンクで、GitHubコードを直接登録する仕組みではない。名前・コードを保持して手作業を減らすには `.scriptable` の共有ファイル方式が適切。
+- **端末での一覧認識・取り込み・実行・iCloud同期は未検証**。Web取得や自動テストだけで完成宣言しない。初回端末導入後の自動更新、バックアップ、復旧は別途実機で検証する。
