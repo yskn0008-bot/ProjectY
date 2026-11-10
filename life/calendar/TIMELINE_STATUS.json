@@ -1,8 +1,8 @@
 {
   "schema": "yos-timeline-delivery-status-v1",
-  "recordedDateJST": "2026-11-07",
-  "state": "WAIT_USER",
-  "reason": "User changed immediate scope to a literal static reference timeline wallpaper; prepared original-image viewer, awaiting iPhone display check.",
+  "recordedDateJST": "2026-11-11",
+  "state": "DESIGN_APPROVED_IMPLEMENTATION",
+  "reason": "User explicitly approved the exact static glass-reference crop (557x1135) on 2026-11-11; dynamic 24-hour behavior and real-device rendering remain unverified.",
   "repository": "yskn0008-bot/ProjectY",
   "pullRequest": 654,
   "baselineHead": "6ffdc056138301e3a1a70eac2f635a761277da64",
@@ -72,7 +72,7 @@
     "url": "https://canva.link/349p0erltl7mr2c",
     "status": "three editable text-free wallpaper pages created; preview exports bundled"
   },
-  "userNextAction": "Replace the current short Scriptable bootstrap with the pinned static viewer URL and run.",
+  "userNextAction": "None required to continue GitHub-side functional review. Physical iPhone Scriptable recognition and final dynamic UI acceptance still require user verification later.",
   "deviceChecks": [
     "Apple fixed event time matches Calendar and cannot move",
     "one flexible item long-press handle moves with live feedback and cancellation",
@@ -80,7 +80,7 @@
     "close and rerun candidate preserves placement",
     "old installed DAYSTREAM remains intact"
   ],
-  "resume": "Current priority is static literal reference canvas, not more task features or CSS approximations. Read REFERENCE_WALLPAPER.md and reference-wallpaper-manifest.json; original JPEGs preserved byte-for-byte. App802af090 and installer479c1619 retained as prior candidates. Await physical screenshot and adjust only viewport bounds if necessary.",
+  "resume": "Treat glass original reference as the approved static visual target, never as actual user schedule data. Reuse existing daystream-timeline.html/core/UI and branch #654, assess live-data behavior and source protection with tests, then request one iPhone visual/interaction check. Do not reinterpret prior visual 'ok' as dynamic-app or production approval. Preserve PR #667 as separate unmerged charcoal candidate and avoid duplicative implementation.",
   "rollback": "Close this candidate and use the unchanged existing DAYSTREAM. No production merge or source-data mutation was made.",
   "backgroundRunner": false,
   "externalChecks": {
@@ -131,7 +131,7 @@
     "physicalResult": "Awaiting iPhone execution"
   },
   "currentFocus": {
-    "scope": "Literal static image foundation; interactive task work deferred by explicit user request",
+    "scope": "Approved static glass crop -> bounded functional 24-hour timeline validation",
     "source": "Original attached JPEG bytes unchanged; no regeneration, retyping or restyling",
     "defaultReference": "glass, second supplied image; left content viewport",
     "alternateReference": "compact, first supplied image; shortcutParameter=compact",
@@ -139,6 +139,24 @@
     "assetCommit": "bd67b996c0da7e54e99b7a3528c2a3233e329c6b",
     "writes": "None; no executable/plan/source-data writes",
     "testEvidence": "reference-wallpaper-test-results.txt:5/5 pass; no physical iPhone render claimed",
-    "next": "Open static viewer via pinned short bootstrap; review original-image viewport on iPhone before restarting task functionality"
+    "next": "Run approval-scope and live-data separation regression tests, verify fixed calendar-event protection and 24h geometry, then arrange one physical iPhone review using the existing route.",
+    "visualApproval": "Static 557x1135 glass crop approved only; interactive 24-hour display not yet visually accepted"
+  },
+  "visualApproval": {
+    "status": "STATIC_CROP_APPROVED",
+    "approvedOnJST": "2026-11-11",
+    "source": "original reference-glass-original.jpeg",
+    "reference": "glass",
+    "approvedCrop": {
+      "x": 45,
+      "y": 87,
+      "width": 557,
+      "height": 1135
+    },
+    "acceptanceEvidence": "User replied 'ok' to YOS_Timeline_Reference_Crop.png in conversation; recorded on existing YOS Timeline Task.",
+    "approvedScope": "static appearance only",
+    "dynamicAppearanceApproved": false,
+    "physicalIPhoneApproved": false,
+    "sampleScheduleIsNotUserData": true
   }
 }
