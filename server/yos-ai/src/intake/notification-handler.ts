@@ -181,6 +181,14 @@ export function createNotificationHandler(options:{
       ? {decision:'YOS_SILENT',alertText:'',alertRequiresAck:false}
       : {...decision,alertRequiresAck:true};
   }
+  async function aiCaptureState(id:string,category:Category,knownBlocks?:NotionBlock[]):Promise<Response> {
+    const {blocks,complete}=knownBlocks?{blocks:knownBlocks,complete:true}:await listBlocks();
+    if(!complete)throw new Error('Inbox reconciliation incomplete');
+    const found=parseRows(blocks).find(e=>e.id===id);
+    if(!found?.aiState)throw new Error('AI notification not found');
+    return result({ok:true,id,duplicate:true,category,aiState:found.aiState,
+      decision:'YOS_SILENT',alertText:''});
+  }
   async function authorized(request:Request):Promise<'capture'|'viewer'|null> {
     const token=/^Bearer ([^\s]{16,512})$/u.exec(request.headers.get('authorization')??'')?.[1];
     if(!token)return null;
@@ -292,7 +300,7 @@ export function createNotificationHandler(options:{
       ownsLock=true;
       const prior=await options.redis.command<string|null>(['GET',key]);
       if(prior==='done'){
-        if(aiMode)return result({ok:true,id,duplicate:true,category,aiState:'pending',decision:'YOS_SILENT',alertText:''});
+        if(aiMode)return await aiCaptureState(id,category);
         const alert=await replayUnacknowledgedAlert(id,decision);
         return result({ok:true,id,duplicate:true,category,...alert});
       }
@@ -302,7 +310,7 @@ export function createNotificationHandler(options:{
         if(!complete)throw new Error('Inbox reconciliation incomplete');
         if(parseRows(blocks).some(x=>x.id===id)){
           await options.redis.command<string>(['SET',key,'done','EX',2592000]);
-          if(aiMode)return result({ok:true,id,duplicate:true,category,aiState:'pending',decision:'YOS_SILENT',alertText:''});
+          if(aiMode)return await aiCaptureState(id,category,blocks);
           const alert=await replayUnacknowledgedAlert(id,decision);
           return result({ok:true,id,duplicate:true,category,...alert});
         }

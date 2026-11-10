@@ -102,6 +102,9 @@ test('failed AI result can be safely retried with the same ID and acknowledged',
   assert.equal(saved.aiState,'complete');assert.equal(saved.alertRequiresAck,true);
   const repeated=await (await h.handler(h.req(outcome))).json();
   assert.equal(repeated.duplicate,true);assert.equal(repeated.decision,'YOS_ALERT');
+  const captureAgain=await (await h.handler(h.req({text:'不正送金を検知',eventId:'ai-mode-00000002',decisionEngine:'chatgpt'}))).json();
+  assert.equal(captureAgain.aiState,'complete');
+  assert.equal(captureAgain.decision,'YOS_SILENT','capture retry never creates a second AI alert');
   assert.equal(h.blocks.length,3,'capture, failed and final result only');
   assert.equal((await (await h.handler(h.req(null,undefined,'GET'))).json()).events[0].aiDecision,'YOS_ALERT');
   await h.handler(h.req({action:'ack-alert',id:capture.id}));
