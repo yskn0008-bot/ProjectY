@@ -31,8 +31,7 @@ test('functional prototype retains original glass default and an independent liv
  assert.match(live,/id="tlGrid"/);
  assert.match(live,/id="tlEnterEdit"/);
  assert.match(live,/YOS_DAYSTREAM_PLAN_IMPORT/);
- assert.match(live,/const PX=2;/);
- assert.match(live,/const MIN='2026-10-16',MAX='2027-01-13'/);
+ assert.match(live,/const MIN='2026-10-16',MAX='2027-01-13',PX=2;/);
  assert.doesNotMatch(code,/YOS_DAYSTREAM_PLAN_IMPORT/);
  assert.doesNotMatch(code,/\bCalendarEvent\b/);
 });
