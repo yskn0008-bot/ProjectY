@@ -85,8 +85,18 @@ function writeChecked(fm,path,content){
   if(fm.readString(path)!==content)throw Error('保存後の読戻しに失敗しました');
 }
 function receiptFor(entry,hash,kind){return {schema:1,name:entry.name,id:entry.id,path:entry.path,sha256:hash,storage:kind,commit:entry.commit}}
+function receiptMatches(receipt,entry,kind){
+  return !!receipt&&receipt.schema===1&&receipt.name===entry.name&&receipt.id===entry.id&&receipt.path===entry.path&&receipt.storage===kind&&typeof receipt.sha256==='string'&&/^[0-9a-f]{64}$/.test(receipt.sha256);
+}
 function assertReceipt(receipt,entry,kind){
-  if(!receipt||receipt.schema!==1||receipt.name!==entry.name||receipt.id!==entry.id||receipt.path!==entry.path||receipt.storage!==kind||!/^[0-9a-f]{64}$/.test(receipt.sha256))throw Error('管理情報が不一致です。既存スクリプトは保護しました');
+  if(!receiptMatches(receipt,entry,kind))throw Error('管理情報が不一致です。既存スクリプトは保護しました');
+}
+async function explainReceiptConflict(entry,kind,currentHash,previous){
+  const where=kind==='iCloud'?'iCloud':'このiPhone内';
+  const exact=currentHash===entry.sha256;
+  const summary=exact?'コード本体はGitHubの検証済み配布版と一致しています。':'同名コードが存在しますが、GitHub配布版とは内容が異なります。';
+  const reason=previous?'管理記録の名前・配布ID・保存場所などが一致しません。':'このコードに対応する管理記録がありません。';
+  await inform('管理記録の安全診断','対象：'+entry.name+'\n保存先：'+where+'\n'+summary+'\n'+reason+'\nコード・管理記録は変更していません。'+(exact?'編集画面から確認できます。':'上書きせず保護してください。'),exact?entry.name:null);
 }
 async function confirm(title,message,label){
   const a=new Alert();a.title=title;a.message=message;a.addAction(label);a.addCancelAction('中止');return (await a.presentAlert())===0;
@@ -169,13 +179,13 @@ async function install(entry){
   const currentHash=current===null?null:digest(current);
   const previous=await readJSON(fm,receiptFile);
   if(currentHash===entry.sha256){
-    if(previous)assertReceipt(previous,entry,chosen.kind);
+    if(previous&&!receiptMatches(previous,entry,chosen.kind)){await explainReceiptConflict(entry,chosen.kind,currentHash,previous);return;}
     // Identical existing code is never overwritten or automatically adopted.
     await inform('登録済み','「'+name+'」は既に同じコードです。既存ファイルは変更していません。',name);
     return;
   }
   if(current!==null){
-    assertReceipt(previous,entry,chosen.kind);
+    if(!receiptMatches(previous,entry,chosen.kind)){await explainReceiptConflict(entry,chosen.kind,currentHash,previous);return;}
     if(previous.sha256!==currentHash)throw Error('Scriptable内で変更されたコードです。上書きしません');
     const approved=await confirm('更新の確認','「'+name+'」をGitHub検証済みの版へ更新します。現在のコードをバックアップしてから変更します。','バックアップして更新');
     if(!approved)return;
