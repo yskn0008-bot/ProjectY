@@ -62,6 +62,8 @@ function normalizeNotionTask(row){
   due:p["期限"]?.date?.start||"",
   nextAction:propertyText(p["次の一手"],"rich_text").slice(0,240),
   blocker:propertyText(p["ブロッカー"],"rich_text").slice(0,240),
+  completion:propertyText(p["完了条件"],"rich_text").slice(0,240),
+  order:Number.isSafeInteger(p["実行順"]?.number)?p["実行順"].number:null,
   area:propertyChoice(p["領域"])};
 }
 async function readNotionTasks(token){
@@ -90,7 +92,7 @@ async function readWidgetTasks(token){
  if(req.response?.statusCode!==200||!Array.isArray(data?.tasks))throw Error("既存のTasks表示を取得できません");
  return data.tasks.map(t=>({title:String(t.title||""),state:String(t.state||""),
   priority:String(t.priority||""),due:String(t.due||""),nextAction:String(t.nextAction||""),
-  blocker:"",area:""}));
+  blocker:"",completion:"",order:Number.isSafeInteger(t.order)?t.order:null,area:""}));
 }
 async function readLocalProgress(){
  if(typeof Keychain==="undefined")return {status:"unavailable",tasks:[],source:""};
@@ -119,13 +121,14 @@ function rankForLocalProgress(articles,progress,now=new Date()){
  const ranked=articles.map((article,index)=>{
   const content=[article.title,article.summary,article.action,...(article.keyPoints||[])].join(' ');
   const articleSignals=signalNames(content); // Never count category or model-written 'reason' as evidence.
+  const bodySignals=signalNames([article.summary,article.action,...(article.keyPoints||[])].join(' '));
   let best=null;
   for(const task of candidates){
    const taskContent=[task.title,task.nextAction,task.blocker,task.completion].join(' ');
    const taskSignals=signalNames(taskContent);
    const common=taskSignals.filter(sig=>articleSignals.includes(sig));
    // Two distinct concrete facts are required: e.g. '返済' AND '期日', not just 'Money'.
-   if(common.length<2)continue;
+   if(common.length<2||!common.some(sig=>bodySignals.includes(sig)))continue;
    const nextSignals=signalNames([task.nextAction,task.blocker].join(' '));
    // If a concrete next action or blocker exists, the article must address it too.
    if(nextSignals.length&&!nextSignals.some(sig=>common.includes(sig)))continue;
@@ -134,7 +137,8 @@ function rankForLocalProgress(articles,progress,now=new Date()){
    const dueDate=Date.parse(task.due||'');
    const days=Number.isFinite(dueDate)?Math.floor((dueDate-today)/86400000):null;
    const deadline=days!==null&&days>=0&&days<=7?20:0;
-   const score=priority+deadline+common.length*8;
+   const taskOrder=Number.isSafeInteger(task.order)&&task.order>=1?Math.max(0,15-Math.min(task.order,15)):0;
+   const score=priority+deadline+common.length*8+taskOrder;
    const match={level,score,state:task.state,scope:taskScope(task),evidence:common.slice(0,3)};
    if(!best||level>best.level||(level===best.level&&score>best.score))best=match;
   }
