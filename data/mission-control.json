@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-12T04:14:08+09:00",
+  "updated_at": "2026-11-12T04:19:35+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -53,6 +53,16 @@
       "updated_at": "2026-11-11T09:56:17Z"
     },
     {
+      "id": "github-pr-663",
+      "title": "PR #663 YOS 日記: standalone Shortcut + existing Notion bridge + isolated signing",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/663",
+      "updated_at": "2026-11-03T08:14:13Z"
+    },
+    {
       "id": "github-pr-664",
       "title": "PR #664 YOS JOURNAL v1.6: on-device Notion relevance + review-gated daily editorial",
       "type": "GitHub PR",
@@ -103,16 +113,6 @@
       "updated_at": "2026-11-11T09:50:19Z"
     },
     {
-      "id": "github-pr-678",
-      "title": "PR #678 feat(daystream): combine specialist tasks and habits in charcoal timeline with reviewable slots",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/678",
-      "updated_at": "2026-11-11T19:09:32Z"
-    },
-    {
       "id": "github-issue-10",
       "title": "Issue #10 Mission Control v2：GitHubのIssue・PR・Commitを自動集約する",
       "type": "GitHub Issue",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-11T19:13:25Z"
+      "updated_at": "2026-11-11T19:18:54Z"
     },
     {
       "id": "github-issue-234",
@@ -195,6 +195,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-10209da2cb35",
+      "title": "feat(daystream): integrate charcoal month/week/day with guarded local planning",
+      "completed_at": "2026-11-11T19:19:00Z",
+      "result": "GitHub mainへ反映（10209da）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/10209da2cb35656ac20c93900e6fe33b2a9f2ac2"
+    },
+    {
       "id": "github-commit-f7f3c6823141",
       "title": "chore(yos-ai): retry deferred approved release (1/4)",
       "completed_at": "2026-11-11T17:30:59Z",
@@ -221,13 +228,6 @@
       "completed_at": "2026-11-11T10:33:39Z",
       "result": "GitHub mainへ反映（4a36d65）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/4a36d650bf9d73f3e750cae3e2bbac33bcea1b5e"
-    },
-    {
-      "id": "github-commit-74b969a4316b",
-      "title": "fix(scriptable): diagnose mismatched receipts without changing files (#674)",
-      "completed_at": "2026-11-11T10:18:59Z",
-      "result": "GitHub mainへ反映（74b969a）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/74b969a4316bf9c0c761645bece891eb13cbcdf1"
     },
     {
       "id": "complete-002",
@@ -264,7 +264,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-12T04:14:08+09:00",
+      "last_update": "2026-11-12T04:19:35+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -339,13 +339,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 8件・Open PR 45件を自動同期中",
+      "next_action": "Open Issue 8件・Open PR 44件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-12T04:14:08+09:00",
+      "last_update": "2026-11-12T04:19:35+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -368,7 +368,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-12T04:14:08+09:00",
+      "last_update": "2026-11-12T04:19:35+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -450,5 +450,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "4eb22895b1546f39b5f782408f3958c3ce623bdbf4e7afb16517f92a031b953d"
+  "github_snapshot_hash": "dbf99a4ffadab31445a82f4fe5f64947515721df635189856803f5cab1ba1d4b"
 }
