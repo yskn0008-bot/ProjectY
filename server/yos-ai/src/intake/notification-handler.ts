@@ -190,7 +190,7 @@ export function createNotificationHandler(options:{
   // Replays remain available until the device confirms presentation separately.
   async function replayUnacknowledgedAlert(id:string,decision:{decision:'YOS_SILENT'|'YOS_ALERT';alertText:string}):
     Promise<{decision:'YOS_SILENT'|'YOS_ALERT';alertText:string;alertRequiresAck:boolean}> {
-    if(decision.decision!=='YOS_ALERT')return {...decision,alertRequiresAck:false};
+    if(decision.decision!=='YOS_ALERT')return {decision:'YOS_SILENT',alertText:'',alertRequiresAck:false};
     const acknowledged=await options.redis.command<string|null>(['GET','yos:notification:inbox:v1:'+id+':alert-ack']);
     return acknowledged==='done'
       ? {decision:'YOS_SILENT',alertText:'',alertRequiresAck:false}
