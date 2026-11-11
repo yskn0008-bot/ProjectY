@@ -42,3 +42,17 @@ test('last distributed glass candidate updates with its own verified backup',asy
 
 test('unrecognized target plus tampered payload never executes any code or changes files',async()=>{const r=await run({cloudExisting:'unknown',tamper:true});assert.equal(r.writes.length,0);assert.equal(r.previewed.length,0);assert.equal(r.opened.length,0);assert.equal(r.cloud.get(target),'unknown');assert.equal(r.alerts.length,1)});
 test('direct preview helper executes async package text in its own function',async()=>{const helper=productionCode.match(/async function runVerifiedPreview\(script\)\{[\s\S]*?\n\}/)[0];const AsyncFunction=Object.getPrototypeOf(async function(){}).constructor;const probe=new AsyncFunction(helper+'\nawait runVerifiedPreview(\'await Promise.resolve(); throw new Error("verified-preview-probe");\');');await assert.rejects(probe(),/verified-preview-probe/)});
+
+test('staged .js script stays identical to native bridge and uses the shared installer name contract',()=>{
+ const name='YOS DAYSTREAM Timeline 開発確認 20261105';
+ const js=read('../../ios-app/scriptable/'+name+'.js');
+ const bridge=read('YOS_DAYSTREAM_TimelineBridge_Dev.js');
+ const expected='// Variables used by Scriptable.\n// icon-color: gray; icon-glyph: calendar;\n// YOS_SCRIPT_NAME: '+name+'\n'+bridge;
+ assert.equal(js,expected,'shared distribution must be generated from the native bridge, not a divergent copy');
+ assert.equal(js.split(/\r?\n/).slice(0,20).find(x=>x.startsWith('// YOS_SCRIPT_NAME: ')),'// YOS_SCRIPT_NAME: '+name);
+ assert.match(js,/YOS_DAYSTREAM_TIMELINE_REVIEW_v1\.json/);
+ assert.ok(js.length<1200000,'must stay inside the existing common installer download limit');
+ new (Object.getPrototypeOf(async function(){}).constructor)(js);
+ const catalog=JSON.parse(read('../../ios-app/scriptable/yos-common-installer-catalog.json'));
+ assert.ok(catalog.targets.every(x=>x.name!==name),'no unapproved change to the main catalog');
+});
