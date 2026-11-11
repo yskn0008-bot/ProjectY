@@ -54,6 +54,10 @@ const FIXED='2026-11-11T09:00:00+09:00';
   const before=await page.evaluate(()=>window.YOS_TIMELINE_DEBUG.getData());
   assert.equal(before.events.length,2);
   assert.equal(before.events[0].date,'2026-11-11');
+  // A second visual state: deliberately scroll to planned events for layout review.
+  // Do not mistake this test-only focus for automatic first-open behavior.
+  const reviewScroll=await page.locator('#tlViewport').evaluate(el=>{el.scrollTop=(9*60-45)*2;return el.scrollTop});
+  assert.ok(reviewScroll>=900,'the editable 24h grid supports scrolling to 09:00');
   await root.screenshot({path:path.join(OUTPUT,'timeline-390px-edit-overlap.png')});
 
   const fixed={schema:'yos-daystream-native-v1',generatedAt:FIXED,range:{start:'2026-10-16',end:'2027-01-13'},sources:{apple:{status:'ok'},tasks:{status:'unavailable'},money:{status:'unavailable'}},items:[{id:'fixture',type:'schedule',title:'試験：変更不可',date:'2026-11-11',source:'Appleカレンダー',startISO:'2026-11-11T11:00:00+09:00',endISO:'2026-11-11T12:00:00+09:00'}]};
