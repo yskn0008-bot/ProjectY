@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-12T08:41:09+09:00",
+  "updated_at": "2026-11-12T08:42:41+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -13,14 +13,14 @@
   },
   "inbox": [
     {
-      "id": "github-pr-681",
-      "title": "PR #681 fix(daystream): separate editor buttons and clarify Shortcut icon states",
+      "id": "github-pr-630",
+      "title": "PR #630 YOS TODAY/TOMORROW: large widget + read-only life board",
       "type": "GitHub PR",
-      "status": "review",
-      "priority": 1,
-      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/681",
-      "updated_at": "2026-11-11T23:40:42Z"
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/630",
+      "updated_at": "2026-11-04T01:25:07Z"
     },
     {
       "id": "github-pr-651",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-11T23:40:39Z"
+      "updated_at": "2026-11-11T23:41:40Z"
     },
     {
       "id": "github-issue-234",
@@ -195,6 +195,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-efb1729298e6",
+      "title": "feat(daystream): intuitive editor icons and explainable compatibility signals",
+      "completed_at": "2026-11-11T23:42:07Z",
+      "result": "GitHub mainへ反映（efb1729）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/efb1729298e69fae6fc70a94c3ce529ec1c00f9b"
+    },
+    {
       "id": "github-commit-43476bad0c4c",
       "title": "feat(daystream): local task gestures and guarded iOS Shortcut launch",
       "completed_at": "2026-11-11T23:01:57Z",
@@ -223,13 +230,6 @@
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/e1c68dca591e108b8f5500973a1bc90ad87fd2c5"
     },
     {
-      "id": "github-commit-10209da2cb35",
-      "title": "feat(daystream): integrate charcoal month/week/day with guarded local planning",
-      "completed_at": "2026-11-11T19:19:00Z",
-      "result": "GitHub mainへ反映（10209da）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/10209da2cb35656ac20c93900e6fe33b2a9f2ac2"
-    },
-    {
       "id": "complete-002",
       "title": "iPhone向けMission Control Dashboardを実装",
       "completed_at": "2026-07-17T17:55:00+09:00",
@@ -254,7 +254,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #681をレビューして公開判断する",
+      "next_action": "PR #649をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -264,7 +264,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-12T08:41:09+09:00",
+      "last_update": "2026-11-12T08:42:41+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -339,13 +339,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 8件・Open PR 46件を自動同期中",
+      "next_action": "Open Issue 8件・Open PR 45件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-12T08:41:09+09:00",
+      "last_update": "2026-11-12T08:42:41+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -359,7 +359,7 @@
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #681をレビューして公開判断する",
+      "next_action": "PR #649をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -368,7 +368,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-12T08:41:09+09:00",
+      "last_update": "2026-11-12T08:42:41+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -450,5 +450,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "26d30cb3ebbd48a3fa2c7d52689f9433e3011f251ad0e668dd3d9f89e4ddb015"
+  "github_snapshot_hash": "1ebba8cef64b4ee8c3dc5138e1e339057f546e8019d0a5e3d45c2b2452bbdda0"
 }
