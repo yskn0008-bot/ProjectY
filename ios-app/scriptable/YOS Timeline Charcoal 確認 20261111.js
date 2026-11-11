@@ -123,9 +123,10 @@ button,input,select{font:inherit}button{cursor:pointer}button:focus-visible,inpu
 .dock{position:fixed;bottom:0;left:0;right:0;padding:9px 7px calc(11px + env(safe-area-inset-bottom));background:#30353eea;border-top:1px solid #ffffff28;backdrop-filter:blur(15px);-webkit-backdrop-filter:blur(15px);z-index:15}.dock-inner{max-width:610px;margin:auto;display:grid;grid-template-columns:repeat(5,1fr)}.tab{display:grid;justify-items:center;align-content:center;gap:5px;background:none;border:0;color:#eef1f6;font-size:10px;padding:3px 0;min-height:52px}.tab svg{height:24px;width:24px;stroke-width:1.8}.tab.active{color:#30baff}
 button:active{opacity:.8}@media(min-width:640px){.dock{left:calc((100vw - 640px)/2);right:calc((100vw - 640px)/2);border-radius:14px 14px 0 0}.focus{left:calc((100vw - 610px)/2);right:calc((100vw - 610px)/2)}}
 @media(max-width:350px){.metric label{font-size:9px}.metric strong{font-size:11px}.metric:first-child strong{font-size:17px}.card{left:69px;padding-right:6px}.card small{font-size:9px}.axis{left:55px}.tick{left:51.5px}.nowline:before{left:45px}}
+.all-day[hidden]{display:none}.all-day{margin:8px 13px 0;padding:9px 12px;border-radius:10px;border:1px solid #ffffff21;background:#ffffff10}.all-day b{font-size:12px;color:#c9dcf1}.all-day span{font-size:12px;display:block;padding:4px 0;color:#eaf2fb}
 .calendar-modes[hidden],.week-overview[hidden],.month-pop[hidden]{display:none}.calendar-modes{display:flex;gap:5px;margin:10px 15px 5px;background:#232b36a9;border:1px solid #ffffff21;padding:3px;border-radius:11px}.calendar-modes button{border:0;border-radius:8px;background:none;color:#d5dbe4;font-weight:650;font-size:12px;min-height:34px;flex:1}.calendar-modes button.active{background:#2379b5;color:#fff}
 .week-overview{margin:8px 13px 20px;border-radius:13px;background:#ffffff0b;border:1px solid #ffffff22;padding:10px}.week-overview-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px;font-size:13px}.week-overview-head button{color:#fff;background:#435567;border:1px solid #ffffff32;border-radius:8px;padding:7px 11px;min-height:36px}.week-overview-head strong{font-size:14px}.week-day{border:0;border-bottom:1px solid #ffffff22;background:transparent;color:#f2f5f9;display:flex;gap:8px;align-items:flex-start;width:100%;text-align:left;padding:10px 4px;min-height:54px}.week-day:last-child{border-bottom:0}.week-day .date{width:45px;flex:none;font-weight:650;font-variant-numeric:tabular-nums}.week-day.today .date{color:#65c0ff}.week-day .agenda{flex:1;min-width:0;font-size:12px}.week-day .agenda span{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:1px 0}.week-day .agenda .task{color:#e2b7f8}.week-day .agenda .habit{color:#9decc9}.week-day .agenda .due{color:#ffd19b}.week-day .empty{color:#c1c9d4}.week-day .more{color:#bdc5d0;font-size:11px}
-.month-pop[hidden]{display:none}.month-pop{margin:0 0 12px;padding:12px;border-radius:14px;border:1px solid #7a8798;background:#353f4c;box-shadow:0 8px 24px #10141b77}.month-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}.month-head strong{font-size:15px}.month-head button{border:1px solid #73879d;background:#45596a;color:#fff;border-radius:8px;padding:8px 11px;min-width:40px;min-height:39px}.month-head button:focus-visible,.month-grid button:focus-visible{outline:2px solid #74cbff;outline-offset:2px}.month-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px}.month-grid span{font-size:11px;color:#d1dbe5;text-align:center;padding:5px 0}.month-grid button{border:0;border-radius:8px;color:#f4f7fb;background:#ffffff0b;min-height:39px;font-size:13px;font-variant-numeric:tabular-nums}.month-grid button.outside{color:#a8b3c2;background:none}.month-grid button.selected{background:#247cbd;color:white;font-weight:700}.month-grid button.current:not(.selected){outline:1px solid #7ac8f2;outline-offset:-2px}.month-grid button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px}.month-grid .markers{display:flex;justify-content:center;gap:3px;height:5px}.month-grid .markers i{width:5px;height:5px;border-radius:50%;background:#45aefa}.month-grid .markers i.task{background:#c778f0}.month-grid .markers i.habit{background:#51d4ac}.month-grid .markers i.due{background:#f8bf79}.month-grid .uncertain{color:#9da7b6;font-size:9px}.month-pop .coverage,.week-overview .coverage{margin:8px 4px 0;font-size:11px;color:#cbd4df;line-height:1.5}
+.month-pop[hidden]{display:none}.month-pop{margin:0 0 12px;padding:12px;border-radius:14px;border:1px solid #7a8798;background:#353f4c;box-shadow:0 8px 24px #10141b77}.month-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}.month-head strong{font-size:15px}.month-head button{border:1px solid #73879d;background:#45596a;color:#fff;border-radius:8px;padding:8px 11px;min-width:40px;min-height:39px}.month-head button:focus-visible,.month-grid button:focus-visible{outline:2px solid #74cbff;outline-offset:2px}.month-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px}.month-grid span{font-size:11px;color:#d1dbe5;text-align:center;padding:5px 0}.month-grid button{border:0;border-radius:8px;color:#f4f7fb;background:#ffffff0b;min-height:39px;font-size:13px;font-variant-numeric:tabular-nums}.month-grid button.outside{color:#a8b3c2;background:none}.month-grid button.selected{background:#247cbd;color:white;font-weight:700}.month-grid button.current:not(.selected){outline:1px solid #7ac8f2;outline-offset:-2px}.month-grid button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px}.month-grid .markers{display:flex;justify-content:center;gap:3px;height:5px}.month-grid .markers i{width:5px;height:5px;border-radius:50%;background:#45aefa}.month-grid .markers i.task{background:#c778f0}.month-grid .markers i.habit{background:#51d4ac}.month-grid .markers i.due{background:#f8bf79}.month-grid .uncertain{color:#9da7b6;font-size:9px}.month-pop .coverage,.week-overview .coverage{margin:8px 4px 0;font-size:11px;color:#cbd4df;line-height:1.5}.month-grid button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px}.month-grid .markers{display:flex;justify-content:center;gap:3px;height:5px}.month-grid .markers i{width:5px;height:5px;border-radius:50%;background:#45aefa}.month-grid .markers i.task{background:#c778f0}.month-grid .markers i.habit{background:#51d4ac}.month-grid .markers i.due{background:#f8bf79}.month-grid .uncertain{color:#9da7b6;font-size:9px}.month-pop .coverage,.week-overview .coverage{margin:8px 4px 0;font-size:11px;color:#cbd4df;line-height:1.5}
 .yos-source-row{display:flex;justify-content:space-between;align-items:center;gap:8px;border-top:1px solid #ffffff22;padding:9px 0}.yos-source-row b{display:block;font-size:13px;line-height:1.45}.yos-source-row small{display:block;font-size:11px;color:#ccd5df;line-height:1.5}.yos-source-row button,#yosPlanBox button,#yosPlanAll{border:1px solid #83b8e4;border-radius:9px;background:#367ea9;color:white;padding:8px 9px;font-size:12px;flex-shrink:0}.tabbox h3:not(:first-child){margin-top:18px}.tabbox input[type=time]{background:#303843;color:white;border:1px solid #94a2b4;border-radius:8px;padding:7px;margin:7px 0}#yosPlanBox:not(:empty){padding:8px 10px;margin:7px 0;border-radius:9px;background:#323f4d}
 </style></head><body>
 <div class="app">
@@ -155,6 +156,7 @@ button:active{opacity:.8}@media(min-width:640px){.dock{left:calc((100vw - 640px)
   </section>
   <div class="searchrow" id="searchRow" hidden><input id="searchInput" type="search" placeholder="予定・タスクを検索" aria-label="検索"></div>
   <div class="microtools"><div class="notice" id="notice" aria-live="polite">端末内の予定を表示します</div><button class="zoomBtn" id="yosTestToggle" type="button" hidden aria-label="テスト予定を表示">テスト表示</button><button class="zoomBtn" id="zoomBtn" type="button" aria-label="タイムラインの表示倍率を切り替え">詳細に拡大</button></div>
+  <div class="all-day" id="dayAllDay" hidden aria-label="終日の予定"></div>
   <div class="editor" id="editor"><b id="editorTitle">予定を追加</b><div class="fields"><input id="newTitle" placeholder="名前" style="flex:1 1 160px" aria-label="名前"><input id="newTime" type="time" value="10:00" aria-label="開始時刻"><input id="newDuration" type="number" min="5" max="1440" step="5" value="30" style="width:76px" aria-label="所要時間（分）"><select id="newKind" aria-label="種類"><option value="task">タスク</option><option value="habit">習慣</option><option value="schedule">予定</option></select></div><button id="saveBtn">追加する</button><button id="cancelEditor" class="light" type="button">閉じる</button></div>
   <section class="week-overview" id="weekOverview" hidden aria-label="週の予定"><div class="week-overview-head"><button id="weekPrev" type="button" aria-label="前週">‹</button><strong id="weekCaption"></strong><button id="weekNext" type="button" aria-label="翌週">›</button></div><div id="weekAgenda"></div><p class="coverage" id="weekCoverage"></p></section>
   <div class="timeline-wrap" id="timelinePanel"><div class="timeline" id="tl"><div class="axis"></div><div class="nowline" id="nowLine" hidden><span class="nowbadge" id="nowBadge"></span></div></div></div>
@@ -190,6 +192,11 @@ const yosCalendarRows=day=>Array.isArray(calendarByDay[day])?calendarByDay[day]:
 const yosTestCount=day=>yosCalendarRows(day).filter(x=>yosIsTestCalendarTitle(x?.title)).length;
 const calendarItems=day=>yosCalendarRows(day).map((x,i)=>({id:200000000+i,t:String(x.title||'予定'),s:Number(x.start),d:Number(x.duration),f:1,kind:'schedule',source:'Apple Calendar',isTest:yosIsTestCalendarTitle(x.title)})).filter(x=>Number.isFinite(x.s)&&Number.isFinite(x.d)&&x.s>=0&&x.d>0&&x.s+x.d<=1440&&(showTestCalendar||!x.isTest));
 const allDayItems=day=>(Array.isArray(allDayDays[day])?allDayDays[day]:[]).filter(t=>showTestCalendar||!yosIsTestCalendarTitle(t)).map(t=>String(t).slice(0,100));
+function yosDaySummary(day){
+ const entries=dayItems(day).sort((a,b)=>a.s-b.s);
+ const deadlines=sourceTasks.filter(x=>x.due===day&&!['完了','保留','待ち'].includes(x.status));
+ return {entries,allDay:allDayItems(day),deadlines,covered:isCalendarCovered(day)};
+}
 function yosRefreshTestToggle(){
  const toggle=document.getElementById('yosTestToggle'),count=yosTestCount(selectedDay);
  toggle.hidden=count===0;
@@ -384,7 +391,7 @@ function renderWeek(){
   const x=new Date(monday);x.setDate(monday.getDate()+offset);const iso=localISO(x);
   const b=document.createElement('button');b.type='button';b.className='day'+(iso===selectedDay?' active':'')+(iso===todayISO?' today':'');
   const s=document.createElement('small'),n=document.createElement('strong');s.textContent=label[x.getDay()];n.textContent=String(x.getDate());
-  b.append(s,n);b.setAttribute('aria-label',iso);b.onclick=()=>showDay(iso);strip.append(b);
+  b.append(s,n);b.setAttribute('aria-label',iso);b.onclick=()=>{setCalendarMode('day');showDay(iso)};strip.append(b);
  }
  document.getElementById('datePicker').value=selectedDay;
 }
@@ -404,12 +411,23 @@ function renderMonth(){
  const total=Math.ceil((leading+new Date(y,m+1,0).getDate())/7)*7;
  for(let i=0;i<total;i++){
   const d=new Date(y,m,i-leading+1,12),iso=localISO(d),button=document.createElement('button');
-  button.type='button';button.textContent=String(d.getDate());
-  button.setAttribute('aria-label',iso);
+  button.type='button';const summary=yosDaySummary(iso);
+  button.setAttribute('aria-label',iso+' 予定'+(summary.entries.length+summary.allDay.length)+'件・期限'+summary.deadlines.length+'件'+(summary.covered?'':'・Apple予定未確認'));
   button.className=(d.getMonth()!==m?'outside ':'')+(iso===selectedDay?'selected ':'')+(iso===todayISO?'current':'');
-  button.onclick=()=>showDay(iso);
+  const numeral=document.createElement('span');numeral.textContent=String(d.getDate());button.append(numeral);
+  if(summary.entries.length||summary.allDay.length||summary.deadlines.length){
+   const markers=document.createElement('span');markers.className='markers';
+   const hasFixed=summary.entries.some(x=>x.source==='Apple Calendar')||summary.allDay.length;
+   const hasTask=summary.entries.some(x=>x.kind==='task'),hasHabit=summary.entries.some(x=>x.kind==='habit');
+   for(const [shown,k] of [[hasFixed,''],[hasTask,'task'],[hasHabit,'habit'],[summary.deadlines.length>0,'due']]){
+     if(!shown)continue;const mark=document.createElement('i');mark.className=k;markers.append(mark);
+   }
+   button.append(markers);
+  }else if(!summary.covered){const mark=document.createElement('span');mark.className='uncertain';mark.textContent='未確認';button.append(mark);}
+  button.onclick=()=>{setCalendarMode('day');showDay(iso)};
   monthGrid.append(button);
  }
+ document.getElementById('monthCoverage').textContent=calendarCoverage.status==='error'||calendarCoverage.status==='unavailable'?'Apple予定の取得不可。端末内の時間割だけ表示しています。':calendarCoverage.status==='partial'?'Apple予定は一部のみ取得。件数は未確定。':'Apple予定は取得済みの範囲のみ。範囲外は未確認。橙の点はタスクの期限で、予定時刻ではありません。';
 }
 document.getElementById('dateBtn').onclick=()=>{
  const opening=monthPanel.hidden;
