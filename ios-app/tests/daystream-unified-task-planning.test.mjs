@@ -177,3 +177,22 @@ test('native plan storage verifies previous-content backup before replacement, r
  assert.match(script,/if\(fm\.readString\(path\)!==after\)throw Error\('readback failed'\)/);
  assert.match(script,/if\(!validPlan\(changed\)\|\|current!==expected\)throw Error/);
 });
+
+
+test('explicitly marked fictional Apple calendar events are display-only hidden and reversible',()=>{
+ const match=client.match(/^const yosIsTestCalendarTitle=title=>.*$/m);
+ assert.ok(match,'calendar test-event classifier should exist');
+ const classify=vm.runInNewContext(match[0]+'\nyosIsTestCalendarTitle',{});
+ for(const value of ['YOS-TEST-DELIVERY-20261112','YOS-TEST_20261112','【架空】支払予定','[架空] お知らせ']){
+  assert.equal(classify(value),true,'expected to hide tagged fake: '+value);
+ }
+ for(const value of ['実際の予定','テスト営業','YOS-TESTING企画','YOS TEST 日程']){
+  assert.equal(classify(value),false,'must not hide untagged or plausible real event: '+value);
+ }
+ assert.match(html,/id="yosTestToggle"[^>]*hidden/);
+ assert.match(client,/let showTestCalendar=false/);
+ assert.match(client,/showTestCalendar\|\|!x\.isTest/);
+ assert.match(client,/items=\[\.\.\.calendarItems\(selectedDay\),\.\.\.items\.filter\(x=>x\.source!=='Apple Calendar'\)\]/);
+ assert.match(client,/元カレンダーは変更していません/);
+ assert.doesNotMatch(script,/CalendarEvent\.(?:create|remove|save)\(/);
+});
