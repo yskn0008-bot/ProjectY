@@ -58,16 +58,46 @@
         "fail": 0
       },
       "assertion": "On-device iPhone Safari/Scriptable visual rendering and touch/save persistence are not covered."
+    },
+    "browser390px": {
+      "status": "PASSED_WITH_VISUAL_GAPS",
+      "testedCommit": "385072c2fea0dfffa4397dad746b46c5c46b3fe4",
+      "runId": 42958403038,
+      "artifactId": 13828116952,
+      "browser": "Playwright Chromium mobile viewport 390x844 @3x",
+      "evidence": [
+        "timeline-390px-glass-empty.png",
+        "timeline-390px-glass-planned.png",
+        "timeline-390px-edit-overlap.png",
+        "approved original reference-glass-original.jpeg"
+      ],
+      "assertions": [
+        "approved glass skin loaded",
+        "no invented events in empty state",
+        "25 hour markers, 2px/minute in edit",
+        "both overlapping local events visible in DOM",
+        "fixed source fixture immovable",
+        "save receipt UI and home return",
+        "zero JS page errors"
+      ],
+      "failureToAccept": [
+        "HOME lacks original vertical time rail",
+        "overlap card titles and times truncate at 390px",
+        "first opening editor starts at midnight, not event/current time"
+      ],
+      "physicallyVerified": false,
+      "userAcceptedDynamic": false
     }
   },
   "notVerified": [
-    "browser rendered UI and visual regression",
     "physical iPhone touch and VoiceOver",
     "Scriptable callback and actual FileManager persistence",
     "Apple and Notion live permissions and values",
     "current installed DAYSTREAM integration",
     "current-head end-to-end GitHub workflows and browser visualization",
-    "full WCAG 2.2 AA"
+    "full WCAG 2.2 AA",
+    "Visual fidelity to approved glass reference; HOME time axis missing and edit cards truncated",
+    "Physical iPhone Scriptable touch/haptics and persistence"
   ],
   "notImplemented": [
     "personal learning from sleep/fatigue/action history",
@@ -153,9 +183,10 @@
     "assetCommit": "bd67b996c0da7e54e99b7a3528c2a3233e329c6b",
     "writes": "None; no executable/plan/source-data writes",
     "testEvidence": "reference-wallpaper-test-results.txt:5/5 pass; no physical iPhone render claimed",
-    "next": "The focused timeline suite is now included in existing Life CI and passed 54/54 on reviewed head b227d069; next is rendering/visual-acceptance comparison to approved glass crop and real-device touch + save/readback, without altering current iPhone scripts.",
+    "next": "Use existing daystream-timeline-ui.js/CSS and build-timeline-review.py to restore approved HOME vertical time-axis, improve overlapping card legibility and initial editor focus; rebuild bridge/pinned package safely, rerun CI plus real browser capture, and obtain on-device approval before merge.",
     "visualApproval": "Static 557x1135 glass crop approved only; interactive 24-hour display not yet visually accepted",
-    "checks": "Approved static crop unchanged, 24h geometry, collisions, touch-move feedback, cancellation, explicit save/readback, fixed Apple event protection, and no sample-data import passed existing regression suite."
+    "checks": "Approved static crop unchanged, 24h geometry, collisions, touch-move feedback, cancellation, explicit save/readback, fixed Apple event protection, and no sample-data import passed existing regression suite.",
+    "visualGate": "Chromium 390px screenshot reviewed, functionality passed but visual fidelity BLOCKED. Initial reference shows 6:00-24:00 time rail; HOME currently shows unordered time sequence cards. Fix in existing builder/skins; do not add new app or fake user events."
   },
   "visualApproval": {
     "status": "STATIC_CROP_APPROVED",
