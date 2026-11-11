@@ -112,20 +112,25 @@ button,input,select{font:inherit}button{cursor:pointer}button:focus-visible,inpu
 .dock{position:fixed;bottom:0;left:0;right:0;padding:9px 7px calc(11px + env(safe-area-inset-bottom));background:#30353eea;border-top:1px solid #ffffff28;backdrop-filter:blur(15px);-webkit-backdrop-filter:blur(15px);z-index:15}.dock-inner{max-width:610px;margin:auto;display:grid;grid-template-columns:repeat(5,1fr)}.tab{display:grid;justify-items:center;align-content:center;gap:5px;background:none;border:0;color:#eef1f6;font-size:10px;padding:3px 0;min-height:52px}.tab svg{height:24px;width:24px;stroke-width:1.8}.tab.active{color:#30baff}
 button:active{opacity:.8}@media(min-width:640px){.dock{left:calc((100vw - 640px)/2);right:calc((100vw - 640px)/2);border-radius:14px 14px 0 0}.focus{left:calc((100vw - 610px)/2);right:calc((100vw - 610px)/2)}}
 @media(max-width:350px){.metric label{font-size:9px}.metric strong{font-size:11px}.metric:first-child strong{font-size:17px}.card{left:69px;padding-right:6px}.card small{font-size:9px}.axis{left:55px}.tick{left:51.5px}.nowline:before{left:45px}}
+.month-pop[hidden]{display:none}.month-pop{margin:0 0 12px;padding:12px;border-radius:14px;border:1px solid #7a8798;background:#353f4c;box-shadow:0 8px 24px #10141b77}.month-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}.month-head strong{font-size:15px}.month-head button{border:1px solid #73879d;background:#45596a;color:#fff;border-radius:8px;padding:8px 11px;min-width:40px;min-height:39px}.month-head button:focus-visible,.month-grid button:focus-visible{outline:2px solid #74cbff;outline-offset:2px}.month-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px}.month-grid span{font-size:11px;color:#d1dbe5;text-align:center;padding:5px 0}.month-grid button{border:0;border-radius:8px;color:#f4f7fb;background:#ffffff0b;min-height:39px;font-size:13px;font-variant-numeric:tabular-nums}.month-grid button.outside{color:#a8b3c2;background:none}.month-grid button.selected{background:#247cbd;color:white;font-weight:700}.month-grid button.current:not(.selected){outline:1px solid #7ac8f2;outline-offset:-2px}
 .yos-source-row{display:flex;justify-content:space-between;align-items:center;gap:8px;border-top:1px solid #ffffff22;padding:9px 0}.yos-source-row b{display:block;font-size:13px;line-height:1.45}.yos-source-row small{display:block;font-size:11px;color:#ccd5df;line-height:1.5}.yos-source-row button,#yosPlanBox button,#yosPlanAll{border:1px solid #83b8e4;border-radius:9px;background:#367ea9;color:white;padding:8px 9px;font-size:12px;flex-shrink:0}.tabbox h3:not(:first-child){margin-top:18px}.tabbox input[type=time]{background:#303843;color:white;border:1px solid #94a2b4;border-radius:8px;padding:7px;margin:7px 0}#yosPlanBox:not(:empty){padding:8px 10px;margin:7px 0;border-radius:9px;background:#323f4d}
 </style></head><body>
 <div class="app">
   <div class="top">
     <div class="headrow"><div><div class="datehead" id="dateTitle">今日</div><div class="subtitle" id="dayCaption">Today</div></div>
       <div class="actions">
-        <button class="iconbtn" id="dateBtn" aria-label="日付を選択"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4m10-4v4M3 10h18"/></svg></button>
+        <button class="iconbtn" type="button" id="dateBtn" aria-label="月カレンダーを開く" aria-controls="monthPicker" aria-expanded="false"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4m10-4v4M3 10h18"/></svg></button>
         <button class="iconbtn" id="searchBtn" aria-label="検索"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m16 16 5 5"/></svg></button>
         <button class="iconbtn" id="addBtn" aria-label="予定を追加"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v16M4 12h16"/></svg></button>
         <button class="iconbtn" id="moreBtn" aria-label="メニュー"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg></button>
       </div>
     </div>
     <div class="week" id="weekStrip" aria-label="日付切り替え"></div>
-    <input type="date" id="datePicker" hidden aria-label="表示日付">
+    <input type="date" id="datePicker" hidden aria-label="表示日付（内部）">
+    <section class="month-pop" id="monthPicker" hidden aria-label="日付を選ぶ月カレンダー">
+      <div class="month-head"><button id="prevMonth" type="button" aria-label="前の月">‹</button><strong id="monthCaption"></strong><button id="nextMonth" type="button" aria-label="次の月">›</button><button id="monthToday" type="button">今日</button></div>
+      <div class="month-grid" id="monthGrid"></div>
+    </section>
   </div>
   <section class="summary" aria-label="今日の概要">
     <div class="metric"><span class="ring" id="progressRing" style="--pct:0%"></span><span class="stack"><label>今日の進捗</label><strong id="todayProgress">—</strong></span></div>
@@ -231,7 +236,7 @@ function yosRenderSources(){
 
 // YOS_UNIFIED_BATCH_START
 function yosBatchPlan(tasks,occupied,start,day){
- if(!Number.isInteger(start)||start<0||start>1439||!/^\d{4}-\d\d-\d\d$/.test(day))return [];
+ if(!Number.isInteger(start)||start<0||start>1439||!/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(day))return [];
  const dayCount=x=>Math.round(Date.UTC(...x.split('-').map(Number).map((n,i)=>i===1?n-1:n))-Date.UTC(...day.split('-').map(Number).map((n,i)=>i===1?n-1:n)))/86400000;
  const score=x=>{
   const delta=x.due?dayCount(x.due):null;
@@ -338,8 +343,9 @@ function updateOverview(){
 }
 function parseDay(iso){const p=iso.split('-').map(Number);return new Date(p[0],p[1]-1,p[2],12);}
 function showDay(iso){
- if(!/^\d{4}-\d\d-\d\d$/.test(iso)||Number.isNaN(parseDay(iso).getTime()))return;
- if(iso===selectedDay)return;
+ if(!/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(iso))return;
+ const parsed=parseDay(iso);if(Number.isNaN(parsed.getTime())||localISO(parsed)!==iso)return;
+ if(iso===selectedDay){hideMonthPicker();return;}
  selectedDay=iso;const data=Object.prototype.hasOwnProperty.call(savedDays,iso)?savedDays[iso]:null;
  items=dayItems(iso);
  isSample=false;
@@ -347,7 +353,7 @@ function showDay(iso){
  yosDefaultStart();planBox.textContent='';yosRenderSources();
  yosRefreshTestToggle();
  note.textContent='端末の時間割 · Notion Tasks '+yosStatusWord(taskSource.status)+' · 習慣 '+yosStatusWord(habitSource.status);
- renderWeek();render();updateReview();window.scrollTo({top:0,behavior:'smooth'});
+ hideMonthPicker();renderWeek();render();updateReview();window.scrollTo({top:0,behavior:'smooth'});
 }
 function renderWeek(){
  const d=parseDay(selectedDay), label=['日','月','火','水','木','金','土'];
@@ -363,6 +369,38 @@ function renderWeek(){
  }
  document.getElementById('datePicker').value=selectedDay;
 }
+// A native date input with the hidden attribute cannot reliably open its picker in WKWebView.
+// Use an in-app monthly date chooser, keeping the hidden input as a read-only day state.
+const monthPanel=document.getElementById('monthPicker'),monthGrid=document.getElementById('monthGrid');
+let monthView=new Date(parseDay(selectedDay).getFullYear(),parseDay(selectedDay).getMonth(),1,12);
+function hideMonthPicker(){monthPanel.hidden=true;document.getElementById('dateBtn').setAttribute('aria-expanded','false')}
+function renderMonth(){
+ monthGrid.textContent='';
+ const y=monthView.getFullYear(),m=monthView.getMonth();
+ document.getElementById('monthCaption').textContent=y+'年 '+(m+1)+'月';
+ for(const label of ['月','火','水','木','金','土','日']){
+  const head=document.createElement('span');head.textContent=label;monthGrid.append(head);
+ }
+ const first=new Date(y,m,1,12),leading=(first.getDay()+6)%7;
+ const total=Math.ceil((leading+new Date(y,m+1,0).getDate())/7)*7;
+ for(let i=0;i<total;i++){
+  const d=new Date(y,m,i-leading+1,12),iso=localISO(d),button=document.createElement('button');
+  button.type='button';button.textContent=String(d.getDate());
+  button.setAttribute('aria-label',iso);
+  button.className=(d.getMonth()!==m?'outside ':'')+(iso===selectedDay?'selected ':'')+(iso===todayISO?'current':'');
+  button.onclick=()=>showDay(iso);
+  monthGrid.append(button);
+ }
+}
+document.getElementById('dateBtn').onclick=()=>{
+ const opening=monthPanel.hidden;
+ if(!opening){hideMonthPicker();return;}
+ const day=parseDay(selectedDay);monthView=new Date(day.getFullYear(),day.getMonth(),1,12);
+ monthPanel.hidden=false;document.getElementById('dateBtn').setAttribute('aria-expanded','true');renderMonth();
+};
+document.getElementById('prevMonth').onclick=()=>{monthView=new Date(monthView.getFullYear(),monthView.getMonth()-1,1,12);renderMonth()};
+document.getElementById('nextMonth').onclick=()=>{monthView=new Date(monthView.getFullYear(),monthView.getMonth()+1,1,12);renderMonth()};
+document.getElementById('monthToday').onclick=()=>showDay(localISO(new Date()));
 function updateNow(){
  const el=document.getElementById('nowLine');if(selectedDay!==localISO(new Date())){el.hidden=true;return;}
  const d=new Date(),m=d.getHours()*60+d.getMinutes();el.hidden=false;el.style.top=yFor(m)+'px';document.getElementById('nowBadge').textContent=fmt(m);
@@ -380,7 +418,6 @@ function renderLists(){
  }
 }
 for(const b of document.querySelectorAll('[data-tab]'))b.onclick=()=>setTab(b.dataset.tab);
-document.getElementById('dateBtn').onclick=()=>{const picker=document.getElementById('datePicker');if(typeof picker.showPicker==='function')picker.showPicker();else picker.click()};
 document.getElementById('datePicker').onchange=e=>showDay(e.target.value);
 document.getElementById('yosTestToggle').onclick=()=>{
  showTestCalendar=!showTestCalendar;
