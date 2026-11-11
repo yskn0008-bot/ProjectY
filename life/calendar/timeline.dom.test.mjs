@@ -30,3 +30,14 @@ test('default glass reference and explicit compact skin share data and keep edit
 test('glass shows recommendations only for an actual deterministic pair, without health claims',()=>{const {nodes:n,window:w}=setup();n.get('tlDay').value='2026-11-04';n.get('tlDay').fire('change');const e=(id,start,kind)=>({id,title:id,date:'2026-11-04',start,duration:15,kind,repeat:'none',transfer:0});w.YOS_DAYSTREAM_PLAN_IMPORT({schema:'yos-daystream-plan-v1',days:{},timeline:{version:1,events:[e('食事',540,'meal'),e('歩行',560,'walk')],overrides:{}}});assert.equal(n.get('tlLegendRecommended').hidden,false);const card=n.get('tlAgenda').children[0].children[2];assert.ok(card.className.includes('tlRuleCandidate'));assert.equal(card.children[4].textContent,'+ 習慣をつなぐ配置（設定ルール）');assert.doesNotMatch(card.children[4].textContent,/血糖|健康|睡眠|科学/)});
 
 test('pearl wallpaper and official icons are bundled offline and plain clears the wallpaper',()=>{const match=html.match(/#tlFrame\[data-wallpaper=pearl\]\{background-image:url\("data:image\/webp;base64,([^"]+)/);assert.ok(match);const bytes=Buffer.from(match[1],'base64');assert.equal(bytes.subarray(0,4).toString(),'RIFF');assert.equal(bytes.subarray(8,12).toString(),'WEBP');assert.match(html,/#tlFrame\[data-wallpaper=plain\]\{background-image:none/);const {nodes:n}=setup();assert.match(n.get('tlSettings').children[0].innerHTML,/viewBox="0 0 256 256"/);assert.doesNotMatch(html,/<script[^>]+src=\"https:/);});
+
+test('glass calendar and editor-return icon buttons render visible SVG instead of empty circles',()=>{
+ const {nodes:n}=setup();
+ for(const id of ['tlCalendar','tlExitEdit','tlPrev','tlNext']){
+  const button=n.get(id);
+  assert.ok(button,`missing ${id}`);
+  assert.ok(button.children.length>0,`missing child SVG for ${id}`);
+  assert.match(button.children[0].innerHTML,/<svg[\s>]/);
+ }
+ assert.match(n.get('tlCalendar').getAttribute?.('aria-label')||'月カレンダーを開く',/カレンダー/);
+});
