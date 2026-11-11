@@ -17,7 +17,7 @@ function task(name,state='次にやる',priority='P2',area=''){
   '期限':{date:null}
  }};
 }
-async function show({tasks=[],keys=[],notionError=false,widgetTasks=null}={}){
+async function show({tasks=[],keys=[],notionError=false,widgetTasks=null,overrideArticles=null}={}){
  const requests=[],files=new Map();
  const fm={
   documentsDirectory:()=>'/local',joinPath:(a,b)=>a+'/'+b,
@@ -28,7 +28,7 @@ async function show({tasks=[],keys=[],notionError=false,widgetTasks=null}={}){
   constructor(url){this.url=url;this.response={statusCode:200};requests.push(this)}
   async loadString(){
    if(!this.url.includes('raw.githubusercontent.com/'))throw Error('Unauthorized data transfer');
-   return JSON.stringify(feed);
+   return JSON.stringify(overrideArticles?{...feed,articles:overrideArticles}:feed);
   }
   async loadJSON(){
    if(this.url.startsWith('https://api.notion.com/v1/data_sources/')){
@@ -115,7 +115,7 @@ test('only approved hosts receive authentication and no credentials enter public
 
 test('generic Money advice is not promoted just because a Money task is in progress',async()=>{
  const broad={...money,title:'家計の話題と暮らし',summary:'家計に関する一般的な情報の紹介です。',link:'https://example.org/generic'};
- const r=await show({keys:['YOS_NOTION_INTEGRATION_TOKEN'],tasks:[task('返済日と借入条件を確認する','実行中','P0','Money')]});
+ const r=await show({keys:['YOS_NOTION_INTEGRATION_TOKEN'],tasks:[task('返済日と借入条件を確認する','実行中','P0','Money')],overrideArticles:[broad]});
  assert.equal(headline(r.html),'今のタスクに直接役立つ記事は未発見');
  assert.doesNotMatch(r.html,/>家計の話題と暮らし<\/h2>/);
 });
@@ -156,4 +156,21 @@ test('no matching source article creates no fake personalized story',async()=>{
  assert.equal(headline(r.html),'今のタスクに直接役立つ記事は未発見');
  assert.match(r.html,/AWAITING EDITION/);
  assert.doesNotMatch(r.html,/記事と一致する具体項目/);
+});
+
+
+test('Money category alone with a vague budget headline is not a useful current-task article',async()=>{
+ const vague={...money,title:'家計のニュースまとめ',summary:'家計について広く紹介する一般記事です。',action:'記事の内容を読む'};
+ const r=await show({keys:['YOS_NOTION_INTEGRATION_TOKEN'],tasks:[
+  task('家計の予算を調整する','実行中','P1','Money')
+ ],overrideArticles:[vague]});
+ assert.equal(headline(r.html),'今のタスクに直接役立つ記事は未発見');
+ assert.doesNotMatch(r.html,/>家計のニュースまとめ<\/h2>/);
+});
+test('Money headline concepts alone do not qualify without body evidence',async()=>{
+ const superficial={...money,title:'家計予算に関する見出しだけ',summary:'一般的な情報やニュースを紹介します。',action:'ニュースを見る'};
+ const r=await show({keys:['YOS_NOTION_INTEGRATION_TOKEN'],tasks:[
+  task('家計の予算を調整する','実行中','P1','Money')
+ ],overrideArticles:[superficial]});
+ assert.equal(headline(r.html),'今のタスクに直接役立つ記事は未発見');
 });
