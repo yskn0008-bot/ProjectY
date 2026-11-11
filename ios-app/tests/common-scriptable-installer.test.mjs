@@ -256,7 +256,8 @@ test('unknown same-name code with another ID receipt is preserved in both locati
 test('isolated glass preview preserves legacy scripts and receipts in both storages',async()=>{
  const entry=shipped.targets.find(x=>x.id==='daystream-glass-20261111');
  assert.ok(entry,'fourth opt-in preview must appear in existing catalog');
- assert.equal(shipped.targets.length,4);
+ assert.equal(shipped.targets.slice(0,4).length,4,'existing four catalog entries remain in order');
+ assert.equal(shipped.targets[3].id,'daystream-glass-20261111');
  assert.equal(entry.name,'YOS DAYSTREAM Glass 検証 20261111');
  assert.equal(entry.path,'ios-app/scriptable/'+entry.name+'.js');
  assert.match(entry.commit,/^[0-9a-f]{40}$/);
