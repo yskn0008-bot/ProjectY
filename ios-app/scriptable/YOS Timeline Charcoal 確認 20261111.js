@@ -362,7 +362,7 @@ function eventIcon(item){const t=item.t||'';const type=/睡眠|就寝/.test(t)?'
 let density='overview',scale=27;
 let zoom=null,selectedId=null;
 const yFor=m=>m/60*scale;
-const editor=document.getElementById('editor');let editingId=null,deleteConfirmId=null;
+const editor=document.getElementById('editor');let editingId=null,deleteConfirmId=null,restorePendingDay=null;
 function showFocusFor(item){
  deleteConfirmId=null;selectedId=item.id;zoom=item.s;
  ft.textContent=item.t;
@@ -552,8 +552,8 @@ document.getElementById('searchInput').oninput=e=>{searchText=e.target.value.tri
 document.getElementById('moreBtn').onclick=()=>{
  const hidden=hiddenCalendar[selectedDay]||[];
  if(hidden.length){
-  if(!confirm('この日、DAYSTREAMだけで非表示にしたApple予定 '+hidden.length+'件を再表示しますか？'))return;
-  delete hiddenCalendar[selectedDay];items=[...calendarItems(selectedDay),...items.filter(x=>x.source!=='Apple Calendar')];
+  if(restorePendingDay!==selectedDay){restorePendingDay=selectedDay;note.textContent='隠したApple予定 '+hidden.length+'件を戻すには、右上「•••」をもう一度押してください';return;}
+  restorePendingDay=null;delete hiddenCalendar[selectedDay];items=[...calendarItems(selectedDay),...items.filter(x=>x.source!=='Apple Calendar')];
   note.textContent=persist()?'非表示を解除しています · 元のApple予定は変更なし':'再表示の保存準備に失敗しました';
   yosRefreshTestToggle();smoothRender();updateReview();return;
  }
@@ -577,7 +577,7 @@ document.getElementById('deleteSelected').onclick=()=>{
 document.getElementById('hideFixed').onclick=()=>{
  const item=items.find(x=>x.id===selectedId);
  if(!item||item.source!=='Apple Calendar'||!item.calendarKey)return;
- const keys=hiddenCalendar[selectedDay]||[];
+ restorePendingDay=null;const keys=hiddenCalendar[selectedDay]||[];
  if(keys.length>=100){fi.textContent='非表示の上限です。右上「•••」から再表示できます。';return;}
  if(!keys.includes(item.calendarKey))hiddenCalendar[selectedDay]=[...keys,item.calendarKey];
  items=[...calendarItems(selectedDay),...items.filter(x=>x.source!=='Apple Calendar')];
