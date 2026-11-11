@@ -56,8 +56,8 @@ test('Notion active Money task outranks completed Health task, even when feed or
   task('家計の予算を調整する','実行中','P1','Money')
  ]});
  assert.equal(headline(r.html),money.title);
- assert.match(r.html,/関連する現在の領域：Money · 実行中/);
- assert.doesNotMatch(r.html,/関連する現在の領域：Health · 完了/);
+ assert.match(r.html,/Money · 実行中 · 記事と一致する具体項目：家計・予算/);
+ assert.doesNotMatch(r.html,/Health · 完了/);
 });
 test('same issue reacts to task state changes without saving a new public issue',async()=>{
  const before=await show({keys:['YOS_NOTION_INTEGRATION_TOKEN'],tasks:[
@@ -87,22 +87,22 @@ test('completed and postponed tasks cannot falsely make issue personalized',asyn
  const r=await show({keys:['YOS_NOTION_INTEGRATION_TOKEN'],tasks:[
   task('家計の予算を調整する','完了','P0'),task('健康ストレッチを続ける','保留','P0')
  ]});
- assert.equal(headline(r.html),health.title);
- assert.match(r.html,/直接一致する記事はありません/);
- assert.doesNotMatch(r.html,/関連する現在の領域：/);
+ assert.equal(headline(r.html),'今のタスクに直接役立つ記事は未発見');
+ assert.match(r.html,/現在のタスクに具体的に一致する記事は、この号にありません/);
+ assert.doesNotMatch(r.html,/記事と一致する具体項目/);
 });
 test('existing secured widget feed is labeled partial, not complete Notion synchronization',async()=>{
  const r=await show({keys:['MY_WAY_WIDGET_TOKEN'],widgetTasks:[
   {title:'家計の予算を調整する',state:'実行中',priority:'P1',nextAction:'確認'}
  ]});
  assert.equal(headline(r.html),money.title);
- assert.match(r.html,/既存タスク表示（最大3件）との暫定照合/);
+ assert.match(r.html,/既存タスク表示（最大3件）の部分照合/);
 });
 test('Notion API error falls back to existing widget token without false full sync',async()=>{
  const r=await show({keys:['YOS_NOTION_INTEGRATION_TOKEN','MY_WAY_WIDGET_TOKEN'],notionError:true,
   widgetTasks:[{title:'健康ストレッチを続ける',state:'次にやる',priority:'P1'}]});
  assert.equal(headline(r.html),health.title);
- assert.match(r.html,/暫定照合/);
+ assert.match(r.html,/部分照合/);
 });
 test('only approved hosts receive authentication and no credentials enter public article cache',async()=>{
  const r=await show({keys:['YOS_NOTION_INTEGRATION_TOKEN'],tasks:[]});
@@ -110,4 +110,50 @@ test('only approved hosts receive authentication and no credentials enter public
  assert.ok(authenticated.length);
  assert.ok(authenticated.every(x=>x.url.startsWith('https://api.notion.com/v1/data_sources/')));
  assert.ok([...r.files.values()].every(x=>!String(x).includes('MOCK_AUTH_ONLY')));
+});
+
+
+test('generic Money advice is not promoted just because a Money task is in progress',async()=>{
+ const broad={...money,title:'家計の話題と暮らし',summary:'家計に関する一般的な情報の紹介です。',link:'https://example.org/generic'};
+ const r=await show({keys:['YOS_NOTION_INTEGRATION_TOKEN'],tasks:[task('返済日と借入条件を確認する','実行中','P0','Money')]});
+ assert.equal(headline(r.html),'今のタスクに直接役立つ記事は未発見');
+ assert.doesNotMatch(r.html,/>家計の話題と暮らし<\/h2>/);
+});
+test('next concrete task is used only when no in-progress task has a matching story',async()=>{
+ const r=await show({keys:['YOS_NOTION_INTEGRATION_TOKEN'],tasks:[
+  task('返済日と借入条件を確認する','実行中','P0','Money'),
+  task('健康ストレッチを続ける','次にやる','P2','Health')
+ ]});
+ assert.equal(headline(r.html),health.title);
+ assert.match(r.html,/次にやるタスクに対応する記事候補/);
+});
+test('in-progress concrete task stays ahead of a higher-priority next task',async()=>{
+ const r=await show({keys:['YOS_NOTION_INTEGRATION_TOKEN'],tasks:[
+  task('家計の予算を調整する','実行中','P3','Money'),
+  task('健康ストレッチを続ける','次にやる','P0','Health')
+ ]});
+ assert.equal(headline(r.html),money.title);
+ assert.match(r.html,/取り組み中タスクに対応する記事候補/);
+});
+test('concrete next action must match the article, not only the task title',async()=>{
+ const t=task('家計の予算を調整する','実行中','P1','Money');
+ t.properties['次の一手']={rich_text:[{plain_text:'銀行口座の残高を確認する'}]};
+ const r=await show({keys:['YOS_NOTION_INTEGRATION_TOKEN'],tasks:[t]});
+ assert.equal(headline(r.html),'今のタスクに直接役立つ記事は未発見');
+ assert.doesNotMatch(r.html,/>家計と予算を見直す<\/h2>/);
+});
+test('current blocked/waiting and deferred/complete tasks cannot drive article selection',async()=>{
+ const r=await show({keys:['YOS_NOTION_INTEGRATION_TOKEN'],tasks:[
+  task('家計の予算を調整する','待ち','P0','Money'),
+  task('健康ストレッチを続ける','保留','P0','Health')
+ ]});
+ assert.equal(headline(r.html),'今のタスクに直接役立つ記事は未発見');
+});
+test('no matching source article creates no fake personalized story',async()=>{
+ const r=await show({keys:['YOS_NOTION_INTEGRATION_TOKEN'],tasks:[
+  task('借入の返済期限を確認する','実行中','P0','Money')
+ ]});
+ assert.equal(headline(r.html),'今のタスクに直接役立つ記事は未発見');
+ assert.match(r.html,/AWAITING EDITION/);
+ assert.doesNotMatch(r.html,/記事と一致する具体項目/);
 });
