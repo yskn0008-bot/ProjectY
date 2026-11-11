@@ -122,6 +122,31 @@ async function recoverPending(fm,target,markerFile,receiptFile,name){
   if(fm.fileExists(markerFile))throw Error('中断記録を消去できませんでした');
 }
 
+// Read-only collision report: never writes, removes, renames, or executes either copy.
+// Display only short SHA-256 fingerprints, not users' script contents or credentials.
+async function diagnoseDuplicate(entry,existing){
+  const report=[];
+  for(const {fm,kind,target} of existing){
+    try{
+      const data=await readable(fm,target);
+      if(typeof data!=='string'||data.length>1200000)throw Error('invalid size');
+      const sha=digest(data);
+      report.push({kind,sha,match:sha===entry.sha256,readable:true});
+    }catch(_){report.push({kind,readable:false});}
+  }
+  const bothReadable=report.every(x=>x.readable);
+  const same=bothReadable&&report[0].sha===report[1].sha;
+  const canonical=report.filter(x=>x.match).map(x=>x.kind==='iCloud'?'iCloud':'このiPhone内');
+  const result=!bothReadable?'一部を読み取れません。原因は未確定です。'
+    :same?(canonical.length===2?'両方とも配布正本と同一です。':'両方の内容は同一ですが、配布正本とは異なります。')
+    :canonical.length===1?'内容は異なります。配布正本と一致するのは'+canonical[0]+'側です。'
+    :'内容が異なり、両方とも配布正本とは一致しません。';
+  const detail=report.map(x=>(x.kind==='iCloud'?'iCloud':'このiPhone内')+'：'+
+    (x.readable?'検証値 '+x.sha.slice(0,12)+'…／配布正本 '+(x.match?'一致':'不一致'):'読み取り不可')).join('\n');
+  await inform('同名スクリプトの安全診断',
+    '対象：'+entry.name+'\n'+detail+'\n'+result+'\nどちらも変更していません。削除・上書きせず保護してください。',null);
+}
+
 async function install(entry){
   const path=entry.path.split('/').map(encodeURIComponent).join('/');
   const url=ROOT+entry.commit+'/'+path;
@@ -133,7 +158,7 @@ async function install(entry){
     const target=s.fm.joinPath(s.fm.documentsDirectory(),name+'.js');
     if(s.fm.fileExists(target))existing.push({...s,target});
   }
-  if(existing.length>1)throw Error('iCloudとローカルの両方に同名スクリプトがあります。変更せず停止しました');
+  if(existing.length>1){await diagnoseDuplicate(entry,existing);return;}
   const chosen=existing[0]||locations[0],fm=chosen.fm;
   const target=chosen.target||fm.joinPath(fm.documentsDirectory(),name+'.js');
   const receiptFile=metadataPath(fm,name,'.receipt.json');
