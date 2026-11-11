@@ -366,11 +366,11 @@ const editor=document.getElementById('editor');let editingId=null,deleteConfirmI
 function showFocusFor(item){
  deleteConfirmId=null;selectedId=item.id;zoom=item.s;
  ft.textContent=item.t;
- const fixed=item.f&&item.source==='Apple Calendar';
+ const fixed=!!item.f,canHide=fixed&&item.source==='Apple Calendar';
  document.getElementById('doneBtn').hidden=!!fixed;
  document.getElementById('editSelected').hidden=!!fixed;
  document.getElementById('deleteSelected').hidden=!!fixed;
- document.getElementById('hideFixed').hidden=!fixed;
+ document.getElementById('hideFixed').hidden=!canHide;
  document.getElementById('doneBtn').textContent=item.done?'未完了に戻す':'完了にする';
  document.getElementById('deleteSelected').textContent='削除';
  fi.textContent=fmt(item.s)+'–'+fmt(item.s+item.d)+(fixed?' · Appleカレンダーの固定予定。元の予定は変更せず、この画面から隠せます。':' · 端末内のタスク・予定。編集・削除できます。');
