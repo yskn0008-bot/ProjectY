@@ -2,8 +2,8 @@ import test from 'node:test';import assert from 'node:assert/strict';import fs f
 const read=n=>fs.readFileSync(new URL(n,import.meta.url),'utf8'),productionCode=read('YOS_DAYSTREAM_Timeline_Installer.js'),raw=read('YOS_DAYSTREAM_Timeline_Review_20261105.scriptable'),pkg=JSON.parse(raw),target=pkg.name+'.js',prior='known prior candidate fixture',prior2='known newer candidate fixture',prior3='known last distributed fixture',hash=s=>crypto.createHash('sha256').update(s).digest('hex');
 const backupTarget=target+'.'+hash(prior).slice(0,12)+'.previous.txt';
 // Simulate installation of this unmerged development package using the production installer's
-// safety algorithm. Its real immutable SOURCE/SHA/LENGTH stay pinned to the last reviewed package.
-// Do NOT repoint production to the changing Draft head or weaken existing-code protection.
+// safety algorithm. The Draft updater uses a pinned reviewed package commit and strict hashes.
+// Keep the existing production branch untouched and preserve unknown-code protection.
 const code=productionCode.replace(/async function runVerifiedPreview\(script\)\{[\s\S]*?\n\}/, 'async function runVerifiedPreview(script){previewed.push(script)}').replace("const PREVIOUS_SCRIPT_SHA='b117fcd0c29c1227ef2205866dd19a0dea2564fc9f736806a5c54bdd49d5d1ca'", "const PREVIOUS_SCRIPT_SHA='"+hash(prior)+"'").replace("380b5fad7a68027e46bcca31608101e9f94924372ed1df7b5d0d7fad6c10d809",hash(prior2)).replace("47d78c6fe61eaa5ad8b3f695250559f6e2686dafd8ff16a94eb40647e8469727",hash(prior3)).replace(/const SCRIPT_SHA='[0-9a-f]{64}'/,"const SCRIPT_SHA='"+hash(pkg.script)+"'").replace(/const SCRIPT_LENGTH=\d+/,"const SCRIPT_LENGTH="+pkg.script.length);
 async function run({cloudExisting,localExisting,backup,tamper=false,network=false,badReadback=false,externalChange=false,backupFailure=false}={}){
  const cloud=new Map([[target+'.previous.txt','legacy backup preserved'],['YOS_DAYSTREAM_TIMELINE_REVIEW_v1.json','existing plan unchanged'],...(cloudExisting===undefined?[]:[[target,cloudExisting]]),...(backup===undefined?[]:[[backupTarget,backup]])]),local=new Map(localExisting===undefined?[]:[[target,localExisting]]),writes=[],removed=[],opened=[],alerts=[],previewed=[];let targetReads=0;
@@ -11,7 +11,15 @@ async function run({cloudExisting,localExisting,backup,tamper=false,network=fals
  const mocks={Request:class{constructor(){this.response={statusCode:network?503:200}}async loadString(){return tamper?JSON.stringify({...pkg,script:pkg.script+'//changed'}):raw}},FileManager:{iCloud:()=>manager(cloud,'cloud'),local:()=>manager(local,'local')},Safari:{open:u=>opened.push(u)},Alert:class{addAction(){}async presentAlert(){alerts.push(this.message)}},Script:{complete(){}}};
  const fn=new (Object.getPrototypeOf(async function(){}).constructor)(...Object.keys(mocks),'previewed',code);await fn(...Object.values(mocks),previewed);assert.equal(cloud.get('YOS_DAYSTREAM_TIMELINE_REVIEW_v1.json'),'existing plan unchanged');assert.equal(cloud.get(target+'.previous.txt'),'legacy backup preserved');return {cloud,local,writes,removed,opened,alerts,previewed};
 }
-test('production remains pinned to the prior reviewed immutable bundle; current Draft is isolated',()=>{assert.match(productionCode,/SOURCE='https:\/\/raw.githubusercontent.com\/yskn0008-bot\/ProjectY\/e28d6acbd4e851dab1d60dd0a3b00452700f85f1\//);assert.match(productionCode,/SCRIPT_SHA='4e7ad93cbf8ce64c1e7b4985547caaf0ce9e949a37dfc8d73f647ca11f529c78'/);assert.match(productionCode,/SCRIPT_LENGTH=216933/);assert.notEqual(hash(pkg.script),'4e7ad93cbf8ce64c1e7b4985547caaf0ce9e949a37dfc8d73f647ca11f529c78');assert.equal(pkg.script,read('YOS_DAYSTREAM_TimelineBridge_Dev.js'));assert.match(productionCode,/PREVIOUS_SCRIPT_SHA='b117fcd0c29c1227ef2205866dd19a0dea2564fc9f736806a5c54bdd49d5d1ca'/)});
+test('draft updater pins the rebuilt candidate to an immutable commit, exact hash and size',()=>{
+ const pinned=productionCode.match(/const SOURCE='https:\/\/raw\.githubusercontent\.com\/yskn0008-bot\/ProjectY\/([0-9a-f]{40})\/life\/calendar\/YOS_DAYSTREAM_Timeline_Review_20261105\.scriptable'/);
+ assert.ok(pinned,'package must use an immutable commit, never a moving branch');
+ assert.match(productionCode,new RegExp("const SCRIPT_SHA='"+hash(pkg.script)+"'"));
+ assert.match(productionCode,new RegExp("const SCRIPT_LENGTH="+pkg.script.length+";"));
+ assert.equal(pkg.script,read('YOS_DAYSTREAM_TimelineBridge_Dev.js'));
+ assert.match(productionCode,/PREVIOUS_SCRIPT_SHA='b117fcd0c29c1227ef2205866dd19a0dea2564fc9f736806a5c54bdd49d5d1ca'/);
+ assert.match(productionCode,/4e7ad93cbf8ce64c1e7b4985547caaf0ce9e949a37dfc8d73f647ca11f529c78/);
+});
 test('fresh install reads back code before launch and leaves plan untouched',async()=>{const r=await run();assert.equal(r.writes.length,1);assert.equal(r.cloud.get(target),pkg.script);assert.equal(r.opened.length,1);assert.equal(r.alerts.length,0)});
 test('known prior version backs up first and updates same candidate name',async()=>{const r=await run({cloudExisting:prior});assert.equal(r.cloud.get(backupTarget),prior);assert.equal(r.cloud.get(target),pkg.script);assert.ok(r.writes[0].p.endsWith('.previous.txt'));assert.ok(r.writes[1].p.endsWith('.js'));assert.equal(r.opened.length,1)});
 test('exact version is no-op, including local storage without cloud duplicate',async()=>{for(const options of [{cloudExisting:pkg.script},{localExisting:pkg.script}]){const r=await run(options);assert.equal(r.writes.length,0);assert.equal(r.opened.length,1)}});
