@@ -133,7 +133,13 @@ button,input,select{font:inherit}button{cursor:pointer}button:focus-visible,inpu
 .card{position:absolute;left:73px;right:0;min-height:16px;border:0;border-radius:9px;padding:1px 9px;display:flex;align-items:center;gap:8px;touch-action:none;user-select:none;-webkit-user-select:none;color:#f8faff;background:#307ec2;box-shadow:0 2px 8px #101b2927;transition:filter .18s ease,box-shadow .18s ease;will-change:transform;overflow:hidden}
 .card:before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:#46b9fb;opacity:.9;pointer-events:none}.card.habit{background:#24976e}.card.habit:before{background:#4bd9a1}.card.task{background:#823db0;touch-action:pan-y}.card.task:before{background:#d079f8}.card.schedule{background:#2e77b3}
 .card.neutral{background:#636b76}.card.neutral:before{background:#97a6b9}.card.sleep{background:#325477}.card.sleep:before{background:#48bdf5}.card.sleep:not(.tiny) b,.card.sleep:not(.tiny) svg{transform:translateY(-9px)}.card.sleep:not(.tiny) small{position:absolute;top:calc(50% + 4px);left:38px;margin:0;font-size:11px;transform:translateY(0)}
-.card .shortcut-launch{min-width:30px;width:30px;min-height:30px;height:30px;display:grid;place-items:center;background:#1c284885;border:1px solid #ffffff66;border-radius:7px;color:#fff;flex:none;text-decoration:none;font-size:17px;font-weight:800;padding:0;position:relative;z-index:2}.card .shortcut-launch.linked{background:#1d648c;border-color:#7bd4ff}.card.task b{flex:1}.card.task{cursor:pointer}.card.task.swiping{filter:brightness(1.14)}.card.done{opacity:.62;filter:saturate(.55)}.card.selected{outline:1.5px solid #e5efff}.card.warning{outline:2px solid #e6a35a}.card.moving{z-index:6;filter:brightness(1.14);box-shadow:0 10px 26px #10131a6c}
+.card .shortcut-launch{min-width:30px;width:30px;min-height:30px;height:30px;display:grid;place-items:center;background:#1c284885;border:1px solid #ffffff66;border-radius:7px;color:#fff;flex:none;text-decoration:none;font-size:17px;font-weight:800;padding:0;position:relative;z-index:2}.card .shortcut-launch.linked{background:#1d648c;border-color:#7bd4ff}.card.task b{flex:1}.card.task{cursor:pointer}.card.task.swiping{filter:brightness(1.14)}.card.compat-positive:before{background:#65d5a5;width:5px}.card.compat-positive{box-shadow:inset 0 0 0 1.5px #65d5a5,0 2px 8px #101b2927}
+.card.compat-negative:before{background:#f0bd6f;width:5px}.card.compat-negative{box-shadow:inset 0 0 0 1.5px #eeb76b,0 2px 8px #101b2927}
+.card.compat-danger:before{background:#ed8a93;width:5px}.card.compat-danger{box-shadow:inset 0 0 0 2px #ed8a93,0 2px 8px #101b2927}
+.card.compat-unknown:before{background:#aab3c0}
+.compat-status{font-size:11px;color:#d8e0ea;margin:6px 14px 3px;line-height:1.55}
+.compat-status[hidden]{display:none}.compat-status strong{font-weight:720}.compat-key{display:flex;flex-wrap:wrap;gap:8px;margin-top:5px}.compat-key span{font-size:10px}.compat-key .pos{color:#8bebc3}.compat-key .neg{color:#ffd391}.compat-key .danger{color:#ffa1ad}
+.card.done{opacity:.62;filter:saturate(.55)}.card.selected{outline:1.5px solid #e5efff}.card.warning{outline:2px solid #e6a35a}.card.moving{z-index:6;filter:brightness(1.14);box-shadow:0 10px 26px #10131a6c}
 .card svg{width:16px;height:16px;flex:none;stroke:#f7f9fc;fill:none;stroke-width:1.8;stroke-linejoin:round;stroke-linecap:round;position:relative}.card b{font-size:12.5px;line-height:1.1;font-weight:630;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:.08px;position:relative}.card small{margin-left:auto;font-size:10px;line-height:1.1;font-weight:500;white-space:nowrap;font-variant-numeric:tabular-nums;flex-shrink:0;position:relative}
 .card.compact{border-radius:7px}.card.compact b{font-size:12px}.card.compact small{font-size:9px}.card.lane{gap:5px;padding-right:5px}.card.lane small{display:none}.card.lane b{font-size:12px}.card.tiny svg{width:13px;height:13px}.card.tiny{gap:5px;padding-left:7px}.card.tiny b{font-size:11px}.card.tiny small{font-size:9px}
 .nowline{position:absolute;left:5px;right:0;height:1.5px;background:#48baff;z-index:8;pointer-events:none;box-shadow:0 0 8px #38b6fa66}.nowline:before{content:"";position:absolute;left:48px;top:-5px;width:10px;height:10px;background:#43b9fc;border:2px solid #eff9ff;border-radius:50%}.nowbadge{position:absolute;right:calc(100% - 55px);top:-11px;background:#218fcf;border-radius:12px;font-size:11px;padding:3px 7px;font-weight:650;font-variant-numeric:tabular-nums}
@@ -177,6 +183,7 @@ button:active{opacity:.8}@media(min-width:640px){.dock{left:calc((100vw - 640px)
   <div class="all-day" id="dayAllDay" hidden aria-label="終日の予定"></div>
   <div class="editor" id="editor"><b id="editorTitle">予定を追加</b><div class="fields"><input id="newTitle" placeholder="名前" style="flex:1 1 160px" aria-label="名前"><input id="newTime" type="time" value="10:00" aria-label="開始時刻"><input id="newDuration" type="number" min="5" max="1440" step="5" value="30" style="width:76px" aria-label="所要時間（分）"><select id="newKind" aria-label="種類"><option value="task">タスク</option><option value="habit">習慣</option><option value="schedule">予定</option></select></div><div id="shortcutField"><label for="newShortcut">ショートカット（任意）</label><input id="newShortcut" maxlength="100" placeholder="既存ショートカットの正式名称" aria-label="起動するiPhoneショートカット名" style="width:100%;margin:5px 0 9px"><small style="color:#d5dce7">登録前は＋で設定、登録後は▶で実行。実行しても自動完了にはしません。</small></div><div class="editor-actions"><button id="saveBtn">追加する</button><button id="cancelEditor" class="light" type="button">閉じる</button></div></div>
   <section class="week-overview" id="weekOverview" hidden aria-label="週の予定"><div class="week-overview-head"><button id="weekPrev" type="button" aria-label="前週">‹</button><strong id="weekCaption"></strong><button id="weekNext" type="button" aria-label="翌週">›</button></div><div id="weekAgenda"></div><p class="coverage" id="weekCoverage"></p></section>
+  <div class="compat-status" id="compatStatus" aria-live="polite">相性を判定中</div>
   <p class="gesture-help" id="gestureHelp">タスクをタップ＝完了 ｜ 左スワイプ＝削除 ｜ 長押し＝編集 ｜ ＋＝登録・▶＝実行</p>
   <div class="timeline-wrap" id="timelinePanel"><div class="timeline" id="tl"><div class="axis"></div><div class="nowline" id="nowLine" hidden><span class="nowbadge" id="nowBadge"></span></div></div></div>
   <section class="tabbox" id="taskPanel"><h3>タスク・未配置</h3><p class="muted">専門タスクの期限と、実行する時間は別。配置しても元データの期限・完了は変わりません。</p>
@@ -184,7 +191,7 @@ button:active{opacity:.8}@media(min-width:640px){.dock{left:calc((100vw - 640px)
  <label for="yosStartFrom">配置提案の開始時刻</label><input id="yosStartFrom" type="time" value="09:00" aria-label="配置提案の開始時刻">
  <button id="yosPlanAll" type="button">上位3件をまとめて配置提案</button><div id="yosPlanBox" aria-live="polite"></div><div id="yosSourceTasks"></div>
  <h3>繰り返し習慣</h3><p class="muted" id="yosHabitSourceStatus">習慣：確認中</p><div id="yosHabitTasks"></div></section>
-  <section class="review" id="review"><h3>一日の振り返り</h3><p id="reviewText">端末内の完了記録を集計します。</p><p id="reviewTip"></p><p class="muted">予定時間と実績時間は異なります。Notionの完了状態には反映しません。</p><button id="reviewBtn">再集計</button></section>
+  <section class="review" id="review"><h3>一日の振り返り</h3><p id="compatReview" class="muted">配置の相性は根拠がある場合だけ評価します。</p><p id="reviewText">端末内の完了記録を集計します。</p><p id="reviewTip"></p><p class="muted">予定時間と実績時間は異なります。Notionの完了状態には反映しません。</p><button id="reviewBtn">再集計</button></section>
   <section class="tabbox" id="recordsPanel"><h3>記録</h3><p>このタイムライン内で完了にした項目のみを表示します。</p><div id="recordsList"></div></section>
   <section class="tabbox" id="aiPanel"><h3>AIプラン</h3><p>AIとの連携は未実装です。実行状況を確認せずに予定の自動変更はしません。</p><p class="muted">追加や時間変更はタイムラインで手動操作できます。</p></section>
   <div class="gesture-delete" id="gestureDelete" hidden aria-live="polite"><span id="gestureDeleteTitle"></span><button id="gestureDeleteConfirm" type="button">削除</button><button id="gestureDeleteCancel" class="cancel" type="button">戻す</button></div>
@@ -420,7 +427,61 @@ document.getElementById('addBtn').onclick=()=>{
 };
 document.getElementById('cancelEditor').onclick=()=>editor.classList.remove('show');
 document.getElementById('saveBtn').onclick=()=>{const title=document.getElementById('newTitle').value.trim(),parts=document.getElementById('newTime').value.split(':').map(Number),duration=Number(document.getElementById('newDuration').value),kind=document.getElementById('newKind').value,shortcut=kind==='task'?document.getElementById('newShortcut').value.trim():'';if(shortcut.length>100||Array.from(shortcut).some(c=>c.charCodeAt(0)<32||c.charCodeAt(0)===127)){note.textContent='ショートカット名は100文字以内で入力してください';return;}if(!title||parts.length!==2||!Number.isFinite(duration)||duration<5||duration>1440){note.textContent='名前・時刻・所要時間を確認してください';return}const start=parts[0]*60+parts[1];if(start+duration>1440){note.textContent='終了時刻は24:00以内にしてください';return}if(editingId!==null){const item=items.find(x=>x.id===editingId);if(item){if(item.f){note.textContent='固定予定は編集できません';return;}Object.assign(item,{t:title,s:start,d:duration,kind,shortcut});}}else{if(isSample){items=[];isSample=false;}items.push({id:Math.max(300000000,...items.map(x=>Number(x.id)||0))+1,t:title,s:start,d:duration,kind,shortcut});}editingId=null;editor.classList.remove('show');document.getElementById('newTitle').value='';document.getElementById('newShortcut').value='';note.textContent=fmt(start)+' に「'+title+'」を'+(editingId===null?'保存':'更新')+(persist()?'（保存処理中）':'（保存処理失敗）');smoothRender();updateReview()};
-function updateReview(){const done=items.filter(x=>x.done),pending=items.filter(x=>!x.done),movable=items.filter(x=>!x.f),completed=movable.filter(x=>x.done);const pct=movable.length?Math.round(completed.length/movable.length*100):0;const used=done.reduce((n,x)=>n+x.d,0);let summary=done.length?'完了記録は'+done.length+'件（合計'+Math.round(used/60*10)/10+'時間）。可動タスクの達成率は'+pct+'%。':'完了記録がまだありません。予定の配置だけでは実行できたか判断できません。';const overlaps=[];const sorted=[...items].sort((a,b)=>a.s-b.s);for(let i=0;i<sorted.length;i++)for(let j=i+1;j<sorted.length&&sorted[j].s<sorted[i].s+sorted[i].d;j++)if(sorted[i].kind===sorted[j].kind&&sorted[i].kind!=='schedule')overlaps.push([sorted[i],sorted[j]]);const pair=overlaps[0];const tip=pair?'改善候補：「'+pair[0].t+'」と「'+pair[1].t+'」は時間が重なっています。同じ種類の作業としてまとめられるか確認すると、切り替えの手間を減らせる可能性があります。':'改善候補：タスクの統合を提案する根拠がまだ不足しています。完了状況と実際の所要時間を記録すると、翌日の改善案を具体化できます。';document.getElementById('reviewText').textContent=summary+' '+(pending.length?'未完了・未確認は'+pending.length+'件。予定の変更と完了は区別して評価します。':'全項目に完了記録があります。');document.getElementById('reviewTip').textContent=tip;updateOverview();renderLists();}document.getElementById('reviewBtn').onclick=updateReview;document.getElementById('doneBtn').onclick=()=>{const x=items.find(x=>x.id===selectedId);if(!x)return;if(x.f){note.textContent='固定予定は元カレンダーで管理してください';return}x.done=!x.done;document.getElementById('doneBtn').textContent=x.done?'未完了に戻す':'完了にする';const saved=persist();note.textContent=x.t+(x.done?'を端末内で仮完了':'の端末内の完了を解除')+(saved?'（保存処理中）':'（保存処理失敗）');fi.textContent=note.textContent;smoothRender();updateReview()};
+// Conservative, explainable compatibility signals from the *local day's actual time slots*.
+// Never infer health, travel distance or subjective mood from a title; unknown remains neutral.
+const yosCompatRank={unknown:0,positive:1,negative:2,danger:3};
+function yosCompatibility(rows){
+ const valid=rows.filter(x=>x&&Number.isFinite(x.s)&&Number.isFinite(x.d)&&x.d>0&&x.s>=0&&x.s+x.d<=1440);
+ const result=new Map(valid.map(x=>[x.id,{level:'unknown',reasons:[]}]));
+ const add=(item,level,reason)=>{
+  const r=result.get(item.id);if(!r)return;
+  if(yosCompatRank[level]>yosCompatRank[r.level])r.level=level;
+  if(!r.reasons.includes(reason))r.reasons.push(reason);
+ };
+ const sorted=[...valid].sort((a,b)=>a.s-b.s||a.id-b.id);
+ for(let i=0;i<sorted.length;i++)for(let j=i+1;j<sorted.length;j++){
+  const a=sorted[i],b=sorted[j],gap=b.s-(a.s+a.d);
+  if(gap>=90)break;
+  if(gap<0){
+   const fixed=!!a.f||!!b.f;
+   const msg=(fixed?'固定予定との時間衝突':'予定が時間重複')+'：「'+a.t+'」と「'+b.t+'」';
+   add(a,'danger',msg);add(b,'danger',msg);continue;
+  }
+  // Only a matched preparation -> action or exercise -> bathing chain suggests a plausible benefit.
+  const prep=a.kind!=='schedule'&&(/準備|支度/.test(a.t))&&b.kind!=='schedule'&&gap<=20;
+  const exercise=/運動|筋トレ|ランニング|ウォーキング/.test(a.t),bath=/入浴|お風呂|シャワー/.test(b.t);
+  if((prep||exercise&&bath)&&gap<=30){
+   const why=prep?'準備から次の行動へ続けられる配置':'運動の後に入浴を続けられる配置';
+   const msg='相乗効果の候補：'+why+'（移動や実際の効果は未確認）';
+   add(a,'positive',msg);add(b,'positive',msg);
+  }else if(gap<5&&a.kind!=='schedule'&&b.kind!=='schedule'&&a.kind!==b.kind){
+   const msg='切替の余裕が5分未満：「'+a.t+'」→「'+b.t+'」。負担増の可能性';
+   add(a,'negative',msg);add(b,'negative',msg);
+  }
+ }
+ return result;
+}
+let latestCompatibility=new Map();
+function yosRenderCompatibility(){
+ latestCompatibility=yosCompatibility(items);
+ const rows=[...latestCompatibility.values()];
+ const counts={positive:0,negative:0,danger:0,unknown:0};
+ for(const item of rows)counts[item.level]++;
+ const status=document.getElementById('compatStatus');
+ status.textContent='';
+ const summary=document.createElement('strong');
+ summary.textContent='配置の相性　＋'+counts.positive+' ／ −'+counts.negative+' ／ ！'+counts.danger+' ／ ？'+counts.unknown;
+ const key=document.createElement('div');key.className='compat-key';
+ for(const [textName,css] of [['＋ 相乗候補','pos'],['− 余裕不足','neg'],['！ 時間衝突','danger'],['？ 判断材料不足','']]){
+  const el=document.createElement('span');el.className=css;el.textContent=textName;key.append(el);
+ }
+ status.append(summary,key);
+ const details=[];
+ for(const record of rows)for(const reason of record.reasons)if(!details.includes(reason))details.push(reason);
+ const review=document.getElementById('compatReview');
+ review.textContent=(details.length?details.slice(0,5).join('。'):'相性を判断できる根拠はまだありません。予定の時刻や準備・移動情報を確認してください。')+'。色は配置からの候補判定で、効果の保証や測定値ではありません。';
+}
+function updateReview(){yosRenderCompatibility();const done=items.filter(x=>x.done),pending=items.filter(x=>!x.done),movable=items.filter(x=>!x.f),completed=movable.filter(x=>x.done);const pct=movable.length?Math.round(completed.length/movable.length*100):0;const used=done.reduce((n,x)=>n+x.d,0);let summary=done.length?'完了記録は'+done.length+'件（合計'+Math.round(used/60*10)/10+'時間）。可動タスクの達成率は'+pct+'%。':'完了記録がまだありません。予定の配置だけでは実行できたか判断できません。';const overlaps=[];const sorted=[...items].sort((a,b)=>a.s-b.s);for(let i=0;i<sorted.length;i++)for(let j=i+1;j<sorted.length&&sorted[j].s<sorted[i].s+sorted[i].d;j++)if(sorted[i].kind===sorted[j].kind&&sorted[i].kind!=='schedule')overlaps.push([sorted[i],sorted[j]]);const pair=overlaps[0];const tip=pair?'改善候補：「'+pair[0].t+'」と「'+pair[1].t+'」は時間が重なっています。同じ種類の作業としてまとめられるか確認すると、切り替えの手間を減らせる可能性があります。':'改善候補：タスクの統合を提案する根拠がまだ不足しています。完了状況と実際の所要時間を記録すると、翌日の改善案を具体化できます。';document.getElementById('reviewText').textContent=summary+' '+(pending.length?'未完了・未確認は'+pending.length+'件。予定の変更と完了は区別して評価します。':'全項目に完了記録があります。');document.getElementById('reviewTip').textContent=tip;updateOverview();renderLists();}document.getElementById('reviewBtn').onclick=updateReview;document.getElementById('doneBtn').onclick=()=>{const x=items.find(x=>x.id===selectedId);if(!x)return;if(x.f){note.textContent='固定予定は元カレンダーで管理してください';return}x.done=!x.done;document.getElementById('doneBtn').textContent=x.done?'未完了に戻す':'完了にする';const saved=persist();note.textContent=x.t+(x.done?'を端末内で仮完了':'の端末内の完了を解除')+(saved?'（保存処理中）':'（保存処理失敗）');fi.textContent=note.textContent;smoothRender();updateReview()};
 
 function updateOverview(){
  const movable=items.filter(x=>!x.f),done=movable.filter(x=>x.done),pct=movable.length?Math.round(done.length/movable.length*100):0;
@@ -704,6 +765,7 @@ function smoothRender(activeId,oldActiveRect){
  [...tl.querySelectorAll('.card')].forEach(n=>{const old=before.get(n.dataset.id);if(!old)return;const now=n.getBoundingClientRect();const dy=old.top-now.top;if(Math.abs(dy)>.5){n.animate([{transform:'translate3d(0,'+dy+'px,0)'},{transform:'translate3d(0,0,0)'}],{duration:260,easing:'cubic-bezier(.2,.8,.2,1)'})}});
 }
 function render(){
+ latestCompatibility=yosCompatibility(items);
  tl.querySelectorAll('.hour,.card,.tick').forEach(n=>n.remove());
  const bottom=yFor(1440);
  for(let h=0;h<=24;h++){const el=document.createElement('div');el.className='hour';el.style.top=yFor(h*60)+'px';el.innerHTML='<span>'+fmt(h*60)+'</span>';tl.append(el)}
@@ -727,6 +789,8 @@ function render(){
    const el=document.createElement('div');el.className='card '+(item.kind==='habit'?'habit':item.kind==='task'?'task':'schedule');
    el.style.top=top+'px';el.style.height=height+'px';
    const lane=lanes.get(item);if(lane&&lane.count>1){el.style.left='calc(73px + (100% - 73px) * '+(lane.lane/lane.count)+')';el.style.width='calc((100% - 73px) / '+lane.count+' - 3px)';el.style.right='auto';el.classList.add('lane')}
+   const compat=latestCompatibility.get(item.id);
+   if(compat){el.classList.add('compat-'+compat.level);el.setAttribute('aria-label',item.t+' '+(compat.reasons[0]||'相性：判断材料不足'));el.title=(compat.reasons[0]||'相性は未確認');}
    if(item.kind==='task'&&!item.f){
     const linked=typeof item.shortcut==='string'&&item.shortcut.length>0;
     const action=document.createElement(linked?'a':'button');
