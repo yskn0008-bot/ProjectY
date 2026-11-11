@@ -1,4 +1,4 @@
-import test from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs';import crypto from 'node:crypto';
+import test from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs';import crypto from 'node:crypto';import vm from 'node:vm';
 const read=n=>fs.readFileSync(new URL(n,import.meta.url),'utf8'),productionCode=read('YOS_DAYSTREAM_Timeline_Installer.js'),raw=read('YOS_DAYSTREAM_Timeline_Review_20261105.scriptable'),pkg=JSON.parse(raw),target=pkg.name+'.js',prior='known prior candidate fixture',prior2='known newer candidate fixture',prior3='known last distributed fixture',hash=s=>crypto.createHash('sha256').update(s).digest('hex');
 const backupTarget=target+'.'+hash(prior).slice(0,12)+'.previous.txt';
 // Simulate installation of this unmerged development package using the production installer's
@@ -55,4 +55,69 @@ test('staged .js script stays identical to native bridge and uses the shared ins
  new (Object.getPrototypeOf(async function(){}).constructor)(js);
  const catalog=JSON.parse(read('../../ios-app/scriptable/yos-common-installer-catalog.json'));
  assert.ok(catalog.targets.every(x=>x.name!==name),'no unapproved change to the main catalog');
+});
+
+const sharedEntryName='YOS DAYSTREAM Timeline 開発確認 20261105';
+const sharedEntryPath='ios-app/scriptable/'+sharedEntryName+'.js';
+const sharedEntryPin='eed19ab2b6cec79162abe3958e2b43ed4d8207d6';
+const sharedCandidate=read('../../'+sharedEntryPath);
+function sharedFM(root){
+ const files=new Map(),dirs=new Set([root]);
+ return {files,dirs,documentsDirectory:()=>root,joinPath:(a,b)=>a.replace(/\/$/,'')+'/'+b,
+  fileExists:p=>files.has(p)||dirs.has(p),
+  createDirectory(p){let x='';for(const s of p.split('/').filter(Boolean)){x+='/'+s;dirs.add(x)}},
+  readString(p){if(!files.has(p))throw Error('file missing '+p);return files.get(p)},
+  writeString(p,v){if(!dirs.has(p.slice(0,p.lastIndexOf('/'))))throw Error('parent missing');files.set(p,String(v))},
+  remove(p){files.delete(p)},isFileStoredIniCloud(){return false},async downloadFileFromiCloud(){}
+ };
+}
+async function runSharedTimeline({cloud=sharedFM('/icloud'),local=sharedFM('/local'),offline=false,tamper=false}={}){
+ const code=read('../../ios-app/scriptable/YOS Common Installer.js');
+ const entry={id:'daystream-candidate',name:sharedEntryName,path:sharedEntryPath,commit:sharedEntryPin,sha256:hash(sharedCandidate)};
+ const catalog={schema:1,repository:'yskn0008-bot/ProjectY',targets:[entry]};
+ const opened=[],alerts=[],requests=[],expectedUrl='https://raw.githubusercontent.com/yskn0008-bot/ProjectY/'+sharedEntryPin+'/'+sharedEntryPath.split('/').map(encodeURIComponent).join('/');
+ class Request{
+  constructor(url){this.url=url;this.response=null;requests.push(url)}
+  async loadString(){
+   if(offline)throw Error('offline');this.response={statusCode:200};
+   if(this.url.endsWith('/main/ios-app/scriptable/yos-common-installer-catalog.json'))return JSON.stringify(catalog);
+   if(this.url===expectedUrl)return tamper?sharedCandidate+'\n// tampered':sharedCandidate;
+   throw Error('unexpected URL: '+this.url);
+  }
+ }
+ class Alert{constructor(){this.title='';this.message=''}addAction(){}addCancelAction(){}async presentAlert(){alerts.push({title:this.title,message:this.message});return -1}}
+ const globals={Request,Alert,FileManager:{iCloud:()=>cloud,local:()=>local},Safari:{open:x=>opened.push(x)},Script:{complete(){}},args:{shortcutParameter:'daystream-candidate',queryParameters:{}},console};
+ await vm.runInNewContext('(async()=>{'+code+'})()',globals,{timeout:10000});
+ return {cloud,local,entry,opened,alerts,requests,expectedUrl};
+}
+test('the real YOS Common Installer accepts the staged timeline, verifies SHA and stores it under its formal name without auto-running',async()=>{
+ const r=await runSharedTimeline();
+ const target='/icloud/'+sharedEntryName+'.js';
+ const receipt='/icloud/YOS Common Installer Data/'+encodeURIComponent(sharedEntryName)+'.receipt.json';
+ assert.equal(r.cloud.files.get(target),sharedCandidate,'installed script must equal immutable pinned candidate');
+ const saved=JSON.parse(r.cloud.files.get(receipt));
+ assert.equal(saved.name,sharedEntryName);assert.equal(saved.sha256,hash(sharedCandidate));
+ assert.equal(saved.commit,sharedEntryPin);assert.equal(r.opened.length,0);
+ assert.ok(r.requests.includes(r.expectedUrl),'installer must request exact immutable URL with encoded name');
+ assert.match(r.alerts.at(-1).title,/登録完了/);
+});
+test('shared installer protects an unknown same-name timeline in either storage and refuses a double collision',async()=>{
+ const c=sharedFM('/icloud'),l=sharedFM('/local'),target='/icloud/'+sharedEntryName+'.js';
+ c.files.set(target,'PERSONAL USER CODE');
+ let r=await runSharedTimeline({cloud:c,local:l});
+ assert.equal(c.files.get(target),'PERSONAL USER CODE');
+ assert.equal(r.opened.length,0);assert.match(r.alerts.at(-1).message,/管理情報|変更された/);
+ l.files.set('/local/'+sharedEntryName+'.js','OTHER USER CODE');
+ r=await runSharedTimeline({cloud:c,local:l});
+ assert.equal(c.files.get(target),'PERSONAL USER CODE');assert.equal(l.files.get('/local/'+sharedEntryName+'.js'),'OTHER USER CODE');
+ assert.match(r.alerts.at(-1).message,/両方/);assert.equal(r.opened.length,0);
+});
+test('shared installer rejects altered timeline downloads and offline failures without creating a candidate',async()=>{
+ for(const opts of [{tamper:true},{offline:true}]){
+  const r=await runSharedTimeline(opts);
+  assert.equal(r.cloud.files.has('/icloud/'+sharedEntryName+'.js'),false);
+  assert.equal(r.local.files.has('/local/'+sharedEntryName+'.js'),false);
+  assert.equal(r.opened.length,0);
+  assert.match(r.alerts.at(-1).title,/未完了/);
+ }
 });
