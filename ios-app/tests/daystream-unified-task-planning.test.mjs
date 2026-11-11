@@ -8,6 +8,7 @@ const html=script.match(/const html=\x60([\s\S]*?)\x60;\s*const payload=/)?.[1]|
 const client=html.match(/<script>([\s\S]*?)<\\\/script>/)?.[1]||'';
 const native=script.slice(script.indexOf('const YOS_TASK_SOURCE='),script.indexOf('async function main(){'));
 const slotSource=client.match(/\/\/ YOS_UNIFIED_SLOT_START([\s\S]*?)\/\/ YOS_UNIFIED_SLOT_END/)?.[1]||'';
+const batchSource=client.match(/\/\/ YOS_UNIFIED_BATCH_START([\s\S]*?)\/\/ YOS_UNIFIED_BATCH_END/)?.[1]||'';
 
 const row=(id,title,status='次にやる',area='Work',due='2026-11-12')=>({
  id,properties:{
@@ -128,4 +129,43 @@ test('old separate user data and reference calendars remain protected',()=>{
  assert.match(script,/YOS_NOTION_KEY='YOS_NOTION_INTEGRATION_TOKEN'/);
  assert.doesNotMatch(script,/YOS_DAYSTREAM_GLASS_VERIFY_20261111_v1\.json|YOS_DAYSTREAM_TIMELINE_REVIEW_v1\.json/);
  assert.doesNotMatch(script,/CalendarEvent\.create|CalendarEvent\.remove|CalendarEvent\.save/);
+});
+
+
+test('batch prioritizes near due dates over undated tasks without inventing fixed appointments',()=>{
+ const logic=vm.runInNewContext(slotSource+batchSource+'\n({yosFindSlot,yosBatchPlan})',{Date});
+ const tasks=[
+  {id:'undated',title:'long term',priority:'P0',status:'次にやる',due:'',area:'Work'},
+  {id:'today',title:'payment check',priority:'P2',status:'次にやる',due:'2026-11-11',area:'Money'},
+  {id:'tomorrow',title:'appointment prep',priority:'P1',status:'実行中',due:'2026-11-12',area:'Life'},
+  {id:'waiting',title:'blocked',priority:'P0',status:'待ち',due:'2026-11-11',area:'Life'}
+ ];
+ const plans=logic.yosBatchPlan(tasks,[{s:540,d:60,f:1}],540,'2026-11-11');
+ assert.deepEqual(Array.from(plans.map(x=>x.task.id)),['today','tomorrow','undated']);
+ assert.deepEqual(Array.from(plans.map(x=>x.at)),[615,660,705]);
+ assert.ok(plans.every(x=>x.d===30));
+ assert.equal(plans.find(x=>x.task.id==='waiting'),undefined);
+});
+
+test('batch declines to consume the last 30 percent of available time',()=>{
+ const logic=vm.runInNewContext(slotSource+batchSource+'\n({yosFindSlot,yosBatchPlan})',{Date});
+ const tasks=Array.from({length:4},(_,i)=>({id:String(i),title:'task '+i,status:'次にやる',priority:'P1',due:'2026-11-11'}));
+ assert.equal(logic.yosBatchPlan(tasks,[],1380,'2026-11-11').length,0);
+ assert.equal(logic.yosBatchPlan(tasks,[{s:0,d:1320,f:1}],1320,'2026-11-11').length,1);
+ assert.equal(logic.yosBatchPlan(tasks,[],1440,'2026-11-11').length,0);
+});
+
+test('stale overdue items are not silently auto-replanned and batch requires review before mutation',()=>{
+ const logic=vm.runInNewContext(slotSource+batchSource+'\n({yosFindSlot,yosBatchPlan})',{Date});
+ const tasks=[
+  {id:'stale',title:'old task',status:'実行中',priority:'P0',due:'2026-10-01'},
+  {id:'recent',title:'recent task',status:'実行中',priority:'P1',due:'2026-11-10'}
+ ];
+ const result=logic.yosBatchPlan(tasks,[],600,'2026-11-11');
+ assert.deepEqual(Array.from(result.map(x=>x.task.id)),['recent']);
+ assert.match(client,/この配置を採用/);
+ assert.match(client,/まとめてこの配置を採用/);
+ assert.match(client,/selectedDay!==day/);
+ assert.match(client,/JSON\.stringify\(proposed\.map/);
+ assert.match(client,/元の期限や状態は変更していません/);
 });
