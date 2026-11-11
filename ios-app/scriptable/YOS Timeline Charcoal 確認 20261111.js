@@ -202,7 +202,7 @@ function yosAddRow(container,title,description,onClick){
 function yosRenderSources(){
  taskFeed.textContent='';habitFeed.textContent='';
  const status=document.getElementById('yosTaskSourceStatus');
- status.textContent='Notion Tasks：'+yosStatusWord(taskSource.status)+(taskSource.status==='ok'||taskSource.status==='partial'?'（取得 '+sourceTasks.length+'件・先頭80件を表示）':'')+(taskSource.checkedAt?' · '+taskSource.checkedAt.slice(5,16).replace('T',' '):'');
+ status.textContent='Notion Tasks：'+yosStatusWord(taskSource.status)+(taskSource.status==='ok'||taskSource.status==='partial'?'（取得 '+sourceTasks.length+'件・先頭80件を表示）':'')+(taskSource.checkedAt?' · '+new Date(taskSource.checkedAt).toLocaleString('ja-JP',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}):'');
  const live=sourceTasks.filter(x=>!['待ち','保留'].includes(x.status));
  live.sort((a,b)=>yosTaskRank(a)-yosTaskRank(b)||String(a.due||'9999').localeCompare(String(b.due||'9999'))||a.title.localeCompare(b.title,'ja'));
  const pending=live.filter(x=>!yosIsPlanned('notion:'+x.id)).slice(0,80);
@@ -223,13 +223,14 @@ function yosPropose(item,kind){
  if(startParts.length!==2||!Number.isInteger(startParts[0])||!Number.isInteger(startParts[1])||startParts[0]>23||startParts[1]>59){planBox.textContent='提案開始時刻を確認してください';return}
  const start=startParts[0]*60+startParts[1],duration=kind==='habit'?15:30,at=yosFindSlot(items,start,duration);
  if(at===null){planBox.textContent='空き枠がありません。開始時刻や既存配置を確認してください。';return}
- const due=kind==='task'?item.due:'',expired=due&&due<selectedDay,ref=(kind==='task'?'notion:':'habit:')+item.id;
+ const proposedDay=selectedDay,due=kind==='task'?item.due:'',expired=due&&due<selectedDay,ref=(kind==='task'?'notion:':'habit:')+item.id;
  const summary=document.createElement('p');summary.textContent='配置案：'+item.title+' · '+fmt(at)+'–'+fmt(at+duration)+'（所要時間'+duration+'分は仮設定）'+(expired?' · 期限経過を要確認':'')+'。元の期限と予定は変更しません。';planBox.append(summary);
  const confirm=document.createElement('button');confirm.textContent='この配置を採用';confirm.onclick=()=>{
+  if(selectedDay!==proposedDay){planBox.textContent='表示日が変わりました。提案し直してください';return}
   if(yosIsPlanned(ref)){planBox.textContent='すでに配置済みです';return}
   // Recompute at acceptance to avoid colliding with an intervening manual edit.
-  const fresh=yosFindSlot(items,at,duration);if(fresh===null){planBox.textContent='空き枠が変わりました。提案し直してください';return}
-  const rec={id:Math.max(200001000,...items.map(x=>Number(x.id)||0))+1,t:item.title,s:fresh,d:duration,kind,source:kind==='task'?'Notion Tasks':'YOS習慣',sourceRef:ref,area:kind==='task'?item.area:'習慣',due:due||'',done:false};
+  const fresh=yosFindSlot(items,at,duration);if(fresh!==at){planBox.textContent='指定した時間に空きがありません。提案し直してください';return}
+  const rec={id:Math.max(300000000,...items.map(x=>Number(x.id)||0))+1,t:item.title,s:fresh,d:duration,kind,source:kind==='task'?'Notion Tasks':'YOS習慣',sourceRef:ref,area:kind==='task'?item.area:'習慣',due:due||'',done:false};
   items.push(rec);const saved=persist();
   planBox.textContent=saved?'端末の時間割へ配置しました。元データは変更していません。':'保存準備に失敗しました';
   smoothRender();updateReview();yosRenderSources();
@@ -259,7 +260,7 @@ const yFor=m=>m/60*scale;
 const editor=document.getElementById('editor');let editingId=null;
 document.getElementById('addBtn').onclick=()=>{editingId=null;document.getElementById('editorTitle').textContent='予定を追加';document.getElementById('saveBtn').textContent='追加する';editor.classList.add('show');document.getElementById('newTitle').focus();};
 document.getElementById('cancelEditor').onclick=()=>editor.classList.remove('show');
-document.getElementById('saveBtn').onclick=()=>{const title=document.getElementById('newTitle').value.trim(),parts=document.getElementById('newTime').value.split(':').map(Number),duration=Number(document.getElementById('newDuration').value),kind=document.getElementById('newKind').value;if(!title||parts.length!==2||!Number.isFinite(duration)||duration<5||duration>1440){note.textContent='名前・時刻・所要時間を確認してください';return}const start=parts[0]*60+parts[1];if(start+duration>1440){note.textContent='終了時刻は24:00以内にしてください';return}if(editingId!==null){const item=items.find(x=>x.id===editingId);if(item){if(item.f){note.textContent='固定予定は編集できません';return;}Object.assign(item,{t:title,s:start,d:duration,kind});}}else{if(isSample){items=[];isSample=false;}items.push({id:Math.max(0,...items.map(x=>Number(x.id)||0))+1,t:title,s:start,d:duration,kind});}editingId=null;editor.classList.remove('show');document.getElementById('newTitle').value='';note.textContent=fmt(start)+' に「'+title+'」を'+(editingId===null?'保存':'更新')+(persist()?'（保存処理中）':'（保存処理失敗）');smoothRender();updateReview()};
+document.getElementById('saveBtn').onclick=()=>{const title=document.getElementById('newTitle').value.trim(),parts=document.getElementById('newTime').value.split(':').map(Number),duration=Number(document.getElementById('newDuration').value),kind=document.getElementById('newKind').value;if(!title||parts.length!==2||!Number.isFinite(duration)||duration<5||duration>1440){note.textContent='名前・時刻・所要時間を確認してください';return}const start=parts[0]*60+parts[1];if(start+duration>1440){note.textContent='終了時刻は24:00以内にしてください';return}if(editingId!==null){const item=items.find(x=>x.id===editingId);if(item){if(item.f){note.textContent='固定予定は編集できません';return;}Object.assign(item,{t:title,s:start,d:duration,kind});}}else{if(isSample){items=[];isSample=false;}items.push({id:Math.max(300000000,...items.map(x=>Number(x.id)||0))+1,t:title,s:start,d:duration,kind});}editingId=null;editor.classList.remove('show');document.getElementById('newTitle').value='';note.textContent=fmt(start)+' に「'+title+'」を'+(editingId===null?'保存':'更新')+(persist()?'（保存処理中）':'（保存処理失敗）');smoothRender();updateReview()};
 function updateReview(){const done=items.filter(x=>x.done),pending=items.filter(x=>!x.done),movable=items.filter(x=>!x.f),completed=movable.filter(x=>x.done);const pct=movable.length?Math.round(completed.length/movable.length*100):0;const used=done.reduce((n,x)=>n+x.d,0);let summary=done.length?'完了記録は'+done.length+'件（合計'+Math.round(used/60*10)/10+'時間）。可動タスクの達成率は'+pct+'%。':'完了記録がまだありません。予定の配置だけでは実行できたか判断できません。';const overlaps=[];const sorted=[...items].sort((a,b)=>a.s-b.s);for(let i=0;i<sorted.length;i++)for(let j=i+1;j<sorted.length&&sorted[j].s<sorted[i].s+sorted[i].d;j++)if(sorted[i].kind===sorted[j].kind&&sorted[i].kind!=='schedule')overlaps.push([sorted[i],sorted[j]]);const pair=overlaps[0];const tip=pair?'改善候補：「'+pair[0].t+'」と「'+pair[1].t+'」は時間が重なっています。同じ種類の作業としてまとめられるか確認すると、切り替えの手間を減らせる可能性があります。':'改善候補：タスクの統合を提案する根拠がまだ不足しています。完了状況と実際の所要時間を記録すると、翌日の改善案を具体化できます。';document.getElementById('reviewText').textContent=summary+' '+(pending.length?'未完了・未確認は'+pending.length+'件。予定の変更と完了は区別して評価します。':'全項目に完了記録があります。');document.getElementById('reviewTip').textContent=tip;updateOverview();renderLists();}document.getElementById('reviewBtn').onclick=updateReview;document.getElementById('doneBtn').onclick=()=>{const x=items.find(x=>x.id===selectedId);if(!x)return;if(x.f){note.textContent='固定予定は元カレンダーで管理してください';return}x.done=!x.done;document.getElementById('doneBtn').textContent=x.done?'未完了に戻す':'完了にする';note.textContent=x.t+(x.done?'を端末内で仮完了':'の端末内の完了を解除')+(persist()?'（保存処理中）':'（保存処理失敗）');smoothRender();updateReview()};
 
 function updateOverview(){
@@ -278,7 +279,7 @@ function showDay(iso){
  items=dayItems(iso);
  isSample=false;
  selectedId=null;zoom=null;focus.classList.remove('show');editor.classList.remove('show');
- yosDefaultStart();yosRenderSources();
+ yosDefaultStart();planBox.textContent='';yosRenderSources();
  note.textContent='端末の時間割 · Notion Tasks '+yosStatusWord(taskSource.status)+' · 習慣 '+yosStatusWord(habitSource.status);
  renderWeek();render();updateReview();window.scrollTo({top:0,behavior:'smooth'});
 }
