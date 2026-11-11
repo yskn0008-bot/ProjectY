@@ -115,3 +115,12 @@ Do not mark the full product complete until these last gates pass.
 - GitHub Actionsで生成した候補は7日間のアーティファクトとして保存。一般公開の `journal/latest.json` へ書き込むpublishジョブは **明示的な手動 `workflow_dispatch` の `publish=true`** の場合だけ動作する。記事の事実関係・当人への適用・画像権利のレビューを完了するまでは実行しない。自動公開や通知の本番切替、端末コード更新を済ませたとは報告しない。
 - `ios-app/tests/journal-daily-editor.test.mjs`（8件）、`ios-app/tests/journal-publication-gate.test.mjs`（5件）を追加し、公開情報の保護と失敗時の旧号保持を検証。ローカルJS模擬試験は13件合格、正式GitHub Actionsの総合結果は別途確認する。
 - **残る完成条件**：実データでのニュース取得→GitHub Models利用権限/レート上限の確認→出典の事実照合・本人の最新状況への安全な関連付け→写真の適切な利用許諾→新号の公開・旧号アーカイブと履歴→iPhoneでの記事更新と表示・通知の実測。手動レビューを省く自動公開は現段階で許可しない。
+
+## 2026-11-12｜Notion現在地連動・端末内の試験実装
+
+- 目的：既存Money・Self・Health・Life・Work等の目標に関係するYOS Tasksを毎回再評価し、本人の記録上の状態・優先度・期限・次の一手・ブロッカーの変化で記事順位が変わること。Notionの記録は実際の達成・現在の事実と同義ではないため、参考順位と明示。
+- 実行場所：既存YOS JOURNAL.jsのiPhone Scriptable端末内。Keychain内の既存YOS_NOTION_INTEGRATION_TOKENでNotion公式APIの既存YOS Tasksデータソースを最大500件読み取る。失敗時はMY_WAY_WIDGET_TOKENの既存認証付きprivate Tasks APIへフォールバックするが、最大3件のため部分的な照合として表示する。未接続なら一般記事であり個人化済みとは表示しない。
+- 記事ごとのMoney/Work/Health/Self/Lifeの話題一致に、既存タスクの実行中・本人操作・次にやる・待ち、優先度、近い期限を反映。完了・保留タスクは個人関連候補から除外する。ただし話題語の一致は本人に最適だと断定できず、適切な最新記事を追加検索することも現段階ではない。
+- セキュリティ：本人のMoney・Health・Self・Tasks本文やキーを公開GitHub latest.json、GitHub Models、記事キャッシュ、公開APIへ転記・送信しない。既存Notion APIまたは既存認証付きTasks API以外にはタスク本文を送らず、iPhone内のメモリだけで判定。誌面には概略の分野と状態しか出さない。
+- 追加テスト ios-app/tests/journal-local-relevance.test.mjs の8件で、進捗変更で表紙記事がMoney→Healthへ切り替わること、完了・保留除外、未接続／通信失敗の非個人化、機密データを送信・保存しないこと、既存非公開Tasksへのフォールバックを検査。
+- 未完：Notionとの実通信・iPhone実機表示、元のGoal→Task紐付け、情報源の拡張と新記事の適合性検証、本番配信、画像の権利確認。既存JOURNALを勝手に改名・削除・上書きせず、開発Draftに留める。
