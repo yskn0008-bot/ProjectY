@@ -500,3 +500,31 @@ test('DAYSTREAM compatibility assesses confirmed conflicts without guessing heal
  assert.match(actualHtml,/id="compatReview"/);
  assert.doesNotMatch(js,/Notion\.updatePage|CalendarEvent\.save/);
 });
+
+
+test('overlap warning counts intersection windows and gives a 15-minute range',()=>{
+ const actual=Function('return '+String.fromCharCode(96)+html+String.fromCharCode(96))();
+ const js=actual.split('<script>')[1]?.split('</script>')[0]||'';
+ const start=js.indexOf('function yosOverlapWindows(rows){'),stop=js.indexOf('let latestCompatibility=',start);
+ assert.ok(start>=0&&stop>start);
+ const evaluate=vm.runInNewContext(js.slice(start,stop)+'\nyosOverlapWindows',{});
+ const item=(id,t,s,d)=>({id,t,s,d,kind:'task'});
+ const overlaps=evaluate([item(1,'削除テスト',585,30),item(2,'動作確認',600,30)]);
+ assert.equal(overlaps.length,1);
+ assert.equal(overlaps[0].from,600);
+ assert.equal(overlaps[0].until,615);
+ assert.deepEqual(Array.from(overlaps[0].titles),['削除テスト','動作確認']);
+ const three=evaluate([item(1,'A',540,60),item(2,'B',570,60),item(3,'C',610,40)]);
+ assert.equal(three.length,1);
+ assert.equal(three[0].from,570);
+ assert.equal(three[0].until,630);
+ const noOverlap=evaluate([item(1,'A',585,15),item(2,'B',600,30)]);
+ assert.equal(noOverlap.length,0);
+ assert.ok(actual.includes('時間の重複：'));
+ assert.ok(actual.includes('overlap-button'));
+ assert.ok(actual.includes('分重複'));
+ assert.ok(actual.includes('overlap-details'));
+ assert.ok(actual.includes('padding-right:24px'));
+ assert.ok(!actual.includes('inset 0 0 0 2px #ed8a93'));
+ assert.doesNotMatch(script,/CalendarEvent\.(?:save|remove|create)\(/);
+});
