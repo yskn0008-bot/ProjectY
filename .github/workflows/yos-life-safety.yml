@@ -99,7 +99,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: yos-daystream-glass-390px
-          path: test-results/timeline-390px-*.png
+          path: |
+            test-results/timeline-390px-*.png
+            life/calendar/design/reference-glass-original.jpeg
           if-no-files-found: warn
 
   life-browser-smoke:
