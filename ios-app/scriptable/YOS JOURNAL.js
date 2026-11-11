@@ -113,7 +113,7 @@ async function readLocalProgress(){
  return {status:error?"error":"unavailable",tasks:[],source:""};
 }
 function rankForLocalProgress(articles,progress,now=new Date()){
- const tasks=(progress.tasks||[]).filter(t=>['実行中','本人操作','次にやる'].includes(t.state)&&t.title).slice(0,500);
+ const tasks=(progress.tasks||[]).filter(t=>(!t.kind||t.kind==='Task')&&['実行中','本人操作','次にやる'].includes(t.state)&&t.title).slice(0,500);
  const active=tasks.filter(t=>t.state==='実行中'||t.state==='本人操作');
  const next=tasks.filter(t=>t.state==='次にやる');
  const candidates=[...active,...next];
