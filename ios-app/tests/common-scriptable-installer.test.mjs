@@ -383,3 +383,71 @@ test('unmanaged same-name charcoal copies stop safely in both storages',async()=
    assert.match(r.alerts.at(-1).message,/管理記録/);
  }
 });
+test('verified receipt-only script restoration writes only missing original body after explicit consent',async()=>{
+ const cloud=fm('/icloud'),local=fm('/local'),entry=shipped.targets.find(t=>t.id==='daystream-glass-20261111');
+ const code=fixtures[entry.id],targetPath='/icloud/'+entry.name+'.js',receiptPath='/icloud/YOS Common Installer Data/'+encodeURIComponent(entry.name)+'.receipt.json';
+ cloud.createDirectory('/icloud/YOS Common Installer Data');
+ const existingReceipt={schema:1,name:entry.name,id:entry.id,path:entry.path,sha256:entry.sha256,storage:'iCloud',commit:entry.commit};
+ const original=JSON.stringify(existingReceipt);
+ cloud.files.set(receiptPath,original);
+ cloud.files.set('/icloud/YOS DAYSTREAM Timeline 開発確認 20261105.js','PRESERVE PRIOR SCRIPT');
+ local.files.set('/local/YOS Timeline Auto.js','PRESERVE OTHER SCRIPT');
+ const cloudBefore=new Map(cloud.files),localBefore=new Map(local.files);
+ const r=await run({cloud,local,id:entry.id,choices:[0,-1]});
+ assert.equal(cloud.files.get(targetPath),code,'restore exactly pinned code bytes');
+ for(const [name,value] of cloudBefore)assert.equal(cloud.files.get(name),value,'must not alter any older cloud file or receipt');
+ assert.deepEqual([...local.files],[...localBefore]);
+ assert.equal(cloud.files.get(receiptPath),original,'receipt must remain byte-identical');
+ assert.equal(r.opened.length,0,'no code runs automatically');
+ assert.equal(r.alerts[0].title,'検証済みコードの本体だけ復元');
+ assert.equal(r.alerts.at(-1).title,'本体の復元完了');
+});
+test('unapproved orphan restore does not create script or change receipt',async()=>{
+ const cloud=fm('/icloud'),local=fm('/local'),entry=shipped.targets[3],root='/icloud',where=root+'/YOS Common Installer Data/'+encodeURIComponent(entry.name)+'.receipt.json';
+ cloud.createDirectory(root+'/YOS Common Installer Data');
+ cloud.files.set(where,JSON.stringify({schema:1,name:entry.name,id:entry.id,path:entry.path,storage:'iCloud',commit:entry.commit,sha256:entry.sha256}));
+ const before=[...cloud.files];
+ const r=await run({cloud,local,id:entry.id,choices:[-1]});
+ assert.deepEqual([...cloud.files],before);
+ assert.equal(r.opened.length,0);
+ assert.equal(r.alerts.at(-1).title,'検証済みコードの本体だけ復元');
+});
+test('orphan receipt is recovered in the storage where it actually exists, never moved to iCloud',async()=>{
+ const cloud=fm('/icloud'),local=fm('/local'),entry=shipped.targets[3],p='/local/YOS Common Installer Data/'+encodeURIComponent(entry.name)+'.receipt.json';
+ local.createDirectory('/local/YOS Common Installer Data');
+ const old=JSON.stringify({schema:1,name:entry.name,id:entry.id,path:entry.path,storage:'local',commit:entry.commit,sha256:entry.sha256});
+ local.files.set(p,old);
+ const r=await run({cloud,local,id:entry.id,choices:[0,-1]});
+ assert.equal(local.files.get('/local/'+entry.name+'.js'),fixtures[entry.id]);
+ assert.equal(local.files.get(p),old);
+ assert.equal(cloud.files.size,0,'must not create unrelated iCloud file');
+ assert.match(r.alerts.at(-1).title,/復元完了/);
+});
+test('orphan metadata with changed commit, hash, ID or storage is never used to create a script',async()=>{
+ const entry=shipped.targets[3],where='/icloud/YOS Common Installer Data/'+encodeURIComponent(entry.name)+'.receipt.json';
+ const expected={schema:1,name:entry.name,id:entry.id,path:entry.path,storage:'iCloud',commit:entry.commit,sha256:entry.sha256};
+ for(const [field,value] of [['commit','f'.repeat(40)],['sha256','e'.repeat(64)],['id','unknown'],['storage','local']]){
+  const cloud=fm('/icloud'),local=fm('/local');
+  cloud.createDirectory('/icloud/YOS Common Installer Data');
+  cloud.files.set(where,JSON.stringify({...expected,[field]:value}));
+  const before=[...cloud.files];
+  const r=await run({cloud,local,id:entry.id});
+  assert.deepEqual([...cloud.files],before,field+' receipt must remain untouched');
+  assert.equal(r.opened.length,0);
+  assert.equal(cloud.files.has('/icloud/'+entry.name+'.js'),false);
+  assert.match(r.alerts.at(-1).title,/保存本体が見つからない安全診断/);
+ }
+});
+test('two orphan receipts in iCloud and local prevent any restore',async()=>{
+ const cloud=fm('/icloud'),local=fm('/local'),entry=shipped.targets[3];
+ for(const [fm,root,storage] of [[cloud,'/icloud','iCloud'],[local,'/local','local']]){
+  fm.createDirectory(root+'/YOS Common Installer Data');
+  fm.files.set(root+'/YOS Common Installer Data/'+encodeURIComponent(entry.name)+'.receipt.json',
+   JSON.stringify({schema:1,name:entry.name,id:entry.id,path:entry.path,storage,commit:entry.commit,sha256:entry.sha256}));
+ }
+ const c=[...cloud.files],l=[...local.files];
+ const r=await run({cloud,local,id:entry.id,choices:[0,-1]});
+ assert.deepEqual([...cloud.files],c);assert.deepEqual([...local.files],l);
+ assert.equal(r.opened.length,0);
+ assert.match(r.alerts.at(-1).message,/管理記録が両方/);
+});
