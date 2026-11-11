@@ -134,7 +134,7 @@ button:active{opacity:.8}@media(min-width:640px){.dock{left:calc((100vw - 640px)
     <div class="metric"><label><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M20 16A8 8 0 0 1 8 4 8 8 0 1 0 20 16Z"/></svg>睡眠予定</label><strong id="sleepInfo">—</strong></div>
   </section>
   <div class="searchrow" id="searchRow" hidden><input id="searchInput" type="search" placeholder="予定・タスクを検索" aria-label="検索"></div>
-  <div class="microtools"><div class="notice" id="notice" aria-live="polite">端末内の予定を表示します</div><button class="zoomBtn" id="zoomBtn" type="button" aria-label="タイムラインの表示倍率を切り替え">詳細に拡大</button></div>
+  <div class="microtools"><div class="notice" id="notice" aria-live="polite">端末内の予定を表示します</div><button class="zoomBtn" id="yosTestToggle" type="button" hidden aria-label="テスト予定を表示">テスト表示</button><button class="zoomBtn" id="zoomBtn" type="button" aria-label="タイムラインの表示倍率を切り替え">詳細に拡大</button></div>
   <div class="editor" id="editor"><b id="editorTitle">予定を追加</b><div class="fields"><input id="newTitle" placeholder="名前" style="flex:1 1 160px" aria-label="名前"><input id="newTime" type="time" value="10:00" aria-label="開始時刻"><input id="newDuration" type="number" min="5" max="1440" step="5" value="30" style="width:76px" aria-label="所要時間（分）"><select id="newKind" aria-label="種類"><option value="task">タスク</option><option value="habit">習慣</option><option value="schedule">予定</option></select></div><button id="saveBtn">追加する</button><button id="cancelEditor" class="light" type="button">閉じる</button></div>
   <div class="timeline-wrap" id="timelinePanel"><div class="timeline" id="tl"><div class="axis"></div><div class="nowline" id="nowLine" hidden><span class="nowbadge" id="nowBadge"></span></div></div></div>
   <section class="tabbox" id="taskPanel"><h3>タスク・未配置</h3><p class="muted">専門タスクの期限と、実行する時間は別。配置しても元データの期限・完了は変わりません。</p>
@@ -160,7 +160,18 @@ const localISO=d=>[d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String
 // Isolated native Scriptable file bridge; legacy WebView localStorage is never read or modified.
 const boot=window.YOS_CHARCOAL_BOOT||{},savedDays=boot.days&&typeof boot.days==='object'?boot.days:{};
 const todayISO=localISO(new Date()),calendarByDay=boot.calendarDays||{};
-const calendarItems=day=>(Array.isArray(calendarByDay[day])?calendarByDay[day]:[]).map((x,i)=>({id:200000000+i,t:String(x.title||'予定'),s:Number(x.start),d:Number(x.duration),f:1,kind:'schedule',source:'Apple Calendar'})).filter(x=>Number.isFinite(x.s)&&Number.isFinite(x.d)&&x.s>=0&&x.d>0&&x.s+x.d<=1440);
+// Only explicitly tagged fictional test events are hidden; never delete or rewrite the source calendar.
+const yosIsTestCalendarTitle=title=>/^(?:YOS-TEST(?:[-_]|$)|\[架空\]|【架空】)/i.test(String(title||'').trim());
+let showTestCalendar=false;
+const yosCalendarRows=day=>Array.isArray(calendarByDay[day])?calendarByDay[day]:[];
+const yosTestCount=day=>yosCalendarRows(day).filter(x=>yosIsTestCalendarTitle(x?.title)).length;
+const calendarItems=day=>yosCalendarRows(day).map((x,i)=>({id:200000000+i,t:String(x.title||'予定'),s:Number(x.start),d:Number(x.duration),f:1,kind:'schedule',source:'Apple Calendar',isTest:yosIsTestCalendarTitle(x.title)})).filter(x=>Number.isFinite(x.s)&&Number.isFinite(x.d)&&x.s>=0&&x.d>0&&x.s+x.d<=1440&&(showTestCalendar||!x.isTest));
+function yosRefreshTestToggle(){
+ const toggle=document.getElementById('yosTestToggle'),count=yosTestCount(selectedDay);
+ toggle.hidden=count===0;
+ toggle.textContent=showTestCalendar?'テストを隠す':'テスト'+count+'件';
+ toggle.setAttribute('aria-label',showTestCalendar?'テスト予定を非表示':('テスト予定'+count+'件を表示'));
+}
 const calendarRows=Array.isArray(calendarByDay[todayISO])?calendarByDay[todayISO]:[];
 const initialItems=calendarItems(todayISO);
 let stored=Object.prototype.hasOwnProperty.call(savedDays,todayISO)?savedDays[todayISO]:null;
@@ -334,6 +345,7 @@ function showDay(iso){
  isSample=false;
  selectedId=null;zoom=null;focus.classList.remove('show');editor.classList.remove('show');
  yosDefaultStart();planBox.textContent='';yosRenderSources();
+ yosRefreshTestToggle();
  note.textContent='端末の時間割 · Notion Tasks '+yosStatusWord(taskSource.status)+' · 習慣 '+yosStatusWord(habitSource.status);
  renderWeek();render();updateReview();window.scrollTo({top:0,behavior:'smooth'});
 }
@@ -370,6 +382,15 @@ function renderLists(){
 for(const b of document.querySelectorAll('[data-tab]'))b.onclick=()=>setTab(b.dataset.tab);
 document.getElementById('dateBtn').onclick=()=>{const picker=document.getElementById('datePicker');if(typeof picker.showPicker==='function')picker.showPicker();else picker.click()};
 document.getElementById('datePicker').onchange=e=>showDay(e.target.value);
+document.getElementById('yosTestToggle').onclick=()=>{
+ showTestCalendar=!showTestCalendar;
+ // Keep the current unsaved editable items in memory. Only refresh read-only calendar projections.
+ items=[...calendarItems(selectedDay),...items.filter(x=>x.source!=='Apple Calendar')];
+ selectedId=null;zoom=null;focus.classList.remove('show');
+ yosRefreshTestToggle();
+ note.textContent=showTestCalendar?'テスト予定を表示中 · 元カレンダーは変更していません':'テスト予定を非表示 · 元カレンダーは変更していません';
+ smoothRender();updateReview();
+};
 document.getElementById('zoomBtn').onclick=()=>{density=density==='overview'?'detail':'overview';scale=density==='overview'?27:56;document.getElementById('zoomBtn').textContent=density==='overview'?'詳細に拡大':'全体表示';render();};
 document.getElementById('searchBtn').onclick=()=>{const row=document.getElementById('searchRow');row.hidden=!row.hidden;if(!row.hidden){setTab('timeline');document.getElementById('searchInput').focus()}else{searchText='';document.getElementById('searchInput').value='';render()}};
 document.getElementById('searchInput').oninput=e=>{searchText=e.target.value.trim().toLocaleLowerCase();render()};
@@ -439,9 +460,9 @@ function render(){
 }
 document.getElementById('closeFocus').onclick=()=>{zoom=null;focus.classList.remove('show');smoothRender()};
 if(Array.isArray(stored)){note.textContent='保存済み時間割を表示 · Notion Tasks '+yosStatusWord(taskSource.status);}
-else if(calendarRows.length){note.textContent='Appleカレンダー '+items.length+'件を読み取り · 端末内編集';}
+else if(calendarRows.length){note.textContent='Appleカレンダー '+calendarRows.length+'件を読み取り'+(yosTestCount(todayISO)?' · テスト'+yosTestCount(todayISO)+'件は非表示':'')+' · 端末内で追加・編集';}
 else{note.textContent='端末内の予定はありません · 右上の追加から登録';}
-yosDefaultStart();renderWeek();render();updateReview();yosRenderSources();setInterval(updateNow,60000);
+yosDefaultStart();yosRefreshTestToggle();renderWeek();render();updateReview();yosRenderSources();setInterval(updateNow,60000);
 <\/script></body></html>`;
 
  const payload=JSON.stringify({days:state.days,calendarDays,taskSource,habitSource,generatedAt:new Date().toISOString()}).replace(/</g,'\\u003c');
