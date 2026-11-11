@@ -103,3 +103,34 @@ jobs:
           name: yos-ios-native-package
           path: ios-app/build/evidence/
           if-no-files-found: error
+
+  notification-browser:
+    name: Notification box 390px (${{ matrix.browser }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, webkit]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install test browser
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps ${{ matrix.browser }}
+      - name: Start existing YOS static server
+        run: |
+          python3 -m http.server 4173 --directory . > /tmp/yos-notification-browser.log 2>&1 &
+          for i in {1..30}; do
+            curl -fsS http://127.0.0.1:4173/yos/notification-box.html >/dev/null && exit 0
+            sleep 1
+          done
+          cat /tmp/yos-notification-browser.log
+          exit 1
+      - name: Check notification history and state controls
+        env:
+          YOS_BROWSER: ${{ matrix.browser }}
+        run: node yos/tests/notification-box-browser-smoke.mjs
