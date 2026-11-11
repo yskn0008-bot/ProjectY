@@ -26,6 +26,103 @@ const valid=x=>{
  if(!articles.length)throw Error("表示できる記事がありません");
  return {date:String(x.date||"発行日未確認"),issuedOn:/^\d{4}-\d{2}-\d{2}$/.test(x.issuedOn||"")?x.issuedOn:"",lead:String(x.lead||""),headline:String(x.headline||""),articles};
 };
+
+// YOS_JOURNAL_LOCAL_RELEVANCE_V1
+// Device only. Public article JSON is never modified with private task data.
+// Uses existing Scriptable Keychain credentials and existing private YOS sources.
+const taskSourceId="965c6086-32c1-463d-93b4-87a9cb69b3ad";
+const topicPatterns={
+ Money:/家計|資金|支払|返済|債務|借入|予算|銀行|税金|給付|補助|助成|物価|収支|費用|金融|生活支援|収入/i,
+ Work:/求人|就職|転職|収入|勤務|雇用|労働|副業|仕事探し|在宅|職業|タクシー|運転代行/i,
+ Health:/健康|運動|睡眠|柔軟|筋肉|通院|医療|病院|療養|痛み|ストレッチ|予防/i,
+ Self:/美容|外見|印象|肌|眉|髪型|ヒゲ|スキンケア|皮膚|自分磨き|身だしなみ/i,
+ Life:/住まい|住宅|賃貸|引越|家事|騒音|暮らし|光熱|家具|災害|防災|住環境/i
+};
+const localTopics=s=>Object.keys(topicPatterns).filter(k=>topicPatterns[k].test(String(s||"")));
+const propertyText=(p,key)=>Array.isArray(p?.[key])?p[key].map(x=>String(x?.plain_text||x?.text?.content||"")).join(""):"";
+const propertyChoice=p=>p?.select?.name||p?.status?.name||"";
+const currentStates=new Set(["次にやる","実行中","本人操作","待ち"]);
+function normalizeNotionTask(row){
+ const p=row?.properties||{};
+ return {title:propertyText(p["やること"],"title").slice(0,180),
+  state:propertyChoice(p["状態"]),priority:propertyChoice(p["優先度"]),
+  due:p["期限"]?.date?.start||"",
+  nextAction:propertyText(p["次の一手"],"rich_text").slice(0,240),
+  blocker:propertyText(p["ブロッカー"],"rich_text").slice(0,240),
+  area:propertyChoice(p["領域"])};
+}
+async function readNotionTasks(token){
+ let cursor=null,all=[];
+ for(let i=0;i<5;i++){
+  const req=new Request("https://api.notion.com/v1/data_sources/"+taskSourceId+"/query");
+  req.method="POST";
+  req.headers={"Authorization":"Bearer "+token,"Notion-Version":"2026-03-11","Content-Type":"application/json"};
+  req.timeoutInterval=12;
+  req.body=JSON.stringify({page_size:100,...(cursor?{start_cursor:cursor}:{})});
+  const data=await req.loadJSON();
+  if(req.response?.statusCode!==200||!Array.isArray(data?.results))throw Error("Notionのタスク取得に失敗");
+  all.push(...data.results.map(normalizeNotionTask));
+  if(!data.has_more)return all;
+  if(!data.next_cursor)throw Error("タスクの続きが不明");
+  cursor=data.next_cursor;
+ }
+ throw Error("タスク取得上限のため現在地を確定できません");
+}
+async function readWidgetTasks(token){
+ const req=new Request("https://project-y-yos-ai.vercel.app/api/yos/widget");
+ req.method="GET";
+ req.headers={"Authorization":"Bearer "+token,"Accept":"application/json"};
+ req.timeoutInterval=10;
+ const data=await req.loadJSON();
+ if(req.response?.statusCode!==200||!Array.isArray(data?.tasks))throw Error("既存のTasks表示を取得できません");
+ return data.tasks.map(t=>({title:String(t.title||""),state:String(t.state||""),
+  priority:String(t.priority||""),due:String(t.due||""),nextAction:String(t.nextAction||""),
+  blocker:"",area:""}));
+}
+async function readLocalProgress(){
+ if(typeof Keychain==="undefined")return {status:"unavailable",tasks:[],source:""};
+ let error="";
+ if(Keychain.contains("YOS_NOTION_INTEGRATION_TOKEN")){
+  try{
+   const token=String(Keychain.get("YOS_NOTION_INTEGRATION_TOKEN")||"").trim();
+   if(token)return {status:"ready",tasks:await readNotionTasks(token),source:"notion"};
+  }catch(e){error=String(e.message||e);}
+ }
+ if(Keychain.contains("MY_WAY_WIDGET_TOKEN")){
+  try{
+   const token=String(Keychain.get("MY_WAY_WIDGET_TOKEN")||"").trim();
+   if(token)return {status:"partial",tasks:await readWidgetTasks(token),source:"widget"};
+  }catch(e){error=String(e.message||e);}
+ }
+ return {status:error?"error":"unavailable",tasks:[],source:""};
+}
+function rankForLocalProgress(articles,progress,now=new Date()){
+ const active=(progress.tasks||[]).filter(t=>currentStates.has(t.state)&&t.title).slice(0,500);
+ const tDay=Date.UTC(now.getFullYear(),now.getMonth(),now.getDate());
+ const ranked=articles.map((a,i)=>{
+  const articleTopics=localTopics([a.title,a.summary,a.category].join(" "));
+  let best=null;
+  for(const t of active){
+   const taskTopics=localTopics([t.title,t.nextAction,t.blocker,t.area].join(" "));
+   const overlap=articleTopics.filter(x=>taskTopics.includes(x));
+   if(!overlap.length)continue;
+   const urgency=({P0:60,P1:38,P2:16,P3:4})[t.priority]||0;
+   const stateBonus=({実行中:24,本人操作:20,"次にやる":15,待ち:5})[t.state]||0;
+   const dueDate=Date.parse(t.due);const days=Number.isFinite(dueDate)?Math.floor((dueDate-tDay)/86400000):null;
+   const deadline=days!==null&&days>=0&&days<=7?20:days!==null&&days<0?6:0;
+   const score=30+urgency+stateBonus+deadline+Math.min(12,overlap.length*4);
+   if(!best||score>best.score)best={score,topic:overlap[0],state:t.state};
+  }
+  return {...a,_yosMatch:best,_yosOriginalIndex:i};
+ });
+ // Never label unlinked public articles as tailored to the user's actual state.
+ if(!["ready","partial"].includes(progress.status))return {articles:ranked,status:"unavailable",matched:0};
+ const count=ranked.filter(a=>a._yosMatch).length;
+ const ordered=[...ranked].sort((a,b)=>(b._yosMatch?.score||0)-(a._yosMatch?.score||0)||a._yosOriginalIndex-b._yosOriginalIndex);
+ return {articles:ordered,status:progress.status,matched:count};
+}
+// End local-only progress logic.
+
 let issue=null,warning="";
 try{
  let incoming=args.shortcutParameter;
@@ -34,7 +131,12 @@ try{
  if(!issue){try{const req=new Request("https://raw.githubusercontent.com/yskn0008-bot/ProjectY/main/ios-app/scriptable/journal/latest.json");req.timeoutInterval=12;const response=await req.loadString();if(req.response?.statusCode!==200)throw Error("HTTP "+req.response?.statusCode);issue=valid(JSON.parse(response));if(!fm.fileExists(dir))fm.createDirectory(dir,true);fm.writeString(file,JSON.stringify(issue))}catch(e){warning="最新版取得不可："+String(e.message||e)}}
  if(!issue&&fm.fileExists(file))issue=valid(JSON.parse(fm.readString(file)));
 }catch(e){warning=String(e.message||e)}
-const issueHeadline=issue?.headline||issue?.articles?.[0]?.title||"今日の視点を、明日の力に。";
+let relevance={status:"unavailable",matched:0,articles:issue?.articles||[]};
+try{
+ if(issue){const local=await readLocalProgress();relevance=rankForLocalProgress(issue.articles,local);}
+}catch(_){relevance={status:"unavailable",matched:0,articles:issue?.articles||[]};}
+if(issue)issue.articles=relevance.articles;
+const issueHeadline=issue?.articles?.[0]?.title||issue?.headline||"今日の視点を、明日の力に。";
 const todayJst=new Date(Date.now()+9*3600000).toISOString().slice(0,10);
 const issueStatus=!issue?"取得できませんでした":issue.issuedOn?(issue.issuedOn===todayJst?"本日号":issue.issuedOn<todayJst?"保存済みの過去号":"発行日を確認してください"):"発行日未確認";
 const ageDays=issue?.issuedOn&&/^\d{4}-\d{2}-\d{2}$/.test(issue.issuedOn)
@@ -42,6 +144,11 @@ const ageDays=issue?.issuedOn&&/^\d{4}-\d{2}-\d{2}$/.test(issue.issuedOn)
 const ageLabel=issueStatus==="保存済みの過去号"&&Number.isFinite(ageDays)&&ageDays>=1?" · "+ageDays+"日前":"";
 const editionLabel=issueStatus+ageLabel;
 const issueNote=warning||issueStatus!=="本日号"?`<div class="notice" role="status"><strong>${esc(editionLabel)}</strong>${issue?.issuedOn?`<p>発行日：${esc(issue.issuedOn)}</p>`:""}${warning?`<p>${esc(warning)}</p>`:""}</div>`:"";
+const relevanceLabel=relevance.status==="ready"
+ ?relevance.matched?"Notionの現在タスクとの関連候補 "+relevance.matched+"件":"Notionを確認しましたが、この号に直接一致する記事はありません"
+ :relevance.status==="partial"?"既存タスク表示（最大3件）との暫定照合 · "+relevance.matched+"件"
+ :"Notionの現在地は未照合 · 一般記事を表示中";
+const relevanceBadge='<div class="notice" role="status"><strong>'+esc(relevanceLabel)+'</strong><p>タスクの記録上の状態に基づく参考順位です。実際の達成や本人への適合は未確認です。</p></div>';
 const leadArticle=issue?.articles?.[0];
 const coverPhoto=leadArticle?.image?`<div class="cover-photo"><img src="${esc(leadArticle.image)}" alt="${esc(leadArticle.imageCaption||"巻頭記事の写真")}" />${leadArticle.imageKind==="illustrative"?'<span class="image-label">イメージ写真</span>':""}</div>`:"";
 const stories=(issue?.articles||[]).map((a,i)=>{
@@ -49,10 +156,11 @@ const stories=(issue?.articles||[]).map((a,i)=>{
  const photo=a.image?`<figure class="story-photo"><img loading="lazy" src="${esc(a.image)}" alt="${esc(a.imageCaption||a.title)}"/>${a.imageCaption||a.imageKind==="illustrative"||a.imageCredit?`<figcaption>${a.imageKind==="illustrative"?"イメージ写真":""}${a.imageCaption?` · ${esc(a.imageCaption)}`:""}${a.imageCredit?` · 写真：${esc(a.imageCredit)}`:""}</figcaption>`:""}</figure>`:"";
  const keyPoints=a.keyPoints.length?`<ul class="key-points">${a.keyPoints.map(t=>`<li>${esc(t)}</li>`).join("")}</ul>`:"";
  const brief=a.summary?`<section class="brief"><div class="section-label"><span>THE BRIEF</span><span>この記事の要約</span></div><p>${esc(a.summary)}</p>${keyPoints}</section>`:"";
+ const localReason=a._yosMatch?'<div class="local-match">関連する現在の領域：'+esc(a._yosMatch.topic)+' · '+esc(a._yosMatch.state)+'（内容の一致候補）</div>':"";
  const reason=a.reason?`<section class="personal"><div class="section-label"><span>WHY IT MATTERS</span><span>今の自分に必要な理由</span></div><p>${esc(a.reason)}</p></section>`:"";
  const caveat=a.caveat?`<p class="caveat"><b>確認事項</b> ${esc(a.caveat)}</p>`:"";
  const action=a.action?`<section class="next-move"><span>YOUR NEXT MOVE / 今日の一歩</span><p>${esc(a.action)}</p></section>`:"";
- return `<article id="story-${i+1}" class="story ${i===0?"top-story":""}">${photo}<div class="inner"><div class="story-topline"><span>${number} / ${String(issue.articles.length).padStart(2,"0")}</span><span>${esc(a.category)}</span></div><h2>${esc(a.title)}</h2>${brief}${reason}${caveat}${action}<a class="read-link" href="${esc(a.link)}" rel="noopener noreferrer" target="_blank">元の記事を読む <span aria-hidden="true">↗</span></a><footer><strong>出典：</strong> ${esc(a.source)}<span class="source-date">掲載・更新日：${esc(a.sourceDate||"未確認")}</span></footer></div></article>`;
+ return `<article id="story-${i+1}" class="story ${i===0?"top-story":""}">${photo}<div class="inner"><div class="story-topline"><span>${number} / ${String(issue.articles.length).padStart(2,"0")}</span><span>${esc(a.category)}</span></div><h2>${esc(a.title)}</h2>${brief}${localReason}${reason}${caveat}${action}<a class="read-link" href="${esc(a.link)}" rel="noopener noreferrer" target="_blank">元の記事を読む <span aria-hidden="true">↗</span></a><footer><strong>出典：</strong> ${esc(a.source)}<span class="source-date">掲載・更新日：${esc(a.sourceDate||"未確認")}</span></footer></div></article>`;
 }).join("");
 const indexNav=issue?.articles?.length?`<nav class="issue-index" aria-label="今号の記事目次"><div class="index-heading"><span>IN THIS ISSUE</span><span>${issue.articles.length} STORIES</span></div><ol>${issue.articles.map((a,i)=>`<li><a href="#story-${i+1}"><span>${String(i+1).padStart(2,"0")} · ${esc(a.category)}</span><strong>${esc(a.title)}</strong></a></li>`).join("")}</ol></nav>`:"";
 const css=`*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:#151719;color:#f6f2ea;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN",sans-serif;-webkit-font-smoothing:antialiased}
@@ -73,5 +181,6 @@ const editorialCss=`
 .story:not(.top-story) .story-photo img{height:205px}.story:not(.top-story) .inner{padding-top:20px}
 @media(min-width:700px){.issue-index{max-width:900px;margin:0 auto 24px}.issue-index ol{display:grid;grid-template-columns:1fr 1fr;column-gap:28px}.issue-index li:nth-child(2){border-top:0}.story{max-width:900px;margin-left:auto;margin-right:auto}}
 `;
-const html=`<!doctype html><html lang="ja"><head><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta charset="utf-8"><title>YOS JOURNAL</title><style>${css}${editorialCss}</style></head><body><header class="cover">${coverPhoto}<div><div class="mast"><span>PERSONAL MAGAZINE</span><span>DAILY / YOS</span></div><h1 class="logo"><span>YOS</span><span>JOURNAL.</span></h1><div class="cover-tag">THE EDITION MADE FOR ONE.</div></div><div class="cover-main"><span class="edition-state ${issueStatus==="保存済みの過去号"?"past":""}">${esc(editionLabel)}</span><span class="cover-number">COVER STORY — 01</span><h2 class="cover-headline">${esc(issueHeadline)}</h2><p class="cover-lead">${esc(issue?.lead||"今の自分に、読む価値のある情報だけを。")}</p><div class="issue-meta"><span>${esc(issue?.date||new Date().toLocaleDateString("ja-JP"))}</span><span>${issue?.articles.length||0} STORIES</span></div></div></header>${issueNote}${indexNav}<main>${stories||`<section class="empty"><small>AWAITING EDITION</small><h2>朝刊を取得できませんでした。</h2><p>通信状況と公開状況を確認してください。</p>${warning?`<p>${esc(warning)}</p>`:""}</section>`}</main></body></html>`;
+const localCss='.local-match{padding:12px 15px;background:#2e3836;border-left:3px solid #a3c0b1;margin:17px 0;color:#f6f2ea;font-size:12px;font-weight:700;line-height:1.7}';
+const html=`<!doctype html><html lang="ja"><head><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta charset="utf-8"><title>YOS JOURNAL</title><style>${css}${editorialCss}${localCss}</style></head><body><header class="cover">${coverPhoto}<div><div class="mast"><span>PERSONAL MAGAZINE</span><span>DAILY / YOS</span></div><h1 class="logo"><span>YOS</span><span>JOURNAL.</span></h1><div class="cover-tag">THE EDITION MADE FOR ONE.</div></div><div class="cover-main"><span class="edition-state ${issueStatus==="保存済みの過去号"?"past":""}">${esc(editionLabel)}</span><span class="cover-number">COVER STORY — 01</span><h2 class="cover-headline">${esc(issueHeadline)}</h2><p class="cover-lead">${esc(issue?.lead||"今の自分に、読む価値のある情報だけを。")}</p><div class="issue-meta"><span>${esc(issue?.date||new Date().toLocaleDateString("ja-JP"))}</span><span>${issue?.articles.length||0} STORIES</span></div></div></header>${issueNote}${relevanceBadge}${indexNav}<main>${stories||`<section class="empty"><small>AWAITING EDITION</small><h2>朝刊を取得できませんでした。</h2><p>通信状況と公開状況を確認してください。</p>${warning?`<p>${esc(warning)}</p>`:""}</section>`}</main></body></html>`;
 const web=new WebView();await web.loadHTML(html);await web.present(false);Script.complete();
