@@ -420,6 +420,7 @@ function updateOverview(){
 }
 function parseDay(iso){const p=iso.split('-').map(Number);return new Date(p[0],p[1]-1,p[2],12);}
 function showDay(iso){
+ hideSwipeDelete();
  if(!/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(iso))return;
  const parsed=parseDay(iso);if(Number.isNaN(parsed.getTime())||localISO(parsed)!==iso)return;
  if(iso===selectedDay){hideMonthPicker();return;}
@@ -546,6 +547,7 @@ for(const b of document.querySelectorAll('[data-view]'))b.onclick=()=>setCalenda
 document.getElementById('weekPrev').onclick=()=>{const d=parseDay(selectedDay);d.setDate(d.getDate()-7);showDay(localISO(d))};
 document.getElementById('weekNext').onclick=()=>{const d=parseDay(selectedDay);d.setDate(d.getDate()+7);showDay(localISO(d))};
 function setTab(name){
+ if(name!=='timeline')hideSwipeDelete();
  for(const b of document.querySelectorAll('[data-tab]')){b.classList.toggle('active',b.dataset.tab===name);b.setAttribute('aria-current',b.dataset.tab===name?'page':'false');}
  document.getElementById('calendarModes').hidden=name!=='timeline';
  document.getElementById('timelinePanel').style.display=name==='timeline'&&calendarMode==='day'?'block':'none';
@@ -615,6 +617,74 @@ document.getElementById('hideFixed').onclick=()=>{
 };
 
 const vibrate=()=>{try{navigator.vibrate?.(8)}catch(e){}};
+
+const gestureBar=document.getElementById('gestureDelete');
+function hideSwipeDelete(){
+ swipeDeleteId=null;gestureBar.hidden=true;
+}
+function showSwipeDelete(item){
+ if(!item||item.f||item.kind!=='task')return;
+ swipeDeleteId=item.id;focus.classList.remove('show');
+ document.getElementById('gestureDeleteTitle').textContent='「'+item.t+'」';
+ gestureBar.hidden=false;
+}
+document.getElementById('gestureDeleteCancel').onclick=hideSwipeDelete;
+document.getElementById('gestureDeleteConfirm').onclick=()=>{
+ const item=items.find(x=>x.id===swipeDeleteId);
+ if(!item||item.f||item.kind!=='task'){hideSwipeDelete();return;}
+ items=items.filter(x=>x.id!==item.id);hideSwipeDelete();
+ note.textContent=persist()?'「'+item.t+'」の削除を保存中':'削除の保存に失敗しました';
+ smoothRender();updateReview();
+};
+function toggleTaskDone(item){
+ const target=items.find(x=>x.id===item.id);
+ if(!target||target.f||target.kind!=='task')return;
+ hideSwipeDelete();target.done=!target.done;
+ const saved=persist();
+ note.textContent='「'+target.t+'」を'+(target.done?'完了':'未完了に戻した')+(saved?' · 端末内で保存中':' · 保存準備に失敗');
+ smoothRender();updateReview();
+}
+// Only local, movable tasks use this gesture system; fixed Apple records and other kinds
+// retain their existing read-only details / vertical time dragging.
+function wireTaskGestures(el,item){
+ let active=null,startX=0,startY=0,lastX=0,lastY=0,mode='tap',timer=null;
+ const clearTimer=()=>{if(timer!==null){clearTimeout(timer);timer=null;}};
+ const begin=(x,y,id)=>{
+  if(active!==null)return;
+  active=id;startX=lastX=x;startY=lastY=y;mode='tap';
+  clearTimer();
+  timer=setTimeout(()=>{
+   if(active!==null&&mode==='tap'){mode='long';active=null;beginLocalEdit(item);}
+   timer=null;
+  },480);
+ };
+ const move=(x,y,event)=>{
+  if(active===null)return;
+  lastX=x;lastY=y;
+  const dx=x-startX,dy=y-startY;
+  if(Math.abs(dx)>10||Math.abs(dy)>10)clearTimer();
+  if(dx< -12&&Math.abs(dx)>Math.abs(dy)*1.25){
+   mode='swipe';event?.preventDefault();
+   el.style.transform='translate3d('+Math.max(-70,dx)+'px,0,0)';
+  }else if(Math.abs(dy)>10&&mode!=='swipe'){mode='scroll';}
+ };
+ const finish=cancelled=>{
+  if(active===null)return;
+  active=null;clearTimer();el.style.transform='';
+  if(cancelled||mode==='scroll'||mode==='long')return;
+  if(mode==='swipe'){if(lastX-startX< -45)showSwipeDelete(item);return;}
+  if(mode==='tap')toggleTaskDone(item);
+ };
+ el.addEventListener('contextmenu',e=>e.preventDefault());
+ el.addEventListener('touchstart',e=>{if(e.touches.length===1)begin(e.touches[0].clientX,e.touches[0].clientY,'touch')},{passive:true});
+ el.addEventListener('touchmove',e=>{if(active==='touch'&&e.touches.length)move(e.touches[0].clientX,e.touches[0].clientY,e)},{passive:false});
+ el.addEventListener('touchend',()=>{if(active==='touch')finish(false)});
+ el.addEventListener('touchcancel',()=>{if(active==='touch')finish(true)});
+ el.addEventListener('pointerdown',e=>{if(e.pointerType==='touch'||e.button!==0)return;begin(e.clientX,e.clientY,e.pointerId);el.setPointerCapture?.(e.pointerId)});
+ el.addEventListener('pointermove',e=>{if(active===e.pointerId)move(e.clientX,e.clientY,e)});
+ el.addEventListener('pointerup',e=>{if(active===e.pointerId)finish(false)});
+ el.addEventListener('pointercancel',e=>{if(active===e.pointerId)finish(true)});
+}
 function smoothRender(activeId,oldActiveRect){
  const before=new Map([...tl.querySelectorAll('.card')].map(n=>[n.dataset.id,n.getBoundingClientRect()]));
  if(activeId&&oldActiveRect)before.set(String(activeId),oldActiveRect);
@@ -636,16 +706,29 @@ function render(){
    const start=yFor(group[0].s);
    const offset=density==='overview'?Math.max(0,priorVisualBottom+3-start):0;
    for(const item of group)lanes.get(item).offset=offset;
-   priorVisualBottom=Math.max(priorVisualBottom,...group.map(item=>yFor(item.s)+offset+Math.max(density==='overview'?17:22,yFor(item.s+item.d)-yFor(item.s)-2)));
+   priorVisualBottom=Math.max(priorVisualBottom,...group.map(item=>yFor(item.s)+offset+Math.max(item.kind==='task'&&!item.f?32:density==='overview'?17:22,yFor(item.s+item.d)-yFor(item.s)-2)));
  }
  sorted.forEach(item=>{
-   const natural=yFor(item.s);const height=Math.max(density==='overview'?17:22,yFor(item.s+item.d)-natural-2);const top=natural+(lanes.get(item)?.offset||0);
+   const natural=yFor(item.s);const height=Math.max(item.kind==='task'&&!item.f?32:density==='overview'?17:22,yFor(item.s+item.d)-natural-2);const top=natural+(lanes.get(item)?.offset||0);
    if(top>natural+2)pushed++;
    lastBottom=top+height;
    const el=document.createElement('div');el.className='card '+(item.kind==='habit'?'habit':item.kind==='task'?'task':'schedule');
    el.style.top=top+'px';el.style.height=height+'px';
    const lane=lanes.get(item);if(lane&&lane.count>1){el.style.left='calc(73px + (100% - 73px) * '+(lane.lane/lane.count)+')';el.style.width='calc((100% - 73px) / '+lane.count+' - 3px)';el.style.right='auto';el.classList.add('lane')}
-   const iconEl=document.createElement('span');iconEl.innerHTML=eventIcon(item);el.append(iconEl.firstChild);
+   if(item.kind==='task'&&!item.f){
+    const linked=typeof item.shortcut==='string'&&item.shortcut.length>0;
+    const action=document.createElement(linked?'a':'button');
+    action.className='shortcut-launch'+(linked?' linked':'');
+    action.textContent='⚡';
+    action.setAttribute('aria-label',linked?'ショートカット「'+item.shortcut+'」を実行':'このタスクにショートカットを設定');
+    if(linked){action.href='shortcuts://run-shortcut?name='+encodeURIComponent(item.shortcut);}
+    else{action.type='button';action.onclick=e=>{e.stopPropagation();beginLocalEdit(item,true)};}
+    for(const type of ['touchstart','touchmove','touchend','touchcancel','pointerdown','pointermove','pointerup','pointercancel'])action.addEventListener(type,e=>e.stopPropagation());
+    action.addEventListener('click',e=>e.stopPropagation());
+    el.append(action);
+   }else{
+    const iconEl=document.createElement('span');iconEl.innerHTML=eventIcon(item);el.append(iconEl.firstChild);
+   }
    const titleEl=document.createElement('b');titleEl.textContent=item.t;el.append(titleEl);
    const timeEl=document.createElement('small');timeEl.textContent=fmt(item.s)+'–'+fmt(item.s+item.d);el.append(timeEl);
    if(item.t==='睡眠'||item.t==='就寝')el.classList.add('sleep');
@@ -661,6 +744,7 @@ function render(){
    const startDrag=(y,id)=>{downY=latestY=y;downS=previewS=item.s;startedAt=performance.now();moved=false;holding=false;activePointer=id};
    const moveDrag=y=>{if(activePointer===null)return;latestY=y;const distance=Math.abs(latestY-downY);if(distance>3&&!item.f){holding=true;moved=true;el.classList.add('moving');if(!frame)frame=requestAnimationFrame(paint)}};
    const endDrag=cancelled=>{if(activePointer===null)return;activePointer=null;if(frame){cancelAnimationFrame(frame);frame=0}const releasedRect=el.getBoundingClientRect();el.classList.remove('moving');el.style.transform='';if(holding&&moved&&!cancelled){const offset=latestY-downY;previewS=Math.max(0,Math.min(1440-item.d,Math.round((downS+offset/scale*60)/5)*5));item.s=previewS;const clashes=items.filter(x=>x!==item&&item.s<x.s+x.d&&x.s<item.s+item.d);note.textContent=(clashes.length?'時間が重複：'+clashes.map(x=>x.t).join('、'):'移動しました')+(persist()?'（保存処理中）':'（保存処理失敗）');smoothRender(item.id,releasedRect)}else if(!moved&&!cancelled){showFocusFor(item);smoothRender()}holding=false};
+   if(item.kind==='task'&&!item.f){wireTaskGestures(el,item)}else{
    // Touch events are used on iOS WebView to avoid pointer capture cancelling a vertical drag.
    el.addEventListener('touchstart',e=>{if(e.touches.length!==1)return;startDrag(e.touches[0].clientY,'touch')},{passive:true});
    el.addEventListener('touchmove',e=>{if(activePointer!=='touch'||!e.touches.length)return;if(!item.f){e.preventDefault();moveDrag(e.touches[0].clientY)}},{passive:false});
@@ -670,6 +754,7 @@ function render(){
    el.addEventListener('pointermove',e=>{if(activePointer===e.pointerId)moveDrag(e.clientY)});
    el.addEventListener('pointerup',e=>{if(activePointer===e.pointerId)endDrag(false)});
    el.addEventListener('pointercancel',e=>{if(activePointer===e.pointerId)endDrag(true)});
+   }
  });
  tl.style.height=(Math.max(bottom,lastBottom)+12)+'px';updateNow();
  if(pushed&&note.textContent.includes('仮データ'))note.textContent='枠の高さは所要時間に対応。重複時は縦にずらして表示（未保存）';
