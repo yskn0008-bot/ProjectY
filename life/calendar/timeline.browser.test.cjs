@@ -21,6 +21,9 @@ const FIXED='2026-11-11T09:00:00+09:00';
   await page.goto(url,{waitUntil:'domcontentloaded'});
   await page.waitForFunction(()=>Boolean(window.YOS_TIMELINE_DEBUG));
   const root=page.locator('#tlFrame');
+  assert.equal(await page.locator('#tlCalendar svg').count(),1,'glass calendar icon must be visible');
+  assert.equal(await page.locator('#tlExitEdit svg').count(),1,'editor back icon must be visible');
+
   assert.equal(await root.getAttribute('data-view'),'home','first screen must be timeline home');
   assert.equal(await root.getAttribute('data-skin'),'glass','approved glass reference is the default');
   assert.equal(await page.locator('#demoBanner').isHidden(),true,'no example schedule becomes real data');
