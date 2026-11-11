@@ -6,9 +6,9 @@
   "repository": "yskn0008-bot/ProjectY",
   "pullRequest": 654,
   "baselineHead": "6ffdc056138301e3a1a70eac2f635a761277da64",
-  "candidateCodeCommit": "802af090cb7cbcbc81be56f38bdaceee1b825eea",
-  "packageSHA256": "67e1abaeee5d3f7251bd1fdbd2c556d03d31aa329fc9d2108a6887dcd037a5c5",
-  "scriptSHA256": "8ce8cb121b21063d4b287f0cef256f05203ee63a27f49217a292b07d9375407e",
+  "candidateCodeCommit": "e28d6acbd4e851dab1d60dd0a3b00452700f85f1",
+  "packageSHA256": "070577f3b4cecd9ecf4794f26d68b76576060ca302e3b2f2620e2a0c5b4f329e",
+  "scriptSHA256": "4e7ad93cbf8ce64c1e7b4985547caaf0ce9e949a37dfc8d73f647ca11f529c78",
   "codeImplemented": [
     "24h exact geometry",
     "fixed source event protection",
@@ -87,6 +87,23 @@
       ],
       "physicallyVerified": false,
       "userAcceptedDynamic": false
+    },
+    "timelineVisualMobile20261111": {
+      "head": "cdcaa0015cd3acc6254636348112e42b0b7f0169",
+      "browser": "Chromium mobile 390x844 @3x",
+      "browserPassed": true,
+      "node": {
+        "pass": 55,
+        "fail": 0
+      },
+      "originalGlassDateCropStillUnchanged": true,
+      "knownBrowserVisualGap": "approved reference shows a 6:00–24:00 time rail; current HOME remains primarily a vertical agenda",
+      "fixedBugs": [
+        "calendar button no longer empty",
+        "edit-back button no longer empty"
+      ],
+      "evidence": "GitHub Life Safety run 42958896104, Morning/Night handoff Chromium job 130320553724, artifacts 13828058539",
+      "onDevice": false
     }
   },
   "notVerified": [
@@ -183,10 +200,11 @@
     "assetCommit": "bd67b996c0da7e54e99b7a3528c2a3233e329c6b",
     "writes": "None; no executable/plan/source-data writes",
     "testEvidence": "reference-wallpaper-test-results.txt:5/5 pass; no physical iPhone render claimed",
-    "next": "Use existing daystream-timeline-ui.js/CSS and build-timeline-review.py to restore approved HOME vertical time-axis, improve overlapping card legibility and initial editor focus; rebuild bridge/pinned package safely, rerun CI plus real browser capture, and obtain on-device approval before merge.",
+    "next": "Restore approved 6:00–24:00 vertical time rail in functional glass HOME using existing UI/CSS/build pipeline; preserve real event times, no invented events, avoid unreadable overlapping cards. Re-run focused tests and 390px screenshot and obtain iPhone acceptance before merge.",
     "visualApproval": "Static 557x1135 glass crop approved only; interactive 24-hour display not yet visually accepted",
     "checks": "Approved static crop unchanged, 24h geometry, collisions, touch-move feedback, cancellation, explicit save/readback, fixed Apple event protection, and no sample-data import passed existing regression suite.",
-    "visualGate": "Chromium 390px screenshot reviewed, functionality passed but visual fidelity BLOCKED. Initial reference shows 6:00-24:00 time rail; HOME currently shows unordered time sequence cards. Fix in existing builder/skins; do not add new app or fake user events."
+    "visualGate": "PR browser visuals captured and analyzed: controls fixed, but temporal rail layout differs substantially from approved screenshot. Visual acceptance blocked.",
+    "installedScriptableVersion": "Unconfirmed; first time .scriptable UTI import failed in separate shared installer workflow."
   },
   "visualApproval": {
     "status": "STATIC_CROP_APPROVED",
