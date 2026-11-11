@@ -28,7 +28,7 @@ jobs:
         with:
           node-version: '22'
       - name: Test editorial safety
-        run: node --test ios-app/tests/journal-daily-editor.test.mjs ios-app/tests/journal-publication-gate.test.mjs ios-app/tests/journal-editorial-viewer.test.mjs ios-app/tests/journal-isolated-installer.test.mjs
+        run: node --test ios-app/tests/journal-daily-editor.test.mjs ios-app/tests/journal-publication-gate.test.mjs ios-app/tests/journal-local-relevance.test.mjs ios-app/tests/journal-editorial-viewer.test.mjs ios-app/tests/journal-isolated-installer.test.mjs
       - name: Prepare public-source draft
         run: node ios-app/scriptable/journal/daily-editor.mjs
         env:
