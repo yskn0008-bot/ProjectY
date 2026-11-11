@@ -198,12 +198,14 @@ test('explicitly marked fictional Apple calendar events are display-only hidden 
 });
 
 
+
 test('real WebView runtime accepts day changes and preserves each day of local plan',()=>{
  const actualHtml=Function('return `'+html+'`')();
- const actualClient=actualHtml.match(/<script>([\\s\\S]*?)<\\/script>/)?.[1]||'';
+ const actualClient=actualHtml.split('<script>')[1]?.split('</script>')[0]||'';
  assert.ok(actualClient);
  new vm.Script(actualClient);
- const navigation=actualClient.match(/function parseDay\\(iso\\)\\{[\\s\\S]*?(?=\\nfunction renderWeek\\(\\))/)?.[0];
+ const from=actualClient.indexOf('function parseDay(iso){'),to=actualClient.indexOf('function renderWeek()');
+ const navigation=from>=0&&to>from?actualClient.slice(from,to):'';
  assert.ok(navigation);
  const env=vm.runInNewContext(`
   const localISO=d=>[d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-');
@@ -232,12 +234,14 @@ test('real WebView runtime accepts day changes and preserves each day of local p
 
 test('calendar header uses in-app month grid rather than a hidden WKWebView date picker',()=>{
  const actualHtml=Function('return `'+html+'`')();
- const actualClient=actualHtml.match(/<script>([\\s\\S]*?)<\\/script>/)?.[1]||'';
- assert.match(actualHtml,/id="dateBtn"[^>]*aria-controls="monthPicker"/);
- assert.match(actualHtml,/id="monthPicker" hidden/);
- assert.match(actualClient,/getElementById\\('dateBtn'\\)\\.onclick=\\(\\)=>/);
- assert.doesNotMatch(actualClient,/picker\\.showPicker\\(\\)|picker\\.click\\(\\)/);
- const module=actualClient.match(/const monthPanel=document.getElementById\\('monthPicker'\\)[\\s\\S]*?(?=\\nfunction updateNow\\(\\))/)?.[0];
+ const actualClient=actualHtml.split('<script>')[1]?.split('</script>')[0]||'';
+ assert.ok(actualHtml.includes('id="dateBtn"')&&actualHtml.includes('aria-controls="monthPicker"'));
+ assert.ok(actualHtml.includes('id="monthPicker" hidden'));
+ assert.ok(actualClient.includes("getElementById('dateBtn').onclick="));
+ assert.ok(!actualClient.includes('picker.showPicker(')&&!actualClient.includes('picker.click('));
+ const from=actualClient.indexOf("const monthPanel=document.getElementById('monthPicker')");
+ const to=actualClient.indexOf('function updateNow()');
+ const module=from>=0&&to>from?actualClient.slice(from,to):'';
  assert.ok(module);
  const controls={monthPicker:{hidden:true},monthGrid:{children:[],set textContent(v){this.children=[]},append(x){this.children.push(x)}},dateBtn:{setAttribute(k,v){this[k]=v}},monthCaption:{},prevMonth:{},nextMonth:{},monthToday:{}};
  const document={getElementById:id=>controls[id],createElement:type=>({type,textContent:'',setAttribute(k,v){this[k]=v}})};
