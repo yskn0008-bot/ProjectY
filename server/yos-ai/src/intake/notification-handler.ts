@@ -188,7 +188,7 @@ export function createNotificationHandler(options:{
     const found=parseRows(blocks).find(e=>e.id===id);
     if(!found?.aiState)throw new Error('AI notification not found');
     return result({ok:true,id,duplicate:true,category,aiState:found.aiState,
-      decision:'YOS_SILENT',alertText:''});
+      analysisText:found.text.replace(/^発信元:[^\n]*\n/u,''),decision:'YOS_SILENT',alertText:''});
   }
   async function authorized(request:Request):Promise<'capture'|'viewer'|null> {
     const token=/^Bearer ([^\s]{16,512})$/u.exec(request.headers.get('authorization')??'')?.[1];
@@ -341,7 +341,8 @@ export function createNotificationHandler(options:{
       // Classification is metadata, not an instruction to record a payment or create a task.
       await append(eventBlock({id,at:event.occurredAt,category,text:safe,sourceApp:event.sourceApp,decisionEngine:event.decisionEngine}));
       await options.redis.command<string>(['SET',key,'done','EX',2592000]);
-      if(aiMode)return result({ok:true,id,duplicate:false,category,aiState:'pending',decision:'YOS_SILENT',alertText:''},201);
+      if(aiMode)return result({ok:true,id,duplicate:false,category,aiState:'pending',analysisText:safe,
+        decision:'YOS_SILENT',alertText:''},201);
       return result({ok:true,id,duplicate:false,category,...decision,alertRequiresAck:decision.decision==='YOS_ALERT'},201);
     }catch{
       // Keep the pending receipt: a timed-out PATCH may have actually succeeded.

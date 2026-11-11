@@ -4,7 +4,7 @@
 
 以下はPR #668内の実装仕様であり、本人の既存「通知受信」へ自動反映された手順ではない。元ショートカットは変更しない。AとBの本番トリガーを同時に有効化しない。
 
-1. 複製したA検証用ショートカットで、ChatGPT実行より**先に**同じ通知APIへ `POST {"text":"通知のTitleとBody","sourceApp":"取得できたアプリ名","eventId":"安定した通知ID","decisionEngine":"chatgpt"}` を送る。成功応答の `id` を保持する。保存失敗時はChatGPT判定を成功扱いせず、元アプリの通知を維持する。
+1. 複製したA検証用ショートカットで、ChatGPT実行より**先に**同じ通知APIへ `POST {"text":"通知のTitleとBody","sourceApp":"取得できたアプリ名","eventId":"安定した通知ID","decisionEngine":"chatgpt"}` を送る。成功応答の `id` と `analysisText` を保持する。ChatGPTアクションには**応答の秘匿済み `analysisText` だけ**を入力し、元のTitle/Bodyや通知オブジェクト全体を直接渡さない。保存失敗、`analysisText` の欠落・空値ではChatGPTを呼ばず、元アプリの通知を維持する。再送時も同じIDに保存済みの秘匿本文を返す。
 2. ChatGPTの応答が `YOS_ALERT` または `YOS_SILENT` と確認できたときだけ、同じAPIへ `POST {"action":"ai-result","id":"保存応答のid","decision":"YOS_ALERT","summary":"機密を含まない短い事実"}` を送る。通常判定は `decision:"YOS_SILENT"` でsummary不要。失敗をショートカットが検知できた場合は `decision:"failed"` として登録する。未到達時は `aiState:pending` のまま残る。
 3. `YOS_ALERT` は結果登録の成功応答にある `alertText` を追加通知し、表示アクション成功後に既存の `ack-alert` を送る。HTTP応答を失った場合は同じID・同じ結果で `ai-result` を再送する。ACK前の重複は再通知、ACK後はSILENTとなる。通知ボックスの「AI未判定」には未到達・失敗が残り、保存済みの秘匿済み本文を再判定用にコピーできる。再判定結果の自動登録には端末側の接続が必要。
 

@@ -82,13 +82,28 @@ test('ChatGPT mode saves before analysis and exposes pending state without a sec
   const first=await (await h.handler(h.req(input))).json();
   assert.equal(first.aiState,'pending');
   assert.equal(first.decision,'YOS_SILENT');
+  assert.equal(first.analysisText,'銀行：引落失敗 800円');
   assert.equal(h.blocks.length,1);
   const history=await (await h.handler(h.req(null,undefined,'GET'))).json();
   assert.equal(history.events[0].aiState,'pending');
   assert.match(history.events[0].text,/引落失敗/);
   assert.doesNotMatch(history.events[0].text,/ai-pending/);
-  assert.equal((await (await h.handler(h.req(input))).json()).duplicate,true);
+  const duplicate=await (await h.handler(h.req(input))).json();
+  assert.equal(duplicate.duplicate,true);
+  assert.equal(duplicate.analysisText,first.analysisText);
   assert.equal(h.blocks.length,1);
+});
+
+test('ChatGPT capture returns only redacted text for a mixed incident and OTP',async()=>{
+  const h=harness(),input={text:'銀行：不正送金を検知。認証コード 123456',sourceApp:'銀行',
+    eventId:'ai-mode-mixed-secret-01',decisionEngine:'chatgpt'};
+  const first=await (await h.handler(h.req(input))).json();
+  assert.equal(first.aiState,'pending');
+  assert.match(first.analysisText,/不正送金/);
+  assert.doesNotMatch(JSON.stringify(first)+JSON.stringify(h.blocks),/123456/);
+  const repeated=await (await h.handler(h.req(input))).json();
+  assert.equal(repeated.analysisText,first.analysisText);
+  assert.doesNotMatch(JSON.stringify(repeated),/123456/);
 });
 
 test('failed AI result can be safely retried with the same ID and acknowledged',async()=>{
