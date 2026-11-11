@@ -378,8 +378,8 @@ function showDay(iso){
  selectedId=null;zoom=null;focus.classList.remove('show');editor.classList.remove('show');
  yosDefaultStart();planBox.textContent='';yosRenderSources();
  yosRefreshTestToggle();
- note.textContent='端末の時間割 · Notion Tasks '+yosStatusWord(taskSource.status)+' · 習慣 '+yosStatusWord(habitSource.status);
- hideMonthPicker();renderWeek();render();updateReview();window.scrollTo({top:0,behavior:'smooth'});
+ note.textContent='端末の時間割 · Notion Tasks '+yosStatusWord(taskSource.status)+' · 習慣 '+yosStatusWord(habitSource.status)+(isCalendarCovered(iso)?'':' · Apple予定未確認');
+ hideMonthPicker();renderWeek();render();renderDayAllDay();if(calendarMode==='week')renderWeekAgenda();updateReview();window.scrollTo({top:0,behavior:'smooth'});
 }
 function renderWeek(){
  const d=parseDay(selectedDay), label=['日','月','火','水','木','金','土'];
@@ -430,6 +430,7 @@ function renderMonth(){
  document.getElementById('monthCoverage').textContent=calendarCoverage.status==='error'||calendarCoverage.status==='unavailable'?'Apple予定の取得不可。端末内の時間割だけ表示しています。':calendarCoverage.status==='partial'?'Apple予定は一部のみ取得。件数は未確定。':'Apple予定は取得済みの範囲のみ。範囲外は未確認。橙の点はタスクの期限で、予定時刻ではありません。';
 }
 document.getElementById('dateBtn').onclick=()=>{
+ if(calendarMode==='month'){setCalendarMode('day');return;}
  const opening=monthPanel.hidden;
  if(!opening){hideMonthPicker();return;}
  const day=parseDay(selectedDay);monthView=new Date(day.getFullYear(),day.getMonth(),1,12);
@@ -437,14 +438,71 @@ document.getElementById('dateBtn').onclick=()=>{
 };
 document.getElementById('prevMonth').onclick=()=>{monthView=new Date(monthView.getFullYear(),monthView.getMonth()-1,1,12);renderMonth()};
 document.getElementById('nextMonth').onclick=()=>{monthView=new Date(monthView.getFullYear(),monthView.getMonth()+1,1,12);renderMonth()};
-document.getElementById('monthToday').onclick=()=>showDay(localISO(new Date()));
+document.getElementById('monthToday').onclick=()=>{setCalendarMode('day');showDay(localISO(new Date()))};
 function updateNow(){
  const el=document.getElementById('nowLine');if(selectedDay!==localISO(new Date())){el.hidden=true;return;}
  const d=new Date(),m=d.getHours()*60+d.getMinutes();el.hidden=false;el.style.top=yFor(m)+'px';document.getElementById('nowBadge').textContent=fmt(m);
 }
+
+let calendarMode='day';
+function renderDayAllDay(){
+ const section=document.getElementById('dayAllDay');section.textContent='';
+ const all=allDayItems(selectedDay);
+ if(calendarMode!=='day'||!all.length){section.hidden=true;return;}
+ section.hidden=false;const head=document.createElement('b');head.textContent='終日 · Appleカレンダー';section.append(head);
+ for(const title of all){const row=document.createElement('span');row.textContent=title;section.append(row)}
+}
+function renderWeekAgenda(){
+ const root=document.getElementById('weekAgenda');root.textContent='';
+ const start=parseDay(selectedDay);start.setDate(start.getDate()-((start.getDay()+6)%7));
+ const end=new Date(start);end.setDate(start.getDate()+6);
+ const lab=['日','月','火','水','木','金','土'];
+ document.getElementById('weekCaption').textContent=(start.getMonth()+1)+'/'+start.getDate()+' ― '+(end.getMonth()+1)+'/'+end.getDate();
+ let unconfirmed=false;
+ for(let n=0;n<7;n++){
+  const d=new Date(start);d.setDate(start.getDate()+n);const iso=localISO(d),summary=yosDaySummary(iso);
+  if(!summary.covered)unconfirmed=true;
+  const row=document.createElement('button');row.type='button';row.className='week-day'+(iso===todayISO?' today':'');row.setAttribute('aria-label',iso);
+  const day=document.createElement('span');day.className='date';day.textContent=d.getDate()+' '+lab[d.getDay()];
+  const agenda=document.createElement('span');agenda.className='agenda';
+  const preview=[];
+  for(const title of summary.allDay)preview.push({text:'終日 '+title,cls:''});
+  for(const item of summary.entries)preview.push({text:fmt(item.s)+' '+item.t,cls:item.kind==='task'?'task':item.kind==='habit'?'habit':''});
+  for(const task of summary.deadlines)preview.push({text:'期限 '+task.title,cls:'due'});
+  for(const item of preview.slice(0,4)){
+   const span=document.createElement('span');span.textContent=item.text;span.className=item.cls;agenda.append(span);
+  }
+  if(preview.length>4){const more=document.createElement('span');more.className='more';more.textContent='他 '+(preview.length-4)+'件';agenda.append(more);}
+  if(!preview.length){const empty=document.createElement('span');empty.className='empty';empty.textContent=summary.covered?'予定・期限の表示なし':'Apple予定未確認';agenda.append(empty);}
+  row.append(day,agenda);row.onclick=()=>{setCalendarMode('day');showDay(iso)};root.append(row);
+ }
+ document.getElementById('weekCoverage').textContent=unconfirmed?'Apple予定の取得範囲外・取得不可の日を含みます。表示なし＝予定なしとは限りません。':'紫＝端末内タスク、緑＝習慣、オレンジ＝Notion期限（時刻未確定）。';
+}
+function setCalendarMode(mode){
+ if(!['month','week','day'].includes(mode))return;
+ calendarMode=mode;
+ for(const b of document.querySelectorAll('[data-view]')){
+  const active=b.dataset.view===mode;b.classList.toggle('active',active);b.setAttribute('aria-pressed',String(active));
+ }
+ if(mode==='month'){
+  const d=parseDay(selectedDay);monthView=new Date(d.getFullYear(),d.getMonth(),1,12);
+  monthPanel.hidden=false;document.getElementById('dateBtn').setAttribute('aria-expanded','true');renderMonth();
+ }else hideMonthPicker();
+ if(mode==='week')renderWeekAgenda();
+ renderDayAllDay();setTab('timeline');
+}
+for(const b of document.querySelectorAll('[data-view]'))b.onclick=()=>setCalendarMode(b.dataset.view);
+document.getElementById('weekPrev').onclick=()=>{const d=parseDay(selectedDay);d.setDate(d.getDate()-7);showDay(localISO(d))};
+document.getElementById('weekNext').onclick=()=>{const d=parseDay(selectedDay);d.setDate(d.getDate()+7);showDay(localISO(d))};
 function setTab(name){
  for(const b of document.querySelectorAll('[data-tab]')){b.classList.toggle('active',b.dataset.tab===name);b.setAttribute('aria-current',b.dataset.tab===name?'page':'false');}
- document.getElementById('timelinePanel').style.display=name==='timeline'?'block':'none';
+ document.getElementById('calendarModes').hidden=name!=='timeline';
+ document.getElementById('timelinePanel').style.display=name==='timeline'&&calendarMode==='day'?'block':'none';
+ document.getElementById('weekOverview').hidden=name!=='timeline'||calendarMode!=='week';
+ if(name!=='timeline')hideMonthPicker();
+ else if(calendarMode==='month'){monthPanel.hidden=false;document.getElementById('dateBtn').setAttribute('aria-expanded','true');renderMonth();}
+ else if(calendarMode==='week')renderWeekAgenda();
+ renderDayAllDay();
  for(const [tab,id] of [['task','taskPanel'],['analysis','review'],['records','recordsPanel'],['ai','aiPanel']])document.getElementById(id).classList.toggle('show',name===tab);
  renderLists();if(name==='task')yosRenderSources();if(name!=='timeline')window.scrollTo({top:0,behavior:'smooth'});
 }
@@ -536,7 +594,7 @@ document.getElementById('closeFocus').onclick=()=>{zoom=null;focus.classList.rem
 if(Array.isArray(stored)){note.textContent='保存済み時間割を表示 · Notion Tasks '+yosStatusWord(taskSource.status);}
 else if(calendarRows.length){note.textContent='Appleカレンダー '+calendarRows.length+'件を読み取り'+(yosTestCount(todayISO)?' · テスト'+yosTestCount(todayISO)+'件は非表示':'')+' · 端末内で追加・編集';}
 else{note.textContent='端末内の予定はありません · 右上の追加から登録';}
-yosDefaultStart();yosRefreshTestToggle();renderWeek();render();updateReview();yosRenderSources();setInterval(updateNow,60000);
+yosDefaultStart();yosRefreshTestToggle();renderWeek();render();renderDayAllDay();updateReview();yosRenderSources();setCalendarMode('day');setInterval(updateNow,60000);
 <\/script></body></html>`;
 
  const payload=JSON.stringify({days:state.days,calendarDays,allDayDays,calendarCoverage,taskSource,habitSource,generatedAt:new Date().toISOString()}).replace(/</g,'\\u003c');
