@@ -201,8 +201,13 @@ export function createNotificationHandler(options:{
     if(!complete)throw new Error('Inbox reconciliation incomplete');
     const found=parseRows(blocks).find(e=>e.id===id);
     if(!found?.aiState)throw new Error('AI notification not found');
+    // A replayed capture must not call ChatGPT again. If its saved alert was
+    // never presented, return that same result until the device ACKs it.
+    const alert=found.aiState==='complete'&&found.aiDecision
+      ? await replayUnacknowledgedAlert(id,{decision:found.aiDecision,alertText:found.aiSummary||''})
+      : {decision:'YOS_SILENT' as const,alertText:'',alertRequiresAck:false};
     return result({ok:true,id,duplicate:true,category,aiState:found.aiState,
-      analysisText:found.text.replace(/^発信元:[^\n]*\n/u,''),decision:'YOS_SILENT',alertText:''});
+      analysisText:found.text.replace(/^発信元:[^\n]*\n/u,''),...alert});
   }
   async function authorized(request:Request):Promise<'capture'|'viewer'|null> {
     const token=/^Bearer ([^\s]{16,512})$/u.exec(request.headers.get('authorization')??'')?.[1];
