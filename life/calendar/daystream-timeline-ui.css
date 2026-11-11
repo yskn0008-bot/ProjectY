@@ -150,3 +150,10 @@ html:has(.tlFrame[data-theme=auto]){--paper:#152236;--ink:#f1f5ff;--muted:#c3d2e
 .tlFrame[data-view=edit] .tlBlock .tlCardWords{display:flex;flex-direction:column;gap:1px;flex:1;min-width:0;overflow:hidden}
 .tlFrame[data-view=edit] .tlBlock .tlCardWords strong{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;white-space:normal;overflow-wrap:anywhere;font-size:13px;line-height:1.15}
 .tlFrame[data-view=edit] .tlBlock .tlCardWords span{white-space:normal;overflow-wrap:anywhere;font-size:11px;line-height:1.15}
+
+/* YOS_GLASS_RAIL_COLLISION_DOT_V2: the dot stays at the real time when its card is shifted to remain readable. */
+.tlFrame[data-skin=glass][data-view=home] .tlAgendaDot::before{top:0;transform:translateY(calc(0px - var(--rail-shift-px,0px)))}
+.tlFrame[data-skin=glass][data-view=home] .tlAgendaRow[data-rail-shift=overlap] .tlAgendaDot::after{
+ display:block;top:calc(5px - var(--rail-shift-px,0px));bottom:auto;left:5px;
+ height:var(--rail-shift-px,0px);width:2px;background:#be733a;opacity:.8;
+}
