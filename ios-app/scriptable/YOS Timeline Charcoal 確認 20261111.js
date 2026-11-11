@@ -362,11 +362,25 @@ function eventIcon(item){const t=item.t||'';const type=/睡眠|就寝/.test(t)?'
 let density='overview',scale=27;
 let zoom=null,selectedId=null;
 const yFor=m=>m/60*scale;
-const editor=document.getElementById('editor');let editingId=null;
+const editor=document.getElementById('editor');let editingId=null,deleteConfirmId=null;
+function showFocusFor(item){
+ deleteConfirmId=null;selectedId=item.id;zoom=item.s;
+ ft.textContent=item.t;
+ const fixed=item.f&&item.source==='Apple Calendar';
+ document.getElementById('doneBtn').hidden=!!fixed;
+ document.getElementById('editSelected').hidden=!!fixed;
+ document.getElementById('deleteSelected').hidden=!!fixed;
+ document.getElementById('hideFixed').hidden=!fixed;
+ document.getElementById('doneBtn').textContent=item.done?'未完了に戻す':'完了にする';
+ document.getElementById('deleteSelected').textContent='削除';
+ fi.textContent=fmt(item.s)+'–'+fmt(item.s+item.d)+(fixed?' · Appleカレンダーの固定予定。元の予定は変更せず、この画面から隠せます。':' · 端末内のタスク・予定。編集・削除できます。');
+ focus.classList.add('show');
+}
+
 document.getElementById('addBtn').onclick=()=>{editingId=null;document.getElementById('editorTitle').textContent='予定を追加';document.getElementById('saveBtn').textContent='追加する';editor.classList.add('show');document.getElementById('newTitle').focus();};
 document.getElementById('cancelEditor').onclick=()=>editor.classList.remove('show');
 document.getElementById('saveBtn').onclick=()=>{const title=document.getElementById('newTitle').value.trim(),parts=document.getElementById('newTime').value.split(':').map(Number),duration=Number(document.getElementById('newDuration').value),kind=document.getElementById('newKind').value;if(!title||parts.length!==2||!Number.isFinite(duration)||duration<5||duration>1440){note.textContent='名前・時刻・所要時間を確認してください';return}const start=parts[0]*60+parts[1];if(start+duration>1440){note.textContent='終了時刻は24:00以内にしてください';return}if(editingId!==null){const item=items.find(x=>x.id===editingId);if(item){if(item.f){note.textContent='固定予定は編集できません';return;}Object.assign(item,{t:title,s:start,d:duration,kind});}}else{if(isSample){items=[];isSample=false;}items.push({id:Math.max(300000000,...items.map(x=>Number(x.id)||0))+1,t:title,s:start,d:duration,kind});}editingId=null;editor.classList.remove('show');document.getElementById('newTitle').value='';note.textContent=fmt(start)+' に「'+title+'」を'+(editingId===null?'保存':'更新')+(persist()?'（保存処理中）':'（保存処理失敗）');smoothRender();updateReview()};
-function updateReview(){const done=items.filter(x=>x.done),pending=items.filter(x=>!x.done),movable=items.filter(x=>!x.f),completed=movable.filter(x=>x.done);const pct=movable.length?Math.round(completed.length/movable.length*100):0;const used=done.reduce((n,x)=>n+x.d,0);let summary=done.length?'完了記録は'+done.length+'件（合計'+Math.round(used/60*10)/10+'時間）。可動タスクの達成率は'+pct+'%。':'完了記録がまだありません。予定の配置だけでは実行できたか判断できません。';const overlaps=[];const sorted=[...items].sort((a,b)=>a.s-b.s);for(let i=0;i<sorted.length;i++)for(let j=i+1;j<sorted.length&&sorted[j].s<sorted[i].s+sorted[i].d;j++)if(sorted[i].kind===sorted[j].kind&&sorted[i].kind!=='schedule')overlaps.push([sorted[i],sorted[j]]);const pair=overlaps[0];const tip=pair?'改善候補：「'+pair[0].t+'」と「'+pair[1].t+'」は時間が重なっています。同じ種類の作業としてまとめられるか確認すると、切り替えの手間を減らせる可能性があります。':'改善候補：タスクの統合を提案する根拠がまだ不足しています。完了状況と実際の所要時間を記録すると、翌日の改善案を具体化できます。';document.getElementById('reviewText').textContent=summary+' '+(pending.length?'未完了・未確認は'+pending.length+'件。予定の変更と完了は区別して評価します。':'全項目に完了記録があります。');document.getElementById('reviewTip').textContent=tip;updateOverview();renderLists();}document.getElementById('reviewBtn').onclick=updateReview;document.getElementById('doneBtn').onclick=()=>{const x=items.find(x=>x.id===selectedId);if(!x)return;if(x.f){note.textContent='固定予定は元カレンダーで管理してください';return}x.done=!x.done;document.getElementById('doneBtn').textContent=x.done?'未完了に戻す':'完了にする';note.textContent=x.t+(x.done?'を端末内で仮完了':'の端末内の完了を解除')+(persist()?'（保存処理中）':'（保存処理失敗）');smoothRender();updateReview()};
+function updateReview(){const done=items.filter(x=>x.done),pending=items.filter(x=>!x.done),movable=items.filter(x=>!x.f),completed=movable.filter(x=>x.done);const pct=movable.length?Math.round(completed.length/movable.length*100):0;const used=done.reduce((n,x)=>n+x.d,0);let summary=done.length?'完了記録は'+done.length+'件（合計'+Math.round(used/60*10)/10+'時間）。可動タスクの達成率は'+pct+'%。':'完了記録がまだありません。予定の配置だけでは実行できたか判断できません。';const overlaps=[];const sorted=[...items].sort((a,b)=>a.s-b.s);for(let i=0;i<sorted.length;i++)for(let j=i+1;j<sorted.length&&sorted[j].s<sorted[i].s+sorted[i].d;j++)if(sorted[i].kind===sorted[j].kind&&sorted[i].kind!=='schedule')overlaps.push([sorted[i],sorted[j]]);const pair=overlaps[0];const tip=pair?'改善候補：「'+pair[0].t+'」と「'+pair[1].t+'」は時間が重なっています。同じ種類の作業としてまとめられるか確認すると、切り替えの手間を減らせる可能性があります。':'改善候補：タスクの統合を提案する根拠がまだ不足しています。完了状況と実際の所要時間を記録すると、翌日の改善案を具体化できます。';document.getElementById('reviewText').textContent=summary+' '+(pending.length?'未完了・未確認は'+pending.length+'件。予定の変更と完了は区別して評価します。':'全項目に完了記録があります。');document.getElementById('reviewTip').textContent=tip;updateOverview();renderLists();}document.getElementById('reviewBtn').onclick=updateReview;document.getElementById('doneBtn').onclick=()=>{const x=items.find(x=>x.id===selectedId);if(!x)return;if(x.f){note.textContent='固定予定は元カレンダーで管理してください';return}x.done=!x.done;document.getElementById('doneBtn').textContent=x.done?'未完了に戻す':'完了にする';const saved=persist();note.textContent=x.t+(x.done?'を端末内で仮完了':'の端末内の完了を解除')+(saved?'（保存処理中）':'（保存処理失敗）');fi.textContent=note.textContent;smoothRender();updateReview()};
 
 function updateOverview(){
  const movable=items.filter(x=>!x.f),done=movable.filter(x=>x.done),pct=movable.length?Math.round(done.length/movable.length*100):0;
@@ -535,9 +549,42 @@ document.getElementById('yosTestToggle').onclick=()=>{
 document.getElementById('zoomBtn').onclick=()=>{density=density==='overview'?'detail':'overview';scale=density==='overview'?27:56;document.getElementById('zoomBtn').textContent=density==='overview'?'詳細に拡大':'全体表示';render();};
 document.getElementById('searchBtn').onclick=()=>{const row=document.getElementById('searchRow');row.hidden=!row.hidden;if(!row.hidden){setTab('timeline');document.getElementById('searchInput').focus()}else{searchText='';document.getElementById('searchInput').value='';render()}};
 document.getElementById('searchInput').oninput=e=>{searchText=e.target.value.trim().toLocaleLowerCase();render()};
-document.getElementById('moreBtn').onclick=()=>{if(!isSample){note.textContent='この日の端末内データは保持しています · 同期先は未接続';return;}if(confirm('見本の予定だけを消しますか？')){items=[];persist();note.textContent='見本を消去しました · 新規追加できます';smoothRender();updateReview();}};
+document.getElementById('moreBtn').onclick=()=>{
+ const hidden=hiddenCalendar[selectedDay]||[];
+ if(hidden.length){
+  if(!confirm('この日、DAYSTREAMだけで非表示にしたApple予定 '+hidden.length+'件を再表示しますか？'))return;
+  delete hiddenCalendar[selectedDay];items=[...calendarItems(selectedDay),...items.filter(x=>x.source!=='Apple Calendar')];
+  note.textContent=persist()?'非表示を解除しています · 元のApple予定は変更なし':'再表示の保存準備に失敗しました';
+  yosRefreshTestToggle();smoothRender();updateReview();return;
+ }
+ note.textContent='非表示の固定予定はありません。端末の予定やタスクは保持されています。';
+};
 document.getElementById('editSelected').onclick=()=>{const item=items.find(x=>x.id===selectedId);if(!item)return;if(item.f){note.textContent='固定予定は編集できません';return;}editingId=item.id;document.getElementById('editorTitle').textContent='予定を編集';document.getElementById('saveBtn').textContent='変更を保存';document.getElementById('newTitle').value=item.t;document.getElementById('newTime').value=fmt(item.s);document.getElementById('newDuration').value=item.d;document.getElementById('newKind').value=item.kind;editor.classList.add('show');focus.classList.remove('show');setTab('timeline');editor.scrollIntoView({behavior:'smooth',block:'start'})};
-document.getElementById('deleteSelected').onclick=()=>{const item=items.find(x=>x.id===selectedId);if(!item||item.f){note.textContent='固定予定は削除できません';return;}if(!confirm('「'+item.t+'」をこの端末の表示から削除しますか？'))return;items=items.filter(x=>x.id!==selectedId);selectedId=null;focus.classList.remove('show');const saved=persist();note.textContent=saved?'端末内の予定を削除しました':'保存に失敗しました';smoothRender();updateReview()};
+document.getElementById('deleteSelected').onclick=()=>{
+ const item=items.find(x=>x.id===selectedId);
+ if(!item||item.f){fi.textContent='Appleカレンダーの固定予定はDAYSTREAMから削除しません。';return;}
+ // In-WebView two-tap confirmation works without native confirm() dialogs.
+ if(deleteConfirmId!==item.id){
+  deleteConfirmId=item.id;
+  document.getElementById('deleteSelected').textContent='削除を確定';
+  fi.textContent='「'+item.t+'」をこの端末のDAYSTREAMから削除します。もう一度「削除を確定」を押してください。';
+  return;
+ }
+ items=items.filter(x=>x.id!==selectedId);selectedId=null;deleteConfirmId=null;focus.classList.remove('show');
+ const saved=persist();note.textContent=saved?'端末内タスクを削除しています（保存処理中）':'保存に失敗しました';
+ smoothRender();updateReview();
+};
+document.getElementById('hideFixed').onclick=()=>{
+ const item=items.find(x=>x.id===selectedId);
+ if(!item||item.source!=='Apple Calendar'||!item.calendarKey)return;
+ const keys=hiddenCalendar[selectedDay]||[];
+ if(keys.length>=100){fi.textContent='非表示の上限です。右上「•••」から再表示できます。';return;}
+ if(!keys.includes(item.calendarKey))hiddenCalendar[selectedDay]=[...keys,item.calendarKey];
+ items=[...calendarItems(selectedDay),...items.filter(x=>x.source!=='Apple Calendar')];
+ selectedId=null;deleteConfirmId=null;focus.classList.remove('show');
+ note.textContent=persist()?'Apple予定はDAYSTREAMだけで非表示 · 元の予定は保持（右上「•••」から復元）':'非表示の保存準備に失敗しました';
+ yosRefreshTestToggle();smoothRender();updateReview();
+};
 
 const vibrate=()=>{try{navigator.vibrate?.(8)}catch(e){}};
 function smoothRender(activeId,oldActiveRect){
@@ -585,7 +632,7 @@ function render(){
    const paint=()=>{frame=0;if(!holding)return;const offset=latestY-downY;el.style.transform='translate3d(0,'+offset+'px,0) scale(1.015)';const next=Math.max(0,Math.min(1440-item.d,Math.round((downS+offset/scale*60)/5)*5));if(next!==previewS){previewS=next;timeLabel.textContent=fmt(next)+'–'+fmt(next+item.d);const now=performance.now();if(now-lastHaptic>75){lastHaptic=now;vibrate()}}};
    const startDrag=(y,id)=>{downY=latestY=y;downS=previewS=item.s;startedAt=performance.now();moved=false;holding=false;activePointer=id};
    const moveDrag=y=>{if(activePointer===null)return;latestY=y;const distance=Math.abs(latestY-downY);if(distance>3&&!item.f){holding=true;moved=true;el.classList.add('moving');if(!frame)frame=requestAnimationFrame(paint)}};
-   const endDrag=cancelled=>{if(activePointer===null)return;activePointer=null;if(frame){cancelAnimationFrame(frame);frame=0}const releasedRect=el.getBoundingClientRect();el.classList.remove('moving');el.style.transform='';if(holding&&moved&&!cancelled){const offset=latestY-downY;previewS=Math.max(0,Math.min(1440-item.d,Math.round((downS+offset/scale*60)/5)*5));item.s=previewS;const clashes=items.filter(x=>x!==item&&item.s<x.s+x.d&&x.s<item.s+item.d);note.textContent=(clashes.length?'時間が重複：'+clashes.map(x=>x.t).join('、'):'移動しました')+(persist()?'（保存処理中）':'（保存処理失敗）');smoothRender(item.id,releasedRect)}else if(!moved&&!cancelled){zoom=item.s;selectedId=item.id;document.getElementById('doneBtn').textContent=item.done?'未完了に戻す':'完了にする';ft.textContent=item.t;fi.textContent=fmt(item.s)+'–'+fmt(item.s+item.d)+(item.f?'　固定予定':'　ドラッグで移動');focus.classList.toggle('show',zoom!==null);smoothRender()}holding=false};
+   const endDrag=cancelled=>{if(activePointer===null)return;activePointer=null;if(frame){cancelAnimationFrame(frame);frame=0}const releasedRect=el.getBoundingClientRect();el.classList.remove('moving');el.style.transform='';if(holding&&moved&&!cancelled){const offset=latestY-downY;previewS=Math.max(0,Math.min(1440-item.d,Math.round((downS+offset/scale*60)/5)*5));item.s=previewS;const clashes=items.filter(x=>x!==item&&item.s<x.s+x.d&&x.s<item.s+item.d);note.textContent=(clashes.length?'時間が重複：'+clashes.map(x=>x.t).join('、'):'移動しました')+(persist()?'（保存処理中）':'（保存処理失敗）');smoothRender(item.id,releasedRect)}else if(!moved&&!cancelled){showFocusFor(item);smoothRender()}holding=false};
    // Touch events are used on iOS WebView to avoid pointer capture cancelling a vertical drag.
    el.addEventListener('touchstart',e=>{if(e.touches.length!==1)return;startDrag(e.touches[0].clientY,'touch')},{passive:true});
    el.addEventListener('touchmove',e=>{if(activePointer!=='touch'||!e.touches.length)return;if(!item.f){e.preventDefault();moveDrag(e.touches[0].clientY)}},{passive:false});
@@ -599,7 +646,7 @@ function render(){
  tl.style.height=(Math.max(bottom,lastBottom)+12)+'px';updateNow();
  if(pushed&&note.textContent.includes('仮データ'))note.textContent='枠の高さは所要時間に対応。重複時は縦にずらして表示（未保存）';
 }
-document.getElementById('closeFocus').onclick=()=>{zoom=null;focus.classList.remove('show');smoothRender()};
+document.getElementById('closeFocus').onclick=()=>{zoom=null;deleteConfirmId=null;focus.classList.remove('show');smoothRender()};
 if(Array.isArray(stored)){note.textContent='保存済み時間割を表示 · Notion Tasks '+yosStatusWord(taskSource.status);}
 else if(calendarRows.length){note.textContent='Appleカレンダー '+calendarRows.length+'件を読み取り'+(yosTestCount(todayISO)?' · テスト'+yosTestCount(todayISO)+'件は非表示':'')+' · 端末内で追加・編集';}
 else{note.textContent='端末内の予定はありません · 右上の追加から登録';}
