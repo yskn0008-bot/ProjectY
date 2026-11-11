@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-11T19:58:10+09:00",
+  "updated_at": "2026-11-11T19:59:42+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -53,6 +53,16 @@
       "updated_at": "2026-11-11T09:56:17Z"
     },
     {
+      "id": "github-pr-663",
+      "title": "PR #663 YOS 日記: standalone Shortcut + existing Notion bridge + isolated signing",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/663",
+      "updated_at": "2026-11-03T08:14:13Z"
+    },
+    {
       "id": "github-pr-664",
       "title": "PR #664 YOS JOURNAL: magazine headline hierarchy and personalized article briefs v1.5",
       "type": "GitHub PR",
@@ -103,16 +113,6 @@
       "updated_at": "2026-11-11T09:50:19Z"
     },
     {
-      "id": "github-pr-676",
-      "title": "PR #676 feat(timeline): add safe isolated charcoal Scriptable preview",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/676",
-      "updated_at": "2026-11-11T10:57:25Z"
-    },
-    {
       "id": "github-issue-10",
       "title": "Issue #10 Mission Control v2：GitHubのIssue・PR・Commitを自動集約する",
       "type": "GitHub Issue",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-11T10:56:49Z"
+      "updated_at": "2026-11-11T10:59:03Z"
     },
     {
       "id": "github-issue-234",
@@ -195,6 +195,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-6380fb1cff0b",
+      "title": "feat(timeline): opt-in isolated charcoal standalone preview",
+      "completed_at": "2026-11-11T10:58:55Z",
+      "result": "GitHub mainへ反映（6380fb1）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/6380fb1cff0b627e3ec4562fe0487cb33f6ffff1"
+    },
+    {
       "id": "github-commit-4a36d650bf9d",
       "title": "feat(daystream): add isolated glass preview via existing Scriptable installer (#675)",
       "completed_at": "2026-11-11T10:33:39Z",
@@ -221,13 +228,6 @@
       "completed_at": "2026-11-11T09:51:49Z",
       "result": "GitHub mainへ反映（599b5c3）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/599b5c350a826c00b4b4514ed23d9c10daa51e56"
-    },
-    {
-      "id": "github-commit-eba22a56213f",
-      "title": "feat(scriptable): add one-time named import package for YOS Common Installer",
-      "completed_at": "2026-11-10T22:23:49Z",
-      "result": "GitHub mainへ反映（eba22a5）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/eba22a56213f851b44ccb326ea12dbcd7262ba61"
     },
     {
       "id": "complete-002",
@@ -264,7 +264,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-11T19:58:10+09:00",
+      "last_update": "2026-11-11T19:59:42+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -339,13 +339,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 8件・Open PR 45件を自動同期中",
+      "next_action": "Open Issue 8件・Open PR 44件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-11T19:58:10+09:00",
+      "last_update": "2026-11-11T19:59:42+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -368,7 +368,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-11T19:58:10+09:00",
+      "last_update": "2026-11-11T19:59:42+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -450,5 +450,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "20a407f9e388b329a311af5ae813c1bf05d28c08afa54559548217263936bad8"
+  "github_snapshot_hash": "443db69590098e2516feff215f66b336867f050c82bf0793a8489ea863c33ad6"
 }
