@@ -88,7 +88,7 @@ test('completed and postponed tasks cannot falsely make issue personalized',asyn
   task('家計の予算を調整する','完了','P0'),task('健康ストレッチを続ける','保留','P0')
  ]});
  assert.equal(headline(r.html),'今のタスクに直接役立つ記事は未発見');
- assert.match(r.html,/現在のタスクに具体的に一致する記事は、この号にありません/);
+ assert.match(r.html,/現在のタスクや方向性に一致する記事は、この号にありません/);
  assert.doesNotMatch(r.html,/記事と一致する具体項目/);
 });
 test('existing secured widget feed is labeled partial, not complete Notion synchronization',async()=>{
@@ -201,7 +201,7 @@ test('discovery lane requires explicit editorial designation and substantive sou
  assert.match(r.html,/NO DIRECT MATCH/);
 });
 test('task utility remains before curated discovery without quotas forcing irrelevant stories',async()=>{
- const jazz={...money,title:'北谷でジャズと夜景を楽しむ',category:'LIFE / DISCOVERY',summary:'北谷の海辺でジャズを無料で楽しめるイベントを紹介しています。',reason:'普段と違う街の雰囲気を楽しむ話題です。',editorialLane:'DISCOVERY',link:'https://example.org/jazz'};
+ const jazz={...money,title:'北谷でジャズと夜景を楽しむ',category:'LIFE / DISCOVERY',summary:'北谷の海辺でジャズを無料で楽しめるイベントを紹介しています。海風とともに街歩きも楽しめる予定です。',reason:'普段と違う街の雰囲気を味わいながら、気軽に音楽や景色を楽しむきっかけになります。',editorialLane:'DISCOVERY',link:'https://example.org/jazz'};
  const r=await show({keys:['YOS_NOTION_INTEGRATION_TOKEN'],tasks:[task('健康ストレッチを続ける','実行中','P1','Health')],overrideArticles:[jazz,health]});
  assert.equal(headline(r.html),health.title);
  assert.match(r.html,/北谷でジャズと夜景を楽しむ/);
