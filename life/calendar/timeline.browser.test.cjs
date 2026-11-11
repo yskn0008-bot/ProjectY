@@ -95,6 +95,9 @@ const FIXED='2026-11-11T09:00:00+09:00';
   assert.match(await page.locator('#tlScaleLabel').innerText(),/時刻軸/);
 
   assert.match(await page.locator('#tlAgenda').evaluate(el=>getComputedStyle(el,'::before').content),/06:00/,'home hour ruler must show the approved morning axis');
+  const railTick=await page.locator('#tlAgenda').evaluate(el=>({top:getComputedStyle(el,'::before').top,line:getComputedStyle(el,'::before').lineHeight}));
+  assert.equal(railTick.top,'-42px','glass visible tick labels must align with actual event minute coordinates');
+  assert.equal(railTick.line,'96px','each two-hour tick remains 2*60*0.8px apart');
   const cardReadability=await page.locator('#tlAgenda .tlAgendaCard').first().evaluate(el=>({clientHeight:el.clientHeight,scrollHeight:el.scrollHeight,titleSize:getComputedStyle(el.querySelector('strong')).fontSize}));
   assert.equal(cardReadability.titleSize,'14px','small time slots must use compact, readable title text');
   assert.ok(cardReadability.scrollHeight<=cardReadability.clientHeight+2,'card text must fit without vertical clipping: '+JSON.stringify(cardReadability));
