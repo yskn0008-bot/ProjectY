@@ -256,7 +256,8 @@ test('unknown same-name code with another ID receipt is preserved in both locati
 test('isolated glass preview preserves legacy scripts and receipts in both storages',async()=>{
  const entry=shipped.targets.find(x=>x.id==='daystream-glass-20261111');
  assert.ok(entry,'fourth opt-in preview must appear in existing catalog');
- assert.equal(shipped.targets.length,4);
+ assert.equal(shipped.targets.slice(0,4).length,4,'existing four catalog entries remain in order');
+ assert.equal(shipped.targets[3].id,'daystream-glass-20261111');
  assert.equal(entry.name,'YOS DAYSTREAM Glass 検証 20261111');
  assert.equal(entry.path,'ios-app/scriptable/'+entry.name+'.js');
  assert.match(entry.commit,/^[0-9a-f]{40}$/);
@@ -333,4 +334,52 @@ test('second run of installed glass preview does not modify an already verified 
  assert.match(r.alerts.at(-1).title,/登録済み/);
  assert.equal(r.opened.length,0);
  assert.equal(cloud.files.get('/icloud/'+entry.name+'.js'),fixtures[id]);
+});
+
+
+test('standalone charcoal preview is an isolated approved native-save candidate',()=>{
+ const id='timeline-charcoal-20261111',entry=shipped.targets.find(t=>t.id===id),source=fixtures[id];
+ assert.ok(entry,'catalog must expose approved charcoal candidate');
+ assert.equal(entry.name,'YOS Timeline Charcoal 確認 20261111');
+ assert.equal(hash(source),entry.sha256);
+ assert.match(source,/^\/\/ YOS_SCRIPT_NAME: YOS Timeline Charcoal 確認 20261111$/m);
+ assert.match(source,/--bg:#353a44/);
+ assert.match(source,/const STORE_NAME='YOS_TIMELINE_CHARCOAL_VERIFY_20261111_v1.json'/);
+ assert.match(source,/YOS_CHARCOAL_ATTACH_SAVE/);
+ assert.match(source,/YOS_CHARCOAL_SAVE_ACK/);
+ assert.doesNotMatch(source,/localStorage\.(?:getItem|setItem)/);
+ assert.doesNotMatch(source,/YOS_DAYSTREAM_GLASS_VERIFY_20261111_v1\.json|YOS_DAYSTREAM_TIMELINE_REVIEW_v1\.json/);
+ new (Object.getPrototypeOf(async function(){}).constructor)(source);
+ const body=source.match(/const html=\x60([\s\S]*?)\x60;\s*const payload=/)?.[1];
+ assert.ok(body,'contains self-contained 24h HTML');
+ const client=body.match(/<script>([\s\S]*?)<\\\/script>/)?.[1];
+ assert.ok(client,'has native-bridge WebView controller');
+ new vm.Script(client);
+});
+test('approved charcoal preview registers beside all previous scripts without changing their bytes',async()=>{
+ const id='timeline-charcoal-20261111',entry=shipped.targets.find(t=>t.id===id);
+ const cloud=fm('/icloud'),local=fm('/local');
+ for(const t of shipped.targets.filter(t=>t.id!==id)){
+   cloud.files.set('/icloud/'+t.name+'.js','EXISTING USER CODE '+t.id);
+   local.files.set('/local/'+t.name+'.js','EXISTING LOCAL CODE '+t.id);
+ }
+ const prevCloud=[...cloud.files],prevLocal=[...local.files];
+ const result=await run({cloud,local,id,choices:[-1]});
+ for(const [k,v] of prevCloud)assert.equal(cloud.files.get(k),v,'must retain original iCloud '+k);
+ for(const [k,v] of prevLocal)assert.equal(local.files.get(k),v,'must retain original local '+k);
+ assert.equal(cloud.files.get('/icloud/'+entry.name+'.js'),fixtures[id]);
+ assert.equal(result.opened.length,0);
+ assert.match(result.alerts.at(-1).title,/登録完了/);
+});
+test('unmanaged same-name charcoal copies stop safely in both storages',async()=>{
+ const id='timeline-charcoal-20261111',name='YOS Timeline Charcoal 確認 20261111';
+ for(const where of ['cloud','local']){
+   const cloud=fm('/icloud'),local=fm('/local'),chosen=where==='cloud'?cloud:local;
+   const root=where==='cloud'?'/icloud':'/local';
+   chosen.files.set(root+'/'+name+'.js','PRESERVE PERSONAL CHARCOAL');
+   const prev=[...chosen.files],r=await run({cloud,local,id});
+   assert.deepEqual([...chosen.files],prev);
+   assert.equal(r.opened.length,0);
+   assert.match(r.alerts.at(-1).message,/管理記録/);
+ }
 });

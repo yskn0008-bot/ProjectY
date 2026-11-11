@@ -29,6 +29,13 @@
       "path": "ios-app/scriptable/YOS DAYSTREAM Glass 検証 20261111.js",
       "commit": "a072140d39aae8bd407fe6e63af438c2e48fdc0e",
       "sha256": "7f7631f47d4e6656b7ac71b923d052c6489520a18ab8f18db0f3755f8546248a"
+    },
+    {
+      "id": "timeline-charcoal-20261111",
+      "name": "YOS Timeline Charcoal 確認 20261111",
+      "path": "ios-app/scriptable/YOS Timeline Charcoal 確認 20261111.js",
+      "commit": "d8369c4fe5c9e27f38bf50837f61ca11b1700ed3",
+      "sha256": "42a9632d9dbf55d9377e9fadb0d05a9b84bd35ee608e1e448afac671ad273a85"
     }
   ]
 }
