@@ -394,7 +394,7 @@ test('task gesture swipe waits for explicit delete and tap only toggles a local 
  controller,
  "const listeners={},el={style:{},addEventListener:(name,cb)=>listeners[name]=cb};",
  "wireTaskGestures(el,globalLocal);",
- "({listeners,items:()=>items,drawer:()=>document.getElementById('gestureDelete').hidden})"
+ "({listeners,items:()=>items,drawer:()=>document.getElementById('gestureDelete').hidden,bindSecond:()=>{const handlers={},el={style:{},addEventListener:(type,cb)=>handlers[type]=cb};wireTaskGestures(el,globalOther);return handlers;}})"
  ].join('\n');
  const env=vm.runInNewContext(fn,{globalDocument:document,globalStats:stats,globalLocal:local,globalOther:other,setTimeout:callback=>{timerFn=callback;return 1},clearTimeout:()=>{timerFn=null}});
  env.listeners.touchstart({touches:[{clientX:220,clientY:200}]});
@@ -409,6 +409,18 @@ test('task gesture swipe waits for explicit delete and tap only toggles a local 
  elements.gestureDeleteConfirm.onclick();
  assert.equal(env.items().length,1);
  assert.equal(env.items()[0].id,other.id);
+ assert.equal(stats.saves,2);
+ const second=env.bindSecond();
+ second.touchstart({touches:[{clientX:220,clientY:200}]});
+ second.touchmove({touches:[{clientX:222,clientY:240}],preventDefault(){throw Error('vertical scroll blocked')}});
+ second.touchend();
+ assert.equal(other.done,undefined,'vertical scrolling must not complete task');
+ second.touchstart({touches:[{clientX:220,clientY:200}]});
+ assert.ok(timerFn,'long-press timer should be registered');
+ timerFn();
+ second.touchend();
+ assert.deepEqual(stats.edits,[other.id]);
+ assert.equal(other.done,undefined,'long press must not complete task');
  assert.equal(stats.saves,2);
  assert.match(actualClient,/beginLocalEdit\(item\)/);
  assert.match(actualClient,/setTimeout\(\(\)=>\{/);
