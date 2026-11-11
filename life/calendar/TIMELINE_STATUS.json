@@ -7,8 +7,8 @@
   "pullRequest": 654,
   "baselineHead": "6ffdc056138301e3a1a70eac2f635a761277da64",
   "candidateCodeCommit": "e28d6acbd4e851dab1d60dd0a3b00452700f85f1",
-  "packageSHA256": "070577f3b4cecd9ecf4794f26d68b76576060ca302e3b2f2620e2a0c5b4f329e",
-  "scriptSHA256": "4e7ad93cbf8ce64c1e7b4985547caaf0ce9e949a37dfc8d73f647ca11f529c78",
+  "packageSHA256": "121b4fbacf8a77b1e87ff0dfd9a71842181ab1e265c4ed725c333e3259381f3f",
+  "scriptSHA256": "2f8d9bddeb5d9088a6e4c2f73ceef1cda0f6961b528bb290b19b3e28fee8fa8d",
   "codeImplemented": [
     "24h exact geometry",
     "fixed source event protection",
@@ -104,6 +104,21 @@
       ],
       "evidence": "GitHub Life Safety run 42958896104, Morning/Night handoff Chromium job 130320553724, artifacts 13828058539",
       "onDevice": false
+    },
+    "timelineCollisionRail20261111": {
+      "testedHead": "07f51ecc294e2fc0c69a48fd999ad560ae1be69f",
+      "gitHubLifeSafetyRun": 42965913679,
+      "lifeNodeRegression": "success",
+      "timeline390pxChromium": "success",
+      "morningNightHandoffWebKit": "success",
+      "iOSAppSafety": "success",
+      "fullLifeSafety": "failure - separate Money UI smoke",
+      "unifiedPWASafety": "failure - separate Money UI smoke",
+      "browserArtifactId": 13831411812,
+      "onDevice": false,
+      "userApprovedDynamic": false,
+      "actualEventStartDot": "anchored to 09:20 while overlapping card remains shifted with connector",
+      "installerPackageCommit": "99333813442cbe03ce2df8e05ee38269e9ec359d"
     }
   },
   "notVerified": [
@@ -111,9 +126,9 @@
     "Scriptable callback and actual FileManager persistence",
     "Apple and Notion live permissions and values",
     "current installed DAYSTREAM integration",
-    "current-head end-to-end GitHub workflows and browser visualization",
+    "full cross-domain CI because unrelated Money UI smoke remains failing; iPhone actual WKWebView is untested",
     "full WCAG 2.2 AA",
-    "Visual fidelity to approved glass reference; HOME time axis missing and edit cards truncated",
+    "final physical iPhone visual fidelity to approved glass reference; automated 390px rail and legibility now improved",
     "Physical iPhone Scriptable touch/haptics and persistence"
   ],
   "notImplemented": [
@@ -133,7 +148,7 @@
     "url": "https://canva.link/349p0erltl7mr2c",
     "status": "three editable text-free wallpaper pages created; preview exports bundled"
   },
-  "userNextAction": "None required to continue GitHub-side functional review. Physical iPhone Scriptable recognition and final dynamic UI acceptance still require user verification later.",
+  "userNextAction": "After safe Scriptable startup is available, one iPhone screenshot plus move/save/close/reopen and permission confirmation remain necessary. No production adoption is authorized.",
   "deviceChecks": [
     "Apple fixed event time matches Calendar and cannot move",
     "one flexible item long-press handle moves with live feedback and cancellation",
@@ -141,7 +156,7 @@
     "close and rerun candidate preserves placement",
     "old installed DAYSTREAM remains intact"
   ],
-  "resume": "Treat glass original reference as the approved static visual target, never as actual user schedule data. Reuse existing daystream-timeline.html/core/UI and branch #654, assess live-data behavior and source protection with tests, then request one iPhone visual/interaction check. Do not reinterpret prior visual 'ok' as dynamic-app or production approval. Preserve PR #667 as separate unmerged charcoal candidate and avoid duplicative implementation.",
+  "resume": "Current PR #654 has a working 24h glass HOME rail with actual-time collision marker and tested native package pinned to 99333813. Do not start over or repoint another installer. Next gate is one physical iPhone visual/touch/persistence/permissions test; haptics not established. PR #667 remains separate draft.",
   "rollback": "Close this candidate and use the unchanged existing DAYSTREAM. No production merge or source-data mutation was made.",
   "backgroundRunner": false,
   "externalChecks": {
@@ -198,13 +213,13 @@
     "alternateReference": "compact, first supplied image; shortcutParameter=compact",
     "renderMethod": "Original JPEG displayed with a bounded viewport and one uniform scale; device frame/status/home chrome and unrelated panels outside the selected viewport",
     "assetCommit": "bd67b996c0da7e54e99b7a3528c2a3233e329c6b",
-    "writes": "None; no executable/plan/source-data writes",
+    "writes": "Draft #654 UI/CSS, tests, generated offline Scriptable package and verified updater changed only; no main, production, existing iPhone scripts or Apple/Notion source data changed.",
     "testEvidence": "reference-wallpaper-test-results.txt:5/5 pass; no physical iPhone render claimed",
-    "next": "Restore approved 6:00–24:00 vertical time rail in functional glass HOME using existing UI/CSS/build pipeline; preserve real event times, no invented events, avoid unreadable overlapping cards. Re-run focused tests and 390px screenshot and obtain iPhone acceptance before merge.",
+    "next": "On the user's iPhone safely open the pinned development package via the existing YOS distribution route; compare 1 screenshot with the approved static glass crop; test collision rail, touch-move, save/readback and reopen. Verify haptics and real Apple/Notion permissions separately before production.",
     "visualApproval": "Static 557x1135 glass crop approved only; interactive 24-hour display not yet visually accepted",
     "checks": "Approved static crop unchanged, 24h geometry, collisions, touch-move feedback, cancellation, explicit save/readback, fixed Apple event protection, and no sample-data import passed existing regression suite.",
-    "visualGate": "PR browser visuals captured and analyzed: controls fixed, but temporal rail layout differs substantially from approved screenshot. Visual acceptance blocked.",
-    "installedScriptableVersion": "Unconfirmed; first time .scriptable UTI import failed in separate shared installer workflow."
+    "visualGate": "Chromium 390x844 time rail, overlap marker anchored to actual 09:20 start, connector to shifted card, save UI and synthetic fixed-event protection pass automated tests. Static crop approved; dynamic UI and physical iPhone visual acceptance remain pending.",
+    "installedScriptableVersion": "Still unconfirmed. Draft same-name updater is pinned to immutable package 99333813 and refuses overwrite of unknown local code; does not prove physical iPhone launch."
   },
   "visualApproval": {
     "status": "STATIC_CROP_APPROVED",
