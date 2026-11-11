@@ -12,22 +12,91 @@ function validPlan(value){
  return entries.every(([day,rows])=>/^\d{4}-\d\d-\d\d$/.test(day)&&Array.isArray(rows)&&rows.length<=150&&rows.every(e=>e&&Number.isInteger(Number(e.id))&&typeof e.t==='string'&&e.t.length>=1&&e.t.length<=120&&Number.isInteger(e.s)&&e.s>=0&&e.s<1440&&Number.isInteger(e.d)&&e.d>0&&e.d<=1440&&e.s+e.d<=1440&&['habit','task','schedule'].includes(e.kind)&&(!e.f||e.f===1)));
 }
 function key(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+
+const YOS_TASK_SOURCE='965c6086-32c1-463d-93b4-87a9cb69b3ad';
+const YOS_NOTION_KEY='YOS_NOTION_INTEGRATION_TOKEN'; // Native Keychain only
+const yosText=(x,n=120)=>String(x??'').replace(/[\u0000-\u001f\u007f]/g,' ').trim().slice(0,n);
+const yosRich=(p,type)=>Array.isArray(p?.[type])?yosText(p[type].map(v=>v.plain_text||v.text?.content||'').join('')):'';
+const yosSelect=p=>yosText(p?.select?.name,32);
+function yosParseTask(row){
+ const p=row?.properties;if(!p||typeof row.id!=='string'||!/^[0-9a-f-]{32,36}$/i.test(row.id))return null;
+ const title=yosRich(p['やること'],'title'),status=yosSelect(p['状態']);
+ if(!title||['完了','中止','取消','キャンセル'].includes(status))return null;
+ const area=yosSelect(p['領域'])||'未分類',priority=yosSelect(p['優先度']);
+ const raw=p['期限']?.date?.start||'',due=/^\d{4}-\d\d-\d\d/.test(raw)?raw.slice(0,10):'';
+ // Notion Task date is a deadline, never a committed fixed appointment slot.
+ return {id:row.id.toLowerCase(),title,area,priority:['P0','P1','P2','P3'].includes(priority)?priority:'',status:status||'未確認',due,
+ action:yosRich(p['次の一手'],'rich_text').slice(0,140)};
+}
+async function yosReadTaskSource(){
+ let token='';try{if(Keychain.contains(YOS_NOTION_KEY))token=Keychain.get(YOS_NOTION_KEY)||''}catch{}
+ if(!token)return {status:'unavailable',items:[],checkedAt:new Date().toISOString()};
+ const rows=[],seen=new Set();let cursor=null,complete=false;
+ try{
+  for(let page=0;page<4;page++){
+   const req=new Request('https://api.notion.com/v1/data_sources/'+YOS_TASK_SOURCE+'/query');
+   req.method='POST';req.headers={Authorization:'Bearer '+token,'Content-Type':'application/json','Notion-Version':'2026-03-11',Accept:'application/json'};
+   req.timeoutInterval=12;req.body=JSON.stringify({page_size:100,...(cursor?{start_cursor:cursor}:{})});
+   const res=await req.loadJSON();
+   if(req.response?.statusCode!==200||!Array.isArray(res?.results))throw Error('Notion read unavailable');
+   for(const row of res.results){const x=yosParseTask(row);if(x&&!seen.has(x.id)){rows.push(x);seen.add(x.id)}}
+   if(!res.has_more){complete=true;break}
+   if(typeof res.next_cursor!=='string'||!res.next_cursor)throw Error('Notion cursor missing');
+   cursor=res.next_cursor;
+  }
+  return {status:complete?'ok':'partial',items:rows.slice(0,400),checkedAt:new Date().toISOString()};
+ }catch{return {status:'error',items:[],checkedAt:new Date().toISOString()};}
+}
+function yosReadHabits(){
+ const empty={status:'unavailable',items:[]};
+ try{
+  const f=FileManager.local(),p=f.joinPath(f.documentsDirectory(),'YOS_HABIT_FLOW_v1.json');
+  if(!f.fileExists(p))return empty;
+  const raw=f.readString(p);if(typeof raw!=='string'||raw.length>65000)return {status:'error',items:[]};
+  const parsed=JSON.parse(raw);
+  if(parsed.schema!=='yos-habit-flow-v1'||parsed.version!==1||!parsed.lists)return {status:'error',items:[]};
+  const items=[],seen=new Set();
+  for(const period of ['daily','weekly','monthly','yearly']){
+   const rows=parsed.lists[period];if(!Array.isArray(rows)||rows.length>40)return {status:'error',items:[]};
+   for(const h of rows){
+    if(!h||!/^[a-zA-Z0-9_-]{1,60}$/.test(h.id)||seen.has(h.id)||!['habit','anchor'].includes(h.kind)||typeof h.title!=='string'||!h.title||h.title.length>65)return {status:'error',items:[]};
+    seen.add(h.id);
+    if(period==='weekly'&&(!Array.isArray(h.weekdays)||h.weekdays.some(x=>!Number.isInteger(x)||x<0||x>6)))return {status:'error',items:[]};
+    items.push({id:h.id,title:yosText(h.title,65),period,kind:h.kind,weekdays:period==='weekly'?h.weekdays:[],dayOfMonth:period==='monthly'?Number(h.dayOfMonth):null,monthDay:period==='yearly'?yosText(h.monthDay,5):'',trigger:yosText(h.timing||h.pair||'',45)});
+   }
+  }
+  return {status:'ok',items};
+ }catch{return {status:'error',items:[]}}
+}
+
 async function main(){
  const prior=fm.fileExists(path)?fm.readString(path):null;
  let state={version:1,days:{}};
  if(prior!==null){try{const parsed=JSON.parse(prior);if(!validPlan(parsed))throw Error('invalid plan');state=parsed}catch{throw Error('保存済みの検証データに問題があります。変更せず中止しました');}}
  let expected=prior;
- const calendarDays={};
+ const calendarDays={},allDayDays={};
+ // Single snapshot: prior month, current month and next two months. Dates outside are "unconfirmed".
+ const now=new Date(),start=new Date(now.getFullYear(),now.getMonth()-1,1),end=new Date(now.getFullYear(),now.getMonth()+3,1);
+ const calendarCoverage={from:key(start),until:key(end),status:'unavailable'};
  try{
-   const now=new Date(),start=new Date(now.getFullYear(),now.getMonth(),now.getDate()),end=new Date(start);end.setDate(start.getDate()+7);
    const records=await CalendarEvent.between(start,end);
-   for(const event of records){if(event.isAllDay||!event.startDate||!event.endDate)continue;
-     for(let n=0;n<7;n++){const a=new Date(start);a.setDate(start.getDate()+n);const b=new Date(a);b.setDate(a.getDate()+1);
+   if(!Array.isArray(records))throw Error('calendar results unavailable');
+   const maxEvents=1000;
+   for(const event of records.slice(0,maxEvents)){
+     if(!event.startDate||!event.endDate)continue;
+     const title=String(event.title||'予定').slice(0,100);
+     for(let n=0,a=new Date(start);a<end&&n<160;n++,a.setDate(a.getDate()+1)){
+       const b=new Date(a);b.setDate(a.getDate()+1);
        const first=Math.max(a.getTime(),event.startDate.getTime()),last=Math.min(b.getTime(),event.endDate.getTime());
-       if(last<=first)continue;const d=key(a);(calendarDays[d]??=[]).push({title:String(event.title||'予定').slice(0,100),start:Math.floor((first-a.getTime())/60000),duration:Math.max(1,Math.round((last-first)/60000))});
+       if(last<=first)continue;
+       const d=key(a);
+       if(event.isAllDay){(allDayDays[d]??=[]).push(title);continue;}
+       (calendarDays[d]??=[]).push({title,start:Math.floor((first-a.getTime())/60000),duration:Math.max(1,Math.round((last-first)/60000))});
      }
    }
- }catch(e){console.warn('Appleカレンダーは読み取り不可: '+String(e.message||e));}
+   calendarCoverage.status=records.length>maxEvents?'partial':'ok';
+ }catch(e){console.warn('Appleカレンダーは読み取り不可: '+String(e.message||e));calendarCoverage.status='error';}
+ const [taskSource,habitSource]=await Promise.all([yosReadTaskSource(),Promise.resolve(yosReadHabits())]);
  const view=new WebView();
 const html=`<!doctype html><html lang="ja"><head><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no"><style>
 :root{--bg:#353a44;--bg2:#3c414b;--text:#f5f7fb;--muted:#ccd3dd;--line:#a4aeba;--blue:#2b7db9;--green:#24966d;--violet:#833baf}
@@ -54,20 +123,31 @@ button,input,select{font:inherit}button{cursor:pointer}button:focus-visible,inpu
 .dock{position:fixed;bottom:0;left:0;right:0;padding:9px 7px calc(11px + env(safe-area-inset-bottom));background:#30353eea;border-top:1px solid #ffffff28;backdrop-filter:blur(15px);-webkit-backdrop-filter:blur(15px);z-index:15}.dock-inner{max-width:610px;margin:auto;display:grid;grid-template-columns:repeat(5,1fr)}.tab{display:grid;justify-items:center;align-content:center;gap:5px;background:none;border:0;color:#eef1f6;font-size:10px;padding:3px 0;min-height:52px}.tab svg{height:24px;width:24px;stroke-width:1.8}.tab.active{color:#30baff}
 button:active{opacity:.8}@media(min-width:640px){.dock{left:calc((100vw - 640px)/2);right:calc((100vw - 640px)/2);border-radius:14px 14px 0 0}.focus{left:calc((100vw - 610px)/2);right:calc((100vw - 610px)/2)}}
 @media(max-width:350px){.metric label{font-size:9px}.metric strong{font-size:11px}.metric:first-child strong{font-size:17px}.card{left:69px;padding-right:6px}.card small{font-size:9px}.axis{left:55px}.tick{left:51.5px}.nowline:before{left:45px}}
+.all-day[hidden]{display:none}.all-day{margin:8px 13px 0;padding:9px 12px;border-radius:10px;border:1px solid #ffffff21;background:#ffffff10}.all-day b{font-size:12px;color:#c9dcf1}.all-day span{font-size:12px;display:block;padding:4px 0;color:#eaf2fb}
+.calendar-modes[hidden],.week-overview[hidden],.month-pop[hidden]{display:none}.calendar-modes{display:flex;gap:5px;margin:10px 15px 5px;background:#232b36a9;border:1px solid #ffffff21;padding:3px;border-radius:11px}.calendar-modes button{border:0;border-radius:8px;background:none;color:#d5dbe4;font-weight:650;font-size:12px;min-height:34px;flex:1}.calendar-modes button.active{background:#2379b5;color:#fff}
+.week-overview{margin:8px 13px 20px;border-radius:13px;background:#ffffff0b;border:1px solid #ffffff22;padding:10px}.week-overview-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px;font-size:13px}.week-overview-head button{color:#fff;background:#435567;border:1px solid #ffffff32;border-radius:8px;padding:7px 11px;min-height:36px}.week-overview-head strong{font-size:14px}.week-day{border:0;border-bottom:1px solid #ffffff22;background:transparent;color:#f2f5f9;display:flex;gap:8px;align-items:flex-start;width:100%;text-align:left;padding:10px 4px;min-height:54px}.week-day:last-child{border-bottom:0}.week-day .date{width:45px;flex:none;font-weight:650;font-variant-numeric:tabular-nums}.week-day.today .date{color:#65c0ff}.week-day .agenda{flex:1;min-width:0;font-size:12px}.week-day .agenda span{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:1px 0}.week-day .agenda .task{color:#e2b7f8}.week-day .agenda .habit{color:#9decc9}.week-day .agenda .due{color:#ffd19b}.week-day .empty{color:#c1c9d4}.week-day .more{color:#bdc5d0;font-size:11px}
+.month-pop[hidden]{display:none}.month-pop{margin:0 0 12px;padding:12px;border-radius:14px;border:1px solid #7a8798;background:#353f4c;box-shadow:0 8px 24px #10141b77}.month-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}.month-head strong{font-size:15px}.month-head button{border:1px solid #73879d;background:#45596a;color:#fff;border-radius:8px;padding:8px 11px;min-width:40px;min-height:39px}.month-head button:focus-visible,.month-grid button:focus-visible{outline:2px solid #74cbff;outline-offset:2px}.month-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px}.month-grid span{font-size:11px;color:#d1dbe5;text-align:center;padding:5px 0}.month-grid button{border:0;border-radius:8px;color:#f4f7fb;background:#ffffff0b;min-height:39px;font-size:13px;font-variant-numeric:tabular-nums}.month-grid button.outside{color:#a8b3c2;background:none}.month-grid button.selected{background:#247cbd;color:white;font-weight:700}.month-grid button.current:not(.selected){outline:1px solid #7ac8f2;outline-offset:-2px}.month-grid button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px}.month-grid .markers{display:flex;justify-content:center;gap:3px;height:5px}.month-grid .markers i{width:5px;height:5px;border-radius:50%;background:#45aefa}.month-grid .markers i.task{background:#c778f0}.month-grid .markers i.habit{background:#51d4ac}.month-grid .markers i.due{background:#f8bf79}.month-grid .uncertain{color:#9da7b6;font-size:9px}.month-pop .coverage,.week-overview .coverage{margin:8px 4px 0;font-size:11px;color:#cbd4df;line-height:1.5}.month-grid button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px}.month-grid .markers{display:flex;justify-content:center;gap:3px;height:5px}.month-grid .markers i{width:5px;height:5px;border-radius:50%;background:#45aefa}.month-grid .markers i.task{background:#c778f0}.month-grid .markers i.habit{background:#51d4ac}.month-grid .markers i.due{background:#f8bf79}.month-grid .uncertain{color:#9da7b6;font-size:9px}.month-pop .coverage,.week-overview .coverage{margin:8px 4px 0;font-size:11px;color:#cbd4df;line-height:1.5}
+.yos-source-row{display:flex;justify-content:space-between;align-items:center;gap:8px;border-top:1px solid #ffffff22;padding:9px 0}.yos-source-row b{display:block;font-size:13px;line-height:1.45}.yos-source-row small{display:block;font-size:11px;color:#ccd5df;line-height:1.5}.yos-source-row button,#yosPlanBox button,#yosPlanAll{border:1px solid #83b8e4;border-radius:9px;background:#367ea9;color:white;padding:8px 9px;font-size:12px;flex-shrink:0}.tabbox h3:not(:first-child){margin-top:18px}.tabbox input[type=time]{background:#303843;color:white;border:1px solid #94a2b4;border-radius:8px;padding:7px;margin:7px 0}#yosPlanBox:not(:empty){padding:8px 10px;margin:7px 0;border-radius:9px;background:#323f4d}
 </style></head><body>
 <div class="app">
   <div class="top">
     <div class="headrow"><div><div class="datehead" id="dateTitle">今日</div><div class="subtitle" id="dayCaption">Today</div></div>
       <div class="actions">
-        <button class="iconbtn" id="dateBtn" aria-label="日付を選択"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4m10-4v4M3 10h18"/></svg></button>
+        <button class="iconbtn" type="button" id="dateBtn" aria-label="月カレンダーを開く" aria-controls="monthPicker" aria-expanded="false"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4m10-4v4M3 10h18"/></svg></button>
         <button class="iconbtn" id="searchBtn" aria-label="検索"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m16 16 5 5"/></svg></button>
         <button class="iconbtn" id="addBtn" aria-label="予定を追加"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v16M4 12h16"/></svg></button>
         <button class="iconbtn" id="moreBtn" aria-label="メニュー"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg></button>
       </div>
     </div>
     <div class="week" id="weekStrip" aria-label="日付切り替え"></div>
-    <input type="date" id="datePicker" hidden aria-label="表示日付">
+    <input type="date" id="datePicker" hidden aria-label="表示日付（内部）">
+    <section class="month-pop" id="monthPicker" hidden aria-label="日付を選ぶ月カレンダー">
+      <div class="month-head"><button id="prevMonth" type="button" aria-label="前の月">‹</button><strong id="monthCaption"></strong><button id="nextMonth" type="button" aria-label="次の月">›</button><button id="monthToday" type="button">今日</button></div>
+      <div class="month-grid" id="monthGrid"></div>
+      <p class="coverage" id="monthCoverage"></p>
+    </section>
   </div>
+  <div class="calendar-modes" id="calendarModes" role="group" aria-label="DAYSTREAM表示切替"><button type="button" data-view="month" aria-pressed="false">月</button><button type="button" data-view="week" aria-pressed="false">週</button><button type="button" data-view="day" aria-pressed="true">日・24時間</button></div>
   <section class="summary" aria-label="今日の概要">
     <div class="metric"><span class="ring" id="progressRing" style="--pct:0%"></span><span class="stack"><label>今日の進捗</label><strong id="todayProgress">—</strong></span></div>
     <div class="metric"><label><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="m8 11 2 2 5-5m-7 8h8"/></svg>タスク</label><strong id="taskCount">—</strong></div>
@@ -75,10 +155,16 @@ button:active{opacity:.8}@media(min-width:640px){.dock{left:calc((100vw - 640px)
     <div class="metric"><label><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M20 16A8 8 0 0 1 8 4 8 8 0 1 0 20 16Z"/></svg>睡眠予定</label><strong id="sleepInfo">—</strong></div>
   </section>
   <div class="searchrow" id="searchRow" hidden><input id="searchInput" type="search" placeholder="予定・タスクを検索" aria-label="検索"></div>
-  <div class="microtools"><div class="notice" id="notice" aria-live="polite">端末内の予定を表示します</div><button class="zoomBtn" id="zoomBtn" type="button" aria-label="タイムラインの表示倍率を切り替え">詳細に拡大</button></div>
+  <div class="microtools"><div class="notice" id="notice" aria-live="polite">端末内の予定を表示します</div><button class="zoomBtn" id="yosTestToggle" type="button" hidden aria-label="テスト予定を表示">テスト表示</button><button class="zoomBtn" id="zoomBtn" type="button" aria-label="タイムラインの表示倍率を切り替え">詳細に拡大</button></div>
+  <div class="all-day" id="dayAllDay" hidden aria-label="終日の予定"></div>
   <div class="editor" id="editor"><b id="editorTitle">予定を追加</b><div class="fields"><input id="newTitle" placeholder="名前" style="flex:1 1 160px" aria-label="名前"><input id="newTime" type="time" value="10:00" aria-label="開始時刻"><input id="newDuration" type="number" min="5" max="1440" step="5" value="30" style="width:76px" aria-label="所要時間（分）"><select id="newKind" aria-label="種類"><option value="task">タスク</option><option value="habit">習慣</option><option value="schedule">予定</option></select></div><button id="saveBtn">追加する</button><button id="cancelEditor" class="light" type="button">閉じる</button></div>
+  <section class="week-overview" id="weekOverview" hidden aria-label="週の予定"><div class="week-overview-head"><button id="weekPrev" type="button" aria-label="前週">‹</button><strong id="weekCaption"></strong><button id="weekNext" type="button" aria-label="翌週">›</button></div><div id="weekAgenda"></div><p class="coverage" id="weekCoverage"></p></section>
   <div class="timeline-wrap" id="timelinePanel"><div class="timeline" id="tl"><div class="axis"></div><div class="nowline" id="nowLine" hidden><span class="nowbadge" id="nowBadge"></span></div></div></div>
-  <section class="tabbox" id="taskPanel"><h3>タスク</h3><div id="taskList"></div></section>
+  <section class="tabbox" id="taskPanel"><h3>タスク・未配置</h3><p class="muted">専門タスクの期限と、実行する時間は別。配置しても元データの期限・完了は変わりません。</p>
+ <div id="taskList"></div><h3>各専門ページから集約</h3><p class="muted" id="yosTaskSourceStatus">Notion Tasks：確認中</p>
+ <label for="yosStartFrom">配置提案の開始時刻</label><input id="yosStartFrom" type="time" value="09:00" aria-label="配置提案の開始時刻">
+ <button id="yosPlanAll" type="button">上位3件をまとめて配置提案</button><div id="yosPlanBox" aria-live="polite"></div><div id="yosSourceTasks"></div>
+ <h3>繰り返し習慣</h3><p class="muted" id="yosHabitSourceStatus">習慣：確認中</p><div id="yosHabitTasks"></div></section>
   <section class="review" id="review"><h3>一日の振り返り</h3><p id="reviewText">端末内の完了記録を集計します。</p><p id="reviewTip"></p><p class="muted">予定時間と実績時間は異なります。Notionの完了状態には反映しません。</p><button id="reviewBtn">再集計</button></section>
   <section class="tabbox" id="recordsPanel"><h3>記録</h3><p>このタイムライン内で完了にした項目のみを表示します。</p><div id="recordsList"></div></section>
   <section class="tabbox" id="aiPanel"><h3>AIプラン</h3><p>AIとの連携は未実装です。実行状況を確認せずに予定の自動変更はしません。</p><p class="muted">追加や時間変更はタイムラインで手動操作できます。</p></section>
@@ -96,17 +182,162 @@ const demoItems=[{id:1,t:'睡眠',s:0,d:390,f:1,kind:'habit'},{id:2,t:'朝の準
 const localISO=d=>[d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-');
 // Isolated native Scriptable file bridge; legacy WebView localStorage is never read or modified.
 const boot=window.YOS_CHARCOAL_BOOT||{},savedDays=boot.days&&typeof boot.days==='object'?boot.days:{};
-const todayISO=localISO(new Date()),calendarByDay=boot.calendarDays||{};
-const calendarItems=day=>(Array.isArray(calendarByDay[day])?calendarByDay[day]:[]).map((x,i)=>({id:10000+i,t:String(x.title||'予定'),s:Number(x.start),d:Number(x.duration),f:1,kind:'schedule',source:'Apple Calendar'})).filter(x=>Number.isFinite(x.s)&&Number.isFinite(x.d)&&x.s>=0&&x.d>0&&x.s+x.d<=1440);
+const todayISO=localISO(new Date()),calendarByDay=boot.calendarDays||{},allDayDays=boot.allDayDays||{};
+const calendarCoverage=boot.calendarCoverage||{from:todayISO,until:todayISO,status:'unavailable'};
+const isCalendarCovered=day=>['ok','partial'].includes(calendarCoverage.status)&&day>=calendarCoverage.from&&day<calendarCoverage.until;
+// Only explicitly tagged fictional test events are hidden; never delete or rewrite the source calendar.
+const yosIsTestCalendarTitle=title=>{const s=String(title||'').trim();return /^YOS-TEST(?:[-_]|$)/i.test(s)||s.startsWith('[架空]')||s.startsWith('【架空】')};
+let showTestCalendar=false;
+const yosCalendarRows=day=>Array.isArray(calendarByDay[day])?calendarByDay[day]:[];
+const yosTestCount=day=>yosCalendarRows(day).filter(x=>yosIsTestCalendarTitle(x?.title)).length;
+const calendarItems=day=>yosCalendarRows(day).map((x,i)=>({id:200000000+i,t:String(x.title||'予定'),s:Number(x.start),d:Number(x.duration),f:1,kind:'schedule',source:'Apple Calendar',isTest:yosIsTestCalendarTitle(x.title)})).filter(x=>Number.isFinite(x.s)&&Number.isFinite(x.d)&&x.s>=0&&x.d>0&&x.s+x.d<=1440&&(showTestCalendar||!x.isTest));
+const allDayItems=day=>(Array.isArray(allDayDays[day])?allDayDays[day]:[]).filter(t=>showTestCalendar||!yosIsTestCalendarTitle(t)).map(t=>String(t).slice(0,100));
+function yosDaySummary(day){
+ const entries=dayItems(day).sort((a,b)=>a.s-b.s);
+ const deadlines=sourceTasks.filter(x=>x.due===day&&!['完了','保留','待ち'].includes(x.status));
+ return {entries,allDay:allDayItems(day),deadlines,covered:isCalendarCovered(day)};
+}
+function yosRefreshTestToggle(){
+ const toggle=document.getElementById('yosTestToggle'),count=yosTestCount(selectedDay);
+ toggle.hidden=count===0;
+ toggle.textContent=showTestCalendar?'テストを隠す':'テスト'+count+'件';
+ toggle.setAttribute('aria-label',showTestCalendar?'テスト予定を非表示':('テスト予定'+count+'件を表示'));
+}
 const calendarRows=Array.isArray(calendarByDay[todayISO])?calendarByDay[todayISO]:[];
 const initialItems=calendarItems(todayISO);
 let stored=Object.prototype.hasOwnProperty.call(savedDays,todayISO)?savedDays[todayISO]:null;
-let selectedDay=todayISO,isSample=false,items=Array.isArray(stored)?stored.map(x=>({...x})):initialItems.map(x=>({...x}));
+const dayItems=day=>[...calendarItems(day),...(Array.isArray(savedDays[day])?savedDays[day]:[]).filter(x=>x.source!=='Apple Calendar').map(x=>({...x}))];
+let selectedDay=todayISO,isSample=false,items=dayItems(todayISO);
 const pendingSaves=[];let saveCallback=null;
 window.YOS_CHARCOAL_ATTACH_SAVE=callback=>{if(pendingSaves.length)callback(pendingSaves.shift());else saveCallback=callback;};
 window.YOS_CHARCOAL_SAVE_ACK=ok=>{note.textContent=ok?'端末内ファイルへ保存しました':'保存できませんでした。再起動後は前の状態に戻ります。';};
-const persist=()=>{try{savedDays[selectedDay]=items.map(x=>({...x}));pendingSaves.push(JSON.stringify({version:1,days:savedDays}));if(saveCallback){const callback=saveCallback;saveCallback=null;callback(pendingSaves.shift());}isSample=false;return true}catch(e){note.textContent='保存処理に失敗しました';return false}};
+const persist=()=>{try{savedDays[selectedDay]=items.filter(x=>x.source!=='Apple Calendar').map(x=>({...x}));pendingSaves.push(JSON.stringify({version:1,days:savedDays}));if(saveCallback){const callback=saveCallback;saveCallback=null;callback(pendingSaves.shift());}isSample=false;return true}catch(e){note.textContent='保存処理に失敗しました';return false}};
 const fmt=m=>String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0');
+
+const taskSource=boot.taskSource||{status:'unavailable',items:[]},habitSource=boot.habitSource||{status:'unavailable',items:[]};
+const sourceTasks=Array.isArray(taskSource.items)?taskSource.items.filter(x=>x&&typeof x.id==='string'&&typeof x.title==='string'):[];
+const sourceHabits=Array.isArray(habitSource.items)?habitSource.items.filter(x=>x&&typeof x.id==='string'&&typeof x.title==='string'):[];
+const planBox=document.getElementById('yosPlanBox'),taskFeed=document.getElementById('yosSourceTasks'),habitFeed=document.getElementById('yosHabitTasks');
+const yosStatusWord=x=>x==='ok'?'取得済み':x==='partial'?'一部のみ取得':x==='unavailable'?'未接続':'取得エラー';
+const yosTaskRank=x=>({P0:0,P1:10,P2:20,P3:30}[x.priority]??40);
+function yosEligibleHabits(day){
+ const d=parseDay(day);return sourceHabits.filter(x=>x.kind==='habit'&&(x.period==='daily'||x.period==='weekly'&&x.weekdays.includes(d.getDay())||x.period==='monthly'&&x.dayOfMonth===d.getDate()||x.period==='yearly'&&x.monthDay===day.slice(5)));
+}
+const yosIsPlanned=ref=>items.some(x=>x.sourceRef===ref);
+// YOS_UNIFIED_SLOT_START
+function yosFindSlot(occupied,start,duration){
+ if(!Number.isInteger(start)||!Number.isInteger(duration)||duration<5||duration>240)return null;
+ const candidate=Math.max(0,Math.ceil(start/15)*15);
+ for(let minute=candidate;minute+duration<=1440;minute+=15){
+  // Keep at least a 15-minute buffer around previously scheduled time blocks.
+  if(!occupied.some(x=>Number.isFinite(x.s)&&Number.isFinite(x.d)&&minute<x.s+x.d+15&&x.s-15<minute+duration))return minute;
+ }
+ return null;
+}
+// YOS_UNIFIED_SLOT_END
+function yosAddRow(container,title,description,onClick){
+ const row=document.createElement('div');row.className='yos-source-row';
+ const body=document.createElement('div'),name=document.createElement('b'),meta=document.createElement('small');
+ name.textContent=title;meta.textContent=description;body.append(name,meta);row.append(body);
+ const button=document.createElement('button');button.textContent='時間を提案';button.onclick=onClick;row.append(button);container.append(row);
+}
+function yosRenderSources(){
+ taskFeed.textContent='';habitFeed.textContent='';
+ const status=document.getElementById('yosTaskSourceStatus');
+ status.textContent='Notion Tasks：'+yosStatusWord(taskSource.status)+(taskSource.status==='ok'||taskSource.status==='partial'?'（取得 '+sourceTasks.length+'件・先頭80件を表示）':'')+(taskSource.checkedAt?' · '+new Date(taskSource.checkedAt).toLocaleString('ja-JP',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}):'');
+ const live=sourceTasks.filter(x=>!['待ち','保留'].includes(x.status));
+ live.sort((a,b)=>yosTaskRank(a)-yosTaskRank(b)||String(a.due||'9999').localeCompare(String(b.due||'9999'))||a.title.localeCompare(b.title,'ja'));
+ const pending=live.filter(x=>!yosIsPlanned('notion:'+x.id)).slice(0,80);
+ if(!pending.length){const p=document.createElement('p');p.className='muted';p.textContent=taskSource.status==='ok'?'未配置の対象タスクはありません':'タスクは未取得・要確認';taskFeed.append(p)}
+ for(const x of pending){
+  const expired=x.due&&x.due<selectedDay;
+  const info=x.area+' · '+(x.priority||'優先度未設定')+' · '+(x.due?(expired?'期限経過・要確認 ':'期限 ')+x.due:'期限未設定')+(x.status==='本人操作'?' · 本人操作':'');
+  yosAddRow(taskFeed,x.title,info,()=>yosPropose(x,'task'));
+ }
+ const habitStatus=document.getElementById('yosHabitSourceStatus');habitStatus.textContent='習慣：'+yosStatusWord(habitSource.status);
+ const habits=yosEligibleHabits(selectedDay).filter(x=>!yosIsPlanned('habit:'+x.id)).slice(0,40);
+ if(!habits.length){const p=document.createElement('p');p.className='muted';p.textContent=habitSource.status==='ok'?'未配置の反復習慣はありません':'習慣データは未取得';habitFeed.append(p)}
+ for(const x of habits)yosAddRow(habitFeed,x.title,(x.trigger||'実施するきっかけ未設定')+' · '+x.period,()=>yosPropose(x,'habit'));
+}
+
+// YOS_UNIFIED_BATCH_START
+function yosBatchPlan(tasks,occupied,start,day){
+ if(!Number.isInteger(start)||start<0||start>1439||!/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(day))return [];
+ const dayCount=x=>Math.round(Date.UTC(...x.split('-').map(Number).map((n,i)=>i===1?n-1:n))-Date.UTC(...day.split('-').map(Number).map((n,i)=>i===1?n-1:n)))/86400000;
+ const score=x=>{
+  const delta=x.due?dayCount(x.due):null;
+  const urgent=delta===null?45:delta<0?0:delta===0?2:delta===1?12:delta<=3?22:delta<=7?32:50;
+  return urgent+({P0:0,P1:10,P2:20,P3:30}[x.priority]??40);
+ };
+ const active=tasks.filter(x=>x&&x.id&&x.title&&!['待ち','保留'].includes(x.status)&&(!x.due||dayCount(x.due)>=-7));
+ active.sort((a,b)=>score(a)-score(b)||String(a.due||'9999').localeCompare(String(b.due||'9999'))||a.title.localeCompare(b.title,'ja'));
+ const slots=Math.ceil((1440-start)/15);
+ let free=0;
+ for(let i=0;i<slots;i++){const m=start+i*15;if(m>=1440)break;if(!occupied.some(x=>Number.isFinite(x.s)&&Number.isFinite(x.d)&&m<x.s+x.d&&x.s<m+15))free+=15}
+ // At least 30% of free time is not allocated by the automatic batch proposal.
+ const maxCommit=Math.floor(free*.7);
+ const working=occupied.map(x=>({s:x.s,d:x.d,f:x.f})),result=[];
+ let used=0;
+ for(const task of active){
+  if(result.length===3||used+45>maxCommit)break;
+  const at=yosFindSlot(working,start,30);if(at===null)break;
+  result.push({task,at,d:30});working.push({s:at,d:30});used+=45;
+ }
+ return result;
+}
+// YOS_UNIFIED_BATCH_END
+function yosProposeBatch(){
+ planBox.textContent='';
+ const value=document.getElementById('yosStartFrom').value.split(':').map(Number);
+ if(value.length!==2||value.some(x=>!Number.isInteger(x))||value[0]<0||value[0]>23||value[1]<0||value[1]>59){planBox.textContent='開始時刻を確認してください';return}
+ const day=selectedDay,from=value[0]*60+value[1],candidates=sourceTasks.filter(x=>!yosIsPlanned('notion:'+x.id));
+ const proposals=yosBatchPlan(candidates,items,from,day);
+ if(!proposals.length){planBox.textContent='提案できる候補がありません。時間・未配置タスク・取得状態を確認してください。';return}
+ const title=document.createElement('p');title.textContent='期限と優先度を参考にした仮配置（上位'+proposals.length+'件）。所要時間は各30分の仮設定、空き時間の30%以上を保留します。';planBox.append(title);
+ for(const v of proposals){const p=document.createElement('p');p.textContent=v.task.area+'：'+v.task.title+'　'+fmt(v.at)+'–'+fmt(v.at+v.d)+(v.task.due?' · 期限 '+v.task.due:'');planBox.append(p)}
+ const button=document.createElement('button');button.textContent='まとめてこの配置を採用';button.onclick=()=>{
+  if(selectedDay!==day){planBox.textContent='表示日が変わりました。再提案してください';return}
+  const proposed=yosBatchPlan(sourceTasks.filter(x=>!yosIsPlanned('notion:'+x.id)),items,from,day);
+  if(JSON.stringify(proposed.map(x=>[x.task.id,x.at,x.d]))!==JSON.stringify(proposals.map(x=>[x.task.id,x.at,x.d]))){planBox.textContent='予定が変わりました。再提案してください';return}
+  const occupied=[...items];
+  for(const p of proposals){
+   if(yosIsPlanned('notion:'+p.task.id)||yosFindSlot(occupied,p.at,p.d)!==p.at){planBox.textContent='空き枠が変わりました。再提案してください';return}
+   occupied.push({s:p.at,d:p.d});
+  }
+  let nextId=Math.max(300000000,...items.map(x=>Number(x.id)||0));
+  for(const p of proposals){const t=p.task;items.push({id:++nextId,t:t.title,s:p.at,d:p.d,kind:'task',source:'Notion Tasks',sourceRef:'notion:'+t.id,area:t.area,due:t.due||'',done:false})}
+  const saved=persist();planBox.textContent=saved?'提案枠を端末内にまとめて保存しました。元の期限や状態は変更していません。':'保存準備に失敗しました';
+  smoothRender();updateReview();yosRenderSources();
+ };
+ planBox.append(button);
+}
+document.getElementById('yosPlanAll').onclick=yosProposeBatch;
+
+function yosPropose(item,kind){
+ planBox.textContent='';
+ const startParts=document.getElementById('yosStartFrom').value.split(':').map(Number);
+ if(startParts.length!==2||!Number.isInteger(startParts[0])||!Number.isInteger(startParts[1])||startParts[0]>23||startParts[1]>59){planBox.textContent='提案開始時刻を確認してください';return}
+ const start=startParts[0]*60+startParts[1],duration=kind==='habit'?15:30,at=yosFindSlot(items,start,duration);
+ if(at===null){planBox.textContent='空き枠がありません。開始時刻や既存配置を確認してください。';return}
+ const proposedDay=selectedDay,due=kind==='task'?item.due:'',expired=due&&due<selectedDay,ref=(kind==='task'?'notion:':'habit:')+item.id;
+ const summary=document.createElement('p');summary.textContent='配置案：'+item.title+' · '+fmt(at)+'–'+fmt(at+duration)+'（所要時間'+duration+'分は仮設定）'+(expired?' · 期限経過を要確認':'')+'。元の期限と予定は変更しません。';planBox.append(summary);
+ const confirm=document.createElement('button');confirm.textContent='この配置を採用';confirm.onclick=()=>{
+  if(selectedDay!==proposedDay){planBox.textContent='表示日が変わりました。提案し直してください';return}
+  if(yosIsPlanned(ref)){planBox.textContent='すでに配置済みです';return}
+  // Recompute at acceptance to avoid colliding with an intervening manual edit.
+  const fresh=yosFindSlot(items,at,duration);if(fresh!==at){planBox.textContent='指定した時間に空きがありません。提案し直してください';return}
+  const rec={id:Math.max(300000000,...items.map(x=>Number(x.id)||0))+1,t:item.title,s:fresh,d:duration,kind,source:kind==='task'?'Notion Tasks':'YOS習慣',sourceRef:ref,area:kind==='task'?item.area:'習慣',due:due||'',done:false};
+  items.push(rec);const saved=persist();
+  planBox.textContent=saved?'端末の時間割へ配置しました。元データは変更していません。':'保存準備に失敗しました';
+  smoothRender();updateReview();yosRenderSources();
+ };
+ planBox.append(confirm);
+}
+function yosDefaultStart(){
+ const n=new Date(),from=selectedDay===localISO(n)?Math.min(23*60,Math.ceil((n.getHours()*60+n.getMinutes()+15)/15)*15):9*60;
+ document.getElementById('yosStartFrom').value=fmt(from);
+}
+
 let searchText='';
 const glyphs={
  sleep:'<path d="M3 19V6m0 10h18m-16 0V8h11a4 4 0 0 1 4 4v4"/>',
@@ -125,8 +356,8 @@ const yFor=m=>m/60*scale;
 const editor=document.getElementById('editor');let editingId=null;
 document.getElementById('addBtn').onclick=()=>{editingId=null;document.getElementById('editorTitle').textContent='予定を追加';document.getElementById('saveBtn').textContent='追加する';editor.classList.add('show');document.getElementById('newTitle').focus();};
 document.getElementById('cancelEditor').onclick=()=>editor.classList.remove('show');
-document.getElementById('saveBtn').onclick=()=>{const title=document.getElementById('newTitle').value.trim(),parts=document.getElementById('newTime').value.split(':').map(Number),duration=Number(document.getElementById('newDuration').value),kind=document.getElementById('newKind').value;if(!title||parts.length!==2||!Number.isFinite(duration)||duration<5||duration>1440){note.textContent='名前・時刻・所要時間を確認してください';return}const start=parts[0]*60+parts[1];if(start+duration>1440){note.textContent='終了時刻は24:00以内にしてください';return}if(editingId!==null){const item=items.find(x=>x.id===editingId);if(item){if(item.f){note.textContent='固定予定は編集できません';return;}Object.assign(item,{t:title,s:start,d:duration,kind});}}else{if(isSample){items=[];isSample=false;}items.push({id:Math.max(0,...items.map(x=>Number(x.id)||0))+1,t:title,s:start,d:duration,kind});}editingId=null;editor.classList.remove('show');document.getElementById('newTitle').value='';note.textContent=fmt(start)+' に「'+title+'」を'+(editingId===null?'保存':'更新')+(persist()?'（保存処理中）':'（保存処理失敗）');smoothRender();updateReview()};
-function updateReview(){const done=items.filter(x=>x.done),pending=items.filter(x=>!x.done),movable=items.filter(x=>!x.f),completed=movable.filter(x=>x.done);const pct=movable.length?Math.round(completed.length/movable.length*100):0;const used=done.reduce((n,x)=>n+x.d,0);let summary=done.length?'完了記録は'+done.length+'件（合計'+Math.round(used/60*10)/10+'時間）。可動タスクの達成率は'+pct+'%。':'完了記録がまだありません。予定の配置だけでは実行できたか判断できません。';const overlaps=[];const sorted=[...items].sort((a,b)=>a.s-b.s);for(let i=0;i<sorted.length;i++)for(let j=i+1;j<sorted.length&&sorted[j].s<sorted[i].s+sorted[i].d;j++)if(sorted[i].kind===sorted[j].kind&&sorted[i].kind!=='schedule')overlaps.push([sorted[i],sorted[j]]);const pair=overlaps[0];const tip=pair?'改善候補：「'+pair[0].t+'」と「'+pair[1].t+'」は時間が重なっています。同じ種類の作業としてまとめられるか確認すると、切り替えの手間を減らせる可能性があります。':'改善候補：タスクの統合を提案する根拠がまだ不足しています。完了状況と実際の所要時間を記録すると、翌日の改善案を具体化できます。';document.getElementById('reviewText').textContent=summary+' '+(pending.length?'未完了・未確認は'+pending.length+'件。予定の変更と完了は区別して評価します。':'全項目に完了記録があります。');document.getElementById('reviewTip').textContent=tip;updateOverview();renderLists();}document.getElementById('reviewBtn').onclick=updateReview;document.getElementById('doneBtn').onclick=()=>{const x=items.find(x=>x.id===selectedId);if(!x)return;x.done=!x.done;document.getElementById('doneBtn').textContent=x.done?'未完了に戻す':'完了にする';note.textContent=x.t+(x.done?'を完了':'の完了を解除')+(persist()?'（保存処理中）':'（保存処理失敗）');smoothRender();updateReview()};
+document.getElementById('saveBtn').onclick=()=>{const title=document.getElementById('newTitle').value.trim(),parts=document.getElementById('newTime').value.split(':').map(Number),duration=Number(document.getElementById('newDuration').value),kind=document.getElementById('newKind').value;if(!title||parts.length!==2||!Number.isFinite(duration)||duration<5||duration>1440){note.textContent='名前・時刻・所要時間を確認してください';return}const start=parts[0]*60+parts[1];if(start+duration>1440){note.textContent='終了時刻は24:00以内にしてください';return}if(editingId!==null){const item=items.find(x=>x.id===editingId);if(item){if(item.f){note.textContent='固定予定は編集できません';return;}Object.assign(item,{t:title,s:start,d:duration,kind});}}else{if(isSample){items=[];isSample=false;}items.push({id:Math.max(300000000,...items.map(x=>Number(x.id)||0))+1,t:title,s:start,d:duration,kind});}editingId=null;editor.classList.remove('show');document.getElementById('newTitle').value='';note.textContent=fmt(start)+' に「'+title+'」を'+(editingId===null?'保存':'更新')+(persist()?'（保存処理中）':'（保存処理失敗）');smoothRender();updateReview()};
+function updateReview(){const done=items.filter(x=>x.done),pending=items.filter(x=>!x.done),movable=items.filter(x=>!x.f),completed=movable.filter(x=>x.done);const pct=movable.length?Math.round(completed.length/movable.length*100):0;const used=done.reduce((n,x)=>n+x.d,0);let summary=done.length?'完了記録は'+done.length+'件（合計'+Math.round(used/60*10)/10+'時間）。可動タスクの達成率は'+pct+'%。':'完了記録がまだありません。予定の配置だけでは実行できたか判断できません。';const overlaps=[];const sorted=[...items].sort((a,b)=>a.s-b.s);for(let i=0;i<sorted.length;i++)for(let j=i+1;j<sorted.length&&sorted[j].s<sorted[i].s+sorted[i].d;j++)if(sorted[i].kind===sorted[j].kind&&sorted[i].kind!=='schedule')overlaps.push([sorted[i],sorted[j]]);const pair=overlaps[0];const tip=pair?'改善候補：「'+pair[0].t+'」と「'+pair[1].t+'」は時間が重なっています。同じ種類の作業としてまとめられるか確認すると、切り替えの手間を減らせる可能性があります。':'改善候補：タスクの統合を提案する根拠がまだ不足しています。完了状況と実際の所要時間を記録すると、翌日の改善案を具体化できます。';document.getElementById('reviewText').textContent=summary+' '+(pending.length?'未完了・未確認は'+pending.length+'件。予定の変更と完了は区別して評価します。':'全項目に完了記録があります。');document.getElementById('reviewTip').textContent=tip;updateOverview();renderLists();}document.getElementById('reviewBtn').onclick=updateReview;document.getElementById('doneBtn').onclick=()=>{const x=items.find(x=>x.id===selectedId);if(!x)return;if(x.f){note.textContent='固定予定は元カレンダーで管理してください';return}x.done=!x.done;document.getElementById('doneBtn').textContent=x.done?'未完了に戻す':'完了にする';note.textContent=x.t+(x.done?'を端末内で仮完了':'の端末内の完了を解除')+(persist()?'（保存処理中）':'（保存処理失敗）');smoothRender();updateReview()};
 
 function updateOverview(){
  const movable=items.filter(x=>!x.f),done=movable.filter(x=>x.done),pct=movable.length?Math.round(done.length/movable.length*100):0;
@@ -138,14 +369,17 @@ function updateOverview(){
 }
 function parseDay(iso){const p=iso.split('-').map(Number);return new Date(p[0],p[1]-1,p[2],12);}
 function showDay(iso){
- if(!/^\d{4}-\d\d-\d\d$/.test(iso)||Number.isNaN(parseDay(iso).getTime()))return;
- if(iso===selectedDay)return;
+ if(!/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(iso))return;
+ const parsed=parseDay(iso);if(Number.isNaN(parsed.getTime())||localISO(parsed)!==iso)return;
+ if(iso===selectedDay){hideMonthPicker();return;}
  selectedDay=iso;const data=Object.prototype.hasOwnProperty.call(savedDays,iso)?savedDays[iso]:null;
- items=Array.isArray(data)?data.map(x=>({...x})):calendarItems(iso);
+ items=dayItems(iso);
  isSample=false;
  selectedId=null;zoom=null;focus.classList.remove('show');editor.classList.remove('show');
- note.textContent=isSample?'見本の予定です（実際の予定ではありません）':data===null&&iso!==todayISO?'この日の端末内予定はまだありません':'端末内の記録を表示 · Notion未接続';
- renderWeek();render();updateReview();window.scrollTo({top:0,behavior:'smooth'});
+ yosDefaultStart();planBox.textContent='';yosRenderSources();
+ yosRefreshTestToggle();
+ note.textContent='端末の時間割 · Notion Tasks '+yosStatusWord(taskSource.status)+' · 習慣 '+yosStatusWord(habitSource.status)+(isCalendarCovered(iso)?'':' · Apple予定未確認');
+ hideMonthPicker();renderWeek();render();renderDayAllDay();if(calendarMode==='week')renderWeekAgenda();updateReview();window.scrollTo({top:0,behavior:'smooth'});
 }
 function renderWeek(){
  const d=parseDay(selectedDay), label=['日','月','火','水','木','金','土'];
@@ -157,19 +391,120 @@ function renderWeek(){
   const x=new Date(monday);x.setDate(monday.getDate()+offset);const iso=localISO(x);
   const b=document.createElement('button');b.type='button';b.className='day'+(iso===selectedDay?' active':'')+(iso===todayISO?' today':'');
   const s=document.createElement('small'),n=document.createElement('strong');s.textContent=label[x.getDay()];n.textContent=String(x.getDate());
-  b.append(s,n);b.setAttribute('aria-label',iso);b.onclick=()=>showDay(iso);strip.append(b);
+  b.append(s,n);b.setAttribute('aria-label',iso);b.onclick=()=>{setCalendarMode('day');showDay(iso)};strip.append(b);
  }
  document.getElementById('datePicker').value=selectedDay;
 }
+// A native date input with the hidden attribute cannot reliably open its picker in WKWebView.
+// Use an in-app monthly date chooser, keeping the hidden input as a read-only day state.
+const monthPanel=document.getElementById('monthPicker'),monthGrid=document.getElementById('monthGrid');
+let monthView=new Date(parseDay(selectedDay).getFullYear(),parseDay(selectedDay).getMonth(),1,12);
+function hideMonthPicker(){monthPanel.hidden=true;document.getElementById('dateBtn').setAttribute('aria-expanded','false')}
+function renderMonth(){
+ monthGrid.textContent='';
+ const y=monthView.getFullYear(),m=monthView.getMonth();
+ document.getElementById('monthCaption').textContent=y+'年 '+(m+1)+'月';
+ for(const label of ['月','火','水','木','金','土','日']){
+  const head=document.createElement('span');head.textContent=label;monthGrid.append(head);
+ }
+ const first=new Date(y,m,1,12),leading=(first.getDay()+6)%7;
+ const total=Math.ceil((leading+new Date(y,m+1,0).getDate())/7)*7;
+ for(let i=0;i<total;i++){
+  const d=new Date(y,m,i-leading+1,12),iso=localISO(d),button=document.createElement('button');
+  button.type='button';const summary=yosDaySummary(iso);
+  button.setAttribute('aria-label',iso+' 予定'+(summary.entries.length+summary.allDay.length)+'件・期限'+summary.deadlines.length+'件'+(summary.covered?'':'・Apple予定未確認'));
+  button.className=(d.getMonth()!==m?'outside ':'')+(iso===selectedDay?'selected ':'')+(iso===todayISO?'current':'');
+  const numeral=document.createElement('span');numeral.textContent=String(d.getDate());button.append(numeral);
+  if(summary.entries.length||summary.allDay.length||summary.deadlines.length){
+   const markers=document.createElement('span');markers.className='markers';
+   const hasFixed=summary.entries.some(x=>x.source==='Apple Calendar')||summary.allDay.length;
+   const hasTask=summary.entries.some(x=>x.kind==='task'),hasHabit=summary.entries.some(x=>x.kind==='habit');
+   for(const [shown,k] of [[hasFixed,''],[hasTask,'task'],[hasHabit,'habit'],[summary.deadlines.length>0,'due']]){
+     if(!shown)continue;const mark=document.createElement('i');mark.className=k;markers.append(mark);
+   }
+   button.append(markers);
+  }else if(!summary.covered){const mark=document.createElement('span');mark.className='uncertain';mark.textContent='未確認';button.append(mark);}
+  button.onclick=()=>{setCalendarMode('day');showDay(iso)};
+  monthGrid.append(button);
+ }
+ document.getElementById('monthCoverage').textContent=calendarCoverage.status==='error'||calendarCoverage.status==='unavailable'?'Apple予定の取得不可。端末内の時間割だけ表示しています。':calendarCoverage.status==='partial'?'Apple予定は一部のみ取得。件数は未確定。':'Apple予定は取得済みの範囲のみ。範囲外は未確認。橙の点はタスクの期限で、予定時刻ではありません。';
+}
+document.getElementById('dateBtn').onclick=()=>{
+ if(calendarMode==='month'){setCalendarMode('day');return;}
+ const opening=monthPanel.hidden;
+ if(!opening){hideMonthPicker();return;}
+ const day=parseDay(selectedDay);monthView=new Date(day.getFullYear(),day.getMonth(),1,12);
+ monthPanel.hidden=false;document.getElementById('dateBtn').setAttribute('aria-expanded','true');renderMonth();
+};
+document.getElementById('prevMonth').onclick=()=>{monthView=new Date(monthView.getFullYear(),monthView.getMonth()-1,1,12);renderMonth()};
+document.getElementById('nextMonth').onclick=()=>{monthView=new Date(monthView.getFullYear(),monthView.getMonth()+1,1,12);renderMonth()};
+document.getElementById('monthToday').onclick=()=>{setCalendarMode('day');showDay(localISO(new Date()))};
 function updateNow(){
  const el=document.getElementById('nowLine');if(selectedDay!==localISO(new Date())){el.hidden=true;return;}
  const d=new Date(),m=d.getHours()*60+d.getMinutes();el.hidden=false;el.style.top=yFor(m)+'px';document.getElementById('nowBadge').textContent=fmt(m);
 }
+
+let calendarMode='day';
+function renderDayAllDay(){
+ const section=document.getElementById('dayAllDay');section.textContent='';
+ const all=allDayItems(selectedDay);
+ if(calendarMode!=='day'||!all.length){section.hidden=true;return;}
+ section.hidden=false;const head=document.createElement('b');head.textContent='終日 · Appleカレンダー';section.append(head);
+ for(const title of all){const row=document.createElement('span');row.textContent=title;section.append(row)}
+}
+function renderWeekAgenda(){
+ const root=document.getElementById('weekAgenda');root.textContent='';
+ const start=parseDay(selectedDay);start.setDate(start.getDate()-((start.getDay()+6)%7));
+ const end=new Date(start);end.setDate(start.getDate()+6);
+ const lab=['日','月','火','水','木','金','土'];
+ document.getElementById('weekCaption').textContent=(start.getMonth()+1)+'/'+start.getDate()+' ― '+(end.getMonth()+1)+'/'+end.getDate();
+ let unconfirmed=false;
+ for(let n=0;n<7;n++){
+  const d=new Date(start);d.setDate(start.getDate()+n);const iso=localISO(d),summary=yosDaySummary(iso);
+  if(!summary.covered)unconfirmed=true;
+  const row=document.createElement('button');row.type='button';row.className='week-day'+(iso===todayISO?' today':'');row.setAttribute('aria-label',iso);
+  const day=document.createElement('span');day.className='date';day.textContent=d.getDate()+' '+lab[d.getDay()];
+  const agenda=document.createElement('span');agenda.className='agenda';
+  const preview=[];
+  for(const title of summary.allDay)preview.push({text:'終日 '+title,cls:''});
+  for(const item of summary.entries)preview.push({text:fmt(item.s)+' '+item.t,cls:item.kind==='task'?'task':item.kind==='habit'?'habit':''});
+  for(const task of summary.deadlines)preview.push({text:'期限 '+task.title,cls:'due'});
+  for(const item of preview.slice(0,4)){
+   const span=document.createElement('span');span.textContent=item.text;span.className=item.cls;agenda.append(span);
+  }
+  if(preview.length>4){const more=document.createElement('span');more.className='more';more.textContent='他 '+(preview.length-4)+'件';agenda.append(more);}
+  if(!preview.length){const empty=document.createElement('span');empty.className='empty';empty.textContent=summary.covered?'予定・期限の表示なし':'Apple予定未確認';agenda.append(empty);}
+  row.append(day,agenda);row.onclick=()=>{setCalendarMode('day');showDay(iso)};root.append(row);
+ }
+ document.getElementById('weekCoverage').textContent=unconfirmed?'Apple予定の取得範囲外・取得不可の日を含みます。表示なし＝予定なしとは限りません。':'紫＝端末内タスク、緑＝習慣、オレンジ＝Notion期限（時刻未確定）。';
+}
+function setCalendarMode(mode){
+ if(!['month','week','day'].includes(mode))return;
+ calendarMode=mode;
+ for(const b of document.querySelectorAll('[data-view]')){
+  const active=b.dataset.view===mode;b.classList.toggle('active',active);b.setAttribute('aria-pressed',String(active));
+ }
+ if(mode==='month'){
+  const d=parseDay(selectedDay);monthView=new Date(d.getFullYear(),d.getMonth(),1,12);
+  monthPanel.hidden=false;document.getElementById('dateBtn').setAttribute('aria-expanded','true');renderMonth();
+ }else hideMonthPicker();
+ if(mode==='week')renderWeekAgenda();
+ renderDayAllDay();setTab('timeline');
+}
+for(const b of document.querySelectorAll('[data-view]'))b.onclick=()=>setCalendarMode(b.dataset.view);
+document.getElementById('weekPrev').onclick=()=>{const d=parseDay(selectedDay);d.setDate(d.getDate()-7);showDay(localISO(d))};
+document.getElementById('weekNext').onclick=()=>{const d=parseDay(selectedDay);d.setDate(d.getDate()+7);showDay(localISO(d))};
 function setTab(name){
  for(const b of document.querySelectorAll('[data-tab]')){b.classList.toggle('active',b.dataset.tab===name);b.setAttribute('aria-current',b.dataset.tab===name?'page':'false');}
- document.getElementById('timelinePanel').style.display=name==='timeline'?'block':'none';
+ document.getElementById('calendarModes').hidden=name!=='timeline';
+ document.getElementById('timelinePanel').style.display=name==='timeline'&&calendarMode==='day'?'block':'none';
+ document.getElementById('weekOverview').hidden=name!=='timeline'||calendarMode!=='week';
+ if(name!=='timeline')hideMonthPicker();
+ else if(calendarMode==='month'){monthPanel.hidden=false;document.getElementById('dateBtn').setAttribute('aria-expanded','true');renderMonth();}
+ else if(calendarMode==='week')renderWeekAgenda();
+ renderDayAllDay();
  for(const [tab,id] of [['task','taskPanel'],['analysis','review'],['records','recordsPanel'],['ai','aiPanel']])document.getElementById(id).classList.toggle('show',name===tab);
- renderLists();if(name!=='timeline')window.scrollTo({top:0,behavior:'smooth'});
+ renderLists();if(name==='task')yosRenderSources();if(name!=='timeline')window.scrollTo({top:0,behavior:'smooth'});
 }
 function renderLists(){
  for(const [id,subset] of [['taskList',items.filter(x=>x.kind==='task')],['recordsList',items.filter(x=>x.done)]]){
@@ -178,8 +513,16 @@ function renderLists(){
  }
 }
 for(const b of document.querySelectorAll('[data-tab]'))b.onclick=()=>setTab(b.dataset.tab);
-document.getElementById('dateBtn').onclick=()=>{const picker=document.getElementById('datePicker');if(typeof picker.showPicker==='function')picker.showPicker();else picker.click()};
 document.getElementById('datePicker').onchange=e=>showDay(e.target.value);
+document.getElementById('yosTestToggle').onclick=()=>{
+ showTestCalendar=!showTestCalendar;
+ // Keep the current unsaved editable items in memory. Only refresh read-only calendar projections.
+ items=[...calendarItems(selectedDay),...items.filter(x=>x.source!=='Apple Calendar')];
+ selectedId=null;zoom=null;focus.classList.remove('show');
+ yosRefreshTestToggle();
+ note.textContent=showTestCalendar?'テスト予定を表示中 · 元カレンダーは変更していません':'テスト予定を非表示 · 元カレンダーは変更していません';
+ smoothRender();updateReview();
+};
 document.getElementById('zoomBtn').onclick=()=>{density=density==='overview'?'detail':'overview';scale=density==='overview'?27:56;document.getElementById('zoomBtn').textContent=density==='overview'?'詳細に拡大':'全体表示';render();};
 document.getElementById('searchBtn').onclick=()=>{const row=document.getElementById('searchRow');row.hidden=!row.hidden;if(!row.hidden){setTab('timeline');document.getElementById('searchInput').focus()}else{searchText='';document.getElementById('searchInput').value='';render()}};
 document.getElementById('searchInput').oninput=e=>{searchText=e.target.value.trim().toLocaleLowerCase();render()};
@@ -248,13 +591,13 @@ function render(){
  if(pushed&&note.textContent.includes('仮データ'))note.textContent='枠の高さは所要時間に対応。重複時は縦にずらして表示（未保存）';
 }
 document.getElementById('closeFocus').onclick=()=>{zoom=null;focus.classList.remove('show');smoothRender()};
-if(Array.isArray(stored)){note.textContent='保存済みデータを表示中 · Notion未接続';}
-else if(calendarRows.length){note.textContent='Appleカレンダー '+items.length+'件を読み取り · 端末内編集';}
+if(Array.isArray(stored)){note.textContent='保存済み時間割を表示 · Notion Tasks '+yosStatusWord(taskSource.status);}
+else if(calendarRows.length){note.textContent='Appleカレンダー '+calendarRows.length+'件を読み取り'+(yosTestCount(todayISO)?' · テスト'+yosTestCount(todayISO)+'件は非表示':'')+' · 端末内で追加・編集';}
 else{note.textContent='端末内の予定はありません · 右上の追加から登録';}
-renderWeek();render();updateReview();setInterval(updateNow,60000);
+yosDefaultStart();yosRefreshTestToggle();renderWeek();render();renderDayAllDay();updateReview();yosRenderSources();setCalendarMode('day');setInterval(updateNow,60000);
 <\/script></body></html>`;
 
- const payload=JSON.stringify({days:state.days,calendarDays}).replace(/</g,'\\u003c');
+ const payload=JSON.stringify({days:state.days,calendarDays,allDayDays,calendarCoverage,taskSource,habitSource,generatedAt:new Date().toISOString()}).replace(/</g,'\\u003c');
  const ready=html.replace('<script>','<script>window.YOS_CHARCOAL_BOOT='+payload+';<\/script><script>');
  await view.loadHTML(ready);
  let closedFlag=false;
@@ -268,8 +611,15 @@ renderWeek();render();updateReview();setInterval(updateNow,60000);
      const changed=JSON.parse(next.value);
      const current=fm.fileExists(path)?fm.readString(path):null;
      if(!validPlan(changed)||current!==expected)throw Error('invalid or concurrent update');
-     const after=JSON.stringify(changed);fm.writeString(path,after);
-     if(fm.readString(path)!==after)throw Error('readback failed');
+     const after=JSON.stringify(changed);
+     // A prior-version backup must be readable before touching the canonical plan.
+     if(current!==null){const backup=path+'.previous';fm.writeString(backup,current);if(fm.readString(backup)!==current)throw Error('backup verification failed');}
+     try{
+       fm.writeString(path,after);if(fm.readString(path)!==after)throw Error('readback failed');
+     }catch(writeError){
+       if(current!==null){try{fm.writeString(path,current);if(fm.readString(path)!==current)throw Error('restore verification failed');}catch(restoreError){console.warn('Original plan restore requires attention: '+String(restoreError.message||restoreError));}}
+       throw writeError;
+     }
      expected=after;ok=true;
    }catch(e){console.warn('Charcoal save did not complete: '+String(e.message||e));}
    if(!closedFlag)await view.evaluateJavaScript('window.YOS_CHARCOAL_SAVE_ACK('+JSON.stringify(ok)+')',false);
