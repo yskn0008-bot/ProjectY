@@ -85,6 +85,9 @@ const FIXED='2026-11-11T09:00:00+09:00';
   assert.equal(await page.locator('#tlAgenda .tlAgendaRow').first().evaluate(el=>getComputedStyle(el).position),'absolute','glass HOME must align events to the time rail');
   assert.equal(await page.locator('#tlAgenda .tlAgendaRow').first().evaluate(el=>el.style.top),'432px','09:00 event should align to 0.8px per minute');
   assert.match(await page.locator('#tlAgenda').evaluate(el=>getComputedStyle(el,'::before').content),/06:00/,'home hour ruler must show the approved morning axis');
+  const cardReadability=await page.locator('#tlAgenda .tlAgendaCard').first().evaluate(el=>({clientHeight:el.clientHeight,scrollHeight:el.scrollHeight,titleSize:getComputedStyle(el.querySelector('strong')).fontSize}));
+  assert.equal(cardReadability.titleSize,'14px','small time slots must use compact, readable title text');
+  assert.ok(cardReadability.scrollHeight<=cardReadability.clientHeight+2,'card text must fit without vertical clipping: '+JSON.stringify(cardReadability));
 
   await root.screenshot({path:path.join(OUTPUT,'timeline-390px-glass-planned.png')});
 
