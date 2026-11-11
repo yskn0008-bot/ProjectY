@@ -215,7 +215,7 @@ test('real WebView runtime accepts day changes and preserves each day of local p
   let selectedDay=todayISO,items=dayItems(todayISO),isSample=false,selectedId=null,zoom=null;
   const note={textContent:''},planBox={textContent:''},focus={classList:{remove(){}}},editor={classList:{remove(){}}};
   const yosStatusWord=()=> '未接続';
-  const yosDefaultStart=()=>{},yosRenderSources=()=>{},yosRefreshTestToggle=()=>{},hideMonthPicker=()=>{};const isCalendarCovered=()=>true;let calendarMode='day';const renderDayAllDay=()=>{},renderWeekAgenda=()=>{};
+  const yosDefaultStart=()=>{},yosRenderSources=()=>{},yosRefreshTestToggle=()=>{},hideMonthPicker=()=>{},hideSwipeDelete=()=>{};const isCalendarCovered=()=>true;let calendarMode='day';const renderDayAllDay=()=>{},renderWeekAgenda=()=>{};
   const renderWeek=()=>{},render=()=>{},updateReview=()=>{};
   const window={scrollTo(){}};
   `+navigation+`
@@ -355,4 +355,93 @@ test('iPhone selected Apple event offers only reversible local hide while editab
  assert.match(realJs,/元の予定は保持/);
  assert.ok(actualHtml.includes('max-height:126px'));
  assert.ok(actualHtml.includes('padding-top:calc(28px + env(safe-area-inset-top))'));
+});
+
+
+test('existing daystream v1 plan accepts optional bound shortcut but rejects malformed names',()=>{
+ const from=script.indexOf('function validPlan(value){'),to=script.indexOf('\nfunction key(d)',from);
+ assert.ok(from>0&&to>from);
+ const valid=vm.runInNewContext(script.slice(from,to)+'\nvalidPlan',{});
+ const local={id:300000001,t:'動作確認',s:600,d:30,kind:'task'};
+ const wrap=task=>({version:1,days:{'2026-11-12':[task]}});
+ assert.equal(valid(wrap(local)),true);
+ assert.equal(valid(wrap({...local,shortcut:'朝の準備'})),true);
+ assert.equal(valid(wrap({...local,shortcut:44})),false);
+ assert.equal(valid(wrap({...local,shortcut:'a'.repeat(101)})),false);
+ assert.ok(script.includes("const STORE_NAME='YOS_TIMELINE_CHARCOAL_VERIFY_20261111_v1.json'"));
+ assert.ok(script.includes("kind,shortcut"));
+});
+
+test('task gesture swipe waits for explicit delete and tap only toggles a local task',()=>{
+ const htmlBody=Function('return '+String.fromCharCode(96)+html+String.fromCharCode(96))();
+ const actualClient=htmlBody.split('<script>')[1]?.split('</script>')[0]||'';
+ new vm.Script(actualClient);
+ const start=actualClient.indexOf("const gestureBar=document.getElementById('gestureDelete')");
+ const end=actualClient.indexOf("function smoothRender(activeId",start);
+ assert.ok(start>0&&end>start);
+ const controller=actualClient.slice(start,end);
+ const elements={};
+ const document={getElementById:id=>elements[id]??(elements[id]={hidden:true,textContent:''})};
+ const local={id:300000001,t:'動作確認',s:600,d:30,kind:'task',done:false};
+ const other={id:300000002,t:'保存する別タスク',s:660,d:30,kind:'task'};
+ const stats={saves:0,edits:[]};
+ let timerFn=null;
+ const fn=[
+ "const document=globalDocument,stats=globalStats,focus={classList:{remove(){}}},note={textContent:''};",
+ "let swipeDeleteId=null,items=[globalLocal,globalOther];",
+ "const persist=()=>{stats.saves++;return true};",
+ "const smoothRender=()=>{},updateReview=()=>{},beginLocalEdit=item=>stats.edits.push(item.id);",
+ controller,
+ "const listeners={},el={style:{},addEventListener:(name,cb)=>listeners[name]=cb};",
+ "wireTaskGestures(el,globalLocal);",
+ "({listeners,items:()=>items,drawer:()=>document.getElementById('gestureDelete').hidden,bindSecond:()=>{const handlers={},el={style:{},addEventListener:(type,cb)=>handlers[type]=cb};wireTaskGestures(el,globalOther);return handlers;}})"
+ ].join('\n');
+ const env=vm.runInNewContext(fn,{globalDocument:document,globalStats:stats,globalLocal:local,globalOther:other,setTimeout:callback=>{timerFn=callback;return 1},clearTimeout:()=>{timerFn=null}});
+ env.listeners.touchstart({touches:[{clientX:220,clientY:200}]});
+ env.listeners.touchend();
+ assert.equal(local.done,true);
+ assert.equal(stats.saves,1);
+ env.listeners.touchstart({touches:[{clientX:220,clientY:200}]});
+ env.listeners.touchmove({touches:[{clientX:125,clientY:202}],preventDefault(){}});
+ env.listeners.touchend();
+ assert.equal(env.drawer(),false);
+ assert.equal(env.items().length,2);
+ elements.gestureDeleteConfirm.onclick();
+ assert.equal(env.items().length,1);
+ assert.equal(env.items()[0].id,other.id);
+ assert.equal(stats.saves,2);
+ const second=env.bindSecond();
+ second.touchstart({touches:[{clientX:220,clientY:200}]});
+ second.touchmove({touches:[{clientX:222,clientY:240}],preventDefault(){throw Error('vertical scroll blocked')}});
+ second.touchend();
+ assert.equal(other.done,undefined,'vertical scrolling must not complete task');
+ second.touchstart({touches:[{clientX:220,clientY:200}]});
+ assert.ok(timerFn,'long-press timer should be registered');
+ timerFn();
+ second.touchend();
+ assert.deepEqual(stats.edits,[other.id]);
+ assert.equal(other.done,undefined,'long press must not complete task');
+ assert.equal(stats.saves,2);
+ assert.match(actualClient,/beginLocalEdit\(item\)/);
+ assert.match(actualClient,/setTimeout\(\(\)=>\{/);
+ assert.match(actualClient,/action.addEventListener\(type,e=>e.stopPropagation\(\)\)/);
+});
+
+test('shortcuts icon uses only user-set name and Scriptable hands off allowlisted run URL',()=>{
+ const actualHtml=Function('return '+String.fromCharCode(96)+html+String.fromCharCode(96))();
+ const clientJs=actualHtml.split('<script>')[1]?.split('</script>')[0]||'';
+ assert.ok(actualHtml.includes('id="newShortcut"'));
+ assert.ok(actualHtml.includes('id="gestureDelete"'));
+ assert.ok(clientJs.includes("action.href='shortcuts://run-shortcut?name='+encodeURIComponent(item.shortcut)"));
+ assert.ok(clientJs.includes("action.className='shortcut-launch'"));
+ const from=script.indexOf("const shortcutPrefix='shortcuts://run-shortcut?name='"),to=script.indexOf('\nconst html=',from);
+ assert.ok(from>0&&to>from);
+ const view={shouldAllowRequest:null},opened=[];
+ vm.runInNewContext(script.slice(from,to),{view,Safari:{open:u=>opened.push(u)},console});
+ assert.equal(view.shouldAllowRequest({url:'about:blank'}),true);
+ assert.equal(view.shouldAllowRequest({url:'shortcuts://run-shortcut?name=%E6%9C%9D'}),false);
+ assert.deepEqual(opened,['shortcuts://run-shortcut?name=%E6%9C%9D']);
+ assert.equal(view.shouldAllowRequest({url:'shortcuts://run-shortcut?name=x&unexpected=1'}),false);
+ assert.equal(opened.length,1);
+ assert.doesNotMatch(script,/CalendarEvent\.(?:remove|save|create)\(/);
 });
