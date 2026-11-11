@@ -716,7 +716,7 @@ function render(){
  let priorVisualBottom=-2;
  for(const group of groups){
    const start=yFor(group[0].s);
-   const offset=density==='overview'?Math.max(0,priorVisualBottom+3-start):0;
+   const offset=Math.max(0,priorVisualBottom+3-start);
    for(const item of group)lanes.get(item).offset=offset;
    priorVisualBottom=Math.max(priorVisualBottom,...group.map(item=>yFor(item.s)+offset+Math.max(item.kind==='task'&&!item.f?32:density==='overview'?17:22,yFor(item.s+item.d)-yFor(item.s)-2)));
  }
