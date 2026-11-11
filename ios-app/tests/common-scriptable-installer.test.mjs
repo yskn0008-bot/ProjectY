@@ -42,7 +42,7 @@ test('optional open sends only editor deep link',async()=>{
 test('identical existing never overwritten; unknown content and cross-storage collision protected',async()=>{
  const cloud=fm('/icloud'),local=fm('/local');cloud.files.set(target,fixtures['timeline-auto']);
  let r=await run({cloud,local});assert.equal(cloud.files.has(receipt),false);assert.match(r.alerts.at(-1).title,/登録済み/);
- cloud.files.set(target,'PERSONAL');r=await run({cloud,local});assert.equal(cloud.files.get(target),'PERSONAL');assert.match(r.alerts.at(-1).title,/未完了/);
+ cloud.files.set(target,'PERSONAL');r=await run({cloud,local});assert.equal(cloud.files.get(target),'PERSONAL');assert.match(r.alerts.at(-1).title,/管理記録の安全診断/);
  local.files.set('/local/YOS Timeline Auto.js','SECOND');r=await run({cloud,local});
  assert.equal(cloud.files.get(target),'PERSONAL');assert.equal(local.files.get('/local/YOS Timeline Auto.js'),'SECOND');assert.match(r.alerts.at(-1).message,/両方/)});
 test('managed update has explicit consent, backup and new receipt',async()=>{
@@ -205,6 +205,49 @@ test('daystream preview never overwrites a preexisting unknown same-name candida
  cloud.files.set(existing,'PERSONAL CUSTOM SCRIPT');
  const r=await run({cloud,id:'daystream-preview'});
  assert.equal(r.cloud.files.get(existing),'PERSONAL CUSTOM SCRIPT');
- assert.match(r.alerts.at(-1).message,/管理情報/);
+ assert.match(r.alerts.at(-1).message,/管理記録/);
  assert.equal(r.opened.length,0);
+});
+
+test('receipt metadata mismatch on byte-identical verified code stays read-only and offers only editor',async()=>{
+ const cloud=fm('/icloud'),local=fm('/local');
+ cloud.createDirectory('/icloud/YOS Common Installer Data');
+ cloud.files.set(target,fixtures['timeline-auto']);
+ const oldReceipt=JSON.stringify({schema:1,name:'YOS Timeline Auto',id:'WRONG',path:shipped.targets[0].path,storage:'iCloud',sha256:hash(fixtures['timeline-auto'])});
+ cloud.files.set(receipt,oldReceipt);
+ const filesBefore=[...cloud.files];
+ const r=await run({cloud,local,id:'timeline-auto',choices:[0]});
+ assert.deepEqual([...cloud.files],filesBefore,'code and receipt should be unchanged');
+ assert.match(r.alerts.at(-1).title,/管理記録の安全診断/);
+ assert.match(r.alerts.at(-1).message,/GitHubの検証済み配布版と一致/);
+ assert.match(r.alerts.at(-1).message,/対象：YOS Timeline Auto/);
+ assert.deepEqual(r.opened,['scriptable:///open/YOS%20Timeline%20Auto']);
+});
+test('unknown same-name code with no receipt displays target and reason, never modifies or opens',async()=>{
+ const cloud=fm('/icloud'),local=fm('/local'),user='USER PROTECTED SECRET';
+ cloud.files.set(target,user);
+ const before=[...cloud.files];
+ const r=await run({cloud,local});
+ assert.deepEqual([...cloud.files],before);
+ assert.match(r.alerts.at(-1).title,/管理記録の安全診断/);
+ assert.match(r.alerts.at(-1).message,/対象：YOS Timeline Auto/);
+ assert.match(r.alerts.at(-1).message,/管理記録がありません/);
+ assert.match(r.alerts.at(-1).message,/配布版とは内容が異なります/);
+ assert.equal(r.opened.length,0);
+ assert.ok(!r.alerts.at(-1).message.includes(user));
+});
+test('unknown same-name code with another ID receipt is preserved in both locations',async()=>{
+ for(const location of ['cloud','local']){
+  const cloud=fm('/icloud'),local=fm('/local'),fmgr=location==='cloud'?cloud:local;
+  const file=fmgr.documentsDirectory()+'/YOS Timeline Auto.js',met=fmgr.documentsDirectory()+'/YOS Common Installer Data/YOS%20Timeline%20Auto.receipt.json';
+  fmgr.createDirectory(fmgr.documentsDirectory()+'/YOS Common Installer Data');
+  fmgr.files.set(file,'LOCAL CUSTOM CODE');
+  fmgr.files.set(met,JSON.stringify({schema:1,name:'YOS Timeline Auto',id:'WRONG',path:shipped.targets[0].path,storage:location==='cloud'?'iCloud':'local',sha256:'f'.repeat(64)}));
+  const beforeCloud=[...cloud.files],beforeLocal=[...local.files];
+  const r=await run({cloud,local});
+  assert.deepEqual([...cloud.files],beforeCloud);
+  assert.deepEqual([...local.files],beforeLocal);
+  assert.match(r.alerts.at(-1).message,/管理記録の名前・配布ID・保存場所/);
+  assert.equal(r.opened.length,0);
+ }
 });
