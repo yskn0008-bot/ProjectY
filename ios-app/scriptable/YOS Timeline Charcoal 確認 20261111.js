@@ -104,6 +104,18 @@ async function main(){
  }catch(e){console.warn('Appleカレンダーは読み取り不可: '+String(e.message||e));calendarCoverage.status='error';}
  const [taskSource,habitSource]=await Promise.all([yosReadTaskSource(),Promise.resolve(yosReadHabits())]);
  const view=new WebView();
+ // Native bridge: a user-tapped local task link is the only shortcut:// request we open.
+ // Safari.open is allowed only for the exact encoded run-shortcut name URL scheme.
+ const shortcutPrefix='shortcuts://run-shortcut?name=';
+ view.shouldAllowRequest=request=>{
+  const url=String(request?.url||'');
+  if(!url.startsWith(shortcutPrefix))return true;
+  const name=url.slice(shortcutPrefix.length);
+  if(name&&name.length<=1200&&!/[&#?]/.test(name)){
+   try{Safari.open(url)}catch(error){console.warn('iOS shortcut handoff failed: '+String(error.message||error));}
+  }
+  return false;
+ };
 const html=`<!doctype html><html lang="ja"><head><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no"><style>
 :root{--bg:#353a44;--bg2:#3c414b;--text:#f5f7fb;--muted:#ccd3dd;--line:#a4aeba;--blue:#2b7db9;--green:#24966d;--violet:#833baf}
 *{box-sizing:border-box}
@@ -724,7 +736,10 @@ function render(){
     if(linked){action.href='shortcuts://run-shortcut?name='+encodeURIComponent(item.shortcut);}
     else{action.type='button';action.onclick=e=>{e.stopPropagation();beginLocalEdit(item,true)};}
     for(const type of ['touchstart','touchmove','touchend','touchcancel','pointerdown','pointermove','pointerup','pointercancel'])action.addEventListener(type,e=>e.stopPropagation());
-    action.addEventListener('click',e=>e.stopPropagation());
+    action.addEventListener('click',e=>{
+     e.stopPropagation();
+     if(linked)note.textContent='iPhoneショートカット「'+item.shortcut+'」へ起動を依頼しました · タスク完了は別';
+    });
     el.append(action);
    }else{
     const iconEl=document.createElement('span');iconEl.innerHTML=eventIcon(item);el.append(iconEl.firstChild);
