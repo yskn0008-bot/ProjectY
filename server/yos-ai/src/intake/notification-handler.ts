@@ -13,6 +13,9 @@ const OTP = /認証コード|確認コード|ワンタイム|二段階認証|ロ
 const PRIVACY_CONTEXT = /認証|確認(?:番号|コード)|ログイン|ワン.?タイム|二段階|セキュリティ(?:コード|番号)|コード|暗証|秘密|機密|極秘|共有してはいけない|パスワード|パスコード|pass(?:word|code)|security\s*code|verification\s*code|\b(?:OTP|2FA|PIN|token|secret)\b|APIキー/iu;
 // Remove resolved/negated incidents before extracting safe fixed labels.
 const NEGATED_RISK = /(?:不正(?:利用|送金|アクセス)|口座凍結|差押|差し押さえ|振込失敗|引落失敗)(?:(?:は|が|を)?(?:確認|検知|検出|発生)(?:されませんでした|されていません|されなかった|されていない|しなかった|していません|しませんでした)|(?:は|が)?(?:ありませんでした|ありません|ない)|(?:は|が)?解除(?:されました|済み|しました)|(?:の|する)?予定は(?:ありません|ない))/giu;
+// Contextual negations and prevention guidance are not actual incidents.
+// Strip only each local negated phrase; later genuine incidents remain actionable.
+const NON_ACTIONABLE_RISK = /(?:不正(?:利用|送金|アクセス)|口座凍結)(?:(?:の)?疑い(?:は|が)?(?:ありません(?:でした)?|ない)|では(?:ありません(?:でした)?|ない)|(?:の)?報告(?:は|が)?(?:ありません(?:でした)?|ない)|を?(?:検知|検出|確認)して(?:おりません|いません)|の可能性について一般的な(?:お知らせ|ご案内)|を未然に防ぐ|の防止策|を防ぐための)/giu;
 const TEST_NOTICE = /^\s*(?:【(?:通知テスト|テスト通知|動作確認|架空)[^】]*】|(?:これは|この通知は|本通知は)?\s*(?:架空の通知テスト|架空のテスト|テスト通知|架空の通知|模擬通知|動作確認(?:用|通知)|test\s+(?:message|notification)|simulation\b))/iu;
 type Category = 'missed-call'|'money-review'|'legal'|'security'|'information';
 type Status = 'unread'|'read'|'pending'|'done';
@@ -87,9 +90,9 @@ function triage(raw:string,category:Category):{decision:'YOS_SILENT'|'YOS_ALERT'
   if(TEST_NOTICE.test(raw))return silent;
   // A missed-call label must not suppress an independent active security or payment incident.
   // Remove only resolved/negated risk phrases. Other active risks in the same message still count.
-  const actionable=raw.replace(NEGATED_RISK,'');
-  const p0=/口座凍結|差押|差し押さえ|不正送金|不正利用|不正アクセス|不審なログイン.{0,12}(?:検知|確認)|訴状/iu.test(actionable);
-  const p1=/引き落としに失敗|引落失敗|振込失敗|(?:引き落とし|引落とし|引落し|口座振替)(?:が|を)?(?:できませんでした|できなかった|できません|できず)|支払期限.{0,12}(?:本日|今日|明日)|期限切れ|督促状(?:が|を)?(?:届きました|受領しました|発行されました)|督促を受けました/iu.test(actionable);
+  const actionable=raw.replace(NEGATED_RISK,'').replace(NON_ACTIONABLE_RISK,'');
+  const p0=/口座凍結|差押|差し押さえ|不正送金|不正利用|不正アクセス|不審なログイン.{0,12}(?:検知|確認)|訴状|(?:クレジットカード|カード)(?:の)?(?:利用|使用)を停止|(?:本人確認未完了|本人認証未完了).{0,18}口座(?:が|は)?停止/iu.test(actionable);
+  const p1=/引き落としに失敗|引落失敗|振込失敗|(?:引き落とし|引落とし|引落し|口座振替)(?:が|を)?(?:できませんでした|できなかった|できません|できず|不可|不能)|支払期限.{0,12}(?:本日|今日|明日)|期限切れ|督促状(?:が|を)?(?:届きました|受領しました|発行されました)|督促を受けました|お支払いを受け付けられませんでした|(?:本日中|今日中|明日まで).{0,24}(?:支払|お支払い).{0,28}(?:電気|ガス|水道|サービス).{0,7}停止/iu.test(actionable);
   if(!p0&&!p1)return silent;
   const safe=safeText(raw),priority=p0?'P0':'P1',facts=safe.replace(/\s+/gu,' ').slice(0,180);
   // Derived fields must use the same redacted text as the Inbox and main alert line.
