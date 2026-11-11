@@ -251,3 +251,86 @@ test('unknown same-name code with another ID receipt is preserved in both locati
   assert.equal(r.opened.length,0);
  }
 });
+
+
+test('isolated glass preview preserves legacy scripts and receipts in both storages',async()=>{
+ const entry=shipped.targets.find(x=>x.id==='daystream-glass-20261111');
+ assert.ok(entry,'fourth opt-in preview must appear in existing catalog');
+ assert.equal(shipped.targets.length,4);
+ assert.equal(entry.name,'YOS DAYSTREAM Glass 検証 20261111');
+ assert.equal(entry.path,'ios-app/scriptable/'+entry.name+'.js');
+ assert.match(entry.commit,/^[0-9a-f]{40}$/);
+ assert.equal(hash(fixtures[entry.id]),entry.sha256);
+ const cloud=fm('/icloud'),local=fm('/local');
+ cloud.createDirectory('/icloud/YOS Common Installer Data');
+ local.createDirectory('/local/YOS Common Installer Data');
+ for(const legacy of shipped.targets.slice(0,3)){
+  const name=legacy.name;
+  cloud.files.set('/icloud/'+name+'.js','USER-CLOUD-OLD '+name);
+  local.files.set('/local/'+name+'.js','USER-LOCAL-OLD '+name);
+  cloud.files.set('/icloud/YOS Common Installer Data/'+encodeURIComponent(name)+'.receipt.json','KEEP-RECEIPT '+name);
+ }
+ const originalCloud=[...cloud.files],originalLocal=[...local.files];
+ const r=await run({cloud,local,id:entry.id,choices:[-1]});
+ assert.equal(r.cloud.files.get('/icloud/'+entry.name+'.js'),fixtures[entry.id]);
+ for(const [key,value] of originalCloud)assert.equal(cloud.files.get(key),value,'must not edit cloud legacy '+key);
+ for(const [key,value] of originalLocal)assert.equal(local.files.get(key),value,'must not edit local legacy '+key);
+ const receiptPath='/icloud/YOS Common Installer Data/'+encodeURIComponent(entry.name)+'.receipt.json';
+ const receipt=JSON.parse(cloud.files.get(receiptPath));
+ assert.equal(receipt.sha256,entry.sha256);assert.equal(receipt.commit,entry.commit);
+ assert.equal(receipt.name,entry.name);assert.equal(receipt.id,entry.id);
+ assert.equal(r.opened.length,0,'new preview never autoruns');
+ assert.match(r.alerts.at(-1).title,/登録完了/);
+});
+test('isolated glass preview uses its own plan file and never imports legacy plans',()=>{
+ const legacy=fixtures['daystream-preview'],glass=fixtures['daystream-glass-20261111'];
+ const fromName='// YOS_SCRIPT_NAME: YOS DAYSTREAM Timeline 開発確認 20261105';
+ const toName='// YOS_SCRIPT_NAME: YOS DAYSTREAM Glass 検証 20261111';
+ const fromPlan="const PLAN_FILE='YOS_DAYSTREAM_TIMELINE_REVIEW_v1.json';";
+ const toPlan="const PLAN_FILE='YOS_DAYSTREAM_GLASS_VERIFY_20261111_v1.json';";
+ const legacyFallback="if(!prior.value&&!prior.blocked&&store){const legacy={fm:store.fm,path:store.fm.joinPath(store.fm.documentsDirectory(),'YOS_DAYSTREAM_PLAN_STATE_v1.json')};prior=readLocalPlan(legacy);}";
+ const expected=legacy.replace(fromName,toName).replace(fromPlan,toPlan).replace(legacyFallback,'// This isolated glass preview never imports legacy DAYSTREAM plan files.').replace('// YOS DAYSTREAM native preview bridge — Scriptable (development only)','// YOS DAYSTREAM native glass preview — separate Scriptable test version; legacy files protected');
+ assert.equal(glass,expected,'glass candidate must be a minimal, audited transformation of the reviewed UI source');
+ assert.ok(glass.includes(toPlan));
+ assert.ok(!glass.includes(fromPlan));
+ assert.ok(!glass.includes('YOS_DAYSTREAM_PLAN_STATE_v1.json'));
+ assert.ok(!glass.includes('const PLAN_FILE='+'YOS_DAYSTREAM_TIMELINE_REVIEW_v1.json'));
+ assert.ok(legacy.includes(fromPlan),'old preview still retains its historical data path');
+ new (Object.getPrototypeOf(async function(){}).constructor)(glass);
+});
+test('isolated glass preview refuses an unmanaged exact-name file in iCloud or local',async()=>{
+ const name='YOS DAYSTREAM Glass 検証 20261111',id='daystream-glass-20261111';
+ for(const where of ['cloud','local']){
+  const cloud=fm('/icloud'),local=fm('/local'),chosen=where==='cloud'?cloud:local,root=where==='cloud'?'/icloud':'/local';
+  chosen.files.set(root+'/'+name+'.js','PERSONAL EXISTING GLASS CODE');
+  const snapshot=[...chosen.files];
+  const r=await run({cloud,local,id});
+  assert.deepEqual([...chosen.files],snapshot);
+  assert.match(r.alerts.at(-1).message,/管理記録/);
+  assert.equal(r.opened.length,0);
+ }
+});
+test('isolated glass preview fails closed when tampered or offline and preserves legacy content',async()=>{
+ const id='daystream-glass-20261111',name='YOS DAYSTREAM Glass 検証 20261111';
+ for(const changed of [{offline:true},{sources:{...fixtures,[id]:fixtures[id]+'\n// invalid modification'}}]){
+  const cloud=fm('/icloud'),local=fm('/local');
+  cloud.files.set('/icloud/YOS DAYSTREAM Timeline 開発確認 20261105.js','PRESERVE OLD');
+  const r=await run({cloud,local,id,...changed});
+  assert.equal(cloud.files.get('/icloud/YOS DAYSTREAM Timeline 開発確認 20261105.js'),'PRESERVE OLD');
+  assert.equal(cloud.files.has('/icloud/'+name+'.js'),false);
+  assert.equal(local.files.has('/local/'+name+'.js'),false);
+  assert.equal(r.opened.length,0);
+  assert.match(r.alerts.at(-1).title,/未完了/);
+ }
+});
+test('second run of installed glass preview does not modify an already verified script',async()=>{
+ const id='daystream-glass-20261111',entry=shipped.targets.find(t=>t.id===id);
+ const cloud=fm('/icloud'),local=fm('/local');
+ await run({cloud,local,id});
+ const before=[...cloud.files];
+ const r=await run({cloud,local,id,choices:[-1]});
+ assert.deepEqual([...cloud.files],before);
+ assert.match(r.alerts.at(-1).title,/登録済み/);
+ assert.equal(r.opened.length,0);
+ assert.equal(cloud.files.get('/icloud/'+entry.name+'.js'),fixtures[id]);
+});

@@ -22,6 +22,13 @@
       "path": "ios-app/scriptable/YOS DAYSTREAM Timeline 開発確認 20261105.js",
       "commit": "97b420ffcccc53ff4538a764355f76fe683bb160",
       "sha256": "883ed5195eb03ef649748a22c0612f6b956339db6702874f519028dd7c520c9d"
+    },
+    {
+      "id": "daystream-glass-20261111",
+      "name": "YOS DAYSTREAM Glass 検証 20261111",
+      "path": "ios-app/scriptable/YOS DAYSTREAM Glass 検証 20261111.js",
+      "commit": "a072140d39aae8bd407fe6e63af438c2e48fdc0e",
+      "sha256": "7f7631f47d4e6656b7ac71b923d052c6489520a18ab8f18db0f3755f8546248a"
     }
   ]
 }
