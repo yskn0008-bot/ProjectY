@@ -12,6 +12,63 @@ function validPlan(value){
  return entries.every(([day,rows])=>/^\d{4}-\d\d-\d\d$/.test(day)&&Array.isArray(rows)&&rows.length<=150&&rows.every(e=>e&&Number.isInteger(Number(e.id))&&typeof e.t==='string'&&e.t.length>=1&&e.t.length<=120&&Number.isInteger(e.s)&&e.s>=0&&e.s<1440&&Number.isInteger(e.d)&&e.d>0&&e.d<=1440&&e.s+e.d<=1440&&['habit','task','schedule'].includes(e.kind)&&(!e.f||e.f===1)));
 }
 function key(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+
+const YOS_TASK_SOURCE='965c6086-32c1-463d-93b4-87a9cb69b3ad';
+const YOS_NOTION_KEY='YOS_NOTION_INTEGRATION_TOKEN'; // Native Keychain only
+const yosText=(x,n=120)=>String(x??'').replace(/[\u0000-\u001f\u007f]/g,' ').trim().slice(0,n);
+const yosRich=(p,type)=>Array.isArray(p?.[type])?yosText(p[type].map(v=>v.plain_text||v.text?.content||'').join('')):'';
+const yosSelect=p=>yosText(p?.select?.name,32);
+function yosParseTask(row){
+ const p=row?.properties;if(!p||typeof row.id!=='string'||!/^[0-9a-f-]{32,36}$/i.test(row.id))return null;
+ const title=yosRich(p['やること'],'title'),status=yosSelect(p['状態']);
+ if(!title||['完了','中止','取消','キャンセル'].includes(status))return null;
+ const area=yosSelect(p['領域'])||'未分類',priority=yosSelect(p['優先度']);
+ const raw=p['期限']?.date?.start||'',due=/^\d{4}-\d\d-\d\d/.test(raw)?raw.slice(0,10):'';
+ // Notion Task date is a deadline, never a committed fixed appointment slot.
+ return {id:row.id.toLowerCase(),title,area,priority:['P0','P1','P2','P3'].includes(priority)?priority:'',status:status||'未確認',due,
+ action:yosRich(p['次の一手'],'rich_text').slice(0,140)};
+}
+async function yosReadTaskSource(){
+ let token='';try{if(Keychain.contains(YOS_NOTION_KEY))token=Keychain.get(YOS_NOTION_KEY)||''}catch{}
+ if(!token)return {status:'unavailable',items:[],checkedAt:new Date().toISOString()};
+ const rows=[],seen=new Set();let cursor=null,complete=false;
+ try{
+  for(let page=0;page<4;page++){
+   const req=new Request('https://api.notion.com/v1/data_sources/'+YOS_TASK_SOURCE+'/query');
+   req.method='POST';req.headers={Authorization:'Bearer '+token,'Content-Type':'application/json','Notion-Version':'2026-03-11',Accept:'application/json'};
+   req.timeoutInterval=12;req.body=JSON.stringify({page_size:100,...(cursor?{start_cursor:cursor}:{})});
+   const res=await req.loadJSON();
+   if(req.response?.statusCode!==200||!Array.isArray(res?.results))throw Error('Notion read unavailable');
+   for(const row of res.results){const x=yosParseTask(row);if(x&&!seen.has(x.id)){rows.push(x);seen.add(x.id)}}
+   if(!res.has_more){complete=true;break}
+   if(typeof res.next_cursor!=='string'||!res.next_cursor)throw Error('Notion cursor missing');
+   cursor=res.next_cursor;
+  }
+  return {status:complete?'ok':'partial',items:rows.slice(0,400),checkedAt:new Date().toISOString()};
+ }catch{return {status:'error',items:[],checkedAt:new Date().toISOString()};}
+}
+function yosReadHabits(){
+ const empty={status:'unavailable',items:[]};
+ try{
+  const f=FileManager.local(),p=f.joinPath(f.documentsDirectory(),'YOS_HABIT_FLOW_v1.json');
+  if(!f.fileExists(p))return empty;
+  const raw=f.readString(p);if(typeof raw!=='string'||raw.length>65000)return {status:'error',items:[]};
+  const parsed=JSON.parse(raw);
+  if(parsed.schema!=='yos-habit-flow-v1'||parsed.version!==1||!parsed.lists)return {status:'error',items:[]};
+  const items=[],seen=new Set();
+  for(const period of ['daily','weekly','monthly','yearly']){
+   const rows=parsed.lists[period];if(!Array.isArray(rows)||rows.length>40)return {status:'error',items:[]};
+   for(const h of rows){
+    if(!h||!/^[a-zA-Z0-9_-]{1,60}$/.test(h.id)||seen.has(h.id)||!['habit','anchor'].includes(h.kind)||typeof h.title!=='string'||!h.title||h.title.length>65)return {status:'error',items:[]};
+    seen.add(h.id);
+    if(period==='weekly'&&(!Array.isArray(h.weekdays)||h.weekdays.some(x=>!Number.isInteger(x)||x<0||x>6)))return {status:'error',items:[]};
+    items.push({id:h.id,title:yosText(h.title,65),period,kind:h.kind,weekdays:period==='weekly'?h.weekdays:[],dayOfMonth:period==='monthly'?Number(h.dayOfMonth):null,monthDay:period==='yearly'?yosText(h.monthDay,5):'',trigger:yosText(h.timing||h.pair||'',45)});
+   }
+  }
+  return {status:'ok',items};
+ }catch{return {status:'error',items:[]}}
+}
+
 async function main(){
  const prior=fm.fileExists(path)?fm.readString(path):null;
  let state={version:1,days:{}};
@@ -28,6 +85,7 @@ async function main(){
      }
    }
  }catch(e){console.warn('Appleカレンダーは読み取り不可: '+String(e.message||e));}
+ const [taskSource,habitSource]=await Promise.all([yosReadTaskSource(),Promise.resolve(yosReadHabits())]);
  const view=new WebView();
 const html=`<!doctype html><html lang="ja"><head><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no"><style>
 :root{--bg:#353a44;--bg2:#3c414b;--text:#f5f7fb;--muted:#ccd3dd;--line:#a4aeba;--blue:#2b7db9;--green:#24966d;--violet:#833baf}
@@ -97,15 +155,16 @@ const localISO=d=>[d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String
 // Isolated native Scriptable file bridge; legacy WebView localStorage is never read or modified.
 const boot=window.YOS_CHARCOAL_BOOT||{},savedDays=boot.days&&typeof boot.days==='object'?boot.days:{};
 const todayISO=localISO(new Date()),calendarByDay=boot.calendarDays||{};
-const calendarItems=day=>(Array.isArray(calendarByDay[day])?calendarByDay[day]:[]).map((x,i)=>({id:10000+i,t:String(x.title||'予定'),s:Number(x.start),d:Number(x.duration),f:1,kind:'schedule',source:'Apple Calendar'})).filter(x=>Number.isFinite(x.s)&&Number.isFinite(x.d)&&x.s>=0&&x.d>0&&x.s+x.d<=1440);
+const calendarItems=day=>(Array.isArray(calendarByDay[day])?calendarByDay[day]:[]).map((x,i)=>({id:200000000+i,t:String(x.title||'予定'),s:Number(x.start),d:Number(x.duration),f:1,kind:'schedule',source:'Apple Calendar'})).filter(x=>Number.isFinite(x.s)&&Number.isFinite(x.d)&&x.s>=0&&x.d>0&&x.s+x.d<=1440);
 const calendarRows=Array.isArray(calendarByDay[todayISO])?calendarByDay[todayISO]:[];
 const initialItems=calendarItems(todayISO);
 let stored=Object.prototype.hasOwnProperty.call(savedDays,todayISO)?savedDays[todayISO]:null;
-let selectedDay=todayISO,isSample=false,items=Array.isArray(stored)?stored.map(x=>({...x})):initialItems.map(x=>({...x}));
+const dayItems=day=>[...calendarItems(day),...(Array.isArray(savedDays[day])?savedDays[day]:[]).filter(x=>x.source!=='Apple Calendar').map(x=>({...x}))];
+let selectedDay=todayISO,isSample=false,items=dayItems(todayISO);
 const pendingSaves=[];let saveCallback=null;
 window.YOS_CHARCOAL_ATTACH_SAVE=callback=>{if(pendingSaves.length)callback(pendingSaves.shift());else saveCallback=callback;};
 window.YOS_CHARCOAL_SAVE_ACK=ok=>{note.textContent=ok?'端末内ファイルへ保存しました':'保存できませんでした。再起動後は前の状態に戻ります。';};
-const persist=()=>{try{savedDays[selectedDay]=items.map(x=>({...x}));pendingSaves.push(JSON.stringify({version:1,days:savedDays}));if(saveCallback){const callback=saveCallback;saveCallback=null;callback(pendingSaves.shift());}isSample=false;return true}catch(e){note.textContent='保存処理に失敗しました';return false}};
+const persist=()=>{try{savedDays[selectedDay]=items.filter(x=>x.source!=='Apple Calendar').map(x=>({...x}));pendingSaves.push(JSON.stringify({version:1,days:savedDays}));if(saveCallback){const callback=saveCallback;saveCallback=null;callback(pendingSaves.shift());}isSample=false;return true}catch(e){note.textContent='保存処理に失敗しました';return false}};
 const fmt=m=>String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0');
 let searchText='';
 const glyphs={
@@ -141,7 +200,7 @@ function showDay(iso){
  if(!/^\d{4}-\d\d-\d\d$/.test(iso)||Number.isNaN(parseDay(iso).getTime()))return;
  if(iso===selectedDay)return;
  selectedDay=iso;const data=Object.prototype.hasOwnProperty.call(savedDays,iso)?savedDays[iso]:null;
- items=Array.isArray(data)?data.map(x=>({...x})):calendarItems(iso);
+ items=dayItems(iso);
  isSample=false;
  selectedId=null;zoom=null;focus.classList.remove('show');editor.classList.remove('show');
  note.textContent=isSample?'見本の予定です（実際の予定ではありません）':data===null&&iso!==todayISO?'この日の端末内予定はまだありません':'端末内の記録を表示 · Notion未接続';
@@ -254,7 +313,7 @@ else{note.textContent='端末内の予定はありません · 右上の追加�
 renderWeek();render();updateReview();setInterval(updateNow,60000);
 <\/script></body></html>`;
 
- const payload=JSON.stringify({days:state.days,calendarDays}).replace(/</g,'\\u003c');
+ const payload=JSON.stringify({days:state.days,calendarDays,taskSource,habitSource,generatedAt:new Date().toISOString()}).replace(/</g,'\\u003c');
  const ready=html.replace('<script>','<script>window.YOS_CHARCOAL_BOOT='+payload+';<\/script><script>');
  await view.loadHTML(ready);
  let closedFlag=false;
