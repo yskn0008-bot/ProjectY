@@ -464,3 +464,39 @@ test('editor action buttons have visible spacing and shortcut icons show separat
  assert.ok(!js.includes("action.textContent='⚡'"));
  assert.match(js,/beginLocalEdit\(item,true\)/);
 });
+
+
+test('DAYSTREAM compatibility assesses confirmed conflicts without guessing health or geography',()=>{
+ const actualHtml=Function('return '+String.fromCharCode(96)+html+String.fromCharCode(96))();
+ const js=actualHtml.split('<script>')[1]?.split('</script>')[0]||'';
+ const first=js.indexOf('const yosCompatRank=');
+ const last=js.indexOf('let latestCompatibility=',first);
+ assert.ok(first>0&&last>first,'compatibility classifier is embedded in actual WebView');
+ const evaluate=vm.runInNewContext(js.slice(first,last)+'\nyosCompatibility',{});
+ const t=(id,name,start,duration,kind='task',fixed=0)=>({id,t:name,s:start,d:duration,kind,f:fixed});
+ const overlaps=evaluate([t(1,'打合せ',600,60,'schedule',1),t(2,'作業',620,30)]);
+ assert.equal(overlaps.get(1).level,'danger');
+ assert.equal(overlaps.get(2).level,'danger');
+ assert.match(overlaps.get(1).reasons[0],/固定予定との時間衝突/);
+ const prep=evaluate([t(3,'外出準備',600,20),t(4,'外出',625,30)]);
+ assert.equal(prep.get(3).level,'positive');
+ assert.equal(prep.get(4).level,'positive');
+ assert.match(prep.get(4).reasons[0],/候補/);
+ const cleanup=evaluate([t(5,'筋トレ',660,30),t(6,'入浴',695,30,'habit')]);
+ assert.equal(cleanup.get(5).level,'positive');
+ assert.equal(cleanup.get(6).level,'positive');
+ const short=evaluate([t(7,'読書',450,30,'task'),t(8,'運動',483,25,'habit')]);
+ assert.equal(short.get(7).level,'negative');
+ const unknown=evaluate([t(9,'銀行手続',600,30),t(10,'夕食',700,30,'habit')]);
+ assert.equal(unknown.get(9).level,'unknown');
+ assert.equal(unknown.get(10).level,'unknown');
+ const prioritize=evaluate([t(11,'外出準備',600,20),t(12,'外出',620,30),t(13,'固定面談',625,30,'schedule',1)]);
+ assert.equal(prioritize.get(12).level,'danger','actual conflict outranks positive suggestions');
+ assert.match(js,/latestCompatibility=yosCompatibility\(items\)/);
+ assert.match(js,/el.classList.add\('compat-'\+compat.level\)/);
+ assert.match(js,/function yosRenderCompatibility\(\)/);
+ assert.match(js,/yosRenderCompatibility\(\);/);
+ assert.match(actualHtml,/id="compatStatus"/);
+ assert.match(actualHtml,/id="compatReview"/);
+ assert.doesNotMatch(js,/Notion\.updatePage|CalendarEvent\.save/);
+});
