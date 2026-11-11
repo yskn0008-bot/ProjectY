@@ -169,3 +169,11 @@ test('stale overdue items are not silently auto-replanned and batch requires rev
  assert.match(client,/JSON\.stringify\(proposed\.map/);
  assert.match(client,/元の期限や状態は変更していません/);
 });
+
+test('native plan storage verifies previous-content backup before replacement, restores on write failure',()=>{
+ assert.match(script,/const backup=path\+'\.previous'/);
+ assert.match(script,/backup verification failed/);
+ assert.match(script,/restore verification failed/);
+ assert.match(script,/if\(fm\.readString\(path\)!==after\)throw Error\('readback failed'\)/);
+ assert.match(script,/if\(!validPlan\(changed\)\|\|current!==expected\)throw Error/);
+});
