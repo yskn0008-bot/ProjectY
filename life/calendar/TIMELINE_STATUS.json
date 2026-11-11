@@ -215,10 +215,10 @@
     "assetCommit": "bd67b996c0da7e54e99b7a3528c2a3233e329c6b",
     "writes": "Draft #654 UI/CSS, tests, generated offline Scriptable package and verified updater changed only; no main, production, existing iPhone scripts or Apple/Notion source data changed.",
     "testEvidence": "reference-wallpaper-test-results.txt:5/5 pass; no physical iPhone render claimed",
-    "next": "On the user's iPhone safely open the pinned development package via the existing YOS distribution route; compare 1 screenshot with the approved static glass crop; test collision rail, touch-move, save/readback and reopen. Verify haptics and real Apple/Notion permissions separately before production.",
+    "next": "Current 24h glass HOME geometry passed 390px browser. Common-installer .js staged only in PR #654; not available from production catalog. YOS System checks safe common installer iPhone first registration, adds candidate to catalog only under release approval, verifies real device appearance/touch/Save/reopen. Preserve original app, data, and PR #667.",
     "visualApproval": "Static 557x1135 glass crop approved only; interactive 24-hour display not yet visually accepted",
     "checks": "Approved static crop unchanged, 24h geometry, collisions, touch-move feedback, cancellation, explicit save/readback, fixed Apple event protection, and no sample-data import passed existing regression suite.",
-    "visualGate": "Chromium 390x844 time rail, overlap marker anchored to actual 09:20 start, connector to shifted card, save UI and synthetic fixed-event protection pass automated tests. Static crop approved; dynamic UI and physical iPhone visual acceptance remain pending.",
+    "visualGate": "2026-11-11 Chromium 390px screenshots visually reviewed after hour-label/timeline-dot fix; final physical iPhone acceptance is still pending.",
     "installedScriptableVersion": "Still unconfirmed. Draft same-name updater is pinned to immutable package 99333813 and refuses overwrite of unknown local code; does not prove physical iPhone launch."
   },
   "visualApproval": {
@@ -237,5 +237,28 @@
     "dynamicAppearanceApproved": false,
     "physicalIPhoneApproved": false,
     "sampleScheduleIsNotUserData": true
+  },
+  "releaseCandidate20261111": {
+    "scope": "24h glass timeline - common-installer-ready staging only",
+    "source": "life/calendar/YOS_DAYSTREAM_TimelineBridge_Dev.js",
+    "stagedScript": "ios-app/scriptable/YOS DAYSTREAM Timeline 開発確認 20261105.js",
+    "scriptName": "YOS DAYSTREAM Timeline 開発確認 20261105",
+    "package": "life/calendar/YOS_DAYSTREAM_Timeline_Review_20261105.scriptable",
+    "fixedPackageCommit": "31fe584de7bceea11fbafc9ad6045f2685f8c00c",
+    "commonInstaller": "ios-app/scriptable/YOS Common Installer.js on main; unchanged",
+    "commonCatalog": "ios-app/scriptable/yos-common-installer-catalog.json on main; candidate NOT LISTED",
+    "whyUnlisted": "Existing common installer owner must approve release registration; iPhone import and actual device behavior unverified",
+    "automatedVerification": {
+      "timelineTests": 59,
+      "lifeBaseTests": 34,
+      "failures": 0,
+      "browser": "390px Chromium passed on earlier current UI; native iPhone not verified",
+      "commit": "caa4d2918751efbbdae3e09a97bf1272e6bc6e2f"
+    },
+    "actualIPhone": "NOT TESTED with staged common-installer script",
+    "priorImportAttempt": ".scriptable UTI unsupported on iPhone; avoid repeating; use .js in Scriptable iCloud folder only after confirming no same-name collision",
+    "haptics": "iPhone Scriptable WebView continuous finger-scroll haptics not verified; standard vibration API unsupported on iOS; do not claim implemented",
+    "gate": "Do not merge, register in main catalog, overwrite existing script, or claim completion before owner review and physical iPhone acceptance",
+    "rollback": "Draft-only candidate; original installed scripts/Notion/Apple Calendar not changed"
   }
 }
