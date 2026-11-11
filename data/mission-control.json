@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-12T08:21:03+09:00",
+  "updated_at": "2026-11-12T08:23:09+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -12,16 +12,6 @@
     ]
   },
   "inbox": [
-    {
-      "id": "github-pr-630",
-      "title": "PR #630 YOS TODAY/TOMORROW: large widget + read-only life board",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/630",
-      "updated_at": "2026-11-04T01:25:07Z"
-    },
     {
       "id": "github-pr-651",
       "title": "PR #651 YOS Notification v0.3: protected capture, live Notion context and safe iPhone updater",
@@ -110,7 +100,17 @@
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/681",
-      "updated_at": "2026-11-11T23:20:34Z"
+      "updated_at": "2026-11-11T23:22:34Z"
+    },
+    {
+      "id": "github-pr-682",
+      "title": "PR #682 YOS JOURNAL: 電子書籍型リーダーへの改修",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/682",
+      "updated_at": "2026-11-11T23:22:13Z"
     },
     {
       "id": "github-issue-10",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-11T22:35:46Z"
+      "updated_at": "2026-11-11T23:22:20Z"
     },
     {
       "id": "github-issue-234",
@@ -264,7 +264,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-12T08:21:03+09:00",
+      "last_update": "2026-11-12T08:23:09+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -339,13 +339,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 8件・Open PR 45件を自動同期中",
+      "next_action": "Open Issue 8件・Open PR 46件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-12T08:21:03+09:00",
+      "last_update": "2026-11-12T08:23:09+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -368,7 +368,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-12T08:21:03+09:00",
+      "last_update": "2026-11-12T08:23:09+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -450,5 +450,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "c50708cf64f0142c4ff5cca623e8fc2125e2f15a731128fb96af9c0b04df8934"
+  "github_snapshot_hash": "939821716d731abd3798699342b847df1664c6b1c2866b5fe27740b43c413cf9"
 }
