@@ -179,3 +179,32 @@ test('an iCloud duplicate that cannot be read remains protected and is explicitl
  assert.match(r.alerts.at(-1).message,/原因は未確定/);
  assert.equal(r.opened.length,0);
 });
+
+test('daystream preview installs alongside preserved conflicting old timeline files without overwrite or autoexecute',async()=>{
+ const cloud=fm('/icloud'),local=fm('/local');
+ const legacyCloud='/icloud/YOS Timeline Auto.js',legacyLocal='/local/YOS Timeline Auto.js';
+ cloud.files.set(legacyCloud,'USER LEGACY CLOUD');local.files.set(legacyLocal,'USER LEGACY LOCAL');
+ const r=await run({cloud,local,id:'daystream-preview',choices:[-1]});
+ const preview=shipped.targets.find(t=>t.id==='daystream-preview');
+ assert.ok(preview,'release manifest should expose a distinct preview choice');
+ assert.equal(preview.name,'YOS DAYSTREAM Timeline 開発確認 20261105');
+ assert.equal(preview.path,'ios-app/scriptable/YOS DAYSTREAM Timeline 開発確認 20261105.js');
+ assert.match(preview.commit,/^[0-9a-f]{40}$/);
+ assert.equal(hash(fixtures['daystream-preview']),preview.sha256);
+ assert.equal(r.cloud.files.get('/icloud/'+preview.name+'.js'),fixtures['daystream-preview']);
+ assert.equal(r.cloud.files.get(legacyCloud),'USER LEGACY CLOUD');
+ assert.equal(r.local.files.get(legacyLocal),'USER LEGACY LOCAL');
+ assert.equal(r.opened.length,0);
+ const receipt=JSON.parse(r.cloud.files.get('/icloud/YOS Common Installer Data/'+encodeURIComponent(preview.name)+'.receipt.json'));
+ assert.equal(receipt.commit,preview.commit);assert.equal(receipt.sha256,preview.sha256);
+ assert.match(r.alerts.at(-1).title,/登録完了/);
+});
+test('daystream preview never overwrites a preexisting unknown same-name candidate',async()=>{
+ const cloud=fm('/icloud');
+ const existing='/icloud/YOS DAYSTREAM Timeline 開発確認 20261105.js';
+ cloud.files.set(existing,'PERSONAL CUSTOM SCRIPT');
+ const r=await run({cloud,id:'daystream-preview'});
+ assert.equal(r.cloud.files.get(existing),'PERSONAL CUSTOM SCRIPT');
+ assert.match(r.alerts.at(-1).message,/管理情報/);
+ assert.equal(r.opened.length,0);
+});
