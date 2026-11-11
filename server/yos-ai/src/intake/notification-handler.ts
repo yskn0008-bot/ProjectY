@@ -85,7 +85,7 @@ function categoryOf(s:string):Category {
 function triage(raw:string,category:Category):{decision:'YOS_SILENT'|'YOS_ALERT';alertText:string} {
   const silent={decision:'YOS_SILENT' as const,alertText:''};
   if(TEST_NOTICE.test(raw))return silent;
-  if(category==='missed-call')return silent;
+  // A missed-call label must not suppress an independent active security or payment incident.
   // Remove only resolved/negated risk phrases. Other active risks in the same message still count.
   const actionable=raw.replace(NEGATED_RISK,'');
   const p0=/口座凍結|差押|差し押さえ|不正送金|不正利用|不正アクセス|不審なログイン.{0,12}(?:検知|確認)|訴状/iu.test(actionable);
