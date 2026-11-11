@@ -154,7 +154,7 @@ test('no matching source article creates no fake personalized story',async()=>{
   task('借入の返済期限を確認する','実行中','P0','Money')
  ]});
  assert.equal(headline(r.html),'今のタスクに直接役立つ記事は未発見');
- assert.match(r.html,/AWAITING EDITION/);
+ assert.match(r.html,/NO DIRECT MATCH/);
  assert.doesNotMatch(r.html,/記事と一致する具体項目/);
 });
 
