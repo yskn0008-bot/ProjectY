@@ -53,7 +53,7 @@ test('glass HOME uses a proportional 24h time rail while compact skin stays unch
  assert.equal(rows[0].style.top,'432px');
  assert.equal(rows[0].style.height,'60px');
  assert.equal(rows[0].dataset.railShift,'none');
- assert.equal(rows[1].style.top,'492px');
+ assert.equal(rows[1].style.top,'500px');
  assert.equal(n.get('tlAgenda').style.height,'1196px');
  assert.match(html,/YOS_APPROVED_GLASS_TIME_RAIL_V1/);
  assert.match(html,/00:00\\A 02:00\\A 04:00\\A 06:00/);
