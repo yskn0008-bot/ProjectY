@@ -174,3 +174,35 @@ test('Money headline concepts alone do not qualify without body evidence',async(
  ],overrideArticles:[superficial]});
  assert.equal(headline(r.html),'今のタスクに直接役立つ記事は未発見');
 });
+
+
+test('curated discovery remains visible without pretending to solve a task',async()=>{
+ const jazz={...money,category:'LIFE / DISCOVERY',title:'北谷のジャズを楽しむ',summary:'北谷の海沿いで無料のジャズライブを見ながら街歩きを楽しめるイベントです。',reason:'予定に縛られず、気分が変わる新しい楽しみを見つけられます。',editorialLane:'DISCOVERY',link:'https://example.org/jazz'};
+ const r=await show({keys:['YOS_NOTION_INTEGRATION_TOKEN'],tasks:[],overrideArticles:[jazz]});
+ assert.equal(headline(r.html),jazz.title);
+ assert.match(r.html,/今日の発見・楽しみの記事 1件/);
+ assert.match(r.html,/DISCOVERY · タスクと無理に結び付けず/);
+});
+test('direction lane links a specific active Project without treating it as a task',async()=>{
+ const direction={...money,category:'WORK / DIRECTION',editorialLane:'DIRECTION',
+  title:'タクシー運転と勤務条件を見直す',summary:'タクシーの勤務条件と運転時間を具体的に比較する資料を紹介します。',
+  action:'タクシーの勤務体系を確認する',reason:'働き方の今後の方向性の比較材料です。',
+  link:'https://example.org/workdirection'};
+ const row=task('タクシー運転と勤務条件を選ぶ','実行中','P1','Work');
+ row.properties['種類']={select:{name:'Project'}};
+ const r=await show({keys:['YOS_NOTION_INTEGRATION_TOKEN'],tasks:[row],overrideArticles:[direction]});
+ assert.equal(headline(r.html),direction.title);
+ assert.match(r.html,/目指す方向性と関連する記事候補 1件/);
+});
+test('discovery lane requires explicit editorial designation and substantive source evidence',async()=>{
+ const poor={...money,category:'MONEY / DISCOVERY',title:'お得な話題',summary:'安くなる',reason:'役立つ',editorialLane:'DISCOVERY'};
+ const r=await show({keys:['YOS_NOTION_INTEGRATION_TOKEN'],tasks:[],overrideArticles:[poor]});
+ assert.equal(headline(r.html),'今のタスクに直接役立つ記事は未発見');
+ assert.match(r.html,/NO DIRECT MATCH/);
+});
+test('task utility remains before curated discovery without quotas forcing irrelevant stories',async()=>{
+ const jazz={...money,title:'北谷でジャズと夜景を楽しむ',category:'LIFE / DISCOVERY',summary:'北谷の海辺でジャズを無料で楽しめるイベントを紹介しています。',reason:'普段と違う街の雰囲気を楽しむ話題です。',editorialLane:'DISCOVERY',link:'https://example.org/jazz'};
+ const r=await show({keys:['YOS_NOTION_INTEGRATION_TOKEN'],tasks:[task('健康ストレッチを続ける','実行中','P1','Health')],overrideArticles:[jazz,health]});
+ assert.equal(headline(r.html),health.title);
+ assert.match(r.html,/北谷でジャズと夜景を楽しむ/);
+});
