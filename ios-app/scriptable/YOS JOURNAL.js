@@ -31,14 +31,27 @@ const valid=x=>{
 // Device only. Public article JSON is never modified with private task data.
 // Uses existing Scriptable Keychain credentials and existing private YOS sources.
 const taskSourceId="965c6086-32c1-463d-93b4-87a9cb69b3ad";
-const topicPatterns={
- Money:/家計|資金|支払|返済|債務|借入|予算|銀行|税金|給付|補助|助成|物価|収支|費用|金融|生活支援|収入/i,
- Work:/求人|就職|転職|収入|勤務|雇用|労働|副業|仕事探し|在宅|職業|タクシー|運転代行/i,
- Health:/健康|運動|睡眠|柔軟|筋肉|通院|医療|病院|療養|痛み|ストレッチ|予防/i,
- Self:/美容|外見|印象|肌|眉|髪型|ヒゲ|スキンケア|皮膚|自分磨き|身だしなみ/i,
- Life:/住まい|住宅|賃貸|引越|家事|騒音|暮らし|光熱|家具|災害|防災|住環境/i
+// YOS_JOURNAL_TASK_SPECIFIC_V2: Do not treat a Money/Health area alone as article relevance.
+// Requires at least two concrete task/article shared concepts; next actions are an additional gate.
+const focusSignals=[
+ ['家計',/家計/],['予算',/予算/],['食費',/食費/],['固定費',/固定費/],
+ ['返済',/返済/],['借入',/借入|借金/],['支払',/支払|支払い/],['期限',/支払日|返済日|期限|期日/],
+ ['銀行',/銀行/],['口座',/口座/],['残高',/残高/],['税金',/税金|所得税|住民税/],
+ ['収入',/収入|給与|賃金/],['貯蓄',/貯金|貯蓄/],['給付',/給付|支援金/],
+ ['就職',/就職|転職|求人|応募|採用/],['在宅',/在宅|リモート/],['面接',/面接/],
+ ['タクシー',/タクシー|二種免許/],['勤務',/勤務|シフト/],['運転',/運転|免許/],
+ ['睡眠',/睡眠|寝つき|入眠/],['ストレッチ',/ストレッチ|柔軟/],['運動',/運動|筋トレ/],
+ ['皮膚',/皮膚|スキンケア/],['ニキビ',/ニキビ|にきび/],['毛穴',/毛穴/],
+ ['眉毛',/眉毛|眉サロン|眉デザイン/],['美容室',/美容室|ヘアサロン/],['脱毛',/脱毛/],
+ ['住宅',/住宅|住まい|賃貸/],['騒音',/騒音/],['防音',/防音/],['引越',/引越|引っ越し/],
+ ['ごみ',/ごみ|ゴミ/],['収集',/収集日|収集曜日|分別|ごみ袋/],
+ ['保証',/保証/],['返品',/返品|交換申請/],['配送',/配送|配達|再配達/],
+];
+const signalNames=text=>focusSignals.filter(([,re])=>re.test(String(text||''))).map(([name])=>name);
+const taskScope=task=>{
+ const m=String(task.area||'').match(/Money|Work|Health|Self|Life/i);
+ return m?m[0]:'';
 };
-const localTopics=s=>Object.keys(topicPatterns).filter(k=>topicPatterns[k].test(String(s||"")));
 const propertyText=(p,key)=>Array.isArray(p?.[key])?p[key].map(x=>String(x?.plain_text||x?.text?.content||"")).join(""):"";
 const propertyChoice=p=>p?.select?.name||p?.status?.name||"";
 const currentStates=new Set(["次にやる","実行中","本人操作","待ち"]);
@@ -97,29 +110,43 @@ async function readLocalProgress(){
  return {status:error?"error":"unavailable",tasks:[],source:""};
 }
 function rankForLocalProgress(articles,progress,now=new Date()){
- const active=(progress.tasks||[]).filter(t=>currentStates.has(t.state)&&t.title).slice(0,500);
- const tDay=Date.UTC(now.getFullYear(),now.getMonth(),now.getDate());
- const ranked=articles.map((a,i)=>{
-  const articleTopics=localTopics([a.title,a.summary,a.category].join(" "));
+ const tasks=(progress.tasks||[]).filter(t=>['実行中','本人操作','次にやる'].includes(t.state)&&t.title).slice(0,500);
+ const active=tasks.filter(t=>t.state==='実行中'||t.state==='本人操作');
+ const next=tasks.filter(t=>t.state==='次にやる');
+ const candidates=[...active,...next];
+ const dateKey=new Date(now.getTime()+9*3600000).toISOString().slice(0,10);
+ const today=Date.parse(dateKey+'T00:00:00Z');
+ const ranked=articles.map((article,index)=>{
+  const content=[article.title,article.summary,article.action,...(article.keyPoints||[])].join(' ');
+  const articleSignals=signalNames(content); // Never count category or model-written 'reason' as evidence.
   let best=null;
-  for(const t of active){
-   const taskTopics=localTopics([t.title,t.nextAction,t.blocker,t.area].join(" "));
-   const overlap=articleTopics.filter(x=>taskTopics.includes(x));
-   if(!overlap.length)continue;
-   const urgency=({P0:60,P1:38,P2:16,P3:4})[t.priority]||0;
-   const stateBonus=({実行中:24,本人操作:20,"次にやる":15,待ち:5})[t.state]||0;
-   const dueDate=Date.parse(t.due);const days=Number.isFinite(dueDate)?Math.floor((dueDate-tDay)/86400000):null;
-   const deadline=days!==null&&days>=0&&days<=7?20:days!==null&&days<0?6:0;
-   const score=30+urgency+stateBonus+deadline+Math.min(12,overlap.length*4);
-   if(!best||score>best.score)best={score,topic:overlap[0],state:t.state};
+  for(const task of candidates){
+   const taskContent=[task.title,task.nextAction,task.blocker,task.completion].join(' ');
+   const taskSignals=signalNames(taskContent);
+   const common=taskSignals.filter(sig=>articleSignals.includes(sig));
+   // Two distinct concrete facts are required: e.g. '返済' AND '期日', not just 'Money'.
+   if(common.length<2)continue;
+   const nextSignals=signalNames([task.nextAction,task.blocker].join(' '));
+   // If a concrete next action or blocker exists, the article must address it too.
+   if(nextSignals.length&&!nextSignals.some(sig=>common.includes(sig)))continue;
+   const level=(task.state==='実行中'||task.state==='本人操作')?2:1;
+   const priority=({P0:60,P1:38,P2:16,P3:4})[task.priority]||0;
+   const dueDate=Date.parse(task.due||'');
+   const days=Number.isFinite(dueDate)?Math.floor((dueDate-today)/86400000):null;
+   const deadline=days!==null&&days>=0&&days<=7?20:0;
+   const score=priority+deadline+common.length*8;
+   const match={level,score,state:task.state,scope:taskScope(task),evidence:common.slice(0,3)};
+   if(!best||level>best.level||(level===best.level&&score>best.score))best=match;
   }
-  return {...a,_yosMatch:best,_yosOriginalIndex:i};
+  return {...article,_yosMatch:best,_yosOriginalIndex:index};
  });
- // Never label unlinked public articles as tailored to the user's actual state.
- if(!["ready","partial"].includes(progress.status))return {articles:ranked,status:"unavailable",matched:0};
- const count=ranked.filter(a=>a._yosMatch).length;
- const ordered=[...ranked].sort((a,b)=>(b._yosMatch?.score||0)-(a._yosMatch?.score||0)||a._yosOriginalIndex-b._yosOriginalIndex);
- return {articles:ordered,status:progress.status,matched:count};
+ if(!['ready','partial'].includes(progress.status))return {articles:ranked,status:'unavailable',matched:0,scope:'none'};
+ // Exclude unrelated stories rather than promoting generic subject-matched articles.
+ const matched=ranked.filter(a=>a._yosMatch).sort((a,b)=>
+  b._yosMatch.level-a._yosMatch.level||b._yosMatch.score-a._yosMatch.score||a._yosOriginalIndex-b._yosOriginalIndex
+ );
+ const scope=matched.length?(matched[0]._yosMatch.level===2?'current':'next'):'none';
+ return {articles:matched,status:progress.status,matched:matched.length,scope};
 }
 // End local-only progress logic.
 
@@ -136,7 +163,7 @@ try{
  if(issue){const local=await readLocalProgress();relevance=rankForLocalProgress(issue.articles,local);}
 }catch(_){relevance={status:"unavailable",matched:0,articles:issue?.articles||[]};}
 if(issue)issue.articles=relevance.articles;
-const issueHeadline=issue?.articles?.[0]?.title||issue?.headline||"今日の視点を、明日の力に。";
+const issueHeadline=issue?.articles?.[0]?.title||(relevance.status!=='unavailable'?'今のタスクに直接役立つ記事は未発見':issue?.headline)||'今日の視点を、明日の力に。';
 const todayJst=new Date(Date.now()+9*3600000).toISOString().slice(0,10);
 const issueStatus=!issue?"取得できませんでした":issue.issuedOn?(issue.issuedOn===todayJst?"本日号":issue.issuedOn<todayJst?"保存済みの過去号":"発行日を確認してください"):"発行日未確認";
 const ageDays=issue?.issuedOn&&/^\d{4}-\d{2}-\d{2}$/.test(issue.issuedOn)
@@ -144,11 +171,11 @@ const ageDays=issue?.issuedOn&&/^\d{4}-\d{2}-\d{2}$/.test(issue.issuedOn)
 const ageLabel=issueStatus==="保存済みの過去号"&&Number.isFinite(ageDays)&&ageDays>=1?" · "+ageDays+"日前":"";
 const editionLabel=issueStatus+ageLabel;
 const issueNote=warning||issueStatus!=="本日号"?`<div class="notice" role="status"><strong>${esc(editionLabel)}</strong>${issue?.issuedOn?`<p>発行日：${esc(issue.issuedOn)}</p>`:""}${warning?`<p>${esc(warning)}</p>`:""}</div>`:"";
-const relevanceLabel=relevance.status==="ready"
- ?relevance.matched?"Notionの現在タスクとの関連候補 "+relevance.matched+"件":"Notionを確認しましたが、この号に直接一致する記事はありません"
- :relevance.status==="partial"?"既存タスク表示（最大3件）との暫定照合 · "+relevance.matched+"件"
- :"Notionの現在地は未照合 · 一般記事を表示中";
-const relevanceBadge='<div class="notice" role="status"><strong>'+esc(relevanceLabel)+'</strong><p>タスクの記録上の状態に基づく参考順位です。実際の達成や本人への適合は未確認です。</p></div>';
+const relevanceLabel=relevance.status==='ready'
+ ?relevance.matched?(relevance.scope==='current'?'取り組み中タスクに対応する記事候補 ':'次にやるタスクに対応する記事候補 ')+relevance.matched+'件':'現在のタスクに具体的に一致する記事は、この号にありません'
+ :relevance.status==='partial'?'既存タスク表示（最大3件）の部分照合 · '+relevance.matched+'件'
+ :'Notionの現在地は未照合 · 一般記事を表示中';
+const relevanceBadge='<div class="notice" role="status"><strong>'+esc(relevanceLabel)+'</strong><p>記事とタスクの具体的な共通点を確認した参考候補です。制度の対象条件・本人への適用・最新の事実は未検証です。</p></div>';
 const leadArticle=issue?.articles?.[0];
 const coverPhoto=leadArticle?.image?`<div class="cover-photo"><img src="${esc(leadArticle.image)}" alt="${esc(leadArticle.imageCaption||"巻頭記事の写真")}" />${leadArticle.imageKind==="illustrative"?'<span class="image-label">イメージ写真</span>':""}</div>`:"";
 const stories=(issue?.articles||[]).map((a,i)=>{
@@ -156,7 +183,7 @@ const stories=(issue?.articles||[]).map((a,i)=>{
  const photo=a.image?`<figure class="story-photo"><img loading="lazy" src="${esc(a.image)}" alt="${esc(a.imageCaption||a.title)}"/>${a.imageCaption||a.imageKind==="illustrative"||a.imageCredit?`<figcaption>${a.imageKind==="illustrative"?"イメージ写真":""}${a.imageCaption?` · ${esc(a.imageCaption)}`:""}${a.imageCredit?` · 写真：${esc(a.imageCredit)}`:""}</figcaption>`:""}</figure>`:"";
  const keyPoints=a.keyPoints.length?`<ul class="key-points">${a.keyPoints.map(t=>`<li>${esc(t)}</li>`).join("")}</ul>`:"";
  const brief=a.summary?`<section class="brief"><div class="section-label"><span>THE BRIEF</span><span>この記事の要約</span></div><p>${esc(a.summary)}</p>${keyPoints}</section>`:"";
- const localReason=a._yosMatch?'<div class="local-match">関連する現在の領域：'+esc(a._yosMatch.topic)+' · '+esc(a._yosMatch.state)+'（内容の一致候補）</div>':"";
+ const localReason=a._yosMatch?'<div class="local-match">'+esc(a._yosMatch.scope||'タスク')+' · '+esc(a._yosMatch.state)+' · 記事と一致する具体項目：'+esc(a._yosMatch.evidence.join('・'))+'（適用条件は未確認）</div>':"";
  const reason=a.reason?`<section class="personal"><div class="section-label"><span>WHY IT MATTERS</span><span>今の自分に必要な理由</span></div><p>${esc(a.reason)}</p></section>`:"";
  const caveat=a.caveat?`<p class="caveat"><b>確認事項</b> ${esc(a.caveat)}</p>`:"";
  const action=a.action?`<section class="next-move"><span>YOUR NEXT MOVE / 今日の一歩</span><p>${esc(a.action)}</p></section>`:"";
