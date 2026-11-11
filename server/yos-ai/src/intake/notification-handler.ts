@@ -10,6 +10,9 @@ const MAX_EVENTS = 120;
 const RELEASE_OWNED_LOCK = "if redis.call('GET', KEYS[1]) == ARGV[1] then return redis.call('DEL', KEYS[1]) else return 0 end";
 const STATE_SET = new Set(['read','pending','done']);
 const OTP = /認証コード|確認コード|ワンタイム|二段階認証|ログインコード|パスワードリセット|verification\s*code|one.?time|\bOTP\b|\b2FA\b|security\s*code|reset\s*password/iu;
+const PRIVACY_CONTEXT = /認証|確認(?:番号|コード)|ログイン|ワン.?タイム|二段階|セキュリティ(?:コード|番号)|コード|暗証|秘密|機密|極秘|共有してはいけない|パスワード|パスコード|pass(?:word|code)|security\s*code|verification\s*code|\b(?:OTP|2FA|PIN|token|secret)\b|APIキー/iu;
+// Remove resolved/negated incidents before extracting safe fixed labels.
+const NEGATED_RISK = /(?:不正(?:利用|送金|アクセス)|口座凍結|差押|差し押さえ|振込失敗|引落失敗)(?:(?:は|が|を)?(?:確認|検知|検出|発生)(?:されませんでした|されていません|されなかった|されていない|しなかった|していません|しませんでした)|(?:は|が)?(?:ありませんでした|ありません|ない)|(?:は|が)?解除(?:されました|済み|しました)|(?:の|する)?予定は(?:ありません|ない))/giu;
 const TEST_NOTICE = /^\s*(?:【(?:通知テスト|テスト通知|動作確認|架空)[^】]*】|(?:これは|この通知は|本通知は)?\s*(?:架空の通知テスト|架空のテスト|テスト通知|架空の通知|模擬通知|動作確認(?:用|通知)|test\s+(?:message|notification)|simulation\b))/iu;
 type Category = 'missed-call'|'money-review'|'legal'|'security'|'information';
 type Status = 'unread'|'read'|'pending'|'done';
@@ -45,14 +48,28 @@ function sha256Hex(s:string):Promise<string> {
   return crypto.subtle.digest('SHA-256',new TextEncoder().encode(s)).then(d=>[...new Uint8Array(d)].map(n=>n.toString(16).padStart(2,'0')).join(''));
 }
 function safeText(raw:string):string {
-  // Keep a non-secret incident description even if the same notice includes an OTP.
-  if(OTP.test(raw)&&!/(?:口座凍結|差押|差し押さえ|不正(?:送金|利用|アクセス)|訴状|督促|引落失敗|振込失敗)/iu.test(raw))
-    return '認証・ログイン関連の通知（秘密の本文は保存していません）';
-  const redacted=OTP.test(raw)
-    ? raw.replace(/(?<![A-Za-z0-9])(?:\d[ \t-]?){3,11}\d(?![A-Za-z0-9])/gu,'[認証値非表示]')
-      .replace(/((?:認証コード|確認コード|本人確認コード|ログインコード|ワンタイム(?:認証)?コード|verification\s*code|security\s*code|OTP)\s*[:：=]?\s*)[A-Za-z0-9_-]{4,20}/giu,'$1[認証値非表示]')
-    : raw;
-  return redacted.replace(/(?:password|パスワード|token|APIキー|secret)\s*[:：=]\s*\S+/giu,'[秘密非表示]')
+  // Never copy a free-form authentication/security notice into Inbox, alert or AI history.
+  // Unknown secret formats cannot be reliably identified by replacement patterns.
+  if(OTP.test(raw)||PRIVACY_CONTEXT.test(raw)){
+    const active=raw.replace(NEGATED_RISK,'');
+    const labels:[RegExp,string][]=[
+      [/不正送金/u,'不正送金'],[/口座凍結/u,'口座凍結'],[/不正アクセス/u,'不正アクセス'],
+      [/不正利用/u,'不正利用'],[/差押|差し押さえ/u,'差押え'],[/訴状/u,'訴状'],
+      [/督促/u,'督促'],[/引落失敗|引き落としに失敗/u,'引き落とし失敗'],
+      [/振込失敗/u,'振込失敗'],[/不審なログイン/u,'不審なログイン']
+    ];
+    const facts=labels.filter(([re])=>re.test(active)).map(([,name])=>name);
+    const safeParts=['認証情報を含む通知（原文非保存）'];
+    if(facts.length)safeParts.push('要確認: '+facts.join('・'));
+    // Explicit monetary/date labels only. An arbitrary "123456円" may be an OTP.
+    const money=/(?:被害額|請求金額|引落金額|支払金額|お支払金額)\s*[:：]?\s*[￥¥]?\s*[\d,]{1,11}円/u.exec(raw)?.[0];
+    if(money)safeParts.push(money);
+    const due=/(?:支払期限|引落期限)\s*[:：]?\s*(?:20\d{2}年)?\s*\d{1,2}月\d{1,2}日/u.exec(raw)?.[0];
+    if(due)safeParts.push(due);
+    safeParts.push('詳細は元アプリで確認');
+    return safeParts.join('。');
+  }
+  return raw.replace(/(?:password|パスワード|token|APIキー|secret)\s*[:：=]\s*\S+/giu,'[秘密非表示]')
     .replace(/((?:口座番号|カード番号|取引番号)\s*[:：=#]?\s*)[\w*-]{4,}/giu,'$1[番号非表示]')
     .replace(/(^|[^\d])(?:\d[\s-]?){12,27}\d(?=[^\d]|$)/gu,'$1[長い番号非表示]')
     .replace(/\b0\d{9,10}\b/gu,'[電話番号非表示]')
@@ -70,10 +87,7 @@ function triage(raw:string,category:Category):{decision:'YOS_SILENT'|'YOS_ALERT'
   if(TEST_NOTICE.test(raw))return silent;
   if(category==='missed-call')return silent;
   // Remove only resolved/negated risk phrases. Other active risks in the same message still count.
-  const actionable=raw.replace(
-    /(?:不正(?:利用|送金|アクセス)|口座凍結|差押|差し押さえ|振込失敗|引落失敗)(?:(?:は|が|を)?(?:確認|検知|検出|発生)(?:されませんでした|されていません|されなかった|されていない|しなかった|していません|しませんでした)|(?:は|が)?(?:ありませんでした|ありません|ない)|(?:は|が)?解除(?:されました|済み|しました)|(?:の|する)?予定は(?:ありません|ない))/giu,
-    ''
-  );
+  const actionable=raw.replace(NEGATED_RISK,'');
   const p0=/口座凍結|差押|差し押さえ|不正送金|不正利用|不正アクセス|不審なログイン.{0,12}(?:検知|確認)|訴状/iu.test(actionable);
   const p1=/引き落としに失敗|引落失敗|振込失敗|(?:引き落とし|引落とし|引落し|口座振替)(?:が|を)?(?:できませんでした|できなかった|できません|できず)|支払期限.{0,12}(?:本日|今日|明日)|期限切れ|督促状(?:が|を)?(?:届きました|受領しました|発行されました)|督促を受けました/iu.test(actionable);
   if(!p0&&!p1)return silent;
@@ -259,7 +273,7 @@ export function createNotificationHandler(options:{
         (summary!==undefined&&(typeof summary!=='string'||summary.length>800)))
         return result({error:'Invalid AI result'},400);
       if(decision==='YOS_ALERT'&&(!summary||!String(summary).trim()))return result({error:'Alert summary required'},400);
-      const safeSummary=decision==='YOS_ALERT'?safeText(String(summary)):'';
+      const safeSummary=decision==='failed'?'':typeof summary==='string'?safeText(summary):'';
       const lock='yos:notification:inbox:v1:'+id+':ai-lock',owner=crypto.randomUUID();
       let ownsLock=false;
       try{
@@ -282,7 +296,7 @@ export function createNotificationHandler(options:{
         await append(now().toISOString()+' · Notification AI Result · notification:'+id+' · '+decision+
           (safeSummary?'\n'+safeSummary:''));
         if(decision==='failed')return result({ok:true,id,aiState:'failed'},201);
-        return result({ok:true,id,aiState:'complete',decision,alertText:safeSummary,
+        return result({ok:true,id,aiState:'complete',decision,alertText:decision==='YOS_ALERT'?safeSummary:'',
           alertRequiresAck:decision==='YOS_ALERT'},201);
       }catch{return result({error:'AI result saving unconfirmed; retry with the same ID'},503)}
       finally{if(ownsLock){try{await options.redis.command<number>(['EVAL',RELEASE_OWNED_LOCK,1,lock,owner])}catch{}}}
