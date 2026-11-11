@@ -67,7 +67,7 @@ test('Notion Tasks read-only source uses existing data-source ID and never sends
  assert.equal(req.method,'POST');
  assert.equal(req.headers.Authorization,'Bearer LOCAL_ONLY_SECRET');
  assert.doesNotMatch(script,/\/v1\/pages\/|req\.method\s*=\s*['"](?:PATCH|PUT|DELETE)['"]/);
- assert.match(script,/const payload=JSON\.stringify\(\{days:state\.days,calendarDays,allDayDays,calendarCoverage,taskSource,habitSource/);
+ assert.match(script,/const payload=JSON\.stringify\(\{days:state\.days,hiddenCalendar:state\.hiddenCalendar\|\|\{\},calendarDays,allDayDays,calendarCoverage,taskSource,habitSource/);
  assert.doesNotMatch(script,/JSON\.stringify\(\{days:state\.days,calendarDays,token/);
  assert.equal(JSON.stringify(x).includes('LOCAL_ONLY_SECRET'),false);
 });
@@ -352,7 +352,7 @@ test('iPhone selected Apple event offers only reversible local hide while editab
  assert.match(realJs,/document.getElementById\('deleteSelected'\).textContent='削除を確定'/);
  assert.match(realJs,/if\(!item\|\|item.source!=='Apple Calendar'\|\|!item.calendarKey\)return/);
  assert.match(realJs,/getElementById\('hideFixed'\).onclick/);
- assert.match(realJs,/元のApple予定は保持/);
+ assert.match(realJs,/元の予定は保持/);
  assert.ok(actualHtml.includes('max-height:126px'));
  assert.ok(actualHtml.includes('padding-top:calc(28px + env(safe-area-inset-top))'));
 });
