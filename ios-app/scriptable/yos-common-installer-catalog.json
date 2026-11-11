@@ -15,6 +15,13 @@
       "path": "ios-app/scriptable/YOS JOURNAL.js",
       "commit": "230975fcc61370e0de3fc0fc9161a047a849b8ff",
       "sha256": "1e7e625c70901fbcd843b193858671cf2614e9ce837cdd8faa714a7fb22c7571"
+    },
+    {
+      "id": "daystream-preview",
+      "name": "YOS DAYSTREAM Timeline 開発確認 20261105",
+      "path": "ios-app/scriptable/YOS DAYSTREAM Timeline 開発確認 20261105.js",
+      "commit": "97b420ffcccc53ff4538a764355f76fe683bb160",
+      "sha256": "883ed5195eb03ef649748a22c0612f6b956339db6702874f519028dd7c520c9d"
     }
   ]
 }
