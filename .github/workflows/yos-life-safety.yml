@@ -90,6 +90,18 @@ jobs:
           LIFE_BROWSER: ${{ matrix.browser }}
         run: node life/tests/daily-flow-handoff-smoke.mjs
 
+      - name: Render and smoke-test DAYSTREAM 390px (chromium)
+        if: matrix.browser == 'chromium'
+        run: node life/calendar/timeline.browser.test.cjs
+
+      - name: Upload DAYSTREAM visual review screenshots
+        if: always() && matrix.browser == 'chromium'
+        uses: actions/upload-artifact@v4
+        with:
+          name: yos-daystream-glass-390px
+          path: test-results/timeline-390px-*.png
+          if-no-files-found: warn
+
   life-browser-smoke:
     name: Life iPhone smoke (${{ matrix.browser }})
     runs-on: ubuntu-latest
