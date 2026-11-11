@@ -80,3 +80,18 @@ test('first editor opening focuses a selected future-day event while preserving 
  n.get('tlEnterEdit').fire('click');
  assert.equal(n.get('tlViewport').scrollTop,1200);
 });
+
+test('overlapping glass HOME events keep time dots at actual start instead of displaced card positions',()=>{
+ const {nodes:n,window:w}=setup();const date='2026-12-03',e=(id,start)=>({id,title:id,date,start,duration:30,kind:'task',repeat:'none',transfer:0});
+ w.YOS_DAYSTREAM_PLAN_IMPORT({schema:'yos-daystream-plan-v1',days:{},timeline:{version:1,events:[e('first',540),e('overlap',560)],overrides:{}}});
+ n.get('tlDay').value=date;n.get('tlDay').fire('change');
+ assert.equal(n.get('tlScaleLabel').textContent,'0–24時 · 時刻軸');
+ const rows=n.get('tlAgenda').children;
+ assert.equal(rows.length,2);
+ assert.equal(rows[0].style.top,'432px');
+ assert.equal(rows[1].style.top,'500px');
+ assert.equal(rows[1].style['--rail-shift-px'],'52px');
+ assert.equal(rows[1].dataset.actualStart,'09:20');
+ assert.equal(rows[1].dataset.railShift,'overlap');
+ assert.match(html,/YOS_GLASS_RAIL_COLLISION_DOT_V2/);
+});
