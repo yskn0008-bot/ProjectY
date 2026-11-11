@@ -44,6 +44,13 @@ try {
     }
     if(method==='GET'){
       const params=new URL(req.url()).searchParams;
+      const id=params.get('id');
+      if(id){
+        const event=history.find(e=>e.id===id);
+        await route.fulfill({status:event?200:404,headers,contentType:'application/json',
+          body:JSON.stringify(event?{ok:true,event,complete:true}:{error:'Notification not found'})});
+        return;
+      }
       const q=params.get('q')||'';
       const matching=history.filter(e=>!q||e.text.includes(q));
       const after=params.get('cursor');
@@ -60,7 +67,7 @@ try {
       const data=req.postDataJSON();
       assert.equal(data.action,'mark');
       assert.ok(['read','pending','done'].includes(data.status));
-      const found=notifications.find(e=>e.id===data.id);
+      const found=history.find(e=>e.id===data.id);
       assert.ok(found,'must not update a missing event');
       found.status=data.status;
       await route.fulfill({status:200,headers,contentType:'application/json',
@@ -143,6 +150,12 @@ try {
   await page.waitForFunction(()=>document.querySelector('#total')?.textContent?.trim()==='120+');
   await page.getByRole('button',{name:'古い通知を読み込む'}).click();
   await page.waitForFunction(()=>document.querySelector('#total')?.textContent?.trim()==='125');
+  await page.locator('.event').last().getByRole('button',{name:'対応待ち'}).click();
+  await page.waitForFunction(()=>document.querySelector('.event:last-child .state')?.textContent?.trim()==='対応待ち');
+  assert.equal((await page.locator('#total').textContent()).trim(),'125',
+    'updating an older record must retain the loaded history');
+  assert.match(await page.locator('#actionStatus').textContent(),/Notionへの反映を確認/);
+  assert.ok(requestLog.some(r=>r.method==='GET'));
   await page.locator('#search').fill('古い対象');
   await page.getByRole('button',{name:'全履歴から検索'}).click();
   await page.waitForFunction(()=>document.querySelector('#total')?.textContent?.trim()==='1');

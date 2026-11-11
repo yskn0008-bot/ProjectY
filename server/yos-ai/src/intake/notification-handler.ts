@@ -207,13 +207,21 @@ export function createNotificationHandler(options:{
     if(!role)return result({error:'Unauthorized'},401);
     if(request.method==='GET'){
       const url=new URL(request.url),query=(url.searchParams.get('q')??'').trim();
-      const cursor=url.searchParams.get('cursor');
+      const cursor=url.searchParams.get('cursor'),id=url.searchParams.get('id');
       if(query.length>80||url.searchParams.getAll('q').length>1||url.searchParams.getAll('cursor').length>1||
-        (cursor!==null&&!/^[0-9a-f]{8,64}$/u.test(cursor)))
+        url.searchParams.getAll('id').length>1||
+        (cursor!==null&&!/^[0-9a-f]{8,64}$/u.test(cursor))||
+        (id!==null&&(!/^[0-9a-f]{8,64}$/u.test(id)||cursor!==null||query!=='')))
         return result({error:'Invalid history query'},400);
       try{
         const {blocks,complete}=await listBlocks();
-        const matching=parseRows(blocks).filter(e=>!query||
+        const rows=parseRows(blocks);
+        if(id!==null){
+          if(!complete)return result({error:'Inbox reconciliation incomplete'},503);
+          const event=rows.find(e=>e.id===id);
+          return event?result({ok:true,event,complete}):result({error:'Notification not found'},404);
+        }
+        const matching=rows.filter(e=>!query||
           (e.text+' '+e.category+' '+(e.aiSummary??'')).toLowerCase().includes(query.toLowerCase()));
         const offset=cursor===null?0:matching.findIndex(e=>e.id===cursor)+1;
         if(cursor!==null&&offset===0)return result({error:'History cursor not found'},400);

@@ -180,9 +180,11 @@ footer a{color:#a8d8e0}.utility{display:flex;align-items:center;gap:8px}
           announce('actionStatus','Notionの状態を更新しています');
           try{
             await request('POST',{action:'mark',id:event.id,status:value});
-            await sync();
-            const current=events.find(e=>e.id===event.id);
-            if(current?.status!==value)throw Error('保存後の確認ができませんでした');
+            const saved=await request('GET',null,'?id='+encodeURIComponent(event.id));
+            if(saved.complete!==true||saved.event?.id!==event.id||saved.event.status!==value)throw Error('保存後の確認ができませんでした');
+            event.status=saved.event.status;
+            complete=complete&&saved.complete===true;
+            render();
             announce('actionStatus','Notionへの反映を確認しました');
           }catch(error){announce('actionStatus',String(error.message||error),true)}
           finally{loading=false;action.disabled=false}

@@ -64,6 +64,7 @@ POST /api/yos/notification のリクエスト（Authorization: Bearer <existing-
 - 隔離PR #668では重要通知の保存後にHTTP応答が失われても、同一IDの再送でACK前なら `YOS_ALERT` を再取得し、ACK後は `YOS_SILENT` とする。`ack-alert` の送信失敗時は再送によって追加通知が重なることがある。
 - HTTP503は保存未確認、409は競合等で保存未確定。誤って保存済みとみなさない。再送時は同じIDでNotionの既存行を照合する。Shortcuts自身の停止・アクション失敗時の自動再実行は未確認。
 - GET /api/yos/notification（同じBearer）で保存済みの通知・未読/対応待ち/完了の状態を取得。最大120件。
+- 通知ボックスで古い履歴の状態を変更した後は、GET `?id=通知ID` でその1件をNotionから読み戻して確認する。画面の読み込み済み履歴を先頭120件へ戻さない。Inboxを上限まで読み切れない場合は確認成功と扱わない。
 - POST { "action": "mark", "id": "通知ID", "status": "read" } 等で既存Inboxに状態を追記。statusはread/pending/doneのみ。
 - 分類はInboxへのカテゴリ保存まで。Moneyの確定支出やTasksへの自動記帳は誤判断を防ぐため未接続。
 
