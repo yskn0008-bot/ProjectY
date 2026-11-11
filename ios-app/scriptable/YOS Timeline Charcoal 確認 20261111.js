@@ -458,8 +458,15 @@ yosDefaultStart();renderWeek();render();updateReview();yosRenderSources();setInt
      const changed=JSON.parse(next.value);
      const current=fm.fileExists(path)?fm.readString(path):null;
      if(!validPlan(changed)||current!==expected)throw Error('invalid or concurrent update');
-     const after=JSON.stringify(changed);fm.writeString(path,after);
-     if(fm.readString(path)!==after)throw Error('readback failed');
+     const after=JSON.stringify(changed);
+     // A prior-version backup must be readable before touching the canonical plan.
+     if(current!==null){const backup=path+'.previous';fm.writeString(backup,current);if(fm.readString(backup)!==current)throw Error('backup verification failed');}
+     try{
+       fm.writeString(path,after);if(fm.readString(path)!==after)throw Error('readback failed');
+     }catch(writeError){
+       if(current!==null){try{fm.writeString(path,current);if(fm.readString(path)!==current)throw Error('restore verification failed');}catch(restoreError){console.warn('Original plan restore requires attention: '+String(restoreError.message||restoreError));}}
+       throw writeError;
+     }
      expected=after;ok=true;
    }catch(e){console.warn('Charcoal save did not complete: '+String(e.message||e));}
    if(!closedFlag)await view.evaluateJavaScript('window.YOS_CHARCOAL_SAVE_ACK('+JSON.stringify(ok)+')',false);
