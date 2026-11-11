@@ -41,3 +41,27 @@ test('glass calendar and editor-return icon buttons render visible SVG instead o
  }
  assert.match(n.get('tlCalendar').getAttribute?.('aria-label')||'月カレンダーを開く',/カレンダー/);
 });
+
+
+test('glass HOME uses a proportional 24h time rail while compact skin stays unchanged',()=>{
+ const {nodes:n,window:w}=setup();
+ const e=(id,start,duration)=>({id,title:id,date:'2026-11-04',start,duration,kind:'task',repeat:'none',transfer:0});
+ w.YOS_DAYSTREAM_PLAN_IMPORT({schema:'yos-daystream-plan-v1',days:{},timeline:{version:1,events:[e('first',540,30),e('second',600,60)],overrides:{}}});
+ n.get('tlDay').value='2026-11-04';n.get('tlDay').fire('change');
+ let rows=n.get('tlAgenda').children;
+ assert.equal(rows.length,2);
+ assert.equal(rows[0].style.top,'432px');
+ assert.equal(rows[0].style.height,'60px');
+ assert.equal(rows[0].dataset.railShift,'none');
+ assert.equal(rows[1].style.top,'492px');
+ assert.equal(n.get('tlAgenda').style.height,'1196px');
+ assert.match(html,/YOS_APPROVED_GLASS_TIME_RAIL_V1/);
+ assert.match(html,/00:00\\A 02:00\\A 04:00\\A 06:00/);
+ const before=w.YOS_TIMELINE_DEBUG.getData();
+ n.get('tlSkin').value='compact';n.get('tlSkin').fire('change');
+ rows=n.get('tlAgenda').children;
+ assert.equal(rows.length,2);
+ assert.equal(rows[0].style.top,undefined);
+ assert.equal(n.get('tlAgenda').style.height,'');
+ assert.deepEqual(w.YOS_TIMELINE_DEBUG.getData(),before);
+});
