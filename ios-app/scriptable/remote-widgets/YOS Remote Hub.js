@@ -1,4 +1,4 @@
-// YOS Remote Hub v6.5 — tap-first adaptive cross + reliable center gesture + top quick actions + user layout editor.
+// YOS Remote Hub v6.6 — tap-first adaptive cross + reliable center gesture + top quick actions + user layout editor.
 // Reliability rule: a center tap must always win over gesture convenience.
 // Navigation: Above/Left/Play/Right/Below => Up/Left/OK/Right/Down.
 // Playback: every slot keeps the user's configured button.
@@ -10,6 +10,7 @@
 const CONFIG = {
   tv: { remoteScript: "YOS BRAVIA Remote" },
   light: { remoteScript: "YOS Light Remote", actionScript: "YOS Light Widget" },
+  floor: { key: "yos.tapo.floor.local-host" },
   ac: { remoteScript: "YOS AC Remote", actionScript: "YOS AC Widget" }
 }
 
@@ -77,6 +78,7 @@ const HYBRID_KEEP_ACTIONS = new Set(["up","down","rewind","fastForward","prev","
 const NAVIGATION_GRACE_MS = 2200
 const RECENT_MEDIA_MS = 120000
 const SWIPE_THRESHOLD = 24
+const TV_SEEK_ACTIONS = new Set(["rewind","fastForward"])
 
 function assertHubIntegrity(){
   const actionNames=new Set(TV_ACTIONS.map(item=>item.action))
@@ -104,6 +106,28 @@ const html = `<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta n
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#000;color:#fff;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Helvetica Neue",sans-serif}
 body{padding:0 8px}
+.device-tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin:0 2px 4px;flex:0 0 54px}
+.device-tab{border:1px solid #343944;border-radius:15px;background:#15181c;color:#8995a5;font-weight:750;font-size:11px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px}
+.device-tab .tab-icon{font-size:20px;line-height:1.1;color:#438eff}
+.device-tab.active{background:#24384f;border-color:#548deb;color:white}
+.remote-panel{display:none;min-height:0}
+.remote-panel.active{display:block}
+.tv-card:before{display:none}.tv-card .top-shortcuts{position:relative;top:auto;left:auto;right:auto;height:32px;margin-bottom:8px}
+.floor-card{padding:13px}
+.floor-power{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}
+.floor-power button,.floor-temp button{border:1px solid #373d48;border-radius:14px;background:#1b1f24;color:white;min-height:49px;font-weight:750;font-size:13px}
+.floor-power button:active,.floor-temp button:active{background:#274265}
+.floor-heading{font-size:13px;font-weight:800;margin:17px 2px 9px;color:#c0c7d0}
+.floor-presets{display:flex;justify-content:space-between;gap:7px}
+.floor-swatch{width:43px;height:43px;min-width:0;border-radius:100%;border:2px solid #50545c;box-shadow:0 2px 10px #0005}
+.floor-slider{width:100%;height:36px;accent-color:#438eff;touch-action:pan-x}
+.floor-temp{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.floor-rainbow{appearance:none;-webkit-appearance:none;width:100%;height:56px;border-radius:18px;border:0;background:linear-gradient(90deg,#f44,#ff0,#0f0,#0ff,#00f,#f0f,#f44);margin-top:4px;touch-action:pan-x}
+.floor-rainbow::-webkit-slider-thumb{appearance:none;-webkit-appearance:none;width:24px;height:66px;background:#ffffff80;border:2px solid #fff;border-radius:12px;box-shadow:0 0 6px #0008}
+.floor-footnote{font-size:11px;line-height:1.5;color:#8995a5;margin:16px 0}
+.floor-state{font-size:11px;color:#a9b5c5;min-height:18px}
+.floor-card .tool{height:33px}
+
 .page{width:100%;max-width:500px;height:100dvh;margin:0 auto;padding:max(58px,calc(env(safe-area-inset-top) + 4px)) 0 max(8px,env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:6px;overflow:hidden}
 .card{margin:0;padding:8px 10px 9px;border:1px solid #45484e;border-radius:22px;background:linear-gradient(155deg,#101215,#050506)}
 .tv-card{position:relative}
@@ -133,16 +157,42 @@ body{padding:0 8px}
 .config-slot.selected{border-color:#438eff;background:#24384f}.palette-key.used{opacity:.45}.palette-key:disabled{opacity:.25}.palette-key .picon{font-size:18px;color:#438eff}.palette-key .plabel{font-size:10px}
 .section-label{font-size:11px;font-weight:800;color:#8e8e93;margin:4px 0 7px}
 @media(max-height:800px){.page{padding-top:max(52px,calc(env(safe-area-inset-top) + 2px));gap:4px}.tv-card:before{top:-29px;height:30px}.top-shortcuts{top:-26px;height:23px}.card{padding:6px 8px 7px}.head{height:24px;margin-bottom:4px}.title{font-size:17px}.grid{gap:5px}}
-</style></head><body><div class="page">
-<section class="card tv-card"><div class="top-shortcuts"><button class="top-shortcut" onclick="sendTVShortcut(event,'input','入力')">↪︎ 入力</button><button class="top-shortcut" onclick="sendTVShortcut(event,'home','ホーム')">⌂ ホーム</button></div><div class="head"><div class="title" onclick="openRemote('tv')">BRAVIA</div><div class="tools"><span id="modeBadge" class="mode-badge">判定中</span><button class="tool" onclick="openLayoutEditor(event)">配置</button><button class="tool" onclick="sendMenu(event)">MENU</button></div></div><div id="tvGrid" class="grid grid-3"></div></section>
-<section class="card"><div class="head"><div class="title" onclick="openRemote('light')">照明</div><div class="brand">Panasonic</div></div><div class="grid grid-3">${makeButtons("light", LIGHT_BUTTONS)}</div></section>
-<section class="card"><div class="head"><div class="title" onclick="openRemote('ac')">エアコン</div><div class="ac-meta"><span id="acTemp" class="ac-temp">--°</span><span class="brand">SHARP</span></div></div><div class="grid grid-4">${makeButtons("ac", AC_BUTTONS)}</div></section>
+</style></head><body><div class="page"><nav class="device-tabs" aria-label="リモコン切り替え"><button class="device-tab active" data-tab="tv" onclick="setPanel('tv')"><span class="tab-icon">▣</span>テレビ</button><button class="device-tab" data-tab="light" onclick="setPanel('light')"><span class="tab-icon">☀</span>照明</button><button class="device-tab" data-tab="ac" onclick="setPanel('ac')"><span class="tab-icon">❄</span>エアコン</button><button class="device-tab" data-tab="floor" onclick="setPanel('floor')"><span class="tab-icon">◉</span>ランプ</button></nav>
+<section class="card tv-card remote-panel active" data-panel="tv"><div class="top-shortcuts"><button class="top-shortcut" onclick="sendTVShortcut(event,'input','入力')">↪︎ 入力</button><button class="top-shortcut" onclick="sendTVShortcut(event,'home','ホーム')">⌂ ホーム</button></div><div class="head"><div class="title" onclick="openRemote('tv')">BRAVIA</div><div class="tools"><span id="modeBadge" class="mode-badge">判定中</span><button class="tool" onclick="openLayoutEditor(event)">配置</button><button class="tool" onclick="sendMenu(event)">MENU</button></div></div><div id="tvGrid" class="grid grid-3"></div></section>
+<section class="card remote-panel" data-panel="light"><div class="head"><div class="title" onclick="openRemote('light')">照明</div><div class="brand">Panasonic</div></div><div class="grid grid-3">${makeButtons("light", LIGHT_BUTTONS)}</div></section>
+<section class="card remote-panel" data-panel="ac"><div class="head"><div class="title" onclick="openRemote('ac')">エアコン</div><div class="ac-meta"><span id="acTemp" class="ac-temp">--°</span><span class="brand">SHARP</span></div></div><div class="grid grid-4">${makeButtons("ac", AC_BUTTONS)}</div></section>
+<section class="card floor-card remote-panel" data-panel="floor">
+<div class="head"><div class="title">フロアランプ</div><div class="tools"><span class="brand">Tapo / Matter</span><button class="tool" onclick="nativeAction('floor','configure','設定')">接続設定</button></div></div>
+<div id="floorStatus" class="floor-state">接続を確認してください</div>
+<div class="floor-power"><button onclick="sendFloor('on')">⏻　点灯</button><button onclick="sendFloor('off')">○　消灯</button></div>
+<div class="floor-heading">カラープリセット</div>
+<div class="floor-presets">
+<button class="floor-swatch" aria-label="電球色" style="background:#ffd4a4" onclick="sendFloor('temp',2700)"></button>
+<button class="floor-swatch" aria-label="青" style="background:#243bff" onclick="sendFloor('color',240)"></button>
+<button class="floor-swatch" aria-label="赤" style="background:#ff2525" onclick="sendFloor('color',0)"></button>
+<button class="floor-swatch" aria-label="緑" style="background:#00dd38" onclick="sendFloor('color',125)"></button>
+<button class="floor-swatch" aria-label="紫" style="background:#ab30ff" onclick="sendFloor('color',275)"></button>
+<button class="floor-swatch" aria-label="黄" style="background:#fff04c" onclick="sendFloor('color',53)"></button>
+</div>
+<div class="floor-heading">明るさ <span id="floorBrightnessLabel">--%</span></div>
+<input id="floorBrightness" class="floor-slider" type="range" min="1" max="100" value="50" aria-label="明るさ" oninput="document.getElementById('floorBrightnessLabel').textContent=this.value+'%'" onchange="sendFloor('brightness',this.value)">
+<div class="floor-heading">白色・色温度</div>
+<div class="floor-temp"><button onclick="sendFloor('temp',2500)">暖色</button><button onclick="sendFloor('temp',3500)">自然色</button><button onclick="sendFloor('temp',5000)">昼白色</button><button onclick="sendFloor('temp',6500)">昼光色</button></div>
+<div class="floor-heading">カラー <span id="floorHueLabel"></span></div>
+<input id="floorHue" class="floor-rainbow" type="range" min="0" max="359" value="0" aria-label="色相" onchange="sendFloor('color',this.value)">
+<p class="floor-footnote">色・調光は自宅Wi-Fiで直接操作。エフェクト・自動バイオリズムはTapoアプリで設定してください。Matter対応だけではScriptableへの直接接続はできません。</p>
+</section>
 </div>
 <div id="configLayer" class="config-layer"><div class="config-card"><div class="config-head"><div class="config-title">BRAVIA 配置</div><div class="config-actions"><button class="tool" onclick="resetLayout(event)">初期化</button><button class="tool" onclick="closeLayoutEditor(event)">完了</button></div></div><p class="config-help">12枠内は「移動元 → 移動先」で入れ替え。再生位置が自動カーソルの中心。中央キーはタップ最優先で決定、24px以上動かした時だけスワイプとして上下左右へ移動します。切替中の長押しは元機能です。</p><div class="section-label">表示中の12枠</div><div id="configGrid" class="config-grid"></div><div class="section-label">使えるBRAVIAボタン</div><div id="palette" class="palette"></div></div></div>
 <script>
-const REMOTES=${JSON.stringify(REMOTES)},ACTIONS=${JSON.stringify(TV_ACTIONS)},DEFAULT=${JSON.stringify(TV_DEFAULT)},CROSS_NAV=${JSON.stringify(CROSS_NAV)},SWIPE_THRESHOLD=${SWIPE_THRESHOLD}
+const REMOTES=${JSON.stringify(REMOTES)},ACTIONS=${JSON.stringify(TV_ACTIONS)},DEFAULT=${JSON.stringify(TV_DEFAULT)},CROSS_NAV=${JSON.stringify(CROSS_NAV)},SWIPE_THRESHOLD=${SWIPE_THRESHOLD},TV_SEEK_ACTIONS=new Set(["rewind","fastForward"])
 const LAYOUT_KEY="yos.remote.tv.buttons.v52"
 let mode="navigation",nonce=0,pollTimer=null,acTimer=null,selectedSlot=null,gestureSuppressUntil=0
+const PANEL_KEY="yos.remote.selected-panel.v1"
+let activePanel="tv"
+function setPanel(name){if(!["tv","light","ac","floor"].includes(name))return;stopActiveHolds();activePanel=name;document.querySelectorAll(".remote-panel").forEach(el=>el.classList.toggle("active",el.dataset.panel===name));document.querySelectorAll(".device-tab").forEach(el=>{const active=el.dataset.tab===name;el.classList.toggle("active",active);el.setAttribute("aria-selected",active?"true":"false")});try{localStorage.setItem(PANEL_KEY,name)}catch(_){}if(name==="floor")nativeAction("floor","refresh","状態取得")}
+function sendFloor(action,value=""){nativeAction("floor",action,String(value))}
+function stopActiveHolds(){nativeAction("tvHoldStop","","");nativeAction("lightHoldStop","","")}
 function meta(action){return ACTIONS.find(item=>item.action===action)}
 function validAction(action){return ACTIONS.some(item=>item.action===action)}
 function loadLayout(){let saved=[];try{saved=JSON.parse(localStorage.getItem(LAYOUT_KEY))}catch(_){}const clean=Array.isArray(saved)?saved.filter(validAction).slice(0,12):[];for(const action of DEFAULT){if(clean.length>=12)break;if(!clean.includes(action))clean.push(action)}for(const item of ACTIONS){if(clean.length>=12)break;if(!clean.includes(item.action))clean.push(item.action)}return clean.slice(0,12)}
@@ -216,10 +266,40 @@ function installCenterGesture(button,baseAction,role,label,baseLabel,overridden)
   },{passive:false})
   button.addEventListener("touchcancel",()=>{active=false;longPressed=false;cancelHold()},{passive:true})
 }
+function bindTVSeekHold(button,baseAction,role,label){
+  let active=false,held=false,holdTimer=null,heartbeat=null,pointerId=null,startX=0,startY=0
+  const clear=()=>{if(holdTimer){clearTimeout(holdTimer);holdTimer=null}if(heartbeat){clearInterval(heartbeat);heartbeat=null}}
+  function end(event){
+    if(!active)return
+    if(event){event.preventDefault();event.stopPropagation()}
+    active=false;clear();button.classList.remove("holding")
+    if(pointerId!==null){try{button.releasePointerCapture(pointerId)}catch(_){}pointerId=null}
+    if(held){held=false;nativeAction("tvHoldStop",baseAction,label)}
+    else if(Date.now()>=gestureSuppressUntil)fireTVKey(baseAction,role,label)
+  }
+  button.addEventListener("pointerdown",event=>{
+    if(active)return
+    event.preventDefault();event.stopPropagation()
+    active=true;held=false;pointerId=event.pointerId;startX=event.clientX;startY=event.clientY
+    button.classList.add("holding");try{button.setPointerCapture(pointerId)}catch(_){}
+    holdTimer=setTimeout(()=>{holdTimer=null;if(!active)return;held=true
+      nativeAction("tvHoldStart",baseAction,label)
+      heartbeat=setInterval(()=>{if(active&&held)nativeAction("tvHoldHeartbeat",baseAction,label)},170)
+    },420)
+  })
+  button.addEventListener("pointermove",event=>{if(active&&!held&&Math.hypot(event.clientX-startX,event.clientY-startY)>18){active=false;clear();button.classList.remove("holding")}})
+  button.addEventListener("pointerup",end)
+  button.addEventListener("pointercancel",()=>{if(held)nativeAction("tvHoldStop",baseAction,label);active=false;held=false;clear();button.classList.remove("holding")})
+  button.addEventListener("lostpointercapture",()=>{if(active)end()})
+  button.addEventListener("click",event=>{event.preventDefault();event.stopPropagation()})
+  button.addEventListener("contextmenu",event=>event.preventDefault())
+  window.addEventListener("blur",()=>{if(active)end()})
+}
 function makeTVKey(baseAction,index){
   const role=crossRole(index),action=displayAction(index,baseAction),item=meta(action),base=meta(baseAction),b=document.createElement("button"),overridden=action!==baseAction
   b.className="key"+(role?" adaptive":"")+(action==="confirm"?" ok":"")
   b.innerHTML='<span class="icon">'+item.icon+'</span><span class="label">'+item.label+'</span>'+(overridden?'<span class="alt-label">長押し '+base.label+'</span>':'')
+  if(TV_SEEK_ACTIONS.has(baseAction)){bindTVSeekHold(b,baseAction,role,item.label);return b}
   let holdTimer=null,suppressUntil=0,startX=0,startY=0,tracking=false
   const cancelHold=()=>{if(holdTimer){clearTimeout(holdTimer);holdTimer=null}}
   if(overridden&&role!=="center"){
@@ -285,11 +365,20 @@ function openLayoutEditor(e){if(e){e.preventDefault();e.stopPropagation()}select
 function closeLayoutEditor(e){if(e){e.preventDefault();e.stopPropagation()}selectedSlot=null;document.getElementById("configLayer").classList.remove("open");renderTV()}
 function resetLayout(e){if(e){e.preventDefault();e.stopPropagation()}layout=DEFAULT.slice();selectedSlot=null;saveLayout();renderTV();renderConfig()}
 function setACState(s){const el=document.getElementById("acTemp"),fan=document.getElementById("acFanLabel");if(!s){if(el)el.textContent="--°";if(fan)fan.textContent="風量 --";return}if(el)el.textContent=s.dry?"—":(Number.isFinite(Number(s.temp))?Math.round(Number(s.temp))+"°":"--°");if(fan)fan.textContent="風量 "+(s.fan||"--")}
+function setFloorState(s){
+  const status=document.getElementById("floorStatus"),brightness=document.getElementById("floorBrightness"),label=document.getElementById("floorBrightnessLabel"),hue=document.getElementById("floorHue")
+  if(!status)return
+  if(!s||!s.ready){status.textContent="接続未設定：接続設定で電球のIPアドレスを登録";return}
+  status.textContent=(s.on?"点灯中":"消灯中")+(s.model?" · "+s.model:"")+(s.colorTemp?" · "+s.colorTemp+"K":"")
+  if(Number.isFinite(Number(s.brightness))){brightness.value=s.brightness;label.textContent=s.brightness+"%"}
+  if(Number.isFinite(Number(s.hue)))hue.value=s.hue
+}
 function nativeResult(result){
   const badge=document.getElementById("modeBadge")
-  if(result&&result.ok===false){if(badge)badge.textContent="エラー";return}
+  if(result&&result.ok===false){if(badge)badge.textContent="エラー";if(activePanel==="floor")document.getElementById("floorStatus").textContent="操作失敗："+(result.message||"接続を確認してください");return}
   if(result&&result.mode)setMode(result.mode)
   if(result&&Object.prototype.hasOwnProperty.call(result,"ac"))setACState(result.ac)
+  if(result&&Object.prototype.hasOwnProperty.call(result,"floor"))setFloorState(result.floor)
 }
 function requestMode(){nativeAction("system","refreshMode","")}function requestAC(){nativeAction("system","refreshAC","")}
 function sendMenu(e){e.preventDefault();e.stopPropagation();nativeAction("tv","menu","MENU")}
@@ -331,7 +420,7 @@ function bindLightHoldButtons(){
   })
 }
 function openRemote(device){window.location.href=REMOTES[device]}
-bindLightHoldButtons();renderTV();requestMode();requestAC();pollTimer=setInterval(requestMode,1600);acTimer=setInterval(requestAC,30000);window.addEventListener("beforeunload",()=>{if(pollTimer)clearInterval(pollTimer);if(acTimer)clearInterval(acTimer)})
+bindLightHoldButtons();renderTV();requestMode();requestAC();try{setPanel(localStorage.getItem(PANEL_KEY)||"tv")}catch(_){setPanel("tv")}pollTimer=setInterval(requestMode,1600);acTimer=setInterval(requestAC,30000);window.addEventListener("beforeunload",()=>{if(pollTimer)clearInterval(pollTimer);if(acTimer)clearInterval(acTimer)})
 </script></body></html>`
 
 function secure(key){return Keychain.contains(key)?Keychain.get(key):""}
@@ -359,6 +448,22 @@ async function readScript(scriptName){for(const manager of [FileManager.iCloud()
 async function runExisting(scriptName,action){const source=await readScript(scriptName);const fakeArgs={queryParameters:{action},shortcutParameter:null,widgetParameter:null,plainTexts:[],urls:[],fileURLs:[],images:[],notification:null};const fakeScript={name:()=>scriptName,complete:()=>{},setShortcutOutput:()=>{},setWidget:()=>{}};const fakeConfig={runsInApp:true,runsInWidget:false,runsWithSiri:false,runsInNotification:false};const AsyncFunction=Object.getPrototypeOf(async function(){}).constructor;await new AsyncFunction("args","Script","config",source)(fakeArgs,fakeScript,fakeConfig)}
 function parseQuery(url){const output={},position=String(url).indexOf("?");if(position<0)return output;String(url).slice(position+1).split("&").forEach(pair=>{const sep=pair.indexOf("="),key=sep>=0?pair.slice(0,sep):pair,value=sep>=0?pair.slice(sep+1):"";output[decodeURIComponent(key)]=decodeURIComponent(value)});return output}
 
+const TV_HOLD_LEASE_MS=720
+let tvHoldAction=null,tvHoldToken=0,tvHoldLeaseUntil=0,tvHoldPromise=Promise.resolve()
+function stopTVHold(){tvHoldAction=null;tvHoldLeaseUntil=0;tvHoldToken++}
+function renewTVHold(action){if(tvHoldAction===action)tvHoldLeaseUntil=Date.now()+TV_HOLD_LEASE_MS}
+function startTVHold(action){
+  if(!TV_SEEK_ACTIONS.has(action))return
+  stopTVHold();tvHoldAction=action;tvHoldLeaseUntil=Date.now()+TV_HOLD_LEASE_MS;const token=tvHoldToken
+  tvHoldPromise=(async()=>{try{
+    while(tvHoldAction===action&&token===tvHoldToken&&Date.now()<tvHoldLeaseUntil){
+      await sonyAction(action,false)
+      if(tvHoldAction!==action||token!==tvHoldToken)break
+      // SOAP requests are serialized, and each response already paces the loop.
+      // No artificial 150-ms gap: stop/release is checked before each new request.
+    }
+  }catch(error){if(token===tvHoldToken)stopTVHold();try{await web.evaluateJavaScript("nativeResult("+JSON.stringify({ok:false,message:String(error&&error.message||error)})+")")}catch(_){}}finally{if(token===tvHoldToken)stopTVHold()}})()
+}
 const LIGHT_HOLD_LEASE_MS=600
 const LIGHT_HOLD_BURST=2
 const LIGHT_HOLD_KEYS={bright:["BRIGHTNESS+","明るくする","明るい"],dark:["BRIGHTNESS-","暗くする","暗い"]}
@@ -382,7 +487,60 @@ function startLightHold(action){
   lightHoldPromise=(async()=>{let first=true;try{const transport=await getLightHoldTransport();while(lightHoldAction===action&&token===lightHoldToken&&Date.now()<lightHoldLeaseUntil){const key=transport.keys[action];await transport.client.fireBurst(transport.remote.device_id,key.name,first?1:LIGHT_HOLD_BURST);first=false;if(lightHoldAction!==action||token!==lightHoldToken)break}}catch(error){lightHoldTransport=null;if(token===lightHoldToken)stopLightHold();try{await web.evaluateJavaScript("nativeResult("+JSON.stringify({ok:false,message:error&&error.message?error.message:String(error)})+")")}catch(_){}}finally{if(token===lightHoldToken)stopLightHold()}})()
 }
 
+const FLOOR_HOST_KEY=CONFIG.floor.key
+let floorClient=null,floorConnectedHost=""
+function floorHost(){return Keychain.contains(FLOOR_HOST_KEY)?Keychain.get(FLOOR_HOST_KEY).trim():""}
+function validateFloorHost(host){
+  if(!/^\d{1,3}(?:\.\d{1,3}){3}$/.test(host))throw new Error("電球のIPv4アドレスを入力してください")
+  const n=host.split(".").map(Number)
+  if(n.some(x=>x>255)||!(n[0]===10||(n[0]===172&&n[1]>=16&&n[1]<=31)||(n[0]===192&&n[1]===168)))throw new Error("自宅LANのIPアドレスのみ使えます")
+  return host
+}
+async function floorTransport(){
+  const host=validateFloorHost(floorHost())
+  if(floorClient&&floorConnectedHost===host)return floorClient
+  const tapo=importModule("YOS Tapo H110 Core")
+  const client=await tapo.clientForHost(host)
+  floorClient=client;floorConnectedHost=host
+  return client
+}
+function floorData(raw){
+  const r=raw&&raw.result||raw
+  if(!r||typeof r!=="object"||!Object.prototype.hasOwnProperty.call(r,"device_on"))throw new Error("電球の状態を取得できません。接続方式やIPを確認してください")
+  return {ready:true,on:!!r.device_on,brightness:Number(r.brightness)||1,hue:Number(r.hue)||0,colorTemp:Number(r.color_temp)||0,model:String(r.model||"")}
+}
+async function readFloor(){
+  if(!floorHost())return{ready:false}
+  const client=await floorTransport()
+  return floorData(await client.query({method:"get_device_info",params:null}))
+}
+async function configureFloor(){
+  const alert=new Alert();alert.title="フロアランプ接続";alert.message="Tapoアプリのフロアランプ → 設定 → デバイス情報で確認できる自宅LANのIPアドレスを入力。既存のTapo認証情報を使います。";alert.addTextField("例: 192.168.1.20",floorHost());alert.addAction("接続テストして保存");alert.addCancelAction("キャンセル")
+  if(await alert.presentAlert()<0)return{ok:true,floor:floorHost()?await readFloor():{ready:false}}
+  const newHost=validateFloorHost(alert.textFieldValue(0).trim())
+  const oldHost=floorHost();Keychain.set(FLOOR_HOST_KEY,newHost);floorClient=null;floorConnectedHost=""
+  try{return{ok:true,floor:await readFloor()}}catch(error){
+    if(oldHost)Keychain.set(FLOOR_HOST_KEY,oldHost);else Keychain.remove(FLOOR_HOST_KEY)
+    floorClient=null;floorConnectedHost=""
+    throw error
+  }
+}
+async function controlFloor(action,value){
+  if(action==="configure")return configureFloor()
+  if(action==="refresh")return{ok:true,floor:await readFloor()}
+  const client=await floorTransport()
+  const numeric=Number(value)
+  let params
+  if(action==="on")params={device_on:true}
+  else if(action==="off")params={device_on:false}
+  else if(action==="brightness")params={device_on:true,brightness:Math.max(1,Math.min(100,Math.round(numeric)||1))}
+  else if(action==="temp")params={device_on:true,color_temp:Math.max(2500,Math.min(6500,Math.round(numeric)||2700))}
+  else if(action==="color")params={device_on:true,hue:Math.max(0,Math.min(359,Math.round(numeric)||0)),saturation:100,color_temp:0}
+  else throw new Error("未対応のランプ操作："+action)
+  await client.query({method:"set_device_info",params})
+  return{ok:true,floor:await readFloor()}
+}
 const queue=[];let running=false,web=null
-async function processQueue(){if(running)return;running=true;while(queue.length){const item=queue.shift();let result;try{if(item.device==="system"&&item.action==="refreshMode")result={ok:true,mode:await inferMode()};else if(item.device==="system"&&item.action==="refreshAC")result={ok:true,ac:await readACSummary()};else if(item.device==="tvCursor"){await sonyAction(item.action,false);result={ok:true,label:item.label,action:item.action,mode:await inferMode()}}else if(item.device==="tvAdaptive"){const currentMode=await inferMode();let action=item.action;if(currentMode==="navigation"&&CROSS_NAV[item.slot])action=CROSS_NAV[item.slot];else if(currentMode==="hybrid"&&HYBRID_CURSOR_ROLES.has(item.slot))action=CROSS_NAV[item.slot];await sonyAction(action);result={ok:true,label:item.label,action,mode:await inferMode()}}else if(item.device==="tvOriginal"){await sonyAction(item.action,false);result={ok:true,label:item.label,action:item.action,mode:await inferMode()}}else if(item.device==="tv"){await sonyAction(item.action);result={ok:true,label:item.label,action:item.action,mode:await inferMode()}}else if(item.device==="light"){await runExisting(CONFIG.light.actionScript,item.action);result={ok:true,label:item.label}}else if(item.device==="ac"){await runExisting(CONFIG.ac.actionScript,item.action);result={ok:true,label:item.label,ac:await readACSummary()}}else throw new Error("不明なデバイスです")}catch(error){result={ok:false,message:error&&error.message?error.message:String(error)}}try{await web.evaluateJavaScript("nativeResult("+JSON.stringify(result)+")")}catch(_){}}running=false}
-web=new WebView();web.shouldAllowRequest=request=>{const url=String(request.url||"");if(!url.startsWith("https://yos-remote.local/__action?"))return true;const query=parseQuery(url);if(query.device==="lightHoldStart"){startLightHold(query.action);return false}if(query.device==="lightHoldHeartbeat"){renewLightHold(query.action);return false}if(query.device==="lightHoldStop"){stopLightHold();return false}queue.push({device:query.device,action:query.action,label:query.label,slot:query.slot});processQueue();return false}
-await web.loadHTML(html,"https://yos-remote.local/");try{await web.evaluateJavaScript("setMode("+JSON.stringify(await inferMode())+")")}catch(_){}try{await web.evaluateJavaScript("setACState("+JSON.stringify(await readACSummary())+")")}catch(_){}await web.present(true);stopLightHold();await Promise.allSettled([lightHoldPromise]);Script.complete()
+async function processQueue(){if(running)return;running=true;while(queue.length){const item=queue.shift();let result;try{if(item.device==="system"&&item.action==="refreshMode")result={ok:true,mode:await inferMode()};else if(item.device==="system"&&item.action==="refreshAC")result={ok:true,ac:await readACSummary()};else if(item.device==="tvCursor"){await sonyAction(item.action,false);result={ok:true,label:item.label,action:item.action,mode:await inferMode()}}else if(item.device==="tvAdaptive"){const currentMode=await inferMode();let action=item.action;if(currentMode==="navigation"&&CROSS_NAV[item.slot])action=CROSS_NAV[item.slot];else if(currentMode==="hybrid"&&HYBRID_CURSOR_ROLES.has(item.slot))action=CROSS_NAV[item.slot];await sonyAction(action);result={ok:true,label:item.label,action,mode:await inferMode()}}else if(item.device==="tvOriginal"){await sonyAction(item.action,false);result={ok:true,label:item.label,action:item.action,mode:await inferMode()}}else if(item.device==="tv"){await sonyAction(item.action);result={ok:true,label:item.label,action:item.action,mode:await inferMode()}}else if(item.device==="light"){await runExisting(CONFIG.light.actionScript,item.action);result={ok:true,label:item.label}}else if(item.device==="ac"){await runExisting(CONFIG.ac.actionScript,item.action);result={ok:true,label:item.label,ac:await readACSummary()}}else if(item.device==="floor")result=await controlFloor(item.action,item.label);else throw new Error("不明なデバイスです")}catch(error){result={ok:false,message:error&&error.message?error.message:String(error)}}try{await web.evaluateJavaScript("nativeResult("+JSON.stringify(result)+")")}catch(_){}}running=false}
+web=new WebView();web.shouldAllowRequest=request=>{const url=String(request.url||"");if(!url.startsWith("https://yos-remote.local/__action?"))return true;const query=parseQuery(url);if(query.device==="tvHoldStart"){startTVHold(query.action);return false}if(query.device==="tvHoldHeartbeat"){renewTVHold(query.action);return false}if(query.device==="tvHoldStop"){stopTVHold();return false}if(query.device==="lightHoldStart"){startLightHold(query.action);return false}if(query.device==="lightHoldHeartbeat"){renewLightHold(query.action);return false}if(query.device==="lightHoldStop"){stopLightHold();return false}queue.push({device:query.device,action:query.action,label:query.label,slot:query.slot});processQueue();return false}
+await web.loadHTML(html,"https://yos-remote.local/");try{await web.evaluateJavaScript("setMode("+JSON.stringify(await inferMode())+")")}catch(_){}try{await web.evaluateJavaScript("setACState("+JSON.stringify(await readACSummary())+")")}catch(_){}await web.present(true);stopTVHold();stopLightHold();await Promise.allSettled([tvHoldPromise,lightHoldPromise]);Script.complete()

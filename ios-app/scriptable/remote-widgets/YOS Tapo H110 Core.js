@@ -86,10 +86,11 @@ function findKey(remote,candidates){
   for(const c of candidates){const n=norm(c);const k=remote.keys.find(x=>norm(x.name)===n||norm(x.label)===n);if(k)return k;}
   return null;
 }
-async function client(){const c=getCredentials();const crypto=new WebCryptoBox();await crypto.init();return new KlapV2(c.host,c.user,c.pass,crypto);}
+async function clientForHost(host){const c=getCredentials();const crypto=new WebCryptoBox();await crypto.init();return new KlapV2(host,c.user,c.pass,crypto);}
+async function client(){const c=getCredentials();return clientForHost(c.host);}
 
 async function fireFriendly(remotePredicate,keyCandidates){
   const remote=findRemote(remotePredicate);if(!remote)throw new Error('対象リモコンが見つかりません。Setupを再実行してください。');const key=findKey(remote,keyCandidates);if(!key)throw new Error('対象ボタンが見つかりません。');const c=await client();await c.fire(remote.device_id,key.name);return{remote,key};
 }
 
-module.exports={K,getCredentials,getMap,findRemote,findKey,client,fireFriendly};
+module.exports={K,getCredentials,getMap,findRemote,findKey,client,clientForHost,fireFriendly};
