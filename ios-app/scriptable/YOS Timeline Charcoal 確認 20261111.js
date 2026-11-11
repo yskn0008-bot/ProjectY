@@ -161,7 +161,7 @@ const localISO=d=>[d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String
 const boot=window.YOS_CHARCOAL_BOOT||{},savedDays=boot.days&&typeof boot.days==='object'?boot.days:{};
 const todayISO=localISO(new Date()),calendarByDay=boot.calendarDays||{};
 // Only explicitly tagged fictional test events are hidden; never delete or rewrite the source calendar.
-const yosIsTestCalendarTitle=title=>/^(?:YOS-TEST(?:[-_]|$)|\[架空\]|【架空】)/i.test(String(title||'').trim());
+const yosIsTestCalendarTitle=title=>{const s=String(title||'').trim();return /^YOS-TEST(?:[-_]|$)/i.test(s)||s.startsWith('[架空]')||s.startsWith('【架空】')};
 let showTestCalendar=false;
 const yosCalendarRows=day=>Array.isArray(calendarByDay[day])?calendarByDay[day]:[];
 const yosTestCount=day=>yosCalendarRows(day).filter(x=>yosIsTestCalendarTitle(x?.title)).length;
