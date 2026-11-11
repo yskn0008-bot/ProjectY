@@ -515,9 +515,11 @@ test('overlap warning counts intersection windows and gives a 15-minute range',(
  assert.equal(overlaps[0].until,615);
  assert.deepEqual(Array.from(overlaps[0].titles),['削除テスト','動作確認']);
  const three=evaluate([item(1,'A',540,60),item(2,'B',570,60),item(3,'C',610,40)]);
- assert.equal(three.length,1);
+ assert.equal(three.length,2,'two separated overlap time ranges are two actual warning areas');
  assert.equal(three[0].from,570);
- assert.equal(three[0].until,630);
+ assert.equal(three[0].until,600);
+ assert.equal(three[1].from,610);
+ assert.equal(three[1].until,630);
  const noOverlap=evaluate([item(1,'A',585,15),item(2,'B',600,30)]);
  assert.equal(noOverlap.length,0);
  assert.ok(actual.includes('時間の重複：'));
