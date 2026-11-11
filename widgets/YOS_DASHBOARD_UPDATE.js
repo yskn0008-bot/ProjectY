@@ -30,6 +30,7 @@ function validateSource(source) {
   // This keeps the updater compatible with future typography/layout refinements.
   const required = [
     "// YOS Dashboard Widget v1",
+    "YOS_HEALTH_LOCAL_BRIDGE_V1",
     "args.widgetParameter",
     "function makeNow(",
     "function makeToday(",
