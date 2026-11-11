@@ -157,3 +157,8 @@ html:has(.tlFrame[data-theme=auto]){--paper:#152236;--ink:#f1f5ff;--muted:#c3d2e
  display:block;top:calc(5px - var(--rail-shift-px,0px));bottom:auto;left:5px;
  height:var(--rail-shift-px,0px);width:2px;background:#be733a;opacity:.8;
 }
+
+/* YOS_GLASS_RAIL_TICK_ALIGNMENT_V3 */
+/* Each 2h label is vertically centred on its true 0.8px/minute position.
+   Pseudo-element lines are 96px high; the previous -8px top displayed the label about 34px too low. */
+.tlFrame[data-skin=glass][data-view=home] #tlAgenda::before{top:-42px}
