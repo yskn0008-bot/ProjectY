@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-12T08:02:24+09:00",
+  "updated_at": "2026-11-12T08:21:03+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -53,16 +53,6 @@
       "updated_at": "2026-11-11T09:56:17Z"
     },
     {
-      "id": "github-pr-663",
-      "title": "PR #663 YOS 日記: standalone Shortcut + existing Notion bridge + isolated signing",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/663",
-      "updated_at": "2026-11-03T08:14:13Z"
-    },
-    {
       "id": "github-pr-664",
       "title": "PR #664 YOS JOURNAL v1.6: on-device Notion relevance + review-gated daily editorial",
       "type": "GitHub PR",
@@ -111,6 +101,16 @@
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/669",
       "updated_at": "2026-11-11T09:50:19Z"
+    },
+    {
+      "id": "github-pr-681",
+      "title": "PR #681 fix(daystream): separate editor buttons and clarify Shortcut icon states",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/681",
+      "updated_at": "2026-11-11T23:20:34Z"
     },
     {
       "id": "github-issue-10",
@@ -264,7 +264,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-12T08:02:24+09:00",
+      "last_update": "2026-11-12T08:21:03+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -339,13 +339,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 8件・Open PR 44件を自動同期中",
+      "next_action": "Open Issue 8件・Open PR 45件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-12T08:02:24+09:00",
+      "last_update": "2026-11-12T08:21:03+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -368,7 +368,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-12T08:02:24+09:00",
+      "last_update": "2026-11-12T08:21:03+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -450,5 +450,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "0a1441a0f9189b6f7296864fe91d47c6e79d66b7d55ddf68c9ea8f9b6df1ec44"
+  "github_snapshot_hash": "c50708cf64f0142c4ff5cca623e8fc2125e2f15a731128fb96af9c0b04df8934"
 }
