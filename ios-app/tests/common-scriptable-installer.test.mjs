@@ -130,3 +130,52 @@ test('explicit YOS_SCRIPT_NAME header wins over filename and requires exact mani
  assert.equal(r2.cloud.files.has('/icloud/YOS 誤った名前.js'),false);
  assert.match(r2.alerts.at(-1).message,/正式名称が一致/);
 });
+
+test('read-only duplicate diagnosis identifies two identical copies and preserves them',async()=>{
+ const cloud=fm('/icloud'),local=fm('/local'),payload=fixtures['timeline-auto'];
+ cloud.files.set(target,payload);local.files.set('/local/YOS Timeline Auto.js',payload);
+ const previousCloud=[...cloud.files],previousLocal=[...local.files];
+ const r=await run({cloud,local});
+ assert.deepEqual([...cloud.files],previousCloud);assert.deepEqual([...local.files],previousLocal);
+ assert.equal(r.opened.length,0);assert.equal(r.alerts.at(-1).title,'同名スクリプトの安全診断');
+ assert.match(r.alerts.at(-1).message,/両方とも配布正本と同一/);
+ assert.match(r.alerts.at(-1).message,/iCloud：検証値/);
+ assert.match(r.alerts.at(-1).message,/このiPhone内：検証値/);
+ assert.ok(!r.alerts.at(-1).message.includes(payload),'never show script content');
+});
+test('read-only duplicate diagnosis recognizes which storage matches the official version',async()=>{
+ for(const isCloud of [true,false]){
+  const cloud=fm('/icloud'),local=fm('/local'),unknown='USER PERSONAL SCRIPT \nSECRET TOKEN 1234';
+  cloud.files.set(target,isCloud?fixtures['timeline-auto']:unknown);
+  local.files.set('/local/YOS Timeline Auto.js',isCloud?unknown:fixtures['timeline-auto']);
+  const beforeCloud=[...cloud.files],beforeLocal=[...local.files];
+  const r=await run({cloud,local});
+  assert.deepEqual([...cloud.files],beforeCloud);assert.deepEqual([...local.files],beforeLocal);
+  assert.match(r.alerts.at(-1).message,new RegExp('配布正本と一致するのは'+(isCloud?'iCloud':'このiPhone内')+'側'));
+  assert.ok(!r.alerts.at(-1).message.includes('SECRET TOKEN'));
+  assert.equal(r.opened.length,0);
+ }
+});
+test('different unknown duplicate scripts remain intact with only short hashes revealed',async()=>{
+ const cloud=fm('/icloud'),local=fm('/local');
+ cloud.files.set(target,'PERSONAL-A-PRIVATE');local.files.set('/local/YOS Timeline Auto.js','PERSONAL-B-PRIVATE');
+ const prevCloud=[...cloud.files],prevLocal=[...local.files];
+ const r=await run({cloud,local});
+ assert.deepEqual([...cloud.files],prevCloud);assert.deepEqual([...local.files],prevLocal);
+ assert.match(r.alerts.at(-1).message,/両方とも配布正本とは一致しません/);
+ assert.ok(!r.alerts.at(-1).message.includes('PERSONAL-A-PRIVATE'));
+ assert.ok(!r.alerts.at(-1).message.includes('PERSONAL-B-PRIVATE'));
+ assert.equal(r.opened.length,0);
+});
+test('an iCloud duplicate that cannot be read remains protected and is explicitly inconclusive',async()=>{
+ const cloud=fm('/icloud'),local=fm('/local');
+ cloud.files.set(target,'CLOUD-UNKNOWN');local.files.set('/local/YOS Timeline Auto.js',fixtures['timeline-auto']);
+ const originals=[...cloud.files];
+ cloud.readString=()=>{throw Error('iCloud sync is unavailable')};
+ const r=await run({cloud,local});
+ assert.deepEqual([...cloud.files],originals);
+ assert.equal(local.files.get('/local/YOS Timeline Auto.js'),fixtures['timeline-auto']);
+ assert.match(r.alerts.at(-1).message,/読み取り不可/);
+ assert.match(r.alerts.at(-1).message,/原因は未確定/);
+ assert.equal(r.opened.length,0);
+});
