@@ -1,12 +1,12 @@
 // Variables used by Scriptable.
 // icon-color: gray; icon-glyph: clock;
 // YOS DAYSTREAM: pinned UI update with known-version backup and readback.
-const SOURCE='https://raw.githubusercontent.com/yskn0008-bot/ProjectY/e28d6acbd4e851dab1d60dd0a3b00452700f85f1/life/calendar/YOS_DAYSTREAM_Timeline_Review_20261105.scriptable';
+const SOURCE='https://raw.githubusercontent.com/yskn0008-bot/ProjectY/93a09930f1a85e7ee6b65910a79a918e12ce12e4/life/calendar/YOS_DAYSTREAM_Timeline_Review_20261105.scriptable';
 const TARGET='YOS DAYSTREAM Timeline 開発確認 20261105';
-const SCRIPT_SHA='4e7ad93cbf8ce64c1e7b4985547caaf0ce9e949a37dfc8d73f647ca11f529c78';
+const SCRIPT_SHA='996b9337f93b5f87ed6efe230a21d209c04e97b0f126ee51115a30e8569ae135';
 const PREVIOUS_SCRIPT_SHA='b117fcd0c29c1227ef2205866dd19a0dea2564fc9f736806a5c54bdd49d5d1ca';
-const PREVIOUS_SCRIPT_SHAS=[PREVIOUS_SCRIPT_SHA,'8ce8cb121b21063d4b287f0cef256f05203ee63a27f49217a292b07d9375407e','380b5fad7a68027e46bcca31608101e9f94924372ed1df7b5d0d7fad6c10d809','47d78c6fe61eaa5ad8b3f695250559f6e2686dafd8ff16a94eb40647e8469727'];
-const SCRIPT_LENGTH=216933;
+const PREVIOUS_SCRIPT_SHAS=[PREVIOUS_SCRIPT_SHA,'8ce8cb121b21063d4b287f0cef256f05203ee63a27f49217a292b07d9375407e','380b5fad7a68027e46bcca31608101e9f94924372ed1df7b5d0d7fad6c10d809','47d78c6fe61eaa5ad8b3f695250559f6e2686dafd8ff16a94eb40647e8469727','4e7ad93cbf8ce64c1e7b4985547caaf0ce9e949a37dfc8d73f647ca11f529c78','58b2956f64f32d04ffec9334df42391a212c5dc652e27091b43b0d905b9ff31e'];
+const SCRIPT_LENGTH=221761;
 function sha256Hex(input){
   const K=[
     0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5,0x3956c25b,0x59f111f1,0x923f82a4,0xab1c5ed5,
