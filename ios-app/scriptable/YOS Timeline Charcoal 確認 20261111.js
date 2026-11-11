@@ -9,6 +9,12 @@ const fm=FileManager.local(),path=fm.joinPath(fm.documentsDirectory(),STORE_NAME
 function validPlan(value){
  if(!value||value.version!==1||!value.days||typeof value.days!=='object'||Array.isArray(value.days))return false;
  const entries=Object.entries(value.days);if(entries.length>120)return false;
+ // Optional display-only hiding metadata. Old v1 plan files without it remain valid.
+ if(value.hiddenCalendar!==undefined){
+  if(!value.hiddenCalendar||typeof value.hiddenCalendar!=='object'||Array.isArray(value.hiddenCalendar))return false;
+  const hidden=Object.entries(value.hiddenCalendar);if(hidden.length>120)return false;
+  if(!hidden.every(([day,keys])=>/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(day)&&Array.isArray(keys)&&keys.length<=100&&keys.every(k=>typeof k==='string'&&k.length>=1&&k.length<=256)))return false;
+ }
  return entries.every(([day,rows])=>/^\d{4}-\d\d-\d\d$/.test(day)&&Array.isArray(rows)&&rows.length<=150&&rows.every(e=>e&&Number.isInteger(Number(e.id))&&typeof e.t==='string'&&e.t.length>=1&&e.t.length<=120&&Number.isInteger(e.s)&&e.s>=0&&e.s<1440&&Number.isInteger(e.d)&&e.d>0&&e.d<=1440&&e.s+e.d<=1440&&['habit','task','schedule'].includes(e.kind)&&(!e.f||e.f===1)));
 }
 function key(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
@@ -103,7 +109,7 @@ const html=`<!doctype html><html lang="ja"><head><meta name="viewport" content="
 *{box-sizing:border-box}
 html,body{margin:0;min-height:100%;background:radial-gradient(ellipse at 66% 6%,#464b56 0%,#353a44 50%,#30353f 100%);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif;font-size:14px;-webkit-font-smoothing:antialiased}
 button,input,select{font:inherit}button{cursor:pointer}button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid #85ccff;outline-offset:2px}
-.app{padding-top:env(safe-area-inset-top);padding-bottom:calc(89px + env(safe-area-inset-bottom));max-width:640px;margin:auto;min-height:100vh}
+.app{padding-top:calc(28px + env(safe-area-inset-top));padding-bottom:calc(89px + env(safe-area-inset-bottom));max-width:640px;margin:auto;min-height:100vh}
 .top{padding:11px 18px 0}.headrow{display:flex;align-items:center;justify-content:space-between;gap:8px}.datehead{font-size:27px;letter-spacing:-.7px;font-weight:680;line-height:1.13;font-variant-numeric:tabular-nums}.subtitle{font-size:12px;color:#e0e4eb;margin-top:2px;font-weight:450}
 .actions{display:flex;gap:12px;align-items:center}.iconbtn{width:31px;height:36px;display:grid;place-items:center;background:none;color:#f5f7fb;border:none;padding:0}.iconbtn svg{width:23px;height:23px;stroke-width:1.9}
 .week{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;margin:11px 0 7px}.day{border:0;border-radius:10px;padding:5px 0 6px;color:#ebedf2;background:transparent;min-height:48px;display:grid;place-content:center;gap:2px}.day small{font-size:11px;font-weight:600}.day strong{font-size:21px;font-weight:590;line-height:1;font-variant-numeric:tabular-nums}.day.active{background:#2077b7;color:white}.day.today:not(.active) strong{text-decoration:underline;text-underline-offset:4px}
@@ -119,11 +125,11 @@ button,input,select{font:inherit}button{cursor:pointer}button:focus-visible,inpu
 .card svg{width:16px;height:16px;flex:none;stroke:#f7f9fc;fill:none;stroke-width:1.8;stroke-linejoin:round;stroke-linecap:round;position:relative}.card b{font-size:12.5px;line-height:1.1;font-weight:630;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:.08px;position:relative}.card small{margin-left:auto;font-size:10px;line-height:1.1;font-weight:500;white-space:nowrap;font-variant-numeric:tabular-nums;flex-shrink:0;position:relative}
 .card.compact{border-radius:7px}.card.compact b{font-size:12px}.card.compact small{font-size:9px}.card.lane{gap:5px;padding-right:5px}.card.lane small{display:none}.card.lane b{font-size:12px}.card.tiny svg{width:13px;height:13px}.card.tiny{gap:5px;padding-left:7px}.card.tiny b{font-size:11px}.card.tiny small{font-size:9px}
 .nowline{position:absolute;left:5px;right:0;height:1.5px;background:#48baff;z-index:8;pointer-events:none;box-shadow:0 0 8px #38b6fa66}.nowline:before{content:"";position:absolute;left:48px;top:-5px;width:10px;height:10px;background:#43b9fc;border:2px solid #eff9ff;border-radius:50%}.nowbadge{position:absolute;right:calc(100% - 55px);top:-11px;background:#218fcf;border-radius:12px;font-size:11px;padding:3px 7px;font-weight:650;font-variant-numeric:tabular-nums}
-.review,.tabbox{display:none;margin:12px 14px;padding:17px;border:1px solid #ffffff22;border-radius:13px;background:#484e58}.review.show,.tabbox.show{display:block}.review h3,.tabbox h3{font-size:16px;margin:0 0 10px}.review p,.tabbox p{line-height:1.6;color:#eff2f6;margin:10px 0}.review .muted,.tabbox .muted{font-size:12px;color:#c5cbd5}.listitem{padding:12px 0;border-bottom:1px solid #ffffff25;display:flex;justify-content:space-between;gap:14px}.listitem:last-child{border-bottom:0}.listitem button{border:0;background:#2d7eb9;color:white;padding:5px 10px;border-radius:8px}.focus{position:fixed;bottom:calc(87px + env(safe-area-inset-bottom));left:14px;right:14px;max-width:600px;margin:auto;padding:12px 14px;border-radius:14px;background:#505864;border:1px solid #a6b8cd;box-shadow:0 10px 35px #0008;z-index:20;display:none}.focus.show{display:block}.focus b{font-size:16px}.focus p{font-size:12px;margin:6px 0 9px}.focus .secondary{background:#6c7785}.focus .danger{background:#794852}
+.review,.tabbox{display:none;margin:12px 14px;padding:17px;border:1px solid #ffffff22;border-radius:13px;background:#484e58}.review.show,.tabbox.show{display:block}.review h3,.tabbox h3{font-size:16px;margin:0 0 10px}.review p,.tabbox p{line-height:1.6;color:#eff2f6;margin:10px 0}.review .muted,.tabbox .muted{font-size:12px;color:#c5cbd5}.listitem{padding:12px 0;border-bottom:1px solid #ffffff25;display:flex;justify-content:space-between;gap:14px}.listitem:last-child{border-bottom:0}.listitem button{border:0;background:#2d7eb9;color:white;padding:5px 10px;border-radius:8px}.focus{position:fixed;bottom:calc(87px + env(safe-area-inset-bottom));left:14px;right:14px;max-width:600px;margin:auto;padding:12px 14px;border-radius:14px;background:#505864;border:1px solid #a6b8cd;box-shadow:0 10px 35px #0008;z-index:20;display:none}.focus.show{display:block}.focus{max-height:min(55vh,450px);overflow-y:auto}.focus button[hidden]{display:none}.focus .actions-row{display:flex;flex-wrap:wrap;gap:7px}.focus .actions-row button{flex:1 1 auto;min-height:41px}.focus b{font-size:16px}.focus p{font-size:12px;margin:6px 0 9px}.focus .secondary{background:#6c7785}.focus .danger{background:#794852}
 .dock{position:fixed;bottom:0;left:0;right:0;padding:9px 7px calc(11px + env(safe-area-inset-bottom));background:#30353eea;border-top:1px solid #ffffff28;backdrop-filter:blur(15px);-webkit-backdrop-filter:blur(15px);z-index:15}.dock-inner{max-width:610px;margin:auto;display:grid;grid-template-columns:repeat(5,1fr)}.tab{display:grid;justify-items:center;align-content:center;gap:5px;background:none;border:0;color:#eef1f6;font-size:10px;padding:3px 0;min-height:52px}.tab svg{height:24px;width:24px;stroke-width:1.8}.tab.active{color:#30baff}
 button:active{opacity:.8}@media(min-width:640px){.dock{left:calc((100vw - 640px)/2);right:calc((100vw - 640px)/2);border-radius:14px 14px 0 0}.focus{left:calc((100vw - 610px)/2);right:calc((100vw - 610px)/2)}}
 @media(max-width:350px){.metric label{font-size:9px}.metric strong{font-size:11px}.metric:first-child strong{font-size:17px}.card{left:69px;padding-right:6px}.card small{font-size:9px}.axis{left:55px}.tick{left:51.5px}.nowline:before{left:45px}}
-.all-day[hidden]{display:none}.all-day{margin:8px 13px 0;padding:9px 12px;border-radius:10px;border:1px solid #ffffff21;background:#ffffff10}.all-day b{font-size:12px;color:#c9dcf1}.all-day span{font-size:12px;display:block;padding:4px 0;color:#eaf2fb}
+.all-day[hidden]{display:none}.all-day{margin:8px 13px 0;padding:9px 12px;border-radius:10px;border:1px solid #ffffff21;background:#ffffff10;max-height:126px;overflow-y:auto;overscroll-behavior:contain;position:relative;z-index:0}.all-day b{font-size:12px;color:#c9dcf1}.all-day span{font-size:12px;display:block;padding:3px 0;color:#eaf2fb;overflow-wrap:anywhere;line-height:1.45}
 .calendar-modes[hidden],.week-overview[hidden],.month-pop[hidden]{display:none}.calendar-modes{display:flex;gap:5px;margin:10px 15px 5px;background:#232b36a9;border:1px solid #ffffff21;padding:3px;border-radius:11px}.calendar-modes button{border:0;border-radius:8px;background:none;color:#d5dbe4;font-weight:650;font-size:12px;min-height:34px;flex:1}.calendar-modes button.active{background:#2379b5;color:#fff}
 .week-overview{margin:8px 13px 20px;border-radius:13px;background:#ffffff0b;border:1px solid #ffffff22;padding:10px}.week-overview-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px;font-size:13px}.week-overview-head button{color:#fff;background:#435567;border:1px solid #ffffff32;border-radius:8px;padding:7px 11px;min-height:36px}.week-overview-head strong{font-size:14px}.week-day{border:0;border-bottom:1px solid #ffffff22;background:transparent;color:#f2f5f9;display:flex;gap:8px;align-items:flex-start;width:100%;text-align:left;padding:10px 4px;min-height:54px}.week-day:last-child{border-bottom:0}.week-day .date{width:45px;flex:none;font-weight:650;font-variant-numeric:tabular-nums}.week-day.today .date{color:#65c0ff}.week-day .agenda{flex:1;min-width:0;font-size:12px}.week-day .agenda span{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:1px 0}.week-day .agenda .task{color:#e2b7f8}.week-day .agenda .habit{color:#9decc9}.week-day .agenda .due{color:#ffd19b}.week-day .empty{color:#c1c9d4}.week-day .more{color:#bdc5d0;font-size:11px}
 .month-pop[hidden]{display:none}.month-pop{margin:0 0 12px;padding:12px;border-radius:14px;border:1px solid #7a8798;background:#353f4c;box-shadow:0 8px 24px #10141b77}.month-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}.month-head strong{font-size:15px}.month-head button{border:1px solid #73879d;background:#45596a;color:#fff;border-radius:8px;padding:8px 11px;min-width:40px;min-height:39px}.month-head button:focus-visible,.month-grid button:focus-visible{outline:2px solid #74cbff;outline-offset:2px}.month-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px}.month-grid span{font-size:11px;color:#d1dbe5;text-align:center;padding:5px 0}.month-grid button{border:0;border-radius:8px;color:#f4f7fb;background:#ffffff0b;min-height:39px;font-size:13px;font-variant-numeric:tabular-nums}.month-grid button.outside{color:#a8b3c2;background:none}.month-grid button.selected{background:#247cbd;color:white;font-weight:700}.month-grid button.current:not(.selected){outline:1px solid #7ac8f2;outline-offset:-2px}.month-grid button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px}.month-grid .markers{display:flex;justify-content:center;gap:3px;height:5px}.month-grid .markers i{width:5px;height:5px;border-radius:50%;background:#45aefa}.month-grid .markers i.task{background:#c778f0}.month-grid .markers i.habit{background:#51d4ac}.month-grid .markers i.due{background:#f8bf79}.month-grid .uncertain{color:#9da7b6;font-size:9px}.month-pop .coverage,.week-overview .coverage{margin:8px 4px 0;font-size:11px;color:#cbd4df;line-height:1.5}.month-grid button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px}.month-grid .markers{display:flex;justify-content:center;gap:3px;height:5px}.month-grid .markers i{width:5px;height:5px;border-radius:50%;background:#45aefa}.month-grid .markers i.task{background:#c778f0}.month-grid .markers i.habit{background:#51d4ac}.month-grid .markers i.due{background:#f8bf79}.month-grid .uncertain{color:#9da7b6;font-size:9px}.month-pop .coverage,.week-overview .coverage{margin:8px 4px 0;font-size:11px;color:#cbd4df;line-height:1.5}
@@ -168,7 +174,7 @@ button:active{opacity:.8}@media(min-width:640px){.dock{left:calc((100vw - 640px)
   <section class="review" id="review"><h3>一日の振り返り</h3><p id="reviewText">端末内の完了記録を集計します。</p><p id="reviewTip"></p><p class="muted">予定時間と実績時間は異なります。Notionの完了状態には反映しません。</p><button id="reviewBtn">再集計</button></section>
   <section class="tabbox" id="recordsPanel"><h3>記録</h3><p>このタイムライン内で完了にした項目のみを表示します。</p><div id="recordsList"></div></section>
   <section class="tabbox" id="aiPanel"><h3>AIプラン</h3><p>AIとの連携は未実装です。実行状況を確認せずに予定の自動変更はしません。</p><p class="muted">追加や時間変更はタイムラインで手動操作できます。</p></section>
-  <div class="focus" id="focus"><b id="focusTitle"></b><p id="focusInfo"></p><button id="doneBtn">完了にする</button><button id="editSelected" class="secondary">編集</button><button id="deleteSelected" class="danger">削除</button><button id="closeFocus" class="secondary">閉じる</button></div>
+  <div class="focus" id="focus"><b id="focusTitle"></b><p id="focusInfo" aria-live="polite"></p><div class="actions-row"><button id="doneBtn">完了にする</button><button id="editSelected" class="secondary">編集</button><button id="deleteSelected" class="danger">削除</button><button id="hideFixed" class="secondary" hidden>この画面で隠す</button><button id="closeFocus" class="secondary">閉じる</button></div></div>
 </div>
 <nav class="dock" aria-label="画面切り替え"><div class="dock-inner">
   <button class="tab active" data-tab="timeline"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4m10-4v4M3 10h18"/></svg><span>タイムライン</span></button>
@@ -182,15 +188,18 @@ const demoItems=[{id:1,t:'睡眠',s:0,d:390,f:1,kind:'habit'},{id:2,t:'朝の準
 const localISO=d=>[d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-');
 // Isolated native Scriptable file bridge; legacy WebView localStorage is never read or modified.
 const boot=window.YOS_CHARCOAL_BOOT||{},savedDays=boot.days&&typeof boot.days==='object'?boot.days:{};
+const hiddenCalendar=boot.hiddenCalendar&&typeof boot.hiddenCalendar==='object'?boot.hiddenCalendar:{};
 const todayISO=localISO(new Date()),calendarByDay=boot.calendarDays||{},allDayDays=boot.allDayDays||{};
 const calendarCoverage=boot.calendarCoverage||{from:todayISO,until:todayISO,status:'unavailable'};
 const isCalendarCovered=day=>['ok','partial'].includes(calendarCoverage.status)&&day>=calendarCoverage.from&&day<calendarCoverage.until;
 // Only explicitly tagged fictional test events are hidden; never delete or rewrite the source calendar.
-const yosIsTestCalendarTitle=title=>{const s=String(title||'').trim();return /^YOS-TEST(?:[-_]|$)/i.test(s)||s.startsWith('[架空]')||s.startsWith('【架空】')};
+const yosIsTestCalendarTitle=title=>{const s=String(title||'').trim();return /^YOS-TEST(?:[-_]|$)/i.test(s)||s.includes('[架空]')||s.includes('【架空】')||s.startsWith('[通知テスト再実行')||s.startsWith('【通知テスト再実行')};
 let showTestCalendar=false;
 const yosCalendarRows=day=>Array.isArray(calendarByDay[day])?calendarByDay[day]:[];
 const yosTestCount=day=>yosCalendarRows(day).filter(x=>yosIsTestCalendarTitle(x?.title)).length;
-const calendarItems=day=>yosCalendarRows(day).map((x,i)=>({id:200000000+i,t:String(x.title||'予定'),s:Number(x.start),d:Number(x.duration),f:1,kind:'schedule',source:'Apple Calendar',isTest:yosIsTestCalendarTitle(x.title)})).filter(x=>Number.isFinite(x.s)&&Number.isFinite(x.d)&&x.s>=0&&x.d>0&&x.s+x.d<=1440&&(showTestCalendar||!x.isTest));
+// Stable per-day source signature; hiding a projection never alters the Apple event itself.
+const yosCalendarKey=(day,x)=>[day,Number(x.start),Number(x.duration),String(x.title||'予定').slice(0,100)].join('|');
+const calendarItems=day=>yosCalendarRows(day).map((x,i)=>({id:200000000+i,t:String(x.title||'予定'),s:Number(x.start),d:Number(x.duration),f:1,kind:'schedule',source:'Apple Calendar',calendarKey:yosCalendarKey(day,x),isTest:yosIsTestCalendarTitle(x.title)})).filter(x=>Number.isFinite(x.s)&&Number.isFinite(x.d)&&x.s>=0&&x.d>0&&x.s+x.d<=1440&&(showTestCalendar||!x.isTest)&&!(hiddenCalendar[day]||[]).includes(x.calendarKey));
 const allDayItems=day=>(Array.isArray(allDayDays[day])?allDayDays[day]:[]).filter(t=>showTestCalendar||!yosIsTestCalendarTitle(t)).map(t=>String(t).slice(0,100));
 function yosDaySummary(day){
  const entries=dayItems(day).sort((a,b)=>a.s-b.s);
@@ -211,7 +220,7 @@ let selectedDay=todayISO,isSample=false,items=dayItems(todayISO);
 const pendingSaves=[];let saveCallback=null;
 window.YOS_CHARCOAL_ATTACH_SAVE=callback=>{if(pendingSaves.length)callback(pendingSaves.shift());else saveCallback=callback;};
 window.YOS_CHARCOAL_SAVE_ACK=ok=>{note.textContent=ok?'端末内ファイルへ保存しました':'保存できませんでした。再起動後は前の状態に戻ります。';};
-const persist=()=>{try{savedDays[selectedDay]=items.filter(x=>x.source!=='Apple Calendar').map(x=>({...x}));pendingSaves.push(JSON.stringify({version:1,days:savedDays}));if(saveCallback){const callback=saveCallback;saveCallback=null;callback(pendingSaves.shift());}isSample=false;return true}catch(e){note.textContent='保存処理に失敗しました';return false}};
+const persist=()=>{try{savedDays[selectedDay]=items.filter(x=>x.source!=='Apple Calendar').map(x=>({...x}));pendingSaves.push(JSON.stringify({version:1,days:savedDays,hiddenCalendar}));if(saveCallback){const callback=saveCallback;saveCallback=null;callback(pendingSaves.shift());}isSample=false;return true}catch(e){note.textContent='保存処理に失敗しました';return false}};
 const fmt=m=>String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0');
 
 const taskSource=boot.taskSource||{status:'unavailable',items:[]},habitSource=boot.habitSource||{status:'unavailable',items:[]};
@@ -353,11 +362,25 @@ function eventIcon(item){const t=item.t||'';const type=/睡眠|就寝/.test(t)?'
 let density='overview',scale=27;
 let zoom=null,selectedId=null;
 const yFor=m=>m/60*scale;
-const editor=document.getElementById('editor');let editingId=null;
+const editor=document.getElementById('editor');let editingId=null,deleteConfirmId=null,restorePendingDay=null;
+function showFocusFor(item){
+ deleteConfirmId=null;selectedId=item.id;zoom=item.s;
+ ft.textContent=item.t;
+ const fixed=!!item.f,canHide=fixed&&item.source==='Apple Calendar';
+ document.getElementById('doneBtn').hidden=!!fixed;
+ document.getElementById('editSelected').hidden=!!fixed;
+ document.getElementById('deleteSelected').hidden=!!fixed;
+ document.getElementById('hideFixed').hidden=!canHide;
+ document.getElementById('doneBtn').textContent=item.done?'未完了に戻す':'完了にする';
+ document.getElementById('deleteSelected').textContent='削除';
+ fi.textContent=fmt(item.s)+'–'+fmt(item.s+item.d)+(fixed?' · Appleカレンダーの固定予定。元の予定は変更せず、この画面から隠せます。':' · 端末内のタスク・予定。編集・削除できます。');
+ focus.classList.add('show');
+}
+
 document.getElementById('addBtn').onclick=()=>{editingId=null;document.getElementById('editorTitle').textContent='予定を追加';document.getElementById('saveBtn').textContent='追加する';editor.classList.add('show');document.getElementById('newTitle').focus();};
 document.getElementById('cancelEditor').onclick=()=>editor.classList.remove('show');
 document.getElementById('saveBtn').onclick=()=>{const title=document.getElementById('newTitle').value.trim(),parts=document.getElementById('newTime').value.split(':').map(Number),duration=Number(document.getElementById('newDuration').value),kind=document.getElementById('newKind').value;if(!title||parts.length!==2||!Number.isFinite(duration)||duration<5||duration>1440){note.textContent='名前・時刻・所要時間を確認してください';return}const start=parts[0]*60+parts[1];if(start+duration>1440){note.textContent='終了時刻は24:00以内にしてください';return}if(editingId!==null){const item=items.find(x=>x.id===editingId);if(item){if(item.f){note.textContent='固定予定は編集できません';return;}Object.assign(item,{t:title,s:start,d:duration,kind});}}else{if(isSample){items=[];isSample=false;}items.push({id:Math.max(300000000,...items.map(x=>Number(x.id)||0))+1,t:title,s:start,d:duration,kind});}editingId=null;editor.classList.remove('show');document.getElementById('newTitle').value='';note.textContent=fmt(start)+' に「'+title+'」を'+(editingId===null?'保存':'更新')+(persist()?'（保存処理中）':'（保存処理失敗）');smoothRender();updateReview()};
-function updateReview(){const done=items.filter(x=>x.done),pending=items.filter(x=>!x.done),movable=items.filter(x=>!x.f),completed=movable.filter(x=>x.done);const pct=movable.length?Math.round(completed.length/movable.length*100):0;const used=done.reduce((n,x)=>n+x.d,0);let summary=done.length?'完了記録は'+done.length+'件（合計'+Math.round(used/60*10)/10+'時間）。可動タスクの達成率は'+pct+'%。':'完了記録がまだありません。予定の配置だけでは実行できたか判断できません。';const overlaps=[];const sorted=[...items].sort((a,b)=>a.s-b.s);for(let i=0;i<sorted.length;i++)for(let j=i+1;j<sorted.length&&sorted[j].s<sorted[i].s+sorted[i].d;j++)if(sorted[i].kind===sorted[j].kind&&sorted[i].kind!=='schedule')overlaps.push([sorted[i],sorted[j]]);const pair=overlaps[0];const tip=pair?'改善候補：「'+pair[0].t+'」と「'+pair[1].t+'」は時間が重なっています。同じ種類の作業としてまとめられるか確認すると、切り替えの手間を減らせる可能性があります。':'改善候補：タスクの統合を提案する根拠がまだ不足しています。完了状況と実際の所要時間を記録すると、翌日の改善案を具体化できます。';document.getElementById('reviewText').textContent=summary+' '+(pending.length?'未完了・未確認は'+pending.length+'件。予定の変更と完了は区別して評価します。':'全項目に完了記録があります。');document.getElementById('reviewTip').textContent=tip;updateOverview();renderLists();}document.getElementById('reviewBtn').onclick=updateReview;document.getElementById('doneBtn').onclick=()=>{const x=items.find(x=>x.id===selectedId);if(!x)return;if(x.f){note.textContent='固定予定は元カレンダーで管理してください';return}x.done=!x.done;document.getElementById('doneBtn').textContent=x.done?'未完了に戻す':'完了にする';note.textContent=x.t+(x.done?'を端末内で仮完了':'の端末内の完了を解除')+(persist()?'（保存処理中）':'（保存処理失敗）');smoothRender();updateReview()};
+function updateReview(){const done=items.filter(x=>x.done),pending=items.filter(x=>!x.done),movable=items.filter(x=>!x.f),completed=movable.filter(x=>x.done);const pct=movable.length?Math.round(completed.length/movable.length*100):0;const used=done.reduce((n,x)=>n+x.d,0);let summary=done.length?'完了記録は'+done.length+'件（合計'+Math.round(used/60*10)/10+'時間）。可動タスクの達成率は'+pct+'%。':'完了記録がまだありません。予定の配置だけでは実行できたか判断できません。';const overlaps=[];const sorted=[...items].sort((a,b)=>a.s-b.s);for(let i=0;i<sorted.length;i++)for(let j=i+1;j<sorted.length&&sorted[j].s<sorted[i].s+sorted[i].d;j++)if(sorted[i].kind===sorted[j].kind&&sorted[i].kind!=='schedule')overlaps.push([sorted[i],sorted[j]]);const pair=overlaps[0];const tip=pair?'改善候補：「'+pair[0].t+'」と「'+pair[1].t+'」は時間が重なっています。同じ種類の作業としてまとめられるか確認すると、切り替えの手間を減らせる可能性があります。':'改善候補：タスクの統合を提案する根拠がまだ不足しています。完了状況と実際の所要時間を記録すると、翌日の改善案を具体化できます。';document.getElementById('reviewText').textContent=summary+' '+(pending.length?'未完了・未確認は'+pending.length+'件。予定の変更と完了は区別して評価します。':'全項目に完了記録があります。');document.getElementById('reviewTip').textContent=tip;updateOverview();renderLists();}document.getElementById('reviewBtn').onclick=updateReview;document.getElementById('doneBtn').onclick=()=>{const x=items.find(x=>x.id===selectedId);if(!x)return;if(x.f){note.textContent='固定予定は元カレンダーで管理してください';return}x.done=!x.done;document.getElementById('doneBtn').textContent=x.done?'未完了に戻す':'完了にする';const saved=persist();note.textContent=x.t+(x.done?'を端末内で仮完了':'の端末内の完了を解除')+(saved?'（保存処理中）':'（保存処理失敗）');fi.textContent=note.textContent;smoothRender();updateReview()};
 
 function updateOverview(){
  const movable=items.filter(x=>!x.f),done=movable.filter(x=>x.done),pct=movable.length?Math.round(done.length/movable.length*100):0;
@@ -526,9 +549,42 @@ document.getElementById('yosTestToggle').onclick=()=>{
 document.getElementById('zoomBtn').onclick=()=>{density=density==='overview'?'detail':'overview';scale=density==='overview'?27:56;document.getElementById('zoomBtn').textContent=density==='overview'?'詳細に拡大':'全体表示';render();};
 document.getElementById('searchBtn').onclick=()=>{const row=document.getElementById('searchRow');row.hidden=!row.hidden;if(!row.hidden){setTab('timeline');document.getElementById('searchInput').focus()}else{searchText='';document.getElementById('searchInput').value='';render()}};
 document.getElementById('searchInput').oninput=e=>{searchText=e.target.value.trim().toLocaleLowerCase();render()};
-document.getElementById('moreBtn').onclick=()=>{if(!isSample){note.textContent='この日の端末内データは保持しています · 同期先は未接続';return;}if(confirm('見本の予定だけを消しますか？')){items=[];persist();note.textContent='見本を消去しました · 新規追加できます';smoothRender();updateReview();}};
+document.getElementById('moreBtn').onclick=()=>{
+ const hidden=hiddenCalendar[selectedDay]||[];
+ if(hidden.length){
+  if(restorePendingDay!==selectedDay){restorePendingDay=selectedDay;note.textContent='隠したApple予定 '+hidden.length+'件を戻すには、右上「•••」をもう一度押してください';return;}
+  restorePendingDay=null;delete hiddenCalendar[selectedDay];items=[...calendarItems(selectedDay),...items.filter(x=>x.source!=='Apple Calendar')];
+  note.textContent=persist()?'非表示を解除しています · 元のApple予定は変更なし':'再表示の保存準備に失敗しました';
+  yosRefreshTestToggle();smoothRender();updateReview();return;
+ }
+ note.textContent='非表示の固定予定はありません。端末の予定やタスクは保持されています。';
+};
 document.getElementById('editSelected').onclick=()=>{const item=items.find(x=>x.id===selectedId);if(!item)return;if(item.f){note.textContent='固定予定は編集できません';return;}editingId=item.id;document.getElementById('editorTitle').textContent='予定を編集';document.getElementById('saveBtn').textContent='変更を保存';document.getElementById('newTitle').value=item.t;document.getElementById('newTime').value=fmt(item.s);document.getElementById('newDuration').value=item.d;document.getElementById('newKind').value=item.kind;editor.classList.add('show');focus.classList.remove('show');setTab('timeline');editor.scrollIntoView({behavior:'smooth',block:'start'})};
-document.getElementById('deleteSelected').onclick=()=>{const item=items.find(x=>x.id===selectedId);if(!item||item.f){note.textContent='固定予定は削除できません';return;}if(!confirm('「'+item.t+'」をこの端末の表示から削除しますか？'))return;items=items.filter(x=>x.id!==selectedId);selectedId=null;focus.classList.remove('show');const saved=persist();note.textContent=saved?'端末内の予定を削除しました':'保存に失敗しました';smoothRender();updateReview()};
+document.getElementById('deleteSelected').onclick=()=>{
+ const item=items.find(x=>x.id===selectedId);
+ if(!item||item.f){fi.textContent='Appleカレンダーの固定予定はDAYSTREAMから削除しません。';return;}
+ // In-WebView two-tap confirmation works without native confirm() dialogs.
+ if(deleteConfirmId!==item.id){
+  deleteConfirmId=item.id;
+  document.getElementById('deleteSelected').textContent='削除を確定';
+  fi.textContent='「'+item.t+'」をこの端末のDAYSTREAMから削除します。もう一度「削除を確定」を押してください。';
+  return;
+ }
+ items=items.filter(x=>x.id!==selectedId);selectedId=null;deleteConfirmId=null;focus.classList.remove('show');
+ const saved=persist();note.textContent=saved?'端末内タスクを削除しています（保存処理中）':'保存に失敗しました';
+ smoothRender();updateReview();
+};
+document.getElementById('hideFixed').onclick=()=>{
+ const item=items.find(x=>x.id===selectedId);
+ if(!item||item.source!=='Apple Calendar'||!item.calendarKey)return;
+ restorePendingDay=null;const keys=hiddenCalendar[selectedDay]||[];
+ if(keys.length>=100){fi.textContent='非表示の上限です。右上「•••」から再表示できます。';return;}
+ if(!keys.includes(item.calendarKey))hiddenCalendar[selectedDay]=[...keys,item.calendarKey];
+ items=[...calendarItems(selectedDay),...items.filter(x=>x.source!=='Apple Calendar')];
+ selectedId=null;deleteConfirmId=null;focus.classList.remove('show');
+ note.textContent=persist()?'Apple予定はDAYSTREAMだけで非表示 · 元の予定は保持（右上「•••」から復元）':'非表示の保存準備に失敗しました';
+ yosRefreshTestToggle();smoothRender();updateReview();
+};
 
 const vibrate=()=>{try{navigator.vibrate?.(8)}catch(e){}};
 function smoothRender(activeId,oldActiveRect){
@@ -576,7 +632,7 @@ function render(){
    const paint=()=>{frame=0;if(!holding)return;const offset=latestY-downY;el.style.transform='translate3d(0,'+offset+'px,0) scale(1.015)';const next=Math.max(0,Math.min(1440-item.d,Math.round((downS+offset/scale*60)/5)*5));if(next!==previewS){previewS=next;timeLabel.textContent=fmt(next)+'–'+fmt(next+item.d);const now=performance.now();if(now-lastHaptic>75){lastHaptic=now;vibrate()}}};
    const startDrag=(y,id)=>{downY=latestY=y;downS=previewS=item.s;startedAt=performance.now();moved=false;holding=false;activePointer=id};
    const moveDrag=y=>{if(activePointer===null)return;latestY=y;const distance=Math.abs(latestY-downY);if(distance>3&&!item.f){holding=true;moved=true;el.classList.add('moving');if(!frame)frame=requestAnimationFrame(paint)}};
-   const endDrag=cancelled=>{if(activePointer===null)return;activePointer=null;if(frame){cancelAnimationFrame(frame);frame=0}const releasedRect=el.getBoundingClientRect();el.classList.remove('moving');el.style.transform='';if(holding&&moved&&!cancelled){const offset=latestY-downY;previewS=Math.max(0,Math.min(1440-item.d,Math.round((downS+offset/scale*60)/5)*5));item.s=previewS;const clashes=items.filter(x=>x!==item&&item.s<x.s+x.d&&x.s<item.s+item.d);note.textContent=(clashes.length?'時間が重複：'+clashes.map(x=>x.t).join('、'):'移動しました')+(persist()?'（保存処理中）':'（保存処理失敗）');smoothRender(item.id,releasedRect)}else if(!moved&&!cancelled){zoom=item.s;selectedId=item.id;document.getElementById('doneBtn').textContent=item.done?'未完了に戻す':'完了にする';ft.textContent=item.t;fi.textContent=fmt(item.s)+'–'+fmt(item.s+item.d)+(item.f?'　固定予定':'　ドラッグで移動');focus.classList.toggle('show',zoom!==null);smoothRender()}holding=false};
+   const endDrag=cancelled=>{if(activePointer===null)return;activePointer=null;if(frame){cancelAnimationFrame(frame);frame=0}const releasedRect=el.getBoundingClientRect();el.classList.remove('moving');el.style.transform='';if(holding&&moved&&!cancelled){const offset=latestY-downY;previewS=Math.max(0,Math.min(1440-item.d,Math.round((downS+offset/scale*60)/5)*5));item.s=previewS;const clashes=items.filter(x=>x!==item&&item.s<x.s+x.d&&x.s<item.s+item.d);note.textContent=(clashes.length?'時間が重複：'+clashes.map(x=>x.t).join('、'):'移動しました')+(persist()?'（保存処理中）':'（保存処理失敗）');smoothRender(item.id,releasedRect)}else if(!moved&&!cancelled){showFocusFor(item);smoothRender()}holding=false};
    // Touch events are used on iOS WebView to avoid pointer capture cancelling a vertical drag.
    el.addEventListener('touchstart',e=>{if(e.touches.length!==1)return;startDrag(e.touches[0].clientY,'touch')},{passive:true});
    el.addEventListener('touchmove',e=>{if(activePointer!=='touch'||!e.touches.length)return;if(!item.f){e.preventDefault();moveDrag(e.touches[0].clientY)}},{passive:false});
@@ -590,14 +646,14 @@ function render(){
  tl.style.height=(Math.max(bottom,lastBottom)+12)+'px';updateNow();
  if(pushed&&note.textContent.includes('仮データ'))note.textContent='枠の高さは所要時間に対応。重複時は縦にずらして表示（未保存）';
 }
-document.getElementById('closeFocus').onclick=()=>{zoom=null;focus.classList.remove('show');smoothRender()};
+document.getElementById('closeFocus').onclick=()=>{zoom=null;deleteConfirmId=null;focus.classList.remove('show');smoothRender()};
 if(Array.isArray(stored)){note.textContent='保存済み時間割を表示 · Notion Tasks '+yosStatusWord(taskSource.status);}
 else if(calendarRows.length){note.textContent='Appleカレンダー '+calendarRows.length+'件を読み取り'+(yosTestCount(todayISO)?' · テスト'+yosTestCount(todayISO)+'件は非表示':'')+' · 端末内で追加・編集';}
 else{note.textContent='端末内の予定はありません · 右上の追加から登録';}
 yosDefaultStart();yosRefreshTestToggle();renderWeek();render();renderDayAllDay();updateReview();yosRenderSources();setCalendarMode('day');setInterval(updateNow,60000);
 <\/script></body></html>`;
 
- const payload=JSON.stringify({days:state.days,calendarDays,allDayDays,calendarCoverage,taskSource,habitSource,generatedAt:new Date().toISOString()}).replace(/</g,'\\u003c');
+ const payload=JSON.stringify({days:state.days,hiddenCalendar:state.hiddenCalendar||{},calendarDays,allDayDays,calendarCoverage,taskSource,habitSource,generatedAt:new Date().toISOString()}).replace(/</g,'\\u003c');
  const ready=html.replace('<script>','<script>window.YOS_CHARCOAL_BOOT='+payload+';<\/script><script>');
  await view.loadHTML(ready);
  let closedFlag=false;
