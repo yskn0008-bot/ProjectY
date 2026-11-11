@@ -135,10 +135,12 @@ button,input,select{font:inherit}button{cursor:pointer}button:focus-visible,inpu
 .card.neutral{background:#636b76}.card.neutral:before{background:#97a6b9}.card.sleep{background:#325477}.card.sleep:before{background:#48bdf5}.card.sleep:not(.tiny) b,.card.sleep:not(.tiny) svg{transform:translateY(-9px)}.card.sleep:not(.tiny) small{position:absolute;top:calc(50% + 4px);left:38px;margin:0;font-size:11px;transform:translateY(0)}
 .card .shortcut-launch{min-width:30px;width:30px;min-height:30px;height:30px;display:grid;place-items:center;background:#1c284885;border:1px solid #ffffff66;border-radius:7px;color:#fff;flex:none;text-decoration:none;font-size:17px;font-weight:800;padding:0;position:relative;z-index:2}.card .shortcut-launch.linked{background:#1d648c;border-color:#7bd4ff}.card.task b{flex:1}.card.task{cursor:pointer}.card.task.swiping{filter:brightness(1.14)}.card.compat-positive:before{background:#65d5a5;width:5px}.card.compat-positive{box-shadow:inset 0 0 0 1.5px #65d5a5,0 2px 8px #101b2927}
 .card.compat-negative:before{background:#f0bd6f;width:5px}.card.compat-negative{box-shadow:inset 0 0 0 1.5px #eeb76b,0 2px 8px #101b2927}
-.card.compat-danger:before{background:#ed8a93;width:5px}.card.compat-danger{box-shadow:inset 0 0 0 2px #ed8a93,0 2px 8px #101b2927}
+.card.compat-danger:before{background:#ed8a93;width:5px}.card.compat-danger{box-shadow:0 2px 8px #101b2927}
+.card.compat-danger:after{content:"!";font-size:12px;font-weight:800;color:#fff;background:#bf485b;border-radius:50%;width:17px;height:17px;line-height:17px;text-align:center;position:absolute;right:3px;top:2px;z-index:1;pointer-events:none}
+.card.compat-danger{padding-right:24px}
 .card.compat-unknown:before{background:#aab3c0}
 .compat-status{font-size:11px;color:#d8e0ea;margin:6px 14px 3px;line-height:1.55}
-.compat-status[hidden]{display:none}.compat-status strong{font-weight:720}.compat-key{display:flex;flex-wrap:wrap;gap:8px;margin-top:5px}.compat-key span{font-size:10px}.compat-key .pos{color:#8bebc3}.compat-key .neg{color:#ffd391}.compat-key .danger{color:#ffa1ad}
+.compat-status[hidden]{display:none}.compat-status strong{font-weight:720}.compat-status .overlap-button{border:1px solid #dc8a91;border-radius:8px;background:#7a3441;color:#fff;font-weight:700;padding:9px 11px;min-height:37px;display:block;margin:5px 0;text-align:left;width:100%}.compat-status .overlap-details{margin:5px 0 9px;padding:9px 11px;border-left:3px solid #e28c96;border-radius:6px;background:#ffffff0d;line-height:1.5}.compat-status .overlap-details[hidden]{display:none}.compat-key{display:flex;flex-wrap:wrap;gap:8px;margin-top:5px}.compat-key span{font-size:10px}.compat-key .pos{color:#8bebc3}.compat-key .neg{color:#ffd391}.compat-key .danger{color:#ffa1ad}
 .card.done{opacity:.62;filter:saturate(.55)}.card.selected{outline:1.5px solid #e5efff}.card.warning{outline:2px solid #e6a35a}.card.moving{z-index:6;filter:brightness(1.14);box-shadow:0 10px 26px #10131a6c}
 .card svg{width:16px;height:16px;flex:none;stroke:#f7f9fc;fill:none;stroke-width:1.8;stroke-linejoin:round;stroke-linecap:round;position:relative}.card b{font-size:12.5px;line-height:1.1;font-weight:630;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:.08px;position:relative}.card small{margin-left:auto;font-size:10px;line-height:1.1;font-weight:500;white-space:nowrap;font-variant-numeric:tabular-nums;flex-shrink:0;position:relative}
 .card.compact{border-radius:7px}.card.compact b{font-size:12px}.card.compact small{font-size:9px}.card.lane{gap:5px;padding-right:5px}.card.lane small{display:none}.card.lane b{font-size:12px}.card.tiny svg{width:13px;height:13px}.card.tiny{gap:5px;padding-left:7px}.card.tiny b{font-size:11px}.card.tiny small{font-size:9px}
@@ -461,6 +463,26 @@ function yosCompatibility(rows){
  }
  return result;
 }
+function yosOverlapWindows(rows){
+ const sorted=rows.filter(x=>x&&Number.isFinite(x.s)&&Number.isFinite(x.d)&&x.s>=0&&x.d>0&&x.s+x.d<=1440).sort((a,b)=>a.s-b.s||a.id-b.id);
+ const clashes=[];
+ for(let i=0;i<sorted.length;i++)for(let j=i+1;j<sorted.length;j++){
+  const a=sorted[i],b=sorted[j];
+  if(b.s>=a.s+a.d)break;
+  const from=Math.max(a.s,b.s),until=Math.min(a.s+a.d,b.s+b.d);
+  if(until>from)clashes.push({from,until,titles:[a.t,b.t]});
+ }
+ // Adjacent and overlapping collision windows form one area, rather than one warning per card.
+ const areas=[];
+ for(const next of clashes.sort((a,b)=>a.from-b.from||a.until-b.until)){
+  const prev=areas[areas.length-1];
+  if(prev&&next.from<=prev.until){
+   prev.until=Math.max(prev.until,next.until);
+   for(const name of next.titles)if(!prev.titles.includes(name))prev.titles.push(name);
+  }else areas.push({...next,titles:[...next.titles]});
+ }
+ return areas;
+}
 let latestCompatibility=new Map();
 function yosRenderCompatibility(){
  latestCompatibility=yosCompatibility(items);
@@ -469,13 +491,26 @@ function yosRenderCompatibility(){
  for(const item of rows)counts[item.level]++;
  const status=document.getElementById('compatStatus');
  status.textContent='';
+ const windows=yosOverlapWindows(items);
  const summary=document.createElement('strong');
- summary.textContent='配置の相性　＋'+counts.positive+' ／ −'+counts.negative+' ／ ！'+counts.danger+' ／ ？'+counts.unknown;
+ summary.textContent=windows.length?'時間の重複：'+windows.length+'か所':'時間の重複なし';
+ status.append(summary);
+ for(const collision of windows){
+  const button=document.createElement('button');button.type='button';button.className='overlap-button';
+  const slot=fmt(collision.from)+'–'+fmt(collision.until);
+  button.textContent='！ '+slot+'｜'+(collision.until-collision.from)+'分重複　詳細';
+  button.setAttribute('aria-expanded','false');
+  const detail=document.createElement('div');detail.className='overlap-details';detail.hidden=true;
+  detail.textContent='重なっている予定：'+collision.titles.join(' ／ ')+'。どちらかの開始時刻・所要時間を変更すると解消できます。';
+  button.onclick=()=>{detail.hidden=!detail.hidden;button.setAttribute('aria-expanded',String(!detail.hidden));};
+  status.append(button,detail);
+ }
+ if(!windows.length&&counts.positive===0&&counts.negative===0)summary.textContent='配置の相性：判断材料不足';
  const key=document.createElement('div');key.className='compat-key';
  for(const [textName,css] of [['＋ 相乗候補','pos'],['− 余裕不足','neg'],['！ 時間衝突','danger'],['？ 判断材料不足','']]){
   const el=document.createElement('span');el.className=css;el.textContent=textName;key.append(el);
  }
- status.append(summary,key);
+ status.append(key);
  const details=[];
  for(const record of rows)for(const reason of record.reasons)if(!details.includes(reason))details.push(reason);
  const review=document.getElementById('compatReview');
