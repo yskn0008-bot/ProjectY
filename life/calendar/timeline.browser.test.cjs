@@ -86,6 +86,14 @@ const FIXED='2026-11-11T09:00:00+09:00';
   assert.equal(await page.locator('#tlAgenda .tlAgendaRow').count(),3,'home must include both flexible and fixed events');
   assert.equal(await page.locator('#tlAgenda .tlAgendaRow').first().evaluate(el=>getComputedStyle(el).position),'absolute','glass HOME must align events to the time rail');
   assert.equal(await page.locator('#tlAgenda .tlAgendaRow').first().evaluate(el=>el.style.top),'432px','09:00 event should align to 0.8px per minute');
+  const overlapRail=await page.locator('#tlAgenda .tlAgendaRow').nth(1).evaluate(el=>({
+   start:el.dataset.actualStart,shift:el.style.getPropertyValue('--rail-shift-px'),
+   realStart:Number.parseFloat(el.style.top)-Number.parseFloat(el.style.getPropertyValue('--rail-shift-px')),
+   line:getComputedStyle(el.querySelector('.tlAgendaDot'),'::after').display
+  }));
+  assert.deepEqual(overlapRail,{start:'09:20',shift:'52px',realStart:448,line:'block'},'overlap dot must remain on 09:20 while readable card moves');
+  assert.match(await page.locator('#tlScaleLabel').innerText(),/時刻軸/);
+
   assert.match(await page.locator('#tlAgenda').evaluate(el=>getComputedStyle(el,'::before').content),/06:00/,'home hour ruler must show the approved morning axis');
   const cardReadability=await page.locator('#tlAgenda .tlAgendaCard').first().evaluate(el=>({clientHeight:el.clientHeight,scrollHeight:el.scrollHeight,titleSize:getComputedStyle(el.querySelector('strong')).fontSize}));
   assert.equal(cardReadability.titleSize,'14px','small time slots must use compact, readable title text');
