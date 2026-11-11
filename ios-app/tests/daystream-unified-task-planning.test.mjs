@@ -196,3 +196,68 @@ test('explicitly marked fictional Apple calendar events are display-only hidden 
  assert.match(client,/元カレンダーは変更していません/);
  assert.doesNotMatch(script,/CalendarEvent\.(?:create|remove|save)\(/);
 });
+
+
+test('real WebView runtime accepts day changes and preserves each day of local plan',()=>{
+ const actualHtml=Function('return `'+html+'`')();
+ const actualClient=actualHtml.match(/<script>([\\s\\S]*?)<\\/script>/)?.[1]||'';
+ assert.ok(actualClient);
+ new vm.Script(actualClient);
+ const navigation=actualClient.match(/function parseDay\\(iso\\)\\{[\\s\\S]*?(?=\\nfunction renderWeek\\(\\))/)?.[0];
+ assert.ok(navigation);
+ const env=vm.runInNewContext(`
+  const localISO=d=>[d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-');
+  const savedDays={'2026-11-12':[{id:1,t:'動作確認',s:600,d:30,kind:'task'}],'2026-11-13':[{id:2,t:'別の日',s:660,d:30,kind:'task'}]};
+  const dayItems=day=>(savedDays[day]||[]).map(x=>({...x}));
+  const todayISO='2026-11-12',taskSource={status:'unavailable'},habitSource={status:'unavailable'};
+  let selectedDay=todayISO,items=dayItems(todayISO),isSample=false,selectedId=null,zoom=null;
+  const note={textContent:''},planBox={textContent:''},focus={classList:{remove(){}}},editor={classList:{remove(){}}};
+  const yosStatusWord=()=> '未接続';
+  const yosDefaultStart=()=>{},yosRenderSources=()=>{},yosRefreshTestToggle=()=>{},hideMonthPicker=()=>{};
+  const renderWeek=()=>{},render=()=>{},updateReview=()=>{};
+  const window={scrollTo(){}};
+  `+navigation+`
+  ({showDay,snapshot:()=>({selectedDay,titles:items.map(x=>x.t),original:savedDays['2026-11-12'].map(x=>x.t)})});
+ `,{Date});
+ env.showDay('2026-11-13');
+ assert.equal(env.snapshot().selectedDay,'2026-11-13');
+ assert.deepEqual(Array.from(env.snapshot().titles),['別の日']);
+ env.showDay('2026-02-30');
+ assert.equal(env.snapshot().selectedDay,'2026-11-13','invalid civil date must be rejected');
+ env.showDay('2026-11-12');
+ assert.equal(env.snapshot().selectedDay,'2026-11-12');
+ assert.deepEqual(Array.from(env.snapshot().titles),['動作確認']);
+ assert.deepEqual(Array.from(env.snapshot().original),['動作確認']);
+});
+
+test('calendar header uses in-app month grid rather than a hidden WKWebView date picker',()=>{
+ const actualHtml=Function('return `'+html+'`')();
+ const actualClient=actualHtml.match(/<script>([\\s\\S]*?)<\\/script>/)?.[1]||'';
+ assert.match(actualHtml,/id="dateBtn"[^>]*aria-controls="monthPicker"/);
+ assert.match(actualHtml,/id="monthPicker" hidden/);
+ assert.match(actualClient,/getElementById\\('dateBtn'\\)\\.onclick=\\(\\)=>/);
+ assert.doesNotMatch(actualClient,/picker\\.showPicker\\(\\)|picker\\.click\\(\\)/);
+ const module=actualClient.match(/const monthPanel=document.getElementById\\('monthPicker'\\)[\\s\\S]*?(?=\\nfunction updateNow\\(\\))/)?.[0];
+ assert.ok(module);
+ const controls={monthPicker:{hidden:true},monthGrid:{children:[],set textContent(v){this.children=[]},append(x){this.children.push(x)}},dateBtn:{setAttribute(k,v){this[k]=v}},monthCaption:{},prevMonth:{},nextMonth:{},monthToday:{}};
+ const document={getElementById:id=>controls[id],createElement:type=>({type,textContent:'',setAttribute(k,v){this[k]=v}})};
+ const env=vm.runInNewContext(`
+  const selectedDay='2026-11-12',todayISO='2026-11-12';
+  const parseDay=iso=>{const p=iso.split('-').map(Number);return new Date(p[0],p[1]-1,p[2],12)};
+  const localISO=d=>[d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-');
+  let chosen=null;const showDay=iso=>{chosen=iso;hideMonthPicker()};
+  `+module+`
+  ({chosen:()=>chosen});
+ `,{Date,document});
+ controls.dateBtn.onclick();
+ assert.equal(controls.monthPicker.hidden,false);
+ assert.equal(controls.dateBtn['aria-expanded'],'true');
+ assert.equal(controls.monthCaption.textContent,'2026年 11月');
+ const target=controls.monthGrid.children.find(b=>b['aria-label']==='2026-11-13');
+ assert.ok(target);target.onclick();
+ assert.equal(env.chosen(),'2026-11-13');
+ assert.equal(controls.monthPicker.hidden,true);
+ controls.dateBtn.onclick();controls.prevMonth.onclick();
+ assert.equal(controls.monthCaption.textContent,'2026年 10月');
+ controls.nextMonth.onclick();assert.equal(controls.monthCaption.textContent,'2026年 11月');
+});
