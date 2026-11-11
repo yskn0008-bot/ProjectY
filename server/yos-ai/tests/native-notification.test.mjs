@@ -195,6 +195,16 @@ test('authentication codes not echoed or stored',async()=>{
   assert.doesNotMatch(JSON.stringify(h.blocks),/987654/);
 });
 
+test('amount field cannot reintroduce a redacted code in a mixed critical alert',async()=>{
+  const h=harness(),r=await h.handler(h.req({
+    text:'銀行：不正送金を検知。認証コード 123456円。被害額8,200円',eventId:'mixed-amount-secret-01'
+  }));
+  const data=await r.json();
+  assert.equal(data.decision,'YOS_ALERT');
+  assert.match(data.alertText,/記載金額: 8,200円/);
+  assert.doesNotMatch(data.alertText+JSON.stringify(h.blocks),/123456/);
+});
+
 test('test notifications and ordinary reminders remain silent',async()=>{
   const h=harness();
   const a=await h.handler(h.req({text:'【通知テスト｜重要】今すぐ確認してください',eventId:'native-unique-0006'}));
