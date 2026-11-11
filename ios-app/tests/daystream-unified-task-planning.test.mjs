@@ -445,3 +445,22 @@ test('shortcuts icon uses only user-set name and Scriptable hands off allowliste
  assert.equal(opened.length,1);
  assert.doesNotMatch(script,/CalendarEvent\.(?:remove|save|create)\(/);
 });
+
+
+test('editor action buttons have visible spacing and shortcut icons show separate setup and launch states',()=>{
+ const rendered=Function('return '+String.fromCharCode(96)+html+String.fromCharCode(96))();
+ const js=rendered.split('<script>')[1]?.split('</script>')[0]||'';
+ assert.ok(rendered.includes('class="editor-actions"'));
+ assert.ok(rendered.includes('gap:16px'));
+ assert.ok(rendered.includes('min-height:46px'));
+ assert.ok(rendered.includes('id="saveBtn"'));
+ assert.ok(rendered.includes('id="cancelEditor"'));
+ assert.ok(rendered.includes('登録前は＋で設定、登録後は▶で実行'));
+ assert.ok(rendered.includes('＋＝登録・▶＝実行'));
+ assert.ok(js.includes("action.textContent=linked?'▶':'＋'"));
+ assert.ok(js.includes("action.className='shortcut-launch'+(linked?' linked':'')"));
+ assert.ok(js.includes("action.href='shortcuts://run-shortcut?name='+encodeURIComponent(item.shortcut)"));
+ assert.ok(!rendered.includes("カードの⚡"));
+ assert.ok(!js.includes("action.textContent='⚡'"));
+ assert.match(js,/beginLocalEdit\(item,true\)/);
+});
