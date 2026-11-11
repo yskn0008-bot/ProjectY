@@ -19,6 +19,12 @@ test('draft updater pins the rebuilt candidate to an immutable commit, exact has
  assert.equal(pkg.script,read('YOS_DAYSTREAM_TimelineBridge_Dev.js'));
  assert.match(productionCode,/PREVIOUS_SCRIPT_SHA='b117fcd0c29c1227ef2205866dd19a0dea2564fc9f736806a5c54bdd49d5d1ca'/);
  assert.match(productionCode,/4e7ad93cbf8ce64c1e7b4985547caaf0ce9e949a37dfc8d73f647ca11f529c78/);
+ assert.equal(pinned[1],'93a09930f1a85e7ee6b65910a79a918e12ce12e4','current package must match the reviewed fixed commit');
+ assert.match(productionCode,/58b2956f64f32d04ffec9334df42391a212c5dc652e27091b43b0d905b9ff31e/,'immediate predecessor must remain a protected known-version candidate');
+ const html=read('daystream-timeline.html'),bridge=read('YOS_DAYSTREAM_TimelineBridge_Dev.js');
+ assert.equal(bridge.match(/const HTML_SHA256 = '([^']+)'/)[1],hash(html),'offline HTML hash must match latest HOME + EDIT');
+ assert.match(html,/YOS_APPROVED_GLASS_TIME_RAIL_V1/);
+ assert.match(html,/YOS_EDIT_OVERLAP_READABILITY_V2/);
 });
 test('fresh install reads back code before launch and leaves plan untouched',async()=>{const r=await run();assert.equal(r.writes.length,1);assert.equal(r.cloud.get(target),pkg.script);assert.equal(r.opened.length,1);assert.equal(r.alerts.length,0)});
 test('known prior version backs up first and updates same candidate name',async()=>{const r=await run({cloudExisting:prior});assert.equal(r.cloud.get(backupTarget),prior);assert.equal(r.cloud.get(target),pkg.script);assert.ok(r.writes[0].p.endsWith('.previous.txt'));assert.ok(r.writes[1].p.endsWith('.js'));assert.equal(r.opened.length,1)});
