@@ -74,17 +74,28 @@ async function main(){
  let state={version:1,days:{}};
  if(prior!==null){try{const parsed=JSON.parse(prior);if(!validPlan(parsed))throw Error('invalid plan');state=parsed}catch{throw Error('保存済みの検証データに問題があります。変更せず中止しました');}}
  let expected=prior;
- const calendarDays={};
+ const calendarDays={},allDayDays={};
+ // Single snapshot: prior month, current month and next two months. Dates outside are "unconfirmed".
+ const now=new Date(),start=new Date(now.getFullYear(),now.getMonth()-1,1),end=new Date(now.getFullYear(),now.getMonth()+3,1);
+ const calendarCoverage={from:key(start),until:key(end),status:'unavailable'};
  try{
-   const now=new Date(),start=new Date(now.getFullYear(),now.getMonth(),now.getDate()),end=new Date(start);end.setDate(start.getDate()+7);
    const records=await CalendarEvent.between(start,end);
-   for(const event of records){if(event.isAllDay||!event.startDate||!event.endDate)continue;
-     for(let n=0;n<7;n++){const a=new Date(start);a.setDate(start.getDate()+n);const b=new Date(a);b.setDate(a.getDate()+1);
+   if(!Array.isArray(records))throw Error('calendar results unavailable');
+   const maxEvents=1000;
+   for(const event of records.slice(0,maxEvents)){
+     if(!event.startDate||!event.endDate)continue;
+     const title=String(event.title||'予定').slice(0,100);
+     for(let n=0,a=new Date(start);a<end&&n<160;n++,a.setDate(a.getDate()+1)){
+       const b=new Date(a);b.setDate(a.getDate()+1);
        const first=Math.max(a.getTime(),event.startDate.getTime()),last=Math.min(b.getTime(),event.endDate.getTime());
-       if(last<=first)continue;const d=key(a);(calendarDays[d]??=[]).push({title:String(event.title||'予定').slice(0,100),start:Math.floor((first-a.getTime())/60000),duration:Math.max(1,Math.round((last-first)/60000))});
+       if(last<=first)continue;
+       const d=key(a);
+       if(event.isAllDay){(allDayDays[d]??=[]).push(title);continue;}
+       (calendarDays[d]??=[]).push({title,start:Math.floor((first-a.getTime())/60000),duration:Math.max(1,Math.round((last-first)/60000))});
      }
    }
- }catch(e){console.warn('Appleカレンダーは読み取り不可: '+String(e.message||e));}
+   calendarCoverage.status=records.length>maxEvents?'partial':'ok';
+ }catch(e){console.warn('Appleカレンダーは読み取り不可: '+String(e.message||e));calendarCoverage.status='error';}
  const [taskSource,habitSource]=await Promise.all([yosReadTaskSource(),Promise.resolve(yosReadHabits())]);
  const view=new WebView();
 const html=`<!doctype html><html lang="ja"><head><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no"><style>
@@ -112,7 +123,9 @@ button,input,select{font:inherit}button{cursor:pointer}button:focus-visible,inpu
 .dock{position:fixed;bottom:0;left:0;right:0;padding:9px 7px calc(11px + env(safe-area-inset-bottom));background:#30353eea;border-top:1px solid #ffffff28;backdrop-filter:blur(15px);-webkit-backdrop-filter:blur(15px);z-index:15}.dock-inner{max-width:610px;margin:auto;display:grid;grid-template-columns:repeat(5,1fr)}.tab{display:grid;justify-items:center;align-content:center;gap:5px;background:none;border:0;color:#eef1f6;font-size:10px;padding:3px 0;min-height:52px}.tab svg{height:24px;width:24px;stroke-width:1.8}.tab.active{color:#30baff}
 button:active{opacity:.8}@media(min-width:640px){.dock{left:calc((100vw - 640px)/2);right:calc((100vw - 640px)/2);border-radius:14px 14px 0 0}.focus{left:calc((100vw - 610px)/2);right:calc((100vw - 610px)/2)}}
 @media(max-width:350px){.metric label{font-size:9px}.metric strong{font-size:11px}.metric:first-child strong{font-size:17px}.card{left:69px;padding-right:6px}.card small{font-size:9px}.axis{left:55px}.tick{left:51.5px}.nowline:before{left:45px}}
-.month-pop[hidden]{display:none}.month-pop{margin:0 0 12px;padding:12px;border-radius:14px;border:1px solid #7a8798;background:#353f4c;box-shadow:0 8px 24px #10141b77}.month-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}.month-head strong{font-size:15px}.month-head button{border:1px solid #73879d;background:#45596a;color:#fff;border-radius:8px;padding:8px 11px;min-width:40px;min-height:39px}.month-head button:focus-visible,.month-grid button:focus-visible{outline:2px solid #74cbff;outline-offset:2px}.month-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px}.month-grid span{font-size:11px;color:#d1dbe5;text-align:center;padding:5px 0}.month-grid button{border:0;border-radius:8px;color:#f4f7fb;background:#ffffff0b;min-height:39px;font-size:13px;font-variant-numeric:tabular-nums}.month-grid button.outside{color:#a8b3c2;background:none}.month-grid button.selected{background:#247cbd;color:white;font-weight:700}.month-grid button.current:not(.selected){outline:1px solid #7ac8f2;outline-offset:-2px}
+.calendar-modes[hidden],.week-overview[hidden],.month-pop[hidden]{display:none}.calendar-modes{display:flex;gap:5px;margin:10px 15px 5px;background:#232b36a9;border:1px solid #ffffff21;padding:3px;border-radius:11px}.calendar-modes button{border:0;border-radius:8px;background:none;color:#d5dbe4;font-weight:650;font-size:12px;min-height:34px;flex:1}.calendar-modes button.active{background:#2379b5;color:#fff}
+.week-overview{margin:8px 13px 20px;border-radius:13px;background:#ffffff0b;border:1px solid #ffffff22;padding:10px}.week-overview-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px;font-size:13px}.week-overview-head button{color:#fff;background:#435567;border:1px solid #ffffff32;border-radius:8px;padding:7px 11px;min-height:36px}.week-overview-head strong{font-size:14px}.week-day{border:0;border-bottom:1px solid #ffffff22;background:transparent;color:#f2f5f9;display:flex;gap:8px;align-items:flex-start;width:100%;text-align:left;padding:10px 4px;min-height:54px}.week-day:last-child{border-bottom:0}.week-day .date{width:45px;flex:none;font-weight:650;font-variant-numeric:tabular-nums}.week-day.today .date{color:#65c0ff}.week-day .agenda{flex:1;min-width:0;font-size:12px}.week-day .agenda span{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:1px 0}.week-day .agenda .task{color:#e2b7f8}.week-day .agenda .habit{color:#9decc9}.week-day .agenda .due{color:#ffd19b}.week-day .empty{color:#c1c9d4}.week-day .more{color:#bdc5d0;font-size:11px}
+.month-pop[hidden]{display:none}.month-pop{margin:0 0 12px;padding:12px;border-radius:14px;border:1px solid #7a8798;background:#353f4c;box-shadow:0 8px 24px #10141b77}.month-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}.month-head strong{font-size:15px}.month-head button{border:1px solid #73879d;background:#45596a;color:#fff;border-radius:8px;padding:8px 11px;min-width:40px;min-height:39px}.month-head button:focus-visible,.month-grid button:focus-visible{outline:2px solid #74cbff;outline-offset:2px}.month-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px}.month-grid span{font-size:11px;color:#d1dbe5;text-align:center;padding:5px 0}.month-grid button{border:0;border-radius:8px;color:#f4f7fb;background:#ffffff0b;min-height:39px;font-size:13px;font-variant-numeric:tabular-nums}.month-grid button.outside{color:#a8b3c2;background:none}.month-grid button.selected{background:#247cbd;color:white;font-weight:700}.month-grid button.current:not(.selected){outline:1px solid #7ac8f2;outline-offset:-2px}.month-grid button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px}.month-grid .markers{display:flex;justify-content:center;gap:3px;height:5px}.month-grid .markers i{width:5px;height:5px;border-radius:50%;background:#45aefa}.month-grid .markers i.task{background:#c778f0}.month-grid .markers i.habit{background:#51d4ac}.month-grid .markers i.due{background:#f8bf79}.month-grid .uncertain{color:#9da7b6;font-size:9px}.month-pop .coverage,.week-overview .coverage{margin:8px 4px 0;font-size:11px;color:#cbd4df;line-height:1.5}
 .yos-source-row{display:flex;justify-content:space-between;align-items:center;gap:8px;border-top:1px solid #ffffff22;padding:9px 0}.yos-source-row b{display:block;font-size:13px;line-height:1.45}.yos-source-row small{display:block;font-size:11px;color:#ccd5df;line-height:1.5}.yos-source-row button,#yosPlanBox button,#yosPlanAll{border:1px solid #83b8e4;border-radius:9px;background:#367ea9;color:white;padding:8px 9px;font-size:12px;flex-shrink:0}.tabbox h3:not(:first-child){margin-top:18px}.tabbox input[type=time]{background:#303843;color:white;border:1px solid #94a2b4;border-radius:8px;padding:7px;margin:7px 0}#yosPlanBox:not(:empty){padding:8px 10px;margin:7px 0;border-radius:9px;background:#323f4d}
 </style></head><body>
 <div class="app">
@@ -130,8 +143,10 @@ button:active{opacity:.8}@media(min-width:640px){.dock{left:calc((100vw - 640px)
     <section class="month-pop" id="monthPicker" hidden aria-label="日付を選ぶ月カレンダー">
       <div class="month-head"><button id="prevMonth" type="button" aria-label="前の月">‹</button><strong id="monthCaption"></strong><button id="nextMonth" type="button" aria-label="次の月">›</button><button id="monthToday" type="button">今日</button></div>
       <div class="month-grid" id="monthGrid"></div>
+      <p class="coverage" id="monthCoverage"></p>
     </section>
   </div>
+  <div class="calendar-modes" id="calendarModes" role="group" aria-label="DAYSTREAM表示切替"><button type="button" data-view="month" aria-pressed="false">月</button><button type="button" data-view="week" aria-pressed="false">週</button><button type="button" data-view="day" aria-pressed="true">日・24時間</button></div>
   <section class="summary" aria-label="今日の概要">
     <div class="metric"><span class="ring" id="progressRing" style="--pct:0%"></span><span class="stack"><label>今日の進捗</label><strong id="todayProgress">—</strong></span></div>
     <div class="metric"><label><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="m8 11 2 2 5-5m-7 8h8"/></svg>タスク</label><strong id="taskCount">—</strong></div>
@@ -141,6 +156,7 @@ button:active{opacity:.8}@media(min-width:640px){.dock{left:calc((100vw - 640px)
   <div class="searchrow" id="searchRow" hidden><input id="searchInput" type="search" placeholder="予定・タスクを検索" aria-label="検索"></div>
   <div class="microtools"><div class="notice" id="notice" aria-live="polite">端末内の予定を表示します</div><button class="zoomBtn" id="yosTestToggle" type="button" hidden aria-label="テスト予定を表示">テスト表示</button><button class="zoomBtn" id="zoomBtn" type="button" aria-label="タイムラインの表示倍率を切り替え">詳細に拡大</button></div>
   <div class="editor" id="editor"><b id="editorTitle">予定を追加</b><div class="fields"><input id="newTitle" placeholder="名前" style="flex:1 1 160px" aria-label="名前"><input id="newTime" type="time" value="10:00" aria-label="開始時刻"><input id="newDuration" type="number" min="5" max="1440" step="5" value="30" style="width:76px" aria-label="所要時間（分）"><select id="newKind" aria-label="種類"><option value="task">タスク</option><option value="habit">習慣</option><option value="schedule">予定</option></select></div><button id="saveBtn">追加する</button><button id="cancelEditor" class="light" type="button">閉じる</button></div>
+  <section class="week-overview" id="weekOverview" hidden aria-label="週の予定"><div class="week-overview-head"><button id="weekPrev" type="button" aria-label="前週">‹</button><strong id="weekCaption"></strong><button id="weekNext" type="button" aria-label="翌週">›</button></div><div id="weekAgenda"></div><p class="coverage" id="weekCoverage"></p></section>
   <div class="timeline-wrap" id="timelinePanel"><div class="timeline" id="tl"><div class="axis"></div><div class="nowline" id="nowLine" hidden><span class="nowbadge" id="nowBadge"></span></div></div></div>
   <section class="tabbox" id="taskPanel"><h3>タスク・未配置</h3><p class="muted">専門タスクの期限と、実行する時間は別。配置しても元データの期限・完了は変わりません。</p>
  <div id="taskList"></div><h3>各専門ページから集約</h3><p class="muted" id="yosTaskSourceStatus">Notion Tasks：確認中</p>
@@ -164,13 +180,16 @@ const demoItems=[{id:1,t:'睡眠',s:0,d:390,f:1,kind:'habit'},{id:2,t:'朝の準
 const localISO=d=>[d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-');
 // Isolated native Scriptable file bridge; legacy WebView localStorage is never read or modified.
 const boot=window.YOS_CHARCOAL_BOOT||{},savedDays=boot.days&&typeof boot.days==='object'?boot.days:{};
-const todayISO=localISO(new Date()),calendarByDay=boot.calendarDays||{};
+const todayISO=localISO(new Date()),calendarByDay=boot.calendarDays||{},allDayDays=boot.allDayDays||{};
+const calendarCoverage=boot.calendarCoverage||{from:todayISO,until:todayISO,status:'unavailable'};
+const isCalendarCovered=day=>['ok','partial'].includes(calendarCoverage.status)&&day>=calendarCoverage.from&&day<calendarCoverage.until;
 // Only explicitly tagged fictional test events are hidden; never delete or rewrite the source calendar.
 const yosIsTestCalendarTitle=title=>{const s=String(title||'').trim();return /^YOS-TEST(?:[-_]|$)/i.test(s)||s.startsWith('[架空]')||s.startsWith('【架空】')};
 let showTestCalendar=false;
 const yosCalendarRows=day=>Array.isArray(calendarByDay[day])?calendarByDay[day]:[];
 const yosTestCount=day=>yosCalendarRows(day).filter(x=>yosIsTestCalendarTitle(x?.title)).length;
 const calendarItems=day=>yosCalendarRows(day).map((x,i)=>({id:200000000+i,t:String(x.title||'予定'),s:Number(x.start),d:Number(x.duration),f:1,kind:'schedule',source:'Apple Calendar',isTest:yosIsTestCalendarTitle(x.title)})).filter(x=>Number.isFinite(x.s)&&Number.isFinite(x.d)&&x.s>=0&&x.d>0&&x.s+x.d<=1440&&(showTestCalendar||!x.isTest));
+const allDayItems=day=>(Array.isArray(allDayDays[day])?allDayDays[day]:[]).filter(t=>showTestCalendar||!yosIsTestCalendarTitle(t)).map(t=>String(t).slice(0,100));
 function yosRefreshTestToggle(){
  const toggle=document.getElementById('yosTestToggle'),count=yosTestCount(selectedDay);
  toggle.hidden=count===0;
@@ -502,7 +521,7 @@ else{note.textContent='端末内の予定はありません · 右上の追加�
 yosDefaultStart();yosRefreshTestToggle();renderWeek();render();updateReview();yosRenderSources();setInterval(updateNow,60000);
 <\/script></body></html>`;
 
- const payload=JSON.stringify({days:state.days,calendarDays,taskSource,habitSource,generatedAt:new Date().toISOString()}).replace(/</g,'\\u003c');
+ const payload=JSON.stringify({days:state.days,calendarDays,allDayDays,calendarCoverage,taskSource,habitSource,generatedAt:new Date().toISOString()}).replace(/</g,'\\u003c');
  const ready=html.replace('<script>','<script>window.YOS_CHARCOAL_BOOT='+payload+';<\/script><script>');
  await view.loadHTML(ready);
  let closedFlag=false;
