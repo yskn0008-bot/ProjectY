@@ -67,7 +67,7 @@ test('Notion Tasks read-only source uses existing data-source ID and never sends
  assert.equal(req.method,'POST');
  assert.equal(req.headers.Authorization,'Bearer LOCAL_ONLY_SECRET');
  assert.doesNotMatch(script,/\/v1\/pages\/|req\.method\s*=\s*['"](?:PATCH|PUT|DELETE)['"]/);
- assert.match(script,/const payload=JSON\.stringify\(\{days:state\.days,calendarDays,taskSource,habitSource/);
+ assert.match(script,/const payload=JSON\.stringify\(\{days:state\.days,calendarDays,allDayDays,calendarCoverage,taskSource,habitSource/);
  assert.doesNotMatch(script,/JSON\.stringify\(\{days:state\.days,calendarDays,token/);
  assert.equal(JSON.stringify(x).includes('LOCAL_ONLY_SECRET'),false);
 });
@@ -215,7 +215,7 @@ test('real WebView runtime accepts day changes and preserves each day of local p
   let selectedDay=todayISO,items=dayItems(todayISO),isSample=false,selectedId=null,zoom=null;
   const note={textContent:''},planBox={textContent:''},focus={classList:{remove(){}}},editor={classList:{remove(){}}};
   const yosStatusWord=()=> '未接続';
-  const yosDefaultStart=()=>{},yosRenderSources=()=>{},yosRefreshTestToggle=()=>{},hideMonthPicker=()=>{};
+  const yosDefaultStart=()=>{},yosRenderSources=()=>{},yosRefreshTestToggle=()=>{},hideMonthPicker=()=>{};const isCalendarCovered=()=>true;let calendarMode='day';const renderDayAllDay=()=>{},renderWeekAgenda=()=>{};
   const renderWeek=()=>{},render=()=>{},updateReview=()=>{};
   const window={scrollTo(){}};
   `+navigation+`
@@ -243,13 +243,13 @@ test('calendar header uses in-app month grid rather than a hidden WKWebView date
  const to=actualClient.indexOf('function updateNow()');
  const module=from>=0&&to>from?actualClient.slice(from,to):'';
  assert.ok(module);
- const controls={monthPicker:{hidden:true},monthGrid:{children:[],set textContent(v){this.children=[]},append(x){this.children.push(x)}},dateBtn:{setAttribute(k,v){this[k]=v}},monthCaption:{},prevMonth:{},nextMonth:{},monthToday:{}};
- const document={getElementById:id=>controls[id],createElement:type=>({type,textContent:'',setAttribute(k,v){this[k]=v}})};
+ const controls={monthPicker:{hidden:true},monthGrid:{children:[],set textContent(v){this.children=[]},append(x){this.children.push(x)}},dateBtn:{setAttribute(k,v){this[k]=v}},monthCaption:{},monthCoverage:{},prevMonth:{},nextMonth:{},monthToday:{}};
+ const document={getElementById:id=>controls[id],createElement:type=>({type,textContent:'',setAttribute(k,v){this[k]=v},append(...items){this.children=(this.children||[]).concat(items)}})};
  const env=vm.runInNewContext(`
   const selectedDay='2026-11-12',todayISO='2026-11-12';
   const parseDay=iso=>{const p=iso.split('-').map(Number);return new Date(p[0],p[1]-1,p[2],12)};
   const localISO=d=>[d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-');
-  let chosen=null;const showDay=iso=>{chosen=iso;hideMonthPicker()};
+  let chosen=null;const showDay=iso=>{chosen=iso;hideMonthPicker()};let calendarMode='day';const setCalendarMode=()=>hideMonthPicker();const yosDaySummary=()=>({entries:[],allDay:[],deadlines:[],covered:true});const calendarCoverage={status:'ok'};
   `+module+`
   ({chosen:()=>chosen});
  `,{Date,document});
@@ -264,4 +264,40 @@ test('calendar header uses in-app month grid rather than a hidden WKWebView date
  controls.dateBtn.onclick();controls.prevMonth.onclick();
  assert.equal(controls.monthCaption.textContent,'2026年 10月');
  controls.nextMonth.onclick();assert.equal(controls.monthCaption.textContent,'2026年 11月');
+});
+
+
+test('DAYSTREAM keeps one local plan across month, week and 24-hour day views',()=>{
+ const actualHtml=Function('return `'+html+'`')();
+ const actualClient=actualHtml.split('<script>')[1]?.split('</script>')[0]||'';
+ new vm.Script(actualClient);
+ assert.ok(actualHtml.includes('id="calendarModes"'));
+ assert.ok(actualHtml.includes('id="weekOverview"'));
+ assert.ok(actualHtml.includes('id="timelinePanel"'));
+ for(const name of ['month','week','day'])assert.ok(actualHtml.includes('data-view="'+name+'"'));
+ assert.match(actualClient,/function setCalendarMode\(mode\)/);
+ assert.match(actualClient,/function renderWeekAgenda\(\)/);
+ assert.match(actualClient,/function renderMonth\(\)/);
+ assert.match(actualClient,/function renderDayAllDay\(\)/);
+ assert.match(actualClient,/sourceTasks\.filter\(x=>x\.due===day/);
+ assert.match(actualClient,/dayItems\(day\)/);
+ assert.match(actualClient,/calendarMode==='day'/);
+ assert.match(actualClient,/calendarMode!=='week'/);
+ assert.match(actualClient,/Apple予定未確認/);
+ assert.match(actualClient,/setCalendarMode\('day'\);showDay\(iso\)/);
+ assert.doesNotMatch(actualClient,/localStorage\.(?:getItem|setItem)/);
+ assert.match(script,/const STORE_NAME='YOS_TIMELINE_CHARCOAL_VERIFY_20261111_v1\.json'/);
+});
+
+test('DAYSTREAM native source projects fixed timed and all-day events into a bounded period, with unknown days explicit',()=>{
+ assert.match(script,/const calendarDays=\{\},allDayDays=\{\}/);
+ assert.match(script,/now\.getMonth\(\)-1,1\)/);
+ assert.match(script,/now\.getMonth\(\)\+3,1\)/);
+ assert.match(script,/await CalendarEvent\.between\(start,end\)/);
+ assert.match(script,/if\(event\.isAllDay\)/);
+ assert.match(script,/calendarCoverage\.status=records\.length>maxEvents\?'partial':'ok'/);
+ assert.match(client,/isCalendarCovered=day=>/);
+ assert.match(client,/allDayItems=day=>/);
+ assert.match(client,/元カレンダーは変更していません/);
+ assert.doesNotMatch(script,/CalendarEvent\.(?:create|remove|save)\(/);
 });
