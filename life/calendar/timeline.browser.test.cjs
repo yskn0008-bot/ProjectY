@@ -38,6 +38,8 @@ const FIXED='2026-11-11T09:00:00+09:00';
   assert.equal(await page.locator('#tlGrid').isVisible(),true);
   assert.equal(await page.locator('#tlGrid .tlHour').count(),25,'0:00 through 24:00 grid');
   assert.equal(await page.locator('#tlGrid').evaluate(el=>el.offsetHeight),2880,'1 minute = 2px');
+  const initialEditScroll=await page.locator('#tlViewport').evaluate(el=>el.scrollTop);
+  assert.ok(initialEditScroll>=960 && initialEditScroll<=1020,'first editor opening focuses 09:00 instead of midnight: '+initialEditScroll);
 
   async function add(title,time,duration,kind){
    await page.locator('#tlAdd').click();
