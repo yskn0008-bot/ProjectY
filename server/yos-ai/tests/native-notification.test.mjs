@@ -550,3 +550,26 @@ test('SILENT AI summary remains searchable in history, never generates an alert,
   assert.equal(r2.alertText,'');
   assert.doesNotMatch(JSON.stringify(h.blocks)+JSON.stringify(r2),/ZX93K1/);
 });
+
+test('mixed missed-call notifications still alert on independent active finance/security incidents',async()=>{
+  const samples=[
+    {id:'risk-missed-mixed-0001',text:'電話：不在着信が1件。銀行：口座凍結が発生しました',expected:'YOS_ALERT',priority:'P0'},
+    {id:'risk-missed-mixed-0002',text:'電話：不在着信が1件。銀行：引き落としに失敗しました',expected:'YOS_ALERT',priority:'P1'},
+    {id:'risk-missed-mixed-0003',text:'電話：不在着信が1件あります',expected:'YOS_SILENT'},
+    {id:'risk-missed-mixed-0004',text:'銀行：口座凍結は解除されました。不在着信が1件あります',expected:'YOS_SILENT'},
+    {id:'risk-missed-mixed-0005',text:'電話：不在着信が1件。銀行：不正送金を検知しました。認証コード 123456',expected:'YOS_ALERT',priority:'P0',secret:'123456'}
+  ];
+  const h=harness();
+  for(const [index,c] of samples.entries()){
+    const category=notificationInternals.categoryOf(c.text);
+    assert.equal(category,'missed-call','mixed regression classification '+index);
+    const triaged=notificationInternals.triage(c.text,category);
+    assert.equal(triaged.decision,c.expected,c.id);
+    if(c.priority)assert.match(triaged.alertText,new RegExp(c.priority),c.id);
+    if(c.secret)assert.doesNotMatch(triaged.alertText,new RegExp(c.secret),c.id);
+    const created=await (await h.handler(h.req({eventId:c.id,text:c.text}))).json();
+    assert.equal(created.decision,c.expected,c.id+' captured');
+    if(c.secret)assert.doesNotMatch(JSON.stringify(created)+JSON.stringify(h.blocks),new RegExp(c.secret));
+  }
+  assert.equal(h.blocks.length,samples.length);
+});
