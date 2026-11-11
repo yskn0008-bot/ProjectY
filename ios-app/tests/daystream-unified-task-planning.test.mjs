@@ -257,7 +257,7 @@ test('calendar header uses in-app month grid rather than a hidden WKWebView date
  assert.equal(controls.monthPicker.hidden,false);
  assert.equal(controls.dateBtn['aria-expanded'],'true');
  assert.equal(controls.monthCaption.textContent,'2026年 11月');
- const target=controls.monthGrid.children.find(b=>b['aria-label']==='2026-11-13');
+ const target=controls.monthGrid.children.find(b=>String(b['aria-label']||'').startsWith('2026-11-13'));
  assert.ok(target);target.onclick();
  assert.equal(env.chosen(),'2026-11-13');
  assert.equal(controls.monthPicker.hidden,true);
