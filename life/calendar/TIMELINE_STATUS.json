@@ -44,7 +44,21 @@
       "pass": 10,
       "fail": 0
     },
-    "rawGitHubDownload": "HTTP 200, JSON parse and both SHA256 hashes matched"
+    "rawGitHubDownload": "HTTP 200, JSON parse and both SHA256 hashes matched",
+    "timelineCI20261111": {
+      "checkedHead": "b227d0692c070d3641ff4fc121907657a6564e4f",
+      "source": "GitHub YOS Life Safety / Life Node regression job 130311443825",
+      "command": "node --test life/calendar/reference-wallpaper.test.mjs life/calendar/timeline.test.mjs life/calendar/timeline.dom.test.mjs life/calendar/timeline-installer.test.mjs",
+      "focusedTests": {
+        "pass": 54,
+        "fail": 0
+      },
+      "existingLifeTests": {
+        "pass": 34,
+        "fail": 0
+      },
+      "assertion": "On-device iPhone Safari/Scriptable visual rendering and touch/save persistence are not covered."
+    }
   },
   "notVerified": [
     "browser rendered UI and visual regression",
@@ -52,7 +66,7 @@
     "Scriptable callback and actual FileManager persistence",
     "Apple and Notion live permissions and values",
     "current installed DAYSTREAM integration",
-    "current-head GitHub CI",
+    "current-head end-to-end GitHub workflows and browser visualization",
     "full WCAG 2.2 AA"
   ],
   "notImplemented": [
@@ -139,8 +153,9 @@
     "assetCommit": "bd67b996c0da7e54e99b7a3528c2a3233e329c6b",
     "writes": "None; no executable/plan/source-data writes",
     "testEvidence": "reference-wallpaper-test-results.txt:5/5 pass; no physical iPhone render claimed",
-    "next": "Run approval-scope and live-data separation regression tests, verify fixed calendar-event protection and 24h geometry, then arrange one physical iPhone review using the existing route.",
-    "visualApproval": "Static 557x1135 glass crop approved only; interactive 24-hour display not yet visually accepted"
+    "next": "The focused timeline suite is now included in existing Life CI and passed 54/54 on reviewed head b227d069; next is rendering/visual-acceptance comparison to approved glass crop and real-device touch + save/readback, without altering current iPhone scripts.",
+    "visualApproval": "Static 557x1135 glass crop approved only; interactive 24-hour display not yet visually accepted",
+    "checks": "Approved static crop unchanged, 24h geometry, collisions, touch-move feedback, cancellation, explicit save/readback, fixed Apple event protection, and no sample-data import passed existing regression suite."
   },
   "visualApproval": {
     "status": "STATIC_CROP_APPROVED",
