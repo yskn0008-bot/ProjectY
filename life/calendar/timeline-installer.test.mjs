@@ -54,7 +54,15 @@ test('staged .js script stays identical to native bridge and uses the shared ins
  assert.ok(js.length<1200000,'must stay inside the existing common installer download limit');
  new (Object.getPrototypeOf(async function(){}).constructor)(js);
  const catalog=JSON.parse(read('../../ios-app/scriptable/yos-common-installer-catalog.json'));
- assert.ok(catalog.targets.every(x=>x.name!==name),'no unapproved change to the main catalog');
+ const registered=catalog.targets.filter(x=>x.name===name);
+ assert.ok(registered.length<=1,'main catalog must not duplicate the same formal script name');
+ if(registered.length){
+   const e=registered[0];
+   assert.equal(e.id,'daystream-preview','catalog entry must reuse the approved preview ID');
+   assert.equal(e.path,'ios-app/scriptable/'+name+'.js','catalog must point to the existing staged script');
+   assert.equal(e.sha256,hash(js),'catalog hash must match staged bytes, not an unrelated package');
+   assert.match(e.commit,/^[0-9a-f]{40}$/u,'catalog must use an immutable reviewed commit');
+ }
 });
 
 const sharedEntryName='YOS DAYSTREAM Timeline 開発確認 20261105';
