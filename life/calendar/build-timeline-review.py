@@ -101,3 +101,11 @@ bridge=bridge.replace("'use strict';", "'use strict';\n"+core,1)
 (out/'YOS_DAYSTREAM_TimelineBridge_Dev.js').write_text(bridge)
 pkg=json.loads((original/'YOS_DAYSTREAM_iPhone_Review_20261102.scriptable').read_text());pkg['name']='YOS DAYSTREAM Timeline 開発確認 20261105';pkg['script']=bridge
 (out/'YOS_DAYSTREAM_Timeline_Review_20261105.scriptable').write_text(json.dumps(pkg,ensure_ascii=False,indent=2)+'\n')
+# Staged release output for the existing ONE YOS Common Installer; no new installer.
+# The shared catalog on main remains untouched until device acceptance.
+common_dir=out.parents[1]/'ios-app'/'scriptable'
+if common_dir.is_dir():
+    name='YOS DAYSTREAM Timeline 開発確認 20261105'
+    common_src='// Variables used by Scriptable.\n// icon-color: gray; icon-glyph: calendar;\n// YOS_SCRIPT_NAME: '+name+'\n'+bridge
+    (common_dir/(name+'.js')).write_text(common_src)
+
