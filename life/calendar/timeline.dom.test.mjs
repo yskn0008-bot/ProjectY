@@ -65,3 +65,18 @@ test('glass HOME uses a proportional 24h time rail while compact skin stays unch
  assert.equal(n.get('tlAgenda').style.height,'');
  assert.deepEqual(w.YOS_TIMELINE_DEBUG.getData(),before);
 });
+
+test('first editor opening focuses a selected future-day event while preserving the glass HOME rail',()=>{
+ const {nodes:n,window:w}=setup();
+ const target='2026-12-03';
+ w.YOS_DAYSTREAM_PLAN_IMPORT({schema:'yos-daystream-plan-v1',days:{},timeline:{version:1,events:[{id:'focus',title:'予定を確認',date:target,start:540,duration:40,kind:'task',repeat:'none',transfer:0}],overrides:{}}});
+ n.get('tlDay').value=target;n.get('tlDay').fire('change');
+ assert.equal(n.get('tlFrame').dataset.view,'home');
+ n.get('tlEnterEdit').fire('click');
+ assert.equal(n.get('tlFrame').dataset.view,'edit');
+ assert.equal(n.get('tlViewport').scrollTop,990);
+ n.get('tlViewport').scrollTop=1200;
+ n.get('tlExitEdit').fire('click');
+ n.get('tlEnterEdit').fire('click');
+ assert.equal(n.get('tlViewport').scrollTop,1200);
+});
