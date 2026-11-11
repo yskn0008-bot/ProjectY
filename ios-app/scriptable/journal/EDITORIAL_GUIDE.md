@@ -1,4 +1,4 @@
-# YOS JOURNAL — Editorial guide v1.5
+# YOS JOURNAL — Editorial guide v1.6
 
 Status: design and editorial contract, 2026-11-07. Not evidence of automated daily publishing or iPhone acceptance.
 
@@ -95,3 +95,12 @@ Existing fields remain compatible. The viewer never invents missing photos, arti
 - [ ] Verify scheduled delivery, tap path, fallback, stale-issue indicators and rollback.
 
 Do not mark the full product complete until these last gates pass.
+
+## 2026-11-12｜Viewer v1.6：既存JOURNAL v1.5を基にした小改修
+
+- 本人がiPhoneのScriptableで `JOURNAL` v1.5を実際に開けることを確認した。GitHub Draftのviewerは追加されていたScriptableメタデータ重複行を含まない同じv1.5コードであり、既存端末の `JOURNAL` は上書きしない。
+- Viewer v1.6では発行状態と発行日を**表紙の見出しより前**に表示する。古い `latest.json` を現在の新刊だと誤認させず、過去号・経過日数・オフライン取得失敗を明示する。記事見出しによる目次（IN THIS ISSUE）を追加し、リンクは既に審査対象となっている記事にだけ付ける。
+- 一覧側には写真の出典者名 `imageCredit`（公開フィードで許諾確認済みの場合のみ）があればキャプションへ明記し、イメージ画像表示も維持。出典と掲載・更新日を明瞭に区別し、日付未確認は推測せず `未確認` と示す。スマホの本文文字サイズ・余白と記事の緩急を調整。追加の新記事や本人属性は創作しない。
+- 画像権利の可否はScriptableのHTML表示コードから自動判定できない。公表前の編集側チェックが必要。個人のNotion情報を公開JSONに入れないこと、本人に不要な記事を掲載しないこと、写真なしを無関係な画像で埋めないことは従来のまま守る。
+- Node Scriptableモックで、古い号・本日号・オフライン保存号・危険URL/理由なし除外・写真権利表記を想定した注記・不正データ表示の6件を追加。これは自動検査であり、iPhoneの誌面・日次発行/通知の実機検証ではない。
+- `JOURNAL`（既存端末名）を勝手に変更せず、GitHub Draft #664に隔離。main、共通インストーラーの本番登録、日次発行、ChatGPT/OpenAI朝刊オートメーションは変更しない。自動発行の研究・信頼性確認・許諾済み写真取得・配信検証は別の未完了工程。
