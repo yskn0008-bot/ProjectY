@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-12T04:56:09+09:00",
+  "updated_at": "2026-11-12T04:59:36+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -70,7 +70,7 @@
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/664",
-      "updated_at": "2026-11-11T19:13:33Z"
+      "updated_at": "2026-11-11T19:58:32Z"
     },
     {
       "id": "github-pr-665",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-11T19:55:31Z"
+      "updated_at": "2026-11-11T19:58:57Z"
     },
     {
       "id": "github-issue-234",
@@ -195,6 +195,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-6d729b37f433",
+      "title": "journal: mark curated enjoyment and goal-direction lanes without storing any private user data",
+      "completed_at": "2026-11-11T19:58:50Z",
+      "result": "GitHub mainへ反映（6d729b3）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/6d729b37f4331612d30e6becf4aea6d76d4bd083"
+    },
+    {
       "id": "github-commit-e1c68dca591e",
       "title": "journal: publish reviewed 2026-11-12 public-source issue with privacy-safe summaries",
       "completed_at": "2026-11-11T19:55:21Z",
@@ -221,13 +228,6 @@
       "completed_at": "2026-11-11T11:12:34Z",
       "result": "GitHub mainへ反映（43da816）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/43da816fa285c4f7207b883ef44c5b5e720fd6db"
-    },
-    {
-      "id": "github-commit-6380fb1cff0b",
-      "title": "feat(timeline): opt-in isolated charcoal standalone preview",
-      "completed_at": "2026-11-11T10:58:55Z",
-      "result": "GitHub mainへ反映（6380fb1）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/6380fb1cff0b627e3ec4562fe0487cb33f6ffff1"
     },
     {
       "id": "complete-002",
@@ -264,7 +264,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-12T04:56:09+09:00",
+      "last_update": "2026-11-12T04:59:36+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -345,7 +345,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-12T04:56:09+09:00",
+      "last_update": "2026-11-12T04:59:36+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -368,7 +368,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-12T04:56:09+09:00",
+      "last_update": "2026-11-12T04:59:36+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -450,5 +450,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "1737273f215d0207a8af11150f6e3bde62d2d0aa211ccac709cf80f2961b967d"
+  "github_snapshot_hash": "8d5d3daef224c76ad9165b48e2849bb222c9728d0b993764fd1961902f22b95a"
 }
