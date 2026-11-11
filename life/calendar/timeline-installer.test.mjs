@@ -19,7 +19,7 @@ test('draft updater pins the rebuilt candidate to an immutable commit, exact has
  assert.equal(pkg.script,read('YOS_DAYSTREAM_TimelineBridge_Dev.js'));
  assert.match(productionCode,/PREVIOUS_SCRIPT_SHA='b117fcd0c29c1227ef2205866dd19a0dea2564fc9f736806a5c54bdd49d5d1ca'/);
  assert.match(productionCode,/4e7ad93cbf8ce64c1e7b4985547caaf0ce9e949a37dfc8d73f647ca11f529c78/);
- assert.equal(pinned[1],'93a09930f1a85e7ee6b65910a79a918e12ce12e4','current package must match the reviewed fixed commit');
+ assert.equal(pinned[1],'99333813442cbe03ce2df8e05ee38269e9ec359d','current package must match the reviewed fixed commit');
  assert.match(productionCode,/58b2956f64f32d04ffec9334df42391a212c5dc652e27091b43b0d905b9ff31e/,'immediate predecessor must remain a protected known-version candidate');
  const html=read('daystream-timeline.html'),bridge=read('YOS_DAYSTREAM_TimelineBridge_Dev.js');
  assert.equal(bridge.match(/const HTML_SHA256 = '([^']+)'/)[1],hash(html),'offline HTML hash must match latest HOME + EDIT');
