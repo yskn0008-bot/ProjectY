@@ -226,6 +226,33 @@ test('Inbox exposes an authenticated history with statuses',async()=>{
   assert.match(after.events[0].text,/不在着信/);
 });
 
+test('authenticated history paginates beyond 120 and searches older Inbox records',async()=>{
+  const h=harness();
+  for(let i=0;i<125;i++){
+    const id=i.toString(16).padStart(24,'0');
+    const text=`2026-11-07T00:${String(Math.floor(i/60)).padStart(2,'0')}:${String(i%60).padStart(2,'0')}.000Z · Native Notification · notification:${id} · information\n`+
+      (i===0?'古い重要な検索対象':'通常のお知らせ')+'\n---';
+    h.blocks.push({id:'block-'+i,type:'paragraph',paragraph:{rich_text:[{type:'text',text:{content:text}}]}});
+  }
+  const get=path=>h.handler(new Request(API+path,{headers:{Authorization:'Bearer '+token}}));
+  const first=await (await get('')).json();
+  assert.equal(first.events.length,120);
+  assert.equal(first.totalMatched,125);
+  assert.equal(first.hasMore,true);
+  const second=await (await get('?cursor='+first.nextCursor)).json();
+  assert.equal(second.events.length,5);
+  assert.equal(second.hasMore,false);
+  assert.equal(second.nextCursor,null);
+  assert.match(second.events[4].text,/古い重要な検索対象/);
+  const searched=await (await get('?q='+encodeURIComponent('古い重要な検索対象'))).json();
+  assert.equal(searched.events.length,1);
+  assert.equal(searched.events[0].id,'0'.repeat(24));
+  assert.equal(searched.totalMatched,1);
+  assert.equal(h.blocks.length,125,'search and pagination must not write to Notion');
+  assert.equal((await get('?cursor='+'f'.repeat(24))).status,400);
+  assert.equal((await get('?q='+'x'.repeat(81))).status,400);
+});
+
 test('legacy Clarity Notification records are readable without rewriting existing Inbox blocks',async()=>{
   const h=harness();
   const legacyId='cc82f767';

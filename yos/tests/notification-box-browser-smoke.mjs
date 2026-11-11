@@ -16,6 +16,7 @@ const notifications=[
     status:'pending',source:'Native Notification',
     text:'引落の案内 <img src=x onerror="window.__notificationXss=true">'}
 ];
+let history=notifications;
 const browser=await browserType.launch({headless:true});
 const context=await browser.newContext({viewport:{width:390,height:844},serviceWorkers:'block'});
 const page=await context.newPage();
@@ -23,7 +24,7 @@ const pageErrors=[];
 page.on('pageerror',error=>pageErrors.push(String(error.message||error)));
 
 try {
-  await page.route(apiHost+'/api/yos/notification',async route=>{
+  await page.route(apiHost+'/api/yos/notification*',async route=>{
     const req=route.request(),method=req.method();
     const headers={
       'access-control-allow-origin':origin,
@@ -42,8 +43,17 @@ try {
       return;
     }
     if(method==='GET'){
+      const params=new URL(req.url()).searchParams;
+      const q=params.get('q')||'';
+      const matching=history.filter(e=>!q||e.text.includes(q));
+      const after=params.get('cursor');
+      const offset=after?matching.findIndex(e=>e.id===after)+1:0;
+      assert.ok(offset>=0,'cursor must exist in filtered mock history');
+      const events=matching.slice(offset,offset+120);
+      const hasMore=offset+events.length<matching.length;
       await route.fulfill({status:200,headers,contentType:'application/json',
-        body:JSON.stringify({ok:true,complete:true,events:notifications})});
+        body:JSON.stringify({ok:true,complete:true,events,hasMore,
+          nextCursor:hasMore?events.at(-1).id:null,totalMatched:matching.length})});
       return;
     }
     if(method==='POST'){
@@ -123,6 +133,20 @@ try {
   assert.ok(requestLog.some(r=>r.authorization==='Bearer '+bearer));
   assert.ok(requestLog.some(r=>r.authorization==='Bearer '+manualBearer));
   assert.ok(requestLog.some(r=>r.method==='POST'));
+
+  // Older records remain reachable and searchable without loading them all at once.
+  history=Array.from({length:125},(_,i)=>({id:i.toString(16).padStart(24,'0'),
+    at:new Date(Date.parse('2026-11-07T00:00:00.000Z')+i*1000).toISOString(),
+    category:'information',status:'unread',source:'Native Notification',
+    text:i===0?'古い対象の通知':'普通のお知らせ'})).reverse();
+  await page.getByRole('button',{name:'更新'}).click();
+  await page.waitForFunction(()=>document.querySelector('#total')?.textContent?.trim()==='120+');
+  await page.getByRole('button',{name:'古い通知を読み込む'}).click();
+  await page.waitForFunction(()=>document.querySelector('#total')?.textContent?.trim()==='125');
+  await page.locator('#search').fill('古い対象');
+  await page.getByRole('button',{name:'全履歴から検索'}).click();
+  await page.waitForFunction(()=>document.querySelector('#total')?.textContent?.trim()==='1');
+  assert.match(await page.locator('.event').textContent(),/古い対象の通知/);
   assert.deepEqual(pageErrors,[]);
   console.log('notification-box browser smoke passed: '+engine);
 } finally {
