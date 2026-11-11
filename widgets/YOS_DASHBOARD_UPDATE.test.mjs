@@ -262,7 +262,6 @@ test("TODAY read-only fallback queries only the existing verified daily journal"
   assert.doesNotMatch(match[0],/POST|'\/pages'/);
 });
 
-
 test("TODAY refreshes a stale positive cache against real YOS Diary without writing",async()=>{
   const fn=widgetSource.match(/async function yosHealthLatestSnapshot\(\) \{[\s\S]*?\n\}/u)?.[0];
   assert.ok(fn);

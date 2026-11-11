@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-02T19:48:41+09:00",
+  "updated_at": "2026-11-11T18:54:39+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -13,16 +13,6 @@
   },
   "inbox": [
     {
-      "id": "github-pr-609",
-      "title": "PR #609 Clarity: Voice / Text / Share user entryを完成",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/609",
-      "updated_at": "2026-10-31T20:12:18Z"
-    },
-    {
       "id": "github-pr-630",
       "title": "PR #630 YOS TODAY/TOMORROW: large widget + read-only life board",
       "type": "GitHub PR",
@@ -30,47 +20,7 @@
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/630",
-      "updated_at": "2026-11-02T10:47:45Z"
-    },
-    {
-      "id": "github-pr-633",
-      "title": "PR #633 Clarity・Gmail共通INBOX：通知取り込みと安全な優先度仕分け",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/633",
-      "updated_at": "2026-10-21T08:17:51Z"
-    },
-    {
-      "id": "github-pr-638",
-      "title": "PR #638 Clarity Next: reduce runtime overhead and route captures to Notion",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/638",
-      "updated_at": "2026-11-01T07:47:27Z"
-    },
-    {
-      "id": "github-pr-646",
-      "title": "PR #646 Clarity: isolated notification triage adapter (draft)",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/646",
-      "updated_at": "2026-10-22T14:15:03Z"
-    },
-    {
-      "id": "github-pr-650",
-      "title": "PR #650 Fix Clarity Share direct save to existing YOS Inbox",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/650",
-      "updated_at": "2026-10-20T10:21:44Z"
+      "updated_at": "2026-11-04T01:25:07Z"
     },
     {
       "id": "github-pr-651",
@@ -80,27 +30,7 @@
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/651",
-      "updated_at": "2026-11-02T10:47:39Z"
-    },
-    {
-      "id": "github-pr-652",
-      "title": "PR #652 Clarity.Voice: ナビ修正・実行経路監査と安全な最適化（未導入）",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/652",
-      "updated_at": "2026-11-01T02:12:05Z"
-    },
-    {
-      "id": "github-pr-653",
-      "title": "PR #653 YOS Tasks calendar read projection (authenticated, bounded)",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/653",
-      "updated_at": "2026-10-31T22:08:10Z"
+      "updated_at": "2026-11-06T16:58:12Z"
     },
     {
       "id": "github-pr-654",
@@ -110,7 +40,77 @@
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/654",
-      "updated_at": "2026-11-02T10:36:27Z"
+      "updated_at": "2026-11-11T06:40:27Z"
+    },
+    {
+      "id": "github-pr-662",
+      "title": "PR #662 YOS TODAY: reflect newly confirmed movement after cached meal report",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/662",
+      "updated_at": "2026-11-02T11:03:16Z"
+    },
+    {
+      "id": "github-pr-663",
+      "title": "PR #663 YOS 日記: standalone Shortcut + existing Notion bridge + isolated signing",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/663",
+      "updated_at": "2026-11-03T08:14:13Z"
+    },
+    {
+      "id": "github-pr-664",
+      "title": "PR #664 YOS JOURNAL: magazine headline hierarchy and personalized article briefs v1.5",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/664",
+      "updated_at": "2026-11-06T17:10:28Z"
+    },
+    {
+      "id": "github-pr-665",
+      "title": "PR #665 YOS｜Scriptableなしの通知受信・Inbox保存・通知ボックス",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/665",
+      "updated_at": "2026-11-07T16:42:20Z"
+    },
+    {
+      "id": "github-pr-667",
+      "title": "PR #667 YOS Timeline: approved charcoal-gray design and daily interactions",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/667",
+      "updated_at": "2026-11-07T22:16:52Z"
+    },
+    {
+      "id": "github-pr-668",
+      "title": "PR #668 test: isolate native notification backend on last READY production commit",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/668",
+      "updated_at": "2026-11-11T09:54:12Z"
+    },
+    {
+      "id": "github-pr-669",
+      "title": "PR #669 fix(vercel): keep existing health and Inbox routes within Hobby 12-function limit",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/669",
+      "updated_at": "2026-11-11T09:50:19Z"
     },
     {
       "id": "github-issue-10",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-02T10:48:02Z"
+      "updated_at": "2026-11-11T09:53:44Z"
     },
     {
       "id": "github-issue-234",
@@ -195,39 +195,39 @@
   ],
   "recently_completed": [
     {
-      "id": "github-commit-efc283abf334",
-      "title": "chore(yos-ai): retry deferred approved release (2/4)",
-      "completed_at": "2026-11-01T16:21:41Z",
-      "result": "GitHub mainへ反映（efc283a）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/efc283abf334e86ef6bf41cf65550fff82a11132"
+      "id": "github-commit-599b5c350a82",
+      "title": "fix(scriptable): diagnose duplicate iCloud/local scripts without file changes (#672)",
+      "completed_at": "2026-11-11T09:51:49Z",
+      "result": "GitHub mainへ反映（599b5c3）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/599b5c350a826c00b4b4514ed23d9c10daa51e56"
     },
     {
-      "id": "github-commit-9d1838674610",
-      "title": "fix(yos-today): show only verified journal reports and confirmed cash snapshots",
-      "completed_at": "2026-11-01T12:17:25Z",
-      "result": "GitHub mainへ反映（9d18386）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/9d1838674610fc15e42ddc52667da04048775981"
+      "id": "github-commit-eba22a56213f",
+      "title": "feat(scriptable): add one-time named import package for YOS Common Installer",
+      "completed_at": "2026-11-10T22:23:49Z",
+      "result": "GitHub mainへ反映（eba22a5）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/eba22a56213f851b44ccb326ea12dbcd7262ba61"
     },
     {
-      "id": "github-commit-5273fa9c19e5",
+      "id": "github-commit-69ca7064f9f3",
+      "title": "feat(scriptable): add shared safe GitHub installer and automatic naming",
+      "completed_at": "2026-11-10T20:30:35Z",
+      "result": "GitHub mainへ反映（69ca706）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/69ca7064f9f3901ce9086080e15a67032ae2c376"
+    },
+    {
+      "id": "github-commit-5cb9ced82ce8",
       "title": "chore(yos-ai): retry deferred approved release (1/4)",
-      "completed_at": "2026-11-01T09:39:45Z",
-      "result": "GitHub mainへ反映（5273fa9）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/5273fa9c19e5bc33a8f76068f0dbc43ea536ff9c"
+      "completed_at": "2026-11-07T19:21:43Z",
+      "result": "GitHub mainへ反映（5cb9ced）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/5cb9ced82ce898bcacec4d3709845ceb1f15cac0"
     },
     {
-      "id": "github-commit-e3c519615bad",
-      "title": "feat(yos-today): guide gentle next health action from verified reports",
-      "completed_at": "2026-11-01T08:31:55Z",
-      "result": "GitHub mainへ反映（e3c5196）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/e3c519615bad7351abac8af122f7ebda064e5d9f"
-    },
-    {
-      "id": "github-commit-28934bfe88e8",
-      "title": "feat(yos-today): present verified food and activity reports from iPhone bridge",
-      "completed_at": "2026-11-01T08:01:56Z",
-      "result": "GitHub mainへ反映（28934bf）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/28934bfe88e8c09cd3c845a31c6fc9334b9ea5a1"
+      "id": "github-commit-a4ede94cec2f",
+      "title": "Diagnose Apple Calendar event fetch and filtering counts on iPhone",
+      "completed_at": "2026-11-07T16:47:39Z",
+      "result": "GitHub mainへ反映（a4ede94）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/a4ede94cec2f949d27d92cc97f5e96b5ab802028"
     },
     {
       "id": "complete-002",
@@ -264,7 +264,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-02T19:48:41+09:00",
+      "last_update": "2026-11-11T18:54:39+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -339,13 +339,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 8件・Open PR 37件を自動同期中",
+      "next_action": "Open Issue 8件・Open PR 44件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-02T19:48:41+09:00",
+      "last_update": "2026-11-11T18:54:39+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -368,7 +368,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-02T19:48:41+09:00",
+      "last_update": "2026-11-11T18:54:39+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -450,5 +450,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "90b573fbf85b5f22d22cb5544b0224f5762c73354dfabe0dbbf49af0c46ca394"
+  "github_snapshot_hash": "b0e3fa2ee80615c66f92391ed5cb8f4d091ad56b86bf8cb6f8a6f38636e44e3d"
 }
