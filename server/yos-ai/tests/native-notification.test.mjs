@@ -485,3 +485,60 @@ test('mixed incident and OTP/test wording: 10-case triage and confidential Inbox
   assert.equal((await r2.json()).decision,'YOS_SILENT');
   assert.doesNotMatch(JSON.stringify(h2.blocks),/123456/);
 });
+
+test('sensitive context uses fixed fact labels and never repeats unknown credential formats',async()=>{
+  const cases=[
+    ['不正送金','銀行：不正送金が発生しました。ログイン用コード ABC123','ABC123'],
+    ['口座凍結','銀行：口座凍結が発生しました。認証番号 ZX93K1','ZX93K1'],
+    ['不正送金','銀行：不正送金が発生しました。ワンタイムパスワード XY98ZY','XY98ZY'],
+    ['不正利用','銀行：不正利用を検知しました。認証コード 123456','123456'],
+    ['不正送金','銀行：不正送金が発生しました。セキュリティコード 582113','582113'],
+    ['口座凍結','銀行：口座凍結が発生しました。確認番号 M2N5P8','M2N5P8'],
+    ['不正アクセス','銀行：不正アクセスを検知。passcode 654321','654321'],
+    ['口座凍結','銀行：口座凍結が発生しました。認証コードを発行しました AB1234','AB1234'],
+    ['不正送金','銀行：不正送金が発生。security code G8F5H3','G8F5H3'],
+    ['口座凍結','銀行：口座凍結が発生。OTP A7C2M9','A7C2M9'],
+    ['不正送金','銀行：不正送金が発生。verification code 998812','998812'],
+    ['', 'ログイン用コード ABC123','ABC123'],
+    ['不正送金','銀行：不正送金。極秘 f04f10ab-2911-11aa','f04f10ab'],
+    ['口座凍結','銀行：口座凍結。共有してはいけないフレーズ peach-summer-lamp','peach-summer-lamp'],
+    ['', '請求金額：8,200円。本人認証の秘密 ABC12D','ABC12D'],
+    ['', '支払期限：11月12日。極秘 456789','456789'],
+    ['', '銀行：不正送金は確認されませんでした。OTP A8C4','A8C4']
+  ];
+  for(const [fact,original,secret] of cases){
+    const safe=notificationInternals.safeText(original);
+    assert.doesNotMatch(safe,new RegExp(secret));
+    assert.match(safe,/原文非保存/);
+    if(fact)assert.match(safe,new RegExp(fact));
+  }
+  const h=harness();
+  const critical=await (await h.handler(h.req({text:cases[0][1],eventId:'sensitive-unknown-0001',decisionEngine:'chatgpt'}))).json();
+  assert.equal(critical.aiState,'pending');
+  assert.match(critical.analysisText,/不正送金/);
+  assert.doesNotMatch(JSON.stringify(h.blocks)+JSON.stringify(critical),/ABC123/);
+  const silent=await (await h.handler(h.req({text:cases[11][1],eventId:'sensitive-unknown-0002'}))).json();
+  assert.equal(silent.decision,'YOS_SILENT');
+  assert.doesNotMatch(JSON.stringify(h.blocks)+JSON.stringify(silent),/ABC123/);
+});
+test('SILENT AI summary remains searchable in history, never generates an alert, and redacts secret values',async()=>{
+  const h=harness();
+  const intake=await (await h.handler(h.req({text:'リマインダーのお知らせ',eventId:'ai-silent-summary-0001',decisionEngine:'chatgpt'}))).json();
+  const payload={action:'ai-result',id:intake.id,decision:'YOS_SILENT',summary:'リマインダーを確認してください'};
+  const saved=await (await h.handler(h.req(payload))).json();
+  assert.equal(saved.aiState,'complete');
+  assert.equal(saved.decision,'YOS_SILENT');
+  assert.equal(saved.alertText,'');
+  const history=await (await h.handler(h.req(null,undefined,'GET'))).json();
+  assert.equal(history.events[0].aiSummary,'リマインダーを確認してください');
+  assert.equal(history.events[0].aiDecision,'YOS_SILENT');
+  assert.equal(history.events[0].status,'unread');
+  const repeated=await (await h.handler(h.req(payload))).json();
+  assert.equal(repeated.duplicate,true);
+  assert.equal(repeated.alertText,'');
+  const capture2=await (await h.handler(h.req({text:'通知の内容',eventId:'ai-silent-summary-0002',decisionEngine:'chatgpt'}))).json();
+  const p2={action:'ai-result',id:capture2.id,decision:'YOS_SILENT',summary:'認証番号 ZX93K1 を確認しました'};
+  const r2=await (await h.handler(h.req(p2))).json();
+  assert.equal(r2.alertText,'');
+  assert.doesNotMatch(JSON.stringify(h.blocks)+JSON.stringify(r2),/ZX93K1/);
+});
