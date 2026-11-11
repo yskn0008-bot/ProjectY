@@ -301,3 +301,58 @@ test('DAYSTREAM native source projects fixed timed and all-day events into a bou
  assert.match(client,/元カレンダーは変更していません/);
  assert.doesNotMatch(script,/CalendarEvent\.(?:create|remove|save)\(/);
 });
+
+
+test('previous local DAYSTREAM plan is accepted and reversible display-only hide metadata is validated',()=>{
+ const from=script.indexOf('function validPlan(value){'),end=script.indexOf('\nfunction key(d)',from);
+ assert.ok(from>=0&&end>from);
+ const validPlan=vm.runInNewContext(script.slice(from,end)+'\nvalidPlan',{});
+ const old={version:1,days:{'2026-11-12':[{id:300000001,t:'動作確認',s:600,d:30,kind:'task'}]}};
+ assert.equal(validPlan(old),true,'already-saved real iPhone task must remain readable');
+ const updated={...old,hiddenCalendar:{'2026-11-12':['2026-11-12|190|5|架空通知']}};
+ assert.equal(validPlan(updated),true,'reversible display-only hidden calendar entries are accepted');
+ assert.equal(validPlan({...old,hiddenCalendar:{'bad-date':['x']}}),false);
+ assert.equal(validPlan({...old,hiddenCalendar:{'2026-11-12':['x'.repeat(257)]}}),false);
+ assert.equal(validPlan({...old,hiddenCalendar:[]}),false);
+ assert.match(script,/const STORE_NAME='YOS_TIMELINE_CHARCOAL_VERIFY_20261111_v1.json'/);
+ assert.match(script,/JSON.stringify\(\{version:1,days:savedDays,hiddenCalendar\}\)/);
+ assert.match(script,/hiddenCalendar:state.hiddenCalendar\|\|\{\}/);
+});
+
+test('fake notification placeholders are hidden by default without hiding real all-day appointments',()=>{
+ const actualHtml=Function('return \`'+html+'\`')();
+ const realJs=actualHtml.split('<script>')[1]?.split('</script>')[0]||'';
+ const definition=realJs.match(/^const yosIsTestCalendarTitle=.*$/m)?.[0];
+ assert.ok(definition);
+ const classify=vm.runInNewContext(definition+'\nyosIsTestCalendarTitle',{});
+ assert.equal(classify('【通知テスト再実行 5/6】 OTP ｜【架空】ログイン確認コード'),true);
+ assert.equal(classify('[通知テスト再実行 6/6] サンプル'),true);
+ assert.equal(classify('YOS-TEST-DELIVERY-20261112'),true);
+ assert.equal(classify('家賃収入日'),false);
+ assert.equal(classify('仕事｜打ち合わせ'),false);
+ assert.match(realJs,/showTestCalendar\|\|!x.isTest/);
+ assert.match(realJs,/hiddenCalendar\[day\]/);
+ assert.match(realJs,/delete hiddenCalendar\[selectedDay\]/);
+ assert.doesNotMatch(script,/CalendarEvent\.(?:create|remove|save)\(/);
+});
+
+test('iPhone selected Apple event offers only reversible local hide while editable tasks have two-click deletion',()=>{
+ const actualHtml=Function('return \`'+html+'\`')();
+ const realJs=actualHtml.split('<script>')[1]?.split('</script>')[0]||'';
+ new vm.Script(realJs);
+ assert.ok(actualHtml.includes('id="hideFixed"'));
+ assert.ok(actualHtml.includes('id="deleteSelected"'));
+ assert.ok(actualHtml.includes('class="actions-row"'));
+ assert.match(realJs,/function showFocusFor\(item\)/);
+ assert.match(realJs,/getElementById\('doneBtn'\).hidden=!!fixed/);
+ assert.match(realJs,/getElementById\('editSelected'\).hidden=!!fixed/);
+ assert.match(realJs,/getElementById\('deleteSelected'\).hidden=!!fixed/);
+ assert.match(realJs,/getElementById\('hideFixed'\).hidden=!canHide/);
+ assert.match(realJs,/if\(deleteConfirmId!==item.id\)/);
+ assert.match(realJs,/document.getElementById\('deleteSelected'\).textContent='削除を確定'/);
+ assert.match(realJs,/if\(!item\|\|item.source!=='Apple Calendar'\|\|!item.calendarKey\)return/);
+ assert.match(realJs,/getElementById\('hideFixed'\).onclick/);
+ assert.match(realJs,/元のApple予定は保持/);
+ assert.ok(actualHtml.includes('max-height:126px'));
+ assert.ok(actualHtml.includes('padding-top:calc(28px + env(safe-area-inset-top))'));
+});
