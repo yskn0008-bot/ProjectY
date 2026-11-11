@@ -112,7 +112,7 @@ button,input,select{font:inherit}button{cursor:pointer}button:focus-visible,inpu
 .dock{position:fixed;bottom:0;left:0;right:0;padding:9px 7px calc(11px + env(safe-area-inset-bottom));background:#30353eea;border-top:1px solid #ffffff28;backdrop-filter:blur(15px);-webkit-backdrop-filter:blur(15px);z-index:15}.dock-inner{max-width:610px;margin:auto;display:grid;grid-template-columns:repeat(5,1fr)}.tab{display:grid;justify-items:center;align-content:center;gap:5px;background:none;border:0;color:#eef1f6;font-size:10px;padding:3px 0;min-height:52px}.tab svg{height:24px;width:24px;stroke-width:1.8}.tab.active{color:#30baff}
 button:active{opacity:.8}@media(min-width:640px){.dock{left:calc((100vw - 640px)/2);right:calc((100vw - 640px)/2);border-radius:14px 14px 0 0}.focus{left:calc((100vw - 610px)/2);right:calc((100vw - 610px)/2)}}
 @media(max-width:350px){.metric label{font-size:9px}.metric strong{font-size:11px}.metric:first-child strong{font-size:17px}.card{left:69px;padding-right:6px}.card small{font-size:9px}.axis{left:55px}.tick{left:51.5px}.nowline:before{left:45px}}
-.yos-source-row{display:flex;justify-content:space-between;align-items:center;gap:8px;border-top:1px solid #ffffff22;padding:9px 0}.yos-source-row b{display:block;font-size:13px;line-height:1.45}.yos-source-row small{display:block;font-size:11px;color:#ccd5df;line-height:1.5}.yos-source-row button,#yosPlanBox button{border:1px solid #83b8e4;border-radius:9px;background:#367ea9;color:white;padding:8px 9px;font-size:12px;flex-shrink:0}.tabbox h3:not(:first-child){margin-top:18px}.tabbox input[type=time]{background:#303843;color:white;border:1px solid #94a2b4;border-radius:8px;padding:7px;margin:7px 0}#yosPlanBox:not(:empty){padding:8px 10px;margin:7px 0;border-radius:9px;background:#323f4d}
+.yos-source-row{display:flex;justify-content:space-between;align-items:center;gap:8px;border-top:1px solid #ffffff22;padding:9px 0}.yos-source-row b{display:block;font-size:13px;line-height:1.45}.yos-source-row small{display:block;font-size:11px;color:#ccd5df;line-height:1.5}.yos-source-row button,#yosPlanBox button,#yosPlanAll{border:1px solid #83b8e4;border-radius:9px;background:#367ea9;color:white;padding:8px 9px;font-size:12px;flex-shrink:0}.tabbox h3:not(:first-child){margin-top:18px}.tabbox input[type=time]{background:#303843;color:white;border:1px solid #94a2b4;border-radius:8px;padding:7px;margin:7px 0}#yosPlanBox:not(:empty){padding:8px 10px;margin:7px 0;border-radius:9px;background:#323f4d}
 </style></head><body>
 <div class="app">
   <div class="top">
@@ -140,7 +140,7 @@ button:active{opacity:.8}@media(min-width:640px){.dock{left:calc((100vw - 640px)
   <section class="tabbox" id="taskPanel"><h3>タスク・未配置</h3><p class="muted">専門タスクの期限と、実行する時間は別。配置しても元データの期限・完了は変わりません。</p>
  <div id="taskList"></div><h3>各専門ページから集約</h3><p class="muted" id="yosTaskSourceStatus">Notion Tasks：確認中</p>
  <label for="yosStartFrom">配置提案の開始時刻</label><input id="yosStartFrom" type="time" value="09:00" aria-label="配置提案の開始時刻">
- <div id="yosPlanBox" aria-live="polite"></div><div id="yosSourceTasks"></div>
+ <button id="yosPlanAll" type="button">上位3件をまとめて配置提案</button><div id="yosPlanBox" aria-live="polite"></div><div id="yosSourceTasks"></div>
  <h3>繰り返し習慣</h3><p class="muted" id="yosHabitSourceStatus">習慣：確認中</p><div id="yosHabitTasks"></div></section>
   <section class="review" id="review"><h3>一日の振り返り</h3><p id="reviewText">端末内の完了記録を集計します。</p><p id="reviewTip"></p><p class="muted">予定時間と実績時間は異なります。Notionの完了状態には反映しません。</p><button id="reviewBtn">再集計</button></section>
   <section class="tabbox" id="recordsPanel"><h3>記録</h3><p>このタイムライン内で完了にした項目のみを表示します。</p><div id="recordsList"></div></section>
@@ -217,6 +217,60 @@ function yosRenderSources(){
  if(!habits.length){const p=document.createElement('p');p.className='muted';p.textContent=habitSource.status==='ok'?'未配置の反復習慣はありません':'習慣データは未取得';habitFeed.append(p)}
  for(const x of habits)yosAddRow(habitFeed,x.title,(x.trigger||'実施するきっかけ未設定')+' · '+x.period,()=>yosPropose(x,'habit'));
 }
+
+// YOS_UNIFIED_BATCH_START
+function yosBatchPlan(tasks,occupied,start,day){
+ if(!Number.isInteger(start)||start<0||start>1439||!/^\d{4}-\d\d-\d\d$/.test(day))return [];
+ const dayCount=x=>Math.round(Date.UTC(...x.split('-').map(Number).map((n,i)=>i===1?n-1:n))-Date.UTC(...day.split('-').map(Number).map((n,i)=>i===1?n-1:n)))/86400000;
+ const score=x=>{
+  const delta=x.due?dayCount(x.due):null;
+  const urgent=delta===null?45:delta<0?0:delta===0?2:delta===1?12:delta<=3?22:delta<=7?32:50;
+  return urgent+({P0:0,P1:10,P2:20,P3:30}[x.priority]??40);
+ };
+ const active=tasks.filter(x=>x&&x.id&&x.title&&!['待ち','保留'].includes(x.status)&&(!x.due||dayCount(x.due)>=-7));
+ active.sort((a,b)=>score(a)-score(b)||String(a.due||'9999').localeCompare(String(b.due||'9999'))||a.title.localeCompare(b.title,'ja'));
+ const slots=Math.ceil((1440-start)/15);
+ let free=0;
+ for(let i=0;i<slots;i++){const m=start+i*15;if(m>=1440)break;if(!occupied.some(x=>Number.isFinite(x.s)&&Number.isFinite(x.d)&&m<x.s+x.d&&x.s<m+15))free+=15}
+ // At least 30% of free time is not allocated by the automatic batch proposal.
+ const maxCommit=Math.floor(free*.7);
+ const working=occupied.map(x=>({s:x.s,d:x.d,f:x.f})),result=[];
+ let used=0;
+ for(const task of active){
+  if(result.length===3||used+45>maxCommit)break;
+  const at=yosFindSlot(working,start,30);if(at===null)break;
+  result.push({task,at,d:30});working.push({s:at,d:30});used+=45;
+ }
+ return result;
+}
+// YOS_UNIFIED_BATCH_END
+function yosProposeBatch(){
+ planBox.textContent='';
+ const value=document.getElementById('yosStartFrom').value.split(':').map(Number);
+ if(value.length!==2||value.some(x=>!Number.isInteger(x))||value[0]<0||value[0]>23||value[1]<0||value[1]>59){planBox.textContent='開始時刻を確認してください';return}
+ const day=selectedDay,from=value[0]*60+value[1],candidates=sourceTasks.filter(x=>!yosIsPlanned('notion:'+x.id));
+ const proposals=yosBatchPlan(candidates,items,from,day);
+ if(!proposals.length){planBox.textContent='提案できる候補がありません。時間・未配置タスク・取得状態を確認してください。';return}
+ const title=document.createElement('p');title.textContent='期限と優先度を参考にした仮配置（上位'+proposals.length+'件）。所要時間は各30分の仮設定、空き時間の30%以上を保留します。';planBox.append(title);
+ for(const v of proposals){const p=document.createElement('p');p.textContent=v.task.area+'：'+v.task.title+'　'+fmt(v.at)+'–'+fmt(v.at+v.d)+(v.task.due?' · 期限 '+v.task.due:'');planBox.append(p)}
+ const button=document.createElement('button');button.textContent='まとめてこの配置を採用';button.onclick=()=>{
+  if(selectedDay!==day){planBox.textContent='表示日が変わりました。再提案してください';return}
+  const proposed=yosBatchPlan(sourceTasks.filter(x=>!yosIsPlanned('notion:'+x.id)),items,from,day);
+  if(JSON.stringify(proposed.map(x=>[x.task.id,x.at,x.d]))!==JSON.stringify(proposals.map(x=>[x.task.id,x.at,x.d]))){planBox.textContent='予定が変わりました。再提案してください';return}
+  const occupied=[...items];
+  for(const p of proposals){
+   if(yosIsPlanned('notion:'+p.task.id)||yosFindSlot(occupied,p.at,p.d)!==p.at){planBox.textContent='空き枠が変わりました。再提案してください';return}
+   occupied.push({s:p.at,d:p.d});
+  }
+  let nextId=Math.max(300000000,...items.map(x=>Number(x.id)||0));
+  for(const p of proposals){const t=p.task;items.push({id:++nextId,t:t.title,s:p.at,d:p.d,kind:'task',source:'Notion Tasks',sourceRef:'notion:'+t.id,area:t.area,due:t.due||'',done:false})}
+  const saved=persist();planBox.textContent=saved?'提案枠を端末内にまとめて保存しました。元の期限や状態は変更していません。':'保存準備に失敗しました';
+  smoothRender();updateReview();yosRenderSources();
+ };
+ planBox.append(button);
+}
+document.getElementById('yosPlanAll').onclick=yosProposeBatch;
+
 function yosPropose(item,kind){
  planBox.textContent='';
  const startParts=document.getElementById('yosStartFrom').value.split(':').map(Number);
