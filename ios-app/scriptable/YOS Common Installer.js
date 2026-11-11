@@ -169,7 +169,16 @@ async function install(entry){
     if(s.fm.fileExists(target))existing.push({...s,target});
   }
   if(existing.length>1){await diagnoseDuplicate(entry,existing);return;}
-  const chosen=existing[0]||locations[0],fm=chosen.fm;
+  // When a receipt exists without its .js, select that exact storage only.
+  // Never create a new script alongside an unresolved cross-storage receipt.
+  const orphaned=[];
+  if(existing.length===0){
+    for(const loc of locations){
+      if(loc.fm.fileExists(metadataPath(loc.fm,name,'.receipt.json')))orphaned.push(loc);
+    }
+    if(orphaned.length>1)throw Error('「'+name+'」の管理記録が両方の保存先にあります。本体を変更せず停止しました');
+  }
+  const chosen=existing[0]||orphaned[0]||locations[0],fm=chosen.fm;
   const target=chosen.target||fm.joinPath(fm.documentsDirectory(),name+'.js');
   const receiptFile=metadataPath(fm,name,'.receipt.json');
   const markerFile=metadataPath(fm,name,'.pending.json');
@@ -189,7 +198,40 @@ async function install(entry){
     if(previous.sha256!==currentHash)throw Error('Scriptable内で変更されたコードです。上書きしません');
     const approved=await confirm('更新の確認','「'+name+'」をGitHub検証済みの版へ更新します。現在のコードをバックアップしてから変更します。','バックアップして更新');
     if(!approved)return;
-  }else if(previous)throw Error('管理情報はありますが、実体がありません。変更せず停止しました');
+  }else if(previous){
+    // Only recover an *exact* immutable release; receipt must be preserved byte for byte.
+    if(!receiptMatches(previous,entry,chosen.kind)||previous.sha256!==entry.sha256||previous.commit!==entry.commit){
+      await inform('保存本体が見つからない安全診断',
+        '対象：'+name+'\n保存先：'+(chosen.kind==='iCloud'?'iCloud':'このiPhone内')+
+        '\n本体が見つからず、管理記録と現在の配布版を完全には照合できません。\nファイル・管理記録は変更していません。',null);
+      return;
+    }
+    for(const loc of locations){
+      if(loc.fm.fileExists(loc.fm.joinPath(loc.fm.documentsDirectory(),name+'.js')))
+        throw Error('同名スクリプトが新たに見つかりました。変更せず停止しました');
+      if(loc.fm!==fm&&loc.fm.fileExists(metadataPath(loc.fm,name,'.receipt.json')))
+        throw Error('別の保存先にも管理記録があります。変更せず停止しました');
+    }
+    const rawReceipt=await readable(fm,receiptFile);
+    const approved=await confirm('検証済みコードの本体だけ復元',
+      '対象：'+name+'\n保存先：'+(chosen.kind==='iCloud'?'iCloud':'このiPhone内')+
+      '\nコードがありませんが管理記録は現在のGitHub配布版と完全一致しています。管理記録や旧スクリプトを変更せず、新しい同名コード本体だけ作成します。','本体だけ復元');
+    if(!approved)return;
+    if(fm.fileExists(target)||await readable(fm,receiptFile)!==rawReceipt||fm.fileExists(markerFile))
+      throw Error('復元直前に保存状態が変わりました。何も変更していません');
+    for(const loc of locations){
+      if(loc.fm.fileExists(loc.fm.joinPath(loc.fm.documentsDirectory(),name+'.js'))||
+          (loc.fm!==fm&&loc.fm.fileExists(metadataPath(loc.fm,name,'.receipt.json'))))
+        throw Error('別の保存先で競合を検出しました。何も変更していません');
+    }
+    try{writeChecked(fm,target,code)}
+    catch(_){throw Error('本体の復元後確認に失敗しました。管理記録や既存コードは変更していません。ファイル状態を確認してください')}
+    if(!fm.fileExists(target)||digest(await readable(fm,target))!==entry.sha256||
+       await readable(fm,receiptFile)!==rawReceipt)
+      throw Error('本体または管理記録の読戻し確認に失敗しました。元の記録は変更していません');
+    await inform('本体の復元完了','「'+name+'」の検証済みコード本体を作成しました。管理記録は変更していません。自動実行もしません。',name);
+    return;
+  }
   // Check the other storage for an orphaned receipt before first registration.
   if(current===null){
     for(const s of locations)if(s.fm!==fm&&s.fm.fileExists(metadataPath(s.fm,name,'.receipt.json')))throw Error('別の保存先に管理記録があり、安全のため停止しました');
