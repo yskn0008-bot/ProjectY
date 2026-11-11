@@ -21,6 +21,7 @@ const valid=x=>{
   imageCaption:String(a.imageCaption||"").trim(),
   imageCredit:String(a.imageCredit||"").trim(),
   imageKind:a.imageKind==="illustrative"?"illustrative":"",
+  editorialLane:["DIRECTION","DISCOVERY"].includes(a.editorialLane)?a.editorialLane:"",
   keyPoints:Array.isArray(a.keyPoints)?a.keyPoints.slice(0,3).map(s=>String(s||"").trim()).filter(Boolean):[]
  })).filter(a=>a.title&&a.link&&a.summary&&a.reason&&a.source);
  if(!articles.length)throw Error("表示できる記事がありません");
@@ -64,7 +65,7 @@ function normalizeNotionTask(row){
   blocker:propertyText(p["ブロッカー"],"rich_text").slice(0,240),
   completion:propertyText(p["完了条件"],"rich_text").slice(0,240),
   order:Number.isSafeInteger(p["実行順"]?.number)?p["実行順"].number:null,
-  area:propertyChoice(p["領域"])};
+  kind:propertyChoice(p["種類"]),area:propertyChoice(p["領域"])};
 }
 async function readNotionTasks(token){
  let cursor=null,all=[];
@@ -92,7 +93,7 @@ async function readWidgetTasks(token){
  if(req.response?.statusCode!==200||!Array.isArray(data?.tasks))throw Error("既存のTasks表示を取得できません");
  return data.tasks.map(t=>({title:String(t.title||""),state:String(t.state||""),
   priority:String(t.priority||""),due:String(t.due||""),nextAction:String(t.nextAction||""),
-  blocker:"",completion:"",order:Number.isSafeInteger(t.order)?t.order:null,area:""}));
+  blocker:"",completion:"",order:Number.isSafeInteger(t.order)?t.order:null,kind:"Task",area:""}));
 }
 async function readLocalProgress(){
  if(typeof Keychain==="undefined")return {status:"unavailable",tasks:[],source:""};
@@ -145,12 +146,35 @@ function rankForLocalProgress(articles,progress,now=new Date()){
   return {...article,_yosMatch:best,_yosOriginalIndex:index};
  });
  if(!['ready','partial'].includes(progress.status))return {articles:ranked,status:'unavailable',matched:0,scope:'none'};
- // Exclude unrelated stories rather than promoting generic subject-matched articles.
- const matched=ranked.filter(a=>a._yosMatch).sort((a,b)=>
+ // Different magazine lanes do different jobs: task utility, direction, and enjoyable discoveries.
+ // Broad category matching cannot make an article "personally useful".
+ const goalRows=(progress.tasks||[]).filter(t=>['Goal','Project'].includes(t.kind)&&
+  ['実行中','次にやる','本人操作'].includes(t.state));
+ for(const a of ranked){
+  if(a._yosMatch||a.editorialLane!=='DIRECTION')continue;
+  const articleFacts=signalNames([a.title,a.summary,a.action].join(' '));
+  const bodyFacts=signalNames([a.summary,a.action].join(' '));
+  let goalMatch=null;
+  for(const g of goalRows){
+   const shared=signalNames([g.title,g.nextAction,g.blocker,g.completion].join(' ')).filter(t=>articleFacts.includes(t));
+   if(shared.length>=2&&shared.some(x=>bodyFacts.includes(x))){
+    const candidate={level:0,score:shared.length*6,scope:taskScope(g),state:'方向性',evidence:shared.slice(0,3)};
+    if(!goalMatch||candidate.score>goalMatch.score)goalMatch=candidate;
+   }
+  }
+  if(goalMatch)a._yosMatch=goalMatch;
+ }
+ const matching=ranked.filter(a=>a._yosMatch).sort((a,b)=>
   b._yosMatch.level-a._yosMatch.level||b._yosMatch.score-a._yosMatch.score||a._yosOriginalIndex-b._yosOriginalIndex
  );
- const scope=matched.length?(matched[0]._yosMatch.level===2?'current':'next'):'none';
- return {articles:matched,status:progress.status,matched:matched.length,scope};
+ // A limited editorially selected discovery can be enjoyable without being disguised as a task match.
+ const discovery=ranked.filter(a=>!a._yosMatch&&a.editorialLane==='DISCOVERY'&&
+   a.link?.startsWith('https://')&&a.source&&a.summary.length>=25&&a.reason.length>=25)
+  .slice(0,2);
+ const selected=[...matching,...discovery];
+ const scope=matching.length?(matching[0]._yosMatch.level===2?'current':matching[0]._yosMatch.level===1?'next':'direction')
+  :discovery.length?'discovery':'none';
+ return {articles:selected,status:progress.status,matched:matching.length,discoveries:discovery.length,scope};
 }
 // End local-only progress logic.
 
@@ -176,7 +200,11 @@ const ageLabel=issueStatus==="保存済みの過去号"&&Number.isFinite(ageDays
 const editionLabel=issueStatus+ageLabel;
 const issueNote=warning||issueStatus!=="本日号"?`<div class="notice" role="status"><strong>${esc(editionLabel)}</strong>${issue?.issuedOn?`<p>発行日：${esc(issue.issuedOn)}</p>`:""}${warning?`<p>${esc(warning)}</p>`:""}</div>`:"";
 const relevanceLabel=relevance.status==='ready'
- ?relevance.matched?(relevance.scope==='current'?'取り組み中タスクに対応する記事候補 ':'次にやるタスクに対応する記事候補 ')+relevance.matched+'件':'現在のタスクに具体的に一致する記事は、この号にありません'
+ ?relevance.scope==='current'?'取り組み中タスクに対応する記事候補 '+relevance.matched+'件'
+ :relevance.scope==='next'?'次にやるタスクに対応する記事候補 '+relevance.matched+'件'
+ :relevance.scope==='direction'?'目指す方向性と関連する記事候補 '+relevance.matched+'件'
+ :relevance.scope==='discovery'?'今日の発見・楽しみの記事 '+(relevance.discoveries||0)+'件（タスクへの直接一致は未確認）'
+ :'現在のタスクや方向性に一致する記事は、この号にありません'
  :relevance.status==='partial'?'既存タスク表示（最大3件）の部分照合 · '+relevance.matched+'件'
  :'Notionの現在地は未照合 · 一般記事を表示中';
 const relevanceBadge='<div class="notice" role="status"><strong>'+esc(relevanceLabel)+'</strong><p>記事とタスクの具体的な共通点を確認した参考候補です。制度の対象条件・本人への適用・最新の事実は未検証です。</p></div>';
@@ -187,7 +215,8 @@ const stories=(issue?.articles||[]).map((a,i)=>{
  const photo=a.image?`<figure class="story-photo"><img loading="lazy" src="${esc(a.image)}" alt="${esc(a.imageCaption||a.title)}"/>${a.imageCaption||a.imageKind==="illustrative"||a.imageCredit?`<figcaption>${a.imageKind==="illustrative"?"イメージ写真":""}${a.imageCaption?` · ${esc(a.imageCaption)}`:""}${a.imageCredit?` · 写真：${esc(a.imageCredit)}`:""}</figcaption>`:""}</figure>`:"";
  const keyPoints=a.keyPoints.length?`<ul class="key-points">${a.keyPoints.map(t=>`<li>${esc(t)}</li>`).join("")}</ul>`:"";
  const brief=a.summary?`<section class="brief"><div class="section-label"><span>THE BRIEF</span><span>この記事の要約</span></div><p>${esc(a.summary)}</p>${keyPoints}</section>`:"";
- const localReason=a._yosMatch?'<div class="local-match">'+esc(a._yosMatch.scope||'タスク')+' · '+esc(a._yosMatch.state)+' · 記事と一致する具体項目：'+esc(a._yosMatch.evidence.join('・'))+'（適用条件は未確認）</div>':"";
+ const localReason=a._yosMatch?'<div class="local-match">'+esc(a._yosMatch.scope||'タスク')+' · '+esc(a._yosMatch.state)+' · 記事と一致する具体項目：'+esc(a._yosMatch.evidence.join('・'))+'（適用条件は未確認）</div>'
+ :a.editorialLane==='DISCOVERY'?'<div class="local-match">DISCOVERY · タスクと無理に結び付けず、気分転換や新しい発見として紹介</div>':"";
  const reason=a.reason?`<section class="personal"><div class="section-label"><span>WHY IT MATTERS</span><span>今の自分に必要な理由</span></div><p>${esc(a.reason)}</p></section>`:"";
  const caveat=a.caveat?`<p class="caveat"><b>確認事項</b> ${esc(a.caveat)}</p>`:"";
  const action=a.action?`<section class="next-move"><span>YOUR NEXT MOVE / 今日の一歩</span><p>${esc(a.action)}</p></section>`:"";
