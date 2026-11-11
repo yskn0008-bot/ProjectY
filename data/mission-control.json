@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-11T15:40:45+09:00",
+  "updated_at": "2026-11-11T18:06:44+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -40,17 +40,7 @@
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/654",
-      "updated_at": "2026-11-11T06:40:23Z"
-    },
-    {
-      "id": "github-pr-662",
-      "title": "PR #662 YOS TODAY: reflect newly confirmed movement after cached meal report",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/662",
-      "updated_at": "2026-11-02T11:03:16Z"
+      "updated_at": "2026-11-11T06:40:27Z"
     },
     {
       "id": "github-pr-663",
@@ -113,6 +103,16 @@
       "updated_at": "2026-11-11T00:20:25Z"
     },
     {
+      "id": "github-pr-672",
+      "title": "PR #672 fix(scriptable): diagnose iCloud/local duplicate safely without file changes",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/672",
+      "updated_at": "2026-11-11T09:06:06Z"
+    },
+    {
       "id": "github-issue-10",
       "title": "Issue #10 Mission Control v2：GitHubのIssue・PR・Commitを自動集約する",
       "type": "GitHub Issue",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-11T06:30:13Z"
+      "updated_at": "2026-11-11T06:41:12Z"
     },
     {
       "id": "github-issue-234",
@@ -264,7 +264,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-11T15:40:45+09:00",
+      "last_update": "2026-11-11T18:06:44+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -339,13 +339,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 8件・Open PR 44件を自動同期中",
+      "next_action": "Open Issue 8件・Open PR 45件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-11T15:40:45+09:00",
+      "last_update": "2026-11-11T18:06:44+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -368,7 +368,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-11T15:40:45+09:00",
+      "last_update": "2026-11-11T18:06:44+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -450,5 +450,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "999fa96a8fafef4a12d0e29450f5c7f22621947f8f8577b977431148aaa3834a"
+  "github_snapshot_hash": "e04314d412699809b14f588ea30a0bcadf3950f16759e32a6d3bea3b5ab98b2a"
 }
