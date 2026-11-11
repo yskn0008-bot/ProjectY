@@ -82,6 +82,10 @@ const FIXED='2026-11-11T09:00:00+09:00';
   await page.locator('#tlExitEdit').click();
   assert.equal(await root.getAttribute('data-view'),'home');
   assert.equal(await page.locator('#tlAgenda .tlAgendaRow').count(),3,'home must include both flexible and fixed events');
+  assert.equal(await page.locator('#tlAgenda .tlAgendaRow').first().evaluate(el=>getComputedStyle(el).position),'absolute','glass HOME must align events to the time rail');
+  assert.equal(await page.locator('#tlAgenda .tlAgendaRow').first().evaluate(el=>el.style.top),'432px','09:00 event should align to 0.8px per minute');
+  assert.match(await page.locator('#tlAgenda').evaluate(el=>getComputedStyle(el,'::before').content),/06:00/,'home hour ruler must show the approved morning axis');
+
   await root.screenshot({path:path.join(OUTPUT,'timeline-390px-glass-planned.png')});
 
   const footerOverflow=await page.evaluate(()=>({documentWidth:document.documentElement.scrollWidth,innerWidth:innerWidth,rootWidth:document.getElementById('tlFrame').getBoundingClientRect().width}));
