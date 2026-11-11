@@ -573,3 +573,43 @@ test('mixed missed-call notifications still alert on independent active finance/
   }
   assert.equal(h.blocks.length,samples.length);
 });
+
+test('notification semantic regression: active incidents, neutral guidance and payment interruption',async()=>{
+  const samples=[
+    ['N01','銀行：不正利用の疑いはありません',false],
+    ['N02','銀行：口座凍結の可能性について一般的なお知らせ',false],
+    ['N03','金融機関：不正送金ではありませんでした',false],
+    ['N04','セキュリティ：不正アクセスの報告はありません',false],
+    ['N05','銀行：口座凍結の予定はありません',false],
+    ['N06','銀行：不正利用を検知しておりません',false],
+    ['N07','通知：不正アクセスを未然に防ぐ一般的なアドバイス',false],
+    ['N08','不正利用の防止策をご紹介します',false],
+    ['N09','不正利用は確認されていません',false],
+    ['N10','口座凍結は解除されました',false],
+    ['P01','銀行：不正送金を検知しました',true],
+    ['P02','カード：不正利用を検知しました',true],
+    ['P03','銀行：口座凍結が発生しました',true],
+    ['P04','公共料金：支払期限は明日です',true],
+    ['P05','銀行：引き落としに失敗しました',true],
+    ['M01','クレジットカード：カードの利用を停止しました',true],
+    ['M02','銀行：口座振替不能のお知らせ',true],
+    ['M03','金融機関：本人確認未完了のため口座が停止されます',true],
+    ['M04','PayPay：お支払いを受け付けられませんでした',true],
+    ['M05','電力会社：本日中にお支払いがない場合、電気を停止します',true],
+    ['M06','カード：請求金額 12,000円、引き落とし不可',true],
+    ['C01','カード：不正利用を検知しました',true],
+    ['C02','銀行：500円の決済が完了しました',false],
+    ['XNEG1','不正送金ではありませんでした。ただし口座凍結が発生しました',true],
+    ['XNEG2','不正利用を未然に防ぐお知らせ。ただしカードの利用を停止しました',true]
+  ];
+  const h=harness();
+  for(const [index,[id,content,expected]] of samples.entries()){
+    const category=notificationInternals.categoryOf(content);
+    const decision=notificationInternals.triage(content,category);
+    assert.equal(decision.decision,expected?'YOS_ALERT':'YOS_SILENT',String(id));
+    const record=await (await h.handler(h.req({text:content,eventId:'semantic-case-'+String(index).padStart(5,'0')}))).json();
+    assert.equal(record.decision,decision.decision,'capture '+String(id));
+    if(!expected)assert.equal(record.alertText,'','silent must never create another notification');
+  }
+  assert.equal(h.blocks.length,samples.length,'each new event is saved exactly once');
+});
