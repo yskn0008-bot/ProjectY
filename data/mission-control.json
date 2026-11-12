@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-12T13:36:15+09:00",
+  "updated_at": "2026-11-12T13:37:57+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -13,14 +13,14 @@
   },
   "inbox": [
     {
-      "id": "github-pr-706",
-      "title": "PR #706 fix(scriptable): 睡眠家電3件の共通インストーラー形式エラーを修正",
+      "id": "github-pr-700",
+      "title": "PR #700 fix(daystream): casual compact task cards, stationary editor and smoother swipe",
       "type": "GitHub PR",
       "status": "review",
       "priority": 1,
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/706",
-      "updated_at": "2026-11-12T04:35:02Z"
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/700",
+      "updated_at": "2026-11-12T04:20:54Z"
     },
     {
       "id": "github-pr-685",
@@ -31,6 +31,16 @@
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/685",
       "updated_at": "2026-11-12T04:25:57Z"
+    },
+    {
+      "id": "github-pr-688",
+      "title": "PR #688 feat(alerts): dense notification history in existing STREAM (draft)",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/688",
+      "updated_at": "2026-11-12T00:15:47Z"
     },
     {
       "id": "github-pr-692",
@@ -80,7 +90,7 @@
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/704",
-      "updated_at": "2026-11-12T04:30:09Z"
+      "updated_at": "2026-11-12T04:36:43Z"
     },
     {
       "id": "github-pr-705",
@@ -93,24 +103,14 @@
       "updated_at": "2026-11-12T04:31:34Z"
     },
     {
-      "id": "github-pr-708",
-      "title": "PR #708 feat(daystream): 最新mainに生活学習の期限カードを安全統合（旧#702後継）",
+      "id": "github-pr-710",
+      "title": "PR #710 feat(daystream): 期限確認カードを現行DAYSTREAMへ安全統合・最終検証",
       "type": "GitHub PR",
       "status": "draft",
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/708",
-      "updated_at": "2026-11-12T04:34:15Z"
-    },
-    {
-      "id": "github-pr-709",
-      "title": "PR #709 feat(journal): clean Smartlog-inspired reader with six illustrated articles",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/709",
-      "updated_at": "2026-11-12T04:35:46Z"
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/710",
+      "updated_at": "2026-11-12T04:36:20Z"
     },
     {
       "id": "github-issue-10",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-12T04:35:38Z"
+      "updated_at": "2026-11-12T04:37:13Z"
     },
     {
       "id": "github-issue-234",
@@ -205,6 +205,20 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-e35f43f1b0bf",
+      "title": "feat(journal): add clean reader with curated articles",
+      "completed_at": "2026-11-12T04:37:16Z",
+      "result": "GitHub mainへ反映（e35f43f）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/e35f43f1b0bfd0063e91ae036a8ec524000bb0ce"
+    },
+    {
+      "id": "github-commit-450e894a76d3",
+      "title": "fix(scriptable): repair required metadata headers for sleep remote installer",
+      "completed_at": "2026-11-12T04:36:43Z",
+      "result": "GitHub mainへ反映（450e894）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/450e894a76d3bf75a262a672a5723ecabd5d2c87"
+    },
+    {
       "id": "github-commit-d474511b2341",
       "title": "release(daystream): approved casual UI and stationary editor with protected installer catalog",
       "completed_at": "2026-11-12T04:35:14Z",
@@ -224,20 +238,6 @@
       "completed_at": "2026-11-12T04:10:18Z",
       "result": "GitHub mainへ反映（8651ba7）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/8651ba7a98f97b6ec50286f3769c6e2ac427f525"
-    },
-    {
-      "id": "github-commit-0b0cc35131a3",
-      "title": "feat(journal): publish six-story curated editorial edition",
-      "completed_at": "2026-11-12T04:06:48Z",
-      "result": "GitHub mainへ反映（0b0cc35）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/0b0cc35131a3a766393448c53c5ce9fcd57b166f"
-    },
-    {
-      "id": "github-commit-860a9621c90d",
-      "title": "perf(daystream): smoother iPhone-style task drag and overlap lane transitions",
-      "completed_at": "2026-11-12T03:47:59Z",
-      "result": "GitHub mainへ反映（860a962）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/860a9621c90d8e723f26f5cacedd71e513292351"
     },
     {
       "id": "complete-002",
@@ -264,7 +264,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #706をレビューして公開判断する",
+      "next_action": "PR #700をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -274,7 +274,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-12T13:36:15+09:00",
+      "last_update": "2026-11-12T13:37:57+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -349,13 +349,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 9件・Open PR 56件を自動同期中",
+      "next_action": "Open Issue 9件・Open PR 54件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-12T13:36:15+09:00",
+      "last_update": "2026-11-12T13:37:57+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -369,7 +369,7 @@
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #706をレビューして公開判断する",
+      "next_action": "PR #700をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -378,7 +378,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-12T13:36:15+09:00",
+      "last_update": "2026-11-12T13:37:57+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -460,5 +460,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "f555aaf6f11c343cf6d25b9c708bd0691378a936c3418d70dfd4916fd8f5d992"
+  "github_snapshot_hash": "03f1a0cd76842d56516f6cac0caf7db106cfde6dee57bb9a1b3250ad92427bd0"
 }
