@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-12T23:18:56+09:00",
+  "updated_at": "2026-11-12T23:20:19+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -23,14 +23,14 @@
       "updated_at": "2026-11-12T04:20:54Z"
     },
     {
-      "id": "github-pr-717",
-      "title": "PR #717 feat(scriptable): 同名衝突を避ける単一YOS Sleep Sceneを共通配布",
+      "id": "github-pr-654",
+      "title": "PR #654 YOS Calendar: mobile-first unified calendar preview (read-only)",
       "type": "GitHub PR",
-      "status": "review",
-      "priority": 1,
-      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/717",
-      "updated_at": "2026-11-12T14:17:58Z"
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/654",
+      "updated_at": "2026-11-11T10:08:02Z"
     },
     {
       "id": "github-pr-664",
@@ -110,7 +110,7 @@
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/716",
-      "updated_at": "2026-11-12T14:18:02Z"
+      "updated_at": "2026-11-12T14:19:35Z"
     },
     {
       "id": "github-issue-10",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-12T14:17:03Z"
+      "updated_at": "2026-11-12T14:18:37Z"
     },
     {
       "id": "github-issue-234",
@@ -205,6 +205,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-97a46cb97ca2",
+      "title": "feat(scriptable): safe standalone sleep scene for existing local remote conflicts",
+      "completed_at": "2026-11-12T14:19:36Z",
+      "result": "GitHub mainへ反映（97a46cb）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/97a46cb97ca25bca01fd4c95563813a5b72abafd"
+    },
+    {
       "id": "github-commit-5a2ebe3acd3b",
       "title": "feat(alerts): publish Pages-only notification history UI",
       "completed_at": "2026-11-12T14:16:55Z",
@@ -233,13 +240,6 @@
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/de4e18b0c795c6d7636d3e0b78db9a33c36dcdf5"
     },
     {
-      "id": "github-commit-869abb14555a",
-      "title": "feat(daystream): reversible elastic time slots for readable five-minute tasks",
-      "completed_at": "2026-11-12T07:12:32Z",
-      "result": "GitHub mainへ反映（869abb1）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/869abb14555adc107eb7d963c6d4d5945bc0959a"
-    },
-    {
       "id": "complete-002",
       "title": "iPhone向けMission Control Dashboardを実装",
       "completed_at": "2026-07-17T17:55:00+09:00",
@@ -264,7 +264,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #717をレビューして公開判断する",
+      "next_action": "PR #700をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -274,7 +274,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-12T23:18:56+09:00",
+      "last_update": "2026-11-12T23:20:19+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -349,13 +349,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 9件・Open PR 52件を自動同期中",
+      "next_action": "Open Issue 9件・Open PR 51件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-12T23:18:56+09:00",
+      "last_update": "2026-11-12T23:20:19+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -369,7 +369,7 @@
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #717をレビューして公開判断する",
+      "next_action": "PR #700をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -378,7 +378,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-12T23:18:56+09:00",
+      "last_update": "2026-11-12T23:20:19+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -460,5 +460,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "a1b98bd91759ef137830cad036ea25cd41d5c1ae89f3ae935fd423a57ebba88b"
+  "github_snapshot_hash": "155a600986d85a6b6771fafc09228d37bee57ff7ea64aacaa7fededd6920350c"
 }
