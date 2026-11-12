@@ -500,3 +500,57 @@ test('DAYSTREAM compatibility assesses confirmed conflicts without guessing heal
  assert.match(actualHtml,/id="compatReview"/);
  assert.doesNotMatch(js,/Notion\.updatePage|CalendarEvent\.save/);
 });
+
+
+test('overlap warning counts intersection windows and gives a 15-minute range',()=>{
+ const actual=Function('return '+String.fromCharCode(96)+html+String.fromCharCode(96))();
+ const js=actual.split('<script>')[1]?.split('</script>')[0]||'';
+ const start=js.indexOf('function yosOverlapWindows(rows){'),stop=js.indexOf('let latestCompatibility=',start);
+ assert.ok(start>=0&&stop>start);
+ const evaluate=vm.runInNewContext(js.slice(start,stop)+'\nyosOverlapWindows',{});
+ const item=(id,t,s,d)=>({id,t,s,d,kind:'task'});
+ const overlaps=evaluate([item(1,'削除テスト',585,30),item(2,'動作確認',600,30)]);
+ assert.equal(overlaps.length,1);
+ assert.equal(overlaps[0].from,600);
+ assert.equal(overlaps[0].until,615);
+ assert.deepEqual(Array.from(overlaps[0].titles),['削除テスト','動作確認']);
+ const three=evaluate([item(1,'A',540,60),item(2,'B',570,60),item(3,'C',610,40)]);
+ assert.equal(three.length,2,'two separated overlap time ranges are two actual warning areas');
+ assert.equal(three[0].from,570);
+ assert.equal(three[0].until,600);
+ assert.equal(three[1].from,610);
+ assert.equal(three[1].until,630);
+ const noOverlap=evaluate([item(1,'A',585,15),item(2,'B',600,30)]);
+ assert.equal(noOverlap.length,0);
+ assert.ok(actual.includes('時間の重複：'));
+ assert.ok(actual.includes('overlap-button'));
+ assert.ok(actual.includes('分重複'));
+ assert.ok(actual.includes('overlap-details'));
+ assert.ok(actual.includes('padding-right:24px'));
+ assert.ok(!actual.includes('inset 0 0 0 2px #ed8a93'));
+ assert.doesNotMatch(script,/CalendarEvent\.(?:save|remove|create)\(/);
+});
+
+
+test('conflict pulse is short, icon-only and respects reduced-motion accessibility',()=>{
+ const rendered=Function('return '+String.fromCharCode(96)+html+String.fromCharCode(96))();
+ assert.match(rendered,/@keyframes yos-conflict-signal/);
+ assert.match(rendered,/\.card\.compat-danger:after\{animation:yos-conflict-signal \.8s ease-in-out 3\}/);
+ assert.match(rendered,/@media \(prefers-reduced-motion:reduce\)\{\.card\.compat-danger:after\{animation:none\}\}/);
+ assert.doesNotMatch(rendered,/\.card\.compat-danger\{animation:/);
+});
+
+
+test('overlapping tasks have a subdued rose fill and restore their native color when resolved',()=>{
+ const htmlBody=Function('return '+String.fromCharCode(96)+html+String.fromCharCode(96))();
+ assert.match(htmlBody,/\.card\.task\{background:#823db0/);
+ assert.match(htmlBody,/\.card\.compat-danger\{background:#995b6c;[^}]*transition:background-color \.25s ease\}/);
+ assert.match(htmlBody,/\.card\.compat-danger:after\{content:"!";[^}]*background:#6f3e4c/);
+ assert.match(htmlBody,/\.card\.compat-danger:after\{animation:yos-conflict-signal \.8s ease-in-out 3\}/);
+ assert.match(htmlBody,/@media \(prefers-reduced-motion:reduce\)/);
+ const js=htmlBody.split('<script>')[1]?.split('</script>')[0]||'';
+ assert.match(js,/latestCompatibility=yosCompatibility\(items\)/);
+ assert.match(js,/el.classList.add\('compat-'\+compat.level\)/);
+ assert.match(js,/function yosOverlapWindows\(rows\)/);
+ assert.ok(!htmlBody.includes('.card.compat-danger{background:#bf485b'));
+});
