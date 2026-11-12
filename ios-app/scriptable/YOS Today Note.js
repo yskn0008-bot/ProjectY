@@ -139,10 +139,42 @@ body{background:#b9ad91;color:#29251f;font-family:-apple-system,BlinkMacSystemFo
 .weather{background:#e5eddc;padding:50px 34px 28px;margin-bottom:35px}.label{font-size:14px;letter-spacing:.30em;color:#77766e;font-weight:800;margin-bottom:24px}.body-text{font-size:20px;line-height:1.7;font-weight:650;overflow-wrap:anywhere;word-break:break-word}.uv{font-size:18px;color:#746f64;border-top:1px dashed rgba(92,78,51,.20);margin-top:20px;padding-top:17px;overflow-wrap:anywhere}
 .bottom{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:28px;align-items:start}.money{background:#dbe9f1;padding:48px 28px 28px;min-height:245px}.now{background:#f6f2e7;padding:48px 28px 28px;min-height:245px}.money-amount{font-size:37px;line-height:1.15;font-weight:900;margin-bottom:13px;overflow-wrap:anywhere}.now-title{font-size:26px;line-height:1.22;font-weight:900;margin-bottom:14px;overflow-wrap:anywhere}.small-text{font-size:17px;line-height:1.52;color:#5f5b54;font-weight:560;overflow-wrap:anywhere;word-break:break-word}.task-text{font-size:16px;line-height:1.48;color:#6c675e;border-top:1px dashed rgba(92,78,51,.18);margin-top:16px;padding-top:14px;overflow-wrap:anywhere;word-break:break-word}.missing{min-height:300px}.missing .hero-title{font-size:31px;margin-top:28px}.missing-copy{font-size:19px;line-height:1.55;margin-top:24px;color:#6f6555;overflow-wrap:anywhere}
 @media(max-width:520px){.wrap{padding:48px 24px 36px}.brand{padding:15px 19px 14px}.brand b{font-size:44px}.brand small{font-size:11px}.date{font-size:27px}.hero{padding:50px 32px 30px;min-height:0}.hero-time{font-size:70px}.hero-title{font-size:32px}.destination{font-size:18px}.trip{gap:12px}.trip strong{font-size:24px}.weather{padding:46px 30px 26px}.bottom{gap:18px}.money,.now{padding:44px 22px 24px}.small-text{font-size:16px}}
-</style></head><body><main class="wrap">
+.journal{background:#fff;padding:22px 25px 20px;margin:32px 0 0;box-shadow:0 6px 14px rgba(54,42,24,.13)}.journal-heading{font-size:14px;font-weight:800;letter-spacing:.1em;margin-bottom:15px}.journal-item{display:flex;gap:12px;align-items:center;padding:10px 0;text-decoration:none;color:#29251f;border-top:1px solid #e4e4e4}.journal-item img{width:90px;height:70px;flex-shrink:0;object-fit:cover;background:#f0f0f0}.journal-item strong{font-size:17px;line-height:1.4;word-break:break-word}.journal-item .journal-title{display:block;flex:1}.journal-item .journal-meta{display:block;color:#777;font-size:11px;margin-top:4px}.journal-note{font-size:12px;color:#666;margin-top:10px}.journal-item:active{opacity:.7}</style></head><body><main class="wrap">
 <div class="top"><div class="brand"><small>YOS DAILY NOTE</small><b>today</b></div><div class="date">${esc(jpDate())}</div></div>
 ${mainCard}${weatherCard}${(moneyCard||nowCard)?`<div class="bottom">${moneyCard}${nowCard}</div>`:''}
-</main></body></html>`;
+<section class="journal" id="journal-section" hidden aria-label="今日のYOS JOURNAL"><div class="journal-heading">YOS JOURNAL｜今日の見出し</div><div id="journal-headlines"></div></section>
+</main>
+<script>
+(function(){
+'use strict';
+var root=document.getElementById('journal-section'),list=document.getElementById('journal-headlines');
+var base='https://yskn0008-bot.github.io/ProjectY/journal-v2/#article-';
+var editions='https://raw.githubusercontent.com/yskn0008-bot/ProjectY/main/journal/editions/';
+var latest='https://raw.githubusercontent.com/yskn0008-bot/ProjectY/main/ios-app/scriptable/journal/latest.json';
+var thumbnails=[
+'https://commons.wikimedia.org/wiki/Special:FilePath/American_Village_-_panoramio.jpg?width=360',
+'https://commons.wikimedia.org/wiki/Special:FilePath/Woman%20applies%20skincare%20product%20in%20bathroom.jpg?width=360',
+'https://commons.wikimedia.org/wiki/Special:FilePath/Crafting%20wooden%20pieces%20in%20a%20workshop.jpg?width=360'
+];
+function el(tag,text){var node=document.createElement(tag);if(text)node.textContent=text;return node}
+function httpsImage(v){return /^https:\/\//i.test(String(v||''))?v:''}
+async function load(u){var r=await fetch(u,{cache:'no-store'});if(!r.ok)throw new Error('fetch');return r.json()}
+(async function(){
+var date=new Date().toLocaleDateString('sv-SE',{timeZone:'Asia/Tokyo'}),issue;
+try{issue=await load(editions+date+'.json')}catch(_){}
+if(!issue)try{issue=await load(latest)}catch(_){}
+if(!issue||issue.issuedOn!==date||!Array.isArray(issue.articles)||!issue.articles.length)return;
+issue.articles.slice(0,3).forEach(function(a,i){
+if(!a||!a.title)return;
+var link=el('a');link.className='journal-item';link.href=base+i;link.target='_blank';link.rel='noopener noreferrer';
+var imgUrl=httpsImage(a.image)||(date==='2026-11-12'?thumbnails[i]:'');
+if(imgUrl){var img=el('img');img.src=imgUrl;img.alt='';img.loading='lazy';img.onerror=function(){img.remove()};link.appendChild(img)}
+var body=el('span');body.className='journal-title';body.appendChild(el('strong',a.title));body.appendChild(el('span','本文を読む'));body.lastChild.className='journal-meta';link.appendChild(body);list.appendChild(link)
+});
+if(list.children.length)root.hidden=false
+})().catch(function(){});
+})();
+</script></body></html>`;
 
 const web=new WebView();
 await web.loadHTML(html);
