@@ -62,7 +62,7 @@ button:active{opacity:.8}@media(min-width:640px){.dock{left:calc((100vw - 640px)
 .yos-learning-live-row strong{font-size:13px;overflow-wrap:anywhere}
 .yos-learning-live-row small{font-size:11px;color:#d3dae5}
 .yos-learning-live-row button{font-size:11px;border-radius:8px;border:1px solid #8eb8d6;background:#285d7c;color:#fff;padding:7px 10px;flex:none}
-</style><script src="./source-adapters.js"></script></head><body class="yos-daystream-web"><div class="yos-web-port" role="navigation" aria-label="DAYSTREAM Web版">
+</style><script src="./source-adapters.js"></script><script src="./yos-tasks-auth.js"></script></head><body class="yos-daystream-web"><div class="yos-web-port" role="navigation" aria-label="DAYSTREAM Web版">
 <a href="../">YOS</a><strong>DAYSTREAM · WEB</strong>
 <button id="yosWebImport" type="button">データ読込</button><button id="yosWebExport" type="button">書き出し</button>
 <button id="yosWebHistory" type="button">行動学習</button>
@@ -104,7 +104,7 @@ button:active{opacity:.8}@media(min-width:640px){.dock{left:calc((100vw - 640px)
   <p class="gesture-help" id="gestureHelp">タスク：タップで完了 ｜ 左スワイプで削除 ｜ 長押しで編集 ｜ 上下ドラッグで移動</p>
   <div class="timeline-wrap" id="timelinePanel"><div class="timeline" id="tl"><div class="axis"></div><div class="nowline" id="nowLine" hidden><span class="nowbadge" id="nowBadge"></span></div></div></div>
   <section class="tabbox" id="taskPanel"><h3>タスク・未配置</h3><p class="muted">専門タスクの期限と、実行する時間は別。配置しても元データの期限・完了は変わりません。</p>
- <div id="taskList"></div><section id="yosLearningHints" class="yos-learning-live" aria-label="期限が近いタスク" hidden><h3>期限が近いタスク <small>確認のみ</small></h3><p class="muted" id="yosLearningCoverage"></p><div id="yosLearningRows"></div></section><h3>各専門ページから集約</h3><p class="muted" id="yosTaskSourceStatus">Notion Tasks：確認中</p>
+ <div id="taskList"></div><section id="yosLearningHints" class="yos-learning-live" aria-label="期限が近いタスク" hidden><h3>期限が近いタスク <small>確認のみ</small></h3><p class="muted" id="yosLearningCoverage"></p><div id="yosLearningRows"></div></section><h3>各専門ページから集約</h3><p class="muted" id="yosTaskSourceStatus">Notion Tasks：確認中</p><button id="yosWebTaskRefresh" type="button">YOS Tasksを更新</button><div id="yosWebTaskAuth" hidden><p id="yosWebTaskAuthStatus" class="muted" role="status"></p><div id="yosWebGoogleButton"></div></div>
  <label for="yosStartFrom">配置提案の開始時刻</label><input id="yosStartFrom" type="time" value="09:00" aria-label="配置提案の開始時刻">
  <button id="yosPlanAll" type="button">上位3件をまとめて配置提案</button><div id="yosPlanBox" aria-live="polite"></div><div id="yosSourceTasks"></div>
  <h3>繰り返し習慣</h3><p class="muted" id="yosHabitSourceStatus">習慣：確認中</p><div id="yosHabitTasks"></div></section>
@@ -150,7 +150,11 @@ button:active{opacity:.8}@media(min-width:640px){.dock{left:calc((100vw - 640px)
   }catch{return null}
  })();
  const effectiveTasks=existingYosCache||importedTasks;
- const importedDays=Object.keys(importedCalendar?.calendarDays||{}).concat(Object.keys(importedCalendar?.allDayDays||{})).sort();
+ const existingLifeSchedule=(()=>{
+  try{return sourceAdapters?.fromYosLifeStore(JSON.parse(localStorage.getItem('yos-life-v1')||'null'))||null}catch{return null}
+ })();
+ const effectiveCalendar=importedCalendar||existingLifeSchedule;
+ const importedDays=Object.keys(effectiveCalendar?.calendarDays||{}).concat(Object.keys(effectiveCalendar?.allDayDays||{})).sort();
  const importedCalendarCoverage=importedDays.length?{
   from:importedDays[0],until:(()=>{const d=new Date(importedDays[importedDays.length-1]+'T00:00:00Z');d.setUTCDate(d.getUTCDate()+1);return d.toISOString().slice(0,10)})(),
   status:'partial'
@@ -165,6 +169,11 @@ button:active{opacity:.8}@media(min-width:640px){.dock{left:calc((100vw - 640px)
   }catch{return false}
  };
  const web={
+  saveAuthorizedTasks(snapshot){
+   if(!snapshot||snapshot.source!=='yos-auth-cache'||snapshot.kind!=='tasks'||!sourceAdapters?.validSaved(snapshot,'tasks'))return false;
+   if(!writeSource(SOURCE_TASK,snapshot))return false;
+   location.reload();return true;
+  },
   importSource(text,name){
    if(!sourceAdapters||typeof text!=='string'||text.length>sourceAdapters.MAX_BYTES)return false;
    try{
@@ -268,13 +277,20 @@ button:active{opacity:.8}@media(min-width:640px){.dock{left:calc((100vw - 640px)
  };
  window.YOS_DAYSTREAM_WEB=web;
  if('serviceWorker' in navigator){navigator.serviceWorker.register('../../service-worker.js',{scope:'../../',updateViaCache:'none'}).catch(()=>{});}
- window.YOS_CHARCOAL_BOOT={days:plan.days,hiddenCalendar:plan.hiddenCalendar||{},calendarDays:importedCalendar?.calendarDays||{},allDayDays:importedCalendar?.allDayDays||{},calendarCoverage:importedCalendarCoverage,calendarSource:importedCalendar?'user-file':'unavailable',taskSource:effectiveTasks?{...effectiveTasks,status:'partial'}:{status:'unavailable',items:[]},habitSource:{status:'unavailable',items:[]},generatedAt:new Date().toISOString()};
+ window.YOS_CHARCOAL_BOOT={days:plan.days,hiddenCalendar:plan.hiddenCalendar||{},calendarDays:effectiveCalendar?.calendarDays||{},allDayDays:effectiveCalendar?.allDayDays||{},calendarCoverage:importedCalendarCoverage,calendarSource:effectiveCalendar?.source||'unavailable',taskSource:effectiveTasks?{...effectiveTasks,status:'partial'}:{status:'unavailable',items:[]},habitSource:{status:'unavailable',items:[]},generatedAt:new Date().toISOString()};
  window.addEventListener('DOMContentLoaded',()=>{
   const f=document.getElementById('yosWebFile'),btn=document.getElementById('yosWebImport');
   btn.onclick=()=>f.click();
   f.onchange=async()=>{const file=f.files?.[0];if(!file)return;if(file.size>1000000){alert('ファイルが大きすぎます');return}try{const raw=await file.text();if(/\.ics$/i.test(file.name)){if(!web.importSource(raw,file.name))alert('カレンダー読込を中止しました。元データは保持されています。');return;}const p=JSON.parse(raw);if(p?.schema==='yos-daystream-web-all-backup-v1'){if(!web.importAll(p))alert('一括復元を中止しました。保存済みデータは保護されています。')}else if(p&&p.version===1&&p.days){if(!web.import(p))alert('時間割の照合または保存に失敗しました。元データは保持されています。')}else if(!web.importSource(raw,file.name)){alert('タスク読込を中止しました。元データは保持されています。')}}catch{alert('ファイルを読み取れません。変更はありません。')}finally{f.value=''}};
   document.getElementById('yosWebExport').onclick=()=>{if(!web.export())alert('バックアップを書き出せませんでした。保存データを確認してください。')};
-  const sourceText=document.getElementById('yosWebSourceState');if(sourceText){sourceText.textContent='端末内保存 · '+(existingYosCache?'YOS認証済みキャッシュ（6時間以内）':importedTasks?'タスク手動取込':'Notion未接続')+' · '+(importedCalendar?'Apple予定手動取込':'Appleカレンダー未接続')+' · 自動同期なし';}
+  const taskRefresh=document.getElementById('yosWebTaskRefresh'),taskAuth=document.getElementById('yosWebTaskAuth');
+  taskRefresh.onclick=()=>{
+   taskAuth.hidden=false;
+   const provider=window.YOS_DAYSTREAM_TASK_AUTH;
+   if(!provider){document.getElementById('yosWebTaskAuthStatus').textContent='本人確認機能を読み込めませんでした';return}
+   provider.setup({host:document.getElementById('yosWebGoogleButton'),status:document.getElementById('yosWebTaskAuthStatus'),save:snapshot=>web.saveAuthorizedTasks(snapshot)});
+  };
+  const sourceText=document.getElementById('yosWebSourceState');if(sourceText){sourceText.textContent='端末内保存 · '+(existingYosCache?'YOS認証済みキャッシュ（6時間以内）':importedTasks?.source==='yos-auth-cache'?'YOS認証済みTasks写し':importedTasks?'タスク手動取込':'Notion未接続')+' · '+(importedCalendar?'Apple予定手動取込':existingLifeSchedule?'保存済みMY WAY生活予定':'Appleカレンダー未接続')+' · 自動同期なし';}
   document.getElementById('yosWebHistory').onclick=()=>{
     const panel=document.getElementById('yosWebHistoryPanel'),rows=document.getElementById('yosWebHistoryRows');
     panel.hidden=!panel.hidden;if(panel.hidden)return;rows.replaceChildren();
@@ -390,7 +406,7 @@ function yosRenderSources(){
  yosRenderLearningHints();
  taskFeed.textContent='';habitFeed.textContent='';
  const status=document.getElementById('yosTaskSourceStatus');
- status.textContent=(taskSource.source==='user-file'?'手動取込のTasks写し：':taskSource.source==='yos-auth-cache'?'YOS認証済みTasksキャッシュ（自動更新なし）：':'Notion Tasks：')+yosStatusWord(taskSource.status)+(taskSource.status==='ok'||taskSource.status==='partial'?'（取得 '+sourceTasks.length+'件・先頭80件を表示）':'')+(taskSource.checkedAt?' · '+new Date(taskSource.checkedAt).toLocaleString('ja-JP',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}):'');
+ status.textContent=(taskSource.source==='user-file'?'手動取込のTasks写し：':taskSource.source==='yos-auth-cache'?'YOS認証済みTasks写し（自動更新なし）：':'Notion Tasks：')+yosStatusWord(taskSource.status)+(taskSource.status==='ok'||taskSource.status==='partial'?'（取得 '+sourceTasks.length+'件・先頭80件を表示）':'')+(taskSource.checkedAt?' · '+new Date(taskSource.checkedAt).toLocaleString('ja-JP',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}):'');
  const live=sourceTasks.filter(x=>!['待ち','保留'].includes(x.status));
  live.sort((a,b)=>yosTaskRank(a)-yosTaskRank(b)||String(a.due||'9999').localeCompare(String(b.due||'9999'))||a.title.localeCompare(b.title,'ja'));
  const pending=live.filter(x=>!yosIsPlanned('notion:'+x.id)).slice(0,80);
@@ -548,7 +564,7 @@ function showFocusFor(item){
  document.getElementById('hideFixed').hidden=!canHide;
  document.getElementById('doneBtn').textContent=item.done?'未完了に戻す':'完了にする';
  document.getElementById('deleteSelected').textContent='削除';
- fi.textContent=fmt(item.s)+'–'+fmt(item.s+item.d)+(fixed?(boot.calendarSource==='user-file'?' · ファイルから取り込んだ固定予定。元のカレンダーは変更しません。':' · Appleカレンダーの固定予定。元の予定は変更せず、この画面から隠せます。'):' · 端末内のタスク・予定。編集・削除できます。');
+ fi.textContent=fmt(item.s)+'–'+fmt(item.s+item.d)+(fixed?(boot.calendarSource==='user-file'?' · ファイルから取り込んだ固定予定。元のカレンダーは変更しません。':boot.calendarSource==='yos-life-local'?' · MY WAY端末保存の予定写し。元の予定は変更しません。':' · Appleカレンダーの固定予定。元の予定は変更せず、この画面から隠せます。'):' · 端末内のタスク・予定。編集・削除できます。');
  focus.classList.add('show');
 }
 
@@ -1093,7 +1109,7 @@ function render(){
 }
 document.getElementById('closeFocus').onclick=()=>{zoom=null;deleteConfirmId=null;focus.classList.remove('show');smoothRender()};
 if(Array.isArray(stored)){note.textContent='保存済み時間割を表示 · Notion Tasks '+yosStatusWord(taskSource.status);}
-else if(calendarRows.length){note.textContent=(boot.calendarSource==='user-file'?'手動取込のApple予定 ':'Appleカレンダー ')+calendarRows.length+'件を読み取り'+(yosTestCount(todayISO)?' · テスト'+yosTestCount(todayISO)+'件は非表示':'')+' · 端末内で追加・編集';}
+else if(calendarRows.length){note.textContent=(boot.calendarSource==='user-file'?'手動取込のApple予定 ':boot.calendarSource==='yos-life-local'?'保存済みMY WAY予定 ':'Appleカレンダー ')+calendarRows.length+'件を読み取り'+(yosTestCount(todayISO)?' · テスト'+yosTestCount(todayISO)+'件は非表示':'')+' · 端末内で追加・編集';}
 else{note.textContent='端末内の予定はありません · 右上の追加から登録';}
 yosDefaultStart();yosRefreshTestToggle();renderWeek();render();renderDayAllDay();updateReview();yosRenderSources();setCalendarMode('day');setInterval(updateNow,60000);setInterval(yosRenderLearningHints,60000);
 </script></body></html>
