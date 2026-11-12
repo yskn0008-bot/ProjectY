@@ -451,7 +451,7 @@ test('shortcut remains editable and launches only from editor, without card icon
  assert.ok(rendered.includes('id="saveBtn"'));
  assert.ok(rendered.includes('id="cancelEditor"'));
  assert.match(js,/run\.href='shortcuts:\/\/run-shortcut\?name='\+encodeURIComponent\(label\)/);
- assert.match(js,/document\.getElementById\('newShortcut'\)\.oninput=updateShortcutField/);
+ assert.match(js,/document\.getElementById\('newShortcut'\)\.oninput=\(\)=>\{refreshShortcutPicker\(\);updateShortcutField\(\)\}/);
  assert.ok(!rendered.includes('class="shortcut-launch"'));
  assert.ok(!js.includes("action.textContent=linked?'▶':'＋'"));
  assert.ok(rendered.includes('上下ドラッグで移動'));
@@ -554,7 +554,7 @@ test('casual coral overlap colors task card and removes all decorative task icon
 
 test('overlapping task lane exposes time label during preview and ordinary display',()=>{
  const htmlBody=Function('return '+String.fromCharCode(96)+html+String.fromCharCode(96))();
- assert.match(htmlBody,/\.card\.task\.lane small\{display:block;margin:1px 0 0;font-size:9\.5px\}/);
+ assert.match(htmlBody,/\.card\.task\.lane \.task-copy small\{display:block;margin:0;font-size:10\.5px\}/);
  assert.match(htmlBody,/\.card\.task\.lane\{flex-wrap:wrap;align-content:center/);
  assert.match(htmlBody,/item\.kind==='task'&&!item\.f\?42:density==='overview'\?17:22/);
  const js=htmlBody.split('<script>')[1]?.split('</script>')[0]||'';
