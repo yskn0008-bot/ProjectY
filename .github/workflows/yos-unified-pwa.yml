@@ -44,6 +44,8 @@ jobs:
       - run: node --check service-worker.js
       - run: node --test tests/daystream-web-port.test.mjs
       - run: node --test tests/daystream-source-import.test.mjs
+      - run: node --test tests/daystream-yos-auth-life.test.mjs
+      - run: node --test tests/daystream-learning-apply.test.mjs
       - run: node --check yos/app.js
       - run: node --check yos/money-v2-runtime-v4.js
       - run: node --check yos/desk/app.js

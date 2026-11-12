@@ -1,0 +1,199 @@
+#define name YOS 日記
+#define color purple
+#define inputs text
+
+#include 'actions/text'
+#include 'actions/calendar'
+#include 'actions/intelligence'
+#include 'actions/documents'
+#include 'actions/crypto'
+#include 'actions/web'
+
+// Standalone journal. Also callable from the existing Night Brief.
+// The shortcut contains no Notion token or diary contents at build time.
+const now = currentDate()
+const day = formatDate(now, "Custom", "yyyy-MM-dd")
+const timeKey = formatDate(now, "Custom", "HH-mm-ss")
+const context = "{ShortcutInput}"
+
+// The three questions remain mandatory; all wording is responsive, not fixed.
+// Already presented prompts are saved BEFORE asking for answers. This prevents
+// three consecutive runs from repeating the same opener.
+const questionFolder = createFolder("YOS Journal Questions")
+const questionFiles = getFolderContents(questionFolder, false)
+const recentQuestionFiles = filterFiles(questionFiles, 24, "Name", "Z to A")
+const recentQuestions = getText(recentQuestionFiles)
+
+const openingPrompt = text("あなたはYOSの日記コーチ。本人が思わず話し始めたくなる、最初の一問を一文だけ作ってください。
+
+求めるもの：『今日あったことは？』のような事務的でありふれた質問ではなく、本人がその日のひと場面、自分らしい瞬間、違和感、好奇心、言えなかったことを自然に思い出せる、具体的で少し意外な切り口。
+・優しくても鋭い問い。無理に感動や深刻な話を引き出さない。
+・まだ今日の出来事は知らないので、あったことを勝手に仮定しない。
+・過去の質問の内容や言い換えにせず、連続実行なら別軸を使う。
+・本人の回答で後から自己理解・YOS分析につながる問いにする。
+・一問のみ。前置き・説明・番号は不要。
+
+直近の質問（すべて既出扱い）：
+{recentQuestions}
+Night Briefからの情報（ある場合だけ）：
+{context}")
+const openingQuestion = askChatGPT(openingPrompt, false, "Text")
+const openingLog = text("YOS_JOURNAL_QUESTION_V1\n日時：{day} {timeKey}（導入1）\n提示した問い：{openingQuestion}")
+saveFile("YOS Journal Questions/{day}-{timeKey}-q1.txt", openingLog, false)
+const event = prompt("1/3 {openingQuestion}", "Text", "")
+if !event {
+    stop()
+}
+
+const secondPrompt = text("あなたはYOSの日記コーチ。1問目への本人の言葉を正確に受け取って、次の会話を深く進める2問目を一つだけ作る。
+
+・相手が実際に使った具体的な表現や出来事を含む。
+・今日の気持ち、何を求めたか、心が揺れた理由、満たされなかったもの、選択の背景など、1問目と異なる焦点を一つ選ぶ。
+・『どう感じた？』『なぜ？』のみの一般論を禁止する。
+・感情が動いたと勝手に前提にしない。本人に問題があると決めつけない。
+・二重質問を禁止。前置き・説明・番号なし。
+
+最初の問い：{openingQuestion}
+本人の回答：{event}
+直近の過去質問：{recentQuestions}")
+const secondQuestion = askChatGPT(secondPrompt, false, "Text")
+const secondLog = text("YOS_JOURNAL_QUESTION_V1\n日時：{day} {timeKey}（導入2）\n提示した問い：{secondQuestion}")
+saveFile("YOS Journal Questions/{day}-{timeKey}-q2.txt", secondLog, false)
+const feeling = prompt("2/3 {secondQuestion}", "Text", "")
+if !feeling {
+    stop()
+}
+
+const starterNotes = text("【今日の出来事】\n{event}\n\n【今日の気持ち・心が動いた瞬間】\n{feeling}")
+const coachPrompt = text("あなたはYOSの優れた質問コーチ。本人の表面的な説明を超えて、本人にとって意味のある本音や価値観、選択の代償、満たされなかった期待、好奇心に触れる『今日の本人だからこそ答えたくなる』問いを1つだけ作る。
+
+【必須】今日の本人の言葉から具体的な出来事・表現を拾い、その単語を問いに含める。誰にでも当てはまる問い、たとえば『どう感じた？』『何が大切？』『何に気づいた？』だけの無難な聞き方は禁止。会話に根拠のない心理診断や、必ず隠れた悩みがあるという決めつけもしない。
+
+【切り口】本人の意思と周囲の期待のずれ／まだ言葉にならない欲求／実際に選ばなかった可能性／心が動いた場面の核心／自由なら選んだこと／失いたくないもの／矛盾の中にある価値。今日の発言に根拠がある角度だけを採用。前回と同じ軸の言い換えはしない。気分や目標を無理にポジティブに誘導しない。
+
+【品質検査】本人の答えを後で分析して現実の助言に結びつけられるか？ 読んだ瞬間少し考え込むくらい具体的か？ 過去に提示した問いと意味が重ならないか？ 自問してから、短い一文の問いだけ出力。二重質問・解説は禁止。
+
+今日の本人の言葉：
+{starterNotes}
+
+この実行ですでに聞いた2問（切り口を重ねない）：
+1. {openingQuestion}
+2. {secondQuestion}
+
+すでに提示済みの問い（今日の途中終了も含む）。文言だけでなくテーマが重複しないように：
+{recentQuestions}
+
+Night Brief参考情報（実際に与えられた場合だけ）：
+{context}")
+@question = askChatGPT(coachPrompt, false, "Text")
+// If the literal question already exists, retry once with a different lens.
+if recentQuestions contains @question {
+    const retryPrompt = text("この問いは既出。却下した問いと過去の問いの言い換えではなく、本人の別の選択・欲求・価値観に迫る切り口の、今日の出来事に固有な質問を1つだけ作って。悩みや過去を捏造せず、前置きなし。\n\n本人の言葉：{starterNotes}\n既出：{recentQuestions}\n却下：{@question}")
+    @question = askChatGPT(retryPrompt, false, "Text")
+}
+const questionLog = text("YOS_JOURNAL_QUESTION_V1\n日時：{day} {timeKey}\n提示した問い：{@question}")
+saveFile("YOS Journal Questions/{day}-{timeKey}.txt", questionLog, false)
+alert(@question, "3/3 今日の問い")
+const firstAnswer = prompt("3/3 自分の言葉で。刺さらなければ『別の問い』と入力すると、一度だけ問いを変えられるよ。", "Text", "")
+@answer = "{firstAnswer}"
+if @answer contains "別の問い" {
+    const alternatePrompt = text("この問いは本人に響かなかった。元の問いや過去の問いと別軸に切り替え、今日の本人の具体的な発言に基づく、鋭くても押し付けない問いを1つだけ。一般論や『どう感じた？』は避ける。前置き不要。\n\n本人の言葉：{starterNotes}\n却下：{@question}\n最近の問い：{recentQuestions}")
+    @question = askChatGPT(alternatePrompt, false, "Text")
+    const otherLog = text("YOS_JOURNAL_QUESTION_V1\n日時：{day} {timeKey}（再質問）\n提示した問い：{@question}")
+    saveFile("YOS Journal Questions/{day}-{timeKey}-2.txt", otherLog, false)
+    alert(@question, "3/3 別の問い")
+    @answer = prompt("自由に答えてね。『わからない』でも大丈夫。", "Text", "")
+}
+if !@answer {
+    stop()
+}
+const finalQuestion = text("{@question}")
+const finalAnswer = text("{@answer}")
+
+// The source of long-term truth is Notion. This existing iCloud folder
+// is used as a limited local cache so today's coach can compare prior answers.
+const pendingFolder = createFolder("YOS Journal Pending")
+const pendingFiles = getFolderContents(pendingFolder, false)
+const recentPendingFiles = filterFiles(pendingFiles, 14, "Name", "Z to A")
+const recentAnswers = getText(recentPendingFiles)
+
+// Q1-Q3 are the only required questions. A purpose-specific follow-up is optional.
+const purpose = prompt(
+    "ここからは自由。深掘りしたい目的があれば1つ入力してね。\n例：自己理解・仕事・お金・人間関係・健康・これからの人生\n空欄ならここで終わり。",
+    "Text",
+    ""
+)
+@purposeQuestion = ""
+@purposeAnswer = ""
+if purpose {
+    const purposePrompt = text("あなたはYOSの日記コーチ。本人の希望テーマに沿った目的別の問いを1問だけ作ってください。本人の価値観や答えを決めつけず、今夜の回答に基づく具体的な問いを短い1文で。前置き・結論・番号は不要。\n\n希望するテーマ：{purpose}\n今日の出来事：{event}\n心が動いたこと：{feeling}\n3問目：{finalQuestion}\n3問目の回答：{finalAnswer}")
+    @purposeQuestion = askChatGPT(purposePrompt, false, "Text")
+    alert(@purposeQuestion, "目的別の問い")
+    @purposeAnswer = prompt(
+        "答えたい範囲で自由に。答えが浮かばなければ空欄でも大丈夫。",
+        "Text",
+        ""
+    )
+}
+
+// Answer-derived YOS advice is part of the diary, not a substitute for it.
+// Only the recent local backup is available to this Shortcut. It cannot read
+// the entire Notion diary here, so trends need explicit supporting evidence.
+const analysisPrompt = text("あなたはYOS。今日の問いの回答と直近の記録から本人を理解し、役に立つアドバイスをしてください。
+
+目的：本人が自分らしく生きながら人生全体の期待値を高める。答えの要約だけで終わらず、具体的な示唆を返す。
+必須ルール：
+・本人が実際に語った事実、そこからの仮説、未確認を分ける。
+・直近記録がない、または比較不能なら『継続的な傾向はまだ未確認』と明記。
+・同じテーマが複数日に繰り返されたときのみ傾向の候補とする。反例・変化を無視しない。
+・心理診断、人格ラベル、因果関係の断定、無理なポジティブ解釈は禁止。
+・今すぐ行動が必要と決めつけず、本人が選べる小さな提案を最大2つ。
+・助言は今日の回答の具体的な一節を根拠にする。発見がなければ無理に作らない。
+・金融・健康・法律の重大な判断は、個別の専門確認が必要だと明示する。
+
+出力形式：短く読みやすい日本語。
+【YOSの分析】本人の回答の根拠→考えられること（事実／仮説／未確認）。
+【過去との比較】直近の記録と比較できる場合だけ。なければ未確認。
+【YOSのアドバイス】具体的で押し付けない提案を1〜2つ。
+
+今日の出来事：{event}
+心が動いた瞬間：{feeling}
+3問目：{finalQuestion}
+本人の回答：{finalAnswer}
+任意の目的：{purpose}
+目的別の問い：{@purposeQuestion}
+目的別の答え：{@purposeAnswer}
+
+直近のローカル日記控え（Notionの全履歴ではなく、保存成功が未確認の控えも含む）：
+{recentAnswers}")
+const yosAdvice = askChatGPT(analysisPrompt, false, "Text")
+alert(yosAdvice, "YOSの分析とアドバイス")
+
+const storyPrompt = text("あなたはYOSの日記作家。以下の確認できた一日の流れと本人の3問への回答を一つの自然な短編日記にしてください。日本語300〜400字程度。出来事の羅列や箇条書きは禁止。時の流れ・場面転換・内面・余韻がある文学的な一人称の文章。本人が実際に感じたと確認できない感情、天候、景色、行動、会話を捏造しない。予定は実行済みと断定しない。根拠が薄いときは無理に埋めず短くする。見出し・前置き・分析・アドバイスは不要。\\n\\nNight Briefから渡された参考情報（未提供なら未確認）：{context}\\n\\n一問目：{openingQuestion}\\n回答：{event}\\n二問目：{secondQuestion}\\n回答：{feeling}\\n三問目：{finalQuestion}\\n回答：{finalAnswer}\\n任意の問い：{@purposeQuestion}\\n回答：{@purposeAnswer}")
+const generatedStory = askChatGPT(storyPrompt, false, "Text")
+// The book UI presents the story for review after all questions.
+const finalStory = text("{generatedStory}")
+const diary = text("【今日の物語】\\n{finalStory}\\n\\n【今日の出来事】\n{event}\n\n【心が動いた瞬間】\n{feeling}\n\n【目的別・自由選択】\nテーマ：{purpose}\n問い：{@purposeQuestion}\n本人の答え：{@purposeAnswer}\n\n【YOSの分析とアドバイス（本人の発言とは別）】\n{yosAdvice}")
+
+const backup = text("YOS_JOURNAL_LOCAL_BACKUP_V1
+日付：{day}
+今日の日記：
+{diary}
+今日の問い：
+{finalQuestion}
+本人の回答：
+{finalAnswer}")
+saveFile("YOS Journal Pending/{day}-{timeKey}.txt", backup, false)
+
+// Scriptable reads the existing Keychain token locally; the URL never goes to a web server.
+const diaryBase64 = base64Encode(diary)
+const questionBase64 = base64Encode(finalQuestion)
+const answerBase64 = base64Encode(finalAnswer)
+const d64 = urlEncode(diaryBase64)
+const q64 = urlEncode(questionBase64)
+const a64 = urlEncode(answerBase64)
+const storyBase64 = base64Encode(finalStory)
+const story64 = urlEncode(storyBase64)
+const bookURL = text("scriptable:///run?scriptName=YOS%20Journal%20Book&date={day}&story={story64}&diary={d64}&question={q64}&answer={a64}")
+openURL(bookURL)
+stop()

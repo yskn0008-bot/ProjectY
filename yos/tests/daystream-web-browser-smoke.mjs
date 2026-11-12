@@ -72,7 +72,59 @@ try{
  assert.ok(pack.actions.some(a=>a.title==='Started action'&&a.startedAt));
  assert.equal(pack.tasks.items[0].title,'Web imported task');
  assert.equal(pack.calendar.eventCount,1);
+ const cancelled=await page.evaluate(()=>{
+  const web=window.YOS_DAYSTREAM_WEB,day='2026-11-13';
+  const before=JSON.parse(localStorage.getItem('YOS_DAYSTREAM_WEB_ACTIONS_V1')||'[]').length;
+  const ok=web.undoCompletion({id:900001,day});
+  const after=JSON.parse(localStorage.getItem('YOS_DAYSTREAM_WEB_ACTIONS_V1')||'[]');
+  const hints=web.suggestions().find(x=>x.title==='Started action');
+  const firstStart=web.markStarted({id:990123,day});
+  const actual=JSON.parse(localStorage.getItem('YOS_DAYSTREAM_WEB_STARTS_V1'))[day+'|990123'];
+  const secondStart=web.markStarted({id:990123,day});
+  const unchanged=JSON.parse(localStorage.getItem('YOS_DAYSTREAM_WEB_STARTS_V1'))[day+'|990123']===actual;
+  return {before,after:after.length,ok,remaining:after.filter(x=>x.title==='Started action').length,hints:hints??null,firstStart,secondStart,unchanged};
+ });
+ assert.equal(cancelled.ok,true);
+ assert.equal(cancelled.before-cancelled.after,1,'undo removes one historical completion');
+ assert.equal(cancelled.remaining,2);
+ assert.equal(cancelled.hints,null,'cancelled completion cannot create a three-occurrence recommendation');
+ assert.equal(cancelled.firstStart,true);
+ assert.equal(cancelled.secondStart,true);
+ assert.equal(cancelled.unchanged,true,'a duplicate start tap does not overwrite confirmed first start');
 
+
+ assert.equal(await page.locator('#yosWebTaskRefresh').count(),1,'read-only YOS Tasks sign-in entry exists');
+ const localSchedule=await page.evaluate(()=>{
+  localStorage.removeItem('YOS_DAYSTREAM_WEB_CAL_SNAPSHOT_V1');
+  localStorage.setItem('yos-life-v1',JSON.stringify({days:{'2026-11-13':{schedule:[{title:'LIFE BROWSER SMOKE',start:'2026-11-13T18:00:00+09:00',end:'2026-11-13T18:45:00+09:00'}]}}}));
+  return true
+ });
+ assert.equal(localSchedule,true);
+ await page.reload({waitUntil:'domcontentloaded'});
+ const inherited=await page.evaluate(()=>window.YOS_CHARCOAL_BOOT);
+ assert.equal(inherited.calendarSource,'yos-life-local');
+ assert.equal(inherited.calendarDays['2026-11-13'][0].title,'LIFE BROWSER SMOKE');
+ assert.match(await page.locator('#yosWebSourceState').innerText(),/保存済みMY WAY生活予定/);
+ page.on('dialog',async dialog=>dialog.accept());
+ const adopted=await page.evaluate(()=>{
+  const title='WEB PORT STORAGE SMOKE',web=window.YOS_DAYSTREAM_WEB;
+  const before=JSON.parse(localStorage.getItem('YOS_DAYSTREAM_WEB_PLAN_V1'));
+  const day=Object.keys(before.days)[0];
+  const wrong=window.YOS_DAYSTREAM_APPLY_SUGGESTION({title,kind:'completion',count:3,suggested:'13:00'});
+  const result=window.YOS_DAYSTREAM_APPLY_SUGGESTION({title,kind:'start',count:3,suggested:'13:00'});
+  const saved=JSON.parse(localStorage.getItem('YOS_DAYSTREAM_WEB_PLAN_V1'));
+  return {wrong:wrong.ok,ok:result.ok,start:saved.days[day].find(x=>x.t===title)?.s,old:before.days[day].find(x=>x.t===title)?.s};
+ });
+ assert.equal(adopted.wrong,false,'completion-only history never moves task start');
+ assert.equal(adopted.ok,true,'verified, user-approved start suggestion moves unambiguous task');
+ assert.equal(adopted.start,780);
+ assert.notEqual(adopted.start,adopted.old);
+ await page.reload({waitUntil:'domcontentloaded'});
+ const kept=await page.evaluate(()=>{
+  const p=JSON.parse(localStorage.getItem('YOS_DAYSTREAM_WEB_PLAN_V1'));
+  return Object.values(p.days).flat().find(x=>x.t==='WEB PORT STORAGE SMOKE')?.s
+ });
+ assert.equal(kept,780,'adopted actual-start proposal survives reload');
  assert.deepEqual(errors,[],'no script errors during load, storage, reload or learning');
  console.log('DAYSTREAM Web port browser smoke PASS',type);
 }finally{await browser.close()}

@@ -74,7 +74,8 @@ test('confirmed start is distinct from completion; browser preserves native plan
  assert.match(html,/id="startActualBtn"/);
  assert.match(html,/markStarted\(event\)/);
  assert.match(html,/YOS_DAYSTREAM_WEB_STARTS_V1/);
- assert.match(html,/if\(saved&&x.done&&x.kind==='task'\)window\.YOS_DAYSTREAM_WEB\.logCompletion/);
+ assert.match(html,/if\(saved&&x.kind==='task'\)\{if\(x.done\)window\.YOS_DAYSTREAM_WEB\.logCompletion/);
+ assert.match(html,/else window\.YOS_DAYSTREAM_WEB\.undoCompletion\(\{id:x.id,day:selectedDay\}\)/);
  assert.match(html,/startedAt/);
  assert.match(html,/開始時刻は未確認/);
  assert.doesNotMatch(code,/YOS_TIMELINE_CHARCOAL_VERIFY_20261111_v1\.json/);
@@ -108,5 +109,5 @@ test('fresh existing authenticated YOS task cache is reused read-only but stale 
  assert.equal(moved.items[0].id,snapshot.items[0].id,'due-date changes do not duplicate a planned task');
  assert.match(html,/yos-task-dashboard-cache-v1/);
  assert.match(html,/existingYosCache\|\|importedTasks/);
- assert.match(html,/YOS認証済みTasksキャッシュ/);
+ assert.match(html,/YOS認証済みTasks写し/);
 });
