@@ -58,3 +58,8 @@ test('three highest ranked records only, duplicate ID removed, partial source ma
  assert.match(x.yosLearningCoverage.textContent,/一部取得/);
  assert.equal(x.yosLearningRows.children[0].children[0].children[0].textContent,'urgent');
 });
+
+test('deadline hint date recalculates from the device clock while screen stays open',()=>{
+ assert.match(segment,/const date=new Date\(\),today=localISO\(date\)/);
+ assert.match(script,/setInterval\(yosRenderLearningHints,60000\)/);
+});
