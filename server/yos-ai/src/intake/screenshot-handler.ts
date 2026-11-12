@@ -90,7 +90,11 @@ export function createScreenshotIntakeHandler(options: {
       } catch {
         // A failed Redis acknowledgement after a successful Notion append must not
         // immediately unlock the capture: doing so could duplicate private images.
-        if (!appendAttempted) {
+        if (appendAttempted) {
+          // Preserve an ambiguous outcome beyond the short processing TTL.
+          // Never automatically retry a potentially completed private upload.
+          try { await options.redis.command<string>(['SET', key, 'uncertain', 'EX', DONE_TTL]); } catch { /* Fail closed until device review. */ }
+        } else {
           try { await options.redis.command<number>(['DEL', key]); } catch { /* Processing TTL allows later retry. */ }
         }
         return response(appendAttempted ? 409 : 503,
