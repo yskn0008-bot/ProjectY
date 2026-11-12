@@ -55,19 +55,19 @@ jobs:
         env:
           PR_BRANCH: ${{ github.head_ref }}
         run: |
+          test -s journal/audio/2026-11-12/article-0.mp3
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          test -s journal/audio/2026-11-12/article-0.mp3
+          # The PR checkout may contain synthetic merge commits from GitHub.
+          # Start at the latest actual branch and bring only the new MP3 across.
+          git fetch origin "$PR_BRANCH"
+          git switch --detach "origin/$PR_BRANCH"
           git add journal/audio/2026-11-12/article-0.mp3
           if git diff --cached --quiet; then
-            echo "Audio already present; no commit necessary"
+            echo "Audio already in review branch"
             exit 0
           fi
           git commit -m 'journal: include verified free Nemo audio preview'
-          # Existing PR automation may advance the review branch during synthesis.
-          # Rebase onto the latest branch without force-pushing or losing those changes.
-          git fetch origin "$PR_BRANCH"
-          git rebase "origin/$PR_BRANCH"
           git push origin "HEAD:refs/heads/$PR_BRANCH"
       - name: Publish verified preview MP3 to existing Pages (main only)
         if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
