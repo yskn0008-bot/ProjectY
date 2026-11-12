@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-13T02:01:32+09:00",
+  "updated_at": "2026-11-13T02:05:16+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -43,14 +43,14 @@
       "updated_at": "2026-11-12T14:28:26Z"
     },
     {
-      "id": "github-pr-734",
-      "title": "PR #734 feat(daystream): 既存YOS本人確認でTasks更新・MY WAY予定を安全共有",
+      "id": "github-pr-664",
+      "title": "PR #664 YOS JOURNAL v1.6: on-device Notion relevance + review-gated daily editorial",
       "type": "GitHub PR",
-      "status": "review",
-      "priority": 1,
-      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/734",
-      "updated_at": "2026-11-12T17:00:46Z"
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/664",
+      "updated_at": "2026-11-11T19:58:32Z"
     },
     {
       "id": "github-pr-685",
@@ -90,7 +90,7 @@
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/701",
-      "updated_at": "2026-11-12T17:00:50Z"
+      "updated_at": "2026-11-12T17:03:46Z"
     },
     {
       "id": "github-pr-705",
@@ -110,7 +110,7 @@
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/721",
-      "updated_at": "2026-11-12T14:40:12Z"
+      "updated_at": "2026-11-12T17:03:47Z"
     },
     {
       "id": "github-issue-10",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-12T17:00:58Z"
+      "updated_at": "2026-11-12T17:04:08Z"
     },
     {
       "id": "github-issue-234",
@@ -205,6 +205,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-02909260b570",
+      "title": "feat(daystream): 既存YOSの認証済みTasksとLife予定を安全連携・学習整合性を改善",
+      "completed_at": "2026-11-12T17:04:22Z",
+      "result": "GitHub mainへ反映（0290926）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/02909260b570c3de65a38727648cc6a62c8ecae9"
+    },
+    {
       "id": "github-commit-4b235ddad765",
       "title": "test(daystream): Web連携の正式仕様に安全回帰テストを更新",
       "completed_at": "2026-11-12T16:45:50Z",
@@ -233,13 +240,6 @@
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/8a96c879baeba78495ab7af0d7558bc9dd4bfba5"
     },
     {
-      "id": "github-commit-2e0c72fc1205",
-      "title": "fix(daystream): iPhone上端の白帯とヘッダーの霞みを修正",
-      "completed_at": "2026-11-12T16:00:39Z",
-      "result": "GitHub mainへ反映（2e0c72f）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/2e0c72fc1205e365cd5cffaea65b45bd25750deb"
-    },
-    {
       "id": "complete-002",
       "title": "iPhone向けMission Control Dashboardを実装",
       "completed_at": "2026-07-17T17:55:00+09:00",
@@ -264,7 +264,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #734をレビューして公開判断する",
+      "next_action": "PR #719をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -274,7 +274,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-13T02:01:32+09:00",
+      "last_update": "2026-11-13T02:05:16+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -349,13 +349,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 9件・Open PR 54件を自動同期中",
+      "next_action": "Open Issue 9件・Open PR 53件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-13T02:01:32+09:00",
+      "last_update": "2026-11-13T02:05:16+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -369,7 +369,7 @@
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #734をレビューして公開判断する",
+      "next_action": "PR #719をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -378,7 +378,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-13T02:01:32+09:00",
+      "last_update": "2026-11-13T02:05:16+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -460,5 +460,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "78ddd084f40b741f53a6208cb6d6eeb91c325c4fe43fd940cf5ad2b9bde55c60"
+  "github_snapshot_hash": "51d2582211c684ef1658396d924457c0ffd8373d7de8f9db52740eaaa31fbca1"
 }
