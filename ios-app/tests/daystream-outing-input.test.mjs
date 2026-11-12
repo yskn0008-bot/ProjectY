@@ -48,7 +48,8 @@ test('one-shot bridge does not write to Notion or change Apple Calendar',()=>{
  assert.ok(!block[1].includes('new Request('));
  assert.match(src,/outingContext:outingInput.context/);
  assert.match(src,/outingTaskDetails:outingInput.taskDetails/);
- assert.match(src,/yosOutingCandidates\(outingTasks,/);
+ assert.match(src,/yosOutingCandidates\(previewTasks,/);
+ assert.match(src,/const previewTasks=yosManualPreview\?sourceTasks\.map/);
 });
 
 test('screen refuses stale outing previews and rechecks while open',()=>{
