@@ -288,7 +288,7 @@ function yosRenderLearningHints(){
  const rows=document.getElementById('yosLearningRows'),coverage=document.getElementById('yosLearningCoverage');
  rows.replaceChildren();panel.hidden=true;
  if(!['ok','partial'].includes(taskSource.status))return;
- const today=todayISO, date=new Date();date.setDate(date.getDate()+1);
+ const date=new Date(),today=localISO(date);date.setDate(date.getDate()+1);
  const next=localISO(date),seen=new Set();
  const active=sourceTasks.filter(x=>{
    if(!x||typeof x.id!=='string'||typeof x.title!=='string'||!['次にやる','実行中','本人操作'].includes(x.status))return false;
@@ -937,7 +937,7 @@ document.getElementById('closeFocus').onclick=()=>{zoom=null;deleteConfirmId=nul
 if(Array.isArray(stored)){note.textContent='保存済み時間割を表示 · Notion Tasks '+yosStatusWord(taskSource.status);}
 else if(calendarRows.length){note.textContent='Appleカレンダー '+calendarRows.length+'件を読み取り'+(yosTestCount(todayISO)?' · テスト'+yosTestCount(todayISO)+'件は非表示':'')+' · 端末内で追加・編集';}
 else{note.textContent='端末内の予定はありません · 右上の追加から登録';}
-yosDefaultStart();yosRefreshTestToggle();renderWeek();render();renderDayAllDay();updateReview();yosRenderSources();setCalendarMode('day');setInterval(updateNow,60000);
+yosDefaultStart();yosRefreshTestToggle();renderWeek();render();renderDayAllDay();updateReview();yosRenderSources();setCalendarMode('day');setInterval(updateNow,60000);setInterval(yosRenderLearningHints,60000);
 <\/script></body></html>`;
 
  const payload=JSON.stringify({days:state.days,hiddenCalendar:state.hiddenCalendar||{},calendarDays,allDayDays,calendarCoverage,taskSource,habitSource,generatedAt:new Date().toISOString()}).replace(/</g,'\\u003c');
