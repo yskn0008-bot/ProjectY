@@ -118,3 +118,10 @@ test('auto gap wiring uses full Apple calendar and never updates source',()=>{
  assert.match(source,/document\.getElementById\('yosOutingStart'\)\.value=gap\?fmt\(gap\.start\):''/);
  assert.doesNotMatch(block,/CalendarEvent\.save|fm\.writeString|Keychain\.set/);
 });
+
+test('editing a confirmed form field invalidates approval and prior preview immediately',()=>{
+ assert.match(source,/field\.oninput=invalidate/);
+ assert.match(source,/field\.onchange=invalidate/);
+ assert.match(source,/document\.getElementById\('yosOutingConfirmed'\)\.checked=false/);
+ assert.match(source,/yosManualPreview=null;yosOutingManualSetup\(\);yosRenderSources\(\)/);
+});
