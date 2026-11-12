@@ -1,28 +1,30 @@
-name: JOURNAL free voice sample (VOICEVOX Nemo)
+name: JOURNAL free voice for published issues (VOICEVOX Nemo)
 on:
   pull_request:
     paths:
       - 'scripts/journal_voicevox_demo.py'
       - '.github/workflows/journal-voice-sample.yml'
       - 'journal-v2/index.html'
+      - 'journal/editions/*.json'
   push:
     branches: [main]
     paths:
       - 'scripts/journal_voicevox_demo.py'
       - '.github/workflows/journal-voice-sample.yml'
+      - 'journal/editions/*.json'
   workflow_dispatch:
 
 permissions:
   contents: write
 
 concurrency:
-  group: journal-free-voice-sample
+  group: journal-free-voice-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
   free-voice-sample:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 45
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -31,12 +33,12 @@ jobs:
       - name: Launch free offline VOICEVOX Nemo engine
         run: |
           docker run -d --rm --name yos-voicevox-nemo -p 127.0.0.1:50121:50121 voicevox/voicevox_nemo_engine:cpu-0.26.0
-      - name: Install audio encoder and generate article 0 sample
+      - name: Generate free narrated summaries of all stories in the newest dated issue
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq ffmpeg
           python3 scripts/journal_voicevox_demo.py
-          ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1 journal/audio/2026-11-12/article-0.mp3
+          find journal/audio -name 'article-*.mp3' -type f -size +4k -print -exec ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1 {} \;
       - name: Diagnose free Nemo engine on failure
         if: failure()
         run: |
@@ -46,8 +48,8 @@ jobs:
       - name: Upload listening preview
         uses: actions/upload-artifact@v4
         with:
-          name: yos-journal-voicevox-nemo-sample
-          path: journal/audio/2026-11-12/article-0.mp3
+          name: yos-journal-voicevox-nemo-published-issue
+          path: journal/audio/**/*.mp3
           if-no-files-found: error
           retention-days: 7
       - name: Commit verified MP3 into this review branch (same-repo PR only)
@@ -55,26 +57,26 @@ jobs:
         env:
           PR_BRANCH: ${{ github.head_ref }}
         run: |
-          test -s journal/audio/2026-11-12/article-0.mp3
+          test -n "$(find journal/audio -type f -name 'article-*.mp3' -size +4k -print -quit)"
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           # The PR checkout may contain synthetic merge commits from GitHub.
           # Start at the latest actual branch and bring only the new MP3 across.
           git fetch origin "$PR_BRANCH"
           git switch --detach "origin/$PR_BRANCH"
-          git add journal/audio/2026-11-12/article-0.mp3
+          git add journal/audio/
           if git diff --cached --quiet; then
             echo "Audio already in review branch"
             exit 0
           fi
-          git commit -m 'journal: include verified free Nemo audio preview'
+          git commit -m 'journal: include verified free Nemo narrated issue'
           git push origin "HEAD:refs/heads/$PR_BRANCH"
       - name: Publish verified preview MP3 to existing Pages (main only)
         if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add journal/audio/2026-11-12/article-0.mp3
+          git add journal/audio/
           if git diff --cached --quiet; then exit 0; fi
-          git commit -m 'journal: publish free Nemo narration sample'
+          git commit -m 'journal: publish free Nemo narrated issue'
           git push origin HEAD:main
