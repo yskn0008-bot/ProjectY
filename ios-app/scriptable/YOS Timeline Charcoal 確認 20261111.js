@@ -936,7 +936,7 @@ function wireTaskGestures(el,item){
  el.addEventListener('contextmenu',e=>e.preventDefault());
  el.addEventListener('touchstart',e=>{if(e.touches.length===1)begin(e.touches[0].clientX,e.touches[0].clientY,'touch')},{passive:true});
  el.addEventListener('touchmove',e=>{if(active==='touch'&&e.touches.length)move(e.touches[0].clientX,e.touches[0].clientY,e)},{passive:false});
- el.addEventListener('touchend',e=>{if(active==='touch'){if(e.changedTouches?.length){lastX=e.changedTouches[0].clientX;lastY=e.changedTouches[0].clientY;}finish(false);}});
+ el.addEventListener('touchend',e=>{if(active==='touch'){if(e?.changedTouches?.length){lastX=e.changedTouches[0].clientX;lastY=e.changedTouches[0].clientY;}finish(false);}});
  el.addEventListener('touchcancel',()=>{if(active==='touch')finish(true)});
  el.addEventListener('pointerdown',e=>{if(e.pointerType==='touch'||e.button!==0)return;begin(e.clientX,e.clientY,e.pointerId);el.setPointerCapture?.(e.pointerId)});
  el.addEventListener('pointermove',e=>{if(active===e.pointerId)move(e.clientX,e.clientY,e)});
