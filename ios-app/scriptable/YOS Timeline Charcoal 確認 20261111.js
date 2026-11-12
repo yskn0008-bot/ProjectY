@@ -103,7 +103,7 @@ function yosReadOutingInput(raw,taskSource,coverage,now){
   if(!ids.has(id)||used.has(id)||!places.has(x?.placeId)||!Number.isInteger(x?.durationMinutes)||x.durationMinutes<5||x.durationMinutes>240)return empty;
   used.add(id);taskDetails.push({id,placeId:x.placeId,durationMinutes:x.durationMinutes});
  }
- return {context:{confirmed:true,calendarVerified:true,day,windowStart:raw.windowStart,windowEnd:raw.windowEnd,freeMinutes:raw.freeMinutes,route},taskDetails};
+ return {context:{confirmed:true,calendarVerified:true,issuedAt:raw.issuedAt,day,windowStart:raw.windowStart,windowEnd:raw.windowEnd,freeMinutes:raw.freeMinutes,route},taskDetails};
 }
 // YOS_OUTING_INPUT_BRIDGE_END
 
@@ -357,7 +357,9 @@ function yosRenderOuting(){
  list.textContent='';
  const current=new Date(),minute=current.getHours()*60+current.getMinutes();
   const context=boot.outingContext;
-  const live=!(context&&selectedDay===localISO(current)&&Number.isInteger(context.windowStart)&&context.windowStart<minute);
+  const issued=context?Date.parse(context.issuedAt||''):NaN;
+  const fresh=Number.isFinite(issued)&&issued<=current.getTime()+60000&&current.getTime()-issued<=300000;
+  const live=fresh&&!(selectedDay===localISO(current)&&Number.isInteger(context.windowStart)&&context.windowStart<minute);
   const result=yosOutingCandidates(outingTasks,live?context:null,items,selectedDay);
  label.textContent=result.reason;
  for(const candidate of result.proposals){
@@ -974,7 +976,7 @@ document.getElementById('closeFocus').onclick=()=>{zoom=null;deleteConfirmId=nul
 if(Array.isArray(stored)){note.textContent='保存済み時間割を表示 · Notion Tasks '+yosStatusWord(taskSource.status);}
 else if(calendarRows.length){note.textContent='Appleカレンダー '+calendarRows.length+'件を読み取り'+(yosTestCount(todayISO)?' · テスト'+yosTestCount(todayISO)+'件は非表示':'')+' · 端末内で追加・編集';}
 else{note.textContent='端末内の予定はありません · 右上の追加から登録';}
-yosDefaultStart();yosRefreshTestToggle();renderWeek();render();renderDayAllDay();updateReview();yosRenderSources();setCalendarMode('day');setInterval(updateNow,60000);
+yosDefaultStart();yosRefreshTestToggle();renderWeek();render();renderDayAllDay();updateReview();yosRenderSources();setCalendarMode('day');setInterval(()=>{updateNow();if(document.getElementById('yosOutingPanel').classList.contains('show'))yosRenderOuting();},60000);
 <\/script></body></html>`;
 
  const payload=JSON.stringify({days:state.days,hiddenCalendar:state.hiddenCalendar||{},calendarDays,allDayDays,calendarCoverage,taskSource,habitSource,outingContext:outingInput.context,outingTaskDetails:outingInput.taskDetails,generatedAt:new Date().toISOString()}).replace(/</g,'\\u003c');
