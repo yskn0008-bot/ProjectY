@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-12T23:15:57+09:00",
+  "updated_at": "2026-11-12T23:17:46+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -21,6 +21,16 @@
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/700",
       "updated_at": "2026-11-12T04:20:54Z"
+    },
+    {
+      "id": "github-pr-654",
+      "title": "PR #654 YOS Calendar: mobile-first unified calendar preview (read-only)",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/654",
+      "updated_at": "2026-11-11T10:08:02Z"
     },
     {
       "id": "github-pr-664",
@@ -80,17 +90,7 @@
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/701",
-      "updated_at": "2026-11-12T14:14:14Z"
-    },
-    {
-      "id": "github-pr-704",
-      "title": "PR #704 feat(alerts): Pages-only dense history UI without Cloud Run",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/704",
-      "updated_at": "2026-11-12T14:14:21Z"
+      "updated_at": "2026-11-12T14:16:53Z"
     },
     {
       "id": "github-pr-705",
@@ -110,7 +110,7 @@
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/716",
-      "updated_at": "2026-11-12T14:15:17Z"
+      "updated_at": "2026-11-12T14:17:10Z"
     },
     {
       "id": "github-issue-10",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-12T14:14:41Z"
+      "updated_at": "2026-11-12T14:17:03Z"
     },
     {
       "id": "github-issue-234",
@@ -205,6 +205,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-5a2ebe3acd3b",
+      "title": "feat(alerts): publish Pages-only notification history UI",
+      "completed_at": "2026-11-12T14:16:55Z",
+      "result": "GitHub mainへ反映（5a2ebe3）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/5a2ebe3acd3bba51b5d07485f60241889c0bfe4f"
+    },
+    {
       "id": "github-commit-1cab915f7626",
       "title": "chore(yos-ai): retry deferred approved release (1/4)",
       "completed_at": "2026-11-12T12:37:34Z",
@@ -231,13 +238,6 @@
       "completed_at": "2026-11-12T07:12:32Z",
       "result": "GitHub mainへ反映（869abb1）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/869abb14555adc107eb7d963c6d4d5945bc0959a"
-    },
-    {
-      "id": "github-commit-7c889a786247",
-      "title": "fix(journal): reliable clean reader and dated editions",
-      "completed_at": "2026-11-12T04:48:06Z",
-      "result": "GitHub mainへ反映（7c889a7）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/7c889a7862474b183b0f733a3aea62894b626280"
     },
     {
       "id": "complete-002",
@@ -274,7 +274,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-12T23:15:57+09:00",
+      "last_update": "2026-11-12T23:17:46+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -349,13 +349,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 9件・Open PR 52件を自動同期中",
+      "next_action": "Open Issue 9件・Open PR 51件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-12T23:15:57+09:00",
+      "last_update": "2026-11-12T23:17:46+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -378,7 +378,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-12T23:15:57+09:00",
+      "last_update": "2026-11-12T23:17:46+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -460,5 +460,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "e123429c76258700590b639d1c776b089b7dcc128a9a1c5684a8fc8c85f1a1bf"
+  "github_snapshot_hash": "e65667aeff342926f9ef600c6567e3d814ba4e4a4455d27107b26b417d9fc5dc"
 }
