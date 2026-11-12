@@ -95,10 +95,10 @@ function node(tag,cls,s){var el=document.createElement(tag);if(cls)el.className=
 function message(s){$('message').textContent=s}
 function render(){
 var counts={action:0,wait:0,done:0};rows.forEach(function(e){counts[label(e)[1]]++});
-$('countAction').textContent=rows.length?counts.action:'—';$('countWaiting').textContent=rows.length?counts.wait:'—';$('countSaved').textContent=rows.length?counts.done:'—';
+$('countAction').textContent=lastComplete||rows.length?counts.action:'—';$('countWaiting').textContent=lastComplete||rows.length?counts.wait:'—';$('countSaved').textContent=lastComplete||rows.length?counts.done:'—';
 var q=$('search').value.toLowerCase().trim(),v=rows.filter(function(e){return (active==='all'||label(e)[1]===active)&&(!q||(summary(e)+' '+(category[e.category]||'通知')).toLowerCase().includes(q))});
 var holder=$('events');holder.replaceChildren();var day='';
-if(!v.length){holder.append(node('p','empty',rows.length?'該当する通知はありません':'通知はまだ取得されていません'));return}
+if(!v.length){holder.append(node('p','empty',rows.length?'該当する通知はありません':lastComplete?'通知履歴はありません':'通知はまだ取得されていません'));return}
 v.forEach(function(e){
 var current=fmt(e.at,{year:'numeric',month:'2-digit',day:'2-digit'}),state=label(e);
 if(current!==day){day=current;holder.append(node('div','day',day))}
