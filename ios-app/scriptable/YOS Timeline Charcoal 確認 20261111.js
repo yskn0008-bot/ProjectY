@@ -331,14 +331,24 @@ function yosOutingCandidates(tasks,context,occupied,day){
   candidates.push({id:t.id,title:t.title,placeId:t.placeId,order:r.order,minutes:cost,taskMinutes:t.durationMinutes,detourMinutes:r.detourMinutes,due:t.due||'',priority:t.priority||'',reason:'経路上の確認済み立寄り先・営業確認済み・所要 '+t.durationMinutes+'分＋寄り道 '+r.detourMinutes+'分'+(t.due?'・期限 '+t.due:'')});
  }
  candidates.sort((a,b)=>a.order-b.order||String(a.due||'9999').localeCompare(String(b.due||'9999'))||({P0:0,P1:1,P2:2,P3:3}[a.priority]??4)-({P0:0,P1:1,P2:2,P3:3}[b.priority]??4)||a.id.localeCompare(b.id));
+ // Every occupied block must be trustworthy. Unknown calendar time => no proposals.
+ if(occupied.some(x=>!x||!Number.isInteger(x.s)||!Number.isInteger(x.d)||x.d<=0||x.s<0||x.s+x.d>1440)){
+  result.reason='予定時刻の確認に失敗したため、ついで行動は提案しません。';result.proposals=[];return result;
+ }
+ const busy=occupied.map(x=>({start:x.s,end:x.s+x.d})).sort((a,b)=>a.start-b.start);
  let budget=Math.min(context.freeMinutes,context.windowEnd-context.windowStart),cursor=context.windowStart;
  for(const c of candidates){
-  const end=cursor+c.minutes;
-  if(c.minutes>budget||end>context.windowEnd){result.excluded.push({id:c.id,reason:'先行候補を含めると時間不足'});continue;}
-  if(occupied.some(x=>x&&Number.isFinite(x.s)&&Number.isFinite(x.d)&&x.d>0&&cursor<x.s+x.d&&x.s<end)){
-   result.excluded.push({id:c.id,reason:'既存の確定・端末内予定に時間衝突'});continue;
+  if(c.minutes>budget){result.excluded.push({id:c.id,reason:'確認済みの空き時間を超える'});continue;}
+  // Preserve every fixed item. Move only the proposed stop to the next free gap.
+  let next=cursor;
+  for(const block of busy){
+   if(next+c.minutes<=block.start)break;
+   if(next>=block.end)continue;
+   next=block.end;
   }
-  result.proposals.push({...c,start:cursor,end});cursor=end;budget-=c.minutes;
+  if(next+c.minutes>context.windowEnd){result.excluded.push({id:c.id,reason:'確定予定を避けると収まらない'});continue;}
+  result.proposals.push({...c,start:next,end:next+c.minutes});
+  cursor=next+c.minutes;budget-=c.minutes;
  }
  result.reason=result.proposals.length?'確定予定・Notion原本には反映しない読み取り専用の提案です。':'条件を確認できる予定外タスクはありません。';
  return result;
