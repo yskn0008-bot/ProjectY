@@ -23,12 +23,13 @@ jobs:
         run: |
           set -euo pipefail
           node --check 'tools/yos-journal/YOS Journal Notion Bridge.js'
+          node --check 'tools/yos-journal/YOS Journal Book.js'
           python3 - <<'PY'
           from pathlib import Path
           source=Path('tools/yos-journal/YOS 日記.cherri').read_text()
           bridge=Path('tools/yos-journal/YOS Journal Notion Bridge.js').read_text()
           assert '#define name YOS 日記' in source
-          assert 'scriptable:///run?scriptName=YOS%20Journal%20Notion%20Bridge' in source
+          assert 'scriptable:///run?scriptName=YOS%20Journal%20Book' in source
           assert 'YOS_NOTION_INTEGRATION_TOKEN' not in source
           assert 'Bearer ' not in source
           assert 'Bearer '+'' not in source
@@ -76,7 +77,7 @@ jobs:
           ids=[a.get('WFWorkflowActionIdentifier','') for a in data.get('WFWorkflowActions',[])]
           blob=repr(data)
           assert ids.count('is.workflow.actions.askllm') == 8, ids
-          assert ids.count('is.workflow.actions.ask') == 7, ids
+          assert ids.count('is.workflow.actions.ask') == 6, ids
           assert 'YOS Journal Questions' in blob
           assert 'すでに提示済みの問い' in blob
           assert 'この実行ですでに聞いた2問' in blob
@@ -94,7 +95,7 @@ jobs:
           assert '空欄ならここで終わり' in blob
           assert ids.count('is.workflow.actions.openurl') == 1, ids
           assert ids.count('com.apple.journal.CreateEntryIntent') == 0
-          assert 'scriptable:///run?scriptName=YOS%20Journal%20Notion%20Bridge' in blob
+          assert 'scriptable:///run?scriptName=YOS%20Journal%20Book' in blob
           assert 'YOS_NOTION_INTEGRATION_TOKEN' not in blob
           assert 'YOS Journal Pending' in blob
           print('YOS 日記 independent shortcut contract: PASS',len(ids),'actions')
