@@ -41,8 +41,8 @@
       "id": "screenshot-bridge",
       "name": "YOS Screenshot Bridge",
       "path": "ios-app/scriptable/YOS Screenshot Bridge.js",
-      "commit": "99a54fa598891b4eb0174d817cc67ff2b65bc613",
-      "sha256": "4a0b372363ff30c0f26053924ee752a2f95746b13953aab795d6af72c197ebe0"
+      "commit": "51a4412d9a7e075c72e8c243761093dbc50bbf0f",
+      "sha256": "7769a730fbf3e013d92b2143b06808b7a7af84c74cf11e4e539bd4707b774ab8"
     }
   ]
 }
