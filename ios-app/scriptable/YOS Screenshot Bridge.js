@@ -1,3 +1,6 @@
+// Variables used by Scriptable.
+// icon-color: gray; icon-glyph: camera;
+// YOS_SCRIPT_NAME: YOS Screenshot Bridge
 // YOS Screenshot Bridge — draft client, not installed or verified on iPhone.
 // Shortcut must explicitly pass a JSON string containing the screenshot bytes.
 // Never infer the image from the latest photo or clipboard.
