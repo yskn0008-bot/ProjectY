@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-12T09:01:48+09:00",
+  "updated_at": "2026-11-12T09:03:27+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -12,16 +12,6 @@
     ]
   },
   "inbox": [
-    {
-      "id": "github-pr-651",
-      "title": "PR #651 YOS Notification v0.3: protected capture, live Notion context and safe iPhone updater",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/651",
-      "updated_at": "2026-11-06T16:58:12Z"
-    },
     {
       "id": "github-pr-654",
       "title": "PR #654 YOS Calendar: mobile-first unified calendar preview (read-only)",
@@ -51,26 +41,6 @@
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/664",
       "updated_at": "2026-11-11T19:58:32Z"
-    },
-    {
-      "id": "github-pr-665",
-      "title": "PR #665 YOS｜Scriptableなしの通知受信・Inbox保存・通知ボックス",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/665",
-      "updated_at": "2026-11-07T16:42:20Z"
-    },
-    {
-      "id": "github-pr-667",
-      "title": "PR #667 YOS Timeline: approved charcoal-gray design and daily interactions",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/667",
-      "updated_at": "2026-11-07T22:16:52Z"
     },
     {
       "id": "github-pr-668",
@@ -110,7 +80,37 @@
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/684",
-      "updated_at": "2026-11-12T00:01:14Z"
+      "updated_at": "2026-11-12T00:01:52Z"
+    },
+    {
+      "id": "github-pr-685",
+      "title": "PR #685 WIP #683: iPhone screenshot intake validation foundation",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/685",
+      "updated_at": "2026-11-12T00:02:32Z"
+    },
+    {
+      "id": "github-pr-686",
+      "title": "PR #686 [YOS 生活学習] 確認済み履歴だけを使う非破壊の提案エンジン（試作）",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/686",
+      "updated_at": "2026-11-12T00:02:18Z"
+    },
+    {
+      "id": "github-pr-687",
+      "title": "PR #687 feat(daystream): 読取専用ついで行動候補と保守的な経路順提案",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/687",
+      "updated_at": "2026-11-12T00:02:32Z"
     },
     {
       "id": "github-issue-10",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-12T00:00:47Z"
+      "updated_at": "2026-11-12T00:02:34Z"
     },
     {
       "id": "github-issue-234",
@@ -274,7 +274,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-12T09:01:48+09:00",
+      "last_update": "2026-11-12T09:03:27+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -349,13 +349,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 9件・Open PR 46件を自動同期中",
+      "next_action": "Open Issue 9件・Open PR 49件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-12T09:01:48+09:00",
+      "last_update": "2026-11-12T09:03:27+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -378,7 +378,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-12T09:01:48+09:00",
+      "last_update": "2026-11-12T09:03:27+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -460,5 +460,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "63bba3adda8c76ee296310c4f55116444d7dd150f516ac24b6cdf88678286a86"
+  "github_snapshot_hash": "d73dd1b04ea1efc3fc54e75e142c9f73007d73196f65ff117aeae6092680dec1"
 }
