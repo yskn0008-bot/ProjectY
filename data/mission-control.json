@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-12T16:13:05+09:00",
+  "updated_at": "2026-11-12T16:28:18+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -31,16 +31,6 @@
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/664",
       "updated_at": "2026-11-11T19:58:32Z"
-    },
-    {
-      "id": "github-pr-668",
-      "title": "PR #668 test: isolate native notification backend on last READY production commit",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/668",
-      "updated_at": "2026-11-11T10:30:36Z"
     },
     {
       "id": "github-pr-685",
@@ -111,6 +101,16 @@
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/705",
       "updated_at": "2026-11-12T04:31:34Z"
+    },
+    {
+      "id": "github-pr-714",
+      "title": "PR #714 feat(journal): Japanese narration and photo headline links in Morning",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/714",
+      "updated_at": "2026-11-12T07:27:49Z"
     },
     {
       "id": "github-issue-10",
@@ -274,7 +274,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-12T16:13:05+09:00",
+      "last_update": "2026-11-12T16:28:18+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -349,13 +349,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 9件・Open PR 52件を自動同期中",
+      "next_action": "Open Issue 9件・Open PR 53件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-12T16:13:05+09:00",
+      "last_update": "2026-11-12T16:28:18+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -378,7 +378,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-12T16:13:05+09:00",
+      "last_update": "2026-11-12T16:28:18+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -460,5 +460,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "4f76d2903981adacbe43a7c11b2ad25e45e42e6a1cc094f267c0a19f6d8f5a15"
+  "github_snapshot_hash": "e05287876ce015110e10d01839b3da8e3eeb298f8fe8c83f3949074cb3294d25"
 }
