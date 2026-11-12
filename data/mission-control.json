@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-12T13:39:40+09:00",
+  "updated_at": "2026-11-12T13:41:39+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -31,16 +31,6 @@
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/685",
       "updated_at": "2026-11-12T04:25:57Z"
-    },
-    {
-      "id": "github-pr-688",
-      "title": "PR #688 feat(alerts): dense notification history in existing STREAM (draft)",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/688",
-      "updated_at": "2026-11-12T00:15:47Z"
     },
     {
       "id": "github-pr-692",
@@ -90,7 +80,7 @@
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/704",
-      "updated_at": "2026-11-12T04:39:03Z"
+      "updated_at": "2026-11-12T04:40:24Z"
     },
     {
       "id": "github-pr-705",
@@ -113,6 +103,16 @@
       "updated_at": "2026-11-12T04:36:20Z"
     },
     {
+      "id": "github-pr-711",
+      "title": "PR #711 feat(daystream): 現行画面を保護して生活学習期限カードを統合（最新main）",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/711",
+      "updated_at": "2026-11-12T04:40:56Z"
+    },
+    {
       "id": "github-issue-10",
       "title": "Issue #10 Mission Control v2：GitHubのIssue・PR・Commitを自動集約する",
       "type": "GitHub Issue",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-12T04:38:47Z"
+      "updated_at": "2026-11-12T04:41:05Z"
     },
     {
       "id": "github-issue-234",
@@ -274,7 +274,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-12T13:39:40+09:00",
+      "last_update": "2026-11-12T13:41:39+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -349,13 +349,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 9件・Open PR 54件を自動同期中",
+      "next_action": "Open Issue 9件・Open PR 55件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-12T13:39:40+09:00",
+      "last_update": "2026-11-12T13:41:39+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -378,7 +378,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-12T13:39:40+09:00",
+      "last_update": "2026-11-12T13:41:39+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -460,5 +460,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "a4ba366e824f9ccd82850dafe46afc82f464ac595688ba7276ddd3e7e82c134e"
+  "github_snapshot_hash": "407b759b7531bf5a2d70cd95b91cb9f82c7db4df548dacca05a2ddc5ee0e06bb"
 }
