@@ -4,10 +4,12 @@ import test from 'node:test';
 import ts from 'typescript';
 
 const source = readFileSync(new URL('../src/intake/screenshot-capture.ts', import.meta.url), 'utf8');
-const js = ts.transpileModule(source.replace('export function parseScreenshotCapture', 'function parseScreenshotCapture'), {
-  compilerOptions: {target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.None}
+const js = ts.transpileModule(source, {
+  compilerOptions: {target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS}
 }).outputText;
-const parse = new Function(js + '\nreturn parseScreenshotCapture;')();
+const moduleExports = {};
+new Function('exports', js)(moduleExports);
+const parse = moduleExports.parseScreenshotCapture;
 
 const valid = {
   captureId: 'screenshot-12345678',
