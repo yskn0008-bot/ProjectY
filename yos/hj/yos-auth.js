@@ -28,6 +28,17 @@
   }
 
   async function providerBases(route) {
+    // Notification history explicitly selects a certified Cloud Run endpoint.
+    // Keep other YOS screens' existing provider routing unchanged.
+    if (route === 'public-config' && typeof globalThis.YOS_AUTH_PUBLIC_CONFIG_BASE_URL === 'string') {
+      try {
+        const explicit = new URL(globalThis.YOS_AUTH_PUBLIC_CONFIG_BASE_URL);
+        if (explicit.protocol === 'https:' && !explicit.username && !explicit.password &&
+            !explicit.search && !explicit.hash && explicit.pathname === '/' &&
+            explicit.hostname.endsWith('.run.app')) return [explicit.origin];
+      } catch {}
+      throw new Error('Explicit notification authentication endpoint is invalid');
+    }
     const router = globalThis.YOS_RUNTIME_PROVIDERS;
     if (router && typeof router.getBaseUrls === 'function') {
       const values = await router.getBaseUrls(route);
