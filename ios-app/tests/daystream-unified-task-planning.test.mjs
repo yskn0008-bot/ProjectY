@@ -574,3 +574,51 @@ test('fluid drag uses frame batching, a stable 2D release animation and respects
  assert.match(js,/scaleX\('\+sx\+'\)/);
  assert.match(js,/duration:340,easing:'cubic-bezier\(\.22,1,\.36,1\)'/);
 });
+
+
+test('task cards use compact pop typography, adjacent larger time and preserve real-hour scale',()=>{
+ const rendered=Function('return '+String.fromCharCode(96)+html+String.fromCharCode(96))();
+ const js=rendered.split('<script>')[1]?.split('</script>')[0]||'';
+ assert.match(rendered,/\.card\.task \.task-copy\{display:flex;flex-direction:column;align-items:flex-start/);
+ assert.match(rendered,/\.card\.task \.task-copy b\{font-size:13\.5px/);
+ assert.match(rendered,/\.card\.task \.task-copy small\{font-size:11\.5px/);
+ assert.match(rendered,/\.card\.task\.lane \.task-copy small\{display:block;margin:0;font-size:10\.5px\}/);
+ assert.match(js,/copy\.className='task-copy';copy\.append\(titleEl,timeEl\)/);
+ assert.match(js,/let density='overview',scale=27/);
+ assert.match(js,/const yFor=m=>m\/60\*scale/);
+ assert.ok(!js.includes('expandHourSlotAutomatically'));
+});
+test('local edit sheet does not scroll page, clarifies duration and displays computed end time',()=>{
+ const rendered=Function('return '+String.fromCharCode(96)+html+String.fromCharCode(96))();
+ const js=rendered.split('<script>')[1]?.split('</script>')[0]||'';
+ assert.match(rendered,/class="editor-backdrop"/);
+ assert.match(rendered,/\.editor\{display:none;position:fixed;z-index:25;top:50%/);
+ assert.match(rendered,/id="newDuration"[^>]*aria-label="所要時間（分）"/);
+ assert.match(rendered,/class="duration-control"/);
+ assert.match(rendered,/id="editEnd"/);
+ assert.match(js,/el\.textContent=end<=1440\?'終了予定：'\+fmt\(end\)/);
+ assert.match(js,/function beginLocalEdit\(item,shortcutFocus=false\)/);
+ const start=js.indexOf('function beginLocalEdit('),end=js.indexOf('function updateShortcutField()',start);
+ assert.ok(start>0&&end>start);
+ assert.ok(!js.slice(start,end).includes("editor.scrollIntoView"));
+ assert.match(js,/document\.getElementById\('editorBackdrop'\)\.onclick=closeEditor/);
+});
+test('saved Shortcuts picker lists only known linked names and keeps manual entry fallback',()=>{
+ const rendered=Function('return '+String.fromCharCode(96)+html+String.fromCharCode(96))();
+ const js=rendered.split('<script>')[1]?.split('</script>')[0]||'';
+ assert.match(rendered,/id="shortcutPicker"/);
+ assert.match(js,/const known=\[\.\.\.new Set\(items\.map\(x=>typeof x\.shortcut==='string'\?x\.shortcut\.trim\(\):''\)\.filter\(Boolean\)\)\]/);
+ assert.match(js,/picker\.hidden=known\.length===0/);
+ assert.match(js,/document\.getElementById\('shortcutPicker'\)\.onchange/);
+ assert.match(js,/document\.getElementById\('newShortcut'\)\.oninput=\(\)=>\{refreshShortcutPicker\(\)/);
+ assert.match(rendered,/id="newShortcut"/);
+});
+test('horizontal task swipe paints at display frame-rate and eases back into place',()=>{
+ const rendered=Function('return '+String.fromCharCode(96)+html+String.fromCharCode(96))();
+ const js=rendered.split('<script>')[1]?.split('</script>')[0]||'';
+ assert.match(js,/const paintSwipe=\(\)=>\{swipeFrame=0/);
+ assert.match(js,/requestAnimationFrame\(paintSwipe\)/);
+ assert.match(js,/cancelAnimationFrame\(swipeFrame\)/);
+ assert.match(js,/transform \.26s cubic-bezier\(\.22,1,\.36,1\)/);
+ assert.match(js,/showSwipeDelete\(item\)/);
+});
