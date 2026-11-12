@@ -1,13 +1,19 @@
-<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#353a44"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="DAYSTREAM"><link rel="manifest" href="./manifest.webmanifest"><title>DAYSTREAM｜YOS Web</title><style>
-.yos-web-port{position:relative;z-index:300;display:flex;align-items:center;gap:7px;flex-wrap:wrap;padding:calc(env(safe-area-inset-top) + 8px) 12px 8px;background:#262c35;color:#f5f7fb;border-bottom:1px solid #666e7d;font:12px -apple-system,BlinkMacSystemFont,sans-serif}
-.yos-web-port a,.yos-web-port button{color:#e6edf9;border:1px solid #727f94;border-radius:8px;background:#414958;padding:7px 10px;text-decoration:none;font-weight:600}
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#353a44"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="DAYSTREAM"><link rel="manifest" href="./manifest.webmanifest"><title>DAYSTREAM｜YOS Web</title><style>
+.yos-web-port{position:relative;z-index:300;display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:calc(env(safe-area-inset-top) + 8px) 16px 12px;background:#262c35;color:#f5f7fb;border-bottom:1px solid #667080;font:12px -apple-system,BlinkMacSystemFont,sans-serif;filter:none;-webkit-filter:none;backdrop-filter:none;-webkit-backdrop-filter:none;opacity:1;box-shadow:none}
+.yos-web-port a,.yos-web-port button{color:#f3f6ff;border:1px solid #778395;border-radius:9px;background:#414958;padding:8px 11px;text-decoration:none;font-weight:650;opacity:1;filter:none;backdrop-filter:none;-webkit-backdrop-filter:none;box-shadow:none}
 .yos-web-port strong{font-size:12px;margin-right:auto;letter-spacing:.05em}
-.yos-web-port-note{width:100%;font-size:10px;opacity:.8;line-height:1.5}
+.yos-web-port-note{width:100%;font-size:11px;opacity:1;color:#d4dce8;line-height:1.55}
 .yos-web-port-dialog{background:#292f3a;color:#edf4ff;padding:12px;font:13px -apple-system,BlinkMacSystemFont,sans-serif}
 .yos-web-port-dialog[hidden]{display:none}
 .yos-web-port-dialog button{color:#edf4ff;background:#414958;border:1px solid #66758b;border-radius:8px;padding:9px;margin:4px}
 .yos-web-port-dialog p{line-height:1.6}
-</style><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no"><style>
+</style><style>
+/* DAYSTREAM Web: cover iOS standalone status bar and avoid duplicate safe-area spacing. */
+html{background:#262c35!important}
+body.yos-daystream-web{background:#353a44;min-height:100svh}
+body.yos-daystream-web .app{padding-top:18px}
+body.yos-daystream-web .yos-web-port{background:#262c35}
+@supports (min-height:100dvh){body.yos-daystream-web{min-height:100dvh}}
 :root{--bg:#353a44;--bg2:#3c414b;--text:#f5f7fb;--muted:#ccd3dd;--line:#a4aeba;--blue:#2b7db9;--green:#24966d;--violet:#833baf}
 *{box-sizing:border-box}
 html,body{margin:0;min-height:100%;background:radial-gradient(ellipse at 66% 6%,#464b56 0%,#353a44 50%,#30353f 100%);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif;font-size:14px;-webkit-font-smoothing:antialiased}
@@ -56,7 +62,7 @@ button:active{opacity:.8}@media(min-width:640px){.dock{left:calc((100vw - 640px)
 .yos-learning-live-row strong{font-size:13px;overflow-wrap:anywhere}
 .yos-learning-live-row small{font-size:11px;color:#d3dae5}
 .yos-learning-live-row button{font-size:11px;border-radius:8px;border:1px solid #8eb8d6;background:#285d7c;color:#fff;padding:7px 10px;flex:none}
-</style></head><body><div class="yos-web-port" role="navigation" aria-label="DAYSTREAM Web版">
+</style></head><body class="yos-daystream-web"><div class="yos-web-port" role="navigation" aria-label="DAYSTREAM Web版">
 <a href="../">YOS</a><strong>DAYSTREAM · WEB</strong>
 <button id="yosWebImport" type="button">データ読込</button><button id="yosWebExport" type="button">書き出し</button>
 <button id="yosWebHistory" type="button">行動学習</button>
