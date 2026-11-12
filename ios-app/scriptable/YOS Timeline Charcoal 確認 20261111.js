@@ -908,7 +908,13 @@ function wireTaskGestures(el,item){
  };
  const finish=cancelled=>{
   if(active===null)return;
-  active=null;clearTimer();clearPaint();const previousRect=mode==='drag'&&!cancelled?el.getBoundingClientRect():null;
+  // The last touch can arrive after the previous paint frame. Match the finger
+  // before measuring the release rectangle so the card never jumps backwards.
+  if(mode==='drag'&&!cancelled){
+   el.style.transform='translate3d(0,'+(lastY-startY)+'px,0)';
+  }
+  const previousRect=mode==='drag'&&!cancelled?el.getBoundingClientRect():null;
+  active=null;clearTimer();clearPaint();
   if(mode==='swipe'){el.style.transition='transform .26s cubic-bezier(.22,1,.36,1)';el.style.transform='translate3d(0,0,0)';}
   else el.style.transform='';
   el.classList.remove('drag-preview');
@@ -946,9 +952,10 @@ function smoothRender(activeId,oldActiveRect){
   const old=before.get(n.dataset.id);if(!old||typeof n.animate!=='function')return;
   const now=n.getBoundingClientRect();
   const dx=old.left-now.left,dy=old.top-now.top;
-  const sx=old.width&&now.width?old.width/now.width:1;
-  if(Math.abs(dx)<.5&&Math.abs(dy)<.5&&Math.abs(sx-1)<.01)return;
-  n.animate([{transform:'translate3d('+dx+'px,'+dy+'px,0) scaleX('+sx+')',opacity:.88},{transform:'translate3d(0,0,0) scaleX(1)',opacity:1}],{duration:340,easing:'cubic-bezier(.22,1,.36,1)'});
+  if(Math.abs(dx)<.5&&Math.abs(dy)<.5)return;
+  // Translation only: scaling the task text/lane width was perceived as jitter.
+  // Respect the new lane geometry immediately; move only its position.
+  n.animate([{transform:'translate3d('+dx+'px,'+dy+'px,0)'},{transform:'translate3d(0,0,0)'}],{duration:235,easing:'cubic-bezier(.22,1,.36,1)'});
  });
 }
 function render(){
