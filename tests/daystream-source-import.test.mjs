@@ -93,6 +93,12 @@ test('one portable backup includes schedule, starts, completions and read-only i
  const old=a.normalizeTasks({items:[]});old.checkedAt='2026-01-01T00:00:00.000Z';
  assert.equal(a.validSaved(old,'tasks'),false);
  assert.equal(a.validSaved(old,'tasks',3650),true);
+ const authArchive={schema:'yos-daystream-source-snapshot-v1',kind:'tasks',status:'partial',source:'yos-auth-cache',checkedAt:new Date(Date.now()-86400000).toISOString(),items:[]};
+ assert.equal(a.validSaved(authArchive,'tasks'),false,'stale auth data is not live');
+ assert.equal(a.validSaved(authArchive,'tasks',3650),false,'large retention alone does not bypass live-source freshness');
+ assert.equal(a.validSaved(authArchive,'tasks',3650,true),true,'the full backup can restore archived source data');
+ assert.match(html,/sourceAdapters\.validSaved\(v,kinds\[i\],3650,true\)/);
+
 });
 
 test('fresh existing authenticated YOS task cache is reused read-only but stale cache is refused',()=>{
