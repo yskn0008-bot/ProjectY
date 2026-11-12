@@ -36,7 +36,7 @@ export function evaluateLifeLearning({records=[],tasks=[],interruptions=[],now,p
   }
   // Repeated sequence must be supported by at least 3 distinct days of recorded executions.
   const pairs=new Map(); const grouped=new Map();
-  for(const e of events.filter(x=>x.action==='executed' && x.confirmed===true && typeof x.taskId==='string' && /^\d{4}-\d{2}-\d{2}$/.test(x.day||'') && new Date(x.atMs).toISOString().slice(0,10)===x.day)) {
+  for(const e of events.filter(x=>x.action==='executed' && x.confirmed===true && typeof x.taskId==='string' && /^\d{4}-\d{2}-\d{2}$/.test(x.day||'') && x.at.slice(0,10)===x.day)) {
     const a=grouped.get(e.day)||[];a.push(e);grouped.set(e.day,a);
   }
   for(const [day,es] of grouped){
