@@ -201,7 +201,12 @@ function draw(issue){
  if(!articles.length)throw Error('出典リンク付きの記事がありません');
  issueKey=String(issue.issuedOn||issue.date||'unknown');
  const parts=[],starts=[];
- parts.push(shell('cover magazine-cover','<div class="cover-top"><span>YOS / PERSONAL EDITION</span><span>11.12 · 2026</span></div><div class="brand">YOS<br>JOURNAL<span class="brand-dot">.</span></div><div class="cover-art"><div class="cover-motif">JAZZ<span>AT THE SEASIDE</span></div></div><div class="cover-bottom"><div class="cover-line">WEEKEND CULTURE <span>NO. 01</span></div><h1>土曜、<br>街がジャズになる。</h1><p>美浜の海風と音楽を巡る、週末ガイド。</p><div class="cover-foot"><span>'+esc(issue.date||'発行日未確認')+'</span><span>'+articles.length+' STORIES INSIDE</span></div></div>'));
+ const jazzSpecial=issue.issuedOn==='2026-11-12'&&articles.some(a=>/ジャズ|MIHAMA/.test(a.title));
+ const coverHeadline=jazzSpecial?'土曜、<br>街がジャズになる。':esc(issue.headline||articles[0].title);
+ const coverCopy=jazzSpecial?'美浜の海風と音楽を巡る、週末ガイド。':esc(issue.lead||'今日、読む価値のある情報を。');
+ const coverTheme=jazzSpecial?'JAZZ':'TODAY';
+ const coverN=jazzSpecial?'WEEKEND CULTURE':'PERSONAL EDITION';
+ parts.push(shell('cover magazine-cover','<div class="cover-top"><span>YOS / PERSONAL EDITION</span><span>'+esc(issue.issuedOn||'DAILY')+'</span></div><div class="brand">YOS<br>JOURNAL<span class="brand-dot">.</span></div><div class="cover-art"><div class="cover-motif">'+coverTheme+'<span>'+(jazzSpecial?'AT THE SEASIDE':'MADE FOR ONE')+'</span></div></div><div class="cover-bottom"><div class="cover-line">'+coverN+' <span>NO. 01</span></div><h1>'+coverHeadline+'</h1><p>'+coverCopy+'</p><div class="cover-foot"><span>'+esc(issue.date||'発行日未確認')+'</span><span>'+articles.length+' STORIES INSIDE</span></div></div>'));
  parts.push('CONTENTS_PLACEHOLDER');
  for(let i=0;i<articles.length;i++){starts.push(parts.length);addArticle(parts,articles[i],i,issue)}
  parts[1]=shell('contents','<div class="kicker">READ / SELECT</div><h2>今日は、こんな話。</h2>'+articles.map((a,i)=>'<button class="toc" data-go="'+starts[i]+'"><span class="number">'+String(i+1).padStart(2,'0')+'</span><span class="detail"><small>'+esc(a.category||'FEATURE')+'</small><strong>'+esc(a.title)+'</strong></span><span class="chevron">›</span></button>').join('')+'<div class="fill"></div><div class="folio">'+esc(issue.date||'')+'</div>');
