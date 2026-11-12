@@ -390,6 +390,7 @@ test('task gestures support tap, confirmed swipe delete, drag time shift, long p
  const code=[
  "const document=globalDocument,stats=globalStats,focus={classList:{remove(){}}},note={textContent:''};",
  "let swipeDeleteId=null,items=[globalLocal,globalOther],scale=60;",
+ "const yFor=m=>m/60*scale,minuteAtY=y=>y/scale*60;",
  "const fmt=m=>String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0');",
  "const persist=()=>{stats.saves++;return true};",
  "const smoothRender=()=>{stats.renders++},updateReview=()=>{stats.reviews++},beginLocalEdit=item=>stats.edits.push(item.id);",
@@ -585,7 +586,7 @@ test('task cards use compact pop typography, adjacent larger time and preserve r
  assert.match(rendered,/\.card\.task\.lane \.task-copy small\{display:block;margin:0;font-size:10\.5px\}/);
  assert.match(js,/copy\.className='task-copy';copy\.append\(titleEl,timeEl\)/);
  assert.match(js,/let density='overview',scale=27/);
- assert.match(js,/const yFor=m=>m\/60\*scale/);
+ assert.match(js,/const yFor=m=>elasticEnabled&&elasticAxis\?elasticAxis\.coordinate\(m\):m\/60\*scale/);
  assert.ok(!js.includes('expandHourSlotAutomatically'));
 });
 test('local edit sheet does not scroll page, clarifies duration and displays computed end time',()=>{
