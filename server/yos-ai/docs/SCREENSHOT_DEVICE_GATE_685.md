@@ -16,11 +16,12 @@ Apple confirms iOS screenshot automations fire when a screenshot is **saved** to
 
 ## Capture binding (fail closed)
 1. Reuse the existing Screenshot -> Photos automation. Keep the unrelated Notification automation unchanged.
-2. Obtain the screenshot *from the automation input* if iOS provides the actual image. If it does not, prefer a scoped 'Get Latest Screenshots' query with count 1 **and verify its creation timestamp against the trigger**. Reject empty/multiple/old/ambiguous results. Never use 'Get Latest Photos' or the clipboard as a fallback.
-3. Convert the selected screenshot to JPEG for transport if over 3 MB, without changing/deleting the original. Keep MIME and bytes consistent.
-4. Generate a stable capture ID for retries, capturedAt ISO 8601, source=ios-screenshot, saveLocation=photos, mimeType and base64 image. Pass JSON to YOS Screenshot Bridge through Run Script. Use existing Clarity credential via Keychain, never embed a token in source.
-5. A 200/201 response with inboxSaved=true is the only silent success. 409 ambiguous outcome must NOT be retried blindly. Other failures notify once, preserving originals.
-6. Confirm the Notion image block exists with the expected image and ID before calling the save verified. Classification requires its own separate read-back.
+2. Only accept a dictionary containing the actual trigger-bound original image bytes, stable captureId, actual capturedAt, source and actual saveLocation. An Image object alone, latest-photo query or clipboard fallback is rejected; it cannot prove the event identity/location and may alter bytes. No physical-device proof that all three triggers supply this dictionary exists yet.
+3. Preserve original encoding. The bridge no longer silently JPEG-recompresses images. Over 3 MB fails closed with the original untouched. No fidelity change is approved by this candidate.
+4. Pass that dictionary/JSON to YOS Screenshot Bridge. Reuse the existing Clarity Keychain credential. Never embed a token. The bridge persists and reads back a private local pending payload before HTTP; an ID collision with different data stops before sending. It does not drain unrelated pending images automatically or delete local source/pending data.
+5. A 200/201 response with inboxSaved=true, matching captureId, imageBlockId, metadataBlockId and imageSha256 means server-side byte-for-byte Inbox readback succeeded. It is not classification completion. 503 retries once with identical payload. Network uncertainty/409 retains the payload and does not blindly retry.
+6. Server binds captureId permanently to a SHA-256 of the image and event metadata, and keeps owner-bound append receipts without expiry. Repeated successful calls re-read the stored image and metadata. Uncertain append calls scan at most 1,000 Inbox blocks, require exactly one matching metadata/image pair, then verify parent and image bytes before reconciling. No match/ambiguity/outage remains held without another append.
+7. Classification is still pending: the existing Clarity text sorter does not parse screenshots, and no image OCR/classifier is currently connected. Do not publish, mark complete, or manufacture routing decisions from image filenames/metadata. Existing destinations in Issue #683 are Shopping/Money/Tasks/Life Log; no new destination is authorized here.
 
 ## Device acceptance
 - Screenshot by hardware buttons; no manual Save; automation starts silently.

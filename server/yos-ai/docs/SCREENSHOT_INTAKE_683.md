@@ -41,3 +41,11 @@ The server draft uses JSON base64 with a **3 MB image limit** to fit serverless 
 
 ## Privacy and release
 Screenshots may contain banking and medical data. Do not include image bytes, OCR text or bearer tokens in logs, query parameters, or notifications. Use existing private Notion integration credentials only. Do not auto-route to another destination until a classification confidence and sensitive-data policy is implemented and tested.
+
+## Work B safety revision — 2026-11-13 (not released)
+
+The draft now binds capture IDs to original bytes and event metadata, persists non-expiring deduplication receipts, and verifies Notion parent, metadata block ID, image block ID and downloaded bytes (SHA-256) before acknowledging Inbox save. Unknown append outcomes use bounded read-only reconciliation; no automatic re-append or new capture ID is allowed. Legacy receipts without verifiable image identity are held.
+
+The bridge requires the trigger's original encoded bytes and complete stable event metadata, preserves a local pending payload before HTTP, and rejects bare Image input/default metadata. Removed the unproven claim that physical trigger input had already been verified. No recompression, latest-photo/clipboard fallback, automatic pending drain, source deletion or token modification.
+
+Classification remains an explicit unfinished gate, not part of Inbox success. The existing text sorter only accepts Clarity text captures and cannot classify an image. An approved image-analysis route must be connected to the existing destinations with ambiguous/sensitive cases held for review. No live image, Notion write, API secret, production enablement or device operation is performed by the automated tests.
