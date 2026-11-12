@@ -442,9 +442,9 @@ function yosOutingManualCapture(){
  if(!confirmed||!place||place.length>80||!Number.isInteger(detour)||detour<0||detour>180||!Number.isInteger(duration)||duration<5||duration>240)return fail('立寄先・時間・経路・営業時間の確認が必要です。');
  if(start===null||end===null||start<minute||end<=start||end-start>480)return fail('現在以降の8時間以内の空き枠を指定してください。');
  // Use the full Apple Calendar snapshot, including events hidden from the timeline.
- const occupied=yosOutingOccupied(day);
- if(occupied.some(x=>!x||!Number.isInteger(x.s)||!Number.isInteger(x.d)||x.d<=0||x.s<0||x.s+x.d>1440))return fail('予定の時間に不明な情報があるため、安全に停止しました。');
- const busy=occupied.map(x=>[Math.max(start,x.s),Math.min(end,x.s+x.d)]).filter(x=>x[1]>x[0]).sort((a,b)=>a[0]-b[0]);
+ const sourceBusy=yosOutingOccupied(day);
+ if(sourceBusy.some(x=>!x||!Number.isInteger(x.s)||!Number.isInteger(x.d)||x.d<=0||x.s<0||x.s+x.d>1440))return fail('予定の時間に不明な情報があるため、安全に停止しました。');
+ const busy=sourceBusy.map(x=>[Math.max(start,x.s),Math.min(end,x.s+x.d)]).filter(x=>x[1]>x[0]).sort((a,b)=>a[0]-b[0]);
  let busyEnd=start,occupied=0;
  for(const [a,b] of busy){if(b>busyEnd){occupied+=b-Math.max(a,busyEnd);busyEnd=b;}}
  const available=end-start-occupied;
