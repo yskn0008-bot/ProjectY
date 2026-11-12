@@ -195,7 +195,7 @@ button:active{opacity:.8}@media(min-width:640px){.dock{left:calc((100vw - 640px)
     if(!Array.isArray(rows)||rows.length>1000)return;
     const startKey=event.day+'|'+String(event.id??''),starts=JSON.parse(localStorage.getItem(STARTS)||'{}');
     const startedAt=typeof starts?.[startKey]==='string'&&Date.parse(starts[startKey])<=Date.parse(event.at)?starts[startKey]:null;
-    const existing=rows.findIndex(r=>r&&r.day===event.day&&r.id===event.id&&r.title===event.title);
+    const existing=event.id===undefined?-1:rows.findIndex(r=>r&&r.day===event.day&&r.id===event.id&&r.title===event.title);
     const record={id:event.id,title:event.title.slice(0,120),sourceRef:String(event.sourceRef||'').slice(0,80),at:event.at,startedAt,day:event.day,plannedStart:event.plannedStart};
     const next=[...(existing<0?rows:rows.filter((r,i)=>i!==existing)),record].slice(-500);
     localStorage.setItem(HISTORY,JSON.stringify(next));
