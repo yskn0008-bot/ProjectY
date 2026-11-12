@@ -2,7 +2,7 @@
 // icon-color: gray; icon-glyph: camera;
 // YOS_SCRIPT_NAME: YOS Screenshot Bridge
 // YOS Screenshot Bridge — draft client, not installed or verified on iPhone.
-// Shortcut must explicitly pass a JSON string containing the screenshot bytes.
+// Shortcut can pass the screenshot Image directly via Run Script input.
 // Never infer the image from the latest photo or clipboard.
 const ENDPOINT = 'https://project-y-yos-ai.vercel.app/api/yos/intake?mode=screenshot';
 const KEY = 'YOS_CLARITY_INTAKE_TOKEN';
@@ -16,6 +16,16 @@ function readPayload(input) {
   // Shortcut may pass a dictionary instead of hand-assembling JSON.
   // Never search Photos/Clipboard: the image must be bound to this trigger.
   let payload = input;
+  // The existing screenshot automation was physically checked to expose
+  // the triggering image through Shortcut Input. Encode that exact image.
+  if (typeof Image !== 'undefined' && input instanceof Image) {
+    const data = Data.fromJPEG(input, 0.75);
+    if (!data || data.getBytes().length > 3_000_000) {
+      throw Error('スクショが3MBを超えています。元画像は変更していません');
+    }
+    payload = {imageBase64: data.toBase64String(), mimeType: 'image/jpeg',
+      saveLocation: 'photos', source: 'ios-screenshot'};
+  }
   if (typeof input === 'string') {
     try { payload = JSON.parse(input); } catch { throw Error('画像データの形式が不正です'); }
   }
