@@ -1083,7 +1083,7 @@ document.getElementById('hideFixed').onclick=()=>{
  yosRefreshTestToggle();smoothRender();updateReview();
 };
 
-const vibrate=()=>{try{navigator.vibrate?.(8)}catch(e){}};
+// No repeating vibration during dragging.
 
 const gestureBar=document.getElementById('gestureDelete');
 function hideSwipeDelete(){
@@ -1113,13 +1113,18 @@ function toggleTaskDone(item){
 }
 // Only local, movable tasks use this gesture system; fixed Apple records and other kinds
 // retain their existing read-only details / vertical time dragging.
+function yosStablePreviewMinute(rawMinute,shownMinute,minMinute,maxMinute){
+ const value=Math.max(minMinute,Math.min(maxMinute,rawMinute));
+ const next=Math.max(minMinute,Math.min(maxMinute,Math.round(value/5)*5));
+ return Number.isFinite(shownMinute)&&Math.abs(next-shownMinute)===5&&Math.abs(value-shownMinute)<3.5?shownMinute:next;
+}
 function wireTaskGestures(el,item){
  let active=null,startX=0,startY=0,lastX=0,lastY=0,mode='tap',timer=null,paintFrame=0,lastPreview=item.s,swipeFrame=0;
  const timeLabel=el.querySelector('small');
  const clearTimer=()=>{if(timer!==null){clearTimeout(timer);timer=null;}};
  const clearPaint=()=>{if(paintFrame){cancelAnimationFrame(paintFrame);paintFrame=0;}if(swipeFrame){cancelAnimationFrame(swipeFrame);swipeFrame=0;}};
  const paintSwipe=()=>{swipeFrame=0;if(mode==='swipe'&&active!==null)el.style.transform='translate3d('+Math.max(-74,lastX-startX)+'px,0,0)';};
- const paintDrag=()=>{paintFrame=0;if(mode!=='drag'||active===null)return;const offset=lastY-startY;el.style.transform='translate3d(0,'+offset+'px,0)';const at=candidateStart();if(at!==lastPreview){lastPreview=at;if(timeLabel)timeLabel.textContent=fmt(at)+'–'+fmt(at+item.d);}};
+ const paintDrag=()=>{paintFrame=0;if(mode!=='drag'||active===null)return;const offset=lastY-startY;el.style.transform='translate3d(0,'+offset+'px,0)';const raw=minuteAtY(yFor(item.s)+offset);const at=yosStablePreviewMinute(raw,lastPreview,0,1440-item.d);if(at!==lastPreview){lastPreview=at;if(timeLabel)timeLabel.textContent=fmt(at)+'–'+fmt(at+item.d);}};
  const candidateStart=()=>Math.max(0,Math.min(1440-item.d,Math.round(minuteAtY(yFor(item.s)+lastY-startY)/5)*5));
  const begin=(x,y,id)=>{
   if(active!==null)return;
@@ -1147,7 +1152,9 @@ function wireTaskGestures(el,item){
  };
  const finish=cancelled=>{
   if(active===null)return;
-  active=null;clearTimer();clearPaint();const previousRect=mode==='drag'&&!cancelled?el.getBoundingClientRect():null;
+  if(mode==='drag'&&!cancelled)el.style.transform='translate3d(0,'+(lastY-startY)+'px,0)';
+  const previousRect=mode==='drag'&&!cancelled?el.getBoundingClientRect():null;
+  active=null;clearTimer();clearPaint();
   if(mode==='swipe'){el.style.transition='transform .26s cubic-bezier(.22,1,.36,1)';el.style.transform='translate3d(0,0,0)';}
   else el.style.transform='';
   el.classList.remove('drag-preview');
@@ -1168,7 +1175,7 @@ function wireTaskGestures(el,item){
  el.addEventListener('contextmenu',e=>e.preventDefault());
  el.addEventListener('touchstart',e=>{if(e.touches.length===1)begin(e.touches[0].clientX,e.touches[0].clientY,'touch')},{passive:true});
  el.addEventListener('touchmove',e=>{if(active==='touch'&&e.touches.length)move(e.touches[0].clientX,e.touches[0].clientY,e)},{passive:false});
- el.addEventListener('touchend',()=>{if(active==='touch')finish(false)});
+ el.addEventListener('touchend',e=>{if(active==='touch'){if(e?.changedTouches?.length){lastX=e.changedTouches[0].clientX;lastY=e.changedTouches[0].clientY;}finish(false);}});
  el.addEventListener('touchcancel',()=>{if(active==='touch')finish(true)});
  el.addEventListener('pointerdown',e=>{if(e.pointerType==='touch'||e.button!==0)return;begin(e.clientX,e.clientY,e.pointerId);el.setPointerCapture?.(e.pointerId)});
  el.addEventListener('pointermove',e=>{if(active===e.pointerId)move(e.clientX,e.clientY,e)});
@@ -1185,9 +1192,9 @@ function smoothRender(activeId,oldActiveRect){
   const old=before.get(n.dataset.id);if(!old||typeof n.animate!=='function')return;
   const now=n.getBoundingClientRect();
   const dx=old.left-now.left,dy=old.top-now.top;
-  const sx=old.width&&now.width?old.width/now.width:1;
-  if(Math.abs(dx)<.5&&Math.abs(dy)<.5&&Math.abs(sx-1)<.01)return;
-  n.animate([{transform:'translate3d('+dx+'px,'+dy+'px,0) scaleX('+sx+')',opacity:.88},{transform:'translate3d(0,0,0) scaleX(1)',opacity:1}],{duration:340,easing:'cubic-bezier(.22,1,.36,1)'});
+  // Preserve the card width; animate position only.
+  if(Math.abs(dx)<.5&&Math.abs(dy)<.5)return;
+  n.animate([{transform:'translate3d('+dx+'px,'+dy+'px,0)'},{transform:'translate3d(0,0,0)'}],{duration:235,easing:'cubic-bezier(.22,1,.36,1)'});
  });
 }
 function render(){
@@ -1233,9 +1240,9 @@ function render(){
    if(searchText&&!item.t.toLocaleLowerCase().includes(searchText))el.style.display='none';
    el.dataset.id=String(item.id);if(item.done)el.classList.add('done');tl.append(el);
    const tick=document.createElement('div');tick.className='tick';tick.style.top=(top-4)+'px';tl.append(tick);
-   let downY=0,downS=0,moved=false,holding=false,activePointer=null,frame=0,latestY=0,previewS=item.s,lastHaptic=0,startedAt=0;
+   let downY=0,downS=0,moved=false,holding=false,activePointer=null,frame=0,latestY=0,previewS=item.s,startedAt=0;
    const timeLabel=el.querySelector('small');
-   const paint=()=>{frame=0;if(!holding)return;const offset=latestY-downY;el.style.transform='translate3d(0,'+offset+'px,0) scale(1.015)';const next=Math.max(0,Math.min(1440-item.d,Math.round(minuteAtY(yFor(downS)+offset)/5)*5));if(next!==previewS){previewS=next;timeLabel.textContent=fmt(next)+'–'+fmt(next+item.d);const now=performance.now();if(now-lastHaptic>75){lastHaptic=now;vibrate()}}};
+   const paint=()=>{frame=0;if(!holding)return;const offset=latestY-downY;el.style.transform='translate3d(0,'+offset+'px,0) scale(1.015)';const next=Math.max(0,Math.min(1440-item.d,Math.round(minuteAtY(yFor(downS)+offset)/5)*5));if(next!==previewS){previewS=next;timeLabel.textContent=fmt(next)+'–'+fmt(next+item.d);}};
    const startDrag=(y,id)=>{downY=latestY=y;downS=previewS=item.s;startedAt=performance.now();moved=false;holding=false;activePointer=id};
    const moveDrag=y=>{if(activePointer===null)return;latestY=y;const distance=Math.abs(latestY-downY);if(distance>3&&!item.f){holding=true;moved=true;el.classList.add('moving');if(!frame)frame=requestAnimationFrame(paint)}};
    const endDrag=cancelled=>{if(activePointer===null)return;activePointer=null;if(frame){cancelAnimationFrame(frame);frame=0}const releasedRect=el.getBoundingClientRect();el.classList.remove('moving');el.style.transform='';if(holding&&moved&&!cancelled){const offset=latestY-downY;previewS=Math.max(0,Math.min(1440-item.d,Math.round(minuteAtY(yFor(downS)+offset)/5)*5));item.s=previewS;const clashes=items.filter(x=>x!==item&&item.s<x.s+x.d&&x.s<item.s+item.d);note.textContent=(clashes.length?'時間が重複：'+clashes.map(x=>x.t).join('、'):'移動しました')+(persist()?'（保存処理中）':'（保存処理失敗）');smoothRender(item.id,releasedRect)}else if(!moved&&!cancelled){showFocusFor(item);smoothRender()}holding=false};
