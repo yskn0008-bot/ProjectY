@@ -30,13 +30,19 @@ jobs:
           persist-credentials: true
       - name: Launch free offline VOICEVOX Nemo engine
         run: |
-          docker run -d --rm --name yos-voicevox-nemo -p 127.0.0.1:50121:50021 voicevox/voicevox_nemo_engine:cpu-0.26.0
+          docker run -d --rm --name yos-voicevox-nemo -p 127.0.0.1:50121:50121 voicevox/voicevox_nemo_engine:cpu-0.26.0
       - name: Install audio encoder and generate article 0 sample
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq ffmpeg
           python3 scripts/journal_voicevox_demo.py
           ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1 journal/audio/2026-11-12/article-0.mp3
+      - name: Diagnose free Nemo engine on failure
+        if: failure()
+        run: |
+          docker ps -a || true
+          docker logs --tail 120 yos-voicevox-nemo || true
+          curl -sv --max-time 4 http://127.0.0.1:50121/speakers || true
       - name: Upload listening preview
         uses: actions/upload-artifact@v4
         with:
