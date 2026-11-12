@@ -46,7 +46,7 @@ def choose_male_speaker(speakers: list[dict]) -> int:
         styles = speaker.get("styles", [])
         for style in styles:
             name = str(speaker.get("name", "")) + " " + str(style.get("name", ""))
-            if "男性" in name:
+            if "男声" in name or "男性" in name:
                 return int(style["id"])
     raise RuntimeError("No verified male Nemo voice available; refusing to guess a speaker ID")
 
