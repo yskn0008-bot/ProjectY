@@ -157,7 +157,7 @@ var thumbnails=[
 'https://commons.wikimedia.org/wiki/Special:FilePath/Crafting%20wooden%20pieces%20in%20a%20workshop.jpg?width=360'
 ];
 function el(tag,text){var node=document.createElement(tag);if(text)node.textContent=text;return node}
-function httpsImage(v){return /^https:\/\//i.test(String(v||''))?v:''}
+function httpsImage(v){var url=String(v||'');return url.indexOf('https://')===0?url:''}
 async function load(u){var r=await fetch(u,{cache:'no-store'});if(!r.ok)throw new Error('fetch');return r.json()}
 (async function(){
 var date=new Date().toLocaleDateString('sv-SE',{timeZone:'Asia/Tokyo'}),issue;
