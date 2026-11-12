@@ -62,7 +62,8 @@ for(const [path,selector,value] of routes){await page.goto(base+path,{waitUntil:
 // The removed DESK dashboard is covered by the current chat-only DESK's separate browser job.
 if(name==='chromium'){
 await page.goto(base+'/yos/',{waitUntil:'networkidle'});await page.evaluate(async()=>{await navigator.serviceWorker.ready});await page.reload({waitUntil:'networkidle'});assert.equal(await page.evaluate(()=>Boolean(navigator.serviceWorker.controller)),true);
-await context.setOffline(true);for(const [path,selector,value] of [['/yos/','#brandTitle','MY IDEA'],...routes]){await page.goto(base+path,{waitUntil:'domcontentloaded'});await text(selector,value)}
+await context.setOffline(true);for(const [path,selector,value] of [['/yos/','#brandTitle','MY WAY'],...routes]){await page.goto(base+path,{waitUntil:'domcontentloaded'});await text(selector,value)}
 }
+assert.equal((await ledger()).accounts[0].balance,10000,'offline routes must preserve the ledger');
 console.log('Unified PWA unknown/known ledger, CRUD, bridges, persistence and offline PASS',name);
 }finally{await browser.close()}
