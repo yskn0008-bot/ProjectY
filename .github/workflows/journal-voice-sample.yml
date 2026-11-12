@@ -64,6 +64,10 @@ jobs:
             exit 0
           fi
           git commit -m 'journal: include verified free Nemo audio preview'
+          # Existing PR automation may advance the review branch during synthesis.
+          # Rebase onto the latest branch without force-pushing or losing those changes.
+          git fetch origin "$PR_BRANCH"
+          git rebase "origin/$PR_BRANCH"
           git push origin "HEAD:refs/heads/$PR_BRANCH"
       - name: Publish verified preview MP3 to existing Pages (main only)
         if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
