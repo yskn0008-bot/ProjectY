@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-13T05:54:06+09:00",
+  "updated_at": "2026-11-13T07:55:56+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -21,6 +21,16 @@
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/700",
       "updated_at": "2026-11-12T04:20:54Z"
+    },
+    {
+      "id": "github-pr-744",
+      "title": "PR #744 fix(daystream): preserve Japan time when importing UTC iCalendar events",
+      "type": "GitHub PR",
+      "status": "review",
+      "priority": 1,
+      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/744",
+      "updated_at": "2026-11-12T22:55:19Z"
     },
     {
       "id": "github-pr-630",
@@ -73,16 +83,6 @@
       "updated_at": "2026-11-11T10:30:36Z"
     },
     {
-      "id": "github-pr-669",
-      "title": "PR #669 fix(vercel): keep existing health and Inbox routes within Hobby 12-function limit",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/669",
-      "updated_at": "2026-11-11T09:50:19Z"
-    },
-    {
       "id": "github-pr-685",
       "title": "PR #685 WIP #683: iPhone screenshot intake validation foundation",
       "type": "GitHub PR",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-12T20:53:27Z"
+      "updated_at": "2026-11-12T22:55:24Z"
     },
     {
       "id": "github-issue-234",
@@ -264,7 +264,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #700をレビューして公開判断する",
+      "next_action": "PR #744をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -274,7 +274,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-13T05:54:06+09:00",
+      "last_update": "2026-11-13T07:55:56+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -349,13 +349,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 9件・Open PR 48件を自動同期中",
+      "next_action": "Open Issue 9件・Open PR 49件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-13T05:54:06+09:00",
+      "last_update": "2026-11-13T07:55:56+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -369,7 +369,7 @@
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #700をレビューして公開判断する",
+      "next_action": "PR #744をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -378,7 +378,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-13T05:54:06+09:00",
+      "last_update": "2026-11-13T07:55:56+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -460,5 +460,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "0c25c915725b631ec297c5c903a2d60f3d7ba66628a159bc0d1ab336325d3bf7"
+  "github_snapshot_hash": "3c3ebd7472e7e528cadfed63389b39aa85d2db3ef8ef15c593daf7c6ebd1a492"
 }
