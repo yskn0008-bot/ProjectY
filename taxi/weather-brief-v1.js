@@ -4,6 +4,8 @@
   const URL='https://api.met.no/weatherapi/locationforecast/2.0/compact?lat=26.2124&lon=127.6809';
   const CACHE_KEY='yos-taxi-naha-weather-v1';
   const HOUR=60*60*1000;
+  const CACHE_HOURS=3; // MET Norway: locations outside the Nordic region, repeat at most every 3 hours.
+  const MAX_CACHE_AGE=CACHE_HOURS*HOUR;
   const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const fmtTime=(value)=>new Intl.DateTimeFormat('ja-JP',{timeZone:'Asia/Tokyo',month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}).format(new Date(value));
   API.extract=(payload,now=Date.now())=>{
@@ -12,7 +14,7 @@
     if(!Array.isArray(series)||!series.length||!Number.isFinite(updated)||updated>now+5*60000||now-updated>6*HOUR)throw new Error('forecast metadata unavailable or outdated');
     const rows=series.map(x=>({
       time:Date.parse(x.time),
-      rain:Number(x?.data?.next_1_hours?.details?.precipitation_amount)
+      rain:x?.data?.next_1_hours?.details?.precipitation_amount == null ? NaN : Number(x.data.next_1_hours.details.precipitation_amount)
     })).filter(x=>Number.isFinite(x.time)&&x.time>=now-15*60000&&x.time<now+6*HOUR&&Number.isFinite(x.rain)&&x.rain>=0&&x.rain<200);
     if(!rows.length)throw new Error('no next-six-hour forecast');
     const wet=rows.filter(x=>x.rain>=0.5);
@@ -33,11 +35,16 @@
     const paint=(summary,label)=>{
       target.innerHTML='<p class="notes">'+esc(API.wording(summary))+'</p>'+
         '<p class="small">'+esc(label)+'</p>'+
-        '<p class="small">出典：<a href="https://api.met.no/" target="_blank" rel="noopener">MET Norway（CC BY 4.0）</a>の数値予報を加工。観測実況・乗車需要の実績ではありません。<a href="https://www.jma.go.jp/bosai/nowc/" target="_blank" rel="noopener">気象庁の雨雲を確認</a></p>';
+        '<p class="small">出典：<a href="https://api.met.no/" target="_blank" rel="noopener">MET Norway（CC BY 4.0）</a>の数値予報を加工。沖縄は予報更新が約6時間ごとの地域です。観測実況・乗車需要の実績ではありません。<a href="https://www.jma.go.jp/bosai/nowc/" target="_blank" rel="noopener">気象庁の雨雲を確認</a></p>';
     };
-    if(current&&now-current.fetchedAt<60*60000){
-      if(current.summary){paint(current.summary,'予報発表 '+fmtTime(current.summary.updatedAt)+'／取得 '+fmtTime(current.fetchedAt)+'（60分以内の保存情報）');return}
-      paint(null,'取得失敗後の再試行待ち（60分以内）');return;
+    // Local cache is deliberately conservative. No repeated requests to the non-Nordic forecast within three hours.
+    const age=current ? now-Number(current.fetchedAt) : NaN;
+    if(current&&Number.isFinite(age)&&age>=0&&age<MAX_CACHE_AGE){
+      if(current.summary){
+        paint(current.summary,'取得時点の約6時間予報（現在の6時間ではありません）｜発表 '+fmtTime(current.summary.updatedAt)+'／取得 '+fmtTime(current.fetchedAt)+'（最大3時間保存）');
+        return;
+      }
+      paint(null,'取得失敗・再試行保留（最大3時間）。気象庁の最新情報をご確認ください。');return;
     }
     target.textContent='那覇中心部の雨予報を取得しています…';
     const ctrl=new AbortController();
@@ -48,10 +55,10 @@
       const data=await response.json();
       const summary=API.extract(data,Date.now());
       write({fetchedAt:Date.now(),summary});
-      paint(summary,'予報発表 '+fmtTime(summary.updatedAt)+'／取得 '+fmtTime(Date.now()));
+      paint(summary,'取得時点から約6時間の予報｜発表 '+fmtTime(summary.updatedAt)+'／取得 '+fmtTime(Date.now()));
     }catch{
       write({fetchedAt:Date.now(),summary:null});
-      paint(null,'外部気象サービスに接続できません。現在の天候は未確認。');
+      paint(null,'外部気象サービスに接続できません。現在の天候は未確認（再試行は3時間後）。');
     }finally{clearTimeout(timeout)}
   };
   root.YosTaxiNahaWeather=API;
