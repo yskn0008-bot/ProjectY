@@ -4,11 +4,11 @@ import {readFileSync} from 'node:fs';
 import vm from 'node:vm';
 const source = readFileSync(new URL('../scriptable/YOS Screenshot Bridge.js', import.meta.url), 'utf8');
 const payload = {captureId:'screenshot-test-0001',capturedAt:'2026-11-13T09:00:00+09:00',source:'ios-screenshot',saveLocation:'clipboard',mimeType:'image/png',imageBase64:'iVBORw0KGgo='};
-async function run(input, {files = new Map(), status = 201, outage = false, spoolFailure = false} = {}) {
+async function run(input, {files = new Map(), status = 201, outage = false, spoolFailure = false, authMissing = false} = {}) {
   const requests=[], notices=[]; let output;
   const context = {
     args:{shortcutParameter:input}, Image:class Image {},
-    Keychain:{contains:()=>true,get:()=> 'test-only-key'},
+    Keychain:{contains:()=>!authMissing,get:()=> 'test-only-key'},
     FileManager:{local:()=>({documentsDirectory:()=>'/private',joinPath:(a,b)=>a+'/'+b,
       fileExists:p=>files.has(p),createDirectory:p=>files.set(p,''),
       readString:p=>files.get(p),writeString:(p,s)=>{if(spoolFailure)throw Error('disk full');files.set(p,s);}})},
@@ -54,4 +54,16 @@ test('reuse of capture ID with different bytes stops before sending and preserve
   const r=await run({...payload,imageBase64:'other-image'},{files});
   assert.equal(r.requests.length,0);
   assert.deepEqual(JSON.parse([...files.values()].find(x=>x.startsWith('{'))),payload);
+});
+
+
+test('missing existing credential retains the original privately and does not send',async()=>{
+  const r=await run({...payload},{authMissing:true});
+  assert.equal(r.requests.length,0);
+  assert.deepEqual(JSON.parse([...r.files.values()].find(x=>x.startsWith('{'))),payload);
+});
+test('unsupported extra fields are never forwarded or persisted',async()=>{
+  const r=await run({...payload,unrelated:'private-extra'});
+  assert.deepEqual(JSON.parse(r.requests[0].body),payload);
+  assert.ok(![...r.files.values()].some(x=>x.includes('private-extra')));
 });

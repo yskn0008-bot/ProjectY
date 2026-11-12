@@ -35,7 +35,8 @@ function readPayload(input) {
     throw Error('スクショ情報が不足しています');
   }
   if (payload.imageBase64.length > 4_000_000) throw Error('画像が大きすぎます（3MB以内に縮小が必要）');
-  return payload;
+  return {captureId: payload.captureId, capturedAt: payload.capturedAt, source: payload.source,
+    saveLocation: payload.saveLocation, mimeType: payload.mimeType, imageBase64: payload.imageBase64};
 }
 function retainPayload(payload) {
   // Private local spool; never modify/delete the Photos/Files/Clipboard original.
@@ -55,8 +56,8 @@ function retainPayload(payload) {
 async function main() {
   try {
     const payload = readPayload(args.shortcutParameter);
-    if (!Keychain.contains(KEY)) throw Error('認証設定がありません');
     retainPayload(payload);
+    if (!Keychain.contains(KEY)) throw Error('認証設定がありません');
     let saved = false;
     let receipt;
     for (let attempt = 0; attempt < 2; attempt++) {
