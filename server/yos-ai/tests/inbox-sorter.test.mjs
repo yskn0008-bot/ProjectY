@@ -1,7 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {readdirSync,readFileSync} from 'node:fs';
 import {createInboxSorter} from '../dist/intake/inbox-sorter.js';
-import cronHandler from '../api/yos/inbox-sort.mjs';
+import cronHandler from '../src/routes/inbox-sort.mjs';
+import intakeRoute from '../api/yos/intake.mjs';
 
 const inbox = '3d35ca88-2895-81ef-9dc8-d5f11ff8e213';
 const taskId = '965c6086-32c1-463d-93b4-87a9cb69b3ad';
@@ -37,6 +39,24 @@ function setup(extraBlocks = [], replaceFixture = false) {
   }
   return {redis, notion, get rows() {return rows;}, get writes() {return writes;}, resetLock() {lock = false;}};
 }
+
+test('main keeps the public Inbox cron URL and at most 12 Vercel functions', async()=>{
+  const v=JSON.parse(readFileSync(new URL('../vercel.json',import.meta.url),'utf8'));
+  assert.ok(v.rewrites.some(x=>x.source==='/api/yos/inbox-sort'&&x.destination==='/api/yos/intake?mode=inbox-sort'));
+  assert.ok(v.crons.some(x=>x.path==='/api/yos/inbox-sort'&&x.schedule==='0 0 * * *'));
+  const funcs=readdirSync(new URL('../api/yos/',import.meta.url)).filter(x=>x.endsWith('.mjs'));
+  assert.equal(funcs.length,12,'Hobby plan permits at most 12 API functions');
+  assert.ok(!funcs.includes('health-sync.mjs')&&!funcs.includes('inbox-sort.mjs'));
+  const existing=process.env.CRON_SECRET;
+  try{
+    delete process.env.CRON_SECRET;
+    const res=await intakeRoute.fetch(new Request('https://example.com/api/yos/intake?mode=inbox-sort'));
+    assert.equal(res.status,401,'cron route must fail closed without secret');
+  }finally{
+    if(existing===undefined)delete process.env.CRON_SECRET;
+    else process.env.CRON_SECRET=existing;
+  }
+});
 
 test('existing remote test row is detected without another write', async () => {
   const s = setup(), key = 'inbox:clarity:yos-test-20261101-0649';
