@@ -499,6 +499,7 @@ function yosOutingNextGap(nowMinutes,occupied,minimumMinutes=30){
 function yosOutingManualSetup(){
  const pick=document.getElementById('yosOutingTaskChoice');
  if(!pick)return;
+ document.getElementById('yosOutingConfirmed').checked=false;
  pick.replaceChildren();
  const empty=document.createElement('option');empty.value='';empty.textContent='タスクを選択';pick.append(empty);
  for(const task of sourceTasks.filter(x=>!['完了','待ち','保留','中止','取消'].includes(x.status)).slice(0,80)){
