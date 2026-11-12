@@ -42,7 +42,7 @@ function speechStep(token){if(token!==speakingToken||!speechActive)return;if(spe
  speechCurrent=u;u.onstart=()=>{if(token!==speakingToken)return;speechStarted=true;speechStatus('朗読中… '+speechIndex+' / '+speechParts.length);speechUpdate()};
  u.onend=()=>{if(token===speakingToken)speechStep(token)};
  u.onerror=(e)=>{if(token===speakingToken){speechActive=false;speechPaused=false;speechStarted=false;speechStatus('朗読できませんでした（'+String(e.error||'音声エラー')+'）。Safariの「ページを読み上げる」もお試しください。');speechUpdate()}};
- try{window.speechSynthesis.speak(u)}catch(e){speechActive=false;speechPaused=false;speechStarted=false;speechStatus('朗読を開始できません。Safariの「ページを読み上げる」をお試しください。');speechUpdate()}
+ try{window.speechSynthesis.speak(u);setTimeout(()=>{if(token===speakingToken&&speechActive&&!speechStarted){speechStatus('音声が始まりません。iPhoneの音量・出力先を確認し、Safariの「ページを読み上げる」をお試しください。')}},3500)}catch(e){speechActive=false;speechPaused=false;speechStarted=false;speechStatus('朗読を開始できません。Safariの「ページを読み上げる」をお試しください。');speechUpdate()}
 }
 function speechToggle(){if(!speechAvailable){speechStatus('このブラウザは音声読み上げに対応していません。Safariで開いてください。');return}const engine=window.speechSynthesis;
  if(speechActive){try{if(speechPaused){engine.resume();speechPaused=false;speechStatus('朗読中…')}else{engine.pause();speechPaused=true;speechStatus('一時停止中')}}catch(_){speechStatus('音声操作に失敗しました')}speechUpdate();return}
