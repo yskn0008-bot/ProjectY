@@ -90,10 +90,27 @@
   if(!Object.keys(days).length&&!Object.keys(allDayDays).length)throw Error('対応する予定がありません');
   return {schema:'yos-daystream-source-snapshot-v1',kind:'calendar',status:skipped?'partial':'ok',calendarDays:days,allDayDays,checkedAt:new Date().toISOString(),source:'user-file',eventCount:count,skippedCount:skipped};
  }
+ function fromYosTaskDashboardCache(cache){
+  if(!cache||typeof cache!=='object'||!Number.isFinite(cache.savedAt)||Date.now()-cache.savedAt<0||Date.now()-cache.savedAt>6*60*60*1000||!Array.isArray(cache.data?.tasks)||cache.data.tasks.length>MAX_TASKS)return null;
+  const items=[],seen=new Set();
+  for(const t of cache.data.tasks){
+   if(!t||typeof t!=='object')continue;
+   const title=str(t.title,120),state=str(t.state,32),rawDue=str(t.due,40),due=rawDue?rawDue.slice(0,10):'';
+   if(!title||!['次にやる','実行中','本人操作','待ち','保留','完了'].includes(state)||due&&!date(due))continue;
+   const order=Number.isSafeInteger(Number(t.order))?Number(t.order):0;
+   // Stable, non-secret ID. No sensitive completion, blocker, evidence or auth payload is retained.
+   let hash=2166136261;
+   for(const ch of title+'|'+order+'|'+due){hash^=ch.charCodeAt(0);hash=Math.imul(hash,16777619)>>>0}
+   const id='yos-cache-'+order+'-'+hash.toString(16);
+   if(seen.has(id))continue;seen.add(id);
+   items.push({id,title,status:state,due,priority:['P0','P1','P2','P3'].includes(t.priority)?t.priority:'',area:'YOS Tasks',action:str(t.nextAction,140)});
+  }
+  return {schema:'yos-daystream-source-snapshot-v1',kind:'tasks',status:'partial',items,checkedAt:new Date(cache.savedAt).toISOString(),source:'yos-auth-cache'};
+ }
  function validSaved(s,kind,retentionDays=7){
   if(!s||s.schema!=='yos-daystream-source-snapshot-v1'||s.kind!==kind||s.source!=='user-file'||!Number.isFinite(Date.parse(s.checkedAt)))return false;
   const age=Date.now()-Date.parse(s.checkedAt);
   return age>=-300000&&age<=retentionDays*86400000;
  }
- root.YOS_DAYSTREAM_SOURCES={normalizeTasks,parseICS,validSaved,MAX_BYTES};
+ root.YOS_DAYSTREAM_SOURCES={normalizeTasks,parseICS,fromYosTaskDashboardCache,validSaved,MAX_BYTES};
 })(typeof window!=='undefined'?window:globalThis);
