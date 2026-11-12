@@ -530,3 +530,12 @@ test('overlap warning counts intersection windows and gives a 15-minute range',(
  assert.ok(!actual.includes('inset 0 0 0 2px #ed8a93'));
  assert.doesNotMatch(script,/CalendarEvent\.(?:save|remove|create)\(/);
 });
+
+
+test('conflict pulse is short, icon-only and respects reduced-motion accessibility',()=>{
+ const rendered=Function('return '+String.fromCharCode(96)+html+String.fromCharCode(96))();
+ assert.match(rendered,/@keyframes yos-conflict-signal/);
+ assert.match(rendered,/\.card\.compat-danger:after\{animation:yos-conflict-signal \.8s ease-in-out 3\}/);
+ assert.match(rendered,/@media \(prefers-reduced-motion:reduce\)\{\.card\.compat-danger:after\{animation:none\}\}/);
+ assert.doesNotMatch(rendered,/\.card\.compat-danger\{animation:/);
+});
