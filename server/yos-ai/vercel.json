@@ -6,6 +6,9 @@
     "autoJobCancelation": false
   },
   "functions": {
+    "api/yos/notification.mjs": {
+      "maxDuration": 30
+    },
     "api/yos/inbox-sort.mjs": {
       "maxDuration": 60
     },
