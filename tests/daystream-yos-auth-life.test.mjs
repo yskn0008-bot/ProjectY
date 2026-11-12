@@ -92,3 +92,14 @@ test('sanitized auth snapshot expires in six hours even when backup validity is 
  assert.equal(adapter.validSaved(snapshot,'tasks',3650),false);
  assert.match(html,/existingYosCache\|\|importedTasks/);
 });
+
+test('completion cancellation removes learning record; rejected storage does not mutate in-memory plan',()=>{
+ assert.match(html,/undoCompletion\(event\)/);
+ assert.match(html,/if\(saved\)\{if\(target\.done\)window\.YOS_DAYSTREAM_WEB\.logCompletion/);
+ assert.match(html,/else window\.YOS_DAYSTREAM_WEB\.undoCompletion\(\{id:target\.id,day:selectedDay\}\)/);
+ assert.match(html,/if\(saved&&x\.kind==='task'\)/);
+ assert.match(html,/const prior=x\.done;x\.done=!x\.done;const saved=persist\(\);if\(!saved\)x\.done=prior/);
+ assert.match(html,/const next=\{version:1,days:\{\.\.\.savedDays,\[selectedDay\]:entries\},hiddenCalendar\}/);
+ assert.match(html,/if\(ok\)\{savedDays\[selectedDay\]=entries;/);
+ assert.match(html,/if\(typeof starts\[key\]==='string'&&Number\.isFinite\(Date\.parse\(starts\[key\]\)\)\)return true/);
+});
