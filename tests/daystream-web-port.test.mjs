@@ -57,3 +57,16 @@ test('DAYSTREAM home-screen install resolves to DAYSTREAM instead of MY WAY',()=
  const sw=fs.readFileSync(new URL('../service-worker.js',import.meta.url),'utf8');
  assert.match(sw,/'\.\/yos\/daystream\/manifest\.webmanifest'/);
 });
+
+test('iPhone home-screen layout paints safe-area dark and keeps header crisp',()=>{
+ assert.equal((html.match(/<meta name="viewport"/g)||[]).length,1,'exactly one viewport declaration');
+ assert.match(html,/<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">/);
+ assert.match(html,/<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">/);
+ assert.match(html,/<body class="yos-daystream-web">/);
+ assert.match(html,/html\{background:#262c35!important\}/);
+ assert.match(html,/body\.yos-daystream-web \.app\{padding-top:18px\}/);
+ assert.match(html,/\.yos-web-port\{[^}]*backdrop-filter:none;[^}]*-webkit-backdrop-filter:none;[^}]*opacity:1;/);
+ assert.match(html,/\.yos-web-port a,\.yos-web-port button\{[^}]*backdrop-filter:none;[^}]*-webkit-backdrop-filter:none;/);
+ const sw=fs.readFileSync(new URL('../service-worker.js',import.meta.url),'utf8');
+ assert.match(sw,/v39-daystream-safearea-header/);
+});
