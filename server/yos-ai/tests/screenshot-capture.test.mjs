@@ -35,3 +35,8 @@ test('rejects missing identifiers, invalid formats and invalid base64', () => {
 test('rejects oversized images', () => {
   assert.equal(parse({...valid, imageBase64: 'AAAA'.repeat(1_666_668)}).ok, false);
 });
+
+test('rejects image type spoofing', () => {
+  assert.equal(parse({...valid, mimeType: 'image/jpeg'}).ok, false);
+  assert.equal(parse({...valid, imageBase64: 'AAAAAAAAAAAA'}).ok, false);
+});
