@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-12T17:55:51+09:00",
+  "updated_at": "2026-11-12T17:56:38+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -31,6 +31,16 @@
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/664",
       "updated_at": "2026-11-11T19:58:32Z"
+    },
+    {
+      "id": "github-pr-668",
+      "title": "PR #668 test: isolate native notification backend on last READY production commit",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/668",
+      "updated_at": "2026-11-11T10:30:36Z"
     },
     {
       "id": "github-pr-685",
@@ -103,16 +113,6 @@
       "updated_at": "2026-11-12T04:31:34Z"
     },
     {
-      "id": "github-pr-715",
-      "title": "PR #715 fix(journal): iPhone Safari silent narration on play",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/715",
-      "updated_at": "2026-11-12T08:55:22Z"
-    },
-    {
       "id": "github-issue-10",
       "title": "Issue #10 Mission Control v2：GitHubのIssue・PR・Commitを自動集約する",
       "type": "GitHub Issue",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-12T08:55:24Z"
+      "updated_at": "2026-11-12T08:55:56Z"
     },
     {
       "id": "github-issue-234",
@@ -205,6 +205,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-63bd5ac4b0e0",
+      "title": "fix(journal): make iPhone speech playback reliable",
+      "completed_at": "2026-11-12T08:55:59Z",
+      "result": "GitHub mainへ反映（63bd5ac）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/63bd5ac4b0e05bda257cfdc568b76a5bcdd84190"
+    },
+    {
       "id": "github-commit-de4e18b0c795",
       "title": "feat(journal): on-device narration and Morning picture headlines",
       "completed_at": "2026-11-12T07:30:23Z",
@@ -231,13 +238,6 @@
       "completed_at": "2026-11-12T04:43:05Z",
       "result": "GitHub mainへ反映（a343f5d）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/a343f5dd7c324271e8080233103ffe9d044354f3"
-    },
-    {
-      "id": "github-commit-e35f43f1b0bf",
-      "title": "feat(journal): add clean reader with curated articles",
-      "completed_at": "2026-11-12T04:37:16Z",
-      "result": "GitHub mainへ反映（e35f43f）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/e35f43f1b0bfd0063e91ae036a8ec524000bb0ce"
     },
     {
       "id": "complete-002",
@@ -274,7 +274,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-12T17:55:51+09:00",
+      "last_update": "2026-11-12T17:56:38+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -349,13 +349,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 9件・Open PR 53件を自動同期中",
+      "next_action": "Open Issue 9件・Open PR 52件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-12T17:55:51+09:00",
+      "last_update": "2026-11-12T17:56:38+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -378,7 +378,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-12T17:55:51+09:00",
+      "last_update": "2026-11-12T17:56:38+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -460,5 +460,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "b79250ac00a9250e96a23772308c0381c2b61ed8566a4bb2cf6787b4bd2f6b5b"
+  "github_snapshot_hash": "0ec3e84359db73d68f9893bcc4a0aa445cf019895a4f36acf08f167c53f8d676"
 }
