@@ -537,7 +537,7 @@ test('overlap warning counts intersection windows and gives a 15-minute range',(
 test('casual coral overlap colors task card and removes all decorative task icons',()=>{
  const htmlBody=Function('return '+String.fromCharCode(96)+html+String.fromCharCode(96))();
  const js=htmlBody.split('<script>')[1]?.split('</script>')[0]||'';
- assert.match(htmlBody,/\.card\.task\{background:#823db0;touch-action:none\}/);
+ assert.match(htmlBody,/\.card\.task\{background:#823db0;touch-action:none;/);
  assert.match(htmlBody,/\.card\.task:before\{display:none\}/);
  assert.match(htmlBody,/\.card\.task\.compat-danger\{background:#CB6F77;/);
  assert.ok(!htmlBody.includes('.card.compat-danger:after'));
