@@ -208,11 +208,39 @@ button:active{opacity:.8}@media(min-width:640px){.dock{left:calc((100vw - 640px)
    if(!web.write(p))return false;
    location.reload();return true
   },
+  importAll(p){
+   if(!p||p.schema!=='yos-daystream-web-all-backup-v1'||!valid(p.plan)||!Array.isArray(p.actions)||p.actions.length>500||!p.starts||typeof p.starts!=='object'||Array.isArray(p.starts)||Object.keys(p.starts).length>500)return false;
+   if(!p.actions.every(e=>e&&typeof e.title==='string'&&e.title.length<=120&&Number.isFinite(Date.parse(e.at))&&/^\d{4}-\d{2}-\d{2}$/.test(e.day)&&Number.isInteger(e.plannedStart)&&e.plannedStart>=0&&e.plannedStart<1440))return false;
+   if(!Object.entries(p.starts).every(([k,v])=>/^\d{4}-\d{2}-\d{2}\|\d{1,12}$/.test(k)&&typeof v==='string'&&Number.isFinite(Date.parse(v))))return false;
+   const snapshots=[p.tasks,p.calendar],kinds=['tasks','calendar'];
+   if(snapshots.some((v,i)=>v!==null&&(!sourceAdapters||!sourceAdapters.validSaved(v,kinds[i],3650))))return false;
+   const values=[JSON.stringify(p.plan),JSON.stringify(p.actions),JSON.stringify(p.starts),p.tasks?JSON.stringify(p.tasks):null,p.calendar?JSON.stringify(p.calendar):null];
+   if(values.some(v=>v&&v.length>1000000))return false;
+   if(!confirm('Web版の時間割・行動履歴・取り込みデータを復元します。現在のWeb版データをバックアップしてから置き換えます。続けますか？'))return false;
+   const keys=[KEY,HISTORY,STARTS,SOURCE_TASK,SOURCE_CAL];
+   const old={};
+   try{
+    for(const k of keys){old[k]=localStorage.getItem(k);if(old[k]!==null){localStorage.setItem(k+'_BACKUP',old[k]);if(localStorage.getItem(k+'_BACKUP')!==old[k])return false}}
+    for(let i=0;i<keys.length;i++){if(values[i]===null)localStorage.removeItem(keys[i]);else localStorage.setItem(keys[i],values[i]);if(localStorage.getItem(keys[i])!==values[i])throw Error('readback mismatch')}
+    location.reload();return true;
+   }catch{
+    let recovered=true;
+    for(const k of keys){try{if(old[k]===null)localStorage.removeItem(k);else if(typeof old[k]==='string')localStorage.setItem(k,old[k]);if(localStorage.getItem(k)!==old[k])recovered=false}catch{recovered=false}}
+    if(!recovered)alert('復元時のエラーが発生しました。以前のバックアップは保持されています。');
+    return false;
+   }
+  },
   export(){
-   try{const p=JSON.parse(localStorage.getItem(KEY)||'null');if(!valid(p))throw Error('no plan');
-    const blob=new Blob([JSON.stringify(p,null,2)],{type:'application/json'});
-    const url=URL.createObjectURL(blob),a=document.createElement('a');
-    a.href=url;a.download='YOS_DAYSTREAM_WEB_BACKUP.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);return true;
+   try{
+    const p=JSON.parse(localStorage.getItem(KEY)||'{"version":1,"days":{},"hiddenCalendar":{}}');
+    if(!valid(p))throw Error('invalid plan');
+    const actions=JSON.parse(localStorage.getItem(HISTORY)||'[]'),starts=JSON.parse(localStorage.getItem(STARTS)||'{}');
+    if(!Array.isArray(actions)||actions.length>500||!starts||typeof starts!=='object'||Array.isArray(starts))throw Error('invalid history');
+    const tasks=JSON.parse(localStorage.getItem(SOURCE_TASK)||'null'),calendar=JSON.parse(localStorage.getItem(SOURCE_CAL)||'null');
+    const data={schema:'yos-daystream-web-all-backup-v1',savedAt:new Date().toISOString(),plan:p,actions,starts,tasks,calendar};
+    const payload=JSON.stringify(data,null,2);if(payload.length>1000000)throw Error('backup too large');
+    const blob=new Blob([payload],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');
+    a.href=url;a.download='YOS_DAYSTREAM_WEB_ALL_BACKUP.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);return true;
    }catch{return false}
   },
   suggestions(){
@@ -237,8 +265,8 @@ button:active{opacity:.8}@media(min-width:640px){.dock{left:calc((100vw - 640px)
  window.addEventListener('DOMContentLoaded',()=>{
   const f=document.getElementById('yosWebFile'),btn=document.getElementById('yosWebImport');
   btn.onclick=()=>f.click();
-  f.onchange=async()=>{const file=f.files?.[0];if(!file)return;if(file.size>1000000){alert('ファイルが大きすぎます');return}try{const raw=await file.text();if(/\.ics$/i.test(file.name)){if(!web.importSource(raw,file.name))alert('カレンダー読込を中止しました。元データは保持されています。');return;}const p=JSON.parse(raw);if(p&&p.version===1&&p.days){if(!web.import(p))alert('時間割の照合または保存に失敗しました。元データは保持されています。')}else if(!web.importSource(raw,file.name)){alert('タスク読込を中止しました。元データは保持されています。')}}catch{alert('ファイルを読み取れません。変更はありません。')}finally{f.value=''}};
-  document.getElementById('yosWebExport').onclick=()=>{if(!web.export())alert('Web版の保存データがありません。')};
+  f.onchange=async()=>{const file=f.files?.[0];if(!file)return;if(file.size>1000000){alert('ファイルが大きすぎます');return}try{const raw=await file.text();if(/\.ics$/i.test(file.name)){if(!web.importSource(raw,file.name))alert('カレンダー読込を中止しました。元データは保持されています。');return;}const p=JSON.parse(raw);if(p?.schema==='yos-daystream-web-all-backup-v1'){if(!web.importAll(p))alert('一括復元を中止しました。保存済みデータは保護されています。')}else if(p&&p.version===1&&p.days){if(!web.import(p))alert('時間割の照合または保存に失敗しました。元データは保持されています。')}else if(!web.importSource(raw,file.name)){alert('タスク読込を中止しました。元データは保持されています。')}}catch{alert('ファイルを読み取れません。変更はありません。')}finally{f.value=''}};
+  document.getElementById('yosWebExport').onclick=()=>{if(!web.export())alert('バックアップを書き出せませんでした。保存データを確認してください。')};
   const sourceText=document.getElementById('yosWebSourceState');if(sourceText){sourceText.textContent='端末内保存 · '+(importedTasks?'タスク手動取込':'Notion未接続')+' · '+(importedCalendar?'Apple予定手動取込':'Appleカレンダー未接続')+' · 自動同期なし';}
   document.getElementById('yosWebHistory').onclick=()=>{
     const panel=document.getElementById('yosWebHistoryPanel'),rows=document.getElementById('yosWebHistoryRows');
