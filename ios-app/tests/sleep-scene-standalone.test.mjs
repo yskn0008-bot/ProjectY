@@ -15,7 +15,11 @@ test('existing installer pins a named, format-compatible standalone sleep scene'
   assert.equal(sleep.sha256,hash(src));
   assert.match(sleep.commit,/^[a-f0-9]{40}$/);
   assert.ok(src.startsWith('// Variables used by Scriptable.\n// YOS_SCRIPT_NAME: YOS Sleep Scene\n'));
-  assert.equal(cat.targets.length,9);
+  const ids=cat.targets.map(t=>t.id);
+  assert.equal(new Set(ids).size,ids.length,'installer target IDs must remain unique');
+  for(const id of ['timeline-auto','journal','daystream-preview','daystream-glass-20261111',
+    'timeline-charcoal-20261111','bravia-smart-power','remote-direct-actions','tapo-h110-core','sleep-scene'])
+    assert.ok(ids.includes(id),'existing installer target preserved: '+id);
 });
 
 async function run(mode,settings={}){

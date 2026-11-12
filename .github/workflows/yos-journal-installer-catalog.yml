@@ -1,0 +1,46 @@
+name: YOS Journal installer catalog staging
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'ios-app/scriptable/YOS Journal Book.js'
+      - 'ios-app/scriptable/YOS Journal Notion Bridge.js'
+      - 'ios-app/scriptable/yos-common-installer-catalog.json'
+      - '.github/workflows/yos-journal-installer-catalog.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  stage-catalog:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+      - name: Verify reviewed immutable journal entries without changing the branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PYTHON'
+          import hashlib,json,pathlib,re,subprocess
+          data=json.loads(pathlib.Path('ios-app/scriptable/yos-common-installer-catalog.json').read_text())
+          assert data['schema']==1
+          targets=data['targets']
+          assert len(targets)<=30
+          assert len({t['id'] for t in targets})==len(targets)
+          for id_,name in [('journal-book','YOS Journal Book'),('journal-notion-bridge','YOS Journal Notion Bridge')]:
+              path='ios-app/scriptable/'+name+'.js'
+              source=pathlib.Path(path).read_bytes()
+              assert source.startswith(b'// Variables used by Scriptable.\n')
+              assert ('// YOS_SCRIPT_NAME: '+name).encode() in source[:250]
+              matches=[t for t in targets if t['id']==id_]
+              assert len(matches)==1, 'Reviewed catalog entry required'
+              item=matches[0]
+              assert item['name']==name and item['path']==path, 'Catalog name collision'
+              assert re.fullmatch('[0-9a-f]{40}',item['commit'])
+              pinned=subprocess.check_output(['git','show',item['commit']+':'+path])
+              assert pinned==source, 'Source changed after reviewed pin'
+              assert item['sha256']==hashlib.sha256(source).hexdigest(), 'Digest mismatch'
+          print('Reviewed journal pins and source digests match; no branch writes.')
+          PYTHON

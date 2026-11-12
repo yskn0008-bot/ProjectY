@@ -1,0 +1,192 @@
+name: YOS 日記 standalone shortcut
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'tools/yos-journal/**'
+      - '.github/workflows/yos-journal-shortcut.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: yos-journal-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-sign:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify Scriptable source syntax and privacy boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check 'tools/yos-journal/YOS Journal Notion Bridge.js'
+          node --check 'tools/yos-journal/YOS Journal Book.js'
+          node --test tools/yos-journal/tests/*.test.mjs
+          python3 - <<'PY'
+          from pathlib import Path
+          source=Path('tools/yos-journal/YOS 日記.cherri').read_text()
+          bridge=Path('tools/yos-journal/YOS Journal Notion Bridge.js').read_text()
+          assert '#define name YOS 日記' in source
+          assert 'scriptable:///run?scriptName=YOS%20Journal%20Book' in source
+          assert 'YOS_NOTION_INTEGRATION_TOKEN' not in source
+          assert 'Bearer ' not in source
+          assert 'Bearer '+'' not in source
+          assert 'api.notion.com' not in source
+          assert "const TOKEN_KEY = 'YOS_NOTION_INTEGRATION_TOKEN'" in bridge
+          assert 'https://api.notion.com/v1' in bridge
+          assert not any(s in source+bridge for s in ['sk-proj-', 'secret_', 'ntn_', 'Bearer sk-'])
+          print('YOS journal static secret-free source contract: PASS')
+          PY
+
+      - name: Install pinned Cherri v2.3.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          url='https://github.com/electrikmilk/cherri/releases/download/v2.3.0/cherri_linux-x86_64.zip'
+          expected='7ab2c384b7b26e7c72a30a8dfa56f89dae12c4068b7951bc1e3193f3698edbe9'
+          curl -fsSL "$url" -o /tmp/cherri.zip
+          printf '%s  %s\n' "$expected" /tmp/cherri.zip | sha256sum -c -
+          mkdir -p /tmp/cherri
+          unzip -q /tmp/cherri.zip -d /tmp/cherri
+          binary="$(find /tmp/cherri -type f -name cherri -print -quit)"
+          test -n "$binary"
+          sudo install -m 0755 "$binary" /usr/local/bin/cherri
+          cherri --version
+
+      - name: Compile standalone YOS 日記 without changing Night Brief
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd tools/yos-journal
+          cherri 'YOS 日記.cherri' --skip-sign --debug
+          test -f './YOS 日記_unsigned.shortcut'
+          mkdir -p artifacts
+          cp './YOS 日記_unsigned.shortcut' './artifacts/YOS 日記.plist'
+
+      - name: Validate compiled shortcut
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import plistlib
+          from pathlib import Path
+          src=Path('tools/yos-journal/artifacts/YOS 日記.plist')
+          data=plistlib.loads(src.read_bytes())
+          ids=[a.get('WFWorkflowActionIdentifier','') for a in data.get('WFWorkflowActions',[])]
+          blob=repr(data)
+          assert ids.count('is.workflow.actions.askllm') == 8, ids
+          assert ids.count('is.workflow.actions.ask') == 6, ids
+          assert 'YOS Journal Questions' in blob
+          assert 'すでに提示済みの問い' in blob
+          assert 'この実行ですでに聞いた2問' in blob
+          assert '別の問い' in blob
+          assert ids.count('is.workflow.actions.file.getfoldercontents') == 2, ids
+          assert ids.count('is.workflow.actions.documentpicker.save') == 5, ids
+          assert 'YOSの分析とアドバイス' in blob
+          assert '今日の物語' in blob
+          assert 'storyRevision' not in blob or '修正したい場合' in blob
+          assert '目的別の問い' in blob
+          assert '直近のローカル日記控え' in blob
+          assert '（導入1）' in blob
+          assert '（導入2）' in blob
+          assert '3/3 自分の言葉で。刺さらなければ' in blob
+          assert '空欄ならここで終わり' in blob
+          assert ids.count('is.workflow.actions.openurl') == 1, ids
+          assert ids.count('com.apple.journal.CreateEntryIntent') == 0
+          assert 'scriptable:///run?scriptName=YOS%20Journal%20Book' in blob
+          assert 'YOS_NOTION_INTEGRATION_TOKEN' not in blob
+          assert 'YOS Journal Pending' in blob
+          print('YOS 日記 independent shortcut contract: PASS',len(ids),'actions')
+          PY
+
+      - name: Sign using existing HubSign workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/clarity-factory/sign_with_hubsign.py \
+            --input 'tools/yos-journal/artifacts/YOS 日記.plist' \
+            --output 'tools/yos-journal/artifacts/YOS 日記.shortcut' \
+            --name 'YOS 日記'
+
+      - name: Validate signed iPhone shortcut
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('tools/yos-journal/artifacts/YOS 日記.shortcut')
+          raw=p.read_bytes()
+          assert raw.startswith(b'AEA1'), raw[:8]
+          assert len(raw)>500
+          print('HubSign AEA1 signed YOS 日記: PASS',len(raw),'bytes')
+          PY
+
+      - name: Upload the signed shortcut, no private journal data
+        uses: actions/upload-artifact@v4
+        with:
+          name: yos-journal-standalone-signed
+          path: |
+            tools/yos-journal/artifacts/YOS 日記.shortcut
+            tools/yos-journal/artifacts/YOS 日記.plist
+          if-no-files-found: error
+
+      - name: Publish signed install file on the isolated draft branch
+        if: github.event_name == 'pull_request'
+        shell: bash
+        env:
+          TARGET_BRANCH: ${{ github.event.pull_request.head.ref }}
+          TARGET_REPO: ${{ github.event.pull_request.head.repo.full_name }}
+        run: |
+          set -euo pipefail
+          test "$TARGET_REPO" = "$GITHUB_REPOSITORY"
+          test "$TARGET_BRANCH" = "feat/yos-night-journal-integration-20261112"
+          cp 'tools/yos-journal/artifacts/YOS 日記.shortcut' /tmp/YOS_Journal_signed.shortcut
+          git fetch origin "$TARGET_BRANCH"
+          git checkout -B "$TARGET_BRANCH" "origin/$TARGET_BRANCH"
+          mkdir -p downloads/yos-journal
+          cp /tmp/YOS_Journal_signed.shortcut downloads/yos-journal/YOS_Journal_signed.shortcut
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('downloads/yos-journal/YOS_Journal_signed.shortcut')
+          data=p.read_bytes()
+          assert data.startswith(b'AEA1')
+          assert len(data)>500
+          print('Signed iPhone Shortcut ready for direct GitHub raw link:',len(data))
+          PY
+          git add downloads/yos-journal/YOS_Journal_signed.shortcut
+          if git diff --cached --quiet; then
+            echo 'No binary change to publish'
+          else
+            git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' \
+              commit -m 'build(journal): publish signed shortcut to draft branch [skip ci]'
+            git push origin HEAD:"$TARGET_BRANCH"
+          fi
+
+      - name: Verify reviewed installer pins without publishing catalog changes
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PYTHON'
+          import hashlib,json,pathlib,subprocess
+          data=json.loads(pathlib.Path('ios-app/scriptable/yos-common-installer-catalog.json').read_text())
+          assert data['schema']==1
+          for id_,name in [('journal-book','YOS Journal Book'),('journal-notion-bridge','YOS Journal Notion Bridge')]:
+              path='ios-app/scriptable/'+name+'.js'
+              source=pathlib.Path(path).read_bytes()
+              rows=[t for t in data['targets'] if t['id']==id_]
+              assert len(rows)==1, 'Reviewed catalog entry required'
+              entry=rows[0]
+              assert entry['name']==name and entry['path']==path
+              assert subprocess.check_output(['git','show',entry['commit']+':'+path])==source
+              assert entry['sha256']==hashlib.sha256(source).hexdigest()
+          print('Reviewed journal pins verified; catalog was not modified.')
+          PYTHON
