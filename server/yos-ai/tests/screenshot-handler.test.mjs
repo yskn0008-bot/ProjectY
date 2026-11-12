@@ -61,10 +61,11 @@ test('invalid auth fails without touching Notion', async () => {
   assert.equal((await handler(request(capture, 'incorrect-token-123456789'))).status, 401);
   assert.equal(calls.length, 0);
 });
-test('failed Notion append is retryable', async () => {
-  const {handler} = setup({failAppend: true});
-  assert.equal((await handler(request())).status, 503);
-  assert.equal((await handler(request())).status, 503);
+test('ambiguous Notion append fails closed to avoid duplicate uploads', async () => {
+  const {handler, calls} = setup({failAppend: true});
+  assert.equal((await handler(request())).status, 409);
+  assert.equal((await handler(request())).status, 409);
+  assert.equal(calls.filter((call) => call.url.endsWith('/children')).length, 1);
 });
 test('all three destinations accepted without changing clipboard', async () => {
   for (const saveLocation of ['photos', 'files', 'clipboard']) {
