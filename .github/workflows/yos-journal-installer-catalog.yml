@@ -1,0 +1,65 @@
+name: YOS Journal installer catalog staging
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'ios-app/scriptable/YOS Journal Book.js'
+      - 'ios-app/scriptable/YOS Journal Notion Bridge.js'
+      - '.github/workflows/yos-journal-installer-catalog.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  stage-catalog:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feat/yos-night-journal-integration-20261112
+          fetch-depth: 0
+      - name: Stage immutable, hashed journal installer entries on draft branch
+        env:
+          GH_EVENT: ${{ github.event_name }}
+          GH_HEAD: ${{ github.event.pull_request.head.ref }}
+          GH_REPO: ${{ github.repository }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GH_REPO" = "yskn0008-bot/ProjectY"
+          if [ "$GH_EVENT" = "pull_request" ]; then
+            test "$GH_HEAD" = "feat/yos-night-journal-integration-20261112"
+          fi
+          python3 - <<'PY'
+          import hashlib,json,pathlib,subprocess
+          catalog=pathlib.Path('ios-app/scriptable/yos-common-installer-catalog.json')
+          data=json.loads(catalog.read_text())
+          assert data['schema']==1
+          targets=data['targets']
+          for id_,name in [('journal-book','YOS Journal Book'),('journal-notion-bridge','YOS Journal Notion Bridge')]:
+              path='ios-app/scriptable/'+name+'.js'
+              source=pathlib.Path(path).read_bytes()
+              assert source.startswith(b'// Variables used by Scriptable.\n')
+              assert ('// YOS_SCRIPT_NAME: '+name).encode() in source[:250]
+              # The blob was introduced on the feature branch and is frozen at the introduction commit.
+              history=subprocess.check_output(['git','log','--format=%H','--reverse','--',path],text=True).splitlines()
+              assert history, path
+              commit=history[0]
+              pinned=subprocess.check_output(['git','show',commit+':'+path])
+              assert pinned==source, 'Source changed after pin; manual release review required'
+              item={'id':id_,'name':name,'path':path,'commit':commit,'sha256':hashlib.sha256(source).hexdigest()}
+              old=next((t for t in targets if t['id']==id_),None)
+              if old:
+                  assert old['name']==name and old['path']==path, 'Catalog name collision'
+                  old.update(item)
+              else:
+                  assert all(t['name']!=name for t in targets), 'Catalog name collision'
+                  targets.append(item)
+          assert len(targets)<=30
+          catalog.write_text(json.dumps(data,ensure_ascii=False,indent=2)+'\n')
+          print('Journal installer entries validated and staged:',[x['id'] for x in targets if x['id'].startswith('journal')])
+          PY
+          git add ios-app/scriptable/yos-common-installer-catalog.json
+          if ! git diff --cached --quiet; then
+            git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'build(journal): stage immutable installer entries [skip ci]'
+            git push origin HEAD:feat/yos-night-journal-integration-20261112
+          fi
