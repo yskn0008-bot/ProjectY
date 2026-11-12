@@ -111,7 +111,7 @@ var res=await fetch(url,{headers:{Authorization:'Bearer '+token,Accept:'applicat
 if(!res.ok)throw Error('通知APIに接続できません（HTTP '+res.status+'）');
 var data=await res.json();
 if(data.ok!==true||!Array.isArray(data.events))throw Error('履歴APIの形式が確認できません');
-data.events.forEach(function(e){if(e&&typeof e.id==='string'&&!seen.has(e.id)&&e.at){seen.add(e.id);out.push(e)}});
+data.events.forEach(function(e){if(e&&typeof e.id==='string'&&typeof e.historyKey==='string'&&!seen.has(e.historyKey)&&e.at){seen.add(e.historyKey);out.push(e)}});
 fully=fully&&data.complete===true;
 if(!data.nextCursor){cursor='';break}
 if(cursors.has(data.nextCursor))throw Error('履歴ページが重複しています');
@@ -141,11 +141,11 @@ $('later').addEventListener('click',async function(){
 if(!selected||!token){message('認証されていません');return}
 if(selected.status==='pending'){alert('既に対応待ちです');return}
 if(!confirm('既存Inboxで「対応待ち」にします。支払いの実行・期限通知の予約は行いません。'))return;
-var id=selected.id;
+var id=selected.historyKey;
 try{var response=await fetch(API,{method:'POST',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({action:'mark',id:id,status:'pending'}),cache:'no-store',credentials:'omit',referrerPolicy:'no-referrer',redirect:'error'});
 var data=await response.json();if(!response.ok||data.ok!==true)throw Error('変更失敗');
 var saved=await fetch(API+'?id='+encodeURIComponent(id),{headers:{Authorization:'Bearer '+token},cache:'no-store',credentials:'omit',referrerPolicy:'no-referrer',redirect:'error'});
-var verify=await saved.json();if(!saved.ok||verify.ok!==true||verify.complete!==true||verify.event?.id!==id||verify.event?.status!=='pending')throw Error('保存後の状態が確認できません');
+var verify=await saved.json();if(!saved.ok||verify.ok!==true||verify.complete!==true||verify.event?.historyKey!==id||verify.event?.status!=='pending')throw Error('保存後の状態が確認できません');
 selected.status='pending';alert('対応待ち状態を確認しました。再通知の予約ではありません。');detail(selected);render();
 }catch(e){alert('処理は未確認です。もう一度記録の状態を確認してください。')}
 });
