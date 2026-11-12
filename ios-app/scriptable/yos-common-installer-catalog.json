@@ -34,8 +34,8 @@
       "id": "timeline-charcoal-20261111",
       "name": "YOS Timeline Charcoal 確認 20261111",
       "path": "ios-app/scriptable/YOS Timeline Charcoal 確認 20261111.js",
-      "commit": "8b6aaba708eef96510f153e5de3aa3b24757f026",
-      "sha256": "dea1f8fc81ac2204468adc6cc71ba6acd7a1751af982eb8a439c2aa53a6c40ed"
+      "commit": "77ccee0b08538d7ad2c3939625a83fee0fe89a4f",
+      "sha256": "22a59870dc28edd6c49056bc5347233d2bccc0ba4c43c5264a0a0e4e8eec0e97"
     },
     {
       "id": "bravia-smart-power",
@@ -64,20 +64,6 @@
       "path": "ios-app/scriptable/remote-widgets/YOS Sleep Scene.js",
       "commit": "808d9e797a5734a4f7326e0471d6a4474244bc38",
       "sha256": "987664699fee3963f001e6610eafb5d371e3009cba990560785ed456171587f8"
-    },
-    {
-      "id": "journal-book",
-      "name": "YOS Journal Book",
-      "path": "ios-app/scriptable/YOS Journal Book.js",
-      "commit": "9c67c5d3ed538b782ef15447d4c575bf538d5474",
-      "sha256": "d094757baadb6434014490f8bcb3ea4246e5afdbf851fda8565e10ad66456149"
-    },
-    {
-      "id": "journal-notion-bridge",
-      "name": "YOS Journal Notion Bridge",
-      "path": "ios-app/scriptable/YOS Journal Notion Bridge.js",
-      "commit": "89a6fe228220b09a58af6c1631eb29e803ea0357",
-      "sha256": "b47f46b56fc528353e0032d370bc56c6c004cf2490fb0af47c864a24e1721870"
     }
   ]
 }

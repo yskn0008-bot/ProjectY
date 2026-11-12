@@ -26,6 +26,7 @@ jobs:
           set -euo pipefail
           node --check 'tools/yos-journal/YOS Journal Notion Bridge.js'
           node --check 'tools/yos-journal/YOS Journal Book.js'
+          node --test tools/yos-journal/tests/*.test.mjs
           python3 - <<'PY'
           from pathlib import Path
           source=Path('tools/yos-journal/YOS 日記.cherri').read_text()
