@@ -10,6 +10,7 @@ on:
       - 'system/**'
       - 'yos/**'
       - 'life/**'
+      - 'tests/daystream-*.test.mjs'
       - '.github/workflows/yos-unified-pwa.yml'
   pull_request:
     branches: [main]
@@ -20,6 +21,7 @@ on:
       - 'system/**'
       - 'yos/**'
       - 'life/**'
+      - 'tests/daystream-*.test.mjs'
       - '.github/workflows/yos-unified-pwa.yml'
   workflow_dispatch:
 
@@ -40,6 +42,8 @@ jobs:
         with:
           node-version: '22'
       - run: node --check service-worker.js
+      - run: node --test tests/daystream-web-port.test.mjs
+      - run: node --test tests/daystream-source-import.test.mjs
       - run: node --check yos/app.js
       - run: node --check yos/money-v2-runtime-v4.js
       - run: node --check yos/desk/app.js
@@ -117,6 +121,10 @@ jobs:
           done
           cat /tmp/yos-unified-pwa.log
           exit 1
+      - name: Verify DAYSTREAM Web 390px portability and persistence
+        env:
+          YOS_BROWSER: ${{ matrix.browser }}
+        run: node yos/tests/daystream-web-browser-smoke.mjs
       - name: Run online + offline smoke
         env:
           YOS_BROWSER: ${{ matrix.browser }}

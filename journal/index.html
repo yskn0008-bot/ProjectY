@@ -55,11 +55,124 @@
 .article-source a{display:block;color:#205479;font-size:15px;font-weight:700;margin-top:8px}
 .article.details .folio{margin-top:10px}
 @media(max-height:760px){.editorial-panel,.editorial-photo{height:135px}.article-lead{line-height:1.5;margin:10px 0}.keypoints{padding:8px 12px}.detail-grid{gap:9px}.detail-item{padding-bottom:7px}.detail-item p{line-height:1.5}}
+
+/* Magazine art direction / multiple editorial grids */
+.magazine-cover{padding:calc(env(safe-area-inset-top) + 18px) 25px 20px!important;background:#101f2d!important;display:none;position:absolute;overflow:hidden}
+.magazine-cover.current{display:flex;flex-direction:column}
+.cover-top{display:flex;justify-content:space-between;border-top:1px solid #c4b7a6;padding-top:10px;font:700 10px/1.2 -apple-system,sans-serif;letter-spacing:.12em;color:#d1c7ba}
+.magazine-cover .brand{font-family:Georgia,"Times New Roman",serif;font-size:clamp(44px,11.5vw,65px);font-weight:700;line-height:.88;letter-spacing:-.055em;margin:clamp(16px,4vh,40px) 0 0;color:#f5f0e8;z-index:2}
+.brand-dot{color:#cba078}
+.cover-art{flex:1;min-height:0;position:relative;margin:8px -25px -4px;overflow:hidden;background:radial-gradient(ellipse at 74% 40%,#af8068 0%,transparent 38%),linear-gradient(140deg,#112c3c 20%,#3e6570 53%,#212e3d 100%)}
+.cover-art:before{content:"";position:absolute;left:-20%;top:29%;width:140%;height:60%;border:1px solid #cfae8d66;border-radius:50%;transform:rotate(-23deg)}
+.cover-art:after{content:"";position:absolute;left:30%;top:0;width:140%;height:100%;background:linear-gradient(90deg,transparent,#172d39cc)}
+.cover-motif{position:absolute;left:8%;top:24%;font:italic 100 clamp(80px,24vw,180px)/.8 Georgia,serif;color:#f7e6ccbb;letter-spacing:-.1em;z-index:1}
+.cover-motif span{display:block;font:700 10px/1 sans-serif;letter-spacing:.26em;margin-top:19px;margin-left:9px;color:#f1dfce}
+.cover-bottom{position:relative;background:#101f2d;margin:0 -25px;padding:16px 25px 0;z-index:3}
+.cover-line{display:flex;justify-content:space-between;border-top:1px solid #b79879;padding-top:10px;font-size:9px;color:#d7bc95;letter-spacing:.13em;font-weight:800}
+.magazine-cover .cover-bottom h1{font-family:-apple-system,"Hiragino Kaku Gothic ProN",sans-serif;font-size:clamp(27px,7.1vw,39px);letter-spacing:-.06em;line-height:1.28;margin:13px 0 8px;color:#faf5ed}
+.cover-bottom p{font-size:13px;line-height:1.45;color:#d7d5d2;margin:0 0 12px}
+.cover-foot{border-top:1px solid #66707b;display:flex;justify-content:space-between;padding-top:9px;font-size:10px;color:#e1d4c6;letter-spacing:.035em}
+.sheet.jazz-hero,.sheet.jazz-guide{background:#152635;color:#f4ede1}
+.eyebrow{font-size:11px;letter-spacing:.15em;font-weight:800;color:#a37f58}
+.eyebrow.light{color:#dcbe92}
+.jazz-title{font-family:Georgia,"Yu Mincho",serif!important;font-size:clamp(31px,8.6vw,42px)!important;font-weight:700;line-height:1.27!important;letter-spacing:-.07em;margin:17px 0!important;color:#f6eee3}
+.jazz-title span,.jazz-title em{display:block}.jazz-title em{font-style:normal;color:#d8ac76}
+.jazz-photo{height:clamp(175px,32vh,315px);border-radius:3px;overflow:hidden;position:relative;background:#354755}
+.jazz-photo img{width:100%;height:100%;object-fit:cover;display:block}
+.photo-mark{position:absolute;bottom:0;left:0;background:#162432d9;color:#fff;font-size:10px;font-weight:800;padding:8px 11px;letter-spacing:.12em}
+.photo-credit{font-size:9px;color:#c7bbb0;line-height:1.3;margin:6px 0 10px}
+.jazz-stats{display:flex;justify-content:space-between;border-top:1px solid #bca282;border-bottom:1px solid #bca282;padding:9px 0;margin:4px 0 10px}
+.jazz-stats b{font:700 clamp(22px,6vw,30px)/1 Georgia,serif;color:#f4eadd;display:block}
+.jazz-stats small{font-size:9px;color:#bea888;letter-spacing:.12em}
+.jazz-deck{font-size:var(--size);line-height:1.55;color:#f1ebe3;margin:8px 0 0}
+.jazz-hero .folio,.jazz-guide .folio{color:#c2b7ab;border-color:#697584}
+.jazz-schedule{background:#f4eee5;color:#1d2a34}
+.program-heading{font:700 clamp(29px,8vw,42px)/1.25 Georgia,"Yu Mincho",serif!important;margin:12px 0 8px!important;letter-spacing:-.07em!important}
+.program-heading em{font:italic 600 clamp(27px,7vw,38px)/1.2 Georgia,serif;color:#9d6b43}
+.program-intro{margin:0 0 13px;font-size:12px;color:#5f6870}
+.lineup-list{flex:1;min-height:0;display:flex;flex-direction:column;justify-content:space-around}
+.lineup-row{display:flex;align-items:center;gap:10px;border-top:1px solid #c9bfb3;padding:7px 0}
+.lineup-row time{font:700 17px/1 Georgia,serif;color:#a07655;width:58px;flex-shrink:0}
+.lineup-name{font-size:clamp(13px,3.9vw,17px);font-weight:700;flex:1;min-width:0;overflow-wrap:anywhere}
+.lineup-row i{font-size:9px;letter-spacing:.1em;font-style:normal;color:#a29181}
+.program-note{font-size:10px;line-height:1.4;color:#6d6b69;margin:7px 0}
+.guide-title{font:700 clamp(29px,7.8vw,39px)/1.35 Georgia,"Yu Mincho",serif!important;letter-spacing:-.06em!important;color:#efe2d4}
+.venue{display:flex;border-top:1px solid #6b7480;padding:15px 0;gap:13px}
+.venue-time{color:#e2bc8f;font:700 23px/1.3 Georgia,serif;min-width:124px}
+.venue-time span{font-size:13px}
+.venue b{font-size:13px;line-height:1.5;display:block}.venue p{font-size:12px;line-height:1.5;color:#d7d4cd}
+.guide-caption{color:#eee5db;font-size:14px;line-height:1.7;margin:14px 0}
+.official-source{border:1px solid #738090;padding:14px;margin-top:5px;font-size:12px}.official-source b{color:#e0be95;letter-spacing:.1em;font-size:10px}
+.official-source p{margin:8px 0}.official-source a{display:block;color:#f5dfbe;font-weight:700;margin-top:8px}
+.skin-feature{background:#eae4da;color:#1d2d37}.feature-index{position:absolute;right:18px;top:20px;font:110px/.9 Georgia,serif;color:#d8cbbb}
+.skin-title{font:700 clamp(30px,8vw,42px)/1.3 Georgia,"Yu Mincho",serif!important;position:relative;z-index:1;letter-spacing:-.06em!important}
+.skin-title em{font-style:normal;color:#997452}
+.skin-lead{font-size:var(--size);line-height:1.65;margin:18px 0}
+.skin-steps{margin-top:15px}.skin-steps>div{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px;border-top:1px solid #bcb0a1;padding:15px 0}
+.skin-steps span{font:italic 23px Georgia,serif;color:#a5825e;min-width:42px}
+.skin-steps b{font-size:18px}.skin-steps small{margin-left:48px;font-size:12px;color:#79736d;display:block;width:100%}
+.feature-note{font-size:12px;line-height:1.6;color:#716a62;margin-top:12px}
+.feature-link{margin-top:12px}.feature-link a{display:inline-block;color:#3a6687;font-weight:750;font-size:14px}
+.money-feature{background:#f7f4ed;color:#1c2b3b}
+.money-big{font:700 clamp(32px,8vw,42px)/1.3 Georgia,"Yu Mincho",serif;letter-spacing:-.07em;margin:27px 0 22px}
+.money-big span{color:#92704d}
+.money-rule{height:1px;background:#b8a082}
+.money-lead{font-size:var(--size);line-height:1.65;margin:19px 0}
+.money-contrast{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:10px 0 18px}
+.money-contrast>div{padding:14px 11px;background:#ebe6de;border:1px solid #d5cbbd}
+.money-contrast small{color:#92704d;font-size:10px;letter-spacing:.1em;display:block;margin-bottom:10px}
+.money-contrast strong{font-size:14px;line-height:1.5}
+.money-action{border-top:1px solid #c6b9a9;padding-top:14px}.money-action b{color:#92704d;font-size:15px}
+.money-action p{font-size:14px;line-height:1.55}.money-action small{color:#5c6873;font-size:11px}
+.money-feature .feature-link a{color:#205479}.money-feature .folio{color:#858b8c;border-color:#d5cec4}
+.story-feature h2{font-size:30px}.story-accent{height:3px;background:#bb997b}.story-lead{font-size:var(--size);line-height:1.7;margin-top:18px}.story-why{background:#ded5c8;padding:16px;margin:20px 0;line-height:1.65}.story-caveat{font-size:12px;color:#73675b}
+@media(max-height:740px){.magazine-cover .brand{font-size:49px}.jazz-photo{height:155px}.jazz-title{font-size:30px!important;margin:10px 0!important}.jazz-deck{font-size:14px}.jazz-stats b{font-size:22px}.lineup-row{padding:4px 0}.lineup-row time{font-size:15px}.guide-title{font-size:29px!important}.venue{padding:9px 0}.skin-steps>div{padding:9px 0}.skin-lead,.money-lead{font-size:15px}}
+
+/* New editorial mix: readable contents, distinct sections and stronger hierarchy */
+.contents .toc{min-height:69px;margin-bottom:10px;padding:10px 12px}
+.contents h2{margin:22px 0 22px;font-size:clamp(25px,7vw,34px)}
+.contents-list{display:grid;gap:9px}
+.contents .toc .detail strong{font-size:clamp(13px,3.7vw,16px);line-height:1.45}
+.story-feature{background:#f7f4ed;color:#1c2b3b}
+.story-feature .eyebrow{color:#997752}
+.story-feature .story-title{font-family:Georgia,"Yu Mincho",serif;font-size:clamp(27px,7.4vw,38px);line-height:1.32;margin:22px 0 12px}
+.story-feature .story-lead{font-size:var(--size);line-height:1.75;margin:18px 0 20px}
+.story-feature .story-why{border-left:3px solid #b99569;background:#ece7de;padding:14px 18px;font-size:15px;line-height:1.65;margin:18px 0}
+.story-feature h3{color:#a27b50;margin:5px 0;font-size:15px}
+.story-feature>p:not(.story-lead){font-size:15px;line-height:1.6}
+.story-feature .feature-link{border-top:1px solid #d4cabf;padding-top:12px}
+@media(max-height:760px){.contents .toc{min-height:58px;margin-bottom:6px}.contents h2{margin:13px 0 14px}.story-feature .story-title{margin:11px 0}}
+
+/* Separate editorial compositions, shared paper + ink palette */
+.style-feature{background:#f7f4ed;color:#1c2b3b}
+.style-number,.local-index{font:italic 94px/.8 Georgia,serif;position:absolute;right:19px;top:38px;color:#e0d6c8;z-index:0}
+.style-title{position:relative;font:700 clamp(33px,9vw,47px)/1.24 Georgia,"Yu Mincho",serif!important;margin:28px 0 12px!important;letter-spacing:-.06em!important}
+.style-title em{font-style:normal;color:#a17b51}
+.style-sub{font-size:11px;letter-spacing:.22em;color:#9c805f;font-weight:750;border-bottom:1px solid #c9bdaf;padding-bottom:14px}
+.style-opening{font-size:var(--size);line-height:1.72;margin:20px 0 14px}
+.style-checks{display:flex;flex-direction:column}
+.style-checks>div{display:grid;grid-template-columns:32px 1fr;gap:0 10px;padding:12px 0;border-top:1px solid #d3c8bc}
+.style-checks span{grid-row:span 2;font:italic 25px Georgia,serif;color:#b08c63}.style-checks b{font-size:19px}.style-checks small{font-size:12px;color:#7b7d79;margin-top:3px}
+.style-note,.local-note{font-size:12px;line-height:1.6;color:#6a7173;margin-top:12px}
+.tech-feature{background:#f7f4ed;color:#192b3e}
+.tech-head{font:700 clamp(29px,7.8vw,40px)/1.35 Georgia,"Yu Mincho",serif!important;letter-spacing:-.055em!important;margin:24px 0 16px!important}.tech-head em{color:#a27a55;font-style:normal}
+.tech-shape{height:clamp(130px,21vh,200px);border-radius:13px;background:linear-gradient(135deg,#152b41,#43576d);color:#fff;display:flex;align-items:center;justify-content:center;gap:27px}
+.tech-screen{width:83px;height:125px;border:3px solid #b9c1c7;border-radius:20px;background:radial-gradient(circle at 78% 25%,#bf8ca6,#293f5a);font:700 48px/1 Georgia,serif;text-align:center;padding-top:30px;box-shadow:0 9px 20px #1117}
+.tech-screen span{font:700 10px sans-serif;display:block}.tech-signal{font:750 10px/2.5 sans-serif;letter-spacing:.12em;color:#d7c4ab}
+.tech-summary{font-size:var(--size);line-height:1.64;margin:15px 0}.tech-value{background:#ebe4d9;padding:13px 15px}.tech-value b{color:#977348;font-size:13px}.tech-value p{font-size:14px;line-height:1.55;margin:8px 0 0}.tech-action{font-size:13px;color:#66717b;margin-top:10px;line-height:1.55}
+.local-feature{background:#f7f4ed;color:#1c2b3b}
+.local-title{position:relative;z-index:1;font:700 clamp(27px,7vw,37px)/1.3 Georgia,"Yu Mincho",serif!important;margin:23px 0 17px!important}
+.local-banner{height:clamp(123px,22vh,190px);background:linear-gradient(145deg,#314a57,#9a806c);padding:18px;color:#efe5d6;position:relative;overflow:hidden;display:flex;align-items:flex-start}
+.local-banner span{font-size:10px;font-weight:750;letter-spacing:.15em;position:relative;z-index:1}
+.local-pattern{position:absolute;right:-65px;top:-65px;width:230px;height:230px;border:25px solid #f3dabd44;border-radius:42px;transform:rotate(28deg)}
+.local-lead{font-size:var(--size);line-height:1.69;margin:15px 0}.local-why{background:#ebe7df;padding:12px 15px;font-size:14px;line-height:1.54}.local-why b{color:#96724e}.local-why p{margin:7px 0}
+@media(max-height:745px){.style-title,.tech-head,.local-title{margin:9px 0!important}.tech-shape,.local-banner{height:100px}.style-opening,.local-lead,.tech-summary{line-height:1.5;margin:9px 0}.style-checks>div{padding:7px 0}.local-why{padding:8px 12px}}
 </style></head>
 <body><div id="app"><main id="stage"><section class="sheet current cover"><div class="topline">PERSONAL MAGAZINE · DAILY / YOS</div><div class="brand">YOS<br>JOURNAL.</div><div class="coverGrow"></div><span class="tag">DAILY EDIT</span><h1>今日を、少し良くする情報。</h1><p>信頼できる情報を、1冊の雑誌のように。</p><div class="issue">記事を読み込み中</div></section></main><nav id="bar" aria-label="ページ操作"><button id="toc" aria-label="目次">☷</button><button id="prev" aria-label="前ページ">‹</button><span id="count">1 / 1</span><button id="next" aria-label="次ページ">›</button><button id="size" aria-label="文字サイズ">Aa</button></nav></div><div id="status" role="status"></div>
 <script>
 (()=>{'use strict';
 const endpoint='https://raw.githubusercontent.com/yskn0008-bot/ProjectY/main/ios-app/scriptable/journal/latest.json';
+const editorialBase='https://raw.githubusercontent.com/yskn0008-bot/ProjectY/main/journal/editions/';
 const stage=document.getElementById('stage'),count=document.getElementById('count'),status=document.getElementById('status');
 const byId=id=>document.getElementById(id),esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const safeLink=x=>{try{const u=new URL(String(x));return u.protocol==='https:'?u.href:''}catch{return ''}};
@@ -71,18 +184,76 @@ const icons=[
 let slides=[],index=0,issueKey='',font=17,tocIndex=1;
 function shell(kind,content){return '<section class="sheet '+kind+'">'+content+'</section>'}
 function para(k,v){return '<h3>'+esc(k)+'</h3><p class="copy">'+esc(v)+'</p>'}
-function addArticle(pages,a,i){
- const cat=esc(a.category||'FEATURE'),title=esc(a.title||''),key=String(i+1).padStart(2,'0');
- const first='<div class="kicker">'+key+' / '+cat+'</div><h2>'+title+'</h2><div class="rule"></div>';
- const synopsis=String(a.summary||''),why=String(a.reason||''),action=String(a.action||''),caveat=String(a.caveat||''),keyPoints=Array.isArray(a.keyPoints)?a.keyPoints:[];
- const image=safeLink(a.image);
- const panel=image?'<img class="editorial-photo" src="'+esc(image)+'" alt="'+esc(a.title)+'" loading="lazy">':'<div class="editorial-panel editorial-'+(i%4)+'"><div class="panel-label">'+esc(a.category||'JOURNAL')+'</div><div class="panel-title">'+esc((keyPoints[0]||a.title||'').slice(0,38))+'</div><div class="panel-number">'+key+'</div></div>';
- const bullets=keyPoints.length?'<div class="keypoints"><div class="small-title">CHECK POINTS</div>'+keyPoints.slice(0,3).map(x=>'<div>· '+esc(x)+'</div>').join('')+'</div>':'';
- pages.push(shell('article',first+panel+'<div class="article-lead">'+esc(synopsis)+'</div>'+bullets+'<div class="fill"></div><div class="folio">STORY '+key+' / 1</div>'));
- const link=safeLink(a.link);
- const items=[['なぜ読む？',why],['次に役立つこと',action],['注意',caveat]].filter(x=>x[1]);
- const details='<div class="kicker">'+key+' / DEEP DIVE</div><div class="secondary-title">'+title+'</div><div class="rule"></div><div class="detail-grid">'+items.map(([k,v])=>'<section class="detail-item"><div class="small-title">'+esc(k)+'</div><p>'+esc(v)+'</p></section>').join('')+'</div><div class="article-source"><div class="small-title">出典・確認先</div><div>'+esc(a.source||'出典未記載')+' · '+esc(a.sourceDate||'日付未確認')+'</div>'+(link?'<a href="'+esc(link)+'" target="_blank" rel="noopener noreferrer">原文を確認する ↗</a>':'<span>有効なリンクなし</span>')+'</div><div class="fill"></div><div class="folio">STORY '+key+' / 2</div>';
- pages.push(shell('article details',details));
+function addArticle(pages,a,i,issue){
+ const cat=String(a.category||'FEATURE'),key=String(i+1).padStart(2,'0');
+ const link=safeLink(a.link),source='<a href="'+esc(link)+'" target="_blank" rel="noopener noreferrer">公式・出典を確認 ↗</a>';
+ const footer='<div class="fill"></div><div class="folio"><span>YOS JOURNAL</span><span>'+key+'</span></div>';
+ const isJazz=issue.issuedOn==='2026-11-12'&&/MIHAMA|ジャズ/.test(a.title);
+ if(isJazz){
+ const photo='https://www.depot-island.co.jp/images/about-pict03.jpg';
+ pages.push(shell('jazz-hero',
+  '<div class="eyebrow light">WEEKEND / CULTURE · 01</div><h2 class="jazz-title"><span>海風と、</span><span>ジャズと、</span><em>土曜の美浜。</em></h2>'+
+  '<div class="jazz-photo"><img src="'+esc(photo)+'" alt="北谷・デポアイランドの海沿いテラス。ライブ当日の写真ではありません"><div class="photo-mark">CHATAN / SEASIDE</div></div>'+
+  '<p class="photo-credit">写真：デポアイランド公式｜会場周辺の風景（イベント当日の写真ではありません）</p>'+
+  '<div class="jazz-stats"><div><b>11.14</b><small>SATURDAY</small></div><div><b>12—20</b><small>TIME</small></div><div><b>FREE</b><small>ADMISSION</small></div></div>'+
+  '<p class="jazz-deck">海沿いを歩いていたら、どこからか生演奏。3つの会場を行き来しながら、気になる音に立ち止まる週末。</p>'+footer));
+ const main=[
+ ['12:00','ジャズんちゅ'],['13:00','D.D.extention'],['14:00','HANS'],['15:10','儀保貴子'],['16:10','SAKI & The Sidewinders'],['17:20','MOJO'],['18:10','亜熱帯クラブ'],['18:40','平良史子'],['19:20','シークレット出演']
+ ];
+ const schedule=main.map(([time,artist],n)=>'<div class="lineup-row"><time>'+esc(time)+'</time><div class="lineup-name">'+esc(artist)+'</div><i>'+(n===8?'LAST':'LIVE')+'</i></div>').join('');
+ pages.push(shell('jazz-schedule',
+  '<div class="eyebrow">02 / THE LINEUP</div><h2 class="program-heading">音楽で辿る、<br><em>12:00 → 20:00</em></h2>'+
+  '<p class="program-intro">デポアイランド・ボードウォーク <strong>メイン会場</strong></p><div class="lineup-list">'+schedule+'</div>'+
+  '<p class="program-note">※演奏時刻・出演者は公式掲載タイムテーブルをもとにした案内。変更の可能性があります。</p>'+footer));
+ pages.push(shell('jazz-guide',
+  '<div class="eyebrow">03 / EXPLORE MIHAMA</div><h2 class="guide-title">海沿いの外にも、<br>音楽がある。</h2>'+
+  '<div class="venue"><div class="venue-time">14:40<span>—15:10</span></div><div><b>THE FAT HATTER OKINAWA</b><p>広瀬朝子による小編成ライブ</p></div></div>'+
+  '<div class="venue"><div class="venue-time">17:45<span>—18:30</span><br>19:00<span>—19:45</span></div><div><b>MBギャラリーチャタン</b><p>MBギャラリーカルテット</p></div></div>'+
+  '<div class="guide-caption">街を歩いて、気になる音を拾っていく。会場間の移動や飲食には別途費用がかかる場合があります。</div>'+
+  '<div class="official-source"><b>OFFICIAL INFORMATION</b><p>北谷町観光協会｜MIHAMA JAZZ STREET 2026</p>'+source+'</div>'+footer));
+ return;
+ }
+ if(/SKIN|HEALTH/.test(cat)){
+ pages.push(shell('skin-feature',
+  '<div class="eyebrow">SELF / BETTER CHOICES</div><div class="feature-index">02</div>'+
+  '<h2 class="skin-title">肌への投資、<br><em>順番で差がつく。</em></h2>'+
+  '<p class="skin-lead">'+esc(a.summary||'')+'</p>'+
+  '<div class="skin-steps"><div><span>01</span><b>いまの肌の状態</b><small>診察で原因を整理</small></div><div><span>02</span><b>標準治療を知る</b><small>費用・期間・副作用を比較</small></div><div><span>03</span><b>必要な施術を選ぶ</b><small>急いで高額施術から始めない</small></div></div>'+
+  '<div class="feature-note">'+esc(a.caveat||'医師の診察を受けて判断する。')+'</div><div class="feature-link">'+source+'</div>'+footer));
+ return;
+ }
+ if(/STYLE/.test(cat)){
+ pages.push(shell('style-feature','<div class="eyebrow">SELF / STYLE</div><div class="style-number">06</div><h2 class="style-title">着飾るより、<br><em>整える。</em></h2><div class="style-sub">THE SMALL DETAILS</div>'+
+ '<p class="style-opening">'+esc(a.summary||'')+'</p><div class="style-checks"><div><span>01</span><b>髪の輪郭</b><small>前・横・後ろのまとまり</small></div><div><span>02</span><b>手元</b><small>爪や指先の清潔感</small></div><div><span>03</span><b>服と香り</b><small>シワを減らし、香りは控えめ</small></div></div>'+
+ '<div class="style-note">'+esc(a.caveat||'')+'</div><div class="feature-link">'+source+'</div>'+footer));
+ return;
+ }
+ if(/TECH/.test(cat)){
+ pages.push(shell('tech-feature','<div class="eyebrow">TECH / NEXT</div><h2 class="tech-head">iPhoneの次の進化を、<br><em>生活のラクさへ。</em></h2>'+
+ '<div class="tech-shape"><div class="tech-screen">27<span>iOS</span></div><div class="tech-signal">SIRI AI<br>WIDGETS<br>PERSONALIZE</div></div>'+
+ '<p class="tech-summary">'+esc(a.summary||'')+'</p><div class="tech-value"><b>気になる理由</b><p>'+esc(a.reason||'')+'</p></div><div class="tech-action">'+esc(a.action||'')+'</div><div class="feature-link">'+source+'</div>'+footer));
+ return;
+ }
+ if(/CRAFT|LOCAL/.test(cat)){
+ pages.push(shell('local-feature','<div class="eyebrow">LIFE / LOCAL CULTURE</div><div class="local-index">'+key+'</div><h2 class="local-title">'+esc(a.title)+'</h2>'+
+ '<div class="local-banner"><span>'+(cat.includes('CRAFT')?'OBJECTS & MATERIALS':'LOCAL ARTS & CULTURE')+'</span><div class="local-pattern"></div></div>'+
+ '<p class="local-lead">'+esc(a.summary||'')+'</p><div class="local-why"><b>楽しみ方のヒント</b><p>'+esc(a.reason||'')+'</p><p>'+esc(a.action||'')+'</p></div>'+
+ '<div class="local-note">'+esc(a.caveat||'')+'</div><div class="feature-link">'+source+'</div>'+footer));
+ return;
+ }
+ if(/MONEY|LAW|LEGAL/.test(cat)){
+ pages.push(shell('money-feature',
+  '<div class="eyebrow">MONEY / OPTIONS</div><div class="money-big">知っている選択肢が、<br><span>安心を増やす。</span></div>'+
+  '<div class="money-rule"></div><p class="money-lead">'+esc(a.summary||'')+'</p>'+
+  '<div class="money-contrast"><div><small>BEFORE</small><strong>情報が少ないまま<br>ひとりで判断</strong></div><div><small>AFTER</small><strong>条件を確認して<br>相談先を選べる</strong></div></div>'+
+  '<div class="money-action"><b>調べるなら、ここから</b><p>'+esc(a.action||'')+'</p><small>'+esc(a.caveat||'')+'</small></div>'+
+  '<div class="feature-link">'+source+'</div>'+footer));
+ return;
+ }
+ pages.push(shell('story-feature','<div class="eyebrow">'+key+' / '+esc(cat)+'</div><h2 class="story-title">'+esc(a.title)+'</h2>'+
+ '<div class="story-accent"></div><p class="story-lead">'+esc(a.summary||'')+'</p><div class="story-why">'+esc(a.reason||'')+'</div>'+
+ '<h3>これから役立つこと</h3><p>'+esc(a.action||'')+'</p><p class="story-caveat">'+esc(a.caveat||'')+'</p>'+
+ '<div class="feature-link">'+source+'</div>'+footer));
 }
 function draw(issue){
  if(!issue||!Array.isArray(issue.articles)||!issue.articles.length)throw Error('記事データがありません');
@@ -90,10 +261,18 @@ function draw(issue){
  if(!articles.length)throw Error('出典リンク付きの記事がありません');
  issueKey=String(issue.issuedOn||issue.date||'unknown');
  const parts=[],starts=[];
- parts.push(shell('cover','<div class="topline">PERSONAL MAGAZINE · DAILY / YOS</div><div class="brand">YOS<br>JOURNAL.</div><div class="coverGrow"></div><span class="tag">TODAY / PICKS</span><h1>'+esc(issue.headline||articles[0].title)+'</h1><p>'+esc(issue.lead||'')+'</p><div class="issue">'+esc(issue.date||'発行日未確認')+' · '+articles.length+' STORIES</div>'));
+ const jazzSpecial=issue.issuedOn==='2026-11-12'&&articles.some(a=>/ジャズ|MIHAMA/.test(a.title));
+ const coverHeadline=jazzSpecial?'土曜、<br>街がジャズになる。':esc(issue.headline||articles[0].title);
+ const coverCopy=jazzSpecial?'美浜の海風と音楽を巡る、週末ガイド。':esc(issue.lead||'今日、読む価値のある情報を。');
+ const coverTheme=jazzSpecial?'JAZZ':'TODAY';
+ const coverN=jazzSpecial?'WEEKEND CULTURE':'PERSONAL EDITION';
+ parts.push(shell('cover magazine-cover','<div class="cover-top"><span>YOS / PERSONAL EDITION</span><span>'+esc(issue.issuedOn||'DAILY')+'</span></div><div class="brand">YOS<br>JOURNAL<span class="brand-dot">.</span></div><div class="cover-art"><div class="cover-motif">'+coverTheme+'<span>'+(jazzSpecial?'AT THE SEASIDE':'MADE FOR ONE')+'</span></div></div><div class="cover-bottom"><div class="cover-line">'+coverN+' <span>NO. 01</span></div><h1>'+coverHeadline+'</h1><p>'+coverCopy+'</p><div class="cover-foot"><span>'+esc(issue.date||'発行日未確認')+'</span><span>'+articles.length+' STORIES INSIDE</span></div></div>'));
  parts.push('CONTENTS_PLACEHOLDER');
- for(let i=0;i<articles.length;i++){starts.push(parts.length);addArticle(parts,articles[i],i)}
- parts[1]=shell('contents','<div class="kicker">YOS JOURNAL / CONTENTS</div><h2>今日の読みもの</h2>'+articles.map((a,i)=>'<button class="toc" data-go="'+starts[i]+'"><span class="number">'+String(i+1).padStart(2,'0')+'</span><span class="detail"><small>'+esc(a.category||'FEATURE')+'</small><strong>'+esc(a.title)+'</strong></span><span class="chevron">›</span></button>').join('')+'<div class="fill"></div><div class="folio">'+esc(issue.date||'')+'</div>');
+ if(articles.length>4)parts.push('CONTENTS_PLACEHOLDER_2');
+ for(let i=0;i<articles.length;i++){starts.push(parts.length);addArticle(parts,articles[i],i,issue)}
+ const tocPage=(subset,offset,heading)=>shell('contents','<div class="kicker">YOS JOURNAL / CURATED READS</div><h2>'+heading+'</h2><div class="contents-list">'+subset.map((a,i)=>'<button class="toc" data-go="'+starts[offset+i]+'"><span class="number">'+String(offset+i+1).padStart(2,'0')+'</span><span class="detail"><small>'+esc(a.category||'FEATURE')+'</small><strong>'+esc(a.title)+'</strong></span><span class="chevron">›</span></button>').join('')+'</div><div class="fill"></div><div class="folio">'+esc(issue.date||'')+'</div>');
+ parts[1]=tocPage(articles.slice(0,4),0,'今日、読みたい話。');
+ if(articles.length>4)parts[2]=tocPage(articles.slice(4),4,'まだある、発見。');
  stage.innerHTML=parts.join('');
  slides=Array.from(stage.querySelectorAll('.sheet'));tocIndex=1;
  stage.querySelectorAll('[data-go]').forEach(el=>el.addEventListener('click',()=>show(Number(el.dataset.go))));
@@ -107,7 +286,7 @@ byId('prev').onclick=()=>show(index-1);byId('next').onclick=()=>show(index+1);by
 byId('size').onclick=()=>{font=font>=19?15:font+1;document.documentElement.style.setProperty('--size',font+'px')};
 let x=0,y=0;stage.addEventListener('touchstart',e=>{x=e.touches[0].clientX;y=e.touches[0].clientY},{passive:true});stage.addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-x,dy=e.changedTouches[0].clientY-y;if(Math.abs(dx)>55&&Math.abs(dx)>Math.abs(dy)*1.4)show(index+(dx<0?1:-1))},{passive:true});
 document.addEventListener('keydown',e=>{if(e.key==='ArrowRight')show(index+1);if(e.key==='ArrowLeft')show(index-1)});
-(async()=>{let issue=null;try{const r=await fetch(endpoint,{cache:'no-store'});if(!r.ok)throw Error('HTTP '+r.status);issue=await r.json();if(!issue.articles?.length)throw Error('記事なし');try{localStorage.setItem('yos-journal-issue-cache',JSON.stringify(issue))}catch{}}catch(e){try{issue=JSON.parse(localStorage.getItem('yos-journal-issue-cache')||'null');if(issue)notice('通信できないため保存した号を表示しています')}catch{}}
+(async()=>{let issue=null;try{const today=new Date().toLocaleDateString('sv-SE',{timeZone:'Asia/Tokyo'});let r=await fetch(editorialBase+today+'.json',{cache:'no-store'});if(!r.ok)r=await fetch(endpoint,{cache:'no-store'});if(!r.ok)throw Error('HTTP '+r.status);issue=await r.json();if(!issue.articles?.length)throw Error('記事なし');try{localStorage.setItem('yos-journal-issue-cache',JSON.stringify(issue))}catch{}}catch(e){try{issue=JSON.parse(localStorage.getItem('yos-journal-issue-cache')||'null');if(issue)notice('通信できないため保存した号を表示しています')}catch{}}
 try{draw(issue)}catch(e){stage.innerHTML='<section class="sheet current"><div id="error"><h2>記事を表示できませんでした</h2><p>'+esc(e.message)+'</p><p>通信を確認して再読み込みしてください。</p></div></section>';count.textContent='—'}})();
 })();
 </script></body></html>

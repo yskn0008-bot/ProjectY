@@ -25,7 +25,6 @@ const ROUTES = new Map([
   ['/api/yos/tasks', tasks],
   ['/api/yos/tasks-health', tasksHealth],
   ['/api/yos/intake', intake],
-  ['/api/yos/notification', intake],
   ['/api/yos/projecty-decision', projectyDecision]
 ]);
 
@@ -82,13 +81,7 @@ async function handle(request, response) {
       ));
       return;
     }
-    let webRequest = await toWebRequest(request);
-    if (url.pathname === '/api/yos/notification') {
-      const target = new URL(webRequest.url);
-      target.pathname = '/api/yos/intake';
-      target.searchParams.set('mode', 'notification');
-      webRequest = new Request(target, webRequest);
-    }
+    const webRequest = await toWebRequest(request);
     await sendWebResponse(response, await route.fetch(webRequest));
   } catch (error) {
     const status = Number(error?.status) === 413 ? 413 : 503;

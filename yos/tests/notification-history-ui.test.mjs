@@ -13,6 +13,8 @@ test('authenticated live reads never embed user records or credentials',()=>{
   assert.match(page,/\.\/hj\/yos-auth\.js/);
   assert.match(page,/Authorization:'Bearer '\+token/);
   assert.match(page,/cache:'no-store'/);
+  assert.doesNotMatch(page,/google-cloud-run|\.run\.app/);
+  assert.match(page,/certified_routes\.includes\('notification'\)/);
   assert.doesNotMatch(page,/notification:b39d57ed|西村陽介|YOS-TEST-P1-20261112/);
   assert.match(page,/未取得です。0件と断定できません/);
 });
@@ -24,5 +26,14 @@ test('cursor guard, readback and no falsely verified payment completion',()=>{
 });
 test('dense UI contains list/search/filter/detail controls',()=>{
   for(const id of ['events','search','connect','refresh','detail','later','reported','openSource'])assert.match(page,new RegExp('id="'+id+'"'));
-  assert.match(page,/grid-template-columns:42px minmax\(0,1fr\) 53px 78px/);
+  assert.match(page,/grid-template-columns:40px minmax\(0,1fr\) 69px 72px/);
+  assert.match(page,/notice-icon/);
+  assert.match(page,/b\.classList\.add\('flag'\)/);
+  assert.match(page,/YOS_ALERT/);
+  assert.match(page,/YOS_SILENT/);
+});
+
+test('confirmed empty inbox displays zero counts, not the unverified dash',()=>{
+  assert.match(page,/lastComplete\|\|rows\.length\?counts\.action:'—'/);
+  assert.match(page,/lastComplete\?'通知履歴はありません'/);
 });

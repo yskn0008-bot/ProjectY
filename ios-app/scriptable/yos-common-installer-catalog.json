@@ -34,8 +34,36 @@
       "id": "timeline-charcoal-20261111",
       "name": "YOS Timeline Charcoal 確認 20261111",
       "path": "ios-app/scriptable/YOS Timeline Charcoal 確認 20261111.js",
-      "commit": "000660b7eafa2d9563732b49dde8c9fbde652bce",
-      "sha256": "a1004bdc8a128725ae644c34b083d7388699d53744dd01002662e3aa063db582"
+      "commit": "77ccee0b08538d7ad2c3939625a83fee0fe89a4f",
+      "sha256": "22a59870dc28edd6c49056bc5347233d2bccc0ba4c43c5264a0a0e4e8eec0e97"
+    },
+    {
+      "id": "bravia-smart-power",
+      "name": "YOS BRAVIA Smart Power",
+      "path": "ios-app/scriptable/remote-widgets/YOS BRAVIA Smart Power.js",
+      "commit": "e924cf1792098ec32dcdce61395ec409af94862b",
+      "sha256": "7812eb72e5373aeac3aa16402ca16d34c77d68707ac145b1504498c0d9a4c7a2"
+    },
+    {
+      "id": "remote-direct-actions",
+      "name": "YOS Remote Direct Actions",
+      "path": "ios-app/scriptable/remote-widgets/YOS Remote Direct Actions.js",
+      "commit": "fe3149177b95616b78742f70d01eb4b50c9476a0",
+      "sha256": "ee8959104a4d239b8b277fa368824a8810a03e682183a18d95b90dd99fd64d9b"
+    },
+    {
+      "id": "tapo-h110-core",
+      "name": "YOS Tapo H110 Core",
+      "path": "ios-app/scriptable/remote-widgets/YOS Tapo H110 Core.js",
+      "commit": "e20ce2e659a371f5ade5298ec436eb14e9b3dcaa",
+      "sha256": "6de2d6a2a0679bb71b2115ed0dbb9e42a58e45cb1c0ba9727b92ef5603f48614"
+    },
+    {
+      "id": "sleep-scene",
+      "name": "YOS Sleep Scene",
+      "path": "ios-app/scriptable/remote-widgets/YOS Sleep Scene.js",
+      "commit": "808d9e797a5734a4f7326e0471d6a4474244bc38",
+      "sha256": "987664699fee3963f001e6610eafb5d371e3009cba990560785ed456171587f8"
     }
   ]
 }
