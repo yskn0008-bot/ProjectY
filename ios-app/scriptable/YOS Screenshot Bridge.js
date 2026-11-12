@@ -10,9 +10,21 @@ async function alertFailure(message) {
   await n.schedule();
 }
 function readPayload(input) {
-  if (typeof input !== 'string') throw Error('ショートカットから画像データが渡されていません');
-  let payload;
-  try { payload = JSON.parse(input); } catch { throw Error('画像データの形式が不正です'); }
+  // Shortcut may pass a dictionary instead of hand-assembling JSON.
+  // Never search Photos/Clipboard: the image must be bound to this trigger.
+  let payload = input;
+  if (typeof input === 'string') {
+    try { payload = JSON.parse(input); } catch { throw Error('画像データの形式が不正です'); }
+  }
+  if (!payload || typeof payload !== 'object' || Array.isArray(payload)) {
+    throw Error('ショートカットから画像データが渡されていません');
+  }
+  // Build non-secret metadata locally; a supplied captureId is retained on retries.
+  if (!payload.captureId) payload.captureId = 'ios-' + Date.now() + '-' + Math.random().toString(36).slice(2, 12);
+  if (!payload.capturedAt) payload.capturedAt = new Date().toISOString();
+  if (!payload.source) payload.source = 'ios-screenshot';
+  if (!payload.saveLocation) payload.saveLocation = 'photos';
+  if (!payload.mimeType) payload.mimeType = 'image/jpeg';
   if (!payload || payload.source !== 'ios-screenshot' ||
       !['photos', 'files', 'clipboard'].includes(payload.saveLocation) ||
       typeof payload.imageBase64 !== 'string' || !payload.imageBase64 ||
