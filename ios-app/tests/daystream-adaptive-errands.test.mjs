@@ -70,3 +70,17 @@ test('skipped first task never falsely removes the detour charge for the next on
  assert.equal(out.proposals[0].detourMinutes,10);
  assert.equal(out.proposals[0].minutes,30);
 });
+
+test('appointments between two tasks at one venue trigger a second confirmed detour',()=>{
+ const at={...context,route:[{placeId:'a',order:1,detourMinutes:10,openConfirmed:true}],windowEnd:700,freeMinutes:50};
+ const errands=[{...tasks[1],id:'one',durationMinutes:10},{...tasks[1],id:'two',durationMinutes:10}];
+ const out=fn(errands,at,[{s:620,d:20,kind:'schedule',f:1}],'2026-11-12');
+ assert.deepEqual(Array.from(out.proposals,x=>[x.start,x.end,x.detourMinutes]),[[600,620,10],[640,660,10]]);
+});
+test('appointment interruption never treats already visited store as zero-cost revisit',()=>{
+ const at={...context,route:[{placeId:'a',order:1,detourMinutes:10,openConfirmed:true}],windowEnd:680,freeMinutes:35};
+ const errands=[{...tasks[1],id:'one',durationMinutes:10},{...tasks[1],id:'two',durationMinutes:10}];
+ const out=fn(errands,at,[{s:620,d:20,kind:'schedule',f:1}],'2026-11-12');
+ assert.deepEqual(Array.from(out.proposals,x=>x.id),['one']);
+ assert.equal(out.excluded[0].id,'two');
+});
