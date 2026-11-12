@@ -20,7 +20,7 @@ test('YOS Tasks refresh reuses existing backend and is opt-in and read-only',()=
  assert.doesNotMatch(authCode,/localStorage|sessionStorage|NOTION_TOKEN|API_SECRET/);
  assert.match(html,/id="yosWebTaskRefresh"/);
  assert.match(html,/provider\.setup\(\{/);
- assert.match(html,/source:\u0027yos-auth-cache\u0027/); // source guard on persisted projected data
+ assert.match(html,/snapshot\.source!==\u0027yos-auth-cache\u0027/); // source guard on persisted projected data
  assert.match(html,/<script src="\.\/yos-tasks-auth\.js"><\/script>/);
  assert.match(worker,/'\.\/yos\/daystream\/yos-tasks-auth\.js'/);
 });
@@ -78,7 +78,7 @@ test('existing MY WAY Life schedule is projected without changing source and spl
  assert.equal(projected.calendarDays['2026-11-13'][1].duration,10);
  assert.equal(projected.calendarDays['2026-11-14'][0].duration,20);
  assert.equal(JSON.stringify(life),original,'projection does not mutate MY WAY data');
- assert.match(html,/既存MY WAY/);
+ assert.match(html,/existingLifeSchedule/);
  assert.match(html,/保存済みMY WAY生活予定/);
 });
 test('sanitized auth snapshot expires in six hours even when backup validity is extended',()=>{
