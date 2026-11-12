@@ -22,7 +22,7 @@ try {
   assert.equal(external.length,0,'demo must make no external API requests');
   await page.locator('[data-filter="action"]').click();
   assert.equal(await page.locator('.event').count(),5);
-  await page.locator('[data-filter="waiting"]').click();
+  await page.locator('[data-filter="wait"]').click();
   assert.equal(await page.locator('.event').count(),3);
   await page.locator('[data-filter="done"]').click();
   assert.equal(await page.locator('.event').count(),6);
