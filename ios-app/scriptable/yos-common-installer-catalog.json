@@ -57,6 +57,13 @@
       "path": "ios-app/scriptable/remote-widgets/YOS Tapo H110 Core.js",
       "commit": "e20ce2e659a371f5ade5298ec436eb14e9b3dcaa",
       "sha256": "6de2d6a2a0679bb71b2115ed0dbb9e42a58e45cb1c0ba9727b92ef5603f48614"
+    },
+    {
+      "id": "sleep-scene",
+      "name": "YOS Sleep Scene",
+      "path": "ios-app/scriptable/remote-widgets/YOS Sleep Scene.js",
+      "commit": "808d9e797a5734a4f7326e0471d6a4474244bc38",
+      "sha256": "987664699fee3963f001e6610eafb5d371e3009cba990560785ed456171587f8"
     }
   ]
 }
