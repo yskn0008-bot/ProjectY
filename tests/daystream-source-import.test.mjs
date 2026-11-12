@@ -108,5 +108,5 @@ test('fresh existing authenticated YOS task cache is reused read-only but stale 
  assert.equal(moved.items[0].id,snapshot.items[0].id,'due-date changes do not duplicate a planned task');
  assert.match(html,/yos-task-dashboard-cache-v1/);
  assert.match(html,/existingYosCache\|\|importedTasks/);
- assert.match(html,/YOS認証済みTasksキャッシュ/);
+ assert.match(html,/YOS認証済みTasks写し/);
 });
