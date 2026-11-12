@@ -1,3 +1,9 @@
+# Integration dependency
+
+This draft is stacked on existing PR #692 (Vercel notification/Inbox candidate, no Cloud Run changes). The same intake function preserves notification, inbox-sort, screenshot, model, mirror and factory routes. Release #692 only after its own approval and live gates; then retarget this draft to main and recheck the final three-way diff. Do not merge the screenshot draft separately into an older intake implementation.
+
+All nine currently published installer targets, including released #720 DAYSTREAM, remain unchanged. The one Screenshot Bridge candidate uses the existing installer. Catalog publication, real screenshot upload and device automation remain unperformed.
+
 # Screenshot automation: device integration gate (2026-11-12)
 
 Apple confirms iOS screenshot automations fire when a screenshot is **saved** to Photos, Files or Clipboard, not merely when a button is pressed. Source: https://support.apple.com/en-tj/guide/shortcuts/apd932ff833f/ios

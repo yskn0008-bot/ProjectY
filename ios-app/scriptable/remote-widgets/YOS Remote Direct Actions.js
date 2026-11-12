@@ -1,3 +1,5 @@
+// Variables used by Scriptable.
+// YOS_SCRIPT_NAME: YOS Remote Direct Actions
 // YOS Remote Direct Actions v1.0
 // Shortcut parameter: "light on", "light off", "ac cool", "ac stop", "floor on", "floor off".
 // No visible remote WebView. Existing installed modules and Keychain are not changed.

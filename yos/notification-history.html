@@ -1,0 +1,304 @@
+<!doctype html>
+<html lang="ja"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#121416"><meta name="referrer" content="no-referrer">
+<title>YOS Alerts｜通知履歴</title>
+<style>
+:root{color-scheme:dark;--bg:#121416;--surface:#1c1f22;--line:#373b40;--fg:#ebeef0;--muted:#9ea5ab;--red:#e2a09b;--amber:#dec18f;--green:#b9d1bc}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:13px/1.45 -apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN",sans-serif}
+button,input{font:inherit}button{cursor:pointer}button:disabled{opacity:.5;cursor:not-allowed}button:focus-visible,input:focus-visible{outline:2px solid #d3dde3;outline-offset:2px}
+main{max-width:560px;margin:auto;min-height:100dvh}header{position:sticky;top:0;z-index:5;background:#121416f5;border-bottom:1px solid var(--line);padding:calc(env(safe-area-inset-top) + 14px) 14px 10px}
+.heading{display:flex;justify-content:space-between;align-items:center;gap:10px}.eyebrow{font-size:10px;letter-spacing:.14em;color:var(--muted)}
+h1{font-size:25px;margin:2px 0 4px;letter-spacing:-.035em}p{margin:5px 0;color:var(--muted)}a{color:#cbd5dd}
+.pill{border:1px solid #626970;border-radius:20px;padding:5px 8px;font-size:10px;color:#c5cbd0}
+.counts{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid #494c50;border-radius:9px;overflow:hidden;margin:14px 0 12px}
+.counts span{text-align:center;padding:8px 0;font-size:12px}.counts span+span{border-left:1px solid #494c50}.counts b{font-size:16px;margin-left:5px}.counts .a{color:var(--red)}.counts .b{color:var(--amber)}.counts .c{color:var(--green)}
+.filters{display:flex;align-items:center;gap:6px;overflow-x:auto;scrollbar-width:none}.filters button{white-space:nowrap;background:#26292d;border:1px solid #494d53;border-radius:16px;padding:7px 11px;font-size:11px;color:#c0c4c8}
+.filters button[aria-pressed=true]{background:#e8eaeb;border-color:#e8eaeb;color:#15181a;font-weight:700}
+.filters .refresh{margin-left:auto;background:none;border-color:#62676d;color:#edf0f2}.search{display:block;width:100%;margin:10px 0 0;padding:9px;background:#24272a;border:1px solid #53575c;border-radius:7px;color:#fff}
+#state{padding:11px 15px;color:#c9d0d6;font-size:11px;display:flex;justify-content:space-between;align-items:center;gap:8px;border-bottom:1px solid #363a40}
+#state button{background:#e4e7e9;border:0;color:#16181a;border-radius:8px;padding:8px 10px;font-size:11px;font-weight:700}
+#message{padding:10px 15px;color:var(--amber);font-size:11px;line-height:1.6}
+#googleSignIn{padding:8px 15px}#googleSignIn[hidden],[hidden]{display:none!important}
+.columns,.event{display:grid;grid-template-columns:42px minmax(0,1fr) 53px 78px;gap:4px;align-items:center}
+.columns{padding:9px 12px;color:var(--muted);font-size:9px;border-bottom:1px solid #52575d}
+.day{background:#202327;padding:6px 12px;color:#afb7bd;font-size:10px;border-bottom:1px solid #373b40}
+.event{background:transparent;border:0;border-bottom:1px solid #33373b;padding:7px 12px;width:100%;text-align:left;min-height:42px;color:var(--fg)}
+.event:active{background:#2a2e32}.time{font-size:11px;font-variant-numeric:tabular-nums}.subject{min-width:0;display:block;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font-size:12px}.category{display:block;color:var(--muted);font-size:9px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tag{display:inline-block;text-align:center;border-radius:5px;padding:4px 1px;font-size:10px;background:#32373b;color:#cbd0d4}
+.tag.action{color:var(--red);background:#482e2b}.tag.wait{color:var(--amber);background:#453a2c}.tag.done{color:var(--green);background:#2c3c32}
+.result{text-align:right;font-size:9px;color:#bfc6cc;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.empty{padding:26px 14px;color:var(--muted)}.footer{font-size:10px;color:#919aa2;padding:20px 14px 45px}
+#detail{position:fixed;inset:0;background:#121416;z-index:10;overflow:auto}
+.detail-head{padding:calc(env(safe-area-inset-top) + 16px) 18px 13px;display:flex;align-items:center;gap:15px;border-bottom:1px solid var(--line)}
+.detail-head button{background:none;border:0;color:#fff;font-size:25px}.detail-head strong{font-size:17px}
+.detail-body{max-width:560px;margin:auto;padding:22px 18px 120px}h2{font-size:23px;line-height:1.35;letter-spacing:-.02em}
+.section{border-top:1px solid var(--line);padding:15px 0}.section strong{font-size:13px}.section p{font-size:12px;line-height:1.7;margin:8px 0 0}
+.actions{position:fixed;left:0;right:0;bottom:0;background:#171a1df7;border-top:1px solid #50555a;padding:12px 12px calc(14px + env(safe-area-inset-bottom));display:flex;gap:8px;justify-content:center}
+.actions button{flex:1;max-width:180px;background:#30353a;color:#fff;border:1px solid #626970;border-radius:8px;padding:12px 2px;font-size:12px}
+.actions button:first-child{background:#e6eaec;color:#111418;border-color:#e6eaec;font-weight:700}
+@media(min-width:650px){#detail .actions{left:calc(50% - 280px);right:calc(50% - 280px)}}
+
+/* YOS Alerts — approved dense mobile layout, 2026-11-13 */
+:root{--bg:#111418;--surface:#202428;--line:#383e44;--fg:#f0f1f1;--muted:#9ea5ae;--red:#ef9da0;--amber:#edce88;--green:#a6d6b4}
+html{background:#111418}body{background:radial-gradient(ellipse at 50% 5%,#1a1e23 0,#111418 44%,#101317 100%);font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Hiragino Kaku Gothic ProN",sans-serif}
+main{max-width:680px;margin:0 auto;min-height:100dvh}
+header{position:relative;z-index:1;background:transparent;border:0;padding:calc(env(safe-area-inset-top) + 21px) 15px 0}
+.heading{align-items:flex-end}.eyebrow{font-size:11px;letter-spacing:.20em;font-weight:500;color:#9aa2aa}h1{font-size:30px;letter-spacing:-.06em;font-weight:800;margin:5px 0 0}
+header>p{font-size:12px;margin:9px 0 0;color:#b8bec5}
+.pill{border:1px solid #69717a;color:#bbc1c7;border-radius:26px;font-size:11px;padding:5px 10px;white-space:nowrap}
+.pill:before{content:"";display:inline-block;background:#7b848d;width:7px;height:7px;border-radius:50%;margin-right:7px}
+.counts{margin:17px 0 12px;border-color:#50565d;border-radius:10px;background:#191d21;grid-template-columns:repeat(3,minmax(0,1fr))}
+.counts span{padding:12px 2px;color:#c6ccd0;font-size:12px;min-width:0;white-space:nowrap}
+.counts span+span{border-left-color:#444b52}
+.counts span:before{content:"";width:7px;height:7px;display:inline-block;border-radius:50%;background:currentColor;margin-right:5px}
+.counts b{font-size:15px;font-variant-numeric:tabular-nums;margin-left:7px;color:#f0f2f2}
+.filters{gap:8px;overflow-x:auto;padding:0 0 1px}
+.filters button{font-size:12px;background:#252a30;border:1px solid #545b63;border-radius:22px;padding:8px 13px;color:#ced2d6;min-height:37px}
+.filters button[aria-pressed=true]{background:#e9eced;color:#111416;border-color:#e9eced}
+.search-shell{position:relative;margin-top:12px}
+.search-shell:before{content:"⌕";font-size:27px;position:absolute;left:12px;top:0;color:#b9c0c6;line-height:39px;pointer-events:none}
+.search{font-size:13px;margin:0;width:100%;background:linear-gradient(120deg,#292e34,#24282d);border:1px solid #585f68;border-radius:10px;padding:11px 10px 11px 38px;color:#f2f4f4;min-height:43px}
+.search::placeholder{color:#b3bac0}
+.columns,.event{grid-template-columns:40px minmax(0,1fr) 69px 72px;gap:5px;align-items:center}
+.columns{position:relative;padding:17px 11px 8px;font-size:10px;color:#a8afb7;border-bottom:1px solid #525962}
+.columns span:last-child{text-align:right}
+#events{padding-bottom:2px}
+.event{position:relative;border-bottom:1px solid #394048;min-height:39px;padding:4px 10px;color:#e8e9eb;font-size:11px;transition:background .15s}
+.event:active{background:#30343b}
+.event.flag{background:linear-gradient(90deg,rgba(112,49,56,.28),rgba(107,49,55,.22))}
+.event.flag:before{position:absolute;content:"";left:0;top:0;bottom:0;width:3px;background:#c6797c}
+.time{font-size:11px;color:#d4d7da;font-variant-numeric:tabular-nums}
+.subject{display:flex;min-width:0;gap:7px;align-items:center;overflow:hidden}
+.notice-icon{flex:0 0 26px;height:27px;width:26px;display:flex;align-items:center;justify-content:center;border-radius:8px;background:#292e35;color:#e9e9ea;font-size:16px;font-weight:500}
+.subject-copy{display:block;min-width:0;overflow:hidden}
+.notice-title{font-size:11px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
+.category{font-size:10px;margin-top:2px;color:#b0b5bd;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tag{font-size:9px;text-align:center;padding:4px 1px;white-space:nowrap;background:transparent;color:#cbd1d6;border:1px solid #7d8791;border-radius:15px;overflow:hidden;text-overflow:ellipsis}
+.tag.action{border-color:#dd8b8c;color:#f2a5a8;background:transparent}
+.tag.wait{border-color:#c4a45f;color:#edcb82;background:transparent}
+.tag.done{border-color:#849095;color:#c7d1d6;background:transparent}
+.result{text-align:center;font-size:9px;padding:5px 2px;border-radius:16px;max-width:100%;white-space:nowrap;color:#bbc2c8;overflow:hidden;text-overflow:ellipsis}
+.result.recorded{color:#a7dab8;background:#20352f}
+.result.pending{color:#cfd6dd;background:#292f35}
+.result.urgent{color:#f2a6a9;background:#543138}
+.result.unverified{color:#b5bdc5;background:#262c31}
+.day{font-size:9px;padding:5px 12px;background:#20252a;color:#b5bec6}
+.empty{font-size:12px;padding:28px 15px;color:#aeb6bf}
+#state{border-top:1px solid #343c44;border-bottom:0;margin:17px 10px 0;padding:13px 5px;gap:10px}
+#state button{font-size:12px;padding:9px 12px;border-radius:12px}
+#message{padding:7px 15px 5px;font-size:11px}
+#googleSignIn{padding:8px 15px}
+.footer{font-size:11px;color:#9ca5ad;padding:15px 15px calc(33px + env(safe-area-inset-bottom))}
+.footer p{font-size:10px;line-height:1.6}
+#detail{background:#121519}
+.detail-head{background:#171b1f}
+.detail-body h2{font-size:23px}
+@media(max-width:375px){
+ .columns,.event{grid-template-columns:36px minmax(0,1fr) 64px 66px;gap:4px}
+ .event{padding-left:8px;padding-right:8px}
+ .notice-icon{width:23px;flex-basis:23px;height:25px}
+ .subject{gap:5px}
+ .tag,.result{font-size:8px}
+ .counts span{font-size:11px}
+}
+
+
+/* Explicit non-persistent demo. Neither auth nor the real notification endpoint is used. */
+.demo-banner{margin:11px 12px 0;padding:9px 12px;border:1px solid #bd9556;border-radius:8px;background:#302819;color:#f5d8a7;font-size:11px;line-height:1.6}
+.demo-banner strong{display:inline-block;margin-right:7px;letter-spacing:.1em}
+#demoStart{background:#32383f!important;color:#edf0f2!important;border:1px solid #65707a!important}
+body.demo-active .event{cursor:pointer}
+body.demo-active #googleSignIn{display:none!important}
+body.demo-active #refresh,body.demo-active #connect{display:none!important}
+body.demo-active #mode{border-color:#bd9556;color:#f6d5a0}
+body.demo-active #mode:before{background:#bd9556}
+</style></head><body>
+<main id="overview"><header>
+<div class="heading"><div><div class="eyebrow">YOS / STREAM</div><h1>通知履歴</h1></div><span class="pill" id="mode">未接続</span></div>
+<p>受信 → 判断 → 処理結果を、1行で確認</p>
+<div class="counts"><span class="a">要対応<b id="countAction">—</b></span><span class="b">未判定<b id="countWaiting">—</b></span><span class="c">記録<b id="countSaved">—</b></span></div>
+<div class="filters"><button data-filter="all" aria-pressed="true">すべて</button><button data-filter="action" aria-pressed="false">要対応</button><button data-filter="wait" aria-pressed="false">未判定</button><button data-filter="done" aria-pressed="false">記録</button></div>
+<div class="search-shell"><input class="search" id="search" type="search" placeholder="通知元・要約を検索" aria-label="通知履歴を検索"></div>
+</header>
+<div id="demoBanner" class="demo-banner" role="status" hidden><strong>DEMO / 架空データ14件</strong>これはデザイン確認用のサンプルです。実際の受信・AI判定・対応記録ではありません。保存・送信も行いません。</div>
+<div class="columns"><span>時刻</span><span>通知の概要</span><span>判断</span><span style="text-align:right">処理結果</span></div>
+<div id="events" aria-live="polite"></div>
+<div id="state"><span id="status">本人認証して既存YOSの履歴を読み込む</span><div style="display:flex;gap:6px"><button id="demoStart" type="button">デモを見る</button><button id="refresh" type="button">更新</button><button id="connect">履歴を取得</button></div></div>
+<div id="googleSignIn" hidden><div id="googleSignInButton"></div></div>
+<div id="message" role="status" aria-live="polite">未取得です。0件と断定できません。</div>
+
+<div class="footer"><a href="./">STREAMへ戻る</a> · <a href="https://app.notion.com/p/3d35ca88289581ef9dc8d5f11ff8e213" rel="noreferrer">既存YOS Inbox</a><p>本人認証付きの既存通知APIから読み取ります。実際の処理結果を確認できない場合は「未確認」と表示します。元アプリの通知は止めません。</p></div>
+</main>
+<section id="detail" hidden><div class="detail-head"><button id="back" aria-label="履歴に戻る">‹</button><strong>通知の詳細</strong></div>
+<div class="detail-body"><div id="detailMeta" class="eyebrow"></div><h2 id="detailTitle"></h2><p id="detailState"></p>
+<div class="section"><strong>YOSの判断</strong><p id="detailDecision"></p></div>
+<div class="section"><strong>確認できたこと</strong><p id="detailFacts"></p></div>
+<div class="section"><strong>次の一手</strong><p id="detailNext"></p></div>
+<div class="section"><strong>処理の記録</strong><p id="detailAudit"></p></div></div>
+<div class="actions"><button id="openSource">原本を確認</button><button id="later">あとで</button><button id="reported">対応した</button></div></section>
+<script src="./hj/yos-auth.js" defer></script>
+<script>
+(function(){
+'use strict';
+var API='';
+async function selectExistingProvider(){
+  if(API)return;
+  var res=await fetch('../data/yos-runtime-providers.json',{cache:'no-store',credentials:'omit'});
+  if(!res.ok)throw Error('既存の接続先設定を読み込めません');
+  var cfg=await res.json();
+  var p=(Array.isArray(cfg.providers)?cfg.providers:[]).find(function(x){
+    return x.id==='vercel' && x.enabled===true &&
+      typeof x.base_url==='string' &&
+      Array.isArray(x.certified_routes) && x.certified_routes.includes('notification');
+  });
+  if(!p)throw Error('通知APIは未公開です。画面は準備済みですが、履歴はまだ読み込めません');
+  var parsed=new URL(p.base_url);
+  if(parsed.protocol!=='https:'||parsed.username||parsed.password||parsed.search||parsed.hash||parsed.pathname!=='/'||
+      parsed.hostname!=='project-y-yos-ai.vercel.app')
+    throw Error('既存通知APIの接続先を検証できません');
+  API=parsed.origin+'/api/yos/notification';
+}
+var INBOX='https://app.notion.com/p/3d35ca88289581ef9dc8d5f11ff8e213';
+var $=function(id){return document.getElementById(id)};
+var rows=[],token='',active='all',selected=null,loading=false,lastComplete=false;
+var isDemo=new URLSearchParams(location.search).get('demo')==='1';
+var category={information:'一般通知','missed-call':'不在着信','money-review':'お金・支払',legal:'法務・期限',security:'セキュリティ'};
+function text(v,n){return String(v==null?'':v).slice(0,n||120)}
+function clean(v){return text(v,130).replace(/[\w.+-]+@[\w.-]+\.[A-Za-z]{2,}/g,'[メール非表示]').replace(/(?:\+?81[- ]?)?0\d{1,4}[- ]?\d{2,4}[- ]?\d{3,4}/g,'[電話非表示]').replace(/\b\d{7,}\b/g,'[番号非表示]').replace(/認証コード.{0,45}/g,'[認証情報非表示]').trim()}
+function fmt(v,opts){var d=new Date(v);return Number.isNaN(+d)?'日時不明':new Intl.DateTimeFormat('ja-JP',Object.assign({timeZone:'Asia/Tokyo'},opts)).format(d)}
+function label(e){if(e.aiState==='complete'&&e.aiDecision==='YOS_ALERT')return ['要対応','action'];if(e.aiState==='pending'||e.aiState==='failed'||!e.aiDecision)return ['未判定','wait'];return ['記録','done']}
+function summary(e){var s=clean(e.aiSummary||e.text||'');return s||'要約未確認'}
+function node(tag,cls,s){var el=document.createElement(tag);if(cls)el.className=cls;if(s!==undefined)el.textContent=s;return el}
+function message(s){$('message').textContent=s}
+function render(){
+var counts={action:0,wait:0,done:0};rows.forEach(function(e){counts[label(e)[1]]++});
+$('countAction').textContent=lastComplete||rows.length?counts.action:'—';$('countWaiting').textContent=lastComplete||rows.length?counts.wait:'—';$('countSaved').textContent=lastComplete||rows.length?counts.done:'—';
+var q=$('search').value.toLowerCase().trim(),v=rows.filter(function(e){return (active==='all'||label(e)[1]===active)&&(!q||(summary(e)+' '+(category[e.category]||'通知')).toLowerCase().includes(q))});
+var holder=$('events');holder.replaceChildren();var day='';
+if(!v.length){holder.append(node('p','empty',rows.length?'該当する通知はありません':lastComplete?'通知履歴はありません':'通知はまだ取得されていません'));return}
+v.forEach(function(e){
+var current=fmt(e.at,{year:'numeric',month:'2-digit',day:'2-digit'}),state=label(e);
+if(current!==day){day=current;holder.append(node('div','day',day))}
+var b=node('button','event');b.type='button';b.setAttribute('aria-label',summary(e)+' の詳細を開く');
+b.append(node('span','time',fmt(e.at,{hour:'2-digit',minute:'2-digit',hourCycle:'h23'})));
+if(state[1]==='action')b.classList.add('flag');
+var part=node('div','subject');
+var symbols={'missed-call':'☎','money-review':'▤',legal:'⚑',security:'◇',information:'✉'};
+part.append(node('span','notice-icon',symbols[e.category]||'◈'));
+var copy=node('span','subject-copy');copy.append(node('span','notice-title',summary(e)));
+var subtitle=clean((e.source||category[e.category]||'通知')+(e.text&&e.aiSummary?' · '+e.text.slice(0,48):''));
+copy.append(node('span','category',subtitle||category[e.category]||'通知'));part.append(copy);b.append(part);
+b.append(node('span','tag '+state[1],state[1]==='action'?'YOS_ALERT':state[1]==='done'?'YOS_SILENT':'未判定'));
+var result=isDemo?[e.displayResult,e.status==='done'?'recorded':e.status==='pending'?'pending':'urgent']:e.status==='pending'?['あとで','pending']:e.status==='done'?['記録済み','recorded']:state[1]==='action'?['要対応','urgent']:state[1]==='done'?['判定済み','recorded']:['—','unverified'];
+b.append(node('span','result '+result[1],result[0]));
+b.addEventListener('click',function(){detail(e)});holder.append(b)
+})
+}
+function detail(e){selected=e;$('detailMeta').textContent=fmt(e.at,{year:'numeric',month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'})+' · '+(category[e.category]||'通知');
+$('detailTitle').textContent=summary(e);
+$('detailState').textContent=isDemo?'DEMO / 架空の通知・操作不可':'YOS判断：'+label(e)[0]+' ／ Inbox受付データ';
+$('detailDecision').textContent=e.aiState==='complete'?(e.aiDecision==='YOS_ALERT'?'要対応と判定':'追加通知不要と判定'):'AIの判断は未確認です。';
+$('detailFacts').textContent=isDemo?'画面の見え方を確認するための架空事例です。実際のInbox・通知・AI判定の記録ではありません。':'通知が既存Inbox由来のAPI記録として取得されました。本人による対応完了や別DB反映は未確認です。';
+$('detailNext').textContent=isDemo?'この画面では実際の処理や送信は行いません。':e.status==='done'?'API上は完了状態です。元の対応結果は別途確認が必要です。':'元の通知を確認し、必要な場合は既存Tasks・Moneyなどで対応します。';
+$('detailAudit').textContent=isDemo?'DEMO：実際の受信・保存・操作履歴はありません。':'受信時刻：'+fmt(e.at,{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'})+' ／ AI：'+(e.aiState||'未判定')+' ／ 現在の状態：'+(e.status||'未確認');
+$('detail').hidden=false;document.body.style.overflow='hidden'}
+function closeDetail(){$('detail').hidden=true;document.body.style.overflow=''}
+async function fetchEvents(){
+if(!token)throw Error('本人認証がありません');
+var out=[],seen=new Set(),cursors=new Set(),cursor='',fully=true;
+for(var page=0;page<30;page++){
+var url=API+(cursor?'?cursor='+encodeURIComponent(cursor):'');
+var res=await fetch(url,{headers:{Authorization:'Bearer '+token,Accept:'application/json'},cache:'no-store',credentials:'omit',referrerPolicy:'no-referrer',redirect:'error'});
+if(!res.ok)throw Error('通知APIに接続できません（HTTP '+res.status+'）');
+var data=await res.json();
+if(data.ok!==true||!Array.isArray(data.events))throw Error('履歴APIの形式が確認できません');
+data.events.forEach(function(e){if(e&&typeof e.id==='string'&&typeof e.historyKey==='string'&&!seen.has(e.historyKey)&&e.at){seen.add(e.historyKey);out.push(e)}});
+fully=fully&&data.complete===true;
+if(!data.nextCursor){cursor='';break}
+if(cursors.has(data.nextCursor))throw Error('履歴ページが重複しています');
+cursors.add(data.nextCursor);cursor=data.nextCursor;
+}
+if(cursor)fully=false;
+out.sort(function(a,b){return Date.parse(b.at)-Date.parse(a.at)});
+return {events:out,complete:fully}
+}
+async function refresh(){
+if(isDemo){message('デモ画面では通信しません。実データ画面に戻ってください。');return}
+if(loading)return;loading=true;$('connect').disabled=true;$('refresh').disabled=true;
+$('status').textContent='履歴を確認しています';message('本人確認・履歴取得中');
+try{await selectExistingProvider();if(!token){if(typeof window.YOS_AUTH?.getGoogleIdToken!=='function')throw Error('YOS本体の本人認証が使えません。単体ファイルでは接続できません');token=await window.YOS_AUTH.getGoogleIdToken()}
+var data=await fetchEvents();rows=data.events;lastComplete=data.complete;
+$('mode').textContent=data.complete?'接続済み':'一部取得';$('status').textContent=rows.length+'件の履歴を取得';
+message(data.complete?'既存の通知APIから取得。AI・実処理は確認済み範囲だけ表示します。':'履歴の一部が未取得です。全件表示ではありません。');
+render();
+}catch(err){message('接続未完了：'+text(err.message,125)+'。以前の表示は保持しています。');$('status').textContent='取得を確認できません';token=''}
+finally{loading=false;$('connect').disabled=false;$('refresh').disabled=false}
+}
+$('connect').addEventListener('click',refresh);$('refresh').addEventListener('click',refresh);
+$('search').addEventListener('input',render);
+document.querySelectorAll('[data-filter]').forEach(function(b){b.addEventListener('click',function(){active=b.dataset.filter;document.querySelectorAll('[data-filter]').forEach(function(x){x.setAttribute('aria-pressed',String(x===b))});render()})});
+$('back').addEventListener('click',closeDetail);
+$('openSource').addEventListener('click',function(){if(isDemo){alert('デモ表示です。元の通知はありません。');return}window.open(INBOX,'_blank','noopener,noreferrer')});
+$('later').addEventListener('click',async function(){
+if(isDemo){alert('デモでは保存や再通知は行いません。');return}
+if(!selected||!token){message('認証されていません');return}
+if(selected.status==='pending'){alert('既に対応待ちです');return}
+if(!confirm('既存Inboxで「対応待ち」にします。支払いの実行・期限通知の予約は行いません。'))return;
+var id=selected.historyKey;
+try{var response=await fetch(API,{method:'POST',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({action:'mark',id:id,status:'pending'}),cache:'no-store',credentials:'omit',referrerPolicy:'no-referrer',redirect:'error'});
+var data=await response.json();if(!response.ok||data.ok!==true)throw Error('変更失敗');
+var saved=await fetch(API+'?id='+encodeURIComponent(id),{headers:{Authorization:'Bearer '+token},cache:'no-store',credentials:'omit',referrerPolicy:'no-referrer',redirect:'error'});
+var verify=await saved.json();if(!saved.ok||verify.ok!==true||verify.complete!==true||verify.event?.historyKey!==id||verify.event?.status!=='pending')throw Error('保存後の状態が確認できません');
+selected.status='pending';alert('対応待ち状態を確認しました。再通知の予約ではありません。');detail(selected);render();
+}catch(e){alert('処理は未確認です。もう一度記録の状態を確認してください。')}
+});
+$('reported').addEventListener('click',function(){if(isDemo){alert('デモです。対応状況は保存しません。');return}alert('本人の対応申告を確定記録する機能はまだ接続されていません。支払い・解決・タスク完了としては記録しません。')});
+
+function demoRows(){
+  // Completely fictional content; never use for actual Alerts counts or follow-ups.
+  var examples=[
+    ['23:40','カード支払いのご案内（明日が期限）','カード会社（架空）','money-review','action','要返信'],
+    ['22:58','不在着信（田中さん）','電話：1件の不在着信（架空）','missed-call','wait','あとで'],
+    ['22:37','荷物のお届け予定','通販：明日10:00〜12:00（架空）','information','done','記録済み'],
+    ['21:58','口座への入金を確認','銀行：入金通知（架空）','money-review','done','記録済み'],
+    ['21:20','タスクのリマインド','ToDo：明日が提出期限（架空）','information','action','要対応'],
+    ['20:47','購入完了のお知らせ','ショップ：注文を受付（架空）','information','done','記録済み'],
+    ['19:53','定期健診のリマインド','クリニック：予約案内（架空）','information','wait','あとで'],
+    ['18:26','予定変更のお知らせ','カレンダー：開始時刻変更（架空）','information','action','確認待ち'],
+    ['17:59','サブスク更新のお知らせ','サービス：更新まで3日（架空）','money-review','wait','未確認'],
+    ['16:44','フライトのリマインド','航空会社：搭乗予定（架空）','information','done','記録済み'],
+    ['15:12','宅配の再配達依頼が必要','宅配便：持ち戻り（架空）','information','action','要対応'],
+    ['12:37','請求書を受領しました','取引先：請求書（架空）','money-review','done','記録済み'],
+    ['10:21','会議のリマインド','カレンダー：本日開催（架空）','information','action','確認待ち'],
+    ['08:03','天気予報のお知らせ','天気：くもり時々雨（架空）','information','done','記録済み']
+  ];
+  return examples.map(function(x,i){
+    var status=x[5]==='あとで'?'pending':x[5]==='記録済み'?'done':'unread';
+    var aiState=i===1||i===6||i===8?'pending':'complete';
+    var aiDecision=aiState==='pending'?undefined:(i===0||i===4||i===7||i===10||i===12?'YOS_ALERT':'YOS_SILENT');
+    return {id:'demo-'+i,historyKey:'demo-history-'+i,at:'2026-11-12T'+x[0]+':00+09:00',
+      aiSummary:x[1],text:x[2],source:x[2],category:x[3],aiState:aiState,
+      aiDecision:aiDecision,status:status,demo:true,displayResult:x[5]};
+  });
+}
+function activateDemo(){
+  isDemo=true;document.body.classList.add('demo-active');
+  rows=demoRows();lastComplete=true;token='';API='';
+  $('mode').textContent='デモ表示';$('demoBanner').hidden=false;
+  $('status').textContent='架空の通知14件でデザインを確認中';
+  $('demoStart').textContent='実データ画面に戻る';
+  message('この14件はサンプルです。実際の履歴は未接続です。');
+  render();
+}
+$('demoStart').addEventListener('click',function(){
+  var next=new URL(window.location.href);
+  if(isDemo)next.searchParams.delete('demo');
+  else next.searchParams.set('demo','1');
+  window.location.assign(next.href);
+});
+
+document.addEventListener('visibilitychange',function(){if(!isDemo&&!document.hidden&&token&&!loading)refresh()});
+if(isDemo)activateDemo();else render();
+})();
+</script></body></html>

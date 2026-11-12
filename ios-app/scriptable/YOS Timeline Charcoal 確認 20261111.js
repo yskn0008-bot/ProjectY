@@ -75,6 +75,37 @@ function yosReadHabits(){
  }catch{return {status:'error',items:[]}}
 }
 
+// YOS_OUTING_INPUT_BRIDGE_START
+// Optional one-shot Shortcut input; a caller must supply confirmed values. Never writes task/calendar sources.
+function yosReadOutingInput(raw,taskSource,coverage,now){
+ const empty={context:null,taskDetails:[]};
+ if(typeof raw==='string'){if(raw.length>16000)return empty;try{raw=JSON.parse(raw)}catch{return empty}}
+ if(!raw||typeof raw!=='object'||Array.isArray(raw)||raw.schema!=='yos-outing-preview-v1')return empty;
+ if(raw.confirmed!==true||raw.source!=='user-confirmed'||taskSource?.status!=='ok'||coverage?.status!=='ok')return empty;
+ if(!(now instanceof Date)||!Number.isFinite(now.getTime()))return empty;
+ const issued=Date.parse(raw.issuedAt||'');
+ if(!Number.isFinite(issued)||issued>now.getTime()+60000||now.getTime()-issued>300000)return empty;
+ const day=raw.day;
+ if(typeof day!=='string'||!/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(day)||day<coverage.from||day>=coverage.until)return empty;
+ if(!Number.isInteger(raw.windowStart)||!Number.isInteger(raw.windowEnd)||raw.windowStart<0||raw.windowEnd>1440||raw.windowEnd-raw.windowStart<5)return empty;
+ if(day===key(now)&&raw.windowStart<now.getHours()*60+now.getMinutes())return empty;
+ if(!Number.isInteger(raw.freeMinutes)||raw.freeMinutes<5||raw.freeMinutes>480)return empty;
+ if(!Array.isArray(raw.route)||raw.route.length===0||raw.route.length>12||!Array.isArray(raw.taskDetails)||raw.taskDetails.length===0||raw.taskDetails.length>30)return empty;
+ const route=[],places=new Set(),orders=new Set();
+ for(const x of raw.route){
+  if(!x||typeof x.placeId!=='string'||!/^[a-zA-Z0-9_-]{1,64}$/.test(x.placeId)||places.has(x.placeId)||!Number.isInteger(x.order)||x.order<0||x.order>12||orders.has(x.order)||!Number.isInteger(x.detourMinutes)||x.detourMinutes<0||x.detourMinutes>180||x.openConfirmed!==true)return empty;
+  places.add(x.placeId);orders.add(x.order);
+  route.push({placeId:x.placeId,order:x.order,detourMinutes:x.detourMinutes,openConfirmed:true});
+ }
+ const ids=new Set(taskSource.items.map(x=>x.id)),used=new Set(),taskDetails=[];
+ for(const x of raw.taskDetails){
+  const id=String(x?.id||'').toLowerCase();
+  if(!ids.has(id)||used.has(id)||!places.has(x?.placeId)||!Number.isInteger(x?.durationMinutes)||x.durationMinutes<5||x.durationMinutes>240)return empty;
+  used.add(id);taskDetails.push({id,placeId:x.placeId,durationMinutes:x.durationMinutes});
+ }
+ return {context:{confirmed:true,calendarVerified:true,issuedAt:raw.issuedAt,day,windowStart:raw.windowStart,windowEnd:raw.windowEnd,freeMinutes:raw.freeMinutes,route},taskDetails};
+}
+// YOS_OUTING_INPUT_BRIDGE_END
 async function main(){
  const prior=fm.fileExists(path)?fm.readString(path):null;
  let state={version:1,days:{}};
@@ -103,12 +134,22 @@ async function main(){
    calendarCoverage.status=records.length>maxEvents?'partial':'ok';
  }catch(e){console.warn('Appleカレンダーは読み取り不可: '+String(e.message||e));calendarCoverage.status='error';}
  const [taskSource,habitSource]=await Promise.all([yosReadTaskSource(),Promise.resolve(yosReadHabits())]);
+  const outingInput=yosReadOutingInput(args?.shortcutParameter,taskSource,calendarCoverage,new Date());
  const view=new WebView();
  // Native bridge: a user-tapped local task link is the only shortcut:// request we open.
  // Safari.open is allowed only for the exact encoded run-shortcut name URL scheme.
  const shortcutPrefix='shortcuts://run-shortcut?name=';
+ const mapsPrefix='https://maps.apple.com/directions?destination=';
  view.shouldAllowRequest=request=>{
   const url=String(request?.url||'');
+  // Permit only Apple's directions URL produced by the user's explicit tap.
+  if(url.startsWith(mapsPrefix)){
+   const encoded=url.slice(mapsPrefix.length);
+   if(url.length<=900&&/^[A-Za-z0-9_.!~*'()%+-]+&mode=(driving|walking|transit)$/.test(encoded)){
+    try{Safari.open(url)}catch(error){console.warn('Apple Maps handoff failed: '+String(error.message||error));}
+   }
+   return false;
+  }
   if(!url.startsWith(shortcutPrefix))return true;
   const name=url.slice(shortcutPrefix.length);
   if(name&&name.length<=1200&&!/[&#?]/.test(name)){
@@ -128,20 +169,23 @@ button,input,select{font:inherit}button{cursor:pointer}button:focus-visible,inpu
 .summary{margin:0 13px 0;background:#ffffff12;border:1px solid #ffffff15;border-radius:14px;padding:9px 10px;display:grid;grid-template-columns:1.16fr .78fr .86fr 1.06fr;min-height:62px;box-shadow:0 5px 18px #11151b18}
 .metric{display:flex;align-items:center;justify-content:center;flex-direction:column;gap:3px;border-right:1px solid #ffffff35;min-width:0}.metric:last-child{border:0}.metric label{font-size:10px;font-weight:560;white-space:nowrap;color:#e7eaf0;display:flex;align-items:center;justify-content:center;gap:4px}.metric label svg{width:13px;height:13px;stroke-width:1.7;flex:none}.metric strong{font-size:13px;font-weight:630;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;font-variant-numeric:tabular-nums}.metric:first-child{flex-direction:row;gap:7px}.metric:first-child strong{font-size:19px}.ring{width:37px;height:37px;flex:none;border-radius:50%;background:conic-gradient(#35bbf4 0 var(--pct),#7d8793 var(--pct) 100%);position:relative}.ring:after{content:"";position:absolute;inset:8px;background:#434852;border-radius:50%}.metric .stack{display:grid;gap:3px}
 .notice{margin:0;padding:3px 0;color:#d7dce4;font-size:10px;line-height:1.25;flex:1;min-width:0}.microtools{display:flex;align-items:center;gap:8px;margin:3px 15px 0;min-height:23px}.zoomBtn{border:1px solid #ffffff40;background:#ffffff0d;color:#edf1f6;border-radius:7px;padding:4px 7px;font-size:10px;font-weight:600;white-space:nowrap}.notice[hidden]{display:none}.searchrow{margin:9px 16px 0}.searchrow[hidden]{display:none}.searchrow input{width:100%;border:1px solid #7b8799;border-radius:10px;background:#252b35;color:white;padding:10px 12px;font-size:14px}
-.editor{display:none;margin:9px 14px;padding:13px;background:#484e59;border:1px solid #6b7583;border-radius:13px;box-shadow:0 10px 25px #15191e55}.editor.show{display:block}.editor b{font-size:15px}.editor .fields{display:flex;gap:7px;flex-wrap:wrap;margin:12px 0}.editor input,.editor select{padding:9px;background:#303742;color:white;border:1px solid #7b8594;border-radius:8px;min-width:0}.editor input[type=time]{max-width:130px}.editor button,.focus button,.review button,.mutedbutton{padding:10px 13px;background:#277dbb;color:#fff;border:0;border-radius:9px;font-weight:670}.editor .danger{background:#754751;margin-left:6px}.editor .light{background:#647184}.editor .editor-actions{display:flex;align-items:center;flex-wrap:wrap;gap:16px;margin-top:18px}.editor .editor-actions button{min-height:46px;min-width:126px}
+.editor-backdrop{display:none;position:fixed;inset:0;z-index:24;background:#0e121a7a;backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}
+.editor-backdrop.show{display:block}
+.editor{display:none;position:fixed;z-index:25;top:50%;left:50%;transform:translate(-50%,-50%);width:calc(100vw - 28px);max-width:600px;max-height:min(78dvh,670px);overflow-y:auto;overscroll-behavior:contain;margin:0;padding:17px;background:#484e59;border:1px solid #778293;border-radius:17px;box-shadow:0 22px 64px #121621a8}
+.editor.show{display:block}.editor b{font-size:15px}.editor .fields{display:flex;gap:7px;flex-wrap:wrap;margin:12px 0}.editor input,.editor select{padding:9px;background:#303742;color:white;border:1px solid #7b8594;border-radius:8px;min-width:0}.editor input[type=time]{max-width:130px}.editor button,.focus button,.review button,.mutedbutton{padding:10px 13px;background:#277dbb;color:#fff;border:0;border-radius:9px;font-weight:670}.editor .danger{background:#754751;margin-left:6px}.editor .light{background:#647184}.editor .editor-actions{display:flex;align-items:center;flex-wrap:wrap;gap:16px;margin-top:18px}.editor .editor-actions button{min-height:46px;min-width:126px}.editor .editor-shortcut-run{display:inline-block;margin-top:8px;padding:10px 13px;border:1px solid #80a4cb;background:#335371;border-radius:9px;color:#f2f7fd;text-decoration:none;font-weight:680}.editor .editor-shortcut-run[hidden]{display:none}.editor .duration-control{display:flex;align-items:center;gap:5px;flex:0 1 133px}.editor .duration-control label{font-size:12px;color:#f0f4fa;white-space:nowrap}.editor .duration-control input{width:76px}.editor .edit-end{display:block;margin:-5px 0 10px;font-size:12px;color:#dce8f4;font-variant-numeric:tabular-nums}.editor .shortcut-picker{width:100%;padding:10px;border-radius:9px;margin:6px 0;background:#303742;border:1px solid #8b97a9;color:#fff}.editor .shortcut-picker[hidden]{display:none}@media(prefers-reduced-motion:reduce){.editor-backdrop{backdrop-filter:none;-webkit-backdrop-filter:none}}
 .timeline-wrap{position:relative;margin:8px 13px 20px 11px;overflow:visible}.timeline{position:relative;touch-action:pan-y}.hour{position:absolute;left:0;right:0;border-top:1px solid #ffffff0f;height:1px;pointer-events:none}.hour span{position:absolute;top:-9px;left:6px;color:#dce2eb;font-size:12px;font-weight:480;font-variant-numeric:tabular-nums}.axis{position:absolute;left:58px;top:0;bottom:0;width:1.5px;background:#c2cad2b8;pointer-events:none}.tick{position:absolute;left:54.5px;width:9px;height:9px;border-radius:50%;background:#dce2ec;z-index:2;border:2px solid #56616e;box-shadow:0 0 0 2px #d7dee755;pointer-events:none}
 .card{position:absolute;left:73px;right:0;min-height:16px;border:0;border-radius:9px;padding:1px 9px;display:flex;align-items:center;gap:8px;touch-action:none;user-select:none;-webkit-user-select:none;color:#f8faff;background:#307ec2;box-shadow:0 2px 8px #101b2927;transition:filter .18s ease,box-shadow .18s ease;will-change:transform;overflow:hidden}
-.card:before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:#46b9fb;opacity:.9;pointer-events:none}.card.habit{background:#24976e}.card.habit:before{background:#4bd9a1}.card.task{background:#823db0;touch-action:pan-y}.card.task:before{background:#d079f8}.card.schedule{background:#2e77b3}
+.card:before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:#46b9fb;opacity:.9;pointer-events:none}.card.habit{background:#24976e}.card.habit:before{background:#4bd9a1}.card.task{background:#823db0;touch-action:none;transform:translate3d(0,0,0);backface-visibility:hidden}.card.task:before{display:none}.card.schedule{background:#2e77b3}
 .card.neutral{background:#636b76}.card.neutral:before{background:#97a6b9}.card.sleep{background:#325477}.card.sleep:before{background:#48bdf5}.card.sleep:not(.tiny) b,.card.sleep:not(.tiny) svg{transform:translateY(-9px)}.card.sleep:not(.tiny) small{position:absolute;top:calc(50% + 4px);left:38px;margin:0;font-size:11px;transform:translateY(0)}
-.card .shortcut-launch{min-width:30px;width:30px;min-height:30px;height:30px;display:grid;place-items:center;background:#1c284885;border:1px solid #ffffff66;border-radius:7px;color:#fff;flex:none;text-decoration:none;font-size:17px;font-weight:800;padding:0;position:relative;z-index:2}.card .shortcut-launch.linked{background:#1d648c;border-color:#7bd4ff}.card.task b{flex:1}.card.task{cursor:pointer}.card.task.swiping{filter:brightness(1.14)}.card.compat-positive:before{background:#65d5a5;width:5px}.card.compat-positive{box-shadow:inset 0 0 0 1.5px #65d5a5,0 2px 8px #101b2927}
+.card.task{cursor:pointer;border-radius:13px;padding:6px 11px;box-shadow:0 4px 12px #17102348}.card.task .task-copy{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:3px;min-width:0;width:100%;height:100%}.card.task .task-copy b{font-size:13.5px;line-height:1.12;font-weight:730;flex:none;max-width:100%;letter-spacing:.06px}.card.task .task-copy small{font-size:11.5px;line-height:1.1;font-weight:610;letter-spacing:.1px;margin:0;max-width:100%;overflow:hidden;text-overflow:ellipsis;color:#fffce9;opacity:.94}.card.task.compact{border-radius:11px}.card.task.compact .task-copy b{font-size:13px}.card.task.compact .task-copy small{font-size:11px}.card.task.swiping{filter:brightness(1.14)}.card.task.drag-preview{z-index:9;box-shadow:0 11px 27px #10131a8a;filter:brightness(1.1);transition:box-shadow .18s ease,filter .18s ease}
+.card.compat-positive:before{background:#65d5a5;width:5px}.card.compat-positive{box-shadow:inset 0 0 0 1.5px #65d5a5,0 2px 8px #101b2927}
 .card.compat-negative:before{background:#f0bd6f;width:5px}.card.compat-negative{box-shadow:inset 0 0 0 1.5px #eeb76b,0 2px 8px #101b2927}
-.card.compat-danger:before{background:#ed8a93;width:5px}.card.compat-danger{box-shadow:inset 0 0 0 2px #ed8a93,0 2px 8px #101b2927}
-.card.compat-unknown:before{background:#aab3c0}
+.card.compat-danger:before{display:none}.card.task.compat-danger{background:#CB6F77;box-shadow:0 2px 8px #101b2927;transition:background-color .25s ease}
 .compat-status{font-size:11px;color:#d8e0ea;margin:6px 14px 3px;line-height:1.55}
-.compat-status[hidden]{display:none}.compat-status strong{font-weight:720}.compat-key{display:flex;flex-wrap:wrap;gap:8px;margin-top:5px}.compat-key span{font-size:10px}.compat-key .pos{color:#8bebc3}.compat-key .neg{color:#ffd391}.compat-key .danger{color:#ffa1ad}
+.compat-status[hidden]{display:none}.compat-status strong{font-weight:720}.compat-status .overlap-button{border:1px solid #a48b6c;border-radius:8px;background:#50463d;color:#f5dfc1;font-weight:650;padding:9px 11px;min-height:37px;display:block;margin:5px 0;text-align:left;width:100%}.compat-status .overlap-details{margin:5px 0 9px;padding:9px 11px;border-left:3px solid #c6a477;border-radius:6px;background:#ffffff0d;line-height:1.5}.compat-status .overlap-details[hidden]{display:none}.compat-key{display:flex;flex-wrap:wrap;gap:8px;margin-top:5px}.compat-key span{font-size:10px}.compat-key .pos{color:#8bebc3}.compat-key .neg{color:#ffd391}.compat-key .danger{color:#ffa1ad}
 .card.done{opacity:.62;filter:saturate(.55)}.card.selected{outline:1.5px solid #e5efff}.card.warning{outline:2px solid #e6a35a}.card.moving{z-index:6;filter:brightness(1.14);box-shadow:0 10px 26px #10131a6c}
 .card svg{width:16px;height:16px;flex:none;stroke:#f7f9fc;fill:none;stroke-width:1.8;stroke-linejoin:round;stroke-linecap:round;position:relative}.card b{font-size:12.5px;line-height:1.1;font-weight:630;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:.08px;position:relative}.card small{margin-left:auto;font-size:10px;line-height:1.1;font-weight:500;white-space:nowrap;font-variant-numeric:tabular-nums;flex-shrink:0;position:relative}
-.card.compact{border-radius:7px}.card.compact b{font-size:12px}.card.compact small{font-size:9px}.card.lane{gap:5px;padding-right:5px}.card.lane small{display:none}.card.lane b{font-size:12px}.card.tiny svg{width:13px;height:13px}.card.tiny{gap:5px;padding-left:7px}.card.tiny b{font-size:11px}.card.tiny small{font-size:9px}
+.card.compact{border-radius:7px}.card.compact b{font-size:12px}.card.compact small{font-size:9px}.card.lane{gap:5px;padding-right:5px}.card.lane small{display:none}.card.lane b{font-size:12px}.card.task.lane{padding:4px 8px}.card.task.lane .task-copy{gap:3px}.card.task.lane .task-copy b{font-size:12px}.card.task.lane .task-copy small{display:block;margin:0;font-size:10.5px}.card.task.tiny .task-copy b{font-size:11.5px}.card.task.tiny .task-copy small{font-size:10px}.card.tiny svg{width:13px;height:13px}.card.tiny{gap:5px;padding-left:7px}.card.tiny b{font-size:11px}.card.tiny small{font-size:9px}
 .nowline{position:absolute;left:5px;right:0;height:1.5px;background:#48baff;z-index:8;pointer-events:none;box-shadow:0 0 8px #38b6fa66}.nowline:before{content:"";position:absolute;left:48px;top:-5px;width:10px;height:10px;background:#43b9fc;border:2px solid #eff9ff;border-radius:50%}.nowbadge{position:absolute;right:calc(100% - 55px);top:-11px;background:#218fcf;border-radius:12px;font-size:11px;padding:3px 7px;font-weight:650;font-variant-numeric:tabular-nums}
 .review,.tabbox{display:none;margin:12px 14px;padding:17px;border:1px solid #ffffff22;border-radius:13px;background:#484e58}.review.show,.tabbox.show{display:block}.review h3,.tabbox h3{font-size:16px;margin:0 0 10px}.review p,.tabbox p{line-height:1.6;color:#eff2f6;margin:10px 0}.review .muted,.tabbox .muted{font-size:12px;color:#c5cbd5}.listitem{padding:12px 0;border-bottom:1px solid #ffffff25;display:flex;justify-content:space-between;gap:14px}.listitem:last-child{border-bottom:0}.listitem button{border:0;background:#2d7eb9;color:white;padding:5px 10px;border-radius:8px}.focus{position:fixed;bottom:calc(87px + env(safe-area-inset-bottom));left:14px;right:14px;max-width:600px;margin:auto;padding:12px 14px;border-radius:14px;background:#505864;border:1px solid #a6b8cd;box-shadow:0 10px 35px #0008;z-index:20;display:none}.gesture-delete[hidden]{display:none}.gesture-delete{position:fixed;left:12px;right:12px;max-width:610px;margin:auto;bottom:calc(88px + env(safe-area-inset-bottom));z-index:21;display:flex;align-items:center;gap:8px;border:1px solid #f0a4b0;border-radius:12px;background:#363c48;padding:11px;color:#fff;box-shadow:0 8px 28px #1119}.gesture-delete span{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600}.gesture-delete button{border:0;border-radius:8px;color:#fff;background:#824452;min-height:42px;padding:9px 12px;font-weight:700}.gesture-delete button.cancel{background:#607082}.gesture-help{font-size:10px;color:#d1d8e3;margin:5px 14px 4px}.focus.show{display:block}.focus{max-height:min(55vh,450px);overflow-y:auto}.focus button[hidden]{display:none}.focus .actions-row{display:flex;flex-wrap:wrap;gap:7px}.focus .actions-row button{flex:1 1 auto;min-height:41px}.focus b{font-size:16px}.focus p{font-size:12px;margin:6px 0 9px}.focus .secondary{background:#6c7785}.focus .danger{background:#794852}
 .dock{position:fixed;bottom:0;left:0;right:0;padding:9px 7px calc(11px + env(safe-area-inset-bottom));background:#30353eea;border-top:1px solid #ffffff28;backdrop-filter:blur(15px);-webkit-backdrop-filter:blur(15px);z-index:15}.dock-inner{max-width:610px;margin:auto;display:grid;grid-template-columns:repeat(5,1fr)}.tab{display:grid;justify-items:center;align-content:center;gap:5px;background:none;border:0;color:#eef1f6;font-size:10px;padding:3px 0;min-height:52px}.tab svg{height:24px;width:24px;stroke-width:1.8}.tab.active{color:#30baff}
@@ -152,6 +196,17 @@ button:active{opacity:.8}@media(min-width:640px){.dock{left:calc((100vw - 640px)
 .week-overview{margin:8px 13px 20px;border-radius:13px;background:#ffffff0b;border:1px solid #ffffff22;padding:10px}.week-overview-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px;font-size:13px}.week-overview-head button{color:#fff;background:#435567;border:1px solid #ffffff32;border-radius:8px;padding:7px 11px;min-height:36px}.week-overview-head strong{font-size:14px}.week-day{border:0;border-bottom:1px solid #ffffff22;background:transparent;color:#f2f5f9;display:flex;gap:8px;align-items:flex-start;width:100%;text-align:left;padding:10px 4px;min-height:54px}.week-day:last-child{border-bottom:0}.week-day .date{width:45px;flex:none;font-weight:650;font-variant-numeric:tabular-nums}.week-day.today .date{color:#65c0ff}.week-day .agenda{flex:1;min-width:0;font-size:12px}.week-day .agenda span{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:1px 0}.week-day .agenda .task{color:#e2b7f8}.week-day .agenda .habit{color:#9decc9}.week-day .agenda .due{color:#ffd19b}.week-day .empty{color:#c1c9d4}.week-day .more{color:#bdc5d0;font-size:11px}
 .month-pop[hidden]{display:none}.month-pop{margin:0 0 12px;padding:12px;border-radius:14px;border:1px solid #7a8798;background:#353f4c;box-shadow:0 8px 24px #10141b77}.month-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}.month-head strong{font-size:15px}.month-head button{border:1px solid #73879d;background:#45596a;color:#fff;border-radius:8px;padding:8px 11px;min-width:40px;min-height:39px}.month-head button:focus-visible,.month-grid button:focus-visible{outline:2px solid #74cbff;outline-offset:2px}.month-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px}.month-grid span{font-size:11px;color:#d1dbe5;text-align:center;padding:5px 0}.month-grid button{border:0;border-radius:8px;color:#f4f7fb;background:#ffffff0b;min-height:39px;font-size:13px;font-variant-numeric:tabular-nums}.month-grid button.outside{color:#a8b3c2;background:none}.month-grid button.selected{background:#247cbd;color:white;font-weight:700}.month-grid button.current:not(.selected){outline:1px solid #7ac8f2;outline-offset:-2px}.month-grid button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px}.month-grid .markers{display:flex;justify-content:center;gap:3px;height:5px}.month-grid .markers i{width:5px;height:5px;border-radius:50%;background:#45aefa}.month-grid .markers i.task{background:#c778f0}.month-grid .markers i.habit{background:#51d4ac}.month-grid .markers i.due{background:#f8bf79}.month-grid .uncertain{color:#9da7b6;font-size:9px}.month-pop .coverage,.week-overview .coverage{margin:8px 4px 0;font-size:11px;color:#cbd4df;line-height:1.5}.month-grid button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px}.month-grid .markers{display:flex;justify-content:center;gap:3px;height:5px}.month-grid .markers i{width:5px;height:5px;border-radius:50%;background:#45aefa}.month-grid .markers i.task{background:#c778f0}.month-grid .markers i.habit{background:#51d4ac}.month-grid .markers i.due{background:#f8bf79}.month-grid .uncertain{color:#9da7b6;font-size:9px}.month-pop .coverage,.week-overview .coverage{margin:8px 4px 0;font-size:11px;color:#cbd4df;line-height:1.5}
 .yos-source-row{display:flex;justify-content:space-between;align-items:center;gap:8px;border-top:1px solid #ffffff22;padding:9px 0}.yos-source-row b{display:block;font-size:13px;line-height:1.45}.yos-source-row small{display:block;font-size:11px;color:#ccd5df;line-height:1.5}.yos-source-row button,#yosPlanBox button,#yosPlanAll{border:1px solid #83b8e4;border-radius:9px;background:#367ea9;color:white;padding:8px 9px;font-size:12px;flex-shrink:0}.tabbox h3:not(:first-child){margin-top:18px}.tabbox input[type=time]{background:#303843;color:white;border:1px solid #94a2b4;border-radius:8px;padding:7px;margin:7px 0}#yosPlanBox:not(:empty){padding:8px 10px;margin:7px 0;border-radius:9px;background:#323f4d}
+
+.yos-learning-live{margin:10px 0 16px;padding:12px 13px;border:1px solid #ffffff29;border-radius:13px;background:#ffffff0d}
+.yos-learning-live h3{margin:0 0 5px;font-size:14px}
+.yos-learning-live h3 small{font-size:11px;font-weight:400;opacity:.78}
+.yos-learning-live .muted{font-size:11px;margin:0 0 9px;line-height:1.5}
+.yos-outing-manual{margin:8px 0}.yos-outing-manual details{border-top:1px solid #ffffff30;padding-top:9px}.yos-outing-manual summary{cursor:pointer;font-weight:670}.yos-outing-manual label{display:block;font-size:12px;color:#e1e8ef;margin-top:8px}.yos-outing-manual input:not([type=checkbox]),.yos-outing-manual select{width:100%;min-height:37px;margin-top:4px;background:#292e37;color:#fff;border:1px solid #8995a3;border-radius:8px;padding:6px}.yos-outing-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 9px}.yos-outing-confirm{display:flex!important;gap:7px;align-items:flex-start}.yos-outing-confirm input{margin-top:2px}.yos-outing-manual button{margin-top:10px;padding:8px 12px;color:#fff;background:#276c9c;border:none;border-radius:9px}
+.yos-learning-live-row{display:flex;gap:8px;align-items:center;justify-content:space-between;padding:7px 0;border-top:1px solid #ffffff1c}
+.yos-learning-live-row>div{min-width:0;display:grid;gap:4px}
+.yos-learning-live-row strong{font-size:13px;overflow-wrap:anywhere}
+.yos-learning-live-row small{font-size:11px;color:#d3dae5}
+.yos-learning-live-row button{font-size:11px;border-radius:8px;border:1px solid #8eb8d6;background:#285d7c;color:#fff;padding:7px 10px;flex:none}
 </style></head><body>
 <div class="app">
   <div class="top">
@@ -179,15 +234,17 @@ button:active{opacity:.8}@media(min-width:640px){.dock{left:calc((100vw - 640px)
     <div class="metric"><label><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M20 16A8 8 0 0 1 8 4 8 8 0 1 0 20 16Z"/></svg>睡眠予定</label><strong id="sleepInfo">—</strong></div>
   </section>
   <div class="searchrow" id="searchRow" hidden><input id="searchInput" type="search" placeholder="予定・タスクを検索" aria-label="検索"></div>
-  <div class="microtools"><div class="notice" id="notice" aria-live="polite">端末内の予定を表示します</div><button class="zoomBtn" id="yosTestToggle" type="button" hidden aria-label="テスト予定を表示">テスト表示</button><button class="zoomBtn" id="zoomBtn" type="button" aria-label="タイムラインの表示倍率を切り替え">詳細に拡大</button></div>
+  <div class="microtools"><div class="notice" id="notice" aria-live="polite">端末内の予定を表示します</div><button class="zoomBtn" id="yosTestToggle" type="button" hidden aria-label="テスト予定を表示">テスト表示</button><button class="zoomBtn" id="elasticBtn" type="button" aria-pressed="true" aria-label="時間枠の自動サイズ調整を切り替え">自動サイズ ON</button><button class="zoomBtn" id="zoomBtn" type="button" aria-label="タイムラインの表示倍率を切り替え">詳細に拡大</button></div>
   <div class="all-day" id="dayAllDay" hidden aria-label="終日の予定"></div>
-  <div class="editor" id="editor"><b id="editorTitle">予定を追加</b><div class="fields"><input id="newTitle" placeholder="名前" style="flex:1 1 160px" aria-label="名前"><input id="newTime" type="time" value="10:00" aria-label="開始時刻"><input id="newDuration" type="number" min="5" max="1440" step="5" value="30" style="width:76px" aria-label="所要時間（分）"><select id="newKind" aria-label="種類"><option value="task">タスク</option><option value="habit">習慣</option><option value="schedule">予定</option></select></div><div id="shortcutField"><label for="newShortcut">ショートカット（任意）</label><input id="newShortcut" maxlength="100" placeholder="既存ショートカットの正式名称" aria-label="起動するiPhoneショートカット名" style="width:100%;margin:5px 0 9px"><small style="color:#d5dce7">登録前は＋で設定、登録後は▶で実行。実行しても自動完了にはしません。</small></div><div class="editor-actions"><button id="saveBtn">追加する</button><button id="cancelEditor" class="light" type="button">閉じる</button></div></div>
+  <div class="editor-backdrop" id="editorBackdrop" aria-hidden="true"></div>
+  <div class="editor" id="editor" role="dialog" aria-modal="true" aria-labelledby="editorTitle"><b id="editorTitle">予定を追加</b><div class="fields"><input id="newTitle" placeholder="名前" style="flex:1 1 160px" aria-label="名前"><input id="newTime" type="time" value="10:00" aria-label="開始時刻"><div class="duration-control"><input id="newDuration" type="number" min="5" max="1440" step="5" value="30" aria-label="所要時間（分）"><label for="newDuration">分</label></div><select id="newKind" aria-label="種類"><option value="task">タスク</option><option value="habit">習慣</option><option value="schedule">予定</option></select></div><span class="edit-end" id="editEnd">終了予定：10:30</span><div id="shortcutField"><label for="shortcutPicker">ショートカット（任意）</label><select id="shortcutPicker" class="shortcut-picker" aria-label="登録済みショートカットから選ぶ"><option value="">候補から選ぶ</option></select><input id="newShortcut" maxlength="100" placeholder="既存ショートカットの正式名称" aria-label="起動するiPhoneショートカット名" style="width:100%;margin:5px 0 9px"><small style="color:#d5dce7">設定したショートカットはここから実行できます。実行しても自動完了にはなりません。</small><a id="runShortcut" class="editor-shortcut-run" href="#" hidden>ショートカットを実行</a></div><div class="editor-actions"><button id="saveBtn">追加する</button><button id="cancelEditor" class="light" type="button">閉じる</button></div></div>
   <section class="week-overview" id="weekOverview" hidden aria-label="週の予定"><div class="week-overview-head"><button id="weekPrev" type="button" aria-label="前週">‹</button><strong id="weekCaption"></strong><button id="weekNext" type="button" aria-label="翌週">›</button></div><div id="weekAgenda"></div><p class="coverage" id="weekCoverage"></p></section>
   <div class="compat-status" id="compatStatus" aria-live="polite">相性を判定中</div>
-  <p class="gesture-help" id="gestureHelp">タスクをタップ＝完了 ｜ 左スワイプ＝削除 ｜ 長押し＝編集 ｜ ＋＝登録・▶＝実行</p>
+  <p class="gesture-help" id="gestureHelp">タスク：タップで完了 ｜ 左スワイプで削除 ｜ 長押しで編集 ｜ 上下ドラッグで移動</p>
   <div class="timeline-wrap" id="timelinePanel"><div class="timeline" id="tl"><div class="axis"></div><div class="nowline" id="nowLine" hidden><span class="nowbadge" id="nowBadge"></span></div></div></div>
+  <section class="tabbox" id="yosOutingPanel" aria-label="ついで行動の提案"><h3>ついで行動</h3><p class="muted" id="yosOutingSummary">経路・営業状況・所要時間を確認中</p><div id="yosOutingProposals"></div><section class="yos-outing-manual"><details id="yosOutingManual"><summary>立寄りを確認して提案</summary><p class="muted">地図での経路・移動時間・営業時間を自分で確認した場合のみ使用。情報は保存しません。</p><label for="yosOutingTaskChoice">未配置のタスク</label><select id="yosOutingTaskChoice"></select><label for="yosOutingPlace">確認した立寄先</label><input id="yosOutingPlace" type="text" maxlength="80" placeholder="施設名と市町村・住所まで入力"><label for="yosOutingMode">経路の確認方法</label><select id="yosOutingMode"><option value="driving">車</option><option value="walking">徒歩</option><option value="transit">公共交通</option></select><button id="yosOutingOpenMaps" type="button">Apple Mapsで経路を確認</button><div class="yos-outing-fields"><label>立寄りに増える移動時間（分）<input id="yosOutingDetour" type="number" min="0" max="180" step="1" value="10"></label><label>作業時間（分）<input id="yosOutingDuration" type="number" min="5" max="240" step="1" value="15"></label><label>空き枠の開始時刻<input id="yosOutingStart" type="time"></label><label>空き枠の終了時刻<input id="yosOutingEnd" type="time"></label></div><label class="yos-outing-confirm"><input id="yosOutingConfirmed" type="checkbox"> 地図の経路・所要時間・営業状況・空き枠を確認済み</label><button id="yosOutingBuild" type="button">この条件で提案</button><p id="yosOutingManualStatus" class="muted" aria-live="polite"></p></details></section><p class="muted">確定予定を動かさず、Notionの原本も更新しません。</p></section>
   <section class="tabbox" id="taskPanel"><h3>タスク・未配置</h3><p class="muted">専門タスクの期限と、実行する時間は別。配置しても元データの期限・完了は変わりません。</p>
- <div id="taskList"></div><h3>各専門ページから集約</h3><p class="muted" id="yosTaskSourceStatus">Notion Tasks：確認中</p>
+ <div id="taskList"></div><section id="yosLearningHints" class="yos-learning-live" aria-label="期限が近いタスク" hidden><h3>期限が近いタスク <small>確認のみ</small></h3><p class="muted" id="yosLearningCoverage"></p><div id="yosLearningRows"></div></section><h3>各専門ページから集約</h3><p class="muted" id="yosTaskSourceStatus">Notion Tasks：確認中</p>
  <label for="yosStartFrom">配置提案の開始時刻</label><input id="yosStartFrom" type="time" value="09:00" aria-label="配置提案の開始時刻">
  <button id="yosPlanAll" type="button">上位3件をまとめて配置提案</button><div id="yosPlanBox" aria-live="polite"></div><div id="yosSourceTasks"></div>
  <h3>繰り返し習慣</h3><p class="muted" id="yosHabitSourceStatus">習慣：確認中</p><div id="yosHabitTasks"></div></section>
@@ -246,6 +303,9 @@ const fmt=m=>String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(
 
 const taskSource=boot.taskSource||{status:'unavailable',items:[]},habitSource=boot.habitSource||{status:'unavailable',items:[]};
 const sourceTasks=Array.isArray(taskSource.items)?taskSource.items.filter(x=>x&&typeof x.id==='string'&&typeof x.title==='string'):[];
+ const outingDetails=new Map(Array.isArray(boot.outingTaskDetails)?boot.outingTaskDetails.map(x=>[x.id,x]):[]);
+ const outingTasks=sourceTasks.map(x=>({...x,...(outingDetails.get(x.id)||{})}));
+ let yosManualPreview=null;
 const sourceHabits=Array.isArray(habitSource.items)?habitSource.items.filter(x=>x&&typeof x.id==='string'&&typeof x.title==='string'):[];
 const planBox=document.getElementById('yosPlanBox'),taskFeed=document.getElementById('yosSourceTasks'),habitFeed=document.getElementById('yosHabitTasks');
 const yosStatusWord=x=>x==='ok'?'取得済み':x==='partial'?'一部のみ取得':x==='unavailable'?'未接続':'取得エラー';
@@ -271,7 +331,227 @@ function yosAddRow(container,title,description,onClick){
  name.textContent=title;meta.textContent=description;body.append(name,meta);row.append(body);
  const button=document.createElement('button');button.textContent='時間を提案';button.onclick=onClick;row.append(button);container.append(row);
 }
+// YOS_LIFE_LEARNING_LIVE_START: sourced only from existing sanitized native taskSource.
+function yosRenderLearningHints(){
+ const panel=document.getElementById('yosLearningHints');
+ const rows=document.getElementById('yosLearningRows'),coverage=document.getElementById('yosLearningCoverage');
+ rows.replaceChildren();panel.hidden=true;
+ if(!['ok','partial'].includes(taskSource.status))return;
+ const date=new Date(),today=localISO(date);date.setDate(date.getDate()+1);
+ const next=localISO(date),seen=new Set();
+ const active=sourceTasks.filter(x=>{
+   if(!x||typeof x.id!=='string'||typeof x.title!=='string'||!['次にやる','実行中','本人操作'].includes(x.status))return false;
+   if(x.due!==today&&x.due!==next||seen.has(x.id))return false;
+   seen.add(x.id);return true;
+ }).sort((a,b)=>a.due.localeCompare(b.due)||yosTaskRank(a)-yosTaskRank(b)||a.title.localeCompare(b.title,'ja')).slice(0,3);
+ if(!active.length)return;
+ coverage.textContent=(taskSource.status==='partial'?'Notion Tasksは一部取得。':'Notion Tasksを確認。')+'期限時刻は未確認。元の予定・完了状態は変更しません。';
+ for(const x of active){
+   const row=document.createElement('div');row.className='yos-learning-live-row';
+   const title=document.createElement('strong');title.textContent=x.title;
+   const meta=document.createElement('small');meta.textContent=(x.due===today?'今日':'明日')+'が期限 · 時刻未確認';
+   const action=document.createElement('button');action.type='button';action.textContent='時間を提案';
+   action.setAttribute('aria-label',x.title+'の時間を提案');
+   action.onclick=()=>yosPropose(x,'task');
+   const info=document.createElement('div');info.append(title,meta);row.append(info,action);rows.append(row);
+ }
+ panel.hidden=false;
+}
+// YOS_LIFE_LEARNING_LIVE_END
+// YOS_ADAPTIVE_ERRANDS_START
+// Pure, read-only outing proposals. No inferred location, opening hours or travel time.
+function yosOutingCandidates(tasks,context,occupied,day){
+ const result={proposals:[],excluded:[],reason:''};
+ if(!context||context.confirmed!==true||context.calendarVerified!==true||context.day!==day||!Array.isArray(context.route)||!Number.isInteger(context.windowStart)||!Number.isInteger(context.windowEnd)||context.windowStart<0||context.windowEnd>1440||context.windowEnd<=context.windowStart||!Number.isInteger(context.freeMinutes)||context.freeMinutes<0){
+  result.reason='現在地・経路・空き時間が未確認のため、ついで行動は提案しません。';return result;
+ }
+ if(!Array.isArray(occupied)||!Array.isArray(tasks)||!/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(day)){
+  result.reason='予定またはタスクの取得状態が不明です。';return result;
+ }
+ const route=new Map(context.route.filter(x=>x&&typeof x.placeId==='string'&&Number.isInteger(x.order)&&x.order>=0&&Number.isInteger(x.detourMinutes)&&x.detourMinutes>=0&&x.openConfirmed===true).map(x=>[x.placeId,x]));
+ const already=new Set(occupied.filter(x=>x&&x.sourceRef).map(x=>x.sourceRef));
+ const candidates=[];
+ for(const t of tasks){
+  if(!t||typeof t.id!=='string'||!t.title||['完了','中止','取消','キャンセル','保留','待ち'].includes(t.status)||already.has('notion:'+t.id))continue;
+  const r=route.get(t.placeId);
+  if(!r||!Number.isInteger(t.durationMinutes)||t.durationMinutes<5||t.durationMinutes>240||t.due&& !/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(t.due)){
+   result.excluded.push({id:t.id,reason:'場所・経路・営業確認・所要時間の確定情報が不足'});continue;
+  }
+  const cost=t.durationMinutes+r.detourMinutes;
+  if(t.durationMinutes>context.freeMinutes){result.excluded.push({id:t.id,reason:'空き時間を超える'});continue;}
+  if(t.due&&t.due<day){result.excluded.push({id:t.id,reason:'期限経過・状況要確認'});continue;}
+  candidates.push({id:t.id,title:t.title,placeId:t.placeId,order:r.order,minutes:cost,taskMinutes:t.durationMinutes,detourMinutes:r.detourMinutes,due:t.due||'',priority:t.priority||'',reason:'経路上の確認済み立寄り先・営業確認済み・所要 '+t.durationMinutes+'分＋寄り道 '+r.detourMinutes+'分'+(t.due?'・期限 '+t.due:'')});
+ }
+ candidates.sort((a,b)=>a.order-b.order||String(a.due||'9999').localeCompare(String(b.due||'9999'))||({P0:0,P1:1,P2:2,P3:3}[a.priority]??4)-({P0:0,P1:1,P2:2,P3:3}[b.priority]??4)||a.id.localeCompare(b.id));
+ // Every occupied block must be trustworthy. Unknown calendar time => no proposals.
+ if(occupied.some(x=>!x||!Number.isInteger(x.s)||!Number.isInteger(x.d)||x.d<=0||x.s<0||x.s+x.d>1440)){
+  result.reason='予定時刻の確認に失敗したため、ついで行動は提案しません。';result.proposals=[];return result;
+ }
+ const busy=occupied.map(x=>({start:x.s,end:x.s+x.d})).sort((a,b)=>a.start-b.start);
+ let budget=Math.min(context.freeMinutes,context.windowEnd-context.windowStart),cursor=context.windowStart;
+ let lastStop='';
+ const nextGap=(start,minutes)=>{
+  let next=start;
+  for(const block of busy){
+   if(next+minutes<=block.start)break;
+   if(next>=block.end)continue;
+   next=block.end;
+  }
+  return next;
+ };
+ for(const c of candidates){
+  // Only contiguous work at the same venue shares a detour.
+  let detour=lastStop===c.placeId?0:c.detourMinutes;
+  let minutes=c.taskMinutes+detour;
+  let next=nextGap(cursor,minutes);
+  // An appointment between tasks means leaving the venue. Charge a new detour.
+  if(next>cursor&&detour===0){
+   detour=c.detourMinutes;minutes=c.taskMinutes+detour;next=nextGap(cursor,minutes);
+  }
+  if(minutes>budget){result.excluded.push({id:c.id,reason:'確認済みの空き時間を超える'});continue;}
+  if(next+minutes>context.windowEnd){result.excluded.push({id:c.id,reason:'確定予定を避けると収まらない'});continue;}
+  result.proposals.push({...c,minutes,detourMinutes:detour,start:next,end:next+minutes,
+   reason:'経路上の確認済み立寄り先・営業確認済み・作業 '+c.taskMinutes+'分'+(detour?'＋寄り道 '+detour+'分':'（寄り道時間は直前の同一店舗候補に計上）')+(c.due?'・期限 '+c.due:'')});
+  lastStop=c.placeId;cursor=next+minutes;budget-=minutes;
+ }
+ result.reason=result.proposals.length?'確定予定・Notion原本には反映しない読み取り専用の提案です。':'条件を確認できる予定外タスクはありません。';
+ return result;
+}
+// YOS_ADAPTIVE_ERRANDS_END
+// YOS_OUTING_MANUAL_CAPTURE_START
+function yosOutingMapsUrl(destination,mode){
+ if(typeof destination!=='string'||!destination.trim()||destination.trim().length>80||!['driving','walking','transit'].includes(mode))return null;
+ return 'https://maps.apple.com/directions?destination='+encodeURIComponent(destination.trim())+'&mode='+mode;
+}
+function yosOutingOpenMaps(){
+ const destination=document.getElementById('yosOutingPlace').value;
+ const mode=document.getElementById('yosOutingMode').value;
+ const link=yosOutingMapsUrl(destination,mode);
+ const status=document.getElementById('yosOutingManualStatus');
+ if(!link){status.textContent='住所または場所を入力してください。';return false;}
+ // Return to this screen to confirm the route, detour minutes and store hours.
+ status.textContent='Apple Mapsで移動時間を確認し、この画面へ戻って入力してください。';
+ window.location.href=link;
+ return true;
+}
+function yosOutingOccupied(day){
+ const allCalendar=(Array.isArray(calendarByDay[day])?calendarByDay[day]:[]).map((x,i)=>({id:'calendar-'+i,s:x?.start,d:x?.duration,source:'Apple Calendar'}));
+ const local=items.filter(x=>!x||x.source!=='Apple Calendar');
+ return [...allCalendar,...local];
+}
+
+// Ephemeral, explicitly user-confirmed fallback inside the existing task screen.
+function yosOutingClock(value){
+ if(typeof value!=='string'||!/^([01][0-9]|2[0-3]):[0-5][0-9]$/.test(value))return null;
+ return Number(value.slice(0,2))*60+Number(value.slice(3));
+}
+function yosOutingManualCapture(){
+ const info=document.getElementById('yosOutingManualStatus');
+ const fail=message=>{yosManualPreview=null;info.textContent=message;yosRenderOuting();return false;};
+ const now=new Date(),day=localISO(now);
+ const calendarIssued=Date.parse(boot.generatedAt||''),tasksIssued=Date.parse(taskSource.checkedAt||'');
+ if(!Number.isFinite(calendarIssued)||!Number.isFinite(tasksIssued)||calendarIssued>now.getTime()+60000||tasksIssued>now.getTime()+60000||now.getTime()-calendarIssued>300000||now.getTime()-tasksIssued>300000)return fail('予定とタスクの確認から5分以上経過しました。画面を開き直してください。');
+ if(selectedDay!==day||taskSource.status!=='ok'||calendarCoverage.status!=='ok'||!isCalendarCovered(day))return fail('本日の予定とタスクを完全取得できた場合のみ使えます。');
+ if(Array.isArray(allDayDays[day])&&allDayDays[day].length)return fail('終日予定があるため、空き枠を確認できません。');
+ const id=document.getElementById('yosOutingTaskChoice').value;
+ const task=sourceTasks.find(x=>x.id===id);
+ const place=document.getElementById('yosOutingPlace').value.trim();
+ const detour=Number(document.getElementById('yosOutingDetour').value);
+ const duration=Number(document.getElementById('yosOutingDuration').value);
+ const start=yosOutingClock(document.getElementById('yosOutingStart').value);
+ const end=yosOutingClock(document.getElementById('yosOutingEnd').value);
+ const confirmed=document.getElementById('yosOutingConfirmed').checked;
+ const minute=now.getHours()*60+now.getMinutes();
+ if(!task||['完了','待ち','保留','中止','取消'].includes(task.status)||yosIsPlanned('notion:'+id))return fail('未配置の対象タスクを選択してください。');
+ if(!confirmed||!place||place.length>80||!Number.isInteger(detour)||detour<0||detour>180||!Number.isInteger(duration)||duration<5||duration>240)return fail('立寄先・時間・経路・営業時間の確認が必要です。');
+ if(start===null||end===null||start<minute||end<=start||end-start>480)return fail('現在以降の8時間以内の空き枠を指定してください。');
+ // Use the full Apple Calendar snapshot, including events hidden from the timeline.
+ const sourceBusy=yosOutingOccupied(day);
+ if(sourceBusy.some(x=>!x||!Number.isInteger(x.s)||!Number.isInteger(x.d)||x.d<=0||x.s<0||x.s+x.d>1440))return fail('予定の時間に不明な情報があるため、安全に停止しました。');
+ const busy=sourceBusy.map(x=>[Math.max(start,x.s),Math.min(end,x.s+x.d)]).filter(x=>x[1]>x[0]).sort((a,b)=>a[0]-b[0]);
+ let busyEnd=start,occupied=0;
+ for(const [a,b] of busy){if(b>busyEnd){occupied+=b-Math.max(a,busyEnd);busyEnd=b;}}
+ const available=end-start-occupied;
+ if(available<5)return fail('確定予定を除く空き時間が足りません。');
+ const placeId='manual-'+id.replace(/[^a-zA-Z0-9_-]/g,'').slice(0,40);
+ const context={confirmed:true,calendarVerified:true,issuedAt:now.toISOString(),day,windowStart:start,windowEnd:end,freeMinutes:available,route:[{placeId,order:0,detourMinutes:detour,openConfirmed:true}]};
+ yosManualPreview={context,id,placeId,durationMinutes:duration};
+ info.textContent='確認した立寄先「'+place+'」の一時提案です。5分後に失効します。';
+ yosRenderOuting();return true;
+}
+// Propose the next confirmed calendar gap without persisting or editing a booking.
+function yosOutingNextGap(nowMinutes,occupied,minimumMinutes=30){
+ if(!Number.isInteger(nowMinutes)||nowMinutes<0||nowMinutes>=1440||!Array.isArray(occupied))return null;
+ if(!Number.isInteger(minimumMinutes)||minimumMinutes<5||minimumMinutes>480)return null;
+ if(occupied.some(x=>!x||!Number.isInteger(x.s)||!Number.isInteger(x.d)||x.d<=0||x.s<0||x.s+x.d>1440))return null;
+ const start=Math.ceil(nowMinutes/5)*5,limit=Math.min(1440,start+480);
+ const busy=occupied.map(x=>({s:x.s,end:x.s+x.d})).sort((a,b)=>a.s-b.s);
+ let cursor=start;
+ for(const block of busy){
+  if(block.end<=cursor)continue;
+  if(block.s>cursor&&Math.min(block.s,limit)-cursor>=minimumMinutes)
+   return {start:cursor,end:Math.min(block.s,limit,cursor+60)};
+  cursor=Math.max(cursor,block.end);
+  if(cursor>=limit)return null;
+ }
+ return limit-cursor>=minimumMinutes?{start:cursor,end:Math.min(limit,cursor+60)}:null;
+}
+function yosOutingManualSetup(){
+ const pick=document.getElementById('yosOutingTaskChoice');
+ if(!pick)return;
+ document.getElementById('yosOutingConfirmed').checked=false;
+ pick.replaceChildren();
+ const empty=document.createElement('option');empty.value='';empty.textContent='タスクを選択';pick.append(empty);
+ for(const task of sourceTasks.filter(x=>!['完了','待ち','保留','中止','取消'].includes(x.status)).slice(0,80)){
+  const opt=document.createElement('option');opt.value=task.id;opt.textContent=task.title.slice(0,90);pick.append(opt);
+ }
+ const now=new Date(),minute=now.getHours()*60+now.getMinutes();
+ const today=localISO(now),validSource=selectedDay===today&&taskSource.status==='ok'&&calendarCoverage.status==='ok'&&isCalendarCovered(today)&&!(allDayDays[today]||[]).length;
+ const gap=validSource?yosOutingNextGap(minute,yosOutingOccupied(today)):null;
+ document.getElementById('yosOutingStart').value=gap?fmt(gap.start):'';
+ document.getElementById('yosOutingEnd').value=gap?fmt(gap.end):'';
+ document.getElementById('yosOutingManualStatus').textContent=gap?'次の空き時間を仮入力しました。実際の経路・営業状況は別途確認してください。':'確認できる空き時間がありません。予定取得・日付を確認してください。';
+ document.getElementById('yosOutingBuild').onclick=yosOutingManualCapture;
+ document.getElementById('yosOutingOpenMaps').onclick=yosOutingOpenMaps;
+ const invalidate=()=>{
+  yosManualPreview=null;
+  document.getElementById('yosOutingConfirmed').checked=false;
+  document.getElementById('yosOutingManualStatus').textContent='条件が変更されました。経路・営業時間を確認し直してください。';
+  yosRenderOuting();
+ };
+ for(const id of ['yosOutingTaskChoice','yosOutingPlace','yosOutingMode','yosOutingDetour','yosOutingDuration','yosOutingStart','yosOutingEnd']){
+  const field=document.getElementById(id);
+  field.oninput=invalidate;
+  field.onchange=invalidate;
+ }
+}
+// YOS_OUTING_MANUAL_CAPTURE_END
+
+// YOS_OUTING_RENDER_START
+function yosRenderOuting(){
+ const label=document.getElementById('yosOutingSummary'),list=document.getElementById('yosOutingProposals');
+ if(!label||!list)return;
+ list.textContent='';
+ const current=new Date(),minute=current.getHours()*60+current.getMinutes();
+  const context=yosManualPreview?.context||boot.outingContext;
+  const issued=context?Date.parse(context.issuedAt||''):NaN;
+  const fresh=Number.isFinite(issued)&&issued<=current.getTime()+60000&&current.getTime()-issued<=300000;
+  const allDayClear=!Array.isArray(allDayDays[selectedDay])||allDayDays[selectedDay].length===0;
+  const live=fresh&&allDayClear&&!(selectedDay===localISO(current)&&Number.isInteger(context.windowStart)&&context.windowStart<minute);
+  const previewTasks=yosManualPreview?sourceTasks.map(x=>x.id===yosManualPreview.id?{...x,placeId:yosManualPreview.placeId,durationMinutes:yosManualPreview.durationMinutes}:x):outingTasks;
+  const result=yosOutingCandidates(previewTasks,live?context:null,yosOutingOccupied(selectedDay),selectedDay);
+ label.textContent=result.reason;
+ for(const candidate of result.proposals){
+  const row=document.createElement('p');
+  row.textContent=fmt(candidate.start)+'–'+fmt(candidate.end)+' · '+candidate.title+' · '+candidate.reason;
+  list.append(row);
+ }
+ if(result.excluded.length){const info=document.createElement('p');info.className='muted';info.textContent='情報不足または時間不足で保留：'+result.excluded.length+'件（自動で実行可能とは判定しません）';list.append(info);}
+}
+// YOS_OUTING_RENDER_END
 function yosRenderSources(){
+ yosRenderLearningHints();
+ yosRenderOuting();
  taskFeed.textContent='';habitFeed.textContent='';
  const status=document.getElementById('yosTaskSourceStatus');
  status.textContent='Notion Tasks：'+yosStatusWord(taskSource.status)+(taskSource.status==='ok'||taskSource.status==='partial'?'（取得 '+sourceTasks.length+'件・先頭80件を表示）':'')+(taskSource.checkedAt?' · '+new Date(taskSource.checkedAt).toLocaleString('ja-JP',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}):'');
@@ -382,7 +662,44 @@ const glyphs={
 function eventIcon(item){const t=item.t||'';const type=/睡眠|就寝/.test(t)?'sleep':/歩|ウォーキング/.test(t)?'walk':/朝食|昼食|夕食|ご飯/.test(t)?'meal':/入浴|お風呂/.test(t)?'bath':/運動|筋トレ/.test(t)?'fitness':/会議/.test(t)?'meeting':/集中|作業/.test(t)?'laptop':/仕事/.test(t)?'work':'clock';return '<svg viewBox="0 0 24 24" aria-hidden="true">'+glyphs[type]+'</svg>'}
 let density='overview',scale=27;
 let zoom=null,selectedId=null;
-const yFor=m=>m/60*scale;
+function yosElasticAxis(rows,baseScale){
+ const valid=rows.filter(x=>Number.isFinite(x.s)&&Number.isFinite(x.d)&&x.s>=0&&x.d>0&&x.s+x.d<=1440);
+ const knots=new Set([0,1440]);
+ for(let h=0;h<=24;h++)knots.add(h*60);
+ for(const item of valid){knots.add(item.s);knots.add(item.s+item.d)}
+ const minutes=[...knots].sort((a,b)=>a-b);
+ const indices=new Map(minutes.map((m,i)=>[m,i])),ending=new Map();
+ for(const item of valid){
+  const minHeight=item.kind==='task'&&!item.f?46:Math.min(22,item.d/60*baseScale);
+  const end=indices.get(item.s+item.d);
+  if(!ending.has(end))ending.set(end,[]);
+  ending.get(end).push({start:indices.get(item.s),height:minHeight});
+ }
+ const pixels=[0];
+ for(let i=1;i<minutes.length;i++){
+  let next=pixels[i-1]+(minutes[i]-minutes[i-1])/60*baseScale;
+  for(const span of ending.get(i)||[])next=Math.max(next,pixels[span.start]+span.height);
+  pixels.push(next);
+ }
+ const coordinate=t=>{
+  const minute=Math.max(0,Math.min(1440,t));
+  let lo=0,hi=minutes.length-1;
+  while(hi-lo>1){const mid=(lo+hi)>>1;if(minutes[mid]<=minute)lo=mid;else hi=mid}
+  const frac=(minute-minutes[lo])/(minutes[hi]-minutes[lo]);
+  return pixels[lo]+(pixels[hi]-pixels[lo])*frac;
+ };
+ const minuteAt=y=>{
+  const px=Math.max(0,Math.min(pixels[pixels.length-1],y));
+  let lo=0,hi=pixels.length-1;
+  while(hi-lo>1){const mid=(lo+hi)>>1;if(pixels[mid]<=px)lo=mid;else hi=mid}
+  const frac=(px-pixels[lo])/(pixels[hi]-pixels[lo]);
+  return minutes[lo]+(minutes[hi]-minutes[lo])*frac;
+ };
+ return {minutes,pixels,coordinate,minuteAt};
+}
+let elasticEnabled=true,elasticAxis=null;
+const yFor=m=>elasticEnabled&&elasticAxis?elasticAxis.coordinate(m):m/60*scale;
+const minuteAtY=y=>elasticEnabled&&elasticAxis?elasticAxis.minuteAt(y):y/scale*60;
 const editor=document.getElementById('editor');let editingId=null,deleteConfirmId=null,restorePendingDay=null,swipeDeleteId=null;
 function showFocusFor(item){
  deleteConfirmId=null;selectedId=item.id;zoom=item.s;
@@ -398,6 +715,32 @@ function showFocusFor(item){
  focus.classList.add('show');
 }
 
+function showEditor(){
+ editor.classList.add('show');
+ document.getElementById('editorBackdrop').classList.add('show');
+ updateEditEnd();
+}
+function closeEditor(){
+ editor.classList.remove('show');
+ document.getElementById('editorBackdrop').classList.remove('show');
+}
+function updateEditEnd(){
+ const t=document.getElementById('newTime').value.split(':').map(Number),duration=Number(document.getElementById('newDuration').value);
+ const el=document.getElementById('editEnd');
+ if(t.length!==2||!t.every(Number.isFinite)||!Number.isFinite(duration)||duration<=0){el.textContent='開始時刻と所要時間を入力してください';return}
+ const end=t[0]*60+t[1]+duration;
+ el.textContent=end<=1440?'終了予定：'+fmt(end)+'（'+duration+'分間）':'終了時刻が24:00を超えています';
+}
+function refreshShortcutPicker(){
+ const picker=document.getElementById('shortcutPicker');
+ const current=document.getElementById('newShortcut').value.trim();
+ const known=[...new Set(items.map(x=>typeof x.shortcut==='string'?x.shortcut.trim():'').filter(Boolean))].sort((a,b)=>a.localeCompare(b,'ja'));
+ picker.replaceChildren();
+ const first=document.createElement('option');first.value='';first.textContent='保存済みのショートカットから選択';picker.append(first);
+ for(const name of known){const option=document.createElement('option');option.value=name;option.textContent=name;picker.append(option)}
+ picker.value=known.includes(current)?current:'';
+ picker.hidden=known.length===0;
+}
 function beginLocalEdit(item,shortcutFocus=false){
  if(!item||item.f)return;
  hideSwipeDelete();
@@ -409,24 +752,40 @@ function beginLocalEdit(item,shortcutFocus=false){
  document.getElementById('newDuration').value=item.d;
  document.getElementById('newKind').value=item.kind;
  document.getElementById('newShortcut').value=item.shortcut||'';
- updateShortcutField();
- editor.classList.add('show');focus.classList.remove('show');setTab('timeline');
- editor.scrollIntoView({behavior:'smooth',block:'start'});
- if(shortcutFocus)document.getElementById('newShortcut').focus();
+ refreshShortcutPicker();updateShortcutField();
+ showEditor();focus.classList.remove('show');setTab('timeline');
+ if(shortcutFocus)document.getElementById('shortcutPicker').focus({preventScroll:true});
 }
 function updateShortcutField(){
- document.getElementById('shortcutField').hidden=document.getElementById('newKind').value!=='task';
+ const isTask=document.getElementById('newKind').value==='task';
+ document.getElementById('shortcutField').hidden=!isTask;
+ const label=document.getElementById('newShortcut').value.trim();
+ const run=document.getElementById('runShortcut');
+ const valid=isTask&&label.length>0&&label.length<=100&&![...label].some(c=>c.charCodeAt(0)<32||c.charCodeAt(0)===127);
+ run.hidden=!valid;
+ if(valid){run.href='shortcuts://run-shortcut?name='+encodeURIComponent(label);run.setAttribute('aria-label','ショートカット「'+label+'」を実行');}
+ else run.removeAttribute('href');
 }
 document.getElementById('newKind').onchange=updateShortcutField;
+document.getElementById('shortcutPicker').onchange=()=>{
+ const selected=document.getElementById('shortcutPicker').value;
+ if(selected){document.getElementById('newShortcut').value=selected;updateShortcutField();}
+};
+document.getElementById('newTime').onchange=updateEditEnd;
+document.getElementById('newTime').oninput=updateEditEnd;
+document.getElementById('newDuration').onchange=updateEditEnd;
+document.getElementById('newDuration').oninput=updateEditEnd;
+document.getElementById('editorBackdrop').onclick=closeEditor;
+document.getElementById('newShortcut').oninput=()=>{refreshShortcutPicker();updateShortcutField()};
+document.getElementById('runShortcut').onclick=()=>{note.textContent='ショートカットの起動を依頼しました。完了記録は変更しません。';};
 document.getElementById('addBtn').onclick=()=>{
  hideSwipeDelete();editingId=null;
  document.getElementById('editorTitle').textContent='予定を追加';document.getElementById('saveBtn').textContent='追加する';
  document.getElementById('newTitle').value='';document.getElementById('newShortcut').value='';
- document.getElementById('newKind').value='task';updateShortcutField();editor.classList.add('show');
- document.getElementById('newTitle').focus();
+ document.getElementById('newKind').value='task';refreshShortcutPicker();updateShortcutField();showEditor();
 };
-document.getElementById('cancelEditor').onclick=()=>editor.classList.remove('show');
-document.getElementById('saveBtn').onclick=()=>{const title=document.getElementById('newTitle').value.trim(),parts=document.getElementById('newTime').value.split(':').map(Number),duration=Number(document.getElementById('newDuration').value),kind=document.getElementById('newKind').value,shortcut=kind==='task'?document.getElementById('newShortcut').value.trim():'';if(shortcut.length>100||Array.from(shortcut).some(c=>c.charCodeAt(0)<32||c.charCodeAt(0)===127)){note.textContent='ショートカット名は100文字以内で入力してください';return;}if(!title||parts.length!==2||!Number.isFinite(duration)||duration<5||duration>1440){note.textContent='名前・時刻・所要時間を確認してください';return}const start=parts[0]*60+parts[1];if(start+duration>1440){note.textContent='終了時刻は24:00以内にしてください';return}if(editingId!==null){const item=items.find(x=>x.id===editingId);if(item){if(item.f){note.textContent='固定予定は編集できません';return;}Object.assign(item,{t:title,s:start,d:duration,kind,shortcut});}}else{if(isSample){items=[];isSample=false;}items.push({id:Math.max(300000000,...items.map(x=>Number(x.id)||0))+1,t:title,s:start,d:duration,kind,shortcut});}editingId=null;editor.classList.remove('show');document.getElementById('newTitle').value='';document.getElementById('newShortcut').value='';note.textContent=fmt(start)+' に「'+title+'」を'+(editingId===null?'保存':'更新')+(persist()?'（保存処理中）':'（保存処理失敗）');smoothRender();updateReview()};
+document.getElementById('cancelEditor').onclick=closeEditor;
+document.getElementById('saveBtn').onclick=()=>{const title=document.getElementById('newTitle').value.trim(),parts=document.getElementById('newTime').value.split(':').map(Number),duration=Number(document.getElementById('newDuration').value),kind=document.getElementById('newKind').value,shortcut=kind==='task'?document.getElementById('newShortcut').value.trim():'';if(shortcut.length>100||Array.from(shortcut).some(c=>c.charCodeAt(0)<32||c.charCodeAt(0)===127)){note.textContent='ショートカット名は100文字以内で入力してください';return;}if(!title||parts.length!==2||!Number.isFinite(duration)||duration<5||duration>1440){note.textContent='名前・時刻・所要時間を確認してください';return}const start=parts[0]*60+parts[1];if(start+duration>1440){note.textContent='終了時刻は24:00以内にしてください';return}if(editingId!==null){const item=items.find(x=>x.id===editingId);if(item){if(item.f){note.textContent='固定予定は編集できません';return;}Object.assign(item,{t:title,s:start,d:duration,kind,shortcut});}}else{if(isSample){items=[];isSample=false;}items.push({id:Math.max(300000000,...items.map(x=>Number(x.id)||0))+1,t:title,s:start,d:duration,kind,shortcut});}editingId=null;closeEditor();document.getElementById('newTitle').value='';document.getElementById('newShortcut').value='';note.textContent=fmt(start)+' に「'+title+'」を'+(editingId===null?'保存':'更新')+(persist()?'（保存処理中）':'（保存処理失敗）');smoothRender();updateReview()};
 // Conservative, explainable compatibility signals from the *local day's actual time slots*.
 // Never infer health, travel distance or subjective mood from a title; unknown remains neutral.
 const yosCompatRank={unknown:0,positive:1,negative:2,danger:3};
@@ -461,6 +820,26 @@ function yosCompatibility(rows){
  }
  return result;
 }
+function yosOverlapWindows(rows){
+ const sorted=rows.filter(x=>x&&Number.isFinite(x.s)&&Number.isFinite(x.d)&&x.s>=0&&x.d>0&&x.s+x.d<=1440).sort((a,b)=>a.s-b.s||a.id-b.id);
+ const clashes=[];
+ for(let i=0;i<sorted.length;i++)for(let j=i+1;j<sorted.length;j++){
+  const a=sorted[i],b=sorted[j];
+  if(b.s>=a.s+a.d)break;
+  const from=Math.max(a.s,b.s),until=Math.min(a.s+a.d,b.s+b.d);
+  if(until>from)clashes.push({from,until,titles:[a.t,b.t]});
+ }
+ // Adjacent and overlapping collision windows form one area, rather than one warning per card.
+ const areas=[];
+ for(const next of clashes.sort((a,b)=>a.from-b.from||a.until-b.until)){
+  const prev=areas[areas.length-1];
+  if(prev&&next.from<=prev.until){
+   prev.until=Math.max(prev.until,next.until);
+   for(const name of next.titles)if(!prev.titles.includes(name))prev.titles.push(name);
+  }else areas.push({...next,titles:[...next.titles]});
+ }
+ return areas;
+}
 let latestCompatibility=new Map();
 function yosRenderCompatibility(){
  latestCompatibility=yosCompatibility(items);
@@ -469,13 +848,26 @@ function yosRenderCompatibility(){
  for(const item of rows)counts[item.level]++;
  const status=document.getElementById('compatStatus');
  status.textContent='';
+ const windows=yosOverlapWindows(items);
  const summary=document.createElement('strong');
- summary.textContent='配置の相性　＋'+counts.positive+' ／ −'+counts.negative+' ／ ！'+counts.danger+' ／ ？'+counts.unknown;
+ summary.textContent=windows.length?'時間の重複：'+windows.length+'か所':'時間の重複なし';
+ status.append(summary);
+ for(const collision of windows){
+  const button=document.createElement('button');button.type='button';button.className='overlap-button';
+  const slot=fmt(collision.from)+'–'+fmt(collision.until);
+  button.textContent='！ '+slot+'｜'+(collision.until-collision.from)+'分重複　詳細';
+  button.setAttribute('aria-expanded','false');
+  const detail=document.createElement('div');detail.className='overlap-details';detail.hidden=true;
+  detail.textContent='重なっている予定：'+collision.titles.join(' ／ ')+'。どちらかの開始時刻・所要時間を変更すると解消できます。';
+  button.onclick=()=>{detail.hidden=!detail.hidden;button.setAttribute('aria-expanded',String(!detail.hidden));};
+  status.append(button,detail);
+ }
+ if(!windows.length&&counts.positive===0&&counts.negative===0)summary.textContent='配置の相性：判断材料不足';
  const key=document.createElement('div');key.className='compat-key';
  for(const [textName,css] of [['＋ 相乗候補','pos'],['− 余裕不足','neg'],['！ 時間衝突','danger'],['？ 判断材料不足','']]){
   const el=document.createElement('span');el.className=css;el.textContent=textName;key.append(el);
  }
- status.append(summary,key);
+ status.append(key);
  const details=[];
  for(const record of rows)for(const reason of record.reasons)if(!details.includes(reason))details.push(reason);
  const review=document.getElementById('compatReview');
@@ -501,7 +893,7 @@ function showDay(iso){
  items=dayItems(iso);
  isSample=false;
  selectedId=null;zoom=null;focus.classList.remove('show');editor.classList.remove('show');
- yosDefaultStart();planBox.textContent='';yosRenderSources();
+ yosDefaultStart();planBox.textContent='';yosManualPreview=null;yosOutingManualSetup();yosRenderSources();
  yosRefreshTestToggle();
  note.textContent='端末の時間割 · Notion Tasks '+yosStatusWord(taskSource.status)+' · 習慣 '+yosStatusWord(habitSource.status)+(isCalendarCovered(iso)?'':' · Apple予定未確認');
  hideMonthPicker();renderWeek();render();renderDayAllDay();if(calendarMode==='week')renderWeekAgenda();updateReview();window.scrollTo({top:0,behavior:'smooth'});
@@ -630,6 +1022,7 @@ function setTab(name){
  else if(calendarMode==='week')renderWeekAgenda();
  renderDayAllDay();
  for(const [tab,id] of [['task','taskPanel'],['analysis','review'],['records','recordsPanel'],['ai','aiPanel']])document.getElementById(id).classList.toggle('show',name===tab);
+ document.getElementById('yosOutingPanel').classList.toggle('show',name==='task');
  renderLists();if(name==='task')yosRenderSources();if(name!=='timeline')window.scrollTo({top:0,behavior:'smooth'});
 }
 function renderLists(){
@@ -649,7 +1042,8 @@ document.getElementById('yosTestToggle').onclick=()=>{
  note.textContent=showTestCalendar?'テスト予定を表示中 · 元カレンダーは変更していません':'テスト予定を非表示 · 元カレンダーは変更していません';
  smoothRender();updateReview();
 };
-document.getElementById('zoomBtn').onclick=()=>{density=density==='overview'?'detail':'overview';scale=density==='overview'?27:56;document.getElementById('zoomBtn').textContent=density==='overview'?'詳細に拡大':'全体表示';render();};
+document.getElementById('elasticBtn').onclick=()=>{elasticEnabled=!elasticEnabled;const btn=document.getElementById('elasticBtn');btn.textContent=elasticEnabled?'自動サイズ ON':'自動サイズ OFF';btn.setAttribute('aria-pressed',String(elasticEnabled));smoothRender();};
+document.getElementById('zoomBtn').onclick=()=>{density=density==='overview'?'detail':'overview';scale=density==='overview'?27:56;document.getElementById('zoomBtn').textContent=density==='overview'?'詳細に拡大':'全体表示';smoothRender();};
 document.getElementById('searchBtn').onclick=()=>{const row=document.getElementById('searchRow');row.hidden=!row.hidden;if(!row.hidden){setTab('timeline');document.getElementById('searchInput').focus()}else{searchText='';document.getElementById('searchInput').value='';render()}};
 document.getElementById('searchInput').oninput=e=>{searchText=e.target.value.trim().toLocaleLowerCase();render()};
 document.getElementById('moreBtn').onclick=()=>{
@@ -689,7 +1083,7 @@ document.getElementById('hideFixed').onclick=()=>{
  yosRefreshTestToggle();smoothRender();updateReview();
 };
 
-const vibrate=()=>{try{navigator.vibrate?.(8)}catch(e){}};
+// No repeating vibration during dragging.
 
 const gestureBar=document.getElementById('gestureDelete');
 function hideSwipeDelete(){
@@ -719,12 +1113,22 @@ function toggleTaskDone(item){
 }
 // Only local, movable tasks use this gesture system; fixed Apple records and other kinds
 // retain their existing read-only details / vertical time dragging.
+function yosStablePreviewMinute(rawMinute,shownMinute,minMinute,maxMinute){
+ const value=Math.max(minMinute,Math.min(maxMinute,rawMinute));
+ const next=Math.max(minMinute,Math.min(maxMinute,Math.round(value/5)*5));
+ return Number.isFinite(shownMinute)&&Math.abs(next-shownMinute)===5&&Math.abs(value-shownMinute)<3.5?shownMinute:next;
+}
 function wireTaskGestures(el,item){
- let active=null,startX=0,startY=0,lastX=0,lastY=0,mode='tap',timer=null;
+ let active=null,startX=0,startY=0,lastX=0,lastY=0,mode='tap',timer=null,paintFrame=0,lastPreview=item.s,swipeFrame=0;
+ const timeLabel=el.querySelector('small');
  const clearTimer=()=>{if(timer!==null){clearTimeout(timer);timer=null;}};
+ const clearPaint=()=>{if(paintFrame){cancelAnimationFrame(paintFrame);paintFrame=0;}if(swipeFrame){cancelAnimationFrame(swipeFrame);swipeFrame=0;}};
+ const paintSwipe=()=>{swipeFrame=0;if(mode==='swipe'&&active!==null)el.style.transform='translate3d('+Math.max(-74,lastX-startX)+'px,0,0)';};
+ const paintDrag=()=>{paintFrame=0;if(mode!=='drag'||active===null)return;const offset=lastY-startY;el.style.transform='translate3d(0,'+offset+'px,0)';const raw=minuteAtY(yFor(item.s)+offset);const at=yosStablePreviewMinute(raw,lastPreview,0,1440-item.d);if(at!==lastPreview){lastPreview=at;if(timeLabel)timeLabel.textContent=fmt(at)+'–'+fmt(at+item.d);}};
+ const candidateStart=()=>Math.max(0,Math.min(1440-item.d,Math.round(minuteAtY(yFor(item.s)+lastY-startY)/5)*5));
  const begin=(x,y,id)=>{
   if(active!==null)return;
-  active=id;startX=lastX=x;startY=lastY=y;mode='tap';
+  active=id;startX=lastX=x;startY=lastY=y;mode='tap';lastPreview=item.s;clearPaint();el.style.transition='';
   clearTimer();
   timer=setTimeout(()=>{
    if(active!==null&&mode==='tap'){mode='long';active=null;beginLocalEdit(item);}
@@ -736,22 +1140,42 @@ function wireTaskGestures(el,item){
   lastX=x;lastY=y;
   const dx=x-startX,dy=y-startY;
   if(Math.abs(dx)>10||Math.abs(dy)>10)clearTimer();
-  if(dx< -12&&Math.abs(dx)>Math.abs(dy)*1.25){
+  if(mode==='swipe'||(mode==='tap'&&dx< -14&&Math.abs(dx)>Math.abs(dy)*1.3)){
    mode='swipe';event?.preventDefault();
-   el.style.transform='translate3d('+Math.max(-70,dx)+'px,0,0)';
-  }else if(Math.abs(dy)>10&&mode!=='swipe'){mode='scroll';}
+   if(!swipeFrame)swipeFrame=requestAnimationFrame(paintSwipe);
+  }else if(mode==='drag'||(mode==='tap'&&Math.abs(dy)>14&&Math.abs(dy)>Math.abs(dx)*1.25)){
+   // A drag starts only on a task card; the surrounding timeline keeps normal scrolling.
+   mode='drag';event?.preventDefault();
+   el.classList.add('drag-preview');
+   if(!paintFrame)paintFrame=requestAnimationFrame(paintDrag);
+  }
  };
  const finish=cancelled=>{
   if(active===null)return;
-  active=null;clearTimer();el.style.transform='';
-  if(cancelled||mode==='scroll'||mode==='long')return;
+  if(mode==='drag'&&!cancelled)el.style.transform='translate3d(0,'+(lastY-startY)+'px,0)';
+  const previousRect=mode==='drag'&&!cancelled?el.getBoundingClientRect():null;
+  active=null;clearTimer();clearPaint();
+  if(mode==='swipe'){el.style.transition='transform .26s cubic-bezier(.22,1,.36,1)';el.style.transform='translate3d(0,0,0)';}
+  else el.style.transform='';
+  el.classList.remove('drag-preview');
+  if(cancelled){if(timeLabel)timeLabel.textContent=fmt(item.s)+'–'+fmt(item.s+item.d);return;}
   if(mode==='swipe'){if(lastX-startX< -45)showSwipeDelete(item);return;}
+  if(mode==='drag'){
+   const at=candidateStart();
+   if(at!==item.s){
+    item.s=at;
+    const saved=persist();
+    note.textContent='「'+item.t+'」を'+fmt(at)+'に移動'+(saved?'（端末内に保存中）':'（保存準備失敗）');
+    smoothRender(item.id,previousRect);updateReview();
+   }else if(timeLabel)timeLabel.textContent=fmt(item.s)+'–'+fmt(item.s+item.d);
+   return;
+  }
   if(mode==='tap')toggleTaskDone(item);
  };
  el.addEventListener('contextmenu',e=>e.preventDefault());
  el.addEventListener('touchstart',e=>{if(e.touches.length===1)begin(e.touches[0].clientX,e.touches[0].clientY,'touch')},{passive:true});
  el.addEventListener('touchmove',e=>{if(active==='touch'&&e.touches.length)move(e.touches[0].clientX,e.touches[0].clientY,e)},{passive:false});
- el.addEventListener('touchend',()=>{if(active==='touch')finish(false)});
+ el.addEventListener('touchend',e=>{if(active==='touch'){if(e?.changedTouches?.length){lastX=e.changedTouches[0].clientX;lastY=e.changedTouches[0].clientY;}finish(false);}});
  el.addEventListener('touchcancel',()=>{if(active==='touch')finish(true)});
  el.addEventListener('pointerdown',e=>{if(e.pointerType==='touch'||e.button!==0)return;begin(e.clientX,e.clientY,e.pointerId);el.setPointerCapture?.(e.pointerId)});
  el.addEventListener('pointermove',e=>{if(active===e.pointerId)move(e.clientX,e.clientY,e)});
@@ -759,17 +1183,27 @@ function wireTaskGestures(el,item){
  el.addEventListener('pointercancel',e=>{if(active===e.pointerId)finish(true)});
 }
 function smoothRender(activeId,oldActiveRect){
+ const reduceMotion=window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
  const before=new Map([...tl.querySelectorAll('.card')].map(n=>[n.dataset.id,n.getBoundingClientRect()]));
  if(activeId&&oldActiveRect)before.set(String(activeId),oldActiveRect);
  render();
- [...tl.querySelectorAll('.card')].forEach(n=>{const old=before.get(n.dataset.id);if(!old)return;const now=n.getBoundingClientRect();const dy=old.top-now.top;if(Math.abs(dy)>.5){n.animate([{transform:'translate3d(0,'+dy+'px,0)'},{transform:'translate3d(0,0,0)'}],{duration:260,easing:'cubic-bezier(.2,.8,.2,1)'})}});
+ if(reduceMotion)return;
+ [...tl.querySelectorAll('.card')].forEach(n=>{
+  const old=before.get(n.dataset.id);if(!old||typeof n.animate!=='function')return;
+  const now=n.getBoundingClientRect();
+  const dx=old.left-now.left,dy=old.top-now.top;
+  // Preserve the card width; animate position only.
+  if(Math.abs(dx)<.5&&Math.abs(dy)<.5)return;
+  n.animate([{transform:'translate3d('+dx+'px,'+dy+'px,0)'},{transform:'translate3d(0,0,0)'}],{duration:235,easing:'cubic-bezier(.22,1,.36,1)'});
+ });
 }
 function render(){
  latestCompatibility=yosCompatibility(items);
+ const sorted=[...items].filter(x=>Number.isFinite(x.s)&&Number.isFinite(x.d)&&x.d>0&&x.s>=0&&x.s+x.d<=1440).sort((a,b)=>a.s-b.s||a.id-b.id);
+ elasticAxis=elasticEnabled?yosElasticAxis(sorted,scale):null;
  tl.querySelectorAll('.hour,.card,.tick').forEach(n=>n.remove());
  const bottom=yFor(1440);
  for(let h=0;h<=24;h++){const el=document.createElement('div');el.className='hour';el.style.top=yFor(h*60)+'px';el.innerHTML='<span>'+fmt(h*60)+'</span>';tl.append(el)}
- const sorted=[...items].filter(x=>Number.isFinite(x.s)&&Number.isFinite(x.d)&&x.d>0&&x.s>=0&&x.s+x.d<=1440).sort((a,b)=>a.s-b.s||a.id-b.id);
  const lanes=new Map();let group=[],groupEnd=-1;const groups=[];
  for(const item of sorted){if(group.length&&item.s>=groupEnd){groups.push(group);group=[]}group.push(item);groupEnd=Math.max(groupEnd,item.s+item.d)}
  if(group.length)groups.push(group);
@@ -778,12 +1212,12 @@ function render(){
  let priorVisualBottom=-2;
  for(const group of groups){
    const start=yFor(group[0].s);
-   const offset=Math.max(0,priorVisualBottom+3-start);
+   const offset=elasticEnabled?0:Math.max(0,priorVisualBottom+3-start);
    for(const item of group)lanes.get(item).offset=offset;
-   priorVisualBottom=Math.max(priorVisualBottom,...group.map(item=>yFor(item.s)+offset+Math.max(item.kind==='task'&&!item.f?32:density==='overview'?17:22,yFor(item.s+item.d)-yFor(item.s)-2)));
+   priorVisualBottom=Math.max(priorVisualBottom,...group.map(item=>yFor(item.s)+offset+Math.max(item.kind==='task'&&!item.f?42:density==='overview'?17:22,yFor(item.s+item.d)-yFor(item.s)-2)));
  }
  sorted.forEach(item=>{
-   const natural=yFor(item.s);const height=Math.max(item.kind==='task'&&!item.f?32:density==='overview'?17:22,yFor(item.s+item.d)-natural-2);const top=natural+(lanes.get(item)?.offset||0);
+   const natural=yFor(item.s);const height=elasticEnabled?Math.max(1,yFor(item.s+item.d)-natural-2):Math.max(item.kind==='task'&&!item.f?42:density==='overview'?17:22,yFor(item.s+item.d)-natural-2);const top=natural+(lanes.get(item)?.offset||0);
    if(top>natural+2)pushed++;
    lastBottom=top+height;
    const el=document.createElement('div');el.className='card '+(item.kind==='habit'?'habit':item.kind==='task'?'task':'schedule');
@@ -791,25 +1225,14 @@ function render(){
    const lane=lanes.get(item);if(lane&&lane.count>1){el.style.left='calc(73px + (100% - 73px) * '+(lane.lane/lane.count)+')';el.style.width='calc((100% - 73px) / '+lane.count+' - 3px)';el.style.right='auto';el.classList.add('lane')}
    const compat=latestCompatibility.get(item.id);
    if(compat){el.classList.add('compat-'+compat.level);el.setAttribute('aria-label',item.t+' '+(compat.reasons[0]||'相性：判断材料不足'));el.title=(compat.reasons[0]||'相性は未確認');}
-   if(item.kind==='task'&&!item.f){
-    const linked=typeof item.shortcut==='string'&&item.shortcut.length>0;
-    const action=document.createElement(linked?'a':'button');
-    action.className='shortcut-launch'+(linked?' linked':'');
-    action.textContent=linked?'▶':'＋';
-    action.setAttribute('aria-label',linked?'ショートカット「'+item.shortcut+'」を実行':'このタスクにショートカットを設定');
-    if(linked){action.href='shortcuts://run-shortcut?name='+encodeURIComponent(item.shortcut);}
-    else{action.type='button';action.onclick=e=>{e.stopPropagation();beginLocalEdit(item,true)};}
-    for(const type of ['touchstart','touchmove','touchend','touchcancel','pointerdown','pointermove','pointerup','pointercancel'])action.addEventListener(type,e=>e.stopPropagation());
-    action.addEventListener('click',e=>{
-     e.stopPropagation();
-     if(linked)note.textContent='iPhoneショートカット「'+item.shortcut+'」へ起動を依頼しました · タスク完了は別';
-    });
-    el.append(action);
-   }else{
+   if(item.kind!=='task'||item.f){
     const iconEl=document.createElement('span');iconEl.innerHTML=eventIcon(item);el.append(iconEl.firstChild);
    }
-   const titleEl=document.createElement('b');titleEl.textContent=item.t;el.append(titleEl);
-   const timeEl=document.createElement('small');timeEl.textContent=fmt(item.s)+'–'+fmt(item.s+item.d);el.append(timeEl);
+   const titleEl=document.createElement('b');titleEl.textContent=item.t;
+   const timeEl=document.createElement('small');timeEl.textContent=fmt(item.s)+'–'+fmt(item.s+item.d);
+   if(item.kind==='task'&&!item.f){
+    const copy=document.createElement('span');copy.className='task-copy';copy.append(titleEl,timeEl);el.append(copy);
+   }else{el.append(titleEl,timeEl);}
    if(item.t==='睡眠'||item.t==='就寝')el.classList.add('sleep');
    if(['朝の準備','朝食','昼食','夕食','入浴'].includes(item.t))el.classList.add('neutral');
    if(height<30)el.classList.add('tiny');
@@ -817,12 +1240,12 @@ function render(){
    if(searchText&&!item.t.toLocaleLowerCase().includes(searchText))el.style.display='none';
    el.dataset.id=String(item.id);if(item.done)el.classList.add('done');tl.append(el);
    const tick=document.createElement('div');tick.className='tick';tick.style.top=(top-4)+'px';tl.append(tick);
-   let downY=0,downS=0,moved=false,holding=false,activePointer=null,frame=0,latestY=0,previewS=item.s,lastHaptic=0,startedAt=0;
+   let downY=0,downS=0,moved=false,holding=false,activePointer=null,frame=0,latestY=0,previewS=item.s,startedAt=0;
    const timeLabel=el.querySelector('small');
-   const paint=()=>{frame=0;if(!holding)return;const offset=latestY-downY;el.style.transform='translate3d(0,'+offset+'px,0) scale(1.015)';const next=Math.max(0,Math.min(1440-item.d,Math.round((downS+offset/scale*60)/5)*5));if(next!==previewS){previewS=next;timeLabel.textContent=fmt(next)+'–'+fmt(next+item.d);const now=performance.now();if(now-lastHaptic>75){lastHaptic=now;vibrate()}}};
+   const paint=()=>{frame=0;if(!holding)return;const offset=latestY-downY;el.style.transform='translate3d(0,'+offset+'px,0) scale(1.015)';const next=Math.max(0,Math.min(1440-item.d,Math.round(minuteAtY(yFor(downS)+offset)/5)*5));if(next!==previewS){previewS=next;timeLabel.textContent=fmt(next)+'–'+fmt(next+item.d);}};
    const startDrag=(y,id)=>{downY=latestY=y;downS=previewS=item.s;startedAt=performance.now();moved=false;holding=false;activePointer=id};
    const moveDrag=y=>{if(activePointer===null)return;latestY=y;const distance=Math.abs(latestY-downY);if(distance>3&&!item.f){holding=true;moved=true;el.classList.add('moving');if(!frame)frame=requestAnimationFrame(paint)}};
-   const endDrag=cancelled=>{if(activePointer===null)return;activePointer=null;if(frame){cancelAnimationFrame(frame);frame=0}const releasedRect=el.getBoundingClientRect();el.classList.remove('moving');el.style.transform='';if(holding&&moved&&!cancelled){const offset=latestY-downY;previewS=Math.max(0,Math.min(1440-item.d,Math.round((downS+offset/scale*60)/5)*5));item.s=previewS;const clashes=items.filter(x=>x!==item&&item.s<x.s+x.d&&x.s<item.s+item.d);note.textContent=(clashes.length?'時間が重複：'+clashes.map(x=>x.t).join('、'):'移動しました')+(persist()?'（保存処理中）':'（保存処理失敗）');smoothRender(item.id,releasedRect)}else if(!moved&&!cancelled){showFocusFor(item);smoothRender()}holding=false};
+   const endDrag=cancelled=>{if(activePointer===null)return;activePointer=null;if(frame){cancelAnimationFrame(frame);frame=0}const releasedRect=el.getBoundingClientRect();el.classList.remove('moving');el.style.transform='';if(holding&&moved&&!cancelled){const offset=latestY-downY;previewS=Math.max(0,Math.min(1440-item.d,Math.round(minuteAtY(yFor(downS)+offset)/5)*5));item.s=previewS;const clashes=items.filter(x=>x!==item&&item.s<x.s+x.d&&x.s<item.s+item.d);note.textContent=(clashes.length?'時間が重複：'+clashes.map(x=>x.t).join('、'):'移動しました')+(persist()?'（保存処理中）':'（保存処理失敗）');smoothRender(item.id,releasedRect)}else if(!moved&&!cancelled){showFocusFor(item);smoothRender()}holding=false};
    if(item.kind==='task'&&!item.f){wireTaskGestures(el,item)}else{
    // Touch events are used on iOS WebView to avoid pointer capture cancelling a vertical drag.
    el.addEventListener('touchstart',e=>{if(e.touches.length!==1)return;startDrag(e.touches[0].clientY,'touch')},{passive:true});
@@ -842,10 +1265,10 @@ document.getElementById('closeFocus').onclick=()=>{zoom=null;deleteConfirmId=nul
 if(Array.isArray(stored)){note.textContent='保存済み時間割を表示 · Notion Tasks '+yosStatusWord(taskSource.status);}
 else if(calendarRows.length){note.textContent='Appleカレンダー '+calendarRows.length+'件を読み取り'+(yosTestCount(todayISO)?' · テスト'+yosTestCount(todayISO)+'件は非表示':'')+' · 端末内で追加・編集';}
 else{note.textContent='端末内の予定はありません · 右上の追加から登録';}
-yosDefaultStart();yosRefreshTestToggle();renderWeek();render();renderDayAllDay();updateReview();yosRenderSources();setCalendarMode('day');setInterval(updateNow,60000);
+yosDefaultStart();yosRefreshTestToggle();renderWeek();render();renderDayAllDay();updateReview();yosOutingManualSetup();yosRenderSources();setCalendarMode('day');setInterval(()=>{updateNow();if(document.getElementById('yosOutingPanel').classList.contains('show'))yosRenderOuting();},60000);setInterval(yosRenderLearningHints,60000);
 <\/script></body></html>`;
 
- const payload=JSON.stringify({days:state.days,hiddenCalendar:state.hiddenCalendar||{},calendarDays,allDayDays,calendarCoverage,taskSource,habitSource,generatedAt:new Date().toISOString()}).replace(/</g,'\\u003c');
+ const payload=JSON.stringify({days:state.days,hiddenCalendar:state.hiddenCalendar||{},calendarDays,allDayDays,calendarCoverage,taskSource,habitSource,outingContext:outingInput.context,outingTaskDetails:outingInput.taskDetails,generatedAt:new Date().toISOString()}).replace(/</g,'\\u003c');
  const ready=html.replace('<script>','<script>window.YOS_CHARCOAL_BOOT='+payload+';<\/script><script>');
  await view.loadHTML(ready);
  let closedFlag=false;

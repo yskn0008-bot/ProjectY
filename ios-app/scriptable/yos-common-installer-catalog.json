@@ -34,8 +34,8 @@
       "id": "timeline-charcoal-20261111",
       "name": "YOS Timeline Charcoal 確認 20261111",
       "path": "ios-app/scriptable/YOS Timeline Charcoal 確認 20261111.js",
-      "commit": "892973bd32295456a61959d1b6ddfc0493f45dc3",
-      "sha256": "c0d26bacfd23ce6c101d9ad8170512911dec70a33f3f07efe8e6914ddaff59be"
+      "commit": "77ccee0b08538d7ad2c3939625a83fee0fe89a4f",
+      "sha256": "22a59870dc28edd6c49056bc5347233d2bccc0ba4c43c5264a0a0e4e8eec0e97"
     },
     {
       "id": "bravia-smart-power",
@@ -64,13 +64,6 @@
       "path": "ios-app/scriptable/remote-widgets/YOS Sleep Scene.js",
       "commit": "808d9e797a5734a4f7326e0471d6a4474244bc38",
       "sha256": "987664699fee3963f001e6610eafb5d371e3009cba990560785ed456171587f8"
-    },
-    {
-      "id": "screenshot-bridge",
-      "name": "YOS Screenshot Bridge",
-      "path": "ios-app/scriptable/YOS Screenshot Bridge.js",
-      "commit": "51a4412d9a7e075c72e8c243761093dbc50bbf0f",
-      "sha256": "7769a730fbf3e013d92b2143b06808b7a7af84c74cf11e4e539bd4707b774ab8"
     }
   ]
 }
