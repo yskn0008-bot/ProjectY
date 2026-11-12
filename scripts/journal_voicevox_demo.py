@@ -113,7 +113,7 @@ def main() -> None:
                 wav_path.write_bytes(wav)
                 files.append(wav_path)
             inputs = Path(tmp) / "concat.txt"
-            inputs.write_text("".join(f"file '{p}'\\n" for p in files), encoding="utf-8")
+            inputs.write_text("".join(f"file '{p}'\n" for p in files), encoding="utf-8")
             target.parent.mkdir(parents=True, exist_ok=True)
             subprocess.run(["ffmpeg", "-nostdin", "-loglevel", "error", "-y", "-f", "concat", "-safe", "0", "-i", str(inputs), "-ac", "1", "-ar", "44100", "-codec:a", "libmp3lame", "-b:a", "96k", str(target)], check=True)
             if target.stat().st_size <= 4000:
