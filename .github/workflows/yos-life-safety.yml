@@ -54,6 +54,9 @@ jobs:
       - name: Run Life data and cache boundary tests
         run: node --test life/tests/home-priority-data.test.mjs life/tests/life-calendar-contract.test.mjs life/tests/all-day-sync.test.mjs life/tests/daily-flow-contract.test.mjs life/tests/daily-flow-orchestrator.test.mjs life/tests/task-quick-add.test.mjs life/tests/night-checkin-life-bridge.test.mjs life/tests/service-worker-cache-scope.test.mjs life/learning/life-learning.test.mjs life/learning/notion-existing-adapter.test.mjs life/learning/daystream-learning-bridge.test.mjs life/learning/daystream-learning-preview.test.mjs life/learning/daystream-learning-section.test.mjs
 
+      - name: Verify timeline reference fidelity, 24h behavior, DOM and safe installer
+        run: node --test life/calendar/reference-wallpaper.test.mjs life/calendar/timeline.test.mjs life/calendar/timeline.dom.test.mjs life/calendar/timeline-installer.test.mjs
+
   daily-flow-handoff-smoke:
     name: Morning/Night handoff (${{ matrix.browser }})
     runs-on: ubuntu-latest
@@ -91,6 +94,20 @@ jobs:
         env:
           LIFE_BROWSER: ${{ matrix.browser }}
         run: node life/tests/daily-flow-handoff-smoke.mjs
+
+      - name: Render and smoke-test DAYSTREAM 390px (chromium)
+        if: matrix.browser == 'chromium'
+        run: node life/calendar/timeline.browser.test.cjs
+
+      - name: Upload DAYSTREAM visual review screenshots
+        if: always() && matrix.browser == 'chromium'
+        uses: actions/upload-artifact@v4
+        with:
+          name: yos-daystream-glass-390px
+          path: |
+            test-results/timeline-390px-*.png
+            life/calendar/design/reference-glass-original.jpeg
+          if-no-files-found: warn
 
   life-browser-smoke:
     name: Life iPhone smoke (${{ matrix.browser }})

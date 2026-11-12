@@ -1,0 +1,22 @@
+✔ production pins match new bundle and retain only reviewed previous version (1.841034ms)
+✔ fresh install reads back code before launch and leaves plan untouched (39.363917ms)
+✔ known prior version backs up first and updates same candidate name (30.288474ms)
+✔ exact version is no-op, including local storage without cloud duplicate (80.264496ms)
+✔ unknown same-name code is preserved and only verified new package opens directly (86.132591ms)
+✔ ambiguous double installation stays untouched without preview (22.771853ms)
+✔ tampered download and HTTP failure never write or launch (2.243084ms)
+✔ unknown backup and failed backup preserve previous candidate (46.13782ms)
+✔ failed readback restores prior version or removes only new candidate (49.409821ms)
+✔ concurrent external edit is preserved and refuses own write (19.352627ms)
+✔ newer reviewed version uses own backup while legacy backup remains intact (18.002906ms)
+✔ last distributed glass candidate updates with its own verified backup (19.70775ms)
+✔ unrecognized target plus tampered payload never executes any code or changes files (1.809301ms)
+✔ direct preview helper executes async package text in its own function (0.947335ms)
+ℹ tests 14
+ℹ suites 0
+ℹ pass 14
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 534.763478

@@ -1,0 +1,36 @@
+✔ Apple event and Notion task/money merge, private token never enters WebView (19.238681ms)
+✔ No Keychain leaves Apple available, Notion sources unconnected (11.985516ms)
+✔ Notion auth failure does not invent tasks or money while Apple still renders (18.764325ms)
+✔ Native status update permits only approved Notion Task completion (0.471131ms)
+✔ reviewed DAYSTREAM HTML checksum stays pinned to native bridge (0.872747ms)
+✔ large Apple and Notion sources keep separate capacities and truthful partial status (29.673376ms)
+✔ DAYSTREAM prioritizes action and distinguishes full, partial and stale native snapshots (0.207884ms)
+✔ native Notion finance is not silently replaced by outdated browser Money (0.183377ms)
+✔ offline iPhone import package embeds the reviewed native page with no runtime UI download (1.095363ms)
+✔ calendar mirror and independent action: keep one Apple event and finance, hide only its Notion echo (8.68119ms)
+✔ a genuine manual task with the same title remains visible (8.54868ms)
+✔ a calendar-origin task with an explicit next action remains visible (8.338973ms)
+✔ when Apple event is unavailable, the existing Notion calendar mirror remains visible (5.787403ms)
+✔ a calendar-origin task for another day remains independent (6.380899ms)
+✔ wake-to-sleep planner keeps anchors, habits, priority and fixed appointments (0.991987ms)
+✔ manual order moves flexible items while fixed appointments remain in place (2.854468ms)
+✔ timestamped Notion task retains a fixed hour and P0 priority (0.117227ms)
+✔ draft-only checks and reordering never write to original Notion or Apple data (0.249696ms)
+✔ local dayplan check and ordering survive a re-open without Notion writes (13.534779ms)
+✔ explicit cancellation keeps Notion unchanged while saving local checkbox draft (19.697477ms)
+✔ explicit approval performs one guarded status-only PATCH and verifies readback (13.887647ms)
+✔ conflicting title or already completed source cannot be changed again (25.694242ms)
+✔ failed local save prevents Notion completion submission (5.551216ms)
+✔ forged IDs, calendar mirrors, and unavailable credentials never update Notion (29.046886ms)
+✔ writeback refuses wrong data source, changed calendar origin and unchecked export (32.158251ms)
+✔ save callback failures and corrupt local plan file produce fail-closed results (13.019487ms)
+✔ closing preview without pressing Save cannot write local file or Notion (7.367818ms)
+✔ only user Save click can activate a native completion callback (0.291089ms)
+ℹ tests 28
+ℹ suites 0
+ℹ pass 28
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 395.439208

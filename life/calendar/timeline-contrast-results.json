@@ -1,0 +1,114 @@
+[
+  {
+    "name": "light fg",
+    "foreground": "#102441",
+    "background": "#f5f7ff",
+    "minimum": 4.5,
+    "ratio": 14.534,
+    "pass": true
+  },
+  {
+    "name": "light sub",
+    "foreground": "#4c607a",
+    "background": "#f5f7ff",
+    "minimum": 4.5,
+    "ratio": 6.019,
+    "pass": true
+  },
+  {
+    "name": "light green",
+    "foreground": "#126842",
+    "background": "#f5f7ff",
+    "minimum": 4.5,
+    "ratio": 6.364,
+    "pass": true
+  },
+  {
+    "name": "light amber",
+    "foreground": "#895000",
+    "background": "#f5f7ff",
+    "minimum": 4.5,
+    "ratio": 6.113,
+    "pass": true
+  },
+  {
+    "name": "light red",
+    "foreground": "#b13237",
+    "background": "#f5f7ff",
+    "minimum": 4.5,
+    "ratio": 5.807,
+    "pass": true
+  },
+  {
+    "name": "light control boundary",
+    "foreground": "#71839e",
+    "background": "#f5f7ff",
+    "minimum": 3,
+    "ratio": 3.607,
+    "pass": true
+  },
+  {
+    "name": "light focus",
+    "foreground": "#102441",
+    "background": "#f5f7ff",
+    "minimum": 3,
+    "ratio": 14.534,
+    "pass": true
+  },
+  {
+    "name": "dark fg",
+    "foreground": "#f1f5ff",
+    "background": "#17283e",
+    "minimum": 4.5,
+    "ratio": 13.654,
+    "pass": true
+  },
+  {
+    "name": "dark sub",
+    "foreground": "#c3d2e7",
+    "background": "#17283e",
+    "minimum": 4.5,
+    "ratio": 9.715,
+    "pass": true
+  },
+  {
+    "name": "dark green",
+    "foreground": "#7fdeb0",
+    "background": "#17283e",
+    "minimum": 4.5,
+    "ratio": 9.207,
+    "pass": true
+  },
+  {
+    "name": "dark amber",
+    "foreground": "#ffc476",
+    "background": "#17283e",
+    "minimum": 4.5,
+    "ratio": 9.514,
+    "pass": true
+  },
+  {
+    "name": "dark red",
+    "foreground": "#ffa7a1",
+    "background": "#17283e",
+    "minimum": 4.5,
+    "ratio": 8.013,
+    "pass": true
+  },
+  {
+    "name": "dark control boundary",
+    "foreground": "#8297b5",
+    "background": "#17283e",
+    "minimum": 3,
+    "ratio": 4.997,
+    "pass": true
+  },
+  {
+    "name": "dark focus",
+    "foreground": "#f1f5ff",
+    "background": "#17283e",
+    "minimum": 3,
+    "ratio": 13.654,
+    "pass": true
+  }
+]

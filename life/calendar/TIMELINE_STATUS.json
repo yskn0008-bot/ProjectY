@@ -1,0 +1,264 @@
+{
+  "schema": "yos-timeline-delivery-status-v1",
+  "recordedDateJST": "2026-11-11",
+  "state": "DESIGN_APPROVED_IMPLEMENTATION",
+  "reason": "User explicitly approved the exact static glass-reference crop (557x1135) on 2026-11-11; dynamic 24-hour behavior and real-device rendering remain unverified.",
+  "repository": "yskn0008-bot/ProjectY",
+  "pullRequest": 654,
+  "baselineHead": "6ffdc056138301e3a1a70eac2f635a761277da64",
+  "candidateCodeCommit": "e28d6acbd4e851dab1d60dd0a3b00452700f85f1",
+  "packageSHA256": "121b4fbacf8a77b1e87ff0dfd9a71842181ab1e265c4ed725c333e3259381f3f",
+  "scriptSHA256": "2f8d9bddeb5d9088a6e4c2f73ceef1cda0f6961b528bb290b19b3e28fee8fa8d",
+  "codeImplemented": [
+    "24h exact geometry",
+    "fixed source event protection",
+    "midnight continuation",
+    "daily-weekly-monthly-yearly recurrence",
+    "long-press handle and time-input alternatives",
+    "live local before-after impact",
+    "linked card colors and symbols",
+    "undo",
+    "explicit save and readback",
+    "source habit read adapter",
+    "offline DAYSTREAM candidate bundle",
+    "pinned no-overwrite installer"
+  ],
+  "automatedVerification": {
+    "candidateNodeAndDOM": {
+      "pass": 33,
+      "fail": 0
+    },
+    "unchangedBaselineNode": {
+      "pass": 28,
+      "fail": 0
+    },
+    "installerNodeMocks": {
+      "pass": 14,
+      "fail": 0
+    },
+    "actualCSSContrastPairs": {
+      "pass": 14,
+      "fail": 0
+    },
+    "designTokenContrastPairs": {
+      "pass": 10,
+      "fail": 0
+    },
+    "rawGitHubDownload": "HTTP 200, JSON parse and both SHA256 hashes matched",
+    "timelineCI20261111": {
+      "checkedHead": "b227d0692c070d3641ff4fc121907657a6564e4f",
+      "source": "GitHub YOS Life Safety / Life Node regression job 130311443825",
+      "command": "node --test life/calendar/reference-wallpaper.test.mjs life/calendar/timeline.test.mjs life/calendar/timeline.dom.test.mjs life/calendar/timeline-installer.test.mjs",
+      "focusedTests": {
+        "pass": 54,
+        "fail": 0
+      },
+      "existingLifeTests": {
+        "pass": 34,
+        "fail": 0
+      },
+      "assertion": "On-device iPhone Safari/Scriptable visual rendering and touch/save persistence are not covered."
+    },
+    "browser390px": {
+      "status": "PASSED_WITH_VISUAL_GAPS",
+      "testedCommit": "385072c2fea0dfffa4397dad746b46c5c46b3fe4",
+      "runId": 42958403038,
+      "artifactId": 13828116952,
+      "browser": "Playwright Chromium mobile viewport 390x844 @3x",
+      "evidence": [
+        "timeline-390px-glass-empty.png",
+        "timeline-390px-glass-planned.png",
+        "timeline-390px-edit-overlap.png",
+        "approved original reference-glass-original.jpeg"
+      ],
+      "assertions": [
+        "approved glass skin loaded",
+        "no invented events in empty state",
+        "25 hour markers, 2px/minute in edit",
+        "both overlapping local events visible in DOM",
+        "fixed source fixture immovable",
+        "save receipt UI and home return",
+        "zero JS page errors"
+      ],
+      "failureToAccept": [
+        "HOME lacks original vertical time rail",
+        "overlap card titles and times truncate at 390px",
+        "first opening editor starts at midnight, not event/current time"
+      ],
+      "physicallyVerified": false,
+      "userAcceptedDynamic": false
+    },
+    "timelineVisualMobile20261111": {
+      "head": "cdcaa0015cd3acc6254636348112e42b0b7f0169",
+      "browser": "Chromium mobile 390x844 @3x",
+      "browserPassed": true,
+      "node": {
+        "pass": 55,
+        "fail": 0
+      },
+      "originalGlassDateCropStillUnchanged": true,
+      "knownBrowserVisualGap": "approved reference shows a 6:00–24:00 time rail; current HOME remains primarily a vertical agenda",
+      "fixedBugs": [
+        "calendar button no longer empty",
+        "edit-back button no longer empty"
+      ],
+      "evidence": "GitHub Life Safety run 42958896104, Morning/Night handoff Chromium job 130320553724, artifacts 13828058539",
+      "onDevice": false
+    },
+    "timelineCollisionRail20261111": {
+      "testedHead": "07f51ecc294e2fc0c69a48fd999ad560ae1be69f",
+      "gitHubLifeSafetyRun": 42965913679,
+      "lifeNodeRegression": "success",
+      "timeline390pxChromium": "success",
+      "morningNightHandoffWebKit": "success",
+      "iOSAppSafety": "success",
+      "fullLifeSafety": "failure - separate Money UI smoke",
+      "unifiedPWASafety": "failure - separate Money UI smoke",
+      "browserArtifactId": 13831411812,
+      "onDevice": false,
+      "userApprovedDynamic": false,
+      "actualEventStartDot": "anchored to 09:20 while overlapping card remains shifted with connector",
+      "installerPackageCommit": "99333813442cbe03ce2df8e05ee38269e9ec359d"
+    }
+  },
+  "notVerified": [
+    "physical iPhone touch and VoiceOver",
+    "Scriptable callback and actual FileManager persistence",
+    "Apple and Notion live permissions and values",
+    "current installed DAYSTREAM integration",
+    "full cross-domain CI because unrelated Money UI smoke remains failing; iPhone actual WKWebView is untested",
+    "full WCAG 2.2 AA",
+    "final physical iPhone visual fidelity to approved glass reference; automated 390px rail and legibility now improved",
+    "Physical iPhone Scriptable touch/haptics and persistence"
+  ],
+  "notImplemented": [
+    "personal learning from sleep/fatigue/action history",
+    "scientific effect quantification",
+    "general-purpose optimal placement across all domains",
+    "deployment into current installed DAYSTREAM",
+    "Figma tokens/components and canvas placement"
+  ],
+  "figma": {
+    "url": "https://www.figma.com/design/uM6BA4k1ZUcE5YXVBkba6f",
+    "status": "empty file created; first canvas inspection blocked by Starter MCP call limit",
+    "fallback": "design/timeline-directions-editable.svg plus TIMELINE_DESIGN.md",
+    "retry": "after existing access limit resets or an already-authorized design route is available; no paid upgrade requested"
+  },
+  "canva": {
+    "url": "https://canva.link/349p0erltl7mr2c",
+    "status": "three editable text-free wallpaper pages created; preview exports bundled"
+  },
+  "userNextAction": "After safe Scriptable startup is available, one iPhone screenshot plus move/save/close/reopen and permission confirmation remain necessary. No production adoption is authorized.",
+  "deviceChecks": [
+    "Apple fixed event time matches Calendar and cannot move",
+    "one flexible item long-press handle moves with live feedback and cancellation",
+    "confirm save shows readback success",
+    "close and rerun candidate preserves placement",
+    "old installed DAYSTREAM remains intact"
+  ],
+  "resume": "Current PR #654 has a working 24h glass HOME rail with actual-time collision marker and tested native package pinned to 99333813. Do not start over or repoint another installer. Next gate is one physical iPhone visual/touch/persistence/permissions test; haptics not established. PR #667 remains separate draft.",
+  "rollback": "Close this candidate and use the unchanged existing DAYSTREAM. No production merge or source-data mutation was made.",
+  "backgroundRunner": false,
+  "externalChecks": {
+    "checkedCommit": "d751046fab2bda6b99b6622f21f56d13044dc897",
+    "vercelCommitStatuses": "7 failure statuses; target URLs indicate build-rate-limit. No deploy retry, upgrade, or configuration change attempted. This offline Scriptable candidate does not require Vercel.",
+    "githubActions": "Not independently verified"
+  },
+  "visualRevision": {
+    "reason": "User rejected real iPhone screenshot: oversized hero, hidden time axis, mixed white shell and dark settings panel",
+    "implemented": "Full-height timeline-first warm canvas; compact 160 CSSpx header/week/legend; closed settings and source sheets; coordinated themes; visible drag feedback",
+    "confirmedOnDevice": "Prior candidate opened and displayed source-status badge only; revised UI not yet device checked",
+    "sourceRecordsChanged": false,
+    "priorCandidateScriptSHA256": "b117fcd0c29c1227ef2205866dd19a0dea2564fc9f736806a5c54bdd49d5d1ca"
+  },
+  "taskAppRevision": {
+    "design": "Glass reference2 is default; compact reference1 selectable. Real generated text-free pearl wallpaper and official offline Phosphor icons embedded. Actual render not yet accepted.",
+    "workingFeatures": [
+      "add/edit placement",
+      "local per-occurrence completion",
+      "confirmed local placement removal and undo",
+      "explicit save/readback/reopen contract",
+      "habits/review/settings views",
+      "week/month/year date navigation"
+    ],
+    "completionScope": "device-local planned occurrences only; no Notion or Calendar mutations",
+    "compatibility": "optional bounded timeline.completed extension; existing saved placements retained",
+    "installer": "Known b117,380 and47d78 script hashes accepted with per-version backup/readback/conflict guards; same candidate name."
+  },
+  "referenceFidelityRevision": {
+    "status": "DEVICE_CAPTURE_CANDIDATE_NOT_VISUALLY_ACCEPTED",
+    "default": "second reference glass screen, pearl background",
+    "alternate": "first reference compact agenda",
+    "sourceTests": {
+      "pass": 33,
+      "fail": 0,
+      "evidence": "task-app-reference-skins-test-results.txt"
+    },
+    "visualQA": "blocked pending actual iPhone capture",
+    "requiredNext": "Run pinned device-check candidate, obtain one screenshot, compare reference at matching viewport, fix visible mismatches, then verify actual touch/save/reopen.",
+    "priorHeldCheckpoint": "0accc5e4c5005692357ef7e5c5b3e066af849af6"
+  },
+  "installerDeviceFinding": {
+    "evidence": "IMG_5922.png user device screenshot",
+    "confirmed": "Updater refused unknown same-name existing code; no visual acceptance of new candidate",
+    "causeOfCodeDifference": "Unconfirmed; not inferred from screenshot",
+    "fix": "Preserve unknown code and run only integrity-checked pinned package directly in memory, without changing script files",
+    "tests": "14 installer tests pass, including no target writes/unknown code execution, tampered payload rejection, and direct async entry primitive",
+    "physicalResult": "Awaiting iPhone execution"
+  },
+  "currentFocus": {
+    "scope": "Approved static glass crop -> bounded functional 24-hour timeline validation",
+    "source": "Original attached JPEG bytes unchanged; no regeneration, retyping or restyling",
+    "defaultReference": "glass, second supplied image; left content viewport",
+    "alternateReference": "compact, first supplied image; shortcutParameter=compact",
+    "renderMethod": "Original JPEG displayed with a bounded viewport and one uniform scale; device frame/status/home chrome and unrelated panels outside the selected viewport",
+    "assetCommit": "bd67b996c0da7e54e99b7a3528c2a3233e329c6b",
+    "writes": "Draft #654 UI/CSS, tests, generated offline Scriptable package and verified updater changed only; no main, production, existing iPhone scripts or Apple/Notion source data changed.",
+    "testEvidence": "reference-wallpaper-test-results.txt:5/5 pass; no physical iPhone render claimed",
+    "next": "Current 24h glass HOME geometry passed 390px browser. Common-installer .js staged only in PR #654; not available from production catalog. YOS System checks safe common installer iPhone first registration, adds candidate to catalog only under release approval, verifies real device appearance/touch/Save/reopen. Preserve original app, data, and PR #667.",
+    "visualApproval": "Static 557x1135 glass crop approved only; interactive 24-hour display not yet visually accepted",
+    "checks": "Approved static crop unchanged, 24h geometry, collisions, touch-move feedback, cancellation, explicit save/readback, fixed Apple event protection, and no sample-data import passed existing regression suite.",
+    "visualGate": "2026-11-11 Chromium 390px screenshots visually reviewed after hour-label/timeline-dot fix; final physical iPhone acceptance is still pending.",
+    "installedScriptableVersion": "Still unconfirmed. Draft same-name updater is pinned to immutable package 99333813 and refuses overwrite of unknown local code; does not prove physical iPhone launch."
+  },
+  "visualApproval": {
+    "status": "STATIC_CROP_APPROVED",
+    "approvedOnJST": "2026-11-11",
+    "source": "original reference-glass-original.jpeg",
+    "reference": "glass",
+    "approvedCrop": {
+      "x": 45,
+      "y": 87,
+      "width": 557,
+      "height": 1135
+    },
+    "acceptanceEvidence": "User replied 'ok' to YOS_Timeline_Reference_Crop.png in conversation; recorded on existing YOS Timeline Task.",
+    "approvedScope": "static appearance only",
+    "dynamicAppearanceApproved": false,
+    "physicalIPhoneApproved": false,
+    "sampleScheduleIsNotUserData": true
+  },
+  "releaseCandidate20261111": {
+    "scope": "24h glass timeline - common-installer-ready staging only",
+    "source": "life/calendar/YOS_DAYSTREAM_TimelineBridge_Dev.js",
+    "stagedScript": "ios-app/scriptable/YOS DAYSTREAM Timeline 開発確認 20261105.js",
+    "scriptName": "YOS DAYSTREAM Timeline 開発確認 20261105",
+    "package": "life/calendar/YOS_DAYSTREAM_Timeline_Review_20261105.scriptable",
+    "fixedPackageCommit": "31fe584de7bceea11fbafc9ad6045f2685f8c00c",
+    "commonInstaller": "ios-app/scriptable/YOS Common Installer.js on main; unchanged",
+    "commonCatalog": "ios-app/scriptable/yos-common-installer-catalog.json on main; candidate NOT LISTED",
+    "whyUnlisted": "Existing common installer owner must approve release registration; iPhone import and actual device behavior unverified",
+    "automatedVerification": {
+      "timelineTests": 59,
+      "lifeBaseTests": 34,
+      "failures": 0,
+      "browser": "390px Chromium passed on earlier current UI; native iPhone not verified",
+      "commit": "caa4d2918751efbbdae3e09a97bf1272e6bc6e2f"
+    },
+    "actualIPhone": "NOT TESTED with staged common-installer script",
+    "priorImportAttempt": ".scriptable UTI unsupported on iPhone; avoid repeating; use .js in Scriptable iCloud folder only after confirming no same-name collision",
+    "haptics": "iPhone Scriptable WebView continuous finger-scroll haptics not verified; standard vibration API unsupported on iOS; do not claim implemented",
+    "gate": "Do not merge, register in main catalog, overwrite existing script, or claim completion before owner review and physical iPhone acceptance",
+    "rollback": "Draft-only candidate; original installed scripts/Notion/Apple Calendar not changed"
+  }
+}

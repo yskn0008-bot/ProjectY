@@ -1,0 +1,62 @@
+[
+  {
+    "name": "primary",
+    "foreground": "#202220",
+    "background": "#f2f2f0",
+    "ratio": 14.29
+  },
+  {
+    "name": "secondary",
+    "foreground": "#595c58",
+    "background": "#f2f2f0",
+    "ratio": 6.05
+  },
+  {
+    "name": "plus",
+    "foreground": "#1f6548",
+    "background": "#ffffff",
+    "ratio": 6.97
+  },
+  {
+    "name": "concern",
+    "foreground": "#865400",
+    "background": "#ffffff",
+    "ratio": 6.4
+  },
+  {
+    "name": "conflict",
+    "foreground": "#ad3028",
+    "background": "#ffffff",
+    "ratio": 6.5
+  },
+  {
+    "name": "dark-primary",
+    "foreground": "#f5f5f2",
+    "background": "#242624",
+    "ratio": 13.95
+  },
+  {
+    "name": "dark-secondary",
+    "foreground": "#c6c9c3",
+    "background": "#242624",
+    "ratio": 9.1
+  },
+  {
+    "name": "dark-plus",
+    "foreground": "#a6d6b8",
+    "background": "#242624",
+    "ratio": 9.39
+  },
+  {
+    "name": "dark-concern",
+    "foreground": "#e9c17a",
+    "background": "#242624",
+    "ratio": 8.98
+  },
+  {
+    "name": "dark-conflict",
+    "foreground": "#ffb4ab",
+    "background": "#242624",
+    "ratio": 8.98
+  }
+]

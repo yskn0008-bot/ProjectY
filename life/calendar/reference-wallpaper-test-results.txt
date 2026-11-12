@@ -1,0 +1,13 @@
+✔ both original JPEGs retain exact source bytes and hashes (2.186639ms)
+✔ crop preserves a single uniform scale without stretching at iPhone widths (0.559641ms)
+✔ static image HTML has no recreated cards, task actions or remote runtime (6.312766ms)
+✔ default and explicit compact load exact pinned image and present only static canvas (155.860836ms)
+✔ failed or altered image is never presented (2.049273ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 267.483745

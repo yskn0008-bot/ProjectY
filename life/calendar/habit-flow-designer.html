@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0d111d"><title>YOS STREAM｜生活導線エディター</title>
+<style>
+:root{color-scheme:dark;--bg:#0c1020;--surface:#171e30;--surface2:#20283c;--line:#35405a;--fg:#f5f7ff;--muted:#b2bdd2;--violet:#9b8cff;--green:#52dcaa;--blue:#79bcff;--gold:#f6c777}
+*{box-sizing:border-box}body{margin:0;font:16px -apple-system,BlinkMacSystemFont,"Hiragino Sans",sans-serif;color:var(--fg);background:var(--bg);-webkit-font-smoothing:antialiased}
+button,input,select{font:inherit}button{cursor:pointer}button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #b2aaff;outline-offset:2px}button:disabled{opacity:.35;cursor:default}a{color:#bfd7ff}
+main{max-width:580px;padding:calc(env(safe-area-inset-top) + 24px) 17px calc(env(safe-area-inset-bottom) + 50px);margin:auto}
+header{display:flex;justify-content:space-between;gap:14px;align-items:center}.brand{font-size:13px;letter-spacing:.16em;font-weight:900;color:#b0a5ff}.status{font-size:12px;color:var(--muted)}h1{font-size:29px;margin:11px 0 4px;line-height:1.2;letter-spacing:-.055em}h2{font-size:19px;margin:0}p{line-height:1.55}.lead{font-size:14px;color:var(--muted);margin:5px 0 22px}.note{border:1px solid #3d5074;border-left:4px solid var(--blue);background:#172338;padding:12px 13px;border-radius:12px;font-size:13px;color:#deeaff;line-height:1.5;margin:12px 0 19px}
+.tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;padding:4px;background:#1e263b;border-radius:16px;margin:10px 0 22px}
+.tabs button{border:0;color:var(--muted);background:transparent;min-height:44px;border-radius:12px;font-weight:800;font-size:14px}.tabs button[aria-selected=true]{background:#6c64d5;color:white}
+.section-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}.counter{font-size:13px;color:var(--muted)}
+.hint{font-size:13px;color:var(--muted);margin:0 0 14px}
+.item{display:grid;grid-template-columns:28px minmax(0,1fr) 45px;gap:9px;align-items:start;padding:15px 10px 12px 8px;border:1px solid var(--line);border-radius:16px;background:var(--surface);margin:0 0 9px;position:relative}
+.item[data-type=anchor]{border-left:3px solid var(--blue)}.item[data-type=habit]{border-left:3px solid var(--green)}.item[data-type=plan]{border-left:3px solid var(--violet)}
+.grip{color:#abb7c9;touch-action:none;cursor:grab;border:0;background:transparent;font-size:23px;min-height:44px;padding:0}.grip:active{cursor:grabbing}
+.item-content{min-width:0}.item-title{font-size:16px;font-weight:770;line-height:1.4}.tag{font-size:11px;border:1px solid #475a7c;color:#d4e1f6;padding:3px 6px;border-radius:7px;display:inline-block;margin:6px 6px 0 0}
+.item-sub{font-size:13px;color:var(--muted);margin-top:6px;line-height:1.4;overflow-wrap:anywhere}
+.actions{display:flex;flex-direction:column;align-items:center;gap:3px}.actions button{border:1px solid #485772;background:#293249;border-radius:9px;min-width:43px;min-height:35px;color:white}
+.detailbutton{border:0;background:transparent;color:#bdc7ff;text-align:left;padding:6px 0;min-height:36px;font-size:13px;font-weight:700}
+.section{margin-top:26px}.sectionline{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.option{display:flex;gap:12px;align-items:center;justify-content:space-between;background:var(--surface);padding:11px 12px;border:1px solid var(--line);border-radius:12px;margin:9px 0}
+.option strong{font-size:14px;display:block}.option small{font-size:12px;color:var(--muted);display:block;margin-top:3px}.option button{background:#3e437f;color:white;border:0;border-radius:11px;min-width:68px;min-height:44px;font-weight:750}
+.addrow{display:flex;gap:8px;margin-top:13px}.addrow input{background:#172037;border:1px solid #62708b;border-radius:12px;min-width:0;flex:1;min-height:46px;color:white;padding:11px;font-size:15px}.addrow button,.primary{background:#7968e8;color:white;border:0;border-radius:12px;min-height:46px;padding:10px 17px;font-weight:800}
+.outline{color:#e0e4fc;border:1px solid #62708b;background:transparent;border-radius:12px;min-height:44px;padding:9px 13px;font-weight:700}
+.footer-actions{display:flex;gap:8px;flex-wrap:wrap;margin:22px 0}.footnote{font-size:12px;line-height:1.5;color:var(--muted)}
+dialog{border:1px solid #56688a;background:#161e32;color:var(--fg);border-radius:22px 22px 0 0;position:fixed;inset:auto 0 0;max-height:83dvh;overflow:auto;width:min(100%,590px);max-width:100%;padding:24px 18px max(25px,env(safe-area-inset-bottom));margin:auto;box-shadow:0 -12px 40px #0008}dialog::backdrop{background:#000a}
+.detailhead{display:flex;justify-content:space-between;gap:10px;align-items:start}.close{border:0;background:#303d59;color:white;border-radius:50%;min-width:44px;min-height:44px;font-size:22px}
+.detailblock{border-top:1px solid #384762;padding:14px 0}.detailblock h3{font-size:14px;margin:0 0 6px;color:var(--green)}.detailblock p{font-size:15px;margin:0;line-height:1.6}
+.field-label{display:block;font-size:13px;color:var(--muted);margin:8px 0}.field{display:block;width:100%;background:#252d41;color:white;border:1px solid #61718e;border-radius:10px;padding:12px;font-size:16px}
+.footer{border-top:1px solid var(--line);padding-top:17px;margin-top:25px;color:var(--muted);font-size:12px;line-height:1.5}
+.dragging{opacity:.5;outline:2px dashed var(--green)}[hidden]{display:none!important}
+@media(max-width:350px){main{padding-inline:11px}.item{grid-template-columns:25px minmax(0,1fr) 38px;padding-inline:6px}.actions button{min-width:37px}.tabs button{font-size:13px}}
+</style></head><body>
+<main>
+<header><div class="brand">YOS / STREAM</div><div class="status" id="storageStatus">編集用・未連携</div></header>
+<h1>生活タイムライン</h1><p class="lead">生活に必要な行動へ、健康・美容・運動の習慣をつなぐ。</p>
+<div class="note">既存Notionの習慣・タスクを参考にした<strong>配置案</strong>です。実行済みや現在の毎日の行動とは断定しません。予定・銀行・Notionへの書込みはしません。</div>
+<div class="tabs" role="tablist" aria-label="繰り返し周期">
+<button role="tab" data-period="daily" aria-selected="true">毎日</button><button role="tab" data-period="weekly" aria-selected="false">毎週</button><button role="tab" data-period="monthly" aria-selected="false">毎月</button><button role="tab" data-period="yearly" aria-selected="false">年・長期</button></div>
+<section><div class="section-top"><h2 id="periodTitle">毎日の流れ</h2><span class="counter" id="count"></span></div>
+<p class="hint" id="periodHint">長押しで移動、または上下ボタンで順序を調整。時刻ではなく行動を基準にします。</p>
+<div id="timeline" aria-live="polite"></div></section>
+<section class="section"><div class="sectionline"><h2>追加できる習慣</h2><span class="counter">必要なものだけ</span></div><div id="suggestions"></div>
+<div class="addrow"><input id="newTitle" maxlength="65" placeholder="自分の習慣を追加" aria-label="追加する習慣名"><button id="add">追加</button></div></section>
+<div class="footer-actions"><button class="primary" id="copy">全期間の設計案をコピー</button><button class="outline" id="restore">この期間を初期化</button></div>
+<div class="footnote" id="saveStatus">ブラウザ内の編集用データ。Notion・Appleカレンダー・YOS日記とは未同期。</div>
+<footer class="footer">既存YOSの正式6画面やScriptable本番版は変更していません。この編集画面はDraft PR内の隔離試作です。安全上必要な通院・運動・睡眠の条件は、配置の便利さより優先します。</footer>
+</main>
+<dialog id="info"><div class="detailhead"><h2 id="infoTitle"></h2><button class="close" id="close" aria-label="詳細を閉じる">×</button></div>
+<p class="lead" id="infoBasis"></p>
+<div class="detailblock"><h3>期待できる効果</h3><p id="infoBenefit"></p></div>
+<div class="detailblock"><h3>おすすめのタイミング</h3><p id="infoTiming"></p></div>
+<div class="detailblock"><h3>前後の行動とのつなぎ方</h3><p id="infoPair"></p></div>
+<div class="detailblock"><h3>安全・注意点</h3><p id="infoCaution"></p></div>
+<div class="detailblock"><label class="field-label" for="infoAnchor">このタイムラインでのきっかけ（編集可）</label><input class="field" id="infoAnchor" maxlength="90"></div>
+<div class="detailblock"><h3>根拠の区分・参考情報</h3><p id="infoEvidence"></p></div>
+<button class="outline" id="remove" style="width:100%">タイムラインから外す</button>
+</dialog>
+<script>
+(function(){
+"use strict";
+const KEY="yos-habit-flow-draft-v1",VERSION=1,MAX=65;
+const definitions={
+wake:{title:"起床・アラーム停止",type:"anchor",anchor:"1日の始まり",basis:"生活行動の仮置き",benefit:"毎日起きるという行動を他の習慣の起点にする。",timing:"起床したとき。",pair:"カーテンを開ける・水を飲むなどへ連結。",caution:"実際の起床時刻やアラーム使用は固定されていない。",evidence:"運用上の設計案"},
+light:{title:"カーテンを開け、自然光を浴びる",type:"habit",anchor:"起床後",basis:"体内時計",benefit:"光は体内時計の調整に関与する。",timing:"起床後の日中の光が入りやすい時間。",pair:"アラーム停止→カーテンを開ける→洗面所へ。",caution:"直射日光を凝視しない。夜の強い光とは作用が異なる。",evidence:"研究・睡眠ガイド（個人差あり）"},
+bathroom:{title:"歯磨き・洗顔・身支度",type:"anchor",anchor:"洗面所へ行ったら",basis:"生活行動の仮置き",benefit:"同じ場所で関連する行動をまとめ、移動や判断を減らす。",timing:"起床後の身支度。",pair:"洗顔→保湿→外出前のUV対策。",caution:"酸性食品・飲料の直後は歯の状態に応じて歯磨きのタイミングに注意。",evidence:"運用上の設計案・歯科ガイド"},
+uv:{title:"保湿・日焼け止め",type:"habit",anchor:"朝の洗顔の直後・外出前",basis:"紫外線対策",benefit:"紫外線から肌を守り、光老化や色素沈着の悪化を抑える。",timing:"保湿は洗顔後、日焼け止めは紫外線を浴びる前。屋外では塗り直す。",pair:"洗顔→保湿→日焼け止め→外出。",caution:"刺激が出たら製品・使用方法を見直す。屋外では約2時間おき、汗や水濡れ後も塗り直す。",evidence:"米国皮膚科学会の一般的な日焼け止めガイド"},
+food:{title:"食事・片付け",type:"anchor",anchor:"最初の食事",basis:"生活行動の仮置き",benefit:"食事を運動・記録へつなぐ起点。",timing:"食べる時間は本人の実生活に合わせる。",pair:"調理中に野菜を足す→食事→片付け→軽く歩く。",caution:"食事時間・回数の固定はしない。",evidence:"運用上の設計案"},
+walk:{title:"食後に2〜5分歩く",type:"habit",anchor:"食器の片付けの直後",basis:"食後血糖・身体活動",benefit:"軽い食後歩行は食後血糖上昇を和らげる可能性がある。",timing:"食後早め。無理なく2〜5分から試す。",pair:"片付け→家の中を歩く／歩いて買い物へ。",caution:"片足立ちや立位だけでは同等の血糖改善とは言えない。体調不良時は無理をしない。",evidence:"食後歩行に関する研究（人・条件により効果差）"},
+work:{title:"予定・重要タスク・外出",type:"anchor",anchor:"その日の固定予定に合わせる",basis:"YOS Tasksを想定した枠",benefit:"移動のついでに活動量を増やせる機会を探す。",timing:"予定時刻は動かさない。",pair:"買い物や移動がある日は徒歩の経路を選び、別の散歩を重複させない。",caution:"実際のカレンダー予定は未読込。締切・固定予定が優先。",evidence:"運用上の設計案"},
+dinner:{title:"夕食・片付け",type:"anchor",anchor:"夕食の前後",basis:"生活行動の仮置き",benefit:"食事の片付けを夜の準備へつなぐ。",timing:"本人の生活時刻に合わせる。",pair:"夕食→片付け→必要なら軽い歩行。",caution:"食後すぐに激しい運動は無理に行わない。",evidence:"運用上の設計案"},
+nightcare:{title:"夜の歯磨き・洗顔・保湿",type:"habit",anchor:"夜に洗面所へ行ったら",basis:"口腔・皮膚ケア",benefit:"歯・肌のケアをまとめて行うことで習慣化しやすくする。",timing:"就寝前に行う。",pair:"歯間清掃→歯磨き、洗顔→保湿。",caution:"歯間清掃は1日1回が目安。肌を強くこすらない。",evidence:"歯科・皮膚科学会の一般的なガイド＋運用上の配置案"},
+charge:{title:"充電・減光・Night",type:"habit",anchor:"就寝前にiPhoneを充電したら",basis:"睡眠環境・既存Night",benefit:"夜の明るさを抑え、振り返りを既存行動に接続する。",timing:"就寝前。",pair:"充電→部屋を暗くする→短くNight→就寝。",caution:"iPhoneを見続けることが睡眠準備の妨げにならないよう短時間にする。",evidence:"睡眠ガイド＋運用上の配置案"},
+sleep:{title:"就寝",type:"anchor",anchor:"1日の終わり",basis:"生活行動の仮置き",benefit:"睡眠時間と翌朝の休養感を優先する。",timing:"毎日の時刻固定より確保できる睡眠時間と体調を重視。",pair:"減光→就寝。",caution:"十分な睡眠時間を確保。寝不足を美容習慣で補おうとしない。",evidence:"厚生労働省睡眠ガイド"},
+mealrecord:{title:"食事をClarityで一言記録",type:"plan",anchor:"食事を片付けた直後",basis:"YOS運用案",benefit:"食事の内容を覚えているうちに記録しやすい。",timing:"食後の片付け後。",pair:"食事→片付け→Clarityへ一言。",caution:"Clarity→日記への自動分類・完全同期は未検証。",evidence:"操作負担を下げる配置案（医学的効果ではない）"},
+floss:{title:"歯間清掃を1日1回",type:"habit",anchor:"夜の歯磨きと一緒",basis:"口腔ケア",benefit:"歯ブラシで届きにくい場所の清掃に役立つ。",timing:"1日のうち継続しやすい時間。夜が絶対条件ではない。",pair:"洗面所で歯磨きとセットにする。",caution:"無理な力で歯肉を傷つけない。",evidence:"歯科関連の一般的な推奨"},
+heel:{title:"安全な場所でかかと上げ",type:"plan",anchor:"調理の待ち時間など",basis:"活動量・バランス",benefit:"ふくらはぎの筋肉を動かす機会。",timing:"安全で余裕のある待ち時間。",pair:"電子レンジ待ちなど。",caution:"熱い鍋や刃物の操作中は行わない。歯ブラシを口に入れた片足立ちは避ける。",evidence:"活動量を増やす運用上の工夫"},
+veggies:{title:"食事に野菜・たんぱく質を足す",type:"habit",anchor:"盛り付けの直前",basis:"食事バランス",benefit:"食事全体の栄養バランス改善に役立つ。",timing:"調理・盛り付け時。特定の時刻に限定しない。",pair:"チャーハン・丼ものの具に野菜を一つかみ追加。",caution:"食事だけでニキビ跡やシミが治るとは言えない。",evidence:"厚生労働省・農林水産省の食事バランスガイド"},
+stretch:{title:"軽いストレッチ",type:"plan",anchor:"入浴後または就寝前",basis:"柔軟性・休息",benefit:"柔軟性や気分転換に役立つ。",timing:"身体を動かしやすい時間。",pair:"入浴後の着替え・夜の準備と接続。",caution:"痛みのある可動域まで無理に伸ばさない。",evidence:"一般的な運動習慣の提案"},
+weights:{title:"筋トレ（週2日）",type:"habit",anchor:"週2日の活動に連結",basis:"筋力・姿勢",benefit:"筋力・体力の維持・改善。",timing:"継続しやすい時間帯。朝と夜の普遍的な優劣は未確立。",pair:"食後の片付け・活動予定に接続。ただし食後すぐの強い運動は避ける。",caution:"同じ筋群の強い運動は回復日を考慮する。",evidence:"WHO等の成人身体活動ガイド"},
+photos:{title:"同条件で肌・顔を撮影",type:"habit",anchor:"週末の身だしなみチェック後",basis:"変化の比較",benefit:"同じ照明・角度で撮ると変化を比較しやすい。",timing:"週1回程度。",pair:"週末の洗面所・鏡の確認とまとめる。",caution:"照明や表情の違いによる変化を治療効果と断定しない。",evidence:"比較精度のための運用上の工夫"},
+groom:{title:"肌・眉・髪・ヒゲ・爪を確認",type:"habit",anchor:"週末の身支度",basis:"清潔感",benefit:"変化と必要な手入れを早めに把握する。",timing:"週1回。",pair:"入浴・洗濯・鏡の確認とまとめる。",caution:"眉は2027年1月16日の育成評価までは剃らない。",evidence:"既存イケメン計画90day"},
+weekly:{title:"日曜Night週次レビュー",type:"habit",anchor:"日曜日のNight",basis:"継続改善",benefit:"続いた習慣と負担を見直し、改善点を1つに絞る。",timing:"週末。",pair:"Nightにまとめて記録。専用の追加通知は不要。",caution:"チェックがない日を未実施と断定しない。",evidence:"YOSの運用設計"},
+mealreview:{title:"食事・運動を見直す",type:"plan",anchor:"日曜Nightと統合",basis:"健康習慣",benefit:"続けやすさ・栄養・活動量の傾向を見る。",timing:"週1回。",pair:"週次レビューに統合して一度だけ確認する。",caution:"未記録は未実行とは限らない。",evidence:"運用上の設計案"},
+monthly:{title:"肌・体型・写真の月次比較",type:"habit",anchor:"月初の日曜Night",basis:"30日変化の確認",benefit:"短い変動より数週間の傾向を確認する。",timing:"月1回。",pair:"既存の週次写真をまとめて比較。",caution:"新しい写真撮影を重複して増やさない。",evidence:"既存90日計画を月次化した運用案"},
+budget:{title:"美容予算と必要な予約を確認",type:"plan",anchor:"Moneyの月次確認と一緒",basis:"費用対効果",benefit:"必要な受診・施術と家計をまとめて判断。",timing:"月1回や必要な予約の前。",pair:"Moneyの予算確認に連結。",caution:"支払い・予約・契約は本人承認後のみ。",evidence:"運用上の設計案"},
+refine:{title:"生活の摩擦を1つ改善",type:"plan",anchor:"月次レビューの最後",basis:"運用最適化",benefit:"行動や判断を増やさず続けやすくする。",timing:"月1回。",pair:"続かなかった習慣から配置を1つだけ調整。",caution:"毎月新しいルールを作ることが目的ではない。",evidence:"運用上の設計案"},
+day90:{title:"90日ごとの外見・健康レビュー",type:"habit",anchor:"初回2027/1/13",basis:"既存90日計画",benefit:"肌・髪・体型・習慣・費用をまとめて評価。",timing:"初回は2027年1月13日。",pair:"月次・週次記録から差分だけ評価。",caution:"施術完了や美容効果の保証日ではない。",evidence:"既存Notionイケメン計画90day"},
+brow:{title:"眉毛3か月育成を評価",type:"habit",anchor:"2027/1/16",basis:"既存美容タスク",benefit:"育てた眉の自然な輪郭から、似合う形を判断。",timing:"2027年1月16日。",pair:"写真比較→眉サロン相談。",caution:"育成前に勝手に剃ったり抜いたりしない。",evidence:"既存Notionの確定予定"},
+annual:{title:"年次の美容・健康・費用レビュー",type:"plan",anchor:"年末・年始の振り返り",basis:"長期改善",benefit:"投資した時間・費用と実際の効果を比較。",timing:"年1回。",pair:"既存MoneyとHealthの年間振り返りに統合。",caution:"現在の医療・健康状態は実測データで確認する。",evidence:"長期の運用提案"},
+dental:{title:"歯科検診の受診周期を確認",type:"plan",anchor:"受診時期の予定確認",basis:"既存歯科タスク",benefit:"口腔の問題を専門的に評価。",timing:"歯科医に指定された時期。",pair:"予定確認に含め、歯科受診自体を年1回へ固定しない。",caution:"症状がある場合は定期見直しを待たず相談。",evidence:"一般的な歯科診療の考え方"},
+medical:{title:"美容医療の効果・費用を再評価",type:"plan",anchor:"施術後・受診前",basis:"既存検討タスク",benefit:"治療目的、リスク、費用と結果を比較して次を決める。",timing:"施術間隔や医師の指示に従う。",pair:"既存美容タスクのレビューへ統合。",caution:"注入・脱毛・手術を自動予約しない。",evidence:"医療判断は担当医による評価が必要"}};
+const periods={
+daily:{title:"起床から就寝まで",hint:"固定時刻を決めず「何の後にするか」で並べます。",items:["wake","light","bathroom","uv","food","veggies","walk","work","dinner","nightcare","charge","sleep"],suggestions:["mealrecord","floss","heel","stretch"]},
+weekly:{title:"1週間の繰り返し",hint:"実際の曜日は選べます。週2回の筋トレは回復日を意識。",items:["weights","groom","photos","weekly"],suggestions:["mealreview"]},
+monthly:{title:"月次の見直し",hint:"毎月すべてを増やさず、既存のNightとMoneyにまとめます。",items:["monthly","budget"],suggestions:["refine"]},
+yearly:{title:"年・長期の節目",hint:"固定の美容施術予定ではありません。期限と受診周期は別扱いです。",items:["day90","brow","annual"],suggestions:["dental","medical"]}};
+const $=id=>document.getElementById(id),escapeHTML=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+let current="daily",selected="",dirty=false,seq=0,dragId="";
+function initial(){return Object.fromEntries(Object.entries(periods).map(([k,v])=>[k,v.items.slice()]));}
+let state=initial(),custom={};
+function valid(data){return data&&data.version===VERSION&&data.lists&&["daily","weekly","monthly","yearly"].every(k=>Array.isArray(data.lists[k])&&data.lists[k].length<=MAX&&data.lists[k].every(id=>typeof id==="string"&&id.length<45))&&data.custom&&typeof data.custom==="object"&&Object.keys(data.custom).length<=70;}
+try{let raw=localStorage.getItem(KEY);if(raw){let parsed=JSON.parse(raw);if(valid(parsed)){state=parsed.lists;custom=parsed.custom||{};seq=Math.max(0,Number(parsed.seq)||0);}}$("storageStatus").textContent="端末内に仮保存";}catch{$("storageStatus").textContent="保存できない環境";}
+function get(id){return custom[id]||definitions[id];}
+function save(){try{let value=JSON.stringify({version:VERSION,lists:state,custom,seq});if(value.length>43000)throw Error("too long");localStorage.setItem(KEY,value);if(localStorage.getItem(KEY)!==value)throw Error("readback failed");$("saveStatus").textContent="この画面内に仮保存済み。Notion・Apple・YOS実績へは未反映。";$("storageStatus").textContent="端末内に仮保存";return true;}catch{$("saveStatus").textContent="保存不可。閉じる前に設計案をコピーしてください。";$("storageStatus").textContent="保存できない環境";return false;}}
+function currentList(){return state[current].filter(id=>!!get(id));}
+function rearrange(id,delta){let list=state[current],at=list.indexOf(id),target=at+delta;if(at<0||target<0||target>=list.length)return;[list[at],list[target]]=[list[target],list[at]];save();render();}
+function putBefore(id,before){let list=state[current],from=list.indexOf(id),to=list.indexOf(before);if(from<0||to<0||from===to)return;list.splice(from,1);to=list.indexOf(before);list.splice(to,0,id);save();render();}
+function addItem(id){let list=state[current];if(list.includes(id)||list.length>=MAX)return;list.push(id);save();render();}
+function removeItem(id){state[current]=state[current].filter(x=>x!==id);save();render();}
+function badge(type){return type==="anchor"?"生活の土台":type==="habit"?"既存計画":"追加・配置案";}
+function render(){
+let data=periods[current],list=currentList();
+$("periodTitle").textContent=data.title;$("periodHint").textContent=data.hint+" 長押しで移動、または上下の矢印で調整。";$("count").textContent=list.length+"項目";
+document.querySelectorAll("[data-period]").forEach(b=>b.setAttribute("aria-selected",String(b.dataset.period===current)));
+$("timeline").innerHTML=list.map((id,i)=>{let a=get(id);return '<article class="item" data-id="'+escapeHTML(id)+'" data-type="'+a.type+'"><button class="grip" data-grip="'+escapeHTML(id)+'" aria-label="'+escapeHTML(a.title)+'をドラッグして移動">⠿</button><div class="item-content"><div class="item-title">'+escapeHTML(a.title)+'</div><span class="tag">'+badge(a.type)+'</span><div class="item-sub">↳ '+escapeHTML(a.anchor)+'</div><button class="detailbutton" data-detail="'+escapeHTML(id)+'">特性・配置のヒント ›</button></div><div class="actions"><button data-move="'+escapeHTML(id)+'" data-dir="-1" aria-label="上に移動" '+(i===0?"disabled":"")+'>↑</button><button data-move="'+escapeHTML(id)+'" data-dir="1" aria-label="下に移動" '+(i===list.length-1?"disabled":"")+'>↓</button></div></article>';}).join("");
+let candidates=data.suggestions.filter(id=>!list.includes(id));$("suggestions").innerHTML=candidates.map(id=>{let a=get(id);return '<div class="option"><div><strong>'+escapeHTML(a.title)+'</strong><small>'+escapeHTML(a.anchor)+'</small></div><button data-add="'+escapeHTML(id)+'" aria-label="'+escapeHTML(a.title)+'を追加">＋追加</button></div>';}).join("")||'<p class="footnote">用意した候補は追加済みです。</p>';
+}
+function showDetail(id){let a=get(id);if(!a)return;selected=id;$("infoTitle").textContent=a.title;$("infoBasis").textContent=a.basis;$("infoBenefit").textContent=a.benefit;$("infoTiming").textContent=a.timing;$("infoPair").textContent=a.pair;$("infoCaution").textContent=a.caution;$("infoEvidence").textContent=a.evidence;$("infoAnchor").value=a.anchor;$("info").showModal();}
+function closeDetail(){if(selected){let a=get(selected);let value=$("infoAnchor").value.trim().slice(0,90);if(a&&value){if(!custom[selected])custom[selected]={...a};custom[selected].anchor=value;save();render();}}$("info").close();selected="";}
+document.querySelectorAll("[data-period]").forEach(b=>b.addEventListener("click",()=>{current=b.dataset.period;render();}));
+$("timeline").addEventListener("click",event=>{let b=event.target.closest("button");if(!b)return;if(b.dataset.move)rearrange(b.dataset.move,Number(b.dataset.dir));if(b.dataset.detail)showDetail(b.dataset.detail);});
+$("suggestions").addEventListener("click",e=>{let b=e.target.closest("button[data-add]");if(b)addItem(b.dataset.add);});
+$("close").addEventListener("click",closeDetail);$("info").addEventListener("cancel",e=>{e.preventDefault();closeDetail();});
+$("remove").addEventListener("click",()=>{if(selected){let id=selected;$("info").close();selected="";removeItem(id);}});
+$("add").addEventListener("click",()=>{let title=$("newTitle").value.trim().slice(0,65);if(!title||currentList().length>=MAX)return;let id="custom"+(++seq);custom[id]={title,type:"plan",anchor:"前後の行動と接続する",basis:"本人追加（根拠未設定）",benefit:"効果は未確認。",timing:"適切な時間帯は未確認。",pair:"生活行動の前後に置き、負担を確かめる。",caution:"安全性や根拠の確認が必要なら専門家に相談する。",evidence:"未確認・本人追加"};$("newTitle").value="";addItem(id);});
+$("newTitle").addEventListener("keydown",e=>{if(e.key==="Enter")$("add").click();});
+$("restore").addEventListener("click",()=>{if(!confirm("この期間の編集順序を初期状態に戻しますか？ 他の期間は維持します。"))return;state[current]=periods[current].items.slice();save();render();});
+$("copy").addEventListener("click",async()=>{let value="YOS 生活導線エディターの配置案（実績ではない）\n\n"+Object.keys(periods).map(k=>"【"+({"daily":"毎日","weekly":"毎週","monthly":"毎月","yearly":"年・長期"}[k])+"】\n"+state[k].map((id,i)=>{let a=get(id);return a?(i+1)+". "+a.title+"｜"+a.anchor:""}).filter(Boolean).join("\n")).join("\n\n");try{await navigator.clipboard.writeText(value);$("saveStatus").textContent="配置案をコピーしました。Notionへ自動保存はしていません。";}catch{let field=document.createElement("textarea");field.value=value;field.style.cssText="position:fixed;top:10px;left:10px;width:90%;height:70%;z-index:100";document.body.append(field);field.focus();field.select();$("saveStatus").textContent="選択したテキストをコピーしてください。";}});
+let dragStart=0;const timeline=$("timeline");
+timeline.addEventListener("pointerdown",e=>{let b=e.target.closest("[data-grip]");if(!b)return;dragId=b.dataset.grip;dragStart=e.clientY;b.setPointerCapture(e.pointerId);b.closest(".item")?.classList.add("dragging");});
+timeline.addEventListener("pointermove",e=>{if(!dragId||Math.abs(e.clientY-dragStart)<19)return;let at=document.elementFromPoint(e.clientX,e.clientY)?.closest(".item");if(at&&at.dataset.id!==dragId){putBefore(dragId,at.dataset.id);dragStart=e.clientY;}});
+["pointerup","pointercancel","lostpointercapture"].forEach(t=>timeline.addEventListener(t,()=>{dragId="";document.querySelectorAll(".dragging").forEach(x=>x.classList.remove("dragging"));}));
+render();
+})();
+</script></body></html>
