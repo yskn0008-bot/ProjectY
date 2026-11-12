@@ -47,7 +47,7 @@ export function createScreenshotIntakeHandler(options: {
       const claimed = await options.redis.command<string | null>(['SET', key, 'processing', 'NX', 'EX', PROCESSING_TTL]);
       if (claimed !== 'OK') {
         if (await options.redis.command<string | null>(['GET', key]) === 'done') {
-          return Response.json({ok: true, captureId: input.captureId, duplicate: true}, {status: 200});
+          return Response.json({ok: true, captureId: input.captureId, duplicate: true, inboxSaved: true, classification: 'pending'}, {status: 200, headers: {'Cache-Control': 'no-store'}});
         }
         throw new CaptureInProgressError();
       }
@@ -84,7 +84,7 @@ export function createScreenshotIntakeHandler(options: {
         if (!appended.ok) throw new Error('Notion append failed');
         appendedToNotion = true;
         await options.redis.command<string>(['SET', key, 'done', 'EX', DONE_TTL]);
-        return Response.json({ok: true, captureId: input.captureId, duplicate: false}, {status: 201});
+        return Response.json({ok: true, captureId: input.captureId, duplicate: false, inboxSaved: true, classification: 'pending'}, {status: 201, headers: {'Cache-Control': 'no-store'}});
       } catch {
         // A failed Redis acknowledgement after a successful Notion append must not
         // immediately unlock the capture: doing so could duplicate private images.
