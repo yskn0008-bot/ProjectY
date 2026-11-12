@@ -31,3 +31,13 @@ Server reuses existing `YOS_CLARITY_INTAKE_TOKEN_SHA256`, `YOS_NOTION_API_TOKEN`
 7. Get approval before production activation and verify on physical iPhone. Do not claim completed before end-to-end evidence.
 
 Reference: https://github.com/yskn0008-bot/ProjectY/issues/683
+
+## Existing notification shortcut reference (2026-11-12 screenshots)
+The user's existing **通知受信** Shortcut is an automation triggered by notifications from selected apps. It runs Scriptable `Notification Bridge` with the trigger's `通知` value, then `Notification Context` with the same value. Next it sends a text prompt to the ChatGPT action and displays a notification only when the answer begins `YOS_ALERT`. This is a **text notification flow**, not a screenshot-image flow. Do not edit, rename, or replace it.
+
+The new screenshot automation should follow the same **trigger → Scriptable bridge → existing YOS intake** pattern, but must not assume that the screenshot trigger passes a screenshot as Shortcut Input. Confirm the exact iOS event data first. Never silently substitute the latest photo or clipboard content. For each of Photos, Files, Clipboard, test with an intentionally distinguishable image and verify the exact capture ID and bytes reach the Inbox. If the trigger does not supply reliable image data, fail closed and preserve the source instead of sending a different image.
+
+The server draft uses JSON base64 with a **3 MB image limit** to fit serverless request-body limits. Large images require client-side downscaling/compression with user-approved fidelity, or a future direct-upload mechanism. The user's screenshot original must remain unchanged.
+
+## Privacy and release
+Screenshots may contain banking and medical data. Do not include image bytes, OCR text or bearer tokens in logs, query parameters, or notifications. Use existing private Notion integration credentials only. Do not auto-route to another destination until a classification confidence and sensitive-data policy is implemented and tested.
