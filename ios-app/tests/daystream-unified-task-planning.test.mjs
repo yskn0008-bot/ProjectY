@@ -436,6 +436,11 @@ test('task gestures support tap, confirmed swipe delete, drag time shift, long p
  assert.ok(timerFn,'long press timer exists');timerFn();env.second.listeners.touchend();
  assert.deepEqual(stats.edits,[other.id]);
  assert.equal(other.done,false,'drag and long press never complete task');
+ env.second.listeners.touchstart(touch(220,200));
+ env.second.listeners.touchmove({...touch(220,217),preventDefault(){}});
+ env.second.listeners.touchend({changedTouches:[{clientX:220,clientY:235}]});
+ assert.equal(other.s,735,'final finger position is honored even without a final touchmove');
+
  assert.match(js,/beginLocalEdit\(item\)/);
  assert.match(js,/setTimeout\(\(\)=>\{/);
  assert.ok(!js.includes("action.addEventListener(type,e=>e.stopPropagation())"));
@@ -651,4 +656,24 @@ test('elastic axis expands short tasks while preserving exact hour/now and rever
  assert.match(js,/Math\.round\(minuteAtY\(yFor\(item\.s\)\+lastY-startY\)\/5\)\*5/);
  assert.match(rendered,/id="elasticBtn"/);
  assert.match(js,/btn\.textContent=elasticEnabled\?'自動サイズ ON':'自動サイズ OFF'/);
+});
+
+
+test('drag preview uses hysteresis to avoid five-minute label chatter and disables repeated haptics',()=>{
+ const htmlBody=Function('return '+String.fromCharCode(96)+html+String.fromCharCode(96))();
+ const js=htmlBody.split('<script>')[1]?.split('</script>')[0]||'';
+ const first=js.indexOf('function yosStablePreviewMinute(');
+ const last=js.indexOf('function wireTaskGestures(',first);
+ assert.ok(first>0&&last>first);
+ const stable=vm.runInNewContext(js.slice(first,last)+'\nyosStablePreviewMinute',{});
+ assert.equal(stable(603.1,600,0,1410),600,'near snap midpoint stays on original label');
+ assert.equal(stable(603.6,600,0,1410),605,'updates after crossing hysteresis threshold');
+ assert.equal(stable(602.1,605,0,1410),605,'small reversal does not jitter back');
+ assert.equal(stable(601.4,605,0,1410),600,'reversal eventually updates at stable threshold');
+ assert.equal(stable(-100,0,0,1410),0,'minimum stays clamped');
+ assert.equal(stable(1440,1410,0,1410),1410,'maximum stays clamped');
+ assert.ok(js.includes('const raw=minuteAtY(yFor(item.s)+offset)'));
+ assert.ok(js.includes("const at=yosStablePreviewMinute(raw,lastPreview,0,1440-item.d)"));
+ assert.match(js,/touchend',e=>\{if\(active==='touch'\)/);
+ assert.ok(!js.includes('navigator.vibrate?.(8)'),'repeated motor pulses are removed from the move path');
 });
