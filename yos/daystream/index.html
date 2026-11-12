@@ -241,7 +241,7 @@ button:active{opacity:.8}@media(min-width:640px){.dock{left:calc((100vw - 640px)
    if(!p.actions.every(e=>e&&typeof e.title==='string'&&e.title.length<=120&&Number.isFinite(Date.parse(e.at))&&/^\d{4}-\d{2}-\d{2}$/.test(e.day)&&Number.isInteger(e.plannedStart)&&e.plannedStart>=0&&e.plannedStart<1440))return false;
    if(!Object.entries(p.starts).every(([k,v])=>/^\d{4}-\d{2}-\d{2}\|\d{1,12}$/.test(k)&&typeof v==='string'&&Number.isFinite(Date.parse(v))))return false;
    const snapshots=[p.tasks,p.calendar],kinds=['tasks','calendar'];
-   if(snapshots.some((v,i)=>v!==null&&(!sourceAdapters||!sourceAdapters.validSaved(v,kinds[i],3650))))return false;
+   if(snapshots.some((v,i)=>v!==null&&(!sourceAdapters||!sourceAdapters.validSaved(v,kinds[i],3650,true))))return false;
    const values=[JSON.stringify(p.plan),JSON.stringify(p.actions),JSON.stringify(p.starts),p.tasks?JSON.stringify(p.tasks):null,p.calendar?JSON.stringify(p.calendar):null];
    if(values.some(v=>v&&v.length>1000000))return false;
    if(!confirm('Web版の時間割・行動履歴・取り込みデータを復元します。現在のWeb版データをバックアップしてから置き換えます。続けますか？'))return false;
