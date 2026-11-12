@@ -28,3 +28,8 @@ test('dense UI contains list/search/filter/detail controls',()=>{
   for(const id of ['events','search','connect','refresh','detail','later','reported','openSource'])assert.match(page,new RegExp('id="'+id+'"'));
   assert.match(page,/grid-template-columns:42px minmax\(0,1fr\) 53px 78px/);
 });
+
+test('confirmed empty inbox displays zero counts, not the unverified dash',()=>{
+  assert.match(page,/lastComplete\|\|rows\.length\?counts\.action:'—'/);
+  assert.match(page,/lastComplete\?'通知履歴はありません'/);
+});
