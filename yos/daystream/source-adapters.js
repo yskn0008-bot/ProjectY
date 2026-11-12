@@ -107,10 +107,41 @@
   }
   return {schema:'yos-daystream-source-snapshot-v1',kind:'tasks',status:'partial',items,checkedAt:new Date(cache.savedAt).toISOString(),source:'yos-auth-cache'};
  }
- function validSaved(s,kind,retentionDays=7){
-  if(!s||s.schema!=='yos-daystream-source-snapshot-v1'||s.kind!==kind||s.source!=='user-file'||!Number.isFinite(Date.parse(s.checkedAt)))return false;
-  const age=Date.now()-Date.parse(s.checkedAt);
-  return age>=-300000&&age<=retentionDays*86400000;
+ function fromYosLifeStore(life){
+  if(!life||typeof life!=='object'||!life.days||typeof life.days!=='object'||Array.isArray(life.days))return null;
+  const entries=Object.entries(life.days);
+  if(entries.length>90)return null;
+  const days={},seen=new Set();let validCount=0,skipped=0;
+  const formatter=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'});
+  const timeParts=ms=>{const p=Object.fromEntries(formatter.formatToParts(new Date(ms)).filter(x=>x.type!=='literal').map(x=>[x.type,x.value]));return {day:p.year+'-'+p.month+'-'+p.day,minute:Number(p.hour)*60+Number(p.minute)}};
+  for(const [key,day] of entries){
+   if(!date(key)||!day||typeof day!=='object')continue;
+   const events=Array.isArray(day.schedule)?day.schedule:[];
+   if(events.length>100)return null;
+   for(const e of events){
+    if(!e||typeof e!=='object'||typeof e.start!=='string'||typeof e.end!=='string'){skipped++;continue}
+    const start=Date.parse(e.start),end=Date.parse(e.end),title=str(e.title||e.name,100);
+    if(!Number.isFinite(start)||!Number.isFinite(end)||!title||end<=start||end-start>86400000){skipped++;continue}
+    const signature=title+'|'+start+'|'+end;if(seen.has(signature))continue;seen.add(signature);
+    let at=start;
+    while(at<end){
+     const p=timeParts(at),midnight=Date.parse(p.day+'T15:00:00Z'); // Tokyo midnight of following UTC day.
+     const next=midnight>at?midnight:at+86400000;
+     const boundary=Math.min(end,next),d=Math.round((boundary-at)/60000);
+     if(d<=0||d>1440||p.minute+d>1440){skipped++;break}
+     (days[p.day]??=[]).push({title,start:p.minute,duration:d});validCount++;at=boundary
+    }
+   }
+  }
+  if(!validCount)return null;
+  // Browser-local Life data can be outdated; no proof of live Apple Calendar access.
+  return {schema:'yos-daystream-life-schedule-v1',source:'yos-life-local',status:'partial',calendarDays:days,allDayDays:{},skippedCount:skipped};
  }
- root.YOS_DAYSTREAM_SOURCES={normalizeTasks,parseICS,fromYosTaskDashboardCache,validSaved,MAX_BYTES};
+ function validSaved(s,kind,retentionDays=7){
+  if(!s||s.schema!=='yos-daystream-source-snapshot-v1'||s.kind!==kind||!['user-file','yos-auth-cache'].includes(s.source)||!Number.isFinite(Date.parse(s.checkedAt)))return false;
+  const age=Date.now()-Date.parse(s.checkedAt);
+  const maxDays=s.source==='yos-auth-cache'?Math.min(retentionDays,0.25):retentionDays;
+  return age>=-300000&&age<=maxDays*86400000;
+ }
+ root.YOS_DAYSTREAM_SOURCES={normalizeTasks,parseICS,fromYosTaskDashboardCache,fromYosLifeStore,validSaved,MAX_BYTES};
 })(typeof window!=='undefined'?window:globalThis);
