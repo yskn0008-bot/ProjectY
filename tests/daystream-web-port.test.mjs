@@ -41,3 +41,19 @@ test('Learning remains suggestion only after three observed completions',()=>{
  assert.match(boot,/Math\.floor\(sorted\.length\/2\)/);
  assert.match(boot,/時間割の自動変更はしません/);
 });
+
+test('DAYSTREAM home-screen install resolves to DAYSTREAM instead of MY WAY',()=>{
+ const manifest=JSON.parse(fs.readFileSync(new URL('../yos/daystream/manifest.webmanifest',import.meta.url),'utf8'));
+ const original=JSON.parse(fs.readFileSync(new URL('../manifest.webmanifest',import.meta.url),'utf8'));
+ assert.match(html,/<link rel="manifest" href="\.\/manifest\.webmanifest">/);
+ assert.equal(manifest.short_name,'DAYSTREAM');
+ assert.equal(manifest.name,'YOS DAYSTREAM');
+ assert.equal(manifest.id,'./');
+ assert.equal(manifest.start_url,'./');
+ assert.equal(manifest.scope,'./');
+ assert.equal(manifest.display,'standalone');
+ assert.equal(original.start_url,'./yos/','original MY WAY launch URL is protected');
+ assert.notEqual(manifest.start_url,original.start_url);
+ const sw=fs.readFileSync(new URL('../service-worker.js',import.meta.url),'utf8');
+ assert.match(sw,/'\.\/yos\/daystream\/manifest\.webmanifest'/);
+});
