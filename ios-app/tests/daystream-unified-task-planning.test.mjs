@@ -524,7 +524,7 @@ test('overlap warning counts intersection windows and gives a 15-minute range',(
  assert.ok(actual.includes('overlap-button'));
  assert.ok(actual.includes('分重複'));
  assert.ok(actual.includes('overlap-details'));
- assert.ok(actual.includes('padding-right:24px'));
+ assert.ok(!actual.includes('padding-right:24px'),'task cards no longer reserve space for warning icon');
  assert.ok(!actual.includes('inset 0 0 0 2px #ed8a93'));
  assert.doesNotMatch(script,/CalendarEvent\.(?:save|remove|create)\(/);
 });
