@@ -128,7 +128,10 @@ button,input,select{font:inherit}button{cursor:pointer}button:focus-visible,inpu
 .summary{margin:0 13px 0;background:#ffffff12;border:1px solid #ffffff15;border-radius:14px;padding:9px 10px;display:grid;grid-template-columns:1.16fr .78fr .86fr 1.06fr;min-height:62px;box-shadow:0 5px 18px #11151b18}
 .metric{display:flex;align-items:center;justify-content:center;flex-direction:column;gap:3px;border-right:1px solid #ffffff35;min-width:0}.metric:last-child{border:0}.metric label{font-size:10px;font-weight:560;white-space:nowrap;color:#e7eaf0;display:flex;align-items:center;justify-content:center;gap:4px}.metric label svg{width:13px;height:13px;stroke-width:1.7;flex:none}.metric strong{font-size:13px;font-weight:630;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;font-variant-numeric:tabular-nums}.metric:first-child{flex-direction:row;gap:7px}.metric:first-child strong{font-size:19px}.ring{width:37px;height:37px;flex:none;border-radius:50%;background:conic-gradient(#35bbf4 0 var(--pct),#7d8793 var(--pct) 100%);position:relative}.ring:after{content:"";position:absolute;inset:8px;background:#434852;border-radius:50%}.metric .stack{display:grid;gap:3px}
 .notice{margin:0;padding:3px 0;color:#d7dce4;font-size:10px;line-height:1.25;flex:1;min-width:0}.microtools{display:flex;align-items:center;gap:8px;margin:3px 15px 0;min-height:23px}.zoomBtn{border:1px solid #ffffff40;background:#ffffff0d;color:#edf1f6;border-radius:7px;padding:4px 7px;font-size:10px;font-weight:600;white-space:nowrap}.notice[hidden]{display:none}.searchrow{margin:9px 16px 0}.searchrow[hidden]{display:none}.searchrow input{width:100%;border:1px solid #7b8799;border-radius:10px;background:#252b35;color:white;padding:10px 12px;font-size:14px}
-.editor{display:none;margin:9px 14px;padding:13px;background:#484e59;border:1px solid #6b7583;border-radius:13px;box-shadow:0 10px 25px #15191e55}.editor.show{display:block}.editor b{font-size:15px}.editor .fields{display:flex;gap:7px;flex-wrap:wrap;margin:12px 0}.editor input,.editor select{padding:9px;background:#303742;color:white;border:1px solid #7b8594;border-radius:8px;min-width:0}.editor input[type=time]{max-width:130px}.editor button,.focus button,.review button,.mutedbutton{padding:10px 13px;background:#277dbb;color:#fff;border:0;border-radius:9px;font-weight:670}.editor .danger{background:#754751;margin-left:6px}.editor .light{background:#647184}.editor .editor-actions{display:flex;align-items:center;flex-wrap:wrap;gap:16px;margin-top:18px}.editor .editor-actions button{min-height:46px;min-width:126px}.editor .editor-shortcut-run{display:inline-block;margin-top:8px;padding:10px 13px;border:1px solid #80a4cb;background:#335371;border-radius:9px;color:#f2f7fd;text-decoration:none;font-weight:680}.editor .editor-shortcut-run[hidden]{display:none}
+.editor-backdrop{display:none;position:fixed;inset:0;z-index:24;background:#0e121a7a;backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}
+.editor-backdrop.show{display:block}
+.editor{display:none;position:fixed;z-index:25;top:50%;left:50%;transform:translate(-50%,-50%);width:calc(100vw - 28px);max-width:600px;max-height:min(78dvh,670px);overflow-y:auto;overscroll-behavior:contain;margin:0;padding:17px;background:#484e59;border:1px solid #778293;border-radius:17px;box-shadow:0 22px 64px #121621a8}
+.editor.show{display:block}.editor b{font-size:15px}.editor .fields{display:flex;gap:7px;flex-wrap:wrap;margin:12px 0}.editor input,.editor select{padding:9px;background:#303742;color:white;border:1px solid #7b8594;border-radius:8px;min-width:0}.editor input[type=time]{max-width:130px}.editor button,.focus button,.review button,.mutedbutton{padding:10px 13px;background:#277dbb;color:#fff;border:0;border-radius:9px;font-weight:670}.editor .danger{background:#754751;margin-left:6px}.editor .light{background:#647184}.editor .editor-actions{display:flex;align-items:center;flex-wrap:wrap;gap:16px;margin-top:18px}.editor .editor-actions button{min-height:46px;min-width:126px}.editor .editor-shortcut-run{display:inline-block;margin-top:8px;padding:10px 13px;border:1px solid #80a4cb;background:#335371;border-radius:9px;color:#f2f7fd;text-decoration:none;font-weight:680}.editor .editor-shortcut-run[hidden]{display:none}.editor .duration-control{display:flex;align-items:center;gap:5px;flex:0 1 133px}.editor .duration-control label{font-size:12px;color:#f0f4fa;white-space:nowrap}.editor .duration-control input{width:76px}.editor .edit-end{display:block;margin:-5px 0 10px;font-size:12px;color:#dce8f4;font-variant-numeric:tabular-nums}.editor .shortcut-picker{width:100%;padding:10px;border-radius:9px;margin:6px 0;background:#303742;border:1px solid #8b97a9;color:#fff}.editor .shortcut-picker[hidden]{display:none}@media(prefers-reduced-motion:reduce){.editor-backdrop{backdrop-filter:none;-webkit-backdrop-filter:none}}
 .timeline-wrap{position:relative;margin:8px 13px 20px 11px;overflow:visible}.timeline{position:relative;touch-action:pan-y}.hour{position:absolute;left:0;right:0;border-top:1px solid #ffffff0f;height:1px;pointer-events:none}.hour span{position:absolute;top:-9px;left:6px;color:#dce2eb;font-size:12px;font-weight:480;font-variant-numeric:tabular-nums}.axis{position:absolute;left:58px;top:0;bottom:0;width:1.5px;background:#c2cad2b8;pointer-events:none}.tick{position:absolute;left:54.5px;width:9px;height:9px;border-radius:50%;background:#dce2ec;z-index:2;border:2px solid #56616e;box-shadow:0 0 0 2px #d7dee755;pointer-events:none}
 .card{position:absolute;left:73px;right:0;min-height:16px;border:0;border-radius:9px;padding:1px 9px;display:flex;align-items:center;gap:8px;touch-action:none;user-select:none;-webkit-user-select:none;color:#f8faff;background:#307ec2;box-shadow:0 2px 8px #101b2927;transition:filter .18s ease,box-shadow .18s ease;will-change:transform;overflow:hidden}
 .card:before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:#46b9fb;opacity:.9;pointer-events:none}.card.habit{background:#24976e}.card.habit:before{background:#4bd9a1}.card.task{background:#823db0;touch-action:none;transform:translate3d(0,0,0);backface-visibility:hidden}.card.task:before{display:none}.card.schedule{background:#2e77b3}
@@ -181,7 +184,8 @@ button:active{opacity:.8}@media(min-width:640px){.dock{left:calc((100vw - 640px)
   <div class="searchrow" id="searchRow" hidden><input id="searchInput" type="search" placeholder="予定・タスクを検索" aria-label="検索"></div>
   <div class="microtools"><div class="notice" id="notice" aria-live="polite">端末内の予定を表示します</div><button class="zoomBtn" id="yosTestToggle" type="button" hidden aria-label="テスト予定を表示">テスト表示</button><button class="zoomBtn" id="zoomBtn" type="button" aria-label="タイムラインの表示倍率を切り替え">詳細に拡大</button></div>
   <div class="all-day" id="dayAllDay" hidden aria-label="終日の予定"></div>
-  <div class="editor" id="editor"><b id="editorTitle">予定を追加</b><div class="fields"><input id="newTitle" placeholder="名前" style="flex:1 1 160px" aria-label="名前"><input id="newTime" type="time" value="10:00" aria-label="開始時刻"><input id="newDuration" type="number" min="5" max="1440" step="5" value="30" style="width:76px" aria-label="所要時間（分）"><select id="newKind" aria-label="種類"><option value="task">タスク</option><option value="habit">習慣</option><option value="schedule">予定</option></select></div><div id="shortcutField"><label for="newShortcut">ショートカット（任意）</label><input id="newShortcut" maxlength="100" placeholder="既存ショートカットの正式名称" aria-label="起動するiPhoneショートカット名" style="width:100%;margin:5px 0 9px"><small style="color:#d5dce7">設定したショートカットはここから実行できます。実行しても自動完了にはなりません。</small><a id="runShortcut" class="editor-shortcut-run" href="#" hidden>ショートカットを実行</a></div><div class="editor-actions"><button id="saveBtn">追加する</button><button id="cancelEditor" class="light" type="button">閉じる</button></div></div>
+  <div class="editor-backdrop" id="editorBackdrop" aria-hidden="true"></div>
+  <div class="editor" id="editor" role="dialog" aria-modal="true" aria-labelledby="editorTitle"><b id="editorTitle">予定を追加</b><div class="fields"><input id="newTitle" placeholder="名前" style="flex:1 1 160px" aria-label="名前"><input id="newTime" type="time" value="10:00" aria-label="開始時刻"><div class="duration-control"><input id="newDuration" type="number" min="5" max="1440" step="5" value="30" aria-label="所要時間（分）"><label for="newDuration">分</label></div><select id="newKind" aria-label="種類"><option value="task">タスク</option><option value="habit">習慣</option><option value="schedule">予定</option></select></div><span class="edit-end" id="editEnd">終了予定：10:30</span><div id="shortcutField"><label for="shortcutPicker">ショートカット（任意）</label><select id="shortcutPicker" class="shortcut-picker" aria-label="登録済みショートカットから選ぶ"><option value="">候補から選ぶ</option></select><input id="newShortcut" maxlength="100" placeholder="既存ショートカットの正式名称" aria-label="起動するiPhoneショートカット名" style="width:100%;margin:5px 0 9px"><small style="color:#d5dce7">設定したショートカットはここから実行できます。実行しても自動完了にはなりません。</small><a id="runShortcut" class="editor-shortcut-run" href="#" hidden>ショートカットを実行</a></div><div class="editor-actions"><button id="saveBtn">追加する</button><button id="cancelEditor" class="light" type="button">閉じる</button></div></div>
   <section class="week-overview" id="weekOverview" hidden aria-label="週の予定"><div class="week-overview-head"><button id="weekPrev" type="button" aria-label="前週">‹</button><strong id="weekCaption"></strong><button id="weekNext" type="button" aria-label="翌週">›</button></div><div id="weekAgenda"></div><p class="coverage" id="weekCoverage"></p></section>
   <div class="compat-status" id="compatStatus" aria-live="polite">相性を判定中</div>
   <p class="gesture-help" id="gestureHelp">タスク：タップで完了 ｜ 左スワイプで削除 ｜ 長押しで編集 ｜ 上下ドラッグで移動</p>
@@ -398,6 +402,32 @@ function showFocusFor(item){
  focus.classList.add('show');
 }
 
+function showEditor(){
+ editor.classList.add('show');
+ document.getElementById('editorBackdrop').classList.add('show');
+ updateEditEnd();
+}
+function closeEditor(){
+ editor.classList.remove('show');
+ document.getElementById('editorBackdrop').classList.remove('show');
+}
+function updateEditEnd(){
+ const t=document.getElementById('newTime').value.split(':').map(Number),duration=Number(document.getElementById('newDuration').value);
+ const el=document.getElementById('editEnd');
+ if(t.length!==2||!t.every(Number.isFinite)||!Number.isFinite(duration)||duration<=0){el.textContent='開始時刻と所要時間を入力してください';return}
+ const end=t[0]*60+t[1]+duration;
+ el.textContent=end<=1440?'終了予定：'+fmt(end)+'（'+duration+'分間）':'終了時刻が24:00を超えています';
+}
+function refreshShortcutPicker(){
+ const picker=document.getElementById('shortcutPicker');
+ const current=document.getElementById('newShortcut').value.trim();
+ const known=[...new Set(items.map(x=>typeof x.shortcut==='string'?x.shortcut.trim():'').filter(Boolean))].sort((a,b)=>a.localeCompare(b,'ja'));
+ picker.replaceChildren();
+ const first=document.createElement('option');first.value='';first.textContent='保存済みのショートカットから選択';picker.append(first);
+ for(const name of known){const option=document.createElement('option');option.value=name;option.textContent=name;picker.append(option)}
+ picker.value=known.includes(current)?current:'';
+ picker.hidden=known.length===0;
+}
 function beginLocalEdit(item,shortcutFocus=false){
  if(!item||item.f)return;
  hideSwipeDelete();
@@ -409,10 +439,9 @@ function beginLocalEdit(item,shortcutFocus=false){
  document.getElementById('newDuration').value=item.d;
  document.getElementById('newKind').value=item.kind;
  document.getElementById('newShortcut').value=item.shortcut||'';
- updateShortcutField();
- editor.classList.add('show');focus.classList.remove('show');setTab('timeline');
- editor.scrollIntoView({behavior:'smooth',block:'start'});
- if(shortcutFocus)document.getElementById('newShortcut').focus();
+ refreshShortcutPicker();updateShortcutField();
+ showEditor();focus.classList.remove('show');setTab('timeline');
+ if(shortcutFocus)document.getElementById('shortcutPicker').focus({preventScroll:true});
 }
 function updateShortcutField(){
  const isTask=document.getElementById('newKind').value==='task';
@@ -425,17 +454,25 @@ function updateShortcutField(){
  else run.removeAttribute('href');
 }
 document.getElementById('newKind').onchange=updateShortcutField;
-document.getElementById('newShortcut').oninput=updateShortcutField;
+document.getElementById('shortcutPicker').onchange=()=>{
+ const selected=document.getElementById('shortcutPicker').value;
+ if(selected){document.getElementById('newShortcut').value=selected;updateShortcutField();}
+};
+document.getElementById('newTime').onchange=updateEditEnd;
+document.getElementById('newTime').oninput=updateEditEnd;
+document.getElementById('newDuration').onchange=updateEditEnd;
+document.getElementById('newDuration').oninput=updateEditEnd;
+document.getElementById('editorBackdrop').onclick=closeEditor;
+document.getElementById('newShortcut').oninput=()=>{refreshShortcutPicker();updateShortcutField()};
 document.getElementById('runShortcut').onclick=()=>{note.textContent='ショートカットの起動を依頼しました。完了記録は変更しません。';};
 document.getElementById('addBtn').onclick=()=>{
  hideSwipeDelete();editingId=null;
  document.getElementById('editorTitle').textContent='予定を追加';document.getElementById('saveBtn').textContent='追加する';
  document.getElementById('newTitle').value='';document.getElementById('newShortcut').value='';
- document.getElementById('newKind').value='task';updateShortcutField();editor.classList.add('show');
- document.getElementById('newTitle').focus();
+ document.getElementById('newKind').value='task';refreshShortcutPicker();updateShortcutField();showEditor();
 };
-document.getElementById('cancelEditor').onclick=()=>editor.classList.remove('show');
-document.getElementById('saveBtn').onclick=()=>{const title=document.getElementById('newTitle').value.trim(),parts=document.getElementById('newTime').value.split(':').map(Number),duration=Number(document.getElementById('newDuration').value),kind=document.getElementById('newKind').value,shortcut=kind==='task'?document.getElementById('newShortcut').value.trim():'';if(shortcut.length>100||Array.from(shortcut).some(c=>c.charCodeAt(0)<32||c.charCodeAt(0)===127)){note.textContent='ショートカット名は100文字以内で入力してください';return;}if(!title||parts.length!==2||!Number.isFinite(duration)||duration<5||duration>1440){note.textContent='名前・時刻・所要時間を確認してください';return}const start=parts[0]*60+parts[1];if(start+duration>1440){note.textContent='終了時刻は24:00以内にしてください';return}if(editingId!==null){const item=items.find(x=>x.id===editingId);if(item){if(item.f){note.textContent='固定予定は編集できません';return;}Object.assign(item,{t:title,s:start,d:duration,kind,shortcut});}}else{if(isSample){items=[];isSample=false;}items.push({id:Math.max(300000000,...items.map(x=>Number(x.id)||0))+1,t:title,s:start,d:duration,kind,shortcut});}editingId=null;editor.classList.remove('show');document.getElementById('newTitle').value='';document.getElementById('newShortcut').value='';note.textContent=fmt(start)+' に「'+title+'」を'+(editingId===null?'保存':'更新')+(persist()?'（保存処理中）':'（保存処理失敗）');smoothRender();updateReview()};
+document.getElementById('cancelEditor').onclick=closeEditor;
+document.getElementById('saveBtn').onclick=()=>{const title=document.getElementById('newTitle').value.trim(),parts=document.getElementById('newTime').value.split(':').map(Number),duration=Number(document.getElementById('newDuration').value),kind=document.getElementById('newKind').value,shortcut=kind==='task'?document.getElementById('newShortcut').value.trim():'';if(shortcut.length>100||Array.from(shortcut).some(c=>c.charCodeAt(0)<32||c.charCodeAt(0)===127)){note.textContent='ショートカット名は100文字以内で入力してください';return;}if(!title||parts.length!==2||!Number.isFinite(duration)||duration<5||duration>1440){note.textContent='名前・時刻・所要時間を確認してください';return}const start=parts[0]*60+parts[1];if(start+duration>1440){note.textContent='終了時刻は24:00以内にしてください';return}if(editingId!==null){const item=items.find(x=>x.id===editingId);if(item){if(item.f){note.textContent='固定予定は編集できません';return;}Object.assign(item,{t:title,s:start,d:duration,kind,shortcut});}}else{if(isSample){items=[];isSample=false;}items.push({id:Math.max(300000000,...items.map(x=>Number(x.id)||0))+1,t:title,s:start,d:duration,kind,shortcut});}editingId=null;closeEditor();document.getElementById('newTitle').value='';document.getElementById('newShortcut').value='';note.textContent=fmt(start)+' に「'+title+'」を'+(editingId===null?'保存':'更新')+(persist()?'（保存処理中）':'（保存処理失敗）');smoothRender();updateReview()};
 // Conservative, explainable compatibility signals from the *local day's actual time slots*.
 // Never infer health, travel distance or subjective mood from a title; unknown remains neutral.
 const yosCompatRank={unknown:0,positive:1,negative:2,danger:3};
@@ -762,15 +799,16 @@ function toggleTaskDone(item){
 // Only local, movable tasks use this gesture system; fixed Apple records and other kinds
 // retain their existing read-only details / vertical time dragging.
 function wireTaskGestures(el,item){
- let active=null,startX=0,startY=0,lastX=0,lastY=0,mode='tap',timer=null,paintFrame=0,lastPreview=item.s;
+ let active=null,startX=0,startY=0,lastX=0,lastY=0,mode='tap',timer=null,paintFrame=0,lastPreview=item.s,swipeFrame=0;
  const timeLabel=el.querySelector('small');
  const clearTimer=()=>{if(timer!==null){clearTimeout(timer);timer=null;}};
- const clearPaint=()=>{if(paintFrame){cancelAnimationFrame(paintFrame);paintFrame=0;}};
+ const clearPaint=()=>{if(paintFrame){cancelAnimationFrame(paintFrame);paintFrame=0;}if(swipeFrame){cancelAnimationFrame(swipeFrame);swipeFrame=0;}};
+ const paintSwipe=()=>{swipeFrame=0;if(mode==='swipe'&&active!==null)el.style.transform='translate3d('+Math.max(-74,lastX-startX)+'px,0,0)';};
  const paintDrag=()=>{paintFrame=0;if(mode!=='drag'||active===null)return;const offset=lastY-startY;el.style.transform='translate3d(0,'+offset+'px,0)';const at=candidateStart();if(at!==lastPreview){lastPreview=at;if(timeLabel)timeLabel.textContent=fmt(at)+'–'+fmt(at+item.d);}};
  const candidateStart=()=>Math.max(0,Math.min(1440-item.d,Math.round((item.s+(lastY-startY)/scale*60)/5)*5));
  const begin=(x,y,id)=>{
   if(active!==null)return;
-  active=id;startX=lastX=x;startY=lastY=y;mode='tap';lastPreview=item.s;clearPaint();
+  active=id;startX=lastX=x;startY=lastY=y;mode='tap';lastPreview=item.s;clearPaint();el.style.transition='';
   clearTimer();
   timer=setTimeout(()=>{
    if(active!==null&&mode==='tap'){mode='long';active=null;beginLocalEdit(item);}
@@ -784,7 +822,7 @@ function wireTaskGestures(el,item){
   if(Math.abs(dx)>10||Math.abs(dy)>10)clearTimer();
   if(mode==='swipe'||(mode==='tap'&&dx< -14&&Math.abs(dx)>Math.abs(dy)*1.3)){
    mode='swipe';event?.preventDefault();
-   el.style.transform='translate3d('+Math.max(-70,dx)+'px,0,0)';
+   if(!swipeFrame)swipeFrame=requestAnimationFrame(paintSwipe);
   }else if(mode==='drag'||(mode==='tap'&&Math.abs(dy)>14&&Math.abs(dy)>Math.abs(dx)*1.25)){
    // A drag starts only on a task card; the surrounding timeline keeps normal scrolling.
    mode='drag';event?.preventDefault();
@@ -794,7 +832,10 @@ function wireTaskGestures(el,item){
  };
  const finish=cancelled=>{
   if(active===null)return;
-  active=null;clearTimer();clearPaint();const previousRect=mode==='drag'&&!cancelled?el.getBoundingClientRect():null;el.style.transform='';el.classList.remove('drag-preview');
+  active=null;clearTimer();clearPaint();const previousRect=mode==='drag'&&!cancelled?el.getBoundingClientRect():null;
+  if(mode==='swipe'){el.style.transition='transform .26s cubic-bezier(.22,1,.36,1)';el.style.transform='translate3d(0,0,0)';}
+  else el.style.transform='';
+  el.classList.remove('drag-preview');
   if(cancelled){if(timeLabel)timeLabel.textContent=fmt(item.s)+'–'+fmt(item.s+item.d);return;}
   if(mode==='swipe'){if(lastX-startX< -45)showSwipeDelete(item);return;}
   if(mode==='drag'){
