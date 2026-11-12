@@ -143,6 +143,13 @@ button:active{opacity:.8}@media(min-width:640px){.dock{left:calc((100vw - 640px)
   try{const s=JSON.parse(localStorage.getItem(key)||'null');return sourceAdapters.validSaved(s,kind)?s:null}catch{return null}
  };
  const importedTasks=readSnapshot(SOURCE_TASK,'tasks'),importedCalendar=readSnapshot(SOURCE_CAL,'calendar');
+ const existingYosCache=(()=>{
+  try{
+   const p=JSON.parse(localStorage.getItem('yos-task-dashboard-cache-v1')||'null');
+   return sourceAdapters?.fromYosTaskDashboardCache(p)||null;
+  }catch{return null}
+ })();
+ const effectiveTasks=existingYosCache||importedTasks;
  const importedDays=Object.keys(importedCalendar?.calendarDays||{}).concat(Object.keys(importedCalendar?.allDayDays||{})).sort();
  const importedCalendarCoverage=importedDays.length?{
   from:importedDays[0],until:(()=>{const d=new Date(importedDays[importedDays.length-1]+'T00:00:00Z');d.setUTCDate(d.getUTCDate()+1);return d.toISOString().slice(0,10)})(),
@@ -261,13 +268,13 @@ button:active{opacity:.8}@media(min-width:640px){.dock{left:calc((100vw - 640px)
  };
  window.YOS_DAYSTREAM_WEB=web;
  if('serviceWorker' in navigator){navigator.serviceWorker.register('../../service-worker.js',{scope:'../../',updateViaCache:'none'}).catch(()=>{});}
- window.YOS_CHARCOAL_BOOT={days:plan.days,hiddenCalendar:plan.hiddenCalendar||{},calendarDays:importedCalendar?.calendarDays||{},allDayDays:importedCalendar?.allDayDays||{},calendarCoverage:importedCalendarCoverage,calendarSource:importedCalendar?'user-file':'unavailable',taskSource:importedTasks?{...importedTasks,status:'partial'}:{status:'unavailable',items:[]},habitSource:{status:'unavailable',items:[]},generatedAt:new Date().toISOString()};
+ window.YOS_CHARCOAL_BOOT={days:plan.days,hiddenCalendar:plan.hiddenCalendar||{},calendarDays:importedCalendar?.calendarDays||{},allDayDays:importedCalendar?.allDayDays||{},calendarCoverage:importedCalendarCoverage,calendarSource:importedCalendar?'user-file':'unavailable',taskSource:effectiveTasks?{...effectiveTasks,status:'partial'}:{status:'unavailable',items:[]},habitSource:{status:'unavailable',items:[]},generatedAt:new Date().toISOString()};
  window.addEventListener('DOMContentLoaded',()=>{
   const f=document.getElementById('yosWebFile'),btn=document.getElementById('yosWebImport');
   btn.onclick=()=>f.click();
   f.onchange=async()=>{const file=f.files?.[0];if(!file)return;if(file.size>1000000){alert('ファイルが大きすぎます');return}try{const raw=await file.text();if(/\.ics$/i.test(file.name)){if(!web.importSource(raw,file.name))alert('カレンダー読込を中止しました。元データは保持されています。');return;}const p=JSON.parse(raw);if(p?.schema==='yos-daystream-web-all-backup-v1'){if(!web.importAll(p))alert('一括復元を中止しました。保存済みデータは保護されています。')}else if(p&&p.version===1&&p.days){if(!web.import(p))alert('時間割の照合または保存に失敗しました。元データは保持されています。')}else if(!web.importSource(raw,file.name)){alert('タスク読込を中止しました。元データは保持されています。')}}catch{alert('ファイルを読み取れません。変更はありません。')}finally{f.value=''}};
   document.getElementById('yosWebExport').onclick=()=>{if(!web.export())alert('バックアップを書き出せませんでした。保存データを確認してください。')};
-  const sourceText=document.getElementById('yosWebSourceState');if(sourceText){sourceText.textContent='端末内保存 · '+(importedTasks?'タスク手動取込':'Notion未接続')+' · '+(importedCalendar?'Apple予定手動取込':'Appleカレンダー未接続')+' · 自動同期なし';}
+  const sourceText=document.getElementById('yosWebSourceState');if(sourceText){sourceText.textContent='端末内保存 · '+(existingYosCache?'YOS認証済みキャッシュ（6時間以内）':importedTasks?'タスク手動取込':'Notion未接続')+' · '+(importedCalendar?'Apple予定手動取込':'Appleカレンダー未接続')+' · 自動同期なし';}
   document.getElementById('yosWebHistory').onclick=()=>{
     const panel=document.getElementById('yosWebHistoryPanel'),rows=document.getElementById('yosWebHistoryRows');
     panel.hidden=!panel.hidden;if(panel.hidden)return;rows.replaceChildren();
@@ -366,7 +373,7 @@ function yosRenderLearningHints(){
    seen.add(x.id);return true;
  }).sort((a,b)=>a.due.localeCompare(b.due)||yosTaskRank(a)-yosTaskRank(b)||a.title.localeCompare(b.title,'ja')).slice(0,3);
  if(!active.length)return;
- coverage.textContent=(taskSource.source==='user-file'?'手動で取り込んだ期限の写し。自動同期なし。':taskSource.status==='partial'?'Notion Tasksは一部取得。':'Notion Tasksを確認。')+'期限時刻は未確認。元の予定・完了状態は変更しません。';
+ coverage.textContent=(taskSource.source==='user-file'?'手動で取り込んだ期限の写し。自動同期なし。':taskSource.source==='yos-auth-cache'?'既存YOSの認証済みキャッシュの写し。現在の同期は未確認。':taskSource.status==='partial'?'Notion Tasksは一部取得。':'Notion Tasksを確認。')+'期限時刻は未確認。元の予定・完了状態は変更しません。';
  for(const x of active){
    const row=document.createElement('div');row.className='yos-learning-live-row';
    const title=document.createElement('strong');title.textContent=x.title;
@@ -383,7 +390,7 @@ function yosRenderSources(){
  yosRenderLearningHints();
  taskFeed.textContent='';habitFeed.textContent='';
  const status=document.getElementById('yosTaskSourceStatus');
- status.textContent=(taskSource.source==='user-file'?'手動取込のTasks写し：':'Notion Tasks：')+yosStatusWord(taskSource.status)+(taskSource.status==='ok'||taskSource.status==='partial'?'（取得 '+sourceTasks.length+'件・先頭80件を表示）':'')+(taskSource.checkedAt?' · '+new Date(taskSource.checkedAt).toLocaleString('ja-JP',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}):'');
+ status.textContent=(taskSource.source==='user-file'?'手動取込のTasks写し：':taskSource.source==='yos-auth-cache'?'YOS認証済みTasksキャッシュ（自動更新なし）：':'Notion Tasks：')+yosStatusWord(taskSource.status)+(taskSource.status==='ok'||taskSource.status==='partial'?'（取得 '+sourceTasks.length+'件・先頭80件を表示）':'')+(taskSource.checkedAt?' · '+new Date(taskSource.checkedAt).toLocaleString('ja-JP',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}):'');
  const live=sourceTasks.filter(x=>!['待ち','保留'].includes(x.status));
  live.sort((a,b)=>yosTaskRank(a)-yosTaskRank(b)||String(a.due||'9999').localeCompare(String(b.due||'9999'))||a.title.localeCompare(b.title,'ja'));
  const pending=live.filter(x=>!yosIsPlanned('notion:'+x.id)).slice(0,80);
