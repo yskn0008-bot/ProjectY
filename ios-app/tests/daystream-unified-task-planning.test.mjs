@@ -652,3 +652,24 @@ test('elastic axis expands short tasks while preserving exact hour/now and rever
  assert.match(rendered,/id="elasticBtn"/);
  assert.match(js,/btn\.textContent=elasticEnabled\?'自動サイズ ON':'自動サイズ OFF'/);
 });
+
+
+test('DAYSTREAM gesture preview stabilizes five-minute boundary without changing saved snap',()=>{
+ const match=client.match(/function yosStablePreviewMinute\([\s\S]*?\n\}/);
+ assert.ok(match,'stable preview function exists');
+ const stable=vm.runInNewContext(match[0]+'\nyosStablePreviewMinute',{});
+ assert.equal(stable(602.6,600,0,1440),600);
+ assert.equal(stable(603.6,600,0,1440),605);
+ assert.equal(stable(601.9,605,0,1440),605);
+ assert.equal(stable(600,605,0,1440),600);
+ assert.match(client,/Math\.round\(minuteAtY\(yFor\(item\.s\)\+lastY-startY\)\/5\)\*5/);
+});
+
+test('DAYSTREAM release uses final touch coordinates and position-only animation',()=>{
+ assert.match(client,/changedTouches\?\.length/);
+ assert.match(client,/lastY=e\.changedTouches\[0\]\.clientY/);
+ assert.match(client,/const previousRect=mode==='drag'&&!cancelled\?el\.getBoundingClientRect\(\):null/);
+ assert.match(client,/duration:235/);
+ assert.doesNotMatch(client,/scaleX\(/);
+ assert.doesNotMatch(client,/navigator\.vibrate/);
+});
