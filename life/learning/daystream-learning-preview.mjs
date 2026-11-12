@@ -5,6 +5,7 @@
  */
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const day=/^\d{4}-\d{2}-\d{2}$/;
+const validDay=value=>day.test(value||'')&&Number.isFinite(Date.parse(value+'T00:00:00Z'))&&new Date(value+'T00:00:00Z').toISOString().slice(0,10)===value;
 export function renderDaystreamLearningPreview(snapshot,{maxCards=3}={}){
   if(!snapshot||snapshot.status!=='read_only'||!Array.isArray(snapshot.cards)||snapshot.cards.length===0)return '';
   const bounded=Math.max(0,Math.min(3,Number.isInteger(maxCards)?maxCards:3));
