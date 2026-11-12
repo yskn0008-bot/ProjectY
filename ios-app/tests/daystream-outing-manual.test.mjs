@@ -10,7 +10,7 @@ function make(overrides={}){
  const entries={
   yosOutingManualStatus:{textContent:''},
   yosOutingTaskChoice:{value:id},
-  yosOutingPlace:{value:'本人が営業を確認した窓口'},
+  yosOutingPlace:{value:'本人が営業を確認した窓口'},yosOutingMode:{value:'driving'},
   yosOutingDetour:{value:'10'},yosOutingDuration:{value:'15'},
   yosOutingStart:{value:'11:00'},yosOutingEnd:{value:'12:00'},
   yosOutingConfirmed:{checked:true}
@@ -20,10 +20,10 @@ function make(overrides={}){
  let draws=0;
  const tasks=[{id,title:'手続き',status:'次にやる'}],initial=JSON.stringify(tasks);
  const FakeDate=class extends Date {constructor(...args){super(...(args.length?args:['2026-11-12T10:00:00']))}};
- const ctx={document:doc,Date:FakeDate,sourceTasks:tasks,taskSource:{status:'ok',checkedAt:'2026-11-12T10:00:00'},calendarCoverage:{status:'ok'},boot:{generatedAt:'2026-11-12T10:00:00'},calendarByDay:{},
+ const ctx={document:doc,window:{location:{href:''}},Date:FakeDate,sourceTasks:tasks,taskSource:{status:'ok',checkedAt:'2026-11-12T10:00:00'},calendarCoverage:{status:'ok'},boot:{generatedAt:'2026-11-12T10:00:00'},calendarByDay:{},
  selectedDay:'2026-11-12',allDayDays:{},items:[],localISO:()=> '2026-11-12',
  isCalendarCovered:()=>true,yosIsPlanned:()=>false,yosRenderOuting:()=>{draws++}};
- const api=vm.runInNewContext('let yosManualPreview=null;\n'+block+'\n({capture:yosOutingManualCapture,snapshot:()=>yosManualPreview})',ctx);
+ const api=vm.runInNewContext('let yosManualPreview=null;\n'+block+'\n({capture:yosOutingManualCapture,openMaps:yosOutingOpenMaps,mapsUrl:yosOutingMapsUrl,snapshot:()=>yosManualPreview})',ctx);
  return {entries,ctx,tasks,initial,api,get draws(){return draws}};
 }
 test('manual confirmation uses existing Notion task and ephemeral preview without data writes',()=>{
@@ -73,4 +73,27 @@ test('manual capture refuses stale Apple or Notion snapshots and invalid local e
   const x=make();mutate(x);assert.equal(x.api.capture(),false);
   assert.equal(x.api.snapshot(),null);
  }
+});
+
+test('one-tap Maps URL uses encoded typed destination and selected route mode',()=>{
+ const x=make();x.entries.yosOutingPlace.value='沖縄県 宜野湾市 真栄原';
+ x.entries.yosOutingMode.value='walking';
+ assert.equal(x.api.openMaps(),true);
+ assert.equal(x.ctx.window.location.href,x.api.mapsUrl('沖縄県 宜野湾市 真栄原','walking'));
+ assert.match(x.ctx.window.location.href,/^https:\/\/maps\.apple\.com\/directions\?destination=%E6%B2%96%E7%B8%84%E7%9C%8C/);
+ assert.match(x.ctx.window.location.href,/&mode=walking$/);
+ assert.equal(x.api.snapshot(),null,'opening Maps must not fabricate a verified route or save');
+});
+test('Maps URL validation rejects unknown mode, missing destination, oversized input',()=>{
+ const x=make();x.entries.yosOutingPlace.value='';
+ assert.equal(x.api.openMaps(),false);assert.equal(x.ctx.window.location.href,'');
+ assert.equal(x.api.mapsUrl('valid','unknown'),null);
+ assert.equal(x.api.mapsUrl('a'.repeat(81),'driving'),null);
+});
+test('Scriptable intercepts only bounded Apple Maps route links and leaves sources unchanged',()=>{
+ assert.match(source,/const mapsPrefix='https:\/\/maps\.apple\.com\/directions\?destination='/);
+ assert.match(source,/if\(url\.startsWith\(mapsPrefix\)\)/);
+ assert.match(source,/Safari\.open\(url\)/);
+ assert.match(source,/id="yosOutingOpenMaps"/);
+ assert.match(source,/getElementById\('yosOutingOpenMaps'\)\.onclick=yosOutingOpenMaps/);
 });
