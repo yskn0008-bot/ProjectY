@@ -74,7 +74,8 @@ test('confirmed start is distinct from completion; browser preserves native plan
  assert.match(html,/id="startActualBtn"/);
  assert.match(html,/markStarted\(event\)/);
  assert.match(html,/YOS_DAYSTREAM_WEB_STARTS_V1/);
- assert.match(html,/if\(saved&&x.done&&x.kind==='task'\)window\.YOS_DAYSTREAM_WEB\.logCompletion/);
+ assert.match(html,/if\(saved&&x.kind==='task'\)\{if\(x.done\)window\.YOS_DAYSTREAM_WEB\.logCompletion/);
+ assert.match(html,/else window\.YOS_DAYSTREAM_WEB\.undoCompletion\(\{id:x.id,day:selectedDay\}\)/);
  assert.match(html,/startedAt/);
  assert.match(html,/開始時刻は未確認/);
  assert.doesNotMatch(code,/YOS_TIMELINE_CHARCOAL_VERIFY_20261111_v1\.json/);
