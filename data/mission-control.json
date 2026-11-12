@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-13T00:26:07+09:00",
+  "updated_at": "2026-11-13T00:28:43+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -12,6 +12,16 @@
     ]
   },
   "inbox": [
+    {
+      "id": "github-pr-700",
+      "title": "PR #700 fix(daystream): casual compact task cards, stationary editor and smoother swipe",
+      "type": "GitHub PR",
+      "status": "review",
+      "priority": 1,
+      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/700",
+      "updated_at": "2026-11-12T04:20:54Z"
+    },
     {
       "id": "github-pr-718",
       "title": "PR #718 fix(daystream): stabilize task drag preview and stop repeated vibration",
@@ -103,16 +113,6 @@
       "updated_at": "2026-11-12T14:40:12Z"
     },
     {
-      "id": "github-pr-724",
-      "title": "PR #724 feat(daystream): 既存CharcoalタイムラインをYOS Web/PWAへ移植",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/724",
-      "updated_at": "2026-11-12T15:25:23Z"
-    },
-    {
       "id": "github-issue-10",
       "title": "Issue #10 Mission Control v2：GitHubのIssue・PR・Commitを自動集約する",
       "type": "GitHub Issue",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-12T15:24:34Z"
+      "updated_at": "2026-11-12T15:28:00Z"
     },
     {
       "id": "github-issue-234",
@@ -205,6 +205,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-47dd7cc388c9",
+      "title": "feat(daystream): YOS Web/PWAへCharcoalタイムラインを安全移植",
+      "completed_at": "2026-11-12T15:27:56Z",
+      "result": "GitHub mainへ反映（47dd7cc）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/47dd7cc388c93d58ee800902c2502415e16d2ab7"
+    },
+    {
       "id": "github-commit-679e54cd043e",
       "title": "Taxi: 那覇中心の営業前ブリーフと情報源確認を追加",
       "completed_at": "2026-11-12T15:03:45Z",
@@ -231,13 +238,6 @@
       "completed_at": "2026-11-12T14:16:55Z",
       "result": "GitHub mainへ反映（5a2ebe3）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/5a2ebe3acd3bba51b5d07485f60241889c0bfe4f"
-    },
-    {
-      "id": "github-commit-1cab915f7626",
-      "title": "chore(yos-ai): retry deferred approved release (1/4)",
-      "completed_at": "2026-11-12T12:37:34Z",
-      "result": "GitHub mainへ反映（1cab915）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/1cab915f76265919cfe36d28bd3c835af092929f"
     },
     {
       "id": "complete-002",
@@ -274,7 +274,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-13T00:26:07+09:00",
+      "last_update": "2026-11-13T00:28:43+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -349,13 +349,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 9件・Open PR 56件を自動同期中",
+      "next_action": "Open Issue 9件・Open PR 55件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-13T00:26:07+09:00",
+      "last_update": "2026-11-13T00:28:43+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -378,7 +378,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-13T00:26:07+09:00",
+      "last_update": "2026-11-13T00:28:43+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -460,5 +460,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "c120653bbdfe35f68ec6a2da4e5d753b0d2ecb9f861303783d76a1623e2d77e0"
+  "github_snapshot_hash": "a5daa021d02212d5d700a465e44b10499eaa61841dca638b1065bea6c5ac9287"
 }
