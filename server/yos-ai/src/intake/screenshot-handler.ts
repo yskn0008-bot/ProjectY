@@ -51,7 +51,7 @@ export function createScreenshotIntakeHandler(options: {
         }
         throw new CaptureInProgressError();
       }
-      let appendedToNotion = false;
+      let appendAttempted = false;
       try {
         const filename = 'screenshot-' + input.captureId.replaceAll(':', '-') +
           (input.mimeType === 'image/png' ? '.png' : input.mimeType === 'image/jpeg' ? '.jpg' : '.heic');
@@ -73,6 +73,9 @@ export function createScreenshotIntakeHandler(options: {
         const sentData = await sent.json() as {status?: string};
         if (sentData.status !== 'uploaded') throw new Error('Notion upload not complete');
         const metadata = input.capturedAt + ' · ios-screenshot/' + input.saveLocation + ' · ' + input.captureId;
+        // A network timeout during append has an ambiguous outcome: Notion may
+        // already have stored the image. Do not automatically retry the append.
+        appendAttempted = true;
         const appended = await fetchImpl('https://api.notion.com/v1/blocks/' + options.notionPageId + '/children', {
           method: 'PATCH', headers: {...headers, 'Content-Type': 'application/json'},
           body: JSON.stringify({children: [
@@ -82,16 +85,16 @@ export function createScreenshotIntakeHandler(options: {
           ]})
         });
         if (!appended.ok) throw new Error('Notion append failed');
-        appendedToNotion = true;
         await options.redis.command<string>(['SET', key, 'done', 'EX', DONE_TTL]);
         return Response.json({ok: true, captureId: input.captureId, duplicate: false, inboxSaved: true, classification: 'pending'}, {status: 201, headers: {'Cache-Control': 'no-store'}});
       } catch {
         // A failed Redis acknowledgement after a successful Notion append must not
         // immediately unlock the capture: doing so could duplicate private images.
-        if (!appendedToNotion) {
+        if (!appendAttempted) {
           try { await options.redis.command<number>(['DEL', key]); } catch { /* Processing TTL allows later retry. */ }
         }
-        return response(503, 'Screenshot intake temporarily unavailable');
+        return response(appendAttempted ? 409 : 503,
+          appendAttempted ? 'Screenshot save outcome uncertain; check Inbox before retrying' : 'Screenshot intake temporarily unavailable');
       }
     } catch (error) {
       return response(error instanceof CaptureInProgressError ? 409 : 503, 'Screenshot intake temporarily unavailable');
