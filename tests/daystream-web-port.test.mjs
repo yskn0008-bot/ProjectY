@@ -30,16 +30,20 @@ test('Migration is explicit, bounded and isolated from the native save file',()=
  assert.match(html,/元のScriptableファイルは変更されません/);
  assert.doesNotMatch(boot,/YOS_TIMELINE_CHARCOAL_VERIFY_20261111_v1\.json/);
 });
-test('No false Notion or Apple Calendar connection claims',()=>{
- assert.match(boot,/taskSource:\{status:'unavailable',items:\[\]\}/);
- assert.match(boot,/calendarCoverage:\{from:'',until:'',status:'unavailable'\}/);
- assert.match(html,/Notion\/Appleカレンダー未接続/);
+test('No false Notion or Apple Calendar automatic-sync claims',()=>{
+ assert.match(boot,/existingYosCache\|\|importedTasks/);
+ assert.match(boot,/taskSource:effectiveTasks\?/);
+ assert.match(boot,/calendarCoverage:importedCalendarCoverage/);
+ assert.match(boot,/Notion未接続/);
+ assert.match(boot,/Appleカレンダー未接続/);
+ assert.match(boot,/自動同期なし/);
+ assert.doesNotMatch(boot,/NOTION_INTEGRATION_TOKEN|Bearer \$\{/);
  assert.match(html,/YOS_DAYSTREAM_WEB\.logCompletion/);
 });
 test('Learning remains suggestion only after three observed completions',()=>{
  assert.match(boot,/filter\(a=>a\.length>=3\)/);
  assert.match(boot,/Math\.floor\(sorted\.length\/2\)/);
- assert.match(boot,/時間割の自動変更はしません/);
+ assert.match(boot,/時間割を自動変更しません/);
 });
 
 test('DAYSTREAM home-screen install resolves to DAYSTREAM instead of MY WAY',()=>{
@@ -68,5 +72,5 @@ test('iPhone home-screen layout paints safe-area dark and keeps header crisp',()
  assert.match(html,/\.yos-web-port\{[^}]*backdrop-filter:none;[^}]*-webkit-backdrop-filter:none;[^}]*opacity:1;/);
  assert.match(html,/\.yos-web-port a,\.yos-web-port button\{[^}]*backdrop-filter:none;[^}]*-webkit-backdrop-filter:none;/);
  const sw=fs.readFileSync(new URL('../service-worker.js',import.meta.url),'utf8');
- assert.match(sw,/v39-daystream-safearea-header/);
+ assert.match(sw,/const CACHE_NAME=CACHE_PREFIX\+'v[0-9]+-daystream-/);
 });
