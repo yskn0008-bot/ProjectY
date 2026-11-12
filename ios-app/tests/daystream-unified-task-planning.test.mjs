@@ -386,7 +386,7 @@ test('task gestures support tap, confirmed swipe delete, drag time shift, long p
  const local={id:300000001,t:'動作確認',s:600,d:30,kind:'task',done:false};
  const other={id:300000002,t:'保存する別タスク',s:660,d:30,kind:'task',done:false};
  const stats={saves:0,edits:[],renders:0,reviews:0};
- let timerFn=null;
+ let timerFn=null,animationFn=null;
  const code=[
  "const document=globalDocument,stats=globalStats,focus={classList:{remove(){}}},note={textContent:''};",
  "let swipeDeleteId=null,items=[globalLocal,globalOther],scale=60;",
@@ -394,12 +394,12 @@ test('task gestures support tap, confirmed swipe delete, drag time shift, long p
  "const persist=()=>{stats.saves++;return true};",
  "const smoothRender=()=>{stats.renders++},updateReview=()=>{stats.reviews++},beginLocalEdit=item=>stats.edits.push(item.id);",
  controller,
- "const makeEl=()=>{const listeners={},small={textContent:''},classes=new Set(),el={style:{},querySelector:()=>small,classList:{add:x=>classes.add(x),remove:x=>classes.delete(x)},addEventListener:(name,cb)=>listeners[name]=cb};return {listeners,small,classes,el}};",
+ "const makeEl=()=>{const listeners={},small={textContent:''},classes=new Set(),el={style:{},querySelector:()=>small,classList:{add:x=>classes.add(x),remove:x=>classes.delete(x)},addEventListener:(name,cb)=>listeners[name]=cb,getBoundingClientRect:()=>({top:0,left:0,width:120,height:42})};return {listeners,small,classes,el}};",
  "const first=makeEl();wireTaskGestures(first.el,globalLocal);",
  "const second=makeEl();wireTaskGestures(second.el,globalOther);",
  "({first,second,items:()=>items,drawer:()=>document.getElementById('gestureDelete').hidden})"
  ].join('\n');
- const env=vm.runInNewContext(code,{globalDocument:document,globalStats:stats,globalLocal:local,globalOther:other,setTimeout:callback=>{timerFn=callback;return 1},clearTimeout:()=>{timerFn=null}});
+ const env=vm.runInNewContext(code,{globalDocument:document,globalStats:stats,globalLocal:local,globalOther:other,setTimeout:callback=>{timerFn=callback;return 1},clearTimeout:()=>{timerFn=null},requestAnimationFrame:fn=>{animationFn=fn;return 1},cancelAnimationFrame:()=>{animationFn=null}});
  const touch=(x,y)=>({touches:[{clientX:x,clientY:y}]});
  env.first.listeners.touchstart(touch(220,200));env.first.listeners.touchend();
  assert.equal(local.done,true);assert.equal(stats.saves,1,'tap saves completion');
@@ -418,6 +418,7 @@ test('task gestures support tap, confirmed swipe delete, drag time shift, long p
  let dragPrevented=false;
  env.second.listeners.touchmove({...touch(223,240),preventDefault(){dragPrevented=true}});
  assert.equal(dragPrevented,true,'drag intentionally intercepts touch scroll only on card');
+ assert.ok(animationFn,'drag frame is scheduled');animationFn();
  assert.equal(env.second.small.textContent,'11:40–12:10','preview displays new time');
  assert.equal(other.s,660,'drag preview does not mutate saved time');
  env.second.listeners.touchend();
@@ -536,7 +537,7 @@ test('overlap warning counts intersection windows and gives a 15-minute range',(
 test('casual coral overlap colors task card and removes all decorative task icons',()=>{
  const htmlBody=Function('return '+String.fromCharCode(96)+html+String.fromCharCode(96))();
  const js=htmlBody.split('<script>')[1]?.split('</script>')[0]||'';
- assert.match(htmlBody,/\.card\.task\{background:#823db0;touch-action:none\}/);
+ assert.match(htmlBody,/\.card\.task\{background:#823db0;touch-action:none;/);
  assert.match(htmlBody,/\.card\.task:before\{display:none\}/);
  assert.match(htmlBody,/\.card\.task\.compat-danger\{background:#CB6F77;/);
  assert.ok(!htmlBody.includes('.card.compat-danger:after'));
@@ -558,4 +559,18 @@ test('overlapping task lane exposes time label during preview and ordinary displ
  assert.match(htmlBody,/item\.kind==='task'&&!item\.f\?42:density==='overview'\?17:22/);
  const js=htmlBody.split('<script>')[1]?.split('</script>')[0]||'';
  assert.match(js,/timeLabel\.textContent=fmt\(at\)\+'–'\+fmt\(at\+item\.d\)/);
+});
+
+
+test('fluid drag uses frame batching, a stable 2D release animation and respects reduced motion',()=>{
+ const rendered=Function('return '+String.fromCharCode(96)+html+String.fromCharCode(96))();
+ const js=rendered.split('<script>')[1]?.split('</script>')[0]||'';
+ assert.match(js,/const paintDrag=\(\)=>\{/);
+ assert.match(js,/requestAnimationFrame\(paintDrag\)/);
+ assert.match(js,/cancelAnimationFrame\(paintFrame\)/);
+ assert.match(js,/smoothRender\(item\.id,previousRect\)/);
+ assert.match(js,/window\.matchMedia\?\.\('\(prefers-reduced-motion: reduce\)'\)/);
+ assert.match(js,/const dx=old\.left-now\.left,dy=old\.top-now\.top/);
+ assert.match(js,/scaleX\('\+sx\+'\)/);
+ assert.match(js,/duration:340,easing:'cubic-bezier\(\.22,1,\.36,1\)'/);
 });

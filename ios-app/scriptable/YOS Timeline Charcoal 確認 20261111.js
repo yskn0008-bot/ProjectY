@@ -131,9 +131,9 @@ button,input,select{font:inherit}button{cursor:pointer}button:focus-visible,inpu
 .editor{display:none;margin:9px 14px;padding:13px;background:#484e59;border:1px solid #6b7583;border-radius:13px;box-shadow:0 10px 25px #15191e55}.editor.show{display:block}.editor b{font-size:15px}.editor .fields{display:flex;gap:7px;flex-wrap:wrap;margin:12px 0}.editor input,.editor select{padding:9px;background:#303742;color:white;border:1px solid #7b8594;border-radius:8px;min-width:0}.editor input[type=time]{max-width:130px}.editor button,.focus button,.review button,.mutedbutton{padding:10px 13px;background:#277dbb;color:#fff;border:0;border-radius:9px;font-weight:670}.editor .danger{background:#754751;margin-left:6px}.editor .light{background:#647184}.editor .editor-actions{display:flex;align-items:center;flex-wrap:wrap;gap:16px;margin-top:18px}.editor .editor-actions button{min-height:46px;min-width:126px}.editor .editor-shortcut-run{display:inline-block;margin-top:8px;padding:10px 13px;border:1px solid #80a4cb;background:#335371;border-radius:9px;color:#f2f7fd;text-decoration:none;font-weight:680}.editor .editor-shortcut-run[hidden]{display:none}
 .timeline-wrap{position:relative;margin:8px 13px 20px 11px;overflow:visible}.timeline{position:relative;touch-action:pan-y}.hour{position:absolute;left:0;right:0;border-top:1px solid #ffffff0f;height:1px;pointer-events:none}.hour span{position:absolute;top:-9px;left:6px;color:#dce2eb;font-size:12px;font-weight:480;font-variant-numeric:tabular-nums}.axis{position:absolute;left:58px;top:0;bottom:0;width:1.5px;background:#c2cad2b8;pointer-events:none}.tick{position:absolute;left:54.5px;width:9px;height:9px;border-radius:50%;background:#dce2ec;z-index:2;border:2px solid #56616e;box-shadow:0 0 0 2px #d7dee755;pointer-events:none}
 .card{position:absolute;left:73px;right:0;min-height:16px;border:0;border-radius:9px;padding:1px 9px;display:flex;align-items:center;gap:8px;touch-action:none;user-select:none;-webkit-user-select:none;color:#f8faff;background:#307ec2;box-shadow:0 2px 8px #101b2927;transition:filter .18s ease,box-shadow .18s ease;will-change:transform;overflow:hidden}
-.card:before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:#46b9fb;opacity:.9;pointer-events:none}.card.habit{background:#24976e}.card.habit:before{background:#4bd9a1}.card.task{background:#823db0;touch-action:none}.card.task:before{display:none}.card.schedule{background:#2e77b3}
+.card:before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:#46b9fb;opacity:.9;pointer-events:none}.card.habit{background:#24976e}.card.habit:before{background:#4bd9a1}.card.task{background:#823db0;touch-action:none;transform:translate3d(0,0,0);backface-visibility:hidden}.card.task:before{display:none}.card.schedule{background:#2e77b3}
 .card.neutral{background:#636b76}.card.neutral:before{background:#97a6b9}.card.sleep{background:#325477}.card.sleep:before{background:#48bdf5}.card.sleep:not(.tiny) b,.card.sleep:not(.tiny) svg{transform:translateY(-9px)}.card.sleep:not(.tiny) small{position:absolute;top:calc(50% + 4px);left:38px;margin:0;font-size:11px;transform:translateY(0)}
-.card.task b{flex:1}.card.task{cursor:pointer}.card.task.swiping{filter:brightness(1.14)}.card.task.drag-preview{z-index:9;box-shadow:0 11px 27px #10131a8a;filter:brightness(1.13)}
+.card.task b{flex:1}.card.task{cursor:pointer}.card.task.swiping{filter:brightness(1.14)}.card.task.drag-preview{z-index:9;box-shadow:0 11px 27px #10131a8a;filter:brightness(1.1);transition:box-shadow .18s ease,filter .18s ease}
 .card.compat-positive:before{background:#65d5a5;width:5px}.card.compat-positive{box-shadow:inset 0 0 0 1.5px #65d5a5,0 2px 8px #101b2927}
 .card.compat-negative:before{background:#f0bd6f;width:5px}.card.compat-negative{box-shadow:inset 0 0 0 1.5px #eeb76b,0 2px 8px #101b2927}
 .card.compat-danger:before{display:none}.card.task.compat-danger{background:#CB6F77;box-shadow:0 2px 8px #101b2927;transition:background-color .25s ease}
@@ -762,13 +762,15 @@ function toggleTaskDone(item){
 // Only local, movable tasks use this gesture system; fixed Apple records and other kinds
 // retain their existing read-only details / vertical time dragging.
 function wireTaskGestures(el,item){
- let active=null,startX=0,startY=0,lastX=0,lastY=0,mode='tap',timer=null;
+ let active=null,startX=0,startY=0,lastX=0,lastY=0,mode='tap',timer=null,paintFrame=0,lastPreview=item.s;
  const timeLabel=el.querySelector('small');
  const clearTimer=()=>{if(timer!==null){clearTimeout(timer);timer=null;}};
+ const clearPaint=()=>{if(paintFrame){cancelAnimationFrame(paintFrame);paintFrame=0;}};
+ const paintDrag=()=>{paintFrame=0;if(mode!=='drag'||active===null)return;const offset=lastY-startY;el.style.transform='translate3d(0,'+offset+'px,0)';const at=candidateStart();if(at!==lastPreview){lastPreview=at;if(timeLabel)timeLabel.textContent=fmt(at)+'–'+fmt(at+item.d);}};
  const candidateStart=()=>Math.max(0,Math.min(1440-item.d,Math.round((item.s+(lastY-startY)/scale*60)/5)*5));
  const begin=(x,y,id)=>{
   if(active!==null)return;
-  active=id;startX=lastX=x;startY=lastY=y;mode='tap';
+  active=id;startX=lastX=x;startY=lastY=y;mode='tap';lastPreview=item.s;clearPaint();
   clearTimer();
   timer=setTimeout(()=>{
    if(active!==null&&mode==='tap'){mode='long';active=null;beginLocalEdit(item);}
@@ -787,14 +789,12 @@ function wireTaskGestures(el,item){
    // A drag starts only on a task card; the surrounding timeline keeps normal scrolling.
    mode='drag';event?.preventDefault();
    el.classList.add('drag-preview');
-   el.style.transform='translate3d(0,'+dy+'px,0)';
-   const at=candidateStart();
-   if(timeLabel)timeLabel.textContent=fmt(at)+'–'+fmt(at+item.d);
+   if(!paintFrame)paintFrame=requestAnimationFrame(paintDrag);
   }
  };
  const finish=cancelled=>{
   if(active===null)return;
-  active=null;clearTimer();el.style.transform='';el.classList.remove('drag-preview');
+  active=null;clearTimer();clearPaint();const previousRect=mode==='drag'&&!cancelled?el.getBoundingClientRect():null;el.style.transform='';el.classList.remove('drag-preview');
   if(cancelled){if(timeLabel)timeLabel.textContent=fmt(item.s)+'–'+fmt(item.s+item.d);return;}
   if(mode==='swipe'){if(lastX-startX< -45)showSwipeDelete(item);return;}
   if(mode==='drag'){
@@ -803,7 +803,7 @@ function wireTaskGestures(el,item){
     item.s=at;
     const saved=persist();
     note.textContent='「'+item.t+'」を'+fmt(at)+'に移動'+(saved?'（端末内に保存中）':'（保存準備失敗）');
-    smoothRender();updateReview();
+    smoothRender(item.id,previousRect);updateReview();
    }else if(timeLabel)timeLabel.textContent=fmt(item.s)+'–'+fmt(item.s+item.d);
    return;
   }
@@ -820,10 +820,19 @@ function wireTaskGestures(el,item){
  el.addEventListener('pointercancel',e=>{if(active===e.pointerId)finish(true)});
 }
 function smoothRender(activeId,oldActiveRect){
+ const reduceMotion=window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
  const before=new Map([...tl.querySelectorAll('.card')].map(n=>[n.dataset.id,n.getBoundingClientRect()]));
  if(activeId&&oldActiveRect)before.set(String(activeId),oldActiveRect);
  render();
- [...tl.querySelectorAll('.card')].forEach(n=>{const old=before.get(n.dataset.id);if(!old)return;const now=n.getBoundingClientRect();const dy=old.top-now.top;if(Math.abs(dy)>.5){n.animate([{transform:'translate3d(0,'+dy+'px,0)'},{transform:'translate3d(0,0,0)'}],{duration:260,easing:'cubic-bezier(.2,.8,.2,1)'})}});
+ if(reduceMotion)return;
+ [...tl.querySelectorAll('.card')].forEach(n=>{
+  const old=before.get(n.dataset.id);if(!old||typeof n.animate!=='function')return;
+  const now=n.getBoundingClientRect();
+  const dx=old.left-now.left,dy=old.top-now.top;
+  const sx=old.width&&now.width?old.width/now.width:1;
+  if(Math.abs(dx)<.5&&Math.abs(dy)<.5&&Math.abs(sx-1)<.01)return;
+  n.animate([{transform:'translate3d('+dx+'px,'+dy+'px,0) scaleX('+sx+')',opacity:.88},{transform:'translate3d(0,0,0) scaleX(1)',opacity:1}],{duration:340,easing:'cubic-bezier(.22,1,.36,1)'});
+ });
 }
 function render(){
  latestCompatibility=yosCompatibility(items);
