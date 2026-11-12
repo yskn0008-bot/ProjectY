@@ -90,10 +90,10 @@
   if(!Object.keys(days).length&&!Object.keys(allDayDays).length)throw Error('対応する予定がありません');
   return {schema:'yos-daystream-source-snapshot-v1',kind:'calendar',status:skipped?'partial':'ok',calendarDays:days,allDayDays,checkedAt:new Date().toISOString(),source:'user-file',eventCount:count,skippedCount:skipped};
  }
- function validSaved(s,kind){
+ function validSaved(s,kind,retentionDays=7){
   if(!s||s.schema!=='yos-daystream-source-snapshot-v1'||s.kind!==kind||s.source!=='user-file'||!Number.isFinite(Date.parse(s.checkedAt)))return false;
   const age=Date.now()-Date.parse(s.checkedAt);
-  return age>=-300000&&age<=7*86400000;
+  return age>=-300000&&age<=retentionDays*86400000;
  }
  root.YOS_DAYSTREAM_SOURCES={normalizeTasks,parseICS,validSaved,MAX_BYTES};
 })(typeof window!=='undefined'?window:globalThis);
