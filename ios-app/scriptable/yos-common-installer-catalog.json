@@ -64,6 +64,13 @@
       "path": "ios-app/scriptable/remote-widgets/YOS Sleep Scene.js",
       "commit": "808d9e797a5734a4f7326e0471d6a4474244bc38",
       "sha256": "987664699fee3963f001e6610eafb5d371e3009cba990560785ed456171587f8"
+    },
+    {
+      "id": "screenshot-bridge",
+      "name": "YOS Screenshot Bridge",
+      "path": "ios-app/scriptable/YOS Screenshot Bridge.js",
+      "commit": "a2dbd184d3fbf23536bab303b8459d57bc0d03b7",
+      "sha256": "ee7ecaea6f8fb44ea59c5a0c76c7080a6482ccb9709945163d68455b4e5749d8"
     }
   ]
 }
