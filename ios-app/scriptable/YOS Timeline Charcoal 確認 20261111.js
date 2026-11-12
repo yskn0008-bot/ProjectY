@@ -288,7 +288,7 @@ function yosOutingCandidates(tasks,context,occupied,day){
  for(const t of tasks){
   if(!t||typeof t.id!=='string'||!t.title||['完了','中止','取消','キャンセル','保留','待ち'].includes(t.status)||already.has('notion:'+t.id))continue;
   const r=route.get(t.placeId);
-  if(!r||!Number.isInteger(t.durationMinutes)||t.durationMinutes<5||t.durationMinutes>240||!Number.isInteger(t.deadlineDayOffset)&&t.due&& !/^\d{4}-\d{2}-\d{2}$/.test(t.due)){
+  if(!r||!Number.isInteger(t.durationMinutes)||t.durationMinutes<5||t.durationMinutes>240||t.due&& !/^\d{4}-\d{2}-\d{2}$/.test(t.due)){
    result.excluded.push({id:t.id,reason:'場所・経路・営業確認・所要時間の確定情報が不足'});continue;
   }
   const cost=t.durationMinutes+r.detourMinutes;
