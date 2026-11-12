@@ -186,6 +186,7 @@ button:active{opacity:.8}@media(min-width:640px){.dock{left:calc((100vw - 640px)
   <div class="compat-status" id="compatStatus" aria-live="polite">相性を判定中</div>
   <p class="gesture-help" id="gestureHelp">タスクをタップ＝完了 ｜ 左スワイプ＝削除 ｜ 長押し＝編集 ｜ ＋＝登録・▶＝実行</p>
   <div class="timeline-wrap" id="timelinePanel"><div class="timeline" id="tl"><div class="axis"></div><div class="nowline" id="nowLine" hidden><span class="nowbadge" id="nowBadge"></span></div></div></div>
+ <section class="tabbox" id="yosOutingPanel" aria-label="ついで行動の提案"><h3>ついで行動</h3><p class="muted" id="yosOutingSummary">経路・営業状況・所要時間を確認中</p><div id="yosOutingProposals"></div><p class="muted">確定予定を動かさず、Notionの原本も更新しません。</p></section>
   <section class="tabbox" id="taskPanel"><h3>タスク・未配置</h3><p class="muted">専門タスクの期限と、実行する時間は別。配置しても元データの期限・完了は変わりません。</p>
  <div id="taskList"></div><h3>各専門ページから集約</h3><p class="muted" id="yosTaskSourceStatus">Notion Tasks：確認中</p>
  <label for="yosStartFrom">配置提案の開始時刻</label><input id="yosStartFrom" type="time" value="09:00" aria-label="配置提案の開始時刻">
@@ -271,7 +272,54 @@ function yosAddRow(container,title,description,onClick){
  name.textContent=title;meta.textContent=description;body.append(name,meta);row.append(body);
  const button=document.createElement('button');button.textContent='時間を提案';button.onclick=onClick;row.append(button);container.append(row);
 }
+// YOS_ADAPTIVE_ERRANDS_START
+// Pure, read-only outing proposals. No inferred location, opening hours or travel time.
+function yosOutingCandidates(tasks,context,occupied,day){
+ const result={proposals:[],excluded:[],reason:''};
+ if(!context||context.confirmed!==true||!Array.isArray(context.route)||!Number.isInteger(context.freeMinutes)||context.freeMinutes<0){
+  result.reason='現在地・経路・空き時間が未確認のため、ついで行動は提案しません。';return result;
+ }
+ if(!Array.isArray(occupied)||!Array.isArray(tasks)||!/^\\d{4}-\\d{2}-\\d{2}$/.test(day)){
+  result.reason='予定またはタスクの取得状態が不明です。';return result;
+ }
+ const route=new Map(context.route.filter(x=>x&&typeof x.placeId==='string'&&Number.isInteger(x.order)&&x.order>=0&&Number.isFinite(x.detourMinutes)&&x.detourMinutes>=0&&x.openConfirmed===true).map(x=>[x.placeId,x]));
+ const already=new Set(occupied.filter(x=>x&&x.sourceRef).map(x=>x.sourceRef));
+ const candidates=[];
+ for(const t of tasks){
+  if(!t||typeof t.id!=='string'||!t.title||['完了','中止','取消','キャンセル','保留','待ち'].includes(t.status)||already.has('notion:'+t.id))continue;
+  const r=route.get(t.placeId);
+  if(!r||!Number.isInteger(t.durationMinutes)||t.durationMinutes<5||t.durationMinutes>240||!Number.isInteger(t.deadlineDayOffset)&&t.due&& !/^\\d{4}-\\d{2}-\\d{2}$/.test(t.due)){
+   result.excluded.push({id:t.id,reason:'場所・経路・営業確認・所要時間の確定情報が不足'});continue;
+  }
+  const cost=t.durationMinutes+r.detourMinutes;
+  if(cost>context.freeMinutes){result.excluded.push({id:t.id,reason:'空き時間を超える'});continue;}
+  if(t.due&&t.due<day){result.excluded.push({id:t.id,reason:'期限経過・状況要確認'});continue;}
+  candidates.push({id:t.id,title:t.title,placeId:t.placeId,order:r.order,minutes:cost,taskMinutes:t.durationMinutes,detourMinutes:r.detourMinutes,due:t.due||'',priority:t.priority||'',reason:'経路上の確認済み立寄り先・営業確認済み・所要 '+t.durationMinutes+'分＋寄り道 '+r.detourMinutes+'分'+(t.due?'・期限 '+t.due:'')});
+ }
+ candidates.sort((a,b)=>a.order-b.order||String(a.due||'9999').localeCompare(String(b.due||'9999'))||({P0:0,P1:1,P2:2,P3:3}[a.priority]??4)-({P0:0,P1:1,P2:2,P3:3}[b.priority]??4)||a.id.localeCompare(b.id));
+ let budget=context.freeMinutes;
+ for(const c of candidates){if(c.minutes<=budget){result.proposals.push(c);budget-=c.minutes;}else result.excluded.push({id:c.id,reason:'先行候補を含めると時間不足'});}
+ result.reason=result.proposals.length?'確定予定・Notion原本には反映しない読み取り専用の提案です。':'条件を確認できる予定外タスクはありません。';
+ return result;
+}
+// YOS_ADAPTIVE_ERRANDS_END
+// YOS_OUTING_RENDER_START
+function yosRenderOuting(){
+ const label=document.getElementById('yosOutingSummary'),list=document.getElementById('yosOutingProposals');
+ if(!label||!list)return;
+ list.textContent='';
+ const result=yosOutingCandidates(sourceTasks,boot.outingContext,items,selectedDay);
+ label.textContent=result.reason;
+ for(const candidate of result.proposals){
+  const row=document.createElement('p');
+  row.textContent=candidate.title+' · '+candidate.reason;
+  list.append(row);
+ }
+ if(result.excluded.length){const info=document.createElement('p');info.className='muted';info.textContent='情報不足または時間不足で保留：'+result.excluded.length+'件（自動で実行可能とは判定しません）';list.append(info);}
+}
+// YOS_OUTING_RENDER_END
 function yosRenderSources(){
+ yosRenderOuting();
  taskFeed.textContent='';habitFeed.textContent='';
  const status=document.getElementById('yosTaskSourceStatus');
  status.textContent='Notion Tasks：'+yosStatusWord(taskSource.status)+(taskSource.status==='ok'||taskSource.status==='partial'?'（取得 '+sourceTasks.length+'件・先頭80件を表示）':'')+(taskSource.checkedAt?' · '+new Date(taskSource.checkedAt).toLocaleString('ja-JP',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}):'');
