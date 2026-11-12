@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {adaptExistingNotionRows as adapt} from './notion-existing-adapter.mjs';
+import {adaptExistingNotionRows as adapt,dueDateOnlyInAppHints} from './notion-existing-adapter.mjs';
 const url=id=>'https://app.notion.com/p/'+id;
 const a='a'.repeat(32),b='b'.repeat(32),c='c'.repeat(32);
 test('existing Tasks date-only deadlines never invent a clock time',()=>{const r=adapt({taskRows:[{url:url(a),'やること':'ゴミ出し','状態':'次にやる','date:期限:start':'2026-11-14','date:期限:is_datetime':0}]});assert.equal(r.tasks[0].dueAt,null);assert.equal(r.tasks[0].deadlinePrecision,'date_only');assert.equal(r.feedbackRecords.length,0)});
@@ -10,3 +10,6 @@ test('event rows are markers only and never count as completed tasks',()=>{const
 test('malformed, duplicated, unknown status and date-only event are ignored',()=>{const r=adapt({taskRows:[{url:url(a),'やること':'a','状態':'次にやる'},{url:url(a),'やること':'a','状態':'次にやる'},{url:url(b),'やること':'b','状態':'UNKNOWN'}],eventRows:[{url:url(c),'種類':'帰宅','date:発生日時:start':'2026-11-12','date:発生日時:is_datetime':0}]});assert.equal(r.tasks.length,1);assert.equal(r.eventMarkers.length,0)});
 test('missing sources are unavailable, not empty confirmed observations',()=>{const r=adapt();assert.equal(r.status,'unavailable');assert.equal(r.available.tasks,false);assert.equal(r.available.events,false)});
 test('Notion rich output accepts results wrapper without mutation',()=>{const input={results:[{url:url(a),'やること':'a','状態':'実行中'}]};const original=JSON.stringify(input);const r=adapt({taskRows:input});assert.equal(r.tasks.length,1);assert.equal(JSON.stringify(input),original)});
+
+test('day-only deadline is shown in-app without assumed time or actual notification',()=>{const r=adapt({taskRows:[{url:url(a),'やること':'ごみ','状態':'次にやる','date:期限:start':'2026-11-14','date:期限:is_datetime':0}]});const hints=dueDateOnlyInAppHints(r,'2026-11-13T12:00:00+09:00');assert.equal(hints.length,1);assert.equal(hints[0].presentation,'in_app_only');assert.equal(hints[0].dueDate,'2026-11-14');assert.equal(hints[0].reason.includes('時刻は未確認'),true)});
+test('faraway, paused or unavailable date-only deadlines do not trigger hints',()=>{const r=adapt({taskRows:[{url:url(a),'やること':'a','状態':'保留','date:期限:start':'2026-11-14','date:期限:is_datetime':0},{url:url(b),'やること':'b','状態':'次にやる','date:期限:start':'2026-12-14','date:期限:is_datetime':0}]});assert.equal(dueDateOnlyInAppHints(r,'2026-11-13T12:00:00+09:00').length,0);assert.equal(dueDateOnlyInAppHints(adapt(),'2026-11-13T12:00:00+09:00').length,0)});
