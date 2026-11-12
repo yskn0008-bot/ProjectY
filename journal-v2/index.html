@@ -26,7 +26,7 @@ const media=[
 {url:cc('Man grooming in a modern bathroom mirror during evening hours while checking reflection.jpg'),credit:'写真：Wikimedia Commons（CC BY 2.0）。身だしなみの一般イメージ。',alt:'洗面所で身だしなみを整える男性',creditUrl:'https://commons.wikimedia.org/wiki/File:Man_grooming_in_a_modern_bathroom_mirror_during_evening_hours_while_checking_reflection.jpg'}
 ];
 let issue=null,items=[];
-const safe=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&gt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const safe=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const photo=(i)=>'<figure><img loading="'+(i===0?'eager':'lazy')+'" referrerpolicy="no-referrer" src="'+safe(media[i].url)+'" alt="'+safe(media[i].alt)+'"><figcaption><a href="'+safe(media[i].creditUrl)+'" target="_blank" rel="noopener">'+safe(media[i].credit)+'</a></figcaption></figure>';
 const dateTitle=()=>safe(issue?.issuedOn||'発行日未確認');
 const details=[
