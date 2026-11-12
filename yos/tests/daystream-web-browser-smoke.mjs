@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import fs from 'node:fs/promises';
 import {chromium,webkit} from 'playwright';
 const type=process.env.YOS_BROWSER||'chromium',browser=await (type==='webkit'?webkit:chromium).launch({headless:true});
 const page=await browser.newPage({viewport:{width:390,height:844},isMobile:true,deviceScaleFactor:2});
@@ -59,6 +60,19 @@ try{
  });
  assert.equal(started.kind,'start');
  assert.equal(started.count,3);
+ const downloadTask=page.waitForEvent('download');
+ await page.locator('#yosWebExport').click();
+ const download=await downloadTask;
+ assert.equal(download.suggestedFilename(),'YOS_DAYSTREAM_WEB_ALL_BACKUP.json');
+ const packageText=await fs.readFile(await download.path(),'utf8');
+ const pack=JSON.parse(packageText);
+ assert.equal(pack.schema,'yos-daystream-web-all-backup-v1');
+ assert.ok(pack.plan.days);
+ assert.ok(Array.isArray(pack.actions));
+ assert.ok(pack.actions.some(a=>a.title==='Started action'&&a.startedAt));
+ assert.equal(pack.tasks.items[0].title,'Web imported task');
+ assert.equal(pack.calendar.eventCount,1);
+
  assert.deepEqual(errors,[],'no script errors during load, storage, reload or learning');
  console.log('DAYSTREAM Web port browser smoke PASS',type);
 }finally{await browser.close()}
