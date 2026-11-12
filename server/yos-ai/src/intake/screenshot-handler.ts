@@ -85,6 +85,15 @@ export function createScreenshotIntakeHandler(options: {
           ]})
         });
         if (!appended.ok) throw new Error('Notion append failed');
+        // HTTP 200 alone is not proof that Notion created the intended blocks.
+        const appendResult = await appended.json() as {results?: Array<{id?: string; type?: string}>};
+        if (!Array.isArray(appendResult.results) || appendResult.results.length !== 3 ||
+            appendResult.results[0]?.type !== 'paragraph' ||
+            appendResult.results[1]?.type !== 'image' ||
+            appendResult.results[2]?.type !== 'divider' ||
+            appendResult.results.some((block) => typeof block.id !== 'string')) {
+          throw new Error('Notion append acknowledgement incomplete');
+        }
         await options.redis.command<string>(['SET', key, 'done', 'EX', DONE_TTL]);
         return Response.json({ok: true, captureId: input.captureId, duplicate: false, inboxSaved: true, classification: 'pending'}, {status: 201, headers: {'Cache-Control': 'no-store'}});
       } catch {
