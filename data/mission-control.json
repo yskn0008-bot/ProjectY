@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-12T13:31:07+09:00",
+  "updated_at": "2026-11-12T13:33:35+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -13,14 +13,14 @@
   },
   "inbox": [
     {
-      "id": "github-pr-700",
-      "title": "PR #700 fix(daystream): casual compact task cards, stationary editor and smoother swipe",
+      "id": "github-pr-706",
+      "title": "PR #706 fix(scriptable): 睡眠家電3件の共通インストーラー形式エラーを修正",
       "type": "GitHub PR",
       "status": "review",
       "priority": 1,
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/700",
-      "updated_at": "2026-11-12T04:20:54Z"
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/706",
+      "updated_at": "2026-11-12T04:32:37Z"
     },
     {
       "id": "github-pr-685",
@@ -33,16 +33,6 @@
       "updated_at": "2026-11-12T04:25:57Z"
     },
     {
-      "id": "github-pr-688",
-      "title": "PR #688 feat(alerts): dense notification history in existing STREAM (draft)",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/688",
-      "updated_at": "2026-11-12T00:15:47Z"
-    },
-    {
       "id": "github-pr-692",
       "title": "PR #692 test(alerts): integrate dense history, notification API and Hobby quota fix",
       "type": "GitHub PR",
@@ -51,26 +41,6 @@
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/692",
       "updated_at": "2026-11-12T04:27:08Z"
-    },
-    {
-      "id": "github-pr-697",
-      "title": "PR #697 [YOS 生活学習] 最新mainへの安全移植とDAYSTREAM表示接続口（旧#686後継）",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/697",
-      "updated_at": "2026-11-12T03:58:55Z"
-    },
-    {
-      "id": "github-pr-698",
-      "title": "PR #698 feat(daystream): 最新操作UIを守る読み取り専用ついで行動の入力・安全提案",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/698",
-      "updated_at": "2026-11-12T04:27:49Z"
     },
     {
       "id": "github-pr-701",
@@ -100,7 +70,7 @@
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/703",
-      "updated_at": "2026-11-12T04:30:41Z"
+      "updated_at": "2026-11-12T04:31:21Z"
     },
     {
       "id": "github-pr-704",
@@ -111,6 +81,36 @@
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/704",
       "updated_at": "2026-11-12T04:30:09Z"
+    },
+    {
+      "id": "github-pr-705",
+      "title": "PR #705 YOS Money: safe billing candidate extraction (isolated draft)",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/705",
+      "updated_at": "2026-11-12T04:31:34Z"
+    },
+    {
+      "id": "github-pr-707",
+      "title": "PR #707 release(daystream): reconcile approved #700 while preserving current installer targets",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/707",
+      "updated_at": "2026-11-12T04:32:58Z"
+    },
+    {
+      "id": "github-pr-708",
+      "title": "PR #708 feat(daystream): 最新mainに生活学習の期限カードを安全統合（旧#702後継）",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/708",
+      "updated_at": "2026-11-12T04:33:01Z"
     },
     {
       "id": "github-issue-10",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-12T04:30:31Z"
+      "updated_at": "2026-11-12T04:32:23Z"
     },
     {
       "id": "github-issue-234",
@@ -264,7 +264,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #700をレビューして公開判断する",
+      "next_action": "PR #706をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -274,7 +274,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-12T13:31:07+09:00",
+      "last_update": "2026-11-12T13:33:35+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -349,13 +349,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 9件・Open PR 54件を自動同期中",
+      "next_action": "Open Issue 9件・Open PR 56件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-12T13:31:07+09:00",
+      "last_update": "2026-11-12T13:33:35+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -369,7 +369,7 @@
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #700をレビューして公開判断する",
+      "next_action": "PR #706をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -378,7 +378,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-12T13:31:07+09:00",
+      "last_update": "2026-11-12T13:33:35+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -460,5 +460,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "a9e12fb0df9b1ce67098a845e4ed90d291dfceff04abf5b4ce6f76ebcbb28695"
+  "github_snapshot_hash": "992b0cc639bc745cfdb50d530329d20ea3bc6f348c714da082d64d305e412cbf"
 }
