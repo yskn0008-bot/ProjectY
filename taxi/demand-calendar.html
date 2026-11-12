@@ -16,6 +16,7 @@
 <section class="hero"><strong id="headline">当日の需要情報を確認</strong><p>那覇中心｜GO・無線・手上げ。公式予定とXなどの速報は別の情報として照合します。この画面は自動リアルタイム監視ではなく、各情報源への確認入口です。出勤前・停車中のみ操作してください。</p><p id="briefDate" class="small"></p></section>
 <nav class="filters" aria-label="需要レベル"><button class="filter active" data-level="all">すべて</button><button class="filter" data-level="high">高需要</button><button class="filter" data-level="medium">中需要</button></nav>
 <section class="section"><div class="section-head"><h2>今後のイベント・需要候補</h2><span id="count" class="small">0件</span></div><div id="eventList" class="list"></div></section>
+<section class="section" aria-label="那覇の雨予報"><div class="section-head"><h2>那覇・直近6時間の雨予報</h2><span class="small">天気予報を自動取得</span></div><article class="card" id="nahaAutoWeather" aria-live="polite"><p class="notes">雨予報は未取得です。取得できない場合は気象庁の雨雲をご確認ください。</p><a class="source" href="https://www.jma.go.jp/bosai/nowc/" target="_blank" rel="noopener">気象庁の雨雲を確認</a></article></section>
 <section class="section"><div class="section-head"><h2>営業前の確認状況</h2><span class="small">確認した情報だけ記録</span></div>
 <div class="card"><p class="notes">各情報源を確認した後、「確認済みとして記録」を押すと、この端末に確認時刻を保存します。内容の正しさや配車需要の確定を意味しません。90分を超えた記録は古い情報として扱います。</p><p id="checkSummary" class="small" aria-live="polite">未確認</p><button id="clearChecks" class="filter" type="button">確認記録をリセット</button></div></section>
 <section class="section"><div class="section-head"><h2>営業前の判断原則</h2></div><article class="card"><p class="notes">通常営業は那覇中心。GO・無線・手上げを組み合わせる。若狭のクルーズ下船が進む場合は国際通り行き、浦添パルコの二次需要を候補にする。ただし国際通り約5割・パルコ発運賃1,500円以上は本人の経験則であり、公式統計ではない。郊外への空車回送は待機列と回送距離を確認して判断する。</p><p class="small">月売上目標 ¥600,000（2026年12月、22～23勤務なら1勤務あたり約¥26,087～¥27,273）。給与計算基準とは区別する。</p></article></section>
@@ -59,5 +60,6 @@ function render(level='all'){
 async function load(){try{const res=await fetch('./demand-calendar-v1.json',{cache:'no-store'});if(!res.ok)throw new Error(`HTTP ${res.status}`);const data=await res.json();allEvents=(data.events||[]).filter(e=>e.endDate?e.endDate>=jstToday():e.date>=jstToday()).sort((a,b)=>a.date.localeCompare(b.date));document.getElementById('headline').textContent=`今後の登録イベント ${allEvents.length}件｜リアルタイム自動監視は未接続`;document.getElementById('briefDate').textContent=`画面表示日：${jstToday()}（日本時間）｜以下の出典は各リンク先で再確認`;render();liveSources=data.liveSources||[];renderLiveSources()}catch(err){document.getElementById('headline').textContent='需要情報を読み込めません';document.getElementById('eventList').innerHTML=`<div class="error">再読み込みしてください。${err.message}</div>`}}
 document.querySelectorAll('.filter[data-level]').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('.filter[data-level]').forEach(x=>x.classList.remove('active'));btn.classList.add('active');render(btn.dataset.level)}));load();
 </script>
+<script defer src="./weather-brief-v1.js"></script>
 </body>
 </html>
