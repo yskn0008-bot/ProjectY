@@ -53,7 +53,7 @@ try{
   const web=window.YOS_DAYSTREAM_WEB,at=new Date().toISOString();
   for(let i=0;i<3;i++){
    web.markStarted({id:900001+i,day:'2026-11-13'});
-   web.logCompletion({id:900001+i,title:'Started action',at,day:'2026-11-13',plannedStart:600});
+   web.logCompletion({id:900001+i,title:'Started action',at:new Date(Date.now()+1000).toISOString(),day:'2026-11-13',plannedStart:600});
   }
   return web.suggestions().find(x=>x.title==='Started action')
  });
