@@ -42,6 +42,7 @@ test('営業前画面は確認時刻を記録できるが確認行為を事実�
   const html = await readFile(htmlPath, 'utf8');
   assert.match(html, /demand-calendar-v1\.json/);
   assert.match(html, /CHECK_KEY='yos-taxi-source-checks-v1'/);
+  assert.match(html, /querySelectorAll\('\.filter\[data-level\]'\)/);
   assert.match(html, /90\*60000/);
   assert.match(html, /確認済みとして記録/);
   assert.match(html, /公式予定とXなどの速報/);
