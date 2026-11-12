@@ -75,8 +75,8 @@ jobs:
           data=plistlib.loads(src.read_bytes())
           ids=[a.get('WFWorkflowActionIdentifier','') for a in data.get('WFWorkflowActions',[])]
           blob=repr(data)
-          assert ids.count('is.workflow.actions.askllm') == 7, ids
-          assert ids.count('is.workflow.actions.ask') == 6, ids
+          assert ids.count('is.workflow.actions.askllm') == 8, ids
+          assert ids.count('is.workflow.actions.ask') == 7, ids
           assert 'YOS Journal Questions' in blob
           assert 'すでに提示済みの問い' in blob
           assert 'この実行ですでに聞いた2問' in blob
@@ -84,6 +84,8 @@ jobs:
           assert ids.count('is.workflow.actions.file.getfoldercontents') == 2, ids
           assert ids.count('is.workflow.actions.documentpicker.save') == 5, ids
           assert 'YOSの分析とアドバイス' in blob
+          assert '今日の物語' in blob
+          assert 'storyRevision' not in blob or '修正したい場合' in blob
           assert '目的別の問い' in blob
           assert '直近のローカル日記控え' in blob
           assert '（導入1）' in blob
@@ -138,7 +140,7 @@ jobs:
         run: |
           set -euo pipefail
           test "$TARGET_REPO" = "$GITHUB_REPOSITORY"
-          test "$TARGET_BRANCH" = "feat/yos-journal-standalone-20261103"
+          test "$TARGET_BRANCH" = "feat/yos-night-journal-integration-20261112"
           cp 'tools/yos-journal/artifacts/YOS 日記.shortcut' /tmp/YOS_Journal_signed.shortcut
           git fetch origin "$TARGET_BRANCH"
           git checkout -B "$TARGET_BRANCH" "origin/$TARGET_BRANCH"
