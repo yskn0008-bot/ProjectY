@@ -175,6 +175,7 @@ if @autoMode == "auto" {
 alert(spacedResponse3, "Night Brief")
 
 // Manual-only handoff. The former Night Check-in is replaced by the standalone journal.
+// Native patcher no longer creates an Apple Journal entry.
 // The brief remains a read-only observation, not proof that planned actions occurred.
 const journalContext = text("【Night Brief／参考情報。予定は実行済みではない】\\n{nightFacts}\\n\\n【YOSの今日の発見】\\n{spacedResponse3}")
 const encodedContext = urlEncode(journalContext)
