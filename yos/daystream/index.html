@@ -233,7 +233,7 @@ button:active{opacity:.8}@media(min-width:640px){.dock{left:calc((100vw - 640px)
  };
  window.YOS_DAYSTREAM_WEB=web;
  if('serviceWorker' in navigator){navigator.serviceWorker.register('../../service-worker.js',{scope:'../../',updateViaCache:'none'}).catch(()=>{});}
- window.YOS_CHARCOAL_BOOT={days:plan.days,hiddenCalendar:plan.hiddenCalendar||{},calendarDays:importedCalendar?.calendarDays||{},allDayDays:importedCalendar?.allDayDays||{},calendarCoverage:importedCalendarCoverage,taskSource:importedTasks?{...importedTasks,status:'partial'}:{status:'unavailable',items:[]},habitSource:{status:'unavailable',items:[]},generatedAt:new Date().toISOString()};
+ window.YOS_CHARCOAL_BOOT={days:plan.days,hiddenCalendar:plan.hiddenCalendar||{},calendarDays:importedCalendar?.calendarDays||{},allDayDays:importedCalendar?.allDayDays||{},calendarCoverage:importedCalendarCoverage,calendarSource:importedCalendar?'user-file':'unavailable',taskSource:importedTasks?{...importedTasks,status:'partial'}:{status:'unavailable',items:[]},habitSource:{status:'unavailable',items:[]},generatedAt:new Date().toISOString()};
  window.addEventListener('DOMContentLoaded',()=>{
   const f=document.getElementById('yosWebFile'),btn=document.getElementById('yosWebImport');
   btn.onclick=()=>f.click();
@@ -513,7 +513,7 @@ function showFocusFor(item){
  document.getElementById('hideFixed').hidden=!canHide;
  document.getElementById('doneBtn').textContent=item.done?'未完了に戻す':'完了にする';
  document.getElementById('deleteSelected').textContent='削除';
- fi.textContent=fmt(item.s)+'–'+fmt(item.s+item.d)+(fixed?' · Appleカレンダーの固定予定。元の予定は変更せず、この画面から隠せます。':' · 端末内のタスク・予定。編集・削除できます。');
+ fi.textContent=fmt(item.s)+'–'+fmt(item.s+item.d)+(fixed?(boot.calendarSource==='user-file'?' · ファイルから取り込んだ固定予定。元のカレンダーは変更しません。':' · Appleカレンダーの固定予定。元の予定は変更せず、この画面から隠せます。'):' · 端末内のタスク・予定。編集・削除できます。');
  focus.classList.add('show');
 }
 
@@ -1058,7 +1058,7 @@ function render(){
 }
 document.getElementById('closeFocus').onclick=()=>{zoom=null;deleteConfirmId=null;focus.classList.remove('show');smoothRender()};
 if(Array.isArray(stored)){note.textContent='保存済み時間割を表示 · Notion Tasks '+yosStatusWord(taskSource.status);}
-else if(calendarRows.length){note.textContent='Appleカレンダー '+calendarRows.length+'件を読み取り'+(yosTestCount(todayISO)?' · テスト'+yosTestCount(todayISO)+'件は非表示':'')+' · 端末内で追加・編集';}
+else if(calendarRows.length){note.textContent=(boot.calendarSource==='user-file'?'手動取込のApple予定 ':'Appleカレンダー ')+calendarRows.length+'件を読み取り'+(yosTestCount(todayISO)?' · テスト'+yosTestCount(todayISO)+'件は非表示':'')+' · 端末内で追加・編集';}
 else{note.textContent='端末内の予定はありません · 右上の追加から登録';}
 yosDefaultStart();yosRefreshTestToggle();renderWeek();render();renderDayAllDay();updateReview();yosRenderSources();setCalendarMode('day');setInterval(updateNow,60000);setInterval(yosRenderLearningHints,60000);
 </script></body></html>
