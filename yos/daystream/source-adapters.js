@@ -100,7 +100,7 @@
    const order=Number.isSafeInteger(Number(t.order))?Number(t.order):0;
    // Stable, non-secret ID. No sensitive completion, blocker, evidence or auth payload is retained.
    let hash=2166136261;
-   for(const ch of title+'|'+order+'|'+due){hash^=ch.charCodeAt(0);hash=Math.imul(hash,16777619)>>>0}
+   for(const ch of title+'|'+order){hash^=ch.charCodeAt(0);hash=Math.imul(hash,16777619)>>>0}
    const id='yos-cache-'+order+'-'+hash.toString(16);
    if(seen.has(id))continue;seen.add(id);
    items.push({id,title,status:state,due,priority:['P0','P1','P2','P3'].includes(t.priority)?t.priority:'',area:'YOS Tasks',action:str(t.nextAction,140)});
