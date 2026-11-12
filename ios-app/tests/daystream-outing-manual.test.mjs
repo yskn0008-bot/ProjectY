@@ -23,7 +23,7 @@ function make(overrides={}){
  const ctx={document:doc,window:{location:{href:''}},Date:FakeDate,sourceTasks:tasks,taskSource:{status:'ok',checkedAt:'2026-11-12T10:00:00'},calendarCoverage:{status:'ok'},boot:{generatedAt:'2026-11-12T10:00:00'},calendarByDay:{},
  selectedDay:'2026-11-12',allDayDays:{},items:[],localISO:()=> '2026-11-12',
  isCalendarCovered:()=>true,yosIsPlanned:()=>false,yosRenderOuting:()=>{draws++}};
- const api=vm.runInNewContext('let yosManualPreview=null;\n'+block+'\n({capture:yosOutingManualCapture,openMaps:yosOutingOpenMaps,mapsUrl:yosOutingMapsUrl,snapshot:()=>yosManualPreview})',ctx);
+ const api=vm.runInNewContext('let yosManualPreview=null;\n'+block+'\n({capture:yosOutingManualCapture,openMaps:yosOutingOpenMaps,mapsUrl:yosOutingMapsUrl,nextGap:yosOutingNextGap,snapshot:()=>yosManualPreview})',ctx);
  return {entries,ctx,tasks,initial,api,get draws(){return draws}};
 }
 test('manual confirmation uses existing Notion task and ephemeral preview without data writes',()=>{
@@ -96,4 +96,25 @@ test('Scriptable intercepts only bounded Apple Maps route links and leaves sourc
  assert.match(source,/Safari\.open\(url\)/);
  assert.match(source,/id="yosOutingOpenMaps"/);
  assert.match(source,/getElementById\('yosOutingOpenMaps'\)\.onclick=yosOutingOpenMaps/);
+});
+
+test('next confirmed free gap prefills without modifying appointments',()=>{
+ const x=make();
+ const occupied=[{s:610,d:60},{s:685,d:40},{s:755,d:40}];
+ const before=JSON.stringify(occupied);
+ const gap=x.api.nextGap(600,occupied);
+ assert.deepEqual({start:gap.start,end:gap.end},{start:725,end:755});
+ assert.equal(JSON.stringify(occupied),before);
+});
+test('next gap safely handles overlapping bookings, gaps too short and bad occupancy',()=>{
+ const x=make();
+ assert.equal(x.api.nextGap(600,[{s:600,d:45},{s:635,d:20},{s:665,d:35}]).start,700);
+ assert.equal(x.api.nextGap(600,[{s:600,d:60},{s:660,d:400},{s:1060,d:380}]),null);
+ assert.equal(x.api.nextGap(600,[{s:600,d:null}]),null);
+ assert.equal(x.api.nextGap(1430,[]),null);
+});
+test('auto gap wiring uses full Apple calendar and never updates source',()=>{
+ assert.match(source,/const gap=validSource\?yosOutingNextGap\(minute,yosOutingOccupied\(today\)\):null/);
+ assert.match(source,/document\.getElementById\('yosOutingStart'\)\.value=gap\?fmt\(gap\.start\):''/);
+ assert.doesNotMatch(block,/CalendarEvent\.save|fm\.writeString|Keychain\.set/);
 });
