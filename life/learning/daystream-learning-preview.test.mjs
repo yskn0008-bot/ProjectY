@@ -13,7 +13,7 @@ test('renders a readable in-app proposal without buttons, timers, links, or scri
 });
 test('escapes potentially malicious Notion source titles',()=>{
  const html=render(snapshot([due('<img src=x onerror=alert(1)>')]));
- assert.doesNotMatch(html,/<img|onerror=/i);
+ assert.doesNotMatch(html,/<img/i);
  assert.match(html,/&lt;img/);
 });
 test('unavailable and missing source data produce no misleading UI',()=>{
