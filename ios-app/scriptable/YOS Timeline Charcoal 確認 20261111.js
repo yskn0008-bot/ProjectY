@@ -281,13 +281,13 @@ function yosAddRow(container,title,description,onClick){
 // Pure, read-only outing proposals. No inferred location, opening hours or travel time.
 function yosOutingCandidates(tasks,context,occupied,day){
  const result={proposals:[],excluded:[],reason:''};
- if(!context||context.confirmed!==true||!Array.isArray(context.route)||!Number.isInteger(context.freeMinutes)||context.freeMinutes<0){
+ if(!context||context.confirmed!==true||context.calendarVerified!==true||context.day!==day||!Array.isArray(context.route)||!Number.isInteger(context.windowStart)||!Number.isInteger(context.windowEnd)||context.windowStart<0||context.windowEnd>1440||context.windowEnd<=context.windowStart||!Number.isInteger(context.freeMinutes)||context.freeMinutes<0){
   result.reason='現在地・経路・空き時間が未確認のため、ついで行動は提案しません。';return result;
  }
  if(!Array.isArray(occupied)||!Array.isArray(tasks)||!/^\d{4}-\d{2}-\d{2}$/.test(day)){
   result.reason='予定またはタスクの取得状態が不明です。';return result;
  }
- const route=new Map(context.route.filter(x=>x&&typeof x.placeId==='string'&&Number.isInteger(x.order)&&x.order>=0&&Number.isFinite(x.detourMinutes)&&x.detourMinutes>=0&&x.openConfirmed===true).map(x=>[x.placeId,x]));
+ const route=new Map(context.route.filter(x=>x&&typeof x.placeId==='string'&&Number.isInteger(x.order)&&x.order>=0&&Number.isInteger(x.detourMinutes)&&x.detourMinutes>=0&&x.openConfirmed===true).map(x=>[x.placeId,x]));
  const already=new Set(occupied.filter(x=>x&&x.sourceRef).map(x=>x.sourceRef));
  const candidates=[];
  for(const t of tasks){
@@ -302,8 +302,15 @@ function yosOutingCandidates(tasks,context,occupied,day){
   candidates.push({id:t.id,title:t.title,placeId:t.placeId,order:r.order,minutes:cost,taskMinutes:t.durationMinutes,detourMinutes:r.detourMinutes,due:t.due||'',priority:t.priority||'',reason:'経路上の確認済み立寄り先・営業確認済み・所要 '+t.durationMinutes+'分＋寄り道 '+r.detourMinutes+'分'+(t.due?'・期限 '+t.due:'')});
  }
  candidates.sort((a,b)=>a.order-b.order||String(a.due||'9999').localeCompare(String(b.due||'9999'))||({P0:0,P1:1,P2:2,P3:3}[a.priority]??4)-({P0:0,P1:1,P2:2,P3:3}[b.priority]??4)||a.id.localeCompare(b.id));
- let budget=context.freeMinutes;
- for(const c of candidates){if(c.minutes<=budget){result.proposals.push(c);budget-=c.minutes;}else result.excluded.push({id:c.id,reason:'先行候補を含めると時間不足'});}
+ let budget=Math.min(context.freeMinutes,context.windowEnd-context.windowStart),cursor=context.windowStart;
+ for(const c of candidates){
+  const end=cursor+c.minutes;
+  if(c.minutes>budget||end>context.windowEnd){result.excluded.push({id:c.id,reason:'先行候補を含めると時間不足'});continue;}
+  if(occupied.some(x=>x&&Number.isFinite(x.s)&&Number.isFinite(x.d)&&x.d>0&&cursor<x.s+x.d&&x.s<end)){
+   result.excluded.push({id:c.id,reason:'既存の確定・端末内予定に時間衝突'});continue;
+  }
+  result.proposals.push({...c,start:cursor,end});cursor=end;budget-=c.minutes;
+ }
  result.reason=result.proposals.length?'確定予定・Notion原本には反映しない読み取り専用の提案です。':'条件を確認できる予定外タスクはありません。';
  return result;
 }
@@ -317,7 +324,7 @@ function yosRenderOuting(){
  label.textContent=result.reason;
  for(const candidate of result.proposals){
   const row=document.createElement('p');
-  row.textContent=candidate.title+' · '+candidate.reason;
+  row.textContent=fmt(candidate.start)+'–'+fmt(candidate.end)+' · '+candidate.title+' · '+candidate.reason;
   list.append(row);
  }
  if(result.excluded.length){const info=document.createElement('p');info.className='muted';info.textContent='情報不足または時間不足で保留：'+result.excluded.length+'件（自動で実行可能とは判定しません）';list.append(info);}
@@ -716,6 +723,7 @@ function setTab(name){
  else if(calendarMode==='week')renderWeekAgenda();
  renderDayAllDay();
  for(const [tab,id] of [['task','taskPanel'],['analysis','review'],['records','recordsPanel'],['ai','aiPanel']])document.getElementById(id).classList.toggle('show',name===tab);
+ document.getElementById('yosOutingPanel').classList.toggle('show',name==='task');
  renderLists();if(name==='task')yosRenderSources();if(name!=='timeline')window.scrollTo({top:0,behavior:'smooth'});
 }
 function renderLists(){
