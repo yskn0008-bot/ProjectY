@@ -20,7 +20,7 @@ const TEST_NOTICE = /^\s*(?:【(?:通知テスト|テスト通知|動作確認|�
 type Category = 'missed-call'|'money-review'|'legal'|'security'|'information';
 type Status = 'unread'|'read'|'pending'|'done';
 type AiState = 'pending'|'failed'|'complete';
-type Event = {id:string; at:string; category:Category; text:string; status:Status; source:string; blockId:string; aiState?:AiState; aiDecision?:'YOS_ALERT'|'YOS_SILENT'; aiSummary?:string};
+type Event = {id:string; historyKey:string; at:string; category:Category; text:string; status:Status; source:string; blockId:string; aiState?:AiState; aiDecision?:'YOS_ALERT'|'YOS_SILENT'; aiSummary?:string};
 type Capture = {text:string; sourceApp:string; occurredAt:string; eventId:string; decisionEngine:'rules'|'chatgpt'};
 type NotionBlock = {
   id?:string;
@@ -129,28 +129,53 @@ const RECORD=/^(\S+)\s*·\s*(Native Notification|Clarity Notification)\s*·\s*no
 const STATE=/^(\S+)\s*·\s*Notification State\s*·\s*notification:([0-9a-f]{8,64})\s*·\s*(read|pending|done)/iu;
 const AI_RESULT=/^(\S+)\s*·\s*Notification AI Result\s*·\s*notification:([0-9a-f]{8,64})\s*·\s*(failed|YOS_ALERT|YOS_SILENT)(?:\n([^]*))?$/iu;
 function parseRows(rows:NotionBlock[]):Event[] {
-  const statuses=new Map<string,Status>(),aiResults=new Map<string,{aiState:AiState;aiDecision?:'YOS_ALERT'|'YOS_SILENT';aiSummary?:string}>(),events=new Map<string,Event>();
+  const statuses=new Map<string,Status>();
+  const events:Event[]=[];
+  const seen=new Set<string>();
+  const latestById=new Map<string,Event>();
   for(const row of rows){
     if(row.type!=='paragraph')continue;
     const value=textOf(row),state=STATE.exec(value);
-    if(state&&state[2]&&state[3]){statuses.set(state[2],state[3] as Status);continue}
+    if(state?.[2]&&state[3]){statuses.set(state[2],state[3] as Status);continue}
     const ai=AI_RESULT.exec(value);
     if(ai?.[2]&&ai[3]){
-      const decision=ai[3]==='failed'?undefined:ai[3] as 'YOS_ALERT'|'YOS_SILENT';
-      aiResults.set(ai[2],{aiState:decision?'complete':'failed',...(decision?{aiDecision:decision}:{}),...(ai[4]?{aiSummary:ai[4]}:{})});
+      // AI results attach only to the latest preceding capture with this legacy ID.
+      // Reused IDs must not mark unrelated historical notifications as analyzed.
+      const target=latestById.get(ai[2]);
+      if(target){
+        const decision=ai[3]==='failed'?undefined:ai[3] as 'YOS_ALERT'|'YOS_SILENT';
+        target.aiState=decision?'complete':'failed';
+        if(decision)target.aiDecision=decision;
+        if(ai[4])target.aiSummary=ai[4];
+      }
       continue;
     }
     const match=RECORD.exec(value);
     if(!match||!row.id||!match[1]||!match[2]||!match[3]||!match[4])continue;
     const body=value.slice(match[0].length).replace(/^\s*/u,'').replace(/\s*---\s*$/u,'').slice(0,1500);
-    // Preserve old Inbox records while exposing legacy missed calls in the dedicated filter.
+    // The capture's 8-hex ID can recur at different times. Use the stable Notion
+    // block identifier for history pagination and row-specific status operations.
+    const stableBlockId=row.id.replace(/-/gu,'').toLowerCase();
+    const historyKey=/^[0-9a-f]{32}$/u.test(stableBlockId)
+      ? stableBlockId
+      : match[3]+Math.max(0,new Date(match[1]).getTime()).toString(16).padStart(16,'0');
+    const signature=match[3]+'|'+match[1]+'|'+body;
+    if(seen.has(signature))continue;
+    seen.add(signature);
     const legacyMissedCall=match[2]==='Clarity Notification'&&match[4]==='information'&&
       body.split(/\r?\n/u).some(line=>line.trim()==='不在着信');
-    events.set(match[3],{id:match[3],at:match[1],category:legacyMissedCall?'missed-call':match[4] as Category,
+    const event:Event={id:match[3],historyKey,at:match[1],
+      category:legacyMissedCall?'missed-call':match[4] as Category,
       text:body,status:'unread',source:match[2],blockId:row.id,
-      ...(match[0].endsWith('ai-pending')?{aiState:'pending' as const}:{})});
+      ...(match[0].endsWith('ai-pending')?{aiState:'pending' as const}:{})};
+    events.push(event);
+    latestById.set(match[3],event);
   }
-  return [...events.values()].map(x=>({...x,status:statuses.get(x.id)??'unread',...((x.aiState&&aiResults.get(x.id))||{})})).sort((a,b)=>b.at.localeCompare(a.at));
+  const counts=new Map<string,number>();
+  for(const e of events)counts.set(e.id,(counts.get(e.id)??0)+1);
+  return events.map(e=>({...e,
+    status:statuses.get(e.historyKey)??(counts.get(e.id)===1?statuses.get(e.id):undefined)??'unread'
+  })).sort((a,b)=>b.at.localeCompare(a.at));
 }
 export function createNotificationHandler(options:{
   tokenSha256:string;notionToken:string;notionPageId:string;redis:RedisCommandClient;
@@ -241,16 +266,16 @@ export function createNotificationHandler(options:{
         const rows=parseRows(blocks);
         if(id!==null){
           if(!complete)return result({error:'Inbox reconciliation incomplete'},503);
-          const event=rows.find(e=>e.id===id);
+          const event=rows.find(e=>e.historyKey===id)??(rows.filter(e=>e.id===id).length===1?rows.find(e=>e.id===id):undefined);
           return event?result({ok:true,event,complete}):result({error:'Notification not found'},404);
         }
         const matching=rows.filter(e=>!query||
           (e.text+' '+e.category+' '+(e.aiSummary??'')).toLowerCase().includes(query.toLowerCase()));
-        const offset=cursor===null?0:matching.findIndex(e=>e.id===cursor)+1;
+        const offset=cursor===null?0:matching.findIndex(e=>e.historyKey===cursor||e.id===cursor)+1;
         if(cursor!==null&&offset===0)return result({error:'History cursor not found'},400);
         const events=matching.slice(offset,offset+MAX_EVENTS),hasMore=offset+events.length<matching.length;
         return result({ok:true,events,complete,visible:events.length,totalMatched:matching.length,
-          hasMore,nextCursor:hasMore?events.at(-1)?.id:null});
+          hasMore,nextCursor:hasMore?events.at(-1)?.historyKey:null});
       }catch{return result({error:'Inbox temporarily unavailable'},503)}
     }
     if(request.headers.get('content-type')?.split(';')[0]?.trim().toLowerCase()!=='application/json')
@@ -316,7 +341,10 @@ export function createNotificationHandler(options:{
       try{
         const {blocks,complete}=await listBlocks();
         if(!complete)return result({error:'Inbox reconciliation incomplete'},503);
-        const found=parseRows(blocks).find(e=>e.id===id);
+        const rows=parseRows(blocks);
+        const matches=rows.filter(e=>e.historyKey===id||e.id===id);
+        if(matches.length>1)return result({error:'Ambiguous legacy notification ID'},409);
+        const found=matches[0];
         if(!found)return result({error:'Notification not found'},404);
         if(found.status===status)return result({ok:true,id,status,duplicate:true});
         await append(now().toISOString()+' · Notification State · notification:'+id+' · '+status);
