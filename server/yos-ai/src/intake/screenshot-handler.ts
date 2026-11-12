@@ -6,6 +6,8 @@ import {parseScreenshotCapture} from './screenshot-capture.js';
 const VERSION = '2025-09-03';
 const PROCESSING_TTL = 120;
 const DONE_TTL = 30 * 86400;
+const RELEASE_OWNED = "if redis.call('GET', KEYS[1]) == ARGV[1] then return redis.call('DEL', KEYS[1]) else return 0 end";
+const ADVANCE_OWNED = "if redis.call('GET', KEYS[1]) == ARGV[1] then redis.call('SET', KEYS[1], ARGV[2], 'EX', ARGV[3]); return 1 else return 0 end";
 
 export function createScreenshotIntakeHandler(options: {
   tokenSha256: string;
@@ -43,8 +45,10 @@ export function createScreenshotIntakeHandler(options: {
     if (!parsed.ok) return response(400, parsed.error);
     const input = parsed.value;
     const key = 'yos:intake:screenshot:v1:' + input.captureId;
+    const owner = 'processing:' + crypto.randomUUID();
+    const uncertain = 'uncertain:' + owner;
     try {
-      const claimed = await options.redis.command<string | null>(['SET', key, 'processing', 'NX', 'EX', PROCESSING_TTL]);
+      const claimed = await options.redis.command<string | null>(['SET', key, owner, 'NX', 'EX', PROCESSING_TTL]);
       if (claimed !== 'OK') {
         if (await options.redis.command<string | null>(['GET', key]) === 'done') {
           return Response.json({ok: true, captureId: input.captureId, duplicate: true, inboxSaved: true, classification: 'pending'}, {status: 200, headers: {'Cache-Control': 'no-store'}});
@@ -73,6 +77,10 @@ export function createScreenshotIntakeHandler(options: {
         const sentData = await sent.json() as {status?: string};
         if (sentData.status !== 'uploaded') throw new Error('Notion upload not complete');
         const metadata = input.capturedAt + ' · ios-screenshot/' + input.saveLocation + ' · ' + input.captureId;
+        // Persist the long-lived uncertain receipt BEFORE the irreversible append.
+        // A worker whose upload lease expired must never append or alter another worker's receipt.
+        const reserved = await options.redis.command<number>(['EVAL', ADVANCE_OWNED, 1, key, owner, uncertain, DONE_TTL]);
+        if (reserved !== 1) return response(409, 'Screenshot ownership changed; check Inbox before retrying');
         // A network timeout during append has an ambiguous outcome: Notion may
         // already have stored the image. Do not automatically retry the append.
         appendAttempted = true;
@@ -94,17 +102,16 @@ export function createScreenshotIntakeHandler(options: {
             appendResult.results.some((block) => typeof block.id !== 'string')) {
           throw new Error('Notion append acknowledgement incomplete');
         }
-        await options.redis.command<string>(['SET', key, 'done', 'EX', DONE_TTL]);
+        const completed = await options.redis.command<number>(['EVAL', ADVANCE_OWNED, 1, key, uncertain, 'done', DONE_TTL]);
+        if (completed !== 1) throw new Error('Screenshot receipt ownership changed');
         return Response.json({ok: true, captureId: input.captureId, duplicate: false, inboxSaved: true, classification: 'pending'}, {status: 201, headers: {'Cache-Control': 'no-store'}});
       } catch {
         // A failed Redis acknowledgement after a successful Notion append must not
         // immediately unlock the capture: doing so could duplicate private images.
-        if (appendAttempted) {
-          // Preserve an ambiguous outcome beyond the short processing TTL.
-          // Never automatically retry a potentially completed private upload.
-          try { await options.redis.command<string>(['SET', key, 'uncertain', 'EX', DONE_TTL]); } catch { /* Fail closed until device review. */ }
-        } else {
-          try { await options.redis.command<number>(['DEL', key]); } catch { /* Processing TTL allows later retry. */ }
+        // After append begins, the durable uncertain receipt already exists. Never
+        // overwrite it here; a successful newer owner must remain untouched.
+        if (!appendAttempted) {
+          try { await options.redis.command<number>(['EVAL', RELEASE_OWNED, 1, key, owner]); } catch { /* Processing TTL allows later retry. */ }
         }
         return response(appendAttempted ? 409 : 503,
           appendAttempted ? 'Screenshot save outcome uncertain; check Inbox before retrying' : 'Screenshot intake temporarily unavailable');

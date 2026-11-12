@@ -12,7 +12,7 @@ const capture = {
   source: 'ios-screenshot', saveLocation: 'photos', mimeType: 'image/png',
   imageBase64: 'iVBORw0KGgo='
 };
-function setup({failAppend = false, missingAcknowledgement = false} = {}) {
+function setup({failAppend = false, missingAcknowledgement = false, loseLease = false, failCreate = false, loseReservationAck = false} = {}) {
   const calls = [];
   const state = new Map();
   const redis = {async command(args) {
@@ -23,16 +23,32 @@ function setup({failAppend = false, missingAcknowledgement = false} = {}) {
     }
     if (args[0] === 'GET') return state.get(args[1]) ?? null;
     if (args[0] === 'DEL') return state.delete(args[1]) ? 1 : 0;
+    if (args[0] === 'EVAL') {
+      const key=args[3],owner=args[4];
+      if(state.get(key)!==owner)return 0;
+      if(args.length===7){
+        state.set(key,args[5]);
+        if(loseReservationAck&&String(args[5]).startsWith('uncertain:'))throw Error('reservation response lost');
+      }else state.delete(key);
+      return 1;
+    }
     throw Error('Unexpected redis command');
   }};
   const fetchImpl = async (url, init) => {
     calls.push({url, init});
-    if (url.endsWith('/file_uploads')) return Response.json({id: upload});
-    if (url.endsWith('/send')) return Response.json({status: 'uploaded'});
+    if (url.endsWith('/file_uploads')) {
+      if(failCreate){state.set('yos:intake:screenshot:v1:'+capture.captureId,'another-worker');throw Error('creation timed out')}
+      return Response.json({id: upload});
+    }
+    if (url.endsWith('/send')) {
+      if(loseLease)state.set('yos:intake:screenshot:v1:'+capture.captureId,'another-worker');
+      return Response.json({status: 'uploaded'});
+    }
+    if (url.endsWith('/children')) assert.match(state.get('yos:intake:screenshot:v1:'+capture.captureId),/^uncertain:/,'durable receipt must exist before append');
     if (url.endsWith('/children')) return failAppend ? new Response('', {status: 500}) : Response.json({results: missingAcknowledgement ? [] : ['paragraph', 'image', 'divider'].map((type, i) => ({type, id: '12345678-1234-1234-1234-12345678901' + i}))});
     throw Error('Unexpected URL');
   };
-  return {calls, handler: createScreenshotIntakeHandler({
+  return {calls, state, handler: createScreenshotIntakeHandler({
     tokenSha256: hash, notionToken: 'notion-test-token', notionPageId: page, redis, fetchImpl
   })};
 }
@@ -89,4 +105,27 @@ test('Notion HTTP success without image-block acknowledgement is not reported as
   assert.equal((await handler(request())).status, 409);
   assert.equal((await handler(request())).status, 409);
   assert.equal(calls.filter((call) => call.url.endsWith('/children')).length, 1);
+});
+
+test('expired upload lease prevents append and preserves the newer worker receipt', async () => {
+  const {handler,calls,state}=setup({loseLease:true});
+  assert.equal((await handler(request())).status,409);
+  assert.equal(calls.filter(c=>c.url.endsWith('/children')).length,0);
+  assert.equal(state.get('yos:intake:screenshot:v1:'+capture.captureId),'another-worker');
+});
+
+test('pre-append failure cannot delete a lease owned by another worker', async () => {
+  const {handler,calls,state}=setup({failCreate:true});
+  assert.equal((await handler(request())).status,503);
+  assert.equal(state.get('yos:intake:screenshot:v1:'+capture.captureId),'another-worker');
+  assert.equal((await handler(request())).status,409);
+  assert.equal(calls.length,1);
+});
+
+test('lost reservation response leaves a durable hold and never appends on retry', async () => {
+  const {handler,calls,state}=setup({loseReservationAck:true});
+  assert.equal((await handler(request())).status,503);
+  assert.match(state.get('yos:intake:screenshot:v1:'+capture.captureId),/^uncertain:/);
+  assert.equal((await handler(request())).status,409);
+  assert.equal(calls.filter(c=>c.url.endsWith('/children')).length,0);
 });
