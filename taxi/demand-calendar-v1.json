@@ -1,10 +1,14 @@
 {
-  "version": 1,
-  "updatedAt": "2026-08-06T23:45:00+09:00",
+  "version": 2,
+  "updatedAt": "2026-11-12",
   "sourcePolicy": {
     "officialSourcesRequired": true,
-    "confidenceLevels": ["confirmed", "provisional", "unverified"],
-    "notes": "Taxi需要判断に使うため、公式情報・取得日・更新日・根拠を必須とする。天候・主催者都合で変更されるため営業前に再確認する。"
+    "confidenceLevels": [
+      "confirmed",
+      "provisional",
+      "unverified"
+    ],
+    "notes": "沖縄交通／那覇中心。公式予定とXなどの速報を区別して照合する。リンク表示は自動取得・監視を意味しない。取得時刻と根拠のない情報を確定扱いにしない。"
   },
   "events": [
     {
@@ -17,7 +21,10 @@
       "venue": "沖縄県総合運動公園",
       "category": "festival",
       "demandLevel": "high",
-      "demandWindows": ["17:30-19:00", "20:30-22:30"],
+      "demandWindows": [
+        "17:30-19:00",
+        "20:30-22:30"
+      ],
       "taxiNotes": "開演前は周辺流入、終了後は沖縄市中心部・北谷方面への移動需要を想定。渋滞・交通規制は未確認。",
       "confidence": "confirmed",
       "sourceName": "VISIT OKINAWA JAPAN（沖縄観光公式）",
@@ -35,7 +42,10 @@
       "venue": "与那原町内",
       "category": "festival",
       "demandLevel": "high",
-      "demandWindows": ["夕方前", "終了後"],
+      "demandWindows": [
+        "夕方前",
+        "終了後"
+      ],
       "taxiNotes": "大規模祭事。那覇・南部との往復需要が見込まれるが、詳細時刻・交通規制は営業前に公式確認が必要。",
       "confidence": "confirmed",
       "sourceName": "VISIT OKINAWA JAPAN（沖縄観光公式）",
@@ -52,7 +62,10 @@
       "venue": "読谷村文化センター",
       "category": "conference",
       "demandLevel": "medium",
-      "demandWindows": ["08:00-09:30", "15:30-17:30"],
+      "demandWindows": [
+        "08:00-09:30",
+        "15:30-17:30"
+      ],
       "taxiNotes": "親子イベントとシンポジウム。読谷村内・北谷方面との移動を想定。来場規模は未確認。",
       "confidence": "confirmed",
       "sourceName": "沖縄県公式ホームページ",
@@ -69,7 +82,10 @@
       "venue": "首里支所 大会議室",
       "category": "lecture",
       "demandLevel": "low",
-      "demandWindows": ["13:00-14:00", "16:00-17:00"],
+      "demandWindows": [
+        "13:00-14:00",
+        "16:00-17:00"
+      ],
       "taxiNotes": "駐車不可のため一部タクシー需要の可能性。規模は限定的と判断。",
       "confidence": "confirmed",
       "sourceName": "那覇市公式ホームページ",
@@ -79,15 +95,81 @@
   ],
   "liveSources": [
     {
-      "id": "naha-cruise-live",
-      "title": "那覇港 クルーズ船寄港予定",
+      "id": "naha-cruise-schedule",
+      "title": "那覇港・若狭 クルーズ寄港予定",
       "type": "cruise",
+      "role": "公式予定",
       "status": "manual-check-required",
-      "confidence": "confirmed",
-      "notes": "寄港予定は申請情報に基づくライブシステムで公開され、天候等で急変する。営業前に当日分を確認する。",
+      "confidence": "unverified",
+      "notes": "入出港時刻・接岸場所・変更を確認。下船開始は寄港予定と別。若狭から国際通り・パルコへの二次需要は本人経験則、全便に当てはめない。",
       "sourceName": "那覇港管理組合",
-      "sourceUrl": "https://nahaport.jp/sp/users/kyakusen/",
-      "sourceCheckedAt": "2026-08-06"
+      "sourceUrl": "https://nahaport.jp/users/kyakusen/"
+    },
+    {
+      "id": "naha-flight-arrival",
+      "title": "那覇空港・本日の到着便",
+      "type": "flight",
+      "role": "公式予定",
+      "status": "manual-check-required",
+      "confidence": "unverified",
+      "notes": "到着便の集中、遅延、欠航を当日確認。到着人数・空車待機の有利さは到着便数だけで断定しない。",
+      "sourceName": "那覇空港",
+      "sourceUrl": "https://www.naha-airport.co.jp/flight/today/"
+    },
+    {
+      "id": "okinawa-rainfall",
+      "title": "那覇周辺・雨雲の動き",
+      "type": "weather",
+      "role": "公式観測",
+      "status": "manual-check-required",
+      "confidence": "unverified",
+      "notes": "気象庁の雨雲・警報を確認。雨の開始・強まりが移動需要に与える影響は実績と照合する。",
+      "sourceName": "気象庁",
+      "sourceUrl": "https://www.jma.go.jp/bosai/rain/"
+    },
+    {
+      "id": "naha-events",
+      "title": "那覇市・イベント情報",
+      "type": "events",
+      "role": "公式予定",
+      "status": "manual-check-required",
+      "confidence": "unverified",
+      "notes": "開催場所、終了時刻、規制と人流を確認。イベントがあるだけで高需要と断定しない。",
+      "sourceName": "那覇市",
+      "sourceUrl": "https://www.city.naha.okinawa.jp/event_calendar.html"
+    },
+    {
+      "id": "okinawa-convention",
+      "title": "沖縄コンベンションセンター・催事",
+      "type": "events",
+      "role": "公式予定",
+      "status": "manual-check-required",
+      "confidence": "unverified",
+      "notes": "郊外イベントは那覇の通常営業を優先し、移動する場合は実車・需要・回送コストを確認する。",
+      "sourceName": "沖縄コンベンションセンター",
+      "sourceUrl": "https://www.oki-conven.jp/allevent/"
+    },
+    {
+      "id": "x-cruise-local",
+      "title": "X・クルーズ船の現地速報",
+      "type": "social",
+      "role": "速報",
+      "status": "manual-check-required",
+      "confidence": "unverified",
+      "notes": "早着・遅延・下船状況などの投稿は未確認の速報。発信者・投稿日時・独立情報を確認し、公式予定と矛盾する際は断定しない。Xへのアクセスが必要な場合あり。",
+      "sourceName": "X 検索",
+      "sourceUrl": "https://x.com/search?q=%E9%82%A3%E8%A6%87%E6%B8%AF%20%E3%82%AF%E3%83%AB%E3%83%BC%E3%82%BA%E8%88%B9&f=live"
+    },
+    {
+      "id": "x-naha-event",
+      "title": "X・那覇のイベント速報",
+      "type": "social",
+      "role": "速報",
+      "status": "manual-check-required",
+      "confidence": "unverified",
+      "notes": "現地混雑や終了時刻変更は未確認情報として扱い、主催者・道路管理者の公式情報と照合する。",
+      "sourceName": "X 検索",
+      "sourceUrl": "https://x.com/search?q=%E9%82%A3%E8%A6%87%20%E3%82%A4%E3%83%99%E3%83%B3%E3%83%88&f=live"
     }
   ]
 }
