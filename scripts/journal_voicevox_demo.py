@@ -17,9 +17,8 @@ import urllib.request
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-DATE = "2026-11-12"
-ISSUE = ROOT / "journal" / "editions" / f"{DATE}.json"
-TARGET = ROOT / "journal" / "audio" / DATE / "article-0.mp3"
+EDITION_DIR = ROOT / "journal" / "editions"
+AUDIO_DIR = ROOT / "journal" / "audio"
 BASE = os.getenv("VOICEVOX_URL", "http://127.0.0.1:50121").rstrip("/")
 
 
@@ -75,32 +74,51 @@ def make_chunks(article: dict) -> list[str]:
 
 
 def main() -> None:
-    data = json.loads(ISSUE.read_text(encoding="utf-8"))
-    assert data.get("issuedOn") == DATE, "Archive date mismatch"
-    article = data["articles"][0]
-    chunks = make_chunks(article)
-    assert chunks and len(chunks) < 40, "Unreasonable sample length"
+    # Only dated public editions are eligible. Personal/Notion data is never read.
+    issues = sorted(EDITION_DIR.glob("????-??-??.json"))
+    if not issues:
+        raise RuntimeError("No published dated issue available")
+    issue_path = issues[-1]
+    data = json.loads(issue_path.read_text(encoding="utf-8"))
+    date = issue_path.stem
+    if data.get("issuedOn") != date:
+        raise RuntimeError("Issue date disagrees with filename")
+    articles = data.get("articles")
+    if not isinstance(articles, list) or not 1 <= len(articles) <= 8:
+        raise RuntimeError("Invalid issue length")
+    pending = [(i, article, AUDIO_DIR / date / f"article-{i}.mp3")
+               for i, article in enumerate(articles)
+               if not (AUDIO_DIR / date / f"article-{i}.mp3").is_file()]
+    if not pending:
+        print(f"All {len(articles)} audio files for {date} already exist")
+        return
     speaker = choose_male_speaker(wait_for_engine())
-
-    with tempfile.TemporaryDirectory() as tmp:
-        files = []
-        for i, text in enumerate(chunks):
-            qs = urllib.parse.urlencode({"text": text, "speaker": speaker})
-            query = json.loads(request("/audio_query?" + qs, data=b""))
-            query["speedScale"] = 0.98
-            query["intonationScale"] = 1.12
-            wav = request("/synthesis?" + urllib.parse.urlencode({"speaker": speaker}), data=json.dumps(query).encode(), mime="application/json")
-            if not wav.startswith(b"RIFF"):
-                raise RuntimeError("VOICEVOX output is not a WAV file")
-            path = Path(tmp) / f"{i:03d}.wav"
-            path.write_bytes(wav)
-            files.append(path)
-        inputs = Path(tmp) / "concat.txt"
-        inputs.write_text("".join(f"file '{p}'\n" for p in files), encoding="utf-8")
-        TARGET.parent.mkdir(parents=True, exist_ok=True)
-        subprocess.run(["ffmpeg", "-nostdin", "-loglevel", "error", "-y", "-f", "concat", "-safe", "0", "-i", str(inputs), "-ac", "1", "-ar", "44100", "-codec:a", "libmp3lame", "-b:a", "96k", str(TARGET)], check=True)
-        assert TARGET.stat().st_size > 4000, "Sample MP3 is empty"
-        print(f"Generated {TARGET.relative_to(ROOT)} ({TARGET.stat().st_size} bytes), speaker={speaker}, chunks={len(chunks)}")
+    for index, article, target in pending:
+        if not isinstance(article, dict) or not article.get("title"):
+            raise RuntimeError(f"Article {index} is missing its title")
+        chunks = make_chunks(article)
+        if not chunks or len(chunks) > 65:
+            raise RuntimeError(f"Invalid narration length: article {index}")
+        with tempfile.TemporaryDirectory() as tmp:
+            files = []
+            for i, text in enumerate(chunks):
+                qs = urllib.parse.urlencode({"text": text, "speaker": speaker})
+                query = json.loads(request("/audio_query?" + qs, data=b""))
+                query["speedScale"] = 0.98
+                query["intonationScale"] = 1.12
+                wav = request("/synthesis?" + urllib.parse.urlencode({"speaker": speaker}), data=json.dumps(query).encode(), mime="application/json")
+                if not wav.startswith(b"RIFF"):
+                    raise RuntimeError("VOICEVOX output is not a WAV file")
+                wav_path = Path(tmp) / f"{i:03d}.wav"
+                wav_path.write_bytes(wav)
+                files.append(wav_path)
+            inputs = Path(tmp) / "concat.txt"
+            inputs.write_text("".join(f"file '{p}'\\n" for p in files), encoding="utf-8")
+            target.parent.mkdir(parents=True, exist_ok=True)
+            subprocess.run(["ffmpeg", "-nostdin", "-loglevel", "error", "-y", "-f", "concat", "-safe", "0", "-i", str(inputs), "-ac", "1", "-ar", "44100", "-codec:a", "libmp3lame", "-b:a", "96k", str(target)], check=True)
+            if target.stat().st_size <= 4000:
+                raise RuntimeError(f"MP3 too small: {target}")
+            print(f"Generated {target.relative_to(ROOT)} ({target.stat().st_size} bytes), speaker={speaker}, chunks={len(chunks)}")
 
 
 if __name__ == "__main__":
