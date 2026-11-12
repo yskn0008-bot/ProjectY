@@ -215,6 +215,7 @@ test('real WebView runtime accepts day changes and preserves each day of local p
   let selectedDay=todayISO,items=dayItems(todayISO),isSample=false,selectedId=null,zoom=null;
   const note={textContent:''},planBox={textContent:''},focus={classList:{remove(){}}},editor={classList:{remove(){}}};
   const yosStatusWord=()=> '未接続';
+  let yosManualPreview=null;const yosOutingManualSetup=()=>{};
   const yosDefaultStart=()=>{},yosRenderSources=()=>{},yosRefreshTestToggle=()=>{},hideMonthPicker=()=>{},hideSwipeDelete=()=>{};const isCalendarCovered=()=>true;let calendarMode='day';const renderDayAllDay=()=>{},renderWeekAgenda=()=>{};
   const renderWeek=()=>{},render=()=>{},updateReview=()=>{};
   const window={scrollTo(){}};
