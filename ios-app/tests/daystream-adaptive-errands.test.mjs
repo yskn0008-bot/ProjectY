@@ -52,3 +52,21 @@ test('replan skips multiple appointments without moving them and respects remain
  const short=fn(tasks,{...context,freeMinutes:15},[],'2026-11-12');
  assert.deepEqual(Array.from(short.proposals,x=>x.id),['t1']);
 });
+
+test('bundles two tasks at one confirmed store without double-counting the detour',()=>{
+ const near={...context,route:[{placeId:'a',order:1,detourMinutes:10,openConfirmed:true}],freeMinutes:35};
+ const errands=[{...tasks[1],id:'first',durationMinutes:10},{...tasks[1],id:'second',durationMinutes:10}];
+ const out=fn(errands,near,[],'2026-11-12');
+ assert.equal(out.proposals.length,2);
+ assert.deepEqual(Array.from(out.proposals,x=>x.minutes),[20,10]);
+ assert.deepEqual(Array.from(out.proposals,x=>x.detourMinutes),[10,0]);
+ assert.deepEqual(Array.from(out.proposals,x=>[x.start,x.end]),[[600,620],[620,630]]);
+});
+test('skipped first task never falsely removes the detour charge for the next one',()=>{
+ const near={...context,route:[{placeId:'a',order:1,detourMinutes:10,openConfirmed:true}],freeMinutes:30};
+ const errands=[{...tasks[1],id:'too-large',durationMinutes:40},{...tasks[1],id:'can-go',durationMinutes:20}];
+ const out=fn(errands,near,[],'2026-11-12');
+ assert.deepEqual(Array.from(out.proposals,x=>x.id),['can-go']);
+ assert.equal(out.proposals[0].detourMinutes,10);
+ assert.equal(out.proposals[0].minutes,30);
+});
