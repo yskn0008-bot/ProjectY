@@ -1,12 +1,11 @@
 // Candidate-only extraction. Never authorizes payment or marks an invoice paid.
 const text = (v, n = 300) => typeof v === 'string' ? v.trim().slice(0, n) : '';
-const DATE_RE = /(?:20\d{2})[\/.-](?:0?[1-9]|1[0-2])[\/.-](?:0?[1-9]|[12]\d|3[01])/gu;
-const AMOUNT_RE = /(?:¥|￥|金額[:：]?\s*|請求(?:額|金額)[:：]?\s*|お支払(?:い)?金額[:：]?\s*)([0-9]{1,3}(?:,[0-9]{3})+|[0-9]{1,9})\s*円?/gu;
+const AMOUNT_RE = /(?:¥|￥|金額[:：]?\s*|請求(?:額|金額)[:：]?\s*|お支払(?:い)?金額[:：]?\s*)([0-9]{1,3}(?:,[0-9]{3})+|[0-9]{1,9})(?![0-9,])\s*円?/gu;
 const DUE_RE = /(?:支払期限|お支払期限|お支払い期限|振込期限|納付期限|期限)[:：\s]*([^\n]{0,35})/u;
 const NEGATIVE = /(?:広告|キャンペーン|クーポン|ポイント還元|お支払い完了|決済完了|入金確認|領収書)/u;
 const BILLING = /(?:請求|未払い|未納|支払期限|お支払い期限|納付期限|振込期限|督促)/u;
 function isoDate(raw) {
-  const m = text(raw, 50).match(/(20\d{2})[\/.-](\d{1,2})[\/.-](\d{1,2})/u);
+  const m = text(raw, 50).match(/(?<!\d)(20\d{2})[\/.-](\d{1,2})[\/.-](\d{1,2})(?!\d)/u);
   if (!m) return null;
   const y = +m[1], mo = +m[2], d = +m[3];
   const dt = new Date(Date.UTC(y, mo - 1, d));
@@ -14,6 +13,7 @@ function isoDate(raw) {
     ? [y, String(mo).padStart(2, '0'), String(d).padStart(2, '0')].join('-') : null;
 }
 export function extractBillingCandidate(input = {}) {
+  if (!input || typeof input !== 'object' || Array.isArray(input)) return null;
   const subject = text(input.subject, 240);
   const body = text(input.body, 8000);
   const sourceId = text(input.sourceId, 200);
@@ -46,7 +46,16 @@ export function extractBillingCandidate(input = {}) {
   };
 }
 export function shouldCreateMoneyEntry(candidate, existing = []) {
-  if (!candidate || candidate.status !== 'verified' || !candidate.due_date ||
+  if (!candidate || candidate.schema !== 'yos-billing-candidate-v1' ||
+      candidate.status !== 'verified' || candidate.requires_review !== false ||
+      !text(candidate.source_id, 200) || candidate.source_id !== text(candidate.source_id, 200) ||
+      candidate.idempotency_key !== 'gmail:' + candidate.source_id ||
+      !/^20\d{2}-\d{2}-\d{2}$/u.test(candidate.due_date || '') ||
+      isoDate(candidate.due_date) !== candidate.due_date || !Array.isArray(existing) ||
       !Number.isSafeInteger(candidate.amount_yen) || candidate.amount_yen <= 0) return false;
-  return !existing.some(e => e?.idempotency_key === candidate.idempotency_key);
+  // A reminder with another message ID may refer to an existing bill. Matching
+  // sender/date/amount is a review candidate, not proof of a separate expense.
+  return !existing.some(e => e?.idempotency_key === candidate.idempotency_key ||
+    (text(candidate.sender) && text(e?.sender).toLowerCase() === text(candidate.sender).toLowerCase() &&
+      e?.due_date === candidate.due_date && e?.amount_yen === candidate.amount_yen));
 }
