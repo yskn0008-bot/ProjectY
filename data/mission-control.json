@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-12T16:10:58+09:00",
+  "updated_at": "2026-11-12T16:13:05+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -31,6 +31,16 @@
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/664",
       "updated_at": "2026-11-11T19:58:32Z"
+    },
+    {
+      "id": "github-pr-668",
+      "title": "PR #668 test: isolate native notification backend on last READY production commit",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/668",
+      "updated_at": "2026-11-11T10:30:36Z"
     },
     {
       "id": "github-pr-685",
@@ -103,16 +113,6 @@
       "updated_at": "2026-11-12T04:31:34Z"
     },
     {
-      "id": "github-pr-713",
-      "title": "PR #713 feat(daystream): reversible elastic timeline trial for 5-minute tasks",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/713",
-      "updated_at": "2026-11-12T07:10:15Z"
-    },
-    {
       "id": "github-issue-10",
       "title": "Issue #10 Mission Control v2：GitHubのIssue・PR・Commitを自動集約する",
       "type": "GitHub Issue",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-12T07:09:18Z"
+      "updated_at": "2026-11-12T07:12:28Z"
     },
     {
       "id": "github-issue-234",
@@ -205,6 +205,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-869abb14555a",
+      "title": "feat(daystream): reversible elastic time slots for readable five-minute tasks",
+      "completed_at": "2026-11-12T07:12:32Z",
+      "result": "GitHub mainへ反映（869abb1）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/869abb14555adc107eb7d963c6d4d5945bc0959a"
+    },
+    {
       "id": "github-commit-7c889a786247",
       "title": "fix(journal): reliable clean reader and dated editions",
       "completed_at": "2026-11-12T04:48:06Z",
@@ -231,13 +238,6 @@
       "completed_at": "2026-11-12T04:36:43Z",
       "result": "GitHub mainへ反映（450e894）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/450e894a76d3bf75a262a672a5723ecabd5d2c87"
-    },
-    {
-      "id": "github-commit-d474511b2341",
-      "title": "release(daystream): approved casual UI and stationary editor with protected installer catalog",
-      "completed_at": "2026-11-12T04:35:14Z",
-      "result": "GitHub mainへ反映（d474511）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/d474511b23415e622431d84292fb3972a6af6e67"
     },
     {
       "id": "complete-002",
@@ -274,7 +274,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-12T16:10:58+09:00",
+      "last_update": "2026-11-12T16:13:05+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -349,13 +349,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 9件・Open PR 53件を自動同期中",
+      "next_action": "Open Issue 9件・Open PR 52件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-12T16:10:58+09:00",
+      "last_update": "2026-11-12T16:13:05+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -378,7 +378,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-12T16:10:58+09:00",
+      "last_update": "2026-11-12T16:13:05+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -460,5 +460,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "0d4fd31a39b5d52403e8eb89c1d41efd79ff9975370539c5ec35c950f6062a0b"
+  "github_snapshot_hash": "4f76d2903981adacbe43a7c11b2ad25e45e42e6a1cc094f267c0a19f6d8f5a15"
 }
