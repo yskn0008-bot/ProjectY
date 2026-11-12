@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-13T01:01:22+09:00",
+  "updated_at": "2026-11-13T01:19:23+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -53,6 +53,16 @@
       "updated_at": "2026-11-12T15:39:37Z"
     },
     {
+      "id": "github-pr-688",
+      "title": "PR #688 feat(alerts): dense notification history in existing STREAM (draft)",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/688",
+      "updated_at": "2026-11-12T00:15:47Z"
+    },
+    {
       "id": "github-pr-692",
       "title": "PR #692 test(alerts): integrate dense history, notification API and Hobby quota fix",
       "type": "GitHub PR",
@@ -81,16 +91,6 @@
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/705",
       "updated_at": "2026-11-12T04:31:34Z"
-    },
-    {
-      "id": "github-pr-716",
-      "title": "PR #716 feat(daystream): 生活学習と既存操作を保護した安全な外出まとめ提案",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/716",
-      "updated_at": "2026-11-12T15:44:27Z"
     },
     {
       "id": "github-pr-720",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-12T15:59:55Z"
+      "updated_at": "2026-11-12T16:18:24Z"
     },
     {
       "id": "github-issue-234",
@@ -205,6 +205,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-8a96c879baeb",
+      "title": "feat(daystream): safe confirmed outing suggestions with Apple Maps and calendar gap",
+      "completed_at": "2026-11-12T16:18:26Z",
+      "result": "GitHub mainへ反映（8a96c87）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/8a96c879baeba78495ab7af0d7558bc9dd4bfba5"
+    },
+    {
       "id": "github-commit-2e0c72fc1205",
       "title": "fix(daystream): iPhone上端の白帯とヘッダーの霞みを修正",
       "completed_at": "2026-11-12T16:00:39Z",
@@ -231,13 +238,6 @@
       "completed_at": "2026-11-12T15:49:01Z",
       "result": "GitHub mainへ反映（da0ff58）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/da0ff5832faaef6cd8ce935d56e308e7c45302b0"
-    },
-    {
-      "id": "github-commit-01d0188f321d",
-      "title": "fix(journal): display free audio player and direct MP3 link",
-      "completed_at": "2026-11-12T15:46:51Z",
-      "result": "GitHub mainへ反映（01d0188）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/01d0188f321d2255f56b3c298a3563fbf79e6f65"
     },
     {
       "id": "complete-002",
@@ -274,7 +274,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-13T01:01:22+09:00",
+      "last_update": "2026-11-13T01:19:23+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -349,13 +349,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 9件・Open PR 55件を自動同期中",
+      "next_action": "Open Issue 9件・Open PR 54件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-13T01:01:22+09:00",
+      "last_update": "2026-11-13T01:19:23+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -378,7 +378,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-13T01:01:22+09:00",
+      "last_update": "2026-11-13T01:19:23+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -460,5 +460,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "1670e31f706ab70427fefa0ee643907061eae7599f6fb756918c0677fe6d6431"
+  "github_snapshot_hash": "d1751b275713dce1187d25bce17d92f0eb6ba0e2b4ea0197b231057e75a05edb"
 }
