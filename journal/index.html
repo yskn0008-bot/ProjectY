@@ -9,7 +9,7 @@
 .sheet{position:absolute;inset:0;padding:calc(env(safe-area-inset-top) + 17px) 25px 22px;background:var(--cream);color:var(--ink);display:none;overflow:hidden}
 .sheet.current{display:flex;flex-direction:column;animation:enter .16s ease-out}
 @keyframes enter{from{opacity:.7;transform:translateX(7px)}to{opacity:1;transform:none}}
-.sheet.cover{background:linear-gradient(180deg,rgba(10,24,42,.28),rgba(14,25,40,.68) 45%,rgba(10,24,42,.96)),url("https://commons.wikimedia.org/wiki/Special:FilePath/Sunset_beach_at_Okinawa.jpg?width=1200") center/cover no-repeat,#243c59;color:white}
+.sheet.cover{background:linear-gradient(180deg,rgba(10,24,42,.28),rgba(14,25,40,.68) 45%,rgba(10,24,42,.96)),radial-gradient(ellipse at 78% 31%,#dd9474 0%,transparent 33%),linear-gradient(149deg,#15283b 1%,#3d5065 48%,#87747b 82%,#172a41) center/cover no-repeat;color:white}
 .cover .topline{font-size:10px;letter-spacing:.21em;font-weight:700}.brand{font-family:Georgia,serif;font-size:clamp(49px,13vw,67px);line-height:.97;letter-spacing:-.055em;margin:30px 0}.coverGrow{flex:1;min-height:16px}.tag{font-size:10px;letter-spacing:.1em;background:#e2bc82;color:#263343;padding:8px 12px;align-self:flex-start;font-weight:800}.cover h1{font-size:clamp(25px,7.7vw,35px);line-height:1.4;letter-spacing:-.035em;margin:15px 0 8px;overflow-wrap:anywhere}.cover p{font-size:14px;line-height:1.65;margin:0 0 12px}.cover .issue{font-size:12px;font-weight:700;border-top:1px solid #ffffff66;padding-top:10px}.credit{font-size:9px;line-height:1.4;color:#e5e2dc;margin-top:8px}.credit a{color:inherit}
 .kicker{font-size:11px;letter-spacing:.13em;color:#9c7749;font-weight:750;line-height:1.5}
 .sheet h2{font-size:clamp(22px,6.6vw,29px);line-height:1.4;margin:17px 0;letter-spacing:-.035em;overflow-wrap:anywhere}
@@ -23,8 +23,40 @@
 @media(max-height:720px){.sheet{padding-top:calc(env(safe-area-inset-top) + 10px);padding-bottom:13px}.sheet h2{font-size:23px;margin:10px 0}.visual{height:85px}.toc{min-height:62px;padding:8px 10px}.cover .brand{margin:18px 0}.cover h1{font-size:26px}.cover p{font-size:13px}}
 @media(max-width:365px){.sheet{padding-left:18px;padding-right:18px}.toc strong{font-size:13px}}
 @media(prefers-reduced-motion:reduce){.sheet.current{animation:none}}
+
+/* Editorial layout: fewer, denser pages. Text is live, selectable and adjustable. */
+.sheet{padding:calc(env(safe-area-inset-top) + 20px) 23px 17px}
+.sheet.cover{background:radial-gradient(ellipse at 77% 30%,rgba(224,145,112,.85),transparent 38%),linear-gradient(152deg,#10263d 3%,#354c66 45%,#846d7c 80%,#152b40);color:white}
+.coverGrow{flex:1;min-height:8px}
+.cover .brand{margin-top:clamp(28px,6vh,75px);font-size:clamp(52px,13.5vw,78px)}
+.cover h1{font-size:clamp(26px,7vw,35px)}
+.cover .tag{letter-spacing:.12em}
+.contents .toc{margin-bottom:12px}
+.article .rule{margin-bottom:13px}
+.article h2{font-size:clamp(22px,6vw,28px);margin:11px 0;line-height:1.35}
+.editorial-panel{height:clamp(145px,27vh,235px);border-radius:14px;padding:18px;display:flex;flex-direction:column;justify-content:space-between;color:#fff;position:relative;overflow:hidden;background:linear-gradient(125deg,#28475d,#ac836b)}
+.editorial-0{background:radial-gradient(circle at 83% 30%,#d5a775,transparent 37%),linear-gradient(135deg,#263d52,#506d7b)}
+.editorial-1{background:radial-gradient(circle at 74% 23%,#f0cfad,transparent 33%),linear-gradient(135deg,#445c6f,#b69088)}
+.editorial-2{background:radial-gradient(circle at 65% 20%,#b6b9a0,transparent 35%),linear-gradient(135deg,#263647,#77656b)}
+.editorial-3{background:radial-gradient(circle at 75% 30%,#b3a3a4,transparent 37%),linear-gradient(135deg,#354e60,#907b6b)}
+.panel-label{font-size:11px;letter-spacing:.15em;font-weight:750;position:relative;z-index:1}
+.panel-title{max-width:90%;font-size:clamp(22px,6vw,32px);font-weight:800;line-height:1.3;position:relative;z-index:1;text-shadow:0 1px 5px #2239}
+.panel-number{font-family:Georgia,serif;font-size:130px;line-height:1;position:absolute;right:-6px;bottom:-29px;opacity:.14}
+.editorial-photo{height:clamp(145px,27vh,235px);width:100%;object-fit:cover;border-radius:14px}
+.article-lead{font-size:var(--size);line-height:1.65;font-weight:500;margin:18px 0 10px;overflow-wrap:anywhere}
+.keypoints{margin-top:10px;background:#eee9df;border-radius:10px;padding:11px 14px;font-size:13px;line-height:1.7}
+.keypoints>div+div{margin-top:3px}
+.small-title{color:#94744e;font-size:11px;font-weight:750;letter-spacing:.07em;margin-bottom:7px}
+.secondary-title{font-size:18px;font-weight:740;line-height:1.45;margin:13px 0}
+.detail-grid{display:flex;flex-direction:column;gap:15px}
+.detail-item{border-bottom:1px solid #ded7ce;padding-bottom:11px}
+.detail-item p{font-size:var(--size);line-height:1.67;margin:0;overflow-wrap:anywhere}
+.article-source{margin-top:15px;padding:12px 14px;background:#ebe6de;border-radius:12px;font-size:12px;line-height:1.6}
+.article-source a{display:block;color:#205479;font-size:15px;font-weight:700;margin-top:8px}
+.article.details .folio{margin-top:10px}
+@media(max-height:760px){.editorial-panel,.editorial-photo{height:135px}.article-lead{line-height:1.5;margin:10px 0}.keypoints{padding:8px 12px}.detail-grid{gap:9px}.detail-item{padding-bottom:7px}.detail-item p{line-height:1.5}}
 </style></head>
-<body><div id="app"><main id="stage"><section class="sheet current cover"><div class="topline">PERSONAL MAGAZINE · DAILY / YOS</div><div class="brand">YOS<br>JOURNAL.</div><div class="coverGrow"></div><span class="tag">TODAY'S EDITION</span><h1>今日を、少し良くする情報。</h1><p>信頼できる情報を、1冊の雑誌のように。</p><div class="issue">記事を読み込み中</div></section></main><nav id="bar" aria-label="ページ操作"><button id="toc" aria-label="目次">☷</button><button id="prev" aria-label="前ページ">‹</button><span id="count">1 / 1</span><button id="next" aria-label="次ページ">›</button><button id="size" aria-label="文字サイズ">Aa</button></nav></div><div id="status" role="status"></div>
+<body><div id="app"><main id="stage"><section class="sheet current cover"><div class="topline">PERSONAL MAGAZINE · DAILY / YOS</div><div class="brand">YOS<br>JOURNAL.</div><div class="coverGrow"></div><span class="tag">DAILY EDIT</span><h1>今日を、少し良くする情報。</h1><p>信頼できる情報を、1冊の雑誌のように。</p><div class="issue">記事を読み込み中</div></section></main><nav id="bar" aria-label="ページ操作"><button id="toc" aria-label="目次">☷</button><button id="prev" aria-label="前ページ">‹</button><span id="count">1 / 1</span><button id="next" aria-label="次ページ">›</button><button id="size" aria-label="文字サイズ">Aa</button></nav></div><div id="status" role="status"></div>
 <script>
 (()=>{'use strict';
 const endpoint='https://raw.githubusercontent.com/yskn0008-bot/ProjectY/main/ios-app/scriptable/journal/latest.json';
@@ -40,27 +72,28 @@ let slides=[],index=0,issueKey='',font=17,tocIndex=1;
 function shell(kind,content){return '<section class="sheet '+kind+'">'+content+'</section>'}
 function para(k,v){return '<h3>'+esc(k)+'</h3><p class="copy">'+esc(v)+'</p>'}
 function addArticle(pages,a,i){
- const cat=esc(a.category||'FEATURE'),title=esc(a.title||''),key='0'+(i+1);
- const head='<div class="kicker">'+key+' / '+cat+'</div><h2>'+title+'</h2><div class="rule"></div>';
- const items=[['概要',a.summary],['この記事を選んだ理由',a.reason],['確認したいこと',a.action],['注意事項',a.caveat],['要点',Array.isArray(a.keyPoints)?a.keyPoints.join('／'):'']].filter(x=>x[1]);
- let part=0;
- for(const [label,txt] of items){const chars=Array.from(String(txt));for(let off=0;off<chars.length;off+=58){
-  const piece=chars.slice(off,off+58).join('');let visual=(part===0)?'<div class="visual">'+icons[i%4]+'</div>':'';
-  pages.push(shell('article',head+visual+para(off?label+'（続き）':label,piece)+'<div class="fill"></div><div class="folio">'+key+' · '+(part+1)+'</div>'));part++;
- }}
+ const cat=esc(a.category||'FEATURE'),title=esc(a.title||''),key=String(i+1).padStart(2,'0');
+ const first='<div class="kicker">'+key+' / '+cat+'</div><h2>'+title+'</h2><div class="rule"></div>';
+ const synopsis=String(a.summary||''),why=String(a.reason||''),action=String(a.action||''),caveat=String(a.caveat||''),keyPoints=Array.isArray(a.keyPoints)?a.keyPoints:[];
+ const image=safeLink(a.image);
+ const panel=image?'<img class="editorial-photo" src="'+esc(image)+'" alt="'+esc(a.title)+'" loading="lazy">':'<div class="editorial-panel editorial-'+(i%4)+'"><div class="panel-label">'+esc(a.category||'JOURNAL')+'</div><div class="panel-title">'+esc((keyPoints[0]||a.title||'').slice(0,38))+'</div><div class="panel-number">'+key+'</div></div>';
+ const bullets=keyPoints.length?'<div class="keypoints"><div class="small-title">CHECK POINTS</div>'+keyPoints.slice(0,3).map(x=>'<div>· '+esc(x)+'</div>').join('')+'</div>':'';
+ pages.push(shell('article',first+panel+'<div class="article-lead">'+esc(synopsis)+'</div>'+bullets+'<div class="fill"></div><div class="folio">STORY '+key+' / 1</div>'));
  const link=safeLink(a.link);
- pages.push(shell('source',head+'<h3>情報源と確認事項</h3><p>出典：'+esc(a.source||'出典未記載')+'</p><small>'+esc(a.sourceDate||'公表日未確認')+'</small>'+(a.caveat?'<p>'+esc(a.caveat)+'</p>':'')+(link?'<a href="'+esc(link)+'" rel="noopener noreferrer" target="_blank">公式情報・原文を確認する ↗</a>':'<p>有効な参照先がありません。</p>')+'<div class="fill"></div><div class="folio">SOURCE · '+key+'</div>'));
+ const items=[['なぜ読む？',why],['次に役立つこと',action],['注意',caveat]].filter(x=>x[1]);
+ const details='<div class="kicker">'+key+' / DEEP DIVE</div><div class="secondary-title">'+title+'</div><div class="rule"></div><div class="detail-grid">'+items.map(([k,v])=>'<section class="detail-item"><div class="small-title">'+esc(k)+'</div><p>'+esc(v)+'</p></section>').join('')+'</div><div class="article-source"><div class="small-title">出典・確認先</div><div>'+esc(a.source||'出典未記載')+' · '+esc(a.sourceDate||'日付未確認')+'</div>'+(link?'<a href="'+esc(link)+'" target="_blank" rel="noopener noreferrer">原文を確認する ↗</a>':'<span>有効なリンクなし</span>')+'</div><div class="fill"></div><div class="folio">STORY '+key+' / 2</div>';
+ pages.push(shell('article details',details));
 }
 function draw(issue){
  if(!issue||!Array.isArray(issue.articles)||!issue.articles.length)throw Error('記事データがありません');
- const articles=issue.articles.filter(a=>a&&a.title&&safeLink(a.link)).slice(0,12);
+ const articles=issue.articles.filter(a=>a&&a.title&&safeLink(a.link)).filter(a=>!(issue.issuedOn==='2026-11-12'&&/タクシー.*求人|配車アプリで働く/.test(a.title))).slice(0,8);
  if(!articles.length)throw Error('出典リンク付きの記事がありません');
  issueKey=String(issue.issuedOn||issue.date||'unknown');
  const parts=[],starts=[];
- parts.push(shell('cover','<div class="topline">PERSONAL MAGAZINE · DAILY / YOS</div><div class="brand">YOS<br>JOURNAL.</div><div class="coverGrow"></div><span class="tag">COVER STORY</span><h1>'+esc(issue.headline||articles[0].title)+'</h1><p>'+esc(issue.lead||'')+'</p><div class="issue">'+esc(issue.date||'発行日未確認')+' · '+articles.length+' STORIES</div><div class="credit">Photo: Mokkie / <a href="https://commons.wikimedia.org/wiki/File:Sunset_beach_at_Okinawa.jpg" target="_blank" rel="noopener">Wikimedia Commons</a> · <a href="https://creativecommons.org/licenses/by-sa/3.0/" target="_blank" rel="noopener">CC BY-SA 3.0</a> · 暗色加工</div>'));
+ parts.push(shell('cover','<div class="topline">PERSONAL MAGAZINE · DAILY / YOS</div><div class="brand">YOS<br>JOURNAL.</div><div class="coverGrow"></div><span class="tag">TODAY / PICKS</span><h1>'+esc(issue.headline||articles[0].title)+'</h1><p>'+esc(issue.lead||'')+'</p><div class="issue">'+esc(issue.date||'発行日未確認')+' · '+articles.length+' STORIES</div>'));
  parts.push('CONTENTS_PLACEHOLDER');
  for(let i=0;i<articles.length;i++){starts.push(parts.length);addArticle(parts,articles[i],i)}
- parts[1]=shell('contents','<div class="kicker">YOS JOURNAL / CONTENTS</div><h2>今号の内容</h2>'+articles.map((a,i)=>'<button class="toc" data-go="'+starts[i]+'"><span class="number">'+String(i+1).padStart(2,'0')+'</span><span class="detail"><small>'+esc(a.category||'FEATURE')+'</small><strong>'+esc(a.title)+'</strong></span><span class="chevron">›</span></button>').join('')+'<div class="fill"></div><div class="folio">'+esc(issue.date||'')+'</div>');
+ parts[1]=shell('contents','<div class="kicker">YOS JOURNAL / CONTENTS</div><h2>今日の読みもの</h2>'+articles.map((a,i)=>'<button class="toc" data-go="'+starts[i]+'"><span class="number">'+String(i+1).padStart(2,'0')+'</span><span class="detail"><small>'+esc(a.category||'FEATURE')+'</small><strong>'+esc(a.title)+'</strong></span><span class="chevron">›</span></button>').join('')+'<div class="fill"></div><div class="folio">'+esc(issue.date||'')+'</div>');
  stage.innerHTML=parts.join('');
  slides=Array.from(stage.querySelectorAll('.sheet'));tocIndex=1;
  stage.querySelectorAll('[data-go]').forEach(el=>el.addEventListener('click',()=>show(Number(el.dataset.go))));
