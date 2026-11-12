@@ -192,7 +192,7 @@ button:active{opacity:.8}@media(min-width:640px){.dock{left:calc((100vw - 640px)
     <div class="metric"><label><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M20 16A8 8 0 0 1 8 4 8 8 0 1 0 20 16Z"/></svg>睡眠予定</label><strong id="sleepInfo">—</strong></div>
   </section>
   <div class="searchrow" id="searchRow" hidden><input id="searchInput" type="search" placeholder="予定・タスクを検索" aria-label="検索"></div>
-  <div class="microtools"><div class="notice" id="notice" aria-live="polite">端末内の予定を表示します</div><button class="zoomBtn" id="yosTestToggle" type="button" hidden aria-label="テスト予定を表示">テスト表示</button><button class="zoomBtn" id="zoomBtn" type="button" aria-label="タイムラインの表示倍率を切り替え">詳細に拡大</button></div>
+  <div class="microtools"><div class="notice" id="notice" aria-live="polite">端末内の予定を表示します</div><button class="zoomBtn" id="yosTestToggle" type="button" hidden aria-label="テスト予定を表示">テスト表示</button><button class="zoomBtn" id="elasticBtn" type="button" aria-pressed="true" aria-label="時間枠の自動サイズ調整を切り替え">自動サイズ ON</button><button class="zoomBtn" id="zoomBtn" type="button" aria-label="タイムラインの表示倍率を切り替え">詳細に拡大</button></div>
   <div class="all-day" id="dayAllDay" hidden aria-label="終日の予定"></div>
   <div class="editor-backdrop" id="editorBackdrop" aria-hidden="true"></div>
   <div class="editor" id="editor" role="dialog" aria-modal="true" aria-labelledby="editorTitle"><b id="editorTitle">予定を追加</b><div class="fields"><input id="newTitle" placeholder="名前" style="flex:1 1 160px" aria-label="名前"><input id="newTime" type="time" value="10:00" aria-label="開始時刻"><div class="duration-control"><input id="newDuration" type="number" min="5" max="1440" step="5" value="30" aria-label="所要時間（分）"><label for="newDuration">分</label></div><select id="newKind" aria-label="種類"><option value="task">タスク</option><option value="habit">習慣</option><option value="schedule">予定</option></select></div><span class="edit-end" id="editEnd">終了予定：10:30</span><div id="shortcutField"><label for="shortcutPicker">ショートカット（任意）</label><select id="shortcutPicker" class="shortcut-picker" aria-label="登録済みショートカットから選ぶ"><option value="">候補から選ぶ</option></select><input id="newShortcut" maxlength="100" placeholder="既存ショートカットの正式名称" aria-label="起動するiPhoneショートカット名" style="width:100%;margin:5px 0 9px"><small style="color:#d5dce7">設定したショートカットはここから実行できます。実行しても自動完了にはなりません。</small><a id="runShortcut" class="editor-shortcut-run" href="#" hidden>ショートカットを実行</a></div><div class="editor-actions"><button id="saveBtn">追加する</button><button id="cancelEditor" class="light" type="button">閉じる</button></div></div>
@@ -424,7 +424,44 @@ const glyphs={
 function eventIcon(item){const t=item.t||'';const type=/睡眠|就寝/.test(t)?'sleep':/歩|ウォーキング/.test(t)?'walk':/朝食|昼食|夕食|ご飯/.test(t)?'meal':/入浴|お風呂/.test(t)?'bath':/運動|筋トレ/.test(t)?'fitness':/会議/.test(t)?'meeting':/集中|作業/.test(t)?'laptop':/仕事/.test(t)?'work':'clock';return '<svg viewBox="0 0 24 24" aria-hidden="true">'+glyphs[type]+'</svg>'}
 let density='overview',scale=27;
 let zoom=null,selectedId=null;
-const yFor=m=>m/60*scale;
+function yosElasticAxis(rows,baseScale){
+ const valid=rows.filter(x=>Number.isFinite(x.s)&&Number.isFinite(x.d)&&x.s>=0&&x.d>0&&x.s+x.d<=1440);
+ const knots=new Set([0,1440]);
+ for(let h=0;h<=24;h++)knots.add(h*60);
+ for(const item of valid){knots.add(item.s);knots.add(item.s+item.d)}
+ const minutes=[...knots].sort((a,b)=>a-b);
+ const indices=new Map(minutes.map((m,i)=>[m,i])),ending=new Map();
+ for(const item of valid){
+  const minHeight=item.kind==='task'&&!item.f?46:Math.min(22,item.d/60*baseScale);
+  const end=indices.get(item.s+item.d);
+  if(!ending.has(end))ending.set(end,[]);
+  ending.get(end).push({start:indices.get(item.s),height:minHeight});
+ }
+ const pixels=[0];
+ for(let i=1;i<minutes.length;i++){
+  let next=pixels[i-1]+(minutes[i]-minutes[i-1])/60*baseScale;
+  for(const span of ending.get(i)||[])next=Math.max(next,pixels[span.start]+span.height);
+  pixels.push(next);
+ }
+ const coordinate=t=>{
+  const minute=Math.max(0,Math.min(1440,t));
+  let lo=0,hi=minutes.length-1;
+  while(hi-lo>1){const mid=(lo+hi)>>1;if(minutes[mid]<=minute)lo=mid;else hi=mid}
+  const frac=(minute-minutes[lo])/(minutes[hi]-minutes[lo]);
+  return pixels[lo]+(pixels[hi]-pixels[lo])*frac;
+ };
+ const minuteAt=y=>{
+  const px=Math.max(0,Math.min(pixels[pixels.length-1],y));
+  let lo=0,hi=pixels.length-1;
+  while(hi-lo>1){const mid=(lo+hi)>>1;if(pixels[mid]<=px)lo=mid;else hi=mid}
+  const frac=(px-pixels[lo])/(pixels[hi]-pixels[lo]);
+  return minutes[lo]+(minutes[hi]-minutes[lo])*frac;
+ };
+ return {minutes,pixels,coordinate,minuteAt};
+}
+let elasticEnabled=true,elasticAxis=null;
+const yFor=m=>elasticEnabled&&elasticAxis?elasticAxis.coordinate(m):m/60*scale;
+const minuteAtY=y=>elasticEnabled&&elasticAxis?elasticAxis.minuteAt(y):y/scale*60;
 const editor=document.getElementById('editor');let editingId=null,deleteConfirmId=null,restorePendingDay=null,swipeDeleteId=null;
 function showFocusFor(item){
  deleteConfirmId=null;selectedId=item.id;zoom=item.s;
@@ -766,7 +803,8 @@ document.getElementById('yosTestToggle').onclick=()=>{
  note.textContent=showTestCalendar?'テスト予定を表示中 · 元カレンダーは変更していません':'テスト予定を非表示 · 元カレンダーは変更していません';
  smoothRender();updateReview();
 };
-document.getElementById('zoomBtn').onclick=()=>{density=density==='overview'?'detail':'overview';scale=density==='overview'?27:56;document.getElementById('zoomBtn').textContent=density==='overview'?'詳細に拡大':'全体表示';render();};
+document.getElementById('elasticBtn').onclick=()=>{elasticEnabled=!elasticEnabled;const btn=document.getElementById('elasticBtn');btn.textContent=elasticEnabled?'自動サイズ ON':'自動サイズ OFF';btn.setAttribute('aria-pressed',String(elasticEnabled));smoothRender();};
+document.getElementById('zoomBtn').onclick=()=>{density=density==='overview'?'detail':'overview';scale=density==='overview'?27:56;document.getElementById('zoomBtn').textContent=density==='overview'?'詳細に拡大':'全体表示';smoothRender();};
 document.getElementById('searchBtn').onclick=()=>{const row=document.getElementById('searchRow');row.hidden=!row.hidden;if(!row.hidden){setTab('timeline');document.getElementById('searchInput').focus()}else{searchText='';document.getElementById('searchInput').value='';render()}};
 document.getElementById('searchInput').oninput=e=>{searchText=e.target.value.trim().toLocaleLowerCase();render()};
 document.getElementById('moreBtn').onclick=()=>{
@@ -843,7 +881,7 @@ function wireTaskGestures(el,item){
  const clearPaint=()=>{if(paintFrame){cancelAnimationFrame(paintFrame);paintFrame=0;}if(swipeFrame){cancelAnimationFrame(swipeFrame);swipeFrame=0;}};
  const paintSwipe=()=>{swipeFrame=0;if(mode==='swipe'&&active!==null)el.style.transform='translate3d('+Math.max(-74,lastX-startX)+'px,0,0)';};
  const paintDrag=()=>{paintFrame=0;if(mode!=='drag'||active===null)return;const offset=lastY-startY;el.style.transform='translate3d(0,'+offset+'px,0)';const at=candidateStart();if(at!==lastPreview){lastPreview=at;if(timeLabel)timeLabel.textContent=fmt(at)+'–'+fmt(at+item.d);}};
- const candidateStart=()=>Math.max(0,Math.min(1440-item.d,Math.round((item.s+(lastY-startY)/scale*60)/5)*5));
+ const candidateStart=()=>Math.max(0,Math.min(1440-item.d,Math.round(minuteAtY(yFor(item.s)+lastY-startY)/5)*5));
  const begin=(x,y,id)=>{
   if(active!==null)return;
   active=id;startX=lastX=x;startY=lastY=y;mode='tap';lastPreview=item.s;clearPaint();el.style.transition='';
@@ -915,10 +953,11 @@ function smoothRender(activeId,oldActiveRect){
 }
 function render(){
  latestCompatibility=yosCompatibility(items);
+ const sorted=[...items].filter(x=>Number.isFinite(x.s)&&Number.isFinite(x.d)&&x.d>0&&x.s>=0&&x.s+x.d<=1440).sort((a,b)=>a.s-b.s||a.id-b.id);
+ elasticAxis=elasticEnabled?yosElasticAxis(sorted,scale):null;
  tl.querySelectorAll('.hour,.card,.tick').forEach(n=>n.remove());
  const bottom=yFor(1440);
  for(let h=0;h<=24;h++){const el=document.createElement('div');el.className='hour';el.style.top=yFor(h*60)+'px';el.innerHTML='<span>'+fmt(h*60)+'</span>';tl.append(el)}
- const sorted=[...items].filter(x=>Number.isFinite(x.s)&&Number.isFinite(x.d)&&x.d>0&&x.s>=0&&x.s+x.d<=1440).sort((a,b)=>a.s-b.s||a.id-b.id);
  const lanes=new Map();let group=[],groupEnd=-1;const groups=[];
  for(const item of sorted){if(group.length&&item.s>=groupEnd){groups.push(group);group=[]}group.push(item);groupEnd=Math.max(groupEnd,item.s+item.d)}
  if(group.length)groups.push(group);
@@ -927,12 +966,12 @@ function render(){
  let priorVisualBottom=-2;
  for(const group of groups){
    const start=yFor(group[0].s);
-   const offset=Math.max(0,priorVisualBottom+3-start);
+   const offset=elasticEnabled?0:Math.max(0,priorVisualBottom+3-start);
    for(const item of group)lanes.get(item).offset=offset;
    priorVisualBottom=Math.max(priorVisualBottom,...group.map(item=>yFor(item.s)+offset+Math.max(item.kind==='task'&&!item.f?42:density==='overview'?17:22,yFor(item.s+item.d)-yFor(item.s)-2)));
  }
  sorted.forEach(item=>{
-   const natural=yFor(item.s);const height=Math.max(item.kind==='task'&&!item.f?42:density==='overview'?17:22,yFor(item.s+item.d)-natural-2);const top=natural+(lanes.get(item)?.offset||0);
+   const natural=yFor(item.s);const height=elasticEnabled?Math.max(1,yFor(item.s+item.d)-natural-2):Math.max(item.kind==='task'&&!item.f?42:density==='overview'?17:22,yFor(item.s+item.d)-natural-2);const top=natural+(lanes.get(item)?.offset||0);
    if(top>natural+2)pushed++;
    lastBottom=top+height;
    const el=document.createElement('div');el.className='card '+(item.kind==='habit'?'habit':item.kind==='task'?'task':'schedule');
@@ -957,10 +996,10 @@ function render(){
    const tick=document.createElement('div');tick.className='tick';tick.style.top=(top-4)+'px';tl.append(tick);
    let downY=0,downS=0,moved=false,holding=false,activePointer=null,frame=0,latestY=0,previewS=item.s,lastHaptic=0,startedAt=0;
    const timeLabel=el.querySelector('small');
-   const paint=()=>{frame=0;if(!holding)return;const offset=latestY-downY;el.style.transform='translate3d(0,'+offset+'px,0) scale(1.015)';const next=Math.max(0,Math.min(1440-item.d,Math.round((downS+offset/scale*60)/5)*5));if(next!==previewS){previewS=next;timeLabel.textContent=fmt(next)+'–'+fmt(next+item.d);const now=performance.now();if(now-lastHaptic>75){lastHaptic=now;vibrate()}}};
+   const paint=()=>{frame=0;if(!holding)return;const offset=latestY-downY;el.style.transform='translate3d(0,'+offset+'px,0) scale(1.015)';const next=Math.max(0,Math.min(1440-item.d,Math.round(minuteAtY(yFor(downS)+offset)/5)*5));if(next!==previewS){previewS=next;timeLabel.textContent=fmt(next)+'–'+fmt(next+item.d);const now=performance.now();if(now-lastHaptic>75){lastHaptic=now;vibrate()}}};
    const startDrag=(y,id)=>{downY=latestY=y;downS=previewS=item.s;startedAt=performance.now();moved=false;holding=false;activePointer=id};
    const moveDrag=y=>{if(activePointer===null)return;latestY=y;const distance=Math.abs(latestY-downY);if(distance>3&&!item.f){holding=true;moved=true;el.classList.add('moving');if(!frame)frame=requestAnimationFrame(paint)}};
-   const endDrag=cancelled=>{if(activePointer===null)return;activePointer=null;if(frame){cancelAnimationFrame(frame);frame=0}const releasedRect=el.getBoundingClientRect();el.classList.remove('moving');el.style.transform='';if(holding&&moved&&!cancelled){const offset=latestY-downY;previewS=Math.max(0,Math.min(1440-item.d,Math.round((downS+offset/scale*60)/5)*5));item.s=previewS;const clashes=items.filter(x=>x!==item&&item.s<x.s+x.d&&x.s<item.s+item.d);note.textContent=(clashes.length?'時間が重複：'+clashes.map(x=>x.t).join('、'):'移動しました')+(persist()?'（保存処理中）':'（保存処理失敗）');smoothRender(item.id,releasedRect)}else if(!moved&&!cancelled){showFocusFor(item);smoothRender()}holding=false};
+   const endDrag=cancelled=>{if(activePointer===null)return;activePointer=null;if(frame){cancelAnimationFrame(frame);frame=0}const releasedRect=el.getBoundingClientRect();el.classList.remove('moving');el.style.transform='';if(holding&&moved&&!cancelled){const offset=latestY-downY;previewS=Math.max(0,Math.min(1440-item.d,Math.round(minuteAtY(yFor(downS)+offset)/5)*5));item.s=previewS;const clashes=items.filter(x=>x!==item&&item.s<x.s+x.d&&x.s<item.s+item.d);note.textContent=(clashes.length?'時間が重複：'+clashes.map(x=>x.t).join('、'):'移動しました')+(persist()?'（保存処理中）':'（保存処理失敗）');smoothRender(item.id,releasedRect)}else if(!moved&&!cancelled){showFocusFor(item);smoothRender()}holding=false};
    if(item.kind==='task'&&!item.f){wireTaskGestures(el,item)}else{
    // Touch events are used on iOS WebView to avoid pointer capture cancelling a vertical drag.
    el.addEventListener('touchstart',e=>{if(e.touches.length!==1)return;startDrag(e.touches[0].clientY,'touch')},{passive:true});
