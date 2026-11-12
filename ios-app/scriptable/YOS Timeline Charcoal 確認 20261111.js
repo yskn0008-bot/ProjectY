@@ -139,8 +139,17 @@ async function main(){
  // Native bridge: a user-tapped local task link is the only shortcut:// request we open.
  // Safari.open is allowed only for the exact encoded run-shortcut name URL scheme.
  const shortcutPrefix='shortcuts://run-shortcut?name=';
+ const mapsPrefix='https://maps.apple.com/directions?destination=';
  view.shouldAllowRequest=request=>{
   const url=String(request?.url||'');
+  // Permit only Apple's directions URL produced by the user's explicit tap.
+  if(url.startsWith(mapsPrefix)){
+   const encoded=url.slice(mapsPrefix.length);
+   if(url.length<=900&&/^[A-Za-z0-9_.!~*'()%+-]+&mode=(driving|walking|transit)$/.test(encoded)){
+    try{Safari.open(url)}catch(error){console.warn('Apple Maps handoff failed: '+String(error.message||error));}
+   }
+   return false;
+  }
   if(!url.startsWith(shortcutPrefix))return true;
   const name=url.slice(shortcutPrefix.length);
   if(name&&name.length<=1200&&!/[&#?]/.test(name)){
@@ -233,7 +242,7 @@ button:active{opacity:.8}@media(min-width:640px){.dock{left:calc((100vw - 640px)
   <div class="compat-status" id="compatStatus" aria-live="polite">相性を判定中</div>
   <p class="gesture-help" id="gestureHelp">タスク：タップで完了 ｜ 左スワイプで削除 ｜ 長押しで編集 ｜ 上下ドラッグで移動</p>
   <div class="timeline-wrap" id="timelinePanel"><div class="timeline" id="tl"><div class="axis"></div><div class="nowline" id="nowLine" hidden><span class="nowbadge" id="nowBadge"></span></div></div></div>
-  <section class="tabbox" id="yosOutingPanel" aria-label="ついで行動の提案"><h3>ついで行動</h3><p class="muted" id="yosOutingSummary">経路・営業状況・所要時間を確認中</p><div id="yosOutingProposals"></div><section class="yos-outing-manual"><details id="yosOutingManual"><summary>立寄りを確認して提案</summary><p class="muted">地図での経路・移動時間・営業時間を自分で確認した場合のみ使用。情報は保存しません。</p><label for="yosOutingTaskChoice">未配置のタスク</label><select id="yosOutingTaskChoice"></select><label for="yosOutingPlace">確認した立寄先</label><input id="yosOutingPlace" type="text" maxlength="80" placeholder="店舗・窓口などの名称"><div class="yos-outing-fields"><label>立寄りに増える移動時間（分）<input id="yosOutingDetour" type="number" min="0" max="180" step="1" value="10"></label><label>作業時間（分）<input id="yosOutingDuration" type="number" min="5" max="240" step="1" value="15"></label><label>空き枠の開始時刻<input id="yosOutingStart" type="time"></label><label>空き枠の終了時刻<input id="yosOutingEnd" type="time"></label></div><label class="yos-outing-confirm"><input id="yosOutingConfirmed" type="checkbox"> 地図の経路・所要時間・営業状況・空き枠を確認済み</label><button id="yosOutingBuild" type="button">この条件で提案</button><p id="yosOutingManualStatus" class="muted" aria-live="polite"></p></details></section><p class="muted">確定予定を動かさず、Notionの原本も更新しません。</p></section>
+  <section class="tabbox" id="yosOutingPanel" aria-label="ついで行動の提案"><h3>ついで行動</h3><p class="muted" id="yosOutingSummary">経路・営業状況・所要時間を確認中</p><div id="yosOutingProposals"></div><section class="yos-outing-manual"><details id="yosOutingManual"><summary>立寄りを確認して提案</summary><p class="muted">地図での経路・移動時間・営業時間を自分で確認した場合のみ使用。情報は保存しません。</p><label for="yosOutingTaskChoice">未配置のタスク</label><select id="yosOutingTaskChoice"></select><label for="yosOutingPlace">確認した立寄先</label><input id="yosOutingPlace" type="text" maxlength="80" placeholder="施設名と市町村・住所まで入力"><label for="yosOutingMode">経路の確認方法</label><select id="yosOutingMode"><option value="driving">車</option><option value="walking">徒歩</option><option value="transit">公共交通</option></select><button id="yosOutingOpenMaps" type="button">Apple Mapsで経路を確認</button><div class="yos-outing-fields"><label>立寄りに増える移動時間（分）<input id="yosOutingDetour" type="number" min="0" max="180" step="1" value="10"></label><label>作業時間（分）<input id="yosOutingDuration" type="number" min="5" max="240" step="1" value="15"></label><label>空き枠の開始時刻<input id="yosOutingStart" type="time"></label><label>空き枠の終了時刻<input id="yosOutingEnd" type="time"></label></div><label class="yos-outing-confirm"><input id="yosOutingConfirmed" type="checkbox"> 地図の経路・所要時間・営業状況・空き枠を確認済み</label><button id="yosOutingBuild" type="button">この条件で提案</button><p id="yosOutingManualStatus" class="muted" aria-live="polite"></p></details></section><p class="muted">確定予定を動かさず、Notionの原本も更新しません。</p></section>
   <section class="tabbox" id="taskPanel"><h3>タスク・未配置</h3><p class="muted">専門タスクの期限と、実行する時間は別。配置しても元データの期限・完了は変わりません。</p>
  <div id="taskList"></div><section id="yosLearningHints" class="yos-learning-live" aria-label="期限が近いタスク" hidden><h3>期限が近いタスク <small>確認のみ</small></h3><p class="muted" id="yosLearningCoverage"></p><div id="yosLearningRows"></div></section><h3>各専門ページから集約</h3><p class="muted" id="yosTaskSourceStatus">Notion Tasks：確認中</p>
  <label for="yosStartFrom">配置提案の開始時刻</label><input id="yosStartFrom" type="time" value="09:00" aria-label="配置提案の開始時刻">
@@ -410,6 +419,21 @@ function yosOutingCandidates(tasks,context,occupied,day){
 }
 // YOS_ADAPTIVE_ERRANDS_END
 // YOS_OUTING_MANUAL_CAPTURE_START
+function yosOutingMapsUrl(destination,mode){
+ if(typeof destination!=='string'||!destination.trim()||destination.trim().length>80||!['driving','walking','transit'].includes(mode))return null;
+ return 'https://maps.apple.com/directions?destination='+encodeURIComponent(destination.trim())+'&mode='+mode;
+}
+function yosOutingOpenMaps(){
+ const destination=document.getElementById('yosOutingPlace').value;
+ const mode=document.getElementById('yosOutingMode').value;
+ const link=yosOutingMapsUrl(destination,mode);
+ const status=document.getElementById('yosOutingManualStatus');
+ if(!link){status.textContent='住所または場所を入力してください。';return false;}
+ // Return to this screen to confirm the route, detour minutes and store hours.
+ status.textContent='Apple Mapsで移動時間を確認し、この画面へ戻って入力してください。';
+ window.location.href=link;
+ return true;
+}
 function yosOutingOccupied(day){
  const allCalendar=(Array.isArray(calendarByDay[day])?calendarByDay[day]:[]).map((x,i)=>({id:'calendar-'+i,s:x?.start,d:x?.duration,source:'Apple Calendar'}));
  const local=items.filter(x=>!x||x.source!=='Apple Calendar');
@@ -468,6 +492,7 @@ function yosOutingManualSetup(){
  document.getElementById('yosOutingStart').value=fmt(start);
  document.getElementById('yosOutingEnd').value=fmt(end);
  document.getElementById('yosOutingBuild').onclick=yosOutingManualCapture;
+ document.getElementById('yosOutingOpenMaps').onclick=yosOutingOpenMaps;
 }
 // YOS_OUTING_MANUAL_CAPTURE_END
 
