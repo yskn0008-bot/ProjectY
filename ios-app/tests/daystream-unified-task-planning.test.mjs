@@ -622,3 +622,32 @@ test('horizontal task swipe paints at display frame-rate and eases back into pla
  assert.match(js,/transform \.26s cubic-bezier\(\.22,1,\.36,1\)/);
  assert.match(js,/showSwipeDelete\(item\)/);
 });
+
+
+test('elastic axis expands short tasks while preserving exact hour/now and reversible minute coordinates',()=>{
+ const rendered=Function('return '+String.fromCharCode(96)+html+String.fromCharCode(96))();
+ const js=rendered.split('<script>')[1]?.split('</script>')[0]||'';
+ const from=js.indexOf('function yosElasticAxis(rows,baseScale){');
+ const until=js.indexOf('let elasticEnabled=true,elasticAxis=null;',from);
+ assert.ok(from>0&&until>from,'executable elastic model is inside the actual WebView');
+ const model=vm.runInNewContext(js.slice(from,until)+'\nyosElasticAxis',{});
+ const task=(id,s,d)=>({id,t:'習慣',s,d,kind:'task',f:0});
+ const a=model([task(1,420,5)],27);
+ assert.ok(a.coordinate(425)-a.coordinate(420)>=46-0.001,'5-minute task reserves at least 46px');
+ assert.ok(a.coordinate(420)-a.coordinate(360)<=28,'preceding quiet hour remains compact');
+ assert.ok(a.coordinate(480)-a.coordinate(425)<=27,'remaining quiet part stays near original density');
+ assert.equal(Math.round(a.minuteAt(a.coordinate(423))),423,'minutes round-trip correctly');
+ assert.ok(a.coordinate(1440)>a.coordinate(0));
+ const many=model([task(1,900,5),task(2,905,5),task(3,910,5)],27);
+ for(const t of [900,905,910])assert.ok(many.coordinate(t+5)-many.coordinate(t)>=46-0.001);
+ assert.ok(many.coordinate(960)-many.coordinate(900)>140,'crowded hour expands naturally');
+ const overlap=model([task(1,900,5),task(2,902,5)],27);
+ for(const [start,end] of [[900,905],[902,907]])assert.ok(overlap.coordinate(end)-overlap.coordinate(start)>=46-0.001);
+ const original=[task(1,420,5)];const before=JSON.stringify(original);model(original,27);assert.equal(JSON.stringify(original),before,'view computation never alters task data');
+ assert.match(js,/elasticAxis=elasticEnabled\?yosElasticAxis\(sorted,scale\):null/);
+ assert.match(js,/const yFor=m=>elasticEnabled&&elasticAxis\?elasticAxis\.coordinate\(m\):m\/60\*scale/);
+ assert.match(js,/const minuteAtY=y=>elasticEnabled&&elasticAxis\?elasticAxis\.minuteAt\(y\):y\/scale\*60/);
+ assert.match(js,/Math\.round\(minuteAtY\(yFor\(item\.s\)\+lastY-startY\)\/5\)\*5/);
+ assert.match(rendered,/id="elasticBtn"/);
+ assert.match(js,/btn\.textContent=elasticEnabled\?'自動サイズ ON':'自動サイズ OFF'/);
+});
