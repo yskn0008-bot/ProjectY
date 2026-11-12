@@ -73,6 +73,18 @@ try{
  assert.equal(pack.tasks.items[0].title,'Web imported task');
  assert.equal(pack.calendar.eventCount,1);
 
+ assert.equal(await page.locator('#yosWebTaskRefresh').count(),1,'read-only YOS Tasks sign-in entry exists');
+ const localSchedule=await page.evaluate(()=>{
+  localStorage.removeItem('YOS_DAYSTREAM_WEB_CAL_SNAPSHOT_V1');
+  localStorage.setItem('yos-life-v1',JSON.stringify({days:{'2026-11-13':{schedule:[{title:'LIFE BROWSER SMOKE',start:'2026-11-13T18:00:00+09:00',end:'2026-11-13T18:45:00+09:00'}]}}}));
+  return true
+ });
+ assert.equal(localSchedule,true);
+ await page.reload({waitUntil:'domcontentloaded'});
+ const inherited=await page.evaluate(()=>window.YOS_CHARCOAL_BOOT);
+ assert.equal(inherited.calendarSource,'yos-life-local');
+ assert.equal(inherited.calendarDays['2026-11-13'][0].title,'LIFE BROWSER SMOKE');
+ assert.match(await page.locator('#yosWebSourceState').innerText(),/保存済みMY WAY生活予定/);
  assert.deepEqual(errors,[],'no script errors during load, storage, reload or learning');
  console.log('DAYSTREAM Web port browser smoke PASS',type);
 }finally{await browser.close()}
