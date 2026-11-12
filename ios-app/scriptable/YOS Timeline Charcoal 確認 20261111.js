@@ -479,6 +479,23 @@ function yosOutingManualCapture(){
  info.textContent='確認した立寄先「'+place+'」の一時提案です。5分後に失効します。';
  yosRenderOuting();return true;
 }
+// Propose the next confirmed calendar gap without persisting or editing a booking.
+function yosOutingNextGap(nowMinutes,occupied,minimumMinutes=30){
+ if(!Number.isInteger(nowMinutes)||nowMinutes<0||nowMinutes>=1440||!Array.isArray(occupied))return null;
+ if(!Number.isInteger(minimumMinutes)||minimumMinutes<5||minimumMinutes>480)return null;
+ if(occupied.some(x=>!x||!Number.isInteger(x.s)||!Number.isInteger(x.d)||x.d<=0||x.s<0||x.s+x.d>1440))return null;
+ const start=Math.ceil(nowMinutes/5)*5,limit=Math.min(1440,start+480);
+ const busy=occupied.map(x=>({s:x.s,end:x.s+x.d})).sort((a,b)=>a.s-b.s);
+ let cursor=start;
+ for(const block of busy){
+  if(block.end<=cursor)continue;
+  if(block.s>cursor&&Math.min(block.s,limit)-cursor>=minimumMinutes)
+   return {start:cursor,end:Math.min(block.s,limit,cursor+60)};
+  cursor=Math.max(cursor,block.end);
+  if(cursor>=limit)return null;
+ }
+ return limit-cursor>=minimumMinutes?{start:cursor,end:Math.min(limit,cursor+60)}:null;
+}
 function yosOutingManualSetup(){
  const pick=document.getElementById('yosOutingTaskChoice');
  if(!pick)return;
@@ -488,9 +505,11 @@ function yosOutingManualSetup(){
   const opt=document.createElement('option');opt.value=task.id;opt.textContent=task.title.slice(0,90);pick.append(opt);
  }
  const now=new Date(),minute=now.getHours()*60+now.getMinutes();
- const start=Math.min(1430,Math.ceil(minute/5)*5),end=Math.min(1439,start+60);
- document.getElementById('yosOutingStart').value=fmt(start);
- document.getElementById('yosOutingEnd').value=fmt(end);
+ const today=localISO(now),validSource=selectedDay===today&&taskSource.status==='ok'&&calendarCoverage.status==='ok'&&isCalendarCovered(today)&&!(allDayDays[today]||[]).length;
+ const gap=validSource?yosOutingNextGap(minute,yosOutingOccupied(today)):null;
+ document.getElementById('yosOutingStart').value=gap?fmt(gap.start):'';
+ document.getElementById('yosOutingEnd').value=gap?fmt(gap.end):'';
+ document.getElementById('yosOutingManualStatus').textContent=gap?'次の空き時間を仮入力しました。実際の経路・営業状況は別途確認してください。':'確認できる空き時間がありません。予定取得・日付を確認してください。';
  document.getElementById('yosOutingBuild').onclick=yosOutingManualCapture;
  document.getElementById('yosOutingOpenMaps').onclick=yosOutingOpenMaps;
 }
