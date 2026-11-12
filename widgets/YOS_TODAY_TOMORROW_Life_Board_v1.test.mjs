@@ -110,7 +110,7 @@ test('overdue task is not silently promoted as todays top priority', async () =>
     {title:'21 | Old Night Brief task',due:localDate(-20),nextAction:'Long historical detail should be folded away'},
     {title:'22 | Relevant current task',due:localDate(+1),nextAction:'Current action'},
   ];
-  const mock = runtime(false,false,'DAY',true,tasks);
+  const mock = runtime(false,false,'DAY',true,tasks,[]);
   await new Function(...Object.keys(mock.globals),'return '+body)(...Object.values(mock.globals));
   const page = mock.snapshot().html;
   const overview = page.slice(page.indexOf('<div class="quick">'),page.indexOf('</div>',page.indexOf('<div class="quick">')));
@@ -547,14 +547,15 @@ test('plans, past actions and third-party exercise do not count as current habit
   }
 });
 
+// Diary fixtures follow Scriptable's device-local date boundary in every test timezone.
 const diaryRow=(date,body,origin='Clarity')=>({properties:{
   '日付':{date:{start:date}},'記録元':{select:{name:origin}},
   '本文':{rich_text:[{plain_text:body}]}
 }});
 test('seven-day tracker recognizes explicit diary movement reports without marking unreported days failed',async()=>{
   const now=new Date();
-  const today=now.toLocaleDateString('sv-SE',{timeZone:'Asia/Tokyo'});
-  const yesterday=new Date(now.getTime()-86400000).toLocaleDateString('sv-SE',{timeZone:'Asia/Tokyo'});
+  const today=now.toLocaleDateString('sv-SE');
+  const yesterday=new Date(now.getTime()-86400000).toLocaleDateString('sv-SE');
   const diary={results:[diaryRow(today,'今日は5分歩いた'),diaryRow(yesterday,'スクワット10回やった')],has_more:false};
   const mock=runtime(false,false,'DAY',false,null,[],undefined,null,null,{results:[],has_more:false},diary);
   await new Function(...Object.keys(mock.globals),'return '+body)(...Object.values(mock.globals));
@@ -566,8 +567,8 @@ test('seven-day tracker recognizes explicit diary movement reports without marki
 });
 test('plan, negation, wrong source and old diary entries do not count as exercise report',async()=>{
   const now=new Date();
-  const today=now.toLocaleDateString('sv-SE',{timeZone:'Asia/Tokyo'});
-  const old=new Date(now.getTime()-10*86400000).toLocaleDateString('sv-SE',{timeZone:'Asia/Tokyo'});
+  const today=now.toLocaleDateString('sv-SE');
+  const old=new Date(now.getTime()-10*86400000).toLocaleDateString('sv-SE');
   const diary={results:[
     diaryRow(today,'今日は5分歩く予定'),
     diaryRow(today,'今日は5分歩かなかった'),
@@ -580,7 +581,7 @@ test('plan, negation, wrong source and old diary entries do not count as exercis
   assert.doesNotMatch(mock.snapshot().html,/>報告あり</);
 });
 test('partially fetched diary does not imply full coverage',async()=>{
-  const today=new Date().toLocaleDateString('sv-SE',{timeZone:'Asia/Tokyo'});
+  const today=new Date().toLocaleDateString('sv-SE');
   const diary={results:[diaryRow(today,'今日は5分歩いた')],has_more:true,next_cursor:'next'};
   const mock=runtime(false,false,'DAY',false,null,[],undefined,null,null,{results:[],has_more:false},diary);
   await new Function(...Object.keys(mock.globals),'return '+body)(...Object.values(mock.globals));
@@ -595,7 +596,7 @@ test('no Keychain or blocked Notion displays unknown rather than inventing compl
   assert.match(blocked.snapshot().html,/日記取得失敗：過去7日の運動実績は未確認/);
 });
 test('widget refresh never reads private diary or increases network access',async()=>{
-  const today=new Date().toLocaleDateString('sv-SE',{timeZone:'Asia/Tokyo'});
+  const today=new Date().toLocaleDateString('sv-SE');
   const diary={results:[diaryRow(today,'今日は5分歩いた')],has_more:false};
   const mock=runtime(true,false,'DAY',false,null,[],undefined,null,null,{results:[],has_more:false},diary);
   await new Function(...Object.keys(mock.globals),'return '+body)(...Object.values(mock.globals));
@@ -604,7 +605,7 @@ test('widget refresh never reads private diary or increases network access',asyn
 
 
 test('actual health-sync journal marker counts a day even when the raw report is inside a titled block',async()=>{
-  const today=new Date().toLocaleDateString('sv-SE',{timeZone:'Asia/Tokyo'});
+  const today=new Date().toLocaleDateString('sv-SE');
   const journalText='\n【Clarity健康記録｜運動｜報告 18:00】\n今日は5分歩いたよ\n本人の運動実施報告。時間未確認。\n[YOS-health:clarity:habit-abc:activity]\n';
   const row=diaryRow(today,journalText);
   row.properties['記録キー']={rich_text:[{plain_text:'health:'+today}]};
@@ -614,7 +615,7 @@ test('actual health-sync journal marker counts a day even when the raw report is
   assert.match(mock.snapshot().html,/日記で確認できた運動報告：1日（過去7日）/);
 });
 test('health marker with wrong journal key or untrusted source does not establish movement',async()=>{
-  const today=new Date().toLocaleDateString('sv-SE',{timeZone:'Asia/Tokyo'});
+  const today=new Date().toLocaleDateString('sv-SE');
   const content='【Clarity健康記録｜運動｜報告 18:00】\n今日は5分歩いた\n[YOS-health:clarity:habit-abc:activity]';
   const wrong=diaryRow(today,content,'Clarity');
   wrong.properties['記録キー']={rich_text:[{plain_text:'health:1900-01-01'}]};
