@@ -1,3 +1,5 @@
+// Variables used by Scriptable.
+// YOS_SCRIPT_NAME: YOS Tapo H110 Core
 // Shared Tapo H110 KLAP v2 core for Scriptable.
 // Credentials and remote map are stored only in Scriptable Keychain.
 

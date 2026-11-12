@@ -15,6 +15,7 @@ test('sleep remote package uses verified pins and original script names',()=>{
     const entry=byId(id);
     assert.ok(entry,id+' missing from common catalog');
     assert.equal(entry.name,entry.path.split('/').pop().replace(/\.js$/,''));
+    assert.ok(load(entry.path.replace('ios-app/scriptable/','')).startsWith('// Variables used by Scriptable.\n// YOS_SCRIPT_NAME: '+entry.name+'\n'), 'installer rejects missing format header: '+id);
     assert.match(entry.commit,/^[a-f0-9]{40}$/);
     assert.equal(digest(load(entry.path.replace('ios-app/scriptable/',''))),entry.sha256);
   }

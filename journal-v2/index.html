@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="#ffffff"><title>YOS JOURNAL | 読む</title>
+<style>
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:#fff;color:#202020;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif;font-size:17px;line-height:1.75;-webkit-text-size-adjust:100%}
+header{height:57px;position:sticky;top:0;z-index:3;background:#fff;border-bottom:1px solid #e8e8e8;display:flex;align-items:center;justify-content:space-between;padding:0 18px;gap:10px}
+.logo{font-size:19px;font-weight:800;letter-spacing:-.04em}.muted{font-size:12px;color:#666}button{font:inherit;cursor:pointer}.back{background:none;border:0;color:#222;font-size:15px;padding:7px 0}#view{max-width:660px;margin:0 auto;padding:23px 20px 90px}.issue{font-size:12px;color:#747474}.intro{font-size:15px;color:#555;margin:6px 0 20px}
+h1{font-size:26px;line-height:1.42;letter-spacing:-.035em;margin:8px 0 17px;font-weight:800}h2{font-size:21px;line-height:1.45;letter-spacing:-.02em;margin:29px 0 10px}h3{font-size:18px;margin:23px 0 7px}
+p{margin:10px 0 17px}figure{margin:16px 0 20px}figure img{display:block;width:100%;height:auto;aspect-ratio:3/2;object-fit:cover;background:#eee}figcaption{font-size:11px;line-height:1.5;color:#666;margin-top:6px}
+.list{display:flex;flex-direction:column;gap:0}.item{display:grid;grid-template-columns:107px 1fr;gap:14px;border:0;border-bottom:1px solid #e7e7e7;padding:18px 0;background:#fff;text-align:left;color:inherit;width:100%;align-items:start}.item img{width:107px;height:85px;object-fit:cover;background:#eee}.item .cat{font-size:11px;color:#666}.item strong{display:block;font-size:17px;line-height:1.48;margin:2px 0 5px}.item .excerpt{font-size:12px;line-height:1.5;color:#616161;display:block}
+.hero-card{width:100%;border:0;background:white;text-align:left;color:inherit;padding:0 0 19px;border-bottom:1px solid #ddd}.hero-card img{width:100%;aspect-ratio:16/10;object-fit:cover;background:#eee}.hero-card strong{display:block;font-size:23px;line-height:1.45;margin:9px 0}.hero-card p{margin:5px 0;font-size:14px;color:#555}
+.article{padding-top:4px}.article .lead{font-weight:650;font-size:18px;line-height:1.75}.article .body{font-size:17px;line-height:1.84}.article figure{margin-left:0;margin-right:0}.article .facts{padding:13px 0;border-top:1px solid #dedede;border-bottom:1px solid #dedede;margin:21px 0;display:grid;gap:6px;font-size:15px}.article .facts div{display:flex;gap:14px}.article .facts b{min-width:74px}.article ul{padding-left:1.25em;margin:10px 0 18px}.article li{margin-bottom:8px}.article a{color:#176098;text-decoration:underline;text-underline-offset:3px}.source{font-size:12px;color:#626262;border-top:1px solid #ddd;margin-top:29px;padding-top:12px}.source a{word-break:break-all}.note{font-size:13px;color:#565656}.related{border-top:1px solid #e1e1e1;margin-top:25px;padding-top:15px}.related button{display:block;background:none;border:0;border-bottom:1px solid #eee;text-align:left;padding:14px 0;width:100%;font-size:15px;font-weight:700}
+.notice{background:#f4f4f4;padding:10px 12px;font-size:12px;line-height:1.5;margin-bottom:18px;color:#444}
+#status{font-size:14px;color:#777}footer{font-size:12px;color:#777;border-top:1px solid #ddd;padding-top:16px;margin-top:35px}
+@media(max-width:350px){#view{padding-left:16px;padding-right:16px}.item{grid-template-columns:94px 1fr;gap:10px}.item img{width:94px;height:80px}.item strong{font-size:16px}}
+.broken-image{aspect-ratio:3/2;display:flex;align-items:center;justify-content:center;border:1px solid #e6e6e6;background:#f7f7f7;color:#777;font-size:13px;padding:16px;text-align:center}.read-date{font-size:12px;color:#777;margin:6px 0 12px}.item.no-image{grid-template-columns:1fr}.item.no-image .excerpt{font-size:13px}.hero-card.no-image{padding-top:14px}.listen-bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:4px 0 18px;padding:10px 0;border-top:1px solid #e8e8e8;border-bottom:1px solid #e8e8e8}.listen-bar button{border:1px solid #d6d6d6;border-radius:8px;background:#fff;color:#222;padding:7px 12px;font-size:14px;font-weight:650;min-height:40px}.listen-bar button:disabled{color:#aaa;border-color:#eee}.listen-bar label{font-size:12px;color:#555;margin-left:auto}.listen-bar select{font-size:14px;padding:6px;border:1px solid #d6d6d6;background:#fff;border-radius:6px}.listen-note{font-size:12px;color:#666;margin:0 0 16px}@media(max-width:420px){.listen-bar label{margin-left:0;width:100%}}</style></head><body><header><span class="logo">YOS JOURNAL</span><button class="back" id="home" hidden>‹ 記事一覧</button></header><main id="view"><p id="status">記事を読み込んでいます…</p></main>
+<script>
+(()=>{'use strict';
+const view=document.getElementById('view'),home=document.getElementById('home'),archiveUrl='https://raw.githubusercontent.com/yskn0008-bot/ProjectY/main/journal/editions/2026-11-12.json',latestUrl='https://raw.githubusercontent.com/yskn0008-bot/ProjectY/main/ios-app/scriptable/journal/latest.json',editionsBase='https://raw.githubusercontent.com/yskn0008-bot/ProjectY/main/journal/editions/';
+const cc=(file)=>'https://commons.wikimedia.org/wiki/Special:FilePath/'+encodeURIComponent(file)+'?width=960';
+const media=[
+{url:cc('American Village - panoramio.jpg'),credit:'写真：Toshihiro Matsui / Wikimedia Commons（CC BY-SA 3.0）。2013年の北谷・美浜の風景。今回のジャズイベント当日の写真ではありません。',alt:'北谷のアメリカンビレッジの街並み',creditUrl:'https://commons.wikimedia.org/wiki/File:American_Village_-_panoramio.jpg',licenseUrl:'https://creativecommons.org/licenses/by-sa/3.0/'},
+{url:cc('Woman applies skincare product in bathroom.jpg'),credit:'写真：Shixart1985 / Wikimedia Commons（CC BY 2.0）。スキンケアの参考イメージ。',alt:'鏡の前でスキンケアをする人',creditUrl:'https://commons.wikimedia.org/wiki/File:Woman_applies_skincare_product_in_bathroom.jpg',licenseUrl:'https://creativecommons.org/licenses/by/2.0/'},
+{url:cc('Crafting wooden pieces in a workshop.jpg'),credit:'写真：Shixart1985 / Wikimedia Commons（CC BY 2.0）。木工の一般的な制作風景。ウッディフェア現地の写真ではありません。',alt:'工房で木を加工している様子',creditUrl:'https://commons.wikimedia.org/wiki/File:Crafting_wooden_pieces_in_a_workshop.jpg',licenseUrl:'https://creativecommons.org/licenses/by/2.0/'},
+{url:cc('Okinawa traditional music performance @ Ueno Park (11096085126).jpg'),credit:'写真：Wikimedia Commons。沖縄伝統音楽の参考写真。宜野湾市文化祭の当日写真ではありません。',alt:'沖縄伝統音楽の演奏風景',creditUrl:'https://commons.wikimedia.org/wiki/File:Okinawa_traditional_music_performance_@_Ueno_Park_(11096085126).jpg'},
+{url:cc('The phone lying on the desk.jpg'),credit:'写真：Ibrohim Toxirov / Wikimedia Commons（CC BY-SA 4.0）。スマートフォンの一般イメージ。',alt:'机の上のスマートフォン',creditUrl:'https://commons.wikimedia.org/wiki/File:The_phone_lying_on_the_desk.jpg',licenseUrl:'https://creativecommons.org/licenses/by-sa/4.0/'},
+{url:cc('Man grooming in a modern bathroom mirror during evening hours while checking reflection.jpg'),credit:'写真：Shixart1985 / Wikimedia Commons（CC BY 2.0）。身だしなみを整える男性の一般イメージ。',alt:'鏡で身だしなみを確認する男性',creditUrl:'https://commons.wikimedia.org/wiki/File:Man_grooming_in_a_modern_bathroom_mirror_during_evening_hours_while_checking_reflection.jpg',licenseUrl:'https://creativecommons.org/licenses/by/2.0/'}
+];
+let issue=null,items=[],archived=true;
+const safe=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const photo=(i)=>{const m=(issue.issuedOn==='2026-11-12'&&items.length===6)?media[i]:null;if(!m)return '';return '<figure><img class="story-image" loading="'+(i===0?'eager':'lazy')+'" referrerpolicy="no-referrer" src="'+safe(m.url)+'" alt="'+safe(m.alt)+'"><figcaption><a href="'+safe(m.creditUrl)+'" target="_blank" rel="noopener noreferrer">'+safe(m.credit)+'</a>'+(m.licenseUrl?' <a href="'+safe(m.licenseUrl)+'" target="_blank" rel="noopener noreferrer">利用条件</a>':'')+'</figcaption></figure>'};
+const dateTitle=()=>safe(issue?.issuedOn||'発行日未確認');
+
+const speechAvailable=typeof window!=='undefined'&&'speechSynthesis' in window&&'SpeechSynthesisUtterance' in window;
+let speakingToken=0,speechParts=[],speechIndex=0,speechCurrent=null,speechActive=false,speechPaused=false,speechStarted=false;
+function speechStatus(message){const el=document.getElementById('speechStatus');if(el)el.textContent=message}
+function speechStop(){speakingToken++;const wasActive=speechActive||speechPaused||speechStarted;speechParts=[];speechIndex=0;speechCurrent=null;speechActive=false;speechPaused=false;speechStarted=false;if(wasActive&&speechAvailable)window.speechSynthesis.cancel();speechUpdate()}
+function speechUpdate(){const play=document.getElementById('speakPlay'),stop=document.getElementById('speakStop');if(play){play.textContent=speechActive?(speechPaused?'▶ 再開':'⏸ 一時停止'):'▶ 朗読する';play.disabled=!speechAvailable}if(stop)stop.disabled=!speechActive}
+function speechParagraphs(){const article=view.querySelector('.article');if(!article)return[];const nodes=article.querySelectorAll('h1,.lead,.facts div,h2,.body,li,.note');return Array.from(nodes).map(el=>(el.textContent||'').trim()).filter(Boolean)}
+function speechStep(token){if(token!==speakingToken||!speechActive)return;if(speechIndex>=speechParts.length){speechActive=false;speechStarted=false;speechPaused=false;speechCurrent=null;speechStatus('読み上げが終了しました');speechUpdate();return}
+ const u=new window.SpeechSynthesisUtterance(speechParts[speechIndex++]);u.lang='ja-JP';u.volume=1;u.rate=Number(document.getElementById('speechRate')?.value||'1');let voices=[];try{voices=window.speechSynthesis.getVoices()||[]}catch(_){}
+ const ja=voices.find(v=>v.lang==='ja-JP')||voices.find(v=>(v.lang||'').startsWith('ja'));if(ja)u.voice=ja;
+ speechCurrent=u;u.onstart=()=>{if(token!==speakingToken)return;speechStarted=true;speechStatus('朗読中… '+speechIndex+' / '+speechParts.length);speechUpdate()};
+ u.onend=()=>{if(token===speakingToken)speechStep(token)};
+ u.onerror=(e)=>{if(token===speakingToken){speechActive=false;speechPaused=false;speechStarted=false;speechStatus('朗読できませんでした（'+String(e.error||'音声エラー')+'）。Safariの「ページを読み上げる」もお試しください。');speechUpdate()}};
+ try{window.speechSynthesis.speak(u);setTimeout(()=>{if(token===speakingToken&&speechActive&&!speechStarted){speechStatus('音声が始まりません。iPhoneの音量・出力先を確認し、Safariの「ページを読み上げる」をお試しください。')}},3500)}catch(e){speechActive=false;speechPaused=false;speechStarted=false;speechStatus('朗読を開始できません。Safariの「ページを読み上げる」をお試しください。');speechUpdate()}
+}
+function speechToggle(){if(!speechAvailable){speechStatus('このブラウザは音声読み上げに対応していません。Safariで開いてください。');return}const engine=window.speechSynthesis;
+ if(speechActive){try{if(speechPaused){engine.resume();speechPaused=false;speechStatus('朗読中…')}else{engine.pause();speechPaused=true;speechStatus('一時停止中')}}catch(_){speechStatus('音声操作に失敗しました')}speechUpdate();return}
+ speechParts=speechParagraphs();if(!speechParts.length){speechStatus('読み上げる本文が見つかりません');return}
+ speakingToken++;speechIndex=0;speechActive=true;speechPaused=false;speechStarted=false;speechStatus('音声を準備しています…');speechUpdate();
+ // iOS Safari may silently drop speech when cancel() immediately precedes speak().
+ // This first playback is launched directly by a user tap, without cancel().
+ speechStep(speakingToken)
+}
+function speechSetup(){const b=document.getElementById('speakPlay'),s=document.getElementById('speakStop');if(!b)return;b.addEventListener('click',speechToggle);s.addEventListener('click',()=>{speechStop();speechStatus('停止しました')});speechUpdate();if(!speechAvailable)speechStatus('Safariで開くと音声読み上げを利用できます')}
+
+const jazzPhoto=cc('Jazzband Blueberries.JPG');
+const jazzPhotoHTML='<figure><img class="story-image" loading="lazy" src="'+safe(jazzPhoto)+'" alt="ジャズバンドの一般的な演奏風景"><figcaption>写真：Kasper Egerup / Wikimedia Commons（CC0）。イベント当日の出演者・演奏風景ではありません。 <a href="https://commons.wikimedia.org/wiki/File:Jazzband_Blueberries.JPG" target="_blank" rel="noopener noreferrer">画像の出典</a></figcaption></figure>';
+const details=[
+{intro:'11月14日（土）、美浜の海沿いでジャズを楽しめるイベントが開催される。観覧無料なので、音楽を目当てに行くのも、散歩の途中に立ち寄るのもあり。',sections:[
+['どんなイベント？','「MIHAMA JAZZ STREET 2026」は、アメリカンビレッジ周辺の3会場で行われる音楽イベント。メインはデポアイランド・ボードウォーク。海辺の景色を楽しみながら演奏を聴けるのが特徴だ。'],
+['行くなら、ここを確認','時間は12:00〜20:00、観覧無料。すべての出演を追う必要はない。まず好きなジャンルや行きやすい時間を選び、食事や散歩と組み合わせると楽しみやすい。'],
+['出演者と演奏時間','出演者ごとの時刻は主催者の告知画像に掲載されている。画像の内容をこちらで確実に照合できていないため、誤ったタイムテーブルは転載しない。公式案内の画像で最新の演奏順を確認できる。']
+],facts:[['開催','11月14日（土）'],['時間','12:00〜20:00'],['料金','観覧無料'],['会場','北谷・美浜の3会場']]},
+{intro:'高額な美容施術を予約する前に、今の肌の悩みが「ニキビそのもの」なのか、毛穴・赤み・跡なのかを整理したい。治療の選び方が違うからだ。',sections:[
+['まず、何に困っている？','新しいニキビが繰り返しできるなら、炎症を抑える標準的な治療を確認する。凹みのあるニキビ跡や毛穴の見え方などは、違う治療法の検討が必要になることがある。'],
+['お金を使う順番','皮膚科で診断を受け、保険診療で対応できる範囲を確認してから自費施術を比較する。高額だから効果が高いとは限らない。費用、回数、ダウンタイム、リスクも一緒に判断する。'],
+['診察で聞くこと','「今ある症状の優先順位」「保険診療の選択肢」「自費施術をするなら期待できる変化と限界」「総費用」を聞けば、宣伝だけで施術を選ばずに済む。']
+]},
+{intro:'家具をネットの写真だけで選ぶ前に、木の質感や仕上げを実物で比べる機会。沖縄ウッディフェアは、部屋づくりのヒントにもなる。',sections:[
+['何が見られる？','県内の木工・工芸に触れられる展示販売イベント。木目、厚み、手触り、色の違いは実物の方が分かりやすい。買わなくても、好みを見つける参考になる。'],
+['見るときのポイント','①木の色が今の部屋に合うか。②大きすぎないか。③表面の手入れが簡単か。④値札だけでなく素材や作り方も確認できるか。'],
+['開催情報','2026年11月12〜15日、おきなわ工芸の杜（豊見城）。開催時間やワークショップの料金は公式チラシで最終確認しておきたい。']
+]},
+{intro:'宜野湾の文化祭なら、普段住んでいる街の作品や音楽に触れられる。大きな旅行をしなくても新しい発見がある。',sections:[
+['作品と舞台、どちらを見る？','展示では陶芸、絵画、デザインなどを楽しめる。舞台では三線や琉球舞踊などの伝統芸能に触れられる。興味のあるジャンルをひとつ決めて行くと、見どころがつかみやすい。'],
+['いつ行く？','展示は11月14日10〜18時、15日10〜17時の案内。古典芸能の舞台など有料催事は別に時間・料金が設定される。'],
+['確認したいこと','会場ごとの企画、入場料、駐車場の案内は市の公式ページで確認する。']
+]},
+{intro:'iPhoneの便利機能は増えても、使う操作が増えたら意味がない。新機能は「今の操作をひとつ減らせるか」で判断すると迷いにくい。',sections:[
+['見るべきポイント','Siri、ウィジェット、表示のカスタマイズなどは、使い慣れたショートカットと役割が重なる場合がある。機能を増やす前に、置き換えられる作業があるかを見る。'],
+['確認の順番','①Apple公式で提供状況を確認。②自分の機種・言語で使えるか確認。③今の操作との違いを比較。④本当に便利なものだけ試す。'],
+['注意','Appleの仕様は機種・地域・言語・提供時期で異なる。新機能の名称だけで現在使えると判断しない。']
+]},
+{intro:'服を増やす前に、髪の輪郭や手元を整えるだけでも印象は変わり得る。手間をかけすぎずに続けやすい部分から考えよう。',sections:[
+['髪型は、正面だけじゃない','鏡で横と後ろも確認する。襟足やサイドのまとまりは、普段は自分では見落としやすい。整髪料を増やすより、まずシルエットを確認したい。'],
+['手元と服を見直す','爪の長さ、手の乾燥、服のシワなど、清潔感を左右しやすい細部をチェック。高いものを買うより、持っているものをきれいに使うのが先。'],
+['香りは控えめに','香りの好みには個人差がある。香水で清潔感を作るのではなく、洗濯・肌・髪の状態を整えた上で必要なら少量を。']
+]}
+];
+function imageFallback(root){root.querySelectorAll('img').forEach(img=>{const fail=()=>{const box=document.createElement('div');box.className='broken-image';box.textContent='画像を表示できません。本文と写真の出典リンクは引き続き利用できます。';img.replaceWith(box)};img.addEventListener('error',fail,{once:true});if(img.complete&&!img.naturalWidth)fail()})}
+function renderList(){speechStop();home.hidden=true;document.title='YOS JOURNAL | 記事一覧';view.innerHTML='<div class="issue">'+dateTitle()+' 発行｜'+items.length+'本の読みもの</div><h1>気になる記事から、読もう。</h1><p class="intro">暮らしや楽しみを、少し豊かにする発見を。</p>'+(archived?'<div class="notice">これは'+dateTitle()+'版の保存記事です。今日の新着記事ではありません。</div>':'')+'<div id="cards" class="list"></div><footer>出典に基づいて要約しています。医療・料金・開催情報は最新の公式情報をご確認ください。</footer>';const cards=document.getElementById('cards');items.forEach((a,i)=>{let b=document.createElement('button');b.className=i===0?'hero-card':'item';let m=issue.issuedOn==='2026-11-12'&&items.length===6?media[i]:null;let img=m?'<img loading="'+(i===0?'eager':'lazy')+'" src="'+safe(m.url)+'" alt="'+safe(m.alt)+'">':'';b.innerHTML=img+'<span><span class="cat">'+safe(a.category)+'</span><strong>'+safe(a.title)+'</strong><span class="excerpt">'+safe((a.summary||'').slice(0,i===0?100:65))+'…</span></span>';if(!m)b.className+=' no-image';b.addEventListener('click',()=>{location.hash='#article-'+i});cards.appendChild(b)});imageFallback(cards)}
+function renderArticle(i){speechStop();let a=items[i],d=(issue.issuedOn==='2026-11-12'&&items.length===6)?details[i]:{intro:String(a.summary||''),sections:[['なぜ気になる？',a.reason],['知っておきたいこと',a.action],['注意点',a.caveat]].filter(x=>x[1])};home.hidden=false;document.title=a.title+' | YOS JOURNAL';let parts='<article class="article"><div class="issue">'+dateTitle()+' / '+safe(a.category||'')+'</div><h1>'+safe(a.title)+'</h1>'+photo(i)+'<div class="listen-bar" role="group" aria-label="記事の朗読"><button id="speakPlay" type="button">▶ 朗読する</button><button id="speakStop" type="button">■ 停止</button><label>速度 <select id="speechRate" aria-label="朗読速度"><option value="0.8">0.8倍</option><option value="1" selected>1.0倍</option><option value="1.2">1.2倍</option><option value="1.5">1.5倍</option></select></label></div><p id="speechStatus" class="listen-note" role="status" aria-live="polite">▶ 朗読する を押すと、この記事を音声で読み上げます。画面ロック中の再生は保証されません。</p><p class="lead">'+safe(d.intro)+'</p>';
+if(d.facts){parts+='<div class="facts">'+d.facts.map(x=>'<div><b>'+safe(x[0])+'</b><span>'+safe(x[1])+'</span></div>').join('')+'</div>'}
+for(let n=0;n<d.sections.length;n++){const sec=d.sections[n];parts+='<h2>'+safe(sec[0])+'</h2><p class="body">'+safe(sec[1])+'</p>';if(issue.issuedOn==='2026-11-12'&&i===0&&n===0)parts+=jazzPhotoHTML}
+parts+=(issue.issuedOn==='2026-11-12'&&i===5?'<p class="note">参考にしたSmartlog記事は「PR」表記のある記事です。商品紹介や印象に関する提案は、公式な医学的根拠とは区別してください。</p>':'')+'<h2>この記事で押さえること</h2><ul>'+((a.keyPoints||[]).map(t=>'<li>'+safe(t)+'</li>').join(''))+'</ul><p class="note">'+safe(a.caveat||'')+'</p><div class="source">出典：'+safe(a.source||'')+'<br><a href="'+safe(a.link||'#')+'" target="_blank" rel="noopener noreferrer">公式・参考情報を読む ↗</a></div><div class="related"><b>次の記事も読む</b><button id="nextStory">'+safe(items[(i+1)%items.length].title)+' →</button></div></article>';
+view.innerHTML=parts;imageFallback(view);speechSetup();document.getElementById('nextStory').onclick=()=>{location.hash='#article-'+((i+1)%items.length)};window.scrollTo(0,0)}
+function route(){const m=location.hash.match(/^#article-(\d+)$/),i=m?Number(m[1]):-1;if(i>=0&&i<items.length)renderArticle(i);else{renderList();window.scrollTo(0,0)}}
+home.addEventListener('click',()=>{location.hash='';route()});window.addEventListener('hashchange',route);window.addEventListener('pagehide',speechStop);
+(async()=>{
+ const today=new Date().toLocaleDateString('sv-SE',{timeZone:'Asia/Tokyo'});
+ let data=null;
+ try{const r=await fetch(editionsBase+today+'.json',{cache:'no-store'});if(r.ok){const x=await r.json();if(x.issuedOn===today&&Array.isArray(x.articles)&&x.articles.length)data=x}}catch(_){}
+ if(!data)try{const r=await fetch(latestUrl,{cache:'no-store'});if(r.ok){const x=await r.json();if(x.issuedOn===today&&Array.isArray(x.articles)&&x.articles.length)data=x}}catch(_){}
+ if(!data)try{const r=await fetch(archiveUrl,{cache:'no-store'});if(!r.ok)throw Error('archive missing');data=await r.json()}catch(_){}
+ if(!data||!Array.isArray(data.articles)||!data.articles.length){view.innerHTML='<h1>記事を読み込めませんでした</h1><p>通信状態を確認して再読み込みしてください。過去号を今日の記事と偽って表示することはありません。</p>';return}
+ issue=data;items=data.articles;archived=data.issuedOn!==today;route();
+})().catch(()=>{view.innerHTML='<h1>記事を表示できませんでした</h1><p>再読み込みしてください。</p>'});
+})();
+</script></body></html>
