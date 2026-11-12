@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>YOS JOURNAL — Personal Magazine</title><meta name="theme-color" content="#142333">
+<style>
+:root{--ink:#1c2b3b;--cream:#f7f4ed;--gold:#d1ac73;--size:17px}
+*{box-sizing:border-box}html,body{height:100%;margin:0;overflow:hidden}body{font-family:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN",sans-serif;background:#142333;color:white;-webkit-tap-highlight-color:transparent}
+#app{height:100%;height:100dvh;display:flex;flex-direction:column;overflow:hidden}
+#stage{flex:1;min-height:0;position:relative;overflow:hidden;touch-action:pan-y}
+.sheet{position:absolute;inset:0;padding:calc(env(safe-area-inset-top) + 17px) 25px 22px;background:var(--cream);color:var(--ink);display:none;overflow:hidden}
+.sheet.current{display:flex;flex-direction:column;animation:enter .16s ease-out}
+@keyframes enter{from{opacity:.7;transform:translateX(7px)}to{opacity:1;transform:none}}
+.sheet.cover{background:linear-gradient(180deg,rgba(10,24,42,.28),rgba(14,25,40,.68) 45%,rgba(10,24,42,.96)),url("https://commons.wikimedia.org/wiki/Special:FilePath/Sunset_beach_at_Okinawa.jpg?width=1200") center/cover no-repeat,#243c59;color:white}
+.cover .topline{font-size:10px;letter-spacing:.21em;font-weight:700}.brand{font-family:Georgia,serif;font-size:clamp(49px,13vw,67px);line-height:.97;letter-spacing:-.055em;margin:30px 0}.coverGrow{flex:1;min-height:16px}.tag{font-size:10px;letter-spacing:.1em;background:#e2bc82;color:#263343;padding:8px 12px;align-self:flex-start;font-weight:800}.cover h1{font-size:clamp(25px,7.7vw,35px);line-height:1.4;letter-spacing:-.035em;margin:15px 0 8px;overflow-wrap:anywhere}.cover p{font-size:14px;line-height:1.65;margin:0 0 12px}.cover .issue{font-size:12px;font-weight:700;border-top:1px solid #ffffff66;padding-top:10px}.credit{font-size:9px;line-height:1.4;color:#e5e2dc;margin-top:8px}.credit a{color:inherit}
+.kicker{font-size:11px;letter-spacing:.13em;color:#9c7749;font-weight:750;line-height:1.5}
+.sheet h2{font-size:clamp(22px,6.6vw,29px);line-height:1.4;margin:17px 0;letter-spacing:-.035em;overflow-wrap:anywhere}
+.contents h2{margin:25px 0}.toc{display:flex;align-items:center;text-align:left;gap:12px;background:#fffefa;border:1px solid #ded8ce;padding:13px 11px;border-radius:12px;color:var(--ink);margin:0 0 9px;font:inherit;width:100%;min-height:78px}.toc .number{font-family:Georgia,serif;font-size:23px;font-weight:700;color:#9a774f}.toc .detail{flex:1;min-width:0}.toc small{font-size:10px;color:#9a774f;display:block;margin-bottom:5px}.toc strong{font-size:14px;line-height:1.45;display:block}.toc .chevron{font-size:22px}
+.rule{border-top:2px solid #c5a376;margin-bottom:15px}.visual{height:min(24vh,165px);margin:0 0 14px;overflow:hidden;border-radius:12px;background:#24384a}.visual svg{height:100%;width:100%;display:block}
+.sheet h3{font-size:15px;color:#987448;margin:3px 0 11px}.sheet .copy{font-size:var(--size);line-height:1.77;margin:0;overflow-wrap:anywhere;white-space:pre-wrap}.fill{flex:1;min-height:3px}.folio{font-size:10px;color:#8e8e89;border-top:1px solid #d5cec4;padding-top:8px;margin-top:18px}
+.source p{font-size:var(--size);line-height:1.78}.source a{color:#174a76;display:block;padding:14px 0;overflow-wrap:anywhere;font-weight:700}.source small{color:#71808a;font-size:12px}
+#bar{background:#142333;height:calc(55px + env(safe-area-inset-bottom));padding:0 13px env(safe-area-inset-bottom);display:flex;align-items:center;justify-content:space-between;gap:9px;flex-shrink:0}#bar button{border:0;background:transparent;color:#fff;font-size:22px;min-width:43px;min-height:43px;cursor:pointer}#bar button:disabled{opacity:.35}#count{font-size:13px;font-variant-numeric:tabular-nums}#bar button:last-child{font-size:16px;font-weight:700}
+#status{position:absolute;z-index:10;top:0;left:0;right:0;background:#fff6dc;color:#644a26;padding:9px 14px;font-size:12px;display:none}
+#error{padding:30px;color:#1d2c3b;background:var(--cream);height:100%}
+@media(max-height:720px){.sheet{padding-top:calc(env(safe-area-inset-top) + 10px);padding-bottom:13px}.sheet h2{font-size:23px;margin:10px 0}.visual{height:85px}.toc{min-height:62px;padding:8px 10px}.cover .brand{margin:18px 0}.cover h1{font-size:26px}.cover p{font-size:13px}}
+@media(max-width:365px){.sheet{padding-left:18px;padding-right:18px}.toc strong{font-size:13px}}
+@media(prefers-reduced-motion:reduce){.sheet.current{animation:none}}
+</style></head>
+<body><div id="app"><main id="stage"><section class="sheet current cover"><div class="topline">PERSONAL MAGAZINE · DAILY / YOS</div><div class="brand">YOS<br>JOURNAL.</div><div class="coverGrow"></div><span class="tag">TODAY'S EDITION</span><h1>今日を、少し良くする情報。</h1><p>信頼できる情報を、1冊の雑誌のように。</p><div class="issue">記事を読み込み中</div></section></main><nav id="bar" aria-label="ページ操作"><button id="toc" aria-label="目次">☷</button><button id="prev" aria-label="前ページ">‹</button><span id="count">1 / 1</span><button id="next" aria-label="次ページ">›</button><button id="size" aria-label="文字サイズ">Aa</button></nav></div><div id="status" role="status"></div>
+<script>
+(()=>{'use strict';
+const endpoint='https://raw.githubusercontent.com/yskn0008-bot/ProjectY/main/ios-app/scriptable/journal/latest.json';
+const stage=document.getElementById('stage'),count=document.getElementById('count'),status=document.getElementById('status');
+const byId=id=>document.getElementById(id),esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const safeLink=x=>{try{const u=new URL(String(x));return u.protocol==='https:'?u.href:''}catch{return ''}};
+const icons=[
+'<svg viewBox="0 0 320 120" aria-label="タクシー"><rect width="320" height="120" fill="#1b3b57"/><path d="M47 82l20-37h139l22 37h16v20H30V82Z" fill="#f0e6da"/><path d="M80 52h111l16 30H64Z" fill="#789bae"/><path d="M119 32h44v13h-44Z" fill="#d8b27b"/><circle cx="83" cy="103" r="13" fill="#152638"/><circle cx="209" cy="103" r="13" fill="#152638"/></svg>',
+'<svg viewBox="0 0 320 120" aria-label="海と音楽"><rect width="320" height="120" fill="#23475c"/><circle cx="257" cy="36" r="22" fill="#e5bc78"/><path d="M0 93q40-21 80 0t80 0t80 0t80 0" fill="none" stroke="#7bb0af" stroke-width="5"/><path d="M134 25v55l44-9V17Z" fill="none" stroke="#f4e5d1" stroke-width="5"/><ellipse cx="122" cy="84" rx="15" ry="9" fill="#f4e5d1"/><ellipse cx="166" cy="75" rx="15" ry="9" fill="#f4e5d1"/></svg>',
+'<svg viewBox="0 0 320 120" aria-label="肌のケア"><rect width="320" height="120" fill="#e5d7c8"/><circle cx="160" cy="53" r="43" fill="#cfa58c"/><path d="M132 51q28-17 56 0m-37 17q12 11 23 0" stroke="#805f55" stroke-width="3" fill="none"/><path d="M99 120q10-42 61-42t61 42" fill="#b89c9e"/><circle cx="247" cy="39" r="14" fill="#fff" opacity=".7"/></svg>',
+'<svg viewBox="0 0 320 120" aria-label="お金と選択肢"><rect width="320" height="120" fill="#254254"/><rect x="64" y="19" width="181" height="86" rx="12" fill="#f0e8dc"/><path d="M83 37h143" stroke="#a3aca9" stroke-width="8"/><path d="M83 81l36-18 31 10 51-28" stroke="#b38b54" stroke-width="6" fill="none"/><circle cx="250" cy="85" r="22" fill="#d5ae75"/><path d="M243 81h14m-7-12v29" stroke="#1f394d" stroke-width="3"/></svg>'];
+let slides=[],index=0,issueKey='',font=17,tocIndex=1;
+function shell(kind,content){return '<section class="sheet '+kind+'">'+content+'</section>'}
+function para(k,v){return '<h3>'+esc(k)+'</h3><p class="copy">'+esc(v)+'</p>'}
+function addArticle(pages,a,i){
+ const cat=esc(a.category||'FEATURE'),title=esc(a.title||''),key='0'+(i+1);
+ const head='<div class="kicker">'+key+' / '+cat+'</div><h2>'+title+'</h2><div class="rule"></div>';
+ const items=[['概要',a.summary],['この記事を選んだ理由',a.reason],['確認したいこと',a.action],['注意事項',a.caveat],['要点',Array.isArray(a.keyPoints)?a.keyPoints.join('／'):'']].filter(x=>x[1]);
+ let part=0;
+ for(const [label,txt] of items){const chars=Array.from(String(txt));for(let off=0;off<chars.length;off+=58){
+  const piece=chars.slice(off,off+58).join('');let visual=(part===0)?'<div class="visual">'+icons[i%4]+'</div>':'';
+  pages.push(shell('article',head+visual+para(off?label+'（続き）':label,piece)+'<div class="fill"></div><div class="folio">'+key+' · '+(part+1)+'</div>'));part++;
+ }}
+ const link=safeLink(a.link);
+ pages.push(shell('source',head+'<h3>情報源と確認事項</h3><p>出典：'+esc(a.source||'出典未記載')+'</p><small>'+esc(a.sourceDate||'公表日未確認')+'</small>'+(a.caveat?'<p>'+esc(a.caveat)+'</p>':'')+(link?'<a href="'+esc(link)+'" rel="noopener noreferrer" target="_blank">公式情報・原文を確認する ↗</a>':'<p>有効な参照先がありません。</p>')+'<div class="fill"></div><div class="folio">SOURCE · '+key+'</div>'));
+}
+function draw(issue){
+ if(!issue||!Array.isArray(issue.articles)||!issue.articles.length)throw Error('記事データがありません');
+ const articles=issue.articles.filter(a=>a&&a.title&&safeLink(a.link)).slice(0,12);
+ if(!articles.length)throw Error('出典リンク付きの記事がありません');
+ issueKey=String(issue.issuedOn||issue.date||'unknown');
+ const parts=[],starts=[];
+ parts.push(shell('cover','<div class="topline">PERSONAL MAGAZINE · DAILY / YOS</div><div class="brand">YOS<br>JOURNAL.</div><div class="coverGrow"></div><span class="tag">COVER STORY</span><h1>'+esc(issue.headline||articles[0].title)+'</h1><p>'+esc(issue.lead||'')+'</p><div class="issue">'+esc(issue.date||'発行日未確認')+' · '+articles.length+' STORIES</div><div class="credit">Photo: Mokkie / <a href="https://commons.wikimedia.org/wiki/File:Sunset_beach_at_Okinawa.jpg" target="_blank" rel="noopener">Wikimedia Commons</a> · <a href="https://creativecommons.org/licenses/by-sa/3.0/" target="_blank" rel="noopener">CC BY-SA 3.0</a> · 暗色加工</div>'));
+ parts.push('CONTENTS_PLACEHOLDER');
+ for(let i=0;i<articles.length;i++){starts.push(parts.length);addArticle(parts,articles[i],i)}
+ parts[1]=shell('contents','<div class="kicker">YOS JOURNAL / CONTENTS</div><h2>今号の内容</h2>'+articles.map((a,i)=>'<button class="toc" data-go="'+starts[i]+'"><span class="number">'+String(i+1).padStart(2,'0')+'</span><span class="detail"><small>'+esc(a.category||'FEATURE')+'</small><strong>'+esc(a.title)+'</strong></span><span class="chevron">›</span></button>').join('')+'<div class="fill"></div><div class="folio">'+esc(issue.date||'')+'</div>');
+ stage.innerHTML=parts.join('');
+ slides=Array.from(stage.querySelectorAll('.sheet'));tocIndex=1;
+ stage.querySelectorAll('[data-go]').forEach(el=>el.addEventListener('click',()=>show(Number(el.dataset.go))));
+ const prior=localStorage.getItem('yos-journal-position-'+issueKey);
+ const saved=Number(prior);show(Number.isInteger(saved)?saved:0);
+ if(issue.issuedOn){const today=new Date().toLocaleDateString('sv-SE',{timeZone:'Asia/Tokyo'});if(issue.issuedOn!==today)notice('本日号ではありません：'+issue.issuedOn)}
+}
+function show(n){if(!slides.length)return;index=Math.max(0,Math.min(slides.length-1,n));slides.forEach((p,i)=>p.classList.toggle('current',i===index));count.textContent=(index+1)+' / '+slides.length;byId('prev').disabled=index===0;byId('next').disabled=index===slides.length-1;try{localStorage.setItem('yos-journal-position-'+issueKey,String(index))}catch{}}
+function notice(x){status.textContent=x;status.style.display='block'}
+byId('prev').onclick=()=>show(index-1);byId('next').onclick=()=>show(index+1);byId('toc').onclick=()=>show(tocIndex);
+byId('size').onclick=()=>{font=font>=19?15:font+1;document.documentElement.style.setProperty('--size',font+'px')};
+let x=0,y=0;stage.addEventListener('touchstart',e=>{x=e.touches[0].clientX;y=e.touches[0].clientY},{passive:true});stage.addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-x,dy=e.changedTouches[0].clientY-y;if(Math.abs(dx)>55&&Math.abs(dx)>Math.abs(dy)*1.4)show(index+(dx<0?1:-1))},{passive:true});
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight')show(index+1);if(e.key==='ArrowLeft')show(index-1)});
+(async()=>{let issue=null;try{const r=await fetch(endpoint,{cache:'no-store'});if(!r.ok)throw Error('HTTP '+r.status);issue=await r.json();if(!issue.articles?.length)throw Error('記事なし');try{localStorage.setItem('yos-journal-issue-cache',JSON.stringify(issue))}catch{}}catch(e){try{issue=JSON.parse(localStorage.getItem('yos-journal-issue-cache')||'null');if(issue)notice('通信できないため保存した号を表示しています')}catch{}}
+try{draw(issue)}catch(e){stage.innerHTML='<section class="sheet current"><div id="error"><h2>記事を表示できませんでした</h2><p>'+esc(e.message)+'</p><p>通信を確認して再読み込みしてください。</p></div></section>';count.textContent='—'}})();
+})();
+</script></body></html>
