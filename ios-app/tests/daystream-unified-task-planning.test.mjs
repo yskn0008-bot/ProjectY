@@ -555,7 +555,7 @@ test('casual coral overlap colors task card and removes all decorative task icon
 test('overlapping task lane exposes time label during preview and ordinary display',()=>{
  const htmlBody=Function('return '+String.fromCharCode(96)+html+String.fromCharCode(96))();
  assert.match(htmlBody,/\.card\.task\.lane \.task-copy small\{display:block;margin:0;font-size:10\.5px\}/);
- assert.match(htmlBody,/\.card\.task\.lane\{flex-wrap:wrap;align-content:center/);
+ assert.match(htmlBody,/\.card\.task\.lane\{padding:4px 8px\}/);
  assert.match(htmlBody,/item\.kind==='task'&&!item\.f\?42:density==='overview'\?17:22/);
  const js=htmlBody.split('<script>')[1]?.split('</script>')[0]||'';
  assert.match(js,/timeLabel\.textContent=fmt\(at\)\+'–'\+fmt\(at\+item\.d\)/);
