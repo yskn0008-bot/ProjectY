@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-12T23:59:54+09:00",
+  "updated_at": "2026-11-13T00:04:34+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -12,6 +12,16 @@
     ]
   },
   "inbox": [
+    {
+      "id": "github-pr-700",
+      "title": "PR #700 fix(daystream): casual compact task cards, stationary editor and smoother swipe",
+      "type": "GitHub PR",
+      "status": "review",
+      "priority": 1,
+      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/700",
+      "updated_at": "2026-11-12T04:20:54Z"
+    },
     {
       "id": "github-pr-718",
       "title": "PR #718 fix(daystream): stabilize task drag preview and stop repeated vibration",
@@ -80,7 +90,7 @@
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/716",
-      "updated_at": "2026-11-12T14:53:08Z"
+      "updated_at": "2026-11-12T15:03:05Z"
     },
     {
       "id": "github-pr-720",
@@ -103,16 +113,6 @@
       "updated_at": "2026-11-12T14:40:12Z"
     },
     {
-      "id": "github-pr-722",
-      "title": "PR #722 Taxi: 那覇中心・営業前需要ブリーフの情報源整理（第1段階）",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/722",
-      "updated_at": "2026-11-12T14:59:21Z"
-    },
-    {
       "id": "github-issue-10",
       "title": "Issue #10 Mission Control v2：GitHubのIssue・PR・Commitを自動集約する",
       "type": "GitHub Issue",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-12T14:58:50Z"
+      "updated_at": "2026-11-12T15:03:54Z"
     },
     {
       "id": "github-issue-234",
@@ -205,6 +205,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-679e54cd043e",
+      "title": "Taxi: 那覇中心の営業前ブリーフと情報源確認を追加",
+      "completed_at": "2026-11-12T15:03:45Z",
+      "result": "GitHub mainへ反映（679e54c）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/679e54cd043ebc0d2e3a8d75ac3b2f8a405176a1"
+    },
+    {
       "id": "github-commit-21e28471856e",
       "title": "feat(journal): publish free Nemo narration sample via GitHub Actions",
       "completed_at": "2026-11-12T14:58:05Z",
@@ -231,13 +238,6 @@
       "completed_at": "2026-11-12T12:37:34Z",
       "result": "GitHub mainへ反映（1cab915）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/1cab915f76265919cfe36d28bd3c835af092929f"
-    },
-    {
-      "id": "github-commit-63bd5ac4b0e0",
-      "title": "fix(journal): make iPhone speech playback reliable",
-      "completed_at": "2026-11-12T08:55:59Z",
-      "result": "GitHub mainへ反映（63bd5ac）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/63bd5ac4b0e05bda257cfdc568b76a5bcdd84190"
     },
     {
       "id": "complete-002",
@@ -274,7 +274,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-12T23:59:54+09:00",
+      "last_update": "2026-11-13T00:04:34+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -349,13 +349,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 9件・Open PR 56件を自動同期中",
+      "next_action": "Open Issue 9件・Open PR 55件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-12T23:59:54+09:00",
+      "last_update": "2026-11-13T00:04:34+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -378,7 +378,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-12T23:59:54+09:00",
+      "last_update": "2026-11-13T00:04:34+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -460,5 +460,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "ddfa14741c0cd3e40d826f33b40d8ad6eb5b5918651ba3edd0cca1044cb372a7"
+  "github_snapshot_hash": "eb4d16056c51bd84695066c52134a9db403cdad5b47306614871bf0798ace6d4"
 }
