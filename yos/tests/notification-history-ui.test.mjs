@@ -26,7 +26,11 @@ test('cursor guard, readback and no falsely verified payment completion',()=>{
 });
 test('dense UI contains list/search/filter/detail controls',()=>{
   for(const id of ['events','search','connect','refresh','detail','later','reported','openSource'])assert.match(page,new RegExp('id="'+id+'"'));
-  assert.match(page,/grid-template-columns:42px minmax\(0,1fr\) 53px 78px/);
+  assert.match(page,/grid-template-columns:40px minmax\(0,1fr\) 69px 72px/);
+  assert.match(page,/notice-icon/);
+  assert.match(page,/b\.classList\.add\('flag'\)/);
+  assert.match(page,/YOS_ALERT/);
+  assert.match(page,/YOS_SILENT/);
 });
 
 test('confirmed empty inbox displays zero counts, not the unverified dash',()=>{
