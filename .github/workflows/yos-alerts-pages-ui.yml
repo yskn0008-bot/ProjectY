@@ -1,0 +1,47 @@
+name: YOS Alerts Pages UI
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'yos/notification-history.html'
+      - 'yos/tests/notification-history-ui.test.mjs'
+      - 'yos/tests/notification-history-browser-smoke.mjs'
+      - '.github/workflows/yos-alerts-pages-ui.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  alerts-ui:
+    name: Alerts history 390px (${{ matrix.browser }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, webkit]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Static UI contract
+        run: node --test yos/tests/notification-history-ui.test.mjs
+      - name: Browser setup
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps ${{ matrix.browser }}
+      - name: Start existing static site
+        run: |
+          python3 -m http.server 4173 --directory . > /tmp/yos-alerts-pages.log 2>&1 &
+          for i in {1..30}; do
+            curl -fsS http://127.0.0.1:4173/yos/notification-history.html >/dev/null && exit 0
+            sleep 1
+          done
+          cat /tmp/yos-alerts-pages.log
+          exit 1
+      - name: Exercise notifications page
+        env:
+          YOS_BROWSER: ${{ matrix.browser }}
+        run: node yos/tests/notification-history-browser-smoke.mjs
