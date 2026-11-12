@@ -36,6 +36,13 @@
       "path": "ios-app/scriptable/YOS Timeline Charcoal 確認 20261111.js",
       "commit": "fc56cc9a7001b21a8e20eda6e1e97704b20d551d",
       "sha256": "c808193ea37ee63d81be347c8b731db18bf98717feb47370e70b6c8c8bfb4f91"
+    },
+    {
+      "id": "screenshot-bridge",
+      "name": "YOS Screenshot Bridge",
+      "path": "ios-app/scriptable/YOS Screenshot Bridge.js",
+      "commit": "61262f270073470a3148d1730008d33a08bf4977",
+      "sha256": "a992f1d8fad142b79fe525212d0d4c453701c07c77f4493d6b5962a1aad782f3"
     }
   ]
 }
