@@ -192,6 +192,7 @@ button:active{opacity:.8}@media(min-width:640px){.dock{left:calc((100vw - 640px)
 .yos-learning-live h3{margin:0 0 5px;font-size:14px}
 .yos-learning-live h3 small{font-size:11px;font-weight:400;opacity:.78}
 .yos-learning-live .muted{font-size:11px;margin:0 0 9px;line-height:1.5}
+.yos-outing-manual{margin:8px 0}.yos-outing-manual details{border-top:1px solid #ffffff30;padding-top:9px}.yos-outing-manual summary{cursor:pointer;font-weight:670}.yos-outing-manual label{display:block;font-size:12px;color:#e1e8ef;margin-top:8px}.yos-outing-manual input:not([type=checkbox]),.yos-outing-manual select{width:100%;min-height:37px;margin-top:4px;background:#292e37;color:#fff;border:1px solid #8995a3;border-radius:8px;padding:6px}.yos-outing-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 9px}.yos-outing-confirm{display:flex!important;gap:7px;align-items:flex-start}.yos-outing-confirm input{margin-top:2px}.yos-outing-manual button{margin-top:10px;padding:8px 12px;color:#fff;background:#276c9c;border:none;border-radius:9px}
 .yos-learning-live-row{display:flex;gap:8px;align-items:center;justify-content:space-between;padding:7px 0;border-top:1px solid #ffffff1c}
 .yos-learning-live-row>div{min-width:0;display:grid;gap:4px}
 .yos-learning-live-row strong{font-size:13px;overflow-wrap:anywhere}
@@ -232,7 +233,7 @@ button:active{opacity:.8}@media(min-width:640px){.dock{left:calc((100vw - 640px)
   <div class="compat-status" id="compatStatus" aria-live="polite">相性を判定中</div>
   <p class="gesture-help" id="gestureHelp">タスク：タップで完了 ｜ 左スワイプで削除 ｜ 長押しで編集 ｜ 上下ドラッグで移動</p>
   <div class="timeline-wrap" id="timelinePanel"><div class="timeline" id="tl"><div class="axis"></div><div class="nowline" id="nowLine" hidden><span class="nowbadge" id="nowBadge"></span></div></div></div>
-  <section class="tabbox" id="yosOutingPanel" aria-label="ついで行動の提案"><h3>ついで行動</h3><p class="muted" id="yosOutingSummary">経路・営業状況・所要時間を確認中</p><div id="yosOutingProposals"></div><p class="muted">確定予定を動かさず、Notionの原本も更新しません。</p></section>
+  <section class="tabbox" id="yosOutingPanel" aria-label="ついで行動の提案"><h3>ついで行動</h3><p class="muted" id="yosOutingSummary">経路・営業状況・所要時間を確認中</p><div id="yosOutingProposals"></div><section class="yos-outing-manual"><details id="yosOutingManual"><summary>立寄りを確認して提案</summary><p class="muted">地図での経路・移動時間・営業時間を自分で確認した場合のみ使用。情報は保存しません。</p><label for="yosOutingTaskChoice">未配置のタスク</label><select id="yosOutingTaskChoice"></select><label for="yosOutingPlace">確認した立寄先</label><input id="yosOutingPlace" type="text" maxlength="80" placeholder="店舗・窓口などの名称"><div class="yos-outing-fields"><label>立寄りに増える移動時間（分）<input id="yosOutingDetour" type="number" min="0" max="180" step="1" value="10"></label><label>作業時間（分）<input id="yosOutingDuration" type="number" min="5" max="240" step="1" value="15"></label><label>空き枠の開始時刻<input id="yosOutingStart" type="time"></label><label>空き枠の終了時刻<input id="yosOutingEnd" type="time"></label></div><label class="yos-outing-confirm"><input id="yosOutingConfirmed" type="checkbox"> 地図の経路・所要時間・営業状況・空き枠を確認済み</label><button id="yosOutingBuild" type="button">この条件で提案</button><p id="yosOutingManualStatus" class="muted" aria-live="polite"></p></details></section><p class="muted">確定予定を動かさず、Notionの原本も更新しません。</p></section>
   <section class="tabbox" id="taskPanel"><h3>タスク・未配置</h3><p class="muted">専門タスクの期限と、実行する時間は別。配置しても元データの期限・完了は変わりません。</p>
  <div id="taskList"></div><section id="yosLearningHints" class="yos-learning-live" aria-label="期限が近いタスク" hidden><h3>期限が近いタスク <small>確認のみ</small></h3><p class="muted" id="yosLearningCoverage"></p><div id="yosLearningRows"></div></section><h3>各専門ページから集約</h3><p class="muted" id="yosTaskSourceStatus">Notion Tasks：確認中</p>
  <label for="yosStartFrom">配置提案の開始時刻</label><input id="yosStartFrom" type="time" value="09:00" aria-label="配置提案の開始時刻">
@@ -295,6 +296,7 @@ const taskSource=boot.taskSource||{status:'unavailable',items:[]},habitSource=bo
 const sourceTasks=Array.isArray(taskSource.items)?taskSource.items.filter(x=>x&&typeof x.id==='string'&&typeof x.title==='string'):[];
  const outingDetails=new Map(Array.isArray(boot.outingTaskDetails)?boot.outingTaskDetails.map(x=>[x.id,x]):[]);
  const outingTasks=sourceTasks.map(x=>({...x,...(outingDetails.get(x.id)||{})}));
+ let yosManualPreview=null;
 const sourceHabits=Array.isArray(habitSource.items)?habitSource.items.filter(x=>x&&typeof x.id==='string'&&typeof x.title==='string'):[];
 const planBox=document.getElementById('yosPlanBox'),taskFeed=document.getElementById('yosSourceTasks'),habitFeed=document.getElementById('yosHabitTasks');
 const yosStatusWord=x=>x==='ok'?'取得済み':x==='partial'?'一部のみ取得':x==='unavailable'?'未接続':'取得エラー';
@@ -407,18 +409,71 @@ function yosOutingCandidates(tasks,context,occupied,day){
  return result;
 }
 // YOS_ADAPTIVE_ERRANDS_END
+// YOS_OUTING_MANUAL_CAPTURE_START
+// Ephemeral, explicitly user-confirmed fallback inside the existing task screen.
+function yosOutingClock(value){
+ if(typeof value!=='string'||!/^([01][0-9]|2[0-3]):[0-5][0-9]$/.test(value))return null;
+ return Number(value.slice(0,2))*60+Number(value.slice(3));
+}
+function yosOutingManualCapture(){
+ const info=document.getElementById('yosOutingManualStatus');
+ const fail=message=>{yosManualPreview=null;info.textContent=message;yosRenderOuting();return false;};
+ const now=new Date(),day=localISO(now);
+ if(selectedDay!==day||taskSource.status!=='ok'||calendarCoverage.status!=='ok'||!isCalendarCovered(day))return fail('本日の予定とタスクを完全取得できた場合のみ使えます。');
+ if(Array.isArray(allDayDays[day])&&allDayDays[day].length)return fail('終日予定があるため、空き枠を確認できません。');
+ const id=document.getElementById('yosOutingTaskChoice').value;
+ const task=sourceTasks.find(x=>x.id===id);
+ const place=document.getElementById('yosOutingPlace').value.trim();
+ const detour=Number(document.getElementById('yosOutingDetour').value);
+ const duration=Number(document.getElementById('yosOutingDuration').value);
+ const start=yosOutingClock(document.getElementById('yosOutingStart').value);
+ const end=yosOutingClock(document.getElementById('yosOutingEnd').value);
+ const confirmed=document.getElementById('yosOutingConfirmed').checked;
+ const minute=now.getHours()*60+now.getMinutes();
+ if(!task||['完了','待ち','保留','中止','取消'].includes(task.status)||yosIsPlanned('notion:'+id))return fail('未配置の対象タスクを選択してください。');
+ if(!confirmed||!place||place.length>80||!Number.isInteger(detour)||detour<0||detour>180||!Number.isInteger(duration)||duration<5||duration>240)return fail('立寄先・時間・経路・営業時間の確認が必要です。');
+ if(start===null||end===null||start<minute||end<=start||end-start>480)return fail('現在以降の8時間以内の空き枠を指定してください。');
+ const busy=items.filter(x=>x&&Number.isInteger(x.s)&&Number.isInteger(x.d)&&x.d>0).map(x=>[Math.max(start,x.s),Math.min(end,x.s+x.d)]).filter(x=>x[1]>x[0]).sort((a,b)=>a[0]-b[0]);
+ if(items.some(x=>!x||!Number.isInteger(x.s)||!Number.isInteger(x.d)||x.d<=0||x.s<0||x.s+x.d>1440))return fail('予定の時間に不明な情報があるため、安全に停止しました。');
+ let busyEnd=start,occupied=0;
+ for(const [a,b] of busy){if(b>busyEnd){occupied+=b-Math.max(a,busyEnd);busyEnd=b;}}
+ const available=end-start-occupied;
+ if(available<5)return fail('確定予定を除く空き時間が足りません。');
+ const placeId='manual-'+id.replace(/[^a-zA-Z0-9_-]/g,'').slice(0,40);
+ const context={confirmed:true,calendarVerified:true,issuedAt:now.toISOString(),day,windowStart:start,windowEnd:end,freeMinutes:available,route:[{placeId,order:0,detourMinutes:detour,openConfirmed:true}]};
+ yosManualPreview={context,id,placeId,durationMinutes:duration};
+ info.textContent='確認した立寄先「'+place+'」の一時提案です。5分後に失効します。';
+ yosRenderOuting();return true;
+}
+function yosOutingManualSetup(){
+ const pick=document.getElementById('yosOutingTaskChoice');
+ if(!pick)return;
+ pick.replaceChildren();
+ const empty=document.createElement('option');empty.value='';empty.textContent='タスクを選択';pick.append(empty);
+ for(const task of sourceTasks.filter(x=>!['完了','待ち','保留','中止','取消'].includes(x.status)).slice(0,80)){
+  const opt=document.createElement('option');opt.value=task.id;opt.textContent=task.title.slice(0,90);pick.append(opt);
+ }
+ const now=new Date(),minute=now.getHours()*60+now.getMinutes();
+ const start=Math.min(1430,Math.ceil(minute/5)*5),end=Math.min(1439,start+60);
+ document.getElementById('yosOutingStart').value=fmt(start);
+ document.getElementById('yosOutingEnd').value=fmt(end);
+ document.getElementById('yosOutingBuild').onclick=yosOutingManualCapture;
+}
+// YOS_OUTING_MANUAL_CAPTURE_END
+
 // YOS_OUTING_RENDER_START
 function yosRenderOuting(){
  const label=document.getElementById('yosOutingSummary'),list=document.getElementById('yosOutingProposals');
  if(!label||!list)return;
  list.textContent='';
  const current=new Date(),minute=current.getHours()*60+current.getMinutes();
-  const context=boot.outingContext;
+  const context=yosManualPreview?.context||boot.outingContext;
   const issued=context?Date.parse(context.issuedAt||''):NaN;
   const fresh=Number.isFinite(issued)&&issued<=current.getTime()+60000&&current.getTime()-issued<=300000;
   const allDayClear=!Array.isArray(allDayDays[selectedDay])||allDayDays[selectedDay].length===0;
   const live=fresh&&allDayClear&&!(selectedDay===localISO(current)&&Number.isInteger(context.windowStart)&&context.windowStart<minute);
-  const result=yosOutingCandidates(outingTasks,live?context:null,items,selectedDay);
+  const previewTasks=yosManualPreview?sourceTasks.map(x=>x.id===yosManualPreview.id?{...x,placeId:yosManualPreview.placeId,durationMinutes:yosManualPreview.durationMinutes}:x):outingTasks;
+  const result=yosOutingCandidates(previewTasks,live?context:null,items,selectedDay);
  label.textContent=result.reason;
  for(const candidate of result.proposals){
   const row=document.createElement('p');
@@ -1137,7 +1192,7 @@ document.getElementById('closeFocus').onclick=()=>{zoom=null;deleteConfirmId=nul
 if(Array.isArray(stored)){note.textContent='保存済み時間割を表示 · Notion Tasks '+yosStatusWord(taskSource.status);}
 else if(calendarRows.length){note.textContent='Appleカレンダー '+calendarRows.length+'件を読み取り'+(yosTestCount(todayISO)?' · テスト'+yosTestCount(todayISO)+'件は非表示':'')+' · 端末内で追加・編集';}
 else{note.textContent='端末内の予定はありません · 右上の追加から登録';}
-yosDefaultStart();yosRefreshTestToggle();renderWeek();render();renderDayAllDay();updateReview();yosRenderSources();setCalendarMode('day');setInterval(()=>{updateNow();if(document.getElementById('yosOutingPanel').classList.contains('show'))yosRenderOuting();},60000);setInterval(yosRenderLearningHints,60000);
+yosDefaultStart();yosRefreshTestToggle();renderWeek();render();renderDayAllDay();updateReview();yosOutingManualSetup();yosRenderSources();setCalendarMode('day');setInterval(()=>{updateNow();if(document.getElementById('yosOutingPanel').classList.contains('show'))yosRenderOuting();},60000);setInterval(yosRenderLearningHints,60000);
 <\/script></body></html>`;
 
  const payload=JSON.stringify({days:state.days,hiddenCalendar:state.hiddenCalendar||{},calendarDays,allDayDays,calendarCoverage,taskSource,habitSource,outingContext:outingInput.context,outingTaskDetails:outingInput.taskDetails,generatedAt:new Date().toISOString()}).replace(/</g,'\\u003c');
