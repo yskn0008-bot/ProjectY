@@ -2,7 +2,7 @@
 const q=args.queryParameters||{};
 const decode=k=>{try {const d=Data.fromBase64String(String(q[k]||''));return d?d.toRawString():'';}catch(e){return '';}};
 const input={date:String(q.date||''),story:decode('story'),diary:decode('diary'),question:decode('question'),answer:decode('answer')};
-if(!/^\\d{4}-\\d{2}-\\d{2}$/.test(input.date)||!input.story||!input.diary||!input.question||!input.answer){const a=new Alert();a.title='YOS 日記';a.message='必要なデータが不足しています。保存は行いません。';a.addAction('閉じる');await a.present();Script.complete();throw new Error('YOS Journal Book: invalid input');}
+if(!/^\d{4}-\d{2}-\d{2}$/.test(input.date)||!input.story||!input.diary||!input.question||!input.answer){const a=new Alert();a.title='YOS 日記';a.message='必要なデータが不足しています。保存は行いません。';a.addAction('閉じる');await a.present();Script.complete();throw new Error('YOS Journal Book: invalid input');}
 const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 const pages=[
 {eyebrow:'YOS JOURNAL',title:input.date,body:'今日という一日を、ひとつの物語に。',type:'cover'},
