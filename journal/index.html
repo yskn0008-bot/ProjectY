@@ -90,7 +90,7 @@ function draw(issue){
  if(!articles.length)throw Error('出典リンク付きの記事がありません');
  issueKey=String(issue.issuedOn||issue.date||'unknown');
  const parts=[],starts=[];
- parts.push(shell('cover','<div class="topline">PERSONAL MAGAZINE · DAILY / YOS</div><div class="brand">YOS<br>JOURNAL.</div><div class="coverGrow"></div><span class="tag">TODAY'S PICKS</span><h1>'+esc(issue.headline||articles[0].title)+'</h1><p>'+esc(issue.lead||'')+'</p><div class="issue">'+esc(issue.date||'発行日未確認')+' · '+articles.length+' STORIES</div>'));
+ parts.push(shell('cover','<div class="topline">PERSONAL MAGAZINE · DAILY / YOS</div><div class="brand">YOS<br>JOURNAL.</div><div class="coverGrow"></div><span class="tag">TODAY / PICKS</span><h1>'+esc(issue.headline||articles[0].title)+'</h1><p>'+esc(issue.lead||'')+'</p><div class="issue">'+esc(issue.date||'発行日未確認')+' · '+articles.length+' STORIES</div>'));
  parts.push('CONTENTS_PLACEHOLDER');
  for(let i=0;i<articles.length;i++){starts.push(parts.length);addArticle(parts,articles[i],i)}
  parts[1]=shell('contents','<div class="kicker">YOS JOURNAL / CONTENTS</div><h2>今日の読みもの</h2>'+articles.map((a,i)=>'<button class="toc" data-go="'+starts[i]+'"><span class="number">'+String(i+1).padStart(2,'0')+'</span><span class="detail"><small>'+esc(a.category||'FEATURE')+'</small><strong>'+esc(a.title)+'</strong></span><span class="chevron">›</span></button>').join('')+'<div class="fill"></div><div class="folio">'+esc(issue.date||'')+'</div>');
