@@ -19,7 +19,7 @@ function make(overrides={}){
  const doc={getElementById:k=>entries[k]};
  let draws=0;
  const tasks=[{id,title:'手続き',status:'次にやる'}],initial=JSON.stringify(tasks);
- const FakeDate=class extends Date {constructor(...args){super(...(args.length?args:['2026-11-12T10:00:00+09:00']))}};
+ const FakeDate=class extends Date {constructor(...args){super(...(args.length?args:['2026-11-12T10:00:00']))}};
  const ctx={document:doc,Date:FakeDate,sourceTasks:tasks,taskSource:{status:'ok'},calendarCoverage:{status:'ok'},
  selectedDay:'2026-11-12',allDayDays:{},items:[],localISO:()=> '2026-11-12',
  isCalendarCovered:()=>true,yosIsPlanned:()=>false,yosRenderOuting:()=>{draws++}};
