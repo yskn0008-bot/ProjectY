@@ -33,3 +33,8 @@ test('proposes bounded non-overlapping times and re-evaluates after time change'
 test('outing panel is attached to task tab rather than hidden permanently',()=>{
  assert.match(src,/getElementById\('yosOutingPanel'\)\.classList\.toggle\('show',name==='task'\)/);
 });
+
+test('date validation survives Scriptable HTML template interpolation',()=>{
+ assert.match(block[1],/\[0-9\]\{4\}/);
+ assert.ok(!block[1].includes('\\\\d'), 'must not rely on an escaped regex through nested template strings');
+});
