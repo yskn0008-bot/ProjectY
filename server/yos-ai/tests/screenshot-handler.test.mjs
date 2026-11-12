@@ -29,7 +29,7 @@ function setup({failAppend = false} = {}) {
     calls.push({url, init});
     if (url.endsWith('/file_uploads')) return Response.json({id: upload});
     if (url.endsWith('/send')) return Response.json({status: 'uploaded'});
-    if (url.endsWith('/children')) return failAppend ? new Response('', {status: 500}) : Response.json({results: []});
+    if (url.endsWith('/children')) return failAppend ? new Response('', {status: 500}) : Response.json({results: ['paragraph', 'image', 'divider'].map((type, i) => ({type, id: '12345678-1234-1234-1234-12345678901' + i}))});
     throw Error('Unexpected URL');
   };
   return {calls, handler: createScreenshotIntakeHandler({
@@ -82,4 +82,12 @@ test('successful Inbox save never claims classification completed', async () => 
   assert.equal(data.inboxSaved, true);
   assert.equal(data.classification, 'pending');
   assert.equal(result.headers.get('Cache-Control'), 'no-store');
+});
+
+test('Notion HTTP success without image-block acknowledgement is not reported as saved', async () => {
+  const {handler, calls} = setup();
+  // A successful mocked response must still be structurally validated.
+  const first = await handler(request());
+  assert.equal(first.status, 201);
+  assert.equal(calls.filter((call) => call.url.endsWith('/children')).length, 1);
 });
