@@ -410,6 +410,12 @@ function yosOutingCandidates(tasks,context,occupied,day){
 }
 // YOS_ADAPTIVE_ERRANDS_END
 // YOS_OUTING_MANUAL_CAPTURE_START
+function yosOutingOccupied(day){
+ const allCalendar=(Array.isArray(calendarByDay[day])?calendarByDay[day]:[]).map((x,i)=>({id:'calendar-'+i,s:x?.start,d:x?.duration,source:'Apple Calendar'}));
+ const local=items.filter(x=>x&&x.source!=='Apple Calendar');
+ return [...allCalendar,...local];
+}
+
 // Ephemeral, explicitly user-confirmed fallback inside the existing task screen.
 function yosOutingClock(value){
  if(typeof value!=='string'||!/^([01][0-9]|2[0-3]):[0-5][0-9]$/.test(value))return null;
@@ -419,6 +425,8 @@ function yosOutingManualCapture(){
  const info=document.getElementById('yosOutingManualStatus');
  const fail=message=>{yosManualPreview=null;info.textContent=message;yosRenderOuting();return false;};
  const now=new Date(),day=localISO(now);
+ const calendarIssued=Date.parse(boot.generatedAt||''),tasksIssued=Date.parse(taskSource.checkedAt||'');
+ if(!Number.isFinite(calendarIssued)||!Number.isFinite(tasksIssued)||calendarIssued>now.getTime()+60000||tasksIssued>now.getTime()+60000||now.getTime()-calendarIssued>300000||now.getTime()-tasksIssued>300000)return fail('予定とタスクの確認から5分以上経過しました。画面を開き直してください。');
  if(selectedDay!==day||taskSource.status!=='ok'||calendarCoverage.status!=='ok'||!isCalendarCovered(day))return fail('本日の予定とタスクを完全取得できた場合のみ使えます。');
  if(Array.isArray(allDayDays[day])&&allDayDays[day].length)return fail('終日予定があるため、空き枠を確認できません。');
  const id=document.getElementById('yosOutingTaskChoice').value;
@@ -433,8 +441,10 @@ function yosOutingManualCapture(){
  if(!task||['完了','待ち','保留','中止','取消'].includes(task.status)||yosIsPlanned('notion:'+id))return fail('未配置の対象タスクを選択してください。');
  if(!confirmed||!place||place.length>80||!Number.isInteger(detour)||detour<0||detour>180||!Number.isInteger(duration)||duration<5||duration>240)return fail('立寄先・時間・経路・営業時間の確認が必要です。');
  if(start===null||end===null||start<minute||end<=start||end-start>480)return fail('現在以降の8時間以内の空き枠を指定してください。');
- const busy=items.filter(x=>x&&Number.isInteger(x.s)&&Number.isInteger(x.d)&&x.d>0).map(x=>[Math.max(start,x.s),Math.min(end,x.s+x.d)]).filter(x=>x[1]>x[0]).sort((a,b)=>a[0]-b[0]);
- if(items.some(x=>!x||!Number.isInteger(x.s)||!Number.isInteger(x.d)||x.d<=0||x.s<0||x.s+x.d>1440))return fail('予定の時間に不明な情報があるため、安全に停止しました。');
+ // Use the full Apple Calendar snapshot, including events hidden from the timeline.
+ const occupied=yosOutingOccupied(day);
+ if(occupied.some(x=>!x||!Number.isInteger(x.s)||!Number.isInteger(x.d)||x.d<=0||x.s<0||x.s+x.d>1440))return fail('予定の時間に不明な情報があるため、安全に停止しました。');
+ const busy=occupied.map(x=>[Math.max(start,x.s),Math.min(end,x.s+x.d)]).filter(x=>x[1]>x[0]).sort((a,b)=>a[0]-b[0]);
  let busyEnd=start,occupied=0;
  for(const [a,b] of busy){if(b>busyEnd){occupied+=b-Math.max(a,busyEnd);busyEnd=b;}}
  const available=end-start-occupied;
@@ -473,7 +483,7 @@ function yosRenderOuting(){
   const allDayClear=!Array.isArray(allDayDays[selectedDay])||allDayDays[selectedDay].length===0;
   const live=fresh&&allDayClear&&!(selectedDay===localISO(current)&&Number.isInteger(context.windowStart)&&context.windowStart<minute);
   const previewTasks=yosManualPreview?sourceTasks.map(x=>x.id===yosManualPreview.id?{...x,placeId:yosManualPreview.placeId,durationMinutes:yosManualPreview.durationMinutes}:x):outingTasks;
-  const result=yosOutingCandidates(previewTasks,live?context:null,items,selectedDay);
+  const result=yosOutingCandidates(previewTasks,live?context:null,yosOutingOccupied(selectedDay),selectedDay);
  label.textContent=result.reason;
  for(const candidate of result.proposals){
   const row=document.createElement('p');
