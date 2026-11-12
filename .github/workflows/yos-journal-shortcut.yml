@@ -17,6 +17,8 @@ jobs:
     timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Verify Scriptable source syntax and privacy boundary
         shell: bash
@@ -161,5 +163,47 @@ jobs:
           else
             git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' \
               commit -m 'build(journal): publish signed shortcut to draft branch [skip ci]'
+            git push origin HEAD:"$TARGET_BRANCH"
+          fi
+
+      - name: Stage scripts in existing shared installer catalog
+        if: github.event_name == 'pull_request'
+        shell: bash
+        env:
+          TARGET_BRANCH: ${{ github.event.pull_request.head.ref }}
+        run: |
+          set -euo pipefail
+          test "$TARGET_BRANCH" = "feat/yos-night-journal-integration-20261112"
+          git fetch origin "$TARGET_BRANCH"
+          git checkout -B "$TARGET_BRANCH" "origin/$TARGET_BRANCH"
+          python3 - <<'PY'
+          import hashlib,json,pathlib,subprocess
+          p=pathlib.Path('ios-app/scriptable/yos-common-installer-catalog.json')
+          data=json.loads(p.read_text())
+          assert data['schema']==1
+          for id_,name in [('journal-book','YOS Journal Book'),('journal-notion-bridge','YOS Journal Notion Bridge')]:
+              path='ios-app/scriptable/'+name+'.js'
+              source=pathlib.Path(path).read_bytes()
+              assert source.startswith(b'// Variables used by Scriptable.\n')
+              assert ('// YOS_SCRIPT_NAME: '+name).encode() in source[:250]
+              history=subprocess.check_output(['git','log','--format=%H','--reverse','--',path],text=True).splitlines()
+              assert history
+              commit=history[0]
+              assert subprocess.check_output(['git','show',commit+':'+path])==source
+              entry={'id':id_,'name':name,'path':path,'commit':commit,'sha256':hashlib.sha256(source).hexdigest()}
+              matches=[t for t in data['targets'] if t['id']==id_]
+              assert len(matches)<=1
+              if matches:
+                  assert matches[0]['name']==name and matches[0]['path']==path
+                  matches[0].update(entry)
+              else:
+                  assert all(t['name']!=name for t in data['targets'])
+                  data['targets'].append(entry)
+          assert len(data['targets'])<=30
+          p.write_text(json.dumps(data,ensure_ascii=False,indent=2)+'\n')
+          PY
+          git add ios-app/scriptable/yos-common-installer-catalog.json
+          if ! git diff --cached --quiet; then
+            git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'build(journal): register verified scripts in shared installer catalog [skip ci]'
             git push origin HEAD:"$TARGET_BRANCH"
           fi
