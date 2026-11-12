@@ -44,7 +44,9 @@ function request(body = capture, auth = token) {
 }
 test('screenshot upload is stored in existing Notion page and repeated capture is deduped', async () => {
   const {handler, calls} = setup();
-  assert.equal((await handler(request())).status, 201);
+  const first = await handler(request());
+  assert.equal(first.status, 201);
+  assert.deepEqual((await first.json()).classification, 'pending');
   assert.equal(calls.length, 3);
   assert.ok(calls[2].url.includes(page));
   const append = JSON.parse(calls[2].init.body);
@@ -69,4 +71,14 @@ test('all three destinations accepted without changing clipboard', async () => {
     const {handler} = setup();
     assert.equal((await handler(request({...capture, saveLocation}))).status, 201);
   }
+});
+
+test('successful Inbox save never claims classification completed', async () => {
+  const {handler} = setup();
+  const result = await handler(request());
+  assert.equal(result.status, 201);
+  const data = await result.json();
+  assert.equal(data.inboxSaved, true);
+  assert.equal(data.classification, 'pending');
+  assert.equal(result.headers.get('Cache-Control'), 'no-store');
 });
