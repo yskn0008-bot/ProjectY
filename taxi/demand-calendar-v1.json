@@ -101,9 +101,9 @@
       "role": "公式予定",
       "status": "manual-check-required",
       "confidence": "unverified",
-      "notes": "入出港時刻・接岸場所・変更を確認。下船開始は寄港予定と別。若狭から国際通り・パルコへの二次需要は本人経験則、全便に当てはめない。",
+      "notes": "港湾管理組合からリンクされている寄港予約システム（申請に基づく予定）。泊8号／新港12号・日時・船名を確認。Xの現地速報との変更点を照合。下船実績は別途確認が必要。",
       "sourceName": "那覇港管理組合",
-      "sourceUrl": "https://nahaport.jp/users/kyakusen/"
+      "sourceUrl": "https://nacru.my.site.com/s/"
     },
     {
       "id": "naha-flight-arrival",
@@ -123,7 +123,7 @@
       "role": "公式観測",
       "status": "manual-check-required",
       "confidence": "unverified",
-      "notes": "気象庁の雨雲・警報を確認。雨の開始・強まりが移動需要に与える影響は実績と照合する。",
+      "notes": "現在の天候・雨雲は気象庁公式で確認。現時点で自動観測の取り込みは未連携。",
       "sourceName": "気象庁",
       "sourceUrl": "https://www.jma.go.jp/bosai/rain/"
     },
