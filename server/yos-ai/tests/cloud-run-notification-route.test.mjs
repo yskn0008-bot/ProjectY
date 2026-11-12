@@ -18,3 +18,15 @@ test('YOS history UI uses enabled certified Cloud Run provider, not Vercel fallb
   assert.doesNotMatch(source,/project-y-yos-ai\.vercel\.app/);
   assert.match(source,/window\.YOS_AI_BASE_URL=parsed\.origin/);
 });
+
+
+test('notification Google sign-in resolves public config only through certified Cloud Run',()=>{
+  const history=readFileSync(new URL('../../../yos/notification-history.html',import.meta.url),'utf8');
+  const auth=readFileSync(new URL('../../../yos/hj/yos-auth.js',import.meta.url),'utf8');
+  assert.match(history,/window\.YOS_AUTH_PUBLIC_CONFIG_BASE_URL=parsed\.origin\+'\/'/);
+  assert.match(history,/parsed\.hostname\.endsWith\('\.run\.app'\)/);
+  assert.match(auth,/route === 'public-config'/);
+  assert.match(auth,/globalThis\.YOS_AUTH_PUBLIC_CONFIG_BASE_URL/);
+  assert.match(auth,/return \[explicit\.origin\]/);
+  assert.match(auth,/throw new Error\('Explicit notification authentication endpoint is invalid'\)/);
+});
