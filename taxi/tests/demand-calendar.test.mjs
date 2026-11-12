@@ -45,6 +45,8 @@ test('営業前画面は確認時刻を記録できるが確認行為を事実�
   assert.match(html, /querySelectorAll\('\.filter\[data-level\]'\)/);
   assert.match(html, /90\*60000/);
   assert.match(html, /確認済みとして記録/);
+  assert.match(html, /button\[data-source-check\]/);
+  assert.match(html, /localStorage\.removeItem\(CHECK_KEY\)/);
   assert.match(html, /公式予定とXなどの速報/);
   assert.match(html, /情報の内容は未連携/);
   assert.match(html, /那覇中心/);
