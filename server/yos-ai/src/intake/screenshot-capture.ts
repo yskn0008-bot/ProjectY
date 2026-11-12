@@ -46,6 +46,9 @@ export function parseScreenshotCapture(input: unknown): ScreenshotParseResult {
   const byteLength = (data.imageBase64.length / 4) * 3 - padding;
   if (byteLength > MAX_IMAGE_BYTES) return {ok: false, error: 'Image exceeds size limit'};
   if (byteLength < 8) return {ok: false, error: 'Image is too small'};
+  if (!hasExpectedImageSignature(data.mimeType, data.imageBase64)) {
+    return {ok: false, error: 'Image bytes do not match the declared format'};
+  }
   return {
     ok: true,
     value: {
@@ -58,4 +61,34 @@ export function parseScreenshotCapture(input: unknown): ScreenshotParseResult {
     },
     byteLength
   };
+}
+
+/** Validate the file signature without decoding the full potentially large image. */
+function hasExpectedImageSignature(mimeType: 'image/png' | 'image/jpeg' | 'image/heic', encoded: string): boolean {
+  // Eight decoded bytes are sufficient for PNG, JPEG and the HEIF ftyp box prefix.
+  const prefix = encoded.slice(0, 24);
+  const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+  const bytes: number[] = [];
+  let bits = 0;
+  let value = 0;
+  for (const char of prefix) {
+    if (char === '=') break;
+    const index = alphabet.indexOf(char);
+    if (index < 0) return false;
+    value = (value << 6) | index;
+    bits += 6;
+    if (bits >= 8) {
+      bits -= 8;
+      bytes.push((value >>> bits) & 255);
+    }
+  }
+  if (mimeType === 'image/png') {
+    return [137, 80, 78, 71, 13, 10, 26, 10].every((byte, index) => bytes[index] === byte);
+  }
+  if (mimeType === 'image/jpeg') {
+    return bytes[0] === 255 && bytes[1] === 216 && bytes[2] === 255;
+  }
+  const brand = String.fromCharCode(...bytes.slice(8, 12));
+  return bytes.length >= 12 && bytes[4] === 102 && bytes[5] === 116 && bytes[6] === 121 && bytes[7] === 112
+    && ['heic', 'heix', 'hevc', 'hevx', 'mif1', 'msf1'].includes(brand);
 }
