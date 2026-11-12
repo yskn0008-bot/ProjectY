@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-13T00:47:32+09:00",
+  "updated_at": "2026-11-13T00:49:35+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -103,14 +103,14 @@
       "updated_at": "2026-11-12T14:40:12Z"
     },
     {
-      "id": "github-pr-727",
-      "title": "PR #727 feat(alerts): match approved dense dark history design",
+      "id": "github-pr-729",
+      "title": "PR #729 Taxi: 那覇営業前ブリーフに降雨予報の自動取得を追加",
       "type": "GitHub PR",
       "status": "draft",
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/727",
-      "updated_at": "2026-11-12T15:46:14Z"
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/729",
+      "updated_at": "2026-11-12T15:47:45Z"
     },
     {
       "id": "github-issue-10",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-12T15:46:51Z"
+      "updated_at": "2026-11-12T15:49:03Z"
     },
     {
       "id": "github-issue-234",
@@ -205,6 +205,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-da0ff5832faa",
+      "title": "feat(alerts): adopt approved high-density notification history UI",
+      "completed_at": "2026-11-12T15:49:01Z",
+      "result": "GitHub mainへ反映（da0ff58）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/da0ff5832faaef6cd8ce935d56e308e7c45302b0"
+    },
+    {
       "id": "github-commit-01d0188f321d",
       "title": "fix(journal): display free audio player and direct MP3 link",
       "completed_at": "2026-11-12T15:46:51Z",
@@ -231,13 +238,6 @@
       "completed_at": "2026-11-12T15:27:56Z",
       "result": "GitHub mainへ反映（47dd7cc）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/47dd7cc388c93d58ee800902c2502415e16d2ab7"
-    },
-    {
-      "id": "github-commit-679e54cd043e",
-      "title": "Taxi: 那覇中心の営業前ブリーフと情報源確認を追加",
-      "completed_at": "2026-11-12T15:03:45Z",
-      "result": "GitHub mainへ反映（679e54c）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/679e54cd043ebc0d2e3a8d75ac3b2f8a405176a1"
     },
     {
       "id": "complete-002",
@@ -274,7 +274,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-13T00:47:32+09:00",
+      "last_update": "2026-11-13T00:49:35+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -355,7 +355,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-13T00:47:32+09:00",
+      "last_update": "2026-11-13T00:49:35+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -378,7 +378,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-13T00:47:32+09:00",
+      "last_update": "2026-11-13T00:49:35+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -460,5 +460,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "0bf18213b97102331ed802d02be608cfb6534dd3471a2f5270c768a09f96752c"
+  "github_snapshot_hash": "4ae8d31c188bc2f147ebafc74b6a309dedd0401019d28a3da8b13f88f11b17d5"
 }
