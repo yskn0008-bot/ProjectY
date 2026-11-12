@@ -103,6 +103,16 @@ header>p{font-size:12px;margin:9px 0 0;color:#b8bec5}
  .counts span{font-size:11px}
 }
 
+
+/* Explicit non-persistent demo. Neither auth nor the real notification endpoint is used. */
+.demo-banner{margin:11px 12px 0;padding:9px 12px;border:1px solid #bd9556;border-radius:8px;background:#302819;color:#f5d8a7;font-size:11px;line-height:1.6}
+.demo-banner strong{display:inline-block;margin-right:7px;letter-spacing:.1em}
+#demoStart{background:#32383f!important;color:#edf0f2!important;border:1px solid #65707a!important}
+body.demo-active .event{cursor:pointer}
+body.demo-active #googleSignIn{display:none!important}
+body.demo-active #refresh,body.demo-active #connect{display:none!important}
+body.demo-active #mode{border-color:#bd9556;color:#f6d5a0}
+body.demo-active #mode:before{background:#bd9556}
 </style></head><body>
 <main id="overview"><header>
 <div class="heading"><div><div class="eyebrow">YOS / STREAM</div><h1>通知履歴</h1></div><span class="pill" id="mode">未接続</span></div>
@@ -111,9 +121,10 @@ header>p{font-size:12px;margin:9px 0 0;color:#b8bec5}
 <div class="filters"><button data-filter="all" aria-pressed="true">すべて</button><button data-filter="action" aria-pressed="false">要対応</button><button data-filter="waiting" aria-pressed="false">未判定</button><button data-filter="done" aria-pressed="false">記録</button></div>
 <div class="search-shell"><input class="search" id="search" type="search" placeholder="通知元・要約を検索" aria-label="通知履歴を検索"></div>
 </header>
+<div id="demoBanner" class="demo-banner" role="status" hidden><strong>DEMO / 架空データ14件</strong>これはデザイン確認用のサンプルです。実際の受信・AI判定・対応記録ではありません。保存・送信も行いません。</div>
 <div class="columns"><span>時刻</span><span>通知の概要</span><span>判断</span><span style="text-align:right">処理結果</span></div>
 <div id="events" aria-live="polite"></div>
-<div id="state"><span id="status">本人認証して既存YOSの履歴を読み込む</span><div style="display:flex;gap:6px"><button id="refresh" type="button">更新</button><button id="connect">履歴を取得</button></div></div>
+<div id="state"><span id="status">本人認証して既存YOSの履歴を読み込む</span><div style="display:flex;gap:6px"><button id="demoStart" type="button">デモを見る</button><button id="refresh" type="button">更新</button><button id="connect">履歴を取得</button></div></div>
 <div id="googleSignIn" hidden><div id="googleSignInButton"></div></div>
 <div id="message" role="status" aria-live="polite">未取得です。0件と断定できません。</div>
 
@@ -151,6 +162,7 @@ async function selectExistingProvider(){
 var INBOX='https://app.notion.com/p/3d35ca88289581ef9dc8d5f11ff8e213';
 var $=function(id){return document.getElementById(id)};
 var rows=[],token='',active='all',selected=null,loading=false,lastComplete=false;
+var isDemo=new URLSearchParams(location.search).get('demo')==='1';
 var category={information:'一般通知','missed-call':'不在着信','money-review':'お金・支払',legal:'法務・期限',security:'セキュリティ'};
 function text(v,n){return String(v==null?'':v).slice(0,n||120)}
 function clean(v){return text(v,130).replace(/[\w.+-]+@[\w.-]+\.[A-Za-z]{2,}/g,'[メール非表示]').replace(/(?:\+?81[- ]?)?0\d{1,4}[- ]?\d{2,4}[- ]?\d{3,4}/g,'[電話非表示]').replace(/\b\d{7,}\b/g,'[番号非表示]').replace(/認証コード.{0,45}/g,'[認証情報非表示]').trim()}
@@ -178,18 +190,18 @@ var copy=node('span','subject-copy');copy.append(node('span','notice-title',summ
 var subtitle=clean((e.source||category[e.category]||'通知')+(e.text&&e.aiSummary?' · '+e.text.slice(0,48):''));
 copy.append(node('span','category',subtitle||category[e.category]||'通知'));part.append(copy);b.append(part);
 b.append(node('span','tag '+state[1],state[1]==='action'?'YOS_ALERT':state[1]==='done'?'YOS_SILENT':'未判定'));
-var result=e.status==='pending'?['あとで','pending']:e.status==='done'?['記録済み','recorded']:state[1]==='action'?['要対応','urgent']:state[1]==='done'?['判定済み','recorded']:['—','unverified'];
+var result=isDemo?[e.displayResult,e.status==='done'?'recorded':e.status==='pending'?'pending':'urgent']:e.status==='pending'?['あとで','pending']:e.status==='done'?['記録済み','recorded']:state[1]==='action'?['要対応','urgent']:state[1]==='done'?['判定済み','recorded']:['—','unverified'];
 b.append(node('span','result '+result[1],result[0]));
 b.addEventListener('click',function(){detail(e)});holder.append(b)
 })
 }
 function detail(e){selected=e;$('detailMeta').textContent=fmt(e.at,{year:'numeric',month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'})+' · '+(category[e.category]||'通知');
 $('detailTitle').textContent=summary(e);
-$('detailState').textContent='YOS判断：'+label(e)[0]+' ／ Inbox受付データ';
+$('detailState').textContent=isDemo?'DEMO / 架空の通知・操作不可':'YOS判断：'+label(e)[0]+' ／ Inbox受付データ';
 $('detailDecision').textContent=e.aiState==='complete'?(e.aiDecision==='YOS_ALERT'?'要対応と判定':'追加通知不要と判定'):'AIの判断は未確認です。';
-$('detailFacts').textContent='通知が既存Inbox由来のAPI記録として取得されました。本人による対応完了や別DB反映は未確認です。';
-$('detailNext').textContent=e.status==='done'?'API上は完了状態です。元の対応結果は別途確認が必要です。':'元の通知を確認し、必要な場合は既存Tasks・Moneyなどで対応します。';
-$('detailAudit').textContent='受信時刻：'+fmt(e.at,{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'})+' ／ AI：'+(e.aiState||'未判定')+' ／ 現在の状態：'+(e.status||'未確認');
+$('detailFacts').textContent=isDemo?'画面の見え方を確認するための架空事例です。実際のInbox・通知・AI判定の記録ではありません。':'通知が既存Inbox由来のAPI記録として取得されました。本人による対応完了や別DB反映は未確認です。';
+$('detailNext').textContent=isDemo?'この画面では実際の処理や送信は行いません。':e.status==='done'?'API上は完了状態です。元の対応結果は別途確認が必要です。':'元の通知を確認し、必要な場合は既存Tasks・Moneyなどで対応します。';
+$('detailAudit').textContent=isDemo?'DEMO：実際の受信・保存・操作履歴はありません。':'受信時刻：'+fmt(e.at,{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'})+' ／ AI：'+(e.aiState||'未判定')+' ／ 現在の状態：'+(e.status||'未確認');
 $('detail').hidden=false;document.body.style.overflow='hidden'}
 function closeDetail(){$('detail').hidden=true;document.body.style.overflow=''}
 async function fetchEvents(){
@@ -212,6 +224,7 @@ out.sort(function(a,b){return Date.parse(b.at)-Date.parse(a.at)});
 return {events:out,complete:fully}
 }
 async function refresh(){
+if(isDemo){message('デモ画面では通信しません。実データ画面に戻ってください。');return}
 if(loading)return;loading=true;$('connect').disabled=true;$('refresh').disabled=true;
 $('status').textContent='履歴を確認しています';message('本人確認・履歴取得中');
 try{await selectExistingProvider();if(!token){if(typeof window.YOS_AUTH?.getGoogleIdToken!=='function')throw Error('YOS本体の本人認証が使えません。単体ファイルでは接続できません');token=await window.YOS_AUTH.getGoogleIdToken()}
@@ -226,8 +239,9 @@ $('connect').addEventListener('click',refresh);$('refresh').addEventListener('cl
 $('search').addEventListener('input',render);
 document.querySelectorAll('[data-filter]').forEach(function(b){b.addEventListener('click',function(){active=b.dataset.filter;document.querySelectorAll('[data-filter]').forEach(function(x){x.setAttribute('aria-pressed',String(x===b))});render()})});
 $('back').addEventListener('click',closeDetail);
-$('openSource').addEventListener('click',function(){window.open(INBOX,'_blank','noopener,noreferrer')});
+$('openSource').addEventListener('click',function(){if(isDemo){alert('デモ表示です。元の通知はありません。');return}window.open(INBOX,'_blank','noopener,noreferrer')});
 $('later').addEventListener('click',async function(){
+if(isDemo){alert('デモでは保存や再通知は行いません。');return}
 if(!selected||!token){message('認証されていません');return}
 if(selected.status==='pending'){alert('既に対応待ちです');return}
 if(!confirm('既存Inboxで「対応待ち」にします。支払いの実行・期限通知の予約は行いません。'))return;
@@ -239,8 +253,52 @@ var verify=await saved.json();if(!saved.ok||verify.ok!==true||verify.complete!==
 selected.status='pending';alert('対応待ち状態を確認しました。再通知の予約ではありません。');detail(selected);render();
 }catch(e){alert('処理は未確認です。もう一度記録の状態を確認してください。')}
 });
-$('reported').addEventListener('click',function(){alert('本人の対応申告を確定記録する機能はまだ接続されていません。支払い・解決・タスク完了としては記録しません。')});
-document.addEventListener('visibilitychange',function(){if(!document.hidden&&token&&!loading)refresh()});
-render();
+$('reported').addEventListener('click',function(){if(isDemo){alert('デモです。対応状況は保存しません。');return}alert('本人の対応申告を確定記録する機能はまだ接続されていません。支払い・解決・タスク完了としては記録しません。')});
+
+function demoRows(){
+  // Completely fictional content; never use for actual Alerts counts or follow-ups.
+  var examples=[
+    ['23:40','カード支払いのご案内（明日が期限）','カード会社（架空）','money-review','action','要返信'],
+    ['22:58','不在着信（田中さん）','電話：1件の不在着信（架空）','missed-call','wait','あとで'],
+    ['22:37','荷物のお届け予定','通販：明日10:00〜12:00（架空）','information','done','記録済み'],
+    ['21:58','口座への入金を確認','銀行：入金通知（架空）','money-review','done','記録済み'],
+    ['21:20','タスクのリマインド','ToDo：明日が提出期限（架空）','information','action','要対応'],
+    ['20:47','購入完了のお知らせ','ショップ：注文を受付（架空）','information','done','記録済み'],
+    ['19:53','定期健診のリマインド','クリニック：予約案内（架空）','information','wait','あとで'],
+    ['18:26','予定変更のお知らせ','カレンダー：開始時刻変更（架空）','information','action','確認待ち'],
+    ['17:59','サブスク更新のお知らせ','サービス：更新まで3日（架空）','money-review','wait','未確認'],
+    ['16:44','フライトのリマインド','航空会社：搭乗予定（架空）','information','done','記録済み'],
+    ['15:12','宅配の再配達依頼が必要','宅配便：持ち戻り（架空）','information','action','要対応'],
+    ['12:37','請求書を受領しました','取引先：請求書（架空）','money-review','done','記録済み'],
+    ['10:21','会議のリマインド','カレンダー：本日開催（架空）','information','action','確認待ち'],
+    ['08:03','天気予報のお知らせ','天気：くもり時々雨（架空）','information','done','記録済み']
+  ];
+  return examples.map(function(x,i){
+    var status=x[5]==='あとで'?'pending':x[5]==='記録済み'?'done':'unread';
+    var aiState=i===1||i===6||i===8?'pending':'complete';
+    var aiDecision=aiState==='pending'?undefined:(i===0||i===4||i===7||i===10||i===12?'YOS_ALERT':'YOS_SILENT');
+    return {id:'demo-'+i,historyKey:'demo-history-'+i,at:'2026-11-12T'+x[0]+':00+09:00',
+      aiSummary:x[1],text:x[2],source:x[2],category:x[3],aiState:aiState,
+      aiDecision:aiDecision,status:status,demo:true,displayResult:x[5]};
+  });
+}
+function activateDemo(){
+  isDemo=true;document.body.classList.add('demo-active');
+  rows=demoRows();lastComplete=true;token='';API='';
+  $('mode').textContent='デモ表示';$('demoBanner').hidden=false;
+  $('status').textContent='架空の通知14件でデザインを確認中';
+  $('demoStart').textContent='実データ画面に戻る';
+  message('この14件はサンプルです。実際の履歴は未接続です。');
+  render();
+}
+$('demoStart').addEventListener('click',function(){
+  var next=new URL(window.location.href);
+  if(isDemo)next.searchParams.delete('demo');
+  else next.searchParams.set('demo','1');
+  window.location.assign(next.href);
+});
+
+document.addEventListener('visibilitychange',function(){if(!isDemo&&!document.hidden&&token&&!loading)refresh()});
+if(isDemo)activateDemo();else render();
 })();
 </script></body></html>
