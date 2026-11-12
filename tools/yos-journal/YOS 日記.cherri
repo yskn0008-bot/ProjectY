@@ -169,7 +169,15 @@ const analysisPrompt = text("あなたはYOS。今日の問いの回答と直近
 const yosAdvice = askChatGPT(analysisPrompt, false, "Text")
 alert(yosAdvice, "YOSの分析とアドバイス")
 
-const diary = text("【今日の出来事】\n{event}\n\n【心が動いた瞬間】\n{feeling}\n\n【目的別・自由選択】\nテーマ：{purpose}\n問い：{@purposeQuestion}\n本人の答え：{@purposeAnswer}\n\n【YOSの分析とアドバイス（本人の発言とは別）】\n{yosAdvice}")
+const storyPrompt = text("あなたはYOSの日記作家。以下の確認できた一日の流れと本人の3問への回答を一つの自然な短編日記にしてください。日本語300〜400字程度。出来事の羅列や箇条書きは禁止。時の流れ・場面転換・内面・余韻がある文学的な一人称の文章。本人が実際に感じたと確認できない感情、天候、景色、行動、会話を捏造しない。予定は実行済みと断定しない。根拠が薄いときは無理に埋めず短くする。見出し・前置き・分析・アドバイスは不要。\\n\\nNight Briefから渡された参考情報（未提供なら未確認）：{context}\\n\\n一問目：{openingQuestion}\\n回答：{event}\\n二問目：{secondQuestion}\\n回答：{feeling}\\n三問目：{finalQuestion}\\n回答：{finalAnswer}\\n任意の問い：{@purposeQuestion}\\n回答：{@purposeAnswer}")
+const generatedStory = askChatGPT(storyPrompt, false, "Text")
+alert(generatedStory, "今日の物語｜保存前の確認")
+const storyRevision = prompt("この物語でよければ空欄のまま進む。修正したい場合は、完成した文章を入力してください。", "Text", "")
+@finalStory = "{generatedStory}"
+if storyRevision {
+    @finalStory = "{storyRevision}"
+}
+const diary = text("【今日の物語】\\n{@finalStory}\\n\\n【今日の出来事】\n{event}\n\n【心が動いた瞬間】\n{feeling}\n\n【目的別・自由選択】\nテーマ：{purpose}\n問い：{@purposeQuestion}\n本人の答え：{@purposeAnswer}\n\n【YOSの分析とアドバイス（本人の発言とは別）】\n{yosAdvice}")
 
 const backup = text("YOS_JOURNAL_LOCAL_BACKUP_V1
 日付：{day}
