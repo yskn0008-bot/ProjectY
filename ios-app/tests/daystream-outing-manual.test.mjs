@@ -20,7 +20,7 @@ function make(overrides={}){
  let draws=0;
  const tasks=[{id,title:'手続き',status:'次にやる'}],initial=JSON.stringify(tasks);
  const FakeDate=class extends Date {constructor(...args){super(...(args.length?args:['2026-11-12T10:00:00']))}};
- const ctx={document:doc,Date:FakeDate,sourceTasks:tasks,taskSource:{status:'ok'},calendarCoverage:{status:'ok'},
+ const ctx={document:doc,Date:FakeDate,sourceTasks:tasks,taskSource:{status:'ok',checkedAt:'2026-11-12T10:00:00'},calendarCoverage:{status:'ok'},boot:{generatedAt:'2026-11-12T10:00:00'},calendarByDay:{},
  selectedDay:'2026-11-12',allDayDays:{},items:[],localISO:()=> '2026-11-12',
  isCalendarCovered:()=>true,yosIsPlanned:()=>false,yosRenderOuting:()=>{draws++}};
  const api=vm.runInNewContext('let yosManualPreview=null;\n'+block+'\n({capture:yosOutingManualCapture,snapshot:()=>yosManualPreview})',ctx);
@@ -56,4 +56,21 @@ test('manual capture is integrated into the existing task panel and still expire
  assert.match(source,/const context=yosManualPreview\?\.context\|\|boot\.outingContext/);
  assert.match(source,/current\.getTime\(\)-issued<=300000/);
  assert.match(source,/function yosRenderSources\(\)\{\s*yosRenderLearningHints\(\);\s*yosRenderOuting\(\)/);
+});
+
+test('hidden Apple appointments remain occupied when they are not in visible items',()=>{
+ const x=make();x.ctx.calendarByDay={'2026-11-12':[{start:665,duration:20,title:'非表示のApple予定'}]};
+ assert.equal(x.api.capture(),true);
+ assert.equal(x.api.snapshot().context.freeMinutes,40);
+});
+test('manual capture refuses stale Apple or Notion snapshots and invalid local entries',()=>{
+ for(const mutate of [
+  x=>x.ctx.boot.generatedAt='2026-11-12T09:45:00',
+  x=>x.ctx.taskSource.checkedAt='2026-11-12T09:45:00',
+  x=>x.ctx.items=[null],
+  x=>x.ctx.calendarByDay={'2026-11-12':[{start:670,duration:null}]}
+ ]){
+  const x=make();mutate(x);assert.equal(x.api.capture(),false);
+  assert.equal(x.api.snapshot(),null);
+ }
 });
