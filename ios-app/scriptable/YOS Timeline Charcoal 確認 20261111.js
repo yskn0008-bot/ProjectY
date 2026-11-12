@@ -152,6 +152,16 @@ button:active{opacity:.8}@media(min-width:640px){.dock{left:calc((100vw - 640px)
 .week-overview{margin:8px 13px 20px;border-radius:13px;background:#ffffff0b;border:1px solid #ffffff22;padding:10px}.week-overview-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px;font-size:13px}.week-overview-head button{color:#fff;background:#435567;border:1px solid #ffffff32;border-radius:8px;padding:7px 11px;min-height:36px}.week-overview-head strong{font-size:14px}.week-day{border:0;border-bottom:1px solid #ffffff22;background:transparent;color:#f2f5f9;display:flex;gap:8px;align-items:flex-start;width:100%;text-align:left;padding:10px 4px;min-height:54px}.week-day:last-child{border-bottom:0}.week-day .date{width:45px;flex:none;font-weight:650;font-variant-numeric:tabular-nums}.week-day.today .date{color:#65c0ff}.week-day .agenda{flex:1;min-width:0;font-size:12px}.week-day .agenda span{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:1px 0}.week-day .agenda .task{color:#e2b7f8}.week-day .agenda .habit{color:#9decc9}.week-day .agenda .due{color:#ffd19b}.week-day .empty{color:#c1c9d4}.week-day .more{color:#bdc5d0;font-size:11px}
 .month-pop[hidden]{display:none}.month-pop{margin:0 0 12px;padding:12px;border-radius:14px;border:1px solid #7a8798;background:#353f4c;box-shadow:0 8px 24px #10141b77}.month-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}.month-head strong{font-size:15px}.month-head button{border:1px solid #73879d;background:#45596a;color:#fff;border-radius:8px;padding:8px 11px;min-width:40px;min-height:39px}.month-head button:focus-visible,.month-grid button:focus-visible{outline:2px solid #74cbff;outline-offset:2px}.month-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px}.month-grid span{font-size:11px;color:#d1dbe5;text-align:center;padding:5px 0}.month-grid button{border:0;border-radius:8px;color:#f4f7fb;background:#ffffff0b;min-height:39px;font-size:13px;font-variant-numeric:tabular-nums}.month-grid button.outside{color:#a8b3c2;background:none}.month-grid button.selected{background:#247cbd;color:white;font-weight:700}.month-grid button.current:not(.selected){outline:1px solid #7ac8f2;outline-offset:-2px}.month-grid button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px}.month-grid .markers{display:flex;justify-content:center;gap:3px;height:5px}.month-grid .markers i{width:5px;height:5px;border-radius:50%;background:#45aefa}.month-grid .markers i.task{background:#c778f0}.month-grid .markers i.habit{background:#51d4ac}.month-grid .markers i.due{background:#f8bf79}.month-grid .uncertain{color:#9da7b6;font-size:9px}.month-pop .coverage,.week-overview .coverage{margin:8px 4px 0;font-size:11px;color:#cbd4df;line-height:1.5}.month-grid button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px}.month-grid .markers{display:flex;justify-content:center;gap:3px;height:5px}.month-grid .markers i{width:5px;height:5px;border-radius:50%;background:#45aefa}.month-grid .markers i.task{background:#c778f0}.month-grid .markers i.habit{background:#51d4ac}.month-grid .markers i.due{background:#f8bf79}.month-grid .uncertain{color:#9da7b6;font-size:9px}.month-pop .coverage,.week-overview .coverage{margin:8px 4px 0;font-size:11px;color:#cbd4df;line-height:1.5}
 .yos-source-row{display:flex;justify-content:space-between;align-items:center;gap:8px;border-top:1px solid #ffffff22;padding:9px 0}.yos-source-row b{display:block;font-size:13px;line-height:1.45}.yos-source-row small{display:block;font-size:11px;color:#ccd5df;line-height:1.5}.yos-source-row button,#yosPlanBox button,#yosPlanAll{border:1px solid #83b8e4;border-radius:9px;background:#367ea9;color:white;padding:8px 9px;font-size:12px;flex-shrink:0}.tabbox h3:not(:first-child){margin-top:18px}.tabbox input[type=time]{background:#303843;color:white;border:1px solid #94a2b4;border-radius:8px;padding:7px;margin:7px 0}#yosPlanBox:not(:empty){padding:8px 10px;margin:7px 0;border-radius:9px;background:#323f4d}
+
+.yos-learning-live{margin:10px 0 16px;padding:12px 13px;border:1px solid #ffffff29;border-radius:13px;background:#ffffff0d}
+.yos-learning-live h3{margin:0 0 5px;font-size:14px}
+.yos-learning-live h3 small{font-size:11px;font-weight:400;opacity:.78}
+.yos-learning-live .muted{font-size:11px;margin:0 0 9px;line-height:1.5}
+.yos-learning-live-row{display:flex;gap:8px;align-items:center;justify-content:space-between;padding:7px 0;border-top:1px solid #ffffff1c}
+.yos-learning-live-row>div{min-width:0;display:grid;gap:4px}
+.yos-learning-live-row strong{font-size:13px;overflow-wrap:anywhere}
+.yos-learning-live-row small{font-size:11px;color:#d3dae5}
+.yos-learning-live-row button{font-size:11px;border-radius:8px;border:1px solid #8eb8d6;background:#285d7c;color:#fff;padding:7px 10px;flex:none}
 </style></head><body>
 <div class="app">
   <div class="top">
@@ -187,7 +197,7 @@ button:active{opacity:.8}@media(min-width:640px){.dock{left:calc((100vw - 640px)
   <p class="gesture-help" id="gestureHelp">タスク：タップで完了 ｜ 左スワイプで削除 ｜ 長押しで編集 ｜ 上下ドラッグで移動</p>
   <div class="timeline-wrap" id="timelinePanel"><div class="timeline" id="tl"><div class="axis"></div><div class="nowline" id="nowLine" hidden><span class="nowbadge" id="nowBadge"></span></div></div></div>
   <section class="tabbox" id="taskPanel"><h3>タスク・未配置</h3><p class="muted">専門タスクの期限と、実行する時間は別。配置しても元データの期限・完了は変わりません。</p>
- <div id="taskList"></div><h3>各専門ページから集約</h3><p class="muted" id="yosTaskSourceStatus">Notion Tasks：確認中</p>
+ <div id="taskList"></div><section id="yosLearningHints" class="yos-learning-live" aria-label="期限が近いタスク" hidden><h3>期限が近いタスク <small>確認のみ</small></h3><p class="muted" id="yosLearningCoverage"></p><div id="yosLearningRows"></div></section><h3>各専門ページから集約</h3><p class="muted" id="yosTaskSourceStatus">Notion Tasks：確認中</p>
  <label for="yosStartFrom">配置提案の開始時刻</label><input id="yosStartFrom" type="time" value="09:00" aria-label="配置提案の開始時刻">
  <button id="yosPlanAll" type="button">上位3件をまとめて配置提案</button><div id="yosPlanBox" aria-live="polite"></div><div id="yosSourceTasks"></div>
  <h3>繰り返し習慣</h3><p class="muted" id="yosHabitSourceStatus">習慣：確認中</p><div id="yosHabitTasks"></div></section>
@@ -271,7 +281,36 @@ function yosAddRow(container,title,description,onClick){
  name.textContent=title;meta.textContent=description;body.append(name,meta);row.append(body);
  const button=document.createElement('button');button.textContent='時間を提案';button.onclick=onClick;row.append(button);container.append(row);
 }
+
+// YOS_LIFE_LEARNING_LIVE_START: sourced only from existing sanitized native taskSource.
+function yosRenderLearningHints(){
+ const panel=document.getElementById('yosLearningHints');
+ const rows=document.getElementById('yosLearningRows'),coverage=document.getElementById('yosLearningCoverage');
+ rows.replaceChildren();panel.hidden=true;
+ if(!['ok','partial'].includes(taskSource.status))return;
+ const date=new Date(),today=localISO(date);date.setDate(date.getDate()+1);
+ const next=localISO(date),seen=new Set();
+ const active=sourceTasks.filter(x=>{
+   if(!x||typeof x.id!=='string'||typeof x.title!=='string'||!['次にやる','実行中','本人操作'].includes(x.status))return false;
+   if(x.due!==today&&x.due!==next||seen.has(x.id))return false;
+   seen.add(x.id);return true;
+ }).sort((a,b)=>a.due.localeCompare(b.due)||yosTaskRank(a)-yosTaskRank(b)||a.title.localeCompare(b.title,'ja')).slice(0,3);
+ if(!active.length)return;
+ coverage.textContent=(taskSource.status==='partial'?'Notion Tasksは一部取得。':'Notion Tasksを確認。')+'期限時刻は未確認。元の予定・完了状態は変更しません。';
+ for(const x of active){
+   const row=document.createElement('div');row.className='yos-learning-live-row';
+   const title=document.createElement('strong');title.textContent=x.title;
+   const meta=document.createElement('small');meta.textContent=(x.due===today?'今日':'明日')+'が期限 · 時刻未確認';
+   const action=document.createElement('button');action.type='button';action.textContent='時間を提案';
+   action.setAttribute('aria-label',x.title+'の時間を提案');
+   action.onclick=()=>yosPropose(x,'task');
+   const info=document.createElement('div');info.append(title,meta);row.append(info,action);rows.append(row);
+ }
+ panel.hidden=false;
+}
+// YOS_LIFE_LEARNING_LIVE_END
 function yosRenderSources(){
+ yosRenderLearningHints();
  taskFeed.textContent='';habitFeed.textContent='';
  const status=document.getElementById('yosTaskSourceStatus');
  status.textContent='Notion Tasks：'+yosStatusWord(taskSource.status)+(taskSource.status==='ok'||taskSource.status==='partial'?'（取得 '+sourceTasks.length+'件・先頭80件を表示）':'')+(taskSource.checkedAt?' · '+new Date(taskSource.checkedAt).toLocaleString('ja-JP',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}):'');
@@ -898,7 +937,7 @@ document.getElementById('closeFocus').onclick=()=>{zoom=null;deleteConfirmId=nul
 if(Array.isArray(stored)){note.textContent='保存済み時間割を表示 · Notion Tasks '+yosStatusWord(taskSource.status);}
 else if(calendarRows.length){note.textContent='Appleカレンダー '+calendarRows.length+'件を読み取り'+(yosTestCount(todayISO)?' · テスト'+yosTestCount(todayISO)+'件は非表示':'')+' · 端末内で追加・編集';}
 else{note.textContent='端末内の予定はありません · 右上の追加から登録';}
-yosDefaultStart();yosRefreshTestToggle();renderWeek();render();renderDayAllDay();updateReview();yosRenderSources();setCalendarMode('day');setInterval(updateNow,60000);
+yosDefaultStart();yosRefreshTestToggle();renderWeek();render();renderDayAllDay();updateReview();yosRenderSources();setCalendarMode('day');setInterval(updateNow,60000);setInterval(yosRenderLearningHints,60000);
 <\/script></body></html>`;
 
  const payload=JSON.stringify({days:state.days,hiddenCalendar:state.hiddenCalendar||{},calendarDays,allDayDays,calendarCoverage,taskSource,habitSource,generatedAt:new Date().toISOString()}).replace(/</g,'\\u003c');
