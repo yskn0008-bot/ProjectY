@@ -75,6 +75,37 @@ function yosReadHabits(){
  }catch{return {status:'error',items:[]}}
 }
 
+// YOS_OUTING_INPUT_BRIDGE_START
+// Optional one-shot Shortcut input; a caller must supply confirmed values. Never writes task/calendar sources.
+function yosReadOutingInput(raw,taskSource,coverage,now){
+ const empty={context:null,taskDetails:[]};
+ if(typeof raw==='string'){if(raw.length>16000)return empty;try{raw=JSON.parse(raw)}catch{return empty}}
+ if(!raw||typeof raw!=='object'||Array.isArray(raw)||raw.schema!=='yos-outing-preview-v1')return empty;
+ if(raw.confirmed!==true||raw.source!=='user-confirmed'||taskSource?.status!=='ok'||coverage?.status!=='ok')return empty;
+ if(!(now instanceof Date)||!Number.isFinite(now.getTime()))return empty;
+ const issued=Date.parse(raw.issuedAt||'');
+ if(!Number.isFinite(issued)||issued>now.getTime()+60000||now.getTime()-issued>300000)return empty;
+ const day=raw.day;
+ if(typeof day!=='string'||!/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(day)||day<coverage.from||day>=coverage.until)return empty;
+ if(!Number.isInteger(raw.windowStart)||!Number.isInteger(raw.windowEnd)||raw.windowStart<0||raw.windowEnd>1440||raw.windowEnd-raw.windowStart<5)return empty;
+ if(day===key(now)&&raw.windowStart<now.getHours()*60+now.getMinutes())return empty;
+ if(!Number.isInteger(raw.freeMinutes)||raw.freeMinutes<5||raw.freeMinutes>480)return empty;
+ if(!Array.isArray(raw.route)||raw.route.length===0||raw.route.length>12||!Array.isArray(raw.taskDetails)||raw.taskDetails.length===0||raw.taskDetails.length>30)return empty;
+ const route=[],places=new Set(),orders=new Set();
+ for(const x of raw.route){
+  if(!x||typeof x.placeId!=='string'||!/^[a-zA-Z0-9_-]{1,64}$/.test(x.placeId)||places.has(x.placeId)||!Number.isInteger(x.order)||x.order<0||x.order>12||orders.has(x.order)||!Number.isInteger(x.detourMinutes)||x.detourMinutes<0||x.detourMinutes>180||x.openConfirmed!==true)return empty;
+  places.add(x.placeId);orders.add(x.order);
+  route.push({placeId:x.placeId,order:x.order,detourMinutes:x.detourMinutes,openConfirmed:true});
+ }
+ const ids=new Set(taskSource.items.map(x=>x.id)),used=new Set(),taskDetails=[];
+ for(const x of raw.taskDetails){
+  const id=String(x?.id||'').toLowerCase();
+  if(!ids.has(id)||used.has(id)||!places.has(x?.placeId)||!Number.isInteger(x?.durationMinutes)||x.durationMinutes<5||x.durationMinutes>240)return empty;
+  used.add(id);taskDetails.push({id,placeId:x.placeId,durationMinutes:x.durationMinutes});
+ }
+ return {context:{confirmed:true,calendarVerified:true,issuedAt:raw.issuedAt,day,windowStart:raw.windowStart,windowEnd:raw.windowEnd,freeMinutes:raw.freeMinutes,route},taskDetails};
+}
+// YOS_OUTING_INPUT_BRIDGE_END
 async function main(){
  const prior=fm.fileExists(path)?fm.readString(path):null;
  let state={version:1,days:{}};
@@ -103,6 +134,7 @@ async function main(){
    calendarCoverage.status=records.length>maxEvents?'partial':'ok';
  }catch(e){console.warn('Appleカレンダーは読み取り不可: '+String(e.message||e));calendarCoverage.status='error';}
  const [taskSource,habitSource]=await Promise.all([yosReadTaskSource(),Promise.resolve(yosReadHabits())]);
+  const outingInput=yosReadOutingInput(args?.shortcutParameter,taskSource,calendarCoverage,new Date());
  const view=new WebView();
  // Native bridge: a user-tapped local task link is the only shortcut:// request we open.
  // Safari.open is allowed only for the exact encoded run-shortcut name URL scheme.
@@ -186,6 +218,7 @@ button:active{opacity:.8}@media(min-width:640px){.dock{left:calc((100vw - 640px)
   <div class="compat-status" id="compatStatus" aria-live="polite">相性を判定中</div>
   <p class="gesture-help" id="gestureHelp">タスク：タップで完了 ｜ 左スワイプで削除 ｜ 長押しで編集 ｜ 上下ドラッグで移動</p>
   <div class="timeline-wrap" id="timelinePanel"><div class="timeline" id="tl"><div class="axis"></div><div class="nowline" id="nowLine" hidden><span class="nowbadge" id="nowBadge"></span></div></div></div>
+  <section class="tabbox" id="yosOutingPanel" aria-label="ついで行動の提案"><h3>ついで行動</h3><p class="muted" id="yosOutingSummary">経路・営業状況・所要時間を確認中</p><div id="yosOutingProposals"></div><p class="muted">確定予定を動かさず、Notionの原本も更新しません。</p></section>
   <section class="tabbox" id="taskPanel"><h3>タスク・未配置</h3><p class="muted">専門タスクの期限と、実行する時間は別。配置しても元データの期限・完了は変わりません。</p>
  <div id="taskList"></div><h3>各専門ページから集約</h3><p class="muted" id="yosTaskSourceStatus">Notion Tasks：確認中</p>
  <label for="yosStartFrom">配置提案の開始時刻</label><input id="yosStartFrom" type="time" value="09:00" aria-label="配置提案の開始時刻">
@@ -246,6 +279,8 @@ const fmt=m=>String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(
 
 const taskSource=boot.taskSource||{status:'unavailable',items:[]},habitSource=boot.habitSource||{status:'unavailable',items:[]};
 const sourceTasks=Array.isArray(taskSource.items)?taskSource.items.filter(x=>x&&typeof x.id==='string'&&typeof x.title==='string'):[];
+ const outingDetails=new Map(Array.isArray(boot.outingTaskDetails)?boot.outingTaskDetails.map(x=>[x.id,x]):[]);
+ const outingTasks=sourceTasks.map(x=>({...x,...(outingDetails.get(x.id)||{})}));
 const sourceHabits=Array.isArray(habitSource.items)?habitSource.items.filter(x=>x&&typeof x.id==='string'&&typeof x.title==='string'):[];
 const planBox=document.getElementById('yosPlanBox'),taskFeed=document.getElementById('yosSourceTasks'),habitFeed=document.getElementById('yosHabitTasks');
 const yosStatusWord=x=>x==='ok'?'取得済み':x==='partial'?'一部のみ取得':x==='unavailable'?'未接続':'取得エラー';
@@ -271,7 +306,66 @@ function yosAddRow(container,title,description,onClick){
  name.textContent=title;meta.textContent=description;body.append(name,meta);row.append(body);
  const button=document.createElement('button');button.textContent='時間を提案';button.onclick=onClick;row.append(button);container.append(row);
 }
+// YOS_ADAPTIVE_ERRANDS_START
+// Pure, read-only outing proposals. No inferred location, opening hours or travel time.
+function yosOutingCandidates(tasks,context,occupied,day){
+ const result={proposals:[],excluded:[],reason:''};
+ if(!context||context.confirmed!==true||context.calendarVerified!==true||context.day!==day||!Array.isArray(context.route)||!Number.isInteger(context.windowStart)||!Number.isInteger(context.windowEnd)||context.windowStart<0||context.windowEnd>1440||context.windowEnd<=context.windowStart||!Number.isInteger(context.freeMinutes)||context.freeMinutes<0){
+  result.reason='現在地・経路・空き時間が未確認のため、ついで行動は提案しません。';return result;
+ }
+ if(!Array.isArray(occupied)||!Array.isArray(tasks)||!/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(day)){
+  result.reason='予定またはタスクの取得状態が不明です。';return result;
+ }
+ const route=new Map(context.route.filter(x=>x&&typeof x.placeId==='string'&&Number.isInteger(x.order)&&x.order>=0&&Number.isInteger(x.detourMinutes)&&x.detourMinutes>=0&&x.openConfirmed===true).map(x=>[x.placeId,x]));
+ const already=new Set(occupied.filter(x=>x&&x.sourceRef).map(x=>x.sourceRef));
+ const candidates=[];
+ for(const t of tasks){
+  if(!t||typeof t.id!=='string'||!t.title||['完了','中止','取消','キャンセル','保留','待ち'].includes(t.status)||already.has('notion:'+t.id))continue;
+  const r=route.get(t.placeId);
+  if(!r||!Number.isInteger(t.durationMinutes)||t.durationMinutes<5||t.durationMinutes>240||t.due&& !/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(t.due)){
+   result.excluded.push({id:t.id,reason:'場所・経路・営業確認・所要時間の確定情報が不足'});continue;
+  }
+  const cost=t.durationMinutes+r.detourMinutes;
+  if(cost>context.freeMinutes){result.excluded.push({id:t.id,reason:'空き時間を超える'});continue;}
+  if(t.due&&t.due<day){result.excluded.push({id:t.id,reason:'期限経過・状況要確認'});continue;}
+  candidates.push({id:t.id,title:t.title,placeId:t.placeId,order:r.order,minutes:cost,taskMinutes:t.durationMinutes,detourMinutes:r.detourMinutes,due:t.due||'',priority:t.priority||'',reason:'経路上の確認済み立寄り先・営業確認済み・所要 '+t.durationMinutes+'分＋寄り道 '+r.detourMinutes+'分'+(t.due?'・期限 '+t.due:'')});
+ }
+ candidates.sort((a,b)=>a.order-b.order||String(a.due||'9999').localeCompare(String(b.due||'9999'))||({P0:0,P1:1,P2:2,P3:3}[a.priority]??4)-({P0:0,P1:1,P2:2,P3:3}[b.priority]??4)||a.id.localeCompare(b.id));
+ let budget=Math.min(context.freeMinutes,context.windowEnd-context.windowStart),cursor=context.windowStart;
+ for(const c of candidates){
+  const end=cursor+c.minutes;
+  if(c.minutes>budget||end>context.windowEnd){result.excluded.push({id:c.id,reason:'先行候補を含めると時間不足'});continue;}
+  if(occupied.some(x=>x&&Number.isFinite(x.s)&&Number.isFinite(x.d)&&x.d>0&&cursor<x.s+x.d&&x.s<end)){
+   result.excluded.push({id:c.id,reason:'既存の確定・端末内予定に時間衝突'});continue;
+  }
+  result.proposals.push({...c,start:cursor,end});cursor=end;budget-=c.minutes;
+ }
+ result.reason=result.proposals.length?'確定予定・Notion原本には反映しない読み取り専用の提案です。':'条件を確認できる予定外タスクはありません。';
+ return result;
+}
+// YOS_ADAPTIVE_ERRANDS_END
+// YOS_OUTING_RENDER_START
+function yosRenderOuting(){
+ const label=document.getElementById('yosOutingSummary'),list=document.getElementById('yosOutingProposals');
+ if(!label||!list)return;
+ list.textContent='';
+ const current=new Date(),minute=current.getHours()*60+current.getMinutes();
+  const context=boot.outingContext;
+  const issued=context?Date.parse(context.issuedAt||''):NaN;
+  const fresh=Number.isFinite(issued)&&issued<=current.getTime()+60000&&current.getTime()-issued<=300000;
+  const live=fresh&&!(selectedDay===localISO(current)&&Number.isInteger(context.windowStart)&&context.windowStart<minute);
+  const result=yosOutingCandidates(outingTasks,live?context:null,items,selectedDay);
+ label.textContent=result.reason;
+ for(const candidate of result.proposals){
+  const row=document.createElement('p');
+  row.textContent=fmt(candidate.start)+'–'+fmt(candidate.end)+' · '+candidate.title+' · '+candidate.reason;
+  list.append(row);
+ }
+ if(result.excluded.length){const info=document.createElement('p');info.className='muted';info.textContent='情報不足または時間不足で保留：'+result.excluded.length+'件（自動で実行可能とは判定しません）';list.append(info);}
+}
+// YOS_OUTING_RENDER_END
 function yosRenderSources(){
+ yosRenderOuting();
  taskFeed.textContent='';habitFeed.textContent='';
  const status=document.getElementById('yosTaskSourceStatus');
  status.textContent='Notion Tasks：'+yosStatusWord(taskSource.status)+(taskSource.status==='ok'||taskSource.status==='partial'?'（取得 '+sourceTasks.length+'件・先頭80件を表示）':'')+(taskSource.checkedAt?' · '+new Date(taskSource.checkedAt).toLocaleString('ja-JP',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}):'');
@@ -672,6 +766,7 @@ function setTab(name){
  else if(calendarMode==='week')renderWeekAgenda();
  renderDayAllDay();
  for(const [tab,id] of [['task','taskPanel'],['analysis','review'],['records','recordsPanel'],['ai','aiPanel']])document.getElementById(id).classList.toggle('show',name===tab);
+ document.getElementById('yosOutingPanel').classList.toggle('show',name==='task');
  renderLists();if(name==='task')yosRenderSources();if(name!=='timeline')window.scrollTo({top:0,behavior:'smooth'});
 }
 function renderLists(){
@@ -898,10 +993,10 @@ document.getElementById('closeFocus').onclick=()=>{zoom=null;deleteConfirmId=nul
 if(Array.isArray(stored)){note.textContent='保存済み時間割を表示 · Notion Tasks '+yosStatusWord(taskSource.status);}
 else if(calendarRows.length){note.textContent='Appleカレンダー '+calendarRows.length+'件を読み取り'+(yosTestCount(todayISO)?' · テスト'+yosTestCount(todayISO)+'件は非表示':'')+' · 端末内で追加・編集';}
 else{note.textContent='端末内の予定はありません · 右上の追加から登録';}
-yosDefaultStart();yosRefreshTestToggle();renderWeek();render();renderDayAllDay();updateReview();yosRenderSources();setCalendarMode('day');setInterval(updateNow,60000);
+yosDefaultStart();yosRefreshTestToggle();renderWeek();render();renderDayAllDay();updateReview();yosRenderSources();setCalendarMode('day');setInterval(()=>{updateNow();if(document.getElementById('yosOutingPanel').classList.contains('show'))yosRenderOuting();},60000);
 <\/script></body></html>`;
 
- const payload=JSON.stringify({days:state.days,hiddenCalendar:state.hiddenCalendar||{},calendarDays,allDayDays,calendarCoverage,taskSource,habitSource,generatedAt:new Date().toISOString()}).replace(/</g,'\\u003c');
+ const payload=JSON.stringify({days:state.days,hiddenCalendar:state.hiddenCalendar||{},calendarDays,allDayDays,calendarCoverage,taskSource,habitSource,outingContext:outingInput.context,outingTaskDetails:outingInput.taskDetails,generatedAt:new Date().toISOString()}).replace(/</g,'\\u003c');
  const ready=html.replace('<script>','<script>window.YOS_CHARCOAL_BOOT='+payload+';<\/script><script>');
  await view.loadHTML(ready);
  let closedFlag=false;
