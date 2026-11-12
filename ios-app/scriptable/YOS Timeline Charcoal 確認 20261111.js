@@ -138,6 +138,9 @@ button,input,select{font:inherit}button{cursor:pointer}button:focus-visible,inpu
 .card.compat-danger:before{background:#ed8a93;width:5px}.card.compat-danger{box-shadow:0 2px 8px #101b2927}
 .card.compat-danger:after{content:"!";font-size:12px;font-weight:800;color:#fff;background:#bf485b;border-radius:50%;width:17px;height:17px;line-height:17px;text-align:center;position:absolute;right:3px;top:2px;z-index:1;pointer-events:none}
 .card.compat-danger{padding-right:24px}
+@keyframes yos-conflict-signal{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.88)}}
+.card.compat-danger:after{animation:yos-conflict-signal .8s ease-in-out 3}
+@media (prefers-reduced-motion:reduce){.card.compat-danger:after{animation:none}}
 .card.compat-unknown:before{background:#aab3c0}
 .compat-status{font-size:11px;color:#d8e0ea;margin:6px 14px 3px;line-height:1.55}
 .compat-status[hidden]{display:none}.compat-status strong{font-weight:720}.compat-status .overlap-button{border:1px solid #dc8a91;border-radius:8px;background:#7a3441;color:#fff;font-weight:700;padding:9px 11px;min-height:37px;display:block;margin:5px 0;text-align:left;width:100%}.compat-status .overlap-details{margin:5px 0 9px;padding:9px 11px;border-left:3px solid #e28c96;border-radius:6px;background:#ffffff0d;line-height:1.5}.compat-status .overlap-details[hidden]{display:none}.compat-key{display:flex;flex-wrap:wrap;gap:8px;margin-top:5px}.compat-key span{font-size:10px}.compat-key .pos{color:#8bebc3}.compat-key .neg{color:#ffd391}.compat-key .danger{color:#ffa1ad}
