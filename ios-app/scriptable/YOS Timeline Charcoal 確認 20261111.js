@@ -512,6 +512,17 @@ function yosOutingManualSetup(){
  document.getElementById('yosOutingManualStatus').textContent=gap?'次の空き時間を仮入力しました。実際の経路・営業状況は別途確認してください。':'確認できる空き時間がありません。予定取得・日付を確認してください。';
  document.getElementById('yosOutingBuild').onclick=yosOutingManualCapture;
  document.getElementById('yosOutingOpenMaps').onclick=yosOutingOpenMaps;
+ const invalidate=()=>{
+  yosManualPreview=null;
+  document.getElementById('yosOutingConfirmed').checked=false;
+  document.getElementById('yosOutingManualStatus').textContent='条件が変更されました。経路・営業時間を確認し直してください。';
+  yosRenderOuting();
+ };
+ for(const id of ['yosOutingTaskChoice','yosOutingPlace','yosOutingMode','yosOutingDetour','yosOutingDuration','yosOutingStart','yosOutingEnd']){
+  const field=document.getElementById(id);
+  field.oninput=invalidate;
+  field.onchange=invalidate;
+ }
 }
 // YOS_OUTING_MANUAL_CAPTURE_END
 
@@ -881,7 +892,7 @@ function showDay(iso){
  items=dayItems(iso);
  isSample=false;
  selectedId=null;zoom=null;focus.classList.remove('show');editor.classList.remove('show');
- yosDefaultStart();planBox.textContent='';yosRenderSources();
+ yosDefaultStart();planBox.textContent='';yosManualPreview=null;yosOutingManualSetup();yosRenderSources();
  yosRefreshTestToggle();
  note.textContent='端末の時間割 · Notion Tasks '+yosStatusWord(taskSource.status)+' · 習慣 '+yosStatusWord(habitSource.status)+(isCalendarCovered(iso)?'':' · Apple予定未確認');
  hideMonthPicker();renderWeek();render();renderDayAllDay();if(calendarMode==='week')renderWeekAgenda();updateReview();window.scrollTo({top:0,behavior:'smooth'});
