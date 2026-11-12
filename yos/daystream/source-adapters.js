@@ -1,0 +1,99 @@
+/* DAYSTREAM browser read-only source adapter.
+ * Offline user-selected files only. No credentials, outbound requests or source writes.
+ */
+(function(root){
+ 'use strict';
+ const MAX_EVENTS=500, MAX_TASKS=400, MAX_BYTES=1000000, DAY=/^\d{4}-\d{2}-\d{2}$/;
+ const str=(v,n)=>String(v??'').replace(/[\u0000-\u001f\u007f]/g,' ').trim().slice(0,n);
+ const date=s=>DAY.test(s)&&!Number.isNaN(Date.parse(s+'T00:00:00Z'))&&new Date(s+'T00:00:00Z').toISOString().slice(0,10)===s;
+ function normalizeTasks(data){
+  if(!data||typeof data!=='object'||Array.isArray(data))throw Error('タスクJSON形式が不正');
+  const raw=Array.isArray(data.items)?data.items:Array.isArray(data.tasks)?data.tasks:null;
+  if(!raw||raw.length>MAX_TASKS)throw Error('タスク数が上限外');
+  const seen=new Set(),items=[];
+  for(const t of raw){
+   if(!t||typeof t!=='object')throw Error('タスクが不正');
+   const id=str(t.id,80),title=str(t.title,120),status=str(t.status||t.state,32),due=str(t.due,10);
+   if(!/^[a-z0-9-]{8,80}$/i.test(id)||!title||!['次にやる','実行中','本人操作','待ち','保留','完了'].includes(status)||due&&!date(due))throw Error('タスクのID・名前・期限・状態を確認できない');
+   if(seen.has(id))continue;seen.add(id);
+   items.push({id,title,status,due,priority:['P0','P1','P2','P3'].includes(t.priority)?t.priority:'',area:str(t.area||'未分類',40),action:str(t.action,140)});
+  }
+  // A projection only. It is not evidence that Notion is currently synchronized.
+  const checkedAt=new Date().toISOString();
+  return {schema:'yos-daystream-source-snapshot-v1',kind:'tasks',status:'ok',items,checkedAt,source:'user-file'};
+ }
+ const unescapeICS=s=>s.replace(/\\[nN]/g,' ').replace(/\\,/g,',').replace(/\\;/g,';').replace(/\\\\/g,'\\');
+ function stamp(raw,params){
+  const s=raw.trim();
+  if(/^\d{8}$/.test(s)){const day=s.slice(0,4)+'-'+s.slice(4,6)+'-'+s.slice(6,8);if(!date(day))throw Error('日付が無効');return {day,minute:0,allDay:true,absolute:null}}
+  const m=s.match(/^(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})?(Z)?$/);
+  if(!m)throw Error('日付形式が未対応');
+  const day=m[1]+'-'+m[2]+'-'+m[3],minute=Number(m[4])*60+Number(m[5]),second=Number(m[6]||0);
+  if(!date(day)||minute>=1440||second>=60)throw Error('時刻が無効');
+  const zone=(params.match(/(?:^|;)TZID=([^;:]+)/i)||[])[1];
+  if(zone&&!/^(?:Asia\/Tokyo|Japan)$/i.test(zone))throw Error('異なるタイムゾーンは推測できません');
+  if(m[7]){
+   const ms=Date.parse(day+'T'+m[4]+':'+m[5]+':'+String(second).padStart(2,'0')+'Z');
+   const local=new Date(ms);
+   return {day:[local.getFullYear(),String(local.getMonth()+1).padStart(2,'0'),String(local.getDate()).padStart(2,'0')].join('-'),minute:local.getHours()*60+local.getMinutes(),allDay:false,absolute:ms};
+  }
+  return {day,minute,allDay:false,absolute:null};
+ }
+ function parseICS(ics){
+  if(typeof ics!=='string'||ics.length>MAX_BYTES||!ics.includes('BEGIN:VCALENDAR'))throw Error('カレンダーファイルではありません');
+  const lines=ics.replace(/\r\n/g,'\n').replace(/\r/g,'\n').split('\n').reduce((a,line)=>{if(/^[ \t]/.test(line)&&a.length)a[a.length-1]+=line.slice(1);else a.push(line);return a},[]);
+  if(lines.length>30000)throw Error('カレンダーの行数が上限を超えました');
+  const days={},allDayDays={},seen=new Set();let inEvent=false,fields=null,count=0,skipped=0;
+  const add=(day,e)=>{if(!days[day])days[day]=[];if(days[day].length<80)days[day].push(e)};
+  for(const line of lines){
+   if(line==='BEGIN:VEVENT'){if(inEvent)throw Error('予定の入れ子が不正');inEvent=true;fields={};continue}
+   if(line==='END:VEVENT'){
+    if(!inEvent)continue;inEvent=false;count++;
+    if(count>MAX_EVENTS)throw Error('予定数が上限超過');
+    if(fields.STATUS==='CANCELLED'||fields.RRULE||fields['RECURRENCE-ID']){skipped++;continue}
+    try{
+     const begin=fields.DTSTART,end=fields.DTEND;
+     if(!begin||!end)throw Error('開始・終了が不明');
+     const a=stamp(begin.value,begin.params),b=stamp(end.value,end.params);
+     const title=str(unescapeICS(fields.SUMMARY||'予定'),100);
+     const uid=str(fields.UID||title+'|'+begin.value,180);
+     if(!title||seen.has(uid+'|'+begin.value))continue;
+     seen.add(uid+'|'+begin.value);
+     if(a.allDay&&b.allDay){
+      const from=new Date(a.day+'T00:00:00Z'),to=new Date(b.day+'T00:00:00Z');
+      const n=(+to-+from)/86400000;if(n<=0||n>31)throw Error('終日予定の範囲が不正');
+      for(let j=0;j<n;j++){const d=new Date(+from+j*86400000).toISOString().slice(0,10);(allDayDays[d]??=[]).push(title)}
+      continue;
+     }
+     if(a.allDay!==b.allDay)throw Error('時刻型が異なる');
+     const a0=new Date(a.day+'T00:00:00Z'),b0=new Date(b.day+'T00:00:00Z');
+     const duration=(a.absolute!==null&&b.absolute!==null)?Math.round((b.absolute-a.absolute)/60000):Math.round((+b0-+a0)/60000+b.minute-a.minute);
+     if(duration<=0||duration>1440)throw Error('期間が無効');
+     let remaining=duration,offset=a.minute,day=a.day;
+     while(remaining>0){
+      const segment=Math.min(remaining,1440-offset);
+      if(segment<=0)throw Error('日跨ぎが不正');
+      add(day,{title,start:offset,duration:segment});
+      remaining-=segment;offset=0;
+      if(remaining>0){const d=new Date(day+'T00:00:00Z');d.setUTCDate(d.getUTCDate()+1);day=d.toISOString().slice(0,10)}
+     }
+    }catch{skipped++}
+    continue;
+   }
+   if(!inEvent)continue;
+   const pos=line.indexOf(':');if(pos<0)continue;
+   const left=line.slice(0,pos),value=line.slice(pos+1),name=left.split(';')[0].toUpperCase();
+   if(['SUMMARY','UID','STATUS','RRULE'].includes(name))fields[name]=value;
+   else if(['DTSTART','DTEND','RECURRENCE-ID'].includes(name))fields[name]={value,params:left.slice(name.length)};
+  }
+  if(inEvent||count===0)throw Error('予定が取得できません');
+  if(!Object.keys(days).length&&!Object.keys(allDayDays).length)throw Error('対応する予定がありません');
+  return {schema:'yos-daystream-source-snapshot-v1',kind:'calendar',status:skipped?'partial':'ok',calendarDays:days,allDayDays,checkedAt:new Date().toISOString(),source:'user-file',eventCount:count,skippedCount:skipped};
+ }
+ function validSaved(s,kind){
+  if(!s||s.schema!=='yos-daystream-source-snapshot-v1'||s.kind!==kind||s.source!=='user-file'||!Number.isFinite(Date.parse(s.checkedAt)))return false;
+  const age=Date.now()-Date.parse(s.checkedAt);
+  return age>=-300000&&age<=7*86400000;
+ }
+ root.YOS_DAYSTREAM_SOURCES={normalizeTasks,parseICS,validSaved,MAX_BYTES};
+})(typeof window!=='undefined'?window:globalThis);
