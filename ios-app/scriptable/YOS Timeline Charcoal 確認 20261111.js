@@ -75,6 +75,38 @@ function yosReadHabits(){
  }catch{return {status:'error',items:[]}}
 }
 
+// YOS_OUTING_INPUT_BRIDGE_START
+// Optional one-shot Shortcut input; a caller must supply confirmed values. Never writes task/calendar sources.
+function yosReadOutingInput(raw,taskSource,coverage,now){
+ const empty={context:null,taskDetails:[]};
+ if(typeof raw==='string'){if(raw.length>16000)return empty;try{raw=JSON.parse(raw)}catch{return empty}}
+ if(!raw||typeof raw!=='object'||Array.isArray(raw)||raw.schema!=='yos-outing-preview-v1')return empty;
+ if(raw.confirmed!==true||raw.source!=='user-confirmed'||taskSource?.status!=='ok'||coverage?.status!=='ok')return empty;
+ if(!(now instanceof Date)||!Number.isFinite(now.getTime()))return empty;
+ const issued=Date.parse(raw.issuedAt||'');
+ if(!Number.isFinite(issued)||issued>now.getTime()+60000||now.getTime()-issued>300000)return empty;
+ const day=raw.day;
+ if(typeof day!=='string'||!/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(day)||day<coverage.from||day>=coverage.until)return empty;
+ if(!Number.isInteger(raw.windowStart)||!Number.isInteger(raw.windowEnd)||raw.windowStart<0||raw.windowEnd>1440||raw.windowEnd-raw.windowStart<5)return empty;
+ if(day===key(now)&&raw.windowStart<now.getHours()*60+now.getMinutes())return empty;
+ if(!Number.isInteger(raw.freeMinutes)||raw.freeMinutes<5||raw.freeMinutes>480)return empty;
+ if(!Array.isArray(raw.route)||raw.route.length===0||raw.route.length>12||!Array.isArray(raw.taskDetails)||raw.taskDetails.length===0||raw.taskDetails.length>30)return empty;
+ const route=[],places=new Set(),orders=new Set();
+ for(const x of raw.route){
+  if(!x||typeof x.placeId!=='string'||!/^[a-zA-Z0-9_-]{1,64}$/.test(x.placeId)||places.has(x.placeId)||!Number.isInteger(x.order)||x.order<0||x.order>12||orders.has(x.order)||!Number.isInteger(x.detourMinutes)||x.detourMinutes<0||x.detourMinutes>180||x.openConfirmed!==true)return empty;
+  places.add(x.placeId);orders.add(x.order);
+  route.push({placeId:x.placeId,order:x.order,detourMinutes:x.detourMinutes,openConfirmed:true});
+ }
+ const ids=new Set(taskSource.items.map(x=>x.id)),used=new Set(),taskDetails=[];
+ for(const x of raw.taskDetails){
+  const id=String(x?.id||'').toLowerCase();
+  if(!ids.has(id)||used.has(id)||!places.has(x?.placeId)||!Number.isInteger(x?.durationMinutes)||x.durationMinutes<5||x.durationMinutes>240)return empty;
+  used.add(id);taskDetails.push({id,placeId:x.placeId,durationMinutes:x.durationMinutes});
+ }
+ return {context:{confirmed:true,calendarVerified:true,day,windowStart:raw.windowStart,windowEnd:raw.windowEnd,freeMinutes:raw.freeMinutes,route},taskDetails};
+}
+// YOS_OUTING_INPUT_BRIDGE_END
+
 async function main(){
  const prior=fm.fileExists(path)?fm.readString(path):null;
  let state={version:1,days:{}};
@@ -103,6 +135,7 @@ async function main(){
    calendarCoverage.status=records.length>maxEvents?'partial':'ok';
  }catch(e){console.warn('Appleカレンダーは読み取り不可: '+String(e.message||e));calendarCoverage.status='error';}
  const [taskSource,habitSource]=await Promise.all([yosReadTaskSource(),Promise.resolve(yosReadHabits())]);
+  const outingInput=yosReadOutingInput(args?.shortcutParameter,taskSource,calendarCoverage,new Date());
  const view=new WebView();
  // Native bridge: a user-tapped local task link is the only shortcut:// request we open.
  // Safari.open is allowed only for the exact encoded run-shortcut name URL scheme.
@@ -252,6 +285,8 @@ const fmt=m=>String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(
 
 const taskSource=boot.taskSource||{status:'unavailable',items:[]},habitSource=boot.habitSource||{status:'unavailable',items:[]};
 const sourceTasks=Array.isArray(taskSource.items)?taskSource.items.filter(x=>x&&typeof x.id==='string'&&typeof x.title==='string'):[];
+ const outingDetails=new Map(Array.isArray(boot.outingTaskDetails)?boot.outingTaskDetails.map(x=>[x.id,x]):[]);
+ const outingTasks=sourceTasks.map(x=>({...x,...(outingDetails.get(x.id)||{})}));
 const sourceHabits=Array.isArray(habitSource.items)?habitSource.items.filter(x=>x&&typeof x.id==='string'&&typeof x.title==='string'):[];
 const planBox=document.getElementById('yosPlanBox'),taskFeed=document.getElementById('yosSourceTasks'),habitFeed=document.getElementById('yosHabitTasks');
 const yosStatusWord=x=>x==='ok'?'取得済み':x==='partial'?'一部のみ取得':x==='unavailable'?'未接続':'取得エラー';
@@ -320,7 +355,10 @@ function yosRenderOuting(){
  const label=document.getElementById('yosOutingSummary'),list=document.getElementById('yosOutingProposals');
  if(!label||!list)return;
  list.textContent='';
- const result=yosOutingCandidates(sourceTasks,boot.outingContext,items,selectedDay);
+ const current=new Date(),minute=current.getHours()*60+current.getMinutes();
+  const context=boot.outingContext;
+  const live=!(context&&selectedDay===localISO(current)&&Number.isInteger(context.windowStart)&&context.windowStart<minute);
+  const result=yosOutingCandidates(outingTasks,live?context:null,items,selectedDay);
  label.textContent=result.reason;
  for(const candidate of result.proposals){
   const row=document.createElement('p');
@@ -939,7 +977,7 @@ else{note.textContent='端末内の予定はありません · 右上の追加�
 yosDefaultStart();yosRefreshTestToggle();renderWeek();render();renderDayAllDay();updateReview();yosRenderSources();setCalendarMode('day');setInterval(updateNow,60000);
 <\/script></body></html>`;
 
- const payload=JSON.stringify({days:state.days,hiddenCalendar:state.hiddenCalendar||{},calendarDays,allDayDays,calendarCoverage,taskSource,habitSource,generatedAt:new Date().toISOString()}).replace(/</g,'\\u003c');
+ const payload=JSON.stringify({days:state.days,hiddenCalendar:state.hiddenCalendar||{},calendarDays,allDayDays,calendarCoverage,taskSource,habitSource,outingContext:outingInput.context,outingTaskDetails:outingInput.taskDetails,generatedAt:new Date().toISOString()}).replace(/</g,'\\u003c');
  const ready=html.replace('<script>','<script>window.YOS_CHARCOAL_BOOT='+payload+';<\/script><script>');
  await view.loadHTML(ready);
  let closedFlag=false;
