@@ -64,8 +64,8 @@ function draw(issue){
  stage.innerHTML=parts.join('');
  slides=Array.from(stage.querySelectorAll('.sheet'));tocIndex=1;
  stage.querySelectorAll('[data-go]').forEach(el=>el.addEventListener('click',()=>show(Number(el.dataset.go))));
- const prior=localStorage.getItem('yos-journal-position-'+issueKey);
- const saved=Number(prior);show(Number.isInteger(saved)?saved:0);
+ let prior=null;try{prior=localStorage.getItem('yos-journal-position-'+issueKey)}catch{}
+ const saved=prior===null?0:Number(prior);show(Number.isInteger(saved)?saved:0);
  if(issue.issuedOn){const today=new Date().toLocaleDateString('sv-SE',{timeZone:'Asia/Tokyo'});if(issue.issuedOn!==today)notice('本日号ではありません：'+issue.issuedOn)}
 }
 function show(n){if(!slides.length)return;index=Math.max(0,Math.min(slides.length-1,n));slides.forEach((p,i)=>p.classList.toggle('current',i===index));count.textContent=(index+1)+' / '+slides.length;byId('prev').disabled=index===0;byId('next').disabled=index===slides.length-1;try{localStorage.setItem('yos-journal-position-'+issueKey,String(index))}catch{}}
