@@ -62,12 +62,12 @@ button:active{opacity:.8}@media(min-width:640px){.dock{left:calc((100vw - 640px)
 .yos-learning-live-row strong{font-size:13px;overflow-wrap:anywhere}
 .yos-learning-live-row small{font-size:11px;color:#d3dae5}
 .yos-learning-live-row button{font-size:11px;border-radius:8px;border:1px solid #8eb8d6;background:#285d7c;color:#fff;padding:7px 10px;flex:none}
-</style></head><body class="yos-daystream-web"><div class="yos-web-port" role="navigation" aria-label="DAYSTREAM Web版">
+</style><script src="./source-adapters.js"></script></head><body class="yos-daystream-web"><div class="yos-web-port" role="navigation" aria-label="DAYSTREAM Web版">
 <a href="../">YOS</a><strong>DAYSTREAM · WEB</strong>
 <button id="yosWebImport" type="button">データ読込</button><button id="yosWebExport" type="button">書き出し</button>
 <button id="yosWebHistory" type="button">行動学習</button>
-<span class="yos-web-port-note">端末内だけに保存 · Notion/Appleカレンダー未接続 · Scriptableのデータは変更しません</span>
-<input id="yosWebFile" type="file" accept=".json,.txt,application/json,text/plain" hidden>
+<span class="yos-web-port-note" id="yosWebSourceState">端末内だけに保存 · Notion/Appleカレンダー自動同期は未接続 · Scriptableのデータは変更しません</span>
+<input id="yosWebFile" type="file" accept=".json,.txt,.ics,application/json,text/plain,text/calendar" hidden>
 </div><section id="yosWebHistoryPanel" class="yos-web-port-dialog" hidden aria-label="行動学習の候補"><div id="yosWebHistoryRows"></div></section>
 <div class="app">
   <div class="top">
@@ -136,7 +136,39 @@ button:active{opacity:.8}@media(min-width:640px){.dock{left:calc((100vw - 640px)
  const storageOk=()=>{try{const k='YOS_DAYSTREAM_WEB_CHECK';localStorage.setItem(k,'1');localStorage.removeItem(k);return true}catch{return false}};
  let plan={version:1,days:{},hiddenCalendar:{}},storedRaw=null;
  try{storedRaw=localStorage.getItem(KEY);if(storedRaw){const p=JSON.parse(storedRaw);if(valid(p))plan=p;else{window.YOS_WEB_DATA_ERROR='保存データの形式に問題があります。上書きしません。';}}}catch{window.YOS_WEB_DATA_ERROR='保存データを読み込めません。上書きしません。';}
+ const SOURCE_TASK='YOS_DAYSTREAM_WEB_TASK_SNAPSHOT_V1',SOURCE_CAL='YOS_DAYSTREAM_WEB_CAL_SNAPSHOT_V1';
+ const sourceAdapters=window.YOS_DAYSTREAM_SOURCES;
+ const readSnapshot=(key,kind)=>{
+  if(!sourceAdapters)return null;
+  try{const s=JSON.parse(localStorage.getItem(key)||'null');return sourceAdapters.validSaved(s,kind)?s:null}catch{return null}
+ };
+ const importedTasks=readSnapshot(SOURCE_TASK,'tasks'),importedCalendar=readSnapshot(SOURCE_CAL,'calendar');
+ const importedDays=Object.keys(importedCalendar?.calendarDays||{}).concat(Object.keys(importedCalendar?.allDayDays||{})).sort();
+ const importedCalendarCoverage=importedDays.length?{
+  from:importedDays[0],until:(()=>{const d=new Date(importedDays[importedDays.length-1]+'T00:00:00Z');d.setUTCDate(d.getUTCDate()+1);return d.toISOString().slice(0,10)})(),
+  status:'partial'
+ }:{from:'',until:'',status:'unavailable'};
+ const writeSource=(key,data)=>{
+  const backupKey=key+'_BACKUP';
+  try{
+   const old=localStorage.getItem(key),next=JSON.stringify(data);
+   if(old!==null){localStorage.setItem(backupKey,old);if(localStorage.getItem(backupKey)!==old)return false}
+   localStorage.setItem(key,next);if(localStorage.getItem(key)!==next)throw Error('readback');
+   return true;
+  }catch{return false}
+ };
  const web={
+  importSource(text,name){
+   if(!sourceAdapters||typeof text!=='string'||text.length>sourceAdapters.MAX_BYTES)return false;
+   try{
+    const calendar=/\.ics$/i.test(name);
+    const snapshot=calendar?sourceAdapters.parseICS(text):sourceAdapters.normalizeTasks(JSON.parse(text));
+    const kind=calendar?'Apple予定（読取専用）':'Notionタスクの写し（読取専用）';
+    if(!confirm(kind+'をこの端末に取り込みます。元のデータは変更せず、自動同期もしません。続けますか？'))return false;
+    if(!writeSource(calendar?SOURCE_CAL:SOURCE_TASK,snapshot))return false;
+    location.reload();return true;
+   }catch{return false}
+  },
   write(p){
    if(!storageOk()||!valid(p)||window.YOS_WEB_DATA_ERROR)return false;
    try{
@@ -186,17 +218,18 @@ button:active{opacity:.8}@media(min-width:640px){.dock{left:calc((100vw - 640px)
  };
  window.YOS_DAYSTREAM_WEB=web;
  if('serviceWorker' in navigator){navigator.serviceWorker.register('../../service-worker.js',{scope:'../../',updateViaCache:'none'}).catch(()=>{});}
- window.YOS_CHARCOAL_BOOT={days:plan.days,hiddenCalendar:plan.hiddenCalendar||{},calendarDays:{},allDayDays:{},calendarCoverage:{from:'',until:'',status:'unavailable'},taskSource:{status:'unavailable',items:[]},habitSource:{status:'unavailable',items:[]},generatedAt:new Date().toISOString()};
+ window.YOS_CHARCOAL_BOOT={days:plan.days,hiddenCalendar:plan.hiddenCalendar||{},calendarDays:importedCalendar?.calendarDays||{},allDayDays:importedCalendar?.allDayDays||{},calendarCoverage:importedCalendarCoverage,taskSource:importedTasks?{...importedTasks,status:'partial'}:{status:'unavailable',items:[]},habitSource:{status:'unavailable',items:[]},generatedAt:new Date().toISOString()};
  window.addEventListener('DOMContentLoaded',()=>{
   const f=document.getElementById('yosWebFile'),btn=document.getElementById('yosWebImport');
   btn.onclick=()=>f.click();
-  f.onchange=async()=>{const file=f.files?.[0];if(!file)return;if(file.size>1000000){alert('ファイルが大きすぎます');return}try{const raw=await file.text(),p=JSON.parse(raw);if(!web.import(p))alert('形式の照合または保存に失敗しました。元データは保持されています。')}catch{alert('JSONファイルを読み取れません。変更はありません。')}finally{f.value=''}};
+  f.onchange=async()=>{const file=f.files?.[0];if(!file)return;if(file.size>1000000){alert('ファイルが大きすぎます');return}try{const raw=await file.text();if(/\.ics$/i.test(file.name)){if(!web.importSource(raw,file.name))alert('カレンダー読込を中止しました。元データは保持されています。');return;}const p=JSON.parse(raw);if(p&&p.version===1&&p.days){if(!web.import(p))alert('時間割の照合または保存に失敗しました。元データは保持されています。')}else if(!web.importSource(raw,file.name)){alert('タスク読込を中止しました。元データは保持されています。')}}catch{alert('ファイルを読み取れません。変更はありません。')}finally{f.value=''}};
   document.getElementById('yosWebExport').onclick=()=>{if(!web.export())alert('Web版の保存データがありません。')};
+  const sourceText=document.getElementById('yosWebSourceState');if(sourceText){sourceText.textContent='端末内保存 · '+(importedTasks?'タスク手動取込':'Notion未接続')+' · '+(importedCalendar?'Apple予定手動取込':'Appleカレンダー未接続')+' · 自動同期なし';}
   document.getElementById('yosWebHistory').onclick=()=>{
     const panel=document.getElementById('yosWebHistoryPanel'),rows=document.getElementById('yosWebHistoryRows');
     panel.hidden=!panel.hidden;if(panel.hidden)return;rows.replaceChildren();
-    const ps=web.suggestions();if(!ps.length){rows.textContent='同じタスクの完了が3件以上たまると、実行実績の中央値を候補として表示します。時間割の自動変更はしません。';return}
-    for(const x of ps){const p=document.createElement('p');p.textContent=x.title+' · 実績'+x.count+'回 · '+x.suggested+'頃が候補';rows.append(p)}
+    const ps=web.suggestions();if(!ps.length){rows.textContent='同じタスクを3回以上完了すると完了時刻の傾向を表示します。開始時刻は未確認で、時間割を自動変更しません。';return}
+    for(const x of ps){const p=document.createElement('p');p.textContent=x.title+' · 完了'+x.count+'回 · '+x.suggested+'頃に完了した傾向（開始時刻は未確認）';rows.append(p)}
   };
   if(window.YOS_WEB_DATA_ERROR){const p=document.getElementById('yosWebHistoryPanel');p.hidden=false;document.getElementById('yosWebHistoryRows').textContent=window.YOS_WEB_DATA_ERROR;}
  });
@@ -290,7 +323,7 @@ function yosRenderLearningHints(){
    seen.add(x.id);return true;
  }).sort((a,b)=>a.due.localeCompare(b.due)||yosTaskRank(a)-yosTaskRank(b)||a.title.localeCompare(b.title,'ja')).slice(0,3);
  if(!active.length)return;
- coverage.textContent=(taskSource.status==='partial'?'Notion Tasksは一部取得。':'Notion Tasksを確認。')+'期限時刻は未確認。元の予定・完了状態は変更しません。';
+ coverage.textContent=(taskSource.source==='user-file'?'手動で取り込んだ期限の写し。自動同期なし。':taskSource.status==='partial'?'Notion Tasksは一部取得。':'Notion Tasksを確認。')+'期限時刻は未確認。元の予定・完了状態は変更しません。';
  for(const x of active){
    const row=document.createElement('div');row.className='yos-learning-live-row';
    const title=document.createElement('strong');title.textContent=x.title;
@@ -307,7 +340,7 @@ function yosRenderSources(){
  yosRenderLearningHints();
  taskFeed.textContent='';habitFeed.textContent='';
  const status=document.getElementById('yosTaskSourceStatus');
- status.textContent='Notion Tasks：'+yosStatusWord(taskSource.status)+(taskSource.status==='ok'||taskSource.status==='partial'?'（取得 '+sourceTasks.length+'件・先頭80件を表示）':'')+(taskSource.checkedAt?' · '+new Date(taskSource.checkedAt).toLocaleString('ja-JP',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}):'');
+ status.textContent=(taskSource.source==='user-file'?'手動取込のTasks写し：':'Notion Tasks：')+yosStatusWord(taskSource.status)+(taskSource.status==='ok'||taskSource.status==='partial'?'（取得 '+sourceTasks.length+'件・先頭80件を表示）':'')+(taskSource.checkedAt?' · '+new Date(taskSource.checkedAt).toLocaleString('ja-JP',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}):'');
  const live=sourceTasks.filter(x=>!['待ち','保留'].includes(x.status));
  live.sort((a,b)=>yosTaskRank(a)-yosTaskRank(b)||String(a.due||'9999').localeCompare(String(b.due||'9999'))||a.title.localeCompare(b.title,'ja'));
  const pending=live.filter(x=>!yosIsPlanned('notion:'+x.id)).slice(0,80);
