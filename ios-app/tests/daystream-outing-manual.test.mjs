@@ -125,3 +125,8 @@ test('editing a confirmed form field invalidates approval and prior preview imme
  assert.match(source,/document\.getElementById\('yosOutingConfirmed'\)\.checked=false/);
  assert.match(source,/yosManualPreview=null;yosOutingManualSetup\(\);yosRenderSources\(\)/);
 });
+
+test('switching days resets manual verification before accepting a new route',()=>{
+ assert.match(source,/function yosOutingManualSetup\(\)\{[\s\S]*?getElementById\('yosOutingConfirmed'\)\.checked=false/);
+ assert.match(source,/yosManualPreview=null;yosOutingManualSetup\(\);yosRenderSources\(\)/);
+});
