@@ -284,7 +284,7 @@ function yosOutingCandidates(tasks,context,occupied,day){
  if(!context||context.confirmed!==true||context.calendarVerified!==true||context.day!==day||!Array.isArray(context.route)||!Number.isInteger(context.windowStart)||!Number.isInteger(context.windowEnd)||context.windowStart<0||context.windowEnd>1440||context.windowEnd<=context.windowStart||!Number.isInteger(context.freeMinutes)||context.freeMinutes<0){
   result.reason='現在地・経路・空き時間が未確認のため、ついで行動は提案しません。';return result;
  }
- if(!Array.isArray(occupied)||!Array.isArray(tasks)||!/^\d{4}-\d{2}-\d{2}$/.test(day)){
+ if(!Array.isArray(occupied)||!Array.isArray(tasks)||!/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(day)){
   result.reason='予定またはタスクの取得状態が不明です。';return result;
  }
  const route=new Map(context.route.filter(x=>x&&typeof x.placeId==='string'&&Number.isInteger(x.order)&&x.order>=0&&Number.isInteger(x.detourMinutes)&&x.detourMinutes>=0&&x.openConfirmed===true).map(x=>[x.placeId,x]));
@@ -293,7 +293,7 @@ function yosOutingCandidates(tasks,context,occupied,day){
  for(const t of tasks){
   if(!t||typeof t.id!=='string'||!t.title||['完了','中止','取消','キャンセル','保留','待ち'].includes(t.status)||already.has('notion:'+t.id))continue;
   const r=route.get(t.placeId);
-  if(!r||!Number.isInteger(t.durationMinutes)||t.durationMinutes<5||t.durationMinutes>240||t.due&& !/^\d{4}-\d{2}-\d{2}$/.test(t.due)){
+  if(!r||!Number.isInteger(t.durationMinutes)||t.durationMinutes<5||t.durationMinutes>240||t.due&& !/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(t.due)){
    result.excluded.push({id:t.id,reason:'場所・経路・営業確認・所要時間の確定情報が不足'});continue;
   }
   const cost=t.durationMinutes+r.detourMinutes;
