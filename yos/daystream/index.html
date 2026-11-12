@@ -112,7 +112,7 @@ button:active{opacity:.8}@media(min-width:640px){.dock{left:calc((100vw - 640px)
   <section class="tabbox" id="recordsPanel"><h3>記録</h3><p>このタイムライン内で完了にした項目のみを表示します。</p><div id="recordsList"></div></section>
   <section class="tabbox" id="aiPanel"><h3>AIプラン</h3><p>AIとの連携は未実装です。実行状況を確認せずに予定の自動変更はしません。</p><p class="muted">追加や時間変更はタイムラインで手動操作できます。</p></section>
   <div class="gesture-delete" id="gestureDelete" hidden aria-live="polite"><span id="gestureDeleteTitle"></span><button id="gestureDeleteConfirm" type="button">削除</button><button id="gestureDeleteCancel" class="cancel" type="button">戻す</button></div>
-  <div class="focus" id="focus"><b id="focusTitle"></b><p id="focusInfo" aria-live="polite"></p><div class="actions-row"><button id="doneBtn">完了にする</button><button id="editSelected" class="secondary">編集</button><button id="deleteSelected" class="danger">削除</button><button id="hideFixed" class="secondary" hidden>この画面で隠す</button><button id="closeFocus" class="secondary">閉じる</button></div></div>
+  <div class="focus" id="focus"><b id="focusTitle"></b><p id="focusInfo" aria-live="polite"></p><div class="actions-row"><button id="startActualBtn" class="secondary" hidden>開始を記録</button><button id="doneBtn">完了にする</button><button id="editSelected" class="secondary">編集</button><button id="deleteSelected" class="danger">削除</button><button id="hideFixed" class="secondary" hidden>この画面で隠す</button><button id="closeFocus" class="secondary">閉じる</button></div></div>
 </div>
 <nav class="dock" aria-label="画面切り替え"><div class="dock-inner">
   <button class="tab active" data-tab="timeline"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4m10-4v4M3 10h18"/></svg><span>タイムライン</span></button>
@@ -124,7 +124,7 @@ button:active{opacity:.8}@media(min-width:640px){.dock{left:calc((100vw - 640px)
 // WEB_PORT_BOOT: use an isolated namespaced browser store; no API credentials.
 (()=>{
  'use strict';
- const KEY='YOS_DAYSTREAM_WEB_PLAN_V1',HISTORY='YOS_DAYSTREAM_WEB_ACTIONS_V1',BACKUP='YOS_DAYSTREAM_WEB_PLAN_BACKUP_V1';
+ const KEY='YOS_DAYSTREAM_WEB_PLAN_V1',HISTORY='YOS_DAYSTREAM_WEB_ACTIONS_V1',BACKUP='YOS_DAYSTREAM_WEB_PLAN_BACKUP_V1',STARTS='YOS_DAYSTREAM_WEB_STARTS_V1';
  const valid=p=>{
   if(!p||p.version!==1||!p.days||typeof p.days!=='object'||Array.isArray(p.days))return false;
   const ds=Object.entries(p.days);
@@ -179,13 +179,27 @@ button:active{opacity:.8}@media(min-width:640px){.dock{left:calc((100vw - 640px)
     return true
    }catch{return false}
   },
+  markStarted(event){
+   if(!event||!Number.isSafeInteger(Number(event.id))||!/^\d{4}-\d{2}-\d{2}$/.test(event.day))return false;
+   try{
+    const starts=JSON.parse(localStorage.getItem(STARTS)||'{}');if(!starts||typeof starts!=='object'||Array.isArray(starts)||Object.keys(starts).length>500)return false;
+    const key=event.day+'|'+event.id,at=new Date().toISOString();
+    starts[key]=at;localStorage.setItem(STARTS,JSON.stringify(starts));
+    return JSON.parse(localStorage.getItem(STARTS)||'{}')[key]===at;
+   }catch{return false}
+  },
   logCompletion(event){
    if(!event||typeof event.title!=='string'||!event.title||!Number.isInteger(event.plannedStart))return;
    try{
     const rows=JSON.parse(localStorage.getItem(HISTORY)||'[]');
     if(!Array.isArray(rows)||rows.length>1000)return;
-    const next=[...rows,{title:event.title.slice(0,120),sourceRef:String(event.sourceRef||'').slice(0,80),at:event.at,day:event.day,plannedStart:event.plannedStart}].slice(-500);
+    const startKey=event.day+'|'+String(event.id??''),starts=JSON.parse(localStorage.getItem(STARTS)||'{}');
+    const startedAt=typeof starts?.[startKey]==='string'&&Date.parse(starts[startKey])<=Date.parse(event.at)?starts[startKey]:null;
+    const existing=rows.findIndex(r=>r&&r.day===event.day&&r.id===event.id&&r.title===event.title);
+    const record={id:event.id,title:event.title.slice(0,120),sourceRef:String(event.sourceRef||'').slice(0,80),at:event.at,startedAt,day:event.day,plannedStart:event.plannedStart};
+    const next=[...(existing<0?rows:rows.filter((r,i)=>i!==existing)),record].slice(-500);
     localStorage.setItem(HISTORY,JSON.stringify(next));
+    if(startedAt){delete starts[startKey];localStorage.setItem(STARTS,JSON.stringify(starts));}
    }catch{}
   },
   import(p){
@@ -207,12 +221,13 @@ button:active{opacity:.8}@media(min-width:640px){.dock{left:calc((100vw - 640px)
    const groups=new Map();
    for(const r of rows){
     if(!r||typeof r.title!=='string'||isNaN(Date.parse(r.at)))continue;
-    const k=r.sourceRef||r.title;const d=new Date(r.at),minute=d.getHours()*60+d.getMinutes();
-    if(!groups.has(k))groups.set(k,[]);groups.get(k).push({title:r.title,minute})
+    const k=r.sourceRef||r.title;const stamp=(typeof r.startedAt==='string'&&Number.isFinite(Date.parse(r.startedAt)))?r.startedAt:r.at;const d=new Date(stamp),minute=d.getHours()*60+d.getMinutes();
+    if(!groups.has(k))groups.set(k,[]);groups.get(k).push({title:r.title,minute,started:Boolean(r.startedAt)})
    }
    return [...groups.values()].filter(a=>a.length>=3).map(a=>{
-     const sorted=a.map(x=>x.minute).sort((x,y)=>x-y),m=sorted[Math.floor(sorted.length/2)];
-     return {title:a[0].title,count:a.length,suggested:String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0')}
+     const starts=a.filter(x=>x.started),basis=starts.length>=3?starts:a;
+     const sorted=basis.map(x=>x.minute).sort((x,y)=>x-y),m=sorted[Math.floor(sorted.length/2)];
+     return {title:a[0].title,count:basis.length,kind:starts.length>=3?'start':'completion',suggested:String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0')}
    }).slice(0,8)
   }
  };
@@ -229,7 +244,7 @@ button:active{opacity:.8}@media(min-width:640px){.dock{left:calc((100vw - 640px)
     const panel=document.getElementById('yosWebHistoryPanel'),rows=document.getElementById('yosWebHistoryRows');
     panel.hidden=!panel.hidden;if(panel.hidden)return;rows.replaceChildren();
     const ps=web.suggestions();if(!ps.length){rows.textContent='同じタスクを3回以上完了すると完了時刻の傾向を表示します。開始時刻は未確認で、時間割を自動変更しません。';return}
-    for(const x of ps){const p=document.createElement('p');p.textContent=x.title+' · 完了'+x.count+'回 · '+x.suggested+'頃に完了した傾向（開始時刻は未確認）';rows.append(p)}
+    for(const x of ps){const p=document.createElement('p');p.textContent=x.title+' · '+(x.kind==='start'?'開始':'完了')+'の実績'+x.count+'回 · '+x.suggested+'頃の傾向'+(x.kind==='start'?'（本人の開始記録）':'（開始時刻は未確認）');rows.append(p)}
   };
   if(window.YOS_WEB_DATA_ERROR){const p=document.getElementById('yosWebHistoryPanel');p.hidden=false;document.getElementById('yosWebHistoryRows').textContent=window.YOS_WEB_DATA_ERROR;}
  });
@@ -492,6 +507,7 @@ function showFocusFor(item){
  ft.textContent=item.t;
  const fixed=!!item.f,canHide=fixed&&item.source==='Apple Calendar';
  document.getElementById('doneBtn').hidden=!!fixed;
+ document.getElementById('startActualBtn').hidden=!!fixed||item.kind!=='task'||!!item.done;
  document.getElementById('editSelected').hidden=!!fixed;
  document.getElementById('deleteSelected').hidden=!!fixed;
  document.getElementById('hideFixed').hidden=!canHide;
@@ -659,7 +675,7 @@ function yosRenderCompatibility(){
  const review=document.getElementById('compatReview');
  review.textContent=(details.length?details.slice(0,5).join('。'):'相性を判断できる根拠はまだありません。予定の時刻や準備・移動情報を確認してください。')+'。色は配置からの候補判定で、効果の保証や測定値ではありません。';
 }
-function updateReview(){yosRenderCompatibility();const done=items.filter(x=>x.done),pending=items.filter(x=>!x.done),movable=items.filter(x=>!x.f),completed=movable.filter(x=>x.done);const pct=movable.length?Math.round(completed.length/movable.length*100):0;const used=done.reduce((n,x)=>n+x.d,0);let summary=done.length?'完了記録は'+done.length+'件（合計'+Math.round(used/60*10)/10+'時間）。可動タスクの達成率は'+pct+'%。':'完了記録がまだありません。予定の配置だけでは実行できたか判断できません。';const overlaps=[];const sorted=[...items].sort((a,b)=>a.s-b.s);for(let i=0;i<sorted.length;i++)for(let j=i+1;j<sorted.length&&sorted[j].s<sorted[i].s+sorted[i].d;j++)if(sorted[i].kind===sorted[j].kind&&sorted[i].kind!=='schedule')overlaps.push([sorted[i],sorted[j]]);const pair=overlaps[0];const tip=pair?'改善候補：「'+pair[0].t+'」と「'+pair[1].t+'」は時間が重なっています。同じ種類の作業としてまとめられるか確認すると、切り替えの手間を減らせる可能性があります。':'改善候補：タスクの統合を提案する根拠がまだ不足しています。完了状況と実際の所要時間を記録すると、翌日の改善案を具体化できます。';document.getElementById('reviewText').textContent=summary+' '+(pending.length?'未完了・未確認は'+pending.length+'件。予定の変更と完了は区別して評価します。':'全項目に完了記録があります。');document.getElementById('reviewTip').textContent=tip;updateOverview();renderLists();}document.getElementById('reviewBtn').onclick=updateReview;document.getElementById('doneBtn').onclick=()=>{const x=items.find(x=>x.id===selectedId);if(!x)return;if(x.f){note.textContent='固定予定は元カレンダーで管理してください';return}x.done=!x.done;document.getElementById('doneBtn').textContent=x.done?'未完了に戻す':'完了にする';const saved=persist();note.textContent=x.t+(x.done?'を端末内で仮完了':'の端末内の完了を解除')+(saved?'（保存処理中）':'（保存処理失敗）');fi.textContent=note.textContent;smoothRender();updateReview()};
+function updateReview(){yosRenderCompatibility();const done=items.filter(x=>x.done),pending=items.filter(x=>!x.done),movable=items.filter(x=>!x.f),completed=movable.filter(x=>x.done);const pct=movable.length?Math.round(completed.length/movable.length*100):0;const used=done.reduce((n,x)=>n+x.d,0);let summary=done.length?'完了記録は'+done.length+'件（合計'+Math.round(used/60*10)/10+'時間）。可動タスクの達成率は'+pct+'%。':'完了記録がまだありません。予定の配置だけでは実行できたか判断できません。';const overlaps=[];const sorted=[...items].sort((a,b)=>a.s-b.s);for(let i=0;i<sorted.length;i++)for(let j=i+1;j<sorted.length&&sorted[j].s<sorted[i].s+sorted[i].d;j++)if(sorted[i].kind===sorted[j].kind&&sorted[i].kind!=='schedule')overlaps.push([sorted[i],sorted[j]]);const pair=overlaps[0];const tip=pair?'改善候補：「'+pair[0].t+'」と「'+pair[1].t+'」は時間が重なっています。同じ種類の作業としてまとめられるか確認すると、切り替えの手間を減らせる可能性があります。':'改善候補：タスクの統合を提案する根拠がまだ不足しています。完了状況と実際の所要時間を記録すると、翌日の改善案を具体化できます。';document.getElementById('reviewText').textContent=summary+' '+(pending.length?'未完了・未確認は'+pending.length+'件。予定の変更と完了は区別して評価します。':'全項目に完了記録があります。');document.getElementById('reviewTip').textContent=tip;updateOverview();renderLists();}document.getElementById('reviewBtn').onclick=updateReview;document.getElementById('startActualBtn').onclick=()=>{const x=items.find(x=>x.id===selectedId);if(!x||x.f||x.kind!=='task'||x.done)return;const ok=window.YOS_DAYSTREAM_WEB.markStarted({id:x.id,day:selectedDay});note.textContent=ok?'「'+x.t+'」の開始をこの端末で記録した':'開始を記録できませんでした';fi.textContent=note.textContent;};document.getElementById('doneBtn').onclick=()=>{const x=items.find(x=>x.id===selectedId);if(!x)return;if(x.f){note.textContent='固定予定は元カレンダーで管理してください';return}x.done=!x.done;document.getElementById('doneBtn').textContent=x.done?'未完了に戻す':'完了にする';const saved=persist();if(saved&&x.done&&x.kind==='task')window.YOS_DAYSTREAM_WEB.logCompletion({id:x.id,title:x.t,sourceRef:x.sourceRef||'',at:new Date().toISOString(),day:selectedDay,plannedStart:x.s});note.textContent=x.t+(x.done?'を端末内で仮完了':'の端末内の完了を解除')+(saved?'（保存処理中）':'（保存処理失敗）');fi.textContent=note.textContent;smoothRender();updateReview()};
 
 function updateOverview(){
  const movable=items.filter(x=>!x.f),done=movable.filter(x=>x.done),pct=movable.length?Math.round(done.length/movable.length*100):0;
@@ -893,7 +909,7 @@ function toggleTaskDone(item){
  if(!target||target.f||target.kind!=='task')return;
  hideSwipeDelete();target.done=!target.done;
  const saved=persist();
- if(saved&&target.done)window.YOS_DAYSTREAM_WEB.logCompletion({title:target.t,sourceRef:target.sourceRef||'',at:new Date().toISOString(),day:selectedDay,plannedStart:target.s});
+ if(saved&&target.done)window.YOS_DAYSTREAM_WEB.logCompletion({id:target.id,title:target.t,sourceRef:target.sourceRef||'',at:new Date().toISOString(),day:selectedDay,plannedStart:target.s});
  note.textContent='「'+target.t+'」を'+(target.done?'完了':'未完了に戻した')+(saved?' · 端末内で保存中':' · 保存準備に失敗');
  smoothRender();updateReview();
 }
