@@ -12,15 +12,18 @@
 </head>
 <body>
 <main class="app">
-<header class="top"><div><p class="eyebrow">YOS TAXI OPERATIONS</p><h1>📅 需要カレンダー</h1></div><a class="back" href="./">営業画面</a></header>
-<section class="hero"><strong id="headline">公式情報を読み込み中</strong><p>イベント・クルーズ船など、営業判断に使う需要要因を信頼度付きで表示します。予定変更があるため、営業前に公式情報を再確認してください。</p></section>
+<header class="top"><div><p class="eyebrow">YOS TAXI OPERATIONS</p><h1>那覇・営業前ブリーフ</h1></div><a class="back" href="./">営業画面</a></header>
+<section class="hero"><strong id="headline">当日の需要情報を確認</strong><p>那覇中心｜GO・無線・手上げ。公式予定とXなどの速報は別の情報として照合します。この画面は自動リアルタイム監視ではなく、各情報源への確認入口です。出勤前・停車中のみ操作してください。</p><p id="briefDate" class="small"></p></section>
 <nav class="filters" aria-label="需要レベル"><button class="filter active" data-level="all">すべて</button><button class="filter" data-level="high">高需要</button><button class="filter" data-level="medium">中需要</button></nav>
-<section class="section"><div class="section-head"><h2>8月の需要要因</h2><span id="count" class="small">0件</span></div><div id="eventList" class="list"></div></section>
-<section class="section"><div class="section-head"><h2>当日確認が必要</h2><span class="small">ライブ情報</span></div><div id="liveList" class="list"></div></section>
+<section class="section"><div class="section-head"><h2>今後のイベント・需要候補</h2><span id="count" class="small">0件</span></div><div id="eventList" class="list"></div></section>
+<section class="section"><div class="section-head"><h2>当日の最新情報を確認</h2><span class="small">公式予定と速報は別扱い</span></div><div id="liveList" class="list"></div></section>
 <footer class="foot">公式情報・取得日・信頼度を表示。未確認事項を事実として扱いません。<br>運転中の操作は禁止です。</footer>
 </main>
 <script>
 const levelLabel={high:'高需要',medium:'中需要',low:'限定需要'};
+const safe=value=>String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+const safeUrl=value=>{try{const u=new URL(value);return u.protocol==='https:'?u.href:'#'}catch{return '#'}};
+const jstToday=()=>new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
 const categoryLabel={festival:'祭り',conference:'講演・催事',lecture:'講座'};
 let allEvents=[];
 function formatDate(e){const d=new Date(`${e.date}T00:00:00+09:00`);const base=new Intl.DateTimeFormat('ja-JP',{month:'long',day:'numeric',weekday:'short'}).format(d);if(!e.endDate)return base;const end=new Date(`${e.endDate}T00:00:00+09:00`);return `${base}〜${new Intl.DateTimeFormat('ja-JP',{month:'numeric',day:'numeric',weekday:'short'}).format(end)}`}
@@ -30,7 +33,7 @@ function render(level='all'){
  if(!events.length){list.innerHTML='<div class="empty">該当する需要情報はありません。</div>';return}
  list.innerHTML=events.map(e=>`<article class="card ${e.demandLevel}"><div class="topline"><div><div class="date">${formatDate(e)} ${e.startTime||''}${e.endTime?`〜${e.endTime}`:''}</div><h3>${e.title}</h3><div class="meta">${e.area}｜${e.venue}｜${categoryLabel[e.category]||e.category}</div></div><span class="badge ${e.demandLevel}">${levelLabel[e.demandLevel]||e.demandLevel}</span></div><div class="windows">${(e.demandWindows||[]).map(w=>`<span class="window">狙い目 ${w}</span>`).join('')}</div><p class="notes">${e.taxiNotes}</p><a class="source" href="${e.sourceUrl}" target="_blank" rel="noopener">公式情報を確認（確認日 ${e.sourceCheckedAt}）</a></article>`).join('')
 }
-async function load(){try{const res=await fetch('./demand-calendar-v1.json',{cache:'no-store'});if(!res.ok)throw new Error(`HTTP ${res.status}`);const data=await res.json();allEvents=(data.events||[]).sort((a,b)=>a.date.localeCompare(b.date));document.getElementById('headline').textContent=`確認済み需要情報 ${allEvents.length}件`;render();document.getElementById('liveList').innerHTML=(data.liveSources||[]).map(s=>`<article class="live"><h3>${s.title}</h3><p>${s.notes}</p><a href="${s.sourceUrl}" target="_blank" rel="noopener">当日の公式予定を開く</a></article>`).join('')||'<div class="empty">ライブ情報はありません。</div>'}catch(err){document.getElementById('headline').textContent='需要情報を読み込めません';document.getElementById('eventList').innerHTML=`<div class="error">再読み込みしてください。${err.message}</div>`}}
+async function load(){try{const res=await fetch('./demand-calendar-v1.json',{cache:'no-store'});if(!res.ok)throw new Error(`HTTP ${res.status}`);const data=await res.json();allEvents=(data.events||[]).filter(e=>e.endDate?e.endDate>=jstToday():e.date>=jstToday()).sort((a,b)=>a.date.localeCompare(b.date));document.getElementById('headline').textContent=`今後の登録イベント ${allEvents.length}件｜リアルタイム自動監視は未接続`;document.getElementById('briefDate').textContent=`情報確認日：${jstToday()}（日本時間）｜以下の出典は各リンク先で再確認`;render();document.getElementById('liveList').innerHTML=(data.liveSources||[]).map(s=>`<article class="live"><h3>${safe(s.title)}</h3><p>${safe(s.notes)}</p><p class="small">情報の役割：${safe(s.role||'予定の確認')}｜確認状況：手動確認が必要</p><a href="${safeUrl(s.sourceUrl)}" target="_blank" rel="noopener">${s.role==='速報'?'速報の投稿を確認':'公式情報を開いて確認'}</a></article>`).join('')||'<div class="empty">確認先は登録されていません。</div>'}catch(err){document.getElementById('headline').textContent='需要情報を読み込めません';document.getElementById('eventList').innerHTML=`<div class="error">再読み込みしてください。${err.message}</div>`}}
 document.querySelectorAll('.filter').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('.filter').forEach(x=>x.classList.remove('active'));btn.classList.add('active');render(btn.dataset.level)}));load();
 </script>
 </body>
