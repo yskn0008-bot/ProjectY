@@ -93,3 +93,20 @@ test('one portable backup includes schedule, starts, completions and read-only i
  assert.equal(a.validSaved(old,'tasks'),false);
  assert.equal(a.validSaved(old,'tasks',3650),true);
 });
+
+test('fresh existing authenticated YOS task cache is reused read-only but stale cache is refused',()=>{
+ const task={title:'実行の確認',state:'次にやる',due:'2026-11-13',priority:'P1',order:4,nextAction:'次の一手',blocker:'NEVER_EXPOSE_BLOCKER'};
+ const cache={savedAt:Date.now(),data:{tasks:[task]}};
+ const snapshot=a.fromYosTaskDashboardCache(cache);
+ assert.equal(snapshot.source,'yos-auth-cache');
+ assert.equal(snapshot.status,'partial');
+ assert.equal(snapshot.items[0].title,task.title);
+ assert.equal(snapshot.items[0].action,task.nextAction);
+ assert.equal(snapshot.items[0].blocker,undefined);
+ assert.equal(a.fromYosTaskDashboardCache({...cache,savedAt:Date.now()-7*3600000}),null);
+ const moved=a.fromYosTaskDashboardCache({savedAt:cache.savedAt,data:{tasks:[{...task,due:'2026-11-15'}]}});
+ assert.equal(moved.items[0].id,snapshot.items[0].id,'due-date changes do not duplicate a planned task');
+ assert.match(html,/yos-task-dashboard-cache-v1/);
+ assert.match(html,/existingYosCache\|\|importedTasks/);
+ assert.match(html,/YOS認証済みTasksキャッシュ/);
+});
