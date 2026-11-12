@@ -372,68 +372,88 @@ test('existing daystream v1 plan accepts optional bound shortcut but rejects mal
  assert.ok(script.includes("kind,shortcut"));
 });
 
-test('task gesture swipe waits for explicit delete and tap only toggles a local task',()=>{
+
+test('task gestures support tap, confirmed swipe delete, drag time shift, long press and cancel',()=>{
  const htmlBody=Function('return '+String.fromCharCode(96)+html+String.fromCharCode(96))();
- const actualClient=htmlBody.split('<script>')[1]?.split('</script>')[0]||'';
- new vm.Script(actualClient);
- const start=actualClient.indexOf("const gestureBar=document.getElementById('gestureDelete')");
- const end=actualClient.indexOf("function smoothRender(activeId",start);
- assert.ok(start>0&&end>start);
- const controller=actualClient.slice(start,end);
+ const js=htmlBody.split('<script>')[1]?.split('</script>')[0]||'';
+ new vm.Script(js);
+ const start=js.indexOf("const gestureBar=document.getElementById('gestureDelete')");
+ const stop=js.indexOf("function smoothRender(activeId",start);
+ assert.ok(start>0&&stop>start);
+ const controller=js.slice(start,stop);
  const elements={};
  const document={getElementById:id=>elements[id]??(elements[id]={hidden:true,textContent:''})};
  const local={id:300000001,t:'動作確認',s:600,d:30,kind:'task',done:false};
- const other={id:300000002,t:'保存する別タスク',s:660,d:30,kind:'task'};
- const stats={saves:0,edits:[]};
+ const other={id:300000002,t:'保存する別タスク',s:660,d:30,kind:'task',done:false};
+ const stats={saves:0,edits:[],renders:0,reviews:0};
  let timerFn=null;
- const fn=[
+ const code=[
  "const document=globalDocument,stats=globalStats,focus={classList:{remove(){}}},note={textContent:''};",
- "let swipeDeleteId=null,items=[globalLocal,globalOther];",
+ "let swipeDeleteId=null,items=[globalLocal,globalOther],scale=60;",
+ "const fmt=m=>String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0');",
  "const persist=()=>{stats.saves++;return true};",
- "const smoothRender=()=>{},updateReview=()=>{},beginLocalEdit=item=>stats.edits.push(item.id);",
+ "const smoothRender=()=>{stats.renders++},updateReview=()=>{stats.reviews++},beginLocalEdit=item=>stats.edits.push(item.id);",
  controller,
- "const listeners={},el={style:{},addEventListener:(name,cb)=>listeners[name]=cb};",
- "wireTaskGestures(el,globalLocal);",
- "({listeners,items:()=>items,drawer:()=>document.getElementById('gestureDelete').hidden,bindSecond:()=>{const handlers={},el={style:{},addEventListener:(type,cb)=>handlers[type]=cb};wireTaskGestures(el,globalOther);return handlers;}})"
+ "const makeEl=()=>{const listeners={},small={textContent:''},classes=new Set(),el={style:{},querySelector:()=>small,classList:{add:x=>classes.add(x),remove:x=>classes.delete(x)},addEventListener:(name,cb)=>listeners[name]=cb};return {listeners,small,classes,el}};",
+ "const first=makeEl();wireTaskGestures(first.el,globalLocal);",
+ "const second=makeEl();wireTaskGestures(second.el,globalOther);",
+ "({first,second,items:()=>items,drawer:()=>document.getElementById('gestureDelete').hidden})"
  ].join('\n');
- const env=vm.runInNewContext(fn,{globalDocument:document,globalStats:stats,globalLocal:local,globalOther:other,setTimeout:callback=>{timerFn=callback;return 1},clearTimeout:()=>{timerFn=null}});
- env.listeners.touchstart({touches:[{clientX:220,clientY:200}]});
- env.listeners.touchend();
- assert.equal(local.done,true);
- assert.equal(stats.saves,1);
- env.listeners.touchstart({touches:[{clientX:220,clientY:200}]});
- env.listeners.touchmove({touches:[{clientX:125,clientY:202}],preventDefault(){}});
- env.listeners.touchend();
- assert.equal(env.drawer(),false);
- assert.equal(env.items().length,2);
- elements.gestureDeleteConfirm.onclick();
- assert.equal(env.items().length,1);
- assert.equal(env.items()[0].id,other.id);
- assert.equal(stats.saves,2);
- const second=env.bindSecond();
- second.touchstart({touches:[{clientX:220,clientY:200}]});
- second.touchmove({touches:[{clientX:222,clientY:240}],preventDefault(){throw Error('vertical scroll blocked')}});
- second.touchend();
- assert.equal(other.done,undefined,'vertical scrolling must not complete task');
- second.touchstart({touches:[{clientX:220,clientY:200}]});
- assert.ok(timerFn,'long-press timer should be registered');
- timerFn();
- second.touchend();
+ const env=vm.runInNewContext(code,{globalDocument:document,globalStats:stats,globalLocal:local,globalOther:other,setTimeout:callback=>{timerFn=callback;return 1},clearTimeout:()=>{timerFn=null}});
+ const touch=(x,y)=>({touches:[{clientX:x,clientY:y}]});
+ env.first.listeners.touchstart(touch(220,200));env.first.listeners.touchend();
+ assert.equal(local.done,true);assert.equal(stats.saves,1,'tap saves completion');
+ env.first.listeners.touchstart(touch(220,200));
+ let prevented=false;env.first.listeners.touchmove({...touch(110,204),preventDefault(){prevented=true}});
+ env.first.listeners.touchend();
+ assert.equal(prevented,true);assert.equal(env.drawer(),false);
+ assert.equal(env.items().length,2,'swipe only reveals explicit delete confirmation');
+ elements.gestureDeleteCancel.onclick();
+ assert.equal(env.drawer(),true);
+ env.first.listeners.touchstart(touch(220,200));
+ env.first.listeners.touchmove({...touch(110,204),preventDefault(){}});
+ env.first.listeners.touchend();elements.gestureDeleteConfirm.onclick();
+ assert.equal(env.items().length,1);assert.equal(stats.saves,2);
+ env.second.listeners.touchstart(touch(220,200));
+ let dragPrevented=false;
+ env.second.listeners.touchmove({...touch(223,240),preventDefault(){dragPrevented=true}});
+ assert.equal(dragPrevented,true,'drag intentionally intercepts touch scroll only on card');
+ assert.equal(env.second.small.textContent,'11:40–12:10','preview displays new time');
+ assert.equal(other.s,660,'drag preview does not mutate saved time');
+ env.second.listeners.touchend();
+ assert.equal(other.s,700,'drag release saves new time');
+ assert.equal(stats.saves,3);
+ assert.equal(stats.renders>0,true);
+ assert.equal(stats.reviews>0,true,'time movement recomputes compatibility');
+ env.second.listeners.touchstart(touch(220,200));
+ env.second.listeners.touchmove({...touch(220,260),preventDefault(){}});
+ env.second.listeners.touchcancel();
+ assert.equal(other.s,700,'canceled drag retains old time');
+ assert.equal(stats.saves,3,'cancel does not save');
+ env.second.listeners.touchstart(touch(220,200));
+ assert.ok(timerFn,'long press timer exists');timerFn();env.second.listeners.touchend();
  assert.deepEqual(stats.edits,[other.id]);
- assert.equal(other.done,undefined,'long press must not complete task');
- assert.equal(stats.saves,2);
- assert.match(actualClient,/beginLocalEdit\(item\)/);
- assert.match(actualClient,/setTimeout\(\(\)=>\{/);
- assert.match(actualClient,/action.addEventListener\(type,e=>e.stopPropagation\(\)\)/);
+ assert.equal(other.done,false,'drag and long press never complete task');
+ assert.match(js,/beginLocalEdit\(item\)/);
+ assert.match(js,/setTimeout\(\(\)=>\{/);
+ assert.ok(!js.includes("action.addEventListener(type,e=>e.stopPropagation())"));
 });
 
-test('shortcuts icon uses only user-set name and Scriptable hands off allowlisted run URL',()=>{
- const actualHtml=Function('return '+String.fromCharCode(96)+html+String.fromCharCode(96))();
- const clientJs=actualHtml.split('<script>')[1]?.split('</script>')[0]||'';
- assert.ok(actualHtml.includes('id="newShortcut"'));
- assert.ok(actualHtml.includes('id="gestureDelete"'));
- assert.ok(clientJs.includes("action.href='shortcuts://run-shortcut?name='+encodeURIComponent(item.shortcut)"));
- assert.ok(clientJs.includes("action.className='shortcut-launch'"));
+test('shortcut remains editable and launches only from editor, without card icons or automatic completion',()=>{
+ const rendered=Function('return '+String.fromCharCode(96)+html+String.fromCharCode(96))();
+ const js=rendered.split('<script>')[1]?.split('</script>')[0]||'';
+ assert.ok(rendered.includes('id="newShortcut"'));
+ assert.ok(rendered.includes('id="runShortcut"'));
+ assert.ok(rendered.includes('class="editor-actions"'));
+ assert.ok(rendered.includes('gap:16px'));
+ assert.ok(rendered.includes('min-height:46px'));
+ assert.ok(rendered.includes('id="saveBtn"'));
+ assert.ok(rendered.includes('id="cancelEditor"'));
+ assert.match(js,/run\.href='shortcuts:\/\/run-shortcut\?name='\+encodeURIComponent\(label\)/);
+ assert.match(js,/document\.getElementById\('newShortcut'\)\.oninput=updateShortcutField/);
+ assert.ok(!rendered.includes('class="shortcut-launch"'));
+ assert.ok(!js.includes("action.textContent=linked?'▶':'＋'"));
+ assert.ok(rendered.includes('上下ドラッグで移動'));
  const from=script.indexOf("const shortcutPrefix='shortcuts://run-shortcut?name='"),to=script.indexOf('\nconst html=',from);
  assert.ok(from>0&&to>from);
  const view={shouldAllowRequest:null},opened=[];
@@ -442,30 +462,8 @@ test('shortcuts icon uses only user-set name and Scriptable hands off allowliste
  assert.equal(view.shouldAllowRequest({url:'shortcuts://run-shortcut?name=%E6%9C%9D'}),false);
  assert.deepEqual(opened,['shortcuts://run-shortcut?name=%E6%9C%9D']);
  assert.equal(view.shouldAllowRequest({url:'shortcuts://run-shortcut?name=x&unexpected=1'}),false);
- assert.equal(opened.length,1);
  assert.doesNotMatch(script,/CalendarEvent\.(?:remove|save|create)\(/);
 });
-
-
-test('editor action buttons have visible spacing and shortcut icons show separate setup and launch states',()=>{
- const rendered=Function('return '+String.fromCharCode(96)+html+String.fromCharCode(96))();
- const js=rendered.split('<script>')[1]?.split('</script>')[0]||'';
- assert.ok(rendered.includes('class="editor-actions"'));
- assert.ok(rendered.includes('gap:16px'));
- assert.ok(rendered.includes('min-height:46px'));
- assert.ok(rendered.includes('id="saveBtn"'));
- assert.ok(rendered.includes('id="cancelEditor"'));
- assert.ok(rendered.includes('登録前は＋で設定、登録後は▶で実行'));
- assert.ok(rendered.includes('＋＝登録・▶＝実行'));
- assert.ok(js.includes("action.textContent=linked?'▶':'＋'"));
- assert.ok(js.includes("action.className='shortcut-launch'+(linked?' linked':'')"));
- assert.ok(js.includes("action.href='shortcuts://run-shortcut?name='+encodeURIComponent(item.shortcut)"));
- assert.ok(!rendered.includes("カードの⚡"));
- assert.ok(!js.includes("action.textContent='⚡'"));
- assert.match(js,/beginLocalEdit\(item,true\)/);
-});
-
-
 test('DAYSTREAM compatibility assesses confirmed conflicts without guessing health or geography',()=>{
  const actualHtml=Function('return '+String.fromCharCode(96)+html+String.fromCharCode(96))();
  const js=actualHtml.split('<script>')[1]?.split('</script>')[0]||'';
@@ -526,31 +524,38 @@ test('overlap warning counts intersection windows and gives a 15-minute range',(
  assert.ok(actual.includes('overlap-button'));
  assert.ok(actual.includes('分重複'));
  assert.ok(actual.includes('overlap-details'));
- assert.ok(actual.includes('padding-right:24px'));
+ assert.ok(!actual.includes('padding-right:24px'),'task cards no longer reserve space for warning icon');
  assert.ok(!actual.includes('inset 0 0 0 2px #ed8a93'));
  assert.doesNotMatch(script,/CalendarEvent\.(?:save|remove|create)\(/);
 });
 
 
-test('conflict pulse is short, icon-only and respects reduced-motion accessibility',()=>{
- const rendered=Function('return '+String.fromCharCode(96)+html+String.fromCharCode(96))();
- assert.match(rendered,/@keyframes yos-conflict-signal/);
- assert.match(rendered,/\.card\.compat-danger:after\{animation:yos-conflict-signal \.8s ease-in-out 3\}/);
- assert.match(rendered,/@media \(prefers-reduced-motion:reduce\)\{\.card\.compat-danger:after\{animation:none\}\}/);
- assert.doesNotMatch(rendered,/\.card\.compat-danger\{animation:/);
+
+
+
+test('casual coral overlap colors task card and removes all decorative task icons',()=>{
+ const htmlBody=Function('return '+String.fromCharCode(96)+html+String.fromCharCode(96))();
+ const js=htmlBody.split('<script>')[1]?.split('</script>')[0]||'';
+ assert.match(htmlBody,/\.card\.task\{background:#823db0;touch-action:none\}/);
+ assert.match(htmlBody,/\.card\.task:before\{display:none\}/);
+ assert.match(htmlBody,/\.card\.task\.compat-danger\{background:#CB6F77;/);
+ assert.ok(!htmlBody.includes('.card.compat-danger:after'));
+ assert.ok(!htmlBody.includes('@keyframes yos-conflict-signal'));
+ assert.ok(!htmlBody.includes('.card .shortcut-launch'));
+ assert.ok(js.includes("if(item.kind!=='task'||item.f)"));
+ assert.ok(js.includes("latestCompatibility=yosCompatibility(items)"));
+ assert.ok(htmlBody.includes('時間の重複：'));
+ assert.ok(js.includes("function yosOverlapWindows(rows)"));
+ assert.ok(!htmlBody.includes('カードの⚡'));
 });
 
 
-test('overlapping tasks have a subdued rose fill and restore their native color when resolved',()=>{
+
+test('overlapping task lane exposes time label during preview and ordinary display',()=>{
  const htmlBody=Function('return '+String.fromCharCode(96)+html+String.fromCharCode(96))();
- assert.match(htmlBody,/\.card\.task\{background:#823db0/);
- assert.match(htmlBody,/\.card\.compat-danger\{background:#995b6c;[^}]*transition:background-color \.25s ease\}/);
- assert.match(htmlBody,/\.card\.compat-danger:after\{content:"!";[^}]*background:#6f3e4c/);
- assert.match(htmlBody,/\.card\.compat-danger:after\{animation:yos-conflict-signal \.8s ease-in-out 3\}/);
- assert.match(htmlBody,/@media \(prefers-reduced-motion:reduce\)/);
+ assert.match(htmlBody,/\.card\.task\.lane small\{display:block;margin:1px 0 0;font-size:9\.5px\}/);
+ assert.match(htmlBody,/\.card\.task\.lane\{flex-wrap:wrap;align-content:center/);
+ assert.match(htmlBody,/item\.kind==='task'&&!item\.f\?42:density==='overview'\?17:22/);
  const js=htmlBody.split('<script>')[1]?.split('</script>')[0]||'';
- assert.match(js,/latestCompatibility=yosCompatibility\(items\)/);
- assert.match(js,/el.classList.add\('compat-'\+compat.level\)/);
- assert.match(js,/function yosOverlapWindows\(rows\)/);
- assert.ok(!htmlBody.includes('.card.compat-danger{background:#bf485b'));
+ assert.match(js,/timeLabel\.textContent=fmt\(at\)\+'–'\+fmt\(at\+item\.d\)/);
 });

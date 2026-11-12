@@ -128,25 +128,20 @@ button,input,select{font:inherit}button{cursor:pointer}button:focus-visible,inpu
 .summary{margin:0 13px 0;background:#ffffff12;border:1px solid #ffffff15;border-radius:14px;padding:9px 10px;display:grid;grid-template-columns:1.16fr .78fr .86fr 1.06fr;min-height:62px;box-shadow:0 5px 18px #11151b18}
 .metric{display:flex;align-items:center;justify-content:center;flex-direction:column;gap:3px;border-right:1px solid #ffffff35;min-width:0}.metric:last-child{border:0}.metric label{font-size:10px;font-weight:560;white-space:nowrap;color:#e7eaf0;display:flex;align-items:center;justify-content:center;gap:4px}.metric label svg{width:13px;height:13px;stroke-width:1.7;flex:none}.metric strong{font-size:13px;font-weight:630;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;font-variant-numeric:tabular-nums}.metric:first-child{flex-direction:row;gap:7px}.metric:first-child strong{font-size:19px}.ring{width:37px;height:37px;flex:none;border-radius:50%;background:conic-gradient(#35bbf4 0 var(--pct),#7d8793 var(--pct) 100%);position:relative}.ring:after{content:"";position:absolute;inset:8px;background:#434852;border-radius:50%}.metric .stack{display:grid;gap:3px}
 .notice{margin:0;padding:3px 0;color:#d7dce4;font-size:10px;line-height:1.25;flex:1;min-width:0}.microtools{display:flex;align-items:center;gap:8px;margin:3px 15px 0;min-height:23px}.zoomBtn{border:1px solid #ffffff40;background:#ffffff0d;color:#edf1f6;border-radius:7px;padding:4px 7px;font-size:10px;font-weight:600;white-space:nowrap}.notice[hidden]{display:none}.searchrow{margin:9px 16px 0}.searchrow[hidden]{display:none}.searchrow input{width:100%;border:1px solid #7b8799;border-radius:10px;background:#252b35;color:white;padding:10px 12px;font-size:14px}
-.editor{display:none;margin:9px 14px;padding:13px;background:#484e59;border:1px solid #6b7583;border-radius:13px;box-shadow:0 10px 25px #15191e55}.editor.show{display:block}.editor b{font-size:15px}.editor .fields{display:flex;gap:7px;flex-wrap:wrap;margin:12px 0}.editor input,.editor select{padding:9px;background:#303742;color:white;border:1px solid #7b8594;border-radius:8px;min-width:0}.editor input[type=time]{max-width:130px}.editor button,.focus button,.review button,.mutedbutton{padding:10px 13px;background:#277dbb;color:#fff;border:0;border-radius:9px;font-weight:670}.editor .danger{background:#754751;margin-left:6px}.editor .light{background:#647184}.editor .editor-actions{display:flex;align-items:center;flex-wrap:wrap;gap:16px;margin-top:18px}.editor .editor-actions button{min-height:46px;min-width:126px}
+.editor{display:none;margin:9px 14px;padding:13px;background:#484e59;border:1px solid #6b7583;border-radius:13px;box-shadow:0 10px 25px #15191e55}.editor.show{display:block}.editor b{font-size:15px}.editor .fields{display:flex;gap:7px;flex-wrap:wrap;margin:12px 0}.editor input,.editor select{padding:9px;background:#303742;color:white;border:1px solid #7b8594;border-radius:8px;min-width:0}.editor input[type=time]{max-width:130px}.editor button,.focus button,.review button,.mutedbutton{padding:10px 13px;background:#277dbb;color:#fff;border:0;border-radius:9px;font-weight:670}.editor .danger{background:#754751;margin-left:6px}.editor .light{background:#647184}.editor .editor-actions{display:flex;align-items:center;flex-wrap:wrap;gap:16px;margin-top:18px}.editor .editor-actions button{min-height:46px;min-width:126px}.editor .editor-shortcut-run{display:inline-block;margin-top:8px;padding:10px 13px;border:1px solid #80a4cb;background:#335371;border-radius:9px;color:#f2f7fd;text-decoration:none;font-weight:680}.editor .editor-shortcut-run[hidden]{display:none}
 .timeline-wrap{position:relative;margin:8px 13px 20px 11px;overflow:visible}.timeline{position:relative;touch-action:pan-y}.hour{position:absolute;left:0;right:0;border-top:1px solid #ffffff0f;height:1px;pointer-events:none}.hour span{position:absolute;top:-9px;left:6px;color:#dce2eb;font-size:12px;font-weight:480;font-variant-numeric:tabular-nums}.axis{position:absolute;left:58px;top:0;bottom:0;width:1.5px;background:#c2cad2b8;pointer-events:none}.tick{position:absolute;left:54.5px;width:9px;height:9px;border-radius:50%;background:#dce2ec;z-index:2;border:2px solid #56616e;box-shadow:0 0 0 2px #d7dee755;pointer-events:none}
 .card{position:absolute;left:73px;right:0;min-height:16px;border:0;border-radius:9px;padding:1px 9px;display:flex;align-items:center;gap:8px;touch-action:none;user-select:none;-webkit-user-select:none;color:#f8faff;background:#307ec2;box-shadow:0 2px 8px #101b2927;transition:filter .18s ease,box-shadow .18s ease;will-change:transform;overflow:hidden}
-.card:before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:#46b9fb;opacity:.9;pointer-events:none}.card.habit{background:#24976e}.card.habit:before{background:#4bd9a1}.card.task{background:#823db0;touch-action:pan-y}.card.task:before{background:#d079f8}.card.schedule{background:#2e77b3}
+.card:before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:#46b9fb;opacity:.9;pointer-events:none}.card.habit{background:#24976e}.card.habit:before{background:#4bd9a1}.card.task{background:#823db0;touch-action:none}.card.task:before{display:none}.card.schedule{background:#2e77b3}
 .card.neutral{background:#636b76}.card.neutral:before{background:#97a6b9}.card.sleep{background:#325477}.card.sleep:before{background:#48bdf5}.card.sleep:not(.tiny) b,.card.sleep:not(.tiny) svg{transform:translateY(-9px)}.card.sleep:not(.tiny) small{position:absolute;top:calc(50% + 4px);left:38px;margin:0;font-size:11px;transform:translateY(0)}
-.card .shortcut-launch{min-width:30px;width:30px;min-height:30px;height:30px;display:grid;place-items:center;background:#1c284885;border:1px solid #ffffff66;border-radius:7px;color:#fff;flex:none;text-decoration:none;font-size:17px;font-weight:800;padding:0;position:relative;z-index:2}.card .shortcut-launch.linked{background:#1d648c;border-color:#7bd4ff}.card.task b{flex:1}.card.task{cursor:pointer}.card.task.swiping{filter:brightness(1.14)}.card.compat-positive:before{background:#65d5a5;width:5px}.card.compat-positive{box-shadow:inset 0 0 0 1.5px #65d5a5,0 2px 8px #101b2927}
+.card.task b{flex:1}.card.task{cursor:pointer}.card.task.swiping{filter:brightness(1.14)}.card.task.drag-preview{z-index:9;box-shadow:0 11px 27px #10131a8a;filter:brightness(1.13)}
+.card.compat-positive:before{background:#65d5a5;width:5px}.card.compat-positive{box-shadow:inset 0 0 0 1.5px #65d5a5,0 2px 8px #101b2927}
 .card.compat-negative:before{background:#f0bd6f;width:5px}.card.compat-negative{box-shadow:inset 0 0 0 1.5px #eeb76b,0 2px 8px #101b2927}
-.card.compat-danger:before{background:#d5a8b4;width:4px}.card.compat-danger{background:#995b6c;box-shadow:0 2px 8px #101b2927;transition:background-color .25s ease}
-.card.compat-danger:after{content:"!";font-size:11px;font-weight:700;color:#fff;background:#6f3e4c;border:1px solid #deb0bd;border-radius:50%;width:16px;height:16px;line-height:15px;text-align:center;position:absolute;right:4px;top:3px;z-index:1;pointer-events:none}
-.card.compat-danger{padding-right:24px}
-@keyframes yos-conflict-signal{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.88)}}
-.card.compat-danger:after{animation:yos-conflict-signal .8s ease-in-out 3}
-@media (prefers-reduced-motion:reduce){.card.compat-danger:after{animation:none}}
-.card.compat-unknown:before{background:#aab3c0}
+.card.compat-danger:before{display:none}.card.task.compat-danger{background:#CB6F77;box-shadow:0 2px 8px #101b2927;transition:background-color .25s ease}
 .compat-status{font-size:11px;color:#d8e0ea;margin:6px 14px 3px;line-height:1.55}
 .compat-status[hidden]{display:none}.compat-status strong{font-weight:720}.compat-status .overlap-button{border:1px solid #a48b6c;border-radius:8px;background:#50463d;color:#f5dfc1;font-weight:650;padding:9px 11px;min-height:37px;display:block;margin:5px 0;text-align:left;width:100%}.compat-status .overlap-details{margin:5px 0 9px;padding:9px 11px;border-left:3px solid #c6a477;border-radius:6px;background:#ffffff0d;line-height:1.5}.compat-status .overlap-details[hidden]{display:none}.compat-key{display:flex;flex-wrap:wrap;gap:8px;margin-top:5px}.compat-key span{font-size:10px}.compat-key .pos{color:#8bebc3}.compat-key .neg{color:#ffd391}.compat-key .danger{color:#ffa1ad}
 .card.done{opacity:.62;filter:saturate(.55)}.card.selected{outline:1.5px solid #e5efff}.card.warning{outline:2px solid #e6a35a}.card.moving{z-index:6;filter:brightness(1.14);box-shadow:0 10px 26px #10131a6c}
 .card svg{width:16px;height:16px;flex:none;stroke:#f7f9fc;fill:none;stroke-width:1.8;stroke-linejoin:round;stroke-linecap:round;position:relative}.card b{font-size:12.5px;line-height:1.1;font-weight:630;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:.08px;position:relative}.card small{margin-left:auto;font-size:10px;line-height:1.1;font-weight:500;white-space:nowrap;font-variant-numeric:tabular-nums;flex-shrink:0;position:relative}
-.card.compact{border-radius:7px}.card.compact b{font-size:12px}.card.compact small{font-size:9px}.card.lane{gap:5px;padding-right:5px}.card.lane small{display:none}.card.lane b{font-size:12px}.card.tiny svg{width:13px;height:13px}.card.tiny{gap:5px;padding-left:7px}.card.tiny b{font-size:11px}.card.tiny small{font-size:9px}
+.card.compact{border-radius:7px}.card.compact b{font-size:12px}.card.compact small{font-size:9px}.card.lane{gap:5px;padding-right:5px}.card.lane small{display:none}.card.lane b{font-size:12px}.card.task.lane{flex-wrap:wrap;align-content:center;gap:0 6px}.card.task.lane b{flex:1 1 100%;font-size:11.5px}.card.task.lane small{display:block;margin:1px 0 0;font-size:9.5px}.card.tiny svg{width:13px;height:13px}.card.tiny{gap:5px;padding-left:7px}.card.tiny b{font-size:11px}.card.tiny small{font-size:9px}
 .nowline{position:absolute;left:5px;right:0;height:1.5px;background:#48baff;z-index:8;pointer-events:none;box-shadow:0 0 8px #38b6fa66}.nowline:before{content:"";position:absolute;left:48px;top:-5px;width:10px;height:10px;background:#43b9fc;border:2px solid #eff9ff;border-radius:50%}.nowbadge{position:absolute;right:calc(100% - 55px);top:-11px;background:#218fcf;border-radius:12px;font-size:11px;padding:3px 7px;font-weight:650;font-variant-numeric:tabular-nums}
 .review,.tabbox{display:none;margin:12px 14px;padding:17px;border:1px solid #ffffff22;border-radius:13px;background:#484e58}.review.show,.tabbox.show{display:block}.review h3,.tabbox h3{font-size:16px;margin:0 0 10px}.review p,.tabbox p{line-height:1.6;color:#eff2f6;margin:10px 0}.review .muted,.tabbox .muted{font-size:12px;color:#c5cbd5}.listitem{padding:12px 0;border-bottom:1px solid #ffffff25;display:flex;justify-content:space-between;gap:14px}.listitem:last-child{border-bottom:0}.listitem button{border:0;background:#2d7eb9;color:white;padding:5px 10px;border-radius:8px}.focus{position:fixed;bottom:calc(87px + env(safe-area-inset-bottom));left:14px;right:14px;max-width:600px;margin:auto;padding:12px 14px;border-radius:14px;background:#505864;border:1px solid #a6b8cd;box-shadow:0 10px 35px #0008;z-index:20;display:none}.gesture-delete[hidden]{display:none}.gesture-delete{position:fixed;left:12px;right:12px;max-width:610px;margin:auto;bottom:calc(88px + env(safe-area-inset-bottom));z-index:21;display:flex;align-items:center;gap:8px;border:1px solid #f0a4b0;border-radius:12px;background:#363c48;padding:11px;color:#fff;box-shadow:0 8px 28px #1119}.gesture-delete span{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600}.gesture-delete button{border:0;border-radius:8px;color:#fff;background:#824452;min-height:42px;padding:9px 12px;font-weight:700}.gesture-delete button.cancel{background:#607082}.gesture-help{font-size:10px;color:#d1d8e3;margin:5px 14px 4px}.focus.show{display:block}.focus{max-height:min(55vh,450px);overflow-y:auto}.focus button[hidden]{display:none}.focus .actions-row{display:flex;flex-wrap:wrap;gap:7px}.focus .actions-row button{flex:1 1 auto;min-height:41px}.focus b{font-size:16px}.focus p{font-size:12px;margin:6px 0 9px}.focus .secondary{background:#6c7785}.focus .danger{background:#794852}
 .dock{position:fixed;bottom:0;left:0;right:0;padding:9px 7px calc(11px + env(safe-area-inset-bottom));background:#30353eea;border-top:1px solid #ffffff28;backdrop-filter:blur(15px);-webkit-backdrop-filter:blur(15px);z-index:15}.dock-inner{max-width:610px;margin:auto;display:grid;grid-template-columns:repeat(5,1fr)}.tab{display:grid;justify-items:center;align-content:center;gap:5px;background:none;border:0;color:#eef1f6;font-size:10px;padding:3px 0;min-height:52px}.tab svg{height:24px;width:24px;stroke-width:1.8}.tab.active{color:#30baff}
@@ -186,10 +181,10 @@ button:active{opacity:.8}@media(min-width:640px){.dock{left:calc((100vw - 640px)
   <div class="searchrow" id="searchRow" hidden><input id="searchInput" type="search" placeholder="予定・タスクを検索" aria-label="検索"></div>
   <div class="microtools"><div class="notice" id="notice" aria-live="polite">端末内の予定を表示します</div><button class="zoomBtn" id="yosTestToggle" type="button" hidden aria-label="テスト予定を表示">テスト表示</button><button class="zoomBtn" id="zoomBtn" type="button" aria-label="タイムラインの表示倍率を切り替え">詳細に拡大</button></div>
   <div class="all-day" id="dayAllDay" hidden aria-label="終日の予定"></div>
-  <div class="editor" id="editor"><b id="editorTitle">予定を追加</b><div class="fields"><input id="newTitle" placeholder="名前" style="flex:1 1 160px" aria-label="名前"><input id="newTime" type="time" value="10:00" aria-label="開始時刻"><input id="newDuration" type="number" min="5" max="1440" step="5" value="30" style="width:76px" aria-label="所要時間（分）"><select id="newKind" aria-label="種類"><option value="task">タスク</option><option value="habit">習慣</option><option value="schedule">予定</option></select></div><div id="shortcutField"><label for="newShortcut">ショートカット（任意）</label><input id="newShortcut" maxlength="100" placeholder="既存ショートカットの正式名称" aria-label="起動するiPhoneショートカット名" style="width:100%;margin:5px 0 9px"><small style="color:#d5dce7">登録前は＋で設定、登録後は▶で実行。実行しても自動完了にはしません。</small></div><div class="editor-actions"><button id="saveBtn">追加する</button><button id="cancelEditor" class="light" type="button">閉じる</button></div></div>
+  <div class="editor" id="editor"><b id="editorTitle">予定を追加</b><div class="fields"><input id="newTitle" placeholder="名前" style="flex:1 1 160px" aria-label="名前"><input id="newTime" type="time" value="10:00" aria-label="開始時刻"><input id="newDuration" type="number" min="5" max="1440" step="5" value="30" style="width:76px" aria-label="所要時間（分）"><select id="newKind" aria-label="種類"><option value="task">タスク</option><option value="habit">習慣</option><option value="schedule">予定</option></select></div><div id="shortcutField"><label for="newShortcut">ショートカット（任意）</label><input id="newShortcut" maxlength="100" placeholder="既存ショートカットの正式名称" aria-label="起動するiPhoneショートカット名" style="width:100%;margin:5px 0 9px"><small style="color:#d5dce7">設定したショートカットはここから実行できます。実行しても自動完了にはなりません。</small><a id="runShortcut" class="editor-shortcut-run" href="#" hidden>ショートカットを実行</a></div><div class="editor-actions"><button id="saveBtn">追加する</button><button id="cancelEditor" class="light" type="button">閉じる</button></div></div>
   <section class="week-overview" id="weekOverview" hidden aria-label="週の予定"><div class="week-overview-head"><button id="weekPrev" type="button" aria-label="前週">‹</button><strong id="weekCaption"></strong><button id="weekNext" type="button" aria-label="翌週">›</button></div><div id="weekAgenda"></div><p class="coverage" id="weekCoverage"></p></section>
   <div class="compat-status" id="compatStatus" aria-live="polite">相性を判定中</div>
-  <p class="gesture-help" id="gestureHelp">タスクをタップ＝完了 ｜ 左スワイプ＝削除 ｜ 長押し＝編集 ｜ ＋＝登録・▶＝実行</p>
+  <p class="gesture-help" id="gestureHelp">タスク：タップで完了 ｜ 左スワイプで削除 ｜ 長押しで編集 ｜ 上下ドラッグで移動</p>
   <div class="timeline-wrap" id="timelinePanel"><div class="timeline" id="tl"><div class="axis"></div><div class="nowline" id="nowLine" hidden><span class="nowbadge" id="nowBadge"></span></div></div></div>
   <section class="tabbox" id="taskPanel"><h3>タスク・未配置</h3><p class="muted">専門タスクの期限と、実行する時間は別。配置しても元データの期限・完了は変わりません。</p>
  <div id="taskList"></div><h3>各専門ページから集約</h3><p class="muted" id="yosTaskSourceStatus">Notion Tasks：確認中</p>
@@ -420,9 +415,18 @@ function beginLocalEdit(item,shortcutFocus=false){
  if(shortcutFocus)document.getElementById('newShortcut').focus();
 }
 function updateShortcutField(){
- document.getElementById('shortcutField').hidden=document.getElementById('newKind').value!=='task';
+ const isTask=document.getElementById('newKind').value==='task';
+ document.getElementById('shortcutField').hidden=!isTask;
+ const label=document.getElementById('newShortcut').value.trim();
+ const run=document.getElementById('runShortcut');
+ const valid=isTask&&label.length>0&&label.length<=100&&![...label].some(c=>c.charCodeAt(0)<32||c.charCodeAt(0)===127);
+ run.hidden=!valid;
+ if(valid){run.href='shortcuts://run-shortcut?name='+encodeURIComponent(label);run.setAttribute('aria-label','ショートカット「'+label+'」を実行');}
+ else run.removeAttribute('href');
 }
 document.getElementById('newKind').onchange=updateShortcutField;
+document.getElementById('newShortcut').oninput=updateShortcutField;
+document.getElementById('runShortcut').onclick=()=>{note.textContent='ショートカットの起動を依頼しました。完了記録は変更しません。';};
 document.getElementById('addBtn').onclick=()=>{
  hideSwipeDelete();editingId=null;
  document.getElementById('editorTitle').textContent='予定を追加';document.getElementById('saveBtn').textContent='追加する';
@@ -759,7 +763,9 @@ function toggleTaskDone(item){
 // retain their existing read-only details / vertical time dragging.
 function wireTaskGestures(el,item){
  let active=null,startX=0,startY=0,lastX=0,lastY=0,mode='tap',timer=null;
+ const timeLabel=el.querySelector('small');
  const clearTimer=()=>{if(timer!==null){clearTimeout(timer);timer=null;}};
+ const candidateStart=()=>Math.max(0,Math.min(1440-item.d,Math.round((item.s+(lastY-startY)/scale*60)/5)*5));
  const begin=(x,y,id)=>{
   if(active!==null)return;
   active=id;startX=lastX=x;startY=lastY=y;mode='tap';
@@ -774,16 +780,33 @@ function wireTaskGestures(el,item){
   lastX=x;lastY=y;
   const dx=x-startX,dy=y-startY;
   if(Math.abs(dx)>10||Math.abs(dy)>10)clearTimer();
-  if(dx< -12&&Math.abs(dx)>Math.abs(dy)*1.25){
+  if(mode==='swipe'||(mode==='tap'&&dx< -14&&Math.abs(dx)>Math.abs(dy)*1.3)){
    mode='swipe';event?.preventDefault();
    el.style.transform='translate3d('+Math.max(-70,dx)+'px,0,0)';
-  }else if(Math.abs(dy)>10&&mode!=='swipe'){mode='scroll';}
+  }else if(mode==='drag'||(mode==='tap'&&Math.abs(dy)>14&&Math.abs(dy)>Math.abs(dx)*1.25)){
+   // A drag starts only on a task card; the surrounding timeline keeps normal scrolling.
+   mode='drag';event?.preventDefault();
+   el.classList.add('drag-preview');
+   el.style.transform='translate3d(0,'+dy+'px,0)';
+   const at=candidateStart();
+   if(timeLabel)timeLabel.textContent=fmt(at)+'–'+fmt(at+item.d);
+  }
  };
  const finish=cancelled=>{
   if(active===null)return;
-  active=null;clearTimer();el.style.transform='';
-  if(cancelled||mode==='scroll'||mode==='long')return;
+  active=null;clearTimer();el.style.transform='';el.classList.remove('drag-preview');
+  if(cancelled){if(timeLabel)timeLabel.textContent=fmt(item.s)+'–'+fmt(item.s+item.d);return;}
   if(mode==='swipe'){if(lastX-startX< -45)showSwipeDelete(item);return;}
+  if(mode==='drag'){
+   const at=candidateStart();
+   if(at!==item.s){
+    item.s=at;
+    const saved=persist();
+    note.textContent='「'+item.t+'」を'+fmt(at)+'に移動'+(saved?'（端末内に保存中）':'（保存準備失敗）');
+    smoothRender();updateReview();
+   }else if(timeLabel)timeLabel.textContent=fmt(item.s)+'–'+fmt(item.s+item.d);
+   return;
+  }
   if(mode==='tap')toggleTaskDone(item);
  };
  el.addEventListener('contextmenu',e=>e.preventDefault());
@@ -818,10 +841,10 @@ function render(){
    const start=yFor(group[0].s);
    const offset=Math.max(0,priorVisualBottom+3-start);
    for(const item of group)lanes.get(item).offset=offset;
-   priorVisualBottom=Math.max(priorVisualBottom,...group.map(item=>yFor(item.s)+offset+Math.max(item.kind==='task'&&!item.f?32:density==='overview'?17:22,yFor(item.s+item.d)-yFor(item.s)-2)));
+   priorVisualBottom=Math.max(priorVisualBottom,...group.map(item=>yFor(item.s)+offset+Math.max(item.kind==='task'&&!item.f?42:density==='overview'?17:22,yFor(item.s+item.d)-yFor(item.s)-2)));
  }
  sorted.forEach(item=>{
-   const natural=yFor(item.s);const height=Math.max(item.kind==='task'&&!item.f?32:density==='overview'?17:22,yFor(item.s+item.d)-natural-2);const top=natural+(lanes.get(item)?.offset||0);
+   const natural=yFor(item.s);const height=Math.max(item.kind==='task'&&!item.f?42:density==='overview'?17:22,yFor(item.s+item.d)-natural-2);const top=natural+(lanes.get(item)?.offset||0);
    if(top>natural+2)pushed++;
    lastBottom=top+height;
    const el=document.createElement('div');el.className='card '+(item.kind==='habit'?'habit':item.kind==='task'?'task':'schedule');
@@ -829,21 +852,7 @@ function render(){
    const lane=lanes.get(item);if(lane&&lane.count>1){el.style.left='calc(73px + (100% - 73px) * '+(lane.lane/lane.count)+')';el.style.width='calc((100% - 73px) / '+lane.count+' - 3px)';el.style.right='auto';el.classList.add('lane')}
    const compat=latestCompatibility.get(item.id);
    if(compat){el.classList.add('compat-'+compat.level);el.setAttribute('aria-label',item.t+' '+(compat.reasons[0]||'相性：判断材料不足'));el.title=(compat.reasons[0]||'相性は未確認');}
-   if(item.kind==='task'&&!item.f){
-    const linked=typeof item.shortcut==='string'&&item.shortcut.length>0;
-    const action=document.createElement(linked?'a':'button');
-    action.className='shortcut-launch'+(linked?' linked':'');
-    action.textContent=linked?'▶':'＋';
-    action.setAttribute('aria-label',linked?'ショートカット「'+item.shortcut+'」を実行':'このタスクにショートカットを設定');
-    if(linked){action.href='shortcuts://run-shortcut?name='+encodeURIComponent(item.shortcut);}
-    else{action.type='button';action.onclick=e=>{e.stopPropagation();beginLocalEdit(item,true)};}
-    for(const type of ['touchstart','touchmove','touchend','touchcancel','pointerdown','pointermove','pointerup','pointercancel'])action.addEventListener(type,e=>e.stopPropagation());
-    action.addEventListener('click',e=>{
-     e.stopPropagation();
-     if(linked)note.textContent='iPhoneショートカット「'+item.shortcut+'」へ起動を依頼しました · タスク完了は別';
-    });
-    el.append(action);
-   }else{
+   if(item.kind!=='task'||item.f){
     const iconEl=document.createElement('span');iconEl.innerHTML=eventIcon(item);el.append(iconEl.firstChild);
    }
    const titleEl=document.createElement('b');titleEl.textContent=item.t;el.append(titleEl);
