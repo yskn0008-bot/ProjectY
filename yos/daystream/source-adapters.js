@@ -34,8 +34,9 @@
   if(zone&&!/^(?:Asia\/Tokyo|Japan)$/i.test(zone))throw Error('異なるタイムゾーンは推測できません');
   if(m[7]){
    const ms=Date.parse(day+'T'+m[4]+':'+m[5]+':'+String(second).padStart(2,'0')+'Z');
-   const local=new Date(ms);
-   return {day:[local.getFullYear(),String(local.getMonth()+1).padStart(2,'0'),String(local.getDate()).padStart(2,'0')].join('-'),minute:local.getHours()*60+local.getMinutes(),allDay:false,absolute:ms};
+   // Asia/Tokyo is UTC+09:00 year-round. Avoid the browser/CI machine's local timezone.
+   const tokyo=new Date(ms+9*60*60000);
+   return {day:[tokyo.getUTCFullYear(),String(tokyo.getUTCMonth()+1).padStart(2,'0'),String(tokyo.getUTCDate()).padStart(2,'0')].join('-'),minute:tokyo.getUTCHours()*60+tokyo.getUTCMinutes(),allDay:false,absolute:ms};
   }
   return {day,minute,allDay:false,absolute:null};
  }
@@ -137,10 +138,10 @@
   // Browser-local Life data can be outdated; no proof of live Apple Calendar access.
   return {schema:'yos-daystream-life-schedule-v1',source:'yos-life-local',status:'partial',calendarDays:days,allDayDays:{},skippedCount:skipped};
  }
- function validSaved(s,kind,retentionDays=7){
+ function validSaved(s,kind,retentionDays=7,archiveRestore=false){
   if(!s||s.schema!=='yos-daystream-source-snapshot-v1'||s.kind!==kind||!['user-file','yos-auth-cache'].includes(s.source)||!Number.isFinite(Date.parse(s.checkedAt)))return false;
   const age=Date.now()-Date.parse(s.checkedAt);
-  const maxDays=s.source==='yos-auth-cache'?Math.min(retentionDays,0.25):retentionDays;
+  const maxDays=s.source==='yos-auth-cache'&&!archiveRestore?Math.min(retentionDays,0.25):retentionDays;
   return age>=-300000&&age<=maxDays*86400000;
  }
  root.YOS_DAYSTREAM_SOURCES={normalizeTasks,parseICS,fromYosTaskDashboardCache,fromYosLifeStore,validSaved,MAX_BYTES};

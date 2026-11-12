@@ -140,7 +140,7 @@ jobs:
           if-no-files-found: error
 
       - name: Publish signed install file on the isolated draft branch
-        if: github.event_name == 'pull_request'
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.ref == 'feat/yos-night-journal-integration-20261112'
         shell: bash
         env:
           TARGET_BRANCH: ${{ github.event.pull_request.head.ref }}

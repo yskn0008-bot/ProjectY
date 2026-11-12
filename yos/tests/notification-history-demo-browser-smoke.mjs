@@ -20,6 +20,36 @@ try {
   assert.equal(await page.locator('#refresh').isVisible(),false,'cannot refresh remote data in demo');
   assert.equal(await page.locator('#connect').isVisible(),false,'cannot authenticate to API in demo');
   assert.equal(external.length,0,'demo must make no external API requests');
+  // Approved design: dense four-column rows must remain readable on iPhone widths.
+  for(const width of [320,375,390,430]){
+    await page.setViewportSize({width,height:844});
+    const measure=await page.evaluate(()=>{
+      const bounds=e=>{const r=e.getBoundingClientRect();return {left:r.left,right:r.right,top:r.top,bottom:r.bottom,height:r.height,width:r.width}};
+      return {screen:document.documentElement.clientWidth,
+        overflow:document.documentElement.scrollWidth,
+        sizes:Object.fromEntries(['.notice-title','.time','.category','.tag','.result'].map(selector=>[selector,parseFloat(getComputedStyle(document.querySelector(selector)).fontSize)])),
+        rows:[...document.querySelectorAll('.event')].map(el=>{
+          const r=bounds(el),parts=[...el.children].map(bounds);
+          return {height:r.height,parts:parts.length,inside:parts.every(p=>p.left>=r.left-1&&p.right<=r.right+1),
+            columnsSeparated:parts.every((p,i)=>i===0||p.left>=parts[i-1].right-1)};
+        })};
+    });
+    assert.equal(measure.rows.length,14);
+    assert.ok(measure.sizes['.notice-title']>=13,'title too small at '+width);
+    assert.ok(measure.sizes['.time']>=12,'time too small at '+width);
+    assert.ok(measure.sizes['.category']>=11,'subtitle too small at '+width);
+    assert.ok(measure.sizes['.tag']>=9,'decision too small at '+width);
+    assert.ok(measure.sizes['.result']>=9,'result too small at '+width);
+
+    assert.ok(measure.overflow<=measure.screen+1,'horizontal overflow at '+width+': '+JSON.stringify(measure));
+    for(const [index,row] of measure.rows.entries()){
+      assert.equal(row.parts,4,'four columns at '+width+' row '+index);
+      assert.ok(row.inside,'content outside its row at '+width+' row '+index);
+      assert.ok(row.columnsSeparated,'overlapping columns at '+width+' row '+index);
+      assert.ok(row.height>=38&&row.height<=72,'unexpected row density at '+width+' row '+index+': '+row.height);
+    }
+  }
+  await page.setViewportSize({width:390,height:844});
   await page.locator('[data-filter="action"]').click();
   assert.equal(await page.locator('.event').count(),5);
   await page.locator('[data-filter="wait"]').click();
