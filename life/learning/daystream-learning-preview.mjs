@@ -11,7 +11,7 @@ export function renderDaystreamLearningPreview(snapshot,{maxCards=3}={}){
   if(!bounded)return '';
   const seen=new Set(),rows=[];
   for(const card of snapshot.cards){
-    if(!card||card.type!=='deadline_date_only'||card.placement!=='in_app_only'||card.changesOriginal!==false||!day.test(card.dueDate||''))continue;
+    if(!card||card.type!=='deadline_date_only'||card.placement!=='in_app_only'||card.changesOriginal!==false||!validDay(card.dueDate))continue;
     if(typeof card.key!=='string'||!card.key||seen.has(card.key)||typeof card.title!=='string'||!card.title.trim())continue;
     seen.add(card.key);
     rows.push('<li class="yos-learning-preview__item"><span class="yos-learning-preview__title">'+esc(card.title.slice(0,120))+'</span><span class="yos-learning-preview__meta">'+esc(card.dueDate)+' · 時刻未確認</span></li>');
