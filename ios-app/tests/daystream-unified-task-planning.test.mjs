@@ -572,8 +572,8 @@ test('fluid drag uses frame batching, a stable 2D release animation and respects
  assert.match(js,/smoothRender\(item\.id,previousRect\)/);
  assert.match(js,/window\.matchMedia\?\.\('\(prefers-reduced-motion: reduce\)'\)/);
  assert.match(js,/const dx=old\.left-now\.left,dy=old\.top-now\.top/);
- assert.match(js,/scaleX\('\+sx\+'\)/);
- assert.match(js,/duration:340,easing:'cubic-bezier\(\.22,1,\.36,1\)'/);
+ assert.doesNotMatch(js,/scaleX\(/);
+ assert.match(js,/duration:235,easing:'cubic-bezier\(\.22,1,\.36,1\)'/);
 });
 
 
