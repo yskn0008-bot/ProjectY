@@ -64,7 +64,24 @@ h1{font-size:25px;margin:2px 0 4px;letter-spacing:-.035em}p{margin:5px 0;color:v
 <script>
 (function(){
 'use strict';
-var API='https://project-y-yos-ai.vercel.app/api/yos/notification';
+var API='';
+async function selectExistingProvider(){
+  if(API)return;
+  var res=await fetch('../data/yos-runtime-providers.json',{cache:'no-store',credentials:'omit'});
+  if(!res.ok)throw Error('既存の接続先設定を読み込めません');
+  var cfg=await res.json();
+  var p=(Array.isArray(cfg.providers)?cfg.providers:[]).find(function(x){
+    return x.id==='google-cloud-run' && x.enabled===true &&
+      typeof x.base_url==='string' &&
+      Array.isArray(x.certified_routes) && x.certified_routes.includes('notification');
+  });
+  if(!p)throw Error('Google Cloud Runの通知APIは未認証・未有効化です。既存の接続設定を確認してください');
+  var parsed=new URL(p.base_url);
+  if(parsed.protocol!=='https:'||parsed.username||parsed.password||parsed.search||parsed.hash||parsed.pathname!=='/')
+    throw Error('既存Cloud Runの接続先が無効です');
+  window.YOS_AI_BASE_URL=parsed.origin;
+  API=parsed.origin+'/api/yos/notification';
+}
 var INBOX='https://app.notion.com/p/3d35ca88289581ef9dc8d5f11ff8e213';
 var $=function(id){return document.getElementById(id)};
 var rows=[],token='',active='all',selected=null,loading=false,lastComplete=false;
@@ -124,7 +141,7 @@ return {events:out,complete:fully}
 async function refresh(){
 if(loading)return;loading=true;$('connect').disabled=true;$('refresh').disabled=true;
 $('status').textContent='履歴を確認しています';message('本人確認・履歴取得中');
-try{if(!token){if(typeof window.YOS_AUTH?.getGoogleIdToken!=='function')throw Error('YOS本体の本人認証が使えません。単体ファイルでは接続できません');token=await window.YOS_AUTH.getGoogleIdToken()}
+try{await selectExistingProvider();if(!token){if(typeof window.YOS_AUTH?.getGoogleIdToken!=='function')throw Error('YOS本体の本人認証が使えません。単体ファイルでは接続できません');token=await window.YOS_AUTH.getGoogleIdToken()}
 var data=await fetchEvents();rows=data.events;lastComplete=data.complete;
 $('mode').textContent=data.complete?'接続済み':'一部取得';$('status').textContent=rows.length+'件の履歴を取得';
 message(data.complete?'既存の通知APIから取得。AI・実処理は確認済み範囲だけ表示します。':'履歴の一部が未取得です。全件表示ではありません。');
