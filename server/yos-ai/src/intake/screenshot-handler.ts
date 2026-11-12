@@ -51,6 +51,7 @@ export function createScreenshotIntakeHandler(options: {
         }
         throw new CaptureInProgressError();
       }
+      let appendedToNotion = false;
       try {
         const filename = 'screenshot-' + input.captureId.replaceAll(':', '-') +
           (input.mimeType === 'image/png' ? '.png' : input.mimeType === 'image/jpeg' ? '.jpg' : '.heic');
@@ -81,10 +82,15 @@ export function createScreenshotIntakeHandler(options: {
           ]})
         });
         if (!appended.ok) throw new Error('Notion append failed');
+        appendedToNotion = true;
         await options.redis.command<string>(['SET', key, 'done', 'EX', DONE_TTL]);
         return Response.json({ok: true, captureId: input.captureId, duplicate: false}, {status: 201});
       } catch {
-        try { await options.redis.command<number>(['DEL', key]); } catch { /* Retry remains possible after TTL. */ }
+        // A failed Redis acknowledgement after a successful Notion append must not
+        // immediately unlock the capture: doing so could duplicate private images.
+        if (!appendedToNotion) {
+          try { await options.redis.command<number>(['DEL', key]); } catch { /* Processing TTL allows later retry. */ }
+        }
         return response(503, 'Screenshot intake temporarily unavailable');
       }
     } catch (error) {
