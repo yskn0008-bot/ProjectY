@@ -33,6 +33,32 @@ try{
  });
  assert.equal(learning.length,1);
  assert.equal(learning[0].count,3);
+ const importState=await page.evaluate(()=>{
+  const parser=window.YOS_DAYSTREAM_SOURCES;
+  const calendar=parser.parseICS('BEGIN:VCALENDAR\nBEGIN:VEVENT\nUID:source1\nSUMMARY:Web read-only fixture\nDTSTART:20261113T090000\nDTEND:20261113T100000\nEND:VEVENT\nEND:VCALENDAR');
+  const tasks=parser.normalizeTasks({items:[{id:'12345678-1234-1234-1234-123456789012',title:'Web imported task',status:'次にやる',priority:'P2',due:'2026-11-13'}]});
+  localStorage.setItem('YOS_DAYSTREAM_WEB_CAL_SNAPSHOT_V1',JSON.stringify(calendar));
+  localStorage.setItem('YOS_DAYSTREAM_WEB_TASK_SNAPSHOT_V1',JSON.stringify(tasks));
+  return {calendarCount:calendar.eventCount,taskCount:tasks.items.length}
+ });
+ assert.equal(importState.calendarCount,1);
+ assert.equal(importState.taskCount,1);
+ await page.reload({waitUntil:'domcontentloaded'});
+ assert.match(await page.locator('#yosWebSourceState').innerText(),/タスク手動取込/);
+ assert.match(await page.locator('#yosWebSourceState').innerText(),/Apple予定手動取込/);
+ await page.locator('[data-tab="task"]').click();
+ assert.match(await page.locator('#yosTaskSourceStatus').innerText(),/手動取込のTasks写し/);
+ assert.match(await page.locator('#yosSourceTasks').innerText(),/Web imported task/);
+ const started=await page.evaluate(()=>{
+  const web=window.YOS_DAYSTREAM_WEB,at=new Date().toISOString();
+  for(let i=0;i<3;i++){
+   web.markStarted({id:900001+i,day:'2026-11-13'});
+   web.logCompletion({id:900001+i,title:'Started action',at,day:'2026-11-13',plannedStart:600});
+  }
+  return web.suggestions().find(x=>x.title==='Started action')
+ });
+ assert.equal(started.kind,'start');
+ assert.equal(started.count,3);
  assert.deepEqual(errors,[],'no script errors during load, storage, reload or learning');
  console.log('DAYSTREAM Web port browser smoke PASS',type);
 }finally{await browser.close()}
