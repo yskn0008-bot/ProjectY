@@ -77,9 +77,10 @@ async function selectExistingProvider(){
   });
   if(!p)throw Error('Google Cloud Runの通知APIは未認証・未有効化です。既存の接続設定を確認してください');
   var parsed=new URL(p.base_url);
-  if(parsed.protocol!=='https:'||parsed.username||parsed.password||parsed.search||parsed.hash||parsed.pathname!=='/')
+  if(parsed.protocol!=='https:'||parsed.username||parsed.password||parsed.search||parsed.hash||parsed.pathname!=='/'||!parsed.hostname.endsWith('.run.app'))
     throw Error('既存Cloud Runの接続先が無効です');
   window.YOS_AI_BASE_URL=parsed.origin;
+  window.YOS_AUTH_PUBLIC_CONFIG_BASE_URL=parsed.origin+'/';
   API=parsed.origin+'/api/yos/notification';
 }
 var INBOX='https://app.notion.com/p/3d35ca88289581ef9dc8d5f11ff8e213';
