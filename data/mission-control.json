@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-13T05:28:28+09:00",
+  "updated_at": "2026-11-13T05:30:18+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -31,26 +31,6 @@
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/630",
       "updated_at": "2026-11-12T17:17:42Z"
-    },
-    {
-      "id": "github-pr-654",
-      "title": "PR #654 YOS Calendar: mobile-first unified calendar preview (read-only)",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/654",
-      "updated_at": "2026-11-11T10:08:02Z"
-    },
-    {
-      "id": "github-pr-662",
-      "title": "PR #662 YOS TODAY: reflect newly confirmed movement after cached meal report",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/662",
-      "updated_at": "2026-11-11T09:56:17Z"
     },
     {
       "id": "github-pr-664",
@@ -103,14 +83,34 @@
       "updated_at": "2026-11-12T20:20:56Z"
     },
     {
-      "id": "github-pr-739",
-      "title": "PR #739 Taxi｜MET Norwayの取得間隔と予報鮮度表示を修正",
+      "id": "github-pr-740",
+      "title": "PR #740 test(alerts): verify approved dense history layout on iPhone widths",
       "type": "GitHub PR",
       "status": "draft",
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/739",
-      "updated_at": "2026-11-12T20:27:48Z"
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/740",
+      "updated_at": "2026-11-12T20:28:43Z"
+    },
+    {
+      "id": "github-pr-741",
+      "title": "PR #741 feat(journal): free narrator MP3 for every published article",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/741",
+      "updated_at": "2026-11-12T20:29:13Z"
+    },
+    {
+      "id": "github-pr-742",
+      "title": "PR #742 fix(daystream): restore portable backups without treating expired Tasks cache as live",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/742",
+      "updated_at": "2026-11-12T20:29:49Z"
     },
     {
       "id": "github-issue-10",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-12T20:20:57Z"
+      "updated_at": "2026-11-12T20:29:36Z"
     },
     {
       "id": "github-issue-234",
@@ -205,6 +205,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-a737f3edbd52",
+      "title": "Taxi: weather freshness policy and dedicated iPhone test runner recovery",
+      "completed_at": "2026-11-12T20:29:37Z",
+      "result": "GitHub mainへ反映（a737f3e）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/a737f3edbd5218731370cbbf464f88b9fc8261df"
+    },
+    {
       "id": "github-commit-d334bb07d8f9",
       "title": "fix(ci): pin YOS browser workflows to Playwright-supported Ubuntu 24.04 (#737)",
       "completed_at": "2026-11-12T19:42:29Z",
@@ -231,13 +238,6 @@
       "completed_at": "2026-11-12T19:36:23Z",
       "result": "GitHub mainへ反映（35c6bfc）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/35c6bfca1dbe6f8dd9c17afdae6bdb10709ffd31"
-    },
-    {
-      "id": "github-commit-18e8f6446b87",
-      "title": "test(alerts): integrate dense history, notification API and Hobby quota fix (#692)",
-      "completed_at": "2026-11-12T19:34:34Z",
-      "result": "GitHub mainへ反映（18e8f64）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/18e8f6446b87c6934996a01d4533946d40f355de"
     },
     {
       "id": "complete-002",
@@ -274,7 +274,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-13T05:28:28+09:00",
+      "last_update": "2026-11-13T05:30:18+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -349,13 +349,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 9件・Open PR 49件を自動同期中",
+      "next_action": "Open Issue 9件・Open PR 51件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-13T05:28:28+09:00",
+      "last_update": "2026-11-13T05:30:18+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -378,7 +378,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-13T05:28:28+09:00",
+      "last_update": "2026-11-13T05:30:18+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -460,5 +460,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "ba1321869d2074982a5d3c544386c313f7b35c13cca081b9048fb3cf142b204a"
+  "github_snapshot_hash": "b6209aa9210c3958502c888cb605915fad42a57eaa817d1fb2f042fd211d6d9c"
 }
