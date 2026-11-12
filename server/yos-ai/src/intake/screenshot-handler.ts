@@ -24,7 +24,7 @@ export function createScreenshotIntakeHandler(options: {
   return async (request) => {
     if (request.method !== 'POST') return response(405, 'Method not allowed');
     const match = /^Bearer ([^\s]{16,512})$/u.exec(request.headers.get('authorization') ?? '');
-    if (!match || !(await matchesHash(match[1], hash))) return response(401, 'Unauthorized');
+    if (!match || !(await matchesHash(match[1]!, hash))) return response(401, 'Unauthorized');
     if (request.headers.get('content-type')?.split(';', 1)[0]?.trim().toLowerCase() !== 'application/json') {
       return response(415, 'JSON required');
     }
