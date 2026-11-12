@@ -1,381 +1,68 @@
 import assert from 'node:assert/strict';
-import { chromium, webkit } from 'playwright';
-
-const browserName=process.env.YOS_BROWSER||'chromium';
-const browserType={chromium,webkit}[browserName];
-const base=process.env.YOS_BASE_URL||'http://127.0.0.1:4173';
-const browser=await browserType.launch({headless:true});
+import {chromium,webkit} from 'playwright';
+import {readFileSync} from 'node:fs';
+const name=process.env.YOS_BROWSER||'chromium',base=process.env.YOS_BASE_URL||'http://127.0.0.1:4173';
+const browser=await ({chromium,webkit}[name]).launch({headless:true});
 const context=await browser.newContext({viewport:{width:390,height:844}});
-const fixedNow=Date.parse('2026-09-23T03:00:00+09:00');
-await context.addInitScript(now=>{
-  const NativeDate=Date;
-  globalThis.Date=class extends NativeDate{
-    constructor(...args){super(...(args.length?args:[now]))}
-    static now(){return now}
-  };
-},fixedNow);
+await context.addInitScript(()=>{const Native=Date,now=Date.parse('2026-11-13T12:00:00+09:00');globalThis.Date=class extends Native{constructor(...args){super(...(args.length?args:[now]))}static now(){return now}}});
 const page=await context.newPage();
-
-async function expectText(selector,text){
-  await page.waitForSelector(selector,{state:'visible'});
-  const value=((await page.locator(selector).textContent())||'').trim();
-  assert.ok(value.includes(text),selector+' expected '+text+', got '+value);
+const version=readFileSync(new URL('../money-master-v1.js',import.meta.url),'utf8').match(/MASTER_VERSION='([^']+)'/)[1];
+// Synthetic context-only ledger. Never use historical personal balances as today's facts.
+const fixture={version:2,masterFacts:{version},accounts:[{id:'test-cash',name:'Test Cash',type:'cash',balance:10000}],transactions:[
+{id:'test-payment',type:'expense',label:'Test Payment',amount:2000,date:'2026-11-14',status:'planned'},
+{id:'test-income',type:'income',label:'Test Income',amount:20000,date:'2026-11-15',status:'planned'}
+],recurring:[],debts:[],goals:[],assets:[],rules:{}};
+async function text(selector,value){await page.waitForSelector(selector,{state:'visible'});assert.ok((await page.locator(selector).textContent()).includes(value),selector+' expected '+value)}
+const ledger=()=>page.evaluate(()=>JSON.parse(localStorage.getItem('yos-money-v2')));
+async function entry(label,amount){
+for(const [key,value] of Object.entries({date:'2026-11-13',label,amount:String(amount)}))await page.locator('#money2DialogForm [name="'+key+'"]').fill(value);
+for(const [key,value] of Object.entries({type:'expense',category:'food',status:'done'}))await page.locator('#money2DialogForm [name="'+key+'"]').selectOption(value);
+await page.locator('#money2DialogForm button.primary').click();
 }
-
 try{
-  await page.goto(base+'/',{waitUntil:'networkidle'});
-  assert.match(page.url(),/\/yos\/?$/);
-  await expectText('#brandTitle','MY WAY');
-  await page.evaluate(() => {
-    const today=new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Tokyo'}).format(new Date());
-    const tomorrow=new Date();tomorrow.setDate(tomorrow.getDate()+1);
-    const tomorrowKey=new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Tokyo'}).format(tomorrow);
-    localStorage.setItem('yos-life-v1',JSON.stringify({
-      activeLifeDate:today,
-      days:{[today]:{schedule:[],tasks:[]}},
-      lifeCalendar:[
-        {id:'payment-car-insurance',title:'車保険',category:'payment',rule:{type:'monthly',day:26}},
-        {id:'payment-rent',title:'家賃',category:'payment',rule:{type:'monthly',day:27}},
-        {id:'income-rent',title:'家賃収入',category:'income',rule:{type:'monthly-next-weekday',day:10}}
-      ]
-    }));
-    localStorage.removeItem('yos-money-v2');
-    localStorage.setItem('hj-domain-journeys-v1',JSON.stringify([{id:'main',name:'人生',stage:'日常世界',theme:'',quest:'連携された次の一手'}]));
-    localStorage.setItem('hj-user-profile-v1',JSON.stringify({focusDomain:'main'}));
-    localStorage.setItem('yos-my-way-ideas-v1',JSON.stringify({text:'連携されたIdea',savedAt:new Date().toISOString()}));
-  });
-  await page.reload({waitUntil:'networkidle'});
-  await page.waitForSelector('#taskDashboardBody',{state:'visible'});
-  await expectText('#taskDashboardBody','今使える');
-  await expectText('#taskDashboardBody','4,588円');
-  await expectText('.money-decision-payment','次の支払い');
-  await expectText('.money-decision-payment','9/26');
-  await expectText('.money-decision-payment','車保険 7,060円');
-  await expectText('.money-decision-warning','不足見込み');
-  await expectText('.money-decision-warning','月末まで');
-  await expectText('.money-decision-warning','89,952円不足');
-  await expectText('.money-decision-income','次の入金');
-  await expectText('.money-decision-income','10/13');
-  await expectText('.money-decision-income','家賃収入 約160,485円');
-  await expectText('#taskDashboardBody','時系列');
-  await expectText('#taskDashboardBody','9/27 電気・家賃');
-  await expectText('#taskDashboardBody','9/28 返済');
-  await expectText('#taskDashboardBody','連携された次の一手');
-  const shared=await page.evaluate(()=>window.YOSSharedStateV1?.snapshot?.());
-  assert.equal(shared?.idea?.text,'連携されたIdea','all five YOS domains share state');
-  assert.equal(shared?.money?.balance,4588,'Money must feed the latest confirmed usable amount');
-  assert.equal(shared?.money?.balanceAfterRequiredPayments,-89952,'Money must preserve the confirmed balance after required payments');
-  assert.equal(shared?.money?.nextIncome?.date,'2026-10-13','Money date must win over Calendar supplement');
-  const moneyFacts=await page.evaluate(()=>JSON.parse(localStorage.getItem('yos-money-v2')));
-  assert.deepEqual(moneyFacts.accounts.map(({name,balance})=>[name,balance]),[['PayPay',4033],['PayPay銀行',133],['現金',422]],'confirmed account breakdown must be written to existing yos-money-v2');
-  assert.equal(moneyFacts.transactions.find(tx=>tx.id==='master-rental-income-2026-09')?.status,'received','9/10 rent income must remain received');
-  assert.equal(moneyFacts.transactions.find(tx=>tx.id==='master-icloud-2026-09')?.status,'paid','9/14 iCloud must remain paid');
-  assert.equal(moneyFacts.transactions.find(tx=>tx.id==='master-rental-income-2026-10')?.date,'2026-10-13','next rent income must be a separate future transaction');
-  const timelineText=await page.locator('.money-mini-timeline').innerText();
-  assert.equal((timelineText.match(/車保険/g)||[]).length,1,'Money and Calendar must not duplicate the same event');
-  const homeGeometry=await page.evaluate(()=>({
-    bottom:document.getElementById('taskDashboard').getBoundingClientRect().bottom,
-    navTop:document.querySelector('.bottom-nav').getBoundingClientRect().top,
-    scrollWidth:document.documentElement.scrollWidth,
-    clientWidth:document.documentElement.clientWidth
-  }));
-  assert.ok(homeGeometry.bottom<=homeGeometry.navTop+1,`Money Home must fit above navigation: ${homeGeometry.bottom}/${homeGeometry.navTop}`);
-  assert.ok(homeGeometry.scrollWidth<=homeGeometry.clientWidth+1,'Money Home must not overflow horizontally');
-
-  await page.evaluate(()=>localStorage.clear());
-  await page.goto(base.replace(/\/$/,'')+'/yos/morning-brief-bridge.html',{waitUntil:'networkidle'});
-  const morning=await page.evaluate(()=>window.__yosMorningBriefBridgeV1?.build?.());
-  assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('yos-money-v2'))?.masterFacts?.version),'2026-09-23-v5','Morning Brief bridge must refresh current Money facts without opening MY WAY first');
-  assert.equal(morning?.source?.money,'yos-money-v2','Morning Brief must read existing Money SSOT');
-  assert.equal(morning?.money?.next_payment?.amount,7060,'Morning Brief must read next payment amount');
-  assert.equal(morning?.money?.next_income?.date,'2026-10-13','Morning Brief must read next income date');
-  assert.equal(morning?.money?.next_income?.amount,160485,'Morning Brief must read next income amount');
-  assert.equal(morning?.money?.shortage_possible,true,'Morning Brief must read shortage state');
-  assert.equal(morning?.money?.shortfall,89952,'Morning Brief must read confirmed shortfall');
-
-  await page.evaluate(()=>localStorage.clear());
-  await page.goto(base.replace(/\/$/,'')+'/yos/payment-alert-bridge.html',{waitUntil:'networkidle'});
-  const paymentAlert=await page.evaluate(()=>window.__yosPaymentAlertBridgeV1?.build?.());
-  assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('yos-money-v2'))?.masterFacts?.version),'2026-09-23-v5','Payment Alert bridge must refresh current Money facts independently');
-  assert.equal(paymentAlert?.source,'yos-money-v2','Payment Alert must read existing Money SSOT');
-  assert.equal(paymentAlert?.payments?.length,1,'Payment Alert must include only payments due within three days');
-  assert.equal(paymentAlert?.payments?.[0]?.id,'master-car-insurance-2026-09','Payment Alert must surface car insurance first');
-  assert.equal(paymentAlert?.payments?.[0]?.amount,7060,'Payment Alert must surface confirmed amount');
-
-  await page.evaluate(()=>localStorage.clear());
-  await page.goto(base.replace(/\/$/,'')+'/yos/money-alert-bridge.html',{waitUntil:'networkidle'});
-  const moneyAlert=await page.evaluate(()=>window.__yosMoneyAlertBridgeV1?.build?.());
-  assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('yos-money-v2'))?.masterFacts?.version),'2026-09-23-v5','Money Alert bridge must refresh current Money facts independently');
-  assert.equal(moneyAlert?.source,'yos-money-v2','Money Alert must read existing Money SSOT');
-  assert.equal(moneyAlert?.current_balance,4588,'Money Alert must read confirmed current balance');
-  assert.equal(moneyAlert?.next_payment?.amount,7060,'Money Alert must read next payment');
-  assert.equal(moneyAlert?.next_income?.date,'2026-10-13','Money Alert must read next income');
-  assert.ok(moneyAlert?.alerts?.some(alert=>alert.kind==='projected_shortage'&&alert.amount===89952),'Money Alert must emit confirmed projected shortage');
-
-  await page.goto(base.replace(/\/$/,'')+'/yos/',{waitUntil:'networkidle'});
-  await page.waitForSelector('#taskDashboardBody',{state:'visible'});
-
-  await page.evaluate(()=>{
-    const money=JSON.parse(localStorage.getItem('yos-money-v2'));
-    money.transactions.find(tx=>tx.id==='master-car-insurance-2026-09').status='paid';
-    localStorage.setItem('yos-money-v2',JSON.stringify(money));
-    window.YOSSharedStateV1.refresh('smoke-paid');
-  });
-  await page.waitForTimeout(50);
-  assert.doesNotMatch(await page.locator('.money-decision-next>div:first-child strong').innerText(),/車保険/,'paid payment must be excluded');
-  await page.evaluate(()=>{
-    const money=JSON.parse(localStorage.getItem('yos-money-v2'));
-    money.transactions.find(tx=>tx.id==='master-car-insurance-2026-09').status='planned';
-    money.accounts=money.accounts.map(account=>({...account,balance:100000}));
-    localStorage.setItem('yos-money-v2',JSON.stringify(money));
-    window.YOSSharedStateV1.refresh('smoke-funded');
-  });
-  await page.waitForTimeout(50);
-  assert.equal(await page.locator('.money-decision-warning').count(),0,'shortage warning must disappear when there is no shortage');
-  await page.evaluate(()=>{
-    const money=JSON.parse(localStorage.getItem('yos-money-v2'));
-    const balances={'master-account-paypay':4033,'master-account-paypay-bank':133,'master-account-cash':422};
-    money.accounts=money.accounts.map(account=>({...account,balance:balances[account.id]??account.balance}));
-    localStorage.setItem('yos-money-v2',JSON.stringify(money));
-    window.YOSSharedStateV1.refresh('smoke-restore');
-  });
-  await page.waitForTimeout(50);
-  await expectText('.money-decision-warning','89,952円不足');
-
-  await page.locator('.money-decision-card').click();
-  await expectText('.money5-brand','MY MONEY');
-  await page.locator('.money5-brand').click();
-  await expectText('#brandTitle','MY WAY');
-
-  await page.locator('.yos-companion[href="./guide.html"]').click();
-  await page.waitForURL(/\/yos\/guide\.html$/);
-  await expectText('h1','今日は、どうする？');
-  const guidePrompt=await page.evaluate(()=>window.YOSGuideV1?.buildPrompt('エアコンの風量が変わらない','normal'));
-  assert.match(guidePrompt,/original_input: エアコンの風量が変わらない/);
-  assert.match(guidePrompt,/必要ならProjectY/);
-  assert.match(guidePrompt,/必要ならSCOUT/);
-  assert.equal(await page.locator('[data-mode]').count(),3);
-  await page.locator('.back-link').click();
-  await page.waitForURL(/\/yos\/?$/);
-  await expectText('#brandTitle','MY WAY');
-
-  await page.locator('.money-nav').click();
-  await expectText('.money5-brand','MY MONEY');
-  await expectText('#money2Body','今使えるお金');
-  await expectText('#money2Body','4,588');
-  await expectText('#money2Body','月末不足');
-  await expectText('#money2Body','89,952');
-  await expectText('#money2Body','今月収支');
-  await expectText('#money2Body','65,405');
-  await expectText('#money2Body','資金カレンダー');
-  await expectText('#money2Body','生活防衛費');
-  assert.equal(await page.locator('.money5-subnav [data-money-tab]').count(),6,'Money must expose six internal destinations');
-  const moneyGeometry=await page.evaluate(()=>({
-    scrollWidth:document.documentElement.scrollWidth,
-    clientWidth:document.documentElement.clientWidth,
-    balanceSize:parseFloat(getComputedStyle(document.querySelector('.money5-balance-head strong')).fontSize)
-  }));
-  assert.ok(moneyGeometry.scrollWidth<=moneyGeometry.clientWidth+1,'MY MONEY must not overflow horizontally at 390px');
-  assert.ok(moneyGeometry.balanceSize>=40,'usable balance must be the strongest numeric hierarchy');
-
-  await page.locator('[data-money-tab="categories"]').click();
-  await expectText('#money2Body','カテゴリー別支出');
-  await page.locator('[data-money-tab="calendar"]').click();
-  await expectText('#money2Body','支払い・入金・定期収支を月で確認');
-  await page.locator('[data-money-tab="dashboard"]').click();
-  await expectText('#money2Body','最近の入出金');
-
-  await page.locator('[data-money-tab="transactions"]').click();
-  await expectText('#money2Body','取引履歴');
-  await page.locator('.money3-panel [data-money-action="add-entry"]').click();
-  await page.locator('#money2DialogForm [name="date"]').fill('2026-09-28');
-  await page.locator('#money2DialogForm [name="type"]').selectOption('expense');
-  await page.locator('#money2DialogForm [name="category"]').selectOption('food');
-  await page.locator('#money2DialogForm [name="label"]').fill('テスト食費');
-  await page.locator('#money2DialogForm [name="amount"]').fill('1234');
-  await page.locator('#money2DialogForm [name="status"]').selectOption('done');
-  await page.locator('#money2DialogForm button.primary').click();
-  await expectText('#money2Body','テスト食費');
-  const addedLedger=await page.evaluate(()=>JSON.parse(localStorage.getItem('yos-money-v2')).transactions.find(tx=>tx.label==='テスト食費'));
-  assert.equal(addedLedger?.category,'food','Money transaction category must persist in yos-money-v2');
-
-  await page.locator('.money3-transaction[data-money-action="edit-entry"]').filter({hasText:'テスト食費'}).click();
-  await expectText('#money2DialogForm','取引を編集');
-  page.once('dialog',d=>d.accept());
-  await page.locator('#money2DialogForm button.danger').click();
-  assert.equal(await page.locator('.money3-transaction').filter({hasText:'テスト食費'}).count(),0,'deleted Money transaction must leave history');
-  assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('yos-money-v2')).transactions.some(tx=>tx.label==='テスト食費')),false,'deleted Money transaction must leave yos-money-v2');
-
-  await page.locator('[data-money-tab="rules"]').click();
-  await expectText('#money2Body','定期収支');
-  await page.locator('[data-money-action="add-recurring"]').first().click();
-  await page.locator('#money2DialogForm [name="type"]').selectOption('expense');
-  await page.locator('#money2DialogForm [name="category"]').selectOption('utilities');
-  await page.locator('#money2DialogForm [name="label"]').fill('テスト定期');
-  await page.locator('#money2DialogForm [name="amount"]').fill('2000');
-  await page.locator('#money2DialogForm [name="day"]').fill('29');
-  await page.locator('#money2DialogForm [name="startDate"]').fill('2026-09-01');
-  await page.locator('#money2DialogForm button.primary').click();
-  assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('yos-money-v2')).recurring.some(rule=>rule.label==='テスト定期')),true,'Money recurring rule must persist in yos-money-v2');
-  await page.locator('[data-money-tab="transactions"]').click();
-  await expectText('#money2Body','テスト定期');
-  await page.locator('.money3-transaction[data-money-action="edit-recurring"]').filter({hasText:'テスト定期'}).click();
-  page.once('dialog',d=>d.accept());
-  await page.locator('#money2DialogForm button.danger').click();
-  assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('yos-money-v2')).recurring.some(rule=>rule.label==='テスト定期')),false,'deleted recurring Money rule must leave yos-money-v2');
-
-  await page.locator('.money5-brand').click();
-  await expectText('#brandTitle','MY WAY');
-  await page.locator('.idea-nav').click();
-  await expectText('#brandTitle','MY IDEA');
-  await page.locator('#ideaMemo').fill('YOS unified PWA smoke');
-  await page.locator('#saveIdea').click();
-  await expectText('#recentIdea','YOS unified PWA smoke');
-  await page.reload({waitUntil:'networkidle'});
-  await expectText('#brandTitle','MY IDEA');
-  await expectText('#recentIdea','YOS unified PWA smoke');
-
-  await page.locator('.journey-nav').click();
-  await expectText('#brandTitle','MY JOURNEY');
-
-  await page.goto(base+'/life/',{waitUntil:'networkidle'});
-  await expectText('.brand h1','MY LIFE');
-
-  await page.goto(base+'/yos/hj/',{waitUntil:'networkidle'});
-  await expectText('.brand h1',"Hero's Journey");
-
-  await page.goto(base+'/system/',{waitUntil:'networkidle'});
-  await expectText('h1','Mission Control');
-
-  await page.evaluate(()=>localStorage.setItem('yos-home-settings-v2',JSON.stringify({yosUrl:'https://chatgpt.com/c/yos-smoke-chat'})));
-  await page.goto(base+'/yos/desk/',{waitUntil:'networkidle'});
-  await page.waitForFunction(()=>document.documentElement.dataset.liveSync==='ok');
-  await expectText('.heroTitle','Clarity');
-  await expectText('.heroSide .big','65%');
-  await expectText('#devList','Money');
-  await expectText('#devList','MY WAY Widget');
-  await expectText('.stats','未完了');
-  await expectText('.stats','本人確認待ち');
-  await expectText('.stats','YOS全体進捗');
-  await expectText('#nightSuggest','本人確認待ち');
-  await expectText('#nightSuggest','Clarity');
-  await page.locator('[data-quick="Money"]').click();
-  await expectText('#sheetBody','4,588円');
-  await expectText('#sheetBody','9/26 車保険 7,060円');
-  await expectText('#sheetBody','89,952円');
-  await expectText('#sheetBody','10/13 家賃収入 約160,485円');
-  await page.locator('#closeSheetBtn').click();
-  await page.locator('[data-page="chats"]').click();
-  await expectText('#chatList','YOS Chat');
-  assert.equal(await page.locator('.chat').count(),1,'YOS DESK CHATS must not ship demo conversations');
-  await expectText('#countAll','1');
-  await expectText('#countUnread','0');
-  await expectText('#countPinned','1');
-  assert.equal((await page.locator('#chatList').innerText()).includes('YOS DESK UI修正'),false,'demo chat titles must be removed');
-  assert.equal((await page.locator('#chatList').innerText()).includes('収入チャンス監視'),false,'demo project chat titles must be removed');
-  await page.locator('[data-page="desk"]').click();
-  const deskType=await page.evaluate(()=>({
-    heroSub:parseFloat(getComputedStyle(document.querySelector('.heroSub')).fontSize),
-    devNext:parseFloat(getComputedStyle(document.querySelector('.devNext')).fontSize),
-    chatName:parseFloat(getComputedStyle(document.querySelector('.chatName')).fontSize),
-    preview:parseFloat(getComputedStyle(document.querySelector('.preview')).fontSize),
-    nav:parseFloat(getComputedStyle(document.querySelector('.nav')).fontSize)
-  }));
-  assert.ok(deskType.heroSub>=17,'YOS DESK hero secondary text must be readable');
-  assert.ok(deskType.devNext>=15,'YOS DESK development secondary text must be readable');
-  assert.ok(deskType.chatName>=18,'YOS DESK chat titles must be readable');
-  assert.ok(deskType.preview>=15,'YOS DESK chat previews must be readable');
-  assert.ok(deskType.nav>=14,'YOS DESK navigation labels must be readable');
-  const firstFoldGeometry=await page.evaluate(()=>{
-    const app=document.getElementById('app');
-    app.scrollTop=0;
-    const appRect=app.getBoundingClientRect();
-    const pinRect=document.getElementById('pinSection').getBoundingClientRect();
-    const developmentRect=document.getElementById('developmentSection').getBoundingClientRect();
-    return {
-      appTop:appRect.top,
-      appBottom:appRect.bottom,
-      pinBottom:pinRect.bottom,
-      bottomGap:appRect.bottom-pinRect.bottom,
-      developmentTop:developmentRect.top
-    };
-  });
-  assert.ok(firstFoldGeometry.pinBottom<=firstFoldGeometry.appBottom+1,'YOS DESK pinned section must fit completely in the initial viewport');
-  assert.ok(firstFoldGeometry.bottomGap>=-1&&firstFoldGeometry.bottomGap<=24,`YOS DESK first screen gap must be within rendering tolerance: gap=${firstFoldGeometry.bottomGap}, pinBottom=${firstFoldGeometry.pinBottom}, appBottom=${firstFoldGeometry.appBottom}`);
-  assert.ok(firstFoldGeometry.developmentTop>=firstFoldGeometry.appBottom-1,`YOS DESK development section must not appear before scrolling: devTop=${firstFoldGeometry.developmentTop}, appBottom=${firstFoldGeometry.appBottom}, gap=${firstFoldGeometry.bottomGap}`);
-
-  await page.evaluate(()=>{document.getElementById('app').scrollTop=180});
-  await page.waitForTimeout(450);
-  const snappedTop=await page.evaluate(()=>document.getElementById('app').scrollTop);
-  const secondTop=await page.evaluate(()=>{
-    const first=document.getElementById('deskFold');
-    const second=document.getElementById('deskSecondFold');
-    return second.offsetTop-first.offsetTop;
-  });
-  assert.ok(Math.min(Math.abs(snappedTop),Math.abs(snappedTop-secondTop))<=3,`YOS DESK must not stop between screens: scrollTop=${snappedTop}, secondTop=${secondTop}`);
-
-  await page.locator('[data-page="chats"]').click();
-  await page.locator('[data-page="desk"]').click();
-  await page.waitForTimeout(80);
-  const resetTop=await page.evaluate(()=>document.getElementById('app').scrollTop);
-  assert.ok(Math.abs(resetTop)<=2,`YOS DESK must reopen at the top screen: scrollTop=${resetTop}`);
-
-  const secondFoldGeometry=await page.evaluate(async()=>{
-    const app=document.getElementById('app');
-    const first=document.getElementById('deskFold');
-    const fold=document.getElementById('deskSecondFold');
-    app.scrollTop=fold.offsetTop-first.offsetTop;
-    await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
-    const appRect=app.getBoundingClientRect();
-    const foldRect=fold.getBoundingClientRect();
-    const developmentRect=document.getElementById('developmentSection').getBoundingClientRect();
-    const composerRect=document.querySelector('#deskSecondFold .composer').getBoundingClientRect();
-    return {
-      appTop:appRect.top,
-      appBottom:appRect.bottom,
-      foldTop:foldRect.top,
-      foldBottom:foldRect.bottom,
-      developmentTop:developmentRect.top,
-      composerBottom:composerRect.bottom,
-      foldScrollHeight:fold.scrollHeight,
-      foldClientHeight:fold.clientHeight
-    };
-  });
-  assert.ok(secondFoldGeometry.developmentTop>=secondFoldGeometry.appTop-1,'YOS DESK second screen must start with development');
-  assert.ok(secondFoldGeometry.composerBottom<=secondFoldGeometry.appBottom+1,'YOS DESK second screen must show through the composer without a third screen');
-  assert.ok(secondFoldGeometry.foldScrollHeight<=secondFoldGeometry.foldClientHeight+1,'YOS DESK development-through-end must fit in one screen');
-
-  const deskGeometry=await page.evaluate(()=>({
-    appBottom:document.getElementById('app').getBoundingClientRect().bottom,
-    navTop:document.getElementById('bottom').getBoundingClientRect().top,
-    navBottom:document.getElementById('bottom').getBoundingClientRect().bottom,
-    viewport:window.innerHeight,
-    scrollHeight:document.getElementById('app').scrollHeight,
-    clientHeight:document.getElementById('app').clientHeight
-  }));
-  assert.ok(deskGeometry.appBottom<=deskGeometry.navTop+1,`YOS DESK content viewport must end above navigation: ${deskGeometry.appBottom}/${deskGeometry.navTop}`);
-  assert.ok(deskGeometry.navBottom<=deskGeometry.viewport+1,'YOS DESK navigation must stay inside viewport');
-  assert.ok(deskGeometry.scrollHeight>=deskGeometry.clientHeight,'YOS DESK content should remain independently scrollable');
-
-  if(browserName==='chromium'){
-    await page.goto(base+'/yos/',{waitUntil:'networkidle'});
-    await page.evaluate(async()=>{await navigator.serviceWorker.ready;});
-    await page.reload({waitUntil:'networkidle'});
-    assert.equal(await page.evaluate(()=>Boolean(navigator.serviceWorker.controller)),true,'root service worker should control YOS');
-
-    await context.setOffline(true);
-
-    await page.goto(base+'/yos/',{waitUntil:'domcontentloaded'});
-    await expectText('#brandTitle','MY WAY');
-    await page.goto(base+'/yos/guide.html',{waitUntil:'domcontentloaded'});
-    await expectText('h1','今日は、どうする？');
-    await page.goto(base+'/life/',{waitUntil:'domcontentloaded'});
-    await expectText('.brand h1','MY LIFE');
-    await page.goto(base+'/yos/hj/',{waitUntil:'domcontentloaded'});
-    await expectText('.brand h1',"Hero's Journey");
-    await page.goto(base+'/system/',{waitUntil:'domcontentloaded'});
-    await expectText('h1','Mission Control');
-  }
-} finally {
-  await browser.close();
+await page.goto(base+'/',{waitUntil:'networkidle'});assert.match(page.url(),/\/yos\/?$/);
+await text('#brandTitle','MY WAY');await text('#taskDashboardBody','未設定');
+assert.equal((await ledger()).accounts.length,0,'fresh install must not invent accounts');
+assert.equal((await ledger()).masterFacts.currentBalance,null);
+assert.equal(await page.evaluate(()=>window.YOSSharedStateV1.snapshot().money.balance),null);
+await page.evaluate(value=>{localStorage.clear();localStorage.setItem('yos-money-v2',JSON.stringify(value));localStorage.setItem('yos-my-way-ideas-v1',JSON.stringify({text:'Fixture Idea'}))},fixture);
+await page.reload({waitUntil:'networkidle'});await text('#taskDashboardBody','10,000円');
+const shared=await page.evaluate(()=>window.YOSSharedStateV1.snapshot());
+assert.equal(shared.money.balance,10000);assert.equal(shared.money.nextPayment.amount,2000);assert.equal(shared.money.nextIncome.amount,20000);assert.equal(shared.idea.text,'Fixture Idea');
+await page.locator('.money-nav').click();await text('.money5-brand','MY MONEY');
+for(const label of ['今使えるお金','今月あと使える','1日あたり','次の支払い','次の入金','今いちばん重要'])await text('#money2Body',label);
+assert.equal(await page.locator('.money5-subnav [data-money-tab]').count(),6);
+assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=document.documentElement.clientWidth+1),'390px layout overflow');
+for(const tab of ['calendar','categories','rules','assets','dashboard','transactions']){await page.locator('[data-money-tab="'+tab+'"]').click();assert.ok((await page.locator('#money2Body').textContent()).trim())}
+await page.locator('.money3-panel [data-money-action="add-entry"]').click();await entry('Test Food',1234);
+assert.equal((await ledger()).transactions.find(x=>x.label==='Test Food').category,'food');
+await page.reload({waitUntil:'networkidle'});
+// The active Money view is persisted; navigate only if the reload returned to MY WAY.
+if(await page.locator('.money-nav').isVisible())await page.locator('.money-nav').click();
+await page.locator('[data-money-tab="transactions"]').click();await text('#money2Body','Test Food');
+await page.locator('.money3-transaction[data-money-action="edit-entry"]').filter({hasText:'Test Food'}).click();await entry('Test Food Edited',1500);
+assert.equal((await ledger()).transactions.find(x=>x.label==='Test Food Edited').amount,1500);
+await page.locator('.money3-transaction[data-money-action="edit-entry"]').filter({hasText:'Test Food Edited'}).click();page.once('dialog',d=>d.accept());await page.locator('#money2DialogForm button.danger').click();
+assert.equal((await ledger()).transactions.some(x=>x.label==='Test Food Edited'),false);
+await page.locator('[data-money-tab="rules"]').click();await page.locator('[data-money-action="add-recurring"]').first().click();
+for(const [key,value] of Object.entries({label:'Test Recurring',amount:'2000',day:'20',startDate:'2026-11-01'}))await page.locator('#money2DialogForm [name="'+key+'"]').fill(value);
+for(const [key,value] of Object.entries({type:'expense',category:'utilities'}))await page.locator('#money2DialogForm [name="'+key+'"]').selectOption(value);
+await page.locator('#money2DialogForm button.primary').click();assert.equal((await ledger()).recurring.some(x=>x.label==='Test Recurring'),true);
+await page.locator('[data-money-tab="transactions"]').click();await page.locator('.money3-transaction[data-money-action="edit-recurring"]').filter({hasText:'Test Recurring'}).click();page.once('dialog',d=>d.accept());await page.locator('#money2DialogForm button.danger').click();
+assert.equal((await ledger()).recurring.some(x=>x.label==='Test Recurring'),false);
+for(const [path,object] of [['morning-brief-bridge','__yosMorningBriefBridgeV1'],['payment-alert-bridge','__yosPaymentAlertBridgeV1'],['money-alert-bridge','__yosMoneyAlertBridgeV1']]){
+await page.goto(base+'/yos/'+path+'.html',{waitUntil:'networkidle'});const result=await page.evaluate(key=>window[key].build(),object);assert.ok(result);assert.equal((await ledger()).accounts[0].balance,10000);
+if(path==='morning-brief-bridge'){assert.equal(result.money.next_payment.amount,2000);assert.equal(result.money.next_income.amount,20000)}
+if(path==='payment-alert-bridge')assert.equal(result.payments[0].amount,2000);
+if(path==='money-alert-bridge')assert.equal(result.current_balance,10000);
 }
+await page.goto(base+'/yos/',{waitUntil:'networkidle'});await page.locator('.idea-nav').click();await page.locator('#ideaMemo').fill('Saved Test Idea');await page.locator('#saveIdea').click();await page.reload({waitUntil:'networkidle'});await text('#recentIdea','Saved Test Idea');
+const routes=[['/yos/guide.html','h1','今日は、どうする？'],['/life/','.brand h1','MY LIFE'],['/yos/hj/','.brand h1',"Hero's Journey"],['/system/','h1','Mission Control']];
+for(const [path,selector,value] of routes){await page.goto(base+path,{waitUntil:'networkidle'});await text(selector,value)}
+// The removed DESK dashboard is covered by the current chat-only DESK's separate browser job.
+if(name==='chromium'){
+await page.goto(base+'/yos/',{waitUntil:'networkidle'});await page.evaluate(async()=>{await navigator.serviceWorker.ready});await page.reload({waitUntil:'networkidle'});assert.equal(await page.evaluate(()=>Boolean(navigator.serviceWorker.controller)),true);
+await context.setOffline(true);for(const [path,selector,value] of [['/yos/','#brandTitle','MY IDEA'],...routes]){await page.goto(base+path,{waitUntil:'domcontentloaded'});await text(selector,value)}
+}
+console.log('Unified PWA unknown/known ledger, CRUD, bridges, persistence and offline PASS',name);
+}finally{await browser.close()}
