@@ -117,3 +117,20 @@ test('fresh existing authenticated YOS task cache is reused read-only but stale 
  assert.match(html,/existingYosCache\|\|importedTasks/);
  assert.match(html,/YOS認証済みTasks写し/);
 });
+
+test('UTC ICS timestamps convert to Asia/Tokyo independent of browser timezone',()=>{
+ const input=ICS([
+  EV('utc-morning',':20261113T003000Z',':20261113T010000Z'),
+  EV('utc-next-day',':20261113T153000Z',':20261113T160000Z')
+ ]);
+ const result=a.parseICS(input);
+ assert.deepEqual(JSON.parse(JSON.stringify(result.calendarDays['2026-11-13'])),[{title:'Testing utc-morning',start:570,duration:30}]);
+ assert.deepEqual(JSON.parse(JSON.stringify(result.calendarDays['2026-11-14'])),[{title:'Testing utc-next-day',start:30,duration:30}]);
+ assert.equal(result.status,'ok');
+});
+test('Tokyo local TZID remains 09:30 for 09:30 wall time',()=>{
+ const input=ICS([EV('tokyo-local',';TZID=Asia/Tokyo:20261113T093000',';TZID=Asia/Tokyo:20261113T100000')]);
+ const result=a.parseICS(input);
+ assert.equal(result.calendarDays['2026-11-13'][0].start,570);
+ assert.equal(result.calendarDays['2026-11-13'][0].duration,30);
+});
