@@ -79,3 +79,17 @@ test('confirmed start is distinct from completion; browser preserves native plan
  assert.match(html,/開始時刻は未確認/);
  assert.doesNotMatch(code,/YOS_TIMELINE_CHARCOAL_VERIFY_20261111_v1\.json/);
 });
+
+test('one portable backup includes schedule, starts, completions and read-only imports',()=>{
+ assert.match(html,/yos-daystream-web-all-backup-v1/);
+ assert.match(html,/importAll\(p\)/);
+ assert.match(html,/schema:'yos-daystream-web-all-backup-v1'/);
+ assert.match(html,/YOS_DAYSTREAM_WEB_ALL_BACKUP\.json/);
+ assert.match(html,/if\(!confirm\('Web版の時間割・行動履歴・取り込みデータを復元します/);
+ assert.match(html,/for\(const k of keys\)\{old\[k\]=localStorage\.getItem\(k\)/);
+ assert.match(html,/localStorage\.setItem\(k\+'_BACKUP',old\[k\]\)/);
+ assert.match(html,/if\(localStorage\.getItem\(keys\[i\]\)!==values\[i\]\)throw Error/);
+ const old=a.normalizeTasks({items:[]});old.checkedAt='2026-01-01T00:00:00.000Z';
+ assert.equal(a.validSaved(old,'tasks'),false);
+ assert.equal(a.validSaved(old,'tasks',3650),true);
+});
