@@ -412,7 +412,7 @@ function yosOutingCandidates(tasks,context,occupied,day){
 // YOS_OUTING_MANUAL_CAPTURE_START
 function yosOutingOccupied(day){
  const allCalendar=(Array.isArray(calendarByDay[day])?calendarByDay[day]:[]).map((x,i)=>({id:'calendar-'+i,s:x?.start,d:x?.duration,source:'Apple Calendar'}));
- const local=items.filter(x=>x&&x.source!=='Apple Calendar');
+ const local=items.filter(x=>!x||x.source!=='Apple Calendar');
  return [...allCalendar,...local];
 }
 
