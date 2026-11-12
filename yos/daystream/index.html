@@ -278,12 +278,12 @@ button:active{opacity:.8}@media(min-width:640px){.dock{left:calc((100vw - 640px)
    for(const r of rows){
     if(!r||typeof r.title!=='string'||isNaN(Date.parse(r.at)))continue;
     const k=r.sourceRef||r.title;const stamp=(typeof r.startedAt==='string'&&Number.isFinite(Date.parse(r.startedAt)))?r.startedAt:r.at;const d=new Date(stamp),minute=d.getHours()*60+d.getMinutes();
-    if(!groups.has(k))groups.set(k,[]);groups.get(k).push({title:r.title,minute,started:Boolean(r.startedAt)})
+    if(!groups.has(k))groups.set(k,[]);groups.get(k).push({title:r.title,sourceRef:String(r.sourceRef||''),minute,started:Boolean(r.startedAt)})
    }
    return [...groups.values()].filter(a=>a.length>=3).map(a=>{
      const starts=a.filter(x=>x.started),basis=starts.length>=3?starts:a;
      const sorted=basis.map(x=>x.minute).sort((x,y)=>x-y),m=sorted[Math.floor(sorted.length/2)];
-     return {title:a[0].title,count:basis.length,kind:starts.length>=3?'start':'completion',suggested:String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0')}
+     return {title:a[0].title,sourceRef:a[0].sourceRef,count:basis.length,kind:starts.length>=3?'start':'completion',suggested:String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0')}
    }).slice(0,8)
   }
  };
@@ -307,7 +307,21 @@ button:active{opacity:.8}@media(min-width:640px){.dock{left:calc((100vw - 640px)
     const panel=document.getElementById('yosWebHistoryPanel'),rows=document.getElementById('yosWebHistoryRows');
     panel.hidden=!panel.hidden;if(panel.hidden)return;rows.replaceChildren();
     const ps=web.suggestions();if(!ps.length){rows.textContent='同じタスクを3回以上完了すると完了時刻の傾向を表示します。開始時刻は未確認で、時間割を自動変更しません。';return}
-    for(const x of ps){const p=document.createElement('p');p.textContent=x.title+' · '+(x.kind==='start'?'開始':'完了')+'の実績'+x.count+'回 · '+x.suggested+'頃の傾向'+(x.kind==='start'?'（本人の開始記録）':'（開始時刻は未確認）');rows.append(p)}
+    for(const x of ps){
+     const p=document.createElement('p');
+     p.textContent=x.title+' · '+(x.kind==='start'?'開始':'完了')+'の実績'+x.count+'回 · '+x.suggested+'頃の傾向'+(x.kind==='start'?'（本人の開始記録）':'（開始時刻は未確認）');rows.append(p);
+     if(x.kind==='start'){
+      const button=document.createElement('button');button.type='button';button.textContent='表示日の時間割に反映';
+      button.setAttribute('aria-label',x.title+'の開始候補を表示日の時間割に反映');
+      button.onclick=()=>{
+       const apply=window.YOS_DAYSTREAM_APPLY_SUGGESTION;
+       const outcome=typeof apply==='function'?apply(x):{ok:false,reason:'時間割を確認できませんでした'};
+       if(outcome.ok)panel.hidden=true;
+       else alert(outcome.reason||'変更できませんでした');
+      };
+      rows.append(button);
+     }
+    }
   };
   if(window.YOS_WEB_DATA_ERROR){const p=document.getElementById('yosWebHistoryPanel');p.hidden=false;document.getElementById('yosWebHistoryRows').textContent=window.YOS_WEB_DATA_ERROR;}
  });
@@ -357,6 +371,22 @@ const persist=()=>{
   note.textContent='保存できませんでした · 元のScriptableデータは変更されません';
   return false;
  }catch(e){note.textContent='ブラウザ保存エラー';return false}
+};
+window.YOS_DAYSTREAM_APPLY_SUGGESTION=(hint)=>{
+ if(!hint||hint.kind!=='start'||hint.count<3||typeof hint.title!=='string'||!/^([01]\d|2[0-3]):[0-5]\d$/.test(hint.suggested))return {ok:false,reason:'開始の実測データが3回以上必要です'};
+ const targetMinute=Number(hint.suggested.slice(0,2))*60+Number(hint.suggested.slice(3));
+ const matching=items.filter(x=>x&&!x.f&&x.kind==='task'&&!x.done&&(hint.sourceRef?x.sourceRef===hint.sourceRef:x.t===hint.title));
+ if(matching.length!==1)return {ok:false,reason:'表示日に対象タスクが1件だけある場合に反映できます'};
+ const target=matching[0];
+ if(!Number.isInteger(target.d)||target.d<1||targetMinute+target.d>1440)return {ok:false,reason:'開始候補と所要時間が24時間内に収まりません'};
+ if(target.s===targetMinute)return {ok:false,reason:'すでに候補の開始時刻です'};
+ if(items.some(x=>x&&x.id!==target.id&&Number.isFinite(x.s)&&Number.isFinite(x.d)&&x.d>0&&targetMinute<x.s+x.d&&targetMinute+target.d>x.s))return {ok:false,reason:'ほかの予定やタスクと重なるため自動反映しません'};
+ if(!confirm('「'+target.t+'」の開始時刻を'+hint.suggested+'に変更しますか？\n元のNotion/Apple予定は変更しません。'))return {ok:false,reason:'変更を中止しました'};
+ const oldStart=target.s;target.s=targetMinute;
+ if(!persist()){target.s=oldStart;return {ok:false,reason:'保存に失敗しました。元の開始時刻を維持します'}}
+ note.textContent='「'+target.t+'」を'+hint.suggested+'開始へ変更し、端末内に保存しました';
+ smoothRender();updateReview();
+ return {ok:true};
 };
 const fmt=m=>String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0');
 

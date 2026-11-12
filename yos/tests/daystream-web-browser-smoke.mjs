@@ -105,6 +105,26 @@ try{
  assert.equal(inherited.calendarSource,'yos-life-local');
  assert.equal(inherited.calendarDays['2026-11-13'][0].title,'LIFE BROWSER SMOKE');
  assert.match(await page.locator('#yosWebSourceState').innerText(),/保存済みMY WAY生活予定/);
+ page.on('dialog',async dialog=>dialog.accept());
+ const adopted=await page.evaluate(()=>{
+  const title='WEB PORT STORAGE SMOKE',web=window.YOS_DAYSTREAM_WEB;
+  const before=JSON.parse(localStorage.getItem('YOS_DAYSTREAM_WEB_PLAN_V1'));
+  const day=Object.keys(before.days)[0];
+  const wrong=window.YOS_DAYSTREAM_APPLY_SUGGESTION({title,kind:'completion',count:3,suggested:'13:00'});
+  const result=window.YOS_DAYSTREAM_APPLY_SUGGESTION({title,kind:'start',count:3,suggested:'13:00'});
+  const saved=JSON.parse(localStorage.getItem('YOS_DAYSTREAM_WEB_PLAN_V1'));
+  return {wrong:wrong.ok,ok:result.ok,start:saved.days[day].find(x=>x.t===title)?.s,old:before.days[day].find(x=>x.t===title)?.s};
+ });
+ assert.equal(adopted.wrong,false,'completion-only history never moves task start');
+ assert.equal(adopted.ok,true,'verified, user-approved start suggestion moves unambiguous task');
+ assert.equal(adopted.start,780);
+ assert.notEqual(adopted.start,adopted.old);
+ await page.reload({waitUntil:'domcontentloaded'});
+ const kept=await page.evaluate(()=>{
+  const p=JSON.parse(localStorage.getItem('YOS_DAYSTREAM_WEB_PLAN_V1'));
+  return Object.values(p.days).flat().find(x=>x.t==='WEB PORT STORAGE SMOKE')?.s
+ });
+ assert.equal(kept,780,'adopted actual-start proposal survives reload');
  assert.deepEqual(errors,[],'no script errors during load, storage, reload or learning');
  console.log('DAYSTREAM Web port browser smoke PASS',type);
 }finally{await browser.close()}

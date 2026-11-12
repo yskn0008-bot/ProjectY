@@ -1,6 +1,6 @@
 'use strict';
 const CACHE_PREFIX='yos-unified-';
-const CACHE_NAME=CACHE_PREFIX+'v41-daystream-yos-tasks-auth-life-projection';
+const CACHE_NAME=CACHE_PREFIX+'v42-daystream-learning-safe-apply';
 const STATIC=[
   './','./index.html','./manifest.webmanifest','./assets/yos-icon-180.png','./assets/yos-icon-512.png',
   './yos/daystream/','./yos/daystream/index.html','./yos/daystream/manifest.webmanifest','./yos/daystream/source-adapters.js','./yos/daystream/yos-tasks-auth.js','./yos/','./yos/index.html','./yos/styles.css','./yos/readability-final.css','./yos/guide.html','./yos/guide.css','./yos/guide.js','./yos/guide-v2.css','./yos/guide-v2.js',
