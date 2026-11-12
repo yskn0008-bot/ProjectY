@@ -539,3 +539,15 @@ test('conflict pulse is short, icon-only and respects reduced-motion accessibili
  assert.match(rendered,/@media \(prefers-reduced-motion:reduce\)\{\.card\.compat-danger:after\{animation:none\}\}/);
  assert.doesNotMatch(rendered,/\.card\.compat-danger\{animation:/);
 });
+
+
+test('overlap notice preserves original task purple and uses restrained amber, not an alarming red fill',()=>{
+ const htmlBody=Function('return '+String.fromCharCode(96)+html+String.fromCharCode(96))();
+ assert.ok(htmlBody.includes('.card.task{background:#823db0'));
+ assert.match(htmlBody,/\.card\.compat-danger:before\{background:#d8b07d;width:3px\}/);
+ assert.match(htmlBody,/\.card\.compat-danger:after\{content:"!";[^}]*background:#e7bd83/);
+ assert.match(htmlBody,/\.compat-status \.overlap-button\{border:1px solid #a48b6c;[^}]*background:#50463d/);
+ assert.doesNotMatch(htmlBody,/\.card\.compat-danger\{[^}]*background:#(?:a63e50|bf485b|7a3441)/i);
+ assert.match(htmlBody,/\.card\.compat-danger:after\{animation:yos-conflict-signal \.8s ease-in-out 3\}/);
+ assert.match(htmlBody,/@media \(prefers-reduced-motion:reduce\)/);
+});
