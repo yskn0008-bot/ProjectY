@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-13T05:50:03+09:00",
+  "updated_at": "2026-11-13T05:54:06+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -73,6 +73,16 @@
       "updated_at": "2026-11-11T10:30:36Z"
     },
     {
+      "id": "github-pr-669",
+      "title": "PR #669 fix(vercel): keep existing health and Inbox routes within Hobby 12-function limit",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/669",
+      "updated_at": "2026-11-11T09:50:19Z"
+    },
+    {
       "id": "github-pr-685",
       "title": "PR #685 WIP #683: iPhone screenshot intake validation foundation",
       "type": "GitHub PR",
@@ -103,16 +113,6 @@
       "updated_at": "2026-11-12T20:20:56Z"
     },
     {
-      "id": "github-pr-743",
-      "title": "PR #743 style(alerts): improve dense notification list text readability",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/743",
-      "updated_at": "2026-11-12T20:49:29Z"
-    },
-    {
       "id": "github-issue-10",
       "title": "Issue #10 Mission Control v2：GitHubのIssue・PR・Commitを自動集約する",
       "type": "GitHub Issue",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-12T20:48:13Z"
+      "updated_at": "2026-11-12T20:53:27Z"
     },
     {
       "id": "github-issue-234",
@@ -205,6 +205,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-f323d90d2e8e",
+      "title": "style(alerts): enlarge dense notification list typography",
+      "completed_at": "2026-11-12T20:53:26Z",
+      "result": "GitHub mainへ反映（f323d90）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/f323d90d2e8e84d260976b2442cb31d897a878b8"
+    },
+    {
       "id": "github-commit-0cb8ef1a25cf",
       "title": "fix(daystream): restore archived Tasks snapshots without stale live display",
       "completed_at": "2026-11-12T20:32:10Z",
@@ -231,13 +238,6 @@
       "completed_at": "2026-11-12T20:29:37Z",
       "result": "GitHub mainへ反映（a737f3e）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/a737f3edbd5218731370cbbf464f88b9fc8261df"
-    },
-    {
-      "id": "github-commit-d334bb07d8f9",
-      "title": "fix(ci): pin YOS browser workflows to Playwright-supported Ubuntu 24.04 (#737)",
-      "completed_at": "2026-11-12T19:42:29Z",
-      "result": "GitHub mainへ反映（d334bb0）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/d334bb07d8f9e299e30a8e295499384869b85779"
     },
     {
       "id": "complete-002",
@@ -274,7 +274,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-13T05:50:03+09:00",
+      "last_update": "2026-11-13T05:54:06+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -349,13 +349,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 9件・Open PR 49件を自動同期中",
+      "next_action": "Open Issue 9件・Open PR 48件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-13T05:50:03+09:00",
+      "last_update": "2026-11-13T05:54:06+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -378,7 +378,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-13T05:50:03+09:00",
+      "last_update": "2026-11-13T05:54:06+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -460,5 +460,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "8223fd11f5a49d8acd947dfe3a52f8477af1beaacb0941fbc76353e3d6a4f472"
+  "github_snapshot_hash": "0c25c915725b631ec297c5c903a2d60f3d7ba66628a159bc0d1ab336325d3bf7"
 }
