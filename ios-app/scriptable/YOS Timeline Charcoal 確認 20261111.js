@@ -326,7 +326,7 @@ function yosOutingCandidates(tasks,context,occupied,day){
    result.excluded.push({id:t.id,reason:'場所・経路・営業確認・所要時間の確定情報が不足'});continue;
   }
   const cost=t.durationMinutes+r.detourMinutes;
-  if(cost>context.freeMinutes){result.excluded.push({id:t.id,reason:'空き時間を超える'});continue;}
+  if(t.durationMinutes>context.freeMinutes){result.excluded.push({id:t.id,reason:'空き時間を超える'});continue;}
   if(t.due&&t.due<day){result.excluded.push({id:t.id,reason:'期限経過・状況要確認'});continue;}
   candidates.push({id:t.id,title:t.title,placeId:t.placeId,order:r.order,minutes:cost,taskMinutes:t.durationMinutes,detourMinutes:r.detourMinutes,due:t.due||'',priority:t.priority||'',reason:'経路上の確認済み立寄り先・営業確認済み・所要 '+t.durationMinutes+'分＋寄り道 '+r.detourMinutes+'分'+(t.due?'・期限 '+t.due:'')});
  }
@@ -337,18 +337,24 @@ function yosOutingCandidates(tasks,context,occupied,day){
  }
  const busy=occupied.map(x=>({start:x.s,end:x.s+x.d})).sort((a,b)=>a.start-b.start);
  let budget=Math.min(context.freeMinutes,context.windowEnd-context.windowStart),cursor=context.windowStart;
+ const stopsVisited=new Set();
  for(const c of candidates){
-  if(c.minutes>budget){result.excluded.push({id:c.id,reason:'確認済みの空き時間を超える'});continue;}
+  // Charge the confirmed detour once per stop, never once per task at that stop.
+  const detour=stopsVisited.has(c.placeId)?0:c.detourMinutes;
+  const minutes=c.taskMinutes+detour;
+  if(minutes>budget){result.excluded.push({id:c.id,reason:'確認済みの空き時間を超える'});continue;}
   // Preserve every fixed item. Move only the proposed stop to the next free gap.
   let next=cursor;
   for(const block of busy){
-   if(next+c.minutes<=block.start)break;
+   if(next+minutes<=block.start)break;
    if(next>=block.end)continue;
    next=block.end;
   }
-  if(next+c.minutes>context.windowEnd){result.excluded.push({id:c.id,reason:'確定予定を避けると収まらない'});continue;}
-  result.proposals.push({...c,start:next,end:next+c.minutes});
-  cursor=next+c.minutes;budget-=c.minutes;
+  if(next+minutes>context.windowEnd){result.excluded.push({id:c.id,reason:'確定予定を避けると収まらない'});continue;}
+  result.proposals.push({...c,minutes,detourMinutes:detour,start:next,end:next+minutes,
+   reason:'経路上の確認済み立寄り先・営業確認済み・作業 '+c.taskMinutes+'分'+(detour?'＋寄り道 '+detour+'分':'（寄り道時間は同一店舗の前候補に計上）')+(c.due?'・期限 '+c.due:'')});
+  stopsVisited.add(c.placeId);
+  cursor=next+minutes;budget-=minutes;
  }
  result.reason=result.proposals.length?'確定予定・Notion原本には反映しない読み取り専用の提案です。':'条件を確認できる予定外タスクはありません。';
  return result;
