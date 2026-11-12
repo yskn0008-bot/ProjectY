@@ -215,6 +215,7 @@ test('real WebView runtime accepts day changes and preserves each day of local p
   let selectedDay=todayISO,items=dayItems(todayISO),isSample=false,selectedId=null,zoom=null;
   const note={textContent:''},planBox={textContent:''},focus={classList:{remove(){}}},editor={classList:{remove(){}}};
   const yosStatusWord=()=> '未接続';
+  let yosManualPreview=null;const yosOutingManualSetup=()=>{};
   const yosDefaultStart=()=>{},yosRenderSources=()=>{},yosRefreshTestToggle=()=>{},hideMonthPicker=()=>{},hideSwipeDelete=()=>{};const isCalendarCovered=()=>true;let calendarMode='day';const renderDayAllDay=()=>{},renderWeekAgenda=()=>{};
   const renderWeek=()=>{},render=()=>{},updateReview=()=>{};
   const window={scrollTo(){}};
@@ -672,4 +673,50 @@ test('DAYSTREAM release uses final touch coordinates and position-only animation
  assert.match(client,/duration:235/);
  assert.doesNotMatch(client,/scaleX\(/);
  assert.doesNotMatch(client,/navigator\.vibrate/);
+});
+
+function gestureFixture(){
+ const start=client.indexOf('function yosStablePreviewMinute(');
+ const end=client.indexOf('function smoothRender(',start);
+ const events={},frames=new Map(),writes=[],renders=[],measurements=[];
+ let nextFrame=1;
+ const label={textContent:''};
+ const el={style:{},classList:{add(){},remove(){}},querySelector:()=>label,
+  addEventListener:(name,callback)=>{events[name]=callback},
+  getBoundingClientRect(){const rect={transform:this.style.transform};measurements.push(rect);return rect;}};
+ const item={id:1,t:'検証用タスク',s:600,d:30,kind:'task'};
+ const wire=vm.runInNewContext(client.slice(start,end)+'\nwireTaskGestures',{
+  setTimeout:()=>1,clearTimeout(){},requestAnimationFrame:callback=>{const id=nextFrame++;frames.set(id,callback);return id},
+  cancelAnimationFrame:id=>frames.delete(id),yFor:x=>x,minuteAtY:x=>x,fmt:String,
+  beginLocalEdit(){},showSwipeDelete(){},toggleTaskDone(){},
+  persist:()=>{writes.push(item.s);return true},note:{},
+  smoothRender:(id,rect)=>renders.push({id,rect}),updateReview(){}
+ });
+ wire(el,item);
+ const touch=y=>({touches:[{clientX:100,clientY:y}],preventDefault(){}});
+ events.touchstart(touch(100));events.touchmove(touch(120));
+ return {events,frames,writes,renders,measurements,item,el,label};
+}
+
+test('touch release before animation frame saves the final five-minute snap and measures the final position',()=>{
+ const h=gestureFixture();
+ assert.equal(h.frames.size,1,'the move is still waiting for a paint frame');
+ h.events.touchend({changedTouches:[{clientX:100,clientY:138}]});
+ assert.equal(h.item.s,640);
+ assert.deepEqual(h.writes,[640]);
+ assert.equal(h.frames.size,0,'obsolete paint frame is cancelled');
+ assert.equal(h.measurements[0].transform,'translate3d(0,38px,0)');
+ assert.equal(h.renders[0].rect,h.measurements[0]);
+ assert.equal(h.el.style.transform,'');
+});
+
+test('touch cancellation discards pending preview and preserves the original task without a write',()=>{
+ const h=gestureFixture();
+ h.events.touchcancel();
+ assert.equal(h.item.s,600);
+ assert.equal(h.writes.length,0);
+ assert.equal(h.renders.length,0);
+ assert.equal(h.frames.size,0);
+ assert.equal(h.el.style.transform,'');
+ assert.equal(h.label.textContent,'600–630');
 });
