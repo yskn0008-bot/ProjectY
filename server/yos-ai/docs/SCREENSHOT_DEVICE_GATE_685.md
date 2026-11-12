@@ -1,16 +1,16 @@
-# Integration dependency
+# Integration dependency (updated 2026-11-13)
 
-This draft is stacked on existing PR #692 (Vercel notification/Inbox candidate, no Cloud Run changes). The same intake function preserves notification, inbox-sort, screenshot, model, mirror and factory routes. Release #692 only after its own approval and live gates; then retarget this draft to main and recheck the final three-way diff. Do not merge the screenshot draft separately into an older intake implementation.
+Notification/Inbox PR #692 and Night/diary PR #701 are now merged. This draft targets main and preserves all 11 published installer entries, including DAYSTREAM and both diary modules, adding Screenshot Bridge only (12 total in the candidate). The intake function preserves notification, inbox-sort, screenshot, model, mirror and factory routes. Combined TypeScript/Node/API tests: 381/381 PASS; iOS/installer: 187/187 PASS on main 5490d524 plus this candidate.
 
-All nine currently published installer targets, including released #720 DAYSTREAM, remain unchanged. The one Screenshot Bridge candidate uses the existing installer. Catalog publication, real screenshot upload and device automation remain unperformed.
+Screenshot release remains blocked by the exact-image and device gates below. The bridge is a draft catalog entry, not a published update. Automated checks do not prove real image binding, Notion file permissions, phone automation, or classification.
 
 # Screenshot automation: device integration gate (2026-11-12)
 
 Apple confirms iOS screenshot automations fire when a screenshot is **saved** to Photos, Files or Clipboard, not merely when a button is pressed. Source: https://support.apple.com/en-tj/guide/shortcuts/apd932ff833f/ios
 
 ## Verified development state
-- Server screenshot route and mock tests exist. YOS AI Core CI passed on commit 4da3f69ad9f75857ed43c827914103fdcef93ba7.
-- iOS Scriptable bridge exists as draft only; no signed Shortcut, no installer registration, no physical-device E2E.
+- Server screenshot route and mock tests exist. Current combined test counts are recorded above; hosted CI evidence is attached to PR #685.
+- iOS Scriptable bridge exists as draft only; no signed Shortcut, no published installer registration, no physical-device E2E.
 - Notion classification is not implemented; server returns classification: pending.
 - Do not merge/deploy/enable until user-approved release and a disposable screenshot proves exact image matching.
 
