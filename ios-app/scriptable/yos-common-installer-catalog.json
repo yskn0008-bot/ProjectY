@@ -36,6 +36,27 @@
       "path": "ios-app/scriptable/YOS Timeline Charcoal 確認 20261111.js",
       "commit": "390175fbbe9b1b795f095c262ee24663064b349a",
       "sha256": "95a94b6ef1c3d1efc7ada538f7729105645122162c40443cd572601bcc5448cb"
+    },
+    {
+      "id": "bravia-smart-power",
+      "name": "YOS BRAVIA Smart Power",
+      "path": "ios-app/scriptable/remote-widgets/YOS BRAVIA Smart Power.js",
+      "commit": "49c4bc881a0921bd7c292785282441f749ec6ac5",
+      "sha256": "f32b4ecdff2d7218576f606aa311ed0fe29c3f6d9e8ca331c55482d8ece08f81"
+    },
+    {
+      "id": "remote-direct-actions",
+      "name": "YOS Remote Direct Actions",
+      "path": "ios-app/scriptable/remote-widgets/YOS Remote Direct Actions.js",
+      "commit": "49c4bc881a0921bd7c292785282441f749ec6ac5",
+      "sha256": "a34e3b5a18a7e07e238328d2faf84e221366f8bafc593898282474f959db4e61"
+    },
+    {
+      "id": "tapo-h110-core",
+      "name": "YOS Tapo H110 Core",
+      "path": "ios-app/scriptable/remote-widgets/YOS Tapo H110 Core.js",
+      "commit": "8258500af72cd7f2dcf066e4f61ec056daa3b733",
+      "sha256": "b455a49ce1ee8e415a29d71bc4e4947e356478aa973127684f5d29c1c0efca35"
     }
   ]
 }
