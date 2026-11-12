@@ -6,6 +6,7 @@ on:
       - 'yos/notification-history.html'
       - 'yos/tests/notification-history-ui.test.mjs'
       - 'yos/tests/notification-history-browser-smoke.mjs'
+      - 'yos/tests/notification-history-stream-navigation.mjs'
       - '.github/workflows/yos-alerts-pages-ui.yml'
   workflow_dispatch:
 
@@ -44,4 +45,6 @@ jobs:
       - name: Exercise notifications page
         env:
           YOS_BROWSER: ${{ matrix.browser }}
-        run: node yos/tests/notification-history-browser-smoke.mjs
+        run: |
+          node yos/tests/notification-history-browser-smoke.mjs
+          node yos/tests/notification-history-stream-navigation.mjs
