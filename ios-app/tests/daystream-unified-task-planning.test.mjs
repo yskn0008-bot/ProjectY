@@ -572,8 +572,8 @@ test('fluid drag uses frame batching, a stable 2D release animation and respects
  assert.match(js,/smoothRender\(item\.id,previousRect\)/);
  assert.match(js,/window\.matchMedia\?\.\('\(prefers-reduced-motion: reduce\)'\)/);
  assert.match(js,/const dx=old\.left-now\.left,dy=old\.top-now\.top/);
- assert.match(js,/scaleX\('\+sx\+'\)/);
- assert.match(js,/duration:340,easing:'cubic-bezier\(\.22,1,\.36,1\)'/);
+ assert.doesNotMatch(js,/scaleX\('\+sx\+'\)/);
+ assert.match(js,/duration:235,easing:'cubic-bezier\(\.22,1,\.36,1\)'/);
 });
 
 
@@ -651,4 +651,20 @@ test('elastic axis expands short tasks while preserving exact hour/now and rever
  assert.match(js,/Math\.round\(minuteAtY\(yFor\(item\.s\)\+lastY-startY\)\/5\)\*5/);
  assert.match(rendered,/id="elasticBtn"/);
  assert.match(js,/btn\.textContent=elasticEnabled\?'自動サイズ ON':'自動サイズ OFF'/);
+});
+
+
+test('release frame is aligned to final touch before measuring without text scaling',()=>{
+ const rendered=Function('return '+String.fromCharCode(96)+html+String.fromCharCode(96))();
+ const js=rendered.split('<script>')[1]?.split('</script>')[0]||'';
+ const start=js.indexOf('function wireTaskGestures(el,item){'),end=js.indexOf('function smoothRender(activeId',start);
+ assert.ok(start>=0&&end>start);
+ const gesture=js.slice(start,end);
+ const fingerIndex=gesture.indexOf("el.style.transform='translate3d(0,'+(lastY-startY)+'px,0)'");
+ const measureIndex=gesture.indexOf("const previousRect=mode==='drag'&&!cancelled?el.getBoundingClientRect():null");
+ assert.ok(fingerIndex>=0&&measureIndex>fingerIndex,'measure final finger position, not stale animation frame');
+ assert.match(js,/n\.animate\(\[\{transform:'translate3d\('\+dx\+'px,'\+dy\+'px,0\)'\}/);
+ assert.doesNotMatch(js,/scaleX\('\+sx\+'\)/);
+ assert.doesNotMatch(js,/opacity:\.88/);
+ assert.match(js,/window\.matchMedia\?\.\('\(prefers-reduced-motion: reduce\)'\)/);
 });
