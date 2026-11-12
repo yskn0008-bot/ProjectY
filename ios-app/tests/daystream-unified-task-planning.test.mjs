@@ -215,6 +215,7 @@ test('real WebView runtime accepts day changes and preserves each day of local p
   let selectedDay=todayISO,items=dayItems(todayISO),isSample=false,selectedId=null,zoom=null;
   const note={textContent:''},planBox={textContent:''},focus={classList:{remove(){}}},editor={classList:{remove(){}}};
   const yosStatusWord=()=> '未接続';
+  let yosManualPreview=null;const yosOutingManualSetup=()=>{};
   const yosDefaultStart=()=>{},yosRenderSources=()=>{},yosRefreshTestToggle=()=>{},hideMonthPicker=()=>{},hideSwipeDelete=()=>{};const isCalendarCovered=()=>true;let calendarMode='day';const renderDayAllDay=()=>{},renderWeekAgenda=()=>{};
   const renderWeek=()=>{},render=()=>{},updateReview=()=>{};
   const window={scrollTo(){}};
@@ -572,8 +573,8 @@ test('fluid drag uses frame batching, a stable 2D release animation and respects
  assert.match(js,/smoothRender\(item\.id,previousRect\)/);
  assert.match(js,/window\.matchMedia\?\.\('\(prefers-reduced-motion: reduce\)'\)/);
  assert.match(js,/const dx=old\.left-now\.left,dy=old\.top-now\.top/);
- assert.match(js,/scaleX\('\+sx\+'\)/);
- assert.match(js,/duration:340,easing:'cubic-bezier\(\.22,1,\.36,1\)'/);
+ assert.doesNotMatch(js,/scaleX\(/);
+ assert.match(js,/duration:235,easing:'cubic-bezier\(\.22,1,\.36,1\)'/);
 });
 
 
@@ -651,4 +652,71 @@ test('elastic axis expands short tasks while preserving exact hour/now and rever
  assert.match(js,/Math\.round\(minuteAtY\(yFor\(item\.s\)\+lastY-startY\)\/5\)\*5/);
  assert.match(rendered,/id="elasticBtn"/);
  assert.match(js,/btn\.textContent=elasticEnabled\?'自動サイズ ON':'自動サイズ OFF'/);
+});
+
+
+test('DAYSTREAM gesture preview stabilizes five-minute boundary without changing saved snap',()=>{
+ const match=client.match(/function yosStablePreviewMinute\([\s\S]*?\n\}/);
+ assert.ok(match,'stable preview function exists');
+ const stable=vm.runInNewContext(match[0]+'\nyosStablePreviewMinute',{});
+ assert.equal(stable(602.6,600,0,1440),600);
+ assert.equal(stable(603.6,600,0,1440),605);
+ assert.equal(stable(601.9,605,0,1440),605);
+ assert.equal(stable(600,605,0,1440),600);
+ assert.match(client,/Math\.round\(minuteAtY\(yFor\(item\.s\)\+lastY-startY\)\/5\)\*5/);
+});
+
+test('DAYSTREAM release uses final touch coordinates and position-only animation',()=>{
+ assert.match(client,/changedTouches\?\.length/);
+ assert.match(client,/lastY=e\.changedTouches\[0\]\.clientY/);
+ assert.match(client,/const previousRect=mode==='drag'&&!cancelled\?el\.getBoundingClientRect\(\):null/);
+ assert.match(client,/duration:235/);
+ assert.doesNotMatch(client,/scaleX\(/);
+ assert.doesNotMatch(client,/navigator\.vibrate/);
+});
+
+function gestureFixture(){
+ const start=client.indexOf('function yosStablePreviewMinute(');
+ const end=client.indexOf('function smoothRender(',start);
+ const events={},frames=new Map(),writes=[],renders=[],measurements=[];
+ let nextFrame=1;
+ const label={textContent:''};
+ const el={style:{},classList:{add(){},remove(){}},querySelector:()=>label,
+  addEventListener:(name,callback)=>{events[name]=callback},
+  getBoundingClientRect(){const rect={transform:this.style.transform};measurements.push(rect);return rect;}};
+ const item={id:1,t:'検証用タスク',s:600,d:30,kind:'task'};
+ const wire=vm.runInNewContext(client.slice(start,end)+'\nwireTaskGestures',{
+  setTimeout:()=>1,clearTimeout(){},requestAnimationFrame:callback=>{const id=nextFrame++;frames.set(id,callback);return id},
+  cancelAnimationFrame:id=>frames.delete(id),yFor:x=>x,minuteAtY:x=>x,fmt:String,
+  beginLocalEdit(){},showSwipeDelete(){},toggleTaskDone(){},
+  persist:()=>{writes.push(item.s);return true},note:{},
+  smoothRender:(id,rect)=>renders.push({id,rect}),updateReview(){}
+ });
+ wire(el,item);
+ const touch=y=>({touches:[{clientX:100,clientY:y}],preventDefault(){}});
+ events.touchstart(touch(100));events.touchmove(touch(120));
+ return {events,frames,writes,renders,measurements,item,el,label};
+}
+
+test('touch release before animation frame saves the final five-minute snap and measures the final position',()=>{
+ const h=gestureFixture();
+ assert.equal(h.frames.size,1,'the move is still waiting for a paint frame');
+ h.events.touchend({changedTouches:[{clientX:100,clientY:138}]});
+ assert.equal(h.item.s,640);
+ assert.deepEqual(h.writes,[640]);
+ assert.equal(h.frames.size,0,'obsolete paint frame is cancelled');
+ assert.equal(h.measurements[0].transform,'translate3d(0,38px,0)');
+ assert.equal(h.renders[0].rect,h.measurements[0]);
+ assert.equal(h.el.style.transform,'');
+});
+
+test('touch cancellation discards pending preview and preserves the original task without a write',()=>{
+ const h=gestureFixture();
+ h.events.touchcancel();
+ assert.equal(h.item.s,600);
+ assert.equal(h.writes.length,0);
+ assert.equal(h.renders.length,0);
+ assert.equal(h.frames.size,0);
+ assert.equal(h.el.style.transform,'');
+ assert.equal(h.label.textContent,'600–630');
 });
