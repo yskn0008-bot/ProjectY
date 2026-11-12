@@ -87,9 +87,18 @@ function findKey(remote,candidates){
   return null;
 }
 async function client(){const c=getCredentials();const crypto=new WebCryptoBox();await crypto.init();return new KlapV2(c.host,c.user,c.pass,crypto);}
+// Optional device-specific local connection. Keep the existing H110 client unchanged.
+async function clientForHost(host){
+  const name=String(host||'').trim();
+  if(!/^(?:\d{1,3}\.){3}\d{1,3}$/.test(name)||name.split('.').some(x=>Number(x)>255))throw Error('IPアドレス不正');
+  const c=getCredentials();
+  const crypto=new WebCryptoBox();
+  await crypto.init();
+  return new KlapV2(name,c.user,c.pass,crypto);
+}
 
 async function fireFriendly(remotePredicate,keyCandidates){
   const remote=findRemote(remotePredicate);if(!remote)throw new Error('対象リモコンが見つかりません。Setupを再実行してください。');const key=findKey(remote,keyCandidates);if(!key)throw new Error('対象ボタンが見つかりません。');const c=await client();await c.fire(remote.device_id,key.name);return{remote,key};
 }
 
-module.exports={K,getCredentials,getMap,findRemote,findKey,client,fireFriendly};
+module.exports={K,getCredentials,getMap,findRemote,findKey,client,clientForHost,fireFriendly};
