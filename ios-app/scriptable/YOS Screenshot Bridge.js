@@ -20,7 +20,7 @@ function readPayload(input) {
   // the triggering image through Shortcut Input. Encode that exact image.
   if (typeof Image !== 'undefined' && input instanceof Image) {
     const data = Data.fromJPEG(input, 0.75);
-    if (!data || data.getBytes().length > 3_000_000) {
+    if (!data || data.toBase64String().length > 4_000_000) {
       throw Error('スクショが3MBを超えています。元画像は変更していません');
     }
     payload = {imageBase64: data.toBase64String(), mimeType: 'image/jpeg',
@@ -53,19 +53,30 @@ async function main() {
   try {
     const payload = readPayload(args.shortcutParameter);
     if (!Keychain.contains(KEY)) throw Error('認証設定がありません');
-    const req = new Request(ENDPOINT);
-    req.method = 'POST';
-    req.headers = {'Authorization': 'Bearer ' + Keychain.get(KEY), 'Content-Type': 'application/json'};
-    req.body = JSON.stringify(payload);
-    req.timeoutInterval = 30;
-    const result = await req.loadJSON();
-    if (req.response.statusCode !== 200 && req.response.statusCode !== 201) {
-      if (req.response.statusCode === 409) throw Error('保存結果が不明です。Notion Inboxを確認してください');
-      throw Error('保存できませんでした（HTTP ' + req.response.statusCode + '）');
+    let saved = false;
+    for (let attempt = 0; attempt < 2; attempt++) {
+      const req = new Request(ENDPOINT);
+      req.method = 'POST';
+      req.headers = {'Authorization': 'Bearer ' + Keychain.get(KEY), 'Content-Type': 'application/json'};
+      req.body = JSON.stringify(payload);
+      req.timeoutInterval = 30;
+      let result;
+      try { result = await req.loadJSON(); }
+      catch { throw Error('通信結果が不明です。自動再送せずInboxを確認してください'); }
+      const status = req.response?.statusCode;
+      if (status === 200 || status === 201) {
+        if (result?.ok !== true || result.inboxSaved !== true || result.captureId !== payload.captureId) {
+          throw Error('保存結果を確認できませんでした');
+        }
+        saved = true;
+        break;
+      }
+      if (status === 409) throw Error('保存結果が不明です。Notion Inboxを確認してください');
+      if (status !== 503 || attempt === 1) throw Error('保存できませんでした（HTTP ' + status + '）');
+      // A 503 before Notion append is safe to retry with the same capture ID.
+      // Retry immediately once; no timers or background execution required.
     }
-    if (result.ok !== true || result.inboxSaved !== true || result.captureId !== payload.captureId) {
-      throw Error('保存結果を確認できませんでした');
-    }
+    if (!saved) throw Error('保存できませんでした');
     // Inbox success is silent. Classification remains pending and is NOT claimed complete.
     Script.setShortcutOutput('YOS_INBOX_SAVED');
   } catch (error) {
