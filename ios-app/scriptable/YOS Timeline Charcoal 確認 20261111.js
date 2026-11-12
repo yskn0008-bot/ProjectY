@@ -423,8 +423,8 @@ function yosRenderOuting(){
 }
 // YOS_OUTING_RENDER_END
 function yosRenderSources(){
- yosRenderOuting();
  yosRenderLearningHints();
+ yosRenderOuting();
  taskFeed.textContent='';habitFeed.textContent='';
  const status=document.getElementById('yosTaskSourceStatus');
  status.textContent='Notion Tasks：'+yosStatusWord(taskSource.status)+(taskSource.status==='ok'||taskSource.status==='partial'?'（取得 '+sourceTasks.length+'件・先頭80件を表示）':'')+(taskSource.checkedAt?' · '+new Date(taskSource.checkedAt).toLocaleString('ja-JP',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}):'');
