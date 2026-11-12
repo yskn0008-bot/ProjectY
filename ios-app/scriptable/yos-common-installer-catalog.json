@@ -1,0 +1,69 @@
+{
+  "schema": 1,
+  "repository": "yskn0008-bot/ProjectY",
+  "targets": [
+    {
+      "id": "timeline-auto",
+      "name": "YOS Timeline Auto",
+      "path": "ios-app/scriptable/YOS Timeline Auto.js",
+      "commit": "230975fcc61370e0de3fc0fc9161a047a849b8ff",
+      "sha256": "2e1002ee004576680ab3dc0c2fe68573f6c97907027d8a304536d2d2222ef5d0"
+    },
+    {
+      "id": "journal",
+      "name": "YOS JOURNAL",
+      "path": "ios-app/scriptable/YOS JOURNAL.js",
+      "commit": "230975fcc61370e0de3fc0fc9161a047a849b8ff",
+      "sha256": "1e7e625c70901fbcd843b193858671cf2614e9ce837cdd8faa714a7fb22c7571"
+    },
+    {
+      "id": "daystream-preview",
+      "name": "YOS DAYSTREAM Timeline 開発確認 20261105",
+      "path": "ios-app/scriptable/YOS DAYSTREAM Timeline 開発確認 20261105.js",
+      "commit": "97b420ffcccc53ff4538a764355f76fe683bb160",
+      "sha256": "883ed5195eb03ef649748a22c0612f6b956339db6702874f519028dd7c520c9d"
+    },
+    {
+      "id": "daystream-glass-20261111",
+      "name": "YOS DAYSTREAM Glass 検証 20261111",
+      "path": "ios-app/scriptable/YOS DAYSTREAM Glass 検証 20261111.js",
+      "commit": "a072140d39aae8bd407fe6e63af438c2e48fdc0e",
+      "sha256": "7f7631f47d4e6656b7ac71b923d052c6489520a18ab8f18db0f3755f8546248a"
+    },
+    {
+      "id": "timeline-charcoal-20261111",
+      "name": "YOS Timeline Charcoal 確認 20261111",
+      "path": "ios-app/scriptable/YOS Timeline Charcoal 確認 20261111.js",
+      "commit": "8b6aaba708eef96510f153e5de3aa3b24757f026",
+      "sha256": "dea1f8fc81ac2204468adc6cc71ba6acd7a1751af982eb8a439c2aa53a6c40ed"
+    },
+    {
+      "id": "bravia-smart-power",
+      "name": "YOS BRAVIA Smart Power",
+      "path": "ios-app/scriptable/remote-widgets/YOS BRAVIA Smart Power.js",
+      "commit": "e924cf1792098ec32dcdce61395ec409af94862b",
+      "sha256": "7812eb72e5373aeac3aa16402ca16d34c77d68707ac145b1504498c0d9a4c7a2"
+    },
+    {
+      "id": "remote-direct-actions",
+      "name": "YOS Remote Direct Actions",
+      "path": "ios-app/scriptable/remote-widgets/YOS Remote Direct Actions.js",
+      "commit": "fe3149177b95616b78742f70d01eb4b50c9476a0",
+      "sha256": "ee8959104a4d239b8b277fa368824a8810a03e682183a18d95b90dd99fd64d9b"
+    },
+    {
+      "id": "tapo-h110-core",
+      "name": "YOS Tapo H110 Core",
+      "path": "ios-app/scriptable/remote-widgets/YOS Tapo H110 Core.js",
+      "commit": "e20ce2e659a371f5ade5298ec436eb14e9b3dcaa",
+      "sha256": "6de2d6a2a0679bb71b2115ed0dbb9e42a58e45cb1c0ba9727b92ef5603f48614"
+    },
+    {
+      "id": "sleep-scene",
+      "name": "YOS Sleep Scene",
+      "path": "ios-app/scriptable/remote-widgets/YOS Sleep Scene.js",
+      "commit": "808d9e797a5734a4f7326e0471d6a4474244bc38",
+      "sha256": "987664699fee3963f001e6610eafb5d371e3009cba990560785ed456171587f8"
+    }
+  ]
+}
