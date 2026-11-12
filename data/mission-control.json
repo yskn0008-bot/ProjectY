@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-12T12:40:10+09:00",
+  "updated_at": "2026-11-12T12:48:25+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -12,16 +12,6 @@
     ]
   },
   "inbox": [
-    {
-      "id": "github-pr-695",
-      "title": "PR #695 perf(daystream): fluid iPhone-style task dragging and animated overlap reflow",
-      "type": "GitHub PR",
-      "status": "review",
-      "priority": 1,
-      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/695",
-      "updated_at": "2026-11-12T03:39:39Z"
-    },
     {
       "id": "github-pr-654",
       "title": "PR #654 YOS Calendar: mobile-first unified calendar preview (read-only)",
@@ -113,6 +103,16 @@
       "updated_at": "2026-11-12T03:24:41Z"
     },
     {
+      "id": "github-pr-696",
+      "title": "PR #696 feat: 既存共通インストーラーに睡眠モード用家電操作2件を追加",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/696",
+      "updated_at": "2026-11-12T03:48:07Z"
+    },
+    {
       "id": "github-issue-10",
       "title": "Issue #10 Mission Control v2：GitHubのIssue・PR・Commitを自動集約する",
       "type": "GitHub Issue",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-12T03:38:13Z"
+      "updated_at": "2026-11-12T03:40:31Z"
     },
     {
       "id": "github-issue-234",
@@ -205,6 +205,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-860a9621c90d",
+      "title": "perf(daystream): smoother iPhone-style task drag and overlap lane transitions",
+      "completed_at": "2026-11-12T03:47:59Z",
+      "result": "GitHub mainへ反映（860a962）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/860a9621c90d8e723f26f5cacedd71e513292351"
+    },
+    {
       "id": "github-commit-595dd908121e",
       "title": "fix(journal): align Money article with editorial palette",
       "completed_at": "2026-11-12T03:32:54Z",
@@ -233,13 +240,6 @@
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/7a0b78d16121594809f9d6119633ff37863663e6"
     },
     {
-      "id": "github-commit-d7e92858e5c6",
-      "title": "feat(journal): add page-turning magazine reader without changing existing delivery",
-      "completed_at": "2026-11-12T00:21:22Z",
-      "result": "GitHub mainへ反映（d7e9285）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/d7e92858e5c685c25cc8f941778c491ad2134716"
-    },
-    {
       "id": "complete-002",
       "title": "iPhone向けMission Control Dashboardを実装",
       "completed_at": "2026-07-17T17:55:00+09:00",
@@ -264,7 +264,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #695をレビューして公開判断する",
+      "next_action": "PR #649をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -274,7 +274,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-12T12:40:10+09:00",
+      "last_update": "2026-11-12T12:48:25+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -355,7 +355,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-12T12:40:10+09:00",
+      "last_update": "2026-11-12T12:48:25+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -369,7 +369,7 @@
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #695をレビューして公開判断する",
+      "next_action": "PR #649をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -378,7 +378,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-12T12:40:10+09:00",
+      "last_update": "2026-11-12T12:48:25+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -460,5 +460,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "d8f93c9dfcf585813fe5312a6f41a5cbda33309833e113f9c62f2c4d15b7760d"
+  "github_snapshot_hash": "12d2eef81970707ddad021cabff922ba344140c63e2c699f2a27094059e8a6b3"
 }
