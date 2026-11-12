@@ -18,7 +18,8 @@ export type ScreenshotParseResult =
   | {ok: true; value: ScreenshotCapture; byteLength: number}
   | {ok: false; error: string};
 
-const MAX_IMAGE_BYTES = 5_000_000;
+// Keep JSON+base64 below Vercel's typical serverless request body limit.
+const MAX_IMAGE_BYTES = 3_000_000;
 const BASE64_PATTERN = /^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/u;
 
 export function parseScreenshotCapture(input: unknown): ScreenshotParseResult {
