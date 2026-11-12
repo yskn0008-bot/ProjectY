@@ -40,7 +40,8 @@ export function parseScreenshotCapture(input: unknown): ScreenshotParseResult {
   if (data.mimeType !== 'image/png' && data.mimeType !== 'image/jpeg' && data.mimeType !== 'image/heic') {
     return {ok: false, error: 'Unsupported image format'};
   }
-  if (typeof data.imageBase64 !== 'string' || !data.imageBase64 || !BASE64_PATTERN.test(data.imageBase64)) {
+  // Check length BEFORE regex: large repeated input can otherwise exhaust the JS stack.
+  if (typeof data.imageBase64 !== 'string' || !data.imageBase64 || data.imageBase64.length > Math.ceil(MAX_IMAGE_BYTES / 3) * 4 || !BASE64_PATTERN.test(data.imageBase64)) {
     return {ok: false, error: 'Invalid base64 image'};
   }
   const padding = data.imageBase64.endsWith('==') ? 2 : data.imageBase64.endsWith('=') ? 1 : 0;
