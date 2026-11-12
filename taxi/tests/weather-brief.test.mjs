@@ -34,13 +34,23 @@ test('古い・未来の・不正な降水予報を拒否する',()=>{
   const nonsensical=payload(NOW,[900,NaN,-1]);
   assert.throws(()=>weather.extract(nonsensical,NOW),/no next-six-hour/);
 });
+test('降水データが欠けている時に雨ゼロとして誤認しない',()=>{
+  const absent=payload(NOW,[0,1]);
+  absent.properties.timeseries[0].data.next_1_hours.details.precipitation_amount=null;
+  const summary=weather.extract(absent,NOW);
+  assert.equal(summary.hours,1);
+  assert.equal(summary.peakRain,1);
+  assert.throws(()=>weather.extract(payload(NOW,[null]),NOW),/no next-six-hour/);
+});
 test('既存営業前ブリーフから自動雨予報が起動し、手動確認への戻り道がある',async()=>{
   const html=await readFile(new URL('../demand-calendar.html',import.meta.url),'utf8');
   assert.match(html,/id="nahaAutoWeather"/);
   assert.match(html,/weather-brief-v1\.js/);
   assert.match(html,/https:\/\/www\.jma\.go\.jp\/bosai\/nowc\//);
   assert.match(js,/lat=26\.2124&lon=127\.6809/);
-  assert.match(js,/60\*60000/);
+  assert.match(js,/CACHE_HOURS=3/);
+  assert.match(js,/age<MAX_CACHE_AGE/);
+  assert.match(js,/取得時点の約6時間予報/);
   assert.match(js,/AbortController/);
   assert.match(js,/CC BY 4\.0/);
   assert.doesNotMatch(html,/DiDiで配車/);
