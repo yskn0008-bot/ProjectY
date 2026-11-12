@@ -7,6 +7,7 @@
 #include 'actions/intelligence'
 #include 'actions/calendar'
 #include 'actions/location'
+#include 'actions/web'
 
 // Native-only Night Brief.
 // No Safari, Scriptable, URL callback, or Run Shortcut.
