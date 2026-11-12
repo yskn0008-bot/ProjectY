@@ -31,6 +31,6 @@ test('changes only DAYSTREAM local plan with verified readback and failure rollb
  assert.match(js[1],/if\(!persist\(\)\)\{target\.s=oldStart/);
  assert.match(js[1],/smoothRender\(\);updateReview\(\)/);
  assert.match(js[1],/days:\{\.\.\.savedDays,\[selectedDay\]:entries\}/);
- assert.match(js[0],/元のNotion\/Apple予定は変更しません/);
+ assert.match(js[1],/元のNotion\/Apple予定は変更しません/);
  assert.doesNotMatch(js[0],/fetch\(.*suggested/);
 });
