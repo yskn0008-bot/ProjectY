@@ -37,3 +37,18 @@ export function adaptExistingNotionRows({taskRows,eventRows}={}){
   }
   return {status:!available.tasks&&!available.events?'unavailable':'read_only',available,tasks,eventMarkers,feedbackRecords:[],interruptions:[],reason:'Existing event kinds do not prove task execution or user feedback'};
 }
+
+/** Evaluate existing Notion snapshots without live access, writes, or outgoing notifications. */
+export function dueDateOnlyInAppHints(adapted, now){
+  if(!adapted || adapted.status==='unavailable'||typeof now!=='string'||!/^\d{4}-\d{2}-\d{2}T/.test(now)||!Number.isFinite(Date.parse(now)))return [];
+  const day=now.slice(0,10), today=Date.parse(day+'T00:00:00Z');
+  const seen=new Set(), hints=[];
+  for(const task of adapted.tasks||[]){
+    if(!task || task.deadlinePrecision!=='date_only'||task.done||task.status==='保留'||task.status==='待ち'||!/^\d{4}-\d{2}-\d{2}$/.test(task.dueDate||'')||seen.has(task.id))continue;
+    const offset=(Date.parse(task.dueDate+'T00:00:00Z')-today)/86400000;
+    if(offset!==0 && offset!==1)continue;
+    seen.add(task.id);
+    hints.push({key:'date-only:'+task.id,taskId:task.id,type:'deadline_date_only',dueDate:task.dueDate,reason:offset===0?'確認済み期限日は今日。時刻は未確認':'確認済み期限日は明日。時刻は未確認',presentation:'in_app_only',requiresApproval:false});
+  }
+  return hints;
+}
