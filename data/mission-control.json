@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-12T23:11:09+09:00",
+  "updated_at": "2026-11-12T23:15:57+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -31,6 +31,16 @@
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/664",
       "updated_at": "2026-11-11T19:58:32Z"
+    },
+    {
+      "id": "github-pr-668",
+      "title": "PR #668 test: isolate native notification backend on last READY production commit",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/668",
+      "updated_at": "2026-11-11T10:30:36Z"
     },
     {
       "id": "github-pr-685",
@@ -70,17 +80,7 @@
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/701",
-      "updated_at": "2026-11-12T06:58:30Z"
-    },
-    {
-      "id": "github-pr-703",
-      "title": "PR #703 feat(daystream): 確定予定を守る外出まとめ・空き枠再配置・最新配布資産保護",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/703",
-      "updated_at": "2026-11-12T04:31:21Z"
+      "updated_at": "2026-11-12T14:14:14Z"
     },
     {
       "id": "github-pr-704",
@@ -90,7 +90,7 @@
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/704",
-      "updated_at": "2026-11-12T04:40:24Z"
+      "updated_at": "2026-11-12T14:14:21Z"
     },
     {
       "id": "github-pr-705",
@@ -110,7 +110,7 @@
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/716",
-      "updated_at": "2026-11-12T14:10:27Z"
+      "updated_at": "2026-11-12T14:15:17Z"
     },
     {
       "id": "github-issue-10",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-12T14:09:34Z"
+      "updated_at": "2026-11-12T14:14:41Z"
     },
     {
       "id": "github-issue-234",
@@ -274,7 +274,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-12T23:11:09+09:00",
+      "last_update": "2026-11-12T23:15:57+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -349,13 +349,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 9件・Open PR 53件を自動同期中",
+      "next_action": "Open Issue 9件・Open PR 52件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-12T23:11:09+09:00",
+      "last_update": "2026-11-12T23:15:57+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -378,7 +378,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-12T23:11:09+09:00",
+      "last_update": "2026-11-12T23:15:57+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -460,5 +460,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "bff661f9c882bd6e3f2bc072d0aa5c4b5a484757606c1ec44d7cb1329bbde993"
+  "github_snapshot_hash": "e123429c76258700590b639d1c776b089b7dcc128a9a1c5684a8fc8c85f1a1bf"
 }
