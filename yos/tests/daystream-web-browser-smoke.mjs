@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import fs from 'node:fs/promises';
 import {chromium,webkit} from 'playwright';
 const type=process.env.YOS_BROWSER||'chromium',browser=await (type==='webkit'?webkit:chromium).launch({headless:true});
 const page=await browser.newPage({viewport:{width:390,height:844},isMobile:true,deviceScaleFactor:2});
@@ -33,6 +34,45 @@ try{
  });
  assert.equal(learning.length,1);
  assert.equal(learning[0].count,3);
+ const importState=await page.evaluate(()=>{
+  const parser=window.YOS_DAYSTREAM_SOURCES;
+  const calendar=parser.parseICS('BEGIN:VCALENDAR\nBEGIN:VEVENT\nUID:source1\nSUMMARY:Web read-only fixture\nDTSTART:20261113T090000\nDTEND:20261113T100000\nEND:VEVENT\nEND:VCALENDAR');
+  const tasks=parser.normalizeTasks({items:[{id:'12345678-1234-1234-1234-123456789012',title:'Web imported task',status:'次にやる',priority:'P2',due:'2026-11-13'}]});
+  localStorage.setItem('YOS_DAYSTREAM_WEB_CAL_SNAPSHOT_V1',JSON.stringify(calendar));
+  localStorage.setItem('YOS_DAYSTREAM_WEB_TASK_SNAPSHOT_V1',JSON.stringify(tasks));
+  return {calendarCount:calendar.eventCount,taskCount:tasks.items.length}
+ });
+ assert.equal(importState.calendarCount,1);
+ assert.equal(importState.taskCount,1);
+ await page.reload({waitUntil:'domcontentloaded'});
+ assert.match(await page.locator('#yosWebSourceState').innerText(),/タスク手動取込/);
+ assert.match(await page.locator('#yosWebSourceState').innerText(),/Apple予定手動取込/);
+ await page.locator('[data-tab="task"]').click();
+ assert.match(await page.locator('#yosTaskSourceStatus').innerText(),/手動取込のTasks写し/);
+ assert.match(await page.locator('#yosSourceTasks').innerText(),/Web imported task/);
+ const started=await page.evaluate(()=>{
+  const web=window.YOS_DAYSTREAM_WEB,at=new Date().toISOString();
+  for(let i=0;i<3;i++){
+   web.markStarted({id:900001+i,day:'2026-11-13'});
+   web.logCompletion({id:900001+i,title:'Started action',at:new Date(Date.now()+1000).toISOString(),day:'2026-11-13',plannedStart:600});
+  }
+  return web.suggestions().find(x=>x.title==='Started action')
+ });
+ assert.equal(started.kind,'start');
+ assert.equal(started.count,3);
+ const downloadTask=page.waitForEvent('download');
+ await page.locator('#yosWebExport').click();
+ const download=await downloadTask;
+ assert.equal(download.suggestedFilename(),'YOS_DAYSTREAM_WEB_ALL_BACKUP.json');
+ const packageText=await fs.readFile(await download.path(),'utf8');
+ const pack=JSON.parse(packageText);
+ assert.equal(pack.schema,'yos-daystream-web-all-backup-v1');
+ assert.ok(pack.plan.days);
+ assert.ok(Array.isArray(pack.actions));
+ assert.ok(pack.actions.some(a=>a.title==='Started action'&&a.startedAt));
+ assert.equal(pack.tasks.items[0].title,'Web imported task');
+ assert.equal(pack.calendar.eventCount,1);
+
  assert.deepEqual(errors,[],'no script errors during load, storage, reload or learning');
  console.log('DAYSTREAM Web port browser smoke PASS',type);
 }finally{await browser.close()}
