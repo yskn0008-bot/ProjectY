@@ -25,10 +25,10 @@
    if(age< -300000||age>limit)return 'stale';
    return 'ready';
  }
- function taskItems(s){
+ function taskItems(s,now){
    if(!Array.isArray(s.items)||s.items.length>400||s.status!=='ok'&&s.status!=='partial')return null;
    if(s.origin==='notion'&&s.complete!==true)return null;
-   const out=[],seen=new Set();
+   const out=[],seen=new Set(),mirror={freshCalendar:0,staleCalendar:0,unknownCalendar:0};
    for(const t of s.items){
      if(!t||typeof t!=='object'||typeof t.id!=='string'||!t.id||seen.has(t.id))return null;
      seen.add(t.id);
@@ -38,6 +38,17 @@
      if(!date)continue;  // Unscheduled work remains in DAYSTREAM's unplaced task queue.
      const dueAt=clean(t.dueAt,80);
      const isFixed=t.timing==='fixed';
+     const isMirrorCalendar=isFixed&&s.origin==='notion';
+     // A newly fetched Notion row is not necessarily a newly synchronized iPhone event.
+     // Source synchronizer must provide an offset-aware timestamp, not merely lastEditedAt.
+     if(isMirrorCalendar){
+       const upstream=clean(t.lastSynced,80);
+       const validStamp=/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2}(?:\.\d{1,3})?)?(?:Z|[+-]\d{2}:\d{2})$/.test(upstream);
+       const stamp=validStamp?Date.parse(upstream):NaN;
+       if(!Number.isFinite(stamp)){mirror.unknownCalendar++;continue}
+       if(now-stamp>DAY_MS||now-stamp< -300000){mirror.staleCalendar++;continue}
+       mirror.freshCalendar++;
+     }
      let clock='';
      if(dueAt&&/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(dueAt)){
        // Time is a deadline unless the original source explicitly identified a calendar record.
@@ -45,12 +56,14 @@
        if(Number.isFinite(instant.getTime()))clock=new Intl.DateTimeFormat('en-GB',
          {timeZone:'Asia/Tokyo',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(instant);
      }
-     const label=isFixed?(clock?'固定予定 '+clock:'固定予定'):(clock?'期限 '+clock:'期限');
-     out.push({id:'daystream:task:'+t.id,type:isFixed?'schedule':'task',date,title:name,
+     const allDay=isMirrorCalendar&&/^終日(?:・|$)/.test(clean(t.action,140));
+     const label=isFixed?(allDay?'終日':clock?'固定予定 '+clock+' · 終了未確認':'固定予定・時刻未確認'):(clock?'期限 '+clock:'期限');
+     const displayName=isMirrorCalendar&&name.startsWith('予定｜')?name.slice(3):name;
+     out.push({id:'daystream:task:'+t.id,type:isFixed?'schedule':'task',date,title:displayName,
        subtitle:label+(state==='完了'?' · 完了':''),done:state==='完了',source:s.origin==='notion'?'Notion Tasks写し':'Tasks取込写し',
        sourceId:t.id,sourceKind:isFixed?'calendar':'task',fixed:isFixed});
    }
-   return out;
+   return {items:out,mirror};
  }
  function calendarItems(s){
    const days=s.calendarDays,allDayDays=s.allDayDays||{};
@@ -82,13 +95,13 @@
    const current=Number.isFinite(now)?now:Date.now();
    const rawTasks=json(storage,TASK_KEY),rawCalendar=json(storage,CAL_KEY);
    const tState=freshness(rawTasks,'tasks',current),cState=freshness(rawCalendar,'calendar',current);
-   let tasks=null,calendar=null;
-   if(tState==='ready')tasks=taskItems(rawTasks);
+   let tasks=null,taskView=null,calendar=null;
+   if(tState==='ready'){taskView=taskItems(rawTasks,current);tasks=taskView?.items||null}
    if(cState==='ready')calendar=calendarItems(rawCalendar);
    const state={tasks:tasks===null?(tState==='ready'?'invalid':tState):'ready',
      calendar:calendar===null?(cState==='ready'?'invalid':cState):'ready'};
    return {items:[...(calendar||[]),...(tasks||[])],status:state,
-     details:{tasks:tasks?{at:rawTasks.checkedAt,origin:rawTasks.origin==='notion'?'notion':'manual',count:tasks.length}:null,
+     details:{tasks:tasks?{at:rawTasks.checkedAt,origin:rawTasks.origin==='notion'?'notion':'manual',count:tasks.length,...taskView.mirror}:null,
        calendar:calendar?{at:rawCalendar.checkedAt,origin:'manual',count:calendar.length}:null}};
  }
  // Cross-source duplicates without shared original IDs are suppressed only when
