@@ -136,6 +136,12 @@ body.glance-mode .bottom .refresh{min-height:36px;padding:7px 11px;font-size:11p
 @media(max-width:355px){body.glance-mode .app{padding-left:9px;padding-right:9px}.glance-card{padding:11px 9px}.glance-card-title{font-size:14px}.glance-line{font-size:12.5px}.glance-line .line-time{flex-basis:35px;font-size:11px}.glance-finbox{padding:7px}.glance-finbox strong{font-size:14px}.glance-advice .adv-label{flex-basis:62px}}
 
 </style>
+<style>
+.calendar-auth{margin:0 0 15px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.calendar-auth #calendarAuthHost{min-width:min(100%,270px)}
+.calendar-auth #calendarAuthStatus{font-size:12px;line-height:1.4;color:var(--muted);margin:7px 0 0}
+.calendar-auth .today-btn{padding:8px 12px;min-height:40px}
+</style>
 </head>
 <body>
 <main class="app">
@@ -145,7 +151,15 @@ body.glance-mode .bottom .refresh{min-height:36px;padding:7px 11px;font-size:11p
   <section class="source-overview" id="sourceOverview" aria-label="元データの接続状況" hidden>
     <div class="source-tile"><div><div class="source-title">MY LIFE</div><div class="source-sub" id="lifeFreshness">保存済み情報</div></div><span class="source-state" id="lifeConnection">未確認</span></div>
     <div class="source-tile"><div><div class="source-title">Money</div><div class="source-sub" id="moneyFreshness">保存済み情報</div></div><span class="source-state" id="moneyConnection">未確認</span></div>
+    <div class="source-tile"><div><div class="source-title">Notion Tasks</div><div class="source-sub" id="calendarTasksFreshness">取得時刻・原本を確認</div></div><span class="source-state" id="calendarTasksState">未接続</span></div>
+    <div class="source-tile"><div><div class="source-title">Apple等の予定</div><div class="source-sub" id="calendarEventsFreshness">DAYSTREAMに取込済みの写しだけ</div></div><span class="source-state" id="calendarEventsState">未接続</span></div>
   </section>
+  <div class="calendar-auth">
+    <button class="today-btn" id="calendarTasksRefresh" type="button">Notion Tasksを更新</button>
+    <div id="calendarAuthHost" hidden>
+      <div id="calendarGoogleButton"></div><p id="calendarAuthStatus" role="status">本人確認待ち</p>
+    </div>
+  </div>
   <div class="mode"><div class="segment" role="group" aria-label="表示切替"><button type="button" data-mode="glance" class="active" aria-pressed="true">概要</button><button type="button" data-mode="month" aria-pressed="false">月</button><button type="button" data-mode="week" aria-pressed="false">週</button><button type="button" data-mode="day" aria-pressed="false">日</button></div><button class="today-btn" type="button" id="goToday">今日へ</button></div>
   <section class="glance-only glance-board" id="glanceBoard" aria-label="1画面の今日の概要">
     <div class="glance-week"><div class="glance-week-head"><div><strong id="glanceWeekTitle">今週</strong> <span>日付を選ぶ</span></div><div class="glance-week-nav"><button id="glancePrev" aria-label="前の週">‹</button><button id="glanceNext" aria-label="次の週">›</button></div></div><div class="glance-days" id="glanceWeekDays"></div></div>
@@ -156,20 +170,23 @@ body.glance-mode .bottom .refresh{min-height:36px;padding:7px 11px;font-size:11p
     <section class="glance-card glance-money"><div class="glance-card-head"><div class="glance-card-title"><span class="glyph" aria-hidden="true">¥</span>お金</div><span class="glance-card-count" id="glanceMoneyCount">予定と実績を区別</span></div><div class="glance-money-row"><div class="glance-finbox"><small>当日の入金</small><strong id="glanceIncome">—</strong><span id="glanceIncomeNote">未確認</span></div><div class="glance-finbox accent"><small>当日の支出</small><strong class="gold" id="glanceExpense">—</strong><span id="glanceExpenseNote">未確認</span></div></div><p class="glance-note" id="glanceNextPayment">金融機関の残高とは異なります</p></section>
     <section class="glance-card glance-habit"><div class="glance-card-head"><div class="glance-card-title"><span class="glyph" aria-hidden="true">♡</span>習慣</div><span class="glance-card-count" id="glanceHabitCount">未確認</span></div><div class="glance-habit-row"><div class="glance-habit-meter" aria-label="習慣の実施報告の有無"><span id="glanceHabitBar" style="width:0"></span></div><span class="glance-habit-label" id="glanceHabitLabel">記録未確認</span></div><div class="glance-habit-copy" id="glanceHabitText">未記録でも未実施とは判断しません。</div></section>
     <div class="glance-advice"><span class="adv-label">YOSの提案</span><span class="adv-copy" id="glanceAdvice">取得できた情報に基づいて整理します。</span></div>
-    <div class="glance-source"><span id="glanceFreshness">MY LIFE・Money：読み取り中</span><span class="offline">Notion・Apple：未接続</span></div>
+    <div class="glance-source"><span id="glanceFreshness">MY LIFE・Money：読み取り中</span><span class="offline" id="calendarGlanceStatus">Notion・Apple：未接続</span></div>
   </section>
   <section class="board" id="board" aria-label="統合カレンダー"><div class="month-bar"><div class="month-name"><strong id="monthTitle">—</strong><small id="monthSub">—</small></div><div class="month-controls"><button class="nav-arrow" id="prev" aria-label="前の期間">‹</button><button class="nav-arrow" id="next" aria-label="次の期間">›</button></div></div><div class="weekday-grid" id="weekdayHeader"><span class="weekday">日</span><span class="weekday">月</span><span class="weekday">火</span><span class="weekday">水</span><span class="weekday">木</span><span class="weekday">金</span><span class="weekday">土</span></div><div class="date-grid" id="dates"></div><div class="legend" id="filters" aria-label="表示カテゴリ"><button data-filter="schedule" aria-pressed="true"><i class="swatch" style="background:var(--schedule)"></i>予定</button><button data-filter="task" aria-pressed="true"><i class="swatch" style="background:var(--task)"></i>タスク</button><button data-filter="money" aria-pressed="true"><i class="swatch" style="background:var(--money)"></i>お金</button><button data-filter="habit" aria-pressed="true"><i class="swatch" style="background:var(--habit)"></i>習慣</button><span class="guide">日付をタップして詳細を見る</span></div></section>
   <div class="day-section"><section class="panel"><div class="section-top"><div><div class="eyebrow">DAY DETAIL</div><h2 id="dayHeading">—</h2></div><span class="count-pill" id="dayCount">—</span></div><div id="dayItems" class="timeline" aria-live="polite"></div><div id="habitIndicator" class="habit-state"></div></section><section class="panel"><div class="section-top"><div><div class="eyebrow">MONEY & INSIGHT</div><h2>その日の収支</h2></div></div><div class="money-overview"><div class="mini income"><div class="lbl">入金</div><strong id="income">—</strong><div class="sub" id="incomeSub">記録を確認</div></div><div class="mini outcome"><div class="lbl">出金</div><strong id="expense">—</strong><div class="sub" id="expenseSub">記録を確認</div></div></div><p class="sync-note" id="moneyNote">Moneyの保存済みデータを読み取ります。銀行との直接同期ではありません。</p><div class="hint"><small>YOS / TODAY'S NOTE</small><p id="insight">利用できる記録を確認して、その日の優先事項を整理します。</p></div></section></div>
-  <div class="tool-links" id="sourceLinks"><a href="../">MY LIFEを開く ↗</a><a href="../../yos/#money">Moneyを開く ↗</a></div>
+  <div class="tool-links" id="sourceLinks"><a href="../">MY LIFEを開く ↗</a><a href="../../yos/#money">Moneyを開く ↗</a><a href="../../yos/daystream/">DAYSTREAM ↗</a></div>
   <details class="disclosure" id="sources"><summary>データの接続状況を見る</summary><p id="sourceDetail">ローカルの既存MY LIFEとMoneyを確認します。NotionとAppleカレンダーの直接同期は未接続です。</p></details>
   <footer class="bottom"><span id="lastRead">読み取り前</span><div style="display:flex;gap:8px;align-items:center"><a class="linkish" href="../">MY LIFE ↗</a><button class="refresh" id="reload" type="button">↻ 保存記録を再読込</button></div></footer>
 </main>
+<script src="./unified-sources.js"></script>
+<script src="../../yos/daystream/source-adapters.js"></script>
+<script src="../../yos/daystream/yos-tasks-auth.js"></script>
 <script>
 'use strict';
 (()=>{
   const $=id=>document.getElementById(id),tz='Asia/Tokyo',now=new Date(),dateFmt=new Intl.DateTimeFormat('sv-SE',{timeZone:tz,year:'numeric',month:'2-digit',day:'2-digit'});
   const dateKey=d=>dateFmt.format(d);const parseDate=k=>new Date(k+'T12:00:00+09:00');const addDays=(key,n)=>{const d=parseDate(key);d.setUTCDate(d.getUTCDate()+n);return dateKey(d)};
-  const today=dateKey(now),state={selected:today,anchor:today,mode:'glance',filters:new Set(['schedule','task','money','habit']),demo:false,items:[],lifeRead:false,moneyRead:false,moneyPrivate:false,loadedAt:null,lifeSynced:null,moneySynced:null};
+  const today=dateKey(now),state={selected:today,anchor:today,mode:'glance',filters:new Set(['schedule','task','money','habit']),demo:false,items:[],lifeRead:false,moneyRead:false,moneyPrivate:false,loadedAt:null,lifeSynced:null,moneySynced:null,otherSources:null};
   const sampleDay=key=>dateKey(parseDate(key)),cash=n=>'¥'+Math.abs(n).toLocaleString('ja-JP');const types={schedule:'予定',task:'タスク',money:'お金',habit:'習慣'};
   const dayName=k=>'日月火水木金土'[parseDate(k).getDay()],displayDay=k=>{const d=parseDate(k);return `${d.getMonth()+1}月${d.getDate()}日（${dayName(k)}）`};
   const isValidKey=k=>/^\d{4}-\d{2}-\d{2}$/.test(String(k||''))&&dateKey(parseDate(k))===k;
@@ -201,13 +218,28 @@ body.glance-mode .bottom .refresh{min-height:36px;padding:7px 11px;font-size:11p
     return pairs.map((x,i)=>({...x,id:'demo:'+i,source:'表示例'}));
   }
   function load(useDemo){const life=normalizeLife(),money=normalizeMoney();
+    // DAYSTREAM copies are already in this same browser origin; do not imply native/API live access.
+    let external=null;
+    try{external=window.YOS_UNIFIED_CALENDAR?.read(localStorage)||null}catch{external=null}
+    state.otherSources=external;
+    const labels={ready:'取込済み',missing:'未接続',stale:'期限切れ',invalid:'形式不一致'};
+    for(const [which,prefix] of [['tasks','calendarTasks'],['calendar','calendarEvents']]){
+      const current=external?.status?.[which]||'missing';
+      $(prefix+'State').textContent=labels[current]||'未確認';
+      $(prefix+'State').className='source-state'+(current==='ready'?' ok':current==='stale'?' stale':'');
+      const details=external?.details?.[which];
+      $(prefix+'Freshness').textContent=details?
+        '端末内の'+(details.origin==='notion'?'Notion正本取得':'手動取込')+'写し '+new Date(details.at).toLocaleString('ja-JP')+' · '+details.count+'件':
+        current==='stale'?'古い写しは予定へ反映しません':current==='invalid'?'不正な写しは元データ保護のため除外':'このブラウザ領域に有効な写しなし';
+    }
+    $('calendarGlanceStatus').textContent='Tasks '+(labels[external?.status?.tasks]||'未接続')+' · 予定 '+(labels[external?.status?.calendar]||'未接続');
     // Installed Web app / GitHub Pages must NEVER imply illustrative financial data is real.
     // Local file previews may start in design mode for visual review.
-    state.demo=(useDemo??(location.protocol==='file:'&&!life.length&&!money.length))&&!state.moneyPrivate;
+    state.demo=(useDemo??(location.protocol==='file:'&&!life.length&&!money.length&&!external?.items?.length))&&!state.moneyPrivate;
     $('sourceOverview').hidden=state.demo;
     setSourceBadge('lifeConnection',state.lifeRead?'保存済み':'未接続',state.lifeRead?freshnessLabel(state.lifeSynced):'このWeb領域に記録なし',state.lifeRead&&state.lifeSynced&&Date.now()-state.lifeSynced.getTime()<=86400000?'ok':state.lifeRead?'stale':'');
     setSourceBadge('moneyConnection',state.moneyPrivate?'非表示':state.moneyRead?'保存済み':'未接続',state.moneyPrivate?'Moneyのプライバシー設定を尊重':state.moneyRead?freshnessLabel(state.moneySynced):'このWeb領域に記録なし',state.moneyRead&&state.moneySynced&&Date.now()-state.moneySynced.getTime()<=86400000?'ok':state.moneyRead?'stale':'');
-state.items=state.demo?createDemo():[...life,...money];state.loadedAt=new Date();$('connection').dataset.connection=state.demo?'demo':'local';$('connection').querySelector('span').textContent=state.demo?'デザインプレビュー':'保存済みデータ';$('demoAlert').hidden=!state.demo;$('toggleDemo').textContent='保存済みデータを見る';$('lastRead').textContent='最終読み取り '+state.loadedAt.toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'});$('sourceDetail').textContent=state.demo?'すべて架空の表示例。実際の予定・金額・習慣記録ではありません。実データへの切替で、このサイトと同じブラウザ内のMY LIFE／Moneyの保存済みデータを確認できます。':`MY LIFE：${state.lifeRead?'同じブラウザの保存記録を読み取り':'保存記録が見つからない'}。Money：${state.moneyPrivate?'Moneyの非表示設定を優先':state.moneyRead?'同じブラウザの保存記録を読み取り':'保存記録が見つからない'}。Notion YOS Tasks・Notion家計・Apple標準カレンダーはまだ直接同期していません。iPhoneの他アプリのデータはWeb画面から勝手に取得できません。`;render();}
+state.items=state.demo?createDemo():(window.YOS_UNIFIED_CALENDAR?.merge([...life,...money],external?.items||[])||[...life,...money]);state.loadedAt=new Date();$('connection').dataset.connection=state.demo?'demo':'local';$('connection').querySelector('span').textContent=state.demo?'デザインプレビュー':'保存済みデータ';$('demoAlert').hidden=!state.demo;$('toggleDemo').textContent='保存済みデータを見る';$('lastRead').textContent='最終読み取り '+state.loadedAt.toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'});$('sourceDetail').textContent=state.demo?'すべて架空の表示例。実際の予定・金額・習慣記録ではありません。実データへの切替で、このサイトと同じブラウザ内のMY LIFE／Moneyの保存済みデータを確認できます。':`MY LIFE：${state.lifeRead?'同じブラウザの保存記録を読み取り':'保存記録が見つからない'}。Money：${state.moneyPrivate?'Moneyの非表示設定を優先':state.moneyRead?'同じブラウザの保存記録を読み取り':'保存記録が見つからない'}。Notion YOS Tasks・Notion家計・Apple標準カレンダーはまだ直接同期していません。iPhoneの他アプリのデータはWeb画面から勝手に取得できません。`;render();}
   function eventsFor(key){return state.items.filter(x=>x.date===key&&state.filters.has(x.type));}
   const endOfMonth=k=>{const d=parseDate(k);return dateKey(new Date(d.getFullYear(),d.getMonth()+1,0,12))};
   function renderCalendar(){const d=parseDate(state.anchor),startKey=dateKey(new Date(d.getFullYear(),d.getMonth(),1,12)),monthEnd=endOfMonth(startKey),start=parseDate(startKey),last=parseDate(monthEnd);const weekdays=['日','月','火','水','木','金','土'];let keys=[];
@@ -297,10 +329,32 @@ state.items=state.demo?createDemo():[...life,...money];state.loadedAt=new Date()
   $('goToday').addEventListener('click',()=>{state.selected=today;state.anchor=today;render();});$('reload').addEventListener('click',()=>load(state.demo));$('toggleDemo').addEventListener('click',()=>load(false));
   window.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&!state.demo)load(false)});
   // Cross-tab source changes and Safari back-forward cache restores refresh the read-only projection.
-  window.addEventListener('storage',e=>{if(!state.demo&&['yos-life-v1','yos-money-v2'].includes(e.key))load(false)});
+  window.addEventListener('storage',e=>{if(!state.demo&&['yos-life-v1','yos-money-v2','YOS_DAYSTREAM_WEB_TASK_SNAPSHOT_V1','YOS_DAYSTREAM_WEB_CAL_SNAPSHOT_V1'].includes(e.key))load(false)});
   window.addEventListener('pageshow',e=>{if(e.persisted&&!state.demo)load(false)});
   window.addEventListener('focus',()=>{if(!state.demo&&state.loadedAt&&Date.now()-state.loadedAt.getTime()>10000)load(false)});
 
+  $('calendarTasksRefresh').addEventListener('click',()=>{
+    $('calendarAuthHost').hidden=false;
+    const api=window.YOS_DAYSTREAM_TASK_AUTH;
+    if(!api){$('calendarAuthStatus').textContent='本人確認の既存機能を読み込めません';return}
+    api.setup({host:$('calendarGoogleButton'),status:$('calendarAuthStatus'),save:snapshot=>{
+      const verify=window.YOS_DAYSTREAM_SOURCES;
+      if(!verify?.validSaved(snapshot,'tasks',0.25)||snapshot.origin!=='notion'||snapshot.complete!==true)return false;
+      const key='YOS_DAYSTREAM_WEB_TASK_SNAPSHOT_V1';
+      const raw=JSON.stringify(snapshot);if(raw.length>1000000)return false;
+      let old=null;
+      try{
+        old=localStorage.getItem(key);
+        if(old!==null){localStorage.setItem(key+'_BACKUP',old);if(localStorage.getItem(key+'_BACKUP')!==old)return false}
+        localStorage.setItem(key,raw);
+        if(localStorage.getItem(key)!==raw)throw Error('読戻し不一致');
+        load(false);return true;
+      }catch{
+        try{if(old===null)localStorage.removeItem(key);else localStorage.setItem(key,old)}catch{}
+        return false;
+      }
+    }});
+  });
   load(undefined);
 })();
 </script>
