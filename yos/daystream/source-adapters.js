@@ -93,20 +93,46 @@
  }
  function fromYosTaskDashboardCache(cache){
   if(!cache||typeof cache!=='object'||!Number.isFinite(cache.savedAt)||Date.now()-cache.savedAt<0||Date.now()-cache.savedAt>6*60*60*1000||!Array.isArray(cache.data?.tasks)||cache.data.tasks.length>MAX_TASKS)return null;
+  const authoritative=cache.data.source==='notion';
+  if(authoritative&&cache.data.complete!==true)return null;
   const items=[],seen=new Set();
+  const tokyo=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit'});
+  const dateValue=value=>{
+   if(value==null||value==='')return {day:'',at:null};
+   if(typeof value!=='string')return null;
+   if(date(value))return {day:value,at:value};
+   // No browser timezone guesses: Notion timestamps must carry an explicit offset.
+   if(!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2}(?:\.\d{1,3})?)?(?:Z|[+-]\d{2}:\d{2})$/.test(value)||!date(value.slice(0,10))||!Number.isFinite(Date.parse(value)))return null;
+   if(Number(value.slice(11,13))>23||Number(value.slice(14,16))>59||(value[16]===':'&&Number(value.slice(17,19))>59))return null;
+   const parts=Object.fromEntries(tokyo.formatToParts(new Date(value)).filter(x=>x.type!=='literal').map(x=>[x.type,x.value]));
+   return {day:parts.year+'-'+parts.month+'-'+parts.day,at:value};
+  };
   for(const t of cache.data.tasks){
-   if(!t||typeof t!=='object')continue;
-   const title=str(t.title,120),state=str(t.state,32),rawDue=str(t.due,40),due=rawDue?rawDue.slice(0,10):'';
-   if(!title||!['次にやる','実行中','本人操作','待ち','保留','完了'].includes(state)||due&&!date(due))continue;
+   if(!t||typeof t!=='object'){if(authoritative)return null;continue}
+   const title=str(t.title,120),state=str(t.state,32),start=dateValue(t.due),end=dateValue(t.dueEnd);
+   if(!title||!['次にやる','実行中','本人操作','待ち','保留','完了'].includes(state)||!start||!end){if(authoritative)return null;continue}
+   if(authoritative&&end.at&&(!start.at||Date.parse(end.at)<Date.parse(start.at)))return null;
    const order=Number.isSafeInteger(Number(t.order))?Number(t.order):0;
-   // Stable, non-secret ID. No sensitive completion, blocker, evidence or auth payload is retained.
-   let hash=2166136261;
-   for(const ch of title+'|'+order){hash^=ch.charCodeAt(0);hash=Math.imul(hash,16777619)>>>0}
-   const id='yos-cache-'+order+'-'+hash.toString(16);
-   if(seen.has(id))continue;seen.add(id);
-   items.push({id,title,status:state,due,priority:['P0','P1','P2','P3'].includes(t.priority)?t.priority:'',area:'YOS Tasks',action:str(t.nextAction,140)});
+   let id;
+   if(authoritative){
+    if(typeof t.id!=='string'||!/^[a-f0-9]{32}$/i.test(t.id))return null;
+    id='notion-'+t.id.toLowerCase();
+   }else{
+    // Backward compatibility for older read-only projection files only.
+    let hash=2166136261;
+    for(const ch of title+'|'+order){hash^=ch.charCodeAt(0);hash=Math.imul(hash,16777619)>>>0}
+    id='yos-cache-'+order+'-'+hash.toString(16);
+   }
+   if(seen.has(id)){if(authoritative)return null;continue}seen.add(id);
+   items.push({id,title,status:state,due:start.day,priority:['P0','P1','P2','P3'].includes(t.priority)?t.priority:'',area:str(t.area||'YOS Tasks',40),action:str(t.nextAction,140),...(authoritative?{
+    dueAt:start.at,dueEnd:end.at,dueTimeZone:str(t.dueTimeZone,80)||null,
+    // A deadline time is not proof of a fixed appointment. Do not schedule it.
+    timing:t.sourceKind==='calendar'?'fixed':start.at&&start.at.includes('T')?'timed-deadline':'flexible',
+    habitCycle:['毎日','毎週','毎月','年・長期'].includes(t.habitCycle)?t.habitCycle:'',
+    lastEditedAt:typeof t.lastEditedAt==='string'?str(t.lastEditedAt,80):null
+   }:{})});
   }
-  return {schema:'yos-daystream-source-snapshot-v1',kind:'tasks',status:'partial',items,checkedAt:new Date(cache.savedAt).toISOString(),source:'yos-auth-cache'};
+  return {schema:'yos-daystream-source-snapshot-v1',kind:'tasks',status:authoritative?'ok':'partial',items,checkedAt:new Date(cache.savedAt).toISOString(),source:'yos-auth-cache',...(authoritative?{origin:'notion',complete:true,ignoredBlankCount:Number.isSafeInteger(cache.data.ignoredBlankCount)&&cache.data.ignoredBlankCount>=0?cache.data.ignoredBlankCount:0}: {})};
  }
  function fromYosLifeStore(life){
   if(!life||typeof life!=='object'||!life.days||typeof life.days!=='object'||Array.isArray(life.days))return null;

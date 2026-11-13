@@ -23,6 +23,8 @@ export function createProductionTaskDashboard(options: CreateProductionTaskDashb
     identityVerifier,
     identityGate,
     googleWorkloadAuth: config.googleWorkloadAuth,
+    notionToken: options.environment.YOS_NOTION_API_TOKEN?.trim() ?? '',
+    notionDataSourceId: options.environment.YOS_NOTION_TASKS_DATA_SOURCE_ID?.trim() ?? '',
     ...(options.fetchImpl ? {fetchImpl: options.fetchImpl} : {})
   });
 }

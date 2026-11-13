@@ -5,6 +5,7 @@ import {createGoogleAccessTokenProvider} from '../auth/google-runtime.js';
 import type {FetchLike} from '../http.js';
 import {GoogleDriveClient} from '../sources/google-drive-client.js';
 import {GoogleSheetsClient} from '../sources/google-sheets-client.js';
+import {loadNotionTaskDashboard, completeNotionTask} from '../widget/notion-source.js';
 import {allowedOrigin, bearerToken, secureJson, type CorsOptions} from '../api/shared.js';
 
 const PROJECTION_NAME = 'YOS Tasks｜MY WAY Read Projection';
@@ -14,6 +15,13 @@ const HEADER = ['実行順','やること','状態','担当','期限','優先度
 
 export interface TaskDashboardItem {
   order: number;
+  id?: string;
+  sourceKind?: 'calendar' | 'task';
+  dueEnd?: string | null;
+  dueTimeZone?: string | null;
+  habitCycle?: string;
+  area?: string;
+  lastEditedAt?: string | null;
   title: string;
   state: string;
   owner: string;
@@ -28,6 +36,9 @@ export interface TaskDashboardItem {
 }
 
 export interface TaskDashboardResponse {
+  source?: 'notion';
+  complete?: boolean;
+  ignoredBlankCount?: number;
   generatedAt: string | null;
   tasks: TaskDashboardItem[];
 }
@@ -36,6 +47,8 @@ export interface CreateTaskDashboardHandlerOptions extends CorsOptions {
   identityVerifier: IdentityVerifier;
   identityGate: IdentityGate;
   googleWorkloadAuth: GoogleWorkloadAuthConfig;
+  notionToken?: string;
+  notionDataSourceId?: string;
   fetchImpl?: FetchLike;
 }
 
@@ -48,7 +61,7 @@ export function createTaskDashboardHandler(options: CreateTaskDashboardHandlerOp
     const origin = allowedOrigin(request, options);
     if (origin === null) return secureJson({error: 'Origin not allowed'}, 403, null);
     if (request.method === 'OPTIONS') return preflight(origin);
-    if (request.method !== 'GET') return secureJson({error: 'Method not allowed'}, 405, origin, {Allow:'GET, OPTIONS'});
+    if (!['GET', 'PATCH'].includes(request.method)) return secureJson({error: 'Method not allowed'}, 405, origin, {Allow:'GET, PATCH, OPTIONS'});
 
     try {
       const idToken = bearerToken(request);
@@ -56,6 +69,42 @@ export function createTaskDashboardHandler(options: CreateTaskDashboardHandlerOp
       await options.identityGate.authorize(identity);
     } catch {
       return secureJson({error: 'Authentication failed'}, 401, origin);
+    }
+
+    // Explicit opt-in: legacy MY WAY callers retain their Google projection contract.
+    // A failed authoritative read must never masquerade as a successful stale fallback.
+    const source = new URL(request.url).searchParams.get('source');
+    if (source !== null && source !== 'notion') return secureJson({error: 'Unknown task source'}, 400, origin);
+    if (request.method === 'PATCH' && source !== 'notion') return secureJson({error: 'Completion requires Notion source'}, 400, origin);
+    if (source === 'notion') {
+      if (!options.notionToken?.trim() || !options.notionDataSourceId?.trim()) {
+        return secureJson({error: 'Notion task source is unavailable'}, 503, origin);
+      }
+      if (request.method === 'PATCH') {
+        if (!(request.headers.get('content-type') ?? '').startsWith('application/json')) return secureJson({error: 'JSON required'}, 415, origin);
+        const body = await request.text();
+        if (body.length > 2048) return secureJson({error: 'Request too large'}, 413, origin);
+        let input: any;
+        try { input = JSON.parse(body); } catch { return secureJson({error: 'Invalid request'}, 400, origin); }
+        if (!input || input.action !== 'complete' || !/^[a-f0-9]{32}$/iu.test(input.pageId) || typeof input.expectedEditedAt !== 'string' || input.expectedEditedAt.length > 80 || typeof input.expectedState !== 'string') return secureJson({error: 'Invalid completion request'}, 400, origin);
+        try {
+          const task = await completeNotionTask({notionToken: options.notionToken, notionDataSourceId: options.notionDataSourceId, fetchImpl, pageId: input.pageId, expectedEditedAt: input.expectedEditedAt, expectedState: input.expectedState});
+          return secureJson({source: 'notion', task}, 200, origin);
+        } catch {
+          return secureJson({error: 'Completion not confirmed; refresh Notion tasks before retrying'}, 409, origin);
+        }
+      }
+      try {
+        const result = await loadNotionTaskDashboard({
+          notionToken: options.notionToken,
+          notionDataSourceId: options.notionDataSourceId,
+          calendar: true,
+          fetchImpl
+        });
+        return secureJson(result, 200, origin, {'Cache-Control': 'private, no-store'});
+      } catch {
+        return secureJson({error: 'Notion tasks could not be read completely'}, 503, origin);
+      }
     }
 
     try {
@@ -114,7 +163,7 @@ function clean(value: string | undefined, max: number): string {
 function preflight(origin: string): Response {
   return new Response(null, {status:204, headers:{
     'Access-Control-Allow-Origin':origin,
-    'Access-Control-Allow-Methods':'GET, OPTIONS',
+    'Access-Control-Allow-Methods':'GET, PATCH, OPTIONS',
     'Access-Control-Allow-Headers':'Authorization, Content-Type',
     'Access-Control-Max-Age':'600',
     'Cache-Control':'no-store',
