@@ -35,11 +35,11 @@ try {
         })};
     });
     assert.equal(measure.rows.length,14);
-    assert.ok(measure.sizes['.notice-title']>=13,'title too small at '+width);
-    assert.ok(measure.sizes['.time']>=12,'time too small at '+width);
-    assert.ok(measure.sizes['.category']>=11,'subtitle too small at '+width);
-    assert.ok(measure.sizes['.tag']>=9,'decision too small at '+width);
-    assert.ok(measure.sizes['.result']>=9,'result too small at '+width);
+    assert.ok(measure.sizes['.notice-title']>=15,'title too small at '+width);
+    assert.ok(measure.sizes['.time']>=13,'time too small at '+width);
+    assert.ok(measure.sizes['.category']>=12,'subtitle too small at '+width);
+    assert.ok(measure.sizes['.tag']>=10,'decision too small at '+width);
+    assert.ok(measure.sizes['.result']>=10,'result too small at '+width);
 
     assert.ok(measure.overflow<=measure.screen+1,'horizontal overflow at '+width+': '+JSON.stringify(measure));
     for(const [index,row] of measure.rows.entries()){

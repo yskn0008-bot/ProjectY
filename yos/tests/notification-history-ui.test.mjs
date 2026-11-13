@@ -26,7 +26,7 @@ test('cursor guard, readback and no falsely verified payment completion',()=>{
 });
 test('dense UI contains list/search/filter/detail controls',()=>{
   for(const id of ['events','search','connect','refresh','detail','later','reported','openSource'])assert.match(page,new RegExp('id="'+id+'"'));
-  assert.match(page,/grid-template-columns:40px minmax\(0,1fr\) 72px 73px/);
+  assert.match(page,/grid-template-columns:42px minmax\(0,1fr\) 73px 74px/);
   assert.match(page,/notice-icon/);
   assert.match(page,/b\.classList\.add\('flag'\)/);
   assert.match(page,/YOS_ALERT/);
