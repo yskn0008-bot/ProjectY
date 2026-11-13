@@ -41,8 +41,9 @@
      let clock='';
      if(dueAt&&/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(dueAt)){
        // Time is a deadline unless the original source explicitly identified a calendar record.
-       const m=dueAt.match(/T(\d{2}):(\d{2})/);
-       clock=m?m[1]+':'+m[2]:'';
+       const instant=new Date(dueAt);
+       if(Number.isFinite(instant.getTime()))clock=new Intl.DateTimeFormat('en-GB',
+         {timeZone:'Asia/Tokyo',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(instant);
      }
      const label=isFixed?(clock?'固定予定 '+clock:'固定予定'):(clock?'期限 '+clock:'期限');
      out.push({id:'daystream:task:'+t.id,type:isFixed?'schedule':'task',date,title:name,
