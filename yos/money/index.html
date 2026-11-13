@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#16191e"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="YOS Money"><link rel="manifest" href="./manifest.webmanifest"><title>YOS Money</title><style>html,body{margin:0;width:100%;height:100%;background:#16191e;color:#fff;font-family:-apple-system,BlinkMacSystemFont,sans-serif}iframe{display:block;width:100%;height:100dvh;border:0}#status{position:absolute;inset:0;display:grid;place-items:center;background:#16191e;padding:24px;text-align:center}#status[hidden]{display:none}</style></head><body><div id="status">Moneyを読み込んでいます…</div><iframe id="money" title="YOS Money" src="../index.html" referrerpolicy="same-origin"></iframe><script>
+'use strict';
+const frame=document.getElementById('money'),status=document.getElementById('status');
+frame.addEventListener('load',()=>{
+ try{
+  const doc=frame.contentDocument;
+  if(!doc||!doc.getElementById('moneyPage'))throw Error('Money画面を確認できません');
+  const style=doc.createElement('style');
+  style.textContent='.topbar,.bottom-nav,.bottom-navigation,.tabbar,.main-nav,nav[aria-label]{display:none!important} .app{padding-top:0!important}';
+  doc.head.appendChild(style);
+  const button=doc.querySelector('[data-page="money"]');
+  if(!button)throw Error('Money切替ボタンがありません');
+  button.click();
+  const panel=doc.getElementById('moneyPage');
+  if(panel.hidden||!panel.classList.contains('active'))throw Error('Money画面の起動を確認できません');
+  status.hidden=true;
+ }catch(e){status.textContent='Moneyの表示を確認できません。既存YOSからMoneyを開いてください。';status.hidden=false}
+});
+</script></body></html>
