@@ -2,15 +2,17 @@ import assert from 'node:assert/strict';
 
 export async function verifyNativeChoice(page){
  const key='YOS_DAYSTREAM_WEB_SHORTCUT_DRAFT_V1';
+ const targetDay=await page.evaluate(()=>{const d=new Date();d.setDate(d.getDate()+1);const iso=localISO(d);showDay(iso);return iso});
  await page.locator('#addBtn').click();await page.locator('#newTitle').fill('下書き保持テスト');
  await page.locator('#wizardNext').click();await page.locator('#newTime').fill('14:00');
  await page.locator('#wizardNext').click();await page.locator('#newDuration').fill('25');await page.locator('#wizardNext').click();
  await page.locator('#chooseNativeShortcut').click();
  const pending=await page.evaluate(k=>JSON.parse(localStorage.getItem(k)),key);
- assert.equal(pending.fields.newTitle,'下書き保持テスト');assert.equal(pending.fields.newTime,'14:00');assert.equal(pending.fields.newDuration,'25');
+ assert.equal(pending.day,targetDay);assert.equal(pending.fields.newTitle,'下書き保持テスト');assert.equal(pending.fields.newTime,'14:00');assert.equal(pending.fields.newDuration,'25');
  assert.match(pending.nonce,/^YOS_PICK_V1:/);
  await page.reload({waitUntil:'networkidle'});await page.locator('#applyNativeShortcut').waitFor();
  assert.equal(await page.locator('#newTitle').inputValue(),'下書き保持テスト');assert.match(await page.locator('#wizardProgress').textContent(),/4 \/ 5/);
+ assert.equal(await page.evaluate(()=>selectedDay),targetDay);
  // A denied clipboard must offer ordinary paste without losing the original draft.
  await page.evaluate(()=>Object.defineProperty(navigator,'clipboard',{configurable:true,value:{readText:()=>Promise.reject(Error('denied'))}}));
  await page.locator('#applyNativeShortcut').click();await page.locator('#nativeShortcutPaste').waitFor();
@@ -34,5 +36,5 @@ export async function verifyNativeChoice(page){
  await page.evaluate(k=>{const original=Storage.prototype.setItem;window.restoreChoiceStorage=()=>Storage.prototype.setItem=original;Storage.prototype.setItem=function(name,value){if(name===k)throw Error('保存拒否');return original.call(this,name,value)}},key);
  await page.locator('#chooseNativeShortcut').click();assert.match(await page.locator('#nativeShortcutStatus').textContent(),/保存拒否/);
  assert.equal(await page.locator('#newTitle').inputValue(),'保存失敗でも保持');assert.equal(await page.locator('#applyNativeShortcut').isVisible(),false);
- await page.evaluate(()=>window.restoreChoiceStorage());await page.locator('#cancelEditor').click();
+ await page.evaluate(()=>window.restoreChoiceStorage());await page.locator('#cancelEditor').click();await page.evaluate(()=>showDay(todayISO));
 }

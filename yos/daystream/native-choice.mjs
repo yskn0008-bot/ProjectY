@@ -48,7 +48,9 @@ window.YOS_TASK_WIZARD.reset=()=>{originalReset();box.hidden=true;pending=null;a
 $('editor').addEventListener('input',()=>{if(!pending||!window.YOS_TASK_WIZARD.isActive())return;try{const stored=JSON.parse(localStorage.getItem(key)||'null');if(!valid(stored)||stored.nonce!==pending.nonce||!!stored.consumed!==!!pending.consumed)return;const next={...pending,fields:snapshot()};write(next);pending=next}catch{status.textContent='下書きを保存できません。この画面を閉じずに入力を続けてください。'}});
 try{
  const saved=JSON.parse(localStorage.getItem(key)||'null');
- if(valid(saved)&&saved.day===selectedDay&&editingId===null){
+ if(valid(saved)&&editingId===null){
+  if(saved.day!==selectedDay)showDay(saved.day);
+  if(saved.day!==selectedDay)throw Error('下書きの日付が不正です');
   pending=saved;for(const id of fieldIds)$(id).value=saved.fields[id];
   refreshShortcutPicker();updateShortcutField();showEditor();window.YOS_TASK_WIZARD.start(3);apply.hidden=!!saved.consumed;
   status.textContent=saved.consumed?'選択済みの下書きを戻しました。次へ進んで確認してください。':'入力中のタスクを戻しました。選択を反映してください。';
