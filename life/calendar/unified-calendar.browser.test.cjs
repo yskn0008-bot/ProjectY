@@ -18,7 +18,8 @@ const {chromium,webkit}=require('playwright');
    window.__testDay=today;
    const schema='yos-daystream-source-snapshot-v1';
    const tasks={schema,kind:'tasks',status:'ok',source:'yos-auth-cache',origin:'notion',complete:true,
-    checkedAt:now.toISOString(),items:[{id:'notion-'+'a'.repeat(32),title:'面接予定の確認',status:'次にやる',due:today,dueAt:today,timing:'flexible'}]};
+    checkedAt:now.toISOString(),items:[{id:'notion-'+'a'.repeat(32),title:'面接予定の確認',status:'次にやる',due:today,dueAt:today,timing:'flexible'},
+     {id:'notion-'+'b'.repeat(32),title:'固定予定テスト',status:'保留',due:today,dueAt:today+'T03:00:00Z',timing:'fixed'}]};
    const calendar={schema,kind:'calendar',status:'ok',source:'user-file',checkedAt:now.toISOString(),
     calendarDays:{[today]:[{title:'美容室',start:600,duration:60},{title:'写真撮影',start:780,duration:45}]},allDayDays:{}};
    const life={days:{[today]:{lastSync:now.toISOString(),schedule:[{id:'orig-1',date:today,title:'美容室',start:today+'T10:00:00+09:00',end:today+'T11:00:00+09:00'}]}}};
@@ -34,6 +35,7 @@ const {chromium,webkit}=require('playwright');
   const schedules=await page.locator('#glanceScheduleItems').innerText();
   assert.equal((schedules.match(/美容室/g)||[]).length,1,'same event in two views must not duplicate');
   assert.match(schedules,/写真撮影/);
+  assert.match(schedules,/12:00[^\n]*固定予定テスト/,'Notion fixed event retains local time, not all-day');
   assert.match(await page.locator('#glanceTaskItems').innerText(),/面接予定の確認/);
   assert.equal((await page.locator('#glanceExpense').innerText()).trim(),'¥0','planned money is not actual');
   assert.match(await page.locator('#glanceExpenseNote').innerText(),/7,000/,'planned money is labeled planned');
