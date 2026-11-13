@@ -125,6 +125,41 @@ try{
   return Object.values(p.days).flat().find(x=>x.t==='WEB PORT STORAGE SMOKE')?.s
  });
  assert.equal(kept,780,'adopted actual-start proposal survives reload');
+ // Restore the downloaded package through the same file input used on iPhone.
+ await Promise.all([
+  page.waitForNavigation({waitUntil:'domcontentloaded'}),
+  page.locator('#yosWebFile').setInputFiles({name:'restore.json',mimeType:'application/json',buffer:Buffer.from(packageText)})
+ ]);
+ const restored=await page.evaluate(()=>({
+  plan:JSON.parse(localStorage.getItem('YOS_DAYSTREAM_WEB_PLAN_V1')),
+  actions:JSON.parse(localStorage.getItem('YOS_DAYSTREAM_WEB_ACTIONS_V1')),
+  tasks:JSON.parse(localStorage.getItem('YOS_DAYSTREAM_WEB_TASK_SNAPSHOT_V1')),
+  calendar:JSON.parse(localStorage.getItem('YOS_DAYSTREAM_WEB_CAL_SNAPSHOT_V1')),
+  prior:JSON.parse(localStorage.getItem('YOS_DAYSTREAM_WEB_PLAN_V1_BACKUP'))
+ }));
+ assert.deepEqual(restored.plan,pack.plan,'portable backup restores the actual downloaded plan');
+ assert.deepEqual(restored.actions,pack.actions);
+ assert.deepEqual(restored.tasks,pack.tasks);
+ assert.deepEqual(restored.calendar,pack.calendar);
+ assert.equal(Object.values(restored.prior.days).flat().find(x=>x.t==='WEB PORT STORAGE SMOKE').s,780,'pre-restore plan is backed up');
+ const utcICS='BEGIN:VCALENDAR\nBEGIN:VEVENT\nUID:ui-utc\nSUMMARY:UTC FILE INPUT\nDTSTART:20261113T003000Z\nDTEND:20261113T010000Z\nEND:VEVENT\nEND:VCALENDAR';
+ await Promise.all([
+  page.waitForNavigation({waitUntil:'domcontentloaded'}),
+  page.locator('#yosWebFile').setInputFiles({name:'calendar.ics',mimeType:'text/calendar',buffer:Buffer.from(utcICS)})
+ ]);
+ const imported=await page.evaluate(()=>JSON.parse(localStorage.getItem('YOS_DAYSTREAM_WEB_CAL_SNAPSHOT_V1')));
+ assert.equal(imported.calendarDays['2026-11-13'][0].start,570,'file input converts UTC to Japan time');
+ if(type==='chromium'){
+  await page.evaluate(async()=>{await navigator.serviceWorker.ready});
+  await page.reload({waitUntil:'networkidle'});
+  assert.equal(await page.evaluate(()=>Boolean(navigator.serviceWorker.controller)),true);
+  await page.context().setOffline(true);
+  await page.reload({waitUntil:'domcontentloaded'});
+  await page.locator('#timelinePanel').waitFor();
+  const offline=await page.evaluate(()=>({plan:JSON.parse(localStorage.getItem('YOS_DAYSTREAM_WEB_PLAN_V1')),calendar:window.YOS_CHARCOAL_BOOT.calendarDays}));
+  assert.deepEqual(offline.plan,pack.plan,'offline launch preserves restored plan');
+  assert.equal(offline.calendar['2026-11-13'][0].start,570,'offline launch retains imported calendar');
+ }
  assert.deepEqual(errors,[],'no script errors during load, storage, reload or learning');
  console.log('DAYSTREAM Web port browser smoke PASS',type);
 }finally{await browser.close()}
