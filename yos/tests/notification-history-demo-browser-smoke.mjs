@@ -28,6 +28,7 @@ try {
       return {screen:document.documentElement.clientWidth,
         overflow:document.documentElement.scrollWidth,
         sizes:Object.fromEntries(['.notice-title','.time','.category','.tag','.result'].map(selector=>[selector,parseFloat(getComputedStyle(document.querySelector(selector)).fontSize)])),
+        subtitleWeight:parseInt(getComputedStyle(document.querySelector('.event .category')).fontWeight,10),
         rows:[...document.querySelectorAll('.event')].map(el=>{
           const r=bounds(el),parts=[...el.children].map(bounds);
           return {height:r.height,parts:parts.length,inside:parts.every(p=>p.left>=r.left-1&&p.right<=r.right+1),
@@ -38,6 +39,7 @@ try {
     assert.ok(measure.sizes['.notice-title']>=15,'title too small at '+width);
     assert.ok(measure.sizes['.time']>=13,'time too small at '+width);
     assert.ok(measure.sizes['.category']>=12,'subtitle too small at '+width);
+    assert.ok(measure.subtitleWeight>=700,'subtitle not bold at '+width);
     assert.ok(measure.sizes['.tag']>=10,'decision too small at '+width);
     assert.ok(measure.sizes['.result']>=10,'result too small at '+width);
 
