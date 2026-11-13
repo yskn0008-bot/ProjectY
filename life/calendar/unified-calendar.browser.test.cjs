@@ -23,7 +23,8 @@ const {chromium,webkit}=require('playwright');
      {id:'notion-'+'c'.repeat(32),title:'予定｜古い通知',status:'保留',due:today,dueAt:today+'T03:00:00Z',timing:'fixed',lastSynced:'2026-11-01T06:56:00Z'}]};
    const calendar={schema,kind:'calendar',status:'ok',source:'user-file',checkedAt:now.toISOString(),
     calendarDays:{[today]:[{title:'美容室',start:600,duration:60},{title:'写真撮影',start:780,duration:45}]},allDayDays:{}};
-   const life={days:{[today]:{lastSync:now.toISOString(),schedule:[{id:'orig-1',date:today,title:'美容室',start:today+'T10:00:00+09:00',end:today+'T11:00:00+09:00'}]}}};
+   const life={days:{[today]:{lastSync:now.toISOString(),schedule:[{id:'orig-1',date:today,title:'美容室',start:today+'T01:00:00Z',end:today+'T02:00:00Z'},
+     {id:'utc-1',date:today,title:'UTC午前予定',start:today+'T01:30:00Z',end:today+'T02:30:00Z'}]}}};
    const money={updatedAt:now.toISOString(),privacy:false,transactions:[{id:'payment-1',date:today,label:'確認済支払い例',type:'expense',amount:7000,completed:false}]};
    localStorage.setItem('YOS_DAYSTREAM_WEB_TASK_SNAPSHOT_V1',JSON.stringify(tasks));
    localStorage.setItem('YOS_DAYSTREAM_WEB_CAL_SNAPSHOT_V1',JSON.stringify(calendar));
@@ -49,6 +50,7 @@ const {chromium,webkit}=require('playwright');
   assert.equal(await page.locator('#dates .cell').count(),7,'week rendered');
   await page.locator('[data-mode="day"]').click();
   assert.equal(await page.locator('#dates .cell').count(),1,'day rendered');
+  assert.match(await page.locator('#dayItems .entry').filter({hasText:'UTC午前予定'}).locator('small').innerText(),/10:30/,'UTC event is shown in Tokyo time');
   await page.evaluate(()=>{
    const key='YOS_DAYSTREAM_WEB_CAL_SNAPSHOT_V1',c=JSON.parse(localStorage.getItem(key));
    c.checkedAt=new Date(Date.now()-8*86400000).toISOString();
