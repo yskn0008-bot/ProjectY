@@ -87,7 +87,7 @@
    if(cState==='ready')calendar=calendarItems(rawCalendar);
    const state={tasks:tasks===null?(tState==='ready'?'invalid':tState):'ready',
      calendar:calendar===null?(cState==='ready'?'invalid':cState):'ready'};
-   return {items:[...(tasks||[]),...(calendar||[])],status:state,
+   return {items:[...(calendar||[]),...(tasks||[])],status:state,
      details:{tasks:tasks?{at:rawTasks.checkedAt,origin:rawTasks.origin==='notion'?'notion':'manual',count:tasks.length}:null,
        calendar:calendar?{at:rawCalendar.checkedAt,origin:'manual',count:calendar.length}:null}};
  }
@@ -97,9 +97,9 @@
    const out=[...extra,...base],seenIds=new Set(),seenTime=new Set(),result=[];
    function key(e){
      if(e.type!=='schedule')return '';
-     const start=/^\d{2}:\d{2}/.exec(e.subtitle||'');
+     const start=/^(?:固定予定\s+)?(\d{2}:\d{2})/.exec(e.subtitle||'');
      const all=e.subtitle==='終日';
-     return (start||all)?e.date+'|'+clean(e.title,100)+'|'+(all?'all':start[0]):'';
+     return (start||all)?e.date+'|'+clean(e.title,100)+'|'+(all?'all':start[1]):'';
    }
    for(const e of out){
      if(!e||typeof e!=='object'||!validDay(e.date)||!['schedule','task','money','habit'].includes(e.type))continue;
