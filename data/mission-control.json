@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-13T11:52:02+09:00",
+  "updated_at": "2026-11-13T12:00:29+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-13T02:51:04Z"
+      "updated_at": "2026-11-13T02:51:46Z"
     },
     {
       "id": "github-issue-234",
@@ -205,6 +205,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-178c73261f45",
+      "title": "Add five selectable device narration voice profiles to YOS Journal v2",
+      "completed_at": "2026-11-13T02:59:54Z",
+      "result": "GitHub mainへ反映（178c732）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/178c73261f45a4d6377febf5a7e1a73325b4bba3"
+    },
+    {
       "id": "github-commit-e450eecc2dcc",
       "title": "style(alerts): bold notification list second line",
       "completed_at": "2026-11-13T02:51:19Z",
@@ -231,13 +238,6 @@
       "completed_at": "2026-11-13T01:15:04Z",
       "result": "GitHub mainへ反映（8535f21）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/8535f21d0b5ded9d1bfa768c42d87cc9e5d867a4"
-    },
-    {
-      "id": "github-commit-4ea6952539be",
-      "title": "test(journal): verify safe Notion save and isolate artifact publication (#745)",
-      "completed_at": "2026-11-12T23:14:57Z",
-      "result": "GitHub mainへ反映（4ea6952）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/4ea6952539be9d09eb72044fd1c87102c78c4722"
     },
     {
       "id": "complete-002",
@@ -274,7 +274,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-13T11:52:02+09:00",
+      "last_update": "2026-11-13T12:00:29+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -355,7 +355,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-13T11:52:02+09:00",
+      "last_update": "2026-11-13T12:00:29+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -378,7 +378,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-13T11:52:02+09:00",
+      "last_update": "2026-11-13T12:00:29+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -460,5 +460,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "1b3e04e265aaa299f01f62d9f436cf82593cfa00e69cb131790a47b730af5b89"
+  "github_snapshot_hash": "4149da1021d7b67332f7efaa5ccc3de077d50350faf6b6cb145208d4044e6f5e"
 }
