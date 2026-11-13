@@ -42,7 +42,7 @@ function speechUpdate(){const play=document.getElementById('speakPlay'),stop=doc
 // Radio mode expands presentation and practical context using only published article fields.
 // It does not claim additional research or introduce new factual assertions.
 function radioParagraphs(){
- const match=location.hash.match(/article-(\\d+)/),idx=match?Number(match[1]):NaN;
+ const match=location.hash.match(/article-(\d+)/),idx=match?Number(match[1]):NaN;
  const a=items[idx];if(!a)return speechParagraphs();
  const d=(issue.issuedOn==='2026-11-12'&&items.length===6)?details[idx]:{intro:String(a.summary||''),sections:[['なぜ気になる？',a.reason],['知っておきたいこと',a.action],['注意点',a.caveat]].filter(x=>x[1])};
  const lines=['YOSジャーナル、深掘りラジオ。今日のテーマは、'+a.title+'。','まず、この記事が伝えたいことからお話しします。',d.intro||a.summary||'',
