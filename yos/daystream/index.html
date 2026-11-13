@@ -624,6 +624,7 @@ function showEditor(){
  updateEditEnd();
 }
 function closeEditor(){
+ window.YOS_TASK_WIZARD?.reset();
  editor.classList.remove('show');
  document.getElementById('editorBackdrop').classList.remove('show');
 }
@@ -637,7 +638,7 @@ function updateEditEnd(){
 function refreshShortcutPicker(){
  const picker=document.getElementById('shortcutPicker');
  const current=document.getElementById('newShortcut').value.trim();
- const known=[...new Set(items.map(x=>typeof x.shortcut==='string'?x.shortcut.trim():'').filter(Boolean))].sort((a,b)=>a.localeCompare(b,'ja'));
+ const known=[...new Set([...items.map(x=>typeof x.shortcut==='string'?x.shortcut.trim():'').filter(Boolean),...(window.YOS_DAYSTREAM_SHORTCUT_NAMES?.read()||[])])].sort((a,b)=>a.localeCompare(b,'ja'));
  picker.replaceChildren();
  const first=document.createElement('option');first.value='';first.textContent='保存済みのショートカットから選択';picker.append(first);
  for(const name of known){const option=document.createElement('option');option.value=name;option.textContent=name;picker.append(option)}
@@ -645,6 +646,7 @@ function refreshShortcutPicker(){
  picker.hidden=known.length===0;
 }
 function beginLocalEdit(item,shortcutFocus=false){
+ window.YOS_TASK_WIZARD?.reset();
  if(!item||item.f)return;
  hideSwipeDelete();
  editingId=item.id;
@@ -685,7 +687,7 @@ document.getElementById('addBtn').onclick=()=>{
  hideSwipeDelete();editingId=null;
  document.getElementById('editorTitle').textContent='予定を追加';document.getElementById('saveBtn').textContent='追加する';
  document.getElementById('newTitle').value='';document.getElementById('newShortcut').value='';
- document.getElementById('newKind').value='task';refreshShortcutPicker();updateShortcutField();showEditor();
+ document.getElementById('newKind').value='task';refreshShortcutPicker();updateShortcutField();showEditor();window.YOS_TASK_WIZARD?.start();
 };
 document.getElementById('cancelEditor').onclick=closeEditor;
 document.getElementById('saveBtn').onclick=()=>{const title=document.getElementById('newTitle').value.trim(),parts=document.getElementById('newTime').value.split(':').map(Number),duration=Number(document.getElementById('newDuration').value),kind=document.getElementById('newKind').value,shortcut=kind==='task'?document.getElementById('newShortcut').value.trim():'';if(shortcut.length>100||Array.from(shortcut).some(c=>c.charCodeAt(0)<32||c.charCodeAt(0)===127)){note.textContent='ショートカット名は100文字以内で入力してください';return;}if(!title||parts.length!==2||!Number.isFinite(duration)||duration<5||duration>1440){note.textContent='名前・時刻・所要時間を確認してください';return}const start=parts[0]*60+parts[1];if(start+duration>1440){note.textContent='終了時刻は24:00以内にしてください';return}if(editingId!==null){const item=items.find(x=>x.id===editingId);if(item){if(item.f){note.textContent='固定予定は編集できません';return;}Object.assign(item,{t:title,s:start,d:duration,kind,shortcut});}}else{if(isSample){items=[];isSample=false;}items.push({id:Math.max(300000000,...items.map(x=>Number(x.id)||0))+1,t:title,s:start,d:duration,kind,shortcut});}editingId=null;closeEditor();document.getElementById('newTitle').value='';document.getElementById('newShortcut').value='';note.textContent=fmt(start)+' に「'+title+'」を'+(editingId===null?'保存':'更新')+(persist()?'（保存処理中）':'（保存処理失敗）');smoothRender();updateReview()};
@@ -1162,4 +1164,4 @@ if(Array.isArray(stored)){note.textContent='保存済み時間割を表示 · No
 else if(calendarRows.length){note.textContent=(boot.calendarSource==='user-file'?'手動取込のApple予定 ':boot.calendarSource==='yos-life-local'?'保存済みMY WAY予定 ':'Appleカレンダー ')+calendarRows.length+'件を読み取り'+(yosTestCount(todayISO)?' · テスト'+yosTestCount(todayISO)+'件は非表示':'')+' · 端末内で追加・編集';}
 else{note.textContent='端末内の予定はありません · 右上の追加から登録';}
 yosDefaultStart();yosRefreshTestToggle();renderWeek();render();renderDayAllDay();updateReview();yosRenderSources();setCalendarMode('day');setInterval(updateNow,60000);setInterval(yosRenderLearningHints,60000);
-</script></body></html>
+</script><script src="./task-wizard.js"></script></body></html>

@@ -1,9 +1,9 @@
 'use strict';
 const CACHE_PREFIX='yos-unified-';
-const CACHE_NAME=CACHE_PREFIX+'v42-daystream-learning-safe-apply';
+const CACHE_NAME=CACHE_PREFIX+'v43-daystream-task-wizard';
 const STATIC=[
   './','./index.html','./manifest.webmanifest','./assets/yos-icon-180.png','./assets/yos-icon-512.png',
-  './yos/daystream/','./yos/daystream/index.html','./yos/daystream/manifest.webmanifest','./yos/daystream/source-adapters.js','./yos/daystream/yos-tasks-auth.js','./yos/','./yos/index.html','./yos/styles.css','./yos/readability-final.css','./yos/guide.html','./yos/guide.css','./yos/guide.js','./yos/guide-v2.css','./yos/guide-v2.js',
+  './yos/daystream/','./yos/daystream/index.html','./yos/daystream/manifest.webmanifest','./yos/daystream/task-wizard.js','./yos/daystream/source-adapters.js','./yos/daystream/yos-tasks-auth.js','./yos/','./yos/index.html','./yos/styles.css','./yos/readability-final.css','./yos/guide.html','./yos/guide.css','./yos/guide.js','./yos/guide-v2.css','./yos/guide-v2.js',
   './yos/desk/','./yos/desk/index.html','./yos/desk/manifest.webmanifest','./yos/desk/import-gpt.html','./yos/desk/style.css','./yos/desk/compact.css','./yos/desk/live-chat.css','./yos/desk/unified-inbox.css','./yos/desk/app.js','./yos/desk/live-chat.js','./yos/desk/unified-inbox.js',
   './yos/task-dashboard.css','./yos/task-dashboard.js','./yos/shared-state-v1.js','./yos/app.js',
   './yos/money-v2.css','./yos/money-master-v1.js','./yos/money-v2.js','./yos/money-v2-runtime-v4.js','./yos/money-journal-v1.js','./yos/money-capture.html','./yos/money-local-import.html',
