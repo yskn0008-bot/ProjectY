@@ -241,11 +241,11 @@ body.glance-mode .bottom .refresh{min-height:36px;padding:7px 11px;font-size:11p
       $('calendarTasksState').className='source-state stale';
       $('calendarTasksFreshness').textContent='Notion取得済み・元カレンダー更新の古い/不明な'+staleNative+'件は予定に表示しません';
     }
-    if(external?.status?.calendar!=='ready'&&freshNative){
+    if(external?.status?.calendar==='missing'&&freshNative){
       $('calendarEventsState').textContent='Notion経由';
       $('calendarEventsState').className='source-state';
       $('calendarEventsFreshness').textContent='元Apple予定の複製写し '+freshNative+'件（ライブ接続ではありません）';
-    }else if(external?.status?.calendar!=='ready'&&staleNative){
+    }else if(external?.status?.calendar==='missing'&&staleNative){
       $('calendarEventsFreshness').textContent='元予定の更新が古い/不明な'+staleNative+'件を安全のため除外';
       $('calendarEventsState').className='source-state stale';
     }
