@@ -129,7 +129,10 @@
     // A deadline time is not proof of a fixed appointment. Do not schedule it.
     timing:t.sourceKind==='calendar'?'fixed':start.at&&start.at.includes('T')?'timed-deadline':'flexible',
     habitCycle:['毎日','毎週','毎月','年・長期'].includes(t.habitCycle)?t.habitCycle:'',
-    lastEditedAt:typeof t.lastEditedAt==='string'?str(t.lastEditedAt,80):null
+    lastEditedAt:typeof t.lastEditedAt==='string'?str(t.lastEditedAt,80):null,
+    // Preserve the source mirror's sync time separately from this Notion GET time.
+    // A fresh Notion read cannot prove Apple Calendar was refreshed recently.
+    lastSynced:typeof t.lastSynced==='string'?str(t.lastSynced,80):null
    }:{})});
   }
   return {schema:'yos-daystream-source-snapshot-v1',kind:'tasks',status:authoritative?'ok':'partial',items,checkedAt:new Date(cache.savedAt).toISOString(),source:'yos-auth-cache',...(authoritative?{origin:'notion',complete:true,ignoredBlankCount:Number.isSafeInteger(cache.data.ignoredBlankCount)&&cache.data.ignoredBlankCount>=0?cache.data.ignoredBlankCount:0}: {})};
