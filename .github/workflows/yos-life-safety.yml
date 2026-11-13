@@ -126,15 +126,15 @@ jobs:
           cat /tmp/life-server.log
           exit 1
 
-      - name: Run morning-to-night smoke
-        env:
-          LIFE_BROWSER: ${{ matrix.browser }}
-        run: node life/tests/life-smoke.mjs
-
       - name: Verify YOS integrated calendar safely in browser
         env:
           LIFE_BROWSER: ${{ matrix.browser }}
         run: node life/calendar/unified-calendar.browser.test.cjs
+
+      - name: Run morning-to-night smoke
+        env:
+          LIFE_BROWSER: ${{ matrix.browser }}
+        run: node life/tests/life-smoke.mjs
 
       - name: Upload Life screenshots
         if: always()
