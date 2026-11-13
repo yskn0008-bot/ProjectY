@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import {chromium,webkit} from 'playwright';
+import {verifyNativeChoice} from './daystream-native-choice-browser.mjs';
 const type=process.env.YOS_BROWSER||'chromium',browser=await (type==='webkit'?webkit:chromium).launch({headless:true});
 const page=await browser.newPage({viewport:{width:390,height:844},isMobile:true,deviceScaleFactor:2});
 const errors=[];
@@ -35,6 +36,7 @@ try{
  await page.evaluate(()=>beginLocalEdit(items.find(x=>x.t==='WIZARD CREATE')));
  assert.equal(await page.locator('#newTitle').isVisible(),true);assert.equal(await page.locator('#newTime').isVisible(),true);
  await page.locator('#cancelEditor').click();
+ await verifyNativeChoice(page);
  const status=await page.evaluate(()=>{
   const day=new Date(),iso=[day.getFullYear(),String(day.getMonth()+1).padStart(2,'0'),String(day.getDate()).padStart(2,'0')].join('-');
   const p={version:1,days:{[iso]:[{id:19001,t:'WEB PORT STORAGE SMOKE',s:480,d:30,kind:'task'}]},hiddenCalendar:{}};
@@ -184,6 +186,54 @@ try{
   assert.deepEqual(offline.plan,pack.plan,'offline launch preserves restored plan');
   assert.equal(offline.calendar['2026-11-13'][0].start,570,'offline launch retains imported calendar');
  }
+ // Authenticated Notion integration uses synthetic rows, never real credentials or data.
+ const liveContext=await browser.newContext({viewport:{width:390,height:844},timezoneId:'Asia/Tokyo',serviceWorkers:'block'});
+ const live=await liveContext.newPage();let state='次にやる',title='NOTION LIVE',version='2026-11-13T01:00:00Z',writes=0,reads=0,failRead=false;
+ const sourceId='11111111222233334444555555555555';
+ const row=()=>({id:sourceId,title,state,order:1000,due:'2026-11-13T15:00:00Z',dueEnd:null,area:'Work',habitCycle:'',lastEditedAt:version});
+ await liveContext.addInitScript(()=>{
+  window.google={accounts:{id:{initialize:settings=>{window.testGoogleCallback=settings.callback},renderButton(){}}}};
+  localStorage.setItem('yos-task-dashboard-cache-v1',JSON.stringify({savedAt:Date.now(),data:{tasks:[{title:'STALE PROJECTION',state:'次にやる',order:1}]}}));
+ });
+ await liveContext.route('https://yskn0008-bot.github.io/**',async route=>{
+  const url=new URL(route.request().url());const response=await route.fetch({url:'http://127.0.0.1:4173'+url.pathname});await route.fulfill({response});
+ });
+ const cors={'Access-Control-Allow-Origin':'https://yskn0008-bot.github.io','Access-Control-Allow-Methods':'GET, PATCH, OPTIONS','Access-Control-Allow-Headers':'Authorization, Content-Type'};
+ await liveContext.route('https://project-y-yos-ai.vercel.app/**',async route=>{
+  if(route.request().method()==='OPTIONS'){await route.fulfill({status:204,headers:cors});return}
+  if(route.request().url().endsWith('/public-config')){await route.fulfill({headers:cors,json:{googleClientId:'test.apps.googleusercontent.com'}});return}
+  assert.match(route.request().url(),/tasks\?source=notion$/);
+  assert.equal(route.request().headers().authorization,'Bearer synthetic-id-token');
+  if(route.request().method()==='PATCH'){
+   writes++;const body=route.request().postDataJSON();assert.equal(body.pageId,sourceId);assert.equal(body.action,'complete');
+   state='完了';version='2026-11-13T02:00:00Z';await route.fulfill({headers:cors,json:{source:'notion',task:row()}});return;
+  }
+  reads++;await route.fulfill(failRead?{status:503,headers:cors,json:{error:'synthetic offline'}}:{headers:cors,json:{source:'notion',complete:true,tasks:[row()]}});
+ });
+ await live.goto('https://yskn0008-bot.github.io/yos/daystream/',{waitUntil:'domcontentloaded'});
+ await live.locator('[data-tab="task"]').click();await live.locator('#yosWebTaskRefresh').click();
+ await live.waitForFunction(()=>typeof window.testGoogleCallback==='function');
+ await live.evaluate(()=>window.testGoogleCallback({credential:'synthetic-id-token'}));
+ assert.match(await live.locator('#yosSourceTasks').textContent(),/NOTION LIVE/);
+ assert.doesNotMatch(await live.locator('#yosSourceTasks').textContent(),/STALE PROJECTION/);
+ await live.locator('#yosStartFrom').fill('09:00');await live.locator('#yosSourceTasks button').first().click();await live.locator('#yosPlanBox button').click();
+ const planned=await live.evaluate(()=>JSON.parse(localStorage.getItem('YOS_DAYSTREAM_WEB_PLAN_V1')));
+ const day=Object.keys(planned.days)[0],placed=planned.days[day][0];assert.equal(placed.sourceRef,'notion:notion-'+sourceId);
+ title='NOTION RENAMED';await live.evaluate(()=>window.YOS_DAYSTREAM_TASK_AUTH.refresh());
+ assert.equal(await live.evaluate(()=>items.find(x=>x.sourceRef==='notion:notion-11111111222233334444555555555555').t),'NOTION RENAMED');
+ assert.equal(await live.evaluate(()=>items.filter(x=>x.sourceRef==='notion:notion-11111111222233334444555555555555').length),1);
+ failRead=true;await live.evaluate(()=>window.YOS_DAYSTREAM_TASK_AUTH.refresh());
+ assert.equal(await live.evaluate(()=>items.find(x=>x.sourceRef==='notion:notion-11111111222233334444555555555555').done),false);
+ failRead=false;
+ await live.evaluate(()=>yosCompleteSource(items.find(x=>x.sourceRef==='notion:notion-11111111222233334444555555555555')));
+ assert.equal(writes,1);assert.equal(await live.evaluate(()=>items.find(x=>x.sourceRef==='notion:notion-11111111222233334444555555555555').done),true);
+ await live.evaluate(()=>yosCompleteSource(items.find(x=>x.sourceRef==='notion:notion-11111111222233334444555555555555')));
+ assert.equal(writes,1,'repeated completion cannot issue a second mutation');
+ await live.reload({waitUntil:'domcontentloaded'});
+ assert.equal(await live.evaluate(()=>items.find(x=>x.sourceRef==='notion:notion-11111111222233334444555555555555').done),true);
+ assert.doesNotMatch(await live.locator('#yosSourceTasks').textContent(),/STALE PROJECTION/);
+ assert.ok(reads>=3);
+ await liveContext.close();
  assert.deepEqual(errors,[],'no script errors during load, storage, reload or learning');
  console.log('DAYSTREAM Web port browser smoke PASS',type);
 }finally{await browser.close()}

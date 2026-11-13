@@ -48,7 +48,7 @@
   if(step<3)fields[step].querySelector?.('input')?.focus({preventScroll:true});
  }
  function reset(){active=false;step=0;progress.hidden=summary.hidden=error.hidden=controls.hidden=true;editor.querySelector('.fields').hidden=false;fields.forEach(el=>el.hidden=false);$('newKind').hidden=false;$('editEnd').hidden=false;$('saveBtn').hidden=false;}
- window.YOS_TASK_WIZARD={start(){active=true;step=0;progress.hidden=error.hidden=controls.hidden=false;render()},reset};reset();
+ window.YOS_TASK_WIZARD={start(at=0){active=true;step=Math.max(0,Math.min(4,at));progress.hidden=error.hidden=controls.hidden=false;render()},isActive:()=>active,reset};reset();
  editor.addEventListener('keydown',event=>{if(active&&event.key==='Enter'&&event.target.tagName!=='TEXTAREA'&&event.target.tagName!=='BUTTON'&&event.target.tagName!=='SELECT'){event.preventDefault();if(step<4)next.click();}});
  editor.addEventListener('click',event=>{if(active&&event.target===$('saveBtn')&&step!==4){event.preventDefault();event.stopImmediatePropagation()}},true);
 })();

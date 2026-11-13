@@ -108,7 +108,7 @@ button:active{opacity:.8}@media(min-width:640px){.dock{left:calc((100vw - 640px)
  <label for="yosStartFrom">配置提案の開始時刻</label><input id="yosStartFrom" type="time" value="09:00" aria-label="配置提案の開始時刻">
  <button id="yosPlanAll" type="button">上位3件をまとめて配置提案</button><div id="yosPlanBox" aria-live="polite"></div><div id="yosSourceTasks"></div>
  <h3>繰り返し習慣</h3><p class="muted" id="yosHabitSourceStatus">習慣：確認中</p><div id="yosHabitTasks"></div></section>
-  <section class="review" id="review"><h3>一日の振り返り</h3><p id="compatReview" class="muted">配置の相性は根拠がある場合だけ評価します。</p><p id="reviewText">端末内の完了記録を集計します。</p><p id="reviewTip"></p><p class="muted">予定時間と実績時間は異なります。Notionの完了状態には反映しません。</p><button id="reviewBtn">再集計</button></section>
+  <section class="review" id="review"><h3>一日の振り返り</h3><p id="compatReview" class="muted">配置の相性は根拠がある場合だけ評価します。</p><p id="reviewText">端末内の完了記録を集計します。</p><p id="reviewTip"></p><p class="muted">予定時間と実績時間は別です。認証済みNotionタスクは原本の完了を確認し、端末だけのタスクは端末内に記録します。</p><button id="reviewBtn">再集計</button></section>
   <section class="tabbox" id="recordsPanel"><h3>記録</h3><p>このタイムライン内で完了にした項目のみを表示します。</p><div id="recordsList"></div></section>
   <section class="tabbox" id="aiPanel"><h3>AIプラン</h3><p>AIとの連携は未実装です。実行状況を確認せずに予定の自動変更はしません。</p><p class="muted">追加や時間変更はタイムラインで手動操作できます。</p></section>
   <div class="gesture-delete" id="gestureDelete" hidden aria-live="polite"><span id="gestureDeleteTitle"></span><button id="gestureDeleteConfirm" type="button">削除</button><button id="gestureDeleteCancel" class="cancel" type="button">戻す</button></div>
@@ -149,7 +149,7 @@ button:active{opacity:.8}@media(min-width:640px){.dock{left:calc((100vw - 640px)
    return sourceAdapters?.fromYosTaskDashboardCache(p)||null;
   }catch{return null}
  })();
- const effectiveTasks=existingYosCache||importedTasks;
+ const effectiveTasks=importedTasks?.origin==='notion'?importedTasks:existingYosCache||importedTasks;
  const existingLifeSchedule=(()=>{
   try{return sourceAdapters?.fromYosLifeStore(JSON.parse(localStorage.getItem('yos-life-v1')||'null'))||null}catch{return null}
  })();
@@ -180,7 +180,7 @@ button:active{opacity:.8}@media(min-width:640px){.dock{left:calc((100vw - 640px)
   saveAuthorizedTasks(snapshot){
    if(!snapshot||snapshot.source!=='yos-auth-cache'||snapshot.kind!=='tasks'||!sourceAdapters?.validSaved(snapshot,'tasks'))return false;
    if(!writeSource(SOURCE_TASK,snapshot))return false;
-   location.reload();return true;
+   window.dispatchEvent(new CustomEvent('yos-notion-tasks',{detail:snapshot}));return true;
   },
   importSource(text,name){
    if(!sourceAdapters||typeof text!=='string'||text.length>sourceAdapters.MAX_BYTES)return false;
@@ -297,7 +297,7 @@ button:active{opacity:.8}@media(min-width:640px){.dock{left:calc((100vw - 640px)
  };
  window.YOS_DAYSTREAM_WEB=web;
  if('serviceWorker' in navigator){navigator.serviceWorker.register('../../service-worker.js',{scope:'../../',updateViaCache:'none'}).catch(()=>{});}
- window.YOS_CHARCOAL_BOOT={days:plan.days,hiddenCalendar:plan.hiddenCalendar||{},calendarDays:effectiveCalendar?.calendarDays||{},allDayDays:effectiveCalendar?.allDayDays||{},calendarCoverage:importedCalendarCoverage,calendarSource:effectiveCalendar?.source||'unavailable',taskSource:effectiveTasks?{...effectiveTasks,status:'partial'}:{status:'unavailable',items:[]},habitSource:{status:'unavailable',items:[]},generatedAt:new Date().toISOString()};
+ window.YOS_CHARCOAL_BOOT={days:plan.days,hiddenCalendar:plan.hiddenCalendar||{},calendarDays:effectiveCalendar?.calendarDays||{},allDayDays:effectiveCalendar?.allDayDays||{},calendarCoverage:importedCalendarCoverage,calendarSource:effectiveCalendar?.source||'unavailable',taskSource:effectiveTasks?{...effectiveTasks,status:effectiveTasks.origin==='notion'?'ok':'partial'}:{status:'unavailable',items:[]},habitSource:{status:'unavailable',items:[]},generatedAt:new Date().toISOString()};
  window.addEventListener('DOMContentLoaded',()=>{
   const f=document.getElementById('yosWebFile'),btn=document.getElementById('yosWebImport');
   btn.onclick=()=>f.click();
@@ -367,7 +367,12 @@ function yosRefreshTestToggle(){
 const calendarRows=Array.isArray(calendarByDay[todayISO])?calendarByDay[todayISO]:[];
 const initialItems=calendarItems(todayISO);
 let stored=Object.prototype.hasOwnProperty.call(savedDays,todayISO)?savedDays[todayISO]:null;
-const dayItems=day=>[...calendarItems(day),...(Array.isArray(savedDays[day])?savedDays[day]:[]).filter(x=>x.source!=='Apple Calendar').map(x=>({...x}))];
+const dayItems=day=>[...calendarItems(day),...(Array.isArray(savedDays[day])?savedDays[day]:[]).filter(x=>x.source!=='Apple Calendar').map(x=>yosReconcileRow(x))];
+function yosReconcileRow(row){
+ const source=boot.taskSource;
+ const match=source?.origin==='notion'&&source.items?.find(t=>'notion:'+t.id===row.sourceRef);
+ return match?{...row,t:match.title,due:match.due,done:match.status==='完了'}:{...row};
+}
 let selectedDay=todayISO,isSample=false,items=dayItems(todayISO);
 // WEB_PORT_BRIDGE: browser-only, never touches Scriptable native files.
 const persist=()=>{
@@ -398,8 +403,9 @@ window.YOS_DAYSTREAM_APPLY_SUGGESTION=(hint)=>{
 };
 const fmt=m=>String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0');
 
-const taskSource=boot.taskSource||{status:'unavailable',items:[]},habitSource=boot.habitSource||{status:'unavailable',items:[]};
-const sourceTasks=Array.isArray(taskSource.items)?taskSource.items.filter(x=>x&&typeof x.id==='string'&&typeof x.title==='string'):[];
+let taskSource=boot.taskSource||{status:'unavailable',items:[]};
+const habitSource=boot.habitSource||{status:'unavailable',items:[]};
+let sourceTasks=Array.isArray(taskSource.items)?taskSource.items.filter(x=>x&&typeof x.id==='string'&&typeof x.title==='string'):[];
 const sourceHabits=Array.isArray(habitSource.items)?habitSource.items.filter(x=>x&&typeof x.id==='string'&&typeof x.title==='string'):[];
 const planBox=document.getElementById('yosPlanBox'),taskFeed=document.getElementById('yosSourceTasks'),habitFeed=document.getElementById('yosHabitTasks');
 const yosStatusWord=x=>x==='ok'?'取得済み':x==='partial'?'一部のみ取得':x==='unavailable'?'未接続':'取得エラー';
@@ -419,11 +425,11 @@ function yosFindSlot(occupied,start,duration){
  return null;
 }
 // YOS_UNIFIED_SLOT_END
-function yosAddRow(container,title,description,onClick){
+function yosAddRow(container,title,description,onClick,label='時間を提案'){
  const row=document.createElement('div');row.className='yos-source-row';
  const body=document.createElement('div'),name=document.createElement('b'),meta=document.createElement('small');
  name.textContent=title;meta.textContent=description;body.append(name,meta);row.append(body);
- const button=document.createElement('button');button.textContent='時間を提案';button.onclick=onClick;row.append(button);container.append(row);
+ const button=document.createElement('button');button.textContent=label;button.onclick=onClick;row.append(button);container.append(row);
 }
 // YOS_LIFE_LEARNING_LIVE_START: sourced only from existing sanitized native taskSource.
 function yosRenderLearningHints(){
@@ -434,7 +440,7 @@ function yosRenderLearningHints(){
  const date=new Date(),today=localISO(date);date.setDate(date.getDate()+1);
  const next=localISO(date),seen=new Set();
  const active=sourceTasks.filter(x=>{
-   if(!x||typeof x.id!=='string'||typeof x.title!=='string'||!['次にやる','実行中','本人操作'].includes(x.status))return false;
+   if(!x||x.timing==='fixed'||typeof x.id!=='string'||typeof x.title!=='string'||!['次にやる','実行中','本人操作'].includes(x.status))return false;
    if(x.due!==today&&x.due!==next||seen.has(x.id))return false;
    seen.add(x.id);return true;
  }).sort((a,b)=>a.due.localeCompare(b.due)||yosTaskRank(a)-yosTaskRank(b)||a.title.localeCompare(b.title,'ja')).slice(0,3);
@@ -456,15 +462,16 @@ function yosRenderSources(){
  yosRenderLearningHints();
  taskFeed.textContent='';habitFeed.textContent='';
  const status=document.getElementById('yosTaskSourceStatus');
- status.textContent=(taskSource.source==='user-file'?'手動取込のTasks写し：':taskSource.source==='yos-auth-cache'?'YOS認証済みTasks写し（自動更新なし）：':'Notion Tasks：')+yosStatusWord(taskSource.status)+(taskSource.status==='ok'||taskSource.status==='partial'?'（取得 '+sourceTasks.length+'件・先頭80件を表示）':'')+(taskSource.checkedAt?' · '+new Date(taskSource.checkedAt).toLocaleString('ja-JP',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}):'');
- const live=sourceTasks.filter(x=>!['待ち','保留'].includes(x.status));
+ status.textContent=(taskSource.source==='user-file'?'手動取込のTasks写し：':taskSource.origin==='notion'?'Notion正本の取得済み写し：':taskSource.source==='yos-auth-cache'?'YOS認証済みTasks写し（自動更新なし）：':'Notion Tasks：')+yosStatusWord(taskSource.status)+(taskSource.status==='ok'||taskSource.status==='partial'?'（取得 '+sourceTasks.length+'件・先頭80件を表示）':'')+(taskSource.checkedAt?' · '+new Date(taskSource.checkedAt).toLocaleString('ja-JP',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}):'');
+ const live=sourceTasks.filter(x=>!['完了','待ち','保留'].includes(x.status));
  live.sort((a,b)=>yosTaskRank(a)-yosTaskRank(b)||String(a.due||'9999').localeCompare(String(b.due||'9999'))||a.title.localeCompare(b.title,'ja'));
  const pending=live.filter(x=>!yosIsPlanned('notion:'+x.id)).slice(0,80);
  if(!pending.length){const p=document.createElement('p');p.className='muted';p.textContent=taskSource.status==='ok'?'未配置の対象タスクはありません':'タスクは未取得・要確認';taskFeed.append(p)}
  for(const x of pending){
   const expired=x.due&&x.due<selectedDay;
-  const info=x.area+' · '+(x.priority||'優先度未設定')+' · '+(x.due?(expired?'期限経過・要確認 ':'期限 ')+x.due:'期限未設定')+(x.status==='本人操作'?' · 本人操作':'');
-  yosAddRow(taskFeed,x.title,info,()=>yosPropose(x,'task'));
+  const info=x.area+' · '+(x.priority||'優先度未設定')+' · '+(x.due?(expired?'期限経過・要確認 ':'期限 ')+x.due:'期限未設定')+(x.dueAt?.includes('T')?' · 期限時刻 '+new Date(x.dueAt).toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit',timeZone:'Asia/Tokyo'}):'')+(x.habitCycle?' · '+x.habitCycle+'（時刻固定なし）':'')+(x.status==='本人操作'?' · 本人操作':'');
+  if(x.timing==='fixed')yosAddRow(taskFeed,x.title,info+' · 元カレンダーの予定（移動しません）',()=>window.open('https://www.notion.so/'+x.id.slice(7),'_blank','noopener'),'Notionで確認');
+  else yosAddRow(taskFeed,x.title,info,()=>yosPropose(x,'task'));
  }
  const habitStatus=document.getElementById('yosHabitSourceStatus');habitStatus.textContent='習慣：'+yosStatusWord(habitSource.status);
  const habits=yosEligibleHabits(selectedDay).filter(x=>!yosIsPlanned('habit:'+x.id)).slice(0,40);
@@ -472,6 +479,30 @@ function yosRenderSources(){
  for(const x of habits)yosAddRow(habitFeed,x.title,(x.trigger||'実施するきっかけ未設定')+' · '+x.period,()=>yosPropose(x,'habit'));
 }
 
+// Source refresh changes projections only; local times, Shortcuts and unrelated rows are retained.
+window.addEventListener('yos-notion-tasks',event=>{
+ const snapshot=event.detail;
+ if(snapshot?.origin!=='notion'||!window.YOS_DAYSTREAM_SOURCES.validSaved(snapshot,'tasks'))return;
+ taskSource=snapshot;sourceTasks=snapshot.items;boot.taskSource=snapshot;
+ items=dayItems(selectedDay);yosRenderSources();smoothRender();updateReview();
+});
+const yosSourceWrites=new Set();
+async function yosCompleteSource(row){
+ const source=sourceTasks.find(t=>'notion:'+t.id===row.sourceRef);
+ if(!source||taskSource.origin!=='notion'||!window.YOS_DAYSTREAM_SOURCES.validSaved(taskSource,'tasks')){note.textContent='原本を確認できません。タスクタブでYOS Tasksを更新してください';return}
+ if(source.status==='完了'){note.textContent='Notionで完了済みです。再開はNotionで確認して行ってください';return}
+ if(yosSourceWrites.has(source.id))return;
+ const completedDay=selectedDay;
+ yosSourceWrites.add(source.id);note.textContent='Notionへ完了を保存・確認中';
+ try{
+  const result=await window.YOS_DAYSTREAM_TASK_AUTH.complete(source);
+  if(!result.ok){note.textContent=result.reason;return}
+  const next={...taskSource,items:sourceTasks.map(t=>t.id===source.id?result.item:t)};
+  const saved=window.YOS_DAYSTREAM_WEB.saveAuthorizedTasks(next);
+  if(saved)window.YOS_DAYSTREAM_WEB.logCompletion({id:row.id,title:row.t,sourceRef:row.sourceRef,at:new Date().toISOString(),day:completedDay,plannedStart:row.s});
+  note.textContent=saved?'Notionの完了を読戻し確認しました':'Notionは完了済みですが端末保存に失敗しました。再取得してください';
+ }catch{note.textContent='完了の結果を確認できません。Notionを再取得してください'}finally{yosSourceWrites.delete(source.id)}
+}
 // YOS_UNIFIED_BATCH_START
 function yosBatchPlan(tasks,occupied,start,day){
  if(!Number.isInteger(start)||start<0||start>1439||!/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(day))return [];
@@ -481,7 +512,7 @@ function yosBatchPlan(tasks,occupied,start,day){
   const urgent=delta===null?45:delta<0?0:delta===0?2:delta===1?12:delta<=3?22:delta<=7?32:50;
   return urgent+({P0:0,P1:10,P2:20,P3:30}[x.priority]??40);
  };
- const active=tasks.filter(x=>x&&x.id&&x.title&&!['待ち','保留'].includes(x.status)&&(!x.due||dayCount(x.due)>=-7));
+ const active=tasks.filter(x=>x&&x.id&&x.title&&x.timing!=='fixed'&&!['完了','待ち','保留'].includes(x.status)&&(!x.due||dayCount(x.due)>=-7));
  active.sort((a,b)=>score(a)-score(b)||String(a.due||'9999').localeCompare(String(b.due||'9999'))||a.title.localeCompare(b.title,'ja'));
  const slots=Math.ceil((1440-start)/15);
  let free=0;
@@ -527,6 +558,7 @@ document.getElementById('yosPlanAll').onclick=yosProposeBatch;
 
 function yosPropose(item,kind){
  planBox.textContent='';
+ if(item.timing==='fixed'){planBox.textContent='元カレンダーの固定予定は時間を動かしません';return}
  const startParts=document.getElementById('yosStartFrom').value.split(':').map(Number);
  if(startParts.length!==2||!Number.isInteger(startParts[0])||!Number.isInteger(startParts[1])||startParts[0]>23||startParts[1]>59){planBox.textContent='提案開始時刻を確認してください';return}
  const start=startParts[0]*60+startParts[1],duration=kind==='habit'?15:30,at=yosFindSlot(items,start,duration);
@@ -778,7 +810,7 @@ function yosRenderCompatibility(){
  const review=document.getElementById('compatReview');
  review.textContent=(details.length?details.slice(0,5).join('。'):'相性を判断できる根拠はまだありません。予定の時刻や準備・移動情報を確認してください。')+'。色は配置からの候補判定で、効果の保証や測定値ではありません。';
 }
-function updateReview(){yosRenderCompatibility();const done=items.filter(x=>x.done),pending=items.filter(x=>!x.done),movable=items.filter(x=>!x.f),completed=movable.filter(x=>x.done);const pct=movable.length?Math.round(completed.length/movable.length*100):0;const used=done.reduce((n,x)=>n+x.d,0);let summary=done.length?'完了記録は'+done.length+'件（合計'+Math.round(used/60*10)/10+'時間）。可動タスクの達成率は'+pct+'%。':'完了記録がまだありません。予定の配置だけでは実行できたか判断できません。';const overlaps=[];const sorted=[...items].sort((a,b)=>a.s-b.s);for(let i=0;i<sorted.length;i++)for(let j=i+1;j<sorted.length&&sorted[j].s<sorted[i].s+sorted[i].d;j++)if(sorted[i].kind===sorted[j].kind&&sorted[i].kind!=='schedule')overlaps.push([sorted[i],sorted[j]]);const pair=overlaps[0];const tip=pair?'改善候補：「'+pair[0].t+'」と「'+pair[1].t+'」は時間が重なっています。同じ種類の作業としてまとめられるか確認すると、切り替えの手間を減らせる可能性があります。':'改善候補：タスクの統合を提案する根拠がまだ不足しています。完了状況と実際の所要時間を記録すると、翌日の改善案を具体化できます。';document.getElementById('reviewText').textContent=summary+' '+(pending.length?'未完了・未確認は'+pending.length+'件。予定の変更と完了は区別して評価します。':'全項目に完了記録があります。');document.getElementById('reviewTip').textContent=tip;updateOverview();renderLists();}document.getElementById('reviewBtn').onclick=updateReview;document.getElementById('startActualBtn').onclick=()=>{const x=items.find(x=>x.id===selectedId);if(!x||x.f||x.kind!=='task'||x.done)return;const ok=window.YOS_DAYSTREAM_WEB.markStarted({id:x.id,day:selectedDay});note.textContent=ok?'「'+x.t+'」の開始をこの端末で記録した':'開始を記録できませんでした';fi.textContent=note.textContent;};document.getElementById('doneBtn').onclick=()=>{const x=items.find(x=>x.id===selectedId);if(!x)return;if(x.f){note.textContent='固定予定は元カレンダーで管理してください';return}const prior=x.done;x.done=!x.done;const saved=persist();if(!saved)x.done=prior;document.getElementById('doneBtn').textContent=x.done?'未完了に戻す':'完了にする';if(saved&&x.kind==='task'){if(x.done)window.YOS_DAYSTREAM_WEB.logCompletion({id:x.id,title:x.t,sourceRef:x.sourceRef||'',at:new Date().toISOString(),day:selectedDay,plannedStart:x.s});else window.YOS_DAYSTREAM_WEB.undoCompletion({id:x.id,day:selectedDay})};note.textContent=x.t+(x.done?'を端末内で仮完了':'の端末内の完了を解除')+(saved?'（保存処理中）':'（保存処理失敗）');fi.textContent=note.textContent;smoothRender();updateReview()};
+function updateReview(){yosRenderCompatibility();const done=items.filter(x=>x.done),pending=items.filter(x=>!x.done),movable=items.filter(x=>!x.f),completed=movable.filter(x=>x.done);const pct=movable.length?Math.round(completed.length/movable.length*100):0;const used=done.reduce((n,x)=>n+x.d,0);let summary=done.length?'完了記録は'+done.length+'件（合計'+Math.round(used/60*10)/10+'時間）。可動タスクの達成率は'+pct+'%。':'完了記録がまだありません。予定の配置だけでは実行できたか判断できません。';const overlaps=[];const sorted=[...items].sort((a,b)=>a.s-b.s);for(let i=0;i<sorted.length;i++)for(let j=i+1;j<sorted.length&&sorted[j].s<sorted[i].s+sorted[i].d;j++)if(sorted[i].kind===sorted[j].kind&&sorted[i].kind!=='schedule')overlaps.push([sorted[i],sorted[j]]);const pair=overlaps[0];const tip=pair?'改善候補：「'+pair[0].t+'」と「'+pair[1].t+'」は時間が重なっています。同じ種類の作業としてまとめられるか確認すると、切り替えの手間を減らせる可能性があります。':'改善候補：タスクの統合を提案する根拠がまだ不足しています。完了状況と実際の所要時間を記録すると、翌日の改善案を具体化できます。';document.getElementById('reviewText').textContent=summary+' '+(pending.length?'未完了・未確認は'+pending.length+'件。予定の変更と完了は区別して評価します。':'全項目に完了記録があります。');document.getElementById('reviewTip').textContent=tip;updateOverview();renderLists();}document.getElementById('reviewBtn').onclick=updateReview;document.getElementById('startActualBtn').onclick=()=>{const x=items.find(x=>x.id===selectedId);if(!x||x.f||x.kind!=='task'||x.done)return;const ok=window.YOS_DAYSTREAM_WEB.markStarted({id:x.id,day:selectedDay});note.textContent=ok?'「'+x.t+'」の開始をこの端末で記録した':'開始を記録できませんでした';fi.textContent=note.textContent;};document.getElementById('doneBtn').onclick=()=>{const x=items.find(x=>x.id===selectedId);if(!x)return;if(x.f){note.textContent='固定予定は元カレンダーで管理してください';return}if(String(x.sourceRef||'').startsWith('notion:')){void yosCompleteSource(x);return}const prior=x.done;x.done=!x.done;const saved=persist();if(!saved)x.done=prior;document.getElementById('doneBtn').textContent=x.done?'未完了に戻す':'完了にする';if(saved&&x.kind==='task'){if(x.done)window.YOS_DAYSTREAM_WEB.logCompletion({id:x.id,title:x.t,sourceRef:x.sourceRef||'',at:new Date().toISOString(),day:selectedDay,plannedStart:x.s});else window.YOS_DAYSTREAM_WEB.undoCompletion({id:x.id,day:selectedDay})};note.textContent=x.t+(x.done?'を端末内で仮完了':'の端末内の完了を解除')+(saved?'（保存処理中）':'（保存処理失敗）');fi.textContent=note.textContent;smoothRender();updateReview()};
 
 function updateOverview(){
  const movable=items.filter(x=>!x.f),done=movable.filter(x=>x.done),pct=movable.length?Math.round(done.length/movable.length*100):0;
@@ -1010,6 +1042,7 @@ document.getElementById('gestureDeleteConfirm').onclick=()=>{
 function toggleTaskDone(item){
  const target=items.find(x=>x.id===item.id);
  if(!target||target.f||target.kind!=='task')return;
+ if(String(target.sourceRef||'').startsWith('notion:')){void yosCompleteSource(target);return}
  hideSwipeDelete();const prior=target.done;target.done=!target.done;
  const saved=persist();if(!saved)target.done=prior;
  if(saved){if(target.done)window.YOS_DAYSTREAM_WEB.logCompletion({id:target.id,title:target.t,sourceRef:target.sourceRef||'',at:new Date().toISOString(),day:selectedDay,plannedStart:target.s});else window.YOS_DAYSTREAM_WEB.undoCompletion({id:target.id,day:selectedDay})}
@@ -1164,4 +1197,4 @@ if(Array.isArray(stored)){note.textContent='保存済み時間割を表示 · No
 else if(calendarRows.length){note.textContent=(boot.calendarSource==='user-file'?'手動取込のApple予定 ':boot.calendarSource==='yos-life-local'?'保存済みMY WAY予定 ':'Appleカレンダー ')+calendarRows.length+'件を読み取り'+(yosTestCount(todayISO)?' · テスト'+yosTestCount(todayISO)+'件は非表示':'')+' · 端末内で追加・編集';}
 else{note.textContent='端末内の予定はありません · 右上の追加から登録';}
 yosDefaultStart();yosRefreshTestToggle();renderWeek();render();renderDayAllDay();updateReview();yosRenderSources();setCalendarMode('day');setInterval(updateNow,60000);setInterval(yosRenderLearningHints,60000);
-</script><script src="./task-wizard.js"></script></body></html>
+</script><script src="./task-wizard.js"></script><script type="module" src="./native-choice.mjs"></script></body></html>

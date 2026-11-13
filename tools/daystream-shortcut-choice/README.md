@@ -1,15 +1,15 @@
-# DAYSTREAM native chooser — isolated feasibility candidate
+# DAYSTREAM native Shortcut selection
 
-No production UI change. Not complete and not a rename-sync implementation.
+Candidate in PR #751. The new-task wizard offers `iPhoneの最新一覧から選ぶ`. Add the signed `YOS Shortcut Choice` once. Every launch reads the current native Shortcut names and asks for one selection. It copies only a nonce-tagged name to the local clipboard; it never runs the selected Shortcut or sends the list to a server.
 
-Target flow: persist the complete unsaved task draft in the home-screen PWA; start the helper with a fresh `YOS_PICK_V1:<nonce>` input; native Get My Shortcuts → names → Choose From List; copy a tagged result locally. On return, accept only the matching unexpired one-use result through a user-initiated paste/read action, then show it in the draft for final confirmation. Cancel/invalid/old/unrelated clipboard data must leave the draft unchanged. Persist consumption together with the draft before creating a task. The protocol module does not itself persist a task or install UI.
+Return to the original home-screen DAYSTREAM, tap `選択を反映`, and confirm the task. If clipboard reading is denied, long-press the fallback field and paste. No name typing or bulk list maintenance is required. Existing imported lists and existing task data remain intact.
 
-The helper contains no list of real names, server requests or execution of the chosen Shortcut. Its list is obtained each run. It is unsigned development output until the return-to-PWA path is verified. Existing YOS Shortcut Names and task UI are untouched.
+The complete creation draft is saved locally before app switching. Reload restores it at step four on the same date. Closing/saving invalidates it. Choice packets expire after ten minutes, accept UTF-8 names up to 100 characters, and must match the current single-use nonce. Failed writes, unrelated packets, cancellation and denied paste do not change the task plan. The helper carries only a random request token through its URL, never task contents. No clipboard polling or automatic execution is used.
 
-Apple documents x-callback textual output, but an HTTPS return may open Safari rather than the installed PWA. Do not transfer task drafts in URL query strings or claim shared storage. WebKit documents clipboard gesture/paste restrictions; never silently poll the clipboard. Actual app-return and paste permission behavior require one physical iPhone test after UI integration is prepared. Both the callback option and explicit-paste fallback remain integration work.
+Existing-task editing retains its previous form. Existing name-only task records do not have stable native IDs: this chooser is **not automatic rename tracking**. Renaming a Shortcut later will not automatically relink old tasks. Stable identity and automatic PWA change delivery remain unproven and open.
 
-Stable shortcut identity is still unverified. A selected name must not be presented as a stable identifier, and additions/deletions must not be guessed to be renames. The requested automatic display-name/target following remains open until stable identity and a permitted live update transport are proven.
+Verification: Cherri 2.3.0 compilation; Node protocol and DAYSTREAM regressions; signed AEA signature plus all 20 action/UUID dataflow entries equal unsigned output. Signer differences are presentation/client defaults only. Signing uses the existing HubSign utility on secret-free static code. Browser smoke covers reload, denied clipboard/paste fallback, wrong packet protection, one-use persistence, final task save, existing editing and storage failures. Physical iPhone app return, paste permission and install behavior still need acceptance. Do not call the integration complete until that gate passes.
 
-Verification: pinned Cherri v2.3.0 compiles the helper. Inspect generated actions for run-time listing, one selection, local-only clipboard and absence of runworkflow/network actions. Node tests verify one-use Japanese names, expiry, mismatch, malformed input and no implicit rename identity. These are not physical phone results.
+The existing Notion/backend #750 production rollout is rate limited. Do not deploy this candidate's combined latest-main Web before the corresponding backend is ready. Keep production unchanged; PR branch is the isolated test source.
 
-References: https://support.apple.com/en-nz/guide/shortcuts/apdcd7f20a6f/ios and https://webkit.org/blog/10855/async-clipboard-api/
+Sources: https://support.apple.com/en-nz/guide/shortcuts/apdcd7f20a6f/ios and https://webkit.org/blog/10855/async-clipboard-api/
