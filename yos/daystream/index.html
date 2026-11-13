@@ -161,12 +161,20 @@ button:active{opacity:.8}@media(min-width:640px){.dock{left:calc((100vw - 640px)
  }:{from:'',until:'',status:'unavailable'};
  const writeSource=(key,data)=>{
   const backupKey=key+'_BACKUP';
+  let old=null,changed=false;
   try{
-   const old=localStorage.getItem(key),next=JSON.stringify(data);
+   old=localStorage.getItem(key);const next=JSON.stringify(data);
    if(old!==null){localStorage.setItem(backupKey,old);if(localStorage.getItem(backupKey)!==old)return false}
+   changed=true;
    localStorage.setItem(key,next);if(localStorage.getItem(key)!==next)throw Error('readback');
    return true;
-  }catch{return false}
+  }catch{
+   if(changed){try{
+    if(old===null)localStorage.removeItem(key);else localStorage.setItem(key,old);
+    if(localStorage.getItem(key)!==old)throw Error('rollback readback');
+   }catch{alert('取り込みに失敗し、元の状態への復旧を確認できません。以前のバックアップを保護しています。');}}
+   return false;
+  }
  };
  const web={
   saveAuthorizedTasks(snapshot){

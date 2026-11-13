@@ -12,6 +12,28 @@ const a=root.YOS_DAYSTREAM_SOURCES;
 const ICS=(blocks)=>'BEGIN:VCALENDAR\nVERSION:2.0\n'+blocks.join('\n')+'\nEND:VCALENDAR\n';
 const EV=(id,start,end,more='')=>'BEGIN:VEVENT\nUID:'+id+'\nSUMMARY:Testing '+id+'\nDTSTART'+start+'\nDTEND'+end+'\n'+more+'END:VEVENT';
 
+function sourceWriter(initial,fail){
+ const values=new Map(initial===null?[]:[['source',initial]]),alerts=[];let injected=false;
+ const localStorage={getItem:key=>values.get(key)??null,removeItem:key=>values.delete(key),setItem(key,value){
+  if(key==='source'&&!injected&&fail){injected=true;if(fail==='throw')throw Error('quota');values.set(key,'incomplete');return}
+  values.set(key,value);
+ }};
+ const fragment=html.slice(html.indexOf(' const writeSource='),html.indexOf(' const web={'));
+ return {write:vm.runInNewContext(fragment+'writeSource',{localStorage,alert:m=>alerts.push(m)}),values,alerts};
+}
+test('failed source readback restores the previous import and preserves its backup',()=>{
+ const old=JSON.stringify({prior:'予定'}),h=sourceWriter(old,'mismatch');
+ assert.equal(h.write('source',{next:'新しい予定'}),false);
+ assert.equal(h.values.get('source'),old);assert.equal(h.values.get('source_BACKUP'),old);assert.deepEqual(h.alerts,[]);
+});
+test('failed first import cannot leave partial source data, and thrown writes preserve existing data',()=>{
+ const first=sourceWriter(null,'mismatch');assert.equal(first.write('source',{next:true}),false);assert.equal(first.values.has('source'),false);
+ const previous=sourceWriter('previous','throw');assert.equal(previous.write('source',{next:true}),false);assert.equal(previous.values.get('source'),'previous');
+});
+test('successful source import is read back and retains the original copy',()=>{
+ const h=sourceWriter('previous');assert.equal(h.write('source',{next:'確認'}),true);assert.equal(h.values.get('source'),JSON.stringify({next:'確認'}));assert.equal(h.values.get('source_BACKUP'),'previous');
+});
+
 test('source adapter is syntax safe and does not call networks or access credentials',()=>{
  new vm.Script(code);
  assert.ok(a&&typeof a.parseICS==='function'&&typeof a.normalizeTasks==='function');
