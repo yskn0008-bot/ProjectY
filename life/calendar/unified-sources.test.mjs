@@ -39,7 +39,7 @@ test('real Notion IDs and Tokyo time are preserved; deadlines never become fixed
  assert.equal(x.items[0].source,'Notion Tasks写し');
 });
 test('only source calendar records become fixed and completion never guesses a duration',()=>{
- const x=read(tasks([task({timing:'fixed',status:'完了'})]));
+ const x=read(tasks([task({timing:'fixed',status:'完了',lastSynced:'2026-11-13T23:00:00Z'})]));
  assert.equal(x.items[0].type,'schedule');
  assert.equal(x.items[0].fixed,true);
  assert.equal(x.items[0].done,true);
@@ -97,4 +97,59 @@ test('a Money item is not deduplicated or imported by this bridge',()=>{
  const r=api.merge([{id:'money:1',type:'money',date:'2026-11-14',title:'家賃',amount:1000}],[]);
  assert.equal(r.length,1);
  assert.equal(r[0].amount,1000);
+});
+
+test('old upstream iPhone calendar mirrors remain excluded even after a fresh Notion GET',()=>{
+ const old=task({title:'予定｜古い予約',timing:'fixed',lastSynced:'2026-11-01T06:56:00Z'});
+ const current=task({id:'notion-'+'b'.repeat(32),title:'現在の通常タスク'});
+ const x=read(tasks([old,current]));
+ assert.equal(x.status.tasks,'ready','Notion task snapshot was freshly fetched');
+ assert.equal(x.items.length,1,'stale native calendar mirror was not scheduled');
+ assert.equal(x.items[0].title,'現在の通常タスク');
+ assert.equal(x.details.tasks.staleCalendar,1);
+ assert.equal(x.details.tasks.freshCalendar,0);
+});
+test('missing or timezone-free upstream source timestamp fails closed without hiding normal tasks',()=>{
+ const noTime=task({title:'予定｜不明',timing:'fixed'});
+ const ambiguous=task({id:'notion-'+'b'.repeat(32),title:'予定｜日時未指定',timing:'fixed',lastSynced:'2026-11-13T23:00:00'});
+ const todo=task({id:'notion-'+'c'.repeat(32),title:'普通のTODO',lastSynced:null});
+ const x=read(tasks([noTime,ambiguous,todo]));
+ assert.equal(x.items.length,1);
+ assert.equal(x.items[0].title,'普通のTODO');
+ assert.equal(x.details.tasks.unknownCalendar,2);
+});
+test('fresh mirror keeps real Tokyo time and strips generated 予定 prefix for cross-source dedupe',()=>{
+ const t=task({title:'予定｜美容室',timing:'fixed',
+   due:'2026-11-14',dueAt:'2026-11-14T10:00:00+09:00',
+   lastSynced:'2026-11-13T23:00:00Z',action:'10:00'});
+ const x=read(tasks([t]),calendar({allDayDays:{},calendarDays:{'2026-11-14':[{title:'美容室',start:600,duration:60}]}}));
+ assert.equal(x.details.tasks.freshCalendar,1);
+ assert.equal(x.details.tasks.staleCalendar,0);
+ const selected=api.merge([],x.items);
+ assert.equal(selected.filter(e=>e.title==='美容室').length,1);
+ assert.equal(selected[0].source,'予定取込写し','full calendar time wins over Notion mirror with unknown end');
+});
+test('upstream all-day marker keeps an event all-day, with no fabricated midnight appointment',()=>{
+ const t=task({title:'予定｜休み',timing:'fixed',action:'終日・沖縄',
+   due:'2026-11-14',dueAt:'2026-11-14T00:00:00+09:00',
+   lastSynced:'2026-11-13T23:00:00Z'});
+ const x=read(tasks([t]));
+ assert.equal(x.items.length,1);
+ assert.equal(x.items[0].subtitle,'終日');
+ assert.equal(x.items[0].title,'休み');
+});
+test('Notion source adapter preserves mirror lastSynced; Notion GET cannot replace it',()=>{
+ const original=readFileSync(new URL('../../yos/daystream/source-adapters.js',import.meta.url),'utf8');
+ const sandbox2={window:{},Intl,Date,Set,Number,Object,String,Array};
+ vm.runInNewContext(original,sandbox2,{timeout:1000});
+ const convert=sandbox2.window.YOS_DAYSTREAM_SOURCES.fromYosTaskDashboardCache;
+ const cached=convert({savedAt:Date.now(),data:{source:'notion',complete:true,tasks:[{
+  id:'a'.repeat(32),title:'予定｜元データ',state:'保留',
+  due:'2026-11-14T10:00:00+09:00',sourceKind:'calendar',dueEnd:null,
+  lastSynced:'2026-11-01T06:56:00Z',lastEditedAt:'2026-11-14T00:00:00Z'
+ }]}});
+ assert.equal(cached.items.length,1);
+ assert.equal(cached.items[0].lastSynced,'2026-11-01T06:56:00Z');
+ assert.equal(cached.items[0].lastEditedAt,'2026-11-14T00:00:00Z');
+ assert.equal(cached.items[0].timing,'fixed');
 });
