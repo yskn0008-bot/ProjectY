@@ -283,7 +283,7 @@ state.items=state.demo?createDemo():(window.YOS_UNIFIED_CALENDAR?.merge([...life
     const txt=(tag,value,classname)=>{const el=document.createElement(tag);if(classname)el.className=classname;el.textContent=value;return el};
     const listings=(target,rows,kind)=>{const root=$(target);root.replaceChildren();if(!rows.length){root.append(txt('div',state.demo?'この日の表示例なし':'登録・取得を確認できません','glance-empty'));return;}
       for(const e of rows.slice(0,3)){const line=document.createElement('div');line.className='glance-line';
-        if(kind==='schedule'){line.append(txt('span',e.subtitle?.match(/^\d{2}:\d{2}/)?.[0]||'終日','line-time'));}
+        if(kind==='schedule'){const at=e.subtitle?.match(/^(?:固定予定\s+)?(\d{2}:\d{2})/);line.append(txt('span',at?.[1]||(e.subtitle==='終日'?'終日':'時刻未確認'),'line-time'));}
         else{line.append(txt('span',e.done?'✓':'□','line-mark'));}
         line.append(txt('span',e.title,'line-copy'+(e.done?' done':'')));root.append(line)}
     };
