@@ -19,7 +19,8 @@ const {chromium,webkit}=require('playwright');
    const schema='yos-daystream-source-snapshot-v1';
    const tasks={schema,kind:'tasks',status:'ok',source:'yos-auth-cache',origin:'notion',complete:true,
     checkedAt:now.toISOString(),items:[{id:'notion-'+'a'.repeat(32),title:'面接予定の確認',status:'次にやる',due:today,dueAt:today,timing:'flexible'},
-     {id:'notion-'+'b'.repeat(32),title:'固定予定テスト',status:'保留',due:today,dueAt:today+'T03:00:00Z',timing:'fixed'}]};
+     {id:'notion-'+'b'.repeat(32),title:'予定｜固定予定テスト',status:'保留',due:today,dueAt:today+'T03:00:00Z',timing:'fixed',lastSynced:now.toISOString()},
+     {id:'notion-'+'c'.repeat(32),title:'予定｜古い通知',status:'保留',due:today,dueAt:today+'T03:00:00Z',timing:'fixed',lastSynced:'2026-11-01T06:56:00Z'}]};
    const calendar={schema,kind:'calendar',status:'ok',source:'user-file',checkedAt:now.toISOString(),
     calendarDays:{[today]:[{title:'美容室',start:600,duration:60},{title:'写真撮影',start:780,duration:45}]},allDayDays:{}};
    const life={days:{[today]:{lastSync:now.toISOString(),schedule:[{id:'orig-1',date:today,title:'美容室',start:today+'T10:00:00+09:00',end:today+'T11:00:00+09:00'}]}}};
@@ -30,7 +31,9 @@ const {chromium,webkit}=require('playwright');
    localStorage.setItem('yos-money-v2',JSON.stringify(money));
   });
   await page.reload({waitUntil:'domcontentloaded'});
-  assert.equal((await page.locator('#calendarTasksState').textContent()).trim(),'取込済み');
+  assert.equal((await page.locator('#calendarTasksState').textContent()).trim(),'要確認');
+  assert.match(await page.locator('#calendarTasksFreshness').innerText(),/古い\/不明な1件/);
+  assert.doesNotMatch(await page.locator('#glanceScheduleItems').innerText(),/古い通知/);
   assert.equal((await page.locator('#calendarEventsState').textContent()).trim(),'取込済み');
   const schedules=await page.locator('#glanceScheduleItems').innerText();
   assert.equal((schedules.match(/美容室/g)||[]).length,1,'same event in two views must not duplicate');
