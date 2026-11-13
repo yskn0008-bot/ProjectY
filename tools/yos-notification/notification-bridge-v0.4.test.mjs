@@ -29,8 +29,9 @@ function env(){
     return outputs.at(-1);
   }
   const queue=()=>JSON.parse(file.get("/documents/YOS_Notification_Pending.json")||"[]");
+  const journal=()=>JSON.parse(file.get("/documents/YOS_Notification_AI_State_V1.json")||"[]");
   const content=()=>server.map(x=>x.paragraph.rich_text[0].text.content).join("\n");
-  return {state,invoke,queue,content};
+  return {state,invoke,queue,journal,content};
 }
 test("Inbox save confirmed and pending drained",async()=>{
   const x=env();assert.match(await x.invoke("PayPay 決済 300円"),/保存確認/);
@@ -66,7 +67,7 @@ test("Missed calls are archived as a separate category",async()=>{
 test("Existing v0.3 pending entry is reconciled, not duplicated",async()=>{
   const x=env();x.state.file.set("/documents/YOS_Notification_Pending.json",
     JSON.stringify([{id:"cafebeef",date:"2026-10-01T10:00:00Z",category:"information",body:"legacy pending"}]));
-  x.state.server.push({paragraph:{rich_text:[{plain_text:"2026-10-01 · notification:cafebeef · information\nlegacy pending"}]}});
+  x.state.server.push({paragraph:{rich_text:[{plain_text:"2026-10-01T10:00:00Z · Clarity Notification · notification:cafebeef · information\nlegacy pending\n---"}]}});
   assert.match(await x.invoke(null),/保存確認/);
   assert.equal(x.state.server.length,1);assert.equal(x.queue().length,0);
 });
@@ -79,4 +80,59 @@ test("Unreadable queue is protected instead of being overwritten",async()=>{
 test("No network or app notifications beyond the existing Notion transport",()=>{
   assert.doesNotMatch(src,/new Notification\(/);
   assert.match(src,/api\.notion\.com/);
+});
+
+// Exercise real Bridge source, not a reimplementation of its recovery logic.
+test("AI crash leaves one recoverable sanitized event after the raw send queue drains",async()=>{
+ const x=env();await x.invoke("荷物が届きました");
+ assert.equal(x.queue().length,0);assert.equal(x.journal().length,1);
+ assert.equal(x.journal()[0].aiState,"unregistered");
+ const list=await x.invoke({yosAction:"pending"});assert.equal(list.events.length,1);
+ assert.equal(x.state.server.length,1);
+});
+test("same event failure then retry success remains one event; identical results replay safely",async()=>{
+ const x=env();await x.invoke("確認用通知");const key=x.journal()[0].key;
+ await x.invoke({yosAction:"ai-result",key,decision:"failed"});assert.equal(x.journal()[0].aiState,"failed");
+ const result={yosAction:"ai-result",key,decision:"YOS_ALERT",summary:"確認してください"};
+ await x.invoke(result);assert.equal(x.journal()[0].aiState,"complete");
+ assert.equal((await x.invoke(result)).duplicate,true);assert.equal(x.journal().length,1);
+ assert.equal(x.state.server.length,1);assert.equal((await x.invoke({yosAction:"pending"})).events.length,0);
+});
+test("unknown IDs and conflicting final results cannot change recorded outcomes",async()=>{
+ const x=env();await x.invoke("確認用");const key=x.journal()[0].key;
+ assert.match(await x.invoke({yosAction:"ai-result",key:"wrong",decision:"YOS_SILENT"}),/停止/);
+ await x.invoke({yosAction:"ai-result",key,decision:"YOS_SILENT",summary:"不要"});
+ assert.match(await x.invoke({yosAction:"ai-result",key,decision:"YOS_ALERT",summary:"変更"}),/停止/);
+ assert.equal(x.journal()[0].decision,"YOS_SILENT");
+});
+test("corrupt journal and disk failures stop before outbound writes and preserve evidence",async()=>{
+ const x=env();x.state.file.set("/documents/YOS_Notification_AI_State_V1.json","{broken");
+ assert.match(await x.invoke("test"),/エラー/);assert.equal(x.state.server.length,0);
+ assert.equal(x.state.file.get("/documents/YOS_Notification_AI_State_V1.json"),"{broken");
+ const y=env();y.state.failDisk=true;await y.invoke("test");assert.equal(y.state.server.length,0);
+});
+test("pending receipt and recorded summary never retain OTP input",async()=>{
+ const x=env();await x.invoke("認証コード 123456");const key=x.journal()[0].key;
+ await x.invoke({yosAction:"ai-result",key,decision:"YOS_SILENT",summary:"確認コード 123456"});
+ assert.doesNotMatch(JSON.stringify(x.journal()),/123456/);
+});
+test("unknown legacy ID-only receipt is not a confirmed save and is not blindly resent",async()=>{
+ const x=env();x.state.file.set("/documents/YOS_Notification_Pending.json",JSON.stringify([{id:"cafebeef",date:"2026-10-01T10:00:00Z",category:"information",body:"legacy pending"}]));
+ x.state.server.push({paragraph:{rich_text:[{plain_text:"2026-10-01 · notification:cafebeef · information\nlegacy pending"}]}});
+ assert.match(await x.invoke(null),/未確認/);assert.equal(x.queue().length,1);assert.equal(x.state.server.length,1);
+});
+
+test("explicit capture returns the same stable receipt key through AI result and replay",async()=>{
+ const x=env(),input={yosAction:"capture",notification:"架空の荷物通知"};
+ const first=await x.invoke(input);assert.equal(first.ok,true);assert.equal(first.saveState,"confirmed");
+ const replay=await x.invoke(input);assert.equal(replay.key,first.key);assert.equal(x.state.server.length,1);
+ await x.invoke({yosAction:"ai-result",key:first.key,decision:"YOS_SILENT",summary:"記録のみ"});
+ assert.equal(x.journal()[0].aiState,"complete");
+});
+test("ambiguous explicit capture retains its key and never reports a confirmed remote save",async()=>{
+ const x=env();x.state.failPatch=true;x.state.ambiguous=true;
+ const input={yosAction:"capture",notification:"架空の配送通知"};
+ const first=await x.invoke(input);assert.equal(first.ok,true);assert.equal(first.saveState,"pending");assert.ok(first.key);
+ x.state.failPatch=false;x.state.ambiguous=false;
+ const next=await x.invoke(input);assert.equal(next.key,first.key);assert.equal(next.saveState,"confirmed");assert.equal(x.state.server.length,1);
 });

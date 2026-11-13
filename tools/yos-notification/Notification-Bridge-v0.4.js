@@ -5,8 +5,14 @@
 const PAGE='3d35ca88289581ef9dc8d5f11ff8e213';
 const TK='YOS_NOTION_INTEGRATION_TOKEN',RK='YOS_NOTIFICATION_RECEIPTS_V1';
 const fm=FileManager.local(),pending=fm.joinPath(fm.documentsDirectory(),'YOS_Notification_Pending.json');
+const journal=fm.joinPath(fm.documentsDirectory(),'YOS_Notification_AI_State_V1.json');
 const MAX_QUEUE=100, BATCH_SIZE=5, MAX_SCAN_PAGES=25;
-function done(v){Script.setShortcutOutput(v);Script.complete()}
+let captureKey='';
+const structuredCapture=args.shortcutParameter?.yosAction==='capture';
+function done(v){
+  const out=structuredCapture?{ok:Boolean(captureKey)&&typeof v==='string'&&!/エラー|停止|未送信|100件/.test(v),key:captureKey,saveState:v==='YOS: Notion保存確認'?'confirmed':'pending',message:v}:v;
+  Script.setShortcutOutput(out);Script.complete();
+}
 function asText(x){
   if(typeof x==='string')return x.trim();
   if(Array.isArray(x))return x.map(asText).filter(Boolean).join('\n');
@@ -31,7 +37,7 @@ function queueRead(){
   if(!Array.isArray(data)||!data.every(x=>x&&/^[0-9a-f]{8}$/.test(x.id)&&typeof x.body==='string'&&typeof x.date==='string'&&typeof x.category==='string'))throw Error('保留キューが不正。変更せず停止');
   return data.map(x=>({...x,possiblySent:x.possiblySent!==false})); // v0.3 queue may already have reached Notion
 }
-function queueWrite(q){fm.writeString(pending,JSON.stringify(q))}
+function queueWrite(q){const data=JSON.stringify(q);fm.writeString(pending,data);if(fm.readString(pending)!==data)throw Error('保留保存の読戻し失敗')}
 function receiptsRead(){const value=Keychain.contains(RK)?parse(Keychain.get(RK)):null;return value&&typeof value==='object'&&!Array.isArray(value)?value:{}}
 function receiptsWrite(value){Keychain.set(RK,JSON.stringify(Object.fromEntries(Object.entries(value).slice(-150))))}
 function token(){return Keychain.contains(TK)?Keychain.get(TK):''}
@@ -45,8 +51,8 @@ async function request(method,path,body){
   return data;
 }
 function entryText(x){return x.date+' · Clarity Notification · notification:'+x.id+' · '+x.category+'\n'+x.body+'\n---'}
-async function remoteIDs(){
-  const ids=new Set();let cursor=null;
+async function remoteEntries(){
+  const entries=new Set();let cursor=null;
   for(let page=0;page<MAX_SCAN_PAGES;page++){
     const url='blocks/'+PAGE+'/children?page_size=100'+(cursor?'&start_cursor='+encodeURIComponent(cursor):'');
     const result=await request('GET',url);
@@ -54,10 +60,9 @@ async function remoteIDs(){
     for(const block of result.results){
       const texts=block.paragraph?.rich_text??[];
       const joined=Array.isArray(texts)?texts.map(x=>x.plain_text??x.text?.content??'').join(''):'';
-      const match=joined.match(/(?:^|\s)notification:([0-9a-f]{8})(?=\s|$)/);
-      if(match)ids.add(match[1]);
+      entries.add(joined);
     }
-    if(!result.has_more)return ids;
+    if(!result.has_more)return entries;
     if(!result.next_cursor)throw Error('Notion照合カーソルなし');
     cursor=result.next_cursor;
   }
@@ -68,14 +73,56 @@ async function append(batch){
   const result=await request('PATCH','blocks/'+PAGE+'/children',{children:rows});
   if(!Array.isArray(result.results)||result.results.length!==batch.length)throw Error('Notion保存結果未確認');
 }
+// This local receipt deliberately records "unregistered", not an assumed AI error.
+// Never expire unresolved events or put unsanitized input into the receipt file.
+function journalRead(){
+  if(!fm.fileExists(journal))return [];
+  const rows=parse(fm.readString(journal));
+  if(!Array.isArray(rows)||rows.length>500||!rows.every(x=>x&&typeof x.key==='string'&&typeof x.id==='string'&&typeof x.body==='string'&&['unregistered','failed','complete'].includes(x.aiState)))throw Error('AI復旧記録が不正。変更せず停止');
+  return rows;
+}
+function journalWrite(rows){
+  const data=JSON.stringify(rows);fm.writeString(journal,data);
+  if(fm.readString(journal)!==data)throw Error('AI復旧記録の読戻し失敗');
+}
+function remember(entry){
+  const rows=journalRead(),key=entry.id+'@'+entry.date;
+  const old=rows.find(x=>x.key===key);
+  if(old){if(old.body!==entry.body)throw Error('通知識別子の衝突');return}
+  if(rows.length>=500)throw Error('AI復旧記録500件。未処理を消さず停止');
+  journalWrite([...rows,{key,id:entry.id,date:entry.date,category:entry.category,body:entry.body,aiState:'unregistered'}]);
+}
+async function runBridge(){
+const command=args.shortcutParameter;
+if(command&&typeof command==='object'&&typeof command.yosAction==='string'&&command.yosAction!=='capture'){
+  const rows=journalRead();
+  if(command.yosAction==='pending'){
+    done({ok:true,events:rows.filter(x=>x.aiState!=='complete')});return;
+  }
+  if(command.yosAction!=='ai-result')throw Error('未知の復旧操作');
+  const event=rows.find(x=>x.key===command.key);
+  if(!event)throw Error('元通知の復旧記録がない');
+  if(!['YOS_ALERT','YOS_SILENT','failed'].includes(command.decision))throw Error('判定結果が不正');
+  const summary=typeof command.summary==='string'?scrub(command.summary).body:'';
+  if(command.decision==='YOS_ALERT'&&!summary.trim())throw Error('重大通知の要約なし');
+  if(event.aiState==='complete'){
+    if(event.decision!==command.decision||event.summary!==summary)throw Error('確定済み結果を上書きしない');
+    done({ok:true,key:event.key,duplicate:true,aiState:'complete'});return;
+  }
+  event.aiState=command.decision==='failed'?'failed':'complete';event.decision=command.decision;event.summary=summary;
+  journalWrite(rows);done({ok:true,key:event.key,aiState:event.aiState});return;
+}
 try{
-  const input=asText(args.shortcutParameter),now=Date.now(),receipts=receiptsRead();
+  const input=asText(structuredCapture?command.notification:args.shortcutParameter),now=Date.now(),receipts=receiptsRead();
   let q=queueRead();
   if(input&&!/^(1|true|\[object Object\]|ショートカットの入力)$/i.test(input)){
     const id=idOf(input);
+    const prior=q.find(x=>x.id===id);
+    if(prior)captureKey=prior.id+'@'+prior.date;
+    else{const remembered=journalRead().filter(x=>x.id===id&&x.body===scrub(input).body&&now-Date.parse(x.date)>=0&&now-Date.parse(x.date)<60000);if(remembered.length===1)captureKey=remembered[0].key;}
     if(!q.some(x=>x.id===id)&&!(receipts[id]&&now-receipts[id]>=0&&now-receipts[id]<60000)){
       if(q.length>=MAX_QUEUE)throw Error('保留100件。追加の保存ができないため本人確認が必要');
-      else{const safe=scrub(input);q.push({id,date:new Date(now).toISOString(),category:safe.category,body:safe.body,possiblySent:false});queueWrite(q)}
+      else{const safe=scrub(input);const entry={id,date:new Date(now).toISOString(),category:safe.category,body:safe.body,possiblySent:false};remember(entry);captureKey=entry.id+'@'+entry.date;q.push(entry);queueWrite(q)}
     }
   }
   if(!q.length){done(input?'YOS: 既存通知・保存済み':'YOS: 入力なし・保留なし')}
@@ -83,11 +130,15 @@ try{
   else{
     let error='';
     try{
+      for(const entry of q)remember(entry);
       if(q.some(x=>x.possiblySent)){
-        const existing=await remoteIDs();
-        for(const x of q)if(existing.has(x.id))receipts[x.id]=now;
+        const existing=await remoteEntries();
+        for(const x of q){
+          if(!existing.has(entryText(x))&&[...existing].some(t=>t.includes('notification:'+x.id+' ')&&(t.startsWith(x.date+' ·')||!/^\d{4}-\d{2}-\d{2}T/.test(t))))throw Error('同じIDの記録を照合できず再送停止');
+          if(existing.has(entryText(x)))receipts[x.id]=now;
+        }
         receiptsWrite(receipts);
-        q=q.filter(x=>!existing.has(x.id)).map(x=>({...x,possiblySent:false}));
+        q=q.filter(x=>!existing.has(entryText(x))).map(x=>({...x,possiblySent:false}));
         queueWrite(q);
       }
       while(q.length){
@@ -106,3 +157,6 @@ try{
     done(error?'YOS: Notion送信未確認・保留保持（'+error.slice(0,45)+'）':'YOS: Notion保存確認');
   }
 }catch(e){done('YOS: 保存前エラー（'+String(e.message??e).slice(0,65)+'）')}
+
+}
+try{await runBridge()}catch(e){done('YOS: 復旧処理停止（'+String(e.message??e).slice(0,65)+'）')}
