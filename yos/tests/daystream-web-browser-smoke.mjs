@@ -210,6 +210,7 @@ try{
  });
  await live.goto('https://yskn0008-bot.github.io/yos/daystream/',{waitUntil:'domcontentloaded'});
  await live.locator('[data-tab="task"]').click();await live.locator('#yosWebTaskRefresh').click();
+ await live.waitForFunction(()=>typeof window.testGoogleCallback==='function');
  await live.evaluate(()=>window.testGoogleCallback({credential:'synthetic-id-token'}));
  assert.match(await live.locator('#yosSourceTasks').textContent(),/NOTION LIVE/);
  assert.doesNotMatch(await live.locator('#yosSourceTasks').textContent(),/STALE PROJECTION/);
