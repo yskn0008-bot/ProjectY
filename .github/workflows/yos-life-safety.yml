@@ -131,6 +131,11 @@ jobs:
           LIFE_BROWSER: ${{ matrix.browser }}
         run: node life/tests/life-smoke.mjs
 
+      - name: Verify YOS integrated calendar safely in browser
+        env:
+          LIFE_BROWSER: ${{ matrix.browser }}
+        run: node life/calendar/unified-calendar.browser.test.cjs
+
       - name: Upload Life screenshots
         if: always()
         uses: actions/upload-artifact@v4
