@@ -57,7 +57,7 @@ jobs:
 
   daily-flow-handoff-smoke:
     name: Morning/Night handoff (${{ matrix.browser }})
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     strategy:
       fail-fast: false
@@ -95,7 +95,7 @@ jobs:
 
   life-browser-smoke:
     name: Life iPhone smoke (${{ matrix.browser }})
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     strategy:
       fail-fast: false
