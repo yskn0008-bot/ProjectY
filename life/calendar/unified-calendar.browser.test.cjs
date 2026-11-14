@@ -49,17 +49,17 @@ const {chromium,webkit}=require('playwright');
   assert.equal(await page.locator('#nativeRefresh').count(),1,'existing Scriptable refresh is available without creating a new installer');
   // Simulate a direct, private on-device read from the existing Scriptable script.
   // The URL fragment must be erased before browser storage is marked successful.
-  await page.evaluate(()=>{
+  const privateUrl=await page.evaluate(()=>{
    const now=new Date(),day=window.__testDay,body={schema:'yos-calendar-native-snapshot-v1',source:'scriptable-on-device',
      checkedAt:now.toISOString(),windowStart:day,windowEnd:day,completeCalendar:true,remindersStatus:'ok',
      events:[{id:'native-1',title:'iPhone予約',start:day+'T02:00:00Z',end:day+'T02:30:00Z',allDay:false}],
      reminders:[{id:'native-reminder-1',title:'電話する',dueAt:day+'T03:00:00Z',completed:false,dueAllDay:false}]};
    const bytes=new TextEncoder().encode(JSON.stringify(body));
    let raw='';for(const b of bytes)raw+=String.fromCharCode(b);
-   location.hash='yos-native='+btoa(raw).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/g,'');
+   return location.origin+location.pathname+location.search+'#yos-native='+btoa(raw).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/g,'');
   });
-  await page.reload({waitUntil:'domcontentloaded'});
-  assert.equal((await page.locator('#nativeConnection').textContent()).trim(),'取込済み','native source now explicit');
+  await page.goto(privateUrl,{waitUntil:'domcontentloaded'});
+  assert.equal((await page.locator('#nativeConnection').textContent()).trim(),'取込済み','native source now explicit: '+await page.locator('#nativeImportStatus').innerText());
   assert.equal(await page.evaluate(()=>location.hash),'','private fragment erased from URL/history');
   assert.match(await page.locator('#nativeImportStatus').innerText(),/保存・確認/);
   assert.match(await page.locator('#glanceScheduleItems').innerText(),/iPhone予約/);
