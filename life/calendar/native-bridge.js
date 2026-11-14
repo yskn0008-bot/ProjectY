@@ -138,5 +138,22 @@
   try{storage.removeItem(PENDING_KEY)}catch{return {ok:false,reason:'storage'}}
   return save(storage,snapshot,now);
  }
- root.YOS_CALENDAR_NATIVE={read,save,consume,keys:{snapshot:KEY,pending:PENDING_KEY}};
+ function asDaystream(storage,now){
+  const snapshot=read(storage,now);
+  if(snapshot.status!=='ready')return null;
+  const days={},allDayDays={};
+  for(const e of snapshot.items){
+   if(e.type!=='schedule')continue;
+   if(e.subtitle==='終日'){(allDayDays[e.date]??=[]).push(e.title);continue}
+   const m=/^(\d{2}):(\d{2}) – (\d{2}):(\d{2})$/.exec(e.subtitle);
+   if(!m)return null;
+   const from=Number(m[1])*60+Number(m[2]),until=Number(m[3])*60+Number(m[4]);
+   if(!Number.isSafeInteger(from)||!Number.isSafeInteger(until)||from<0||until>1440||until<=from)return null;
+   (days[e.date]??=[]).push({title:e.title,start:from,duration:until-from});
+  }
+  return {status:'ok',source:'scriptable-on-device',calendarDays:days,allDayDays,
+   calendarCoverage:{from:snapshot.details.windowStart,until:nextDay(snapshot.details.windowEnd),status:'ok'},
+   checkedAt:snapshot.details.at};
+ }
+ root.YOS_CALENDAR_NATIVE={read,save,consume,asDaystream,keys:{snapshot:KEY,pending:PENDING_KEY}};
 })(typeof window!=='undefined'?window:globalThis);
