@@ -50,7 +50,7 @@ const {chromium,webkit}=require('playwright');
   // Simulate a direct, private on-device read from the existing Scriptable script.
   // The URL fragment must be erased before browser storage is marked successful.
   const privateUrl=await page.evaluate(()=>{
-   const now=new Date(),day=window.__testDay,body={schema:'yos-calendar-native-snapshot-v1',source:'scriptable-on-device',
+   const now=new Date(),day=new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit'}).format(now),body={schema:'yos-calendar-native-snapshot-v1',source:'scriptable-on-device',
      checkedAt:now.toISOString(),windowStart:day,windowEnd:day,completeCalendar:true,remindersStatus:'ok',
      events:[{id:'native-1',title:'iPhone予約',start:day+'T02:00:00Z',end:day+'T02:30:00Z',allDay:false}],
      reminders:[{id:'native-reminder-1',title:'電話する',dueAt:day+'T03:00:00Z',completed:false,dueAllDay:false}]};
