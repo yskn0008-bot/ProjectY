@@ -110,6 +110,7 @@
         <button class="yos131-primary" data-proxy="${meta[2]}"><span class="yos131-primary-label">${meta[1]}</span>${meta[2]==='shiftButton'?'<small class="yos131-primary-hint">開始可能時刻を確認中</small>':''}</button>
       </section>
       <section class="yos131-card yos131-advice" data-go-nav><span>YOS判断</span><strong>${esc(advice)}</strong><span class="arrow">›</span></section>
+      <a class="yos131-card yos131-advice" href="./revenue-goal.html" style="text-decoration:none;border:1px solid rgba(255,202,112,.34)"><span>月商100万円</span><strong>必要日商・時給を確認</strong><span class="arrow">›</span></a>
       <section class="yos131-kpis"><div><span>実車</span><strong>${rides.length}回</strong></div><div><span>実車率</span><strong>${util}%</strong></div><div><span>平均単価</span><strong>${money(avg)}</strong></div></section>
       <section class="yos131-card yos131-actions"><button data-proxy="breakButton">休憩</button><button data-proxy="memoButton">メモ</button><button class="accent" data-go-nav>ナビ</button><button data-proxy="endButton">終了</button></section>
     </main>`;
