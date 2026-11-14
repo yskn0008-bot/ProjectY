@@ -89,6 +89,20 @@ const {chromium,webkit}=require('playwright');
   assert.equal((await page.locator('#glanceExpense').textContent()).trim(),'—','Money privacy respected');
   assert.equal((await page.locator('#moneyConnection').textContent()).trim(),'非表示');
   assert.equal((await page.locator('#notionMoneyConnection').textContent()).trim(),'非表示','Notion Money is hidden by the existing privacy setting');
+  // DAYSTREAM is a separate route but the same authenticated website origin.
+  // It must see the recently validated native calendar and Reminder deadlines
+  // without writing the original Apple Calendar or another Notion collection.
+  await page.goto('http://127.0.0.1:4173/yos/daystream/',{waitUntil:'domcontentloaded'});
+  const linked=await page.evaluate(()=>({
+    source:window.YOS_CHARCOAL_BOOT?.calendarSource,
+    coverage:window.YOS_CHARCOAL_BOOT?.calendarCoverage,
+    rows:Object.values(window.YOS_CHARCOAL_BOOT?.calendarDays||{}).flat(),
+    reminders:window.YOS_CHARCOAL_BOOT?.nativeReminders
+  }));
+  assert.equal(linked.source,'scriptable-on-device','DAYSTREAM uses verified native data');
+  assert.equal(linked.coverage?.status,'ok','native Calendar coverage is not inferred from event count');
+  assert.equal(linked.rows.some(r=>r.title==='iPhone予約'),true,'native appointment appears in DAYSTREAM');
+  assert.equal(linked.reminders?.some(r=>r.title==='電話する'),true,'native reminder deadline appears in DAYSTREAM');
   assert.deepEqual(failures,[],'no JS runtime exceptions');
   console.log('YOS unified calendar '+kind+' browser tests PASS');
  }finally{await browser.close()}
