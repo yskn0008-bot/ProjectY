@@ -42,6 +42,7 @@ jobs:
         with:
           node-version: '22'
       - run: node --check service-worker.js
+      - run: node --test tools/daystream-shortcut-choice/choice-protocol.test.mjs
       - run: node --test tests/daystream-web-port.test.mjs
       - run: node --test tests/daystream-source-import.test.mjs
       - run: node --test tests/daystream-yos-auth-life.test.mjs
