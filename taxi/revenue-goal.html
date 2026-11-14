@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0a0c10">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="./manifest.webmanifest">
+<title>月商100万円ナビ｜YOS Taxi</title>
+<style>
+:root{color-scheme:dark;--bg:#090c11;--panel:#141920;--panel2:#1b222a;--line:#2b343d;--text:#f6f6f4;--muted:#9ba8b3;--gold:#ffca70;--green:#75e0b1;--blue:#8eb5ff}
+*{box-sizing:border-box}html{background:var(--bg)}body{margin:0;min-height:100vh;color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif;-webkit-font-smoothing:antialiased;background:radial-gradient(ellipse at 95% 0%,rgba(255,184,79,.10),transparent 37%),var(--bg)}
+a{color:inherit}button,input{font:inherit}button{cursor:pointer;touch-action:manipulation}
+.shell{width:min(100%,650px);margin:auto;padding:calc(env(safe-area-inset-top) + 16px) 16px calc(env(safe-area-inset-bottom) + 102px)}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:24px}.back{text-decoration:none;display:inline-flex;align-items:center;gap:8px;color:#d0d6dc;font-size:13px;font-weight:700;min-height:42px}.top-brand{font-size:11px;font-weight:900;letter-spacing:.18em;color:var(--gold)}.eyebrow{margin:0 0 8px;color:var(--gold);font-size:10px;font-weight:900;letter-spacing:.19em}
+h1{margin:0 0 7px;font-size:clamp(27px,7vw,34px);letter-spacing:-.045em;line-height:1.1}p{line-height:1.65}.subtitle{margin:0 0 22px;color:var(--muted);font-size:12px}
+.hero{position:relative;overflow:hidden;border:1px solid #625139;border-radius:26px;background:linear-gradient(150deg,#332a20 0%,#1d1b1a 40%,#151b1d 100%);padding:21px 19px 19px;box-shadow:0 15px 32px rgba(0,0,0,.18)}.hero::after{content:"";position:absolute;top:-95px;right:-100px;width:260px;height:260px;border:1px solid rgba(255,218,152,.15);border-radius:50%;box-shadow:0 0 0 38px rgba(255,218,152,.03),0 0 0 82px rgba(255,218,152,.025);pointer-events:none}
+.hero-head{display:flex;justify-content:space-between;align-items:center;gap:10px}.hero-label{font-size:11px;font-weight:800;color:#f5d4a2}.pill{background:#ffffff14;border:1px solid #ffffff24;border-radius:999px;padding:6px 10px;font-size:10px;color:#ded4c7}
+.goal{margin:19px 0 13px;font-size:clamp(39px,11vw,54px);font-weight:850;letter-spacing:-.06em;line-height:1}
+.progress-label{display:flex;justify-content:space-between;font-size:11px;color:#b9c1c2;margin-bottom:8px}.progress-label strong{color:#f0d39d}.track{height:9px;background:#ffffff17;border-radius:99px;overflow:hidden}.fill{width:0;height:100%;background:linear-gradient(90deg,#dba65c,#f7d7a2);border-radius:99px;transition:width .3s}
+.hero-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:20px;padding-top:16px;border-top:1px solid #ffffff22}.hero-row span{display:block;color:#b6b7b1;font-size:10px;margin-bottom:6px}.hero-row strong{font-size:22px;letter-spacing:-.04em}
+.section-head{display:flex;align-items:baseline;justify-content:space-between;gap:7px;margin:26px 0 11px}.section-head h2{font-size:16px;margin:0;letter-spacing:-.02em}.section-head small{font-size:10px;color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.metric{background:linear-gradient(160deg,#182027,#141920);border:1px solid var(--line);border-radius:20px;padding:17px 13px;min-height:115px}.metric span{display:block;color:var(--muted);font-size:11px}.metric strong{display:block;font-size:clamp(21px,6vw,28px);letter-spacing:-.05em;margin:12px 0 4px;line-height:1.1}.metric small{font-size:10px;color:#9faab4}.metric.emphasis{border-color:#5d674e;background:linear-gradient(135deg,#203127,#151c1b)}.metric.emphasis strong{color:#c1f3d4}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:22px;padding:16px;margin-top:10px}.panel-summary{display:grid;grid-template-columns:1fr auto;gap:6px;align-items:center}.panel-summary span{font-size:12px;color:var(--muted)}.panel-summary strong{font-size:15px}
+.notice{border:1px solid #455063;border-radius:15px;padding:12px 13px;margin-top:13px;background:#1b2632;color:#c6d5e5;font-size:11px;line-height:1.7}
+.two-line{display:flex;justify-content:space-between;gap:10px;padding:13px 0;border-bottom:1px solid var(--line)}.two-line:last-child{border-bottom:0;padding-bottom:0}.two-line span{font-size:12px;color:var(--muted)}.two-line strong{font-size:13px;text-align:right}
+.day-row{display:grid;grid-template-columns:50px 1fr;gap:3px 10px;padding:11px 0;border-bottom:1px solid var(--line)}.day-row:last-child{border-bottom:0}.day-row span{font-size:13px;color:#acb8c2}.day-row strong{font-size:15px;text-align:right}.day-row small{grid-column:1 / -1;font-size:10px;color:var(--muted);text-align:right}.empty-state{color:var(--muted);font-size:12px;line-height:1.7;margin:6px 0}
+details{margin-top:25px;border:1px solid var(--line);background:var(--panel);border-radius:22px;overflow:hidden}details summary{list-style:none;cursor:pointer;padding:16px 17px;font-weight:800;font-size:14px;min-height:52px}details summary::-webkit-details-marker{display:none}details summary::after{content:"＋";float:right;color:var(--gold)}details[open] summary::after{content:"−"}details .inside{padding:0 17px 17px}.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px 10px}.form-grid label{display:block;color:var(--muted);font-size:11px}.form-grid input{display:block;margin-top:7px;width:100%;min-width:0;height:46px;border:1px solid #35414a;border-radius:12px;background:#0b1117;color:var(--text);font-size:18px;font-weight:800;padding:8px 10px;font-variant-numeric:tabular-nums}.field-note{font-size:10px;color:var(--muted);line-height:1.6;margin:12px 0 0}
+.small-cta{margin-top:16px;width:100%;min-height:44px;background:transparent;border:1px solid var(--line);border-radius:13px;color:var(--text);font-weight:700}
+.fine{color:#9da9b5;font-size:10px;line-height:1.7;margin:18px 2px 0}
+.nav{position:fixed;bottom:0;left:0;right:0;padding:10px 16px calc(env(safe-area-inset-bottom) + 12px);background:linear-gradient(180deg,rgba(9,12,17,.02),rgba(9,12,17,.97) 25%);z-index:4}.nav-inner{max-width:630px;margin:auto;display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:7px}.nav a{text-decoration:none;display:grid;place-items:center;min-height:50px;border-radius:15px;background:#1c252c;border:1px solid #39434b;font-size:12px;font-weight:800}.nav a.primary{background:linear-gradient(140deg,#ffcc78,#f0a951);color:#221913;border:0}
+@media(min-width:500px){.grid{grid-template-columns:repeat(2,1fr)}.metric{padding:19px 17px}}
+</style>
+<script defer src="./revenue-goal-v1.js"></script>
+</head>
+<body>
+<main class="shell">
+  <header class="top"><a class="back" href="./index.html" aria-label="営業コントロールへ戻る">‹　営業コントロール</a><span class="top-brand">YOS / TAXI</span></header>
+  <p class="eyebrow">REVENUE INTELLIGENCE</p>
+  <h1>月商100万円ナビ</h1>
+  <p class="subtitle">既存の乗務記録を使い、達成までに必要な売上ペースを確認する。</p>
+
+  <section class="hero" aria-label="月間売上の進捗">
+    <div class="hero-head"><span class="hero-label" id="monthLabel">対象月</span><span class="pill">月間売上目標</span></div>
+    <div class="goal" id="targetTop">¥1,000,000</div>
+    <div class="progress-label"><span>目標達成率</span><strong id="progressText">記録待ち</strong></div>
+    <div class="track"><div id="progressBar" class="fill" role="progressbar" aria-label="月間売上進捗" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></div></div>
+    <div class="hero-row"><div><span>記録された売上</span><strong id="actualSales">未記録</strong></div><div><span>目標まで</span><strong id="remainingSales">¥1,000,000</strong></div></div>
+  </section>
+
+  <div class="section-head"><h2>残りの達成ペース</h2><small>売上目標から逆算</small></div>
+  <section class="grid" aria-label="必要売上ペース">
+    <div class="metric emphasis"><span>残り1乗務あたり</span><strong id="neededDaily">未確認</strong><small>残り乗務数で計算</small></div>
+    <div class="metric"><span>残り1時間あたり</span><strong id="neededHourly">未確認</strong><small>実働時間ベース</small></div>
+    <div class="metric"><span>計画した乗務数</span><strong id="targetShifts">23乗務</strong><small id="currentDays">0乗務</small></div>
+    <div class="metric"><span>残り乗務数（計画上）</span><strong id="leftShifts">23乗務</strong><small id="sourceStatus">端末内の営業カレンダー</small></div>
+  </section>
+  <p id="baselineLabel" class="fine">計画全体の必要売上を計算しています。</p>
+
+  <div class="section-head"><h2>乗車回転の目安</h2><small>平均単価は仮定</small></div>
+  <section class="panel" aria-label="乗車回数シミュレーション">
+    <div class="two-line"><span>必要乗車回数</span><strong id="expectedRides">未確認</strong></div>
+    <div class="two-line"><span>1乗車に使える総時間</span><strong id="cycleMinutes">未確認</strong></div>
+    <p class="field-note">総時間には、乗車・迎車・待機・空車移動を含む。空車時間そのものではない。</p>
+  </section>
+
+  <div class="section-head"><h2>今月の記録</h2><small>直近6乗務</small></div>
+  <section class="panel" aria-label="月内の乗務記録"><div id="recentDays"><p class="empty-state">端末内の記録を読込中です。</p></div><p id="dataNotice" class="notice" aria-live="polite">情報を確認しています。</p></section>
+
+  <details id="planSettings">
+    <summary>目標・勤務条件を調整</summary>
+    <div class="inside">
+      <div class="form-grid">
+        <label for="goalMonth">対象月<input id="goalMonth" type="month" min="2026-01" max="2035-12"></label>
+        <label for="targetValue">月間目標（税込円）<input id="targetValue" type="number" min="100000" max="10000000" step="10000" inputmode="numeric"></label>
+        <label for="plannedShifts">予定乗務数<input id="plannedShifts" type="number" min="1" max="31" step="1" inputmode="numeric"></label>
+        <label for="plannedHours">予定実働時間（月）<input id="plannedHours" type="number" min="1" max="300" step="0.5" inputmode="decimal"></label>
+        <label for="assumedFare">想定平均運賃（円）<input id="assumedFare" type="number" min="500" max="30000" step="100" inputmode="numeric"></label>
+      </div>
+      <p class="field-note">初期値23乗務・175時間・平均運賃1,500円はシミュレーション条件。実際の夜勤契約や配車手数料を確認した値ではありません。条件変更はこの画面だけに保存し、既存の営業・日報データを変更しません。</p>
+    </div>
+  </details>
+
+  <button class="small-cta" type="button" id="reloadData">端末の最新記録を再読込</button>
+  <p class="fine">この画面は既存YOS Taxiの営業カレンダーと端末内の当日記録を読み取ります。Project75シート・会社メーターとは自動同期していません。実車時間率や空車時間は、降車時刻などの実測データがない限り表示しません。会社評価の税抜・配車手数料控除後売上は未計算。安全のため運転中の操作は禁止です。</p>
+</main>
+<nav class="nav" aria-label="YOS Taxi ナビゲーション"><div class="nav-inner"><a href="./index.html" class="primary">営業に戻る</a><a href="./calendar.html">営業カレンダー</a><a href="./demand-calendar.html">需要情報</a></div></nav>
+</body>
+</html>
