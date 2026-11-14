@@ -131,3 +131,31 @@ test('expired import nonce cannot be reused',()=>{
  assert.equal(r.reason,'unrequested');
  assert.equal(s.getItem(api.keys.snapshot),null);
 });
+
+test('DAYSTREAM gets native Calendar segments and coverage from the same verified store, never writes originals',()=>{
+ const s=store();const snapshot=snap({events:[
+ {id:'night',title:'夜勤',start:'2026-11-14T14:00:00Z',end:'2026-11-14T16:30:00Z',allDay:false},
+ {id:'holiday',title:'休み',start:'2026-11-14T15:00:00Z',end:'2026-11-15T15:00:00Z',allDay:true}
+ ],reminders:[]});
+ assert.equal(api.save(s,snapshot,now).ok,true);
+ const before=s.getItem(api.keys.snapshot);
+ const d=api.asDaystream(s,now);
+ assert.equal(d.status,'ok');
+ assert.equal(d.source,'scriptable-on-device');
+ assert.equal(d.calendarCoverage.from,'2026-11-14');
+ assert.equal(d.calendarCoverage.until,'2026-11-29');
+ assert.equal(d.calendarCoverage.status,'ok');
+ assert.deepEqual(Array.from(d.calendarDays['2026-11-14'].map(e=>[e.start,e.duration])),[[1380,60]]);
+ assert.deepEqual(Array.from(d.calendarDays['2026-11-15'].map(e=>[e.start,e.duration])),[[0,90]]);
+ assert.deepEqual(Array.from(d.allDayDays['2026-11-15']),['休み']);
+ assert.equal(s.getItem(api.keys.snapshot),before,'projection is read-only');
+});
+test('DAYSTREAM source shows empty verified coverage but never implies live Apple permission',()=>{
+ const s=store();
+ assert.equal(api.save(s,snap({events:[],reminders:[]}),now).ok,true);
+ const d=api.asDaystream(s,now);
+ assert.equal(d.status,'ok');
+ assert.equal(Object.keys(d.calendarDays).length,0);
+ assert.equal(d.calendarCoverage.status,'ok');
+ assert.equal(api.asDaystream(s,now+86400000+1),null,'expired 24-hour native import is not a current calendar');
+});
