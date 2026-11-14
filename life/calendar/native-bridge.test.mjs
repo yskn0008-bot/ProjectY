@@ -87,7 +87,8 @@ test('readback/backup failure restores the prior saved data',()=>{
  assert.equal(s.getItem(api.keys.snapshot),expected);
 });
 test('private URL fragment imported and erased before any result; invalid fragment erased but never saved',()=>{
- const s=store(),payload=Buffer.from(JSON.stringify(snap()),'utf8').toString('base64url');
+ const nonce='f'.repeat(32),s=store({[api.keys.pending]:JSON.stringify({nonce,createdAt:now})});
+ const payload=Buffer.from(JSON.stringify(snap({requestNonce:nonce})),'utf8').toString('base64url');
  let cleared='',calls=0;
  const location={pathname:'/ProjectY/life/calendar/',search:'?mode=glance',hash:'#yos-native='+payload};
  const history={replaceState:(_a,_b,url)=>{cleared=url;calls++}};
