@@ -159,6 +159,45 @@ export function unavailableMorningBrief(reason = 'notion-source-unavailable'): M
   };
 }
 
+export interface YosCalendarMoneyEvent {
+  id: string;
+  title: string;
+  date: string;
+  amount: number;
+  kind: 'income' | 'expense';
+}
+
+/** Only current confirmed, source-edited future Money rows. No balances, notes or raw records. */
+export async function loadNotionCalendarMoney(options: {
+  notionToken: string;
+  fetchImpl: FetchLike;
+  now?: Date;
+}): Promise<{status: 'ok'; checkedAt: string; complete: true; items: YosCalendarMoneyEvent[]}> {
+  const now = options.now ?? new Date();
+  const token = required(options.notionToken, 'Notion token');
+  const sourceId = await resolveDataSourceIdByTitle(token, EVENTS_SOURCE_TITLE, options.fetchImpl);
+  const pages = await queryDataSource(options.fetchImpl, token, sourceId);
+  const today = tokyoDateKey(now);
+  const result: YosCalendarMoneyEvent[] = [];
+  const seen = new Set<string>();
+  for (const raw of pages) {
+    const p = parseMoneyEvent(raw);
+    if (!p || p.state !== '予定' || p.verification !== '確認済'
+       || !isFreshTimestamp(p.lastEditedAt, now, 7)) continue;
+    const days = daysBetween(today, p.date);
+    if (days < 0 || days > 31 || p.kind === 'transfer') continue;
+    const id = typeof raw.id === 'string' && /^[a-f0-9-]{32,36}$/i.test(raw.id)
+      ? raw.id.replaceAll('-', '').toLowerCase() : '';
+    if (!id || seen.has(id)) throw new Error('Money calendar contains invalid or duplicate IDs');
+    seen.add(id);
+    result.push({id, title: p.title.slice(0, 100), date: p.date,
+      amount: p.amount, kind: p.kind === 'income' ? 'income' : 'expense'});
+    if (result.length > 100) throw new Error('Money calendar exceeds read capacity');
+  }
+  return {status:'ok',checkedAt:now.toISOString(),complete:true,
+    items:result.sort((a,b)=>a.date.localeCompare(b.date)||a.id.localeCompare(b.id))};
+}
+
 async function loadMorningMoney(options: {
   notionToken: string;
   fetchImpl: FetchLike;
@@ -356,6 +395,7 @@ async function queryDataSource(
       : null;
     page += 1;
   } while (cursor && page < MAX_PAGES);
+  if(cursor)throw new Error('Notion source pages are incomplete');
   return rows;
 }
 
