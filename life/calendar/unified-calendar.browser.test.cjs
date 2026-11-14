@@ -50,10 +50,11 @@ const {chromium,webkit}=require('playwright');
   // Simulate a direct, private on-device read from the existing Scriptable script.
   // The URL fragment must be erased before browser storage is marked successful.
   const privateUrl=await page.evaluate(()=>{
-   const now=new Date(),day=new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit'}).format(now),body={schema:'yos-calendar-native-snapshot-v1',source:'scriptable-on-device',
+   const now=new Date(),day=new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit'}).format(now),nonce='f'.repeat(32),body={schema:'yos-calendar-native-snapshot-v1',source:'scriptable-on-device',requestNonce:nonce,
      checkedAt:now.toISOString(),windowStart:day,windowEnd:day,completeCalendar:true,remindersStatus:'ok',
      events:[{id:'native-1',title:'iPhone予約',start:day+'T02:00:00Z',end:day+'T02:30:00Z',allDay:false}],
      reminders:[{id:'native-reminder-1',title:'電話する',dueAt:day+'T03:00:00Z',completed:false,dueAllDay:false}]};
+   localStorage.setItem('YOS_CALENDAR_NATIVE_PENDING_V1',JSON.stringify({nonce,createdAt:now.getTime()}));
    const bytes=new TextEncoder().encode(JSON.stringify(body));
    let raw='';for(const b of bytes)raw+=String.fromCharCode(b);
    return location.origin+location.pathname+location.search+'#yos-native='+btoa(raw).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/g,'');
