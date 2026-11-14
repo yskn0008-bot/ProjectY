@@ -1,0 +1,107 @@
+name: YOS Verify shortcut
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'tools/yos-verify/**'
+      - '.github/workflows/yos-verify-shortcut.yml'
+      - 'tools/clarity-factory/sign_with_hubsign.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-sign:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pinned Cherri v2.3.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          url='https://github.com/electrikmilk/cherri/releases/download/v2.3.0/cherri_linux-x86_64.zip'
+          expected='7ab2c384b7b26e7c72a30a8dfa56f89dae12c4068b7951bc1e3193f3698edbe9'
+          curl -fsSL "$url" -o /tmp/cherri.zip
+          printf '%s  %s\n' "$expected" /tmp/cherri.zip | sha256sum -c -
+          mkdir -p /tmp/cherri
+          unzip -q /tmp/cherri.zip -d /tmp/cherri
+          binary="$(find /tmp/cherri -type f -name cherri -print -quit)"
+          test -n "$binary"
+          sudo install -m 0755 "$binary" /usr/local/bin/cherri
+          cherri --version
+
+      - name: Compile YOS Verify
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd tools/yos-verify
+          rm -f './YOS Verify_unsigned.shortcut' './YOS Verify.plist'
+          cherri 'YOS Verify.cherri' --skip-sign --debug
+          test -f './YOS Verify_unsigned.shortcut'
+          mkdir -p artifacts
+          cp './YOS Verify_unsigned.shortcut' 'artifacts/YOS Verify.plist'
+
+      - name: Validate YOS Verify contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import plistlib
+          from pathlib import Path
+          p=Path('tools/yos-verify/artifacts/YOS Verify.plist')
+          workflow=plistlib.loads(p.read_bytes())
+          actions=workflow.get('WFWorkflowActions',[])
+          ids=[a.get('WFWorkflowActionIdentifier','') for a in actions]
+          blob=repr(workflow)
+          assert ids.count('is.workflow.actions.askllm') == 1
+          assert ids.count('is.workflow.actions.openurl') == 0
+          assert ids.count('is.workflow.actions.runworkflow') == 0
+          assert ids.count('is.workflow.actions.file.getfoldercontents') == 1
+          assert ids.count('is.workflow.actions.filter.files') == 1
+          assert ids.count('is.workflow.actions.setclipboard') >= 1
+          assert ids.count('is.workflow.actions.documentpicker.save') == 1
+          assert 'Clarity Ledger.txt' in blob
+          assert 'YOS Night History' in blob
+          assert 'REQUEST_DONE' in blob
+          assert 'YOS_NIGHT_RECORD_V1' in blob
+          assert 'スクショ不要' in blob
+          assert 'scriptable' not in blob.lower()
+          print(f'YOS Verify contract: PASS ({len(actions)} actions)')
+          PY
+
+      - name: Sign YOS Verify
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/clarity-factory/sign_with_hubsign.py \
+            --input 'tools/yos-verify/artifacts/YOS Verify.plist' \
+            --output 'tools/yos-verify/artifacts/YOS Verify.shortcut' \
+            --name 'YOS Verify' \
+            2>&1 | tee 'tools/yos-verify/artifacts/yos-verify-hubsign.log'
+
+      - name: Verify signed artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('tools/yos-verify/artifacts/YOS Verify.shortcut')
+          data=p.read_bytes()
+          assert data.startswith(b'AEA1'), data[:8]
+          assert len(data)>500, len(data)
+          print(f'YOS Verify signed AEA1: PASS ({len(data)} bytes)')
+          PY
+
+      - name: Upload iPhone acceptance package
+        uses: actions/upload-artifact@v4
+        with:
+          name: yos-verify
+          path: |
+            tools/yos-verify/artifacts/YOS Verify.shortcut
+            tools/yos-verify/artifacts/YOS Verify.plist
+            tools/yos-verify/artifacts/yos-verify-hubsign.log
+          if-no-files-found: error
