@@ -159,3 +159,32 @@ test('DAYSTREAM source shows empty verified coverage but never implies live Appl
  assert.equal(d.calendarCoverage.status,'ok');
  assert.equal(api.asDaystream(s,now+86400000+1),null,'expired 24-hour native import is not a current calendar');
 });
+
+test('Safari/PWA isolated storage needs a visible user confirmation before accepting any imported data',()=>{
+ const nonce='e'.repeat(32),storage=store();
+ const encoded=Buffer.from(JSON.stringify(snap({requestNonce:nonce})),'utf8').toString('base64url');
+ const location={pathname:'/ProjectY/life/calendar/',search:'',hash:'#yos-native='+encoded};
+ const hist={replaceState:()=>{}};
+ const proposed=api.consume(storage,location,hist,now);
+ assert.equal(proposed.ok,false);assert.equal(proposed.reason,'confirmation-needed');
+ assert.equal(proposed.details.eventCount,1);
+ assert.equal(storage.getItem(api.keys.snapshot),null,'no silent source writes');
+ const confirmed=api.confirmImport(storage,now);
+ assert.equal(confirmed.ok,true);
+ assert.equal(api.read(storage,now).items.length,2);
+ assert.equal(api.confirmImport(storage,now).ok,false,'explicit consent is single-use');
+});
+test('invalid forged and stale fragments cannot bypass the confirmation gate',()=>{
+ const bad=store();
+ for(const patch of [
+  {requestNonce:'bad'},
+  {requestNonce:'e'.repeat(32),checkedAt:'2026-11-01T00:00:00Z'},
+  {requestNonce:'e'.repeat(32),completeCalendar:false}
+ ]){
+  const payload=Buffer.from(JSON.stringify(snap(patch)),'utf8').toString('base64url');
+  const r=api.consume(bad,{pathname:'/',search:'',hash:'#yos-native='+payload},{replaceState:()=>{}},now);
+  assert.equal(r.ok,false);
+  assert.notEqual(r.reason,'confirmation-needed');
+  assert.equal(bad.getItem(api.keys.snapshot),null);
+ }
+});
