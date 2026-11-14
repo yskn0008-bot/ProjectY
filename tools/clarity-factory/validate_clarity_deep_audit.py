@@ -51,6 +51,8 @@ ALLOWED_ACTION_IDS = {
     "is.workflow.actions.setvolume",
     "is.workflow.actions.openurl",
     "is.workflow.actions.showresult",
+    "is.workflow.actions.urlencode",
+    "dk.simonbs.Scriptable.RunScriptInlineIntent",
 }
 
 RANGE_RE = re.compile(r"^\{(\d+),\s*(\d+)\}$")
@@ -152,6 +154,19 @@ def validate(path: Path, expected_build_id: str) -> None:
     unknown = sorted(set(counts) - allowed_action_ids)
     if unknown:
         raise AssertionError(f"unreviewed action identifier(s): {unknown}")
+
+    inline_scripts = [
+        action for action in actions
+        if action.get("WFWorkflowActionIdentifier")
+        == "dk.simonbs.Scriptable.RunScriptInlineIntent"
+    ]
+    if len(inline_scripts) != 1:
+        raise AssertionError(f"expected one inline Notion bridge, found {len(inline_scripts)}")
+    inline_script = params(inline_scripts[0]).get("script")
+    if not isinstance(inline_script, str) or "const YOS_BRIDGE_DRY_RUN=true;" not in inline_script:
+        raise AssertionError("Clarity Voice Notion bridge must remain dry-run in test artifacts")
+    if "const YOS_BRIDGE_DRY_RUN=false;" in inline_script:
+        raise AssertionError("live Notion writes are forbidden in test artifacts")
 
     # Index every addressable action and every named variable before resolving refs.
     uuid_index: dict[str, tuple[int, dict]] = {}
@@ -363,8 +378,8 @@ def validate(path: Path, expected_build_id: str) -> None:
     if not isinstance(value, dict) or value.get("WFActionParameterFilterPrefix") != 1:
         raise AssertionError("external-write gate must remain AND")
     rows = value.get("WFActionParameterFilterTemplates")
-    if not isinstance(rows, list) or len(rows) != 2:
-        raise AssertionError("external-write gate must have two rows")
+    if not isinstance(rows, list) or len(rows) != 3:
+        raise AssertionError("external-write gate must have three rows")
     boolean_rows = {}
     for row in rows:
         if not isinstance(row, dict):
@@ -383,8 +398,9 @@ def validate(path: Path, expected_build_id: str) -> None:
     if boolean_rows != {
         "externalWriteText": (4, "はい"),
         "requiresConfirmationText": (4, "いいえ"),
+        "executor": (5, "notion"),
     }:
-        raise AssertionError(f"external-write boolean rows wrong: {boolean_rows!r}")
+        raise AssertionError(f"external-write gate rows wrong: {boolean_rows!r}")
 
     # Audit every Conditional and Repeat group, not just feature paths.
     condition_groups: dict[str, list[tuple[int, int]]] = defaultdict(list)

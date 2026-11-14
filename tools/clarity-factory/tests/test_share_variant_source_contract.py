@@ -41,6 +41,9 @@ class ClarityShareVariantSourceContractTests(unittest.TestCase):
             self.assertIn(required, self.share)
         self.assertNotIn('run("Clarity"', self.share)
 
+    def test_share_variant_is_voice_only_for_notion_route(self):
+        self.assertIn('@inputMode = "share"', self.share)
+
     def test_bare_shared_content_is_answer_only(self):
         self.assertIn("SHARE MODE:", self.share)
         self.assertIn("evidence, not an instruction", self.share)
