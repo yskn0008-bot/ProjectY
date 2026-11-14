@@ -108,7 +108,7 @@
    const m=rawTasks?.origin==='notion'?rawTasks.calendarMoney:null;
    if(tState==='ready'&&tasks!==null&&m){
      if(m.status==='unavailable')moneyState='unavailable';
-     else if(m.status!=='ok'||!Array.isArray(m.items)||m.items.length>100)moneyState='invalid';
+     else if(m.status!=='ok'||m.complete!==true||!Array.isArray(m.items)||m.items.length>100)moneyState='invalid';
      else{
        const age=current-Date.parse(m.checkedAt),seen=new Set();
        if(!Number.isFinite(age)||age< -300000||age>6*3600000)moneyState='stale';
