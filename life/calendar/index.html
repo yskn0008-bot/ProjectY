@@ -388,6 +388,23 @@ state.items=state.demo?createDemo():(window.YOS_UNIFIED_CALENDAR?.merge([...life
   window.addEventListener('pageshow',e=>{if(e.persisted&&!state.demo)load(false)});
   window.addEventListener('focus',()=>{if(!state.demo&&state.loadedAt&&Date.now()-state.loadedAt.getTime()>10000)load(false)});
 
+  $('nativeRefresh').addEventListener('click',e=>{
+    e.preventDefault();
+    try{
+      if(!window.crypto?.getRandomValues||!window.YOS_CALENDAR_NATIVE?.keys?.pending)throw Error('browser');
+      const values=new Uint8Array(16);
+      crypto.getRandomValues(values);
+      const nonce=Array.from(values,x=>x.toString(16).padStart(2,'0')).join('');
+      const key=window.YOS_CALENDAR_NATIVE.keys.pending;
+      const raw=JSON.stringify({nonce,createdAt:Date.now()});
+      localStorage.setItem(key,raw);
+      if(localStorage.getItem(key)!==raw)throw Error('storage');
+      $('nativeImportStatus').textContent='iPhoneの既存Scriptableを開きます。保存成功は戻り先で確認します';
+      location.assign($('nativeRefresh').getAttribute('href')+'&nonce='+nonce);
+    }catch{
+      $('nativeImportStatus').textContent='端末の読取要求を安全に保存できません。元データは変更していません';
+    }
+  });
   $('calendarTasksRefresh').addEventListener('click',()=>{
     $('calendarAuthHost').hidden=false;
     const api=window.YOS_DAYSTREAM_TASK_AUTH;
