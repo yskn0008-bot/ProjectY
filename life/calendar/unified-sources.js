@@ -104,11 +104,35 @@
    let tasks=null,taskView=null,calendar=null;
    if(tState==='ready'){taskView=taskItems(rawTasks,current);tasks=taskView?.items||null}
    if(cState==='ready')calendar=calendarItems(rawCalendar);
+   let money=[],moneyState='missing',moneyDetails=null;
+   const m=rawTasks?.origin==='notion'?rawTasks.calendarMoney:null;
+   if(tState==='ready'&&tasks!==null&&m){
+     if(m.status==='unavailable')moneyState='unavailable';
+     else if(m.status!=='ok'||!Array.isArray(m.items)||m.items.length>100)moneyState='invalid';
+     else{
+       const age=current-Date.parse(m.checkedAt),seen=new Set();
+       if(!Number.isFinite(age)||age< -300000||age>6*3600000)moneyState='stale';
+       else{
+         moneyState='ready';
+         for(const e of m.items){
+           if(!e||typeof e.id!=='string'||!/^([a-f0-9]{32})$/.test(e.id)||seen.has(e.id)||
+             !clean(e.title,100)||!validDay(e.date)||!Number.isFinite(e.amount)||e.amount<0||
+             !['income','expense'].includes(e.kind)){moneyState='invalid';money=[];break}
+           seen.add(e.id);
+           money.push({id:'notion:money:'+e.id,type:'money',date:e.date,title:clean(e.title,100),
+             subtitle:'確認済の予定',amount:Math.round(e.amount),moneyKind:e.kind,complete:false,
+             source:'Notion家計確認済',sourceId:e.id});
+         }
+         if(moneyState==='ready')moneyDetails={at:m.checkedAt,count:money.length};
+       }
+     }
+   }
    const state={tasks:tasks===null?(tState==='ready'?'invalid':tState):'ready',
-     calendar:calendar===null?(cState==='ready'?'invalid':cState):'ready'};
-   return {items:[...(calendar||[]),...(tasks||[])],status:state,
+     calendar:calendar===null?(cState==='ready'?'invalid':cState):'ready',money:moneyState};
+   return {items:[...(calendar||[]),...(tasks||[]),...money],status:state,
      details:{tasks:tasks?{at:rawTasks.checkedAt,origin:rawTasks.origin==='notion'?'notion':'manual',count:tasks.length,...taskView.mirror}:null,
-       calendar:calendar?{at:rawCalendar.checkedAt,origin:'manual',count:calendar.length}:null}};
+       calendar:calendar?{at:rawCalendar.checkedAt,origin:'manual',count:calendar.length}:null,
+       money:moneyDetails}};
  }
  // Cross-source duplicates without shared original IDs are suppressed only when
  // the same day, same title and the same *explicit* start time are verified.
