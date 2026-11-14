@@ -133,13 +133,13 @@
   let pending=null;
   try{pending=JSON.parse(storage.getItem(PENDING_KEY)||'null')}catch{}
   const current=Number.isFinite(now)?now:Date.now();
-  if(!pending||typeof pending.nonce!=='string'||!/^[a-f0-9]{32}$/.test(pending.nonce)
-     ||snapshot.requestNonce!==pending.nonce||!Number.isFinite(pending.createdAt)
-     ||current-pending.createdAt>5*60000||current-pending.createdAt< -300000){
-    // iOS Home Screen PWAs and Safari may have isolated browser storage.
-    // Fail closed to automatic import, but offer a visible explicit confirmation
-    // for this one local-only payload; never persist a forged link silently.
-    if(/^[a-f0-9]{32}$/.test(String(snapshot.requestNonce||''))&&verify(snapshot,current).ok){
+  const pendingValid=pending&&typeof pending.nonce==='string'&&/^[a-f0-9]{32}$/.test(pending.nonce)
+     &&snapshot.requestNonce===pending.nonce&&Number.isFinite(pending.createdAt)
+     &&current-pending.createdAt<=5*60000&&current-pending.createdAt>=-300000;
+  if(!pendingValid){
+    // Only a genuinely separate Safari/PWA storage context has no pending
+    // request. A mismatched or expired request in this context is rejected.
+    if(!pending&&/^[a-f0-9]{32}$/.test(String(snapshot.requestNonce||''))&&verify(snapshot,current).ok){
       pendingConfirmation=snapshot;
       return {ok:false,reason:'confirmation-needed',details:{
        eventCount:snapshot.events.length,reminderCount:snapshot.reminders.length,remindersStatus:snapshot.remindersStatus}};
