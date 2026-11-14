@@ -104,7 +104,7 @@
    seen.add(e.id);
    items.push({id:e.id,title:str(e.title,100),date:e.date,amount:Math.round(e.amount),kind:e.kind});
   }
-  return {status:'ok',checkedAt:source.checkedAt,items};
+  return {status:'ok',complete:true,checkedAt:source.checkedAt,items};
  }
  function fromYosTaskDashboardCache(cache){
   if(!cache||typeof cache!=='object'||!Number.isFinite(cache.savedAt)||Date.now()-cache.savedAt<0||Date.now()-cache.savedAt>6*60*60*1000||!Array.isArray(cache.data?.tasks)||cache.data.tasks.length>MAX_TASKS)return null;
