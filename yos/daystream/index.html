@@ -158,7 +158,21 @@ button:active{opacity:.8}@media(min-width:640px){.dock{left:calc((100vw - 640px)
  const nativeCalendar=(()=>{try{return window.YOS_CALENDAR_NATIVE?.asDaystream(localStorage)||null}catch{return null}})();
  const nativeReminders=nativeSnapshot?.status==='ready'?
    nativeSnapshot.items.filter(x=>x.type==='task'&&x.sourceKind==='reminder').map(x=>({id:x.id,title:x.title,due:x.date,status:'次にやる',source:'iPhone Reminders取込'})):[];
- const effectiveCalendar=nativeCalendar||importedCalendar||existingLifeSchedule;
+ // A verified iPhone refresh covers only its explicit 14-day window. Preserve
+ // already-imported dates OUTSIDE that window instead of replacing the whole
+ // calendar with the new partial date range.
+ const effectiveCalendar=(()=>{
+  const fallback=importedCalendar||existingLifeSchedule;
+  if(!nativeCalendar)return fallback;
+  if(!fallback)return nativeCalendar;
+  const outside=key=>key<nativeCalendar.calendarCoverage.from||key>=nativeCalendar.calendarCoverage.until;
+  const extra=days=>Object.fromEntries(Object.entries(days||{}).filter(([key])=>outside(key)));
+  const days={...extra(fallback.calendarDays),...nativeCalendar.calendarDays};
+  const allDay={...extra(fallback.allDayDays),...nativeCalendar.allDayDays};
+  const added=Object.keys(extra(fallback.calendarDays)).length+Object.keys(extra(fallback.allDayDays)).length;
+  return added?{...nativeCalendar,source:'scriptable-on-device + '+(fallback.source||'manual'),
+   calendarDays:days,allDayDays:allDay}:nativeCalendar;
+ })();
  const importedDays=Object.keys(effectiveCalendar?.calendarDays||{}).concat(Object.keys(effectiveCalendar?.allDayDays||{})).sort();
  const importedCalendarCoverage=nativeCalendar?.calendarCoverage||(importedDays.length?{
   from:importedDays[0],until:(()=>{const d=new Date(importedDays[importedDays.length-1]+'T00:00:00Z');d.setUTCDate(d.getUTCDate()+1);return d.toISOString().slice(0,10)})(),
