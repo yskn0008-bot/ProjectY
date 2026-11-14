@@ -93,7 +93,7 @@ async function runNativeCalendar(){
   if(/too many/i.test(String(error)))throw error;
   remindersStatus='unavailable';reminders=[];
  }
- if(localDateKey(start)!==localDateKey(new Date(now.getFullYear(),now.getMonth(),now.getDate())))
+ if(localDateKey(start)!==localDateKey(new Date()))
   throw Error('日付が変わりました。再実行してください');
  const snapshot={schema:'yos-calendar-native-snapshot-v1',source:'scriptable-on-device',requestNonce:nonce,
   checkedAt:new Date().toISOString(),windowStart:localDateKey(start),
