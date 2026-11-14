@@ -153,3 +153,39 @@ test('Notion source adapter preserves mirror lastSynced; Notion GET cannot repla
  assert.equal(cached.items[0].lastEditedAt,'2026-11-14T00:00:00Z');
  assert.equal(cached.items[0].timing,'fixed');
 });
+
+test('stale Notion Reminders mirrors are NOT treated as current tasks even on a fresh Notion GET',()=>{
+ const old=task({title:'Task｜期限が古い',timing:'timed-deadline',
+  sourceFamily:'reminder',action:'Remindersで確認',lastSynced:'2026-11-01T07:00:00Z'});
+ const ordinary=task({id:'notion-'+'b'.repeat(32),title:'通常のタスク',sourceFamily:'task'});
+ const x=read(tasks([old,ordinary]));
+ assert.equal(x.items.length,1);
+ assert.equal(x.items[0].title,'通常のタスク');
+ assert.equal(x.details.tasks.staleReminders,1);
+});
+test('old Notion endpoint fallback identifies legacy Reminder mirrors conservatively',()=>{
+ const old=task({title:'Task｜旧ミラー',action:'Remindersで確認',lastSynced:'2026-11-01T07:00:00Z'});
+ const x=read(tasks([old]));
+ assert.equal(x.items.length,0);
+ assert.equal(x.details.tasks.staleReminders,1);
+});
+test('a verified current Reminder copy remains marked Reminder and source-aware dedupe suppresses identical native record',()=>{
+ const current=task({title:'Task｜電話する',sourceFamily:'reminder',
+  due:'2026-11-14',dueAt:'2026-11-14T03:00:00Z',
+  lastSynced:'2026-11-13T23:00:00Z',action:'Remindersで確認'});
+ const x=read(tasks([current]));
+ assert.equal(x.items.length,1);
+ assert.equal(x.details.tasks.freshReminders,1);
+ assert.equal(x.items[0].title,'電話する');
+ assert.equal(x.items[0].sourceKind,'reminder');
+ assert.match(x.items[0].subtitle,/リマインダー期限 12:00/);
+ const native={id:'native:reminder:1',type:'task',sourceKind:'reminder',
+  title:'電話する',date:'2026-11-14',subtitle:'リマインダー期限 12:00'};
+ const merged=api.merge([x.items[0]],[native]);
+ assert.equal(merged.length,1);
+ assert.equal(merged[0].id,native.id);
+});
+test('Notion mirrored Money current summary is never mistaken for confirmed payment',()=>{
+ const x=read(tasks([task({sourceFamily:'money',title:'使えるお金 3万円'})]));
+ assert.equal(x.items.length,0);
+});
