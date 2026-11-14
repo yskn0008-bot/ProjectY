@@ -21,6 +21,9 @@ const {chromium,webkit}=require('playwright');
     checkedAt:now.toISOString(),items:[{id:'notion-'+'a'.repeat(32),title:'面接予定の確認',status:'次にやる',due:today,dueAt:today,timing:'flexible'},
      {id:'notion-'+'b'.repeat(32),title:'予定｜固定予定テスト',status:'保留',due:today,dueAt:today+'T03:00:00Z',timing:'fixed',lastSynced:now.toISOString()},
      {id:'notion-'+'c'.repeat(32),title:'予定｜古い通知',status:'保留',due:today,dueAt:today+'T03:00:00Z',timing:'fixed',lastSynced:'2026-11-01T06:56:00Z'}]};
+   const next=new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date(now.getTime()+86400000));
+   tasks.calendarMoney={status:'ok',checkedAt:now.toISOString(),items:[
+      {id:'f'.repeat(32),date:next,title:'確認済み翌日支払',amount:1200,kind:'expense'}]};
    const calendar={schema,kind:'calendar',status:'ok',source:'user-file',checkedAt:now.toISOString(),
     calendarDays:{[today]:[{title:'美容室',start:600,duration:60},{title:'写真撮影',start:780,duration:45}]},allDayDays:{}};
    const life={days:{[today]:{lastSync:now.toISOString(),schedule:[{id:'orig-1',date:today,title:'美容室',start:today+'T01:00:00Z',end:today+'T02:00:00Z'},
@@ -36,6 +39,7 @@ const {chromium,webkit}=require('playwright');
   assert.match(await page.locator('#calendarTasksFreshness').innerText(),/予定1件/);
   assert.doesNotMatch(await page.locator('#glanceScheduleItems').innerText(),/古い通知/);
   assert.equal((await page.locator('#calendarEventsState').textContent()).trim(),'取込済み');
+  assert.equal((await page.locator('#notionMoneyConnection').textContent()).trim(),'確認済','confirmed Notion money source is disclosed');
   const schedules=await page.locator('#glanceScheduleItems').innerText();
   assert.equal((schedules.match(/美容室/g)||[]).length,1,'same event in two views must not duplicate');
   assert.match(schedules,/写真撮影/);
@@ -81,6 +85,7 @@ const {chromium,webkit}=require('playwright');
   assert.doesNotMatch(await page.locator('#glanceScheduleItems').innerText(),/写真撮影/);
   assert.equal((await page.locator('#glanceExpense').textContent()).trim(),'—','Money privacy respected');
   assert.equal((await page.locator('#moneyConnection').textContent()).trim(),'非表示');
+  assert.equal((await page.locator('#notionMoneyConnection').textContent()).trim(),'非表示','Notion Money is hidden by the existing privacy setting');
   assert.deepEqual(failures,[],'no JS runtime exceptions');
   console.log('YOS unified calendar '+kind+' browser tests PASS');
  }finally{await browser.close()}
