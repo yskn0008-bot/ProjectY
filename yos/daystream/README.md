@@ -11,6 +11,18 @@
 - Notion Tasks、Apple Calendar、端末のショートカット連携、実機の振動はWebブラウザから自動接続していません。Web画面に未接続と明示します。認証トークンはブラウザに配布しません。
 - 既存YOSのService Workerに追加したため、一度オンラインでキャッシュされた後はオフライン起動候補となります。ネットワークなしの初回起動は保証しません。
 
+## 2026-11-15｜YOS統合カレンダーの実データ接続（PR #752、実機受入は未了）
+
+既存の統合カレンダー `/ProjectY/life/calendar/` はDAYSTREAMの認証済みNotion Tasks読取契約を再利用し、追加のDB・サーバー・認証秘密なしで月／週／日／今日概要を表示。元Notionの期限とAppleの固定予定を区別し、元カレンダーの「最終同期」が古い複製を、今日のNotion API読取時刻だけで最新と誤認しません。
+
+- **Notion Tasks**：既存Google本人認証を本人が選ぶと、既存YOS APIの `?source=notion&calendarMoney=1` へ読取。未配信の本番コードには利用不可。Notionのタスク状態・期限・原本IDを端末内で検証して読み戻します。Apple Calendar／Reminders／Money由来の複製行は原本側を変えられないように保護。
+- **Money**：既存Notion「家計イベント・入出金予定」の `状態=予定` かつ `確度=確認済`、更新が直近7日以内、今後31日までの収入・支出だけを、元ID・タイトル・日付・額・区分に限定して表示。口座残高・本文・未確認／見込み・資金移動は表示しません。既存Moneyの非表示設定を優先。取得失敗や不完全レスポンスは金額不明として扱います。
+- **iPhone予定・リマインダー**：既存 `life/calendar-sync-scriptable.js` の`target=calendar`だけで今後15日のCalendarEventと期限付き未完了Reminderを読み、ブラウザのURL**フラグメント**（HTTP送信されない部分）から既存統合カレンダーの端末ストレージへ保存・読み戻し。元の予定・通知は変更なし。古い端末写し（24時間超）は非表示。Safariとホーム画面PWAが保存領域を共有できない場合は、無断取り込みを避けるため、表示される「iPhoneの取込を確認」を本人が一度押す必要があります。接続先の既存Scriptableスクリプト名称・配布・iPhoneアクセス権限は**実機未確認**。
+- **DAYSTREAM連携**：ブラウザ保存領域を共有できる場合、同じiPhoneカレンダーの検証済み写しがDAYSTREAMの固定予定と週のリマインダー期限に反映されます。古い・未確認の場合は従来の手動ICS、MY LIFE保存予定を再利用。**独立ホーム画面PWA間の常時同期を保証しません**。
+- **Googleカレンダー**：ChatGPTコネクターが読めることと、YOS Webアプリが自動で取得できることは別物です。iPhoneの標準カレンダーへ表示されているGoogle予定は端末読取で対象となる可能性がありますが、実機の有効化と取得範囲は未検証。サーバーから無人で直接Google APIを巡回する機能は追加していません。
+
+自動テストは架空のデータでローカルスナップショットの期限・検証・重複・プライバシー・DAYSTREAMへの反映・Chromium／WebKitの端末類似ブラウザ動作を確認します。本番YOSの認証済みNotion GET、現実のiPhone Scriptable起動、Safari／PWA保存境界、既存インストーラーによる更新、本人の使用感は**別の未完了ゲート**です。自動テスト合格をiPhone実機完成とは報告しません。
+
 ## 確認と終了条件
 
 `node --test tests/daystream-web-port.test.mjs`、`YOS_BROWSER=chromium node yos/tests/daystream-web-browser-smoke.mjs`、`YOS_BROWSER=webkit node yos/tests/daystream-web-browser-smoke.mjs`（後者2件はPlaywrightをインストールしたCIサーバーで起動）。
