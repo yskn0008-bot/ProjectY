@@ -4,7 +4,7 @@
  */
 (function(root){
  'use strict';
- const KEY='YOS_CALENDAR_NATIVE_SNAPSHOT_V1';
+ const KEY='YOS_CALENDAR_NATIVE_SNAPSHOT_V1',PENDING_KEY='YOS_CALENDAR_NATIVE_PENDING_V1';
  const SCHEMA='yos-calendar-native-snapshot-v1';
  const DAY_MS=86400000,MAX_BYTES=16000,MAX_EVENTS=80,MAX_REMINDERS=80,MAX_SPAN=15;
  const TZ='Asia/Tokyo';
@@ -127,7 +127,16 @@
   }
   const snapshot=decodePayload(hash.slice('#yos-native='.length));
   if(!snapshot)return {ok:false,reason:'invalid'};
+  // A web link alone is not proof that the user's Scriptable produced the data.
+  // Bind it to a locally initiated one-tap request for integrity (no server secrets).
+  let pending=null;
+  try{pending=JSON.parse(storage.getItem(PENDING_KEY)||'null')}catch{}
+  const current=Number.isFinite(now)?now:Date.now();
+  if(!pending||typeof pending.nonce!=='string'||!/^[a-f0-9]{32}$/.test(pending.nonce)
+     ||snapshot.requestNonce!==pending.nonce||!Number.isFinite(pending.createdAt)
+     ||current-pending.createdAt>5*60000||current-pending.createdAt< -300000)return {ok:false,reason:'unrequested'};
+  try{storage.removeItem(PENDING_KEY)}catch{return {ok:false,reason:'storage'}}
   return save(storage,snapshot,now);
  }
- root.YOS_CALENDAR_NATIVE={read,save,consume,keys:{snapshot:KEY}};
+ root.YOS_CALENDAR_NATIVE={read,save,consume,keys:{snapshot:KEY,pending:PENDING_KEY}};
 })(typeof window!=='undefined'?window:globalThis);
