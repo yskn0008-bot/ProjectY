@@ -67,6 +67,26 @@ const {chromium,webkit}=require('playwright');
   assert.match(await page.locator('#nativeImportStatus').innerText(),/保存・確認/);
   assert.match(await page.locator('#glanceScheduleItems').innerText(),/iPhone予約/);
   assert.match(await page.locator('#glanceTaskItems').innerText(),/電話する/);
+  // Safari and a Home Screen PWA can be separate storage containers. A browser
+  // arriving without the original nonce may never import silently.
+  const anotherBrowserUrl=await page.evaluate(()=>{
+    const key='YOS_CALENDAR_NATIVE_SNAPSHOT_V1';
+    const raw=localStorage.getItem(key);
+    localStorage.removeItem(key);
+    const bytes=new TextEncoder().encode(raw);
+    let text='';for(const n of bytes)text+=String.fromCharCode(n);
+    return location.origin+location.pathname+'#yos-native='+btoa(text).replace(/\\+/g,'-').replace(/\\//g,'_').replace(/=+$/g,'');
+  });
+  await page.goto('about:blank');
+  await page.goto(anotherBrowserUrl,{waitUntil:'domcontentloaded'});
+  assert.match(await page.locator('#nativeImportStatus').innerText(),/別のブラウザからの取込/);
+  assert.equal(await page.evaluate(()=>localStorage.getItem('YOS_CALENDAR_NATIVE_SNAPSHOT_V1')),null,'no silent cross-app data write');
+  assert.equal(await page.locator('#nativeConfirm').isVisible(),true);
+  await page.locator('#nativeConfirm').click();
+  assert.equal((await page.locator('#nativeConnection').textContent()).trim(),'取込済み');
+  assert.equal((await page.locator('#nativeConfirm').isVisible()),false);
+  assert.match(await page.locator('#nativeImportStatus').innerText(),/保存・読戻し/);
+
   assert.equal((await page.locator('#glanceExpense').innerText()).trim(),'¥0','planned money is not actual');
   assert.match(await page.locator('#glanceExpenseNote').innerText(),/7,000/,'planned money is labeled planned');
   await page.locator('[data-mode="month"]').click();
