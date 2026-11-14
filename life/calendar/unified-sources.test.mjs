@@ -227,3 +227,9 @@ test('DAYSTREAM source adapter preserves only bounded typed Notion Money events'
  assert.equal(bad.calendarMoney.status,'invalid');
  assert.equal(bad.items.length,0);
 });
+
+test('existing YOS menu links to unified calendar without adding a seventh main screen',()=>{
+ const home=readFileSync(new URL('../../yos/index.html',import.meta.url),'utf8');
+ assert.match(home,/<a href="\.\.\/life\/calendar\/">統合カレンダー/);
+ assert.match(home,/<a href="\.\/daystream\/">DAYSTREAM/);
+});
