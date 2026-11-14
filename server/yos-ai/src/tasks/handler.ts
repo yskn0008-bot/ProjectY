@@ -16,7 +16,7 @@ const HEADER = ['実行順','やること','状態','担当','期限','優先度
 export interface TaskDashboardItem {
   order: number;
   id?: string;
-  sourceKind?: 'calendar' | 'task';
+  sourceKind?: 'calendar' | 'reminder' | 'money' | 'task';
   dueEnd?: string | null;
   dueTimeZone?: string | null;
   habitCycle?: string;
