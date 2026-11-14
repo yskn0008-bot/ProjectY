@@ -78,6 +78,13 @@
       "path": "ios-app/scriptable/YOS Journal Notion Bridge.js",
       "commit": "f14674bfc52926e66e1f22d8490de23f6a2ba079",
       "sha256": "b47f46b56fc528353e0032d370bc56c6c004cf2490fb0af47c864a24e1721870"
+    },
+    {
+      "id": "screenshot-bridge",
+      "name": "YOS Screenshot Bridge",
+      "path": "ios-app/scriptable/YOS Screenshot Bridge.js",
+      "commit": "7ce60ec991be3dfc235cdf8daa11aed215d707ee",
+      "sha256": "2a465318fe88f3a16654039f744f87dbc4c05ecd48b16a9f5b931fbf643ec3f1"
     }
   ]
 }
