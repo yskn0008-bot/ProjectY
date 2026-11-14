@@ -6,6 +6,7 @@ import type {FetchLike} from '../http.js';
 import {GoogleDriveClient} from '../sources/google-drive-client.js';
 import {GoogleSheetsClient} from '../sources/google-sheets-client.js';
 import {loadNotionTaskDashboard, completeNotionTask} from '../widget/notion-source.js';
+import {loadNotionCalendarMoney} from '../widget/morning.js';
 import {allowedOrigin, bearerToken, secureJson, type CorsOptions} from '../api/shared.js';
 
 const PROJECTION_NAME = 'YOS Tasks｜MY WAY Read Projection';
@@ -101,6 +102,12 @@ export function createTaskDashboardHandler(options: CreateTaskDashboardHandlerOp
           calendar: true,
           fetchImpl
         });
+        if(request.method==='GET'&&new URL(request.url).searchParams.get('calendarMoney')==='1'){
+          let calendarMoney;
+          try {calendarMoney=await loadNotionCalendarMoney({notionToken:options.notionToken,fetchImpl});}
+          catch {calendarMoney={status:'unavailable' as const};}
+          return secureJson({...result,calendarMoney},200,origin,{'Cache-Control':'private, no-store'});
+        }
         return secureJson(result, 200, origin, {'Cache-Control': 'private, no-store'});
       } catch {
         return secureJson({error: 'Notion tasks could not be read completely'}, 503, origin);
