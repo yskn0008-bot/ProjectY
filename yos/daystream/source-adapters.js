@@ -128,6 +128,7 @@
     dueAt:start.at,dueEnd:end.at,dueTimeZone:str(t.dueTimeZone,80)||null,
     // A deadline time is not proof of a fixed appointment. Do not schedule it.
     timing:t.sourceKind==='calendar'?'fixed':start.at&&start.at.includes('T')?'timed-deadline':'flexible',
+    sourceFamily:['calendar','reminder','money'].includes(t.sourceKind)?t.sourceKind:'task',
     habitCycle:['毎日','毎週','毎月','年・長期'].includes(t.habitCycle)?t.habitCycle:'',
     lastEditedAt:typeof t.lastEditedAt==='string'?str(t.lastEditedAt,80):null,
     // Preserve the source mirror's sync time separately from this Notion GET time.
