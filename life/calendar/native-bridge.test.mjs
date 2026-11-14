@@ -119,9 +119,9 @@ test('a forged native URL without a browser-initiated nonce cannot replace store
  const result=api.consume(s,{pathname:'/ProjectY/life/calendar/',search:'',hash:'#yos-native='+payload},
    {replaceState:()=>cleared++},now);
  assert.equal(result.ok,false);
- assert.equal(result.reason,'unrequested');
+ assert.equal(result.reason,'confirmation-needed','no request must never silently import data');
  assert.equal(cleared,1);
- assert.equal(s.getItem(api.keys.snapshot),previous);
+ assert.equal(s.getItem(api.keys.snapshot),previous,'only explicit user approval may replace');
 });
 test('expired import nonce cannot be reused',()=>{
  const nonce='b'.repeat(32);
