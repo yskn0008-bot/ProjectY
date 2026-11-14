@@ -159,7 +159,7 @@ body.glance-mode .bottom .refresh{min-height:36px;padding:7px 11px;font-size:11p
   <div class="calendar-auth">
     <button class="today-btn" id="calendarTasksRefresh" type="button">Notion Tasksを更新</button>
     <a class="today-btn" id="nativeRefresh" href="scriptable:///run?scriptName=YOS%20Life%20Calendar%20Sync&target=calendar" aria-label="既存Scriptableから端末の予定とリマインダーを読み込む">iPhone予定を更新</a>
-    <span id="nativeImportStatus" role="status" style="font-size:11px;color:var(--muted)"></span>
+    <span id="nativeImportStatus" role="status" style="font-size:11px;color:var(--muted)"></span><button class="today-btn" id="nativeConfirm" type="button" hidden>iPhoneの取込を確認</button>
     <div id="calendarAuthHost" hidden>
       <div id="calendarGoogleButton"></div><p id="calendarAuthStatus" role="status">本人確認待ち</p>
     </div>
@@ -428,7 +428,19 @@ state.items=state.demo?createDemo():(window.YOS_UNIFIED_CALENDAR?.merge([...life
     }});
   });
   const incoming=window.YOS_CALENDAR_NATIVE?.consume(localStorage,location,history);
-  if(incoming&&incoming.reason!=='none'){
+  if(incoming?.reason==='confirmation-needed'){
+    // Safari may not share storage with the Home Screen PWA. Only explicit
+    // confirmation can import across isolated contexts; original data is never changed.
+    $('nativeImportStatus').textContent='別のブラウザからの取込です。予定'+incoming.details.eventCount+'件・リマインダー'+
+      (incoming.details.remindersStatus==='ok'?incoming.details.reminderCount+'件':'権限未確認')+'を確認してください。';
+    $('nativeConfirm').hidden=false;
+    $('nativeConfirm').addEventListener('click',()=>{
+      $('nativeConfirm').hidden=true;
+      const confirmed=window.YOS_CALENDAR_NATIVE?.confirmImport(localStorage);
+      $('nativeImportStatus').textContent=confirmed?.ok?'端末の予定を保存・読戻し確認しました':'取込できませんでした。元データは保持しました。';
+      load(false);
+    },{once:true});
+  }else if(incoming&&incoming.reason!=='none'){
     $('nativeImportStatus').textContent=incoming.ok?'iPhoneの予定を端末内に保存・確認しました':'端末情報は保存しませんでした（'+incoming.reason+'）';
   }
   load(undefined);
