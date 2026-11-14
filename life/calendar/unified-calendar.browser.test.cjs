@@ -75,7 +75,7 @@ const {chromium,webkit}=require('playwright');
     localStorage.removeItem(key);
     const bytes=new TextEncoder().encode(raw);
     let text='';for(const n of bytes)text+=String.fromCharCode(n);
-    return location.origin+location.pathname+'#yos-native='+btoa(text).replace(/\\+/g,'-').replace(/\\//g,'_').replace(/=+$/g,'');
+    return location.origin+location.pathname+'#yos-native='+btoa(text).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/g,'');
   });
   await page.goto('about:blank');
   await page.goto(anotherBrowserUrl,{waitUntil:'domcontentloaded'});
