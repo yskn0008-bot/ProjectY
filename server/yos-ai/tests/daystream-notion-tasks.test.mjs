@@ -97,8 +97,8 @@ test('empty Notion placeholder rows are reported without hiding partially popula
  await assert.rejects(()=>load(async()=>payload([{...blank,properties:{...blank.properties,'期限':{date:{start:'2026-11-13'}}}}])),/no title/);
 });
 
-function mutationHarness({state='次にやる',version='2026-11-13T01:00:00Z',parent=ds,cycle='',uncertain=false}={}){
- let current={...page({'状態':select(state),'習慣周期':select(cycle)}),parent:{data_source_id:parent},last_edited_time:version};
+function mutationHarness({state='次にやる',version='2026-11-13T01:00:00Z',parent=ds,cycle='',syncKey='',uncertain=false}={}){
+ let current={...page({'状態':select(state),'習慣周期':select(cycle),'同期キー':rich(syncKey)}),parent:{data_source_id:parent},last_edited_time:version};
  const calls=[];
  const h=handler(async(url,init)=>{
   calls.push({url:String(url),method:init.method,body:init.body});
@@ -130,4 +130,22 @@ test('unknown completion result is resolved on explicit retry without a second w
  assert.equal((await h.complete()).status,409);
  assert.equal((await h.complete()).status,200);
  assert.equal(h.calls.filter(x=>x.method==='PATCH').length,1);
+});
+
+test('Notion calendar API preserves mirror source types so stale reminders and money are never plain tasks',async()=>{
+ const rows=[
+  {...page({'同期キー':rich('calendar:aaa')}),id:'a'.repeat(32)},
+  {...page({'同期キー':rich('reminder:bbb')}),id:'b'.repeat(32)},
+  {...page({'同期キー':rich('money:current')}),id:'c'.repeat(32)},
+  {...page({'同期キー':rich('')}),id:'d'.repeat(32)}
+ ];
+ const x=await load(async()=>payload(rows));
+ assert.deepEqual(x.tasks.map(t=>t.sourceKind),['calendar','reminder','money','task']);
+});
+test('calendar, reminder and money mirrors are source-owned and cannot be completed through YOS Tasks',async()=>{
+ for(const syncKey of ['calendar:abc','reminder:abc','money:current']){
+  const h=mutationHarness({syncKey});
+  assert.equal((await h.complete()).status,409);
+  assert.equal(h.calls.some(c=>c.method==='PATCH'),false);
+ }
 });
