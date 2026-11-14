@@ -44,7 +44,7 @@ test('calendar importer is available through the existing shared installer witho
  assert.match(code,/CalendarEvent\.between\(/);
  assert.match(code,/Reminder\.allIncomplete\(/);
  assert.match(code,/args\.queryParameters\?\.target==='calendar'/);
- const result=await run({id:entry.id,choices:[0,-1]});
+ const result=await run({id:entry.id,choices:[-1]});
  assert.equal(result.cloud.files.get('/icloud/YOS Life Calendar Sync.js'),code);
  assert.equal(result.opened.length,0,'import must not autoexecute or request Calendar permission');
 });
