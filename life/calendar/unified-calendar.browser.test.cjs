@@ -110,6 +110,13 @@ const {chromium,webkit}=require('playwright');
   assert.equal((await page.locator('#glanceExpense').textContent()).trim(),'—','Money privacy respected');
   assert.equal((await page.locator('#moneyConnection').textContent()).trim(),'非表示');
   assert.equal((await page.locator('#notionMoneyConnection').textContent()).trim(),'非表示','Notion Money is hidden by the existing privacy setting');
+  // Fresh again for this separate coverage test; stale imported records must
+  // remain excluded (as confirmed above), while fresh out-of-window dates survive.
+  await page.evaluate(()=>{
+   const key='YOS_DAYSTREAM_WEB_CAL_SNAPSHOT_V1',p=JSON.parse(localStorage.getItem(key));
+   p.checkedAt=new Date().toISOString();
+   localStorage.setItem(key,JSON.stringify(p));
+  });
   // DAYSTREAM is a separate route but the same authenticated website origin.
   // It must see the recently validated native calendar and Reminder deadlines
   // without writing the original Apple Calendar or another Notion collection.
