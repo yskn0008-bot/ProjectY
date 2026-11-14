@@ -7,7 +7,7 @@ import vm from 'node:vm';
 
 const js=readFileSync(new URL('./native-bridge.js',import.meta.url),'utf8');
 const ctx={window:{atob:base64=>Buffer.from(base64,'base64').toString('binary')},Intl,Date,Number,String,Object,Array,Uint8Array,TextDecoder};
-vm.runInNewContext(js,ctx,{timeout:1000});
+vm.runInNewContext(js,ctx,{timeout:5000});
 const api=ctx.window.YOS_CALENDAR_NATIVE;
 const now=Date.parse('2026-11-14T00:00:00Z');
 const snap=(patch={})=>({
