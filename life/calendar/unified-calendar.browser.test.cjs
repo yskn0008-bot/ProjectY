@@ -22,7 +22,7 @@ const {chromium,webkit}=require('playwright');
      {id:'notion-'+'b'.repeat(32),title:'予定｜固定予定テスト',status:'保留',due:today,dueAt:today+'T03:00:00Z',timing:'fixed',lastSynced:now.toISOString()},
      {id:'notion-'+'c'.repeat(32),title:'予定｜古い通知',status:'保留',due:today,dueAt:today+'T03:00:00Z',timing:'fixed',lastSynced:'2026-11-01T06:56:00Z'}]};
    const next=new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date(now.getTime()+86400000));
-   tasks.calendarMoney={status:'ok',checkedAt:now.toISOString(),items:[
+   tasks.calendarMoney={status:'ok',complete:true,checkedAt:now.toISOString(),items:[
       {id:'f'.repeat(32),date:next,title:'確認済み翌日支払',amount:1200,kind:'expense'}]};
    const calendar={schema,kind:'calendar',status:'ok',source:'user-file',checkedAt:now.toISOString(),
     calendarDays:{[today]:[{title:'美容室',start:600,duration:60},{title:'写真撮影',start:780,duration:45}]},allDayDays:{}};
