@@ -25,7 +25,7 @@
   if(!snapshot||snapshot.schema!==SCHEMA||snapshot.source!=='scriptable-on-device'||snapshot.completeCalendar!==true)return {ok:false,reason:'invalid'};
   const at=parseAt(snapshot.checkedAt);
   if(at===null||at>now+300000||now-at>DAY_MS)return {ok:false,reason:'stale'};
-  if(!validDay(snapshot.windowStart)||!validDay(snapshot.windowEnd)||Date.parse(snapshot.windowEnd)-Date.parse(snapshot.windowStart)>15*DAY_MS)return {ok:false,reason:'invalid'};
+  if(!validDay(snapshot.windowStart)||!validDay(snapshot.windowEnd)||Date.parse(snapshot.windowEnd)<Date.parse(snapshot.windowStart)||Date.parse(snapshot.windowEnd)-Date.parse(snapshot.windowStart)>15*DAY_MS)return {ok:false,reason:'invalid'};
   if(!Array.isArray(snapshot.events)||snapshot.events.length>MAX_EVENTS||
      !Array.isArray(snapshot.reminders)||snapshot.reminders.length>MAX_REMINDERS||
      !['ok','unavailable'].includes(snapshot.remindersStatus))return {ok:false,reason:'invalid'};
@@ -36,13 +36,14 @@
    seen.add('event:'+e.id);
    const a=parseAt(e.start),b=parseAt(e.end);
    if(a===null||b===null||b<=a||b-a>MAX_SPAN*DAY_MS)return {ok:false,reason:'invalid'};
-   if(parts(a).day<snapshot.windowStart||parts(a).day>snapshot.windowEnd)return {ok:false,reason:'invalid'};
+   if(parts(b-1).day<snapshot.windowStart||parts(a).day>snapshot.windowEnd)return {ok:false,reason:'invalid'};
   }
   for(const r of snapshot.reminders){
    if(!r||typeof r!=='object'||!clean(r.id,180)||!clean(r.title,100)||r.completed!==false)return {ok:false,reason:'invalid'};
    if(seen.has('reminder:'+r.id))return {ok:false,reason:'invalid'};
    seen.add('reminder:'+r.id);
    if(r.dueAt!==null&&parseAt(r.dueAt)===null)return {ok:false,reason:'invalid'};
+   if(r.dueAllDay!==undefined&&typeof r.dueAllDay!=='boolean')return {ok:false,reason:'invalid'};
   }
   if(snapshot.remindersStatus==='unavailable'&&snapshot.reminders.length)return {ok:false,reason:'invalid'};
   return {ok:true};
@@ -57,8 +58,7 @@
   for(const e of snapshot.events){
    const start=parseAt(e.start),end=parseAt(e.end),a=parts(start),b=parts(end);
    let day=a.day,n=0;
-   const last=e.allDay&&b.minutes===0?new Date(end-1):new Date(end-1);
-   const stop=parts(last.getTime()).day;
+   const stop=parts(end-1).day;
    while(day<=stop&&n++<MAX_SPAN+1){
     if(day>=snapshot.windowStart&&day<=snapshot.windowEnd){
      const time=e.allDay?'終日':day===a.day?clock(a.minutes)+(day===b.day?' – '+clock(b.minutes):' – 24:00'):'00:00 – '+(day===b.day?clock(b.minutes):'24:00');
@@ -72,7 +72,7 @@
    for(const r of snapshot.reminders){
     if(!r.dueAt)continue;const d=parts(parseAt(r.dueAt));
     add({id:'native:reminder:'+clean(r.id,180),type:'task',date:d.day,title:clean(r.title),
-     subtitle:'リマインダー期限 '+clock(d.minutes),source:'iPhone Reminders取込',sourceKind:'reminder',sourceId:clean(r.id,180),done:false,fixed:false});
+     subtitle:r.dueAllDay?'リマインダー期限（日付のみ）':'リマインダー期限 '+clock(d.minutes),source:'iPhone Reminders取込',sourceKind:'reminder',sourceId:clean(r.id,180),done:false,fixed:false});
    }
   }
   return events;
