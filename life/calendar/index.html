@@ -152,10 +152,13 @@ body.glance-mode .bottom .refresh{min-height:36px;padding:7px 11px;font-size:11p
     <div class="source-tile"><div><div class="source-title">MY LIFE</div><div class="source-sub" id="lifeFreshness">保存済み情報</div></div><span class="source-state" id="lifeConnection">未確認</span></div>
     <div class="source-tile"><div><div class="source-title">Money</div><div class="source-sub" id="moneyFreshness">保存済み情報</div></div><span class="source-state" id="moneyConnection">未確認</span></div>
     <div class="source-tile"><div><div class="source-title">Notion Tasks</div><div class="source-sub" id="calendarTasksFreshness">取得時刻・原本を確認</div></div><span class="source-state" id="calendarTasksState">未接続</span></div>
+    <div class="source-tile"><div><div class="source-title">iPhone予定・通知</div><div class="source-sub" id="nativeFreshness">端末側からの取込状況</div></div><span class="source-state" id="nativeConnection">未接続</span></div>
     <div class="source-tile"><div><div class="source-title">Apple等の予定</div><div class="source-sub" id="calendarEventsFreshness">DAYSTREAMに取込済みの写しだけ</div></div><span class="source-state" id="calendarEventsState">未接続</span></div>
   </section>
   <div class="calendar-auth">
     <button class="today-btn" id="calendarTasksRefresh" type="button">Notion Tasksを更新</button>
+    <a class="today-btn" id="nativeRefresh" href="scriptable:///run?scriptName=YOS%20Life%20Calendar%20Sync&target=calendar" aria-label="既存Scriptableから端末の予定とリマインダーを読み込む">iPhone予定を更新</a>
+    <span id="nativeImportStatus" role="status" style="font-size:11px;color:var(--muted)"></span>
     <div id="calendarAuthHost" hidden>
       <div id="calendarGoogleButton"></div><p id="calendarAuthStatus" role="status">本人確認待ち</p>
     </div>
@@ -179,6 +182,7 @@ body.glance-mode .bottom .refresh{min-height:36px;padding:7px 11px;font-size:11p
   <footer class="bottom"><span id="lastRead">読み取り前</span><div style="display:flex;gap:8px;align-items:center"><a class="linkish" href="../">MY LIFE ↗</a><button class="refresh" id="reload" type="button">↻ 保存記録を再読込</button></div></footer>
 </main>
 <script src="./unified-sources.js"></script>
+<script src="./native-bridge.js"></script>
 <script src="../../yos/daystream/source-adapters.js"></script>
 <script src="../../yos/daystream/yos-tasks-auth.js"></script>
 <script>
@@ -186,7 +190,7 @@ body.glance-mode .bottom .refresh{min-height:36px;padding:7px 11px;font-size:11p
 (()=>{
   const $=id=>document.getElementById(id),tz='Asia/Tokyo',now=new Date(),dateFmt=new Intl.DateTimeFormat('sv-SE',{timeZone:tz,year:'numeric',month:'2-digit',day:'2-digit'});
   const dateKey=d=>dateFmt.format(d);const parseDate=k=>new Date(k+'T12:00:00+09:00');const addDays=(key,n)=>{const d=parseDate(key);d.setUTCDate(d.getUTCDate()+n);return dateKey(d)};
-  const today=dateKey(now),state={selected:today,anchor:today,mode:'glance',filters:new Set(['schedule','task','money','habit']),demo:false,items:[],lifeRead:false,moneyRead:false,moneyPrivate:false,loadedAt:null,lifeSynced:null,moneySynced:null,otherSources:null};
+  const today=dateKey(now),state={selected:today,anchor:today,mode:'glance',filters:new Set(['schedule','task','money','habit']),demo:false,items:[],lifeRead:false,moneyRead:false,moneyPrivate:false,loadedAt:null,lifeSynced:null,moneySynced:null,otherSources:null,nativeSources:null};
   const sampleDay=key=>dateKey(parseDate(key)),cash=n=>'¥'+Math.abs(n).toLocaleString('ja-JP');const types={schedule:'予定',task:'タスク',money:'お金',habit:'習慣'};
   const dayName=k=>'日月火水木金土'[parseDate(k).getDay()],displayDay=k=>{const d=parseDate(k);return `${d.getMonth()+1}月${d.getDate()}日（${dayName(k)}）`};
   const isValidKey=k=>/^\d{4}-\d{2}-\d{2}$/.test(String(k||''))&&dateKey(parseDate(k))===k;
@@ -233,6 +237,15 @@ body.glance-mode .bottom .refresh{min-height:36px;padding:7px 11px;font-size:11p
     let external=null;
     try{external=window.YOS_UNIFIED_CALENDAR?.read(localStorage)||null}catch{external=null}
     state.otherSources=external;
+    let native=null;
+    try{native=window.YOS_CALENDAR_NATIVE?.read(localStorage)||null}catch{native=null}
+    state.nativeSources=native;
+    const nativeStatus=native?.status||'missing';
+    $('nativeConnection').textContent={ready:'取込済み',stale:'期限切れ',invalid:'形式不一致',missing:'未接続'}[nativeStatus]||'未確認';
+    $('nativeConnection').className='source-state'+(nativeStatus==='ready'?' ok':nativeStatus==='stale'?' stale':'');
+    $('nativeFreshness').textContent=nativeStatus==='ready'?
+      '端末から保存 '+new Date(native.details.at).toLocaleString('ja-JP')+' · 予定'+native.details.eventCount+'件 · 通知'+(native.details.remindersStatus==='ok'?native.details.reminderCount+'件':'権限未確認'):
+      nativeStatus==='stale'?'古い端末写しは予定へ反映しません':nativeStatus==='invalid'?'形式不一致の端末写しは反映しません':'Scriptableから同じブラウザに安全に取り込み';
     const labels={ready:'取込済み',missing:'未接続',stale:'期限切れ',invalid:'形式不一致'};
     for(const [which,prefix] of [['tasks','calendarTasks'],['calendar','calendarEvents']]){
       const current=external?.status?.[which]||'missing';
@@ -261,15 +274,15 @@ body.glance-mode .bottom .refresh{min-height:36px;padding:7px 11px;font-size:11p
       $('calendarEventsState').className='source-state stale';
     }
     $('calendarGlanceStatus').textContent='Tasks '+(labels[external?.status?.tasks]||'未接続')+
-      ' · 予定 '+(labels[external?.status?.calendar]|| (freshNative?'Notion経由':'未接続'))+
+      ' · 予定 '+(native?.status==='ready'?'端末取込':labels[external?.status?.calendar]|| (freshNative?'Notion経由':'未接続'))+
       (staleNative?' · 元更新未確認'+staleNative+'件':'');
     // Installed Web app / GitHub Pages must NEVER imply illustrative financial data is real.
     // Local file previews may start in design mode for visual review.
-    state.demo=(useDemo??(location.protocol==='file:'&&!life.length&&!money.length&&!external?.items?.length))&&!state.moneyPrivate;
+    state.demo=(useDemo??(location.protocol==='file:'&&!life.length&&!money.length&&!external?.items?.length&&!native?.items?.length))&&!state.moneyPrivate;
     $('sourceOverview').hidden=state.demo;
     setSourceBadge('lifeConnection',state.lifeRead?'保存済み':'未接続',state.lifeRead?freshnessLabel(state.lifeSynced):'このWeb領域に記録なし',state.lifeRead&&state.lifeSynced&&Date.now()-state.lifeSynced.getTime()<=86400000?'ok':state.lifeRead?'stale':'');
     setSourceBadge('moneyConnection',state.moneyPrivate?'非表示':state.moneyRead?'保存済み':'未接続',state.moneyPrivate?'Moneyのプライバシー設定を尊重':state.moneyRead?freshnessLabel(state.moneySynced):'このWeb領域に記録なし',state.moneyRead&&state.moneySynced&&Date.now()-state.moneySynced.getTime()<=86400000?'ok':state.moneyRead?'stale':'');
-state.items=state.demo?createDemo():(window.YOS_UNIFIED_CALENDAR?.merge([...life,...money],external?.items||[])||[...life,...money]);state.loadedAt=new Date();$('connection').dataset.connection=state.demo?'demo':'local';$('connection').querySelector('span').textContent=state.demo?'デザインプレビュー':'保存済みデータ';$('demoAlert').hidden=!state.demo;$('toggleDemo').textContent='保存済みデータを見る';$('lastRead').textContent='最終読み取り '+state.loadedAt.toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'});$('sourceDetail').textContent=state.demo?'すべて架空の表示例。実際の予定・金額・習慣記録ではありません。実データへの切替で、このサイトと同じブラウザ内のMY LIFE／Moneyの保存済みデータを確認できます。':`MY LIFE：${state.lifeRead?'同じブラウザの保存記録を読み取り':'保存記録が見つからない'}。Money：${state.moneyPrivate?'Moneyの非表示設定を優先':state.moneyRead?'同じブラウザの保存記録を読み取り':'保存記録が見つからない'}。Notion Tasks：${external?.status?.tasks==='ready'?'取得済み写し（元カレンダー更新の古い・未確認データは除外）':'未接続／古い写し'}。Notion家計イベントは未接続。Apple標準カレンダーは直接自動接続していません。iPhoneの他アプリの情報はWeb画面から勝手に取得できません。`;render();}
+state.items=state.demo?createDemo():(window.YOS_UNIFIED_CALENDAR?.merge([...life,...money], [...(native?.items||[]),...(external?.items||[])])||[...life,...money]);state.loadedAt=new Date();$('connection').dataset.connection=state.demo?'demo':'local';$('connection').querySelector('span').textContent=state.demo?'デザインプレビュー':'保存済みデータ';$('demoAlert').hidden=!state.demo;$('toggleDemo').textContent='保存済みデータを見る';$('lastRead').textContent='最終読み取り '+state.loadedAt.toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'});$('sourceDetail').textContent=state.demo?'すべて架空の表示例。実際の予定・金額・習慣記録ではありません。実データへの切替で、このサイトと同じブラウザ内のMY LIFE／Moneyの保存済みデータを確認できます。':`MY LIFE：${state.lifeRead?'同じブラウザの保存記録を読み取り':'保存記録が見つからない'}。Money：${state.moneyPrivate?'Moneyの非表示設定を優先':state.moneyRead?'同じブラウザの保存記録を読み取り':'保存記録が見つからない'}。Notion Tasks：${external?.status?.tasks==='ready'?'取得済み写し（元カレンダー更新の古い・未確認データは除外）':'未接続／古い写し'}。Notion家計イベントは未接続。Apple標準カレンダーは直接自動接続していません。iPhoneの他アプリの情報はWeb画面から勝手に取得できません。`;render();}
   function eventsFor(key){return state.items.filter(x=>x.date===key&&state.filters.has(x.type));}
   const endOfMonth=k=>{const d=parseDate(k);return dateKey(new Date(d.getFullYear(),d.getMonth()+1,0,12))};
   function renderCalendar(){const d=parseDate(state.anchor),startKey=dateKey(new Date(d.getFullYear(),d.getMonth(),1,12)),monthEnd=endOfMonth(startKey),start=parseDate(startKey),last=parseDate(monthEnd);const weekdays=['日','月','火','水','木','金','土'];let keys=[];
@@ -359,7 +372,7 @@ state.items=state.demo?createDemo():(window.YOS_UNIFIED_CALENDAR?.merge([...life
   $('goToday').addEventListener('click',()=>{state.selected=today;state.anchor=today;render();});$('reload').addEventListener('click',()=>load(state.demo));$('toggleDemo').addEventListener('click',()=>load(false));
   window.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&!state.demo)load(false)});
   // Cross-tab source changes and Safari back-forward cache restores refresh the read-only projection.
-  window.addEventListener('storage',e=>{if(!state.demo&&['yos-life-v1','yos-money-v2','YOS_DAYSTREAM_WEB_TASK_SNAPSHOT_V1','YOS_DAYSTREAM_WEB_CAL_SNAPSHOT_V1'].includes(e.key))load(false)});
+  window.addEventListener('storage',e=>{if(!state.demo&&['yos-life-v1','yos-money-v2','YOS_DAYSTREAM_WEB_TASK_SNAPSHOT_V1','YOS_DAYSTREAM_WEB_CAL_SNAPSHOT_V1','YOS_CALENDAR_NATIVE_SNAPSHOT_V1'].includes(e.key))load(false)});
   window.addEventListener('pageshow',e=>{if(e.persisted&&!state.demo)load(false)});
   window.addEventListener('focus',()=>{if(!state.demo&&state.loadedAt&&Date.now()-state.loadedAt.getTime()>10000)load(false)});
 
@@ -385,6 +398,10 @@ state.items=state.demo?createDemo():(window.YOS_UNIFIED_CALENDAR?.merge([...life
       }
     }});
   });
+  const incoming=window.YOS_CALENDAR_NATIVE?.consume(localStorage,location,history);
+  if(incoming&&incoming.reason!=='none'){
+    $('nativeImportStatus').textContent=incoming.ok?'iPhoneの予定を端末内に保存・確認しました':'端末情報は保存しませんでした（'+incoming.reason+'）';
+  }
   load(undefined);
 })();
 </script>
