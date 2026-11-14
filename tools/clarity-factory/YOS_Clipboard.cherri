@@ -1,0 +1,149 @@
+#define name YOS_Clipboard
+#define color blue
+
+#include 'actions/calendar'
+#include 'actions/crypto'
+#include 'actions/documents'
+#include 'actions/sharing'
+#include 'actions/text'
+
+// Fixed local Clipboard child for Clarity.
+action 'documentpicker.open' getOptionalFile(text path: 'WFGetFilePath', bool ?errorIfNotFound: 'WFFileErrorIfNotFound' = false)
+// Buffer is temporary implementation state only, not an SSOT.
+// Contract: add | next | merge | select|N | duplicate | clear | screenshots
+const bufferPath = "YOS Clipboard/buffer.txt"
+const cursorPath = "YOS Clipboard/cursor.txt"
+const cursorOne = text("1")
+const emptyText = text("")
+createFolder("YOS Clipboard")
+
+const requestedCommand = prompt("YOS_Clipboard mode: add / next / merge / select|N / duplicate / clear / screenshots", "Text", "")
+@command = "{requestedCommand}"
+
+if @command == "add" {
+    const clip = getClipboard()
+    if !clip {
+        output("YOS_CLIPBOARD_BLOCKED:empty_clipboard")
+    }
+    const encoded = base64Encode(clip)
+    @record = "{encoded}"
+    @buffer = ""
+    @existing = getOptionalFile(bufferPath, false)
+    if @existing {
+        @buffer = "{@existing}"
+        if @buffer {
+            @buffer += "\n"
+        }
+    }
+    @buffer += @record
+    saveFile(bufferPath, @buffer, true)
+    saveFile(cursorPath, cursorOne, true)
+    output("YOS_CLIPBOARD_OK:add")
+}
+
+if @command == "next" {
+    const file = getOptionalFile(bufferPath, false)
+    if !file {
+        output("YOS_CLIPBOARD_BLOCKED:empty_buffer")
+    }
+    const rawLines = splitText("{file}", "\n")
+    @lines = []
+    for nextLine in rawLines {
+        if @nextLine {
+            @lines += @nextLine
+        }
+    }
+    const totalCount = count(@lines)
+    @total = "{totalCount}"
+    @cursor = 1
+    const cursorFile = getOptionalFile(cursorPath, false)
+    if cursorFile {
+        @cursor = number(cursorFile)
+    }
+    if @cursor > @total {
+        @cursor = 1
+    }
+    const encodedItem = getListItem(@lines, @cursor)
+    if !encodedItem {
+        @cursor = 1
+        const firstEncoded = getListItem(@lines, 1)
+        const firstDecoded = base64Decode(firstEncoded)
+        setClipboard(firstDecoded)
+        const cursorTwo = text("2")
+        saveFile(cursorPath, cursorTwo, true)
+        output("YOS_CLIPBOARD_OK:next:1")
+    }
+    const decodedItem = base64Decode(encodedItem)
+    setClipboard(decodedItem)
+    @nextCursor = @cursor + 1
+    const nextCursorText = text("{@nextCursor}")
+    saveFile(cursorPath, nextCursorText, true)
+    output("YOS_CLIPBOARD_OK:next:{@cursor}")
+}
+
+if @command == "merge" {
+    const mergeFile = getOptionalFile(bufferPath, false)
+    if !mergeFile {
+        output("YOS_CLIPBOARD_BLOCKED:empty_buffer")
+    }
+    const mergeLines = splitText("{mergeFile}", "\n")
+    @merged = ""
+    @seen = 0
+    for mergeEncodedItem in mergeLines {
+        if @mergeEncodedItem {
+            const mergeDecodedItem = base64Decode(@mergeEncodedItem)
+            if @seen > 0 {
+                @merged += "\n"
+            }
+            @merged += "{mergeDecodedItem}"
+            @seen += 1
+        }
+    }
+    if @seen == 0 {
+        output("YOS_CLIPBOARD_BLOCKED:empty_buffer")
+    }
+    setClipboard(@merged)
+    output("YOS_CLIPBOARD_OK:merge:{@seen}")
+}
+
+if @command contains "select|" {
+    const parts = splitText(@command, "|")
+    const indexPart = getListItem(parts, 2)
+    @index = number(indexPart)
+    if @index < 1 {
+        output("YOS_CLIPBOARD_BLOCKED:bad_index")
+    }
+    const selectFile = getOptionalFile(bufferPath, false)
+    if !selectFile {
+        output("YOS_CLIPBOARD_BLOCKED:empty_buffer")
+    }
+    const selectLines = splitText("{selectFile}", "\n")
+    const selectEncodedItem = getListItem(selectLines, @index)
+    if !selectEncodedItem {
+        output("YOS_CLIPBOARD_BLOCKED:index_out_of_range")
+    }
+    const selectDecodedItem = base64Decode(selectEncodedItem)
+    setClipboard(selectDecodedItem)
+    output("YOS_CLIPBOARD_OK:select:{@index}")
+}
+
+if @command == "duplicate" {
+    const duplicateClip = getClipboard()
+    if !duplicateClip {
+        output("YOS_CLIPBOARD_BLOCKED:empty_clipboard")
+    }
+    setClipboard(duplicateClip)
+    output("YOS_CLIPBOARD_OK:duplicate")
+}
+
+if @command == "clear" {
+    saveFile(bufferPath, emptyText, true)
+    saveFile(cursorPath, cursorOne, true)
+    output("YOS_CLIPBOARD_OK:clear")
+}
+
+if @command == "screenshots" {
+    output("YOS_CLIPBOARD_BLOCKED:screenshots_not_verified")
+}
+
+output("YOS_CLIPBOARD_BLOCKED:unsupported:{@command}")
