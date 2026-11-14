@@ -91,6 +91,21 @@
   if(!Object.keys(days).length&&!Object.keys(allDayDays).length)throw Error('対応する予定がありません');
   return {schema:'yos-daystream-source-snapshot-v1',kind:'calendar',status:skipped?'partial':'ok',calendarDays:days,allDayDays,checkedAt:new Date().toISOString(),source:'user-file',eventCount:count,skippedCount:skipped};
  }
+
+ function normalizeCalendarMoney(source){
+  if(source===undefined)return null;
+  if(!source||source.status!=='ok')return {status:'unavailable',items:[]};
+  if(source.complete!==true||!Array.isArray(source.items)||source.items.length>100||typeof source.checkedAt!=='string')return {status:'invalid',items:[]};
+  const seen=new Set(),items=[];
+  for(const e of source.items){
+   if(!e||typeof e!=='object'||typeof e.id!=='string'||!/^[a-f0-9]{32}$/.test(e.id)||seen.has(e.id)||
+      !str(e.title,100)||!date(e.date)||!Number.isFinite(e.amount)||e.amount<0||
+      !['income','expense'].includes(e.kind))return {status:'invalid',items:[]};
+   seen.add(e.id);
+   items.push({id:e.id,title:str(e.title,100),date:e.date,amount:Math.round(e.amount),kind:e.kind});
+  }
+  return {status:'ok',checkedAt:source.checkedAt,items};
+ }
  function fromYosTaskDashboardCache(cache){
   if(!cache||typeof cache!=='object'||!Number.isFinite(cache.savedAt)||Date.now()-cache.savedAt<0||Date.now()-cache.savedAt>6*60*60*1000||!Array.isArray(cache.data?.tasks)||cache.data.tasks.length>MAX_TASKS)return null;
   const authoritative=cache.data.source==='notion';
@@ -136,7 +151,7 @@
     lastSynced:typeof t.lastSynced==='string'?str(t.lastSynced,80):null
    }:{})});
   }
-  return {schema:'yos-daystream-source-snapshot-v1',kind:'tasks',status:authoritative?'ok':'partial',items,checkedAt:new Date(cache.savedAt).toISOString(),source:'yos-auth-cache',...(authoritative?{origin:'notion',complete:true,ignoredBlankCount:Number.isSafeInteger(cache.data.ignoredBlankCount)&&cache.data.ignoredBlankCount>=0?cache.data.ignoredBlankCount:0}: {})};
+  return {schema:'yos-daystream-source-snapshot-v1',kind:'tasks',status:authoritative?'ok':'partial',items,checkedAt:new Date(cache.savedAt).toISOString(),source:'yos-auth-cache',...(authoritative?{origin:'notion',complete:true,ignoredBlankCount:Number.isSafeInteger(cache.data.ignoredBlankCount)&&cache.data.ignoredBlankCount>=0?cache.data.ignoredBlankCount:0,...(cache.data.calendarMoney!==undefined?{calendarMoney:normalizeCalendarMoney(cache.data.calendarMoney)}:{})}: {})};
  }
  function fromYosLifeStore(life){
   if(!life||typeof life!=='object'||!life.days||typeof life.days!=='object'||Array.isArray(life.days))return null;
