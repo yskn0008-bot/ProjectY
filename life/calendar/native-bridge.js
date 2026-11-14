@@ -8,6 +8,7 @@
  const SCHEMA='yos-calendar-native-snapshot-v1';
  const DAY_MS=86400000,MAX_BYTES=16000,MAX_EVENTS=80,MAX_REMINDERS=80,MAX_SPAN=15;
  const TZ='Asia/Tokyo';
+ let pendingConfirmation=null; // In memory only, lost on page close or reload.
  const clean=(x,max=100)=>typeof x==='string'?x.replace(/[\u0000-\u001f\u007f]/g,' ').trim().slice(0,max):'';
  function validDay(s){return /^\d{4}-\d{2}-\d{2}$/.test(s)&&!Number.isNaN(Date.parse(s+'T00:00:00Z'))&&new Date(s+'T00:00:00Z').toISOString().slice(0,10)===s}
  function parseAt(s){
@@ -134,7 +135,17 @@
   const current=Number.isFinite(now)?now:Date.now();
   if(!pending||typeof pending.nonce!=='string'||!/^[a-f0-9]{32}$/.test(pending.nonce)
      ||snapshot.requestNonce!==pending.nonce||!Number.isFinite(pending.createdAt)
-     ||current-pending.createdAt>5*60000||current-pending.createdAt< -300000)return {ok:false,reason:'unrequested'};
+     ||current-pending.createdAt>5*60000||current-pending.createdAt< -300000){
+    // iOS Home Screen PWAs and Safari may have isolated browser storage.
+    // Fail closed to automatic import, but offer a visible explicit confirmation
+    // for this one local-only payload; never persist a forged link silently.
+    if(/^[a-f0-9]{32}$/.test(String(snapshot.requestNonce||''))&&verify(snapshot,current).ok){
+      pendingConfirmation=snapshot;
+      return {ok:false,reason:'confirmation-needed',details:{
+       eventCount:snapshot.events.length,reminderCount:snapshot.reminders.length,remindersStatus:snapshot.remindersStatus}};
+    }
+    return {ok:false,reason:'unrequested'};
+  }
   try{storage.removeItem(PENDING_KEY)}catch{return {ok:false,reason:'storage'}}
   return save(storage,snapshot,now);
  }
@@ -155,5 +166,10 @@
    calendarCoverage:{from:snapshot.details.windowStart,until:nextDay(snapshot.details.windowEnd),status:'ok'},
    checkedAt:snapshot.details.at};
  }
- root.YOS_CALENDAR_NATIVE={read,save,consume,asDaystream,keys:{snapshot:KEY,pending:PENDING_KEY}};
+ function confirmImport(storage,now){
+  const value=pendingConfirmation;pendingConfirmation=null;
+  if(!value)return {ok:false,reason:'none'};
+  return save(storage,value,now);
+ }
+ root.YOS_CALENDAR_NATIVE={read,save,consume,confirmImport,asDaystream,keys:{snapshot:KEY,pending:PENDING_KEY}};
 })(typeof window!=='undefined'?window:globalThis);
