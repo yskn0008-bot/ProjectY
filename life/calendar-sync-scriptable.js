@@ -60,6 +60,8 @@ function nativeStableId(parts){
  return 'local-'+h.toString(16);
 }
 async function runNativeCalendar(){
+ const nonce=String(args.queryParameters?.nonce||'');
+ if(!/^[a-f0-9]{32}$/.test(nonce))throw Error('統合カレンダーの更新ボタンから実行してください');
  const now=new Date(),start=new Date(now.getFullYear(),now.getMonth(),now.getDate());
  const end=new Date(start);end.setDate(end.getDate()+15);
  const raw=await CalendarEvent.between(start,end);
@@ -93,7 +95,7 @@ async function runNativeCalendar(){
  }
  if(localDateKey(start)!==localDateKey(new Date(now.getFullYear(),now.getMonth(),now.getDate())))
   throw Error('日付が変わりました。再実行してください');
- const snapshot={schema:'yos-calendar-native-snapshot-v1',source:'scriptable-on-device',
+ const snapshot={schema:'yos-calendar-native-snapshot-v1',source:'scriptable-on-device',requestNonce:nonce,
   checkedAt:new Date().toISOString(),windowStart:localDateKey(start),
   windowEnd:localDateKey(new Date(end.getTime()-1000)),completeCalendar:true,
   remindersStatus,events,reminders};
