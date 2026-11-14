@@ -59,6 +59,7 @@ const {chromium,webkit}=require('playwright');
    return location.origin+location.pathname+location.search+'#yos-native='+btoa(raw).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/g,'');
   });
   await page.goto(privateUrl,{waitUntil:'domcontentloaded'});
+  await page.reload({waitUntil:'domcontentloaded'}); // hash navigation alone does not re-execute the import script
   assert.equal((await page.locator('#nativeConnection').textContent()).trim(),'取込済み','native source now explicit: '+await page.locator('#nativeImportStatus').innerText());
   assert.equal(await page.evaluate(()=>location.hash),'','private fragment erased from URL/history');
   assert.match(await page.locator('#nativeImportStatus').innerText(),/保存・確認/);
