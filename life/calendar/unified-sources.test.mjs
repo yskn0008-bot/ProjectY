@@ -189,3 +189,41 @@ test('Notion mirrored Money current summary is never mistaken for confirmed paym
  const x=read(tasks([task({sourceFamily:'money',title:'使えるお金 3万円'})]));
  assert.equal(x.items.length,0);
 });
+
+test('confirmed Notion Money future items display as planned, not actual, never a raw balance',()=>{
+ const data=tasks([task({title:'通常タスク'})],{calendarMoney:{status:'ok',complete:true,checkedAt:'2026-11-13T23:30:00Z',
+  items:[{id:'1'.repeat(32),title:'家賃',date:'2026-11-14',amount:55000,kind:'expense'},
+         {id:'2'.repeat(32),title:'収入予定',date:'2026-11-15',amount:120000,kind:'income'}]}});
+ const x=read(data);
+ assert.equal(x.status.money,'ready');
+ assert.equal(x.details.money.count,2);
+ assert.equal(x.items.filter(e=>e.type==='money').length,2);
+ assert.equal(x.items.find(e=>e.type==='money').complete,false);
+ assert.equal(x.items.find(e=>e.type==='money').source,'Notion家計確認済');
+});
+test('malformed, stale or unavailable Money never hides existing Notion tasks',()=>{
+ for(const m of [
+  {status:'ok',complete:true,checkedAt:'2026-11-01T00:00:00Z',items:[]},
+  {status:'ok',complete:true,checkedAt:'2026-11-13T23:00:00Z',items:[{id:'bad',title:'bad',date:'2026-11-14',amount:500,kind:'expense'}]},
+  {status:'unavailable',items:[]}
+ ]){
+  const x=read(tasks([task()],{calendarMoney:m}));
+  assert.equal(x.items.length,1);
+  assert.notEqual(x.status.money,'ready');
+ }
+});
+test('DAYSTREAM source adapter preserves only bounded typed Notion Money events',()=>{
+ const raw=readFileSync(new URL('../../yos/daystream/source-adapters.js',import.meta.url),'utf8');
+ const sub={window:{},Intl,Date,Set,Number,Object,String,Array};
+ vm.runInNewContext(raw,sub,{timeout:1000});
+ const fn=sub.window.YOS_DAYSTREAM_SOURCES.fromYosTaskDashboardCache;
+ const data=fn({savedAt:Date.now(),data:{source:'notion',complete:true,tasks:[],
+ calendarMoney:{status:'ok',complete:true,checkedAt:new Date().toISOString(),items:[{id:'a'.repeat(32),title:'支払い',date:'2026-11-14',amount:1200,kind:'expense'}]}}});
+ assert.equal(data.calendarMoney.status,'ok');
+ assert.equal(data.calendarMoney.items[0].amount,1200);
+ const bad=fn({savedAt:Date.now(),data:{source:'notion',complete:true,tasks:[],
+  calendarMoney:{status:'ok',complete:true,checkedAt:new Date().toISOString(),
+   items:[{id:'bad',title:'坏',date:'2026-11-14',amount:-1200,kind:'expense'}]}}});
+ assert.equal(bad.calendarMoney.status,'invalid');
+ assert.equal(bad.items.length,0);
+});
