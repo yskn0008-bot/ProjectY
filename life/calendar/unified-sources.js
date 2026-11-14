@@ -40,7 +40,7 @@
      const isFixed=t.timing==='fixed';
      const isMirrorCalendar=isFixed&&s.origin==='notion';
      const isMirrorReminder=s.origin==='notion'&&(t.sourceFamily==='reminder'||(/^Task｜/.test(name)&&/Remindersで確認/.test(clean(t.action,140))));
-     const isMirrorMoney=s.origin==='notion'&&t.sourceFamily==='money';
+     const isMirrorMoney=s.origin==='notion'&&(t.sourceFamily==='money'||(name==='Money｜現在地'&&/^使えるお金 /.test(clean(t.action,140))));
      // A Money summary mirrored into Tasks is not a verified original payment event.
      if(isMirrorMoney)continue;
      // A newly fetched Notion row is not necessarily a newly synchronized iPhone event.
