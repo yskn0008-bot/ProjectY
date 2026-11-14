@@ -28,7 +28,7 @@
  function taskItems(s,now){
    if(!Array.isArray(s.items)||s.items.length>400||s.status!=='ok'&&s.status!=='partial')return null;
    if(s.origin==='notion'&&s.complete!==true)return null;
-   const out=[],seen=new Set(),mirror={freshCalendar:0,staleCalendar:0,unknownCalendar:0};
+   const out=[],seen=new Set(),mirror={freshCalendar:0,staleCalendar:0,unknownCalendar:0,freshReminders:0,staleReminders:0,unknownReminders:0};
    for(const t of s.items){
      if(!t||typeof t!=='object'||typeof t.id!=='string'||!t.id||seen.has(t.id))return null;
      seen.add(t.id);
@@ -39,15 +39,20 @@
      const dueAt=clean(t.dueAt,80);
      const isFixed=t.timing==='fixed';
      const isMirrorCalendar=isFixed&&s.origin==='notion';
+     const isMirrorReminder=s.origin==='notion'&&(t.sourceFamily==='reminder'||(/^Task｜/.test(name)&&/Remindersで確認/.test(clean(t.action,140))));
+     const isMirrorMoney=s.origin==='notion'&&t.sourceFamily==='money';
+     // A Money summary mirrored into Tasks is not a verified original payment event.
+     if(isMirrorMoney)continue;
      // A newly fetched Notion row is not necessarily a newly synchronized iPhone event.
      // Source synchronizer must provide an offset-aware timestamp, not merely lastEditedAt.
-     if(isMirrorCalendar){
+     if(isMirrorCalendar||isMirrorReminder){
+       const prefix=isMirrorCalendar?'Calendar':'Reminders';
        const upstream=clean(t.lastSynced,80);
        const validStamp=/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2}(?:\.\d{1,3})?)?(?:Z|[+-]\d{2}:\d{2})$/.test(upstream);
        const stamp=validStamp?Date.parse(upstream):NaN;
-       if(!Number.isFinite(stamp)){mirror.unknownCalendar++;continue}
-       if(now-stamp>DAY_MS||now-stamp< -300000){mirror.staleCalendar++;continue}
-       mirror.freshCalendar++;
+       if(!Number.isFinite(stamp)){mirror['unknown'+prefix]++;continue}
+       if(now-stamp>DAY_MS||now-stamp< -300000){mirror['stale'+prefix]++;continue}
+       mirror['fresh'+prefix]++;
      }
      let clock='';
      if(dueAt&&/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(dueAt)){
@@ -58,10 +63,11 @@
      }
      const allDay=isMirrorCalendar&&/^終日(?:・|$)/.test(clean(t.action,140));
      const label=isFixed?(allDay?'終日':clock?'固定予定 '+clock+' · 終了未確認':'固定予定・時刻未確認'):(clock?'期限 '+clock:'期限');
-     const displayName=isMirrorCalendar&&name.startsWith('予定｜')?name.slice(3):name;
+     const displayName=isMirrorCalendar&&name.startsWith('予定｜')?name.slice(3):isMirrorReminder&&name.startsWith('Task｜')?name.slice(5):name;
      out.push({id:'daystream:task:'+t.id,type:isFixed?'schedule':'task',date,title:displayName,
-       subtitle:label+(state==='完了'?' · 完了':''),done:state==='完了',source:s.origin==='notion'?'Notion Tasks写し':'Tasks取込写し',
-       sourceId:t.id,sourceKind:isFixed?'calendar':'task',fixed:isFixed});
+       subtitle:(isMirrorReminder?(clock?'リマインダー期限 '+clock:'リマインダー期限') : label)+(state==='完了'?' · 完了':''),
+       done:state==='完了',source:s.origin==='notion'?'Notion Tasks写し':'Tasks取込写し',
+       sourceId:t.id,sourceKind:isMirrorReminder?'reminder':isFixed?'calendar':'task',fixed:isFixed});
    }
    return {items:out,mirror};
  }
@@ -109,6 +115,10 @@
  function merge(base,extra){
    const out=[...extra,...base],seenIds=new Set(),seenTime=new Set(),result=[];
    function key(e){
+     if(e.type==='task'&&e.sourceKind==='reminder'){
+       const r=/リマインダー期限 (\d{2}:\d{2})/.exec(e.subtitle||'');
+       return r?e.date+'|r|'+clean(e.title,100)+'|'+r[1]:'';
+     }
      if(e.type!=='schedule')return '';
      const start=/^(?:固定予定\s+)?(\d{2}:\d{2})/.exec(e.subtitle||'');
      const all=e.subtitle==='終日';
