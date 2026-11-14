@@ -62,7 +62,7 @@ button:active{opacity:.8}@media(min-width:640px){.dock{left:calc((100vw - 640px)
 .yos-learning-live-row strong{font-size:13px;overflow-wrap:anywhere}
 .yos-learning-live-row small{font-size:11px;color:#d3dae5}
 .yos-learning-live-row button{font-size:11px;border-radius:8px;border:1px solid #8eb8d6;background:#285d7c;color:#fff;padding:7px 10px;flex:none}
-</style><script src="./source-adapters.js"></script><script src="./yos-tasks-auth.js"></script></head><body class="yos-daystream-web"><div class="yos-web-port" role="navigation" aria-label="DAYSTREAM Web版">
+</style><script src="./source-adapters.js"></script><script src="../../life/calendar/native-bridge.js"></script><script src="./yos-tasks-auth.js"></script></head><body class="yos-daystream-web"><div class="yos-web-port" role="navigation" aria-label="DAYSTREAM Web版">
 <a href="../">YOS</a><strong>DAYSTREAM · WEB</strong>
 <button id="yosWebImport" type="button">データ読込</button><button id="yosWebExport" type="button">書き出し</button>
 <button id="yosWebHistory" type="button">行動学習</button>
@@ -153,12 +153,17 @@ button:active{opacity:.8}@media(min-width:640px){.dock{left:calc((100vw - 640px)
  const existingLifeSchedule=(()=>{
   try{return sourceAdapters?.fromYosLifeStore(JSON.parse(localStorage.getItem('yos-life-v1')||'null'))||null}catch{return null}
  })();
- const effectiveCalendar=importedCalendar||existingLifeSchedule;
+ // Prefer the locally verified iPhone copy only when it shares the same browser origin.
+ const nativeSnapshot=(()=>{try{return window.YOS_CALENDAR_NATIVE?.read(localStorage)||null}catch{return null}})();
+ const nativeCalendar=(()=>{try{return window.YOS_CALENDAR_NATIVE?.asDaystream(localStorage)||null}catch{return null}})();
+ const nativeReminders=nativeSnapshot?.status==='ready'?
+   nativeSnapshot.items.filter(x=>x.type==='task'&&x.sourceKind==='reminder').map(x=>({id:x.id,title:x.title,due:x.date,status:'次にやる',source:'iPhone Reminders取込'})):[];
+ const effectiveCalendar=nativeCalendar||importedCalendar||existingLifeSchedule;
  const importedDays=Object.keys(effectiveCalendar?.calendarDays||{}).concat(Object.keys(effectiveCalendar?.allDayDays||{})).sort();
- const importedCalendarCoverage=importedDays.length?{
+ const importedCalendarCoverage=nativeCalendar?.calendarCoverage||(importedDays.length?{
   from:importedDays[0],until:(()=>{const d=new Date(importedDays[importedDays.length-1]+'T00:00:00Z');d.setUTCDate(d.getUTCDate()+1);return d.toISOString().slice(0,10)})(),
   status:'partial'
- }:{from:'',until:'',status:'unavailable'};
+ }:{from:'',until:'',status:'unavailable'});
  const writeSource=(key,data)=>{
   const backupKey=key+'_BACKUP';
   let old=null,changed=false;
@@ -297,7 +302,7 @@ button:active{opacity:.8}@media(min-width:640px){.dock{left:calc((100vw - 640px)
  };
  window.YOS_DAYSTREAM_WEB=web;
  if('serviceWorker' in navigator){navigator.serviceWorker.register('../../service-worker.js',{scope:'../../',updateViaCache:'none'}).catch(()=>{});}
- window.YOS_CHARCOAL_BOOT={days:plan.days,hiddenCalendar:plan.hiddenCalendar||{},calendarDays:effectiveCalendar?.calendarDays||{},allDayDays:effectiveCalendar?.allDayDays||{},calendarCoverage:importedCalendarCoverage,calendarSource:effectiveCalendar?.source||'unavailable',taskSource:effectiveTasks?{...effectiveTasks,status:effectiveTasks.origin==='notion'?'ok':'partial'}:{status:'unavailable',items:[]},habitSource:{status:'unavailable',items:[]},generatedAt:new Date().toISOString()};
+ window.YOS_CHARCOAL_BOOT={days:plan.days,hiddenCalendar:plan.hiddenCalendar||{},calendarDays:effectiveCalendar?.calendarDays||{},allDayDays:effectiveCalendar?.allDayDays||{},calendarCoverage:importedCalendarCoverage,nativeReminders,calendarSource:effectiveCalendar?.source||'unavailable',taskSource:effectiveTasks?{...effectiveTasks,status:effectiveTasks.origin==='notion'?'ok':'partial'}:{status:'unavailable',items:[]},habitSource:{status:'unavailable',items:[]},generatedAt:new Date().toISOString()};
  window.addEventListener('DOMContentLoaded',()=>{
   const f=document.getElementById('yosWebFile'),btn=document.getElementById('yosWebImport');
   btn.onclick=()=>f.click();
@@ -310,7 +315,7 @@ button:active{opacity:.8}@media(min-width:640px){.dock{left:calc((100vw - 640px)
    if(!provider){document.getElementById('yosWebTaskAuthStatus').textContent='本人確認機能を読み込めませんでした';return}
    provider.setup({host:document.getElementById('yosWebGoogleButton'),status:document.getElementById('yosWebTaskAuthStatus'),save:snapshot=>web.saveAuthorizedTasks(snapshot)});
   };
-  const sourceText=document.getElementById('yosWebSourceState');if(sourceText){sourceText.textContent='端末内保存 · '+(existingYosCache?'YOS認証済みキャッシュ（6時間以内）':importedTasks?.source==='yos-auth-cache'?'YOS認証済みTasks写し':importedTasks?'タスク手動取込':'Notion未接続')+' · '+(importedCalendar?'Apple予定手動取込':existingLifeSchedule?'保存済みMY WAY生活予定':'Appleカレンダー未接続')+' · 自動同期なし';}
+  const sourceText=document.getElementById('yosWebSourceState');if(sourceText){sourceText.textContent='端末内保存 · '+(existingYosCache?'YOS認証済みキャッシュ（6時間以内）':importedTasks?.source==='yos-auth-cache'?'YOS認証済みTasks写し':importedTasks?'タスク手動取込':'Notion未接続')+' · '+(nativeCalendar?'iPhone予定の確認済み端末取込':importedCalendar?'Apple予定手動取込':existingLifeSchedule?'保存済みMY WAY生活予定':'Appleカレンダー未接続')+' · 自動同期なし';}
   document.getElementById('yosWebHistory').onclick=()=>{
     const panel=document.getElementById('yosWebHistoryPanel'),rows=document.getElementById('yosWebHistoryRows');
     panel.hidden=!panel.hidden;if(panel.hidden)return;rows.replaceChildren();
@@ -341,7 +346,7 @@ const localISO=d=>[d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String
 // Isolated native Scriptable file bridge; legacy WebView localStorage is never read or modified.
 const boot=window.YOS_CHARCOAL_BOOT||{},savedDays=boot.days&&typeof boot.days==='object'?boot.days:{};
 const hiddenCalendar=boot.hiddenCalendar&&typeof boot.hiddenCalendar==='object'?boot.hiddenCalendar:{};
-const todayISO=localISO(new Date()),calendarByDay=boot.calendarDays||{},allDayDays=boot.allDayDays||{};
+const todayISO=localISO(new Date()),calendarByDay=boot.calendarDays||{},allDayDays=boot.allDayDays||{},nativeReminders=Array.isArray(boot.nativeReminders)?boot.nativeReminders:[];
 const calendarCoverage=boot.calendarCoverage||{from:todayISO,until:todayISO,status:'unavailable'};
 const isCalendarCovered=day=>['ok','partial'].includes(calendarCoverage.status)&&day>=calendarCoverage.from&&day<calendarCoverage.until;
 // Only explicitly tagged fictional test events are hidden; never delete or rewrite the source calendar.
@@ -356,6 +361,11 @@ const allDayItems=day=>(Array.isArray(allDayDays[day])?allDayDays[day]:[]).filte
 function yosDaySummary(day){
  const entries=dayItems(day).sort((a,b)=>a.s-b.s);
  const deadlines=sourceTasks.filter(x=>x.due===day&&!['完了','保留','待ち'].includes(x.status));
+ const existing=new Set(deadlines.map(x=>x.title+'|'+x.due));
+ for(const reminder of nativeReminders.filter(x=>x.due===day)){
+  const key=reminder.title+'|'+reminder.due;if(existing.has(key))continue;
+  existing.add(key);deadlines.push(reminder);
+ }
  return {entries,allDay:allDayItems(day),deadlines,covered:isCalendarCovered(day)};
 }
 function yosRefreshTestToggle(){
@@ -646,7 +656,7 @@ function showFocusFor(item){
  document.getElementById('hideFixed').hidden=!canHide;
  document.getElementById('doneBtn').textContent=item.done?'未完了に戻す':'完了にする';
  document.getElementById('deleteSelected').textContent='削除';
- fi.textContent=fmt(item.s)+'–'+fmt(item.s+item.d)+(fixed?(boot.calendarSource==='user-file'?' · ファイルから取り込んだ固定予定。元のカレンダーは変更しません。':boot.calendarSource==='yos-life-local'?' · MY WAY端末保存の予定写し。元の予定は変更しません。':' · Appleカレンダーの固定予定。元の予定は変更せず、この画面から隠せます。'):' · 端末内のタスク・予定。編集・削除できます。');
+ fi.textContent=fmt(item.s)+'–'+fmt(item.s+item.d)+(fixed?(boot.calendarSource==='user-file'?' · ファイルから取り込んだ固定予定。元のカレンダーは変更しません。':boot.calendarSource==='scriptable-on-device'?' · iPhoneから読取済みの固定予定。元のカレンダーは変更しません。':boot.calendarSource==='yos-life-local'?' · MY WAY端末保存の予定写し。元の予定は変更しません。':' · Appleカレンダーの固定予定。元の予定は変更せず、この画面から隠せます。'):' · 端末内のタスク・予定。編集・削除できます。');
  focus.classList.add('show');
 }
 
@@ -1194,7 +1204,7 @@ function render(){
 }
 document.getElementById('closeFocus').onclick=()=>{zoom=null;deleteConfirmId=null;focus.classList.remove('show');smoothRender()};
 if(Array.isArray(stored)){note.textContent='保存済み時間割を表示 · Notion Tasks '+yosStatusWord(taskSource.status);}
-else if(calendarRows.length){note.textContent=(boot.calendarSource==='user-file'?'手動取込のApple予定 ':boot.calendarSource==='yos-life-local'?'保存済みMY WAY予定 ':'Appleカレンダー ')+calendarRows.length+'件を読み取り'+(yosTestCount(todayISO)?' · テスト'+yosTestCount(todayISO)+'件は非表示':'')+' · 端末内で追加・編集';}
+else if(calendarRows.length){note.textContent=(boot.calendarSource==='user-file'?'手動取込のApple予定 ':boot.calendarSource==='scriptable-on-device'?'iPhone端末からの取込予定 ':boot.calendarSource==='yos-life-local'?'保存済みMY WAY予定 ':'Appleカレンダー ')+calendarRows.length+'件を読み取り'+(yosTestCount(todayISO)?' · テスト'+yosTestCount(todayISO)+'件は非表示':'')+' · 端末内で追加・編集';}
 else{note.textContent='端末内の予定はありません · 右上の追加から登録';}
 yosDefaultStart();yosRefreshTestToggle();renderWeek();render();renderDayAllDay();updateReview();yosRenderSources();setCalendarMode('day');setInterval(updateNow,60000);setInterval(yosRenderLearningHints,60000);
 </script><script src="./task-wizard.js"></script></body></html>
