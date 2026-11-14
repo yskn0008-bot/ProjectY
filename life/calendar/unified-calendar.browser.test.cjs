@@ -25,7 +25,8 @@ const {chromium,webkit}=require('playwright');
    tasks.calendarMoney={status:'ok',complete:true,checkedAt:now.toISOString(),items:[
       {id:'f'.repeat(32),date:next,title:'確認済み翌日支払',amount:1200,kind:'expense'}]};
    const calendar={schema,kind:'calendar',status:'ok',source:'user-file',checkedAt:now.toISOString(),
-    calendarDays:{[today]:[{title:'美容室',start:600,duration:60},{title:'写真撮影',start:780,duration:45}]},allDayDays:{}};
+    calendarDays:{[today]:[{title:'美容室',start:600,duration:60},{title:'写真撮影',start:780,duration:45}],
+     [next]:[{title:'既存の翌日予定',start:540,duration:60}]},allDayDays:{}};
    const life={days:{[today]:{lastSync:now.toISOString(),schedule:[{id:'orig-1',date:today,title:'美容室',start:today+'T01:00:00Z',end:today+'T02:00:00Z'},
      {id:'utc-1',date:today,title:'UTC午前予定',start:today+'T01:30:00Z',end:today+'T02:30:00Z'}]}}};
    const money={updatedAt:now.toISOString(),privacy:false,transactions:[{id:'payment-1',date:today,label:'確認済支払い例',type:'expense',amount:7000,completed:false}]};
@@ -119,9 +120,10 @@ const {chromium,webkit}=require('playwright');
     rows:Object.values(window.YOS_CHARCOAL_BOOT?.calendarDays||{}).flat(),
     reminders:window.YOS_CHARCOAL_BOOT?.nativeReminders
   }));
-  assert.equal(linked.source,'scriptable-on-device','DAYSTREAM uses verified native data');
+  assert.equal(linked.source.startsWith('scriptable-on-device'),true,'DAYSTREAM uses verified native data without deleting outside dates');
   assert.equal(linked.coverage?.status,'ok','native Calendar coverage is not inferred from event count');
   assert.equal(linked.rows.some(r=>r.title==='iPhone予約'),true,'native appointment appears in DAYSTREAM');
+  assert.equal(linked.rows.some(r=>r.title==='既存の翌日予定'),true,'previously imported date outside native window is preserved');
   assert.equal(linked.reminders?.some(r=>r.title==='電話する'),true,'native reminder deadline appears in DAYSTREAM');
   assert.deepEqual(failures,[],'no JS runtime exceptions');
   console.log('YOS unified calendar '+kind+' browser tests PASS');
