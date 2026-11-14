@@ -102,7 +102,7 @@
     const meta={before:['営業前','営業開始','shiftButton'],available:['空車','乗車','rideButton'],occupied:['乗車中','降車','dropoffButton'],break:['休憩中','休憩終了','breakButton'],ended:['営業終了','YOSへ送る','shareButton']}[c.ops.status]||['営業前','営業開始','shiftButton'];
     const advice=c.ops.status==='before'?'営業開始で記録を始める':c.ops.status==='occupied'?'安全運転を最優先':c.ops.status==='break'?'休憩後にYOSナビで再配置':idle>=15?'空車15分超。エリアを見直す':'現在地で営業を継続';
     return`<main class="yos131-page yos131-drive">
-      ${header('営業','',`<button class="yos131-icon-btn" data-notice>${svg('bell')}</button>`)}
+      ${header('営業','',`<a href="./revenue-goal.html" aria-label="月商100万円ナビ" style="display:inline-flex;align-items:center;min-height:42px;margin-right:8px;color:#ffca70;font-size:11px;font-weight:800;text-decoration:none;vertical-align:top">月100万</a><button class="yos131-icon-btn" data-notice>${svg('bell')}</button>`)}
       <section class="yos131-card yos131-sales">
         <div class="yos131-sales-copy"><span>本日の売上</span><strong>${money(sales)}</strong><small>目標 ${money(target)}</small><div class="yos131-progress"><b style="width:${pct}%"></b></div></div>
         <div class="yos131-ring" style="--pct:${pct*3.6}deg"><strong>${pct}%</strong></div>
@@ -110,7 +110,6 @@
         <button class="yos131-primary" data-proxy="${meta[2]}"><span class="yos131-primary-label">${meta[1]}</span>${meta[2]==='shiftButton'?'<small class="yos131-primary-hint">開始可能時刻を確認中</small>':''}</button>
       </section>
       <section class="yos131-card yos131-advice" data-go-nav><span>YOS判断</span><strong>${esc(advice)}</strong><span class="arrow">›</span></section>
-      <a class="yos131-card yos131-advice" href="./revenue-goal.html" style="text-decoration:none;border:1px solid rgba(255,202,112,.34)"><span>月商100万円</span><strong>必要日商・時給を確認</strong><span class="arrow">›</span></a>
       <section class="yos131-kpis"><div><span>実車</span><strong>${rides.length}回</strong></div><div><span>実車率</span><strong>${util}%</strong></div><div><span>平均単価</span><strong>${money(avg)}</strong></div></section>
       <section class="yos131-card yos131-actions"><button data-proxy="breakButton">休憩</button><button data-proxy="memoButton">メモ</button><button class="accent" data-go-nav>ナビ</button><button data-proxy="endButton">終了</button></section>
     </main>`;
