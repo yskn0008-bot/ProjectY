@@ -108,3 +108,26 @@ test('cannot persist credentials in bridge, existing Scriptable default Life rou
  assert.match(script,/YOS_CALENDAR_NATIVE_URL/);
  assert.doesNotMatch(js,/notionToken|Bearer|api\.notion|localStorage\.setItem/);
 });
+
+test('a forged native URL without a browser-initiated nonce cannot replace stored tasks',()=>{
+ const s=store(),old=snap();
+ assert.equal(api.save(s,old,now).ok,true);
+ const previous=s.getItem(api.keys.snapshot);
+ const forged=snap({requestNonce:'a'.repeat(32),events:[]});
+ const payload=Buffer.from(JSON.stringify(forged),'utf8').toString('base64url');
+ let cleared=0;
+ const result=api.consume(s,{pathname:'/ProjectY/life/calendar/',search:'',hash:'#yos-native='+payload},
+   {replaceState:()=>cleared++},now);
+ assert.equal(result.ok,false);
+ assert.equal(result.reason,'unrequested');
+ assert.equal(cleared,1);
+ assert.equal(s.getItem(api.keys.snapshot),previous);
+});
+test('expired import nonce cannot be reused',()=>{
+ const nonce='b'.repeat(32);
+ const s=store({[api.keys.pending]:JSON.stringify({nonce,createdAt:now-6*60000})});
+ const encoded=Buffer.from(JSON.stringify(snap({requestNonce:nonce})),'utf8').toString('base64url');
+ const r=api.consume(s,{pathname:'/',search:'',hash:'#yos-native='+encoded},{replaceState:()=>{}},now);
+ assert.equal(r.reason,'unrequested');
+ assert.equal(s.getItem(api.keys.snapshot),null);
+});
