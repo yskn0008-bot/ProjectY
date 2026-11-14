@@ -259,11 +259,12 @@ body.glance-mode .bottom .refresh{min-height:36px;padding:7px 11px;font-size:11p
     // Never confuse the time we read Notion with the last iPhone Calendar synchronization.
     const mirror=external?.details?.tasks;
     const staleNative=(mirror?.staleCalendar||0)+(mirror?.unknownCalendar||0);
+    const staleReminders=(mirror?.staleReminders||0)+(mirror?.unknownReminders||0);
     const freshNative=mirror?.freshCalendar||0;
-    if(mirror&&staleNative){
+    if(mirror&&(staleNative||staleReminders)){
       $('calendarTasksState').textContent='要確認';
       $('calendarTasksState').className='source-state stale';
-      $('calendarTasksFreshness').textContent='Notion取得済み・元カレンダー更新の古い/不明な'+staleNative+'件は予定に表示しません';
+      $('calendarTasksFreshness').textContent='Notion取得済み · 元の予定'+staleNative+'件、リマインダー'+staleReminders+'件の更新時刻が古い/不明で除外';
     }
     if(external?.status?.calendar==='missing'&&freshNative){
       $('calendarEventsState').textContent='Notion経由';
@@ -275,7 +276,7 @@ body.glance-mode .bottom .refresh{min-height:36px;padding:7px 11px;font-size:11p
     }
     $('calendarGlanceStatus').textContent='Tasks '+(labels[external?.status?.tasks]||'未接続')+
       ' · 予定 '+(native?.status==='ready'?'端末取込':labels[external?.status?.calendar]|| (freshNative?'Notion経由':'未接続'))+
-      (staleNative?' · 元更新未確認'+staleNative+'件':'');
+      (staleNative||staleReminders?' · 元更新未確認'+(staleNative+staleReminders)+'件':'');
     // Installed Web app / GitHub Pages must NEVER imply illustrative financial data is real.
     // Local file previews may start in design mode for visual review.
     state.demo=(useDemo??(location.protocol==='file:'&&!life.length&&!money.length&&!external?.items?.length&&!native?.items?.length))&&!state.moneyPrivate;
