@@ -8,6 +8,7 @@ const pages = [
   { name: 'week', path: './calendar.html', ready: '#weekView', mode: 'week' },
   { name: 'month', path: './calendar.html', ready: '#monthView', mode: 'month' },
   { name: 'manage', path: './settings.html', ready: '#save' },
+  { name: 'goal', path: './revenue-goal.html', ready: '#neededDaily' },
 ];
 const artifactRoot = resolve(import.meta.dirname, '../test-results/iphone17-artifacts');
 

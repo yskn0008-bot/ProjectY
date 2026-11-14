@@ -1,7 +1,7 @@
 'use strict';
 const CACHE_PREFIX='yos-taxi-projecty-';
-const CACHE='yos-taxi-projecty-v148-shift-start-gate';
-const VERSION='148';
+const CACHE='yos-taxi-projecty-v149-revenue-goal';
+const VERSION='149';
 const STATIC=[
   './','./index.html','./calendar.html','./settings.html','./manifest.webmanifest','./swipe-nav.js',
   './final-app-v131.css','./final-fix-v133.css','./final-app-v131.js',
@@ -11,7 +11,7 @@ const STATIC=[
   './bulk-ux-v139.css','./bulk-ux-v139.js',
   './quick-controls-v141.css','./quick-controls-v141.js',
   './sync-diagnostics-v142.css','./sync-diagnostics-v142.js',
-  './demand-calendar.html','./demand-calendar-v1.json','./demand-home-v144.css','./demand-home-v144.js',
+  './demand-calendar.html','./demand-calendar-v1.json','./revenue-goal.html','./revenue-goal-v1.js','./demand-home-v144.css','./demand-home-v144.js',
   './decision-loop-v1.js','./ops-loop-v144.js','./ops-loop-ui-v144.js','./ops-loop-v144.css'
 ];
 
