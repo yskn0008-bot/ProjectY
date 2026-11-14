@@ -149,3 +149,29 @@ test('calendar, reminder and money mirrors are source-owned and cannot be comple
   assert.equal(h.calls.some(c=>c.method==='PATCH'),false);
  }
 });
+
+test('opt-in calendarMoney GET uses existing identity/origin gate; unavailable Money does not erase verified Tasks',async()=>{
+ let requests=0;const h=handler(async(url,init)=>{
+  requests++;
+  if(String(url).includes('/data_sources/'+ds+'/query'))return payload([page()]);
+  if(String(url).endsWith('/search'))return Response.json({results:[]});
+  throw Error('no accessible money source');
+ });
+ const requestMoney=new Request('https://existing.example/api/yos/tasks?source=notion&calendarMoney=1',{
+  headers:{Origin:origin,Authorization:'Bearer test-id-token'}});
+ const r=await h(requestMoney);
+ assert.equal(r.status,200);
+ const j=await r.json();
+ assert.equal(j.source,'notion');assert.equal(j.tasks.length,1);
+ assert.equal(j.calendarMoney.status,'unavailable');
+ assert.ok(requests>=2);
+});
+test('not opting in does not perform a Money source query or return financial data',async()=>{
+ let requests=0;const h=handler(async()=>{
+  requests++;return payload([page()]);
+ });
+ const r=await h(request());
+ const data=await r.json();assert.equal(r.status,200);
+ assert.equal(requests,1);
+ assert.equal('calendarMoney' in data,false);
+});
