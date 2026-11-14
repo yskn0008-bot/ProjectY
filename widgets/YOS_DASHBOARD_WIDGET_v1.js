@@ -551,17 +551,20 @@ function yosHealthSnapshotFromJournal(body, day, now=Date.now()) {
 }
 async function yosHealthLatestSnapshot() {
   const cached=yosHealthReadTodaySnapshot();
-  if(cached && (cached.meals>0 || cached.activities>0))return cached;
+  // A positive morning cache must not conceal a newer exercise report all day.
+  const age=cached ? Date.now()-cached.verifiedAt : Infinity;
+  const fallback=cached && age>=0 && age<=60*60*1000 ? cached : null;
+  if(cached && age>=0 && age<=10*60*1000)return cached;
   if(!Keychain.contains(YOS_HEALTH_TOKEN_KEY))return null;
   try{
     const token=Keychain.get(YOS_HEALTH_TOKEN_KEY);
     if(!token)return null;
     const day=yosHealthDay(new Date());
     const entry=await yosHealthExisting(token,day);
-    if(!entry)return cached;
+    if(!entry)return fallback;
     const body=yosHealthValue(entry.properties?.['本文']?.rich_text);
-    return yosHealthSnapshotFromJournal(body,day) || cached;
-  }catch(_){return cached;}
+    return yosHealthSnapshotFromJournal(body,day) || fallback;
+  }catch(_){return fallback;}
 }
 
 function yosHealthReadTodaySnapshot() {
