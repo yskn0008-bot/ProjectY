@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import {chromium,webkit} from 'playwright';
+import {verifyNativeChoice} from './daystream-native-choice-browser.mjs';
 const type=process.env.YOS_BROWSER||'chromium',browser=await (type==='webkit'?webkit:chromium).launch({headless:true});
 const page=await browser.newPage({viewport:{width:390,height:844},isMobile:true,deviceScaleFactor:2});
 const errors=[];
@@ -35,6 +36,7 @@ try{
  await page.evaluate(()=>beginLocalEdit(items.find(x=>x.t==='WIZARD CREATE')));
  assert.equal(await page.locator('#newTitle').isVisible(),true);assert.equal(await page.locator('#newTime').isVisible(),true);
  await page.locator('#cancelEditor').click();
+ await verifyNativeChoice(page);
  const status=await page.evaluate(()=>{
   const day=new Date(),iso=[day.getFullYear(),String(day.getMonth()+1).padStart(2,'0'),String(day.getDate()).padStart(2,'0')].join('-');
   const p={version:1,days:{[iso]:[{id:19001,t:'WEB PORT STORAGE SMOKE',s:480,d:30,kind:'task'}]},hiddenCalendar:{}};

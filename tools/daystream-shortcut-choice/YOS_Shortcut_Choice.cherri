@@ -1,0 +1,22 @@
+#define name YOS Shortcut Choice
+#define color blue
+#include 'actions/shortcuts'
+#include 'actions/text'
+#include 'actions/sharing'
+#include 'actions/crypto'
+const request = "{ShortcutInput}"
+const valid = matchText('^YOS_PICK_V1:[a-zA-Z0-9-]{16,80}$', request)
+if !valid {
+    alert("DAYSTREAMの選択ボタンから開いてください。", "YOS")
+    stop()
+}
+const shortcuts = getShortcuts()
+const names = getShortcutDetail(shortcuts, "Name")
+const selected = chooseFromList(names, "タスクに付けるショートカット")
+if !selected {
+    stop()
+}
+const encoded = base64Encode(selected)
+const result = text("{request}\n{encoded}")
+setClipboard(result, true)
+alert("選択結果をコピーしました。DAYSTREAMへ戻って『選択を反映』を押してください。", "YOS")
