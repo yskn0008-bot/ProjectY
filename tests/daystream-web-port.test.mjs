@@ -74,3 +74,18 @@ test('iPhone home-screen layout paints safe-area dark and keeps header crisp',()
  const sw=fs.readFileSync(new URL('../service-worker.js',import.meta.url),'utf8');
  assert.match(sw,/const CACHE_NAME=CACHE_PREFIX\+'v[0-9]+-daystream-/);
 });
+
+
+test('unified calendar PWA updates old SW cache and retains offline fallback without exposing private data',()=>{
+ const sw=fs.readFileSync(new URL('../service-worker.js',import.meta.url),'utf8');
+ assert.match(sw,/v45-daystream-unified-calendar/);
+ for(const path of [
+   './life/calendar/','./life/calendar/index.html',
+   './life/calendar/native-bridge.js','./life/calendar/unified-sources.js'
+ ])assert.ok(sw.includes("'"+path+"'"),'calendar asset is precached: '+path);
+ assert.match(sw,/endsWith\('\/life\/calendar\/'\)/);
+ for(const path of ['/ProjectY/life/calendar/native-bridge.js','/ProjectY/life/calendar/unified-sources.js',
+ '/ProjectY/yos/daystream/source-adapters.js','/ProjectY/yos/daystream/yos-tasks-auth.js'])
+ assert.ok(sw.includes("'"+path+"'"),'source adapter refresh is network-first: '+path);
+ assert.match(sw,/event\.request\.mode==='navigate'/);
+});
