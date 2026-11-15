@@ -85,7 +85,7 @@ export async function completeNotionTask(options: LoadNotionTaskDashboardOptions
     if (!isRecord(page.parent) || String(page.parent.data_source_id ?? '').replaceAll('-', '').toLowerCase() !== source) throw new Error('Task parent mismatch');
     const task = parseTask(page, true);
     if (!task || task.id !== id.replaceAll('-', '').toLowerCase()) throw new Error('Task is unavailable');
-    if (task.sourceKind === 'calendar') throw new Error('Fixed calendar records must be managed in the original calendar');
+    if (task.sourceKind !== 'task') throw new Error('Mirrored calendar/reminder/money records must be managed in the original source');
     if (task.habitCycle) throw new Error('Recurring templates cannot be completed as one occurrence');
     return task;
   };
@@ -157,7 +157,7 @@ function parseTask(value: unknown, calendar: boolean): TaskDashboardItem | null 
   const date = isRecord(properties['期限']) && isRecord(properties['期限'].date) ? properties['期限'].date : null;
   const metadata = calendar ? {
     id: normalizeId(String(value.id ?? ''), 'Notion page ID').replaceAll('-', '').toLowerCase(),
-    sourceKind: textProperty(properties['同期キー'], 'rich_text', 500).startsWith('calendar:') ? 'calendar' as const : 'task' as const,
+    sourceKind: (()=>{const sync=textProperty(properties['同期キー'], 'rich_text', 500);return sync.startsWith('calendar:')?'calendar' as const:sync.startsWith('reminder:')?'reminder' as const:sync.startsWith('money:')?'money' as const:'task' as const})(),
     dueEnd: date && typeof date.end === 'string' ? clean(date.end, 80) : null,
     dueTimeZone: date && typeof date.time_zone === 'string' ? clean(date.time_zone, 80) : null,
     habitCycle: selectProperty(properties['習慣周期'], 30),

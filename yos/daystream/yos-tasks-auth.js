@@ -35,7 +35,8 @@
   inflight=(async()=>{
    set(status,'Notion正本の予定・タスクを取得中');
    try{
-    const res=await timedFetch(API+'/api/yos/tasks?source=notion',{method:'GET',headers:{Authorization:'Bearer '+currentToken,Accept:'application/json'}});
+    const url=API+'/api/yos/tasks?source=notion'+(context.includeCalendarMoney===true?'&calendarMoney=1':'');
+    const res=await timedFetch(url,{method:'GET',headers:{Authorization:'Bearer '+currentToken,Accept:'application/json'}});
     if(!res.ok){if(res.status===401)currentToken='';throw new Error(res.status===401?'本人確認の期限が切れています':'YOS Tasksを取得できません ('+res.status+')')}
     const result=await res.json();
     if(result.source!=='notion'||result.complete!==true||!Array.isArray(result.tasks)||result.tasks.length>400)throw new Error('タスク取得内容が不完全です');
@@ -64,12 +65,12 @@
    return {ok:true,item:updated};
   }catch(e){return {ok:false,reason:e instanceof Error?e.message:'結果不明です。Notionを再取得して確認してください'}}finally{completing=false}
  }
- function setup({host,status,save}){
+ function setup({host,status,save,includeCalendarMoney=false}){
   if(initialized){if(currentToken)return refresh();return Promise.resolve(true)}
   if(initializing)return initializing;
   if(location.origin!==SITE){set(status,'YOS正規サイト以外では本人確認を開始しません');return Promise.resolve(false)}
   if(!host||typeof save!=='function'){set(status,'認証画面の準備ができません');return Promise.resolve(false)}
-  context={status,save};
+  context={status,save,includeCalendarMoney};
   set(status,'Google本人確認を準備しています');
   initializing=Promise.all([
    timedFetch(API+'/api/yos/public-config',{headers:{Accept:'application/json'}}).then(async response=>{

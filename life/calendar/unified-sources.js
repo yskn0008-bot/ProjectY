@@ -1,0 +1,163 @@
+/* YOS unified calendar: READ-ONLY projection of already-authorized DAYSTREAM snapshots.
+ * It never fetches private APIs, writes source records, or claims iOS Calendar permissions.
+ * Storage is origin-scoped: separate iPhone Home Screen web apps may not share it.
+ */
+(function(root){
+ 'use strict';
+ const TASK_KEY='YOS_DAYSTREAM_WEB_TASK_SNAPSHOT_V1';
+ const CAL_KEY='YOS_DAYSTREAM_WEB_CAL_SNAPSHOT_V1';
+ const SCHEMA='yos-daystream-source-snapshot-v1';
+ const DATE=/^\d{4}-\d{2}-\d{2}$/;
+ const STATES=new Set(['次にやる','実行中','本人操作','待ち','保留','完了']);
+ const DAY_MS=86400000;
+ function clean(x,max=120){return String(x==null?'':x).replace(/[\u0000-\u001f\u007f]/g,' ').trim().slice(0,max)}
+ function validDay(x){return typeof x==='string'&&DATE.test(x)&&!Number.isNaN(Date.parse(x+'T00:00:00Z'))&&new Date(x+'T00:00:00Z').toISOString().slice(0,10)===x}
+ function time(n){return String(Math.floor(n/60)).padStart(2,'0')+':'+String(n%60).padStart(2,'0')}
+ function json(storage,key){
+   try { const raw=storage.getItem(key);return raw&&raw.length<=1000000?JSON.parse(raw):null }
+   catch {return null}
+ }
+ function freshness(s,kind,now){
+   if(!s||s.schema!==SCHEMA||s.kind!==kind||!['user-file','yos-auth-cache'].includes(s.source))return 'missing';
+   const at=Date.parse(s.checkedAt);
+   if(!Number.isFinite(at))return 'invalid';
+   const age=now-at,limit=s.source==='yos-auth-cache'?6*3600000:7*DAY_MS;
+   if(age< -300000||age>limit)return 'stale';
+   return 'ready';
+ }
+ function taskItems(s,now){
+   if(!Array.isArray(s.items)||s.items.length>400||s.status!=='ok'&&s.status!=='partial')return null;
+   if(s.origin==='notion'&&s.complete!==true)return null;
+   const out=[],seen=new Set(),mirror={freshCalendar:0,staleCalendar:0,unknownCalendar:0,freshReminders:0,staleReminders:0,unknownReminders:0};
+   for(const t of s.items){
+     if(!t||typeof t!=='object'||typeof t.id!=='string'||!t.id||seen.has(t.id))return null;
+     seen.add(t.id);
+     const name=clean(t.title,100),state=clean(t.status,30),date=clean(t.due,10);
+     if(!name||!STATES.has(state)||date&&!validDay(date))return null;
+     if(s.origin==='notion'&&!/^notion-[a-f0-9]{32}$/.test(t.id))return null;
+     if(!date)continue;  // Unscheduled work remains in DAYSTREAM's unplaced task queue.
+     const dueAt=clean(t.dueAt,80);
+     const isFixed=t.timing==='fixed';
+     const isMirrorCalendar=isFixed&&s.origin==='notion';
+     const isMirrorReminder=s.origin==='notion'&&(t.sourceFamily==='reminder'||(/^Task｜/.test(name)&&/Remindersで確認/.test(clean(t.action,140))));
+     const isMirrorMoney=s.origin==='notion'&&(t.sourceFamily==='money'||(name==='Money｜現在地'&&/^使えるお金 /.test(clean(t.action,140))));
+     // A Money summary mirrored into Tasks is not a verified original payment event.
+     if(isMirrorMoney)continue;
+     // A newly fetched Notion row is not necessarily a newly synchronized iPhone event.
+     // Source synchronizer must provide an offset-aware timestamp, not merely lastEditedAt.
+     if(isMirrorCalendar||isMirrorReminder){
+       const prefix=isMirrorCalendar?'Calendar':'Reminders';
+       const upstream=clean(t.lastSynced,80);
+       const validStamp=/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2}(?:\.\d{1,3})?)?(?:Z|[+-]\d{2}:\d{2})$/.test(upstream);
+       const stamp=validStamp?Date.parse(upstream):NaN;
+       if(!Number.isFinite(stamp)){mirror['unknown'+prefix]++;continue}
+       if(now-stamp>DAY_MS||now-stamp< -300000){mirror['stale'+prefix]++;continue}
+       mirror['fresh'+prefix]++;
+     }
+     let clock='';
+     if(dueAt&&/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(dueAt)){
+       // Time is a deadline unless the original source explicitly identified a calendar record.
+       const instant=new Date(dueAt);
+       if(Number.isFinite(instant.getTime()))clock=new Intl.DateTimeFormat('en-GB',
+         {timeZone:'Asia/Tokyo',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(instant);
+     }
+     const allDay=isMirrorCalendar&&/^終日(?:・|$)/.test(clean(t.action,140));
+     const label=isFixed?(allDay?'終日':clock?'固定予定 '+clock+' · 終了未確認':'固定予定・時刻未確認'):(clock?'期限 '+clock:'期限');
+     const displayName=isMirrorCalendar&&name.startsWith('予定｜')?name.slice(3):isMirrorReminder&&name.startsWith('Task｜')?name.slice(5):name;
+     out.push({id:'daystream:task:'+t.id,type:isFixed?'schedule':'task',date,title:displayName,
+       subtitle:(isMirrorReminder?(clock?'リマインダー期限 '+clock:'リマインダー期限') : label)+(state==='完了'?' · 完了':''),
+       done:state==='完了',source:s.origin==='notion'?'Notion Tasks写し':'Tasks取込写し',
+       sourceId:t.id,sourceKind:isMirrorReminder?'reminder':isFixed?'calendar':'task',fixed:isFixed});
+   }
+   return {items:out,mirror};
+ }
+ function calendarItems(s){
+   const days=s.calendarDays,allDayDays=s.allDayDays||{};
+   if(!days||typeof days!=='object'||Array.isArray(days)||!allDayDays||typeof allDayDays!=='object'||Array.isArray(allDayDays))return null;
+   const out=[];let count=0;
+   if(Object.keys(days).length>366||Object.keys(allDayDays).length>366)return null;
+   for(const [day,events] of Object.entries(days)){
+     if(!validDay(day)||!Array.isArray(events)||events.length>80)return null;
+     for(const e of events){
+       if(!e||typeof e!=='object'||!Number.isInteger(e.start)||!Number.isInteger(e.duration)||e.start<0||e.start>=1440||e.duration<1||e.start+e.duration>1440)return null;
+       const name=clean(e.title,100);if(!name)return null;
+       out.push({id:'daystream:cal:'+day+':'+count,type:'schedule',date:day,title:name,
+         subtitle:time(e.start)+' – '+time(e.start+e.duration),source:'予定取込写し',sourceKind:'calendar',fixed:true});
+       if(++count>1000)return null;
+     }
+   }
+   for(const [day,titles] of Object.entries(allDayDays)){
+     if(!validDay(day)||!Array.isArray(titles)||titles.length>80)return null;
+     for(const title of titles){
+       const name=clean(title,100);if(!name)return null;
+       out.push({id:'daystream:allday:'+day+':'+count,type:'schedule',date:day,title:name,
+         subtitle:'終日',source:'予定取込写し',sourceKind:'calendar',fixed:true});
+       if(++count>1000)return null;
+     }
+   }
+   return out;
+ }
+ function read(storage,now){
+   const current=Number.isFinite(now)?now:Date.now();
+   const rawTasks=json(storage,TASK_KEY),rawCalendar=json(storage,CAL_KEY);
+   const tState=freshness(rawTasks,'tasks',current),cState=freshness(rawCalendar,'calendar',current);
+   let tasks=null,taskView=null,calendar=null;
+   if(tState==='ready'){taskView=taskItems(rawTasks,current);tasks=taskView?.items||null}
+   if(cState==='ready')calendar=calendarItems(rawCalendar);
+   let money=[],moneyState='missing',moneyDetails=null;
+   const m=rawTasks?.origin==='notion'?rawTasks.calendarMoney:null;
+   if(tState==='ready'&&tasks!==null&&m){
+     if(m.status==='unavailable')moneyState='unavailable';
+     else if(m.status!=='ok'||m.complete!==true||!Array.isArray(m.items)||m.items.length>100)moneyState='invalid';
+     else{
+       const age=current-Date.parse(m.checkedAt),seen=new Set();
+       if(!Number.isFinite(age)||age< -300000||age>6*3600000)moneyState='stale';
+       else{
+         moneyState='ready';
+         for(const e of m.items){
+           if(!e||typeof e.id!=='string'||!/^([a-f0-9]{32})$/.test(e.id)||seen.has(e.id)||
+             !clean(e.title,100)||!validDay(e.date)||!Number.isFinite(e.amount)||e.amount<0||
+             !['income','expense'].includes(e.kind)){moneyState='invalid';money=[];break}
+           seen.add(e.id);
+           money.push({id:'notion:money:'+e.id,type:'money',date:e.date,title:clean(e.title,100),
+             subtitle:'確認済の予定',amount:Math.round(e.amount),moneyKind:e.kind,complete:false,
+             source:'Notion家計確認済',sourceId:e.id});
+         }
+         if(moneyState==='ready')moneyDetails={at:m.checkedAt,count:money.length};
+       }
+     }
+   }
+   const state={tasks:tasks===null?(tState==='ready'?'invalid':tState):'ready',
+     calendar:calendar===null?(cState==='ready'?'invalid':cState):'ready',money:moneyState};
+   return {items:[...(calendar||[]),...(tasks||[]),...money],status:state,
+     details:{tasks:tasks?{at:rawTasks.checkedAt,origin:rawTasks.origin==='notion'?'notion':'manual',count:tasks.length,...taskView.mirror}:null,
+       calendar:calendar?{at:rawCalendar.checkedAt,origin:'manual',count:calendar.length}:null,
+       money:moneyDetails}};
+ }
+ // Cross-source duplicates without shared original IDs are suppressed only when
+ // the same day, same title and the same *explicit* start time are verified.
+ function merge(base,extra){
+   const out=[...extra,...base],seenIds=new Set(),seenTime=new Set(),result=[];
+   function key(e){
+     if(e.type==='task'&&e.sourceKind==='reminder'){
+       const r=/リマインダー期限 (\d{2}:\d{2})/.exec(e.subtitle||'');
+       return r?e.date+'|r|'+clean(e.title,100)+'|'+r[1]:'';
+     }
+     if(e.type!=='schedule')return '';
+     const start=/^(?:固定予定\s+)?(\d{2}:\d{2})/.exec(e.subtitle||'');
+     const all=e.subtitle==='終日';
+     return (start||all)?e.date+'|'+clean(e.title,100)+'|'+(all?'all':start[1]):'';
+   }
+   for(const e of out){
+     if(!e||typeof e!=='object'||!validDay(e.date)||!['schedule','task','money','habit'].includes(e.type))continue;
+     if(e.id&&seenIds.has(e.id))continue;
+     const k=key(e);
+     if(k&&seenTime.has(k))continue;
+     if(e.id)seenIds.add(e.id);
+     if(k)seenTime.add(k);
+     result.push(e);
+   }
+   return result;
+ }
+ root.YOS_UNIFIED_CALENDAR={read,merge,keys:{tasks:TASK_KEY,calendar:CAL_KEY}};
+})(typeof window!=='undefined'?window:globalThis);

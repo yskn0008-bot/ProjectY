@@ -34,6 +34,20 @@ const target='/icloud/YOS Timeline Auto.js',receipt='/icloud/YOS Common Installe
 test('catalog pins original bytes, canonical script names and SHA256',()=>{
  assert.equal(shipped.schema,1);
  for(const t of shipped.targets){assert.equal(hash(fixtures[t.id]),t.sha256);assert.equal(t.name,t.path.split('/').pop().slice(0,-3));assert.match(t.commit,/^[0-9a-f]{40}$/)}});
+test('calendar importer is available through the existing shared installer without manual naming',async()=>{
+ const entry=shipped.targets.find(t=>t.id==='life-calendar-sync');
+ assert.ok(entry,'YOS Life Calendar Sync must be catalogued');
+ assert.equal(entry.name,'YOS Life Calendar Sync');
+ const code=fixtures[entry.id];
+ assert.match(code,/^\/\/ Variables used by Scriptable\./);
+ assert.match(code,/^\/\/ YOS_SCRIPT_NAME: YOS Life Calendar Sync$/m);
+ assert.match(code,/CalendarEvent\.between\(/);
+ assert.match(code,/Reminder\.allIncomplete\(/);
+ assert.match(code,/args\.queryParameters\?\.target==='calendar'/);
+ const result=await run({id:entry.id,choices:[-1]});
+ assert.equal(result.cloud.files.get('/icloud/YOS Life Calendar Sync.js'),code);
+ assert.equal(result.opened.length,0,'import must not autoexecute or request Calendar permission');
+});
 test('first install is automatic-name, hashed, recorded and does not autoexecute',async()=>{
  const r=await run();assert.equal(r.cloud.files.get(target),fixtures['timeline-auto']);
  assert.equal(JSON.parse(r.cloud.files.get(receipt)).sha256,shipped.targets[0].sha256);assert.equal(r.cloud.files.has(marker),false);assert.equal(r.opened.length,0)});
