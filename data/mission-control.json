@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-15T19:26:06+09:00",
+  "updated_at": "2026-11-15T19:30:54+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -110,7 +110,7 @@
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/757",
-      "updated_at": "2026-11-15T10:25:37Z"
+      "updated_at": "2026-11-15T10:30:03Z"
     },
     {
       "id": "github-issue-10",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-14T19:54:28Z"
+      "updated_at": "2026-11-15T10:28:42Z"
     },
     {
       "id": "github-issue-234",
@@ -205,6 +205,20 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-4b46eae6f4a8",
+      "title": "merge(calendar): approved 21-file YOS calendar, DAYSTREAM and Scriptable shared installer release",
+      "completed_at": "2026-11-15T10:30:12Z",
+      "result": "GitHub mainへ反映（4b46eae）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/4b46eae6f4a8dd94263e315a3259d19f8bac38f9"
+    },
+    {
+      "id": "github-commit-25ae7a41f160",
+      "title": "feat(calendar): release YOS unified calendar, authenticated sources, DAYSTREAM and shared iPhone installer",
+      "completed_at": "2026-11-15T10:24:32Z",
+      "result": "GitHub mainへ反映（25ae7a4）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/25ae7a41f16016aa5c08e341fe54b8e18309cef1"
+    },
+    {
       "id": "github-commit-78f00e5de8c1",
       "title": "Taxi: 月商100万円ナビを既存Webアプリに統合",
       "completed_at": "2026-11-14T16:09:15Z",
@@ -224,20 +238,6 @@
       "completed_at": "2026-11-13T16:04:12Z",
       "result": "GitHub mainへ反映（b288003）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/b288003ab49819df82f6c4cc384dba1e0bbadebf"
-    },
-    {
-      "id": "github-commit-b5f92629bc9c",
-      "title": "fix(daystream): connect Notion Tasks reads and verified completion (#750)",
-      "completed_at": "2026-11-13T14:44:13Z",
-      "result": "GitHub mainへ反映（b5f9262）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/b5f92629bc9ce67ce37c88eefc181c677391f4d0"
-    },
-    {
-      "id": "github-commit-71021500ad46",
-      "title": "feat(daystream): guide new tasks and search imported Shortcut names (#749)",
-      "completed_at": "2026-11-13T10:15:47Z",
-      "result": "GitHub mainへ反映（7102150）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/71021500ad46f62c7172c452d907fa5dd4a9f9c2"
     },
     {
       "id": "complete-002",
@@ -274,7 +274,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-15T19:26:06+09:00",
+      "last_update": "2026-11-15T19:30:54+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -355,7 +355,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-15T19:26:06+09:00",
+      "last_update": "2026-11-15T19:30:54+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -378,7 +378,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-15T19:26:06+09:00",
+      "last_update": "2026-11-15T19:30:54+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -460,5 +460,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "9109e1bc5633942d46c6ed6e3531671029a418ef9dfe7d227206666d64f5400d"
+  "github_snapshot_hash": "656846bfe344696a17cce830ef1fd1df982d0be18ac30fd9725d333af3cf547a"
 }
