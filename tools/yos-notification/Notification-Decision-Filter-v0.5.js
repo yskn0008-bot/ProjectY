@@ -77,14 +77,14 @@ function decisionResult(value) {
   }
   if (lines.length < 2 || lines.length > 4) return invalid('missing_or_long_body');
   const body = lines.slice(1).join(' ').trim();
-  if (!body || body.length > 500) return invalid('missing_or_long_body');
+  if (!body || body.length > 550) return invalid('missing_or_long_body');
   if (/^(?:事実|本人への影響|影響|将来のリスク|リスク|次の一手|推奨する次の一手|根拠|優先度)\s*[:：]/u.test(body) ||
       /YOS_(?:ALERT|SILENT)/u.test(body)) return invalid('ambiguous_format');
   if (/認証コード|確認コード|ワンタイム|OTP|2FA|verification\s*code|security\s*code/iu.test(raw))
     return invalid('secret_context');
   const summary = safeText(body);
   if (!summary) return invalid('empty_after_sanitization');
-  return {status:'alert',decision:'YOS_ALERT',summary:summary.slice(0,280),reason:''};
+  return {status:'alert',decision:'YOS_ALERT',summary,reason:''};
 }
 function notificationText(value) {
   const out = decisionResult(value);
