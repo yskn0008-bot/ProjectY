@@ -174,7 +174,7 @@ async function main(){
  await view.loadHTML(html);
  const installed=await view.evaluateJavaScript(initialJS);
  const layout=await view.evaluateJavaScript("(function(){const host=document.getElementById('approvedCalendar');return {ready:document.readyState,exists:!!host,grid:!!document.getElementById('calGrid'),height:host?.getBoundingClientRect().height||0}})()");
- if(installed!==true||!layout?.exists||!layout?.grid||layout.height<80)
+ if(installed!==true||!layout?.exists||!layout?.grid)
   throw Error('カレンダーの初期表示に失敗しました。元のデータは変更していません');
  async function paint(next){
   // Preserve the existing Money privacy flag before placing private records in WebView.
