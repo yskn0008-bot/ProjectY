@@ -103,8 +103,8 @@ test('one unavailable source is labelled unavailable instead of inventing its da
 test('calendar adapter never writes Notion or persists raw source data into GitHub',()=>{
  assert.doesNotMatch(script,/req\.method\s*=\s*['"](?:PATCH|DELETE|PUT)['"]/);
  assert.doesNotMatch(script,/localStorage\.setItem|Keychain\.set|FileManager\.local/);
- assert.match(script,/window\.YOS_APPROVED_CALENDAR\.update\(data\)/);
- assert.match(script,/window\.__yosNativeNotify\('refresh'\)/);
+ assert.match(script,/api\.update\(bridge\)/);
+ assert.match(script,/scriptable:\/\/\/run\?scriptName=YOS%20Calendar%20Notion/);
 });
 
 test('existing Money privacy toggle keeps private Notion amounts out of WebView entirely',async()=>{
@@ -137,6 +137,6 @@ test('new static WebView bootstraps complete approved UI without evaluating its 
 });
 test('special HTML in Notion title stays data and cannot close inline scripts',async()=>{
  const r=await run();
- assert.match(r.loaded[0],/replace\(\/<\/g/);
+ assert.match(script,/JSON\.stringify\(data\)\.replace\(\/<\/g/);
  assert.equal(r.injected[0].items.length,6);
 });
