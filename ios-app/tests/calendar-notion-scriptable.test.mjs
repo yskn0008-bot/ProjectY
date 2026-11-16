@@ -20,7 +20,7 @@ function fixture(url){
  else throw Error('unknown source '+id);
  return {id:id.replace(/-/g,'').slice(0,31)+'a',properties:p};
 }
-async function run({hasKey=true,failSource=null}={}){
+async function run({hasKey=true,failSource=null,moneyPrivate=false}={}){
  const requests=[],alerts=[],injected=[],loaded=[];
  class FakeRequest{
   constructor(url){this.url=url}
@@ -35,6 +35,7 @@ async function run({hasKey=true,failSource=null}={}){
   async loadURL(url){loaded.push(url)}
   async evaluateJavaScript(code,pending){
    if(code.includes('if(!window.YOS_APPROVED_CALENDAR)return false'))return true;
+   if(code.includes("localStorage.getItem('yos-money-v2')"))return moneyPrivate;
    if(code.includes('var data=')){
     const start=code.indexOf('var data=')+'var data='.length;
     const stop=code.indexOf(';data.complete=',start);
@@ -90,4 +91,12 @@ test('calendar adapter never writes Notion or persists raw source data into GitH
  assert.doesNotMatch(script,/localStorage\.setItem|Keychain\.set|FileManager\.local/);
  assert.match(script,/window\.YOS_APPROVED_CALENDAR\.update\(data\)/);
  assert.match(script,/window\.__yosNativeNotify\('refresh'\)/);
+});
+
+test('existing Money privacy toggle keeps private Notion amounts out of WebView entirely',async()=>{
+ const r=await run({moneyPrivate:true});
+ assert.equal(r.injected.length,1);
+ assert.ok(!r.injected[0].items.some(x=>x.type==='money'));
+ assert.equal(r.injected[0].moneyPrivate,true);
+ assert.equal(r.injected[0].moneyRead,false);
 });
