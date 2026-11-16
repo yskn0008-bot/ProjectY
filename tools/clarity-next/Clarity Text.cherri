@@ -1,6 +1,7 @@
 #define name Clarity Text
 #define color purple
 
+#include 'actions/text'
 #include 'actions/shortcuts'
 
 // Recovery: delegate the entire text-entry and verified Notion Raw First flow
@@ -8,4 +9,5 @@
 // Do not ask for text a second time here; v3 itself asks exactly once.
 // Do not call Clarity Next because its empty input falls through to dictation.
 // This is a temporary safety repair, NOT a silent migration of production devices.
-run("Clarity Voice Pilot v3")
+const noForwardedInput = text("")
+run("Clarity Voice Pilot v3", noForwardedInput)
