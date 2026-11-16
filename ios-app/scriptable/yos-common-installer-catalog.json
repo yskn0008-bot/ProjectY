@@ -90,8 +90,8 @@
       "id": "calendar-notion",
       "name": "YOS Calendar Notion",
       "path": "ios-app/scriptable/YOS Calendar Notion.js",
-      "commit": "c7e520e681d44744df10ee9e7dfa4ff318dd1297",
-      "sha256": "6e6ce9edbf05c46a3084fdd0a222d59d9a16f88b3304b266abfca751ff9fa36a"
+      "commit": "ff6589c359bc836e3b68ff937b5bee0e27607c27",
+      "sha256": "7153bfcc066c3a357b2f1e44f03804417e0534861149a55f03c14dd85eb2aaf6"
     },
     {
       "id": "clarity-inbox-bridge",
