@@ -261,8 +261,8 @@ test('calendar auth keeps existing Google fallback and secures passkey refresh a
  assert.match(calendar,/googleId\.initialize/);
  assert.match(calendar,/googleToken=token;currentToken=token/);
  assert.match(calendar,/PASSKEY_API=API\+'\/api\/yos\/tasks\?passkey=1'/);
- assert.match(calendar,/action:'auth-verify'/);
- assert.match(calendar,/action:'register-verify'/);
+ assert.match(calendar,/passkeyPost\('auth-verify'/);
+ assert.match(calendar,/passkeyPost\('register-verify'/);
  assert.match(calendar,/currentToken=result\.token/);
  assert.match(calendar,/action:'complete-habit'/);
  assert.match(calendar,/expectedEditedAt:item\.lastEditedAt/);
