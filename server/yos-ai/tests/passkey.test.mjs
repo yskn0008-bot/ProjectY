@@ -130,7 +130,7 @@ test('passkey authentication creates hashed 12h session; replay and logout denie
  assert.equal(await verifyPasskeySession(auth.json.token,f.redis,'different'),false);
  assert.equal((await f.request('auth-verify',{requestId:options.json.requestId,credential:{id}})).status,401);
  const key=[...f.db.keys()].find(k=>k.includes(':session:'));assert.ok(key);
- assert.doesNotMatch(key,auth.json.token);
+ assert.equal(key.includes(auth.json.token),false);
  const session=JSON.parse(f.db.get(key));
  assert.ok(session.expiresAt<=Date.now()+12*3600*1000&&session.expiresAt>Date.now());
  assert.equal((await f.request('logout',{},auth.json.token)).status,200);
