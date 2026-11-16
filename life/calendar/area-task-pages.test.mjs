@@ -33,6 +33,17 @@ test('Notion tasks are classified by their real titles, not the old Life bucket'
  assert.equal(result.tasks[0].due,'','no due date must remain undated');
  assert.equal(result.tasks[0].url,'https://www.notion.so/'+ 'a'.repeat(32));
 });
+test('old reminder mirrors cannot become fresh merely because Notion was refreshed',()=>{
+ const key='YOS_DAYSTREAM_WEB_TASK_SNAPSHOT_V1';
+ store.setItem(key,JSON.stringify(snapshot([
+  task('a','Task｜以前のリマインダー',{sourceFamily:'reminder',lastSynced:'2026-10-01T01:00:00Z'}),
+  task('b','通常タスク',{sourceFamily:'task'})
+ ])));
+ const r=api.readNotion(store,NOW);
+ assert.equal(r.status,'ready');
+ assert.equal(r.tasks.length,1);
+ assert.equal(r.tasks[0].title,'通常タスク');
+});
 test('stale, incomplete, duplicate and malformed snapshots fail closed',()=>{
  const key='YOS_DAYSTREAM_WEB_TASK_SNAPSHOT_V1';
  for(const broken of [
