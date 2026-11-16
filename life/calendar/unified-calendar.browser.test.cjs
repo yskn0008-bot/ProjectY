@@ -223,7 +223,15 @@ const {chromium,webkit}=require('playwright');
     assert.equal(await authPage.evaluate(()=>document.documentElement.scrollWidth>window.innerWidth+1),false,'no page-level overflow '+width+'px');
     await authPage.screenshot({path:'test-results/calendar-faceid-'+kind+'-'+width+'.png'});
    }
-   await authPage.evaluate(()=>{window.__calendarAuthTest.registered=false});
+   // Provide deterministic fake GSI only for this explicit fallback path.
+   // Never attempt live Google authentication during browser acceptance.
+   await authPage.evaluate(()=>{
+    window.google={accounts:{id:{
+     initialize(config){window.__testGoogleCallback=config.callback},
+     renderButton(host){host.textContent='Google本人確認（テスト）'}
+    }}};
+    window.__calendarAuthTest.registered=false;
+   });
    await face.click();
    await authPage.locator('.cal-passkey-fallback[open]').waitFor();
    await authPage.waitForFunction(()=>typeof window.__testGoogleCallback==='function');
