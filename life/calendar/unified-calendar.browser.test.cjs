@@ -174,6 +174,11 @@ const {chromium,webkit}=require('playwright');
     Object.defineProperty(window,'PublicKeyCredential',{configurable:true,value:function PublicKeyCredential(){}});
     Object.defineProperty(navigator,'credentials',{configurable:true,value:{}});
     const oldFetch=window.fetch.bind(window);
+    // Headless WebKit may not expose a real WebAuthn device. Mock it on every
+    // navigation so a session-restored PWA is tested with equivalent capabilities.
+    Object.defineProperty(window,'PublicKeyCredential',{configurable:true,value:function PublicKeyCredential(){}});
+    const fakeCredential={id:'test-credential',type:'public-key',toJSON(){return {id:this.id,type:this.type}}};
+    Object.defineProperty(navigator,'credentials',{configurable:true,value:{get:async()=>fakeCredential,create:async()=>fakeCredential}});
     window.__calendarAuthTest={calls:[],registered:true,denyReads:false};
     window.fetch=async(input,options={})=>{
      if(!String(input).startsWith('https://project-y-yos-ai.vercel.app/'))return oldFetch(input,options);
