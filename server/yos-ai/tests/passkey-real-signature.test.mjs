@@ -40,9 +40,10 @@ test('real ES256 WebAuthn signature succeeds only for correct RP and user verifi
 test('real ES256 WebAuthn rejects a modified signature',async()=>{
   const f=fixture();
   const signature=Buffer.from(f.signature);signature[signature.length-1]^=0x01;
-  await assert.rejects(()=>verifyAuthenticationResponse({...f.expected,response:{
+  const result=await verifyAuthenticationResponse({...f.expected,response:{
     ...f.expected.response,response:{...f.expected.response.response,signature:signature.toString('base64url')}
-  }}));
+  }}).catch(()=>({verified:false}));
+  assert.equal(result.verified,false);
 });
 test('real ES256 WebAuthn rejects a different browser Origin, relying party and missing UV',async()=>{
   const wrongOrigin=fixture({clientOrigin:'https://attacker.example'});
