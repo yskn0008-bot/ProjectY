@@ -76,3 +76,18 @@
 - 新しい候補は、同名本体がiCloud/local双方に存在せず、管理記録が一方にだけあり、**正式名称・ID・配布パス・保存先・SHA256・固定commitが現在のGitHub配布一覧と完全一致する場合だけ**、該当する保存先へ本体を再作成する確認ダイアログを表示する。
 - 本人が「本体だけ復元」を選択するまで書き込みしない。実行直前にファイル・管理記録が変化していないか再確認し、検証済みコード本文を新規に作るだけ。元管理記録・旧スクリプト・旧バックアップは削除・改名・上書きせず、再作成した本体のSHAと受領証の読戻しを検証。自動実行なし。
 - 二重管理記録、受領証が現在の固定版と不一致、同名本体が後から発生した、管理記録の変化、ダウンロード改ざん・オフライン・iCloudエラーは安全停止し、疑わしい元ファイルは変更しない。コードをGitHubに公開してもiPhoneの保存済み既存インストーラーは自動更新されないため、実機での修正版導入・復元結果は未確認。
+
+
+## 2026-11-17｜Notification Bridge v0.3 → v0.4 安全移行候補（PR #762）
+
+iPhoneの既存「通知受信」は、`Run Notification Bridge with 通知` を `Notification Context`／ChatGPTより前に実行している。本人がScriptableから現行v0.3のソース全文を提示。既存Notion Inboxに、2026-11-17 00:48 JSTの `Clarity Notification` 記録があり、現在の原文受信経路には動作実績がある。
+
+- 旧版の許可SHA-256は **`5a8aa3e408eb85fae2f46516f6340549f3390852a0d1827775fc6b3521d402bd`** の1種類。見た目の「v0.3」表記や類似コードだけでは移行を許可しない。旧版はGitHub旧Draft #651のテストfixtureとしてバイト固定した。
+- 配布IDは `notification-bridge`、名前は **`Notification Bridge`**（既存のショートカット名・Scriptable呼出名を変更しない）。新ソースは `ios-app/scriptable/Notification Bridge.js` のGitHub固定コミットとSHA-256で照合する。他のカタログ対象を変更しない。
+- 旧管理レシートなし＋既存同名コードが許可SHAに完全一致した場合に限り、本人が「バックアップして更新」を明示承認すると移行。iCloud/local二重存在、別保存先の管理レシート、未知のコード、手動改変、ハッシュ不一致は無変更で停止。
+- 更新前の旧ソースは共通Installerの `backups/Notification%20Bridge-<旧ハッシュ>.txt` に保護。更新結果は読み戻し、receipt管理。不明な途中停止は記録に照合して旧ソースへロールバック。レシートなし旧版に戻す場合は誤って新管理レシートを残さない。既存の通知キュー `YOS_Notification_Pending.json`、Keychain、Notion Inboxは移行時に変更しない。
+- `v0.4` は内部に `capture`・`ai-result`・`claim-retry` 等の復旧状態管理候補を持つ。ただし **v0.4更新だけで自動復旧は動かない**。現在のShortcutの `with 通知` は後方互換で、AI処理結果を同じkeyへ返す配線はない。AI例外でShortcutsが途中停止しても、当初の受領記録だけが残る。
+- 次の実機工程は、共通Installer本体の現在版と端末のiCloud/local状況を確認してからの本人承認移行、既存Notion保存の前後照合。続いて同じShortcutに `capture → ChatGPT → ai-result`、別の既存オートメーション経路に `claim-retry → ChatGPT → ai-result` を接続する。無通知SILENT・重要ALERT・AI例外・重複・保存ACK欠損・iPhoneロック時のE2Eを検証。既存元アプリ通知は停止しない。
+- この候補はDraft PRで、GitHub main・iPhone・Notion本番には未反映。配布対象がカタログに載っていても、共通InstallerのiPhone側の実体が古いと安全移行機能が存在しないため、現行端末での確認を省略しない。
+
+自動検証：`cd ios-app && node --test tests/common-scriptable-installer.test.mjs`。追加したテストは、既知旧ソース／本人承認／拒否／未知改変／両ストア衝突／レシートの書込み失敗／中断復元を検査する。独立模擬Scriptable試験は23項目PASS。現HEADのCIとiPhone実機受入は別の完了条件。
