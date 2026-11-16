@@ -90,7 +90,7 @@ html,body{background:#061120!important;color:#f2f5fc!important}
 #approvedCalendar .cal-day-stat{display:flex;align-items:center;justify-content:center;gap:6px;min-width:0;font-size:11px;color:#d2dcea;border-right:1px solid #1e3650}
 #approvedCalendar .cal-day-stat:last-child{border:0}
 #approvedCalendar .cal-day-stat svg{width:18px!important;height:18px!important;color:#389ffa}
-#approvedCalendar .cal-day-stat[data-kind="habit"] svg{color:#45d1b6}
+#approvedCalendar .cal-day-stat[data-stat-kind="habit"] svg{color:#45d1b6}
 #approvedCalendar .cal-day-stat b{font-size:12px;font-weight:750;white-space:nowrap}
 #approvedCalendar .cal-timeline{flex:1 1 auto;min-height:0;overflow:auto;gap:6px!important;padding:4px 1px 6px 0!important;scrollbar-width:thin;scrollbar-color:#305173 transparent}
 #approvedCalendar .cal-time-row{display:grid;grid-template-columns:52px 14px minmax(0,1fr);gap:7px;min-height:54px!important;align-items:stretch;flex:none}
