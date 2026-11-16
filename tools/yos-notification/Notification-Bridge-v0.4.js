@@ -129,6 +129,47 @@ if(command&&typeof command==='object'&&typeof command.yosAction==='string'&&comm
       exhausted:unresolved.filter(x=>Number.isSafeInteger(x.retryCount)&&x.retryCount>=MAX_RETRIES).length});
     return;
   }
+
+  if(command.yosAction==='recovery-status'){
+    const open=rows.filter(x=>x.aiState!=='complete');
+    const unacknowledged=rows.filter(x=>x.aiState==='complete'&&x.decision==='YOS_ALERT'&&!x.alertAcknowledgedAt);
+    done({ok:true,unresolved:open.length,
+      retryExhausted:open.filter(x=>(x.retryCount||0)>=2).length,
+      unacknowledgedAlerts:unacknowledged.length,
+      alertAttemptsExhausted:unacknowledged.filter(x=>(x.alertAttempts||0)>=2).length});
+    return;
+  }
+  if(command.yosAction==='claim-alert'){
+    // An AI result being saved is not proof that Show Notification ran.
+    // Only a matching acknowledgement from the Shortcut closes this item.
+    const now=Date.now();
+    const pending=rows.filter(x=>x.aiState==='complete'&&x.decision==='YOS_ALERT'&&
+      !x.alertAcknowledgedAt&&typeof x.summary==='string'&&x.summary.trim());
+    const item=pending.filter(x=>(x.alertAttempts||0)<2&&
+      (!x.nextAlertAt||Date.parse(x.nextAlertAt)<=now)).sort((a,b)=>a.date.localeCompare(b.date))[0];
+    if(!item){
+      done({ok:true,event:null,pending:pending.length,
+        exhausted:pending.filter(x=>(x.alertAttempts||0)>=2).length});return;
+    }
+    item.alertAttempts=(item.alertAttempts||0)+1;
+    item.nextAlertAt=new Date(now+(item.alertAttempts===1?15:90)*60000).toISOString();
+    journalWrite(rows);
+    done({ok:true,event:{key:item.key,summary:item.summary,attempt:item.alertAttempts},
+      pending:pending.length});return;
+  }
+  if(command.yosAction==='ack-alert'){
+    const event=rows.find(x=>x.key===command.key);
+    if(!event||event.aiState!=='complete'||event.decision!=='YOS_ALERT')
+      throw Error('対象の重要通知が見つからない');
+    if(event.alertAcknowledgedAt){
+      done({ok:true,key:event.key,duplicate:true,alertAcknowledged:true});return;
+    }
+    if((event.alertAttempts||0)<1)
+      throw Error('通知表示処理の実行記録がない');
+    event.alertAcknowledgedAt=new Date().toISOString();
+    journalWrite(rows);
+    done({ok:true,key:event.key,alertAcknowledged:true});return;
+  }
   if(command.yosAction!=='ai-result')throw Error('未知の復旧操作');
   const event=rows.find(x=>x.key===command.key);
   if(!event)throw Error('元通知の復旧記録がない');
