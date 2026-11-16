@@ -32,7 +32,7 @@
    for(const t of s.items){
      if(!t||typeof t!=='object'||typeof t.id!=='string'||!t.id||seen.has(t.id))return null;
      seen.add(t.id);
-     const name=clean(t.title,100),state=clean(t.status,30),date=clean(t.due,10);
+     const name=clean(t.title,100),state=clean(t.status,30),date=clean(t.due,10)||(t.habitCycle==='毎日'?new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date(now)):'');
      if(!name||!STATES.has(state)||date&&!validDay(date))return null;
      if(s.origin==='notion'&&!/^notion-[a-f0-9]{32}$/.test(t.id))return null;
      if(!date)continue;  // Unscheduled work remains in DAYSTREAM's unplaced task queue.
@@ -139,7 +139,7 @@
            if(e.type==='money'&&(!Number.isFinite(e.amount)||e.amount<0||!['income','expense'].includes(e.moneyKind))){valid=false;break}
            ids.add(e.id);let clock='';
            if(typeof e.dueAt==='string'&&/T/.test(e.dueAt)&&Number.isFinite(Date.parse(e.dueAt)))clock=new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Tokyo',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(new Date(e.dueAt));
-           rows.push({id:e.type==='money'?'notion:money:'+e.id:'notion:extra:'+e.id,sourceId:e.id,date:e.date,type:e.type,title:clean(e.title,100),area:clean(e.area,40),subtitle:clean(e.subtitle,80),done:e.done===true,clock,...(e.type==='money'?{amount:Math.round(e.amount),moneyKind:e.moneyKind,complete:e.complete===true,verification:clean(e.verification,20),originalId:clean(e.originalId,120)}:{}),source:clean(src.name,60)});
+           rows.push({id:e.type==='money'?'notion:money:'+e.id:'notion:extra:'+e.id,sourceId:e.id,date:e.date,type:e.type,title:clean(e.title,100),area:clean(e.area,40),subtitle:clean(e.subtitle,80),done:e.done===true,clock,...(e.type==='habit'&&/^[a-f0-9]{32}$/.test(e.taskId)?{habitTaskId:e.taskId}:{}),...(e.type==='money'?{amount:Math.round(e.amount),moneyKind:e.moneyKind,complete:e.complete===true,verification:clean(e.verification,20),originalId:clean(e.originalId,120)}:{}),source:clean(src.name,60)});
          }
          if(valid)extras.push(...rows);
          extraStatus.push({name:clean(src?.name,60),status:valid?'ready':'unavailable'});

@@ -183,12 +183,13 @@ body.glance-mode .bottom .refresh{min-height:36px;padding:7px 11px;font-size:11p
   <details class="disclosure" id="sources"><summary>データの接続状況を見る</summary><p id="sourceDetail">ローカルの既存MY LIFEとMoneyを確認します。NotionとAppleカレンダーの直接同期は未接続です。</p></details>
   <footer class="bottom"><span id="lastRead">読み取り前</span><div style="display:flex;gap:8px;align-items:center"><a class="linkish" href="../">MY LIFE ↗</a><button class="refresh" id="reload" type="button">↻ 保存記録を再読込</button></div></footer>
 </main>
+<script src="./habit-calendar.js"></script>
 <script src="./approved-calendar.js"></script>
 <script src="./unified-sources.js"></script>
 <script src="./native-bridge.js"></script>
 <script src="../../yos/daystream/source-adapters.js"></script>
 <script src="./calendar-source-extension.js"></script>
-<script src="../../yos/daystream/yos-tasks-auth.js"></script>
+<script src="./calendar-task-auth.js"></script>
 <script>
 'use strict';
 (()=>{
@@ -378,8 +379,22 @@ state.items=state.demo?createDemo():(window.YOS_UNIFIED_CALENDAR?.merge([...life
     const appTitle=displayDay(state.selected);
     document.querySelector('.hero h1').textContent=state.mode==='glance'?appTitle:'毎日を、ひと目で。';
   }
-  function render(){document.body.classList.toggle('glance-mode',state.mode==='glance');renderCalendar();renderDetails();renderGlance();window.YOS_APPROVED_CALENDAR?.update({...state,complete:completeCalendarTask})}
+  function render(){document.body.classList.toggle('glance-mode',state.mode==='glance');renderCalendar();renderDetails();renderGlance();window.YOS_APPROVED_CALENDAR?.update({...state,complete:completeCalendarTask,completeHabit:completeCalendarHabit})}
 
+  async function completeCalendarHabit(e){
+    const key='YOS_DAYSTREAM_WEB_TASK_SNAPSHOT_V1';
+    let snapshot;try{snapshot=JSON.parse(localStorage.getItem(key))}catch{return {ok:false,reason:'習慣を再取得してください'}}
+    const task=snapshot?.items?.find(t=>t.id===e.sourceId);
+    if(!task)return {ok:false,reason:'習慣の原本を再取得してください'};
+    const result=await window.YOS_DAYSTREAM_TASK_AUTH?.completeHabit(task,e.date);
+    if(!result?.ok)return result||{ok:false,reason:'本人確認を開始してください'};
+    // Refresh the real source. Never mark the recurring template completed.
+    const refreshed=await window.YOS_DAYSTREAM_TASK_AUTH.refresh(true);
+    if(!refreshed)return {ok:false,reason:'Notionへの実施記録は読戻し済み。画面の再取得に失敗したため、更新して確認してください'};
+    load(false);
+    const confirmed=state.items.some(x=>x.habitTaskId===task.id.slice(7)&&x.date===e.date&&x.done===true);
+    return confirmed?{ok:true}:{ok:false,reason:'Notionの保存は確認済みですが、画面用の取得に実施記録が含まれません。更新して確認してください'};
+  }
   async function completeCalendarTask(e){
     const key='YOS_DAYSTREAM_WEB_TASK_SNAPSHOT_V1',before=localStorage.getItem(key);
     let snapshot;try{snapshot=JSON.parse(before)}catch{return {ok:false,reason:'取得済みの原本を確認できません'}}
@@ -460,6 +475,7 @@ state.items=state.demo?createDemo():(window.YOS_UNIFIED_CALENDAR?.merge([...life
   }else if(incoming&&incoming.reason!=='none'){
     $('nativeImportStatus').textContent=incoming.ok?'iPhoneの予定を端末内に保存・確認しました':'端末情報は保存しませんでした（'+incoming.reason+'）';
   }
+  if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('../../service-worker.js',{scope:'../../',updateViaCache:'none'}).catch(()=>{});
   load(undefined);
 })();
 </script>

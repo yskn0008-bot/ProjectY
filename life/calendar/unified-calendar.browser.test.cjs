@@ -147,6 +147,9 @@ const {chromium,webkit}=require('playwright');
     assert.equal((report.match(/PASS /g)||[]).length,20,'twenty rendered assertions per screen');
    }
   }
+  await page.goto('http://127.0.0.1:4173/life/calendar/tests/habit-occurrence.browser.html',{waitUntil:'domcontentloaded'});
+  await page.waitForFunction(()=>/DONE|ERROR/.test(document.getElementById('result').textContent));
+  const habits=await page.locator('#result').innerText();assert.doesNotMatch(habits,/FAIL|ERROR/);assert.equal((habits.match(/PASS /g)||[]).length,5);
   assert.deepEqual(failures,[],'approved render has no runtime exceptions');
   console.log('YOS unified calendar '+kind+' browser tests PASS');
  }finally{await browser.close()}

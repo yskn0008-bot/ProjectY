@@ -36,6 +36,12 @@ export async function loadCalendarSources({notionToken,fetchImpl,now=new Date()}
     const id=typeof row.id==='string'?row.id.replaceAll('-','').toLowerCase():'';
     if(!/^[a-f0-9]{32}$/.test(id)||ids.has(id)||!object(row.properties))throw Error('invalid');ids.add(id);
     const p=row.properties,title=text(p[source.title]),at=date(p[source.date]?.date?.start);if(!title||!at){skippedUndated++;continue}
+    if(source.name==='YOS 生活イベント'){
+      const key=Array.isArray(p['記録キー']?.rich_text)?p['記録キー'].rich_text.map((x:any)=>x?.plain_text??x?.text?.content??'').join(''):'';
+      const m=/^calendar:habit:([a-f0-9]{32}):(\d{4}-\d{2}-\d{2})$/.exec(key);
+      let meta:any;try{meta=JSON.parse(p['備考']?.rich_text?.map((x:any)=>x?.plain_text??x?.text?.content??'').join('')||'null')}catch{}
+      if(m&&m[2]===at.day&&meta?.schema==='yos-calendar-habit-occurrence-v1'&&meta.taskId===m[1]&&meta.date===at.day){items.push({id,type:'habit',title:title.replace(/^習慣｜/,''),date:at.day,dueAt:'',area:'',done:true,taskId:m[1],subtitle:'実施済み（本人記録）',source:source.name});continue}
+    }
     // Cases track referenced tasks. Do not count both as separate work.
     if(source.name==='YOS 案件'&&Array.isArray(p['関連タスク']?.relation)&&p['関連タスク'].relation.length){skippedLinked++;continue}
     const state=select(p['状態']),verification=select(p['事実の確度']);

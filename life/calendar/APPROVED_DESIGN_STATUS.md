@@ -57,9 +57,20 @@ node --test life/calendar/*.test.mjs life/tests/life-calendar-contract.test.mjs 
 
 - New frontend/backend revision is not merged or publicly deployed. No public switch is claimed.
 - Actual owner-authenticated GETs for the additional Notion sources and a real task PATCH are unverified. Existing connector schema reads do not prove the backend token has access.
-- Repeating habits are identified from their existing property. Safely updating one habit occurrence is not implemented by the existing task-completion endpoint. These items open original details instead of modifying a habit template. Automatic recurrence expansion from insufficient source timing is not invented.
+- Repeating habits are identified from their existing property. Calendar-only habit completion now writes one date-specific receipt to the existing YOS 生活イベント source. Original habit templates are never completed. A durable existing Redis reservation blocks duplicate/uncertain creates, while receipt readback resolves already-applied requests. Daily/weekly/monthly display respects known anchors; missing timing is not invented. Real owner-authenticated write is still unverified.
 - Date-less items remain outside the dated calendar; this does not mean they are done or absent from Notion.
 - Existing financial source is bounded at 400 dated records per source. Exceeding that bound reports unavailable; no incomplete result is called complete.
 - iPhone Safari/PWA rendering, safe-area behavior, authentication, touch/save/reopen and native return are unverified. Chromium iframe QA is not physical iPhone/WebKit QA.
-- Offline/PWA caching for the new assets needs the existing service-worker owner's coordinated release change; service-worker source was deliberately not changed here.
+- Root PWA cache has an additive v46 generation with all Calendar assets and direct-open registration. Existing DAYSTREAM assets and routing are preserved. Physical iPhone offline acceptance remains unverified.
 - Future integration must check latest main and shared backend dependencies before merge. Rollback of the visual change is the prior calendar revision; source data requires no migration or undo.
+
+
+## Completion follow-up
+
+- Added `complete-habit` to the existing authenticated Tasks endpoint, backed by the already configured Upstash client and the existing Life Events source. No database, Redis service or schema was created. Date-specific keys survive unknown network outcomes; an unresolved pending request is held instead of re-created. A retry can read an existing valid receipt.
+- Calendar uses a Calendar-only derivative of existing task auth; no `yos/daystream/**` file is changed. Authentication origin/identity/token handling follows the existing contract.
+- Validated that production has the Notion token and existing Redis configuration by metadata only; values were not read. Tasks data source env ID was absent, so the production adapter now defaults to the schema-verified existing Tasks source ID. Explicit configured IDs still take precedence.
+- Real Notion habit-edit view contains two unnamed rows with only a recurrence default. The strict Tasks parser now reports those as ignored placeholders, while meaningful unnamed tasks still fail closed. No actual row was modified or deleted.
+- Public config responds successfully with the expected official Origin. This proves public config/Origin handling, not owner-authenticated Notion access. Notion credentials are production-only; they are not copied into preview.
+- Local targeted tests: 88 PASS, including single-date completion, replay recovery, two simultaneous clicks, lost response after create, missing receipt after unknown outcome, wrong parent/version, future-date rejection, recurrence anchors and calendar projection.
+- Local Chromium: approved screen 20 assertions PASS, habit receipt UI 5 assertions PASS. Full latest GitHub CI is pending. Existing aggregate Life Money-label smoke remains a separate issue.
