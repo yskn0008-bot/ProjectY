@@ -52,7 +52,12 @@ function decide(segment){
 }
 function parsePlan(json,raw){
   let items;
-  try{items=JSON.parse(json);}catch(_){throw Error('BAD_MODEL_JSON');}
+  try{
+    items=JSON.parse(json);
+    if(items&&!Array.isArray(items)&&typeof items==='object'&&typeof items.items_json==='string'){
+      items=JSON.parse(items.items_json);
+    }
+  }catch(_){throw Error('BAD_MODEL_JSON');}
   if(!Array.isArray(items)||items.length<1||items.length>V3.maxItems)throw Error('BAD_MODEL_ITEMS');
   // All suggestions must be anchored to the exact user's original text.
   // Detect overlap; never let GPT invent content outside the captured input.
@@ -67,6 +72,33 @@ function parsePlan(json,raw){
   // Do not require full coverage; any unmentioned text remains in Inbox.
   return items;
 }
+// Pure, strictly anchored interpretation. The AI cannot supply or change operation parameters.
+function explicitDeviceLiteral(value,target){
+  const t=trim(value).normalize('NFKC');
+  if(/[\r\n?？]|(?:消|停止|削除|解除|取消|しない|なくして|やめて)/u.test(t))return null;
+  if(target==='timer'){
+    const m=/^(?:タイマー\s*(?:[:：]\s*)?([1-9]\d?)\s*分(?:\s*(?:に設定|開始|スタート))?|([1-9]\d?)\s*分(?:の)?タイマー(?:を)?(?:かけて|開始|スタート))$/u.exec(t);
+    const n=Number(m?.[1]||m?.[2]);
+    return Number.isInteger(n)&&n>=1&&n<=60?{operation:'start_timer',value:n}:null;
+  }
+  if(target==='brightness'){
+    const m=/^(?:画面の)?明るさ\s*[:：]\s*(100|[1-9]\d?)\s*%(?:\s*にして)?$/u.exec(t);
+    const n=Number(m?.[1]);
+    return Number.isInteger(n)&&n>=5&&n<=100?{operation:'set_brightness',value:n}:null;
+  }
+  return null;
+}
+// For one unambiguous device command, the user's exact verified raw text outranks model formatting.
+// This does NOT apply to mixed inputs, quoted examples, or multi-line requests.
+function exactSingleDeviceItems(raw){
+  const t=trim(raw);
+  if(!t||t.length>80||/[\r\n]/u.test(t))return null;
+  for(const target of ['timer','brightness']){
+    if(explicitDeviceLiteral(t,target))return [{text:t,target,confidence:1}];
+  }
+  return null;
+}
+
 async function notion(method,path,token,body){
   const req=new Request('https://api.notion.com/v1'+path);req.method=method;
   req.headers={'Authorization':'Bearer '+token,'Notion-Version':V3.version,'Content-Type':'application/json'};
@@ -100,7 +132,12 @@ async function run(){
   let rows;try{rows=JSON.parse(fm.readString(path));if(!Array.isArray(rows))throw Error();}catch(_){return '端末の原文確認に失敗。仕分け停止';}
   const row=rows.filter(x=>x?.raw===raw).sort((a,b)=>Number(b.startedAt)-Number(a.startedAt))[0];
   if(!row||row.inboxStatus!=='confirmed')return 'Inbox未確認。仕分け停止・原文保持';
-  let items;try{items=parsePlan(json,row.raw);}catch(_){return 'AI出力が不正。仕分け停止・原文保持';}
+  let items=exactSingleDeviceItems(row.raw);
+  if(!items){
+    try{items=parsePlan(json,row.raw);}catch(e){
+      return 'AI出力が不正（'+String(e?.message||'UNKNOWN')+'）。仕分け停止・原文保持';
+    }
+  }
   if(!Keychain.contains(V3.tokenKey)||!Keychain.get(V3.tokenKey))return 'Inbox保存済み／認証なし。仕分け保留';
   const token=Keychain.get(V3.tokenKey);
   const planSignature=JSON.stringify(items.map(item=>[item.text.trim(),item.target]));
@@ -111,16 +148,7 @@ async function run(){
   let deviceCommand=null;
   const decideDevice=(item)=>{
     if(!item||!['timer','brightness'].includes(item.target)||Number(item.confidence)<0.98)return null;
-    const t=trim(item.text).normalize('NFKC');
-    if(/[\r\n?？]|(消|停止|削除|解除|取消|しない|なくして|やめて)/u.test(t))return null;
-    if(item.target==='timer'){
-      const m=/^(?:タイマー\s*[:：]\s*([1-9]\d?)\s*分(?:\s*(?:に設定|開始|スタート))?|([1-9]\d?)\s*分(?:の)?タイマー(?:を)?(?:かけて|開始|スタート))$/u.exec(t);
-      const n=Number(m?.[1]||m?.[2]);
-      return n>=1&&n<=60?{operation:'start_timer',value:n}:null;
-    }
-    const m=/^(?:画面の)?明るさ\s*[:：]\s*(100|[1-9]\d?)\s*%(?:\s*にして)?$/u.exec(t);
-    const n=Number(m?.[1]);
-    return n>=5&&n<=100?{operation:'set_brightness',value:n}:null;
+    return explicitDeviceLiteral(item.text,item.target);
   };
   for(let i=0;i<items.length;i++){
     const item=items[i],num=String(i+1).padStart(2,'0'),state=row.items[num]||{};

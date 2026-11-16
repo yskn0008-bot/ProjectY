@@ -106,9 +106,11 @@ await test('Inbox uncertainty suppresses all action and Notion writes',async()=>
  const h=harness({failInboxReadback:true});const raw='タイマー：3分';await h.run1(raw);
  const a=await exec(h,[item(raw,'timer')],raw);assert.equal(a.operation,'none');assert.equal(h.events.creates,0);
 });
-await test('Malformed JSON stops device operation',async()=>{
- const h=harness();const raw='タイマー：3分';await h.run1(raw);
- const a=JSON.parse(await h.run2('invalid\n__YOS_V4_RAW__\n'+raw));assert.equal(a.operation,'none');
+await test('Malformed model JSON fails closed for ordinary task input',async()=>{
+ const h=harness();const raw='タスク：棚を整理する';await h.run1(raw);
+ const a=JSON.parse(await h.run2('invalid\n__YOS_V4_RAW__\n'+raw));
+ assert.equal(a.operation,'none');assert.match(a.summary,/BAD_MODEL_JSON/);
+ assert.equal(h.events.creates,0);
 });
 await test('Two separate captures with same timer text within 24h are deduped by original receipt',async()=>{
  const h=harness();const raw='タイマー：3分';await h.run1(raw);await exec(h,[item(raw,'timer')],raw);
@@ -160,6 +162,57 @@ await test('Standalone timer in negated or quoted outer context must hold',async
   const h=harness();await h.run1(raw);const a=await exec(h,[item('タイマー：3分','timer')],raw);
   assert.equal(a.operation,'none',raw);
  }
+});
+await test('Real iPhone input タイマー3分 bypasses broken model JSON only when explicit',async()=>{
+ const h=harness();const raw='タイマー3分';
+ assert.match(await h.run1(raw),/Inbox保存・読戻し成功/);
+ const a=JSON.parse(await h.run2('invalid\n__YOS_V4_RAW__\n'+raw));
+ assert.equal(a.operation,'start_timer');assert.equal(a.value,3);
+ assert.match(a.key,/^inbox:clarity:device4-.+:01$/);
+ assert.equal(h.events.patches,1);assert.equal(h.events.creates,0);
+});
+await test('A repaired user retry reuses original Inbox capture and cannot start timer twice',async()=>{
+ const h=harness();const raw='タイマー3分';await h.run1(raw);
+ const first=JSON.parse(await h.run2('invalid\n__YOS_V4_RAW__\n'+raw));
+ assert.equal(first.operation,'start_timer');
+ assert.match(await h.run1(raw),/Inbox保存確認済み/);
+ const second=JSON.parse(await h.run2('invalid\n__YOS_V4_RAW__\n'+raw));
+ assert.equal(second.operation,'none');assert.equal(h.events.patches,1);
+});
+await test('Local timer recognizes colon and no-colon spellings without relying on AI',async()=>{
+ for(const raw of ['タイマー：3分','タイマー3分','タイマー 3分','3分のタイマーをかけて']){
+  const h=harness();await h.run1(raw);
+  const a=JSON.parse(await h.run2('invalid\n__YOS_V4_RAW__\n'+raw));
+  assert.equal(a.operation,'start_timer',raw);
+ }
+});
+await test('Standalone brightness with a broken model gets exactly the typed value',async()=>{
+ const h=harness();const raw='画面の明るさ：35%';await h.run1(raw);
+ const a=JSON.parse(await h.run2('invalid\n__YOS_V4_RAW__\n'+raw));
+ assert.equal(a.operation,'set_brightness');assert.equal(a.value,35);
+});
+await test('Malformatted AI for mixed instructions cannot invoke even a valid embedded timer',async()=>{
+ const h=harness();const raw='タスク：棚を整理する\nタイマー3分';await h.run1(raw);
+ const a=JSON.parse(await h.run2('invalid\n__YOS_V4_RAW__\n'+raw));
+ assert.equal(a.operation,'none');assert.equal(h.events.creates,0);
+});
+await test('Model hallucination cannot override an exact direct user command',async()=>{
+ const h=harness();const raw='タイマー3分';await h.run1(raw);
+ const a=await exec(h,[item('タイマー：3分','timer')],raw);
+ assert.equal(a.operation,'start_timer');assert.equal(a.value,3);
+});
+await test('Unsafe timer variants never use deterministic recovery',async()=>{
+ for(const raw of ['タイマー61分','タイマー3分をキャンセル','これは例文：タイマー3分','タイマー3分\n実行しないで','タイマー0分','タイマー300分']){
+  const h=harness();await h.run1(raw);
+  const a=JSON.parse(await h.run2('invalid\n__YOS_V4_RAW__\n'+raw));
+  assert.equal(a.operation,'none',raw);
+ }
+});
+await test('An AI envelope with encoded items_json remains allowed only after validation',async()=>{
+ const h=harness();const raw='タスク：本棚を掃除する';await h.run1(raw);
+ const wrapped=JSON.stringify({items_json:JSON.stringify([item(raw,'task')])});
+ const a=JSON.parse(await h.run2(wrapped+'\n__YOS_V4_RAW__\n'+raw));
+ assert.equal(a.operation,'none');assert.equal(h.events.creates,1);
 });
 for(const [name,s,err] of cases)console.log(`${s} ${name}${err?'\n'+err:''}`);
 console.log(`RESULT ${cases.filter(x=>x[1]==='PASS').length}/${cases.length}`);
