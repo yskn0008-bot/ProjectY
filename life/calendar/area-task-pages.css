@@ -1,7 +1,7 @@
 /* Domain task pages: existing month and DAYSTREAM retain their approved layouts. */
 #approvedCalendar.cal-area-mode .cal-area-page{display:flex;flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;flex-direction:column;gap:10px;padding:0 1px 12px}
-#approvedCalendar.cal-area-mode .cal-nav{grid-template-columns:repeat(3,minmax(0,1fr))}
-#approvedCalendar.cal-area-mode .cal-nav button{min-width:0;font-size:12px!important}
+#approvedCalendar .cal-nav{grid-template-columns:repeat(3,minmax(0,1fr))}
+#approvedCalendar .cal-nav button{min-width:0;font-size:12px!important}
 #approvedCalendar .cal-area-page[hidden]{display:none!important}
 #approvedCalendar .cal-area-page h2{font-size:20px;margin:2px 0 0}
 #approvedCalendar .cal-area-page h3{font-size:18px;margin:0}
