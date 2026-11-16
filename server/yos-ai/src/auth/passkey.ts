@@ -19,10 +19,10 @@ const CHALLENGE = 'yos:calendar:passkey:v1:challenge:';
 const SESSION = 'yos:calendar:passkey:v1:session:';
 const SESSION_SECONDS = 12 * 3600;
 const CHALLENGE_SECONDS = 300;
-const hex = (bytes: Uint8Array) => Buffer.from(bytes).toString('hex');
+const hex = (bytes: Uint8Array) => [...bytes].map(b=>b.toString(16).padStart(2,'0')).join('');
 const random = () => hex(crypto.getRandomValues(new Uint8Array(32)));
-const b64url = (bytes: Uint8Array) => Buffer.from(bytes).toString('base64url');
-const fromB64 = (s: string) => new Uint8Array(Buffer.from(s, 'base64url'));
+const b64url = (bytes: Uint8Array) => btoa(String.fromCharCode(...bytes)).replaceAll('+','-').replaceAll('/','_').replace(/=+$/,'');
+const fromB64 = (s: string) => Uint8Array.from(atob(s.replaceAll('-','+').replaceAll('_','/')+'='.repeat((4-s.length%4)%4)),c=>c.charCodeAt(0));
 const sha = async (s: string) => hex(new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s))));
 const match = (s: unknown, re: RegExp): s is string => typeof s === 'string' && re.test(s);
 
