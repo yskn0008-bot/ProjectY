@@ -44,7 +44,7 @@ test('Voice原文を同一IDでNotionへ保存し、読戻し成功まで確認�
   const m=mocked();
   assert.match(await m.run('明日10時に面談'),/Notion Inbox保存確認済み/);
   assert.equal(m.blocks[1].paragraph.rich_text[0].text.content,'明日10時に面談');
-  assert.match(m.blocks[0].paragraph.rich_text[0].text.content,/Clarity\\.Voice · clarity:/);
+  assert.match(m.blocks[0].paragraph.rich_text[0].text.content,/Clarity\.Voice · clarity:/);
   assert.equal(m.counts.writes,1);assert.equal(m.counts.readback,3);
   assert.match(await m.run('明日10時に面談'),/保存確認済み/);
   assert.equal(m.counts.writes,1);
