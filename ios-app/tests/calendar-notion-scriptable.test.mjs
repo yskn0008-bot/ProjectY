@@ -72,7 +72,7 @@ test('direct Notion Calendar reads six existing sources without any Vercel or ne
  assert.equal(r.requests.length,6);
  assert.equal(r.loaded.length,1);
  assert.match(r.loaded[0],/<!doctype html>/);
- assert.match(r.loaded[0],/approved-calendar/);
+ assert.match(r.loaded[0],/#approvedCalendar/);
  assert.equal(r.assets.length,3);
  assert.ok(r.assets.every(x=>x.startsWith('https://raw.githubusercontent.com/yskn0008-bot/ProjectY/8a09f912da184582ad8b2e01bce809b10ddb1c7d/life/calendar/')));
  assert.doesNotMatch(script,/await view\.loadURL\(UI\)/);
