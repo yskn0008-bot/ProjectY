@@ -167,6 +167,7 @@ const {chromium,webkit}=require('playwright');
    await localPage.locator('.cal-local-field input[type=text]').fill('端末内の確認タスク');
    await localPage.locator('.cal-local-field input[type=date]').fill(current);
    await localPage.locator('.cal-local-save').click();
+   await localPage.locator('#calSettings .sheet-head button').click();
    await localPage.locator('[data-view="day"]').click();
    const localRow=localPage.locator('.cal-untimed-row').filter({hasText:'端末内の確認タスク'});
    assert.equal(await localRow.count(),1,'newly saved local item renders in own daily screen');
