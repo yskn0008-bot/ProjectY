@@ -7,7 +7,34 @@
 'use strict';
 
 const NOTION_KEY='YOS_NOTION_INTEGRATION_TOKEN';
-const UI='https://yskn0008-bot.github.io/ProjectY/life/calendar/?view=month';
+// Pin the approved design: no live GitHub Pages navigation is required.
+const UI_REF='8a09f912da184582ad8b2e01bce809b10ddb1c7d';
+const UI_ASSETS='https://raw.githubusercontent.com/yskn0008-bot/ProjectY/'+UI_REF+'/life/calendar/';
+async function asset(name,minimum,maximum,check){
+ const request=new Request(UI_ASSETS+name);
+ request.timeoutInterval=20;
+ const value=await request.loadString();
+ if(request.response?.statusCode!==200||typeof value!=='string'||value.length<minimum||value.length>maximum||!value.includes(check))
+  throw Error('カレンダーの画面部品 '+name+' を取得できません（表示は開始していません）');
+ return value;
+}
+async function offlineHTML(){
+ const [css,habit,approved]=await Promise.all([
+  asset('approved-calendar.css',5000,90000,'#approvedCalendar'),
+  asset('habit-calendar.js',500,10000,'YOS_CALENDAR_HABITS'),
+  asset('approved-calendar.js',5000,90000,'YOS_APPROVED_CALENDAR')
+ ]);
+ // Only immutable project-approved sources are used, never Notion data or credentials.
+ const safeScript=x=>x.replace(/<\/script/gi,'<\\/script');
+ const safeCss=x=>x.replace(/<\/style/gi,'<\\/style');
+ return '<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">'+
+ '<meta name="theme-color" content="#051522"><title>YOS CALENDAR</title><style>'+
+ '[hidden]{display:none!important}html,body{margin:0;min-height:100%;background:#051522;color:#f7f8ff}'+safeCss(css)+
+ '</style></head><body>'+
+ '<div id="sourceOverview" hidden></div><section class="calendar-auth"><button type="button" id="calendarTasksRefresh">↻ Notionを更新</button></section>'+
+ '<div id="sources"></div><div id="sourceLinks"></div><button type="button" id="reload">↻ Notionを更新</button>'+
+ '<script>'+safeScript(habit)+'</script><script>'+safeScript(approved)+'</script></body></html>';
+}
 const VERSION='2026-03-11';
 const BASE='https://api.notion.com/v1/data_sources/';
 const sources=[
@@ -141,9 +168,14 @@ async function main(){
  const data=await loadNotion(token);
  if(data.fail.length===sources.length){await showAlert('Notionを取得できません','すべての保存先への接続に失敗しました。Notionの権限と通信を確認してください。');return}
  const view=new WebView();
- await view.loadURL(UI);
+ // A dark blank WebView was observed with loadURL(GitHub Pages). Render the same
+ // approved CSS/JS locally instead, and verify a live calendar root before present.
+ const html=await offlineHTML();
+ await view.loadHTML(html);
  const installed=await view.evaluateJavaScript(initialJS);
- if(installed!==true)throw Error('既存カレンダーUIを読み込めませんでした');
+ const layout=await view.evaluateJavaScript("(function(){const host=document.getElementById('approvedCalendar');return {ready:document.readyState,exists:!!host,grid:!!document.getElementById('calGrid'),height:host?.getBoundingClientRect().height||0}})()");
+ if(installed!==true||!layout?.exists||!layout?.grid)
+  throw Error('カレンダーの初期表示に失敗しました。元のデータは変更していません');
  async function paint(next){
   // Preserve the existing Money privacy flag before placing private records in WebView.
   const hideMoney=await view.evaluateJavaScript("(function(){try{return JSON.parse(localStorage.getItem('yos-money-v2')||'null')?.privacy===true}catch{return false}})()");
@@ -154,6 +186,8 @@ async function main(){
   const expression='(function(){var data='+json+';data.complete=function(){return Promise.resolve({ok:false,reason:"Notionの元ページで完了してください"})};data.completeHabit=data.complete;window.YOS_APPROVED_CALENDAR.update(data);return window.YOS_APPROVED_CALENDAR.inspect().items.length;})()';
   const count=await view.evaluateJavaScript(expression);
   if(count!==visible.items.length)throw Error('UIへ読み込んだ件数が一致しません');
+  const cells=await view.evaluateJavaScript("document.querySelectorAll('#calGrid .cal-day').length");
+  if(cells!==42)throw Error('月カレンダーの42日付枠を描画できませんでした。黒画面は表示しません');
  }
  await paint(data);
  const close=view.present(true).then(()=>({type:'close'}));
