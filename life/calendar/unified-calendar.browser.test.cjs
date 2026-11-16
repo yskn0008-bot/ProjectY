@@ -163,12 +163,20 @@ const {chromium,webkit}=require('playwright');
    await localPage.locator('.cal-header .cal-icon-button').nth(1).click();
    assert.equal(await localPage.locator('#calendarTasksRefresh').isVisible(),false,'no Google/Face ID login request on default screen');
    assert.match(await localPage.locator('#notionTasksOpen').getAttribute('href'),/notion\.so\/06e62efb/,'Notion stays available for original edits');
+   require('node:fs').mkdirSync('test-results',{recursive:true});
+   await localPage.screenshot({path:'test-results/calendar-local-settings-'+kind+'-390.png'});
    await localPage.locator('#calSettings .cal-local-open').click();
    await localPage.locator('.cal-local-field input[type=text]').fill('端末内の確認タスク');
    await localPage.locator('.cal-local-field input[type=date]').fill(current);
    await localPage.locator('.cal-local-save').click();
    await localPage.locator('#calSettings .sheet-head button').click();
    await localPage.locator('[data-view="day"]').click();
+   for(const [width,height] of [[320,667],[390,844],[402,874]]){
+    await localPage.setViewportSize({width,height});
+    assert.equal(await localPage.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false,'local daily view fits '+width+'px');
+    await localPage.screenshot({path:'test-results/calendar-local-day-'+kind+'-'+width+'.png'});
+   }
+
    const localRow=localPage.locator('.cal-untimed-row').filter({hasText:'端末内の確認タスク'});
    assert.equal(await localRow.count(),1,'newly saved local item renders in own daily screen');
    assert.match(await localPage.evaluate(()=>JSON.stringify(JSON.parse(localStorage.getItem('YOS_CALENDAR_LOCAL_ENTRIES_V1')))),/端末内の確認タスク/);
