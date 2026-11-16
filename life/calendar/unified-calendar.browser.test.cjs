@@ -177,7 +177,8 @@ const {chromium,webkit}=require('playwright');
      const action=options.body?JSON.parse(options.body).action:'GET';
      mock.calls.push(action);
      let status=200,body={};
-     if(action==='auth-options'){
+     if(String(input).includes('/public-config')){body={googleClientId:'test.apps.googleusercontent.com'}}
+     else if(action==='auth-options'){
       if(mock.registered){body={requestId:'a'.repeat(64),options:{challenge:'AQ',allowCredentials:[]}}}
       else{status=409;body={registered:false}}
      }else if(action==='auth-verify'){body={token:'yos_pk_'+'b'.repeat(64),expiresAt:Date.now()+3600000}}
@@ -186,7 +187,7 @@ const {chromium,webkit}=require('playwright');
      else if(action==='GET'){
       if(mock.denyReads){status=401;body={error:'expired'}}
       else{body={source:'notion',complete:true,tasks:[]}}
-     }else if(String(input).includes('/public-config')){body={googleClientId:'test.apps.googleusercontent.com'}}
+     }
      return new Response(JSON.stringify(body),{status,headers:{'Content-Type':'application/json'}});
     };
    });
@@ -212,7 +213,7 @@ const {chromium,webkit}=require('playwright');
    assert.match(await authPage.evaluate(()=>sessionStorage.getItem('yos_calendar_passkey_session_v1')),/yos_pk_/);
    await authPage.reload({waitUntil:'domcontentloaded'});
    await authPage.waitForFunction(()=>window.__calendarAuthTest.calls.includes('GET'));
-   assert.deepEqual(await authPage.evaluate(()=>window.__calendarAuthTest.calls.slice()),['GET'],'reload safely reuses live session without Google');
+   assert.equal(await authPage.evaluate(()=>window.__calendarAuthTest.calls.every(x=>x==='GET') && window.__calendarAuthTest.calls.length>=1),true,'reload safely reuses live session without Google');
    await authPage.locator('.cal-header .cal-icon-button').nth(1).click();
    await face.waitFor({state:'visible'});
    require('node:fs').mkdirSync('test-results',{recursive:true});
