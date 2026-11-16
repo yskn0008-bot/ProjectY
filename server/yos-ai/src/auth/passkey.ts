@@ -157,8 +157,13 @@ export function createPasskeyHandler(options: PasskeyOptions): (request: Request
         // Synced passkeys may legitimately keep counter 0; all other counters increase.
         const next=v.authenticationInfo.newCounter;
         if (c.counter>0 && next<=c.counter) throw Error('Authenticator replay');
-        const saved=await options.redis.command<string|null>(['SET',CRED_KEY,JSON.stringify({...c,counter:next}),'XX']);
-        if (saved !== 'OK') throw Error('Credential update failed');
+        // Atomic compare-and-swap prevents concurrent assertions from rolling back counters.
+        const updated=await options.redis.command<number>([
+          'EVAL',
+          "if redis.call('GET', KEYS[1]) ~= ARGV[1] then return 0 end; redis.call('SET', KEYS[1], ARGV[2]); return 1",
+          1,CRED_KEY,JSON.stringify(c),JSON.stringify({...c,counter:next})
+        ]);
+        if (updated !== 1) throw Error('Credential changed during verification');
         const token='yos_pk_'+random();
         const expiresAt=Date.now()+SESSION_SECONDS*1000;
         const sessionSaved=await options.redis.command<string|null>(['SET',SESSION+await sha(token),JSON.stringify({subjectHash:options.subjectHash,expiresAt}),'NX','EX',SESSION_SECONDS]);

@@ -79,9 +79,12 @@ export function createTaskDashboardHandler(options: CreateTaskDashboardHandlerOp
     }
     if (!['GET', 'PATCH'].includes(request.method)) return secureJson({error: 'Method not allowed'}, 405, origin, {Allow:'GET, PATCH, POST, OPTIONS'});
 
+    const source = new URL(request.url).searchParams.get('source');
     try {
       const idToken = bearerToken(request);
       if (idToken.startsWith('yos_pk_')) {
+        // A Calendar passkey cannot authorize the legacy Google projection.
+        if (source !== 'notion') return secureJson({error:'Passkey is limited to Notion tasks'},403,origin);
         if (!options.passkeyRedis || !options.passkeySubjectHash ||
             !(await verifyPasskeySession(idToken,options.passkeyRedis,options.passkeySubjectHash))) {
           throw Error('Invalid passkey session');
@@ -96,7 +99,6 @@ export function createTaskDashboardHandler(options: CreateTaskDashboardHandlerOp
 
     // Explicit opt-in: legacy MY WAY callers retain their Google projection contract.
     // A failed authoritative read must never masquerade as a successful stale fallback.
-    const source = new URL(request.url).searchParams.get('source');
     if (source !== null && source !== 'notion') return secureJson({error: 'Unknown task source'}, 400, origin);
     if (request.method === 'PATCH' && source !== 'notion') return secureJson({error: 'Completion requires Notion source'}, 400, origin);
     if (source === 'notion') {

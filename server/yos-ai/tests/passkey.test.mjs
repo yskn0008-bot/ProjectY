@@ -2,11 +2,18 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createPasskeyHandler,verifyPasskeySession} from '../dist/auth/passkey.js';
 const O='https://yskn0008-bot.github.io',id='a'.repeat(32),subjectHash='owner';
-function fixture(){
+function fixture({authCounter=0,beforeAuthStore=()=>{}}={}){
  const db=new Map();let verifyCalls=0;
  const redis={async command(args){
   const [cmd,key,value,...opts]=args;
   if(cmd==='GET')return db.get(key)??null;
+  if(cmd==='EVAL'){
+   const [script,keysCount,credentialKey,previous,next]=args.slice(1);
+   assert.equal(keysCount,1);
+   assert.match(script,/redis.call/);
+   if(db.get(credentialKey)!==previous)return 0;
+   db.set(credentialKey,next);return 1;
+  }
   if(cmd==='GETDEL'){const v=db.get(key)??null;db.delete(key);return v}
   if(cmd==='DEL'){const v=db.delete(key);return Number(v)}
   if(cmd==='SET'){
@@ -20,7 +27,7 @@ function fixture(){
   async generateRegistrationOptions(o){assert.equal(o.rpID,'yskn0008-bot.github.io');assert.equal(o.authenticatorSelection.userVerification,'required');return {challenge:'C'.repeat(43),user:{id:'Z3JvdXA'},rp:{id:o.rpID}}},
   async verifyRegistrationResponse(o){verifyCalls++;assert.equal(o.expectedOrigin,O);assert.equal(o.expectedRPID,'yskn0008-bot.github.io');assert.equal(o.requireUserVerification,true);assert.equal(o.expectedChallenge,'C'.repeat(43));return {verified:true,registrationInfo:{credential:{id,publicKey:new Uint8Array(65).fill(1),counter:0,transports:['internal']}}}},
   async generateAuthenticationOptions(o){assert.equal(o.rpID,'yskn0008-bot.github.io');assert.equal(o.userVerification,'required');return {challenge:'D'.repeat(43),allowCredentials:o.allowCredentials}},
-  async verifyAuthenticationResponse(o){verifyCalls++;assert.equal(o.expectedOrigin,O);assert.equal(o.expectedRPID,'yskn0008-bot.github.io');assert.equal(o.expectedChallenge,'D'.repeat(43));assert.equal(o.requireUserVerification,true);return {verified:true,authenticationInfo:{newCounter:0}}}
+  async verifyAuthenticationResponse(o){verifyCalls++;assert.equal(o.expectedOrigin,O);assert.equal(o.expectedRPID,'yskn0008-bot.github.io');assert.equal(o.expectedChallenge,'D'.repeat(43));assert.equal(o.requireUserVerification,true);beforeAuthStore(db);return {verified:true,authenticationInfo:{newCounter:authCounter}}}
  };
  const handler=createPasskeyHandler({redis,allowedOrigins:[O],identityVerifier:{async verify(token){if(token!=='real-google')throw Error('No verified Google');return {subject:'owner'}}},identityGate:{async authorize(){return {subjectHash}}},subjectHash,fido});
  const request=async(action,params={},token='',origin=O)=>{const r=await handler(new Request('https://example.invalid/api/yos/passkey',{method:'POST',headers:{origin,'content-type':'application/json',...(token?{authorization:'Bearer '+token}:{})},body:JSON.stringify({action,...params})}));return {status:r.status,json:await r.json()}};
@@ -60,4 +67,43 @@ test('unregistered users cannot obtain a WebAuthn session and stale/invalid sess
  assert.equal((await f.request('auth-options')).status,409);
  assert.equal((await verifyPasskeySession('yos_pk_'+id+id,f.redis,subjectHash)),false);
  assert.equal((await f.request('logout',{},'yos_pk_'+id+id)).status,401);
+});
+
+test('credential counter update is atomic and fails closed on concurrent modification',async()=>{
+ const f=fixture({authCounter:1,beforeAuthStore:db=>{
+  const key='yos:calendar:passkey:v1:primary';
+  const current=JSON.parse(db.get(key));
+  db.set(key,JSON.stringify({...current,counter:9}));
+ }});
+ const enrolled=await f.request('register-options',{},'real-google');
+ assert.equal((await f.request('register-verify',{requestId:enrolled.json.requestId,credential:{id}},'real-google')).status,200);
+ const challenge=await f.request('auth-options');
+ const denied=await f.request('auth-verify',{requestId:challenge.json.requestId,credential:{id}});
+ assert.equal(denied.status,401);
+ assert.equal([...f.db.keys()].filter(k=>k.includes(':session:')).length,0);
+});
+test('challenge expiry, wrong origin, malformed JSON and missing bearer fail safely',async()=>{
+ const f=fixture();
+ const started=await f.request('register-options',{},'real-google');
+ const pending=[...f.db.keys()].find(k=>k.includes(':challenge:'));
+ assert.ok(pending);f.db.delete(pending);
+ assert.equal((await f.request('register-verify',{requestId:started.json.requestId,credential:{id}},'real-google')).status,401);
+ const wrong=await f.request('auth-options',{},'','https://evil.example');
+ assert.equal(wrong.status,403);
+ const raw=await f.handler(new Request('https://example.invalid/api/yos/tasks?passkey=1',{method:'POST',headers:{origin:O,'content-type':'application/json'},body:'{bad'}));
+ assert.equal(raw.status,400);
+ assert.equal((await f.request('logout',{},'')).status,401);
+});
+test('sessions expire server-side even if a Redis key was not removed yet',async()=>{
+ const f=fixture();
+ const a=await f.request('register-options',{},'real-google');
+ assert.equal((await f.request('register-verify',{requestId:a.json.requestId,credential:{id}},'real-google')).status,200);
+ const b=await f.request('auth-options');
+ const login=await f.request('auth-verify',{requestId:b.json.requestId,credential:{id}});
+ assert.equal(login.status,200);
+ const key=[...f.db.keys()].find(k=>k.includes(':session:'));
+ assert.ok(key);
+ const record=JSON.parse(f.db.get(key));
+ f.db.set(key,JSON.stringify({...record,expiresAt:Date.now()-1}));
+ assert.equal(await verifyPasskeySession(login.json.token,f.redis,subjectHash),false);
 });
