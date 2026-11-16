@@ -73,6 +73,13 @@ node --test life/calendar/*.test.mjs life/tests/life-calendar-contract.test.mjs 
 - Real Notion habit-edit view contains two unnamed rows with only a recurrence default. The strict Tasks parser now reports those as ignored placeholders, while meaningful unnamed tasks still fail closed. No actual row was modified or deleted.
 - Public config responds successfully with the expected official Origin. This proves public config/Origin handling, not owner-authenticated Notion access. Notion credentials are production-only; they are not copied into preview.
 - Local targeted tests: 90 PASS, including single-date completion, replay recovery, two simultaneous clicks, lost response after create, missing receipt after unknown outcome, wrong parent/version, future-date rejection, recurrence anchors and calendar projection.
-- Local Chromium: approved screen 20 assertions PASS, habit receipt UI 5 assertions PASS. Full latest GitHub CI is pending. Existing aggregate Life Money-label smoke remains a separate issue.
+- Local Chromium: approved screen 20 assertions PASS, habit receipt UI 5 assertions PASS. On source head f3b8920ab165541f2fd3e23b8f3d8e8c4534396c, Calendar browser acceptance passed in Chromium and WebKit (three viewport sizes, month/day controls and the one-day habit receipt flow). AI Core, Unified PWA, Life Node and iOS bundle contracts passed. The native simulator job remained queued at the last observation; native application sources were not changed. Existing aggregate Life Money-label smoke remains a separate failure (money is missing 最近の入出金), not a Calendar acceptance failure.
 
 - Full local server suite: 396 tests PASS; API syntax checks PASS. Calendar auth parity checks ensure the existing identity/origin/token behavior is unchanged outside the explicit habit action.
+
+## Final source audit
+
+- Latest behavioral CI source: `f3b8920ab165541f2fd3e23b8f3d8e8c4534396c`; complete tested tree `9ddded18274a3353dc8b6d8374a0a93fbd92eefc`.
+- Browser acceptance passed before the separate existing Money smoke failed. No assertion was removed to suppress that failure.
+- Final evidence-only update adds this status and the scoped `design-qa.md`; it restores the unrelated Morning Brief signed binary to its starting blob. Runtime files retain the tested bytes. No claim that skipped final-head CI executed.
+- This revision is ready for production approval, not published or physical-iPhone verified. No owner-authenticated task or habit write was performed.
