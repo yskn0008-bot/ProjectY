@@ -15,3 +15,11 @@ body{background:var(--cal-bg)!important;color:var(--cal-text)}body>.app{display:
 #calSettings .today-btn,#calSettings .tool-links a{background:#173249;color:#f7f8ff;border-color:#526574;text-decoration:none}
 #calSettings .disclosure{background:#112a3e;border-color:#526574}#calSettings .disclosure summary{color:#cadbea}
 #calSettings #calendarAuthStatus,#calSettings #nativeImportStatus{color:#bfd0df!important}
+
+/* Device-local entry sheet; month and daily canvases stay unchanged. */
+.cal-sheet{overflow-y:auto;overscroll-behavior:contain}
+.cal-sheet .cal-local-field{display:flex;flex-direction:column;gap:5px;margin:10px 0;color:#dfebf5;font-size:12px}
+.cal-sheet .cal-local-field input,.cal-sheet .cal-local-field select{display:block;width:100%;min-height:42px;border:1px solid #526574;border-radius:11px;background:#112a3e;color:#f7f8ff;padding:9px 11px;font:inherit;font-size:16px}
+#calSettings .cal-local-open,.cal-sheet .cal-local-save{width:100%;min-height:44px;background:#173952;border:1px solid #46a9df;border-radius:12px;color:#fff;font-weight:700}
+.cal-sheet .cal-local-delete{width:100%;border:1px solid #975b69;background:#33232b;color:#fbe8ea}
+.cal-sheet .cal-local-status{min-height:20px;font-size:12px;overflow-wrap:anywhere}
