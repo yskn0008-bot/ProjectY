@@ -56,6 +56,32 @@ jobs:
           test -s './Clarity Voice Pilot v4_unsigned.shortcut'
           python3 validate_runtime.py './Clarity Voice Pilot v4_unsigned.shortcut'
 
+      - name: Sign secret-free pilot with existing HubSign route
+        id: sign
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/clarity-factory/sign_with_hubsign.py \
+            --input 'tools/clarity-v4-device-pilot/Clarity Voice Pilot v4_unsigned.shortcut' \
+            --output 'tools/clarity-v4-device-pilot/Clarity-Voice-Pilot-v4-signed.shortcut' \
+            --name 'Clarity Voice Pilot v4'
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('tools/clarity-v4-device-pilot/Clarity-Voice-Pilot-v4-signed.shortcut')
+          raw=p.read_bytes()
+          assert raw.startswith(b'AEA1') and len(raw)>500
+          print(f'PASS signed AEA1 ({len(raw)} bytes) - iPhone runtime NOT verified')
+          PY
+
+      - name: Upload signed trial artifact
+        if: steps.sign.outcome == 'success'
+        uses: actions/upload-artifact@v4
+        with:
+          name: clarity-v4-signed-iphone-trial
+          path: tools/clarity-v4-device-pilot/Clarity-Voice-Pilot-v4-signed.shortcut
+          if-no-files-found: error
+
       - name: Upload unsigned proof for inspection only
         if: success()
         uses: actions/upload-artifact@v4
