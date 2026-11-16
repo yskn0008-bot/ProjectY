@@ -138,48 +138,75 @@
   return true;
  }
  function setup({host,status,save,includeCalendarMoney=false}){
-  if(initialized){if(currentToken)return refresh();return Promise.resolve(true)}
+  if(initialized){if(validSession())return refresh(true);return Promise.resolve(true)}
   if(initializing)return initializing;
   if(location.origin!==SITE){set(status,'YOS正規サイト以外では本人確認を開始しません');return Promise.resolve(false)}
   if(!host||typeof save!=='function'){set(status,'認証画面の準備ができません');return Promise.resolve(false)}
   context={status,save,includeCalendarMoney};
   const face=document.createElement('button');face.type='button';face.textContent='Face IDでNotionを接続';face.className='cal-passkey-primary';
-  const enroll=document.createElement('button');enroll.type='button';enroll.textContent='このiPhoneにFace IDを登録';enroll.hidden=true;enroll.className='cal-passkey-secondary';
+  const enroll=document.createElement('button');enroll.type='button';enroll.textContent='Face IDをこのiPhoneに登録';enroll.hidden=true;enroll.className='cal-passkey-secondary';
   const fallback=document.createElement('details');fallback.className='cal-passkey-fallback';
-  const title=document.createElement('summary');title.textContent='初回登録・復旧（Google本人確認）';fallback.append(title);
+  const title=document.createElement('summary');title.textContent='初回登録・利用できない場合（Google本人確認）';fallback.append(title);
   const googleHost=document.createElement('div');fallback.append(googleHost);
   host.replaceChildren(face,enroll,fallback);
-  face.addEventListener('click',async()=>{face.disabled=true;try{await faceSignIn(status)}catch(e){set(status,e instanceof Error?e.message:'Face IDの確認に失敗しました');fallback.open=true}finally{face.disabled=false}});
-  enroll.addEventListener('click',async()=>{enroll.disabled=true;try{await enrollPasskey(status);enroll.hidden=true}catch(e){set(status,e instanceof Error?e.message:'登録できませんでした')}finally{enroll.disabled=false}});
+  let googleReady=false;
+  const loadGoogle=()=>{
+   if(googleReady)return Promise.resolve(true);
+   if(initializing)return initializing;
+   if(!validSession())set(status,'初回・復旧用のGoogle本人確認を準備中です');
+   initializing=Promise.all([
+    timedFetch(API+'/api/yos/public-config',{headers:{Accept:'application/json'}}).then(async response=>{
+     if(!response.ok)throw Error('Google認証設定を取得できません');
+     const data=await response.json();
+     if(typeof data.googleClientId!=='string'||!data.googleClientId.endsWith('.apps.googleusercontent.com')||!/^[a-zA-Z0-9_.-]+$/.test(data.googleClientId))throw Error('Google認証設定が無効です');
+     return data.googleClientId;
+    }),getScript()
+   ]).then(([clientId,googleId])=>{
+    googleId.initialize({client_id:clientId,auto_select:false,itp_support:true,use_fedcm_for_prompt:true,callback:async({credential})=>{
+     const token=typeof credential==='string'?credential.trim():'';
+     if(!token||token.length>8192){set(status,'Google本人確認を完了できませんでした');return}
+     googleToken=token;currentToken=token;passkeyExpiresAt=0;enroll.hidden=false;
+     const ok=await refresh(true);
+     if(ok)set(status,'Google本人確認・Notion更新済み。Face ID登録で次回からGoogle不要です');
+     else if(currentToken===token)set(status,'Google確認情報を受け取りました。Notion取得は未確認ですが、Face ID登録を続けられます');
+    }});
+    googleId.renderButton(googleHost,{type:'standard',theme:'outline',size:'large',text:'continue_with',shape:'rectangular',
+     width:Math.min(300,Math.max(180,Math.floor(googleHost.getBoundingClientRect().width||240)-8))});
+    googleReady=true;return true;
+   }).catch(e=>{
+    if(!validSession())set(status,'Google本人確認を読み込めません。'+errorMessage(e,'通信状態を確認してください'));
+    return false;
+   }).finally(()=>{initializing=null});
+   return initializing;
+  };
+  // No Google script or account prompt unless the owner opens this fallback.
+  fallback.addEventListener('toggle',()=>{if(fallback.open)void loadGoogle()});
+  face.addEventListener('click',async()=>{
+   face.disabled=true;
+   try{await faceSignIn(status)}
+   catch(e){
+    set(status,errorMessage(e,'Face IDの確認に失敗しました'));
+    if(e?.code==='NOT_REGISTERED'||e?.code==='UNSUPPORTED')fallback.open=true;
+   }finally{face.disabled=false}
+  });
+  enroll.addEventListener('click',async()=>{
+   enroll.disabled=true;
+   try{await enrollPasskey(status);enroll.hidden=true;fallback.open=false}
+   catch(e){set(status,errorMessage(e,'Face ID登録を完了できませんでした'))}
+   finally{enroll.disabled=false}
+  });
   initialized=true;
   try{
    const stored=JSON.parse(root.sessionStorage?.getItem(STORAGE)||'null');
-   if(stored&&/^yos_pk_[a-f0-9]{64}$/.test(stored.token)&&Number.isFinite(stored.expiresAt)&&stored.expiresAt>Date.now()){currentToken=stored.token;refresh(true)}
-  }catch{root.sessionStorage?.removeItem(STORAGE)}
-  set(status,currentToken?'保存済みセッションを検証しています':'Face IDで接続できます。未登録なら初回だけGoogle本人確認が必要です');
-  // The Google bridge is fallback-only: Face ID remains usable if GSI fails.
-  initializing=Promise.all([
-   timedFetch(API+'/api/yos/public-config',{headers:{Accept:'application/json'}}).then(async response=>{
-    if(!response.ok)throw Error('Google認証設定を取得できません');
-    const data=await response.json();
-    if(typeof data.googleClientId!=='string'||!data.googleClientId.endsWith('.apps.googleusercontent.com')||!/^[a-zA-Z0-9_.-]+$/.test(data.googleClientId))throw Error('Google認証設定が無効です');
-    return data.googleClientId;
-   }),
-   getScript()
-  ]).then(([clientId,googleId])=>{
-   googleId.initialize({client_id:clientId,auto_select:false,itp_support:true,use_fedcm_for_prompt:true,callback:async({credential})=>{
-    const token=typeof credential==='string'?credential.trim():'';
-    if(!token||token.length>8192){set(status,'Google本人確認を完了できませんでした');return}
-    googleToken=token;currentToken=token;enroll.hidden=false;
-    const ok=await refresh(true);
-    set(status,ok?'Notion取得済み。Face IDを登録すると次回からGoogle不要です':'Google認証済み。Face ID登録は可能です');
-   }});
-   googleId.renderButton(googleHost,{type:'standard',theme:'outline',size:'large',text:'continue_with',shape:'rectangular',
-    width:Math.min(300,Math.max(220,Math.floor(host.getBoundingClientRect().width||260)))});
-   return true;
-  }).catch(()=>{set(status,'Face IDは利用できます。Googleの初回登録画面だけ読み込めませんでした');return false})
-    .finally(()=>{initializing=null});
-  return initializing;
+   if(stored&&/^yos_pk_[a-f0-9]{64}$/.test(stored.token)&&Number.isFinite(stored.expiresAt)&&stored.expiresAt>Date.now()&&stored.expiresAt<=Date.now()+43260000){
+    currentToken=stored.token;passkeyExpiresAt=stored.expiresAt;
+    set(status,'保存済みの本人確認を検証中。Notionの最新データを読み込みます');
+    void refresh(true);
+   }else if(stored)clearSession();
+  }catch{clearSession()}
+  if(!currentToken)set(status,'Face IDで接続できます。初回登録だけGoogle本人確認が必要です');
+  if(!root.PublicKeyCredential||!root.navigator?.credentials){face.hidden=true;fallback.open=true}
+  return Promise.resolve(true);
  }
  root.addEventListener?.('online',()=>{if(validSession())refresh(false)});
  root.document?.addEventListener?.('visibilitychange',()=>{if(root.document.visibilityState==='visible'&&validSession())refresh(false)});
