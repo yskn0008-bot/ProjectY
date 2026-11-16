@@ -233,3 +233,18 @@ test('existing YOS menu links to unified calendar without adding a seventh main 
  assert.match(home,/<a href="\.\.\/life\/calendar\/">統合カレンダー/);
  assert.match(home,/<a href="\.\/daystream\/">DAYSTREAM/);
 });
+
+test('calendar-specific sources keep area, habitual classification and do not fabricate unplaced times',()=>{
+ const x=read(tasks([task({habitCycle:'毎日',area:'Self',dueAt:'2026-11-13'})]));
+ assert.equal(x.items[0].type,'habit');assert.equal(x.items[0].area,'Self');assert.equal(x.items[0].clock,'');
+});
+test('extra sources retain verified money, partial-source status and fail closed for invalid money',()=>{
+ const extras={checkedAt:'2026-11-13T23:00:00Z',sources:[{name:'家計イベント・入出金予定',status:'ok',complete:true,items:[{id:'c'.repeat(32),date:'2026-11-14',type:'money',title:'未確認の支払い',moneyKind:'expense',amount:1200,verification:'未確認',subtitle:'予定 · 未確認'}]}]};
+ const x=read(tasks([],{calendarSources:extras}));assert.equal(x.extraStatus[0].status,'ready');assert.equal(x.items[0].verification,'未確認');assert.equal(x.items[0].amount,1200);
+ extras.sources[0].items[0].amount=-1;assert.equal(read(tasks([],{calendarSources:extras})).items.length,0);
+});
+test('same financial identity is counted once; ambiguous cross-source amounts require reconciliation',()=>{
+ const e={id:'notion:money:abc',sourceId:'abc',date:'2026-11-14',type:'money',title:'通信料',amount:1200,moneyKind:'expense',source:'Notion'};
+ assert.equal(api.merge([e],[{...e,source:'別の写し'}]).length,1);
+ const r=api.merge([{...e,id:'local:abc',sourceId:'',source:'Money'}],[e]);assert.equal(r.length,2);assert.equal(r.every(x=>x.reconciliationPending),true);
+});

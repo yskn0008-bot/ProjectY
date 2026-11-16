@@ -6,6 +6,7 @@ import type {FetchLike} from '../http.js';
 import {GoogleDriveClient} from '../sources/google-drive-client.js';
 import {GoogleSheetsClient} from '../sources/google-sheets-client.js';
 import {loadNotionTaskDashboard, completeNotionTask} from '../widget/notion-source.js';
+import {loadCalendarSources} from './calendar-sources.js';
 import {loadNotionCalendarMoney} from '../widget/morning.js';
 import {allowedOrigin, bearerToken, secureJson, type CorsOptions} from '../api/shared.js';
 
@@ -106,7 +107,8 @@ export function createTaskDashboardHandler(options: CreateTaskDashboardHandlerOp
           let calendarMoney;
           try {calendarMoney=await loadNotionCalendarMoney({notionToken:options.notionToken,fetchImpl});}
           catch {calendarMoney={status:'unavailable' as const};}
-          return secureJson({...result,calendarMoney},200,origin,{'Cache-Control':'private, no-store'});
+          const calendarSources=await loadCalendarSources({notionToken:options.notionToken,fetchImpl});
+          return secureJson({...result,calendarMoney,...(calendarSources?{calendarSources}:{})},200,origin,{'Cache-Control':'private, no-store'});
         }
         return secureJson(result, 200, origin, {'Cache-Control': 'private, no-store'});
       } catch {
