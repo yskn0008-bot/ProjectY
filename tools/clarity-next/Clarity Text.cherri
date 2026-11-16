@@ -1,13 +1,11 @@
 #define name Clarity Text
 #define color purple
 
-#include 'actions/text'
 #include 'actions/shortcuts'
 
-const textInput = prompt("Clarityに入力", "Text", "")
-if !textInput {
-    stop()
-}
-
-const payload = text("__YOS_CLARITY_TEXT_V1__\n{textInput}")
-run("Clarity Next", payload)
+// Recovery: delegate the entire text-entry and verified Notion Raw First flow
+// to the existing user-confirmed Clarity Voice Pilot v3.
+// Do not ask for text a second time here; v3 itself asks exactly once.
+// Do not call Clarity Next because its empty input falls through to dictation.
+// This is a temporary safety repair, NOT a silent migration of production devices.
+run("Clarity Voice Pilot v3")
