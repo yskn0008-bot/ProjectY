@@ -175,3 +175,11 @@ test('not opting in does not perform a Money source query or return financial da
  assert.equal(requests,1);
  assert.equal('calendarMoney' in data,false);
 });
+
+test('unnamed rows containing only a recurrence default are ignored without blocking named habits',async()=>{
+ const blank={id:'f'.repeat(32),properties:{'やること':rich('','title'),'習慣周期':select('毎日')}};
+ const r=await load(async()=>payload([blank,page()]));
+ assert.equal(r.ignoredBlankCount,1);assert.equal(r.tasks.length,1);
+ const partial={...blank,properties:{...blank.properties,'次の一手':rich('Meaningful unfinished task')}};
+ await assert.rejects(()=>load(async()=>payload([partial])),/title/);
+});

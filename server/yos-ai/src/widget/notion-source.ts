@@ -144,7 +144,10 @@ function parseTask(value: unknown, calendar: boolean): TaskDashboardItem | null 
   if (!calendar && (!ordered || !title)) return null;
   // Notion permits blank placeholder pages. Keep them in the DB, report them separately.
   if (calendar && !title) {
-    const populated = Object.values(properties).some((property) => {
+    const populated = Object.entries(properties).some(([name,property]) => {
+      // The existing habit-edit view contains unnamed rows with only a default
+      // recurrence select. They are placeholders, not malformed named tasks.
+      if(name==='習慣周期'||name==='やること')return false;
       if (!isRecord(property)) return false;
       return ['title','rich_text','relation','multi_select'].some(key => Array.isArray(property[key]) && property[key].length > 0)
         || ['date','select','status','url','number','checkbox'].some(key => property[key] !== null && property[key] !== undefined && property[key] !== false);

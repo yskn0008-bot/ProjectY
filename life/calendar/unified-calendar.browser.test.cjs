@@ -82,21 +82,24 @@ const {chromium,webkit}=require('playwright');
   await page.goto(anotherBrowserUrl,{waitUntil:'domcontentloaded'});
   assert.match(await page.locator('#nativeImportStatus').innerText(),/別のブラウザからの取込/);
   assert.equal(await page.evaluate(()=>localStorage.getItem('YOS_CALENDAR_NATIVE_SNAPSHOT_V1')),null,'no silent cross-app data write');
+  await page.locator('[aria-label="接続と設定"]').click();
   assert.equal(await page.locator('#nativeConfirm').isVisible(),true);
   await page.locator('#nativeConfirm').click();
   assert.equal((await page.locator('#nativeConnection').textContent()).trim(),'取込済み');
   assert.equal((await page.locator('#nativeConfirm').isVisible()),false);
   assert.match(await page.locator('#nativeImportStatus').innerText(),/保存・読戻し/);
+  await page.locator('#calSettings .sheet-head button').click();
 
   assert.equal((await page.locator('#glanceExpense').innerText()).trim(),'¥0','planned money is not actual');
   assert.match(await page.locator('#glanceExpenseNote').innerText(),/7,000/,'planned money is labeled planned');
-  await page.locator('[data-mode="month"]').click();
-  assert.equal(await page.locator('#dates .cell').count()>27,true,'month rendered');
-  await page.locator('[data-mode="week"]').click();
-  assert.equal(await page.locator('#dates .cell').count(),7,'week rendered');
-  await page.locator('[data-mode="day"]').click();
-  assert.equal(await page.locator('#dates .cell').count(),1,'day rendered');
-  assert.match(await page.locator('#dayItems .entry').filter({hasText:'UTC午前予定'}).locator('small').innerText(),/10:30/,'UTC event is shown in Tokyo time');
+  assert.equal(await page.locator('#calGrid .cal-day').count(),42,'approved six-week month rendered');
+  const selectedDay=await page.locator('.cal-day.selected').getAttribute('data-date');
+  await page.locator('.cal-day[data-date="'+selectedDay+'"]').click();
+  assert.equal(await page.locator('#calDaily').isVisible(),true,'date opens separate daily screen');
+  assert.equal(await page.locator('.cal-month').isVisible(),false,'month is not stacked with daily');
+  assert.equal((await page.locator('.cal-time-row').filter({hasText:'UTC午前予定'}).locator('.cal-time').innerText()).trim(),'10:30','UTC event shown in Tokyo time');
+  await page.locator('[data-view="month"]').click();
+  assert.equal(await page.locator('#calGrid').isVisible(),true,'return to calendar');
   await page.evaluate(()=>{
    const key='YOS_DAYSTREAM_WEB_CAL_SNAPSHOT_V1',c=JSON.parse(localStorage.getItem(key));
    c.checkedAt=new Date(Date.now()-8*86400000).toISOString();
@@ -133,6 +136,21 @@ const {chromium,webkit}=require('playwright');
   assert.equal(linked.rows.some(r=>r.title==='既存の翌日予定'),true,'previously imported date outside native window is preserved');
   assert.equal(linked.reminders?.some(r=>r.title==='電話する'),true,'native reminder deadline appears in DAYSTREAM');
   assert.deepEqual(failures,[],'no JS runtime exceptions');
+  // Rendered acceptance of the approved two-screen UI with fictional data.
+  // The harness cannot run on the production origin.
+  for(const [width,height] of [[402,874],[390,844],[320,667]]){
+   for(const view of ['month','day']){
+    await page.goto('http://127.0.0.1:4173/life/calendar/tests/approved-calendar.browser.html?w='+width+'&h='+height+'&view='+view,{waitUntil:'domcontentloaded'});
+    await page.waitForFunction(()=>/DONE|ERROR/.test(document.getElementById('result').textContent),{timeout:10000});
+    const report=await page.locator('#result').innerText();
+    assert.doesNotMatch(report,/FAIL|ERROR/,'approved '+view+' '+width+'px: '+report);
+    assert.equal((report.match(/PASS /g)||[]).length,20,'twenty rendered assertions per screen');
+   }
+  }
+  await page.goto('http://127.0.0.1:4173/life/calendar/tests/habit-occurrence.browser.html',{waitUntil:'domcontentloaded'});
+  await page.waitForFunction(()=>/DONE|ERROR/.test(document.getElementById('result').textContent));
+  const habits=await page.locator('#result').innerText();assert.doesNotMatch(habits,/FAIL|ERROR/);assert.equal((habits.match(/PASS /g)||[]).length,5);
+  assert.deepEqual(failures,[],'approved render has no runtime exceptions');
   console.log('YOS unified calendar '+kind+' browser tests PASS');
  }finally{await browser.close()}
 })().catch(e=>{console.error(e);process.exitCode=1});

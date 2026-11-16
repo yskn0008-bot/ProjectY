@@ -6,6 +6,9 @@ import type {FetchLike} from '../http.js';
 import {GoogleDriveClient} from '../sources/google-drive-client.js';
 import {GoogleSheetsClient} from '../sources/google-sheets-client.js';
 import {loadNotionTaskDashboard, completeNotionTask} from '../widget/notion-source.js';
+import {completeHabitOccurrence} from './habit-occurrence.js';
+import type {RedisCommandClient} from '../storage/upstash-rest.js';
+import {loadCalendarSources} from './calendar-sources.js';
 import {loadNotionCalendarMoney} from '../widget/morning.js';
 import {allowedOrigin, bearerToken, secureJson, type CorsOptions} from '../api/shared.js';
 
@@ -49,6 +52,7 @@ export interface CreateTaskDashboardHandlerOptions extends CorsOptions {
   identityGate: IdentityGate;
   googleWorkloadAuth: GoogleWorkloadAuthConfig;
   notionToken?: string;
+  habitRedis?: RedisCommandClient;
   notionDataSourceId?: string;
   fetchImpl?: FetchLike;
 }
@@ -87,6 +91,11 @@ export function createTaskDashboardHandler(options: CreateTaskDashboardHandlerOp
         if (body.length > 2048) return secureJson({error: 'Request too large'}, 413, origin);
         let input: any;
         try { input = JSON.parse(body); } catch { return secureJson({error: 'Invalid request'}, 400, origin); }
+        if(input?.action==='complete-habit'){
+          if(!/^[a-f0-9]{32}$/iu.test(input.pageId)||typeof input.occurrenceDay!=='string'||typeof input.expectedEditedAt!=='string'||input.expectedEditedAt.length>80)return secureJson({error:'Invalid habit request'},400,origin);
+          if(!options.habitRedis)return secureJson({error:'Habit receipt storage unavailable; no source changes made'},503,origin);
+          try{const occurrence=await completeHabitOccurrence({notionToken:options.notionToken,notionDataSourceId:options.notionDataSourceId,fetchImpl,redis:options.habitRedis,pageId:input.pageId,occurrenceDay:input.occurrenceDay,expectedEditedAt:input.expectedEditedAt});return secureJson({source:'notion',occurrence},200,origin)}catch{return secureJson({error:'Habit save not confirmed; refresh before retrying'},409,origin)}
+        }
         if (!input || input.action !== 'complete' || !/^[a-f0-9]{32}$/iu.test(input.pageId) || typeof input.expectedEditedAt !== 'string' || input.expectedEditedAt.length > 80 || typeof input.expectedState !== 'string') return secureJson({error: 'Invalid completion request'}, 400, origin);
         try {
           const task = await completeNotionTask({notionToken: options.notionToken, notionDataSourceId: options.notionDataSourceId, fetchImpl, pageId: input.pageId, expectedEditedAt: input.expectedEditedAt, expectedState: input.expectedState});
@@ -106,7 +115,8 @@ export function createTaskDashboardHandler(options: CreateTaskDashboardHandlerOp
           let calendarMoney;
           try {calendarMoney=await loadNotionCalendarMoney({notionToken:options.notionToken,fetchImpl});}
           catch {calendarMoney={status:'unavailable' as const};}
-          return secureJson({...result,calendarMoney},200,origin,{'Cache-Control':'private, no-store'});
+          const calendarSources=await loadCalendarSources({notionToken:options.notionToken,fetchImpl});
+          return secureJson({...result,calendarMoney,...(calendarSources?{calendarSources}:{})},200,origin,{'Cache-Control':'private, no-store'});
         }
         return secureJson(result, 200, origin, {'Cache-Control': 'private, no-store'});
       } catch {

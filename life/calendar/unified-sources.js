@@ -32,7 +32,7 @@
    for(const t of s.items){
      if(!t||typeof t!=='object'||typeof t.id!=='string'||!t.id||seen.has(t.id))return null;
      seen.add(t.id);
-     const name=clean(t.title,100),state=clean(t.status,30),date=clean(t.due,10);
+     const name=clean(t.title,100),state=clean(t.status,30),date=clean(t.due,10)||(t.habitCycle==='毎日'?new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date(now)):'');
      if(!name||!STATES.has(state)||date&&!validDay(date))return null;
      if(s.origin==='notion'&&!/^notion-[a-f0-9]{32}$/.test(t.id))return null;
      if(!date)continue;  // Unscheduled work remains in DAYSTREAM's unplaced task queue.
@@ -64,9 +64,9 @@
      const allDay=isMirrorCalendar&&/^終日(?:・|$)/.test(clean(t.action,140));
      const label=isFixed?(allDay?'終日':clock?'固定予定 '+clock+' · 終了未確認':'固定予定・時刻未確認'):(clock?'期限 '+clock:'期限');
      const displayName=isMirrorCalendar&&name.startsWith('予定｜')?name.slice(3):isMirrorReminder&&name.startsWith('Task｜')?name.slice(5):name;
-     out.push({id:'daystream:task:'+t.id,type:isFixed?'schedule':'task',date,title:displayName,
+     out.push({id:'daystream:task:'+t.id,type:isFixed?'schedule':t.habitCycle?'habit':'task',date,title:displayName,
        subtitle:(isMirrorReminder?(clock?'リマインダー期限 '+clock:'リマインダー期限') : label)+(state==='完了'?' · 完了':''),
-       done:state==='完了',source:s.origin==='notion'?'Notion Tasks写し':'Tasks取込写し',
+       area:clean(t.area,40),clock,habitCycle:clean(t.habitCycle,20),done:state==='完了',source:s.origin==='notion'?'Notion Tasks写し':'Tasks取込写し',
        sourceId:t.id,sourceKind:isMirrorReminder?'reminder':isFixed?'calendar':'task',fixed:isFixed});
    }
    return {items:out,mirror};
@@ -127,9 +127,28 @@
        }
      }
    }
+   const extras=[],extraStatus=[];
+   if(tState==='ready'&&tasks!==null&&rawTasks?.origin==='notion'&&rawTasks.calendarSources){
+     const x=rawTasks.calendarSources,age=current-Date.parse(x.checkedAt);
+     if(Number.isFinite(age)&&age>=-300000&&age<=6*3600000&&Array.isArray(x.sources)&&x.sources.length<=5){
+       for(const src of x.sources){
+         let valid=src?.status==='ok'&&src.complete===true&&Array.isArray(src.items)&&src.items.length<=400;
+         const rows=[],ids=new Set();
+         if(valid)for(const e of src.items){
+           if(!e||!/^[a-f0-9]{32}$/.test(e.id)||ids.has(e.id)||!validDay(e.date)||!clean(e.title,100)||!['schedule','task','habit','money'].includes(e.type)){valid=false;break}
+           if(e.type==='money'&&(!Number.isFinite(e.amount)||e.amount<0||!['income','expense'].includes(e.moneyKind))){valid=false;break}
+           ids.add(e.id);let clock='';
+           if(typeof e.dueAt==='string'&&/T/.test(e.dueAt)&&Number.isFinite(Date.parse(e.dueAt)))clock=new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Tokyo',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(new Date(e.dueAt));
+           rows.push({id:e.type==='money'?'notion:money:'+e.id:'notion:extra:'+e.id,sourceId:e.id,date:e.date,type:e.type,title:clean(e.title,100),area:clean(e.area,40),subtitle:clean(e.subtitle,80),done:e.done===true,clock,...(e.type==='habit'&&/^[a-f0-9]{32}$/.test(e.taskId)?{habitTaskId:e.taskId}:{}),...(e.type==='money'?{amount:Math.round(e.amount),moneyKind:e.moneyKind,complete:e.complete===true,verification:clean(e.verification,20),originalId:clean(e.originalId,120)}:{}),source:clean(src.name,60)});
+         }
+         if(valid)extras.push(...rows);
+         extraStatus.push({name:clean(src?.name,60),status:valid?'ready':'unavailable'});
+       }
+     }
+   }
    const state={tasks:tasks===null?(tState==='ready'?'invalid':tState):'ready',
      calendar:calendar===null?(cState==='ready'?'invalid':cState):'ready',money:moneyState};
-   return {items:[...(calendar||[]),...(tasks||[]),...money],status:state,
+   return {items:[...(calendar||[]),...(tasks||[]),...extras,...money],status:state,extraStatus,
      details:{tasks:tasks?{at:rawTasks.checkedAt,origin:rawTasks.origin==='notion'?'notion':'manual',count:tasks.length,...taskView.mirror}:null,
        calendar:calendar?{at:rawCalendar.checkedAt,origin:'manual',count:calendar.length}:null,
        money:moneyDetails}};
@@ -137,7 +156,7 @@
  // Cross-source duplicates without shared original IDs are suppressed only when
  // the same day, same title and the same *explicit* start time are verified.
  function merge(base,extra){
-   const out=[...extra,...base],seenIds=new Set(),seenTime=new Set(),result=[];
+   const out=[...extra,...base].sort((a,b)=>Number(b?.type==='money'&&b.complete===true)-Number(a?.type==='money'&&a.complete===true)),seenIds=new Set(),seenTime=new Set(),seenOriginal=new Set(),result=[];
    function key(e){
      if(e.type==='task'&&e.sourceKind==='reminder'){
        const r=/リマインダー期限 (\d{2}:\d{2})/.exec(e.subtitle||'');
@@ -151,12 +170,18 @@
    for(const e of out){
      if(!e||typeof e!=='object'||!validDay(e.date)||!['schedule','task','money','habit'].includes(e.type))continue;
      if(e.id&&seenIds.has(e.id))continue;
+     const original=e.type==='money'?(e.originalId||e.sourceId||''):'';
+     if(original&&seenOriginal.has(original))continue;
+     if(original)seenOriginal.add(original);
      const k=key(e);
      if(k&&seenTime.has(k))continue;
      if(e.id)seenIds.add(e.id);
      if(k)seenTime.add(k);
      result.push(e);
    }
+   const groups=new Map();
+   for(const e of result){if(e.type!=='money')continue;const k=e.date+'|'+e.moneyKind+'|'+e.amount+'|'+e.title;const g=groups.get(k)||[];g.push(e);groups.set(k,g)}
+   for(const g of groups.values())if(new Set(g.map(e=>e.source)).size>1)for(const e of g)e.reconciliationPending=true;
    return result;
  }
  root.YOS_UNIFIED_CALENDAR={read,merge,keys:{tasks:TASK_KEY,calendar:CAL_KEY}};

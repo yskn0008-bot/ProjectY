@@ -1,0 +1,37 @@
+<!doctype html><meta charset="utf-8"><title>YOS Calendar · 画面比較と自動試験</title><style>body{margin:0;background:#172331;color:white;font:14px sans-serif}iframe{border:0;display:block}header{height:35px;padding:8px;box-sizing:border-box}#result{position:absolute;top:40px;left:625px;white-space:pre-wrap;width:490px}</style><header>実装画面 · デザイン比較用の架空データ（本人の予定ではありません）</header><iframe id="phone" title="iPhone画面"></iframe><pre id="result">実行中</pre><script>
+if(!['127.0.0.1','localhost'].includes(location.hostname))throw Error('This fictional-data QA harness is local-only');
+for(const k of ['yos-life-v1','YOS_DAYSTREAM_WEB_CAL_SNAPSHOT_V1','YOS_CALENDAR_NATIVE_SNAPSHOT_V1'])localStorage.removeItem(k);
+const q=new URLSearchParams(location.search),width=+(q.get('w')||390),height=+(q.get('h')||844),phone=document.getElementById('phone');phone.width=width;phone.height=height;const now=new Date().toISOString(),schema='yos-daystream-source-snapshot-v1';const day='2026-11-18';let index=0;const id=()=> (++index).toString(16).padStart(32,'0');
+const items=[['起床・モーニングルーティン','Self','06:30','毎日','完了'],['ストレッチ（10分）','Health','07:00','毎日','完了'],['不燃ゴミの前日確認','Life','08:00','','次にやる'],['案件の打ち合わせ','Work','10:00','','次にやる'],['トレーニング（ジム or 自宅）','Health','19:00','毎日','次にやる'],['スキンケア・コンディション記録','Self','22:00','毎日','次にやる'],['YOS環境の月次点検','Work','','','次にやる'],['家計の週次チェック','Money','','','次にやる']].map(([title,area,t,habitCycle,status])=>({id:'notion-'+id(),title,area,due:day,dueAt:t?day+'T'+t+':00+09:00':day,timing:title==='案件の打ち合わせ'?'fixed':'flexible',lastSynced:now,habitCycle,status,lastEditedAt:now}));
+const monthNames={1:'家計確認',2:'申請準備',3:'保険引落',4:'MTG',5:'給与',6:'ジム',8:'外食予定',9:'書類提出',10:'コンタクト',11:'研修',12:'ガス支払',13:'APT更新',14:'掃除',15:'出金',16:'環境点検',17:'運動',19:'仕分け',20:'通信料',21:'買い出し',22:'休息',23:'予定あり',24:'レポート',25:'入金',26:'面談',27:'ジム',28:'片付け',29:'イベント',30:'家賃'};
+for(const [n,title] of Object.entries(monthNames))items.push({id:'notion-'+id(),title,area:['Life','Work','Health','Self'][n%4],due:'2026-11-'+n.padStart(2,'0'),dueAt:'2026-11-'+n.padStart(2,'0'),timing:'flexible',status:'次にやる'});
+const snapshot={schema,kind:'tasks',status:'ok',source:'yos-auth-cache',origin:'notion',complete:true,checkedAt:now,items,calendarMoney:{status:'ok',complete:true,checkedAt:now,items:[{id:id(),date:day,title:'支出・支払い',amount:12000,kind:'expense'},{id:id(),date:'2026-11-25',title:'入金',amount:300000,kind:'income'},{id:id(),date:'2026-11-05',title:'給与',amount:40000,kind:'income'}]}};
+localStorage.setItem('YOS_DAYSTREAM_WEB_TASK_SNAPSHOT_V1',JSON.stringify(snapshot));
+localStorage.setItem('yos-money-v2',JSON.stringify({updatedAt:now,privacy:false,transactions:[]}));
+phone.src='/life/calendar/?date='+day+'&view='+'month';
+phone.onload=async()=>{const w=phone.contentWindow,d=w.document,out=[],assert=(condition,message)=>{out.push((condition?'PASS ':'FAIL ')+message);if(!condition)throw Error(message)},click=s=>d.querySelector(s).click();try{
+assert(d.querySelectorAll('.cal-day').length===42,'6週・月曜始まり');
+assert(d.documentElement.scrollWidth<=width,'横スクロールなし '+width+'px');assert(d.documentElement.scrollHeight<=height+1,'ページ縦スクロールなし '+height+'px');
+assert(d.querySelector('.cal-header h1').textContent==='YOS CALENDAR','独立した画面見出し');
+assert(d.querySelector('[data-date="2026-11-18"] .cal-cell-money').textContent==='−¥12,000','日付マスの支出');
+click('[data-area="Money"]');assert(!d.querySelector('[data-date="2026-11-18"] .cal-cell-money'),'Money OFF');click('[data-area="Money"]');
+click('[data-date="2026-11-18"]');assert(!d.querySelector('#calDaily').hidden&&d.querySelector('.cal-month').hidden,'日付から日別へ');
+const times=[...d.querySelectorAll('.cal-time')].map(x=>x.textContent);assert(times.join(',')==='06:30,07:00,08:00,10:00,19:00,22:00','時刻順（時刻未設定は分離）');
+assert(d.querySelectorAll('.cal-untimed-row').length===3,'時間未設定のタスク・支払を別欄');
+assert(d.querySelector('.cal-event-copy').href.startsWith('https://www.notion.so/'),'元Notionリンク');
+const snapshotKey='YOS_DAYSTREAM_WEB_TASK_SNAPSHOT_V1',savedAt=JSON.parse(localStorage.getItem(snapshotKey)).checkedAt;
+let completeCalls=0;w.YOS_DAYSTREAM_TASK_AUTH.complete=async task=>{completeCalls++;return {ok:false,reason:'テスト：保存失敗'}};
+click('.cal-time-row:nth-child(3) .cal-complete');await new Promise(r=>setTimeout(r,0));assert(!JSON.parse(localStorage.getItem(snapshotKey)).items.find(x=>x.title==='不燃ゴミの前日確認').status.includes('完了'),'失敗時に完了へ偽装しない');d.querySelector('dialog[open]').close();
+w.YOS_DAYSTREAM_TASK_AUTH.complete=async task=>({ok:true,item:{...task,status:'完了'}});
+click('.cal-time-row:nth-child(3) .cal-complete');await new Promise(r=>setTimeout(r,0));assert(JSON.parse(localStorage.getItem(snapshotKey)).items.find(x=>x.title==='不燃ゴミの前日確認').status==='完了','読戻し成功時のみ完了表示');assert(JSON.parse(localStorage.getItem(snapshotKey)).checkedAt===savedAt,'完了操作で他の記録の鮮度を偽装しない');d.querySelector('dialog[open]').close();
+click('[aria-label="翌日"]');assert(d.querySelector('#calPeriod').textContent.includes('19日'),'翌日');click('[aria-label="前日"]');
+click('[data-view="month"]');click('[data-area="Self"]');assert(w.YOS_APPROVED_CALENDAR.inspect().view==='month','カレンダーに復帰');assert(d.querySelector('[data-area="Self"]').getAttribute('aria-pressed')==='false','領域OFF状態を維持');click('[data-area="Self"]');
+click('[data-kind="habit"]');assert(d.querySelector('#calSummary .cal-counts').textContent.endsWith('習慣0件'),'習慣だけOFF');click('[data-kind="habit"]');
+click('[aria-label="次の月"]');assert(d.querySelector('#calPeriod').textContent==='2026年12月','月移動');
+click('[aria-label="前の月"]');click('[data-date="2026-11-18"]');
+localStorage.setItem(snapshotKey,JSON.stringify(snapshot));d.getElementById('reload').click();
+if(q.get('view')!=='day')click('[data-view="month"]');
+const qaStyle=d.createElement('style');qaStyle.textContent='#calNotice::before{content:"架空データ · "}';d.head.append(qaStyle);d.querySelector('#calNotice').textContent='デザイン比較用の架空データ · 残高予測は未接続';
+await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));assert(d.documentElement.scrollWidth<=width,'最終描画の横スクロールなし');assert(d.documentElement.scrollHeight<=height+1,'最終描画の縦スクロールなし');out.push('DONE · '+width+'×'+height);out.push(...[...d.querySelectorAll('.cal-daily > *, .cal-time-row')].map(e=>e.className+': '+e.getBoundingClientRect().height+' / '+e.scrollHeight));document.getElementById('result').textContent=out.join('\n');
+}catch(e){document.getElementById('result').textContent=out.join('\n')+'\nERROR '+e.message;}};
+</script>
