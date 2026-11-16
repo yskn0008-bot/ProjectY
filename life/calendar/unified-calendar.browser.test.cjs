@@ -210,6 +210,7 @@ const {chromium,webkit}=require('playwright');
    });
    await authPage.locator('.cal-header .cal-icon-button').nth(1).click();
    await authPage.locator('#calendarTasksRefresh').click();
+   assert.equal(await authPage.locator('#calSettings .calendar-auth').evaluate(el=>el.firstElementChild.id),'calendarAuthHost','Face ID is first in connection settings');
    const face=authPage.locator('.cal-passkey-primary');
    await face.waitFor({state:'visible'});
    assert.equal(await authPage.evaluate(()=>window.__calendarAuthTest.calls.length),0,'Google and network are lazy at first render');
