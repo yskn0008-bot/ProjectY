@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-17T02:28:24+09:00",
+  "updated_at": "2026-11-17T02:37:16+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -12,16 +12,6 @@
     ]
   },
   "inbox": [
-    {
-      "id": "github-pr-630",
-      "title": "PR #630 YOS TODAY/TOMORROW: large widget + read-only life board",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/630",
-      "updated_at": "2026-11-12T17:17:42Z"
-    },
     {
       "id": "github-pr-651",
       "title": "PR #651 YOS Notification v0.3: protected capture, live Notion context and safe iPhone updater",
@@ -41,16 +31,6 @@
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/654",
       "updated_at": "2026-11-13T18:00:26Z"
-    },
-    {
-      "id": "github-pr-685",
-      "title": "PR #685 WIP #683: iPhone screenshot intake validation foundation",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/685",
-      "updated_at": "2026-11-13T01:46:33Z"
     },
     {
       "id": "github-pr-751",
@@ -100,7 +80,7 @@
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/764",
-      "updated_at": "2026-11-16T17:27:49Z"
+      "updated_at": "2026-11-16T17:28:17Z"
     },
     {
       "id": "github-pr-765",
@@ -110,7 +90,27 @@
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/765",
-      "updated_at": "2026-11-16T17:27:51Z"
+      "updated_at": "2026-11-16T17:36:44Z"
+    },
+    {
+      "id": "github-pr-767",
+      "title": "PR #767 YOS Calendar｜Google・Face ID不要の安全なiPhone接続",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/767",
+      "updated_at": "2026-11-16T17:36:39Z"
+    },
+    {
+      "id": "github-pr-768",
+      "title": "PR #768 YOS Calendar｜認証なしで使える端末内カレンダー（Notion原本は保護）",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/768",
+      "updated_at": "2026-11-16T17:35:40Z"
     },
     {
       "id": "github-issue-10",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-16T17:23:15Z"
+      "updated_at": "2026-11-16T17:36:34Z"
     },
     {
       "id": "github-issue-234",
@@ -274,7 +274,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-17T02:28:24+09:00",
+      "last_update": "2026-11-17T02:37:16+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -349,13 +349,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 9件・Open PR 52件を自動同期中",
+      "next_action": "Open Issue 9件・Open PR 54件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-17T02:28:24+09:00",
+      "last_update": "2026-11-17T02:37:16+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -378,7 +378,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-17T02:28:24+09:00",
+      "last_update": "2026-11-17T02:37:16+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -460,5 +460,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "fa9812497eb1324a9ddff85193239a368bf01bd07ade6002e20b0a6b44b5fb5a"
+  "github_snapshot_hash": "8db41c28ef54ec56fa865d222cb146db859db398cce8b2c559c5d2e3f0425f76"
 }
