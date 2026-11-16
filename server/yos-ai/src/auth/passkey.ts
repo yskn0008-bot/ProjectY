@@ -35,6 +35,7 @@ interface CredentialRecord {
   counter: number;
   transports: string[];
   subjectHash: string;
+  generation?: number;
 }
 type Fido = {
   generateRegistrationOptions: typeof generateRegistrationOptions;
@@ -62,7 +63,9 @@ async function credential(redis: RedisCommandClient): Promise<CredentialRecord |
   if (!data) return null;
   const c = JSON.parse(data) as CredentialRecord;
   if (!match(c.id, /^[A-Za-z0-9_-]{20,1000}$/) || !match(c.publicKey, /^[A-Za-z0-9_-]{20,4000}$/) ||
-      !Number.isSafeInteger(c.counter) || c.counter < 0 || typeof c.subjectHash !== 'string' ||
+      !Number.isSafeInteger(c.counter) || c.counter < 0 ||
+      (c.generation !== undefined && (!Number.isSafeInteger(c.generation) || c.generation < 0)) ||
+      typeof c.subjectHash !== 'string' ||
       !Array.isArray(c.transports)) throw Error('Invalid passkey record');
   return c;
 }
@@ -120,8 +123,15 @@ export async function verifyPasskeySession(token: string, redis: RedisCommandCli
   const key = SESSION + await sha(token);
   const data = await redis.command<string | null>(['GET', key]);
   if (!data) return false;
-  const record = JSON.parse(data) as {subjectHash:string;expiresAt:number};
-  return record.subjectHash === subjectHash && Number.isFinite(record.expiresAt) && record.expiresAt > Date.now();
+  const record = JSON.parse(data) as {subjectHash:string;expiresAt:number;generation?:number};
+  if (record.subjectHash !== subjectHash || !Number.isFinite(record.expiresAt) ||
+      record.expiresAt <= Date.now()) return false;
+  // Credential generation is checked for every bearer request. A future
+  // owner-verified recovery rotation can revoke all outstanding sessions
+  // without scanning or deleting every Redis token key.
+  const current = await credential(redis);
+  return !!current && current.subjectHash === subjectHash &&
+    (current.generation ?? 0) === (record.generation ?? 0);
 }
 export function createPasskeyHandler(options: PasskeyOptions): (request: Request) => Promise<Response> {
   const fido: Fido = options.fido || {generateRegistrationOptions, verifyRegistrationResponse, generateAuthenticationOptions, verifyAuthenticationResponse};
@@ -197,7 +207,7 @@ export function createPasskeyHandler(options: PasskeyOptions): (request: Request
         const c=v.registrationInfo.credential;
         const record: CredentialRecord = {
           id:c.id,publicKey:b64url(c.publicKey),counter:c.counter,
-          transports:c.transports||[],subjectHash:options.subjectHash
+          transports:c.transports||[],subjectHash:options.subjectHash,generation:0
         };
         const result=await options.redis.command<string|null>(['SET',CRED_KEY,JSON.stringify(record),'NX']);
         if (result!=='OK') throw Error('Credential already enrolled or storage unavailable');
@@ -234,7 +244,7 @@ export function createPasskeyHandler(options: PasskeyOptions): (request: Request
         if (updated !== 1) throw Error('Credential changed during verification');
         const token='yos_pk_'+random();
         const expiresAt=Date.now()+SESSION_SECONDS*1000;
-        const sessionSaved=await options.redis.command<string|null>(['SET',SESSION+await sha(token),JSON.stringify({subjectHash:options.subjectHash,expiresAt}),'NX','EX',SESSION_SECONDS]);
+        const sessionSaved=await options.redis.command<string|null>(['SET',SESSION+await sha(token),JSON.stringify({subjectHash:options.subjectHash,expiresAt,generation:c.generation??0}),'NX','EX',SESSION_SECONDS]);
         if (sessionSaved!=='OK') throw Error('Session storage failed');
         return secureJson({token,expiresAt},200,origin);
       }

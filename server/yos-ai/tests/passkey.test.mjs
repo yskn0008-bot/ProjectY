@@ -163,3 +163,14 @@ test('origin, unsupported method and malformed JSON stop before enrollment',asyn
  assert.equal((await f.request('auth-options')).status,409);
  assert.equal(f.db.size,0);
 });
+test('session generation invalidation rejects all tokens after credential rotation',async()=>{
+ const f=fixture();await f.enroll();
+ const options=await f.request('auth-options');
+ const login=await f.request('auth-verify',{requestId:options.json.requestId,credential:{id}});
+ assert.equal(login.status,200);
+ assert.equal(await verifyPasskeySession(login.json.token,f.redis,subjectHash),true);
+ const key='yos:calendar:passkey:v1:primary';
+ const saved=JSON.parse(f.db.get(key));
+ f.db.set(key,JSON.stringify({...saved,generation:(saved.generation??0)+1}));
+ assert.equal(await verifyPasskeySession(login.json.token,f.redis,subjectHash),false);
+});

@@ -9,7 +9,11 @@ const token='yos_pk_'+'a'.repeat(64);
 const key='yos:calendar:passkey:v1:session:'+createHash('sha256').update(token).digest('hex');
 
 function fixture(){
- const sessions=new Map([[key,JSON.stringify({subjectHash,expiresAt:Date.now()+60_000})]]);
+ const credentialKey='yos:calendar:passkey:v1:primary';
+ const sessions=new Map([
+  [key,JSON.stringify({subjectHash,expiresAt:Date.now()+60_000})],
+  [credentialKey,JSON.stringify({id:'a'.repeat(32),publicKey:'b'.repeat(100),counter:0,transports:[],subjectHash})]
+ ]);
  const counts={google:0,notion:0};
  const redis={async command([command,redisKey]){
   assert.equal(command,'GET');return sessions.get(redisKey)??null;
@@ -29,7 +33,7 @@ function fixture(){
   }
  });
  const req=(path,auth=token,method='GET')=>new Request('https://existing.example/api/yos/tasks'+path,{method,headers:{Origin:origin,Authorization:'Bearer '+auth}});
- return {h,req,counts,sessions};
+ return {h,req,counts,sessions,credentialKey};
 }
 test('passkey authorizes only explicit Notion GET, never legacy Google projection',async()=>{
  const f=fixture();
@@ -69,4 +73,19 @@ test('authenticated passkey PATCH reaches validation but malformed completions n
  }
  assert.equal(f.counts.notion,0);
  assert.equal(f.counts.google,0);
+});
+test('all previously valid passkey sessions are rejected after credential generation changes',async()=>{
+ const f=fixture();
+ assert.equal((await f.h(f.req('?source=notion'))).status,200);
+ f.sessions.set(f.credentialKey,JSON.stringify({
+  ...JSON.parse(f.sessions.get(f.credentialKey)),generation:1
+ }));
+ assert.equal((await f.h(f.req('?source=notion'))).status,401);
+ assert.equal(f.counts.notion,1);
+});
+test('session bearer without a stored credential is not sufficient to read Notion',async()=>{
+ const f=fixture();
+ f.sessions.delete(f.credentialKey);
+ assert.equal((await f.h(f.req('?source=notion'))).status,401);
+ assert.equal(f.counts.notion,0);
 });
