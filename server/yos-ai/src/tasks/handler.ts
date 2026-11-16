@@ -8,7 +8,7 @@ import {GoogleSheetsClient} from '../sources/google-sheets-client.js';
 import {loadNotionTaskDashboard, completeNotionTask} from '../widget/notion-source.js';
 import {completeHabitOccurrence} from './habit-occurrence.js';
 import type {RedisCommandClient} from '../storage/upstash-rest.js';
-import {verifyPasskeySession, createPasskeyHandler} from '../auth/passkey.js';
+import {verifyPasskeySession, createPasskeyHandler, type NotionPairingConfig} from '../auth/passkey.js';
 import {loadCalendarSources} from './calendar-sources.js';
 import {loadNotionCalendarMoney} from '../widget/morning.js';
 import {allowedOrigin, bearerToken, secureJson, type CorsOptions} from '../api/shared.js';
@@ -56,6 +56,7 @@ export interface CreateTaskDashboardHandlerOptions extends CorsOptions {
   habitRedis?: RedisCommandClient;
   passkeyRedis?: RedisCommandClient;
   passkeySubjectHash?: string;
+  passkeyPairing?: NotionPairingConfig;
   notionDataSourceId?: string;
   fetchImpl?: FetchLike;
 }
@@ -73,15 +74,18 @@ export function createTaskDashboardHandler(options: CreateTaskDashboardHandlerOp
       if (!options.passkeyRedis || !options.passkeySubjectHash) return secureJson({error:'Passkey not configured'},503,origin);
       return createPasskeyHandler({
         allowedOrigins:options.allowedOrigins,allowMissingOrigin:false,
-        redis:options.passkeyRedis,identityVerifier:options.identityVerifier,
-        identityGate:options.identityGate,subjectHash:options.passkeySubjectHash
+        redis:options.passkeyRedis,subjectHash:options.passkeySubjectHash,
+        ...(options.passkeyPairing?{pairing:options.passkeyPairing}:{})
       })(request);
     }
     if (!['GET', 'PATCH'].includes(request.method)) return secureJson({error: 'Method not allowed'}, 405, origin, {Allow:'GET, PATCH, POST, OPTIONS'});
 
+    const source = new URL(request.url).searchParams.get('source');
     try {
       const idToken = bearerToken(request);
       if (idToken.startsWith('yos_pk_')) {
+        // A Calendar passkey cannot authorize the legacy Google projection.
+        if (source !== 'notion') return secureJson({error:'Passkey is limited to Notion tasks'},403,origin);
         if (!options.passkeyRedis || !options.passkeySubjectHash ||
             !(await verifyPasskeySession(idToken,options.passkeyRedis,options.passkeySubjectHash))) {
           throw Error('Invalid passkey session');
@@ -96,7 +100,6 @@ export function createTaskDashboardHandler(options: CreateTaskDashboardHandlerOp
 
     // Explicit opt-in: legacy MY WAY callers retain their Google projection contract.
     // A failed authoritative read must never masquerade as a successful stale fallback.
-    const source = new URL(request.url).searchParams.get('source');
     if (source !== null && source !== 'notion') return secureJson({error: 'Unknown task source'}, 400, origin);
     if (request.method === 'PATCH' && source !== 'notion') return secureJson({error: 'Completion requires Notion source'}, 400, origin);
     if (source === 'notion') {
