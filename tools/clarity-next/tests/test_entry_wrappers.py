@@ -11,12 +11,14 @@ class ClarityEntryWrapperTests(unittest.TestCase):
         cls.text = TEXT.read_text(encoding="utf-8")
         cls.share = SHARE.read_text(encoding="utf-8")
 
-    def test_text_is_thin_wrapper_over_clarity_next(self):
+    def test_text_recovers_through_installed_verified_v3_without_dictation(self):
         self.assertIn("#define name Clarity Text", self.text)
-        self.assertIn("__YOS_CLARITY_TEXT_V1__", self.text)
-        self.assertIn('run("Clarity Next", payload)', self.text)
+        self.assertIn('run("Clarity Voice Pilot v3")', self.text)
+        self.assertNotIn('run("Clarity Next"', self.text)
+        self.assertNotIn("__YOS_CLARITY_TEXT_V1__", self.text)
         self.assertNotIn("askChatGPT", self.text)
         self.assertNotIn("listen(", self.text)
+        self.assertNotIn("prompt(", self.text)
 
     def test_share_is_thin_wrapper_over_clarity_next(self):
         self.assertIn("#define name Clarity Share v4", self.share)
