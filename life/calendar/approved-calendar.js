@@ -69,7 +69,7 @@ function copyLink(e){const url=notionUrl(e),copy=el(url?'a':'button','cal-event-
 function drawDay(){daily.replaceChildren();const entries=rows(selected),fin=el('section','cal-glass cal-finance'),label=el('div','cal-finance-label');label.append(icon('Money'),el('div',null,'収支'));const bal=el('div','cal-balance','残高予定');bal.append(el('b',null,'—'));bal.title='安全に検証できる残高予測の接続なし';fin.append(label,financeLines(entries),bal);const stats=el('div','cal-day-stats');
 for(const [kind,labelName,mark] of [['task','タスク','task'],['schedule','予定','calendar'],['habit','習慣','habit']]){
 const subset=entries.filter(e=>e.type===kind),completed=subset.filter(e=>e.done).length;
-const item=el('div','cal-day-stat');item.dataset.kind=kind;
+const item=el('div','cal-day-stat');item.dataset.statKind=kind;
 item.append(icon(mark),el('span',null,labelName),el('b',null,kind==='schedule'?String(subset.length):completed+'/'+subset.length));
 stats.append(item)
 }
