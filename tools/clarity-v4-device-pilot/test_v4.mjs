@@ -92,9 +92,12 @@ await test('No execution for untrusted AI-invented item text',async()=>{
  const h=harness();const raw='タイマーをセットしない';await h.run1(raw);
  const a=await exec(h,[item('タイマー：3分','timer')],raw);assert.equal(a.operation,'none');assert.match(a.summary,/AI出力が不正/);
 });
-await test('Low confidence holds action',async()=>{
- const h=harness();const raw='タイマー：3分';await h.run1(raw);
- const a=await exec(h,[item(raw,'timer',0.95)],raw);assert.equal(a.operation,'none');
+await test('Low-confidence AI device suggestion is held for mixed requests',async()=>{
+ const h=harness();const raw='タスク：窓を拭く\nタイマー：3分';await h.run1(raw);
+ const a=await exec(h,[item('タスク：窓を拭く','task'),item('タイマー：3分','timer',0.95)],raw);
+ assert.equal(a.operation,'none');
+ assert.equal(h.events.creates,1);
+ assert.match(a.summary,/操作保留/);
 });
 await test('Only one device operation per input; other one holds',async()=>{
  const h=harness();const raw='タイマー：2分\n画面の明るさ：25%';await h.run1(raw);
