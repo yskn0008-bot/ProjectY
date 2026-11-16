@@ -478,6 +478,14 @@ state.items=state.demo?createDemo():(window.YOS_UNIFIED_CALENDAR?.merge([...life
   }
   if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('../../service-worker.js',{scope:'../../',updateViaCache:'none'}).catch(()=>{});
   load(undefined);
+  // Reuse the existing short-lived session with no extra tap after a reload.
+  try{
+    const session=JSON.parse(sessionStorage.getItem('yos_calendar_passkey_session_v1')||'null');
+    if(session&&/^yos_pk_[a-f0-9]{64}$/.test(session.token)&&
+       Number.isFinite(session.expiresAt)&&session.expiresAt>Date.now()){
+      $('calendarTasksRefresh').click();
+    }
+  }catch{sessionStorage.removeItem('yos_calendar_passkey_session_v1')}
 })();
 </script>
 </body>
