@@ -64,8 +64,8 @@ if operation == "start_timer" {
   const minutes = getNumbers(verifiedValue)
   if minutes >= 1 && minutes <= 60 {
     startTimer(qty(minutes, "min"))
-    const ack = text("{itemKey}|start_timer")
-    yosInline(SCRIPT3, ack)
+    const timerAck = text("{itemKey}|start_timer")
+    yosInline(SCRIPT3, timerAck)
   }
 }
 if operation == "set_brightness" {
@@ -75,8 +75,8 @@ if operation == "set_brightness" {
     rawAction("is.workflow.actions.setbrightness", {
       "WFBrightness": "${brightnessRatio}"
     })
-    const ack = text("{itemKey}|set_brightness")
-    yosInline(SCRIPT3, ack)
+    const brightnessAck = text("{itemKey}|set_brightness")
+    yosInline(SCRIPT3, brightnessAck)
   }
 }
 show("{summary}")
