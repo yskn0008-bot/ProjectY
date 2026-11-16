@@ -19,7 +19,7 @@ function clock(e){return e.clock||(/(?:固定予定 |期限 |リマインダー�
 function notionUrl(e){const id=(e.sourceId||'').replace(/^notion-/,'');return /^[a-f0-9]{32}$/.test(id)?'https://www.notion.so/'+id:null}
 let bridge,view='month',selected=key(new Date()),anchor=selected,types=new Set(['schedule','task','habit']),areas=new Set(Object.keys(colors)),query='',pending=false;
 const host=el('main');host.id='approvedCalendar';document.body.append(host);
-const header=el('header','cal-header'),logo=icon('logo');logo.classList.add('cal-logo');const heading=el('div','cal-heading');heading.append(el('h1',null,'YOS CALENDAR'),el('p',null,'統合カレンダー'));header.append(logo,heading,button('cal-icon-button','予定を検索',()=>search.showModal(),'search'),button('cal-icon-button','接続と設定',()=>settings.showModal(),'more'));host.append(header);
+const header=el('header','cal-header'),logo=icon('logo');logo.classList.add('cal-logo');const heading=el('div','cal-heading');heading.append(el('h1',null,'YOS CALENDAR'),el('p',null,'統合カレンダー'));header.append(logo,heading,button('cal-icon-button','予定を検索',()=>search.showModal(),'search'),button('cal-icon-button','接続と設定',()=>{settings.showModal();if($('calendarAuthHost')?.hidden)$('calendarTasksRefresh')?.click()},'more'));host.append(header);
 const filters=el('section','cal-filters');filters.setAttribute('aria-label','表示ON/OFF');host.append(filters);
 for(const t of ['schedule','task','habit']){const b=button('cal-chip',labels[t]+'の表示切替',()=>{types.has(t)?types.delete(t):types.add(t);draw()},t==='schedule'?'calendar':t);b.dataset.kind=t;b.append(el('span',null,labels[t]),el('span','chip-check','✓'));filters.append(b)}
 for(const a of ['Money','Work','Health','Self','Life']){const b=button('cal-chip domain',a+'の表示切替',()=>{areas.has(a)?areas.delete(a):areas.add(a);draw()},a);b.style.setProperty('--accent',colors[a]);b.dataset.area=a;b.append(el('span',null,a));filters.append(b)}
@@ -33,7 +33,7 @@ const nav=el('nav','cal-glass cal-nav');nav.setAttribute('aria-label','カレン
 function sheet(title){const d=el('dialog','cal-sheet');const h=el('div','sheet-head');h.append(el('h2',null,title),button('','閉じる',()=>d.close()));h.lastChild.textContent='閉じる';d.append(h);document.body.append(d);return d}
 const settings=sheet('接続と設定');settings.id='calSettings';
 // Keep the original authenticated/native update elements and listeners intact.
-for(const id of ['sourceOverview'])settings.append($(id));settings.append(document.querySelector('.calendar-auth'));settings.append($('sources'),$('sourceLinks'),$('reload'));
+settings.append(document.querySelector('.calendar-auth'));settings.append($('sourceOverview'),$('sources'),$('sourceLinks'),$('reload'));
 const extraStatus=el('p');extraStatus.id='calExtraStatus';settings.append(extraStatus);
 settings.append(el('p',null,'取得できない情報は表示しません。予定・実績・未確認は原本の区分を保ちます。習慣は選択した日だけ実施記録を保存します。元の繰り返し設定は変更しません。'));
 const filterDialog=sheet('表示ON/OFF');const other=button('','未分類も表示',()=>{areas.has('other')?areas.delete('other'):areas.add('other');other.setAttribute('aria-pressed',String(areas.has('other')));draw()});other.setAttribute('aria-pressed','true');other.textContent='未分類も表示';filterDialog.append(other,el('p',null,'領域が登録されていない項目を、推測でMoneyやLifeへ割り当てません。'));
