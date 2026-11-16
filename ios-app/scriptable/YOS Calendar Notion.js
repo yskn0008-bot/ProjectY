@@ -186,6 +186,8 @@ async function main(){
   const expression='(function(){var data='+json+';data.complete=function(){return Promise.resolve({ok:false,reason:"Notionの元ページで完了してください"})};data.completeHabit=data.complete;window.YOS_APPROVED_CALENDAR.update(data);return window.YOS_APPROVED_CALENDAR.inspect().items.length;})()';
   const count=await view.evaluateJavaScript(expression);
   if(count!==visible.items.length)throw Error('UIへ読み込んだ件数が一致しません');
+  const cells=await view.evaluateJavaScript("document.querySelectorAll('#calGrid .cal-day').length");
+  if(cells!==42)throw Error('月カレンダーの42日付枠を描画できませんでした。黒画面は表示しません');
  }
  await paint(data);
  const close=view.present(true).then(()=>({type:'close'}));
