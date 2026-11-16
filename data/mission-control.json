@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-17T03:38:36+09:00",
+  "updated_at": "2026-11-17T03:40:19+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -21,6 +21,16 @@
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/651",
       "updated_at": "2026-11-16T15:54:43Z"
+    },
+    {
+      "id": "github-pr-759",
+      "title": "PR #759 fix(inbox): recognize real Clarity capture headers without unsafe routing",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/759",
+      "updated_at": "2026-11-16T12:28:26Z"
     },
     {
       "id": "github-pr-762",
@@ -103,16 +113,6 @@
       "updated_at": "2026-11-16T18:16:31Z"
     },
     {
-      "id": "github-pr-772",
-      "title": "PR #772 YOS Calendar｜VercelなしでNotion 6保存先を既存UIに直接反映",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/772",
-      "updated_at": "2026-11-16T18:37:51Z"
-    },
-    {
       "id": "github-issue-10",
       "title": "Issue #10 Mission Control v2：GitHubのIssue・PR・Commitを自動集約する",
       "type": "GitHub Issue",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-16T18:37:25Z"
+      "updated_at": "2026-11-16T18:38:59Z"
     },
     {
       "id": "github-issue-234",
@@ -205,6 +205,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-8a09f912da18",
+      "title": "feat(calendar): direct Notion-to-approved-UI bridge via existing Scriptable",
+      "completed_at": "2026-11-16T18:39:20Z",
+      "result": "GitHub mainへ反映（8a09f91）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/8a09f912da184582ad8b2e01bce809b10ddb1c7d"
+    },
+    {
       "id": "github-commit-d9ac9df21df5",
       "title": "chore(yos-ai): retry deferred approved release (1/4)",
       "completed_at": "2026-11-16T18:21:52Z",
@@ -231,13 +238,6 @@
       "completed_at": "2026-11-16T15:49:49Z",
       "result": "GitHub mainへ反映（caa2088）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/caa20888c764b27ebc29027d9ccc13bc9c055ca4"
-    },
-    {
-      "id": "github-commit-666e97d00f8a",
-      "title": "fix(calendar): approved iPhone PWA cache refresh and offline calendar route",
-      "completed_at": "2026-11-15T10:40:16Z",
-      "result": "GitHub mainへ反映（666e97d）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/666e97d00f8a3a94ea120024c5f86e30152b8f40"
     },
     {
       "id": "complete-002",
@@ -274,7 +274,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-17T03:38:36+09:00",
+      "last_update": "2026-11-17T03:40:19+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -349,13 +349,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 9件・Open PR 58件を自動同期中",
+      "next_action": "Open Issue 9件・Open PR 57件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-17T03:38:36+09:00",
+      "last_update": "2026-11-17T03:40:19+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -378,7 +378,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-17T03:38:36+09:00",
+      "last_update": "2026-11-17T03:40:19+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -460,5 +460,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "5666ea37ba7691f41d2648c05d15bc4b9c06edbed55a6d948573d84c634a67f7"
+  "github_snapshot_hash": "123047d84f8b7eb41da215df20619dc2db823454e19d32df2d40c3c7c86e44f1"
 }
