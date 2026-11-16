@@ -93,7 +93,7 @@ const {chromium,webkit}=require('playwright');
   assert.equal((await page.locator('#glanceExpense').innerText()).trim(),'¥0','planned money is not actual');
   assert.match(await page.locator('#glanceExpenseNote').innerText(),/7,000/,'planned money is labeled planned');
   assert.equal(await page.locator('#calGrid .cal-day').count(),42,'approved six-week month rendered');
-  const selectedDay=await page.evaluate(()=>window.__testDay);
+  const selectedDay=await page.locator('.cal-day.selected').getAttribute('data-date');
   await page.locator('.cal-day[data-date="'+selectedDay+'"]').click();
   assert.equal(await page.locator('#calDaily').isVisible(),true,'date opens separate daily screen');
   assert.equal(await page.locator('.cal-month').isVisible(),false,'month is not stacked with daily');
