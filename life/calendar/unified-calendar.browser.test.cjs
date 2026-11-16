@@ -151,6 +151,42 @@ const {chromium,webkit}=require('playwright');
   await page.waitForFunction(()=>/DONE|ERROR/.test(document.getElementById('result').textContent));
   const habits=await page.locator('#result').innerText();assert.doesNotMatch(habits,/FAIL|ERROR/);assert.equal((habits.match(/PASS /g)||[]).length,5);
   assert.deepEqual(failures,[],'approved render has no runtime exceptions');
+
+  // No identity-provider fixture: the owner can create, finish and remove a
+  // clearly device-only entry. This never claims the item reached Notion.
+  {
+   const localPage=await browser.newPage({viewport:{width:390,height:844},deviceScaleFactor:2});
+   const external=[];
+   localPage.on('request',r=>{if(r.url().includes('project-y-yos-ai.vercel.app')||r.url().includes('accounts.google.com'))external.push(r.url())});
+   await localPage.goto('http://127.0.0.1:4173/life/calendar/',{waitUntil:'domcontentloaded'});
+   const current=await localPage.evaluate(()=>window.YOS_APPROVED_CALENDAR.inspect().selected);
+   await localPage.locator('.cal-header .cal-icon-button').nth(1).click();
+   assert.equal(await localPage.locator('#calendarTasksRefresh').isVisible(),false,'no Google/Face ID login request on default screen');
+   assert.match(await localPage.locator('#notionTasksOpen').getAttribute('href'),/notion\.so\/06e62efb/,'Notion stays available for original edits');
+   await localPage.locator('#calSettings .cal-local-open').click();
+   await localPage.locator('.cal-local-field input[type=text]').fill('端末内の確認タスク');
+   await localPage.locator('.cal-local-field input[type=date]').fill(current);
+   await localPage.locator('.cal-local-save').click();
+   await localPage.locator('[data-view="day"]').click();
+   const localRow=localPage.locator('.cal-untimed-row').filter({hasText:'端末内の確認タスク'});
+   assert.equal(await localRow.count(),1,'newly saved local item renders in own daily screen');
+   assert.match(await localPage.evaluate(()=>JSON.stringify(JSON.parse(localStorage.getItem('YOS_CALENDAR_LOCAL_ENTRIES_V1')))),/端末内の確認タスク/);
+   await localRow.locator('.cal-complete').click();
+   assert.match(await localPage.locator('dialog[open] #calMessage, dialog[open] [role=status]').allTextContents().then(x=>x.join(' ')),/このiPhone内で完了しました/);
+   assert.equal(await localPage.locator('.cal-untimed-row').filter({hasText:'端末内の確認タスク'}).locator('.cal-checkbox.checked').count(),1,'local completion reads back as done');
+   await localPage.locator('dialog[open] .sheet-head button').click();
+   await localPage.locator('.cal-untimed-row').filter({hasText:'端末内の確認タスク'}).locator('.untimed-title').click();
+   localPage.once('dialog',dialog=>dialog.accept());
+   await localPage.locator('dialog[open] .cal-local-delete').click();
+   assert.equal(await localPage.locator('.cal-untimed-row').filter({hasText:'端末内の確認タスク'}).count(),0,'local deletion updates view');
+   assert.deepEqual(external,[],'neither Google nor Face ID nor backend API is called');
+   for(const [width,height] of [[320,667],[390,844],[402,874]]){
+    await localPage.setViewportSize({width,height});
+    assert.equal(await localPage.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false,'login-free app fits '+width+'px');
+   }
+   await localPage.close();
+  }
+
   console.log('YOS unified calendar '+kind+' browser tests PASS');
  }finally{await browser.close()}
 })().catch(e=>{console.error(e);process.exitCode=1});
