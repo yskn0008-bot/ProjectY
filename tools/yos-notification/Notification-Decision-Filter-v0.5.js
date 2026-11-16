@@ -21,7 +21,7 @@ function safeText(value) {
     .replace(/[<>]/g, '')
     .trim();
 }
-function notificationText(modelResponse) {
+function legacyNotificationText(modelResponse) {
   const message = modelText(modelResponse).replace(/^\uFEFF/, '').replace(/\r\n?/g, '\n').trim();
   if (!message || message.length > 10000) return '';
   const lines = message.split('\n').map(line => line.trim()).filter(Boolean);
@@ -55,11 +55,47 @@ function notificationText(modelResponse) {
   ].filter(Boolean).join('\n');
   return summary.slice(0,550);
 }
+// Backward-compatible decision adapter. The existing Shortcut still gets a
+// string; a caller explicitly using yosMode:"structured" receives the status.
+// Invalid output must remain unresolved in Notification Bridge, not SILENT.
+function decisionResult(value) {
+  const raw = modelText(value).replace(/^\uFEFF/u, '').replace(/\r\n?/gu, '\n').trim();
+  const invalid = reason => ({status:'invalid',decision:null,summary:'',reason});
+  if (!raw || raw.length > 10000) return invalid('empty_or_oversized');
+  const lines = raw.split('\n').map(line => line.trim()).filter(Boolean);
+  if (lines[0] === 'YOS_SILENT') {
+    if (lines.slice(1).some(line => /^YOS_(?:ALERT|SILENT)(?:\b|$)/u.test(line)))
+      return invalid('contradictory');
+    return {status:'silent',decision:'YOS_SILENT',summary:'',reason:''};
+  }
+  if (lines[0] !== 'YOS_ALERT') return invalid('unrecognized_header');
+  if (lines.slice(1).some(line => /^YOS_(?:ALERT|SILENT)(?:\b|$)/u.test(line)))
+    return invalid('contradictory');
+  if (/^優先度\s*[:：]/u.test(lines[1] || '')) {
+    const summary = legacyNotificationText(raw);
+    return summary ? {status:'alert',decision:'YOS_ALERT',summary,reason:''} : invalid('invalid_legacy_fields');
+  }
+  if (lines.length < 2 || lines.length > 4) return invalid('missing_or_long_body');
+  const body = lines.slice(1).join(' ').trim();
+  if (!body || body.length > 500) return invalid('missing_or_long_body');
+  if (/^(?:事実|本人への影響|影響|将来のリスク|リスク|次の一手|推奨する次の一手|根拠|優先度)\s*[:：]/u.test(body) ||
+      /YOS_(?:ALERT|SILENT)/u.test(body)) return invalid('ambiguous_format');
+  if (/認証コード|確認コード|ワンタイム|OTP|2FA|verification\s*code|security\s*code/iu.test(raw))
+    return invalid('secret_context');
+  const summary = safeText(body);
+  if (!summary) return invalid('empty_after_sanitization');
+  return {status:'alert',decision:'YOS_ALERT',summary:summary.slice(0,280),reason:''};
+}
+function notificationText(value) {
+  const out = decisionResult(value);
+  return out.status === 'alert' ? out.summary : '';
+}
 // The Scriptable bridge has no side effects other than returning the validated string.
 if (typeof Script !== 'undefined' && typeof args !== 'undefined') {
-  Script.setShortcutOutput(notificationText(args.shortcutParameter));
+  Script.setShortcutOutput(args.shortcutParameter && args.shortcutParameter.yosMode === 'structured'
+    ? decisionResult(args.shortcutParameter) : notificationText(args.shortcutParameter));
   Script.complete();
 }
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { notificationText, safeText, modelText };
+  module.exports = { notificationText, decisionResult, safeText, modelText };
 }
