@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-17T02:43:11+09:00",
+  "updated_at": "2026-11-17T02:47:07+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -31,16 +31,6 @@
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/654",
       "updated_at": "2026-11-13T18:00:26Z"
-    },
-    {
-      "id": "github-pr-751",
-      "title": "PR #751 DAYSTREAM: preserve task drafts through current native Shortcut selection",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/751",
-      "updated_at": "2026-11-13T14:55:03Z"
     },
     {
       "id": "github-pr-753",
@@ -100,7 +90,7 @@
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/767",
-      "updated_at": "2026-11-16T17:42:30Z"
+      "updated_at": "2026-11-16T17:42:54Z"
     },
     {
       "id": "github-pr-768",
@@ -110,7 +100,17 @@
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/768",
-      "updated_at": "2026-11-16T17:39:55Z"
+      "updated_at": "2026-11-16T17:42:38Z"
+    },
+    {
+      "id": "github-pr-769",
+      "title": "PR #769 Clarity v4 pilot｜原文保存＋Notion一括仕分け＋安全なiPhone操作",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/769",
+      "updated_at": "2026-11-16T17:46:41Z"
     },
     {
       "id": "github-issue-10",
@@ -274,7 +274,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-17T02:43:11+09:00",
+      "last_update": "2026-11-17T02:47:07+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -349,13 +349,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 9件・Open PR 54件を自動同期中",
+      "next_action": "Open Issue 9件・Open PR 55件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-17T02:43:11+09:00",
+      "last_update": "2026-11-17T02:47:07+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -378,7 +378,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-17T02:43:11+09:00",
+      "last_update": "2026-11-17T02:47:07+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -460,5 +460,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "a594e190d9a2d80ce54f57ec87047f60df6a034f1f7a3f2d5a26aa5248d6ea53"
+  "github_snapshot_hash": "52685cb9f56ab80dcffc0bb47d6e3d0206640984f09d19ad0a93aeebdf7c5fec"
 }
