@@ -90,8 +90,8 @@
       "id": "calendar-notion",
       "name": "YOS Calendar Notion",
       "path": "ios-app/scriptable/YOS Calendar Notion.js",
-      "commit": "851fb02fbd3f24f573765bdd0621c573efaf4e98",
-      "sha256": "741e2fedb0ca05bfb57a286ae0b06f4aacaf482114bc6758c222a14778724e71"
+      "commit": "b1059366ce7d1aba34548bdc856af59a94cee3f3",
+      "sha256": "b47e19c2e39a199a5827efd00b19ff6f8a03af47cd8d80e5e187203766a29658"
     }
   ]
 }
