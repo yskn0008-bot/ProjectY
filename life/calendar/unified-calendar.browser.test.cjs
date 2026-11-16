@@ -48,6 +48,27 @@ const {chromium,webkit}=require('playwright');
   const timed=page.locator('#glanceScheduleItems .glance-line').filter({hasText:'固定予定テスト'});
   assert.equal((await timed.locator('.line-time').innerText()).trim(),'12:00','Notion fixed event retains Tokyo time');
   assert.match(await page.locator('#glanceTaskItems').innerText(),/面接予定の確認/);
+  // Category task pages reuse the private in-browser Notion snapshot, including
+  // dates that DAYSTREAM cannot schedule. No source update is attempted.
+  await page.locator('.cal-areas-nav').click();
+  assert.equal(await page.locator('#calAreasPanel').isVisible(),true,'domain task page is accessible');
+  await page.locator('#calAreasPanel .cal-area-tabs button').filter({hasText:'Work'}).click();
+  assert.match(await page.locator('#calAreasPanel').innerText(),/面接予定の確認/);
+  await page.locator('#calAreasPanel .cal-area-tabs button').filter({hasText:'Self'}).click();
+  await page.locator('#calAreasPanel .cal-area-add input[aria-label="タスク名"]').fill('一時テストの習慣');
+  await page.locator('#calAreasPanel .cal-area-add select').selectOption('habit');
+  await page.locator('#calAreasPanel .cal-area-add button[type="submit"]').click();
+  const local=page.locator('#calAreasPanel .cal-area-task').filter({hasText:'一時テストの習慣'});
+  assert.equal(await local.count(),1,'added habit appears once');
+  await local.locator('.cal-area-check').click();
+  assert.equal(await local.locator('.cal-area-check').innerText(),'✓','area local completion verified');
+  assert.match(await page.locator('#calAreasPanel').innerText(),/Notion未同期/,'no false Notion sync claim');
+  page.once('dialog',dialog=>dialog.accept());
+  await local.locator('.cal-area-delete').click();
+  assert.equal(await page.locator('#calAreasPanel .cal-area-task').filter({hasText:'一時テストの習慣'}).count(),0);
+  await page.locator('button[data-view="month"]').click();
+  assert.equal(await page.locator('#calGrid').isVisible(),true,'return to original month');
+
   assert.equal(await page.locator('#nativeRefresh').count(),1,'existing Scriptable refresh is available without creating a new installer');
   // Simulate a direct, private on-device read from the existing Scriptable script.
   // The URL fragment must be erased before browser storage is marked successful.
