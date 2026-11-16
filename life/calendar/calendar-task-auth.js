@@ -1,215 +1,206 @@
-/* Calendar-specific derivative of the existing Tasks auth (DAYSTREAM is unchanged). user-initiated reuse of existing YOS Tasks authentication.
- * No automatic login, no Notion/Google API secret in browser files, completion only after an explicit task action.
- * Uses the existing YOS Tasks endpoint and Google client ID with explicit Notion source selection.
- */
+/* YOS Calendar private-Notion device pairing. Never send a Notion secret to the browser.
+ * Auth contract: POST /api/yos/tasks?pair=1. Backend must validate an owner edit
+ * of an unshared Notion verification page before issuing a Notion-only session.
+ * Until then this deliberately fails closed. Existing DAYSTREAM is untouched. */
 (function(root){
- 'use strict';
- const API='https://project-y-yos-ai.vercel.app';
- const SITE='https://yskn0008-bot.github.io';
- const GSI='https://accounts.google.com/gsi/client';
- let initialized=false,initializing=null,currentToken='',googleToken='',passkeyExpiresAt=0,context=null,inflight=null,lastRead=0,completing=false;
- const set=(status,message)=>{if(status)status.textContent=message};
- const STORAGE='yos_calendar_passkey_session_v1';
- const clearSession=()=>{currentToken='';passkeyExpiresAt=0;try{root.sessionStorage?.removeItem(STORAGE)}catch{}};
- const validSession=()=>{
-  if(!currentToken)return false;
-  if(currentToken.startsWith('yos_pk_')&&passkeyExpiresAt<=Date.now()){
-   clearSession();set(context?.status,'接続期限切れです。Face IDで再接続してください');return false;
-  }
-  return true;
- };
- const errorMessage=(e,otherwise)=>{
-  if(e?.name==='AbortError')return '通信がタイムアウトしました。通信状態を確認して再試行してください';
-  if(root.navigator?.onLine===false||e instanceof TypeError)return '通信できません。オフライン時は前回取得分を最新として扱いません';
-  return e instanceof Error?e.message:otherwise;
- };
- const getScript=()=>{
-  if(root.google?.accounts?.id)return Promise.resolve(root.google.accounts.id);
-  return new Promise((resolve,reject)=>{
-   const existing=document.querySelector('script[data-yos-tasks-google]')||document.querySelector('script[src="'+GSI+'"]');
-   const script=existing||document.createElement('script');
-   const timeout=setTimeout(()=>reject(new Error('Google本人確認の読み込みがタイムアウトしました')),15000);
-   const finish=()=>{clearTimeout(timeout);if(root.google?.accounts?.id)resolve(root.google.accounts.id);else reject(new Error('Google本人確認を利用できません'))};
-   script.addEventListener('load',finish,{once:true});
-   script.addEventListener('error',()=>{clearTimeout(timeout);reject(new Error('Google本人確認の読み込みに失敗しました'))},{once:true});
-   if(root.google?.accounts?.id)finish();
-   else if(!existing){script.src=GSI;script.async=true;script.referrerPolicy='strict-origin-when-cross-origin';script.dataset.yosTasksGoogle='1';document.head.append(script)}
-  })
- };
- const timedFetch=(url,opts={})=>{
-  const controller=new AbortController();
-  const timeout=setTimeout(()=>controller.abort(),14000);
-  return fetch(url,{...opts,signal:controller.signal,cache:'no-store',credentials:'omit'}).finally(()=>clearTimeout(timeout))
- };
- async function refresh(force=true){
-  if(!validSession()||!context||completing)return false;
-  if(inflight)return inflight;
-  if(!force&&Date.now()-lastRead<300000)return true;
-  const {status,save}=context;
-  inflight=(async()=>{
-   set(status,'Notion正本の予定・タスクを取得中');
-   try{
-    const url=API+'/api/yos/tasks?source=notion'+(context.includeCalendarMoney===true?'&calendarMoney=1':'');
-    const res=await timedFetch(url,{method:'GET',headers:{Authorization:'Bearer '+currentToken,Accept:'application/json'}});
-    if(!res.ok){if(res.status===401){clearSession();googleToken=''}throw new Error(res.status===401?'本人確認期限切れです。Face IDで再接続してください':'YOS Tasksを取得できません ('+res.status+')')}
-    const result=await res.json();
-    if(result.source!=='notion'||result.complete!==true||!Array.isArray(result.tasks)||result.tasks.length>400)throw new Error('タスク取得内容が不完全です');
-    const snapshot=root.YOS_DAYSTREAM_SOURCES?.fromYosTaskDashboardCache({savedAt:Date.now(),data:result});
-    if(!snapshot)throw new Error('Tasksの内容を安全に検証できません');
-    if(!save(snapshot)){set(status,'端末に保存できません。前回の写しを保持します');return false}
-    lastRead=Date.now();set(status,'Notion正本を更新しました。画面復帰時と利用中5分ごとに再取得します');return true;
-   }catch(e){set(status,errorMessage(e,'Tasksを更新できませんでした')+'。前回取得分は最新と扱いません');return false}
-  })().finally(()=>{inflight=null});
-  return inflight;
- }
- async function complete(item){
-  if(!validSession())return {ok:false,reason:'「接続と設定」からFace IDで接続してください'};
-  if(!item||!/^notion-[a-f0-9]{32}$/.test(item.id)||!item.lastEditedAt||item.habitCycle||item.timing==='fixed')return {ok:false,reason:'原本または習慣の実施回を確認できないため、Notionでは完了にしません'};
-  if(completing)return {ok:false,reason:'別のタスクを保存中です。完了の確認後にもう一度押してください'};
-  completing=true;
-  try{
-   if(inflight)await inflight;
-   if(!validSession())throw Error('本人確認期限切れです。Face IDで再接続してください');
-   const res=await timedFetch(API+'/api/yos/tasks?source=notion',{method:'PATCH',headers:{Authorization:'Bearer '+currentToken,'Content-Type':'application/json',Accept:'application/json'},body:JSON.stringify({action:'complete',pageId:item.id.slice(7),expectedEditedAt:item.lastEditedAt,expectedState:item.status})});
-   if(!res.ok){if(res.status===401){clearSession();googleToken=''}throw Error('Notionの完了を確認できません。更新して状態を確認してください')}
-   const data=await res.json();
-   const snapshot=root.YOS_DAYSTREAM_SOURCES?.fromYosTaskDashboardCache({savedAt:Date.now(),data:{source:data.source,complete:true,tasks:[data.task]}});
-   const updated=snapshot?.items?.[0];
-   if(!updated||updated.id!==item.id||updated.status!=='完了')throw Error('Notionの完了読戻しを確認できません');
-   return {ok:true,item:updated};
-  }catch(e){return {ok:false,reason:errorMessage(e,'結果不明です。Notionを再取得して確認してください')}}finally{completing=false}
- }
- async function completeHabit(item,occurrenceDay){
-  if(!validSession())return {ok:false,reason:'「接続と設定」からFace IDで接続してください'};
-  if(completing)return {ok:false,reason:'保存中です。結果を確認してから操作してください'};
-  if(!item||!/^notion-[a-f0-9]{32}$/.test(item.id)||!item.habitCycle||!item.lastEditedAt||!/^\d{4}-\d{2}-\d{2}$/.test(occurrenceDay))return {ok:false,reason:'習慣の原本と実施日を確認できません'};
-  completing=true;
-  try{
-   if(inflight)await inflight;
-   if(!validSession())throw Error('本人確認期限切れです。Face IDで再接続してください');
-   const res=await timedFetch(API+'/api/yos/tasks?source=notion',{method:'PATCH',headers:{Authorization:'Bearer '+currentToken,'Content-Type':'application/json',Accept:'application/json'},body:JSON.stringify({action:'complete-habit',pageId:item.id.slice(7),occurrenceDay,expectedEditedAt:item.lastEditedAt})});
-   if(!res.ok){if(res.status===401){clearSession();googleToken=''}throw Error(res.status===401?'本人確認期限切れです。Face IDで再接続してください':res.status===503?'実施記録の保存先を利用できません':'習慣の保存結果を確認できません。再取得して確認してください')}
-   const data=await res.json(),e=data.occurrence;
-   if(data.source!=='notion'||!e||!/^[a-f0-9]{32}$/.test(e.id)||e.taskId!==item.id.slice(7)||e.date!==occurrenceDay||e.done!==true)throw Error('実施記録の読戻しを確認できません');
-   return {ok:true,occurrence:e};
-  }catch(e){return {ok:false,reason:errorMessage(e,'習慣を保存できませんでした')}}finally{completing=false}
- }
- const PASSKEY_API=API+'/api/yos/tasks?passkey=1';
- async function passkeyPost(action,data={},token=''){
-  const headers={'Content-Type':'application/json',Accept:'application/json'};
-  if(token)headers.Authorization='Bearer '+token;
-  const res=await timedFetch(PASSKEY_API,{method:'POST',headers,body:JSON.stringify({action,...data})});
-  const result=await res.json().catch(()=>({}));
+'use strict';
+const API='https://project-y-yos-ai.vercel.app',SITE='https://yskn0008-bot.github.io';
+const PAIR=API+'/api/yos/tasks?pair=1';
+let context=null,initialized=false,token='',expires=0,lastRead=0,inflight=null,saving=false,pair=null,connecting=null;
+const msg=(text)=>{if(context?.status)context.status.textContent=text};
+const valid=()=>/^yos_dev_[a-f0-9]{64}$/.test(token)&&expires>Date.now()+15000;
+const clear=()=>{token='';expires=0};
+const fail=(err)=>err?.name==='AbortError'?'通信がタイムアウトしました。再接続してください':
+ root.navigator?.onLine===false||err instanceof TypeError?'通信できません。以前の記録を最新として扱いません':
+ err instanceof Error?err.message:'通信結果を確認できません';
+function ttl(v){
+ if(!/^yos_dev_[a-f0-9]{64}$/.test(v?.token||'')||
+   !Number.isFinite(v?.expiresAt)||v.expiresAt<=Date.now()||v.expiresAt>Date.now()+3660000)
+  throw Error('安全なセッションを確認できません');
+ token=v.token;expires=v.expiresAt;
+}
+function dbOpen(){
+ return new Promise((resolve,reject)=>{
+  if(!root.indexedDB||!root.crypto?.subtle)return reject(Error('端末内に認証情報を安全に保存できません'));
+  const req=root.indexedDB.open('yos-calendar-notion-device-v1',1);
+  req.onupgradeneeded=()=>{if(!req.result.objectStoreNames.contains('keys'))req.result.createObjectStore('keys')};
+  req.onerror=()=>reject(Error('端末の保存領域に接続できません'));
+  req.onsuccess=()=>resolve(req.result);
+ });
+}
+async function savedDevice(operation,value){
+ const db=await dbOpen();
+ return new Promise((resolve,reject)=>{
+  const tx=db.transaction('keys',operation==='get'?'readonly':'readwrite');
+  const store=tx.objectStore('keys');
+  const request=operation==='get'?store.get('primary'):store.put(value,'primary');
+  request.onsuccess=()=>resolve(request.result);
+  request.onerror=()=>reject(Error('端末内の保存結果を確認できません'));
+  tx.oncomplete=()=>db.close();
+  tx.onerror=()=>{db.close();reject(Error('端末の認証情報を書き込めません'))};
+ });
+}
+const b64=buf=>{
+ let text='',bytes=new Uint8Array(buf);
+ for(let i=0;i<bytes.length;i+=4096)text+=String.fromCharCode(...bytes.slice(i,i+4096));
+ return btoa(text).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+};
+async function signed(privateKey,options){
+ if(!/^[a-f0-9]{64}$/.test(options?.requestId||'')||
+    typeof options.challenge!=='string'||options.challenge.length<8||options.challenge.length>256)
+  throw Error('端末認証の確認情報が不完全です');
+ const data=new TextEncoder().encode(['YOS-CALENDAR-DEVICE-V1',SITE,options.requestId,options.challenge].join('\n'));
+ return b64(await root.crypto.subtle.sign({name:'ECDSA',hash:'SHA-256'},privateKey,data));
+}
+async function request(url,method='GET',body=null,auth=''){
+ const abort=new AbortController(),timer=setTimeout(()=>abort.abort(),14000);
+ try{
+  const headers={Accept:'application/json'};
+  if(body!==null)headers['Content-Type']='application/json';
+  if(auth)headers.Authorization='Bearer '+auth;
+  const res=await fetch(url,{method,headers,body:body===null?undefined:JSON.stringify(body),cache:'no-store',credentials:'omit',signal:abort.signal});
+  const data=await res.json().catch(()=>({}));
   if(!res.ok){
-   if(res.status===409&&action==='auth-options'){
-    const e=Error('パスキー未登録です。初回だけGoogle本人確認から登録してください');e.code='NOT_REGISTERED';throw e;
-   }
-   if(res.status===409)throw Error('パスキーが既に登録されています。登録状態を確認してください');
-   if(res.status===403)throw Error('このサイトからはFace IDを開始できません');
-   if(res.status===503)throw Error('Face ID接続は一時的に利用できません。Google本人確認も利用できます');
-   if(res.status===401)throw Error('本人確認を完了できませんでした。もう一度確認してください');
-   throw Error('Face ID接続に失敗しました ('+res.status+')');
+   const error=Error(res.status===405||res.status===404||res.status===501?'端末接続APIはまだサーバーに反映されていません':
+    res.status===403?'このサイトからのアクセスは拒否されています':
+    res.status===409?'接続コードが未確認または期限切れです。Notionの記録を確認してください':
+    res.status===429?'安全のため接続試行を一時停止しています':
+    res.status===401?'端末の接続期限が切れました':
+    'Notionとの接続に失敗しました ('+res.status+')');
+   error.status=res.status;throw error;
   }
-  return result;
- }
- async function faceSignIn(status){
-  if(!root.YOS_CALENDAR_PASSKEY||!root.PublicKeyCredential||!root.navigator?.credentials){
-   const e=Error('この環境でFace IDを利用できません。SafariまたはGoogle本人確認をご利用ください');e.code='UNSUPPORTED';throw e;
-  }
-  set(status,'Face IDで本人確認中');
-  const first=await passkeyPost('auth-options');
-  const proof=await root.YOS_CALENDAR_PASSKEY.authenticate(first.options);
-  const result=await passkeyPost('auth-verify',{requestId:first.requestId,credential:proof});
-  if(!/^yos_pk_[a-f0-9]{64}$/.test(result.token||'')||!Number.isFinite(result.expiresAt)||result.expiresAt<=Date.now())throw Error('安全なセッションを取得できません');
-  currentToken=result.token;passkeyExpiresAt=result.expiresAt;googleToken='';
-  try{root.sessionStorage?.setItem(STORAGE,JSON.stringify({token:result.token,expiresAt:result.expiresAt}))}catch{}
-  set(status,'Face ID確認済み。Notionの最新データを取得します');
-  return refresh(true);
- }
- async function enrollPasskey(status){
-  if(!googleToken)throw Error('初回はGoogle本人確認を行ってください');
-  const first=await passkeyPost('register-options',{},googleToken);
-  const credential=await root.YOS_CALENDAR_PASSKEY.create(first.options);
-  const checked=await passkeyPost('register-verify',{requestId:first.requestId,credential},googleToken);
-  if(checked.registered!==true)throw Error('パスキーの保存を確認できません');
-  set(status,'Face IDの登録完了。ログインを確認します');
-  const ok=await refresh(true);
-  if(ok)set(status,'Face ID登録完了・Notion更新済み。次回からGoogle不要です');
-  return true;
- }
- function setup({host,status,save,includeCalendarMoney=false}){
-  if(initialized){if(validSession())return refresh(true);return Promise.resolve(true)}
-  if(initializing)return initializing;
-  if(location.origin!==SITE){set(status,'YOS正規サイト以外では本人確認を開始しません');return Promise.resolve(false)}
-  if(!host||typeof save!=='function'){set(status,'認証画面の準備ができません');return Promise.resolve(false)}
-  context={status,save,includeCalendarMoney};
-  const face=document.createElement('button');face.type='button';face.textContent='Face IDでNotionを接続';face.className='cal-passkey-primary';
-  const enroll=document.createElement('button');enroll.type='button';enroll.textContent='Face IDをこのiPhoneに登録';enroll.hidden=true;enroll.className='cal-passkey-secondary';
-  const fallback=document.createElement('details');fallback.className='cal-passkey-fallback';
-  const title=document.createElement('summary');title.textContent='初回登録・利用できない場合（Google本人確認）';fallback.append(title);
-  const googleHost=document.createElement('div');fallback.append(googleHost);
-  host.replaceChildren(face,enroll,fallback);
-  let googleReady=false;
-  const loadGoogle=()=>{
-   if(googleReady)return Promise.resolve(true);
-   if(initializing)return initializing;
-   if(!validSession())set(status,'初回・復旧用のGoogle本人確認を準備中です');
-   initializing=Promise.all([
-    timedFetch(API+'/api/yos/public-config',{headers:{Accept:'application/json'}}).then(async response=>{
-     if(!response.ok)throw Error('Google認証設定を取得できません');
-     const data=await response.json();
-     if(typeof data.googleClientId!=='string'||!data.googleClientId.endsWith('.apps.googleusercontent.com')||!/^[a-zA-Z0-9_.-]+$/.test(data.googleClientId))throw Error('Google認証設定が無効です');
-     return data.googleClientId;
-    }),getScript()
-   ]).then(([clientId,googleId])=>{
-    googleId.initialize({client_id:clientId,auto_select:false,itp_support:true,use_fedcm_for_prompt:true,callback:async({credential})=>{
-     const token=typeof credential==='string'?credential.trim():'';
-     if(!token||token.length>8192){set(status,'Google本人確認を完了できませんでした');return}
-     googleToken=token;currentToken=token;passkeyExpiresAt=0;enroll.hidden=false;
-     const ok=await refresh(true);
-     if(ok)set(status,'Google本人確認・Notion更新済み。Face ID登録で次回からGoogle不要です');
-     else if(currentToken===token)set(status,'Google確認情報を受け取りました。Notion取得は未確認ですが、Face ID登録を続けられます');
-    }});
-    googleId.renderButton(googleHost,{type:'standard',theme:'outline',size:'large',text:'continue_with',shape:'rectangular',
-     width:Math.min(300,Math.max(180,Math.floor(googleHost.getBoundingClientRect().width||240)-8))});
-    googleReady=true;return true;
-   }).catch(e=>{
-    if(!validSession())set(status,'Google本人確認を読み込めません。'+errorMessage(e,'通信状態を確認してください'));
-    return false;
-   }).finally(()=>{initializing=null});
-   return initializing;
-  };
-  // No Google script or account prompt unless the owner opens this fallback.
-  fallback.addEventListener('toggle',()=>{if(fallback.open)void loadGoogle()});
-  face.addEventListener('click',async()=>{
-   face.disabled=true;
-   try{await faceSignIn(status)}
-   catch(e){
-    set(status,errorMessage(e,'Face IDの確認に失敗しました'));
-    if(e?.code==='NOT_REGISTERED'||e?.code==='UNSUPPORTED')fallback.open=true;
-   }finally{face.disabled=false}
-  });
-  enroll.addEventListener('click',async()=>{
-   enroll.disabled=true;
-   try{await enrollPasskey(status);enroll.hidden=true;fallback.open=false}
-   catch(e){set(status,errorMessage(e,'Face ID登録を完了できませんでした'))}
-   finally{enroll.disabled=false}
-  });
-  initialized=true;
+  return data;
+ }finally{clearTimeout(timer)}
+}
+const post=(action,input={})=>request(PAIR,'POST',{action,...input});
+async function connect(){
+ if(valid())return true;
+ if(connecting)return connecting;
+ clear();
+ connecting=(async()=>{
   try{
-   const stored=JSON.parse(root.sessionStorage?.getItem(STORAGE)||'null');
-   if(stored&&/^yos_pk_[a-f0-9]{64}$/.test(stored.token)&&Number.isFinite(stored.expiresAt)&&stored.expiresAt>Date.now()&&stored.expiresAt<=Date.now()+43260000){
-    currentToken=stored.token;passkeyExpiresAt=stored.expiresAt;
-    set(status,'保存済みの本人確認を検証中。Notionの最新データを読み込みます');
-    void refresh(true);
-   }else if(stored)clearSession();
-  }catch{clearSession()}
-  if(!currentToken)set(status,'Face IDで接続できます。初回登録だけGoogle本人確認が必要です');
-  if(!root.PublicKeyCredential||!root.navigator?.credentials){face.hidden=true;fallback.open=true}
-  return Promise.resolve(true);
+   const device=await savedDevice('get');
+   if(!device||device.pending||!/^[a-f0-9]{64}$/.test(device.deviceId||'')||!device.privateKey)return false;
+   const options=await post('auth-options',{deviceId:device.deviceId});
+   const signature=await signed(device.privateKey,options);
+   ttl(await post('auth-verify',{deviceId:device.deviceId,requestId:options.requestId,signature}));
+   msg('端末の自動接続を確認しました。Notionの正本を読込中です');
+   return true;
+  }catch(e){msg(fail(e));return false}
+ })().finally(()=>{connecting=null});
+ return connecting;
+}
+async function refresh(force=true){
+ if(!context||saving)return false;
+ if(!force&&valid()&&Date.now()-lastRead<300000)return true;
+ if(inflight)return inflight;
+ inflight=(async()=>{
+  if(!await connect())return false;
+  msg('Notionから予定・タスク・習慣を取得中');
+  try{
+   const url=API+'/api/yos/tasks?source=notion'+(context.includeCalendarMoney?'&calendarMoney=1':'');
+   const data=await request(url,'GET',null,token);
+   if(data.source!=='notion'||data.complete!==true||!Array.isArray(data.tasks)||data.tasks.length>400)throw Error('Notionの取得結果が不完全です');
+   const snap=root.YOS_DAYSTREAM_SOURCES?.fromYosTaskDashboardCache({savedAt:Date.now(),data});
+   if(!snap||context.save(snap)!==true)throw Error('安全な保存と読戻しに失敗しました');
+   lastRead=Date.now();msg('Notion正本を取得済み。次回から自動接続します');return true;
+  }catch(e){if(e.status===401)clear();msg(fail(e)+'。前回取得分は最新として扱いません');return false}
+ })().finally(()=>{inflight=null});
+ return inflight;
+}
+async function write(item,day){
+ if(!await connect())return {ok:false,reason:'Notionの端末接続を確認してください'};
+ if(saving)return {ok:false,reason:'保存中のため、結果確認後に操作してください'};
+ if(!item||!/^notion-[a-f0-9]{32}$/.test(item.id)||!item.lastEditedAt)
+  return {ok:false,reason:'元のNotion記録が確認できません'};
+ const habit=typeof day==='string';
+ if(habit){
+  if(!item.habitCycle||!/^\d{4}-\d{2}-\d{2}$/.test(day))return {ok:false,reason:'習慣の実施日を確認できません'};
+ }else if(item.habitCycle||item.timing==='fixed'){
+  return {ok:false,reason:'原本の完了対象ではありません'};
  }
- root.addEventListener?.('online',()=>{if(validSession())refresh(false)});
- root.document?.addEventListener?.('visibilitychange',()=>{if(root.document.visibilityState==='visible'&&validSession())refresh(false)});
- root.setInterval?.(()=>{if(validSession()&&root.document?.visibilityState==='visible')refresh(false)},60000);
- root.YOS_DAYSTREAM_TASK_AUTH={setup,refresh,complete,completeHabit};
+ saving=true;
+ try{
+  if(inflight)await inflight;
+  if(!await connect())throw Error('端末の認証期限が切れました');
+  const input=habit?
+   {action:'complete-habit',pageId:item.id.slice(7),occurrenceDay:day,expectedEditedAt:item.lastEditedAt}:
+   {action:'complete',pageId:item.id.slice(7),expectedEditedAt:item.lastEditedAt,expectedState:item.status};
+  const result=await request(API+'/api/yos/tasks?source=notion','PATCH',input,token);
+  if(habit){
+   const e=result.occurrence;
+   if(result.source!=='notion'||!e||!/^[a-f0-9]{32}$/.test(e.id)||e.taskId!==item.id.slice(7)||e.date!==day||e.done!==true)
+    throw Error('習慣の実施記録を読み戻せません');
+   return {ok:true,occurrence:e};
+  }
+  const snap=root.YOS_DAYSTREAM_SOURCES?.fromYosTaskDashboardCache({savedAt:Date.now(),data:{source:result.source,complete:true,tasks:[result.task]}});
+  const updated=snap?.items?.[0];
+  if(!updated||updated.id!==item.id||updated.status!=='完了')throw Error('Notionの完了を読み戻せません');
+  return {ok:true,item:updated};
+ }catch(e){if(e.status===401)clear();return {ok:false,reason:fail(e)+'。重複送信せずNotionを再取得して確認してください'}}
+ finally{saving=false}
+}
+async function begin(status,els){
+ els.start.disabled=true;
+ try{
+  const r=await post('pair-options');
+  if(!/^[a-f0-9]{64}$/.test(r?.requestId||'')||!/^[A-Z0-9-]{8,96}$/.test(r?.challenge||'')||
+   !Number.isFinite(r.expiresAt)||r.expiresAt<=Date.now()||r.expiresAt>Date.now()+660000)throw Error('接続情報が正しくありません');
+  const url=new URL(r.notionUrl);
+  if(url.protocol!=='https:'||!['notion.so','www.notion.so','app.notion.com'].includes(url.hostname))throw Error('Notionへのリンクを確認できません');
+  const keys=await root.crypto.subtle.generateKey({name:'ECDSA',namedCurve:'P-256'},false,['sign','verify']);
+  const publicKey=await root.crypto.subtle.exportKey('jwk',keys.publicKey);
+  await savedDevice('put',{pending:true,requestId:r.requestId,privateKey:keys.privateKey});
+  const probe=await savedDevice('get');
+  if(probe?.requestId!==r.requestId||!probe.privateKey)throw Error('端末の保存を確認できません');
+  pair={...r,privateKey:keys.privateKey,publicKey};
+  els.code.textContent=r.challenge;els.copy.hidden=false;els.link.href=url.href;els.link.hidden=false;els.verify.hidden=false;
+  msg('コードをNotionの非公開確認ページへ貼り付け、戻って「接続を確認」を押してください');
+ }catch(e){msg(fail(e))}finally{els.start.disabled=false}
+}
+async function verify(els){
+ els.verify.disabled=true;
+ try{
+  if(!pair||pair.expiresAt<=Date.now())throw Error('コードの期限切れです。再発行してください');
+  const signature=await signed(pair.privateKey,{requestId:pair.requestId,challenge:pair.challenge});
+  const r=await post('pair-verify',{requestId:pair.requestId,publicKey:pair.publicKey,signature});
+  if(!/^[a-f0-9]{64}$/.test(r?.deviceId||''))throw Error('端末の登録結果が不完全です');
+  ttl(r);
+  await savedDevice('put',{deviceId:r.deviceId,privateKey:pair.privateKey,pending:false});
+  if((await savedDevice('get'))?.deviceId!==r.deviceId)throw Error('端末の登録結果を保存できません');
+  pair=null;els.copy.hidden=true;els.link.hidden=true;els.verify.hidden=true;els.start.hidden=true;
+  await refresh(true);
+ }catch(e){msg(fail(e)+'。Notionの記録を確認し、二重登録しないでください')}finally{els.verify.disabled=false}
+}
+function setup({host,status,save,includeCalendarMoney=false}){
+ if(initialized){if(valid())return refresh(true);return connect().then(ok=>ok?refresh(true):false)}
+ if(location.origin!==SITE){if(status)status.textContent='YOS正規サイト以外では接続できません';return Promise.resolve(false)}
+ if(!host||typeof save!=='function'){if(status)status.textContent='接続画面の準備ができません';return Promise.resolve(false)}
+ initialized=true;context={status,save,includeCalendarMoney};
+ const make=(tag,cls,label)=>{const el=document.createElement(tag);el.className=cls||'';el.textContent=label||'';return el};
+ const start=make('button','cal-passkey-primary','Notionと接続する');start.type='button';
+ const guide=make('p','','初回だけ非公開Notionで端末を確認。以降は認証操作なしで自動接続します。');
+ const code=make('strong','cal-device-code','');
+ const copy=make('button','cal-passkey-secondary','コードをコピー');copy.type='button';copy.hidden=true;
+ const link=make('a','cal-passkey-secondary','Notion確認ページを開く');link.hidden=true;link.target='_blank';link.rel='noopener noreferrer';
+ const verifyButton=make('button','cal-passkey-primary','接続を確認');verifyButton.type='button';verifyButton.hidden=true;
+ host.replaceChildren(start,guide,code,copy,link,verifyButton);
+ const els={start,guide,code,copy,link,verify:verifyButton};
+ start.addEventListener('click',()=>void begin(status,els));
+ copy.addEventListener('click',async()=>{
+  try{if(!pair||pair.expiresAt<=Date.now())throw Error('コードの期限切れです');await root.navigator.clipboard.writeText(pair.challenge);msg('コピーしました。非公開Notionページへ貼り付けてください')}
+  catch(e){msg(fail(e)+'。コードを長押ししてコピーしてください')}
+ });
+ verifyButton.addEventListener('click',()=>void verify(els));
+ msg('接続状態を確認中');
+ void connect().then(async ok=>{
+  if(ok){start.hidden=true;guide.hidden=true;await refresh(true)}
+  else msg(root.navigator?.onLine===false?'オフラインです。接続時に通信が必要です':'初回のみ「Notionと接続する」で端末を確認してください');
+ });
+ return Promise.resolve(true);
+}
+root.addEventListener?.('online',()=>{if(context)void refresh(false)});
+root.document?.addEventListener?.('visibilitychange',()=>{if(root.document.visibilityState==='visible'&&context)void refresh(false)});
+root.setInterval?.(()=>{if(root.document?.visibilityState==='visible'&&context)void refresh(false)},300000);
+root.YOS_DAYSTREAM_TASK_AUTH={setup,refresh,complete:item=>write(item),completeHabit:(item,day)=>write(item,day)};
 })(typeof window!=='undefined'?window:globalThis);
