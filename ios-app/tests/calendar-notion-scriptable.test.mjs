@@ -132,6 +132,7 @@ test('new static WebView bootstraps complete approved UI without evaluating its 
  assert.match(r.loaded[0],/42日付枠|42/);
  assert.match(r.loaded[0],/yosBootMessage/);
  assert.ok(!r.loaded[0].includes('test-token'));
+ assert.doesNotMatch(r.loaded[0],/Bearer test-token|Authorization:.*test-token/);
  assert.doesNotMatch(script,/view\.present\(true\)/);
  assert.doesNotMatch(script,/await view\.evaluateJavaScript\(expression\)/);
 });
