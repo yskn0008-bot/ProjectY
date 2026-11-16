@@ -50,7 +50,7 @@ node --test life/calendar/*.test.mjs life/tests/life-calendar-contract.test.mjs 
 - Local Chromium iframe harness: 20 behavioral assertions PASS at final 402×874 month and daily screens. Exercises filters, month/day navigation, chronology, original links, untimed division, failed/successful task completion, freshness preservation and final page overflow. 320×667 also passed the 20 assertions; 390×844 passed the earlier 18-assertion revision before final overflow/typography refinements.
 - Fixture completion is mocked; it does not prove an authenticated real Notion mutation.
 - Browser fixture: `tests/approved-calendar.browser.html` is restricted to localhost and only uses fictional records. It must not be run against a personal-data origin.
-- Original `yos/daystream/**`, installed/native timeline files, service worker, installers and original Notion records have zero changes.
+- Original `yos/daystream/**`, installed/native timeline files, installers and original Notion records have zero changes. The completion follow-up below adds only Calendar runtime files to the root service-worker cache.
 - `git diff --check`: PASS.
 
 ## Remaining gates — not a completed production release
@@ -72,5 +72,7 @@ node --test life/calendar/*.test.mjs life/tests/life-calendar-contract.test.mjs 
 - Validated that production has the Notion token and existing Redis configuration by metadata only; values were not read. Tasks data source env ID was absent, so the production adapter now defaults to the schema-verified existing Tasks source ID. Explicit configured IDs still take precedence.
 - Real Notion habit-edit view contains two unnamed rows with only a recurrence default. The strict Tasks parser now reports those as ignored placeholders, while meaningful unnamed tasks still fail closed. No actual row was modified or deleted.
 - Public config responds successfully with the expected official Origin. This proves public config/Origin handling, not owner-authenticated Notion access. Notion credentials are production-only; they are not copied into preview.
-- Local targeted tests: 88 PASS, including single-date completion, replay recovery, two simultaneous clicks, lost response after create, missing receipt after unknown outcome, wrong parent/version, future-date rejection, recurrence anchors and calendar projection.
+- Local targeted tests: 90 PASS, including single-date completion, replay recovery, two simultaneous clicks, lost response after create, missing receipt after unknown outcome, wrong parent/version, future-date rejection, recurrence anchors and calendar projection.
 - Local Chromium: approved screen 20 assertions PASS, habit receipt UI 5 assertions PASS. Full latest GitHub CI is pending. Existing aggregate Life Money-label smoke remains a separate issue.
+
+- Full local server suite: 396 tests PASS; API syntax checks PASS. Calendar auth parity checks ensure the existing identity/origin/token behavior is unchanged outside the explicit habit action.

@@ -248,3 +248,19 @@ test('same financial identity is counted once; ambiguous cross-source amounts re
  assert.equal(api.merge([e],[{...e,source:'別の写し'}]).length,1);
  const r=api.merge([{...e,id:'local:abc',sourceId:'',source:'Money'}],[e]);assert.equal(r.length,2);assert.equal(r.every(x=>x.reconciliationPending),true);
 });
+
+test('calendar auth preserves the reviewed identity/origin/token implementation outside its new habit action',()=>{
+ const original=readFileSync(new URL('../../yos/daystream/yos-tasks-auth.js',import.meta.url),'utf8');
+ const calendar=readFileSync(new URL('./calendar-task-auth.js',import.meta.url),'utf8');
+ const a=calendar.indexOf(' async function completeHabit('),b=calendar.indexOf(' function setup(',a);
+ const unchanged=(calendar.slice(0,a)+calendar.slice(b)).replace('{setup,refresh,complete,completeHabit};','{setup,refresh,complete};');
+ assert.equal(unchanged.split('\n').slice(1).join('\n'),original.split('\n').slice(1).join('\n'));
+ assert.match(calendar,/action:'complete-habit'/);assert.match(calendar,/expectedEditedAt:item.lastEditedAt/);assert.match(calendar,/e\.taskId!==item\.id\.slice\(7\)/);
+});
+test('calendar PWA cache includes every new runtime module without caching fictional test fixtures',()=>{
+ const sw=readFileSync(new URL('../../service-worker.js',import.meta.url),'utf8');
+ for(const f of ['approved-calendar.css','approved-calendar.js','calendar-task-auth.js','calendar-source-extension.js','habit-calendar.js'])assert.ok(sw.includes("'./life/calendar/"+f+"'"));
+ assert.doesNotMatch(sw,/approved-calendar\.browser\.html|habit-occurrence\.browser\.html/);
+ const production=readFileSync(new URL('../../server/yos-ai/src/tasks/production.ts',import.meta.url),'utf8');
+ assert.match(production,/YOS_NOTION_TASKS_DATA_SOURCE_ID\?\.trim\(\) \|\| '965c6086-32c1-463d-93b4-87a9cb69b3ad'/);
+});
