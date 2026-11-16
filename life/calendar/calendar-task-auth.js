@@ -7,8 +7,22 @@
  const API='https://project-y-yos-ai.vercel.app';
  const SITE='https://yskn0008-bot.github.io';
  const GSI='https://accounts.google.com/gsi/client';
- let initialized=false,initializing=null,currentToken='',googleToken='',context=null,inflight=null,lastRead=0,completing=false;
+ let initialized=false,initializing=null,currentToken='',googleToken='',passkeyExpiresAt=0,context=null,inflight=null,lastRead=0,completing=false;
  const set=(status,message)=>{if(status)status.textContent=message};
+ const STORAGE='yos_calendar_passkey_session_v1';
+ const clearSession=()=>{currentToken='';passkeyExpiresAt=0;try{root.sessionStorage?.removeItem(STORAGE)}catch{}};
+ const validSession=()=>{
+  if(!currentToken)return false;
+  if(currentToken.startsWith('yos_pk_')&&passkeyExpiresAt<=Date.now()){
+   clearSession();set(context?.status,'接続期限切れです。Face IDで再接続してください');return false;
+  }
+  return true;
+ };
+ const errorMessage=(e,otherwise)=>{
+  if(e?.name==='AbortError')return '通信がタイムアウトしました。通信状態を確認して再試行してください';
+  if(root.navigator?.onLine===false||e instanceof TypeError)return '通信できません。オフライン時は前回取得分を最新として扱いません';
+  return e instanceof Error?e.message:otherwise;
+ };
  const getScript=()=>{
   if(root.google?.accounts?.id)return Promise.resolve(root.google.accounts.id);
   return new Promise((resolve,reject)=>{
@@ -28,7 +42,7 @@
   return fetch(url,{...opts,signal:controller.signal,cache:'no-store',credentials:'omit'}).finally(()=>clearTimeout(timeout))
  };
  async function refresh(force=true){
-  if(!currentToken||!context||completing)return false;
+  if(!validSession()||!context||completing)return false;
   if(inflight)return inflight;
   if(!force&&Date.now()-lastRead<300000)return true;
   const {status,save}=context;
@@ -37,67 +51,78 @@
    try{
     const url=API+'/api/yos/tasks?source=notion'+(context.includeCalendarMoney===true?'&calendarMoney=1':'');
     const res=await timedFetch(url,{method:'GET',headers:{Authorization:'Bearer '+currentToken,Accept:'application/json'}});
-    if(!res.ok){if(res.status===401){currentToken='';root.sessionStorage?.removeItem('yos_calendar_passkey_session_v1')}throw new Error(res.status===401?'本人確認の期限が切れています':'YOS Tasksを取得できません ('+res.status+')')}
+    if(!res.ok){if(res.status===401){clearSession();googleToken=''}throw new Error(res.status===401?'本人確認期限切れです。Face IDで再接続してください':'YOS Tasksを取得できません ('+res.status+')')}
     const result=await res.json();
     if(result.source!=='notion'||result.complete!==true||!Array.isArray(result.tasks)||result.tasks.length>400)throw new Error('タスク取得内容が不完全です');
     const snapshot=root.YOS_DAYSTREAM_SOURCES?.fromYosTaskDashboardCache({savedAt:Date.now(),data:result});
     if(!snapshot)throw new Error('Tasksの内容を安全に検証できません');
     if(!save(snapshot)){set(status,'端末に保存できません。前回の写しを保持します');return false}
     lastRead=Date.now();set(status,'Notion正本を更新しました。画面復帰時と利用中5分ごとに再取得します');return true;
-   }catch(e){set(status,(e instanceof Error?e.message:'Tasksを更新できませんでした')+'。前回取得分は最新と扱いません');return false}
+   }catch(e){set(status,errorMessage(e,'Tasksを更新できませんでした')+'。前回取得分は最新と扱いません');return false}
   })().finally(()=>{inflight=null});
   return inflight;
  }
  async function complete(item){
-  if(!currentToken)return {ok:false,reason:'タスクタブの「YOS Tasksを更新」から本人確認してください'};
+  if(!validSession())return {ok:false,reason:'「接続と設定」からFace IDで接続してください'};
   if(!item||!/^notion-[a-f0-9]{32}$/.test(item.id)||!item.lastEditedAt||item.habitCycle||item.timing==='fixed')return {ok:false,reason:'原本または習慣の実施回を確認できないため、Notionでは完了にしません'};
   if(completing)return {ok:false,reason:'別のタスクを保存中です。完了の確認後にもう一度押してください'};
   completing=true;
   try{
    if(inflight)await inflight;
-   if(!currentToken)throw Error('本人確認が必要です');
+   if(!validSession())throw Error('本人確認期限切れです。Face IDで再接続してください');
    const res=await timedFetch(API+'/api/yos/tasks?source=notion',{method:'PATCH',headers:{Authorization:'Bearer '+currentToken,'Content-Type':'application/json',Accept:'application/json'},body:JSON.stringify({action:'complete',pageId:item.id.slice(7),expectedEditedAt:item.lastEditedAt,expectedState:item.status})});
-   if(!res.ok){if(res.status===401){currentToken='';root.sessionStorage?.removeItem('yos_calendar_passkey_session_v1')}throw Error('Notionの完了を確認できません。更新して状態を確認してください')}
+   if(!res.ok){if(res.status===401){clearSession();googleToken=''}throw Error('Notionの完了を確認できません。更新して状態を確認してください')}
    const data=await res.json();
    const snapshot=root.YOS_DAYSTREAM_SOURCES?.fromYosTaskDashboardCache({savedAt:Date.now(),data:{source:data.source,complete:true,tasks:[data.task]}});
    const updated=snapshot?.items?.[0];
    if(!updated||updated.id!==item.id||updated.status!=='完了')throw Error('Notionの完了読戻しを確認できません');
    return {ok:true,item:updated};
-  }catch(e){return {ok:false,reason:e instanceof Error?e.message:'結果不明です。Notionを再取得して確認してください'}}finally{completing=false}
+  }catch(e){return {ok:false,reason:errorMessage(e,'結果不明です。Notionを再取得して確認してください')}}finally{completing=false}
  }
  async function completeHabit(item,occurrenceDay){
-  if(!currentToken)return {ok:false,reason:'「接続と設定」からNotion Tasksを更新してください'};
+  if(!validSession())return {ok:false,reason:'「接続と設定」からFace IDで接続してください'};
   if(completing)return {ok:false,reason:'保存中です。結果を確認してから操作してください'};
   if(!item||!/^notion-[a-f0-9]{32}$/.test(item.id)||!item.habitCycle||!item.lastEditedAt||!/^\d{4}-\d{2}-\d{2}$/.test(occurrenceDay))return {ok:false,reason:'習慣の原本と実施日を確認できません'};
   completing=true;
   try{
    if(inflight)await inflight;
+   if(!validSession())throw Error('本人確認期限切れです。Face IDで再接続してください');
    const res=await timedFetch(API+'/api/yos/tasks?source=notion',{method:'PATCH',headers:{Authorization:'Bearer '+currentToken,'Content-Type':'application/json',Accept:'application/json'},body:JSON.stringify({action:'complete-habit',pageId:item.id.slice(7),occurrenceDay,expectedEditedAt:item.lastEditedAt})});
-   if(!res.ok)throw Error(res.status===503?'実施記録の保存先を利用できません':'習慣の保存結果を確認できません。再取得して確認してください');
+   if(!res.ok){if(res.status===401){clearSession();googleToken=''}throw Error(res.status===401?'本人確認期限切れです。Face IDで再接続してください':res.status===503?'実施記録の保存先を利用できません':'習慣の保存結果を確認できません。再取得して確認してください')}
    const data=await res.json(),e=data.occurrence;
    if(data.source!=='notion'||!e||!/^[a-f0-9]{32}$/.test(e.id)||e.taskId!==item.id.slice(7)||e.date!==occurrenceDay||e.done!==true)throw Error('実施記録の読戻しを確認できません');
    return {ok:true,occurrence:e};
-  }catch(e){return {ok:false,reason:e instanceof Error?e.message:'習慣を保存できませんでした'}}finally{completing=false}
+  }catch(e){return {ok:false,reason:errorMessage(e,'習慣を保存できませんでした')}}finally{completing=false}
  }
  const PASSKEY_API=API+'/api/yos/tasks?passkey=1';
- const STORAGE='yos_calendar_passkey_session_v1';
  async function passkeyPost(action,data={},token=''){
   const headers={'Content-Type':'application/json',Accept:'application/json'};
   if(token)headers.Authorization='Bearer '+token;
   const res=await timedFetch(PASSKEY_API,{method:'POST',headers,body:JSON.stringify({action,...data})});
   const result=await res.json().catch(()=>({}));
-  if(!res.ok)throw Error(res.status===409?'パスキー未登録です。初回だけGoogle本人確認から登録してください':'本人確認を完了できませんでした');
+  if(!res.ok){
+   if(res.status===409&&action==='auth-options'){
+    const e=Error('パスキー未登録です。初回だけGoogle本人確認から登録してください');e.code='NOT_REGISTERED';throw e;
+   }
+   if(res.status===409)throw Error('パスキーが既に登録されています。登録状態を確認してください');
+   if(res.status===403)throw Error('このサイトからはFace IDを開始できません');
+   if(res.status===503)throw Error('Face ID接続は一時的に利用できません。Google本人確認も利用できます');
+   if(res.status===401)throw Error('本人確認を完了できませんでした。もう一度確認してください');
+   throw Error('Face ID接続に失敗しました ('+res.status+')');
+  }
   return result;
  }
  async function faceSignIn(status){
-  if(!root.YOS_CALENDAR_PASSKEY)throw Error('パスキーのプログラムを読み込めません');
+  if(!root.YOS_CALENDAR_PASSKEY||!root.PublicKeyCredential||!root.navigator?.credentials){
+   const e=Error('この環境でFace IDを利用できません。SafariまたはGoogle本人確認をご利用ください');e.code='UNSUPPORTED';throw e;
+  }
   set(status,'Face IDで本人確認中');
   const first=await passkeyPost('auth-options');
   const proof=await root.YOS_CALENDAR_PASSKEY.authenticate(first.options);
   const result=await passkeyPost('auth-verify',{requestId:first.requestId,credential:proof});
   if(!/^yos_pk_[a-f0-9]{64}$/.test(result.token||'')||!Number.isFinite(result.expiresAt)||result.expiresAt<=Date.now())throw Error('安全なセッションを取得できません');
-  currentToken=result.token;googleToken='';
-  root.sessionStorage?.setItem(STORAGE,JSON.stringify({token:result.token,expiresAt:result.expiresAt}));
+  currentToken=result.token;passkeyExpiresAt=result.expiresAt;googleToken='';
+  try{root.sessionStorage?.setItem(STORAGE,JSON.stringify({token:result.token,expiresAt:result.expiresAt}))}catch{}
   set(status,'Face ID確認済み。Notionの最新データを取得します');
   return refresh(true);
  }
@@ -108,7 +133,9 @@
   const checked=await passkeyPost('register-verify',{requestId:first.requestId,credential},googleToken);
   if(checked.registered!==true)throw Error('パスキーの保存を確認できません');
   set(status,'Face IDの登録完了。ログインを確認します');
-  return faceSignIn(status);
+  const ok=await refresh(true);
+  if(ok)set(status,'Face ID登録完了・Notion更新済み。次回からGoogle不要です');
+  return true;
  }
  function setup({host,status,save,includeCalendarMoney=false}){
   if(initialized){if(currentToken)return refresh();return Promise.resolve(true)}
@@ -154,8 +181,8 @@
     .finally(()=>{initializing=null});
   return initializing;
  }
- root.addEventListener?.('online',()=>{if(currentToken)refresh(false)});
- root.document?.addEventListener?.('visibilitychange',()=>{if(root.document.visibilityState==='visible'&&currentToken)refresh(false)});
- root.setInterval?.(()=>{if(currentToken&&root.document?.visibilityState==='visible')refresh(false)},60000);
+ root.addEventListener?.('online',()=>{if(validSession())refresh(false)});
+ root.document?.addEventListener?.('visibilitychange',()=>{if(root.document.visibilityState==='visible'&&validSession())refresh(false)});
+ root.setInterval?.(()=>{if(validSession()&&root.document?.visibilityState==='visible')refresh(false)},60000);
  root.YOS_DAYSTREAM_TASK_AUTH={setup,refresh,complete,completeHabit};
 })(typeof window!=='undefined'?window:globalThis);
