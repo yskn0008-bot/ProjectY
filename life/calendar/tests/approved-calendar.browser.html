@@ -12,10 +12,10 @@ phone.src='/life/calendar/?date='+day+'&view='+'month';
 phone.onload=async()=>{const w=phone.contentWindow,d=w.document,out=[],assert=(condition,message)=>{out.push((condition?'PASS ':'FAIL ')+message);if(!condition)throw Error(message)},click=s=>d.querySelector(s).click();try{
 assert(d.querySelectorAll('.cal-day').length===42,'6週・月曜始まり');
 assert(d.documentElement.scrollWidth<=width,'横スクロールなし '+width+'px');assert(d.documentElement.scrollHeight<=height+1,'ページ縦スクロールなし '+height+'px');
-assert(d.querySelector('.cal-header h1').textContent==='Calendar'&&d.querySelector('.cal-heading .cal-brand').textContent==='YOS','参照画像のミニマル見出し');
+assert(d.querySelector('.cal-header h1').textContent==='Calendar'&&d.querySelector('.cal-heading .cal-brand').textContent==='YOS'&&d.querySelector('.cal-filters').compareDocumentPosition(d.querySelector('.cal-nav'))&Node.DOCUMENT_POSITION_FOLLOWING,'参照画像の見出しとフィルタ位置');
 assert(d.querySelector('[data-date="2026-11-18"] .cal-cell-money').textContent==='−¥12,000','日付マスの支出');
 click('[data-area="Money"]');assert(!d.querySelector('[data-date="2026-11-18"] .cal-cell-money'),'Money OFF');click('[data-area="Money"]');
-click('[data-date="2026-11-18"]');assert(!d.querySelector('#calDaily').hidden&&d.querySelector('.cal-month').hidden,'日付から日別へ');
+click('[data-date="2026-11-18"]');assert(!d.querySelector('#calDaily').hidden&&d.querySelector('.cal-month').hidden&&d.querySelectorAll('.cal-day-stat').length===3,'日付からサマリー付き日別へ');
 const times=[...d.querySelectorAll('.cal-time')].map(x=>x.textContent);assert(times.join(',')==='06:30,07:00,08:00,10:00,19:00,22:00','時刻順（時刻未設定は分離）');
 assert(d.querySelectorAll('.cal-untimed-row').length===3,'時間未設定のタスク・支払を別欄');
 assert(d.querySelector('.cal-event-copy').href.startsWith('https://www.notion.so/'),'元Notionリンク');
