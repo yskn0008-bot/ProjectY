@@ -99,6 +99,36 @@ if(command&&typeof command==='object'&&typeof command.yosAction==='string'&&comm
   if(command.yosAction==='pending'){
     done({ok:true,events:rows.filter(x=>x.aiState!=='complete')});return;
   }
+  if(command.yosAction==='claim-retry'){
+    // Reuse only a CONFIRMED Inbox receipt. Failed, missing, or interrupted
+    // AI calls stay unresolved. Never replay the raw Notion capture here.
+    const now=Date.now(),receipts=receiptsRead(),MIN_AGE=10*60*1000,MAX_RETRIES=2;
+    const unresolved=rows.filter(x=>x.aiState!=='complete');
+    const candidates=unresolved.filter(x=>{
+      const at=Date.parse(x.date),attempts=Number.isSafeInteger(x.retryCount)?x.retryCount:0;
+      if(!Number.isFinite(at)||now-at<MIN_AGE||now-at<0||attempts>=MAX_RETRIES)return false;
+      if(rows.some(y=>y!==x&&y.id===x.id))return false; // legacy 8-char collision
+      if(typeof receipts[x.id]!=='number'||receipts[x.id]<at)return false;
+      if(x.nextRetryAt&&Date.parse(x.nextRetryAt)>now)return false;
+      return true;
+    }).sort((a,b)=>a.date.localeCompare(b.date));
+    const event=candidates[0];
+    if(!event){
+      done({ok:true,event:null,unresolved:unresolved.length,
+        exhausted:unresolved.filter(x=>Number.isSafeInteger(x.retryCount)&&x.retryCount>=MAX_RETRIES).length});
+      return;
+    }
+    const attempt=(event.retryCount||0)+1;
+    event.retryCount=attempt;
+    // Write and read back the claim BEFORE returning AI input. A crash may use
+    // a retry slot, but cannot accidentally generate unlimited duplicate work.
+    event.nextRetryAt=new Date(now+(attempt===1?30:90)*60000).toISOString();
+    journalWrite(rows);
+    done({ok:true,event:{key:event.key,id:event.id,category:event.category,
+      body:event.body,date:event.date,attempt},unresolved:unresolved.length,
+      exhausted:unresolved.filter(x=>Number.isSafeInteger(x.retryCount)&&x.retryCount>=MAX_RETRIES).length});
+    return;
+  }
   if(command.yosAction!=='ai-result')throw Error('未知の復旧操作');
   const event=rows.find(x=>x.key===command.key);
   if(!event)throw Error('元通知の復旧記録がない');
