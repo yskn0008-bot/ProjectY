@@ -79,7 +79,7 @@
    return {ok:true,occurrence:e};
   }catch(e){return {ok:false,reason:e instanceof Error?e.message:'習慣を保存できませんでした'}}finally{completing=false}
  }
- const PASSKEY_API=API+'/api/yos/passkey';
+ const PASSKEY_API=API+'/api/yos/tasks?passkey=1';
  const STORAGE='yos_calendar_passkey_session_v1';
  async function passkeyPost(action,data={},token=''){
   const headers={'Content-Type':'application/json',Accept:'application/json'};
