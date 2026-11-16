@@ -30,7 +30,7 @@ jobs:
           diff -u /tmp/source.before /tmp/source.after
           node test_v4.mjs
           ! grep -R -n -E 'YOS Clarity Voice Pilot v3 Receipts.json|clarity:trial2-|__YOS_V3_RAW__' \
-            01_save_raw.js 02_route.js 03_ack_device.js build_v4.py test_v4.mjs README.md
+            01_save_raw.js 02_route.js 03_ack_device.js build_v4.py Clarity_v4_device_pilot.cherri
 
       - name: Install pinned Cherri v2.3.0
         shell: bash
