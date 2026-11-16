@@ -72,7 +72,9 @@ if operation == "set_brightness" {
   const percent = getNumbers(verifiedValue)
   if percent >= 5 && percent <= 100 {
     const brightnessRatio = percent * 0.01
-    setBrightness(brightnessRatio)
+    rawAction("is.workflow.actions.setbrightness", {
+      "WFBrightness": "${brightnessRatio}"
+    })
     const ack = text("{itemKey}|set_brightness")
     yosInline(SCRIPT3, ack)
   }
