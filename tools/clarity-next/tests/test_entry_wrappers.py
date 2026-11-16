@@ -13,7 +13,7 @@ class ClarityEntryWrapperTests(unittest.TestCase):
 
     def test_text_recovers_through_installed_verified_v3_without_dictation(self):
         self.assertIn("#define name Clarity Text", self.text)
-        self.assertIn('run("Clarity Voice Pilot v3")', self.text)
+        self.assertIn('run("Clarity Voice Pilot v3", noForwardedInput)', self.text)
         self.assertNotIn('run("Clarity Next"', self.text)
         self.assertNotIn("__YOS_CLARITY_TEXT_V1__", self.text)
         self.assertNotIn("askChatGPT", self.text)
