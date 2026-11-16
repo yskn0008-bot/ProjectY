@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-17T01:15:24+09:00",
+  "updated_at": "2026-11-17T01:29:35+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -41,16 +41,6 @@
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/654",
       "updated_at": "2026-11-13T18:00:26Z"
-    },
-    {
-      "id": "github-pr-664",
-      "title": "PR #664 YOS JOURNAL v1.6: on-device Notion relevance + review-gated daily editorial",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/664",
-      "updated_at": "2026-11-11T19:58:32Z"
     },
     {
       "id": "github-pr-685",
@@ -111,6 +101,16 @@
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/762",
       "updated_at": "2026-11-16T16:08:15Z"
+    },
+    {
+      "id": "github-pr-764",
+      "title": "PR #764 YOS Calendar｜Face IDパスキー認証（Googleは初回登録・復旧のみ）",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/764",
+      "updated_at": "2026-11-16T16:29:06Z"
     },
     {
       "id": "github-issue-10",
@@ -274,7 +274,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-17T01:15:24+09:00",
+      "last_update": "2026-11-17T01:29:35+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -349,13 +349,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 9件・Open PR 50件を自動同期中",
+      "next_action": "Open Issue 9件・Open PR 51件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-17T01:15:24+09:00",
+      "last_update": "2026-11-17T01:29:35+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -378,7 +378,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-17T01:15:24+09:00",
+      "last_update": "2026-11-17T01:29:35+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -460,5 +460,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "cbef2ae0578ac7d9ca169a3ed6ccdd199a884f2df9ca87011d4c80a9c3d76a6c"
+  "github_snapshot_hash": "8c3f77adef95462176918fb32273c29ab76fe8e9497ad8020ecd7d5e21cf43dd"
 }
