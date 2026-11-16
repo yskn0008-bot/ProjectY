@@ -1,9 +1,9 @@
 /* Record only a returned native Shortcuts action, not proof of a changed iOS state.
    No network / Notion writes. Re-run and ambiguous receipts remain fail-closed. */
-const FILE='YOS Clarity Voice Pilot v3 Receipts.json';
+const FILE='YOS Clarity Device Pilot v4 Receipts.json';
 function ack(){
   const arg=String(args.shortcutParameter??'');
-  const m=/^inbox:(clarity:trial2-[a-z0-9-]+):([0-9]{2})\|((?:start_timer)|(?:set_brightness))$/u.exec(arg);
+  const m=/^inbox:(clarity:device4-[a-z0-9-]+):([0-9]{2})\|((?:start_timer)|(?:set_brightness))$/u.exec(arg);
   if(!m)return '操作結果記録：入力不正';
   const fm=FileManager.local(),path=fm.joinPath(fm.documentsDirectory(),FILE);
   if(!fm.fileExists(path))return '操作結果記録：原文台帳なし';

@@ -1,11 +1,11 @@
-/* Clarity Voice Pilot v3: one input, multiple independent, verified routes.
+/* Clarity Device Pilot v4: one input, multiple independent, verified routes.
  * AI may only suggest {text,target,confidence} items. It cannot issue commands.
  * Original Inbox capture must already be saved and read back before ANY route.
  * One stable captureId + item index is used as destination sync key.
  */
 const V3={
   tokenKey:'YOS_NOTION_INTEGRATION_TOKEN',
-  file:'YOS Clarity Voice Pilot v3 Receipts.json',
+  file:'YOS Clarity Device Pilot v4 Receipts.json',
   version:'2025-09-03',maxItems:6,
   sources:{
     task:{id:'965c6086-32c1-463d-93b4-87a9cb69b3ad',title:'やること',key:'同期キー'},
@@ -93,7 +93,7 @@ function props(decision,row,key){
 }
 function save(fm,path,rows){const value=JSON.stringify(rows);fm.writeString(path,value);if(fm.readString(path)!==value)throw Error('LOCAL_READBACK_FAIL');}
 async function run(){
-  const text=String(args.shortcutParameter??'');const boundary='\n__YOS_V3_RAW__\n';const idx=text.indexOf(boundary);
+  const text=String(args.shortcutParameter??'');const boundary='\n__YOS_V4_RAW__\n';const idx=text.indexOf(boundary);
   if(idx<1)return 'AI応答の形式が不正。Inbox原文は保護';
   const json=text.slice(0,idx).trim(),raw=text.slice(idx+boundary.length).trim();
   const fm=FileManager.local(),path=fm.joinPath(fm.documentsDirectory(),V3.file);
@@ -128,8 +128,10 @@ async function run(){
     if(item.target==='timer'||item.target==='brightness'){
       const candidate=decideDevice(item);
       if(!candidate){held++;results.push(num+':操作保留');continue;}
-      // A device instruction must occupy its own full input line.
-      // This blocks quoted examples or a command embedded inside unrelated prose.
+      // Reject a standalone command quoted in a longer context or negated elsewhere in the input.
+      if(/(?:実行しない|操作しない|セットしない|しないで|禁止|見本|例文|引用|転記|架空|仮定|サンプル|通知本文|メール本文|共有文)/u.test(row.raw)){
+        held++;results.push(num+':引用・否定などの文脈で保留');continue;
+      }
       if(!row.raw.split(/\r?\n/u).some(line=>line.trim()===trim(item.text))){held++;results.push(num+':独立した操作行でないため保留');continue;}
       // One device dispatch per capture, even after the first action has returned.
       if(row.deviceOperationKey&&row.deviceOperationKey!==num){held++;results.push(num+':同一受付で2件目の操作は保留');continue;}

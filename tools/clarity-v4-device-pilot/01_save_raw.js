@@ -1,11 +1,11 @@
-/* Clarity Voice Pilot v3 — stage 1, Raw First.
+/* Clarity Device Pilot v4 — stage 1, Raw First.
  * Keep existing Clarity unchanged. This code is executed inside Scriptable Run Inline Script.
  * Its one job is durable local capture + verified YOS Inbox append.
  */
 const YOS2={
   inboxId:'3d35ca88-2895-81ef-9dc8-d5f11ff8e213',
   tokenKey:'YOS_NOTION_INTEGRATION_TOKEN',
-  file:'YOS Clarity Voice Pilot v3 Receipts.json',
+  file:'YOS Clarity Device Pilot v4 Receipts.json',
   version:'2025-09-03',maxChars:14000
 };
 function sanitize(v){return String(v??'').replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/g,'').trim();}
@@ -21,7 +21,7 @@ function saveRows(fm,path,rows){
   fm.writeString(path,data);
   if(fm.readString(path)!==data)throw Error('LOCAL_READBACK_FAILED');
 }
-function newCaptureId(){return 'clarity:trial2-'+Date.now().toString(36)+'-'+Math.floor(Math.random()*1e9).toString(36);}
+function newCaptureId(){return 'clarity:device4-'+Date.now().toString(36)+'-'+Math.floor(Math.random()*1e9).toString(36);}
 async function notion(method,path,token,body){
   const req=new Request('https://api.notion.com/v1'+path);
   req.method=method;

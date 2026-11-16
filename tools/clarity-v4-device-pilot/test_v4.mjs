@@ -48,19 +48,19 @@ function harness(options={}){
     await vm.runInContext(`(async function(){ ${code} })()`,c);
     return String(output);
   }
-  return {files,pages,blocks,events,run1:p=>run(script1,p),run2:p=>run(script2,p),run3:p=>run(script3,p),receipts:()=>JSON.parse(files.get('/private/YOS Clarity Voice Pilot v3 Receipts.json')||'[]')};
+  return {files,pages,blocks,events,run1:p=>run(script1,p),run2:p=>run(script2,p),run3:p=>run(script3,p),receipts:()=>JSON.parse(files.get('/private/YOS Clarity Device Pilot v4 Receipts.json')||'[]')};
 }
 
 const cases=[];
 async function test(name,fn){try{await fn();cases.push([name,'PASS']);}catch(e){cases.push([name,'FAIL',e.stack||String(e)]);}}
-const payload=(items,raw)=>JSON.stringify(items)+'\n__YOS_V3_RAW__\n'+raw;
+const payload=(items,raw)=>JSON.stringify(items)+'\n__YOS_V4_RAW__\n'+raw;
 const item=(text,target,confidence=0.99)=>({text,target,confidence});
 const exec=async(h,items,raw)=>JSON.parse(await h.run2(payload(items,raw)));
 await test('Mixed task shopping and timer: two Notion rows + one guarded device dispatch',async()=>{
  const h=harness();const raw='タスク：玄関を掃除する\n買い物リスト：牛乳\nタイマー：3分';
  assert.match(await h.run1(raw),/Inbox保存・読戻し成功/);
  const v=await exec(h,[item('タスク：玄関を掃除する','task'),item('買い物リスト：牛乳','shopping'),item('タイマー：3分','timer')],raw);
- assert.equal(v.operation,'start_timer');assert.equal(v.value,3);assert.match(v.key,/^inbox:clarity:trial2-.+:03$/);
+ assert.equal(v.operation,'start_timer');assert.equal(v.value,3);assert.match(v.key,/^inbox:clarity:device4-.+:03$/);
  assert.equal(h.events.creates,2);assert.equal(h.events.patches,1);
  assert.equal(h.receipts()[0].items['03'].status,'device_dispatching');
 });
@@ -108,7 +108,7 @@ await test('Inbox uncertainty suppresses all action and Notion writes',async()=>
 });
 await test('Malformed JSON stops device operation',async()=>{
  const h=harness();const raw='タイマー：3分';await h.run1(raw);
- const a=JSON.parse(await h.run2('invalid\n__YOS_V3_RAW__\n'+raw));assert.equal(a.operation,'none');
+ const a=JSON.parse(await h.run2('invalid\n__YOS_V4_RAW__\n'+raw));assert.equal(a.operation,'none');
 });
 await test('Two separate captures with same timer text within 24h are deduped by original receipt',async()=>{
  const h=harness();const raw='タイマー：3分';await h.run1(raw);await exec(h,[item(raw,'timer')],raw);
@@ -146,6 +146,20 @@ await test('Bad or forged ack cannot mark action returned',async()=>{
 await test('One capture still does not create duplicate Notion rows on retry',async()=>{
  const h=harness();const raw='タスク：棚を整理する';await h.run1(raw);await exec(h,[item(raw,'task')],raw);
  await h.run1(raw);await exec(h,[item(raw,'task')],raw);assert.equal(h.events.creates,1);
+});
+await test('v4 ledger is independent from installed v3 ledger',async()=>{
+ const h=harness();const v3='/private/YOS Clarity Voice Pilot v3 Receipts.json';const sentinel='[{"do_not_touch":true}]';
+ h.files.set(v3,sentinel);
+ const raw='タイマー：3分';await h.run1(raw);const a=await exec(h,[item(raw,'timer')],raw);
+ assert.equal(a.operation,'start_timer');await h.run3(a.key+'|start_timer');
+ assert.equal(h.files.get(v3),sentinel);
+ assert.match(h.receipts()[0].captureId,/^clarity:device4-/);
+});
+await test('Standalone timer in negated or quoted outer context must hold',async()=>{
+ for(const raw of ['以下の文章は例文です。\nタイマー：3分','タイマー操作は禁止。\nタイマー：3分','通知本文：\nタイマー：3分']){
+  const h=harness();await h.run1(raw);const a=await exec(h,[item('タイマー：3分','timer')],raw);
+  assert.equal(a.operation,'none',raw);
+ }
 });
 for(const [name,s,err] of cases)console.log(`${s} ${name}${err?'\n'+err:''}`);
 console.log(`RESULT ${cases.filter(x=>x[1]==='PASS').length}/${cases.length}`);

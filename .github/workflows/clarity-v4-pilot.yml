@@ -1,0 +1,65 @@
+name: Clarity v4 isolated compile proof
+
+on:
+  pull_request:
+    paths:
+      - 'tools/clarity-v4-device-pilot/**'
+      - '.github/workflows/clarity-v4-pilot.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  static-and-compile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Validate source and generated Cherri
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd tools/clarity-v4-device-pilot
+          sha256sum Clarity_v4_device_pilot.cherri > /tmp/source.before
+          python3 build_v4.py
+          sha256sum Clarity_v4_device_pilot.cherri > /tmp/source.after
+          diff -u /tmp/source.before /tmp/source.after
+          node test_v4.mjs
+          ! grep -R -n -E 'YOS Clarity Voice Pilot v3 Receipts.json|clarity:trial2-|__YOS_V3_RAW__' \
+            01_save_raw.js 02_route.js 03_ack_device.js build_v4.py test_v4.mjs README.md
+
+      - name: Install pinned Cherri v2.3.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          url='https://github.com/electrikmilk/cherri/releases/download/v2.3.0/cherri_linux-x86_64.zip'
+          expected='7ab2c384b7b26e7c72a30a8dfa56f89dae12c4068b7951bc1e3193f3698edbe9'
+          curl -fsSL "$url" -o /tmp/cherri.zip
+          printf '%s  %s\n' "$expected" /tmp/cherri.zip | sha256sum -c -
+          mkdir -p /tmp/cherri
+          unzip -q /tmp/cherri.zip -d /tmp/cherri
+          binary="$(find /tmp/cherri -type f -name cherri -print -quit)"
+          test -n "$binary"
+          sudo install -m 0755 "$binary" /usr/local/bin/cherri
+          cherri --version
+
+      - name: Compile unsigned pilot and audit actions
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd tools/clarity-v4-device-pilot
+          cherri Clarity_v4_device_pilot.cherri --skip-sign --debug
+          test -s './Clarity Voice Pilot v4_unsigned.shortcut'
+          python3 validate_runtime.py './Clarity Voice Pilot v4_unsigned.shortcut'
+
+      - name: Upload unsigned proof for inspection only
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: clarity-v4-unsigned-static-proof
+          path: tools/clarity-v4-device-pilot/Clarity Voice Pilot v4_unsigned.shortcut
+          if-no-files-found: error
