@@ -8,6 +8,7 @@ import {GoogleSheetsClient} from '../sources/google-sheets-client.js';
 import {loadNotionTaskDashboard, completeNotionTask} from '../widget/notion-source.js';
 import {completeHabitOccurrence} from './habit-occurrence.js';
 import type {RedisCommandClient} from '../storage/upstash-rest.js';
+import {verifyPasskeySession} from '../auth/passkey.js';
 import {loadCalendarSources} from './calendar-sources.js';
 import {loadNotionCalendarMoney} from '../widget/morning.js';
 import {allowedOrigin, bearerToken, secureJson, type CorsOptions} from '../api/shared.js';
@@ -53,6 +54,8 @@ export interface CreateTaskDashboardHandlerOptions extends CorsOptions {
   googleWorkloadAuth: GoogleWorkloadAuthConfig;
   notionToken?: string;
   habitRedis?: RedisCommandClient;
+  passkeyRedis?: RedisCommandClient;
+  passkeySubjectHash?: string;
   notionDataSourceId?: string;
   fetchImpl?: FetchLike;
 }
@@ -70,8 +73,15 @@ export function createTaskDashboardHandler(options: CreateTaskDashboardHandlerOp
 
     try {
       const idToken = bearerToken(request);
-      const identity = await options.identityVerifier.verify(idToken);
-      await options.identityGate.authorize(identity);
+      if (idToken.startsWith('yos_pk_')) {
+        if (!options.passkeyRedis || !options.passkeySubjectHash ||
+            !(await verifyPasskeySession(idToken,options.passkeyRedis,options.passkeySubjectHash))) {
+          throw Error('Invalid passkey session');
+        }
+      } else {
+        const identity = await options.identityVerifier.verify(idToken);
+        await options.identityGate.authorize(identity);
+      }
     } catch {
       return secureJson({error: 'Authentication failed'}, 401, origin);
     }

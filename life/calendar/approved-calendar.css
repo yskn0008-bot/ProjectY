@@ -15,3 +15,11 @@ body{background:var(--cal-bg)!important;color:var(--cal-text)}body>.app{display:
 #calSettings .today-btn,#calSettings .tool-links a{background:#173249;color:#f7f8ff;border-color:#526574;text-decoration:none}
 #calSettings .disclosure{background:#112a3e;border-color:#526574}#calSettings .disclosure summary{color:#cadbea}
 #calSettings #calendarAuthStatus,#calSettings #nativeImportStatus{color:#bfd0df!important}
+
+/* Passwordless identity is scoped to the Calendar connection sheet. */
+#calSettings .cal-passkey-primary{display:block;width:100%;background:#155b8a!important;border:1px solid #55c2ff!important;border-radius:12px;color:#fff!important;padding:12px!important;font-size:14px;font-weight:750;min-height:46px}
+#calSettings .cal-passkey-secondary{background:#173952!important;border:1px solid #5d9cba!important;border-radius:12px;color:#fff!important;padding:10px!important}
+#calSettings .cal-passkey-fallback{border:1px solid #546d81;border-radius:12px;padding:10px 12px;width:100%;color:#d9e9f8}
+#calSettings .cal-passkey-fallback summary{cursor:pointer;font-size:12px}
+#calSettings .cal-passkey-fallback>div{margin-top:10px}
+#calSettings .calendar-auth #calendarGoogleButton{display:flex;flex-direction:column;align-items:stretch;gap:10px;min-width:0;width:100%}
