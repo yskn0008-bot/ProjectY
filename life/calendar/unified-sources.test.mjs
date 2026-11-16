@@ -249,13 +249,27 @@ test('same financial identity is counted once; ambiguous cross-source amounts re
  const r=api.merge([{...e,id:'local:abc',sourceId:'',source:'Money'}],[e]);assert.equal(r.length,2);assert.equal(r.every(x=>x.reconciliationPending),true);
 });
 
-test('calendar auth preserves the reviewed identity/origin/token implementation outside its new habit action',()=>{
+test('calendar auth keeps existing Google fallback and secures passkey refresh and writes',()=>{
  const original=readFileSync(new URL('../../yos/daystream/yos-tasks-auth.js',import.meta.url),'utf8');
  const calendar=readFileSync(new URL('./calendar-task-auth.js',import.meta.url),'utf8');
- const a=calendar.indexOf(' async function completeHabit('),b=calendar.indexOf(' function setup(',a);
- const unchanged=(calendar.slice(0,a)+calendar.slice(b)).replace('{setup,refresh,complete,completeHabit};','{setup,refresh,complete};');
- assert.equal(unchanged.split('\n').slice(1).join('\n'),original.split('\n').slice(1).join('\n'));
- assert.match(calendar,/action:'complete-habit'/);assert.match(calendar,/expectedEditedAt:item.lastEditedAt/);assert.match(calendar,/e\.taskId!==item\.id\.slice\(7\)/);
+ const native=readFileSync(new URL('./index.html',import.meta.url),'utf8');
+ assert.match(original,/location\.origin!==SITE/);
+ assert.match(calendar,/location\.origin!==SITE/);
+ assert.match(calendar,/credentials:'omit'/);
+ assert.match(calendar,/cache:'no-store'/);
+ assert.match(calendar,/includeCalendarMoney===true/);
+ assert.match(calendar,/googleId\.initialize/);
+ assert.match(calendar,/googleToken=token;currentToken=token/);
+ assert.match(calendar,/PASSKEY_API=API\+'\/api\/yos\/tasks\?passkey=1'/);
+ assert.match(calendar,/passkeyPost\('auth-verify'/);
+ assert.match(calendar,/passkeyPost\('register-verify'/);
+ assert.match(calendar,/currentToken=result\.token/);
+ assert.match(calendar,/action:'complete-habit'/);
+ assert.match(calendar,/expectedEditedAt:item\.lastEditedAt/);
+ assert.match(calendar,/e\.taskId!==item\.id\.slice\(7\)/);
+ assert.match(native,/YOS_DAYSTREAM_WEB_TASK_SNAPSHOT_V1/);
+ assert.match(native,/snapshot\.origin!=='notion'/);
+ assert.match(native,/snapshot\.complete!==true/);
 });
 test('calendar PWA cache includes every new runtime module without caching fictional test fixtures',()=>{
  const sw=readFileSync(new URL('../../service-worker.js',import.meta.url),'utf8');

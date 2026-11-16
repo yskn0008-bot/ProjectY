@@ -19,7 +19,8 @@
   "dependencies": {
     "@vercel/functions": "^2.2.13",
     "@vercel/oidc": "^3.0.2",
-    "google-auth-library": "10.9.1"
+    "google-auth-library": "10.9.1",
+    "@simplewebauthn/server": "14.1.0"
   },
   "devDependencies": {
     "typescript": "^5.8.3"

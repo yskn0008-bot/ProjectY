@@ -8,6 +8,7 @@ import {GoogleSheetsClient} from '../sources/google-sheets-client.js';
 import {loadNotionTaskDashboard, completeNotionTask} from '../widget/notion-source.js';
 import {completeHabitOccurrence} from './habit-occurrence.js';
 import type {RedisCommandClient} from '../storage/upstash-rest.js';
+import {verifyPasskeySession, createPasskeyHandler} from '../auth/passkey.js';
 import {loadCalendarSources} from './calendar-sources.js';
 import {loadNotionCalendarMoney} from '../widget/morning.js';
 import {allowedOrigin, bearerToken, secureJson, type CorsOptions} from '../api/shared.js';
@@ -53,6 +54,8 @@ export interface CreateTaskDashboardHandlerOptions extends CorsOptions {
   googleWorkloadAuth: GoogleWorkloadAuthConfig;
   notionToken?: string;
   habitRedis?: RedisCommandClient;
+  passkeyRedis?: RedisCommandClient;
+  passkeySubjectHash?: string;
   notionDataSourceId?: string;
   fetchImpl?: FetchLike;
 }
@@ -66,12 +69,27 @@ export function createTaskDashboardHandler(options: CreateTaskDashboardHandlerOp
     const origin = allowedOrigin(request, options);
     if (origin === null) return secureJson({error: 'Origin not allowed'}, 403, null);
     if (request.method === 'OPTIONS') return preflight(origin);
-    if (!['GET', 'PATCH'].includes(request.method)) return secureJson({error: 'Method not allowed'}, 405, origin, {Allow:'GET, PATCH, OPTIONS'});
+    if (request.method === 'POST' && new URL(request.url).searchParams.get('passkey') === '1') {
+      if (!options.passkeyRedis || !options.passkeySubjectHash) return secureJson({error:'Passkey not configured'},503,origin);
+      return createPasskeyHandler({
+        allowedOrigins:options.allowedOrigins,allowMissingOrigin:false,
+        redis:options.passkeyRedis,identityVerifier:options.identityVerifier,
+        identityGate:options.identityGate,subjectHash:options.passkeySubjectHash
+      })(request);
+    }
+    if (!['GET', 'PATCH'].includes(request.method)) return secureJson({error: 'Method not allowed'}, 405, origin, {Allow:'GET, PATCH, POST, OPTIONS'});
 
     try {
       const idToken = bearerToken(request);
-      const identity = await options.identityVerifier.verify(idToken);
-      await options.identityGate.authorize(identity);
+      if (idToken.startsWith('yos_pk_')) {
+        if (!options.passkeyRedis || !options.passkeySubjectHash ||
+            !(await verifyPasskeySession(idToken,options.passkeyRedis,options.passkeySubjectHash))) {
+          throw Error('Invalid passkey session');
+        }
+      } else {
+        const identity = await options.identityVerifier.verify(idToken);
+        await options.identityGate.authorize(identity);
+      }
     } catch {
       return secureJson({error: 'Authentication failed'}, 401, origin);
     }
@@ -180,7 +198,7 @@ function clean(value: string | undefined, max: number): string {
 function preflight(origin: string): Response {
   return new Response(null, {status:204, headers:{
     'Access-Control-Allow-Origin':origin,
-    'Access-Control-Allow-Methods':'GET, PATCH, OPTIONS',
+    'Access-Control-Allow-Methods':'GET, PATCH, POST, OPTIONS',
     'Access-Control-Allow-Headers':'Authorization, Content-Type',
     'Access-Control-Max-Age':'600',
     'Cache-Control':'no-store',

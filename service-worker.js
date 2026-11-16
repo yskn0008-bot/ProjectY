@@ -1,6 +1,6 @@
 'use strict';
 const CACHE_PREFIX='yos-unified-';
-const CACHE_NAME=CACHE_PREFIX+'v46-daystream-approved-calendar-occurrences';
+const CACHE_NAME=CACHE_PREFIX+'v47-daystream-calendar-passkey';
 const STATIC=[
   './','./index.html','./manifest.webmanifest','./assets/yos-icon-180.png','./assets/yos-icon-512.png',
   './yos/daystream/','./yos/daystream/index.html','./yos/daystream/manifest.webmanifest','./yos/daystream/task-wizard.js','./yos/daystream/source-adapters.js','./yos/daystream/yos-tasks-auth.js','./yos/','./yos/index.html','./yos/styles.css','./yos/readability-final.css','./yos/guide.html','./yos/guide.css','./yos/guide.js','./yos/guide-v2.css','./yos/guide-v2.js',
@@ -11,7 +11,7 @@ const STATIC=[
   './yos/money-reference-v1.css','./yos/money-reference-v1.js','./yos/money-dark-v5.css','./yos/money-polish-v2.css','./yos/money-readable-v3.css',
   './yos/assets/home-life-path-watercolor-v1.webp','./yos/assets/journey-valley-watercolor-v1.webp',
   './yos/taxi-live-v1.js','./yos/hj-entry.js','./yos/journey.html','./yos/journey.css','./yos/journey.js',
-  './life/','./life/index.html','./life/calendar/','./life/calendar/index.html','./life/calendar/unified-sources.js','./life/calendar/native-bridge.js','./life/calendar/approved-calendar.css','./life/calendar/approved-calendar.js','./life/calendar/calendar-source-extension.js','./life/calendar/calendar-task-auth.js','./life/calendar/habit-calendar.js','./life/home-v1.css','./life/home-priority-v1.css','./life/readability-final.css',
+  './life/','./life/index.html','./life/calendar/','./life/calendar/index.html','./life/calendar/unified-sources.js','./life/calendar/native-bridge.js','./life/calendar/approved-calendar.css','./life/calendar/approved-calendar.js','./life/calendar/calendar-source-extension.js','./life/calendar/calendar-task-auth.js','./life/calendar/habit-calendar.js','./life/calendar/passkey-client.js','./life/home-v1.css','./life/home-priority-v1.css','./life/readability-final.css',
   './life/yos-suite-v3.js','./life/home-v1.js','./life/daily-flow-orchestrator-v1.js','./life/task-quick-add-v1.js','./life/night-checkin-save-bridge.html','./life/night-checkin-life-bridge-v1.js',
   './yos/hj/','./yos/hj/index.html','./yos/hj/styles.css','./yos/hj/onboarding.css','./yos/hj/scenes.css','./yos/hj/completion.css',
   './yos/runtime-provider-router.js','./data/yos-runtime-providers.json',
@@ -25,6 +25,7 @@ const CRITICAL_NETWORK_FIRST=new Set([
   '/ProjectY/life/calendar/calendar-source-extension.js',
   '/ProjectY/life/calendar/calendar-task-auth.js',
   '/ProjectY/life/calendar/habit-calendar.js',
+  '/ProjectY/life/calendar/passkey-client.js',
   '/ProjectY/yos/money-master-v1.js',
   '/ProjectY/yos/shared-state-v1.js',
   '/ProjectY/yos/task-dashboard.js',
