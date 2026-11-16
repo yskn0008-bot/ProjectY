@@ -169,6 +169,10 @@ const {chromium,webkit}=require('playwright');
     body:'window.google={accounts:{id:{initialize:function(c){window.__testGoogleCallback=c.callback},renderButton:function(host){host.textContent="Google本人確認（テスト）"}}}}'
    }));
    await authPage.addInitScript(()=>{
+    // WebKit headless does not expose biometric APIs; install a deterministic
+    // feature-detection stub before Calendar setup, not after the page loads.
+    Object.defineProperty(window,'PublicKeyCredential',{configurable:true,value:function PublicKeyCredential(){}});
+    Object.defineProperty(navigator,'credentials',{configurable:true,value:{}});
     const oldFetch=window.fetch.bind(window);
     window.__calendarAuthTest={calls:[],registered:true,denyReads:false};
     window.fetch=async(input,options={})=>{
