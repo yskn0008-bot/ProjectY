@@ -99,7 +99,7 @@ await test('Low confidence holds action',async()=>{
 await test('Only one device operation per input; other one holds',async()=>{
  const h=harness();const raw='タイマー：2分\n画面の明るさ：25%';await h.run1(raw);
  const a=await exec(h,[item('タイマー：2分','timer'),item('画面の明るさ：25%','brightness')],raw);
- assert.equal(a.operation,'start_timer');assert.match(a.summary,/2件目の操作保留/);
+ assert.equal(a.operation,'start_timer');assert.match(a.summary,/2件目の操作.*保留/);
  assert.equal(Object.keys(h.receipts()[0].items).length,1);
 });
 await test('Inbox uncertainty suppresses all action and Notion writes',async()=>{
@@ -113,6 +113,19 @@ await test('Malformed JSON stops device operation',async()=>{
 await test('Two separate captures with same timer text within 24h are deduped by original receipt',async()=>{
  const h=harness();const raw='タイマー：3分';await h.run1(raw);await exec(h,[item(raw,'timer')],raw);
  await h.run1(raw);assert.equal(h.receipts().length,1);
+});
+await test('Embedded quoted command is not executed even if AI selects that substring',async()=>{
+ const h=harness();const raw='メモ: 以下は説明文で、タイマー：3分という例です';await h.run1(raw);
+ const a=await exec(h,[item('タイマー：3分','timer')],raw);assert.equal(a.operation,'none');
+ assert.match(a.summary,/独立した操作行でない/);
+});
+await test('After first device action returns, second action cannot dispatch on same capture',async()=>{
+ const h=harness();const raw='タイマー：2分\n画面の明るさ：25%';await h.run1(raw);
+ const items=[item('タイマー：2分','timer'),item('画面の明るさ：25%','brightness')];
+ const a=await exec(h,items,raw);assert.equal(a.operation,'start_timer');
+ await h.run3(a.key+'|start_timer');
+ const b=await exec(h,items,raw);assert.equal(b.operation,'none');
+ assert.match(b.summary,/同一受付で2件目の操作は保留/);
 });
 await test('3 independent Notion routes still work',async()=>{
  const h=harness();const raw='タスク：窓を拭く\n買い物リスト：牛乳\n生活記録：散歩した';await h.run1(raw);
