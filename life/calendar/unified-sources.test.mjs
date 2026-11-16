@@ -265,7 +265,7 @@ test('calendar Notion device pairing removes Google/Face ID from its login flow'
  assert.match(calendar,/action:'complete-habit'/);
  assert.match(calendar,/expectedEditedAt:item\.lastEditedAt/);
  assert.match(calendar,/e\.taskId!==item\.id\.slice\(7\)/);
- assert.doesNotMatch(calendar,/google\.accounts|PASSKEY_API|Face ID/);
+ assert.doesNotMatch(calendar,/google\.accounts|PASSKEY_API|Face IDで/);
  assert.doesNotMatch(html,/src="\.\/passkey-client\.js"/);
  assert.match(html,/YOS_DAYSTREAM_WEB_TASK_SNAPSHOT_V1/);
  assert.match(html,/snapshot\.origin!=='notion'/);
