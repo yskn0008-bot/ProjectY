@@ -66,7 +66,7 @@ const {chromium,webkit}=require('playwright');
   page.once('dialog',dialog=>dialog.accept());
   await local.locator('.cal-area-delete').click();
   assert.equal(await page.locator('#calAreasPanel .cal-area-task').filter({hasText:'一時テストの習慣'}).count(),0);
-  await page.locator('[data-view="month"]').click();
+  await page.locator('button[data-view="month"]').click();
   assert.equal(await page.locator('#calGrid').isVisible(),true,'return to original month');
 
   assert.equal(await page.locator('#nativeRefresh').count(),1,'existing Scriptable refresh is available without creating a new installer');
