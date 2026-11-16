@@ -265,6 +265,26 @@ test('calendar is login-free and imports a high-entropy private device link safe
  assert.match(html,/snapshot\.origin!=='notion'/);
  assert.match(html,/snapshot\.complete!==true/);
 });
+test('private setup link is consumed locally and its fragment removed before storage',()=>{
+ const script=readFileSync(new URL('./calendar-task-auth.js',import.meta.url),'utf8');
+ const token='yos_cd_'+'a'.repeat(64),events=[],values=new Map();
+ const location={hash:'#yos-device='+token,pathname:'/ProjectY/life/calendar/',search:'',origin:'https://yskn0008-bot.github.io'};
+ const browser={
+  location,
+  history:{replaceState(){events.push('erase');location.hash=''}},
+  localStorage:{
+   getItem:k=>values.get(k)||null,
+   setItem(k,v){events.push('store');values.set(k,v)},
+   removeItem:k=>values.delete(k)
+  },
+  document:{addEventListener(){}},addEventListener(){},setInterval(){}
+ };
+ vm.runInNewContext(script,{window:browser,document:browser.document},{timeout:1000});
+ assert.deepEqual(events,['erase','store']);
+ assert.equal(location.hash,'');
+ assert.equal(values.get('yos_calendar_device_key_v1'),token);
+ assert.equal(browser.YOS_DAYSTREAM_TASK_AUTH.hasDeviceKey(),true);
+});
 test('calendar PWA cache includes every new runtime module without caching fictional test fixtures',()=>{
  const sw=readFileSync(new URL('../../service-worker.js',import.meta.url),'utf8');
  for(const f of ['approved-calendar.css','approved-calendar.js','calendar-task-auth.js','calendar-source-extension.js','habit-calendar.js'])assert.ok(sw.includes("'./life/calendar/"+f+"'"));
