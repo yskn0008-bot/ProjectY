@@ -34,6 +34,7 @@ template='''#define name Clarity Voice Pilot v4
 #include 'actions/intelligence'
 #include 'actions/calendar'
 #include 'actions/settings'
+#include 'actions/device'
 
 // Non-destructive v4 pilot: Clarity is the only input. Notion v3 Raw First remains intact.
 // After verified Inbox readback, a guarded device command uses Shortcuts actions,
