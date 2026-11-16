@@ -128,11 +128,17 @@ async function run(){
     if(item.target==='timer'||item.target==='brightness'){
       const candidate=decideDevice(item);
       if(!candidate){held++;results.push(num+':操作保留');continue;}
+      // A device instruction must occupy its own full input line.
+      // This blocks quoted examples or a command embedded inside unrelated prose.
+      if(!row.raw.split(/\r?\n/u).some(line=>line.trim()===trim(item.text))){held++;results.push(num+':独立した操作行でないため保留');continue;}
+      // One device dispatch per capture, even after the first action has returned.
+      if(row.deviceOperationKey&&row.deviceOperationKey!==num){held++;results.push(num+':同一受付で2件目の操作は保留');continue;}
       if(deviceCommand){held++;results.push(num+':2件目の操作保留');continue;}
       if(state.status==='device_action_returned'){duplicates++;results.push(num+':操作済み記録');continue;}
       // Fail closed on any uncertain prior run. No blind re-execution.
       if(state.attempts>0){unknown++;results.push(num+':前回の端末操作結果不明');continue;}
       // Mark dispatch before the iOS action runs; if the shortcut crashes, do NOT replay.
+      row.deviceOperationKey=num;
       row.items[num]={attempts:1,status:'device_dispatching',target:item.target,
         operation:candidate.operation,value:candidate.value};
       try{save(fm,path,rows);}catch(_){return JSON.stringify({operation:'none',value:0,key:'',summary:'端末への操作依頼状態を記録できず安全停止'});}
