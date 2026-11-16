@@ -8,7 +8,7 @@ import {GoogleSheetsClient} from '../sources/google-sheets-client.js';
 import {loadNotionTaskDashboard, completeNotionTask} from '../widget/notion-source.js';
 import {completeHabitOccurrence} from './habit-occurrence.js';
 import type {RedisCommandClient} from '../storage/upstash-rest.js';
-import {verifyPasskeySession, createPasskeyHandler} from '../auth/passkey.js';
+import {verifyPasskeySession, createPasskeyHandler, type NotionPairingConfig} from '../auth/passkey.js';
 import {loadCalendarSources} from './calendar-sources.js';
 import {loadNotionCalendarMoney} from '../widget/morning.js';
 import {allowedOrigin, bearerToken, secureJson, type CorsOptions} from '../api/shared.js';
@@ -56,6 +56,7 @@ export interface CreateTaskDashboardHandlerOptions extends CorsOptions {
   habitRedis?: RedisCommandClient;
   passkeyRedis?: RedisCommandClient;
   passkeySubjectHash?: string;
+  passkeyPairing?: NotionPairingConfig;
   notionDataSourceId?: string;
   fetchImpl?: FetchLike;
 }
@@ -73,8 +74,8 @@ export function createTaskDashboardHandler(options: CreateTaskDashboardHandlerOp
       if (!options.passkeyRedis || !options.passkeySubjectHash) return secureJson({error:'Passkey not configured'},503,origin);
       return createPasskeyHandler({
         allowedOrigins:options.allowedOrigins,allowMissingOrigin:false,
-        redis:options.passkeyRedis,identityVerifier:options.identityVerifier,
-        identityGate:options.identityGate,subjectHash:options.passkeySubjectHash
+        redis:options.passkeyRedis,subjectHash:options.passkeySubjectHash,
+        ...(options.passkeyPairing?{pairing:options.passkeyPairing}:{})
       })(request);
     }
     if (!['GET', 'PATCH'].includes(request.method)) return secureJson({error: 'Method not allowed'}, 405, origin, {Allow:'GET, PATCH, POST, OPTIONS'});

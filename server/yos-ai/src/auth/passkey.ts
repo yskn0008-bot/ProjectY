@@ -1,14 +1,13 @@
 /**
- * Calendar-only WebAuthn passkey. Google identity is required exactly once to
- * enroll. Authentication after that verifies a WebAuthn signature, not Face ID
- * data. The browser never receives the Notion token or credential public key.
+ * Calendar-only WebAuthn passkey. New enrollment uses a verified, owner-edited
+ * private Notion page; no Google sign-in is required. Legacy Tasks Google
+ * authorization remains separate. Notion secrets never reach the browser.
  */
 import {
   generateRegistrationOptions, verifyRegistrationResponse,
   generateAuthenticationOptions, verifyAuthenticationResponse
 } from '@simplewebauthn/server';
-import type {IdentityGate} from './identity-gate.js';
-import type {IdentityVerifier} from './types.js';
+import type {FetchLike} from '../http.js';
 import type {RedisCommandClient} from '../storage/upstash-rest.js';
 import {allowedOrigin, bearerToken, secureJson, type CorsOptions} from '../api/shared.js';
 
@@ -19,6 +18,10 @@ const CHALLENGE = 'yos:calendar:passkey:v1:challenge:';
 const SESSION = 'yos:calendar:passkey:v1:session:';
 const SESSION_SECONDS = 12 * 3600;
 const CHALLENGE_SECONDS = 300;
+const PAIR = 'yos:calendar:passkey:v1:pair:';
+const NOTION_VERSION = '2022-06-28';
+const UUID = /^[a-f0-9]{8}-?[a-f0-9]{4}-?[a-f0-9]{4}-?[a-f0-9]{4}-?[a-f0-9]{12}$/iu;
+const PAIR_CODE = /^YOS-[a-f0-9]{64}$/u;
 const hex = (bytes: Uint8Array) => [...bytes].map(b=>b.toString(16).padStart(2,'0')).join('');
 const random = () => hex(crypto.getRandomValues(new Uint8Array(32)));
 const b64url = (bytes: Uint8Array) => btoa(String.fromCharCode(...bytes)).replaceAll('+','-').replaceAll('/','_').replace(/=+$/,'');
@@ -39,11 +42,19 @@ type Fido = {
   generateAuthenticationOptions: typeof generateAuthenticationOptions;
   verifyAuthenticationResponse: typeof verifyAuthenticationResponse;
 };
+export interface NotionPairingConfig {
+  pageId: string;
+  editorId: string;
+  notionToken: string;
+  // Must be manually audited: Notion API cannot prove that no other users
+  // are granted edit access. Disabled unless ownership and sharing reviewed.
+  auditedPrivate: boolean;
+  fetchImpl?: FetchLike;
+}
 export interface PasskeyOptions extends CorsOptions {
   redis: RedisCommandClient;
-  identityGate: IdentityGate;
-  identityVerifier: IdentityVerifier;
   subjectHash: string;
+  pairing?: NotionPairingConfig;
   fido?: Fido;
 }
 async function credential(redis: RedisCommandClient): Promise<CredentialRecord | null> {
@@ -55,23 +66,50 @@ async function credential(redis: RedisCommandClient): Promise<CredentialRecord |
       !Array.isArray(c.transports)) throw Error('Invalid passkey record');
   return c;
 }
-async function requireGoogle(request: Request, options: PasskeyOptions): Promise<void> {
-  const id = await options.identityVerifier.verify(bearerToken(request));
-  const account = await options.identityGate.authorize(id);
-  if (account.subjectHash !== options.subjectHash) throw Error('Owner mismatch');
+function pairingAllowed(pairing: NotionPairingConfig | undefined): pairing is NotionPairingConfig {
+  return !!pairing && pairing.auditedPrivate === true &&
+    UUID.test(pairing.pageId) && UUID.test(pairing.editorId) && !!pairing.notionToken.trim();
+}
+async function verifyNotionEditorCode(config: NotionPairingConfig, code: string, startedAt: number) {
+  // Only server-side reads. No integration token, private page blocks or
+  // credential key material are returned to the unauthenticated client.
+  const f: FetchLike = config.fetchImpl ?? fetch;
+  const headers = {Authorization:'Bearer '+config.notionToken, 'Notion-Version':NOTION_VERSION};
+  const page = await f('https://api.notion.com/v1/pages/'+config.pageId,{headers});
+  if (!page.ok) throw Error('Notion page is not accessible');
+  const pageJson: any = await page.json();
+  if (pageJson?.object !== 'page' ||
+      String(pageJson.id||'').replaceAll('-','').toLowerCase()!==config.pageId.replaceAll('-','').toLowerCase() ||
+      pageJson.public_url !== null || pageJson.archived===true || pageJson.in_trash===true) {
+    throw Error('Pairing page is not confirmed private');
+  }
+  const response = await f('https://api.notion.com/v1/blocks/'+config.pageId+'/children?page_size=100',{headers});
+  if (!response.ok) throw Error('Notion blocks are not accessible');
+  const content: any = await response.json();
+  if (content?.has_more !== false || !Array.isArray(content.results) || content.results.length>100)
+    throw Error('Notion pairing block set is not complete');
+  const matched = content.results.filter((b:any)=>{
+    if (b?.type!=='paragraph' || b.archived===true || b.in_trash===true ||
+        String(b.last_edited_by?.id||'').replaceAll('-','').toLowerCase()!==config.editorId.replaceAll('-','').toLowerCase() ||
+        typeof b.last_edited_time!=='string' || !Array.isArray(b.paragraph?.rich_text)) return false;
+    const editedAt=Date.parse(b.last_edited_time);
+    if (!Number.isFinite(editedAt) || editedAt + 30000 < startedAt) return false;
+    return b.paragraph.rich_text.map((x:any)=>x?.plain_text).join('')===code;
+  });
+  if (matched.length!==1) throw Error('Owner-edited pairing proof is unavailable');
 }
 async function takeChallenge(redis: RedisCommandClient, requestId: unknown, kind: string) {
   if (!match(requestId, /^[a-f0-9]{64}$/)) throw Error('Invalid challenge ID');
   const data = await redis.command<string | null>(['GETDEL', CHALLENGE + requestId]);
   if (!data) throw Error('Challenge expired or used');
-  const saved = JSON.parse(data) as {challenge:string;kind:string};
+  const saved = JSON.parse(data) as {challenge:string;kind:string;mode?:string};
   if (saved.kind !== kind || !match(saved.challenge, /^[A-Za-z0-9_-]{30,150}$/)) throw Error('Challenge mismatch');
-  return saved.challenge;
+  return saved;
 }
-async function saveChallenge(redis: RedisCommandClient, challenge: string, kind: string) {
+async function saveChallenge(redis: RedisCommandClient, challenge: string, kind: string, mode=kind) {
   const requestId = random();
   const stored = await redis.command<string | null>(
-    ['SET', CHALLENGE + requestId, JSON.stringify({challenge,kind}), 'NX', 'EX', CHALLENGE_SECONDS]
+    ['SET', CHALLENGE + requestId, JSON.stringify({challenge,kind,mode}), 'NX', 'EX', CHALLENGE_SECONDS]
   );
   if (stored !== 'OK') throw Error('Challenge storage unavailable');
   return requestId;
@@ -105,34 +143,64 @@ export function createPasskeyHandler(options: PasskeyOptions): (request: Request
       if (!body || typeof body !== 'object') throw Error();
     } catch {return secureJson({error:'Invalid request'},400,origin);}
     try {
-      if (body.action === 'register-options') {
-        await requireGoogle(request,options);
+      if (body.action === 'pair-start') {
+        if (!pairingAllowed(options.pairing))
+          return secureJson({error:'Notion pairing is not yet configured and verified'},503,origin);
         if (await credential(options.redis)) return secureJson({error:'Passkey already enrolled'},409,origin);
-        const registration = await fido.generateRegistrationOptions({
+        const requestId=random(),code='YOS-'+random(),startedAt=Date.now();
+        const ok=await options.redis.command<string|null>([
+          'SET',PAIR+requestId,JSON.stringify({codeHash:await sha(code),startedAt,owner:options.subjectHash}),
+          'NX','EX',CHALLENGE_SECONDS
+        ]);
+        if (ok!=='OK') throw Error('Pairing challenge unavailable');
+        return secureJson({requestId,code,expiresIn:CHALLENGE_SECONDS,
+          pageUrl:'https://www.notion.so/'+options.pairing.pageId.replaceAll('-','')},200,origin);
+      }
+      if (body.action === 'register-options') {
+        if (!pairingAllowed(options.pairing))
+          return secureJson({error:'Notion pairing is not yet configured and verified'},503,origin);
+        if (await credential(options.redis)) return secureJson({error:'Passkey already enrolled'},409,origin);
+        if (!match(body.pairRequestId,/^[a-f0-9]{64}$/) || !match(body.pairCode,PAIR_CODE))
+          throw Error('Invalid pairing proof');
+        const pairKey=PAIR+body.pairRequestId;
+        const saved=await options.redis.command<string|null>(['GET',pairKey]);
+        if (!saved) throw Error('Pairing challenge expired');
+        const pair=JSON.parse(saved) as {codeHash:string;startedAt:number;owner:string};
+        if (pair.owner!==options.subjectHash || pair.codeHash!==await sha(body.pairCode) ||
+            !Number.isFinite(pair.startedAt) || pair.startedAt>Date.now()+30000 ||
+            Date.now()-pair.startedAt>CHALLENGE_SECONDS*1000)
+          throw Error('Pairing proof does not match');
+        await verifyNotionEditorCode(options.pairing,body.pairCode,pair.startedAt);
+        // Consume only after owner edit verified, atomically. No replay.
+        const consumed=await options.redis.command<string|null>(['GETDEL',pairKey]);
+        if (consumed!==saved) throw Error('Pairing proof was consumed or replaced');
+        const registration=await fido.generateRegistrationOptions({
           rpName:'YOS Calendar',rpID:RP_ID,userName:'YOS Owner',
           userID:new TextEncoder().encode(options.subjectHash),attestationType:'none',
           supportedAlgorithmIDs:[-7,-257],
           authenticatorSelection:{residentKey:'required',userVerification:'required'}
         });
-        const requestId = await saveChallenge(options.redis,registration.challenge,'register');
+        const requestId=await saveChallenge(options.redis,registration.challenge,'register','notion');
         return secureJson({requestId,options:registration},200,origin);
       }
       if (body.action === 'register-verify') {
-        await requireGoogle(request,options);
-        const challenge=await takeChallenge(options.redis,body.requestId,'register');
+        if (!pairingAllowed(options.pairing))
+          return secureJson({error:'Notion pairing is not yet configured and verified'},503,origin);
         if (await credential(options.redis)) return secureJson({error:'Passkey already enrolled'},409,origin);
+        const saved=await takeChallenge(options.redis,body.requestId,'register');
+        if (saved.mode!=='notion') throw Error('Enrollment proof was not verified');
         const v=await fido.verifyRegistrationResponse({
-          response:body.credential,expectedChallenge:challenge,expectedOrigin:RP_ORIGIN,expectedRPID:RP_ID,
+          response:body.credential,expectedChallenge:saved.challenge,expectedOrigin:RP_ORIGIN,expectedRPID:RP_ID,
           requireUserVerification:true,supportedAlgorithmIDs:[-7,-257]
         });
         if (!v.verified || !v.registrationInfo?.credential) throw Error('Unverified registration');
         const c=v.registrationInfo.credential;
-        const saved: CredentialRecord = {
+        const record: CredentialRecord = {
           id:c.id,publicKey:b64url(c.publicKey),counter:c.counter,
           transports:c.transports||[],subjectHash:options.subjectHash
         };
-        const result=await options.redis.command<string|null>(['SET',CRED_KEY,JSON.stringify(saved),'NX']);
-        if (result !== 'OK') throw Error('Credential exists or storage unavailable');
+        const result=await options.redis.command<string|null>(['SET',CRED_KEY,JSON.stringify(record),'NX']);
+        if (result!=='OK') throw Error('Credential already enrolled or storage unavailable');
         return secureJson({registered:true},200,origin);
       }
       if (body.action === 'auth-options') {
@@ -149,7 +217,7 @@ export function createPasskeyHandler(options: PasskeyOptions): (request: Request
         const c=await credential(options.redis);
         if (!c || c.subjectHash!==options.subjectHash || body.credential?.id !== c.id) throw Error('Credential not registered');
         const v=await fido.verifyAuthenticationResponse({
-          response:body.credential,expectedChallenge:challenge,expectedOrigin:RP_ORIGIN,expectedRPID:RP_ID,
+          response:body.credential,expectedChallenge:challenge.challenge,expectedOrigin:RP_ORIGIN,expectedRPID:RP_ID,
           requireUserVerification:true,
           credential:{id:c.id,publicKey:fromB64(c.publicKey),counter:c.counter,transports:c.transports as any}
         });

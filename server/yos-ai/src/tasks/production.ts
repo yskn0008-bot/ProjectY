@@ -28,6 +28,17 @@ export function createProductionTaskDashboard(options: CreateProductionTaskDashb
     identityGate,
     googleWorkloadAuth: config.googleWorkloadAuth,
     ...(passkeyRedis?{habitRedis:passkeyRedis,passkeyRedis,passkeySubjectHash:config.allowedSubjectHash}:{}),
+    ...(options.environment.YOS_PASSKEY_PAIRING_PRIVATE_AUDITED==='true' &&
+        options.environment.YOS_PASSKEY_PAIRING_PAGE_ID &&
+        options.environment.YOS_PASSKEY_PAIRING_EDITOR_ID &&
+        options.environment.YOS_NOTION_API_TOKEN ?
+        {passkeyPairing:{
+          auditedPrivate:true,
+          pageId:options.environment.YOS_PASSKEY_PAIRING_PAGE_ID,
+          editorId:options.environment.YOS_PASSKEY_PAIRING_EDITOR_ID,
+          notionToken:options.environment.YOS_NOTION_API_TOKEN,
+          ...(options.fetchImpl?{fetchImpl:options.fetchImpl}:{})
+        }}:{}),
     notionToken: options.environment.YOS_NOTION_API_TOKEN?.trim() ?? '',
     notionDataSourceId: options.environment.YOS_NOTION_TASKS_DATA_SOURCE_ID?.trim() || '965c6086-32c1-463d-93b4-87a9cb69b3ad',
     ...(options.fetchImpl ? {fetchImpl: options.fetchImpl} : {})
