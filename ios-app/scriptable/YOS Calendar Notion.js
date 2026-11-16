@@ -145,12 +145,15 @@ async function main(){
  const installed=await view.evaluateJavaScript(initialJS);
  if(installed!==true)throw Error('既存カレンダーUIを読み込めませんでした');
  async function paint(next){
-  const payload={...next,__nativeNotion:true};
+  // Preserve the existing Money privacy flag before placing private records in WebView.
+  const hideMoney=await view.evaluateJavaScript("(function(){try{return JSON.parse(localStorage.getItem('yos-money-v2')||'null')?.privacy===true}catch{return false}})()");
+  const visible=hideMoney?{...next,items:next.items.filter(x=>x.type!=='money'),moneyRead:false,moneyPrivate:true}:next;
+  const payload={...visible,__nativeNotion:true};
   delete payload.fail;delete payload.complete;delete payload.completeHabit;
   const json=JSON.stringify(payload).replace(/</g,'\\u003c');
   const expression='(function(){var data='+json+';data.complete=function(){return Promise.resolve({ok:false,reason:"Notionの元ページで完了してください"})};data.completeHabit=data.complete;window.YOS_APPROVED_CALENDAR.update(data);return window.YOS_APPROVED_CALENDAR.inspect().items.length;})()';
   const count=await view.evaluateJavaScript(expression);
-  if(count!==next.items.length)throw Error('UIへ読み込んだ件数が一致しません');
+  if(count!==visible.items.length)throw Error('UIへ読み込んだ件数が一致しません');
  }
  await paint(data);
  const close=view.present(true).then(()=>({type:'close'}));
