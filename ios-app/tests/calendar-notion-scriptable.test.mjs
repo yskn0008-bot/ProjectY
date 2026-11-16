@@ -74,7 +74,7 @@ test('direct Notion Calendar reads six existing sources without any Vercel or ne
  assert.match(r.loaded[0],/<!doctype html>/);
  assert.match(r.loaded[0],/#approvedCalendar/);
  assert.equal(r.assets.length,3);
- assert.ok(r.assets.every(x=>x.startsWith('https://raw.githubusercontent.com/yskn0008-bot/ProjectY/8a09f912da184582ad8b2e01bce809b10ddb1c7d/life/calendar/')));
+ assert.ok(r.assets.every(x=>x.startsWith('https://raw.githubusercontent.com/yskn0008-bot/ProjectY/1b4f01e45670d911fb72909bc575164840921871/life/calendar/')));
  assert.doesNotMatch(script,/await view\.loadURL\(UI\)/);
  assert.match(script,/await WebView\.loadHTML\(html,null,null,true\)/);
  assert.doesNotMatch(script,/view\.evaluateJavaScript\(waitJS/);
@@ -140,4 +140,11 @@ test('special HTML in Notion title stays data and cannot close inline scripts',a
  const r=await run();
  assert.match(script,/JSON\.stringify\(data\)\.replace\(\/<\/g/);
  assert.equal(r.injected[0].items.length,6);
+});
+
+test('on-device reader pins the actual merged minimal Calendar + DAYSTREAM assets',()=>{
+ assert.match(script,/const UI_REF='1b4f01e45670d911fb72909bc575164840921871'/);
+ assert.match(script,/asset\('approved-calendar\.css'/);
+ assert.match(script,/asset\('approved-calendar\.js'/);
+ assert.doesNotMatch(script,/vercel\.app/);
 });
