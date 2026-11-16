@@ -58,3 +58,15 @@ test('unauthorized PATCH cannot modify Notion',async()=>{
  assert.equal((await f.h(f.req('?source=notion','wrong-google','PATCH'))).status,401);
  assert.equal(f.counts.notion,0);
 });
+test('authenticated passkey PATCH reaches validation but malformed completions never write to Notion',async()=>{
+ const f=fixture();
+ for(const action of ['complete','complete-habit']){
+  const response=await f.h(new Request('https://existing.example/api/yos/tasks?source=notion',{
+   method:'PATCH',headers:{Origin:origin,Authorization:'Bearer '+token,'Content-Type':'application/json'},
+   body:JSON.stringify({action,pageId:'invalid-page-id'})
+  }));
+  assert.equal(response.status,400);
+ }
+ assert.equal(f.counts.notion,0);
+ assert.equal(f.counts.google,0);
+});
