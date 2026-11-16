@@ -92,6 +92,13 @@
       "path": "ios-app/scriptable/YOS Calendar Notion.js",
       "commit": "c7e520e681d44744df10ee9e7dfa4ff318dd1297",
       "sha256": "6e6ce9edbf05c46a3084fdd0a222d59d9a16f88b3304b266abfca751ff9fa36a"
+    },
+    {
+      "id": "clarity-inbox-bridge",
+      "name": "YOS Clarity Inbox Bridge",
+      "path": "ios-app/scriptable/YOS Clarity Inbox Bridge.js",
+      "commit": "8a1e05116f7807da218f8f218e760a244e5daac3",
+      "sha256": "74b566f75cb3f99173186d0398fa7ac01e89ed7913463927d1ae3621a8e97ae8"
     }
   ]
 }
