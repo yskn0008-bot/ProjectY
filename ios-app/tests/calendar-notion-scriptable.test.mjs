@@ -20,8 +20,8 @@ function fixture(url){
  else throw Error('unknown source '+id);
  return {id:id.replace(/-/g,'').slice(0,31)+'a',properties:p};
 }
-async function run({hasKey=true,failSource=null,moneyPrivate=false,failAsset=false,emptyGrid=false}={}){
- const requests=[],assets=[],alerts=[],injected=[],loaded=[];
+async function run({hasKey=true,failSource=null,moneyPrivate=false,failAsset=false}={}){
+ const requests=[],assets=[],alerts=[],injected=[],loaded=[],probes=[];
  class FakeRequest{
   constructor(url){this.url=url}
   async loadString(){
@@ -40,25 +40,21 @@ async function run({hasKey=true,failSource=null,moneyPrivate=false,failAsset=fal
    return {results:[fixture(this.url)],has_more:false};
   }
  }
- class FakeWebView {
-  async loadHTML(html){loaded.push(html)}
-  async evaluateJavaScript(code,pending){
-   if(code.includes('if(!window.YOS_APPROVED_CALENDAR)return false'))return true;
-   if(code.includes("const host=document.getElementById('approvedCalendar')"))return {ready:'complete',exists:true,grid:true,height:500};
-   if(code.includes("document.querySelectorAll('#calGrid .cal-day').length"))return emptyGrid?0:42;
-   if(code.includes("localStorage.getItem('yos-money-v2')"))return moneyPrivate;
-   if(code.includes('var data=')){
-    const start=code.indexOf('var data=')+'var data='.length;
-    const stop=code.indexOf(';data.complete=',start);
-    assert.ok(stop>start);
-    const payload=JSON.parse(code.slice(start,stop));
-    injected.push(payload);
-    return payload.items.length;
-   }
-   if(code.includes('window.__yosNativeReply=completion')&&pending)return new Promise(()=>{});
-   throw Error('unknown injected expression');
+ class FakeWebView{
+  static async loadHTML(html,base,preferred,fullscreen){
+   assert.equal(fullscreen,true);
+   loaded.push(html);
+   const start=html.indexOf('const bridge=')+'const bridge='.length;
+   const stop=html.indexOf(';',start);
+   assert.ok(start>12&&stop>start);
+   const payload=JSON.parse(html.slice(start,stop));
+   injected.push(payload);
   }
-  async present(){return undefined}
+  async loadHTML(html){probes.push(html)}
+  async evaluateJavaScript(code){
+   if(code.includes("localStorage.getItem('yos-money-v2')"))return moneyPrivate;
+   throw Error('Unexpected native JavaScript evaluation after rendering');
+  }
  }
  class FakeAlert{
   constructor(){this.title='';this.message=''}
@@ -69,17 +65,20 @@ async function run({hasKey=true,failSource=null,moneyPrivate=false,failAsset=fal
   Keychain:{contains:()=>hasKey,get:()=>hasKey?'test-token':''},
   Script:{complete(){}},Intl,Date,Promise,JSON,Error,String,Number,Object,Array,RegExp,Math,Set,Map};
  await vm.runInNewContext('(async()=>{\n'+script+'\n})()',scope,{timeout:5000});
- return {requests,assets,alerts,injected,loaded};
+ return {requests,assets,alerts,injected,loaded,probes};
 }
 test('direct Notion Calendar reads six existing sources without any Vercel or new auth',async()=>{
  const r=await run();
  assert.equal(r.requests.length,6);
  assert.equal(r.loaded.length,1);
  assert.match(r.loaded[0],/<!doctype html>/);
- assert.match(r.loaded[0],/approvedCalendar/);
+ assert.match(r.loaded[0],/#approvedCalendar/);
  assert.equal(r.assets.length,3);
  assert.ok(r.assets.every(x=>x.startsWith('https://raw.githubusercontent.com/yskn0008-bot/ProjectY/8a09f912da184582ad8b2e01bce809b10ddb1c7d/life/calendar/')));
  assert.doesNotMatch(script,/await view\.loadURL\(UI\)/);
+ assert.match(script,/await WebView\.loadHTML\(html,null,null,true\)/);
+ assert.doesNotMatch(script,/view\.evaluateJavaScript\(waitJS/);
+ assert.match(r.loaded[0],/YOS CALENDAR　画面を読み込んでいます/);
  assert.ok(r.requests.every(x=>x.auth==='Bearer test-token'&&x.version==='2026-03-11'&&x.method==='POST'));
  assert.ok(r.requests.every(x=>x.url.startsWith('https://api.notion.com/v1/data_sources/')));
  assert.equal(r.injected.length,1);
@@ -104,8 +103,8 @@ test('one unavailable source is labelled unavailable instead of inventing its da
 test('calendar adapter never writes Notion or persists raw source data into GitHub',()=>{
  assert.doesNotMatch(script,/req\.method\s*=\s*['"](?:PATCH|DELETE|PUT)['"]/);
  assert.doesNotMatch(script,/localStorage\.setItem|Keychain\.set|FileManager\.local/);
- assert.match(script,/window\.YOS_APPROVED_CALENDAR\.update\(data\)/);
- assert.match(script,/window\.__yosNativeNotify\('refresh'\)/);
+ assert.match(script,/api\.update\(bridge\)/);
+ assert.match(script,/scriptable:\/\/\/run\?scriptName=YOS%20Calendar%20Notion/);
 });
 
 test('existing Money privacy toggle keeps private Notion amounts out of WebView entirely',async()=>{
@@ -123,8 +122,22 @@ test('asset download failure shows a specific error instead of presenting an emp
  assert.match(r.alerts[0]?.message||'',/画面部品/);
 });
 
-test('zero day cells are rejected before presenting a black calendar even when source count matches',async()=>{
- const r=await run({emptyGrid:true});
- assert.equal(r.injected.length,1);
- assert.match(r.alerts[0]?.message||'',/42日付枠/);
+
+test('new static WebView bootstraps complete approved UI without evaluating its displayed instance',async()=>{
+ const r=await run();
+ assert.equal(r.loaded.length,1);
+ assert.equal(r.probes.length,1);
+ assert.match(r.loaded[0],/const bridge=/);
+ assert.match(r.loaded[0],/window\.YOS_APPROVED_CALENDAR/);
+ assert.match(r.loaded[0],/42日付枠|42/);
+ assert.match(r.loaded[0],/yosBootMessage/);
+ assert.ok(!r.loaded[0].includes('test-token'));
+ assert.doesNotMatch(r.loaded[0],/Bearer test-token|Authorization:.*test-token/);
+ assert.doesNotMatch(script,/view\.present\(true\)/);
+ assert.doesNotMatch(script,/await view\.evaluateJavaScript\(expression\)/);
+});
+test('special HTML in Notion title stays data and cannot close inline scripts',async()=>{
+ const r=await run();
+ assert.match(script,/JSON\.stringify\(data\)\.replace\(\/<\/g/);
+ assert.equal(r.injected[0].items.length,6);
 });

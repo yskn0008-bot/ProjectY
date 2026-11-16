@@ -18,22 +18,29 @@ async function asset(name,minimum,maximum,check){
   throw Error('カレンダーの画面部品 '+name+' を取得できません（表示は開始していません）');
  return value;
 }
-async function offlineHTML(){
+const YOS_CALENDAR_BOOT_TEMPLATE="(function(){\n  function fail(reason){\n    const el=document.getElementById('yosBootMessage');\n    if(el){\n      el.textContent='YOS CALENDAR — 表示エラー: '+String(reason||'画面を読み込めませんでした');\n      el.style.background='#051522';\n      el.style.color='#ffffff';\n      el.style.padding='96px 20px 20px';\n    }\n  }\n  try{\n    const bridge=__YOS_BRIDGE_JSON__;\n    bridge.complete=()=>Promise.resolve({ok:false,reason:'Notionの元ページで完了してください'});\n    bridge.completeHabit=()=>Promise.resolve({ok:false,reason:'Notionの元ページで確認してください'});\n    const api=window.YOS_APPROVED_CALENDAR;\n    if(!api||typeof api.update!=='function')throw Error('承認済みカレンダーの画面部品が未起動');\n    api.update(bridge);\n    if(document.querySelectorAll('#calGrid .cal-day').length!==42)throw Error('月の42日付枠が表示できません');\n    const newest=bridge.checkedAt||'時刻未確認';\n    const status=document.getElementById('calNotice');\n    if(status)status.textContent='Notionを取得 · '+bridge.items.length+'件 · '+newest.slice(11,16)+' UTC';\n    const boot=document.getElementById('yosBootMessage');\n    if(boot)boot.remove();\n    for(const id of ['calendarTasksRefresh','reload']){\n      const button=document.getElementById(id);\n      if(!button)continue;\n      button.textContent='↻ Notionを更新';\n      button.addEventListener('click',function(ev){\n        ev.preventDefault();ev.stopImmediatePropagation();\n        location.href='scriptable:///run?scriptName=YOS%20Calendar%20Notion';\n      },true);\n    }\n  }catch(error){fail(error?.message||error)}\n})()";
+async function offlineHTML(data){
  const [css,habit,approved]=await Promise.all([
   asset('approved-calendar.css',5000,90000,'#approvedCalendar'),
   asset('habit-calendar.js',500,10000,'YOS_CALENDAR_HABITS'),
   asset('approved-calendar.js',5000,90000,'YOS_APPROVED_CALENDAR')
  ]);
- // Only immutable project-approved sources are used, never Notion data or credentials.
+ // Inject a one-time source snapshot into HTML before any WebView is presented.
+ // The Notion integration token stays in native Scriptable Keychain.
+ const json=JSON.stringify(data).replace(/</g,'\\u003c').replace(/\u2028/g,'\\u2028').replace(/\u2029/g,'\\u2029');
+ const boot=YOS_CALENDAR_BOOT_TEMPLATE.replace('__YOS_BRIDGE_JSON__',json);
  const safeScript=x=>x.replace(/<\/script/gi,'<\\/script');
  const safeCss=x=>x.replace(/<\/style/gi,'<\\/style');
- return '<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">'+
+ const baseline='<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">'+
  '<meta name="theme-color" content="#051522"><title>YOS CALENDAR</title><style>'+
  '[hidden]{display:none!important}html,body{margin:0;min-height:100%;background:#051522;color:#f7f8ff}'+safeCss(css)+
  '</style></head><body>'+
+ '<div id="yosBootMessage" role="status" style="position:fixed;z-index:99999;inset:0;padding:96px 22px;background:#051522;color:white;font-size:16px;font-family:-apple-system,sans-serif">YOS CALENDAR　画面を読み込んでいます…</div>'+
  '<div id="sourceOverview" hidden></div><section class="calendar-auth"><button type="button" id="calendarTasksRefresh">↻ Notionを更新</button></section>'+
  '<div id="sources"></div><div id="sourceLinks"></div><button type="button" id="reload">↻ Notionを更新</button>'+
- '<script>'+safeScript(habit)+'</script><script>'+safeScript(approved)+'</script></body></html>';
+ '<script>'+safeScript(habit)+'</script><script>'+safeScript(approved)+'</script>'+
+ '<script>'+safeScript(boot)+'</script></body></html>';
+ return baseline;
 }
 const VERSION='2026-03-11';
 const BASE='https://api.notion.com/v1/data_sources/';
@@ -132,32 +139,6 @@ async function loadNotion(token){
   demo:false,complete:()=>Promise.resolve({ok:false,reason:'Notionの元ページで完了してください'}),
   completeHabit:()=>Promise.resolve({ok:false,reason:'Notionの元ページで実施記録を確認してください'})};
 }
-const initialJS=String.raw`(function(){
- if(!window.YOS_APPROVED_CALENDAR)return false;
- const api=window.YOS_APPROVED_CALENDAR,original=api.update.bind(api);
- let current=null;
- api.update=function(data){
-  if(data&&data.__nativeNotion===true){current=data;return original(data)}
-  return original(current||data);
- };
- window.__yosNativeNotify=function(event){
-  if(window.__yosNativeReply){const reply=window.__yosNativeReply;window.__yosNativeReply=null;reply(event)}
-  else window.__yosNativeQueued=event;
- };
- for(const id of ['calendarTasksRefresh','reload']){
-  const button=document.getElementById(id);
-  if(!button)continue;
-  button.textContent='↻ Notionを更新';
-  button.addEventListener('click',function(ev){
-   ev.preventDefault();ev.stopImmediatePropagation();window.__yosNativeNotify('refresh');
-  },true);
- }
- return true;
-})()`;
-const waitJS=String.raw`(function(){
- if(window.__yosNativeQueued){const event=window.__yosNativeQueued;window.__yosNativeQueued=null;completion(event)}
- else window.__yosNativeReply=completion;
-})()`;
 async function showAlert(title,message){
  const a=new Alert();a.title=title;a.message=message;a.addAction('閉じる');await a.presentAlert();
 }
@@ -167,40 +148,25 @@ async function main(){
  if(!token){await showAlert('Notion未接続','このiPhoneの既存KeychainにNotion接続情報が見つかりません。既存YOSのNotion連携を確認してください。');return}
  const data=await loadNotion(token);
  if(data.fail.length===sources.length){await showAlert('Notionを取得できません','すべての保存先への接続に失敗しました。Notionの権限と通信を確認してください。');return}
- const view=new WebView();
- // A dark blank WebView was observed with loadURL(GitHub Pages). Render the same
- // approved CSS/JS locally instead, and verify a live calendar root before present.
- const html=await offlineHTML();
- await view.loadHTML(html);
- const installed=await view.evaluateJavaScript(initialJS);
- const layout=await view.evaluateJavaScript("(function(){const host=document.getElementById('approvedCalendar');return {ready:document.readyState,exists:!!host,grid:!!document.getElementById('calGrid'),height:host?.getBoundingClientRect().height||0}})()");
- if(installed!==true||!layout?.exists||!layout?.grid)
-  throw Error('カレンダーの初期表示に失敗しました。元のデータは変更していません');
- async function paint(next){
-  // Preserve the existing Money privacy flag before placing private records in WebView.
-  const hideMoney=await view.evaluateJavaScript("(function(){try{return JSON.parse(localStorage.getItem('yos-money-v2')||'null')?.privacy===true}catch{return false}})()");
-  const visible=hideMoney?{...next,items:next.items.filter(x=>x.type!=='money'),moneyRead:false,moneyPrivate:true}:next;
-  const payload={...visible,__nativeNotion:true};
-  delete payload.fail;delete payload.complete;delete payload.completeHabit;
-  const json=JSON.stringify(payload).replace(/</g,'\\u003c');
-  const expression='(function(){var data='+json+';data.complete=function(){return Promise.resolve({ok:false,reason:"Notionの元ページで完了してください"})};data.completeHabit=data.complete;window.YOS_APPROVED_CALENDAR.update(data);return window.YOS_APPROVED_CALENDAR.inspect().items.length;})()';
-  const count=await view.evaluateJavaScript(expression);
-  if(count!==visible.items.length)throw Error('UIへ読み込んだ件数が一致しません');
-  const cells=await view.evaluateJavaScript("document.querySelectorAll('#calGrid .cal-day').length");
-  if(cells!==42)throw Error('月カレンダーの42日付枠を描画できませんでした。黒画面は表示しません');
- }
- await paint(data);
- const close=view.present(true).then(()=>({type:'close'}));
- let listening=view.evaluateJavaScript(waitJS,true).then(value=>({type:'event',value}),()=>({type:'close'}));
- for(;;){
-  const event=await Promise.race([close,listening]);
-  if(event.type==='close')break;
-  if(event.value==='refresh'){
-   const updated=await loadNotion(token);
-   if(updated.fail.length<sources.length)await paint(updated);
-  }
-  listening=view.evaluateJavaScript(waitJS,true).then(value=>({type:'event',value}),()=>({type:'close'}));
- }
+ // The old WebView ran multiple evaluateJavaScript calls before present() and
+ // could show a completely black native page despite DOM-only mock tests.
+ // The static Scriptable API displays the fully built HTML in one operation.
+ // Read a separate privacy preference snapshot; never evaluate the displayed view.
+ let moneyPrivate=false;
+ try{
+  const probe=new WebView();
+  await probe.loadHTML('<!doctype html><html><body></body></html>');
+  moneyPrivate=await probe.evaluateJavaScript("(function(){try{return JSON.parse(localStorage.getItem('yos-money-v2')||'null')?.privacy===true}catch{return false}})()")===true;
+ }catch{moneyPrivate=true}
+ const dataForView={...data,items:moneyPrivate?data.items.filter(x=>x.type!=='money'):data.items,
+  moneyRead:moneyPrivate?false:data.moneyRead,moneyPrivate};
+ delete dataForView.fail;
+ delete dataForView.complete;
+ delete dataForView.completeHabit;
+ const html=await offlineHTML(dataForView);
+ if(!html.includes('yosBootMessage')||!html.includes('YOS_APPROVED_CALENDAR'))
+  throw Error('カレンダーHTML生成に失敗しました');
+ await WebView.loadHTML(html,null,null,true);
 }
 try{await main()}catch(e){await showAlert('YOS Calendar 接続エラー',clean(e?.message||e,200))}
 Script.complete();
