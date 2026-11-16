@@ -3,7 +3,7 @@
 (function(root){
 'use strict';
 const paths={calendar:'M5 3v4m14-4v4M3 10h18M5 5h14a2 2 0 0 1 2 2v13H3V7a2 2 0 0 1 2-2Zm3 9h3m-1.5-1.5v3m5-1.5h3m-1.5-1.5v3',task:'M5 3v4m14-4v4M3 10h18M5 5h14a2 2 0 0 1 2 2v13H3V7a2 2 0 0 1 2-2Zm2 10 3 3 6-6',habit:'M20 9a8 8 0 0 0-13-5L4 6m0-4v4h4M4 15a8 8 0 0 0 13 5l3-2m0 4v-4h-4',Money:'M18 6c0 2-3 3-6 3S6 8 6 6s3-3 6-3 6 1 6 3Zm0 0v5c0 2-3 3-6 3s-6-1-6-3V6m12 5v5c0 2-3 3-6 3s-6-1-6-3v-5m5 8v2c-4 0-8-1-8-3v-5',Work:'M5 3v4m14-4v4M3 10h18M5 5h14a2 2 0 0 1 2 2v13H3V7a2 2 0 0 1 2-2Zm3 10h3m-1.5-1.5v3m5-1.5h3',Health:'M20 5c-2-2-5-1-8 2-3-3-6-4-8-2-4 4 0 8 8 15 8-7 12-11 8-15Zm-12 7h2l1-2 2 4 1-2h2',Self:'M12 2c1 6 3 8 9 9-6 1-8 3-9 9-1-6-3-8-9-9 6-1 8-3 9-9Zm8 15v5m-2.5-2.5h5M4 1v4M2 3h4',Life:'m2 11 10-9 10 9h-4v10h-5v-7h-3v7H5V11',other:'M12 4v1m0 6v9',search:'M20 20l-6-6M16 9a7 7 0 1 1-14 0 7 7 0 0 1 14 0',more:'M4 12h.01M12 12h.01M20 12h.01',left:'m15 4-8 8 8 8',right:'m9 4 8 8-8 8',list:'M9 5h13M9 12h13M9 19h13M2 5h1M2 12h1M2 19h1',settings:'M2 6h12m4 0h4M2 18h4m4 0h12M14 3v6M6 15v6',logo:'M12 1 23 21H1L12 1Zm0 0v10M1 21l11-10 11 10M7 8l5 3 5-3M8 15l4-4 4 4'};
-const colors={Money:'#ffc52e',Work:'#29b9ff',Health:'#ff5891',Self:'#c084ff',Life:'#68efa0',other:'#a8bdce'};
+const colors={Money:'#b68dff',Work:'#ff789d',Health:'#2db5c8',Self:'#ba83f4',Life:'#f8a34f',other:'#a8bdce'};
 const labels={schedule:'予定',task:'タスク',habit:'習慣'};
 const $=id=>document.getElementById(id);
 const el=(tag,cls,text)=>{const x=document.createElement(tag);if(cls)x.className=cls;if(text!==undefined)x.textContent=text;return x};
