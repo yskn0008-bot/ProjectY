@@ -49,7 +49,18 @@ function saveLocal(store,o){
   store.setItem(LOCAL,next);if(store.getItem(LOCAL)!==next)throw Error('verify');return true
  }catch{try{if(old===null)store.removeItem(LOCAL);else store.setItem(LOCAL,old)}catch{}return false}
 }
-root.YOS_CALENDAR_AREAS={classify,readNotion,readLocal,saveLocal};
+function itemsForDay(day){
+ if(!validDate(day))return [];
+ const o=readLocal(root.localStorage);
+ if(!o.ok)return [];
+ return o.rows.filter(t=>t.kind==='habit'||t.due===day).map(t=>({
+  id:'area-local:'+t.id,sourceId:t.id,date:day,title:t.title,type:t.kind,area:t.area,
+  subtitle:t.kind==='habit'?'毎日の習慣 · 分野別ページで記録':'端末内タスク · 分野別ページで記録',
+  done:t.kind==='habit'?o.checks[t.id+'|'+day]===true:t.done,
+  source:'この端末のみ（Notion未同期）',sourceKind:'local'
+ }));
+}
+root.YOS_CALENDAR_AREAS={classify,readNotion,readLocal,saveLocal,itemsForDay};
 if(!root.document||!root.YOS_APPROVED_CALENDAR)return;
 const d=root.document,host=d.getElementById('approvedCalendar'),nav=host?.querySelector('.cal-nav'),api=root.YOS_APPROVED_CALENDAR;
 if(!host||!nav)return;
@@ -110,6 +121,17 @@ function render(){
  const suggestions=node('div','cal-area-suggestions');suggestions.append(node('p',null,'必要なら習慣として追加'));
  for(const t of tips[chosen])suggestions.append(btn('＋ '+t,()=>create(t,'habit','')));
  panel.append(suggestions);
+ const seen=new Set(notion.tasks.map(t=>t.id));
+ const fromSources=source?.demo===false?(source?.items||[]).filter(t=>
+   t&&['task','habit'].includes(t.type)&&t.date===day&&!String(t.id||'').startsWith('area-local:')&&
+   (t.sourceId?.startsWith('notion-')?(!seen.has(t.sourceId)):(t.source!=='デザイン比較用の架空データ'))&&
+   classify(t.title,t.area)===chosen):[];
+ panel.append(node('h4',null,'この日の取得済みタスク '+fromSources.length+'件'));
+ for(const t of fromSources.slice(0,50)){
+  const row=node('div','cal-area-task'),detail=node('div','cal-area-task-copy');
+  detail.append(node('strong',null,clean(t.title)),node('small',null,(t.done?'完了記録あり':'未完了・要確認')+' · '+clean(t.source||'取得元未確認',40)));
+  row.append(node('span','cal-area-n','•'),detail);panel.append(row)
+ }
  const tasks=notion.tasks.filter(t=>t.area===chosen&&t.status!=='完了').sort((a,b)=>(a.due||'9999').localeCompare(b.due||'9999'));
  panel.append(node('h4',null,'Notionの未完了タスク '+tasks.length+'件'));
  if(!tasks.length)panel.append(node('p','cal-area-empty',notion.status==='ready'?'この分野の未完了は取得されていません':'Notionを安全に取り込むと、ここへ期限あり・期限なしのタスクを表示します'));
