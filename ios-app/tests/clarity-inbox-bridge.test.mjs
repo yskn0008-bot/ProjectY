@@ -100,3 +100,23 @@ test('異なる入力元で同一の原文を受けても別受付として保�
   assert.match(await m.run({rawText:'同じ内容',source:'text'}),/保存確認済み/);
   assert.equal(m.counts.writes,2);
 });
+
+test('保存確認済みの古い受付IDを整理後も保持し、151件目以降の再送を拒否する',async()=>{
+  const m=mocked();
+  for(let i=0;i<151;i++){
+    const id='clarity:archive-'+String(i).padStart(8,'0');
+    assert.match(await m.run({rawText:'原文'+i,source:'voice',captureId:id}),/保存確認済み/);
+  }
+  assert.equal(m.counts.writes,151);
+  const history=JSON.parse(m.files.get('/docs/YOS Clarity Inbox Bridge Receipts.json'));
+  assert.equal(history.length,151);
+  assert.equal(history[0].status,'archived');
+  assert.equal(history[0].captureId,'clarity:archive-00000000');
+  const repeated=await m.run({rawText:'原文0',source:'voice',captureId:'clarity:archive-00000000'});
+  assert.match(repeated,/Notion未保存/);
+  assert.match(repeated,/二重送信を防ぐため再送を保留/);
+  assert.equal(m.counts.writes,151);
+  const conflicting=await m.run({rawText:'異なる原文',source:'voice',captureId:'clarity:archive-00000000'});
+  assert.match(conflicting,/Notion未保存/);
+  assert.equal(m.counts.writes,151);
+});
