@@ -249,27 +249,27 @@ test('same financial identity is counted once; ambiguous cross-source amounts re
  const r=api.merge([{...e,id:'local:abc',sourceId:'',source:'Money'}],[e]);assert.equal(r.length,2);assert.equal(r.every(x=>x.reconciliationPending),true);
 });
 
-test('calendar auth keeps existing Google fallback and secures passkey refresh and writes',()=>{
+test('calendar Notion device pairing removes Google/Face ID from its login flow',()=>{
  const original=readFileSync(new URL('../../yos/daystream/yos-tasks-auth.js',import.meta.url),'utf8');
  const calendar=readFileSync(new URL('./calendar-task-auth.js',import.meta.url),'utf8');
- const native=readFileSync(new URL('./index.html',import.meta.url),'utf8');
+ const html=readFileSync(new URL('./index.html',import.meta.url),'utf8');
  assert.match(original,/location\.origin!==SITE/);
  assert.match(calendar,/location\.origin!==SITE/);
  assert.match(calendar,/credentials:'omit'/);
  assert.match(calendar,/cache:'no-store'/);
- assert.match(calendar,/includeCalendarMoney===true/);
- assert.match(calendar,/googleId\.initialize/);
- assert.match(calendar,/googleToken=token;currentToken=token/);
- assert.match(calendar,/PASSKEY_API=API\+'\/api\/yos\/tasks\?passkey=1'/);
- assert.match(calendar,/passkeyPost\('auth-verify'/);
- assert.match(calendar,/passkeyPost\('register-verify'/);
- assert.match(calendar,/currentToken=result\.token/);
+ assert.match(calendar,/includeCalendarMoney\?'&calendarMoney=1'/);
+ assert.match(calendar,/PAIR=API\+'\/api\/yos\/tasks\?pair=1'/);
+ for(const verb of ['pair-options','pair-verify','auth-options','auth-verify'])assert.ok(calendar.includes("post('"+verb+"'"));
+ assert.match(calendar,/subtle\.generateKey\(\{name:'ECDSA',namedCurve:'P-256'\},false/);
+ assert.match(calendar,/root\.indexedDB/);
  assert.match(calendar,/action:'complete-habit'/);
  assert.match(calendar,/expectedEditedAt:item\.lastEditedAt/);
  assert.match(calendar,/e\.taskId!==item\.id\.slice\(7\)/);
- assert.match(native,/YOS_DAYSTREAM_WEB_TASK_SNAPSHOT_V1/);
- assert.match(native,/snapshot\.origin!=='notion'/);
- assert.match(native,/snapshot\.complete!==true/);
+ assert.doesNotMatch(calendar,/google\.accounts|PASSKEY_API|Face ID/);
+ assert.doesNotMatch(html,/src="\.\/passkey-client\.js"/);
+ assert.match(html,/YOS_DAYSTREAM_WEB_TASK_SNAPSHOT_V1/);
+ assert.match(html,/snapshot\.origin!=='notion'/);
+ assert.match(html,/snapshot\.complete!==true/);
 });
 test('calendar PWA cache includes every new runtime module without caching fictional test fixtures',()=>{
  const sw=readFileSync(new URL('../../service-worker.js',import.meta.url),'utf8');
