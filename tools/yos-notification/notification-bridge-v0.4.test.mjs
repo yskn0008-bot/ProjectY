@@ -136,3 +136,36 @@ test("ambiguous explicit capture retains its key and never reports a confirmed r
  x.state.failPatch=false;x.state.ambiguous=false;
  const next=await x.invoke(input);assert.equal(next.key,first.key);assert.equal(next.saveState,"confirmed");assert.equal(x.state.server.length,1);
 });
+
+
+test("claim-retry only returns confirmed, aged unresolved receipt and never resends the source",async()=>{
+  const x=env();await x.invoke("家賃の引落しに失敗しました");
+  const rows=x.journal(),old=new Date(Date.now()-11*60000).toISOString();
+  rows[0].date=old;x.state.file.set("/documents/YOS_Notification_AI_State_V1.json",JSON.stringify(rows));
+  const claim=await x.invoke({yosAction:"claim-retry"});
+  assert.equal(claim.event.key,rows[0].key);
+  assert.equal(claim.event.attempt,1);
+  assert.match(claim.event.body,/引落し/);
+  assert.equal(x.state.server.length,1);
+  const immediate=await x.invoke({yosAction:"claim-retry"});
+  assert.equal(immediate.event,null);
+  const after=x.journal();after[0].nextRetryAt=new Date(Date.now()-1000).toISOString();
+  x.state.file.set("/documents/YOS_Notification_AI_State_V1.json",JSON.stringify(after));
+  const retry=await x.invoke({yosAction:"claim-retry"});
+  assert.equal(retry.event.attempt,2);
+  const stop=await x.invoke({yosAction:"claim-retry"});
+  assert.equal(stop.event,null);assert.equal(stop.exhausted,1);
+  assert.equal(x.state.server.length,1,"retry claim must never duplicate remote capture");
+  await x.invoke({yosAction:"ai-result",key:rows[0].key,decision:"YOS_SILENT"});
+  assert.equal((await x.invoke({yosAction:"pending"})).events.length,0);
+});
+test("claim-retry refuses unconfirmed Notion save and keeps its queue",async()=>{
+  const x=env();x.state.failPatch=true;x.state.ambiguous=true;
+  await x.invoke({yosAction:"capture",notification:"架空の引落失敗"});
+  const rows=x.journal();rows[0].date=new Date(Date.now()-20*60000).toISOString();
+  x.state.file.set("/documents/YOS_Notification_AI_State_V1.json",JSON.stringify(rows));
+  const res=await x.invoke({yosAction:"claim-retry"});
+  assert.equal(res.event,null);
+  assert.equal(x.queue().length,1);
+  assert.equal(x.state.server.length,1,"ambiguous existing write must not be repeated");
+});
