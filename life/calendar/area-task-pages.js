@@ -26,6 +26,7 @@ function readNotion(store,now){
   if(!t||!/^notion-[a-f0-9]{32}$/.test(t.id)||seen.has(t.id)||!clean(t.title)||!VALID.has(t.status)||t.due&&!validDate(t.due))return {status:'invalid',tasks:[]};
   seen.add(t.id);
   if(['calendar','money'].includes(t.sourceFamily))continue;
+  if(t.sourceFamily==='reminder'){const stamp=t.lastSynced;if(typeof stamp!=='string'||!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2}(?:\.\d{1,3})?)?(?:Z|[+-]\d{2}:\d{2})$/.test(stamp)||now-Date.parse(stamp)>86400000||now-Date.parse(stamp)<-300000)continue}
   tasks.push({id:t.id,title:clean(t.title),area:classify(t.title,t.area),due:t.due||'',status:t.status,habit:!!t.habitCycle,url:'https://www.notion.so/'+t.id.slice(7)});
  }
  return {status:'ready',tasks,at:s.checkedAt};
