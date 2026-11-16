@@ -20,7 +20,7 @@ function fixture(url){
  else throw Error('unknown source '+id);
  return {id:id.replace(/-/g,'').slice(0,31)+'a',properties:p};
 }
-async function run({hasKey=true,failSource=null,moneyPrivate=false,failAsset=false}={}){
+async function run({hasKey=true,failSource=null,moneyPrivate=false,failAsset=false,emptyGrid=false}={}){
  const requests=[],assets=[],alerts=[],injected=[],loaded=[];
  class FakeRequest{
   constructor(url){this.url=url}
@@ -45,6 +45,7 @@ async function run({hasKey=true,failSource=null,moneyPrivate=false,failAsset=fal
   async evaluateJavaScript(code,pending){
    if(code.includes('if(!window.YOS_APPROVED_CALENDAR)return false'))return true;
    if(code.includes("const host=document.getElementById('approvedCalendar')"))return {ready:'complete',exists:true,grid:true,height:500};
+   if(code.includes("document.querySelectorAll('#calGrid .cal-day').length"))return emptyGrid?0:42;
    if(code.includes("localStorage.getItem('yos-money-v2')"))return moneyPrivate;
    if(code.includes('var data=')){
     const start=code.indexOf('var data=')+'var data='.length;
@@ -120,4 +121,10 @@ test('asset download failure shows a specific error instead of presenting an emp
  assert.equal(r.loaded.length,0);
  assert.equal(r.injected.length,0);
  assert.match(r.alerts[0]?.message||'',/画面部品/);
+});
+
+test('zero day cells are rejected before presenting a black calendar even when source count matches',async()=>{
+ const r=await run({emptyGrid:true});
+ assert.equal(r.injected.length,1);
+ assert.match(r.alerts[0]?.message||'',/42日付枠/);
 });
