@@ -152,8 +152,8 @@ const {chromium,webkit}=require('playwright');
   const habits=await page.locator('#result').innerText();assert.doesNotMatch(habits,/FAIL|ERROR/);assert.equal((habits.match(/PASS /g)||[]).length,5);
   assert.deepEqual(failures,[],'approved render has no runtime exceptions');
 
-  // Face ID connection sheet: real Chromium/WebKit rendering, mocked WebAuthn and
-  // API only. Official origin is simulated from localhost; no personal data writes.
+  // New login-free device onboarding: browser crypto + IndexedDB + mocked server.
+  // No real Notion write, no Google/Face ID, no public user data.
   {
    const authPage=await browser.newPage({viewport:{width:402,height:874},deviceScaleFactor:2});
    const pageErrors=[];
@@ -164,104 +164,68 @@ const {chromium,webkit}=require('playwright');
     const response=await route.fetch({url:'http://127.0.0.1:4173'+local+remote.search});
     await route.fulfill({response});
    });
-   await authPage.route('https://accounts.google.com/gsi/client',route=>route.fulfill({
-    status:200,contentType:'application/javascript',
-    body:'window.google={accounts:{id:{initialize:function(c){window.__testGoogleCallback=c.callback},renderButton:function(host){host.textContent="Google本人確認（テスト）"}}}}'
-   }));
    await authPage.addInitScript(()=>{
-    // WebKit headless does not expose biometric APIs; install a deterministic
-    // feature-detection stub before Calendar setup, not after the page loads.
-    Object.defineProperty(window,'PublicKeyCredential',{configurable:true,value:function PublicKeyCredential(){}});
-    Object.defineProperty(navigator,'credentials',{configurable:true,value:{}});
-    const oldFetch=window.fetch.bind(window);
-    // Headless WebKit may not expose a real WebAuthn device. Mock it on every
-    // navigation so a session-restored PWA is tested with equivalent capabilities.
-    Object.defineProperty(window,'PublicKeyCredential',{configurable:true,value:function PublicKeyCredential(){}});
-    const fakeCredential={id:'test-credential',type:'public-key',toJSON(){return {id:this.id,type:this.type}}};
-    Object.defineProperty(navigator,'credentials',{configurable:true,value:{get:async()=>fakeCredential,create:async()=>fakeCredential}});
-    window.__calendarAuthTest={calls:[],registered:true,denyReads:false};
+    const original=window.fetch.bind(window);
+    window.__notionPairMock={calls:[],ownerEdited:false,denyReads:false,apiDown:false};
     window.fetch=async(input,options={})=>{
-     if(!String(input).startsWith('https://project-y-yos-ai.vercel.app/'))return oldFetch(input,options);
-     const mock=window.__calendarAuthTest;
-     const action=options.body?JSON.parse(options.body).action:'GET';
-     mock.calls.push(action);
-     let status=200,body={};
-     if(String(input).includes('/public-config')){body={googleClientId:'test.apps.googleusercontent.com'}}
-     else if(action==='auth-options'){
-      if(mock.registered){body={requestId:'a'.repeat(64),options:{challenge:'AQ',allowCredentials:[]}}}
-      else{status=409;body={registered:false}}
-     }else if(action==='auth-verify'){body={token:'yos_pk_'+'b'.repeat(64),expiresAt:Date.now()+3600000}}
-     else if(action==='register-options'){body={requestId:'a'.repeat(64),options:{challenge:'AQ',user:{id:'AQ'}}}}
-     else if(action==='register-verify'){mock.registered=true;body={registered:true}}
-     else if(action==='GET'){
-      if(mock.denyReads){status=401;body={error:'expired'}}
-      else{body={source:'notion',complete:true,tasks:[]}}
+     if(!String(input).startsWith('https://project-y-yos-ai.vercel.app/'))return original(input,options);
+     const m=window.__notionPairMock,action=options.body?JSON.parse(options.body).action:'GET';
+     m.calls.push(action);
+     let status=200,data={};
+     if(m.apiDown&&String(input).includes('?pair=1')){status=405;data={error:'Not implemented'}}
+     else if(action==='pair-options'){
+      data={requestId:'a'.repeat(64),challenge:'YOS-7C2F19A4B2D8',expiresAt:Date.now()+600000,notionUrl:'https://app.notion.com/p/41a5ca882895813696a4ebe8b45211d8'};
+     }else if(action==='pair-verify'){
+      if(!m.ownerEdited){status=409;data={error:'Owner edit missing'}}
+      else{data={deviceId:'c'.repeat(64),token:'yos_dev_'+'b'.repeat(64),expiresAt:Date.now()+3600000}}
+     }else if(action==='auth-options'){
+      data={requestId:'a'.repeat(64),challenge:'sign-this-device-challenge'};
+     }else if(action==='auth-verify'){
+      data={token:'yos_dev_'+'b'.repeat(64),expiresAt:Date.now()+3600000};
+     }else if(action==='GET'){
+      if(m.denyReads){status=401;data={error:'expired'}}
+      else{data={source:'notion',complete:true,tasks:[]}}
      }
-     return new Response(JSON.stringify(body),{status,headers:{'Content-Type':'application/json'}});
+     return new Response(JSON.stringify(data),{status,headers:{'Content-Type':'application/json'}});
     };
    });
    await authPage.goto('https://yskn0008-bot.github.io/ProjectY/life/calendar/',{waitUntil:'domcontentloaded'});
-   // A mock device credential proves UI wiring, not a physical biometric result.
-   await authPage.evaluate(()=>{
-    Object.defineProperty(window,'PublicKeyCredential',{configurable:true,value:function PublicKeyCredential(){}});
-    Object.defineProperty(navigator,'credentials',{configurable:true,value:{}});
-    window.YOS_CALENDAR_PASSKEY.authenticate=async()=>({id:'test-credential',type:'public-key'});
-    window.YOS_CALENDAR_PASSKEY.create=async()=>({id:'test-credential',type:'public-key'});
-   });
    await authPage.locator('.cal-header .cal-icon-button').nth(1).click();
-   await authPage.locator('#calendarTasksRefresh').click();
-   assert.equal(await authPage.locator('#calSettings .calendar-auth').evaluate(el=>el.firstElementChild.id),'calendarAuthHost','Face ID is first in connection settings');
-   const face=authPage.locator('.cal-passkey-primary');
-   await face.waitFor({state:'visible'});
-   assert.equal(await authPage.evaluate(()=>window.__calendarAuthTest.calls.length),0,'Google and network are lazy at first render');
-   assert.equal(await authPage.locator('.cal-passkey-fallback').getAttribute('open'),null,'Google fallback is secondary');
-   await face.click();
-   await authPage.waitForFunction(()=>window.__calendarAuthTest.calls.includes('GET'));
-   const firstCalls=await authPage.evaluate(()=>window.__calendarAuthTest.calls.slice());
-   assert.deepEqual(firstCalls,['auth-options','auth-verify','GET'],'Face ID session gates first Notion read');
-   assert.match(await authPage.locator('#calendarAuthStatus').innerText(),/Notion正本を更新しました/);
-   assert.match(await authPage.evaluate(()=>sessionStorage.getItem('yos_calendar_passkey_session_v1')),/yos_pk_/);
-   await authPage.reload({waitUntil:'domcontentloaded'});
-   await authPage.waitForFunction(()=>window.__calendarAuthTest.calls.includes('GET'));
-   assert.equal(await authPage.evaluate(()=>window.__calendarAuthTest.calls.every(x=>x==='GET') && window.__calendarAuthTest.calls.length>=1),true,'reload safely reuses live session without Google');
-   await authPage.locator('.cal-header .cal-icon-button').nth(1).click();
-   await face.waitFor({state:'visible'});
+   const start=authPage.locator('#calSettings .cal-passkey-primary').first();
+   await start.waitFor({state:'visible'});
+   assert.equal(await start.innerText(),'Notionと接続する','Notion-only entrypoint');
+   assert.equal(await authPage.locator('#calSettings .calendar-auth').evaluate(el=>el.firstElementChild.id),'calendarAuthHost','connection appears before source cards');
+   assert.equal(await authPage.evaluate(()=>window.__notionPairMock.calls.length),0,'first screen never requests personal data without pairing');
+   assert.equal(await authPage.evaluate(()=>document.body.innerText.includes('Face ID')||document.body.innerText.includes('Google本人確認')),false,'no extra Google or Face ID controls');
    require('node:fs').mkdirSync('test-results',{recursive:true});
    for(const [width,height] of [[320,667],[390,844],[402,874]]){
     await authPage.setViewportSize({width,height});
-    const bounds=await face.boundingBox();
-    assert.ok(bounds&&bounds.x>=-1&&bounds.x+bounds.width<=width+1,'Face ID fits '+width+'px');
-    assert.equal(await authPage.evaluate(()=>document.documentElement.scrollWidth>window.innerWidth+1),false,'no page-level overflow '+width+'px');
-    await authPage.screenshot({path:'test-results/calendar-faceid-'+kind+'-'+width+'.png'});
+    const bounds=await start.boundingBox();
+    assert.ok(bounds&&bounds.x>=-1&&bounds.x+bounds.width<=width+1,'Notion pairing button fits '+width+'px');
+    assert.equal(await authPage.evaluate(()=>document.documentElement.scrollWidth>window.innerWidth+1),false,'pairing no overflow '+width+'px');
+    await authPage.screenshot({path:'test-results/calendar-notion-pair-'+kind+'-'+width+'.png'});
    }
-   // Provide deterministic fake GSI only for this explicit fallback path.
-   // Never attempt live Google authentication during browser acceptance.
-   await authPage.evaluate(()=>{
-    window.google={accounts:{id:{
-     initialize(config){window.__testGoogleCallback=config.callback},
-     renderButton(host){host.textContent='Google本人確認（テスト）'}
-    }}};
-    // The reload replaced the earlier mock with the real passkey transport.
-    Object.defineProperty(window,'PublicKeyCredential',{configurable:true,value:function PublicKeyCredential(){}});
-    Object.defineProperty(navigator,'credentials',{configurable:true,value:{}});
-    window.YOS_CALENDAR_PASSKEY.authenticate=async()=>({id:'test-credential',type:'public-key'});
-    window.YOS_CALENDAR_PASSKEY.create=async()=>({id:'test-credential',type:'public-key'});
-    window.__calendarAuthTest.registered=false;
-   });
-   await face.click();
-   await authPage.locator('.cal-passkey-fallback[open]').waitFor();
-   await authPage.waitForFunction(()=>typeof window.__testGoogleCallback==='function');
-   await authPage.evaluate(()=>window.__testGoogleCallback({credential:'test-google-id-token'}));
-   await authPage.locator('.cal-passkey-secondary').waitFor({state:'visible'});
-   const prior=await authPage.evaluate(()=>window.__calendarAuthTest.calls.filter(x=>x==='auth-verify').length);
-   await authPage.locator('.cal-passkey-secondary').click();
-   await authPage.waitForFunction(()=>document.querySelector('.cal-passkey-secondary')?.hidden===true);
-   assert.equal(await authPage.evaluate(()=>window.__calendarAuthTest.calls.filter(x=>x==='auth-verify').length),prior,'registration does not prompt Face ID twice');
-   await authPage.evaluate(()=>{window.__calendarAuthTest.denyReads=true});
-   await face.click();
-   await authPage.waitForFunction(()=>document.querySelector('#calendarAuthStatus').textContent.includes('期限切れ'));
-   assert.equal(await authPage.evaluate(()=>sessionStorage.getItem('yos_calendar_passkey_session_v1')),null,'401 revokes browser session');
-   assert.deepEqual(pageErrors,[],'Face ID screen has no browser runtime exception');
+   await start.click();
+   await authPage.locator('.cal-device-code').filter({hasText:'YOS-7C2F19A4B2D8'}).waitFor();
+   assert.match(await authPage.locator('#calendarAuthStatus').innerText(),/コードをNotion/);
+   assert.equal(await authPage.locator('a').filter({hasText:'Notion確認ページを開く'}).getAttribute('href'),'https://app.notion.com/p/41a5ca882895813696a4ebe8b45211d8');
+   // A real private Notion owner edit is required in production. Mock only here.
+   const verify=authPage.locator('#calSettings button').filter({hasText:'接続を確認'});
+   await verify.click();
+   await authPage.waitForFunction(()=>document.querySelector('#calendarAuthStatus').textContent.includes('コードが未確認'));
+   assert.equal(await authPage.evaluate(()=>window.__notionPairMock.calls.filter(x=>x==='GET').length),0,'no data before owner proof');
+   await authPage.evaluate(()=>{window.__notionPairMock.ownerEdited=true});
+   await verify.click();
+   await authPage.waitForFunction(()=>window.__notionPairMock.calls.includes('GET'));
+   assert.match(await authPage.locator('#calendarAuthStatus').innerText(),/Notion正本を取得済み/);
+   await authPage.reload({waitUntil:'domcontentloaded'});
+   await authPage.waitForFunction(()=>window.__notionPairMock.calls.includes('auth-verify')&&window.__notionPairMock.calls.includes('GET'));
+   assert.equal(await authPage.evaluate(()=>window.__notionPairMock.calls.includes('pair-options')),false,'existing device auto-reconnects without registration');
+   await authPage.evaluate(()=>{window.__notionPairMock.denyReads=true});
+   await authPage.locator('.cal-header .cal-icon-button').nth(1).click();
+   await authPage.locator('#calendarTasksRefresh').click();
+   await authPage.waitForFunction(()=>document.querySelector('#calendarAuthStatus').textContent.includes('最新として扱いません'));
+   assert.deepEqual(pageErrors,[],'login-free Calendar browser has no JS exceptions');
    await authPage.close();
   }
 
