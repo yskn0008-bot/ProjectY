@@ -33,7 +33,7 @@ const nav=el('nav','cal-glass cal-nav');nav.setAttribute('aria-label','カレン
 function sheet(title){const d=el('dialog','cal-sheet');const h=el('div','sheet-head');h.append(el('h2',null,title),button('','閉じる',()=>d.close()));h.lastChild.textContent='閉じる';d.append(h);document.body.append(d);return d}
 const settings=sheet('接続と設定');settings.id='calSettings';
 // Keep the original authenticated/native update elements and listeners intact.
-settings.append(document.querySelector('.calendar-auth'));settings.append($('sourceOverview'),$('sources'),$('sourceLinks'),$('reload'));
+const authControls=document.querySelector('.calendar-auth');authControls.prepend($('calendarAuthHost'));settings.append(authControls);settings.append($('sourceOverview'),$('sources'),$('sourceLinks'),$('reload'));
 const extraStatus=el('p');extraStatus.id='calExtraStatus';settings.append(extraStatus);
 settings.append(el('p',null,'取得できない情報は表示しません。予定・実績・未確認は原本の区分を保ちます。習慣は選択した日だけ実施記録を保存します。元の繰り返し設定は変更しません。'));
 const filterDialog=sheet('表示ON/OFF');const other=button('','未分類も表示',()=>{areas.has('other')?areas.delete('other'):areas.add('other');other.setAttribute('aria-pressed',String(areas.has('other')));draw()});other.setAttribute('aria-pressed','true');other.textContent='未分類も表示';filterDialog.append(other,el('p',null,'領域が登録されていない項目を、推測でMoneyやLifeへ割り当てません。'));
