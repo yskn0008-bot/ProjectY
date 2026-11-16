@@ -44,7 +44,7 @@ test('Voice原文を同一IDでNotionへ保存し、読戻し成功まで確認�
   const m=mocked();
   assert.match(await m.run('明日10時に面談'),/Notion Inbox保存確認済み/);
   assert.equal(m.blocks[1].paragraph.rich_text[0].text.content,'明日10時に面談');
-  assert.match(m.blocks[0].paragraph.rich_text[0].text.content,/Clarity\.Voice · clarity:/);
+  assert.match(m.blocks[0].paragraph.rich_text[0].text.content,/Clarity Voice · clarity:/);
   assert.equal(m.counts.writes,1);assert.equal(m.counts.readback,3);
   assert.match(await m.run('明日10時に面談'),/保存確認済み/);
   assert.equal(m.counts.writes,1);
@@ -65,4 +65,38 @@ test('端末の保管が失敗した場合はNotionに一切書かない',async(
   const m=mocked({diskFail:true});
   assert.match(await m.run('書込停止'),/Notion未保存/);
   assert.equal(m.counts.writes,0);
+});
+
+test('Text/Shareの構造化入力も既存Inboxへ原文を保存し入力元を残す',async()=>{
+  const m=mocked();
+  assert.match(await m.run({rawText:'今日の記録',source:'text',captureId:'clarity:text-abcd1234'}),/保存確認済み/);
+  assert.match(m.blocks[0].paragraph.rich_text[0].text.content,/Clarity Text · clarity:text-abcd1234/);
+  assert.match(await m.run({rawText:'共有した資料',source:'share',shareSource:'pdf',captureId:'share:abcde12345678'}),/保存確認済み/);
+  assert.match(m.blocks[3].paragraph.rich_text[0].text.content,/Clarity Share · share:abcde12345678 · source=pdf/);
+  assert.equal(m.blocks[4].paragraph.rich_text[0].text.content,'共有した資料');
+  assert.equal(m.counts.writes,2);
+});
+
+test('受付IDで再送を照合し、同じIDの原文不一致は安全に止める',async()=>{
+  const m=mocked();
+  const x={rawText:'再送確認',source:'text',captureId:'clarity:retry-abcd1234'};
+  assert.match(await m.run(x),/保存確認済み/);
+  assert.match(await m.run(x),/保存確認済み/);
+  assert.equal(m.counts.writes,1);
+  assert.match(await m.run({...x,rawText:'違う本文'}),/Notion未保存/);
+  assert.equal(m.counts.writes,1);
+});
+
+test('不明な入力元と不正IDの送信を拒否し、外部に書き込まない',async()=>{
+  const m=mocked();
+  assert.match(await m.run({rawText:'入力',source:'unknown'}),/Notion未保存/);
+  assert.match(await m.run({rawText:'入力',source:'share',captureId:'../bad'}),/Notion未保存/);
+  assert.equal(m.counts.writes,0);
+});
+
+test('異なる入力元で同一の原文を受けても別受付として保存する',async()=>{
+  const m=mocked();
+  assert.match(await m.run({rawText:'同じ内容',source:'voice'}),/保存確認済み/);
+  assert.match(await m.run({rawText:'同じ内容',source:'text'}),/保存確認済み/);
+  assert.equal(m.counts.writes,2);
 });
