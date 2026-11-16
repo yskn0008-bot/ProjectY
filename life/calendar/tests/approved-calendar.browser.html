@@ -26,7 +26,7 @@ w.YOS_DAYSTREAM_TASK_AUTH.complete=async task=>({ok:true,item:{...task,status:'�
 click('.cal-time-row:nth-child(3) .cal-complete');await new Promise(r=>setTimeout(r,0));assert(JSON.parse(localStorage.getItem(snapshotKey)).items.find(x=>x.title==='不燃ゴミの前日確認').status==='完了','読戻し成功時のみ完了表示');assert(JSON.parse(localStorage.getItem(snapshotKey)).checkedAt===savedAt,'完了操作で他の記録の鮮度を偽装しない');d.querySelector('dialog[open]').close();
 click('[aria-label="翌日"]');assert(d.querySelector('#calPeriod').textContent.includes('19日'),'翌日');click('[aria-label="前日"]');
 click('[data-view="month"]');click('[data-area="Self"]');assert(w.YOS_APPROVED_CALENDAR.inspect().view==='month','カレンダーに復帰');assert(d.querySelector('[data-area="Self"]').getAttribute('aria-pressed')==='false','領域OFF状態を維持');click('[data-area="Self"]');
-click('[data-kind="habit"]');assert(d.querySelector('#calSummary .cal-counts').textContent.endsWith('習慣0件'),'習慣だけOFF');click('[data-kind="habit"]');
+click('[data-kind="habit"]');assert(d.querySelector('#calSummary .cal-counts').textContent.endsWith('習慣0件'),'習慣だけOFF（表示='+JSON.stringify(d.querySelector('#calSummary .cal-counts').textContent)+'／切替='+d.querySelector('[data-kind="habit"]').getAttribute('aria-pressed')+'）');click('[data-kind="habit"]');
 click('[aria-label="次の月"]');assert(d.querySelector('#calPeriod').textContent==='2026年12月','月移動');
 click('[aria-label="前の月"]');click('[data-date="2026-11-18"]');
 localStorage.setItem(snapshotKey,JSON.stringify(snapshot));d.getElementById('reload').click();
