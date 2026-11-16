@@ -20,10 +20,19 @@ function fixture(url){
  else throw Error('unknown source '+id);
  return {id:id.replace(/-/g,'').slice(0,31)+'a',properties:p};
 }
-async function run({hasKey=true,failSource=null,moneyPrivate=false}={}){
- const requests=[],alerts=[],injected=[],loaded=[];
+async function run({hasKey=true,failSource=null,moneyPrivate=false,failAsset=false}={}){
+ const requests=[],assets=[],alerts=[],injected=[],loaded=[];
  class FakeRequest{
   constructor(url){this.url=url}
+  async loadString(){
+   assets.push(this.url);
+   this.response={statusCode:failAsset?404:200};
+   const name=this.url.split('/').pop();
+   if(name==='approved-calendar.css')return '#approvedCalendar{}'+'.cal-chip{}'.repeat(1000);
+   if(name==='approved-calendar.js')return '/* YOS_APPROVED_CALENDAR */'+('var ok=true;').repeat(800);
+   if(name==='habit-calendar.js')return '/* YOS_CALENDAR_HABITS */'+('var habit=true;').repeat(50);
+   throw Error('unexpected asset '+name);
+  }
   async loadJSON(){
    requests.push({url:this.url,auth:this.headers?.Authorization,version:this.headers?.['Notion-Version'],method:this.method});
    if(this.url.includes(failSource||'source-never-fails')){this.response={statusCode:403};return {message:'not found'}}
@@ -32,9 +41,10 @@ async function run({hasKey=true,failSource=null,moneyPrivate=false}={}){
   }
  }
  class FakeWebView {
-  async loadURL(url){loaded.push(url)}
+  async loadHTML(html){loaded.push(html)}
   async evaluateJavaScript(code,pending){
    if(code.includes('if(!window.YOS_APPROVED_CALENDAR)return false'))return true;
+   if(code.includes("const host=document.getElementById('approvedCalendar')"))return {ready:'complete',exists:true,grid:true,height:500};
    if(code.includes("localStorage.getItem('yos-money-v2')"))return moneyPrivate;
    if(code.includes('var data=')){
     const start=code.indexOf('var data=')+'var data='.length;
@@ -58,13 +68,17 @@ async function run({hasKey=true,failSource=null,moneyPrivate=false}={}){
   Keychain:{contains:()=>hasKey,get:()=>hasKey?'test-token':''},
   Script:{complete(){}},Intl,Date,Promise,JSON,Error,String,Number,Object,Array,RegExp,Math,Set,Map};
  await vm.runInNewContext('(async()=>{\n'+script+'\n})()',scope,{timeout:5000});
- return {requests,alerts,injected,loaded};
+ return {requests,assets,alerts,injected,loaded};
 }
 test('direct Notion Calendar reads six existing sources without any Vercel or new auth',async()=>{
  const r=await run();
  assert.equal(r.requests.length,6);
  assert.equal(r.loaded.length,1);
- assert.match(r.loaded[0],/^https:\/\/yskn0008-bot\.github\.io\/ProjectY\/life\/calendar\//);
+ assert.match(r.loaded[0],/<!doctype html>/);
+ assert.match(r.loaded[0],/approvedCalendar/);
+ assert.equal(r.assets.length,3);
+ assert.ok(r.assets.every(x=>x.startsWith('https://raw.githubusercontent.com/yskn0008-bot/ProjectY/8a09f912da184582ad8b2e01bce809b10ddb1c7d/life/calendar/')));
+ assert.doesNotMatch(script,/await view\.loadURL\(UI\)/);
  assert.ok(r.requests.every(x=>x.auth==='Bearer test-token'&&x.version==='2026-03-11'&&x.method==='POST'));
  assert.ok(r.requests.every(x=>x.url.startsWith('https://api.notion.com/v1/data_sources/')));
  assert.equal(r.injected.length,1);
@@ -99,4 +113,11 @@ test('existing Money privacy toggle keeps private Notion amounts out of WebView 
  assert.ok(!r.injected[0].items.some(x=>x.type==='money'));
  assert.equal(r.injected[0].moneyPrivate,true);
  assert.equal(r.injected[0].moneyRead,false);
+});
+
+test('asset download failure shows a specific error instead of presenting an empty black WebView',async()=>{
+ const r=await run({failAsset:true});
+ assert.equal(r.loaded.length,0);
+ assert.equal(r.injected.length,0);
+ assert.match(r.alerts[0]?.message||'',/画面部品/);
 });
