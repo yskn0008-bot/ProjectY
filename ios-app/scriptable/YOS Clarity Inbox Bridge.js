@@ -37,16 +37,30 @@ const message = (status,receipt,detail='') => ({status,captureId:receipt?.captur
 function load() {
   if (!fm.fileExists(receiptPath)) return [];
   const rows=JSON.parse(fm.readString(receiptPath));
-  if (!Array.isArray(rows) || rows.length>5000 || rows.some(r=>!r||!legalId(r.captureId)||typeof r.raw!=='string'))
+  if (!Array.isArray(rows) || rows.length>100000 ||
+      rows.some(r=>!r || !legalId(r.captureId) ||
+        (r.status==='archived'
+          ? (typeof r.source!=='string' || !r.source)
+          : typeof r.raw!=='string')))
     throw Error('LOCAL_RECEIPTS_INVALID');
   return rows;
 }
 function persist(rows) {
-  // Never discard an unresolved capture. Prune only old, verified receipts.
-  const confirmed=rows.filter(r=>r.status==='confirmed').slice(-150);
-  const unresolved=rows.filter(r=>r.status!=='confirmed');
+  // Keep every confirmed capture ID as an archival tombstone after its full
+  // local receipt ages out. Deleting IDs would let old Shortcut retries append
+  // duplicate Notion blocks. Archive only confirmed receipts, never pending ones.
+  const confirmed=rows.filter(r=>r.status==='confirmed');
+  const archival=rows.filter(r=>r.status==='archived').concat(
+    confirmed.slice(0,-150).map(r=>({
+      captureId:r.captureId, source:r.source||'Clarity Voice',
+      createdAt:r.createdAt, status:'archived'
+    }))
+  );
+  const recent=confirmed.slice(-150);
+  const unresolved=rows.filter(r=>r.status!=='confirmed'&&r.status!=='archived');
   if (unresolved.length>500) throw Error('LOCAL_PENDING_LIMIT');
-  const serialized=JSON.stringify([...confirmed,...unresolved]);
+  if (archival.length+recent.length+unresolved.length>100000) throw Error('LOCAL_RECEIPTS_LIMIT');
+  const serialized=JSON.stringify([...archival,...recent,...unresolved]);
   fm.writeString(receiptPath,serialized);
   if (fm.readString(receiptPath)!==serialized) throw Error('LOCAL_READBACK_FAILED');
 }
@@ -115,6 +129,8 @@ async function run() {
   let row=externalId ? rows.find(r=>r.captureId===externalId) :
     rows.find(r=>r.raw===raw&&sameSource(r)&&r.status!=='confirmed');
   const now=Date.now();
+  if(row?.status==='archived')
+    return message('held',row,'過去に保存確認済みの受付IDです。二重送信を防ぐため再送を保留');
   if(row && (row.raw!==raw || !sameSource(row)))
     return message('held',row,'同じ受付IDに異なる原文・入力元があるため停止');
   if(!row && !externalId) {
