@@ -8,6 +8,9 @@ const ROOT='https://raw.githubusercontent.com/'+OWNER+'/';
 const CATALOG=ROOT+'main/ios-app/scriptable/yos-common-installer-catalog.json';
 const DATA_DIR='YOS Common Installer Data';
 const SELF='YOS Common Installer';
+// Exact user-verified legacy Notification Bridge v0.3 source from ProjectY.
+// Never use fuzzy version matching to adopt an unmanaged user script.
+const LEGACY_NOTIFICATION_BRIDGE_V03_SHA='5a8aa3e408eb85fae2f46516f6340549f3390852a0d1827775fc6b3521d402bd';
 
 function digest(text){
   const K=[0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5,0x3956c25b,0x59f111f1,0x923f82a4,0xab1c5ed5,0xd807aa98,0x12835b01,0x243185be,0x550c7dc3,0x72be5d74,0x80deb1fe,0x9bdc06a7,0xc19bf174,0xe49b69c1,0xefbe4786,0x0fc19dc6,0x240ca1cc,0x2de92c6f,0x4a7484aa,0x5cb0a9dc,0x76f988da,0x983e5152,0xa831c66d,0xb00327c8,0xbf597fc7,0xc6e00bf3,0xd5a79147,0x06ca6351,0x14292967,
@@ -116,12 +119,26 @@ async function recoverPending(fm,target,markerFile,receiptFile,name){
   const actualReceipt=await readJSON(fm,receiptFile);
   const receiptHash=actualReceipt?.sha256||null;
   if(p.oldHash){
-    if(!/^[0-9a-f]{64}$/.test(p.oldHash)||typeof p.backup!=='string'||p.backup!==fm.joinPath(fm.joinPath(basePath(fm),'backups'),encodeURIComponent(name)+'-'+p.oldHash+'.txt')||!fm.fileExists(p.backup)||typeof p.oldReceipt!=='string')throw Error('復旧用バックアップを特定できません');
-    const before=await readable(fm,p.backup),previous=JSON.parse(p.oldReceipt);
-    if(digest(before)!==p.oldHash||previous.sha256!==p.oldHash||previous.name!==name||![p.oldHash,p.newHash].includes(liveHash)||![p.oldHash,p.newHash].includes(receiptHash))throw Error('復旧記録とファイルに矛盾があります。変更しません');
+    const wasUnmanagedLegacy=p.oldReceipt===null&&name==='Notification Bridge'&&p.oldHash===LEGACY_NOTIFICATION_BRIDGE_V03_SHA;
+    if(!/^[0-9a-f]{64}$/.test(p.oldHash)||typeof p.backup!=='string'||
+       p.backup!==fm.joinPath(fm.joinPath(basePath(fm),'backups'),encodeURIComponent(name)+'-'+p.oldHash+'.txt')||
+       !fm.fileExists(p.backup)||!(typeof p.oldReceipt==='string'||wasUnmanagedLegacy))
+      throw Error('復旧用バックアップを特定できません');
+    const before=await readable(fm,p.backup),previous=wasUnmanagedLegacy?null:JSON.parse(p.oldReceipt);
+    if(digest(before)!==p.oldHash||
+       (!wasUnmanagedLegacy&&(previous.sha256!==p.oldHash||previous.name!==name))||
+       ![p.oldHash,p.newHash].includes(liveHash)||
+       !(wasUnmanagedLegacy?[null,p.newHash].includes(receiptHash):[p.oldHash,p.newHash].includes(receiptHash)))
+      throw Error('復旧記録とファイルに矛盾があります。変更しません');
     if(liveHash!==p.oldHash)writeChecked(fm,target,before);
-    if(receiptHash!==p.oldHash)writeChecked(fm,receiptFile,p.oldReceipt);
-    if(digest(await readable(fm,target))!==p.oldHash||JSON.parse(await readable(fm,receiptFile)).sha256!==p.oldHash)throw Error('復旧の確認に失敗しました');
+    if(wasUnmanagedLegacy){
+      if(receiptHash===p.newHash)fm.remove(receiptFile);
+      if(fm.fileExists(receiptFile))throw Error('旧版の管理記録復元に失敗しました');
+    }else if(receiptHash!==p.oldHash)writeChecked(fm,receiptFile,p.oldReceipt);
+    if(digest(await readable(fm,target))!==p.oldHash||
+       (!wasUnmanagedLegacy&&JSON.parse(await readable(fm,receiptFile)).sha256!==p.oldHash)||
+       (wasUnmanagedLegacy&&fm.fileExists(receiptFile)))
+      throw Error('復旧の確認に失敗しました');
   }else{
     if(p.oldHash!==null||p.backup!==null||p.oldReceipt!==null||![null,p.newHash].includes(liveHash)||![null,p.newHash].includes(receiptHash))throw Error('初回登録の中断状態が不明です。変更しません');
     if(liveHash===p.newHash)fm.remove(target);
@@ -187,6 +204,14 @@ async function install(entry){
   const current=existing.length?await readable(fm,target):null;
   const currentHash=current===null?null:digest(current);
   const previous=await readJSON(fm,receiptFile);
+  const legacyMigration=entry.id==='notification-bridge'&&name==='Notification Bridge'&&
+    current!==null&&currentHash===LEGACY_NOTIFICATION_BRIDGE_V03_SHA&&previous===null;
+  if(legacyMigration){
+    for(const loc of locations){
+      if(loc.fm!==fm&&loc.fm.fileExists(metadataPath(loc.fm,name,'.receipt.json')))
+        throw Error('旧版の管理情報が別保存先にあります。変更しません');
+    }
+  }
   if(currentHash===entry.sha256){
     if(previous&&!receiptMatches(previous,entry,chosen.kind)){await explainReceiptConflict(entry,chosen.kind,currentHash,previous);return;}
     // Identical existing code is never overwritten or automatically adopted.
@@ -194,9 +219,17 @@ async function install(entry){
     return;
   }
   if(current!==null){
-    if(!receiptMatches(previous,entry,chosen.kind)){await explainReceiptConflict(entry,chosen.kind,currentHash,previous);return;}
-    if(previous.sha256!==currentHash)throw Error('Scriptable内で変更されたコードです。上書きしません');
-    const approved=await confirm('更新の確認','「'+name+'」をGitHub検証済みの版へ更新します。現在のコードをバックアップしてから変更します。','バックアップして更新');
+    if(!receiptMatches(previous,entry,chosen.kind)&&!legacyMigration){
+      await explainReceiptConflict(entry,chosen.kind,currentHash,previous);return;
+    }
+    if(!legacyMigration&&previous.sha256!==currentHash)
+      throw Error('Scriptable内で変更されたコードです。上書きしません');
+    const approved=await confirm(
+      legacyMigration?'Notification Bridge v0.3 の安全な移行':'更新の確認',
+      legacyMigration?
+        '「'+name+'」のコードが既知のv0.3と完全一致しました。元のコードをバックアップした後、同じ名前のv0.4へ移行します。既存の通知キュー、Notion、Keychainは変更しません。本人のショートカット接続は別途必要です。':
+        '「'+name+'」をGitHub検証済みの版へ更新します。現在のコードをバックアップしてから変更します。',
+      'バックアップして更新');
     if(!approved)return;
   }else if(previous){
     // Only recover an *exact* immutable release; receipt must be preserved byte for byte.
@@ -263,8 +296,12 @@ async function install(entry){
         restored=!fm.fileExists(target)&&!fm.fileExists(receiptFile);
       }else{
         if(fm.fileExists(target)&&digest(await readable(fm,target))===entry.sha256)writeChecked(fm,target,current);
-        if(oldReceipt!==null&&fm.fileExists(receiptFile)&&await readable(fm,receiptFile)===receipt)writeChecked(fm,receiptFile,oldReceipt);
-        restored=fm.fileExists(target)&&digest(await readable(fm,target))===currentHash;
+        if(oldReceipt!==null&&fm.fileExists(receiptFile)&&await readable(fm,receiptFile)===receipt)
+          writeChecked(fm,receiptFile,oldReceipt);
+        if(oldReceipt===null&&fm.fileExists(receiptFile)&&await readable(fm,receiptFile)===receipt)
+          fm.remove(receiptFile);
+        restored=fm.fileExists(target)&&digest(await readable(fm,target))===currentHash&&
+          (oldReceipt!==null||!fm.fileExists(receiptFile));
       }
       if(restored&&fm.fileExists(markerFile))fm.remove(markerFile);
     }catch(_){}

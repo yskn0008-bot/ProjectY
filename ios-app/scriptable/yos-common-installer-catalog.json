@@ -85,6 +85,13 @@
       "path": "ios-app/scriptable/YOS Life Calendar Sync.js",
       "commit": "bb17b5af8f009fdbcb6c6d4c542edf7b79be6f6c",
       "sha256": "d3ed090e8a7ec8df84a744f1610ef209515578baed2e70700eb20313593df0a2"
+    },
+    {
+      "id": "notification-bridge",
+      "name": "Notification Bridge",
+      "path": "ios-app/scriptable/Notification Bridge.js",
+      "commit": "177a3f36ef5cde8e87bd68749d537a959c81acde",
+      "sha256": "42255f71a3acea975aece325c0c69d9d90d3e3fe70e00c1915c8f1e6f5bb2b64"
     }
   ]
 }

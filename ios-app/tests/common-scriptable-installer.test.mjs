@@ -465,3 +465,105 @@ test('two orphan receipts in iCloud and local prevent any restore',async()=>{
  assert.equal(r.opened.length,0);
  assert.match(r.alerts.at(-1).message,/管理記録が両方/);
 });
+
+
+const legacyBridgeV03=fs.readFileSync(new URL('./fixtures/Notification-Bridge-v0.3.js',import.meta.url),'utf8');
+const notificationEntry=shipped.targets.find(t=>t.id==='notification-bridge');
+const bridgeTarget='/icloud/Notification Bridge.js';
+const bridgeReceipt='/icloud/YOS Common Installer Data/Notification%20Bridge.receipt.json';
+const bridgeMarker='/icloud/YOS Common Installer Data/Notification%20Bridge.pending.json';
+test('known installed Notification Bridge v0.3 exactly matches allowlisted SHA256',()=>{
+  assert.ok(notificationEntry);
+  assert.equal(hash(legacyBridgeV03),'5a8aa3e408eb85fae2f46516f6340549f3390852a0d1827775fc6b3521d402bd');
+  assert.match(legacyBridgeV03,/^\/\/ YOS Notification Bridge v0\.3/);
+  assert.match(fixtures['notification-bridge'],/^\/\/ YOS_SCRIPT_NAME: Notification Bridge$/m);
+  assert.match(fixtures['notification-bridge'],/YOS_Notification_Pending\.json/);
+  assert.match(fixtures['notification-bridge'],/YOS_NOTION_INTEGRATION_TOKEN/);
+  assert.match(fixtures['notification-bridge'],/YOS_NOTIFICATION_RECEIPTS_V1/);
+});
+test('exact-match unmanaged Bridge v0.3 is only migrated after consent, preserving original bytes in backup',async()=>{
+  const cloud=fm('/icloud'),local=fm('/local'),other='/icloud/YOS_Notification_Pending.json';
+  cloud.files.set(bridgeTarget,legacyBridgeV03);
+  cloud.files.set(other,'[{"id":"aabbccdd","date":"2026-11-17T00:00:00Z","category":"information","body":"PENDING"}]');
+  const r=await run({cloud,local,id:'notification-bridge',choices:[0,-1]});
+  assert.equal(cloud.files.get(bridgeTarget),fixtures['notification-bridge']);
+  assert.equal(cloud.files.get(other),'[{"id":"aabbccdd","date":"2026-11-17T00:00:00Z","category":"information","body":"PENDING"}]');
+  assert.equal(JSON.parse(cloud.files.get(bridgeReceipt)).sha256,notificationEntry.sha256);
+  const backup='/icloud/YOS Common Installer Data/backups/Notification%20Bridge-'+hash(legacyBridgeV03)+'.txt';
+  assert.equal(cloud.files.get(backup),legacyBridgeV03);
+  assert.equal(cloud.files.has(bridgeMarker),false);
+  assert.equal(r.opened.length,0);
+  assert.equal(r.alerts[0].title,'Notification Bridge v0.3 の安全な移行');
+  assert.match(r.alerts.at(-1).title,/更新完了/);
+});
+test('declined legacy Bridge migration never touches existing code or queue',async()=>{
+  const cloud=fm('/icloud'),local=fm('/local');
+  cloud.files.set(bridgeTarget,legacyBridgeV03);
+  cloud.files.set('/icloud/YOS_Notification_Pending.json','PRESERVED QUEUE');
+  const files=[...cloud.files];
+  const r=await run({cloud,local,id:'notification-bridge',choices:[-1]});
+  assert.deepEqual([...cloud.files],files);
+  assert.equal(r.alerts.length,1);
+  assert.equal(r.opened.length,0);
+});
+test('modified Bridge v0.3 or unknown unmanaged same-name script is never adopted',async()=>{
+  for(const code of [legacyBridgeV03+'\n// local change','PERSONAL SCRIPT']){
+    const cloud=fm('/icloud'),local=fm('/local');
+    cloud.files.set(bridgeTarget,code);
+    const before=[...cloud.files];
+    const r=await run({cloud,local,id:'notification-bridge',choices:[0]});
+    assert.deepEqual([...cloud.files],before);
+    assert.equal(r.opened.length,0);
+    assert.match(r.alerts.at(-1).title,/管理記録の安全診断/);
+  }
+});
+test('Bridge migration stops when iCloud/local scripts coexist or there is another storage receipt',async()=>{
+  const cloud=fm('/icloud'),local=fm('/local');
+  cloud.files.set(bridgeTarget,legacyBridgeV03);
+  local.files.set('/local/Notification Bridge.js',legacyBridgeV03);
+  const r=await run({cloud,local,id:'notification-bridge'});
+  assert.equal(cloud.files.get(bridgeTarget),legacyBridgeV03);
+  assert.equal(local.files.get('/local/Notification Bridge.js'),legacyBridgeV03);
+  assert.match(r.alerts.at(-1).title,/同名スクリプトの安全診断/);
+  local.files.delete('/local/Notification Bridge.js');
+  local.createDirectory('/local/YOS Common Installer Data');
+  local.files.set('/local/YOS Common Installer Data/Notification%20Bridge.receipt.json','PREEXISTING');
+  const rr=await run({cloud,local,id:'notification-bridge'});
+  assert.equal(cloud.files.get(bridgeTarget),legacyBridgeV03);
+  assert.match(rr.alerts.at(-1).message,/旧版の管理情報が別保存先/);
+});
+test('interrupted Bridge migration restores v0.3 and removes only newly created receipt',async()=>{
+  const cloud=fm('/icloud'),local=fm('/local');
+  const backup='/icloud/YOS Common Installer Data/backups/Notification%20Bridge-'+hash(legacyBridgeV03)+'.txt';
+  cloud.createDirectory('/icloud/YOS Common Installer Data/backups');
+  cloud.files.set(backup,legacyBridgeV03);
+  cloud.files.set(bridgeTarget,fixtures['notification-bridge']);
+  cloud.files.set(bridgeReceipt,JSON.stringify({
+    schema:1,name:'Notification Bridge',id:'notification-bridge',
+    path:notificationEntry.path,storage:'iCloud',
+    commit:notificationEntry.commit,sha256:notificationEntry.sha256}));
+  cloud.files.set(bridgeMarker,JSON.stringify({schema:1,name:'Notification Bridge',
+    oldHash:hash(legacyBridgeV03),newHash:notificationEntry.sha256,
+    backup,receiptFile:bridgeReceipt,oldReceipt:null}));
+  const r=await run({cloud,local,id:'notification-bridge'});
+  assert.equal(cloud.files.get(bridgeTarget),legacyBridgeV03);
+  assert.equal(cloud.files.has(bridgeReceipt),false);
+  assert.equal(cloud.files.has(bridgeMarker),false);
+  assert.equal(cloud.files.get(backup),legacyBridgeV03);
+  assert.match(r.alerts.at(-1).message,/前回の中断状態を復旧/);
+});
+test('Bridge migration receipt write failure immediately rolls back to v0.3',async()=>{
+  const cloud=fm('/icloud'),local=fm('/local'),base=cloud.writeString.bind(cloud);
+  cloud.files.set(bridgeTarget,legacyBridgeV03);
+  let fail=true;
+  cloud.writeString=(path,value)=>{
+    if(path===bridgeReceipt&&fail){fail=false;throw Error('injected receipt fault')}
+    base(path,value);
+  };
+  const r=await run({cloud,local,id:'notification-bridge',choices:[0]});
+  assert.equal(cloud.files.get(bridgeTarget),legacyBridgeV03);
+  assert.equal(cloud.files.has(bridgeReceipt),false);
+  assert.equal(cloud.files.has(bridgeMarker),false);
+  assert.match(r.alerts.at(-1).message,/元のコードを復元/);
+  assert.equal(r.opened.length,0);
+});
