@@ -91,3 +91,34 @@ test('long GPT prose cannot push the actionable next step and source outside not
   assert.match(output,/根拠：本日の元通知/);
   assert.equal(output.length<=550,true);
 });
+
+
+test('short Japanese natural alert is displayed without the old fixed headings',()=>{
+  const {decisionResult,notificationText}=(()=>{let out;vm.runInNewContext(code,{module:{exports:{}},Script:undefined,args:undefined},{timeout:1000});const mod={exports:{}};vm.runInNewContext(code,{module:mod},{timeout:1000});return mod.exports})();
+  const raw='YOS_ALERT\n口座振替が失敗しています。元アプリで請求期限を確認してください。';
+  assert.equal(decisionResult(raw).status,'alert');
+  assert.equal(notificationText(raw),'口座振替が失敗しています。元アプリで請求期限を確認してください。');
+  assert.doesNotMatch(notificationText(raw),/事実:|影響:|根拠:|YOS_ALERT/);
+});
+test('SILENT stays empty; invalid or contradictory model output is NOT a completed silent decision',()=>{
+  const mod={exports:{}};vm.runInNewContext(code,{module:mod},{timeout:1000});
+  const {decisionResult,notificationText}=mod.exports;
+  assert.equal(decisionResult('YOS_SILENT').status,'silent');
+  assert.equal(notificationText('YOS_SILENT'),'');
+  for(const raw of ['', '接続エラー', 'YOS_ALERT', 'YOS_ALERT\n確認コード 123456',
+    'YOS_ALERT\n期限を確認してください\nYOS_SILENT']){
+    assert.equal(decisionResult(raw).status,'invalid',raw);
+    assert.equal(notificationText(raw),'');
+  }
+  assert.equal(decisionResult({yosMode:'structured',response:'YOS_ALERT\n口座が利用停止になりました。元アプリで確認してください。'}).status,'alert');
+});
+test('structured Scriptable mode distinguishes invalid, silent, and actionable without extra notifications',()=>{
+  function run(response){
+    let output;vm.runInNewContext(code,{args:{shortcutParameter:{yosMode:'structured',response}},
+      Script:{setShortcutOutput(v){output=v},complete(){}},module:{exports:{}}},{timeout:1000});
+    return output;
+  }
+  assert.equal(run('YOS_SILENT').status,'silent');
+  assert.equal(run('YOS_ALERT\n銀行アプリで確認してください。').status,'alert');
+  assert.equal(run('model timeout').status,'invalid');
+});
