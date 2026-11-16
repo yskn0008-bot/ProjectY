@@ -2,6 +2,7 @@
  * The test uses entirely fictional data in one browser origin, no Notion or Apple writes.
  */
 const assert=require('node:assert/strict');
+const fs=require('node:fs');
 const {chromium,webkit}=require('playwright');
 (async()=>{
  const kind=process.env.LIFE_BROWSER==='webkit'?'webkit':'chromium';
@@ -145,6 +146,10 @@ const {chromium,webkit}=require('playwright');
     const report=await page.locator('#result').innerText();
     assert.doesNotMatch(report,/FAIL|ERROR/,'approved '+view+' '+width+'px: '+report);
     assert.equal((report.match(/PASS /g)||[]).length,20,'twenty rendered assertions per screen');
+    if(width===390){
+     fs.mkdirSync('test-results',{recursive:true});
+     await page.locator('#phone').screenshot({path:'test-results/calendar-minimal-'+view+'-390-'+kind+'.png'});
+    }
    }
   }
   await page.goto('http://127.0.0.1:4173/life/calendar/tests/habit-occurrence.browser.html',{waitUntil:'domcontentloaded'});
