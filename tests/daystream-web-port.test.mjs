@@ -78,10 +78,10 @@ test('iPhone home-screen layout paints safe-area dark and keeps header crisp',()
 
 test('unified calendar PWA updates old SW cache and retains offline fallback without exposing private data',()=>{
  const sw=fs.readFileSync(new URL('../service-worker.js',import.meta.url),'utf8');
- assert.match(sw,/v46-daystream-approved-calendar-occurrences/);
+ assert.match(sw,/v47-daystream-calendar-no-login-local/);
  for(const path of [
    './life/calendar/','./life/calendar/index.html',
-   './life/calendar/native-bridge.js','./life/calendar/unified-sources.js'
+   './life/calendar/native-bridge.js','./life/calendar/unified-sources.js','./life/calendar/local-entries.js'
  ])assert.ok(sw.includes("'"+path+"'"),'calendar asset is precached: '+path);
  assert.match(sw,/endsWith\('\/life\/calendar\/'\)/);
  for(const path of ['/ProjectY/life/calendar/native-bridge.js','/ProjectY/life/calendar/unified-sources.js',

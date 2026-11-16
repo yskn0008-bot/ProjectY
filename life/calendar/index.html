@@ -158,7 +158,8 @@ body.glance-mode .bottom .refresh{min-height:36px;padding:7px 11px;font-size:11p
     <div class="source-tile"><div><div class="source-title">Apple等の予定</div><div class="source-sub" id="calendarEventsFreshness">DAYSTREAMに取込済みの写しだけ</div></div><span class="source-state" id="calendarEventsState">未接続</span></div>
   </section>
   <div class="calendar-auth">
-    <button class="today-btn" id="calendarTasksRefresh" type="button">Notion Tasksを更新</button>
+    <button class="today-btn" id="calendarTasksRefresh" type="button" hidden>Notion Tasksを更新（従来認証）</button>
+    <a class="today-btn" id="notionTasksOpen" href="https://www.notion.so/06e62efb9a3c45e2bec77a53332c925a" target="_blank" rel="noopener noreferrer">Notion Tasksを開く</a>
     <a class="today-btn" id="nativeRefresh" href="scriptable:///run?scriptName=YOS%20Life%20Calendar%20Sync&target=calendar" aria-label="既存Scriptableから端末の予定とリマインダーを読み込む">iPhone予定を更新</a>
     <span id="nativeImportStatus" role="status" style="font-size:11px;color:var(--muted)"></span><button class="today-btn" id="nativeConfirm" type="button" hidden>iPhoneの取込を確認</button>
     <div id="calendarAuthHost" hidden>
@@ -190,6 +191,7 @@ body.glance-mode .bottom .refresh{min-height:36px;padding:7px 11px;font-size:11p
 <script src="../../yos/daystream/source-adapters.js"></script>
 <script src="./calendar-source-extension.js"></script>
 <script src="./calendar-task-auth.js"></script>
+<script src="./local-entries.js"></script>
 <script>
 'use strict';
 (()=>{
@@ -238,6 +240,7 @@ body.glance-mode .bottom .refresh{min-height:36px;padding:7px 11px;font-size:11p
     return pairs.map((x,i)=>({...x,id:'demo:'+i,source:'表示例'}));
   }
   function load(useDemo){const life=normalizeLife(),money=normalizeMoney();
+    const local=window.YOS_CALENDAR_LOCAL?.items(localStorage)||{ok:false,items:[]};
     // DAYSTREAM copies are already in this same browser origin; do not imply native/API live access.
     let external=null;
     try{external=window.YOS_UNIFIED_CALENDAR?.read(localStorage)||null}catch{external=null}
@@ -251,7 +254,7 @@ body.glance-mode .bottom .refresh{min-height:36px;padding:7px 11px;font-size:11p
       moneyState==='private'?'Moneyの非表示設定により金額を表示しません':
       moneyState==='unavailable'?'正本の取得が失敗しました':
       moneyState==='stale'?'古い写しは金額に使用しません':
-      moneyState==='invalid'?'不完全な写しは表示しません':'Notion Tasksを更新したときだけ取得';
+      moneyState==='invalid'?'不完全な写しは表示しません':'Notionは自動取得していません。原本はNotionで開く';
     let native=null;
     try{native=window.YOS_CALENDAR_NATIVE?.read(localStorage)||null}catch{native=null}
     state.nativeSources=native;
@@ -294,12 +297,12 @@ body.glance-mode .bottom .refresh{min-height:36px;padding:7px 11px;font-size:11p
       (staleNative||staleReminders?' · 元更新未確認'+(staleNative+staleReminders)+'件':'');
     // Installed Web app / GitHub Pages must NEVER imply illustrative financial data is real.
     // Local file previews may start in design mode for visual review.
-    state.demo=(useDemo??(location.protocol==='file:'&&!life.length&&!money.length&&!external?.items?.length&&!native?.items?.length))&&!state.moneyPrivate;
+    state.demo=(useDemo??(location.protocol==='file:'&&!life.length&&!money.length&&!external?.items?.length&&!native?.items?.length&&!local.items?.length))&&!state.moneyPrivate;
     $('sourceOverview').hidden=state.demo;
     setSourceBadge('lifeConnection',state.lifeRead?'保存済み':'未接続',state.lifeRead?freshnessLabel(state.lifeSynced):'このWeb領域に記録なし',state.lifeRead&&state.lifeSynced&&Date.now()-state.lifeSynced.getTime()<=86400000?'ok':state.lifeRead?'stale':'');
     setSourceBadge('moneyConnection',state.moneyPrivate?'非表示':state.moneyRead?'保存済み':'未接続',state.moneyPrivate?'Moneyのプライバシー設定を尊重':state.moneyRead?freshnessLabel(state.moneySynced):'このWeb領域に記録なし',state.moneyRead&&state.moneySynced&&Date.now()-state.moneySynced.getTime()<=86400000?'ok':state.moneyRead?'stale':'');
 state.notionMoneyRead=state.notionMoneyRead||(!state.moneyPrivate&&external?.extraStatus?.some(s=>s.name==='家計イベント・入出金予定'&&s.status==='ready'));
-state.items=state.demo?createDemo():(window.YOS_UNIFIED_CALENDAR?.merge([...life,...money], [...(native?.items||[]),...(external?.items||[]).filter(e=>!state.moneyPrivate||e.type!=='money')])||[...life,...money]);state.loadedAt=new Date();$('connection').dataset.connection=state.demo?'demo':'local';$('connection').querySelector('span').textContent=state.demo?'デザインプレビュー':'保存済みデータ';$('demoAlert').hidden=!state.demo;$('toggleDemo').textContent='保存済みデータを見る';$('lastRead').textContent='最終読み取り '+state.loadedAt.toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'});$('sourceDetail').textContent=state.demo?'すべて架空の表示例。実際の予定・金額・習慣記録ではありません。実データへの切替で、このサイトと同じブラウザ内のMY LIFE／Moneyの保存済みデータを確認できます。':`MY LIFE：${state.lifeRead?'同じブラウザの保存記録を読み取り':'保存記録が見つからない'}。Money：${state.moneyPrivate?'Moneyの非表示設定を優先':state.moneyRead?'同じブラウザの保存記録を読み取り':'保存記録が見つからない'}。Notion Tasks：${external?.status?.tasks==='ready'?'取得済み写し（元カレンダー更新の古い・未確認データは除外）':'未接続／古い写し'}。Notion家計：${external?.status?.money==='ready'?'確認済み未来予定のみ取得':'未接続または取得未確認'}。Apple標準カレンダーは直接自動接続していません。iPhoneの他アプリの情報はWeb画面から勝手に取得できません。`;render();}
+state.items=state.demo?createDemo():(window.YOS_UNIFIED_CALENDAR?.merge([...life,...money,...(local.items||[])], [...(native?.items||[]),...(external?.items||[]).filter(e=>!state.moneyPrivate||e.type!=='money')])||[...life,...money,...(local.items||[])]);state.loadedAt=new Date();$('connection').dataset.connection=state.demo?'demo':'local';$('connection').querySelector('span').textContent=state.demo?'デザインプレビュー':'保存済みデータ';$('demoAlert').hidden=!state.demo;$('toggleDemo').textContent='保存済みデータを見る';$('lastRead').textContent='最終読み取り '+state.loadedAt.toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'});$('sourceDetail').textContent=state.demo?'すべて架空の表示例。実際の予定・金額・習慣記録ではありません。実データへの切替で、このサイトと同じブラウザ内のMY LIFE／Moneyの保存済みデータを確認できます。':`MY LIFE：${state.lifeRead?'同じブラウザの保存記録を読み取り':'保存記録が見つからない'}。Money：${state.moneyPrivate?'Moneyの非表示設定を優先':state.moneyRead?'同じブラウザの保存記録を読み取り':'保存記録が見つからない'}。Notion Tasks：${external?.status?.tasks==='ready'?'取得済み写し（元カレンダー更新の古い・未確認データは除外）':'未接続／古い写し'}。Notion家計：${external?.status?.money==='ready'?'確認済み未来予定のみ取得':'未接続または取得未確認'}。Apple標準カレンダーは直接自動接続していません。iPhoneの他アプリの情報はWeb画面から勝手に取得できません。`;render();}
   function eventsFor(key){return state.items.filter(x=>x.date===key&&state.filters.has(x.type));}
   const endOfMonth=k=>{const d=parseDate(k);return dateKey(new Date(d.getFullYear(),d.getMonth()+1,0,12))};
   function renderCalendar(){const d=parseDate(state.anchor),startKey=dateKey(new Date(d.getFullYear(),d.getMonth(),1,12)),monthEnd=endOfMonth(startKey),start=parseDate(startKey),last=parseDate(monthEnd);const weekdays=['日','月','火','水','木','金','土'];let keys=[];
@@ -382,6 +385,11 @@ state.items=state.demo?createDemo():(window.YOS_UNIFIED_CALENDAR?.merge([...life
   function render(){document.body.classList.toggle('glance-mode',state.mode==='glance');renderCalendar();renderDetails();renderGlance();window.YOS_APPROVED_CALENDAR?.update({...state,complete:completeCalendarTask,completeHabit:completeCalendarHabit})}
 
   async function completeCalendarHabit(e){
+    if(e.sourceKind==='local'){
+      const done=window.YOS_CALENDAR_LOCAL?.complete(localStorage,e.sourceId);
+      if(done?.ok)load(false);
+      return done||{ok:false,reason:'端末内の保存機能を利用できません'};
+    }
     const key='YOS_DAYSTREAM_WEB_TASK_SNAPSHOT_V1';
     let snapshot;try{snapshot=JSON.parse(localStorage.getItem(key))}catch{return {ok:false,reason:'習慣を再取得してください'}}
     const task=snapshot?.items?.find(t=>t.id===e.sourceId);
@@ -396,6 +404,11 @@ state.items=state.demo?createDemo():(window.YOS_UNIFIED_CALENDAR?.merge([...life
     return confirmed?{ok:true}:{ok:false,reason:'Notionの保存は確認済みですが、画面用の取得に実施記録が含まれません。更新して確認してください'};
   }
   async function completeCalendarTask(e){
+    if(e.sourceKind==='local'){
+      const done=window.YOS_CALENDAR_LOCAL?.complete(localStorage,e.sourceId);
+      if(done?.ok)load(false);
+      return done||{ok:false,reason:'端末内の保存機能を利用できません'};
+    }
     const key='YOS_DAYSTREAM_WEB_TASK_SNAPSHOT_V1',before=localStorage.getItem(key);
     let snapshot;try{snapshot=JSON.parse(before)}catch{return {ok:false,reason:'取得済みの原本を確認できません'}}
     const task=snapshot?.items?.find(t=>t.id===e.sourceId);
@@ -475,6 +488,7 @@ state.items=state.demo?createDemo():(window.YOS_UNIFIED_CALENDAR?.merge([...life
   }else if(incoming&&incoming.reason!=='none'){
     $('nativeImportStatus').textContent=incoming.ok?'iPhoneの予定を端末内に保存・確認しました':'端末情報は保存しませんでした（'+incoming.reason+'）';
   }
+  window.YOS_CALENDAR_REFRESH_LOCAL=()=>load(false);
   if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('../../service-worker.js',{scope:'../../',updateViaCache:'none'}).catch(()=>{});
   load(undefined);
 })();
