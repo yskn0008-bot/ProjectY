@@ -1,7 +1,7 @@
 // Variables used by Scriptable.
 // icon-color: purple; icon-glyph: inbox;
 // YOS_SCRIPT_NAME: YOS Clarity Inbox Bridge
-// Clarity.Voice⭐︎ -> existing Notion YOS Inbox (Raw First + verified readback).
+// Clarity Voice / Text / Share -> existing Notion YOS Inbox (Raw First + verified readback).
 // A Shortcut must pass the original dictated text as its Scriptable input.
 // No token is embedded or sent to GitHub; the existing Scriptable Keychain is reused.
 'use strict';
@@ -17,12 +17,19 @@ const CFG = Object.freeze({
   maxScanPages: 60
 });
 const input = typeof args === 'undefined' ? '' : args.shortcutParameter;
+const payload = input && typeof input === 'object' && !Array.isArray(input) ? input : {};
 const raw = typeof input === 'string' ? input :
-  (input && typeof input === 'object' && typeof input.rawText === 'string' ? input.rawText : '');
+  (typeof payload.rawText === 'string' ? payload.rawText : '');
+const sourceKey = String(payload.source || payload.inputMode || 'voice').toLowerCase().replace(/^clarity[. ]?/, '').trim();
+const sourceLabels = Object.freeze({voice:'Clarity Voice',text:'Clarity Text',share:'Clarity Share'});
+const sourceLabel = sourceLabels[sourceKey] || null;
+const shareSource = sourceKey === 'share' && /^(text|url|webpage|richtext|image|pdf)$/.test(String(payload.shareSource || '').toLowerCase())
+  ? String(payload.shareSource).toLowerCase() : '';
+const externalId = payload.captureId === undefined || payload.captureId === null || payload.captureId === '' ? '' : String(payload.captureId);
 const fm = FileManager.local();
 const receiptPath = fm.joinPath(fm.documentsDirectory(), CFG.receiptsFile);
 const isNonEmpty = typeof raw === 'string' && raw.trim().length > 0;
-const legalId = s => /^clarity:[a-z0-9_-]{8,100}$/i.test(String(s || ''));
+const legalId = s => /^(?:clarity|share):[a-z0-9_-]{8,100}$/i.test(String(s || ''));
 const textOf = b => (b?.paragraph?.rich_text || []).map(v => v.plain_text ?? v.text?.content ?? '').join('');
 const paragraph = value => ({object:'block',type:'paragraph',paragraph:{rich_text:[{type:'text',text:{content:value}}]}});
 const split = text => {const result=[];for(let n=0;n<text.length;n+=CFG.chunkLength)result.push(text.slice(n,n+CFG.chunkLength));return result;};
@@ -98,17 +105,26 @@ async function reconcile(meta,chunks,token) {
 }
 async function run() {
   if (!isNonEmpty) return message('missing',null,'ショートカットから原文が渡されていません');
+  if (!sourceLabel) return message('held',null,'不明なClarity入力元のため保存を保留');
+  if (externalId && !legalId(externalId)) return message('held',null,'受付IDが不正なため保存を保留');
   if (raw.length>CFG.maxLength) return message('held',null,'長文のためNotion送信を保留（元ショートカットの記録を保持）');
   let rows;
   try{rows=load();}
   catch(_){return message('held',null,'既存の保存記録が読めないため変更せず停止');}
-  let row=rows.find(r=>r.raw===raw&&r.status!=='confirmed');
+  const sameSource=r=>r.source===sourceLabel || (!r.source && sourceKey==='voice');
+  let row=externalId ? rows.find(r=>r.captureId===externalId) :
+    rows.find(r=>r.raw===raw&&sameSource(r)&&r.status!=='confirmed');
   const now=Date.now();
-  if(!row) {
-    // Avoid double handling an immediate Shortcut retry, but do not suppress future repeated commands.
-    row=rows.find(r=>r.raw===raw&&r.status==='confirmed'&&now-r.createdAt<30000);
+  if(row && (row.raw!==raw || !sameSource(row)))
+    return message('held',row,'同じ受付IDに異なる原文・入力元があるため停止');
+  if(!row && !externalId) {
+    // Only collapse retries within 30 seconds for legacy shortcuts lacking an ID.
+    row=rows.find(r=>r.raw===raw&&sameSource(r)&&r.status==='confirmed'&&now-r.createdAt<30000);
     if(row)return message('confirmed',row,'直前の同一入力は読戻し確認済み');
-    row={captureId:newId(),raw,createdAt:now,status:'queued',attempts:0,attemptedAt:0};
+  }
+  if(!row) {
+    row={captureId:externalId || newId(),raw,source:sourceLabel,shareSource,
+      createdAt:now,status:'queued',attempts:0,attemptedAt:0};
     rows.push(row);
   }
   try{persist(rows);}catch(_){return message('held',row,'端末の原文保存・読戻しに失敗');}
@@ -117,7 +133,8 @@ async function run() {
   const token=Keychain.get(CFG.tokenKey);
   if(typeof token!=='string'||token.length<10)return message('held',row,'既存Notion認証キーが無効');
   const chunks=split(row.raw);
-  const meta=new Date(row.createdAt).toISOString()+' · Clarity.Voice · '+row.captureId;
+  const meta=new Date(row.createdAt).toISOString()+' · '+(row.source || 'Clarity Voice')+' · '+row.captureId+
+    (row.shareSource?' · source='+row.shareSource:'');
   const blocks=[paragraph(meta),...chunks.map(paragraph),{object:'block',type:'divider',divider:{}}];
   // If an earlier request may have reached Notion, read the entire Inbox before retrying.
   if(row.attempts>0) {
