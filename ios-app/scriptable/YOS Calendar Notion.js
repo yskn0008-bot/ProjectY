@@ -8,7 +8,7 @@
 
 const NOTION_KEY='YOS_NOTION_INTEGRATION_TOKEN';
 // Pin the approved design: no live GitHub Pages navigation is required.
-const UI_REF='8a09f912da184582ad8b2e01bce809b10ddb1c7d';
+const UI_REF='1b4f01e45670d911fb72909bc575164840921871';
 const UI_ASSETS='https://raw.githubusercontent.com/yskn0008-bot/ProjectY/'+UI_REF+'/life/calendar/';
 async function asset(name,minimum,maximum,check){
  const request=new Request(UI_ASSETS+name);
