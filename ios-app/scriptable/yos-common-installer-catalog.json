@@ -97,8 +97,8 @@
       "id": "clarity-inbox-bridge",
       "name": "YOS Clarity Inbox Bridge",
       "path": "ios-app/scriptable/YOS Clarity Inbox Bridge.js",
-      "commit": "b617714789fb125ad1dc7a798dedf32c76386d84",
-      "sha256": "829f87ddeea83820e335400e5467768a52dddf4f467388bab96cb271d8ff208b"
+      "commit": "e4ae550e513e05b079e1c56e7f78fd846505dfbb",
+      "sha256": "406f2ed4f20efaec8bf9a0bb8e02fa095ded1dead7236c1c40c74f7ea52f8885"
     }
   ]
 }
