@@ -1,5 +1,5 @@
 /* YOS Calendar: an owner-provisioned 256-bit device key, no login prompts.
- * The secret is never distributed in public JavaScript or sent in a URL.
+ * The secret enters via a URL fragment only; it is erased before any network call.
  * The existing DAYSTREAM authentication is intentionally unchanged.
  */
 (function(root){
@@ -41,7 +41,7 @@
    try{
     const url=API+'/api/yos/tasks?source=notion'+(context.includeCalendarMoney===true?'&calendarMoney=1':'');
     const res=await timedFetch(url,{method:'GET',headers:{Authorization:'Bearer '+currentToken,Accept:'application/json'}});
-    if(!res.ok){if(res.status===401)clearToken();throw new Error(res.status===401?'本人確認の期限が切れています':'YOS Tasksを取得できません ('+res.status+')')}
+    if(!res.ok){if(res.status===401)clearToken();throw new Error(res.status===401?'iPhoneの接続情報を確認できません。専用リンクから再設定してください':'YOS Tasksを取得できません ('+res.status+')')}
     const result=await res.json();
     if(result.source!=='notion'||result.complete!==true||!Array.isArray(result.tasks)||result.tasks.length>400)throw new Error('タスク取得内容が不完全です');
     const snapshot=root.YOS_DAYSTREAM_SOURCES?.fromYosTaskDashboardCache({savedAt:Date.now(),data:result});
@@ -59,7 +59,7 @@
   completing=true;
   try{
    if(inflight)await inflight;
-   if(!currentToken)throw Error('本人確認が必要です');
+   if(!currentToken)throw Error('端末の接続設定が必要です');
    const res=await timedFetch(API+'/api/yos/tasks?source=notion',{method:'PATCH',headers:{Authorization:'Bearer '+currentToken,'Content-Type':'application/json',Accept:'application/json'},body:JSON.stringify({action:'complete',pageId:item.id.slice(7),expectedEditedAt:item.lastEditedAt,expectedState:item.status})});
    if(!res.ok){if(res.status===401)clearToken();throw Error('Notionの完了を確認できません。更新して状態を確認してください')}
    const data=await res.json();
