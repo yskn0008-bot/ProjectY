@@ -85,6 +85,13 @@
       "path": "ios-app/scriptable/YOS Life Calendar Sync.js",
       "commit": "bb17b5af8f009fdbcb6c6d4c542edf7b79be6f6c",
       "sha256": "d3ed090e8a7ec8df84a744f1610ef209515578baed2e70700eb20313593df0a2"
+    },
+    {
+      "id": "calendar-notion",
+      "name": "YOS Calendar Notion",
+      "path": "ios-app/scriptable/YOS Calendar Notion.js",
+      "commit": "44ba29a17dc48927efbb809bce057b49d55d8114",
+      "sha256": "44a053be24e7b6e128d99add68d6abe21d46f340ebc640450578bdee8564975d"
     }
   ]
 }
