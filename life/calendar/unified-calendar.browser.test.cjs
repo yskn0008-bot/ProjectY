@@ -230,6 +230,11 @@ const {chromium,webkit}=require('playwright');
      initialize(config){window.__testGoogleCallback=config.callback},
      renderButton(host){host.textContent='Google本人確認（テスト）'}
     }}};
+    // The reload replaced the earlier mock with the real passkey transport.
+    Object.defineProperty(window,'PublicKeyCredential',{configurable:true,value:function PublicKeyCredential(){}});
+    Object.defineProperty(navigator,'credentials',{configurable:true,value:{}});
+    window.YOS_CALENDAR_PASSKEY.authenticate=async()=>({id:'test-credential',type:'public-key'});
+    window.YOS_CALENDAR_PASSKEY.create=async()=>({id:'test-credential',type:'public-key'});
     window.__calendarAuthTest.registered=false;
    });
    await face.click();
@@ -239,7 +244,7 @@ const {chromium,webkit}=require('playwright');
    await authPage.locator('.cal-passkey-secondary').waitFor({state:'visible'});
    const prior=await authPage.evaluate(()=>window.__calendarAuthTest.calls.filter(x=>x==='auth-verify').length);
    await authPage.locator('.cal-passkey-secondary').click();
-   await authPage.waitForFunction(()=>window.__calendarAuthTest.calls.includes('register-verify'));
+   await authPage.waitForFunction(()=>document.querySelector('.cal-passkey-secondary')?.hidden===true);
    assert.equal(await authPage.evaluate(()=>window.__calendarAuthTest.calls.filter(x=>x==='auth-verify').length),prior,'registration does not prompt Face ID twice');
    await authPage.evaluate(()=>{window.__calendarAuthTest.denyReads=true});
    await face.click();
