@@ -141,3 +141,10 @@ test('special HTML in Notion title stays data and cannot close inline scripts',a
  assert.match(script,/JSON\.stringify\(data\)\.replace\(\/<\/g/);
  assert.equal(r.injected[0].items.length,6);
 });
+
+test('on-device reader pins the actual merged minimal Calendar + DAYSTREAM assets',()=>{
+ assert.match(script,/const UI_REF='1b4f01e45670d911fb72909bc575164840921871'/);
+ assert.match(script,/asset\('approved-calendar\.css'/);
+ assert.match(script,/asset\('approved-calendar\.js'/);
+ assert.doesNotMatch(script,/vercel\.app/);
+});
