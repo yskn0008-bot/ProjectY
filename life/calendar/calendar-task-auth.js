@@ -135,7 +135,7 @@
    timedFetch(API+'/api/yos/public-config',{headers:{Accept:'application/json'}}).then(async response=>{
     if(!response.ok)throw Error('Google認証設定を取得できません');
     const data=await response.json();
-    if(typeof data.googleClientId!=='string'||!/^[a-zA-Z0-9_.-]+\\.apps\\.googleusercontent\\.com$/.test(data.googleClientId))throw Error('Google認証設定が無効です');
+    if(typeof data.googleClientId!=='string'||!data.googleClientId.endsWith('.apps.googleusercontent.com')||!/^[a-zA-Z0-9_.-]+$/.test(data.googleClientId))throw Error('Google認証設定が無効です');
     return data.googleClientId;
    }),
    getScript()
