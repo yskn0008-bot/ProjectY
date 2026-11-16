@@ -169,3 +169,36 @@ test("claim-retry refuses unconfirmed Notion save and keeps its queue",async()=>
   assert.equal(x.queue().length,1);
   assert.equal(x.state.server.length,1,"ambiguous existing write must not be repeated");
 });
+
+
+test("important alert stays pending until the Shortcuts show-notification action is acknowledged",async()=>{
+  const x=env();const c=await x.invoke({yosAction:"capture",notification:"架空：カードの不正利用を検知"});
+  await x.invoke({yosAction:"ai-result",key:c.key,decision:"YOS_ALERT",
+    summary:"カードの不正利用が検知されました。カード会社アプリで確認してください。"});
+  let health=await x.invoke({yosAction:"recovery-status"});
+  assert.equal(health.unacknowledgedAlerts,1);
+  const first=await x.invoke({yosAction:"claim-alert"});
+  assert.equal(first.event.key,c.key);assert.equal(first.event.attempt,1);
+  assert.match(first.event.summary,/不正利用/);
+  assert.equal((await x.invoke({yosAction:"claim-alert"})).event,null);
+  assert.equal(x.state.server.length,1);
+  assert.equal((await x.invoke({yosAction:"ack-alert",key:c.key})).alertAcknowledged,true);
+  assert.equal((await x.invoke({yosAction:"ack-alert",key:c.key})).duplicate,true);
+  health=await x.invoke({yosAction:"recovery-status"});
+  assert.equal(health.unacknowledgedAlerts,0);
+  assert.equal((await x.invoke({yosAction:"claim-alert"})).event,null);
+});
+test("alert with interrupted display is offered once more and then held for review",async()=>{
+  const x=env();const c=await x.invoke({yosAction:"capture",notification:"架空：口座凍結しました"});
+  await x.invoke({yosAction:"ai-result",key:c.key,decision:"YOS_ALERT",summary:"口座凍結について銀行アプリで確認してください。"});
+  const first=await x.invoke({yosAction:"claim-alert"});
+  assert.equal(first.event.attempt,1);
+  const rows=x.journal();rows[0].nextAlertAt=new Date(Date.now()-1000).toISOString();
+  x.state.file.set("/documents/YOS_Notification_AI_State_V1.json",JSON.stringify(rows));
+  const retry=await x.invoke({yosAction:"claim-alert"});
+  assert.equal(retry.event.attempt,2);
+  const held=await x.invoke({yosAction:"claim-alert"});
+  assert.equal(held.event,null);assert.equal(held.exhausted,1);
+  assert.equal((await x.invoke({yosAction:"recovery-status"})).alertAttemptsExhausted,1);
+  assert.equal(x.state.server.length,1);
+});
