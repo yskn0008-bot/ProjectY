@@ -79,7 +79,7 @@ function dayProjection(items,day){
  const start=Date.parse(day+'T00:00:00+09:00'),stop=start+86400000,out=[];
  for(const t of items){
   if(!t.dueAt)continue;
-  const base={id:t.id,title:t.title,status:t.status,sourceFamily:t.sourceFamily,url:'https://www.notion.so/'+t.id.slice(7)};
+  const base={id:t.id,title:t.title,status:t.status,sourceFamily:t.sourceFamily,originalStart:t.dueAt,originalEnd:t.dueEnd||null,editedAt:t.lastEditedAt||null};
   if(!t.dueAt.includes('T')){
    if(t.due<=day&&day<=(t.dueEnd||t.due))out.push({...base,type:'undated'});
    continue;
@@ -109,39 +109,132 @@ const BROWSER_BOOT=String.raw`
  });
 })();
 `;
-const BROWSER_RENDER=String.raw`
-(()=>{
+const BROWSER_RENDER=String.raw`(()=>{
  try{
   const projectDay=__PROJECT_DAY__;
   const originalRender=render,originalAllDay=renderDayAllDay,originalReview=updateReview;
   const source=()=>projectDay(boot.taskSource.items,selectedDay);
-  const link=row=>{
-   const el=document.createElement('a');el.href=row.url;el.rel='noopener';
-   el.textContent=(row.status==='完了'?'✓ ':'')+row.title;el.style.color='inherit';
-   return el;
+  let ignoreClickUntil=0;
+  const tokyoDay=value=>{
+   const p=Object.fromEntries(new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date(value)).filter(x=>x.type!=='literal').map(x=>[x.type,x.value]));
+   return p.year+'-'+p.month+'-'+p.day;
+  };
+  const canMove=row=>row.sourceFamily==='task'&&
+   typeof row.originalStart==='string'&&row.originalStart.includes('T')&&
+   Number.isFinite(Date.parse(row.originalStart))&&tokyoDay(row.originalStart)===selectedDay&&
+   typeof row.editedAt==='string'&&Number.isFinite(Date.parse(row.editedAt))&&
+   (!row.originalEnd||Number.isFinite(Date.parse(row.originalEnd))&&Date.parse(row.originalEnd)-Date.parse(row.originalStart)<=86400000);
+  const sheet=document.createElement('div');sheet.id='yosNotionEditSheet';sheet.hidden=true;sheet.setAttribute('role','presentation');
+  const dialog=document.createElement('section');dialog.setAttribute('role','dialog');dialog.setAttribute('aria-modal','true');dialog.setAttribute('aria-labelledby','yosNotionSheetTitle');
+  dialog.innerHTML='<div class="yos-notion-sheet-head"><strong id="yosNotionSheetTitle"></strong><button type="button" id="yosNotionClose">閉じる</button></div><p id="yosNotionSheetInfo"></p><label for="yosNotionNewTime">移動先の開始時刻</label><input id="yosNotionNewTime" type="time" step="300"><p id="yosNotionSheetNote"></p><button id="yosNotionSave" type="button">変更内容を確認</button>';
+  sheet.append(dialog);document.body.append(sheet);
+  const title=dialog.querySelector('#yosNotionSheetTitle'),info=dialog.querySelector('#yosNotionSheetInfo');
+  const timeInput=dialog.querySelector('#yosNotionNewTime'),save=dialog.querySelector('#yosNotionSave'),note=dialog.querySelector('#yosNotionSheetNote');
+  const closeSheet=()=>{sheet.hidden=true};
+  dialog.querySelector('#yosNotionClose').onclick=closeSheet;
+  sheet.addEventListener('click',e=>{if(e.target===sheet)closeSheet()});
+  const openSheet=(row,at)=>{
+   const allowed=canMove(row),clock=fmt(at??row.s);
+   title.textContent=row.title;
+   info.textContent=(row.sourceFamily==='calendar'?'予定':'タスク')+' · '+selectedDay+' · '+fmt(row.s)+(row.type==='range'?'–'+fmt(row.s+row.d):'')+' · Notion';
+   timeInput.value=clock==='24:00'?'23:55':clock;
+   timeInput.disabled=!allowed;save.hidden=!allowed;
+   note.textContent=allowed?'ドラッグした時刻を確認してください。Notionへの保存前にもう一度確認します。':
+    row.sourceFamily==='calendar'?'連携された勤務・カレンダー予定は読み取り専用です。ここからは変更しません。':
+    '日時が未設定、または日をまたぐ途中区間です。ここからは変更しません。';
+   save.onclick=()=>{
+    const value=timeInput.value;
+    if(!/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(value)){note.textContent='時刻を確認してください';return}
+    const next=selectedDay+'T'+value+':00+09:00';
+    if(Date.parse(next)===Date.parse(row.originalStart)){closeSheet();return}
+    const q=new URLSearchParams();
+    q.set('action','move');q.set('id',row.id.slice(7));q.set('old',row.originalStart);
+    q.set('end',row.originalEnd||'');q.set('edited',row.editedAt);q.set('next',next);
+    closeSheet();
+    location.href='scriptable:///run?scriptName=YOS%20DAYSTREAM%20Notion&'+q.toString();
+   };
+   sheet.hidden=false;
+  };
+  const wire=(el,row)=>{
+   el.addEventListener('contextmenu',e=>e.preventDefault());
+   const permitted=canMove(row);
+   let touch=null,timer=null,held=false,offset=0,preview=row.s;
+   const stop=()=>{if(timer!==null){clearTimeout(timer);timer=null}};
+   const reset=()=>{stop();el.classList.remove('yos-notion-dragging');el.style.transform='';el.querySelector('small').textContent=el.dataset.timeLabel;touch=null;held=false;offset=0};
+   el.addEventListener('touchstart',e=>{
+    if(e.touches.length!==1)return;
+    const p=e.touches[0];touch={x:p.clientX,y:p.clientY};preview=row.s;held=false;
+    if(permitted)timer=setTimeout(()=>{if(touch){held=true;el.classList.add('yos-notion-dragging')}timer=null},360);
+   },{passive:true});
+   el.addEventListener('touchmove',e=>{
+    if(!touch||e.touches.length!==1)return;
+    const p=e.touches[0],dx=p.clientX-touch.x,dy=p.clientY-touch.y;
+    if(!held){
+     if(Math.abs(dx)>10||Math.abs(dy)>10){stop();touch=null}
+     return;
+    }
+    e.preventDefault();
+    offset=dy;preview=Math.max(0,Math.min(1435,Math.round(minuteAtY(yFor(row.s)+dy)/5)*5));
+    el.style.transform='translate3d(0,'+offset+'px,0) scale(1.015)';
+    el.querySelector('small').textContent=fmt(preview)+(row.type==='range'?'–'+fmt(preview+row.d):'')+' · 移動先';
+   },{passive:false});
+   el.addEventListener('touchend',()=>{
+    if(!touch)return;
+    const shouldMove=held&&Math.abs(offset)>8,at=preview;
+    reset();ignoreClickUntil=performance.now()+600;
+    if(shouldMove)openSheet(row,at);
+    else if(!held)openSheet(row);
+   });
+   el.addEventListener('touchcancel',reset);
+   el.addEventListener('click',e=>{
+    e.preventDefault();e.stopPropagation();
+    if(performance.now()<ignoreClickUntil)return;
+    openSheet(row);
+   });
+   el.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openSheet(row)}});
+  };
+  const makeCard=row=>{
+   const el=document.createElement('button');el.type='button';el.className='yos-notion-projection';
+   el.dataset.timeLabel=(row.type==='deadline'?'期限 ':'')+fmt(row.s)+(row.type==='range'?'–'+fmt(row.s+row.d):'')+(row.sourceFamily==='calendar'?' · 予定':' · タスク');
+   const meta=document.createElement('small');meta.className='yos-notion-meta';meta.textContent=el.dataset.timeLabel;
+   const title=document.createElement('span');title.className='yos-notion-title';title.textContent=(row.status==='完了'&&row.sourceFamily!=='calendar'?'✓ ':'')+row.title;
+   el.append(meta,title);
+   el.setAttribute('aria-label',el.dataset.timeLabel+' '+title.textContent);
+   el.dataset.kind=row.sourceFamily;
+   if(row.status==='完了'&&row.sourceFamily!=='calendar')el.dataset.done='true';
+   wire(el,row);return el;
   };
   render=function(){
    tl.querySelectorAll('.yos-notion-projection').forEach(x=>x.remove());
    originalRender();
    const rows=source().filter(x=>x.type!=='undated').sort((a,b)=>a.s-b.s);
-   // Source blocks stay in their own right-hand column alongside local plans.
    let group=[],end=-1;const groups=[];
-   for(const row of rows){const bottom=yFor(row.s+row.d),top=yFor(row.s),finish=Math.max(top+28,bottom);
+   for(const row of rows){
+    const top=yFor(row.s),bottom=yFor(row.s+row.d);
+    row.top=top;row.height=Math.max(36,bottom-top-2);
     if(group.length&&top>=end){groups.push(group);group=[];end=-1}
-    row.top=top;row.height=Math.max(28,bottom-top-2);group.push(row);end=Math.max(end,finish)}
+    group.push(row);end=Math.max(end,top+row.height);
+   }
    if(group.length)groups.push(group);
    for(const g of groups){
     const ends=[];
-    for(const row of g){let lane=ends.findIndex(v=>v<=row.top);if(lane<0){lane=ends.length;ends.push(0)}ends[lane]=row.top+row.height;row.lane=lane}
-    const hasLocal=g.some(row=>items.some(x=>row.s<x.s+x.d&&x.s<row.s+Math.max(1,row.d)));
-    const left=hasLocal?'52%':'73px',width=hasLocal?'48%':'(100% - 73px)';
     for(const row of g){
-     const el=link(row);el.className='yos-notion-projection';
-     el.style.cssText='position:absolute;z-index:5;box-sizing:border-box;overflow:auto;border-left:3px solid #5fc2ff;border-radius:7px;background:#254c6a;padding:4px 6px;font-size:12px;text-decoration:none;top:'+row.top+'px;height:'+row.height+'px;left:calc('+left+' + '+width+' * '+row.lane/ends.length+');width:calc('+width+' / '+ends.length+' - 3px)';
-     if(row.status==='完了')el.style.opacity='.55';
-     const time=document.createElement('small');time.style.display='block';
-     time.textContent=(row.type==='deadline'?'期限 ':'')+fmt(row.s)+(row.type==='range'?'–'+fmt(row.s+row.d):'')+(row.sourceFamily==='calendar'?' · 予定 · Notion':' · Notion');
-     el.prepend(time);tl.append(el);
+     let lane=ends.findIndex(v=>v<=row.top);
+     if(lane<0){lane=ends.length;ends.push(0)}
+     ends[lane]=row.top+row.height;row.lane=lane;
+    }
+    for(const row of g){
+     // Narrow columns only for an actual overlap. Do not halve a whole group
+     // because an unrelated local task overlaps another source block.
+     const localOverlap=items.some(x=>Number.isFinite(x.s)&&Number.isFinite(x.d)&&row.s<x.s+x.d&&x.s<row.s+Math.max(1,row.d));
+     const left=localOverlap?'calc(52% + (48% - 8px) * '+row.lane+'/'+ends.length+')':
+       'calc(73px + (100% - 85px) * '+row.lane+'/'+ends.length+')';
+     const width=localOverlap?'calc((48% - 8px) / '+ends.length+' - 3px)':
+       'calc((100% - 85px) / '+ends.length+' - 3px)';
+     const el=makeCard(row);
+     el.style.left=left;el.style.width=width;el.style.top=row.top+'px';el.style.height=row.height+'px';
+     if(row.d>=180)el.dataset.long='true';
+     tl.append(el);
     }
    }
   };
@@ -151,8 +244,8 @@ const BROWSER_RENDER=String.raw`
    const rows=source().filter(x=>x.type==='undated');
    if(!rows.length)return;
    const section=document.getElementById('dayAllDay');section.hidden=false;
-   const title=document.createElement('b');title.textContent='時間未設定 · Notion';section.append(title);
-   for(const row of rows){const span=document.createElement('span');span.append(link(row));section.append(span)}
+   const head=document.createElement('b');head.textContent='時間未設定 · Notion';section.append(head);
+   for(const row of rows){const el=makeCard(row);el.classList.add('yos-notion-all-day');section.append(el)}
   };
   updateReview=function(){
    originalReview();
@@ -169,8 +262,33 @@ const BROWSER_RENDER=String.raw`
   const message=document.getElementById('yosNativeBoot');
   if(message)message.textContent='DAYSTREAMの表示に失敗しました。閉じて再起動してください。';
  }
-})();
-`;
+})();`;
+
+const NATIVE_STYLE=String.raw`<style id="yosNotionNativeStyle">
+.yos-notion-projection{position:absolute;z-index:6;display:flex;flex-direction:column;gap:3px;box-sizing:border-box;overflow:hidden;text-align:left;padding:7px 9px;appearance:none;-webkit-appearance:none;border:1px solid #45627c;border-left:4px solid #69c6ff;border-radius:9px;background:#263a50;color:#f5f8ff!important;font:500 13px/1.35 -apple-system,BlinkMacSystemFont,sans-serif;cursor:pointer;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;touch-action:pan-y;white-space:normal;overflow-wrap:anywhere;box-shadow:0 1px 3px #0002}
+.yos-notion-projection[data-kind="calendar"]{background:#34414d;border-color:#697989;border-left-color:#d9b778}
+.yos-notion-projection[data-long="true"]{background:rgba(39,54,72,.76)}
+.yos-notion-projection[data-done="true"]{opacity:.62}
+.yos-notion-projection:focus-visible{outline:2px solid #a0e4ff;outline-offset:1px}
+.yos-notion-projection .yos-notion-meta{display:block!important;color:#bde6ff!important;font-size:11px!important;line-height:1.3;font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.yos-notion-projection[data-kind="calendar"] .yos-notion-meta{color:#f1d4a7!important}
+.yos-notion-projection .yos-notion-title{display:block;color:#fff!important;font-size:13px!important;line-height:1.38;font-weight:650;letter-spacing:0;overflow-wrap:anywhere}
+.yos-notion-projection.yos-notion-dragging{z-index:14;box-shadow:0 8px 22px #000a;outline:2px solid #9cdaff;touch-action:none}
+.yos-notion-all-day{position:relative!important;top:auto!important;left:auto!important;width:100%!important;height:auto!important;min-height:44px!important;margin:7px 0}
+#yosNotionEditSheet[hidden]{display:none!important}
+#yosNotionEditSheet{position:fixed;z-index:100002;inset:0;display:flex;align-items:flex-end;justify-content:center;background:#07101bd9;backdrop-filter:blur(4px);padding:12px 12px calc(20px + env(safe-area-inset-bottom))}
+#yosNotionEditSheet section{box-sizing:border-box;width:100%;max-width:600px;padding:18px;border-radius:20px;background:#1b2836;color:#f8fbff;border:1px solid #69819a;box-shadow:0 14px 36px #0008}
+#yosNotionEditSheet .yos-notion-sheet-head{display:flex;justify-content:space-between;gap:10px;align-items:start}
+#yosNotionEditSheet strong{font-size:18px;line-height:1.4}
+#yosNotionEditSheet p{font-size:13px;color:#d1dfed;line-height:1.55}
+#yosNotionEditSheet label{display:block;font-size:13px;margin:14px 0 6px}
+#yosNotionEditSheet input{box-sizing:border-box;width:100%;min-height:48px;border-radius:10px;border:1px solid #90a7bd;background:#27394d;color:#fff;font-size:18px;padding:8px}
+#yosNotionEditSheet button{background:#2276a7;color:#fff;font-weight:650;font-size:14px;border:1px solid #8dcbeb;border-radius:10px;min-height:44px;padding:10px 16px}
+#yosNotionEditSheet button[hidden]{display:none}
+#yosNotionEditSheet #yosNotionClose{background:#405367}
+#yosNotionEditSheet #yosNotionSave{width:100%}
+@media(max-width:350px){.yos-notion-projection .yos-notion-title{font-size:12px!important}.yos-notion-projection{padding:5px 6px}}
+</style>`;
 const safeScript=s=>s.replace(/<\/script/gi,'<\\/script');
 function buildHTML(html,adapters,native,wizard,snapshot){
  if(!html.includes('// WEB_PORT_BOOT')||!html.includes('</script><script>\nconst tl=')||!html.includes('<script src="./task-wizard.js"></script>'))throw Error('DAYSTREAMの形式が一致しません');
@@ -180,7 +298,7 @@ function buildHTML(html,adapters,native,wizard,snapshot){
  .replace('<script src="./yos-tasks-auth.js"></script>','')
  .replace('</script><script>\nconst tl=','</script><script>'+safeScript(BROWSER_BOOT.replace('__SNAPSHOT__',json))+'</script><script>\nconst tl=')
  .replace('<script src="./task-wizard.js"></script>','<script>'+safeScript(wizard)+'</script><script>'+safeScript(BROWSER_RENDER.replace('__PROJECT_DAY__','('+dayProjection.toString()+')').replace('const projectDay=','const validDate='+validDate.toString()+';const projectDay='))+'</script>');
- out=out.replace('<head>','<head><base href="https://yskn0008-bot.github.io/ProjectY/yos/daystream/">')
+ out=out.replace('<head>','<head>'+NATIVE_STYLE+'<base href="https://yskn0008-bot.github.io/ProjectY/yos/daystream/">')
  .replace('<body class="yos-daystream-web">','<body class="yos-daystream-web"><div id="yosNativeBoot" role="status" style="position:fixed;inset:0;z-index:99999;background:#343943;color:white;padding:80px 20px;font-family:-apple-system,sans-serif">DAYSTREAMを読み込んでいます…</div>');
  // Never start a service worker from the native HTML presentation.
  out=out.replace("if('serviceWorker' in navigator)","if(false)");
