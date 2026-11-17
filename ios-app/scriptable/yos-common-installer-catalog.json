@@ -111,8 +111,8 @@
       "id": "remote-web",
       "name": "YOS Remote Web",
       "path": "ios-app/scriptable/remote-widgets/YOS Remote Web.js",
-      "commit": "170b46b663f487d271911da91b1d8052170f3793",
-      "sha256": "2553cf0dd5af9310d31dcf4fa078dd9cad4db5c04d9b0a43ff7293969336f811"
+      "commit": "6a8b3f82bb262111b996a71b18fad1138feb2977",
+      "sha256": "741cda2f153fe3d0b832d7bd22c0a703a432fc8e02728c9f37cc34fac8cc16ca"
     }
   ]
 }
