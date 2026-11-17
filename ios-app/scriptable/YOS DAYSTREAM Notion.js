@@ -95,6 +95,17 @@ const BROWSER_BOOT=String.raw`
 (()=>{
  const snapshot=__SNAPSHOT__;
  window.YOS_CHARCOAL_BOOT.taskSource=snapshot;
+ // Messages are sent only after a user explicitly taps the inline Save button.
+ // The Notion credential remains in the native Scriptable Keychain, never here.
+ window.YOS_DAYSTREAM_NATIVE_ACTIVE=__NATIVE_ACTIVE__;
+ window.YOS_DAYSTREAM_OUTBOX=[];
+ window.YOS_DAYSTREAM_EMIT=event=>{
+  if(!window.YOS_DAYSTREAM_NATIVE_ACTIVE)return false;
+  const listener=window.YOS_DAYSTREAM_NATIVE_WAIT;
+  if(listener){window.YOS_DAYSTREAM_NATIVE_WAIT=null;listener(event)}
+  else window.YOS_DAYSTREAM_OUTBOX.push(event);
+  return true;
+ };
  window.YOS_DAYSTREAM_TASK_AUTH={
   setup:()=>{location.href='scriptable:///run?scriptName=YOS%20DAYSTREAM%20Notion';return Promise.resolve(true)},
   complete:()=>Promise.resolve({ok:false,reason:'表示専用です。Notionの元ページで完了してください'})
@@ -131,6 +142,56 @@ const BROWSER_RENDER=String.raw`(()=>{
   const title=dialog.querySelector('#yosNotionSheetTitle'),info=dialog.querySelector('#yosNotionSheetInfo');
   const timeInput=dialog.querySelector('#yosNotionNewTime'),save=dialog.querySelector('#yosNotionSave'),note=dialog.querySelector('#yosNotionSheetNote');
   const closeSheet=()=>{sheet.hidden=true};
+  // Bottom confirmation stays inside this SAME WebView after drag.
+  const moveBar=document.createElement('aside');moveBar.id='yosNotionMoveBar';
+  moveBar.hidden=true;moveBar.setAttribute('aria-live','polite');
+  moveBar.innerHTML='<span id="yosMoveSummary"></span><div class="yos-move-actions"><button id="yosMoveCancel" type="button">戻す</button><button id="yosMoveSave" type="button">保存</button></div>';
+  document.body.append(moveBar);
+  const moveSummary=moveBar.querySelector('#yosMoveSummary');
+  const moveSave=moveBar.querySelector('#yosMoveSave');
+  let pendingMove=null,requestSeq=0;
+  const cancelMove=()=>{if(!pendingMove?.saving){pendingMove=null;moveBar.hidden=true}};
+  moveBar.querySelector('#yosMoveCancel').onclick=cancelMove;
+  const previewMove=(row,to)=>{
+   if(!canMove(row))return;
+   const nextMinute=Math.max(0,Math.min(1435,Math.round(to/5)*5));
+   const next=selectedDay+'T'+fmt(nextMinute)+':00+09:00';
+   if(!Number.isFinite(Date.parse(next))||Date.parse(next)===Date.parse(row.originalStart))return;
+   pendingMove={requestId:String(++requestSeq),row,
+    values:{id:row.id.slice(7),old:row.originalStart,end:row.originalEnd||'',
+     edited:row.editedAt,next},saving:false};
+   moveSummary.textContent=row.title+'  '+fmt(row.s)+' → '+fmt(nextMinute);
+   moveSave.disabled=false;moveSave.textContent='保存';
+   moveBar.hidden=false;
+  };
+  moveSave.onclick=()=>{
+   if(!pendingMove||pendingMove.saving)return;
+   if(!window.YOS_DAYSTREAM_NATIVE_ACTIVE){
+    moveSummary.textContent='Scriptableアプリから開くと日時を保存できます';
+    return;
+   }
+   const request={type:'move',requestId:pendingMove.requestId,values:pendingMove.values};
+   if(!window.YOS_DAYSTREAM_EMIT(request)){
+    moveSummary.textContent='保存できません。元の日時は変更していません';
+    return;
+   }
+   pendingMove.saving=true;moveSave.disabled=true;moveSave.textContent='保存中';
+  };
+  window.YOS_DAYSTREAM_NATIVE_REPLY=reply=>{
+   if(!pendingMove||reply?.requestId!==pendingMove.requestId)return;
+   pendingMove.saving=false;
+   if(reply.ok&&reply.snapshot?.items){
+    pendingMove=null;moveBar.hidden=true;
+    boot.taskSource=reply.snapshot;
+    window.YOS_CHARCOAL_BOOT.taskSource=reply.snapshot;
+    render();renderDayAllDay();updateReview();
+    const status=document.getElementById('yosWebSourceState');
+    if(status)status.textContent='Notion '+reply.snapshot.items.length+'件取得 · 保存済み';
+   }else{
+    moveSave.disabled=true;moveSave.textContent='保存停止';
+    moveSummary.textContent=String(reply?.message||'保存状態を確認できません。Notionの元タスクを確認してください').slice(0,130);
+   }
+  };
   dialog.querySelector('#yosNotionClose').onclick=closeSheet;
   sheet.addEventListener('click',e=>{if(e.target===sheet)closeSheet()});
   const openSheet=(row,at)=>{
@@ -147,11 +208,8 @@ const BROWSER_RENDER=String.raw`(()=>{
     if(!/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(value)){note.textContent='時刻を確認してください';return}
     const next=selectedDay+'T'+value+':00+09:00';
     if(Date.parse(next)===Date.parse(row.originalStart)){closeSheet();return}
-    const q=new URLSearchParams();
-    q.set('action','move');q.set('id',row.id.slice(7));q.set('old',row.originalStart);
-    q.set('end',row.originalEnd||'');q.set('edited',row.editedAt);q.set('next',next);
     closeSheet();
-    location.href='scriptable:///run?scriptName=YOS%20DAYSTREAM%20Notion&'+q.toString();
+    previewMove(row,Number(value.slice(0,2))*60+Number(value.slice(3,5)));
    };
    sheet.hidden=false;
   };
@@ -183,15 +241,8 @@ const BROWSER_RENDER=String.raw`(()=>{
     const shouldMove=held&&Math.abs(offset)>8,at=preview;
     reset();ignoreClickUntil=performance.now()+600;
     if(shouldMove){
-     // No full-screen edit sheet on drop. A small native confirmation
-     // protects the Notion write; cancellation keeps the original time.
-     const next=selectedDay+'T'+fmt(at)+':00+09:00';
-     if(Date.parse(next)!==Date.parse(row.originalStart)&&canMove(row)){
-      const q=new URLSearchParams();
-      q.set('action','move');q.set('id',row.id.slice(7));q.set('old',row.originalStart);
-      q.set('end',row.originalEnd||'');q.set('edited',row.editedAt);q.set('next',next);
-      location.href='scriptable:///run?scriptName=YOS%20DAYSTREAM%20Notion&'+q.toString();
-     }
+     // Keep the WebView visible: inline Save/Undo bar, no Scriptable relaunch.
+     previewMove(row,at);
     }else if(!held)openSheet(row);
    });
    el.addEventListener('touchcancel',reset);
@@ -323,13 +374,13 @@ const NATIVE_STYLE=String.raw`<style id="yosNotionNativeStyle">
 @media(max-width:350px){.yos-notion-projection .yos-notion-title{font-size:12px!important}.yos-notion-projection{padding:5px 6px}}
 </style>`;
 const safeScript=s=>s.replace(/<\/script/gi,'<\\/script');
-function buildHTML(html,adapters,native,wizard,snapshot){
+function buildHTML(html,adapters,native,wizard,snapshot,nativeActive=false){
  if(!html.includes('// WEB_PORT_BOOT')||!html.includes('</script><script>\nconst tl=')||!html.includes('<script src="./task-wizard.js"></script>'))throw Error('DAYSTREAMの形式が一致しません');
  const json=JSON.stringify(snapshot).replace(/</g,'\\u003c').replace(/\u2028/g,'\\u2028').replace(/\u2029/g,'\\u2029');
  let out=html.replace('<script src="./source-adapters.js"></script>','<script>'+safeScript(adapters)+'</script>')
  .replace('<script src="../../life/calendar/native-bridge.js"></script>','<script>'+safeScript(native)+'</script>')
  .replace('<script src="./yos-tasks-auth.js"></script>','')
- .replace('</script><script>\nconst tl=','</script><script>'+safeScript(BROWSER_BOOT.replace('__SNAPSHOT__',json))+'</script><script>\nconst tl=')
+ .replace('</script><script>\nconst tl=','</script><script>'+safeScript(BROWSER_BOOT.replace('__SNAPSHOT__',json).replace('__NATIVE_ACTIVE__',nativeActive?'true':'false'))+'</script><script>\nconst tl=')
  .replace('<script src="./task-wizard.js"></script>','<script>'+safeScript(wizard)+'</script><script>'+safeScript(BROWSER_RENDER.replace('__PROJECT_DAY__','('+dayProjection.toString()+')').replace('const projectDay=','const validDate='+validDate.toString()+';const projectDay='))+'</script>');
  out=out.replace('<head>','<head>'+NATIVE_STYLE+'<base href="https://yskn0008-bot.github.io/ProjectY/yos/daystream/">')
  .replace('<body class="yos-daystream-web">','<body class="yos-daystream-web"><div id="yosNativeBoot" role="status" style="position:fixed;inset:0;z-index:99999;background:#343943;color:white;padding:80px 20px;font-family:-apple-system,sans-serif">DAYSTREAMを読み込んでいます…</div>');
@@ -382,7 +433,11 @@ async function main(){
  // This payload contains only task projections; credentials never enter the WebView.
  const output=buildHTML(html,adapters,native,wizard,snapshot);
  stage='画面表示';
- await WebView.loadHTML(output,null,null,true);
+ if(typeof config!=='undefined'&&config.runsWithSiri){
+  await WebView.loadHTML(output,null,null,true);
+ }else{
+  await presentWithInlineBridge(output,token,adapters);
+ }
 }
 const YOS_TASK_DB='06e62efb9a3c45e2bec77a53332c925a';
 const apiHeaders=token=>({
@@ -425,7 +480,7 @@ function validateMoveInput(params){
   throw Error('同じ日の開始時刻だけ変更できます。日跨ぎの終了時刻は維持します');
  return {id,old,end,next,edited,duration};
 }
-async function moveNotion(params,refresh=main){
+async function moveNotion(params,refresh=main,inlineConfirmed=false){
  if(typeof config!=='undefined'&&config.runsWithSiri)
   throw Error('Notionの日時変更はScriptableアプリで確認してください');
  const move=validateMoveInput(params);
@@ -444,12 +499,14 @@ async function moveNotion(params,refresh=main){
  const newEnd=move.end?new Date(Date.parse(move.next)+move.duration).toISOString():null;
  const before=tokyoParts(move.old),after=tokyoParts(move.next);
  const name=clean(rich(p['やること']),64);
- const confirm=new Alert();confirm.title='Notionの日時を変更';
- confirm.message='タスク：'+name+'\n'+before.day+' '+before.time+' → '+after.day+' '+after.time+
-   '\n'+(newEnd?'所要時間・終了時刻は保持します':'期限の時刻だけ変更します')+
-   '\nNotionの「期限」に反映します。';
- confirm.addAction('Notionに保存');confirm.addCancelAction('キャンセル');
- if(await confirm.presentAlert()!==0){await refresh();return}
+ if(!inlineConfirmed){
+  const confirm=new Alert();confirm.title='Notionの日時を変更';
+  confirm.message='タスク：'+name+'\n'+before.day+' '+before.time+' → '+after.day+' '+after.time+
+    '\n'+(newEnd?'所要時間・終了時刻は保持します':'期限の時刻だけ変更します')+
+    '\nNotionの「期限」に反映します。';
+  confirm.addAction('Notionに保存');confirm.addCancelAction('キャンセル');
+  if(await confirm.presentAlert()!==0){await refresh();return}
+ }
  // Re-read immediately before write. A stale or replaced date cannot be updated.
  const latest=await notionPage(token,move.id),currentDue=latest.properties['期限']?.date;
  if(latest.last_edited_time!==move.edited||!currentDue||
@@ -467,6 +524,48 @@ async function moveNotion(params,refresh=main){
  if(!saved||!matchInstant(saved.start,move.next)||!matchInstant(saved.end||null,newEnd))
   throw Error('Notionへの保存後照合が一致しません。再操作せず元タスクを確認してください');
  await refresh();
+}
+
+const INLINE_BRIDGE_WAIT=String.raw`(()=>{
+ const queue=window.YOS_DAYSTREAM_OUTBOX;
+ if(!window.YOS_DAYSTREAM_NATIVE_ACTIVE){completion({type:'inactive'});return}
+ if(!Array.isArray(queue)){completion({type:'inactive'});return}
+ if(queue.length){completion(queue.shift());return}
+ window.YOS_DAYSTREAM_NATIVE_WAIT=completion;
+})();`;
+async function presentWithInlineBridge(html,token,adapters){
+ // Scriptable's instance WebView supports evaluateJavaScript(..., true), which
+ // resolves when the browser calls completion(). No URL scheme or app switch.
+ const web=new WebView();
+ await web.loadHTML(html);
+ const shown=web.present(true);
+ const closed=shown.then(()=>({type:'closed'}),()=>({type:'closed'}));
+ const makeSnapshot=async()=>{
+  const latest=await readTasks(token);
+  const scope={};new Function('window',adapters)(scope);
+  const snapshot=scope.YOS_DAYSTREAM_SOURCES.fromYosTaskDashboardCache({savedAt:Date.now(),data:latest});
+  if(!snapshot)throw Error('更新後のNotionデータを検証できません');
+  return snapshot;
+ };
+ while(true){
+  const event=await Promise.race([
+   closed,
+   web.evaluateJavaScript(INLINE_BRIDGE_WAIT,true).then(x=>x,()=>({type:'closed'}))
+  ]);
+  if(!event||event.type==='closed'||event.type==='inactive')break;
+  if(event.type!=='move'||typeof event.requestId!=='string'||event.requestId.length>32)continue;
+  let response={requestId:event.requestId,ok:false,message:'Notionへの保存を確認できません'};
+  try{
+   // Only the in-view Save button emits this request. The native side verifies
+   // the original Notion page and deadlines again before making a PATCH.
+   await moveNotion(event.values,async()=>{},true);
+   response={requestId:event.requestId,ok:true,snapshot:await makeSnapshot()};
+  }catch(e){response.message=clean(e?.message||e,130)}
+  try{
+   await web.evaluateJavaScript('window.YOS_DAYSTREAM_NATIVE_REPLY('+JSON.stringify(response).replace(/</g,'\\u003c')+')',false);
+  }catch(e){break}
+ }
+ await shown;
 }
 // SCRIPTABLE_ENTRY
 try{
