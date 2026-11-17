@@ -74,3 +74,35 @@ test('missing Keychain stops before source or UI requests',async()=>{
  const a=api({Keychain:{contains:()=>false},Alert,Request:class{constructor(){throw Error('unexpected request')}}});
  await a.main();assert.deepEqual(alerts,['Notion未接続']);
 });
+
+test('Siri route returns a shortcut output instead of presenting an unsupported Alert',async()=>{
+ const outputs=[];
+ const a=api({
+  config:{runsInSiri:true},
+  Script:{setShortcutOutput:value=>outputs.push(value)},
+  Alert:class{constructor(){throw Error('Siri Alert should never be constructed')}},
+  Keychain:{contains(){throw Error('should not read credentials in Siri')}},
+  Request:class{constructor(){throw Error('should not make a request in Siri')}}
+ });
+ await a.main();
+ assert.equal(outputs.length,1);
+ assert.match(outputs[0],/DAYSTREAM 起動方法/);
+ assert.match(outputs[0],/scriptable:\/\/\/run\?scriptName=YOS%20DAYSTREAM%20Notion/);
+});
+test('Notion HTTP failures are categorized without exposing server or token contents',async()=>{
+ for(const [http,hint] of [[401,'認証情報'],[403,'閲覧権限'],[404,'共有設定'],[429,'アクセス制限'],[503,'一時的']]){
+  const a=api({Request:class{
+   async loadJSON(){this.response={statusCode:http};return {message:'raw-token-should-not-leak'}}
+  }});
+  await assert.rejects(a.readTasks('fake-secret'),e=>{
+   assert.match(e.message,new RegExp('HTTP '+http));assert.match(e.message,new RegExp(hint));
+   assert.doesNotMatch(e.message,/raw-token|fake-secret/);return true;
+  });
+ }
+});
+test('malformed success and offline requests yield distinct read errors',async()=>{
+ const malformed=api({Request:class{async loadJSON(){this.response={statusCode:200};return {results:'unexpected',has_more:false}}}});
+ await assert.rejects(malformed.readTasks('fake-secret'),/HTTP 200：応答の形式/);
+ const offline=api({Request:class{async loadJSON(){throw Error('private exception contents')}}});
+ await assert.rejects(offline.readTasks('fake-secret'),/HTTP 不明：応答がありません/);
+});
