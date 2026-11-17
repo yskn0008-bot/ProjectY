@@ -221,11 +221,18 @@ const BROWSER_RENDER=String.raw`(()=>{
    for(const row of rows){
     const top=yFor(row.s),bottom=yFor(row.s+row.d);
     row.top=top;row.height=Math.max(36,bottom-top-2);
-    if(group.length&&top>=end){groups.push(group);group=[];end=-1}
-    group.push(row);end=Math.max(end,top+row.height);
+    // Group only when SOURCE times overlap; short consecutive actions are independent.
+    if(group.length&&row.s>=end){groups.push(group);group=[];end=-1}
+    group.push(row);end=Math.max(end,row.s+Math.max(1,row.d));
    }
    if(group.length)groups.push(group);
+   let visualBottom=-Infinity;
    for(const g of groups){
+    // A 2-5 minute task still needs a touchable label. Stack successive
+    // micro-actions without turning them into half-width overlapping columns.
+    const lift=Math.max(0,visualBottom+3-g[0].top);
+    for(const row of g)row.top+=lift;
+    visualBottom=Math.max(visualBottom,...g.map(row=>row.top+row.height));
     const ends=[];
     for(const row of g){
      let lane=ends.findIndex(v=>v<=row.top);
