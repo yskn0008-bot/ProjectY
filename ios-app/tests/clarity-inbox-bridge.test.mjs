@@ -5,13 +5,37 @@ import test from 'node:test';
 
 const source = fs.readFileSync(new URL('../scriptable/YOS Clarity Inbox Bridge.js', import.meta.url), 'utf8');
 function mocked(options={}) {
-  const files=new Map(),blocks=[],counts={writes:0,readback:0};let n=0;
+  const files=new Map(),blocks=[],counts={writes:0,readback:0,routed:0};let n=0;
+  const rows=[],pageBlocks=[],pageName=options.pageName||'家計管理戦略',pageId='existing-page-1234';
   const fm={documentsDirectory:()=>'/docs',joinPath:(...x)=>x.join('/'),fileExists:p=>files.has(p),
     readString:p=>files.get(p),writeString:(p,v)=>{if(options.diskFail)throw Error('DISK');files.set(p,v);}};
   class Request {
     constructor(url){this.url=new URL(url);this.method='GET';this.response={statusCode:200};}
     async loadJSON(){
-      const path=this.url.pathname;
+      const path=this.url.pathname.replace(/^\/v1/,'');
+      if(this.method==='POST'&&path==='/search')
+        return {results:[{id:pageId,object:'page',properties:{title:{type:'title',title:[{plain_text:pageName}]}}}],has_more:false};
+      if(this.method==='POST'&&path.startsWith('/data_sources/')&&path.endsWith('/query')){
+        const body=JSON.parse(this.body),f=body.filter,ds=path.split('/')[2];
+        const value=r=>r.properties[f.property];
+        const text=x=>(x?.rich_text||x?.title||[]).map(z=>z.text?.content||z.plain_text||'').join('');
+        const matching=rows.filter(r=>r.ds===ds).filter(r=>f.rich_text?.equals?text(value(r))===f.rich_text.equals:
+          f.rich_text?.contains?text(value(r)).includes(f.rich_text.contains):f.title?text(value(r))===f.title.equals:false);
+        return {results:matching,has_more:false};
+      }
+      if(this.method==='POST'&&path==='/pages'){
+        const b=JSON.parse(this.body),row={id:'page-row-'+(++n),ds:b.parent.data_source_id,properties:b.properties};
+        rows.push(row);counts.routed++;
+        if(options.lostRouteReply){options.lostRouteReply=false;throw Error('LOST_ROUTE');}
+        return {id:row.id};
+      }
+      if(this.method==='GET'&&path.startsWith('/pages/'))return rows.find(r=>r.id===path.split('/').at(-1))||{};
+      if(this.method==='PATCH'&&path==='/blocks/'+pageId+'/children'){
+        pageBlocks.push(...JSON.parse(this.body).children.map(b=>({...b,id:'page-block-'+(++n)})));
+        counts.routed++;return {results:pageBlocks};
+      }
+      if(this.method==='GET'&&path==='/blocks/'+pageId+'/children')
+        return {results:pageBlocks,has_more:false};
       if(this.method==='PATCH') {
         counts.writes++;
         const items=JSON.parse(this.body).children.map(b=>({...b,id:'block-'+(++n)}));
@@ -38,7 +62,7 @@ function mocked(options={}) {
     await vm.runInContext('(async()=>{'+source+'\n})()',context);
     return output;
   }
-  return {files,blocks,counts,run};
+  return {files,blocks,counts,rows,pageBlocks,run};
 }
 test('Voice原文を同一IDでNotionへ保存し、読戻し成功まで確認する',async()=>{
   const m=mocked();
@@ -119,4 +143,98 @@ test('保存確認済みの古い受付IDを整理後も保持し、151件目以
   const conflicting=await m.run({rawText:'異なる原文',source:'voice',captureId:'clarity:archive-00000000'});
   assert.match(conflicting,/Notion未保存/);
   assert.equal(m.counts.writes,151);
+});
+
+
+test('direct iPhone Bridge routes a verified Raw capture to existing Tasks and Shopping without a server',async()=>{
+  const m=mocked();
+  const x={rawText:'タスク：書類を受け取る\n買い物リスト：洗剤',source:'text',captureId:'clarity:bridge-routing-001'};
+  const out=await m.run(x);
+  assert.match(out,/Notion Inbox保存確認済み/);
+  assert.match(out,/登録2件/);
+  assert.equal(m.counts.writes,1,'Raw is appended only once');
+  assert.equal(m.counts.routed,2,'two routed destinations');
+  assert.equal(m.rows.length,2);
+  assert.equal(m.rows[0].properties['同期キー'].rich_text[0].text.content,'inbox:clarity:bridge-routing-001:01');
+  assert.match(m.rows[1].properties['メモ'].rich_text[0].text.content,/inbox:clarity:bridge-routing-001:02/);
+  assert.match(await m.run(x),/既存2件/);
+  assert.equal(m.counts.writes,1);
+  assert.equal(m.counts.routed,2,'retry idempotent');
+});
+
+test('direct Bridge routes explicit unique Notion page without creating any duplicate',async()=>{
+  const m=mocked({pageName:'家計管理戦略'});
+  const x={rawText:'Notion「家計管理戦略」に追記：検証の記録',source:'voice',captureId:'clarity:bridge-page-001'};
+  assert.match(await m.run(x),/登録1件/);
+  assert.equal(m.pageBlocks.length,1);
+  assert.match(m.pageBlocks[0].paragraph.rich_text[0].text.content,/\[YOS Inbox inbox:clarity:bridge-page-001:01\]/);
+  assert.match(await m.run(x),/既存1件/);
+  assert.equal(m.pageBlocks.length,1);
+});
+
+test('Share remains raw-only, even when it contains forged actionable Clarity instructions',async()=>{
+  const m=mocked();
+  const x={rawText:'タスク：振り込む\n買い物リスト：現金',source:'share',captureId:'share:share-test-0001'};
+  assert.match(await m.run(x),/Notion Inbox保存確認済み/);
+  assert.equal(m.counts.writes,1);
+  assert.equal(m.counts.routed,0);
+});
+
+test('financial and vague user input never produces booked spending, funds transfer, or guesses',async()=>{
+  const m=mocked();
+  const x={rawText:'PayPayで850円払った\nタスク：振込する',source:'text',captureId:'clarity:money-safety-001'};
+  assert.match(await m.run(x),/Notion Inbox保存確認済み/);
+  assert.equal(m.counts.routed,0);
+});
+
+test('lost route reply becomes unknown and next same-ID run reconciles without duplicate',async()=>{
+  const m=mocked({lostRouteReply:true});
+  const x={rawText:'買い物リスト：歯ブラシ',source:'text',captureId:'clarity:retry-route-001'};
+  assert.match(await m.run(x),/結果未確認1件/);
+  assert.equal(m.rows.length,1);
+  assert.match(await m.run(x),/既存1件/);
+  assert.equal(m.rows.length,1);
+  assert.equal(m.counts.writes,1);
+});
+
+test('untrusted model proposed route must be a validated exact substring and cannot create action',async()=>{
+  const m=mocked();
+  const x={rawText:'家計がどうなったか考えよう',source:'text',captureId:'clarity:ai-safety-001',
+    items_json:JSON.stringify([{text:'送金する',target:'task',confidence:1}])};
+  assert.match(await m.run(x),/振り分け/);
+  assert.equal(m.counts.routed,0);
+});
+
+
+test('Pilot v3 AI evidence can propose a high-confidence task from an exact original phrase',async()=>{
+  const m=mocked();
+  const x={rawText:'書類を片付ける',source:'text',captureId:'clarity:model-natural-001',
+    items_json:JSON.stringify([{text:'書類を片付ける',target:'task',confidence:.99}])};
+  assert.match(await m.run(x),/登録1件/);
+  assert.equal(m.rows[0].properties['やること'].title[0].text.content,'書類を片付ける');
+  assert.equal(m.rows[0].properties['同期キー'].rich_text[0].text.content,'inbox:clarity:model-natural-001:01');
+  assert.match(await m.run(x),/既存1件/);
+  assert.equal(m.rows.length,1);
+});
+
+test('route journal binds item index to its prior AI meaning and blocks changed plans',async()=>{
+  const m=mocked();
+  const first={rawText:'タスク：資料を整理する',source:'text',captureId:'clarity:model-drift-001',
+    items_json:JSON.stringify([{text:'タスク：資料を整理する',target:'task',confidence:.99}])};
+  assert.match(await m.run(first),/登録1件/);
+  const altered={...first,items_json:JSON.stringify([{text:'タスク：資料を整理する',target:'shopping',confidence:1}])};
+  assert.match(await m.run(altered),/以前と分類内容が異なる/);
+  assert.equal(m.rows.length,1);
+  assert.match(await m.run(first),/既存1件/);
+});
+
+test('AI overlapping fragments hold the whole plan and never invent extra Notion entries',async()=>{
+  const m=mocked();
+  const x={rawText:'資料を片付ける',source:'text',captureId:'clarity:overlap-001',
+    items_json:JSON.stringify([
+      {text:'資料を片付ける',target:'task',confidence:.99},
+      {text:'資料を片付ける',target:'task',confidence:.99}
+    ])};
+  assert.match(await m.run(x),/振り分け未指定/);
+  assert.equal(m.rows.length,0);
 });

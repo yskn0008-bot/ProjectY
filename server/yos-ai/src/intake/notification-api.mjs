@@ -1,4 +1,5 @@
 import {createNotificationHandler} from '../../dist/intake/notification-handler.js';
+import {createInboxSorter} from '../../dist/intake/inbox-sorter.js';
 import {loadYosStorageConfig} from '../../dist/storage/config.js';
 import {UpstashRestClient} from '../../dist/storage/upstash-rest.js';
 import {createGoogleIdentityVerifier} from '../../dist/auth/google-runtime.js';
@@ -48,6 +49,29 @@ export default {fetch:async function(request){
   try{response=await getHandler()(request)}
   catch{response=Response.json({error:'YOS notification service is unavailable'},
     {status:503,headers:{'Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}})}
+  // Preserve the existing API contract and process only confirmed new Raw events.
+  // This gate is independent of the scheduled historical sorter, and defaults OFF.
+  if (request.method==='POST' && response.status===201 &&
+      process.env.YOS_INBOX_INSTANT_ENABLED==='1') {
+    try {
+      const receipt=await response.clone().json();
+      if (receipt?.ok===true && receipt.duplicate===false &&
+          typeof receipt.category==='string' &&
+          typeof receipt.id==='string' && /^[0-9a-f]{24}$/u.test(receipt.id)) {
+        const storage=loadYosStorageConfig(process.env);
+        const sorter=createInboxSorter({
+          notionToken:process.env.YOS_NOTION_API_TOKEN||'',
+          inboxPageId:process.env.YOS_NOTION_INBOX_PAGE_ID||'',
+          redis:new UpstashRestClient({url:storage.upstashUrl,token:storage.upstashToken}),
+          mode:'run', captureId:'notification:'+receipt.id
+        });
+        await sorter();
+      }
+    } catch (error) {
+      // Do not ask the iPhone to retry a Raw capture that was already saved.
+      console.error(JSON.stringify({event:'yos_inbox_notification_routing_pending',message:String(error?.message||error)}));
+    }
+  }
   const headers=new Headers(response.headers);
   for(const [key,value]of Object.entries(cors))headers.set(key,value);
   return new Response(response.body,{status:response.status,headers});

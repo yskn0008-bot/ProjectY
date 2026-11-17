@@ -182,12 +182,210 @@ async function run() {
     return message('held',row,'Notion保存は未確認：'+String(e.message||e));
   }
 }
+
+// v3-compatible optional direct routing. After durable Raw readback, this can
+// send an explicit Clarity user instruction to its existing Notion destination
+// without a server, new token, DB, Shortcut or service. Never route shared data.
+// Generic destinations use an EXACT, uniquely resolved existing Notion page.
+const ROUTES=Object.freeze({
+  task:{id:'965c6086-32c1-463d-93b4-87a9cb69b3ad',title:'やること',key:'同期キー'},
+  shopping:{id:'d0ed2cf0-c84e-4770-b77c-3a1a9e11bcfc',title:'商品名',key:'メモ'},
+  diary:{id:'fe0e0973-d1cc-4bde-b138-1cb1da64ac68',title:'日記',key:'記録キー'},
+  life:{id:'30df9a73-2ea7-4ff7-8187-2b62dc8f9da4',title:'イベント名',key:'記録キー'}
+});
+const rt=s=>[{type:'text',text:{content:String(s)}}];
+const plain=xs=>(xs||[]).map(x=>x.plain_text??x.text?.content??'').join('');
+function routeDay(ms){return new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date(ms));}
+function instruction(line){
+  const text=String(line||'').trim().normalize('NFKC');
+  if(!text||text.length>1800||/^(?:もし|仮に|相談|質問|調べて|比較して)/u.test(text))return null;
+  let m=/^Notion[のに]?[「『]([^」』]{1,100})[」』]に(?:追記|保存|記録)[：:\s]+([\s\S]{1,1800})$/iu.exec(text);
+  if(m&&m[1]?.trim()&&m[2]?.trim()&&m[1].trim()!=='YOS Inbox')
+    return {target:'page',pageName:m[1].trim(),text:m[2].trim()};
+  if(/(?:支払|入金|出金|返済|振込|決済|購入済|残高|銀行|PayPay|送金|ログイン|暗証番号)/iu.test(text))
+    return null;
+  m=/^(?:タスク|やること)[：:]\s*(.{1,180})$/iu.exec(text);
+  if(m)return {target:'task',text:m[1].trim()};
+  m=/^(?:買い物リスト|買い物|欲しいもの)[：:]\s*(.{1,180})$/iu.exec(text);
+  if(m)return {target:'shopping',text:m[1].trim()};
+  m=/^(?:日記)[：:]\s*(.{1,800})$/iu.exec(text);
+  if(m)return {target:'diary',text:m[1].trim()};
+  m=/^生活記録に[：:\s]*(.{1,180})を(?:記録|保存)して[。！!]?$/iu.exec(text);
+  if(m)return {target:'life',text:m[1].trim()};
+  return null;
+}
+const routeUnsafe=/(?:削除|キャンセル|取り消し|登録しない|追加しない|記録しない|買わない|欲しくない|したくない|中止|やめる)/u;
+const routeFinance=/(?:残高|支払|入金|出金|返済|振込|送金|口座|銀行|PayPay|クレジット|請求|引落|\d[\d,]*\s*円)/iu;
+const routeDateRisk=/(?:明日|あした|明後日|今週|来週|来月|来年|再来週|今日|今夜|今度|月末|\d{1,2}\s*[日月時]|\d{1,4}[-/]\d{1,2}|予定|期限|締切|予約)/u;
+function modelInstruction(item){
+  // v3's exact-substring and high-confidence guard, with no natural-language
+  // device commands, funds transfers, payments, or destructive instructions.
+  if(!item||typeof item.text!=='string'||typeof item.target!=='string'||
+      !Number.isFinite(item.confidence)||item.confidence<.95||item.confidence>1)return null;
+  const candidate=item.text.trim().normalize('NFKC');
+  if(candidate.length<3||candidate.length>1000||/[?？]/u.test(candidate)||routeUnsafe.test(candidate))return null;
+  const explicit=instruction(candidate);
+  if(explicit&&item.target===explicit.target)return explicit;
+  if(routeFinance.test(candidate)||!['task','shopping','diary','life'].includes(item.target))return null;
+  if(['task','shopping'].includes(item.target)&&routeDateRisk.test(candidate))return null;
+  if(item.confidence<.98)return null;
+  let text='';
+  if(item.target==='task'&&/^[^\n]{2,80}(?:する|片付ける|掃除する)[。!！]?$/u.test(candidate))
+    text=candidate.replace(/[。!！]+$/u,'').trim();
+  if(item.target==='shopping'&&/^[^\n]{2,90}(?:を|が)?(?:買いたい|買わなきゃ|欲しい)[。!！]?$/u.test(candidate))
+    text=candidate.replace(/(?:を|が)?(?:買いたい|買わなきゃ|欲しい)[。!！]?$/u,'').trim();
+  // Diary and Life still require an explicit user label. Historical memories,
+  // health claims, and future plans must not be misfiled by a classifier guess.
+  return text&&text.length<=120?{target:item.target,text}:null;
+}
+function proposals(){
+  if(sourceKey==='share')return [];
+  // The existing Pilot v3 asks ChatGPT for {text,target,confidence}; GPT must
+  // quote exact non-overlapping substrings of the user's Raw capture.
+  const supplied=payload.items_json??payload.itemsJson;
+  if(supplied!==undefined){
+    let parsed;
+    try{parsed=typeof supplied==='string'?JSON.parse(supplied):supplied;}catch(_){return [];}
+    if(!Array.isArray(parsed)||parsed.length>6)return [];
+    const taken=[];
+    const plans=[];
+    for(const item of parsed){
+      if(!item||typeof item.text!=='string'||item.text.length<3||item.text.length>1000){
+        return []; // malformed plan: stop the entire batch rather than shifting keys
+      }
+      const t=item.text.trim();
+      let p=raw.indexOf(t),found=-1;
+      while(p>=0){
+        if(taken.every(([a,b])=>p+t.length<=a||p>=b)){found=p;break;}
+        p=raw.indexOf(t,p+1);
+      }
+      if(found<0)return [];
+      taken.push([found,found+t.length]);
+      plans.push(modelInstruction(item));
+    }
+    return plans;
+  }
+  const lines=raw.replace(/<br\s*\/?\s*>/giu,'\n').split(/\r?\n/u).map(x=>x.trim()).filter(Boolean);
+  if(lines.length>6)return [];
+  return lines.map(instruction);
+}
+
+async function routeQuery(ds,filter,token){
+  const result=await notion('POST','/data_sources/'+ds+'/query',token,{filter,page_size:2});
+  if(!Array.isArray(result.results)||result.has_more)throw Error('ROUTE_QUERY_INCOMPLETE');
+  return result.results;
+}
+async function routeToKnown(v,receipt,token,entry){
+  const spec=ROUTES[v.target];
+  const filter={property:spec.key,rich_text: v.target==='shopping'?{contains:receipt}:{equals:receipt}};
+  let matches=await routeQuery(spec.id,filter,token);
+  for(const row of matches){
+    const got=await notion('GET','/pages/'+row.id,token);
+    const existing=plain(got.properties?.[spec.key]?.rich_text);
+    if(v.target==='shopping'?existing.split(/\r?\n/u).includes(receipt):existing===receipt)return 'duplicate';
+  }
+  // Check the verified v3 receipt on retries even if the older single-item
+  // record used the unsuffixed key.
+  const sameTitle=await routeQuery(spec.id,{property:spec.title,title:{equals:v.target==='diary'?routeDay(entry.createdAt)+'｜Clarity':v.text}},token);
+  if(sameTitle.length) return 'held'; // Do not overwrite/duplicate a named row.
+  const props={};
+  const title=v.target==='diary'?routeDay(entry.createdAt)+'｜Clarity':v.text;
+  props[spec.title]={title:rt(title)};
+  if(v.target==='task'){
+    props['同期キー']={rich_text:rt(receipt)};
+    props['正本・根拠']={rich_text:rt('YOS Inbox '+entry.captureId)};
+    props['種類']={select:{name:'Task'}};
+    props['状態']={select:{name:'次にやる'}};
+  }else if(v.target==='shopping'){
+    props['メモ']={rich_text:rt(v.text+'\n'+receipt)};
+    props['区分']={select:{name:'欲しいもの'}};
+    props['買い物状態']={select:{name:'検討中'}};
+  }else if(v.target==='diary'){
+    props['本文']={rich_text:rt(v.text)};
+    props['日付']={date:{start:routeDay(entry.createdAt)}};
+    props['記録元']={select:{name:'Clarity'}};
+    props['記録キー']={rich_text:rt(receipt)};
+  }else if(v.target==='life'){
+    props['備考']={rich_text:rt(v.text)};
+    props['記録キー']={rich_text:rt(receipt)};
+    props['取得元']={select:{name:'Clarity'}};
+    props['種類']={select:{name:'その他'}};
+  }
+  const created=await notion('POST','/pages',token,{parent:{type:'data_source_id',data_source_id:spec.id},properties:props});
+  if(!created?.id)throw Error('ROUTE_CREATE_UNKNOWN');
+  const saved=await notion('GET','/pages/'+created.id,token);
+  const keyValue=plain(saved.properties?.[spec.key]?.rich_text);
+  if(!(v.target==='shopping'?keyValue.split(/\r?\n/u).includes(receipt):keyValue===receipt))throw Error('ROUTE_READBACK_UNKNOWN');
+  return 'created';
+}
+async function routeToPage(v,receipt,token){
+  const found=await notion('POST','/search',token,{query:v.pageName,filter:{property:'object',value:'page'},page_size:100});
+  if(!Array.isArray(found.results)||found.has_more)throw Error('PAGE_SEARCH_INCOMPLETE');
+  const exact=found.results.filter(p=>p?.object==='page'&&!p.in_trash&&!p.archived&&p.id&&p.id!==CFG.inboxId &&
+    Object.values(p.properties||{}).some(x=>x?.type==='title'&&plain(x.title)===v.pageName));
+  if(exact.length!==1)return 'held';
+  const id=exact[0].id;
+  async function hasReceipt(){
+    let cursor='';
+    for(let i=0;i<60;i++){
+      const res=await notion('GET','/blocks/'+id+'/children?page_size=100'+(cursor?'&start_cursor='+encodeURIComponent(cursor):''),token);
+      if(!Array.isArray(res.results)||typeof res.has_more!=='boolean')throw Error('PAGE_SCAN_INCOMPLETE');
+      if(res.results.some(b=>b.type==='paragraph'&&plain(b.paragraph?.rich_text).startsWith('[YOS Inbox '+receipt+']')))return true;
+      if(!res.has_more)return false;
+      if(typeof res.next_cursor!=='string'||!res.next_cursor||res.next_cursor===cursor)throw Error('PAGE_CURSOR_INVALID');
+      cursor=res.next_cursor;
+    }
+    throw Error('PAGE_SCAN_LIMIT');
+  }
+  if(await hasReceipt())return 'duplicate';
+  const item=paragraph('[YOS Inbox '+receipt+'] '+v.text);
+  await notion('PATCH','/blocks/'+id+'/children',token,{children:[item]});
+  if(!await hasReceipt())throw Error('PAGE_APPEND_READBACK_UNKNOWN');
+  return 'created';
+}
+async function routeAfterVerifiedRaw(outcome){
+  if(outcome.status!=='confirmed'||sourceKey==='share')return null;
+  if(!Keychain.contains(CFG.tokenKey))return '振り分け保留（認証情報なし）';
+  const rows=load(),entry=rows.find(x=>x.captureId===outcome.captureId);
+  if(!entry||entry.status!=='confirmed'||entry.raw!==raw)return '振り分け保留（Raw受領確認なし）';
+  const plan=proposals();
+  if(!plan.length)return '振り分け未指定（原文は保存済み）';
+  // Freeze the item-to-receipt mapping in the existing local receipt journal.
+  // Repeated AI classifications of the same Raw text must never re-purpose
+  // an existing :01 or :02 receipt for another Notion destination.
+  const signature=JSON.stringify(plan.map(x=>x?[x.target,x.text,x.pageName||'']:null));
+  if(entry.planSignature&&entry.planSignature!==signature)return '振り分け保留（以前と分類内容が異なる）';
+  if(!entry.planSignature){
+    entry.planSignature=signature;
+    try{persist(rows);}catch(_){return '振り分け保留（分類状態を端末に保存できません）';}
+  }
+  const token=Keychain.get(CFG.tokenKey);
+  let created=0,duplicates=0,held=0,unknown=0;
+  for(let i=0;i<plan.length;i++){
+    const v=plan[i];
+    if(!v){held++;continue;}
+    const receipt='inbox:'+entry.captureId+':'+String(i+1).padStart(2,'0');
+    try {
+      const result=v.target==='page'?await routeToPage(v,receipt,token):await routeToKnown(v,receipt,token,entry);
+      if(result==='created')created++;
+      else if(result==='duplicate')duplicates++;
+      else held++;
+    }catch(_){unknown++;} // A timed-out write may have succeeded; next pass must reconcile first.
+  }
+  return '振り分け：登録'+created+'件／既存'+duplicates+'件／保留'+held+'件／結果未確認'+unknown+'件';
+}
+
 let outcome;
 try{outcome=await run();}
 catch(e){outcome=message('held',null,'安全停止：'+String(e.message||e));}
+let routeStatus=null;
+if(outcome.status==='confirmed'){
+  try{routeStatus=await routeAfterVerifiedRaw(outcome);}
+  catch(_){routeStatus='振り分け保留（結果不明・原文保存済み）';}
+}
 const line=outcome.status==='confirmed'?'Notion Inbox保存確認済み':
   outcome.status==='missing'?'Notion未保存：入力がありません':'Notion未保存・確認待ち';
-Script.setShortcutOutput(line+'\n'+outcome.detail+'\n'+(outcome.captureId||''));
+Script.setShortcutOutput(line+'\n'+outcome.detail+'\n'+(outcome.captureId||'')+(routeStatus?'\n'+routeStatus:''));
 // Notify only on errors, without exposing the sensitive voice content.
 if(outcome.status!=='confirmed'){
   try {const n=new Notification();n.title='Clarity｜Notion保存を確認できません';n.body=outcome.detail;n.sound='default';await n.schedule();}catch(_){}

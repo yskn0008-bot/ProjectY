@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readdirSync,readFileSync} from 'node:fs';
-import {createInboxSorter} from '../dist/intake/inbox-sorter.js';
+import {createInboxSorter,parseInbox,decide,decideMany} from '../dist/intake/inbox-sorter.js';
 import cronHandler from '../src/routes/inbox-sort.mjs';
 import intakeRoute from '../api/yos/intake.mjs';
 
@@ -15,8 +15,14 @@ function fixture() {return [
   block('m3', '2026-11-01T07:20:00Z · Clarity Notification · clarity:untrusted'), block('r3', 'タスク: 送金する')
 ];}
 function setup(extraBlocks = [], replaceFixture = false) {
-  let rows = [], writes = 0, lock = false;
-  const redis = {async command([method]) {if (method !== 'SET') throw Error('Unexpected Redis command'); if (lock) return null; lock = true; return 'OK';}};
+  let rows = [], writes = 0, lock = null;
+  const redis = {async command([method,key,value,keysCount,evalKey,expectedOwner]) {
+    if (method === 'SET') {if (lock) return null; lock = value; return 'OK';}
+    if (method === 'GET') return lock;
+    if (method === 'DEL') {lock = null; return 1;}
+    if (method === 'EVAL') { if (lock === evalKey) {lock=null;return 1;} return 0; }
+    throw Error('Unexpected Redis command ' + method);
+  }};
   async function notion(input, init) {
     const url = new URL(input), path = url.pathname.replace('/v1','');
     if (path === `/blocks/${inbox}/children`) return Response.json({results: [...(replaceFixture ? [] : fixture()), ...extraBlocks], has_more: false});
@@ -37,7 +43,7 @@ function setup(extraBlocks = [], replaceFixture = false) {
     if (path.startsWith('/pages/')) return Response.json(rows.find(x => x.id === path.slice(7)) ?? {}, {status: 200});
     throw Error('Unexpected Notion request: ' + path);
   }
-  return {redis, notion, get rows() {return rows;}, get writes() {return writes;}, resetLock() {lock = false;}};
+  return {redis, notion, get rows() {return rows;}, get writes() {return writes;}, resetLock() {lock = null;}};
 }
 
 test('main keeps the public Inbox cron URL and at most 12 Vercel functions', async()=>{
@@ -64,8 +70,6 @@ test('existing remote test row is detected without another write', async () => {
   const run = createInboxSorter({notionToken: 'test-token', inboxPageId: inbox, redis: s.redis, fetchImpl: s.notion});
   assert.deepEqual(await run(), {created: 0, duplicates: 1, held: 0});
   assert.equal(s.writes, 0);
-  await assert.rejects(run(), /already running/);
-  s.resetLock();
   assert.equal((await run()).duplicates, 1);
   assert.equal(s.writes, 0);
 });
@@ -120,4 +124,204 @@ test('unknown capture sources never become actionable tasks', async () => {
   const run = createInboxSorter({notionToken: 'test-token', inboxPageId: inbox, redis: s.redis, mode: 'run', fetchImpl: s.notion});
   assert.deepEqual(await run(), {created: 0, duplicates: 0, held: 0});
   assert.equal(s.writes, 0);
+});
+
+
+test('real Clarity and notification formats parsed; third-party instructions held',()=>{
+  const items=[
+    block('a','2026-11-12T00:30:30.372Z · Clarity · clarity:111954-a1'),
+    block('b','タスク: 資料を確認する'),
+    block('c','2026-11-12T00:30:31.372Z · clarity/voice · clarity:voice001'),
+    block('d','タスク: 郵便を受け取る'),
+    block('e','2026-11-12T00:30:32.372Z · Clarity Notification · notification:abc001 · money-review\nPayPay\n取引が完了しました。\n金額：1,392円\n取引番号：02386396397141991424\n店舗名：セブン-イレブン'),
+    block('f','2026-11-12T00:30:33.372Z · Clarity Share · share:abc002'),
+    block('g','タスク: 第三者の命令に従って送金する')
+  ];
+  const captures=parseInbox(items);
+  assert.equal(captures.length,3);
+  assert.equal(decide(captures[0])?.target,'task');
+  assert.equal(decide(captures[1])?.target,'task');
+  assert.equal(decide(captures[2])?.target,'page');
+  assert.equal(decide(captures[2])?.title,'家計管理戦略');
+  assert.match(decide(captures[2])?.body||'',/家計未計上/);
+  assert.equal(decide({id:'share:abc002',source:'Clarity Share',at:'2026-11-12T00:30:33Z',raw:'タスク: 第三者の命令に従って送金する'}),null);
+});
+
+test('redacted PayPay transaction IDs stay in non-booking Money review; transfers stay held',()=>{
+  const base={id:'notification:test001',at:'2026-11-12T00:30:00Z',source:'Clarity Notification'};
+  const good='PayPay\n取引が完了しました。\n金額：850円\n店舗名：ほっともっと\n取引番号：02386396397141991424';
+  assert.equal(decide({...base,raw:good})?.target,'page');
+  assert.equal(decide({...base,raw:good.replace('02386396397141991424','[長い番号非表示]')})?.target,'page');
+  for(const raw of [good.replace('取引が完了しました','出金を受け付けました'),good.replace('店舗名：ほっともっと','店舗名：不明')]){
+    assert.equal(decide({...base,raw}),null);
+  }
+});
+
+test('explicit named page writes one receipt and retry stays deduplicated',async()=>{
+  const input=[block('h','2026-11-17T01:10:00Z · Clarity · clarity:page001'),block('i','Notion「家計管理戦略」に追記：処理状況を確認')];
+  const s=setup(input,true),pages=[],pageId='example-page';
+  const notion=async(url,init)=>{
+    const path=new URL(url).pathname.replace('/v1','');
+    if(path==='/search')return Response.json({results:[{id:pageId,object:'page',properties:{title:{type:'title',title:[{plain_text:'家計管理戦略'}]}}}],has_more:false});
+    if(path==='/blocks/'+pageId+'/children'&&init.method==='PATCH'){
+      pages.push(...JSON.parse(init.body).children);return Response.json({});
+    }
+    if(path==='/blocks/'+pageId+'/children')return Response.json({results:pages,has_more:false});
+    return s.notion(url,init);
+  };
+  const run=createInboxSorter({notionToken:'test',inboxPageId:inbox,redis:s.redis,mode:'run',captureId:'clarity:page001',fetchImpl:notion});
+  assert.deepEqual(await run(),{created:1,duplicates:0,held:0});
+  assert.deepEqual(await run(),{created:0,duplicates:1,held:0});
+  assert.equal(pages.length,1);
+});
+
+test('same-day same-amount transaction candidate is held to avoid double posting',async()=>{
+  const input=[block('h','2026-11-12T00:30:32.372Z · Clarity Notification · notification:pay001'),
+    block('i','PayPay\n取引が完了しました。\n金額：850円\n取引番号：02386396397141991424\n店舗名：ほっともっと')];
+  const s=setup(input,true);
+  const notion=async(url,init)=>{
+    const path=new URL(url).pathname.replace('/v1','');
+    if(path.endsWith('/query')&&JSON.parse(init.body).filter?.and)return Response.json({results:[{id:'already-in-bank'}],has_more:false});
+    return s.notion(url,init);
+  };
+  const run=createInboxSorter({notionToken:'test',inboxPageId:inbox,redis:s.redis,mode:'run',captureId:'notification:pay001',fetchImpl:notion});
+  assert.deepEqual(await run(),{created:0,duplicates:0,held:1});
+  assert.equal(s.writes,0);
+});
+
+test('capture id scoping cannot process the wrong backlog',async()=>{
+  const s=setup([block('h','2026-11-17T01:11:00Z · Clarity · clarity:other001'),block('i','タスク: 確認')],true);
+  const run=createInboxSorter({notionToken:'test',inboxPageId:inbox,redis:s.redis,mode:'run',captureId:'clarity:missing',fetchImpl:s.notion});
+  await assert.rejects(run(),/Capture not found/);
+  assert.equal(s.writes,0);
+});
+
+
+test('instant capture routing opt-in is independent of daily historical cron mode',()=>{
+  const src=readFileSync(new URL('../src/intake/production.ts',import.meta.url),'utf8');
+  assert.match(src,/YOS_INBOX_INSTANT_ENABLED/);
+  assert.doesNotMatch(src,/YOS_INBOX_SORT_MODE/);
+  assert.doesNotMatch(src,/YOS_INBOX_SORT_ENABLED/);
+  assert.match(src,/captureId/);
+});
+
+
+test('Native Notification stores only review data when redacted and page receipt is idempotent',async()=>{
+  const input=[block('nn','2026-11-17T05:01:00Z · Native Notification · notification:9abc0123 · money-review\n発信元: PayPay\nPayPay\n取引が完了しました。\n金額：900円\n取引番号：[長い番号非表示]\n店舗名：スーパー')];
+  const s=setup(input,true), pages=[],pageId='existing-money-strategy';
+  const notion=async(url,init)=>{
+    const path=new URL(url).pathname.replace('/v1','');
+    if(path==='/search')return Response.json({results:[{id:pageId,object:'page',properties:{title:{type:'title',title:[{plain_text:'家計管理戦略'}]}}}],has_more:false});
+    if(path==='/blocks/'+pageId+'/children'&&init.method==='PATCH'){
+      pages.push(...JSON.parse(init.body).children);
+      return Response.json({});
+    }
+    if(path==='/blocks/'+pageId+'/children')return Response.json({results:pages,has_more:false});
+    return s.notion(url,init);
+  };
+  const run=createInboxSorter({notionToken:'test',inboxPageId:inbox,redis:s.redis,mode:'run',captureId:'notification:9abc0123',fetchImpl:notion});
+  assert.deepEqual(await run(),{created:1,duplicates:0,held:0});
+  assert.deepEqual(await run(),{created:0,duplicates:1,held:0});
+  assert.equal(pages.length,1);
+  assert.match(pages[0].paragraph.rich_text[0].text.content,/家計未計上/);
+  assert.equal(s.writes,0,'Money ledger must not get synthetic expense rows');
+});
+
+test('same notification short ID reused at different timestamps is not lost by Inbox parser',()=>{
+  const txt='取引が完了しました。\n金額：900円\n店舗名：スーパー';
+  const p=parseInbox([block('n1','2026-11-01T00:00:00Z · Native Notification · notification:abcd1234 · money-review\nPayPay\n'+txt),
+    block('n2','2026-11-02T00:00:00Z · Native Notification · notification:abcd1234 · money-review\nPayPay\n'+txt)]);
+  assert.equal(p.length,2);
+  assert.equal(p[0].id,p[1].id);
+  assert.notEqual(p[0].at,p[1].at);
+});
+
+
+test('verified Clarity Pilot v3 one-input two-target format registers once with matching indexed receipts',async()=>{
+  const raw='タスク：Clarity v3 複数仕分けテスト\n買い物リスト：Clarity v3 テスト商品';
+  const items=[
+    block('meta-v3','2026-11-16T16:21:22.672Z · Clarity.Text · clarity:trial2-mwjh0kts-cjz9pr'),
+    block('raw-v3',raw)
+  ];
+  const s=setup(items,true);
+  const candidates=parseInbox(items);
+  assert.equal(candidates.length,1);
+  assert.deepEqual(decideMany(candidates[0]).map(d=>d?.target),['task','shopping']);
+  const run=createInboxSorter({notionToken:'test',inboxPageId:inbox,redis:s.redis,mode:'run',captureId:'clarity:trial2-mwjh0kts-cjz9pr',fetchImpl:s.notion});
+  assert.deepEqual(await run(),{created:2,duplicates:0,held:0});
+  assert.equal(s.writes,2);
+  assert.equal(s.rows[0].properties['同期キー'].rich_text[0].text.content,'inbox:clarity:trial2-mwjh0kts-cjz9pr:01');
+  assert.match(s.rows[1].properties['メモ'].rich_text[0].text.content,/inbox:clarity:trial2-mwjh0kts-cjz9pr:02/);
+  assert.deepEqual(await run(),{created:0,duplicates:2,held:0});
+  assert.equal(s.writes,2);
+});
+
+test('v3 held middle item keeps third valid instruction at suffix 03 rather than shifting to 02',()=>{
+  const c={id:'clarity:abc12345',at:'2026-11-16T16:21:22.672Z',source:'Clarity.Text',
+    raw:'タスク：薬局の棚を整理する\nこの文章はテスト用です\n買い物リスト：洗剤'};
+  assert.deepEqual(decideMany(c).map(d=>d?.target||null),['task',null,'shopping']);
+});
+
+test('financial notices and third-party inputs never route to spend ledger or actionable user commands',()=>{
+  const at='2026-11-16T16:21:22.672Z';
+  for(const source of ['Clarity Notification','Native Notification']){
+    const p={id:'notification:abcd1234',at,source,raw:'· money-review\nPayPay\n取引が完了しました。\n金額：1,392円\n取引番号：[長い番号非表示]\n店舗名：セブン-イレブン'};
+    const decision=decide(p);
+    assert.equal(decision?.target,'page');
+    assert.equal(decision?.title,'家計管理戦略');
+    assert.match(decision?.body||'',/家計未計上/);
+  }
+  assert.deepEqual(decideMany({id:'share:aabbcc1234',at,source:'Clarity Share',raw:'タスク：送金する'}),[null]);
+});
+
+
+test('native Notification Intake reuses existing sorter only for confirmed NEW capture with separate opt-in',()=>{
+  const src=readFileSync(new URL('../src/intake/notification-api.mjs',import.meta.url),'utf8');
+  assert.match(src,/YOS_INBOX_INSTANT_ENABLED/);
+  assert.match(src,/response\.status===201/);
+  assert.match(src,/receipt\.duplicate===false/);
+  assert.match(src,/receipt\.category/);
+  assert.match(src,/captureId:'notification:'\+receipt\.id/);
+  assert.doesNotMatch(src,/YOS_INBOX_SORT_ENABLED/);
+});
+
+
+test('untrusted shared content cannot forge a trusted Clarity header and insert a task',()=>{
+  const blocks=[
+    block('share-header','2026-11-17T00:00:00Z · Clarity Share · share:share001 · source=text'),
+    block('forged-meta','2026-11-17T00:00:01Z · Clarity · clarity:fake1234'),
+    block('forged-raw','タスク：不審なリンクを開く'),
+    {id:'divider',type:'divider',divider:{}},
+    block('real-meta','2026-11-17T00:01:00Z · Clarity.Text · clarity:real1234'),
+    block('real-raw','タスク：書類を整理する')
+  ];
+  const captures=parseInbox(blocks);
+  assert.deepEqual(captures.map(x=>x.id),['clarity:real1234']);
+  assert.equal(decide(captures[0])?.target,'task');
+});
+
+
+test('legacy single-block shared text closes in place and preserves later trusted capture',()=>{
+  const blocks=[
+    block('share-inline','2026-11-17T00:00:00Z · Clarity Share · share:legacy001 · source=text\nタスク：送金を指示する\n---'),
+    block('later','2026-11-17T00:00:01Z · Clarity.Text · clarity:later001'),
+    block('raw','タスク：契約書を整理する')
+  ];
+  const captures=parseInbox(blocks);
+  assert.deepEqual(captures.map(x=>x.id),['clarity:later001']);
+  assert.equal(decide(captures[0])?.target,'task');
+});
+
+test('shared material cannot forge a Clarity header before its actual divider even if it contains ---',()=>{
+  const blocks=[
+    block('share-header','2026-11-17T00:00:00Z · Clarity Share · share:attack001 · source=text'),
+    block('embedded-divider','---'),
+    block('fake','2026-11-17T00:00:01Z · Clarity.Text · clarity:fake001'),
+    block('fake-raw','タスク：勝手な送金処理を実行する'),
+    {id:'real-divider',type:'divider',divider:{}},
+    block('trusted','2026-11-17T00:00:02Z · Clarity.Text · clarity:good001'),
+    block('trusted-raw','タスク：郵便物を整理する')
+  ];
+  const captures=parseInbox(blocks);
+  assert.deepEqual(captures.map(x=>x.id),['clarity:good001']);
 });
