@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-17T09:52:19+09:00",
+  "updated_at": "2026-11-17T12:03:07+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -12,6 +12,16 @@
     ]
   },
   "inbox": [
+    {
+      "id": "github-pr-762",
+      "title": "PR #762 feat(notification): safeguard v0.3→v0.4 migration using common installer",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/762",
+      "updated_at": "2026-11-16T16:08:15Z"
+    },
     {
       "id": "github-pr-764",
       "title": "PR #764 YOS Calendar｜Face IDパスキー認証（Googleは初回登録・復旧のみ）",
@@ -103,16 +113,6 @@
       "updated_at": "2026-11-17T00:51:43Z"
     },
     {
-      "id": "github-pr-782",
-      "title": "PR #782 DAYSTREAM｜SiriのAlertクラッシュ防止・Notion接続エラー診断",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/782",
-      "updated_at": "2026-11-17T00:50:14Z"
-    },
-    {
       "id": "github-issue-10",
       "title": "Issue #10 Mission Control v2：GitHubのIssue・PR・Commitを自動集約する",
       "type": "GitHub Issue",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-17T00:51:13Z"
+      "updated_at": "2026-11-17T03:02:37Z"
     },
     {
       "id": "github-issue-234",
@@ -205,6 +205,20 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-e4375c56f9ee",
+      "title": "fix(daystream): Siri-safe Notion connection diagnostics (#782)",
+      "completed_at": "2026-11-17T03:02:35Z",
+      "result": "GitHub mainへ反映（e4375c5）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/e4375c56f9eedae6ecbc0f15b50de8ca3df3bcfe"
+    },
+    {
+      "id": "github-commit-e3db8f9bbc7d",
+      "title": "chore(yos-ai): retry deferred approved release (1/4)",
+      "completed_at": "2026-11-17T01:53:56Z",
+      "result": "GitHub mainへ反映（e3db8f9）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/e3db8f9bbc7dc83139c30a0f7d63ddeda72207f8"
+    },
+    {
       "id": "github-commit-febf654f26ae",
       "title": "DAYSTREAM｜既存画面へNotion TasksをiPhoneから直接表示 (#780)",
       "completed_at": "2026-11-17T00:00:30Z",
@@ -224,20 +238,6 @@
       "completed_at": "2026-11-16T22:04:13Z",
       "result": "GitHub mainへ反映（fc34abd）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/fc34abde505f4cf7d64d7e63d1d4a6a0db0b252a"
-    },
-    {
-      "id": "github-commit-88ae5394a38f",
-      "title": "feat(calendar): ship minimal UI to existing Scriptable installer",
-      "completed_at": "2026-11-16T20:19:51Z",
-      "result": "GitHub mainへ反映（88ae539）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/88ae5394a38fc433037daffef25e0500cab3fba9"
-    },
-    {
-      "id": "github-commit-1b4f01e45670",
-      "title": "feat(calendar): minimalist YOS month and DAYSTREAM matching selected visual",
-      "completed_at": "2026-11-16T20:14:49Z",
-      "result": "GitHub mainへ反映（1b4f01e）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/1b4f01e45670d911fb72909bc575164840921871"
     },
     {
       "id": "complete-002",
@@ -274,7 +274,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-17T09:52:19+09:00",
+      "last_update": "2026-11-17T12:03:07+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -349,13 +349,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 9件・Open PR 60件を自動同期中",
+      "next_action": "Open Issue 9件・Open PR 59件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-17T09:52:19+09:00",
+      "last_update": "2026-11-17T12:03:07+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -378,7 +378,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-17T09:52:19+09:00",
+      "last_update": "2026-11-17T12:03:07+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -460,5 +460,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "2474cbd221b2d8ad18be85c5c8c71990813461cf3534a4982f1c7ddda2e32807"
+  "github_snapshot_hash": "400d0c9e3f6f50d1c413a844c6e188bfa250440ed15af21cdcd0a9aca295ffe1"
 }
