@@ -392,7 +392,7 @@ function validateMoveInput(params){
   throw Error('同じ日の開始時刻だけ変更できます。日跨ぎの終了時刻は維持します');
  return {id,old,end,next,edited,duration};
 }
-async function moveNotion(params){
+async function moveNotion(params,refresh=main){
  if(typeof config!=='undefined'&&config.runsWithSiri)
   throw Error('Notionの日時変更はScriptableアプリで確認してください');
  const move=validateMoveInput(params);
@@ -416,7 +416,7 @@ async function moveNotion(params){
    '\n'+(newEnd?'所要時間・終了時刻は保持します':'期限の時刻だけ変更します')+
    '\nNotionの「期限」に反映します。';
  confirm.addAction('Notionに保存');confirm.addCancelAction('キャンセル');
- if(await confirm.presentAlert()!==0){await main();return}
+ if(await confirm.presentAlert()!==0){await refresh();return}
  // Re-read immediately before write. A stale or replaced date cannot be updated.
  const latest=await notionPage(token,move.id),currentDue=latest.properties['期限']?.date;
  if(latest.last_edited_time!==move.edited||!currentDue||
@@ -433,7 +433,7 @@ async function moveNotion(params){
  const check=await notionPage(token,move.id),saved=check.properties['期限']?.date;
  if(!saved||!matchInstant(saved.start,move.next)||!matchInstant(saved.end||null,newEnd))
   throw Error('Notionへの保存後照合が一致しません。再操作せず元タスクを確認してください');
- await main();
+ await refresh();
 }
 // SCRIPTABLE_ENTRY
 try{
