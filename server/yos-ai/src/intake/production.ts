@@ -2,6 +2,7 @@ import type {Environment} from '../config.js';
 import {loadYosStorageConfig} from '../storage/config.js';
 import {UpstashRestClient} from '../storage/upstash-rest.js';
 import {createClarityIntakeHandler} from './handler.js';
+import {createInboxSorter} from './inbox-sorter.js';
 import {createNotionMirrorHandler, mirrorNotionInput} from './mirror-handler.js';
 import {moneyShadowToMirrorInput, type MoneyShadowSnapshot} from './money-mirror.js';
 
@@ -12,12 +13,48 @@ export function createProductionClarityIntakeHandler(options: {environment: Envi
     token: storage.upstashToken
   });
 
-  return createClarityIntakeHandler({
+  const intake = createClarityIntakeHandler({
     tokenSha256: requiredHash(options.environment, 'YOS_CLARITY_INTAKE_TOKEN_SHA256'),
     notionToken: required(options.environment, 'YOS_NOTION_API_TOKEN'),
     notionPageId: required(options.environment, 'YOS_NOTION_INBOX_PAGE_ID'),
     redis
   });
+  return async (request: Request): Promise<Response> => {
+    // An Inbox receipt is always committed before any destination attempt.
+    // The existing enabled/run gates are required; no production activation
+    // occurs merely by deploying this code.
+    if (options.environment.YOS_INBOX_SORT_ENABLED !== '1' ||
+        options.environment.YOS_INBOX_SORT_MODE !== 'run') return intake(request);
+    let captureId: string | undefined;
+    try {
+      const body = await request.clone().json() as Record<string, unknown>;
+      if (typeof body.captureId === 'string' && /^[a-zA-Z0-9._:-]{8,128}$/u.test(body.captureId)) captureId = body.captureId;
+    } catch {
+      // Invalid inputs are still rejected by the original intake handler.
+    }
+    const saved = await intake(request);
+    if (!saved.ok || !captureId) return saved;
+    let routing: {created: number; duplicates: number; held: number} | {pending: true};
+    try {
+      const sorter = createInboxSorter({
+        notionToken: required(options.environment, 'YOS_NOTION_API_TOKEN'),
+        inboxPageId: required(options.environment, 'YOS_NOTION_INBOX_PAGE_ID'),
+        redis,
+        mode: 'run',
+        captureId
+      });
+      routing = await sorter();
+    } catch {
+      // Never turn a confirmed Raw capture into an apparent intake failure.
+      // The existing daily sorter can retry safely by captureId.
+      routing = {pending: true};
+    }
+    const receipt = await saved.json() as Record<string, unknown>;
+    return Response.json({...receipt, routing}, {
+      status: saved.status,
+      headers: {'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff'}
+    });
+  };
 }
 
 function required(environment: Environment, name: string): string {
