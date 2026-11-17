@@ -1,89 +1,73 @@
 import assert from 'node:assert/strict';
 import {chromium,webkit} from 'playwright';
 import {htmlFor,row} from './daystream-notion-scriptable.test.mjs';
-const browser=await (process.env.LIFE_BROWSER==='webkit'?webkit:chromium).launch({headless:true});
+
+const date='2026-12-01',rows=[
+ row('2026-12-01T05:20:00Z','2026-12-01T05:22:00Z',
+  '起床','a'.repeat(32),'yos-daystream-routine-202612-wake'),
+ row('2026-12-01T05:22:00Z','2026-12-01T05:25:00Z',
+  '水を飲む','b'.repeat(32),'yos-daystream-routine-202612-wake-water'),
+ row('2026-12-01T05:25:00Z','2026-12-01T05:30:00Z',
+  '歯磨き','c'.repeat(32),'yos-daystream-routine-202612-wake-brush'),
+ row('2026-11-30T21:10:00Z','2026-12-01T05:20:00Z',
+  '睡眠','d'.repeat(32),'yos-daystream-routine-202612-sleep')
+];
+const html=htmlFor(rows),browser=await (process.env.LIFE_BROWSER==='webkit'?webkit:chromium).launch({headless:true});
+const store='YOS_DAYSTREAM_WEB_PLAN_V1',importKey='YOS_DAYSTREAM_DIRECT_IMPORTED_V1';
 try{
  for(const width of [320,390,402]){
-  const page=await browser.newPage({viewport:{width,height:844},timezoneId:'Asia/Tokyo'});
-  const errors=[],network=[];
+  const context=await browser.newContext({viewport:{width,height:844},timezoneId:'Asia/Tokyo'});
+  const page=await context.newPage(),errors=[];
   page.on('pageerror',e=>errors.push(e.message));
-  await page.route('**/*',route=>{network.push(route.request().url());return route.abort()});
-  const date=await page.evaluate(()=>{const d=new Date();return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-')});
-  const shift=row(date+'T17:00:00+09:00',date+'T23:00:00+09:00','夜勤','e'.repeat(32));
-  shift.properties['状態']={select:null};
-  shift.properties['同期キー']={rich_text:[{plain_text:'yos-shift-'+date}]};
-  await page.setContent(htmlFor([
-   row(date+'T10:00:00+09:00',date+'T11:00:00+09:00','架空の時間範囲'),
-   row(date+'T14:00:00+09:00',null,'架空の期限','b'.repeat(32)),
-   row(date,null,'架空の日付タスク','c'.repeat(32)),
-   row(null,null,'架空の日付なし','d'.repeat(32)),
-   shift
-  ]));
-  await page.waitForFunction(()=>!document.getElementById('yosNativeBoot'));
-  assert.equal(await page.locator('#tl .yos-notion-projection').count(),3);
-  assert.match(await page.locator('#tl .yos-notion-projection').last().innerText(),/予定.*夜勤/s);
-  // Source cards are controls, never anchors: long press cannot open a Notion login preview.
-  assert.equal(await page.locator('#tl a.yos-notion-projection').count(),0);
-  assert.equal(await page.locator('#tl button.yos-notion-projection').count(),3);
-  const shortCard=page.locator('#tl button.yos-notion-projection').filter({hasText:'架空の期限'});
-  assert.equal(await shortCard.getAttribute('data-compact'),'true');
-  assert.match(await shortCard.locator('small').innerText(),/^14:00$/);
-  assert.equal(await page.locator('#tl .yos-notion-projection').first().evaluate(el=>getComputedStyle(el).color),
-   'rgb(245, 248, 255)');
-  // Single casual fill: no left accent or alternate shift color.
-  const appearance=await page.locator('#tl .yos-notion-projection').evaluateAll(els=>
-   els.map(el=>({background:getComputedStyle(el).backgroundColor,
-    leftWidth:getComputedStyle(el).borderLeftWidth,
-    rightWidth:getComputedStyle(el).borderRightWidth,
-    leftColor:getComputedStyle(el).borderLeftColor,
-    rightColor:getComputedStyle(el).borderRightColor})));
-  assert.equal(new Set(appearance.map(x=>x.background)).size,1);
-  assert.ok(appearance.every(x=>x.leftWidth===x.rightWidth&&x.leftColor===x.rightColor));
-
-  await page.locator('#tl button.yos-notion-projection').first().click();
-  assert.equal(await page.locator('#yosNotionEditSheet').isVisible(),true);
-  assert.equal(await page.locator('#yosNotionNewTime').isEnabled(),true);
-  await page.locator('#yosNotionClose').click();
-  assert.equal(await page.locator('#yosNotionEditSheet').isVisible(),false);
-  await page.locator('#tl button.yos-notion-projection').filter({hasText:'夜勤'}).click();
-  assert.equal(await page.locator('#yosNotionNewTime').isDisabled(),true);
-  assert.match(await page.locator('#yosNotionSheetNote').innerText(),/読み取り専用/);
-  await page.locator('#yosNotionClose').click();
-  assert.match(await page.locator('#dayAllDay').innerText(),/時間未設定.*架空の日付タスク/s);
-  assert.match(await page.locator('#yosWebSourceState').innerText(),/Notion 5件取得/);
-  assert.equal(await page.locator('#taskCount').innerText(),'0/3');
-  await page.locator('[data-tab="task"]').click();
-  assert.match(await page.locator('#yosSourceTasks').innerText(),/架空の日付なし/);
+  await page.route('**/*',route=>{
+   if(route.request().url()==='http://yos.local/')return route.fulfill({status:200,contentType:'text/html',body:html});
+   return route.abort();
+  });
+  await page.goto('http://yos.local/');
+  await page.waitForFunction(()=>document.getElementById('yosNativeBoot')===null);
+  await page.evaluate(()=>showDay('2026-12-01'));
+  let state=await page.evaluate(key=>JSON.parse(localStorage.getItem(key)),store);
+  const direct=state.days[date].filter(x=>x.sourceRef?.startsWith('yos-direct:'));
+  assert.equal(direct.length,4);
+  assert.deepEqual(direct.map(x=>x.t),['睡眠','起床','水を飲む','歯磨き']);
+  assert.deepEqual(direct.map(x=>[x.s,x.d]),[[370,490],[860,2],[862,3],[865,5]]);
+  assert.equal(await page.locator('#tl .yos-notion-projection').count(),0);
+  assert.equal(await page.locator('#tl .card.task').count(),4);
+  assert.equal(await page.locator('#tl .card.task .task-copy').count(),4);
+  assert.equal(await page.locator('#yosNotionEditSheet').count(),0);
+  assert.equal(await page.locator('#yosNotionMoveBar').count(),0);
+  const colors=await page.locator('#tl .card.task').evaluateAll(cards=>cards.map(c=>getComputedStyle(c).backgroundColor));
+  assert.equal(new Set(colors).size,1);
+  assert.ok(colors.every(c=>c!=='rgba(0, 0, 0, 0)'));
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
+  assert.equal(await page.evaluate(key=>Object.keys(JSON.parse(localStorage.getItem(key))).length,importKey),4);
+  // Editing the existing native record is authoritative; reimport cannot reset its time.
+  await page.evaluate(key=>{
+   const p=JSON.parse(localStorage.getItem(key));
+   const task=p.days['2026-12-01'].find(x=>x.t==='水を飲む');task.s=910;
+   p.days['2026-12-01'].push({id:90001,t:'既存テスト',s:990,d:30,kind:'task',done:false});
+   if(!window.YOS_DAYSTREAM_WEB.write(p))throw Error('Native plan store failed');
+  },store);
+  await page.reload();
+  await page.waitForFunction(()=>document.getElementById('yosNativeBoot')===null);
+  state=await page.evaluate(key=>JSON.parse(localStorage.getItem(key)),store);
+  const after=state.days[date];
+  assert.equal(after.filter(x=>x.sourceRef?.startsWith('yos-direct:')).length,4);
+  assert.equal(after.find(x=>x.t==='水を飲む').s,910);
+  assert.equal(after.find(x=>x.t==='既存テスト').s,990);
+  // An intentional native deletion stays deleted (no resurrection on reopen).
+  await page.evaluate(key=>{
+   const p=JSON.parse(localStorage.getItem(key));
+   p.days['2026-12-01']=p.days['2026-12-01'].filter(x=>x.t!=='歯磨き');
+   if(!window.YOS_DAYSTREAM_WEB.write(p))throw Error('Delete verification failed');
+  },store);
+  await page.reload();
+  await page.waitForFunction(()=>document.getElementById('yosNativeBoot')===null);
+  state=await page.evaluate(key=>JSON.parse(localStorage.getItem(key)),store);
+  assert.equal(state.days[date].some(x=>x.t==='歯磨き'),false);
+  assert.equal(state.days[date].some(x=>x.t==='既存テスト'),true);
   assert.deepEqual(errors,[]);
-  assert.equal(network.filter(u=>/api\.notion|accounts\.google|vercel/.test(u)).length,0);
-  // The separate 2-5 minute steps must not collapse into narrow lanes or overlap.
-  const microPage=await browser.newPage({viewport:{width,height:844},timezoneId:'Asia/Tokyo'});
-  await microPage.setContent(htmlFor([
-   row(date+'T10:00:00+09:00',date+'T10:02:00+09:00','起床','1'.repeat(32)),
-   row(date+'T10:02:00+09:00',date+'T10:05:00+09:00','水を飲む','2'.repeat(32)),
-   row(date+'T10:05:00+09:00',date+'T10:10:00+09:00','歯磨き','3'.repeat(32)),
-   row(date+'T10:10:00+09:00',date+'T11:00:00+09:00','睡眠','4'.repeat(32))
-  ]));
-  await microPage.waitForFunction(()=>!document.getElementById('yosNativeBoot'));
-  await microPage.waitForFunction(()=>document.querySelectorAll('#tl .yos-notion-projection').length===4);
-  const separate=await microPage.locator('#tl .yos-notion-projection').evaluateAll(nodes=>nodes.map(n=>({
-   title:n.textContent,top:n.offsetTop,height:n.offsetHeight,width:n.offsetWidth,left:n.offsetLeft
-  })));
-  assert.equal(separate.length,4);
-  assert.ok(separate[1].top>=separate[0].top+separate[0].height);
-  assert.ok(separate[2].top>=separate[1].top+separate[1].height);
-  assert.ok(separate[3].top>=separate[2].top+separate[2].height);
-  // Hour ticks must follow the same elastic axis as microtasks AND sleep.
-  const ticks=await microPage.locator('#tl .hour').evaluateAll(nodes=>[nodes[10].offsetTop,nodes[11].offsetTop]);
-  assert.ok(Math.abs(separate[0].top-ticks[0])<=2);
-  assert.ok(ticks[1]>=separate[3].top+separate[3].height-3);
-  assert.equal(await microPage.locator('#tl .card[data-id^="-200000"]').count(),0);
-  assert.equal(new Set(separate.map(x=>x.left)).size,1);
-  assert.equal(new Set(separate.map(x=>x.width)).size,1);
-  assert.match(separate.map(x=>x.title).join('|'),/起床.*水を飲む.*歯磨き.*睡眠/s);
-  await microPage.close();
-  await page.close();
+  await context.close();
  }
 }finally{await browser.close()}
-console.log('DAYSTREAM Notion browser: 320/390/402px PASS');
+console.log('DAYSTREAM native tasks: 320/390/402px PASS');
