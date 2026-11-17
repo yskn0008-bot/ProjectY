@@ -383,7 +383,10 @@ try{
   for(let i=1;i<visible.length;i++)assert.ok(visible[i].top>=visible[i-1].bottom-2,'dense tasks do not cover one another: '+visible[i-1].id+'/'+visible[i].id);
   for(const id of [2102,2106,2108])assert.notEqual(byId.get(id).color,byId.get(2110).color,'semantic color '+id+' differs from unknown');
   assert.equal(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,'no sideways overflow');
-  const grip=p.locator('#tl [data-id="2102"] .task-drag-grip');await grip.scrollIntoViewIfNeeded();
+  const grip=p.locator('#tl [data-id="2102"] .task-drag-grip');
+  // iPhone has a fixed bottom navigation bar: position the grip in the visible center,
+  // not merely inside the viewport while still covered by the dock.
+  await p.evaluate(()=>document.querySelector('#tl [data-id="2102"]').scrollIntoView({block:'center',behavior:'instant'}));
   const r=await grip.boundingBox();assert.ok(r&&r.width>=36,'draggable grip is reachable');
   await p.evaluate(()=>{const el=document.querySelector('#tl [data-id="2102"]');window.__yosDragTrace=[];for(const name of ['pointerdown','pointermove','pointerup','pointercancel','touchstart','touchmove','touchend'])el.addEventListener(name,e=>window.__yosDragTrace.push({event:name,y:e.clientY,pointerType:e.pointerType,button:e.button,target:e.target.className}),true)});
   await p.mouse.move(r.x+r.width/2,r.y+r.height/2);await p.mouse.down();
