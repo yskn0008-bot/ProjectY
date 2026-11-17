@@ -99,6 +99,13 @@
       "path": "ios-app/scriptable/YOS Clarity Inbox Bridge.js",
       "commit": "e4ae550e513e05b079e1c56e7f78fd846505dfbb",
       "sha256": "406f2ed4f20efaec8bf9a0bb8e02fa095ded1dead7236c1c40c74f7ea52f8885"
+    },
+    {
+      "id": "daystream-notion",
+      "name": "YOS DAYSTREAM Notion",
+      "path": "ios-app/scriptable/YOS DAYSTREAM Notion.js",
+      "commit": "dbaf481d009a6f6d80c41c7e1afe8499f3627151",
+      "sha256": "bb58d694c1208a1b9647dbbb4a762326d4d08fcbff6e1d92c96d35d1055d9507"
     }
   ]
 }
