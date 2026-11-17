@@ -62,19 +62,26 @@ try{
   await microPage.setContent(htmlFor([
    row(date+'T10:00:00+09:00',date+'T10:02:00+09:00','起床','1'.repeat(32)),
    row(date+'T10:02:00+09:00',date+'T10:05:00+09:00','水を飲む','2'.repeat(32)),
-   row(date+'T10:05:00+09:00',date+'T10:10:00+09:00','歯磨き','3'.repeat(32))
+   row(date+'T10:05:00+09:00',date+'T10:10:00+09:00','歯磨き','3'.repeat(32)),
+   row(date+'T10:10:00+09:00',date+'T11:00:00+09:00','睡眠','4'.repeat(32))
   ]));
   await microPage.waitForFunction(()=>!document.getElementById('yosNativeBoot'));
-  await microPage.waitForFunction(()=>document.querySelectorAll('#tl .yos-notion-projection').length===3);
+  await microPage.waitForFunction(()=>document.querySelectorAll('#tl .yos-notion-projection').length===4);
   const separate=await microPage.locator('#tl .yos-notion-projection').evaluateAll(nodes=>nodes.map(n=>({
    title:n.textContent,top:n.offsetTop,height:n.offsetHeight,width:n.offsetWidth,left:n.offsetLeft
   })));
-  assert.equal(separate.length,3);
+  assert.equal(separate.length,4);
   assert.ok(separate[1].top>=separate[0].top+separate[0].height);
   assert.ok(separate[2].top>=separate[1].top+separate[1].height);
+  assert.ok(separate[3].top>=separate[2].top+separate[2].height);
+  // Hour ticks must follow the same elastic axis as microtasks AND sleep.
+  const ticks=await microPage.locator('#tl .hour').evaluateAll(nodes=>[nodes[10].offsetTop,nodes[11].offsetTop]);
+  assert.ok(Math.abs(separate[0].top-ticks[0])<=2);
+  assert.ok(ticks[1]>=separate[3].top+separate[3].height-3);
+  assert.equal(await microPage.locator('#tl .card[data-id^="-200000"]').count(),0);
   assert.equal(new Set(separate.map(x=>x.left)).size,1);
   assert.equal(new Set(separate.map(x=>x.width)).size,1);
-  assert.match(separate.map(x=>x.title).join('|'),/起床.*水を飲む.*歯磨き/s);
+  assert.match(separate.map(x=>x.title).join('|'),/起床.*水を飲む.*歯磨き.*睡眠/s);
   await microPage.close();
   await page.close();
  }
