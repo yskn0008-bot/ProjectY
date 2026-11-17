@@ -351,9 +351,98 @@ async function main(){
  stage='画面表示';
  await WebView.loadHTML(output,null,null,true);
 }
+const YOS_TASK_DB='06e62efb9a3c45e2bec77a53332c925a';
+const apiHeaders=token=>({
+ Authorization:'Bearer '+token,'Notion-Version':'2025-09-03',
+ 'Content-Type':'application/json',Accept:'application/json'
+});
+const tokyoParts=value=>{
+ const ms=Date.parse(value);
+ if(!Number.isFinite(ms))return null;
+ const x=Object.fromEntries(new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(new Date(ms)).filter(p=>p.type!=='literal').map(p=>[p.type,p.value]));
+ return {day:x.year+'-'+x.month+'-'+x.day,time:x.hour+':'+x.minute};
+};
+const matchInstant=(a,b)=>a===null&&b===null||
+ typeof a==='string'&&typeof b==='string'&&Number.isFinite(Date.parse(a))&&Date.parse(a)===Date.parse(b);
+async function notionPage(token,id){
+ const request=new Request('https://api.notion.com/v1/pages/'+id);
+ request.method='GET';request.headers=apiHeaders(token);request.timeoutInterval=15;
+ const page=await request.loadJSON();
+ const status=request.response?.statusCode;
+ if(status!==200)throw Error(status===401?'Notionの認証を確認してください':
+  status===403?'Notionの閲覧権限を確認してください':
+  status===404?'Notionの元タスクを取得できません':'Notionの再確認に失敗（HTTP '+(status||'不明')+'）');
+ if(page?.object!=='page'||!page.properties||page.archived||page.in_trash)
+  throw Error('Notionのタスク形式が一致しません');
+ if(page.parent?.data_source_id!==SOURCE&&page.parent?.database_id!==YOS_TASK_DB)
+  throw Error('YOS Tasks以外のデータは変更しません');
+ return page;
+}
+function validateMoveInput(params){
+ const id=String(params?.id||'').toLowerCase();
+ const old=String(params?.old||''),end=String(params?.end||'')||null;
+ const next=String(params?.next||''),edited=String(params?.edited||'');
+ if(!/^[a-f0-9]{32}$/.test(id)||!validAt(old)||!old.includes('T')||
+   end!==null&&(!validAt(end)||!end.includes('T'))||!validAt(next)||!next.includes('T')||
+   !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/.test(edited))
+  throw Error('日時変更の入力形式を確認できません');
+ const from=Date.parse(old),to=Date.parse(next),duration=end===null?0:Date.parse(end)-from;
+ const originalDay=tokyoParts(old),newDay=tokyoParts(next);
+ if(!originalDay||!newDay||originalDay.day!==newDay.day||duration<0||duration>86400000||from===to)
+  throw Error('同じ日の開始時刻だけ変更できます。日跨ぎの終了時刻は維持します');
+ return {id,old,end,next,edited,duration};
+}
+async function moveNotion(params){
+ if(typeof config!=='undefined'&&config.runsWithSiri)
+  throw Error('Notionの日時変更はScriptableアプリで確認してください');
+ const move=validateMoveInput(params);
+ let token='';
+ try{if(Keychain.contains(NOTION_KEY))token=Keychain.get(NOTION_KEY)||''}catch{}
+ if(!token)throw Error('既存のNotion接続情報がありません');
+ const page=await notionPage(token,move.id);
+ const p=page.properties,due=p['期限']?.date,sourceKey=rich(p['同期キー']),state=pick(p['状態']);
+ if(!STATES.includes(state)||/^(?:yos-shift-|apple-calendar:|calendar:)/.test(sourceKey))
+  throw Error('連携予定や状態未確認のタスクは変更しません');
+ if(!due||!matchInstant(due.start,move.old)||!matchInstant(due.end||null,move.end)||
+    page.last_edited_time!==move.edited)
+  throw Error('Notion側が更新されました。先に画面を再読み込みしてください');
+ if(due.time_zone&&due.time_zone!=='Asia/Tokyo')
+  throw Error('別の時間帯のタスクは変更しません');
+ const newEnd=move.end?new Date(Date.parse(move.next)+move.duration).toISOString():null;
+ const before=tokyoParts(move.old),after=tokyoParts(move.next);
+ const name=clean(rich(p['やること']),64);
+ const confirm=new Alert();confirm.title='Notionの日時を変更';
+ confirm.message='タスク：'+name+'\n'+before.day+' '+before.time+' → '+after.day+' '+after.time+
+   '\n'+(newEnd?'所要時間・終了時刻は保持します':'期限の時刻だけ変更します')+
+   '\nNotionの「期限」に反映します。';
+ confirm.addAction('Notionに保存');confirm.addCancelAction('キャンセル');
+ if(await confirm.presentAlert()!==0){await main();return}
+ // Re-read immediately before write. A stale or replaced date cannot be updated.
+ const latest=await notionPage(token,move.id),currentDue=latest.properties['期限']?.date;
+ if(latest.last_edited_time!==move.edited||!currentDue||
+   !matchInstant(currentDue.start,move.old)||!matchInstant(currentDue.end||null,move.end))
+  throw Error('確認中にNotionが更新されました。変更しません');
+ const request=new Request('https://api.notion.com/v1/pages/'+move.id);
+ request.method='PATCH';request.headers=apiHeaders(token);request.timeoutInterval=20;
+ request.body=JSON.stringify({properties:{'期限':{date:{start:move.next,end:newEnd}}}});
+ const result=await request.loadJSON(),status=request.response?.statusCode;
+ if(status!==200||result?.object!=='page'){
+  throw Error(status===403?'Notion連携に日時の書込み権限がありません。元データは変更していません':
+   'Notionへの保存結果を確認できません（HTTP '+(status||'不明')+'）。元のタスクを確認してください');
+ }
+ const check=await notionPage(token,move.id),saved=check.properties['期限']?.date;
+ if(!saved||!matchInstant(saved.start,move.next)||!matchInstant(saved.end||null,newEnd))
+  throw Error('Notionへの保存後照合が一致しません。再操作せず元タスクを確認してください');
+ await main();
+}
 // SCRIPTABLE_ENTRY
-try{await main()}catch(error){
+try{
+ if(typeof args!=='undefined'&&args.queryParameters?.action==='move'){
+  stage='Notion日時変更';
+  await moveNotion(args.queryParameters);
+ }else await main();
+}catch(error){
  const detail=clean(error?.message||error,180);
- await showAlert('DAYSTREAM 接続エラー','［'+stage+'］'+detail+'。Notionの内容は変更していません。');
+ await showAlert('DAYSTREAM '+(stage==='Notion日時変更'?'更新':'接続')+'エラー','［'+stage+'］'+detail);
 }
 Script.complete();
