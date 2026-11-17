@@ -25,6 +25,9 @@ try{
   // Source cards are controls, never anchors: long press cannot open a Notion login preview.
   assert.equal(await page.locator('#tl a.yos-notion-projection').count(),0);
   assert.equal(await page.locator('#tl button.yos-notion-projection').count(),3);
+  const shortCard=page.locator('#tl button.yos-notion-projection').filter({hasText:'架空の期限'});
+  assert.equal(await shortCard.getAttribute('data-compact'),'true');
+  assert.match(await shortCard.locator('small').innerText(),/^14:00$/);
   assert.equal(await page.locator('#tl .yos-notion-projection').first().evaluate(el=>getComputedStyle(el).color),
    'rgb(245, 248, 255)');
   await page.locator('#tl button.yos-notion-projection').first().click();
