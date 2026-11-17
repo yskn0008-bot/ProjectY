@@ -47,9 +47,11 @@ export function parseInbox(blocks: Block[]): Capture[] {
         (source === 'Clarity Share' && !match[3].startsWith('share:')) ||
         (source !== 'Clarity Notification' && source !== 'Native Notification' && source !== 'Clarity Share' && !match[3].startsWith('clarity:'))) continue;
     if (source === 'Clarity Share') {
-      // A shared document can contain a fake "YYYY · Clarity · clarity:..."
-      // paragraph. Treat every child as untrusted payload up to the actual
-      // separator; never re-interpret those payload blocks as user captures.
+      // Some share saves combine source/payload/--- in ONE paragraph (sometimes
+      // with HTML <br>), while others write separate blocks. Keep both opaque.
+      // A fake Clarity header inside shared material must never be promoted.
+      const completeInline = /(?:^|\\n|<br\\s*\\/?\\s*>)\\s*\\\\?---\\s*$/iu.test(line);
+      if (completeInline) continue;
       let foundEnd = false;
       for (let j = i + 1; j < blocks.length; j++) {
         i = j;
