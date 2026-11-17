@@ -56,20 +56,20 @@ try{
 
  const completeResult=await page.evaluate(()=>{
   const task=items.find(x=>x.t==='WIZARD CREATE');toggleTaskDone(task);
-  return {done:items.find(x=>x.t==='WIZARD CREATE').done,actions:JSON.parse(localStorage.getItem('YOS_DAYSTREAM_WEB_ACTIONS_V1')||'[]').length};
+  return {done:Boolean(items.find(x=>x.t==='WIZARD CREATE').done),actions:JSON.parse(localStorage.getItem('YOS_DAYSTREAM_WEB_ACTIONS_V1')||'[]').length};
  });
  assert.equal(completeResult.done,true);
  assert.equal(completeResult.actions,1);
  await page.locator('#yosUndoBtn').click();
  const undoneCompletion=await page.evaluate(()=>({
-  done:items.find(x=>x.t==='WIZARD CREATE').done,
+  done:Boolean(items.find(x=>x.t==='WIZARD CREATE').done),
   actions:JSON.parse(localStorage.getItem('YOS_DAYSTREAM_WEB_ACTIONS_V1')||'[]').length
  }));
  assert.equal(undoneCompletion.done,false,'undo restores local task incomplete status');
  assert.equal(undoneCompletion.actions,0,'undo rolls back its local completion log');
  await page.locator('#yosRedoBtn').click();
  const redoneCompletion=await page.evaluate(()=>({
-  done:items.find(x=>x.t==='WIZARD CREATE').done,
+  done:Boolean(items.find(x=>x.t==='WIZARD CREATE').done),
   actions:JSON.parse(localStorage.getItem('YOS_DAYSTREAM_WEB_ACTIONS_V1')||'[]').length
  }));
  assert.equal(redoneCompletion.done,true,'redo restores local completion status');
