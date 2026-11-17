@@ -1,3 +1,4 @@
+import {randomUUID} from 'node:crypto';
 import type {FetchLike} from '../http.js';
 import type {RedisCommandClient} from '../storage/upstash-rest.js';
 
@@ -41,8 +42,13 @@ export function parseInbox(blocks: Block[]): Capture[] {
     if (block?.type !== 'paragraph') continue;
     const line = plain(block.paragraph?.rich_text);
     const match = /^(\d{4}-\d\d-\d\dT\S+)\s*·\s*([^·\n]+)\s*·\s*((?:clarity|notification|share):[a-z\d._:-]+)/iu.exec(line);
-    if (!match || !match[1] || !match[2] || !match[3] || seen.has(match[3]) || !/^(?:Memo|Clarity|Clarity Voice|Clarity Text|Clarity\.Voice|Clarity\.Text|Clarity Notification|Clarity Share)$/iu.test(match[2].trim())) continue;
+    if (!match || !match[1] || !match[2] || !match[3] || seen.has(match[3]) || !/^(?:Memo|Clarity|Clarity Voice|Clarity Text|Clarity\.Voice|Clarity\.Text|clarity\/voice|clarity\/text|Clarity Notification|Clarity Share)$/iu.test(match[2].trim())) continue;
+    const source = match[2].trim();
+    if ((source === 'Clarity Notification' && !match[3].startsWith('notification:')) ||
+        (source === 'Clarity Share' && !match[3].startsWith('share:')) ||
+        (source !== 'Clarity Notification' && source !== 'Clarity Share' && !match[3].startsWith('clarity:'))) continue;
     let raw = line.slice(match[0].length).trim();
+    if (/^·\s*(?:information|money-review|missed-call|legal|security)$/iu.test(raw)) raw = '';
     if (!raw) for (let j = i + 1; j < Math.min(blocks.length, i + 5); j++) {
       const next = blocks[j];
       if (next?.type !== 'paragraph') break;
@@ -77,7 +83,7 @@ export function decide(capture: Capture): Decision {
     return {target: 'money', title: shop, amount, merchant: shop, transactionId: transaction[1]};
   }
   // Share content cannot issue Notion writes.
-  if (source === 'Clarity Share' || !/^(?:Memo|Clarity|Clarity Voice|Clarity Text|Clarity\.Voice|Clarity\.Text)$/iu.test(source) ||
+  if (source === 'Clarity Share' || !/^(?:Memo|Clarity|Clarity Voice|Clarity Text|Clarity\.Voice|Clarity\.Text|clarity\/voice|clarity\/text)$/iu.test(source) ||
       !capture.id.startsWith('clarity:')) return null;
   // Exact page name only; arbitrary guesses are held.
   const namedPage = /^Notion[のに]?[「『]([^」』]{1,100})[」』]に(?:記録|保存|追記)[：:\s]+([\s\S]{1,1800})$/iu.exec(text);
@@ -98,7 +104,7 @@ export function decide(capture: Capture): Decision {
   return null;
 }
 
-export function createInboxSorter(options: {notionToken: string; inboxPageId: string; redis: RedisCommandClient; mode?: 'test' | 'run'; fetchImpl?: FetchLike}) {
+export function createInboxSorter(options: {notionToken: string; inboxPageId: string; redis: RedisCommandClient; mode?: 'test' | 'run'; captureId?: string; fetchImpl?: FetchLike}) {
   if (!options.notionToken || !/^[a-f0-9-]{32,36}$/iu.test(options.inboxPageId)) throw new Error('Inbox sorter configuration missing');
   const mode = options.mode ?? 'test';
   if (mode !== 'test' && mode !== 'run') throw new Error('Invalid Inbox sorter mode');
@@ -197,25 +203,33 @@ export function createInboxSorter(options: {notionToken: string; inboxPageId: st
     return 'created';
   }
   return async function run(): Promise<{created: number; duplicates: number; held: number}> {
-    const lock = 'yos:inbox-sorter:lock';
-    if (await options.redis.command<string | null>(['SET', lock, 'processing', 'NX', 'EX', 120]) !== 'OK') throw new Error('Inbox sorter already running');
-    let created = 0, duplicates = 0, held = 0;
-    // The lock expires automatically. Destination keys, not the lock, protect retries.
-    const all = parseInbox(await blocks());
-    const selected = mode === 'test' ? all.filter(capture => capture.id === ACCEPTANCE_ID) : all;
-    if (mode === 'test' && selected.length !== 1) throw new Error('Acceptance capture missing; no writes');
-    for (const capture of selected) {
-      const decision = decide(capture);
-      if (!decision) {held++; continue;}
-      try {
-        const result = await write(capture, decision);
-        if (result === 'created') created++; else duplicates++;
-      } catch (error) {
-        if (!(error instanceof HoldCapture)) throw error;
-        held++;
+    const lock = 'yos:inbox-sorter:lock', owner = randomUUID();
+    if (await options.redis.command<string | null>(['SET', lock, owner, 'NX', 'EX', 120]) !== 'OK') throw new Error('Inbox sorter already running');
+    try {
+      let created = 0, duplicates = 0, held = 0;
+      const all = parseInbox(await blocks());
+      const selected = options.captureId ? all.filter(capture => capture.id === options.captureId) :
+        mode === 'test' ? all.filter(capture => capture.id === ACCEPTANCE_ID) : all;
+      if (mode === 'test' && !options.captureId && selected.length !== 1) throw new Error('Acceptance capture missing; no writes');
+      if (options.captureId && selected.length !== 1) throw new Error('Capture not found or ambiguous; no writes');
+      for (const capture of selected) {
+        const decision = decide(capture);
+        if (!decision) {held++; continue;}
+        try {
+          const result = await write(capture, decision);
+          if (result === 'created') created++; else duplicates++;
+        } catch (error) {
+          if (!(error instanceof HoldCapture)) throw error;
+          held++;
+        }
+        if (created >= 10) break;
       }
-      if (created >= 10) break;
+      return {created, duplicates, held};
+    } finally {
+      // Do not release another process's lock if the TTL has already expired.
+      if (await options.redis.command<string | null>(['GET', lock]) === owner) {
+        await options.redis.command<number>(['DEL', lock]);
+      }
     }
-    return {created, duplicates, held};
   };
 }
