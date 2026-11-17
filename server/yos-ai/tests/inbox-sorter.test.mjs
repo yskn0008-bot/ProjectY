@@ -16,10 +16,11 @@ function fixture() {return [
 ];}
 function setup(extraBlocks = [], replaceFixture = false) {
   let rows = [], writes = 0, lock = null;
-  const redis = {async command([method,key,value]) {
+  const redis = {async command([method,key,value,keysCount,evalKey,expectedOwner]) {
     if (method === 'SET') {if (lock) return null; lock = value; return 'OK';}
     if (method === 'GET') return lock;
     if (method === 'DEL') {lock = null; return 1;}
+    if (method === 'EVAL') { if (lock === expectedOwner) {lock=null;return 1;} return 0; }
     throw Error('Unexpected Redis command ' + method);
   }};
   async function notion(input, init) {
@@ -190,4 +191,13 @@ test('capture id scoping cannot process the wrong backlog',async()=>{
   const run=createInboxSorter({notionToken:'test',inboxPageId:inbox,redis:s.redis,mode:'run',captureId:'clarity:missing',fetchImpl:s.notion});
   await assert.rejects(run(),/Capture not found/);
   assert.equal(s.writes,0);
+});
+
+
+test('instant capture routing opt-in is independent of daily historical cron mode',()=>{
+  const src=readFileSync(new URL('../src/intake/production.ts',import.meta.url),'utf8');
+  assert.match(src,/YOS_INBOX_INSTANT_ENABLED/);
+  assert.doesNotMatch(src,/YOS_INBOX_SORT_MODE/);
+  assert.doesNotMatch(src,/YOS_INBOX_SORT_ENABLED/);
+  assert.match(src,/captureId/);
 });
