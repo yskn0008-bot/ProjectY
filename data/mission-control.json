@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-17T16:38:31+09:00",
+  "updated_at": "2026-11-17T16:42:47+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -12,16 +12,6 @@
     ]
   },
   "inbox": [
-    {
-      "id": "github-pr-762",
-      "title": "PR #762 feat(notification): safeguard v0.3→v0.4 migration using common installer",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/762",
-      "updated_at": "2026-11-16T16:08:15Z"
-    },
     {
       "id": "github-pr-764",
       "title": "PR #764 YOS Calendar｜Face IDパスキー認証（Googleは初回登録・復旧のみ）",
@@ -113,6 +103,16 @@
       "updated_at": "2026-11-17T07:29:19Z"
     },
     {
+      "id": "github-pr-793",
+      "title": "PR #793 DAYSTREAM｜元の紫色のタイムラインへ14件を安全に追加",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/793",
+      "updated_at": "2026-11-17T07:42:00Z"
+    },
+    {
       "id": "github-issue-10",
       "title": "Issue #10 Mission Control v2：GitHubのIssue・PR・Commitを自動集約する",
       "type": "GitHub Issue",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-17T07:37:53Z"
+      "updated_at": "2026-11-17T07:38:54Z"
     },
     {
       "id": "github-issue-234",
@@ -274,7 +274,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-17T16:38:31+09:00",
+      "last_update": "2026-11-17T16:42:47+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -349,13 +349,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 9件・Open PR 59件を自動同期中",
+      "next_action": "Open Issue 9件・Open PR 60件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-17T16:38:31+09:00",
+      "last_update": "2026-11-17T16:42:47+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -378,7 +378,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-17T16:38:31+09:00",
+      "last_update": "2026-11-17T16:42:47+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -460,5 +460,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "4b1bc0e6e24519c54d80528ba5c153022a58a5c3b1fddca3dec7f80addaf9874"
+  "github_snapshot_hash": "125d7a6ffcf8165fd98b4c7e3fd20a3c0658391571601f3b40483c8bafdc869c"
 }
