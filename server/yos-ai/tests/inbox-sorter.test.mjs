@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readdirSync,readFileSync} from 'node:fs';
-import {createInboxSorter,parseInbox,decide} from '../dist/intake/inbox-sorter.js';
+import {createInboxSorter,parseInbox,decide,decideMany} from '../dist/intake/inbox-sorter.js';
 import cronHandler from '../src/routes/inbox-sort.mjs';
 import intakeRoute from '../api/yos/intake.mjs';
 
@@ -234,4 +234,42 @@ test('same notification short ID reused at different timestamps is not lost by I
   assert.equal(p.length,2);
   assert.equal(p[0].id,p[1].id);
   assert.notEqual(p[0].at,p[1].at);
+});
+
+
+test('verified Clarity Pilot v3 one-input two-target format registers once with matching indexed receipts',async()=>{
+  const raw='タスク：Clarity v3 複数仕分けテスト\n買い物リスト：Clarity v3 テスト商品';
+  const items=[
+    block('meta-v3','2026-11-16T16:21:22.672Z · Clarity.Text · clarity:trial2-mwjh0kts-cjz9pr'),
+    block('raw-v3',raw)
+  ];
+  const s=setup(items,true);
+  const candidates=parseInbox(items);
+  assert.equal(candidates.length,1);
+  assert.deepEqual(decideMany(candidates[0]).map(d=>d?.target),['task','shopping']);
+  const run=createInboxSorter({notionToken:'test',inboxPageId:inbox,redis:s.redis,mode:'run',captureId:'clarity:trial2-mwjh0kts-cjz9pr',fetchImpl:s.notion});
+  assert.deepEqual(await run(),{created:2,duplicates:0,held:0});
+  assert.equal(s.writes,2);
+  assert.equal(s.rows[0].properties['同期キー'].rich_text[0].text.content,'inbox:clarity:trial2-mwjh0kts-cjz9pr:01');
+  assert.match(s.rows[1].properties['メモ'].rich_text[0].text.content,/inbox:clarity:trial2-mwjh0kts-cjz9pr:02/);
+  assert.deepEqual(await run(),{created:0,duplicates:2,held:0});
+  assert.equal(s.writes,2);
+});
+
+test('v3 held middle item keeps third valid instruction at suffix 03 rather than shifting to 02',()=>{
+  const c={id:'clarity:abc12345',at:'2026-11-16T16:21:22.672Z',source:'Clarity.Text',
+    raw:'タスク：薬局の棚を整理する\nこの文章はテスト用です\n買い物リスト：洗剤'};
+  assert.deepEqual(decideMany(c).map(d=>d?.target||null),['task',null,'shopping']);
+});
+
+test('financial notices and third-party inputs never route to spend ledger or actionable user commands',()=>{
+  const at='2026-11-16T16:21:22.672Z';
+  for(const source of ['Clarity Notification','Native Notification']){
+    const p={id:'notification:abcd1234',at,source,raw:'· money-review\nPayPay\n取引が完了しました。\n金額：1,392円\n取引番号：[長い番号非表示]\n店舗名：セブン-イレブン'};
+    const decision=decide(p);
+    assert.equal(decision?.target,'page');
+    assert.equal(decision?.title,'家計管理戦略');
+    assert.match(decision?.body||'',/家計未計上/);
+  }
+  assert.deepEqual(decideMany({id:'share:aabbcc1234',at,source:'Clarity Share',raw:'タスク：送金する'}),[null]);
 });
