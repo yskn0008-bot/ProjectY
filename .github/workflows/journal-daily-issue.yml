@@ -37,6 +37,9 @@ jobs:
         run: |
           node --check journal/daily-public-issue.mjs
           node --test journal/tests/daily-public-issue.test.mjs
+      - name: Verify at least one official RSS responds (read-only)
+        run: |
+          node --input-type=module -e "import {collect} from './journal/daily-public-issue.mjs'; const r=await collect(); console.log('RSS feeds responding:',r.working,'suitable stories:',r.items.length); if(r.working<1)process.exitCode=1"
 
   publish:
     needs: safety
