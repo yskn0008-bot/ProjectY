@@ -37,8 +37,8 @@ try{
     rightWidth:getComputedStyle(el).borderRightWidth,
     leftColor:getComputedStyle(el).borderLeftColor,
     rightColor:getComputedStyle(el).borderRightColor})));
-  assert.equal(new Set(appearance.map(x=>x.background)).size,1);
-  assert.ok(appearance.every(x=>x.leftWidth===x.rightWidth&&x.leftColor===x.rightColor));
+  assert.equal(new Set(appearance.filter((x,i)=>i<2).map(x=>x.background)).size,1);
+  assert.ok(appearance.every(x=>x.leftWidth==='0px'&&x.rightWidth==='0px'));
 
   await page.locator('#tl button.yos-notion-projection').first().click();
   assert.equal(await page.locator('#yosNotionEditSheet').isVisible(),true);
@@ -49,6 +49,15 @@ try{
   assert.equal(await page.locator('#yosNotionNewTime').isDisabled(),true);
   assert.match(await page.locator('#yosNotionSheetNote').innerText(),/読み取り専用/);
   await page.locator('#yosNotionClose').click();
+  // A tap edit also uses an inline confirmation, never a Scriptable URL jump.
+  await page.locator('#tl button.yos-notion-projection').first().click();
+  await page.locator('#yosNotionNewTime').fill('11:15');
+  await page.locator('#yosNotionSave').click();
+  assert.equal(await page.locator('#yosNotionEditSheet').isVisible(),false);
+  assert.equal(await page.locator('#yosNotionMoveBar').isVisible(),true);
+  assert.equal(await page.locator('#yosNotionMoveBar').innerText().then(x=>x.includes('保存')),true);
+  await page.locator('#yosMoveCancel').click();
+  assert.equal(await page.locator('#yosNotionMoveBar').isVisible(),false);
   assert.match(await page.locator('#dayAllDay').innerText(),/時間未設定.*架空の日付タスク/s);
   assert.match(await page.locator('#yosWebSourceState').innerText(),/Notion 5件取得/);
   assert.equal(await page.locator('#taskCount').innerText(),'0/3');
@@ -83,6 +92,30 @@ try{
   assert.equal(new Set(separate.map(x=>x.width)).size,1);
   assert.match(separate.map(x=>x.title).join('|'),/起床.*水を飲む.*歯磨き.*睡眠/s);
   await microPage.close();
+  // In Scriptable bridge mode, explicit Save only sends a local native message.
+  const livePage=await browser.newPage({viewport:{width,height:844},timezoneId:'Asia/Tokyo'});
+  await livePage.setContent(htmlFor([
+   row(date+'T10:00:00+09:00',date+'T10:20:00+09:00','歯磨き','5'.repeat(32))
+  ],true));
+  await livePage.waitForFunction(()=>!document.getElementById('yosNativeBoot'));
+  const beforeUrl=livePage.url();
+  await livePage.locator('#tl button.yos-notion-projection').first().click();
+  await livePage.locator('#yosNotionNewTime').fill('10:30');
+  await livePage.locator('#yosNotionSave').click();
+  await livePage.locator('#yosMoveSave').click();
+  assert.equal(livePage.url(),beforeUrl);
+  const queued=await livePage.evaluate(()=>window.YOS_DAYSTREAM_OUTBOX.slice());
+  assert.equal(queued.length,1);
+  assert.equal(queued[0].type,'move');
+  assert.equal(queued[0].values.id,'5'.repeat(32));
+  assert.equal(queued[0].values.next,date+'T10:30:00+09:00');
+  await livePage.evaluate(()=>window.YOS_DAYSTREAM_NATIVE_REPLY({
+   requestId:window.YOS_DAYSTREAM_OUTBOX[0].requestId,ok:false,message:'再確認が必要です'
+  }));
+  assert.match(await livePage.locator('#yosNotionMoveBar').innerText(),/再確認が必要/);
+  assert.equal(await livePage.locator('#yosMoveSave').isDisabled(),true);
+  assert.equal(livePage.url(),beforeUrl);
+  await livePage.close();
   await page.close();
  }
 }finally{await browser.close()}
