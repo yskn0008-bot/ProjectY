@@ -46,6 +46,23 @@ export function parseInbox(blocks: Block[]): Capture[] {
     if (((source === 'Clarity Notification' || source === 'Native Notification') && !match[3].startsWith('notification:')) ||
         (source === 'Clarity Share' && !match[3].startsWith('share:')) ||
         (source !== 'Clarity Notification' && source !== 'Native Notification' && source !== 'Clarity Share' && !match[3].startsWith('clarity:'))) continue;
+    if (source === 'Clarity Share') {
+      // A shared document can contain a fake "YYYY · Clarity · clarity:..."
+      // paragraph. Treat every child as untrusted payload up to the actual
+      // separator; never re-interpret those payload blocks as user captures.
+      let foundEnd = false;
+      for (let j = i + 1; j < blocks.length; j++) {
+        i = j;
+        const next = blocks[j];
+        if (next?.type === 'divider' || (next?.type === 'paragraph' &&
+          /^(?:---|\\---)$/u.test(plain(next.paragraph?.rich_text).trim()))) {
+          foundEnd = true;
+          break;
+        }
+      }
+      if (!foundEnd) break; // incomplete shared payload: stop the scan safely
+      continue;
+    }
     let raw = line.slice(match[0].length).trim();
     if (/^·\s*(?:information|money-review|missed-call|legal|security)$/iu.test(raw)) raw = '';
     if (!raw) for (let j = i + 1; j < Math.min(blocks.length, i + 5); j++) {
