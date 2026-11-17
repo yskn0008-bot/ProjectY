@@ -22,6 +22,20 @@ try{
   await page.waitForFunction(()=>!document.getElementById('yosNativeBoot'));
   assert.equal(await page.locator('.yos-notion-projection').count(),3);
   assert.match(await page.locator('.yos-notion-projection').last().innerText(),/予定.*夜勤/s);
+  // Source cards are controls, never anchors: long press cannot open a Notion login preview.
+  assert.equal(await page.locator('a.yos-notion-projection').count(),0);
+  assert.equal(await page.locator('button.yos-notion-projection').count(),3);
+  assert.equal(await page.locator('.yos-notion-projection').first().evaluate(el=>getComputedStyle(el).color),
+   'rgb(245, 248, 255)');
+  await page.locator('button.yos-notion-projection').first().click();
+  assert.equal(await page.locator('#yosNotionEditSheet').isVisible(),true);
+  assert.equal(await page.locator('#yosNotionNewTime').isEnabled(),true);
+  await page.locator('#yosNotionClose').click();
+  assert.equal(await page.locator('#yosNotionEditSheet').isVisible(),false);
+  await page.locator('button.yos-notion-projection').filter({hasText:'夜勤'}).click();
+  assert.equal(await page.locator('#yosNotionNewTime').isDisabled(),true);
+  assert.match(await page.locator('#yosNotionSheetNote').innerText(),/読み取り専用/);
+  await page.locator('#yosNotionClose').click();
   assert.match(await page.locator('#dayAllDay').innerText(),/時間未設定.*架空の日付タスク/s);
   assert.match(await page.locator('#yosWebSourceState').innerText(),/Notion 5件取得/);
   assert.equal(await page.locator('#taskCount').innerText(),'0/3');
