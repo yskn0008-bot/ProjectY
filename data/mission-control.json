@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-17T16:47:25+09:00",
+  "updated_at": "2026-11-17T16:47:53+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -74,13 +74,13 @@
     },
     {
       "id": "github-pr-770",
-      "title": "PR #770 [Taxi] 承認デザイン忠実再現｜1画面UI・降車ワンタップ・日報導線",
+      "title": "PR #770 [Taxi] 本番画面を承認UIへ切替｜旧画面保存・降車ワンタップ・PWA対応",
       "type": "GitHub PR",
       "status": "draft",
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/770",
-      "updated_at": "2026-11-17T07:46:52Z"
+      "updated_at": "2026-11-17T07:47:21Z"
     },
     {
       "id": "github-pr-771",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-17T07:45:59Z"
+      "updated_at": "2026-11-17T07:47:14Z"
     },
     {
       "id": "github-issue-234",
@@ -274,7 +274,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-17T16:47:25+09:00",
+      "last_update": "2026-11-17T16:47:53+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -355,7 +355,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-17T16:47:25+09:00",
+      "last_update": "2026-11-17T16:47:53+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -378,7 +378,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-17T16:47:25+09:00",
+      "last_update": "2026-11-17T16:47:53+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -460,5 +460,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "991c4be341dc955ae8fae61bc7b77783525760dde606abf8772bd381000175f2"
+  "github_snapshot_hash": "3b9bad6d9c5afbef8a7ae225c2e3fdfdff7cccda8072656f932ae07440c747cb"
 }
