@@ -65,7 +65,7 @@ button:active{opacity:.8}@media(min-width:640px){.dock{left:calc((100vw - 640px)
 
 /* Explicit grip avoids accidental moves during iPhone vertical scrolling. */
 .microtools{flex-wrap:wrap}
-.yos-history-actions{display:flex;gap:4px;align-items:center;flex-shrink:0}
+.yos-history-actions{display:flex;gap:5px;align-items:center;flex-shrink:0;position:fixed;right:max(14px,calc((100vw - 610px)/2));bottom:calc(97px + env(safe-area-inset-bottom));z-index:19;padding:5px;border:1px solid #ffffff35;border-radius:11px;background:#303741eb;box-shadow:0 5px 18px #0006}
 .yos-history-button{display:grid;place-items:center;min-width:32px;height:30px;border:1px solid #ffffff50;background:#ffffff12;border-radius:8px;color:#f2f7ff;font-size:21px;line-height:1;padding:0}
 .yos-history-button:disabled{opacity:.35;cursor:default}
 .card.task{touch-action:pan-y}
