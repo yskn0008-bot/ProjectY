@@ -141,15 +141,18 @@ test('real Clarity and notification formats parsed; third-party instructions hel
   assert.equal(captures.length,4);
   assert.equal(decide(captures[0])?.target,'task');
   assert.equal(decide(captures[1])?.target,'task');
-  assert.deepEqual(decide(captures[2]),{target:'money',title:'セブン-イレブン',merchant:'セブン-イレブン',amount:1392,transactionId:'02386396397141991424'});
+  assert.equal(decide(captures[2])?.target,'page');
+  assert.equal(decide(captures[2])?.title,'家計管理戦略');
+  assert.match(decide(captures[2])?.body||'',/家計未計上/);
   assert.equal(decide(captures[3]),null);
 });
 
-test('Money writes require actual transaction ID and do not count transfers',()=>{
+test('redacted PayPay transaction IDs stay in non-booking Money review; transfers stay held',()=>{
   const base={id:'notification:test001',at:'2026-11-12T00:30:00Z',source:'Clarity Notification'};
   const good='PayPay\n取引が完了しました。\n金額：850円\n店舗名：ほっともっと\n取引番号：02386396397141991424';
-  assert.equal(decide({...base,raw:good})?.target,'money');
-  for(const raw of [good.replace('02386396397141991424','[番号非表示]'),good.replace('取引が完了しました','出金を受け付けました'),good.replace('店舗名：ほっともっと','店舗名：不明')]){
+  assert.equal(decide({...base,raw:good})?.target,'page');
+  assert.equal(decide({...base,raw:good.replace('02386396397141991424','[長い番号非表示]')})?.target,'page');
+  for(const raw of [good.replace('取引が完了しました','出金を受け付けました'),good.replace('店舗名：ほっともっと','店舗名：不明')]){
     assert.equal(decide({...base,raw}),null);
   }
 });
@@ -200,4 +203,35 @@ test('instant capture routing opt-in is independent of daily historical cron mod
   assert.doesNotMatch(src,/YOS_INBOX_SORT_MODE/);
   assert.doesNotMatch(src,/YOS_INBOX_SORT_ENABLED/);
   assert.match(src,/captureId/);
+});
+
+
+test('Native Notification stores only review data when redacted and page receipt is idempotent',async()=>{
+  const input=[block('nn','2026-11-17T05:01:00Z · Native Notification · notification:9abc0123 · money-review\n発信元: PayPay\nPayPay\n取引が完了しました。\n金額：900円\n取引番号：[長い番号非表示]\n店舗名：スーパー')];
+  const s=setup(input,true), pages=[],pageId='existing-money-strategy';
+  const notion=async(url,init)=>{
+    const path=new URL(url).pathname.replace('/v1','');
+    if(path==='/search')return Response.json({results:[{id:pageId,object:'page',properties:{title:{type:'title',title:[{plain_text:'家計管理戦略'}]}}}],has_more:false});
+    if(path==='/blocks/'+pageId+'/children'&&init.method==='PATCH'){
+      pages.push(...JSON.parse(init.body).children);
+      return Response.json({});
+    }
+    if(path==='/blocks/'+pageId+'/children')return Response.json({results:pages,has_more:false});
+    return s.notion(url,init);
+  };
+  const run=createInboxSorter({notionToken:'test',inboxPageId:inbox,redis:s.redis,mode:'run',captureId:'notification:9abc0123',fetchImpl:notion});
+  assert.deepEqual(await run(),{created:1,duplicates:0,held:0});
+  assert.deepEqual(await run(),{created:0,duplicates:1,held:0});
+  assert.equal(pages.length,1);
+  assert.match(pages[0].paragraph.rich_text[0].text.content,/家計未計上/);
+  assert.equal(s.writes,0,'Money ledger must not get synthetic expense rows');
+});
+
+test('same notification short ID reused at different timestamps is not lost by Inbox parser',()=>{
+  const txt='取引が完了しました。\n金額：900円\n店舗名：スーパー';
+  const p=parseInbox([block('n1','2026-11-01T00:00:00Z · Native Notification · notification:abcd1234 · money-review\nPayPay\n'+txt),
+    block('n2','2026-11-02T00:00:00Z · Native Notification · notification:abcd1234 · money-review\nPayPay\n'+txt)]);
+  assert.equal(p.length,2);
+  assert.equal(p[0].id,p[1].id);
+  assert.notEqual(p[0].at,p[1].at);
 });
