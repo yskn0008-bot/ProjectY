@@ -1,4 +1,3 @@
-import {randomUUID} from 'node:crypto';
 import type {FetchLike} from '../http.js';
 import type {RedisCommandClient} from '../storage/upstash-rest.js';
 
@@ -78,9 +77,9 @@ export function decide(capture: Capture): Decision {
     const amount = Number(money?.[1]?.replaceAll(',', ''));
     if (!money || !merchant || !transaction || !Number.isSafeInteger(amount) || amount <= 0 || amount > 1000000 ||
         !day(capture.at)) return null;
-    const shop = merchant[1].trim().slice(0, 90);
+    const shop = (merchant[1] ?? '').trim().slice(0, 90);
     if (!shop || /(?:非表示|不明|未確認)/u.test(shop)) return null;
-    return {target: 'money', title: shop, amount, merchant: shop, transactionId: transaction[1]};
+    return {target: 'money', title: shop, amount, merchant: shop, transactionId: transaction[1] ?? ''};
   }
   // Share content cannot issue Notion writes.
   if (source === 'Clarity Share' || !/^(?:Memo|Clarity|Clarity Voice|Clarity Text|Clarity\.Voice|Clarity\.Text|clarity\/voice|clarity\/text)$/iu.test(source) ||
@@ -203,7 +202,7 @@ export function createInboxSorter(options: {notionToken: string; inboxPageId: st
     return 'created';
   }
   return async function run(): Promise<{created: number; duplicates: number; held: number}> {
-    const lock = 'yos:inbox-sorter:lock', owner = randomUUID();
+    const lock = 'yos:inbox-sorter:lock', owner = crypto.randomUUID();
     if (await options.redis.command<string | null>(['SET', lock, owner, 'NX', 'EX', 120]) !== 'OK') throw new Error('Inbox sorter already running');
     try {
       let created = 0, duplicates = 0, held = 0;
