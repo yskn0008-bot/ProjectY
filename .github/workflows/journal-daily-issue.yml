@@ -1,6 +1,11 @@
 name: YOS JOURNAL daily source-first issue
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - 'journal/daily-public-issue.mjs'
+      - '.github/workflows/journal-daily-issue.yml'
   pull_request:
     paths:
       - 'journal/daily-public-issue.mjs'
@@ -43,7 +48,7 @@ jobs:
 
   publish:
     needs: safety
-    if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.publish == true)
+    if: github.event_name == 'schedule' || (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_dispatch' && inputs.publish == true)
     runs-on: ubuntu-latest
     timeout-minutes: 12
     permissions:
