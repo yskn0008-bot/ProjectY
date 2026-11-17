@@ -30,6 +30,16 @@ try{
   assert.match(await shortCard.locator('small').innerText(),/^14:00$/);
   assert.equal(await page.locator('#tl .yos-notion-projection').first().evaluate(el=>getComputedStyle(el).color),
    'rgb(245, 248, 255)');
+  // Single casual fill: no left accent or alternate shift color.
+  const appearance=await page.locator('#tl .yos-notion-projection').evaluateAll(els=>
+   els.map(el=>({background:getComputedStyle(el).backgroundColor,
+    leftWidth:getComputedStyle(el).borderLeftWidth,
+    rightWidth:getComputedStyle(el).borderRightWidth,
+    leftColor:getComputedStyle(el).borderLeftColor,
+    rightColor:getComputedStyle(el).borderRightColor})));
+  assert.equal(new Set(appearance.map(x=>x.background)).size,1);
+  assert.ok(appearance.every(x=>x.leftWidth===x.rightWidth&&x.leftColor===x.rightColor));
+
   await page.locator('#tl button.yos-notion-projection').first().click();
   assert.equal(await page.locator('#yosNotionEditSheet').isVisible(),true);
   assert.equal(await page.locator('#yosNotionNewTime').isEnabled(),true);
