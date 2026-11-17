@@ -14,6 +14,18 @@ test('Web port inherits the approved original charcoal UI and main navigation',(
  assert.match(native,/YOS_LIFE_LEARNING_LIVE_START/);
  assert.match(html,/YOS_LIFE_LEARNING_LIVE_START/);
 });
+test('History buttons and drag-only grip preserve original native task-card rendering',()=>{
+ assert.match(html,/id="yosUndoBtn"/);
+ assert.match(html,/id="yosRedoBtn"/);
+ assert.match(html,/function yosHistoryRestore\(direction\)/);
+ assert.match(html,/yosHistorySnapshot\(\)/);
+ assert.match(html,/task-drag-grip/);
+ assert.match(html,/\.card\.task\{touch-action:pan-y\}/);
+ assert.match(html,/dragAllowed&&Math\.abs\(dy\)>14/);
+ assert.match(html,/else if\(mode==='drag'/);
+ assert.match(html,/右端の⋮で移動/);
+});
+
 test('Browser scripts parse without native Scriptable APIs',()=>{
  assert.equal(scripts.length,2);
  for(const code of scripts)new vm.Script(code);

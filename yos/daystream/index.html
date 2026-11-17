@@ -62,6 +62,16 @@ button:active{opacity:.8}@media(min-width:640px){.dock{left:calc((100vw - 640px)
 .yos-learning-live-row strong{font-size:13px;overflow-wrap:anywhere}
 .yos-learning-live-row small{font-size:11px;color:#d3dae5}
 .yos-learning-live-row button{font-size:11px;border-radius:8px;border:1px solid #8eb8d6;background:#285d7c;color:#fff;padding:7px 10px;flex:none}
+
+/* Explicit grip avoids accidental moves during iPhone vertical scrolling. */
+.microtools{flex-wrap:wrap}
+.yos-history-actions{display:flex;gap:5px;align-items:center;flex-shrink:0;position:fixed;right:max(14px,calc((100vw - 610px)/2));bottom:calc(97px + env(safe-area-inset-bottom));z-index:19;padding:5px;border:1px solid #ffffff35;border-radius:11px;background:#303741eb;box-shadow:0 5px 18px #0006}
+.yos-history-button{display:grid;place-items:center;min-width:32px;height:30px;border:1px solid #ffffff50;background:#ffffff12;border-radius:8px;color:#f2f7ff;font-size:21px;line-height:1;padding:0}
+.yos-history-button:disabled{opacity:.35;cursor:default}
+.card.task{touch-action:pan-y}
+.card.task .task-drag-grip{display:grid;place-items:center;flex:0 0 20px;align-self:stretch;min-height:25px;touch-action:none;-webkit-touch-callout:none;user-select:none;-webkit-user-select:none;font-size:24px;color:#f0def8;cursor:grab;line-height:1}
+.card.task .task-drag-grip:active{cursor:grabbing}
+.editor #editorTitle,.editor .edit-end,.editor label{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 </style><script src="./source-adapters.js"></script><script src="../../life/calendar/native-bridge.js"></script><script src="./yos-tasks-auth.js"></script></head><body class="yos-daystream-web"><div class="yos-web-port" role="navigation" aria-label="DAYSTREAM Web版">
 <a href="../">YOS</a><strong>DAYSTREAM · WEB</strong>
 <button id="yosWebImport" type="button">データ読込</button><button id="yosWebExport" type="button">書き出し</button>
@@ -95,13 +105,13 @@ button:active{opacity:.8}@media(min-width:640px){.dock{left:calc((100vw - 640px)
     <div class="metric"><label><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M20 16A8 8 0 0 1 8 4 8 8 0 1 0 20 16Z"/></svg>睡眠予定</label><strong id="sleepInfo">—</strong></div>
   </section>
   <div class="searchrow" id="searchRow" hidden><input id="searchInput" type="search" placeholder="予定・タスクを検索" aria-label="検索"></div>
-  <div class="microtools"><div class="notice" id="notice" aria-live="polite">端末内の予定を表示します</div><button class="zoomBtn" id="yosTestToggle" type="button" hidden aria-label="テスト予定を表示">テスト表示</button><button class="zoomBtn" id="elasticBtn" type="button" aria-pressed="true" aria-label="時間枠の自動サイズ調整を切り替え">自動サイズ ON</button><button class="zoomBtn" id="zoomBtn" type="button" aria-label="タイムラインの表示倍率を切り替え">詳細に拡大</button></div>
+  <div class="microtools"><div class="notice" id="notice" aria-live="polite">端末内の予定を表示します</div><button class="zoomBtn" id="yosTestToggle" type="button" hidden aria-label="テスト予定を表示">テスト表示</button><div class="yos-history-actions" role="group" aria-label="操作の取り消しとやり直し"><button id="yosUndoBtn" class="yos-history-button" type="button" aria-label="操作を戻す" title="操作を戻す" disabled>↶</button><button id="yosRedoBtn" class="yos-history-button" type="button" aria-label="操作を進める" title="操作を進める" disabled>↷</button></div><button class="zoomBtn" id="elasticBtn" type="button" aria-pressed="true" aria-label="時間枠の自動サイズ調整を切り替え">自動サイズ ON</button><button class="zoomBtn" id="zoomBtn" type="button" aria-label="タイムラインの表示倍率を切り替え">詳細に拡大</button></div>
   <div class="all-day" id="dayAllDay" hidden aria-label="終日の予定"></div>
   <div class="editor-backdrop" id="editorBackdrop" aria-hidden="true"></div>
   <div class="editor" id="editor" role="dialog" aria-modal="true" aria-labelledby="editorTitle"><b id="editorTitle">予定を追加</b><div class="fields"><input id="newTitle" placeholder="名前" style="flex:1 1 160px" aria-label="名前"><input id="newTime" type="time" value="10:00" aria-label="開始時刻"><div class="duration-control"><input id="newDuration" type="number" min="5" max="1440" step="5" value="30" aria-label="所要時間（分）"><label for="newDuration">分</label></div><select id="newKind" aria-label="種類"><option value="task">タスク</option><option value="habit">習慣</option><option value="schedule">予定</option></select></div><span class="edit-end" id="editEnd">終了予定：10:30</span><div id="shortcutField"><label for="shortcutPicker">ショートカット（任意）</label><select id="shortcutPicker" class="shortcut-picker" aria-label="登録済みショートカットから選ぶ"><option value="">候補から選ぶ</option></select><input id="newShortcut" maxlength="100" placeholder="既存ショートカットの正式名称" aria-label="起動するiPhoneショートカット名" style="width:100%;margin:5px 0 9px"><small style="color:#d5dce7">設定したショートカットはここから実行できます。実行しても自動完了にはなりません。</small><a id="runShortcut" class="editor-shortcut-run" href="#" hidden>ショートカットを実行</a></div><div class="editor-actions"><button id="saveBtn">追加する</button><button id="cancelEditor" class="light" type="button">閉じる</button></div></div>
   <section class="week-overview" id="weekOverview" hidden aria-label="週の予定"><div class="week-overview-head"><button id="weekPrev" type="button" aria-label="前週">‹</button><strong id="weekCaption"></strong><button id="weekNext" type="button" aria-label="翌週">›</button></div><div id="weekAgenda"></div><p class="coverage" id="weekCoverage"></p></section>
   <div class="compat-status" id="compatStatus" aria-live="polite">相性を判定中</div>
-  <p class="gesture-help" id="gestureHelp">タスク：タップで完了 ｜ 左スワイプで削除 ｜ 長押しで編集 ｜ 上下ドラッグで移動</p>
+  <p class="gesture-help" id="gestureHelp">タスク：タップで完了 ｜ 左スワイプで削除 ｜ 長押しで編集 ｜ 右端の⋮で移動</p>
   <div class="timeline-wrap" id="timelinePanel"><div class="timeline" id="tl"><div class="axis"></div><div class="nowline" id="nowLine" hidden><span class="nowbadge" id="nowBadge"></span></div></div></div>
   <section class="tabbox" id="taskPanel"><h3>タスク・未配置</h3><p class="muted">専門タスクの期限と、実行する時間は別。配置しても元データの期限・完了は変わりません。</p>
  <div id="taskList"></div><section id="yosLearningHints" class="yos-learning-live" aria-label="期限が近いタスク" hidden><h3>期限が近いタスク <small>確認のみ</small></h3><p class="muted" id="yosLearningCoverage"></p><div id="yosLearningRows"></div></section><h3>各専門ページから集約</h3><p class="muted" id="yosTaskSourceStatus">Notion Tasks：確認中</p><button id="yosWebTaskRefresh" type="button">YOS Tasksを更新</button><div id="yosWebTaskAuth" hidden><p id="yosWebTaskAuthStatus" class="muted" role="status"></p><div id="yosWebGoogleButton"></div></div>
@@ -439,13 +449,72 @@ function yosReconcileRow(row){
  return match?{...row,t:match.title,due:match.due,done:match.status==='完了'}:{...row};
 }
 let selectedDay=todayISO,isSample=false,items=dayItems(todayISO);
+
+const yosHistoryUndo=[],yosHistoryRedo=[],yosHistoryLimit=20;
+const yosPlanKey='YOS_DAYSTREAM_WEB_PLAN_V1',yosActionKey='YOS_DAYSTREAM_WEB_ACTIONS_V1';
+const yosHistoryEmptyPlan=JSON.stringify({version:1,days:{},hiddenCalendar:{}});
+function yosHistorySnapshot(){
+ return {plan:localStorage.getItem(yosPlanKey)||yosHistoryEmptyPlan,actions:localStorage.getItem(yosActionKey)||'[]'};
+}
+function yosHistoryButtonState(){
+ document.getElementById('yosUndoBtn').disabled=yosHistoryUndo.length===0;
+ document.getElementById('yosRedoBtn').disabled=yosHistoryRedo.length===0;
+}
+function yosHistoryAfterCompletion(){
+ const last=yosHistoryUndo[yosHistoryUndo.length-1];
+ if(last)last.after.actions=localStorage.getItem(yosActionKey)||'[]';
+}
+function yosHistoryRecord(before){
+ const after=yosHistorySnapshot();
+ if(before.plan===after.plan)return;
+ yosHistoryUndo.push({before,after});
+ if(yosHistoryUndo.length>yosHistoryLimit)yosHistoryUndo.shift();
+ yosHistoryRedo.length=0;yosHistoryButtonState();
+}
+function yosHistoryRestore(direction){
+ const undo=direction==='undo',stack=undo?yosHistoryUndo:yosHistoryRedo,other=undo?yosHistoryRedo:yosHistoryUndo;
+ if(!stack.length)return;
+ const step=stack[stack.length-1],from=undo?step.after:step.before,to=undo?step.before:step.after;
+ try{
+  const current=yosHistorySnapshot();
+  if(current.plan!==from.plan||current.actions!==from.actions){
+   yosHistoryUndo.length=0;yosHistoryRedo.length=0;yosHistoryButtonState();
+   note.textContent='別の保存操作を検出しました。安全のため戻る・進むの履歴をリセットしました。';return;
+  }
+  const restored=JSON.parse(to.plan);
+  if(!restored||restored.version!==1||!restored.days||!restored.hiddenCalendar)throw Error('invalid snapshot');
+  if(!window.YOS_DAYSTREAM_WEB.write(restored)){note.textContent='元の保存内容を保護しました。操作を戻せませんでした。';return;}
+  try{
+   localStorage.setItem(yosActionKey,to.actions);
+   if(localStorage.getItem(yosActionKey)!==to.actions)throw Error('history mismatch');
+  }catch{
+   const recovered=window.YOS_DAYSTREAM_WEB.write(JSON.parse(from.plan));
+   note.textContent=recovered?'記録の復元に失敗したため時間割を元に戻しました。':'操作履歴の復旧を確認できません。バックアップを保護し、操作を停止してください。';
+   return;
+  }
+  for(const key of Object.keys(savedDays))delete savedDays[key];
+  Object.assign(savedDays,restored.days);
+  for(const key of Object.keys(hiddenCalendar))delete hiddenCalendar[key];
+  Object.assign(hiddenCalendar,restored.hiddenCalendar);
+  items=dayItems(selectedDay);selectedId=null;zoom=null;
+  hideSwipeDelete();focus.classList.remove('show');closeEditor();
+  stack.pop();other.push(step);yosHistoryButtonState();
+  renderWeek();render();renderDayAllDay();updateReview();yosRenderSources();
+  note.textContent=undo?'直前の操作を戻しました':'取り消した操作をやり直しました';
+ }catch{
+  note.textContent='操作履歴の読み込みに失敗しました。保存済みデータを確認してください。';
+ }
+}
+document.getElementById('yosUndoBtn').onclick=()=>yosHistoryRestore('undo');
+document.getElementById('yosRedoBtn').onclick=()=>yosHistoryRestore('redo');
 // WEB_PORT_BRIDGE: browser-only, never touches Scriptable native files.
 const persist=()=>{
  try{
+  const before=yosHistorySnapshot();
   const entries=items.filter(x=>x.source!=='Apple Calendar').map(x=>({...x}));
   const next={version:1,days:{...savedDays,[selectedDay]:entries},hiddenCalendar};
   const ok=window.YOS_DAYSTREAM_WEB.write(next);
-  if(ok){savedDays[selectedDay]=entries;isSample=false;note.textContent='このブラウザに保存しました';return true;}
+  if(ok){savedDays[selectedDay]=entries;isSample=false;yosHistoryRecord(before);note.textContent='このブラウザに保存しました';return true;}
   note.textContent='保存できませんでした · 元のScriptableデータは変更されません';
   return false;
  }catch(e){note.textContent='ブラウザ保存エラー';return false}
@@ -875,7 +944,7 @@ function yosRenderCompatibility(){
  const review=document.getElementById('compatReview');
  review.textContent=(details.length?details.slice(0,5).join('。'):'相性を判断できる根拠はまだありません。予定の時刻や準備・移動情報を確認してください。')+'。色は配置からの候補判定で、効果の保証や測定値ではありません。';
 }
-function updateReview(){yosRenderCompatibility();const done=items.filter(x=>x.done),pending=items.filter(x=>!x.done),movable=items.filter(x=>!x.f),completed=movable.filter(x=>x.done);const pct=movable.length?Math.round(completed.length/movable.length*100):0;const used=done.reduce((n,x)=>n+x.d,0);let summary=done.length?'完了記録は'+done.length+'件（合計'+Math.round(used/60*10)/10+'時間）。可動タスクの達成率は'+pct+'%。':'完了記録がまだありません。予定の配置だけでは実行できたか判断できません。';const overlaps=[];const sorted=[...items].sort((a,b)=>a.s-b.s);for(let i=0;i<sorted.length;i++)for(let j=i+1;j<sorted.length&&sorted[j].s<sorted[i].s+sorted[i].d;j++)if(sorted[i].kind===sorted[j].kind&&sorted[i].kind!=='schedule')overlaps.push([sorted[i],sorted[j]]);const pair=overlaps[0];const tip=pair?'改善候補：「'+pair[0].t+'」と「'+pair[1].t+'」は時間が重なっています。同じ種類の作業としてまとめられるか確認すると、切り替えの手間を減らせる可能性があります。':'改善候補：タスクの統合を提案する根拠がまだ不足しています。完了状況と実際の所要時間を記録すると、翌日の改善案を具体化できます。';document.getElementById('reviewText').textContent=summary+' '+(pending.length?'未完了・未確認は'+pending.length+'件。予定の変更と完了は区別して評価します。':'全項目に完了記録があります。');document.getElementById('reviewTip').textContent=tip;updateOverview();renderLists();}document.getElementById('reviewBtn').onclick=updateReview;document.getElementById('startActualBtn').onclick=()=>{const x=items.find(x=>x.id===selectedId);if(!x||x.f||x.kind!=='task'||x.done)return;const ok=window.YOS_DAYSTREAM_WEB.markStarted({id:x.id,day:selectedDay});note.textContent=ok?'「'+x.t+'」の開始をこの端末で記録した':'開始を記録できませんでした';fi.textContent=note.textContent;};document.getElementById('doneBtn').onclick=()=>{const x=items.find(x=>x.id===selectedId);if(!x)return;if(x.f){note.textContent='固定予定は元カレンダーで管理してください';return}if(String(x.sourceRef||'').startsWith('notion:')){void yosCompleteSource(x);return}const prior=x.done;x.done=!x.done;const saved=persist();if(!saved)x.done=prior;document.getElementById('doneBtn').textContent=x.done?'未完了に戻す':'完了にする';if(saved&&x.kind==='task'){if(x.done)window.YOS_DAYSTREAM_WEB.logCompletion({id:x.id,title:x.t,sourceRef:x.sourceRef||'',at:new Date().toISOString(),day:selectedDay,plannedStart:x.s});else window.YOS_DAYSTREAM_WEB.undoCompletion({id:x.id,day:selectedDay})};note.textContent=x.t+(x.done?'を端末内で仮完了':'の端末内の完了を解除')+(saved?'（保存処理中）':'（保存処理失敗）');fi.textContent=note.textContent;smoothRender();updateReview()};
+function updateReview(){yosRenderCompatibility();const done=items.filter(x=>x.done),pending=items.filter(x=>!x.done),movable=items.filter(x=>!x.f),completed=movable.filter(x=>x.done);const pct=movable.length?Math.round(completed.length/movable.length*100):0;const used=done.reduce((n,x)=>n+x.d,0);let summary=done.length?'完了記録は'+done.length+'件（合計'+Math.round(used/60*10)/10+'時間）。可動タスクの達成率は'+pct+'%。':'完了記録がまだありません。予定の配置だけでは実行できたか判断できません。';const overlaps=[];const sorted=[...items].sort((a,b)=>a.s-b.s);for(let i=0;i<sorted.length;i++)for(let j=i+1;j<sorted.length&&sorted[j].s<sorted[i].s+sorted[i].d;j++)if(sorted[i].kind===sorted[j].kind&&sorted[i].kind!=='schedule')overlaps.push([sorted[i],sorted[j]]);const pair=overlaps[0];const tip=pair?'改善候補：「'+pair[0].t+'」と「'+pair[1].t+'」は時間が重なっています。同じ種類の作業としてまとめられるか確認すると、切り替えの手間を減らせる可能性があります。':'改善候補：タスクの統合を提案する根拠がまだ不足しています。完了状況と実際の所要時間を記録すると、翌日の改善案を具体化できます。';document.getElementById('reviewText').textContent=summary+' '+(pending.length?'未完了・未確認は'+pending.length+'件。予定の変更と完了は区別して評価します。':'全項目に完了記録があります。');document.getElementById('reviewTip').textContent=tip;updateOverview();renderLists();}document.getElementById('reviewBtn').onclick=updateReview;document.getElementById('startActualBtn').onclick=()=>{const x=items.find(x=>x.id===selectedId);if(!x||x.f||x.kind!=='task'||x.done)return;const ok=window.YOS_DAYSTREAM_WEB.markStarted({id:x.id,day:selectedDay});note.textContent=ok?'「'+x.t+'」の開始をこの端末で記録した':'開始を記録できませんでした';fi.textContent=note.textContent;};document.getElementById('doneBtn').onclick=()=>{const x=items.find(x=>x.id===selectedId);if(!x)return;if(x.f){note.textContent='固定予定は元カレンダーで管理してください';return}if(String(x.sourceRef||'').startsWith('notion:')){void yosCompleteSource(x);return}const prior=x.done;x.done=!x.done;const saved=persist();if(!saved)x.done=prior;document.getElementById('doneBtn').textContent=x.done?'未完了に戻す':'完了にする';if(saved&&x.kind==='task'){if(x.done)window.YOS_DAYSTREAM_WEB.logCompletion({id:x.id,title:x.t,sourceRef:x.sourceRef||'',at:new Date().toISOString(),day:selectedDay,plannedStart:x.s});else window.YOS_DAYSTREAM_WEB.undoCompletion({id:x.id,day:selectedDay});yosHistoryAfterCompletion()};note.textContent=x.t+(x.done?'を端末内で仮完了':'の端末内の完了を解除')+(saved?'（保存処理中）':'（保存処理失敗）');fi.textContent=note.textContent;smoothRender();updateReview()};
 
 function updateOverview(){
  const movable=items.filter(x=>!x.f),done=movable.filter(x=>x.done),pct=movable.length?Math.round(done.length/movable.length*100):0;
@@ -1110,23 +1179,23 @@ function toggleTaskDone(item){
  if(String(target.sourceRef||'').startsWith('notion:')){void yosCompleteSource(target);return}
  hideSwipeDelete();const prior=target.done;target.done=!target.done;
  const saved=persist();if(!saved)target.done=prior;
- if(saved){if(target.done)window.YOS_DAYSTREAM_WEB.logCompletion({id:target.id,title:target.t,sourceRef:target.sourceRef||'',at:new Date().toISOString(),day:selectedDay,plannedStart:target.s});else window.YOS_DAYSTREAM_WEB.undoCompletion({id:target.id,day:selectedDay})}
+ if(saved){if(target.done)window.YOS_DAYSTREAM_WEB.logCompletion({id:target.id,title:target.t,sourceRef:target.sourceRef||'',at:new Date().toISOString(),day:selectedDay,plannedStart:target.s});else window.YOS_DAYSTREAM_WEB.undoCompletion({id:target.id,day:selectedDay});yosHistoryAfterCompletion()}
  note.textContent='「'+target.t+'」を'+(target.done?'完了':'未完了に戻した')+(saved?' · 端末内で保存中':' · 保存準備に失敗');
  smoothRender();updateReview();
 }
 // Only local, movable tasks use this gesture system; fixed Apple records and other kinds
 // retain their existing read-only details / vertical time dragging.
 function wireTaskGestures(el,item){
- let active=null,startX=0,startY=0,lastX=0,lastY=0,mode='tap',timer=null,paintFrame=0,lastPreview=item.s,swipeFrame=0;
+ let active=null,startX=0,startY=0,lastX=0,lastY=0,mode='tap',timer=null,paintFrame=0,lastPreview=item.s,swipeFrame=0,dragAllowed=false;
  const timeLabel=el.querySelector('small');
  const clearTimer=()=>{if(timer!==null){clearTimeout(timer);timer=null;}};
  const clearPaint=()=>{if(paintFrame){cancelAnimationFrame(paintFrame);paintFrame=0;}if(swipeFrame){cancelAnimationFrame(swipeFrame);swipeFrame=0;}};
  const paintSwipe=()=>{swipeFrame=0;if(mode==='swipe'&&active!==null)el.style.transform='translate3d('+Math.max(-74,lastX-startX)+'px,0,0)';};
  const paintDrag=()=>{paintFrame=0;if(mode!=='drag'||active===null)return;const offset=lastY-startY;el.style.transform='translate3d(0,'+offset+'px,0)';const at=candidateStart();if(at!==lastPreview){lastPreview=at;if(timeLabel)timeLabel.textContent=fmt(at)+'–'+fmt(at+item.d);}};
  const candidateStart=()=>Math.max(0,Math.min(1440-item.d,Math.round(minuteAtY(yFor(item.s)+lastY-startY)/5)*5));
- const begin=(x,y,id)=>{
+ const begin=(x,y,id,grip)=>{
   if(active!==null)return;
-  active=id;startX=lastX=x;startY=lastY=y;mode='tap';lastPreview=item.s;clearPaint();el.style.transition='';
+  active=id;startX=lastX=x;startY=lastY=y;dragAllowed=!!grip;mode='tap';lastPreview=item.s;clearPaint();el.style.transition='';
   clearTimer();
   timer=setTimeout(()=>{
    if(active!==null&&mode==='tap'){mode='long';active=null;beginLocalEdit(item);}
@@ -1138,10 +1207,11 @@ function wireTaskGestures(el,item){
   lastX=x;lastY=y;
   const dx=x-startX,dy=y-startY;
   if(Math.abs(dx)>10||Math.abs(dy)>10)clearTimer();
+  if(!dragAllowed&&mode==='tap'&&Math.abs(dy)>10&&Math.abs(dy)>Math.abs(dx)){mode='scroll';return;}
   if(mode==='swipe'||(mode==='tap'&&dx< -14&&Math.abs(dx)>Math.abs(dy)*1.3)){
    mode='swipe';event?.preventDefault();
    if(!swipeFrame)swipeFrame=requestAnimationFrame(paintSwipe);
-  }else if(mode==='drag'||(mode==='tap'&&Math.abs(dy)>14&&Math.abs(dy)>Math.abs(dx)*1.25)){
+  }else if(mode==='drag'||(mode==='tap'&&dragAllowed&&Math.abs(dy)>14&&Math.abs(dy)>Math.abs(dx)*1.25)){
    // A drag starts only on a task card; the surrounding timeline keeps normal scrolling.
    mode='drag';event?.preventDefault();
    el.classList.add('drag-preview');
@@ -1169,11 +1239,11 @@ function wireTaskGestures(el,item){
   if(mode==='tap')toggleTaskDone(item);
  };
  el.addEventListener('contextmenu',e=>e.preventDefault());
- el.addEventListener('touchstart',e=>{if(e.touches.length===1)begin(e.touches[0].clientX,e.touches[0].clientY,'touch')},{passive:true});
+ el.addEventListener('touchstart',e=>{if(e.touches.length===1)begin(e.touches[0].clientX,e.touches[0].clientY,'touch',e.target.closest('.task-drag-grip'))},{passive:true});
  el.addEventListener('touchmove',e=>{if(active==='touch'&&e.touches.length)move(e.touches[0].clientX,e.touches[0].clientY,e)},{passive:false});
  el.addEventListener('touchend',()=>{if(active==='touch')finish(false)});
  el.addEventListener('touchcancel',()=>{if(active==='touch')finish(true)});
- el.addEventListener('pointerdown',e=>{if(e.pointerType==='touch'||e.button!==0)return;begin(e.clientX,e.clientY,e.pointerId);el.setPointerCapture?.(e.pointerId)});
+ el.addEventListener('pointerdown',e=>{if(e.pointerType==='touch'||e.button!==0)return;begin(e.clientX,e.clientY,e.pointerId,e.target.closest('.task-drag-grip'));el.setPointerCapture?.(e.pointerId)});
  el.addEventListener('pointermove',e=>{if(active===e.pointerId)move(e.clientX,e.clientY,e)});
  el.addEventListener('pointerup',e=>{if(active===e.pointerId)finish(false)});
  el.addEventListener('pointercancel',e=>{if(active===e.pointerId)finish(true)});
@@ -1227,7 +1297,7 @@ function render(){
    const titleEl=document.createElement('b');titleEl.textContent=item.t;
    const timeEl=document.createElement('small');timeEl.textContent=fmt(item.s)+'–'+fmt(item.s+item.d);
    if(item.kind==='task'&&!item.f){
-    const copy=document.createElement('span');copy.className='task-copy';copy.append(titleEl,timeEl);el.append(copy);
+    const copy=document.createElement('span');copy.className='task-copy';copy.append(titleEl,timeEl);el.append(copy);const grip=document.createElement('span');grip.className='task-drag-grip';grip.textContent='⋮';grip.setAttribute('aria-label','ドラッグして時刻を移動');el.append(grip);
    }else{el.append(titleEl,timeEl);}
    if(item.t==='睡眠'||item.t==='就寝')el.classList.add('sleep');
    if(['朝の準備','朝食','昼食','夕食','入浴'].includes(item.t))el.classList.add('neutral');

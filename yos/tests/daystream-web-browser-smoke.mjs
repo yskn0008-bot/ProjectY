@@ -35,6 +35,47 @@ try{
  await page.evaluate(()=>beginLocalEdit(items.find(x=>x.t==='WIZARD CREATE')));
  assert.equal(await page.locator('#newTitle').isVisible(),true);assert.equal(await page.locator('#newTime').isVisible(),true);
  await page.locator('#cancelEditor').click();
+
+ // Action history must preserve existing task cards, with intentional, reversible changes.
+ assert.equal(await page.locator('#yosUndoBtn').isEnabled(),true);
+ assert.equal(await page.locator('#yosRedoBtn').isEnabled(),false);
+ const touchSafety=await page.locator('#tl .card.task').first().evaluate(el=>({
+  surface:getComputedStyle(el).touchAction,
+  grip:getComputedStyle(el.querySelector('.task-drag-grip')).touchAction
+ }));
+ assert.equal(touchSafety.surface,'pan-y','swiping over task card should scroll page, not move task');
+ assert.equal(touchSafety.grip,'none','only the dedicated handle may initiate vertical dragging');
+ await page.locator('#yosUndoBtn').click();
+ const undoneTask=await page.evaluate(()=>Object.values(JSON.parse(localStorage.getItem('YOS_DAYSTREAM_WEB_PLAN_V1')).days).flat().some(x=>x.t==='WIZARD CREATE'));
+ assert.equal(undoneTask,false,'undo removes newly created local card');
+ assert.equal(await page.locator('#yosRedoBtn').isEnabled(),true);
+ await page.locator('#yosRedoBtn').click();
+ const redoneTask=await page.evaluate(()=>Object.values(JSON.parse(localStorage.getItem('YOS_DAYSTREAM_WEB_PLAN_V1')).days).flat().find(x=>x.t==='WIZARD CREATE'));
+ assert.equal(redoneTask.s,780,'redo restores the same local card without changing its time');
+ assert.equal(redoneTask.shortcut,'PayPay','redo preserves existing shortcut association');
+
+ const completeResult=await page.evaluate(()=>{
+  const task=items.find(x=>x.t==='WIZARD CREATE');toggleTaskDone(task);
+  return {done:Boolean(items.find(x=>x.t==='WIZARD CREATE').done),actions:JSON.parse(localStorage.getItem('YOS_DAYSTREAM_WEB_ACTIONS_V1')||'[]').length};
+ });
+ assert.equal(completeResult.done,true);
+ assert.equal(completeResult.actions,1);
+ await page.locator('#yosUndoBtn').click();
+ const undoneCompletion=await page.evaluate(()=>({
+  done:Boolean(items.find(x=>x.t==='WIZARD CREATE').done),
+  actions:JSON.parse(localStorage.getItem('YOS_DAYSTREAM_WEB_ACTIONS_V1')||'[]').length
+ }));
+ assert.equal(undoneCompletion.done,false,'undo restores local task incomplete status');
+ assert.equal(undoneCompletion.actions,0,'undo rolls back its local completion log');
+ await page.locator('#yosRedoBtn').click();
+ const redoneCompletion=await page.evaluate(()=>({
+  done:Boolean(items.find(x=>x.t==='WIZARD CREATE').done),
+  actions:JSON.parse(localStorage.getItem('YOS_DAYSTREAM_WEB_ACTIONS_V1')||'[]').length
+ }));
+ assert.equal(redoneCompletion.done,true,'redo restores local completion status');
+ assert.equal(redoneCompletion.actions,1,'redo restores original local completion log');
+
+
  const status=await page.evaluate(()=>{
   const day=new Date(),iso=[day.getFullYear(),String(day.getMonth()+1).padStart(2,'0'),String(day.getDate()).padStart(2,'0')].join('-');
   const p={version:1,days:{[iso]:[{id:19001,t:'WEB PORT STORAGE SMOKE',s:480,d:30,kind:'task'}]},hiddenCalendar:{}};
