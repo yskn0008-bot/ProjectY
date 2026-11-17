@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-17T16:47:53+09:00",
+  "updated_at": "2026-11-17T16:48:34+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -12,6 +12,16 @@
     ]
   },
   "inbox": [
+    {
+      "id": "github-pr-770",
+      "title": "PR #770 [Taxi] 本番画面を承認UIへ切替｜旧画面保存・降車ワンタップ・PWA対応",
+      "type": "GitHub PR",
+      "status": "review",
+      "priority": 1,
+      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/770",
+      "updated_at": "2026-11-17T07:47:59Z"
+    },
     {
       "id": "github-pr-762",
       "title": "PR #762 feat(notification): safeguard v0.3→v0.4 migration using common installer",
@@ -73,16 +83,6 @@
       "updated_at": "2026-11-16T18:31:56Z"
     },
     {
-      "id": "github-pr-770",
-      "title": "PR #770 [Taxi] 本番画面を承認UIへ切替｜旧画面保存・降車ワンタップ・PWA対応",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/770",
-      "updated_at": "2026-11-17T07:47:21Z"
-    },
-    {
       "id": "github-pr-771",
       "title": "PR #771 YOS Calendar｜Notionデータを承認済みUIへ安全同期（Google/Face IDなし）",
       "type": "GitHub PR",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-17T07:47:14Z"
+      "updated_at": "2026-11-17T07:47:47Z"
     },
     {
       "id": "github-issue-234",
@@ -264,7 +264,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #649をレビューして公開判断する",
+      "next_action": "PR #770をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -274,7 +274,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-17T16:47:53+09:00",
+      "last_update": "2026-11-17T16:48:34+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -355,7 +355,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-17T16:47:53+09:00",
+      "last_update": "2026-11-17T16:48:34+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -369,7 +369,7 @@
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #649をレビューして公開判断する",
+      "next_action": "PR #770をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -378,7 +378,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-17T16:47:53+09:00",
+      "last_update": "2026-11-17T16:48:34+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -460,5 +460,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "3b9bad6d9c5afbef8a7ae225c2e3fdfdff7cccda8072656f932ae07440c747cb"
+  "github_snapshot_hash": "48846db0760ebcb1bd8e0d469cb57307edbd34f39d17cb5bd6cd0e277873259e"
 }
