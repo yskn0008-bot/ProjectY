@@ -139,6 +139,11 @@ async function cli() {
   const candidate = JSON.parse(await readFile(filename, 'utf8'));
   const rootIndex = args.indexOf('--root');
   const root = rootIndex >= 0 ? resolve(args[rootIndex + 1]) : resolve(dirname(fileURLToPath(import.meta.url)), '..');
+  if (args.includes('--validate-only')) {
+    validateCandidate(candidate);
+    console.log('Candidate fields and public-data patterns passed; source claims still need independent review.');
+    return;
+  }
   const prepared = await prepareFiles(candidate, root);
   console.log('Candidate structurally valid: ' + prepared.issue.issuedOn + ', stories=' + prepared.issue.articles.length + '. Source fact-checking remains the GPT editor responsibility.');
   if (args.includes('--write')) {
