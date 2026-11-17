@@ -346,19 +346,25 @@ const BROWSER_RENDER=String.raw`(()=>{
 })();`;
 
 const NATIVE_STYLE=String.raw`<style id="yosNotionNativeStyle">
-.yos-notion-projection{position:absolute;z-index:6;display:flex;flex-direction:column;gap:3px;box-sizing:border-box;overflow:hidden;text-align:left;padding:7px 9px;appearance:none;-webkit-appearance:none;border:1px solid #45586c;border-radius:14px;background:#45586c;color:#f5f8ff!important;font:500 13px/1.35 -apple-system,BlinkMacSystemFont,sans-serif;cursor:pointer;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;touch-action:pan-y;white-space:normal;overflow-wrap:anywhere;box-shadow:0 1px 3px #0002}
-.yos-notion-projection[data-kind="calendar"]{background:#45586c;border-color:#45586c}
-.yos-notion-projection[data-long="true"]{background:#45586c}
+.yos-notion-projection{position:absolute;z-index:6;display:flex;flex-direction:row;align-items:center;gap:9px;box-sizing:border-box;overflow:hidden;text-align:left;padding:5px 10px;appearance:none;-webkit-appearance:none;border:0;border-radius:9px;background:#434d5b;color:#f6f8fd!important;font:500 13px/1.35 -apple-system,BlinkMacSystemFont,sans-serif;cursor:pointer;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;touch-action:pan-y;white-space:normal;overflow-wrap:anywhere;box-shadow:none}
+.yos-notion-projection[data-kind="calendar"]{background:#434d5b}
+.yos-notion-projection[data-long="true"]{background:rgba(67,77,91,.38);align-items:flex-start;padding-top:12px}
 .yos-notion-projection[data-done="true"]{opacity:.62}
 .yos-notion-projection:focus-visible{outline:2px solid #a0e4ff;outline-offset:1px}
-.yos-notion-projection .yos-notion-meta{display:block!important;color:#f1f5fa!important;font-size:11px!important;line-height:1.3;font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.yos-notion-projection .yos-notion-meta{display:block!important;flex:0 0 auto;color:#d5dce5!important;font-size:11px!important;line-height:1.3;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .yos-notion-projection[data-kind="calendar"] .yos-notion-meta{color:#f1f5fa!important}
-.yos-notion-projection .yos-notion-title{display:block;color:#fff!important;font-size:13px!important;line-height:1.38;font-weight:650;letter-spacing:0;overflow-wrap:anywhere}
-.yos-notion-projection[data-compact="true"]{flex-direction:row;align-items:center;gap:6px;padding:3px 6px}
+.yos-notion-projection .yos-notion-title{display:block;min-width:0;flex:1;color:#fff!important;font-size:13px!important;line-height:1.38;font-weight:600;letter-spacing:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.yos-notion-projection[data-compact="true"]{flex-direction:row;align-items:center;gap:7px;padding:3px 9px}
 .yos-notion-projection[data-compact="true"] .yos-notion-meta{flex:0 0 auto;max-width:45px;white-space:nowrap;font-size:10px!important}
 .yos-notion-projection[data-compact="true"] .yos-notion-title{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:12px!important}
-.yos-notion-projection.yos-notion-dragging{z-index:14;box-shadow:0 8px 22px #000a;outline:2px solid #9cdaff;touch-action:none}
+.yos-notion-projection.yos-notion-dragging{z-index:14;box-shadow:0 4px 12px #0008;outline:1px solid #c2d0de;touch-action:none}
 .yos-notion-all-day{position:relative!important;top:auto!important;left:auto!important;width:100%!important;height:auto!important;min-height:44px!important;margin:7px 0}
+#yosNotionMoveBar[hidden]{display:none!important}
+#yosNotionMoveBar{position:fixed;z-index:100003;bottom:calc(96px + env(safe-area-inset-bottom));left:12px;right:12px;max-width:560px;margin:auto;border-radius:12px;background:#252f3c;color:#f4f8ff;box-shadow:0 6px 16px #0006;border:1px solid #5c6b7c;padding:10px 12px;display:flex;align-items:center;gap:10px;justify-content:space-between;font-size:13px;line-height:1.4}
+#yosNotionMoveBar .yos-move-actions{display:flex;gap:7px;flex-shrink:0}
+#yosNotionMoveBar button{min-height:36px;min-width:52px;padding:6px 12px;background:#47576b;color:#fff;border:0;border-radius:8px;font-size:13px;font-weight:600}
+#yosNotionMoveBar #yosMoveSave{background:#7fadd6;color:#142337}
+#yosNotionMoveBar button:disabled{opacity:.55}
 #yosNotionEditSheet[hidden]{display:none!important}
 #yosNotionEditSheet{position:fixed;z-index:100002;inset:0;display:flex;align-items:flex-end;justify-content:center;background:#07101bd9;backdrop-filter:blur(4px);padding:12px 12px calc(20px + env(safe-area-inset-bottom))}
 #yosNotionEditSheet section{box-sizing:border-box;width:100%;max-width:600px;padding:18px;border-radius:20px;background:#1b2836;color:#f8fbff;border:1px solid #69819a;box-shadow:0 14px 36px #0008}
@@ -431,12 +437,13 @@ async function main(){
  const snapshot=scope.YOS_DAYSTREAM_SOURCES.fromYosTaskDashboardCache({savedAt:Date.now(),data});
  if(!snapshot)throw Error('Notionの取得結果を検証できません');
  // This payload contains only task projections; credentials never enter the WebView.
- const output=buildHTML(html,adapters,native,wizard,snapshot);
+ const live=!(typeof config!=='undefined'&&config.runsWithSiri);
+ const output=buildHTML(html,adapters,native,wizard,snapshot,live);
  stage='画面表示';
- if(typeof config!=='undefined'&&config.runsWithSiri){
-  await WebView.loadHTML(output,null,null,true);
- }else{
+ if(!live){ 
   await presentWithInlineBridge(output,token,adapters);
+ }else{
+  await WebView.loadHTML(output,null,null,true);
  }
 }
 const YOS_TASK_DB='06e62efb9a3c45e2bec77a53332c925a';
