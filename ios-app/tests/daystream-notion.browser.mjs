@@ -9,16 +9,21 @@ try{
   page.on('pageerror',e=>errors.push(e.message));
   await page.route('**/*',route=>{network.push(route.request().url());return route.abort()});
   const date=await page.evaluate(()=>{const d=new Date();return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-')});
+  const shift=row(date+'T17:00:00+09:00',date+'T23:00:00+09:00','夜勤','e'.repeat(32));
+  shift.properties['状態']={select:null};
+  shift.properties['同期キー']={rich_text:[{plain_text:'yos-shift-'+date}]};
   await page.setContent(htmlFor([
    row(date+'T10:00:00+09:00',date+'T11:00:00+09:00','架空の時間範囲'),
    row(date+'T14:00:00+09:00',null,'架空の期限','b'.repeat(32)),
    row(date,null,'架空の日付タスク','c'.repeat(32)),
-   row(null,null,'架空の日付なし','d'.repeat(32))
+   row(null,null,'架空の日付なし','d'.repeat(32)),
+   shift
   ]));
   await page.waitForFunction(()=>!document.getElementById('yosNativeBoot'));
-  assert.equal(await page.locator('.yos-notion-projection').count(),2);
+  assert.equal(await page.locator('.yos-notion-projection').count(),3);
+  assert.match(await page.locator('.yos-notion-projection').last().innerText(),/予定.*夜勤/s);
   assert.match(await page.locator('#dayAllDay').innerText(),/時間未設定.*架空の日付タスク/s);
-  assert.match(await page.locator('#yosWebSourceState').innerText(),/Notion 4件取得/);
+  assert.match(await page.locator('#yosWebSourceState').innerText(),/Notion 5件取得/);
   assert.equal(await page.locator('#taskCount').innerText(),'0/3');
   await page.locator('[data-tab="task"]').click();
   assert.match(await page.locator('#yosSourceTasks').innerText(),/架空の日付なし/);
