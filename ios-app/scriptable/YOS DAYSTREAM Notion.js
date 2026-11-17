@@ -186,10 +186,10 @@ async function asset(path,marker){
  if(req.response?.statusCode!==200||typeof text!=='string'||text.length>350000||!text.includes(marker))throw Error('画面部品を取得できません：'+path);
  return text;
 }
-// Siri/Shortcuts cannot present Scriptable Alert; deliver an actionable result instead.
+// In Siri/Shortcuts, use shortcut output for errors instead of unsupported Alert.
 async function showAlert(title,message){
  const output=title+'：'+message;
- if(typeof config!=='undefined'&&config.runsInSiri){
+ if(typeof config!=='undefined'&&config.runsWithSiri){
   if(typeof Script!=='undefined'&&typeof Script.setShortcutOutput==='function')Script.setShortcutOutput(output);
   else console.warn(output);
   return;
@@ -205,10 +205,7 @@ async function showAlert(title,message){
 let stage='起動';
 async function main(){
  stage='実行環境';
- if(typeof config!=='undefined'&&config.runsInSiri){
-  await showAlert('DAYSTREAM 起動方法','Siri/ショートカット内ではDAYSTREAMの画面を表示できません。ショートカットで「URLを開く」を使用し、scriptable:///run?scriptName=YOS%20DAYSTREAM%20Notion を開いてください。');
-  return;
- }
+ // WebView.loadHTML is supported in Siri; only Alert is unsupported.
  stage='Notion認証';
  let token='';try{if(Keychain.contains(NOTION_KEY))token=Keychain.get(NOTION_KEY)||''}catch{}
  if(!token){await showAlert('Notion未接続','既存YOSのNotion接続情報がiPhone内に見つかりません。既存の接続設定を確認してください。');return}
