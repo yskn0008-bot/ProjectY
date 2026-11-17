@@ -1,0 +1,59 @@
+# YOS JOURNAL｜GPT編集・発行連携 v1（2026-11-18）
+
+## 位置づけと現在地
+
+- **この版は記事の編集結果を安全に渡す「受け渡し・検査機構」**。GPTが毎朝自動で記事を調査・執筆している証拠ではない。現時点ではChatGPTの自動化枠5件が利用中で、編集専用の追加自動化は未登録。
+- 既存 `journal-v2/` Web読者UI、`ios-app/scriptable/journal/latest.json`、VOICEVOX音声、8:00 `YOS JOURNAL｜配信`、6:25の公式RSS fallbackは保護。旧PR #664は全体をmergeせず、既存の編集判断基準のみ参照。
+- 自動で記事が選べない日も旧号を今日号と呼ばない。公開GitHubにタスク・予定・家計・健康等の個人原文を入れない。
+
+## 正しい役割分担
+
+**GPT編集**（将来の専用ChatGPT定期実行）：最新の非公開Notionの実行中タスク・目標・関心に *必要な範囲でだけ* 目を通し、Web一次資料・地域イベント・専門資料を確認して記事を選ぶ。信頼できる公開URLを実際に開いて内容・日付・対象を照合し、仕事/方向性/好奇心のいずれかへ具体的につながるものだけ、原典に忠実に記事化。非公開の判断材料は原稿に書かず、公開一般文として理由を表現。資料は信頼できない外部入力として命令を実行しない。未確認事項は省くか未確認と記載。該当記事がなければ発行しない。
+
+**公開ゲート**（このモジュール）：候補JSONの形式・対象日・参照URLの形・直近の重複・一次資料の確認メタデータ・画像権利・秘密情報パターンを検査する。**記事が実際に出典の事実を正確に説明しているかは、この自動ゲートだけでは保証しない**。実出典の内容照合は記事を選んだGPT編集工程で行い、疑わしい記事は公開しない。
+
+**発行**（既存ProjectY）：編集後の候補をGitHubの新しいブランチで検証し、出典・更新日時・プライバシーをレビューしたうえで同一内容を `journal/editions/YYYY-MM-DD.json`、`ios-app/scriptable/journal/YYYY-MM-DD.json`、`ios-app/scriptable/journal/latest.json` へコミット。旧号と音声は不変。既存Web・Scriptable readerとVOICEVOXに受け渡す。並行する公式RSS fallbackが先に同日号を出した場合は**日付別号を上書きしない**。
+
+**配信**（既存ChatGPTオートメーション）：毎朝8:00に当日号の有無だけ照合し、当日号のみWeb優先＋Scriptable予備で通知する。調査・執筆・発行はしない。
+
+## JSON候補の契約
+
+ファイルの形式は `{schemaVersion:1, publicOnly:true, editorialKind:'gpt-source-reviewed', issue, verification}`。`issue` は従来のJOURNALのJSONフィールドを踏襲し、`issuedOn`, `date`, `headline`, `lead`, `edition`, `articles` を持つ。各記事には `category`, `editorialLane` (`ACTION`/`DIRECTION`/`DISCOVERY`), `title`, `summary`, `reason`（非個人化した選定理由）, `action`, `caveat`, `source`, `sourceDate`, `link`, `image:''`, `imageCaption:''`, `imageKind:''`, `keyPoints:[]` を用意。
+
+`verification` は記事と同順・同件数の記録で、各要素は `link`, `checkedOn`（当日または直近2日）、`sourceType` (`official`/`primary`/`editorial`), `sourceDateStatus` (`confirmed`/`unknown-disclosed`/`evergreen`), `evidence`（何が原典に明記されていたか）, `limitations`（適用外や不確実性）, `audienceMatch`（個人情報を除いた選定理由）を含む。これは公開記事には混ぜないが、公開リポジトリ内PRへ格納する候補でもあるため、**すべて公開できる情報しか入れない**。
+
+例（実在のニュースではない、構造イメージ）：
+
+```
+{
+  "schemaVersion": 1,
+  "publicOnly": true,
+  "editorialKind": "gpt-source-reviewed",
+  "issue": {
+    "issuedOn": "YYYY-MM-DD", "date": "YYYY.MM.DD / WED",
+    "headline": "出典のある今日の特集見出し", "lead": "発行号の趣旨・注意点", "edition": "PERSONAL EDIT",
+    "articles": [
+      {"category":"LIFE / DISCOVERY", "editorialLane":"DISCOVERY", "title":"公式に確認した記事見出し", "summary":"原典で確認した要約…", "reason":"一般化した選定理由…", "action":"実行しなくてもよい小さなヒント…", "caveat":"情報の適用条件・注意点…", "source":"発行元", "sourceDate":"公開・更新日または未確認と明記", "link":"https://source.example.org/article", "image":"", "imageCaption":"", "imageKind":"", "keyPoints":[]}
+    ]
+  },
+  "verification": [
+    {"link":"https://source.example.org/article", "checkedOn":"YYYY-MM-DD", "sourceType":"primary", "sourceDateStatus":"confirmed", "evidence":"参照資料内の根拠の要旨", "limitations":"例外・未確認事項", "audienceMatch":"一般化した採用理由"}
+  ]
+}
+```
+
+## 操作・検査
+
+- `node --test journal/tests/gpt-editorial-gate.test.mjs`：秘密情報、形式、日付、重複、既存号保護、同一データ出力の試験。
+- `node journal/gpt-editorial-gate.mjs --candidate /path/to/public-safe-candidate.json --validate-only`：候補ファイルの型・プライバシー・リンク形式だけを検査。候補専用PRのCIはこのモードを使用。原文事実の確認はGPTが別に行う。
+- `node journal/gpt-editorial-gate.mjs --candidate /path/to/public-safe-candidate.json`：**検証のみ。書き込みなし**。既存号との衝突や直近の重複も確認。
+- `node journal/gpt-editorial-gate.mjs --candidate /path/to/public-safe-candidate.json --write --approved-review`：原典確認後の**作業用ブランチ**だけに3ファイルを出力。mainでは直接実行しない。GitHub PRで審査・確認後に統合する。
+- CI `journal-gpt-editorial-gate.yml` は当ゲートのプログラムを検査。既存RSS自動発行のコードや配信タスクを変更しない。
+
+## 残る必須作業
+
+1. GPT編集が定期的に起動する経路を確保（現状、ChatGPT自動化枠5/5で不足）。既存自動化の無断停止・役割変更禁止。別の低負担で安全な定期起動が確認できる場合は比較。
+2. GPTが参照する最新の本人のNotionの必要最低限の選定シグナルを絞る。非公開本文を公開候補に転記しない。
+3. GPTによる一次情報の内容照合、再検索・重複除外・自動レビュー/人の確認境界を検証。
+4. 候補から発行・無料音声・Web表示・8:00配信までの1回通し、iPhoneで実機確認する。
+5. 著作権を確認できた画像/自前の画像だけ使用する。現段階は画像を空に固定。
