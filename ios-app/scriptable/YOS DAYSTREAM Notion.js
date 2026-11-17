@@ -1,7 +1,7 @@
 // Variables used by Scriptable.
 // icon-color: blue; icon-glyph: tasks;
 // YOS_SCRIPT_NAME: YOS DAYSTREAM Notion
-// Existing DAYSTREAM UI + native read-only Notion query. No Notion writes.
+// Existing DAYSTREAM UI + native Notion reads. A confirmed move can update only '期限'.
 'use strict';
 const NOTION_KEY='YOS_NOTION_INTEGRATION_TOKEN';
 const UI_REF='732803c68546155f63fa99c11e9ad8eb8bdf4505';
