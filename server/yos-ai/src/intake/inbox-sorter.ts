@@ -5,6 +5,7 @@ import type {RedisCommandClient} from '../storage/upstash-rest.js';
 const NOTION = 'https://api.notion.com/v1';
 const VERSION = '2025-09-03';
 const ACCEPTANCE_ID = 'clarity:yos-test-20261101-0649';
+const RELEASE_OWNED_LOCK = "if redis.call('GET',KEYS[1]) == ARGV[1] then return redis.call('DEL',KEYS[1]) else return 0 end";
 const SOURCES = {
   task: {id: '965c6086-32c1-463d-93b4-87a9cb69b3ad', title: 'やること', key: '同期キー'},
   shopping: {id: 'd0ed2cf0-c84e-4770-b77c-3a1a9e11bcfc', title: '商品名', key: 'メモ'},
@@ -225,10 +226,9 @@ export function createInboxSorter(options: {notionToken: string; inboxPageId: st
       }
       return {created, duplicates, held};
     } finally {
-      // Do not release another process's lock if the TTL has already expired.
-      if (await options.redis.command<string | null>(['GET', lock]) === owner) {
-        await options.redis.command<number>(['DEL', lock]);
-      }
+      // Atomic compare/delete. A prior GET followed by DEL could erase another worker's lock.
+      try { await options.redis.command<number>(['EVAL', RELEASE_OWNED_LOCK, 1, lock, owner]); }
+      catch { /* TTL recovers an abandoned lock without deleting another owner's lease. */ }
     }
   };
 }
