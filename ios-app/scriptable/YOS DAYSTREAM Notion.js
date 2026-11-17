@@ -160,7 +160,7 @@ const BROWSER_RENDER=String.raw`(()=>{
    const permitted=canMove(row);
    let touch=null,timer=null,held=false,offset=0,preview=row.s;
    const stop=()=>{if(timer!==null){clearTimeout(timer);timer=null}};
-   const reset=()=>{stop();el.classList.remove('yos-notion-dragging');el.style.transform='';el.querySelector('small').textContent=el.dataset.timeLabel;touch=null;held=false;offset=0};
+   const reset=()=>{stop();el.classList.remove('yos-notion-dragging');el.style.transform='';el.querySelector('small').textContent=el.dataset.compact==='true'?fmt(row.s):el.dataset.timeLabel;touch=null;held=false;offset=0};
    el.addEventListener('touchstart',e=>{
     if(e.touches.length!==1)return;
     const p=e.touches[0];touch={x:p.clientX,y:p.clientY};preview=row.s;held=false;
@@ -226,7 +226,11 @@ const BROWSER_RENDER=String.raw`(()=>{
     for(const row of g){
      // Narrow columns only for an actual overlap. Do not halve a whole group
      // because an unrelated local task overlaps another source block.
-     const localOverlap=items.some(x=>Number.isFinite(x.s)&&Number.isFinite(x.d)&&row.s<x.s+x.d&&x.s<row.s+Math.max(1,row.d));
+     const localOverlap=items.some(x=>{
+      const ref=String(x.sourceRef||'');
+      if(ref===row.id||ref==='notion:'+row.id)return false; // Already reflected by this Notion card.
+      return Number.isFinite(x.s)&&Number.isFinite(x.d)&&row.s<x.s+x.d&&x.s<row.s+Math.max(1,row.d);
+     });
      const left=localOverlap?'calc(52% + (48% - 8px) * '+row.lane+'/'+ends.length+')':
        'calc(73px + (100% - 85px) * '+row.lane+'/'+ends.length+')';
      const width=localOverlap?'calc((48% - 8px) / '+ends.length+' - 3px)':
@@ -234,6 +238,7 @@ const BROWSER_RENDER=String.raw`(()=>{
      const el=makeCard(row);
      el.style.left=left;el.style.width=width;el.style.top=row.top+'px';el.style.height=row.height+'px';
      if(row.d>=180)el.dataset.long='true';
+     if(row.height<46){el.dataset.compact='true';el.querySelector('small').textContent=fmt(row.s)}
      tl.append(el);
     }
    }
@@ -273,6 +278,9 @@ const NATIVE_STYLE=String.raw`<style id="yosNotionNativeStyle">
 .yos-notion-projection .yos-notion-meta{display:block!important;color:#bde6ff!important;font-size:11px!important;line-height:1.3;font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .yos-notion-projection[data-kind="calendar"] .yos-notion-meta{color:#f1d4a7!important}
 .yos-notion-projection .yos-notion-title{display:block;color:#fff!important;font-size:13px!important;line-height:1.38;font-weight:650;letter-spacing:0;overflow-wrap:anywhere}
+.yos-notion-projection[data-compact="true"]{flex-direction:row;align-items:center;gap:6px;padding:3px 6px}
+.yos-notion-projection[data-compact="true"] .yos-notion-meta{flex:0 0 auto;max-width:45px;white-space:nowrap;font-size:10px!important}
+.yos-notion-projection[data-compact="true"] .yos-notion-title{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:12px!important}
 .yos-notion-projection.yos-notion-dragging{z-index:14;box-shadow:0 8px 22px #000a;outline:2px solid #9cdaff;touch-action:none}
 .yos-notion-all-day{position:relative!important;top:auto!important;left:auto!important;width:100%!important;height:auto!important;min-height:44px!important;margin:7px 0}
 #yosNotionEditSheet[hidden]{display:none!important}
