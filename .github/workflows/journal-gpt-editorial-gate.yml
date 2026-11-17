@@ -6,6 +6,7 @@ on:
       - 'journal/gpt-editorial-gate.mjs'
       - 'journal/tests/gpt-editorial-gate.test.mjs'
       - 'journal/GPT_EDITORIAL.md'
+      - 'journal/editorial-candidates/*.json'
       - '.github/workflows/journal-gpt-editorial-gate.yml'
 
 permissions:
@@ -17,6 +18,8 @@ jobs:
     timeout-minutes: 8
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -24,3 +27,13 @@ jobs:
         run: node --check journal/gpt-editorial-gate.mjs
       - name: Test privacy, sources, dates, existing edition preservation
         run: node --test journal/tests/gpt-editorial-gate.test.mjs
+      - name: Check added or modified GPT candidate JSON from this PR
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --name-only "$BASE_SHA" HEAD -- 'journal/editorial-candidates/*.json' | while IFS= read -r candidate; do
+            test -f "$candidate" || continue
+            node journal/gpt-editorial-gate.mjs --candidate "$candidate" --validate-only
+          done
