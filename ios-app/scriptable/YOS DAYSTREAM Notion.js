@@ -24,14 +24,20 @@ function project(row){
  if(row.archived||row.in_trash)return null;
  const p=row.properties,title=clean(rich(p['やること']));
  if(!title)return null;
- const state=pick(p['状態']),due=p['期限']?.date;
- if(!STATES.includes(state))throw Error('タスクの状態を確認できません');
- if(due&&(!validAt(due.start)||due.end&&(!validAt(due.end)||due.end.includes('T')!==due.start.includes('T')||Date.parse(due.end)<Date.parse(due.start))))throw Error('タスクの日時を確認できません');
  const sync=rich(p['同期キー']);
+ const calendarSource=/^(?:yos-shift-|apple-calendar:|calendar:)/.test(sync);
+ const sourceState=pick(p['状態']),due=p['期限']?.date;
+ // Calendar entries may have no task status. Never write a guessed status to Notion.
+ // The legacy read-only adapter needs a known value; this placeholder is never
+ // shown as task state or included in task completion counts for calendar entries.
+ if(!STATES.includes(sourceState)&&!(calendarSource&&sourceState===''))
+  throw Error('タスクの状態を確認できません：'+clean(title,48));
+ const state=sourceState||'次にやる';
+ if(due&&(!validAt(due.start)||due.end&&(!validAt(due.end)||due.end.includes('T')!==due.start.includes('T')||Date.parse(due.end)<Date.parse(due.start))))throw Error('タスクの日時を確認できません');
  return {id,title,state,due:due?.start||null,dueEnd:due?.end||null,dueTimeZone:due?.time_zone||null,
  priority:pick(p['優先度']),area:pick(p['領域'])||'YOS Tasks',nextAction:clean(rich(p['次の一手']),140),
  order:Number.isSafeInteger(p['実行順']?.number)?p['実行順'].number:0,
- sourceKind:/^(?:yos-shift-|apple-calendar:|calendar:)/.test(sync)?'calendar':'task',
+ sourceKind:calendarSource?'calendar':'task',
  habitCycle:pick(p['習慣周期']),lastEditedAt:row.last_edited_time||null,
  lastSynced:p['最終同期']?.date?.start||null};
 }
@@ -73,7 +79,7 @@ function dayProjection(items,day){
  const start=Date.parse(day+'T00:00:00+09:00'),stop=start+86400000,out=[];
  for(const t of items){
   if(!t.dueAt)continue;
-  const base={id:t.id,title:t.title,status:t.status,url:'https://www.notion.so/'+t.id.slice(7)};
+  const base={id:t.id,title:t.title,status:t.status,sourceFamily:t.sourceFamily,url:'https://www.notion.so/'+t.id.slice(7)};
   if(!t.dueAt.includes('T')){
    if(t.due<=day&&day<=(t.dueEnd||t.due))out.push({...base,type:'undated'});
    continue;
@@ -134,7 +140,7 @@ const BROWSER_RENDER=String.raw`
      el.style.cssText='position:absolute;z-index:5;box-sizing:border-box;overflow:auto;border-left:3px solid #5fc2ff;border-radius:7px;background:#254c6a;padding:4px 6px;font-size:12px;text-decoration:none;top:'+row.top+'px;height:'+row.height+'px;left:calc('+left+' + '+width+' * '+row.lane/ends.length+');width:calc('+width+' / '+ends.length+' - 3px)';
      if(row.status==='完了')el.style.opacity='.55';
      const time=document.createElement('small');time.style.display='block';
-     time.textContent=(row.type==='deadline'?'期限 ':'')+fmt(row.s)+(row.type==='range'?'–'+fmt(row.s+row.d):'')+' · Notion';
+     time.textContent=(row.type==='deadline'?'期限 ':'')+fmt(row.s)+(row.type==='range'?'–'+fmt(row.s+row.d):'')+(row.sourceFamily==='calendar'?' · 予定 · Notion':' · Notion');
      el.prepend(time);tl.append(el);
     }
    }
@@ -150,7 +156,7 @@ const BROWSER_RENDER=String.raw`
   };
   updateReview=function(){
    originalReview();
-   const rows=source().filter(x=>!['待ち','保留'].includes(x.status));
+   const rows=source().filter(x=>x.sourceFamily!=='calendar'&&!['待ち','保留'].includes(x.status));
    const local=items.filter(x=>x.kind==='task'&&!rows.some(r=>'notion:'+r.id===x.sourceRef));
    const total=rows.length+local.length,done=rows.filter(x=>x.status==='完了').length+local.filter(x=>x.done).length;
    document.getElementById('taskCount').textContent=done+'/'+total;
