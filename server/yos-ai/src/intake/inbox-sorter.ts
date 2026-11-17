@@ -10,13 +10,12 @@ const SOURCES = {
   task: {id: '965c6086-32c1-463d-93b4-87a9cb69b3ad', title: 'やること', key: '同期キー'},
   shopping: {id: 'd0ed2cf0-c84e-4770-b77c-3a1a9e11bcfc', title: '商品名', key: 'メモ'},
   diary: {id: 'fe0e0973-d1cc-4bde-b138-1cb1da64ac68', title: '日記', key: '記録キー'},
-  life: {id: '30df9a73-2ea7-4ff7-8187-2b62dc8f9da4', title: 'イベント名', key: '記録キー'},
-  money: {id: '95b30d16-7530-40c6-a320-dab99acad55d', title: '項目', key: '原本ID'}
+  life: {id: '30df9a73-2ea7-4ff7-8187-2b62dc8f9da4', title: 'イベント名', key: '記録キー'}
 } as const;
 type Target = keyof typeof SOURCES | 'page';
 type Capture = {id: string; at: string; source: string; raw: string};
-type Decision = {target: Exclude<Target, 'page'>; title: string; body?: string; amount?: number; merchant?: string; transactionId?: string} |
-  {target: 'page'; title: string; body: string} | null;
+type Decision = {target: Exclude<Target, 'page'>; title: string; body?: string} |
+  {target: 'page'; title: string; body: string; moneyReview?: {amount: number; merchant: string}} | null;
 type Rich = {type: 'text'; text: {content: string}};
 type Block = {id: string; type: string; paragraph?: {rich_text?: Array<{plain_text?: string; text?: {content?: string}}>} };
 class HoldCapture extends Error {}
@@ -42,11 +41,11 @@ export function parseInbox(blocks: Block[]): Capture[] {
     if (block?.type !== 'paragraph') continue;
     const line = plain(block.paragraph?.rich_text);
     const match = /^(\d{4}-\d\d-\d\dT\S+)\s*·\s*([^·\n]+)\s*·\s*((?:clarity|notification|share):[a-z\d._:-]+)/iu.exec(line);
-    if (!match || !match[1] || !match[2] || !match[3] || seen.has(match[3]) || !/^(?:Memo|Clarity|Clarity Voice|Clarity Text|Clarity\.Voice|Clarity\.Text|clarity\/voice|clarity\/text|Clarity Notification|Clarity Share)$/iu.test(match[2].trim())) continue;
+    if (!match || !match[1] || !match[2] || !match[3] || !/^(?:Memo|Clarity|Clarity Voice|Clarity Text|Clarity\.Voice|Clarity\.Text|clarity\/voice|clarity\/text|Clarity Notification|Native Notification|Clarity Share)$/iu.test(match[2].trim())) continue;
     const source = match[2].trim();
-    if ((source === 'Clarity Notification' && !match[3].startsWith('notification:')) ||
+    if (((source === 'Clarity Notification' || source === 'Native Notification') && !match[3].startsWith('notification:')) ||
         (source === 'Clarity Share' && !match[3].startsWith('share:')) ||
-        (source !== 'Clarity Notification' && source !== 'Clarity Share' && !match[3].startsWith('clarity:'))) continue;
+        (source !== 'Clarity Notification' && source !== 'Native Notification' && source !== 'Clarity Share' && !match[3].startsWith('clarity:'))) continue;
     let raw = line.slice(match[0].length).trim();
     if (/^·\s*(?:information|money-review|missed-call|legal|security)$/iu.test(raw)) raw = '';
     if (!raw) for (let j = i + 1; j < Math.min(blocks.length, i + 5); j++) {
@@ -58,7 +57,9 @@ export function parseInbox(blocks: Block[]): Capture[] {
       raw = candidate; break;
     }
     if (!raw || raw === '---' || raw.length > 12000) continue;
-    seen.add(match[3]);
+    const occurrence = match[3] + ':' + match[1] + ':' + raw;
+    if (seen.has(occurrence)) continue;
+    seen.add(occurrence);
     captures.push({id: match[3], at: match[1], source: match[2].trim(), raw});
   }
   return captures;
@@ -67,20 +68,31 @@ export function parseInbox(blocks: Block[]): Capture[] {
 export function decide(capture: Capture): Decision {
   const text = capture.raw.trim().normalize('NFKC');
   const source = capture.source.trim();
-  // Notifications are data, never actionable instructions.
-  if (source === 'Clarity Notification') {
-    const normalized = text.replace(/<br\s*\/?\s*>/giu, '\n').replace(/&nbsp;/giu, ' ');
-    if (!/PayPay/u.test(normalized) || !/取引が完了しました/u.test(normalized) ||
-        /(?:出金|チャージ|送金|受け取り|取消|返金|失敗|受付)/u.test(normalized)) return null;
+  // Notifications are evidence, never commands. Even a "completed" notice is
+  // not a reconciliation against the official bank/PayPay ledger. Store only
+  // a bounded review receipt in the EXISTING Money page; never change cash balance,
+  // booked expense, budget or income directly from notifications.
+  if (source === 'Clarity Notification' || source === 'Native Notification') {
+    const normalized = text.replace(/<br\s*\/?\s*>/giu, '\n').replace(/&nbsp;/giu, ' ')
+      .replace(/^\s*·\s*(?:money-review|information|missed-call|legal|security)(?:\s*·\s*ai-pending)?\s*/iu, '').trim();
+    const senderLine = normalized.split(/\r?\n/u).map(v => v.trim()).filter(Boolean);
+    const isPayPay = senderLine.some(line => /^(?:発信元:\s*)?PayPay(?:銀行)?$/u.test(line));
+    const complete = /取引が完了しました/u.test(normalized);
+    if (!isPayPay || !complete ||
+        /(?:出金|チャージ|送金|資金移動|受け取り|取消|返金|失敗|受付|取り消し)/u.test(normalized)) return null;
     const money = /金額[：:]\s*([\d,]+)円/u.exec(normalized);
     const merchant = /店舗名[：:]\s*([^\n]+)/u.exec(normalized);
-    const transaction = /取引番号[：:]\s*([0-9]{8,32})(?:\s|$)/u.exec(normalized);
     const amount = Number(money?.[1]?.replaceAll(',', ''));
-    if (!money || !merchant || !transaction || !Number.isSafeInteger(amount) || amount <= 0 || amount > 1000000 ||
-        !day(capture.at)) return null;
-    const shop = (merchant[1] ?? '').trim().slice(0, 90);
-    if (!shop || /(?:非表示|不明|未確認)/u.test(shop)) return null;
-    return {target: 'money', title: shop, amount, merchant: shop, transactionId: transaction[1] ?? ''};
+    const shop = (merchant?.[1] ?? '').trim().slice(0, 90);
+    const timestamp = day(capture.at);
+    if (!money || !merchant || !timestamp || !shop || /(?:非表示|不明|未確認)/u.test(shop) ||
+        !Number.isSafeInteger(amount) || amount <= 0 || amount > 1000000) return null;
+    return {
+      target: 'page', title: '家計管理戦略',
+      body: '【通知照合待ち・家計未計上】' + timestamp + '　' + shop + '　' +
+        amount.toLocaleString('ja-JP') + '円。通知の決済完了表記のみ確認。公式明細・既存記帳と照合するまで支出/残高に反映しない。',
+      moneyReview: {amount, merchant: shop}
+    };
   }
   // Share content cannot issue Notion writes.
   if (source === 'Clarity Share' || !/^(?:Memo|Clarity|Clarity Voice|Clarity Text|Clarity\.Voice|Clarity\.Text|clarity\/voice|clarity\/text)$/iu.test(source) ||
@@ -141,17 +153,7 @@ export function createInboxSorter(options: {notionToken: string; inboxPageId: st
       if ((decision.target === 'shopping' ? plain(existing.properties?.[spec.key]?.rich_text).split(/\r?\n/u).includes(key) : plain(existing.properties?.[spec.key]?.rich_text) === key)) return 'duplicate';
       throw new Error('Existing key readback mismatch');
     }
-    if (decision.target === 'money') {
-      if (!decision.transactionId || !decision.amount || !decision.merchant) throw new HoldCapture('Unverified transaction');
-      if ((await unique(spec.id, {property: spec.key, rich_text: {equals: decision.transactionId}})).length) throw new HoldCapture('Already imported by official ID');
-      const candidates = await api('/data_sources/' + spec.id + '/query', 'POST', {filter: {and: [
-        {property: '日付', date: {equals: day(capture.at)}},
-        {property: '金額', number: {equals: decision.amount}}
-      ]}, page_size: 2});
-      if (candidates.has_more || (candidates.results ?? []).length) throw new HoldCapture('Possible existing transaction');
-    } else if ((await unique(spec.id, {property: spec.title, title: {equals: decision.title}})).length) {
-      throw new HoldCapture('Existing title; held');
-    }
+    if ((await unique(spec.id, {property: spec.title, title: {equals: decision.title}})).length) throw new HoldCapture('Existing title; held');
     if (decision.target === 'diary' && (await unique(spec.id, {property: '日付', date: {equals: day(capture.at)}})).length) throw new HoldCapture('Existing diary day; held');
     const title = {title: rich(decision.title)}, ref = {rich_text: rich(key)};
     let properties: Record<string, unknown>;
@@ -160,13 +162,7 @@ export function createInboxSorter(options: {notionToken: string; inboxPageId: st
       case 'shopping': properties = {'商品名': title, 'メモ': {rich_text: rich(capture.raw + '\n' + key)}, '区分': {select: {name: '欲しいもの'}}, '買い物状態': {select: {name: '検討中'}}}; break;
       case 'diary': properties = {'日記': title, '本文': {rich_text: rich(decision.body ?? '')}, '日付': {date: {start: day(capture.at)}}, '記録元': {select: {name: 'Clarity'}}, '記録キー': ref}; break;
       case 'life': properties = {'イベント名': title, '備考': {rich_text: rich(capture.raw)}, '記録キー': ref, '取得元': {select: {name: 'Clarity'}}, '種類': {select: {name: 'その他'}}}; break;
-      case 'money':
-        properties = {'項目': title, '原本ID': ref, '日付': {date: {start: day(capture.at)}},
-          '金額': {number: decision.amount}, '区分': {select: {name: '支出'}},
-          '分類': {select: {name: 'その他'}}, '状態': {select: {name: '実績'}},
-          '確度': {select: {name: '未確認'}}, '確認元': {rich_text: rich('PayPay決済完了通知（公式明細未照合）')},
-          '支払元': {rich_text: rich('PayPay')}, 'メモ': {rich_text: rich('通知元ID=' + capture.id + '; 取引番号=' + decision.transactionId + '; 正式明細との照合待ち。通知だけで残高は更新しない。')}};
-        break;
+
     }
     const created = await api('/pages', 'POST', {parent: {type: 'data_source_id', data_source_id: spec.id}, properties});
     if (!created.id) throw new Error('Notion page ID missing; do not retry blindly');
@@ -174,7 +170,16 @@ export function createInboxSorter(options: {notionToken: string; inboxPageId: st
     if (!(decision.target === 'shopping' ? plain(saved.properties?.[spec.key]?.rich_text).split(/\r?\n/u).includes(key) : plain(saved.properties?.[spec.key]?.rich_text) === key)) throw new Error('Created key readback mismatch; do not retry blindly');
     return 'created';
   }
-  async function writeToPage(capture: Capture, decision: {target: 'page'; title: string; body: string}): Promise<'created' | 'duplicate'> {
+  async function writeToPage(capture: Capture, decision: {target: 'page'; title: string; body: string; moneyReview?: {amount: number; merchant: string}}): Promise<'created' | 'duplicate'> {
+    // Existing Money data remains authoritative; potential duplicate notices are held.
+    if (decision.moneyReview) {
+      const result = await api('/data_sources/95b30d16-7530-40c6-a320-dab99acad55d/query', 'POST', {filter: {and: [
+        {property: '日付', date: {equals: day(capture.at)}},
+        {property: '金額', number: {equals: decision.moneyReview.amount}}
+      ]}, page_size: 100});
+      if (result.has_more || !Array.isArray(result.results)) throw new HoldCapture('Money reconciliation incomplete');
+      if (result.results.length > 0) throw new HoldCapture('Potentially already booked in Money');
+    }
     const search = await api('/search', 'POST', {query: decision.title, filter: {property: 'object', value: 'page'}, page_size: 100});
     if (search.has_more) throw new HoldCapture('Ambiguous page search');
     const matches = (search.results ?? []).filter((page: any) => {
@@ -183,7 +188,8 @@ export function createInboxSorter(options: {notionToken: string; inboxPageId: st
       return titles.some((p: any) => plain(p.title) === decision.title);
     });
     if (matches.length !== 1 || matches[0].id === options.inboxPageId) throw new HoldCapture('Page title not unique or inaccessible');
-    const pageId = matches[0].id as string, key = 'inbox:' + capture.id;
+    const pageId = matches[0].id as string,
+      key = 'inbox:' + capture.id + (capture.id.startsWith('notification:') ? ':' + capture.at : '');
     async function hasReceipt(): Promise<boolean> {
       let cursor: string | null = null;
       for (let i = 0; i < 30; i++) {
