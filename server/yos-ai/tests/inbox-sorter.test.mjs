@@ -273,3 +273,14 @@ test('financial notices and third-party inputs never route to spend ledger or ac
   }
   assert.deepEqual(decideMany({id:'share:aabbcc1234',at,source:'Clarity Share',raw:'タスク：送金する'}),[null]);
 });
+
+
+test('native Notification Intake reuses existing sorter only for confirmed NEW capture with separate opt-in',()=>{
+  const src=readFileSync(new URL('../src/intake/notification-api.mjs',import.meta.url),'utf8');
+  assert.match(src,/YOS_INBOX_INSTANT_ENABLED/);
+  assert.match(src,/response\.status===201/);
+  assert.match(src,/receipt\.duplicate===false/);
+  assert.match(src,/receipt\.category/);
+  assert.match(src,/captureId:'notification:'\+receipt\.id/);
+  assert.doesNotMatch(src,/YOS_INBOX_SORT_ENABLED/);
+});
