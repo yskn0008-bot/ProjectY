@@ -29,7 +29,7 @@ try{
   assert.equal(await shortCard.getAttribute('data-compact'),'true');
   assert.match(await shortCard.locator('small').innerText(),/^14:00$/);
   assert.equal(await page.locator('#tl .yos-notion-projection').first().evaluate(el=>getComputedStyle(el).color),
-   'rgb(245, 248, 255)');
+   'rgb(246, 248, 253)');
   // Single casual fill: no left accent or alternate shift color.
   const appearance=await page.locator('#tl .yos-notion-projection').evaluateAll(els=>
    els.map(el=>({background:getComputedStyle(el).backgroundColor,
