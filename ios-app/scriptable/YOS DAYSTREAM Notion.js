@@ -440,7 +440,7 @@ async function main(){
  const live=!(typeof config!=='undefined'&&config.runsWithSiri);
  const output=buildHTML(html,adapters,native,wizard,snapshot,live);
  stage='画面表示';
- if(!live){ 
+ if(live){
   await presentWithInlineBridge(output,token,adapters);
  }else{
   await WebView.loadHTML(output,null,null,true);
