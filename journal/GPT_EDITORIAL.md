@@ -45,7 +45,8 @@
 ## 操作・検査
 
 - `node --test journal/tests/gpt-editorial-gate.test.mjs`：秘密情報、形式、日付、重複、既存号保護、同一データ出力の試験。
-- `node journal/gpt-editorial-gate.mjs --candidate /path/to/public-safe-candidate.json`：**検証のみ。書き込みなし**。
+- `node journal/gpt-editorial-gate.mjs --candidate /path/to/public-safe-candidate.json --validate-only`：候補ファイルの型・プライバシー・リンク形式だけを検査。候補専用PRのCIはこのモードを使用。原文事実の確認はGPTが別に行う。
+- `node journal/gpt-editorial-gate.mjs --candidate /path/to/public-safe-candidate.json`：**検証のみ。書き込みなし**。既存号との衝突や直近の重複も確認。
 - `node journal/gpt-editorial-gate.mjs --candidate /path/to/public-safe-candidate.json --write --approved-review`：原典確認後の**作業用ブランチ**だけに3ファイルを出力。mainでは直接実行しない。GitHub PRで審査・確認後に統合する。
 - CI `journal-gpt-editorial-gate.yml` は当ゲートのプログラムを検査。既存RSS自動発行のコードや配信タスクを変更しない。
 
