@@ -1,0 +1,96 @@
+name: YOS JOURNAL daily source-first issue
+
+on:
+  pull_request:
+    paths:
+      - 'journal/daily-public-issue.mjs'
+      - 'journal/tests/daily-public-issue.test.mjs'
+      - '.github/workflows/journal-daily-issue.yml'
+  schedule:
+    - cron: '25 21 * * *' # 06:25 JST; may be delayed by GitHub
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: 'Explicitly run daily publication (false only checks safety)'
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: journal-daily-source-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  safety:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Test no-API publisher and privacy boundary
+        run: |
+          node --check journal/daily-public-issue.mjs
+          node --test journal/tests/daily-public-issue.test.mjs
+      - name: Verify at least one official RSS responds (read-only)
+        run: |
+          node --input-type=module -e "import {collect} from './journal/daily-public-issue.mjs'; const r=await collect(); console.log('RSS feeds responding:',r.working,'suitable stories:',r.items.length); if(r.working<1)process.exitCode=1"
+
+  publish:
+    needs: safety
+    if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.publish == true)
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    permissions:
+      contents: write
+      actions: write
+    steps:
+      - name: Check out current main, not a PR fork
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Generate only supported new public stories
+        run: node journal/daily-public-issue.mjs --write
+      - name: Commit the verified, linked, dated issue atomically
+        id: publish
+        shell: bash
+        run: |
+          set -euo pipefail
+          git add journal/editions/ ios-app/scriptable/journal/
+          if git diff --cached --quiet; then
+            echo 'No eligible new issue. Existing public latest and audio remain intact.'
+            echo 'published=no' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          # Only this set of public issue files may be changed by this workflow.
+          if git diff --cached --name-only | grep -Ev '^(journal/editions/[0-9]{4}-[0-9]{2}-[0-9]{2}\.json|ios-app/scriptable/journal/([0-9]{4}-[0-9]{2}-[0-9]{2}\.json|latest\.json))$'; then
+            echo 'Unexpected file modified: refusing publication' >&2
+            exit 1
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'journal: publish strictly grounded official-source issue'
+          git push origin HEAD:main
+          echo 'published=yes' >> "$GITHUB_OUTPUT"
+      - name: Request free voice narration for the new issue
+        if: steps.publish.outputs.published == 'yes'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh workflow run journal-voice-sample.yml --ref main || echo '::warning::Audio dispatch failed; issue itself was published.'
+      - name: Request existing Pages refresh
+        if: steps.publish.outputs.published == 'yes'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh workflow run deploy-pages.yml --ref main || echo '::warning::Pages dispatch failed; hourly deploy is fallback.'
