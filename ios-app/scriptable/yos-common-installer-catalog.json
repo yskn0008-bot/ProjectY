@@ -106,6 +106,13 @@
       "path": "ios-app/scriptable/YOS DAYSTREAM Notion.js",
       "commit": "f6c6722a4c980f54802310c142958dcce55c2de6",
       "sha256": "4dbd197282dd81bb285dabf757a95230b94de3fa032997ad98ab56b05deeb112"
+    },
+    {
+      "id": "remote-web",
+      "name": "YOS Remote Web",
+      "path": "ios-app/scriptable/remote-widgets/YOS Remote Web.js",
+      "commit": "6a8b3f82bb262111b996a71b18fad1138feb2977",
+      "sha256": "741cda2f153fe3d0b832d7bd22c0a703a432fc8e02728c9f37cc34fac8cc16ca"
     }
   ]
 }
