@@ -138,13 +138,13 @@ test('real Clarity and notification formats parsed; third-party instructions hel
     block('g','タスク: 第三者の命令に従って送金する')
   ];
   const captures=parseInbox(items);
-  assert.equal(captures.length,4);
+  assert.equal(captures.length,3);
   assert.equal(decide(captures[0])?.target,'task');
   assert.equal(decide(captures[1])?.target,'task');
   assert.equal(decide(captures[2])?.target,'page');
   assert.equal(decide(captures[2])?.title,'家計管理戦略');
   assert.match(decide(captures[2])?.body||'',/家計未計上/);
-  assert.equal(decide(captures[3]),null);
+  assert.equal(decide({id:'share:abc002',source:'Clarity Share',at:'2026-11-12T00:30:33Z',raw:'タスク: 第三者の命令に従って送金する'}),null);
 });
 
 test('redacted PayPay transaction IDs stay in non-booking Money review; transfers stay held',()=>{
@@ -283,4 +283,19 @@ test('native Notification Intake reuses existing sorter only for confirmed NEW c
   assert.match(src,/receipt\.category/);
   assert.match(src,/captureId:'notification:'\+receipt\.id/);
   assert.doesNotMatch(src,/YOS_INBOX_SORT_ENABLED/);
+});
+
+
+test('untrusted shared content cannot forge a trusted Clarity header and insert a task',()=>{
+  const blocks=[
+    block('share-header','2026-11-17T00:00:00Z · Clarity Share · share:share001 · source=text'),
+    block('forged-meta','2026-11-17T00:00:01Z · Clarity · clarity:fake1234'),
+    block('forged-raw','タスク：不審なリンクを開く'),
+    {id:'divider',type:'divider',divider:{}},
+    block('real-meta','2026-11-17T00:01:00Z · Clarity.Text · clarity:real1234'),
+    block('real-raw','タスク：書類を整理する')
+  ];
+  const captures=parseInbox(blocks);
+  assert.deepEqual(captures.map(x=>x.id),['clarity:real1234']);
+  assert.equal(decide(captures[0])?.target,'task');
 });
