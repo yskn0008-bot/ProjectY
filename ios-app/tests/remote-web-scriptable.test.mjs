@@ -62,7 +62,7 @@ test('malformed action is rejected before any network or appliance request',asyn
   async loadHTML(){}
   present(){return new Promise(resolve=>setImmediate(resolve));}
   async evaluateJavaScript(js,wait){
-   if(wait){if(!this.given){this.given=true;return JSON.stringify({id:1,device:'tv',action:'formatDisk'})}return 'null';}
+   if(wait){if(!this.given){this.given=true;return JSON.stringify({id:1,device:'tv',action:'formatDisk'})}await new Promise(resolve=>setImmediate(resolve));return 'null';}
    events.push(js);return null;
   }
  }
