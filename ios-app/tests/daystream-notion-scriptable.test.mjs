@@ -31,6 +31,32 @@ test('invalid state/date/id rejects complete-source result',()=>{
  const r=row();r.properties['状態'].select.name='unknown';assert.throws(()=>a.project(r));
  assert.throws(()=>a.project(row(null,null,'bad','not-id')));
 });
+test('Notion calendar shifts without task status remain scheduled, not completed or paused',()=>{
+ const a=api();
+ for(const [name,kind] of [['夜勤','yos-shift-2026-11-20'],['日勤','calendar:manual-2026-11-21']]){
+  const r=row('2026-11-20T17:00:00+09:00','2026-11-21T05:00:00+09:00',name);
+  r.properties['状態']={select:null};
+  r.properties['同期キー']={rich_text:[{plain_text:kind}]};
+  const t=a.project(r);
+  assert.equal(t.sourceKind,'calendar');
+  assert.equal(t.state,'次にやる'); // Browser adapter placeholder; not persisted to Notion.
+  const projected=a.dayProjection([{id:'notion-'+t.id,title:t.title,status:t.state,
+   sourceFamily:t.sourceKind,dueAt:t.due,dueEnd:t.dueEnd}],'2026-11-20');
+  assert.equal(projected.length,1);
+  assert.equal(projected[0].sourceFamily,'calendar');
+ }
+ const normal=row('2026-11-20',null,'通常タスク');
+ normal.properties['状態']={select:null};
+ assert.throws(()=>a.project(normal),/タスクの状態を確認できません：通常タスク/);
+ const unexpected=row('2026-11-20',null,'夜勤');
+ unexpected.properties['状態']={select:{name:'不明'}};
+ unexpected.properties['同期キー']={rich_text:[{plain_text:'yos-shift-2026-11-20'}]};
+ assert.throws(()=>a.project(unexpected),/タスクの状態を確認できません/);
+});
+test('Notion blank-title record is skipped without misleading status failure',()=>{
+ const r=row();r.properties['やること']={title:[]};r.properties['状態']={select:null};
+ assert.equal(api().project(r),null);
+});
 test('night shift is split at Tokyo midnight without phantom end-day block',()=>{
  const a=api(),t={id:'notion-'+'a'.repeat(32),title:'夜勤',dueAt:'2026-11-20T17:00:00+09:00',dueEnd:'2026-11-21T05:00:00+09:00'};
  assert.equal(a.dayProjection([t],'2026-11-20')[0].s,1020);
