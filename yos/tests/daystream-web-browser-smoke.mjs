@@ -54,6 +54,28 @@ try{
  assert.equal(redoneTask.s,780,'redo restores the same local card without changing its time');
  assert.equal(redoneTask.shortcut,'PayPay','redo preserves existing shortcut association');
 
+ const completeResult=await page.evaluate(()=>{
+  const task=items.find(x=>x.t==='WIZARD CREATE');toggleTaskDone(task);
+  return {done:items.find(x=>x.t==='WIZARD CREATE').done,actions:JSON.parse(localStorage.getItem('YOS_DAYSTREAM_WEB_ACTIONS_V1')||'[]').length};
+ });
+ assert.equal(completeResult.done,true);
+ assert.equal(completeResult.actions,1);
+ await page.locator('#yosUndoBtn').click();
+ const undoneCompletion=await page.evaluate(()=>({
+  done:items.find(x=>x.t==='WIZARD CREATE').done,
+  actions:JSON.parse(localStorage.getItem('YOS_DAYSTREAM_WEB_ACTIONS_V1')||'[]').length
+ }));
+ assert.equal(undoneCompletion.done,false,'undo restores local task incomplete status');
+ assert.equal(undoneCompletion.actions,0,'undo rolls back its local completion log');
+ await page.locator('#yosRedoBtn').click();
+ const redoneCompletion=await page.evaluate(()=>({
+  done:items.find(x=>x.t==='WIZARD CREATE').done,
+  actions:JSON.parse(localStorage.getItem('YOS_DAYSTREAM_WEB_ACTIONS_V1')||'[]').length
+ }));
+ assert.equal(redoneCompletion.done,true,'redo restores local completion status');
+ assert.equal(redoneCompletion.actions,1,'redo restores original local completion log');
+
+
  const status=await page.evaluate(()=>{
   const day=new Date(),iso=[day.getFullYear(),String(day.getMonth()+1).padStart(2,'0'),String(day.getDate()).padStart(2,'0')].join('-');
   const p={version:1,days:{[iso]:[{id:19001,t:'WEB PORT STORAGE SMOKE',s:480,d:30,kind:'task'}]},hiddenCalendar:{}};
