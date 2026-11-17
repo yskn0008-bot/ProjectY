@@ -3,7 +3,7 @@ import { mkdir } from 'node:fs/promises';
 import { resolve } from 'node:path';
 
 const pages = [
-  { name: 'drive', path: './index.html', ready: '.yos131-primary[data-proxy="shiftButton"]' },
+  { name: 'drive', path: './index.html?legacy=1', ready: '.yos131-primary[data-proxy="shiftButton"]' },
   { name: 'today', path: './calendar.html', ready: '#todayView' },
   { name: 'week', path: './calendar.html', ready: '#weekView', mode: 'week' },
   { name: 'month', path: './calendar.html', ready: '#monthView', mode: 'month' },
@@ -113,7 +113,7 @@ test.describe('iPhone17 viewport and touch smoke', () => {
       await openIPhone17App(page, entry);
 
       if (entry.name === 'drive') {
-        await page.goto('./index.html', { waitUntil: 'domcontentloaded' });
+        await page.goto('./index.html?legacy=1', { waitUntil: 'domcontentloaded' });
         await expect(page.locator('.yos131-drive')).toBeVisible();
         await expect(page.locator('.yos131-primary[data-proxy="shiftButton"]')).toBeVisible();
         expect(await page.evaluate(() => Boolean(navigator.serviceWorker.controller)), 'controlled second index navigation').toBeTruthy();
@@ -324,7 +324,7 @@ test.describe('iPhone17 viewport and touch smoke', () => {
         targetSales: 30000, vehicle: '521', plannedStart: '18:46', plannedEnd: '03:30', areas: '那覇', yosUrl: '',
       }));
     });
-    await page.goto('./index.html', { waitUntil: 'domcontentloaded' });
+    await page.goto('./index.html?legacy=1', { waitUntil: 'domcontentloaded' });
 
     const hidden = page.locator('#shiftButton');
     const proxy = page.locator('.yos131-primary[data-proxy="shiftButton"]');
@@ -344,4 +344,25 @@ test.describe('iPhone17 viewport and touch smoke', () => {
     await expect(proxy).toContainText('営業開始できます');
     expect(exceptions, 'uncaught JavaScript exceptions').toEqual([]);
   });
+});
+
+
+test('default entry: approved one-screen UI and legacy recovery', async ({ page }) => {
+  const errors=[];
+  page.on('pageerror', error => errors.push(error.message));
+  await page.goto('./index.html', {waitUntil:'domcontentloaded'});
+  await expect(page).toHaveURL(/\/ui-v2\.html$/);
+  await expect(page.locator('#drop-btn')).toBeVisible();
+  await expect(page.locator('#photo-btn')).toBeVisible();
+  await expect(page.locator('#sync-status')).toContainText('Notion未接続');
+  const pageOverflow=await page.evaluate(() => document.documentElement.scrollHeight > innerHeight + 1);
+  expect(pageOverflow).toBe(false);
+  await page.locator('[data-page="strategy"]').click();
+  await expect(page.locator('#strategy-view')).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollHeight > innerHeight + 1)).toBe(false);
+  await page.locator('[data-page="history"]').click();
+  await page.locator('#history-info-btn').click();
+  await expect(page).toHaveURL(/\/index\.html\?legacy=1$/);
+  await expect(page.locator('.yos131-primary[data-proxy="shiftButton"]')).toBeVisible();
+  expect(errors).toEqual([]);
 });
