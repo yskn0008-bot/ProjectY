@@ -109,11 +109,33 @@ export function decide(capture: Capture): Decision {
   if (match?.[1]?.trim() && !/(?:明日|来週|予定|つもり)/u.test(match[1])) return {target: 'life', title: match[1].trim()};
   match = /^(?:タスク|やること)(?:に)?[：:]\s*(.+)$/u.exec(text) || /^(.+?)を(?:タスク|やること)に(?:登録|追加|入れて)(?:して)?[。！!]?$/u.exec(text);
   if (match?.[1]?.trim() && !/(?:明日|来週|今日|\d{1,2}時|\d{1,2}日)/u.test(match[1])) return {target: 'task', title: match[1].trim()};
-  match = /^(.+?)を(?:欲しいもの|買い物リスト)に(?:登録|追加|入れて)(?:して)?[。！!]?$/u.exec(text);
+  match = /^(?:買い物リスト|買い物|欲しいもの)[：:]\s*(.+)$/u.exec(text) || /^(.+?)を(?:欲しいもの|買い物リスト)に(?:登録|追加|入れて)(?:して)?[。！!]?$/u.exec(text);
   if (match?.[1]?.trim()) return {target: 'shopping', title: match[1].trim()};
   match = /^(?:日記に|日記[：:])\s*(.+?)(?:を(?:記録|保存)して)?[。！!]?$/u.exec(text);
   if (match?.[1]?.trim()) return {target: 'diary', title: day(capture.at) + '｜Clarity', body: match[1].trim()};
   return null;
+}
+
+// Preserve the proven Clarity Pilot v3 behavior: one Raw capture may contain up
+// to six explicit independently routed requests. Each index gets the v3 receipt
+// suffix :01, :02 ... so the existing iPhone router and server share keys.
+export function decideMany(capture: Capture): NonNullable<Decision>[] {
+  if (!/^(?:Memo|Clarity|Clarity Voice|Clarity Text|Clarity\.Voice|Clarity\.Text|clarity\/voice|clarity\/text)$/iu.test(capture.source)) {
+    const decision = decide(capture);
+    return decision ? [decision] : [];
+  }
+  const lines = capture.raw.replace(/<br\s*\/?\s*>/giu, '\n').split(/\r?\n/u).map(v => v.trim()).filter(Boolean);
+  if (lines.length > 6) return [];
+  if (lines.length <= 1) {
+    const decision = decide(capture);
+    return decision ? [decision] : [];
+  }
+  const out: NonNullable<Decision>[] = [];
+  for (const line of lines) {
+    const decision = decide({...capture, raw: line});
+    if (decision) out.push(decision);
+  }
+  return out;
 }
 
 export function createInboxSorter(options: {notionToken: string; inboxPageId: string; redis: RedisCommandClient; mode?: 'test' | 'run'; captureId?: string; fetchImpl?: FetchLike}) {
@@ -144,10 +166,24 @@ export function createInboxSorter(options: {notionToken: string; inboxPageId: st
     if (result.has_more || result.results?.length > 1) throw new HoldCapture('Ambiguous destination match');
     return result.results ?? [];
   }
-  async function write(capture: Capture, decision: NonNullable<Decision>): Promise<'created' | 'duplicate'> {
-    if (decision.target === 'page') return writeToPage(capture, decision);
-    const spec = SOURCES[decision.target], key = 'inbox:' + capture.id;
+  async function write(capture: Capture, decision: NonNullable<Decision>, index = 1): Promise<'created' | 'duplicate'> {
+    const key = 'inbox:' + capture.id + (capture.id.startsWith('clarity:') ? ':' + String(index).padStart(2, '0') :
+      capture.id.startsWith('notification:') ? ':' + capture.at : '');
+    if (decision.target === 'page') return writeToPage(capture, decision, key);
+    const spec = SOURCES[decision.target];
     const byKey = await unique(spec.id, {property: spec.key, rich_text: decision.target === 'shopping' ? {contains: key} : {equals: key}});
+    // Legacy server test rows used the unsuffixed key. The already installed
+    // Pilot v3 uses indexed keys. Treat both as duplicates for item #1.
+    if (!byKey.length && index === 1 && capture.id.startsWith('clarity:')) {
+      const legacy = 'inbox:' + capture.id;
+      const matches = await unique(spec.id, {property: spec.key,
+        rich_text: decision.target === 'shopping' ? {contains: legacy} : {equals: legacy}});
+      if (matches.length) {
+        const page = await api('/pages/' + matches[0].id);
+        const value = plain(page.properties?.[spec.key]?.rich_text);
+        if (decision.target === 'shopping' ? value.split(/\r?\n/u).includes(legacy) : value === legacy) return 'duplicate';
+      }
+    }
     if (byKey.length) {
       const existing = await api('/pages/' + byKey[0].id);
       if ((decision.target === 'shopping' ? plain(existing.properties?.[spec.key]?.rich_text).split(/\r?\n/u).includes(key) : plain(existing.properties?.[spec.key]?.rich_text) === key)) return 'duplicate';
@@ -170,7 +206,7 @@ export function createInboxSorter(options: {notionToken: string; inboxPageId: st
     if (!(decision.target === 'shopping' ? plain(saved.properties?.[spec.key]?.rich_text).split(/\r?\n/u).includes(key) : plain(saved.properties?.[spec.key]?.rich_text) === key)) throw new Error('Created key readback mismatch; do not retry blindly');
     return 'created';
   }
-  async function writeToPage(capture: Capture, decision: {target: 'page'; title: string; body: string; moneyReview?: {amount: number; merchant: string}}): Promise<'created' | 'duplicate'> {
+  async function writeToPage(capture: Capture, decision: {target: 'page'; title: string; body: string; moneyReview?: {amount: number; merchant: string}}, receiptKey: string): Promise<'created' | 'duplicate'> {
     // Existing Money data remains authoritative; potential duplicate notices are held.
     if (decision.moneyReview) {
       const result = await api('/data_sources/95b30d16-7530-40c6-a320-dab99acad55d/query', 'POST', {filter: {and: [
@@ -188,8 +224,7 @@ export function createInboxSorter(options: {notionToken: string; inboxPageId: st
       return titles.some((p: any) => plain(p.title) === decision.title);
     });
     if (matches.length !== 1 || matches[0].id === options.inboxPageId) throw new HoldCapture('Page title not unique or inaccessible');
-    const pageId = matches[0].id as string,
-      key = 'inbox:' + capture.id + (capture.id.startsWith('notification:') ? ':' + capture.at : '');
+    const pageId = matches[0].id as string, key = receiptKey;
     async function hasReceipt(): Promise<boolean> {
       let cursor: string | null = null;
       for (let i = 0; i < 30; i++) {
@@ -219,14 +254,17 @@ export function createInboxSorter(options: {notionToken: string; inboxPageId: st
       if (mode === 'test' && !options.captureId && selected.length !== 1) throw new Error('Acceptance capture missing; no writes');
       if (options.captureId && selected.length !== 1) throw new Error('Capture not found or ambiguous; no writes');
       for (const capture of selected) {
-        const decision = decide(capture);
-        if (!decision) {held++; continue;}
-        try {
-          const result = await write(capture, decision);
-          if (result === 'created') created++; else duplicates++;
-        } catch (error) {
-          if (!(error instanceof HoldCapture)) throw error;
-          held++;
+        const decisions = decideMany(capture);
+        if (decisions.length === 0) {held++; continue;}
+        for (let i = 0; i < decisions.length; i++) {
+          try {
+            const result = await write(capture, decisions[i]!, i + 1);
+            if (result === 'created') created++; else duplicates++;
+          } catch (error) {
+            if (!(error instanceof HoldCapture)) throw error;
+            held++;
+          }
+          if (created >= 10) break;
         }
         if (created >= 10) break;
       }
