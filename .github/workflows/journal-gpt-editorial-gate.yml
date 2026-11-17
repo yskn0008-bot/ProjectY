@@ -1,0 +1,26 @@
+name: YOS JOURNAL GPT editorial candidate safety
+
+on:
+  pull_request:
+    paths:
+      - 'journal/gpt-editorial-gate.mjs'
+      - 'journal/tests/gpt-editorial-gate.test.mjs'
+      - 'journal/GPT_EDITORIAL.md'
+      - '.github/workflows/journal-gpt-editorial-gate.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  gpt-editorial-safety:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check GPT candidate parser syntax
+        run: node --check journal/gpt-editorial-gate.mjs
+      - name: Test privacy, sources, dates, existing edition preservation
+        run: node --test journal/tests/gpt-editorial-gate.test.mjs
