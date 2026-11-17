@@ -329,6 +329,76 @@ try{
   afterAgain,'invalid file cannot alter saved plan');
  assert.deepEqual(mergeErrors,[]);
  await mergeContext.close();
+
+ // Screenshot scenario: long sleep overlaps multiple short tasks, two short tasks overlap,
+ // and two tasks start at the same minute. Source times must remain unchanged.
+ for(const width of [320,390,402]){
+  const ctx=await browser.newContext({viewport:{width,height:844},isMobile:true,hasTouch:true,timezoneId:'Asia/Tokyo',serviceWorkers:'block'});
+  const p=await ctx.newPage();const errs=[];
+  p.on('pageerror',e=>errs.push(e.message));
+  await p.goto('http://127.0.0.1:4173/yos/daystream/',{waitUntil:'domcontentloaded'});
+  const before=await p.evaluate(()=>{
+   const day=localISO(new Date());
+   const slots=[
+    [2100,'Health｜睡眠時間を確保する',0,470,'task'],
+    [2101,'シャワー',100,13,'task'],
+    [2102,'洗顔',345,5,'task'],
+    [2103,'保湿',348,5,'task'],
+    [2104,'歯磨き',353,5,'task'],
+    [2105,'同じ開始時刻の長い名前を持つ確認タスク',353,5,'task'],
+    [2106,'運動',600,15,'task'],
+    [2107,'入浴',620,15,'task'],
+    [2108,'メール',720,30,'task'],
+    [2109,'記録',752,15,'habit'],
+    [2110,'単独',1000,5,'task']
+   ];
+   const tasks=slots.map(([id,t,s,d,kind])=>({id,t,s,d,kind,done:false}));
+   if(!window.YOS_DAYSTREAM_WEB.write({version:1,days:{[day]:tasks},hiddenCalendar:{}}))throw Error('fixture save failed');
+   return tasks;
+  });
+  await p.reload({waitUntil:'domcontentloaded'});
+  const cells=await p.locator('#tl .card').evaluateAll(nodes=>nodes.map(node=>{
+   const r=node.getBoundingClientRect(),b=node.querySelector('b'),time=node.querySelector('small');
+   return {id:Number(node.dataset.id),top:r.top,bottom:r.bottom,width:r.width,
+    backdrop:node.classList.contains('yos-backdrop'),foreground:node.classList.contains('yos-foreground'),
+    title:b.textContent,time:time.textContent,color:getComputedStyle(node).backgroundColor,
+    whiteSpace:getComputedStyle(b).whiteSpace,
+    textOK:b.scrollWidth<=b.clientWidth+2&&b.scrollHeight<=b.clientHeight+2,
+    timeOK:time.scrollWidth<=time.clientWidth+2};
+  }));
+  assert.equal(cells.length,before.length);
+  const byId=new Map(cells.map(c=>[c.id,c]));
+  assert.equal(byId.get(2100).backdrop,true,'long task is background, not a narrow lane');
+  for(const id of [2101,2102,2103,2104,2105,2106,2107,2108,2110]){
+   const item=byId.get(id);
+   assert.equal(item.foreground,true,'full-width task '+id);
+   assert.ok(item.width>width*.6,'title and hours have enough horizontal space: '+id);
+   assert.equal(item.whiteSpace,'normal','allow title line wraps: '+id);
+   assert.equal(item.textOK,true,'title not cropped: '+id);
+   assert.equal(item.timeOK,true,'full start-end times visible: '+id);
+  }
+  assert.equal(byId.get(2102).time,'05:45–05:50');
+  assert.equal(byId.get(2103).time,'05:48–05:53');
+  const visible=cells.filter(c=>!c.backdrop).sort((a,b)=>a.top-b.top);
+  for(let i=1;i<visible.length;i++)assert.ok(visible[i].top>=visible[i-1].bottom-2,'dense tasks do not cover one another: '+visible[i-1].id+'/'+visible[i].id);
+  for(const id of [2102,2106,2108])assert.notEqual(byId.get(id).color,byId.get(2110).color,'semantic color '+id+' differs from unknown');
+  assert.equal(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,'no sideways overflow');
+  const grip=p.locator('#tl [data-id="2102"] .task-drag-grip');
+  // iPhone has a fixed bottom navigation bar: position the grip in the visible center,
+  // not merely inside the viewport while still covered by the dock.
+  await p.evaluate(()=>document.querySelector('#tl [data-id="2102"]').scrollIntoView({block:'center',behavior:'instant'}));
+  const r=await grip.boundingBox();assert.ok(r&&r.width>=36,'draggable grip is reachable');
+  await p.evaluate(()=>{const el=document.querySelector('#tl [data-id="2102"]');window.__yosDragTrace=[];for(const name of ['pointerdown','pointermove','pointerup','pointercancel','touchstart','touchmove','touchend'])el.addEventListener(name,e=>window.__yosDragTrace.push({event:name,y:e.clientY,pointerType:e.pointerType,button:e.button,target:e.target.className}),true)});
+  await p.mouse.move(r.x+r.width/2,r.y+r.height/2);await p.mouse.down();
+  await p.mouse.move(r.x+r.width/2,r.y+r.height/2+130,{steps:12});await p.mouse.up();
+  const dragState=await p.evaluate(()=>({s:items.find(x=>x.id===2102).s,note:note.textContent,events:window.__yosDragTrace,scrollY:scrollY}));
+  assert.notEqual(dragState.s,345,'the grip actually moves a task: '+JSON.stringify(dragState));
+  await p.locator('#yosUndoBtn').click();
+  assert.equal(await p.evaluate(()=>items.find(x=>x.id===2102).s),345,'undo reverses task move');
+  assert.deepEqual(errs,[]);
+  await ctx.close();
+ }
+
  assert.deepEqual(errors,[],'no script errors during load, storage, reload or learning');
  console.log('DAYSTREAM Web port browser smoke PASS',type);
 }finally{await browser.close()}
