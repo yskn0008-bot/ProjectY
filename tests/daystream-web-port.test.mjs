@@ -14,7 +14,6 @@ test('Web port inherits the approved original charcoal UI and main navigation',(
  assert.match(native,/YOS_LIFE_LEARNING_LIVE_START/);
  assert.match(html,/YOS_LIFE_LEARNING_LIVE_START/);
 });
-test('Browser scripts parse without native Scriptable APIs',()=>{
 test('History buttons and drag-only grip preserve original native task-card rendering',()=>{
  assert.match(html,/id="yosUndoBtn"/);
  assert.match(html,/id="yosRedoBtn"/);
@@ -27,6 +26,7 @@ test('History buttons and drag-only grip preserve original native task-card rend
  assert.match(html,/右端の⋮で移動/);
 });
 
+test('Browser scripts parse without native Scriptable APIs',()=>{
  assert.equal(scripts.length,2);
  for(const code of scripts)new vm.Script(code);
  assert.match(ui,/WEB_PORT_BRIDGE/);
