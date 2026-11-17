@@ -42,8 +42,21 @@ async function readTasks(token){
   req.method='POST';req.timeoutInterval=20;
   req.headers={Authorization:'Bearer '+token,'Notion-Version':'2025-09-03','Content-Type':'application/json'};
   req.body=JSON.stringify({page_size:100,...(cursor?{start_cursor:cursor}:{})});
-  const data=await req.loadJSON();
-  if(req.response?.statusCode!==200||!Array.isArray(data?.results)||typeof data.has_more!=='boolean')throw Error('Notionを取得できません。接続権限と通信を確認してください');
+  let data,fetchError=null;
+  try{data=await req.loadJSON()}catch(error){fetchError=error}
+  const http=req.response?.statusCode;
+  if(http!==200){
+   const hint=http===401?'認証情報が無効または期限切れです':
+    http===403?'連携にYOS Tasksの閲覧権限がありません':
+    http===404?'YOS Tasksの共有設定またはデータソースIDを確認してください':
+    http===429?'Notionのアクセス制限中です。しばらくして更新してください':
+    http>=500?'Notion側が一時的に応答していません':
+    http==null?'応答がありません（通信環境を確認してください）':'APIの応答を確認してください';
+   throw Error('Notion取得 HTTP '+(http??'不明')+'：'+hint);
+  }
+  if(fetchError)throw Error('Notion取得 HTTP 200：応答データを読み取れません');
+  if(!Array.isArray(data?.results)||typeof data.has_more!=='boolean')
+   throw Error('Notion取得 HTTP 200：応答の形式が想定と異なります');
   for(const row of data.results){
    const task=project(row),id=String(row.id).replace(/-/g,'').toLowerCase();
    if(seen.has(id))throw Error('Notionの重複応答を検出しました');
@@ -173,26 +186,53 @@ async function asset(path,marker){
  if(req.response?.statusCode!==200||typeof text!=='string'||text.length>350000||!text.includes(marker))throw Error('画面部品を取得できません：'+path);
  return text;
 }
+// Siri/Shortcuts cannot present Scriptable Alert; deliver an actionable result instead.
 async function showAlert(title,message){
- const a=new Alert();a.title=title;a.message=message;a.addAction('閉じる');await a.presentAlert();
+ const output=title+'：'+message;
+ if(typeof config!=='undefined'&&config.runsInSiri){
+  if(typeof Script!=='undefined'&&typeof Script.setShortcutOutput==='function')Script.setShortcutOutput(output);
+  else console.warn(output);
+  return;
+ }
+ try{
+  const a=new Alert();a.title=title;a.message=message;a.addAction('閉じる');await a.presentAlert();
+ }catch(error){
+  // Never hide the original failure behind "Alerts are not supported in Siri".
+  if(typeof Script!=='undefined'&&typeof Script.setShortcutOutput==='function')Script.setShortcutOutput(output);
+  else console.warn(output);
+ }
 }
+let stage='起動';
 async function main(){
+ stage='実行環境';
+ if(typeof config!=='undefined'&&config.runsInSiri){
+  await showAlert('DAYSTREAM 起動方法','Siri/ショートカット内ではDAYSTREAMの画面を表示できません。ショートカットで「URLを開く」を使用し、scriptable:///run?scriptName=YOS%20DAYSTREAM%20Notion を開いてください。');
+  return;
+ }
+ stage='Notion認証';
  let token='';try{if(Keychain.contains(NOTION_KEY))token=Keychain.get(NOTION_KEY)||''}catch{}
  if(!token){await showAlert('Notion未接続','既存YOSのNotion接続情報がiPhone内に見つかりません。既存の接続設定を確認してください。');return}
+ stage='Notion取得';
  const data=await readTasks(token);
+ stage='画面部品の取得';
  const [html,adapters,native,wizard]=await Promise.all([
   asset('yos/daystream/index.html','// WEB_PORT_BOOT'),
   asset('yos/daystream/source-adapters.js','YOS_DAYSTREAM_SOURCES'),
   asset('life/calendar/native-bridge.js','YOS_CALENDAR_NATIVE'),
   asset('yos/daystream/task-wizard.js','YOS_TASK_WIZARD')
  ]);
+ stage='データ変換';
  const scope={};new Function('window',adapters)(scope);
  const snapshot=scope.YOS_DAYSTREAM_SOURCES.fromYosTaskDashboardCache({savedAt:Date.now(),data});
  if(!snapshot)throw Error('Notionの取得結果を検証できません');
  // This payload contains only task projections; credentials never enter the WebView.
  const output=buildHTML(html,adapters,native,wizard,snapshot);
+ stage='画面表示';
  await WebView.loadHTML(output,null,null,true);
 }
 // SCRIPTABLE_ENTRY
-try{await main()}catch(error){await showAlert('DAYSTREAM 接続エラー','取得・表示を完了できませんでした。前回データは変更していません。Notionの接続権限と通信を確認してください。')}
+try{await main()}catch(error){
+ const detail=clean(error?.message||error,180);
+ await showAlert('DAYSTREAM 接続エラー','［'+stage+'］'+detail+'。Notionの内容は変更していません。');
+}
 Script.complete();
