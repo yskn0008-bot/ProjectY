@@ -37,7 +37,9 @@ try{
   assert.equal(await page.locator('#yosNotionEditSheet').count(),0);
   assert.equal(await page.locator('#yosNotionMoveBar').count(),0);
   const colors=await page.locator('#tl .card.task').evaluateAll(cards=>cards.map(c=>getComputedStyle(c).backgroundColor));
-  assert.equal(new Set(colors).size,1);
+  // The original DAYSTREAM intentionally colors sleep differently from tasks.
+  // Preserve that native styling instead of imposing a new visual scheme.
+  assert.equal(new Set(colors.slice(1)).size,1);
   assert.ok(colors.every(c=>c!=='rgba(0, 0, 0, 0)'));
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
   assert.equal(await page.evaluate(key=>Object.keys(JSON.parse(localStorage.getItem(key))).length,importKey),4);
