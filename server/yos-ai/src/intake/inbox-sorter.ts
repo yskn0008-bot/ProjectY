@@ -119,23 +119,17 @@ export function decide(capture: Capture): Decision {
 // Preserve the proven Clarity Pilot v3 behavior: one Raw capture may contain up
 // to six explicit independently routed requests. Each index gets the v3 receipt
 // suffix :01, :02 ... so the existing iPhone router and server share keys.
-export function decideMany(capture: Capture): NonNullable<Decision>[] {
+export function decideMany(capture: Capture): Decision[] {
   if (!/^(?:Memo|Clarity|Clarity Voice|Clarity Text|Clarity\.Voice|Clarity\.Text|clarity\/voice|clarity\/text)$/iu.test(capture.source)) {
-    const decision = decide(capture);
-    return decision ? [decision] : [];
+    return [decide(capture)];
   }
   const lines = capture.raw.replace(/<br\s*\/?\s*>/giu, '\n').split(/\r?\n/u).map(v => v.trim()).filter(Boolean);
   if (lines.length > 6) return [];
   if (lines.length <= 1) {
-    const decision = decide(capture);
-    return decision ? [decision] : [];
+    return [decide(capture)];
   }
-  const out: NonNullable<Decision>[] = [];
-  for (const line of lines) {
-    const decision = decide({...capture, raw: line});
-    if (decision) out.push(decision);
-  }
-  return out;
+  // Keep null slots. Index alignment with Pilot v3 matters for idempotency.
+  return lines.map(line => decide({...capture, raw: line}));
 }
 
 export function createInboxSorter(options: {notionToken: string; inboxPageId: string; redis: RedisCommandClient; mode?: 'test' | 'run'; captureId?: string; fetchImpl?: FetchLike}) {
@@ -257,8 +251,10 @@ export function createInboxSorter(options: {notionToken: string; inboxPageId: st
         const decisions = decideMany(capture);
         if (decisions.length === 0) {held++; continue;}
         for (let i = 0; i < decisions.length; i++) {
+          const decision = decisions[i];
+          if (!decision) {held++; continue;}
           try {
-            const result = await write(capture, decisions[i]!, i + 1);
+            const result = await write(capture, decision, i + 1);
             if (result === 'created') created++; else duplicates++;
           } catch (error) {
             if (!(error instanceof HoldCapture)) throw error;
