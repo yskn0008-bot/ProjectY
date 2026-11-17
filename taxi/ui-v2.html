@@ -31,6 +31,65 @@
 @media(max-height:770px){.header{min-height:calc(79px + var(--safe-top));padding-top:calc(8px + var(--safe-top))}.branding h1{font-size:23px}.status-card{min-height:43px;flex-basis:43px}.sales-card{min-height:93px;flex-basis:93px;padding:8px 12px}.quick{min-height:60px;flex-basis:60px}.quick .copy b{font-size:14px}.decision{min-height:72px;flex-basis:72px}.kpis{min-height:66px;flex-basis:66px;padding:5px}.kpi-value{font-size:17px}.nav{flex-basis:calc(60px + var(--safe-bottom));height:calc(60px + var(--safe-bottom));margin-top:3px}.view{gap:5px;padding-top:3px}.footer-card{flex-basis:27px;min-height:27px}.period{grid-template-columns:52px 1fr auto 10px;gap:6px}.period time{font-size:12px}.period b{font-size:12px}.period small{font-size:9px}.metrics .main-value{font-size:25px}.status-label{font-size:16px}}
 @media(max-height:630px){.header{min-height:calc(58px + var(--safe-top));padding-top:calc(5px + var(--safe-top))}.slash{height:27px}.branding h1{font-size:20px}.branding p{font-size:10px}.view{gap:3px;padding-top:2px}.status-card{flex-basis:31px;min-height:31px;padding:4px 8px}.status-label{font-size:13px}.status-note{font-size:9px;padding:4px 6px}.status-divider{height:20px}.status-dot{height:11px;width:11px}.sales-card{flex-basis:65px;min-height:65px;padding:5px 8px}.metrics .main-value{font-size:21px}.metrics strong{font-size:15px;margin-top:3px}.metrics span{font-size:9px}.bar{height:7px}.quick{flex-basis:43px;min-height:43px;gap:4px}.quick button{border-radius:10px;padding:4px}.quick svg{height:20px;width:20px}.quick .copy b{font-size:11px}.quick .copy small{font-size:8px}.quick .arrow{width:12px;height:12px}.decision{flex-basis:56px;min-height:56px;padding:5px 8px;gap:2px}.decision small{font-size:10px}.decision strong{font-size:12px}.decision span{font-size:10px}.periods{min-height:75px;padding:2px}.period{grid-template-columns:48px 1fr auto 10px;padding:0 3px;gap:4px}.period time{font-size:10px;padding:3px 0}.period b{font-size:10px}.period small{font-size:8px}.kpis{flex-basis:50px;min-height:50px;padding:4px 2px}.kpi-label{font-size:8px;gap:2px}.kpi-label svg{width:10px;height:10px}.kpi-value{font-size:14px;margin-top:3px}.kpis .pending .kpi-value{font-size:14px}.kpis>div{min-height:42px}.footer-card{flex-basis:20px;min-height:20px;padding:2px;font-size:8px}.nav{flex-basis:calc(45px + var(--safe-bottom));height:calc(45px + var(--safe-bottom));margin-top:2px;padding:2px 4px calc(2px + var(--safe-bottom))}.nav button{font-size:9px;gap:2px}.nav button svg{height:16px;width:16px}.view.strategy .intro{flex-basis:68px;padding:9px;gap:3px}.view.strategy .intro strong{font-size:13px}.view.strategy .intro small,.view.strategy .intro p{font-size:9px}.view.strategy .section-head,.view.history .section-head,.view.analysis .section-head{flex-basis:17px;font-size:10px;margin-top:0}.strat-list{gap:3px}.strat-row{padding:3px 6px}.strat-row time{font-size:10px;flex-basis:44px}.strat-row b{font-size:10px}.strat-row small{font-size:8px}.rules{flex-basis:67px;padding:6px;font-size:9px;gap:4px}.rules svg{width:10px;height:10px}.strategy-foot{flex-basis:48px;padding:6px;gap:2px}.strategy-foot span{font-size:9px}.strategy-foot strong{font-size:12px}.view.analysis .statgrid{flex-basis:110px}.view.history .history-sub{flex-basis:57px;font-size:9px}.view.history .history-controls{flex-basis:37px}}
 @media(max-width:350px){.header{padding-left:13px;padding-right:10px}.view{padding-left:8px;padding-right:8px}.brandmark{margin-right:0}.preview-id{display:none}.status-note{font-size:10px}.metrics .main-value{font-size:23px}.metrics strong{font-size:17px}.metrics span{font-size:11px}.quick .copy b{font-size:13px}.quick .copy small{font-size:9px}.period b{font-size:12px}.period small{font-size:9px}.kpi-label{font-size:9px}.kpi-value{font-size:16px}.decision strong{font-size:14px}}
+
+/* iPhone in-app browser: give all five strategy rows enough space for both text lines.
+   Earlier 631–770px views compressed the rows below their text's intrinsic height. */
+@media (min-height:631px) and (max-height:850px){
+ .view.strategy{gap:4px}
+ .view.strategy .intro{flex:0 0 75px;min-height:0;padding:8px 12px;gap:3px}
+ .view.strategy .intro small{font-size:11px;line-height:1.2}
+ .view.strategy .intro strong{font-size:16px;line-height:1.25}
+ .view.strategy .intro p{font-size:10px;line-height:1.2}
+ .view.strategy .section-head{flex:0 0 18px;min-height:18px;margin-top:1px;font-size:12px}
+ .view.strategy .strat-list{gap:4px}
+ .view.strategy .strat-row{padding:3px 8px;gap:8px}
+ .view.strategy .strat-row time{font-size:13px;flex-basis:55px}
+ .view.strategy .strat-row .strat-copy{gap:1px;flex:1 1 auto;min-width:0}
+ .view.strategy .strat-row b{font-size:12px;line-height:1.25}
+ .view.strategy .strat-row small{font-size:10px;line-height:1.15;display:block;white-space:normal;-webkit-line-clamp:unset;overflow:visible}
+ .view.strategy .rules{flex:0 0 65px;min-height:65px;padding:6px 10px;gap:4px;font-size:10px;line-height:1.2}
+ .view.strategy .rules svg{flex:0 0 13px;width:13px;height:13px}
+ .view.strategy .strategy-foot{flex:0 0 48px;min-height:48px;padding:6px 10px;gap:2px}
+ .view.strategy .strategy-foot span{font-size:10px;line-height:1.2}
+ .view.strategy .strategy-foot strong{font-size:14px;line-height:1.2}
+ .view.strategy .footer-card{flex:0 0 23px;min-height:23px;padding:3px 6px;font-size:9px}
+}
+
+/* Keep primary actions legible at in-app browser widths. */
+.quick{gap:6px}
+.quick button{gap:4px;padding:6px 4px}
+.quick svg{width:23px;height:23px}
+.quick .arrow{width:12px;height:12px}
+.quick .copy b{font-size:14px;letter-spacing:-.05em}
+.quick .copy small{font-size:10px}
+.decision{padding:9px 12px;gap:3px}
+.decision small{line-height:1.18}
+.decision strong{line-height:1.12}
+.decision span{line-height:1.15}
+@media (min-height:631px) and (max-height:850px){
+ .view.sales .decision{padding:6px 10px;gap:2px}
+ .view.sales .decision small{font-size:11px}
+ .view.sales .decision strong{font-size:15px;line-height:1.16}
+ .view.sales .decision span{font-size:11px}
+}
+@media (min-height:631px) and (max-height:670px){
+ .view.sales{gap:4px}
+ .view.sales .sales-card{flex-basis:90px;min-height:90px}
+ .view.sales .kpis{flex-basis:64px;min-height:64px}
+}
+@media (max-height:630px){
+ .decision{padding:2px 7px;gap:0}
+ .decision small{line-height:1.1}
+ .decision strong{line-height:1.1}
+ .decision span{line-height:1.1}
+}
+@media (max-width:350px){
+ .quick svg{width:18px;height:18px}
+ .quick .arrow{width:10px;height:10px}
+ .quick button{gap:2px;padding:4px 2px}
+ .quick .copy b{font-size:11px;letter-spacing:-.05em}
+ .quick .copy small{font-size:8px}
+}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{transition:none!important}}
 </style>
 </head>
@@ -70,7 +129,7 @@
 <main class="view strategy" id="strategy-view" aria-label="運行戦略画面">
 <section class="intro"><small>◎ 今夜の基本戦略・検証中</small><strong id="strategy-main">松山・久茂地の需要を検証</strong><p>IMadaメソッド＋降車後の連続乗車。現地の最新需要は未確認。</p></section>
 <div class="section-head"><svg><use href="#icon-clock"/></svg>17:00〜05:00｜時間帯別の戦略</div>
-<div class="strat-list"><button class="strat-row" data-strat="0"><time>17–20</time><span class="strat-copy"><b>久茂地・泉崎・旭橋</b><small>退勤・ホテル・飲食移動、GO＋会社無線</small></span></button><button class="strat-row" data-strat="1"><time>20–22</time><span class="strat-copy"><b>久茂地・牧志・安里</b><small>短中距離を回転させる。次の乗車までを重視</small></span></button><button class="strat-row" data-strat="2"><time>22–00</time><span class="strat-copy"><b>松山・久茂地・前島</b><small>深夜割増、無駄な付け待ちを抑制</small></span></button><button class="strat-row" data-strat="3"><time>00–02</time><span class="strat-copy"><b>松山・久茂地・若狭</b><small>帰宅需要の重点候補、供給過多に注意</small></span></button><button class="strat-row" data-strat="4"><time>02–05</time><span class="strat-copy"><b>降車地・帰庫動線</b><small>残存需要、長距離後の回送効率を比較</small></span></button></div>
+<div class="strat-list"><button class="strat-row" data-strat="0"><time>17–20</time><span class="strat-copy"><b>久茂地・泉崎・旭橋</b><small>退勤・ホテル・飲食／GO・無線</small></span></button><button class="strat-row" data-strat="1"><time>20–22</time><span class="strat-copy"><b>久茂地・牧志・安里</b><small>短中距離の回転と次客獲得を重視</small></span></button><button class="strat-row" data-strat="2"><time>22–00</time><span class="strat-copy"><b>松山・久茂地・前島</b><small>深夜割増・長い付け待ちは避ける</small></span></button><button class="strat-row" data-strat="3"><time>00–02</time><span class="strat-copy"><b>松山・久茂地・若狭</b><small>帰宅需要、空車の多さに注意</small></span></button><button class="strat-row" data-strat="4"><time>02–05</time><span class="strat-copy"><b>降車地・帰庫動線</b><small>残存需要と帰庫への回送を比較</small></span></button></div>
 <div class="section-head"><svg><use href="#icon-target"/></svg>判断ルール（停車中のみ）</div>
 <div class="panel rules"><span><svg><use href="#icon-target"/></svg>5〜10分で反応を見直し、15分で同一判断を再評価</span><span><svg><use href="#icon-target"/></svg>長距離後は降車先の次客と空車帰還を比較</span><span><svg><use href="#icon-target"/></svg>高額客より、次の乗車までの時間を最小化</span></div>
 <div class="strategy-foot"><span>◎ 今夜の軸</span><strong>狙うのは高額客より、次の乗車までの時間</strong></div>
@@ -112,7 +171,7 @@
  function commitShift(s,type){s.events.push({id:crypto.randomUUID?.()||`local-${Date.now()}`,businessDate:s.businessDate,type,at:type==='shift_start'?s.shiftStart:s.shiftEnd,matched:false});return save(s)}
  function activeBand(d=new Date()){const h=Number(new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Tokyo',hour:'2-digit',hourCycle:'h23'}).format(d));if(h>=17&&h<22)return 0;if(h>=22||h<2)return 1;if(h>=2&&h<5)return 2;return -1}
  const advice=[['久茂地・牧志周辺の回転を確認','退勤・飲食・観光の移動を検証'],['松山・久茂地周辺の需要を確認','同一待機は15分を目安に再評価'],['降車先の次客・帰庫動線を比較','残存需要と回送時間を再評価']];
- function updatePlan(){const band=activeBand(),item=advice[band]||['次の営業に向けて需要を確認','時間帯による初期仮説・現地需要は未確認'];$('decision-text').textContent=item[0];$('decision-sub').textContent=item[1];$('strategy-main').textContent=item[0];document.querySelectorAll('[data-band]').forEach(x=>x.classList.toggle('selected',Number(x.dataset.band)===band));document.querySelectorAll('[data-strat]').forEach(x=>{const s=Number(x.dataset.strat);x.classList.toggle('selected',(band===0&&s===1)||(band===1&&(s===2||s===3))||(band===2&&s===4))})}
+ function updatePlan(){const band=activeBand(),item=advice[band]||['次の営業に向けて需要を確認','時間帯による初期仮説・現地需要は未確認'];$('decision-text').textContent=item[0];$('decision-sub').textContent=item[1];$('strategy-main').textContent=item[0];document.querySelectorAll('[data-band]').forEach(x=>x.classList.toggle('selected',Number(x.dataset.band)===band));const localHour=Number(new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Tokyo',hour:'2-digit',hourCycle:'h23'}).format(new Date()));const stratSlot=localHour>=17&&localHour<20?0:localHour>=20&&localHour<22?1:localHour>=22?2:localHour<2?3:localHour>=2&&localHour<5?4:-1;document.querySelectorAll('[data-strat]').forEach(x=>x.classList.toggle('selected',Number(x.dataset.strat)===stratSlot))}
  function render(){const now=new Date();$('current-clock').textContent=time(now);const active=isActive(),ended=isEnded();$('status-label').textContent=active?'営業中':ended?'営業終了':'営業前';$('status-dot').className='status-dot '+(active?'':ended?'end':'off');const d=drops();$('ride-count').textContent=d.length+'件';$('pending-count').textContent=d.filter(e=>!e.matched).length+'件';$('analysis-drops').textContent=d.length+'件';$('report-clock').textContent='日報未反映';$('last-reflected').textContent='最終反映：なし（日報）';$('sync-status').textContent='Notion未接続';// Pending Notion integration: never infer a fare from a tap or metadata from a photograph.
  $('sales-value').textContent='—';$('target-value').textContent='—';$('progress-value').textContent='—';$('progress-bar').style.width='0%';$('hourly-value').textContent='—';$('average-value').textContent='—';updatePlan();renderHistory()}
  function renderHistory(){const list=$('history-list');list.replaceChildren();const events=dayEvents().slice().reverse();if(!events.length){const el=document.createElement('div');el.className='log';el.textContent='この営業日の記録はまだありません。';list.append(el)}events.forEach(e=>{const row=document.createElement(e.type==='dropoff'?'button':'div');if(e.type==='dropoff')row.type='button';row.className='log'+(e.voidedAt?' voided':'');const a=document.createElement('div');const title=document.createElement('b');title.textContent=e.type==='dropoff'?(e.voidedAt?'降車記録・取消済':'降車時刻'):e.type==='shift_start'?'営業開始':'営業終了';const caption=document.createElement('small');caption.textContent=' '+time(e.at,true)+' ・ '+(e.type==='dropoff'?(e.voidedAt?'取消履歴':'日報未照合'):'端末内記録');a.append(title,document.createElement('br'),caption);const b=document.createElement('span');b.className='badge';b.textContent=e.type==='dropoff'?'訂正':'端末内';row.append(a,b);if(e.type==='dropoff')row.addEventListener('click',()=>{openSheet(e.voidedAt?'降車記録を復帰':'降車記録を取り消す',`記録時刻 ${time(e.at,true)}。取り消しても履歴は削除しません。`,[{text:e.voidedAt?'取消を戻す':'記録を取消',primary:true,run:()=>{const s=structuredClone(state);const target=s.events.find(x=>x.id===e.id);if(!target)return;if(target.voidedAt)delete target.voidedAt;else target.voidedAt=instant();if(save(s)){render();toast('降車記録の状態を更新しました')}}}])});list.append(row)})}
