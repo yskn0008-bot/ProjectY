@@ -89,3 +89,17 @@ test('unified calendar PWA updates old SW cache and retains offline fallback wit
  assert.ok(sw.includes("'"+path+"'"),'source adapter refresh is network-first: '+path);
  assert.match(sw,/event\.request\.mode==='navigate'/);
 });
+
+
+test('Additive direct task import reuses original local-storage protection and UI',()=>{
+ assert.match(boot,/importDirectTasks\(p\)/);
+ assert.match(boot,/yos-daystream-direct-task-import-v1/);
+ assert.match(boot,/if\(!web\.write\(updated\)\)return false/);
+ assert.match(boot,/sourceRef:ref,done:false/);
+ assert.match(boot,/const days=\{\.\.\.current\.days\}/);
+ assert.match(boot,/if\(!valid\(current\)\)return false/);
+ assert.match(boot,/if\(!confirm\('元のDAYSTREAMへ'/);
+ assert.doesNotMatch(boot,/YOS_NOTION_INTEGRATION_TOKEN/);
+ assert.equal((html.match(/id="timelinePanel"/g)||[]).length,1);
+ assert.equal((html.match(/id="yosWebImport"/g)||[]).length,1);
+});

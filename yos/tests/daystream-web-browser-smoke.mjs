@@ -232,6 +232,62 @@ try{
  assert.doesNotMatch(await live.locator('#yosSourceTasks').textContent(),/STALE PROJECTION/);
  assert.ok(reads>=3);
  await liveContext.close();
+
+ // A private JSON import merges into THIS original PWA's existing plan.
+ // It must not replace native cards, existing times, or unrelated app data.
+ const mergeContext=await browser.newContext({viewport:{width:390,height:844},timezoneId:'Asia/Tokyo',serviceWorkers:'block'});
+ const mergePage=await mergeContext.newPage();
+ const mergeErrors=[];mergePage.on('pageerror',e=>mergeErrors.push(e.message));
+ mergePage.on('dialog',dialog=>dialog.accept());
+ await mergePage.goto('http://127.0.0.1:4173/yos/daystream/',{waitUntil:'domcontentloaded'});
+ const beforeMerge=await mergePage.evaluate(()=>{
+  const p={version:1,days:{
+   '2026-12-01':[{id:7001,t:'既存テスト',s:900,d:30,kind:'task',done:false}],
+   '2026-11-17':[{id:7002,t:'別の日',s:540,d:30,kind:'task',done:false}]
+  },hiddenCalendar:{}};
+  if(!window.YOS_DAYSTREAM_WEB.write(p))throw Error('Cannot store original plan');
+  return p;
+ });
+ await mergePage.reload({waitUntil:'domcontentloaded'});
+ const packageData={schema:'yos-daystream-direct-task-import-v1',items:[
+  {sourceId:'a'.repeat(32),day:'2026-12-01',title:'起床',s:860,d:2},
+  {sourceId:'b'.repeat(32),day:'2026-12-01',title:'水を飲む',s:862,d:3}
+ ]};
+ await Promise.all([
+  mergePage.waitForNavigation({waitUntil:'domcontentloaded'}),
+  mergePage.locator('#yosWebFile').setInputFiles({name:'private-daystream.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(packageData))})
+ ]);
+ const firstMerge=await mergePage.evaluate(()=>({
+  plan:JSON.parse(localStorage.getItem('YOS_DAYSTREAM_WEB_PLAN_V1')),
+  backup:JSON.parse(localStorage.getItem('YOS_DAYSTREAM_WEB_PLAN_BACKUP_V1'))
+ }));
+ assert.deepEqual(firstMerge.backup,beforeMerge,'the entire original plan is backed up');
+ assert.equal(firstMerge.plan.days['2026-12-01'].length,3);
+ assert.deepEqual(firstMerge.plan.days['2026-12-01'].map(x=>x.t),['既存テスト','起床','水を飲む']);
+ assert.deepEqual(firstMerge.plan.days['2026-11-17'],beforeMerge.days['2026-11-17']);
+ await mergePage.evaluate(()=>showDay('2026-12-01'));
+ assert.equal(await mergePage.locator('#tl .card.task').count(),3);
+ assert.equal(await mergePage.locator('#tl .yos-notion-projection').count(),0);
+ const edit=await mergePage.evaluate(()=>{
+  const p=JSON.parse(localStorage.getItem('YOS_DAYSTREAM_WEB_PLAN_V1'));
+  p.days['2026-12-01'].find(x=>x.t==='水を飲む').s=920;
+  return window.YOS_DAYSTREAM_WEB.write(p);
+ });
+ assert.equal(edit,true);
+ await mergePage.reload({waitUntil:'domcontentloaded'});
+ const importAgain=await mergePage.evaluate(p=>window.YOS_DAYSTREAM_WEB.importDirectTasks(p),packageData);
+ assert.equal(importAgain,true,'manual reimport is idempotent');
+ const afterAgain=await mergePage.evaluate(()=>JSON.parse(localStorage.getItem('YOS_DAYSTREAM_WEB_PLAN_V1')));
+ assert.equal(afterAgain.days['2026-12-01'].length,3);
+ assert.equal(afterAgain.days['2026-12-01'].find(x=>x.t==='水を飲む').s,920);
+ assert.equal(afterAgain.days['2026-12-01'].find(x=>x.t==='既存テスト').s,900);
+ const invalid=await mergePage.evaluate(p=>window.YOS_DAYSTREAM_WEB.importDirectTasks(p),
+  {...packageData,items:[packageData.items[0],packageData.items[0]]});
+ assert.equal(invalid,false);
+ assert.deepEqual(await mergePage.evaluate(()=>JSON.parse(localStorage.getItem('YOS_DAYSTREAM_WEB_PLAN_V1'))),
+  afterAgain,'invalid file cannot alter saved plan');
+ assert.deepEqual(mergeErrors,[]);
+ await mergeContext.close();
  assert.deepEqual(errors,[],'no script errors during load, storage, reload or learning');
  console.log('DAYSTREAM Web port browser smoke PASS',type);
 }finally{await browser.close()}
