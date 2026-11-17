@@ -204,3 +204,37 @@ test('untrusted model proposed route must be a validated exact substring and can
   assert.match(await m.run(x),/振り分け/);
   assert.equal(m.counts.routed,0);
 });
+
+
+test('Pilot v3 AI evidence can propose a high-confidence task from an exact original phrase',async()=>{
+  const m=mocked();
+  const x={rawText:'書類を片付ける',source:'text',captureId:'clarity:model-natural-001',
+    items_json:JSON.stringify([{text:'書類を片付ける',target:'task',confidence:.99}])};
+  assert.match(await m.run(x),/登録1件/);
+  assert.equal(m.rows[0].properties['やること'].title[0].text.content,'書類を片付ける');
+  assert.equal(m.rows[0].properties['同期キー'].rich_text[0].text.content,'inbox:clarity:model-natural-001:01');
+  assert.match(await m.run(x),/既存1件/);
+  assert.equal(m.rows.length,1);
+});
+
+test('route journal binds item index to its prior AI meaning and blocks changed plans',async()=>{
+  const m=mocked();
+  const first={rawText:'タスク：資料を整理する',source:'text',captureId:'clarity:model-drift-001',
+    items_json:JSON.stringify([{text:'タスク：資料を整理する',target:'task',confidence:.99}])};
+  assert.match(await m.run(first),/登録1件/);
+  const altered={...first,items_json:JSON.stringify([{text:'タスク：資料を整理する',target:'shopping',confidence:1}])};
+  assert.match(await m.run(altered),/以前と分類内容が異なる/);
+  assert.equal(m.rows.length,1);
+  assert.match(await m.run(first),/既存1件/);
+});
+
+test('AI overlapping fragments hold the whole plan and never invent extra Notion entries',async()=>{
+  const m=mocked();
+  const x={rawText:'資料を片付ける',source:'text',captureId:'clarity:overlap-001',
+    items_json:JSON.stringify([
+      {text:'資料を片付ける',target:'task',confidence:.99},
+      {text:'資料を片付ける',target:'task',confidence:.99}
+    ])};
+  assert.match(await m.run(x),/振り分け未指定/);
+  assert.equal(m.rows.length,0);
+});
