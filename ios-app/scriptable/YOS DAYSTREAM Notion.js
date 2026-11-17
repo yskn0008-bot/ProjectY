@@ -215,8 +215,23 @@ const BROWSER_RENDER=String.raw`(()=>{
   };
   render=function(){
    tl.querySelectorAll('.yos-notion-projection').forEach(x=>x.remove());
-   originalRender();
    const rows=source().filter(x=>x.type!=='undated').sort((a,b)=>a.s-b.s);
+   // Reuse DAYSTREAM's existing elastic time axis: include read-only Notion
+   // events as temporary layout-only rows while the shared axis is computed.
+   // This keeps 2-minute steps legible WITHOUT shifting unrelated hour labels
+   // or sleep/work appointments out of their real clock positions.
+   const originals=items,ghosts=rows.filter(x=>x.d>0&&x.s>=0&&x.s+x.d<=1440)
+    .map((x,i)=>({id:-2000000000-i,t:x.title,s:x.s,d:x.d,
+     kind:'task',f:0,done:false,source:'YOS source axis'}));
+   try{
+    items=[...originals,...ghosts];
+    originalRender();
+   }finally{items=originals}
+   for(const g of ghosts){
+    const card=tl.querySelector('.card[data-id="'+g.id+'"]');
+    if(card?.nextElementSibling?.classList.contains('tick'))card.nextElementSibling.remove();
+    card?.remove();
+   }
    let group=[],end=-1;const groups=[];
    for(const row of rows){
     const top=yFor(row.s),bottom=yFor(row.s+row.d);
@@ -226,13 +241,7 @@ const BROWSER_RENDER=String.raw`(()=>{
     group.push(row);end=Math.max(end,row.s+Math.max(1,row.d));
    }
    if(group.length)groups.push(group);
-   let visualBottom=-Infinity;
    for(const g of groups){
-    // A 2-5 minute task still needs a touchable label. Stack successive
-    // micro-actions without turning them into half-width overlapping columns.
-    const lift=Math.max(0,visualBottom+3-g[0].top);
-    for(const row of g)row.top+=lift;
-    visualBottom=Math.max(visualBottom,...g.map(row=>row.top+row.height));
     const ends=[];
     for(const row of g){
      let lane=ends.findIndex(v=>v<=row.top);
