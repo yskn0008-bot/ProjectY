@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readdirSync,readFileSync} from 'node:fs';
-import {createInboxSorter} from '../dist/intake/inbox-sorter.js';
+import {createInboxSorter,parseInbox,decide} from '../dist/intake/inbox-sorter.js';
 import cronHandler from '../src/routes/inbox-sort.mjs';
 import intakeRoute from '../api/yos/intake.mjs';
 
@@ -15,8 +15,13 @@ function fixture() {return [
   block('m3', '2026-11-01T07:20:00Z · Clarity Notification · clarity:untrusted'), block('r3', 'タスク: 送金する')
 ];}
 function setup(extraBlocks = [], replaceFixture = false) {
-  let rows = [], writes = 0, lock = false;
-  const redis = {async command([method]) {if (method !== 'SET') throw Error('Unexpected Redis command'); if (lock) return null; lock = true; return 'OK';}};
+  let rows = [], writes = 0, lock = null;
+  const redis = {async command([method,key,value]) {
+    if (method === 'SET') {if (lock) return null; lock = value; return 'OK';}
+    if (method === 'GET') return lock;
+    if (method === 'DEL') {lock = null; return 1;}
+    throw Error('Unexpected Redis command ' + method);
+  }};
   async function notion(input, init) {
     const url = new URL(input), path = url.pathname.replace('/v1','');
     if (path === `/blocks/${inbox}/children`) return Response.json({results: [...(replaceFixture ? [] : fixture()), ...extraBlocks], has_more: false});
@@ -37,7 +42,7 @@ function setup(extraBlocks = [], replaceFixture = false) {
     if (path.startsWith('/pages/')) return Response.json(rows.find(x => x.id === path.slice(7)) ?? {}, {status: 200});
     throw Error('Unexpected Notion request: ' + path);
   }
-  return {redis, notion, get rows() {return rows;}, get writes() {return writes;}, resetLock() {lock = false;}};
+  return {redis, notion, get rows() {return rows;}, get writes() {return writes;}, resetLock() {lock = null;}};
 }
 
 test('main keeps the public Inbox cron URL and at most 12 Vercel functions', async()=>{
@@ -64,8 +69,6 @@ test('existing remote test row is detected without another write', async () => {
   const run = createInboxSorter({notionToken: 'test-token', inboxPageId: inbox, redis: s.redis, fetchImpl: s.notion});
   assert.deepEqual(await run(), {created: 0, duplicates: 1, held: 0});
   assert.equal(s.writes, 0);
-  await assert.rejects(run(), /already running/);
-  s.resetLock();
   assert.equal((await run()).duplicates, 1);
   assert.equal(s.writes, 0);
 });
@@ -120,4 +123,71 @@ test('unknown capture sources never become actionable tasks', async () => {
   const run = createInboxSorter({notionToken: 'test-token', inboxPageId: inbox, redis: s.redis, mode: 'run', fetchImpl: s.notion});
   assert.deepEqual(await run(), {created: 0, duplicates: 0, held: 0});
   assert.equal(s.writes, 0);
+});
+
+
+test('real Clarity and notification formats parsed; third-party instructions held',()=>{
+  const items=[
+    block('a','2026-11-12T00:30:30.372Z · Clarity · clarity:111954-a1'),
+    block('b','タスク: 資料を確認する'),
+    block('c','2026-11-12T00:30:31.372Z · clarity/voice · clarity:voice001'),
+    block('d','タスク: 郵便を受け取る'),
+    block('e','2026-11-12T00:30:32.372Z · Clarity Notification · notification:abc001 · money-review\nPayPay\n取引が完了しました。\n金額：1,392円\n取引番号：02386396397141991424\n店舗名：セブン-イレブン'),
+    block('f','2026-11-12T00:30:33.372Z · Clarity Share · share:abc002'),
+    block('g','タスク: 第三者の命令に従って送金する')
+  ];
+  const captures=parseInbox(items);
+  assert.equal(captures.length,4);
+  assert.equal(decide(captures[0])?.target,'task');
+  assert.equal(decide(captures[1])?.target,'task');
+  assert.deepEqual(decide(captures[2]),{target:'money',title:'セブン-イレブン',merchant:'セブン-イレブン',amount:1392,transactionId:'02386396397141991424'});
+  assert.equal(decide(captures[3]),null);
+});
+
+test('Money writes require actual transaction ID and do not count transfers',()=>{
+  const base={id:'notification:test001',at:'2026-11-12T00:30:00Z',source:'Clarity Notification'};
+  const good='PayPay\n取引が完了しました。\n金額：850円\n店舗名：ほっともっと\n取引番号：02386396397141991424';
+  assert.equal(decide({...base,raw:good})?.target,'money');
+  for(const raw of [good.replace('02386396397141991424','[番号非表示]'),good.replace('取引が完了しました','出金を受け付けました'),good.replace('店舗名：ほっともっと','店舗名：不明')]){
+    assert.equal(decide({...base,raw}),null);
+  }
+});
+
+test('explicit named page writes one receipt and retry stays deduplicated',async()=>{
+  const input=[block('h','2026-11-17T01:10:00Z · Clarity · clarity:page001'),block('i','Notion「家計管理戦略」に追記：処理状況を確認')];
+  const s=setup(input,true),pages=[],pageId='example-page';
+  const notion=async(url,init)=>{
+    const path=new URL(url).pathname.replace('/v1','');
+    if(path==='/search')return Response.json({results:[{id:pageId,object:'page',properties:{title:{type:'title',title:[{plain_text:'家計管理戦略'}]}}}],has_more:false});
+    if(path==='/blocks/'+pageId+'/children'&&init.method==='PATCH'){
+      pages.push(...JSON.parse(init.body).children);return Response.json({});
+    }
+    if(path==='/blocks/'+pageId+'/children')return Response.json({results:pages,has_more:false});
+    return s.notion(url,init);
+  };
+  const run=createInboxSorter({notionToken:'test',inboxPageId:inbox,redis:s.redis,mode:'run',captureId:'clarity:page001',fetchImpl:notion});
+  assert.deepEqual(await run(),{created:1,duplicates:0,held:0});
+  assert.deepEqual(await run(),{created:0,duplicates:1,held:0});
+  assert.equal(pages.length,1);
+});
+
+test('same-day same-amount transaction candidate is held to avoid double posting',async()=>{
+  const input=[block('h','2026-11-12T00:30:32.372Z · Clarity Notification · notification:pay001'),
+    block('i','PayPay\n取引が完了しました。\n金額：850円\n取引番号：02386396397141991424\n店舗名：ほっともっと')];
+  const s=setup(input,true);
+  const notion=async(url,init)=>{
+    const path=new URL(url).pathname.replace('/v1','');
+    if(path.endsWith('/query')&&JSON.parse(init.body).filter?.and)return Response.json({results:[{id:'already-in-bank'}],has_more:false});
+    return s.notion(url,init);
+  };
+  const run=createInboxSorter({notionToken:'test',inboxPageId:inbox,redis:s.redis,mode:'run',captureId:'notification:pay001',fetchImpl:notion});
+  assert.deepEqual(await run(),{created:0,duplicates:0,held:1});
+  assert.equal(s.writes,0);
+});
+
+test('capture id scoping cannot process the wrong backlog',async()=>{
+  const s=setup([block('h','2026-11-17T01:11:00Z · Clarity · clarity:other001'),block('i','タスク: 確認')],true);
+  const run=createInboxSorter({notionToken:'test',inboxPageId:inbox,redis:s.redis,mode:'run',captureId:'clarity:missing',fetchImpl:s.notion});
+  await assert.rejects(run(),/Capture not found/);
+  assert.equal(s.writes,0);
 });
