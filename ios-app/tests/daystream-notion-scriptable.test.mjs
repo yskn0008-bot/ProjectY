@@ -75,19 +75,37 @@ test('missing Keychain stops before source or UI requests',async()=>{
  await a.main();assert.deepEqual(alerts,['Notion未接続']);
 });
 
-test('Siri route returns a shortcut output instead of presenting an unsupported Alert',async()=>{
+test('Siri error uses runsWithSiri and returns shortcut output without Alert',async()=>{
  const outputs=[];
  const a=api({
-  config:{runsInSiri:true},
+  config:{runsWithSiri:true},
   Script:{setShortcutOutput:value=>outputs.push(value)},
   Alert:class{constructor(){throw Error('Siri Alert should never be constructed')}},
-  Keychain:{contains(){throw Error('should not read credentials in Siri')}},
-  Request:class{constructor(){throw Error('should not make a request in Siri')}}
+  Keychain:{contains:()=>false},
+  Request:class{constructor(){throw Error('should not request without token')}}
  });
  await a.main();
  assert.equal(outputs.length,1);
- assert.match(outputs[0],/DAYSTREAM 起動方法/);
- assert.match(outputs[0],/scriptable:\/\/\/run\?scriptName=YOS%20DAYSTREAM%20Notion/);
+ assert.match(outputs[0],/Notion未接続/);
+});
+test('Siri still renders its WebView with a valid read-only Notion response',async()=>{
+ const outputs=[];let renders=0;
+ const assets=['yos/daystream/index.html','yos/daystream/source-adapters.js','life/calendar/native-bridge.js','yos/daystream/task-wizard.js'];
+ const a=api({
+  config:{runsWithSiri:true},
+  Script:{setShortcutOutput:value=>outputs.push(value)},
+  Alert:class{constructor(){throw Error('unexpected Siri alert')}},
+  Keychain:{contains:()=>true,get:()=> 'fake-token'},
+  Request:class{
+   constructor(url){this.url=url}
+   async loadJSON(){this.response={statusCode:200};return {results:[row('2026-11-17')],has_more:false}}
+   async loadString(){this.response={statusCode:200};const p=assets.find(x=>this.url.endsWith('/'+x));assert.ok(p);return text(p)}
+  },
+  WebView:{async loadHTML(html){renders++;assert.match(html,/Notionを更新/);assert.match(html,/yosNativeBoot/)}}
+ });
+ await a.main();
+ assert.equal(renders,1);
+ assert.deepEqual(outputs,[]);
 });
 test('Notion HTTP failures are categorized without exposing server or token contents',async()=>{
  for(const [http,hint] of [[401,'認証情報'],[403,'閲覧権限'],[404,'共有設定'],[429,'アクセス制限'],[503,'一時的']]){
