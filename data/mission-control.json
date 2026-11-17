@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-17T16:16:54+09:00",
+  "updated_at": "2026-11-17T16:20:35+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -12,16 +12,6 @@
     ]
   },
   "inbox": [
-    {
-      "id": "github-pr-764",
-      "title": "PR #764 YOS Calendar｜Face IDパスキー認証（Googleは初回登録・復旧のみ）",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/764",
-      "updated_at": "2026-11-16T17:37:22Z"
-    },
     {
       "id": "github-pr-765",
       "title": "PR #765 YOS Calendar｜Passkey backend hardening (integration into #764 only)",
@@ -110,7 +100,17 @@
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/788",
-      "updated_at": "2026-11-17T07:16:29Z"
+      "updated_at": "2026-11-17T07:16:48Z"
+    },
+    {
+      "id": "github-pr-789",
+      "title": "PR #789 feat(remote): YOS Remote Web — iPhone Scriptable WebView with native LAN appliance bridge",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/789",
+      "updated_at": "2026-11-17T07:20:00Z"
     },
     {
       "id": "github-issue-10",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-17T07:15:48Z"
+      "updated_at": "2026-11-17T07:16:50Z"
     },
     {
       "id": "github-issue-234",
@@ -274,7 +274,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-17T16:16:54+09:00",
+      "last_update": "2026-11-17T16:20:35+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -349,13 +349,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 9件・Open PR 60件を自動同期中",
+      "next_action": "Open Issue 9件・Open PR 61件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-17T16:16:54+09:00",
+      "last_update": "2026-11-17T16:20:35+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -378,7 +378,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-17T16:16:54+09:00",
+      "last_update": "2026-11-17T16:20:35+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -460,5 +460,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "e0063d8dde66e954dead1a34aa7c2d50f31f397f50755f2220970cdd418f0742"
+  "github_snapshot_hash": "9d2d1268f6ad869ffa9f93e2412c6345727e1ddb59c02a14d8380ef575348014"
 }
