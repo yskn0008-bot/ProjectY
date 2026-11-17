@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-17T12:03:07+09:00",
+  "updated_at": "2026-11-17T12:09:48+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -12,16 +12,6 @@
     ]
   },
   "inbox": [
-    {
-      "id": "github-pr-762",
-      "title": "PR #762 feat(notification): safeguard v0.3→v0.4 migration using common installer",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/762",
-      "updated_at": "2026-11-16T16:08:15Z"
-    },
     {
       "id": "github-pr-764",
       "title": "PR #764 YOS Calendar｜Face IDパスキー認証（Googleは初回登録・復旧のみ）",
@@ -111,6 +101,16 @@
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/781",
       "updated_at": "2026-11-17T00:51:43Z"
+    },
+    {
+      "id": "github-pr-783",
+      "title": "PR #783 DAYSTREAM｜Notionの状態未設定の夜勤・日勤予定を安全に表示",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/783",
+      "updated_at": "2026-11-17T03:09:27Z"
     },
     {
       "id": "github-issue-10",
@@ -274,7 +274,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-17T12:03:07+09:00",
+      "last_update": "2026-11-17T12:09:48+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -349,13 +349,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 9件・Open PR 59件を自動同期中",
+      "next_action": "Open Issue 9件・Open PR 60件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-17T12:03:07+09:00",
+      "last_update": "2026-11-17T12:09:48+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -378,7 +378,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-17T12:03:07+09:00",
+      "last_update": "2026-11-17T12:09:48+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -460,5 +460,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "400d0c9e3f6f50d1c413a844c6e188bfa250440ed15af21cdcd0a9aca295ffe1"
+  "github_snapshot_hash": "1d0093bc9c3f064ba7548b7a76dd7c03ad441b1cd2efeffc68ed4fd669c856e6"
 }
