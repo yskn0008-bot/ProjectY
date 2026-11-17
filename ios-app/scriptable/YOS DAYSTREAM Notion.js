@@ -113,6 +113,8 @@ const BROWSER_BOOT=String.raw`
 const BROWSER_DIRECT_IMPORT=String.raw`
 (()=>{
  'use strict';
+ // The original DAYSTREAM renders its own native task cards; no overlay renderer.
+ window.addEventListener('DOMContentLoaded',()=>document.getElementById('yosNativeBoot')?.remove());
  const seeds=__DIRECT_ROWS__,boot=window.YOS_CHARCOAL_BOOT,web=window.YOS_DAYSTREAM_WEB;
  if(!boot?.days||!web?.write||window.YOS_WEB_DATA_ERROR||!Array.isArray(seeds)||seeds.length>40)return;
  const key='YOS_DAYSTREAM_DIRECT_IMPORTED_V1';
