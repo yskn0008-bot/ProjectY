@@ -47,22 +47,20 @@ export function parseInbox(blocks: Block[]): Capture[] {
         (source === 'Clarity Share' && !match[3].startsWith('share:')) ||
         (source !== 'Clarity Notification' && source !== 'Native Notification' && source !== 'Clarity Share' && !match[3].startsWith('clarity:'))) continue;
     if (source === 'Clarity Share') {
-      // Some share saves combine source/payload/--- in ONE paragraph (sometimes
-      // with HTML <br>), while others write separate blocks. Keep both opaque.
-      // A fake Clarity header inside shared material must never be promoted.
-      const completeInline = /(?:^|\\n|<br\\s*\\/?\\s*>)\\s*\\\\?---\\s*$/iu.test(line);
-      if (completeInline) continue;
+      // Legacy captures can be one paragraph with an inline "---" terminator;
+      // the Scriptable bridge uses a separate divider. Preserve both formats.
+      // Never reinterpret shared text as an actionable Clarity capture.
+      if (/(?:\r?\n|<br\s*\/?>)\s*\\?---\s*$/iu.test(line)) continue;
       let foundEnd = false;
       for (let j = i + 1; j < blocks.length; j++) {
         i = j;
         const next = blocks[j];
-        if (next?.type === 'divider' || (next?.type === 'paragraph' &&
-          /^(?:---|\\---)$/u.test(plain(next.paragraph?.rich_text).trim()))) {
+        if (next?.type === 'divider') {
           foundEnd = true;
           break;
         }
       }
-      if (!foundEnd) break; // incomplete shared payload: stop the scan safely
+      if (!foundEnd) break; // incomplete shared envelope: stop scan safely
       continue;
     }
     let raw = line.slice(match[0].length).trim();
