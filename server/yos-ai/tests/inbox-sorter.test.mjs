@@ -20,7 +20,7 @@ function setup(extraBlocks = [], replaceFixture = false) {
     if (method === 'SET') {if (lock) return null; lock = value; return 'OK';}
     if (method === 'GET') return lock;
     if (method === 'DEL') {lock = null; return 1;}
-    if (method === 'EVAL') { if (lock === expectedOwner) {lock=null;return 1;} return 0; }
+    if (method === 'EVAL') { if (lock === evalKey) {lock=null;return 1;} return 0; }
     throw Error('Unexpected Redis command ' + method);
   }};
   async function notion(input, init) {
