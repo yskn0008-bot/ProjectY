@@ -182,8 +182,17 @@ const BROWSER_RENDER=String.raw`(()=>{
     if(!touch)return;
     const shouldMove=held&&Math.abs(offset)>8,at=preview;
     reset();ignoreClickUntil=performance.now()+600;
-    if(shouldMove)openSheet(row,at);
-    else if(!held)openSheet(row);
+    if(shouldMove){
+     // No full-screen edit sheet on drop. A small native confirmation
+     // protects the Notion write; cancellation keeps the original time.
+     const next=selectedDay+'T'+fmt(at)+':00+09:00';
+     if(Date.parse(next)!==Date.parse(row.originalStart)&&canMove(row)){
+      const q=new URLSearchParams();
+      q.set('action','move');q.set('id',row.id.slice(7));q.set('old',row.originalStart);
+      q.set('end',row.originalEnd||'');q.set('edited',row.editedAt);q.set('next',next);
+      location.href='scriptable:///run?scriptName=YOS%20DAYSTREAM%20Notion&'+q.toString();
+     }
+    }else if(!held)openSheet(row);
    });
    el.addEventListener('touchcancel',reset);
    el.addEventListener('click',e=>{
@@ -212,11 +221,18 @@ const BROWSER_RENDER=String.raw`(()=>{
    for(const row of rows){
     const top=yFor(row.s),bottom=yFor(row.s+row.d);
     row.top=top;row.height=Math.max(36,bottom-top-2);
-    if(group.length&&top>=end){groups.push(group);group=[];end=-1}
-    group.push(row);end=Math.max(end,top+row.height);
+    // Group only when SOURCE times overlap; short consecutive actions are independent.
+    if(group.length&&row.s>=end){groups.push(group);group=[];end=-1}
+    group.push(row);end=Math.max(end,row.s+Math.max(1,row.d));
    }
    if(group.length)groups.push(group);
+   let visualBottom=-Infinity;
    for(const g of groups){
+    // A 2-5 minute task still needs a touchable label. Stack successive
+    // micro-actions without turning them into half-width overlapping columns.
+    const lift=Math.max(0,visualBottom+3-g[0].top);
+    for(const row of g)row.top+=lift;
+    visualBottom=Math.max(visualBottom,...g.map(row=>row.top+row.height));
     const ends=[];
     for(const row of g){
      let lane=ends.findIndex(v=>v<=row.top);
@@ -270,13 +286,13 @@ const BROWSER_RENDER=String.raw`(()=>{
 })();`;
 
 const NATIVE_STYLE=String.raw`<style id="yosNotionNativeStyle">
-.yos-notion-projection{position:absolute;z-index:6;display:flex;flex-direction:column;gap:3px;box-sizing:border-box;overflow:hidden;text-align:left;padding:7px 9px;appearance:none;-webkit-appearance:none;border:1px solid #45627c;border-left:4px solid #69c6ff;border-radius:9px;background:#263a50;color:#f5f8ff!important;font:500 13px/1.35 -apple-system,BlinkMacSystemFont,sans-serif;cursor:pointer;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;touch-action:pan-y;white-space:normal;overflow-wrap:anywhere;box-shadow:0 1px 3px #0002}
-.yos-notion-projection[data-kind="calendar"]{background:#34414d;border-color:#697989;border-left-color:#d9b778}
-.yos-notion-projection[data-long="true"]{background:rgba(39,54,72,.76)}
+.yos-notion-projection{position:absolute;z-index:6;display:flex;flex-direction:column;gap:3px;box-sizing:border-box;overflow:hidden;text-align:left;padding:7px 9px;appearance:none;-webkit-appearance:none;border:1px solid #45586c;border-radius:14px;background:#45586c;color:#f5f8ff!important;font:500 13px/1.35 -apple-system,BlinkMacSystemFont,sans-serif;cursor:pointer;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;touch-action:pan-y;white-space:normal;overflow-wrap:anywhere;box-shadow:0 1px 3px #0002}
+.yos-notion-projection[data-kind="calendar"]{background:#45586c;border-color:#45586c}
+.yos-notion-projection[data-long="true"]{background:#45586c}
 .yos-notion-projection[data-done="true"]{opacity:.62}
 .yos-notion-projection:focus-visible{outline:2px solid #a0e4ff;outline-offset:1px}
-.yos-notion-projection .yos-notion-meta{display:block!important;color:#bde6ff!important;font-size:11px!important;line-height:1.3;font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.yos-notion-projection[data-kind="calendar"] .yos-notion-meta{color:#f1d4a7!important}
+.yos-notion-projection .yos-notion-meta{display:block!important;color:#f1f5fa!important;font-size:11px!important;line-height:1.3;font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.yos-notion-projection[data-kind="calendar"] .yos-notion-meta{color:#f1f5fa!important}
 .yos-notion-projection .yos-notion-title{display:block;color:#fff!important;font-size:13px!important;line-height:1.38;font-weight:650;letter-spacing:0;overflow-wrap:anywhere}
 .yos-notion-projection[data-compact="true"]{flex-direction:row;align-items:center;gap:6px;padding:3px 6px}
 .yos-notion-projection[data-compact="true"] .yos-notion-meta{flex:0 0 auto;max-width:45px;white-space:nowrap;font-size:10px!important}

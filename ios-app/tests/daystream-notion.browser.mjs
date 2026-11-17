@@ -30,6 +30,16 @@ try{
   assert.match(await shortCard.locator('small').innerText(),/^14:00$/);
   assert.equal(await page.locator('#tl .yos-notion-projection').first().evaluate(el=>getComputedStyle(el).color),
    'rgb(245, 248, 255)');
+  // Single casual fill: no left accent or alternate shift color.
+  const appearance=await page.locator('#tl .yos-notion-projection').evaluateAll(els=>
+   els.map(el=>({background:getComputedStyle(el).backgroundColor,
+    leftWidth:getComputedStyle(el).borderLeftWidth,
+    rightWidth:getComputedStyle(el).borderRightWidth,
+    leftColor:getComputedStyle(el).borderLeftColor,
+    rightColor:getComputedStyle(el).borderRightColor})));
+  assert.equal(new Set(appearance.map(x=>x.background)).size,1);
+  assert.ok(appearance.every(x=>x.leftWidth===x.rightWidth&&x.leftColor===x.rightColor));
+
   await page.locator('#tl button.yos-notion-projection').first().click();
   assert.equal(await page.locator('#yosNotionEditSheet').isVisible(),true);
   assert.equal(await page.locator('#yosNotionNewTime').isEnabled(),true);
@@ -47,6 +57,25 @@ try{
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
   assert.deepEqual(errors,[]);
   assert.equal(network.filter(u=>/api\.notion|accounts\.google|vercel/.test(u)).length,0);
+  // The separate 2-5 minute steps must not collapse into narrow lanes or overlap.
+  const microPage=await browser.newPage({viewport:{width,height:844},timezoneId:'Asia/Tokyo'});
+  await microPage.setContent(htmlFor([
+   row(date+'T10:00:00+09:00',date+'T10:02:00+09:00','起床','1'.repeat(32)),
+   row(date+'T10:02:00+09:00',date+'T10:05:00+09:00','水を飲む','2'.repeat(32)),
+   row(date+'T10:05:00+09:00',date+'T10:10:00+09:00','歯磨き','3'.repeat(32))
+  ]));
+  await microPage.waitForFunction(()=>!document.getElementById('yosNativeBoot'));
+  await microPage.waitForFunction(()=>document.querySelectorAll('#tl .yos-notion-projection').length===3);
+  const separate=await microPage.locator('#tl .yos-notion-projection').evaluateAll(nodes=>nodes.map(n=>({
+   title:n.textContent,top:n.offsetTop,height:n.offsetHeight,width:n.offsetWidth,left:n.offsetLeft
+  })));
+  assert.equal(separate.length,3);
+  assert.ok(separate[1].top>=separate[0].top+separate[0].height);
+  assert.ok(separate[2].top>=separate[1].top+separate[1].height);
+  assert.equal(new Set(separate.map(x=>x.left)).size,1);
+  assert.equal(new Set(separate.map(x=>x.width)).size,1);
+  assert.match(separate.map(x=>x.title).join('|'),/起床.*水を飲む.*歯磨き/s);
+  await microPage.close();
   await page.close();
  }
 }finally{await browser.close()}
