@@ -97,15 +97,15 @@
       "id": "clarity-inbox-bridge",
       "name": "YOS Clarity Inbox Bridge",
       "path": "ios-app/scriptable/YOS Clarity Inbox Bridge.js",
-      "commit": "e4ae550e513e05b079e1c56e7f78fd846505dfbb",
-      "sha256": "406f2ed4f20efaec8bf9a0bb8e02fa095ded1dead7236c1c40c74f7ea52f8885"
+      "commit": "4a00b2a9ff72769d245c5ffc990b2e8b113bcda7",
+      "sha256": "a8065ce2b2aad012a10348430d812faac2a35df41107f4f5f8c36f0a28f3d2f5"
     },
     {
       "id": "daystream-notion",
       "name": "YOS DAYSTREAM Notion",
       "path": "ios-app/scriptable/YOS DAYSTREAM Notion.js",
-      "commit": "dbaf481d009a6f6d80c41c7e1afe8499f3627151",
-      "sha256": "bb58d694c1208a1b9647dbbb4a762326d4d08fcbff6e1d92c96d35d1055d9507"
+      "commit": "6e45840474bc1bcbc629005083e0ecbcedf4ee25",
+      "sha256": "8dfce95ff8482dc820c1f99ff7a23d13f40c99ca307f6eadec0edf097f86dc07"
     }
   ]
 }
