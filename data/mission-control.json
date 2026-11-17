@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-17T16:24:15+09:00",
+  "updated_at": "2026-11-17T16:26:15+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -12,6 +12,26 @@
     ]
   },
   "inbox": [
+    {
+      "id": "github-pr-764",
+      "title": "PR #764 YOS Calendar｜Face IDパスキー認証（Googleは初回登録・復旧のみ）",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/764",
+      "updated_at": "2026-11-16T17:37:22Z"
+    },
+    {
+      "id": "github-pr-765",
+      "title": "PR #765 YOS Calendar｜Passkey backend hardening (integration into #764 only)",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/765",
+      "updated_at": "2026-11-16T17:40:17Z"
+    },
     {
       "id": "github-pr-767",
       "title": "PR #767 YOS Calendar｜Google・Face ID不要の安全なiPhone接続",
@@ -73,16 +93,6 @@
       "updated_at": "2026-11-16T18:54:38Z"
     },
     {
-      "id": "github-pr-787",
-      "title": "PR #787 DAYSTREAM｜画面を変えずに日時保存・軽量カードへ改善",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/787",
-      "updated_at": "2026-11-17T07:03:36Z"
-    },
-    {
       "id": "github-pr-788",
       "title": "PR #788 DAYSTREAM｜元のタイムラインへ個別タスクを直接登録（専用カード廃止）",
       "type": "GitHub PR",
@@ -90,7 +100,7 @@
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/788",
-      "updated_at": "2026-11-17T07:23:44Z"
+      "updated_at": "2026-11-17T07:24:06Z"
     },
     {
       "id": "github-pr-789",
@@ -100,17 +110,7 @@
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/789",
-      "updated_at": "2026-11-17T07:22:45Z"
-    },
-    {
-      "id": "github-pr-790",
-      "title": "PR #790 YOS JOURNAL: restore safe daily editions without retired GitHub Models",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/790",
-      "updated_at": "2026-11-17T07:23:49Z"
+      "updated_at": "2026-11-17T07:25:27Z"
     },
     {
       "id": "github-issue-10",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-17T07:23:47Z"
+      "updated_at": "2026-11-17T07:24:30Z"
     },
     {
       "id": "github-issue-234",
@@ -205,6 +205,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-cc3c3bc3252a",
+      "title": "journal: restore source-first scheduled publication without retired AI API",
+      "completed_at": "2026-11-17T07:25:27Z",
+      "result": "GitHub mainへ反映（cc3c3bc）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/cc3c3bc3252a43f930c5b5934fdd2b070ba27489"
+    },
+    {
       "id": "github-commit-c318b61c3c33",
       "title": "fix(daystream): align short actions with shared elastic time axis (#786)",
       "completed_at": "2026-11-17T04:32:45Z",
@@ -231,13 +238,6 @@
       "completed_at": "2026-11-17T04:08:28Z",
       "result": "GitHub mainへ反映（ada080b）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/ada080b9e3aebf96e2b7ebbef3c8efbac51590b0"
-    },
-    {
-      "id": "github-commit-8f7148c6d5c1",
-      "title": "fix(daystream): display status-free Notion shifts as calendar events (#783)",
-      "completed_at": "2026-11-17T03:44:29Z",
-      "result": "GitHub mainへ反映（8f7148c）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/8f7148c6d5c19d0d09fc658a1dc5c0e98dfd44a6"
     },
     {
       "id": "complete-002",
@@ -274,7 +274,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-17T16:24:15+09:00",
+      "last_update": "2026-11-17T16:26:15+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -349,13 +349,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 9件・Open PR 62件を自動同期中",
+      "next_action": "Open Issue 9件・Open PR 60件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-17T16:24:15+09:00",
+      "last_update": "2026-11-17T16:26:15+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -378,7 +378,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-17T16:24:15+09:00",
+      "last_update": "2026-11-17T16:26:15+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -460,5 +460,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "ea3a70fabc238f0495b28c1f5ed3cd71be7a373e189fcbf2a950c9cbc3a7a51e"
+  "github_snapshot_hash": "e8e0c90c19ff29d2b74adce1eefe5a8951369e28123f3fce3e4ee784e6f31d61"
 }
