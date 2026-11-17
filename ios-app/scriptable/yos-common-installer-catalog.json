@@ -104,8 +104,8 @@
       "id": "daystream-notion",
       "name": "YOS DAYSTREAM Notion",
       "path": "ios-app/scriptable/YOS DAYSTREAM Notion.js",
-      "commit": "03c6b67bf3c465c7c75f0d819effd9e4f89b1186",
-      "sha256": "f28245eace2bc9ffefe28aa0d0db8c50842b9c88e1f47b3a5d45dbdcfd1b81f9"
+      "commit": "6e45840474bc1bcbc629005083e0ecbcedf4ee25",
+      "sha256": "8dfce95ff8482dc820c1f99ff7a23d13f40c99ca307f6eadec0edf097f86dc07"
     }
   ]
 }
