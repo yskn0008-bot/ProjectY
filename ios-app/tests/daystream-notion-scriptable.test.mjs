@@ -7,7 +7,7 @@ const root=new URL('../../',import.meta.url);
 const text=path=>readFileSync(new URL(path,root),'utf8');
 export function api(overrides={}){
  const context=vm.createContext({Intl,Date,console,...overrides});
- vm.runInContext(script.split('// SCRIPTABLE_ENTRY')[0]+'\nglobalThis.api={project,dayProjection,readTasks,buildHTML,main};',context);
+ vm.runInContext(script.split('// SCRIPTABLE_ENTRY')[0]+'\nglobalThis.api={project,dayProjection,readTasks,buildHTML,main,validateMoveInput,moveNotion};',context);
  return context.api;
 }
 export const row=(start=null,end=null,name='架空タスク',id='a'.repeat(32))=>({id,last_edited_time:'2026-11-17T00:00:00Z',properties:{
@@ -149,4 +149,73 @@ test('malformed success and offline requests yield distinct read errors',async()
  await assert.rejects(malformed.readTasks('fake-secret'),/HTTP 200：応答の形式/);
  const offline=api({Request:class{async loadJSON(){throw Error('private exception contents')}}});
  await assert.rejects(offline.readTasks('fake-secret'),/HTTP 不明：応答がありません/);
+});
+
+test('native Notion move validates same-day timestamps and rejects unrelated input',()=>{
+ const a=api();
+ const base={id:'a'.repeat(32),old:'2026-11-20T17:00:00+09:00',
+  end:'2026-11-20T18:00:00+09:00',edited:'2026-11-17T00:00:00Z',next:'2026-11-20T19:00:00+09:00'};
+ assert.equal(a.validateMoveInput(base).duration,3600000);
+ assert.throws(()=>a.validateMoveInput({...base,id:'not-a-notion-id'}));
+ assert.throws(()=>a.validateMoveInput({...base,next:'2026-11-21T19:00:00+09:00'}));
+ assert.throws(()=>a.validateMoveInput({...base,next:base.old}));
+ assert.throws(()=>a.validateMoveInput({...base,end:'2026-11-21T22:00:00+09:00'}));
+});
+function mockMove({confirmation=0,calendar=false,changed=false,foreign=false}={}){
+ const calls={get:0,patch:0,refresh:0,bodies:[],alerts:0};
+ const old='2026-11-20T17:00:00+09:00',end='2026-11-20T18:00:00+09:00',
+  edited='2026-11-17T00:00:00Z',next='2026-11-20T19:00:00+09:00';
+ const rowdata=row(old,end,'変更テスト');
+ if(calendar){
+  rowdata.properties['状態']={select:null};
+  rowdata.properties['同期キー']={rich_text:[{plain_text:'yos-shift-2026-11-20'}]};
+ }
+ const page={object:'page',id:'a'.repeat(32),parent:foreign?{database_id:'b'.repeat(32)}:
+   {data_source_id:'965c6086-32c1-463d-93b4-87a9cb69b3ad'},
+  last_edited_time:changed?'2026-11-17T00:02:00Z':edited,properties:rowdata.properties};
+ const a=api({
+  config:{runsWithSiri:false},
+  Keychain:{contains:()=>true,get:()=> 'private-placeholder-token'},
+  Alert:class{
+   addAction(){} addCancelAction(){}
+   async presentAlert(){calls.alerts++;return confirmation}
+  },
+  Request:class{
+   constructor(url){this.url=url;this.response=null}
+   async loadJSON(){
+    assert.match(this.headers.Authorization,/^Bearer private-placeholder-token$/);
+    if(this.method==='GET'){
+     calls.get++;this.response={statusCode:200};return structuredClone(page);
+    }
+    if(this.method==='PATCH'){
+     calls.patch++;const body=JSON.parse(this.body);calls.bodies.push(body);
+     page.properties['期限']=body.properties['期限'];
+     page.last_edited_time='2026-11-17T00:03:00Z';
+     this.response={statusCode:200};
+     return structuredClone(page);
+    }
+    throw Error('unexpected request');
+   }
+  }
+ });
+ return {a,calls,params:{id:'a'.repeat(32),old,end,edited,next},refresh:async()=>{calls.refresh++}};
+}
+test('explicitly approved edit updates only Notion deadline and checks read-back',async()=>{
+ const f=mockMove();
+ await f.a.moveNotion(f.params,f.refresh);
+ assert.equal(f.calls.patch,1);assert.equal(f.calls.refresh,1);
+ assert.equal(f.calls.get,3);assert.equal(f.calls.alerts,1);
+ assert.deepEqual(Object.keys(f.calls.bodies[0].properties),['期限']);
+ assert.equal(f.calls.bodies[0].properties['期限'].date.start,f.params.next);
+ assert.equal(Date.parse(f.calls.bodies[0].properties['期限'].date.end)-Date.parse(f.params.next),3600000);
+});
+test('no Notion write on cancelled action or stale/foreign/calendar source',async()=>{
+ const cancelled=mockMove({confirmation:-1});
+ await cancelled.a.moveNotion(cancelled.params,cancelled.refresh);
+ assert.equal(cancelled.calls.patch,0);assert.equal(cancelled.calls.refresh,1);
+ for(const scenario of [{changed:true},{foreign:true},{calendar:true}]){
+  const f=mockMove(scenario);
+  await assert.rejects(f.a.moveNotion(f.params,f.refresh));
+  assert.equal(f.calls.patch,0);assert.equal(f.calls.refresh,0);
+ }
 });
