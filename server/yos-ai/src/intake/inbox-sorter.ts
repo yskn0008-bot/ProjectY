@@ -39,7 +39,7 @@ export function parseInbox(blocks: Block[]): Capture[] {
     if (block?.type !== 'paragraph') continue;
     const line = plain(block.paragraph?.rich_text);
     const match = /^(\d{4}-\d\d-\d\dT\S+)\s*·\s*([^·\n]+)\s*·\s*(clarity:[a-z\d_-]+)/iu.exec(line);
-    if (!match || !match[1] || !match[2] || !match[3] || seen.has(match[3]) || !/^(?:Memo|Clarity Voice|Clarity Text)$/iu.test(match[2].trim())) continue;
+    if (!match || !match[1] || !match[2] || !match[3] || seen.has(match[3]) || !/^(?:Memo|Clarity|Clarity Voice|Clarity Text)$/iu.test(match[2].trim())) continue;
     let raw = line.slice(match[0].length).trim();
     if (!raw) for (let j = i + 1; j < Math.min(blocks.length, i + 5); j++) {
       const next = blocks[j];

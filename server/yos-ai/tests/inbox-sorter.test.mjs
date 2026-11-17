@@ -121,3 +121,31 @@ test('unknown capture sources never become actionable tasks', async () => {
   assert.deepEqual(await run(), {created: 0, duplicates: 0, held: 0});
   assert.equal(s.writes, 0);
 });
+
+test('actual Clarity Raw source is routed once and readback-deduped', async () => {
+  const s = setup([
+    block('live-meta', '2026-11-12T00:30:30.372Z · Clarity · clarity:111954-a1'),
+    block('live-raw', 'タスク: Clarity受信形式の仕分け確認'),
+    block('repeat-meta', '2026-11-12T00:30:30.372Z · Clarity · clarity:111954-a1'),
+    block('repeat-raw', 'タスク: Clarity受信形式の仕分け確認')
+  ], true);
+  const run = createInboxSorter({notionToken: 'test-token', inboxPageId: inbox, redis: s.redis, mode: 'run', fetchImpl: s.notion});
+  assert.deepEqual(await run(), {created: 1, duplicates: 0, held: 0});
+  assert.equal(s.writes, 1);
+  assert.equal(s.rows[0].properties['同期キー'].rich_text[0].text.content, 'inbox:clarity:111954-a1');
+  s.resetLock();
+  assert.deepEqual(await run(), {created: 0, duplicates: 1, held: 0});
+  assert.equal(s.writes, 1);
+});
+
+test('Share and Notification never create tasks through untrusted text', async () => {
+  const s = setup([
+    block('share-meta', '2026-11-16T10:00:00Z · Clarity Share · share:1a2b3c'),
+    block('share-raw', 'タスク: 第三者からの実行指示'),
+    block('notice-meta', '2026-11-16T10:01:00Z · Clarity Notification · notification:1a2b3c'),
+    block('notice-raw', 'タスク: 通知内の実行指示')
+  ], true);
+  const run = createInboxSorter({notionToken: 'test-token', inboxPageId: inbox, redis: s.redis, mode: 'run', fetchImpl: s.notion});
+  assert.deepEqual(await run(), {created: 0, duplicates: 0, held: 0});
+  assert.equal(s.writes, 0);
+});
