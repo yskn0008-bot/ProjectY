@@ -21,10 +21,9 @@ export function createProductionClarityIntakeHandler(options: {environment: Envi
   });
   return async (request: Request): Promise<Response> => {
     // An Inbox receipt is always committed before any destination attempt.
-    // The existing enabled/run gates are required; no production activation
+    // The separate opt-in gate is required; no production activation
     // occurs merely by deploying this code.
-    if (options.environment.YOS_INBOX_SORT_ENABLED !== '1' ||
-        options.environment.YOS_INBOX_SORT_MODE !== 'run') return intake(request);
+    if (options.environment.YOS_INBOX_INSTANT_ENABLED !== '1') return intake(request);
     let captureId: string | undefined;
     try {
       const body = await request.clone().json() as Record<string, unknown>;
@@ -46,7 +45,7 @@ export function createProductionClarityIntakeHandler(options: {environment: Envi
       routing = await sorter();
     } catch {
       // Never turn a confirmed Raw capture into an apparent intake failure.
-      // The existing daily sorter can retry safely by captureId.
+      // Pending captures remain in Inbox. The existing daily sorter must remain gated independently.
       routing = {pending: true};
     }
     const receipt = await saved.json() as Record<string, unknown>;
