@@ -58,13 +58,15 @@ try{
   assert.deepEqual(errors,[]);
   assert.equal(network.filter(u=>/api\.notion|accounts\.google|vercel/.test(u)).length,0);
   // The separate 2-5 minute steps must not collapse into narrow lanes or overlap.
-  await page.setContent(htmlFor([
+  const microPage=await browser.newPage({viewport:{width,height:844},timezoneId:'Asia/Tokyo'});
+  await microPage.setContent(htmlFor([
    row(date+'T10:00:00+09:00',date+'T10:02:00+09:00','起床','1'.repeat(32)),
    row(date+'T10:02:00+09:00',date+'T10:05:00+09:00','水を飲む','2'.repeat(32)),
    row(date+'T10:05:00+09:00',date+'T10:10:00+09:00','歯磨き','3'.repeat(32))
   ]));
-  await page.waitForFunction(()=>!document.getElementById('yosNativeBoot'));
-  const separate=await page.locator('#tl .yos-notion-projection').evaluateAll(nodes=>nodes.map(n=>({
+  await microPage.waitForFunction(()=>!document.getElementById('yosNativeBoot'));
+  await microPage.waitForFunction(()=>document.querySelectorAll('#tl .yos-notion-projection').length===3);
+  const separate=await microPage.locator('#tl .yos-notion-projection').evaluateAll(nodes=>nodes.map(n=>({
    title:n.textContent,top:n.offsetTop,height:n.offsetHeight,width:n.offsetWidth,left:n.offsetLeft
   })));
   assert.equal(separate.length,3);
@@ -73,6 +75,7 @@ try{
   assert.equal(new Set(separate.map(x=>x.left)).size,1);
   assert.equal(new Set(separate.map(x=>x.width)).size,1);
   assert.match(separate.map(x=>x.title).join('|'),/起床.*水を飲む.*歯磨き/s);
+  await microPage.close();
   await page.close();
  }
 }finally{await browser.close()}
