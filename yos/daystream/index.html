@@ -72,6 +72,24 @@ button:active{opacity:.8}@media(min-width:640px){.dock{left:calc((100vw - 640px)
 .card.task .task-drag-grip{display:grid;place-items:center;flex:0 0 20px;align-self:stretch;min-height:25px;touch-action:none;-webkit-touch-callout:none;user-select:none;-webkit-user-select:none;font-size:24px;color:#f0def8;cursor:grab;line-height:1}
 .card.task .task-drag-grip:active{cursor:grabbing}
 .editor #editorTitle,.editor .edit-end,.editor label{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+
+/* Daystream readable-density layout: original task bar identity and gesture contracts remain. */
+.card.task{min-width:0;overflow:hidden}
+.card.task .task-copy{min-width:0;flex:1 1 auto;width:auto;height:100%;justify-content:center;align-items:flex-start;gap:5px}
+.card.task .task-copy b{display:block;white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:anywhere;word-break:normal;max-width:100%;line-height:1.28;font-size:13.5px;flex:0 0 auto}
+.card.task .task-copy small{display:block;white-space:nowrap;overflow:visible;text-overflow:clip;flex:0 0 auto;max-width:100%;font-size:11.5px;letter-spacing:0;font-variant-numeric:tabular-nums}
+.card.task.lane .task-copy b,.card.task.tiny .task-copy b,.card.task.compact .task-copy b{font-size:13.5px;line-height:1.28;white-space:normal}
+.card.task.lane .task-copy small,.card.task.tiny .task-copy small,.card.task.compact .task-copy small{display:block;font-size:11.5px;white-space:nowrap}
+.card.task .task-drag-grip{flex:0 0 38px;min-width:38px;min-height:42px;margin-right:-5px;border-left:1px solid #ffffff27;border-radius:6px;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+.card.task.yos-backdrop{z-index:1;align-items:flex-start;padding-top:9px}
+.card.task.yos-backdrop .task-copy{height:auto;justify-content:flex-start}
+.card.task.yos-foreground{z-index:3}
+.card.task.yos-backdrop .task-copy b{font-size:13.5px}
+.card.task.yos-backdrop .task-drag-grip{align-self:flex-start}
+.card.task.compat-positive{background:#267f66;box-shadow:inset 0 0 0 1.5px #72f0bf,0 3px 12px #101b2927}
+.card.task.compat-negative{background:#95651f;box-shadow:inset 0 0 0 1.5px #ffd391,0 3px 12px #101b2927}
+.card.task.compat-danger{background:#b9596a;box-shadow:inset 0 0 0 1.5px #f4a1b2,0 3px 12px #101b2927}
+.card.task.moving,.card.task.drag-preview{z-index:10}
 </style><script src="./source-adapters.js"></script><script src="../../life/calendar/native-bridge.js"></script><script src="./yos-tasks-auth.js"></script></head><body class="yos-daystream-web"><div class="yos-web-port" role="navigation" aria-label="DAYSTREAM Web版">
 <a href="../">YOS</a><strong>DAYSTREAM · WEB</strong>
 <button id="yosWebImport" type="button">データ読込</button><button id="yosWebExport" type="button">書き出し</button>
@@ -765,6 +783,53 @@ function yosElasticAxis(rows,baseScale){
  };
  return {minutes,pixels,coordinate,minuteAt};
 }
+
+/* Time grows vertically only where task labels or dense, simultaneous entries require it.
+   The source start/end times never change; long overlapping tasks become full-width backdrops. */
+function yosReadableTaskHeight(item){
+ const available=Math.max(150,Math.min(610,window.innerWidth)-143);
+ const approxChars=Math.max(7,Math.floor(available/14));
+ const lines=Math.max(1,Math.ceil([...String(item.t||'')].length/approxChars));
+ return Math.max(64,28+lines*20+19);
+}
+function yosBackdropRows(rows){
+ const result=new Set();
+ for(const item of rows){
+  if(item.kind!=='task'||item.f||item.d<120)continue;
+  if(rows.some(other=>other!==item&&other.kind==='task'&&other.d<=90&&other.s<item.s+item.d&&other.s+other.d>item.s))result.add(item);
+ }
+ return result;
+}
+function yosReadableAxis(rows,baseScale,backdrops){
+ const base=yosElasticAxis(rows,baseScale);
+ const foreground=rows.filter(item=>!backdrops.has(item));
+ const groups=new Map();
+ for(const item of foreground){
+  if(!groups.has(item.s))groups.set(item.s,[]);
+  groups.get(item.s).push(item);
+ }
+ const starts=[...groups.keys()].sort((a,b)=>a-b),spans=[];
+ for(let i=0;i<starts.length;i++){
+  const start=starts[i],entries=groups.get(start),next=starts[i+1];
+  const required=entries.reduce((sum,item)=>sum+(item.kind==='task'&&!item.f?yosReadableTaskHeight(item):Math.max(23,Math.min(60,base.coordinate(item.s+item.d)-base.coordinate(item.s))))+4,0);
+  const end=next??Math.min(1440,Math.max(start+1,...entries.map(item=>item.s+item.d)));
+  if(end<=start)continue;
+  const natural=base.coordinate(end)-base.coordinate(start);
+  if(natural<required)spans.push({start,end,extra:required-natural});
+ }
+ const coordinate=minute=>{
+  const m=Math.max(0,Math.min(1440,minute));let result=base.coordinate(m);
+  for(const band of spans){if(m<=band.start)continue;result+=band.extra*(m>=band.end?1:(m-band.start)/(band.end-band.start))}
+  return result;
+ };
+ const minuteAt=height=>{
+  let lo=0,hi=1440;
+  for(let i=0;i<22;i++){const mid=(lo+hi)/2;if(coordinate(mid)<height)lo=mid;else hi=mid}
+  return (lo+hi)/2;
+ };
+ return {coordinate,minuteAt,backdrops,groups};
+}
+
 let elasticEnabled=true,elasticAxis=null;
 const yFor=m=>elasticEnabled&&elasticAxis?elasticAxis.coordinate(m):m/60*scale;
 const minuteAtY=y=>elasticEnabled&&elasticAxis?elasticAxis.minuteAt(y):y/scale*60;
@@ -1266,29 +1331,35 @@ function smoothRender(activeId,oldActiveRect){
 function render(){
  latestCompatibility=yosCompatibility(items);
  const sorted=[...items].filter(x=>Number.isFinite(x.s)&&Number.isFinite(x.d)&&x.d>0&&x.s>=0&&x.s+x.d<=1440).sort((a,b)=>a.s-b.s||a.id-b.id);
- elasticAxis=elasticEnabled?yosElasticAxis(sorted,scale):null;
+ const backdrops=yosBackdropRows(sorted);
+ elasticAxis=elasticEnabled?yosReadableAxis(sorted,scale,backdrops):null;
  tl.querySelectorAll('.hour,.card,.tick').forEach(n=>n.remove());
  const bottom=yFor(1440);
  for(let h=0;h<=24;h++){const el=document.createElement('div');el.className='hour';el.style.top=yFor(h*60)+'px';el.innerHTML='<span>'+fmt(h*60)+'</span>';tl.append(el)}
- const lanes=new Map();let group=[],groupEnd=-1;const groups=[];
- for(const item of sorted){if(group.length&&item.s>=groupEnd){groups.push(group);group=[]}group.push(item);groupEnd=Math.max(groupEnd,item.s+item.d)}
- if(group.length)groups.push(group);
- for(const g of groups){const ends=[];for(const item of g){let lane=ends.findIndex(end=>end<=item.s);if(lane<0){lane=ends.length;ends.push(0)}ends[lane]=item.s+item.d;lanes.set(item,{lane,count:0})}for(const item of g)lanes.get(item).count=ends.length}
- let lastBottom=-2;let pushed=0;
- let priorVisualBottom=-2;
- for(const group of groups){
-   const start=yFor(group[0].s);
-   const offset=elasticEnabled?0:Math.max(0,priorVisualBottom+3-start);
-   for(const item of group)lanes.get(item).offset=offset;
-   priorVisualBottom=Math.max(priorVisualBottom,...group.map(item=>yFor(item.s)+offset+Math.max(item.kind==='task'&&!item.f?42:density==='overview'?17:22,yFor(item.s+item.d)-yFor(item.s)-2)));
+ // Keep readable cards full-width; pack concurrent starts vertically within a stretched time segment.
+ const visualOffsets=new Map();const groups=new Map();
+ for(const item of sorted.filter(x=>!backdrops.has(x))){
+  if(!groups.has(item.s))groups.set(item.s,[]);
+  groups.get(item.s).push(item);
  }
+ for(const group of groups.values()){
+  let offset=0;
+  for(const item of group){
+   visualOffsets.set(item,offset);
+   offset+=(item.kind==='task'&&!item.f?yosReadableTaskHeight(item):Math.max(23,Math.min(60,yFor(item.s+item.d)-yFor(item.s))))+4;
+  }
+ }
+ let lastBottom=-2;
  sorted.forEach(item=>{
-   const natural=yFor(item.s);const height=elasticEnabled?Math.max(1,yFor(item.s+item.d)-natural-2):Math.max(item.kind==='task'&&!item.f?42:density==='overview'?17:22,yFor(item.s+item.d)-natural-2);const top=natural+(lanes.get(item)?.offset||0);
-   if(top>natural+2)pushed++;
-   lastBottom=top+height;
+   const natural=yFor(item.s);
+   const backdrop=backdrops.has(item),isTask=item.kind==='task'&&!item.f;
+   const height=backdrop?Math.max(yosReadableTaskHeight(item),yFor(item.s+item.d)-natural-2):isTask?yosReadableTaskHeight(item):Math.max(density==='overview'?21:26,yFor(item.s+item.d)-natural-2);
+   const top=natural+(visualOffsets.get(item)||0);
+   lastBottom=Math.max(lastBottom,top+height);
    const el=document.createElement('div');el.className='card '+(item.kind==='habit'?'habit':item.kind==='task'?'task':'schedule');
+   if(backdrop)el.classList.add('yos-backdrop');
+   else if(isTask)el.classList.add('yos-foreground');
    el.style.top=top+'px';el.style.height=height+'px';
-   const lane=lanes.get(item);if(lane&&lane.count>1){el.style.left='calc(73px + (100% - 73px) * '+(lane.lane/lane.count)+')';el.style.width='calc((100% - 73px) / '+lane.count+' - 3px)';el.style.right='auto';el.classList.add('lane')}
    const compat=latestCompatibility.get(item.id);
    if(compat){el.classList.add('compat-'+compat.level);el.setAttribute('aria-label',item.t+' '+(compat.reasons[0]||'相性：判断材料不足'));el.title=(compat.reasons[0]||'相性は未確認');}
    if(item.kind!=='task'||item.f){
@@ -1301,7 +1372,7 @@ function render(){
    }else{el.append(titleEl,timeEl);}
    if(item.t==='睡眠'||item.t==='就寝')el.classList.add('sleep');
    if(['朝の準備','朝食','昼食','夕食','入浴'].includes(item.t))el.classList.add('neutral');
-   if(height<30)el.classList.add('tiny');
+   if(height<30&&!isTask)el.classList.add('tiny');
    if(density==='overview')el.classList.add('compact');
    if(searchText&&!item.t.toLocaleLowerCase().includes(searchText))el.style.display='none';
    el.dataset.id=String(item.id);if(item.done)el.classList.add('done');tl.append(el);
@@ -1325,7 +1396,7 @@ function render(){
    }
  });
  tl.style.height=(Math.max(bottom,lastBottom)+12)+'px';updateNow();
- if(pushed&&note.textContent.includes('仮データ'))note.textContent='枠の高さは所要時間に対応。重複時は縦にずらして表示（未保存）';
+ // Readable-density layout is visual only; no source time or task mutation.
 }
 document.getElementById('closeFocus').onclick=()=>{zoom=null;deleteConfirmId=null;focus.classList.remove('show');smoothRender()};
 if(Array.isArray(stored)){note.textContent='保存済み時間割を表示 · Notion Tasks '+yosStatusWord(taskSource.status);}
