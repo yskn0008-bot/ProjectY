@@ -2,6 +2,23 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8">
+<script id="yos-taxi-ui-cutover">
+// New UI is the default. Legacy remains available at ?legacy=1.
+// Never interrupt an active shift in the original local record store.
+(function(){
+  const query=new URLSearchParams(location.search);
+  if(query.get('legacy')==='1')return;
+  try{
+    const record=JSON.parse(localStorage.getItem('yos-taxi-ops-v1')||'null');
+    if(record&&['available','occupied','break'].includes(record.status)){
+      const shifted=new Date(Date.now()-8*60*60*1000);
+      const businessDate=new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit'}).format(shifted);
+      if(record.businessDate===businessDate)return;
+    }
+  }catch(e){/* Invalid legacy data is left untouched; never delete it. */}
+  location.replace(new URL('./ui-v2.html',location.href).href);
+})();
+</script>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0b0b0d">
 <meta name="apple-mobile-web-app-capable" content="yes">
