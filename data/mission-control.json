@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-17T16:42:47+09:00",
+  "updated_at": "2026-11-17T16:43:45+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -12,6 +12,16 @@
     ]
   },
   "inbox": [
+    {
+      "id": "github-pr-762",
+      "title": "PR #762 feat(notification): safeguard v0.3→v0.4 migration using common installer",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/762",
+      "updated_at": "2026-11-16T16:08:15Z"
+    },
     {
       "id": "github-pr-764",
       "title": "PR #764 YOS Calendar｜Face IDパスキー認証（Googleは初回登録・復旧のみ）",
@@ -70,7 +80,7 @@
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/770",
-      "updated_at": "2026-11-17T07:30:55Z"
+      "updated_at": "2026-11-17T07:43:23Z"
     },
     {
       "id": "github-pr-771",
@@ -103,16 +113,6 @@
       "updated_at": "2026-11-17T07:29:19Z"
     },
     {
-      "id": "github-pr-793",
-      "title": "PR #793 DAYSTREAM｜元の紫色のタイムラインへ14件を安全に追加",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/793",
-      "updated_at": "2026-11-17T07:42:00Z"
-    },
-    {
       "id": "github-issue-10",
       "title": "Issue #10 Mission Control v2：GitHubのIssue・PR・Commitを自動集約する",
       "type": "GitHub Issue",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-17T07:38:54Z"
+      "updated_at": "2026-11-17T07:43:10Z"
     },
     {
       "id": "github-issue-234",
@@ -205,6 +205,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-63053209bf79",
+      "title": "feat(daystream): preserve original purple tasks with private additive import (#793)",
+      "completed_at": "2026-11-17T07:43:11Z",
+      "result": "GitHub mainへ反映（6305320）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/63053209bf79821ad0cb6b5ba1ed5c18d0379b98"
+    },
+    {
       "id": "github-commit-6030e1cedea9",
       "title": "journal: publish verified 2026-11-17 editorial issue with free voice",
       "completed_at": "2026-11-17T07:37:56Z",
@@ -231,13 +238,6 @@
       "completed_at": "2026-11-17T07:25:27Z",
       "result": "GitHub mainへ反映（cc3c3bc）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/cc3c3bc3252a43f930c5b5934fdd2b070ba27489"
-    },
-    {
-      "id": "github-commit-c318b61c3c33",
-      "title": "fix(daystream): align short actions with shared elastic time axis (#786)",
-      "completed_at": "2026-11-17T04:32:45Z",
-      "result": "GitHub mainへ反映（c318b61）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/c318b61c3c33d74e38eab11a590490caa5e2a139"
     },
     {
       "id": "complete-002",
@@ -274,7 +274,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-17T16:42:47+09:00",
+      "last_update": "2026-11-17T16:43:45+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -349,13 +349,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 9件・Open PR 60件を自動同期中",
+      "next_action": "Open Issue 9件・Open PR 59件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-17T16:42:47+09:00",
+      "last_update": "2026-11-17T16:43:45+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -378,7 +378,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-17T16:42:47+09:00",
+      "last_update": "2026-11-17T16:43:45+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -460,5 +460,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "125d7a6ffcf8165fd98b4c7e3fd20a3c0658391571601f3b40483c8bafdc869c"
+  "github_snapshot_hash": "13845183c795fd79166fd19005516ec074e542d35392c4ad939a84ef5628b686"
 }
