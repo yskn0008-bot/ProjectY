@@ -54,7 +54,7 @@ test('native WebView opens without network commands or writing device config',as
  assert.equal(calls[0][0],'load');
  assert.equal(calls[1][0],'present');
  assert.ok(calls.some(x=>x[0]==='done'));
- assert.ok(!calls.some(x=>x[0]==='eval'));
+ assert.ok(calls.filter(x=>x[0]==='eval').length<=1,'poll should stop immediately after dismissal');
 });
 test('malformed action is rejected before any network or appliance request',async()=>{
  const events=[],scriptMessages=[];
