@@ -14,11 +14,11 @@ export const row=(start=null,end=null,name='架空タスク',id='a'.repeat(32))=
  'やること':{title:[{plain_text:name}]},'状態':{select:{name:'次にやる'}},
  '期限':{date:start?{start,end}:null}
 }});
-export function htmlFor(tasks){
+export function htmlFor(tasks,nativeActive=false){
  const scope={};vm.runInNewContext(text('yos/daystream/source-adapters.js'),{window:scope,Intl,Date});
  const snapshot=scope.YOS_DAYSTREAM_SOURCES.fromYosTaskDashboardCache({savedAt:Date.now(),data:{source:'notion',complete:true,tasks:tasks.map(r=>api().project(r))}});
  assert.ok(snapshot);
- return api().buildHTML(text('yos/daystream/index.html'),text('yos/daystream/source-adapters.js'),text('life/calendar/native-bridge.js'),text('yos/daystream/task-wizard.js'),snapshot);
+ return api().buildHTML(text('yos/daystream/index.html'),text('yos/daystream/source-adapters.js'),text('life/calendar/native-bridge.js'),text('yos/daystream/task-wizard.js'),snapshot,nativeActive);
 }
 test('date-only and no-date tasks retain their meaning',()=>{
  const a=api();assert.equal(a.project(row()).due,null);
@@ -208,6 +208,26 @@ test('explicitly approved edit updates only Notion deadline and checks read-back
  assert.deepEqual(Object.keys(f.calls.bodies[0].properties),['期限']);
  assert.equal(f.calls.bodies[0].properties['期限'].date.start,f.params.next);
  assert.equal(Date.parse(f.calls.bodies[0].properties['期限'].date.end)-Date.parse(f.params.next),3600000);
+});
+test('explicit inline confirmation bypasses Alert but keeps native Notion freshness guards',async()=>{
+ const f=mockMove();
+ await f.a.moveNotion(f.params,f.refresh,true);
+ assert.equal(f.calls.patch,1);
+ assert.equal(f.calls.alerts,0);
+ assert.equal(f.calls.get,3);
+ assert.deepEqual(Object.keys(f.calls.bodies[0].properties),['期限']);
+ const guarded=mockMove({changed:true});
+ await assert.rejects(guarded.a.moveNotion(guarded.params,guarded.refresh,true));
+ assert.equal(guarded.calls.patch,0);
+});
+test('WebView bridge code uses callback evaluation and never embeds the Keychain token',()=>{
+ const a=api(),h=htmlFor([row('2026-11-17T10:00:00+09:00')],true);
+ assert.match(h,/YOS_DAYSTREAM_NATIVE_ACTIVE=true/);
+ assert.match(h,/YOS_DAYSTREAM_NATIVE_REPLY/);
+ assert.match(h,/yosNotionMoveBar/);
+ assert.doesNotMatch(h,/Bearer |YOS_NOTION_INTEGRATION_TOKEN|location.href='scriptable:\/\/\/run\?scriptName=YOS%20DAYSTREAM%20Notion&'/);
+ assert.match(script,/evaluateJavaScript\(INLINE_BRIDGE_WAIT,true\)/);
+ assert.match(script,/web\.present\(true\)/);
 });
 test('no Notion write on cancelled action or stale/foreign/calendar source',async()=>{
  const cancelled=mockMove({confirmation:-1});
