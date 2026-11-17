@@ -366,3 +366,42 @@ test('default entry: approved one-screen UI and legacy recovery', async ({ page 
   await expect(page.locator('.yos131-primary[data-proxy="shiftButton"]')).toBeVisible();
   expect(errors).toEqual([]);
 });
+
+
+test('v2 in-app browser heights: all sales text and strategy rows fit their boxes', async ({page}) => {
+  await page.clock.setFixedTime(new Date('2026-11-17T17:01:00+09:00'));
+  for (const [width,height] of [[393,650],[393,631],[320,568],[320,650],[375,700],[390,799],[402,874]]) {
+    await page.setViewportSize({width,height});
+    await page.goto('./ui-v2.html', {waitUntil:'domcontentloaded'});
+    let problems = await page.evaluate(() => {
+      const items=[...document.querySelectorAll('.quick .copy b,.quick .copy small,.decision strong,.decision span,.period b,.period small,.kpi-label,.kpi-value,.footer-card span')];
+      const active = element => {const style=getComputedStyle(element);return style.display!=='none' && style.visibility!=='hidden' && element.getBoundingClientRect().height>0};
+      const bad=items.filter(active).filter(element=>element.scrollWidth>element.clientWidth+1 || element.scrollHeight>element.clientHeight+2).map(element=>element.textContent.trim());
+      const main=document.querySelector('.view.active');
+      if(main.scrollHeight>main.clientHeight+2)bad.push('sales main internally overflowing');
+      return bad;
+    });
+    expect(problems, 'sales text overflow at '+width+'x'+height).toEqual([]);
+    await page.locator('[data-page="strategy"]').click();
+    await expect(page.locator('.strat-row.selected')).toHaveAttribute('data-strat','0');
+    problems=await page.evaluate(() => {
+      const bad=[];
+      const rows=[...document.querySelectorAll('.strat-row')];
+      rows.forEach((row,i) => {
+        const container=row.getBoundingClientRect();
+        for(const selector of ['time','b','small']){
+          const child=row.querySelector(selector),rect=child.getBoundingClientRect();
+          if(rect.top<container.top-0.6 || rect.bottom>container.bottom+0.6 || rect.left<container.left-1 || rect.right>container.right+1)
+            bad.push(i+' '+selector+' is outside its row');
+          if(child.scrollWidth>child.clientWidth+1 || child.scrollHeight>child.clientHeight+2)
+            bad.push(i+' '+selector+' text clipped');
+        }
+      });
+      const main=document.querySelector('.view.active');
+      if(main.scrollHeight>main.clientHeight+2)bad.push('strategy main internally overflowing');
+      if(document.documentElement.scrollHeight>innerHeight+1)bad.push('page scroll');
+      return bad;
+    });
+    expect(problems,'strategy text overlap at '+width+'x'+height).toEqual([]);
+  }
+});
