@@ -45,7 +45,25 @@ def validate(path: Path) -> dict:
     assert save.get('WFAskWhereToSave') is False, f'location prompt unexpected: {save}'
     assert save.get('WFSaveFileOverwrite') is False, f'overwrite unexpectedly enabled: {save}'
     assert 'YOS-JOURNAL-GPT-DRAFT-' in repr(save), 'draft filename not found'
-    return {'actions': len(actions), 'ask_llm': len(ask), 'save': len(saves)}
+    attachment=save.get('WFInput')
+    assert isinstance(attachment,dict) and attachment.get('Value',{}).get('OutputName')=='draftText', 'saved input not draft'
+    scriptable_id='dk.simonbs.Scriptable.RunScriptInlineIntent'
+    inline=[p for n,p in pairs if n==scriptable_id]
+    assert len(inline)==1, f'expected one private Scriptable handoff, got {len(inline)}'
+    handoff=inline[0]
+    assert handoff.get('runInApp') is False and handoff.get('ShowWhenRun') is False, 'unexpected UI handoff'
+    assert handoff.get('parameter')==attachment, 'Notion input differs from locally saved draft'
+    raw=handoff.get('script',{})
+    script=raw.get('Value',{}).get('string') if isinstance(raw,dict) else None
+    assert isinstance(script,str), 'Notion inline script missing'
+    for required in ('api.notion.com/v1','YOS_NOTION_INTEGRATION_TOKEN',
+                     'YOS_JOURNAL_DRAFT_V1','READBACK_MISMATCH',
+                     'SCAN_INCOMPLETE','Keychain.contains'):
+        assert required in script, f'private handoff safety missing: {required}'
+    assert 'raw.githubusercontent.com' not in script and 'api.github.com' not in script, 'public upload forbidden'
+    assert '__YOS_JOURNAL_INBOX_INLINE__' not in workflow_rep, 'unpatched Scriptable action'
+    assert '__YOS_JOURNAL_DRAFT_INPUT__' not in workflow_rep, 'unpatched draft attachment'
+    return {'actions': len(actions), 'ask_llm': len(ask), 'save': len(saves), 'private_handoff':len(inline)}
 
 
 def main():
