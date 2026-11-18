@@ -1,0 +1,94 @@
+name: Shortcut Factory Revival - reviewed builds
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'tools/shortcut-factory/**'
+      - '.github/workflows/shortcut-factory-revival.yml'
+      - 'tools/clarity-factory/sign_with_hubsign.py'
+  workflow_dispatch:
+    inputs:
+      target:
+        description: 'Reviewed Shortcut to sign (no automatic publishing)'
+        type: choice
+        required: true
+        options:
+          - stash
+          - stash-add
+      sign_reviewed:
+        description: 'I reviewed the source and approve sending it to third-party HubSign'
+        type: boolean
+        required: true
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: shortcut-factory-revival-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate-and-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Safety unit tests and source pin verification
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -s tools/shortcut-factory/tests -p 'test_factory_v4.py' -v
+          python3 tools/shortcut-factory/factory_v4.py validate --target all
+          python3 tools/shortcut-factory/validate_secret_free.py \
+            'tools/shortcut-factory/shortcuts/STASH.cherri' \
+            'tools/shortcut-factory/shortcuts/STASH Add.cherri'
+      - name: Install pinned and checksum-verified Cherri 2.3.0
+        run: |
+          set -euo pipefail
+          url='https://github.com/electrikmilk/cherri/releases/download/v2.3.0/cherri_linux-x86_64.zip'
+          expected='7ab2c384b7b26e7c72a30a8dfa56f89dae12c4068b7951bc1e3193f3698edbe9'
+          curl -fsSL "$url" -o /tmp/cherri.zip
+          printf '%s  %s\n' "$expected" /tmp/cherri.zip | sha256sum -c -
+          mkdir -p /tmp/cherri
+          unzip -q /tmp/cherri.zip -d /tmp/cherri
+          binary="$(find /tmp/cherri -type f -name cherri -print -quit)"
+          test -n "$binary"
+          sudo install -m 0755 "$binary" /usr/local/bin/cherri
+          cherri --version
+      - name: Compile registered Shortcuts and generate provenance receipts
+        run: |
+          set -euo pipefail
+          python3 tools/shortcut-factory/factory_v4.py build --target all
+          python3 tools/shortcut-factory/validate_stash_factory.py \
+            'tools/shortcut-factory/artifacts/stash-unsigned.shortcut' \
+            'tools/shortcut-factory/artifacts/stash-add-unsigned.shortcut'
+      - name: Upload unsigned review package (not an install link)
+        uses: actions/upload-artifact@v4
+        with:
+          name: shortcut-factory-revival-review
+          path: |
+            tools/shortcut-factory/artifacts/*-unsigned.shortcut
+            tools/shortcut-factory/artifacts/*-receipt.json
+          if-no-files-found: error
+          retention-days: 14
+      - name: Install signed-envelope decoder only for approved signing
+        if: github.event_name == 'workflow_dispatch' && inputs.sign_reviewed == true
+        run: python3 -m pip install --disable-pip-version-check lzfse
+      - name: Explicitly reviewed third-party signing and semantic verification
+        if: github.event_name == 'workflow_dispatch' && inputs.sign_reviewed == true
+        env:
+          TARGET: ${{ inputs.target }}
+        run: |
+          set -euo pipefail
+          python3 tools/shortcut-factory/factory_v4.py sign --target "$TARGET" --reviewed
+      - name: Upload signed iPhone acceptance candidate
+        if: github.event_name == 'workflow_dispatch' && inputs.sign_reviewed == true
+        uses: actions/upload-artifact@v4
+        with:
+          name: shortcut-factory-revival-signed-${{ inputs.target }}
+          path: |
+            tools/shortcut-factory/artifacts/${{ inputs.target }}.shortcut
+            tools/shortcut-factory/artifacts/${{ inputs.target }}-receipt.json
+          if-no-files-found: error
+          retention-days: 14
