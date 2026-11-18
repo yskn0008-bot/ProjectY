@@ -9,7 +9,7 @@ const raw='【YOS_EDITORIAL_DRAFT_V1】\n【状態: 下書き・出典独立照�
 
 function mock({input=raw,key=true,loseAfterWrite=false,existing=[],unknownScan=false}={}) {
   const blocks=structuredClone(existing),calls=[],notifications=[],outputs=[];
-  let id=1000,lost=false;
+  let id=1000+blocks.length,lost=false;
   class Request {
     constructor(url){this.url=url;this.method='GET';this.response=null;}
     async loadJSON(){
