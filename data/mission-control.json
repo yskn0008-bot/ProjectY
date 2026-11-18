@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-18T23:09:47+09:00",
+  "updated_at": "2026-11-18T23:11:26+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -13,14 +13,14 @@
   },
   "inbox": [
     {
-      "id": "github-pr-817",
-      "title": "PR #817 DAYSTREAM｜D「Layer」と相性の色表示",
+      "id": "github-pr-762",
+      "title": "PR #762 feat(notification): safeguard v0.3→v0.4 migration using common installer",
       "type": "GitHub PR",
-      "status": "review",
-      "priority": 1,
-      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/817",
-      "updated_at": "2026-11-18T14:08:57Z"
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/762",
+      "updated_at": "2026-11-16T16:08:15Z"
     },
     {
       "id": "github-pr-764",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-18T14:09:04Z"
+      "updated_at": "2026-11-18T14:09:32Z"
     },
     {
       "id": "github-issue-234",
@@ -205,6 +205,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-b17676c965d2",
+      "title": "DAYSTREAM｜D「Layer」と相性の色表示 (#817)",
+      "completed_at": "2026-11-18T14:10:52Z",
+      "result": "GitHub mainへ反映（b17676c）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/b17676c965d22c29dfa44481bd8ce855a6c05522"
+    },
+    {
       "id": "github-commit-9d9c2b5ac76c",
       "title": "fix(scriptable): prevent black WebView presentation for ikemen reader",
       "completed_at": "2026-11-18T09:17:35Z",
@@ -233,13 +240,6 @@
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/483ef613e298b4d6109d9e1de84b588bea290b21"
     },
     {
-      "id": "github-commit-86437fab1263",
-      "title": "style(daystream): slim outlined task bars with distinct overlap backdrops (#812)",
-      "completed_at": "2026-11-18T08:38:23Z",
-      "result": "GitHub mainへ反映（86437fa）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/86437fab1263f9a4babc1053a0c824d1db0302b0"
-    },
-    {
       "id": "complete-002",
       "title": "iPhone向けMission Control Dashboardを実装",
       "completed_at": "2026-07-17T17:55:00+09:00",
@@ -264,7 +264,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #817をレビューして公開判断する",
+      "next_action": "PR #649をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -274,7 +274,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-18T23:09:47+09:00",
+      "last_update": "2026-11-18T23:11:26+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -349,13 +349,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 9件・Open PR 60件を自動同期中",
+      "next_action": "Open Issue 9件・Open PR 59件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-18T23:09:47+09:00",
+      "last_update": "2026-11-18T23:11:26+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -369,7 +369,7 @@
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #817をレビューして公開判断する",
+      "next_action": "PR #649をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -378,7 +378,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-18T23:09:47+09:00",
+      "last_update": "2026-11-18T23:11:26+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -460,5 +460,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "d19cdfe3111dd0d81d466c7a8cf17d1b6fb4770ab488606df4479f0242e1fe1e"
+  "github_snapshot_hash": "27ad2158863c1a899af29790c497f76f026fe1498017259c6f09bc1a0520aa2d"
 }
