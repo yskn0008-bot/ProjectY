@@ -17,7 +17,9 @@ test('YOS Tasks refresh reuses existing backend and is opt-in and read-only',()=
  assert.match(authCode,/credentials:'omit'/);
  assert.match(authCode,/cache:'no-store'/);
  assert.match(authCode,/method:'GET'/);
- assert.doesNotMatch(authCode,/localStorage|sessionStorage|NOTION_TOKEN|API_SECRET/);
+ assert.match(authCode,/yos_calendar_device_key_v1/);
+ assert.equal(authCode.includes('.setItem('),false);assert.equal(authCode.includes('.removeItem('),false);assert.doesNotMatch(authCode,/sessionStorage|NOTION_TOKEN|API_SECRET/);
+ assert.equal(html.includes('hasDeviceKey?.())setupTaskSource(true)'),true);
  assert.match(html,/id="yosWebTaskRefresh"/);
  assert.match(html,/provider\.setup\(\{/);
  assert.match(html,/snapshot\.source!==\u0027yos-auth-cache\u0027/); // source guard on persisted projected data
@@ -52,6 +54,46 @@ test('YOS Tasks credential is used transiently and only sanitized Tasks are save
  assert.equal(sanitized.items[0].action,'確認');
  assert.equal(sanitized.source,'yos-auth-cache');
  assert.equal(local.YOS_DAYSTREAM_SOURCES.validSaved(sanitized,'tasks'),true);
+});
+test('an existing Calendar device key refreshes Notion without Google and does not persist credentials',async()=>{
+ const device='yos_cd_'+'a'.repeat(64),requests=[],saved=[];
+ const win={google:{accounts:{id:{initialize(){throw Error('Google must not initialize')},renderButton(){throw Error('Google must not display')}}}},
+  localStorage:{getItem(key){assert.equal(key,'yos_calendar_device_key_v1');return device}},
+  document:{createElement:()=>({textContent:''})}};
+ win.window=win;
+ const ctx={window:win,location:{origin:'https://yskn0008-bot.github.io'},document:win.document,
+  fetch:async(url,opts)=>{
+   requests.push({url,opts});
+   assert.equal(url,'https://project-y-yos-ai.vercel.app/api/yos/tasks?source=notion');
+   return {ok:true,json:async()=>({source:'notion',complete:true,tasks:[{id:'11111111222233334444555555555555',title:'買い物',state:'次にやる',sourceKind:'task',due:'2026-11-19T10:00:00Z',dueEnd:'2026-11-19T10:30:00Z',evidence:'YOS Inbox clarity:window-unique',order:1}]})};
+  },AbortController,setTimeout,clearTimeout,Date,Intl,Math};
+ vm.runInNewContext(sourceCode,ctx);vm.runInNewContext(authCode,ctx);
+ const provider=win.YOS_DAYSTREAM_TASK_AUTH;
+ assert.equal(provider.hasDeviceKey(),true);
+ const host={replaceChildren(){},appendChild(){},getBoundingClientRect:()=>({width:280})},status={textContent:''};
+ assert.equal(await provider.setup({host,status,save:s=>{saved.push(s);return true},deviceOnly:true}),true);
+ assert.equal(requests.length,1);
+ assert.equal(requests[0].opts.headers.Authorization,'Bearer '+device);
+ assert.equal(saved.length,1);
+ assert.equal(saved[0].origin,'notion');
+ assert.doesNotMatch(JSON.stringify(saved[0]),/yos_cd_/);
+});
+test('unavailable device authorization never removes Calendar key or secretly starts Google',async()=>{
+ const token='yos_cd_'+'b'.repeat(64),calls=[];
+ const win={localStorage:{getItem:()=>token},google:{accounts:{id:{initialize(){},renderButton(){calls.push('google-button')}}}},document:{createElement:()=>({textContent:''})}};
+ win.window=win;
+ const ctx={window:win,location:{origin:'https://yskn0008-bot.github.io'},document:win.document,
+  fetch:async(url)=>{calls.push(url);return url.endsWith('/public-config')?{ok:true,json:async()=>({googleClientId:'valid.apps.googleusercontent.com'})}:{ok:false,status:401}},
+  AbortController,setTimeout,clearTimeout,Date,Intl};
+ vm.runInNewContext(authCode,ctx);
+ const host={replaceChildren(){},appendChild(){},getBoundingClientRect:()=>({width:280})},status={textContent:''};
+ const provider=win.YOS_DAYSTREAM_TASK_AUTH;
+ assert.equal(await provider.setup({host,status,save:()=>{throw Error('No save allowed')},deviceOnly:true}),false);
+ assert.deepEqual(calls, ['https://project-y-yos-ai.vercel.app/api/yos/tasks?source=notion']);
+ assert.equal(provider.hasDeviceKey(),true);
+ assert.equal(await provider.setup({host,status,save:()=>true}),true);
+ assert.ok(calls.includes('https://project-y-yos-ai.vercel.app/api/yos/public-config'));
+ assert.ok(calls.includes('google-button'));
 });
 test('cross-origin page cannot start YOS identity flow',async()=>{
  const win={};win.window=win;

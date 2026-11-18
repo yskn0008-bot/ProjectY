@@ -427,12 +427,16 @@ html:has(body.yos-daystream-web),body.yos-daystream-web{background:#111721}
   f.onchange=async()=>{const file=f.files?.[0];if(!file)return;if(file.size>1000000){alert('ファイルが大きすぎます');return}try{const raw=await file.text();if(/\.ics$/i.test(file.name)){if(!web.importSource(raw,file.name))alert('カレンダー読込を中止しました。元データは保持されています。');return;}const p=JSON.parse(raw);if(p?.schema==='yos-daystream-direct-task-import-v1'){if(!web.importDirectTasks(p))alert('タスクの追加を中止しました。既存データは保護されています。')}else if(p?.schema==='yos-daystream-web-all-backup-v1'){if(!web.importAll(p))alert('一括復元を中止しました。保存済みデータは保護されています。')}else if(p&&p.version===1&&p.days){if(!web.import(p))alert('時間割の照合または保存に失敗しました。元データは保持されています。')}else if(!web.importSource(raw,file.name)){alert('タスク読込を中止しました。元データは保持されています。')}}catch{alert('ファイルを読み取れません。変更はありません。')}finally{f.value=''}};
   document.getElementById('yosWebExport').onclick=()=>{if(!web.export())alert('バックアップを書き出せませんでした。保存データを確認してください。')};
   const taskRefresh=document.getElementById('yosWebTaskRefresh'),taskAuth=document.getElementById('yosWebTaskAuth');
-  taskRefresh.onclick=()=>{
+  const setupTaskSource=(deviceOnly=false)=>{
    taskAuth.hidden=false;
    const provider=window.YOS_DAYSTREAM_TASK_AUTH;
    if(!provider){document.getElementById('yosWebTaskAuthStatus').textContent='本人確認機能を読み込めませんでした';return}
-   provider.setup({host:document.getElementById('yosWebGoogleButton'),status:document.getElementById('yosWebTaskAuthStatus'),save:snapshot=>web.saveAuthorizedTasks(snapshot)});
+   provider.setup({host:document.getElementById('yosWebGoogleButton'),status:document.getElementById('yosWebTaskAuthStatus'),save:snapshot=>web.saveAuthorizedTasks(snapshot),deviceOnly});
   };
+  taskRefresh.onclick=()=>setupTaskSource(false);
+  // The authenticated Calendar and DAYSTREAM may share Safari origin storage.
+  // A standalone PWA may not share it; never assume a key exists or request one.
+  if(window.YOS_DAYSTREAM_TASK_AUTH?.hasDeviceKey?.())setupTaskSource(true);
   const sourceText=document.getElementById('yosWebSourceState');if(sourceText){sourceText.textContent='端末内保存 · '+(existingYosCache?'YOS認証済みキャッシュ（6時間以内）':importedTasks?.source==='yos-auth-cache'?'YOS認証済みTasks写し':importedTasks?'タスク手動取込':'Notion未接続')+' · '+(nativeCalendar?'iPhone予定の確認済み端末取込':importedCalendar?'Apple予定手動取込':existingLifeSchedule?'保存済みMY WAY生活予定':'Appleカレンダー未接続')+' · 自動同期なし';}
   document.getElementById('yosWebHistory').onclick=()=>{
     const panel=document.getElementById('yosWebHistoryPanel'),rows=document.getElementById('yosWebHistoryRows');

@@ -7,6 +7,17 @@
  const API='https://project-y-yos-ai.vercel.app';
  const SITE='https://yskn0008-bot.github.io';
  const GSI='https://accounts.google.com/gsi/client';
+ // Read-only reuse of the existing Calendar candidate's owner-provisioned key.
+ // No key is embedded, generated or newly stored by DAYSTREAM.
+ const DEVICE_STORAGE='yos_calendar_device_key_v1';
+ const DEVICE_RE=/^yos_cd_[a-f0-9]{64}$/;
+ const readDeviceKey=()=>{
+  try{
+   if(location.origin!==SITE)return '';
+   const key=root.localStorage?.getItem(DEVICE_STORAGE)||'';
+   return DEVICE_RE.test(key)?key:'';
+  }catch{return '';}
+ };
  let initialized=false,initializing=null,currentToken='',context=null,inflight=null,lastRead=0,completing=false;
  const set=(status,message)=>{if(status)status.textContent=message};
  const getScript=()=>{
@@ -65,35 +76,57 @@
    return {ok:true,item:updated};
   }catch(e){return {ok:false,reason:e instanceof Error?e.message:'結果不明です。Notionを再取得して確認してください'}}finally{completing=false}
  }
- function setup({host,status,save,includeCalendarMoney=false}){
+ function setup({host,status,save,includeCalendarMoney=false,deviceOnly=false}){
   if(initialized){if(currentToken)return refresh();return Promise.resolve(true)}
   if(initializing)return initializing;
   if(location.origin!==SITE){set(status,'YOS正規サイト以外では本人確認を開始しません');return Promise.resolve(false)}
   if(!host||typeof save!=='function'){set(status,'認証画面の準備ができません');return Promise.resolve(false)}
   context={status,save,includeCalendarMoney};
-  set(status,'Google本人確認を準備しています');
-  initializing=Promise.all([
-   timedFetch(API+'/api/yos/public-config',{headers:{Accept:'application/json'}}).then(async response=>{
-    if(!response.ok)throw new Error('既存YOS認証設定を取得できません');
-    const data=await response.json();
-    if(typeof data.googleClientId!=='string'||!/^[a-zA-Z0-9_.-]+\.apps\.googleusercontent\.com$/.test(data.googleClientId))throw new Error('認証設定が無効です');
-    return data.googleClientId;
-   }),
-   getScript()
-  ]).then(([clientId,googleId])=>{
-   googleId.initialize({client_id:clientId,auto_select:false,itp_support:true,use_fedcm_for_prompt:true,callback:async({credential})=>{
-    const token=typeof credential==='string'?credential.trim():'';
-    if(!token||token.length>8192){set(status,'本人確認を完了できませんでした');return}
-    currentToken=token;return refresh();
-   }});
-   host.replaceChildren();
-   googleId.renderButton(host,{type:'standard',theme:'outline',size:'large',text:'continue_with',shape:'rectangular',width:Math.min(300,Math.max(220,Math.floor(host.getBoundingClientRect().width||260)))});
-   initialized=true;set(status,'Google本人確認を選ぶと、既存YOS Tasksの読取専用データを更新します');return true
-  }).catch(e=>{set(status,e instanceof Error?e.message:'認証を利用できません');return false}).finally(()=>{initializing=null});
-  return initializing
+  const googleSetup=()=>{
+   set(status,'Google本人確認を準備しています');
+   return Promise.all([
+    timedFetch(API+'/api/yos/public-config',{headers:{Accept:'application/json'}}).then(async response=>{
+     if(!response.ok)throw new Error('既存YOS認証設定を取得できません');
+     const data=await response.json();
+    if(typeof data.googleClientId!=='string'||!data.googleClientId.endsWith('.apps.googleusercontent.com')||!/^[a-zA-Z0-9_.-]+$/.test(data.googleClientId))throw new Error('認証設定が無効です');
+     return data.googleClientId;
+    }),
+    getScript()
+   ]).then(([clientId,googleId])=>{
+    googleId.initialize({client_id:clientId,auto_select:false,itp_support:true,use_fedcm_for_prompt:true,callback:async({credential})=>{
+     const token=typeof credential==='string'?credential.trim():'';
+     if(!token||token.length>8192){set(status,'本人確認を完了できませんでした');return}
+     currentToken=token;return refresh();
+    }});
+    host.replaceChildren();
+    googleId.renderButton(host,{type:'standard',theme:'outline',size:'large',text:'continue_with',shape:'rectangular',width:Math.min(300,Math.max(220,Math.floor(host.getBoundingClientRect().width||260)))});
+    initialized=true;set(status,'Google本人確認を選ぶと、既存YOS Tasksの読取専用データを更新します');return true;
+   }).catch(e=>{set(status,e instanceof Error?e.message:'認証を利用できません');return false});
+  };
+  const deviceKey=readDeviceKey();
+  if(deviceKey){
+   currentToken=deviceKey;
+   set(status,'既存Calendarの端末接続を確認しています');
+   initializing=refresh(true).then(ok=>{
+    if(ok){
+     host.replaceChildren();
+     const note=root.document?.createElement?.('p');
+     if(note){note.textContent='接続済み。Google・Face ID操作は不要です。';host.appendChild?.(note)}
+     initialized=true;
+     return true;
+    }
+    // A missing/disabled backend must not delete Calendar's shared key.
+    currentToken='';
+    return deviceOnly?false:googleSetup();
+   }).finally(()=>{initializing=null});
+   return initializing;
+  }
+  if(deviceOnly)return Promise.resolve(false);
+  initializing=googleSetup().finally(()=>{initializing=null});
+  return initializing;
  }
  root.addEventListener?.('online',()=>{if(currentToken)refresh(false)});
  root.document?.addEventListener?.('visibilitychange',()=>{if(root.document.visibilityState==='visible'&&currentToken)refresh(false)});
  root.setInterval?.(()=>{if(currentToken&&root.document?.visibilityState==='visible')refresh(false)},60000);
- root.YOS_DAYSTREAM_TASK_AUTH={setup,refresh,complete};
+ root.YOS_DAYSTREAM_TASK_AUTH={setup,refresh,complete,hasDeviceKey:()=>Boolean(readDeviceKey())};
 })(typeof window!=='undefined'?window:globalThis);
