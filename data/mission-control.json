@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-19T01:00:55+09:00",
+  "updated_at": "2026-11-19T01:03:27+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -13,6 +13,16 @@
   },
   "inbox": [
     {
+      "id": "github-pr-827",
+      "title": "PR #827 JOURNAL: Browse today and past articles by genre or date",
+      "type": "GitHub PR",
+      "status": "review",
+      "priority": 1,
+      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/827",
+      "updated_at": "2026-11-18T16:02:59Z"
+    },
+    {
       "id": "github-pr-663",
       "title": "PR #663 YOS 日記: standalone Shortcut + existing Notion bridge + isolated signing",
       "type": "GitHub PR",
@@ -21,16 +31,6 @@
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/663",
       "updated_at": "2026-11-18T15:25:14Z"
-    },
-    {
-      "id": "github-pr-765",
-      "title": "PR #765 YOS Calendar｜Passkey backend hardening (integration into #764 only)",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/765",
-      "updated_at": "2026-11-16T17:40:17Z"
     },
     {
       "id": "github-pr-767",
@@ -264,7 +264,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #649をレビューして公開判断する",
+      "next_action": "PR #827をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -274,7 +274,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-19T01:00:55+09:00",
+      "last_update": "2026-11-19T01:03:27+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -349,13 +349,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 9件・Open PR 60件を自動同期中",
+      "next_action": "Open Issue 9件・Open PR 61件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-19T01:00:55+09:00",
+      "last_update": "2026-11-19T01:03:27+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -369,7 +369,7 @@
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #649をレビューして公開判断する",
+      "next_action": "PR #827をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -378,7 +378,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-19T01:00:55+09:00",
+      "last_update": "2026-11-19T01:03:27+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -460,5 +460,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "b8e79db5f8ecb56b05c7b453517495ea76616d747447fedf7fb807da3288576f"
+  "github_snapshot_hash": "55c0fa9fb0c139d6bd2454399eddd958e33f2417a5921dcbd64ec31cc0cba46e"
 }
