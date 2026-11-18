@@ -34,6 +34,17 @@ test('Undo/redo and three gesture intents preserve normal scroll and task data',
  assert.match(html,/少し押さえて上下に動かすと移動/);
 });
 
+test('Slim duration-aware task bars retain full text and dark casual semantic colors',()=>{
+ assert.match(html,/function yosTaskDurationHeight\(duration\)/);
+ for(const [minutes,pixels] of [[5,42],[15,46],[30,50],[60,54],[120,58]]){
+  assert.ok(html.includes('if(duration<='+minutes+')return '+pixels+';'));
+ }
+ assert.match(html,/return Math\.max\(yosTaskDurationHeight\(item\.d\),contentMin\)/);
+ assert.match(html,/el\.dataset\.durationBand=/);
+ assert.match(html,/\.card\.task\{background:#55278b;border-radius:11px;padding:2px 9px 2px 11px/);
+ for(const tone of ['#155d4d','#76501b','#903e55'])
+  assert.ok(html.includes('background:'+tone),'semantic tone '+tone+' remains available');
+});
 test('Browser scripts parse without native Scriptable APIs',()=>{
  assert.equal(scripts.length,2);
  for(const code of scripts)new vm.Script(code);
