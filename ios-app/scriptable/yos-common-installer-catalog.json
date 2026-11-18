@@ -125,8 +125,8 @@
       "id": "health-automation",
       "name": "YOS Health Automation",
       "path": "ios-app/scriptable/YOS Health Automation.js",
-      "commit": "54f4d246eb7e242e4b038b6acce7841b7b6be7ab",
-      "sha256": "da669fa38631593c29b154a3941a1f520d4ce87673419e6e4ffbef3301af08d1"
+      "commit": "1bfb5e45c05540aa7683b8a7aee0960e970e73f5",
+      "sha256": "97ef50be22157d51fefff3f84308e336ba8e4ed253a7365e64256786168d5d8f"
     }
   ]
 }
