@@ -113,6 +113,13 @@
       "path": "ios-app/scriptable/YOS イケメン攻略本.js",
       "commit": "7c94cb39f25c3ec513167063514d4eb19346a48c",
       "sha256": "41dbc735247e3241a35ec0ccb0bfe141cb684b1f0bc98489104484916ff70281"
+    },
+    {
+      "id": "health-automation",
+      "name": "YOS Health Automation",
+      "path": "ios-app/scriptable/YOS Health Automation.js",
+      "commit": "54f4d246eb7e242e4b038b6acce7841b7b6be7ab",
+      "sha256": "da669fa38631593c29b154a3941a1f520d4ce87673419e6e4ffbef3301af08d1"
     }
   ]
 }
