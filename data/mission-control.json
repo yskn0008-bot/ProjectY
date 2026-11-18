@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-18T14:50:33+09:00",
+  "updated_at": "2026-11-18T14:56:02+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -13,14 +13,14 @@
   },
   "inbox": [
     {
-      "id": "github-pr-803",
-      "title": "PR #803 [Taxi] 研究方針を維持して大文字・重要情報に絞った1画面へ改善",
+      "id": "github-pr-651",
+      "title": "PR #651 YOS Notification v0.3: protected capture, live Notion context and safe iPhone updater",
       "type": "GitHub PR",
-      "status": "review",
-      "priority": 1,
-      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/803",
-      "updated_at": "2026-11-18T05:50:13Z"
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/651",
+      "updated_at": "2026-11-16T15:54:43Z"
     },
     {
       "id": "github-pr-762",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-18T05:47:57Z"
+      "updated_at": "2026-11-18T05:50:30Z"
     },
     {
       "id": "github-issue-234",
@@ -205,6 +205,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-3ce453cdf9dc",
+      "title": "feat(taxi): simplify dashboard with large readable type",
+      "completed_at": "2026-11-18T05:55:33Z",
+      "result": "GitHub mainへ反映（3ce453c）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/3ce453cdf9dc5fd5c210149f25b800deae17d1ff"
+    },
+    {
       "id": "github-commit-1eb82c1b9860",
       "title": "journal: restore original premium magazine reader at existing URL",
       "completed_at": "2026-11-18T05:43:59Z",
@@ -233,13 +240,6 @@
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/496a0ea4e35b9bcaef0efda821c057e81ecc82e7"
     },
     {
-      "id": "github-commit-15f691f27882",
-      "title": "journal: deliver page-turn iPhone PWA at existing Web URL",
-      "completed_at": "2026-11-18T04:53:10Z",
-      "result": "GitHub mainへ反映（15f691f）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/15f691f2788255db711ee11011a61d5c6ab8f68a"
-    },
-    {
       "id": "complete-002",
       "title": "iPhone向けMission Control Dashboardを実装",
       "completed_at": "2026-07-17T17:55:00+09:00",
@@ -264,7 +264,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #803をレビューして公開判断する",
+      "next_action": "PR #649をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -274,7 +274,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-18T14:50:33+09:00",
+      "last_update": "2026-11-18T14:56:02+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -349,13 +349,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 9件・Open PR 59件を自動同期中",
+      "next_action": "Open Issue 9件・Open PR 58件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-18T14:50:33+09:00",
+      "last_update": "2026-11-18T14:56:02+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -369,7 +369,7 @@
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #803をレビューして公開判断する",
+      "next_action": "PR #649をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -378,7 +378,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-18T14:50:33+09:00",
+      "last_update": "2026-11-18T14:56:02+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -460,5 +460,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "1a016ae6af0dd19e462f11907bfe820e96fd5b83acb1042761af7dbc2b98ee50"
+  "github_snapshot_hash": "a91efd471c4357342dbb8d27ecaa5d83f5289b437e17ff59c8a6fc75a0d36921"
 }
