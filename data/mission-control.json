@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-19T00:36:51+09:00",
+  "updated_at": "2026-11-19T00:45:06+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-18T15:35:39Z"
+      "updated_at": "2026-11-18T15:44:12Z"
     },
     {
       "id": "github-issue-234",
@@ -205,6 +205,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-08630a0d6644",
+      "title": "journal: preserve the original design and reduce only mobile card spacing (#821)",
+      "completed_at": "2026-11-18T15:44:16Z",
+      "result": "GitHub mainへ反映（08630a0）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/08630a0d664401744ecca3060f25c356c483a6df"
+    },
+    {
       "id": "github-commit-6c1dc4137fd2",
       "title": "journal: tighten the mobile article list spacing (#820)",
       "completed_at": "2026-11-18T15:35:57Z",
@@ -231,13 +238,6 @@
       "completed_at": "2026-11-18T09:17:35Z",
       "result": "GitHub mainへ反映（9d9c2b5）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/9d9c2b5ac76cf1ee2b571d62335d7b06fc244372"
-    },
-    {
-      "id": "github-commit-aa61b6b4d2a8",
-      "title": "journal: restore actually approved Smartlog v712 reader exactly",
-      "completed_at": "2026-11-18T09:13:08Z",
-      "result": "GitHub mainへ反映（aa61b6b）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/aa61b6b4d2a8a77a9880570af9494bdfc98d2e99"
     },
     {
       "id": "complete-002",
@@ -274,7 +274,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-19T00:36:51+09:00",
+      "last_update": "2026-11-19T00:45:06+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -355,7 +355,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-19T00:36:51+09:00",
+      "last_update": "2026-11-19T00:45:06+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -378,7 +378,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-19T00:36:51+09:00",
+      "last_update": "2026-11-19T00:45:06+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -460,5 +460,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "61aa123a6a1cb3010fe7a79e0378affc4624801954ac7f0e75d033fe6d531177"
+  "github_snapshot_hash": "f6228dc25536a541b8652a2e309829883e257d170bebfe0825c2da9f9b56f263"
 }
