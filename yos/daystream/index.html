@@ -104,6 +104,22 @@ button:active{opacity:.8}@media(min-width:640px){.dock{left:calc((100vw - 640px)
 .card.task.compat-negative{background:#aa7529;box-shadow:inset 0 1px 0 #ffffff35,0 3px 8px #08061238}
 .card.task.compat-danger{background:#c45e78;box-shadow:inset 0 1px 0 #ffffff35,0 3px 8px #08061238}
 .card.task.drag-preview{box-shadow:inset 0 1px 0 #ffffff56,0 9px 23px #08061280}
+
+/* Compact, crisply separated foreground bars; long overlapping windows recede. */
+.card.task{border:1px solid #f5e8ffb8;box-shadow:0 0 0 1px #1b2232a8,0 3px 7px #08061270;padding:1px 8px 1px 10px;border-radius:9px}
+.card.task .task-copy{gap:1px}
+.card.task .task-copy b,.card.task.lane .task-copy b,.card.task.tiny .task-copy b,.card.task.compact .task-copy b{font-size:12.5px;line-height:1.18}
+.card.task .task-copy small,.card.task.lane .task-copy small,.card.task.tiny .task-copy small,.card.task.compact .task-copy small{font-size:10.5px;line-height:1.1}
+.card.task .task-drag-grip{min-height:30px;min-width:38px;margin-right:-4px;border-left:1px solid #ffffff40}
+.card.task.compat-positive{border-color:#b9f3df;box-shadow:0 0 0 1px #1b2232a8,0 3px 7px #08061270}
+.card.task.compat-negative{border-color:#ffe1ad;box-shadow:0 0 0 1px #1b2232a8,0 3px 7px #08061270}
+.card.task.compat-danger{border-color:#ffd5e0;box-shadow:0 0 0 1px #1b2232a8,0 3px 7px #08061270}
+.card.task.yos-backdrop{background:#51445d;border:1px dashed #c7acd4;box-shadow:none;color:#f4f0f7;opacity:1;z-index:1}
+.card.task.yos-backdrop.compat-positive{background:#304c46;border-color:#86c6ab}
+.card.task.yos-backdrop.compat-negative{background:#51483d;border-color:#cbb18a}
+.card.task.yos-backdrop.compat-danger{background:#654753;border-color:#c999a6}
+.card.task.yos-foreground{z-index:3}
+.card.task.drag-preview,.card.task.moving{box-shadow:0 0 0 1px #fff9,0 8px 20px #0909118a}
 </style><script src="./source-adapters.js"></script><script src="../../life/calendar/native-bridge.js"></script><script src="./yos-tasks-auth.js"></script></head><body class="yos-daystream-web"><div class="yos-web-port" role="navigation" aria-label="DAYSTREAM Web版">
 <a href="../">YOS</a><strong>DAYSTREAM · WEB</strong>
 <button id="yosWebImport" type="button">データ読込</button><button id="yosWebExport" type="button">書き出し</button>
@@ -801,13 +817,13 @@ function yosElasticAxis(rows,baseScale){
 /* Time grows vertically only where task labels or dense, simultaneous entries require it.
    The source start/end times never change; long overlapping tasks become full-width backdrops. */
 function yosTaskDurationHeight(duration){
- // Compact progression in display pixels, not edits to the source duration.
- if(duration<=5)return 42;
- if(duration<=15)return 46;
- if(duration<=30)return 50;
- if(duration<=60)return 54;
- if(duration<=120)return 58;
- return 60;
+ // Denser display only; saved task minutes remain unchanged.
+ if(duration<=5)return 34;
+ if(duration<=15)return 36;
+ if(duration<=30)return 38;
+ if(duration<=60)return 42;
+ if(duration<=120)return 46;
+ return 48;
 }
 function yosReadableTaskHeight(item){
  // Reserve space for the 38px drag handle + full title and full start/end text.
@@ -816,7 +832,7 @@ function yosReadableTaskHeight(item){
  const available=Math.max(122,Math.min(610,window.innerWidth)-166);
  const approxChars=Math.max(7,Math.floor(available/14));
  const lines=Math.max(1,Math.ceil([...String(item.t||'')].length/approxChars));
- const contentMin=17*lines+13+2+8;
+ const contentMin=15*lines+12+1+4+2;
  return Math.max(yosTaskDurationHeight(item.d),contentMin);
 }
 function yosBackdropRows(rows){
