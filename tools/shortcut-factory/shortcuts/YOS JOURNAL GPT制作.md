@@ -30,4 +30,13 @@
 - 既存編集契約: `journal/GPT_EDITORIAL.md`
 - 既存公開ゲート: `journal/gpt-editorial-gate.mjs`
 
-状態: **ソース作成・構文未検証 / 未署名 / iPhone未導入 / 公開経路未接続**。
+## 2026-11-19｜機械ビルド結果
+
+- 既存Shortcut Factory v3の専用PRジョブに接続し、固定Cherri v2.3.0でコンパイルPASS、既存秘密情報静的検査PASS。
+- `validate_journal_gpt_candidate.py` がGPTアクション（ChatGPT / Text / FollowUp false）、原稿保存（固有名・上書きOFF・保存場所確認OFF）、公開/URL送信アクションなしを検証PASS。
+- 既存HubSignアダプター署名PASS。AEA1形式・サイズ検査PASS。GitHub Actions [run #44369127226](https://github.com/yskn0008-bot/ProjectY/actions/runs/44369127226)、成果物名 `yos-journal-gpt-shortcut-candidate`（artifact #14459146692）。
+- 成果物のzipを取得し、署名済み `.shortcut` 24,885 bytes / AEA1、未署名Workflowは25アクション、モデルが `ChatGPT`、Text出力、FollowUp false、保存時の上書きOFFと再検証済み。
+- **未完了**：iPhone実機取り込み、本人端末でChatGPT実行許可の確認、原稿のiCloud実保存・同名競合・無入力・オフラインの実測。既存公開ゲートへの無人受渡しも未接続。実際に記事が公開された証拠ではない。
+- 配布は受入テスト用の署名済み候補に限る。既存共通インストーラーへの本配布登録、mainマージ、既存通知の切替えは行わない。
+
+状態: **Cherriビルド・構造検査・署名PASS / iPhone実機未確認 / 公開経路未接続**。
