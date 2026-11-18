@@ -41,13 +41,25 @@ test('fail closed on permission denied',async()=>{
  assert.match(r.outputs[0],/^health_error:/);
  assert.equal(r.completed,1);
 });
-test('manual menu reuses existing Clarity',async()=>{
+test('manual menu schedules water only and does not open another app',async()=>{
  const r=await invoke('menu',{selected:0});
- assert.ok(r.opened[0].startsWith('shortcuts://run-shortcut?name=Clarity.Voice'));
+ assert.equal(r.notifications.length,4);
+ assert.equal(r.opened.length,0);
+ assert.equal(r.completed,1);
 });
-test('manual menu opens original JOURNAL URL',async()=>{
+test('manual menu cancels only hydration notifications',async()=>{
  const r=await invoke('menu',{selected:1});
- assert.deepEqual(r.opened,['https://yskn0008-bot.github.io/ProjectY/journal-v2/']);
+ assert.equal(r.notifications.length,0);
+ assert.equal(r.cancelled.length,1);
+ assert.equal(r.cancelled[0].length,4);
+ assert.equal(r.opened.length,0);
+});
+test('health automation has no Clarity or JOURNAL launch dependency',()=>{
+ assert.ok(!script.includes('Safari.open('));
+ assert.ok(!script.includes('shortcuts://run-shortcut'));
+ assert.ok(!script.includes('journal-v2'));
+ assert.ok(!script.includes('Clarity.Voice'));
+ assert.ok(!script.includes('JOURNAL'));
 });
 test('unknown command does not schedule or cancel',async()=>{
  const r=await invoke('invalid');

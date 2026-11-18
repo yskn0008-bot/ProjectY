@@ -2,14 +2,12 @@
 // icon-color: green; icon-glyph: heart;
 // YOS_SCRIPT_NAME: YOS Health Automation
 // YOS Health Automation — Scriptable / iPhone Shortcuts
-// Safe operations: schedules/cancels only its own local water reminders.
+// Purpose: sleep-mode-based hydration reminders only.
 // Does NOT access HealthKit, control Sleep Cycle, or modify other YOS scripts.
 const YOS_HEALTH = Object.freeze({
   scriptName: 'YOS Health Automation',
   waterIds: [1, 2, 3, 4].map(i => `yos.health.water.awake.${i}`),
   offsetMinutes: [120, 300, 480, 660],
-  journalUrl: 'https://yskn0008-bot.github.io/ProjectY/journal-v2/',
-  clarityName: 'Clarity.Voice',
 });
 
 function getMode() {
@@ -52,23 +50,14 @@ async function scheduleWater(now = new Date()) {
 async function showMenu() {
   const menu = new Alert();
   menu.title = 'YOS Health';
-  menu.message = '既存のアプリ・ショートカットを再利用します。';
-  menu.addAction('食事の相談（Clarity）');
-  menu.addAction('今日のJOURNAL');
+  menu.message = '起床後の水分通知を管理します。';
   menu.addAction('水分通知を設定');
   menu.addAction('水分通知を止める');
   menu.addCancelAction('閉じる');
   const choice = await menu.presentSheet();
   if (choice === 0) {
-    // This opens existing Clarity for a natural-language meal conversation;
-    // it does NOT pretend to automatically prescribe meals.
-    const url = 'shortcuts://run-shortcut?name=' + encodeURIComponent(YOS_HEALTH.clarityName);
-    Safari.open(url);
-  } else if (choice === 1) {
-    Safari.open(YOS_HEALTH.journalUrl);
-  } else if (choice === 2) {
     await scheduleWater();
-  } else if (choice === 3) {
+  } else if (choice === 1) {
     await cancelWater();
   }
 }
