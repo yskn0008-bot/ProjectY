@@ -234,7 +234,7 @@ jobs:
           python3 tools/clarity-factory/sign_with_hubsign.py \
             --input 'tools/shortcut-factory/artifacts/YOS-JOURNAL-GPT-unsigned.shortcut' \
             --output 'tools/shortcut-factory/artifacts/YOS-JOURNAL-GPT-signed.shortcut' \
-            --name 'YOS JOURNAL GPT制作'
+            --name 'YOS JOURNAL GPT制作 TEST'
 
       - name: Check signed AEA1 artifact
         shell: bash
