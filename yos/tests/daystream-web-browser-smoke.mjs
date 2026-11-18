@@ -391,7 +391,18 @@ try{
   }
   assert.ok(byId.get(2105).thickness>byId.get(2110).thickness,
    'long task title wraps instead of being cut in a slim bar');
-  assert.equal(byId.get(2110).color,'rgb(85, 39, 139)','default task color is deep casual purple');
+  assert.equal(byId.get(2110).color,'rgb(153, 88, 210)','default task color is brighter casual purple');
+  for(const id of [2102,2106,2108,2110]){
+   const surface=await p.locator('#tl [data-id="'+id+'"]').evaluate(el=>({
+    shadow:getComputedStyle(el).boxShadow,
+    before:getComputedStyle(el,'::before').display
+   }));
+   assert.equal(surface.before,'none','left stripe must be hidden for task '+id);
+   assert.ok(!surface.shadow.includes('inset 4px'),'left accent shadow absent for task '+id);
+  }
+  assert.equal(byId.get(2106).color,'rgb(37, 142, 112)','positive status has brighter green');
+  assert.equal(byId.get(2108).color,'rgb(170, 117, 41)','negative status has brighter amber');
+  assert.equal(byId.get(2102).color,'rgb(196, 94, 120)','overlap has brighter red');
   assert.equal(byId.get(2110).radius,'11px','rounded casual bars keep compact corners');
 
   const visible=cells.filter(c=>!c.backdrop).sort((a,b)=>a.top-b.top);
