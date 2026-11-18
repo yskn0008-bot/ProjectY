@@ -292,8 +292,10 @@
  function drops(){return dayEvents().filter(e=>e.type==='dropoff'&&!e.voidedAt)}
  function isActive(){return state.businessDate===dateKey()&&Boolean(state.shiftStart)&&!state.shiftEnd}
  function isEnded(){return state.businessDate===dateKey()&&Boolean(state.shiftEnd)}
- function withEvent(type,at){const s=structuredClone(state),id=typeof crypto.randomUUID==='function'?crypto.randomUUID():`local-${Date.now()}-${Math.random().toString(36).slice(2,9)}`;s.events.push({id,businessDate:s.businessDate,type,at,matched:false});return save(s)}
- function stampDropoff(){const at=instant();const day=dateKey(new Date(at));if(state.businessDate!==day){toast('営業日が変わっています。営業状態を確認してください');return false}if(!isActive()){toast('先に営業を開始してください（営業状態をタップ）');return false}const last=[...dayEvents()].reverse().find(e=>e.type==='dropoff');if(last&&Date.parse(at)-Date.parse(last.at)<4000){toast('連続タップを防止しました');return false}if(withEvent('dropoff',at)){render();toast('降車 '+time(at,true)+' を記録（端末内）');return true}return false}
+ // Only the same browser/app storage container may write to this local shift ledger.
+ // Shortcut invocation IDs are saved WITH the event so URL reload/retries cannot duplicate a dropoff.
+ function withEvent(type,at,requestId=null){const s=structuredClone(state);if(requestId&&s.events.some(e=>e.shortcutRequestId===requestId))return false;const id=typeof crypto.randomUUID==='function'?crypto.randomUUID():`local-${Date.now()}-${Math.random().toString(36).slice(2,9)}`;const event={id,businessDate:s.businessDate,type,at,matched:false};if(requestId)event.shortcutRequestId=requestId;s.events.push(event);return save(s)}
+ function stampDropoff(requestId=null,shortcutAt=null){const token=typeof requestId==='string'?requestId:null;const at=typeof shortcutAt==='string'?shortcutAt:instant();if(token&&state.events.some(e=>e.shortcutRequestId===token)){toast('この降車はすでに記録されています');return true}const day=dateKey(new Date(at));if(state.businessDate!==day){toast('営業日が変わっています。営業状態を確認してください');return false}if(!isActive()){toast('先に営業を開始してください（営業状態をタップ）');return false}const last=[...dayEvents()].reverse().find(e=>e.type==='dropoff');if(last&&Date.parse(at)-Date.parse(last.at)<4000){toast('連続タップを防止しました');return false}if(withEvent('dropoff',at,token)){render();toast('降車 '+time(at,true)+' を記録（この画面の保存領域）');return true}return false}
  function changeShift(){const now=instant(),today=dateKey(new Date(now));if(state.businessDate!==today&&state.shiftStart&&!state.shiftEnd){toast('前回の営業が未終了です。履歴でご確認ください');return}
  const base=state.businessDate===today?structuredClone(state):{...structuredClone(state),businessDate:today,shiftStart:null,shiftEnd:null};
  if(!base.shiftStart){openSheet('営業を開始',`営業開始の時刻を端末に記録します。`,[{text:'開始する',primary:true,run:()=>{const s=structuredClone(base);s.shiftStart=instant();if(commitShift(s,'shift_start')){render();toast('営業開始を記録しました')}}}]);return}
@@ -325,8 +327,45 @@
  ];
  function showM100(){openSheet('M100｜営業判断ルール',m100Rules.join('\n\n'));$('modal').classList.add('m100-open')}
  $('m100-rule-btn').addEventListener('click',showM100);
+ // Shortcut widget deep-link: the action runs ONLY in the storage container that opens this URL.
+ // iOS standalone PWA storage is separate from Safari; never create a new shift silently.
+ function handleShortcutLink(){
+   const url=new URL(location.href),action=url.searchParams.get('yos_action');
+   if(!action)return;
+   const requestId=url.searchParams.get('yos_req');
+   // Remove the action BEFORE doing anything; refresh/back must not re-run the operation.
+   url.searchParams.delete('yos_action');url.searchParams.delete('yos_req');
+   history.replaceState(history.state,'',url.pathname+url.search+url.hash);
+   if(action==='dropoff'){
+     if(!requestId||!/^[A-Za-z0-9_-]{12,80}$/.test(requestId)){
+       openSheet('降車は記録していません','ショートカットの一意な操作番号が確認できません。重複記録を防ぐため処理を停止しました。');return;
+     }
+     if(state.events.some(e=>e.shortcutRequestId===requestId)){toast('この降車はすでに記録されています');return;}
+     if(!isActive()){
+       openSheet('降車は記録していません','この画面の保存先に営業中の記録がありません。Safariとホーム画面Webアプリは保存領域が異なる場合があります。出庫と降車を同じ入口で実行し、履歴を確認してください。');return;
+     }
+     // The first 14 digits are the native Shortcuts tap time in JST, not the browser-open time.
+     const stamp=requestId.match(/^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})-/);
+     if(!stamp){openSheet('降車は記録していません','操作時刻を検証できませんでした。古いショートカットは更新してください。');return;}
+     const at=`${stamp[1]}-${stamp[2]}-${stamp[3]}T${stamp[4]}:${stamp[5]}:${stamp[6]}+09:00`;
+     const gap=Date.now()-Date.parse(at);
+     if(!Number.isFinite(gap)||gap < -30000||gap > 180000){openSheet('降車は記録していません','操作から3分以上経過したか端末時刻が一致しません。間違った降車時刻を保存しないため停止しました。安全な場所で営業履歴を確認してください。');return;}
+     stampDropoff(requestId,at);return;
+   }
+   if(action==='start'){
+     if(isActive()){toast('この保存先ではすでに営業中です');return;}
+     if(isEnded()){openSheet('営業開始はできません','この営業日はすでに営業終了しています。履歴を確認してください。');return;}
+     changeShift();return;
+   }
+   if(action==='end'){
+     if(!isActive()){openSheet('営業終了は記録していません','この画面の保存先に営業中の記録がありません。履歴と実際の勤務を確認してください。');return;}
+     changeShift();return;
+   }
+   if(action==='report'){navigate('sales');$('photo-btn').focus();toast('日報写真ボタンから写真を選択してください');return;}
+   if(action==='m100'){navigate('strategy');showM100();}
+ }
  $('status-btn').addEventListener('click',changeShift);$('drop-btn').addEventListener('click',stampDropoff);$('photo-btn').addEventListener('click',()=>$('photo-input').click());$('photo-input').addEventListener('change',e=>{handleFile(e.target.files?.[0]);e.target.value=''});$('decision-btn').addEventListener('click',()=>navigate('strategy'));document.querySelectorAll('[data-band]').forEach(x=>x.addEventListener('click',()=>{const band=Number(x.dataset.band);navigate('strategy');const target=document.querySelectorAll('[data-strat]')[[1,3,4][band]];target?.focus()}));document.querySelectorAll('[data-page]').forEach(x=>x.addEventListener('click',()=>navigate(x.dataset.page)));document.querySelectorAll('[data-strat]').forEach(x=>x.addEventListener('click',()=>{const labels=['退勤・宿泊需要を検証。GO・無線中心','飲食・観光の回転を検証','22時以降、待機過多を避ける','帰宅需要の重点候補。供給過多に注意','降車地での再乗車と帰庫動線を比較'];openSheet('時間帯別の営業方針',labels[Number(x.dataset.strat)]+'。これらは初期仮説であり、現地の需要や安全な待機可否は未確認です。')}));$('close-modal').addEventListener('click',closeSheet);$('modal').addEventListener('click',e=>{if(e.target===$('modal'))closeSheet()});$('history-info-btn').addEventListener('click',()=>{location.href='./index.html?legacy=1'});$('export-btn').addEventListener('click',exportJson);
- render();setInterval(()=>{const now=new Date();$('current-clock').textContent=time(now);updatePlan()},30000);
+ render();handleShortcutLink();setInterval(()=>{const now=new Date();$('current-clock').textContent=time(now);updatePlan()},30000);
  window.YOSTaxiPreview={debugState:()=>structuredClone(state),recordDropoff:stampDropoff,navigate,activeBand};
  if('serviceWorker' in navigator) addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js').catch(()=>{}));
 })();
