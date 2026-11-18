@@ -12,7 +12,7 @@ p{margin:10px 0 17px}figure{margin:16px 0 20px}figure img{display:block;width:10
 .notice{background:#f4f4f4;padding:10px 12px;font-size:12px;line-height:1.5;margin-bottom:18px;color:#444}
 #status{font-size:14px;color:#777}footer{font-size:12px;color:#777;border-top:1px solid #ddd;padding-top:16px;margin-top:35px}
 @media(max-width:350px){#view{padding-left:16px;padding-right:16px}.item{grid-template-columns:94px 1fr;gap:10px}.item img{width:94px;height:80px}.item strong{font-size:16px}}
-.broken-image{aspect-ratio:3/2;display:flex;align-items:center;justify-content:center;border:1px solid #e6e6e6;background:#f7f7f7;color:#777;font-size:13px;padding:16px;text-align:center}.read-date{font-size:12px;color:#777;margin:6px 0 12px}.item.no-image{grid-template-columns:1fr}.item.no-image .excerpt{font-size:13px}.hero-card.no-image{padding-top:14px}.listen-bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:4px 0 18px;padding:10px 0;border-top:1px solid #e8e8e8;border-bottom:1px solid #e8e8e8}.listen-bar button{border:1px solid #d6d6d6;border-radius:8px;background:#fff;color:#222;padding:7px 12px;font-size:14px;font-weight:650;min-height:40px}.listen-bar button:disabled{color:#aaa;border-color:#eee}.listen-bar label{font-size:12px;color:#555;margin-left:auto}.listen-bar select{font-size:14px;padding:6px;border:1px solid #d6d6d6;background:#fff;border-radius:6px}.listen-note{font-size:12px;color:#666;margin:0 0 16px}@media(max-width:420px){.listen-bar label{margin-left:0;width:100%}}.nemo-audio{border:1px solid #e8e8e8;background:#fafafa;border-radius:10px;margin:12px 0 18px;padding:14px}.nemo-audio b{font-size:15px}.nemo-audio audio{display:block;width:100%;margin:10px 0}.nemo-audio p{font-size:12px;color:#666;margin:0}</style><link rel="manifest" href="./manifest.webmanifest"><link rel="icon" href="./icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="./apple-touch-icon.png"></head><body><header><span class="logo">YOS JOURNAL</span><button class="back" id="home" hidden>‹ 記事一覧</button></header><main id="view"><p id="status">記事を読み込んでいます…</p></main>
+.broken-image{aspect-ratio:3/2;display:flex;align-items:center;justify-content:center;border:1px solid #e6e6e6;background:#f7f7f7;color:#777;font-size:13px;padding:16px;text-align:center}.read-date{font-size:12px;color:#777;margin:6px 0 12px}.item.no-image{grid-template-columns:1fr}.item.no-image .excerpt{font-size:13px}.hero-card.no-image{padding-top:14px}</style></head><body><header><span class="logo">YOS JOURNAL</span><button class="back" id="home" hidden>‹ 記事一覧</button></header><main id="view"><p id="status">記事を読み込んでいます…</p></main>
 <script>
 (()=>{'use strict';
 const view=document.getElementById('view'),home=document.getElementById('home'),archiveUrl='https://raw.githubusercontent.com/yskn0008-bot/ProjectY/main/journal/editions/2026-11-12.json',latestUrl='https://raw.githubusercontent.com/yskn0008-bot/ProjectY/main/ios-app/scriptable/journal/latest.json',editionsBase='https://raw.githubusercontent.com/yskn0008-bot/ProjectY/main/journal/editions/';
@@ -28,59 +28,15 @@ const media=[
 let issue=null,items=[],archived=true;
 const safe=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function resolveMedia(i){
- const legacy=(issue?.issuedOn==='2026-11-12'&&items.length===6)?media[i]:null;
- if(legacy)return legacy;
+ const original=issue?.issuedOn==='2026-11-12'&&items.length===6?media[i]:null;
+ if(original)return original;
  const a=items[i]||{},url=String(a.image||''),src=String(a.imageSourceUrl||''),license=String(a.imageLicenseUrl||'');
  if(a.imageKind!=='reference'||!/^https:\/\/commons\.wikimedia\.org\/wiki\/Special:FilePath\//.test(url)||!/^https:\/\/commons\.wikimedia\.org\/wiki\/File:/.test(src)||!a.imageCaption||!a.imageCredit)return null;
  if(license&&!/^https:\/\/creativecommons\.org\/(?:licenses\/|publicdomain\/)/.test(license))return null;
- return {url,alt:String(a.imageCaption),credit:'参考写真（開催当日の記録ではありません）：'+String(a.imageCredit)+'。'+String(a.imageCaption),creditUrl:src,licenseUrl:license};
+ return {url,alt:String(a.imageCaption),credit:'参考写真（当日現場の写真ではありません）：'+String(a.imageCredit)+'。'+String(a.imageCaption),creditUrl:src,licenseUrl:license};
 }
 const photo=(i)=>{const m=resolveMedia(i);if(!m)return '';return '<figure><img class="story-image" loading="'+(i===0?'eager':'lazy')+'" referrerpolicy="no-referrer" src="'+safe(m.url)+'" alt="'+safe(m.alt)+'"><figcaption><a href="'+safe(m.creditUrl)+'" target="_blank" rel="noopener noreferrer">'+safe(m.credit)+'</a>'+(m.licenseUrl?' <a href="'+safe(m.licenseUrl)+'" target="_blank" rel="noopener noreferrer">利用条件</a>':'')+'</figcaption></figure>'};
 const dateTitle=()=>safe(issue?.issuedOn||'発行日未確認');
-
-const speechAvailable=typeof window!=='undefined'&&'speechSynthesis' in window&&'SpeechSynthesisUtterance' in window;
-// Five device-voice profiles. Actual voice availability depends on the iPhone/browser.
-const speechProfiles=[{label:'標準・自然',rate:1,pitch:1,voice:0},{label:'落ち着いた低音',rate:.9,pitch:.75,voice:0},{label:'明るく軽快',rate:1.12,pitch:1.25,voice:1},{label:'ゆっくり丁寧',rate:.82,pitch:1,voice:0},{label:'ニュース調',rate:1.06,pitch:.9,voice:2}];
-function speechProfile(){return speechProfiles[Number(document.getElementById('speechVoice')?.value||0)]||speechProfiles[0]}
-function speechVoiceChanged(){if(speechActive)speechStop();speechStatus('声の設定を変更しました。朗読するを押してください。')}
-let speakingToken=0,speechParts=[],speechIndex=0,speechCurrent=null,speechActive=false,speechPaused=false,speechStarted=false;
-function speechStatus(message){const el=document.getElementById('speechStatus');if(el)el.textContent=message}
-function speechStop(){speakingToken++;const wasActive=speechActive||speechPaused||speechStarted;speechParts=[];speechIndex=0;speechCurrent=null;speechActive=false;speechPaused=false;speechStarted=false;if(wasActive&&speechAvailable)window.speechSynthesis.cancel();speechUpdate()}
-function speechUpdate(){const play=document.getElementById('speakPlay'),stop=document.getElementById('speakStop');if(play){play.textContent=speechActive?(speechPaused?'▶ 再開':'⏸ 一時停止'):'▶ 朗読する';play.disabled=!speechAvailable}if(stop)stop.disabled=!speechActive}
-// Radio mode expands presentation and practical context using only published article fields.
-// It does not claim additional research or introduce new factual assertions.
-function radioParagraphs(){
- const match=location.hash.match(/article-(\d+)/),idx=match?Number(match[1]):NaN;
- const a=items[idx];if(!a)return speechParagraphs();
- const d=(issue.issuedOn==='2026-11-12'&&items.length===6)?details[idx]:{intro:String(a.summary||''),sections:[['なぜ気になる？',a.reason],['知っておきたいこと',a.action],['注意点',a.caveat]].filter(x=>x[1])};
- const lines=['YOSジャーナル、深掘りラジオ。今日のテーマは、'+a.title+'。','まず、この記事が伝えたいことからお話しします。',d.intro||a.summary||'',
- 'ここからは、話のポイントを順番に整理していきましょう。'];
- for(const section of d.sections||[]){if(section[1])lines.push('まずは、'+section[0]+'について。',String(section[1]),'ここまでを踏まえて、次の視点に進みます。')}
- const points=(a.keyPoints||[]).filter(Boolean);if(points.length){lines.push('ここで、覚えておきたいポイントを整理します。');points.forEach((p,i)=>lines.push('ポイント'+(i+1)+'。'+p))}
- if(a.action)lines.push('実際の暮らしに結びつけるなら、'+a.action);
- if(a.caveat)lines.push('一方で、気をつけたい点もあります。'+a.caveat);
- lines.push('今日の話を聞いて、あなたなら何を試してみたいでしょうか。無理に結論を出さず、一つ気になったことを持ち帰ってみてください。','以上、YOSジャーナル、深掘りラジオでした。なお、この解説は掲載記事を話し言葉に再構成したもので、記事外の追加取材は行っていません。');
- return lines.filter(Boolean)
-}
-function speechParagraphs(){const article=view.querySelector('.article');if(!article)return[];const nodes=article.querySelectorAll('h1,.lead,.facts div,h2,.body,li,.note');return Array.from(nodes).map(el=>(el.textContent||'').trim()).filter(Boolean)}
-function speechStep(token){if(token!==speakingToken||!speechActive)return;if(speechIndex>=speechParts.length){speechActive=false;speechStarted=false;speechPaused=false;speechCurrent=null;speechStatus('読み上げが終了しました');speechUpdate();return}
- const u=new window.SpeechSynthesisUtterance(speechParts[speechIndex++]);u.lang='ja-JP';u.volume=1;const profile=speechProfile();u.rate=profile.rate*Number(document.getElementById('speechRate')?.value||'1');u.pitch=profile.pitch;let voices=[];try{voices=window.speechSynthesis.getVoices()||[]}catch(_){}
- const ja=voices.filter(v=>(v.lang||'').toLowerCase().startsWith('ja'));if(ja.length)u.voice=ja[Math.min(profile.voice,ja.length-1)];
- speechCurrent=u;u.onstart=()=>{if(token!==speakingToken)return;speechStarted=true;speechStatus('朗読中… '+speechIndex+' / '+speechParts.length);speechUpdate()};
- u.onend=()=>{if(token===speakingToken)speechStep(token)};
- u.onerror=(e)=>{if(token===speakingToken){speechActive=false;speechPaused=false;speechStarted=false;speechStatus('朗読できませんでした（'+String(e.error||'音声エラー')+'）。Safariの「ページを読み上げる」もお試しください。');speechUpdate()}};
- try{window.speechSynthesis.speak(u);setTimeout(()=>{if(token===speakingToken&&speechActive&&!speechStarted){speechStatus('音声が始まりません。iPhoneの音量・出力先を確認し、Safariの「ページを読み上げる」をお試しください。')}},3500)}catch(e){speechActive=false;speechPaused=false;speechStarted=false;speechStatus('朗読を開始できません。Safariの「ページを読み上げる」をお試しください。');speechUpdate()}
-}
-function speechToggle(){if(!speechAvailable){speechStatus('このブラウザは音声読み上げに対応していません。Safariで開いてください。');return}const engine=window.speechSynthesis;
- if(speechActive){try{if(speechPaused){engine.resume();speechPaused=false;speechStatus('朗読中…')}else{engine.pause();speechPaused=true;speechStatus('一時停止中')}}catch(_){speechStatus('音声操作に失敗しました')}speechUpdate();return}
- speechParts=document.getElementById('speechMode')?.value==='radio'?radioParagraphs():speechParagraphs();if(!speechParts.length){speechStatus('読み上げる本文が見つかりません');return}
- speakingToken++;speechIndex=0;speechActive=true;speechPaused=false;speechStarted=false;speechStatus('音声を準備しています…');speechUpdate();
- // iOS Safari may silently drop speech when cancel() immediately precedes speak().
- // This first playback is launched directly by a user tap, without cancel().
- speechStep(speakingToken)
-}
-function speechSetup(){const b=document.getElementById('speakPlay'),s=document.getElementById('speakStop');if(!b)return;b.addEventListener('click',speechToggle);s.addEventListener('click',()=>{speechStop();speechStatus('停止しました')});document.getElementById('speechVoice')?.addEventListener('change',speechVoiceChanged);document.getElementById('speechMode')?.addEventListener('change',speechVoiceChanged);speechUpdate();if(!speechAvailable)speechStatus('Safariで開くと音声読み上げを利用できます')}
-
 const jazzPhoto=cc('Jazzband Blueberries.JPG');
 const jazzPhotoHTML='<figure><img class="story-image" loading="lazy" src="'+safe(jazzPhoto)+'" alt="ジャズバンドの一般的な演奏風景"><figcaption>写真：Kasper Egerup / Wikimedia Commons（CC0）。イベント当日の出演者・演奏風景ではありません。 <a href="https://commons.wikimedia.org/wiki/File:Jazzband_Blueberries.JPG" target="_blank" rel="noopener noreferrer">画像の出典</a></figcaption></figure>';
 const details=[
@@ -116,19 +72,19 @@ const details=[
 ]}
 ];
 function imageFallback(root){root.querySelectorAll('img').forEach(img=>{const fail=()=>{const box=document.createElement('div');box.className='broken-image';box.textContent='画像を表示できません。本文と写真の出典リンクは引き続き利用できます。';img.replaceWith(box)};img.addEventListener('error',fail,{once:true});if(img.complete&&!img.naturalWidth)fail()})}
-function renderList(){speechStop();home.hidden=true;document.title='YOS JOURNAL | 記事一覧';view.innerHTML='<div class="issue">'+dateTitle()+' 発行｜'+items.length+'本の読みもの</div><h1>気になる記事から、読もう。</h1><p class="intro">暮らしや楽しみを、少し豊かにする発見を。</p>'+(archived?'<div class="notice">これは'+dateTitle()+'版の保存記事です。今日の新着記事ではありません。</div>':'')+'<div id="cards" class="list"></div><footer>出典に基づいて要約しています。医療・料金・開催情報は最新の公式情報をご確認ください。</footer>';const cards=document.getElementById('cards');items.forEach((a,i)=>{let b=document.createElement('button');b.className=i===0?'hero-card':'item';let m=resolveMedia(i);let img=m?'<img loading="'+(i===0?'eager':'lazy')+'" src="'+safe(m.url)+'" alt="'+safe(m.alt)+'">':'';b.innerHTML=img+'<span><span class="cat">'+safe(a.category)+'</span><strong>'+safe(a.title)+'</strong><span class="excerpt">'+safe((a.summary||'').slice(0,i===0?100:65))+'…</span></span>';if(!m)b.className+=' no-image';b.addEventListener('click',()=>{location.hash='#article-'+i});cards.appendChild(b)});imageFallback(cards)}
-function renderArticle(i){speechStop();let a=items[i],d=(issue.issuedOn==='2026-11-12'&&items.length===6)?details[i]:{intro:String(a.summary||''),sections:[['なぜ気になる？',a.reason],['知っておきたいこと',a.action],['注意点',a.caveat]].filter(x=>x[1])};home.hidden=false;document.title=a.title+' | YOS JOURNAL';const audioPath=/^\d{4}-\d{2}-\d{2}$/.test(issue.issuedOn||'')?'../journal/audio/'+issue.issuedOn+'/article-'+i+'.mp3':'';let parts='<article class="article"><div class="issue">'+dateTitle()+' / '+safe(a.category||'')+'</div><h1>'+safe(a.title)+'</h1>'+photo(i)+(audioPath?'<section id="nemoAudio" class="nemo-audio"><b>無料・男性ナレーション</b><audio id="nemoPlayer" controls preload="metadata" playsinline><source src="'+safe(audioPath)+'" type="audio/mpeg">お使いのブラウザで音声の再生ができません。</audio><p>記事の要点を朗読した音声版です。音声：VOICEVOX Nemo。<a href="'+safe(audioPath)+'">音声だけを開く</a></p></section>':'')+'<div class="listen-bar" role="group" aria-label="記事の朗読"><label>番組 <select id="speechMode" aria-label="音声モード"><option value="radio" selected>深掘りラジオ</option><option value="article">記事を朗読</option></select></label><label>声 <select id="speechVoice" aria-label="朗読の声"><option value="0">標準・自然</option><option value="1">落ち着いた低音</option><option value="2">明るく軽快</option><option value="3">ゆっくり丁寧</option><option value="4">ニュース調</option></select></label><button id="speakPlay" type="button">▶ 端末音声で読む（予備）</button><button id="speakStop" type="button">■ 停止</button><label>速度 <select id="speechRate" aria-label="朗読速度"><option value="0.8">0.8倍</option><option value="1" selected>1.0倍</option><option value="1.2">1.2倍</option><option value="1.5">1.5倍</option></select></label></div><p id="speechStatus" class="listen-note" role="status" aria-live="polite">深掘りラジオは記事内の情報を会話調に再構成します。追加取材や新事実の取得は行いません。画面ロック中の再生は保証されません。</p><p class="lead">'+safe(d.intro)+'</p>';
+function renderList(){home.hidden=true;document.title='YOS JOURNAL | 記事一覧';view.innerHTML='<div class="issue">'+dateTitle()+' 発行｜'+items.length+'本の読みもの</div><h1>気になる記事から、読もう。</h1><p class="intro">暮らしや楽しみを、少し豊かにする発見を。</p>'+(archived?'<div class="notice">これは'+dateTitle()+'版の保存記事です。今日の新着記事ではありません。</div>':'')+'<div id="cards" class="list"></div><footer>出典に基づいて要約しています。医療・料金・開催情報は最新の公式情報をご確認ください。</footer>';const cards=document.getElementById('cards');items.forEach((a,i)=>{let b=document.createElement('button');b.className=i===0?'hero-card':'item';let m=resolveMedia(i);let img=m?'<img loading="'+(i===0?'eager':'lazy')+'" src="'+safe(m.url)+'" alt="'+safe(m.alt)+'">':'';b.innerHTML=img+'<span><span class="cat">'+safe(a.category)+'</span><strong>'+safe(a.title)+'</strong><span class="excerpt">'+safe((a.summary||'').slice(0,i===0?100:65))+'…</span></span>';if(!m)b.className+=' no-image';b.addEventListener('click',()=>{location.hash='#article-'+i});cards.appendChild(b)});imageFallback(cards)}
+function renderArticle(i){let a=items[i],d=(issue.issuedOn==='2026-11-12'&&items.length===6)?details[i]:{intro:String(a.summary||''),sections:[['なぜ気になる？',a.reason],['知っておきたいこと',a.action],['注意点',a.caveat]].filter(x=>x[1])};home.hidden=false;document.title=a.title+' | YOS JOURNAL';let parts='<article class="article"><div class="issue">'+dateTitle()+' / '+safe(a.category||'')+'</div><h1>'+safe(a.title)+'</h1>'+photo(i)+'<p class="lead">'+safe(d.intro)+'</p>';
 if(d.facts){parts+='<div class="facts">'+d.facts.map(x=>'<div><b>'+safe(x[0])+'</b><span>'+safe(x[1])+'</span></div>').join('')+'</div>'}
 for(let n=0;n<d.sections.length;n++){const sec=d.sections[n];parts+='<h2>'+safe(sec[0])+'</h2><p class="body">'+safe(sec[1])+'</p>';if(issue.issuedOn==='2026-11-12'&&i===0&&n===0)parts+=jazzPhotoHTML}
 parts+=(issue.issuedOn==='2026-11-12'&&i===5?'<p class="note">参考にしたSmartlog記事は「PR」表記のある記事です。商品紹介や印象に関する提案は、公式な医学的根拠とは区別してください。</p>':'')+'<h2>この記事で押さえること</h2><ul>'+((a.keyPoints||[]).map(t=>'<li>'+safe(t)+'</li>').join(''))+'</ul><p class="note">'+safe(a.caveat||'')+'</p><div class="source">出典：'+safe(a.source||'')+'<br><a href="'+safe(a.link||'#')+'" target="_blank" rel="noopener noreferrer">公式・参考情報を読む ↗</a></div><div class="related"><b>次の記事も読む</b><button id="nextStory">'+safe(items[(i+1)%items.length].title)+' →</button></div></article>';
-view.innerHTML=parts;imageFallback(view);speechSetup();const nemoPlayer=document.getElementById('nemoPlayer');if(nemoPlayer){nemoPlayer.addEventListener('error',()=>{const box=document.getElementById('nemoAudio');if(box)box.innerHTML='<b>この記事の音声はまだ公開されていません</b><p>記事本文はこのまま読めます。</p>'},true)}document.getElementById('nextStory').onclick=()=>{location.hash='#article-'+((i+1)%items.length)};window.scrollTo(0,0)}
+view.innerHTML=parts;imageFallback(view);document.getElementById('nextStory').onclick=()=>{location.hash='#article-'+((i+1)%items.length)};window.scrollTo(0,0)}
 function route(){const m=location.hash.match(/^#article-(\d+)$/),i=m?Number(m[1]):-1;if(i>=0&&i<items.length)renderArticle(i);else{renderList();window.scrollTo(0,0)}}
-home.addEventListener('click',()=>{location.hash='';route()});window.addEventListener('hashchange',route);window.addEventListener('pagehide',speechStop);
+home.addEventListener('click',()=>{location.hash='';route()});window.addEventListener('hashchange',route);
 (async()=>{
  const today=new Date().toLocaleDateString('sv-SE',{timeZone:'Asia/Tokyo'});
  let data=null;
  try{const r=await fetch(editionsBase+today+'.json',{cache:'no-store'});if(r.ok){const x=await r.json();if(x.issuedOn===today&&Array.isArray(x.articles)&&x.articles.length)data=x}}catch(_){}
- if(!data)try{const r=await fetch(latestUrl,{cache:'no-store'});if(r.ok){const x=await r.json();if(/^\d{4}-\d{2}-\d{2}$/.test(x.issuedOn||'')&&x.issuedOn<=today&&Array.isArray(x.articles)&&x.articles.length)data=x}}catch(_){}
+ if(!data)try{const r=await fetch(latestUrl,{cache:'no-store'});if(r.ok){const x=await r.json();if(x.issuedOn===today&&Array.isArray(x.articles)&&x.articles.length)data=x}}catch(_){}
  if(!data)try{const r=await fetch(archiveUrl,{cache:'no-store'});if(!r.ok)throw Error('archive missing');data=await r.json()}catch(_){}
  if(!data||!Array.isArray(data.articles)||!data.articles.length){view.innerHTML='<h1>記事を読み込めませんでした</h1><p>通信状態を確認して再読み込みしてください。過去号を今日の記事と偽って表示することはありません。</p>';return}
  issue=data;items=data.articles;archived=data.issuedOn!==today;route();
