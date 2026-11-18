@@ -460,6 +460,13 @@ try{
  const g9=await gp.evaluate(()=>window.__gestureTouch(91001,[['touchstart',200,360,0],['touchmove',120,360,0],['touchend',120,360,0]]));
  assert.equal(g9.deleteVisible,true,'swipe delete still requires confirmation');
  await gp.locator('#gestureDeleteCancel').click();
+ const cancelledArmed=await gp.evaluate(()=>window.__gestureTouch(91001,[['touchstart',200,360,320],['touchcancel',200,360,0]]));
+ assert.equal(cancelledArmed.done,false,'interrupted press does not complete a task');
+ assert.equal(cancelledArmed.start,360,'interrupted press does not alter task time');
+ const tinySlideTap=await gp.evaluate(()=>window.__gestureTouch(91001,[['touchstart',200,360,35],['touchmove',204,364,0],['touchend',204,364,0]]));
+ assert.equal(tinySlideTap.done,true,'normal finger jitter under 12px still allows deliberate brief tap');
+ await gp.evaluate(()=>window.__gestureTouch(91001,[['touchstart',200,360,35],['touchend',200,360,0]]));
+ assert.equal(await gp.evaluate(()=>!!items.find(x=>x.id===91001).done),false,'test restores original task state');
  assert.deepEqual(gestureErrors,[],'no browser errors in three-gesture interactions');
  await gestureContext.close();
 
