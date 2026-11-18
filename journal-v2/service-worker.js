@@ -1,5 +1,5 @@
 'use strict';
-const CACHE='yos-journal-smartlog-restored-v2-20261118';
+const CACHE='yos-journal-smartlog-restored-v3-20261118-712';
 const SHELL=['./','./index.html','./manifest.webmanifest','./icon.svg','./icon-192.png','./icon-512.png','./apple-touch-icon.png','./cover.jpg','./skin.jpg','./taxi.jpg','./life.jpg'];
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(SHELL)).then(()=>self.skipWaiting()).catch(()=>self.skipWaiting())));
 self.addEventListener('activate',event=>event.waitUntil(Promise.all([caches.keys().then(keys=>Promise.all(keys.filter(key=>(key.startsWith('yos-journal-pageflip-')||key.startsWith('yos-journal-original-restored-')||key.startsWith('yos-journal-smartlog-restored-'))&&key!==CACHE).map(key=>caches.delete(key)))),self.clients.claim()])));
