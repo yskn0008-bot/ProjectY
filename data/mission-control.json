@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-18T14:56:02+09:00",
+  "updated_at": "2026-11-18T15:04:46+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -12,16 +12,6 @@
     ]
   },
   "inbox": [
-    {
-      "id": "github-pr-651",
-      "title": "PR #651 YOS Notification v0.3: protected capture, live Notion context and safe iPhone updater",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/651",
-      "updated_at": "2026-11-16T15:54:43Z"
-    },
     {
       "id": "github-pr-762",
       "title": "PR #762 feat(notification): safeguard v0.3→v0.4 migration using common installer",
@@ -111,6 +101,16 @@
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/789",
       "updated_at": "2026-11-17T07:29:19Z"
+    },
+    {
+      "id": "github-pr-804",
+      "title": "PR #804 Restore actual Smartlog-style JOURNAL reader from pre-replacement GitHub blob",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/804",
+      "updated_at": "2026-11-18T06:04:21Z"
     },
     {
       "id": "github-issue-10",
@@ -274,7 +274,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-18T14:56:02+09:00",
+      "last_update": "2026-11-18T15:04:46+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -349,13 +349,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 9件・Open PR 58件を自動同期中",
+      "next_action": "Open Issue 9件・Open PR 59件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-18T14:56:02+09:00",
+      "last_update": "2026-11-18T15:04:46+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -378,7 +378,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-18T14:56:02+09:00",
+      "last_update": "2026-11-18T15:04:46+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -460,5 +460,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "a91efd471c4357342dbb8d27ecaa5d83f5289b437e17ff59c8a6fc75a0d36921"
+  "github_snapshot_hash": "c9b0b9d7fe3b1f31944fc3d86358757f876941eb9ca49f569760c2d47e68befb"
 }
