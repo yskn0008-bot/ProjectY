@@ -20,7 +20,7 @@ export const row=(start=null,end=null,name='架空タスク',id='a'.repeat(32),k
   '同期キー':{rich_text:key?[{plain_text:key}]:[]}
  }
 });
-export function htmlFor(tasks){
+export function htmlFor(tasks,deviceCalendar=null){
  const a=api(),rows=tasks.map(x=>a.project(x));
  const scope={};
  vm.runInNewContext(text('yos/daystream/source-adapters.js'),{window:scope,Intl,Date});
@@ -31,7 +31,7 @@ export function htmlFor(tasks){
  return a.buildHTML(text('yos/daystream/index.html'),
   text('yos/daystream/source-adapters.js'),
   text('life/calendar/native-bridge.js'),
-  text('yos/daystream/task-wizard.js'),snapshot,a.nativeDirectRows(rows));
+  text('yos/daystream/task-wizard.js'),snapshot,a.nativeDirectRows(rows),deviceCalendar);
 }
 test('Notion direct seeds preserve independent morning and night task titles',()=>{
  const a=api();
