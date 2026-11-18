@@ -71,5 +71,29 @@ try{
   assert.deepEqual(errors,[]);
   await context.close();
  }
+
+ // Calendar rows created by existing Clarity iCloud routing appear as fixed
+ // schedules in the same native DAYSTREAM layout without a new local task.
+ const deviceMirror={status:'ok',source:'scriptable-on-device',
+  calendarDays:{'2026-12-01':[{title:'Clarity予定',start:1140,duration:30}]},
+  allDayDays:{},calendarCoverage:{from:'2026-12-01',until:'2026-12-02',status:'ok'}};
+ const calendarHtml=htmlFor([],deviceMirror);
+ const context=await browser.newContext({viewport:{width:390,height:844},timezoneId:'Asia/Tokyo'});
+ const page=await context.newPage(),errors=[];
+ page.on('pageerror',error=>errors.push(error.message));
+ await page.route('**/*',route=>{
+  if(route.request().url()==='http://yos.local/')return route.fulfill({status:200,contentType:'text/html',body:calendarHtml});
+  return route.abort();
+ });
+ await page.goto('http://yos.local/');
+ await page.waitForFunction(()=>document.getElementById('yosNativeBoot')===null);
+ await page.evaluate(()=>showDay('2026-12-01'));
+ assert.equal(await page.locator('#tl .card.schedule').count(),1);
+ assert.equal(await page.locator('#tl .card.task').count(),0);
+ assert.match(await page.locator('#tl .card.schedule').innerText(),/Clarity予定/);
+ const saved=await page.evaluate(key=>JSON.parse(localStorage.getItem(key)),store);
+ assert.ok(!saved||!Object.values(saved.days||{}).flat().some(x=>x.t==='Clarity予定'));
+ assert.deepEqual(errors,[]);
+ await context.close();
 }finally{await browser.close()}
 console.log('DAYSTREAM native tasks: 320/390/402px PASS');
