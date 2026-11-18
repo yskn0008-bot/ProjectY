@@ -36,13 +36,19 @@ test('Undo/redo and three gesture intents preserve normal scroll and task data',
 
 test('Slim duration-aware task bars retain full text and dark casual semantic colors',()=>{
  assert.match(html,/function yosTaskDurationHeight\(duration\)/);
- for(const [minutes,pixels] of [[5,42],[15,46],[30,50],[60,54],[120,58]]){
+ for(const [minutes,pixels] of [[5,34],[15,36],[30,38],[60,42],[120,46]]){
   assert.ok(html.includes('if(duration<='+minutes+')return '+pixels+';'));
  }
  assert.match(html,/return Math\.max\(yosTaskDurationHeight\(item\.d\),contentMin\)/);
  assert.match(html,/el\.dataset\.durationBand=/);
  assert.match(html,/\.card\.task\{background:#9958d2;border-radius:11px;padding:2px 9px 2px 11px/);
  assert.match(html,/\.card\.task:before\{display:none\}/);
+ assert.match(html,/return 48;/,'extended tasks also use slimmer height');
+ assert.match(html,/\.card\.task\{border:1px solid #f5e8ffb8/,'foreground cards have clear borders');
+ assert.match(html,/\.card\.task\.yos-backdrop\.compat-danger\{background:#654753/,'overlapping sleep background is muted');
+ assert.match(html,/\.card\.task\.yos-backdrop\{background:#51445d;border:1px dashed/,'long span has separate visual style');
+ assert.match(html,/\.card\.task \.task-drag-grip\{min-height:30px;min-width:38px/,'grip stays wide despite slimmer bars');
+
  for(const tone of ['#258e70','#aa7529','#c45e78'])
   assert.ok(html.includes('background:'+tone),'brighter semantic tone '+tone+' remains available');
  assert.doesNotMatch(html,/inset 4px 0 0/,'no left accent strip remains on task cards');

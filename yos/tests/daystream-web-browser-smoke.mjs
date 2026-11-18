@@ -382,10 +382,11 @@ try{
   }
   assert.equal(byId.get(2102).time,'05:45–05:50');
   assert.equal(byId.get(2103).time,'05:48–05:53');
+  assert.equal(byId.get(2105).time,'05:53–05:58');
 
   // Slender short tasks, progressively thicker longer tasks; text-overflow
   // protection is always allowed to increase the height if needed.
-  for(const [id,height,band] of [[2110,42,'xs'],[2101,46,'sm'],[2108,50,'md'],[2111,54,'lg'],[2112,58,'xl']]){
+  for(const [id,height,band] of [[2110,34,'xs'],[2101,36,'sm'],[2108,38,'md'],[2111,42,'lg'],[2112,46,'xl']]){
    assert.equal(byId.get(id).thickness,height,'duration-based visible bar height: '+id);
    assert.equal(byId.get(id).band,band,'duration class matches stored duration: '+id);
   }
@@ -404,6 +405,21 @@ try{
   assert.equal(byId.get(2108).color,'rgb(170, 117, 41)','negative status has brighter amber');
   assert.equal(byId.get(2102).color,'rgb(196, 94, 120)','overlap has brighter red');
   assert.equal(byId.get(2110).radius,'11px','rounded casual bars keep compact corners');
+
+  const distinct=await p.locator('#tl [data-id="2100"], #tl [data-id="2102"], #tl [data-id="2110"]').evaluateAll(nodes=>nodes.map(el=>({
+   id:Number(el.dataset.id),background:getComputedStyle(el).backgroundColor,
+   border:getComputedStyle(el).borderWidth,borderStyle:getComputedStyle(el).borderStyle,
+   borderColor:getComputedStyle(el).borderColor,shadow:getComputedStyle(el).boxShadow
+  })));
+  const appearance=new Map(distinct.map(x=>[x.id,x]));
+  assert.equal(appearance.get(2100).background,'rgb(101, 71, 83)','long overlapping sleep span is muted behind cards');
+  assert.equal(appearance.get(2100).borderStyle,'dashed','long backdrop has a separate outlined style');
+  assert.equal(appearance.get(2102).borderStyle,'solid','short overlapping card has a crisp solid edge');
+  assert.equal(appearance.get(2102).border,'1px','short task remains distinct from backdrop');
+  assert.notEqual(appearance.get(2102).shadow,'none','foreground cards retain a separating shadow in any browser color notation');
+  assert.notEqual(appearance.get(2100).background,appearance.get(2102).background,'background sleep does not look like the red foreground');
+  assert.equal(appearance.get(2110).border,'1px','purple cards also have a border');
+
 
   const visible=cells.filter(c=>!c.backdrop).sort((a,b)=>a.top-b.top);
   for(let i=1;i<visible.length;i++)assert.ok(visible[i].top>=visible[i-1].bottom-2,'dense tasks do not cover one another: '+visible[i-1].id+'/'+visible[i].id);
