@@ -21,10 +21,19 @@ p{margin:10px 0 17px}figure{margin:16px 0 20px}figure img{display:block;width:10
  .list .hero-card strong{line-height:1.3;margin-block:5px}
  .list .item .excerpt,.list .hero-card .excerpt{line-height:1.32}
 }
+/* Edition navigation uses the existing journal typography and cards. */
+.edition-nav{display:flex;gap:16px;border-bottom:1px solid #e7e7e7;margin-bottom:14px}
+.edition-nav a{display:inline-flex;align-items:center;min-height:44px;color:#555;text-decoration:none;font-size:14px}
+.edition-nav a[aria-current]{color:#202020;font-weight:750;box-shadow:inset 0 -2px #202020}
+.archive-filters{display:flex;flex-wrap:wrap;gap:8px 12px;margin:0 0 7px}
+.archive-filters label{display:grid;flex:1;gap:3px;min-width:115px;font-size:12px;color:#555}
+.archive-filters select{min-height:44px;width:100%;background:#fff;color:#202020;font-size:16px;border:1px solid #d6d6d6;border-radius:4px;padding:0 8px}
+.archive-more{min-height:44px;margin-top:10px;background:#fff;border:1px solid #d6d6d6;padding:0 12px}
+.archive-count{font-size:12px;color:#666;margin:8px 0 3px}
 </style></head><body><header><span class="logo">YOS JOURNAL</span><button class="back" id="home" hidden>‹ 記事一覧</button></header><main id="view"><p id="status">記事を読み込んでいます…</p></main>
 <script>
 (()=>{'use strict';
-const view=document.getElementById('view'),home=document.getElementById('home'),archiveUrl='https://raw.githubusercontent.com/yskn0008-bot/ProjectY/main/journal/editions/2026-11-12.json',latestUrl='https://raw.githubusercontent.com/yskn0008-bot/ProjectY/main/ios-app/scriptable/journal/latest.json',editionsBase='https://raw.githubusercontent.com/yskn0008-bot/ProjectY/main/journal/editions/';
+const view=document.getElementById('view'),home=document.getElementById('home'),latestUrl='https://raw.githubusercontent.com/yskn0008-bot/ProjectY/main/ios-app/scriptable/journal/latest.json',editionsBase='https://raw.githubusercontent.com/yskn0008-bot/ProjectY/main/journal/editions/';
 const cc=(file)=>'https://commons.wikimedia.org/wiki/Special:FilePath/'+encodeURIComponent(file)+'?width=960';
 const media=[
 {url:cc('American Village - panoramio.jpg'),credit:'写真：Toshihiro Matsui / Wikimedia Commons（CC BY-SA 3.0）。2013年の北谷・美浜の風景。今回のジャズイベント当日の写真ではありません。',alt:'北谷のアメリカンビレッジの街並み',creditUrl:'https://commons.wikimedia.org/wiki/File:American_Village_-_panoramio.jpg',licenseUrl:'https://creativecommons.org/licenses/by-sa/3.0/'},
@@ -34,12 +43,15 @@ const media=[
 {url:cc('The phone lying on the desk.jpg'),credit:'写真：Ibrohim Toxirov / Wikimedia Commons（CC BY-SA 4.0）。スマートフォンの一般イメージ。',alt:'机の上のスマートフォン',creditUrl:'https://commons.wikimedia.org/wiki/File:The_phone_lying_on_the_desk.jpg',licenseUrl:'https://creativecommons.org/licenses/by-sa/4.0/'},
 {url:cc('Man grooming in a modern bathroom mirror during evening hours while checking reflection.jpg'),credit:'写真：Shixart1985 / Wikimedia Commons（CC BY 2.0）。身だしなみを整える男性の一般イメージ。',alt:'鏡で身だしなみを確認する男性',creditUrl:'https://commons.wikimedia.org/wiki/File:Man_grooming_in_a_modern_bathroom_mirror_during_evening_hours_while_checking_reflection.jpg',licenseUrl:'https://creativecommons.org/licenses/by/2.0/'}
 ];
-let issue=null,items=[],archived=true;
+let issue=null,items=[],todayIssue=null,todayRequest=null,routeVersion=0;
+const today=new Date().toLocaleDateString('sv-SE',{timeZone:'Asia/Tokyo'});
+const editions=new Map();
+let archiveIndex=null,archiveDate='',archiveGenre='',archiveLimit=24;
 const safe=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-function resolveMedia(i){
- const original=issue?.issuedOn==='2026-11-12'&&items.length===6?media[i]:null;
+function resolveMedia(i,edition=issue){
+ const original=edition?.issuedOn==='2026-11-12'&&edition.articles.length===6?media[i]:null;
  if(original)return original;
- const a=items[i]||{},url=String(a.image||''),src=String(a.imageSourceUrl||''),license=String(a.imageLicenseUrl||'');
+ const a=edition?.articles[i]||{},url=String(a.image||''),src=String(a.imageSourceUrl||''),license=String(a.imageLicenseUrl||'');
  if(a.imageKind!=='reference'||!/^https:\/\/commons\.wikimedia\.org\/wiki\/Special:FilePath\//.test(url)||!/^https:\/\/commons\.wikimedia\.org\/wiki\/File:/.test(src)||!a.imageCaption||!a.imageCredit)return null;
  if(license&&!/^https:\/\/creativecommons\.org\/(?:licenses\/|publicdomain\/)/.test(license))return null;
  return {url,alt:String(a.imageCaption),credit:'参考写真（当日現場の写真ではありません）：'+String(a.imageCredit)+'。'+String(a.imageCaption),creditUrl:src,licenseUrl:license};
@@ -81,22 +93,113 @@ const details=[
 ]}
 ];
 function imageFallback(root){root.querySelectorAll('img').forEach(img=>{const fail=()=>{const box=document.createElement('div');box.className='broken-image';box.textContent='画像を表示できません。本文と写真の出典リンクは引き続き利用できます。';img.replaceWith(box)};img.addEventListener('error',fail,{once:true});if(img.complete&&!img.naturalWidth)fail()})}
-function renderList(){home.hidden=true;document.title='YOS JOURNAL | 記事一覧';view.innerHTML='<div class="issue">'+dateTitle()+' 発行｜'+items.length+'本の読みもの</div><h1>気になる記事から、読もう。</h1><p class="intro">暮らしや楽しみを、少し豊かにする発見を。</p>'+(archived?'<div class="notice">これは'+dateTitle()+'版の保存記事です。今日の新着記事ではありません。</div>':'')+'<div id="cards" class="list"></div><footer>出典に基づいて要約しています。医療・料金・開催情報は最新の公式情報をご確認ください。</footer>';const cards=document.getElementById('cards');items.forEach((a,i)=>{let b=document.createElement('button');b.className=i===0?'hero-card':'item';let m=resolveMedia(i);let img=m?'<img loading="'+(i===0?'eager':'lazy')+'" src="'+safe(m.url)+'" alt="'+safe(m.alt)+'">':'';b.innerHTML=img+'<span><span class="cat">'+safe(a.category)+'</span><strong>'+safe(a.title)+'</strong><span class="excerpt">'+safe((a.summary||'').slice(0,i===0?100:65))+'…</span></span>';if(!m)b.className+=' no-image';b.addEventListener('click',()=>{location.hash='#article-'+i});cards.appendChild(b)});imageFallback(cards)}
+const editionNav=archive=>'<nav class="edition-nav" aria-label="JOURNALの号"><a href="#today"'+(archive?'':' aria-current="page"')+'>今日の記事</a><a href="#archive"'+(archive?' aria-current="page"':'')+'>過去の記事</a></nav>';
+const footer='<footer>出典に基づいて要約しています。医療・料金・開催情報は最新の公式情報をご確認ください。</footer>';
+const issueArticleHash=(edition,i)=>edition.issuedOn===today?'#article-'+i:'#archive-'+edition.issuedOn+'-'+i;
+const genreNames={SELF:'身だしなみ',HEALTH:'健康',PRESENCE:'人間関係・会話',CONNECTION:'人間関係・会話',LIFE:'暮らし・地域',EXPERIENCE:'体験・お出かけ',CULTURE:'文化・芸術',TECH:'テクノロジー',MONEY:'お金',WORK:'仕事'};
+function genre(article){
+ const [section,topic]=String(article.category||'').toUpperCase().split('/').map(tag=>tag.trim());
+ if(['ART','CRAFT','CULTURE','LIVE'].includes(topic))return genreNames.CULTURE;
+ return genreNames[section]||'その他';
+}
+function storyCard(edition,i,featured=false,showDate=false){
+ const a=edition.articles[i],m=resolveMedia(i,edition);
+ const b=document.createElement('button');
+ b.type='button';b.className=(featured?'hero-card':'item')+(m?'':' no-image');
+ const img=m?'<img loading="'+(featured?'eager':'lazy')+'" src="'+safe(m.url)+'" alt="'+safe(m.alt)+'">':'';
+ b.innerHTML=img+'<span><span class="cat">'+(showDate?safe(edition.issuedOn)+' ｜ ':'')+safe(a.category)+'</span><strong>'+safe(a.title)+'</strong><span class="excerpt">'+safe((a.summary||'').slice(0,featured?100:65))+'…</span></span>';
+ b.addEventListener('click',()=>{location.hash=issueArticleHash(edition,i)});
+ return b;
+}
+function renderList(){
+ home.hidden=true;document.title='YOS JOURNAL | 記事一覧';
+ view.innerHTML=editionNav(false)+(todayIssue?'<div class="issue">'+safe(todayIssue.issuedOn)+' 発行｜'+todayIssue.articles.length+'本の読みもの</div><h1>気になる記事から、読もう。</h1><p class="intro">暮らしや楽しみを、少し豊かにする発見を。</p><div id="cards" class="list"></div>'+footer:'<p class="notice">今日の記事はまだありません。過去の記事は上のタブから読めます。</p>');
+ if(!todayIssue)return;
+ const cards=document.getElementById('cards');
+ todayIssue.articles.forEach((_,i)=>cards.appendChild(storyCard(todayIssue,i,i===0)));
+ imageFallback(cards);
+}
+function renderArchive(){
+ home.hidden=true;document.title='YOS JOURNAL | 過去の記事';
+ const list=archiveIndex.filter(edition=>edition.issuedOn<today);
+ const genres=[...new Set(list.flatMap(edition=>edition.articles.map(genre)))].sort((a,b)=>a.localeCompare(b,'ja'));
+ const options=(values,all,selected)=>'<option value="">'+all+'</option>'+values.map(v=>'<option value="'+safe(v)+'"'+(v===selected?' selected':'')+'>'+safe(v)+'</option>').join('');
+ view.innerHTML=editionNav(true)+'<h1>過去の記事</h1><div class="archive-filters"><label>ジャンル<select id="archiveGenre">'+options(genres,'すべて',archiveGenre)+'</select></label><label>発行日<select id="archiveDate">'+options(list.map(x=>x.issuedOn),'すべて',archiveDate)+'</select></label></div><p id="archiveCount" class="archive-count" aria-live="polite"></p><div id="cards" class="list"></div><button id="archiveMore" class="archive-more" type="button" hidden>さらに表示</button>'+footer;
+ const genreSelect=document.getElementById('archiveGenre'),dateSelect=document.getElementById('archiveDate'),more=document.getElementById('archiveMore');
+ function update(){
+  const stories=list.filter(edition=>!archiveDate||edition.issuedOn===archiveDate).flatMap(edition=>edition.articles.map((a,i)=>({edition,a,i}))).filter(({a})=>!archiveGenre||genre(a)===archiveGenre);
+  const cards=document.getElementById('cards');cards.innerHTML='';
+  stories.slice(0,archiveLimit).forEach(({edition,i})=>cards.appendChild(storyCard(edition,i,false,true)));
+  imageFallback(cards);
+  document.getElementById('archiveCount').textContent=stories.length?stories.length+'件':'該当する記事はありません。';
+  more.hidden=stories.length<=archiveLimit;
+ }
+ genreSelect.addEventListener('change',()=>{archiveGenre=genreSelect.value;archiveLimit=24;update()});
+ dateSelect.addEventListener('change',()=>{archiveDate=dateSelect.value;archiveLimit=24;update()});
+ more.addEventListener('click',()=>{archiveLimit+=24;update()});
+ update();
+}
 function renderArticle(i){let a=items[i],d=(issue.issuedOn==='2026-11-12'&&items.length===6)?details[i]:{intro:String(a.summary||''),sections:[['なぜ気になる？',a.reason],['知っておきたいこと',a.action],['注意点',a.caveat]].filter(x=>x[1])};home.hidden=false;document.title=a.title+' | YOS JOURNAL';let parts='<article class="article"><div class="issue">'+dateTitle()+' / '+safe(a.category||'')+'</div><h1>'+safe(a.title)+'</h1>'+photo(i)+'<p class="lead">'+safe(d.intro)+'</p>';
 if(d.facts){parts+='<div class="facts">'+d.facts.map(x=>'<div><b>'+safe(x[0])+'</b><span>'+safe(x[1])+'</span></div>').join('')+'</div>'}
 for(let n=0;n<d.sections.length;n++){const sec=d.sections[n];parts+='<h2>'+safe(sec[0])+'</h2><p class="body">'+safe(sec[1])+'</p>';if(issue.issuedOn==='2026-11-12'&&i===0&&n===0)parts+=jazzPhotoHTML}
 parts+=(issue.issuedOn==='2026-11-12'&&i===5?'<p class="note">参考にしたSmartlog記事は「PR」表記のある記事です。商品紹介や印象に関する提案は、公式な医学的根拠とは区別してください。</p>':'')+'<h2>この記事で押さえること</h2><ul>'+((a.keyPoints||[]).map(t=>'<li>'+safe(t)+'</li>').join(''))+'</ul><p class="note">'+safe(a.caveat||'')+'</p><div class="source">出典：'+safe(a.source||'')+'<br><a href="'+safe(a.link||'#')+'" target="_blank" rel="noopener noreferrer">公式・参考情報を読む ↗</a></div><div class="related"><b>次の記事も読む</b><button id="nextStory">'+safe(items[(i+1)%items.length].title)+' →</button></div></article>';
-view.innerHTML=parts;imageFallback(view);document.getElementById('nextStory').onclick=()=>{location.hash='#article-'+((i+1)%items.length)};window.scrollTo(0,0)}
-function route(){const m=location.hash.match(/^#article-(\d+)$/),i=m?Number(m[1]):-1;if(i>=0&&i<items.length)renderArticle(i);else{renderList();window.scrollTo(0,0)}}
-home.addEventListener('click',()=>{location.hash='';route()});window.addEventListener('hashchange',route);
-(async()=>{
- const today=new Date().toLocaleDateString('sv-SE',{timeZone:'Asia/Tokyo'});
- let data=null;
- try{const r=await fetch(editionsBase+today+'.json',{cache:'no-store'});if(r.ok){const x=await r.json();if(x.issuedOn===today&&Array.isArray(x.articles)&&x.articles.length)data=x}}catch(_){}
- if(!data)try{const r=await fetch(latestUrl,{cache:'no-store'});if(r.ok){const x=await r.json();if(x.issuedOn===today&&Array.isArray(x.articles)&&x.articles.length)data=x}}catch(_){}
- if(!data)try{const r=await fetch(archiveUrl,{cache:'no-store'});if(!r.ok)throw Error('archive missing');data=await r.json()}catch(_){}
- if(!data||!Array.isArray(data.articles)||!data.articles.length){view.innerHTML='<h1>記事を読み込めませんでした</h1><p>通信状態を確認して再読み込みしてください。過去号を今日の記事と偽って表示することはありません。</p>';return}
- issue=data;items=data.articles;archived=data.issuedOn!==today;route();
-})().catch(()=>{view.innerHTML='<h1>記事を表示できませんでした</h1><p>再読み込みしてください。</p>'});
+view.innerHTML=parts;imageFallback(view);document.getElementById('nextStory').onclick=()=>{location.hash=issueArticleHash(issue,(i+1)%items.length)};window.scrollTo(0,0)}
+function editionOK(x,date){
+ return x?.issuedOn===date&&Array.isArray(x.articles)&&x.articles.length>0;
+}
+async function readEdition(date,retryLatest=false){
+ if(editions.has(date))return editions.get(date);
+ for(const url of (retryLatest?[editionsBase+date+'.json',latestUrl]:[editionsBase+date+'.json'])){
+  try{
+   const r=await fetch(url,{cache:'no-store'});
+   if(!r.ok)continue;
+   const data=await r.json();
+   if(editionOK(data,date)){editions.set(date,data);return data;}
+  }catch(_){}
+ }
+ return null;
+}
+async function readArchive(){
+ if(archiveIndex)return archiveIndex;
+ const result=await fetch('./archive-index.json',{cache:'no-store'});
+ if(!result.ok)throw Error('archive index unavailable');
+ const data=await result.json();
+ if(!Array.isArray(data.editions))throw Error('archive index invalid');
+ archiveIndex=data.editions.filter(x=>/^\d{4}-\d{2}-\d{2}$/.test(x.issuedOn)&&editionOK(x,x.issuedOn)).sort((a,b)=>b.issuedOn.localeCompare(a.issuedOn));
+ return archiveIndex;
+}
+async function route(){
+ const version=++routeVersion,hash=location.hash;
+ const article=hash.match(/^#article-(\d+)$/);
+ const previous=hash.match(/^#archive-(\d{4}-\d{2}-\d{2})-(\d+)$/);
+ const archive=hash==='#archive'||Boolean(previous);
+ const index=article?Number(article[1]):previous?Number(previous[2]):-1;
+ try{
+  if(!archive){
+   todayRequest??=readEdition(today,true);
+   todayIssue=await todayRequest;
+   if(version!==routeVersion)return;
+  }
+  if(index>=0){
+   const data=previous?await readEdition(previous[1]):todayIssue;
+   if(version!==routeVersion)return;
+   if(data&&index<data.articles.length){issue=data;items=data.articles;renderArticle(index);return;}
+   home.hidden=true;view.innerHTML=editionNav(archive)+'<p class="notice">記事を読み込めませんでした。一覧から選び直してください。</p>';return;
+  }
+  if(archive){
+   home.hidden=true;
+   if(!archiveIndex)view.innerHTML=editionNav(true)+'<p id="status">過去の記事を読み込んでいます…</p>';
+   await readArchive();
+   if(version!==routeVersion)return;
+   renderArchive();
+  }else{renderList();}
+  window.scrollTo(0,0);
+ }catch(_){
+  if(version===routeVersion)view.innerHTML=editionNav(archive)+'<p class="notice">記事を読み込めませんでした。ページを再読み込みしてください。</p>';
+ }
+}
+home.addEventListener('click',()=>{location.hash=issue?.issuedOn===today?'#today':'#archive'});
+window.addEventListener('hashchange',route);
+route();
 })();
 </script><script>if('serviceWorker' in navigator)navigator.serviceWorker.register('./service-worker.js').catch(()=>{});</script></body></html>
