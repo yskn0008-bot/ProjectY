@@ -1,0 +1,15 @@
+#define name YOS TAXI 降車
+#define color orange
+
+#include 'actions/text'
+#include 'actions/calendar'
+#include 'actions/web'
+
+// A single native Shortcut can be assigned to both Lock Screen and Home Screen.
+// Only the existing browser context's active shift can accept the record.
+// Capture moment of tap, not eventual browser-open time.
+const tappedAt = formatDate(currentDate(), "Custom", "yyyyMMddHHmmss")
+const salt = randomNumber(100000, 999999)
+const recordUrl = text("https://yskn0008-bot.github.io/ProjectY/taxi/ui-v2.html?yos_action=dropoff&yos_req={tappedAt}-{salt}")
+openURL(recordUrl)
+stop()
