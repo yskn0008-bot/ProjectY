@@ -2,7 +2,7 @@
 // icon-color: green; icon-glyph: heart;
 // YOS_SCRIPT_NAME: YOS Health Automation
 // YOS Health Automation — Scriptable / iPhone Shortcuts
-// Purpose: sleep-mode-based hydration reminders only; no Clarity or JOURNAL launch.
+// Purpose: sleep-mode-based hydration reminders only.
 // Does NOT access HealthKit, control Sleep Cycle, or modify other YOS scripts.
 const YOS_HEALTH = Object.freeze({
   scriptName: 'YOS Health Automation',
