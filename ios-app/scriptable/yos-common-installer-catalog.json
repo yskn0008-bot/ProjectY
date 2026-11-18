@@ -106,6 +106,13 @@
       "path": "ios-app/scriptable/YOS DAYSTREAM Notion.js",
       "commit": "8cbd54645a4f51d7867d954ea2ebd04979d4baee",
       "sha256": "0f1e827cbe578f004d9295548e905bf676252639debaab5d4a4b8b9d4b517931"
+    },
+    {
+      "id": "ikemen-magazine",
+      "name": "YOS イケメン攻略本",
+      "path": "ios-app/scriptable/YOS イケメン攻略本.js",
+      "commit": "7e72de2000d2846d929290609ed311dc37cf5561",
+      "sha256": "5136748e724163258494a6601fcdd066e4c9091f56659c04121552c5ade06984"
     }
   ]
 }
