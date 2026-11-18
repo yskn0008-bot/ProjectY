@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-18T17:10:56+09:00",
+  "updated_at": "2026-11-18T17:12:13+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -12,16 +12,6 @@
     ]
   },
   "inbox": [
-    {
-      "id": "github-pr-651",
-      "title": "PR #651 YOS Notification v0.3: protected capture, live Notion context and safe iPhone updater",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/651",
-      "updated_at": "2026-11-16T15:54:43Z"
-    },
     {
       "id": "github-pr-762",
       "title": "PR #762 feat(notification): safeguard v0.3→v0.4 migration using common installer",
@@ -111,6 +101,16 @@
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/789",
       "updated_at": "2026-11-17T07:29:19Z"
+    },
+    {
+      "id": "github-pr-809",
+      "title": "PR #809 fix(scriptable): イケメン攻略本のショートカット黒画面を回避",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/809",
+      "updated_at": "2026-11-18T08:11:47Z"
     },
     {
       "id": "github-issue-10",
@@ -274,7 +274,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-18T17:10:56+09:00",
+      "last_update": "2026-11-18T17:12:13+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -349,13 +349,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 9件・Open PR 58件を自動同期中",
+      "next_action": "Open Issue 9件・Open PR 59件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-18T17:10:56+09:00",
+      "last_update": "2026-11-18T17:12:13+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -378,7 +378,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-18T17:10:56+09:00",
+      "last_update": "2026-11-18T17:12:13+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -460,5 +460,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "becfd4747e1a85f7765781a1d41d632b4cef3778e66ae0263dd1e3f95d15cbae"
+  "github_snapshot_hash": "db0f0458549f020d47aacd784bfaf50a198801e2c294cab0e35e8c75d991769c"
 }
