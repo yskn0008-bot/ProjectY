@@ -14,13 +14,18 @@ assert 'if(!isActive())' in app
 assert "180000" in app
 assert "ios" not in drop.lower() or "storage" in drop.lower()
 assert "yyyyMMddHHmmss" in drop
-assert "yos_action=dropoff&yos_req={tappedAt}-WIDGET" in drop
+assert "Clarity Inbox.txt" in drop
+assert "YOS_TAXI_DROPOFF_REQUEST" in drop
+assert "appendResolvedFile(inboxFile, captured)" in drop
+assert "const verifyFile = getFile" in drop
+assert "if verifiedText contains requestId" in drop
+assert "yos_action=dropoff&yos_req={requestId}" in drop
 assert "openURL(recordUrl)" in drop
 assert "chooseFromList(@actions" in shift
 for action in ("start","end","m100","report"):
     assert "yos_action="+action in shift
 assert "startTimer(qty(20, \"min\"))" in shift
 for source in [shift,drop]:
-    for invalid in ("api.notion.com","Keychain","file.append","saveFile(","localStorage.setItem","deleteFile("):
+    for invalid in ("api.notion.com","Keychain","saveFile(","localStorage.setItem","deleteFile("):
         assert invalid not in source,invalid
 print("YOS Taxi Shortcut source contracts: PASS")
