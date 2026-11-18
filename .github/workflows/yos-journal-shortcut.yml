@@ -75,27 +75,19 @@ jobs:
           data=plistlib.loads(src.read_bytes())
           ids=[a.get('WFWorkflowActionIdentifier','') for a in data.get('WFWorkflowActions',[])]
           blob=repr(data)
-          assert ids.count('is.workflow.actions.askllm') == 7, ids
-          assert ids.count('is.workflow.actions.ask') == 6, ids
-          assert 'YOS Journal Questions' in blob
-          assert 'すでに提示済みの問い' in blob
-          assert 'この実行ですでに聞いた2問' in blob
-          assert '別の問い' in blob
-          assert ids.count('is.workflow.actions.file.getfoldercontents') == 2, ids
-          assert ids.count('is.workflow.actions.documentpicker.save') == 5, ids
-          assert 'YOSの分析とアドバイス' in blob
-          assert '目的別の問い' in blob
-          assert '直近のローカル日記控え' in blob
-          assert '（導入1）' in blob
-          assert '（導入2）' in blob
-          assert '3/3 自分の言葉で。刺さらなければ' in blob
-          assert '空欄ならここで終わり' in blob
+          assert ids.count('is.workflow.actions.askllm') == 1, ids
+          assert ids.count('is.workflow.actions.ask') == 1, ids
+          assert ids.count('is.workflow.actions.documentpicker.save') == 2, ids
           assert ids.count('is.workflow.actions.openurl') == 1, ids
           assert ids.count('com.apple.journal.CreateEntryIntent') == 0
+          for text in ('【出来事】','【気持ち】','【どう感じた】',
+                       '本人の言葉（原文）','YOS Journal Pending',
+                       'YOS_JOURNAL_RAW_V2','YOS_JOURNAL_LOCAL_BACKUP_V2'):
+              assert text in blob, text
           assert 'scriptable:///run?scriptName=YOS%20Journal%20Notion%20Bridge' in blob
           assert 'YOS_NOTION_INTEGRATION_TOKEN' not in blob
-          assert 'YOS Journal Pending' in blob
-          print('YOS 日記 independent shortcut contract: PASS',len(ids),'actions')
+          assert 'api.notion.com' not in blob
+          print('YOS 日記 one-input memory diary contract: PASS',len(ids),'actions')
           PY
 
       - name: Sign using existing HubSign workflow
