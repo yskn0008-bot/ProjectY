@@ -392,7 +392,7 @@ try{
   }
   assert.ok(byId.get(2105).thickness>byId.get(2110).thickness,
    'long task title wraps instead of being cut in a slim bar');
-  assert.equal(byId.get(2110).color,'rgb(153, 88, 210)','default task color is brighter casual purple');
+  assert.equal(byId.get(2110).color,'rgb(34, 46, 68)','default task uses the Layer slate surface');
   for(const id of [2102,2106,2108,2110]){
    const surface=await p.locator('#tl [data-id="'+id+'"]').evaluate(el=>({
     shadow:getComputedStyle(el).boxShadow,
@@ -401,10 +401,10 @@ try{
    assert.equal(surface.before,'none','left stripe must be hidden for task '+id);
    assert.ok(!surface.shadow.includes('inset 4px'),'left accent shadow absent for task '+id);
   }
-  assert.equal(byId.get(2106).color,'rgb(37, 142, 112)','positive status has brighter green');
-  assert.equal(byId.get(2108).color,'rgb(170, 117, 41)','negative status has brighter amber');
-  assert.equal(byId.get(2102).color,'rgb(196, 94, 120)','overlap has brighter red');
-  assert.equal(byId.get(2110).radius,'11px','rounded casual bars keep compact corners');
+  assert.equal(byId.get(2106).color,'rgb(35, 71, 62)','positive status has a green surface');
+  assert.equal(byId.get(2108).color,'rgb(73, 55, 34)','negative status has an amber surface');
+  assert.equal(byId.get(2102).color,'rgb(75, 48, 59)','overlap has a rose surface');
+  assert.equal(byId.get(2110).radius,'11px','compact task cards keep rounded corners');
 
   const distinct=await p.locator('#tl [data-id="2100"], #tl [data-id="2102"], #tl [data-id="2110"]').evaluateAll(nodes=>nodes.map(el=>({
    id:Number(el.dataset.id),background:getComputedStyle(el).backgroundColor,
@@ -412,19 +412,19 @@ try{
    borderColor:getComputedStyle(el).borderColor,shadow:getComputedStyle(el).boxShadow,image:getComputedStyle(el).backgroundImage
   })));
   const appearance=new Map(distinct.map(x=>[x.id,x]));
-  assert.equal(appearance.get(2100).background,'rgb(101, 71, 83)','long overlapping sleep span is muted behind cards');
-  assert.equal(appearance.get(2100).borderStyle,'dashed','long backdrop has a separate outlined style');
+  assert.equal(appearance.get(2100).background,'rgb(56, 41, 51)','long overlapping sleep span is muted behind cards');
+  assert.equal(appearance.get(2100).borderStyle,'solid','long backdrop has a quiet solid outline');
   assert.equal(appearance.get(2102).borderStyle,'solid','short overlapping card has a crisp solid edge');
   assert.equal(appearance.get(2102).border,'1px','short task remains distinct from backdrop');
   assert.notEqual(appearance.get(2102).shadow,'none','foreground cards retain a separating shadow in any browser color notation');
   assert.notEqual(appearance.get(2100).background,appearance.get(2102).background,'background sleep does not look like the red foreground');
-  assert.equal(appearance.get(2110).border,'1px','purple cards also have a border');
+  assert.equal(appearance.get(2110).border,'1px','neutral cards also have a border');
 
   assert.equal(appearance.get(2100).image,'none','long sleep backdrop stays flat');
   for(const id of [2102,2110]){
    const fg=appearance.get(id);
-   assert.ok(fg.image.includes('linear-gradient('),'foreground task '+id+' has a gentle top-to-bottom sheen');
-   assert.ok(fg.shadow.includes('inset'),'foreground task '+id+' has a subtle raised inner highlight');
+   assert.equal(fg.image,'none','foreground task '+id+' uses a flat Layer surface');
+   assert.notEqual(fg.shadow,'none','foreground task '+id+' uses a soft separating shadow');
    assert.ok(!fg.shadow.includes('inset 4px'),'do not restore a stripe on task '+id);
   }
 
@@ -571,6 +571,36 @@ try{
  assert.equal(tinySlideTap.done,true,'normal finger jitter under 12px still allows deliberate brief tap');
  await gp.evaluate(()=>window.__gestureTouch(91001,[['touchstart',200,360,35],['touchend',200,360,0]]));
  assert.equal(await gp.evaluate(()=>!!items.find(x=>x.id===91001).done),false,'test restores original task state');
+ // Verify the existing timeline renders long fixed and editable windows behind live status cards.
+ await gp.evaluate(()=>{
+  items=[
+   {id:1,t:'睡眠',s:30,d:450,kind:'schedule',f:true},
+   {id:2,t:'テスト',s:260,d:30,kind:'task'},
+   {id:3,t:'深い作業',s:390,d:120,kind:'task'},
+   {id:4,t:'筋トレ',s:600,d:30,kind:'task'},
+   {id:5,t:'入浴',s:635,d:30,kind:'habit'},
+   {id:6,t:'読書',s:800,d:20,kind:'task'},
+   {id:7,t:'掃除',s:823,d:20,kind:'habit'},
+   {id:8,t:'自由時間',s:1140,d:20,kind:'task'}
+  ];
+  render();updateReview();
+ });
+ const card=id=>gp.locator('#tl .card[data-id="'+id+'"]');
+ assert.match(await card(1).getAttribute('class'),/yos-backdrop/);
+ assert.match(await card(3).getAttribute('class'),/yos-backdrop/);
+ assert.equal(await card(2).locator('.layer-status').textContent(),'！ 時間衝突');
+ assert.equal(await card(4).locator('.layer-status').textContent(),'＋ 相乗候補');
+ assert.equal(await card(6).locator('.layer-status').textContent(),'− 余裕不足');
+ assert.equal(await card(8).locator('.layer-status').count(),0);
+ const sleep=await card(1).boundingBox(),work=await card(3).boundingBox(),testCard=await card(2).boundingBox();
+ assert.ok(sleep.x+sleep.width<=work.x,'overlapping long intervals have separate lanes');
+ assert.ok(testCard.y>sleep.y&&testCard.y<sleep.y+sleep.height,'short action is inside the sleep window');
+ assert.equal(await card(2).evaluate(el=>{
+  const rect=el.getBoundingClientRect();
+  return getComputedStyle(el).backgroundColor==='rgb(75, 48, 59)'&&Number(getComputedStyle(el).zIndex)>Number(getComputedStyle(document.querySelector('.yos-backdrop')).zIndex)&&rect.width>0;
+ }),true,'danger tint and foreground stacking are computed by the browser');
+ await gp.evaluate(()=>{items.find(item=>item.id===2).s=540;render();updateReview();});
+ assert.equal(await card(2).locator('.layer-status').count(),0,'conflict tint disappears when moved clear');
  assert.deepEqual(gestureErrors,[],'no browser errors in three-gesture interactions');
  await gestureContext.close();
 
