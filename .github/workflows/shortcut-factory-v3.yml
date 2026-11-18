@@ -210,12 +210,22 @@ jobs:
           cherri 'YOS JOURNAL GPT制作.cherri' --skip-sign --debug
           test -s 'YOS JOURNAL GPT制作_unsigned.shortcut'
           test -s 'YOS JOURNAL GPT制作.plist'
-          mkdir -p ../artifacts
-          cp 'YOS JOURNAL GPT制作_unsigned.shortcut' '../artifacts/YOS-JOURNAL-GPT-unsigned.shortcut'
+          cd ../../..
+          python3 tools/shortcut-factory/patch_journal_draft_inbox.py \
+            'tools/shortcut-factory/shortcuts/YOS JOURNAL GPT制作_unsigned.shortcut' \
+            --script 'tools/shortcut-factory/journal_draft_inbox_inline.js'
+          mkdir -p tools/shortcut-factory/artifacts
+          cp 'tools/shortcut-factory/shortcuts/YOS JOURNAL GPT制作_unsigned.shortcut' 'tools/shortcut-factory/artifacts/YOS-JOURNAL-GPT-unsigned.shortcut'
 
-      - name: Validate compiled model and local-only save semantics
+      - name: Validate private Notion writer and failure tests
+        shell: bash
         run: |
-          python3 tools/shortcut-factory/validate_journal_gpt_candidate.py 'tools/shortcut-factory/shortcuts/YOS JOURNAL GPT制作.plist'
+          node --check tools/shortcut-factory/journal_draft_inbox_inline.js
+          node --test tools/shortcut-factory/tests/journal-draft-inbox.test.mjs
+
+      - name: Validate compiled model, local backup and private handoff
+        run: |
+          python3 tools/shortcut-factory/validate_journal_gpt_candidate.py 'tools/shortcut-factory/artifacts/YOS-JOURNAL-GPT-unsigned.shortcut'
 
       - name: Sign candidate through existing HubSign adapter
         shell: bash
