@@ -35,8 +35,10 @@ def validate(path: Path) -> dict:
     assert params.get('WFGenerativeResultType') == 'Text', 'result type must be Text'
     prompt = params.get('WFLLMPrompt')
     assert prompt is not None, 'GPT prompt missing'
-    prompt_rep = repr(prompt)
-    assert 'YOS JOURNAL' in prompt_rep and '要裏取り' in prompt_rep, 'editorial safety prompt missing'
+    workflow_rep = repr(wf)
+    # WFLLMPrompt references the preceding Text action via token attachment;
+    # the literal editorial prompt is therefore elsewhere in the workflow.
+    assert 'YOS JOURNAL' in workflow_rep and '要裏取り' in workflow_rep, 'editorial safety prompt missing'
     saves = [p for n, p in pairs if n == 'is.workflow.actions.documentpicker.save']
     assert len(saves) == 1, f'expected 1 save action, got {len(saves)}'
     save = saves[0]
