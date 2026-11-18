@@ -10,7 +10,7 @@ const STATE_NAME='reading-state.json';
 const RUNTIME_NAME='magazine-runtime.html';
 const PHOTO_NAMES=['yos-ikemen-photo-1-v3.jpg','yos-ikemen-photo-2-v3.jpg','yos-ikemen-photo-3-v3.jpg'];
 const DIAG_NAME='v3-display-confirmed.txt';
-const VERSION='v3 / 2026-11-18';
+const VERSION='v4 / 2026-11-18';
 const READER_KEY='YOS_IKEMEN_EDITORIAL_V1';
 const fm=FileManager.local();
 const folder=fm.joinPath(fm.documentsDirectory(),DATA_DIR);
@@ -111,20 +111,6 @@ function lightweightHTML(html){
  if(count!==PHOTO_NAMES.length||slim.length>150000||slim.length<30000)throw Error('写真分離後のHTMLが不正です');
  return slim;
 }
-// Distinguish a real WebView document from a blank native preview. Always keep
-// the original magazine, existing photos, and reading-state untouched on error.
-async function verifyWebView(web){
- let timer=null;
- try{
-  const check=web.evaluateJavaScript(`JSON.stringify({pages:document.querySelectorAll('section.sheet').length,hasCover:!!document.querySelector('#p-0'),body:document.body?.offsetHeight||0,title:document.title})`,false);
-  const timeout=new Promise(resolve=>{timer=Timer.schedule(6000,false,()=>resolve(null))});
-  const raw=await Promise.race([check,timeout]);
-  if(!raw)throw Error('画面の内容を6秒以内に確認できませんでした（WebViewが応答していません）');
-  const o=typeof raw==='string'?JSON.parse(raw):raw;
-  if(o.pages!==48||!o.hasCover||o.body<50)throw Error('画面の構築に失敗しました（page='+o.pages+', body='+o.body+'）');
-  return o;
- }finally{if(timer)timer.invalidate()}
-}
 function saveState(raw){
  if(typeof raw!=='string'||raw.length>20000)throw Error('保存データが不正です');
  const next=validateState(JSON.parse(raw));
@@ -139,21 +125,6 @@ function saveState(raw){
  }
  if(fm.fileExists(temp))fm.remove(temp);
 }
-function captureNext(web){
- // This listener is installed while the magazine is visible. The page keeps
- // the newest snapshot pending, so rapid taps do not lose updates between polls.
- return web.evaluateJavaScript(`(function(){
-   const send=()=>{
-     const raw=window.__YOS_PENDING_NATIVE_STATE__;
-     if(!raw)return;
-     window.__YOS_PENDING_NATIVE_STATE__=null;
-     document.removeEventListener('yos-native-state',send);
-     completion(raw);
-   };
-   document.addEventListener('yos-native-state',send);
-   send();
- })();`,true);
-}
 async function launch(){
  const original=validateHTML(fm.readString(htmlPath));
  const before=readState();
@@ -165,38 +136,29 @@ async function launch(){
  storeChecked(runtimePath,ready);
  if(!fm.fileExists(runtimePath)||fm.readString(runtimePath)!==ready)
   throw Error('表示用ファイルの準備・照合に失敗しました');
+ // Do not evaluate JavaScript or present a native Alert after preparing the
+ // WebView and before displaying it: on the user's iPhone the DOM was readable
+ // but its first presentation appeared completely black.
+ // Use a standard modal instead of the fragile fullscreen presentation.
  const web=new WebView();
  await web.loadFile(runtimePath);
- const check=await verifyWebView(web);
- // A single native confirmation identifies whether the new code is actually
- // running on the device. The previous versions displayed a black WebView.
- const diag=fm.joinPath(folder,DIAG_NAME);
- if(!fm.fileExists(diag)){
-  await showMessage('攻略本 '+VERSION+' 検証',
-   'Scriptableの修正版が起動しました。\n48ページを検出。写真3枚は端末内に保存済み。\n今から攻略本を表示します。');
-  storeChecked(diag,VERSION);
+ console.log('YOS IKEMEN '+VERSION+' local HTML prepared: '+ready.length+' chars');
+ await web.present(false);
+ // No concurrent evaluateJavaScript / callback observer while the WebView is
+ // onscreen. On dismissal, read the current snapshot once (best effort) and
+ // write the same protected JSON state; keep the old state on any failure.
+ let exported;
+ try{
+  exported=await web.evaluateJavaScript('typeof window.__YOS_EXPORT_DATA__ === "function" ? window.__YOS_EXPORT_DATA__() : null',false);
+  if(typeof exported!=='string'||!exported)throw Error('表示画面から読書記録を取得できませんでした');
+  saveState(exported);
+  console.log('YOS IKEMEN '+VERSION+' reader state stored');
+ }catch(e){
+  console.warn('YOS IKEMEN reading-state checkpoint failed: '+String(e));
+  await showMessage('読書記録の保存は未確認',
+   '攻略本の表示処理は終了しましたが、最後の読書位置・保存記事の記録を確認できませんでした。旧記録は保持しています。\n'+String(e));
  }
- // The WebView can be discarded when dismissed; capture updates while visible.
- const dismissed=web.present(true).then(()=>({kind:'dismissed'}),e=>({kind:'dismissed',error:String(e)}));
- let saved=false,bridgeError=null;
- for(;;){
-  const change=captureNext(web).then(value=>({kind:'change',value}),e=>({kind:'bridge-error',error:String(e)}));
-  const result=await Promise.race([dismissed,change]);
-  if(result.kind==='dismissed')break;
-  if(result.kind==='bridge-error'){bridgeError=result.error;break;}
-  try{saveState(result.value);saved=true}
-  catch(e){bridgeError=String(e);break}
- }
- if(bridgeError){
-  // The reader stays available but its last native checkpoint may be stale.
-  await dismissed;
-  await showMessage('読書記録の保存は未確認','攻略本を閉じましたが、一部の記録をiPhoneへ保存できませんでした。\n'+bridgeError);
- }
- if(!saved&&!bridgeError){
-  // No checkpoint event is expected only if the user closed extremely quickly.
-  // An existing saved state is kept and never reset.
-  console.warn('No native checkpoint received; existing state preserved');
- }
+
 }
 async function main(){
  // Shortcuts may host the reader inside a memory-limited extension. Transfer
