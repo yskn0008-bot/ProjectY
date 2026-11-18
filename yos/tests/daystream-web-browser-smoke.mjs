@@ -350,7 +350,9 @@ try{
     [2107,'入浴',620,15,'task'],
     [2108,'メール',720,30,'task'],
     [2109,'記録',752,15,'habit'],
-    [2110,'単独',1000,5,'task']
+    [2110,'単独',1000,5,'task'],
+    [2111,'深い作業',900,50,'task'],
+    [2112,'散歩',1200,90,'task']
    ];
    const tasks=slots.map(([id,t,s,d,kind])=>({id,t,s,d,kind,done:false}));
    if(!window.YOS_DAYSTREAM_WEB.write({version:1,days:{[day]:tasks},hiddenCalendar:{}}))throw Error('fixture save failed');
@@ -361,6 +363,7 @@ try{
    const r=node.getBoundingClientRect(),b=node.querySelector('b'),time=node.querySelector('small');
    return {id:Number(node.dataset.id),top:r.top,bottom:r.bottom,width:r.width,
     backdrop:node.classList.contains('yos-backdrop'),foreground:node.classList.contains('yos-foreground'),
+    thickness:r.height,band:node.dataset.durationBand||'',radius:getComputedStyle(node).borderRadius,
     title:b.textContent,time:time.textContent,color:getComputedStyle(node).backgroundColor,
     whiteSpace:getComputedStyle(b).whiteSpace,
     textOK:b.scrollWidth<=b.clientWidth+2&&b.scrollHeight<=b.clientHeight+2,
@@ -369,7 +372,7 @@ try{
   assert.equal(cells.length,before.length);
   const byId=new Map(cells.map(c=>[c.id,c]));
   assert.equal(byId.get(2100).backdrop,true,'long task is background, not a narrow lane');
-  for(const id of [2101,2102,2103,2104,2105,2106,2107,2108,2110]){
+  for(const id of [2101,2102,2103,2104,2105,2106,2107,2108,2110,2111,2112]){
    const item=byId.get(id);
    assert.equal(item.foreground,true,'full-width task '+id);
    assert.ok(item.width>width*.6,'title and hours have enough horizontal space: '+id);
@@ -379,6 +382,18 @@ try{
   }
   assert.equal(byId.get(2102).time,'05:45–05:50');
   assert.equal(byId.get(2103).time,'05:48–05:53');
+
+  // Slender short tasks, progressively thicker longer tasks; text-overflow
+  // protection is always allowed to increase the height if needed.
+  for(const [id,height,band] of [[2110,42,'xs'],[2101,46,'sm'],[2108,50,'md'],[2111,54,'lg'],[2112,58,'xl']]){
+   assert.equal(byId.get(id).thickness,height,'duration-based visible bar height: '+id);
+   assert.equal(byId.get(id).band,band,'duration class matches stored duration: '+id);
+  }
+  assert.ok(byId.get(2105).thickness>byId.get(2110).thickness,
+   'long task title wraps instead of being cut in a slim bar');
+  assert.equal(byId.get(2110).color,'rgb(85, 39, 139)','default task color is deep casual purple');
+  assert.equal(byId.get(2110).radius,'11px','rounded casual bars keep compact corners');
+
   const visible=cells.filter(c=>!c.backdrop).sort((a,b)=>a.top-b.top);
   for(let i=1;i<visible.length;i++)assert.ok(visible[i].top>=visible[i-1].bottom-2,'dense tasks do not cover one another: '+visible[i-1].id+'/'+visible[i].id);
   for(const id of [2102,2106,2108])assert.notEqual(byId.get(id).color,byId.get(2110).color,'semantic color '+id+' differs from unknown');
