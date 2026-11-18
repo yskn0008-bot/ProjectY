@@ -155,3 +155,23 @@ test('source snapshots exclude credentials and private notes',()=>{
  const result=adapter().fromYosTaskDashboardCache(cache([task({blocker:'SECRET',completion:'SECRET',evidence:'SECRET',token:'SECRET'})]));
  assert.doesNotMatch(JSON.stringify(result),/SECRET/);
 });
+
+test('explicit Clarity windows project once into the existing Tokyo timeline without saving a local copy',()=>{
+ const local={};local.window=local;
+ vm.runInNewContext(sourceCode,{window:local,Date,Intl});
+ const source=local.YOS_DAYSTREAM_SOURCES;
+ const t={id:'11111111222233334444555555555555',title:'買い物',state:'次にやる',sourceKind:'task',evidence:'YOS Inbox clarity:window-unique',due:'2026-11-19T10:00:00Z',dueEnd:'2026-11-19T10:30:00Z'};
+ const snapshot=tasks=>source.fromYosTaskDashboardCache({savedAt:Date.now(),data:{source:'notion',complete:true,tasks}});
+ const day='2026-11-19';
+ const rows=source.clarityTimeline(snapshot([t]),day,[]);
+ assert.equal(rows.length,1);
+ assert.equal(rows[0].s,19*60);
+ assert.equal(rows[0].d,30);
+ assert.equal(rows[0].f,true);
+ assert.equal(source.clarityTimeline(snapshot([t]),day,[{sourceRef:rows[0].sourceRef}]).length,0);
+ for(const patch of [{evidence:''},{dueEnd:null},{sourceKind:'calendar'},{habitCycle:'毎日'},{dueEnd:'2026-11-20T01:00:00Z'}]){
+  assert.equal(source.clarityTimeline(snapshot([{...t,...patch}]),day,[]).length,0);
+ }
+ assert.doesNotMatch(JSON.stringify(snapshot([t])),/clarity:window-unique/,'the capture receipt stays in Notion');
+ assert.match(html,/const entries=items\.filter\(x=>x\.source!=='Apple Calendar'&&x\.source!=='Clarity'\)/);
+});

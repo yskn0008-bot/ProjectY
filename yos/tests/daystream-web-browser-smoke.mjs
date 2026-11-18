@@ -229,6 +229,9 @@ try{
  const liveContext=await browser.newContext({viewport:{width:390,height:844},timezoneId:'Asia/Tokyo',serviceWorkers:'block'});
  const live=await liveContext.newPage();let state='次にやる',title='NOTION LIVE',version='2026-11-13T01:00:00Z',writes=0,reads=0,failRead=false;
  const sourceId='11111111222233334444555555555555';
+ const captureDay=new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
+ const timedClarity={id:'22222222333344445555666666666666',title:'CLARITY TIMED',state:'次にやる',sourceKind:'task',
+  evidence:'YOS Inbox clarity:test-window-0001',due:captureDay+'T19:00:00+09:00',dueEnd:captureDay+'T19:30:00+09:00'};
  const row=()=>({id:sourceId,title,state,order:1000,due:'2026-11-13T15:00:00Z',dueEnd:null,area:'Work',habitCycle:'',lastEditedAt:version});
  await liveContext.addInitScript(()=>{
   window.google={accounts:{id:{initialize:settings=>{window.testGoogleCallback=settings.callback},renderButton(){}}}};
@@ -247,17 +250,20 @@ try{
    writes++;const body=route.request().postDataJSON();assert.equal(body.pageId,sourceId);assert.equal(body.action,'complete');
    state='完了';version='2026-11-13T02:00:00Z';await route.fulfill({headers:cors,json:{source:'notion',task:row()}});return;
   }
-  reads++;await route.fulfill(failRead?{status:503,headers:cors,json:{error:'synthetic offline'}}:{headers:cors,json:{source:'notion',complete:true,tasks:[row()]}});
+  reads++;await route.fulfill(failRead?{status:503,headers:cors,json:{error:'synthetic offline'}}:{headers:cors,json:{source:'notion',complete:true,tasks:[row(),timedClarity]}});
  });
  await live.goto('https://yskn0008-bot.github.io/yos/daystream/',{waitUntil:'domcontentloaded'});
  await live.locator('[data-tab="task"]').click();await live.locator('#yosWebTaskRefresh').click();
  await live.waitForFunction(()=>typeof window.testGoogleCallback==='function');
  await live.evaluate(()=>window.testGoogleCallback({credential:'synthetic-id-token'}));
  assert.match(await live.locator('#yosSourceTasks').textContent(),/NOTION LIVE/);
+ assert.doesNotMatch(await live.locator('#yosSourceTasks').textContent(),/CLARITY TIMED/);
+ assert.equal(await live.locator('#tl .card').filter({hasText:'CLARITY TIMED'}).count(),1);
  assert.doesNotMatch(await live.locator('#yosSourceTasks').textContent(),/STALE PROJECTION/);
  await live.locator('#yosStartFrom').fill('09:00');await live.locator('#yosSourceTasks button').first().click();await live.locator('#yosPlanBox button').click();
  const planned=await live.evaluate(()=>JSON.parse(localStorage.getItem('YOS_DAYSTREAM_WEB_PLAN_V1')));
  const day=Object.keys(planned.days)[0],placed=planned.days[day][0];assert.equal(placed.sourceRef,'notion:notion-'+sourceId);
+ assert.equal(planned.days[day].length,1,'read-only Clarity projection is not stored as an editable task');
  title='NOTION RENAMED';await live.evaluate(()=>window.YOS_DAYSTREAM_TASK_AUTH.refresh());
  assert.equal(await live.evaluate(()=>items.find(x=>x.sourceRef==='notion:notion-11111111222233334444555555555555').t),'NOTION RENAMED');
  assert.equal(await live.evaluate(()=>items.filter(x=>x.sourceRef==='notion:notion-11111111222233334444555555555555').length),1);
@@ -272,6 +278,7 @@ try{
  assert.equal(await live.evaluate(()=>items.find(x=>x.sourceRef==='notion:notion-11111111222233334444555555555555').done),true);
  assert.doesNotMatch(await live.locator('#yosSourceTasks').textContent(),/STALE PROJECTION/);
  assert.ok(reads>=3);
+ assert.equal(await live.locator('#tl .card').filter({hasText:'CLARITY TIMED'}).count(),1);
  await liveContext.close();
 
  // A private JSON import merges into THIS original PWA's existing plan.
