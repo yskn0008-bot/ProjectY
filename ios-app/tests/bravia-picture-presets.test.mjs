@@ -4,7 +4,7 @@ import fs from 'node:fs';
 
 const source=fs.readFileSync(new URL('../scriptable/remote-widgets/YOS Remote Hub.js',import.meta.url),'utf8');
 
-function makeHarness({unsupported=false,brightness=80,mode='standard',writeFails=false}={}){
+function makeHarness({unsupported=false,brightness=80,mode='standard',writeFails=false,modes=['standard','cinema']}={}){
   const begin=source.indexOf('const PICTURE_BACKUP_KEY=');
   const end=source.indexOf('async function discoverSony(){',begin);
   assert.ok(begin>0&&end>begin,'picture module extraction markers must exist');
@@ -26,7 +26,7 @@ function makeHarness({unsupported=false,brightness=80,mode='standard',writeFails
       if(request.method==='getPictureQualitySettings'){
         const target=request.params[0].target;
         reads.push(target);
-        const candidate=target==='pictureMode'?[{value:'standard'},{value:'cinema'}]:[{min:0,max:100,step:1}];
+        const candidate=target==='pictureMode'?modes.map(value=>({value})):[{min:0,max:100,step:1}];
         return JSON.stringify({result:[[{target,currentValue:values[target],isAvailable:true,candidate}]]});
       }
       if(request.method==='setPictureQualitySettings'){
@@ -115,4 +115,14 @@ test('read-back mismatch is not reported as successful and backup is retained',a
   await assert.rejects((await h.api).applyPicturePreset('night'),/反映確認できませんでした/);
   assert.equal(h.values.brightness,'80');
   assert.equal(h.keyStore.size,1,'backup is retained for safe recovery');
+});
+
+test('picture preset matches mixed-case Sony values and writes the exact reported value',async()=>{
+  const h=makeHarness({modes:['Standard','Cinema home'],mode:'Standard'});
+  const api=await h.api;
+  const p=await api.pictureCapabilities();
+  assert.deepEqual(p.support,{day:true,night:true,movie:true});
+  await api.applyPicturePreset('movie');
+  assert.equal(h.values.pictureMode,'Cinema home');
+  assert.deepEqual(h.writes,[{target:'pictureMode',value:'Cinema home'}]);
 });
