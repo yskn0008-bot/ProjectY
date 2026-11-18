@@ -32,7 +32,7 @@ button,input,select{font:inherit}button{cursor:pointer}button:focus-visible,inpu
 .timeline-wrap{position:relative;margin:8px 13px 20px 11px;overflow:visible}.timeline{position:relative;touch-action:pan-y}.hour{position:absolute;left:0;right:0;border-top:1px solid #ffffff0f;height:1px;pointer-events:none}.hour span{position:absolute;top:-9px;left:6px;color:#dce2eb;font-size:12px;font-weight:480;font-variant-numeric:tabular-nums}.axis{position:absolute;left:58px;top:0;bottom:0;width:1.5px;background:#c2cad2b8;pointer-events:none}.tick{position:absolute;left:54.5px;width:9px;height:9px;border-radius:50%;background:#dce2ec;z-index:2;border:2px solid #56616e;box-shadow:0 0 0 2px #d7dee755;pointer-events:none}
 .card{position:absolute;left:73px;right:0;min-height:16px;border:0;border-radius:9px;padding:1px 9px;display:flex;align-items:center;gap:8px;touch-action:none;user-select:none;-webkit-user-select:none;color:#f8faff;background:#307ec2;box-shadow:0 2px 8px #101b2927;transition:filter .18s ease,box-shadow .18s ease;will-change:transform;overflow:hidden}
 .card:before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:#46b9fb;opacity:.9;pointer-events:none}.card.habit{background:#24976e}.card.habit:before{background:#4bd9a1}.card.task{background:#823db0;touch-action:none;transform:translate3d(0,0,0);backface-visibility:hidden}.card.task:before{display:none}.card.schedule{background:#2e77b3}
-.card.neutral{background:#636b76}.card.neutral:before{background:#97a6b9}.card.sleep{background:#325477}.card.sleep:before{background:#48bdf5}.card.sleep:not(.tiny) b,.card.sleep:not(.tiny) svg{transform:translateY(-9px)}.card.sleep:not(.tiny) small{position:absolute;top:calc(50% + 4px);left:38px;margin:0;font-size:11px;transform:translateY(0)}
+.card.neutral{background:#636b76}.card.neutral:before{background:#97a6b9}.card.sleep{background:#325477}.card.sleep:before{background:#48bdf5}
 .card.task{cursor:pointer;border-radius:13px;padding:6px 11px;box-shadow:0 4px 12px #17102348}.card.task .task-copy{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:3px;min-width:0;width:100%;height:100%}.card.task .task-copy b{font-size:13.5px;line-height:1.12;font-weight:730;flex:none;max-width:100%;letter-spacing:.06px}.card.task .task-copy small{font-size:11.5px;line-height:1.1;font-weight:610;letter-spacing:.1px;margin:0;max-width:100%;overflow:hidden;text-overflow:ellipsis;color:#fffce9;opacity:.94}.card.task.compact{border-radius:11px}.card.task.compact .task-copy b{font-size:13px}.card.task.compact .task-copy small{font-size:11px}.card.task.swiping{filter:brightness(1.14)}.card.task.drag-preview{z-index:9;box-shadow:0 11px 27px #10131a8a;filter:brightness(1.1);transition:box-shadow .18s ease,filter .18s ease}
 .card.compat-positive:before{background:#65d5a5;width:5px}.card.compat-positive{box-shadow:inset 0 0 0 1.5px #65d5a5,0 2px 8px #101b2927}
 .card.compat-negative:before{background:#f0bd6f;width:5px}.card.compat-negative{box-shadow:inset 0 0 0 1.5px #eeb76b,0 2px 8px #101b2927}
@@ -74,64 +74,61 @@ button:active{opacity:.8}@media(min-width:640px){.dock{left:calc((100vw - 640px)
 .card.task.press-armed{outline:2px solid #dce6ff;outline-offset:-2px;filter:brightness(1.1)}
 .editor #editorTitle,.editor .edit-end,.editor label{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 
-/* Daystream readable-density layout: original task bar identity and gesture contracts remain. */
-.card.task{min-width:0;overflow:hidden}
-.card.task .task-copy{min-width:0;flex:1 1 auto;width:auto;height:100%;justify-content:center;align-items:flex-start;gap:5px}
-.card.task .task-copy b{display:block;white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:anywhere;word-break:normal;max-width:100%;line-height:1.28;font-size:13.5px;flex:0 0 auto}
-.card.task .task-copy small{display:block;white-space:nowrap;overflow:visible;text-overflow:clip;flex:0 0 auto;max-width:100%;font-size:11.5px;letter-spacing:0;font-variant-numeric:tabular-nums}
-.card.task.lane .task-copy b,.card.task.tiny .task-copy b,.card.task.compact .task-copy b{font-size:13.5px;line-height:1.28;white-space:normal}
-.card.task.lane .task-copy small,.card.task.tiny .task-copy small,.card.task.compact .task-copy small{display:block;font-size:11.5px;white-space:nowrap}
-.card.task .task-drag-grip{flex:0 0 38px;min-width:38px;min-height:42px;margin-right:-5px;border-left:1px solid #ffffff27;border-radius:6px;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
-.card.task.yos-backdrop{z-index:1;align-items:flex-start;padding-top:9px}
-.card.task.yos-backdrop .task-copy{height:auto;justify-content:flex-start}
-.card.task.yos-foreground{z-index:3}
-.card.task.yos-backdrop .task-copy b{font-size:13.5px}
-.card.task.yos-backdrop .task-drag-grip{align-self:flex-start}
-.card.task.compat-positive{background:#267f66;box-shadow:inset 0 0 0 1.5px #72f0bf,0 3px 12px #101b2927}
-.card.task.compat-negative{background:#95651f;box-shadow:inset 0 0 0 1.5px #ffd391,0 3px 12px #101b2927}
-.card.task.compat-danger{background:#b9596a;box-shadow:inset 0 0 0 1.5px #f4a1b2,0 3px 12px #101b2927}
-.card.task.moving,.card.task.drag-preview{z-index:10}
-
-/* DURATION COMPACT · brighter casual cards, no leading accent stripe. */
-.card.task{background:#9958d2;border-radius:11px;padding:2px 9px 2px 11px;box-shadow:inset 0 1px 0 #ffffff35,0 3px 8px #08061238;color:#fff;transition:filter .18s ease,box-shadow .18s ease}
-.card.task:before{display:none}
-.card.task .task-copy{gap:2px}
-.card.task .task-copy b,.card.task.lane .task-copy b,.card.task.tiny .task-copy b,.card.task.compact .task-copy b{font-size:13px;line-height:1.23;font-weight:750;letter-spacing:.06px}
-.card.task .task-copy small,.card.task.lane .task-copy small,.card.task.tiny .task-copy small,.card.task.compact .task-copy small{font-size:11px;line-height:1.15;letter-spacing:0;color:#f7f2ff;opacity:.98;font-weight:610}
-.card.task .task-drag-grip{min-height:38px;min-width:38px;border-left:1px solid #ffffff21;color:#ebd9fb}
-.card.task.yos-backdrop{padding-top:7px}
-.card.task.compat-positive{background:#258e70;box-shadow:inset 0 1px 0 #ffffff35,0 3px 8px #08061238}
-.card.task.compat-negative{background:#aa7529;box-shadow:inset 0 1px 0 #ffffff35,0 3px 8px #08061238}
-.card.task.compat-danger{background:#c45e78;box-shadow:inset 0 1px 0 #ffffff35,0 3px 8px #08061238}
-.card.task.drag-preview{box-shadow:inset 0 1px 0 #ffffff56,0 9px 23px #08061280}
-
-/* Compact, crisply separated foreground bars; long overlapping windows recede. */
-.card.task{border:1px solid #f5e8ffb8;box-shadow:0 0 0 1px #1b2232a8,0 3px 7px #08061270;padding:1px 8px 1px 10px;border-radius:9px}
-.card.task .task-copy{gap:1px}
-.card.task .task-copy b,.card.task.lane .task-copy b,.card.task.tiny .task-copy b,.card.task.compact .task-copy b{font-size:12.5px;line-height:1.18}
-.card.task .task-copy small,.card.task.lane .task-copy small,.card.task.tiny .task-copy small,.card.task.compact .task-copy small{font-size:10.5px;line-height:1.1}
-.card.task .task-drag-grip{min-height:30px;min-width:38px;margin-right:-4px;border-left:1px solid #ffffff40}
-.card.task.compat-positive{border-color:#b9f3df;box-shadow:0 0 0 1px #1b2232a8,0 3px 7px #08061270}
-.card.task.compat-negative{border-color:#ffe1ad;box-shadow:0 0 0 1px #1b2232a8,0 3px 7px #08061270}
-.card.task.compat-danger{border-color:#ffd5e0;box-shadow:0 0 0 1px #1b2232a8,0 3px 7px #08061270}
-.card.task.yos-backdrop{background:#51445d;border:1px dashed #c7acd4;box-shadow:none;color:#f4f0f7;opacity:1;z-index:1}
-.card.task.yos-backdrop.compat-positive{background:#304c46;border-color:#86c6ab}
-.card.task.yos-backdrop.compat-negative{background:#51483d;border-color:#cbb18a}
-.card.task.yos-backdrop.compat-danger{background:#654753;border-color:#c999a6}
-.card.task.yos-foreground{z-index:3}
-.card.task.drag-preview,.card.task.moving{box-shadow:0 0 0 1px #fff9,0 8px 20px #0909118a}
-
-/* Almost-flat lift: faint top sheen, subtle rounded surface and soft lower shadow.
-   Preserve bright semantic background-color, existing slim geometry and no left stripe.
-   Long overlapping cards stay deliberately flat behind the foreground. */
-.card.task:not(.yos-backdrop){
- background-image:linear-gradient(to bottom,rgba(255,255,255,.075) 0%,rgba(255,255,255,.018) 38%,rgba(0,0,0,.035) 100%);
- box-shadow:inset 0 1px 0 rgba(255,255,255,.22),inset 0 -1px 0 rgba(0,0,0,.08),0 0 0 1px #1b2232a8,0 4px 8px rgba(8,6,18,.29);
+/* Layer: long intervals remain visible behind independently interactive cards. */
+html:has(body.yos-daystream-web),body.yos-daystream-web{background:#111721}
+.yos-daystream-web .yos-web-port,.yos-daystream-web .dock{background:#172130;color:#f1f5fd;border-color:#2b3b52}
+.yos-daystream-web .yos-web-port a,.yos-daystream-web .yos-web-port button{background:#222e44;border-color:#495d7d}
+.yos-daystream-web .app{padding-top:12px}
+.yos-daystream-web .day.active{background:#a2e6d4;color:#142823}
+.yos-daystream-web .summary{background:transparent;border:0;border-block:1px solid #2b3b52;border-radius:0;box-shadow:none;min-height:48px}
+.yos-daystream-web .metric{border-color:#2b3b52}
+.yos-daystream-web .ring{width:30px;height:30px;background:conic-gradient(#a2e6d4 0 var(--pct),#35465b var(--pct) 100%)}
+.yos-daystream-web .ring:after{inset:6px;background:#111721}
+.timeline{--card-inset:73px;isolation:isolate}
+.timeline .axis{background:#40546a}
+.timeline .hour{border-color:#2b3b52}
+.timeline .hour span{color:#aab9cd}
+.timeline .tick{width:7px;height:7px;left:55.5px;background:#a2e6d4;border:1px solid #111721;box-shadow:none}
+.timeline .nowline{background:#a2e6d4;box-shadow:none}
+.timeline .nowline:before,.timeline .nowbadge{background:#a2e6d4;color:#142823}
+.timeline .card{
+ --layer-surface:#222e44;--layer-edge:#495d7d;
+ --zone-surface:#1b3242;--zone-edge:#3e6879;--signal:#aab9cd;
+ left:var(--card-inset);min-width:0;background:var(--layer-surface);
+ border:1px solid var(--layer-edge);border-radius:8px;color:#f1f5fd;
+ box-shadow:0 3px 8px #080d1755;padding:1px 7px 1px 9px;gap:5px;
 }
-.card.task.yos-backdrop{background-image:none;box-shadow:none}
-.card.task.drag-preview:not(.yos-backdrop),.card.task.moving:not(.yos-backdrop){
- box-shadow:inset 0 1px 0 rgba(255,255,255,.27),0 0 0 1px #fff8,0 7px 14px rgba(9,9,17,.34);
+.timeline .card:before{display:none}
+.timeline .card small{color:#d1ddee;font-size:11px}
+.timeline .card.habit{--layer-surface:#233b37;--layer-edge:#537a6c}
+.timeline .card.sleep{--zone-surface:#1b3242;--zone-edge:#3e6879}
+.timeline .card.compat-positive{--layer-surface:#23473e;--layer-edge:#73c7aa;--zone-surface:#1d3935;--zone-edge:#589c87;--signal:#a2e6d4}
+.timeline .card.compat-negative{--layer-surface:#493722;--layer-edge:#c39456;--zone-surface:#352d25;--zone-edge:#9d7949;--signal:#ffd397}
+.timeline .card.compat-danger{--layer-surface:#4b303b;--layer-edge:#d690a2;--zone-surface:#382933;--zone-edge:#a96d81;--signal:#ffc0ce}
+.timeline .task-copy{width:auto;min-width:0;flex:1 1 auto;gap:1px}
+.timeline .task-copy b{font-size:13px;line-height:1.2;white-space:normal;overflow-wrap:anywhere}
+.timeline .task-copy small{margin:0;line-height:1.1}
+.timeline .task-meta{display:flex;align-items:center;gap:6px;max-width:100%}
+.timeline .layer-status{flex:none;font-size:10px;line-height:1.2;color:var(--signal);white-space:nowrap}
+.timeline .task-drag-grip{flex-basis:38px;min-width:38px;min-height:0;margin-right:-5px;border-left:1px solid #ffffff22;color:#d1ddee}
+.timeline .yos-backdrop{
+ left:calc(var(--zone-start,0%) + var(--card-inset) * var(--zone-left,1));
+ right:calc(var(--zone-remaining,0%) - var(--card-inset) * var(--zone-right,0) + var(--zone-gap,0px));
+ align-items:flex-start;padding-top:6px;min-height:0;z-index:1;
+ background:var(--zone-surface);border-color:var(--zone-edge);box-shadow:none;
 }
+.timeline .yos-backdrop .task-copy{height:auto;justify-content:flex-start}.timeline .yos-backdrop .task-meta{flex-wrap:wrap}
+.timeline .yos-backdrop .task-drag-grip{height:30px}
+.timeline .yos-backdrop .layer-status{overflow:hidden;text-overflow:ellipsis}
+.timeline .event-copy{display:grid;gap:2px;min-width:0}.timeline .event-copy small{margin:0}.timeline .yos-backdrop .event-copy .layer-status{text-overflow:ellipsis;overflow:hidden}
+.timeline .yos-backdrop small{position:static;margin:0}
+.timeline .card.sleep :is(b,small,svg){transform:none}.timeline .card.sleep small{position:static;margin:0}
+.timeline .yos-foreground{z-index:3}
+.timeline .yos-foreground.is-layered,.timeline .yos-foreground.is-layered.task{left:calc(var(--card-inset) + 10px)}
+.timeline .card.done{opacity:.72;filter:none}
+.timeline .card.done b{text-decoration:line-through}
+.timeline .card.drag-preview,.timeline .card.moving{z-index:10;box-shadow:0 8px 20px #080d17bb}
+@media(max-width:370px){.timeline{--card-inset:69px}.timeline .layer-status{font-size:9px}}
 </style><script src="./source-adapters.js"></script><script src="../../life/calendar/native-bridge.js"></script><script src="./yos-tasks-auth.js"></script></head><body class="yos-daystream-web"><div class="yos-web-port" role="navigation" aria-label="DAYSTREAM Web版">
 <a href="../">YOS</a><strong>DAYSTREAM · WEB</strong>
 <button id="yosWebImport" type="button">データ読込</button><button id="yosWebExport" type="button">書き出し</button>
@@ -826,8 +823,7 @@ function yosElasticAxis(rows,baseScale){
  return {minutes,pixels,coordinate,minuteAt};
 }
 
-/* Time grows vertically only where task labels or dense, simultaneous entries require it.
-   The source start/end times never change; long overlapping tasks become full-width backdrops. */
+/* The readable axis and proportional view share the same saved times. */
 function yosTaskDurationHeight(duration){
  // Denser display only; saved task minutes remain unchanged.
  if(duration<=5)return 34;
@@ -848,12 +844,20 @@ function yosReadableTaskHeight(item){
  return Math.max(yosTaskDurationHeight(item.d),contentMin);
 }
 function yosBackdropRows(rows){
- const result=new Set();
+ // Connected intervals share the smallest available lane across the cluster.
+ const layout=new Map();
+ let laneEnds=[],cluster=[];
+ const finish=()=>{for(const [item,lane] of cluster)layout.set(item,{lane,count:laneEnds.length});};
  for(const item of rows){
-  if(item.kind!=='task'||item.f||item.d<120)continue;
-  if(rows.some(other=>other!==item&&other.kind==='task'&&other.d<=90&&other.s<item.s+item.d&&other.s+other.d>item.s))result.add(item);
+  if(item.d<120)continue;
+  if(laneEnds.every(end=>end<=item.s)){finish();laneEnds=[];cluster=[];}
+  const available=laneEnds.findIndex(end=>end<=item.s);
+  const lane=available<0?laneEnds.length:available;
+  laneEnds[lane]=item.s+item.d;
+  cluster.push([item,lane]);
  }
- return result;
+ finish();
+ return layout;
 }
 function yosReadableAxis(rows,baseScale,backdrops){
  const base=yosElasticAxis(rows,baseScale);
@@ -866,7 +870,7 @@ function yosReadableAxis(rows,baseScale,backdrops){
  const starts=[...groups.keys()].sort((a,b)=>a-b),spans=[];
  for(let i=0;i<starts.length;i++){
   const start=starts[i],entries=groups.get(start),next=starts[i+1];
-  const required=entries.reduce((sum,item)=>sum+(item.kind==='task'&&!item.f?yosReadableTaskHeight(item):Math.max(23,Math.min(60,base.coordinate(item.s+item.d)-base.coordinate(item.s))))+4,0);
+  const required=entries.reduce((sum,item)=>sum+(item.kind==='task'&&!item.f?yosReadableTaskHeight(item):Math.max(28,Math.min(60,base.coordinate(item.s+item.d)-base.coordinate(item.s))))+4,0);
   const end=next??Math.min(1440,Math.max(start+1,...entries.map(item=>item.s+item.d)));
   if(end<=start)continue;
   const natural=base.coordinate(end)-base.coordinate(start);
@@ -901,6 +905,8 @@ function showFocusFor(item){
  document.getElementById('doneBtn').textContent=item.done?'未完了に戻す':'完了にする';
  document.getElementById('deleteSelected').textContent='削除';
  fi.textContent=fmt(item.s)+'–'+fmt(item.s+item.d)+(fixed?(boot.calendarSource==='user-file'?' · ファイルから取り込んだ固定予定。元のカレンダーは変更しません。':boot.calendarSource==='scriptable-on-device'?' · iPhoneから読取済みの固定予定。元のカレンダーは変更しません。':boot.calendarSource==='yos-life-local'?' · MY WAY端末保存の予定写し。元の予定は変更しません。':' · Appleカレンダーの固定予定。元の予定は変更せず、この画面から隠せます。'):' · 端末内のタスク・予定。編集・削除できます。');
+ const reasons=latestCompatibility.get(item.id)?.reasons;
+ if(reasons?.length)fi.textContent+=' ｜ '+reasons.join(' ｜ ');
  focus.classList.add('show');
 }
 
@@ -985,8 +991,8 @@ function yosCompatibility(rows){
  const result=new Map(valid.map(x=>[x.id,{level:'unknown',reasons:[]}]));
  const add=(item,level,reason)=>{
   const r=result.get(item.id);if(!r)return;
-  if(yosCompatRank[level]>yosCompatRank[r.level])r.level=level;
-  if(!r.reasons.includes(reason))r.reasons.push(reason);
+  if(yosCompatRank[level]>yosCompatRank[r.level]){r.level=level;r.reasons.unshift(reason);}
+  else if(!r.reasons.includes(reason))r.reasons.push(reason);
  };
  const sorted=[...valid].sort((a,b)=>a.s-b.s||a.id-b.id);
  for(let i=0;i<sorted.length;i++)for(let j=i+1;j<sorted.length;j++){
@@ -994,7 +1000,8 @@ function yosCompatibility(rows){
   if(gap>=90)break;
   if(gap<0){
    const fixed=!!a.f||!!b.f;
-   const msg=(fixed?'固定予定との時間衝突':'予定が時間重複')+'：「'+a.t+'」と「'+b.t+'」';
+   const overlap=Math.min(a.s+a.d,b.s+b.d)-b.s;
+   const msg=(fixed?'固定予定との時間衝突':'予定が時間重複')+'（'+overlap+'分）：「'+a.t+'」と「'+b.t+'」';
    add(a,'danger',msg);add(b,'danger',msg);continue;
   }
   // Only a matched preparation -> action or exercise -> bathing chain suggests a plausible benefit.
@@ -1492,8 +1499,9 @@ function render(){
  tl.querySelectorAll('.hour,.card,.tick').forEach(n=>n.remove());
  const bottom=yFor(1440);
  for(let h=0;h<=24;h++){const el=document.createElement('div');el.className='hour';el.style.top=yFor(h*60)+'px';el.innerHTML='<span>'+fmt(h*60)+'</span>';tl.append(el)}
- // Keep readable cards full-width; pack concurrent starts vertically within a stretched time segment.
+ // Keep short cards readable and pack simultaneous starts above interval backdrops.
  const visualOffsets=new Map();const groups=new Map();
+ const zones=[...backdrops.keys()];
  for(const item of sorted.filter(x=>!backdrops.has(x))){
   if(!groups.has(item.s))groups.set(item.s,[]);
   groups.get(item.s).push(item);
@@ -1502,38 +1510,65 @@ function render(){
   let offset=0;
   for(const item of group){
    visualOffsets.set(item,offset);
-   offset+=(item.kind==='task'&&!item.f?yosReadableTaskHeight(item):Math.max(23,Math.min(60,yFor(item.s+item.d)-yFor(item.s))))+4;
+   offset+=(item.kind==='task'&&!item.f?yosReadableTaskHeight(item):Math.max(28,Math.min(60,yFor(item.s+item.d)-yFor(item.s))))+4;
   }
  }
  let lastBottom=-2;
  sorted.forEach(item=>{
    const natural=yFor(item.s);
    const backdrop=backdrops.has(item),isTask=item.kind==='task'&&!item.f;
-   const height=backdrop?Math.max(yosReadableTaskHeight(item),yFor(item.s+item.d)-natural-2):isTask?yosReadableTaskHeight(item):Math.max(density==='overview'?21:26,yFor(item.s+item.d)-natural-2);
+   const span=yFor(item.s+item.d)-natural;
+   const height=backdrop?Math.max(1,span-2):isTask?yosReadableTaskHeight(item):Math.max(28,Math.min(60,span));
    const top=natural+(visualOffsets.get(item)||0);
    lastBottom=Math.max(lastBottom,top+height);
    const el=document.createElement('div');el.className='card '+(item.kind==='habit'?'habit':item.kind==='task'?'task':'schedule');
    if(isTask){el.dataset.durationBand=item.d<=5?'xs':item.d<=15?'sm':item.d<=30?'md':item.d<=60?'lg':item.d<=120?'xl':'xxl';}
-   if(backdrop)el.classList.add('yos-backdrop');
-   else if(isTask)el.classList.add('yos-foreground');
+   if(backdrop){
+    el.classList.add('yos-backdrop');
+    const {lane,count}=backdrops.get(item),start=lane/count,remaining=(count-lane-1)/count;
+    el.style.setProperty('--zone-start',start*100+'%');
+    el.style.setProperty('--zone-left',1-start);
+    el.style.setProperty('--zone-remaining',remaining*100+'%');
+    el.style.setProperty('--zone-right',remaining);
+    el.style.setProperty('--zone-gap',remaining?'3px':'0px');
+   }else{
+    el.classList.add('yos-foreground');
+    if(zones.some(zone=>item.s<zone.s+zone.d&&zone.s<item.s+item.d))el.classList.add('is-layered');
+   }
    el.style.top=top+'px';el.style.height=height+'px';
    const compat=latestCompatibility.get(item.id);
-   if(compat){el.classList.add('compat-'+compat.level);el.setAttribute('aria-label',item.t+' '+(compat.reasons[0]||'相性：判断材料不足'));el.title=(compat.reasons[0]||'相性は未確認');}
+   let statusEl;
+   if(compat){
+    el.classList.add('compat-'+compat.level);
+    const label={positive:'＋ 相乗候補',negative:'− 余裕不足',danger:'！ 時間衝突'}[compat.level];
+    const reason=compat.reasons[0]||'相性：判断材料不足';
+    el.setAttribute('aria-label',[item.t,fmt(item.s)+'–'+fmt(item.s+item.d),reason].join('、'));
+    el.title=reason;
+    if(label){
+     statusEl=document.createElement('span');statusEl.className='layer-status';statusEl.textContent=label;
+    }
+   }
    if(item.kind!=='task'||item.f){
     const iconEl=document.createElement('span');iconEl.innerHTML=eventIcon(item);el.append(iconEl.firstChild);
    }
    const titleEl=document.createElement('b');titleEl.textContent=item.t;
    const timeEl=document.createElement('small');timeEl.textContent=fmt(item.s)+'–'+fmt(item.s+item.d);
    if(item.kind==='task'&&!item.f){
-    const copy=document.createElement('span');copy.className='task-copy';copy.append(titleEl,timeEl);el.append(copy);const grip=document.createElement('span');grip.className='task-drag-grip';grip.textContent='⋮';grip.setAttribute('aria-label','ドラッグして時刻を移動');el.append(grip);
-   }else{el.append(titleEl,timeEl);}
+    const copy=document.createElement('span');copy.className='task-copy';
+    const meta=document.createElement('span');meta.className='task-meta';meta.append(timeEl);if(statusEl)meta.append(statusEl);
+    copy.append(titleEl,meta);el.append(copy);const grip=document.createElement('span');grip.className='task-drag-grip';grip.textContent='⋮';grip.setAttribute('aria-label','ドラッグして時刻を移動');el.append(grip);
+   }else{
+    const copy=document.createElement('span');copy.className='event-copy';
+    const meta=document.createElement('span');meta.className='task-meta';meta.append(timeEl);if(statusEl)meta.append(statusEl);
+    copy.append(titleEl,meta);el.append(copy);
+   }
    if(item.t==='睡眠'||item.t==='就寝')el.classList.add('sleep');
    if(['朝の準備','朝食','昼食','夕食','入浴'].includes(item.t))el.classList.add('neutral');
    if(height<30&&!isTask)el.classList.add('tiny');
    if(density==='overview')el.classList.add('compact');
    if(searchText&&!item.t.toLocaleLowerCase().includes(searchText))el.style.display='none';
    el.dataset.id=String(item.id);if(item.done)el.classList.add('done');tl.append(el);
-   const tick=document.createElement('div');tick.className='tick';tick.style.top=(top-4)+'px';tl.append(tick);
+   const tick=document.createElement('div');tick.className='tick';tick.style.top=(natural-3)+'px';tl.append(tick);
    let downY=0,downS=0,moved=false,holding=false,activePointer=null,frame=0,latestY=0,previewS=item.s,lastHaptic=0,startedAt=0;
    const timeLabel=el.querySelector('small');
    const paint=()=>{frame=0;if(!holding)return;const offset=latestY-downY;el.style.transform='translate3d(0,'+offset+'px,0) scale(1.015)';const next=Math.max(0,Math.min(1440-item.d,Math.round(minuteAtY(yFor(downS)+offset)/5)*5));if(next!==previewS){previewS=next;timeLabel.textContent=fmt(next)+'–'+fmt(next+item.d);const now=performance.now();if(now-lastHaptic>75){lastHaptic=now;vibrate()}}};

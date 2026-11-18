@@ -571,6 +571,36 @@ try{
  assert.equal(tinySlideTap.done,true,'normal finger jitter under 12px still allows deliberate brief tap');
  await gp.evaluate(()=>window.__gestureTouch(91001,[['touchstart',200,360,35],['touchend',200,360,0]]));
  assert.equal(await gp.evaluate(()=>!!items.find(x=>x.id===91001).done),false,'test restores original task state');
+ // Verify the existing timeline renders long fixed and editable windows behind live status cards.
+ await gp.evaluate(()=>{
+  items=[
+   {id:1,t:'睡眠',s:30,d:450,kind:'schedule',f:true},
+   {id:2,t:'テスト',s:260,d:30,kind:'task'},
+   {id:3,t:'深い作業',s:390,d:120,kind:'task'},
+   {id:4,t:'筋トレ',s:600,d:30,kind:'task'},
+   {id:5,t:'入浴',s:635,d:30,kind:'habit'},
+   {id:6,t:'読書',s:800,d:20,kind:'task'},
+   {id:7,t:'掃除',s:823,d:20,kind:'habit'},
+   {id:8,t:'自由時間',s:1140,d:20,kind:'task'}
+  ];
+  render();updateReview();
+ });
+ const card=id=>gp.locator('#tl .card[data-id="'+id+'"]');
+ assert.match(await card(1).getAttribute('class'),/yos-backdrop/);
+ assert.match(await card(3).getAttribute('class'),/yos-backdrop/);
+ assert.equal(await card(2).locator('.layer-status').textContent(),'！ 時間衝突');
+ assert.equal(await card(4).locator('.layer-status').textContent(),'＋ 相乗候補');
+ assert.equal(await card(6).locator('.layer-status').textContent(),'− 余裕不足');
+ assert.equal(await card(8).locator('.layer-status').count(),0);
+ const sleep=await card(1).boundingBox(),work=await card(3).boundingBox(),testCard=await card(2).boundingBox();
+ assert.ok(sleep.x+sleep.width<=work.x,'overlapping long intervals have separate lanes');
+ assert.ok(testCard.y>sleep.y&&testCard.y<sleep.y+sleep.height,'short action is inside the sleep window');
+ assert.equal(await card(2).evaluate(el=>{
+  const rect=el.getBoundingClientRect();
+  return getComputedStyle(el).backgroundColor==='rgb(75, 48, 59)'&&Number(getComputedStyle(el).zIndex)>Number(getComputedStyle(document.querySelector('.yos-backdrop')).zIndex)&&rect.width>0;
+ }),true,'danger tint and foreground stacking are computed by the browser');
+ await gp.evaluate(()=>{items.find(item=>item.id===2).s=540;render();updateReview();});
+ assert.equal(await card(2).locator('.layer-status').count(),0,'conflict tint disappears when moved clear');
  assert.deepEqual(gestureErrors,[],'no browser errors in three-gesture interactions');
  await gestureContext.close();
 
