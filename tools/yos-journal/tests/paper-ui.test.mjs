@@ -9,14 +9,20 @@ function fixture(overrides={}){return {date:'2026-11-13',story:'【出来事】�
 async function open(options={}){
   const input=fixture(options.input),query=options.mode==='compose'?{mode:'compose',date:input.date}:{date:input.date,story:encode(input.story),diary:encode(input.diary),question:encode(input.question),answer:encode(input.answer)};
   const state={html:'',opened:[],requests:[],presented:0,backups:[]};
-  class WebView{async loadHTML(html){state.html=html;}async present(){state.presented++;}async evaluateJavaScript(s){if(options.readbackFails)throw new Error('readback');if(s.includes('yosFinish'))return options.finished!==false;if(s.includes('yosMood'))return options.mood||'';return options.review===undefined?input.story:options.review;}}
+  class WebView{constructor(){this.screen=state.presented;}async loadHTML(html){state.html=html;}async present(){state.presented++;}async evaluateJavaScript(s){if(options.readbackFails)throw new Error('readback');if(s.includes('yosPickPhoto'))return options.pickPhoto===true && this.screen===0;if(s.includes('yosFinish'))return options.finished!==false;if(s.includes('yosMood'))return options.mood||'';return options.review===undefined?input.story:options.review;}}
   class Alert{addAction(){}addCancelAction(){}async presentAlert(){return options.choice??-1;}}
   const fakeTasks=options.tasks||[];
   const Data={fromBase64String:s=>({toRawString:()=>Buffer.from(s,'base64').toString()}),fromString:s=>({toBase64String:()=>encode(s)})};
   const Request=class{constructor(url){this.url=url;this.response={statusCode:200};}async loadJSON(){state.requests.push({url:this.url,method:this.method,body:JSON.parse(this.body||'{}')});return {results:fakeTasks};}};
-  const fileMocks={saved:[],iCloud(){return this},local(){return this},documentsDirectory(){return '/documents'},joinPath(a,c){return a+'/'+c},writeString(path,value){if(options.fileWriteFails)throw Error('write denied');this.saved.push({path,value});}};
- state.backups=fileMocks.saved;
- const ctx={args:{queryParameters:query},Data,WebView,Alert,FileManager:fileMocks,CalendarEvent:{between:async()=>options.calendar||[]},Keychain:{contains:()=>options.auth!==false,get:()=> 'mock-token'},Request,Intl,Date,Safari:{open:url=>state.opened.push(url)},Script:{complete(){}}};
+  const fileMocks={saved:[],images:[],iCloud(){return this},local(){return this},documentsDirectory(){return '/documents'},joinPath(a,c){return a+'/'+c},fileExists(){return false},read(){throw Error('unavailable')},writeString(path,value){if(options.fileWriteFails)throw Error('write denied');this.saved.push({path,value});},write(path,value){this.images.push({path,value});}};
+ state.backups=fileMocks.saved;state.photos=fileMocks.images;
+ const imageData={toBase64String:()=>Buffer.from('mock-native-image').toString('base64')};
+ const Photos={fromLibrary:async()=>({})};
+ class DrawContext{set size(value){this._size=value;}set opaque(value){this._opaque=value;}drawImageInRect(){}getImage(){return {};}}
+ const Size=class{constructor(w,h){this.width=w;this.height=h;}};
+ const Rect=class{constructor(x,y,w,h){this.width=w;this.height=h;}};
+ Data.fromPNG=()=>imageData;
+ const ctx={args:{queryParameters:query},Data,WebView,Alert,FileManager:fileMocks,Photos,DrawContext,Size,Rect,CalendarEvent:{between:async()=>options.calendar||[]},Keychain:{contains:()=>options.auth!==false,get:()=> 'mock-token'},Request,Intl,Date,Safari:{open:url=>state.opened.push(url)},Script:{complete(){}}};
   try{await vm.runInNewContext('(async()=>{'+source+'})()',ctx);return state;}catch(error){return {...state,error};}
 }
 const task=(title,date='2026-11-13T14:00:00+09:00',status='完了')=>({
@@ -81,4 +87,15 @@ test('compose mode refuses oversized URL and preserves the raw backup locally',a
 });
 test('closing review without clicking printed-finish never saves',async()=>{
  const r=await open({finished:false,choice:0});assert.equal(r.opened.length,0);
+});
+
+test('a chosen iPhone photo reopens the same paper page without losing typed words',async()=>{
+ const r=await open({mode:'compose',pickPhoto:true,review:'今夜は嬉しかった'});
+ assert.equal(r.error,undefined);
+ assert.equal(r.presented,2);
+ assert.equal(r.photos.length,1);
+ assert.match(r.html,/data:image\/png;base64,/);
+ assert.match(r.html,/今夜は嬉しかった/);
+ assert.equal(r.opened.length,1);
+ assert.match(r.photos[0].path,/YOS-Journal-Photo-2026-11-13\.png/);
 });
