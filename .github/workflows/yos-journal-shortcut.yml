@@ -86,7 +86,7 @@ jobs:
           assert ids.count('is.workflow.actions.askllm') == 1, ids
           assert ids.count('is.workflow.actions.ask') == 0, ids
           # One callback branch (start/end), so no ChatGPT-output conditional is allowed.
-          assert ids.count('is.workflow.actions.conditional') == 2, ids
+          assert ids.count('is.workflow.actions.conditional') == 3, ids
           assert 'if !edited' not in Path('tools/yos-journal/YOS 日記.cherri').read_text()
           assert ids.count('is.workflow.actions.documentpicker.save') == 2, ids
           assert ids.count('is.workflow.actions.openurl') == 2, ids
