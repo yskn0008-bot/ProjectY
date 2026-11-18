@@ -199,7 +199,7 @@ function routeDay(ms){return new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Tok
 function scheduledTask(text,createdAt){
   if(/[?？]/u.test(text)||routeUnsafe.test(text)||/(?:は不要|しない|行かない|見送り)[。！!]*$/u.test(text))return null;
   const value=text.replace(/^(?:タスク|やること)[:：]\s*/u,'');
-  const match=/^(今日|明日|あした|明後日|\d{4}-\d{2}-\d{2})[,、\s]*(\d{1,2})(?::(\d{2})|時\s*(?:(\d{1,2})分)?)\s*(?:から[,、\s]*(\d{1,4})分|[〜～~–—-]\s*(\d{1,2})(?::(\d{2})|時\s*(?:(\d{1,2})分)?))[,、\s]+(.{1,120})$/u.exec(value);
+  const match=/^(今日|明日|あした|明後日|\d{4}-\d{2}-\d{2})(?:の)?[,、\s]*(\d{1,2})(?::(\d{2})|時\s*(?:(\d{1,2})分)?)\s*(?:から[,、\s]*(\d{1,4})分|[〜～~–—-]\s*(\d{1,2})(?::(\d{2})|時\s*(?:(\d{1,2})分)?))[,、\s]*(.{1,120})$/u.exec(value);
   if(!match)return null;
   const [,when,h,colons,spoken,duration,endH,endColon,endSpoken,title]=match;
   const startMinute=Number(colons??spoken??0);

@@ -253,7 +253,7 @@ test('明示した開始・長さを日本時間で同じタスクに一回だ�
 
 test('明日の音声入力と明示した終了時刻だけを時間枠として扱う',async()=>{
  const m=mocked();
- assert.match(await m.run('明日19時から30分、買い物'),/登録1件/);
+ assert.match(await m.run('明日の19時から30分買い物'),/登録1件/);
  const at=new Date(m.blocks[0].paragraph.rich_text[0].text.content.split(' · ')[0]);
  const jst=new Date(at.getTime()+9*3600000);
  const nextDay=new Date(Date.UTC(jst.getUTCFullYear(),jst.getUTCMonth(),jst.getUTCDate()+1,10));
