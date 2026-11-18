@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-19T03:12:39+09:00",
+  "updated_at": "2026-11-19T03:14:30+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -20,7 +20,7 @@
       "priority": 1,
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/830",
-      "updated_at": "2026-11-18T18:11:51Z"
+      "updated_at": "2026-11-18T18:13:21Z"
     },
     {
       "id": "github-pr-663",
@@ -31,16 +31,6 @@
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/663",
       "updated_at": "2026-11-18T15:25:14Z"
-    },
-    {
-      "id": "github-pr-767",
-      "title": "PR #767 YOS Calendar｜Google・Face ID不要の安全なiPhone接続",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/767",
-      "updated_at": "2026-11-16T17:42:54Z"
     },
     {
       "id": "github-pr-769",
@@ -113,6 +103,16 @@
       "updated_at": "2026-11-18T16:52:47Z"
     },
     {
+      "id": "github-pr-833",
+      "title": "PR #833 YOS Health｜睡眠集中モード連動の水分通知・既存Clarity/JOURNAL導線",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/833",
+      "updated_at": "2026-11-18T18:13:06Z"
+    },
+    {
       "id": "github-issue-10",
       "title": "Issue #10 Mission Control v2：GitHubのIssue・PR・Commitを自動集約する",
       "type": "GitHub Issue",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-18T18:12:04Z"
+      "updated_at": "2026-11-18T18:13:29Z"
     },
     {
       "id": "github-issue-234",
@@ -274,7 +274,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-19T03:12:39+09:00",
+      "last_update": "2026-11-19T03:14:30+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -349,13 +349,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 9件・Open PR 62件を自動同期中",
+      "next_action": "Open Issue 9件・Open PR 63件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-19T03:12:39+09:00",
+      "last_update": "2026-11-19T03:14:30+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -378,7 +378,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-19T03:12:39+09:00",
+      "last_update": "2026-11-19T03:14:30+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -460,5 +460,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "282d0b8088d794f6c03199c9a22faa61c1e8051a409b512cf74f88dc78f86a92"
+  "github_snapshot_hash": "1b94fa5768d202e76c4ff5c190e91b9a11ca98aba27ee907d0e7654980b6fa6b"
 }
