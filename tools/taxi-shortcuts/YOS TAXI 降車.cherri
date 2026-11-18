@@ -2,54 +2,15 @@
 #define color orange
 
 #include 'actions/text'
-#include 'actions/documents'
 #include 'actions/calendar'
 #include 'actions/web'
 
-// Historical common Files inbox, NOT the Notion YOS Inbox.
-// Capture a raw dropoff REQUEST first: it is not a verified passenger event.
-// Do not write to another file or create a replacement if the original is absent.
-action 'file.append' appendResolvedFile(
-    variable file: 'WFFile',
-    variable input: 'WFInput'
-) {
-    "WFAppendFileWriteMode": "Append"
-}
-
+// Use the existing YOS Taxi browser event store only.
+// This Shortcut never writes to iCloud/Clarity or creates another ledger.
+// Native actions capture tap time before opening the browser.
 const tapDate = currentDate()
 const tappedAt = formatDate(tapDate, "Custom", "yyyyMMddHHmmss")
 const salt = randomNumber(100000, 999999)
-const requestId = text("{tappedAt}-{salt}")
-const inboxFile = getFile("Clarity Inbox.txt", nil, false)
-if !inboxFile {
-    alert("既存のファイル Clarity Inbox.txt が見つからないため、降車操作は保存していません。YOS TAXI の元のボタンを使ってください。", "YOS TAXI 降車")
-    stop()
-}
-
-const existing = getText(inboxFile)
-if existing contains requestId {
-    alert("同じ受付IDが既に存在するため、二重保存を止めました。", "YOS TAXI 降車")
-    stop()
-}
-
-// Tab-delimited envelope matches existing Clarity Inbox.txt conventions.
-// Type is deliberately a raw "request"; no ride is declared completed yet.
-const captured = text("{tapDate}\t{requestId}\tYOS_TAXI_DROPOFF_REQUEST\tShortcut\n")
-appendResolvedFile(inboxFile, captured)
-
-// Append must be VERIFIED, not inferred from a successful Shortcut execution.
-const verifyFile = getFile("Clarity Inbox.txt", nil, false)
-if !verifyFile {
-    alert("共通Inboxの保存結果を確認できませんでした。自動で再送しません。", "YOS TAXI 降車")
-    stop()
-}
-const verifiedText = getText(verifyFile)
-if verifiedText contains requestId {
-    // The existing web app accepts only an active shift in THIS browser.
-    // Different Safari/PWA stores must fail visibly, not invent a ride.
-    const recordUrl = text("https://yskn0008-bot.github.io/ProjectY/taxi/ui-v2.html?yos_action=dropoff&yos_req={requestId}")
-    openURL(recordUrl)
-    stop()
-}
-alert("共通Inboxへの保存結果が未確認です。重複防止のため再送せず停止しました。", "YOS TAXI 降車")
+const recordUrl = text("https://yskn0008-bot.github.io/ProjectY/taxi/ui-v2.html?yos_action=dropoff&yos_req={tappedAt}-{salt}")
+openURL(recordUrl)
 stop()
