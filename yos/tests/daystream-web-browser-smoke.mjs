@@ -158,7 +158,7 @@ try{
  assert.equal(cancelled.unchanged,true,'a duplicate start tap does not overwrite confirmed first start');
 
 
- assert.equal(await page.locator('#yosWebTaskRefresh').count(),1,'read-only YOS Tasks sign-in entry exists');
+ assert.equal(await page.locator('#yosWebTaskRefresh').count(),1,'private iPhone Notion entry exists');
  const localSchedule=await page.evaluate(()=>{
   localStorage.removeItem('YOS_DAYSTREAM_WEB_CAL_SNAPSHOT_V1');
   localStorage.setItem('yos-life-v1',JSON.stringify({days:{'2026-11-13':{schedule:[{title:'LIFE BROWSER SMOKE',start:'2026-11-13T18:00:00+09:00',end:'2026-11-13T18:45:00+09:00'}]}}}));
@@ -225,53 +225,27 @@ try{
   assert.deepEqual(offline.plan,pack.plan,'offline launch preserves restored plan');
   assert.equal(offline.calendar['2026-11-13'][0].start,570,'offline launch retains imported calendar');
  }
- // Authenticated Notion integration uses synthetic rows, never real credentials or data.
+ // Previously obtained Notion data stays private; the Web page has no Google sign-in path.
  const liveContext=await browser.newContext({viewport:{width:390,height:844},timezoneId:'Asia/Tokyo',serviceWorkers:'block'});
- const live=await liveContext.newPage();let state='次にやる',title='NOTION LIVE',version='2026-11-13T01:00:00Z',writes=0,reads=0,failRead=false;
- const sourceId='11111111222233334444555555555555';
- const row=()=>({id:sourceId,title,state,order:1000,due:'2026-11-13T15:00:00Z',dueEnd:null,area:'Work',habitCycle:'',lastEditedAt:version});
- await liveContext.addInitScript(()=>{
-  window.google={accounts:{id:{initialize:settings=>{window.testGoogleCallback=settings.callback},renderButton(){}}}};
-  localStorage.setItem('yos-task-dashboard-cache-v1',JSON.stringify({savedAt:Date.now(),data:{tasks:[{title:'STALE PROJECTION',state:'次にやる',order:1}]}}));
- });
- await liveContext.route('https://yskn0008-bot.github.io/**',async route=>{
-  const url=new URL(route.request().url());const response=await route.fetch({url:'http://127.0.0.1:4173'+url.pathname});await route.fulfill({response});
- });
- const cors={'Access-Control-Allow-Origin':'https://yskn0008-bot.github.io','Access-Control-Allow-Methods':'GET, PATCH, OPTIONS','Access-Control-Allow-Headers':'Authorization, Content-Type'};
- await liveContext.route('https://project-y-yos-ai.vercel.app/**',async route=>{
-  if(route.request().method()==='OPTIONS'){await route.fulfill({status:204,headers:cors});return}
-  if(route.request().url().endsWith('/public-config')){await route.fulfill({headers:cors,json:{googleClientId:'test.apps.googleusercontent.com'}});return}
-  assert.match(route.request().url(),/tasks\?source=notion$/);
-  assert.equal(route.request().headers().authorization,'Bearer synthetic-id-token');
-  if(route.request().method()==='PATCH'){
-   writes++;const body=route.request().postDataJSON();assert.equal(body.pageId,sourceId);assert.equal(body.action,'complete');
-   state='完了';version='2026-11-13T02:00:00Z';await route.fulfill({headers:cors,json:{source:'notion',task:row()}});return;
-  }
-  reads++;await route.fulfill(failRead?{status:503,headers:cors,json:{error:'synthetic offline'}}:{headers:cors,json:{source:'notion',complete:true,tasks:[row()]}});
- });
- await live.goto('https://yskn0008-bot.github.io/yos/daystream/',{waitUntil:'domcontentloaded'});
- await live.locator('[data-tab="task"]').click();await live.locator('#yosWebTaskRefresh').click();
- await live.waitForFunction(()=>typeof window.testGoogleCallback==='function');
- await live.evaluate(()=>window.testGoogleCallback({credential:'synthetic-id-token'}));
- assert.match(await live.locator('#yosSourceTasks').textContent(),/NOTION LIVE/);
- assert.doesNotMatch(await live.locator('#yosSourceTasks').textContent(),/STALE PROJECTION/);
- await live.locator('#yosStartFrom').fill('09:00');await live.locator('#yosSourceTasks button').first().click();await live.locator('#yosPlanBox button').click();
- const planned=await live.evaluate(()=>JSON.parse(localStorage.getItem('YOS_DAYSTREAM_WEB_PLAN_V1')));
- const day=Object.keys(planned.days)[0],placed=planned.days[day][0];assert.equal(placed.sourceRef,'notion:notion-'+sourceId);
- title='NOTION RENAMED';await live.evaluate(()=>window.YOS_DAYSTREAM_TASK_AUTH.refresh());
- assert.equal(await live.evaluate(()=>items.find(x=>x.sourceRef==='notion:notion-11111111222233334444555555555555').t),'NOTION RENAMED');
- assert.equal(await live.evaluate(()=>items.filter(x=>x.sourceRef==='notion:notion-11111111222233334444555555555555').length),1);
- failRead=true;await live.evaluate(()=>window.YOS_DAYSTREAM_TASK_AUTH.refresh());
- assert.equal(await live.evaluate(()=>items.find(x=>x.sourceRef==='notion:notion-11111111222233334444555555555555').done),false);
- failRead=false;
- await live.evaluate(()=>yosCompleteSource(items.find(x=>x.sourceRef==='notion:notion-11111111222233334444555555555555')));
- assert.equal(writes,1);assert.equal(await live.evaluate(()=>items.find(x=>x.sourceRef==='notion:notion-11111111222233334444555555555555').done),true);
- await live.evaluate(()=>yosCompleteSource(items.find(x=>x.sourceRef==='notion:notion-11111111222233334444555555555555')));
- assert.equal(writes,1,'repeated completion cannot issue a second mutation');
+ const live=await liveContext.newPage();
+ const remote=[];
+ live.on('request',request=>{if(/accounts\.google\.com|project-y-yos-ai\.vercel\.app/.test(request.url()))remote.push(request.url())});
+ const captureDay=new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
+ await live.goto('http://127.0.0.1:4173/yos/daystream/',{waitUntil:'domcontentloaded'});
+ assert.equal(await live.evaluate(()=>window.YOS_DAYSTREAM_TASK_AUTH),undefined);
+ assert.equal(await live.locator('#yosWebGoogleButton').count(),0);
+ await live.evaluate(day=>{
+  const data={source:'notion',complete:true,tasks:[{
+   id:'22222222333344445555666666666666',title:'CLARITY TIMED',state:'次にやる',sourceKind:'task',
+   evidence:'YOS Inbox clarity:test-window-0001',due:day+'T19:00:00+09:00',dueEnd:day+'T19:30:00+09:00'
+  }]};
+  const snapshot=window.YOS_DAYSTREAM_SOURCES.fromYosTaskDashboardCache({savedAt:Date.now(),data});
+  if(!window.YOS_DAYSTREAM_WEB.saveAuthorizedTasks(snapshot))throw Error('fixture not saved');
+ },captureDay);
+ assert.equal(await live.locator('#tl .card').filter({hasText:'CLARITY TIMED'}).count(),1);
  await live.reload({waitUntil:'domcontentloaded'});
- assert.equal(await live.evaluate(()=>items.find(x=>x.sourceRef==='notion:notion-11111111222233334444555555555555').done),true);
- assert.doesNotMatch(await live.locator('#yosSourceTasks').textContent(),/STALE PROJECTION/);
- assert.ok(reads>=3);
+ assert.equal(await live.locator('#tl .card').filter({hasText:'CLARITY TIMED'}).count(),1);
+ assert.deepEqual(remote,[]);
  await liveContext.close();
 
  // A private JSON import merges into THIS original PWA's existing plan.

@@ -422,3 +422,81 @@ test('v2 in-app browser heights: all sales text and strategy rows fit their boxe
     expect(problems,'strategy text overlap at '+width+'x'+height).toEqual([]);
   }
 });
+
+
+test('M100: safe-stop checklist opens without changing ride records or viewport', async ({page}) => {
+  const errors=[];
+  page.on('pageerror', error => errors.push(error.message));
+  for(const [width,height] of [[320,568],[393,650],[402,874]]){
+    await page.setViewportSize({width,height});
+    await page.goto('./ui-v2.html',{waitUntil:'domcontentloaded'});
+    const before=await page.evaluate(() => localStorage.getItem('yos-taxi-ui-v2-live-20261117'));
+    await page.locator('[data-page="strategy"]').click();
+    const btn=page.locator('#m100-rule-btn');
+    await expect(btn).toBeVisible();
+    expect(await page.evaluate(() => document.documentElement.scrollHeight > innerHeight+1)).toBe(false);
+    await btn.click();
+    await expect(page.locator('#modal.m100-open')).toBeVisible();
+    await expect(page.locator('#modal-title')).toContainText('M100');
+    for(const n of [1,2,3,4,5,6])await expect(page.locator('#modal-body')).toContainText(n+'｜');
+    await expect(page.locator('#modal-body')).toContainText('自動学習はまだ行いません');
+    await expect(page.locator('#modal-body')).toContainText('強制移動ではない');
+    await page.locator('#close-modal').click();
+    await expect(page.locator('#modal')).not.toBeVisible();
+    await page.locator('[data-page="sales"]').click();
+    await expect(page.locator('#drop-btn')).toBeVisible();
+    await expect(page.locator('#photo-btn')).toBeVisible();
+    const after=await page.evaluate(() => localStorage.getItem('yos-taxi-ui-v2-live-20261117'));
+    expect(after,'M100 guidance must not mutate shift or ride records').toBe(before);
+  }
+  expect(errors).toEqual([]);
+});
+
+
+test('Taxi Shortcuts: locked/home widgets use same local shift and retry-safe dropoff', async ({page,browser}) => {
+  const errors=[];
+  page.on('pageerror',e=>errors.push(e.message));
+  await page.clock.setFixedTime(new Date('2026-11-19T17:15:00+09:00'));
+  const id='20261119171500-345671';
+  const state=()=>page.evaluate(()=>window.YOSTaxiPreview.debugState());
+  await page.goto('./ui-v2.html?yos_action=dropoff&yos_req='+id,{waitUntil:'domcontentloaded'});
+  await expect(page.locator('#modal-title')).toContainText('降車は記録していません');
+  expect((await state()).events).toHaveLength(0);
+  expect(page.url()).not.toContain('yos_action');
+  await page.goto('./ui-v2.html?yos_action=start',{waitUntil:'domcontentloaded'});
+  await expect(page.locator('#modal-title')).toContainText('営業を開始');
+  await page.locator('#modal-actions .primary').click();
+  expect((await state()).events).toHaveLength(1);
+  await page.goto('./ui-v2.html?yos_action=dropoff&yos_req='+id,{waitUntil:'domcontentloaded'});
+  expect((await state()).events).toHaveLength(2);
+  const recorded=(await state()).events.at(-1);
+  expect(recorded.shortcutRequestId).toBe(id);
+  expect(new Date(recorded.at).getTime()).toBe(new Date('2026-11-19T08:15:00.000Z').getTime());
+  await page.reload();
+  expect((await state()).events).toHaveLength(2);
+  await page.goto('./ui-v2.html?yos_action=dropoff&yos_req='+id,{waitUntil:'domcontentloaded'});
+  expect((await state()).events).toHaveLength(2);
+  await page.goto('./ui-v2.html?yos_action=dropoff&yos_req=invalid',{waitUntil:'domcontentloaded'});
+  expect((await state()).events).toHaveLength(2);
+  await expect(page.locator('#modal-title')).toContainText('降車は記録していません');
+  await page.clock.setFixedTime(new Date('2026-11-19T17:20:00+09:00'));
+  await page.goto('./ui-v2.html?yos_action=dropoff&yos_req=20261119171000-882200',{waitUntil:'domcontentloaded'});
+  expect((await state()).events).toHaveLength(2);
+  await expect(page.locator('#modal-title')).toContainText('降車は記録していません');
+  await page.goto('./ui-v2.html?yos_action=end',{waitUntil:'domcontentloaded'});
+  await expect(page.locator('#modal-title')).toContainText('営業終了');
+  await page.locator('#modal-actions .primary').click();
+  expect((await state()).events).toHaveLength(3);
+  await page.goto('./ui-v2.html?yos_action=dropoff&yos_req=20261119172000-991122',{waitUntil:'domcontentloaded'});
+  expect((await state()).events).toHaveLength(3);
+  await expect(page.locator('#modal-title')).toContainText('降車は記録していません');
+  // Safari and Home Screen PWA can have isolated storage. Never write to a new one.
+  const separate=await browser.newContext({timezoneId:'Asia/Tokyo'});
+  const other=await separate.newPage();
+  await other.clock.setFixedTime(new Date('2026-11-19T17:15:00+09:00'));
+  await other.goto(new URL('./ui-v2.html?yos_action=dropoff&yos_req=20261119171500-221133',page.url()).href,{waitUntil:'domcontentloaded'});
+  await expect(other.locator('#modal-title')).toContainText('降車は記録していません');
+  expect(await other.evaluate(()=>window.YOSTaxiPreview.debugState().events.length)).toBe(0);
+  await separate.close();
+  expect(errors).toEqual([]);
+});

@@ -196,7 +196,26 @@ const ROUTES=Object.freeze({
 const rt=s=>[{type:'text',text:{content:String(s)}}];
 const plain=xs=>(xs||[]).map(x=>x.plain_text??x.text?.content??'').join('');
 function routeDay(ms){return new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date(ms));}
-function instruction(line){
+function scheduledTask(text,createdAt){
+  if(/[?？]/u.test(text)||routeUnsafe.test(text)||/(?:は不要|しない|行かない|見送り)[。！!]*$/u.test(text))return null;
+  const value=text.replace(/^(?:タスク|やること)[:：]\s*/u,'');
+  const match=/^(今日|明日|あした|明後日|\d{4}-\d{2}-\d{2})(?:の)?[,、\s]*(\d{1,2})(?::(\d{2})|時\s*(?:(\d{1,2})分)?)\s*(?:から[,、\s]*(\d{1,4})分|[〜～~–—-]\s*(\d{1,2})(?::(\d{2})|時\s*(?:(\d{1,2})分)?))[,、\s]*(.{1,120})$/u.exec(value);
+  if(!match)return null;
+  const [,when,h,colons,spoken,duration,endH,endColon,endSpoken,title]=match;
+  const startMinute=Number(colons??spoken??0);
+  const endMinute=Number(endColon??endSpoken??0);
+  if(Number(h)>23||startMinute>59||endMinute>59)return null;
+  const relative={今日:0,明日:1,あした:1,明後日:2}[when];
+  const day=relative===undefined?when:new Date(Date.parse(routeDay(createdAt)+'T00:00:00Z')+relative*86400000).toISOString().slice(0,10);
+  const midnight=Date.parse(day+'T00:00:00+09:00');
+  if(!Number.isFinite(midnight)||routeDay(midnight)!==day)return null;
+  const start=Number(h)*60+startMinute;
+  const end=duration?start+Number(duration):Number(endH)*60+endMinute;
+  if(end-start<5||end>1440)return null;
+  const format=minute=>new Date(midnight+minute*60000).toISOString();
+  return {target:'task',text:title.trim(),window:{start:format(start),end:format(end)}};
+}
+function instruction(line,createdAt){
   const text=String(line||'').trim().normalize('NFKC');
   if(!text||text.length>1800||/^(?:もし|仮に|相談|質問|調べて|比較して)/u.test(text))return null;
   let m=/^Notion[のに]?[「『]([^」』]{1,100})[」』]に(?:追記|保存|記録)[：:\s]+([\s\S]{1,1800})$/iu.exec(text);
@@ -204,6 +223,8 @@ function instruction(line){
     return {target:'page',pageName:m[1].trim(),text:m[2].trim()};
   if(/(?:支払|入金|出金|返済|振込|決済|購入済|残高|銀行|PayPay|送金|ログイン|暗証番号)/iu.test(text))
     return null;
+  const timed=scheduledTask(text,createdAt);
+  if(timed&&timed.text)return timed;
   m=/^(?:タスク|やること)[：:]\s*(.{1,180})$/iu.exec(text);
   if(m)return {target:'task',text:m[1].trim()};
   m=/^(?:買い物リスト|買い物|欲しいもの)[：:]\s*(.{1,180})$/iu.exec(text);
@@ -217,14 +238,14 @@ function instruction(line){
 const routeUnsafe=/(?:削除|キャンセル|取り消し|登録しない|追加しない|記録しない|買わない|欲しくない|したくない|中止|やめる)/u;
 const routeFinance=/(?:残高|支払|入金|出金|返済|振込|送金|口座|銀行|PayPay|クレジット|請求|引落|\d[\d,]*\s*円)/iu;
 const routeDateRisk=/(?:明日|あした|明後日|今週|来週|来月|来年|再来週|今日|今夜|今度|月末|\d{1,2}\s*[日月時]|\d{1,4}[-/]\d{1,2}|予定|期限|締切|予約)/u;
-function modelInstruction(item){
+function modelInstruction(item,createdAt){
   // v3's exact-substring and high-confidence guard, with no natural-language
   // device commands, funds transfers, payments, or destructive instructions.
   if(!item||typeof item.text!=='string'||typeof item.target!=='string'||
       !Number.isFinite(item.confidence)||item.confidence<.95||item.confidence>1)return null;
   const candidate=item.text.trim().normalize('NFKC');
   if(candidate.length<3||candidate.length>1000||/[?？]/u.test(candidate)||routeUnsafe.test(candidate))return null;
-  const explicit=instruction(candidate);
+  const explicit=instruction(candidate,createdAt);
   if(explicit&&item.target===explicit.target)return explicit;
   if(routeFinance.test(candidate)||!['task','shopping','diary','life'].includes(item.target))return null;
   if(['task','shopping'].includes(item.target)&&routeDateRisk.test(candidate))return null;
@@ -238,7 +259,7 @@ function modelInstruction(item){
   // health claims, and future plans must not be misfiled by a classifier guess.
   return text&&text.length<=120?{target:item.target,text}:null;
 }
-function proposals(){
+function proposals(createdAt){
   if(sourceKey==='share')return [];
   // The existing Pilot v3 asks ChatGPT for {text,target,confidence}; GPT must
   // quote exact non-overlapping substrings of the user's Raw capture.
@@ -261,13 +282,13 @@ function proposals(){
       }
       if(found<0)return [];
       taken.push([found,found+t.length]);
-      plans.push(modelInstruction(item));
+      plans.push(modelInstruction(item,createdAt));
     }
     return plans;
   }
   const lines=raw.replace(/<br\s*\/?\s*>/giu,'\n').split(/\r?\n/u).map(x=>x.trim()).filter(Boolean);
   if(lines.length>6)return [];
-  return lines.map(instruction);
+  return lines.map(line=>instruction(line,createdAt));
 }
 
 async function routeQuery(ds,filter,token){
@@ -287,7 +308,14 @@ async function routeToKnown(v,receipt,token,entry){
   // Check the verified v3 receipt on retries even if the older single-item
   // record used the unsuffixed key.
   const sameTitle=await routeQuery(spec.id,{property:spec.title,title:{equals:v.target==='diary'?routeDay(entry.createdAt)+'｜Clarity':v.text}},token);
-  if(sameTitle.length) return 'held'; // Do not overwrite/duplicate a named row.
+  if(sameTitle.some(row=>{
+    if(!v.window)return true;
+    const date=row.properties?.['期限']?.date;
+    if(!date?.start)return true; // A nameless time match must not overwrite an existing unscheduled row.
+    const at=Date.parse(date.start),until=Date.parse(date.end);
+    return !Number.isFinite(at)||!date.start.includes('T')||at===Date.parse(v.window.start)||
+      (Number.isFinite(until)&&at<Date.parse(v.window.end)&&until>Date.parse(v.window.start));
+  }))return 'held';
   const props={};
   const title=v.target==='diary'?routeDay(entry.createdAt)+'｜Clarity':v.text;
   props[spec.title]={title:rt(title)};
@@ -296,6 +324,7 @@ async function routeToKnown(v,receipt,token,entry){
     props['正本・根拠']={rich_text:rt('YOS Inbox '+entry.captureId)};
     props['種類']={select:{name:'Task'}};
     props['状態']={select:{name:'次にやる'}};
+    if(v.window)props['期限']={date:v.window};
   }else if(v.target==='shopping'){
     props['メモ']={rich_text:rt(v.text+'\n'+receipt)};
     props['区分']={select:{name:'欲しいもの'}};
@@ -316,6 +345,10 @@ async function routeToKnown(v,receipt,token,entry){
   const saved=await notion('GET','/pages/'+created.id,token);
   const keyValue=plain(saved.properties?.[spec.key]?.rich_text);
   if(!(v.target==='shopping'?keyValue.split(/\r?\n/u).includes(receipt):keyValue===receipt))throw Error('ROUTE_READBACK_UNKNOWN');
+  if(v.window){
+    const date=saved.properties?.['期限']?.date;
+    if(Date.parse(date?.start)!==Date.parse(v.window.start)||Date.parse(date?.end)!==Date.parse(v.window.end))throw Error('ROUTE_DATE_READBACK_UNKNOWN');
+  }
   return 'created';
 }
 async function routeToPage(v,receipt,token){
@@ -348,12 +381,12 @@ async function routeAfterVerifiedRaw(outcome){
   if(!Keychain.contains(CFG.tokenKey))return '振り分け保留（認証情報なし）';
   const rows=load(),entry=rows.find(x=>x.captureId===outcome.captureId);
   if(!entry||entry.status!=='confirmed'||entry.raw!==raw)return '振り分け保留（Raw受領確認なし）';
-  const plan=proposals();
+  const plan=proposals(entry.createdAt);
   if(!plan.length)return '振り分け未指定（原文は保存済み）';
   // Freeze the item-to-receipt mapping in the existing local receipt journal.
   // Repeated AI classifications of the same Raw text must never re-purpose
   // an existing :01 or :02 receipt for another Notion destination.
-  const signature=JSON.stringify(plan.map(x=>x?[x.target,x.text,x.pageName||'']:null));
+  const signature=JSON.stringify(plan.map(x=>x?[x.target,x.text,x.pageName||'',...(x.window?[x.window.start,x.window.end]:[])]:null));
   if(entry.planSignature&&entry.planSignature!==signature)return '振り分け保留（以前と分類内容が異なる）';
   if(!entry.planSignature){
     entry.planSignature=signature;

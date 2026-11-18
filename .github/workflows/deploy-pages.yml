@@ -61,6 +61,38 @@ jobs:
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
 
+      - name: Build JOURNAL archive index
+        run: |
+          python - <<'PYTHON'
+          import json
+          import re
+          from pathlib import Path
+
+          fields = ("category", "title", "image", "imageCaption", "imageKind",
+                    "imageCredit", "imageSourceUrl", "imageLicenseUrl")
+          editions = []
+          for path in sorted(Path("journal/editions").glob("????-??-??.json"), reverse=True):
+              try:
+                  issue = json.loads(path.read_text(encoding="utf-8"))
+                  if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", path.stem) or issue["issuedOn"] != path.stem:
+                      raise ValueError("edition date does not match its filename")
+                  if not isinstance(issue["articles"], list) or not issue["articles"]:
+                      raise ValueError("issue has no articles")
+                  cards = []
+                  for article in issue["articles"]:
+                      card = {key: article[key] for key in fields if key in article}
+                      card["summary"] = article.get("summary", "")[:65]
+                      cards.append(card)
+                  editions.append({"issuedOn": path.stem, "articles": cards})
+              except (OSError, ValueError, KeyError, TypeError) as error:
+                  print(f"::warning::Skipping invalid JOURNAL edition {path.name}: {error}")
+
+          Path("journal-v2/archive-index.json").write_text(
+              json.dumps({"editions": editions}, ensure_ascii=False, separators=(",", ":")) + "\n",
+              encoding="utf-8",
+          )
+          PYTHON
+
       - name: Upload static site
         uses: actions/upload-pages-artifact@v4
         with:

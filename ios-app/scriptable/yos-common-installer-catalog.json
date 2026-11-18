@@ -97,15 +97,15 @@
       "id": "clarity-inbox-bridge",
       "name": "YOS Clarity Inbox Bridge",
       "path": "ios-app/scriptable/YOS Clarity Inbox Bridge.js",
-      "commit": "104e46b81cc20ad1253865ca4bf1793ff467bd97",
-      "sha256": "3758d8911467aba6dcbdc7a26cbccfc7b22bbab837aff5e615518f8e93fc8567"
+      "commit": "bcecaceb7d933ee0d97e45dbedd159b6004d5860",
+      "sha256": "25917c13e195f585fae450a1bd34147bf240e69801c55cd8a4012b0a35dc45d8"
     },
     {
       "id": "daystream-notion",
       "name": "YOS DAYSTREAM Notion",
       "path": "ios-app/scriptable/YOS DAYSTREAM Notion.js",
-      "commit": "8cbd54645a4f51d7867d954ea2ebd04979d4baee",
-      "sha256": "0f1e827cbe578f004d9295548e905bf676252639debaab5d4a4b8b9d4b517931"
+      "commit": "1d79878057849fb129d0ceb02223916f3aecda97",
+      "sha256": "04e797c698c06034ca96fa5f64e79e9f4463b2dacb4d93fb472d926bf429d99d"
     },
     {
       "id": "ikemen-magazine",
@@ -113,6 +113,20 @@
       "path": "ios-app/scriptable/YOS イケメン攻略本.js",
       "commit": "7c94cb39f25c3ec513167063514d4eb19346a48c",
       "sha256": "41dbc735247e3241a35ec0ccb0bfe141cb684b1f0bc98489104484916ff70281"
+    },
+    {
+      "id": "bravia-picture-check",
+      "name": "YOS BRAVIA Picture Check",
+      "path": "ios-app/scriptable/remote-widgets/YOS BRAVIA Picture Check.js",
+      "commit": "71504b0e8a7b51e6b403a312437c37152a7e7e20",
+      "sha256": "e202fa7ecc4efcb0dd18dc5b4ad6cf788144a7775e83be2ac0a6868306e147b6"
+    },
+    {
+      "id": "health-automation",
+      "name": "YOS Health Automation",
+      "path": "ios-app/scriptable/YOS Health Automation.js",
+      "commit": "54f4d246eb7e242e4b038b6acce7841b7b6be7ab",
+      "sha256": "da669fa38631593c29b154a3941a1f520d4ce87673419e6e4ffbef3301af08d1"
     }
   ]
 }
