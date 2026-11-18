@@ -1,0 +1,10 @@
+#define name YOS TAXI 出庫
+#define color blue
+
+#include 'actions/text'
+#include 'actions/web'
+
+// Fast optional launcher. Existing shift data remains owned by YOS Taxi.
+alert("出庫前に、免許・車両・メーター・決済端末・体調・必要書類を会社の規定に沿って点検してください。\nこのショートカットは点検を自動判定しません。\n次の画面で営業開始を本人が確認してください。", "YOS TAXI｜出庫準備")
+openURL("https://yskn0008-bot.github.io/ProjectY/taxi/ui-v2.html?yos_action=start")
+stop()

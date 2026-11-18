@@ -1,0 +1,10 @@
+#define name YOS TAXI 帰庫
+#define color blue
+
+#include 'actions/text'
+#include 'actions/web'
+
+// In the existing web UI the user must confirm the shift end.
+alert("帰庫時は、メーター・現金・電子決済・忘れ物・未照合降車件数・日報写真を確認してください。\nこの画面の後で、営業終了を本人が確定します。\n確認・精算・日報送信を自動実施したことにはなりません。", "YOS TAXI｜帰庫準備")
+openURL("https://yskn0008-bot.github.io/ProjectY/taxi/ui-v2.html?yos_action=end")
+stop()
