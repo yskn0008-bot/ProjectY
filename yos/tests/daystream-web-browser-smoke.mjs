@@ -392,7 +392,7 @@ try{
   }
   assert.ok(byId.get(2105).thickness>byId.get(2110).thickness,
    'long task title wraps instead of being cut in a slim bar');
-  assert.equal(byId.get(2110).color,'rgb(153, 88, 210)','default task color is brighter casual purple');
+  assert.equal(byId.get(2110).color,'rgb(34, 46, 68)','default task uses the Layer slate surface');
   for(const id of [2102,2106,2108,2110]){
    const surface=await p.locator('#tl [data-id="'+id+'"]').evaluate(el=>({
     shadow:getComputedStyle(el).boxShadow,
@@ -401,10 +401,10 @@ try{
    assert.equal(surface.before,'none','left stripe must be hidden for task '+id);
    assert.ok(!surface.shadow.includes('inset 4px'),'left accent shadow absent for task '+id);
   }
-  assert.equal(byId.get(2106).color,'rgb(37, 142, 112)','positive status has brighter green');
-  assert.equal(byId.get(2108).color,'rgb(170, 117, 41)','negative status has brighter amber');
-  assert.equal(byId.get(2102).color,'rgb(196, 94, 120)','overlap has brighter red');
-  assert.equal(byId.get(2110).radius,'11px','rounded casual bars keep compact corners');
+  assert.equal(byId.get(2106).color,'rgb(35, 71, 62)','positive status has a green surface');
+  assert.equal(byId.get(2108).color,'rgb(73, 55, 34)','negative status has an amber surface');
+  assert.equal(byId.get(2102).color,'rgb(75, 48, 59)','overlap has a rose surface');
+  assert.equal(byId.get(2110).radius,'11px','compact task cards keep rounded corners');
 
   const distinct=await p.locator('#tl [data-id="2100"], #tl [data-id="2102"], #tl [data-id="2110"]').evaluateAll(nodes=>nodes.map(el=>({
    id:Number(el.dataset.id),background:getComputedStyle(el).backgroundColor,
@@ -412,19 +412,19 @@ try{
    borderColor:getComputedStyle(el).borderColor,shadow:getComputedStyle(el).boxShadow,image:getComputedStyle(el).backgroundImage
   })));
   const appearance=new Map(distinct.map(x=>[x.id,x]));
-  assert.equal(appearance.get(2100).background,'rgb(101, 71, 83)','long overlapping sleep span is muted behind cards');
-  assert.equal(appearance.get(2100).borderStyle,'dashed','long backdrop has a separate outlined style');
+  assert.equal(appearance.get(2100).background,'rgb(56, 41, 51)','long overlapping sleep span is muted behind cards');
+  assert.equal(appearance.get(2100).borderStyle,'solid','long backdrop has a quiet solid outline');
   assert.equal(appearance.get(2102).borderStyle,'solid','short overlapping card has a crisp solid edge');
   assert.equal(appearance.get(2102).border,'1px','short task remains distinct from backdrop');
   assert.notEqual(appearance.get(2102).shadow,'none','foreground cards retain a separating shadow in any browser color notation');
   assert.notEqual(appearance.get(2100).background,appearance.get(2102).background,'background sleep does not look like the red foreground');
-  assert.equal(appearance.get(2110).border,'1px','purple cards also have a border');
+  assert.equal(appearance.get(2110).border,'1px','neutral cards also have a border');
 
   assert.equal(appearance.get(2100).image,'none','long sleep backdrop stays flat');
   for(const id of [2102,2110]){
    const fg=appearance.get(id);
-   assert.ok(fg.image.includes('linear-gradient('),'foreground task '+id+' has a gentle top-to-bottom sheen');
-   assert.ok(fg.shadow.includes('inset'),'foreground task '+id+' has a subtle raised inner highlight');
+   assert.equal(fg.image,'none','foreground task '+id+' uses a flat Layer surface');
+   assert.notEqual(fg.shadow,'none','foreground task '+id+' uses a soft separating shadow');
    assert.ok(!fg.shadow.includes('inset 4px'),'do not restore a stripe on task '+id);
   }
 
