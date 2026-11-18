@@ -9,7 +9,6 @@
 // Only the existing browser context's active shift can accept the record.
 // Capture moment of tap, not eventual browser-open time.
 const tappedAt = formatDate(currentDate(), "Custom", "yyyyMMddHHmmss")
-const salt = randomNumber(100000, 999999)
-const recordUrl = text("https://yskn0008-bot.github.io/ProjectY/taxi/ui-v2.html?yos_action=dropoff&yos_req={tappedAt}-{salt}")
+const recordUrl = text("https://yskn0008-bot.github.io/ProjectY/taxi/ui-v2.html?yos_action=dropoff&yos_req={tappedAt}-WIDGET")
 openURL(recordUrl)
 stop()
