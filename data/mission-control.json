@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-19T05:05:46+09:00",
+  "updated_at": "2026-11-19T05:09:15+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -13,14 +13,14 @@
   },
   "inbox": [
     {
-      "id": "github-pr-839",
-      "title": "PR #839 YOS Health｜水分通知だけに整理、Clarity・JOURNAL起動を撤去",
+      "id": "github-pr-840",
+      "title": "PR #840 [Taxi] 出庫〜帰庫・緊急対応を7本の標準ショートカットに統合",
       "type": "GitHub PR",
       "status": "review",
       "priority": 1,
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/839",
-      "updated_at": "2026-11-18T20:05:13Z"
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/840",
+      "updated_at": "2026-11-18T20:07:32Z"
     },
     {
       "id": "github-pr-663",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-18T19:50:20Z"
+      "updated_at": "2026-11-18T20:08:04Z"
     },
     {
       "id": "github-issue-234",
@@ -205,6 +205,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-ff86e4c6783e",
+      "title": "refactor(health): keep hydration notifications only",
+      "completed_at": "2026-11-18T20:08:23Z",
+      "result": "GitHub mainへ反映（ff86e4c）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/ff86e4c6783e7fc5d73ef15bed6c5cb179c2f014"
+    },
+    {
       "id": "github-commit-4e43ce539ac7",
       "title": "feat(taxi): persistent dropoff success and failure result",
       "completed_at": "2026-11-18T19:50:00Z",
@@ -233,13 +240,6 @@
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/eb03554a8aa4bd9d558bd27671c6b3a62d9075cc"
     },
     {
-      "id": "github-commit-9c0cc407bf9a",
-      "title": "feat(taxi): add guarded shift and lock/home dropoff Shortcuts",
-      "completed_at": "2026-11-18T19:28:41Z",
-      "result": "GitHub mainへ反映（9c0cc40）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/9c0cc407bf9a59aa53cc80e5de149e6edaad0cf9"
-    },
-    {
       "id": "complete-002",
       "title": "iPhone向けMission Control Dashboardを実装",
       "completed_at": "2026-07-17T17:55:00+09:00",
@@ -264,7 +264,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #839をレビューして公開判断する",
+      "next_action": "PR #840をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -274,7 +274,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-19T05:05:46+09:00",
+      "last_update": "2026-11-19T05:09:15+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -355,7 +355,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-19T05:05:46+09:00",
+      "last_update": "2026-11-19T05:09:15+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -369,7 +369,7 @@
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #839をレビューして公開判断する",
+      "next_action": "PR #840をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -378,7 +378,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-19T05:05:46+09:00",
+      "last_update": "2026-11-19T05:09:15+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -460,5 +460,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "972b95a9035d859a883d1503d06596926926e9deb2a6b31638fe921cb14850d9"
+  "github_snapshot_hash": "81f9bc49b4c8118e707c872f9893df19e7d949b0f8b4b48a565406c0742b2d80"
 }
