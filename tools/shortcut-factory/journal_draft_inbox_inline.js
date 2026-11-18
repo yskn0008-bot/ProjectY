@@ -1,105 +1,88 @@
-// YOS JOURNAL GPT制作 → existing private Notion YOS Inbox (draft-only).
-// Embedded into the compiled Shortcut's native Scriptable inline action.
-// No new credentials, service, DB, or installable Scriptable script.
-// The source draft has already been saved to iCloud Drive by Shortcuts.
-// Never uploads text to public GitHub or labels it as a published issue.
+// YOS JOURNAL GPT draft -> existing private Notion YOS Inbox.
+// Fast, fail-closed, draft-only handoff. Never publishes or puts content in a URL.
+// The Shortcut has already saved a local iCloud backup before executing this.
 'use strict';
-const JOURNAL_INBOX=Object.freeze({
-  page:'3d35ca88-2895-81ef-9dc8-d5f11ff8e213',
-  token:'YOS_NOTION_INTEGRATION_TOKEN',
+const J=Object.freeze({
+  inbox:'3d35ca88-2895-81ef-9dc8-d5f11ff8e213',
+  key:'YOS_NOTION_INTEGRATION_TOKEN',
   version:'2025-09-03',
   maxLength:12000,
   chunkSize:1400,
-  maxPages:60
+  receipts:'YOS JOURNAL Draft Receipt Cache.json'
 });
-const txt=x=>String(x??'');
-const plain=b=>(b?.paragraph?.rich_text||[]).map(x=>x.plain_text??x.text?.content??'').join('');
-const para=x=>({object:'block',type:'paragraph',paragraph:{rich_text:[{type:'text',text:{content:x}}]}});
-function digest(s) {
+const plain=b=>(b?.paragraph?.rich_text||[]).map(t=>t.plain_text??t.text?.content??'').join('');
+const para=s=>({object:'block',type:'paragraph',paragraph:{rich_text:[{type:'text',text:{content:s}}]}});
+function digest(s){
   let a=2166136261,b=2246822519;
-  for(let i=0;i<s.length;i++){const c=s.charCodeAt(i);a=Math.imul(a^c,16777619)>>>0;b=Math.imul(b^c,3266489917)>>>0;}
+  for(let i=0;i<s.length;i++){
+    const c=s.charCodeAt(i);
+    a=Math.imul(a^c,16777619)>>>0;
+    b=Math.imul(b^c,3266489917)>>>0;
+  }
   return [a,b].map(x=>x.toString(16).padStart(8,'0')).join('');
 }
-function chunks(str) {
-  const out=[];for(let i=0;i<str.length;i+=JOURNAL_INBOX.chunkSize)out.push(str.slice(i,i+JOURNAL_INBOX.chunkSize));
-  return out;
+function chunks(str){const arr=[];for(let i=0;i<str.length;i+=J.chunkSize)arr.push(str.slice(i,i+J.chunkSize));return arr;}
+function stateFile(){const fm=FileManager.local();return {fm,path:fm.joinPath(fm.documentsDirectory(),J.receipts)};}
+function loadRecords(store){
+  if(!store.fm.fileExists(store.path))return [];
+  const rows=JSON.parse(store.fm.readString(store.path));
+  if(!Array.isArray(rows)||rows.length>3000||rows.some(x=>!x||typeof x.id!=='string'||!/^\[YOS_JOURNAL_DRAFT_V1:[0-9a-f]{16}:\d{3,5}\]$/.test(x.id)||!['unknown','submitted'].includes(x.status)))throw Error('LOCAL_RECEIPTS_INVALID');
+  return rows;
 }
-async function request(method,path,token,body) {
-  const req=new Request('https://api.notion.com/v1'+path);
-  req.method=method;
-  req.timeoutInterval=20;
-  req.headers={Authorization:'Bearer '+token,'Notion-Version':JOURNAL_INBOX.version,'Content-Type':'application/json'};
-  if(body!==undefined)req.body=JSON.stringify(body);
-  let data;
-  try{data=await req.loadJSON();}catch(_){throw Error('NETWORK_UNKNOWN');}
-  if(!req.response||req.response.statusCode<200||req.response.statusCode>=300)
-    throw Error('NOTION_HTTP_'+(req.response?.statusCode||'UNKNOWN'));
-  return data;
+function persist(store,records){
+  const json=JSON.stringify(records);
+  store.fm.writeString(store.path,json);
+  if(store.fm.readString(store.path)!==json)throw Error('LOCAL_RECEIPT_READBACK_FAILED');
 }
-async function findReceipt(token,marker,expected) {
-  let cursor='',markers=0,complete=0,window=[];
-  for(let i=0;i<JOURNAL_INBOX.maxPages;i++) {
-    const res=await request('GET','/blocks/'+JOURNAL_INBOX.page+'/children?page_size=100'+(cursor?'&start_cursor='+encodeURIComponent(cursor):''),token);
-    if(!Array.isArray(res.results)||typeof res.has_more!=='boolean')throw Error('SCAN_INVALID');
-    for(const b of res.results){
-      const v=b.type==='paragraph'?plain(b):'#OTHER#';
-      if(v===marker)markers++;
-      window.push(v);
-      if(window.length>expected.length)window.shift();
-      if(window.length===expected.length&&window.every((str,j)=>str===expected[j]))complete++;
-    }
-    if(!res.has_more)return {markers,complete};
-    if(!res.next_cursor||res.next_cursor===cursor)throw Error('SCAN_CURSOR_INVALID');
-    cursor=res.next_cursor;
+async function send(token,segments){
+  const req=new Request('https://api.notion.com/v1/blocks/'+J.inbox+'/children');
+  req.method='PATCH';req.timeoutInterval=7;
+  req.headers={Authorization:'Bearer '+token,'Notion-Version':J.version,'Content-Type':'application/json'};
+  req.body=JSON.stringify({children:segments.map(para)});
+  const response=await req.loadJSON();
+  if(!req.response||req.response.statusCode<200||req.response.statusCode>=300)throw Error('NOTION_HTTP_'+(req.response?.statusCode||'UNKNOWN'));
+  if(!Array.isArray(response?.results)||response.results.length!==segments.length)throw Error('NOTION_REPLY_INCOMPLETE');
+  for(let i=0;i<segments.length;i++){
+    const block=response.results[i];
+    if(!block?.id||block.type!=='paragraph'||plain(block)!==segments[i])throw Error('NOTION_REPLY_CONTENT_MISMATCH');
   }
-  throw Error('SCAN_INCOMPLETE');
+  return true;
 }
-async function verifyBlocks(token,expected,items) {
-  if(!Array.isArray(items)||items.length!==expected.length||items.some(x=>!x?.id))throw Error('APPEND_RESPONSE_INVALID');
-  for(let i=0;i<expected.length;i++){
-    const block=await request('GET','/blocks/'+encodeURIComponent(items[i].id),token);
-    if(block?.type!=='paragraph'||plain(block)!==expected[i])throw Error('READBACK_MISMATCH');
-  }
-}
-async function transfer(input) {
+async function transfer(input){
   if(typeof input!=='string')return {status:'held',reason:'NO_TEXT_INPUT'};
   const raw=input.trim();
-  if(raw.length<150||raw.length>JOURNAL_INBOX.maxLength)return {status:'held',reason:'LENGTH_OUT_OF_RANGE'};
-  if(!raw.slice(0,260).includes('YOS_EDITORIAL_DRAFT_V1'))return {status:'held',reason:'DRAFT_MARKER_MISSING'};
-  if(!raw.includes('公開不可・要審査'))return {status:'held',reason:'NOT_REVIEW_MARKED'};
+  if(raw.length<150||raw.length>J.maxLength)return {status:'held',reason:'LENGTH_OUT_OF_RANGE'};
+  if(!raw.slice(0,260).includes('YOS_EDITORIAL_DRAFT_V1')||!raw.includes('公開不可・要審査'))return {status:'held',reason:'NOT_A_REVIEW_DRAFT'};
   if(/(?:sk-proj-|gh[pousr]_[A-Za-z0-9_-]{16,}|Bearer\s+\S+)/i.test(raw))return {status:'held',reason:'SENSITIVE_TOKEN_MARKER'};
-  if(!Keychain.contains(JOURNAL_INBOX.token))return {status:'held',reason:'NOTION_KEY_MISSING'};
-  const token=Keychain.get(JOURNAL_INBOX.token);
+  if(!Keychain.contains(J.key))return {status:'held',reason:'NOTION_KEY_MISSING'};
+  const token=Keychain.get(J.key);
   if(typeof token!=='string'||token.length<10)return {status:'held',reason:'NOTION_KEY_INVALID'};
-  const marker='[YOS_JOURNAL_DRAFT_V1:'+digest(raw)+':'+raw.length+']';
-  // Fixed metadata also makes reconciliation stable across midnight.
-  const segments=[marker,'JOURNAL下書き・未検証・公開禁止',...chunks(raw)];
-  if(segments.length>100)return {status:'held',reason:'TOO_MANY_BLOCKS'};
-  let result=await findReceipt(token,marker,segments);
-  if(result.markers>1)return {status:'held',reason:'DUPLICATE_MARKERS_FOUND'};
-  if(result.markers===1&&result.complete!==1)return {status:'held',reason:'INCOMPLETE_EXISTING_DRAFT'};
-  if(result.complete===1)return {status:'confirmed',reason:'ALREADY_VERIFIED',marker};
-  const reply=await request('PATCH','/blocks/'+JOURNAL_INBOX.page+'/children',token,{children:segments.map(para)});
-  // Unknown response must never be treated as safe to blindly retry.
-  await verifyBlocks(token,segments,reply.results);
-  result=await findReceipt(token,marker,segments);
-  if(result.markers!==1||result.complete!==1)throw Error('RECEIPT_NOT_UNIQUE_AFTER_WRITE');
-  return {status:'confirmed',reason:'NOTION_READBACK_OK',marker};
-}
-async function notifyHeld(reason) {
-  try{
-    const n=new Notification();
-    n.title='YOS JOURNAL｜下書き転送は保留';
-    n.body='iCloudには下書きを保存済み。Notionへの反映は未確認（'+reason+'）。再実行で二重送信しないよう保護します。';
-    await n.schedule();
-  }catch(_){}
+  const id='[YOS_JOURNAL_DRAFT_V1:'+digest(raw)+':'+raw.length+']';
+  const segments=[id,'JOURNAL下書き・未検証・公開禁止',...chunks(raw)];
+  if(segments.length>90)return {status:'held',reason:'TOO_MANY_BLOCKS'};
+  const store=stateFile();
+  let records=loadRecords(store);
+  const row=records.find(x=>x.id===id);
+  // Unknown deliveries must never be blindly retried.
+  if(row)return {status:row.status==='submitted'?'submitted':'held',reason:row.status==='submitted'?'ALREADY_SUBMITTED_CHECK_PENDING':'PREVIOUS_RESULT_UNKNOWN'};
+  records.push({id,status:'unknown'});
+  persist(store,records);
+  try{await send(token,segments);}catch(e){return {status:'held',reason:'NOTION_RESULT_UNKNOWN'};}
+  records=loadRecords(store);
+  const candidate=records.find(x=>x.id===id);
+  if(!candidate||candidate.status!=='unknown')return {status:'held',reason:'LOCAL_RECEIPT_CONFLICT'};
+  candidate.status='submitted';
+  try{persist(store,records);}catch(e){return {status:'held',reason:'LOCAL_RECEIPT_UPDATE_FAILED'};}
+  // API acknowledgement is not independent Notion readback; never call it verified.
+  return {status:'submitted',reason:'NOTION_API_ACK_PENDING_READBACK'};
 }
 async function main(){
-  let result;
+  let result={status:'held',reason:'UNKNOWN'};
   try{result=await transfer(args.shortcutParameter);}
-  catch(e){result={status:'held',reason:txt(e?.message||e)};}
-  if(result.status!=='confirmed')await notifyHeld(result.reason);
-  Script.setShortcutOutput('YOS_JOURNAL_DRAFT_NOTION_'+(result.status==='confirmed'?'CONFIRMED':'HELD')+':'+result.reason);
-  Script.complete();
+  catch(e){result={status:'held',reason:String(e?.message||e).slice(0,65)};}
+  try{Script.setShortcutOutput('YOS_JOURNAL_NOTION_'+result.status.toUpperCase()+':'+result.reason);}
+  catch(e){/* output API failure must not bypass Script.complete */}
+  return result;
 }
-await main();
+try{await main();}
+finally{Script.complete();}
