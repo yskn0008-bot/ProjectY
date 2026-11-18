@@ -565,3 +565,23 @@ test('Dropoff result is persistent and clearly confirms success, retry and failu
   expect(await eventCount()).toBe(2);
   expect(errors).toEqual([]);
 });
+
+
+test('YOS TAXI workflow links: read-only history and analysis do not alter shift records', async ({page}) => {
+  const errors=[];
+  page.on('pageerror',error=>errors.push(error.message));
+  await page.clock.setFixedTime(new Date('2026-11-19T18:30:00+09:00'));
+  await page.goto('./ui-v2.html',{waitUntil:'domcontentloaded'});
+  const original=await page.evaluate(()=>localStorage.getItem('yos-taxi-ui-v2-live-20261117'));
+  await page.goto('./ui-v2.html?yos_action=history',{waitUntil:'domcontentloaded'});
+  await expect(page.locator('#history-view')).toBeVisible();
+  expect(page.url()).not.toContain('yos_action');
+  const afterHistory=await page.evaluate(()=>localStorage.getItem('yos-taxi-ui-v2-live-20261117'));
+  expect(afterHistory).toBe(original);
+  await page.goto('./ui-v2.html?yos_action=analysis',{waitUntil:'domcontentloaded'});
+  await expect(page.locator('#analysis-view')).toBeVisible();
+  expect(page.url()).not.toContain('yos_action');
+  const afterAnalysis=await page.evaluate(()=>localStorage.getItem('yos-taxi-ui-v2-live-20261117'));
+  expect(afterAnalysis).toBe(original);
+  expect(errors).toEqual([]);
+});
