@@ -388,7 +388,7 @@ async function readPictureSetting(target){
 function pictureChoices(entry){return entry&&Array.isArray(entry.candidate)?entry.candidate.map(x=>String(x&&x.value||"")).filter(Boolean):[]}
 function pictureModeChoice(entry,kind){
   const available=pictureChoices(entry)
-  const normalized=value=>String(value||"").trim().toLowerCase().replace(/[\\s_-]/g,"")
+  const normalized=value=>String(value||"").trim().toLowerCase().replace(/[\s_-]/g,"")
   const order=kind==="day"?["standard"]:["cinema","cinemaHome","cinemaPro","cinema1","cinema2"]
   for(const candidate of order){
     const match=available.find(value=>normalized(value)===normalized(candidate))
