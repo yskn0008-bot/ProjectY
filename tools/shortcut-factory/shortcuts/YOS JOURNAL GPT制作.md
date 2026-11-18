@@ -7,7 +7,7 @@
 - `tools/shortcut-factory/shortcuts/YOS JOURNAL GPT制作.cherri` は既存Cherri Factoryのソース。ユーザーiPhoneへのインストールに使える署名済み `.shortcut` ではない。
 - `askChatGPT(prompt, false, "Text")` は Cherri の Apple Intelligence / ChatGPT アクション（iPhone側の「モデルを使用」の機能拡張モデル相当）を呼ぶ。明示的な出力形式はText、Follow Upは無効。
 - ショートカット入力（共有シートで渡す公開可能な資料テキスト）をGPTへ渡し、2026-11-19改訂の既存編集方針に沿って深い特集原稿の下書きを生成する。
-- 資料なし、URLしかなく中身を照合できない場合、作り話の「今日の新記事」は出さず「調査待ちの企画案」にする。
+- 資料なしの場合も調査対象の問い・仮説・具体的な場面を含む特集下書きを組み立てるが、事実未確認部分は【要裏取り】と明示し、追加確認すべき一次資料を挙げ、状態を【調査待ち】とする。URLしかなく中身を照合できない場合も同様。
 - GPT出力の基本長と識別子を検査し、日付と時刻を含む固有名 `YOS-JOURNAL-GPT-DRAFT-YYYY-MM-DD-HH-mm-ss.md` で iCloud Drive / Shortcuts に**上書きなし**保存する。
 - **公開・通知は行わない**。保存通知はショートカットが原稿保存に成功した場合の端末内通知だけ。プライベートNotion原文・GitHub秘密鍵を送信・保存しない。
 
