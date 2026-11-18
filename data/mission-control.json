@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-18T18:14:51+09:00",
+  "updated_at": "2026-11-18T18:18:25+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -12,6 +12,16 @@
     ]
   },
   "inbox": [
+    {
+      "id": "github-pr-651",
+      "title": "PR #651 YOS Notification v0.3: protected capture, live Notion context and safe iPhone updater",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/651",
+      "updated_at": "2026-11-16T15:54:43Z"
+    },
     {
       "id": "github-pr-762",
       "title": "PR #762 feat(notification): safeguard v0.3→v0.4 migration using common installer",
@@ -103,16 +113,6 @@
       "updated_at": "2026-11-17T07:29:19Z"
     },
     {
-      "id": "github-pr-816",
-      "title": "PR #816 fix(scriptable): 攻略本WebView黒画面v4・表示前JS監視を除去",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/816",
-      "updated_at": "2026-11-18T09:14:13Z"
-    },
-    {
       "id": "github-issue-10",
       "title": "Issue #10 Mission Control v2：GitHubのIssue・PR・Commitを自動集約する",
       "type": "GitHub Issue",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-18T09:12:22Z"
+      "updated_at": "2026-11-18T09:17:29Z"
     },
     {
       "id": "github-issue-234",
@@ -205,6 +205,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-9d9c2b5ac76c",
+      "title": "fix(scriptable): prevent black WebView presentation for ikemen reader",
+      "completed_at": "2026-11-18T09:17:35Z",
+      "result": "GitHub mainへ反映（9d9c2b5）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/9d9c2b5ac76cf1ee2b571d62335d7b06fc244372"
+    },
+    {
       "id": "github-commit-aa61b6b4d2a8",
       "title": "journal: restore actually approved Smartlog v712 reader exactly",
       "completed_at": "2026-11-18T09:13:08Z",
@@ -231,13 +238,6 @@
       "completed_at": "2026-11-18T08:38:23Z",
       "result": "GitHub mainへ反映（86437fa）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/86437fab1263f9a4babc1053a0c824d1db0302b0"
-    },
-    {
-      "id": "github-commit-2c2ddff52484",
-      "title": "fix(scriptable): split local magazine photos and diagnose blank WebView",
-      "completed_at": "2026-11-18T08:33:14Z",
-      "result": "GitHub mainへ反映（2c2ddff）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/2c2ddff52484ef9b853746e6fb5410ec634ee113"
     },
     {
       "id": "complete-002",
@@ -274,7 +274,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-18T18:14:51+09:00",
+      "last_update": "2026-11-18T18:18:25+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -349,13 +349,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 9件・Open PR 59件を自動同期中",
+      "next_action": "Open Issue 9件・Open PR 58件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-18T18:14:51+09:00",
+      "last_update": "2026-11-18T18:18:25+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -378,7 +378,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-18T18:14:51+09:00",
+      "last_update": "2026-11-18T18:18:25+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -460,5 +460,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "91fd3e99455ed83a4931b9ea605db41e2ea4c08d67a7f114c4d2346ad3a68c5a"
+  "github_snapshot_hash": "097b609d428920779c85ea47967f4c2fc268dd5ab8ce5ba2a5d2089772511a15"
 }
