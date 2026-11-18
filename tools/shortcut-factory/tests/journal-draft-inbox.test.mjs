@@ -95,3 +95,18 @@ test('different content yields a different receipt without overwriting first dra
   assert.equal(b.calls.filter(x=>x.method==='PATCH').length,1);
   assert.equal(b.blocks.filter(x=>String(x.paragraph?.rich_text?.[0]?.text?.content||'').startsWith('[YOS_JOURNAL_DRAFT_V1:')).length,2);
 });
+
+test('a partial existing marker is never mistaken for a completed draft',async()=>{
+  const existing=[{id:'fake-1',type:'paragraph',paragraph:{rich_text:[{type:'text',text:{content:'[YOS_JOURNAL_DRAFT_V1:0000000000000000:120]'}}]}}];
+  const m=mock({existing});
+  await m.execute();
+  // A foreign marker does not block a different article, so it is safe to add one.
+  assert.match(m.outputs[0],/NOTION_CONFIRMED/);
+  // Simulate a known incomplete duplicate using this article's exact receipt ID.
+  const thisReceipt=m.blocks.find(b=>String(b.paragraph?.rich_text?.[0]?.text?.content||'').startsWith('[YOS_JOURNAL_DRAFT_V1:')&&b.id!=='fake-1');
+  assert.ok(thisReceipt);
+  const x=mock({existing:[thisReceipt]});
+  await x.execute();
+  assert.match(x.outputs[0],/NOTION_HELD:INCOMPLETE_EXISTING_DRAFT/);
+  assert.equal(x.calls.filter(c=>c.method==='PATCH').length,0);
+});
