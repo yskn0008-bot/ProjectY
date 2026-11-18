@@ -14,7 +14,7 @@ assert 'if(!isActive())' in app
 assert "180000" in app
 assert "ios" not in drop.lower() or "storage" in drop.lower()
 assert "yyyyMMddHHmmss" in drop
-assert "yos_action=dropoff&yos_req={tappedAt}-{salt}" in drop
+assert "yos_action=dropoff&yos_req={tappedAt}-WIDGET" in drop
 assert "openURL(recordUrl)" in drop
 assert "chooseFromList(@actions" in shift
 for action in ("start","end","m100","report"):
