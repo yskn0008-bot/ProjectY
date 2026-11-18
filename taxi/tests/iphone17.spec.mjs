@@ -406,6 +406,8 @@ test('v2 in-app browser heights: all sales text and strategy rows fit their boxe
         const container=row.getBoundingClientRect();
         for(const selector of ['time','b','small']){
           const child=row.querySelector(selector),rect=child.getBoundingClientRect();
+          // Secondary detail is intentionally hidden on the compact large-type view.
+          if(getComputedStyle(child).display==='none'||!rect.width||!rect.height)continue;
           if(rect.top<container.top-0.6 || rect.bottom>container.bottom+0.6 || rect.left<container.left-1 || rect.right>container.right+1)
             bad.push(i+' '+selector+' is outside its row');
           if(child.scrollWidth>child.clientWidth+1 || child.scrollHeight>child.clientHeight+2)
