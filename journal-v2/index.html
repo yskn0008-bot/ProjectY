@@ -13,19 +13,10 @@ p{margin:10px 0 17px}figure{margin:16px 0 20px}figure img{display:block;width:10
 #status{font-size:14px;color:#777}footer{font-size:12px;color:#777;border-top:1px solid #ddd;padding-top:16px;margin-top:35px}
 @media(max-width:350px){#view{padding-left:16px;padding-right:16px}.item{grid-template-columns:94px 1fr;gap:10px}.item img{width:94px;height:80px}.item strong{font-size:16px}}
 .broken-image{aspect-ratio:3/2;display:flex;align-items:center;justify-content:center;border:1px solid #e6e6e6;background:#f7f7f7;color:#777;font-size:13px;padding:16px;text-align:center}.read-date{font-size:12px;color:#777;margin:6px 0 12px}.item.no-image{grid-template-columns:1fr}.item.no-image .excerpt{font-size:13px}.hero-card.no-image{padding-top:14px}
-/* Keep the mobile article list compact while preserving full article text. */
+/* Reduce only the vertical spacing of mobile list cards. */
 @media(max-width:600px){
- .list .item{grid-template-columns:88px minmax(0,1fr);gap:11px;padding:9px 0}
- .list .item.no-image{grid-template-columns:minmax(0,1fr)}
- .list .item img{width:88px;height:68px}
- .list .item .cat{display:block;line-height:1.25}
- .list .item strong{line-height:1.32;margin:3px 0 4px}
- .list .item .excerpt,.list .hero-card .excerpt{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;line-height:1.4}
+ .list .item{padding-block:9px}
  .list .hero-card{padding-bottom:10px}
-}
-@media(max-width:350px){
- .list .item{grid-template-columns:76px minmax(0,1fr);gap:9px}
- .list .item img{width:76px;height:60px}
 }
 </style></head><body><header><span class="logo">YOS JOURNAL</span><button class="back" id="home" hidden>‹ 記事一覧</button></header><main id="view"><p id="status">記事を読み込んでいます…</p></main>
 <script>
