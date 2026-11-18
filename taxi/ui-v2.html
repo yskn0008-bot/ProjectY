@@ -208,6 +208,15 @@
  .view.sales .decision strong{font-size:15px}
 }
 
+/* Safari standalone safe areas at mid-height iPhones */
+@media(min-height:701px) and (max-height:850px){
+ .view.sales .sales-card{flex-basis:clamp(77px,12dvh,98px)}
+ .view.sales .quick{flex-basis:clamp(60px,10.2dvh,79px)}
+ .view.sales .decision{flex-basis:clamp(70px,11dvh,91px)}
+ .view.strategy .strat-list{min-height:clamp(185px,27dvh,211px)}
+ .view.strategy .intro{flex-basis:clamp(75px,11dvh,92px)}
+}
+
 </style>
 </head>
 <body>
