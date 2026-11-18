@@ -419,9 +419,15 @@ try{
    if(!card)throw Error('gesture fixture card missing');
    const target=fromGrip?card.querySelector('.task-drag-grip'):card.querySelector('.task-copy');
    for(const [type,x,y,hold] of steps){
-    const touch=new Touch({identifier:1,target,clientX:x,clientY:y,pageX:x,pageY:y,screenX:x,screenY:y});
+    // WebKit test runners do not expose constructible Touch objects. A synthetic
+    // cancelable Event carrying TouchList-shaped coordinates tests the same handlers.
+    const touch={identifier:1,target,clientX:x,clientY:y};
     const contacts=type==='touchend'||type==='touchcancel'?[]:[touch];
-    target.dispatchEvent(new TouchEvent(type,{bubbles:true,cancelable:true,touches:contacts,targetTouches:contacts,changedTouches:[touch]}));
+    const event=new Event(type,{bubbles:true,cancelable:true});
+    Object.defineProperty(event,'touches',{value:contacts});
+    Object.defineProperty(event,'targetTouches',{value:contacts});
+    Object.defineProperty(event,'changedTouches',{value:[touch]});
+    target.dispatchEvent(event);
     if(hold)await new Promise(ok=>setTimeout(ok,hold));
    }
    return {start:items.find(x=>x.id===id)?.s,done:!!items.find(x=>x.id===id)?.done,
