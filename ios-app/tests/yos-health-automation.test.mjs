@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
 import test from 'node:test';
+import {createHash} from 'node:crypto';
 const script = fs.readFileSync(new URL('../scriptable/YOS Health Automation.js', import.meta.url),'utf8');
 
 async function invoke(mode, {errorIndex=-1, selected=-1}={}) {
@@ -60,4 +61,22 @@ test('no secret or HealthKit/SleepCycle claims',()=>{
  assert.ok(!script.includes('Bearer '));
  assert.ok(!script.includes('HealthKit.save'));
  assert.ok(!script.includes('SleepCycle.start'));
+});
+
+test('installer accepts the Scriptable header and the exact canonical name',()=>{
+ assert.ok(script.startsWith('// Variables used by Scriptable.'));
+ const header=script.split(/\r?\n/).slice(0,20).join('\n');
+ const name=header.match(/^\/\/ YOS_SCRIPT_NAME:\s*(.+)\s*$/m)?.[1]?.trim();
+ assert.equal(name,'YOS Health Automation');
+});
+test('shared installer catalog pins the exact current source without changing other entries',()=>{
+ const file=fs.readFileSync(new URL('../scriptable/yos-common-installer-catalog.json', import.meta.url),'utf8');
+ const catalog=JSON.parse(file);
+ const entries=catalog.targets.filter(t=>t.id==='health-automation');
+ assert.equal(entries.length,1);
+ assert.equal(entries[0].name,'YOS Health Automation');
+ assert.equal(entries[0].path,'ios-app/scriptable/YOS Health Automation.js');
+ assert.equal(entries[0].sha256,createHash('sha256').update(script,'utf8').digest('hex'));
+ assert.match(entries[0].commit,/^[0-9a-f]{40}$/);
+ assert.equal(catalog.targets.length,new Set(catalog.targets.map(t=>t.id)).size);
 });
