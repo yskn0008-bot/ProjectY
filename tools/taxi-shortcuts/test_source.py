@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Contract checks: do not introduce a second Taxi log or an unsafe cross-browser write."""
+"""Contract checks: no duplicate ledger and no unsafe cross-browser write."""
 from pathlib import Path
 base=Path(__file__).resolve().parent
 repo=base.parents[1]
@@ -11,21 +11,16 @@ assert 'function handleShortcutLink()' in app
 assert 'shortcutRequestId' in app
 assert 'history.replaceState(history.state' in app
 assert 'if(!isActive())' in app
-assert "180000" in app
-assert "ios" not in drop.lower() or "storage" in drop.lower()
-assert "yyyyMMddHHmmss" in drop
-assert "Clarity Inbox.txt" in drop
-assert "YOS_TAXI_DROPOFF_REQUEST" in drop
-assert "appendResolvedFile(inboxFile, captured)" in drop
-assert "const verifyFile = getFile" in drop
-assert "if verifiedText contains requestId" in drop
-assert "yos_action=dropoff&yos_req={requestId}" in drop
-assert "openURL(recordUrl)" in drop
-assert "chooseFromList(@actions" in shift
-for action in ("start","end","m100","report"):
-    assert "yos_action="+action in shift
-assert "startTimer(qty(20, \"min\"))" in shift
-for source in [shift,drop]:
-    for invalid in ("api.notion.com","Keychain","saveFile(","localStorage.setItem","deleteFile("):
+assert '180000' in app
+assert 'yyyyMMddHHmmss' in drop
+assert 'const salt = randomNumber(100000, 999999)' in drop
+assert 'yos_action=dropoff&yos_req={tappedAt}-{salt}' in drop
+assert 'openURL(recordUrl)' in drop
+assert 'chooseFromList(@actions' in shift
+for action in ('start','end','m100','report'):
+    assert 'yos_action='+action in shift
+assert 'startTimer(qty(20, "min"))' in shift
+for source in (shift,drop):
+    for invalid in ('api.notion.com','Keychain','appendResolvedFile','file.append','saveFile(', 'getFile(', 'localStorage.setItem','deleteFile('):
         assert invalid not in source,invalid
 print("YOS Taxi Shortcut source contracts: PASS")
