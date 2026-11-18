@@ -1257,7 +1257,33 @@ function wireTaskGestures(el,item){
  const HOLD_TO_MOVE=260, HOLD_TO_EDIT=750, MOVE_SLOP=12;
  let active=null,startX=0,startY=0,lastX=0,lastY=0,mode='tap';
  let armTimer=null,editTimer=null,paintFrame=0,swipeFrame=0,lastPreview=item.s,gripStart=false;
+ let backgroundLock=null;
  const timeLabel=el.querySelector('small');
+
+ const lockBackground=()=>{
+  if(backgroundLock)return;
+  const x=window.scrollX,y=window.scrollY;
+  let correcting=false;
+  // Block native touch scrolling once a card is armed, without disabling ordinary swipes.
+  const preventScroll=e=>{if(e.cancelable)e.preventDefault()};
+  const restoreScroll=()=>{
+   if(!backgroundLock||correcting)return;
+   if(Math.abs(window.scrollX-x)<1&&Math.abs(window.scrollY-y)<1)return;
+   correcting=true;window.scrollTo(x,y);correcting=false;
+  };
+  backgroundLock={x,y,preventScroll,restoreScroll};
+  document.addEventListener('touchmove',preventScroll,{capture:true,passive:false});
+  window.addEventListener('scroll',restoreScroll,{passive:true});
+  restoreScroll();
+ };
+ const unlockBackground=()=>{
+  if(!backgroundLock)return;
+  const locked=backgroundLock;
+  document.removeEventListener('touchmove',locked.preventScroll,true);
+  window.removeEventListener('scroll',locked.restoreScroll);
+  backgroundLock=null;
+ };
+
  const clearTimers=()=>{
   if(armTimer!==null){clearTimeout(armTimer);armTimer=null}
   if(editTimer!==null){clearTimeout(editTimer);editTimer=null}
@@ -1283,18 +1309,19 @@ function wireTaskGestures(el,item){
   if(active!==null)return;
   clearTimers();clearPaint();
   active=id;startX=lastX=x;startY=lastY=y;mode='tap';gripStart=!!grip;
+  if(gripStart)lockBackground();
   lastPreview=item.s;el.style.transition='';
   // Long, motionless contact edits. An intermediate armed state never marks done.
   armTimer=setTimeout(()=>{
    armTimer=null;
    if(active!==null&&mode==='tap'){
-    mode='armed';el.classList.add('press-armed');vibrate();
+    mode='armed';el.classList.add('press-armed');lockBackground();vibrate();
    }
   },HOLD_TO_MOVE);
   editTimer=setTimeout(()=>{
    editTimer=null;
    if(active!==null&&(mode==='tap'||mode==='armed')){
-    active=null;clearTimers();clearPaint();resetVisual();mode='long';
+    active=null;clearTimers();clearPaint();unlockBackground();resetVisual();mode='long';
     beginLocalEdit(item);
    }
   },HOLD_TO_EDIT);
@@ -1316,7 +1343,7 @@ function wireTaskGestures(el,item){
    return;
   }
   if(left){
-   clearTimers();mode='swipe';el.classList.remove('press-armed');
+   clearTimers();unlockBackground();mode='swipe';el.classList.remove('press-armed');
    if(event?.cancelable)event.preventDefault();
    if(!swipeFrame)swipeFrame=requestAnimationFrame(paintSwipe);
    return;
@@ -1325,12 +1352,12 @@ function wireTaskGestures(el,item){
    // A quick swipe scrolls, but a brief stationary press arms a deliberate drag.
    // The existing ⋮ grip remains an immediate, accessible drag fallback.
    if(mode==='armed'||gripStart){
-    clearTimers();mode='drag';el.classList.remove('press-armed');
+    lockBackground();clearTimers();mode='drag';el.classList.remove('press-armed');
     el.classList.add('drag-preview');
     if(event?.cancelable)event.preventDefault();
     if(!paintFrame)paintFrame=requestAnimationFrame(paintDrag);
    }else{
-    clearTimers();mode='scroll';
+    clearTimers();unlockBackground();mode='scroll';
    }
    return;
   }
@@ -1342,7 +1369,7 @@ function wireTaskGestures(el,item){
  const finish=cancelled=>{
   if(active===null)return;
   const completedMode=mode,wasGrip=gripStart,oldRect=completedMode==='drag'&&!cancelled?el.getBoundingClientRect():null;
-  active=null;clearTimers();clearPaint();
+  active=null;clearTimers();clearPaint();unlockBackground();
   el.classList.remove('press-armed','drag-preview');
   if(completedMode==='swipe'){
    el.style.transition='transform .26s cubic-bezier(.22,1,.36,1)';

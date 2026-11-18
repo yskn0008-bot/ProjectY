@@ -24,6 +24,11 @@ test('Undo/redo and three gesture intents preserve normal scroll and task data',
  assert.match(html,/const HOLD_TO_MOVE=260, HOLD_TO_EDIT=750/);
  assert.match(html,/mode='armed'/);
  assert.match(html,/mode==='armed'\|\|gripStart/);
+ assert.match(html,/const lockBackground=\(\)=>/);
+ assert.match(html,/const unlockBackground=\(\)=>/);
+ assert.match(html,/addEventListener\('touchmove',preventScroll,\{capture:true,passive:false\}\)/);
+ assert.match(html,/window\.addEventListener\('scroll',restoreScroll,\{passive:true\}\)/);
+ assert.match(html,/active=null;clearTimers\(\);clearPaint\(\);unlockBackground\(\)/);
  assert.match(html,/if\(completedMode==='tap'&&!wasGrip\)toggleTaskDone\(item\)/);
  assert.match(html,/beginLocalEdit\(item\)/);
  assert.match(html,/少し押さえて上下に動かすと移動/);

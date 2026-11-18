@@ -444,6 +444,59 @@ try{
  const g4=await gp.evaluate(()=>window.__gestureTouch(91001,[['touchstart',200,360,0],['touchmove',200,420,0],['touchend',200,420,0]]));
  assert.equal(g4.start,360,'quick vertical swipe scrolls instead of changing task time');
  assert.equal(g4.done,false,'scrolling does not mark task complete');
+
+ // While a card is armed, even an attempted viewport scroll must leave the
+ // hour grid pinned. On finger release native scrolling must work again.
+ const pinned=await gp.evaluate(async()=>{
+  const nap=ms=>new Promise(ok=>setTimeout(ok,ms));
+  const target=document.querySelector('#tl [data-id="91001"] .task-copy');
+  const send=(type,x=200,y=360)=>{
+   const touch={identifier:100,target,clientX:x,clientY:y};
+   const touches=(type==='touchend'||type==='touchcancel')?[]:[touch];
+   const e=new Event(type,{bubbles:true,cancelable:true});
+   Object.defineProperty(e,'touches',{value:touches});
+   Object.defineProperty(e,'changedTouches',{value:[touch]});
+   target.dispatchEvent(e);return e.defaultPrevented;
+  };
+  window.scrollTo(0,175);await nap(55);
+  const before=window.scrollY;
+  send('touchstart');await nap(320);
+  const touchBlocked=send('touchmove');
+  window.scrollTo(0,before+125);await nap(60);
+  const during=window.scrollY;
+  send('touchend');
+  window.scrollTo(0,before+125);await nap(60);
+  const after=window.scrollY;
+  return {before,during,after,touchBlocked,start:items.find(x=>x.id===91001).s};
+ });
+ assert.ok(pinned.before>0,'scroll-lock fixture has an actual scrollable timeline');
+ assert.equal(pinned.touchBlocked,true,'armed press prevents native document scrolling');
+ assert.ok(Math.abs(pinned.during-pinned.before)<=2,'background time ruler must remain still on armed press: '+JSON.stringify(pinned));
+ assert.ok(pinned.after>pinned.before+40,'normal background scroll is restored on release: '+JSON.stringify(pinned));
+ assert.equal(pinned.start,360,'press does not change source start');
+
+ const canceledLock=await gp.evaluate(async()=>{
+  const nap=ms=>new Promise(done=>setTimeout(done,ms));
+  const target=document.querySelector('#tl [data-id="91001"] .task-copy');
+  const send=(type)=>{
+   const touch={identifier:101,target,clientX:200,clientY:360};
+   const touches=type==='touchcancel'?[]:[touch];
+   const event=new Event(type,{bubbles:true,cancelable:true});
+   Object.defineProperty(event,'touches',{value:touches});
+   Object.defineProperty(event,'changedTouches',{value:[touch]});
+   target.dispatchEvent(event);
+  };
+  window.scrollTo(0,170);await nap(60);
+  const before=window.scrollY;
+  send('touchstart');await nap(320);
+  send('touchcancel');
+  window.scrollTo(0,before+100);await nap(60);
+  return {before,after:window.scrollY};
+ });
+ assert.ok(canceledLock.after>canceledLock.before+40,
+  'canceled gesture must release the global scroll lock: '+JSON.stringify(canceledLock));
+
+
  const g5=await gp.evaluate(()=>window.__gestureTouch(91001,[['touchstart',200,360,320],['touchmove',200,530,30],['touchend',200,530,0]]));
  assert.notEqual(g5.start,360,'hold then move on the task body actually moves time');
  assert.equal(g5.done,false,'drag must not complete a task');
