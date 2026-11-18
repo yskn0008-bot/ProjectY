@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-19T00:33:10+09:00",
+  "updated_at": "2026-11-19T00:35:52+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -13,14 +13,14 @@
   },
   "inbox": [
     {
-      "id": "github-pr-819",
-      "title": "PR #819 JOURNAL: Publish Ultimate Personal Edition for 2026-11-19",
+      "id": "github-pr-820",
+      "title": "PR #820 JOURNAL: Compact the mobile article list",
       "type": "GitHub PR",
       "status": "review",
       "priority": 1,
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/819",
-      "updated_at": "2026-11-18T15:32:19Z"
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/820",
+      "updated_at": "2026-11-18T15:35:19Z"
     },
     {
       "id": "github-pr-663",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-18T15:31:37Z"
+      "updated_at": "2026-11-18T15:32:47Z"
     },
     {
       "id": "github-issue-234",
@@ -205,6 +205,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-2a74fb59ebe7",
+      "title": "JOURNAL: Publish Ultimate Personal Edition for 2026-11-19 (#819)",
+      "completed_at": "2026-11-18T15:35:05Z",
+      "result": "GitHub mainへ反映（2a74fb5）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/2a74fb59ebe7594652a0c4225bf29ec2da24e0cc"
+    },
+    {
       "id": "github-commit-b17676c965d2",
       "title": "DAYSTREAM｜D「Layer」と相性の色表示 (#817)",
       "completed_at": "2026-11-18T14:10:52Z",
@@ -233,13 +240,6 @@
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/8bdf0656c56ff30afec07cdb1a21e04b0ddd4092"
     },
     {
-      "id": "github-commit-483ef613e298",
-      "title": "journal: restore licensed photo cards in approved Smartlog reader",
-      "completed_at": "2026-11-18T08:39:22Z",
-      "result": "GitHub mainへ反映（483ef61）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/483ef613e298b4d6109d9e1de84b588bea290b21"
-    },
-    {
       "id": "complete-002",
       "title": "iPhone向けMission Control Dashboardを実装",
       "completed_at": "2026-07-17T17:55:00+09:00",
@@ -264,7 +264,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #819をレビューして公開判断する",
+      "next_action": "PR #820をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -274,7 +274,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-19T00:33:10+09:00",
+      "last_update": "2026-11-19T00:35:52+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -355,7 +355,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-19T00:33:10+09:00",
+      "last_update": "2026-11-19T00:35:52+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -369,7 +369,7 @@
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #819をレビューして公開判断する",
+      "next_action": "PR #820をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -378,7 +378,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-19T00:33:10+09:00",
+      "last_update": "2026-11-19T00:35:52+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -460,5 +460,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "0baeafb92796fcff87b5ca2bd6ec4718bd951a2d071075e4bf09da016c7d0beb"
+  "github_snapshot_hash": "435064510f5682c1958b5414e5815b8e9ae1fe39726e56cb29e9c16f20945526"
 }
