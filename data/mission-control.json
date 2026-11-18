@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-19T01:06:23+09:00",
+  "updated_at": "2026-11-19T01:29:27+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -13,16 +13,6 @@
   },
   "inbox": [
     {
-      "id": "github-pr-823",
-      "title": "PR #823 Clarityの時刻つきタスクを既存DAYSTREAM Webに表示",
-      "type": "GitHub PR",
-      "status": "review",
-      "priority": 1,
-      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/823",
-      "updated_at": "2026-11-18T16:05:35Z"
-    },
-    {
       "id": "github-pr-663",
       "title": "PR #663 YOS 日記: standalone Shortcut + existing Notion bridge + isolated signing",
       "type": "GitHub PR",
@@ -31,16 +21,6 @@
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/663",
       "updated_at": "2026-11-18T15:25:14Z"
-    },
-    {
-      "id": "github-pr-765",
-      "title": "PR #765 YOS Calendar｜Passkey backend hardening (integration into #764 only)",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/765",
-      "updated_at": "2026-11-16T17:40:17Z"
     },
     {
       "id": "github-pr-767",
@@ -113,6 +93,26 @@
       "updated_at": "2026-11-18T13:48:30Z"
     },
     {
+      "id": "github-pr-823",
+      "title": "PR #823 Clarityの時刻つきタスクを既存DAYSTREAM Webに表示",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/823",
+      "updated_at": "2026-11-18T16:22:05Z"
+    },
+    {
+      "id": "github-pr-830",
+      "title": "PR #830 YOS JOURNAL: iPhone Shortcuts 朝刊確認・通知の開発候補",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/830",
+      "updated_at": "2026-11-18T16:29:00Z"
+    },
+    {
       "id": "github-issue-10",
       "title": "Issue #10 Mission Control v2：GitHubのIssue・PR・Commitを自動集約する",
       "type": "GitHub Issue",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-18T16:04:10Z"
+      "updated_at": "2026-11-18T16:23:24Z"
     },
     {
       "id": "github-issue-234",
@@ -205,6 +205,20 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-fe1fbbc8a6c5",
+      "title": "Publish Clarity time windows in DAYSTREAM Web (#829)",
+      "completed_at": "2026-11-18T16:24:17Z",
+      "result": "GitHub mainへ反映（fe1fbbc）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/fe1fbbc8a6c5560868fc4848dad8f375043f642f"
+    },
+    {
+      "id": "github-commit-cc859b31a3ec",
+      "title": "journal: restore missing archive photos and refine card dividers (#828)",
+      "completed_at": "2026-11-18T16:13:14Z",
+      "result": "GitHub mainへ反映（cc859b3）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/cc859b31a3ecf6c434a71713aa8c121c613af13a"
+    },
+    {
       "id": "github-commit-055a412ed96a",
       "title": "JOURNAL: Browse today and past articles by genre or date (#827)",
       "completed_at": "2026-11-18T16:04:10Z",
@@ -224,20 +238,6 @@
       "completed_at": "2026-11-18T15:53:05Z",
       "result": "GitHub mainへ反映（5c7f94f）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/5c7f94f38d4295f66b36cb8268e4d31588846308"
-    },
-    {
-      "id": "github-commit-c2bec3860c01",
-      "title": "docs(journal): honor reader feedback and stage research feature",
-      "completed_at": "2026-11-18T15:52:28Z",
-      "result": "GitHub mainへ反映（c2bec38）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/c2bec3860c018798055f68fd5519c4e4d177f76e"
-    },
-    {
-      "id": "github-commit-190e2023798d",
-      "title": "journal: restore photographs to the November 19 edition (#822)",
-      "completed_at": "2026-11-18T15:49:26Z",
-      "result": "GitHub mainへ反映（190e202）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/190e2023798d41e812ad0c7aafe91dfaf4ce4678"
     },
     {
       "id": "complete-002",
@@ -264,7 +264,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #823をレビューして公開判断する",
+      "next_action": "PR #649をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -274,7 +274,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-19T01:06:23+09:00",
+      "last_update": "2026-11-19T01:29:27+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -349,13 +349,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 9件・Open PR 60件を自動同期中",
+      "next_action": "Open Issue 9件・Open PR 61件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-19T01:06:23+09:00",
+      "last_update": "2026-11-19T01:29:27+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -369,7 +369,7 @@
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #823をレビューして公開判断する",
+      "next_action": "PR #649をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -378,7 +378,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-19T01:06:23+09:00",
+      "last_update": "2026-11-19T01:29:27+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -460,5 +460,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "5f1e0f1ddbee48706cdeb1d50192b8a9a2cc9bdb9709b32e8aa2498af4278f85"
+  "github_snapshot_hash": "44d961f6473ac1dc9fdd4cb555ba956c94cdce32c7859c46dc7035a6f0c29e23"
 }

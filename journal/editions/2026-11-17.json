@@ -16,14 +16,17 @@
       "source": "日本皮膚科学会｜にきびQ18",
       "sourceDate": "2026-11-17確認／公開日未確認",
       "link": "https://qa.dermatol.or.jp/qa3/q18.html",
-      "image": "",
-      "imageCaption": "",
-      "imageKind": "",
+      "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Woman_applies_skincare_product_in_bathroom.jpg?width=800",
+      "imageCaption": "鏡の前でスキンケアをする人の参考写真",
+      "imageKind": "reference",
       "keyPoints": [
         "洗顔は原則1日2回",
         "泡でやさしく洗う",
         "洗いすぎによる刺激を避ける"
-      ]
+      ],
+      "imageCredit": "Shixart1985 / Wikimedia Commons",
+      "imageSourceUrl": "https://commons.wikimedia.org/wiki/File:Woman_applies_skincare_product_in_bathroom.jpg",
+      "imageLicenseUrl": "https://creativecommons.org/licenses/by/2.0/"
     },
     {
       "category": "DISCOVERY / LIVE",
@@ -36,14 +39,17 @@
       "source": "おきなわ音楽月間｜公式",
       "sourceDate": "2026-11-17確認／11-20・11-21開催予定",
       "link": "https://o-o-g.jp/index.html",
-      "image": "",
-      "imageCaption": "",
-      "imageKind": "",
+      "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Band_performs_at_night_concert_outdoors.jpg?width=800",
+      "imageCaption": "屋外ライブの参考写真。まちなかLIVE当日の写真ではありません。",
+      "imageKind": "reference",
       "keyPoints": [
         "11月20日・21日 各19時",
         "沖縄市中央エリア",
         "観覧無料"
-      ]
+      ],
+      "imageCredit": "Shixart1985 / Wikimedia Commons",
+      "imageSourceUrl": "https://commons.wikimedia.org/wiki/File:Band_performs_at_night_concert_outdoors.jpg",
+      "imageLicenseUrl": "https://creativecommons.org/licenses/by/2.0/"
     },
     {
       "category": "WORK / TAXI",
@@ -56,14 +62,17 @@
       "source": "沖縄交通｜タクシー公式",
       "sourceDate": "2026-11-17確認／改定告知2026-08-24",
       "link": "https://www.okinawa-kotsu-grp.co.jp/taxi.php",
-      "image": "",
-      "imageCaption": "",
-      "imageKind": "",
+      "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Toyota_Crown_white_taxi.jpg?width=800",
+      "imageCaption": "タクシー車両の参考写真。沖縄交通の車両ではありません。",
+      "imageKind": "reference",
       "keyPoints": [
         "運賃改定は8月24日から",
         "一部の金額は公式欄が未更新",
         "深夜早朝割増22:00〜05:00"
-      ]
+      ],
+      "imageCredit": "Ominae / Wikimedia Commons",
+      "imageSourceUrl": "https://commons.wikimedia.org/wiki/File:Toyota_Crown_white_taxi.jpg",
+      "imageLicenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/"
     },
     {
       "category": "DISCOVERY / ART",
@@ -76,14 +85,17 @@
       "source": "佐喜眞美術館｜公式展覧会案内",
       "sourceDate": "2026-09-03公開／11-23まで開催予定",
       "link": "https://sakima.jp/news/n3326919.html",
-      "image": "",
-      "imageCaption": "",
-      "imageKind": "",
+      "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Sakima_Art_Museum12n3104.jpg?width=800",
+      "imageCaption": "宜野湾市の佐喜眞美術館。今回の展覧会の写真ではありません。",
+      "imageKind": "reference",
       "keyPoints": [
         "会期は11月23日まで",
         "火曜は通常休館",
         "宜野湾市上原の美術館"
-      ]
+      ],
+      "imageCredit": "663highland / Wikimedia Commons",
+      "imageSourceUrl": "https://commons.wikimedia.org/wiki/File:Sakima_Art_Museum12n3104.jpg",
+      "imageLicenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/"
     }
   ]
 }
