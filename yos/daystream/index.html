@@ -125,7 +125,7 @@ html:has(body.yos-daystream-web),body.yos-daystream-web{background:#111721}
 .timeline .card.done b{text-decoration:line-through}
 .timeline .card.drag-preview,.timeline .card.moving{z-index:10;box-shadow:0 8px 20px #080d17bb}
 @media(max-width:370px){.timeline{--card-inset:69px}.timeline .layer-status{font-size:9px}}
-</style><script src="./source-adapters.js"></script><script src="../../life/calendar/native-bridge.js"></script><script src="./yos-tasks-auth.js"></script></head><body class="yos-daystream-web"><div class="yos-web-port" role="navigation" aria-label="DAYSTREAM Web版">
+</style><script src="./source-adapters.js"></script><script src="../../life/calendar/native-bridge.js"></script></head><body class="yos-daystream-web"><div class="yos-web-port" role="navigation" aria-label="DAYSTREAM Web版">
 <a href="../">YOS</a><strong>DAYSTREAM · WEB</strong>
 <button id="yosWebImport" type="button">データ読込</button><button id="yosWebExport" type="button">書き出し</button>
 <button id="yosWebHistory" type="button">行動学習</button>
@@ -167,7 +167,7 @@ html:has(body.yos-daystream-web),body.yos-daystream-web{background:#111721}
   <p class="gesture-help" id="gestureHelp">タスク：軽くタップで完了 ｜ 少し押さえて上下に動かすと移動 ｜ 長押しで編集 ｜ 左スワイプで削除</p>
   <div class="timeline-wrap" id="timelinePanel"><div class="timeline" id="tl"><div class="axis"></div><div class="nowline" id="nowLine" hidden><span class="nowbadge" id="nowBadge"></span></div></div></div>
   <section class="tabbox" id="taskPanel"><h3>タスク・未配置</h3><p class="muted">専門タスクの期限と、実行する時間は別。配置しても元データの期限・完了は変わりません。</p>
- <div id="taskList"></div><section id="yosLearningHints" class="yos-learning-live" aria-label="期限が近いタスク" hidden><h3>期限が近いタスク <small>確認のみ</small></h3><p class="muted" id="yosLearningCoverage"></p><div id="yosLearningRows"></div></section><h3>各専門ページから集約</h3><p class="muted" id="yosTaskSourceStatus">Notion Tasks：確認中</p><button id="yosWebTaskRefresh" type="button">YOS Tasksを更新</button><div id="yosWebTaskAuth" hidden><p id="yosWebTaskAuthStatus" class="muted" role="status"></p><div id="yosWebGoogleButton"></div></div>
+ <div id="taskList"></div><section id="yosLearningHints" class="yos-learning-live" aria-label="期限が近いタスク" hidden><h3>期限が近いタスク <small>確認のみ</small></h3><p class="muted" id="yosLearningCoverage"></p><div id="yosLearningRows"></div></section><h3>各専門ページから集約</h3><p class="muted" id="yosTaskSourceStatus">Notion Tasks：確認中</p><button id="yosWebTaskRefresh" type="button">iPhoneでNotionタスクを開く</button>
  <label for="yosStartFrom">配置提案の開始時刻</label><input id="yosStartFrom" type="time" value="09:00" aria-label="配置提案の開始時刻">
  <button id="yosPlanAll" type="button">上位3件をまとめて配置提案</button><div id="yosPlanBox" aria-live="polite"></div><div id="yosSourceTasks"></div>
  <h3>繰り返し習慣</h3><p class="muted" id="yosHabitSourceStatus">習慣：確認中</p><div id="yosHabitTasks"></div></section>
@@ -426,12 +426,8 @@ html:has(body.yos-daystream-web),body.yos-daystream-web{background:#111721}
   btn.onclick=()=>f.click();
   f.onchange=async()=>{const file=f.files?.[0];if(!file)return;if(file.size>1000000){alert('ファイルが大きすぎます');return}try{const raw=await file.text();if(/\.ics$/i.test(file.name)){if(!web.importSource(raw,file.name))alert('カレンダー読込を中止しました。元データは保持されています。');return;}const p=JSON.parse(raw);if(p?.schema==='yos-daystream-direct-task-import-v1'){if(!web.importDirectTasks(p))alert('タスクの追加を中止しました。既存データは保護されています。')}else if(p?.schema==='yos-daystream-web-all-backup-v1'){if(!web.importAll(p))alert('一括復元を中止しました。保存済みデータは保護されています。')}else if(p&&p.version===1&&p.days){if(!web.import(p))alert('時間割の照合または保存に失敗しました。元データは保持されています。')}else if(!web.importSource(raw,file.name)){alert('タスク読込を中止しました。元データは保持されています。')}}catch{alert('ファイルを読み取れません。変更はありません。')}finally{f.value=''}};
   document.getElementById('yosWebExport').onclick=()=>{if(!web.export())alert('バックアップを書き出せませんでした。保存データを確認してください。')};
-  const taskRefresh=document.getElementById('yosWebTaskRefresh'),taskAuth=document.getElementById('yosWebTaskAuth');
-  taskRefresh.onclick=()=>{
-   taskAuth.hidden=false;
-   const provider=window.YOS_DAYSTREAM_TASK_AUTH;
-   if(!provider){document.getElementById('yosWebTaskAuthStatus').textContent='本人確認機能を読み込めませんでした';return}
-   provider.setup({host:document.getElementById('yosWebGoogleButton'),status:document.getElementById('yosWebTaskAuthStatus'),save:snapshot=>web.saveAuthorizedTasks(snapshot)});
+  document.getElementById('yosWebTaskRefresh').onclick=()=>{
+   location.href='scriptable:///run?scriptName=YOS%20DAYSTREAM%20Notion';
   };
   const sourceText=document.getElementById('yosWebSourceState');if(sourceText){sourceText.textContent='端末内保存 · '+(existingYosCache?'YOS認証済みキャッシュ（6時間以内）':importedTasks?.source==='yos-auth-cache'?'YOS認証済みTasks写し':importedTasks?'タスク手動取込':'Notion未接続')+' · '+(nativeCalendar?'iPhone予定の確認済み端末取込':importedCalendar?'Apple予定手動取込':existingLifeSchedule?'保存済みMY WAY生活予定':'Appleカレンダー未接続')+' · 自動同期なし';}
   document.getElementById('yosWebHistory').onclick=()=>{
@@ -680,6 +676,7 @@ window.addEventListener('yos-notion-tasks',event=>{
 const yosSourceWrites=new Set();
 async function yosCompleteSource(row){
  const source=sourceTasks.find(t=>'notion:'+t.id===row.sourceRef);
+ if(!window.YOS_DAYSTREAM_TASK_AUTH?.complete){note.textContent='この画面はNotionの読取専用です。Notionの元ページで完了してください';return}
  if(!source||taskSource.origin!=='notion'||!window.YOS_DAYSTREAM_SOURCES.validSaved(taskSource,'tasks')){note.textContent='原本を確認できません。タスクタブでYOS Tasksを更新してください';return}
  if(source.status==='完了'){note.textContent='Notionで完了済みです。再開はNotionで確認して行ってください';return}
  if(yosSourceWrites.has(source.id))return;

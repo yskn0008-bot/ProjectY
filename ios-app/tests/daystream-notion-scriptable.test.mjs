@@ -113,3 +113,12 @@ test('new Scriptable source cannot PATCH or DELETE original Notion records',()=>
  assert.doesNotMatch(script,/method\s*=\s*['"](?:PATCH|DELETE)['"]/);
  assert.doesNotMatch(script,/scriptable:\/\/\/run\?scriptName=YOS%20DAYSTREAM%20Notion&/);
 });
+
+test('device-local Notion read displays an explicit Clarity time window without Google',()=>{
+ const r=row('2026-11-19T10:00:00Z','2026-11-19T10:30:00Z','買い物');
+ r.properties['正本・根拠']={rich_text:[{plain_text:'YOS Inbox clarity:test-window-0001'}]};
+ const h=htmlFor([r]);
+ assert.match(h,/"clarityWindow":true/);
+ assert.match(h,/scriptable:\/\/\/run\?scriptName=YOS%20DAYSTREAM%20Notion/);
+ assert.doesNotMatch(h,/accounts\.google\.com|yosWebGoogleButton/);
+});
