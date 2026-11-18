@@ -1,0 +1,26 @@
+#define name YOS TAXI 緊急
+#define color red
+
+#include 'actions/text'
+#include 'actions/sharing'
+
+// Safety-first guidance: no automated calls, location sharing or third-party messages.
+@cases: array
+@cases += "事故・負傷・急病"
+@cases += "故障・車両停止"
+@cases += "忘れ物・トラブル"
+const response = chooseFromList(@cases, "緊急時｜必ず安全確保を先に")
+const item = getText(response)
+if item == "事故・負傷・急病" {
+    alert("まず運転を停止し、人命・安全と二次事故の防止を優先。\n必要なら119・事故時は110、会社にも連絡してください。\n救護・警察への届出などは会社と法令の手順に従ってください。\n※自動通報はしていません。", "緊急｜人命優先")
+    stop()
+}
+if item == "故障・車両停止" {
+    alert("無理に運転せず、周囲の安全確保・必要なハザードや退避を優先。\n高速道路上は特に危険です。安全な場所へ退避し、会社と必要な救援先へ連絡してください。\n※自動救援要請はしていません。", "緊急｜故障")
+    stop()
+}
+if item == "忘れ物・トラブル" {
+    alert("車内忘れ物は安全に保管し、日時・品目等を会社へ報告。\nお客様の個人情報を第三者へ公開しないでください。\nトラブル時は安全確保と会社への相談を優先。\n※自動送信はしていません。", "YOS TAXI｜トラブル")
+    stop()
+}
+stop()
