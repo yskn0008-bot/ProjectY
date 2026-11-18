@@ -416,7 +416,7 @@ try{
   assert.equal(appearance.get(2100).borderStyle,'dashed','long backdrop has a separate outlined style');
   assert.equal(appearance.get(2102).borderStyle,'solid','short overlapping card has a crisp solid edge');
   assert.equal(appearance.get(2102).border,'1px','short task remains distinct from backdrop');
-  assert.ok(appearance.get(2102).shadow.includes('rgb('),'foreground cards retain a separating shadow');
+  assert.notEqual(appearance.get(2102).shadow,'none','foreground cards retain a separating shadow in any browser color notation');
   assert.notEqual(appearance.get(2100).background,appearance.get(2102).background,'background sleep does not look like the red foreground');
   assert.equal(appearance.get(2110).border,'1px','purple cards also have a border');
 
