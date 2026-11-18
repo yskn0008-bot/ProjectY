@@ -45,10 +45,10 @@
 ## 2026-11-19｜iCloud → 既存Notion Inboxへの自動受け渡し（PR候補）
 
 - ローカル保存後、iPhoneの既存Scriptable「Run Inline Script」アクションを同一ショートカット内で実行。既存Scriptable Keychain `YOS_NOTION_INTEGRATION_TOKEN` を利用し、既存 **YOS Inbox（3d35ca88-2895-81ef-9dc8-d5f11ff8e213）** のみにMarkdown下書きを非公開で送る。トークン、原稿本文は公開GitHubやURLへ載せない。
-- `tools/shortcut-factory/journal_draft_inbox_inline.js` は識別子 `YOS_EDITORIAL_DRAFT_V1`、公開不可マーク、サイズ、秘密鍵パターンを検査。本文の2系統ハッシュ+長さから受付IDを作り、送信前に既存Inboxをページ終端まで照合。同じ受付IDがあれば二重登録せず成功扱い。前回の通信が不明な場合も、所在を完全照合できなければ再送せず保留。
-- 書き込み直後のNotionブロック個別読戻し + 再度の受付IDと本文全ブロックの連続一致で初めて確定。途中の不完全保存を成功扱いせず、日付をまたいでも固定受領データで重複防止。Notion障害、認証不足、長文、既存Inboxの走査不完了は**iCloud原稿を保持しNotion未確認**。端末へ保留通知を出すが、ショートカット自体の「iCloud保存済み」と混同しない。
+- `tools/shortcut-factory/journal_draft_inbox_inline.js` は識別子 `YOS_EDITORIAL_DRAFT_V1`、公開不可マーク、サイズ、秘密鍵パターンを検査。本文の2系統ハッシュ+長さから受付IDを作り、既存Scriptableのローカル受領記録へ**送信前に不明状態を書いて読戻す**。同じ受付IDの再実行は送信せず、Notionから返答が失われた場合も二重書込みしない。旧版のInbox全件走査は実機の実行時間制限を疑い撤去。ローカル受領記録が失われた別端末では完全な重複抑止を保証できないため、本番配布前に確認が必要。
+- Notion APIの書込み応答に含まれる全文を確認したら「API受付・独立した読戻し待ち」として保存し、**完全保存・公開済みとは報告しない**。独立したNotion GET読戻しは既存GPT編集または実機確認の後工程。通信失敗や認証不足はiCloud原稿を維持して保留。時間を圧迫する追加通知をやめ、`Script.complete()` はfinally節で必ず実行する。
 - Cherriコンパイル後、`patch_journal_draft_inbox.py` でiCloud保存アクションと**まったく同じ`draftText`の動的参照**をScriptableアクションへ配線。コンパイル後検査で外部アップロード先が既存Notionだけであることと上書きOFFを確認。
 - 毎朝6:00の既存GPT編集に、Inbox内の受付IDを条件付きで候補として参照する指示は追加済み（設定読戻し成功）。ただし**実際にNotionの下書きまで到達するかは未確認**。受け取った下書きは**未検証の編集素材**であり、本人の承認や一次出典確認・既存 `journal/gpt-editorial-gate.mjs` による審査を代替しない。本人が公開許可していない日付の自動公開や既存号上書きは行わない。
 - 既存iPhoneにインストール済みの旧版は更新していない。GitHub CI成功後も、同名更新衝突を防ぐため既存共通インストーラーへの本登録を無断で行わない。実機インポート・Notion反映確認後に公開側接続を選択する。
 
-**状態：実装候補。機械試験と署名が完了するまでは導入不可。**
+**状態：iPhoneでScriptable Run Inline Scriptの無出力エラーを再現済み。通常版は保護し、別名 `YOS JOURNAL GPT制作 TEST` の修正版候補を作成・機械検証中。iPhoneでの成功は未確認。**
