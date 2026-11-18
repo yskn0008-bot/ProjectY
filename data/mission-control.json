@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-19T01:31:25+09:00",
+  "updated_at": "2026-11-19T01:37:25+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -12,6 +12,26 @@
     ]
   },
   "inbox": [
+    {
+      "id": "github-pr-830",
+      "title": "PR #830 YOS JOURNAL: iPhone Shortcuts 朝刊確認・通知の開発候補",
+      "type": "GitHub PR",
+      "status": "review",
+      "priority": 1,
+      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/830",
+      "updated_at": "2026-11-18T16:34:40Z"
+    },
+    {
+      "id": "github-pr-831",
+      "title": "PR #831 DAYSTREAMのGoogle本人確認を外して既存iPhone接続を使う",
+      "type": "GitHub PR",
+      "status": "review",
+      "priority": 1,
+      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/831",
+      "updated_at": "2026-11-18T16:36:20Z"
+    },
     {
       "id": "github-pr-663",
       "title": "PR #663 YOS 日記: standalone Shortcut + existing Notion bridge + isolated signing",
@@ -33,16 +53,6 @@
       "updated_at": "2026-11-16T17:42:54Z"
     },
     {
-      "id": "github-pr-768",
-      "title": "PR #768 YOS Calendar｜認証なしで使える端末内カレンダー（Notion原本は保護）",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/768",
-      "updated_at": "2026-11-16T17:42:38Z"
-    },
-    {
       "id": "github-pr-769",
       "title": "PR #769 Clarity v4 pilot｜原文保存＋Notion一括仕分け＋安全なiPhone操作",
       "type": "GitHub PR",
@@ -60,7 +70,7 @@
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/771",
-      "updated_at": "2026-11-16T18:16:31Z"
+      "updated_at": "2026-11-18T16:35:41Z"
     },
     {
       "id": "github-pr-773",
@@ -100,17 +110,7 @@
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/823",
-      "updated_at": "2026-11-18T16:30:39Z"
-    },
-    {
-      "id": "github-pr-830",
-      "title": "PR #830 YOS JOURNAL: iPhone Shortcuts 朝刊確認・通知の開発候補",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/830",
-      "updated_at": "2026-11-18T16:29:32Z"
+      "updated_at": "2026-11-18T16:31:11Z"
     },
     {
       "id": "github-issue-10",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-18T16:30:53Z"
+      "updated_at": "2026-11-18T16:36:30Z"
     },
     {
       "id": "github-issue-234",
@@ -264,7 +264,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #649をレビューして公開判断する",
+      "next_action": "PR #831をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -274,7 +274,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-19T01:31:25+09:00",
+      "last_update": "2026-11-19T01:37:25+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -349,13 +349,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 9件・Open PR 61件を自動同期中",
+      "next_action": "Open Issue 9件・Open PR 62件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-19T01:31:25+09:00",
+      "last_update": "2026-11-19T01:37:25+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -369,7 +369,7 @@
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #649をレビューして公開判断する",
+      "next_action": "PR #831をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -378,7 +378,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-19T01:31:25+09:00",
+      "last_update": "2026-11-19T01:37:25+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -460,5 +460,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "af7b0b3244514378e4a90e269747caeef4ce5d38201a8203faff296747e78437"
+  "github_snapshot_hash": "d2d51f0a6deadd2c3a698907aabde664f956cd0d024565b9f7f9d40dceba1d2f"
 }
