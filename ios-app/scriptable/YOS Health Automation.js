@@ -1,3 +1,6 @@
+// Variables used by Scriptable.
+// icon-color: green; icon-glyph: heart;
+// YOS_SCRIPT_NAME: YOS Health Automation
 // YOS Health Automation — Scriptable / iPhone Shortcuts
 // Safe operations: schedules/cancels only its own local water reminders.
 // Does NOT access HealthKit, control Sleep Cycle, or modify other YOS scripts.
