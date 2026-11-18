@@ -60,7 +60,7 @@ test('compose mode opens with real calendar/Notion context and no fabricated pre
  const r=await open({mode:'compose',review:'今日は友人と話せて嬉しかった',calendar:[{title:'買い物',startDate:new Date('2026-11-13T13:00:00+09:00'),isAllDay:false}],tasks:[task('片付け')]});
  assert.equal(r.error,undefined);assert.equal(r.presented,1);
  assert.match(r.html,/買い物/);assert.match(r.html,/片付け/);
- assert.match(r.html,/mode\\":\\"compose/);
+ assert.ok(r.html.includes('"mode":"compose"'));
  assert.equal(r.opened.length,1);
  assert.equal(r.backups.length,1);
  assert.ok(r.opened[0].startsWith('shortcuts://run-shortcut?'));
