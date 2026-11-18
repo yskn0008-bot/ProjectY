@@ -71,6 +71,7 @@ button:active{opacity:.8}@media(min-width:640px){.dock{left:calc((100vw - 640px)
 .card.task{touch-action:pan-y}
 .card.task .task-drag-grip{display:grid;place-items:center;flex:0 0 20px;align-self:stretch;min-height:25px;touch-action:none;-webkit-touch-callout:none;user-select:none;-webkit-user-select:none;font-size:24px;color:#f0def8;cursor:grab;line-height:1}
 .card.task .task-drag-grip:active{cursor:grabbing}
+.card.task.press-armed{outline:2px solid #dce6ff;outline-offset:-2px;filter:brightness(1.1)}
 .editor #editorTitle,.editor .edit-end,.editor label{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 
 /* Daystream readable-density layout: original task bar identity and gesture contracts remain. */
@@ -129,7 +130,7 @@ button:active{opacity:.8}@media(min-width:640px){.dock{left:calc((100vw - 640px)
   <div class="editor" id="editor" role="dialog" aria-modal="true" aria-labelledby="editorTitle"><b id="editorTitle">予定を追加</b><div class="fields"><input id="newTitle" placeholder="名前" style="flex:1 1 160px" aria-label="名前"><input id="newTime" type="time" value="10:00" aria-label="開始時刻"><div class="duration-control"><input id="newDuration" type="number" min="5" max="1440" step="5" value="30" aria-label="所要時間（分）"><label for="newDuration">分</label></div><select id="newKind" aria-label="種類"><option value="task">タスク</option><option value="habit">習慣</option><option value="schedule">予定</option></select></div><span class="edit-end" id="editEnd">終了予定：10:30</span><div id="shortcutField"><label for="shortcutPicker">ショートカット（任意）</label><select id="shortcutPicker" class="shortcut-picker" aria-label="登録済みショートカットから選ぶ"><option value="">候補から選ぶ</option></select><input id="newShortcut" maxlength="100" placeholder="既存ショートカットの正式名称" aria-label="起動するiPhoneショートカット名" style="width:100%;margin:5px 0 9px"><small style="color:#d5dce7">設定したショートカットはここから実行できます。実行しても自動完了にはなりません。</small><a id="runShortcut" class="editor-shortcut-run" href="#" hidden>ショートカットを実行</a></div><div class="editor-actions"><button id="saveBtn">追加する</button><button id="cancelEditor" class="light" type="button">閉じる</button></div></div>
   <section class="week-overview" id="weekOverview" hidden aria-label="週の予定"><div class="week-overview-head"><button id="weekPrev" type="button" aria-label="前週">‹</button><strong id="weekCaption"></strong><button id="weekNext" type="button" aria-label="翌週">›</button></div><div id="weekAgenda"></div><p class="coverage" id="weekCoverage"></p></section>
   <div class="compat-status" id="compatStatus" aria-live="polite">相性を判定中</div>
-  <p class="gesture-help" id="gestureHelp">タスク：タップで完了 ｜ 左スワイプで削除 ｜ 長押しで編集 ｜ 右端の⋮で移動</p>
+  <p class="gesture-help" id="gestureHelp">タスク：軽くタップで完了 ｜ 少し押さえて上下に動かすと移動 ｜ 長押しで編集 ｜ 左スワイプで削除</p>
   <div class="timeline-wrap" id="timelinePanel"><div class="timeline" id="tl"><div class="axis"></div><div class="nowline" id="nowLine" hidden><span class="nowbadge" id="nowBadge"></span></div></div></div>
   <section class="tabbox" id="taskPanel"><h3>タスク・未配置</h3><p class="muted">専門タスクの期限と、実行する時間は別。配置しても元データの期限・完了は変わりません。</p>
  <div id="taskList"></div><section id="yosLearningHints" class="yos-learning-live" aria-label="期限が近いタスク" hidden><h3>期限が近いタスク <small>確認のみ</small></h3><p class="muted" id="yosLearningCoverage"></p><div id="yosLearningRows"></div></section><h3>各専門ページから集約</h3><p class="muted" id="yosTaskSourceStatus">Notion Tasks：確認中</p><button id="yosWebTaskRefresh" type="button">YOS Tasksを更新</button><div id="yosWebTaskAuth" hidden><p id="yosWebTaskAuthStatus" class="muted" role="status"></p><div id="yosWebGoogleButton"></div></div>
@@ -1251,64 +1252,138 @@ function toggleTaskDone(item){
 // Only local, movable tasks use this gesture system; fixed Apple records and other kinds
 // retain their existing read-only details / vertical time dragging.
 function wireTaskGestures(el,item){
- let active=null,startX=0,startY=0,lastX=0,lastY=0,mode='tap',timer=null,paintFrame=0,lastPreview=item.s,swipeFrame=0,dragAllowed=false;
+ // iPhone Web views do not provide reliable force/pressure. Use press duration,
+ // direction, and movement. Short tap completes; hold+drag moves; still long hold edits.
+ const HOLD_TO_MOVE=260, HOLD_TO_EDIT=750, MOVE_SLOP=12;
+ let active=null,startX=0,startY=0,lastX=0,lastY=0,mode='tap';
+ let armTimer=null,editTimer=null,paintFrame=0,swipeFrame=0,lastPreview=item.s,gripStart=false;
  const timeLabel=el.querySelector('small');
- const clearTimer=()=>{if(timer!==null){clearTimeout(timer);timer=null;}};
- const clearPaint=()=>{if(paintFrame){cancelAnimationFrame(paintFrame);paintFrame=0;}if(swipeFrame){cancelAnimationFrame(swipeFrame);swipeFrame=0;}};
- const paintSwipe=()=>{swipeFrame=0;if(mode==='swipe'&&active!==null)el.style.transform='translate3d('+Math.max(-74,lastX-startX)+'px,0,0)';};
- const paintDrag=()=>{paintFrame=0;if(mode!=='drag'||active===null)return;const offset=lastY-startY;el.style.transform='translate3d(0,'+offset+'px,0)';const at=candidateStart();if(at!==lastPreview){lastPreview=at;if(timeLabel)timeLabel.textContent=fmt(at)+'–'+fmt(at+item.d);}};
+ const clearTimers=()=>{
+  if(armTimer!==null){clearTimeout(armTimer);armTimer=null}
+  if(editTimer!==null){clearTimeout(editTimer);editTimer=null}
+ };
+ const clearPaint=()=>{
+  if(paintFrame){cancelAnimationFrame(paintFrame);paintFrame=0}
+  if(swipeFrame){cancelAnimationFrame(swipeFrame);swipeFrame=0}
+ };
+ const resetVisual=()=>{
+  el.classList.remove('drag-preview','press-armed');
+  el.style.transform='';
+  if(timeLabel)timeLabel.textContent=fmt(item.s)+'–'+fmt(item.s+item.d);
+ };
  const candidateStart=()=>Math.max(0,Math.min(1440-item.d,Math.round(minuteAtY(yFor(item.s)+lastY-startY)/5)*5));
+ const paintSwipe=()=>{swipeFrame=0;if(mode==='swipe'&&active!==null)el.style.transform='translate3d('+Math.max(-74,lastX-startX)+'px,0,0)'};
+ const paintDrag=()=>{
+  paintFrame=0;if(mode!=='drag'||active===null)return;
+  el.style.transform='translate3d(0,'+(lastY-startY)+'px,0)';
+  const at=candidateStart();
+  if(at!==lastPreview){lastPreview=at;if(timeLabel)timeLabel.textContent=fmt(at)+'–'+fmt(at+item.d)}
+ };
  const begin=(x,y,id,grip)=>{
   if(active!==null)return;
-  active=id;startX=lastX=x;startY=lastY=y;dragAllowed=!!grip;mode='tap';lastPreview=item.s;clearPaint();el.style.transition='';
-  clearTimer();
-  timer=setTimeout(()=>{
-   if(active!==null&&mode==='tap'){mode='long';active=null;beginLocalEdit(item);}
-   timer=null;
-  },480);
+  clearTimers();clearPaint();
+  active=id;startX=lastX=x;startY=lastY=y;mode='tap';gripStart=!!grip;
+  lastPreview=item.s;el.style.transition='';
+  // Long, motionless contact edits. An intermediate armed state never marks done.
+  armTimer=setTimeout(()=>{
+   armTimer=null;
+   if(active!==null&&mode==='tap'){
+    mode='armed';el.classList.add('press-armed');vibrate();
+   }
+  },HOLD_TO_MOVE);
+  editTimer=setTimeout(()=>{
+   editTimer=null;
+   if(active!==null&&(mode==='tap'||mode==='armed')){
+    active=null;clearTimers();clearPaint();resetVisual();mode='long';
+    beginLocalEdit(item);
+   }
+  },HOLD_TO_EDIT);
  };
  const move=(x,y,event)=>{
-  if(active===null)return;
+  if(active===null||mode==='scroll'||mode==='ignored')return;
   lastX=x;lastY=y;
-  const dx=x-startX,dy=y-startY;
-  if(Math.abs(dx)>10||Math.abs(dy)>10)clearTimer();
-  if(!dragAllowed&&mode==='tap'&&Math.abs(dy)>10&&Math.abs(dy)>Math.abs(dx)){mode='scroll';return;}
-  if(mode==='swipe'||(mode==='tap'&&dx< -14&&Math.abs(dx)>Math.abs(dy)*1.3)){
-   mode='swipe';event?.preventDefault();
-   if(!swipeFrame)swipeFrame=requestAnimationFrame(paintSwipe);
-  }else if(mode==='drag'||(mode==='tap'&&dragAllowed&&Math.abs(dy)>14&&Math.abs(dy)>Math.abs(dx)*1.25)){
-   // A drag starts only on a task card; the surrounding timeline keeps normal scrolling.
-   mode='drag';event?.preventDefault();
-   el.classList.add('drag-preview');
+  const dx=x-startX,dy=y-startY,ax=Math.abs(dx),ay=Math.abs(dy);
+  const vertical=ay>MOVE_SLOP&&ay>ax*1.1;
+  const left=ax>14&&dx<0&&ax>ay*1.3;
+  if(mode==='drag'){
+   if(event?.cancelable)event.preventDefault();
    if(!paintFrame)paintFrame=requestAnimationFrame(paintDrag);
+   return;
+  }
+  if(mode==='swipe'){
+   if(event?.cancelable)event.preventDefault();
+   if(!swipeFrame)swipeFrame=requestAnimationFrame(paintSwipe);
+   return;
+  }
+  if(left){
+   clearTimers();mode='swipe';el.classList.remove('press-armed');
+   if(event?.cancelable)event.preventDefault();
+   if(!swipeFrame)swipeFrame=requestAnimationFrame(paintSwipe);
+   return;
+  }
+  if(vertical){
+   // A quick swipe scrolls, but a brief stationary press arms a deliberate drag.
+   // The existing ⋮ grip remains an immediate, accessible drag fallback.
+   if(mode==='armed'||gripStart){
+    clearTimers();mode='drag';el.classList.remove('press-armed');
+    el.classList.add('drag-preview');
+    if(event?.cancelable)event.preventDefault();
+    if(!paintFrame)paintFrame=requestAnimationFrame(paintDrag);
+   }else{
+    clearTimers();mode='scroll';
+   }
+   return;
+  }
+  if((ax>MOVE_SLOP||ay>MOVE_SLOP)&&mode==='tap'){
+   // Non-vertical finger movement is not an affirmative completion tap.
+   if(ax>ay){clearTimers();mode='ignored'}
   }
  };
  const finish=cancelled=>{
   if(active===null)return;
-  active=null;clearTimer();clearPaint();const previousRect=mode==='drag'&&!cancelled?el.getBoundingClientRect():null;
-  if(mode==='swipe'){el.style.transition='transform .26s cubic-bezier(.22,1,.36,1)';el.style.transform='translate3d(0,0,0)';}
-  else el.style.transform='';
-  el.classList.remove('drag-preview');
-  if(cancelled){if(timeLabel)timeLabel.textContent=fmt(item.s)+'–'+fmt(item.s+item.d);return;}
-  if(mode==='swipe'){if(lastX-startX< -45)showSwipeDelete(item);return;}
-  if(mode==='drag'){
-   const at=candidateStart();
-   if(at!==item.s){
-    item.s=at;
+  const completedMode=mode,wasGrip=gripStart,oldRect=completedMode==='drag'&&!cancelled?el.getBoundingClientRect():null;
+  active=null;clearTimers();clearPaint();
+  el.classList.remove('press-armed','drag-preview');
+  if(completedMode==='swipe'){
+   el.style.transition='transform .26s cubic-bezier(.22,1,.36,1)';
+   el.style.transform='translate3d(0,0,0)';
+  }else el.style.transform='';
+  if(cancelled){
+   if(timeLabel)timeLabel.textContent=fmt(item.s)+'–'+fmt(item.s+item.d);
+   return;
+  }
+  if(completedMode==='swipe'){
+   if(lastX-startX< -45)showSwipeDelete(item);
+   return;
+  }
+  if(completedMode==='drag'){
+   const next=candidateStart();
+   if(next!==item.s){
+    const original=item.s;item.s=next;
     const saved=persist();
-    note.textContent='「'+item.t+'」を'+fmt(at)+'に移動'+(saved?'（端末内に保存中）':'（保存準備失敗）');
-    smoothRender(item.id,previousRect);updateReview();
+    if(!saved){item.s=original;note.textContent='時刻の保存に失敗したため移動を取り消しました'}
+    else note.textContent='「'+item.t+'」を'+fmt(next)+'に移動（この端末に保存）';
+    smoothRender(item.id,oldRect);updateReview();
    }else if(timeLabel)timeLabel.textContent=fmt(item.s)+'–'+fmt(item.s+item.d);
    return;
   }
-  if(mode==='tap')toggleTaskDone(item);
+  // A release after an armed hold, scroll or grip tap is not a completion.
+  if(completedMode==='tap'&&!wasGrip)toggleTaskDone(item);
  };
  el.addEventListener('contextmenu',e=>e.preventDefault());
- el.addEventListener('touchstart',e=>{if(e.touches.length===1)begin(e.touches[0].clientX,e.touches[0].clientY,'touch',e.target.closest('.task-drag-grip'))},{passive:true});
- el.addEventListener('touchmove',e=>{if(active==='touch'&&e.touches.length)move(e.touches[0].clientX,e.touches[0].clientY,e)},{passive:false});
+ el.addEventListener('touchstart',e=>{
+  if(e.touches.length===1)begin(e.touches[0].clientX,e.touches[0].clientY,'touch',e.target.closest('.task-drag-grip'));
+ },{passive:true});
+ el.addEventListener('touchmove',e=>{
+  if(active==='touch'&&e.touches.length)move(e.touches[0].clientX,e.touches[0].clientY,e);
+ },{passive:false});
  el.addEventListener('touchend',()=>{if(active==='touch')finish(false)});
  el.addEventListener('touchcancel',()=>{if(active==='touch')finish(true)});
- el.addEventListener('pointerdown',e=>{if(e.pointerType==='touch'||e.button!==0)return;begin(e.clientX,e.clientY,e.pointerId,e.target.closest('.task-drag-grip'));el.setPointerCapture?.(e.pointerId)});
+ el.addEventListener('pointerdown',e=>{
+  if(e.pointerType==='touch'||e.button!==0)return;
+  begin(e.clientX,e.clientY,e.pointerId,e.target.closest('.task-drag-grip'));
+  el.setPointerCapture?.(e.pointerId);
+ });
  el.addEventListener('pointermove',e=>{if(active===e.pointerId)move(e.clientX,e.clientY,e)});
  el.addEventListener('pointerup',e=>{if(active===e.pointerId)finish(false)});
  el.addEventListener('pointercancel',e=>{if(active===e.pointerId)finish(true)});
