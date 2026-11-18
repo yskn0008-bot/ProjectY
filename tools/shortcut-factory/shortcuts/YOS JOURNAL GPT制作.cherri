@@ -10,7 +10,7 @@
 // Development candidate for the existing Shortcut Factory, not a signed .shortcut.
 // Input: public article text or source notes shared to Shortcuts. Empty input is allowed,
 // but in that case the model MUST only plan research, not invent verified articles.
-// Never sends drafts to GitHub/Notion/public web. Does not touch the existing morning checker.
+// Never sends drafts to GitHub/public web. Private Notion Inbox handoff uses existing Scriptable Keychain only.
 // Always writes a unique local draft; no overwrite, no silent publication.
 
 const now = currentDate()
@@ -34,5 +34,15 @@ if markerCount == 0 {
 }
 
 saveFile("YOS-JOURNAL-GPT-DRAFT-{stamp}.md", draftText, false)
+
+// Private handoff after local backup. The native Scriptable intent receives
+// the exact draftText action output through a postcompile token-preserving patch.
+// No URL with draft data, no embedded Notion secret, and no public GitHub commit.
+rawAction("dk.simonbs.Scriptable.RunScriptInlineIntent", {
+    "script": "__YOS_JOURNAL_INBOX_INLINE__",
+    "parameter": "__YOS_JOURNAL_DRAFT_INPUT__",
+    "runInApp": false,
+    "ShowWhenRun": false
+})
 showNotification("編集下書きをiCloud DriveのShortcutsフォルダに保存しました。公開はしていません。", "YOS JOURNAL")
 stop()
