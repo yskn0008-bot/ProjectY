@@ -10,7 +10,9 @@ const date='2026-12-01',rows=[
  row('2026-12-01T05:25:00Z','2026-12-01T05:30:00Z',
   '歯磨き','c'.repeat(32),'yos-daystream-routine-202612-wake-brush'),
  row('2026-11-30T21:10:00Z','2026-12-01T05:20:00Z',
-  '睡眠','d'.repeat(32),'yos-daystream-routine-202612-sleep')
+  '睡眠','d'.repeat(32),'yos-daystream-routine-202612-sleep'),
+ row('2026-12-01T06:30:00Z','2026-12-01T07:00:00Z',
+  '買い物','e'.repeat(32),'inbox:clarity:bridge-routing-001:01')
 ];
 const html=htmlFor(rows),browser=await (process.env.LIFE_BROWSER==='webkit'?webkit:chromium).launch({headless:true});
 const store='YOS_DAYSTREAM_WEB_PLAN_V1',importKey='YOS_DAYSTREAM_DIRECT_IMPORTED_V1';
@@ -28,12 +30,12 @@ try{
   await page.evaluate(()=>showDay('2026-12-01'));
   let state=await page.evaluate(key=>JSON.parse(localStorage.getItem(key)),store);
   const direct=state.days[date].filter(x=>x.sourceRef?.startsWith('yos-direct:'));
-  assert.equal(direct.length,4);
-  assert.deepEqual(direct.map(x=>x.t),['睡眠','起床','水を飲む','歯磨き']);
-  assert.deepEqual(direct.map(x=>[x.s,x.d]),[[370,490],[860,2],[862,3],[865,5]]);
+  assert.equal(direct.length,5);
+  assert.deepEqual(direct.map(x=>x.t),['睡眠','起床','水を飲む','歯磨き','買い物']);
+  assert.deepEqual(direct.map(x=>[x.s,x.d]),[[370,490],[860,2],[862,3],[865,5],[930,30]]);
   assert.equal(await page.locator('#tl .yos-notion-projection').count(),0);
-  assert.equal(await page.locator('#tl .card.task').count(),4);
-  assert.equal(await page.locator('#tl .card.task .task-copy').count(),4);
+  assert.equal(await page.locator('#tl .card.task').count(),5);
+  assert.equal(await page.locator('#tl .card.task .task-copy').count(),5);
   assert.equal(await page.locator('#yosNotionEditSheet').count(),0);
   assert.equal(await page.locator('#yosNotionMoveBar').count(),0);
   const colors=await page.locator('#tl .card.task').evaluateAll(cards=>cards.map(c=>getComputedStyle(c).backgroundColor));
@@ -42,7 +44,7 @@ try{
   assert.equal(new Set(colors.slice(1)).size,1);
   assert.ok(colors.every(c=>c!=='rgba(0, 0, 0, 0)'));
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
-  assert.equal(await page.evaluate(key=>Object.keys(JSON.parse(localStorage.getItem(key))).length,importKey),4);
+  assert.equal(await page.evaluate(key=>Object.keys(JSON.parse(localStorage.getItem(key))).length,importKey),5);
   // Editing the existing native record is authoritative; reimport cannot reset its time.
   await page.evaluate(key=>{
    const p=JSON.parse(localStorage.getItem(key));
@@ -54,7 +56,7 @@ try{
   await page.waitForFunction(()=>document.getElementById('yosNativeBoot')===null);
   state=await page.evaluate(key=>JSON.parse(localStorage.getItem(key)),store);
   const after=state.days[date];
-  assert.equal(after.filter(x=>x.sourceRef?.startsWith('yos-direct:')).length,4);
+  assert.equal(after.filter(x=>x.sourceRef?.startsWith('yos-direct:')).length,5);
   assert.equal(after.find(x=>x.t==='水を飲む').s,910);
   assert.equal(after.find(x=>x.t==='既存テスト').s,990);
   // An intentional native deletion stays deleted (no resurrection on reopen).

@@ -169,10 +169,18 @@ function nativeDirectRows(tasks){
  };
  const rows=[],used=new Set();
  for(const t of tasks){
-  if(!t||!/^yos-daystream-routine-202612-(?:night(?:-[a-z]+)?|wake(?:-[a-z]+)?|care(?:-[a-z]+)?|sleep)$/.test(t.syncKey||''))continue;
+  if(!t)continue;
+  const sync=String(t.syncKey||'');
+  const routine=/^yos-daystream-routine-202612-(?:night(?:-[a-z]+)?|wake(?:-[a-z]+)?|care(?:-[a-z]+)?|sleep)$/.test(sync);
+  // Clarity's existing Inbox Bridge writes exactly this stable sync key.
+  // Only explicit start+end times may become purple timeline cards: an
+  // unscheduled task remains in the read-only task list, never guessed.
+  const clarity=/^inbox:clarity:[a-z0-9_-]{8,100}:\d{2}$/i.test(sync);
+  if(!routine&&!clarity)continue;
+  if(clarity&&(!t.due||!t.dueEnd||!t.due.includes('T')||!t.dueEnd.includes('T')))continue;
   if(t.sourceKind!=='task'||!/^[a-f0-9]{32}$/.test(t.id||'')||!STATES.includes(t.state)||
     !validAt(t.due)||!validAt(t.dueEnd)||!t.due.includes('T')||!t.dueEnd.includes('T')||
-    used.has(t.id))throw Error('生活タスクの元データを確認できません');
+    used.has(t.id))throw Error('時間指定タスクの元データを確認できません');
   const a=tokyo(t.due),b=tokyo(t.dueEnd),duration=(Date.parse(t.dueEnd)-Date.parse(t.due))/60000;
   if(!a||!b||a.day!==b.day||!Number.isInteger(duration)||duration<1||a.minute+duration>1440||
     !t.title||typeof t.title!=='string')throw Error('生活タスクの時間を確認できません');

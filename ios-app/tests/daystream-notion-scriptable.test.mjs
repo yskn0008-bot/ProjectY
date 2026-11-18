@@ -47,7 +47,7 @@ test('Notion direct seeds preserve independent morning and night task titles',()
  ]);
  assert.ok(out.every(x=>x.day==='2026-12-01'&&!x.done));
 });
-test('only explicitly approved routine sources are direct-imported',()=>{
+test('only approved routines and explicitly timed Clarity Inbox tasks become native cards',()=>{
  const a=api();
  const approved=row('2026-12-01T05:30:00Z','2026-12-01T05:35:00Z',
   '歯磨き','a'.repeat(32),'yos-daystream-routine-202612-night-brush');
@@ -55,7 +55,18 @@ test('only explicitly approved routine sources are direct-imported',()=>{
   '夜勤','b'.repeat(32),'yos-shift-2026-12-01');
  calendar.properties['状態']={select:null};
  const ordinary=row('2026-12-01T09:00:00Z',null,'未登録タスク','c'.repeat(32));
- assert.deepEqual([...a.nativeDirectRows([approved,calendar,ordinary].map(r=>a.project(r)))].map(x=>x.title),['歯磨き']);
+ const clarity=row('2026-12-01T06:30:00Z','2026-12-01T07:00:00Z',
+  '買い物','d'.repeat(32),'inbox:clarity:bridge-routing-001:01');
+ const missingTime=row(null,null,'いつか掃除する','e'.repeat(32),'inbox:clarity:bridge-routing-002:01');
+ const unrelated=row('2026-12-01T07:00:00Z','2026-12-01T07:30:00Z',
+  '既存の別タスク','f'.repeat(32),'other-source');
+ const projected=[approved,calendar,ordinary,clarity,missingTime,unrelated].map(r=>a.project(r));
+ const imported=[...a.nativeDirectRows(projected)];
+ assert.deepEqual(imported.map(x=>x.title),['歯磨き','買い物']);
+ assert.equal(imported[1].day,'2026-12-01');
+ assert.equal(imported[1].s,930);
+ assert.equal(imported[1].d,30);
+ assert.equal(imported[1].id,'d'.repeat(32));
 });
 test('invalid or ambiguous direct time source fails safely',()=>{
  const a=api(),wrong=row('2026-12-01',null,'起床','a'.repeat(32),'yos-daystream-routine-202612-wake');
