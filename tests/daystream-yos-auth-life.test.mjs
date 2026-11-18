@@ -18,8 +18,8 @@ test('YOS Tasks refresh reuses existing backend and is opt-in and read-only',()=
  assert.match(authCode,/cache:'no-store'/);
  assert.match(authCode,/method:'GET'/);
  assert.match(authCode,/yos_calendar_device_key_v1/);
- assert.doesNotMatch(authCode,/\\.setItem\\(|\\.removeItem\\(|sessionStorage|NOTION_TOKEN|API_SECRET/);
- assert.match(html,/if\\(window\\.YOS_DAYSTREAM_TASK_AUTH\\?\\.hasDeviceKey\\?\\.\\(\\)\\)setupTaskSource\\(true\\)/);
+ assert.equal(authCode.includes('.setItem('),false);assert.equal(authCode.includes('.removeItem('),false);assert.doesNotMatch(authCode,/sessionStorage|NOTION_TOKEN|API_SECRET/);
+ assert.equal(html.includes('hasDeviceKey?.())setupTaskSource(true)'),true);
  assert.match(html,/id="yosWebTaskRefresh"/);
  assert.match(html,/provider\.setup\(\{/);
  assert.match(html,/snapshot\.source!==\u0027yos-auth-cache\u0027/); // source guard on persisted projected data
@@ -64,7 +64,7 @@ test('an existing Calendar device key refreshes Notion without Google and does n
  const ctx={window:win,location:{origin:'https://yskn0008-bot.github.io'},document:win.document,
   fetch:async(url,opts)=>{
    requests.push({url,opts});
-   assert.match(url,/\\/api\\/yos\\/tasks\\?source=notion$/);
+   assert.equal(url,'https://project-y-yos-ai.vercel.app/api/yos/tasks?source=notion');
    return {ok:true,json:async()=>({source:'notion',complete:true,tasks:[{id:'11111111222233334444555555555555',title:'買い物',state:'次にやる',sourceKind:'task',due:'2026-11-19T10:00:00Z',dueEnd:'2026-11-19T10:30:00Z',evidence:'YOS Inbox clarity:window-unique',order:1}]})};
   },AbortController,setTimeout,clearTimeout,Date,Intl,Math};
  vm.runInNewContext(sourceCode,ctx);vm.runInNewContext(authCode,ctx);
