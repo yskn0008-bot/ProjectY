@@ -443,6 +443,9 @@ test('M100: safe-stop checklist opens without changing ride records or viewport'
     await expect(page.locator('#modal-body')).toContainText('強制移動ではない');
     await page.locator('#close-modal').click();
     await expect(page.locator('#modal')).not.toBeVisible();
+    await page.locator('[data-page="sales"]').click();
+    await expect(page.locator('#drop-btn')).toBeVisible();
+    await expect(page.locator('#photo-btn')).toBeVisible();
     const after=await page.evaluate(() => localStorage.getItem('yos-taxi-ui-v2-live-20261117'));
     expect(after,'M100 guidance must not mutate shift or ride records').toBe(before);
   }
