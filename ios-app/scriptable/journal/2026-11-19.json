@@ -16,13 +16,16 @@
       "source": "米国皮膚科学会（AAD）｜脂性肌の一般向けガイド",
       "sourceDate": "掲載日の記載を確認できず／2026-11-18閲覧",
       "link": "https://www.aad.org/public/everyday-care/skin-care-basics/dry/oily-skin",
-      "image": "",
-      "imageCaption": "",
-      "imageKind": "",
+      "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Man_grooming_in_a_modern_bathroom_mirror_during_evening_hours_while_checking_reflection.jpg?width=800",
+      "imageCaption": "鏡の前で身だしなみを確認する男性の参考写真",
+      "imageKind": "reference",
       "keyPoints": [
         "紙はこすらず、皮脂が気になる部分に数秒当てる。",
         "その場の見え方と、毎日の手入れの見直しを分ける。"
-      ]
+      ],
+      "imageCredit": "Shixart1985 / Wikimedia Commons",
+      "imageSourceUrl": "https://commons.wikimedia.org/wiki/File:Man_grooming_in_a_modern_bathroom_mirror_during_evening_hours_while_checking_reflection.jpg",
+      "imageLicenseUrl": "https://creativecommons.org/licenses/by/2.0/"
     },
     {
       "category": "PRESENCE / 会話",
@@ -35,13 +38,16 @@
       "source": "Huangら（2017）、Journal of Personality and Social Psychology／訂正（2025、PMID 40111841）",
       "sourceDate": "原著2017年・訂正2025年／2026-11-18照合",
       "link": "https://pubmed.ncbi.nlm.nih.gov/28447835/",
-      "image": "",
-      "imageCaption": "",
-      "imageKind": "",
+      "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Coffee%2C_conversation_and_collaboration_-_ATTT_2025.jpg?width=800",
+      "imageCaption": "テーブルを囲んで会話する人たちの参考写真",
+      "imageKind": "reference",
       "keyPoints": [
         "相手が自分から話した言葉に、一度だけ質問してみる。",
         "自然に聞ける範囲で。答え方に合わせて話の深さを調整する。"
-      ]
+      ],
+      "imageCredit": "JyotiPN / Wikimedia Commons",
+      "imageSourceUrl": "https://commons.wikimedia.org/wiki/File:Coffee%2C_conversation_and_collaboration_-_ATTT_2025.jpg",
+      "imageLicenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/"
     },
     {
       "category": "EXPERIENCE / 沖縄",
@@ -54,13 +60,16 @@
       "source": "沖縄県立博物館・美術館｜博物館常設展・開館案内",
       "sourceDate": "常設展示・料金表は2026-11-18確認",
       "link": "https://okimu.jp/museum/permanent/",
-      "image": "",
-      "imageCaption": "",
-      "imageKind": "",
+      "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Okinawa_Prefectural_Museum_%26_Art_Museum_(Okinawa).jpg?width=800",
+      "imageCaption": "沖縄県立博物館・美術館の外観",
+      "imageKind": "reference",
       "keyPoints": [
         "短時間なら自然史と民俗の二つに絞る。",
         "常設展一般530円（確認日11月18日）。移動時間・交通費は別。"
-      ]
+      ],
+      "imageCredit": "Mk2010 / Wikimedia Commons",
+      "imageSourceUrl": "https://commons.wikimedia.org/wiki/File:Okinawa_Prefectural_Museum_%26_Art_Museum_(Okinawa).jpg",
+      "imageLicenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/"
     }
   ]
 }
