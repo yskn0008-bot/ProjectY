@@ -17,7 +17,13 @@ async function open(options={}){
   const ctx={args:{queryParameters:query},Data,WebView,Alert,CalendarEvent:{between:async()=>options.calendar||[]},Keychain:{contains:()=>options.auth!==false,get:()=> 'mock-token'},Request,Intl,Date,Safari:{open:url=>state.opened.push(url)},Script:{complete(){}}};
   try{await vm.runInNewContext('(async()=>{'+source+'})()',ctx);return state;}catch(error){return {...state,error};}
 }
-const task=(title,date='2026-11-13T14:00:00+09:00',status='完了')=>({properties:{'やること':{title:[{text:{content:title}}]},'期限':{date:{start:date}},'状態':{select:{name:status}}}}});
+const task=(title,date='2026-11-13T14:00:00+09:00',status='完了')=>({
+ properties:{
+  'やること':{title:[{text:{content:title}}]},
+  '期限':{date:{start:date}},
+  '状態':{select:{name:status}}
+ }
+});
 
 test('single-page adult paper journal has minimal editable note and non-fake photo placeholder',async()=>{
  const r=await open();assert.equal(r.error,undefined);assert.equal(r.presented,1);
