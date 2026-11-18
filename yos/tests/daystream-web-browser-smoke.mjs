@@ -409,7 +409,7 @@ try{
   const distinct=await p.locator('#tl [data-id="2100"], #tl [data-id="2102"], #tl [data-id="2110"]').evaluateAll(nodes=>nodes.map(el=>({
    id:Number(el.dataset.id),background:getComputedStyle(el).backgroundColor,
    border:getComputedStyle(el).borderWidth,borderStyle:getComputedStyle(el).borderStyle,
-   borderColor:getComputedStyle(el).borderColor,shadow:getComputedStyle(el).boxShadow
+   borderColor:getComputedStyle(el).borderColor,shadow:getComputedStyle(el).boxShadow,image:getComputedStyle(el).backgroundImage
   })));
   const appearance=new Map(distinct.map(x=>[x.id,x]));
   assert.equal(appearance.get(2100).background,'rgb(101, 71, 83)','long overlapping sleep span is muted behind cards');
@@ -419,6 +419,15 @@ try{
   assert.notEqual(appearance.get(2102).shadow,'none','foreground cards retain a separating shadow in any browser color notation');
   assert.notEqual(appearance.get(2100).background,appearance.get(2102).background,'background sleep does not look like the red foreground');
   assert.equal(appearance.get(2110).border,'1px','purple cards also have a border');
+
+  assert.equal(appearance.get(2100).image,'none','long sleep backdrop stays flat');
+  for(const id of [2102,2110]){
+   const fg=appearance.get(id);
+   assert.ok(fg.image.includes('linear-gradient('),'foreground task '+id+' has a gentle top-to-bottom sheen');
+   assert.ok(fg.shadow.includes('inset'),'foreground task '+id+' has a subtle raised inner highlight');
+   assert.ok(!fg.shadow.includes('inset 4px'),'do not restore a stripe on task '+id);
+  }
+
 
 
   const visible=cells.filter(c=>!c.backdrop).sort((a,b)=>a.top-b.top);

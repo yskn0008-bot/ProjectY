@@ -53,6 +53,14 @@ test('Slim duration-aware task bars retain full text and dark casual semantic co
   assert.ok(html.includes('background:'+tone),'brighter semantic tone '+tone+' remains available');
  assert.doesNotMatch(html,/inset 4px 0 0/,'no left accent strip remains on task cards');
 });
+test('Subtle raised foreground task surfaces never affect the backdrop or layout',()=>{
+ assert.match(html,/\.card\.task:not\(\.yos-backdrop\)\{/);
+ assert.match(html,/background-image:linear-gradient\(to bottom,rgba\(255,255,255,\.075\)/);
+ assert.match(html,/inset 0 1px 0 rgba\(255,255,255,\.22\)/);
+ assert.match(html,/\.card\.task\.yos-backdrop\{background-image:none;box-shadow:none\}/);
+ assert.match(html,/\.card\.task\.drag-preview:not\(\.yos-backdrop\)/);
+ assert.doesNotMatch(html,/inset 4px 0 0/,'do not reintroduce the old left accent strip');
+});
 test('Browser scripts parse without native Scriptable APIs',()=>{
  assert.equal(scripts.length,2);
  for(const code of scripts)new vm.Script(code);
