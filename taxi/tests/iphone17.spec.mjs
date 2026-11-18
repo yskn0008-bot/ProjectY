@@ -373,6 +373,21 @@ test('v2 in-app browser heights: all sales text and strategy rows fit their boxe
   for (const [width,height] of [[393,650],[393,631],[320,568],[320,650],[375,700],[390,799],[402,874]]) {
     await page.setViewportSize({width,height});
     await page.goto('./ui-v2.html', {waitUntil:'domcontentloaded'});
+    // compact cockpit primary hierarchy: one current period and two verified counters.
+    const cockpit=await page.evaluate(() => {
+      const visible=e=>getComputedStyle(e).display!=='none'&&e.getBoundingClientRect().height>0;
+      return {
+        periodRows:[...document.querySelectorAll('.period')].filter(visible).length,
+        kpiCells:[...document.querySelectorAll('.kpis>div')].filter(visible).length,
+        dropFont:parseFloat(getComputedStyle(document.querySelector('#drop-btn .copy b')).fontSize),
+        statusFont:parseFloat(getComputedStyle(document.querySelector('.status-label')).fontSize),
+      };
+    });
+    expect(cockpit.periodRows,'only current time band shown').toBe(1);
+    expect(cockpit.kpiCells,'only measured counters shown').toBe(2);
+    expect(cockpit.dropFont,'primary action must remain legible').toBeGreaterThanOrEqual(width<=350?12:16);
+    expect(cockpit.statusFont,'shift status must remain legible').toBeGreaterThanOrEqual(width<=350?15:17);
+    await expect(page.locator('#photo-btn')).toContainText('日報写真');
     let problems = await page.evaluate(() => {
       const items=[...document.querySelectorAll('.quick .copy b,.quick .copy small,.decision strong,.decision span,.period b,.period small,.kpi-label,.kpi-value,.footer-card span')];
       const active = element => {const style=getComputedStyle(element);return style.display!=='none' && style.visibility!=='hidden' && element.getBoundingClientRect().height>0};
@@ -391,6 +406,8 @@ test('v2 in-app browser heights: all sales text and strategy rows fit their boxe
         const container=row.getBoundingClientRect();
         for(const selector of ['time','b','small']){
           const child=row.querySelector(selector),rect=child.getBoundingClientRect();
+          // Secondary detail is intentionally hidden on the compact large-type view.
+          if(getComputedStyle(child).display==='none'||!rect.width||!rect.height)continue;
           if(rect.top<container.top-0.6 || rect.bottom>container.bottom+0.6 || rect.left<container.left-1 || rect.right>container.right+1)
             bad.push(i+' '+selector+' is outside its row');
           if(child.scrollWidth>child.clientWidth+1 || child.scrollHeight>child.clientHeight+2)
