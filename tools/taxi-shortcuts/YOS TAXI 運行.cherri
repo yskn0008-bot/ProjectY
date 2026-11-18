@@ -16,28 +16,29 @@
 @actions += "日報写真｜選択する"
 
 const chosen = chooseFromList(@actions, "YOS TAXI｜運行")
+const selected = getText(chosen)
 
-if chosen == "出庫｜開始を確認" {
+if selected == "出庫｜開始を確認" {
     openURL("https://yskn0008-bot.github.io/ProjectY/taxi/ui-v2.html?yos_action=start")
     stop()
 }
-if chosen == "営業画面｜開く" {
+if selected == "営業画面｜開く" {
     openURL("https://yskn0008-bot.github.io/ProjectY/taxi/ui-v2.html")
     stop()
 }
-if chosen == "M100｜停車中に確認" {
+if selected == "M100｜停車中に確認" {
     openURL("https://yskn0008-bot.github.io/ProjectY/taxi/ui-v2.html?yos_action=m100")
     stop()
 }
-if chosen == "休憩｜20分タイマー（記録なし）" {
+if selected == "休憩｜20分タイマー（記録なし）" {
     startTimer(qty(20, "min"))
     stop()
 }
-if chosen == "帰庫｜終了を確認" {
+if selected == "帰庫｜終了を確認" {
     openURL("https://yskn0008-bot.github.io/ProjectY/taxi/ui-v2.html?yos_action=end")
     stop()
 }
-if chosen == "日報写真｜選択する" {
+if selected == "日報写真｜選択する" {
     openURL("https://yskn0008-bot.github.io/ProjectY/taxi/ui-v2.html?yos_action=report")
     stop()
 }
