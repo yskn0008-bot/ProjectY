@@ -36,13 +36,19 @@ async function request(method,path,token,body) {
     throw Error('NOTION_HTTP_'+(req.response?.statusCode||'UNKNOWN'));
   return data;
 }
-async function findReceipt(token,marker) {
-  let cursor='',hits=0;
+async function findReceipt(token,marker,expected) {
+  let cursor='',markers=0,complete=0,window=[];
   for(let i=0;i<JOURNAL_INBOX.maxPages;i++) {
     const res=await request('GET','/blocks/'+JOURNAL_INBOX.page+'/children?page_size=100'+(cursor?'&start_cursor='+encodeURIComponent(cursor):''),token);
     if(!Array.isArray(res.results)||typeof res.has_more!=='boolean')throw Error('SCAN_INVALID');
-    for(const b of res.results)if(b.type==='paragraph'&&plain(b)===marker)hits++;
-    if(!res.has_more)return hits;
+    for(const b of res.results){
+      const v=b.type==='paragraph'?plain(b):'#OTHER#';
+      if(v===marker)markers++;
+      window.push(v);
+      if(window.length>expected.length)window.shift();
+      if(window.length===expected.length&&window.every((str,j)=>str===expected[j]))complete++;
+    }
+    if(!res.has_more)return {markers,complete};
     if(!res.next_cursor||res.next_cursor===cursor)throw Error('SCAN_CURSOR_INVALID');
     cursor=res.next_cursor;
   }
@@ -65,18 +71,19 @@ async function transfer(input) {
   if(!Keychain.contains(JOURNAL_INBOX.token))return {status:'held',reason:'NOTION_KEY_MISSING'};
   const token=Keychain.get(JOURNAL_INBOX.token);
   if(typeof token!=='string'||token.length<10)return {status:'held',reason:'NOTION_KEY_INVALID'};
-  const day=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
   const marker='[YOS_JOURNAL_DRAFT_V1:'+digest(raw)+':'+raw.length+']';
-  let hits=await findReceipt(token,marker);
-  if(hits>1)return {status:'held',reason:'DUPLICATE_MARKERS_FOUND'};
-  if(hits===1)return {status:'confirmed',reason:'ALREADY_VERIFIED',marker};
-  const segments=[marker,'JOURNAL下書き・未検証・公開禁止 '+day,...chunks(raw)];
+  // Fixed metadata also makes reconciliation stable across midnight.
+  const segments=[marker,'JOURNAL下書き・未検証・公開禁止',...chunks(raw)];
   if(segments.length>100)return {status:'held',reason:'TOO_MANY_BLOCKS'};
+  let result=await findReceipt(token,marker,segments);
+  if(result.markers>1)return {status:'held',reason:'DUPLICATE_MARKERS_FOUND'};
+  if(result.markers===1&&result.complete!==1)return {status:'held',reason:'INCOMPLETE_EXISTING_DRAFT'};
+  if(result.complete===1)return {status:'confirmed',reason:'ALREADY_VERIFIED',marker};
   const reply=await request('PATCH','/blocks/'+JOURNAL_INBOX.page+'/children',token,{children:segments.map(para)});
   // Unknown response must never be treated as safe to blindly retry.
   await verifyBlocks(token,segments,reply.results);
-  hits=await findReceipt(token,marker);
-  if(hits!==1)throw Error('RECEIPT_NOT_UNIQUE_AFTER_WRITE');
+  result=await findReceipt(token,marker,segments);
+  if(result.markers!==1||result.complete!==1)throw Error('RECEIPT_NOT_UNIQUE_AFTER_WRITE');
   return {status:'confirmed',reason:'NOTION_READBACK_OK',marker};
 }
 async function notifyHeld(reason) {
