@@ -54,10 +54,10 @@ const editorialPrompt = text("あなたはYOSの記憶日記編集担当です�
 本人の入力（そのままの原文）：
 {raw}")
 const edited = askChatGPT(editorialPrompt, false, "Text")
-if !edited {
-    alert("AIの整理結果を受け取れませんでした。原文はiCloudに保存しています。", "YOS 日記：未保存")
-    stop()
-}
+// Do not branch directly on the ChatGPT app's result variable.
+// In Cherri 2.3, that produces an incomplete iOS If comparator.
+// An empty result is rejected by the existing Journal Book before Notion save.
+// The raw words have already been backed up in iCloud.
 const finalStory = text("{edited}")
 const diary = text("【今日の記憶】\n{finalStory}")
 const todayQuestion = text("今日、何があって、どんな気持ちになり、どう感じた？")

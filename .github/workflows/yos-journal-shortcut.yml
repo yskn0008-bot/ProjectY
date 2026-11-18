@@ -85,6 +85,10 @@ jobs:
           blob=repr(data)
           assert ids.count('is.workflow.actions.askllm') == 1, ids
           assert ids.count('is.workflow.actions.ask') == 1, ids
+          # A direct if on the ChatGPT app's output produced an unconfigured
+          # comparison on iPhone; only the user-input empty guard may remain.
+          assert ids.count('is.workflow.actions.conditional') == 3, ids
+          assert 'if !edited' not in Path('tools/yos-journal/YOS 日記.cherri').read_text()
           assert ids.count('is.workflow.actions.documentpicker.save') == 2, ids
           assert ids.count('is.workflow.actions.openurl') == 1, ids
           assert ids.count('com.apple.journal.CreateEntryIntent') == 0
