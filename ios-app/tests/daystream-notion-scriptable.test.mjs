@@ -9,7 +9,7 @@ const text=path=>readFileSync(new URL(path,root),'utf8');
 export function api(overrides={}){
  const context=vm.createContext({Intl,Date,console,...overrides});
  vm.runInContext(script.split('// SCRIPTABLE_ENTRY')[0]+
-  '\nglobalThis.api={project,readTasks,buildHTML,main,nativeDirectRows,dayProjection};',context);
+  '\nglobalThis.api={project,readTasks,buildHTML,main,nativeDirectRows,dayProjection,readDeviceCalendar};',context);
  return context.api;
 }
 export const row=(start=null,end=null,name='架空タスク',id='a'.repeat(32),key='')=>({
@@ -121,4 +121,47 @@ test('device-local Notion read displays an explicit Clarity time window without 
  assert.match(h,/"clarityWindow":true/);
  assert.match(h,/scriptable:\/\/\/run\?scriptName=YOS%20DAYSTREAM%20Notion/);
  assert.doesNotMatch(h,/accounts\.google\.com|yosWebGoogleButton/);
+});
+
+
+test('existing Scriptable DAYSTREAM reads a new iPhone calendar event without a task write',async()=>{
+ const now=new Date(),when=new Date(now.getTime()+86400000),to=new Date(when.getTime()+30*60000);
+ const a=api({CalendarEvent:{between:async()=>[{
+  identifier:'clarity-calendar-001',title:'Clarity連携テスト',startDate:when,endDate:to,isAllDay:false
+ }]}});
+ const native=text('life/calendar/native-bridge.js');
+ const mirror=await a.readDeviceCalendar(native,[],now);
+ assert.equal(mirror?.status,'ok');
+ assert.equal(mirror?.source,'scriptable-on-device');
+ assert.equal(Object.values(mirror.calendarDays).flat().length,1);
+ assert.equal(Object.values(mirror.calendarDays).flat()[0].title,'Clarity連携テスト');
+ const h=htmlFor([]);
+ const combined=a.buildHTML(text('yos/daystream/index.html'),text('yos/daystream/source-adapters.js'),
+  native,text('yos/daystream/task-wizard.js'),{schema:'yos-daystream-source-snapshot-v1',kind:'tasks',
+  status:'ok',items:[],checkedAt:new Date().toISOString(),source:'yos-auth-cache',origin:'notion',complete:true},[],mirror);
+ assert.match(combined,/const nativeCalendar=\{"status":"ok","source":"scriptable-on-device"/);
+ for(const m of combined.matchAll(/<script>([\s\S]*?)<\/script>/g))new vm.Script(m[1]);
+ assert.ok(h.includes('YOS_DAYSTREAM_DIRECT_IMPORTED_V1'));
+});
+test('device calendar mirror skips an exact Notion Clarity task instead of showing two cards',async()=>{
+ const now=new Date(),start=new Date(now.getTime()+86400000),end=new Date(start.getTime()+30*60000);
+ const events=[{identifier:'same-event',title:'買い物',startDate:start,endDate:end,isAllDay:false}];
+ const a=api({CalendarEvent:{between:async()=>events}});
+ const notionTask={sourceKind:'task',title:'買い物',due:start.toISOString(),dueEnd:end.toISOString(),
+  evidence:'YOS Inbox clarity:test-window-0001'};
+ const result=await a.readDeviceCalendar(text('life/calendar/native-bridge.js'),[notionTask],now);
+ assert.equal(result?.status,'ok');
+ assert.deepEqual([...Object.keys(result.calendarDays)],[]);
+ assert.equal(events.length,1,'source calendar was not edited');
+});
+test('device calendar read failure or incomplete source cannot erase Notion tasks',async()=>{
+ const now=new Date();
+ const error=api({CalendarEvent:{between:async()=>{throw Error('Calendar access denied')}}});
+ assert.equal(await error.readDeviceCalendar(text('life/calendar/native-bridge.js'),[],now),null);
+ const tooMany=api({CalendarEvent:{between:async()=>Array.from({length:81},(_,i)=>({
+  identifier:'item-'+i,title:'予定',startDate:now,endDate:new Date(now.getTime()+600000),isAllDay:false
+ }))}});
+ assert.equal(await tooMany.readDeviceCalendar(text('life/calendar/native-bridge.js'),[],now),null);
+ const bad=api({CalendarEvent:{between:async()=>[{identifier:'broken',title:'予約',startDate:now,endDate:now}]}});
+ assert.equal(await bad.readDeviceCalendar(text('life/calendar/native-bridge.js'),[],now),null);
 });
