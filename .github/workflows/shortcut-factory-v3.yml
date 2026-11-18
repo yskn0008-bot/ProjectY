@@ -173,3 +173,76 @@ jobs:
             tools/shortcut-factory/artifacts/stash-hubsign.log
           if-no-files-found: error
           retention-days: 14
+
+  # Reuses the existing Factory, pinned compiler, secret scan and signing adapter.
+  # This is a PR-only candidate: no main deployment, catalog change or iPhone install.
+  build-journal-gpt-candidate:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify candidate is secret-free before external signing
+        run: |
+          python3 tools/shortcut-factory/validate_secret_free.py 'tools/shortcut-factory/shortcuts/YOS JOURNAL GPT制作.cherri'
+
+      - name: Install existing pinned Cherri v2.3.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          url='https://github.com/electrikmilk/cherri/releases/download/v2.3.0/cherri_linux-x86_64.zip'
+          expected='7ab2c384b7b26e7c72a30a8dfa56f89dae12c4068b7951bc1e3193f3698edbe9'
+          curl -fsSL "$url" -o /tmp/cherri.zip
+          printf '%s  %s\n' "$expected" /tmp/cherri.zip | sha256sum -c -
+          mkdir -p /tmp/cherri
+          unzip -q /tmp/cherri.zip -d /tmp/cherri
+          binary="$(find /tmp/cherri -type f -name cherri -print -quit)"
+          test -n "$binary"
+          sudo install -m 0755 "$binary" /usr/local/bin/cherri
+          cherri --version
+
+      - name: Compile GPT editorial candidate with no signing
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd tools/shortcut-factory/shortcuts
+          cherri 'YOS JOURNAL GPT制作.cherri' --skip-sign --debug
+          test -s 'YOS JOURNAL GPT制作_unsigned.shortcut'
+          test -s 'YOS JOURNAL GPT制作.plist'
+          mkdir -p ../artifacts
+          cp 'YOS JOURNAL GPT制作_unsigned.shortcut' '../artifacts/YOS-JOURNAL-GPT-unsigned.shortcut'
+
+      - name: Validate compiled model and local-only save semantics
+        run: |
+          python3 tools/shortcut-factory/validate_journal_gpt_candidate.py 'tools/shortcut-factory/shortcuts/YOS JOURNAL GPT制作.plist'
+
+      - name: Sign candidate through existing HubSign adapter
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/clarity-factory/sign_with_hubsign.py \
+            --input 'tools/shortcut-factory/artifacts/YOS-JOURNAL-GPT-unsigned.shortcut' \
+            --output 'tools/shortcut-factory/artifacts/YOS-JOURNAL-GPT-signed.shortcut' \
+            --name 'YOS JOURNAL GPT制作'
+
+      - name: Check signed AEA1 artifact
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('tools/shortcut-factory/artifacts/YOS-JOURNAL-GPT-signed.shortcut')
+          b = p.read_bytes()
+          assert b.startswith(b'AEA1') and len(b) > 500, 'invalid signed Shortcut'
+          print('YOS JOURNAL GPT AEA1 envelope PASS:',len(b),'bytes')
+          PY
+
+      - name: Upload PR-only iPhone acceptance candidate
+        uses: actions/upload-artifact@v4
+        with:
+          name: yos-journal-gpt-shortcut-candidate
+          path: |
+            tools/shortcut-factory/artifacts/YOS-JOURNAL-GPT-signed.shortcut
+            tools/shortcut-factory/artifacts/YOS-JOURNAL-GPT-unsigned.shortcut
+          if-no-files-found: error
+          retention-days: 14
