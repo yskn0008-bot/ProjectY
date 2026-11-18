@@ -35,7 +35,7 @@ const task=(title,date='2026-11-13T14:00:00+09:00',status='完了')=>({
 
 test('single-page adult paper journal has minimal editable note and non-fake photo placeholder',async()=>{
  const r=await open();assert.equal(r.error,undefined);assert.equal(r.presented,1);
- for(const marker of ['YOS 日記','今日の流れ','心に残ったこと','今日の記録','今日の気分','storyReview','書き終えた','今日の写真','未登録'])assert.ok(r.html.includes(marker),marker);
+ for(const marker of ['YOS 日記','今日の流れ','心に残ったこと','今日の記録','今日の気分','storyReview','書き終えた','今日の写真','写真を選ぶ'])assert.ok(r.html.includes(marker),marker);
  assert.match(r.html,/overflow:hidden/);
  assert.doesNotMatch(r.html,/https?:\/\/[^" ]+\.jpg|Nov\. 18/);
 });
