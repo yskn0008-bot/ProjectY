@@ -115,6 +115,13 @@
       "sha256": "41dbc735247e3241a35ec0ccb0bfe141cb684b1f0bc98489104484916ff70281"
     },
     {
+      "id": "bravia-picture-check",
+      "name": "YOS BRAVIA Picture Check",
+      "path": "ios-app/scriptable/remote-widgets/YOS BRAVIA Picture Check.js",
+      "commit": "71504b0e8a7b51e6b403a312437c37152a7e7e20",
+      "sha256": "e202fa7ecc4efcb0dd18dc5b4ad6cf788144a7775e83be2ac0a6868306e147b6"
+    },
+    {
       "id": "health-automation",
       "name": "YOS Health Automation",
       "path": "ios-app/scriptable/YOS Health Automation.js",

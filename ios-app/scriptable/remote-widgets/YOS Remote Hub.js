@@ -134,11 +134,22 @@ body{padding:0 8px}
 .section-label{font-size:11px;font-weight:800;color:#8e8e93;margin:4px 0 7px}
 @media(max-height:800px){.page{padding-top:max(52px,calc(env(safe-area-inset-top) + 2px));gap:4px}.tv-card:before{top:-29px;height:30px}.top-shortcuts{top:-26px;height:23px}.card{padding:6px 8px 7px}.head{height:24px;margin-bottom:4px}.title{font-size:17px}.grid{gap:5px}}
 </style></head><body><div class="page">
-<section class="card tv-card"><div class="top-shortcuts"><button class="top-shortcut" onclick="sendTVShortcut(event,'input','入力')">↪︎ 入力</button><button class="top-shortcut" onclick="sendTVShortcut(event,'home','ホーム')">⌂ ホーム</button></div><div class="head"><div class="title" onclick="openRemote('tv')">BRAVIA</div><div class="tools"><span id="modeBadge" class="mode-badge">判定中</span><button class="tool" onclick="openLayoutEditor(event)">配置</button><button class="tool" onclick="sendMenu(event)">MENU</button></div></div><div id="tvGrid" class="grid grid-3"></div></section>
+<section class="card tv-card"><div class="top-shortcuts"><button class="top-shortcut" onclick="sendTVShortcut(event,'input','入力')">↪︎ 入力</button><button class="top-shortcut" onclick="sendTVShortcut(event,'home','ホーム')">⌂ ホーム</button></div><div class="head"><div class="title" onclick="openRemote('tv')">BRAVIA</div><div class="tools"><span id="modeBadge" class="mode-badge">判定中</span><button class="tool" onclick="openPictureEditor(event)">画質</button><button class="tool" onclick="openLayoutEditor(event)">配置</button><button class="tool" onclick="sendMenu(event)">MENU</button></div></div><div id="tvGrid" class="grid grid-3"></div></section>
 <section class="card"><div class="head"><div class="title" onclick="openRemote('light')">照明</div><div class="brand">Panasonic</div></div><div class="grid grid-3">${makeButtons("light", LIGHT_BUTTONS)}</div></section>
 <section class="card"><div class="head"><div class="title" onclick="openRemote('ac')">エアコン</div><div class="ac-meta"><span id="acTemp" class="ac-temp">--°</span><span class="brand">SHARP</span></div></div><div class="grid grid-4">${makeButtons("ac", AC_BUTTONS)}</div></section>
 </div>
 <div id="configLayer" class="config-layer"><div class="config-card"><div class="config-head"><div class="config-title">BRAVIA 配置</div><div class="config-actions"><button class="tool" onclick="resetLayout(event)">初期化</button><button class="tool" onclick="closeLayoutEditor(event)">完了</button></div></div><p class="config-help">12枠内は「移動元 → 移動先」で入れ替え。再生位置が自動カーソルの中心。中央キーはタップ最優先で決定、24px以上動かした時だけスワイプとして上下左右へ移動します。切替中の長押しは元機能です。</p><div class="section-label">表示中の12枠</div><div id="configGrid" class="config-grid"></div><div class="section-label">使えるBRAVIAボタン</div><div id="palette" class="palette"></div></div></div>
+<div id="pictureLayer" class="config-layer" role="dialog" aria-modal="true" aria-label="BRAVIA画質設定"><div class="config-card">
+  <div class="config-head"><div class="config-title">BRAVIA 画質</div><button class="tool" onclick="closePictureEditor(event)">閉じる</button></div>
+  <p class="config-help">対応している設定だけ変更します。夜は現在の画質モードを保ったまま明るさを下げます。テレビ側が非対応なら変更しません。</p>
+  <div class="config-grid">
+    <button class="config-slot" data-picture="day" onclick="selectPictureScene(event,'day')" disabled>☀ 昼</button>
+    <button class="config-slot" data-picture="night" onclick="selectPictureScene(event,'night')" disabled>☾ 夜</button>
+    <button class="config-slot" data-picture="movie" onclick="selectPictureScene(event,'movie')" disabled>▶ 映画</button>
+  </div>
+  <p id="pictureStatus" class="config-help" aria-live="polite">接続確認前</p>
+  <button class="tool" onclick="probePictureScene(event)">対応状況を再確認</button>
+</div></div>
 <script>
 const REMOTES=${JSON.stringify(REMOTES)},ACTIONS=${JSON.stringify(TV_ACTIONS)},DEFAULT=${JSON.stringify(TV_DEFAULT)},CROSS_NAV=${JSON.stringify(CROSS_NAV)},SWIPE_THRESHOLD=${SWIPE_THRESHOLD}
 const LAYOUT_KEY="yos.remote.tv.buttons.v52"
@@ -284,8 +295,22 @@ function renderConfig(){
 function openLayoutEditor(e){if(e){e.preventDefault();e.stopPropagation()}selectedSlot=null;document.getElementById("configLayer").classList.add("open");renderConfig()}
 function closeLayoutEditor(e){if(e){e.preventDefault();e.stopPropagation()}selectedSlot=null;document.getElementById("configLayer").classList.remove("open");renderTV()}
 function resetLayout(e){if(e){e.preventDefault();e.stopPropagation()}layout=DEFAULT.slice();selectedSlot=null;saveLayout();renderTV();renderConfig()}
+function openPictureEditor(e){if(e){e.preventDefault();e.stopPropagation()}document.getElementById("pictureLayer").classList.add("open");probePictureScene()}
+function closePictureEditor(e){if(e){e.preventDefault();e.stopPropagation()}document.getElementById("pictureLayer").classList.remove("open")}
+function probePictureScene(e){if(e){e.preventDefault();e.stopPropagation()}const status=document.getElementById("pictureStatus");if(status)status.textContent="BRAVIAに対応状況を確認中…";nativeAction("picture","probe","画質対応確認")}
+function selectPictureScene(e,scene){if(e){e.preventDefault();e.stopPropagation()}if(!["day","night","movie"].includes(scene))return;const button=document.querySelector('[data-picture="'+scene+'"]');if(!button||button.disabled)return;const status=document.getElementById("pictureStatus");if(status)status.textContent="画質を切り替えて確認中…";nativeAction("picture",scene,"画質")}
+function showPictureStatus(result){
+  const status=document.getElementById("pictureStatus");if(!status)return;
+  if(result&&result.picture){status.textContent=result.picture.message||"画質設定を確認しました";
+    const supported=result.picture.support||{};
+    document.querySelectorAll("[data-picture]").forEach(button=>{button.disabled=!supported[button.dataset.picture]})
+  }else if(result&&result.ok===false&&document.getElementById("pictureLayer").classList.contains("open")){
+    status.textContent="変更できませんでした："+String(result.message||"通信に失敗しました");
+  }
+}
 function setACState(s){const el=document.getElementById("acTemp"),fan=document.getElementById("acFanLabel");if(!s){if(el)el.textContent="--°";if(fan)fan.textContent="風量 --";return}if(el)el.textContent=s.dry?"—":(Number.isFinite(Number(s.temp))?Math.round(Number(s.temp))+"°":"--°");if(fan)fan.textContent="風量 "+(s.fan||"--")}
 function nativeResult(result){
+  showPictureStatus(result)
   const badge=document.getElementById("modeBadge")
   if(result&&result.ok===false){if(badge)badge.textContent="エラー";return}
   if(result&&result.mode)setMode(result.mode)
@@ -342,6 +367,92 @@ let modeState=loadMode(),commandIndex=null
 function rememberMode(mode,action){const now=Date.now();modeState={mode,navigationUntil:mode==="navigation"?now+NAVIGATION_GRACE_MS:0,lastAction:action||"",updatedAt:now};Keychain.set(STORAGE.mode,JSON.stringify(modeState));return mode}
 function noteAction(action){if(action==="pause"){rememberMode("hybrid",action);return}if(action==="play"){rememberMode("media",action);return}if(action==="stop"){rememberMode("navigation",action);return}if(modeState.mode==="hybrid"&&HYBRID_KEEP_ACTIONS.has(action)){rememberMode("hybrid",action);return}if(NAV_ACTIONS.has(action))rememberMode("navigation",action);else if(MEDIA_ACTIONS.has(action))rememberMode("media",action)}
 async function sonyJSON(service,method){const r=new Request("http://"+sonyHost()+"/sony/"+service);r.method="POST";r.headers={"Content-Type":"application/json","X-Auth-PSK":sonyPSK()};r.body=JSON.stringify({method,params:[],id:1,version:"1.0"});return JSON.parse(await r.loadString())}
+
+const PICTURE_BACKUP_KEY="yos.bravia.scriptable.picture-night-backup.v1"
+async function sonyVideoJSON(method,params){
+  const r=new Request("http://"+sonyHost()+"/sony/video")
+  r.method="POST";r.timeoutInterval=8
+  r.headers={"Content-Type":"application/json","X-Auth-PSK":sonyPSK()}
+  r.body=JSON.stringify({method,params,id:1,version:"1.0"})
+  const data=JSON.parse(await r.loadString())
+  if(data&&data.error)throw new Error("画質API非対応／拒否 ("+String(data.error[0]||"error")+")")
+  if(!data||!Array.isArray(data.result))throw new Error("BRAVIA画質応答が不明です")
+  return data
+}
+async function readPictureSetting(target){
+  const data=await sonyVideoJSON("getPictureQualitySettings",[{target}])
+  const entries=data.result.flat(3)
+  const entry=entries.find(x=>x&&typeof x==="object"&&x.target===target)
+  return entry&&entry.isAvailable!==false?entry:null
+}
+function pictureChoices(entry){return entry&&Array.isArray(entry.candidate)?entry.candidate.map(x=>String(x&&x.value||"")).filter(Boolean):[]}
+function pictureModeChoice(entry,kind){
+  const available=pictureChoices(entry)
+  const normalized=value=>String(value||"").trim().toLowerCase().replace(/[\s_-]/g,"")
+  const order=kind==="day"?["standard"]:["cinema","cinemaHome","cinemaPro","cinema1","cinema2"]
+  for(const candidate of order){
+    const match=available.find(value=>normalized(value)===normalized(candidate))
+    if(match)return match
+  }
+  return null
+}
+function pictureNumeric(entry){
+  const c=entry&&Array.isArray(entry.candidate)?entry.candidate.find(x=>Number.isFinite(Number(x.min))&&Number.isFinite(Number(x.max))&&Number.isFinite(Number(x.step))&&Number(x.step)>0):null
+  const current=Number(entry&&entry.currentValue)
+  if(!c||!Number.isFinite(current)||Number(c.max)<=Number(c.min))return null
+  return{min:Number(c.min),max:Number(c.max),step:Number(c.step),current}
+}
+function nightBackup(){try{const s=Keychain.contains(PICTURE_BACKUP_KEY)?JSON.parse(Keychain.get(PICTURE_BACKUP_KEY)):null;return s&&typeof s==="object"?s:null}catch(_){return null}}
+async function pictureCapabilities(){
+  const [mode,bright]=await Promise.all([readPictureSetting("pictureMode").catch(()=>null),readPictureSetting("brightness").catch(()=>null)])
+  const n=pictureNumeric(bright),saved=nightBackup()
+  const support={day:Boolean(pictureModeChoice(mode,"day")||saved&&n&&Number.isFinite(Number(saved.original))),night:Boolean(n),movie:Boolean(pictureModeChoice(mode,"movie"))}
+  return{support,message:support.day||support.night||support.movie?"利用可能なモードを確認しました。変更はボタンを押した時だけ行います。":"画質APIが非対応か、現在の入力では設定を変更できません。テレビのクイック設定を利用してください。"}
+}
+async function writePictureSetting(target,value){
+  const result=await sonyVideoJSON("setPictureQualitySettings",[{settings:[{target,value:String(value)}]}])
+  const after=await readPictureSetting(target)
+  if(!after||!(String(after.currentValue)===String(value)||Number.isFinite(Number(value))&&Number(after.currentValue)===Number(value))){
+    throw new Error("画質設定を送信しましたが、反映確認できませんでした")
+  }
+  return result
+}
+async function applyPicturePreset(scene){
+  if(!["day","night","movie"].includes(scene))throw new Error("未知の画質モードです")
+  const mode=await readPictureSetting("pictureMode").catch(()=>null)
+  const bright=await readPictureSetting("brightness").catch(()=>null)
+  const range=pictureNumeric(bright),saved=nightBackup()
+  let message
+  if(scene==="night"){
+    if(!range)throw new Error("このBRAVIAでは明るさを直接設定できません")
+    const {min,max,step,current}=range
+    const level=min+Math.round((max-min)*0.25/step)*step
+    const target=Math.max(min,Math.min(max,level))
+    if(current<=target){message="すでに夜向けの明るさです。設定は変更していません。"}
+    else{
+      Keychain.set(PICTURE_BACKUP_KEY,JSON.stringify({original:current,night:target,mode:mode?String(mode.currentValue):null}))
+      await writePictureSetting("brightness",target)
+      message="夜モード：映像処理を変えずに画面を暗くしました"
+    }
+  }else if(scene==="day"){
+    const canRestore=Boolean(saved&&range&&Number(range.current)===Number(saved.night)&&(!saved.mode||mode&&String(mode.currentValue)===String(saved.mode))&&Number(saved.original)>=range.min&&Number(saved.original)<=range.max)
+    if(canRestore){await writePictureSetting("brightness",saved.original);Keychain.remove(PICTURE_BACKUP_KEY);message="昼モード：夜間前の明るさに戻しました"}
+    else{
+      const choice=pictureModeChoice(mode,"day")
+      if(!choice)throw new Error("標準画質モードに直接切り替えられません")
+      if(String(mode.currentValue)!==choice)await writePictureSetting("pictureMode",choice)
+      message="昼モード：標準画質に切り替えました"
+    }
+  }else{
+    const choice=pictureModeChoice(mode,"movie")
+    if(!choice)throw new Error("映画向け画質モードに直接切り替えられません")
+    if(String(mode.currentValue)!==choice)await writePictureSetting("pictureMode",choice)
+    message="映画モード：シネマ画質に切り替えました"
+  }
+  const result=await pictureCapabilities()
+  return{support:result.support,message}
+}
+
 async function discoverSony(){if(commandIndex)return;const data=await sonyJSON("system","getRemoteControllerInfo"),commands=data&&data.result&&data.result[1];if(!Array.isArray(commands))throw new Error("BRAVIAコマンド取得失敗");commandIndex=new Map();commands.forEach(item=>{if(item&&item.name&&item.value)commandIndex.set(String(item.name).toLowerCase(),String(item.value))})}
 function xmlEscape(v){return String(v).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&apos;")}
 async function sonyAction(action,trackMode=true){await discoverSony();if(trackMode)noteAction(action);let code=null;if(action==="quick"&&Keychain.contains(STORAGE.quick)){const saved=String(Keychain.get(STORAGE.quick)).toLowerCase();if(commandIndex.has(saved))code=commandIndex.get(saved)}for(const alias of ALIASES[action]||[]){if(!code&&commandIndex.has(alias.toLowerCase()))code=commandIndex.get(alias.toLowerCase())}if(!code)throw new Error("BRAVIA未対応："+action);const r=new Request("http://"+sonyHost()+"/sony/ircc");r.method="POST";r.headers={"Content-Type":"text/xml; charset=UTF-8","X-Auth-PSK":sonyPSK(),SOAPACTION:'"urn:schemas-sony-com:service:IRCC:1#X_SendIRCC"'};r.body='<?xml version="1.0"?><s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:X_SendIRCC xmlns:u="urn:schemas-sony-com:service:IRCC:1"><IRCCCode>'+xmlEscape(code)+'</IRCCCode></u:X_SendIRCC></s:Body></s:Envelope>';await r.loadString()}
@@ -383,6 +494,6 @@ function startLightHold(action){
 }
 
 const queue=[];let running=false,web=null
-async function processQueue(){if(running)return;running=true;while(queue.length){const item=queue.shift();let result;try{if(item.device==="system"&&item.action==="refreshMode")result={ok:true,mode:await inferMode()};else if(item.device==="system"&&item.action==="refreshAC")result={ok:true,ac:await readACSummary()};else if(item.device==="tvCursor"){await sonyAction(item.action,false);result={ok:true,label:item.label,action:item.action,mode:await inferMode()}}else if(item.device==="tvAdaptive"){const currentMode=await inferMode();let action=item.action;if(currentMode==="navigation"&&CROSS_NAV[item.slot])action=CROSS_NAV[item.slot];else if(currentMode==="hybrid"&&HYBRID_CURSOR_ROLES.has(item.slot))action=CROSS_NAV[item.slot];await sonyAction(action);result={ok:true,label:item.label,action,mode:await inferMode()}}else if(item.device==="tvOriginal"){await sonyAction(item.action,false);result={ok:true,label:item.label,action:item.action,mode:await inferMode()}}else if(item.device==="tv"){await sonyAction(item.action);result={ok:true,label:item.label,action:item.action,mode:await inferMode()}}else if(item.device==="light"){await runExisting(CONFIG.light.actionScript,item.action);result={ok:true,label:item.label}}else if(item.device==="ac"){await runExisting(CONFIG.ac.actionScript,item.action);result={ok:true,label:item.label,ac:await readACSummary()}}else throw new Error("不明なデバイスです")}catch(error){result={ok:false,message:error&&error.message?error.message:String(error)}}try{await web.evaluateJavaScript("nativeResult("+JSON.stringify(result)+")")}catch(_){}}running=false}
+async function processQueue(){if(running)return;running=true;while(queue.length){const item=queue.shift();let result;try{if(item.device==="system"&&item.action==="refreshMode")result={ok:true,mode:await inferMode()};else if(item.device==="system"&&item.action==="refreshAC")result={ok:true,ac:await readACSummary()};else if(item.device==="picture"){if(item.action==="probe")result={ok:true,picture:await pictureCapabilities()};else result={ok:true,picture:await applyPicturePreset(item.action)}}else if(item.device==="tvCursor"){await sonyAction(item.action,false);result={ok:true,label:item.label,action:item.action,mode:await inferMode()}}else if(item.device==="tvAdaptive"){const currentMode=await inferMode();let action=item.action;if(currentMode==="navigation"&&CROSS_NAV[item.slot])action=CROSS_NAV[item.slot];else if(currentMode==="hybrid"&&HYBRID_CURSOR_ROLES.has(item.slot))action=CROSS_NAV[item.slot];await sonyAction(action);result={ok:true,label:item.label,action,mode:await inferMode()}}else if(item.device==="tvOriginal"){await sonyAction(item.action,false);result={ok:true,label:item.label,action:item.action,mode:await inferMode()}}else if(item.device==="tv"){await sonyAction(item.action);result={ok:true,label:item.label,action:item.action,mode:await inferMode()}}else if(item.device==="light"){await runExisting(CONFIG.light.actionScript,item.action);result={ok:true,label:item.label}}else if(item.device==="ac"){await runExisting(CONFIG.ac.actionScript,item.action);result={ok:true,label:item.label,ac:await readACSummary()}}else throw new Error("不明なデバイスです")}catch(error){result={ok:false,message:error&&error.message?error.message:String(error)}}try{await web.evaluateJavaScript("nativeResult("+JSON.stringify(result)+")")}catch(_){}}running=false}
 web=new WebView();web.shouldAllowRequest=request=>{const url=String(request.url||"");if(!url.startsWith("https://yos-remote.local/__action?"))return true;const query=parseQuery(url);if(query.device==="lightHoldStart"){startLightHold(query.action);return false}if(query.device==="lightHoldHeartbeat"){renewLightHold(query.action);return false}if(query.device==="lightHoldStop"){stopLightHold();return false}queue.push({device:query.device,action:query.action,label:query.label,slot:query.slot});processQueue();return false}
 await web.loadHTML(html,"https://yos-remote.local/");try{await web.evaluateJavaScript("setMode("+JSON.stringify(await inferMode())+")")}catch(_){}try{await web.evaluateJavaScript("setACState("+JSON.stringify(await readACSummary())+")")}catch(_){}await web.present(true);stopLightHold();await Promise.allSettled([lightHoldPromise]);Script.complete()
