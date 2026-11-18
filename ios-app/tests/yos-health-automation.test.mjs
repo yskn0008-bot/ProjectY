@@ -54,6 +54,10 @@ test('unknown command does not schedule or cancel',async()=>{
  assert.match(r.outputs[0],/^health_error:Unknown/);
 });
 test('no secret or HealthKit/SleepCycle claims',()=>{
- assert.ok(!/Notification\\.removeAllPending\\s*\\(|api\\.notion\\.com|sk-proj-|Bearer /i.test(script));
- assert.ok(!/HealthKit\\.save|SleepCycle\\.start/i.test(script));
+ assert.ok(!script.includes('Notification.removeAllPending('));
+ assert.ok(!script.includes('api.notion.com'));
+ assert.ok(!script.includes('sk-proj-'));
+ assert.ok(!script.includes('Bearer '));
+ assert.ok(!script.includes('HealthKit.save'));
+ assert.ok(!script.includes('SleepCycle.start'));
 });
