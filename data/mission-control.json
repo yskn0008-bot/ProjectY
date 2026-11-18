@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-18T17:30:23+09:00",
+  "updated_at": "2026-11-18T17:34:12+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -12,6 +12,16 @@
     ]
   },
   "inbox": [
+    {
+      "id": "github-pr-651",
+      "title": "PR #651 YOS Notification v0.3: protected capture, live Notion context and safe iPhone updater",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/651",
+      "updated_at": "2026-11-16T15:54:43Z"
+    },
     {
       "id": "github-pr-762",
       "title": "PR #762 feat(notification): safeguard v0.3→v0.4 migration using common installer",
@@ -103,16 +113,6 @@
       "updated_at": "2026-11-17T07:29:19Z"
     },
     {
-      "id": "github-pr-811",
-      "title": "PR #811 fix(scriptable): イケメン攻略本の写真分離・黒画面診断v3",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/811",
-      "updated_at": "2026-11-18T08:29:46Z"
-    },
-    {
       "id": "github-issue-10",
       "title": "Issue #10 Mission Control v2：GitHubのIssue・PR・Commitを自動集約する",
       "type": "GitHub Issue",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-18T08:25:27Z"
+      "updated_at": "2026-11-18T08:33:12Z"
     },
     {
       "id": "github-issue-234",
@@ -205,6 +205,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-2c2ddff52484",
+      "title": "fix(scriptable): split local magazine photos and diagnose blank WebView",
+      "completed_at": "2026-11-18T08:33:14Z",
+      "result": "GitHub mainへ反映（2c2ddff）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/2c2ddff52484ef9b853746e6fb5410ec634ee113"
+    },
+    {
       "id": "github-commit-0853d473986d",
       "title": "style(daystream): brighter task colors without left accent stripe (#810)",
       "completed_at": "2026-11-18T08:25:14Z",
@@ -231,13 +238,6 @@
       "completed_at": "2026-11-18T07:48:15Z",
       "result": "GitHub mainへ反映（42349e6）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/42349e62f1546dfc0bdf69a8a8c7f34db23ac762"
-    },
-    {
-      "id": "github-commit-9291ff0da28a",
-      "title": "fix(daystream): lock background timeline during deliberate task dragging (#806)",
-      "completed_at": "2026-11-18T06:33:15Z",
-      "result": "GitHub mainへ反映（9291ff0）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/9291ff0da28a30824b3511c7a4c6eeb80ac6b1c8"
     },
     {
       "id": "complete-002",
@@ -274,7 +274,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-18T17:30:23+09:00",
+      "last_update": "2026-11-18T17:34:12+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -349,13 +349,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 9件・Open PR 59件を自動同期中",
+      "next_action": "Open Issue 9件・Open PR 58件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-18T17:30:23+09:00",
+      "last_update": "2026-11-18T17:34:12+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -378,7 +378,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-18T17:30:23+09:00",
+      "last_update": "2026-11-18T17:34:12+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -460,5 +460,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "86357b9b915cf0d978eb150616192ca93f7281acecf7fb97cc15d1214826497d"
+  "github_snapshot_hash": "8e6b58bbadccc10c0d47e464cd996dc3dc877c8830a942c04fca1e7f13880661"
 }
