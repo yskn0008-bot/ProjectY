@@ -3,7 +3,7 @@ const CACHE_PREFIX='yos-taxi-projecty-';
 const CACHE='yos-taxi-projecty-v149-revenue-goal';
 const VERSION='149';
 const STATIC=[
-  './','./index.html','./calendar.html','./settings.html','./manifest.webmanifest','./swipe-nav.js',
+  './','./index.html','./ui-v2.html','./calendar.html','./settings.html','./manifest.webmanifest','./swipe-nav.js',
   './final-app-v131.css','./final-fix-v133.css','./final-app-v131.js',
   './report-sync-v43.js','./settings-v20.js','./projecty-live-sync-v1.js',
   './theme-v134.css','./theme-v134.js','./manage-layout-v136.css',

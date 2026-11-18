@@ -3,7 +3,7 @@ import { mkdir } from 'node:fs/promises';
 import { resolve } from 'node:path';
 
 const pages = [
-  { name: 'drive', path: './index.html', ready: '.yos131-primary[data-proxy="shiftButton"]' },
+  { name: 'drive', path: './index.html?legacy=1', ready: '.yos131-primary[data-proxy="shiftButton"]' },
   { name: 'today', path: './calendar.html', ready: '#todayView' },
   { name: 'week', path: './calendar.html', ready: '#weekView', mode: 'week' },
   { name: 'month', path: './calendar.html', ready: '#monthView', mode: 'month' },
@@ -113,7 +113,7 @@ test.describe('iPhone17 viewport and touch smoke', () => {
       await openIPhone17App(page, entry);
 
       if (entry.name === 'drive') {
-        await page.goto('./index.html', { waitUntil: 'domcontentloaded' });
+        await page.goto('./index.html?legacy=1', { waitUntil: 'domcontentloaded' });
         await expect(page.locator('.yos131-drive')).toBeVisible();
         await expect(page.locator('.yos131-primary[data-proxy="shiftButton"]')).toBeVisible();
         expect(await page.evaluate(() => Boolean(navigator.serviceWorker.controller)), 'controlled second index navigation').toBeTruthy();
@@ -324,7 +324,7 @@ test.describe('iPhone17 viewport and touch smoke', () => {
         targetSales: 30000, vehicle: '521', plannedStart: '18:46', plannedEnd: '03:30', areas: '那覇', yosUrl: '',
       }));
     });
-    await page.goto('./index.html', { waitUntil: 'domcontentloaded' });
+    await page.goto('./index.html?legacy=1', { waitUntil: 'domcontentloaded' });
 
     const hidden = page.locator('#shiftButton');
     const proxy = page.locator('.yos131-primary[data-proxy="shiftButton"]');
@@ -344,4 +344,110 @@ test.describe('iPhone17 viewport and touch smoke', () => {
     await expect(proxy).toContainText('営業開始できます');
     expect(exceptions, 'uncaught JavaScript exceptions').toEqual([]);
   });
+});
+
+
+test('default entry: approved one-screen UI and legacy recovery', async ({ page }) => {
+  const errors=[];
+  page.on('pageerror', error => errors.push(error.message));
+  await page.goto('./index.html', {waitUntil:'domcontentloaded'});
+  await expect(page).toHaveURL(/\/ui-v2\.html$/);
+  await expect(page.locator('#drop-btn')).toBeVisible();
+  await expect(page.locator('#photo-btn')).toBeVisible();
+  await expect(page.locator('#sync-status')).toContainText('Notion未接続');
+  const pageOverflow=await page.evaluate(() => document.documentElement.scrollHeight > innerHeight + 1);
+  expect(pageOverflow).toBe(false);
+  await page.locator('[data-page="strategy"]').click();
+  await expect(page.locator('#strategy-view')).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollHeight > innerHeight + 1)).toBe(false);
+  await page.locator('[data-page="history"]').click();
+  await page.locator('#history-info-btn').click();
+  await expect(page).toHaveURL(/\/index\.html\?legacy=1$/);
+  await expect(page.locator('.yos131-primary[data-proxy="shiftButton"]')).toBeVisible();
+  expect(errors).toEqual([]);
+});
+
+
+test('v2 in-app browser heights: all sales text and strategy rows fit their boxes', async ({page}) => {
+  await page.clock.setFixedTime(new Date('2026-11-17T17:01:00+09:00'));
+  for (const [width,height] of [[393,650],[393,631],[320,568],[320,650],[375,700],[390,799],[402,874]]) {
+    await page.setViewportSize({width,height});
+    await page.goto('./ui-v2.html', {waitUntil:'domcontentloaded'});
+    // compact cockpit primary hierarchy: one current period and two verified counters.
+    const cockpit=await page.evaluate(() => {
+      const visible=e=>getComputedStyle(e).display!=='none'&&e.getBoundingClientRect().height>0;
+      return {
+        periodRows:[...document.querySelectorAll('.period')].filter(visible).length,
+        kpiCells:[...document.querySelectorAll('.kpis>div')].filter(visible).length,
+        dropFont:parseFloat(getComputedStyle(document.querySelector('#drop-btn .copy b')).fontSize),
+        statusFont:parseFloat(getComputedStyle(document.querySelector('.status-label')).fontSize),
+      };
+    });
+    expect(cockpit.periodRows,'only current time band shown').toBe(1);
+    expect(cockpit.kpiCells,'only measured counters shown').toBe(2);
+    expect(cockpit.dropFont,'primary action must remain legible').toBeGreaterThanOrEqual(width<=350?12:16);
+    expect(cockpit.statusFont,'shift status must remain legible').toBeGreaterThanOrEqual(width<=350?15:17);
+    await expect(page.locator('#photo-btn')).toContainText('日報写真');
+    let problems = await page.evaluate(() => {
+      const items=[...document.querySelectorAll('.quick .copy b,.quick .copy small,.decision strong,.decision span,.period b,.period small,.kpi-label,.kpi-value,.footer-card span')];
+      const active = element => {const style=getComputedStyle(element);return style.display!=='none' && style.visibility!=='hidden' && element.getBoundingClientRect().height>0};
+      const bad=items.filter(active).filter(element=>element.scrollWidth>element.clientWidth+1 || element.scrollHeight>element.clientHeight+2).map(element=>element.textContent.trim());
+      const main=document.querySelector('.view.active');
+      if(main.scrollHeight>main.clientHeight+2)bad.push('sales main internally overflowing');
+      return bad;
+    });
+    expect(problems, 'sales text overflow at '+width+'x'+height).toEqual([]);
+    await page.locator('[data-page="strategy"]').click();
+    await expect(page.locator('.strat-row.selected')).toHaveAttribute('data-strat','0');
+    problems=await page.evaluate(() => {
+      const bad=[];
+      const rows=[...document.querySelectorAll('.strat-row')];
+      rows.forEach((row,i) => {
+        const container=row.getBoundingClientRect();
+        for(const selector of ['time','b','small']){
+          const child=row.querySelector(selector),rect=child.getBoundingClientRect();
+          // Secondary detail is intentionally hidden on the compact large-type view.
+          if(getComputedStyle(child).display==='none'||!rect.width||!rect.height)continue;
+          if(rect.top<container.top-0.6 || rect.bottom>container.bottom+0.6 || rect.left<container.left-1 || rect.right>container.right+1)
+            bad.push(i+' '+selector+' is outside its row');
+          if(child.scrollWidth>child.clientWidth+1 || child.scrollHeight>child.clientHeight+2)
+            bad.push(i+' '+selector+' text clipped');
+        }
+      });
+      const main=document.querySelector('.view.active');
+      if(main.scrollHeight>main.clientHeight+2)bad.push('strategy main internally overflowing');
+      if(document.documentElement.scrollHeight>innerHeight+1)bad.push('page scroll');
+      return bad;
+    });
+    expect(problems,'strategy text overlap at '+width+'x'+height).toEqual([]);
+  }
+});
+
+
+test('M100: safe-stop checklist opens without changing ride records or viewport', async ({page}) => {
+  const errors=[];
+  page.on('pageerror', error => errors.push(error.message));
+  for(const [width,height] of [[320,568],[393,650],[402,874]]){
+    await page.setViewportSize({width,height});
+    await page.goto('./ui-v2.html',{waitUntil:'domcontentloaded'});
+    const before=await page.evaluate(() => localStorage.getItem('yos-taxi-ui-v2-live-20261117'));
+    await page.locator('[data-page="strategy"]').click();
+    const btn=page.locator('#m100-rule-btn');
+    await expect(btn).toBeVisible();
+    expect(await page.evaluate(() => document.documentElement.scrollHeight > innerHeight+1)).toBe(false);
+    await btn.click();
+    await expect(page.locator('#modal.m100-open')).toBeVisible();
+    await expect(page.locator('#modal-title')).toContainText('M100');
+    for(const n of [1,2,3,4,5,6])await expect(page.locator('#modal-body')).toContainText(n+'｜');
+    await expect(page.locator('#modal-body')).toContainText('自動学習はまだ行いません');
+    await expect(page.locator('#modal-body')).toContainText('強制移動ではない');
+    await page.locator('#close-modal').click();
+    await expect(page.locator('#modal')).not.toBeVisible();
+    await page.locator('[data-page="sales"]').click();
+    await expect(page.locator('#drop-btn')).toBeVisible();
+    await expect(page.locator('#photo-btn')).toBeVisible();
+    const after=await page.evaluate(() => localStorage.getItem('yos-taxi-ui-v2-live-20261117'));
+    expect(after,'M100 guidance must not mutate shift or ride records').toBe(before);
+  }
+  expect(errors).toEqual([]);
 });

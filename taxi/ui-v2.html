@@ -1,0 +1,335 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#04152a">
+<link rel="manifest" href="./manifest.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>YOS TAXI｜那覇夜勤ダッシュボード（試作）</title>
+<style>
+:root{color-scheme:dark;--bg:#031020;--navy:#061c31;--panel:#071f35;--edge:#5da9cf;--gold:#ffcb32;--cyan:#27e6ee;--dim:#b4cde2;--white:#f4f8ff;--green:#4cf172;--unit:1;--safe-top:env(safe-area-inset-top,0px);--safe-bottom:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#020b18}body{color:var(--white);font:-apple-system-body;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;-webkit-font-smoothing:antialiased}button,input{font:inherit}button{cursor:pointer;-webkit-tap-highlight-color:transparent}button:focus-visible{outline:2px solid #fff5a9;outline-offset:2px}svg{fill:none;stroke:currentColor;stroke-linecap:round;stroke-linejoin:round;stroke-width:1.9}
+.app{position:relative;margin:auto;width:100%;max-width:460px;height:100vh;height:100dvh;display:flex;flex-direction:column;overflow:hidden;background:radial-gradient(ellipse at 79% 9%,#15416a 0%,transparent 31%),linear-gradient(180deg,#051c34 0%,#021021 40%,#031323 100%);box-shadow:0 0 0 1px #28506f4d}
+.header{position:relative;flex:0 0 auto;min-height:calc(99px + var(--safe-top));padding:calc(17px + var(--safe-top)) 19px 8px 19px;overflow:hidden;display:flex;align-items:flex-end}
+.mount{position:absolute;inset:auto 0 0 0;width:100%;height:58px;pointer-events:none;opacity:.75;stroke:none!important}.header-inner{position:relative;z-index:1;display:flex;align-items:center;gap:12px;width:100%;padding-bottom:4px}.slash{width:9px;height:38px;background:linear-gradient(#fff283,#f5b900);transform:skew(-23deg);border-radius:3px;box-shadow:0 0 22px #ffd73080;flex:0 0 auto}.branding h1{font-style:italic;font-weight:950;letter-spacing:.015em;margin:0;font-size:26px;line-height:1.06;text-shadow:0 2px 5px #0009}.branding p{font-size:12px;letter-spacing:.035em;margin:5px 0 0;color:#ebf0f8}.preview-id{margin-left:auto;align-self:start;border:1px solid #597590;border-radius:50px;color:#b1d4e9;font-size:9px;font-weight:850;padding:4px 6px;white-space:nowrap;background:#09243bce}
+.view{display:none;flex:1 1 0;min-height:0;padding:4px 12px 0;overflow:hidden;flex-direction:column;gap:clamp(6px,1.1dvh,11px)}.view.active{display:flex}.panel{border:1px solid #519fc9;box-shadow:inset 0 0 26px #0b659c12,0 6px 22px #0004;background:linear-gradient(160deg,#082a45 0%,#04182d 74%);border-radius:16px;min-width:0}
+.status-card{min-height:49px;flex:0 0 49px;padding:7px 11px;display:flex;align-items:center;gap:10px;border-radius:16px;width:100%;color:var(--white);text-align:left}.status-dot{width:15px;height:15px;border-radius:50%;background:var(--green);box-shadow:0 0 9px 4px #2bf4578c;flex:0 0 auto}.status-dot.off{background:#90a6b8;box-shadow:0 0 4px #486c8a}.status-dot.end{background:#ffbb56;box-shadow:0 0 6px #ffbb565a}.status-label{font-size:18px;font-weight:900;letter-spacing:.01em;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.status-divider{height:27px;border-left:1px solid #6baccd;margin-left:auto;flex:0 0 auto}.status-note{font-size:11px;padding:7px 8px;border:1px solid #618fac;background:#0e314e;border-radius:40px;white-space:nowrap;color:#e3edf7;flex:0 0 auto}
+.sales-card{flex:0 0 104px;min-height:104px;padding:12px 14px 10px;display:flex;flex-direction:column;justify-content:space-between}.metrics{display:grid;grid-template-columns:1.55fr 1fr .85fr;align-items:center;gap:0}.metrics>div{min-width:0}.metrics>div+div{border-left:1px solid #578eae;padding-left:12px}.metrics span{display:block;font-size:12px;white-space:nowrap;color:#edf4fc}.metrics strong{display:block;line-height:1.05;font-weight:940;letter-spacing:-.03em;white-space:nowrap;margin-top:6px;font-size:21px}.metrics .main-value{font-size:28px}.metrics .gold{color:#ffdf3d}.bar{width:100%;height:10px;border-radius:20px;background:#324f65;overflow:hidden}.bar b{display:block;height:100%;width:0;background:linear-gradient(90deg,#fff16d,#ffcc31);border-radius:20px;box-shadow:0 0 15px #ffd84ab5}
+.quick{display:grid;grid-template-columns:1fr 1fr;gap:8px;flex:0 0 68px;min-height:68px}.quick button{border-radius:15px;border:2px solid #ffdf72;display:flex;align-items:center;justify-content:center;gap:6px;min-width:0;padding:9px 6px;box-shadow:0 0 14px #ffbf2635,0 7px 13px #0006;color:#130f05;background:linear-gradient(165deg,#ffe178,#ffc630 61%,#ffa200);font-weight:900;text-align:left}.quick .photo{background:linear-gradient(150deg,#2b6a9a,#0a3455 70%);border-color:#4bdeff;color:#edfaff;box-shadow:0 0 14px #06c8ff35,0 7px 13px #0006}.quick svg{width:27px;height:27px;flex:0 0 auto;stroke-width:2.2}.quick .copy{display:flex;flex-direction:column;gap:4px;min-width:0}.quick .copy b{font-size:16px;white-space:nowrap;letter-spacing:-.04em}.quick .copy small{font-size:10px;white-space:nowrap;font-weight:600}.quick .arrow{width:15px;height:15px}
+.decision{flex:0 0 85px;min-height:85px;border:1.5px solid #2af6fa;border-radius:17px;padding:10px 13px;background:linear-gradient(130deg,#005161,#034057 54%,#06213b);position:relative;overflow:hidden;box-shadow:0 0 15px #18e5ff28;display:flex;flex-direction:column;justify-content:center;gap:5px;text-align:left;width:100%;color:white}.decision:after{content:"";position:absolute;right:-6px;top:-12px;width:123px;height:110px;opacity:.38;background:repeating-linear-gradient(140deg,transparent 0 22px,#2e779a 23px 25px,transparent 26px 45px),repeating-linear-gradient(45deg,transparent 0 17px,#2b6583 18px 20px,transparent 21px 37px);transform:rotate(8deg);pointer-events:none}.decision small{font-size:12px;font-weight:900;color:#45eef5;position:relative;z-index:1}.decision strong{font-size:17px;font-weight:940;color:#ffe059;letter-spacing:-.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;position:relative;z-index:1;max-width:94%}.decision span{font-size:12px;color:#f5f6fd;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;position:relative;z-index:1}
+.periods{flex:1 1 0;min-height:104px;display:flex;flex-direction:column;justify-content:space-around;padding:3px 4px;border-radius:14px}.period{height:33.3333%;min-height:0;width:100%;display:grid;grid-template-columns:66px 1fr auto 12px;gap:8px;align-items:center;background:transparent;border:0;border-radius:9px;padding:0 7px;color:#edf3fd;text-align:left}.period+ .period{border-top:1px solid #335774}.period time{font-size:15px;text-align:center;font-weight:950;background:#183d5d;border-radius:7px;padding:6px 2px;white-space:nowrap}.period b{font-size:15px;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.period small{font-size:11px;white-space:nowrap;color:#bfd0dc}.period svg{width:13px;height:13px}.period.selected{background:linear-gradient(110deg,#56420c88,#392a0963);outline:1px solid #ffbc11;color:#ffdf4c}.period.selected time{color:#ffdb34;background:#4d3710}.period.selected small{color:#ebdbb8}
+.kpis{flex:0 0 77px;min-height:77px;border-radius:15px;padding:11px 5px;display:grid;grid-template-columns:.85fr 1.22fr 1.05fr .91fr;align-items:center}.kpis>div{min-width:0;text-align:center;padding:0 3px;min-height:55px;display:flex;flex-direction:column;justify-content:center}.kpis>div+div{border-left:1px solid #5e9abd}.kpi-label{display:flex;align-items:center;justify-content:center;gap:4px;font-size:10px;white-space:nowrap;font-weight:800}.kpi-label svg{width:14px;height:14px}.kpi-value{display:block;font-size:20px;font-weight:950;white-space:nowrap;margin-top:6px;letter-spacing:-.04em}.kpis .pending,.kpis .pending .kpi-label{color:#ffda38}.kpis .pending .kpi-value{font-size:19px}
+.footer-card{flex:0 0 31px;min-height:31px;border:1px solid #315b78;border-radius:20px;background:#091f36;padding:5px 8px;display:flex;align-items:center;justify-content:center;gap:6px;white-space:nowrap;font-size:10px;color:#c7d9e8;overflow:hidden}.footer-card span{overflow:hidden;text-overflow:ellipsis;max-width:48%}.footer-card i{border-left:1px solid #587e98;height:15px;flex:0 0 auto}.footer-card svg{width:13px;height:13px;flex:0 0 auto}
+.nav{flex:0 0 calc(73px + var(--safe-bottom));height:calc(73px + var(--safe-bottom));border-top:1px solid #33698f;background:linear-gradient(#072741,#03152b);display:grid;grid-template-columns:repeat(4,1fr);padding:7px 8px calc(8px + var(--safe-bottom));gap:4px;margin-top:8px}.nav button{border:0;background:none;color:#c8d9ec;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:5px;font-size:12px;font-weight:900;position:relative}.nav button svg{height:22px;width:22px}.nav button.active{color:#ffdc37}.nav button.active:after{content:"";position:absolute;bottom:0;width:49%;height:3px;border-radius:5px;background:#ffdf37;box-shadow:0 0 12px 3px #ffe53e55}
+.view.strategy .intro{flex:0 0 100px;border:1px solid var(--cyan);border-radius:17px;background:linear-gradient(115deg,#064b60,#062b43);padding:15px;display:flex;flex-direction:column;justify-content:center;gap:7px}.view.strategy .intro small{font-size:12px;color:#52eff6;font-weight:900}.view.strategy .intro strong{font-size:19px;color:#ffe060;line-height:1.25}.view.strategy .intro p{font-size:11px;margin:0;color:#e7f6fd;line-height:1.4}.view.strategy .section-head,.view.history .section-head,.view.analysis .section-head{flex:0 0 22px;display:flex;align-items:center;gap:7px;font-weight:900;font-size:14px;margin-top:5px}.view.strategy .section-head svg{width:17px;height:17px;color:var(--cyan)}.strat-list{flex:1 1 0;min-height:0;display:flex;flex-direction:column;gap:6px}.strat-row{flex:1 1 0;border:1px solid #365c7a;border-radius:11px;background:#09233a;display:flex;align-items:center;padding:6px 9px;gap:10px;text-align:left;color:white;min-height:0}.strat-row time{font-size:15px;flex:0 0 62px;font-weight:950;color:#b7d6ed}.strat-row .strat-copy{display:flex;flex-direction:column;gap:3px;min-width:0}.strat-row b{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.strat-row small{color:#b8cede;font-size:10px;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.strat-row.selected{border-color:#ffca38;background:#2d2b1d}.strat-row.selected time,.strat-row.selected b{color:#ffe056}.rules{flex:0 0 95px;padding:11px 12px;display:flex;flex-direction:column;justify-content:center;gap:9px;font-size:11px;line-height:1.2}.rules span{display:flex;gap:6px;align-items:center}.rules svg{width:15px;height:15px;color:#68e2f0}.strategy-foot{flex:0 0 70px;padding:11px 13px;border-radius:15px;background:linear-gradient(115deg,#08617b,#083452);border:1px solid #42c7e3;display:flex;flex-direction:column;justify-content:center;gap:5px}.strategy-foot span{color:#aaf5fd;font-size:11px;font-weight:800}.strategy-foot strong{color:#ffe363;font-size:17px;font-weight:900}
+.view.history .history-list{flex:1 1 0;overflow:auto;min-height:0;padding:4px 0}.log{width:100%;color:#f3f7ff;text-align:left;border:1px solid #315974;background:#09213a;border-radius:12px;padding:11px;margin-bottom:7px;display:flex;align-items:center;justify-content:space-between;gap:12px}.log.voided{opacity:.65;border-color:#52718a}.log b{font-size:14px}.log small{font-size:10px;color:#b5cbde}.log .badge{border:1px solid #50718b;padding:5px 7px;border-radius:20px;font-size:10px;color:#b4d2ea;white-space:nowrap}.view.history .history-sub{flex:0 0 67px;font-size:11px;line-height:1.7;padding:9px 12px}.view.history .history-controls{flex:0 0 45px;display:flex;gap:8px}.secondary-btn{width:100%;border:1px solid #4e9bb6;background:#123b59;border-radius:12px;color:#dcf3ff;font-weight:900;font-size:12px}.view.analysis .statgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;flex:0 0 145px}.stat{border:1px solid #346c89;background:#0c2b43;border-radius:14px;padding:14px 11px}.stat small{font-size:11px;color:#b4c9d9}.stat strong{display:block;font-size:20px;margin-top:9px}.view.analysis .analysis-note{padding:13px;font-size:12px;line-height:1.65}.view.analysis .analysis-memo{flex:1 1 0;display:flex;flex-direction:column;justify-content:center;padding:16px;font-size:12px;line-height:2}
+.modal{position:fixed;z-index:9;inset:0;background:#000a;display:none;align-items:flex-end;justify-content:center}.modal.open{display:flex}.sheet{width:min(100%,460px);border:1px solid #4da9c5;background:linear-gradient(#0a3554,#07192e);border-radius:20px 20px 0 0;padding:20px 17px calc(24px + var(--safe-bottom));box-shadow:0 -20px 50px #000a;max-height:90dvh;overflow:auto}.sheet h2{font-size:19px;margin:0 0 8px}.sheet p{color:#c8dbea;font-size:12px;line-height:1.6}.sheet .buttonrow{display:flex;gap:10px;margin-top:15px}.sheet .buttonrow button{border-radius:12px;min-height:48px;flex:1;background:#194460;border:1px solid #5384a3;color:white;font-weight:900}.sheet .buttonrow button.primary{background:linear-gradient(#ffdc65,#ffba26);border-color:#ffedac;color:#1a160b}.sheet .sheet-quiet{color:#aec6d9;font-size:11px}.sheet .close{float:right;background:none;border:0;color:#bad0df;font-size:24px;line-height:1}
+.toast{position:fixed;z-index:15;left:50%;bottom:calc(86px + var(--safe-bottom));transform:translate(-50%,130%);background:#0f485c;color:#ebffff;box-shadow:0 8px 35px #000a;border:1px solid #21f5ff;padding:11px 14px;border-radius:14px;font-size:12px;font-weight:850;max-width:min(93%,430px);opacity:0;pointer-events:none;transition:transform .15s,opacity .15s}.toast.show{opacity:1;transform:translate(-50%,0)}
+@media(min-height:771px) and (max-height:850px){.status-card{min-height:46px;flex-basis:46px}.sales-card{min-height:95px;flex-basis:95px;padding:9px 12px}.quick{min-height:62px;flex-basis:62px}.decision{min-height:75px;flex-basis:75px}.kpis{min-height:70px;flex-basis:70px;padding:7px 4px}.footer-card{min-height:28px;flex-basis:28px}.nav{flex-basis:calc(68px + var(--safe-bottom));height:calc(68px + var(--safe-bottom));margin-top:5px}}
+@media(max-height:770px){.header{min-height:calc(79px + var(--safe-top));padding-top:calc(8px + var(--safe-top))}.branding h1{font-size:23px}.status-card{min-height:43px;flex-basis:43px}.sales-card{min-height:93px;flex-basis:93px;padding:8px 12px}.quick{min-height:60px;flex-basis:60px}.quick .copy b{font-size:14px}.decision{min-height:72px;flex-basis:72px}.kpis{min-height:66px;flex-basis:66px;padding:5px}.kpi-value{font-size:17px}.nav{flex-basis:calc(60px + var(--safe-bottom));height:calc(60px + var(--safe-bottom));margin-top:3px}.view{gap:5px;padding-top:3px}.footer-card{flex-basis:27px;min-height:27px}.period{grid-template-columns:52px 1fr auto 10px;gap:6px}.period time{font-size:12px}.period b{font-size:12px}.period small{font-size:9px}.metrics .main-value{font-size:25px}.status-label{font-size:16px}}
+@media(max-height:630px){.header{min-height:calc(58px + var(--safe-top));padding-top:calc(5px + var(--safe-top))}.slash{height:27px}.branding h1{font-size:20px}.branding p{font-size:10px}.view{gap:3px;padding-top:2px}.status-card{flex-basis:31px;min-height:31px;padding:4px 8px}.status-label{font-size:13px}.status-note{font-size:9px;padding:4px 6px}.status-divider{height:20px}.status-dot{height:11px;width:11px}.sales-card{flex-basis:65px;min-height:65px;padding:5px 8px}.metrics .main-value{font-size:21px}.metrics strong{font-size:15px;margin-top:3px}.metrics span{font-size:9px}.bar{height:7px}.quick{flex-basis:43px;min-height:43px;gap:4px}.quick button{border-radius:10px;padding:4px}.quick svg{height:20px;width:20px}.quick .copy b{font-size:11px}.quick .copy small{font-size:8px}.quick .arrow{width:12px;height:12px}.decision{flex-basis:56px;min-height:56px;padding:5px 8px;gap:2px}.decision small{font-size:10px}.decision strong{font-size:12px}.decision span{font-size:10px}.periods{min-height:75px;padding:2px}.period{grid-template-columns:48px 1fr auto 10px;padding:0 3px;gap:4px}.period time{font-size:10px;padding:3px 0}.period b{font-size:10px}.period small{font-size:8px}.kpis{flex-basis:50px;min-height:50px;padding:4px 2px}.kpi-label{font-size:8px;gap:2px}.kpi-label svg{width:10px;height:10px}.kpi-value{font-size:14px;margin-top:3px}.kpis .pending .kpi-value{font-size:14px}.kpis>div{min-height:42px}.footer-card{flex-basis:20px;min-height:20px;padding:2px;font-size:8px}.nav{flex-basis:calc(45px + var(--safe-bottom));height:calc(45px + var(--safe-bottom));margin-top:2px;padding:2px 4px calc(2px + var(--safe-bottom))}.nav button{font-size:9px;gap:2px}.nav button svg{height:16px;width:16px}.view.strategy .intro{flex-basis:68px;padding:9px;gap:3px}.view.strategy .intro strong{font-size:13px}.view.strategy .intro small,.view.strategy .intro p{font-size:9px}.view.strategy .section-head,.view.history .section-head,.view.analysis .section-head{flex-basis:17px;font-size:10px;margin-top:0}.strat-list{gap:3px}.strat-row{padding:3px 6px}.strat-row time{font-size:10px;flex-basis:44px}.strat-row b{font-size:10px}.strat-row small{font-size:8px}.rules{flex-basis:67px;padding:6px;font-size:9px;gap:4px}.rules svg{width:10px;height:10px}.strategy-foot{flex-basis:48px;padding:6px;gap:2px}.strategy-foot span{font-size:9px}.strategy-foot strong{font-size:12px}.view.analysis .statgrid{flex-basis:110px}.view.history .history-sub{flex-basis:57px;font-size:9px}.view.history .history-controls{flex-basis:37px}}
+@media(max-width:350px){.header{padding-left:13px;padding-right:10px}.view{padding-left:8px;padding-right:8px}.brandmark{margin-right:0}.preview-id{display:none}.status-note{font-size:10px}.metrics .main-value{font-size:23px}.metrics strong{font-size:17px}.metrics span{font-size:11px}.quick .copy b{font-size:13px}.quick .copy small{font-size:9px}.period b{font-size:12px}.period small{font-size:9px}.kpi-label{font-size:9px}.kpi-value{font-size:16px}.decision strong{font-size:14px}}
+
+/* iPhone in-app browser: give all five strategy rows enough space for both text lines.
+   Earlier 631–770px views compressed the rows below their text's intrinsic height. */
+@media (min-height:631px) and (max-height:850px){
+ .view.strategy{gap:4px}
+ .view.strategy .intro{flex:0 0 75px;min-height:0;padding:8px 12px;gap:3px}
+ .view.strategy .intro small{font-size:11px;line-height:1.2}
+ .view.strategy .intro strong{font-size:16px;line-height:1.25}
+ .view.strategy .intro p{font-size:10px;line-height:1.2}
+ .view.strategy .section-head{flex:0 0 18px;min-height:18px;margin-top:1px;font-size:12px}
+ .view.strategy .strat-list{gap:4px}
+ .view.strategy .strat-row{padding:3px 8px;gap:8px}
+ .view.strategy .strat-row time{font-size:13px;flex-basis:55px}
+ .view.strategy .strat-row .strat-copy{gap:1px;flex:1 1 auto;min-width:0}
+ .view.strategy .strat-row b{font-size:12px;line-height:1.25}
+ .view.strategy .strat-row small{font-size:10px;line-height:1.15;display:block;white-space:normal;-webkit-line-clamp:unset;overflow:visible}
+ .view.strategy .rules{flex:0 0 65px;min-height:65px;padding:6px 10px;gap:4px;font-size:10px;line-height:1.2}
+ .view.strategy .rules svg{flex:0 0 13px;width:13px;height:13px}
+ .view.strategy .strategy-foot{flex:0 0 48px;min-height:48px;padding:6px 10px;gap:2px}
+ .view.strategy .strategy-foot span{font-size:10px;line-height:1.2}
+ .view.strategy .strategy-foot strong{font-size:14px;line-height:1.2}
+ .view.strategy .footer-card{flex:0 0 23px;min-height:23px;padding:3px 6px;font-size:9px}
+}
+
+/* Keep primary actions legible at in-app browser widths. */
+.quick{gap:6px}
+.quick button{gap:4px;padding:6px 4px}
+.quick svg{width:23px;height:23px}
+.quick .arrow{width:12px;height:12px}
+.quick .copy b{font-size:14px;letter-spacing:-.05em}
+.quick .copy small{font-size:10px}
+.decision{padding:9px 12px;gap:3px}
+.decision small{line-height:1.18}
+.decision strong{line-height:1.12}
+.decision span{line-height:1.15}
+@media (min-height:631px) and (max-height:850px){
+ .view.sales .decision{padding:6px 10px;gap:2px}
+ .view.sales .decision small{font-size:11px}
+ .view.sales .decision strong{font-size:15px;line-height:1.16}
+ .view.sales .decision span{font-size:11px}
+}
+@media (min-height:631px) and (max-height:670px){
+ .view.sales{gap:4px}
+ .view.sales .sales-card{flex-basis:90px;min-height:90px}
+ .view.sales .kpis{flex-basis:64px;min-height:64px}
+}
+@media (max-height:630px){
+ .decision{padding:2px 7px;gap:0}
+ .decision small{line-height:1.1}
+ .decision strong{line-height:1.1}
+ .decision span{line-height:1.1}
+}
+@media (max-width:350px){
+ .quick svg{width:18px;height:18px}
+ .quick .arrow{width:10px;height:10px}
+ .quick button{gap:2px;padding:4px 2px}
+ .quick .copy b{font-size:11px;letter-spacing:-.05em}
+ .quick .copy small{font-size:8px}
+}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{transition:none!important}}
+
+/* YOS TAXI ACCESSIBLE / LARGE TYPE (approved simplified single-viewport UI).
+   Keep all persisted keys, buttons and shift/ride logic exactly as before. */
+.header{min-height:calc(clamp(55px,10dvh,76px) + var(--safe-top));padding:calc(6px + var(--safe-top)) 15px 6px}
+.header-inner{gap:11px}
+.branding h1{font-size:clamp(24px,6.7vw,31px)}
+.branding p{font-size:clamp(11px,3.1vw,14px)}
+.slash{height:34px}
+.view{gap:clamp(4px,.9dvh,9px);padding:4px 12px 0}
+.view.sales .status-card{flex:0 0 clamp(43px,7.2dvh,59px);min-height:0;padding:5px 11px}
+.status-label{font-size:clamp(17px,4.9vw,23px)}
+.status-note{font-size:clamp(10px,2.8vw,13px);padding:6px 7px}
+.view.sales .sales-card{flex:0 0 clamp(77px,14dvh,114px);min-height:0;padding:8px 12px}
+.metrics span{font-size:clamp(12px,3.15vw,15px)}
+.metrics strong{font-size:clamp(20px,5.6vw,29px)}
+.metrics .main-value{font-size:clamp(28px,8.5vw,41px)}
+.metrics>div+div{padding-left:clamp(7px,2vw,12px)}
+.view.sales .quick{flex:0 0 clamp(60px,11.6dvh,88px);min-height:0;gap:7px}
+.quick button{padding:5px 5px;gap:4px;min-width:0}
+.quick svg{width:clamp(20px,6.1vw,27px);height:clamp(20px,6.1vw,27px)}
+.quick .arrow{width:12px;height:12px}
+.quick .copy b{font-size:clamp(16px,4.8vw,21px);white-space:nowrap;line-height:1.15;letter-spacing:-.05em}
+.quick .copy small{font-size:clamp(10px,2.7vw,12px);white-space:nowrap}
+.view.sales .decision{flex:0 0 clamp(70px,12.5dvh,100px);min-height:0;padding:8px 12px;gap:5px}
+.decision small{font-size:clamp(12px,3.45vw,15px);line-height:1.18}
+.decision strong{font-size:clamp(17px,4.9vw,22px);line-height:1.14;white-space:normal;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;max-width:90%}
+.decision span{font-size:clamp(12px,3.25vw,15px);line-height:1.17}
+.view.sales .periods{flex:1 1 0;min-height:clamp(46px,8dvh,66px);padding:4px 6px}
+.period{display:none}
+.period.current{height:100%;display:grid;grid-template-columns:65px minmax(0,1fr) 12px;gap:9px;padding:0 7px}
+.period.current time{font-size:clamp(15px,4.2vw,18px);padding:7px 1px}
+.period.current b{font-size:clamp(16px,4.75vw,21px)}
+.period small{display:none}
+.view.sales .kpis{flex:0 0 clamp(60px,10.7dvh,81px);min-height:0;grid-template-columns:1fr 1fr;padding:5px}
+.kpis>div:nth-child(2),.kpis>div:nth-child(3){display:none}
+.kpis>div:nth-child(4){border-left:1px solid #5e9abd}
+.kpis>div{min-height:45px}
+.kpi-label{font-size:clamp(13px,3.7vw,16px)}
+.kpi-label svg{width:clamp(16px,4.4vw,20px);height:clamp(16px,4.4vw,20px)}
+.kpi-value,.kpis .pending .kpi-value{font-size:clamp(23px,6.5vw,29px);margin-top:5px}
+.view.sales .footer-card{flex:0 0 24px;min-height:0}
+.nav{flex:0 0 calc(clamp(55px,9dvh,75px) + var(--safe-bottom));height:calc(clamp(55px,9dvh,75px) + var(--safe-bottom));margin-top:4px;padding:5px 7px calc(6px + var(--safe-bottom))}
+.nav button{font-size:clamp(12px,3.6vw,15px);gap:3px}
+.nav button svg{width:clamp(22px,5.6vw,27px);height:clamp(22px,5.6vw,27px)}
+/* The strategy tab is a readable index; tap a row for its full wording. */
+.view.strategy .intro{flex:0 0 clamp(75px,12.7dvh,103px);padding:9px 13px;gap:5px}
+.view.strategy .intro small{font-size:clamp(12px,3.25vw,15px)}
+.view.strategy .intro strong{font-size:clamp(17px,4.75vw,21px);line-height:1.18}
+.view.strategy .intro p{font-size:clamp(12px,3.3vw,14px);line-height:1.24}
+.view.strategy .section-head{flex:0 0 22px;min-height:0;font-size:clamp(13px,3.6vw,17px);margin-top:0}
+.view.strategy .strat-list{flex:1 1 0;min-height:clamp(195px,31dvh,235px);gap:5px}
+.view.strategy .strat-row{padding:3px 9px;gap:12px;min-height:0}
+.view.strategy .strat-row time{font-size:clamp(15px,4.2vw,18px);flex:0 0 55px}
+.view.strategy .strat-row b{font-size:clamp(16px,4.4vw,20px);line-height:1.25}
+.view.strategy .strat-row small{display:none}
+.view.strategy .rules{flex:0 0 clamp(55px,10dvh,78px);padding:7px 12px;gap:4px;font-size:clamp(13px,3.7vw,16px)}
+.view.strategy .rules span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.view.strategy .rules span:nth-child(3){display:none}
+.view.strategy .rules svg{height:14px;width:14px;flex:0 0 auto}
+.view.strategy .strategy-foot{flex:0 0 clamp(46px,8dvh,63px);padding:7px 11px;gap:3px}
+.view.strategy .strategy-foot span{font-size:clamp(11px,2.9vw,13px)}
+.view.strategy .strategy-foot strong{font-size:clamp(14px,3.8vw,18px);line-height:1.14;white-space:normal}
+.view.strategy .footer-card{flex:0 0 23px;min-height:0;font-size:10px;padding:3px 6px}
+/* Smaller chat-browser viewports get increased hierarchy without creating scrolling. */
+@media(max-height:700px){
+ .header{min-height:calc(56px + var(--safe-top))}
+ .view{gap:5px}
+ .view.sales .status-card{flex-basis:43px}
+ .view.sales .sales-card{flex-basis:78px}
+ .view.sales .quick{flex-basis:66px}
+ .view.sales .decision{flex-basis:70px;gap:3px}
+ .view.sales .kpis{flex-basis:60px}
+ .view.sales .footer-card{flex-basis:23px}
+ .view.strategy .intro{flex-basis:77px}
+ .view.strategy .strat-list{min-height:193px}
+ .view.strategy .rules{flex-basis:56px}
+ .view.strategy .strategy-foot{flex-basis:49px}
+ .view.strategy .footer-card{display:none}
+ .nav{flex-basis:calc(56px + var(--safe-bottom));height:calc(56px + var(--safe-bottom))}
+}
+@media(max-height:630px){
+ .header{min-height:calc(52px + var(--safe-top));padding-top:calc(4px + var(--safe-top))}
+ .view{gap:4px}
+ .view.sales .status-card{flex-basis:39px}
+ .view.sales .sales-card{flex-basis:68px}
+ .view.sales .quick{flex-basis:59px}
+ .view.sales .decision{flex-basis:66px}
+ .view.sales .periods{min-height:43px}
+ .view.sales .kpis{flex-basis:55px}
+ .view.sales .footer-card{flex-basis:20px}
+ .view.strategy .intro{flex-basis:69px}
+ .view.strategy .section-head{flex-basis:20px}
+ .view.strategy .strat-list{min-height:182px;gap:3px}
+ .view.strategy .rules{flex-basis:49px;font-size:11px}
+ .view.strategy .strategy-foot{flex-basis:43px}
+ .nav{flex-basis:calc(50px + var(--safe-bottom));height:calc(50px + var(--safe-bottom));margin-top:2px}
+}
+@media(max-width:350px){
+ .quick .copy b{font-size:13px}
+ .quick .copy small{font-size:9px}
+ .quick svg{height:19px;width:19px}
+ .status-label{font-size:16px}
+ .view.strategy .strat-row b{font-size:15px}
+ .view.strategy .strat-row time{font-size:14px;flex-basis:45px}
+ .period.current{grid-template-columns:52px minmax(0,1fr) 11px;gap:5px}
+ .period.current b{font-size:15px}
+}
+
+.view.sales{justify-content:space-between}
+.view.sales .periods{flex:0 0 clamp(55px,9.5dvh,75px);min-height:0}
+@media(max-height:700px){.view.sales .periods{flex-basis:58px}}
+@media(max-height:630px){
+ .view.sales .periods{flex-basis:51px}
+ .view.sales .decision{flex-basis:70px}
+ .view.sales .decision strong{font-size:15px}
+}
+
+/* Safari standalone safe areas at mid-height iPhones */
+@media(min-height:701px) and (max-height:850px){
+ .view.sales .sales-card{flex-basis:clamp(77px,12dvh,98px)}
+ .view.sales .quick{flex-basis:clamp(60px,10.2dvh,79px)}
+ .view.sales .decision{flex-basis:clamp(70px,11dvh,91px)}
+ .view.strategy .strat-list{min-height:clamp(185px,27dvh,211px)}
+ .view.strategy .intro{flex-basis:clamp(75px,11dvh,92px)}
+}
+
+/* M100: reuse the existing strategy-foot slot, with no added scroll area. */
+.strategy-foot{width:100%;text-align:left;font:inherit;cursor:pointer}
+.strategy-foot:focus-visible{outline:2px solid #fff5a9;outline-offset:2px}
+.modal.m100-open .sheet p{font-size:15px;line-height:1.7;white-space:pre-line}
+</style>
+</head>
+<body>
+<svg xmlns="http://www.w3.org/2000/svg" style="width:0;height:0;position:absolute;overflow:hidden" aria-hidden="true">
+<symbol id="icon-car" viewBox="0 0 24 24"><path d="M4.5 15.5h15l-1.2-5.1a2 2 0 0 0-2-1.7H7.7a2 2 0 0 0-2 1.7l-1.2 5.1Z"/><path d="M7 8.7 8 5.6h8l1 3.1M4 12h16M6.5 15.5v3M17.5 15.5v3M7.5 13h.1M16.5 13h.1"/></symbol>
+<symbol id="icon-camera" viewBox="0 0 24 24"><path d="M3 7h4l2-3h6l2 3h4v13H3z"/><circle cx="12" cy="13" r="4"/></symbol>
+<symbol id="icon-pin" viewBox="0 0 24 24"><path d="M12 22s7-6.8 7-13a7 7 0 0 0-14 0c0 6.2 7 13 7 13Z"/><circle cx="12" cy="9" r="2.5"/></symbol>
+<symbol id="icon-note" viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h6"/></symbol>
+<symbol id="icon-bars" viewBox="0 0 24 24"><path d="M5 20v-6M12 20V4M19 20v-9"/></symbol>
+<symbol id="icon-arrow" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></symbol>
+<symbol id="icon-people" viewBox="0 0 24 24"><circle cx="9" cy="7" r="3"/><path d="M3 20v-3a6 6 0 0 1 12 0v3M18 20v-3c0-2-1-3-2-4M16 5a3 3 0 0 1 0 6"/></symbol>
+<symbol id="icon-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7h.01"/></symbol>
+<symbol id="icon-refresh" viewBox="0 0 24 24"><path d="M20 8a8 8 0 0 0-14-3L3 8M3 3v5h5M4 16a8 8 0 0 0 14 3l3-3M21 21v-5h-5"/></symbol>
+<symbol id="icon-alert" viewBox="0 0 24 24"><path d="M10 4 2 20h20L14 4a2 2 0 0 0-4 0Z"/><path d="M12 9v5M12 18h.01"/></symbol>
+<symbol id="icon-coin" viewBox="0 0 24 24"><ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v4c0 1.7 3.6 3 8 3s8-1.3 8-3V6M4 10v4c0 1.7 3.6 3 8 3s8-1.3 8-3v-4M4 14v4c0 1.7 3.6 3 8 3s8-1.3 8-3v-4"/></symbol>
+<symbol id="icon-tag" viewBox="0 0 24 24"><path d="M3 12 12 3h9v9l-9 9Z"/><circle cx="17" cy="7" r="1"/></symbol>
+<symbol id="icon-link" viewBox="0 0 24 24"><path d="M9 14l6-6M8 17H7a5 5 0 0 1 0-10h3M14 7h3a5 5 0 1 1 0 10h-3"/></symbol>
+<symbol id="icon-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l4 2"/></symbol>
+<symbol id="icon-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></symbol>
+</svg>
+<div class="app" id="app">
+<header class="header">
+<svg viewBox="0 0 460 70" class="mount" preserveAspectRatio="none" aria-hidden="true"><path fill="#061e35" d="M0 63 20 59 46 63 78 48 101 55 128 45 147 52 174 46 205 54 230 42 255 57 287 49 318 31 350 42 378 21 411 31 433 25 460 33V70H0Z"/><path fill="#081d31" d="M0 67 47 58 91 65 134 52 175 60 228 52 274 63 327 44 386 52 429 44 460 47V70H0Z"/></svg>
+<div class="header-inner"><div class="slash"></div><div class="branding"><h1>YOS TAXI</h1><p>那覇・夜勤（17:00 – 05:00）</p></div><span class="preview-id">日報未同期</span></div>
+</header>
+<main class="view active sales" id="sales-view" aria-label="営業・売上画面">
+<button class="panel status-card" id="status-btn" type="button" aria-label="営業状態・営業開始終了を操作"><span class="status-dot off" id="status-dot"></span><strong class="status-label"><span id="status-label">営業前</span>・<span id="current-clock">--:--</span></strong><span class="status-divider"></span><span class="status-note" id="report-clock">日報未反映</span></button>
+<section class="panel sales-card" aria-label="売上と目標"><div class="metrics"><div><span>本日の売上</span><strong class="main-value" id="sales-value">—</strong></div><div><span>目標</span><strong id="target-value">—</strong></div><div><span>達成率</span><strong class="gold" id="progress-value">—</strong></div></div><div class="bar"><b id="progress-bar"></b></div></section>
+<div class="quick"><button type="button" id="drop-btn"><svg><use href="#icon-car"/></svg><span class="copy"><b>降車を記録</b><small>時刻を保存</small></span><svg class="arrow"><use href="#icon-arrow"/></svg></button><button type="button" class="photo" id="photo-btn"><svg><use href="#icon-camera"/></svg><span class="copy"><b>日報写真</b><small>選択・共有</small></span><svg class="arrow"><use href="#icon-arrow"/></svg></button></div>
+<input id="photo-input" type="file" accept="image/*" hidden>
+<button type="button" class="decision" id="decision-btn"><small>◎ 次の判断（仮説）</small><strong id="decision-text">那覇中心部の需要を確認</strong><span id="decision-sub">同一待機は15分を目安に再評価</span></button>
+<section class="panel periods" aria-label="時間帯別営業プラン"><button class="period" type="button" data-band="0"><time>17–22</time><b>久茂地・牧志</b><small>回転を重視</small><svg><use href="#icon-arrow"/></svg></button><button class="period" type="button" data-band="1"><time>22–02</time><b>松山・久茂地</b><small>重点（仮説）</small><svg><use href="#icon-arrow"/></svg></button><button class="period" type="button" data-band="2"><time>02–05</time><b>降車先・帰庫動線</b><small>残存需要</small><svg><use href="#icon-arrow"/></svg></button></section>
+<section class="panel kpis" aria-label="営業指標"><div><span class="kpi-label"><svg><use href="#icon-people"/></svg>降車記録</span><strong class="kpi-value" id="ride-count">0件</strong></div><div><span class="kpi-label"><svg><use href="#icon-coin"/></svg>売上時給</span><strong class="kpi-value" id="hourly-value">—</strong></div><div><span class="kpi-label"><svg><use href="#icon-tag"/></svg>平均単価</span><strong class="kpi-value" id="average-value">—</strong></div><div class="pending"><span class="kpi-label"><svg><use href="#icon-alert"/></svg>未照合</span><strong class="kpi-value" id="pending-count">0件</strong></div></section>
+<div class="footer-card"><svg><use href="#icon-info"/></svg><span id="last-reflected">日報の最終反映：なし</span><i></i><svg><use href="#icon-link"/></svg><span id="sync-status">Notion未接続</span></div>
+</main>
+<main class="view strategy" id="strategy-view" aria-label="運行戦略画面">
+<section class="intro"><small>◎ 今夜の基本戦略・検証中</small><strong id="strategy-main">松山・久茂地の需要を検証</strong><p id="strategy-detail">降車後の次客を重視。現地需要は未確認。</p></section>
+<div class="section-head"><svg><use href="#icon-clock"/></svg>17:00〜05:00｜時間帯別の戦略</div>
+<div class="strat-list"><button class="strat-row" data-strat="0"><time>17–20</time><span class="strat-copy"><b>久茂地・泉崎・旭橋</b><small>退勤・ホテル・飲食／GO・無線</small></span></button><button class="strat-row" data-strat="1"><time>20–22</time><span class="strat-copy"><b>久茂地・牧志・安里</b><small>短中距離の回転と次客獲得を重視</small></span></button><button class="strat-row" data-strat="2"><time>22–00</time><span class="strat-copy"><b>松山・久茂地・前島</b><small>深夜割増・長い付け待ちは避ける</small></span></button><button class="strat-row" data-strat="3"><time>00–02</time><span class="strat-copy"><b>松山・久茂地・若狭</b><small>帰宅需要、空車の多さに注意</small></span></button><button class="strat-row" data-strat="4"><time>02–05</time><span class="strat-copy"><b>降車地・帰庫動線</b><small>残存需要と帰庫への回送を比較</small></span></button></div>
+<div class="section-head"><svg><use href="#icon-target"/></svg>判断ルール（停車中のみ）</div>
+<div class="panel rules"><span><svg><use href="#icon-target"/></svg>5〜10分観察 → 15分で見直し</span><span><svg><use href="#icon-target"/></svg>長距離後は次客・帰路を比較</span><span><svg><use href="#icon-target"/></svg>高額客より、次の乗車までの時間を最小化</span></div>
+<button type="button" class="strategy-foot" id="m100-rule-btn" aria-label="M100営業判断の6つのルールを停車中に確認"><span>◎ M100｜営業判断の型（仮説）</span><strong>待つ・流す・移動の3択を確認 ›</strong></button>
+<div class="footer-card"><svg><use href="#icon-info"/></svg>営業実績で未検証の初期仮説。15分は強制移動の条件ではありません。</div>
+</main>
+<main class="view history" id="history-view" aria-label="記録履歴画面"><div class="section-head">端末内｜降車・乗務記録</div><div class="panel history-sub">本画面は端末内の降車時刻を保存します。日報との自動照合・Notion保存は未接続。旧UIの記録は保持しています。</div><div id="history-list" class="history-list"></div><div class="history-controls"><button class="secondary-btn" id="export-btn">JSONバックアップを保存</button><button class="secondary-btn" id="history-info-btn">旧UIの記録を開く</button></div><div class="footer-card"><svg><use href="#icon-info"/></svg>保存先：この端末内のみ。Notion未連携</div></main>
+<main class="view analysis" id="analysis-view" aria-label="営業分析画面"><div class="section-head">確認できる数値だけを表示</div><div class="statgrid"><div class="stat"><small>降車ボタン記録</small><strong id="analysis-drops">0件</strong></div><div class="stat"><small>日報の売上</small><strong>未接続</strong></div><div class="stat"><small>実車時間率</small><strong>未計測</strong></div><div class="stat"><small>空車時間</small><strong>未計測</strong></div></div><div class="panel analysis-note">過去の紙日報に降車時刻がない場合、正確な空車時間は算出できません。新しい降車タップと、日報から得る乗車時刻・乗車番号を照合できたものだけ分析に利用します。</div><div class="panel analysis-memo">計画中：<br>① 日報写真と前回写真の差分読取<br>② 降車時刻との一意な照合<br>③ Notion正本へ認証付きの安全な登録<br>④ 30乗務の実績で那覇戦略の再校正</div><div class="footer-card"><svg><use href="#icon-info"/></svg>未確認情報を実績・確定売上として扱わない</div></main>
+<nav class="nav" aria-label="画面切替"><button type="button" class="active" data-page="sales"><svg><use href="#icon-car"/></svg>営業</button><button type="button" data-page="strategy"><svg><use href="#icon-pin"/></svg>戦略</button><button type="button" data-page="history"><svg><use href="#icon-note"/></svg>履歴</button><button type="button" data-page="analysis"><svg><use href="#icon-bars"/></svg>分析</button></nav>
+<div id="modal" class="modal" role="dialog" aria-modal="true" aria-label="操作確認"><div class="sheet"><button class="close" type="button" id="close-modal" aria-label="閉じる">×</button><h2 id="modal-title">確認</h2><p id="modal-body"></p><div id="modal-actions" class="buttonrow"></div></div></div>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+</div>
+<script>
+'use strict';
+(()=>{
+ const STORE='yos-taxi-ui-v2-live-20261117';
+ const CUTOVER=8;
+ const $=id=>document.getElementById(id);
+ const instant=()=>new Date().toISOString();
+ const time=(s,seconds=false)=>new Intl.DateTimeFormat('ja-JP',{timeZone:'Asia/Tokyo',hour:'2-digit',minute:'2-digit',...(seconds?{second:'2-digit'}:{}),hour12:false}).format(new Date(s));
+ const dateKey=(d=new Date())=>{const x=new Date(d.getTime()-CUTOVER*3600000);return new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit'}).format(x)};
+ const empty=()=>({businessDate:dateKey(),shiftStart:null,shiftEnd:null,events:[],photos:[],version:1});
+ const parse=()=>{try{const s=JSON.parse(localStorage.getItem(STORE)||'null');return s?.version===1&&Array.isArray(s.events)&&Array.isArray(s.photos)?s:empty()}catch{return empty()}};
+ let state=parse(),selectedFile=null,toastHandle=null,modalAction=null;
+ const money=n=>'¥'+Math.round(n).toLocaleString('ja-JP');
+ const number=n=>typeof n==='number'&&Number.isFinite(n)?n:null;
+ const save=s=>{try{localStorage.setItem(STORE,JSON.stringify(s));state=s;return true}catch{notify('保存失敗：端末内記録は更新されませんでした');return false}};
+ function toast(msg){const box=$('toast');box.textContent=msg;box.classList.add('show');clearTimeout(toastHandle);toastHandle=setTimeout(()=>box.classList.remove('show'),3000)}
+ function notify(msg){toast(msg)}
+ function dayEvents(){return state.events.filter(e=>e.businessDate===dateKey())}
+ function drops(){return dayEvents().filter(e=>e.type==='dropoff'&&!e.voidedAt)}
+ function isActive(){return state.businessDate===dateKey()&&Boolean(state.shiftStart)&&!state.shiftEnd}
+ function isEnded(){return state.businessDate===dateKey()&&Boolean(state.shiftEnd)}
+ function withEvent(type,at){const s=structuredClone(state),id=typeof crypto.randomUUID==='function'?crypto.randomUUID():`local-${Date.now()}-${Math.random().toString(36).slice(2,9)}`;s.events.push({id,businessDate:s.businessDate,type,at,matched:false});return save(s)}
+ function stampDropoff(){const at=instant();const day=dateKey(new Date(at));if(state.businessDate!==day){toast('営業日が変わっています。営業状態を確認してください');return false}if(!isActive()){toast('先に営業を開始してください（営業状態をタップ）');return false}const last=[...dayEvents()].reverse().find(e=>e.type==='dropoff');if(last&&Date.parse(at)-Date.parse(last.at)<4000){toast('連続タップを防止しました');return false}if(withEvent('dropoff',at)){render();toast('降車 '+time(at,true)+' を記録（端末内）');return true}return false}
+ function changeShift(){const now=instant(),today=dateKey(new Date(now));if(state.businessDate!==today&&state.shiftStart&&!state.shiftEnd){toast('前回の営業が未終了です。履歴でご確認ください');return}
+ const base=state.businessDate===today?structuredClone(state):{...structuredClone(state),businessDate:today,shiftStart:null,shiftEnd:null};
+ if(!base.shiftStart){openSheet('営業を開始',`営業開始の時刻を端末に記録します。`,[{text:'開始する',primary:true,run:()=>{const s=structuredClone(base);s.shiftStart=instant();if(commitShift(s,'shift_start')){render();toast('営業開始を記録しました')}}}]);return}
+ if(!base.shiftEnd){openSheet('営業終了',`営業終了時刻を記録します。降車ボタンの未照合件数：${drops().filter(x=>!x.matched).length}件。`,[{text:'終了する',primary:true,run:()=>{const s=structuredClone(base);s.shiftEnd=instant();if(commitShift(s,'shift_end')){render();toast('営業終了を記録しました')}}}]);return}toast('この営業日は終了済みです')}
+ function commitShift(s,type){s.events.push({id:crypto.randomUUID?.()||`local-${Date.now()}`,businessDate:s.businessDate,type,at:type==='shift_start'?s.shiftStart:s.shiftEnd,matched:false});return save(s)}
+ function activeBand(d=new Date()){const h=Number(new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Tokyo',hour:'2-digit',hourCycle:'h23'}).format(d));if(h>=17&&h<22)return 0;if(h>=22||h<2)return 1;if(h>=2&&h<5)return 2;return -1}
+ const advice=[['久茂地・牧志で回転','次客までの時間を重視'],['松山・久茂地の需要','同じ待ち方は15分で見直す'],['降車先の次客を確認','帰庫までの効率も比較']];
+ const strategyDetail=['退勤・ホテル／GO・無線が中心','飲食移動は回転と次客の早さ','深夜割増。待機過多は避ける','帰宅需要を検証。供給過多に注意','降車後の再乗車と帰庫を比較'];
+ function updatePlan(){const band=activeBand(),item=advice[band]||['次の営業に向けて需要を確認','時間帯による初期仮説・現地需要は未確認'];$('decision-text').textContent=item[0];$('decision-sub').textContent=item[1];$('strategy-main').textContent=item[0];document.querySelectorAll('[data-band]').forEach(x=>{const slot=Number(x.dataset.band);x.classList.toggle('selected',slot===band);x.classList.toggle('current',slot===(band<0?0:band))});const localHour=Number(new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Tokyo',hour:'2-digit',hourCycle:'h23'}).format(new Date()));const stratSlot=localHour>=17&&localHour<20?0:localHour>=20&&localHour<22?1:localHour>=22?2:localHour<2?3:localHour>=2&&localHour<5?4:-1;document.querySelectorAll('[data-strat]').forEach(x=>x.classList.toggle('selected',Number(x.dataset.strat)===stratSlot));$('strategy-detail').textContent=stratSlot<0?'営業時間外。次回の需要は未確認':strategyDetail[stratSlot]}
+ function render(){const now=new Date();$('current-clock').textContent=time(now);const active=isActive(),ended=isEnded();$('status-label').textContent=active?'営業中':ended?'営業終了':'営業前';$('status-dot').className='status-dot '+(active?'':ended?'end':'off');const d=drops();$('ride-count').textContent=d.length+'件';$('pending-count').textContent=d.filter(e=>!e.matched).length+'件';$('analysis-drops').textContent=d.length+'件';$('report-clock').textContent='日報未反映';$('last-reflected').textContent='最終反映：なし（日報）';$('sync-status').textContent='Notion未接続';// Pending Notion integration: never infer a fare from a tap or metadata from a photograph.
+ $('sales-value').textContent='—';$('target-value').textContent='—';$('progress-value').textContent='—';$('progress-bar').style.width='0%';$('hourly-value').textContent='—';$('average-value').textContent='—';updatePlan();renderHistory()}
+ function renderHistory(){const list=$('history-list');list.replaceChildren();const events=dayEvents().slice().reverse();if(!events.length){const el=document.createElement('div');el.className='log';el.textContent='この営業日の記録はまだありません。';list.append(el)}events.forEach(e=>{const row=document.createElement(e.type==='dropoff'?'button':'div');if(e.type==='dropoff')row.type='button';row.className='log'+(e.voidedAt?' voided':'');const a=document.createElement('div');const title=document.createElement('b');title.textContent=e.type==='dropoff'?(e.voidedAt?'降車記録・取消済':'降車時刻'):e.type==='shift_start'?'営業開始':'営業終了';const caption=document.createElement('small');caption.textContent=' '+time(e.at,true)+' ・ '+(e.type==='dropoff'?(e.voidedAt?'取消履歴':'日報未照合'):'端末内記録');a.append(title,document.createElement('br'),caption);const b=document.createElement('span');b.className='badge';b.textContent=e.type==='dropoff'?'訂正':'端末内';row.append(a,b);if(e.type==='dropoff')row.addEventListener('click',()=>{openSheet(e.voidedAt?'降車記録を復帰':'降車記録を取り消す',`記録時刻 ${time(e.at,true)}。取り消しても履歴は削除しません。`,[{text:e.voidedAt?'取消を戻す':'記録を取消',primary:true,run:()=>{const s=structuredClone(state);const target=s.events.find(x=>x.id===e.id);if(!target)return;if(target.voidedAt)delete target.voidedAt;else target.voidedAt=instant();if(save(s)){render();toast('降車記録の状態を更新しました')}}}])});list.append(row)})}
+ function navigate(page){document.querySelectorAll('.view').forEach(x=>x.classList.toggle('active',x.id===page+'-view'));document.querySelectorAll('[data-page]').forEach(x=>x.classList.toggle('active',x.dataset.page===page))}
+ function openSheet(title,body,actions=[]){$('modal-title').textContent=title;$('modal-body').textContent=body;const area=$('modal-actions');area.replaceChildren();const cancel=document.createElement('button');cancel.textContent='閉じる';cancel.addEventListener('click',closeSheet);area.append(cancel);actions.forEach(a=>{const btn=document.createElement('button');btn.textContent=a.text;btn.classList.toggle('primary',a.primary===true);btn.addEventListener('click',()=>{closeSheet();a.run()});area.append(btn)});$('modal').classList.add('open')}
+ function closeSheet(){$('modal').classList.remove('open','m100-open')}
+ function handleFile(file){if(!file)return;if(!file.type.startsWith('image/')){toast('画像ファイルを選んでください');return}selectedFile=file;openSheet('日報写真を選択しました',`${file.name}\n画像は現在未送信・未保存です。共有シートが使える場合は共有先のアプリを選んでください。Notionへの自動照合は未実装です。`,[{text:'共有シートを開く',primary:true,run:sharePhoto}])}
+ async function sharePhoto(){const file=selectedFile;if(!file){toast('写真を先に選択してください');return}try{if(navigator.canShare?.({files:[file]})&&navigator.share){await navigator.share({files:[file],title:'YOS Taxi｜手書き日報',text:'YOS Taxiの日報写真です。既存の乗務記録と差分を照合してください。'});toast('共有先での取り込み結果を確認してください（Notion連携なし）')}else{openSheet('写真の共有は未対応','この環境では写真共有シートを利用できません。写真をChatGPT等へ直接共有してください。')}}catch(e){if(e?.name!=='AbortError')toast('写真を共有できませんでした')}}
+ function exportJson(){const data={disclaimer:'このファイルは新UIの端末内時刻記録です。Notion正本・紙日報の代替ではありません',state};const url=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download=`yos-taxi-local-${state.businessDate}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(url),5000)}
+ // M100 is a safe-stop checklist, not an automatic revenue predictor.
+ const m100Rules=[
+  '1｜降車前：次の一手を仮決め。降車先の次客・帰庫動線を考慮。',
+  '2｜空車時：安全な停車場所で「待つ・流す・移動」を比較。需要が未確認なら移動先を断定しない。',
+  '3｜5分で観察、10分で点検、15分で再判断、30分で原因確認。すべて暫定の見直し目安で、強制移動ではない。',
+  '4｜移動は、回送時間を含めても改善が見込める場合のみ。人気エリアへの無根拠な回送を避ける。',
+  '5｜1乗車ではなく次客獲得までの1サイクルで比較。ロング客も歓迎し、降車後の機会を含めて評価。',
+  '6｜営業後：日報の実売上・乗車数・空車時間（確認できたものだけ）を比較。30乗務を初期観察の目安にする。',
+  '【現状】M100の成果・那覇での最適時間は未実証。乗車時刻・売上・現在地・需要は新UIに未接続。自動判断や自動学習はまだ行いません。',
+  '【安全】走行中の画面操作・注視はしない。乗車拒否・違法待機・休憩削減は行わない。'
+ ];
+ function showM100(){openSheet('M100｜営業判断ルール',m100Rules.join('\n\n'));$('modal').classList.add('m100-open')}
+ $('m100-rule-btn').addEventListener('click',showM100);
+ $('status-btn').addEventListener('click',changeShift);$('drop-btn').addEventListener('click',stampDropoff);$('photo-btn').addEventListener('click',()=>$('photo-input').click());$('photo-input').addEventListener('change',e=>{handleFile(e.target.files?.[0]);e.target.value=''});$('decision-btn').addEventListener('click',()=>navigate('strategy'));document.querySelectorAll('[data-band]').forEach(x=>x.addEventListener('click',()=>{const band=Number(x.dataset.band);navigate('strategy');const target=document.querySelectorAll('[data-strat]')[[1,3,4][band]];target?.focus()}));document.querySelectorAll('[data-page]').forEach(x=>x.addEventListener('click',()=>navigate(x.dataset.page)));document.querySelectorAll('[data-strat]').forEach(x=>x.addEventListener('click',()=>{const labels=['退勤・宿泊需要を検証。GO・無線中心','飲食・観光の回転を検証','22時以降、待機過多を避ける','帰宅需要の重点候補。供給過多に注意','降車地での再乗車と帰庫動線を比較'];openSheet('時間帯別の営業方針',labels[Number(x.dataset.strat)]+'。これらは初期仮説であり、現地の需要や安全な待機可否は未確認です。')}));$('close-modal').addEventListener('click',closeSheet);$('modal').addEventListener('click',e=>{if(e.target===$('modal'))closeSheet()});$('history-info-btn').addEventListener('click',()=>{location.href='./index.html?legacy=1'});$('export-btn').addEventListener('click',exportJson);
+ render();setInterval(()=>{const now=new Date();$('current-clock').textContent=time(now);updatePlan()},30000);
+ window.YOSTaxiPreview={debugState:()=>structuredClone(state),recordDropoff:stampDropoff,navigate,activeBand};
+ if('serviceWorker' in navigator) addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js').catch(()=>{}));
+})();
+</script>
+</body>
+</html>

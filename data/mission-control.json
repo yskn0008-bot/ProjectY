@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-17T03:07:07+09:00",
+  "updated_at": "2026-11-19T01:31:25+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -13,64 +13,14 @@
   },
   "inbox": [
     {
-      "id": "github-pr-651",
-      "title": "PR #651 YOS Notification v0.3: protected capture, live Notion context and safe iPhone updater",
+      "id": "github-pr-663",
+      "title": "PR #663 YOS 日記: standalone Shortcut + existing Notion bridge + isolated signing",
       "type": "GitHub PR",
       "status": "draft",
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/651",
-      "updated_at": "2026-11-16T15:54:43Z"
-    },
-    {
-      "id": "github-pr-753",
-      "title": "PR #753 WIP: YOS Remote Web UI and secure migration boundary",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/753",
-      "updated_at": "2026-11-13T20:57:55Z"
-    },
-    {
-      "id": "github-pr-759",
-      "title": "PR #759 fix(inbox): recognize real Clarity capture headers without unsafe routing",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/759",
-      "updated_at": "2026-11-16T12:28:26Z"
-    },
-    {
-      "id": "github-pr-762",
-      "title": "PR #762 feat(notification): safeguard v0.3→v0.4 migration using common installer",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/762",
-      "updated_at": "2026-11-16T16:08:15Z"
-    },
-    {
-      "id": "github-pr-764",
-      "title": "PR #764 YOS Calendar｜Face IDパスキー認証（Googleは初回登録・復旧のみ）",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/764",
-      "updated_at": "2026-11-16T17:37:22Z"
-    },
-    {
-      "id": "github-pr-765",
-      "title": "PR #765 YOS Calendar｜Passkey backend hardening (integration into #764 only)",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/765",
-      "updated_at": "2026-11-16T17:40:17Z"
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/663",
+      "updated_at": "2026-11-18T15:25:14Z"
     },
     {
       "id": "github-pr-767",
@@ -100,17 +50,67 @@
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/769",
-      "updated_at": "2026-11-16T18:06:22Z"
+      "updated_at": "2026-11-16T18:31:56Z"
     },
     {
-      "id": "github-pr-770",
-      "title": "PR #770 [Taxi] 新UI試作｜降車ワンタップ・日報導線・那覇夜勤戦略",
+      "id": "github-pr-771",
+      "title": "PR #771 YOS Calendar｜Notionデータを承認済みUIへ安全同期（Google/Face IDなし）",
       "type": "GitHub PR",
       "status": "draft",
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/770",
-      "updated_at": "2026-11-16T17:53:10Z"
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/771",
+      "updated_at": "2026-11-16T18:16:31Z"
+    },
+    {
+      "id": "github-pr-773",
+      "title": "PR #773 fix: restore Clarity Text to verified v3 without dictation fallback",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/773",
+      "updated_at": "2026-11-16T18:54:38Z"
+    },
+    {
+      "id": "github-pr-789",
+      "title": "PR #789 feat(remote): YOS Remote Web — iPhone Scriptable WebView with native LAN appliance bridge",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/789",
+      "updated_at": "2026-11-17T07:29:19Z"
+    },
+    {
+      "id": "github-pr-818",
+      "title": "PR #818 YOS AUTOPILOT｜Clarityの日時確定タスクをDAYSTREAM標準カードへ安全に接続",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/818",
+      "updated_at": "2026-11-18T13:48:30Z"
+    },
+    {
+      "id": "github-pr-823",
+      "title": "PR #823 Clarityの時刻つきタスクを既存DAYSTREAM Webに表示",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/823",
+      "updated_at": "2026-11-18T16:30:39Z"
+    },
+    {
+      "id": "github-pr-830",
+      "title": "PR #830 YOS JOURNAL: iPhone Shortcuts 朝刊確認・通知の開発候補",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/830",
+      "updated_at": "2026-11-18T16:29:32Z"
     },
     {
       "id": "github-issue-10",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-16T18:04:45Z"
+      "updated_at": "2026-11-18T16:30:53Z"
     },
     {
       "id": "github-issue-234",
@@ -205,39 +205,39 @@
   ],
   "recently_completed": [
     {
-      "id": "github-commit-0728a7a9e9be",
-      "title": "docs(yos): enforce Notion-first work and one final cloud release",
-      "completed_at": "2026-11-16T16:14:49Z",
-      "result": "GitHub mainへ反映（0728a7a）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/0728a7a9e9bed7c49b1392f2d71c06cbfc6d7509"
+      "id": "github-commit-fe1fbbc8a6c5",
+      "title": "Publish Clarity time windows in DAYSTREAM Web (#829)",
+      "completed_at": "2026-11-18T16:24:17Z",
+      "result": "GitHub mainへ反映（fe1fbbc）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/fe1fbbc8a6c5560868fc4848dad8f375043f642f"
     },
     {
-      "id": "github-commit-e0dbea1ad02f",
-      "title": "fix(calendar): readable native-import and source links on navy settings",
-      "completed_at": "2026-11-16T15:56:03Z",
-      "result": "GitHub mainへ反映（e0dbea1）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/e0dbea1ad02fb0a2c9b6313d68377dc65ebb5ade"
+      "id": "github-commit-cc859b31a3ec",
+      "title": "journal: restore missing archive photos and refine card dividers (#828)",
+      "completed_at": "2026-11-18T16:13:14Z",
+      "result": "GitHub mainへ反映（cc859b3）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/cc859b31a3ecf6c434a71713aa8c121c613af13a"
     },
     {
-      "id": "github-commit-caa20888c764",
-      "title": "feat(calendar): approved navy calendar and day-specific habit completion",
-      "completed_at": "2026-11-16T15:49:49Z",
-      "result": "GitHub mainへ反映（caa2088）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/caa20888c764b27ebc29027d9ccc13bc9c055ca4"
+      "id": "github-commit-055a412ed96a",
+      "title": "JOURNAL: Browse today and past articles by genre or date (#827)",
+      "completed_at": "2026-11-18T16:04:10Z",
+      "result": "GitHub mainへ反映（055a412）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/055a412ed96a95696aa63c491bbf8c89ddd9f304"
     },
     {
-      "id": "github-commit-666e97d00f8a",
-      "title": "fix(calendar): approved iPhone PWA cache refresh and offline calendar route",
-      "completed_at": "2026-11-15T10:40:16Z",
-      "result": "GitHub mainへ反映（666e97d）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/666e97d00f8a3a94ea120024c5f86e30152b8f40"
+      "id": "github-commit-983406ae0868",
+      "title": "feat(taxi): add M100 provisional safe-stop decision rules",
+      "completed_at": "2026-11-18T16:00:04Z",
+      "result": "GitHub mainへ反映（983406a）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/983406ae0868b71467e79fa21ae1ab0dff3d3574"
     },
     {
-      "id": "github-commit-4b46eae6f4a8",
-      "title": "merge(calendar): approved 21-file YOS calendar, DAYSTREAM and Scriptable shared installer release",
-      "completed_at": "2026-11-15T10:30:12Z",
-      "result": "GitHub mainへ反映（4b46eae）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/4b46eae6f4a8dd94263e315a3259d19f8bac38f9"
+      "id": "github-commit-5c7f94f38d42",
+      "title": "journal: tighten text line spacing in mobile article cards (#825)",
+      "completed_at": "2026-11-18T15:53:05Z",
+      "result": "GitHub mainへ反映（5c7f94f）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/5c7f94f38d4295f66b36cb8268e4d31588846308"
     },
     {
       "id": "complete-002",
@@ -274,7 +274,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-17T03:07:07+09:00",
+      "last_update": "2026-11-19T01:31:25+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -349,13 +349,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 9件・Open PR 56件を自動同期中",
+      "next_action": "Open Issue 9件・Open PR 61件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-17T03:07:07+09:00",
+      "last_update": "2026-11-19T01:31:25+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -378,7 +378,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-17T03:07:07+09:00",
+      "last_update": "2026-11-19T01:31:25+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -460,5 +460,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "b68c8b946bc0e9c27aa501357a14c0522c55e83a40930e5d456fc4a12b0359b1"
+  "github_snapshot_hash": "af7b0b3244514378e4a90e269747caeef4ce5d38201a8203faff296747e78437"
 }

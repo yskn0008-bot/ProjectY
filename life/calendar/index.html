@@ -143,6 +143,7 @@ body.glance-mode .bottom .refresh{min-height:36px;padding:7px 11px;font-size:11p
 .calendar-auth .today-btn{padding:8px 12px;min-height:40px}
 </style>
 <link rel="stylesheet" href="./approved-calendar.css">
+<link rel="stylesheet" href="./area-task-pages.css">
 </head>
 <body>
 <main class="app">
@@ -185,6 +186,7 @@ body.glance-mode .bottom .refresh{min-height:36px;padding:7px 11px;font-size:11p
 </main>
 <script src="./habit-calendar.js"></script>
 <script src="./approved-calendar.js"></script>
+<script src="./area-task-pages.js"></script>
 <script src="./unified-sources.js"></script>
 <script src="./native-bridge.js"></script>
 <script src="../../yos/daystream/source-adapters.js"></script>
@@ -477,7 +479,7 @@ state.items=state.demo?createDemo():(window.YOS_UNIFIED_CALENDAR?.merge([...life
   }
   if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('../../service-worker.js',{scope:'../../',updateViaCache:'none'}).catch(()=>{});
   load(undefined);
-  // When provisioned on this iPhone, silently fetch fresh Notion without prompts.
+  // When this iPhone was previously provisioned, refresh without login prompts.
   if(window.YOS_DAYSTREAM_TASK_AUTH?.hasDeviceKey?.())$('calendarTasksRefresh').click();
 })();
 </script>

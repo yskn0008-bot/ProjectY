@@ -14,6 +14,66 @@ test('Web port inherits the approved original charcoal UI and main navigation',(
  assert.match(native,/YOS_LIFE_LEARNING_LIVE_START/);
  assert.match(html,/YOS_LIFE_LEARNING_LIVE_START/);
 });
+test('Undo/redo and three gesture intents preserve normal scroll and task data',()=>{
+ assert.match(html,/id="yosUndoBtn"/);
+ assert.match(html,/id="yosRedoBtn"/);
+ assert.match(html,/function yosHistoryRestore\(direction\)/);
+ assert.match(html,/yosHistorySnapshot\(\)/);
+ assert.match(html,/task-drag-grip/);
+ assert.match(html,/\.card\.task\{touch-action:pan-y\}/);
+ assert.match(html,/const HOLD_TO_MOVE=260, HOLD_TO_EDIT=750/);
+ assert.match(html,/mode='armed'/);
+ assert.match(html,/mode==='armed'\|\|gripStart/);
+ assert.match(html,/const lockBackground=\(\)=>/);
+ assert.match(html,/const unlockBackground=\(\)=>/);
+ assert.match(html,/addEventListener\('touchmove',preventScroll,\{capture:true,passive:false\}\)/);
+ assert.match(html,/window\.addEventListener\('scroll',restoreScroll,\{passive:true\}\)/);
+ assert.match(html,/active=null;clearTimers\(\);clearPaint\(\);unlockBackground\(\)/);
+ assert.match(html,/if\(completedMode==='tap'&&!wasGrip\)toggleTaskDone\(item\)/);
+ assert.match(html,/beginLocalEdit\(item\)/);
+ assert.match(html,/少し押さえて上下に動かすと移動/);
+});
+
+test('Layer preserves real long intervals and reuses lanes for disjoint windows',()=>{
+ const code=ui.slice(ui.indexOf('function yosBackdropRows'),ui.indexOf('function yosReadableAxis'));
+ const layout=vm.runInNewContext(code+'\nyosBackdropRows',{});
+ const rows=[
+  {id:1,s:30,d:450,kind:'schedule',f:true},
+  {id:2,s:260,d:30,kind:'task'},
+  {id:3,s:390,d:120,kind:'task'},
+  {id:4,s:480,d:120,kind:'habit'},
+  {id:5,s:610,d:120,kind:'task'},
+  {id:6,s:740,d:119,kind:'task'}
+ ];
+ const input=JSON.stringify(rows),lanes=layout(rows);
+ assert.deepEqual(rows.map(row=>lanes.has(row)?[lanes.get(row).lane,lanes.get(row).count]:null),
+  [[0,2],null,[1,2],[0,2],[0,1],null]);
+ assert.equal(JSON.stringify(rows),input);
+ assert.match(ui,/backdrop\?Math\.max\(1,span-2\)/);
+ assert.match(ui,/tick\.style\.top=\(natural-3\)/);
+ assert.match(html,/\.timeline \.yos-foreground\{z-index:3\}/);
+ assert.match(html,/background:var\(--zone-surface\);border-color:var\(--zone-edge\);box-shadow:none/);
+ assert.match(html,/task-drag-grip\{flex-basis:38px;min-width:38px/);
+});
+test('Layer uses the strongest state color and reason, with a visible label',()=>{
+ const code=ui.slice(ui.indexOf('const yosCompatRank'),ui.indexOf('function yosOverlapWindows'));
+ const compat=vm.runInNewContext(code+'\nyosCompatibility',{});
+ const row=(id,t,s,d,kind='task')=>({id,t,s,d,kind});
+ const results=compat([
+  row(1,'外出準備',10,20),row(2,'外出',30,30),row(3,'予定',40,10,'schedule'),
+  row(4,'運動',120,35),row(5,'入浴',160,30,'habit'),
+  row(6,'読書',250,20),row(7,'掃除',272,20,'habit'),row(8,'自由時間',400,30)
+ ]);
+ assert.equal(results.get(2).level,'danger');
+ assert.match(results.get(2).reasons[0],/時間重複（10分）/);
+ assert.equal(results.get(4).level,'positive');
+ assert.equal(results.get(6).level,'negative');
+ assert.equal(results.get(8).level,'unknown');
+ for(const [state,shade] of [['positive','#23473e'],['negative','#493722'],['danger','#4b303b']]){
+  assert.ok(html.includes('.timeline .card.compat-'+state+'{--layer-surface:'+shade));
+ }
+ assert.match(ui,/positive:'＋ 相乗候補',negative:'− 余裕不足',danger:'！ 時間衝突'/);
+});
 test('Browser scripts parse without native Scriptable APIs',()=>{
  assert.equal(scripts.length,2);
  for(const code of scripts)new vm.Script(code);
@@ -78,7 +138,7 @@ test('iPhone home-screen layout paints safe-area dark and keeps header crisp',()
 
 test('unified calendar PWA updates old SW cache and retains offline fallback without exposing private data',()=>{
  const sw=fs.readFileSync(new URL('../service-worker.js',import.meta.url),'utf8');
- assert.match(sw,/v47-daystream-calendar-device-key/);
+ assert.match(sw,/v49-daystream-calendar-device-key/);
  for(const path of [
    './life/calendar/','./life/calendar/index.html',
    './life/calendar/native-bridge.js','./life/calendar/unified-sources.js'
@@ -88,4 +148,18 @@ test('unified calendar PWA updates old SW cache and retains offline fallback wit
  '/ProjectY/yos/daystream/source-adapters.js','/ProjectY/yos/daystream/yos-tasks-auth.js'])
  assert.ok(sw.includes("'"+path+"'"),'source adapter refresh is network-first: '+path);
  assert.match(sw,/event\.request\.mode==='navigate'/);
+});
+
+
+test('Additive direct task import reuses original local-storage protection and UI',()=>{
+ assert.match(boot,/importDirectTasks\(p\)/);
+ assert.match(boot,/yos-daystream-direct-task-import-v1/);
+ assert.match(boot,/if\(!web\.write\(updated\)\)return false/);
+ assert.match(boot,/sourceRef:ref,done:false/);
+ assert.match(boot,/const days=\{\.\.\.current\.days\}/);
+ assert.match(boot,/if\(!valid\(current\)\)return false/);
+ assert.match(boot,/if\(!confirm\('元のDAYSTREAMへ'/);
+ assert.doesNotMatch(boot,/YOS_NOTION_INTEGRATION_TOKEN/);
+ assert.equal((html.match(/id="timelinePanel"/g)||[]).length,1);
+ assert.equal((html.match(/id="yosWebImport"/g)||[]).length,1);
 });

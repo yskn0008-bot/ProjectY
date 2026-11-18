@@ -85,6 +85,34 @@
       "path": "ios-app/scriptable/YOS Life Calendar Sync.js",
       "commit": "bb17b5af8f009fdbcb6c6d4c542edf7b79be6f6c",
       "sha256": "d3ed090e8a7ec8df84a744f1610ef209515578baed2e70700eb20313593df0a2"
+    },
+    {
+      "id": "calendar-notion",
+      "name": "YOS Calendar Notion",
+      "path": "ios-app/scriptable/YOS Calendar Notion.js",
+      "commit": "ff6589c359bc836e3b68ff937b5bee0e27607c27",
+      "sha256": "7153bfcc066c3a357b2f1e44f03804417e0534861149a55f03c14dd85eb2aaf6"
+    },
+    {
+      "id": "clarity-inbox-bridge",
+      "name": "YOS Clarity Inbox Bridge",
+      "path": "ios-app/scriptable/YOS Clarity Inbox Bridge.js",
+      "commit": "bcecaceb7d933ee0d97e45dbedd159b6004d5860",
+      "sha256": "25917c13e195f585fae450a1bd34147bf240e69801c55cd8a4012b0a35dc45d8"
+    },
+    {
+      "id": "daystream-notion",
+      "name": "YOS DAYSTREAM Notion",
+      "path": "ios-app/scriptable/YOS DAYSTREAM Notion.js",
+      "commit": "8cbd54645a4f51d7867d954ea2ebd04979d4baee",
+      "sha256": "0f1e827cbe578f004d9295548e905bf676252639debaab5d4a4b8b9d4b517931"
+    },
+    {
+      "id": "ikemen-magazine",
+      "name": "YOS イケメン攻略本",
+      "path": "ios-app/scriptable/YOS イケメン攻略本.js",
+      "commit": "7c94cb39f25c3ec513167063514d4eb19346a48c",
+      "sha256": "41dbc735247e3241a35ec0ccb0bfe141cb684b1f0bc98489104484916ff70281"
     }
   ]
 }

@@ -1,0 +1,75 @@
+{
+  "issuedOn": "2026-11-19",
+  "date": "2026.11.19 / THU",
+  "headline": "身だしなみ、会話、沖縄。いつもの一日を少し深く。",
+  "lead": "午後の鏡で気づいたこと。相手がふと話したひと言。博物館の棚に残る暮らしの道具。見慣れたものをもう少し近くで見ると、一日の楽しみが増えていく。",
+  "edition": "ULTIMATE PERSONAL EDITION",
+  "articles": [
+    {
+      "category": "SELF / 身だしなみ",
+      "editorialLane": "DIRECTION",
+      "title": "午後のテカリ。洗面台へ戻る前に、鏡の前で数秒。",
+      "summary": "昼すぎ、外に出る前に鏡を見たら、額と鼻だけが光っている。朝の手入れを全部見直したくなるけれど、いま気になるのが鏡に映る光り方なら、その場でできる手入れがある。米国皮膚科学会は、あぶらとり紙を顔にそっと押し当て、数秒置いて皮脂を吸わせる方法を紹介している。大事なのは、紙を肌の上で滑らせないこと。表面の皮脂を取る手入れで、皮脂が出る原因を変える方法ではない。すぐに身だしなみを整えたい場面と、朝の洗顔や保湿を見直したい場面を分けると、日中の一度のテカリで毎日の手入れを次々に変えずに済む。",
+      "reason": "洗顔後の感触と、人に会う前の見え方には別々の手入れがある。今回は昼の見え方だけに絞る。",
+      "action": "手元にあぶらとり紙があれば、気になる部分に数秒当てて離す。外出前の鏡で見え方が十分整うか、同じ光の下で見比べてみる。購入は必須ではない。",
+      "caveat": "これはその場の見え方を整える一般的な手入れ。皮脂量や肌の状態を診断するものではない。赤みや痛みが続く場合は皮膚科に相談する。",
+      "source": "米国皮膚科学会（AAD）｜脂性肌の一般向けガイド",
+      "sourceDate": "掲載日の記載を確認できず／2026-11-18閲覧",
+      "link": "https://www.aad.org/public/everyday-care/skin-care-basics/dry/oily-skin",
+      "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Man_grooming_in_a_modern_bathroom_mirror_during_evening_hours_while_checking_reflection.jpg?width=800",
+      "imageCaption": "鏡の前で身だしなみを確認する男性の参考写真",
+      "imageKind": "reference",
+      "keyPoints": [
+        "紙はこすらず、皮脂が気になる部分に数秒当てる。",
+        "その場の見え方と、毎日の手入れの見直しを分ける。"
+      ],
+      "imageCredit": "Shixart1985 / Wikimedia Commons",
+      "imageSourceUrl": "https://commons.wikimedia.org/wiki/File:Man_grooming_in_a_modern_bathroom_mirror_during_evening_hours_while_checking_reflection.jpg",
+      "imageLicenseUrl": "https://creativecommons.org/licenses/by/2.0/"
+    },
+    {
+      "category": "PRESENCE / 会話",
+      "editorialLane": "DIRECTION",
+      "title": "会話は、相手のひと言を拾うと深くなる。",
+      "summary": "「最近、休みの日に海へ行くんだ」。そう聞いたら、知っている海の話を返すこともできる。ここで「どんな時間帯が好き？」と聞いてみると、相手が見ている海が少し見えてくる。昼の透明な海と、夕方にただ座っていたい海では、続く話が違う。Huangらは、知り合うための会話で、追い質問を多くする人は相手から好意的に受け取られ、話を受け止めているという印象も伝わりやすいと報告した。2025年に報告上の誤りの訂正が公表され、独立点検でも論文の結論は維持された。会話で拾うとしたら、相手が自分から選んだ言葉。その言葉に本当に興味があれば、話題をいくつも用意する手間が減る。",
+      "reason": "話の切れ目で次の話題を考える負担を減らしながら、相手の答えを聞く余白を作れる。",
+      "action": "話の中で、気になった言葉を一つだけ拾う。答えが短いときは掘り続けず、自分の感想を短く返すか、次の話題に移る。",
+      "caveat": "研究は初対面に近い場面を含む。聞き方だけで人間関係の結果を予測することはできない。相手がどのくらい話したいかを尊重する。",
+      "source": "Huangら（2017）、Journal of Personality and Social Psychology／訂正（2025、PMID 40111841）",
+      "sourceDate": "原著2017年・訂正2025年／2026-11-18照合",
+      "link": "https://pubmed.ncbi.nlm.nih.gov/28447835/",
+      "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Coffee%2C_conversation_and_collaboration_-_ATTT_2025.jpg?width=800",
+      "imageCaption": "テーブルを囲んで会話する人たちの参考写真",
+      "imageKind": "reference",
+      "keyPoints": [
+        "相手が自分から話した言葉に、一度だけ質問してみる。",
+        "自然に聞ける範囲で。答え方に合わせて話の深さを調整する。"
+      ],
+      "imageCredit": "JyotiPN / Wikimedia Commons",
+      "imageSourceUrl": "https://commons.wikimedia.org/wiki/File:Coffee%2C_conversation_and_collaboration_-_ATTT_2025.jpg",
+      "imageLicenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/"
+    },
+    {
+      "category": "EXPERIENCE / 沖縄",
+      "editorialLane": "DISCOVERY",
+      "title": "那覇で30分。いつもの沖縄を、違う目で見る。",
+      "summary": "那覇で用事が早く終わったら、おきみゅーで三つだけ展示を見て帰る。博物館常設展「海と島に生きる」は沖縄の自然、歴史、文化を扱い、総合展示に加えて自然史、考古、美術工芸、歴史、民俗に分かれている。最初に自然史で色を一つ拾い、民俗で暮らしの道具を探す。よく手が触れた場所はどこだったか。自分ならどんなふうに使うだろう。最後は展示を見ている間に思い出した、よく通る道や海の景色を一つ覚えて帰る。館内を一周しなくても、次にその道を歩くとき、以前は意識していなかったものが目に入るかもしれない。",
+      "reason": "短い空き時間で、沖縄の日常と展示で知った暮らしをつなげて楽しめる。常設展なので日程を選びやすい。",
+      "action": "館内30分を目安に、色・形・使い方のどれかが気に入った展示を選ぶ。行く日は公式サイトの開館時間と料金を確認する。",
+      "caveat": "一般料金は2026年11月18日に確認した公式案内で530円。原則月曜休館で、祝日などに当たる場合は翌平日が休館。交通費と移動時間は別で、展示や開館時間は変わることがある。",
+      "source": "沖縄県立博物館・美術館｜博物館常設展・開館案内",
+      "sourceDate": "常設展示・料金表は2026-11-18確認",
+      "link": "https://okimu.jp/museum/permanent/",
+      "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Okinawa_Prefectural_Museum_%26_Art_Museum_(Okinawa).jpg?width=800",
+      "imageCaption": "沖縄県立博物館・美術館の外観",
+      "imageKind": "reference",
+      "keyPoints": [
+        "短時間なら自然史と民俗の二つに絞る。",
+        "常設展一般530円（確認日11月18日）。移動時間・交通費は別。"
+      ],
+      "imageCredit": "Mk2010 / Wikimedia Commons",
+      "imageSourceUrl": "https://commons.wikimedia.org/wiki/File:Okinawa_Prefectural_Museum_%26_Art_Museum_(Okinawa).jpg",
+      "imageLicenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/"
+    }
+  ]
+}

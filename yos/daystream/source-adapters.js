@@ -141,6 +141,8 @@
    if(seen.has(id)){if(authoritative)return null;continue}seen.add(id);
    items.push({id,title,status:state,due:start.day,priority:['P0','P1','P2','P3'].includes(t.priority)?t.priority:'',area:str(t.area||'YOS Tasks',40),action:str(t.nextAction,140),...(authoritative?{
     dueAt:start.at,dueEnd:end.at,dueTimeZone:str(t.dueTimeZone,80)||null,
+    ...(t.sourceKind==='task'&&/^YOS Inbox clarity:[a-z0-9_-]{8,100}$/i.test(t.evidence||'')&&
+      start.at?.includes('T')&&end.at?.includes('T')&&clarityMinutes(start.day,start.at,end.at)?{clarityWindow:true}:{}),
     // A deadline time is not proof of a fixed appointment. Do not schedule it.
     timing:t.sourceKind==='calendar'?'fixed':start.at&&start.at.includes('T')?'timed-deadline':'flexible',
     sourceFamily:['calendar','reminder','money'].includes(t.sourceKind)?t.sourceKind:'task',
@@ -152,6 +154,25 @@
    }:{})});
   }
   return {schema:'yos-daystream-source-snapshot-v1',kind:'tasks',status:authoritative?'ok':'partial',items,checkedAt:new Date(cache.savedAt).toISOString(),source:'yos-auth-cache',...(authoritative?{origin:'notion',complete:true,ignoredBlankCount:Number.isSafeInteger(cache.data.ignoredBlankCount)&&cache.data.ignoredBlankCount>=0?cache.data.ignoredBlankCount:0,...(cache.data.calendarMoney!==undefined?{calendarMoney:normalizeCalendarMoney(cache.data.calendarMoney)}:{})}: {})};
+ }
+ function clarityMinutes(day,startAt,endAt){
+  const midnight=Date.parse(day+'T00:00:00+09:00');
+  const start=(Date.parse(startAt)-midnight)/60000,end=(Date.parse(endAt)-midnight)/60000;
+  if(!Number.isInteger(start)||!Number.isInteger(end)||start<0||end>1440||end-start<5)return null;
+  return {start,end};
+ }
+ function clarityTimeline(snapshot,day,localRows){
+  if(snapshot?.origin!=='notion'||snapshot.complete!==true||!Array.isArray(snapshot.items)||!date(day))return [];
+  const alreadyPlanned=new Set(localRows.map(row=>row.sourceRef));
+  return snapshot.items.flatMap(task=>{
+   if(task.clarityWindow!==true||task.due!==day||task.habitCycle||!/^notion-[a-f0-9]{32}$/.test(task.id)||
+      !['次にやる','実行中','本人操作','完了'].includes(task.status)||alreadyPlanned.has('notion:'+task.id))return [];
+   const span=clarityMinutes(day,task.dueAt,task.dueEnd);
+   if(!span)return [];
+   const {start,end}=span;
+   return [{id:'clarity:'+task.id,t:task.title,s:start,d:end-start,kind:'task',f:true,
+    source:'Clarity',sourceRef:'notion:'+task.id,done:task.status==='完了'}];
+  });
  }
  function fromYosLifeStore(life){
   if(!life||typeof life!=='object'||!life.days||typeof life.days!=='object'||Array.isArray(life.days))return null;
@@ -189,5 +210,5 @@
   const maxDays=s.source==='yos-auth-cache'&&!archiveRestore?Math.min(retentionDays,0.25):retentionDays;
   return age>=-300000&&age<=maxDays*86400000;
  }
- root.YOS_DAYSTREAM_SOURCES={normalizeTasks,parseICS,fromYosTaskDashboardCache,fromYosLifeStore,validSaved,MAX_BYTES};
+ root.YOS_DAYSTREAM_SOURCES={normalizeTasks,parseICS,fromYosTaskDashboardCache,clarityTimeline,fromYosLifeStore,validSaved,MAX_BYTES};
 })(typeof window!=='undefined'?window:globalThis);
