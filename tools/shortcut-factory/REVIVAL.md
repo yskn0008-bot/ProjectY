@@ -24,3 +24,7 @@ The separate JOURNAL source is in PR #830, not main. Do not duplicate, silently 
 ## Remaining gates
 
 GitHub CI compile/sign result; reviewer approval before HubSign; signed file retrieval; physical iPhone import/execution and collision handling. iOS unattended installation and silent replacement are not promised.
+
+## Initial machine evidence
+
+GitHub Actions [Shortcut Factory Revival run #44352076533](https://github.com/yskn0008-bot/ProjectY/actions/runs/44352076533) passed the safety tests, pinned Cherri compilation, STASH structure checks, and unsigned artifact upload. This does **not** certify HubSign signing, iPhone import, or runtime operation.
