@@ -265,3 +265,52 @@ test('明日の音声入力と明示した終了時刻だけを時間枠とし�
  }
  assert.equal(m.rows.length,2);
 });
+
+
+test('Calendar Raw-only mode preserves Inbox receipt without creating duplicate Notion Task',async()=>{
+  const m=mocked();
+  const x={rawText:'2026-11-20 19時から30分、連携テスト',source:'voice',
+    captureId:'clarity:calendar-test-001',executionTarget:'calendar.create',routeMode:'raw-only'};
+  const first=await m.run(x);
+  assert.match(first,/Notion Inbox保存確認済み/);
+  assert.match(first,/原文のみ保存/);
+  assert.equal(m.counts.writes,1);
+  assert.equal(m.counts.routed,0);
+  assert.equal(m.rows.length,0);
+  assert.match(await m.run(x),/原文のみ保存/);
+  assert.equal(m.counts.writes,1);
+  assert.equal(m.counts.routed,0);
+  assert.equal(m.blocks[1].paragraph.rich_text[0].text.content,x.rawText);
+});
+
+test('Calendar Raw-only guard fails closed when caller omits routeMode',async()=>{
+  const m=mocked();
+  const x={rawText:'2026-11-20 19時から30分、連携テスト',source:'voice',
+    captureId:'clarity:calendar-guard-001',executionTarget:'calendar.create'};
+  const output=await m.run(x);
+  assert.match(output,/Notion Inbox保存確認済み/);
+  assert.match(output,/振り分け保留/);
+  assert.equal(m.counts.writes,1);
+  assert.equal(m.counts.routed,0);
+  assert.equal(m.rows.length,0);
+});
+
+test('Unknown routeMode holds downstream route after verified Raw and never executes action',async()=>{
+  const m=mocked();
+  const x={rawText:'2026-11-20 19時から30分、買い物',source:'text',
+    captureId:'clarity:route-unknown-001',routeMode:'untrusted'};
+  assert.match(await m.run(x),/振り分け保留（未対応の振り分けモード）/);
+  assert.equal(m.counts.writes,1);
+  assert.equal(m.counts.routed,0);
+  assert.equal(m.rows.length,0);
+});
+
+test('Raw-only calendar capture with missing Notion credentials is held locally and not sent',async()=>{
+  const m=mocked({token:false});
+  const x={rawText:'2026-11-20 19時から30分、連携テスト',source:'voice',
+    captureId:'clarity:calendar-offline-001',executionTarget:'calendar.create',routeMode:'raw-only'};
+  assert.match(await m.run(x),/Notion未保存/);
+  assert.equal(m.counts.writes,0);
+  assert.equal(m.counts.routed,0);
+  assert.match(m.files.get('/docs/YOS Clarity Inbox Bridge Receipts.json'),/calendar-offline-001/);
+});
