@@ -8,6 +8,9 @@ const DATA_DIR='YOS Ikemen Guide';
 const HTML_NAME='magazine.html';
 const STATE_NAME='reading-state.json';
 const RUNTIME_NAME='magazine-runtime.html';
+const PHOTO_NAMES=['yos-ikemen-photo-1-v3.jpg','yos-ikemen-photo-2-v3.jpg','yos-ikemen-photo-3-v3.jpg'];
+const DIAG_NAME='v3-display-confirmed.txt';
+const VERSION='v3 / 2026-11-18';
 const READER_KEY='YOS_IKEMEN_EDITORIAL_V1';
 const fm=FileManager.local();
 const folder=fm.joinPath(fm.documentsDirectory(),DATA_DIR);
@@ -85,6 +88,43 @@ function injectedHTML(html,state){
   .replace(persistMarker,"function persist(){try{localStorage.setItem(KEY,JSON.stringify(data))}catch(e){}window.__YOS_PENDING_NATIVE_STATE__=JSON.stringify(data);document.dispatchEvent(new Event('yos-native-state'))}")
   .replace(exportMarker,"setPage(location.hash?indexOfHash():data.last||0,!location.hash);\nwindow.__YOS_EXPORT_DATA__=()=>JSON.stringify(data);\n</script>");
 }
+// Keep private photographs on this device as separate JPEG files. The 48-page
+// HTML becomes ~70 KB rather than ~1.8 MB and can be loaded as a local document.
+function lightweightHTML(html){
+ let count=0;
+ const slim=html.replace(/data:image\/jpeg;base64,([A-Za-z0-9+/=]+)/g,(whole,base64)=>{
+  if(count>=PHOTO_NAMES.length||base64.length<100000)throw Error('写真データの整合性エラー');
+  const name=PHOTO_NAMES[count++],path=fm.joinPath(folder,name);
+  const fresh=Data.fromBase64String(base64);
+  if(!fresh)throw Error('写真を読み込めませんでした');
+  if(fm.fileExists(path)){
+   const current=fm.read(path);
+   if(!current||current.toBase64String()!==base64)throw Error('写真の保存先に別の内容があります。上書きせず停止しました：'+name);
+  }else{
+   fm.write(path,fresh);
+   if(!fm.fileExists(path)||fm.read(path)?.toBase64String()!==base64){
+    throw Error('写真ファイルの保存・照合に失敗しました：'+name);
+   }
+  }
+  return './'+name;
+ });
+ if(count!==PHOTO_NAMES.length||slim.length>150000||slim.length<30000)throw Error('写真分離後のHTMLが不正です');
+ return slim;
+}
+// Distinguish a real WebView document from a blank native preview. Always keep
+// the original magazine, existing photos, and reading-state untouched on error.
+async function verifyWebView(web){
+ let timer=null;
+ try{
+  const check=web.evaluateJavaScript(`JSON.stringify({pages:document.querySelectorAll('section.sheet').length,hasCover:!!document.querySelector('#p-0'),body:document.body?.offsetHeight||0,title:document.title})`,false);
+  const timeout=new Promise(resolve=>{timer=Timer.schedule(6000,false,()=>resolve(null))});
+  const raw=await Promise.race([check,timeout]);
+  if(!raw)throw Error('画面の内容を6秒以内に確認できませんでした（WebViewが応答していません）');
+  const o=typeof raw==='string'?JSON.parse(raw):raw;
+  if(o.pages!==48||!o.hasCover||o.body<50)throw Error('画面の構築に失敗しました（page='+o.pages+', body='+o.body+'）');
+  return o;
+ }finally{if(timer)timer.invalidate()}
+}
 function saveState(raw){
  if(typeof raw!=='string'||raw.length>20000)throw Error('保存データが不正です');
  const next=validateState(JSON.parse(raw));
@@ -121,12 +161,21 @@ async function launch(){
  // Load the large photo-rich document from the private file system. Passing its
  // 1.8 MB HTML as a string through a Shortcuts WebView may leave a blank view.
  // This generated copy is never sent to GitHub or an external web service.
- const ready=injectedHTML(original,before);
+ const ready=lightweightHTML(injectedHTML(original,before));
  storeChecked(runtimePath,ready);
- if(!fm.fileExists(runtimePath)||fm.readString(runtimePath).length!==ready.length)
-  throw Error('表示用ファイルの準備に失敗しました');
+ if(!fm.fileExists(runtimePath)||fm.readString(runtimePath)!==ready)
+  throw Error('表示用ファイルの準備・照合に失敗しました');
  const web=new WebView();
  await web.loadFile(runtimePath);
+ const check=await verifyWebView(web);
+ // A single native confirmation identifies whether the new code is actually
+ // running on the device. The previous versions displayed a black WebView.
+ const diag=fm.joinPath(folder,DIAG_NAME);
+ if(!fm.fileExists(diag)){
+  await showMessage('攻略本 '+VERSION+' 検証',
+   'Scriptableの修正版が起動しました。\n48ページを検出。写真3枚は端末内に保存済み。\n今から攻略本を表示します。');
+  storeChecked(diag,VERSION);
+ }
  // The WebView can be discarded when dismissed; capture updates while visible.
  const dismissed=web.present(true).then(()=>({kind:'dismissed'}),e=>({kind:'dismissed',error:String(e)}));
  let saved=false,bridgeError=null;
@@ -167,5 +216,5 @@ async function main(){
  }
  await launch();
 }
-try{await main()}catch(e){await showMessage('イケメン攻略本｜未完了',String(e).replace(/^Error:\s*/,''))}
+try{await main()}catch(e){await showMessage('イケメン攻略本 '+VERSION+'｜未完了',String(e).replace(/^Error:\s*/,''))}
 Script.complete();
