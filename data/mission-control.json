@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-18T17:36:41+09:00",
+  "updated_at": "2026-11-18T17:38:59+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -20,7 +20,17 @@
       "priority": 1,
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/813",
-      "updated_at": "2026-11-18T08:36:15Z"
+      "updated_at": "2026-11-18T08:38:20Z"
+    },
+    {
+      "id": "github-pr-762",
+      "title": "PR #762 feat(notification): safeguard v0.3→v0.4 migration using common installer",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/762",
+      "updated_at": "2026-11-16T16:08:15Z"
     },
     {
       "id": "github-pr-764",
@@ -103,16 +113,6 @@
       "updated_at": "2026-11-17T07:29:19Z"
     },
     {
-      "id": "github-pr-812",
-      "title": "PR #812 DAYSTREAM｜重なりが分かる輪郭とさらに細い時間連動バー",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/812",
-      "updated_at": "2026-11-18T08:35:27Z"
-    },
-    {
       "id": "github-issue-10",
       "title": "Issue #10 Mission Control v2：GitHubのIssue・PR・Commitを自動集約する",
       "type": "GitHub Issue",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-18T08:35:28Z"
+      "updated_at": "2026-11-18T08:38:14Z"
     },
     {
       "id": "github-issue-234",
@@ -205,6 +205,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-86437fab1263",
+      "title": "style(daystream): slim outlined task bars with distinct overlap backdrops (#812)",
+      "completed_at": "2026-11-18T08:38:23Z",
+      "result": "GitHub mainへ反映（86437fa）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/86437fab1263f9a4babc1053a0c824d1db0302b0"
+    },
+    {
       "id": "github-commit-2c2ddff52484",
       "title": "fix(scriptable): split local magazine photos and diagnose blank WebView",
       "completed_at": "2026-11-18T08:33:14Z",
@@ -231,13 +238,6 @@
       "completed_at": "2026-11-18T08:10:17Z",
       "result": "GitHub mainへ反映（bd76a9a）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/bd76a9af666eb856148a676c3cdd6fe35cc2ce90"
-    },
-    {
-      "id": "github-commit-42349e62f154",
-      "title": "feat(scriptable): add YOS イケメン攻略本 to common installer",
-      "completed_at": "2026-11-18T07:48:15Z",
-      "result": "GitHub mainへ反映（42349e6）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/42349e62f1546dfc0bdf69a8a8c7f34db23ac762"
     },
     {
       "id": "complete-002",
@@ -274,7 +274,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-18T17:36:41+09:00",
+      "last_update": "2026-11-18T17:38:59+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -349,13 +349,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 9件・Open PR 60件を自動同期中",
+      "next_action": "Open Issue 9件・Open PR 59件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-18T17:36:41+09:00",
+      "last_update": "2026-11-18T17:38:59+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -378,7 +378,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-18T17:36:41+09:00",
+      "last_update": "2026-11-18T17:38:59+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -460,5 +460,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "bba565f39c6c402b92493307b4e8748adeb4d68593c667bf11a6375e54f7e69c"
+  "github_snapshot_hash": "9540c9d9661b734d7035bf23b38a4247aa555ae1b1712eb6cb5b1b30da996d33"
 }
