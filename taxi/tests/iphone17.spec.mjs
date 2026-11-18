@@ -422,3 +422,29 @@ test('v2 in-app browser heights: all sales text and strategy rows fit their boxe
     expect(problems,'strategy text overlap at '+width+'x'+height).toEqual([]);
   }
 });
+
+
+test('M100: safe-stop checklist opens without changing ride records or viewport', async ({page}) => {
+  const errors=[];
+  page.on('pageerror', error => errors.push(error.message));
+  for(const [width,height] of [[320,568],[393,650],[402,874]]){
+    await page.setViewportSize({width,height});
+    await page.goto('./ui-v2.html',{waitUntil:'domcontentloaded'});
+    const before=await page.evaluate(() => localStorage.getItem('yos-taxi-ui-v2-live-20261117'));
+    await page.locator('[data-page="strategy"]').click();
+    const btn=page.locator('#m100-rule-btn');
+    await expect(btn).toBeVisible();
+    expect(await page.evaluate(() => document.documentElement.scrollHeight > innerHeight+1)).toBe(false);
+    await btn.click();
+    await expect(page.locator('#modal.m100-open')).toBeVisible();
+    await expect(page.locator('#modal-title')).toContainText('M100');
+    for(const n of [1,2,3,4,5,6])await expect(page.locator('#modal-body')).toContainText(n+'｜');
+    await expect(page.locator('#modal-body')).toContainText('自動学習はまだ行いません');
+    await expect(page.locator('#modal-body')).toContainText('強制移動ではない');
+    await page.locator('#close-modal').click();
+    await expect(page.locator('#modal')).not.toBeVisible();
+    const after=await page.evaluate(() => localStorage.getItem('yos-taxi-ui-v2-live-20261117'));
+    expect(after,'M100 guidance must not mutate shift or ride records').toBe(before);
+  }
+  expect(errors).toEqual([]);
+});
