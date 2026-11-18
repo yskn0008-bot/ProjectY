@@ -84,13 +84,14 @@ jobs:
           ids=[a.get('WFWorkflowActionIdentifier','') for a in data.get('WFWorkflowActions',[])]
           blob=repr(data)
           assert ids.count('is.workflow.actions.askllm') == 1, ids
-          assert ids.count('is.workflow.actions.ask') == 1, ids
-          # A direct if on the ChatGPT app's output produced an unconfigured
-          # comparison on iPhone; only the user-input empty guard may remain.
+          assert ids.count('is.workflow.actions.ask') == 0, ids
+          # One callback branch (start/end), so no ChatGPT-output conditional is allowed.
           assert ids.count('is.workflow.actions.conditional') == 2, ids
           assert 'if !edited' not in Path('tools/yos-journal/YOS 日記.cherri').read_text()
           assert ids.count('is.workflow.actions.documentpicker.save') == 2, ids
-          assert ids.count('is.workflow.actions.openurl') == 1, ids
+          assert ids.count('is.workflow.actions.openurl') == 2, ids
+          assert 'YOS_JOURNAL_COMPOSE_V1:' in blob
+          assert 'mode=compose' in blob
           assert ids.count('com.apple.journal.CreateEntryIntent') == 0
           for required in ('【出来事】','【気持ち】','【どう感じた】',
                            '本人の言葉（原文）','YOS Journal Pending',

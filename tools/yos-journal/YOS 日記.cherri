@@ -16,15 +16,18 @@ const now = currentDate()
 const day = formatDate(now, "Custom", "yyyy-MM-dd")
 const timeKey = formatDate(now, "Custom", "HH-mm-ss")
 
-// One optional-length entry. iPhone dictation can be used in the normal text field.
-const raw = prompt(
-    "今日、何があって、どんな気持ちになり、どう感じた？\n忘れたくない場面を一言でOK。何もなければ空欄で終了。",
-    "Text",
-    ""
-)
-if !raw {
+// Step 1: open the existing paper journal with today's schedule BEFORE typing.
+// Step 2: only the same Scriptable journal can hand the person's words back here.
+// A strict callback marker means ordinary Night Brief input cannot be mistaken for a diary.
+@incoming = "{ShortcutInput}"
+if @incoming contains "YOS_JOURNAL_COMPOSE_V1:" {
+    nothing() // No extra prompt; the callback text is processed below.
+} else {
+    const startURL = text("scriptable:///run?scriptName=YOS%20Journal%20Book&mode=compose&date={day}")
+    openURL(startURL)
     stop()
 }
+const raw = replaceText("YOS_JOURNAL_COMPOSE_V1:", "", @incoming)
 
 // Save the original words FIRST; even if AI editing or Notion fails, the memory
 // remains in the existing iCloud YOS Journal Pending folder.
