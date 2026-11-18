@@ -399,6 +399,64 @@ try{
   await ctx.close();
  }
 
+
+ // Three-finger-intent regression: short tap => complete, held-moving => move,
+ // long stationary hold => editor. Does not require unavailable iPhone force data.
+ const gestureContext=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,timezoneId:'Asia/Tokyo',serviceWorkers:'block'});
+ const gp=await gestureContext.newPage();
+ const gestureErrors=[];gp.on('pageerror',e=>gestureErrors.push(e.message));
+ await gp.goto('http://127.0.0.1:4173/yos/daystream/',{waitUntil:'domcontentloaded'});
+ await gp.evaluate(()=>{
+  const day=localISO(new Date()),p={version:1,days:{[day]:[
+   {id:91001,t:'THREE GESTURES',s:360,d:15,kind:'task',done:false}
+  ]},hiddenCalendar:{}};
+  if(!window.YOS_DAYSTREAM_WEB.write(p))throw Error('gesture fixture save failed');
+ });
+ await gp.reload({waitUntil:'domcontentloaded'});
+ await gp.evaluate(()=>{
+  window.__gestureTouch=async (id,steps,fromGrip=false)=>{
+   const card=document.querySelector('#tl [data-id="'+id+'"]');
+   if(!card)throw Error('gesture fixture card missing');
+   const target=fromGrip?card.querySelector('.task-drag-grip'):card.querySelector('.task-copy');
+   for(const [type,x,y,hold] of steps){
+    const touch=new Touch({identifier:1,target,clientX:x,clientY:y,pageX:x,pageY:y,screenX:x,screenY:y});
+    const contacts=type==='touchend'||type==='touchcancel'?[]:[touch];
+    target.dispatchEvent(new TouchEvent(type,{bubbles:true,cancelable:true,touches:contacts,targetTouches:contacts,changedTouches:[touch]}));
+    if(hold)await new Promise(ok=>setTimeout(ok,hold));
+   }
+   return {start:items.find(x=>x.id===id)?.s,done:!!items.find(x=>x.id===id)?.done,
+    editor:document.getElementById('editor').classList.contains('show'),
+    deleteVisible:!document.getElementById('gestureDelete').hidden};
+  };
+ });
+ const g1=await gp.evaluate(()=>window.__gestureTouch(91001,[['touchstart',200,360,45],['touchend',200,360,0]]));
+ assert.equal(g1.done,true,'brief tap completes local task');
+ const g2=await gp.evaluate(()=>window.__gestureTouch(91001,[['touchstart',200,360,40],['touchend',200,360,0]]));
+ assert.equal(g2.done,false,'second brief tap toggles local completion');
+ const g3=await gp.evaluate(()=>window.__gestureTouch(91001,[['touchstart',200,360,320],['touchend',200,360,0]]));
+ assert.equal(g3.done,false,'a held but un-dragged touch does not complete');
+ const g4=await gp.evaluate(()=>window.__gestureTouch(91001,[['touchstart',200,360,0],['touchmove',200,420,0],['touchend',200,420,0]]));
+ assert.equal(g4.start,360,'quick vertical swipe scrolls instead of changing task time');
+ assert.equal(g4.done,false,'scrolling does not mark task complete');
+ const g5=await gp.evaluate(()=>window.__gestureTouch(91001,[['touchstart',200,360,320],['touchmove',200,530,30],['touchend',200,530,0]]));
+ assert.notEqual(g5.start,360,'hold then move on the task body actually moves time');
+ assert.equal(g5.done,false,'drag must not complete a task');
+ await gp.locator('#yosUndoBtn').click();
+ assert.equal(await gp.evaluate(()=>items.find(x=>x.id===91001).s),360,'undo restores the original time');
+ const g6=await gp.evaluate(()=>window.__gestureTouch(91001,[['touchstart',200,360,780],['touchend',200,360,0]]));
+ assert.equal(g6.editor,true,'motionless long hold opens task editor');
+ assert.equal(g6.done,false,'editing never auto-completes task');
+ await gp.locator('#cancelEditor').click();
+ const g7=await gp.evaluate(()=>window.__gestureTouch(91001,[['touchstart',200,360,320],['touchmove',200,530,0],['touchcancel',200,530,0]]));
+ assert.equal(g7.start,360,'cancelled move does not overwrite saved time');
+ const g8=await gp.evaluate(()=>window.__gestureTouch(91001,[['touchstart',240,370,35],['touchend',240,370,0]],true));
+ assert.equal(g8.done,false,'tapping the drag grip never accidentally completes');
+ const g9=await gp.evaluate(()=>window.__gestureTouch(91001,[['touchstart',200,360,0],['touchmove',120,360,0],['touchend',120,360,0]]));
+ assert.equal(g9.deleteVisible,true,'swipe delete still requires confirmation');
+ await gp.locator('#gestureDeleteCancel').click();
+ assert.deepEqual(gestureErrors,[],'no browser errors in three-gesture interactions');
+ await gestureContext.close();
+
  assert.deepEqual(errors,[],'no script errors during load, storage, reload or learning');
  console.log('DAYSTREAM Web port browser smoke PASS',type);
 }finally{await browser.close()}
