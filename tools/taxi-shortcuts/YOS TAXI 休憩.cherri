@@ -1,0 +1,10 @@
+#define name YOS TAXI 休憩
+#define color green
+
+#include 'actions/text'
+#include 'actions/calendar'
+
+// This timer does not log break completion or waive company-required breaks.
+alert("20分タイマーを開始します。\n実際の休憩・仮眠・運行上の休息は、体調と会社規定を優先してください。\n乗務の休憩時刻はこのショートカットでは保存しません。", "YOS TAXI｜休憩")
+startTimer(qty(20, "min"))
+stop()
