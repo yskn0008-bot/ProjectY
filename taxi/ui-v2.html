@@ -386,7 +386,7 @@
      if(!isActive()){
        showDropoffResult('error','この画面に営業中の記録がありません。Safariとホーム画面Webアプリは保存領域が異なる場合があります。出庫と降車を同じ入口で実行し、履歴を確認してください。');return;
      }
-     const stamp=requestId.match(/^(\\d{4})(\\d{2})(\\d{2})(\\d{2})(\\d{2})(\\d{2})-/);
+     const stamp=requestId.match(/^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})-/);
      if(!stamp){showDropoffResult('error','操作時刻を検証できません。古いショートカットは更新してください。');return}
      const at=`${stamp[1]}-${stamp[2]}-${stamp[3]}T${stamp[4]}:${stamp[5]}:${stamp[6]}+09:00`;
      const gap=Date.now()-Date.parse(at);
