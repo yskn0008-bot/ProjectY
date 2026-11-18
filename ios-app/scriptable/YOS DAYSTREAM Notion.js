@@ -4,7 +4,7 @@
 // Existing DAYSTREAM UI + native Notion reads. A confirmed move can update only '期限'.
 'use strict';
 const NOTION_KEY='YOS_NOTION_INTEGRATION_TOKEN';
-const UI_REF='732803c68546155f63fa99c11e9ad8eb8bdf4505';
+const UI_REF='177c3671af645e32d7a08af82d8dedef4bc82098';
 const ROOT='https://raw.githubusercontent.com/yskn0008-bot/ProjectY/'+UI_REF+'/';
 const SOURCE='965c6086-32c1-463d-93b4-87a9cb69b3ad';
 const STATES=['次にやる','実行中','本人操作','待ち','保留','完了'];
@@ -38,6 +38,7 @@ function project(row){
  priority:pick(p['優先度']),area:pick(p['領域'])||'YOS Tasks',nextAction:clean(rich(p['次の一手']),140),
  order:Number.isSafeInteger(p['実行順']?.number)?p['実行順'].number:0,
  sourceKind:calendarSource?'calendar':'task',
+ evidence:clean(rich(p['正本・根拠']),150),
  habitCycle:pick(p['習慣周期']),syncKey:sync,lastEditedAt:row.last_edited_time||null,
  lastSynced:p['最終同期']?.date?.start||null};
 }
