@@ -11,24 +11,32 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: yos-journal-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build-sign:
     runs-on: ubuntu-latest
     timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Verify Scriptable source syntax and privacy boundary
         shell: bash
         run: |
           set -euo pipefail
           node --check 'tools/yos-journal/YOS Journal Notion Bridge.js'
+          node --check 'tools/yos-journal/YOS Journal Book.js'
+          node --test tools/yos-journal/tests/*.test.mjs
           python3 - <<'PY'
           from pathlib import Path
           source=Path('tools/yos-journal/YOS 日記.cherri').read_text()
           bridge=Path('tools/yos-journal/YOS Journal Notion Bridge.js').read_text()
           assert '#define name YOS 日記' in source
-          assert 'scriptable:///run?scriptName=YOS%20Journal%20Notion%20Bridge' in source
+          assert 'scriptable:///run?scriptName=YOS%20Journal%20Book' in source
           assert 'YOS_NOTION_INTEGRATION_TOKEN' not in source
           assert 'Bearer ' not in source
           assert 'Bearer '+'' not in source
@@ -80,14 +88,15 @@ jobs:
           assert ids.count('is.workflow.actions.documentpicker.save') == 2, ids
           assert ids.count('is.workflow.actions.openurl') == 1, ids
           assert ids.count('com.apple.journal.CreateEntryIntent') == 0
-          for text in ('【出来事】','【気持ち】','【どう感じた】',
-                       '本人の言葉（原文）','YOS Journal Pending',
-                       'YOS_JOURNAL_RAW_V2','YOS_JOURNAL_LOCAL_BACKUP_V2'):
-              assert text in blob, text
-          assert 'scriptable:///run?scriptName=YOS%20Journal%20Notion%20Bridge' in blob
+          for required in ('【出来事】','【気持ち】','【どう感じた】',
+                           '本人の言葉（原文）','YOS Journal Pending',
+                           'YOS_JOURNAL_RAW_V2','YOS_JOURNAL_LOCAL_BACKUP_V2',
+                           '【今日の記憶】'):
+              assert required in blob, required
+          assert 'scriptable:///run?scriptName=YOS%20Journal%20Book' in blob
           assert 'YOS_NOTION_INTEGRATION_TOKEN' not in blob
           assert 'api.notion.com' not in blob
-          print('YOS 日記 one-input memory diary contract: PASS',len(ids),'actions')
+          print('YOS 日記 one-input memory diary with book review: PASS',len(ids),'actions')
           PY
 
       - name: Sign using existing HubSign workflow
@@ -122,7 +131,7 @@ jobs:
           if-no-files-found: error
 
       - name: Publish signed install file on the isolated draft branch
-        if: github.event_name == 'pull_request'
+        if: github.event_name == 'pull_request' && github.event.pull_request.number == 663 && github.event.pull_request.head.ref == 'feat/yos-journal-standalone-20261103'
         shell: bash
         env:
           TARGET_BRANCH: ${{ github.event.pull_request.head.ref }}
@@ -152,3 +161,23 @@ jobs:
               commit -m 'build(journal): publish signed shortcut to draft branch [skip ci]'
             git push origin HEAD:"$TARGET_BRANCH"
           fi
+
+      - name: Verify reviewed installer pins without publishing catalog changes
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PYTHON'
+          import hashlib,json,pathlib,subprocess
+          data=json.loads(pathlib.Path('ios-app/scriptable/yos-common-installer-catalog.json').read_text())
+          assert data['schema']==1
+          for id_,name in [('journal-book','YOS Journal Book'),('journal-notion-bridge','YOS Journal Notion Bridge')]:
+              path='ios-app/scriptable/'+name+'.js'
+              source=pathlib.Path(path).read_bytes()
+              rows=[t for t in data['targets'] if t['id']==id_]
+              assert len(rows)==1, 'Reviewed catalog entry required'
+              entry=rows[0]
+              assert entry['name']==name and entry['path']==path
+              assert subprocess.check_output(['git','show',entry['commit']+':'+path])==source
+              assert entry['sha256']==hashlib.sha256(source).hexdigest()
+          print('Reviewed journal pins verified; catalog was not modified.')
+          PYTHON

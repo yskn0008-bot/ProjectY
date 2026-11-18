@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>YOS JOURNAL — Personal Magazine</title><meta name="theme-color" content="#142333">
+<style>
+:root{--ink:#1c2b3b;--cream:#f7f4ed;--gold:#d1ac73;--size:17px}
+*{box-sizing:border-box}html,body{height:100%;margin:0;overflow:hidden}body{font-family:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN",sans-serif;background:#142333;color:white;-webkit-tap-highlight-color:transparent}
+#app{height:100%;height:100dvh;display:flex;flex-direction:column;overflow:hidden}
+#stage{flex:1;min-height:0;position:relative;overflow:hidden;touch-action:pan-y}
+.sheet{position:absolute;inset:0;padding:calc(env(safe-area-inset-top) + 17px) 25px 22px;background:var(--cream);color:var(--ink);display:none;overflow:hidden}
+.sheet.current{display:flex;flex-direction:column;animation:enter .16s ease-out}
+@keyframes enter{from{opacity:.7;transform:translateX(7px)}to{opacity:1;transform:none}}
+.sheet.cover{background:linear-gradient(180deg,rgba(10,24,42,.28),rgba(14,25,40,.68) 45%,rgba(10,24,42,.96)),radial-gradient(ellipse at 78% 31%,#dd9474 0%,transparent 33%),linear-gradient(149deg,#15283b 1%,#3d5065 48%,#87747b 82%,#172a41) center/cover no-repeat;color:white}
+.cover .topline{font-size:10px;letter-spacing:.21em;font-weight:700}.brand{font-family:Georgia,serif;font-size:clamp(49px,13vw,67px);line-height:.97;letter-spacing:-.055em;margin:30px 0}.coverGrow{flex:1;min-height:16px}.tag{font-size:10px;letter-spacing:.1em;background:#e2bc82;color:#263343;padding:8px 12px;align-self:flex-start;font-weight:800}.cover h1{font-size:clamp(25px,7.7vw,35px);line-height:1.4;letter-spacing:-.035em;margin:15px 0 8px;overflow-wrap:anywhere}.cover p{font-size:14px;line-height:1.65;margin:0 0 12px}.cover .issue{font-size:12px;font-weight:700;border-top:1px solid #ffffff66;padding-top:10px}.credit{font-size:9px;line-height:1.4;color:#e5e2dc;margin-top:8px}.credit a{color:inherit}
+.kicker{font-size:11px;letter-spacing:.13em;color:#9c7749;font-weight:750;line-height:1.5}
+.sheet h2{font-size:clamp(22px,6.6vw,29px);line-height:1.4;margin:17px 0;letter-spacing:-.035em;overflow-wrap:anywhere}
+.contents h2{margin:25px 0}.toc{display:flex;align-items:center;text-align:left;gap:12px;background:#fffefa;border:1px solid #ded8ce;padding:13px 11px;border-radius:12px;color:var(--ink);margin:0 0 9px;font:inherit;width:100%;min-height:78px}.toc .number{font-family:Georgia,serif;font-size:23px;font-weight:700;color:#9a774f}.toc .detail{flex:1;min-width:0}.toc small{font-size:10px;color:#9a774f;display:block;margin-bottom:5px}.toc strong{font-size:14px;line-height:1.45;display:block}.toc .chevron{font-size:22px}
+.rule{border-top:2px solid #c5a376;margin-bottom:15px}.visual{height:min(24vh,165px);margin:0 0 14px;overflow:hidden;border-radius:12px;background:#24384a}.visual svg{height:100%;width:100%;display:block}
+.sheet h3{font-size:15px;color:#987448;margin:3px 0 11px}.sheet .copy{font-size:var(--size);line-height:1.77;margin:0;overflow-wrap:anywhere;white-space:pre-wrap}.fill{flex:1;min-height:3px}.folio{font-size:10px;color:#8e8e89;border-top:1px solid #d5cec4;padding-top:8px;margin-top:18px}
+.source p{font-size:var(--size);line-height:1.78}.source a{color:#174a76;display:block;padding:14px 0;overflow-wrap:anywhere;font-weight:700}.source small{color:#71808a;font-size:12px}
+#bar{background:#142333;height:calc(55px + env(safe-area-inset-bottom));padding:0 13px env(safe-area-inset-bottom);display:flex;align-items:center;justify-content:space-between;gap:9px;flex-shrink:0}#bar button{border:0;background:transparent;color:#fff;font-size:22px;min-width:43px;min-height:43px;cursor:pointer}#bar button:disabled{opacity:.35}#count{font-size:13px;font-variant-numeric:tabular-nums}#bar button:last-child{font-size:16px;font-weight:700}
+#status{position:absolute;z-index:10;top:0;left:0;right:0;background:#fff6dc;color:#644a26;padding:9px 14px;font-size:12px;display:none}
+#error{padding:30px;color:#1d2c3b;background:var(--cream);height:100%}
+@media(max-height:720px){.sheet{padding-top:calc(env(safe-area-inset-top) + 10px);padding-bottom:13px}.sheet h2{font-size:23px;margin:10px 0}.visual{height:85px}.toc{min-height:62px;padding:8px 10px}.cover .brand{margin:18px 0}.cover h1{font-size:26px}.cover p{font-size:13px}}
+@media(max-width:365px){.sheet{padding-left:18px;padding-right:18px}.toc strong{font-size:13px}}
+@media(prefers-reduced-motion:reduce){.sheet.current{animation:none}}
+
+/* Editorial layout: fewer, denser pages. Text is live, selectable and adjustable. */
+.sheet{padding:calc(env(safe-area-inset-top) + 20px) 23px 17px}
+.sheet.cover{background:radial-gradient(ellipse at 77% 30%,rgba(224,145,112,.85),transparent 38%),linear-gradient(152deg,#10263d 3%,#354c66 45%,#846d7c 80%,#152b40);color:white}
+.coverGrow{flex:1;min-height:8px}
+.cover .brand{margin-top:clamp(28px,6vh,75px);font-size:clamp(52px,13.5vw,78px)}
+.cover h1{font-size:clamp(26px,7vw,35px)}
+.cover .tag{letter-spacing:.12em}
+.contents .toc{margin-bottom:12px}
+.article .rule{margin-bottom:13px}
+.article h2{font-size:clamp(22px,6vw,28px);margin:11px 0;line-height:1.35}
+.editorial-panel{height:clamp(145px,27vh,235px);border-radius:14px;padding:18px;display:flex;flex-direction:column;justify-content:space-between;color:#fff;position:relative;overflow:hidden;background:linear-gradient(125deg,#28475d,#ac836b)}
+.editorial-0{background:radial-gradient(circle at 83% 30%,#d5a775,transparent 37%),linear-gradient(135deg,#263d52,#506d7b)}
+.editorial-1{background:radial-gradient(circle at 74% 23%,#f0cfad,transparent 33%),linear-gradient(135deg,#445c6f,#b69088)}
+.editorial-2{background:radial-gradient(circle at 65% 20%,#b6b9a0,transparent 35%),linear-gradient(135deg,#263647,#77656b)}
+.editorial-3{background:radial-gradient(circle at 75% 30%,#b3a3a4,transparent 37%),linear-gradient(135deg,#354e60,#907b6b)}
+.panel-label{font-size:11px;letter-spacing:.15em;font-weight:750;position:relative;z-index:1}
+.panel-title{max-width:90%;font-size:clamp(22px,6vw,32px);font-weight:800;line-height:1.3;position:relative;z-index:1;text-shadow:0 1px 5px #2239}
+.panel-number{font-family:Georgia,serif;font-size:130px;line-height:1;position:absolute;right:-6px;bottom:-29px;opacity:.14}
+.editorial-photo{height:clamp(145px,27vh,235px);width:100%;object-fit:cover;border-radius:14px}
+.article-lead{font-size:var(--size);line-height:1.65;font-weight:500;margin:18px 0 10px;overflow-wrap:anywhere}
+.keypoints{margin-top:10px;background:#eee9df;border-radius:10px;padding:11px 14px;font-size:13px;line-height:1.7}
+.keypoints>div+div{margin-top:3px}
+.small-title{color:#94744e;font-size:11px;font-weight:750;letter-spacing:.07em;margin-bottom:7px}
+.secondary-title{font-size:18px;font-weight:740;line-height:1.45;margin:13px 0}
+.detail-grid{display:flex;flex-direction:column;gap:15px}
+.detail-item{border-bottom:1px solid #ded7ce;padding-bottom:11px}
+.detail-item p{font-size:var(--size);line-height:1.67;margin:0;overflow-wrap:anywhere}
+.article-source{margin-top:15px;padding:12px 14px;background:#ebe6de;border-radius:12px;font-size:12px;line-height:1.6}
+.article-source a{display:block;color:#205479;font-size:15px;font-weight:700;margin-top:8px}
+.article.details .folio{margin-top:10px}
+@media(max-height:760px){.editorial-panel,.editorial-photo{height:135px}.article-lead{line-height:1.5;margin:10px 0}.keypoints{padding:8px 12px}.detail-grid{gap:9px}.detail-item{padding-bottom:7px}.detail-item p{line-height:1.5}}
+
+/* Magazine art direction / multiple editorial grids */
+.magazine-cover{padding:calc(env(safe-area-inset-top) + 18px) 25px 20px!important;background:#101f2d!important;display:none;position:absolute;overflow:hidden}
+.magazine-cover.current{display:flex;flex-direction:column}
+.cover-top{display:flex;justify-content:space-between;border-top:1px solid #c4b7a6;padding-top:10px;font:700 10px/1.2 -apple-system,sans-serif;letter-spacing:.12em;color:#d1c7ba}
+.magazine-cover .brand{font-family:Georgia,"Times New Roman",serif;font-size:clamp(44px,11.5vw,65px);font-weight:700;line-height:.88;letter-spacing:-.055em;margin:clamp(16px,4vh,40px) 0 0;color:#f5f0e8;z-index:2}
+.brand-dot{color:#cba078}
+.cover-art{flex:1;min-height:0;position:relative;margin:8px -25px -4px;overflow:hidden;background:radial-gradient(ellipse at 74% 40%,#af8068 0%,transparent 38%),linear-gradient(140deg,#112c3c 20%,#3e6570 53%,#212e3d 100%)}
+.cover-art:before{content:"";position:absolute;left:-20%;top:29%;width:140%;height:60%;border:1px solid #cfae8d66;border-radius:50%;transform:rotate(-23deg)}
+.cover-art:after{content:"";position:absolute;left:30%;top:0;width:140%;height:100%;background:linear-gradient(90deg,transparent,#172d39cc)}
+.cover-motif{position:absolute;left:8%;top:24%;font:italic 100 clamp(80px,24vw,180px)/.8 Georgia,serif;color:#f7e6ccbb;letter-spacing:-.1em;z-index:1}
+.cover-motif span{display:block;font:700 10px/1 sans-serif;letter-spacing:.26em;margin-top:19px;margin-left:9px;color:#f1dfce}
+.cover-bottom{position:relative;background:#101f2d;margin:0 -25px;padding:16px 25px 0;z-index:3}
+.cover-line{display:flex;justify-content:space-between;border-top:1px solid #b79879;padding-top:10px;font-size:9px;color:#d7bc95;letter-spacing:.13em;font-weight:800}
+.magazine-cover .cover-bottom h1{font-family:-apple-system,"Hiragino Kaku Gothic ProN",sans-serif;font-size:clamp(27px,7.1vw,39px);letter-spacing:-.06em;line-height:1.28;margin:13px 0 8px;color:#faf5ed}
+.cover-bottom p{font-size:13px;line-height:1.45;color:#d7d5d2;margin:0 0 12px}
+.cover-foot{border-top:1px solid #66707b;display:flex;justify-content:space-between;padding-top:9px;font-size:10px;color:#e1d4c6;letter-spacing:.035em}
+.sheet.jazz-hero,.sheet.jazz-guide{background:#152635;color:#f4ede1}
+.eyebrow{font-size:11px;letter-spacing:.15em;font-weight:800;color:#a37f58}
+.eyebrow.light{color:#dcbe92}
+.jazz-title{font-family:Georgia,"Yu Mincho",serif!important;font-size:clamp(31px,8.6vw,42px)!important;font-weight:700;line-height:1.27!important;letter-spacing:-.07em;margin:17px 0!important;color:#f6eee3}
+.jazz-title span,.jazz-title em{display:block}.jazz-title em{font-style:normal;color:#d8ac76}
+.jazz-photo{height:clamp(175px,32vh,315px);border-radius:3px;overflow:hidden;position:relative;background:#354755}
+.jazz-photo img{width:100%;height:100%;object-fit:cover;display:block}
+.photo-mark{position:absolute;bottom:0;left:0;background:#162432d9;color:#fff;font-size:10px;font-weight:800;padding:8px 11px;letter-spacing:.12em}
+.photo-credit{font-size:9px;color:#c7bbb0;line-height:1.3;margin:6px 0 10px}
+.jazz-stats{display:flex;justify-content:space-between;border-top:1px solid #bca282;border-bottom:1px solid #bca282;padding:9px 0;margin:4px 0 10px}
+.jazz-stats b{font:700 clamp(22px,6vw,30px)/1 Georgia,serif;color:#f4eadd;display:block}
+.jazz-stats small{font-size:9px;color:#bea888;letter-spacing:.12em}
+.jazz-deck{font-size:var(--size);line-height:1.55;color:#f1ebe3;margin:8px 0 0}
+.jazz-hero .folio,.jazz-guide .folio{color:#c2b7ab;border-color:#697584}
+.jazz-schedule{background:#f4eee5;color:#1d2a34}
+.program-heading{font:700 clamp(29px,8vw,42px)/1.25 Georgia,"Yu Mincho",serif!important;margin:12px 0 8px!important;letter-spacing:-.07em!important}
+.program-heading em{font:italic 600 clamp(27px,7vw,38px)/1.2 Georgia,serif;color:#9d6b43}
+.program-intro{margin:0 0 13px;font-size:12px;color:#5f6870}
+.lineup-list{flex:1;min-height:0;display:flex;flex-direction:column;justify-content:space-around}
+.lineup-row{display:flex;align-items:center;gap:10px;border-top:1px solid #c9bfb3;padding:7px 0}
+.lineup-row time{font:700 17px/1 Georgia,serif;color:#a07655;width:58px;flex-shrink:0}
+.lineup-name{font-size:clamp(13px,3.9vw,17px);font-weight:700;flex:1;min-width:0;overflow-wrap:anywhere}
+.lineup-row i{font-size:9px;letter-spacing:.1em;font-style:normal;color:#a29181}
+.program-note{font-size:10px;line-height:1.4;color:#6d6b69;margin:7px 0}
+.guide-title{font:700 clamp(29px,7.8vw,39px)/1.35 Georgia,"Yu Mincho",serif!important;letter-spacing:-.06em!important;color:#efe2d4}
+.venue{display:flex;border-top:1px solid #6b7480;padding:15px 0;gap:13px}
+.venue-time{color:#e2bc8f;font:700 23px/1.3 Georgia,serif;min-width:124px}
+.venue-time span{font-size:13px}
+.venue b{font-size:13px;line-height:1.5;display:block}.venue p{font-size:12px;line-height:1.5;color:#d7d4cd}
+.guide-caption{color:#eee5db;font-size:14px;line-height:1.7;margin:14px 0}
+.official-source{border:1px solid #738090;padding:14px;margin-top:5px;font-size:12px}.official-source b{color:#e0be95;letter-spacing:.1em;font-size:10px}
+.official-source p{margin:8px 0}.official-source a{display:block;color:#f5dfbe;font-weight:700;margin-top:8px}
+.skin-feature{background:#eae4da;color:#1d2d37}.feature-index{position:absolute;right:18px;top:20px;font:110px/.9 Georgia,serif;color:#d8cbbb}
+.skin-title{font:700 clamp(30px,8vw,42px)/1.3 Georgia,"Yu Mincho",serif!important;position:relative;z-index:1;letter-spacing:-.06em!important}
+.skin-title em{font-style:normal;color:#997452}
+.skin-lead{font-size:var(--size);line-height:1.65;margin:18px 0}
+.skin-steps{margin-top:15px}.skin-steps>div{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px;border-top:1px solid #bcb0a1;padding:15px 0}
+.skin-steps span{font:italic 23px Georgia,serif;color:#a5825e;min-width:42px}
+.skin-steps b{font-size:18px}.skin-steps small{margin-left:48px;font-size:12px;color:#79736d;display:block;width:100%}
+.feature-note{font-size:12px;line-height:1.6;color:#716a62;margin-top:12px}
+.feature-link{margin-top:12px}.feature-link a{display:inline-block;color:#3a6687;font-weight:750;font-size:14px}
+.money-feature{background:#f7f4ed;color:#1c2b3b}
+.money-big{font:700 clamp(32px,8vw,42px)/1.3 Georgia,"Yu Mincho",serif;letter-spacing:-.07em;margin:27px 0 22px}
+.money-big span{color:#92704d}
+.money-rule{height:1px;background:#b8a082}
+.money-lead{font-size:var(--size);line-height:1.65;margin:19px 0}
+.money-contrast{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:10px 0 18px}
+.money-contrast>div{padding:14px 11px;background:#ebe6de;border:1px solid #d5cbbd}
+.money-contrast small{color:#92704d;font-size:10px;letter-spacing:.1em;display:block;margin-bottom:10px}
+.money-contrast strong{font-size:14px;line-height:1.5}
+.money-action{border-top:1px solid #c6b9a9;padding-top:14px}.money-action b{color:#92704d;font-size:15px}
+.money-action p{font-size:14px;line-height:1.55}.money-action small{color:#5c6873;font-size:11px}
+.money-feature .feature-link a{color:#205479}.money-feature .folio{color:#858b8c;border-color:#d5cec4}
+.story-feature h2{font-size:30px}.story-accent{height:3px;background:#bb997b}.story-lead{font-size:var(--size);line-height:1.7;margin-top:18px}.story-why{background:#ded5c8;padding:16px;margin:20px 0;line-height:1.65}.story-caveat{font-size:12px;color:#73675b}
+@media(max-height:740px){.magazine-cover .brand{font-size:49px}.jazz-photo{height:155px}.jazz-title{font-size:30px!important;margin:10px 0!important}.jazz-deck{font-size:14px}.jazz-stats b{font-size:22px}.lineup-row{padding:4px 0}.lineup-row time{font-size:15px}.guide-title{font-size:29px!important}.venue{padding:9px 0}.skin-steps>div{padding:9px 0}.skin-lead,.money-lead{font-size:15px}}
+
+/* New editorial mix: readable contents, distinct sections and stronger hierarchy */
+.contents .toc{min-height:69px;margin-bottom:10px;padding:10px 12px}
+.contents h2{margin:22px 0 22px;font-size:clamp(25px,7vw,34px)}
+.contents-list{display:grid;gap:9px}
+.contents .toc .detail strong{font-size:clamp(13px,3.7vw,16px);line-height:1.45}
+.story-feature{background:#f7f4ed;color:#1c2b3b}
+.story-feature .eyebrow{color:#997752}
+.story-feature .story-title{font-family:Georgia,"Yu Mincho",serif;font-size:clamp(27px,7.4vw,38px);line-height:1.32;margin:22px 0 12px}
+.story-feature .story-lead{font-size:var(--size);line-height:1.75;margin:18px 0 20px}
+.story-feature .story-why{border-left:3px solid #b99569;background:#ece7de;padding:14px 18px;font-size:15px;line-height:1.65;margin:18px 0}
+.story-feature h3{color:#a27b50;margin:5px 0;font-size:15px}
+.story-feature>p:not(.story-lead){font-size:15px;line-height:1.6}
+.story-feature .feature-link{border-top:1px solid #d4cabf;padding-top:12px}
+@media(max-height:760px){.contents .toc{min-height:58px;margin-bottom:6px}.contents h2{margin:13px 0 14px}.story-feature .story-title{margin:11px 0}}
+
+/* Separate editorial compositions, shared paper + ink palette */
+.style-feature{background:#f7f4ed;color:#1c2b3b}
+.style-number,.local-index{font:italic 94px/.8 Georgia,serif;position:absolute;right:19px;top:38px;color:#e0d6c8;z-index:0}
+.style-title{position:relative;font:700 clamp(33px,9vw,47px)/1.24 Georgia,"Yu Mincho",serif!important;margin:28px 0 12px!important;letter-spacing:-.06em!important}
+.style-title em{font-style:normal;color:#a17b51}
+.style-sub{font-size:11px;letter-spacing:.22em;color:#9c805f;font-weight:750;border-bottom:1px solid #c9bdaf;padding-bottom:14px}
+.style-opening{font-size:var(--size);line-height:1.72;margin:20px 0 14px}
+.style-checks{display:flex;flex-direction:column}
+.style-checks>div{display:grid;grid-template-columns:32px 1fr;gap:0 10px;padding:12px 0;border-top:1px solid #d3c8bc}
+.style-checks span{grid-row:span 2;font:italic 25px Georgia,serif;color:#b08c63}.style-checks b{font-size:19px}.style-checks small{font-size:12px;color:#7b7d79;margin-top:3px}
+.style-note,.local-note{font-size:12px;line-height:1.6;color:#6a7173;margin-top:12px}
+.tech-feature{background:#f7f4ed;color:#192b3e}
+.tech-head{font:700 clamp(29px,7.8vw,40px)/1.35 Georgia,"Yu Mincho",serif!important;letter-spacing:-.055em!important;margin:24px 0 16px!important}.tech-head em{color:#a27a55;font-style:normal}
+.tech-shape{height:clamp(130px,21vh,200px);border-radius:13px;background:linear-gradient(135deg,#152b41,#43576d);color:#fff;display:flex;align-items:center;justify-content:center;gap:27px}
+.tech-screen{width:83px;height:125px;border:3px solid #b9c1c7;border-radius:20px;background:radial-gradient(circle at 78% 25%,#bf8ca6,#293f5a);font:700 48px/1 Georgia,serif;text-align:center;padding-top:30px;box-shadow:0 9px 20px #1117}
+.tech-screen span{font:700 10px sans-serif;display:block}.tech-signal{font:750 10px/2.5 sans-serif;letter-spacing:.12em;color:#d7c4ab}
+.tech-summary{font-size:var(--size);line-height:1.64;margin:15px 0}.tech-value{background:#ebe4d9;padding:13px 15px}.tech-value b{color:#977348;font-size:13px}.tech-value p{font-size:14px;line-height:1.55;margin:8px 0 0}.tech-action{font-size:13px;color:#66717b;margin-top:10px;line-height:1.55}
+.local-feature{background:#f7f4ed;color:#1c2b3b}
+.local-title{position:relative;z-index:1;font:700 clamp(27px,7vw,37px)/1.3 Georgia,"Yu Mincho",serif!important;margin:23px 0 17px!important}
+.local-banner{height:clamp(123px,22vh,190px);background:linear-gradient(145deg,#314a57,#9a806c);padding:18px;color:#efe5d6;position:relative;overflow:hidden;display:flex;align-items:flex-start}
+.local-banner span{font-size:10px;font-weight:750;letter-spacing:.15em;position:relative;z-index:1}
+.local-pattern{position:absolute;right:-65px;top:-65px;width:230px;height:230px;border:25px solid #f3dabd44;border-radius:42px;transform:rotate(28deg)}
+.local-lead{font-size:var(--size);line-height:1.69;margin:15px 0}.local-why{background:#ebe7df;padding:12px 15px;font-size:14px;line-height:1.54}.local-why b{color:#96724e}.local-why p{margin:7px 0}
+@media(max-height:745px){.style-title,.tech-head,.local-title{margin:9px 0!important}.tech-shape,.local-banner{height:100px}.style-opening,.local-lead,.tech-summary{line-height:1.5;margin:9px 0}.style-checks>div{padding:7px 0}.local-why{padding:8px 12px}}
+</style></head>
+<body><div id="app"><main id="stage"><section class="sheet current cover"><div class="topline">PERSONAL MAGAZINE · DAILY / YOS</div><div class="brand">YOS<br>JOURNAL.</div><div class="coverGrow"></div><span class="tag">DAILY EDIT</span><h1>今日を、少し良くする情報。</h1><p>信頼できる情報を、1冊の雑誌のように。</p><div class="issue">記事を読み込み中</div></section></main><nav id="bar" aria-label="ページ操作"><button id="toc" aria-label="目次">☷</button><button id="prev" aria-label="前ページ">‹</button><span id="count">1 / 1</span><button id="next" aria-label="次ページ">›</button><button id="size" aria-label="文字サイズ">Aa</button></nav></div><div id="status" role="status"></div>
+<script>
+(()=>{'use strict';
+const endpoint='https://raw.githubusercontent.com/yskn0008-bot/ProjectY/main/ios-app/scriptable/journal/latest.json';
+const editorialBase='https://raw.githubusercontent.com/yskn0008-bot/ProjectY/main/journal/editions/';
+const stage=document.getElementById('stage'),count=document.getElementById('count'),status=document.getElementById('status');
+const byId=id=>document.getElementById(id),esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const safeLink=x=>{try{const u=new URL(String(x));return u.protocol==='https:'?u.href:''}catch{return ''}};
+const icons=[
+'<svg viewBox="0 0 320 120" aria-label="タクシー"><rect width="320" height="120" fill="#1b3b57"/><path d="M47 82l20-37h139l22 37h16v20H30V82Z" fill="#f0e6da"/><path d="M80 52h111l16 30H64Z" fill="#789bae"/><path d="M119 32h44v13h-44Z" fill="#d8b27b"/><circle cx="83" cy="103" r="13" fill="#152638"/><circle cx="209" cy="103" r="13" fill="#152638"/></svg>',
+'<svg viewBox="0 0 320 120" aria-label="海と音楽"><rect width="320" height="120" fill="#23475c"/><circle cx="257" cy="36" r="22" fill="#e5bc78"/><path d="M0 93q40-21 80 0t80 0t80 0t80 0" fill="none" stroke="#7bb0af" stroke-width="5"/><path d="M134 25v55l44-9V17Z" fill="none" stroke="#f4e5d1" stroke-width="5"/><ellipse cx="122" cy="84" rx="15" ry="9" fill="#f4e5d1"/><ellipse cx="166" cy="75" rx="15" ry="9" fill="#f4e5d1"/></svg>',
+'<svg viewBox="0 0 320 120" aria-label="肌のケア"><rect width="320" height="120" fill="#e5d7c8"/><circle cx="160" cy="53" r="43" fill="#cfa58c"/><path d="M132 51q28-17 56 0m-37 17q12 11 23 0" stroke="#805f55" stroke-width="3" fill="none"/><path d="M99 120q10-42 61-42t61 42" fill="#b89c9e"/><circle cx="247" cy="39" r="14" fill="#fff" opacity=".7"/></svg>',
+'<svg viewBox="0 0 320 120" aria-label="お金と選択肢"><rect width="320" height="120" fill="#254254"/><rect x="64" y="19" width="181" height="86" rx="12" fill="#f0e8dc"/><path d="M83 37h143" stroke="#a3aca9" stroke-width="8"/><path d="M83 81l36-18 31 10 51-28" stroke="#b38b54" stroke-width="6" fill="none"/><circle cx="250" cy="85" r="22" fill="#d5ae75"/><path d="M243 81h14m-7-12v29" stroke="#1f394d" stroke-width="3"/></svg>'];
+let slides=[],index=0,issueKey='',font=17,tocIndex=1;
+function shell(kind,content){return '<section class="sheet '+kind+'">'+content+'</section>'}
+function para(k,v){return '<h3>'+esc(k)+'</h3><p class="copy">'+esc(v)+'</p>'}
+function addArticle(pages,a,i,issue){
+ const cat=String(a.category||'FEATURE'),key=String(i+1).padStart(2,'0');
+ const link=safeLink(a.link),source='<a href="'+esc(link)+'" target="_blank" rel="noopener noreferrer">公式・出典を確認 ↗</a>';
+ const footer='<div class="fill"></div><div class="folio"><span>YOS JOURNAL</span><span>'+key+'</span></div>';
+ const isJazz=issue.issuedOn==='2026-11-12'&&/MIHAMA|ジャズ/.test(a.title);
+ if(isJazz){
+ const photo='https://www.depot-island.co.jp/images/about-pict03.jpg';
+ pages.push(shell('jazz-hero',
+  '<div class="eyebrow light">WEEKEND / CULTURE · 01</div><h2 class="jazz-title"><span>海風と、</span><span>ジャズと、</span><em>土曜の美浜。</em></h2>'+
+  '<div class="jazz-photo"><img src="'+esc(photo)+'" alt="北谷・デポアイランドの海沿いテラス。ライブ当日の写真ではありません"><div class="photo-mark">CHATAN / SEASIDE</div></div>'+
+  '<p class="photo-credit">写真：デポアイランド公式｜会場周辺の風景（イベント当日の写真ではありません）</p>'+
+  '<div class="jazz-stats"><div><b>11.14</b><small>SATURDAY</small></div><div><b>12—20</b><small>TIME</small></div><div><b>FREE</b><small>ADMISSION</small></div></div>'+
+  '<p class="jazz-deck">海沿いを歩いていたら、どこからか生演奏。3つの会場を行き来しながら、気になる音に立ち止まる週末。</p>'+footer));
+ const main=[
+ ['12:00','ジャズんちゅ'],['13:00','D.D.extention'],['14:00','HANS'],['15:10','儀保貴子'],['16:10','SAKI & The Sidewinders'],['17:20','MOJO'],['18:10','亜熱帯クラブ'],['18:40','平良史子'],['19:20','シークレット出演']
+ ];
+ const schedule=main.map(([time,artist],n)=>'<div class="lineup-row"><time>'+esc(time)+'</time><div class="lineup-name">'+esc(artist)+'</div><i>'+(n===8?'LAST':'LIVE')+'</i></div>').join('');
+ pages.push(shell('jazz-schedule',
+  '<div class="eyebrow">02 / THE LINEUP</div><h2 class="program-heading">音楽で辿る、<br><em>12:00 → 20:00</em></h2>'+
+  '<p class="program-intro">デポアイランド・ボードウォーク <strong>メイン会場</strong></p><div class="lineup-list">'+schedule+'</div>'+
+  '<p class="program-note">※演奏時刻・出演者は公式掲載タイムテーブルをもとにした案内。変更の可能性があります。</p>'+footer));
+ pages.push(shell('jazz-guide',
+  '<div class="eyebrow">03 / EXPLORE MIHAMA</div><h2 class="guide-title">海沿いの外にも、<br>音楽がある。</h2>'+
+  '<div class="venue"><div class="venue-time">14:40<span>—15:10</span></div><div><b>THE FAT HATTER OKINAWA</b><p>広瀬朝子による小編成ライブ</p></div></div>'+
+  '<div class="venue"><div class="venue-time">17:45<span>—18:30</span><br>19:00<span>—19:45</span></div><div><b>MBギャラリーチャタン</b><p>MBギャラリーカルテット</p></div></div>'+
+  '<div class="guide-caption">街を歩いて、気になる音を拾っていく。会場間の移動や飲食には別途費用がかかる場合があります。</div>'+
+  '<div class="official-source"><b>OFFICIAL INFORMATION</b><p>北谷町観光協会｜MIHAMA JAZZ STREET 2026</p>'+source+'</div>'+footer));
+ return;
+ }
+ if(/SKIN|HEALTH/.test(cat)){
+ pages.push(shell('skin-feature',
+  '<div class="eyebrow">SELF / BETTER CHOICES</div><div class="feature-index">02</div>'+
+  '<h2 class="skin-title">肌への投資、<br><em>順番で差がつく。</em></h2>'+
+  '<p class="skin-lead">'+esc(a.summary||'')+'</p>'+
+  '<div class="skin-steps"><div><span>01</span><b>いまの肌の状態</b><small>診察で原因を整理</small></div><div><span>02</span><b>標準治療を知る</b><small>費用・期間・副作用を比較</small></div><div><span>03</span><b>必要な施術を選ぶ</b><small>急いで高額施術から始めない</small></div></div>'+
+  '<div class="feature-note">'+esc(a.caveat||'医師の診察を受けて判断する。')+'</div><div class="feature-link">'+source+'</div>'+footer));
+ return;
+ }
+ if(/STYLE/.test(cat)){
+ pages.push(shell('style-feature','<div class="eyebrow">SELF / STYLE</div><div class="style-number">06</div><h2 class="style-title">着飾るより、<br><em>整える。</em></h2><div class="style-sub">THE SMALL DETAILS</div>'+
+ '<p class="style-opening">'+esc(a.summary||'')+'</p><div class="style-checks"><div><span>01</span><b>髪の輪郭</b><small>前・横・後ろのまとまり</small></div><div><span>02</span><b>手元</b><small>爪や指先の清潔感</small></div><div><span>03</span><b>服と香り</b><small>シワを減らし、香りは控えめ</small></div></div>'+
+ '<div class="style-note">'+esc(a.caveat||'')+'</div><div class="feature-link">'+source+'</div>'+footer));
+ return;
+ }
+ if(/TECH/.test(cat)){
+ pages.push(shell('tech-feature','<div class="eyebrow">TECH / NEXT</div><h2 class="tech-head">iPhoneの次の進化を、<br><em>生活のラクさへ。</em></h2>'+
+ '<div class="tech-shape"><div class="tech-screen">27<span>iOS</span></div><div class="tech-signal">SIRI AI<br>WIDGETS<br>PERSONALIZE</div></div>'+
+ '<p class="tech-summary">'+esc(a.summary||'')+'</p><div class="tech-value"><b>気になる理由</b><p>'+esc(a.reason||'')+'</p></div><div class="tech-action">'+esc(a.action||'')+'</div><div class="feature-link">'+source+'</div>'+footer));
+ return;
+ }
+ if(/CRAFT|LOCAL/.test(cat)){
+ pages.push(shell('local-feature','<div class="eyebrow">LIFE / LOCAL CULTURE</div><div class="local-index">'+key+'</div><h2 class="local-title">'+esc(a.title)+'</h2>'+
+ '<div class="local-banner"><span>'+(cat.includes('CRAFT')?'OBJECTS & MATERIALS':'LOCAL ARTS & CULTURE')+'</span><div class="local-pattern"></div></div>'+
+ '<p class="local-lead">'+esc(a.summary||'')+'</p><div class="local-why"><b>楽しみ方のヒント</b><p>'+esc(a.reason||'')+'</p><p>'+esc(a.action||'')+'</p></div>'+
+ '<div class="local-note">'+esc(a.caveat||'')+'</div><div class="feature-link">'+source+'</div>'+footer));
+ return;
+ }
+ if(/MONEY|LAW|LEGAL/.test(cat)){
+ pages.push(shell('money-feature',
+  '<div class="eyebrow">MONEY / OPTIONS</div><div class="money-big">知っている選択肢が、<br><span>安心を増やす。</span></div>'+
+  '<div class="money-rule"></div><p class="money-lead">'+esc(a.summary||'')+'</p>'+
+  '<div class="money-contrast"><div><small>BEFORE</small><strong>情報が少ないまま<br>ひとりで判断</strong></div><div><small>AFTER</small><strong>条件を確認して<br>相談先を選べる</strong></div></div>'+
+  '<div class="money-action"><b>調べるなら、ここから</b><p>'+esc(a.action||'')+'</p><small>'+esc(a.caveat||'')+'</small></div>'+
+  '<div class="feature-link">'+source+'</div>'+footer));
+ return;
+ }
+ pages.push(shell('story-feature','<div class="eyebrow">'+key+' / '+esc(cat)+'</div><h2 class="story-title">'+esc(a.title)+'</h2>'+
+ '<div class="story-accent"></div><p class="story-lead">'+esc(a.summary||'')+'</p><div class="story-why">'+esc(a.reason||'')+'</div>'+
+ '<h3>これから役立つこと</h3><p>'+esc(a.action||'')+'</p><p class="story-caveat">'+esc(a.caveat||'')+'</p>'+
+ '<div class="feature-link">'+source+'</div>'+footer));
+}
+function draw(issue){
+ if(!issue||!Array.isArray(issue.articles)||!issue.articles.length)throw Error('記事データがありません');
+ const articles=issue.articles.filter(a=>a&&a.title&&safeLink(a.link)).filter(a=>!(issue.issuedOn==='2026-11-12'&&/タクシー.*求人|配車アプリで働く/.test(a.title))).slice(0,8);
+ if(!articles.length)throw Error('出典リンク付きの記事がありません');
+ issueKey=String(issue.issuedOn||issue.date||'unknown');
+ const parts=[],starts=[];
+ const jazzSpecial=issue.issuedOn==='2026-11-12'&&articles.some(a=>/ジャズ|MIHAMA/.test(a.title));
+ const coverHeadline=jazzSpecial?'土曜、<br>街がジャズになる。':esc(issue.headline||articles[0].title);
+ const coverCopy=jazzSpecial?'美浜の海風と音楽を巡る、週末ガイド。':esc(issue.lead||'今日、読む価値のある情報を。');
+ const coverTheme=jazzSpecial?'JAZZ':'TODAY';
+ const coverN=jazzSpecial?'WEEKEND CULTURE':'PERSONAL EDITION';
+ parts.push(shell('cover magazine-cover','<div class="cover-top"><span>YOS / PERSONAL EDITION</span><span>'+esc(issue.issuedOn||'DAILY')+'</span></div><div class="brand">YOS<br>JOURNAL<span class="brand-dot">.</span></div><div class="cover-art"><div class="cover-motif">'+coverTheme+'<span>'+(jazzSpecial?'AT THE SEASIDE':'MADE FOR ONE')+'</span></div></div><div class="cover-bottom"><div class="cover-line">'+coverN+' <span>NO. 01</span></div><h1>'+coverHeadline+'</h1><p>'+coverCopy+'</p><div class="cover-foot"><span>'+esc(issue.date||'発行日未確認')+'</span><span>'+articles.length+' STORIES INSIDE</span></div></div>'));
+ parts.push('CONTENTS_PLACEHOLDER');
+ if(articles.length>4)parts.push('CONTENTS_PLACEHOLDER_2');
+ for(let i=0;i<articles.length;i++){starts.push(parts.length);addArticle(parts,articles[i],i,issue)}
+ const tocPage=(subset,offset,heading)=>shell('contents','<div class="kicker">YOS JOURNAL / CURATED READS</div><h2>'+heading+'</h2><div class="contents-list">'+subset.map((a,i)=>'<button class="toc" data-go="'+starts[offset+i]+'"><span class="number">'+String(offset+i+1).padStart(2,'0')+'</span><span class="detail"><small>'+esc(a.category||'FEATURE')+'</small><strong>'+esc(a.title)+'</strong></span><span class="chevron">›</span></button>').join('')+'</div><div class="fill"></div><div class="folio">'+esc(issue.date||'')+'</div>');
+ parts[1]=tocPage(articles.slice(0,4),0,'今日、読みたい話。');
+ if(articles.length>4)parts[2]=tocPage(articles.slice(4),4,'まだある、発見。');
+ stage.innerHTML=parts.join('');
+ slides=Array.from(stage.querySelectorAll('.sheet'));tocIndex=1;
+ stage.querySelectorAll('[data-go]').forEach(el=>el.addEventListener('click',()=>show(Number(el.dataset.go))));
+ let prior=null;try{prior=localStorage.getItem('yos-journal-position-'+issueKey)}catch{}
+ const saved=prior===null?0:Number(prior);show(Number.isInteger(saved)?saved:0);
+ if(issue.issuedOn){const today=new Date().toLocaleDateString('sv-SE',{timeZone:'Asia/Tokyo'});if(issue.issuedOn!==today)notice('本日号ではありません：'+issue.issuedOn)}
+}
+function show(n){if(!slides.length)return;index=Math.max(0,Math.min(slides.length-1,n));slides.forEach((p,i)=>p.classList.toggle('current',i===index));count.textContent=(index+1)+' / '+slides.length;byId('prev').disabled=index===0;byId('next').disabled=index===slides.length-1;try{localStorage.setItem('yos-journal-position-'+issueKey,String(index))}catch{}}
+function notice(x){status.textContent=x;status.style.display='block'}
+byId('prev').onclick=()=>show(index-1);byId('next').onclick=()=>show(index+1);byId('toc').onclick=()=>show(tocIndex);
+byId('size').onclick=()=>{font=font>=19?15:font+1;document.documentElement.style.setProperty('--size',font+'px')};
+let x=0,y=0;stage.addEventListener('touchstart',e=>{x=e.touches[0].clientX;y=e.touches[0].clientY},{passive:true});stage.addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-x,dy=e.changedTouches[0].clientY-y;if(Math.abs(dx)>55&&Math.abs(dx)>Math.abs(dy)*1.4)show(index+(dx<0?1:-1))},{passive:true});
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight')show(index+1);if(e.key==='ArrowLeft')show(index-1)});
+(async()=>{let issue=null;try{const today=new Date().toLocaleDateString('sv-SE',{timeZone:'Asia/Tokyo'});let r=await fetch(editorialBase+today+'.json',{cache:'no-store'});if(!r.ok)r=await fetch(endpoint,{cache:'no-store'});if(!r.ok)throw Error('HTTP '+r.status);issue=await r.json();if(!issue.articles?.length)throw Error('記事なし');try{localStorage.setItem('yos-journal-issue-cache',JSON.stringify(issue))}catch{}}catch(e){try{issue=JSON.parse(localStorage.getItem('yos-journal-issue-cache')||'null');if(issue)notice('通信できないため保存した号を表示しています')}catch{}}
+try{draw(issue)}catch(e){stage.innerHTML='<section class="sheet current"><div id="error"><h2>記事を表示できませんでした</h2><p>'+esc(e.message)+'</p><p>通信を確認して再読み込みしてください。</p></div></section>';count.textContent='—'}})();
+})();
+</script></body></html>

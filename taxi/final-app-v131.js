@@ -124,6 +124,7 @@
     return`<main class="yos131-page yos131-today">
       ${header('今日の予定','',`<button class="yos131-icon-btn" data-edit-day="${key}">＋</button>`)}
       <section class="yos131-card yos131-summary3"><div><span>目標</span><strong>${money(target)}</strong></div><div><span>実績</span><strong class="${performance(actual,target)}">${money(actual)}</strong></div><div><span>達成率</span><strong>${pct}%</strong></div></section>
+      <a href="./revenue-goal.html" class="yos131-card" style="display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:50px;text-decoration:none;border:1px solid rgba(255,202,112,.34);font-size:13px;font-weight:800;color:#ffca70"><span>月商100万円ナビ</span><strong>目標管理　›</strong></a>
       <div class="yos131-datebar"><button data-day-shift="-1">‹</button><strong>${new Intl.DateTimeFormat('ja-JP',{month:'long',day:'numeric',weekday:'short'}).format(focus)}</strong><button data-day-shift="1">›</button></div>
       <section class="yos131-card yos131-schedule">${rows.map(([time,label])=>`<button class="yos131-schedule-row" data-edit-day="${key}"><time>${time}</time><span>${label}</span><i></i></button>`).join('')}</section>
       <section class="yos131-card yos131-memo"><button data-edit-day="${key}">${esc(v.event||'今日の注意・イベントを入力')}</button></section>

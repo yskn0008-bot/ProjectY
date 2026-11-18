@@ -1,0 +1,18 @@
+<!doctype html><meta charset="utf-8"><title>Habit occurrence · local-only fictional test</title><style>body{background:#051522;color:white;font:14px sans-serif}iframe{border:0;width:402px;height:874px}pre{position:absolute;left:440px;top:10px;white-space:pre-wrap}</style><iframe id="phone" title="習慣の実施日テスト"></iframe><pre id="result">実行中</pre><script>
+if(!['127.0.0.1','localhost'].includes(location.hostname))throw Error('Local fictional fixture only');
+for(const k of ['yos-life-v1','YOS_DAYSTREAM_WEB_CAL_SNAPSHOT_V1','YOS_CALENDAR_NATIVE_SNAPSHOT_V1'])localStorage.removeItem(k);
+const today=new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date()),at=new Date().toISOString(),id='a'.repeat(32),receipt='b'.repeat(32),key='YOS_DAYSTREAM_WEB_TASK_SNAPSHOT_V1';
+const snapshot={schema:'yos-daystream-source-snapshot-v1',kind:'tasks',source:'yos-auth-cache',origin:'notion',complete:true,status:'ok',checkedAt:at,items:[{id:'notion-'+id,title:'試験用の習慣',area:'Life',due:today,dueAt:today,status:'次にやる',habitCycle:'毎日',timing:'flexible',lastEditedAt:at}],calendarSources:{checkedAt:at,sources:[{name:'YOS 生活イベント',status:'ok',complete:true,items:[]}]}};
+localStorage.setItem(key,JSON.stringify(snapshot));const frame=document.getElementById('phone');frame.src='/life/calendar/?view=day&date='+today;
+frame.onload=async()=>{const w=frame.contentWindow,d=w.document,checks=[],assert=(b,m)=>{checks.push((b?'PASS ':'FAIL ')+m);if(!b)throw Error(m)},tick=()=>new Promise(r=>setTimeout(r,0));let calls=0;
+try{
+ w.YOS_DAYSTREAM_TASK_AUTH.completeHabit=async(item,date)=>{calls++;const s=JSON.parse(localStorage.getItem(key));s.calendarSources.sources[0].items=[{id:receipt,taskId:id,date,title:item.title,type:'habit',done:true,dueAt:'',subtitle:'実施済み（本人記録）'}];localStorage.setItem(key,JSON.stringify(s));return {ok:true,occurrence:{id:receipt,taskId:id,date,done:true}}};
+ w.YOS_DAYSTREAM_TASK_AUTH.refresh=async()=>{d.getElementById('reload').click();return true};
+ d.querySelector('.cal-unscheduled .cal-complete').click();await tick();assert(d.querySelector('.cal-unscheduled .cal-complete').getAttribute('aria-checked')==='true','この日の実施記録を読戻して完了');d.querySelector('dialog[open]').close();
+ assert(JSON.parse(localStorage.getItem(key)).items[0].status==='次にやる','繰り返し原本を完了にしない');
+ d.querySelector('[aria-label="翌日"]').click();assert(d.querySelector('.cal-unscheduled .cal-complete').getAttribute('aria-checked')==='false','翌日は未完了のまま');
+ d.querySelector('.cal-unscheduled .cal-complete').click();await tick();assert(calls===1,'未来の日へ完了書込を送らない');d.querySelector('dialog[open]').close();
+ d.querySelector('[aria-label="今日に戻る"]').click();d.getElementById('reload').click();assert(d.querySelector('.cal-unscheduled .cal-complete').getAttribute('aria-checked')==='true','再取得しても実施日だけ完了を維持');
+ checks.push('DONE');document.getElementById('result').textContent=checks.join('\n');
+}catch(e){document.getElementById('result').textContent=checks.join('\n')+'\nERROR '+e.message}}
+</script>

@@ -1,3 +1,5 @@
+// Variables used by Scriptable.
+// YOS_SCRIPT_NAME: YOS BRAVIA Smart Power
 // YOS BRAVIA Smart Power v1.0
 // Shortcut parameter: on / off / status. No visible WebView.
 const hostKey="yos.bravia.scriptable.host";

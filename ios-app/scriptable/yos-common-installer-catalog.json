@@ -1,0 +1,118 @@
+{
+  "schema": 1,
+  "repository": "yskn0008-bot/ProjectY",
+  "targets": [
+    {
+      "id": "timeline-auto",
+      "name": "YOS Timeline Auto",
+      "path": "ios-app/scriptable/YOS Timeline Auto.js",
+      "commit": "230975fcc61370e0de3fc0fc9161a047a849b8ff",
+      "sha256": "2e1002ee004576680ab3dc0c2fe68573f6c97907027d8a304536d2d2222ef5d0"
+    },
+    {
+      "id": "journal",
+      "name": "YOS JOURNAL",
+      "path": "ios-app/scriptable/YOS JOURNAL.js",
+      "commit": "230975fcc61370e0de3fc0fc9161a047a849b8ff",
+      "sha256": "1e7e625c70901fbcd843b193858671cf2614e9ce837cdd8faa714a7fb22c7571"
+    },
+    {
+      "id": "daystream-preview",
+      "name": "YOS DAYSTREAM Timeline 開発確認 20261105",
+      "path": "ios-app/scriptable/YOS DAYSTREAM Timeline 開発確認 20261105.js",
+      "commit": "97b420ffcccc53ff4538a764355f76fe683bb160",
+      "sha256": "883ed5195eb03ef649748a22c0612f6b956339db6702874f519028dd7c520c9d"
+    },
+    {
+      "id": "daystream-glass-20261111",
+      "name": "YOS DAYSTREAM Glass 検証 20261111",
+      "path": "ios-app/scriptable/YOS DAYSTREAM Glass 検証 20261111.js",
+      "commit": "a072140d39aae8bd407fe6e63af438c2e48fdc0e",
+      "sha256": "7f7631f47d4e6656b7ac71b923d052c6489520a18ab8f18db0f3755f8546248a"
+    },
+    {
+      "id": "timeline-charcoal-20261111",
+      "name": "YOS Timeline Charcoal 確認 20261111",
+      "path": "ios-app/scriptable/YOS Timeline Charcoal 確認 20261111.js",
+      "commit": "77ccee0b08538d7ad2c3939625a83fee0fe89a4f",
+      "sha256": "22a59870dc28edd6c49056bc5347233d2bccc0ba4c43c5264a0a0e4e8eec0e97"
+    },
+    {
+      "id": "bravia-smart-power",
+      "name": "YOS BRAVIA Smart Power",
+      "path": "ios-app/scriptable/remote-widgets/YOS BRAVIA Smart Power.js",
+      "commit": "e924cf1792098ec32dcdce61395ec409af94862b",
+      "sha256": "7812eb72e5373aeac3aa16402ca16d34c77d68707ac145b1504498c0d9a4c7a2"
+    },
+    {
+      "id": "remote-direct-actions",
+      "name": "YOS Remote Direct Actions",
+      "path": "ios-app/scriptable/remote-widgets/YOS Remote Direct Actions.js",
+      "commit": "fe3149177b95616b78742f70d01eb4b50c9476a0",
+      "sha256": "ee8959104a4d239b8b277fa368824a8810a03e682183a18d95b90dd99fd64d9b"
+    },
+    {
+      "id": "tapo-h110-core",
+      "name": "YOS Tapo H110 Core",
+      "path": "ios-app/scriptable/remote-widgets/YOS Tapo H110 Core.js",
+      "commit": "e20ce2e659a371f5ade5298ec436eb14e9b3dcaa",
+      "sha256": "6de2d6a2a0679bb71b2115ed0dbb9e42a58e45cb1c0ba9727b92ef5603f48614"
+    },
+    {
+      "id": "sleep-scene",
+      "name": "YOS Sleep Scene",
+      "path": "ios-app/scriptable/remote-widgets/YOS Sleep Scene.js",
+      "commit": "808d9e797a5734a4f7326e0471d6a4474244bc38",
+      "sha256": "987664699fee3963f001e6610eafb5d371e3009cba990560785ed456171587f8"
+    },
+    {
+      "id": "journal-book",
+      "name": "YOS Journal Book",
+      "path": "ios-app/scriptable/YOS Journal Book.js",
+      "commit": "f14674bfc52926e66e1f22d8490de23f6a2ba079",
+      "sha256": "9886c3d41c6b9871b5db6153616884c3830b61e11c6867ba1b89e8478d0bba6b"
+    },
+    {
+      "id": "journal-notion-bridge",
+      "name": "YOS Journal Notion Bridge",
+      "path": "ios-app/scriptable/YOS Journal Notion Bridge.js",
+      "commit": "f14674bfc52926e66e1f22d8490de23f6a2ba079",
+      "sha256": "b47f46b56fc528353e0032d370bc56c6c004cf2490fb0af47c864a24e1721870"
+    },
+    {
+      "id": "life-calendar-sync",
+      "name": "YOS Life Calendar Sync",
+      "path": "ios-app/scriptable/YOS Life Calendar Sync.js",
+      "commit": "bb17b5af8f009fdbcb6c6d4c542edf7b79be6f6c",
+      "sha256": "d3ed090e8a7ec8df84a744f1610ef209515578baed2e70700eb20313593df0a2"
+    },
+    {
+      "id": "calendar-notion",
+      "name": "YOS Calendar Notion",
+      "path": "ios-app/scriptable/YOS Calendar Notion.js",
+      "commit": "ff6589c359bc836e3b68ff937b5bee0e27607c27",
+      "sha256": "7153bfcc066c3a357b2f1e44f03804417e0534861149a55f03c14dd85eb2aaf6"
+    },
+    {
+      "id": "clarity-inbox-bridge",
+      "name": "YOS Clarity Inbox Bridge",
+      "path": "ios-app/scriptable/YOS Clarity Inbox Bridge.js",
+      "commit": "104e46b81cc20ad1253865ca4bf1793ff467bd97",
+      "sha256": "3758d8911467aba6dcbdc7a26cbccfc7b22bbab837aff5e615518f8e93fc8567"
+    },
+    {
+      "id": "daystream-notion",
+      "name": "YOS DAYSTREAM Notion",
+      "path": "ios-app/scriptable/YOS DAYSTREAM Notion.js",
+      "commit": "8cbd54645a4f51d7867d954ea2ebd04979d4baee",
+      "sha256": "0f1e827cbe578f004d9295548e905bf676252639debaab5d4a4b8b9d4b517931"
+    },
+    {
+      "id": "ikemen-magazine",
+      "name": "YOS イケメン攻略本",
+      "path": "ios-app/scriptable/YOS イケメン攻略本.js",
+      "commit": "7c94cb39f25c3ec513167063514d4eb19346a48c",
+      "sha256": "41dbc735247e3241a35ec0ccb0bfe141cb684b1f0bc98489104484916ff70281"
+    }
+  ]
+}

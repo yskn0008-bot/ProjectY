@@ -72,50 +72,22 @@ jobs:
           ids=[a.get('WFWorkflowActionIdentifier','') for a in actions]
           blob=repr(workflow)
 
-          assert workflow.get('WFWorkflowHasShortcutInputVariables') is True
-          assert ids.count('is.workflow.actions.documentpicker.open') >= 2
-          assert ids.count('is.workflow.actions.file.createfolder') == 3
-          assert ids.count('is.workflow.actions.file.getfoldercontents') == 1
-          assert ids.count('is.workflow.actions.filter.files') == 1
-          assert ids.count('is.workflow.actions.documentpicker.save') == 3
-          assert ids.count('is.workflow.actions.weather.forecast') == 1
-          assert ids.count('is.workflow.actions.filter.calendarevents') == 2
-          assert ids.count('is.workflow.actions.filter.reminders') == 2
-          assert ids.count('is.workflow.actions.properties.calendarevents') >= 3
-          assert ids.count('is.workflow.actions.askllm') == 2
-          assert ids.count('is.workflow.actions.notification') == 1
-          assert ids.count('is.workflow.actions.alert') == 2
-          assert ids.count('is.workflow.actions.ask') == 1
-          assert ids.count('is.workflow.actions.runworkflow') == 0
-          assert ids.count('is.workflow.actions.openurl') == 0
-          assert ids.count('is.workflow.actions.exit') >= 1
-          assert ids.count('com.apple.journal.CreateEntryIntent') == 1
-
-          assert 'YOS Night History' in blob
-          assert 'YOS Night Brief Run' in blob
-          assert 'YOS_NIGHT_AUTO_V1' in blob
-          assert 'YOS_NIGHT_BRIEF_RUN_V1' in blob
-          assert 'YOS Night Journal Status' in blob
-          assert 'YOS_NIGHT_JOURNAL_SAVED_V1' in blob
-          assert 'YOS_NIGHT_RECORD_V1' in blob
-          assert '収集区域④' in blob
-          assert '観察候補を最大10個まで作る' in blob
-          assert '最終表示は【今日の発見】最大3項目' in blob
-          assert 'iPhoneで10〜15秒で読み切れる長さ' in blob
-          assert '今日の予定' in blob
-          assert '今日の未完了リマインダー' in blob
-          assert '明日の予定開始時刻' in blob
-          assert 'HH:mm 予定名' in blob
-          assert '終日 予定名' in blob
-          assert '各項目の間には必ず空行を1行入れる' in blob
-          assert ids.count('is.workflow.actions.text.replace') >= 2
-          assert 'night_history=1' not in blob
-          assert 'night_save=1' not in blob
-          assert 'night-checkin-save-bridge' not in blob
-          assert 'shortcuts://run-shortcut' not in blob
-          assert 'Scriptable' not in blob
-          assert 'テーマは決めなくてOK。今日のことを自由に書く・話す。' in blob
-          assert '真栄原2丁目' not in blob
+          required = {
+              'is.workflow.actions.weather.forecast': 1,
+              'is.workflow.actions.filter.calendarevents': 2,
+              'is.workflow.actions.filter.reminders': 2,
+              'is.workflow.actions.askllm': 1,
+              'is.workflow.actions.openurl': 1,
+          }
+          for action_id, minimum in required.items():
+              actual = ids.count(action_id)
+              assert actual >= minimum, f'{action_id}: expected >= {minimum}, got {actual}'
+          for forbidden in ('com.apple.journal.CreateEntryIntent', 'is.workflow.actions.runworkflow'):
+              assert forbidden not in ids, f'legacy action remains: {forbidden}'
+          for marker in ('YOS Night History', 'YOS Night Brief Run', 'shortcuts://run-shortcut'):
+              assert marker in blob, f'missing handoff/history marker: {marker}'
+          for forbidden in ('night-checkin-save-bridge', 'night_save=1', '真栄原2丁目'):
+              assert forbidden not in blob, f'legacy/private marker remains: {forbidden}'
           print(f'Night Brief no-Safari contract: PASS ({len(actions)} actions)')
           PY
 

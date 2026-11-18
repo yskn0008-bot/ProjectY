@@ -10,6 +10,7 @@ on:
       - 'system/**'
       - 'yos/**'
       - 'life/**'
+      - 'tests/daystream-*.test.mjs'
       - '.github/workflows/yos-unified-pwa.yml'
   pull_request:
     branches: [main]
@@ -20,6 +21,7 @@ on:
       - 'system/**'
       - 'yos/**'
       - 'life/**'
+      - 'tests/daystream-*.test.mjs'
       - '.github/workflows/yos-unified-pwa.yml'
   workflow_dispatch:
 
@@ -32,7 +34,7 @@ concurrency:
 
 jobs:
   contract:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
@@ -40,6 +42,10 @@ jobs:
         with:
           node-version: '22'
       - run: node --check service-worker.js
+      - run: node --test tests/daystream-web-port.test.mjs
+      - run: node --test tests/daystream-source-import.test.mjs
+      - run: node --test tests/daystream-yos-auth-life.test.mjs
+      - run: node --test tests/daystream-learning-apply.test.mjs
       - run: node --check yos/app.js
       - run: node --check yos/money-v2-runtime-v4.js
       - run: node --check yos/desk/app.js
@@ -55,7 +61,7 @@ jobs:
 
   desk-browser:
     name: DESK chat UI 390px (${{ matrix.browser }})
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     strategy:
       fail-fast: false
@@ -93,7 +99,7 @@ jobs:
 
   browser:
     name: Unified PWA 390px (${{ matrix.browser }})
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     strategy:
       fail-fast: false
@@ -117,6 +123,10 @@ jobs:
           done
           cat /tmp/yos-unified-pwa.log
           exit 1
+      - name: Verify DAYSTREAM Web 390px portability and persistence
+        env:
+          YOS_BROWSER: ${{ matrix.browser }}
+        run: node yos/tests/daystream-web-browser-smoke.mjs
       - name: Run online + offline smoke
         env:
           YOS_BROWSER: ${{ matrix.browser }}

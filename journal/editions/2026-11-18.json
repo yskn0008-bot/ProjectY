@@ -1,0 +1,78 @@
+{
+  "issuedOn": "2026-11-18",
+  "date": "2026.11.18 / WED",
+  "headline": "週末に向けて、沖縄の楽しみと新しい技術を見つける。",
+  "lead": "宜野湾の地元産業、AIの実体験、沖縄の工芸。行くかどうかは自由。一次情報を確認した3特集をページをめくって読む。",
+  "edition": "THE LOCAL DISCOVERY EDIT",
+  "articles": [
+    {
+      "category": "LIFE / LOCAL",
+      "editorialLane": "DISCOVERY",
+      "title": "宜野湾の産業まつりは、近場の楽しみを広げる2日間。",
+      "summary": "宜野湾市は11月21日（土）と22日（日）、9時から17時まで宜野湾海浜公園で第37回産業まつりを開催すると案内している。市内の農水産物・商工業製品の販売に加え、木のおもちゃで遊べる木育キャラバン、木工体験、音楽ライブなどを予定。開催内容は随時更新される。",
+      "reason": "遠出せずに土地のものづくりや音楽を見て回り、新しい楽しみを見つけられる選択肢になる。",
+      "action": "気になる催しがあれば開催日と時間を公式案内で確認し、行くかどうかを決める。",
+      "caveat": "出店・体験・出演者は変更される場合がある。入場や個別体験の料金、駐車場などは原文で追加確認。過去の9月発表を当日公開の新着記事とは扱わない。",
+      "source": "宜野湾市｜公式開催案内",
+      "sourceDate": "2026-09-11更新／2026-11-21・22開催予定",
+      "link": "https://www.city.ginowan.lg.jp/soshiki/keizai/3/1_1/20848.html",
+      "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Food%20in%20okinawa%20festival.jpg?width=960",
+      "imageCaption": "沖縄の祭りで提供された料理の参考写真。宜野湾産業まつりの会場・当日写真ではありません。",
+      "imageKind": "reference",
+      "keyPoints": [
+        "11月21日・22日 各9:00〜17:00",
+        "宜野湾海浜公園",
+        "木育・木工体験・音楽ライブなど"
+      ],
+      "imageCredit": "Martinbayo / Wikimedia Commons（CC BY-SA 4.0）",
+      "imageSourceUrl": "https://commons.wikimedia.org/wiki/File:Food_in_okinawa_festival.jpg",
+      "imageLicenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/"
+    },
+    {
+      "category": "TECH / DISCOVERY",
+      "editorialLane": "DIRECTION",
+      "title": "沖縄のDX展示会で、AIが出展者探しを手伝う。",
+      "summary": "ResorTech EXPO 2026は11月19日（木）・20日（金）に沖縄サントリーアリーナで開催。主催側は来場者の興味や課題に合った出展者を探す「AIコンシェルジュ」の実証実験を案内している。AIの活用を資料で読むだけでなく、実際の展示会運営でどう役立てるかに触れられる機会になる。",
+      "reason": "AIの役立ち方を日常の操作・判断の削減という視点で観察でき、仕組みづくりの発想につながる。",
+      "action": "AIコンシェルジュの案内と展示テーマを公式サイトで確認し、見たいものがあれば来場登録の条件を調べる。",
+      "caveat": "公式サイトは来場登録の案内を掲載している。利用方法、対象ブース、実証の実施状況は変更の可能性があるため当日確認が必要。イベントの告知を実際の利用成果と混同しない。",
+      "source": "ResorTech EXPO｜公式ニュース",
+      "sourceDate": "公表日未確認／2026-11-19・20開催予定",
+      "link": "https://resortech-expo.okinawa/news/13427/",
+      "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Modern%20industrial%20robot%20in%20action%20during%20a%20technology%20exhibition%20in%20a%20large%20hall.jpg?width=960",
+      "imageCaption": "一般的な技術展示会の参考写真。ResorTech EXPOやAIコンシェルジュの実際の写真ではありません。",
+      "imageKind": "reference",
+      "keyPoints": [
+        "11月19日・20日 開催予定",
+        "沖縄サントリーアリーナ",
+        "出展者を探すAIコンシェルジュの実証"
+      ],
+      "imageCredit": "Shixart1985 / Wikimedia Commons（CC BY 2.0）",
+      "imageSourceUrl": "https://commons.wikimedia.org/wiki/File:Modern_industrial_robot_in_action_during_a_technology_exhibition_in_a_large_hall.jpg",
+      "imageLicenseUrl": "https://creativecommons.org/licenses/by/2.0/"
+    },
+    {
+      "category": "LIFE / CULTURE",
+      "editorialLane": "DISCOVERY",
+      "title": "沖縄の工芸に触れる、4日間だけの無料展示。",
+      "summary": "沖縄県は第48回沖縄県工芸公募展を11月19日（木）から22日（日）まで、おきなわ工芸の杜の2階展示室で開催すると案内している。初日は11時開場、最終日は16時まで。会場の公式イベント案内では入場無料とされ、沖縄の工芸品の技術やデザインに触れられる展示だ。",
+      "reason": "部屋に合う色・素材・質感を実物から学ぶきっかけになり、買い物をせずに美的な発見を楽しめる。",
+      "action": "会場と開催時間を確かめ、気になるなら展示内容を見に行く候補として残す。",
+      "caveat": "作品展示の詳細と開催内容は変更される場合がある。一般向け展示であり作品応募期間はすでに終了している。現地までの交通費は別。",
+      "source": "沖縄県｜第48回工芸公募展",
+      "sourceDate": "2026-10-04更新／2026-11-19〜22開催予定",
+      "link": "https://www.pref.okinawa.jp/shigoto/kogyo/1011626/1011638/1034090/1040776.html",
+      "image": "https://commons.wikimedia.org/wiki/Special:FilePath/KinjoPot1656.jpg?width=700",
+      "imageCaption": "沖縄の伝統的な陶器の参考写真。今回の沖縄県工芸公募展の展示作品ではありません。",
+      "imageKind": "reference",
+      "keyPoints": [
+        "11月19〜22日開催予定",
+        "おきなわ工芸の杜・2F展示室",
+        "入場無料（会場公式案内）"
+      ],
+      "imageCredit": "Fg2 / Wikimedia Commons（撮影者によるパブリックドメイン公開）",
+      "imageSourceUrl": "https://commons.wikimedia.org/wiki/File:KinjoPot1656.jpg",
+      "imageLicenseUrl": ""
+    }
+  ]
+}

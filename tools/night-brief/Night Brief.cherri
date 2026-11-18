@@ -7,6 +7,7 @@
 #include 'actions/intelligence'
 #include 'actions/calendar'
 #include 'actions/location'
+#include 'actions/web'
 
 // Native-only Night Brief.
 // No Safari, Scriptable, URL callback, or Run Shortcut.
@@ -173,100 +174,11 @@ if @autoMode == "auto" {
 }
 alert(spacedResponse3, "Night Brief")
 
-const rawInput = prompt(
-    "テーマは決めなくてOK。今日のことを自由に書く・話す。\n\n思いつかなければ：今日あったこと／気分・気づき／明日やること",
-    "Text",
-    ""
-)
-
-const checkinPrompt = text("あなたはYOS Night Check-inです。
-本人の今日の入力を整理し、日記前に作った外部視点と直近記録も参考にしながら、今日のNight記録を作る。
-
-入力や記録にない事実を作らない。
-性格診断・心理診断をしない。
-事実・観察・推論を区別する。
-過去と同じ発見を、新しい根拠なしに繰り返さない。
-
-返答はDictionaryのみ。
-キーは summary, mood_state, tomorrow, discoveries, three_line_diary, tomorrow_message の6つだけ。
-
-summary: 今日あったことを簡潔に整理。
-mood_state: 本人の入力に根拠がある気分・状態だけ。
-tomorrow: 明日やること。無ければ空文字。
-discoveries: 日記前の外部視点と本人入力を照合し、新しい根拠がある発見だけ。根拠不足なら『新しい発見なし』。
-three_line_diary: 事実ベースの3行日記。改行で3行。
-tomorrow_message: 明日への短い一言。
-
-日記前の外部視点：
-{spacedResponse3}
-
-直近のNight記録：
-{recentHistory}
-
-今日の本人入力：
-{rawInput}")
-
-const checkinResult = askChatGPT(checkinPrompt, false, "Dictionary")
-const parsed = getDictionary(checkinResult)
-
-const summary = "{parsed['summary']}"
-const mood = "{parsed['mood_state']}"
-const tomorrowAction = "{parsed['tomorrow']}"
-const discoveries = "{parsed['discoveries']}"
-const diary = "{parsed['three_line_diary']}"
-const message = "{parsed['tomorrow_message']}"
-
-const recordText = text("YOS_NIGHT_RECORD_V1
-date: {todayKey}
-summary: {summary}
-mood_state: {mood}
-tomorrow: {tomorrowAction}
-discoveries: {discoveries}
-three_line_diary:
-{diary}
-tomorrow_message: {message}
-raw_input:
-{rawInput}
-")
-
-saveFile("YOS Night History/{todayKey}.txt", recordText, true)
-
-const journalTitle = text("{todayLabel} Night")
-const journalBody = text("今日あったこと：
-{summary}
-
-気分 / 状態：
-{mood}
-
-YOS 自分の発見：
-{discoveries}
-
-3行日記：
-{diary}
-
-明日：
-{tomorrowAction}
-
-明日への一言：
-{message}")
-
-const journalStatusFolder = createFolder("YOS Night Journal Status")
-const journalStatusFile = getFile("YOS Night Journal Status/{todayKey}.txt", nil, false)
-if !journalStatusFile {
-    const journalPlaceholder = text("YOS_NIGHT_JOURNAL_PLACEHOLDER")
-    const journalSavedMarker = text("YOS_NIGHT_JOURNAL_SAVED_V1\n{todayKey}")
-    saveFile("YOS Night Journal Status/{todayKey}.txt", journalSavedMarker, true)
-}
-
-const finalText = text("保存しました
-
-発見：
-{discoveries}
-
-明日：
-{tomorrowAction}
-
-3行日記：
-{diary}")
-
-alert(finalText, "Night Brief")
+// Manual-only handoff. The former Night Check-in is replaced by the standalone journal.
+// Native patcher no longer creates an Apple Journal entry.
+// The brief remains a read-only observation, not proof that planned actions occurred.
+const journalContext = text("【Night Brief／参考情報。予定は実行済みではない】\\n{nightFacts}\\n\\n【YOSの今日の発見】\\n{spacedResponse3}")
+const encodedContext = urlEncode(journalContext)
+const journalURL = text("shortcuts://run-shortcut?name=YOS%20%E6%97%A5%E8%A8%98&input=text&text={encodedContext}")
+openURL(journalURL)
+stop()

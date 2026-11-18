@@ -22,7 +22,6 @@ TODAY_REMINDERS_MARKER = "YOS_NIGHT_TODAY_REMINDERS_PLACEHOLDER"
 WEATHER_MARKER = "YOS_NIGHT_WEATHER_PLACEHOLDER"
 CALENDAR_MARKER = "YOS_NIGHT_CALENDAR_PLACEHOLDER"
 REMINDERS_MARKER = "YOS_NIGHT_REMINDERS_PLACEHOLDER"
-JOURNAL_MARKER = "YOS_NIGHT_JOURNAL_PLACEHOLDER"
 
 
 def fail(message: str) -> None:
@@ -168,7 +167,6 @@ def patch(path: Path) -> None:
     wi = find_marker(actions, WEATHER_MARKER)
     ci = find_marker(actions, CALENDAR_MARKER)
     ri = find_marker(actions, REMINDERS_MARKER)
-    ji = find_marker(actions, JOURNAL_MARKER)
 
     weather_params = replacement_base(actions[wi])
     # Match the proven Morning Brief native Weather action. The Forecast Type
@@ -309,26 +307,6 @@ def patch(path: Path) -> None:
         "WFWorkflowActionParameters": reminders_params,
     }
 
-    journal_title_uuid = find_custom_output(actions, "journalTitle")
-    journal_body_uuid = find_custom_output(actions, "journalBody")
-    journal_params = replacement_base(actions[ji])
-    journal_params.update({
-        "AppIntentDescriptor": {
-            "AppIntentIdentifier": "CreateEntryIntent",
-            "BundleIdentifier": "com.apple.journal",
-            "Name": "Journal",
-            "TeamIdentifier": "0000000000",
-        },
-        "OpenWhenRun": False,
-        "entryBookmark": False,
-        "title": text_token_output(journal_title_uuid),
-        "message": text_token_output(journal_body_uuid),
-    })
-    actions[ji] = {
-        "WFWorkflowActionIdentifier": "com.apple.journal.CreateEntryIntent",
-        "WFWorkflowActionParameters": journal_params,
-    }
-
     # Cherri 2.3 can degrade a bare boolean variable condition into
     # "has any value". Because false/0 still has a value, that makes manual
     # Night Brief stop at the AUTO gates. Require explicit text equality.
@@ -373,7 +351,7 @@ def patch(path: Path) -> None:
 
     blob = repr(workflow)
     ids = [a.get("WFWorkflowActionIdentifier", "") for a in actions]
-    for marker in (TODAY_CALENDAR_MARKER, TODAY_REMINDERS_MARKER, WEATHER_MARKER, CALENDAR_MARKER, REMINDERS_MARKER, JOURNAL_MARKER):
+    for marker in (TODAY_CALENDAR_MARKER, TODAY_REMINDERS_MARKER, WEATHER_MARKER, CALENDAR_MARKER, REMINDERS_MARKER):
         if marker in blob:
             fail(f"placeholder survived: {marker}")
     if ids.count("is.workflow.actions.weather.forecast") != 1:
@@ -386,29 +364,29 @@ def patch(path: Path) -> None:
         fail("Reminders patch failed")
     if ids.count("is.workflow.actions.runworkflow"):
         fail("Night Brief must not depend on another Shortcut")
-    if ids.count("is.workflow.actions.openurl"):
-        fail("Night Brief must not open Safari")
+    if ids.count("is.workflow.actions.openurl") != 1:
+        fail("Night Brief manual journal handoff missing")
     if ids.count("is.workflow.actions.exit") < 1:
         fail("Night Brief auto mode stop is missing")
-    if "night_history=1" in blob or "night_save=1" in blob or "shortcuts://run-shortcut" in blob:
+    if "night_history=1" in blob or "night_save=1" in blob:
         fail("legacy browser/shortcut callback survived")
-    if ids.count("is.workflow.actions.file.createfolder") != 3:
-        fail("expected history, auto-run, and journal-status folders")
+    if ids.count("is.workflow.actions.file.createfolder") != 2:
+        fail("expected history and auto-run folders")
     if ids.count("is.workflow.actions.file.getfoldercontents") != 1:
         fail("Night history folder read missing")
     if ids.count("is.workflow.actions.filter.files") != 1:
         fail("Night history 14-day filter missing")
-    if ids.count("is.workflow.actions.documentpicker.save") != 3:
-        fail("expected history, auto-run marker, and journal-status saves")
-    if ids.count("com.apple.journal.CreateEntryIntent") != 1:
-        fail("Journal Create Entry patch failed")
+    if ids.count("is.workflow.actions.documentpicker.save") != 1:
+        fail("expected auto-run marker save")
+    if ids.count("com.apple.journal.CreateEntryIntent") != 0:
+        fail("legacy Apple Journal action survived")
     if "真栄原2丁目" in blob:
         fail("private street-level text must not be embedded")
 
     path.write_bytes(plistlib.dumps(workflow, fmt=plistlib.FMT_XML, sort_keys=False))
     print(
         "Night Brief native-only patch: PASS "
-        f"(actions={len(actions)}, weather=1, calendar=2, reminders=2, journal=1, auto_mode=1, safari=0, scriptable=0)"
+        f"(actions={len(actions)}, weather=1, calendar=2, reminders=2, journal_handoff=1, auto_mode=1)"
     )
 
 

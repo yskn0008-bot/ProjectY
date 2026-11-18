@@ -1,9 +1,9 @@
 'use strict';
 const CACHE_PREFIX='yos-unified-';
-const CACHE_NAME=CACHE_PREFIX+'v36-chat-preview-fallback';
+const CACHE_NAME=CACHE_PREFIX+'v48-daystream-calendar-domain-pages';
 const STATIC=[
   './','./index.html','./manifest.webmanifest','./assets/yos-icon-180.png','./assets/yos-icon-512.png',
-  './yos/','./yos/index.html','./yos/styles.css','./yos/readability-final.css','./yos/guide.html','./yos/guide.css','./yos/guide.js','./yos/guide-v2.css','./yos/guide-v2.js',
+  './yos/daystream/','./yos/daystream/index.html','./yos/daystream/manifest.webmanifest','./yos/daystream/task-wizard.js','./yos/daystream/source-adapters.js','./yos/daystream/yos-tasks-auth.js','./yos/','./yos/index.html','./yos/styles.css','./yos/readability-final.css','./yos/guide.html','./yos/guide.css','./yos/guide.js','./yos/guide-v2.css','./yos/guide-v2.js',
   './yos/desk/','./yos/desk/index.html','./yos/desk/manifest.webmanifest','./yos/desk/import-gpt.html','./yos/desk/style.css','./yos/desk/compact.css','./yos/desk/live-chat.css','./yos/desk/unified-inbox.css','./yos/desk/app.js','./yos/desk/live-chat.js','./yos/desk/unified-inbox.js',
   './yos/task-dashboard.css','./yos/task-dashboard.js','./yos/shared-state-v1.js','./yos/app.js',
   './yos/money-v2.css','./yos/money-master-v1.js','./yos/money-v2.js','./yos/money-v2-runtime-v4.js','./yos/money-journal-v1.js','./yos/money-capture.html','./yos/money-local-import.html',
@@ -11,7 +11,7 @@ const STATIC=[
   './yos/money-reference-v1.css','./yos/money-reference-v1.js','./yos/money-dark-v5.css','./yos/money-polish-v2.css','./yos/money-readable-v3.css',
   './yos/assets/home-life-path-watercolor-v1.webp','./yos/assets/journey-valley-watercolor-v1.webp',
   './yos/taxi-live-v1.js','./yos/hj-entry.js','./yos/journey.html','./yos/journey.css','./yos/journey.js',
-  './life/','./life/index.html','./life/home-v1.css','./life/home-priority-v1.css','./life/readability-final.css',
+  './life/','./life/index.html','./life/calendar/','./life/calendar/index.html','./life/calendar/unified-sources.js','./life/calendar/native-bridge.js','./life/calendar/approved-calendar.css','./life/calendar/approved-calendar.js','./life/calendar/calendar-source-extension.js','./life/calendar/calendar-task-auth.js','./life/calendar/habit-calendar.js','./life/calendar/area-task-pages.js','./life/calendar/area-task-pages.css','./life/home-v1.css','./life/home-priority-v1.css','./life/readability-final.css',
   './life/yos-suite-v3.js','./life/home-v1.js','./life/daily-flow-orchestrator-v1.js','./life/task-quick-add-v1.js','./life/night-checkin-save-bridge.html','./life/night-checkin-life-bridge-v1.js',
   './yos/hj/','./yos/hj/index.html','./yos/hj/styles.css','./yos/hj/onboarding.css','./yos/hj/scenes.css','./yos/hj/completion.css',
   './yos/runtime-provider-router.js','./data/yos-runtime-providers.json',
@@ -20,6 +20,13 @@ const STATIC=[
   './system/','./system/index.html','./data/mission-control.json','./data/yos-assets.json','./data/yos-user-tasks.json'
 ];
 const CRITICAL_NETWORK_FIRST=new Set([
+  '/ProjectY/life/calendar/approved-calendar.css',
+  '/ProjectY/life/calendar/approved-calendar.js',
+  '/ProjectY/life/calendar/calendar-source-extension.js',
+  '/ProjectY/life/calendar/calendar-task-auth.js',
+  '/ProjectY/life/calendar/habit-calendar.js',
+  '/ProjectY/life/calendar/area-task-pages.js',
+  '/ProjectY/life/calendar/area-task-pages.css',
   '/ProjectY/yos/money-master-v1.js',
   '/ProjectY/yos/shared-state-v1.js',
   '/ProjectY/yos/task-dashboard.js',
@@ -35,6 +42,10 @@ const CRITICAL_NETWORK_FIRST=new Set([
   '/ProjectY/yos/payment-alert-bridge-v1.js',
   '/ProjectY/yos/money-alert-bridge-v1.js',
   '/ProjectY/life/night-checkin-life-bridge-v1.js',
+  '/ProjectY/life/calendar/unified-sources.js',
+  '/ProjectY/life/calendar/native-bridge.js',
+  '/ProjectY/yos/daystream/source-adapters.js',
+  '/ProjectY/yos/daystream/yos-tasks-auth.js',
   '/ProjectY/yos/desk/index.html',
   '/ProjectY/yos/desk/manifest.webmanifest',
   '/ProjectY/yos/desk/import-gpt.html',
@@ -49,7 +60,7 @@ const CRITICAL_NETWORK_FIRST=new Set([
 ]);
 self.addEventListener('install',event=>{event.waitUntil((async()=>{const cache=await caches.open(CACHE_NAME);for(const path of STATIC){try{await cache.add(new Request(path,{cache:'reload'}));}catch(error){console.warn('YOS precache skipped',path,error);}}await self.skipWaiting();})());});
 self.addEventListener('activate',event=>{event.waitUntil((async()=>{const keys=await caches.keys();await Promise.all(keys.filter(key=>key.startsWith(CACHE_PREFIX)&&key!==CACHE_NAME).map(key=>caches.delete(key)));await self.clients.claim();})());});
-function fallbackPath(url){const path=url.pathname;if(path.endsWith('/yos/guide.html'))return './yos/guide.html';if(path.endsWith('/yos/desk/')||path.endsWith('/yos/desk/index.html'))return './yos/desk/index.html';if(path.endsWith('/yos/')||path.endsWith('/yos/index.html'))return './yos/index.html';if(path.endsWith('/life/night-checkin-save-bridge.html'))return './life/night-checkin-save-bridge.html';if(path.endsWith('/life/')||path.endsWith('/life/index.html'))return './life/index.html';if(path.endsWith('/yos/hj/')||path.endsWith('/yos/hj/index.html'))return './yos/hj/index.html';if(path.endsWith('/system/')||path.endsWith('/system/index.html'))return './system/index.html';return './index.html';}
+function fallbackPath(url){const path=url.pathname;if(path.endsWith('/yos/daystream/')||path.endsWith('/yos/daystream/index.html'))return './yos/daystream/index.html';if(path.endsWith('/yos/guide.html'))return './yos/guide.html';if(path.endsWith('/yos/desk/')||path.endsWith('/yos/desk/index.html'))return './yos/desk/index.html';if(path.endsWith('/yos/')||path.endsWith('/yos/index.html'))return './yos/index.html';if(path.endsWith('/life/calendar/')||path.endsWith('/life/calendar/index.html'))return './life/calendar/index.html';if(path.endsWith('/life/night-checkin-save-bridge.html'))return './life/night-checkin-save-bridge.html';if(path.endsWith('/life/')||path.endsWith('/life/index.html'))return './life/index.html';if(path.endsWith('/yos/hj/')||path.endsWith('/yos/hj/index.html'))return './yos/hj/index.html';if(path.endsWith('/system/')||path.endsWith('/system/index.html'))return './system/index.html';return './index.html';}
 async function cacheResponse(request,response){if(response&&response.ok){const cache=await caches.open(CACHE_NAME);await cache.put(request,response.clone());}return response;}
 async function networkFirst(request){try{const response=await fetch(request,{cache:'no-store'});if(response&&response.ok)await cacheResponse(request,response);return response;}catch{return caches.match(request,{ignoreSearch:true});}}
 self.addEventListener('fetch',event=>{

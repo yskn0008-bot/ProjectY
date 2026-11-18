@@ -1,0 +1,10 @@
+#define name YOS Shortcut Names
+#define color blue
+#include 'actions/shortcuts'
+#include 'actions/text'
+#include 'actions/sharing'
+const shortcuts = getShortcuts()
+const names = getShortcutDetail(shortcuts, "Name")
+const list = joinText(names, "\n")
+setClipboard(list, true)
+alert("名前一覧をコピーしました。ホームのDAYSTREAMに戻り、タスク作成の『iPhoneの一覧を取り込む』へ貼り付けて登録してください。", "YOS Shortcut Names")

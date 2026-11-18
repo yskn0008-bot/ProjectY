@@ -76,5 +76,5 @@ test('保存キーとTaxi Service Worker境界を変更しない', () => {
   assert.doesNotMatch(html + finalApp, /migration|removeItem\(|localStorage\.clear\(/i);
   assert.match(sw, /const CACHE_PREFIX='yos-taxi-projecty-'/);
   assert.match(sw, /key\.startsWith\(CACHE_PREFIX\)&&key!==CACHE/);
-  assert.match(sw, /const VERSION='148'/);
+  assert.match(sw, /const VERSION='149'/);
 });

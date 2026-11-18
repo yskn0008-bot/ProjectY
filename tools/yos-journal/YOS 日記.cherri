@@ -58,7 +58,8 @@ if !edited {
     alert("AIの整理結果を受け取れませんでした。原文はiCloudに保存しています。", "YOS 日記：未保存")
     stop()
 }
-const diary = text("{edited}")
+const finalStory = text("{edited}")
+const diary = text("【今日の記憶】\n{finalStory}")
 const todayQuestion = text("今日、何があって、どんな気持ちになり、どう感じた？")
 const originalAnswer = text("{raw}")
 
@@ -67,15 +68,17 @@ const originalAnswer = text("{raw}")
 const prepared = text("YOS_JOURNAL_LOCAL_BACKUP_V2\n日付：{day}\n【YOSの整理】\n{diary}\n\n【本人の言葉（原文）】\n{originalAnswer}")
 saveFile("YOS Journal Pending/{day}-{timeKey}-prepared.txt", prepared, false)
 
-// Existing Scriptable bridge preserves today's page, prevents duplicate inserts,
-// and reads the record back from the existing Notion "YOS 日記" data source.
-// The fixed question is a schema-compatible label, not a required second input.
+// Existing Journal Book displays the short recollection for review before saving.
+// Journal Book passes the reviewed version to the unchanged Notion Bridge;
+// the Night Brief -> YOS 日記 handoff already in main remains intact.
 const diaryBase64 = base64Encode(diary)
 const questionBase64 = base64Encode(todayQuestion)
 const answerBase64 = base64Encode(originalAnswer)
 const d64 = urlEncode(diaryBase64)
 const q64 = urlEncode(questionBase64)
 const a64 = urlEncode(answerBase64)
-const saveURL = text("scriptable:///run?scriptName=YOS%20Journal%20Notion%20Bridge&date={day}&diary={d64}&question={q64}&answer={a64}")
-openURL(saveURL)
+const storyBase64 = base64Encode(finalStory)
+const story64 = urlEncode(storyBase64)
+const bookURL = text("scriptable:///run?scriptName=YOS%20Journal%20Book&date={day}&story={story64}&diary={d64}&question={q64}&answer={a64}")
+openURL(bookURL)
 stop()

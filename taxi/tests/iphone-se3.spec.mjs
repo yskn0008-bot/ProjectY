@@ -3,11 +3,12 @@ import { mkdir } from 'node:fs/promises';
 import { resolve } from 'node:path';
 
 const pages = [
-  { name: 'drive', path: './index.html', ready: '.yos131-primary[data-proxy="shiftButton"]' },
+  { name: 'drive', path: './index.html?legacy=1', ready: '.yos131-primary[data-proxy="shiftButton"]' },
   { name: 'today', path: './calendar.html', ready: '#todayView' },
   { name: 'week', path: './calendar.html', ready: '#weekView', mode: 'week' },
   { name: 'month', path: './calendar.html', ready: '#monthView', mode: 'month' },
   { name: 'manage', path: './settings.html', ready: '#save' },
+  { name: 'goal', path: './revenue-goal.html', ready: '#neededDaily' },
 ];
 const artifactRoot = resolve(import.meta.dirname, '../test-results/artifacts');
 
@@ -112,7 +113,7 @@ test.describe('iPhone SE3 viewport and touch smoke', () => {
       await openApp(page, entry);
 
       if (entry.name === 'drive') {
-        await page.goto('./index.html', { waitUntil: 'domcontentloaded' });
+        await page.goto('./index.html?legacy=1', { waitUntil: 'domcontentloaded' });
         await expect(page.locator('.yos131-primary[data-proxy="shiftButton"]')).toBeVisible();
 
         const demand = page.locator('.demand-home');
@@ -154,4 +155,25 @@ test.describe('iPhone SE3 viewport and touch smoke', () => {
       });
     });
   }
+});
+
+
+test('default entry: approved one-screen UI and legacy recovery', async ({ page }) => {
+  const errors=[];
+  page.on('pageerror', error => errors.push(error.message));
+  await page.goto('./index.html', {waitUntil:'domcontentloaded'});
+  await expect(page).toHaveURL(/\/ui-v2\.html$/);
+  await expect(page.locator('#drop-btn')).toBeVisible();
+  await expect(page.locator('#photo-btn')).toBeVisible();
+  await expect(page.locator('#sync-status')).toContainText('Notion未接続');
+  const pageOverflow=await page.evaluate(() => document.documentElement.scrollHeight > innerHeight + 1);
+  expect(pageOverflow).toBe(false);
+  await page.locator('[data-page="strategy"]').click();
+  await expect(page.locator('#strategy-view')).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollHeight > innerHeight + 1)).toBe(false);
+  await page.locator('[data-page="history"]').click();
+  await page.locator('#history-info-btn').click();
+  await expect(page).toHaveURL(/\/index\.html\?legacy=1$/);
+  await expect(page.locator('.yos131-primary[data-proxy="shiftButton"]')).toBeVisible();
+  expect(errors).toEqual([]);
 });
