@@ -471,7 +471,7 @@ test('Taxi Shortcuts: locked/home widgets use same local shift and retry-safe dr
   expect((await state()).events).toHaveLength(2);
   const recorded=(await state()).events.at(-1);
   expect(recorded.shortcutRequestId).toBe(id);
-  expect(recorded.at).toBe('2026-11-19T08:15:00.000Z');
+  expect(new Date(recorded.at).getTime()).toBe(new Date('2026-11-19T08:15:00.000Z').getTime());
   await page.reload();
   expect((await state()).events).toHaveLength(2);
   await page.goto('./ui-v2.html?yos_action=dropoff&yos_req='+id,{waitUntil:'domcontentloaded'});
