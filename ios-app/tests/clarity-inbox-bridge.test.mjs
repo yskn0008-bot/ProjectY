@@ -238,3 +238,30 @@ test('AI overlapping fragments hold the whole plan and never invent extra Notion
   assert.match(await m.run(x),/振り分け未指定/);
   assert.equal(m.rows.length,0);
 });
+
+test('明示した開始・長さを日本時間で同じタスクに一回だけ保存する',async()=>{
+ const m=mocked();
+ const payload={source:'voice',captureId:'clarity:window-unique',rawText:'2026-11-19 19時から30分、買い物'};
+ assert.match(await m.run(payload),/登録1件/);
+ assert.match(await m.run(payload),/既存1件/);
+ assert.equal(m.counts.writes,1);
+ assert.equal(m.rows.length,1);
+ assert.equal(m.rows[0].properties['やること'].title[0].text.content,'買い物');
+ assert.deepEqual(m.rows[0].properties['期限'].date,{start:'2026-11-19T10:00:00.000Z',end:'2026-11-19T10:30:00.000Z'});
+ assert.equal(m.rows[0].properties['同期キー'].rich_text[0].text.content,'inbox:clarity:window-unique:01');
+});
+
+test('明日の音声入力と明示した終了時刻だけを時間枠として扱う',async()=>{
+ const m=mocked();
+ assert.match(await m.run('明日の19時から30分買い物'),/登録1件/);
+ const at=new Date(m.blocks[0].paragraph.rich_text[0].text.content.split(' · ')[0]);
+ const jst=new Date(at.getTime()+9*3600000);
+ const nextDay=new Date(Date.UTC(jst.getUTCFullYear(),jst.getUTCMonth(),jst.getUTCDate()+1,10));
+ assert.equal(m.rows[0].properties['期限'].date.start,nextDay.toISOString());
+ assert.match(await m.run('2026-11-21 18:15–18:45 片付け'),/登録1件/);
+ assert.equal(m.rows[1].properties['期限'].date.end,'2026-11-21T09:45:00.000Z');
+ for(const raw of ['明日19時、連絡','2026-02-30 12時から30分、確認','明日19時から30分、買い物はしない']){
+  await m.run(raw);
+ }
+ assert.equal(m.rows.length,2);
+});
