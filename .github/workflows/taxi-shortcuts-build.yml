@@ -47,6 +47,8 @@ jobs:
           cd tools/taxi-shortcuts
           cherri 'YOS TAXI 運行.cherri' --skip-sign --debug
           cherri 'YOS TAXI 降車.cherri' --skip-sign --debug
+          # Reuse the existing iPhone-proven Clarity persistence patch; no Mac-only Get Parent action.
+          python3 ../clarity-factory/patch_append_file_paths.py 'YOS TAXI 降車_unsigned.shortcut'
           test -f 'YOS TAXI 運行_unsigned.shortcut'
           test -f 'YOS TAXI 降車_unsigned.shortcut'
           python3 validate_compiled.py 'YOS TAXI 運行_unsigned.shortcut' 'YOS TAXI 降車_unsigned.shortcut'
