@@ -7,6 +7,7 @@ const NAME='YOS イケメン攻略本';
 const DATA_DIR='YOS Ikemen Guide';
 const HTML_NAME='magazine.html';
 const STATE_NAME='reading-state.json';
+const RUNTIME_NAME='magazine-runtime.html';
 const READER_KEY='YOS_IKEMEN_EDITORIAL_V1';
 const fm=FileManager.local();
 const folder=fm.joinPath(fm.documentsDirectory(),DATA_DIR);
@@ -116,8 +117,16 @@ function captureNext(web){
 async function launch(){
  const original=validateHTML(fm.readString(htmlPath));
  const before=readState();
+ const runtimePath=fm.joinPath(folder,RUNTIME_NAME);
+ // Load the large photo-rich document from the private file system. Passing its
+ // 1.8 MB HTML as a string through a Shortcuts WebView may leave a blank view.
+ // This generated copy is never sent to GitHub or an external web service.
+ const ready=injectedHTML(original,before);
+ storeChecked(runtimePath,ready);
+ if(!fm.fileExists(runtimePath)||fm.readString(runtimePath).length!==ready.length)
+  throw Error('表示用ファイルの準備に失敗しました');
  const web=new WebView();
- await web.loadHTML(injectedHTML(original,before));
+ await web.loadFile(runtimePath);
  // The WebView can be discarded when dismissed; capture updates while visible.
  const dismissed=web.present(true).then(()=>({kind:'dismissed'}),e=>({kind:'dismissed',error:String(e)}));
  let saved=false,bridgeError=null;
@@ -141,6 +150,13 @@ async function launch(){
  }
 }
 async function main(){
+ // Shortcuts may host the reader inside a memory-limited extension. Transfer
+ // execution to the installed Scriptable app before loading embedded photos.
+ if(typeof config!=='undefined'&&config.runsInApp===false){
+  try{Safari.open('scriptable:///run/'+encodeURIComponent(NAME));}
+  catch(e){await showMessage('Scriptableアプリで開いてください','ショートカット内では写真付きの画面を表示できない場合があります。Scriptableアプリを開き「'+NAME+'」を実行してください。\n'+String(e));}
+  return;
+ }
  ensureDir();
  if(!fm.fileExists(htmlPath)){
   const ok=await decision('イケメン攻略本｜初回設定','写真入り48ページのHTMLを、iPhoneの「ファイル」から1度だけ選びます。取り込んだ内容はこのiPhone内で保存し、公開しません。','HTMLを選ぶ');
