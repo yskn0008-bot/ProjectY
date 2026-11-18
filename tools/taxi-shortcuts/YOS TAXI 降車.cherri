@@ -44,13 +44,12 @@ if !verifyFile {
     stop()
 }
 const verifiedText = getText(verifyFile)
-if !(verifiedText contains requestId) {
-    alert("共通Inboxへの保存結果が未確認です。重複防止のため再送せず停止しました。", "YOS TAXI 降車")
+if verifiedText contains requestId {
+    // The existing web app accepts only an active shift in THIS browser.
+    // Different Safari/PWA stores must fail visibly, not invent a ride.
+    const recordUrl = text("https://yskn0008-bot.github.io/ProjectY/taxi/ui-v2.html?yos_action=dropoff&yos_req={requestId}")
+    openURL(recordUrl)
     stop()
 }
-
-// The existing web app accepts only an active shift in THIS browser container.
-// Different Safari/PWA local stores must fail visibly instead of inventing a ride.
-const recordUrl = text("https://yskn0008-bot.github.io/ProjectY/taxi/ui-v2.html?yos_action=dropoff&yos_req={requestId}")
-openURL(recordUrl)
+alert("共通Inboxへの保存結果が未確認です。重複防止のため再送せず停止しました。", "YOS TAXI 降車")
 stop()
