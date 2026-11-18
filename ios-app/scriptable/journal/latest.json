@@ -16,14 +16,17 @@
       "source": "宜野湾市｜公式開催案内",
       "sourceDate": "2026-09-11更新／2026-11-21・22開催予定",
       "link": "https://www.city.ginowan.lg.jp/soshiki/keizai/3/1_1/20848.html",
-      "image": "",
-      "imageCaption": "",
-      "imageKind": "",
+      "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Food%20in%20okinawa%20festival.jpg?width=960",
+      "imageCaption": "沖縄の祭りで提供された料理の参考写真。宜野湾産業まつりの会場・当日写真ではありません。",
+      "imageKind": "reference",
       "keyPoints": [
         "11月21日・22日 各9:00〜17:00",
         "宜野湾海浜公園",
         "木育・木工体験・音楽ライブなど"
-      ]
+      ],
+      "imageCredit": "Martinbayo / Wikimedia Commons（CC BY-SA 4.0）",
+      "imageSourceUrl": "https://commons.wikimedia.org/wiki/File:Food_in_okinawa_festival.jpg",
+      "imageLicenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/"
     },
     {
       "category": "TECH / DISCOVERY",
@@ -36,14 +39,17 @@
       "source": "ResorTech EXPO｜公式ニュース",
       "sourceDate": "公表日未確認／2026-11-19・20開催予定",
       "link": "https://resortech-expo.okinawa/news/13427/",
-      "image": "",
-      "imageCaption": "",
-      "imageKind": "",
+      "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Modern%20industrial%20robot%20in%20action%20during%20a%20technology%20exhibition%20in%20a%20large%20hall.jpg?width=960",
+      "imageCaption": "一般的な技術展示会の参考写真。ResorTech EXPOやAIコンシェルジュの実際の写真ではありません。",
+      "imageKind": "reference",
       "keyPoints": [
         "11月19日・20日 開催予定",
         "沖縄サントリーアリーナ",
         "出展者を探すAIコンシェルジュの実証"
-      ]
+      ],
+      "imageCredit": "Shixart1985 / Wikimedia Commons（CC BY 2.0）",
+      "imageSourceUrl": "https://commons.wikimedia.org/wiki/File:Modern_industrial_robot_in_action_during_a_technology_exhibition_in_a_large_hall.jpg",
+      "imageLicenseUrl": "https://creativecommons.org/licenses/by/2.0/"
     },
     {
       "category": "LIFE / CULTURE",
@@ -56,14 +62,17 @@
       "source": "沖縄県｜第48回工芸公募展",
       "sourceDate": "2026-10-04更新／2026-11-19〜22開催予定",
       "link": "https://www.pref.okinawa.jp/shigoto/kogyo/1011626/1011638/1034090/1040776.html",
-      "image": "",
-      "imageCaption": "",
-      "imageKind": "",
+      "image": "https://commons.wikimedia.org/wiki/Special:FilePath/KinjoPot1656.jpg?width=700",
+      "imageCaption": "沖縄の伝統的な陶器の参考写真。今回の沖縄県工芸公募展の展示作品ではありません。",
+      "imageKind": "reference",
       "keyPoints": [
         "11月19〜22日開催予定",
         "おきなわ工芸の杜・2F展示室",
         "入場無料（会場公式案内）"
-      ]
+      ],
+      "imageCredit": "Fg2 / Wikimedia Commons（撮影者によるパブリックドメイン公開）",
+      "imageSourceUrl": "https://commons.wikimedia.org/wiki/File:KinjoPot1656.jpg",
+      "imageLicenseUrl": ""
     }
   ]
 }
