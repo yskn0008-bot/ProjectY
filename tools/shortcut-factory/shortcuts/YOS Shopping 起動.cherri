@@ -1,0 +1,13 @@
+#define name YOS Shopping 起動
+#define color pink
+#define version 1
+
+// Existing Scriptable script: YOS Shopping.
+// Native Shortcuts Scriptable "Run Script", NOT URL/Open URL/Quick Look.
+// Run In App is mandatory for its interactive WebView.
+rawAction("dk.simonbs.Scriptable.ParameterizedRunScriptIntent", {
+    "fileName": "YOS Shopping",
+    "parameter": "",
+    "runInApp": true,
+    "ShowWhenRun": false
+})
