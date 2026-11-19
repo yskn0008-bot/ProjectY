@@ -704,11 +704,12 @@ async function enrichShoppingPrices(rows){
   if(!trustedProductPage(item.url||''))return false;
   const e=manifest.entries[item.id];
   if(!e||e.signature!==priceObservationSignature(item))return true;
+  if(e.failedAt&&now-e.failedAt<PRICE_OBSERVATION_RETRY)return false;
   if(e.observation){
    const t=Date.parse(e.observation.webPriceCheckedAt);
    return !Number.isFinite(t)||now-t>PRICE_OBSERVATION_TTL;
   }
-  return !e.failedAt||now-e.failedAt>PRICE_OBSERVATION_RETRY;
+  return true;
  }).sort((a,b)=>Number(b.state==='購入候補')-Number(a.state==='購入候補')||
   Number(!manifest.entries[a.id]?.observation)-Number(!manifest.entries[b.id]?.observation))
   .slice(0,PRICE_OBSERVATION_LIMIT);
