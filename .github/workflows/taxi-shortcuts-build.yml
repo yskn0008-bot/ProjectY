@@ -30,6 +30,36 @@ jobs:
           if grep -REi '(gh[pousr]_[A-Za-z0-9_]{20,}|sk-[A-Za-z0-9_-]{20,}|xox[baprs]-[A-Za-z0-9-]{10,}|BEGIN [A-Z ]*PRIVATE KEY)' tools/taxi-shortcuts; then
             echo 'Found possible secret in Shortcut source' >&2; exit 1
           fi
+      # Diagnostic only: external sites may be unavailable; record each source separately.
+      # Never turn a transport failure into successful research.
+      - name: Probe live official research sources (diagnostic only)
+        continue-on-error: true
+        timeout-minutes: 2
+        shell: bash
+        run: |
+          python3 taxi/build_research_feed.py --no-previous --out "$RUNNER_TEMP/yos-taxi-research-live.json"
+          python3 - <<'PY'
+          import json,os
+          from pathlib import Path
+          path=Path(os.environ["RUNNER_TEMP"])/"yos-taxi-research-live.json"
+          feed=json.loads(path.read_text(encoding="utf-8"))
+          assert feed["schema"]==1 and len(feed["sources"])==3
+          for source in feed["sources"]:
+              print("YOS_TAXI_LIVE_SOURCE",source["id"],source["status"],
+                    "publishedAt="+str(source.get("publishedAt")),
+                    "checkedAt="+str(source.get("checkedAt")),
+                    "reason="+str(source.get("detail",""))[:140])
+              if source["status"]!="ok":
+                  print("::warning::YOS TAXI source",source["id"],"not confirmed:",source["status"])
+          PY
+      - name: Upload research source probe (not published, contains no user data)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: YOS-TAXI-live-source-probe
+          path: ${{ runner.temp }}/yos-taxi-research-live.json
+          if-no-files-found: warn
+          retention-days: 3
       - name: Install pinned Cherri v2.3.0
         shell: bash
         run: |

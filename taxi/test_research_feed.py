@@ -36,6 +36,19 @@ class CollectorTests(unittest.TestCase):
   self.assertEqual(len(news["items"]),1)
   self.assertEqual(news["items"][0]["url"],"https://www.city.naha.okinawa.jp/news/test.html")
 
+ def test_procurement_rss_is_not_a_taxi_event(self):
+  feed='''<?xml version="1.0"?><rss version="2.0"><channel>
+  <item><title>令和8年度那覇市LRT導入に伴う交通影響把握調査業務に係る制限付き一般競争入札の実施について</title>
+  <link>https://www.city.naha.okinawa.jp/business/procurement.html</link>
+  <pubDate>Fri, 20 Nov 2026 10:00:00 +0900</pubDate></item>
+  <item><title>交通規制のお知らせ</title>
+  <link>https://www.city.naha.okinawa.jp/news/traffic.html</link>
+  <pubDate>Fri, 20 Nov 2026 10:00:00 +0900</pubDate></item>
+  </channel></rss>'''.encode('utf-8')
+  items=b.naha_news(feed,CHECKED)["items"]
+  self.assertEqual(len(items),1)
+  self.assertEqual(items[0]["title"],"交通規制のお知らせ")
+
  def test_cruise_is_catalog_not_arrival(self):
   x=b.cruise_catalog(CRUISE,CHECKED)
   self.assertEqual(x["status"],"ok")

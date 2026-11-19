@@ -156,6 +156,7 @@ function allowedOfficialUrl(raw){
 }
 const sourceLabel=(s)=>s==='ok'?'取得成功':s==='stale'?'原本が古い':s==='unknown'?'更新日不明':'未取得';
 const sourceSummary=(s)=>typeof s==='string'?s.slice(0,180):'';
+let lastFeed=null;
 function createOfficialLink(raw,caption){
  const href=allowedOfficialUrl(raw);if(!href)return null;
  const a=document.createElement('a');a.className='feed-link';a.textContent=caption;a.href=href;a.target='_blank';a.rel='noopener noreferrer';return a;
@@ -165,8 +166,12 @@ function renderOfficialFeed(feed,at=new Date()){
  if(feed?.schema!==1||!Number.isFinite(generated.getTime())||!Array.isArray(feed.sources))throw Error('bad snapshot');
  if(generated.getTime()>at.getTime()+10*60000)throw Error('future snapshot');
  const ageMin=(at.getTime()-generated.getTime())/60000,expired=ageMin>150;
- const status=$('feed-status');status.textContent=expired?'配信が古い':'配信確認';status.className='badge '+(expired?'warn':'good');
- $('feed-meta').textContent='最終配信 '+format(generated)+'｜'+(expired?'配信が古いため営業判断には使用不可':'各情報源の状態を個別確認');
+ const validSources=feed.sources.filter(s=>s&&typeof s.name==='string'&&['ok','stale','unknown','error'].includes(s.status));
+ const unresolved=validSources.filter(s=>s.status!=='ok').length;
+ const noneConfirmed=validSources.length===0||unresolved===validSources.length;
+ const summaryStatus=expired?'配信が古い':noneConfirmed?'情報源未取得':unresolved?'一部未取得':'配信確認';
+ const status=$('feed-status');status.textContent=summaryStatus;status.className='badge '+(summaryStatus==='配信確認'?'good':'warn');
+ $('feed-meta').textContent='最終配信 '+format(generated)+'｜'+(expired?'配信が古いため営業判断には使用不可':noneConfirmed?'確認できた公式情報がありません':unresolved?'一部の公式情報は取得・鮮度に問題があります':'各情報源の状態を個別確認');
  const holder=$('feed-sources');holder.replaceChildren();
  for(const s of feed.sources.slice(0,5)){
    if(!s||typeof s.name!=='string'||!['ok','stale','unknown','error'].includes(s.status))continue;
@@ -202,6 +207,13 @@ function renderOfficialFeed(feed,at=new Date()){
    const p=document.createElement('p');p.className='tiny';p.textContent='前回との差分：未確認';holder.prepend(p);
  }
 }
+function revalidateOfficialFeed(){
+ if(!lastFeed||$('feed-status').textContent==='配信が古い')return;
+ const issued=new Date(lastFeed.generatedAt||'');
+ if(Number.isFinite(issued.getTime())&&Date.now()-issued.getTime()>150*60000){
+  renderOfficialFeed(lastFeed,new Date());
+ }
+}
 let feedCheckedAt=0;
 async function loadOfficialFeed(){
  const btn=$('feed-reload');btn.disabled=true;
@@ -212,8 +224,10 @@ async function loadOfficialFeed(){
   try{res=await fetch('./research-feed.json?ts='+Date.now(),{cache:'no-store',signal:controller.signal})}finally{clearTimeout(timer)}
   if(!res.ok)throw Error('HTTP '+res.status);
   const body=await res.text();if(body.length>150000)throw Error('too large');
-  renderOfficialFeed(JSON.parse(body));feedCheckedAt=Date.now();
+  const parsed=JSON.parse(body);
+  renderOfficialFeed(parsed);lastFeed=parsed;feedCheckedAt=Date.now();
  }catch(_){
+  lastFeed=null;
   $('feed-status').textContent='未取得';$('feed-status').className='badge warn';
   $('feed-meta').textContent='自動収集結果を確認できません。公式原本を直接確認してください。';
   $('feed-sources').replaceChildren();
@@ -278,11 +292,14 @@ $('phase-during').addEventListener('click',()=>setPhase('during'));
 $('weather-fetch').addEventListener('click',retrieve);
 setPhase(phase);
 window.YOSTaxiResearchTest={decodeForecast,setPhase,revalidate}; // Read-only deterministic test hook.
-document.addEventListener('visibilitychange',()=>{if(!document.hidden)revalidate()});
-window.addEventListener('pageshow',revalidate);
-setInterval(revalidate,60000); // UI-only validity check; does not poll the remote endpoint.
+document.addEventListener('visibilitychange',()=>{
+ if(!document.hidden){revalidate();revalidateOfficialFeed()}
+});
+window.addEventListener('pageshow',()=>{revalidate();revalidateOfficialFeed()});
+setInterval(()=>{revalidate();revalidateOfficialFeed()},60000); // Updates labels only; never polls the remote endpoint.
 $('feed-reload').addEventListener('click',loadOfficialFeed);
 window.YOSTaxiResearchTest.renderOfficialFeed=renderOfficialFeed;
+window.YOSTaxiResearchTest.revalidateOfficialFeed=revalidateOfficialFeed;
 retrieve(); // Direct official forecast request from iPhone.
 loadOfficialFeed(); // Reads published hourly research snapshot; no private data.
 })();

@@ -32,6 +32,9 @@ SNAPSHOT_URL = "https://yskn0008-bot.github.io/ProjectY/taxi/research-feed.json"
 OUTPUT = Path(__file__).with_name("research-feed.json")
 HEADERS = {"User-Agent": "YOS-TAXI-public-source-check/1.0 (+https://github.com/yskn0008-bot/ProjectY)", "Accept": "application/json, application/xml, text/xml, application/rss+xml, */*"}
 KEYWORDS = ("イベント", "催し", "祭", "交通", "道路", "通行止め", "迂回", "規制", "運行", "運休", "渋滞", "台風", "大雨", "暴風", "観光", "コンサート", "花火", "マラソン", "事故", "バス")
+# Prevent administrative procurement announcements containing words like "traffic"
+# from being mistaken for an event / regulation relevant to taxi demand.
+ADMIN_NOTICE_WORDS = ("一般競争入札", "入札参加資格", "公募型プロポーザル", "企画提案募集", "委託業務", "入札公告")
 JST_FORMAT = "%Y-%m-%d %H:%M JST"
 
 
@@ -125,7 +128,7 @@ def naha_news(raw: bytes, checked: dt.datetime) -> dict:
             continue
         if not published or not (-600 <= (checked - published).total_seconds() <= 7 * 86400):
             continue
-        if not any(word in title for word in KEYWORDS):
+        if not any(word in title for word in KEYWORDS) or any(word in title for word in ADMIN_NOTICE_WORDS):
             continue
         digest = hashlib.sha256(url.encode("utf-8")).hexdigest()[:16]
         items.append({"id": digest, "title": title[:120], "url": url,
