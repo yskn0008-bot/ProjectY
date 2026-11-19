@@ -95,5 +95,61 @@ try{
  assert.ok(!saved||!Object.values(saved.days||{}).flat().some(x=>x.t==='Clarity予定'));
  assert.deepEqual(errors,[]);
  await context.close();
+
+ // Real-world regression: long, read-only Apple appointments (e.g., a 7h
+ // night shift) must not trap vertical finger scrolling on iPhone.
+ const longShift={status:'ok',source:'scriptable-on-device',
+  calendarDays:{'2026-12-01':[{title:'夜勤',start:1020,duration:420}]},
+  allDayDays:{},calendarCoverage:{from:'2026-12-01',until:'2026-12-02',status:'ok'}};
+ const shiftHtml=htmlFor([],longShift);
+ const scroller=await browser.newContext({
+  viewport:{width:390,height:844},timezoneId:'Asia/Tokyo',
+  hasTouch:true,isMobile:process.env.LIFE_BROWSER!=='webkit'
+ });
+ const scrollPage=await scroller.newPage(),scrollErrors=[];
+ scrollPage.on('pageerror',e=>scrollErrors.push(e.message));
+ await scrollPage.route('**/*',route=>{
+  if(route.request().url()==='http://yos.local/')
+   return route.fulfill({status:200,contentType:'text/html',body:shiftHtml});
+  return route.abort();
+ });
+ await scrollPage.goto('http://yos.local/');
+ await scrollPage.waitForFunction(()=>document.getElementById('yosNativeBoot')===null);
+ await scrollPage.evaluate(()=>showDay('2026-12-01'));
+ const shift=scrollPage.locator('#tl .card.schedule.fixed-scroll');
+ assert.equal(await shift.count(),1,'fixed night shift is a native scrolling surface');
+ assert.equal(await shift.evaluate(el=>getComputedStyle(el).touchAction),'pan-y');
+ assert.equal(await shift.innerText().then(x=>x.includes('夜勤')),true);
+ assert.equal(await scrollPage.locator('#tl .card.task').count(),0);
+ if(process.env.LIFE_BROWSER==='chromium'){
+  const absolute=await shift.evaluate(el=>el.getBoundingClientRect().top+scrollY);
+  await scrollPage.evaluate(top=>scrollTo(0,Math.max(0,top-240)),absolute);
+  const rect=await shift.boundingBox();
+  assert.ok(rect,'night shift has a touchable bounding rectangle');
+  const x=Math.round(rect.x+rect.width/2);
+  const y=Math.round(Math.max(100,Math.min(570,rect.y+Math.min(65,rect.height/3))));
+  assert.ok(y>rect.y&&y<rect.y+rect.height,'touch starts inside the actual night shift');
+  const before=await scrollPage.evaluate(()=>scrollY);
+  assert.ok(before>40,'night shift is in a scrolled document');
+  const cdp=await scroller.newCDPSession(scrollPage);
+  await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x,y}]});
+  for(let i=1;i<=8;i++){
+   await cdp.send('Input.dispatchTouchEvent',{type:'touchMove',
+    touchPoints:[{x,y:y+i*19}]});
+   await scrollPage.waitForTimeout(24);
+  }
+  await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
+  await scrollPage.waitForTimeout(180);
+  const after=await scrollPage.evaluate(()=>scrollY);
+  assert.ok(after<before-25,
+   'touching a long fixed Apple card must scroll the whole timeline, not freeze it: '+before+' → '+after);
+  assert.equal(await scrollPage.locator('#focus.show').count(),0,
+   'a scroll gesture must not open the fixed appointment details');
+  const saved=await scrollPage.evaluate(key=>localStorage.getItem(key),store);
+  assert.ok(!saved||!JSON.parse(saved).days?.['2026-12-01']?.length,
+   'scrolling must not write into the local timeline plan');
+ }
+ assert.deepEqual(scrollErrors,[]);
+ await scroller.close();
 }finally{await browser.close()}
 console.log('DAYSTREAM native tasks: 320/390/402px PASS');
