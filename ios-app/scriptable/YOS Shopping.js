@@ -330,7 +330,9 @@ function trustedProductPage(url){
  const host=hostName(url);
  if(!ALLOWED_PRODUCT_HOSTS.some(domain=>host===domain||host.endsWith('.'+domain)))return false;
  const path=url.slice(8+host.length);
- if(/\/(?:s|search|category|c|campaign|list|searchresult)(?:[/?]|$)/i.test(path))return false;
+ if(/\/(?:s|search|campaign|list|searchresult)(?:[/?]|$)/i.test(path))return false;
+ // Manufacturer stores legitimately place individual product pages inside /category/.
+ if(/\/category(?:[/?]|$)/i.test(path)&&!/\d{4,}(?:\.html?)(?:[?#]|$)/i.test(path))return false;
  if(/amazon\.co\.jp$/.test(host)&&!/\/(?:dp|gp\/product)\/[a-z0-9]{10}/i.test(path))return false;
  if(/rakuten\.co\.jp$/.test(host)&&!/\.(?:html|htm)(?:[?#]|$)|\/item\//i.test(path))return false;
  return path.length>=9;
