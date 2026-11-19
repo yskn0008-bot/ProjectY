@@ -28,8 +28,15 @@ export async function previewReviewedCandidate(candidate,dossier,root,{
     const verification=candidate.verification[index];
     if(verification.checkedOn!==dossier.reviewedOn)
       stop('independent source review date mismatch');
-    if(!dossier.claims.some(x=>x.sourceId===dossier.sources.find(s=>new URL(s.url).href===url)?.id&&x.status==='supported_in_study'))
-      stop('no supported, specifically reviewed claims for article');
+    const boundSource = dossier.sources.find(s=>new URL(s.url).href===url);
+    if (!Array.isArray(verification.reviewClaimIds) || !verification.reviewClaimIds.length)
+      stop('article missing independent reviewed claim IDs');
+    const validClaims = new Map(dossier.claims.map(c=>[c.id,c]));
+    for (const id of verification.reviewClaimIds) {
+      const claim=validClaims.get(id);
+      if (!claim || claim.sourceId !== boundSource.id || claim.status !== 'supported_in_study')
+        stop('unsupported, unreviewed or mismatched claim in article: '+id);
+    }
     // Review does not establish that all prose is correct: do not convert
     // the existence of matching source URLs into approval.
   }
