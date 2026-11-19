@@ -83,3 +83,15 @@ test('HTML entities and tag splits normalize without accepting a substring in sc
   const text=extractReadableText('<html><body>A&nbsp;test <b>with</b> data &amp; methods.</body></html>','text/html');
   assert.equal(text,'A test with data & methods.');
 });
+
+test('Europe PMC OA full-text XML is accepted without granting broad access to unrelated EBI APIs',async()=>{
+  const ep='https://www.ebi.ac.uk/europepmc/webservices/rest/PMC9626598/fullTextXML';
+  assert.equal(safeSourceUrl(ep),ep);
+  assert.throws(()=>safeSourceUrl('https://www.ebi.ac.uk/private/anything'),/Unsafe/);
+  const p=packet();p.sources[0].url=ep;
+  const xml='<article><front><title-group><article-title>Simulated source study</article-title></title-group></front><body><sec><p>'+sentence+'</p><p>Further synthetic context confirms that the sample is made up and is included only to exercise XML text extraction.</p></sec></body></article>';
+  const result=await auditResearchPacket(p,{fetcher:mock(xml,200,{'content-type':'application/xml'}),clock});
+  assert.equal(result.sources[0].status,'retrieved_not_fact_checked');
+  assert.equal(result.claims[0].status,'evidence_located_review_required');
+  assert.equal(result.checks.verifiedClaims,0);
+});
