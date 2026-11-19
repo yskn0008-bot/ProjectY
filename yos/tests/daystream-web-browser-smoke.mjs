@@ -9,6 +9,7 @@ try{
  const res=await page.goto('http://127.0.0.1:4173/yos/daystream/',{waitUntil:'domcontentloaded'});
  assert.equal(res.status(),200);
  await page.locator('#timelinePanel').waitFor();
+ await page.locator('.native-tools summary').click();
  await page.locator('#yosWebImport').waitFor();
  assert.equal(await page.locator('#yosWebHistory').isVisible(),true);
  await page.locator('#addBtn').click();
@@ -126,6 +127,7 @@ try{
  assert.equal(started.kind,'start');
  assert.equal(started.count,3);
  const downloadTask=page.waitForEvent('download');
+ await page.locator('.native-tools').evaluate(el=>{el.open=true});
  await page.locator('#yosWebExport').click();
  const download=await downloadTask;
  assert.equal(download.suggestedFilename(),'YOS_DAYSTREAM_WEB_ALL_BACKUP.json');
@@ -397,7 +399,8 @@ try{
   assert.equal(appearance.get(2100).image,'none','long sleep backdrop stays flat');
   for(const id of [2102,2110]){
    const fg=appearance.get(id);
-   assert.equal(fg.image,'none','foreground task '+id+' uses a flat Layer surface');
+   if(id===2110)assert.match(fg.image,/linear-gradient/,'ordinary cards use the LIFE FLOW gradient');
+   else assert.equal(fg.image,'none','a collision keeps its warning surface');
    assert.notEqual(fg.shadow,'none','foreground task '+id+' uses a soft separating shadow');
    assert.ok(!fg.shadow.includes('inset 4px'),'do not restore a stripe on task '+id);
   }
