@@ -18,7 +18,7 @@ const MAX_BYTES = 750000;
 const PRIVATE = /(?:sk-proj-|ntn_[A-Za-z0-9_-]+|gh[pousr]_[A-Za-z0-9_]{16,}|Bearer\s+\S+|口座番号|マイナンバー|暗証番号|ようすけ|陽介|個人の予定|個人の残高|YOS_NOTION_INTEGRATION_TOKEN)/i;
 const FIXED_HOSTS = new Set([
   'pmc.ncbi.nlm.nih.gov', 'pubmed.ncbi.nlm.nih.gov',
-  'www.ncbi.nlm.nih.gov', 'api.crossref.org', 'www.ebi.ac.uk',
+  'www.ncbi.nlm.nih.gov', 'api.crossref.org', 'www.crossref.org', 'www.ebi.ac.uk',
   'www.jstage.jst.go.jp', 'www.nature.com',
   'www.pref.okinawa.lg.jp', 'www.city.naha.okinawa.jp'
 ]);
