@@ -26,7 +26,7 @@ test('returns only real received abstract metadata with DOI URL',async()=>{
   const r=await run();
   assert.match(r.result,/YOS_RESEARCH_ABSTRACT_V1/);
   assert.match(r.result,/10.1038\/s41598-022-22866-x/);
-  assert.match(r.result,/原典意味照合は未実施/);
+  assert.match(r.result,/独立した意味照合は未実施/);
   assert.match(r.result,/自動公開禁止/);
   assert.equal(r.completed,1);
   assert.equal(r.urls.length,1);
