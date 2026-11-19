@@ -4,7 +4,7 @@
 // Existing DAYSTREAM UI + native Notion reads. A confirmed move can update only '期限'.
 'use strict';
 const NOTION_KEY='YOS_NOTION_INTEGRATION_TOKEN';
-const UI_REF='177c3671af645e32d7a08af82d8dedef4bc82098';
+const UI_REF='2ed6c103a962be2dc9cfe2e33e751c40a7970ca6';
 const ROOT='https://raw.githubusercontent.com/yskn0008-bot/ProjectY/'+UI_REF+'/';
 const SOURCE='965c6086-32c1-463d-93b4-87a9cb69b3ad';
 const STATES=['次にやる','実行中','本人操作','待ち','保留','完了'];
