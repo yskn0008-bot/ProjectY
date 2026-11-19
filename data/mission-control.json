@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-19T21:15:41+09:00",
+  "updated_at": "2026-11-19T21:21:17+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -12,16 +12,6 @@
     ]
   },
   "inbox": [
-    {
-      "id": "github-pr-769",
-      "title": "PR #769 Clarity v4 pilot｜原文保存＋Notion一括仕分け＋安全なiPhone操作",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/769",
-      "updated_at": "2026-11-16T18:31:56Z"
-    },
     {
       "id": "github-pr-771",
       "title": "PR #771 YOS Calendar｜Notionデータを承認済みUIへ安全同期（Google/Face IDなし）",
@@ -113,6 +103,16 @@
       "updated_at": "2026-11-19T11:55:27Z"
     },
     {
+      "id": "github-pr-853",
+      "title": "PR #853 fix(scriptable): inventory detects scripts with supported FileManager API",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/853",
+      "updated_at": "2026-11-19T12:20:07Z"
+    },
+    {
       "id": "github-issue-10",
       "title": "Issue #10 Mission Control v2：GitHubのIssue・PR・Commitを自動集約する",
       "type": "GitHub Issue",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-19T12:15:08Z"
+      "updated_at": "2026-11-19T12:20:28Z"
     },
     {
       "id": "github-issue-234",
@@ -205,6 +205,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-33376a370cde",
+      "title": "fix(life): use Scriptable universal HTTPS link for Shopping (#852)",
+      "completed_at": "2026-11-19T12:20:31Z",
+      "result": "GitHub mainへ反映（33376a3）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/33376a370cde2538d2308bec5cf9d8663d9190fa"
+    },
+    {
       "id": "github-commit-948f34542b0d",
       "title": "feat(scriptable): register read-only inventory in shared installer (#851)",
       "completed_at": "2026-11-19T12:15:04Z",
@@ -231,13 +238,6 @@
       "completed_at": "2026-11-19T11:34:26Z",
       "result": "GitHub mainへ反映（3599943）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/359994374ff4fc0d501aad226b9232b0a6856be5"
-    },
-    {
-      "id": "github-commit-3ac75c179f97",
-      "title": "merge latest main safely: keep all 20 installer entries and update journal book only",
-      "completed_at": "2026-11-19T11:32:37Z",
-      "result": "GitHub mainへ反映（3ac75c1）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/3ac75c179f976769377c7a677fae2141d4cc6592"
     },
     {
       "id": "complete-002",
@@ -274,7 +274,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-19T21:15:41+09:00",
+      "last_update": "2026-11-19T21:21:17+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -349,13 +349,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 9件・Open PR 63件を自動同期中",
+      "next_action": "Open Issue 9件・Open PR 64件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-19T21:15:41+09:00",
+      "last_update": "2026-11-19T21:21:17+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -378,7 +378,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-19T21:15:41+09:00",
+      "last_update": "2026-11-19T21:21:17+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -460,5 +460,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "010bd9049839e8472b89d2a43594ddd93e195a2a0f00ca4b6c22284551727794"
+  "github_snapshot_hash": "323b343dce056af5d6f03e5fb491cef705d09e6e9ac4e6de2991c271cdd1d457"
 }
