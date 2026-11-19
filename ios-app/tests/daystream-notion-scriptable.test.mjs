@@ -283,7 +283,7 @@ test('repeating monthly habit requires an explicit anchor date; titles cannot in
   text('yos/daystream/source-adapters.js'),
   text('life/calendar/native-bridge.js'),
   text('yos/daystream/task-wizard.js'),snapshot,[],null,'Apple予定：テスト',source);
- assert.match(h,/source:"?notion-tasks-cycle"?/);
+ assert.match(h,/"source":"notion-tasks-cycle"/);
  assert.doesNotMatch(h,/<script>privateTitle\(\)<\/script>/);
  for(const m of h.matchAll(/<script>([\s\S]*?)<\/script>/g))new vm.Script(m[1]);
 });
