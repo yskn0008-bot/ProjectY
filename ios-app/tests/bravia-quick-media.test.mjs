@@ -182,6 +182,9 @@ test('ACTUAL rendered Scriptable WebView script parses and starts the remote but
   assert.equal(nodes.get('quickSoundModes').children.length,2,'sound mode choices must appear');
   assert.equal(nodes.get('quickAudioOutputs').children.length,2,'audio output choices must appear');
   assert.equal(nodes.get('quickApps').children.length,5,'all app names must appear');
+  ui.showQuickStatus({ok:true,quick:{apps:{youtube:true,netflix:true}}});
+  assert.equal(nodes.get('quickSoundModes').children.length,2,'launching app must not clear sound choices');
+  assert.equal(nodes.get('quickAudioOutputs').children.length,2,'launching app must not clear output choices');
   window.location.href='';
   nodes.get('quickPictureModes').children[1].handlers.click({
     preventDefault(){},stopPropagation(){}
