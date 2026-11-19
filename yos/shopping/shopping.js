@@ -56,8 +56,9 @@
   const buy=item=>!item.purchased&&item.state!=='保留'&&
     Number.isFinite(item.targetPrice)&&Number.isFinite(item.currentPrice)&&
     item.currentPrice<=item.targetPrice&&recentPrice(item);
-  const recommend=item=>!item.purchased&&(sale(item)||buy(item)||restock(item));
-  const sortRank=item=> (restock(item)?100:0)+(sale(item)?60:0)+(buy(item)?30:0)+(item.priority==='高'?10:0);
+  const selected=item=>!item.purchased&&item.state==='購入候補';
+  const recommend=item=>!item.purchased&&(sale(item)||buy(item)||restock(item)||selected(item));
+  const sortRank=item=> (restock(item)?100:0)+(sale(item)?60:0)+(buy(item)?30:0)+(selected(item)?18:0)+(item.priority==='高'?10:0);
   const number=(id,count)=>{const node=el(id);if(node)node.textContent=String(count)};
   function status(message){el('connectionState').textContent=message}
   let toastTimeout;
@@ -100,38 +101,45 @@
     return items;
   }
   function imageBlock(item){
-    const image=safeLink(item.imageUrl);
+    // Local images are injected by the private Scriptable runtime, not read from Notion URLs.
+    const local=typeof item.localPhotoData==='string'&&/^data:image\/jpeg;base64,[A-Za-z0-9+/=]{16,750000}$/.test(item.localPhotoData)?item.localPhotoData:'';
+    const image=local||safeLink(item.imageUrl);
     return image?'<img loading="lazy" decoding="async" alt="'+escapeText(item.name)+'の商品写真" src="'+escapeText(image)+'">':
-      '<div class="no-photo" aria-label="写真未登録"><span>'+escapeText(imgIcons[item.category]||'◈')+'</span><small>写真未登録</small></div>';
+      '<div class="no-photo" aria-label="商品写真未登録"><span class="missing-glyph">'+escapeText(imgIcons[item.category]||'◈')+'</span><small>写真を追加</small></div>';
   }
   function badge(item){
     if(restock(item))return '<span class="flag restock">▣ 補充候補</span>';
-    if(sale(item))return '<span class="flag" title="登録価格の差です。現在の価格と購入条件は要確認">◆ 値引き中</span>';
+    if(sale(item))return '<span class="flag" title="Notion登録参考価格との差。最新販売条件は要確認">◆ 値引き候補</span>';
+    if(selected(item))return '<span class="flag selected">★ 購入候補</span>';
     return '';
   }
   function card(item){
     const favorite=state.favorites.has(item.id);
     const pct=diffPct(item);
     const url=safeLink(item.url);
-    const priceKnown=Number.isFinite(item.currentPrice);
-    const priceClass=priceKnown?'price-now':'price-now unknown';
-    const purchaseStatus=item.purchased?'購入済':restock(item)?'補充する':buy(item)?'🛒 買い時':'価格監視';
-    const statusClass=restock(item)?'purchase-status stock':buy(item)?'purchase-status':'purchase-status wait';
+    const hasCurrent=Number.isFinite(item.currentPrice);
+    const hasReference=Number.isFinite(item.referencePrice);
+    const priceText=hasCurrent?yen(item.currentPrice):hasReference?'参考 '+yen(item.referencePrice):'価格未確認';
+    const statusText=item.purchased?'購入済':restock(item)?'補充が必要':buy(item)?'目標価格以下':selected(item)?'購入候補':item.state==='保留'?'保留中':'検討中';
+    const statusClass=item.purchased?'purchase-status purchased-state':restock(item)?'purchase-status stock':buy(item)?'purchase-status':selected(item)?'purchase-status selected-state':'purchase-status wait';
+    const photoMissing=!item.localPhotoData&&!safeLink(item.imageUrl);
+    const actions='<button type="button" data-action="detail" data-id="'+escapeText(item.id)+'" aria-label="商品詳細">詳細</button>'+
+      (NATIVE?'<button type="button" data-action="edit" data-id="'+escapeText(item.id)+'" aria-label="価格と在庫を編集">編集</button>':'')+
+      (url?'<a href="'+escapeText(url)+'" target="_blank" rel="noopener noreferrer" aria-label="商品ページを開く">↗</a>':'');
     return '<article class="product-card'+(item.purchased?' purchased':'')+'" data-id="'+escapeText(item.id)+'">'+
       badge(item)+
-      '<div class="product-photo">'+imageBlock(item)+'</div>'+
+      '<div class="product-photo">'+imageBlock(item)+
+      (photoMissing&&NATIVE?'<button class="photo-quick" type="button" data-action="photo" data-id="'+escapeText(item.id)+'" aria-label="商品写真を追加">＋</button>':'')+
+      '</div>'+
       '<div class="product-details">'+
-      '<div class="product-heading" title="'+escapeText(item.name)+'">'+escapeText(item.name)+'</div>'+
-      '<button class="heart'+(favorite?' active':'')+'" type="button" data-action="favorite" data-id="'+escapeText(item.id)+'" aria-label="'+(favorite?'お気に入りから外す':'お気に入りに追加')+'">'+(favorite?'♥':'♡')+'</button>'+
+      '<div class="product-heading-row"><h3 class="product-heading" title="'+escapeText(item.name)+'">'+escapeText(item.name)+'</h3>'+
+      '<button class="heart'+(favorite?' active':'')+'" type="button" data-action="favorite" data-id="'+escapeText(item.id)+'" aria-label="'+(favorite?'お気に入りから外す':'お気に入りに追加')+'">'+(favorite?'♥':'♡')+'</button></div>'+
       '<span class="category-tag">'+escapeText(item.category||item.type||'その他')+'</span>'+
-      '<span class="'+statusClass+'">'+purchaseStatus+'</span>'+
-      '<div class="price-row"><strong class="'+priceClass+'">'+yen(item.currentPrice)+'</strong>'+
+      '<span class="'+statusClass+'">'+escapeText(statusText)+'</span>'+
+      '<div class="price-row"><strong class="'+(hasCurrent?'price-now':'price-now unknown')+'">'+escapeText(priceText)+'</strong>'+
       (pct&&sale(item)?'<del class="price-was">'+yen(item.referencePrice)+'</del><span class="discount-rate">'+pct+'% OFF</span>':'')+'</div>'+
       '<span class="store-label" title="'+escapeText(item.shop.join('・'))+'">'+(item.shop.length?'登録店: '+escapeText(item.shop.join('・')):'販売店未登録')+'</span>'+
-      '<div class="product-actions"><button type="button" data-action="detail" data-id="'+escapeText(item.id)+'" aria-label="'+escapeText(item.name)+'の詳細">▥</button>'+
-      (url?'<a href="'+escapeText(url)+'" target="_blank" rel="noopener noreferrer" aria-label="販売ページを確認">🛒</a>':
-      '<button data-action="research" data-id="'+escapeText(item.id)+'" type="button" aria-label="価格を調査">⌕</button>')+
-      '</div></div></article>';
+      '<div class="product-actions">'+actions+'</div></div></article>';
   }
   function render(){
     const all=state.items.filter(x=>!x.purchased).length;
@@ -158,7 +166,7 @@
     state.filter=value;render();window.scrollTo({top:0,behavior:'smooth'});
   }
   function detail(item){
-    const url=safeLink(item.url),pct=diffPct(item),photo=safeLink(item.imageUrl);
+    const url=safeLink(item.url),pct=diffPct(item),photo=(item.localPhotoData&&/^data:image\/jpeg;base64,[A-Za-z0-9+/=]{16,750000}$/.test(item.localPhotoData)?item.localPhotoData:'')||safeLink(item.imageUrl);
     const message=state.demo?'サンプル表示：実際の価格ではありません':pct?
       '登録参考価格との差。送料・クーポン・販売期間・沖縄への配送を購入前に確認してください。':
       '値引き情報は未確認です。';
@@ -176,6 +184,7 @@
       '<div class="detail-action">'+
       (url?'<a href="'+escapeText(url)+'" target="_blank" rel="noopener noreferrer">販売ページで価格を確認</a>':'')+
       '<button type="button" data-action="research" data-id="'+escapeText(item.id)+'">商品をウェブで価格調査</button>'+
+      (NATIVE?'<button type="button" data-action="edit" data-id="'+escapeText(item.id)+'">登録価格・目標・在庫を編集</button><button type="button" data-action="photo" data-id="'+escapeText(item.id)+'">iPhoneの写真を設定</button>':'')+
       (!item.purchased?'<button type="button" class="confirm-purchase" data-action="purchase" data-id="'+escapeText(item.id)+'">購入済みにする</button>':'')+
       '</div>';
     el('detailDialog').showModal();
@@ -187,8 +196,8 @@
   }
   function runNative(action,fields={}){
     if(!NATIVE){toast('実データの編集はiPhoneのScriptable版で利用できます');return}
-    const search=new URLSearchParams({scriptName:'YOS Shopping',action,...fields});
-    location.href='scriptable:///run?'+search.toString();
+    const search=new URLSearchParams({action,...fields});
+    location.href='https://open.scriptable.app/run/YOS%20Shopping?'+search.toString();
   }
   function addItem(event){
     event.preventDefault();
@@ -245,6 +254,8 @@
       if(action==='detail')detail(item);
       if(action==='research')research(item);
       if(action==='purchase')purchase(item);
+      if(action==='edit')runNative('edit',{id:item.id,expectedEditedAt:item.updatedAt||''});
+      if(action==='photo')runNative('photo',{id:item.id,expectedEditedAt:item.updatedAt||''});
     });
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install,{once:true});else install();
