@@ -385,12 +385,13 @@ function titleMatchesProduct(item,title,html,sourceUrl){
  const t=normalizePictureText(title);
  if(t.length<6)return false;
  // Search result and list pages can contain a brand but not a matching product.
- const tokens=item.name.normalize('NFKC').split(/[\s　・\-－_／/（）()]+/).map(normalizePictureText).filter(x=>x.length>=3);
+ const tokens=item.name.normalize('NFKC').split(/[\s　・\-－_／/（）()]+/).map(normalizePictureText)
+  .filter(x=>x.length>=3&&!/^\d+(?:\.\d+)?(?:ml|g|kg|cm|枚|個|本|枚入)$/i.test(x));
+ // Barcode URL alone must not validate a different variant of the same brand.
  const matches=tokens.filter(x=>t.includes(x)).length;
- const sourceHasJan=/\d{12,14}/.test(sourceUrl);
- if(matches<(sourceHasJan?1:2))return false;
+ if(tokens.length===0||matches<Math.min(2,tokens.length))return false;
  const amount=item.name.normalize('NFKC').match(/(\d+(?:\.\d+)?)\s*(ml|g|kg|cm|枚|個|本|枚入)/i);
- if(amount&&!sourceHasJan&&!normalizePictureText(title+' '+html.slice(0,16000)).includes(normalizePictureText(amount[0])))return false;
+ if(amount&&!normalizePictureText(title+' '+html.slice(0,16000)).includes(normalizePictureText(amount[0])))return false;
  return true;
 }
 
