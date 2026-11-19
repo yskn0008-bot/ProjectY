@@ -125,3 +125,12 @@ test('quickProbe is read-only and does not mutate TV',async()=>{
  assert.ok(p.picture);
  assert.ok(requests.every(x=>!['setActiveApp','setPlayContent','setSoundSettings'].includes(x.method)));
 });
+
+test('generated WebView JavaScript is syntactically valid, including quick-mode buttons',()=>{
+ const begin=source.indexOf('<script>'),end=source.indexOf('</script>',begin);
+ assert.ok(begin>0&&end>begin,'Scriptable WebView inline script boundaries');
+ let htmlScript=source.slice(begin+8,end);
+ // The surrounding Scriptable template interpolates these JSON objects at runtime.
+ htmlScript=htmlScript.replace(/\$\{JSON\.stringify\([^)]*\)\}/g,'[]');
+ assert.doesNotThrow(()=>new Function(htmlScript));
+});
