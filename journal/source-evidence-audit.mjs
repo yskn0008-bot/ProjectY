@@ -18,7 +18,7 @@ const MAX_BYTES = 750000;
 const PRIVATE = /(?:sk-proj-|ntn_[A-Za-z0-9_-]+|gh[pousr]_[A-Za-z0-9_]{16,}|Bearer\s+\S+|口座番号|マイナンバー|暗証番号|ようすけ|陽介|個人の予定|個人の残高|YOS_NOTION_INTEGRATION_TOKEN)/i;
 const FIXED_HOSTS = new Set([
   'pmc.ncbi.nlm.nih.gov', 'pubmed.ncbi.nlm.nih.gov',
-  'www.ncbi.nlm.nih.gov', 'api.crossref.org',
+  'www.ncbi.nlm.nih.gov', 'api.crossref.org', 'www.ebi.ac.uk',
   'www.jstage.jst.go.jp', 'www.nature.com',
   'www.pref.okinawa.lg.jp', 'www.city.naha.okinawa.jp'
 ]);
@@ -43,7 +43,7 @@ export function safeSourceUrl(raw) {
       parsed.port || parsed.hash || parsed.search || !host.includes('.') ||
       host.endsWith('.') || !(/^[a-z0-9.-]+$/).test(host) ||
       !(FIXED_HOSTS.has(host) || host.endsWith('.gov') || host.endsWith('.go.jp') ||
-        host.endsWith('.ac.jp')) ) throw new Error('Unsafe or unsupported research source URL');
+        host.endsWith('.ac.jp')) || (host === 'www.ebi.ac.uk' && !/^\/europepmc\/webservices\/rest\/PMC[0-9]+\/fullTextXML$/.test(parsed.pathname))) throw new Error('Unsafe or unsupported research source URL');
   return parsed.href;
 }
 export function validateResearchPacket(packet) {
@@ -88,10 +88,10 @@ function decodeEntities(text) {
   });
 }
 export function extractReadableText(body, mime) {
-  if (!/^text\/(?:html|plain)\b/i.test(mime)) throw new Error('Unsupported source format');
+  if (! /^(?:text\/(?:html|plain|xml)|application\/xml)\b/i.test(mime)) throw new Error('Unsupported source format');
   if (/(?:checking your browser|enable javascript and cookies to continue|verify you are human|captcha|access denied)/i.test(body.slice(0,9000)))
     throw new Error('Source blocked by access challenge');
-  const text = /^text\/html/i.test(mime)
+  const text = /^(?:text\/(?:html|xml)|application\/xml)/i.test(mime)
     ? body.replace(/<(?:script|style|noscript|svg|nav|footer)\b[^>]*>[\s\S]*?<\/(?:script|style|noscript|svg|nav|footer)>/gi, ' ')
       .replace(/<!--[\s\S]*?-->/g, ' ').replace(/<[^>]*>/g, ' ')
     : body;
@@ -119,7 +119,7 @@ export async function downloadSource(url, {fetcher = fetch, timeoutMs = 12000} =
     }
     if (!response.ok) throw new Error('Source returned HTTP ' + response.status);
     const mime = response.headers.get('content-type') || '';
-    if (!/^text\/(?:html|plain)\b/i.test(mime)) throw new Error('Unsupported source format');
+    if (! /^(?:text\/(?:html|plain|xml)|application\/xml)\b/i.test(mime)) throw new Error('Unsupported source format');
     const len = Number(response.headers.get('content-length'));
     if (Number.isFinite(len) && len > MAX_BYTES) throw new Error('Source too large');
     if (!response.body) throw new Error('Empty source response');
