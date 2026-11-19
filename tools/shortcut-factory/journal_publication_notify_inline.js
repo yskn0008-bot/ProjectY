@@ -4,6 +4,8 @@
 'use strict';
 const SOURCE='https://raw.githubusercontent.com/yskn0008-bot/ProjectY/main/ios-app/scriptable/journal/latest.json';
 const READER='https://yskn0008-bot.github.io/ProjectY/journal-v2/';
+// Only the existing human-reviewed GPT publication lane, never the generic RSS fallback.
+const REQUIRED_EDITION='PUBLIC-SOURCE PERSONAL EDIT';
 const STATE_FILE='YOS JOURNAL Published Notification V1.json';
 const SENSITIVE=/(?:sk-proj-|ntn_[A-Za-z0-9_-]+|gh[pousr]_[A-Za-z0-9_]{16,}|Bearer\s+\S+|口座番号|暗証番号|マイナンバー|あなたの残高|個人の残高|住所|電話番号|非公開|ようすけ|陽介)/i;
 function dayJST(date){
@@ -24,6 +26,7 @@ function lastSent(store){
 }
 function isPublicToday(data,now){
   if(!data||typeof data!=='object'||Array.isArray(data))return false;
+  if(data.edition!==REQUIRED_EDITION)return false;
   if(data.issuedOn!==dayJST(now)||!/^\d{4}-\d{2}-\d{2}$/.test(data.issuedOn))return false;
   if(!Array.isArray(data.articles)||data.articles.length<1||data.articles.length>6)return false;
   if(typeof data.headline!=='string'||data.headline.trim().length<12||data.headline.length>160)return false;
@@ -32,6 +35,8 @@ function isPublicToday(data,now){
   for(const x of data.articles){
     if(!x||typeof x!=='object'||typeof x.title!=='string'||x.title.length<8||x.title.length>160)return false;
     if(typeof x.link!=='string'||!x.link.startsWith('https://'))return false;
+    // Existing editorial gate publishes without unlicensed images.
+    if(x.image!==''||x.imageCaption!==''||x.imageKind!=='')return false;
     const url=x.link.match(/^https:\/\/([a-z0-9.-]+)(?=\/|$)/i);
     if(!url||!url[1].includes('.')||url[1].endsWith('.invalid')||x.link.includes('@'))return false;
   }
