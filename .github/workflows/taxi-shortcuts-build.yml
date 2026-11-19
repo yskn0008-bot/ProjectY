@@ -5,6 +5,8 @@ on:
     paths:
       - 'taxi/ui-v2.html'
       - 'taxi/research.html'
+      - 'taxi/build_research_feed.py'
+      - 'taxi/test_research_feed.py'
       - 'taxi/tests/iphone17.spec.mjs'
       - 'tools/taxi-shortcuts/**'
       - '.github/workflows/taxi-shortcuts-build.yml'
@@ -24,6 +26,7 @@ jobs:
         run: |
           set -euo pipefail
           python3 tools/taxi-shortcuts/test_source.py
+          python3 -m unittest discover -s taxi -p 'test_research_feed.py' -v
           if grep -REi '(gh[pousr]_[A-Za-z0-9_]{20,}|sk-[A-Za-z0-9_-]{20,}|xox[baprs]-[A-Za-z0-9-]{10,}|BEGIN [A-Z ]*PRIVATE KEY)' tools/taxi-shortcuts; then
             echo 'Found possible secret in Shortcut source' >&2; exit 1
           fi
