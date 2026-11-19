@@ -9,7 +9,7 @@ const NAME='YOS Shopping';
 const NOTION_KEY='YOS_NOTION_INTEGRATION_TOKEN';
 const SOURCE='d0ed2cf0-c84e-4770-b77c-3a1a9e11bcfc';
 const VERSION='2026-03-11';
-const UI_REF='ad0caeff76496b2bf7f43686da7406ff15002585';
+const UI_REF='a3c7eae491ddfa920b8a907ed2476320cb67e8da';
 const ASSETS='https://raw.githubusercontent.com/yskn0008-bot/ProjectY/'+UI_REF+'/yos/shopping/';
 const CATEGORIES=new Set(['食品','洗濯','掃除','衛生','美容','家電','家具','その他']);
 const clean=(v,max=180)=>typeof v==='string'?v.replace(/[\u0000-\u001f\u007f]/g,' ').trim().slice(0,max):'';
