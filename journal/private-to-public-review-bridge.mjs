@@ -18,6 +18,10 @@ function doiFor(url){
     const v=decodeURIComponent(u.pathname.slice(1)).trim().toLowerCase();
     if(/^10\.\d{4,9}\/[-._;()/:a-z0-9]+$/i.test(v))return v;
   }
+  if(u.hostname==='journals.sagepub.com'||u.hostname==='doi.org'){
+    const match=u.pathname.match(/^\/doi\/(10\.\d{4,9}\/[A-Za-z0-9._;()/:-]+)\/?$/);
+    if(match)return match[1].toLowerCase();
+  }
   return null;
  }catch{return null;}
 }
