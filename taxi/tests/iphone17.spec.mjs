@@ -879,3 +879,28 @@ test('Taxi scheduled evidence: an open screen expires automatically when the fee
  await expect(page.locator('#feed-sources')).toContainText('更新されていません');
  expect(await page.evaluate(()=>localStorage.getItem('yos-taxi-ui-v2-live-20261117'))).toBeNull();
 });
+
+
+test('Taxi scheduled evidence: unknown source publication date is not a failed request',async ({page})=>{
+ await page.clock.setFixedTime(new Date('2026-11-20T02:22:00+09:00'));
+ await page.route('**/taxi/research-feed.json?ts=*',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({
+  schema:1,generatedAt:'2026-11-19T17:18:00Z',
+  sources:[
+   {id:'jma',name:'気象庁｜本島中南部の予報',status:'ok',checkedAt:'2026-11-19T17:18:00Z',
+     publishedAt:'2026-11-19T08:00:00Z',summary:'くもり',url:'https://www.jma.go.jp/bosai/forecast/',items:[]},
+   {id:'naha_rss',name:'那覇市｜公式更新',status:'ok',checkedAt:'2026-11-19T17:18:00Z',
+     publishedAt:null,summary:'関連する見出しなし',url:'https://www.city.naha.okinawa.jp/about/rss.html',items:[]},
+   {id:'cruise_catalog',name:'沖縄県｜クルーズ予約・実績資料',status:'unknown',
+     checkedAt:'2026-11-19T17:18:00Z',publishedAt:null,
+     summary:'2026年の寄港予約CSV',url:'https://data.bodik.jp/dataset/470007_okinawa-cruise',items:[]}
+  ],
+  difference:{status:'not_checked',added:[],previousAt:null}
+ })}));
+ await page.goto('./research.html?phase=before',{waitUntil:'domcontentloaded'});
+ await expect(page.locator('#feed-status')).toHaveText('一部要確認');
+ await expect(page.locator('#feed-status')).toHaveClass(/warn/);
+ await expect(page.locator('#feed-meta')).toContainText('沖縄県：更新日不明');
+ await expect(page.locator('#feed-meta')).toContainText('更新日・鮮度を要確認');
+ await expect(page.locator('#feed-meta')).not.toContainText('一部の公式情報を取得できませんでした');
+ expect(await page.evaluate(()=>localStorage.getItem('yos-taxi-ui-v2-live-20261117'))).toBeNull();
+});
