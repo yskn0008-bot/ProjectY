@@ -1,0 +1,37 @@
+#define name YOS 買い物とリサーチ
+#define color purple
+
+#include 'actions/device'
+#include 'actions/text'
+#include 'actions/sharing'
+
+// One iPhone shortcut, two independent native destinations.
+// Existing Apple Reminders shopping list stays the source of truth.
+// No YOS Shopping script, simulated store prices or Notion credentials.
+@actions: array
+@actions += "買い物リスト｜リマインダー"
+@actions += "商品リサーチ｜Perplexity"
+
+const selected = chooseFromList(@actions, "YOS｜買い物")
+if !selected {
+    stop()
+}
+const actionName = getText(selected)
+
+if actionName == "買い物リスト｜リマインダー" {
+    openApp("reminders")
+    stop()
+}
+
+if actionName == "商品リサーチ｜Perplexity" {
+    const item = prompt("調べたい商品名・型番・URL", "Text", "")
+    if !item {
+        stop()
+    }
+    const researchText = text("商品リサーチ：{item}\nAmazon・楽天・メーカー公式・沖縄県宜野湾市周辺の販売店を比較。商品名、JAN/型番、容量、現在価格（確認日と出典URL）、送料と沖縄配送可否、在庫を必ず分ける。価格不明、送料不明、商品一致未確認は明記。参考価格を現在価格や最安値と呼ばない。情報源のない予測価格を作らない。")
+    setClipboard(researchText)
+    // Native Open App, not an unreliable Scriptable or universal URL.
+    // The prepared query can be pasted into Perplexity's search field.
+    openApp("ai.perplexity.app")
+    stop()
+}
