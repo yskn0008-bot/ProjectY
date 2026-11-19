@@ -14,9 +14,9 @@ def validate(path):
     ask=[i for i,v in enumerate(ids) if str(v).endswith('askllm')]
     saves=[i for i,v in enumerate(ids) if v=='is.workflow.actions.documentpicker.save']
     inline=[i for i,v in enumerate(ids) if v==INTENT]
-    if len(ask)!=2 or len(saves)!=2 or len(inline)!=2:
-        raise AssertionError(f"expected two GPT, two backups, and two Scriptable: {len(ask),len(saves),len(inline)}")
-    if not (inline[0]<ask[0]<saves[0]<ask[1]<saves[1]<inline[1]):
+    if len(ask)!=2 or len(saves)!=3 or len(inline)!=2:
+        raise AssertionError(f"expected two GPT, three backups, and two Scriptable: {len(ask),len(saves),len(inline)}")
+    if not (inline[0]<saves[0]<ask[0]<saves[1]<ask[1]<saves[2]<inline[1]):
         raise AssertionError("unexpected source->writer->backup->editor->backup->private Notion order")
     scripts=[]
     for i in inline:
@@ -40,12 +40,14 @@ def validate(path):
             raise AssertionError("GPT must use isolated Text with FollowUp off")
     if 'YOS_RESEARCH_ABSTRACT_V1' not in repr(root) or '公開不可・要審査' not in repr(root):
         raise AssertionError("missing editorial safety prompts")
-    p1,p2=[actions[i]['WFWorkflowActionParameters'] for i in saves]
-    for p in (p1,p2):
+    research,p1,p2=[actions[i]['WFWorkflowActionParameters'] for i in saves]
+    for p in (research,p1,p2):
         if p.get('WFAskWhereToSave') is not False or p.get('WFSaveFileOverwrite') is not False:
             raise AssertionError("iCloud backup is prompting or overwriting")
-    if 'YOS-JOURNAL-GPT-WRITER-' not in repr(p1) or 'YOS-JOURNAL-GPT-DRAFT-' not in repr(p2):
+    if 'YOS-JOURNAL-GPT-RESEARCH-' not in repr(research) or 'YOS-JOURNAL-GPT-WRITER-' not in repr(p1) or 'YOS-JOURNAL-GPT-DRAFT-' not in repr(p2):
         raise AssertionError("writer and editor backup naming changed")
+    if research['WFInput'].get('Value',{}).get('OutputName')!='researchText':
+        raise AssertionError('research backup not from actual public source output')
     if p1['WFInput'].get('Value',{}).get('OutputName')!='writerText' or p2['WFInput'].get('Value',{}).get('OutputName')!='draftText':
         raise AssertionError("backups don't preserve original model outputs")
     if actions[inline[1]]['WFWorkflowActionParameters']['parameter']!=p2['WFInput']:
@@ -55,7 +57,7 @@ def validate(path):
     # to be inferred as an ActionOutput by the compiler, compiler checks only.
     if 'researchText' not in repr(root):
         raise AssertionError('GPT prompt must embed research material variable')
-    return {"actions":len(actions),"gpt":2,"scriptable":2,"save":2}
+    return {"actions":len(actions),"gpt":2,"scriptable":2,"save":3}
 
 if __name__=="__main__":
     p=argparse.ArgumentParser()
