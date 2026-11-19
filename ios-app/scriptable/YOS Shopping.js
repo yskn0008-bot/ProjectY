@@ -9,7 +9,7 @@ const NAME='YOS Shopping';
 const NOTION_KEY='YOS_NOTION_INTEGRATION_TOKEN';
 const SOURCE='d0ed2cf0-c84e-4770-b77c-3a1a9e11bcfc';
 const VERSION='2026-03-11';
-const UI_REF='39be6907ef7598510b92d8082d6e385039933286';
+const UI_REF='ad0caeff76496b2bf7f43686da7406ff15002585';
 const ASSETS='https://raw.githubusercontent.com/yskn0008-bot/ProjectY/'+UI_REF+'/yos/shopping/';
 const CATEGORIES=new Set(['食品','洗濯','掃除','衛生','美容','家電','家具','その他']);
 const clean=(v,max=180)=>typeof v==='string'?v.replace(/[\u0000-\u001f\u007f]/g,' ').trim().slice(0,max):'';
@@ -256,17 +256,284 @@ async function setLocalPhoto(token,q){
 function attachLocalPhotos(rows){
  if(typeof FileManager==='undefined'||typeof Data==='undefined')return rows;
  try{
-  const fm=FileManager.local();
+  const fm=FileManager.local(),manifest=loadPictureManifest(fm);
   return rows.map(item=>{
-   const file=photoPath(fm,item.id).path;
-   if(!fm.fileExists(file))return item;
-   try{
-    const raw=fm.read(file),base64=raw?.toBase64String();
-    if(!base64||base64.length>750000)return item;
-    return {...item,localPhotoData:'data:image/jpeg;base64,'+base64};
-   }catch{return item}
+   const personal=encodeLocalPicture(fm,photoPath(fm,item.id).path);
+   if(personal)return {...item,localPhotoData:personal,photoKind:'product',photoSourceUrl:null};
+   const cached=currentAutoPhoto(fm,item,manifest);
+   if(cached)return {...item,localPhotoData:cached.data,photoKind:cached.kind,photoSourceUrl:cached.sourceUrl};
+   return item;
   });
  }catch{return rows}
+}
+
+
+const AUTO_PHOTO_DIR='YOS Shopping Auto Photos';
+const PHOTO_MAX_NEW_PER_OPEN=8;
+const PHOTO_RETRY_MS=2*24*60*60*1000;
+const ALLOWED_PRODUCT_HOSTS=[
+ 'muji.com','kao-kirei.com','shop.rohto.co.jp','matsukiyococokara-online.com',
+ 'shiseido.co.jp','nitori-net.jp','amazon.co.jp','rakuten.co.jp','yodobashi.com',
+ 'biccamera.com','askul.co.jp'
+];
+const CATEGORY_PHOTO_QUERIES=[
+ [/トイレットペーパー/,['toilet paper rolls','toilet paper']],
+ [/トイレ洗剤/,['toilet cleaner bottle','toilet bowl cleaner']],
+ [/柔軟剤/,['fabric softener bottle','fabric softener']],
+ [/ボディソープ/,['body wash bottle','body wash']],
+ [/キッチンペーパー/,['kitchen paper towels','paper towels']],
+ [/シャンプー/,['shampoo bottle','shampoo']],
+ [/歯磨き粉/,['toothpaste tube','toothpaste']],
+ [/ティッシュペーパー/,['tissue box','tissue box']],
+ [/食器用洗剤/,['dishwashing liquid bottle','dishwashing liquid']],
+ [/洗濯洗剤/,['laundry detergent bottle','laundry detergent']],
+ [/ハンドソープ/,['liquid hand soap','hand soap']],
+ [/ゴミ袋/,['garbage bags','garbage bags']],
+ [/脂性肌向け低刺激泡洗顔料/,['face cleanser bottle','face cleanser']],
+ [/ラグ/,['area rug','rug']],
+ [/椅子/,['chair furniture','chair']]
+];
+function pictureDir(fm){
+ const dir=fm.joinPath(fm.libraryDirectory(),AUTO_PHOTO_DIR);
+ return {dir,manifest:fm.joinPath(dir,'manifest-v1.json')};
+}
+function autoPicturePath(fm,id){return fm.joinPath(pictureDir(fm).dir,id+'.jpg')}
+function pictureSignature(item){return [item.name,item.url||'',item.imageUrl||''].join('|')}
+function loadPictureManifest(fm){
+ try{
+  const file=pictureDir(fm).manifest;
+  if(fm.fileExists(file)){
+   const obj=JSON.parse(fm.readString(file));
+   if(obj&&obj.version===1&&obj.entries&&typeof obj.entries==='object')return obj;
+  }
+ }catch{}
+ return {version:1,entries:{}};
+}
+function savePictureManifest(fm,manifest){
+ const dir=pictureDir(fm).dir;
+ if(!fm.fileExists(dir))fm.createDirectory(dir,true);
+ fm.writeString(pictureDir(fm).manifest,JSON.stringify(manifest));
+}
+function encodeLocalPicture(fm,path){
+ try{
+  if(!fm.fileExists(path))return null;
+  const data=fm.read(path),b64=data?.toBase64String();
+  return b64&&b64.length>=20&&b64.length<=750000?'data:image/jpeg;base64,'+b64:null;
+ }catch{return null}
+}
+function hostName(url){
+ const safe=safeHttps(url);
+ if(!safe)return '';
+ return safe.slice(8).split(/[/?#]/,1)[0].toLowerCase().replace(/:443$/,'');
+}
+function trustedProductPage(url){
+ const host=hostName(url);
+ if(!ALLOWED_PRODUCT_HOSTS.some(domain=>host===domain||host.endsWith('.'+domain)))return false;
+ const path=url.slice(8+host.length);
+ if(/\/(?:s|search|category|c|campaign|list|searchresult)(?:[/?]|$)/i.test(path))return false;
+ if(/amazon\.co\.jp$/.test(host)&&!/\/(?:dp|gp\/product)\/[a-z0-9]{10}/i.test(path))return false;
+ if(/rakuten\.co\.jp$/.test(host)&&!/\.(?:html|htm)(?:[?#]|$)|\/item\//i.test(path))return false;
+ return path.length>=9;
+}
+function htmlAttr(tag,key){
+ const pattern=new RegExp('(?:^|\\s)'+key+'\\s*=\\s*(?:"([^"]*)"|\\x27([^\\x27]*)\\x27)','i');
+ const m=tag.match(pattern);return m?m[1]||m[2]||'':'';
+}
+function decodedHTML(text){
+ return String(text||'').replace(/&amp;/g,'&').replace(/&quot;/g,'"').replace(/&#39;|&apos;/g,"'").replace(/&lt;/g,'<').replace(/&gt;/g,'>');
+}
+function ogValue(html,names){
+ const tags=html.match(/<meta\b[^>]*>/gi)||[];
+ for(const name of names){
+  for(const tag of tags){
+   const key=(htmlAttr(tag,'property')||htmlAttr(tag,'name')).toLowerCase();
+   if(key===name){const value=htmlAttr(tag,'content');if(value)return decodedHTML(value).trim()}
+  }
+ }
+ return '';
+}
+function resolvedImageLink(pageUrl,raw){
+ let image=decodedHTML(raw).trim();
+ if(image.startsWith('//'))image='https:'+image;
+ else if(image.startsWith('/'))image='https://'+hostName(pageUrl)+image;
+ else if(image.startsWith('./'))image='https://'+hostName(pageUrl)+'/'+image.slice(2);
+ // Never load data:, javascript:, internal hosts or accidentally copy tracker URLs.
+ const host=hostName(image);
+ if(!host||host==='localhost'||host.endsWith('.local')||host==='0.0.0.0'||/^\d+\.\d+\.\d+\.\d+$/.test(host))return null;
+ if(/(?:logo|placeholder|noimage|default_image|tracking_pixel)/i.test(image))return null;
+ return safeHttps(image);
+}
+function normalizePictureText(s){
+ return String(s||'').normalize('NFKC').toLowerCase().replace(/[\s　・\-－_／/（）()]+/g,'');
+}
+function titleMatchesProduct(item,title,html,sourceUrl){
+ const t=normalizePictureText(title);
+ if(t.length<6)return false;
+ // Search result and list pages can contain a brand but not a matching product.
+ const tokens=item.name.normalize('NFKC').split(/[\s　・\-－_／/（）()]+/).map(normalizePictureText).filter(x=>x.length>=3);
+ const matches=tokens.filter(x=>t.includes(x)).length;
+ const sourceHasJan=/\d{12,14}/.test(sourceUrl);
+ if(matches<(sourceHasJan?1:2))return false;
+ const amount=item.name.normalize('NFKC').match(/(\d+(?:\.\d+)?)\s*(ml|g|kg|cm|枚|個|本|枚入)/i);
+ if(amount&&!sourceHasJan&&!normalizePictureText(title+' '+html.slice(0,16000)).includes(normalizePictureText(amount[0])))return false;
+ return true;
+}
+async function findExactProductImage(item){
+ if(!item.url||!trustedProductPage(item.url))return null;
+ try{
+  const req=new Request(item.url);req.timeoutInterval=6;
+  req.headers={'Accept':'text/html','User-Agent':'Mozilla/5.0 (compatible; YOSShopping/1.0)'};
+  const html=await req.loadString();
+  if(req.response?.statusCode!==200||html.length>1700000||html.length<100)return null;
+  const finalUrl=safeHttps(req.response?.url)||item.url;
+  if(!trustedProductPage(finalUrl))return null;
+  const title=ogValue(html,['og:title','twitter:title'])||decodedHTML((html.match(/<title[^>]*>([^<]+)<\/title>/i)||[])[1]||'');
+  if(!titleMatchesProduct(item,title,html,finalUrl))return null;
+  const raw=ogValue(html,['og:image:secure_url','og:image','twitter:image']);
+  const image=resolvedImageLink(finalUrl,raw);
+  if(!image)return null;
+  return {image,kind:'product',sourceUrl:finalUrl,notionCover:true};
+ }catch{return null}
+}
+function representativeSearch(item){
+ if(item.url&&trustedProductPage(item.url))return null;
+ if(/(?:確認待ち|テスト商品|商品名未確認|不明)/.test(item.name))return null;
+ for(const [pattern,terms] of CATEGORY_PHOTO_QUERIES)if(pattern.test(item.name))return terms;
+ return null;
+}
+async function findRepresentativeImage(item){
+ const terms=representativeSearch(item);
+ if(!terms)return null;
+ try{
+  const endpoint='https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrnamespace=6&gsrlimit=6&gsrsearch='+encodeURIComponent(terms[0])+
+    '&prop=imageinfo&iiprop=url%7Cmime&iiurlwidth=380&format=json';
+  const req=new Request(endpoint);req.timeoutInterval=6;
+  req.headers={'Accept':'application/json','User-Agent':'YOSShopping/1.0 (private photo catalog)'};
+  const data=await req.loadJSON();
+  if(req.response?.statusCode!==200||!data?.query?.pages)return null;
+  const pages=Object.values(data.query.pages);
+  const keyword=terms[1].toLowerCase().split(' ')[0];
+  for(const page of pages){
+   const name=String(page.title||'').toLowerCase();
+   const inf=page.imageinfo?.[0],mime=inf?.mime;
+   if(!name.includes(keyword)||!['image/jpeg','image/png','image/webp'].includes(mime))continue;
+   const img=safeHttps(inf.thumburl||inf.url);
+   const info=safeHttps(inf.descriptionurl);
+   if(img&&hostName(img).endsWith('wikimedia.org')&&info)
+    return {image:img,kind:'representative',sourceUrl:info,notionCover:false};
+  }
+ }catch{}
+ return null;
+}
+function jpegThumbnail(image){
+ if(!image||!Number.isFinite(image.size?.width)||!Number.isFinite(image.size?.height)||image.size.width<90||image.size.height<90)
+  return null;
+ const w=image.size.width,h=image.size.height;
+ const ratio=Math.max(w,h)/Math.min(w,h);
+ if(ratio>3.5)return null;
+ const scale=Math.min(400/w,400/h,1);
+ const tw=Math.max(1,Math.round(w*scale)),th=Math.max(1,Math.round(h*scale));
+ const canvas=new DrawContext();
+ canvas.size=new Size(tw,th);canvas.opaque=true;canvas.respectScreenScale=false;
+ canvas.setFillColor(Color.white());canvas.fillRect(new Rect(0,0,tw,th));
+ canvas.drawImageInRect(image,new Rect(0,0,tw,th));
+ const jpg=Data.fromJPEG(canvas.getImage());
+ const b64=jpg?.toBase64String();
+ return b64&&b64.length<=750000&&b64.length>=20?jpg:null;
+}
+async function downloadPhoto(source){
+ try{
+  const req=new Request(source.image);req.timeoutInterval=6;
+  req.headers={'Accept':'image/avif,image/webp,image/png,image/jpeg,image/*','User-Agent':'Mozilla/5.0 (compatible; YOSShopping/1.0)'};
+  if(source.kind==='product')req.headers.Referer=source.sourceUrl;
+  const image=await req.loadImage();
+  if(req.response?.statusCode!==200)return null;
+  const mime=String(req.response?.mimeType||'').toLowerCase();
+  if(mime&&!mime.startsWith('image/'))return null;
+  return jpegThumbnail(image);
+ }catch{return null}
+}
+function isExistingManualPhoto(fm,item){return Boolean(encodeLocalPicture(fm,photoPath(fm,item.id).path))}
+function currentAutoPhoto(fm,item,manifest){
+ const entry=manifest.entries[item.id];
+ const signature=pictureSignature(item);
+ if(!entry||entry.signature!==signature||!['product','representative'].includes(entry.kind))return null;
+ const data=encodeLocalPicture(fm,autoPicturePath(fm,item.id));
+ if(!data)return null;
+ return {data,kind:entry.kind,sourceUrl:entry.sourceUrl};
+}
+async function tryEnrichPhoto(item){
+ if(item.imageUrl){
+  const jpg=await downloadPhoto({image:item.imageUrl,kind:'product',sourceUrl:item.url||item.imageUrl});
+  if(jpg)return {jpg,kind:'product',sourceUrl:item.url||item.imageUrl,coverUrl:null};
+ }
+ const exact=await findExactProductImage(item);
+ if(exact){
+  const jpg=await downloadPhoto(exact);
+  if(jpg)return {jpg,kind:'product',sourceUrl:exact.sourceUrl,coverUrl:!item.imageUrl?exact.image:null};
+ }
+ const generic=await findRepresentativeImage(item);
+ if(generic){
+  const jpg=await downloadPhoto(generic);
+  if(jpg)return {jpg,kind:'representative',sourceUrl:generic.sourceUrl,coverUrl:null};
+ }
+ return null;
+}
+async function enrichShoppingPhotos(items,token){
+ if(typeof FileManager==='undefined'||typeof Data==='undefined'||typeof DrawContext==='undefined')return items;
+ const fm=FileManager.local();
+ const manifest=loadPictureManifest(fm);
+ const now=Date.now();
+ const candidates=items.filter(item=>{
+  if(isExistingManualPhoto(fm,item)||currentAutoPhoto(fm,item,manifest))return false;
+  const entry=manifest.entries[item.id];
+  if(entry?.signature===pictureSignature(item)&&entry.failedAt&&now-entry.failedAt<PHOTO_RETRY_MS)return false;
+  return Boolean(item.imageUrl||trustedProductPage(item.url||'')||representativeSearch(item));
+ }).sort((a,b)=>Number(Boolean(b.imageUrl))-Number(Boolean(a.imageUrl))||
+  Number(Boolean(trustedProductPage(b.url||'')))-Number(Boolean(trustedProductPage(a.url||''))));
+ const pendingWrites=[];
+ // Download a bounded batch in parallel. Every successful image is stored, so
+ // following launches use local bytes even if the image host stops serving it.
+ const todo=candidates.slice(0,PHOTO_MAX_NEW_PER_OPEN);
+ const outcomes=await Promise.all(todo.map(async item=>({item,result:await tryEnrichPhoto(item)})));
+ for(const {item,result} of outcomes){
+  if(result){
+   const path=autoPicturePath(fm,item.id);
+   try{
+    if(!fm.fileExists(pictureDir(fm).dir))fm.createDirectory(pictureDir(fm).dir,true);
+    fm.write(path,result.jpg);
+    if(!encodeLocalPicture(fm,path))throw Error('cache verify failed');
+    manifest.entries[item.id]={
+     signature:pictureSignature(item),kind:result.kind,
+     sourceUrl:result.sourceUrl,checkedAt:now
+    };
+    if(result.coverUrl)pendingWrites.push({item,url:result.coverUrl});
+   }catch{manifest.entries[item.id]={signature:pictureSignature(item),failedAt:now}}
+  }else manifest.entries[item.id]={signature:pictureSignature(item),failedAt:now};
+ }
+ try{savePictureManifest(fm,manifest)}catch{}
+ // Only exact, publicly retrievable image URLs from matching product pages may
+ // be written to Notion, never category examples. Do not overwrite existing covers.
+ // Limit writes per opening and verify the page again to avoid changing a stale row.
+ let written=0;
+ for(const candidate of pendingWrites.slice(0,2)){
+  try{
+   const before=await notion(token,'pages/'+candidate.item.id);
+   if(id32(before.parent?.data_source_id)!==SOURCE.replace(/-/g,'')||before.cover||
+      project(before)?.name!==candidate.item.name)continue;
+   await notion(token,'pages/'+candidate.item.id,'PATCH',{
+    cover:{type:'external',external:{url:candidate.url}}
+   });
+   const after=await notion(token,'pages/'+candidate.item.id);
+   if(after.cover?.external?.url===candidate.url)written++;
+  }catch{}
+ }
+ // A Notion cover write changes last_edited_time, so refresh version-sensitive
+ // actions rather than passing stale record timestamps to purchase/edit handlers.
+ if(written){
+  try{items=await list(token)}catch{}
+ }
+ return items;
 }
 
 async function asset(file,min,max,contains){
@@ -318,6 +585,7 @@ async function main(){
    await info('追加確認','Notionの一覧から追加した商品を読み戻しました');
   }
  }
+ rows=await enrichShoppingPhotos(rows,token);
  const [html,css,js]=await Promise.all([
   asset('index.html',3500,25000,'id="productGrid"'),
   asset('shopping.css',7000,30000,'.product-grid'),
