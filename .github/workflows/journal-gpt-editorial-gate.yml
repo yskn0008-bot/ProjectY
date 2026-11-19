@@ -3,6 +3,8 @@ name: YOS JOURNAL GPT editorial candidate safety
 on:
   pull_request:
     paths:
+      - 'journal/private-to-public-review-bridge.mjs'
+      - 'journal/tests/private-to-public-review-bridge.test.mjs'
       - 'journal/notion-private-draft-readback.mjs'
       - 'journal/tests/notion-private-draft-readback.test.mjs'
       - 'journal/gpt-editorial-gate.mjs'
@@ -79,6 +81,10 @@ jobs:
         run: |
           node --check journal/notion-private-draft-readback.mjs
           node --test journal/tests/notion-private-draft-readback.test.mjs
+      - name: Test Notion-private-to-public candidate source provenance without publication
+        run: |
+          node --check journal/private-to-public-review-bridge.mjs
+          node --test journal/tests/private-to-public-review-bridge.test.mjs
       - name: Test privacy, sources, dates, existing edition preservation
         run: node --test journal/tests/gpt-editorial-gate.test.mjs
       - name: Check added or modified GPT candidate JSON from this PR
