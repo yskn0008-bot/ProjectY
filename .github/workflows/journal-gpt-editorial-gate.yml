@@ -5,6 +5,7 @@ on:
   pull_request:
     paths:
       - 'journal/private-to-public-review-bridge.mjs'
+      - 'journal/tests/private-notion-to-reader.e2e.test.mjs'
       - 'journal/tests/private-to-public-review-bridge.test.mjs'
       - 'journal/notion-private-draft-readback.mjs'
       - 'journal/tests/notion-private-draft-readback.test.mjs'
@@ -97,6 +98,8 @@ jobs:
             exit 1
           fi
           node journal/notion-private-draft-readback.mjs --dry-run-private-readback
+      - name: Check synthetic Notion-to-JOURNAL reader end-to-end without public writes
+        run: node --test journal/tests/private-notion-to-reader.e2e.test.mjs
       - name: Test privacy, sources, dates, existing edition preservation
         run: node --test journal/tests/gpt-editorial-gate.test.mjs
       - name: Check added or modified GPT candidate JSON from this PR
