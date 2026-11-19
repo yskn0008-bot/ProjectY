@@ -5,7 +5,7 @@
 const SOURCE='https://raw.githubusercontent.com/yskn0008-bot/ProjectY/main/ios-app/scriptable/journal/latest.json';
 const READER='https://yskn0008-bot.github.io/ProjectY/journal-v2/';
 const STATE_FILE='YOS JOURNAL Published Notification V1.json';
-const SENSITIVE=/(?:sk-proj-|ntn_[A-Za-z0-9_-]+|gh[pousr]_[A-Za-z0-9_]{16,}|Bearer\s+\S+|口座番号|暗証番号|マイナンバー|あなたの残高|ようすけ|陽介)/i;
+const SENSITIVE=/(?:sk-proj-|ntn_[A-Za-z0-9_-]+|gh[pousr]_[A-Za-z0-9_]{16,}|Bearer\s+\S+|口座番号|暗証番号|マイナンバー|あなたの残高|個人の残高|住所|電話番号|非公開|ようすけ|陽介)/i;
 function dayJST(date){
   const chunks=new Intl.DateTimeFormat('en-US',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(date);
   const p={};for(const item of chunks){if(item.type!=='literal')p[item.type]=item.value;}
