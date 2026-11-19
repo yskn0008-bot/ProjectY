@@ -21,7 +21,7 @@ test('review status remains manual even if someone changes hold to requires appr
 test('rejects fake publication approval and unsupported source methods',()=>{
  const d=copy();d.articleAssessment.publishDecision='published';
  assert.throws(()=>validateIndependentDossier(d),/Invalid publish/);
- const q=copy();q.reviewerMethod='A model said the study was probably true';
+ const q=copy();q.reviewerMethod='An AI model guessed at study findings based on its own general knowledge; it did not open, obtain, or examine the original publisher source.';
  assert.throws(()=>validateIndependentDossier(q),/review method|Independent original-source/);
  const z=copy();z.sources[0].originalAccess='AI hallucination';
  assert.throws(()=>validateIndependentDossier(z),/Original source/);
