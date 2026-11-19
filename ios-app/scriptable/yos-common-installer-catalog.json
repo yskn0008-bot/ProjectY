@@ -153,8 +153,8 @@
       "id": "scriptable-inventory",
       "name": "YOS Scriptable 棚卸し",
       "path": "ios-app/scriptable/YOS Scriptable 棚卸し.js",
-      "commit": "05ffe3341257d6632ca5f95cc16e2a3df3fd2ecc",
-      "sha256": "3583ad6ca3368a0181ed61949da4873e994378eec4fc16e62b634bfa37bf3b64"
+      "commit": "adfaf28d5d562d364a44528aac94e00a544968b0",
+      "sha256": "03924895d6c89a35ea7fd9e21b62567ccd1622f126f11b225d568b8427fe0c85"
     }
   ]
 }
