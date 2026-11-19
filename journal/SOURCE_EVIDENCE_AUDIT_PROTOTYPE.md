@@ -62,3 +62,12 @@ node --test journal/tests/source-evidence-audit.test.mjs
 - [ ] 現行原稿と資料あり原稿のA/B評価（本人の実機で同条件の原稿を取得後、面白さ/正確さ/稼働時間を比較）。
 
 本部品は**原典の取得確認を実際に行う最小の土台**であり、完全なファクトチェックの代替ではない。追加のChatGPTや外部有料APIは不要。APIキーを入れない。
+
+
+## 利用可能な機械可読原典（Europe PMC）
+
+論文本文が必要な場合、Europe PMCの**オープンアクセス全文XML**も取得候補になる（公式解説：https://dev.europepmc.org/RestfulWebService）。例：https://www.ebi.ac.uk/europepmc/webservices/rest/PMC9626598/fullTextXML
+
+今回の試作は上記のPMC-ID形式のHTTPS URLに限って www.ebi.ac.uk を許可し、XML本文からの短い原文引用位置を探す。OA対象外の論文、アクセス拒否、取得サイズ上限、引用の不一致では保留。**Crossrefの論文メタデータ検索は本文の意味確認の代替ではない。**
+
+利用規約と著作権の確認なしに全文を公開・再配布しない。取得失敗や機械的な引用一致を「事実が検証された」と表示しない。
