@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-20T01:58:57+09:00",
+  "updated_at": "2026-11-20T02:01:07+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -21,6 +21,16 @@
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/771",
       "updated_at": "2026-11-18T16:35:41Z"
+    },
+    {
+      "id": "github-pr-789",
+      "title": "PR #789 feat(remote): YOS Remote Web — iPhone Scriptable WebView with native LAN appliance bridge",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/789",
+      "updated_at": "2026-11-17T07:29:19Z"
     },
     {
       "id": "github-pr-818",
@@ -80,7 +90,7 @@
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/857",
-      "updated_at": "2026-11-19T16:58:20Z"
+      "updated_at": "2026-11-19T17:00:28Z"
     },
     {
       "id": "github-pr-870",
@@ -93,16 +103,6 @@
       "updated_at": "2026-11-19T16:53:18Z"
     },
     {
-      "id": "github-pr-877",
-      "title": "PR #877 YOS TAXI: 毎時収集の情報源を実通信検証・失敗表示を正確化",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/877",
-      "updated_at": "2026-11-19T16:57:20Z"
-    },
-    {
       "id": "github-pr-878",
       "title": "PR #878 YOS JOURNAL｜11月20日研究特集を既存誌面へ発行するレビュー（未公開）",
       "type": "GitHub PR",
@@ -110,7 +110,7 @@
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/878",
-      "updated_at": "2026-11-19T16:56:54Z"
+      "updated_at": "2026-11-19T16:59:27Z"
     },
     {
       "id": "github-issue-10",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-19T16:58:27Z"
+      "updated_at": "2026-11-19T17:00:17Z"
     },
     {
       "id": "github-issue-234",
@@ -205,6 +205,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-cb8625b49b05",
+      "title": "fix(taxi): validate official source health and expire stale research safely",
+      "completed_at": "2026-11-19T17:00:28Z",
+      "result": "GitHub mainへ反映（cb8625b）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/cb8625b49b0501e5aa71685f21aefc2d7576ca5c"
+    },
+    {
       "id": "github-commit-158355487fe8",
       "title": "feat(shopping): source-linked JPY listing observations and honest Web data status (#876)",
       "completed_at": "2026-11-19T16:55:32Z",
@@ -231,13 +238,6 @@
       "completed_at": "2026-11-19T16:29:57Z",
       "result": "GitHub mainへ反映（d0876ca）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/d0876ca4ceb5a32bf1c3937af59cec49ed57fed5"
-    },
-    {
-      "id": "github-commit-635113cbab4f",
-      "title": "feat(shortcuts): signed YOS Shopping native Scriptable launcher (#872)",
-      "completed_at": "2026-11-19T16:29:06Z",
-      "result": "GitHub mainへ反映（635113c）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/635113cbab4f80df90dba3051510137ce3cb894f"
     },
     {
       "id": "complete-002",
@@ -274,7 +274,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-20T01:58:57+09:00",
+      "last_update": "2026-11-20T02:01:07+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -349,13 +349,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 9件・Open PR 66件を自動同期中",
+      "next_action": "Open Issue 9件・Open PR 65件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-20T01:58:57+09:00",
+      "last_update": "2026-11-20T02:01:07+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -378,7 +378,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-20T01:58:57+09:00",
+      "last_update": "2026-11-20T02:01:07+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -460,5 +460,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "ddc5e60734b9cc4926d9acc9924387f0b5d11b310ed38debd53affa85d885ae6"
+  "github_snapshot_hash": "1be3badae89c9f087c22e2bd3a4f59dcaf93c1949814a6f53d58d98ccf21b9f8"
 }
