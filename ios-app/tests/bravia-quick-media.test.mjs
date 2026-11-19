@@ -126,12 +126,38 @@ test('quickProbe is read-only and does not mutate TV',async()=>{
  assert.ok(requests.every(x=>!['setActiveApp','setPlayContent','setSoundSettings'].includes(x.method)));
 });
 
-test('generated WebView JavaScript is syntactically valid, including quick-mode buttons',()=>{
- const begin=source.indexOf('<script>'),end=source.indexOf('</script>',begin);
- assert.ok(begin>0&&end>begin,'Scriptable WebView inline script boundaries');
- let htmlScript=source.slice(begin+8,end);
- // The surrounding Scriptable template interpolates these JSON objects at runtime.
- htmlScript=htmlScript.replace(/\$\{JSON\.stringify\([^)]*\)\}/g,'[]');
- htmlScript=htmlScript.replace(/\$\{SWIPE_THRESHOLD\}/g,'24');
- assert.doesNotThrow(()=>new Function(htmlScript));
+test('ACTUAL rendered Scriptable WebView script parses and starts the remote buttons',()=>{
+  const tick=String.fromCharCode(96);
+  const start=source.indexOf('const html = '+tick);
+  const end=source.indexOf('</html>'+tick,start);
+  assert.ok(start>0&&end>start,'HTML template boundaries');
+  const template=source.slice(start+'const html = '.length,end+'</html>'.length+1);
+  const render=new Function('REMOTES','TV_ACTIONS','TV_DEFAULT','CROSS_NAV','SWIPE_THRESHOLD','makeButtons','LIGHT_BUTTONS','AC_BUTTONS','return '+template);
+  const actions=[{action:'play',icon:'▶',label:'再生'},{action:'up',icon:'↑',label:'上'}];
+  const html=render({tv:'scriptable://run'},actions,['play','up'],{up:'up',down:'down',left:'left',right:'right',center:'play'},24,()=>'',[],[]);
+  const begin=html.indexOf('<script>'),finish=html.indexOf('</script>',begin);
+  assert.ok(begin>0&&finish>begin,'rendered script boundaries');
+  const runtime=html.slice(begin+8,finish);
+  assert.doesNotThrow(()=>new Function(runtime),'the rendered HTML must have valid JS');
+  const nodes=new Map();
+  class Node{
+    constructor(){this.children=[];this.textContent='';this.style={};this.classList={add(){},remove(){},toggle(){}};this.dataset={};}
+    set innerHTML(s){this._html=s;this.children=[]}
+    get innerHTML(){return this._html||''}
+    appendChild(node){this.children.push(node);return node}
+    addEventListener(){}
+    setAttribute(){}
+  }
+  const document={
+    getElementById(id){if(!nodes.has(id))nodes.set(id,new Node());return nodes.get(id)},
+    createElement(){return new Node()},querySelectorAll(){return []},
+    addEventListener(){},hidden:false
+  };
+  const window={location:{href:''},addEventListener(){}};
+  const localStorage={getItem(){return null},setItem(){}};
+  const launch=new Function('window','document','localStorage','setInterval','clearInterval','setTimeout','clearTimeout',runtime);
+  launch(window,document,localStorage,()=>1,()=>{},()=>1,()=>{});
+  assert.ok(nodes.get('tvGrid').children.length>=2,'navigation buttons must render');
+  assert.equal(nodes.get('modeBadge').textContent,'カーソル','mode must not stay 判定中');
+  assert.ok(window.location.href.includes('__action?'),'initial status request expected');
 });
